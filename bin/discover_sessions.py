@@ -64,9 +64,31 @@ def safe(label):
     return re.sub(r"[^A-Za-z0-9_-]", "_", label) or "unknown"
 
 
+def resolve(session_id):
+    """session_id -> friendly label (same logic as registration). For retrofit hooks."""
+    if not session_id:
+        return ""
+    for fp in glob.glob(os.path.join(SESS_DIR, "*.json")):
+        try:
+            with open(fp, encoding="utf-8") as f:
+                sess = json.load(f)
+        except Exception:
+            continue
+        if sess.get("sessionId") == session_id:
+            pid = sess.get("pid") or os.path.splitext(os.path.basename(fp))[0]
+            label, _ = label_and_type(cmdline(pid), sess)
+            return safe(label)
+    return ""
+
+
 def main():
-    exclude = set()
     argv = sys.argv[1:]
+    if "--resolve" in argv:
+        j = argv.index("--resolve")
+        print(resolve(argv[j + 1] if j + 1 < len(argv) else ""))
+        return
+
+    exclude = set()
     i = 0
     while i < len(argv):
         if argv[i] == "--exclude" and i + 1 < len(argv):

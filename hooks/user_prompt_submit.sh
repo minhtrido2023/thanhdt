@@ -8,7 +8,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 KB="$ROOT/kb"
-id="${1:-${AGENT_ID:-unknown}}"
+source "$ROOT/hooks/_resolve_id.sh"   # sets $id from $1 or stdin session_id; exits 0 if excluded
 
 cur="$(tr -dc '0-9' < "$KB/version.txt" 2>/dev/null || true)"; cur="${cur:-0}"
 cache="${XDG_CACHE_HOME:-$HOME/.cache}/mike_kbver_$id"
