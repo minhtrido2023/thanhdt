@@ -1,8 +1,9 @@
-# Mike fleet — context pack (v1)
+# Mike fleet — context pack (v2)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
+- [2026-06-21T10:02:52Z] con-backtest/finding — vnm-bt-result: {"winrate": 0.58, "trades": 40}
 - [2026-06-21T10:02:52Z] con-research/finding — vnm-breakout: {"ticker": "VNM", "signal": "breakout MA200"}
 <!--RECENT-END-->
 
