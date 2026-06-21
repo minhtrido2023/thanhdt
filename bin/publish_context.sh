@@ -24,8 +24,13 @@ recent="$(python3 "$PY" recent "$BUS/inbox" 20 2>/dev/null || true)"
   printf '## MỚI NHẤT — kết quả gần đây từ toàn fleet\n'
   printf '%s\n' "$recent"
   printf '<!--RECENT-END-->\n\n'
-  printf '## Tri thức chuẩn tắc\n'
-  printf 'Chi tiết đầy đủ ở kb/KNOWLEDGE.md (do Mike biên tập). Trạng thái fleet ở kb/fleet_status.md.\n'
+  # Curated canonical knowledge (Mike-edited) — injected into every agent at SessionStart.
+  if [ -s "$KB/canonical.md" ]; then
+    cat "$KB/canonical.md"
+    printf '\n'
+  fi
+  printf '## Nguồn chuẩn tắc đầy đủ\n'
+  printf 'Lịch sử/chi tiết: kb/KNOWLEDGE.md (Mike biên tập). Trạng thái fleet: kb/fleet_status.md.\n'
 } > "$KB/context_pack.md"
 
 echo "published context_pack v$ver"

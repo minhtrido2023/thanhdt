@@ -18,4 +18,7 @@ if [ -s "$KB/context_pack.md" ]; then
   echo "[Mike KB v$cur] Bối cảnh chung của fleet (đọc trước khi làm, không hỏi lại điều đã ghi ở đây):"
   cat "$KB/context_pack.md"
 fi
+
+# Surface any NEW directive Mike assigned to this agent (once, via offset cache).
+source "$ROOT/hooks/_directives.sh"
 exit 0

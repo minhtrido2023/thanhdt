@@ -23,4 +23,7 @@ if [ "$cur" != "$seen" ]; then
     printf '%s\n' "$recent"
   fi
 fi
+
+# Surface any NEW directive Mike assigned to this agent (once, via offset cache).
+source "$ROOT/hooks/_directives.sh"
 exit 0

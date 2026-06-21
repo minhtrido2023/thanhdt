@@ -1,13 +1,3 @@
-# Mike fleet — context pack (v2)
-> Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
-
-<!--RECENT-START-->
-## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-06-21T15:23:20Z] Wendy/finding — vn-tax-cheatsheet: Thuế TNCN giao dịch CK cá nhân (VN, hiện hành tới 1/7/2026 & sau đó). NGUỒN GỐC: Luật Thuế TNCN 2025 số 109/2025/QH15 (ban hành 10/12/2025, hiệu lực 01/07/2026); Thông tư 111/2013/TT-BTC; Nghị định 126/2020/NĐ-CP. (1) BÁN/CHUYỂN NHƯỢNG CK NIÊM YẾT: 0,1% trên GIÁ BÁN mỗi lần (KHÔNG trừ giá vốn, áp cả khi lỗ); khấu trừ tại nguồn bởi CTCK. Luật 109/2025 GIỮ NGUYÊN 0,1% (không đổi sang 20% lãi cho CK niêm yết). (2) CỔ TỨC TIỀN MẶT: 5% (thu nhập đầu tư vốn), khấu trừ tại nguồn khi chi trả. (3) CỔ TỨC BẰNG CỔ PHIẾU / CỔ PHIẾU THƯỞNG: theo quy định HIỆN HÀNH KHÔNG đánh thuế lúc nhận; chỉ nộp KHI BÁN = 5% x mệnh giá (đầu tư vốn) + 0,1% x giá bán (chuyển nhượng). Đề xuất sửa NĐ126 đánh 5% NGAY khi nhận đã bị TẠM GÁC (chưa ban hành tính tới 2025-2026). ĐIỂM MỚI Luật 109: MIỄN thuế chứng chỉ quỹ mở nắm giữ >=2 năm. LƯU Ý: thông tin THAM KHẢO, không phải ý kiến luật sư hành nghề; rủi ro cao -> kiểm chứng luật sư + văn bản gốc.
-- [2026-06-21T15:22:50Z] Winston/finding — rubber weekly feed: sources + alert thresholds: {"sources": {"primary_USD": "regionalert.com/prices/natural-rubber RSS3/TSR20/SMR20 USD/ton daily — continues WB RSS3 series", "secondary_CN": "SunSirs prodetail-586 China natural rubber spot RMB/ton — reuse phosphorus HW_CHECK infra", "ref_monthly": "WB Pink Sheet RSS3 USD/kg (existing rubber_monthly.csv)"}, "vol_RSS3_20yr": {"weekly_1sigma_pct": 3.9, "monthly_abs_p75": 8.85, "monthly_abs_p90": 13.3, "3mo_abs_p75": 18.4, "3mo_abs_p90": 27.9}, "proposed_alerts": {"WATCH_ping_Taylor": "weekly>=+/-7% OR 4wk_cum>=+/-15% OR cross cycle pivot", "ALERT_ping_Bill": "weekly>=+/-12% OR 3mo_cum>=+/-25% OR cycle-band break"}, "current_state": "+19% in 3mo (2.26->2.69 USD/kg, ~95th pct level) — already near WATCH", "stocks": ["GVR", "PHR", "DPR", "DRI", "TRC", "HRC"]}
-- [2026-06-21T15:07:56Z] Mike/decision — create-fleet: {"theme": "Billions", "strategy": "production V2.4 go-live 2026-06-30", "roster": ["Mafee=execution(DNSE/PHS)", "DollarBill=portfolio-manager", "Taylor=quant/algo", "Wendy=legal-VN", "Spyros=risk&compliance", "Winston=data/regime-ops"], "autonomy": "Mafee semi-auto: paper full-auto; live only orders in approved plan within hard limits; Spyros owns BOT_STOP kill-switch", "date": "2026-06-21"}
-<!--RECENT-END-->
-
 ## Tri thức chung của đội (canonical — Mike biên tập; MỌI agent phải nắm)
 > Cập nhật 2026-06-21. Lịch sử/chi tiết: `kb/KNOWLEDGE.md`. Số liệu gốc auditable: `data/results_registry.md`.
 > Codebase: `/home/trido/thanhdt/WorkingClaude` (BigQuery `tav2_bq`). Đây là hệ **POC nghiên cứu**, chưa chạy tiền thật tự động.
@@ -49,6 +39,3 @@ Vận hành chiến lược **production V2.4**, **go-live 2026-06-30**, trên T
 
 ### Backup / DR
 - `~/thanhdt/backup.sh` → GitHub **minhtrido2023/thanhdt** (private): nhánh **main** = workspace + code + scrubbed Claude history; nhánh **mike-fleet** = fleet (config + KB). **Tự động daily 00:00 ICT** (cron) + chạy tay `./backup.sh "msg"` cho mốc quan trọng. PAT có hạn — push lỗi auth thì cấp lại token.
-
-## Nguồn chuẩn tắc đầy đủ
-Lịch sử/chi tiết: kb/KNOWLEDGE.md (Mike biên tập). Trạng thái fleet: kb/fleet_status.md.
