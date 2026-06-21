@@ -27,7 +27,7 @@ Vận hành chiến lược **production V2.4**, **go-live 2026-06-30**, trên T
 - Illiquidity premium VN tập trung ở **vi-mô < 1 tỷ/ngày ADV**.
 
 ### Hạ tầng giao dịch
-- `trading_bot/` (brokers/executor/plan) sẵn sàng. **DNSE live OK** (tiểu khoản 0001743768). **PHS live BLOCKED** (chờ client credential, lỗi `-700003`) → PHS chạy paper.
+- `trading_bot/` (brokers/executor/plan) sẵn sàng. **DNSE live OK** (số tiểu khoản nằm trong `secrets/`, KHÔNG ghi ở KB). **PHS live BLOCKED** (chờ client credential, lỗi `-700003`) → PHS chạy paper.
 - **Ủy quyền lệnh (an toàn tiền thật):** Taylor đặt rule (user duyệt) → Bill lập plan `data/plan_<acct>_<T+1>.json` (user duyệt) → **Mafee chỉ thực thi lệnh CÓ trong plan**, trong hạn mức cứng (`trading_bot/config.py` + `data/trading_rules.json`); paper full-auto, live trong limit, **KHÔNG tự chế lệnh**. Spyros giám sát + kill-switch `data/BOT_STOP`. Handoff = file `data/` + bus (companion model).
 
 ### Quy chuẩn làm việc (bắt buộc — khoa học & auditable)
