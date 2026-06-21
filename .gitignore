@@ -95,4 +95,4 @@ _reorg_migrate.py
 _scrub_sessions.py
 
 # ---- Claude session history (SCRUBBED) — keep despite *.jsonl rule ---
-!claude_sessions/*.jsonl
+!claude_sessions/**/*.jsonl
