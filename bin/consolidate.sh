@@ -21,7 +21,7 @@ NEW="$(mktemp)"; trap 'rm -f "$NEW"' EXIT
 for f in "$BUS"/inbox/*.jsonl; do
   base="$(basename "$f")"
   total="$(wc -l < "$f" 2>/dev/null | tr -dc '0-9')"; total="${total:-0}"
-  prev="$(tr -dc '0-9' < "$STATE/$base" 2>/dev/null || true)"; prev="${prev:-0}"
+  prev="$(cat "$STATE/$base" 2>/dev/null | tr -dc '0-9' || true)"; prev="${prev:-0}"
   if [ "$total" -gt "$prev" ]; then
     tail -n +"$((prev + 1))" "$f" >> "$NEW"
     printf '%s' "$total" > "$STATE/$base"
