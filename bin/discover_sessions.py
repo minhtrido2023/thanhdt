@@ -112,6 +112,12 @@ def main():
         if not any("claude" in p for p in parts):
             continue
         label, typ = label_and_type(parts, sess)
+        cwd0 = sess.get("cwd", "")
+        # A session running under mike/agents/<id>/ IS that child — label by <id>, kind=child.
+        m = re.search(r"/mike/agents/([^/]+)/?$", cwd0)
+        kind = "child" if m else "external"
+        if m:
+            label = m.group(1)
         if label in exclude or sess.get("name") in exclude:
             continue
         lbl = safe(label)
@@ -120,10 +126,10 @@ def main():
             lbl = "%s_%s" % (lbl, pid)
         seen[lbl] = True
 
-        cwd = sess.get("cwd", "")
+        cwd = cwd0
         rec = {
             "agent_id": lbl,
-            "kind": "external",
+            "kind": kind,
             "status": sess.get("status", "running"),
             "current_task": "%s · cwd=%s" % (typ, cwd or "?"),
             "last_heartbeat": now_iso(),
