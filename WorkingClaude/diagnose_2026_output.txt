@@ -1,0 +1,88 @@
+Loading data ...
+Pulling D1 signals ...
+Running D1+slot12 sim ...
+
+=== 2026 TRADES SUMMARY (n=26) ===
+  Mean ret_net: -4.04%  Median: -9.86%  WR: 30.8%
+  By exit reason: {'TIME': 19, 'EOD': 4, 'STOP': 3}
+  By play_type: {'DEEP_VALUE_RECOVERY': 21, 'RE_BACKLOG_BUY': 4, 'MOMENTUM_S': 1}
+  By leg: {'BAL': 14, 'VN30': 12}
+
+Pulling V11 context (VNI/MA200, state5, days_since_release) for 2026 entries ...
+
+=== V11 FILTER ANALYSIS ON 2026 TRADES ===
+
+Distribution of V11 block status:
+v11_block
+OK                      30
+SV_TIGHT(state3>60d)     8
+
+P&L by V11 status:
+                       n   mean  median      wr
+v11_block                                      
+OK                    30  -8.63  -10.88   13.33
+SV_TIGHT(state3>60d)   8  16.15   16.15  100.00
+
+=== HYPOTHETICAL: V11-filtered universe ===
+  Original 2026: n=38, mean=-3.41%, sum_ret=-129.72%
+  V11-allowed:   n=30, mean=-8.63%, sum_ret=-258.95%
+  V11-blocked:   n=8, mean=+16.15%, sum_ret=+129.23%
+
+=== ALL 2026 TRADES DETAIL ===
+entry_date  exit_date ticker           play_type  ret_net reason  vni_ratio  state5  days_since_release            v11_block
+2026-01-09 2026-03-20    NAF DEEP_VALUE_RECOVERY    26.88   TIME      1.223       4                  71                   OK
+2026-01-09 2026-03-20    SHB DEEP_VALUE_RECOVERY   -10.11   TIME      1.223       4                  78                   OK
+2026-01-09 2026-03-20    SHB DEEP_VALUE_RECOVERY   -10.11   TIME      1.223       4                  78                   OK
+2026-01-09 2026-03-20    SSI DEEP_VALUE_RECOVERY   -11.65   TIME      1.223       4                  74                   OK
+2026-01-09 2026-03-20    SSI DEEP_VALUE_RECOVERY   -11.65   TIME      1.223       4                  74                   OK
+2026-01-09 2026-03-20    MSB DEEP_VALUE_RECOVERY   -12.24   TIME      1.223       4                  71                   OK
+2026-01-09 2026-03-20    PC1 DEEP_VALUE_RECOVERY     9.98   TIME      1.223       4                  72                   OK
+2026-01-09 2026-03-20    PET DEEP_VALUE_RECOVERY    25.88   TIME      1.223       4                  73                   OK
+2026-01-09 2026-03-20    SHB DEEP_VALUE_RECOVERY   -10.11   TIME      1.223       4                  78                   OK
+2026-01-09 2026-03-20    DPR DEEP_VALUE_RECOVERY    -7.14   TIME      1.223       4                  73                   OK
+2026-01-09 2026-03-20    SHB DEEP_VALUE_RECOVERY   -10.11   TIME      1.223       4                  78                   OK
+2026-01-09 2026-03-20    SSI DEEP_VALUE_RECOVERY   -11.65   TIME      1.223       4                  74                   OK
+2026-01-09 2026-03-20    SSI DEEP_VALUE_RECOVERY   -11.65   TIME      1.223       4                  74                   OK
+2026-01-12 2026-03-09    ACV DEEP_VALUE_RECOVERY   -23.68   STOP      1.227       4                  74                   OK
+2026-01-12 2026-03-23    MBB DEEP_VALUE_RECOVERY   -11.79   TIME      1.227       4                  77                   OK
+2026-01-13 2026-03-24    MWG DEEP_VALUE_RECOVERY   -13.27   TIME      1.241       4                  83                   OK
+2026-01-13 2026-03-10    VND DEEP_VALUE_RECOVERY   -21.07   STOP      1.241       4                  85                   OK
+2026-01-13 2026-03-24    MWG DEEP_VALUE_RECOVERY   -13.27   TIME      1.241       4                  83                   OK
+2026-01-13 2026-03-24    MSN DEEP_VALUE_RECOVERY    -9.62   TIME      1.241       4                  78                   OK
+2026-01-13 2026-03-24    MSN DEEP_VALUE_RECOVERY    -9.62   TIME      1.241       4                  78                   OK
+2026-01-13 2026-03-24    MWG DEEP_VALUE_RECOVERY   -13.18   TIME      1.241       4                  83                   OK
+2026-01-13 2026-03-24    MWG DEEP_VALUE_RECOVERY   -13.18   TIME      1.241       4                  83                   OK
+2026-01-13 2026-03-24    MSN DEEP_VALUE_RECOVERY    -9.62   TIME      1.241       4                  78                   OK
+2026-01-13 2026-03-24    MSN DEEP_VALUE_RECOVERY    -9.62   TIME      1.241       4                  78                   OK
+2026-01-14 2026-03-09    VIX DEEP_VALUE_RECOVERY   -21.53   STOP      1.233       4                  98                   OK
+2026-01-15 2026-03-26    AAA DEEP_VALUE_RECOVERY   -14.15   TIME      1.212       4                  78                   OK
+2026-01-16 2026-03-27    PHR          MOMENTUM_S    -6.83   TIME      1.219       4                  78                   OK
+2026-01-21 2026-04-01    VPB DEEP_VALUE_RECOVERY    -8.30   TIME      1.216       4                   0                   OK
+2026-01-26 2026-04-06    TCB DEEP_VALUE_RECOVERY   -18.92   TIME      1.180       4                   4                   OK
+2026-02-02 2026-04-13    PVD DEEP_VALUE_RECOVERY     2.35   TIME      1.146       4                   0                   OK
+2026-04-17 2026-05-15    VHM      RE_BACKLOG_BUY    15.85    EOD      1.078       3                  74 SV_TIGHT(state3>60d)
+2026-04-17 2026-05-15    VHM      RE_BACKLOG_BUY    15.85    EOD      1.078       3                  74 SV_TIGHT(state3>60d)
+2026-04-17 2026-05-15    VHM      RE_BACKLOG_BUY    15.85    EOD      1.078       3                  74 SV_TIGHT(state3>60d)
+2026-04-17 2026-05-15    VHM      RE_BACKLOG_BUY    15.85    EOD      1.078       3                  74 SV_TIGHT(state3>60d)
+2026-04-23 2026-05-15    VRE      RE_BACKLOG_BUY    16.46    EOD      1.104       3                  87 SV_TIGHT(state3>60d)
+2026-04-23 2026-05-15    VRE      RE_BACKLOG_BUY    16.46    EOD      1.104       3                  87 SV_TIGHT(state3>60d)
+2026-04-23 2026-05-15    VRE      RE_BACKLOG_BUY    16.46    EOD      1.104       3                  87 SV_TIGHT(state3>60d)
+2026-04-23 2026-05-15    VRE      RE_BACKLOG_BUY    16.46    EOD      1.104       3                  87 SV_TIGHT(state3>60d)
+
+Saved diagnose_2026_trades.csv
+
+=== STATE5 TIMELINE 2026 ===
+      time  state5  prev_state
+2026-01-08       4         3.0
+2026-02-03       3         4.0
+2026-03-17       2         3.0
+2026-04-09       3         2.0
+
+=== VNINDEX 2026 trajectory (key dates) ===
+  Start (2026-01): 1788.40
+  Min:             1591.17 on 2026-03-23
+  Max:             1925.46 on 2026-05-14
+  Latest:          1921.60 on 2026-05-15
+  YTD ret:         +7.45%
+  Peak-to-trough DD: -16.38%
+  Trough-to-current: +20.77%

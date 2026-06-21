@@ -1,0 +1,26 @@
+# 8L — one image, two services: the 24/7 bot + the cron runner (daily 5-step + quarterly).
+# Run from the deploy_8l/ folder (paths are relative to it; build context = repo root one level up).
+# Put sa-key.json + telegram_config.json at the REPO ROOT (one level up), then:
+#   cd deploy_8l && docker compose up -d --build
+services:
+  bot:
+    build: { context: .., dockerfile: deploy_8l/Dockerfile }
+    image: 8l-app:latest
+    restart: always
+    command: ["python3","telegram_8l_bot.py"]
+    volumes:
+      - ../data:/opt/8l/data
+      - ../sa-key.json:/opt/8l/sa-key.json:ro
+      - ../telegram_config.json:/opt/8l/telegram_config.json:ro
+    logging: { driver: json-file, options: { max-size: "10m", max-file: "3" } }
+
+  cron:
+    image: 8l-app:latest          # reuses the image built by `bot`
+    depends_on: [bot]
+    restart: always
+    command: ["bash","-lc","crontab /opt/8l/deploy_8l/crontab.txt && cron -f"]
+    volumes:
+      - ../data:/opt/8l/data
+      - ../sa-key.json:/opt/8l/sa-key.json:ro
+      - ../telegram_config.json:/opt/8l/telegram_config.json:ro
+    logging: { driver: json-file, options: { max-size: "10m", max-file: "3" } }

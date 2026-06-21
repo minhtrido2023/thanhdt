@@ -1,0 +1,43 @@
+====================================================================================================
+  5-SYSTEM PROD-SPEC BACKTEST 2014-01-01 -> 2026-05-15  (50B per system)  TAG=201401_202605_v34b_crel
+====================================================================================================
+
+[1] Loading signals + prices + VNI + Open prices...
+  [variant] PKL=ba_v11_unified_12y_sig.pkl  FA_TABLE=tav2_bq.fa_ratings
+  ETF underlying: VNINDEX proxy (no E1VFVN30 data found)
+  Open: 1,228,491 rows / 453 tk
+
+[2] Loading states (TQ34b + LIVE)...
+
+[3] D1 RE_BACKLOG_BUY reclassification...
+  RE_BACKLOG_BUY reclassified: 1,774
+  After SV_TIGHT: 702,923 rows
+
+[8] Running legs (prod spec)...
+  BAL_TQ_base final: 173.089B
+  BAL_LIVE_base final: 203.985B
+  BAL_TQ_kelly final: 186.013B
+  VN30_TQ_base final: 203.197B
+  VN30_TQ_kelly final: 236.401B
+
+[9] LAGGED schedule + books...
+  LAG v12 : 393.850B
+  LAG v121: 496.450B
+
+[10] M1+M3r ensemble signal...
+
+[11] Building NAV series...
+
+  Saved: data/5sys_prodspec_201401_202605_v34b_crel.csv  shape=(3082, 7)
+
+====================================================================================================
+  HEADLINE  (2014-01-01 -> 2026-05-15)  init=50B
+====================================================================================================
+  System                     CAGR   Sharpe    MaxDD  Calmar   Wealth   TotRet
+  V1 V11+TQ34b            +17.74%    +1.18  -27.42%   +0.65    +7.53 +653.36%
+  V2 V12+TQ34b            +21.71%    +1.63  -15.91%   +1.36   +11.34+1034.47%
+  V3 V12+LIVE             +22.23%    +1.68  -15.26%   +1.46   +11.96+1096.30%
+  V4 V121_ENS+TQ34b       +20.89%    +1.40  -24.87%   +0.84   +10.44 +944.40%
+  V5 V4+KellyQ2           +22.02%    +1.38  -29.54%   +0.75   +11.72+1071.83%
+  VNI B&H                 +11.42%    +0.68  -45.26%   +0.25    +3.81 +280.88%
+DONE.

@@ -1,0 +1,86 @@
+# =====================================================================
+#  Backup repo .gitignore  —  keep CODE + DOCS + CONTEXT, exclude
+#  secrets, credentials, virtualenvs, caches and large binary data.
+# =====================================================================
+
+# ---- Credentials / secrets (NEVER commit) ---------------------------
+# Whole Google Cloud SDK config dir (auth tokens, etc.)
+gcloud_dtienthanh/
+google-cloud-sdk/
+# Any JSON may hold credentials/tokens/runtime state -> ignore by
+# default, then allow-list known-safe files below.
+*.json
+# ...but DO keep these non-secret JSONs:
+!**/*.template.json
+!**/bigquery_dictionary.json
+# Refactored-out secret holder (belt & suspenders; covered by *.json)
+phs_secret.json
+# Other secret material
+*.pem
+*.key
+*.p12
+*.pfx
+.env
+.env.*
+telegram_config.json
+telegram_run_*.log
+
+# ---- Python ---------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.so
+wc_venv/
+*venv/
+.venv/
+env/
+.ipynb_checkpoints/
+
+# ---- Virtualenv / build junk ---------------------------------------
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# ---- Tabular market data (regenerable from BigQuery) ----------------
+# All CSV/TSV here is market data (often >100MB); keep it out of git.
+*.csv
+*.tsv
+# Raw execution / trading logs (may contain order & account details)
+*.jsonl
+
+# ---- Large binary data / model weights (regenerable; GitHub 100MB) --
+*.pkl
+*.pkl.*
+*.bak*
+*.npy
+*.npz
+*.parquet
+*.feather
+*.h5
+*.hdf5
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.xlsx
+*.xls
+*.zip
+*.gz
+*.tar
+*.7z
+*.pdf
+*.bak
+
+# ---- OS / editor ----------------------------------------------------
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# ---- Logs -----------------------------------------------------------
+*.log
+
+# ---- Claude Code local settings (machine-specific) ------------------
+.claude/settings.local.json
+**/.claude/settings.local.json

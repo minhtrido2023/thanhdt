@@ -1,0 +1,1 @@
+SELECT t.ticker, t.time FROM `tav2_bq.ticker` AS t WHERE (t.time >= '2020-01-01' AND t.time <= '2026-04-03') AND (t.Close > 1.85*t.BVPS) AND (t.NP_P0 / NULLIF(t.NP_P1, 0) < 0.91) AND (t.Close < 0.97*t.VAP1M) AND (t.Close_T1W > 0.92*t.VAP1M) AND (t.Volume > 0.95* t.Volume_3M_P50) AND (CAST(t.ICB_Code AS STRING) != '8633') ORDER BY t.ticker, t.time

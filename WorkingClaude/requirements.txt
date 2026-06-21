@@ -1,0 +1,18 @@
+# BA-system v11 production dependencies
+# Python 3.11+ required
+
+# Core data processing
+pandas>=2.0.0,<3.0.0
+numpy>=1.24.0,<2.0.0
+
+# HTTP for Telegram bot API
+requests>=2.31.0,<3.0.0
+
+# Google Cloud (alternative to bq CLI if direct API access preferred)
+# Uncomment if migrating from bq CLI to native Python BigQuery client:
+# google-cloud-bigquery>=3.13.0
+# google-auth>=2.23.0
+# db-dtypes>=1.1.0  # for BigQuery DataFrame conversion
+
+# Optional: matplotlib for chart generation in Telegram (if send_charts=true)
+# matplotlib>=3.7.0

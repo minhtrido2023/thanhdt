@@ -1,0 +1,197 @@
+[2026-05-12T14:58:41] === Paper-trade daily run for 2026-05-11 ===
+[2026-05-12T14:58:42] Using holistic recommendations: holistic_2026-05-08.csv (signal date: 2026-05-08; exec date: 2026-05-11)
+[2026-05-12T14:58:42]   5 BUY candidates today: ['PAN', 'DXP', 'DHC', 'PHP', 'TLG']
+[2026-05-12T14:58:42]   PAN (COMPOUNDER_BUY): rule=E1_T1115_LIM
+[2026-05-12T14:58:43]     fill=32.450 (vs OPEN=32.800, ATC=32.800), missed=False
+[2026-05-12T14:58:43]   DXP (COMPOUNDER_BUY): rule=E1_T1115_LIM
+[2026-05-12T14:58:44]     fill=15.000 (vs OPEN=15.100, ATC=15.000), missed=False
+[2026-05-12T14:58:44]   DHC (COMPOUNDER_BUY): rule=E1_T1115_LIM
+[2026-05-12T14:58:44]     fill=36.700 (vs OPEN=36.200, ATC=36.850), missed=False
+[2026-05-12T14:58:44]   PHP (COMPOUNDER_BUY): rule=E1_T1115_LIM
+[2026-05-12T14:58:45]     fill=36.300 (vs OPEN=36.300, ATC=35.000), missed=False
+[2026-05-12T14:58:45]   TLG (COMPOUNDER_BUY): rule=E1_T1115_LIM
+[2026-05-12T14:58:47]     fill=50.500 (vs OPEN=51.000, ATC=50.200), missed=False
+[2026-05-12T14:58:47]   Logged 5 new entries -> C:\Users\hotro\OneDrive\Pictures\Documents\WorkingClaude\paper_trade_entries.csv
+[2026-05-12T14:58:47] === Done ===
+
+[2026-05-12T15:17:09] === Paper-trade daily run for 2026-05-11 ===
+[2026-05-12T15:17:09] Using holistic recommendations: holistic_2026-05-08.csv (signal date: 2026-05-08; exec date: 2026-05-11)
+[2026-05-12T15:17:09]   5 BUY candidates today: ['PAN', 'DXP', 'DHC', 'PHP', 'TLG']
+[2026-05-12T15:17:09]   PAN: already logged for 2026-05-08, skip
+[2026-05-12T15:17:09]   DXP: already logged for 2026-05-08, skip
+[2026-05-12T15:17:09]   DHC: already logged for 2026-05-08, skip
+[2026-05-12T15:17:09]   PHP: already logged for 2026-05-08, skip
+[2026-05-12T15:17:09]   TLG: already logged for 2026-05-08, skip
+[2026-05-12T15:17:09] === Done ===
+
+[2026-05-13T16:01:20] === Paper-trade daily run for 2026-05-13 ===
+[2026-05-13T16:01:23] Using holistic recommendations: holistic_2026-05-12.csv (signal date: 2026-05-12; exec date: 2026-05-13)
+[2026-05-13T16:01:23]   4 BUY candidates today: ['PAN', 'DRI', 'DXP', 'VTO']
+[2026-05-13T16:01:23]   PAN (COMPOUNDER_BUY): rule=E1_T1115_LIM
+[2026-05-13T16:01:24]     fill=32.000 (vs OPEN=32.600, ATC=31.600), missed=False
+[2026-05-13T16:01:24]   DRI (COMPOUNDER_BUY): rule=E1_T1115_LIM
+[2026-05-13T16:01:25]     fill=14.900 (vs OPEN=14.400, ATC=14.900), missed=False
+[2026-05-13T16:01:25]   DXP (COMPOUNDER_BUY): rule=E1_T1115_LIM
+[2026-05-13T16:01:26]     fill=15.100 (vs OPEN=15.200, ATC=15.100), missed=False
+[2026-05-13T16:01:26]   VTO (COMPOUNDER_BUY): rule=E1_T1115_LIM
+[2026-05-13T16:01:27]     fill=12.100 (vs OPEN=12.100, ATC=12.200), missed=False
+[2026-05-13T16:01:27]   Logged 4 new entries -> C:\Users\hotro\OneDrive\Pictures\Documents\WorkingClaude\paper_trade_entries.csv
+[2026-05-13T16:01:32] === Done ===
+
+[2026-05-17T17:22:09] === Paper-trade daily run for 2026-05-17 ===
+[2026-05-17T17:22:12] 2026-05-17 is not a trading day (no intraday for VNM), skip
+[2026-05-20T14:55:35] === Paper-trade daily run for 2026-05-20 ===
+[2026-05-20T14:55:43] Using holistic recommendations: holistic_2026-05-19.csv (signal date: 2026-05-19; exec date: 2026-05-20)
+[2026-05-20T14:55:43]   5 BUY candidates today: ['PAN', 'PHP', 'VEA', 'CTR', 'PTB']
+[2026-05-20T14:55:43]   PAN (COMPOUNDER_BUY): rule=E1_T1115_LIM
+[2026-05-20T14:55:44]     fill=31.900 (vs OPEN=32.900, ATC=32.200), missed=False
+[2026-05-20T14:55:44]   PHP (COMPOUNDER_BUY): rule=E1_T1115_LIM
+[2026-05-20T14:55:45]     fill=37.400 (vs OPEN=37.500, ATC=37.400), missed=False
+[2026-05-20T14:55:45]   VEA (COMPOUNDER_BUY): rule=E1_T1115_LIM
+[2026-05-20T14:55:46]     fill=34.500 (vs OPEN=34.900, ATC=35.000), missed=False
+[2026-05-20T14:55:46]   CTR (COMPOUNDER_BUY): rule=E1_T1115_LIM
+[2026-05-20T14:55:47]     fill=90.800 (vs OPEN=91.600, ATC=95.000), missed=False
+[2026-05-20T14:55:47]   PTB (COMPOUNDER_BUY): rule=E1_T1115_LIM
+[2026-05-20T14:55:48]     fill=38.950 (vs OPEN=40.050, ATC=39.700), missed=False
+[2026-05-20T14:55:48]   Logged 5 new entries -> C:\Users\hotro\OneDrive\Pictures\Documents\WorkingClaude\paper_trade_entries.csv
+[2026-05-20T14:55:55] === Done ===
+
+[2026-05-21T14:55:20] === Paper-trade daily run for 2026-05-21 ===
+[2026-05-21T14:55:22] Using holistic recommendations: holistic_2026-05-20.csv (signal date: 2026-05-20; exec date: 2026-05-21)
+[2026-05-21T14:55:22]   5 BUY candidates today: ['OIL', 'ABB', 'TVN', 'NAF', 'PET']
+[2026-05-21T14:55:22]   OIL (MOMENTUM_S): rule=E1_T1115_LIM
+[2026-05-21T14:55:24]     fill=15.300 (vs OPEN=15.700, ATC=15.500), missed=False
+[2026-05-21T14:55:24]   ABB (DEEP_VALUE_RECOVERY): rule=E_S2_ANTICIPATE
+[2026-05-21T14:55:25]     fill=15.300 (vs OPEN=15.300, ATC=15.300), missed=True
+[2026-05-21T14:55:25]   TVN (DEEP_VALUE_RECOVERY): rule=E_S2_ANTICIPATE
+[2026-05-21T14:55:26]     fill=9.300 (vs OPEN=9.100, ATC=9.300), missed=True
+[2026-05-21T14:55:26]   NAF (DEEP_VALUE_RECOVERY): rule=E_S2_ANTICIPATE
+[2026-05-21T14:55:27]     fill=51.800 (vs OPEN=51.100, ATC=51.800), missed=True
+[2026-05-21T14:55:27]   PET (DEEP_VALUE_RECOVERY): rule=E_S2_ANTICIPATE
+[2026-05-21T14:55:28]     fill=48.750 (vs OPEN=47.700, ATC=48.750), missed=True
+[2026-05-21T14:55:29]   Logged 5 new entries -> C:\Users\hotro\OneDrive\Pictures\Documents\WorkingClaude\paper_trade_entries.csv
+[2026-05-21T14:55:44] === Done ===
+
+[2026-05-22T14:55:14] === Paper-trade daily run for 2026-05-22 ===
+[2026-05-22T14:55:14] Using holistic recommendations: holistic_2026-05-20.csv (signal date: 2026-05-20; exec date: 2026-05-22)
+[2026-05-22T14:55:14]   5 BUY candidates today: ['OIL', 'ABB', 'NAF', 'TVN', 'PET']
+[2026-05-22T14:55:14]   OIL: already logged for 2026-05-20, skip
+[2026-05-22T14:55:14]   ABB: already logged for 2026-05-20, skip
+[2026-05-22T14:55:14]   NAF: already logged for 2026-05-20, skip
+[2026-05-22T14:55:14]   TVN: already logged for 2026-05-20, skip
+[2026-05-22T14:55:14]   PET: already logged for 2026-05-20, skip
+[2026-05-22T14:55:26] === Done ===
+
+[2026-05-24T16:43:41] === Paper-trade daily run for 2026-05-24 ===
+[2026-05-24T16:43:51] 2026-05-24 is not a trading day (no intraday for VNM), skip
+[2026-05-27T15:27:31] === Paper-trade daily run for 2026-05-27 ===
+[2026-05-27T15:27:40] Using holistic recommendations: holistic_2026-05-25.csv (signal date: 2026-05-25; exec date: 2026-05-27)
+[2026-05-27T15:27:41]   3 BUY candidates today: ['TVN', 'PAN', 'PHP']
+[2026-05-27T15:27:41]   TVN (MOMENTUM_N): rule=E1_T1115_LIM
+[2026-05-27T15:27:42]     fill=11.600 (vs OPEN=11.700, ATC=11.900), missed=False
+[2026-05-27T15:27:42]   PAN (COMPOUNDER_BUY): rule=E1_T1115_LIM
+[2026-05-27T15:27:43]     fill=33.300 (vs OPEN=33.600, ATC=33.050), missed=False
+[2026-05-27T15:27:43]   PHP (COMPOUNDER_BUY): rule=E1_T1115_LIM
+[2026-05-27T15:27:44]     fill=36.600 (vs OPEN=37.000, ATC=36.800), missed=False
+[2026-05-27T15:27:44]   Logged 3 new entries -> C:\Users\hotro\OneDrive\Pictures\Documents\WorkingClaude\paper_trade_entries.csv
+[2026-05-27T15:28:11] === Done ===
+
+[2026-05-28T16:30:36] === Paper-trade daily run for 2026-05-28 ===
+[2026-05-28T16:34:03] Using holistic recommendations: holistic_2026-05-27.csv (signal date: 2026-05-27; exec date: 2026-05-28)
+[2026-05-28T16:37:01]   1 BUY candidates today: ['PAN']
+[2026-05-28T16:39:34]   PAN (COMPOUNDER_BUY): rule=E1_T1115_LIM
+[2026-05-28T16:44:15]     fill=32.950 (vs OPEN=33.000, ATC=32.900), missed=False
+[2026-05-28T16:44:53]   Logged 1 new entries -> C:\Users\hotro\OneDrive\Pictures\Documents\WorkingClaude\paper_trade_entries.csv
+[2026-05-28T16:50:23] === Done ===
+
+[2026-05-29T14:55:23] === Paper-trade daily run for 2026-05-29 ===
+[2026-05-29T14:55:27] Using holistic recommendations: holistic_2026-05-27.csv (signal date: 2026-05-27; exec date: 2026-05-29)
+[2026-05-29T14:55:27]   1 BUY candidates today: ['PAN']
+[2026-05-29T14:55:27]   PAN: already logged for 2026-05-27, skip
+[2026-05-29T14:55:29]   SHADOW STOP PAN age=18d: intraday_low=24.350 <= stop=25.960, eod_close=24.450, eod_confirms=YES, mode=SHADOW
+[2026-05-29T14:55:29]   STOP EOD-CONFIRMED PAN age=18d: eod_close=24.450 <= stop=25.960, exit_net=-24.85%
+[2026-05-29T14:55:33]   SHADOW STOP PAN age=16d: intraday_low=24.350 <= stop=25.600, eod_close=24.450, eod_confirms=YES, mode=SHADOW
+[2026-05-29T14:55:33]   STOP EOD-CONFIRMED PAN age=16d: eod_close=24.450 <= stop=25.600, exit_net=-23.79%
+[2026-05-29T14:55:37]   SHADOW STOP PAN age=9d: intraday_low=24.350 <= stop=25.520, eod_close=24.450, eod_confirms=YES, mode=SHADOW
+[2026-05-29T14:55:37]   STOP EOD-CONFIRMED PAN age=9d: eod_close=24.450 <= stop=25.520, exit_net=-23.55%
+[2026-05-29T14:55:46]   SHADOW STOP PAN age=2d: intraday_low=24.350 <= stop=26.640, eod_close=24.450, eod_confirms=YES, mode=SHADOW
+[2026-05-29T14:55:46]   STOP EOD-CONFIRMED PAN age=2d: eod_close=24.450 <= stop=26.640, exit_net=-26.78%
+[2026-05-29T14:55:48]   SHADOW STOP PAN age=1d: intraday_low=24.350 <= stop=26.360, eod_close=24.450, eod_confirms=YES, mode=SHADOW
+[2026-05-29T14:55:48]   STOP EOD-CONFIRMED PAN age=1d: eod_close=24.450 <= stop=26.360, exit_net=-26.00%
+[2026-05-29T14:55:48]   Logged 5 exits -> C:\Users\hotro\OneDrive\Pictures\Documents\WorkingClaude\paper_trade_exits.csv
+[2026-05-29T14:55:48] === Done ===
+
+[2026-05-30T14:56:40] === Paper-trade daily run for 2026-05-30 ===
+[2026-05-30T14:56:49] 2026-05-30 is not a trading day (no intraday for VNM), skip
+[2026-06-02T15:59:05] === Paper-trade daily run for 2026-06-02 ===
+[2026-06-02T15:59:14] Using holistic recommendations: holistic_2026-06-01.csv (signal date: 2026-06-01; exec date: 2026-06-02)
+[2026-06-02T15:59:14]   0 BUY candidates today: []
+[2026-06-02T15:59:51] === Done ===
+
+[2026-06-03T14:55:49] === Paper-trade daily run for 2026-06-03 ===
+[2026-06-03T14:55:51] Using holistic recommendations: holistic_2026-06-02.csv (signal date: 2026-06-02; exec date: 2026-06-03)
+[2026-06-03T14:55:52]   1 BUY candidates today: ['DRI']
+[2026-06-03T14:55:52]   DRI (COMPOUNDER_BUY): rule=E1_T1115_LIM
+[2026-06-03T14:55:53]     fill=14.400 (vs OPEN=14.300, ATC=14.500), missed=False
+[2026-06-03T14:55:53]   Logged 1 new entries -> C:\Users\hotro\OneDrive\Pictures\Documents\WorkingClaude\paper_trade_entries.csv
+[2026-06-03T14:56:09] === Done ===
+
+[2026-06-04T14:55:59] === Paper-trade daily run for 2026-06-04 ===
+[2026-06-04T14:56:11] Using holistic recommendations: holistic_2026-06-03.csv (signal date: 2026-06-03; exec date: 2026-06-04)
+[2026-06-04T14:56:12]   0 BUY candidates today: []
+[2026-06-04T14:56:37] === Done ===
+
+[2026-06-05T18:33:45] === Paper-trade daily run for 2026-06-05 ===
+[2026-06-05T18:33:53] Using holistic recommendations: holistic_2026-06-04.csv (signal date: 2026-06-04; exec date: 2026-06-05)
+[2026-06-05T18:33:53]   1 BUY candidates today: ['DRI']
+[2026-06-05T18:33:53]   DRI (COMPOUNDER_BUY): rule=E1_T1115_LIM
+[2026-06-05T18:33:54]     fill=14.700 (vs OPEN=14.700, ATC=14.500), missed=False
+[2026-06-05T18:33:54]   Logged 1 new entries -> C:\Users\hotro\OneDrive\Pictures\Documents\WorkingClaude\paper_trade_entries.csv
+[2026-06-05T18:34:14] === Done ===
+
+[2026-06-07T15:38:31] === Paper-trade daily run for 2026-06-07 ===
+[2026-06-07T15:38:32] 2026-06-07 is not a trading day (no intraday for VNM), skip
+[2026-06-08T15:08:08] === Paper-trade daily run for 2026-06-08 ===
+[2026-06-08T15:08:15] Using holistic recommendations: holistic_2026-06-05.csv (signal date: 2026-06-05; exec date: 2026-06-08)
+[2026-06-08T15:08:15]   3 BUY candidates today: ['PSI', 'DRI', 'NCT']
+[2026-06-08T15:08:15]   PSI (MOMENTUM_N): rule=E1_T1115_LIM
+[2026-06-08T15:08:18]     fill=8.900 (vs OPEN=9.000, ATC=8.900), missed=False
+[2026-06-08T15:08:18]   DRI (COMPOUNDER_BUY): rule=E1_T1115_LIM
+[2026-06-08T15:08:19]     fill=14.200 (vs OPEN=14.600, ATC=14.300), missed=False
+[2026-06-08T15:08:19]   NCT (COMPOUNDER_BUY): rule=E1_T1115_LIM
+[2026-06-08T15:08:21]     fill=92.000 (vs OPEN=92.100, ATC=91.900), missed=False
+[2026-06-08T15:08:21]   Logged 3 new entries -> C:\Users\hotro\OneDrive\Pictures\Documents\WorkingClaude\paper_trade_entries.csv
+[2026-06-08T15:08:41] === Done ===
+
+[2026-06-09T16:58:49] === Paper-trade daily run for 2026-06-09 ===
+[2026-06-09T16:58:52] Using holistic recommendations: holistic_2026-06-08.csv (signal date: 2026-06-08; exec date: 2026-06-09)
+[2026-06-09T16:58:52]   0 BUY candidates today: []
+[2026-06-09T16:59:17] === Done ===
+
+[2026-06-11T14:55:28] === Paper-trade daily run for 2026-06-11 ===
+[2026-06-11T14:55:32] Using holistic recommendations: holistic_2026-06-10.csv (signal date: 2026-06-10; exec date: 2026-06-11)
+[2026-06-11T14:55:32]   0 BUY candidates today: []
+[2026-06-11T14:55:52] === Done ===
+
+[2026-06-12T16:24:42] === Paper-trade daily run for 2026-06-12 ===
+[2026-06-12T16:24:43] Using holistic recommendations: holistic_2026-06-11.csv (signal date: 2026-06-11; exec date: 2026-06-12)
+[2026-06-12T16:24:43]   1 BUY candidates today: ['DRI']
+[2026-06-12T16:24:43]   DRI (COMPOUNDER_BUY): rule=E1_T1115_LIM
+[2026-06-12T16:24:44]     fill=14.400 (vs OPEN=14.600, ATC=14.400), missed=False
+[2026-06-12T16:24:44]   Logged 1 new entries -> C:\Users\hotro\OneDrive\Pictures\Documents\WorkingClaude\paper_trade_entries.csv
+[2026-06-12T16:25:05] === Done ===
+
+[2026-06-13T15:59:51] === Paper-trade daily run for 2026-06-13 ===
+[2026-06-13T15:59:59] 2026-06-13 is not a trading day (no intraday for VNM), skip
+[2026-06-14T16:12:12] === Paper-trade daily run for 2026-06-14 ===
+[2026-06-14T16:12:15] 2026-06-14 is not a trading day (no intraday for VNM), skip
+[2026-06-15T17:57:09] === Paper-trade daily run for 2026-06-15 ===
+[2026-06-15T17:57:17] Using holistic recommendations: holistic_2026-06-12.csv (signal date: 2026-06-12; exec date: 2026-06-15)
+[2026-06-15T17:57:17]   2 BUY candidates today: ['AAA', 'KLB']
+[2026-06-15T17:57:17]   AAA (COMPOUNDER_BUY): rule=E1_T1115_LIM
+[2026-06-15T17:57:18]     fill=7.300 (vs OPEN=7.280, ATC=7.300), missed=False
+[2026-06-15T17:57:18]   KLB (COMPOUNDER_BUY): rule=E1_T1115_LIM
+[2026-06-15T17:57:19]     fill=14.450 (vs OPEN=14.550, ATC=14.750), missed=False
+[2026-06-15T17:57:21]   Logged 2 new entries -> C:\Users\hotro\OneDrive\Pictures\Documents\WorkingClaude\paper_trade_entries.csv
+[2026-06-15T17:58:04] === Done ===
+

@@ -1,0 +1,1 @@
+SELECT t.ticker, t.time FROM `tav2_bq.ticker` AS t WHERE (t.time >= '2020-01-01' AND t.time <= '2026-04-03') AND ((t.Volume_3M_P50*t.Price/ NULLIF(t.Inflation_7, 0))>2200000000.0) AND (t.Risk_Rating <= 6) AND (t.PE > 2.0) AND (t.PE < 19.0) AND (t.PB < 2.75) AND (t.PB > 0.1) AND (t.D_RSI < 83.0) AND (t.FSCORE > 4.0) ORDER BY t.ticker, t.time

@@ -1,0 +1,75 @@
+🛰️ V2.3 (DT5G) REPORT — 2026-06-18
+Sent: 2026-06-18 18:00 (next session T+1 entry)
+Market regime (DT5G): 🟡 NEUTRAL (state=3)
+Strategy: V2.3 = BAL | LAG static (always-on, no ensemble switch) + allocator + CAPIT v2
+BAL: max=12 · 10%/pos (book) · hold 45d · stop -20% · Fin/RE cap 4 · 8L≥4 half-size in BEAR/CRISIS
+LAG: PEAD T+5 entry · hold 25td · NO stop · LAG_HI 10% / LAG_LO 8% (book)
+ETF parking: 70% idle cash → E1VFVN30 (NEUTRAL, cả 2 book)
+Guards: SV_TIGHT Fresh-Q · overheat P3 · AVOID_exbull (momentum chặn ở state 5)
+⚖️ Allocator w_LAG: target 65% (state 3) · current 50% → 🔁 REBALANCE — band ±10pp breached
+📋 BOOK A — BAL (momentum, allocator-weighted)
+Không có signal — giữ cash cho book này.
+📋 BOOK B — LAG (PEAD always-on, 65% NAV target)
+Không có entry PEAD đến hạn — giữ vị thế LAG hiện có (hold 25td, NO stop) + parking.
+🧯 CAPIT v2: breadth oversold 0.0% &lt; gate 30% — dormant
+📊 Universe distribution
+  BA-core: 0 mã | Compounder/info: 6 mã
+  Wait/Pass/Avoid: 247 mã
+💡 Execution checklist (T+1 next session)
+  • Vốn: BAL 35% / LAG 65% NAV (rebal CHỈ khi lệch &gt;10pp)
+  • BAL: 0 pos × 10% book · stop -20% · hold 45d
+  • LAG: 0 entry mới (10/8% book) · NO stop · hold 25td
+  • Cash dư cả 2 book → 70% E1VFVN30
+🛰️ MARKET-STATE ENGINE — DT5G (gated live)
+
+As of:   2026-06-18
+Source:  DT5G + macro overlay
+
+🔄 DT5G transitions từ 2026-04-01
+
+Số ngày: 54   |   transitions: 0
+  (không có transition — state ổn định)
+
+📊 V2.3 LIVE paper-trade — forward OOS track
+V2.3: chạy từ 2026-06-11 — NAV 49.976B (-0.05%) sau 5 phiên.
+🧪 Benchmark / control arms (paper-trade nền)
+
+V4 12.1 ⭐ctrl 2026-06-01 →  -2.11% (13p)
+V11 SongSinh  2026-04-01 →  +4.41% (53p)
+V12 AmDuong   2026-04-01 →  -1.04% (53p)
+
+V4 12.1 = control arm của OOS showdown vs V2.3 (ensemble-switch, rời production 2026-06-12). Ret% tính từ ngày start mỗi sim — không so trực tiếp giữa sim khác start.
+🛡️ VOL-SPIKE HEDGE cho V5 (paper-trade → 30/06)
+
+As of:  2026-06-18   VN30F=1971.4
+rv10 = 15.7%   ngưỡng = 20.8%
+CÒ: 🟢 OFF (flat) — không hedge
+------------------------------
+Paper 8 phiên | hedge ON 0
+V5 only   : +nan%
+V5+hedge  : +nan%
+Đóng góp  : +nanpp (+0đ)
+
+⚙️ F-SYSTEM sleeve riêng (DT5G+Van, paper → 30/06)
+
+As of:  2026-06-18   VN30F=1971.4
+DT5G=NEUTRAL  base=+0.70 x scale=1.26
+Position = +0.89
+🟢 Phiên kế: LONG 45 HĐ VN30F
+  (notional 8,858,033,927)
+------------------------------
+Sleeve base 10B | 9 phiên
+Return    : -0.65%
+NAV       : 9,935,319,869
+
+📈 ORB intraday VN30F (paper-trade live)
+
+Data: 2026-06-18 14:45:00  VN30F=1971.4
+Rule: 09:30 dấu OR(09:00-09:30)
+  → long/short giữ đến 14:30, no stop
+Phiên kế: 5 HĐ (sleeve 1B)
+------------------------------
+Phiên cuối 2026-06-18: SHORT 🔴-0.32%
+8 phiên | WR 62% | Sharpe 5.93
+Cum +1.69% | NAV 1,016,860,179
+

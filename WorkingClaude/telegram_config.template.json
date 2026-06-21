@@ -1,0 +1,10 @@
+{
+  "_comment_setup": "1) Tạo bot qua @BotFather trong Telegram → lấy bot_token. 2) Nhắn tin bất kỳ cho bot, sau đó mở https://api.telegram.org/bot<TOKEN>/getUpdates để lấy chat_id (số nguyên, có thể âm). 3) Copy file này thành telegram_config.json và điền giá trị thật. KHÔNG commit telegram_config.json (chứa secret).",
+  "bot_token": "1234567890:ABCDEFghijklmnopqrstuvwxyz1234567890",
+  "chat_id": "123456789",
+  "_comment_chat_id": "chat_id is your personal user ID (positive int) for DM, or group ID (negative, starts with -100...) for group chat",
+  "_comment_extra": "Optional: send_charts=false (default no chart attachments), include_universe_stats=true",
+  "send_charts": false,
+  "include_universe_stats": true,
+  "include_f_overlay": true
+}

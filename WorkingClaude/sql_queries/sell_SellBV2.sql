@@ -1,0 +1,1 @@
+SELECT t.ticker, t.time FROM `tav2_bq.ticker` AS t WHERE (t.time >= '2020-01-01' AND t.time <= '2026-04-03') AND (t.PB > 1.23*t.PB_MA5Y + 0.84*t.PB_SD5Y) AND (t.NP_P0 / NULLIF(t.NP_P1, 0) < 0.62) AND (t.Close < 0.99*t.VAP1M) AND (t.Close_T1W > 0.8*t.VAP1M) AND (t.D_RSI > 0.28) AND (t.Volume > 1.01*t.Volume_3M_P50) ORDER BY t.ticker, t.time

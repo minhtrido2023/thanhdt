@@ -1,0 +1,84 @@
+SHAPE: (41, 83)
+Mã CP
+yearReport
+lengthReport
+publicDate
+TÀI SẢN NGẮN HẠN
+Tiền và tương đương tiền
+Tiền
+Các khoản tương đương tiền
+Đầu tư tài chính ngắn hạn
+Các khoản phải thu
+Phải thu khách hàng
+Trả trước người bán
+Phải thu khác
+Dự phòng nợ khó đòi
+Hàng tồn kho, ròng
+Hàng tồn kho
+Dự phòng giảm giá hàng tồn kho
+Tài sản lưu động khác
+Chi phí trả trước ngắn hạn
+Thuế GTGT được khấu trừ
+Phải thu thuế khác
+TÀI SẢN DÀI HẠN
+Phải thu dài hạn
+Phải thu dài hạn khác
+Tài sản cố định
+GTCL TSCĐ hữu hình
+Nguyên giá TSCĐ hữu hình
+Khấu hao lũy kế TSCĐ hữu hình
+GTCL tài sản cố định vô hình
+Nguyên giá TSCĐ vô hình
+Khấu hao lũy kế TSCĐ vô hình
+Giá trị ròng tài sản đầu tư
+Nguyên giá tài sản đầu tư
+Khấu hao lũy kế tài sản đầu tư
+Đầu tư dài hạn
+Đầu tư vào các công ty liên kết
+Đầu tư dài hạn khác
+Tài sản dài hạn khác
+Trả trước dài hạn
+Thuế thu nhập hoãn lại
+TỔNG CỘNG TÀI SẢN
+NỢ PHẢI TRẢ
+Nợ ngắn hạn
+Vay ngắn hạn
+Phải trả người bán
+Người mua trả tiền trước
+Thuế và các khoản phải trả Nhà nước
+Phải trả người lao động
+Chi phí phải trả
+Phải trả về xây dựng cơ bản
+Phải trả khác
+Dự phòng các khoản phải trả ngắn hạn
+Quỹ khen thưởng, phúc lợi
+Nợ dài hạn
+Phải trả dài hạn khác
+Vay dài hạn
+Thuế thu nhập hoãn lại
+Dự phòng các khoản nợ dài hạn
+Doanh thu chưa thực hiện
+Vốn chủ sở hữu
+Vốn và các quỹ
+Vốn góp
+Thặng dư vốn cổ phần
+Vốn khác
+Cổ phiếu quỹ
+Lãi chưa phân phối
+Tổng cộng nguồn vốn
+Đầu tư nắm giữ đến ngày đáo hạn
+Phải thu cho vay ngắn hạn
+Tài sản dở dang dài hạn
+Chi phí sản xuất, kinh doanh dở dang dài hạn
+Đầu tư nắm giữ đến ngày đáo hạn
+Thiết bị, vật tư, phụ tùng thay thế dài hạn
+Doanh thu chưa thực hiện ngắn hạn
+Chi phí phải trả dài hạn
+Trái phiếu chuyển đổi
+Cổ phiếu phổ thông
+Quyền chọn chuyển đổi trái phiếu
+LNST chưa phân phối lũy kế đến cuối kỳ trước
+LNST chưa phân phối kỳ này
+Xây dựng cơ bản đang dở dang
+Lợi thế thương mại
+Lợi ích cổ đông không kiểm soát

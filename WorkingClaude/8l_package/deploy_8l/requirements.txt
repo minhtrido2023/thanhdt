@@ -1,0 +1,6 @@
+pandas>=2.0
+numpy>=1.24
+requests>=2.28
+# Optional — only to REFRESH the bank lens (data/bank_lens_v3.csv) on the server.
+# Needs VN-friendly egress (VCI source). If the server can't reach it, refresh banks on the laptop instead.
+# vnstock>=3.2

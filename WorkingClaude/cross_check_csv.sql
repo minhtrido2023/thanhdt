@@ -1,0 +1,6 @@
+SELECT time, Close AS close_bq, VNINDEX_PE AS pe_bq, D_CMF AS cmf_bq, D_RSI AS rsi_bq
+FROM `lithe-record-440915-m9.tav2_bq.ticker`
+  FOR SYSTEM_TIME AS OF TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
+WHERE ticker = "VNINDEX"
+  AND time IN ("2014-01-02","2017-06-15","2019-06-24","2021-08-23","2024-03-15","2025-12-30","2026-05-20")
+ORDER BY time

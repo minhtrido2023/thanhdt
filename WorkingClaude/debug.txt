@@ -1,0 +1,1732 @@
+=== CONFIG === 
+{
+  "mcpServers": {
+    "my-mcp-server": {
+      "command": "C:\\Users\\hotro\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+      "args": [
+        "C:\\Users\\hotro\\mcp-proxy\\proxy.py"
+      ]
+    }
+  }
+} 
+=== MAIN LOG === 
+2026-04-24 00:04:23 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:04:24 [info] [CCD] Initialized with version 2.1.111
+2026-04-24 00:04:24 [info] [growthbook] next refresh in 60 min
+2026-04-24 00:04:25 [info] [IdleManager:session] Initialized with 900s timeout
+2026-04-24 00:04:25 [info] [IdleManager:preview] Initialized with 1800s timeout
+2026-04-24 00:04:25 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:04:25 [info] [office-addin] Module loaded { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false } ] }
+2026-04-24 00:04:25 [info] [office-addin] MCP Server created { isMacOS: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false } ] }
+2026-04-24 00:04:26 [info] Not main instance, returning early from app ready
+2026-04-24 00:04:26 [error] CFPrefs→JSON migration write failed ENOENT: no such file or directory, rename 'C:\Users\hotro\AppData\Roaming\Claude-3p\claude_desktop_config.json.tmp' -> 'C:\Users\hotro\AppData\Roaming\Claude-3p\claude_desktop_config.json' {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'rename',
+  path: 'C:\\Users\\hotro\\AppData\\Roaming\\Claude-3p\\claude_desktop_config.json.tmp',
+  dest: 'C:\\Users\\hotro\\AppData\\Roaming\\Claude-3p\\claude_desktop_config.json',
+  stack: "Error: ENOENT: no such file or directory, rename 'C:\\Users\\hotro\\AppData\\Roaming\\Claude-3p\\claude_desktop_config.json.tmp' -> 'C:\\Users\\hotro\\AppData\\Roaming\\Claude-3p\\claude_desktop_config.json'\n    at async Object.rename (node:internal/fs/promises:782:10)\n    at async C:\\Users\\hotro\\AppData\\Local\\AnthropicClaude\\app-1.3883.0\\resources\\app.asar\\.vite\\build\\index.js:83:4591\n    at async C:\\Users\\hotro\\AppData\\Local\\AnthropicClaude\\app-1.3883.0\\resources\\app.asar\\.vite\\build\\index.js:83:4035\n    at async En (C:\\Users\\hotro\\AppData\\Local\\AnthropicClaude\\app-1.3883.0\\resources\\app.asar\\.vite\\build\\index.js:83:5116)\n    at async C:\\Users\\hotro\\AppData\\Local\\AnthropicClaude\\app-1.3883.0\\resources\\app.asar\\.vite\\build\\index.js:116:152088\n    at async C:\\Users\\hotro\\AppData\\Local\\AnthropicClaude\\app-1.3883.0\\resources\\app.asar\\.vite\\build\\index.js:83:4035\n    at async HHi (C:\\Users\\hotro\\AppData\\Local\\AnthropicClaude\\app-1.3883.0\\resources\\app.asar\\.vite\\build\\index.js:116:151904)",
+  Symbol(level): 'error',
+  Symbol(splat): [
+    Error: ENOENT: no such file or directory, rename 'C:\Users\hotro\AppData\Roaming\Claude-3p\claude_desktop_config.json.tmp' -> 'C:\Users\hotro\AppData\Roaming\Claude-3p\claude_desktop_config.json'
+        at async Object.rename (node:internal/fs/promises:782:10)
+        at async C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:83:4591
+        at async C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:83:4035
+        at async En (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:83:5116)
+        at async C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:116:152088
+        at async C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:83:4035
+        at async HHi (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:116:151904) {
+      errno: -4058,
+      code: 'ENOENT',
+      syscall: 'rename',
+      path: 'C:\\Users\\hotro\\AppData\\Roaming\\Claude-3p\\claude_desktop_config.json.tmp',
+      dest: 'C:\\Users\\hotro\\AppData\\Roaming\\Claude-3p\\claude_desktop_config.json'
+    }
+  ]
+}
+2026-04-24 00:04:27 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:04:27 [info] [CCD] Initialized with version 2.1.111
+2026-04-24 00:04:27 [info] [growthbook] next refresh in 60 min
+2026-04-24 00:04:28 [info] [IdleManager:session] Initialized with 900s timeout
+2026-04-24 00:04:28 [info] [IdleManager:preview] Initialized with 1800s timeout
+2026-04-24 00:04:28 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:04:28 [info] [office-addin] Module loaded { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false } ] }
+2026-04-24 00:04:28 [info] [office-addin] MCP Server created { isMacOS: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false } ] }
+2026-04-24 00:04:28 [info] Not main instance, returning early from app ready
+2026-04-24 00:05:20 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:05:21 [info] [CCD] Initialized with version 2.1.111
+2026-04-24 00:05:21 [info] [growthbook] next refresh in 60 min
+2026-04-24 00:05:21 [info] [IdleManager:session] Initialized with 900s timeout
+2026-04-24 00:05:21 [info] [IdleManager:preview] Initialized with 1800s timeout
+2026-04-24 00:05:21 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:05:22 [info] [office-addin] Module loaded { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false } ] }
+2026-04-24 00:05:22 [info] [office-addin] MCP Server created { isMacOS: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false } ] }
+2026-04-24 00:05:22 [info] Not main instance, returning early from app ready
+2026-04-24 00:05:44 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:05:45 [info] [CCD] Initialized with version 2.1.111
+2026-04-24 00:05:45 [info] [growthbook] next refresh in 60 min
+2026-04-24 00:05:45 [info] [IdleManager:session] Initialized with 900s timeout
+2026-04-24 00:05:45 [info] [IdleManager:preview] Initialized with 1800s timeout
+2026-04-24 00:05:45 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:05:45 [info] [office-addin] Module loaded { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false } ] }
+2026-04-24 00:05:45 [info] [office-addin] MCP Server created { isMacOS: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false } ] }
+2026-04-24 00:05:45 [info] Not main instance, returning early from app ready
+2026-04-24 00:06:58 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:06:59 [info] [CCD] Initialized with version 2.1.111
+2026-04-24 00:06:59 [info] [growthbook] next refresh in 60 min
+2026-04-24 00:06:59 [info] [IdleManager:session] Initialized with 900s timeout
+2026-04-24 00:06:59 [info] [IdleManager:preview] Initialized with 1800s timeout
+2026-04-24 00:06:59 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:07:00 [info] [office-addin] Module loaded { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false } ] }
+2026-04-24 00:07:00 [info] [office-addin] MCP Server created { isMacOS: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false } ] }
+2026-04-24 00:07:00 [info] Not main instance, returning early from app ready
+2026-04-24 00:07:01 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:07:02 [info] [CCD] Initialized with version 2.1.111
+2026-04-24 00:07:02 [info] [growthbook] next refresh in 60 min
+2026-04-24 00:07:02 [info] [IdleManager:session] Initialized with 900s timeout
+2026-04-24 00:07:02 [info] [IdleManager:preview] Initialized with 1800s timeout
+2026-04-24 00:07:02 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:07:02 [info] [office-addin] Module loaded { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false } ] }
+2026-04-24 00:07:02 [info] [office-addin] MCP Server created { isMacOS: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false } ] }
+2026-04-24 00:07:02 [info] Not main instance, returning early from app ready
+2026-04-24 00:07:37 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:07:38 [info] [CCD] Initialized with version 2.1.111
+2026-04-24 00:07:38 [info] [growthbook] next refresh in 60 min
+2026-04-24 00:07:38 [info] [IdleManager:session] Initialized with 900s timeout
+2026-04-24 00:07:38 [info] [IdleManager:preview] Initialized with 1800s timeout
+2026-04-24 00:07:38 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:07:38 [info] [office-addin] Module loaded { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false } ] }
+2026-04-24 00:07:38 [info] [office-addin] MCP Server created { isMacOS: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false } ] }
+2026-04-24 00:07:39 [info] Not main instance, returning early from app ready
+2026-04-24 00:08:24 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:08:25 [info] [CCD] Initialized with version 2.1.111
+2026-04-24 00:08:25 [info] [growthbook] next refresh in 60 min
+2026-04-24 00:08:25 [info] [IdleManager:session] Initialized with 900s timeout
+2026-04-24 00:08:25 [info] [IdleManager:preview] Initialized with 1800s timeout
+2026-04-24 00:08:25 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:08:26 [info] [office-addin] Module loaded { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false } ] }
+2026-04-24 00:08:26 [info] [office-addin] MCP Server created { isMacOS: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false } ] }
+2026-04-24 00:08:26 [info] App is installed, enabling initial check and auto-updates
+2026-04-24 00:08:26 [info] Update URL: https://api.anthropic.com/api/desktop/win32/x64/squirrel/update
+2026-04-24 00:08:26 [info] Checking for updates
+2026-04-24 00:08:26 [info] [account] Account details not yet available, waiting for IPC...
+2026-04-24 00:08:26 [info] [CoworkArtifacts] Protocol handler registered
+2026-04-24 00:08:26 [info] [CoworkFilePreview] Protocol handler registered
+2026-04-24 00:08:26 [info] [cu-side-panel] initialized
+2026-04-24 00:08:26 [info] [cu-esc] initialized
+2026-04-24 00:08:26 [info] [cu-teach] controller initialized
+2026-04-24 00:08:26 [info] [cu-glow] initialized
+2026-04-24 00:08:26 [info] [cu-notifications] listeners registered
+2026-04-24 00:08:27 [info] NotificationService initialized with Electron notifications
+2026-04-24 00:08:27 [info] [remoteMarketplaceMigration] marketplace_migration.invoked
+2026-04-24 00:08:27 [info] [remoteUploadsMigration] upload_migration.invoked
+2026-04-24 00:08:27 [info] [wake-scheduler] registered claim id=scheduled-tasks
+2026-04-24 00:08:27 [info] [Chrome Extension MCP] Installed native host manifest for All at C:\Users\hotro\AppData\Roaming\Claude\ChromeNativeHost\com.anthropic.claude_browser_extension.json
+2026-04-24 00:08:27 [info] [Chrome Extension MCP] Registering native host for Chrome in Windows registry: SOFTWARE\Google\Chrome\NativeMessagingHosts\com.anthropic.claude_browser_extension
+2026-04-24 00:08:27 [info] [Chrome Extension MCP] Registry verification successful for Chrome
+2026-04-24 00:08:27 [info] [Chrome Extension MCP] Registering native host for Brave in Windows registry: SOFTWARE\BraveSoftware\Brave-Browser\NativeMessagingHosts\com.anthropic.claude_browser_extension
+2026-04-24 00:08:27 [info] [Chrome Extension MCP] Registry verification successful for Brave
+2026-04-24 00:08:27 [info] [Chrome Extension MCP] Registering native host for Edge in Windows registry: SOFTWARE\Microsoft\Edge\NativeMessagingHosts\com.anthropic.claude_browser_extension
+2026-04-24 00:08:27 [info] [Chrome Extension MCP] Registry verification successful for Edge
+2026-04-24 00:08:27 [info] [Chrome Extension MCP] Registering native host for Chromium in Windows registry: SOFTWARE\Chromium\NativeMessagingHosts\com.anthropic.claude_browser_extension
+2026-04-24 00:08:27 [info] [Chrome Extension MCP] Registry verification successful for Chromium
+2026-04-24 00:08:27 [info] [Chrome Extension MCP] Registering native host for Arc in Windows registry: SOFTWARE\ArcBrowser\Arc\NativeMessagingHosts\com.anthropic.claude_browser_extension
+2026-04-24 00:08:27 [info] [Chrome Extension MCP] Registry verification successful for Arc
+2026-04-24 00:08:27 [info] [Chrome Extension MCP] Registering native host for Vivaldi in Windows registry: SOFTWARE\Vivaldi\NativeMessagingHosts\com.anthropic.claude_browser_extension
+2026-04-24 00:08:27 [info] [Chrome Extension MCP] Registry verification successful for Vivaldi
+2026-04-24 00:08:27 [info] [Chrome Extension MCP] Registering native host for Opera in Windows registry: SOFTWARE\Opera Software\Opera Stable\NativeMessagingHosts\com.anthropic.claude_browser_extension
+2026-04-24 00:08:27 [info] [Chrome Extension MCP] Registry verification successful for Opera
+2026-04-24 00:08:27 [info] [Chrome Extension MCP] Native host installation complete
+2026-04-24 00:08:27 [info] [Claude in Chrome] MCP server registered
+2026-04-24 00:08:28 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:08:29 [info] [CCD] Initialized with version 2.1.111
+2026-04-24 00:08:29 [info] [growthbook] next refresh in 60 min
+2026-04-24 00:08:29 [info] [IdleManager:session] Initialized with 900s timeout
+2026-04-24 00:08:29 [info] [IdleManager:preview] Initialized with 1800s timeout
+2026-04-24 00:08:29 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:08:29 [info] [office-addin] Module loaded { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false } ] }
+2026-04-24 00:08:29 [info] [office-addin] MCP Server created { isMacOS: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false } ] }
+2026-04-24 00:08:30 [info] App is installed, enabling initial check and auto-updates
+2026-04-24 00:08:30 [info] Update URL: https://api.anthropic.com/api/desktop/win32/x64/squirrel/update
+2026-04-24 00:08:30 [info] Checking for updates
+2026-04-24 00:08:30 [info] [account] Account details not yet available, waiting for IPC...
+2026-04-24 00:08:30 [info] [CoworkArtifacts] Protocol handler registered
+2026-04-24 00:08:30 [info] [CoworkFilePreview] Protocol handler registered
+2026-04-24 00:08:30 [info] [cu-side-panel] initialized
+2026-04-24 00:08:30 [info] [cu-esc] initialized
+2026-04-24 00:08:30 [info] [cu-teach] controller initialized
+2026-04-24 00:08:30 [info] [cu-glow] initialized
+2026-04-24 00:08:30 [info] [cu-notifications] listeners registered
+2026-04-24 00:08:30 [info] NotificationService initialized with Electron notifications
+2026-04-24 00:08:30 [info] [remoteMarketplaceMigration] marketplace_migration.invoked
+2026-04-24 00:08:30 [info] [remoteUploadsMigration] upload_migration.invoked
+2026-04-24 00:08:30 [info] [wake-scheduler] registered claim id=scheduled-tasks
+2026-04-24 00:08:31 [info] [Chrome Extension MCP] Installed native host manifest for All at C:\Users\hotro\AppData\Roaming\Claude\ChromeNativeHost\com.anthropic.claude_browser_extension.json
+2026-04-24 00:08:31 [info] [Chrome Extension MCP] Registering native host for Chrome in Windows registry: SOFTWARE\Google\Chrome\NativeMessagingHosts\com.anthropic.claude_browser_extension
+2026-04-24 00:08:31 [info] [Chrome Extension MCP] Registry verification successful for Chrome
+2026-04-24 00:08:31 [info] [Chrome Extension MCP] Registering native host for Brave in Windows registry: SOFTWARE\BraveSoftware\Brave-Browser\NativeMessagingHosts\com.anthropic.claude_browser_extension
+2026-04-24 00:08:31 [info] [Chrome Extension MCP] Registry verification successful for Brave
+2026-04-24 00:08:31 [info] [Chrome Extension MCP] Registering native host for Edge in Windows registry: SOFTWARE\Microsoft\Edge\NativeMessagingHosts\com.anthropic.claude_browser_extension
+2026-04-24 00:08:31 [info] [Chrome Extension MCP] Registry verification successful for Edge
+2026-04-24 00:08:31 [info] [Chrome Extension MCP] Registering native host for Chromium in Windows registry: SOFTWARE\Chromium\NativeMessagingHosts\com.anthropic.claude_browser_extension
+2026-04-24 00:08:31 [info] [Chrome Extension MCP] Registry verification successful for Chromium
+2026-04-24 00:08:31 [info] [Chrome Extension MCP] Registering native host for Arc in Windows registry: SOFTWARE\ArcBrowser\Arc\NativeMessagingHosts\com.anthropic.claude_browser_extension
+2026-04-24 00:08:31 [info] [Chrome Extension MCP] Registry verification successful for Arc
+2026-04-24 00:08:31 [info] [Chrome Extension MCP] Registering native host for Vivaldi in Windows registry: SOFTWARE\Vivaldi\NativeMessagingHosts\com.anthropic.claude_browser_extension
+2026-04-24 00:08:31 [info] [Chrome Extension MCP] Registry verification successful for Vivaldi
+2026-04-24 00:08:31 [info] [Chrome Extension MCP] Registering native host for Opera in Windows registry: SOFTWARE\Opera Software\Opera Stable\NativeMessagingHosts\com.anthropic.claude_browser_extension
+2026-04-24 00:08:31 [info] [Chrome Extension MCP] Registry verification successful for Opera
+2026-04-24 00:08:31 [info] [Chrome Extension MCP] Native host installation complete
+2026-04-24 00:08:31 [info] [Claude in Chrome] MCP server registered
+2026-04-24 00:08:31 [info] [growthbook] loaded 129 features (129 changed)
+2026-04-24 00:08:31 [info] [chicago] GrowthBook chicago_config: raw={"enabled":false,"pixelValidation":false,"clipboardPasteMultiline":true,"screenshotFilter":true,"mouseAnimation":true,"hideBeforeAction":true,"coordinateMode":"pixels","dispatchCuGrantTtlMs":1800000} → enabled=false subGates={"pixelValidation":false,"clipboardPasteMultiline":true,"mouseAnimation":true,"hideBeforeAction":true,"autoTargetDisplay":true,"clipboardGuard":true} coordMode=pixels dispatchTtlMs=1800000
+2026-04-24 00:08:31 [info] [remoteMarketplaceMigration] marketplace_migration.gate_check gate=claudeai_cowork_backend_marketplaces value=true
+2026-04-24 00:08:31 [info] [remoteUploadsMigration] upload_migration.gate_check gate=cowork_plugin_host_ops value=true
+2026-04-24 00:08:31 [info] [remoteUploadsMigration] upload_migration.gate_check gate=claudeai_cowork_backend_marketplaces value=true
+2026-04-24 00:08:31 [info] [remoteMarketplaceMigration] marketplace_migration.paths_unavailable err=Error: No active account/org for marketplace operations
+    at jge (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:6902:959)
+    at async USA (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:6902:1078)
+    at async MUn (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:10250:11749) {
+  [stack]: [Getter/Setter],
+  [message]: 'No active account/org for marketplace operations'
+}
+2026-04-24 00:08:31 [info] [remoteUploadsMigration] upload_migration.paths_unavailable err=Error: No active account/org for marketplace operations
+    at jge (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:6902:959)
+    at async Object.USA [as resolveCoworkPaths] (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:6902:1078)
+    at async bUn (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:10250:16084) {
+  [stack]: [Getter/Setter],
+  [message]: 'No active account/org for marketplace operations'
+}
+2026-04-24 00:08:33 [info] [buddy] starting bridge
+2026-04-24 00:08:33 [info] [buddy] bridge started
+2026-04-24 00:08:33 [info] [growthbook] refreshing for account change
+2026-04-24 00:08:33 [info] claude.ai account details provided
+2026-04-24 00:08:33 [info] claude.ai account active and logged in
+2026-04-24 00:08:33 [info] Tracked desktop initial activation
+2026-04-24 00:08:33 [info] Starting periodic extension update checks (interval: 21600000ms)
+2026-04-24 00:08:33 [info] Starting blocklist update checks. Initial check will be triggered on first ConnectToServer.
+2026-04-24 00:08:33 [info] Config file written
+2026-04-24 00:08:33 [info] [account] User logged out during IPC wait, stopping early
+2026-04-24 00:08:33 [warn] [LocalSessionManager] Cannot initialize sessions: accountId=null, orgId=null. Keeping existing sessions.
+2026-04-24 00:08:33 [warn] [LocalAgentModeSessionManager] Cannot initialize sessions: accountId=null, orgId=null. Keeping existing sessions.
+2026-04-24 00:08:33 [info] [account] User is logged out, skipping account ID wait
+2026-04-24 00:08:33 [info] [growthbook] loaded 129 features (0 changed)
+2026-04-24 00:08:33 [info] [growthbook] refreshing for account change
+2026-04-24 00:08:33 [info] [growthbook] next refresh in 60 min
+2026-04-24 00:08:34 [info] [growthbook] loaded 129 features (0 changed)
+2026-04-24 00:08:34 [info] [growthbook] next refresh in 60 min
+2026-04-24 00:08:34 [warn] Blocked permission check {
+  permission: 'background-sync',
+  requestingOrigin: 'https://a.claude.ai/',
+  requestingUrl: 'https://a.claude.ai/isolated-segment.html?v=46843a99fd',
+  isMainFrame: false,
+  topFrameUrl: 'https://claude.ai/login'
+}
+2026-04-24 00:09:01 [info] [EventLogging] Flushing 5 events
+2026-04-24 00:13:54 [info] [growthbook] refreshing for account change
+2026-04-24 00:13:53 [info] [CCD] Initialized with version 2.1.111
+2026-04-24 00:13:52 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:13:53 [info] [growthbook] next refresh in 60 min
+2026-04-24 00:13:53 [info] [IdleManager:session] Initialized with 900s timeout
+2026-04-24 00:13:53 [info] [IdleManager:preview] Initialized with 1800s timeout
+2026-04-24 00:13:53 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:13:53 [info] [office-addin] Module loaded { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false } ] }
+2026-04-24 00:13:53 [info] [office-addin] MCP Server created { isMacOS: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false } ] }
+2026-04-24 00:13:54 [info] Not main instance, returning early from app ready
+2026-04-24 00:13:54 [info] [growthbook] loaded 129 features (0 changed)
+2026-04-24 00:13:54 [info] [growthbook] next refresh in 60 min
+2026-04-24 00:13:57 [info] [growthbook] refreshing for account change
+2026-04-24 00:13:57 [info] [account] Account details not yet available, waiting for IPC...
+2026-04-24 00:13:57 [info] [account] User logged out during IPC wait, stopping early
+2026-04-24 00:13:57 [warn] [LocalSessionManager] Cannot initialize sessions: accountId=null, orgId=null. Keeping existing sessions.
+2026-04-24 00:13:57 [warn] [LocalAgentModeSessionManager] Cannot initialize sessions: accountId=null, orgId=null. Keeping existing sessions.
+2026-04-24 00:13:57 [info] [growthbook] loaded 129 features (0 changed)
+2026-04-24 00:13:57 [info] [growthbook] refreshing for account change
+2026-04-24 00:13:57 [info] [growthbook] next refresh in 60 min
+2026-04-24 00:13:57 [info] [growthbook] loaded 129 features (0 changed)
+2026-04-24 00:13:57 [info] [growthbook] next refresh in 60 min
+2026-04-24 00:13:58 [warn] Blocked permission check {
+  permission: 'background-sync',
+  requestingOrigin: 'https://a.claude.ai/',
+  requestingUrl: 'https://a.claude.ai/isolated-segment.html?v=46843a99fd',
+  isMainFrame: false,
+  topFrameUrl: 'https://claude.ai/magic-link#8cf7efb31c080b6d31261f32d32c78ed:dGEyMDI2MDNAZ29vZ2xlZ3JvdXBzLmNvbQ=='
+}
+2026-04-24 00:13:58 [info] [account] Identity changed (loggedOut: true → false, uuid: <none> → 06feffbb-6b63-425d-9b78-46ee00ef31b6), clearing oauth cache
+2026-04-24 00:13:58 [info] [oauth] clearing token cache, had 0 cached tokens
+2026-04-24 00:13:58 [info] [growthbook] refreshing for account change
+2026-04-24 00:13:58 [info] [LocalSessionManager] Org changed from null to deca5385-e605-4dad-bf74-fe11f439d8bd, reinitializing sessions
+2026-04-24 00:13:58 [info] [LocalAgentModeSessionManager] Org changed from null to deca5385-e605-4dad-bf74-fe11f439d8bd, reinitializing sessions
+2026-04-24 00:13:58 [info] [LocalSessionManager] Initialization succeeded — accountId=06feffbb-6b63-425d-9b78-46ee00ef31b6, orgId=deca5385-e605-4dad-bf74-fe11f439d8bd, existingSessions=0
+2026-04-24 00:13:58 [info] [CCDScheduledTasks] Reset
+2026-04-24 00:13:58 [info] [LocalAgentModeSessionManager] Initialization succeeded — accountId=06feffbb-6b63-425d-9b78-46ee00ef31b6, orgId=deca5385-e605-4dad-bf74-fe11f439d8bd, existingSessions=0
+2026-04-24 00:13:58 [info] [ScheduledTasks] Reset
+2026-04-24 00:13:58 [info] No persisted sessions found
+2026-04-24 00:13:58 [warn] [LocalAgentModeSessionManager] no VMAPI; cliPluginBridge not registered
+2026-04-24 00:13:58 [info] [sessions-bridge] account-change reevaluate: <none> → deca5385-e605-4dad-bf74-fe11f439d8bd:06feffbb-6b63-425d-9b78-46ee00ef31b6
+2026-04-24 00:13:58 [info] [LocalSessionManager] Session storage directory does not exist yet, skipping load: C:\Users\hotro\AppData\Roaming\Claude\claude-code-sessions\06feffbb-6b63-425d-9b78-46ee00ef31b6\deca5385-e605-4dad-bf74-fe11f439d8bd
+2026-04-24 00:13:59 [info] Trying to load oauth token cache
+2026-04-24 00:13:59 [info] [SkillsPlugin] Starting periodic sync (interval: 600000ms)
+2026-04-24 00:13:59 [info] [SkillsPlugin] Starting skills sync
+2026-04-24 00:13:59 [info] [oauth] token cache location: C:\Users\hotro\AppData\Roaming\Claude\config.json
+2026-04-24 00:13:59 [info] [oauth] loaded token cache from disk with 0 entries: [ [length]: 0 ]
+2026-04-24 00:13:59 [info] [LocalSessionManager] Initialization succeeded — accountId=06feffbb-6b63-425d-9b78-46ee00ef31b6, orgId=deca5385-e605-4dad-bf74-fe11f439d8bd, existingSessions=0
+2026-04-24 00:13:59 [info] [Spaces] Loaded 0 spaces for 06feffbb-6b63-425d-9b78-46ee00ef31b6/deca5385-e605-4dad-bf74-fe11f439d8bd
+2026-04-24 00:13:59 [info] [LocalAgentModeSessionManager] Scheduled tasks service initialized
+2026-04-24 00:13:59 [info] [RemotePluginManager] Starting remote plugins sync
+2026-04-24 00:13:59 [info] [LocalAgentModeSessionManager] Initialization succeeded — accountId=06feffbb-6b63-425d-9b78-46ee00ef31b6, orgId=deca5385-e605-4dad-bf74-fe11f439d8bd, existingSessions=0
+2026-04-24 00:13:59 [info] No persisted sessions found
+2026-04-24 00:13:59 [warn] [ScheduledTasks] Already initialized
+2026-04-24 00:13:59 [info] [LocalAgentModeSessionManager] Scheduled tasks service initialized
+2026-04-24 00:13:59 [info] [RemotePluginManager] Sync already in progress, waiting...
+2026-04-24 00:13:59 [info] [oauth] looking up token for orgId=deca5385-e605-4dad-bf74-fe11f439d8bd, cacheKey=9d1c250a-e61b-44d9-88ed-5944d1962f5e:deca5385-e605-4dad-bf74-fe11f439d8bd:https://api.anthropic.com:user:inference user:file_upload user:profile user:sessions:claude_code
+2026-04-24 00:13:59 [info] [oauth] no cached token found for orgId=deca5385-e605-4dad-bf74-fe11f439d8bd
+2026-04-24 00:13:59 [info] [oauth] performing fresh oauth exchange for orgId=deca5385-e605-4dad-bf74-fe11f439d8bd
+2026-04-24 00:13:59 [info] [CCDScheduledTasks] Initialized { accountId: '06feffbb-6b63-425d-9b78-46ee00ef31b6', orgId: 'deca5385-e605-4dad-bf74-fe11f439d8bd', Symbol(level): 'info', Symbol(splat): [ { accountId: '06feffbb-6b63-425d-9b78-46ee00ef31b6', orgId: 'deca5385-e605-4dad-bf74-fe11f439d8bd' } ] }
+2026-04-24 00:13:59 [info] [ScheduledTasks] Initialized { accountId: '06feffbb-6b63-425d-9b78-46ee00ef31b6', orgId: 'deca5385-e605-4dad-bf74-fe11f439d8bd', Symbol(level): 'info', Symbol(splat): [ { accountId: '06feffbb-6b63-425d-9b78-46ee00ef31b6', orgId: 'deca5385-e605-4dad-bf74-fe11f439d8bd' } ] }
+2026-04-24 00:13:59 [info] [CCD] Downloading from https://downloads.claude.ai/claude-code-releases/2.1.111/win32-x64/claude.exe.zst
+2026-04-24 00:13:59 [info] [download:1] Starting download from https://downloads.claude.ai/claude-code-releases/2.1.111/win32-x64/claude.exe.zst
+2026-04-24 00:13:59 [info] [LocalSessionManager] Session storage directory does not exist yet, skipping load: C:\Users\hotro\AppData\Roaming\Claude\claude-code-sessions\06feffbb-6b63-425d-9b78-46ee00ef31b6\deca5385-e605-4dad-bf74-fe11f439d8bd
+2026-04-24 00:13:59 [warn] [CCDScheduledTasks] Already initialized
+2026-04-24 00:13:59 [info] MCP Server connection requested for: mcp-registry
+2026-04-24 00:13:59 [info] Running initial blocklist check triggered by ConnectToServer
+2026-04-24 00:13:59 [info] Organization allowlist enabled: false
+2026-04-24 00:13:59 [info] Updated allowlist enabled state for org deca5385-e605-4dad-bf74-fe11f439d8bd: false
+2026-04-24 00:13:59 [info] Successfully fetched blocklist from https://claude.ai/api/organizations/deca5385-e605-4dad-bf74-fe11f439d8bd/dxt/blocklist with 0 entries
+2026-04-24 00:13:59 [info] Saved 1 blocklists with 0 entries
+2026-04-24 00:13:59 [info] Successfully updated blocklist
+2026-04-24 00:13:59 [info] Checking 0 extensions via can_install API using stored metadata
+2026-04-24 00:13:59 [info] can_install check completed: 0 extensions checked: [ [length]: 0 ]
+2026-04-24 00:13:59 [info] [SkillsPlugin] Found 6 enabled skills
+2026-04-24 00:13:59 [info] [SkillsPlugin] Delta: 6 to download, 0 to remove
+2026-04-24 00:13:59 [info] [PluginsFetcher] fetchAutoInstalledPlugins: 0 plugins
+2026-04-24 00:13:59 [info] [RemotePluginManager] Delta: 0 to download, 0 to remove
+2026-04-24 00:13:59 [info] [RemotePluginManager] Sync complete: 0 downloaded, 0 removed, 0 orphans cleaned
+2026-04-24 00:13:59 [info] [growthbook] loaded 129 features (2 changed)
+2026-04-24 00:13:59 [info] [growthbook] refreshing for account change
+2026-04-24 00:13:59 [info] [growthbook] next refresh in 60 min
+2026-04-24 00:13:59 [info] Successfully fetched blocklist from https://claude.ai/api/organizations/deca5385-e605-4dad-bf74-fe11f439d8bd/dxt/blocklist with 0 entries
+2026-04-24 00:13:59 [info] Organization allowlist enabled: false
+2026-04-24 00:13:59 [info] Updated allowlist enabled state for org deca5385-e605-4dad-bf74-fe11f439d8bd: false
+2026-04-24 00:13:59 [info] Saved 1 blocklists with 0 entries
+2026-04-24 00:13:59 [info] Successfully updated blocklist
+2026-04-24 00:13:59 [info] Checking 0 extensions via can_install API using stored metadata
+2026-04-24 00:13:59 [info] can_install check completed: 0 extensions checked: [ [length]: 0 ]
+2026-04-24 00:14:00 [info] [growthbook] loaded 129 features (0 changed)
+2026-04-24 00:14:00 [info] [growthbook] next refresh in 60 min
+2026-04-24 00:14:00 [info] [oauth] obtained new token for orgId=deca5385-e605-4dad-bf74-fe11f439d8bd, caching
+2026-04-24 00:14:00 [info] Config file written
+2026-04-24 00:14:00 [info] LocalAgentModeSessions.getSupportedCommands: sessionId=undefined, cwd=undefined
+2026-04-24 00:14:00 [info] Config file written
+2026-04-24 00:14:00 [info] [growthbook] refreshing for account change
+2026-04-24 00:14:00 [info] [growthbook] loaded 129 features (0 changed)
+2026-04-24 00:14:00 [info] [growthbook] next refresh in 60 min
+2026-04-24 00:14:01 [info] [SkillsPlugin] Sync complete: 6 downloaded, 0 removed, 0 orphans cleaned
+2026-04-24 00:14:01 [info] MCP Server connection requested for: mcp-registry
+2026-04-24 00:14:01 [info] MCP Server connection requested for: Claude in Chrome
+2026-04-24 00:14:03 [warn] Blocked permission check {
+  permission: 'background-sync',
+  requestingOrigin: 'https://a.claude.ai/',
+  requestingUrl: 'https://a.claude.ai/isolated-segment.html?v=46843a99fd',
+  isMainFrame: false,
+  topFrameUrl: 'https://claude.ai/new'
+}
+2026-04-24 00:14:09 [info] [download:1] 74.2% (38.2/51.5 MB) avg 3.82 MB/s, ETA 3s
+2026-04-24 00:14:11 [info] [CCD] Downloaded file size: 245423264 bytes, transferred bytes: 54042832 bytes (expected: 54042832)
+2026-04-24 00:14:11 [info] [CCD] Verifying checksum
+2026-04-24 00:14:11 [info] [CCD] Installed at C:\Users\hotro\AppData\Roaming\Claude\claude-code\2.1.111\claude.exe
+2026-04-24 00:14:23 [info] [EventLogging] Flushing 2 events
+2026-04-24 00:18:47 [info] [Claude in Chrome] Executing tool: tabs_context_mcp
+2026-04-24 00:18:47 [info] [Claude in Chrome] ensureConnected called, connected=false, authenticated=false, wsState=undefined
+2026-04-24 00:18:47 [info] [Claude in Chrome] Not connecting, starting connection...
+2026-04-24 00:18:47 [info] [oauth] looking up token for orgId=deca5385-e605-4dad-bf74-fe11f439d8bd, cacheKey=89355bc3-cbfd-4382-905b-976645cad410:deca5385-e605-4dad-bf74-fe11f439d8bd:https://api.anthropic.com:user:inference user:office
+2026-04-24 00:18:47 [info] [oauth] no cached token found for orgId=deca5385-e605-4dad-bf74-fe11f439d8bd
+2026-04-24 00:18:47 [info] [oauth] performing fresh oauth exchange for orgId=deca5385-e605-4dad-bf74-fe11f439d8bd
+2026-04-24 00:18:48 [info] [oauth] obtained new token for orgId=deca5385-e605-4dad-bf74-fe11f439d8bd, caching
+2026-04-24 00:18:49 [info] [oauth] looking up token for orgId=deca5385-e605-4dad-bf74-fe11f439d8bd, cacheKey=89355bc3-cbfd-4382-905b-976645cad410:deca5385-e605-4dad-bf74-fe11f439d8bd:https://api.anthropic.com:user:inference user:office
+2026-04-24 00:18:49 [info] [oauth] using cached token for orgId=deca5385-e605-4dad-bf74-fe11f439d8bd
+2026-04-24 00:18:49 [info] [Claude in Chrome] Connecting to bridge: wss://bridge.claudeusercontent.com/chrome/06feffbb-6b63-425d-9b78-46ee00ef31b6
+2026-04-24 00:18:49 [info] [Claude in Chrome] WebSocket connected, sending connect message
+2026-04-24 00:18:49 [info] [Claude in Chrome] Waiting for Chrome extension to connect (duration: 2007ms)
+2026-04-24 00:18:50 [info] [Claude in Chrome] Connection successful
+2026-04-24 00:18:50 [info] [Claude in Chrome] No extensions connected, waiting up to 10000ms for peer_connected
+2026-04-24 00:19:00 [info] [Claude in Chrome] No extensions found after waiting
+2026-04-24 00:19:00 [info] [Claude in Chrome] Error calling tool: [Claude in Chrome] No Chrome extension connected after discovery {
+  name: 'NoExtensionConnectedError',
+  stack: 'NoExtensionConnectedError: [Claude in Chrome] No Chrome extension connected after discovery\n    at Uzi.callTool (C:\\Users\\hotro\\AppData\\Local\\AnthropicClaude\\app-1.3883.0\\resources\\app.asar\\.vite\\build\\index.js:267:17667)\n    at async prr (C:\\Users\\hotro\\AppData\\Local\\AnthropicClaude\\app-1.3883.0\\resources\\app.asar\\.vite\\build\\index.js:320:3191)\n    at async r_t (C:\\Users\\hotro\\AppData\\Local\\AnthropicClaude\\app-1.3883.0\\resources\\app.asar\\.vite\\build\\index.js:320:2030)\n    at async a (C:\\Users\\hotro\\AppData\\Local\\AnthropicClaude\\app-1.3883.0\\resources\\app.asar\\.vite\\build\\index.js:315:34503)',
+  Symbol(level): 'info',
+  Symbol(splat): [
+    DSt [NoExtensionConnectedError]: [Claude in Chrome] No Chrome extension connected after discovery
+        at Uzi.callTool (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:267:17667)
+        at async prr (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:320:3191)
+        at async r_t (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:320:2030)
+        at async a (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:315:34503)
+  ]
+}
+2026-04-24 00:19:19 [info] [EventLogging] Flushing 2 events
+2026-04-24 00:20:51 [info] [Claude in Chrome] Executing tool: tabs_context_mcp
+2026-04-24 00:20:51 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 00:20:51 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 00:20:51 [info] [Claude in Chrome] Error calling tool: [Claude in Chrome] No Chrome extension connected after discovery {
+  name: 'NoExtensionConnectedError',
+  stack: 'NoExtensionConnectedError: [Claude in Chrome] No Chrome extension connected after discovery\n    at Uzi.callTool (C:\\Users\\hotro\\AppData\\Local\\AnthropicClaude\\app-1.3883.0\\resources\\app.asar\\.vite\\build\\index.js:267:17667)\n    at prr (C:\\Users\\hotro\\AppData\\Local\\AnthropicClaude\\app-1.3883.0\\resources\\app.asar\\.vite\\build\\index.js:320:3199)\n    at r_t (C:\\Users\\hotro\\AppData\\Local\\AnthropicClaude\\app-1.3883.0\\resources\\app.asar\\.vite\\build\\index.js:320:2036)',
+  Symbol(level): 'info',
+  Symbol(splat): [
+    DSt [NoExtensionConnectedError]: [Claude in Chrome] No Chrome extension connected after discovery
+        at Uzi.callTool (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:267:17667)
+        at prr (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:320:3199)
+        at r_t (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:320:2036)
+  ]
+}
+2026-04-24 00:21:11 [info] [Claude in Chrome] Executing tool: tabs_context_mcp
+2026-04-24 00:21:11 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 00:21:11 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 00:21:11 [info] [Claude in Chrome] Error calling tool: [Claude in Chrome] No Chrome extension connected after discovery {
+  name: 'NoExtensionConnectedError',
+  stack: 'NoExtensionConnectedError: [Claude in Chrome] No Chrome extension connected after discovery\n    at Uzi.callTool (C:\\Users\\hotro\\AppData\\Local\\AnthropicClaude\\app-1.3883.0\\resources\\app.asar\\.vite\\build\\index.js:267:17667)\n    at prr (C:\\Users\\hotro\\AppData\\Local\\AnthropicClaude\\app-1.3883.0\\resources\\app.asar\\.vite\\build\\index.js:320:3199)\n    at r_t (C:\\Users\\hotro\\AppData\\Local\\AnthropicClaude\\app-1.3883.0\\resources\\app.asar\\.vite\\build\\index.js:320:2036)',
+  Symbol(level): 'info',
+  Symbol(splat): [
+    DSt [NoExtensionConnectedError]: [Claude in Chrome] No Chrome extension connected after discovery
+        at Uzi.callTool (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:267:17667)
+        at prr (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:320:3199)
+        at r_t (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:320:2036)
+  ]
+}
+2026-04-24 00:22:25 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:22:26 [info] [CCD] Initialized with version 2.1.111
+2026-04-24 00:22:26 [info] [growthbook] next refresh in 60 min
+2026-04-24 00:22:26 [info] [IdleManager:session] Initialized with 900s timeout
+2026-04-24 00:22:26 [info] [IdleManager:preview] Initialized with 1800s timeout
+2026-04-24 00:22:26 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:22:26 [error] Error reading or parsing config file: {
+  error: SyntaxError: Unexpected token '﻿', "﻿{"mcpServ"... is not valid JSON
+      at JSON.parse (<anonymous>)
+      at szi (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:263:77755)
+      at qa (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:263:79812)
+      at Object.<anonymous> (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:6918:18342)
+      at Module._compile (node:internal/modules/cjs/loader:1820:14)
+      at Module._extensions..js (node:internal/modules/cjs/loader:1953:10)
+      at Module.load (node:internal/modules/cjs/loader:1540:32)
+      at Module._load (node:internal/modules/cjs/loader:1342:12)
+      at c._load (node:electron/js2c/node_init:2:18047)
+      at wrapModuleLoad (node:internal/modules/cjs/loader:262:19)
+      at Module.require (node:internal/modules/cjs/loader:1563:12)
+      at Module.h (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.pre.js:5:3370)
+      at _require.e.require (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.pre.js:5:2341)
+      at require (node:internal/modules/helpers:152:16)
+      at Object.<anonymous> (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.pre.js:62:3979)
+      at Module._compile (node:internal/modules/cjs/loader:1820:14)
+      at Module._extensions..js (node:internal/modules/cjs/loader:1953:10)
+      at Module.load (node:internal/modules/cjs/loader:1540:32)
+      at Module._load (node:internal/modules/cjs/loader:1342:12)
+      at c._load (node:electron/js2c/node_init:2:18047) {
+    [stack]: [Getter/Setter],
+    [message]: `Unexpected token '﻿', "﻿{"mcpServ"... is not valid JSON`
+  }
+}
+2026-04-24 00:22:26 [info] [office-addin] Module loaded { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false } ] }
+2026-04-24 00:22:26 [info] [office-addin] MCP Server created { isMacOS: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false } ] }
+2026-04-24 00:22:26 [info] Not main instance, returning early from app ready
+2026-04-24 00:22:44 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:22:45 [info] [CCD] Initialized with version 2.1.111
+2026-04-24 00:22:45 [info] [growthbook] next refresh in 60 min
+2026-04-24 00:22:45 [info] [IdleManager:session] Initialized with 900s timeout
+2026-04-24 00:22:45 [info] [IdleManager:preview] Initialized with 1800s timeout
+2026-04-24 00:22:45 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:22:45 [error] Error reading or parsing config file: {
+  error: SyntaxError: Unexpected token '﻿', "﻿{"mcpServ"... is not valid JSON
+      at JSON.parse (<anonymous>)
+      at szi (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:263:77755)
+      at qa (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:263:79812)
+      at Object.<anonymous> (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:6918:18342)
+      at Module._compile (node:internal/modules/cjs/loader:1820:14)
+      at Module._extensions..js (node:internal/modules/cjs/loader:1953:10)
+      at Module.load (node:internal/modules/cjs/loader:1540:32)
+      at Module._load (node:internal/modules/cjs/loader:1342:12)
+      at c._load (node:electron/js2c/node_init:2:18047)
+      at wrapModuleLoad (node:internal/modules/cjs/loader:262:19)
+      at Module.require (node:internal/modules/cjs/loader:1563:12)
+      at Module.h (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.pre.js:5:3370)
+      at _require.e.require (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.pre.js:5:2341)
+      at require (node:internal/modules/helpers:152:16)
+      at Object.<anonymous> (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.pre.js:62:3979)
+      at Module._compile (node:internal/modules/cjs/loader:1820:14)
+      at Module._extensions..js (node:internal/modules/cjs/loader:1953:10)
+      at Module.load (node:internal/modules/cjs/loader:1540:32)
+      at Module._load (node:internal/modules/cjs/loader:1342:12)
+      at c._load (node:electron/js2c/node_init:2:18047) {
+    [stack]: [Getter/Setter],
+    [message]: `Unexpected token '﻿', "﻿{"mcpServ"... is not valid JSON`
+  }
+}
+2026-04-24 00:22:45 [info] [office-addin] Module loaded { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false } ] }
+2026-04-24 00:22:45 [info] [office-addin] MCP Server created { isMacOS: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false } ] }
+2026-04-24 00:22:45 [info] Not main instance, returning early from app ready
+2026-04-24 00:24:06 [info] [SkillsPlugin] Window focused — polling now (last poll was 607269ms ago)
+2026-04-24 00:24:06 [info] [SkillsPlugin] Starting skills sync
+2026-04-24 00:24:06 [info] [SkillsPlugin] Found 6 enabled skills
+2026-04-24 00:24:06 [info] [SkillsPlugin] Delta: 0 to download, 0 to remove
+2026-04-24 00:24:06 [info] [SkillsPlugin] Sync complete: 0 downloaded, 0 removed, 0 orphans cleaned
+2026-04-24 00:25:04 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:25:05 [info] [CCD] Initialized with version 2.1.111
+2026-04-24 00:25:05 [info] [growthbook] next refresh in 60 min
+2026-04-24 00:25:05 [info] [IdleManager:session] Initialized with 900s timeout
+2026-04-24 00:25:05 [info] [IdleManager:preview] Initialized with 1800s timeout
+2026-04-24 00:25:05 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:25:05 [error] Error reading or parsing config file: {
+  error: SyntaxError: Unexpected token '﻿', "﻿{
+    "mcpS"... is not valid JSON
+      at JSON.parse (<anonymous>)
+      at szi (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:263:77755)
+      at qa (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:263:79812)
+      at Object.<anonymous> (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:6918:18342)
+      at Module._compile (node:internal/modules/cjs/loader:1820:14)
+      at Module._extensions..js (node:internal/modules/cjs/loader:1953:10)
+      at Module.load (node:internal/modules/cjs/loader:1540:32)
+      at Module._load (node:internal/modules/cjs/loader:1342:12)
+      at c._load (node:electron/js2c/node_init:2:18047)
+      at wrapModuleLoad (node:internal/modules/cjs/loader:262:19)
+      at Module.require (node:internal/modules/cjs/loader:1563:12)
+      at Module.h (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.pre.js:5:3370)
+      at _require.e.require (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.pre.js:5:2341)
+      at require (node:internal/modules/helpers:152:16)
+      at Object.<anonymous> (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.pre.js:62:3979)
+      at Module._compile (node:internal/modules/cjs/loader:1820:14)
+      at Module._extensions..js (node:internal/modules/cjs/loader:1953:10)
+      at Module.load (node:internal/modules/cjs/loader:1540:32)
+      at Module._load (node:internal/modules/cjs/loader:1342:12)
+      at c._load (node:electron/js2c/node_init:2:18047) {
+    [stack]: [Getter/Setter],
+    [message]: `Unexpected token '﻿', "﻿{\n  "mcpS"... is not valid JSON`
+  }
+}
+2026-04-24 00:25:05 [info] [office-addin] Module loaded { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false } ] }
+2026-04-24 00:25:05 [info] [office-addin] MCP Server created { isMacOS: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false } ] }
+2026-04-24 00:25:05 [info] Not main instance, returning early from app ready
+2026-04-24 00:25:14 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:25:15 [info] [CCD] Initialized with version 2.1.111
+2026-04-24 00:25:15 [info] [growthbook] next refresh in 60 min
+2026-04-24 00:25:15 [info] [IdleManager:session] Initialized with 900s timeout
+2026-04-24 00:25:15 [info] [IdleManager:preview] Initialized with 1800s timeout
+2026-04-24 00:25:15 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:25:15 [error] Error reading or parsing config file: {
+  error: SyntaxError: Unexpected token '﻿', "﻿{
+    "mcpS"... is not valid JSON
+      at JSON.parse (<anonymous>)
+      at szi (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:263:77755)
+      at qa (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:263:79812)
+      at Object.<anonymous> (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:6918:18342)
+      at Module._compile (node:internal/modules/cjs/loader:1820:14)
+      at Module._extensions..js (node:internal/modules/cjs/loader:1953:10)
+      at Module.load (node:internal/modules/cjs/loader:1540:32)
+      at Module._load (node:internal/modules/cjs/loader:1342:12)
+      at c._load (node:electron/js2c/node_init:2:18047)
+      at wrapModuleLoad (node:internal/modules/cjs/loader:262:19)
+      at Module.require (node:internal/modules/cjs/loader:1563:12)
+      at Module.h (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.pre.js:5:3370)
+      at _require.e.require (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.pre.js:5:2341)
+      at require (node:internal/modules/helpers:152:16)
+      at Object.<anonymous> (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.pre.js:62:3979)
+      at Module._compile (node:internal/modules/cjs/loader:1820:14)
+      at Module._extensions..js (node:internal/modules/cjs/loader:1953:10)
+      at Module.load (node:internal/modules/cjs/loader:1540:32)
+      at Module._load (node:internal/modules/cjs/loader:1342:12)
+      at c._load (node:electron/js2c/node_init:2:18047) {
+    [stack]: [Getter/Setter],
+    [message]: `Unexpected token '﻿', "﻿{\n  "mcpS"... is not valid JSON`
+  }
+}
+2026-04-24 00:25:15 [info] [office-addin] Module loaded { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false } ] }
+2026-04-24 00:25:15 [info] [office-addin] MCP Server created { isMacOS: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false } ] }
+2026-04-24 00:25:15 [info] Not main instance, returning early from app ready
+2026-04-24 00:25:24 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:25:24 [info] [CCD] Initialized with version 2.1.111
+2026-04-24 00:25:24 [info] [growthbook] next refresh in 60 min
+2026-04-24 00:25:24 [info] [IdleManager:session] Initialized with 900s timeout
+2026-04-24 00:25:24 [info] [IdleManager:preview] Initialized with 1800s timeout
+2026-04-24 00:25:25 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:25:25 [error] Error reading or parsing config file: {
+  error: SyntaxError: Unexpected token '﻿', "﻿{
+    "mcpS"... is not valid JSON
+      at JSON.parse (<anonymous>)
+      at szi (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:263:77755)
+      at qa (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:263:79812)
+      at Object.<anonymous> (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:6918:18342)
+      at Module._compile (node:internal/modules/cjs/loader:1820:14)
+      at Module._extensions..js (node:internal/modules/cjs/loader:1953:10)
+      at Module.load (node:internal/modules/cjs/loader:1540:32)
+      at Module._load (node:internal/modules/cjs/loader:1342:12)
+      at c._load (node:electron/js2c/node_init:2:18047)
+      at wrapModuleLoad (node:internal/modules/cjs/loader:262:19)
+      at Module.require (node:internal/modules/cjs/loader:1563:12)
+      at Module.h (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.pre.js:5:3370)
+      at _require.e.require (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.pre.js:5:2341)
+      at require (node:internal/modules/helpers:152:16)
+      at Object.<anonymous> (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.pre.js:62:3979)
+      at Module._compile (node:internal/modules/cjs/loader:1820:14)
+      at Module._extensions..js (node:internal/modules/cjs/loader:1953:10)
+      at Module.load (node:internal/modules/cjs/loader:1540:32)
+      at Module._load (node:internal/modules/cjs/loader:1342:12)
+      at c._load (node:electron/js2c/node_init:2:18047) {
+    [stack]: [Getter/Setter],
+    [message]: `Unexpected token '﻿', "﻿{\n  "mcpS"... is not valid JSON`
+  }
+}
+2026-04-24 00:25:25 [info] [office-addin] Module loaded { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false } ] }
+2026-04-24 00:25:25 [info] [office-addin] MCP Server created { isMacOS: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false } ] }
+2026-04-24 00:25:25 [info] Not main instance, returning early from app ready
+2026-04-24 00:26:16 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:26:16 [info] [CCD] Initialized with version 2.1.111
+2026-04-24 00:26:16 [info] [growthbook] next refresh in 60 min
+2026-04-24 00:26:16 [info] [IdleManager:session] Initialized with 900s timeout
+2026-04-24 00:26:16 [info] [IdleManager:preview] Initialized with 1800s timeout
+2026-04-24 00:26:17 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:26:17 [error] Error reading or parsing config file: {
+  error: SyntaxError: Unexpected token '﻿', "﻿{\r\n  "m"... is not valid JSON
+      at JSON.parse (<anonymous>)
+      at szi (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:263:77755)
+      at qa (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:263:79812)
+      at Object.<anonymous> (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:6918:18342)
+      at Module._compile (node:internal/modules/cjs/loader:1820:14)
+      at Module._extensions..js (node:internal/modules/cjs/loader:1953:10)
+      at Module.load (node:internal/modules/cjs/loader:1540:32)
+      at Module._load (node:internal/modules/cjs/loader:1342:12)
+      at c._load (node:electron/js2c/node_init:2:18047)
+      at wrapModuleLoad (node:internal/modules/cjs/loader:262:19)
+      at Module.require (node:internal/modules/cjs/loader:1563:12)
+      at Module.h (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.pre.js:5:3370)
+      at _require.e.require (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.pre.js:5:2341)
+      at require (node:internal/modules/helpers:152:16)
+      at Object.<anonymous> (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.pre.js:62:3979)
+      at Module._compile (node:internal/modules/cjs/loader:1820:14)
+      at Module._extensions..js (node:internal/modules/cjs/loader:1953:10)
+      at Module.load (node:internal/modules/cjs/loader:1540:32)
+      at Module._load (node:internal/modules/cjs/loader:1342:12)
+      at c._load (node:electron/js2c/node_init:2:18047) {
+    [stack]: [Getter/Setter],
+    [message]: `Unexpected token '﻿', "﻿{\\r\\n  "m"... is not valid JSON`
+  }
+}
+2026-04-24 00:26:17 [info] [office-addin] Module loaded { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false } ] }
+2026-04-24 00:26:17 [info] [office-addin] MCP Server created { isMacOS: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false } ] }
+2026-04-24 00:26:17 [info] Not main instance, returning early from app ready
+2026-04-24 00:26:26 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:26:27 [info] [CCD] Initialized with version 2.1.111
+2026-04-24 00:26:27 [info] [growthbook] next refresh in 60 min
+2026-04-24 00:26:27 [info] [IdleManager:session] Initialized with 900s timeout
+2026-04-24 00:26:27 [info] [IdleManager:preview] Initialized with 1800s timeout
+2026-04-24 00:26:27 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:26:27 [error] Error reading or parsing config file: {
+  error: SyntaxError: Unexpected token '﻿', "﻿{\r\n  "m"... is not valid JSON
+      at JSON.parse (<anonymous>)
+      at szi (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:263:77755)
+      at qa (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:263:79812)
+      at Object.<anonymous> (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:6918:18342)
+      at Module._compile (node:internal/modules/cjs/loader:1820:14)
+      at Module._extensions..js (node:internal/modules/cjs/loader:1953:10)
+      at Module.load (node:internal/modules/cjs/loader:1540:32)
+      at Module._load (node:internal/modules/cjs/loader:1342:12)
+      at c._load (node:electron/js2c/node_init:2:18047)
+      at wrapModuleLoad (node:internal/modules/cjs/loader:262:19)
+      at Module.require (node:internal/modules/cjs/loader:1563:12)
+      at Module.h (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.pre.js:5:3370)
+      at _require.e.require (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.pre.js:5:2341)
+      at require (node:internal/modules/helpers:152:16)
+      at Object.<anonymous> (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.pre.js:62:3979)
+      at Module._compile (node:internal/modules/cjs/loader:1820:14)
+      at Module._extensions..js (node:internal/modules/cjs/loader:1953:10)
+      at Module.load (node:internal/modules/cjs/loader:1540:32)
+      at Module._load (node:internal/modules/cjs/loader:1342:12)
+      at c._load (node:electron/js2c/node_init:2:18047) {
+    [stack]: [Getter/Setter],
+    [message]: `Unexpected token '﻿', "﻿{\\r\\n  "m"... is not valid JSON`
+  }
+}
+2026-04-24 00:26:27 [info] [office-addin] Module loaded { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false } ] }
+2026-04-24 00:26:27 [info] [office-addin] MCP Server created { isMacOS: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false } ] }
+2026-04-24 00:26:27 [info] Not main instance, returning early from app ready
+2026-04-24 00:26:42 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:26:43 [info] [CCD] Initialized with version 2.1.111
+2026-04-24 00:26:43 [info] [growthbook] next refresh in 60 min
+2026-04-24 00:26:43 [info] [IdleManager:session] Initialized with 900s timeout
+2026-04-24 00:26:43 [info] [IdleManager:preview] Initialized with 1800s timeout
+2026-04-24 00:26:43 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:26:43 [error] Error reading or parsing config file: {
+  error: SyntaxError: Unexpected token '﻿', "﻿{\r\n  "m"... is not valid JSON
+      at JSON.parse (<anonymous>)
+      at szi (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:263:77755)
+      at qa (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:263:79812)
+      at Object.<anonymous> (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:6918:18342)
+      at Module._compile (node:internal/modules/cjs/loader:1820:14)
+      at Module._extensions..js (node:internal/modules/cjs/loader:1953:10)
+      at Module.load (node:internal/modules/cjs/loader:1540:32)
+      at Module._load (node:internal/modules/cjs/loader:1342:12)
+      at c._load (node:electron/js2c/node_init:2:18047)
+      at wrapModuleLoad (node:internal/modules/cjs/loader:262:19)
+      at Module.require (node:internal/modules/cjs/loader:1563:12)
+      at Module.h (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.pre.js:5:3370)
+      at _require.e.require (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.pre.js:5:2341)
+      at require (node:internal/modules/helpers:152:16)
+      at Object.<anonymous> (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.pre.js:62:3979)
+      at Module._compile (node:internal/modules/cjs/loader:1820:14)
+      at Module._extensions..js (node:internal/modules/cjs/loader:1953:10)
+      at Module.load (node:internal/modules/cjs/loader:1540:32)
+      at Module._load (node:internal/modules/cjs/loader:1342:12)
+      at c._load (node:electron/js2c/node_init:2:18047) {
+    [stack]: [Getter/Setter],
+    [message]: `Unexpected token '﻿', "﻿{\\r\\n  "m"... is not valid JSON`
+  }
+}
+2026-04-24 00:26:43 [info] [office-addin] Module loaded { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false } ] }
+2026-04-24 00:26:43 [info] [office-addin] MCP Server created { isMacOS: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false } ] }
+2026-04-24 00:26:43 [info] Not main instance, returning early from app ready
+2026-04-24 00:27:36 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:27:37 [info] [CCD] Initialized with version 2.1.111
+2026-04-24 00:27:37 [info] [growthbook] next refresh in 60 min
+2026-04-24 00:27:37 [info] [IdleManager:session] Initialized with 900s timeout
+2026-04-24 00:27:37 [info] [IdleManager:preview] Initialized with 1800s timeout
+2026-04-24 00:27:37 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:27:37 [error] Error reading or parsing config file: {
+  error: SyntaxError: Unexpected token '﻿', "﻿{\r\n  "m"... is not valid JSON
+      at JSON.parse (<anonymous>)
+      at szi (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:263:77755)
+      at qa (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:263:79812)
+      at Object.<anonymous> (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:6918:18342)
+      at Module._compile (node:internal/modules/cjs/loader:1820:14)
+      at Module._extensions..js (node:internal/modules/cjs/loader:1953:10)
+      at Module.load (node:internal/modules/cjs/loader:1540:32)
+      at Module._load (node:internal/modules/cjs/loader:1342:12)
+      at c._load (node:electron/js2c/node_init:2:18047)
+      at wrapModuleLoad (node:internal/modules/cjs/loader:262:19)
+      at Module.require (node:internal/modules/cjs/loader:1563:12)
+      at Module.h (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.pre.js:5:3370)
+      at _require.e.require (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.pre.js:5:2341)
+      at require (node:internal/modules/helpers:152:16)
+      at Object.<anonymous> (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.pre.js:62:3979)
+      at Module._compile (node:internal/modules/cjs/loader:1820:14)
+      at Module._extensions..js (node:internal/modules/cjs/loader:1953:10)
+      at Module.load (node:internal/modules/cjs/loader:1540:32)
+      at Module._load (node:internal/modules/cjs/loader:1342:12)
+      at c._load (node:electron/js2c/node_init:2:18047) {
+    [stack]: [Getter/Setter],
+    [message]: `Unexpected token '﻿', "﻿{\\r\\n  "m"... is not valid JSON`
+  }
+}
+2026-04-24 00:27:37 [info] [office-addin] Module loaded { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false } ] }
+2026-04-24 00:27:37 [info] [office-addin] MCP Server created { isMacOS: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false } ] }
+2026-04-24 00:27:37 [info] Not main instance, returning early from app ready
+2026-04-24 00:28:11 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:28:12 [info] [CCD] Initialized with version 2.1.111
+2026-04-24 00:28:12 [info] [growthbook] next refresh in 60 min
+2026-04-24 00:28:12 [info] [IdleManager:session] Initialized with 900s timeout
+2026-04-24 00:28:12 [info] [IdleManager:preview] Initialized with 1800s timeout
+2026-04-24 00:28:12 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:28:12 [error] Error reading or parsing config file: {
+  error: SyntaxError: Unexpected token '﻿', "﻿{\r\n  "m"... is not valid JSON
+      at JSON.parse (<anonymous>)
+      at szi (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:263:77755)
+      at qa (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:263:79812)
+      at Object.<anonymous> (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:6918:18342)
+      at Module._compile (node:internal/modules/cjs/loader:1820:14)
+      at Module._extensions..js (node:internal/modules/cjs/loader:1953:10)
+      at Module.load (node:internal/modules/cjs/loader:1540:32)
+      at Module._load (node:internal/modules/cjs/loader:1342:12)
+      at c._load (node:electron/js2c/node_init:2:18047)
+      at wrapModuleLoad (node:internal/modules/cjs/loader:262:19)
+      at Module.require (node:internal/modules/cjs/loader:1563:12)
+      at Module.h (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.pre.js:5:3370)
+      at _require.e.require (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.pre.js:5:2341)
+      at require (node:internal/modules/helpers:152:16)
+      at Object.<anonymous> (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.pre.js:62:3979)
+      at Module._compile (node:internal/modules/cjs/loader:1820:14)
+      at Module._extensions..js (node:internal/modules/cjs/loader:1953:10)
+      at Module.load (node:internal/modules/cjs/loader:1540:32)
+      at Module._load (node:internal/modules/cjs/loader:1342:12)
+      at c._load (node:electron/js2c/node_init:2:18047) {
+    [stack]: [Getter/Setter],
+    [message]: `Unexpected token '﻿', "﻿{\\r\\n  "m"... is not valid JSON`
+  }
+}
+2026-04-24 00:28:12 [info] [office-addin] Module loaded { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false } ] }
+2026-04-24 00:28:12 [info] [office-addin] MCP Server created { isMacOS: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false } ] }
+2026-04-24 00:28:12 [info] Not main instance, returning early from app ready
+2026-04-24 00:29:48 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:29:49 [info] [CCD] Initialized with version 2.1.111
+2026-04-24 00:29:49 [info] [growthbook] next refresh in 60 min
+2026-04-24 00:29:49 [info] [IdleManager:session] Initialized with 900s timeout
+2026-04-24 00:29:49 [info] [IdleManager:preview] Initialized with 1800s timeout
+2026-04-24 00:29:49 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:29:49 [warn] Skipped invalid MCP server config entries: { invalidServers: [ 'my-mcp-server', [length]: 1 ] }
+2026-04-24 00:29:49 [info] [office-addin] Module loaded { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false } ] }
+2026-04-24 00:29:49 [info] [office-addin] MCP Server created { isMacOS: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false } ] }
+2026-04-24 00:29:49 [info] Not main instance, returning early from app ready
+2026-04-24 00:29:56 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:29:57 [info] [CCD] Initialized with version 2.1.111
+2026-04-24 00:29:57 [info] [growthbook] next refresh in 60 min
+2026-04-24 00:29:57 [info] [IdleManager:session] Initialized with 900s timeout
+2026-04-24 00:29:57 [info] [IdleManager:preview] Initialized with 1800s timeout
+2026-04-24 00:29:57 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:29:57 [warn] Skipped invalid MCP server config entries: { invalidServers: [ 'my-mcp-server', [length]: 1 ] }
+2026-04-24 00:29:57 [info] [office-addin] Module loaded { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false } ] }
+2026-04-24 00:29:57 [info] [office-addin] MCP Server created { isMacOS: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false } ] }
+2026-04-24 00:29:58 [info] Not main instance, returning early from app ready
+2026-04-24 00:30:17 [info] [Claude in Chrome] Executing tool: tabs_context_mcp
+2026-04-24 00:30:17 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 00:30:17 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 00:30:17 [info] [Claude in Chrome] Error calling tool: [Claude in Chrome] No Chrome extension connected after discovery {
+  name: 'NoExtensionConnectedError',
+  stack: 'NoExtensionConnectedError: [Claude in Chrome] No Chrome extension connected after discovery\n    at Uzi.callTool (C:\\Users\\hotro\\AppData\\Local\\AnthropicClaude\\app-1.3883.0\\resources\\app.asar\\.vite\\build\\index.js:267:17667)\n    at prr (C:\\Users\\hotro\\AppData\\Local\\AnthropicClaude\\app-1.3883.0\\resources\\app.asar\\.vite\\build\\index.js:320:3199)\n    at r_t (C:\\Users\\hotro\\AppData\\Local\\AnthropicClaude\\app-1.3883.0\\resources\\app.asar\\.vite\\build\\index.js:320:2036)',
+  Symbol(level): 'info',
+  Symbol(splat): [
+    DSt [NoExtensionConnectedError]: [Claude in Chrome] No Chrome extension connected after discovery
+        at Uzi.callTool (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:267:17667)
+        at prr (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:320:3199)
+        at r_t (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:320:2036)
+  ]
+}
+2026-04-24 00:31:04 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:31:04 [info] [CCD] Initialized with version 2.1.111
+2026-04-24 00:31:04 [info] [growthbook] next refresh in 60 min
+2026-04-24 00:31:04 [info] [IdleManager:session] Initialized with 900s timeout
+2026-04-24 00:31:04 [info] [IdleManager:preview] Initialized with 1800s timeout
+2026-04-24 00:31:05 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:31:05 [warn] Skipped invalid MCP server config entries: { invalidServers: [ 'my-mcp-server', [length]: 1 ] }
+2026-04-24 00:31:05 [info] [office-addin] Module loaded { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false } ] }
+2026-04-24 00:31:05 [info] [office-addin] MCP Server created { isMacOS: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false } ] }
+2026-04-24 00:31:05 [info] Not main instance, returning early from app ready
+2026-04-24 00:31:41 [info] Config file written
+2026-04-24 00:31:41 [info] [growthbook] loaded 129 features (0 changed)
+2026-04-24 00:32:53 [info] Successfully fetched blocklist from https://claude.ai/api/organizations/deca5385-e605-4dad-bf74-fe11f439d8bd/dxt/blocklist with 0 entries
+2026-04-24 00:32:53 [info] Organization allowlist enabled: false
+2026-04-24 00:32:53 [info] Updated allowlist enabled state for org deca5385-e605-4dad-bf74-fe11f439d8bd: false
+2026-04-24 00:32:53 [info] Saved 1 blocklists with 0 entries
+2026-04-24 00:32:53 [info] Successfully updated blocklist
+2026-04-24 00:32:53 [info] Checking 0 extensions via can_install API using stored metadata
+2026-04-24 00:32:53 [info] can_install check completed: 0 extensions checked: [ [length]: 0 ]
+2026-04-24 00:32:59 [error] Failed to read version of node binary "node", failed with Error: Failed to spawn node: spawn node ENOENT
+    at ChildProcess.<anonymous> (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:116:154509)
+    at ChildProcess.emit (node:events:520:35)
+    at ChildProcess._handle.onexit (node:internal/child_process:292:12)
+    at onErrorNT (node:internal/child_process:484:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  [stack]: [Getter/Setter],
+  [message]: 'Failed to spawn node: spawn node ENOENT'
+}
+2026-04-24 00:33:59 [info] [SkillsPlugin] Starting skills sync
+2026-04-24 00:33:59 [info] [SkillsPlugin] Found 6 enabled skills
+2026-04-24 00:33:59 [info] [SkillsPlugin] Delta: 0 to download, 0 to remove
+2026-04-24 00:33:59 [info] [SkillsPlugin] Sync complete: 0 downloaded, 0 removed, 0 orphans cleaned
+2026-04-24 00:35:53 [info] [Claude in Chrome] Executing tool: tabs_context_mcp
+2026-04-24 00:35:53 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 00:35:53 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 00:35:53 [info] [Claude in Chrome] Error calling tool: [Claude in Chrome] No Chrome extension connected after discovery {
+  name: 'NoExtensionConnectedError',
+  stack: 'NoExtensionConnectedError: [Claude in Chrome] No Chrome extension connected after discovery\n    at Uzi.callTool (C:\\Users\\hotro\\AppData\\Local\\AnthropicClaude\\app-1.3883.0\\resources\\app.asar\\.vite\\build\\index.js:267:17667)\n    at prr (C:\\Users\\hotro\\AppData\\Local\\AnthropicClaude\\app-1.3883.0\\resources\\app.asar\\.vite\\build\\index.js:320:3199)\n    at r_t (C:\\Users\\hotro\\AppData\\Local\\AnthropicClaude\\app-1.3883.0\\resources\\app.asar\\.vite\\build\\index.js:320:2036)',
+  Symbol(level): 'info',
+  Symbol(splat): [
+    DSt [NoExtensionConnectedError]: [Claude in Chrome] No Chrome extension connected after discovery
+        at Uzi.callTool (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:267:17667)
+        at prr (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:320:3199)
+        at r_t (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:320:2036)
+  ]
+}
+2026-04-24 00:37:32 [error] writeFileDownloadAndOpen: rejected filename: Blocked executable extension: .bat
+2026-04-24 00:37:36 [error] writeFileDownloadAndOpen: rejected filename: Blocked executable extension: .bat
+2026-04-24 00:37:36 [error] writeFileDownloadAndOpen: rejected filename: Blocked executable extension: .bat
+2026-04-24 00:38:07 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:38:08 [info] [CCD] Initialized with version 2.1.111
+2026-04-24 00:38:08 [info] [growthbook] next refresh in 60 min
+2026-04-24 00:38:08 [info] [IdleManager:session] Initialized with 900s timeout
+2026-04-24 00:38:08 [info] [IdleManager:preview] Initialized with 1800s timeout
+2026-04-24 00:38:08 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 00:38:08 [info] [office-addin] Module loaded { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false } ] }
+2026-04-24 00:38:08 [info] [office-addin] MCP Server created { isMacOS: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false } ] }
+2026-04-24 00:38:08 [info] Not main instance, returning early from app ready
+2026-04-24 00:38:55 [info] [Claude in Chrome] Executing tool: tabs_context_mcp
+2026-04-24 00:38:55 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 00:38:55 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 00:38:55 [info] [Claude in Chrome] Error calling tool: [Claude in Chrome] No Chrome extension connected after discovery {
+  name: 'NoExtensionConnectedError',
+  stack: 'NoExtensionConnectedError: [Claude in Chrome] No Chrome extension connected after discovery\n    at Uzi.callTool (C:\\Users\\hotro\\AppData\\Local\\AnthropicClaude\\app-1.3883.0\\resources\\app.asar\\.vite\\build\\index.js:267:17667)\n    at prr (C:\\Users\\hotro\\AppData\\Local\\AnthropicClaude\\app-1.3883.0\\resources\\app.asar\\.vite\\build\\index.js:320:3199)\n    at r_t (C:\\Users\\hotro\\AppData\\Local\\AnthropicClaude\\app-1.3883.0\\resources\\app.asar\\.vite\\build\\index.js:320:2036)',
+  Symbol(level): 'info',
+  Symbol(splat): [
+    DSt [NoExtensionConnectedError]: [Claude in Chrome] No Chrome extension connected after discovery
+        at Uzi.callTool (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:267:17667)
+        at prr (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:320:3199)
+        at r_t (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:320:2036)
+  ]
+}
+2026-04-24 00:39:28 [info] [Claude in Chrome] Executing tool: tabs_context_mcp
+2026-04-24 00:39:28 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 00:39:28 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 00:39:28 [info] [Claude in Chrome] Error calling tool: [Claude in Chrome] No Chrome extension connected after discovery {
+  name: 'NoExtensionConnectedError',
+  stack: 'NoExtensionConnectedError: [Claude in Chrome] No Chrome extension connected after discovery\n    at Uzi.callTool (C:\\Users\\hotro\\AppData\\Local\\AnthropicClaude\\app-1.3883.0\\resources\\app.asar\\.vite\\build\\index.js:267:17667)\n    at prr (C:\\Users\\hotro\\AppData\\Local\\AnthropicClaude\\app-1.3883.0\\resources\\app.asar\\.vite\\build\\index.js:320:3199)\n    at r_t (C:\\Users\\hotro\\AppData\\Local\\AnthropicClaude\\app-1.3883.0\\resources\\app.asar\\.vite\\build\\index.js:320:2036)',
+  Symbol(level): 'info',
+  Symbol(splat): [
+    DSt [NoExtensionConnectedError]: [Claude in Chrome] No Chrome extension connected after discovery
+        at Uzi.callTool (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:267:17667)
+        at prr (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:320:3199)
+        at r_t (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:320:2036)
+  ]
+}
+2026-04-24 00:40:02 [info] [Claude in Chrome] Bridge connection closed (code: 1006, duration: 1272642ms)
+2026-04-24 00:40:02 [info] [Claude in Chrome] Bridge reconnecting in 2000ms (attempt 1)
+2026-04-24 00:40:04 [info] [oauth] looking up token for orgId=deca5385-e605-4dad-bf74-fe11f439d8bd, cacheKey=89355bc3-cbfd-4382-905b-976645cad410:deca5385-e605-4dad-bf74-fe11f439d8bd:https://api.anthropic.com:user:inference user:office
+2026-04-24 00:40:04 [info] [oauth] using cached token for orgId=deca5385-e605-4dad-bf74-fe11f439d8bd
+2026-04-24 00:40:04 [info] [oauth] looking up token for orgId=deca5385-e605-4dad-bf74-fe11f439d8bd, cacheKey=89355bc3-cbfd-4382-905b-976645cad410:deca5385-e605-4dad-bf74-fe11f439d8bd:https://api.anthropic.com:user:inference user:office
+2026-04-24 00:40:04 [info] [oauth] using cached token for orgId=deca5385-e605-4dad-bf74-fe11f439d8bd
+2026-04-24 00:40:04 [info] [Claude in Chrome] Connecting to bridge: wss://bridge.claudeusercontent.com/chrome/06feffbb-6b63-425d-9b78-46ee00ef31b6
+2026-04-24 00:40:05 [info] [Claude in Chrome] WebSocket connected, sending connect message
+2026-04-24 00:40:05 [info] [Claude in Chrome] Waiting for Chrome extension to connect (duration: 768ms)
+2026-04-24 00:40:32 [info] [EventLogging] Flushing 3 events
+2026-04-24 00:40:48 [error] writeFileDownloadAndOpen: rejected filename: Blocked executable extension: .bat
+2026-04-24 00:42:10 [info] [Claude in Chrome] Executing tool: tabs_context_mcp
+2026-04-24 00:42:10 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 00:42:10 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 00:42:10 [info] [Claude in Chrome] No extensions connected, waiting up to 10000ms for peer_connected
+2026-04-24 00:42:20 [info] [Claude in Chrome] No extensions found after waiting
+2026-04-24 00:42:20 [info] [Claude in Chrome] Error calling tool: [Claude in Chrome] No Chrome extension connected after discovery {
+  name: 'NoExtensionConnectedError',
+  stack: 'NoExtensionConnectedError: [Claude in Chrome] No Chrome extension connected after discovery\n    at Uzi.callTool (C:\\Users\\hotro\\AppData\\Local\\AnthropicClaude\\app-1.3883.0\\resources\\app.asar\\.vite\\build\\index.js:267:17667)\n    at async prr (C:\\Users\\hotro\\AppData\\Local\\AnthropicClaude\\app-1.3883.0\\resources\\app.asar\\.vite\\build\\index.js:320:3191)\n    at async r_t (C:\\Users\\hotro\\AppData\\Local\\AnthropicClaude\\app-1.3883.0\\resources\\app.asar\\.vite\\build\\index.js:320:2030)\n    at async a (C:\\Users\\hotro\\AppData\\Local\\AnthropicClaude\\app-1.3883.0\\resources\\app.asar\\.vite\\build\\index.js:315:34503)',
+  Symbol(level): 'info',
+  Symbol(splat): [
+    DSt [NoExtensionConnectedError]: [Claude in Chrome] No Chrome extension connected after discovery
+        at Uzi.callTool (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:267:17667)
+        at async prr (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:320:3191)
+        at async r_t (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:320:2030)
+        at async a (C:\Users\hotro\AppData\Local\AnthropicClaude\app-1.3883.0\resources\app.asar\.vite\build\index.js:315:34503)
+  ]
+}
+2026-04-24 00:42:24 [info] [Claude in Chrome] Executing tool: switch_browser
+2026-04-24 00:42:24 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 00:42:24 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 00:45:33 [info] [SkillsPlugin] Window focused — polling now (last poll was 694282ms ago)
+2026-04-24 00:45:33 [info] [SkillsPlugin] Starting skills sync
+2026-04-24 00:45:33 [info] [SkillsPlugin] Found 6 enabled skills
+2026-04-24 00:45:33 [info] [SkillsPlugin] Delta: 0 to download, 0 to remove
+2026-04-24 00:45:33 [info] [SkillsPlugin] Sync complete: 0 downloaded, 0 removed, 0 orphans cleaned
+2026-04-24 00:49:25 [info] [Claude in Chrome] Chrome extension connected to bridge
+2026-04-24 00:49:55 [info] [EventLogging] Flushing 1 events
+2026-04-24 00:50:07 [info] [Claude in Chrome] Executing tool: tabs_context_mcp
+2026-04-24 00:50:07 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 00:50:07 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 00:50:07 [info] [Claude in Chrome] Selected Chrome extension: cfb4df84...
+2026-04-24 00:50:16 [info] [Claude in Chrome] Executing tool: javascript_tool
+2026-04-24 00:50:16 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 00:50:16 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 00:50:37 [info] [EventLogging] Flushing 5 events
+2026-04-24 00:50:47 [warn] [Claude in Chrome] Tool call error: javascript_tool (fe8d8887) after 30168ms
+2026-04-24 00:50:55 [info] [Claude in Chrome] Executing tool: navigate
+2026-04-24 00:50:55 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 00:50:55 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 00:51:17 [info] [EventLogging] Flushing 3 events
+2026-04-24 00:51:26 [warn] [Claude in Chrome] Tool call error: navigate (6d86bf29) after 30605ms
+2026-04-24 00:51:56 [info] [EventLogging] Flushing 1 events
+2026-04-24 00:55:20 [info] [Claude in Chrome] Executing tool: tabs_context_mcp
+2026-04-24 00:55:20 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 00:55:20 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 00:55:28 [info] [Claude in Chrome] Executing tool: navigate
+2026-04-24 00:55:28 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 00:55:28 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 00:55:39 [info] [Claude in Chrome] Executing tool: javascript_tool
+2026-04-24 00:55:39 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 00:55:39 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 00:55:50 [info] [EventLogging] Flushing 9 events
+2026-04-24 00:56:25 [info] [SkillsPlugin] Window focused — polling now (last poll was 651768ms ago)
+2026-04-24 00:56:25 [info] [SkillsPlugin] Starting skills sync
+2026-04-24 00:56:25 [info] [SkillsPlugin] Found 6 enabled skills
+2026-04-24 00:56:25 [info] [SkillsPlugin] Delta: 0 to download, 0 to remove
+2026-04-24 00:56:25 [info] [SkillsPlugin] Sync complete: 0 downloaded, 0 removed, 0 orphans cleaned
+2026-04-24 00:57:29 [info] [Claude in Chrome] Executing tool: navigate
+2026-04-24 00:57:29 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 00:57:29 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 00:57:59 [info] [EventLogging] Flushing 2 events
+2026-04-24 00:58:00 [warn] [Claude in Chrome] Tool call error: navigate (d9520211) after 31103ms
+2026-04-24 00:58:30 [info] [EventLogging] Flushing 1 events
+2026-04-24 01:00:42 [info] [Claude in Chrome] Executing tool: navigate
+2026-04-24 01:00:42 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:00:42 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:00:52 [info] [Claude in Chrome] Executing tool: javascript_tool
+2026-04-24 01:00:52 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:00:52 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:00:53 [warn] [Claude in Chrome] Tool call error: javascript_tool (e84ba693) after 729ms
+2026-04-24 01:00:59 [info] [Claude in Chrome] Executing tool: javascript_tool
+2026-04-24 01:00:59 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:00:59 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:01:09 [info] [Claude in Chrome] Executing tool: browser_batch
+2026-04-24 01:01:09 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:01:09 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:01:10 [warn] [Claude in Chrome] Tool call error: browser_batch (359026a4) after 139ms
+2026-04-24 01:01:12 [info] [EventLogging] Flushing 12 events
+2026-04-24 01:01:16 [info] [Claude in Chrome] Executing tool: javascript_tool
+2026-04-24 01:01:16 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:01:16 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:01:46 [info] [EventLogging] Flushing 3 events
+2026-04-24 01:03:05 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 01:03:06 [info] [CCD] Initialized with version 2.1.111
+2026-04-24 01:03:06 [info] [growthbook] next refresh in 60 min
+2026-04-24 01:03:06 [info] [IdleManager:session] Initialized with 900s timeout
+2026-04-24 01:03:06 [info] [IdleManager:preview] Initialized with 1800s timeout
+2026-04-24 01:03:06 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 01:03:06 [info] [office-addin] Module loaded { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false } ] }
+2026-04-24 01:03:06 [info] [office-addin] MCP Server created { isMacOS: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false } ] }
+2026-04-24 01:03:07 [info] Not main instance, returning early from app ready
+2026-04-24 01:03:59 [info] [SkillsPlugin] Starting skills sync
+2026-04-24 01:03:59 [info] [SkillsPlugin] Found 6 enabled skills
+2026-04-24 01:03:59 [info] [SkillsPlugin] Delta: 0 to download, 0 to remove
+2026-04-24 01:03:59 [info] [SkillsPlugin] Sync complete: 0 downloaded, 0 removed, 0 orphans cleaned
+2026-04-24 01:07:17 [info] [Claude in Chrome] Executing tool: navigate
+2026-04-24 01:07:17 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:07:17 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:07:47 [info] [EventLogging] Flushing 2 events
+2026-04-24 01:07:49 [warn] [Claude in Chrome] Tool call error: navigate (7daafbb2) after 32329ms
+2026-04-24 01:08:19 [info] [EventLogging] Flushing 1 events
+2026-04-24 01:08:30 [info] [updater] Using GrowthBook check_interval_ticks=1 (default 4)
+2026-04-24 01:08:30 [info] Update URL: https://api.anthropic.com/api/desktop/win32/x64/squirrel/update
+2026-04-24 01:08:30 [info] Checking for updates
+2026-04-24 01:09:00 [info] [EventLogging] Flushing 2 events
+2026-04-24 01:09:19 [error] writeFileDownloadAndOpen: rejected filename: Blocked executable extension: .bat
+2026-04-24 01:09:20 [info] [Claude in Chrome] Executing tool: javascript_tool
+2026-04-24 01:09:20 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:09:20 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:09:50 [info] [EventLogging] Flushing 3 events
+2026-04-24 01:10:13 [info] [Claude in Chrome] Executing tool: javascript_tool
+2026-04-24 01:10:13 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:10:13 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:10:17 [info] [Claude in Chrome] Executing tool: navigate
+2026-04-24 01:10:17 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:10:17 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:10:43 [info] [EventLogging] Flushing 5 events
+2026-04-24 01:10:48 [warn] [Claude in Chrome] Tool call error: navigate (1b20f364) after 30579ms
+2026-04-24 01:11:18 [info] [EventLogging] Flushing 1 events
+2026-04-24 01:11:40 [error] writeFileDownloadAndOpen: rejected filename: Blocked executable extension: .bat
+2026-04-24 01:11:43 [error] writeFileDownloadAndOpen: rejected filename: Blocked executable extension: .bat
+2026-04-24 01:11:43 [error] writeFileDownloadAndOpen: rejected filename: Blocked executable extension: .bat
+2026-04-24 01:12:12 [error] writeFileDownloadAndOpen: rejected filename: Blocked executable extension: .bat
+2026-04-24 01:12:14 [error] writeFileDownloadAndOpen: rejected filename: Blocked executable extension: .bat
+2026-04-24 01:12:17 [error] writeFileDownloadAndOpen: rejected filename: Blocked executable extension: .bat
+2026-04-24 01:12:28 [error] writeFileDownloadAndOpen: rejected filename: Blocked executable extension: .bat
+2026-04-24 01:12:52 [error] writeFileDownloadAndOpen: rejected filename: Blocked executable extension: .bat
+2026-04-24 01:13:06 [error] writeFileDownloadAndOpen: rejected filename: Blocked executable extension: .bat
+2026-04-24 01:14:00 [info] [SkillsPlugin] Window focused — polling now (last poll was 601387ms ago)
+2026-04-24 01:14:00 [info] [SkillsPlugin] Starting skills sync
+2026-04-24 01:14:00 [info] [SkillsPlugin] Found 6 enabled skills
+2026-04-24 01:14:00 [info] [SkillsPlugin] Delta: 0 to download, 0 to remove
+2026-04-24 01:14:00 [info] [SkillsPlugin] Sync complete: 0 downloaded, 0 removed, 0 orphans cleaned
+2026-04-24 01:14:01 [info] [growthbook] loaded 129 features (0 changed)
+2026-04-24 01:14:01 [info] [growthbook] next refresh in 60 min
+2026-04-24 01:15:00 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 01:15:00 [info] [CCD] Initialized with version 2.1.111
+2026-04-24 01:15:00 [info] [growthbook] next refresh in 60 min
+2026-04-24 01:15:00 [info] [IdleManager:session] Initialized with 900s timeout
+2026-04-24 01:15:00 [info] [IdleManager:preview] Initialized with 1800s timeout
+2026-04-24 01:15:01 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 01:15:01 [info] [office-addin] Module loaded { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false } ] }
+2026-04-24 01:15:01 [info] [office-addin] MCP Server created { isMacOS: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false } ] }
+2026-04-24 01:15:01 [info] Not main instance, returning early from app ready
+2026-04-24 01:16:26 [info] [Claude in Chrome] Executing tool: javascript_tool
+2026-04-24 01:16:26 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:16:26 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:16:28 [warn] [Claude in Chrome] Tool call error: javascript_tool (3c9a3c0c) after 2118ms
+2026-04-24 01:16:36 [info] [Claude in Chrome] Executing tool: navigate
+2026-04-24 01:16:36 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:16:36 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:16:52 [info] [Claude in Chrome] Executing tool: javascript_tool
+2026-04-24 01:16:52 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:16:52 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:16:56 [info] [EventLogging] Flushing 9 events
+2026-04-24 01:17:31 [info] [Claude in Chrome] Executing tool: navigate
+2026-04-24 01:17:31 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:17:31 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:17:51 [info] [Claude in Chrome] Executing tool: javascript_tool
+2026-04-24 01:17:51 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:17:51 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:18:01 [info] [EventLogging] Flushing 6 events
+2026-04-24 01:19:24 [info] [Claude in Chrome] Executing tool: navigate
+2026-04-24 01:19:24 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:19:24 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:19:24 [warn] [Claude in Chrome] Tool call error: navigate (15cdf499) after 74ms
+2026-04-24 01:19:28 [info] [Claude in Chrome] Executing tool: tabs_context_mcp
+2026-04-24 01:19:28 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:19:28 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:19:34 [info] [Claude in Chrome] Executing tool: navigate
+2026-04-24 01:19:34 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:19:34 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:19:49 [info] [Claude in Chrome] Executing tool: javascript_tool
+2026-04-24 01:19:49 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:19:49 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:19:54 [info] [EventLogging] Flushing 12 events
+2026-04-24 01:20:32 [info] [Claude in Chrome] Chrome extension disconnected from bridge (deviceId=cfb4df84-7875-4c0d-885d-32e3c0afb75e, selected=cfb4df84-7875-4c0d-885d-32e3c0afb75e)
+2026-04-24 01:20:32 [info] [Claude in Chrome] Selected extension disconnected, clearing selection
+2026-04-24 01:20:35 [info] [Claude in Chrome] Chrome extension connected to bridge
+2026-04-24 01:20:35 [info] [Claude in Chrome] Previously selected extension reconnected, auto-reselecting
+2026-04-24 01:20:35 [info] [Claude in Chrome] Selected Chrome extension: cfb4df84...
+2026-04-24 01:21:02 [info] [EventLogging] Flushing 2 events
+2026-04-24 01:21:34 [info] [Claude in Chrome] Executing tool: javascript_tool
+2026-04-24 01:21:34 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:21:34 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:22:04 [info] [EventLogging] Flushing 3 events
+2026-04-24 01:23:29 [info] [Claude in Chrome] Executing tool: javascript_tool
+2026-04-24 01:23:29 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:23:29 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:23:59 [info] [EventLogging] Flushing 3 events
+2026-04-24 01:24:09 [info] [SkillsPlugin] Window focused — polling now (last poll was 609370ms ago)
+2026-04-24 01:24:09 [info] [SkillsPlugin] Starting skills sync
+2026-04-24 01:24:10 [info] [SkillsPlugin] Found 6 enabled skills
+2026-04-24 01:24:10 [info] [SkillsPlugin] Delta: 0 to download, 0 to remove
+2026-04-24 01:24:10 [info] [SkillsPlugin] Sync complete: 0 downloaded, 0 removed, 0 orphans cleaned
+2026-04-24 01:24:47 [info] [Claude in Chrome] Bridge connection closed (code: 1006, duration: 2682505ms)
+2026-04-24 01:24:47 [info] [Claude in Chrome] Bridge reconnecting in 2000ms (attempt 1)
+2026-04-24 01:24:49 [info] [oauth] looking up token for orgId=deca5385-e605-4dad-bf74-fe11f439d8bd, cacheKey=89355bc3-cbfd-4382-905b-976645cad410:deca5385-e605-4dad-bf74-fe11f439d8bd:https://api.anthropic.com:user:inference user:office
+2026-04-24 01:24:49 [info] [oauth] using cached token for orgId=deca5385-e605-4dad-bf74-fe11f439d8bd
+2026-04-24 01:24:49 [info] [oauth] looking up token for orgId=deca5385-e605-4dad-bf74-fe11f439d8bd, cacheKey=89355bc3-cbfd-4382-905b-976645cad410:deca5385-e605-4dad-bf74-fe11f439d8bd:https://api.anthropic.com:user:inference user:office
+2026-04-24 01:24:49 [info] [oauth] using cached token for orgId=deca5385-e605-4dad-bf74-fe11f439d8bd
+2026-04-24 01:24:49 [info] [Claude in Chrome] Connecting to bridge: wss://bridge.claudeusercontent.com/chrome/06feffbb-6b63-425d-9b78-46ee00ef31b6
+2026-04-24 01:24:50 [info] [Claude in Chrome] WebSocket connected, sending connect message
+2026-04-24 01:24:50 [info] [Claude in Chrome] Paired with Chrome extension (duration: 258ms)
+2026-04-24 01:24:52 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 01:24:53 [info] [CCD] Initialized with version 2.1.111
+2026-04-24 01:24:53 [info] [growthbook] next refresh in 60 min
+2026-04-24 01:24:53 [info] [IdleManager:session] Initialized with 900s timeout
+2026-04-24 01:24:53 [info] [IdleManager:preview] Initialized with 1800s timeout
+2026-04-24 01:24:53 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 01:24:53 [info] [office-addin] Module loaded { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false } ] }
+2026-04-24 01:24:53 [info] [office-addin] MCP Server created { isMacOS: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false } ] }
+2026-04-24 01:24:53 [info] Not main instance, returning early from app ready
+2026-04-24 01:24:57 [info] [Claude in Chrome] Chrome extension disconnected from bridge (deviceId=cfb4df84-7875-4c0d-885d-32e3c0afb75e, selected=none)
+2026-04-24 01:24:59 [info] [Claude in Chrome] Chrome extension connected to bridge
+2026-04-24 01:24:59 [info] [Claude in Chrome] Previously selected extension reconnected, auto-reselecting
+2026-04-24 01:24:59 [info] [Claude in Chrome] Selected Chrome extension: cfb4df84...
+2026-04-24 01:25:17 [info] [EventLogging] Flushing 5 events
+2026-04-24 01:26:09 [info] [Claude in Chrome] Executing tool: tabs_context_mcp
+2026-04-24 01:26:09 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:26:09 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:26:21 [info] [Claude in Chrome] Executing tool: javascript_tool
+2026-04-24 01:26:21 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:26:21 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:26:39 [info] [EventLogging] Flushing 6 events
+2026-04-24 01:27:16 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 01:27:16 [info] [CCD] Initialized with version 2.1.111
+2026-04-24 01:27:16 [info] [growthbook] next refresh in 60 min
+2026-04-24 01:27:16 [info] [IdleManager:session] Initialized with 900s timeout
+2026-04-24 01:27:16 [info] [IdleManager:preview] Initialized with 1800s timeout
+2026-04-24 01:27:16 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 01:27:17 [info] [office-addin] Module loaded { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false } ] }
+2026-04-24 01:27:17 [info] [office-addin] MCP Server created { isMacOS: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false } ] }
+2026-04-24 01:27:17 [info] Not main instance, returning early from app ready
+2026-04-24 01:29:51 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 01:29:52 [info] [CCD] Initialized with version 2.1.111
+2026-04-24 01:29:52 [info] [growthbook] next refresh in 60 min
+2026-04-24 01:29:52 [info] [IdleManager:session] Initialized with 900s timeout
+2026-04-24 01:29:52 [info] [IdleManager:preview] Initialized with 1800s timeout
+2026-04-24 01:29:52 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 01:29:52 [info] [office-addin] Module loaded { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false } ] }
+2026-04-24 01:29:52 [info] [office-addin] MCP Server created { isMacOS: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false } ] }
+2026-04-24 01:29:53 [info] Not main instance, returning early from app ready
+2026-04-24 01:30:07 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 01:30:08 [info] [CCD] Initialized with version 2.1.111
+2026-04-24 01:30:08 [info] [growthbook] next refresh in 60 min
+2026-04-24 01:30:08 [info] [IdleManager:session] Initialized with 900s timeout
+2026-04-24 01:30:08 [info] [IdleManager:preview] Initialized with 1800s timeout
+2026-04-24 01:30:08 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 01:30:08 [info] [office-addin] Module loaded { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false } ] }
+2026-04-24 01:30:08 [info] [office-addin] MCP Server created { isMacOS: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false } ] }
+2026-04-24 01:30:08 [info] Not main instance, returning early from app ready
+2026-04-24 01:31:00 [info] [Claude in Chrome] Executing tool: javascript_tool
+2026-04-24 01:31:00 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:31:00 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:31:01 [warn] [Claude in Chrome] Tool call error: javascript_tool (fdd47518) after 146ms
+2026-04-24 01:31:06 [info] [Claude in Chrome] Executing tool: tabs_context_mcp
+2026-04-24 01:31:06 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:31:06 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:31:20 [info] [Claude in Chrome] Executing tool: browser_batch
+2026-04-24 01:31:20 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:31:20 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:31:30 [info] [EventLogging] Flushing 9 events
+2026-04-24 01:32:39 [info] [Claude in Chrome] Executing tool: javascript_tool
+2026-04-24 01:32:39 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:32:39 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:33:09 [info] [EventLogging] Flushing 3 events
+2026-04-24 01:33:22 [info] [Claude in Chrome] Executing tool: javascript_tool
+2026-04-24 01:33:22 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:33:22 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:33:42 [info] [Claude in Chrome] Executing tool: javascript_tool
+2026-04-24 01:33:42 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:33:42 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:33:43 [warn] [Claude in Chrome] Tool call error: javascript_tool (c5a40059) after 69ms
+2026-04-24 01:33:52 [info] [EventLogging] Flushing 6 events
+2026-04-24 01:33:57 [info] [Claude in Chrome] Executing tool: browser_batch
+2026-04-24 01:33:57 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:33:57 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:33:57 [warn] [Claude in Chrome] Tool call error: browser_batch (279ea216) after 85ms
+2026-04-24 01:33:59 [info] [SkillsPlugin] Starting skills sync
+2026-04-24 01:33:59 [info] [SkillsPlugin] Found 6 enabled skills
+2026-04-24 01:33:59 [info] [SkillsPlugin] Delta: 0 to download, 0 to remove
+2026-04-24 01:33:59 [info] [SkillsPlugin] Sync complete: 0 downloaded, 0 removed, 0 orphans cleaned
+2026-04-24 01:34:03 [info] [Claude in Chrome] Executing tool: tabs_context_mcp
+2026-04-24 01:34:03 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:34:03 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:34:15 [info] [Claude in Chrome] Executing tool: browser_batch
+2026-04-24 01:34:15 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:34:15 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:34:27 [info] [EventLogging] Flushing 9 events
+2026-04-24 01:35:14 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 01:35:15 [info] [CCD] Initialized with version 2.1.111
+2026-04-24 01:35:15 [info] [growthbook] next refresh in 60 min
+2026-04-24 01:35:15 [info] [IdleManager:session] Initialized with 900s timeout
+2026-04-24 01:35:15 [info] [IdleManager:preview] Initialized with 1800s timeout
+2026-04-24 01:35:15 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 01:35:15 [info] [office-addin] Module loaded { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false } ] }
+2026-04-24 01:35:15 [info] [office-addin] MCP Server created { isMacOS: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false } ] }
+2026-04-24 01:35:15 [info] Not main instance, returning early from app ready
+2026-04-24 01:38:05 [info] [Claude in Chrome] Chrome extension disconnected from bridge (deviceId=cfb4df84-7875-4c0d-885d-32e3c0afb75e, selected=cfb4df84-7875-4c0d-885d-32e3c0afb75e)
+2026-04-24 01:38:05 [info] [Claude in Chrome] Selected extension disconnected, clearing selection
+2026-04-24 01:38:35 [info] [EventLogging] Flushing 1 events
+2026-04-24 01:38:39 [info] [Claude in Chrome] Bridge connection closed (code: 1006, duration: 829474ms)
+2026-04-24 01:38:39 [info] [Claude in Chrome] Bridge reconnecting in 2000ms (attempt 1)
+2026-04-24 01:38:41 [info] [oauth] looking up token for orgId=deca5385-e605-4dad-bf74-fe11f439d8bd, cacheKey=89355bc3-cbfd-4382-905b-976645cad410:deca5385-e605-4dad-bf74-fe11f439d8bd:https://api.anthropic.com:user:inference user:office
+2026-04-24 01:38:41 [info] [oauth] using cached token for orgId=deca5385-e605-4dad-bf74-fe11f439d8bd
+2026-04-24 01:38:41 [info] [oauth] looking up token for orgId=deca5385-e605-4dad-bf74-fe11f439d8bd, cacheKey=89355bc3-cbfd-4382-905b-976645cad410:deca5385-e605-4dad-bf74-fe11f439d8bd:https://api.anthropic.com:user:inference user:office
+2026-04-24 01:38:41 [info] [oauth] using cached token for orgId=deca5385-e605-4dad-bf74-fe11f439d8bd
+2026-04-24 01:38:41 [info] [Claude in Chrome] Connecting to bridge: wss://bridge.claudeusercontent.com/chrome/06feffbb-6b63-425d-9b78-46ee00ef31b6
+2026-04-24 01:38:42 [info] [Claude in Chrome] WebSocket connected, sending connect message
+2026-04-24 01:38:42 [info] [Claude in Chrome] Paired with Chrome extension (duration: 630ms)
+2026-04-24 01:39:09 [info] [EventLogging] Flushing 3 events
+2026-04-24 01:42:24 [info] [Claude in Chrome] Executing tool: javascript_tool
+2026-04-24 01:42:24 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:42:24 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:42:24 [info] [Claude in Chrome] Selected Chrome extension: cfb4df84...
+2026-04-24 01:42:54 [info] [EventLogging] Flushing 3 events
+2026-04-24 01:43:41 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 01:43:42 [info] [CCD] Initialized with version 2.1.111
+2026-04-24 01:43:42 [info] [growthbook] next refresh in 60 min
+2026-04-24 01:43:42 [info] [IdleManager:session] Initialized with 900s timeout
+2026-04-24 01:43:42 [info] [IdleManager:preview] Initialized with 1800s timeout
+2026-04-24 01:43:42 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 01:43:42 [info] [office-addin] Module loaded { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false } ] }
+2026-04-24 01:43:42 [info] [office-addin] MCP Server created { isMacOS: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false } ] }
+2026-04-24 01:43:42 [info] Not main instance, returning early from app ready
+2026-04-24 01:43:59 [info] [SkillsPlugin] Starting skills sync
+2026-04-24 01:43:59 [info] [SkillsPlugin] Found 6 enabled skills
+2026-04-24 01:43:59 [info] [SkillsPlugin] Delta: 0 to download, 0 to remove
+2026-04-24 01:43:59 [info] [SkillsPlugin] Sync complete: 0 downloaded, 0 removed, 0 orphans cleaned
+2026-04-24 01:44:08 [info] [Claude in Chrome] Executing tool: browser_batch
+2026-04-24 01:44:08 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:44:08 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:44:22 [info] [Claude in Chrome] Executing tool: javascript_tool
+2026-04-24 01:44:22 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:44:22 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:44:38 [info] [EventLogging] Flushing 6 events
+2026-04-24 01:52:19 [info] [Claude in Chrome] Chrome extension disconnected from bridge (deviceId=cfb4df84-7875-4c0d-885d-32e3c0afb75e, selected=cfb4df84-7875-4c0d-885d-32e3c0afb75e)
+2026-04-24 01:52:19 [info] [Claude in Chrome] Selected extension disconnected, clearing selection
+2026-04-24 01:52:21 [info] [Claude in Chrome] Chrome extension connected to bridge
+2026-04-24 01:52:21 [info] [Claude in Chrome] Previously selected extension reconnected, auto-reselecting
+2026-04-24 01:52:21 [info] [Claude in Chrome] Selected Chrome extension: cfb4df84...
+2026-04-24 01:52:49 [info] [EventLogging] Flushing 2 events
+2026-04-24 01:53:04 [info] [Claude in Chrome] Chrome extension disconnected from bridge (deviceId=cfb4df84-7875-4c0d-885d-32e3c0afb75e, selected=cfb4df84-7875-4c0d-885d-32e3c0afb75e)
+2026-04-24 01:53:04 [info] [Claude in Chrome] Selected extension disconnected, clearing selection
+2026-04-24 01:53:06 [info] [Claude in Chrome] Chrome extension connected to bridge
+2026-04-24 01:53:06 [info] [Claude in Chrome] Previously selected extension reconnected, auto-reselecting
+2026-04-24 01:53:06 [info] [Claude in Chrome] Selected Chrome extension: cfb4df84...
+2026-04-24 01:53:34 [info] [EventLogging] Flushing 2 events
+2026-04-24 01:57:32 [info] [SkillsPlugin] Window focused — polling now (last poll was 812925ms ago)
+2026-04-24 01:57:32 [info] [SkillsPlugin] Starting skills sync
+2026-04-24 01:57:32 [info] [SkillsPlugin] Found 6 enabled skills
+2026-04-24 01:57:32 [info] [SkillsPlugin] Delta: 0 to download, 0 to remove
+2026-04-24 01:57:32 [info] [SkillsPlugin] Sync complete: 0 downloaded, 0 removed, 0 orphans cleaned
+2026-04-24 01:57:41 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 01:57:42 [info] [CCD] Initialized with version 2.1.111
+2026-04-24 01:57:42 [info] [growthbook] next refresh in 60 min
+2026-04-24 01:57:42 [info] [IdleManager:session] Initialized with 900s timeout
+2026-04-24 01:57:42 [info] [IdleManager:preview] Initialized with 1800s timeout
+2026-04-24 01:57:42 [info] Starting app {
+  appVersion: '1.3883.0',
+  isPackaged: true,
+  platform: 'win32',
+  arch: 'x64',
+  nodeVersion: '24.14.0'
+}
+2026-04-24 01:57:42 [info] [office-addin] Module loaded { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false, IS_DEV: false, IS_NEST_BUILD: false } ] }
+2026-04-24 01:57:42 [info] [office-addin] MCP Server created { isMacOS: false, Symbol(level): 'info', Symbol(splat): [ { isMacOS: false } ] }
+2026-04-24 01:57:42 [info] Not main instance, returning early from app ready
+2026-04-24 01:59:27 [info] [Claude in Chrome] Executing tool: browser_batch
+2026-04-24 01:59:27 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:59:27 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:59:42 [info] [Claude in Chrome] Executing tool: javascript_tool
+2026-04-24 01:59:42 [info] [Claude in Chrome] ensureConnected called, connected=true, authenticated=true, wsState=1
+2026-04-24 01:59:42 [info] [Claude in Chrome] Already connected and authenticated
+2026-04-24 01:59:57 [info] [EventLogging] Flushing 6 events
+ 
+=== MCP SERVER LOGS === 
+ 
+=== PROXY TEST === 
+{"jsonrpc": "2.0", "id": 1, "result": {"protocolVersion": "2024-11-05", "capabilities": {"experimental": {}, "logging": {}, "prompts": {"listChanged": true}, "resources": {"subscribe": false, "listChanged": true}, "tools": {"listChanged": true}, "extensions": {"io.modelcontextprotocol/ui": {}}}, "serverInfo": {"name": "simulation-v1-6-webui-service", "version": "3.2.4"}}}
+ 
+=== PROXY.PY CONTENT === 
+import sys, json, urllib.request, urllib.error
+
+REMOTE = "http://192.168.100.6:8766/mcp/"
+_session_id = None
+
+def parse_sse(data: bytes):
+    text = data.decode('utf-8', errors='replace')
+    for block in text.split('\n\n'):
+        for line in block.split('\n'):
+            line = line.rstrip('\r')
+            if line.startswith('data:'):
+                payload = line[5:].strip()
+                if payload and payload != '[DONE]':
+                    try:
+                        yield json.loads(payload)
+                    except json.JSONDecodeError:
+                        pass
+
+def forward(msg):
+    global _session_id
+    headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json, text/event-stream',
+    }
+    if _session_id:
+        headers['mcp-session-id'] = _session_id
+
+    req = urllib.request.Request(REMOTE, json.dumps(msg).encode(), headers)
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            sid = r.headers.get('mcp-session-id')
+            if sid:
+                _session_id = sid
+            body = r.read()
+            ct = r.headers.get('Content-Type', '')
+            if 'text/event-stream' in ct:
+                return list(parse_sse(body)), None
+            elif body.strip():
+                return [json.loads(body)], None
+            else:
+                return [], None
+    except urllib.error.HTTPError as e:
+        if e.code in (202, 204):
+            return [], None
+        return [], {"code": -32603, "message": f"HTTP {e.code}: {e.reason}"}
+    except Exception as e:
+        return [], {"code": -32603, "message": str(e)}
+
+for line in sys.stdin:
+    line = line.strip()
+    if not line:
+        continue
+    try:
+        msg = json.loads(line)
+        is_notification = "id" not in msg
+        messages, error = forward(msg)
+
+        if is_notification:
+            # Forward any unsolicited server notifications only
+            for resp in messages:
+                if "id" not in resp:
+                    resp.setdefault("jsonrpc", "2.0")
+                    print(json.dumps(resp), flush=True)
+        else:
+            if error and not messages:
+                print(json.dumps({"jsonrpc": "2.0", "id": msg.get("id"), "error": error}), flush=True)
+            else:
+                for resp in messages:
+                    resp.setdefault("jsonrpc", "2.0")
+                    if "id" not in resp:
+                        resp["id"] = msg.get("id")
+                    print(json.dumps(resp), flush=True)
+    except Exception as e:
+        import traceback
+        with open(r'C:\Users\hotro\mcp-proxy\proxy_error.log', 'a') as f:
+            f.write(traceback.format_exc() + '\n')

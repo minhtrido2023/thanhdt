@@ -1,0 +1,23 @@
+[Unit]
+Description=8L interactive Telegram bot (ticker query -> 8L ranking)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# EDIT: deploy user + app dir
+User=ubuntu
+WorkingDirectory=/opt/8l
+Environment=WORKDIR_8L=/opt/8l
+Environment=BQ_BIN=bq
+Environment=DNA_PYEXE=/opt/8l/venv/bin/python
+Environment=CLOUDSDK_PYTHON=python3
+Environment=GOOGLE_APPLICATION_CREDENTIALS=/opt/8l/sa-key.json
+ExecStart=/opt/8l/venv/bin/python /opt/8l/telegram_8l_bot.py
+Restart=always
+RestartSec=10
+StandardOutput=append:/opt/8l/data/telegram_8l_bot.log
+StandardError=append:/opt/8l/data/telegram_8l_bot.log
+
+[Install]
+WantedBy=multi-user.target

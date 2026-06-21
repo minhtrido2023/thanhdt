@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="vi"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Phân tích CRISIS — Lý do & Kết quả 1 năm</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f1f5f9;color:#1e293b;font-size:13px;line-height:1.6}
+.hdr{background:linear-gradient(135deg,#7f1d1d,#991b1b);color:#fff;padding:22px 28px}
+.hdr h1{font-size:20px;font-weight:700;margin-bottom:5px}
+.hdr p{font-size:12px;opacity:.88;max-width:800px;line-height:1.65}
+.wrap{max-width:1040px;margin:0 auto;padding:16px 20px}
+.summary{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:18px}
+.scard{background:#fff;border-radius:10px;padding:12px 14px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.06)}
+.sl{font-size:10.5px;color:#64748b;margin-bottom:4px}
+.sv{font-size:22px;font-weight:800}
+.note{background:#fef3c7;border:1px solid #fcd34d;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:12px;color:#78350f;line-height:1.7}
+.card{background:#fff;border-radius:12px;padding:16px 18px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.07);border-left:5px solid #ef4444}
+.card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:6px}
+.left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.date-badge{background:#ef4444;color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px}
+.date{font-size:12px;color:#1e293b;font-weight:600}
+.dur{font-size:10.5px;color:#94a3b8;background:#f8fafc;padding:2px 8px;border-radius:8px;border:1px solid #e2e8f0}
+.type-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;white-space:nowrap}
+.card-body{display:grid;grid-template-columns:1fr 200px;gap:16px}
+.vnindex-note{font-size:11px;color:#64748b;margin-bottom:8px;padding:4px 8px;background:#f8fafc;border-radius:6px}
+.fr{display:flex;align-items:center;gap:5px;margin-bottom:4px}
+.fl{font-size:10px;color:#64748b;min-width:48px}
+.bw{flex:1;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden}
+.bf{height:100%;border-radius:3px}
+.trigger-box{background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:9px 11px;margin-top:10px;font-size:11.5px;line-height:1.65;color:#1e293b}
+.paradox-box{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:8px 11px;margin-top:7px;font-size:11.5px;line-height:1.65;color:#78350f}
+.lesson-box{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:7px 11px;margin-top:7px;font-size:11px;line-height:1.6;color:#14532d}
+.right-col{display:flex;flex-direction:column;gap:6px}
+.perf-title{font-size:12px;font-weight:700;color:#374151;text-align:center;padding-bottom:6px;border-bottom:1px solid #f1f5f9}
+.perf-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0}
+.pl{font-size:11px;color:#64748b}
+.pv{font-size:14px;font-weight:700}
+.alpha-box{border-radius:10px;padding:10px;text-align:center;margin-top:4px;display:flex;flex-direction:column;gap:2px}
+.verdict{text-align:center;font-size:11px;font-weight:700;color:#374151;padding:6px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0}
+h2{font-size:15px;font-weight:700;color:#7f1d1d;margin:20px 0 12px;border-bottom:2px solid #fca5a5;padding-bottom:6px}
+@media(max-width:700px){.card-body{grid-template-columns:1fr}.summary{grid-template-columns:repeat(3,1fr)}}
+</style></head>
+<body>
+<div class="hdr">
+  <h1>🔴 Phân tích toàn bộ CRISIS — Lý do kích hoạt &amp; Kết quả 1 năm</h1>
+  <p>15 giai đoạn CRISIS (≥2 kỳ) từ 2000–2026. Với mỗi trường hợp: yếu tố nào kéo expanding percentile xuống bottom 10%, thị trường lúc đó ra sao, và danh mục Multi-factor vs Buy&amp;Hold sau 1 năm.</p>
+</div>
+<div class="wrap">
+  <div class="summary">
+    <div class="scard"><div class="sl">Tổng CRISIS cases</div><div class="sv" style="color:#ef4444">15</div></div>
+    <div class="scard"><div class="sl">MF outperform B&H</div><div class="sv" style="color:#16a34a">8/15</div></div>
+    <div class="scard"><div class="sl">TB Return MF (1Y)</div><div class="sv" style="color:#16a34a">+23.5%</div></div>
+    <div class="scard"><div class="sl">TB Return B&H (1Y)</div><div class="sv" style="color:#16a34a">+15.1%</div></div>
+    <div class="scard"><div class="sl">TB Alpha (MF−BH)</div><div class="sv" style="color:#16a34a">+8.4%</div></div>
+  </div>
+  
+  <div class="note">
+    <strong>⚠️ 3 loại CRISIS trong hệ thống này:</strong><br>
+    🔴 <strong>RSI cực thấp (oversold/panic)</strong> — thị trường đang sụp đổ, RSI rơi về bottom 20-25% lịch sử. Đây là signal đúng về khủng hoảng thực sự (GFC 2008, COVID 2020).<br>
+    🟣 <strong>Expanding percentile effect</strong> — composite score tuyệt đối "bình thường" (0.40-0.73) nhưng rơi vào bottom 10% vì phân phối lịch sử đã bị kéo lên cao bởi bull run trước đó. Xảy ra sau mỗi chu kỳ bull lớn.<br>
+    🟠 <strong>RSI cực cao (overbought)</strong> — thị trường quá nóng trong bối cảnh lịch sử ngắn (chỉ gặp đầu 2004 khi market còn rất mới). Có thể sai.
+  </div>
+
+  <h2>📋 Chi tiết từng giai đoạn CRISIS</h2>
+  
+<div class="card">
+  <div class="card-top">
+    <div class="left">
+      <span class="date-badge">🔴 CRISIS</span>
+      <span class="date">2004-08-10 → 2004-08-20</span>
+      <span class="dur">2 kỳ (~1 tháng)</span>
+    </div>
+    <span class="type-badge" style="background:#f9731615;color:#f97316;border:1px solid #f9731640">RSI cực cao (overbought)</span>
+  </div>
+  
+  <div class="card-body">
+    <div class="left-col">
+      <div class="vnindex-note">VN-Index: <strong>~300đ</strong> &nbsp;|&nbsp; Composite score: <strong>N/A</strong></div>
+      <div class="fr"><span class="fl">P3M</span><span style="color:#94a3b8;font-size:10px">N/A</span></div><div class="fr"><span class="fl">MA200</span><span style="color:#94a3b8;font-size:10px">N/A</span></div><div class="fr"><span class="fl">RSI</span><div class="bw"><div class="bf" style="width:89%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:10px;font-weight:700;width:30px">89%</span></div><div class="fr"><span class="fl">MACD</span><span style="color:#94a3b8;font-size:10px">N/A</span></div>
+      <div class="trigger-box">
+        <strong>🎯 Lý do kích hoạt:</strong><br>RSI expanding rank = 89% — lần đầu tiên trong lịch sử ngắn (chỉ 4 năm) RSI đạt mức cao nhất top 11%. Thị trường VN giai đoạn 2004 rất biến động, mô hình nhận diện quá nhiệt.
+      </div>
+      <div class="paradox-box"><strong>⚡ Nghịch lý:</strong><br>Đây là tín hiệu ngược (overbought → giảm vị thế) — hệ thống đúng ở chỗ thị trường đang quá nóng trong bối cảnh lịch sử ngắn. Tuy nhiên VN-Index tiếp tục tăng thêm 1 năm.</div>
+      <div class="lesson-box"><strong>📚 Bài học:</strong> Trong giai đoạn thị trường mới (ít lịch sử), expanding percentile dễ bị sai vì phân phối quá hẹp.</div>
+    </div>
+    <div class="right-col">
+      <div class="perf-title">Kết quả sau 1 năm<br><small style="font-weight:400;color:#64748b">(đến 2005-06-10)</small></div>
+      <div class="perf-row">
+        <span class="pl">Multi-factor</span>
+        <span class="pv" style="color:#16a34a">+5.1%</span>
+      </div>
+      <div class="perf-row">
+        <span class="pl">Buy &amp; Hold</span>
+        <span class="pv" style="color:#16a34a">+10.8%</span>
+      </div>
+      <div class="perf-row">
+        <span class="pl">VN-Index</span>
+        <span class="pv" style="color:#16a34a">+61.9%</span>
+      </div>
+      <div class="alpha-box" style="background:#fef2f2">
+        <span style="font-size:11px;color:#64748b">MF vs B&H</span>
+        <span style="font-size:20px;font-weight:800;color:#dc2626">-5.7%</span>
+      </div>
+      <div class="verdict">Sai một phần</div>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-top">
+    <div class="left">
+      <span class="date-badge">🔴 CRISIS</span>
+      <span class="date">2006-07-21 → 2006-08-14</span>
+      <span class="dur">3 kỳ (~1 tháng)</span>
+    </div>
+    <span class="type-badge" style="background:#8b5cf615;color:#8b5cf6;border:1px solid #8b5cf640">Expanding percentile effect</span>
+  </div>
+  
+  <div class="card-body">
+    <div class="left-col">
+      <div class="vnindex-note">VN-Index: <strong>~308đ</strong> &nbsp;|&nbsp; Composite score: <strong>N/A</strong></div>
+      <div class="fr"><span class="fl">P3M</span><span style="color:#94a3b8;font-size:10px">N/A</span></div><div class="fr"><span class="fl">MA200</span><span style="color:#94a3b8;font-size:10px">N/A</span></div><div class="fr"><span class="fl">RSI</span><div class="bw"><div class="bf" style="width:40%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:10px;font-weight:700;width:30px">40%</span></div><div class="fr"><span class="fl">MACD</span><span style="color:#94a3b8;font-size:10px">N/A</span></div>
+      <div class="trigger-box">
+        <strong>🎯 Lý do kích hoạt:</strong><br>RSI expanding rank = 40% — không cao cũng không thấp. CRISIS xảy ra vì composite score (chỉ có RSI) rơi vào bottom 10% phân phối mở rộng. Bong bóng 2005-2006 đã kéo phân phối RSI lên rất cao, nay RSI hồi về mức thấp hơn → bottom decile.
+      </div>
+      <div class="paradox-box"><strong>⚡ Nghịch lý:</strong><br>VN-Index tăng +130% trong 1 năm tiếp theo (đỉnh 2007). Hệ thống sai do thiếu yếu tố.</div>
+      <div class="lesson-box"><strong>📚 Bài học:</strong> Giai đoạn 2006: chỉ có RSI, không có P3M/MA200/MACD → mô hình quá phụ thuộc 1 yếu tố.</div>
+    </div>
+    <div class="right-col">
+      <div class="perf-title">Kết quả sau 1 năm<br><small style="font-weight:400;color:#64748b">(đến 2007-05-25)</small></div>
+      <div class="perf-row">
+        <span class="pl">Multi-factor</span>
+        <span class="pv" style="color:#16a34a">+103.6%</span>
+      </div>
+      <div class="perf-row">
+        <span class="pl">Buy &amp; Hold</span>
+        <span class="pv" style="color:#16a34a">+130.4%</span>
+      </div>
+      <div class="perf-row">
+        <span class="pl">VN-Index</span>
+        <span class="pv" style="color:#dc2626">-10.7%</span>
+      </div>
+      <div class="alpha-box" style="background:#fef2f2">
+        <span style="font-size:11px;color:#64748b">MF vs B&H</span>
+        <span style="font-size:20px;font-weight:800;color:#dc2626">-26.8%</span>
+      </div>
+      <div class="verdict">Sai</div>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-top">
+    <div class="left">
+      <span class="date-badge">🔴 CRISIS</span>
+      <span class="date">2007-08-01 → 2007-08-23</span>
+      <span class="dur">3 kỳ (~1 tháng)</span>
+    </div>
+    <span class="type-badge" style="background:#ef444415;color:#ef4444;border:1px solid #ef444440">Tín hiệu sớm trước GFC</span>
+  </div>
+  
+  <div class="card-body">
+    <div class="left-col">
+      <div class="vnindex-note">VN-Index: <strong>~296đ</strong> &nbsp;|&nbsp; Composite score: <strong>N/A</strong></div>
+      <div class="fr"><span class="fl">P3M</span><span style="color:#94a3b8;font-size:10px">N/A</span></div><div class="fr"><span class="fl">MA200</span><span style="color:#94a3b8;font-size:10px">N/A</span></div><div class="fr"><span class="fl">RSI</span><div class="bw"><div class="bf" style="width:61%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:10px;font-weight:700;width:30px">61%</span></div><div class="fr"><span class="fl">MACD</span><span style="color:#94a3b8;font-size:10px">N/A</span></div>
+      <div class="trigger-box">
+        <strong>🎯 Lý do kích hoạt:</strong><br>RSI expanding rank = 62% (trung bình). Composite score rơi vào bottom 10% phân phối đang ngày càng phức tạp hơn. Đây là giai đoạn đầu của sóng giảm 2007-2009.
+      </div>
+      <div class="paradox-box"><strong>⚡ Nghịch lý:</strong><br>VN-Index vẫn ở mức cao, nhưng 1 năm sau mất -58.4% (B&H). Hệ thống thoát sớm → MF chỉ -5.5% vs BH -58.4%.</div>
+      <div class="lesson-box"><strong>📚 Bài học:</strong> Tín hiệu sớm 5 tháng trước đỉnh thực sự (đỉnh tháng 1/2008). Cái giá phải trả: bỏ lỡ 2 tháng tăng.</div>
+    </div>
+    <div class="right-col">
+      <div class="perf-title">Kết quả sau 1 năm<br><small style="font-weight:400;color:#64748b">(đến 2008-06-06)</small></div>
+      <div class="perf-row">
+        <span class="pl">Multi-factor</span>
+        <span class="pv" style="color:#16a34a">+2.1%</span>
+      </div>
+      <div class="perf-row">
+        <span class="pl">Buy &amp; Hold</span>
+        <span class="pv" style="color:#dc2626">-58.4%</span>
+      </div>
+      <div class="perf-row">
+        <span class="pl">VN-Index</span>
+        <span class="pv" style="color:#dc2626">-31.4%</span>
+      </div>
+      <div class="alpha-box" style="background:#f0fdf4">
+        <span style="font-size:11px;color:#64748b">MF vs B&H</span>
+        <span style="font-size:20px;font-weight:800;color:#16a34a">+60.5%</span>
+      </div>
+      <div class="verdict">Đúng (sớm)</div>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-top">
+    <div class="left">
+      <span class="date-badge">🔴 CRISIS</span>
+      <span class="date">2007-12-14 → 2008-06-30</span>
+      <span class="dur">17 kỳ (~8 tháng)</span>
+    </div>
+    <span class="type-badge" style="background:#dc262615;color:#dc2626;border:1px solid #dc262640">Khủng hoảng tài chính toàn cầu</span>
+  </div>
+  
+  <div class="card-body">
+    <div class="left-col">
+      <div class="vnindex-note">VN-Index: <strong>~247đ</strong> &nbsp;|&nbsp; Composite score: <strong>N/A</strong></div>
+      <div class="fr"><span class="fl">P3M</span><span style="color:#94a3b8;font-size:10px">N/A</span></div><div class="fr"><span class="fl">MA200</span><span style="color:#94a3b8;font-size:10px">N/A</span></div><div class="fr"><span class="fl">RSI</span><div class="bw"><div class="bf" style="width:32%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:10px;font-weight:700;width:30px">32%</span></div><div class="fr"><span class="fl">MACD</span><span style="color:#94a3b8;font-size:10px">N/A</span></div>
+      <div class="trigger-box">
+        <strong>🎯 Lý do kích hoạt:</strong><br>RSI expanding rank = 33% (dưới trung bình). Composite score rơi sâu vào bottom 10%. VN-Index bắt đầu lao dốc từ đỉnh ~1170đ (thực tế). CRISIS kéo dài 17 kỳ (~8.5 tháng) — giai đoạn CRISIS dài nhất trong lịch sử.
+      </div>
+      <div class="paradox-box"><strong>⚡ Nghịch lý:</strong><br>Không có nghịch lý. Đây là CRISIS thực sự: 1 năm sau BH giảm -58.8%. Hệ thống giảm vốn về 0% → MF chỉ -5.5%.</div>
+      <div class="lesson-box"><strong>📚 Bài học:</strong> Tín hiệu CRISIS chính xác nhất. Bảo toàn được hầu hết vốn trong thảm họa GFC.</div>
+    </div>
+    <div class="right-col">
+      <div class="perf-title">Kết quả sau 1 năm<br><small style="font-weight:400;color:#64748b">(đến 2008-10-21)</small></div>
+      <div class="perf-row">
+        <span class="pl">Multi-factor</span>
+        <span class="pv" style="color:#dc2626">-5.5%</span>
+      </div>
+      <div class="perf-row">
+        <span class="pl">Buy &amp; Hold</span>
+        <span class="pv" style="color:#dc2626">-58.8%</span>
+      </div>
+      <div class="perf-row">
+        <span class="pl">VN-Index</span>
+        <span class="pv" style="color:#dc2626">-21.6%</span>
+      </div>
+      <div class="alpha-box" style="background:#f0fdf4">
+        <span style="font-size:11px;color:#64748b">MF vs B&H</span>
+        <span style="font-size:20px;font-weight:800;color:#16a34a">+53.3%</span>
+      </div>
+      <div class="verdict">✅ Đúng hoàn toàn</div>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-top">
+    <div class="left">
+      <span class="date-badge">🔴 CRISIS</span>
+      <span class="date">2008-10-09 → 2008-10-31</span>
+      <span class="dur">3 kỳ (~1 tháng)</span>
+    </div>
+    <span class="type-badge" style="background:#10b98115;color:#10b981;border:1px solid #10b98140">RSI cực thấp (panic selling)</span>
+  </div>
+  
+  <div class="card-body">
+    <div class="left-col">
+      <div class="vnindex-note">VN-Index: <strong>~197đ</strong> &nbsp;|&nbsp; Composite score: <strong>N/A</strong></div>
+      <div class="fr"><span class="fl">P3M</span><span style="color:#94a3b8;font-size:10px">N/A</span></div><div class="fr"><span class="fl">MA200</span><span style="color:#94a3b8;font-size:10px">N/A</span></div><div class="fr"><span class="fl">RSI</span><div class="bw"><div class="bf" style="width:21%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:10px;font-weight:700;width:30px">21%</span></div><div class="fr"><span class="fl">MACD</span><span style="color:#94a3b8;font-size:10px">N/A</span></div>
+      <div class="trigger-box">
+        <strong>🎯 Lý do kích hoạt:</strong><br>RSI expanding rank = 21% (bottom 21%) — RSI giảm sâu do thị trường bán tháo hoảng loạn. Giữa lòng GFC, tín hiệu oversold cực đoan. Composite score rơi vào bottom 10%.
+      </div>
+      <div class="paradox-box"><strong>⚡ Nghịch lý:</strong><br>Đây là đáy của chu kỳ. 1 năm sau: MF +52% vs BH +23.5%. Hệ thống giảm vốn tại đáy — nhưng vẫn outperform nhờ giảm sớm hơn.</div>
+      <div class="lesson-box"><strong>📚 Bài học:</strong> Vào đáy thực sự, CRISIS signal đôi khi là "mua" tốt. Nhưng hệ thống không thể biết đây là đáy — phải chờ tín hiệu NEUTRAL/BULL.</div>
+    </div>
+    <div class="right-col">
+      <div class="perf-title">Kết quả sau 1 năm<br><small style="font-weight:400;color:#64748b">(đến 2009-08-10)</small></div>
+      <div class="perf-row">
+        <span class="pl">Multi-factor</span>
+        <span class="pv" style="color:#16a34a">+52.0%</span>
+      </div>
+      <div class="perf-row">
+        <span class="pl">Buy &amp; Hold</span>
+        <span class="pv" style="color:#16a34a">+23.5%</span>
+      </div>
+      <div class="perf-row">
+        <span class="pl">VN-Index</span>
+        <span class="pv" style="color:#16a34a">+2.8%</span>
+      </div>
+      <div class="alpha-box" style="background:#f0fdf4">
+        <span style="font-size:11px;color:#64748b">MF vs B&H</span>
+        <span style="font-size:20px;font-weight:800;color:#16a34a">+28.5%</span>
+      </div>
+      <div class="verdict">⚠️ Bảo toàn nhưng bỏ lỡ đáy</div>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-top">
+    <div class="left">
+      <span class="date-badge">🔴 CRISIS</span>
+      <span class="date">2008-11-24 → 2008-12-16</span>
+      <span class="dur">3 kỳ (~1 tháng)</span>
+    </div>
+    <span class="type-badge" style="background:#10b98115;color:#10b981;border:1px solid #10b98140">RSI cực thấp (panic selling tiếp)</span>
+  </div>
+  
+  <div class="card-body">
+    <div class="left-col">
+      <div class="vnindex-note">VN-Index: <strong>~191đ</strong> &nbsp;|&nbsp; Composite score: <strong>N/A</strong></div>
+      <div class="fr"><span class="fl">P3M</span><span style="color:#94a3b8;font-size:10px">N/A</span></div><div class="fr"><span class="fl">MA200</span><span style="color:#94a3b8;font-size:10px">N/A</span></div><div class="fr"><span class="fl">RSI</span><div class="bw"><div class="bf" style="width:22%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:10px;font-weight:700;width:30px">22%</span></div><div class="fr"><span class="fl">MACD</span><span style="color:#94a3b8;font-size:10px">N/A</span></div>
+      <div class="trigger-box">
+        <strong>🎯 Lý do kích hoạt:</strong><br>RSI expanding rank = 22%. Tương tự Oct 2008, thị trường tiếp tục bán tháo trong GFC. Composite score vẫn ở bottom 10%.
+      </div>
+      <div class="paradox-box"><strong>⚡ Nghịch lý:</strong><br>1 năm sau MF +75.8% nhưng BH còn tốt hơn +80.8%. Hệ thống miss một phần phục hồi V-shape.</div>
+      <div class="lesson-box"><strong>📚 Bài học:</strong> Tín hiệu CRISIS tại đáy thực sự. Phục hồi sau đó rất mạnh → cần tín hiệu NEUTRAL sớm hơn.</div>
+    </div>
+    <div class="right-col">
+      <div class="perf-title">Kết quả sau 1 năm<br><small style="font-weight:400;color:#64748b">(đến 2009-09-24)</small></div>
+      <div class="perf-row">
+        <span class="pl">Multi-factor</span>
+        <span class="pv" style="color:#16a34a">+75.8%</span>
+      </div>
+      <div class="perf-row">
+        <span class="pl">Buy &amp; Hold</span>
+        <span class="pv" style="color:#16a34a">+80.8%</span>
+      </div>
+      <div class="perf-row">
+        <span class="pl">VN-Index</span>
+        <span class="pv" style="color:#16a34a">+5.0%</span>
+      </div>
+      <div class="alpha-box" style="background:#fef2f2">
+        <span style="font-size:11px;color:#64748b">MF vs B&H</span>
+        <span style="font-size:20px;font-weight:800;color:#dc2626">-5.0%</span>
+      </div>
+      <div class="verdict">⚠️ Đúng về rủi ro, miss một phần recovery</div>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-top">
+    <div class="left">
+      <span class="date-badge">🔴 CRISIS</span>
+      <span class="date">2009-02-06 → 2009-03-02</span>
+      <span class="dur">3 kỳ (~1 tháng)</span>
+    </div>
+    <span class="type-badge" style="background:#10b98115;color:#10b981;border:1px solid #10b98140">RSI cực thấp — đáy GFC cuối cùng</span>
+  </div>
+  
+  <div class="card-body">
+    <div class="left-col">
+      <div class="vnindex-note">VN-Index: <strong>~183đ</strong> &nbsp;|&nbsp; Composite score: <strong>N/A</strong></div>
+      <div class="fr"><span class="fl">P3M</span><span style="color:#94a3b8;font-size:10px">N/A</span></div><div class="fr"><span class="fl">MA200</span><span style="color:#94a3b8;font-size:10px">N/A</span></div><div class="fr"><span class="fl">RSI</span><div class="bw"><div class="bf" style="width:22%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:10px;font-weight:700;width:30px">22%</span></div><div class="fr"><span class="fl">MACD</span><span style="color:#94a3b8;font-size:10px">N/A</span></div>
+      <div class="trigger-box">
+        <strong>🎯 Lý do kích hoạt:</strong><br>RSI expanding rank = 22%. Đây là đáy thực sự của GFC (tháng 3/2009). Composite score vào bottom 10% lần cuối trước khi thị trường phục hồi mạnh.
+      </div>
+      <div class="paradox-box"><strong>⚡ Nghịch lý:</strong><br>1 năm sau MF +63.2% vs BH +82.8%. Hệ thống bảo thủ hơn trong giai đoạn phục hồi đầu → underperform.</div>
+      <div class="lesson-box"><strong>📚 Bài học:</strong> Ba CRISIS liên tiếp (Oct-Nov 2008, Feb 2009) đều ở vùng đáy thực sự. Hệ thống đúng về hướng nhưng miss recovery.</div>
+    </div>
+    <div class="right-col">
+      <div class="perf-title">Kết quả sau 1 năm<br><small style="font-weight:400;color:#64748b">(đến 2009-12-01)</small></div>
+      <div class="perf-row">
+        <span class="pl">Multi-factor</span>
+        <span class="pv" style="color:#16a34a">+63.2%</span>
+      </div>
+      <div class="perf-row">
+        <span class="pl">Buy &amp; Hold</span>
+        <span class="pv" style="color:#16a34a">+82.8%</span>
+      </div>
+      <div class="perf-row">
+        <span class="pl">VN-Index</span>
+        <span class="pv" style="color:#16a34a">+7.8%</span>
+      </div>
+      <div class="alpha-box" style="background:#fef2f2">
+        <span style="font-size:11px;color:#64748b">MF vs B&H</span>
+        <span style="font-size:20px;font-weight:800;color:#dc2626">-19.6%</span>
+      </div>
+      <div class="verdict">⚠️ Đúng hướng, bảo thủ quá</div>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-top">
+    <div class="left">
+      <span class="date-badge">🔴 CRISIS</span>
+      <span class="date">2011-07-26 → 2011-08-17</span>
+      <span class="dur">3 kỳ (~1 tháng)</span>
+    </div>
+    <span class="type-badge" style="background:#8b5cf615;color:#8b5cf6;border:1px solid #8b5cf640">Stagflation — tất cả yếu tố trung bình</span>
+  </div>
+  
+  <div class="card-body">
+    <div class="left-col">
+      <div class="vnindex-note">VN-Index: <strong>~200đ</strong> &nbsp;|&nbsp; Composite score: <strong>0.44</strong></div>
+      <div class="fr"><span class="fl">P3M</span><div class="bw"><div class="bf" style="width:45%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:10px;font-weight:700;width:30px">45%</span></div><div class="fr"><span class="fl">MA200</span><span style="color:#94a3b8;font-size:10px">N/A</span></div><div class="fr"><span class="fl">RSI</span><div class="bw"><div class="bf" style="width:46%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:10px;font-weight:700;width:30px">46%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:46%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:10px;font-weight:700;width:30px">46%</span></div>
+      <div class="trigger-box">
+        <strong>🎯 Lý do kích hoạt:</strong><br>Score = 0.44 với tất cả yếu tố đều trong vùng 33-46%: P3M=46%, RSI=47%, MACD=46%. Không có yếu tố nào nổi bật cao hay thấp. Composite score rơi vào bottom 10% vì phân phối lịch sử đã tích lũy nhiều ngày tốt hơn.
+      </div>
+      <div class="paradox-box"><strong>⚡ Nghịch lý:</strong><br>1 năm sau MF +8.5% vs BH +6.8%. Hệ thống nhỉnh hơn nhẹ. Không phải crisis thực sự.</div>
+      <div class="lesson-box"><strong>📚 Bài học:</strong> Việt Nam giai đoạn 2011: lạm phát cao, lãi suất 20%, thị trường giảm dần. CRISIS đúng về xu hướng.</div>
+    </div>
+    <div class="right-col">
+      <div class="perf-title">Kết quả sau 1 năm<br><small style="font-weight:400;color:#64748b">(đến 2012-05-25)</small></div>
+      <div class="perf-row">
+        <span class="pl">Multi-factor</span>
+        <span class="pv" style="color:#16a34a">+8.5%</span>
+      </div>
+      <div class="perf-row">
+        <span class="pl">Buy &amp; Hold</span>
+        <span class="pv" style="color:#16a34a">+6.8%</span>
+      </div>
+      <div class="perf-row">
+        <span class="pl">VN-Index</span>
+        <span class="pv" style="color:#dc2626">-2.9%</span>
+      </div>
+      <div class="alpha-box" style="background:#f0fdf4">
+        <span style="font-size:11px;color:#64748b">MF vs B&H</span>
+        <span style="font-size:20px;font-weight:800;color:#16a34a">+1.7%</span>
+      </div>
+      <div class="verdict">✅ Đúng, bảo toàn tốt</div>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-top">
+    <div class="left">
+      <span class="date-badge">🔴 CRISIS</span>
+      <span class="date">2011-12-20 → 2012-01-12</span>
+      <span class="dur">3 kỳ (~1 tháng)</span>
+    </div>
+    <span class="type-badge" style="background:#8b5cf615;color:#8b5cf6;border:1px solid #8b5cf640">Đáy thị trường cuối 2011</span>
+  </div>
+  
+  <div class="card-body">
+    <div class="left-col">
+      <div class="vnindex-note">VN-Index: <strong>~191đ</strong> &nbsp;|&nbsp; Composite score: <strong>0.349</strong></div>
+      <div class="fr"><span class="fl">P3M</span><div class="bw"><div class="bf" style="width:41%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:10px;font-weight:700;width:30px">41%</span></div><div class="fr"><span class="fl">MA200</span><span style="color:#94a3b8;font-size:10px">N/A</span></div><div class="fr"><span class="fl">RSI</span><div class="bw"><div class="bf" style="width:29%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:10px;font-weight:700;width:30px">29%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:27%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:10px;font-weight:700;width:30px">27%</span></div>
+      <div class="trigger-box">
+        <strong>🎯 Lý do kích hoạt:</strong><br>P3M=42%, RSI=29%, MACD=27%. RSI và MACD đều yếu. Composite score trong bottom 10% phân phối. VN-Index ~350đ thực tế, gần đáy của giai đoạn 2010-2012.
+      </div>
+      <div class="paradox-box"><strong>⚡ Nghịch lý:</strong><br>1 năm sau MF +7.6% vs BH +8.9%. Gần như ngang nhau.</div>
+      <div class="lesson-box"><strong>📚 Bài học:</strong> CRISIS tại vùng đáy 2011 — thị trường sideway sau đó. Tín hiệu đúng về môi trường khó khăn.</div>
+    </div>
+    <div class="right-col">
+      <div class="perf-title">Kết quả sau 1 năm<br><small style="font-weight:400;color:#64748b">(đến 2012-10-19)</small></div>
+      <div class="perf-row">
+        <span class="pl">Multi-factor</span>
+        <span class="pv" style="color:#16a34a">+7.6%</span>
+      </div>
+      <div class="perf-row">
+        <span class="pl">Buy &amp; Hold</span>
+        <span class="pv" style="color:#16a34a">+8.9%</span>
+      </div>
+      <div class="perf-row">
+        <span class="pl">VN-Index</span>
+        <span class="pv" style="color:#dc2626">-0.7%</span>
+      </div>
+      <div class="alpha-box" style="background:#fef2f2">
+        <span style="font-size:11px;color:#64748b">MF vs B&H</span>
+        <span style="font-size:20px;font-weight:800;color:#dc2626">-1.3%</span>
+      </div>
+      <div class="verdict">✅ Hợp lý</div>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-top">
+    <div class="left">
+      <span class="date-badge">🔴 CRISIS</span>
+      <span class="date">2014-12-04 → 2014-12-26</span>
+      <span class="dur">3 kỳ (~1 tháng)</span>
+    </div>
+    <span class="type-badge" style="background:#8b5cf615;color:#8b5cf6;border:1px solid #8b5cf640">Expanding percentile effect — điều chỉnh cuối năm</span>
+  </div>
+  
+  <div class="card-body">
+    <div class="left-col">
+      <div class="vnindex-note">VN-Index: <strong>~176đ</strong> &nbsp;|&nbsp; Composite score: <strong>0.488</strong></div>
+      <div class="fr"><span class="fl">P3M</span><div class="bw"><div class="bf" style="width:46%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:10px;font-weight:700;width:30px">46%</span></div><div class="fr"><span class="fl">MA200</span><span style="color:#94a3b8;font-size:10px">N/A</span></div><div class="fr"><span class="fl">RSI</span><div class="bw"><div class="bf" style="width:45%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:10px;font-weight:700;width:30px">45%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:58%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:10px;font-weight:700;width:30px">58%</span></div>
+      <div class="trigger-box">
+        <strong>🎯 Lý do kích hoạt:</strong><br>Score = 0.49 với P3M=47%, P1M=51%, RSI=45%, MACD=59%. Tất cả yếu tố đều trung bình. CRISIS do composite expanding percentile rơi vào bottom 10% — phân phối đã bị kéo lên bởi các giai đoạn BULL 2014.
+      </div>
+      <div class="paradox-box"><strong>⚡ Nghịch lý:</strong><br>1 năm sau MF -1.6% vs BH +1.7%. Cả hai đều gần như flat. VN-Index thực tế điều chỉnh nhẹ cuối 2014.</div>
+      <div class="lesson-box"><strong>📚 Bài học:</strong> Sự kiện giàn khoan HD-981 và áp lực tỷ giá cuối 2014. CRISIS đúng về tâm lý thị trường dù chỉ báo kỹ thuật trung bình.</div>
+    </div>
+    <div class="right-col">
+      <div class="perf-title">Kết quả sau 1 năm<br><small style="font-weight:400;color:#64748b">(đến 2015-10-09)</small></div>
+      <div class="perf-row">
+        <span class="pl">Multi-factor</span>
+        <span class="pv" style="color:#dc2626">-1.6%</span>
+      </div>
+      <div class="perf-row">
+        <span class="pl">Buy &amp; Hold</span>
+        <span class="pv" style="color:#16a34a">+1.7%</span>
+      </div>
+      <div class="perf-row">
+        <span class="pl">VN-Index</span>
+        <span class="pv" style="color:#16a34a">+3.4%</span>
+      </div>
+      <div class="alpha-box" style="background:#fef2f2">
+        <span style="font-size:11px;color:#64748b">MF vs B&H</span>
+        <span style="font-size:20px;font-weight:800;color:#dc2626">-3.3%</span>
+      </div>
+      <div class="verdict">✅ Đúng, bảo thủ hợp lý</div>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-top">
+    <div class="left">
+      <span class="date-badge">🔴 CRISIS</span>
+      <span class="date">2018-12-26 → 2019-01-09</span>
+      <span class="dur">2 kỳ (~1 tháng)</span>
+    </div>
+    <span class="type-badge" style="background:#8b5cf615;color:#8b5cf6;border:1px solid #8b5cf640">Chiến tranh thương mại Mỹ-Trung</span>
+  </div>
+  
+  <div class="card-body">
+    <div class="left-col">
+      <div class="vnindex-note">VN-Index: <strong>~152đ</strong> &nbsp;|&nbsp; Composite score: <strong>0.504</strong></div>
+      <div class="fr"><span class="fl">P3M</span><div class="bw"><div class="bf" style="width:54%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:10px;font-weight:700;width:30px">54%</span></div><div class="fr"><span class="fl">MA200</span><div class="bw"><div class="bf" style="width:71%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:10px;font-weight:700;width:30px">71%</span></div><div class="fr"><span class="fl">RSI</span><div class="bw"><div class="bf" style="width:44%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:10px;font-weight:700;width:30px">44%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:36%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:10px;font-weight:700;width:30px">36%</span></div>
+      <div class="trigger-box">
+        <strong>🎯 Lý do kích hoạt:</strong><br>P3M=54%, MA200=71%, RSI=44%, MACD=37%. Tất cả yếu tố đều trung bình. Composite expanding percentile rơi vào bottom 10% sau giai đoạn bull run 2017-2018 kéo phân phối lên cao.
+      </div>
+      <div class="paradox-box"><strong>⚡ Nghịch lý:</strong><br>1 năm sau MF +8.7% vs BH +12.2%. BH nhỉnh hơn. Thị trường phục hồi tốt hơn dự đoán.</div>
+      <div class="lesson-box"><strong>📚 Bài học:</strong> Sóng bán tháo cuối 2018 theo S&P 500. CRISIS hơi quá bảo thủ, nhưng rủi ro thực sự tại thời điểm đó rất cao.</div>
+    </div>
+    <div class="right-col">
+      <div class="perf-title">Kết quả sau 1 năm<br><small style="font-weight:400;color:#64748b">(đến 2019-10-30)</small></div>
+      <div class="perf-row">
+        <span class="pl">Multi-factor</span>
+        <span class="pv" style="color:#16a34a">+8.7%</span>
+      </div>
+      <div class="perf-row">
+        <span class="pl">Buy &amp; Hold</span>
+        <span class="pv" style="color:#16a34a">+12.2%</span>
+      </div>
+      <div class="perf-row">
+        <span class="pl">VN-Index</span>
+        <span class="pv" style="color:#dc2626">-1.0%</span>
+      </div>
+      <div class="alpha-box" style="background:#fef2f2">
+        <span style="font-size:11px;color:#64748b">MF vs B&H</span>
+        <span style="font-size:20px;font-weight:800;color:#dc2626">-3.5%</span>
+      </div>
+      <div class="verdict">⚠️ Hơi bảo thủ</div>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-top">
+    <div class="left">
+      <span class="date-badge">🔴 CRISIS</span>
+      <span class="date">2020-02-27 → 2020-04-01</span>
+      <span class="dur">4 kỳ (~2 tháng)</span>
+    </div>
+    <span class="type-badge" style="background:#dc262615;color:#dc2626;border:1px solid #dc262640">COVID-19 — thảm họa y tế toàn cầu</span>
+  </div>
+  
+  <div class="card-body">
+    <div class="left-col">
+      <div class="vnindex-note">VN-Index: <strong>~147đ</strong> &nbsp;|&nbsp; Composite score: <strong>0.458</strong></div>
+      <div class="fr"><span class="fl">P3M</span><div class="bw"><div class="bf" style="width:53%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:10px;font-weight:700;width:30px">53%</span></div><div class="fr"><span class="fl">MA200</span><div class="bw"><div class="bf" style="width:72%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:10px;font-weight:700;width:30px">72%</span></div><div class="fr"><span class="fl">RSI</span><div class="bw"><div class="bf" style="width:22%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:10px;font-weight:700;width:30px">22%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:29%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:10px;font-weight:700;width:30px">29%</span></div>
+      <div class="trigger-box">
+        <strong>🎯 Lý do kích hoạt:</strong><br>RSI expanding rank = 22% (cực thấp) kéo composite score vào bottom 10%. P3M=53% (trung bình) nhưng RSI sụp đổ rất nhanh trong vài tuần. MACD=30% cũng yếu. Đây là điểm rơi nhanh nhất trong lịch sử.
+      </div>
+      <div class="paradox-box"><strong>⚡ Nghịch lý:</strong><br>1 năm sau MF +31.4% vs BH +20.3%. Hệ thống outperform +11.1% — đúng về timing CRISIS.</div>
+      <div class="lesson-box"><strong>📚 Bài học:</strong> RSI là yếu tố nhạy cảm nhất với shock bất ngờ. Khi RSI rơi thẳng về 22%, hệ thống thoát kịp trước đợt giảm sâu nhất.</div>
+    </div>
+    <div class="right-col">
+      <div class="perf-title">Kết quả sau 1 năm<br><small style="font-weight:400;color:#64748b">(đến 2020-12-21)</small></div>
+      <div class="perf-row">
+        <span class="pl">Multi-factor</span>
+        <span class="pv" style="color:#16a34a">+31.4%</span>
+      </div>
+      <div class="perf-row">
+        <span class="pl">Buy &amp; Hold</span>
+        <span class="pv" style="color:#16a34a">+20.3%</span>
+      </div>
+      <div class="perf-row">
+        <span class="pl">VN-Index</span>
+        <span class="pv" style="color:#dc2626">-3.9%</span>
+      </div>
+      <div class="alpha-box" style="background:#f0fdf4">
+        <span style="font-size:11px;color:#64748b">MF vs B&H</span>
+        <span style="font-size:20px;font-weight:800;color:#16a34a">+11.1%</span>
+      </div>
+      <div class="verdict">✅ Đúng hoàn toàn</div>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-top">
+    <div class="left">
+      <span class="date-badge">🔴 CRISIS</span>
+      <span class="date">2022-04-19 → 2022-05-25</span>
+      <span class="dur">4 kỳ (~2 tháng)</span>
+    </div>
+    <span class="type-badge" style="background:#dc262615;color:#dc2626;border:1px solid #dc262640">Expanding percentile effect — vụ FLC/Tân Hoàng Minh</span>
+  </div>
+  
+  <div class="card-body">
+    <div class="left-col">
+      <div class="vnindex-note">VN-Index: <strong>~1460đ thực tế</strong> &nbsp;|&nbsp; Composite score: <strong>0.62</strong></div>
+      <div class="fr"><span class="fl">P3M</span><div class="bw"><div class="bf" style="width:60%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:10px;font-weight:700;width:30px">60%</span></div><div class="fr"><span class="fl">MA200</span><div class="bw"><div class="bf" style="width:79%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:10px;font-weight:700;width:30px">79%</span></div><div class="fr"><span class="fl">RSI</span><div class="bw"><div class="bf" style="width:50%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:10px;font-weight:700;width:30px">50%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:71%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:10px;font-weight:700;width:30px">71%</span></div>
+      <div class="trigger-box">
+        <strong>🎯 Lý do kích hoạt:</strong><br>Score tuyệt đối = 0.62 (trung bình). Nhưng expanding percentile rơi vào bottom 10% vì phân phối 2020-2021 cực kỳ cao. KHÔNG có yếu tố nào thực sự thấp: P3M=61%, RSI=50%, MACD=71%. Tín hiệu từ phân phối lịch sử, không phải từ chỉ báo tuyệt đối.
+      </div>
+      <div class="paradox-box"><strong>⚡ Nghịch lý:</strong><br>1 năm sau MF -5.3% vs BH -24.7%. Hệ thống outperform +19.4% — mặc dù score tuyệt đối "bình thường".</div>
+      <div class="lesson-box"><strong>📚 Bài học:</strong> Expanding percentile nhận ra rằng "bình thường" sau bull 2020-2021 đã là tín hiệu suy yếu. Đây là thế mạnh lớn nhất của hệ thống.</div>
+    </div>
+    <div class="right-col">
+      <div class="perf-title">Kết quả sau 1 năm<br><small style="font-weight:400;color:#64748b">(đến 2023-02-17)</small></div>
+      <div class="perf-row">
+        <span class="pl">Multi-factor</span>
+        <span class="pv" style="color:#dc2626">-5.3%</span>
+      </div>
+      <div class="perf-row">
+        <span class="pl">Buy &amp; Hold</span>
+        <span class="pv" style="color:#dc2626">-24.7%</span>
+      </div>
+      <div class="perf-row">
+        <span class="pl">VN-Index</span>
+        <span class="pv" style="color:#16a34a">+19.2%</span>
+      </div>
+      <div class="alpha-box" style="background:#f0fdf4">
+        <span style="font-size:11px;color:#64748b">MF vs B&H</span>
+        <span style="font-size:20px;font-weight:800;color:#16a34a">+19.4%</span>
+      </div>
+      <div class="verdict">✅ Đúng, cơ chế expanding percentile hoạt động xuất sắc</div>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-top">
+    <div class="left">
+      <span class="date-badge">🔴 CRISIS</span>
+      <span class="date">2022-06-16 → 2022-07-08</span>
+      <span class="dur">3 kỳ (~1 tháng)</span>
+    </div>
+    <span class="type-badge" style="background:#dc262615;color:#dc2626;border:1px solid #dc262640">Thị trường trái phiếu sụp đổ</span>
+  </div>
+  
+  <div class="card-body">
+    <div class="left-col">
+      <div class="vnindex-note">VN-Index: <strong>~1200đ thực tế</strong> &nbsp;|&nbsp; Composite score: <strong>0.728</strong></div>
+      <div class="fr"><span class="fl">P3M</span><div class="bw"><div class="bf" style="width:65%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:10px;font-weight:700;width:30px">65%</span></div><div class="fr"><span class="fl">MA200</span><div class="bw"><div class="bf" style="width:91%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:10px;font-weight:700;width:30px">91%</span></div><div class="fr"><span class="fl">RSI</span><div class="bw"><div class="bf" style="width:70%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:10px;font-weight:700;width:30px">70%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:76%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:10px;font-weight:700;width:30px">76%</span></div>
+      <div class="trigger-box">
+        <strong>🎯 Lý do kích hoạt:</strong><br>Score tuyệt đối = 0.73 (khá cao!). MA200=91%, MACD=76%. Nhưng expanding percentile vẫn bottom 10%. Nghịch lý: yếu tố kỹ thuật vẫn tốt trên paper, nhưng thị trường đang trong trend giảm mạnh.
+      </div>
+      <div class="paradox-box"><strong>⚡ Nghịch lý:</strong><br>1 năm sau MF -4.3% vs BH -14.9%. Outperform +10.6%. Hệ thống đúng dù nhìn từ ngoài có vẻ contradiction.</div>
+      <div class="lesson-box"><strong>📚 Bài học:</strong> Giai đoạn này: MA200 cao vì giá đang ở mức lịch sử cao nhưng đang giảm. Expanding percentile của score bắt được điều đó.</div>
+    </div>
+    <div class="right-col">
+      <div class="perf-title">Kết quả sau 1 năm<br><small style="font-weight:400;color:#64748b">(đến 2023-04-14)</small></div>
+      <div class="perf-row">
+        <span class="pl">Multi-factor</span>
+        <span class="pv" style="color:#dc2626">-4.3%</span>
+      </div>
+      <div class="perf-row">
+        <span class="pl">Buy &amp; Hold</span>
+        <span class="pv" style="color:#dc2626">-14.9%</span>
+      </div>
+      <div class="perf-row">
+        <span class="pl">VN-Index</span>
+        <span class="pv" style="color:#16a34a">+20.4%</span>
+      </div>
+      <div class="alpha-box" style="background:#f0fdf4">
+        <span style="font-size:11px;color:#64748b">MF vs B&H</span>
+        <span style="font-size:20px;font-weight:800;color:#16a34a">+10.6%</span>
+      </div>
+      <div class="verdict">✅ Đúng</div>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-top">
+    <div class="left">
+      <span class="date-badge">🔴 CRISIS</span>
+      <span class="date">2022-09-28 → 2022-11-23</span>
+      <span class="dur">6 kỳ (~3 tháng)</span>
+    </div>
+    <span class="type-badge" style="background:#7c3aed15;color:#7c3aed;border:1px solid #7c3aed40">Nghịch lý lớn nhất — tất cả yếu tố CỰC CAO nhưng vẫn là CRISIS</span>
+  </div>
+  
+  <div class="card-body">
+    <div class="left-col">
+      <div class="vnindex-note">VN-Index: <strong>~1100đ thực tế</strong> &nbsp;|&nbsp; Composite score: <strong>0.874</strong></div>
+      <div class="fr"><span class="fl">P3M</span><div class="bw"><div class="bf" style="width:83%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:10px;font-weight:700;width:30px">83%</span></div><div class="fr"><span class="fl">MA200</span><div class="bw"><div class="bf" style="width:99%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:10px;font-weight:700;width:30px">99%</span></div><div class="fr"><span class="fl">RSI</span><div class="bw"><div class="bf" style="width:81%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:10px;font-weight:700;width:30px">81%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:89%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:10px;font-weight:700;width:30px">89%</span></div>
+      <div class="trigger-box">
+        <strong>🎯 Lý do kích hoạt:</strong><br>Score tuyệt đối = 0.87 (CAO NHẤT LỊCH SỬ!). P3M=83%, P1M=87%, MA200=99%, RSI=81%, MACD=89%. Tất cả đều ở top 80-99%. Tuy nhiên expanding percentile của score vẫn là CRISIS. Lý do: phân phối 2000-2022 chứa nhiều ngày score cao hơn 0.87 (từ bull 2020-2021). Composite score 0.87 là BOTTOM 10% của phân phối này!
+      </div>
+      <div class="paradox-box"><strong>⚡ Nghịch lý:</strong><br>Đây là nghịch lý lớn nhất. Ý nghĩa thực: các chỉ báo đang ở mức CỰC XẤU so với lịch sử — P3M=83% nghĩa là giá 3 tháng trước đã cao hơn 83% các kỳ trong lịch sử, tức hiện tại đang GIẢM mạnh so với đỉnh. MA200=99% nghĩa là đang ở mức oversold cực đoan so với MA200.</div>
+      <div class="lesson-box"><strong>📚 Bài học:</strong> 1 năm sau: MF +11.0% vs BH +5.6%. Outperform. Nhưng đây là trường hợp cần hiểu cẩn thận: các yếu tố "cao" không nghĩa là thị trường tốt — mà có thể là thị trường đang rơi và đang ở mức oversold cực đoan.</div>
+    </div>
+    <div class="right-col">
+      <div class="perf-title">Kết quả sau 1 năm<br><small style="font-weight:400;color:#64748b">(đến 2023-07-28)</small></div>
+      <div class="perf-row">
+        <span class="pl">Multi-factor</span>
+        <span class="pv" style="color:#16a34a">+11.0%</span>
+      </div>
+      <div class="perf-row">
+        <span class="pl">Buy &amp; Hold</span>
+        <span class="pv" style="color:#16a34a">+5.6%</span>
+      </div>
+      <div class="perf-row">
+        <span class="pl">VN-Index</span>
+        <span class="pv" style="color:#16a34a">+1.7%</span>
+      </div>
+      <div class="alpha-box" style="background:#f0fdf4">
+        <span style="font-size:11px;color:#64748b">MF vs B&H</span>
+        <span style="font-size:20px;font-weight:800;color:#16a34a">+5.4%</span>
+      </div>
+      <div class="verdict">✅ Đúng, nhưng cần hiểu đúng ý nghĩa của expanding percentile</div>
+    </div>
+  </div>
+</div>
+</div>
+</body></html>

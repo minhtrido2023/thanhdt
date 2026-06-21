@@ -1,0 +1,37 @@
+# ============================================================================
+# WorkingClaude server cron — installed 2026-06-16 (mirrors Windows Task Scheduler).
+# TIMES ARE IN UTC (server clock). Source schedule is ICT (UTC+7) -> subtract 7h.
+# dow: 0=Sun .. 6=Sat. Wrappers self-log to data/*.log; this line's stray output -> cron_dispatch.log
+# ============================================================================
+MAILTO=""
+SHELL=/bin/bash
+CR=/home/trido/thanhdt/WorkingClaude/server_cron
+LOG=/home/trido/thanhdt/WorkingClaude/data/cron_dispatch.log
+
+# ---- DAILY (every day) ----
+55 7  * * *   bash $CR/paper_trade_run.sh        >> $LOG 2>&1   # PaperTradeBA      14:55 ICT
+15 8  * * *   bash $CR/bull_div_boost_run.sh     >> $LOG 2>&1   # BullDvgBoost      15:15 ICT
+20 8  * * *   bash $CR/sbv_macro_run.sh          >> $LOG 2>&1   # SBVMacroOverlay   15:20 ICT
+30 8  * * *   bash $CR/papertrade_daily.sh       >> $LOG 2>&1   # PaperTrade3Sys    15:30 ICT
+30 8  * * *   bash $CR/layer3_v4_shadow_run.sh   >> $LOG 2>&1   # Layer3v4Shadow    15:30 ICT
+30 8  * * *   bash $CR/ngu_hanh_shadow_run.sh    >> $LOG 2>&1   # NguHanhShadow     15:30 ICT
+45 10 * * *   bash $CR/pt_8l_daily.sh            >> $LOG 2>&1   # 8L_Daily_Alert    17:45 ICT
+
+# ---- WEEKDAYS (Mon-Fri) ----
+0 11 * * 1-5  bash $CR/telegram_run_daily.sh     >> $LOG 2>&1   # BA Telegram 18:00 ICT
+
+# ---- WEEKLY ----
+0 9  * * 0    bash $CR/papertrade_weekly.sh      >> $LOG 2>&1   # PaperTradeWeekly       Sun 16:00 ICT
+30 8 * * 5    bash $CR/paper_trade_weekly_run.sh >> $LOG 2>&1   # PaperTradeWeeklyReport Fri 15:30 ICT
+
+# ---- ONE-OFF (fires that calendar day; remove after it runs) ----
+0 2  29 6 *   bash $CR/dt4_decision_review.sh    >> $LOG 2>&1   # DT4DecisionReview  2026-06-29 09:00 ICT
+0 9  30 6 *   bash $CR/papertrade_milestone.sh   >> $LOG 2>&1   # MilestoneMid       2026-06-30 16:00 ICT
+30 9 30 6 *   bash $CR/paper_trade_review_run.sh >> $LOG 2>&1   # Review_0630        2026-06-30 16:30 ICT
+0 9  31 8 *   bash $CR/papertrade_milestone.sh   >> $LOG 2>&1   # MilestoneFinal     2026-08-31 16:00 ICT
+30 8 19 5 *   bash $CR/bull_div_boost_report_run.sh >> $LOG 2>&1 # BullDvgBoostReport 2027-05-19 15:30 ICT
+35 8 19 5 *   bash $CR/sbv_macro_report_run.sh   >> $LOG 2>&1   # SBVMacroReport     2027-05-19 15:35 ICT
+
+# ---- NOT scheduled (one-offs already PAST, or GUI-only): ----
+#   dt4_foundation_decision.sh (2026-05-29 past), remind_bc.sh (2026-06-06 past),
+#   paper_trade_reminder.ps1 (Windows MessageBox popup — no headless equivalent).

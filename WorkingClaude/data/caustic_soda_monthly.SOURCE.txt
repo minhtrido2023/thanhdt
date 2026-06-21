@@ -1,0 +1,24 @@
+caustic_soda_monthly.csv — DATA PROVENANCE / WARNING
+====================================================
+
+STATUS: SYNTHETIC ESTIMATE — NOT from a verified market-data provider. LOW CONFIDENCE.
+
+- The World Bank "Pink Sheet" (CMO Historical Monthly) does NOT track caustic soda
+  (verified against CMO file dated 2026-06-02: 71 commodities, no caustic soda).
+- This series was constructed by piecewise-linear interpolation between estimated anchor
+  points (a ~700 USD/t basis + a qualitative "China chlor-alkali glut" narrative), NOT
+  measured prices. Statistical fingerprint: ~35% of points lie exactly on straight lines and
+  ~53% are round/third values — the signature of interpolation, not a real price series.
+- Production flagged it as unreliable (2026-06-12) — correctly.
+
+IMPACT (contained): only ticker CSV maps to caustic_soda (cyclical_structural.COMMODITY_MAP).
+CSV's cyclical pctile/verdict derived from this file should be treated as LOW CONFIDENCE.
+
+TO FIX PROPERLY: source a real caustic-soda (NaOH) monthly price series from a provider that
+actually tracks it — e.g. Sunsirs (China spot), Business Analytiq, Intratec, TradingEconomics
+(China caustic soda). Replace this file (keep format: month,price ; month=YYYY-MM) and remove
+this warning. The other 5 commodities (iron_ore, urea, dap, rubber, sugar) + brent are sourced
+from the World Bank Pink Sheet via rebuild_commodity_wb.py and ARE authoritative.
+
+Decision (user, 2026-06-12): KEEP the current synthetic series for now but flag it clearly
+(this file + the [DATA=SYNTHETIC ESTIMATE] tag in cyclical_structural.py output).

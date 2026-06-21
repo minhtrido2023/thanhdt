@@ -1,0 +1,21 @@
+========================================================================
+BullDvg Boost — Paper-Trade Report
+========================================================================
+Deploy date: 2026-05-19
+Report date: 2026-05-19  (0 months elapsed)
+Tracking window: 2026-05-15 -> 2026-05-15
+Total sessions tracked: 1
+Boost-active sessions: 0  (0.0%)
+Filtered BullDvg fires: 0
+
+Cumulative alpha (lift=0.25, additive on VNI ret during boost window):
+  +0.000%  (paper-trade estimate)
+
+Fire log:
+  (none — no filtered BullDvg fires during tracking)
+
+Report incomplete: only 0 months elapsed; 
+  wait until 2027-05-19 for final verdict.
+
+Decision audit log: bull_div_boost_log.csv
+Daily NAV tracker:  bull_div_boost_tracker.csv

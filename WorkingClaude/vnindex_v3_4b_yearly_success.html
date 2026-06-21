@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Tam Quan v3.4b — Success rate theo năm</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+* { box-sizing:border-box;margin:0;padding:0 }
+body { background:#0a0f1e;color:#e2e8f0;font-family:'Segoe UI',sans-serif;padding:20px }
+h1 { font-size:20px;color:#f8fafc;margin-bottom:4px }
+h2 { font-size:15px;color:#cbd5e1;margin:20px 0 10px }
+.subtitle { color:#64748b;font-size:13px;margin-bottom:16px }
+.staging-tag { background:#7c3aed;color:#fff;padding:2px 10px;border-radius:6px;font-size:11px;font-weight:700;margin-left:8px }
+.panel { background:#0f172a;border:1px solid #334155;border-radius:8px;padding:14px;margin-bottom:16px }
+.panel .sub { font-size:11px;color:#64748b;margin-bottom:10px }
+table { width:100%;border-collapse:collapse;font-size:12px }
+thead th { background:#0f172a;color:#64748b;font-size:10px;font-weight:700;
+            text-transform:uppercase;letter-spacing:.5px;padding:8px 6px;
+            border-bottom:2px solid #334155;text-align:left }
+.table-wrap { overflow-x:auto;border-radius:8px;border:1px solid #334155;background:#0f172a }
+.legend { background:#1e293b;border:1px solid #334155;border-radius:8px;padding:10px 14px;
+           margin-bottom:14px;font-size:12px;color:#94a3b8 }
+.legend b { color:#e2e8f0 }
+.legend code { background:#0f172a;color:#86efac;padding:1px 6px;border-radius:4px;font-size:11px }
+canvas { background:#0a0f1e;border-radius:6px }
+</style>
+</head>
+<body>
+<h1>📈 Tam Quan v3.4b — Success rate theo năm/kỷ nguyên<span class="staging-tag">STAGING NEXT</span></h1>
+<p class="subtitle">264 transitions từ 2001 đến 2026 · grading T+20 forward return vs base rate VNINDEX cùng năm</p>
+
+<div class="legend">
+  <b>Cách đọc</b>:<br>
+  • <b>UP win%</b> = % upgrade-transitions có r20 &gt; 0 (system nói lên, market thật sự lên).<br>
+  • <b>DOWN win%</b> = % downgrade-transitions có r20 &lt; 0 (system nói xuống, market thật sự xuống).<br>
+  • Trong dấu ngoặc <code>(X%)</code> là <b>base rate</b> năm đó (% tuần dương / âm random của VNINDEX).<br>
+  • <b>Edge</b> = system win% − base rate. Edge dương = system tốt hơn random. Edge âm = system tệ hơn random.<br>
+  • <b>NET edge</b> = weighted avg edge (theo số transitions up vs down). Mục tiêu: edge dương ổn định.<br>
+</div>
+
+<h2>📊 Tổng hợp theo kỷ nguyên</h2>
+<div class="table-wrap">
+<table>
+<thead><tr>
+  <th>Era</th><th style="text-align:right">n trans</th>
+  <th style="text-align:right">UP win%</th><th style="text-align:right">UP edge</th>
+  <th style="text-align:right">DOWN win%</th><th style="text-align:right">DOWN edge</th>
+  <th style="text-align:right">NET edge</th>
+</tr></thead>
+<tbody><tr style="border-bottom:1px solid #334155;background:#1e293b">
+      <td style="padding:8px 10px;color:#e2e8f0;font-weight:700">Pre-modern 2000-2007</td>
+      <td style="padding:8px 10px;text-align:right;color:#cbd5e1;font-weight:600">57</td>
+      <td style="padding:8px 10px;text-align:right;color:#cbd5e1">56%</td>
+      <td style="padding:8px 10px;text-align:right;color:#86efac;font-weight:700">+6.2pp</td>
+      <td style="padding:8px 10px;text-align:right;color:#cbd5e1">63%</td>
+      <td style="padding:8px 10px;text-align:right;color:#86efac;font-weight:700">+10.3pp</td>
+      <td style="padding:8px 10px;text-align:right;background:#86efac;color:#0a0f1e;font-weight:800">+8.4pp</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155;background:#1e293b">
+      <td style="padding:8px 10px;color:#e2e8f0;font-weight:700">Post-GFC 2008-2013</td>
+      <td style="padding:8px 10px;text-align:right;color:#cbd5e1;font-weight:600">58</td>
+      <td style="padding:8px 10px;text-align:right;color:#cbd5e1">45%</td>
+      <td style="padding:8px 10px;text-align:right;color:#86efac;font-weight:700">+1.6pp</td>
+      <td style="padding:8px 10px;text-align:right;color:#cbd5e1">52%</td>
+      <td style="padding:8px 10px;text-align:right;color:#fca5a5;font-weight:700">-9.0pp</td>
+      <td style="padding:8px 10px;text-align:right;background:#fbbf24;color:#0a0f1e;font-weight:800">-3.7pp</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155;background:#1e293b">
+      <td style="padding:8px 10px;color:#e2e8f0;font-weight:700">Modern 2014-2019</td>
+      <td style="padding:8px 10px;text-align:right;color:#cbd5e1;font-weight:600">56</td>
+      <td style="padding:8px 10px;text-align:right;color:#cbd5e1">66%</td>
+      <td style="padding:8px 10px;text-align:right;color:#86efac;font-weight:700">+9.3pp</td>
+      <td style="padding:8px 10px;text-align:right;color:#cbd5e1">22%</td>
+      <td style="padding:8px 10px;text-align:right;color:#fca5a5;font-weight:700">-22.6pp</td>
+      <td style="padding:8px 10px;text-align:right;background:#fca5a5;color:#0a0f1e;font-weight:800">-6.1pp</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155;background:#1e293b">
+      <td style="padding:8px 10px;color:#e2e8f0;font-weight:700">COVID+ 2020-2023</td>
+      <td style="padding:8px 10px;text-align:right;color:#cbd5e1;font-weight:600">61</td>
+      <td style="padding:8px 10px;text-align:right;color:#cbd5e1">79%</td>
+      <td style="padding:8px 10px;text-align:right;color:#86efac;font-weight:700">+15.2pp</td>
+      <td style="padding:8px 10px;text-align:right;color:#cbd5e1">26%</td>
+      <td style="padding:8px 10px;text-align:right;color:#fca5a5;font-weight:700">-8.8pp</td>
+      <td style="padding:8px 10px;text-align:right;background:#fbbf24;color:#0a0f1e;font-weight:800">+4.6pp</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155;background:#1e293b">
+      <td style="padding:8px 10px;color:#e2e8f0;font-weight:700">Recent 2024-2026</td>
+      <td style="padding:8px 10px;text-align:right;color:#cbd5e1;font-weight:600">32</td>
+      <td style="padding:8px 10px;text-align:right;color:#cbd5e1">88%</td>
+      <td style="padding:8px 10px;text-align:right;color:#86efac;font-weight:700">+18.9pp</td>
+      <td style="padding:8px 10px;text-align:right;color:#cbd5e1">40%</td>
+      <td style="padding:8px 10px;text-align:right;color:#86efac;font-weight:700">+9.6pp</td>
+      <td style="padding:8px 10px;text-align:right;background:#86efac;color:#0a0f1e;font-weight:800">+14.5pp</td>
+    </tr></tbody>
+</table>
+</div>
+
+<h2>📈 Chart: NET edge theo năm</h2>
+<div class="panel">
+  <canvas id="chart_net" height="120"></canvas>
+</div>
+
+<h2>📉 Chart: UP edge vs DOWN edge theo năm</h2>
+<div class="panel">
+  <canvas id="chart_split" height="120"></canvas>
+</div>
+
+<h2>🔍 Chi tiết theo năm</h2>
+<div class="table-wrap">
+<table>
+<thead><tr>
+  <th>Năm</th><th style="text-align:right">n</th><th style="text-align:right">▲</th><th style="text-align:right">▼</th>
+  <th style="text-align:right">UP win</th><th style="text-align:right">(base)</th><th style="text-align:right">UP edge</th><th style="text-align:right">UP mean r20</th>
+  <th style="text-align:right">DN win</th><th style="text-align:right">(base)</th><th style="text-align:right">DN edge</th><th style="text-align:right">DN mean r20</th>
+  <th style="text-align:right">NET edge</th>
+</tr></thead>
+<tbody><tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px;color:#cbd5e1;font-weight:600">2001</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">7</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">3</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">4</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">67%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(54%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-weight:700">+12pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">-6.4%</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">75%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(46%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-weight:700">+29pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">-11.8%</td>
+      <td style="padding:6px 10px;text-align:right;background:#86efac;color:#0a0f1e;font-weight:800">+22.0pp</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px;color:#cbd5e1;font-weight:600">2002</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">8</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">4</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">4</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">50%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(28%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-weight:700">+22pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">+2.1%</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">75%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(72%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-weight:700">+3pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">-1.3%</td>
+      <td style="padding:6px 10px;text-align:right;background:#86efac;color:#0a0f1e;font-weight:800">+12.5pp</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px;color:#cbd5e1;font-weight:600">2003</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">10</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">5</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">5</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">20%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(35%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#fca5a5;font-weight:700">-15pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">+3.2%</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">80%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(65%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-weight:700">+15pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">-1.4%</td>
+      <td style="padding:6px 10px;text-align:right;background:#fbbf24;color:#0a0f1e;font-weight:800">+0.0pp</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px;color:#cbd5e1;font-weight:600">2004</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">6</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">2</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">4</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">50%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(46%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-weight:700">+4pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">+1.9%</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">25%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(54%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#fca5a5;font-weight:700">-29pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">+2.8%</td>
+      <td style="padding:6px 10px;text-align:right;background:#fca5a5;color:#0a0f1e;font-weight:800">-17.9pp</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px;color:#cbd5e1;font-weight:600">2006</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">16</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">9</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">7</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">78%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(71%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-weight:700">+7pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">+11.3%</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">57%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(29%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-weight:700">+28pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">-4.3%</td>
+      <td style="padding:6px 10px;text-align:right;background:#86efac;color:#0a0f1e;font-weight:800">+16.1pp</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px;color:#cbd5e1;font-weight:600">2007</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">10</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">4</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">6</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">50%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(36%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-weight:700">+14pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">+7.0%</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">67%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(64%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-weight:700">+3pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">+3.5%</td>
+      <td style="padding:6px 10px;text-align:right;background:#86efac;color:#0a0f1e;font-weight:800">+7.3pp</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px;color:#cbd5e1;font-weight:600">2008</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">6</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">3</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">3</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">33%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(25%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-weight:700">+8pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">-14.5%</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">100%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(75%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-weight:700">+25pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">-26.2%</td>
+      <td style="padding:6px 10px;text-align:right;background:#86efac;color:#0a0f1e;font-weight:800">+16.7pp</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px;color:#cbd5e1;font-weight:600">2009</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">4</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">3</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">1</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">67%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(64%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-weight:700">+3pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">+5.1%</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">100%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(36%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-weight:700">+64pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">-4.6%</td>
+      <td style="padding:6px 10px;text-align:right;background:#86efac;color:#0a0f1e;font-weight:800">+18.1pp</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px;color:#cbd5e1;font-weight:600">2010</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">19</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">9</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">10</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">33%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(47%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#fca5a5;font-weight:700">-14pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">+0.6%</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">40%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(53%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#fca5a5;font-weight:700">-13pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">+1.2%</td>
+      <td style="padding:6px 10px;text-align:right;background:#fca5a5;color:#0a0f1e;font-weight:800">-13.3pp</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px;color:#cbd5e1;font-weight:600">2011</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">19</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">8</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">11</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">12%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(26%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#fca5a5;font-weight:700">-14pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">-2.6%</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">64%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(74%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#fca5a5;font-weight:700">-10pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">+0.5%</td>
+      <td style="padding:6px 10px;text-align:right;background:#fca5a5;color:#0a0f1e;font-weight:800">-11.7pp</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px;color:#cbd5e1;font-weight:600">2012</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">6</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">4</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">2</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">100%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(56%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-weight:700">+44pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">+7.5%</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">0%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(44%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#fca5a5;font-weight:700">-44pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">+3.0%</td>
+      <td style="padding:6px 10px;text-align:right;background:#86efac;color:#0a0f1e;font-weight:800">+14.5pp</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px;color:#cbd5e1;font-weight:600">2013</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">4</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">2</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">2</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">100%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(63%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-weight:700">+37pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">+3.2%</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">0%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(37%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#fca5a5;font-weight:700">-37pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">+3.1%</td>
+      <td style="padding:6px 10px;text-align:right;background:#fbbf24;color:#0a0f1e;font-weight:800">+0.0pp</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px;color:#cbd5e1;font-weight:600">2014</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">4</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">1</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">3</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">100%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(57%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-weight:700">+43pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">+3.1%</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">33%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(43%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#fca5a5;font-weight:700">-10pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">+1.5%</td>
+      <td style="padding:6px 10px;text-align:right;background:#fbbf24;color:#0a0f1e;font-weight:800">+3.3pp</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px;color:#cbd5e1;font-weight:600">2015</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">12</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">7</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">5</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">57%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(55%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-weight:700">+2pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">-0.4%</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">0%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(45%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#fca5a5;font-weight:700">-45pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">+3.2%</td>
+      <td style="padding:6px 10px;text-align:right;background:#fca5a5;color:#0a0f1e;font-weight:800">-17.5pp</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px;color:#cbd5e1;font-weight:600">2016</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">6</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">3</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">3</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">100%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(69%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-weight:700">+31pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">+4.6%</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">0%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(31%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#fca5a5;font-weight:700">-31pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">+4.6%</td>
+      <td style="padding:6px 10px;text-align:right;background:#fbbf24;color:#0a0f1e;font-weight:800">+0.0pp</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px;color:#cbd5e1;font-weight:600">2017</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">3</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">2</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">1</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">100%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(86%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-weight:700">+14pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">+2.4%</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">0%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(14%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#fca5a5;font-weight:700">-14pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">+13.4%</td>
+      <td style="padding:6px 10px;text-align:right;background:#fbbf24;color:#0a0f1e;font-weight:800">+4.8pp</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px;color:#cbd5e1;font-weight:600">2018</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">16</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">7</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">9</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">57%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(49%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-weight:700">+8pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">-0.6%</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">22%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(51%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#fca5a5;font-weight:700">-29pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">+2.2%</td>
+      <td style="padding:6px 10px;text-align:right;background:#fca5a5;color:#0a0f1e;font-weight:800">-12.7pp</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px;color:#cbd5e1;font-weight:600">2019</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">15</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">9</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">6</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">56%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(52%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-weight:700">+4pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">+1.3%</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">50%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(48%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-weight:700">+2pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">-0.8%</td>
+      <td style="padding:6px 10px;text-align:right;background:#fbbf24;color:#0a0f1e;font-weight:800">+2.9pp</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px;color:#cbd5e1;font-weight:600">2020</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">16</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">10</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">6</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">90%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(66%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-weight:700">+24pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">+5.4%</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">33%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(34%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#fca5a5;font-weight:700">-0pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">-0.8%</td>
+      <td style="padding:6px 10px;text-align:right;background:#86efac;color:#0a0f1e;font-weight:800">+14.7pp</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px;color:#cbd5e1;font-weight:600">2021</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">23</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">11</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">12</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">82%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(72%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-weight:700">+9pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">+3.1%</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">8%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(28%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#fca5a5;font-weight:700">-19pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">+5.5%</td>
+      <td style="padding:6px 10px;text-align:right;background:#fca5a5;color:#0a0f1e;font-weight:800">-5.5pp</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px;color:#cbd5e1;font-weight:600">2022</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">7</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">4</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">3</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">50%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(40%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-weight:700">+10pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">-0.2%</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">67%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(60%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-weight:700">+6pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">-7.9%</td>
+      <td style="padding:6px 10px;text-align:right;background:#86efac;color:#0a0f1e;font-weight:800">+8.6pp</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px;color:#cbd5e1;font-weight:600">2023</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">15</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">9</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">6</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">78%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(63%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-weight:700">+15pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">+0.4%</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">33%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(37%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#fca5a5;font-weight:700">-4pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">+0.5%</td>
+      <td style="padding:6px 10px;text-align:right;background:#86efac;color:#0a0f1e;font-weight:800">+7.5pp</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px;color:#cbd5e1;font-weight:600">2024</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">11</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">6</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">5</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">100%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(55%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-weight:700">+45pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">+1.9%</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">60%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(45%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-weight:700">+15pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">+0.2%</td>
+      <td style="padding:6px 10px;text-align:right;background:#86efac;color:#0a0f1e;font-weight:800">+31.3pp</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px;color:#cbd5e1;font-weight:600">2025</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">19</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">10</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">9</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">90%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(80%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-weight:700">+10pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">+4.4%</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">22%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(20%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-weight:700">+2pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">+4.9%</td>
+      <td style="padding:6px 10px;text-align:right;background:#86efac;color:#0a0f1e;font-weight:800">+6.3pp</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px;color:#cbd5e1;font-weight:600">2026</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">2</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">1</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8">1</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">0%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(49%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#fca5a5;font-weight:700">-49pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">-2.7%</td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">100%</td>
+      <td style="padding:6px 10px;text-align:right;color:#94a3b8;font-size:11px">(51%)</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-weight:700">+49pp</td>
+      <td style="padding:6px 10px;text-align:right;color:#cbd5e1">-8.5%</td>
+      <td style="padding:6px 10px;text-align:right;background:#fbbf24;color:#0a0f1e;font-weight:800">+0.0pp</td>
+    </tr></tbody>
+</table>
+</div>
+
+<script>
+const D = {"years": [2001, 2002, 2003, 2004, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026], "up_edges": [12.362030905077255, 21.610169491525422, -15.222672064777328, 3.5999999999999943, 6.577777777777783, 13.70967741935484, 8.032128514056222, 2.921646746347932, -13.866666666666667, -13.709677419354836, 43.60000000000001, 37.2, 43.31983805668016, 2.3041474654377865, 30.677290836653384, 14.400000000000006, 8.342857142857142, 3.555555555555557, 23.730158730158735, 9.418181818181836, 10.24096385542169, 15.127175368139227, 44.8, 10.08032128514057, -48.57142857142857], "dn_edges": [29.304635761589402, 3.3898305084745743, 15.222672064777328, -28.599999999999994, 28.34285714285714, 2.9569892473118173, 25.301204819277103, 63.745019920318725, -12.800000000000004, -10.153958944281534, -43.60000000000001, -37.2, -9.986504723346833, -45.16129032258065, -30.677290836653384, -14.400000000000006, -28.97777777777778, 2.0, -0.3968253968254061, -19.266666666666676, 6.4257028112449674, -4.016064257028113, 15.200000000000003, 2.141900937081651, 48.57142857142857], "net_edges": [22.043519394512767, 12.499999999999998, 0.0, -17.866666666666664, 16.1, 7.258064516129027, 16.66666666666666, 18.12749003984063, -13.305263157894741, -11.65110356536503, 14.533333333333337, 0.0, 3.3400809716599156, -17.473118279569892, 0.0, 4.800000000000002, -12.650000000000002, 2.9333333333333345, 14.682539682539682, -5.547826086956518, 8.605851979345951, 7.4698795180722914, 31.34545454545454, 6.320016909744241, 0.0], "n_trans": [7, 8, 10, 6, 16, 10, 6, 4, 19, 19, 6, 4, 4, 12, 6, 3, 16, 15, 16, 23, 7, 15, 11, 19, 2], "up_means": [-6.404862766385044, 2.0573909201786282, 3.188658871363912, 1.9061602879851813, 11.265599173802302, 6.993273339549375, -14.475380763825704, 5.0702162573056375, 0.5618550914750251, -2.6272791152709156, 7.5344029042691, 3.1658859407253215, 3.073722297602899, -0.42208811387215595, 4.58101811523938, 2.4450628981962375, -0.6117070540141275, 1.3123635213285312, 5.380680854787654, 3.081286063349554, -0.19798593214414018, 0.43093513268398004, 1.897493474177007, 4.391346480473072, -2.7193264693264663], "dn_means": [-11.768930303736155, -1.2657059738182208, -1.4157945955835016, 2.8227474356816855, -4.28507688574838, 3.4724258177720957, -26.163328187834274, -4.595145451176597, 1.2046584127168802, 0.49305087460497726, 2.967803038686745, 3.1216927125831795, 1.4701033556546172, 3.23830035778375, 4.623990189955726, 13.38922544353094, 2.1783890696494184, -0.7556343216462202, -0.7899679114487523, 5.481228494936539, -7.935745052184984, 0.5299695052259874, 0.17232352370679216, 4.898121933175743, -8.508718516468306], "base_means": [2.1148328141188926, -1.3905682104848984, 0.9625769251038845, 2.0797342946846857, 10.046050667136674, 0.11165501069570752, -6.465725814375246, 5.040017608003408, 0.04640372508139086, -2.1949358486126584, 1.9760735711644706, 1.4454875992914362, 0.7144710633334252, -0.19131139228603494, 1.8541349118239268, 3.5634207373262936, -1.0514869729214882, 0.5629070333775462, 1.8192822132872262, 2.191095812779436, -2.303511497812697, 0.729421251704652, 0.6276736800816499, 3.400690466257435, 0.728152300117329]};
+const baseOpt = {
+  responsive:true, maintainAspectRatio:false,
+  plugins:{ legend:{ labels:{ color:'#cbd5e1', font:{size:11} } } },
+  scales:{
+    x:{ ticks:{ color:'#64748b' }, grid:{color:'#1e293b'} },
+    y:{ ticks:{ color:'#64748b', callback:v=>v+'pp' }, grid:{color:'#1e293b'} }
+  }
+};
+new Chart(document.getElementById('chart_net'), {
+  type:'bar',
+  data:{ labels:D.years, datasets:[{
+    label:'NET edge', data:D.net_edges,
+    backgroundColor: D.net_edges.map(v => v>5?'rgba(34,197,94,0.7)':(v>-5?'rgba(251,191,36,0.6)':'rgba(239,68,68,0.7)')),
+    borderColor: '#0a0f1e', borderWidth:1
+  }]},
+  options: baseOpt
+});
+new Chart(document.getElementById('chart_split'), {
+  type:'bar',
+  data:{ labels:D.years, datasets:[
+    { label:'UP edge',   data:D.up_edges,
+      backgroundColor:'rgba(34,197,94,0.65)', borderColor:'#16a34a', borderWidth:1 },
+    { label:'DOWN edge', data:D.dn_edges,
+      backgroundColor:'rgba(239,68,68,0.65)', borderColor:'#dc2626', borderWidth:1 }
+  ]},
+  options: baseOpt
+});
+</script>
+</body>
+</html>

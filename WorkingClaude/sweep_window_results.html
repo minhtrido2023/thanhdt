@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Sweep MODE_WIN — Tối ưu Smoothing Window</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0f1e;color:#e2e8f0;font-family:'Segoe UI',sans-serif;padding:24px}
+h1{font-size:22px;color:#f8fafc;margin-bottom:6px}
+.sub{color:#64748b;font-size:13px;margin-bottom:20px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.card{background:#0f172a;border:1px solid #1e293b;border-radius:10px;padding:16px}
+canvas{width:100%!important}
+.tbl-wrap{overflow-x:auto;border-radius:10px;border:1px solid #1e293b;margin-bottom:24px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{background:#0f172a;color:#475569;font-size:11px;font-weight:700;text-transform:uppercase;
+          letter-spacing:.5px;padding:9px 10px;position:sticky;top:0;z-index:5;
+          border-bottom:2px solid #1e293b;white-space:nowrap;text-align:right}
+thead th:first-child{text-align:left}
+tr:hover td{background:rgba(96,165,250,0.06)!important}
+.note{background:#1e293b;border:1px solid #334155;border-radius:8px;padding:14px 18px;
+       font-size:13px;line-height:1.7;color:#94a3b8;margin-bottom:20px}
+.note strong{color:#e2e8f0}
+.highlight{color:#fbbf24;font-weight:700}
+</style>
+</head>
+<body>
+<h1>🔬 Sweep MODE_WIN: Tối ưu Smoothing Window cho 5-State System</h1>
+<p class="sub">Sweep window từ 3 → 40 ngày &nbsp;·&nbsp; Giữ nguyên tất cả tham số khác (RAMP=3, SNAP=3%, TC=0.1%)</p>
+
+<div class="note">
+  <strong>Giải thích cột:</strong><br>
+  <strong>1d</strong> = số lần trạng thái tồn tại ≤ 1 ngày (flip ngay hôm sau) &nbsp;·&nbsp;
+  <strong>≤5d / ≤10d</strong> = số lần trạng thái ngắn &nbsp;·&nbsp;
+  <strong>AvgDur</strong> = thời gian giữ trạng thái trung bình &nbsp;·&nbsp;
+  <strong>MinDur</strong> = trạng thái ngắn nhất &nbsp;·&nbsp;
+  <span class="highlight">★ = window cho Sharpe cao nhất</span> &nbsp;·&nbsp;
+  ◄ = window hiện tại (5d)
+</div>
+
+<div class="tbl-wrap">
+<table>
+<thead>
+<tr>
+  <th style="text-align:left">Window</th>
+  <th colspan="4" style="text-align:center;border-left:1px solid #334155">── Full Period ──</th>
+  <th colspan="3" style="text-align:center;border-left:1px solid #334155">── Từ 2016 ──</th>
+  <th colspan="6" style="text-align:center;border-left:1px solid #334155">── Transition Quality ──</th>
+</tr>
+<tr>
+  <th style="text-align:left">Window</th>
+  <th style="border-left:1px solid #334155">CAGR</th><th>Sharpe</th><th>MaxDD</th><th>Calmar</th>
+  <th style="border-left:1px solid #334155">CAGR</th><th>Sharpe</th><th>MaxDD</th>
+  <th style="border-left:1px solid #334155">Trans</th><th>1d</th><th>≤5d</th><th>≤10d</th><th>AvgDur</th><th>MinDur</th>
+</tr>
+</thead>
+<tbody>
+<tr style="background:transparent;border-bottom:1px solid #1e293b">
+      <td style="padding:7px 10px;font-weight:600;color:#f8fafc">3d</td>
+      <td style="padding:7px 10px;text-align:right;color:#60a5fa">15.2%</td>
+      <td style="padding:7px 10px;text-align:right;color:#fbbf24;font-weight:700">0.65</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">-61.4%</td>
+      <td style="padding:7px 10px;text-align:right;color:#a78bfa">0.25</td>
+      <td style="padding:7px 10px;text-align:right;color:#60a5fa;border-left:1px solid #334155">12.9%</td>
+      <td style="padding:7px 10px;text-align:right;color:#4ade80;font-weight:700">1.03</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">-18.7%</td>
+      <td style="padding:7px 10px;text-align:right;color:#94a3b8;border-left:1px solid #334155">364</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">13</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">108</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">189</td>
+      <td style="padding:7px 10px;text-align:right;color:#94a3b8">26d</td>
+      <td style="padding:7px 10px;text-align:right;color:#94a3b8">1d</td>
+    </tr><tr style="background:#1e293b;border-bottom:1px solid #1e293b">
+      <td style="padding:7px 10px;font-weight:600;color:#f8fafc">5d ◄ hiện tại</td>
+      <td style="padding:7px 10px;text-align:right;color:#60a5fa">15.3%</td>
+      <td style="padding:7px 10px;text-align:right;color:#fbbf24;font-weight:700">0.66</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">-61.7%</td>
+      <td style="padding:7px 10px;text-align:right;color:#a78bfa">0.25</td>
+      <td style="padding:7px 10px;text-align:right;color:#60a5fa;border-left:1px solid #334155">13.0%</td>
+      <td style="padding:7px 10px;text-align:right;color:#4ade80;font-weight:700">1.01</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">-19.7%</td>
+      <td style="padding:7px 10px;text-align:right;color:#94a3b8;border-left:1px solid #334155">305</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">25</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">69</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">133</td>
+      <td style="padding:7px 10px;text-align:right;color:#94a3b8">31d</td>
+      <td style="padding:7px 10px;text-align:right;color:#94a3b8">1d</td>
+    </tr><tr style="background:transparent;border-bottom:1px solid #1e293b">
+      <td style="padding:7px 10px;font-weight:600;color:#f8fafc">7d</td>
+      <td style="padding:7px 10px;text-align:right;color:#60a5fa">14.9%</td>
+      <td style="padding:7px 10px;text-align:right;color:#fbbf24;font-weight:700">0.66</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">-61.9%</td>
+      <td style="padding:7px 10px;text-align:right;color:#a78bfa">0.24</td>
+      <td style="padding:7px 10px;text-align:right;color:#60a5fa;border-left:1px solid #334155">12.8%</td>
+      <td style="padding:7px 10px;text-align:right;color:#4ade80;font-weight:700">0.99</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">-20.8%</td>
+      <td style="padding:7px 10px;text-align:right;color:#94a3b8;border-left:1px solid #334155">265</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">13</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">43</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">98</td>
+      <td style="padding:7px 10px;text-align:right;color:#94a3b8">35d</td>
+      <td style="padding:7px 10px;text-align:right;color:#94a3b8">1d</td>
+    </tr><tr style="background:transparent;border-bottom:1px solid #1e293b">
+      <td style="padding:7px 10px;font-weight:600;color:#f8fafc">10d</td>
+      <td style="padding:7px 10px;text-align:right;color:#60a5fa">15.0%</td>
+      <td style="padding:7px 10px;text-align:right;color:#fbbf24;font-weight:700">0.67</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">-62.1%</td>
+      <td style="padding:7px 10px;text-align:right;color:#a78bfa">0.24</td>
+      <td style="padding:7px 10px;text-align:right;color:#60a5fa;border-left:1px solid #334155">13.0%</td>
+      <td style="padding:7px 10px;text-align:right;color:#4ade80;font-weight:700">1.00</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">-21.5%</td>
+      <td style="padding:7px 10px;text-align:right;color:#94a3b8;border-left:1px solid #334155">256</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">29</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">55</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">94</td>
+      <td style="padding:7px 10px;text-align:right;color:#94a3b8">37d</td>
+      <td style="padding:7px 10px;text-align:right;color:#94a3b8">1d</td>
+    </tr><tr style="background:transparent;border-bottom:1px solid #1e293b">
+      <td style="padding:7px 10px;font-weight:600;color:#f8fafc">12d</td>
+      <td style="padding:7px 10px;text-align:right;color:#60a5fa">14.7%</td>
+      <td style="padding:7px 10px;text-align:right;color:#fbbf24;font-weight:700">0.68</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">-62.1%</td>
+      <td style="padding:7px 10px;text-align:right;color:#a78bfa">0.24</td>
+      <td style="padding:7px 10px;text-align:right;color:#60a5fa;border-left:1px solid #334155">13.3%</td>
+      <td style="padding:7px 10px;text-align:right;color:#4ade80;font-weight:700">1.02</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">-21.4%</td>
+      <td style="padding:7px 10px;text-align:right;color:#94a3b8;border-left:1px solid #334155">227</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">20</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">45</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">76</td>
+      <td style="padding:7px 10px;text-align:right;color:#94a3b8">41d</td>
+      <td style="padding:7px 10px;text-align:right;color:#94a3b8">1d</td>
+    </tr><tr style="background:transparent;border-bottom:1px solid #1e293b">
+      <td style="padding:7px 10px;font-weight:600;color:#f8fafc">15d</td>
+      <td style="padding:7px 10px;text-align:right;color:#60a5fa">14.2%</td>
+      <td style="padding:7px 10px;text-align:right;color:#fbbf24;font-weight:700">0.67</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">-62.2%</td>
+      <td style="padding:7px 10px;text-align:right;color:#a78bfa">0.23</td>
+      <td style="padding:7px 10px;text-align:right;color:#60a5fa;border-left:1px solid #334155">13.0%</td>
+      <td style="padding:7px 10px;text-align:right;color:#4ade80;font-weight:700">0.99</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">-23.0%</td>
+      <td style="padding:7px 10px;text-align:right;color:#94a3b8;border-left:1px solid #334155">161</td>
+      <td style="padding:7px 10px;text-align:right;color:#fbbf24">2</td>
+      <td style="padding:7px 10px;text-align:right;color:#fbbf24">15</td>
+      <td style="padding:7px 10px;text-align:right;color:#fbbf24">32</td>
+      <td style="padding:7px 10px;text-align:right;color:#94a3b8">58d</td>
+      <td style="padding:7px 10px;text-align:right;color:#94a3b8">1d</td>
+    </tr><tr style="background:transparent;border-bottom:1px solid #1e293b">
+      <td style="padding:7px 10px;font-weight:600;color:#f8fafc">18d</td>
+      <td style="padding:7px 10px;text-align:right;color:#60a5fa">14.2%</td>
+      <td style="padding:7px 10px;text-align:right;color:#fbbf24;font-weight:700">0.68</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">-62.3%</td>
+      <td style="padding:7px 10px;text-align:right;color:#a78bfa">0.23</td>
+      <td style="padding:7px 10px;text-align:right;color:#60a5fa;border-left:1px solid #334155">13.0%</td>
+      <td style="padding:7px 10px;text-align:right;color:#4ade80;font-weight:700">0.98</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">-24.9%</td>
+      <td style="padding:7px 10px;text-align:right;color:#94a3b8;border-left:1px solid #334155">164</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">9</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">29</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">44</td>
+      <td style="padding:7px 10px;text-align:right;color:#94a3b8">57d</td>
+      <td style="padding:7px 10px;text-align:right;color:#94a3b8">1d</td>
+    </tr><tr style="background:transparent;border-bottom:1px solid #1e293b">
+      <td style="padding:7px 10px;font-weight:600;color:#f8fafc">20d</td>
+      <td style="padding:7px 10px;text-align:right;color:#60a5fa">13.6%</td>
+      <td style="padding:7px 10px;text-align:right;color:#fbbf24;font-weight:700">0.67</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">-62.3%</td>
+      <td style="padding:7px 10px;text-align:right;color:#a78bfa">0.22</td>
+      <td style="padding:7px 10px;text-align:right;color:#60a5fa;border-left:1px solid #334155">12.1%</td>
+      <td style="padding:7px 10px;text-align:right;color:#4ade80;font-weight:700">0.92</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">-30.4%</td>
+      <td style="padding:7px 10px;text-align:right;color:#94a3b8;border-left:1px solid #334155">160</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">12</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">32</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">50</td>
+      <td style="padding:7px 10px;text-align:right;color:#94a3b8">59d</td>
+      <td style="padding:7px 10px;text-align:right;color:#94a3b8">1d</td>
+    </tr><tr style="background:transparent;border-bottom:1px solid #1e293b">
+      <td style="padding:7px 10px;font-weight:600;color:#f8fafc">25d</td>
+      <td style="padding:7px 10px;text-align:right;color:#60a5fa">14.2%</td>
+      <td style="padding:7px 10px;text-align:right;color:#fbbf24;font-weight:700">0.67</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">-62.3%</td>
+      <td style="padding:7px 10px;text-align:right;color:#a78bfa">0.23</td>
+      <td style="padding:7px 10px;text-align:right;color:#60a5fa;border-left:1px solid #334155">12.6%</td>
+      <td style="padding:7px 10px;text-align:right;color:#4ade80;font-weight:700">0.93</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">-26.6%</td>
+      <td style="padding:7px 10px;text-align:right;color:#94a3b8;border-left:1px solid #334155">115</td>
+      <td style="padding:7px 10px;text-align:right;color:#fbbf24">4</td>
+      <td style="padding:7px 10px;text-align:right;color:#fbbf24">16</td>
+      <td style="padding:7px 10px;text-align:right;color:#fbbf24">29</td>
+      <td style="padding:7px 10px;text-align:right;color:#94a3b8">82d</td>
+      <td style="padding:7px 10px;text-align:right;color:#94a3b8">1d</td>
+    </tr><tr style="background:#1a2744;border-bottom:1px solid #1e293b">
+      <td style="padding:7px 10px;font-weight:800;color:#f8fafc">30d ★</td>
+      <td style="padding:7px 10px;text-align:right;color:#60a5fa">14.3%</td>
+      <td style="padding:7px 10px;text-align:right;color:#fbbf24;font-weight:700">0.70</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">-62.3%</td>
+      <td style="padding:7px 10px;text-align:right;color:#a78bfa">0.23</td>
+      <td style="padding:7px 10px;text-align:right;color:#60a5fa;border-left:1px solid #334155">12.8%</td>
+      <td style="padding:7px 10px;text-align:right;color:#4ade80;font-weight:700">0.93</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">-26.4%</td>
+      <td style="padding:7px 10px;text-align:right;color:#94a3b8;border-left:1px solid #334155">108</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">12</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">22</td>
+      <td style="padding:7px 10px;text-align:right;color:#fbbf24">34</td>
+      <td style="padding:7px 10px;text-align:right;color:#94a3b8">87d</td>
+      <td style="padding:7px 10px;text-align:right;color:#94a3b8">1d</td>
+    </tr><tr style="background:transparent;border-bottom:1px solid #1e293b">
+      <td style="padding:7px 10px;font-weight:600;color:#f8fafc">40d</td>
+      <td style="padding:7px 10px;text-align:right;color:#60a5fa">13.4%</td>
+      <td style="padding:7px 10px;text-align:right;color:#fbbf24;font-weight:700">0.58</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">-62.3%</td>
+      <td style="padding:7px 10px;text-align:right;color:#a78bfa">0.21</td>
+      <td style="padding:7px 10px;text-align:right;color:#60a5fa;border-left:1px solid #334155">11.5%</td>
+      <td style="padding:7px 10px;text-align:right;color:#4ade80;font-weight:700">0.84</td>
+      <td style="padding:7px 10px;text-align:right;color:#f87171">-27.7%</td>
+      <td style="padding:7px 10px;text-align:right;color:#94a3b8;border-left:1px solid #334155">76</td>
+      <td style="padding:7px 10px;text-align:right;color:#fbbf24">5</td>
+      <td style="padding:7px 10px;text-align:right;color:#fbbf24">11</td>
+      <td style="padding:7px 10px;text-align:right;color:#fbbf24">16</td>
+      <td style="padding:7px 10px;text-align:right;color:#94a3b8">123d</td>
+      <td style="padding:7px 10px;text-align:right;color:#94a3b8">1d</td>
+    </tr><tr style="background:#0c1830;border-top:2px solid #334155">
+  <td style="padding:7px 10px;color:#64748b;font-style:italic">B&amp;H</td>
+  <td style="padding:7px 10px;text-align:right;color:#64748b">12.1%</td>
+  <td style="padding:7px 10px;text-align:right;color:#64748b">0.46</td>
+  <td style="padding:7px 10px;text-align:right;color:#64748b">-79.9%</td>
+  <td style="padding:7px 10px;text-align:right;color:#64748b">0.15</td>
+  <td style="padding:7px 10px;text-align:right;color:#64748b;border-left:1px solid #334155">12.2%</td>
+  <td style="padding:7px 10px;text-align:right;color:#64748b">0.71</td>
+  <td style="padding:7px 10px;text-align:right;color:#64748b">-45.3%</td>
+  <td colspan="6" style="padding:7px 10px;color:#64748b;font-size:11px;border-left:1px solid #334155">— buy &amp; hold, không chuyển trạng thái</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h3 style="font-size:14px;color:#94a3b8;margin-bottom:12px">Sharpe vs Window size</h3>
+    <canvas id="chartSharpe" height="200"></canvas>
+  </div>
+  <div class="card">
+    <h3 style="font-size:14px;color:#94a3b8;margin-bottom:12px">Số transitions & trạng thái ≤5d</h3>
+    <canvas id="chartTrans" height="200"></canvas>
+  </div>
+  <div class="card">
+    <h3 style="font-size:14px;color:#94a3b8;margin-bottom:12px">CAGR vs Window size</h3>
+    <canvas id="chartCagr" height="200"></canvas>
+  </div>
+</div>
+
+<script>
+const wins   = [3, 5, 7, 10, 12, 15, 18, 20, 25, 30, 40];
+const sharpe = [np.float64(0.651), np.float64(0.664), np.float64(0.657), np.float64(0.673), np.float64(0.685), np.float64(0.665), np.float64(0.68), np.float64(0.669), np.float64(0.667), np.float64(0.7), np.float64(0.576)];
+const sh16   = [np.float64(1.028), np.float64(1.012), np.float64(0.99), np.float64(0.997), np.float64(1.016), np.float64(0.987), np.float64(0.978), np.float64(0.918), np.float64(0.927), np.float64(0.927), np.float64(0.84)];
+const cagr   = [np.float64(15.19), np.float64(15.34), np.float64(14.9), np.float64(14.99), np.float64(14.74), np.float64(14.24), np.float64(14.21), np.float64(13.6), np.float64(14.25), np.float64(14.33), np.float64(13.37)];
+const trans  = [364, 305, 265, 256, 227, 161, 164, 160, 115, 108, 76];
+const s5     = [108, 69, 43, 55, 45, 15, 29, 32, 16, 22, 11];
+
+const defaults = {responsive:true,maintainAspectRatio:false,animation:false,
+  plugins:{legend:{labels:{boxWidth:12,color:'#94a3b8'}}},
+  scales:{x:{ticks:{color:'#64748b'},grid:{color:'#1e293b'}},
+           y:{ticks:{color:'#64748b'},grid:{color:'#1e293b'}}}};
+
+new Chart(document.getElementById('chartSharpe'),{
+  type:'line',
+  data:{labels:wins.map(w=>w+'d'),datasets:[
+    {label:'Sharpe (full)',data:sharpe,borderColor:'#4ade80',borderWidth:2,pointRadius:5,pointBackgroundColor:'#4ade80',fill:false},
+    {label:'Sharpe (2016+)',data:sh16,borderColor:'#60a5fa',borderWidth:2,pointRadius:5,pointBackgroundColor:'#60a5fa',borderDash:[4,3],fill:false}
+  ]},
+  options:{...defaults,scales:{x:{...defaults.scales.x},y:{...defaults.scales.y,
+    title:{display:true,text:'Sharpe Ratio',color:'#64748b'}}}}
+});
+
+new Chart(document.getElementById('chartTrans'),{
+  type:'bar',
+  data:{labels:wins.map(w=>w+'d'),datasets:[
+    {label:'Tổng transitions',data:trans,backgroundColor:'rgba(96,165,250,0.6)',yAxisID:'y'},
+    {label:'Trạng thái ≤5d',data:s5,backgroundColor:'rgba(248,113,113,0.7)',yAxisID:'y2'}
+  ]},
+  options:{...defaults,scales:{
+    x:{...defaults.scales.x},
+    y:{...defaults.scales.y,position:'left',title:{display:true,text:'Tổng trans',color:'#64748b'}},
+    y2:{position:'right',grid:{drawOnChartArea:false},ticks:{color:'#f87171'},
+         title:{display:true,text:'≤5d',color:'#f87171'}}
+  }}
+});
+
+new Chart(document.getElementById('chartCagr'),{
+  type:'line',
+  data:{labels:wins.map(w=>w+'d'),datasets:[
+    {label:'CAGR% (full)',data:cagr,borderColor:'#fbbf24',borderWidth:2,pointRadius:5,fill:false}
+  ]},
+  options:{...defaults,scales:{x:{...defaults.scales.x},y:{...defaults.scales.y,
+    title:{display:true,text:'CAGR (%)',color:'#64748b'}}}}
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+# MANIFEST — copy to server app root (preserve data/ subfolder). Updated for 5-step daily chain.
+
+## CODE (required)
+  OK  rating_8l.py   <-- NEW: credit-style quality 1-5 (daily step 1)
+  OK  unified_screener.py
+  OK  rank_8l.py
+  OK  power_lens.py
+  OK  dna_card.py
+  OK  telegram_recommend.py
+  OK  telegram_8l_bot.py
+  OK  rank_8l_daily_alert.py
+  OK  cheap_pb_floor.py   <-- NEW: rating x PB-floor x Ngu-Hanh buy-now (daily step 5, Telegram)
+  OK  pt_8l_quarterly.py
+
+## ROOT files (config + FA quality inputs)
+  OK  fa_ratings_lh.csv
+  OK  fundamental_rating_latest.csv
+  OK  telegram_config.json   <-- SECRET, copy securely
+
+## data/ cached lens inputs (refresh periodically; rating_8l reads bank_lens_v3 + power_lens)
+  OK  data/bank_lens_v3.csv
+  OK  data/power_lens.csv
+  OK  data/engine_class.csv
+  OK  data/cyclical_structural.csv
+  OK  data/asset_play.csv
+  OK  data/margin_cycle_detector.csv
+  OK  data/rubber_monthly.csv
+  OK  data/iron_ore_monthly.csv
+  OK  data/urea_monthly.csv
+  OK  data/dap_monthly.csv
+  OK  data/brent_monthly.csv
+
+## deploy_8l/ (README, setup.sh, run_daily.sh[5-step], 8l-bot.service, crontab.txt[17:45], env.sh, requirements.txt)
+
+## GENERATED on server (do NOT copy): data/rating_8l.csv, rating_8l_top30.csv, rating_8l_buynow.csv,
+##   data/unified_screener.csv, data/rank_8l.csv, data/rank_8l_prev.csv, data/cheap_pb_floor.csv,
+##   data/cheap_pb_floor_prev.csv, data/pt_8l/*, data/power_lens.csv
+## Ngu-Hanh state for cheap_pb_floor = BQ table tav2_bq.vnindex_5state_dt5g_live (no local file)
+
+## NOT needed on server: *.bat (Windows), *_ic.py test scripts, patch_portable.py

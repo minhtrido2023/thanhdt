@@ -1,0 +1,5 @@
+Strategies (14): ['BKMA200', 'BullDvg', 'BuySupport', 'CashCowStock', 'Conservative', 'DividendYield', 'RSILow30', 'SuperGrowth', 'SurpriseEarning', 'TL3M', 'TradingValueMax', 'TrendingGrowth', 'UnderBV', 'VolMax1Y']
+Sell signals (13): ['MA21', 'MA31', 'MA41', 'S13', 'SellLowGrowth', 'SellBV', 'SellBV2', 'SellPE', 'SellResistance', 'SellResistance1M', 'SellResistance1Y', 'BearDvg2', 'SellVolMax']
+
+=== Querying BUY signals ===
+  BKMA200 ... 

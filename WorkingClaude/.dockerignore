@@ -1,0 +1,35 @@
+# Keep the 8L image lean — exclude everything except the runtime set.
+# (build context = repo root; COPY . pulls only what's not ignored)
+*
+# un-ignore the 8L runtime code...
+!rating_8l.py
+!unified_screener.py
+!rank_8l.py
+!power_lens.py
+!dna_card.py
+!telegram_recommend.py
+!telegram_8l_bot.py
+!rank_8l_daily_alert.py
+!cheap_pb_floor.py
+!pt_8l_quarterly.py
+# ...root inputs...
+!fa_ratings_lh.csv
+!fundamental_rating_latest.csv
+# ...the deploy folder...
+!deploy_8l/
+!deploy_8l/**
+# ...and the cached data inputs (only the CSVs the pipeline reads; outputs are regenerated)...
+!data/
+data/*
+!data/bank_lens_v3.csv
+!data/power_lens.csv
+!data/engine_class.csv
+!data/cyclical_structural.csv
+!data/asset_play.csv
+!data/margin_cycle_detector.csv
+!data/rubber_monthly.csv
+!data/iron_ore_monthly.csv
+!data/urea_monthly.csv
+!data/dap_monthly.csv
+!data/brent_monthly.csv
+# NOTE: sa-key.json + telegram_config.json are MOUNTED at runtime (not baked into the image).

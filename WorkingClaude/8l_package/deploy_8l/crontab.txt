@@ -1,0 +1,19 @@
+# 8L cron jobs (bare-metal: `crontab deploy_8l/crontab.txt`; container: loaded by the cron service).
+# All jobs route through wrapper scripts that auto-detect venv (bare-metal) vs system python (container).
+# Times are Asia/Ho_Chi_Minh (CRON_TZ; container also has TZ baked).
+CRON_TZ=Asia/Ho_Chi_Minh
+
+# Daily EOD 5-step chain (rating -> screener -> rank -> surprise-alert -> cheap-pb-floor) — 17:45 Mon-Fri
+45 17 * * 1-5 /opt/8l/deploy_8l/run_daily.sh
+
+# Quarterly SNAPSHOT top-20 — 09:00 on 1st of Jan/Apr/Jul/Oct
+0 9 1 1,4,7,10 * /opt/8l/deploy_8l/run_quarterly.sh snapshot
+
+# Quarterly REVIEW vs VNINDEX (Telegram) — 16:00 on 28th of Mar/Jun/Sep/Dec
+0 16 28 3,6,9,12 * /opt/8l/deploy_8l/run_quarterly.sh review --telegram
+
+# Weekly power-lens refresh (BQ-only) — Sun 08:00
+0 8 * * 0 /opt/8l/deploy_8l/run_power.sh
+
+# OPTIONAL: bank-lens refresh if vnstock reachable from this host — Sun 08:10
+# 10 8 * * 0 cd /opt/8l && deploy_8l/run_power.sh   # (adapt: make a run_bank.sh calling bank_lens_v3.py)

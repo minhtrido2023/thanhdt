@@ -1,0 +1,1 @@
+SELECT t.ticker, t.time, t.Open FROM `tav2_bq.ticker` AS t WHERE t.time >= '2020-01-01' AND t.time <= '2026-04-03' ORDER BY t.ticker, t.time

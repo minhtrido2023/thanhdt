@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Tam Quan v3.1 · T+5 Transition Success Histogram</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+* { box-sizing:border-box;margin:0;padding:0 }
+body { background:#0a0f1e;color:#e2e8f0;font-family:'Segoe UI',sans-serif;padding:20px }
+h1 { font-size:20px;color:#f8fafc;margin-bottom:4px }
+h2 { font-size:15px;color:#cbd5e1;margin:20px 0 10px }
+.subtitle { color:#64748b;font-size:13px;margin-bottom:16px }
+.staging-tag { background:#7c3aed;color:#fff;padding:2px 10px;border-radius:6px;font-size:11px;font-weight:700;margin-left:8px }
+.stats { display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px }
+.stat-card { background:#1e293b;border-radius:8px;padding:10px 16px;border:1px solid #334155;min-width:140px }
+.stat-card .num { font-size:22px;font-weight:800 }
+.stat-card .lbl { font-size:11px;color:#64748b }
+.grid { display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px }
+.panel { background:#0f172a;border:1px solid #334155;border-radius:8px;padding:14px }
+.panel h3 { font-size:13px;color:#cbd5e1;margin-bottom:8px }
+.panel .sub { font-size:11px;color:#64748b;margin-bottom:10px }
+.legend { background:#1e293b;border:1px solid #334155;border-radius:8px;padding:10px 14px;
+           margin-bottom:14px;font-size:12px;color:#94a3b8 }
+.legend b { color:#e2e8f0 }
+.legend code { background:#0f172a;color:#86efac;padding:1px 6px;border-radius:4px;font-size:11px }
+table { width:100%;border-collapse:collapse;font-size:12px }
+thead th { background:#0f172a;color:#64748b;font-size:10px;font-weight:700;
+            text-transform:uppercase;letter-spacing:.5px;padding:8px 6px;
+            border-bottom:2px solid #334155;text-align:left }
+.table-wrap { overflow-x:auto;max-height:420px;overflow-y:auto;
+               border-radius:8px;border:1px solid #334155;background:#0f172a }
+.small { font-size:11px;color:#64748b }
+canvas { background:#0a0f1e;border-radius:6px }
+</style>
+</head>
+<body>
+
+<h1>📊 Tam Quan v3.1 · T+5 Transition Success Histogram<span class="staging-tag">STAGING</span></h1>
+<p class="subtitle">293 transitions có đủ 5 phiên forward · 2000–2026
+· Success = upgrade →&nbsp;r5&gt;0, downgrade →&nbsp;r5&lt;0</p>
+
+<div class="stats">
+  <div class="stat-card"><div class="num" style="color:#e2e8f0">293</div><div class="lbl">Tổng transitions</div></div>
+  <div class="stat-card"><div class="num" style="color:#86efac">56.7%</div><div class="lbl">Strict win rate</div></div>
+  <div class="stat-card"><div class="num" style="color:#fbbf24">23.9%</div><div class="lbl">Graded win (±2/4%)</div></div>
+  <div class="stat-card"><div class="num" style="color:#86efac">+0.67%</div><div class="lbl">Mean T+5 return</div></div>
+  <div class="stat-card"><div class="num" style="color:#86efac">+0.62%</div><div class="lbl">Median T+5 return</div></div>
+  <div class="stat-card"><div class="num" style="color:#16a34a">152</div><div class="lbl">▲ Upgrade (win 64%)</div></div>
+  <div class="stat-card"><div class="num" style="color:#dc2626">141</div><div class="lbl">▼ Downgrade (win 49%)</div></div>
+</div>
+
+<div class="legend">
+  <b>Đọc biểu đồ thế nào?</b>
+  Mỗi histogram chia T+5 forward return của VNINDEX vào các bin 1% (từ −15% đến +15%).
+  • <b>Strict win</b>: upgrade thắng nếu r5 &gt; 0; downgrade thắng nếu r5 &lt; 0 (bất kể độ lớn).
+  • <b>Graded win</b>: yêu cầu độ lớn ≥ <code>2%</code> cho 1-step, <code>4%</code> cho 2+step — strict hơn, lọc nhiễu sát 0.
+  • Cột <b>step</b> = số bậc state nhảy (▲▲ = +2 bậc như NEUTRAL→EX-BULL).
+  Hệ thống "hợp lý" nếu UP có phân bố lệch phải (mean &gt; 0) và DOWN lệch trái (mean &lt; 0).
+</div>
+
+<h2>📈 Distribution by direction</h2>
+<div class="grid">
+  <div class="panel">
+    <h3>Tất cả transitions <span class="small">(n=293)</span></h3>
+    <div class="sub">Mean +0.67% · Median +0.62% · IQR [-1.22%, +2.50%]</div>
+    <canvas id="chartAll" height="180"></canvas>
+  </div>
+  <div class="panel">
+    <h3>▲ Upgrade vs ▼ Downgrade <span class="small">(stacked)</span></h3>
+    <div class="sub">Upgrade mean +0.94% · Downgrade mean +0.37% — kỳ vọng đối nghịch nhau</div>
+    <canvas id="chartUpDown" height="180"></canvas>
+  </div>
+  <div class="panel">
+    <h3>▲ Upgrade: Win (xanh) vs Fail (đỏ)</h3>
+    <div class="sub">Win = r5 &gt; 0 (n=97) · Fail = r5 ≤ 0 (n=55)</div>
+    <canvas id="chartUp" height="180"></canvas>
+  </div>
+  <div class="panel">
+    <h3>▼ Downgrade: Win (xanh) vs Fail (đỏ)</h3>
+    <div class="sub">Win = r5 &lt; 0 (n=69) · Fail = r5 ≥ 0 (n=72)</div>
+    <canvas id="chartDown" height="180"></canvas>
+  </div>
+</div>
+
+<h2>🎯 Win rate theo từng cặp chuyển state</h2>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+  <th>Từ</th><th>Step</th><th>Sang</th>
+  <th style="text-align:right">n</th>
+  <th style="text-align:right">Mean r5</th>
+  <th style="text-align:right">Median r5</th>
+  <th style="text-align:right">Strict win</th>
+  <th style="text-align:right">Graded win</th>
+</tr>
+</thead>
+<tbody>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px"><span style="background:#7f1d1d;color:#fca5a5;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">CRISIS</span></td>
+      <td style="padding:6px 6px;text-align:center;color:#94a3b8">▲</td>
+      <td style="padding:6px 10px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">40</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-variant-numeric:tabular-nums">+0.64%</td>
+      <td style="padding:6px 10px;text-align:right;color:#fca5a5;font-variant-numeric:tabular-nums">-0.02%</td>
+      <td style="padding:6px 10px;text-align:right;color:#eab308;font-weight:700">50%</td>
+      <td style="padding:6px 10px;text-align:right;color:#eab308;font-weight:700">30%</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px"><span style="background:#7f1d1d;color:#fca5a5;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">CRISIS</span></td>
+      <td style="padding:6px 6px;text-align:center;color:#94a3b8">▲▲</td>
+      <td style="padding:6px 10px"><span style="background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">NEUTRAL</span></td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">14</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-variant-numeric:tabular-nums">+0.00%</td>
+      <td style="padding:6px 10px;text-align:right;color:#fca5a5;font-variant-numeric:tabular-nums">-0.17%</td>
+      <td style="padding:6px 10px;text-align:right;color:#eab308;font-weight:700">50%</td>
+      <td style="padding:6px 10px;text-align:right;color:#dc2626;font-weight:700">0%</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td>
+      <td style="padding:6px 6px;text-align:center;color:#94a3b8">▼</td>
+      <td style="padding:6px 10px"><span style="background:#7f1d1d;color:#fca5a5;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">CRISIS</span></td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">40</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-variant-numeric:tabular-nums">+0.25%</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-variant-numeric:tabular-nums">+0.53%</td>
+      <td style="padding:6px 10px;text-align:right;color:#eab308;font-weight:700">45%</td>
+      <td style="padding:6px 10px;text-align:right;color:#dc2626;font-weight:700">25%</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td>
+      <td style="padding:6px 6px;text-align:center;color:#94a3b8">▲</td>
+      <td style="padding:6px 10px"><span style="background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">NEUTRAL</span></td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">51</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-variant-numeric:tabular-nums">+1.39%</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-variant-numeric:tabular-nums">+0.91%</td>
+      <td style="padding:6px 10px;text-align:right;color:#16a34a;font-weight:700">73%</td>
+      <td style="padding:6px 10px;text-align:right;color:#eab308;font-weight:700">33%</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px"><span style="background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">NEUTRAL</span></td>
+      <td style="padding:6px 6px;text-align:center;color:#94a3b8">▼▼</td>
+      <td style="padding:6px 10px"><span style="background:#7f1d1d;color:#fca5a5;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">CRISIS</span></td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">8</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-variant-numeric:tabular-nums">+0.62%</td>
+      <td style="padding:6px 10px;text-align:right;color:#fca5a5;font-variant-numeric:tabular-nums">-0.76%</td>
+      <td style="padding:6px 10px;text-align:right;color:#16a34a;font-weight:700">62%</td>
+      <td style="padding:6px 10px;text-align:right;color:#dc2626;font-weight:700">0%</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px"><span style="background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">NEUTRAL</span></td>
+      <td style="padding:6px 6px;text-align:center;color:#94a3b8">▼</td>
+      <td style="padding:6px 10px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">50</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-variant-numeric:tabular-nums">+0.42%</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-variant-numeric:tabular-nums">+0.17%</td>
+      <td style="padding:6px 10px;text-align:right;color:#eab308;font-weight:700">50%</td>
+      <td style="padding:6px 10px;text-align:right;color:#dc2626;font-weight:700">14%</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px"><span style="background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">NEUTRAL</span></td>
+      <td style="padding:6px 6px;text-align:center;color:#94a3b8">▲</td>
+      <td style="padding:6px 10px"><span style="background:#14532d;color:#86efac;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BULL</span></td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">32</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-variant-numeric:tabular-nums">+0.93%</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-variant-numeric:tabular-nums">+0.90%</td>
+      <td style="padding:6px 10px;text-align:right;color:#16a34a;font-weight:700">69%</td>
+      <td style="padding:6px 10px;text-align:right;color:#dc2626;font-weight:700">28%</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px"><span style="background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">NEUTRAL</span></td>
+      <td style="padding:6px 6px;text-align:center;color:#94a3b8">▲▲</td>
+      <td style="padding:6px 10px"><span style="background:#3b0764;color:#c4b5fd;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">EX-BULL</span></td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">1</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-variant-numeric:tabular-nums">+0.59%</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-variant-numeric:tabular-nums">+0.59%</td>
+      <td style="padding:6px 10px;text-align:right;color:#16a34a;font-weight:700">100%</td>
+      <td style="padding:6px 10px;text-align:right;color:#dc2626;font-weight:700">0%</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px"><span style="background:#14532d;color:#86efac;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BULL</span></td>
+      <td style="padding:6px 6px;text-align:center;color:#94a3b8">▼▼▼</td>
+      <td style="padding:6px 10px"><span style="background:#7f1d1d;color:#fca5a5;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">CRISIS</span></td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">4</td>
+      <td style="padding:6px 10px;text-align:right;color:#fca5a5;font-variant-numeric:tabular-nums">-2.60%</td>
+      <td style="padding:6px 10px;text-align:right;color:#fca5a5;font-variant-numeric:tabular-nums">-2.34%</td>
+      <td style="padding:6px 10px;text-align:right;color:#16a34a;font-weight:700">75%</td>
+      <td style="padding:6px 10px;text-align:right;color:#dc2626;font-weight:700">25%</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px"><span style="background:#14532d;color:#86efac;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BULL</span></td>
+      <td style="padding:6px 6px;text-align:center;color:#94a3b8">▼</td>
+      <td style="padding:6px 10px"><span style="background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">NEUTRAL</span></td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">24</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-variant-numeric:tabular-nums">+0.35%</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-variant-numeric:tabular-nums">+0.19%</td>
+      <td style="padding:6px 10px;text-align:right;color:#eab308;font-weight:700">50%</td>
+      <td style="padding:6px 10px;text-align:right;color:#dc2626;font-weight:700">17%</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px"><span style="background:#14532d;color:#86efac;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BULL</span></td>
+      <td style="padding:6px 6px;text-align:center;color:#94a3b8">▲</td>
+      <td style="padding:6px 10px"><span style="background:#3b0764;color:#c4b5fd;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">EX-BULL</span></td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">14</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-variant-numeric:tabular-nums">+1.11%</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-variant-numeric:tabular-nums">+1.90%</td>
+      <td style="padding:6px 10px;text-align:right;color:#16a34a;font-weight:700">71%</td>
+      <td style="padding:6px 10px;text-align:right;color:#16a34a;font-weight:700">50%</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px"><span style="background:#3b0764;color:#c4b5fd;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">EX-BULL</span></td>
+      <td style="padding:6px 6px;text-align:center;color:#94a3b8">▼▼▼▼</td>
+      <td style="padding:6px 10px"><span style="background:#7f1d1d;color:#fca5a5;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">CRISIS</span></td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">2</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-variant-numeric:tabular-nums">+0.97%</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-variant-numeric:tabular-nums">+0.97%</td>
+      <td style="padding:6px 10px;text-align:right;color:#eab308;font-weight:700">50%</td>
+      <td style="padding:6px 10px;text-align:right;color:#dc2626;font-weight:700">0%</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px"><span style="background:#3b0764;color:#c4b5fd;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">EX-BULL</span></td>
+      <td style="padding:6px 6px;text-align:center;color:#94a3b8">▼▼▼</td>
+      <td style="padding:6px 10px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">1</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-variant-numeric:tabular-nums">+6.65%</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-variant-numeric:tabular-nums">+6.65%</td>
+      <td style="padding:6px 10px;text-align:right;color:#dc2626;font-weight:700">0%</td>
+      <td style="padding:6px 10px;text-align:right;color:#dc2626;font-weight:700">0%</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px"><span style="background:#3b0764;color:#c4b5fd;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">EX-BULL</span></td>
+      <td style="padding:6px 6px;text-align:center;color:#94a3b8">▼▼</td>
+      <td style="padding:6px 10px"><span style="background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">NEUTRAL</span></td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">1</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-variant-numeric:tabular-nums">+3.75%</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-variant-numeric:tabular-nums">+3.75%</td>
+      <td style="padding:6px 10px;text-align:right;color:#dc2626;font-weight:700">0%</td>
+      <td style="padding:6px 10px;text-align:right;color:#dc2626;font-weight:700">0%</td>
+    </tr>
+<tr style="border-bottom:1px solid #334155">
+      <td style="padding:6px 10px"><span style="background:#3b0764;color:#c4b5fd;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">EX-BULL</span></td>
+      <td style="padding:6px 6px;text-align:center;color:#94a3b8">▼</td>
+      <td style="padding:6px 10px"><span style="background:#14532d;color:#86efac;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BULL</span></td>
+      <td style="padding:6px 10px;text-align:right;color:#e2e8f0;font-weight:600">11</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-variant-numeric:tabular-nums">+0.54%</td>
+      <td style="padding:6px 10px;text-align:right;color:#86efac;font-variant-numeric:tabular-nums">+1.69%</td>
+      <td style="padding:6px 10px;text-align:right;color:#eab308;font-weight:700">45%</td>
+      <td style="padding:6px 10px;text-align:right;color:#dc2626;font-weight:700">27%</td>
+    </tr>
+</tbody>
+</table>
+</div>
+
+<h2>🔍 Verification — best / worst transitions</h2>
+<div class="grid">
+  <div class="panel">
+    <h3 style="color:#86efac">▲ Top 12 upgrade thành công nhất</h3>
+    <table><thead><tr><th>Ngày</th><th>Từ</th><th>Sang</th><th style="text-align:right">r5</th><th style="text-align:center">OK</th></tr></thead>
+    <tbody><tr><td style="padding:4px 8px;color:#94a3b8">2001-10-26</td><td style="padding:4px 8px"><span style="background:#7f1d1d;color:#fca5a5;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">CRISIS</span></td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px;text-align:right;color:#86efac;font-weight:700;font-variant-numeric:tabular-nums">+9.58%</td><td style="padding:4px 8px;text-align:center">✓</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2001-03-30</td><td style="padding:4px 8px"><span style="background:#7f1d1d;color:#fca5a5;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">CRISIS</span></td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px;text-align:right;color:#86efac;font-weight:700;font-variant-numeric:tabular-nums">+9.58%</td><td style="padding:4px 8px;text-align:center">✓</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2008-06-30</td><td style="padding:4px 8px"><span style="background:#7f1d1d;color:#fca5a5;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">CRISIS</span></td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px;text-align:right;color:#86efac;font-weight:700;font-variant-numeric:tabular-nums">+9.14%</td><td style="padding:4px 8px;text-align:center">✓</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2001-05-25</td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px"><span style="background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">NEUTRAL</span></td><td style="padding:4px 8px;text-align:right;color:#86efac;font-weight:700;font-variant-numeric:tabular-nums">+8.62%</td><td style="padding:4px 8px;text-align:center">✓</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2006-11-15</td><td style="padding:4px 8px"><span style="background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">NEUTRAL</span></td><td style="padding:4px 8px"><span style="background:#14532d;color:#86efac;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BULL</span></td><td style="padding:4px 8px;text-align:right;color:#86efac;font-weight:700;font-variant-numeric:tabular-nums">+8.36%</td><td style="padding:4px 8px;text-align:center">✓</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2009-12-28</td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px"><span style="background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">NEUTRAL</span></td><td style="padding:4px 8px;text-align:right;color:#86efac;font-weight:700;font-variant-numeric:tabular-nums">+8.10%</td><td style="padding:4px 8px;text-align:center">✓</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2012-01-18</td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px"><span style="background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">NEUTRAL</span></td><td style="padding:4px 8px;text-align:right;color:#86efac;font-weight:700;font-variant-numeric:tabular-nums">+7.72%</td><td style="padding:4px 8px;text-align:center">✓</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2007-09-19</td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px"><span style="background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">NEUTRAL</span></td><td style="padding:4px 8px;text-align:right;color:#86efac;font-weight:700;font-variant-numeric:tabular-nums">+7.37%</td><td style="padding:4px 8px;text-align:center">✓</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2012-01-12</td><td style="padding:4px 8px"><span style="background:#7f1d1d;color:#fca5a5;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">CRISIS</span></td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px;text-align:right;color:#86efac;font-weight:700;font-variant-numeric:tabular-nums">+7.27%</td><td style="padding:4px 8px;text-align:center">✓</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2011-08-31</td><td style="padding:4px 8px"><span style="background:#7f1d1d;color:#fca5a5;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">CRISIS</span></td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px;text-align:right;color:#86efac;font-weight:700;font-variant-numeric:tabular-nums">+6.54%</td><td style="padding:4px 8px;text-align:center">✓</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2020-04-29</td><td style="padding:4px 8px"><span style="background:#7f1d1d;color:#fca5a5;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">CRISIS</span></td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px;text-align:right;color:#86efac;font-weight:700;font-variant-numeric:tabular-nums">+5.80%</td><td style="padding:4px 8px;text-align:center">✓</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2017-11-15</td><td style="padding:4px 8px"><span style="background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">NEUTRAL</span></td><td style="padding:4px 8px"><span style="background:#14532d;color:#86efac;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BULL</span></td><td style="padding:4px 8px;text-align:right;color:#86efac;font-weight:700;font-variant-numeric:tabular-nums">+5.67%</td><td style="padding:4px 8px;text-align:center">✓</td></tr></tbody></table>
+  </div>
+  <div class="panel">
+    <h3 style="color:#fca5a5">▲ Top 12 upgrade thất bại tệ nhất</h3>
+    <table><thead><tr><th>Ngày</th><th>Từ</th><th>Sang</th><th style="text-align:right">r5</th><th style="text-align:center">OK</th></tr></thead>
+    <tbody><tr><td style="padding:4px 8px;color:#94a3b8">2018-11-08</td><td style="padding:4px 8px"><span style="background:#7f1d1d;color:#fca5a5;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">CRISIS</span></td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px;text-align:right;color:#fca5a5;font-weight:700;font-variant-numeric:tabular-nums">-3.14%</td><td style="padding:4px 8px;text-align:center">✗</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2023-11-16</td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px"><span style="background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">NEUTRAL</span></td><td style="padding:4px 8px;text-align:right;color:#fca5a5;font-weight:700;font-variant-numeric:tabular-nums">-3.29%</td><td style="padding:4px 8px;text-align:center">✗</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2011-11-09</td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px"><span style="background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">NEUTRAL</span></td><td style="padding:4px 8px;text-align:right;color:#fca5a5;font-weight:700;font-variant-numeric:tabular-nums">-3.53%</td><td style="padding:4px 8px;text-align:center">✗</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2011-09-16</td><td style="padding:4px 8px"><span style="background:#7f1d1d;color:#fca5a5;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">CRISIS</span></td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px;text-align:right;color:#fca5a5;font-weight:700;font-variant-numeric:tabular-nums">-3.68%</td><td style="padding:4px 8px;text-align:center">✗</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2006-07-11</td><td style="padding:4px 8px"><span style="background:#7f1d1d;color:#fca5a5;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">CRISIS</span></td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px;text-align:right;color:#fca5a5;font-weight:700;font-variant-numeric:tabular-nums">-3.94%</td><td style="padding:4px 8px;text-align:center">✗</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2010-09-06</td><td style="padding:4px 8px"><span style="background:#7f1d1d;color:#fca5a5;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">CRISIS</span></td><td style="padding:4px 8px"><span style="background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">NEUTRAL</span></td><td style="padding:4px 8px;text-align:right;color:#fca5a5;font-weight:700;font-variant-numeric:tabular-nums">-4.01%</td><td style="padding:4px 8px;text-align:center">✗</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2011-12-07</td><td style="padding:4px 8px"><span style="background:#7f1d1d;color:#fca5a5;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">CRISIS</span></td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px;text-align:right;color:#fca5a5;font-weight:700;font-variant-numeric:tabular-nums">-5.08%</td><td style="padding:4px 8px;text-align:center">✗</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2006-11-24</td><td style="padding:4px 8px"><span style="background:#14532d;color:#86efac;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BULL</span></td><td style="padding:4px 8px"><span style="background:#3b0764;color:#c4b5fd;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">EX-BULL</span></td><td style="padding:4px 8px;text-align:right;color:#fca5a5;font-weight:700;font-variant-numeric:tabular-nums">-5.14%</td><td style="padding:4px 8px;text-align:center">✗</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2008-05-05</td><td style="padding:4px 8px"><span style="background:#7f1d1d;color:#fca5a5;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">CRISIS</span></td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px;text-align:right;color:#fca5a5;font-weight:700;font-variant-numeric:tabular-nums">-5.61%</td><td style="padding:4px 8px;text-align:center">✗</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2010-08-18</td><td style="padding:4px 8px"><span style="background:#7f1d1d;color:#fca5a5;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">CRISIS</span></td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px;text-align:right;color:#fca5a5;font-weight:700;font-variant-numeric:tabular-nums">-6.94%</td><td style="padding:4px 8px;text-align:center">✗</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2008-09-29</td><td style="padding:4px 8px"><span style="background:#7f1d1d;color:#fca5a5;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">CRISIS</span></td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px;text-align:right;color:#fca5a5;font-weight:700;font-variant-numeric:tabular-nums">-9.46%</td><td style="padding:4px 8px;text-align:center">✗</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2026-03-02</td><td style="padding:4px 8px"><span style="background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">NEUTRAL</span></td><td style="padding:4px 8px"><span style="background:#14532d;color:#86efac;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BULL</span></td><td style="padding:4px 8px;text-align:right;color:#fca5a5;font-weight:700;font-variant-numeric:tabular-nums">-10.47%</td><td style="padding:4px 8px;text-align:center">✗</td></tr></tbody></table>
+  </div>
+  <div class="panel">
+    <h3 style="color:#86efac">▼ Top 12 downgrade thành công nhất</h3>
+    <table><thead><tr><th>Ngày</th><th>Từ</th><th>Sang</th><th style="text-align:right">r5</th><th style="text-align:center">OK</th></tr></thead>
+    <tbody><tr><td style="padding:4px 8px;color:#94a3b8">2016-07-27</td><td style="padding:4px 8px"><span style="background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">NEUTRAL</span></td><td style="padding:4px 8px"><span style="background:#7f1d1d;color:#fca5a5;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">CRISIS</span></td><td style="padding:4px 8px;text-align:right;color:#fca5a5;font-weight:700;font-variant-numeric:tabular-nums">-3.73%</td><td style="padding:4px 8px;text-align:center">✓</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2026-01-30</td><td style="padding:4px 8px"><span style="background:#14532d;color:#86efac;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BULL</span></td><td style="padding:4px 8px"><span style="background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">NEUTRAL</span></td><td style="padding:4px 8px;text-align:right;color:#fca5a5;font-weight:700;font-variant-numeric:tabular-nums">-4.02%</td><td style="padding:4px 8px;text-align:center">✓</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2011-11-11</td><td style="padding:4px 8px"><span style="background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">NEUTRAL</span></td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px;text-align:right;color:#fca5a5;font-weight:700;font-variant-numeric:tabular-nums">-4.21%</td><td style="padding:4px 8px;text-align:center">✓</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2010-05-18</td><td style="padding:4px 8px"><span style="background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">NEUTRAL</span></td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px;text-align:right;color:#fca5a5;font-weight:700;font-variant-numeric:tabular-nums">-4.33%</td><td style="padding:4px 8px;text-align:center">✓</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2006-07-13</td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px"><span style="background:#7f1d1d;color:#fca5a5;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">CRISIS</span></td><td style="padding:4px 8px;text-align:right;color:#fca5a5;font-weight:700;font-variant-numeric:tabular-nums">-4.63%</td><td style="padding:4px 8px;text-align:center">✓</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2026-03-05</td><td style="padding:4px 8px"><span style="background:#14532d;color:#86efac;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BULL</span></td><td style="padding:4px 8px"><span style="background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">NEUTRAL</span></td><td style="padding:4px 8px;text-align:right;color:#fca5a5;font-weight:700;font-variant-numeric:tabular-nums">-5.47%</td><td style="padding:4px 8px;text-align:center">✓</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2021-07-08</td><td style="padding:4px 8px"><span style="background:#3b0764;color:#c4b5fd;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">EX-BULL</span></td><td style="padding:4px 8px"><span style="background:#14532d;color:#86efac;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BULL</span></td><td style="padding:4px 8px;text-align:right;color:#fca5a5;font-weight:700;font-variant-numeric:tabular-nums">-5.87%</td><td style="padding:4px 8px;text-align:center">✓</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2023-09-19</td><td style="padding:4px 8px"><span style="background:#14532d;color:#86efac;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BULL</span></td><td style="padding:4px 8px"><span style="background:#7f1d1d;color:#fca5a5;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">CRISIS</span></td><td style="padding:4px 8px;text-align:right;color:#fca5a5;font-weight:700;font-variant-numeric:tabular-nums">-6.07%</td><td style="padding:4px 8px;text-align:center">✓</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2008-05-09</td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px"><span style="background:#7f1d1d;color:#fca5a5;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">CRISIS</span></td><td style="padding:4px 8px;text-align:right;color:#fca5a5;font-weight:700;font-variant-numeric:tabular-nums">-8.05%</td><td style="padding:4px 8px;text-align:center">✓</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2004-08-02</td><td style="padding:4px 8px"><span style="background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">NEUTRAL</span></td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px;text-align:right;color:#fca5a5;font-weight:700;font-variant-numeric:tabular-nums">-9.88%</td><td style="padding:4px 8px;text-align:center">✓</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2001-09-07</td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px"><span style="background:#7f1d1d;color:#fca5a5;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">CRISIS</span></td><td style="padding:4px 8px;text-align:right;color:#fca5a5;font-weight:700;font-variant-numeric:tabular-nums">-11.17%</td><td style="padding:4px 8px;text-align:center">✓</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2008-10-01</td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px"><span style="background:#7f1d1d;color:#fca5a5;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">CRISIS</span></td><td style="padding:4px 8px;text-align:right;color:#fca5a5;font-weight:700;font-variant-numeric:tabular-nums">-11.68%</td><td style="padding:4px 8px;text-align:center">✓</td></tr></tbody></table>
+  </div>
+  <div class="panel">
+    <h3 style="color:#fca5a5">▼ Top 12 downgrade thất bại tệ nhất</h3>
+    <table><thead><tr><th>Ngày</th><th>Từ</th><th>Sang</th><th style="text-align:right">r5</th><th style="text-align:center">OK</th></tr></thead>
+    <tbody><tr><td style="padding:4px 8px;color:#94a3b8">2011-05-26</td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px"><span style="background:#7f1d1d;color:#fca5a5;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">CRISIS</span></td><td style="padding:4px 8px;text-align:right;color:#86efac;font-weight:700;font-variant-numeric:tabular-nums">+13.22%</td><td style="padding:4px 8px;text-align:center">✗</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2020-05-05</td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px"><span style="background:#7f1d1d;color:#fca5a5;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">CRISIS</span></td><td style="padding:4px 8px;text-align:right;color:#86efac;font-weight:700;font-variant-numeric:tabular-nums">+9.31%</td><td style="padding:4px 8px;text-align:center">✗</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2025-04-08</td><td style="padding:4px 8px"><span style="background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">NEUTRAL</span></td><td style="padding:4px 8px"><span style="background:#7f1d1d;color:#fca5a5;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">CRISIS</span></td><td style="padding:4px 8px;text-align:right;color:#86efac;font-weight:700;font-variant-numeric:tabular-nums">+8.39%</td><td style="padding:4px 8px;text-align:center">✗</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2001-03-23</td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px"><span style="background:#7f1d1d;color:#fca5a5;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">CRISIS</span></td><td style="padding:4px 8px;text-align:right;color:#86efac;font-weight:700;font-variant-numeric:tabular-nums">+7.69%</td><td style="padding:4px 8px;text-align:center">✗</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2015-08-24</td><td style="padding:4px 8px"><span style="background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">NEUTRAL</span></td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px;text-align:right;color:#86efac;font-weight:700;font-variant-numeric:tabular-nums">+7.18%</td><td style="padding:4px 8px;text-align:center">✗</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2006-11-30</td><td style="padding:4px 8px"><span style="background:#3b0764;color:#c4b5fd;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">EX-BULL</span></td><td style="padding:4px 8px"><span style="background:#14532d;color:#86efac;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BULL</span></td><td style="padding:4px 8px;text-align:right;color:#86efac;font-weight:700;font-variant-numeric:tabular-nums">+6.96%</td><td style="padding:4px 8px;text-align:center">✗</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2021-01-29</td><td style="padding:4px 8px"><span style="background:#3b0764;color:#c4b5fd;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">EX-BULL</span></td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px;text-align:right;color:#86efac;font-weight:700;font-variant-numeric:tabular-nums">+6.65%</td><td style="padding:4px 8px;text-align:center">✗</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2010-05-21</td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px"><span style="background:#7f1d1d;color:#fca5a5;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">CRISIS</span></td><td style="padding:4px 8px;text-align:right;color:#86efac;font-weight:700;font-variant-numeric:tabular-nums">+6.06%</td><td style="padding:4px 8px;text-align:center">✗</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2001-05-30</td><td style="padding:4px 8px"><span style="background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">NEUTRAL</span></td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px;text-align:right;color:#86efac;font-weight:700;font-variant-numeric:tabular-nums">+5.88%</td><td style="padding:4px 8px;text-align:center">✗</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2025-12-16</td><td style="padding:4px 8px"><span style="background:#14532d;color:#86efac;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BULL</span></td><td style="padding:4px 8px"><span style="background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">NEUTRAL</span></td><td style="padding:4px 8px;text-align:right;color:#86efac;font-weight:700;font-variant-numeric:tabular-nums">+5.54%</td><td style="padding:4px 8px;text-align:center">✗</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2020-07-31</td><td style="padding:4px 8px"><span style="background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">NEUTRAL</span></td><td style="padding:4px 8px"><span style="background:#7c2d12;color:#fdba74;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BEAR</span></td><td style="padding:4px 8px;text-align:right;color:#86efac;font-weight:700;font-variant-numeric:tabular-nums">+5.39%</td><td style="padding:4px 8px;text-align:center">✗</td></tr>
+<tr><td style="padding:4px 8px;color:#94a3b8">2025-12-30</td><td style="padding:4px 8px"><span style="background:#14532d;color:#86efac;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">BULL</span></td><td style="padding:4px 8px"><span style="background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap">NEUTRAL</span></td><td style="padding:4px 8px;text-align:right;color:#86efac;font-weight:700;font-variant-numeric:tabular-nums">+5.02%</td><td style="padding:4px 8px;text-align:center">✗</td></tr></tbody></table>
+  </div>
+</div>
+
+<script>
+const D = {"labels": ["-15%", "-14%", "-13%", "-12%", "-11%", "-10%", "-9%", "-8%", "-7%", "-6%", "-5%", "-4%", "-3%", "-2%", "-1%", "+0%", "+1%", "+2%", "+3%", "+4%", "+5%", "+6%", "+7%", "+8%", "+9%", "+10%", "+11%", "+12%", "+13%", "+14%"], "all": [0, 0, 0, 2, 1, 2, 1, 0, 2, 5, 5, 13, 18, 34, 41, 41, 38, 31, 21, 11, 9, 4, 5, 4, 4, 0, 0, 0, 1, 0], "up": [0, 0, 0, 0, 1, 1, 0, 0, 1, 3, 1, 6, 7, 10, 25, 32, 17, 19, 11, 3, 5, 1, 3, 3, 3, 0, 0, 0, 0, 0], "down": [0, 0, 0, 2, 0, 1, 1, 0, 1, 2, 4, 7, 11, 24, 16, 9, 21, 12, 10, 8, 4, 3, 2, 1, 1, 0, 0, 0, 1, 0], "up_ok": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 17, 19, 11, 3, 5, 1, 3, 3, 3, 0, 0, 0, 0, 0], "up_fail": [0, 0, 0, 0, 1, 1, 0, 0, 1, 3, 1, 6, 7, 10, 25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "down_ok": [0, 0, 0, 2, 0, 1, 1, 0, 1, 2, 4, 7, 11, 24, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "down_fail": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 21, 12, 10, 8, 4, 3, 2, 1, 1, 0, 0, 0, 1, 0]};
+const baseOpt = {
+  responsive:true, maintainAspectRatio:false,
+  plugins:{ legend:{ labels:{ color:'#cbd5e1', font:{size:11} } } },
+  scales:{
+    x:{ ticks:{ color:'#64748b', font:{size:9}, autoSkip:true, maxTicksLimit:16 }, grid:{color:'#1e293b'} },
+    y:{ ticks:{ color:'#64748b', font:{size:10} }, grid:{color:'#1e293b'} }
+  }
+};
+function makeBar(id, datasets, stacked=false){
+  const opt = JSON.parse(JSON.stringify(baseOpt));
+  if(stacked){ opt.scales.x.stacked=true; opt.scales.y.stacked=true; }
+  new Chart(document.getElementById(id), {
+    type:'bar',
+    data:{ labels:D.labels, datasets:datasets },
+    options: opt
+  });
+}
+makeBar('chartAll', [
+  { label:'All transitions', data:D.all, backgroundColor:'#60a5fa', borderColor:'#3b82f6', borderWidth:1 }
+]);
+makeBar('chartUpDown', [
+  { label:'▲ Upgrade',   data:D.up,   backgroundColor:'rgba(34,197,94,0.65)',  borderColor:'#16a34a', borderWidth:1 },
+  { label:'▼ Downgrade', data:D.down, backgroundColor:'rgba(239,68,68,0.65)',  borderColor:'#dc2626', borderWidth:1 }
+], true);
+makeBar('chartUp', [
+  { label:'Win (r5>0)',  data:D.up_ok,   backgroundColor:'rgba(34,197,94,0.75)', borderColor:'#16a34a', borderWidth:1 },
+  { label:'Fail (r5≤0)', data:D.up_fail, backgroundColor:'rgba(239,68,68,0.75)', borderColor:'#dc2626', borderWidth:1 }
+], true);
+makeBar('chartDown', [
+  { label:'Win (r5<0)',  data:D.down_ok,   backgroundColor:'rgba(34,197,94,0.75)', borderColor:'#16a34a', borderWidth:1 },
+  { label:'Fail (r5≥0)', data:D.down_fail, backgroundColor:'rgba(239,68,68,0.75)', borderColor:'#dc2626', borderWidth:1 }
+], true);
+</script>
+</body>
+</html>

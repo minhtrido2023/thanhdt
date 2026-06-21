@@ -1,0 +1,87 @@
+Loading common inputs ...
+Loading state5 timeline ...
+  3082 dates with state data, states distribution: {1: 865, 2: 113, 3: 1589, 4: 397, 5: 118}
+
+Running variants:
+  v4_baseline (exit_map=None) ...
+  D1+slot12 (exit_map=None) ...
+  K2_50_BEAR (exit_map={2: 0.5, 1: 0.5}) ...
+  K2_50_BEAR_CR (exit_map={2: 0.5, 1: 1.0}) ...
+  K2_30_BEAR_CR (exit_map={2: 0.3, 1: 0.5}) ...
+  K2_50_NEUT (exit_map={3: 0.5, 2: 0.5, 1: 0.5}) ...
+  K2_70_BEAR (exit_map={2: 0.7, 1: 0.7}) ...
+
+=============================================================================================================================
+  K2 STATE-PARTIAL-EXIT — D1+slot12 base, variants of exit fractions
+=============================================================================================================================
+Period          Variant              CAGR%  Sharpe   MaxDD%  Calmar  Wealth    ΔvsD1
+------------------------------------------------------------------------------------
+FULL (2014-now) v4_baseline          15.17    1.28    -15.1    1.01    5.73        -
+FULL (2014-now) D1+slot12 ★          15.68    1.34    -14.3    1.09    6.05        -
+FULL (2014-now) K2_50_BEAR           15.12    1.34    -14.8    1.02    5.70  -0.56pp
+FULL (2014-now) K2_50_BEAR_CR        14.48    1.30    -16.5    0.88    5.32  -1.20pp
+FULL (2014-now) K2_30_BEAR_CR        15.12    1.34    -14.8    1.02    5.70  -0.56pp
+FULL (2014-now) K2_50_NEUT           10.98    1.19    -14.9    0.74    3.63  -4.70pp
+FULL (2014-now) K2_70_BEAR           15.07    1.34    -15.2    0.99    5.67  -0.61pp
+FULL (2014-now) VNINDEX_BH           11.42    0.68    -45.3    0.25    3.81        -
+
+Last 5Y         v4_baseline          18.57    1.28    -12.5    1.49    2.34        -
+Last 5Y         D1+slot12 ★          17.58    1.25    -13.5    1.30    2.24        -
+Last 5Y         K2_50_BEAR           15.65    1.18    -14.8    1.06    2.07  -1.93pp
+Last 5Y         K2_50_BEAR_CR        14.31    1.10    -16.5    0.87    1.95  -3.26pp
+Last 5Y         K2_30_BEAR_CR        15.65    1.18    -14.8    1.06    2.07  -1.92pp
+Last 5Y         K2_50_NEUT           10.11    0.99    -13.5    0.75    1.62  -7.47pp
+Last 5Y         K2_70_BEAR           15.53    1.17    -15.2    1.02    2.06  -2.05pp
+Last 5Y         VNINDEX_BH            8.84    0.53    -40.3    0.22    1.53        -
+
+Last 3Y         v4_baseline          12.28    0.90    -12.5    0.98    1.42        -
+Last 3Y         D1+slot12 ★          14.46    1.02    -13.5    1.07    1.50        -
+Last 3Y         K2_50_BEAR           11.55    0.89    -14.8    0.78    1.39  -2.91pp
+Last 3Y         K2_50_BEAR_CR        10.42    0.82    -16.5    0.63    1.35  -4.04pp
+Last 3Y         K2_30_BEAR_CR        11.56    0.89    -14.8    0.78    1.39  -2.90pp
+Last 3Y         K2_50_NEUT            9.32    1.08     -7.4    1.26    1.31  -5.14pp
+Last 3Y         K2_70_BEAR           11.34    0.88    -15.2    0.75    1.38  -3.12pp
+Last 3Y         VNINDEX_BH           21.71    1.17    -18.1    1.20    1.80        -
+
+Last 1Y         v4_baseline          22.90    1.26    -12.5    1.83    1.23        -
+Last 1Y         D1+slot12 ★          27.58    1.45    -13.5    2.04    1.28        -
+Last 1Y         K2_50_BEAR           24.80    1.38    -14.8    1.68    1.25  -2.78pp
+Last 1Y         K2_50_BEAR_CR        22.20    1.25    -16.5    1.35    1.22  -5.37pp
+Last 1Y         K2_30_BEAR_CR        24.36    1.36    -14.8    1.65    1.24  -3.22pp
+Last 1Y         K2_50_NEUT           13.24    1.10     -7.4    1.79    1.13 -14.34pp
+Last 1Y         K2_70_BEAR           24.37    1.36    -15.2    1.61    1.24  -3.21pp
+Last 1Y         VNINDEX_BH           46.37    1.95    -16.4    2.83    1.46        -
+
+YTD 2026        v4_baseline         -21.94   -1.26    -12.0   -1.82    0.92        -
+YTD 2026        D1+slot12 ★         -14.68   -0.71    -12.7   -1.15    0.95        -
+YTD 2026        K2_50_BEAR          -10.68   -0.49    -12.9   -0.83    0.96  +4.00pp
+YTD 2026        K2_50_BEAR_CR       -11.14   -0.52    -13.1   -0.85    0.96  +3.54pp
+YTD 2026        K2_30_BEAR_CR       -11.64   -0.55    -12.9   -0.90    0.96  +3.04pp
+YTD 2026        K2_50_NEUT            6.05    0.79     -5.5    1.09    1.02 +20.73pp
+YTD 2026        K2_70_BEAR          -10.40   -0.48    -12.9   -0.80    0.96  +4.28pp
+YTD 2026        VNINDEX_BH           22.36    0.99    -16.4    1.37    1.07        -
+
+OOS 2024-now    v4_baseline          17.20    1.20    -12.5    1.38    1.46        -
+OOS 2024-now    D1+slot12 ★          19.89    1.33    -13.5    1.47    1.54        -
+OOS 2024-now    K2_50_BEAR           16.01    1.19    -14.8    1.08    1.42  -3.88pp
+OOS 2024-now    K2_50_BEAR_CR        14.81    1.10    -16.5    0.90    1.39  -5.08pp
+OOS 2024-now    K2_30_BEAR_CR        16.03    1.19    -14.8    1.09    1.42  -3.86pp
+OOS 2024-now    K2_50_NEUT           11.80    1.31     -7.4    1.60    1.30  -8.09pp
+OOS 2024-now    K2_70_BEAR           15.89    1.18    -15.2    1.05    1.42  -4.00pp
+OOS 2024-now    VNINDEX_BH           25.08    1.30    -18.1    1.39    1.70        -
+
+2026 YTD per variant (trade-level):
+  D1+slot12       n2026= 26 mean26=-4.04%  WR=30.8% | total state-exits ever: 0
+  K2_50_BEAR      n2026=143 mean26=-5.30%  WR=23.8% | total state-exits ever: 2073
+  K2_50_BEAR_CR   n2026=128 mean26=-4.53%  WR=26.6% | total state-exits ever: 474
+  K2_30_BEAR_CR   n2026=143 mean26=-5.31%  WR=23.8% | total state-exits ever: 2073
+  K2_50_NEUT      n2026=696 mean26=-0.72%  WR=38.6% | total state-exits ever: 8159
+  K2_70_BEAR      n2026=143 mean26=-5.30%  WR=23.8% | total state-exits ever: 2073
+
+Reason distribution (best K2 variant D1+K2_50_BEAR):
+reason
+STATE_PARTIAL_S1    1649
+STATE_PARTIAL_S2     424
+TIME                 382
+STOP                  37
+EOD                    4

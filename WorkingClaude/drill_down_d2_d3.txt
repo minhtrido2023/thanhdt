@@ -1,0 +1,281 @@
+Loading data + signals...
+
+Running BAL_Fin4(v10) at 50B (reference) ...
+
+===============================================================================================
+  PART A — SECTOR EVOLUTION YEAR-BY-YEAR (BAL_Fin4 50B)
+===============================================================================================
+
+    Year     n  Misc/Oil  Material  Industri  ConsGood    Health  ConsServ  Utilitie    Fin/RE  Tech/Tel
+  ----------------------------------------------------------------------------------------------------
+    2015     2     0(  0%)     0(  0%)     0(  0%)     0(  0%)     0(  0%)     0(  0%)     0(  0%)     2(100%)     0(  0%)
+    2016     6     0(  0%)     1( 17%)     2( 33%)     0(  0%)     0(  0%)     0(  0%)     0(  0%)     2( 33%)     1( 17%)
+    2017    29     0(  0%)     2(  7%)     6( 21%)     1(  3%)     0(  0%)     2(  7%)     0(  0%)    18( 62%)     0(  0%)
+    2018    33     0(  0%)     1(  3%)     8( 24%)     6( 18%)     0(  0%)     1(  3%)     0(  0%)    17( 52%)     0(  0%)
+    2019    18     1(  6%)     2( 11%)     1(  6%)     1(  6%)     0(  0%)     1(  6%)     1(  6%)    11( 61%)     0(  0%)
+    2020    32     0(  0%)     6( 19%)     6( 19%)     5( 16%)     0(  0%)     1(  3%)     0(  0%)    14( 44%)     0(  0%)
+    2021    82     0(  0%)    18( 22%)    11( 13%)     7(  9%)     1(  1%)     0(  0%)     0(  0%)    45( 55%)     0(  0%)
+    2022     1     0(  0%)     0(  0%)     0(  0%)     0(  0%)     0(  0%)     0(  0%)     0(  0%)     1(100%)     0(  0%)
+    2023    13     0(  0%)     0(  0%)     4( 31%)     0(  0%)     0(  0%)     0(  0%)     0(  0%)     9( 69%)     0(  0%)
+    2024    24     3( 12%)     2(  8%)     2(  8%)     3( 12%)     0(  0%)     0(  0%)     0(  0%)    13( 54%)     1(  4%)
+    2025    36     1(  3%)     3(  8%)    12( 33%)     3(  8%)     0(  0%)     1(  3%)     0(  0%)    15( 42%)     1(  3%)
+    2026    13     0(  0%)     1(  8%)     2( 15%)     1(  8%)     0(  0%)     2( 15%)     0(  0%)     6( 46%)     0(  0%)
+
+  Per-sector AVG NET RETURN per year (in S145+ pool):
+    Year  Misc/Oil  Material  Industri  ConsGood    Health  ConsServ  Utilitie    Fin/RE  Tech/Tel
+    2015       n/a       n/a       n/a       n/a       n/a       n/a       n/a    +64.4%       n/a
+    2016       n/a       n/a     -6.6%       n/a       n/a       n/a       n/a     +0.2%       n/a
+    2017       n/a     +2.2%    +18.9%       n/a       n/a    +37.3%       n/a    +19.3%       n/a
+    2018       n/a       n/a     -5.6%     -0.6%       n/a       n/a       n/a     -3.2%       n/a
+    2019       n/a     +7.3%       n/a       n/a       n/a       n/a       n/a     -4.5%       n/a
+    2020       n/a    +11.4%    +14.7%    +14.2%       n/a       n/a       n/a    +28.6%       n/a
+    2021       n/a    +18.5%     +6.9%    +21.1%       n/a       n/a       n/a    +14.7%       n/a
+    2022       n/a       n/a       n/a       n/a       n/a       n/a       n/a       n/a       n/a
+    2023       n/a       n/a     -5.8%       n/a       n/a       n/a       n/a     -7.8%       n/a
+    2024     +1.6%     +7.9%    -15.4%    +26.4%       n/a       n/a       n/a    +14.2%       n/a
+    2025       n/a    +12.1%     +8.3%    +11.9%       n/a       n/a       n/a    +13.0%       n/a
+    2026       n/a       n/a     +3.4%       n/a       n/a     +5.0%       n/a     +0.7%       n/a
+
+===============================================================================================
+  PART B — DAY-OF-WEEK + MONTH PATTERNS
+===============================================================================================
+
+  Returns by entry day-of-week:
+            n  avg_ret  median_ret    win
+entry_dow                                
+Monday     57     7.15        4.60  57.89
+Tuesday    37     4.36        2.62  56.76
+Wednesday  54    13.49       11.13  68.52
+Thursday   86    12.80        7.76  69.77
+Friday     55     9.79        5.29  58.18
+
+  Returns by entry month:
+              n  avg_ret  median_ret    win
+entry_month                                
+1            39     8.73        5.24  66.67
+2            32     5.85        4.18  56.25
+3            25     2.94        1.43  56.00
+4            28     5.63       -2.49  50.00
+5            14    25.04       21.67  92.86
+6            22     3.93        5.67  54.55
+7            24    -1.10       -5.86  29.17
+8            27    21.15       10.13  81.48
+9             9    13.30       11.31  77.78
+10           19    11.11        5.63  78.95
+11           33    16.63       16.05  69.70
+12           17    18.62        9.26  70.59
+
+  Returns by entry quarter:
+            n  avg_ret    win
+entry_qtr                    
+1          96     6.26  60.42
+2          64     9.29  60.94
+3          60    11.07  60.00
+4          69    15.60  72.46
+
+===============================================================================================
+  PART C — POSITION MANAGEMENT VARIANTS (BAL_Fin4 50B)
+===============================================================================================
+
+  PM Variant                     |    CAGR     Sh      DD   Cal  trades
+  baseline (BL20)                |  16.69%   1.05  -19.6%  0.85       0
+  BL10                           |  16.69%   1.05  -19.6%  0.85       0
+  BL30                           |  16.69%   1.05  -19.6%  0.85       0
+  BL40                           |  15.53%   1.00  -19.6%  0.79       0
+  BL20+trail_tight               |  15.06%   1.05  -20.5%  0.74       0
+  BL20+trail_loose               |  17.14%   1.06  -19.7%  0.87       0
+  BL20+sec_lim_2_global          |  14.80%   1.02  -20.4%  0.73       0
+  BL20+sec_lim_3_global          |  15.84%   1.03  -19.6%  0.81       0
+  hold_30d                       |  15.38%   0.99  -17.8%  0.86       0
+  hold_60d                       |  13.94%   0.93  -25.0%  0.56       0
+  hold_90d                       |  14.51%   0.96  -28.0%  0.52       0
+  stop_-15%                      |  16.61%   1.08  -20.8%  0.80       0
+  stop_-25%                      |  16.38%   1.01  -20.1%  0.81       0
+
+  Saved: round14_*.csv
+Loading signals + context ...
+========================================================================================================================
+  💛 ĐỢT 2: 12 entries 12-14/08/2025  (state 5 EX-BULL period — top before CRISIS)
+========================================================================================================================
+
+🟢 VJC  2025-08-12 → 2025-10-16 (45d)  ret=+35.93%  reason=TIME
+   entry: TA=148  state5=5  play_type=MOMENTUM_S  sector=5
+   stock: liq=131.2B  days_since_rel=11
+   market@entry: VNI=1608  MA200=1310  ratio=1.227  RSI=0.766  
+   market@exit:  VNI=1767  ratio=1.257  RSI=0.714
+   state path: 5(08-12) → 1(09-23) → 1(10-16)
+
+🛑 AAS  2025-08-12 → 2025-09-23 (28d)  ret=-21.91%  reason=STOP
+   entry: TA=145  state5=5  play_type=MOMENTUM_S  sector=8
+   stock: liq=8.1B  days_since_rel=22
+   market@entry: VNI=1608  MA200=1310  ratio=1.227  RSI=0.766  
+   market@exit:  VNI=1635  ratio=1.195  RSI=0.488
+   state path: 5(08-12) → 1(09-23)
+
+🛑 HTN  2025-08-12 → 2025-10-02 (35d)  ret=-21.39%  reason=STOP
+   entry: TA=148  state5=5  play_type=MOMENTUM_S  sector=8
+   stock: liq=8.4B  days_since_rel=13
+   market@entry: VNI=1608  MA200=1310  ratio=1.227  RSI=0.766  
+   market@exit:  VNI=1653  ratio=1.196  RSI=0.515
+   state path: 5(08-12) → 1(09-23) → 1(10-02)
+
+🟢 SHS  2025-08-12 → 2025-10-16 (45d)  ret=+13.66%  reason=TIME
+   entry: TA=128  state5=5  play_type=MOMENTUM_A  sector=8
+   stock: liq=561.8B  days_since_rel=22
+   market@entry: VNI=1608  MA200=1310  ratio=1.227  RSI=0.766  
+   market@exit:  VNI=1767  ratio=1.257  RSI=0.714
+   state path: 5(08-12) → 1(09-23) → 1(10-16)
+
+🛑 VGC  2025-08-12 → 2025-10-08 (39d)  ret=-20.69%  reason=STOP
+   entry: TA=156  state5=5  play_type=MOMENTUM_QUALITY  sector=2
+   stock: liq=73.0B  days_since_rel=15
+   market@entry: VNI=1608  MA200=1310  ratio=1.227  RSI=0.766  
+   market@exit:  VNI=1698  ratio=1.221  RSI=0.614
+   state path: 5(08-12) → 1(09-23) → 1(10-08)
+
+🟡 SHB  2025-08-12 → 2025-10-16 (45d)  ret=+7.95%  reason=TIME
+   entry: TA=123  state5=5  play_type=COMPOUNDER_HOLD  sector=8
+   stock: liq=1120.4B  days_since_rel=12
+   market@entry: VNI=1608  MA200=1310  ratio=1.227  RSI=0.766  
+   market@exit:  VNI=1767  ratio=1.257  RSI=0.714
+   state path: 5(08-12) → 1(09-23) → 1(10-16)
+
+🟢 C69  2025-08-12 → 2025-10-16 (45d)  ret=+25.38%  reason=TIME
+   entry: TA=141  state5=5  play_type=MOMENTUM_S  sector=2
+   stock: liq=4.3B  days_since_rel=11
+   market@entry: VNI=1608  MA200=1310  ratio=1.227  RSI=0.766  
+   market@exit:  VNI=1767  ratio=1.257  RSI=0.714
+   state path: 5(08-12) → 1(09-23) → 1(10-16)
+
+🟢 TAL  2025-08-12 → 2025-10-16 (45d)  ret=+40.65%  reason=TIME
+   entry: TA=153  state5=5  play_type=MOMENTUM_S  sector=8
+   stock: liq=3.6B  days_since_rel=11
+   market@entry: VNI=1608  MA200=1310  ratio=1.227  RSI=0.766  
+   market@exit:  VNI=1767  ratio=1.257  RSI=0.714
+   state path: 5(08-12) → 1(09-23) → 1(10-16)
+
+🔴 CRE  2025-08-12 → 2025-10-16 (45d)  ret=-0.45%  reason=TIME
+   entry: TA=126  state5=5  play_type=MOMENTUM_A  sector=8
+   stock: liq=3.4B  days_since_rel=11
+   market@entry: VNI=1608  MA200=1310  ratio=1.227  RSI=0.766  
+   market@exit:  VNI=1767  ratio=1.257  RSI=0.714
+   state path: 5(08-12) → 1(09-23) → 1(10-16)
+
+🔴 HPX  2025-08-12 → 2025-10-16 (45d)  ret=-12.06%  reason=TIME
+   entry: TA=138  state5=5  play_type=MOMENTUM_A  sector=8
+   stock: liq=20.7B  days_since_rel=13
+   market@entry: VNI=1608  MA200=1310  ratio=1.227  RSI=0.766  
+   market@exit:  VNI=1767  ratio=1.257  RSI=0.714
+   state path: 5(08-12) → 1(09-23) → 1(10-16)
+
+🛑 DCM  2025-08-13 → 2025-10-17 (45d)  ret=-17.97%  reason=TIME
+   entry: TA=118  state5=5  play_type=COMPOUNDER_HOLD  sector=1
+   stock: liq=195.9B  days_since_rel=15
+   market@entry: VNI=1612  MA200=1312  ratio=1.228  RSI=0.771  
+   market@exit:  VNI=1731  ratio=1.230  RSI=0.593
+   state path: 5(08-13) → 1(09-23) → 1(10-17)
+
+🔴 CTS  2025-08-14 → 2025-10-20 (45d)  ret=-7.06%  reason=TIME
+   entry: TA=141  state5=5  play_type=MOMENTUM_S  sector=8
+   stock: liq=127.1B  days_since_rel=24
+   market@entry: VNI=1641  MA200=1314  ratio=1.249  RSI=0.803  
+   market@exit:  VNI=1636  ratio=1.161  RSI=0.400
+   state path: 5(08-14) → 1(09-23) → 1(10-20)
+
+📊 ĐỢT 2 Pattern:
+   Winners (5/12): VJC, SHS, SHB, C69, TAL
+   Losers  (7/12): AAS, HTN, VGC, CRE, HPX, DCM, CTS
+   Stops:  AAS, HTN, VGC — -21.9%, -21.4%, -20.7%
+
+========================================================================================================================
+  🟢 ĐỢT 3: 12 entries 09-15/01/2026  (state 3 NEUTRAL transition, before Q1 BEAR)
+========================================================================================================================
+
+🔴 DPR  2026-01-09 → 2026-03-20 (45d)  ret=-6.93%  reason=TIME
+   entry: TA=136  state5=4  play_type=DEEP_VALUE_RECOVERY  sector=1
+   stock: liq=17.4B  days_since_rel=72
+   market@entry: VNI=1868  MA200=1527  ratio=1.223  RSI=0.727  
+   market@exit:  VNI=1648  ratio=1.000  RSI=0.327
+   state path: 4(01-09) → 3(02-03) → 2(03-17) → 2(03-20)
+
+🛑 BCM  2026-01-09 → 2026-03-09 (36d)  ret=-23.62%  reason=STOP
+   entry: TA=140  state5=4  play_type=DEEP_VALUE_RECOVERY  sector=8
+   stock: liq=15.1B  days_since_rel=67
+   market@entry: VNI=1868  MA200=1527  ratio=1.223  RSI=0.727  
+   market@exit:  VNI=1653  ratio=1.013  RSI=0.260
+   state path: 4(01-09) → 3(02-03) → 3(03-09)
+
+🔴 MSB  2026-01-09 → 2026-03-20 (45d)  ret=-10.72%  reason=TIME
+   entry: TA=50  state5=4  play_type=PASS  sector=8
+   stock: liq=76.4B  days_since_rel=67
+   market@entry: VNI=1868  MA200=1527  ratio=1.223  RSI=0.727  
+   market@exit:  VNI=1648  ratio=1.000  RSI=0.327
+   state path: 4(01-09) → 3(02-03) → 2(03-17) → 2(03-20)
+
+🔴 SHB  2026-01-09 → 2026-03-20 (45d)  ret=-10.15%  reason=TIME
+   entry: TA=90  state5=4  play_type=PASS  sector=8
+   stock: liq=1084.6B  days_since_rel=78
+   market@entry: VNI=1868  MA200=1527  ratio=1.223  RSI=0.727  
+   market@exit:  VNI=1648  ratio=1.000  RSI=0.327
+   state path: 4(01-09) → 3(02-03) → 2(03-17) → 2(03-20)
+
+🟢 PET  2026-01-09 → 2026-03-20 (45d)  ret=+27.01%  reason=TIME
+   entry: TA=126  state5=4  play_type=DEEP_VALUE_RECOVERY  sector=5
+   stock: liq=39.7B  days_since_rel=72
+   market@entry: VNI=1868  MA200=1527  ratio=1.223  RSI=0.727  
+   market@exit:  VNI=1648  ratio=1.000  RSI=0.327
+   state path: 4(01-09) → 3(02-03) → 2(03-17) → 2(03-20)
+
+🛑 ACV  2026-01-09 → 2026-03-20 (45d)  ret=-20.08%  reason=TIME
+   entry: TA=118  state5=4  play_type=DEEP_VALUE_RECOVERY  sector=2
+   stock: liq=48.0B  days_since_rel=67
+   market@entry: VNI=1868  MA200=1527  ratio=1.223  RSI=0.727  
+   market@exit:  VNI=1648  ratio=1.000  RSI=0.327
+   state path: 4(01-09) → 3(02-03) → 2(03-17) → 2(03-20)
+
+🔴 MWG  2026-01-09 → 2026-03-20 (45d)  ret=-7.79%  reason=TIME
+   entry: TA=108  state5=4  play_type=DEEP_VALUE_RECOVERY  sector=5
+   stock: liq=532.1B  days_since_rel=67
+   market@entry: VNI=1868  MA200=1527  ratio=1.223  RSI=0.727  
+   market@exit:  VNI=1648  ratio=1.000  RSI=0.327
+   state path: 4(01-09) → 3(02-03) → 2(03-17) → 2(03-20)
+
+🔴 AAS  2026-01-09 → 2026-03-20 (45d)  ret=-12.14%  reason=TIME
+   entry: TA=31  state5=4  play_type=PASS  sector=8
+   stock: liq=12.1B  days_since_rel=88
+   market@entry: VNI=1868  MA200=1527  ratio=1.223  RSI=0.727  
+   market@exit:  VNI=1648  ratio=1.000  RSI=0.327
+   state path: 4(01-09) → 3(02-03) → 2(03-17) → 2(03-20)
+
+🟢 NAF  2026-01-09 → 2026-03-20 (45d)  ret=+29.31%  reason=TIME
+   entry: TA=108  state5=4  play_type=DEEP_VALUE_RECOVERY  sector=3
+   stock: liq=21.6B  days_since_rel=67
+   market@entry: VNI=1868  MA200=1527  ratio=1.223  RSI=0.727  
+   market@exit:  VNI=1648  ratio=1.000  RSI=0.327
+   state path: 4(01-09) → 3(02-03) → 2(03-17) → 2(03-20)
+
+🟢 PC1  2026-01-09 → 2026-03-20 (45d)  ret=+11.54%  reason=TIME
+   entry: TA=116  state5=4  play_type=DEEP_VALUE_RECOVERY  sector=2
+   stock: liq=57.3B  days_since_rel=67
+   market@entry: VNI=1868  MA200=1527  ratio=1.223  RSI=0.727  
+   market@exit:  VNI=1648  ratio=1.000  RSI=0.327
+   state path: 4(01-09) → 3(02-03) → 2(03-17) → 2(03-20)
+
+🔴 SSI  2026-01-09 → 2026-03-20 (45d)  ret=-11.65%  reason=TIME
+   entry: TA=71  state5=4  play_type=PASS  sector=8
+   stock: liq=857.1B  days_since_rel=67
+   market@entry: VNI=1868  MA200=1527  ratio=1.223  RSI=0.727  
+   market@exit:  VNI=1648  ratio=1.000  RSI=0.327
+   state path: 4(01-09) → 3(02-03) → 2(03-17) → 2(03-20)
+
+🔴 MSN  2026-01-15 → 2026-03-26 (45d)  ret=-11.43%  reason=TIME
+   entry: TA=143  state5=4  play_type=DEEP_VALUE_RECOVERY  sector=3
+   stock: liq=406.5B  days_since_rel=79
+   market@entry: VNI=1865  MA200=1539  ratio=1.212  RSI=0.654  
+   market@exit:  VNI=1645  ratio=0.994  RSI=0.386
+   state path: 4(01-15) → 3(02-03) → 2(03-17) → 2(03-26)
+
+📊 ĐỢT 3 Pattern:
+   Winners (3/12): PET, NAF, PC1
+   Losers  (9/12): DPR, BCM, MSB, SHB, ACV, MWG, AAS, SSI, MSN
+   Stops:  BCM — -23.6%

@@ -1,0 +1,19 @@
+# WorkingClaude server cron (UTC = ICT-7h). Installed 2026-06-16. Mirrors Windows Task Scheduler.
+MAILTO=""
+SHELL=/bin/bash
+55 7 * * *   bash /home/trido/thanhdt/WorkingClaude/server_cron/paper_trade_run.sh        >> /home/trido/thanhdt/WorkingClaude/data/cron_dispatch.log 2>&1
+15 8 * * *   bash /home/trido/thanhdt/WorkingClaude/server_cron/bull_div_boost_run.sh     >> /home/trido/thanhdt/WorkingClaude/data/cron_dispatch.log 2>&1
+20 8 * * *   bash /home/trido/thanhdt/WorkingClaude/server_cron/sbv_macro_run.sh          >> /home/trido/thanhdt/WorkingClaude/data/cron_dispatch.log 2>&1
+30 8 * * *   bash /home/trido/thanhdt/WorkingClaude/server_cron/papertrade_daily.sh       >> /home/trido/thanhdt/WorkingClaude/data/cron_dispatch.log 2>&1
+30 8 * * *   bash /home/trido/thanhdt/WorkingClaude/server_cron/layer3_v4_shadow_run.sh   >> /home/trido/thanhdt/WorkingClaude/data/cron_dispatch.log 2>&1
+30 8 * * *   bash /home/trido/thanhdt/WorkingClaude/server_cron/ngu_hanh_shadow_run.sh    >> /home/trido/thanhdt/WorkingClaude/data/cron_dispatch.log 2>&1
+45 10 * * *  bash /home/trido/thanhdt/WorkingClaude/server_cron/pt_8l_daily.sh            >> /home/trido/thanhdt/WorkingClaude/data/cron_dispatch.log 2>&1
+0 11 * * 1-5 bash /home/trido/thanhdt/WorkingClaude/server_cron/telegram_run_daily.sh     >> /home/trido/thanhdt/WorkingClaude/data/cron_dispatch.log 2>&1
+0 9 * * 0    bash /home/trido/thanhdt/WorkingClaude/server_cron/papertrade_weekly.sh      >> /home/trido/thanhdt/WorkingClaude/data/cron_dispatch.log 2>&1
+30 8 * * 5   bash /home/trido/thanhdt/WorkingClaude/server_cron/paper_trade_weekly_run.sh >> /home/trido/thanhdt/WorkingClaude/data/cron_dispatch.log 2>&1
+0 2 29 6 *   bash /home/trido/thanhdt/WorkingClaude/server_cron/dt4_decision_review.sh    >> /home/trido/thanhdt/WorkingClaude/data/cron_dispatch.log 2>&1
+0 9 30 6 *   bash /home/trido/thanhdt/WorkingClaude/server_cron/papertrade_milestone.sh   >> /home/trido/thanhdt/WorkingClaude/data/cron_dispatch.log 2>&1
+30 9 30 6 *  bash /home/trido/thanhdt/WorkingClaude/server_cron/paper_trade_review_run.sh >> /home/trido/thanhdt/WorkingClaude/data/cron_dispatch.log 2>&1
+0 9 31 8 *   bash /home/trido/thanhdt/WorkingClaude/server_cron/papertrade_milestone.sh   >> /home/trido/thanhdt/WorkingClaude/data/cron_dispatch.log 2>&1
+30 8 19 5 *  bash /home/trido/thanhdt/WorkingClaude/server_cron/bull_div_boost_report_run.sh >> /home/trido/thanhdt/WorkingClaude/data/cron_dispatch.log 2>&1
+35 8 19 5 *  bash /home/trido/thanhdt/WorkingClaude/server_cron/sbv_macro_report_run.sh   >> /home/trido/thanhdt/WorkingClaude/data/cron_dispatch.log 2>&1

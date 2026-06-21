@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Công thức Hệ thống Phân loại Thị trường VN-Index</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f8fafc;color:#1e293b;font-size:13.5px;line-height:1.65}
+.hdr{background:linear-gradient(135deg,#1e3a5f,#1a4731);color:#fff;padding:26px 32px}
+.hdr h1{font-size:21px;font-weight:700;margin-bottom:5px}
+.hdr p{font-size:12.5px;opacity:.85;max-width:900px}
+.wrap{max-width:1000px;margin:0 auto;padding:20px 24px}
+h2{font-size:16px;font-weight:700;color:#1e3a5f;margin:24px 0 12px;border-bottom:2px solid #e2e8f0;padding-bottom:6px}
+h3{font-size:13.5px;font-weight:700;color:#374151;margin:16px 0 8px}
+.step{background:#fff;border-radius:12px;padding:18px 20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.06);border-left:4px solid #3b82f6}
+.step.warn{border-left-color:#f59e0b}
+.step.green{border-left-color:#10b981}
+.step.red{border-left-color:#ef4444}
+.step-num{display:inline-block;background:#3b82f6;color:#fff;border-radius:50%;width:24px;height:24px;text-align:center;line-height:24px;font-size:12px;font-weight:700;margin-right:8px}
+.step-title{font-size:15px;font-weight:700;color:#1e293b}
+pre{background:#0f172a;color:#e2e8f0;border-radius:10px;padding:16px 18px;font-size:12px;line-height:1.7;overflow-x:auto;margin:12px 0;white-space:pre-wrap}
+.kw{color:#93c5fd} .fn{color:#6ee7b7} .cm{color:#6b7280;font-style:italic}
+.cn{color:#fbbf24} .op{color:#f472b6}
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin:10px 0}
+th{background:#f1f5f9;padding:8px 10px;text-align:left;font-weight:700;color:#374151;border-bottom:2px solid #e2e8f0}
+td{padding:7px 10px;border-bottom:1px solid #f1f5f9}
+tr:hover td{background:#f8fafc}
+.mono{font-family:monospace;background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:11.5px}
+.formula{background:#fefce8;border:1px solid #fde68a;border-radius:8px;padding:12px 16px;margin:10px 0;font-family:monospace;font-size:13px;color:#1e293b}
+.note{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 14px;margin:10px 0;font-size:12px;color:#1e40af;line-height:1.7}
+.warn-box{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;margin:10px 0;font-size:12px;color:#92400e}
+.param-row td:first-child{font-family:monospace;color:#2563eb;font-weight:600}
+.state-table td:nth-child(2){font-weight:700}
+.alloc{display:inline-block;padding:2px 10px;border-radius:10px;color:#fff;font-weight:700;font-size:12px}
+.flow{display:flex;gap:0;align-items:center;flex-wrap:wrap;margin:14px 0}
+.fl-box{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;padding:9px 14px;font-size:12px;font-weight:600;text-align:center;min-width:100px}
+.fl-arr{color:#94a3b8;font-size:20px;padding:0 8px}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <h1>⚙️ Công thức đầy đủ: Hệ thống Phân loại Thị trường VN-Index</h1>
+  <p>Mô tả chính xác từng bước tính toán — có thể implement lại và backtest độc lập. Toàn bộ hệ thống <strong>không dùng dữ liệu tương lai</strong>: mọi ngưỡng đều được tính từ expanding window (dữ liệu từ đầu đến thời điểm t).</p>
+</div>
+<div class="wrap">
+
+<div class="flow">
+  <div class="fl-box">① Tính yếu tố thô<br><small>Raw factors</small></div>
+  <div class="fl-arr">→</div>
+  <div class="fl-box">② Expanding percentile<br><small>Rank từng yếu tố</small></div>
+  <div class="fl-arr">→</div>
+  <div class="fl-box">③ Composite score<br><small>Bình quân có trọng số</small></div>
+  <div class="fl-arr">→</div>
+  <div class="fl-box">④ Expanding %tile score<br><small>Rank của score</small></div>
+  <div class="fl-arr">→</div>
+  <div class="fl-box">⑤ Trạng thái thô<br><small>5 mức</small></div>
+  <div class="fl-arr">→</div>
+  <div class="fl-box">⑥ Risk overrides<br><small>Lọc rủi ro</small></div>
+  <div class="fl-arr">→</div>
+  <div class="fl-box">⑦ Smoothing<br><small>Mode 5 kỳ</small></div>
+  <div class="fl-arr">→</div>
+  <div class="fl-box" style="background:#dcfce7;border-color:#86efac">⑧ Thực thi<br><small>T+1 · 3-day ramp</small></div>
+</div>
+
+<h2>BƯỚC 1 — Tính giá trị thô của từng yếu tố</h2>
+<div class="step">
+  <span class="step-num">1</span><span class="step-title">7 yếu tố đầu vào</span>
+  <br><br>
+  <table>
+    <tr><th>Ký hiệu</th><th>Công thức</th><th>Trọng số</th><th>Nguồn</th></tr>
+    <tr class="param-row"><td>P3M[t]</td><td>Close[t] / Close[t−60] − 1</td><td>30%</td><td>OHLCV</td></tr>
+    <tr class="param-row"><td>P1M[t]</td><td>Close[t] / Close[t−20] − 1</td><td>10%</td><td>OHLCV</td></tr>
+    <tr class="param-row"><td>MA200[t]</td><td>Close[t] / SMA(Close,200)[t] − 1</td><td>15%</td><td>OHLCV</td></tr>
+    <tr class="param-row"><td>RSI[t]</td><td>Wilder RSI(14) / 100  →  [0,1]</td><td>15%</td><td>OHLCV (BigQuery 2014+)</td></tr>
+    <tr class="param-row"><td>MACD[t]</td><td>EMA(12)−EMA(26) trừ Signal EMA(9)</td><td>10%</td><td>OHLCV (BigQuery 2014+)</td></tr>
+    <tr class="param-row"><td>CMF[t]</td><td>Chaikin Money Flow (14 ngày)</td><td>8%</td><td>BigQuery từ 2014</td></tr>
+    <tr class="param-row"><td>Breadth[t]</td><td>% cổ phiếu > MA50 trong toàn thị trường</td><td>12%</td><td>BigQuery từ 2014</td></tr>
+  </table>
+
+  <div class="formula">
+RSI Wilder:
+  U[t] = max(Close[t] - Close[t-1], 0)
+  D[t] = max(Close[t-1] - Close[t], 0)
+  AvgU[t] = (AvgU[t-1] * 13 + U[t]) / 14    ← Wilder smoothing
+  AvgD[t] = (AvgD[t-1] * 13 + D[t]) / 14
+  RSI[t]  = AvgU[t] / (AvgU[t] + AvgD[t])   ← đã ÷100, kết quả [0,1]
+
+MACD histogram:
+  EMA12[t]  = EMA12[t-1] * (1 - 2/13) + Close[t] * (2/13)
+  EMA26[t]  = EMA26[t-1] * (1 - 2/27) + Close[t] * (2/27)
+  MACD[t]   = EMA12[t] - EMA26[t]
+  Signal[t] = Signal[t-1] * (1 - 2/10) + MACD[t] * (2/10)
+  Hist[t]   = MACD[t] - Signal[t]           ← đây là giá trị thô dùng để rank
+  </div>
+  <div class="note">Dữ liệu cần: chuỗi Close hàng ngày của VNINDEX từ 2000-07-28. CMF và Breadth chỉ có từ 2014 (lấy từ BigQuery), khi thiếu hệ thống tự điều chỉnh trọng số theo yếu tố có sẵn.</div>
+</div>
+
+<h2>BƯỚC 2 — Expanding Window Percentile Rank</h2>
+<div class="step">
+  <span class="step-num">2</span><span class="step-title">Tính rank từng yếu tố — không dùng dữ liệu tương lai</span>
+  <br><br>
+
+  <div class="formula">
+<b>Expanding percentile rank tại thời điểm t:</b>
+
+  rank_f[t] = #{s ≤ t : f[s] ≤ f[t], f[s] không phải NaN}
+              ─────────────────────────────────────────────
+              #{s ≤ t : f[s] không phải NaN}
+
+  Điều kiện: cần ít nhất min_lookback = 252 ngày hợp lệ
+             Nếu chưa đủ 252 điểm → rank_f[t] = NaN (chưa tính)
+  </div>
+
+<pre><span class="kw">def</span> <span class="fn">expanding_pct_rank</span>(series: np.ndarray, min_lb: int = <span class="cn">252</span>) -> np.ndarray:
+    <span class="cm">"""
+    Tính expanding percentile rank — không look-ahead.
+    Trả về giá trị trong [0, 1]; NaN nếu chưa đủ min_lb điểm.
+    """</span>
+    out = np.full(len(series), np.nan)
+    <span class="kw">for</span> t <span class="kw">in</span> range(len(series)):
+        hist = series[:t+<span class="cn">1</span>]
+        valid = hist[~np.isnan(hist)]
+        <span class="kw">if</span> len(valid) < min_lb:
+            <span class="kw">continue</span>                        <span class="cm"># chưa đủ dữ liệu</span>
+        out[t] = np.sum(valid <= series[t]) / len(valid)
+    <span class="kw">return</span> out</pre>
+
+  <div class="note"><strong>Tại sao expanding, không rolling?</strong> Rolling 252 ngày sẽ "quên" các giai đoạn cực đoan trong quá khứ. Expanding window giữ lại toàn bộ lịch sử — một đỉnh bull run 2007 vẫn ảnh hưởng đến ngưỡng phân loại năm 2022.</div>
+</div>
+
+<h2>BƯỚC 3 — Composite Score</h2>
+<div class="step">
+  <span class="step-num">3</span><span class="step-title">Bình quân có trọng số của 7 rank yếu tố</span>
+  <br><br>
+  <div class="formula">
+Trọng số cơ sở:
+  W = {P3M: 0.30,  P1M: 0.10,  MA200: 0.15,
+        RSI: 0.15,  MACD: 0.10,  CMF: 0.08,  Breadth: 0.12}
+
+Composite score tại t (chỉ dùng yếu tố có sẵn):
+  available = {k : rank_k[t] không phải NaN}
+  Yêu cầu:   |available| ≥ 3
+
+  score[t] = Σ (rank_k[t] × W[k])  for k in available
+             ─────────────────────────────────────────
+             Σ W[k]  for k in available
+
+  (chuẩn hóa lại để tổng trọng số = 1)
+  </div>
+<pre><span class="kw">def</span> <span class="fn">composite_score</span>(ranks: dict, W_BASE: dict, min_factors: int = <span class="cn">3</span>) -> float:
+    avail = {k: v <span class="kw">for</span> k, v <span class="kw">in</span> ranks.items() <span class="kw">if</span> <span class="kw">not</span> np.isnan(v)}
+    <span class="kw">if</span> len(avail) < min_factors:
+        <span class="kw">return</span> np.nan
+    w_sum = sum(W_BASE[k] <span class="kw">for</span> k <span class="kw">in</span> avail)
+    <span class="kw">return</span> sum(avail[k] * W_BASE[k] <span class="kw">for</span> k <span class="kw">in</span> avail) / w_sum</pre>
+</div>
+
+<h2>BƯỚC 4 — Expanding Percentile của Composite Score</h2>
+<div class="step">
+  <span class="step-num">4</span><span class="step-title">Rank của score trong phân phối lịch sử của chính nó</span>
+  <br><br>
+  <div class="formula">
+  r_score[t] = expanding_pct_rank(score, min_lb=252)[t]
+
+  ← Áp dụng cùng hàm BƯỚC 2 lên mảng score[]
+  ← min_lb=252 ngày hợp lệ của score (không phải Close)
+  </div>
+  <div class="warn-box"><strong>⚠️ Đây là bước quan trọng nhất và thường bị hiểu nhầm.</strong> Trạng thái thị trường được xác định bởi <em>r_score</em> — vị trí của composite score trong phân phối lịch sử của chính nó — không phải giá trị tuyệt đối của score. Một score = 0.62 có thể là CRISIS nếu 90% các ngày trước đó có score cao hơn (ví dụ: sau bull run 2020–2021).</div>
+</div>
+
+<h2>BƯỚC 5 — Phân loại trạng thái thô</h2>
+<div class="step">
+  <span class="step-num">5</span><span class="step-title">5 trạng thái theo ngưỡng cố định của r_score</span>
+  <br><br>
+  <table class="state-table">
+    <tr><th>r_score[t]</th><th>Trạng thái</th><th>Tỉ lệ nắm giữ cổ phiếu</th><th>Ý nghĩa</th></tr>
+    <tr><td>< 0.10</td><td><span class="alloc" style="background:#ef4444">CRISIS</span></td><td style="font-weight:700;color:#ef4444">0%</td><td>Bottom 10% lịch sử → thoát toàn bộ</td></tr>
+    <tr><td>0.10 – 0.20</td><td><span class="alloc" style="background:#f97316">BEAR</span></td><td style="font-weight:700;color:#f97316">20%</td><td>Thị trường yếu rõ rệt → giảm mạnh</td></tr>
+    <tr><td>0.20 – 0.70</td><td><span class="alloc" style="background:#eab308">NEUTRAL</span></td><td style="font-weight:700;color:#92400e">70%</td><td>Vùng bình thường → tỉ lệ cơ sở</td></tr>
+    <tr><td>0.70 – 0.90</td><td><span class="alloc" style="background:#22c55e">BULL</span></td><td style="font-weight:700;color:#166534">100%</td><td>Top 30% → đủ vốn, không margin</td></tr>
+    <tr><td>≥ 0.90</td><td><span class="alloc" style="background:#10b981">EX-BULL</span></td><td style="font-weight:700;color:#065f46">130%</td><td>Top 10% → dùng margin 30%</td></tr>
+  </table>
+  <div class="formula">
+state_raw[t]:
+  if   r_score[t] < 0.10  →  1 (CRISIS)
+  elif r_score[t] < 0.20  →  2 (BEAR)
+  elif r_score[t] < 0.70  →  3 (NEUTRAL)
+  elif r_score[t] < 0.90  →  4 (BULL)
+  else                    →  5 (EX-BULL)
+  </div>
+</div>
+
+<h2>BƯỚC 6 — Risk Overrides (3 bộ lọc độc lập)</h2>
+<div class="step red">
+  <span class="step-num">6</span><span class="step-title">Giới hạn trạng thái theo rủi ro thực tế</span>
+  <br><br>
+  <table>
+    <tr><th>Override</th><th>Điều kiện</th><th>Tác động</th></tr>
+    <tr><td><strong>PE đắt</strong></td><td>PE[t] > expanding_P90(PE)[t]</td><td>Nếu state=5 → hạ xuống 4 (không dùng margin khi thị trường đắt)</td></tr>
+    <tr><td><strong>Drawdown sâu</strong></td><td>DD[t] < −25%</td><td>Nếu state≥4 → hạ xuống 3 (không tăng vốn khi đang lỗ lớn)</td></tr>
+    <tr><td><strong>Biến động cao</strong></td><td>Vol20[t] > 1.5 × AvgVol_expanding[t]</td><td>Nếu state=5 → hạ xuống 4 (không dùng margin khi VIX cao)</td></tr>
+  </table>
+  <div class="formula">
+DD[t]   = Close[t] / max(Close[0..t]) − 1        ← max drawdown từ đỉnh đến t
+Vol20[t] = std(daily_return[t-19..t]) × √252      ← annualized vol 20 ngày
+AvgVol_expanding[t] = mean(Vol20[0..t])           ← expanding average
+
+PE_P90_expanding[t] = expanding_pct_rank(PE, 0.90)[t]
+
+state[t] = state_raw[t]   ← bắt đầu từ state thô
+if PE[t] > PE_P90[t] and state[t] == 5:   state[t] = 4
+if DD[t] < -0.25   and state[t] >= 4:     state[t] = 3
+if Vol20[t] > 1.5*AvgVol[t] and state[t]==5: state[t] = 4
+  </div>
+  <div class="note">Ba override này <strong>chỉ giảm</strong> trạng thái, không bao giờ tăng. Chúng hoạt động độc lập và có thể kích hoạt đồng thời.</div>
+</div>
+
+<h2>BƯỚC 7 — Trailing Mode Smoothing (5 kỳ)</h2>
+<div class="step warn">
+  <span class="step-num">7</span><span class="step-title">Lọc nhiễu bằng rolling mode — chỉ dùng quá khứ</span>
+  <br><br>
+  <div class="formula">
+smoothed_state[t] = mode(state[t-4], state[t-3], state[t-2], state[t-1], state[t])
+
+← mode = trạng thái xuất hiện nhiều nhất trong 5 kỳ gần nhất
+← nếu hòa (2-2-1): ưu tiên trạng thái gần nhất
+  </div>
+<pre><span class="kw">from</span> scipy.stats <span class="kw">import</span> mode <span class="kw">as</span> scipy_mode
+
+<span class="kw">def</span> <span class="fn">rolling_mode</span>(states: np.ndarray, window: int = <span class="cn">5</span>) -> np.ndarray:
+    out = states.copy()
+    <span class="kw">for</span> t <span class="kw">in</span> range(window - <span class="cn">1</span>, len(states)):
+        window_vals = states[t-window+<span class="cn">1</span> : t+<span class="cn">1</span>]
+        m = scipy_mode(window_vals, keepdims=<span class="cn">True</span>)
+        out[t] = int(m.mode[<span class="cn">0</span>])
+    <span class="kw">return</span> out</pre>
+  <div class="note">Smoothing ngăn hệ thống flip-flop liên tục khi composite score dao động quanh ngưỡng. Nếu state đổi 3/5 ngày trở lên mới ghi nhận là chuyển đổi thực sự.</div>
+</div>
+
+<h2>BƯỚC 8 — Thực thi danh mục</h2>
+<div class="step green">
+  <span class="step-num">8</span><span class="step-title">T+1 execution delay + 3-day gradual ramp + chi phí giao dịch</span>
+  <br><br>
+  <div class="formula">
+<b>Tham số:</b>
+  TARGET_W  = {1: 0.00, 2: 0.20, 3: 0.70, 4: 1.00, 5: 1.30}
+  DEPOSIT_R = 0.06 / 252    ← lãi suất tiết kiệm 6%/năm (phần tiền mặt)
+  BORROW_R  = 0.10 / 252    ← lãi suất margin 10%/năm (phần vượt 100%)
+  TC        = 0.001          ← phí giao dịch 0.1% mỗi lần mua/bán
+  RAMP      = 3              ← chuyển dần qua 3 ngày
+  SNAP_THR  = 0.03           ← nếu chênh < 3% → chuyển ngay lập tức
+
+<b>Vòng lặp hàng ngày:</b>
+  w_prev    ← trọng số cổ phiếu ngày hôm qua
+  target    = TARGET_W[ smoothed_state[t-1] ]   ← T+1 delay
+  diff      = target - w_prev
+  if |diff| < SNAP_THR:
+      w_new = target                             ← snap nếu nhỏ
+  else:
+      w_new = w_prev + diff / RAMP               ← tiến 1/3 mỗi ngày
+
+  r[t]     = Close[t] / Close[t-1] - 1          ← daily return VNINDEX
+  cash_r   = max(0, 1 - w_new) × DEPOSIT_R      ← lãi tiền mặt
+  margin_c = max(0, w_new - 1)  × BORROW_R      ← chi phí margin
+  trade_c  = |w_new - w_prev|   × TC             ← phí giao dịch
+  pnl[t]   = w_new × r[t] + cash_r - margin_c - trade_c
+
+  PV[t]    = PV[t-1] × (1 + pnl[t])
+  </div>
+<pre><span class="kw">def</span> <span class="fn">backtest</span>(close: np.ndarray, smoothed_state: np.ndarray) -> np.ndarray:
+    TARGET_W   = {<span class="cn">1</span>:<span class="cn">0.00</span>, <span class="cn">2</span>:<span class="cn">0.20</span>, <span class="cn">3</span>:<span class="cn">0.70</span>, <span class="cn">4</span>:<span class="cn">1.00</span>, <span class="cn">5</span>:<span class="cn">1.30</span>}
+    DEPOSIT_R  = <span class="cn">0.06</span> / <span class="cn">252</span>
+    BORROW_R   = <span class="cn">0.10</span> / <span class="cn">252</span>
+    TC         = <span class="cn">0.001</span>
+    RAMP       = <span class="cn">3</span>
+    SNAP_THR   = <span class="cn">0.03</span>
+    n          = len(close)
+    pv         = np.zeros(n);  pv[<span class="cn">0</span>] = <span class="cn">1e9</span>   <span class="cm"># vốn ban đầu 1 tỷ VND</span>
+    w          = <span class="cn">0.70</span>                          <span class="cm"># trọng số khởi đầu = NEUTRAL</span>
+
+    <span class="kw">for</span> t <span class="kw">in</span> range(<span class="cn">1</span>, n):
+        target = TARGET_W[smoothed_state[t-<span class="cn">1</span>]]   <span class="cm"># T+1 delay</span>
+        diff   = target - w
+        w_new  = target <span class="kw">if</span> abs(diff) < SNAP_THR <span class="kw">else</span> w + diff / RAMP
+        r      = close[t] / close[t-<span class="cn">1</span>] - <span class="cn">1</span>
+        cash_r = max(<span class="cn">0</span>, <span class="cn">1</span> - w_new) * DEPOSIT_R
+        marg_c = max(<span class="cn">0</span>, w_new - <span class="cn">1</span>)  * BORROW_R
+        trd_c  = abs(w_new - w)         * TC
+        pv[t]  = pv[t-<span class="cn">1</span>] * (<span class="cn">1</span> + w_new*r + cash_r - marg_c - trd_c)
+        w      = w_new
+    <span class="kw">return</span> pv</pre>
+</div>
+
+<h2>Tóm tắt tham số — bảng tham chiếu</h2>
+<div class="step">
+<table>
+  <tr><th>Nhóm</th><th>Tham số</th><th>Giá trị</th><th>Mô tả</th></tr>
+  <tr><td rowspan="2"><strong>Data</strong></td><td class="mono">min_lookback</td><td>252</td><td>Số ngày tối thiểu để bắt đầu tính expanding rank</td></tr>
+  <tr><td class="mono">min_factors</td><td>3</td><td>Số yếu tố tối thiểu để tính composite score</td></tr>
+  <tr><td rowspan="7"><strong>Trọng số</strong></td><td class="mono">W_P3M</td><td>0.30</td><td>Momentum 3 tháng</td></tr>
+  <tr><td class="mono">W_P1M</td><td>0.10</td><td>Momentum 1 tháng</td></tr>
+  <tr><td class="mono">W_MA200</td><td>0.15</td><td>Xu hướng dài hạn</td></tr>
+  <tr><td class="mono">W_RSI</td><td>0.15</td><td>Overbought/oversold</td></tr>
+  <tr><td class="mono">W_MACD</td><td>0.10</td><td>Đà tăng/giảm</td></tr>
+  <tr><td class="mono">W_CMF</td><td>0.08</td><td>Dòng tiền</td></tr>
+  <tr><td class="mono">W_BRD</td><td>0.12</td><td>Breadth thị trường</td></tr>
+  <tr><td rowspan="5"><strong>State thresholds</strong></td><td class="mono">CRISIS_THR</td><td>0.10</td><td>r_score &lt; 0.10</td></tr>
+  <tr><td class="mono">BEAR_THR</td><td>0.20</td><td>r_score &lt; 0.20</td></tr>
+  <tr><td class="mono">NEUTRAL_THR</td><td>0.70</td><td>r_score &lt; 0.70</td></tr>
+  <tr><td class="mono">BULL_THR</td><td>0.90</td><td>r_score &lt; 0.90</td></tr>
+  <tr><td class="mono">EXBULL_THR</td><td>1.00</td><td>r_score ≥ 0.90</td></tr>
+  <tr><td rowspan="3"><strong>Risk</strong></td><td class="mono">DD_LIMIT</td><td>−0.25</td><td>Drawdown tối đa trước khi hạ state</td></tr>
+  <tr><td class="mono">VOL_MULT</td><td>1.5×</td><td>Vol20 / AvgVol_expanding vượt mức này</td></tr>
+  <tr><td class="mono">PE_PCT</td><td>P90</td><td>PE vượt P90 expanding</td></tr>
+  <tr><td rowspan="2"><strong>Smoothing</strong></td><td class="mono">MODE_WINDOW</td><td>5</td><td>Trailing mode window (kỳ)</td></tr>
+  <tr><td class="mono">EXEC_DELAY</td><td>T+1</td><td>Tín hiệu ngày T → thực thi ngày T+1</td></tr>
+  <tr><td rowspan="4"><strong>Thực thi</strong></td><td class="mono">RAMP_DAYS</td><td>3</td><td>Chuyển dần qua 3 ngày (1/3 mỗi ngày)</td></tr>
+  <tr><td class="mono">TC</td><td>0.001</td><td>Phí giao dịch 0.1%</td></tr>
+  <tr><td class="mono">DEPOSIT_R</td><td>6%/năm</td><td>Lãi tiết kiệm cho phần tiền mặt</td></tr>
+  <tr><td class="mono">BORROW_R</td><td>10%/năm</td><td>Lãi vay margin cho phần vượt 100%</td></tr>
+</table>
+</div>
+
+<h2>Ví dụ minh họa: tại sao CRISIS xảy ra khi score "cao"?</h2>
+<div class="step warn">
+  <span class="step-num">!</span><span class="step-title">Nghịch lý expanding window — quan trọng cần hiểu</span>
+  <br><br>
+  <table>
+    <tr><th>Thời điểm</th><th>score tuyệt đối</th><th>r_score (expanding %tile)</th><th>Trạng thái</th><th>Lý do</th></tr>
+    <tr><td>Feb 2012</td><td>0.40</td><td>0.80 → BULL</td><td><span class="alloc" style="background:#22c55e">BULL</span></td><td>0.40 là TOP 20% của lịch sử 2000–2012 (thị trường phần lớn ảm đạm)</td></tr>
+    <tr><td>Sep 2022</td><td>0.87</td><td>0.05 → CRISIS</td><td><span class="alloc" style="background:#ef4444">CRISIS</span></td><td>0.87 là BOTTOM 5% vì lịch sử 2000–2022 có nhiều ngày với score 0.85–0.95 (bull run 2020–2021 đẩy phân phối lên cao)</td></tr>
+    <tr><td>Apr 2026</td><td>0.64</td><td>0.55 → NEUTRAL</td><td><span class="alloc" style="background:#eab308">NEUTRAL</span></td><td>0.64 ở mức trung bình trong phân phối 26 năm</td></tr>
+  </table>
+  <div class="note" style="margin-top:10px">Đây là <strong>tính năng</strong>, không phải lỗi: hệ thống tự động nâng ngưỡng kỳ vọng sau mỗi chu kỳ bull. Sau khi thị trường đạt đỉnh lịch sử, bất kỳ sự suy yếu nào cũng được nhận diện sớm hơn.</div>
+</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="vi"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lịch sử Trạng Thái Thị Trường VN-Index 2000–2026</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f1f5f9;color:#1e293b;font-size:13px}
+.hdr{background:linear-gradient(135deg,#1e3a5f,#1a4731);color:#fff;padding:24px 28px}
+.hdr h1{font-size:20px;font-weight:700;margin-bottom:6px}
+.hdr p{font-size:12px;opacity:.85;max-width:850px;line-height:1.65}
+.leg{display:flex;gap:14px;margin-top:12px;flex-wrap:wrap}
+.li{display:flex;align-items:center;gap:5px;font-size:11px}
+.ld{width:11px;height:11px;border-radius:50%}
+.wrap{max-width:1100px;margin:0 auto;padding:16px 20px}
+.cs{background:#fff;border-radius:12px;padding:18px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.cs h2{font-size:14px;font-weight:600;color:#374151;margin-bottom:12px}
+.cw{height:200px}
+.stats{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:16px}
+.st{background:#fff;border-radius:10px;padding:11px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.sl{font-size:10px;color:#64748b;margin-bottom:3px}
+.sv{font-size:20px;font-weight:700}
+.fb{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.fb span{font-size:12px;color:#64748b;font-weight:600}
+.btn{padding:5px 13px;border-radius:16px;border:2px solid #e2e8f0;background:#fff;font-size:11px;cursor:pointer;font-weight:700;transition:all .15s}
+.btn[data-s="0"].on{background:#64748b;color:#fff;border-color:#64748b}
+.btn[data-s="1"].on{background:#ef4444;color:#fff;border-color:#ef4444}
+.btn[data-s="2"].on{background:#f97316;color:#fff;border-color:#f97316}
+.btn[data-s="3"].on{background:#eab308;color:#1e293b;border-color:#eab308}
+.btn[data-s="4"].on{background:#22c55e;color:#fff;border-color:#22c55e}
+.btn[data-s="5"].on{background:#10b981;color:#fff;border-color:#10b981}
+.note{background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:12px;color:#1e40af;line-height:1.7}
+.card{border-radius:10px;padding:13px 15px;margin-bottom:10px;transition:transform .15s,box-shadow .15s}
+.card:hover{transform:translateX(3px);box-shadow:0 4px 14px rgba(0,0,0,.09)}
+.ch{margin-bottom:9px}
+.sb{color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px}
+.dr{font-size:11px;color:#64748b;margin-left:9px}
+.db{font-size:10px;color:#94a3b8;margin-left:7px;background:#fff;padding:2px 8px;border-radius:8px;border:1px solid #e2e8f0}
+.cb{display:grid;grid-template-columns:260px 1fr;gap:14px}
+.fr{display:flex;align-items:center;gap:5px;margin-bottom:5px}
+.fl{font-size:10.5px;color:#64748b;min-width:130px}
+.bw{flex:1;height:7px;background:#e2e8f0;border-radius:4px;overflow:hidden}
+.bf{height:100%;border-radius:4px}
+.fna{font-size:10px;color:#94a3b8;font-style:italic}
+.ct{font-size:12px;line-height:1.65}
+.ct strong{color:#1e293b;font-size:12.5px;display:block;margin-bottom:4px}
+.cd{color:#64748b}
+@media(max-width:700px){.cb{grid-template-columns:1fr}.stats{grid-template-columns:repeat(3,1fr)}}
+</style></head>
+<body>
+<div class="hdr">
+  <h1>📈 Lịch sử Chuyển Đổi Trạng Thái Thị Trường VN-Index (2000–2026)</h1>
+  <p>Hệ thống 7 yếu tố (P3M, P1M, MA200, RSI, MACD, CMF, Breadth) phân loại thị trường bằng <strong>expanding window percentile</strong> — mọi quyết định chỉ dùng dữ liệu trong quá khứ. Trạng thái được xác định bởi <em>vị trí tương đối trong phân phối lịch sử</em>, không phải giá trị tuyệt đối của chỉ báo.</p>
+  <div class="leg">
+    <div class="li"><div class="ld" style="background:#ef4444"></div>CRISIS (0%) – bottom 10%</div>
+    <div class="li"><div class="ld" style="background:#f97316"></div>BEAR (20%) – 10–20%</div>
+    <div class="li"><div class="ld" style="background:#eab308"></div>NEUTRAL (70%) – 20–70%</div>
+    <div class="li"><div class="ld" style="background:#22c55e"></div>BULL (100%) – 70–90%</div>
+    <div class="li"><div class="ld" style="background:#10b981"></div>EX-BULL (130%) – top 10%</div>
+  </div>
+</div>
+<div class="wrap">
+  <div class="cs">
+    <h2>📊 Biểu đồ danh mục theo thời gian (logarithmic)</h2>
+    <div class="cw"><canvas id="ch"></canvas></div>
+  </div>
+  <div class="stats">
+    <div class="st"><div class="sl">Giai đoạn ≥2 tháng</div><div class="sv" style="color:#3b82f6">58</div></div>
+    <div class="st"><div class="sl" style="color:#ef4444">CRISIS</div><div class="sv" style="color:#ef4444">4</div></div>
+    <div class="st"><div class="sl" style="color:#f97316">BEAR</div><div class="sv" style="color:#f97316">1</div></div>
+    <div class="st"><div class="sl" style="color:#ca8a04">NEUTRAL</div><div class="sv" style="color:#ca8a04">36</div></div>
+    <div class="st"><div class="sl" style="color:#16a34a">BULL</div><div class="sv" style="color:#16a34a">13</div></div>
+    <div class="st"><div class="sl" style="color:#10b981">EX-BULL</div><div class="sv" style="color:#10b981">4</div></div>
+  </div>
+  <div class="note">
+    <strong>⚠️ Nguyên tắc cốt lõi:</strong> Trạng thái CRISIS không có nghĩa là các chỉ báo "xấu" theo nghĩa tuyệt đối — mà là chúng đang ở <em>bottom 10% so với toàn bộ lịch sử tính từ đầu đến thời điểm đó</em>. Sau bull run 2020–2021, một composite score = 0.62 vẫn có thể là bottom 10% vì phân phối lịch sử đã được kéo lên rất cao. Đây là cơ chế tự thích nghi qua các chu kỳ.
+  </div>
+  <div class="fb">
+    <span>Lọc:</span>
+    <button class="btn on" data-s="0">Tất cả (58)</button>
+    <button class="btn" data-s="1" style="color:#ef4444;border-color:#ef4444">🔴 CRISIS (4)</button>
+    <button class="btn" data-s="2" style="color:#f97316;border-color:#f97316">🟠 BEAR (1)</button>
+    <button class="btn" data-s="3" style="color:#ca8a04;border-color:#eab308">🟡 NEUTRAL (36)</button>
+    <button class="btn" data-s="4" style="color:#16a34a;border-color:#22c55e">🟢 BULL (13)</button>
+    <button class="btn" data-s="5" style="color:#10b981;border-color:#10b981">💚 EX-BULL (4)</button>
+  </div>
+  <div id="cards"><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2000-07-28 → 2004-04-16</span>
+      <span class="db">97 kỳ (~48 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">RSI-14</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">MACD</span><span class="fna">chưa đủ data</span></div></div>
+    <div class="xc"><div class="ct"><strong>📍 Khai trương TTCK Việt Nam</strong><br><span class="cd">Thị trường mới ra đời với VN-Index = 100 điểm. Chưa đủ 252 ngày dữ liệu để tính expanding percentile nên mô hình giữ mặc định NEUTRAL 70%. Toàn bộ giai đoạn 2000-2004 hệ thống không có tín hiệu đủ tin cậy (thiếu dữ liệu P3M, MA200, MACD).</span></div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2004-06-03 → 2004-07-19</span>
+      <span class="db">5 kỳ (~2 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:77%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:11px;font-weight:700;width:34px;text-align:right">77%</span></div><div class="fr"><span class="fl">MACD</span><span class="fna">chưa đủ data</span></div></div>
+    <div class="xc"><div class="ct" style="color:#94a3b8;font-style:italic">Giai đoạn ngắn / chưa có chú thích lịch sử</div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2004-09-01 → 2004-10-19</span>
+      <span class="db">5 kỳ (~2 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:91%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:11px;font-weight:700;width:34px;text-align:right">91%</span></div><div class="fr"><span class="fl">MACD</span><span class="fna">chưa đủ data</span></div></div>
+    <div class="xc"><div class="ct" style="color:#94a3b8;font-style:italic">Giai đoạn ngắn / chưa có chú thích lịch sử</div></div>
+  </div>
+</div><div class="card" data-s="4" style="border-left:5px solid #22c55e;background:#f0fdf4">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#22c55e">🟢 BULL (100%)</span>
+      <span class="dr">2004-12-02 → 2005-01-06</span>
+      <span class="db">4 kỳ (~2 tháng) · nắm 100%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:91%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:11px;font-weight:700;width:34px;text-align:right">91%</span></div><div class="fr"><span class="fl">MACD</span><span class="fna">chưa đủ data</span></div></div>
+    <div class="xc"><div class="ct" style="color:#94a3b8;font-style:italic">Giai đoạn ngắn / chưa có chú thích lịch sử</div></div>
+  </div>
+</div><div class="card" data-s="4" style="border-left:5px solid #22c55e;background:#f0fdf4">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#22c55e">🟢 BULL (100%)</span>
+      <span class="dr">2005-02-16 → 2005-04-25</span>
+      <span class="db">7 kỳ (~3 tháng) · nắm 100%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:95%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:11px;font-weight:700;width:34px;text-align:right">95%</span></div><div class="fr"><span class="fl">MACD</span><span class="fna">chưa đủ data</span></div></div>
+    <div class="xc"><div class="ct"><strong>📍 Bull run đầu – VN-Index tiếp tục tăng mạnh</strong><br><span class="cd">RSI expanding rank = 0.95 (top 5%). Thị trường tăng liên tục từ 384→427đ (+11%). BULL kéo dài 7 kỳ (~3.5 tháng).</span></div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2005-07-26 → 2005-08-29</span>
+      <span class="db">4 kỳ (~2 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:99%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:11px;font-weight:700;width:34px;text-align:right">99%</span></div><div class="fr"><span class="fl">MACD</span><span class="fna">chưa đủ data</span></div></div>
+    <div class="xc"><div class="ct" style="color:#94a3b8;font-style:italic">Giai đoạn ngắn / chưa có chú thích lịch sử</div></div>
+  </div>
+</div><div class="card" data-s="5" style="border-left:5px solid #10b981;background:#ecfdf5">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#10b981">💚 EX-BULL (130%)</span>
+      <span class="dr">2005-09-09 → 2005-10-25</span>
+      <span class="db">5 kỳ (~2 tháng) · nắm 130%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:67%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:11px;font-weight:700;width:34px;text-align:right">67%</span></div><div class="fr"><span class="fl">MACD</span><span class="fna">chưa đủ data</span></div></div>
+    <div class="xc"><div class="ct"><strong>📍 EX-BULL lần đầu – bong bóng đầu tiên của TTCK VN</strong><br><span class="cd">RSI expanding rank đạt 0.68 nhưng composite score vào top 10% lịch sử → EX-BULL 130%. VN-Index đạt ~500-570đ. Đây là giai đoạn bong bóng cổ phiếu đầu tiên, thanh khoản rất thấp, P/E rất cao.</span></div></div>
+  </div>
+</div><div class="card" data-s="5" style="border-left:5px solid #10b981;background:#ecfdf5">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#10b981">💚 EX-BULL (130%)</span>
+      <span class="dr">2006-02-23 → 2006-04-20</span>
+      <span class="db">6 kỳ (~3 tháng) · nắm 130%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:34%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">34%</span></div><div class="fr"><span class="fl">MACD</span><span class="fna">chưa đủ data</span></div></div>
+    <div class="xc"><div class="ct"><strong>📍 EX-BULL – Bong bóng 2005-2007 tiếp diễn</strong><br><span class="cd">RSI expanding rank = 0.34 (đã hạ nhiệt), nhưng composite score (P3M chính) vẫn ở top 10% lịch sử. VN-Index điều chỉnh từ ~360→300đ nhưng xu hướng dài hạn vẫn tăng. Mô hình giữ EX-BULL 130% trong 6 kỳ.</span></div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2006-05-26 → 2006-06-29</span>
+      <span class="db">4 kỳ (~2 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:33%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">33%</span></div><div class="fr"><span class="fl">MACD</span><span class="fna">chưa đủ data</span></div></div>
+    <div class="xc"><div class="ct" style="color:#94a3b8;font-style:italic">Giai đoạn ngắn / chưa có chú thích lịch sử</div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2006-08-24 → 2006-09-28</span>
+      <span class="db">4 kỳ (~2 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:35%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">35%</span></div><div class="fr"><span class="fl">MACD</span><span class="fna">chưa đủ data</span></div></div>
+    <div class="xc"><div class="ct" style="color:#94a3b8;font-style:italic">Giai đoạn ngắn / chưa có chú thích lịch sử</div></div>
+  </div>
+</div><div class="card" data-s="4" style="border-left:5px solid #22c55e;background:#f0fdf4">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#22c55e">🟢 BULL (100%)</span>
+      <span class="dr">2006-12-05 → 2007-03-14</span>
+      <span class="db">9 kỳ (~4 tháng) · nắm 100%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:25%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">25%</span></div><div class="fr"><span class="fl">MACD</span><span class="fna">chưa đủ data</span></div></div>
+    <div class="xc"><div class="ct"><strong>📍 BULL – Phục hồi và bứt phá tiến đến đỉnh lịch sử</strong><br><span class="cd">RSI expanding rank = 0.25. Composite score vào top 30% → BULL 100%. VN-Index tăng từ ~203→246đ (+21%) trong 9 kỳ. Đây là giai đoạn trước đỉnh lịch sử tháng 3/2007 (~1,170đ thực tế).</span></div></div>
+  </div>
+</div><div class="card" data-s="2" style="border-left:5px solid #f97316;background:#fff7ed">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#f97316">🟠 BEAR (20%)</span>
+      <span class="dr">2007-06-18 → 2007-07-20</span>
+      <span class="db">4 kỳ (~2 tháng) · nắm 20%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:58%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">58%</span></div><div class="fr"><span class="fl">MACD</span><span class="fna">chưa đủ data</span></div></div>
+    <div class="xc"><div class="ct" style="color:#94a3b8;font-style:italic">Giai đoạn ngắn / chưa có chú thích lịch sử</div></div>
+  </div>
+</div><div class="card" data-s="1" style="border-left:5px solid #ef4444;background:#fef2f2">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#ef4444">🔴 CRISIS (0%)</span>
+      <span class="dr">2007-12-14 → 2008-06-30</span>
+      <span class="db">17 kỳ (~8 tháng) · nắm 0%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:32%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">32%</span></div><div class="fr"><span class="fl">MACD</span><span class="fna">chưa đủ data</span></div></div>
+    <div class="xc"><div class="ct"><strong>📍 CRISIS – Khủng hoảng Tài chính Toàn cầu bắt đầu</strong><br><span class="cd">RSI expanding rank rơi về 0.33. Composite score đột ngột vào bottom 10% lịch sử. VN-Index bắt đầu lao dốc từ đỉnh ~1,170đ. CRISIS kéo dài 17 kỳ (~8.5 tháng) – giai đoạn giảm lịch sử nhất từ trước đến nay. Đây là tín hiệu chính xác nhất của hệ thống trong giai đoạn đầu.</span></div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2008-08-22 → 2008-09-29</span>
+      <span class="db">4 kỳ (~2 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:26%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">26%</span></div><div class="fr"><span class="fl">MACD</span><span class="fna">chưa đủ data</span></div></div>
+    <div class="xc"><div class="ct"><strong>📍 NEUTRAL – Ổn định tạm thời giữa khủng hoảng</strong><br><span class="cd">RSI expanding rank = 0.27. Composite score thoát bottom 20% tạm thời. VN-Index ~200-210đ. Giai đoạn "dead cat bounce" giữa GFC. Chỉ kéo dài 4 kỳ rồi quay lại CRISIS/BEAR.</span></div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2009-03-24 → 2009-08-20</span>
+      <span class="db">14 kỳ (~7 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:37%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">37%</span></div><div class="fr"><span class="fl">MACD</span><span class="fna">chưa đủ data</span></div></div>
+    <div class="xc"><div class="ct"><strong>📍 NEUTRAL – Đáy GFC, tín hiệu ổn định hóa</strong><br><span class="cd">RSI expanding rank = 0.38. Composite score thoát bottom 20%. VN-Index ~190đ (đáy GFC thực tế ~235đ tháng 3/2009). Bắt đầu giai đoạn phục hồi 14 kỳ (~7 tháng). Đây là đáy chính xác nhất mà hệ thống nhận diện.</span></div></div>
+  </div>
+</div><div class="card" data-s="4" style="border-left:5px solid #22c55e;background:#f0fdf4">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#22c55e">🟢 BULL (100%)</span>
+      <span class="dr">2009-09-01 → 2009-10-06</span>
+      <span class="db">4 kỳ (~2 tháng) · nắm 100%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:51%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">51%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:77%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:11px;font-weight:700;width:34px;text-align:right">77%</span></div></div>
+    <div class="xc"><div class="ct"><strong>📍 BULL – Xác nhận phục hồi V-shape</strong><br><span class="cd">RSI expanding rank = 0.52, MACD expanding rank = 0.77. Composite score vào top 30% → BULL 100%. VN-Index ~199→201đ. Thị trường phục hồi mạnh, nhà đầu tư nước ngoài quay lại.</span></div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2010-02-08 → 2010-04-22</span>
+      <span class="db">7 kỳ (~3 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:65%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:11px;font-weight:700;width:34px;text-align:right">65%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:48%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">48%</span></div></div>
+    <div class="xc"><div class="ct"><strong>📍 NEUTRAL – Áp lực lạm phát và thắt chặt tiền tệ</strong><br><span class="cd">RSI = 0.66, MACD = 0.48. Composite score rời top 30% → NEUTRAL 70%. VN-Index chịu áp lực từ chính sách thắt chặt của NHNN, lạm phát tăng mạnh (>10%).</span></div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2010-05-19 → 2010-07-26</span>
+      <span class="db">7 kỳ (~3 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:63%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:11px;font-weight:700;width:34px;text-align:right">63%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:42%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">42%</span></div></div>
+    <div class="xc"><div class="ct" style="color:#94a3b8;font-style:italic">Giai đoạn ngắn / chưa có chú thích lịch sử</div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2010-09-10 → 2010-10-14</span>
+      <span class="db">4 kỳ (~2 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:52%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">52%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:26%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">26%</span></div></div>
+    <div class="xc"><div class="ct" style="color:#94a3b8;font-style:italic">Giai đoạn ngắn / chưa có chú thích lịch sử</div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2011-02-24 → 2011-05-19</span>
+      <span class="db">8 kỳ (~4 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:41%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">41%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:28%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">28%</span></div></div>
+    <div class="xc"><div class="ct"><strong>📍 NEUTRAL – Stagflation: lạm phát 20%, VND mất giá</strong><br><span class="cd">RSI = 0.41, MACD = 0.29. Composite score yếu. VN-Index trải qua giai đoạn khó khăn nhất: lãi suất tín dụng 20-25%, lạm phát 18-22%, VND liên tục phá giá. Mô hình giữ NEUTRAL 70% suốt 8 kỳ.</span></div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2011-10-03 → 2011-11-16</span>
+      <span class="db">5 kỳ (~2 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:44%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">44%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:40%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">40%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:40%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">40%</span></div></div>
+    <div class="xc"><div class="ct" style="color:#94a3b8;font-style:italic">Giai đoạn ngắn / chưa có chú thích lịch sử</div></div>
+  </div>
+</div><div class="card" data-s="4" style="border-left:5px solid #22c55e;background:#f0fdf4">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#22c55e">🟢 BULL (100%)</span>
+      <span class="dr">2012-02-10 → 2012-05-15</span>
+      <span class="db">9 kỳ (~4 tháng) · nắm 100%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:40%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">40%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:42%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">42%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:39%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">39%</span></div></div>
+    <div class="xc"><div class="ct"><strong>📍 BULL – NHNN hạ lãi suất, thanh khoản cải thiện</strong><br><span class="cd">P3M expanding rank = 0.40, MACD = 0.39. Composite score vào top 30% → BULL 100%. VN-Index đáy cuối 2011 (~350đ thực tế). NHNN bắt đầu hạ lãi suất, tín dụng nới lỏng. BULL kéo dài 9 kỳ (~4.5 tháng).</span></div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2012-05-25 → 2012-06-28</span>
+      <span class="db">4 kỳ (~2 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:40%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">40%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:42%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">42%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:40%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">40%</span></div></div>
+    <div class="xc"><div class="ct" style="color:#94a3b8;font-style:italic">Giai đoạn ngắn / chưa có chú thích lịch sử</div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2012-07-20 → 2012-08-23</span>
+      <span class="db">4 kỳ (~2 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:36%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">36%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:30%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">30%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:29%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">29%</span></div></div>
+    <div class="xc"><div class="ct" style="color:#94a3b8;font-style:italic">Giai đoạn ngắn / chưa có chú thích lịch sử</div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2012-09-27 → 2012-10-31</span>
+      <span class="db">4 kỳ (~2 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:43%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">43%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:41%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">41%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:41%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">41%</span></div></div>
+    <div class="xc"><div class="ct" style="color:#94a3b8;font-style:italic">Giai đoạn ngắn / chưa có chú thích lịch sử</div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2013-10-18 → 2013-11-21</span>
+      <span class="db">4 kỳ (~2 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:34%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">34%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:26%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">26%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:34%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">34%</span></div></div>
+    <div class="xc"><div class="ct" style="color:#94a3b8;font-style:italic">Giai đoạn ngắn / chưa có chú thích lịch sử</div></div>
+  </div>
+</div><div class="card" data-s="4" style="border-left:5px solid #22c55e;background:#f0fdf4">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#22c55e">🟢 BULL (100%)</span>
+      <span class="dr">2014-01-17 → 2014-03-25</span>
+      <span class="db">6 kỳ (~3 tháng) · nắm 100%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:35%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">35%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:31%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">31%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:45%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">45%</span></div></div>
+    <div class="xc"><div class="ct"><strong>📍 BULL – Phục hồi trung hạn, dòng vốn FDI mạnh</strong><br><span class="cd">P3M = 0.36, MACD = 0.46. Composite score vào top 30%. VN-Index vùng 500-600đ thực tế. Dòng vốn FDI kỷ lục, xuất khẩu tăng mạnh. BULL kéo dài 6 kỳ (~3 tháng).</span></div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2014-05-26 → 2014-07-31</span>
+      <span class="db">7 kỳ (~3 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:38%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">38%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:25%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">25%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:42%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">42%</span></div></div>
+    <div class="xc"><div class="ct" style="color:#94a3b8;font-style:italic">Giai đoạn ngắn / chưa có chú thích lịch sử</div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2015-01-09 → 2015-02-12</span>
+      <span class="db">4 kỳ (~2 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:53%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">53%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:63%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:11px;font-weight:700;width:34px;text-align:right">63%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:63%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:11px;font-weight:700;width:34px;text-align:right">63%</span></div></div>
+    <div class="xc"><div class="ct" style="color:#94a3b8;font-style:italic">Giai đoạn ngắn / chưa có chú thích lịch sử</div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2015-04-17 → 2015-06-30</span>
+      <span class="db">7 kỳ (~3 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:60%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:11px;font-weight:700;width:34px;text-align:right">60%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><span class="fna">chưa đủ data</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:62%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:11px;font-weight:700;width:34px;text-align:right">62%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:62%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:11px;font-weight:700;width:34px;text-align:right">62%</span></div></div>
+    <div class="xc"><div class="ct"><strong>📍 NEUTRAL kéo dài – Tích lũy trước bull run 2017</strong><br><span class="cd">P3M = 0.61, RSI = 0.62, MACD = 0.62. Tất cả yếu tố đồng đều trong vùng trung bình → NEUTRAL ổn định 7 kỳ (~3.5 tháng). VN-Index dao động 560-630đ thực tế.</span></div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2015-09-07 → 2015-11-24</span>
+      <span class="db">8 kỳ (~4 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:63%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:11px;font-weight:700;width:34px;text-align:right">63%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><div class="bw"><div class="bf" style="width:87%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:11px;font-weight:700;width:34px;text-align:right">87%</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:49%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">49%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:24%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">24%</span></div></div>
+    <div class="xc"><div class="ct"><strong>📍 NEUTRAL – Trung Quốc phá giá CNY, thị trường toàn cầu bán tháo</strong><br><span class="cd">P3M = 0.63, MA200 = 0.88, RSI = 0.49, MACD = 0.25 (MACD yếu). Composite score trong vùng NEUTRAL. VN-Index bị ảnh hưởng bởi cú sốc CNY tháng 8/2015. NEUTRAL 8 kỳ.</span></div></div>
+  </div>
+</div><div class="card" data-s="4" style="border-left:5px solid #22c55e;background:#f0fdf4">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#22c55e">🟢 BULL (100%)</span>
+      <span class="dr">2016-06-14 → 2016-07-18</span>
+      <span class="db">4 kỳ (~2 tháng) · nắm 100%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:50%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">50%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><div class="bw"><div class="bf" style="width:62%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:11px;font-weight:700;width:34px;text-align:right">62%</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:29%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">29%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:22%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">22%</span></div></div>
+    <div class="xc"><div class="ct" style="color:#94a3b8;font-style:italic">Giai đoạn ngắn / chưa có chú thích lịch sử</div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2016-10-17 → 2017-02-02</span>
+      <span class="db">10 kỳ (~5 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:43%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">43%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><div class="bw"><div class="bf" style="width:59%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">59%</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:29%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">29%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:48%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">48%</span></div></div>
+    <div class="xc"><div class="ct"><strong>📍 NEUTRAL kéo dài – Tích lũy ổn định</strong><br><span class="cd">P3M = 0.43, MA200 = 0.60, RSI = 0.30, MACD = 0.49. Composite score ổn định vùng trung bình. Kéo dài 10 kỳ (~5 tháng). VN-Index tích lũy vùng 660-700đ, chuẩn bị cho bull run 2017.</span></div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2017-03-20 → 2017-05-18</span>
+      <span class="db">6 kỳ (~3 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:23%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">23%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><div class="bw"><div class="bf" style="width:47%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">47%</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:17%;background:#dc2626"></div></div><span style="color:#dc2626;font-size:11px;font-weight:700;width:34px;text-align:right">17%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:31%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">31%</span></div></div>
+    <div class="xc"><div class="ct" style="color:#94a3b8;font-style:italic">Giai đoạn ngắn / chưa có chú thích lịch sử</div></div>
+  </div>
+</div><div class="card" data-s="4" style="border-left:5px solid #22c55e;background:#f0fdf4">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#22c55e">🟢 BULL (100%)</span>
+      <span class="dr">2017-05-30 → 2017-07-13</span>
+      <span class="db">5 kỳ (~2 tháng) · nắm 100%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:21%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">21%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><div class="bw"><div class="bf" style="width:41%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">41%</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:10%;background:#dc2626"></div></div><span style="color:#dc2626;font-size:11px;font-weight:700;width:34px;text-align:right">10%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:22%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">22%</span></div></div>
+    <div class="xc"><div class="ct"><strong>📍 BULL – Bắt đầu bull run 2017: vốn hóa tăng tốc</strong><br><span class="cd">P3M = 0.21, MA200 = 0.41, MACD = 0.23. Composite score vào top 30% → BULL 100%. VN-Index bứt phá 700→800→900đ. Nhiều cổ phiếu vốn hóa lớn (VIC, VHM, VRE) niêm yết, thị trường bùng nổ.</span></div></div>
+  </div>
+</div><div class="card" data-s="4" style="border-left:5px solid #22c55e;background:#f0fdf4">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#22c55e">🟢 BULL (100%)</span>
+      <span class="dr">2017-10-24 → 2018-02-02</span>
+      <span class="db">10 kỳ (~5 tháng) · nắm 100%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:24%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">24%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><div class="bw"><div class="bf" style="width:42%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">42%</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:39%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">39%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:69%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:11px;font-weight:700;width:34px;text-align:right">69%</span></div></div>
+    <div class="xc"><div class="ct"><strong>📍 BULL kéo dài – Đà tăng mạnh nhất từ 2007</strong><br><span class="cd">P3M = 0.25, MA200 = 0.42, MACD = 0.69 (MACD dẫn sóng). BULL 10 kỳ (~5 tháng). VN-Index tăng từ 800→1,100→1,200đ. Giai đoạn bull run mạnh nhất trong 10 năm, NĐT cá nhân và tổ chức đổ tiền vào mạnh.</span></div></div>
+  </div>
+</div><div class="card" data-s="4" style="border-left:5px solid #22c55e;background:#f0fdf4">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#22c55e">🟢 BULL (100%)</span>
+      <span class="dr">2018-03-05 → 2018-04-06</span>
+      <span class="db">4 kỳ (~2 tháng) · nắm 100%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:29%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">29%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><div class="bw"><div class="bf" style="width:51%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">51%</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:49%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">49%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:68%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:11px;font-weight:700;width:34px;text-align:right">68%</span></div></div>
+    <div class="xc"><div class="ct" style="color:#94a3b8;font-style:italic">Giai đoạn ngắn / chưa có chú thích lịch sử</div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2018-08-01 → 2018-10-09</span>
+      <span class="db">7 kỳ (~3 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:44%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">44%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><div class="bw"><div class="bf" style="width:63%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:11px;font-weight:700;width:34px;text-align:right">63%</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:45%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">45%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:32%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">32%</span></div></div>
+    <div class="xc"><div class="ct"><strong>📍 NEUTRAL – Ổn định sau điều chỉnh lớn</strong><br><span class="cd">P3M = 0.45, MA200 = 0.64, RSI = 0.46. Composite score về vùng trung bình → NEUTRAL 70%. VN-Index vùng 900-1,000đ. Thị trường tích lũy sau sóng bán tháo.</span></div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2019-03-25 → 2019-05-24</span>
+      <span class="db">6 kỳ (~3 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:64%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:11px;font-weight:700;width:34px;text-align:right">64%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><div class="bw"><div class="bf" style="width:78%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:11px;font-weight:700;width:34px;text-align:right">78%</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:44%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">44%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:42%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">42%</span></div></div>
+    <div class="xc"><div class="ct" style="color:#94a3b8;font-style:italic">Giai đoạn ngắn / chưa có chú thích lịch sử</div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2019-06-27 → 2019-10-30</span>
+      <span class="db">12 kỳ (~6 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:73%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:11px;font-weight:700;width:34px;text-align:right">73%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><div class="bw"><div class="bf" style="width:85%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:11px;font-weight:700;width:34px;text-align:right">85%</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:52%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">52%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:49%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">49%</span></div></div>
+    <div class="xc"><div class="ct"><strong>📍 NEUTRAL kéo dài – Thị trường ổn định dù chiến tranh TM</strong><br><span class="cd">P3M = 0.73, MA200 = 0.85, RSI = 0.52. Composite score ổn định. VN-Index vùng 950-1,000đ. 12 kỳ (~6 tháng) NEUTRAL liên tiếp. Thị trường "chịu đựng" tốt các cú sốc bên ngoài.</span></div></div>
+  </div>
+</div><div class="card" data-s="1" style="border-left:5px solid #ef4444;background:#fef2f2">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#ef4444">🔴 CRISIS (0%)</span>
+      <span class="dr">2020-02-27 → 2020-04-01</span>
+      <span class="db">4 kỳ (~2 tháng) · nắm 0%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:53%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">53%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><div class="bw"><div class="bf" style="width:72%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:11px;font-weight:700;width:34px;text-align:right">72%</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:22%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">22%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:29%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">29%</span></div></div>
+    <div class="xc"><div class="ct"><strong>📍 CRISIS – COVID-19: thị trường sụp đổ trong 3 tuần</strong><br><span class="cd">P3M = 0.53, RSI = 0.23 (rơi sốc), MACD = 0.30. RSI expanding rank rơi cực nhanh về vùng thấp nhất. Composite score vào bottom 10%. VN-Index rơi từ ~990→630đ trong vòng 1 tháng. CRISIS kéo dài 4 kỳ.</span></div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2020-04-24 → 2020-06-01</span>
+      <span class="db">4 kỳ (~2 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:28%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">28%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><div class="bw"><div class="bf" style="width:46%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">46%</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:11%;background:#dc2626"></div></div><span style="color:#dc2626;font-size:11px;font-weight:700;width:34px;text-align:right">11%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:18%;background:#dc2626"></div></div><span style="color:#dc2626;font-size:11px;font-weight:700;width:34px;text-align:right">18%</span></div></div>
+    <div class="xc"><div class="ct"><strong>📍 NEUTRAL – Chính phủ can thiệp, đáy đã tạo</strong><br><span class="cd">P3M = 0.29, RSI = 0.12 (cực thấp), MACD = 0.18. Composite score thoát bottom 20%. VN-Index ~650đ. Chính phủ và NHNN tung các gói hỗ trợ lớn. Tín hiệu bắt đầu phục hồi.</span></div></div>
+  </div>
+</div><div class="card" data-s="4" style="border-left:5px solid #22c55e;background:#f0fdf4">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#22c55e">🟢 BULL (100%)</span>
+      <span class="dr">2020-08-28 → 2020-10-14</span>
+      <span class="db">5 kỳ (~2 tháng) · nắm 100%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:48%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">48%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><div class="bw"><div class="bf" style="width:56%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">56%</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:29%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">29%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:56%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">56%</span></div></div>
+    <div class="xc"><div class="ct"><strong>📍 BULL – Làn sóng NĐT cá nhân: F0 đổ bộ thị trường</strong><br><span class="cd">P3M = 0.49, MA200 = 0.57, MACD = 0.57. Composite score vào top 30% → BULL 100%. VN-Index 870→1,000đ. Hơn 100,000 tài khoản mới mở mỗi tháng, margin tăng kỷ lục. Bắt đầu chu kỳ bull run lịch sử.</span></div></div>
+  </div>
+</div><div class="card" data-s="5" style="border-left:5px solid #10b981;background:#ecfdf5">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#10b981">💚 EX-BULL (130%)</span>
+      <span class="dr">2020-11-27 → 2020-12-31</span>
+      <span class="db">4 kỳ (~2 tháng) · nắm 130%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:46%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">46%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><div class="bw"><div class="bf" style="width:64%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:11px;font-weight:700;width:34px;text-align:right">64%</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:34%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">34%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:61%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:11px;font-weight:700;width:34px;text-align:right">61%</span></div></div>
+    <div class="xc"><div class="ct"><strong>📍 EX-BULL – VN-Index vượt 1,000đ lần đầu</strong><br><span class="cd">P3M = 0.47, MA200 = 0.64, MACD = 0.61. Composite score vào top 10% → EX-BULL 130%. VN-Index lần đầu vượt và giữ được ngưỡng 1,000đ. Vaccine COVID được phê duyệt, tâm lý thị trường cực kỳ tích cực.</span></div></div>
+  </div>
+</div><div class="card" data-s="4" style="border-left:5px solid #22c55e;background:#f0fdf4">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#22c55e">🟢 BULL (100%)</span>
+      <span class="dr">2021-02-23 → 2021-05-27</span>
+      <span class="db">9 kỳ (~4 tháng) · nắm 100%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:37%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">37%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><div class="bw"><div class="bf" style="width:54%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">54%</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:24%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">24%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:48%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">48%</span></div></div>
+    <div class="xc"><div class="ct"><strong>📍 BULL – Tăng tốc lên 1,200-1,400đ</strong><br><span class="cd">P3M = 0.38, MA200 = 0.55. Composite score rời top 10% nhưng giữ top 30% → BULL 100%. VN-Index 1,100→1,300→1,400đ. Dòng tiền nội địa tiếp tục bơm mạnh vào thị trường.</span></div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2021-08-25 → 2021-09-30</span>
+      <span class="db">4 kỳ (~2 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:30%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">30%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><div class="bw"><div class="bf" style="width:65%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:11px;font-weight:700;width:34px;text-align:right">65%</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:28%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">28%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:38%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">38%</span></div></div>
+    <div class="xc"><div class="ct" style="color:#94a3b8;font-style:italic">Giai đoạn ngắn / chưa có chú thích lịch sử</div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2022-01-21 → 2022-04-06</span>
+      <span class="db">7 kỳ (~3 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:24%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">24%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><div class="bw"><div class="bf" style="width:36%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">36%</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:8%;background:#dc2626"></div></div><span style="color:#dc2626;font-size:11px;font-weight:700;width:34px;text-align:right">8%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:23%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">23%</span></div></div>
+    <div class="xc"><div class="ct"><strong>📍 NEUTRAL – Cảnh báo sớm: P3M và RSI suy yếu bất thường</strong><br><span class="cd">P3M = 0.24 (thấp bất thường), MA200 = 0.37, RSI = 0.08 (cực thấp!). Dù VN-Index vẫn ở đỉnh ~1,500đ, RSI và P3M đã yếu đi rõ rệt trong phân phối lịch sử → Composite score rơi vào NEUTRAL. Tín hiệu cảnh báo sớm trước khi thị trường đảo chiều.</span></div></div>
+  </div>
+</div><div class="card" data-s="1" style="border-left:5px solid #ef4444;background:#fef2f2">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#ef4444">🔴 CRISIS (0%)</span>
+      <span class="dr">2022-04-19 → 2022-05-25</span>
+      <span class="db">4 kỳ (~2 tháng) · nắm 0%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:60%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:11px;font-weight:700;width:34px;text-align:right">60%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><div class="bw"><div class="bf" style="width:79%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:11px;font-weight:700;width:34px;text-align:right">79%</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:50%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">50%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:71%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:11px;font-weight:700;width:34px;text-align:right">71%</span></div></div>
+    <div class="xc"><div class="ct"><strong>📍 CRISIS – Vụ Tân Hoàng Minh, FLC: niềm tin sụp đổ</strong><br><span class="cd">Expanding percentile rơi vào bottom 10%. Dù absolute composite score = 0.62, đây là mức thấp nhất so với phân phối đã được kéo cao bởi giai đoạn bull 2020-2021. VN-Index ~1,460→1,200→1,050đ. Vụ bắt giữ chủ tịch FLC (Trịnh Văn Quyết), Tân Hoàng Minh hủy trái phiếu gây hoảng loạn.</span></div></div>
+  </div>
+</div><div class="card" data-s="1" style="border-left:5px solid #ef4444;background:#fef2f2">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#ef4444">🔴 CRISIS (0%)</span>
+      <span class="dr">2022-09-28 → 2022-11-23</span>
+      <span class="db">6 kỳ (~3 tháng) · nắm 0%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:83%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:11px;font-weight:700;width:34px;text-align:right">83%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><div class="bw"><div class="bf" style="width:99%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:11px;font-weight:700;width:34px;text-align:right">99%</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:81%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:11px;font-weight:700;width:34px;text-align:right">81%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:89%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:11px;font-weight:700;width:34px;text-align:right">89%</span></div></div>
+    <div class="xc"><div class="ct"><strong>📍 CRISIS – Khủng hoảng niềm tin và lãi suất toàn cầu</strong><br><span class="cd">Score = 0.87 (cao nhất tuyệt đối!) nhưng expanding percentile rơi sâu nhất (bottom 10%). Đây là nghịch lý quan trọng: Score cao phản ánh các chỉ báo kỹ thuật đang ở vùng cực cao theo lịch sử (thị trường đang ở mức worst-case), expanding percentile rơi vì so sánh với toàn bộ lịch sử đã rất tốt. VN-Index ~1,100→870đ. Fed tăng lãi suất 75bps 4 lần liên tiếp.</span></div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2023-01-09 → 2023-02-17</span>
+      <span class="db">4 kỳ (~2 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:82%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:11px;font-weight:700;width:34px;text-align:right">82%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><div class="bw"><div class="bf" style="width:97%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:11px;font-weight:700;width:34px;text-align:right">97%</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:68%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:11px;font-weight:700;width:34px;text-align:right">68%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:38%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">38%</span></div></div>
+    <div class="xc"><div class="ct" style="color:#94a3b8;font-style:italic">Giai đoạn ngắn / chưa có chú thích lịch sử</div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2023-03-13 → 2023-04-14</span>
+      <span class="db">4 kỳ (~2 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:83%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:11px;font-weight:700;width:34px;text-align:right">83%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><div class="bw"><div class="bf" style="width:97%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:11px;font-weight:700;width:34px;text-align:right">97%</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:66%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:11px;font-weight:700;width:34px;text-align:right">66%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:12%;background:#dc2626"></div></div><span style="color:#dc2626;font-size:11px;font-weight:700;width:34px;text-align:right">12%</span></div></div>
+    <div class="xc"><div class="ct" style="color:#94a3b8;font-style:italic">Giai đoạn ngắn / chưa có chú thích lịch sử</div></div>
+  </div>
+</div><div class="card" data-s="4" style="border-left:5px solid #22c55e;background:#f0fdf4">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#22c55e">🟢 BULL (100%)</span>
+      <span class="dr">2023-06-02 → 2023-07-06</span>
+      <span class="db">4 kỳ (~2 tháng) · nắm 100%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:83%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:11px;font-weight:700;width:34px;text-align:right">83%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><div class="bw"><div class="bf" style="width:98%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:11px;font-weight:700;width:34px;text-align:right">98%</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:67%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:11px;font-weight:700;width:34px;text-align:right">67%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:23%;background:#ea580c"></div></div><span style="color:#ea580c;font-size:11px;font-weight:700;width:34px;text-align:right">23%</span></div></div>
+    <div class="xc"><div class="ct"><strong>📍 BULL – Phục hồi rõ ràng giữa 2023</strong><br><span class="cd">P3M = 0.84 (top 16%), MA200 = 0.99 (gần đỉnh lịch sử), RSI = 0.67, MACD = 0.23. Composite score vào top 30% → BULL 100%. VN-Index 1,060→1,150→1,200đ. Dòng tiền quay lại sau giai đoạn tái cơ cấu.</span></div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2023-11-21 → 2024-01-05</span>
+      <span class="db">5 kỳ (~2 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:84%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:11px;font-weight:700;width:34px;text-align:right">84%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><div class="bw"><div class="bf" style="width:100%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:11px;font-weight:700;width:34px;text-align:right">100%</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:84%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:11px;font-weight:700;width:34px;text-align:right">84%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:67%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:11px;font-weight:700;width:34px;text-align:right">67%</span></div></div>
+    <div class="xc"><div class="ct"><strong>📍 NEUTRAL – Tích lũy trước đà bứt phá cuối 2023</strong><br><span class="cd">Composite score ổn định vùng trung bình. VN-Index 1,050→1,250đ (+18.5% trong 5 kỳ!). Giai đoạn NEUTRAL với hiệu suất B&H rất cao nhờ thị trường tăng nhanh.</span></div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2024-06-24 → 2024-07-26</span>
+      <span class="db">4 kỳ (~2 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:83%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:11px;font-weight:700;width:34px;text-align:right">83%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><div class="bw"><div class="bf" style="width:100%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:11px;font-weight:700;width:34px;text-align:right">100%</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:78%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:11px;font-weight:700;width:34px;text-align:right">78%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:46%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">46%</span></div></div>
+    <div class="xc"><div class="ct" style="color:#94a3b8;font-style:italic">Giai đoạn ngắn / chưa có chú thích lịch sử</div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2024-08-19 → 2024-10-16</span>
+      <span class="db">6 kỳ (~3 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:85%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:11px;font-weight:700;width:34px;text-align:right">85%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><div class="bw"><div class="bf" style="width:99%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:11px;font-weight:700;width:34px;text-align:right">99%</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:89%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:11px;font-weight:700;width:34px;text-align:right">89%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:93%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:11px;font-weight:700;width:34px;text-align:right">93%</span></div></div>
+    <div class="xc"><div class="ct"><strong>📍 NEUTRAL – Điều chỉnh ngắn sau đỉnh, dòng tiền vẫn tích cực</strong><br><span class="cd">Absolute score = 0.90 (rất cao!) nhưng expanding percentile vào NEUTRAL vì phân phối lịch sử đã được nâng cao bởi các giai đoạn bull trước. VN-Index ~1,260→1,300đ. Thị trường điều chỉnh sau đỉnh tháng 9/2024.</span></div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2024-11-29 → 2025-01-03</span>
+      <span class="db">4 kỳ (~2 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:84%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:11px;font-weight:700;width:34px;text-align:right">84%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><div class="bw"><div class="bf" style="width:98%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:11px;font-weight:700;width:34px;text-align:right">98%</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:64%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:11px;font-weight:700;width:34px;text-align:right">64%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:13%;background:#dc2626"></div></div><span style="color:#dc2626;font-size:11px;font-weight:700;width:34px;text-align:right">13%</span></div></div>
+    <div class="xc"><div class="ct" style="color:#94a3b8;font-style:italic">Giai đoạn ngắn / chưa có chú thích lịch sử</div></div>
+  </div>
+</div><div class="card" data-s="5" style="border-left:5px solid #10b981;background:#ecfdf5">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#10b981">💚 EX-BULL (130%)</span>
+      <span class="dr">2025-07-15 → 2025-08-28</span>
+      <span class="db">5 kỳ (~2 tháng) · nắm 130%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:84%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:11px;font-weight:700;width:34px;text-align:right">84%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><div class="bw"><div class="bf" style="width:95%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:11px;font-weight:700;width:34px;text-align:right">95%</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:60%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:11px;font-weight:700;width:34px;text-align:right">60%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:15%;background:#dc2626"></div></div><span style="color:#dc2626;font-size:11px;font-weight:700;width:34px;text-align:right">15%</span></div></div>
+    <div class="xc"><div class="ct"><strong>📍 EX-BULL – Bull run giữa 2025</strong><br><span class="cd">P3M = 0.85, MA200 = 0.95. Composite score đạt top 10% → EX-BULL 130%. Kéo dài 5 kỳ (~2.5 tháng). Thị trường hưởng lợi từ dòng vốn FDI kỷ lục và kỳ vọng nâng hạng.</span></div></div>
+  </div>
+</div><div class="card" data-s="3" style="border-left:5px solid #eab308;background:#fefce8">
+  <div class="ch">
+    <div>
+      <span class="sb" style="background:#eab308">🟡 NEUTRAL (70%)</span>
+      <span class="dr">2025-10-27 → 2025-11-28</span>
+      <span class="db">4 kỳ (~2 tháng) · nắm 70%</span>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="fc"><div class="fr"><span class="fl">P3M – Momentum 3T</span><div class="bw"><div class="bf" style="width:79%;background:#65a30d"></div></div><span style="color:#65a30d;font-size:11px;font-weight:700;width:34px;text-align:right">79%</span></div><div class="fr"><span class="fl">MA200 – Xu hướng</span><div class="bw"><div class="bf" style="width:93%;background:#16a34a"></div></div><span style="color:#16a34a;font-size:11px;font-weight:700;width:34px;text-align:right">93%</span></div><div class="fr"><span class="fl">RSI-14</span><div class="bw"><div class="bf" style="width:49%;background:#ca8a04"></div></div><span style="color:#ca8a04;font-size:11px;font-weight:700;width:34px;text-align:right">49%</span></div><div class="fr"><span class="fl">MACD</span><div class="bw"><div class="bf" style="width:6%;background:#dc2626"></div></div><span style="color:#dc2626;font-size:11px;font-weight:700;width:34px;text-align:right">6%</span></div></div>
+    <div class="xc"><div class="ct" style="color:#94a3b8;font-style:italic">Giai đoạn ngắn / chưa có chú thích lịch sử</div></div>
+  </div>
+</div></div>
+</div>
+<script>
+const tsData=[{"t": "2000-07-28", "v": 1.0, "b": 1.0, "st": 3}, {"t": "2000-08-16", "v": 1.096, "b": 1.138, "st": 3}, {"t": "2000-09-06", "v": 1.088, "b": 1.125, "st": 3}, {"t": "2000-09-25", "v": 1.132, "b": 1.19, "st": 3}, {"t": "2000-10-13", "v": 1.196, "b": 1.286, "st": 3}, {"t": "2000-11-01", "v": 1.291, "b": 1.433, "st": 3}, {"t": "2000-11-20", "v": 1.43, "b": 1.657, "st": 3}, {"t": "2000-12-08", "v": 1.524, "b": 1.813, "st": 3}, {"t": "2000-12-27", "v": 1.652, "b": 2.031, "st": 3}, {"t": "2001-01-17", "v": 1.819, "b": 2.327, "st": 3}, {"t": "2001-02-12", "v": 1.947, "b": 2.562, "st": 3}, {"t": "2001-03-02", "v": 1.935, "b": 2.536, "st": 3}, {"t": "2001-03-21", "v": 1.976, "b": 2.611, "st": 3}, {"t": "2001-04-09", "v": 2.127, "b": 2.898, "st": 3}, {"t": "2001-04-27", "v": 2.287, "b": 3.211, "st": 3}, {"t": "2001-05-18", "v": 2.532, "b": 3.709, "st": 3}, {"t": "2001-06-06", "v": 2.786, "b": 4.246, "st": 3}, {"t": "2001-06-25", "v": 3.436, "b": 5.71, "st": 3}, {"t": "2001-07-13", "v": 2.764, "b": 4.165, "st": 3}, {"t": "2001-08-01", "v": 2.673, "b": 3.956, "st": 3}, {"t": "2001-08-20", "v": 2.223, "b": 3.023, "st": 3}, {"t": "2001-09-10", "v": 2.15, "b": 2.866, "st": 3}, {"t": "2001-09-28", "v": 1.926, "b": 2.445, "st": 3}, {"t": "2001-10-17", "v": 1.87, "b": 2.335, "st": 3}, {"t": "2001-11-05", "v": 2.07, "b": 2.698, "st": 3}, {"t": "2001-11-23", "v": 2.191, "b": 2.922, "st": 3}, {"t": "2001-12-12", "v": 2.063, "b": 2.678, "st": 3}, {"t": "2001-12-31", "v": 1.887, "b": 2.354, "st": 3}, {"t": "2002-01-18", "v": 1.725, "b": 2.068, "st": 3}, {"t": "2002-02-06", "v": 1.718, "b": 2.054, "st": 3}, {"t": "2002-03-04", "v": 1.634, "b": 1.91, "st": 3}, {"t": "2002-03-14", "v": 1.623, "b": 1.89, "st": 3}, {"t": "2002-03-26", "v": 1.642, "b": 1.92, "st": 3}, {"t": "2002-04-05", "v": 1.683, "b": 1.988, "st": 3}, {"t": "2002-04-17", "v": 1.675, "b": 1.971, "st": 3}, {"t": "2002-05-02", "v": 1.749, "b": 2.095, "st": 3}, {"t": "2002-05-14", "v": 1.752, "b": 2.099, "st": 3}, {"t": "2002-05-24", "v": 1.742, "b": 2.08, "st": 3}, {"t": "2002-06-05", "v": 1.728, "b": 2.055, "st": 3}, {"t": "2002-06-17", "v": 1.684, "b": 1.978, "st": 3}, {"t": "2002-06-27", "v": 1.696, "b": 1.996, "st": 3}, {"t": "2002-07-09", "v": 1.693, "b": 1.99, "st": 3}, {"t": "2002-07-19", "v": 1.648, "b": 1.913, "st": 3}, {"t": "2002-07-31", "v": 1.687, "b": 1.976, "st": 3}, {"t": "2002-08-12", "v": 1.652, "b": 1.915, "st": 3}, {"t": "2002-08-22", "v": 1.649, "b": 1.91, "st": 3}, {"t": "2002-09-04", "v": 1.648, "b": 1.906, "st": 3}, {"t": "2002-09-16", "v": 1.637, "b": 1.887, "st": 3}, {"t": "2002-09-26", "v": 1.608, "b": 1.837, "st": 3}, {"t": "2002-10-08", "v": 1.586, "b": 1.8, "st": 3}, {"t": "2002-10-18", "v": 1.579, "b": 1.786, "st": 3}, {"t": "2002-10-30", "v": 1.573, "b": 1.776, "st": 3}, {"t": "2002-11-11", "v": 1.559, "b": 1.752, "st": 3}, {"t": "2002-11-21", "v": 1.568, "b": 1.765, "st": 3}, {"t": "2002-12-03", "v": 1.613, "b": 1.836, "st": 3}, {"t": "2002-12-13", "v": 1.618, "b": 1.842, "st": 3}, {"t": "2002-12-25", "v": 1.618, "b": 1.841, "st": 3}, {"t": "2003-01-07", "v": 1.598, "b": 1.806, "st": 3}, {"t": "2003-01-17", "v": 1.551, "b": 1.731, "st": 3}, {"t": "2003-02-10", "v": 1.539, "b": 1.709, "st": 3}, {"t": "2003-02-20", "v": 1.509, "b": 1.66, "st": 3}, {"t": "2003-03-04", "v": 1.503, "b": 1.649, "st": 3}, {"t": "2003-03-14", "v": 1.481, "b": 1.613, "st": 3}, {"t": "2003-03-26", "v": 1.424, "b": 1.524, "st": 3}, {"t": "2003-04-07", "v": 1.406, "b": 1.494, "st": 3}, {"t": "2003-04-17", "v": 1.415, "b": 1.507, "st": 3}, {"t": "2003-04-29", "v": 1.428, "b": 1.525, "st": 3}, {"t": "2003-05-14", "v": 1.461, "b": 1.574, "st": 3}, {"t": "2003-05-26", "v": 1.431, "b": 1.528, "st": 3}, {"t": "2003-06-05", "v": 1.425, "b": 1.517, "st": 3}, {"t": "2003-06-17", "v": 1.426, "b": 1.517, "st": 3}, {"t": "2003-06-27", "v": 1.429, "b": 1.52, "st": 3}, {"t": "2003-07-09", "v": 1.424, "b": 1.511, "st": 3}, {"t": "2003-07-21", "v": 1.417, "b": 1.499, "st": 3}, {"t": "2003-07-31", "v": 1.394, "b": 1.463, "st": 3}, {"t": "2003-08-12", "v": 1.365, "b": 1.419, "st": 3}, {"t": "2003-08-22", "v": 1.367, "b": 1.421, "st": 3}, {"t": "2003-09-05", "v": 1.366, "b": 1.418, "st": 3}, {"t": "2003-09-17", "v": 1.357, "b": 1.403, "st": 3}, {"t": "2003-09-29", "v": 1.35, "b": 1.393, "st": 3}, {"t": "2003-10-09", "v": 1.335, "b": 1.37, "st": 3}, {"t": "2003-10-21", "v": 1.314, "b": 1.337, "st": 3}, {"t": "2003-10-31", "v": 1.332, "b": 1.362, "st": 3}, {"t": "2003-11-12", "v": 1.384, "b": 1.438, "st": 3}, {"t": "2003-11-24", "v": 1.515, "b": 1.633, "st": 3}, {"t": "2003-12-04", "v": 1.518, "b": 1.636, "st": 3}, {"t": "2003-12-16", "v": 1.535, "b": 1.661, "st": 3}, {"t": "2003-12-26", "v": 1.536, "b": 1.66, "st": 3}, {"t": "2004-01-09", "v": 1.583, "b": 1.733, "st": 3}, {"t": "2004-01-29", "v": 1.816, "b": 2.105, "st": 3}, {"t": "2004-02-10", "v": 1.834, "b": 2.13, "st": 3}, {"t": "2004-02-20", "v": 1.968, "b": 2.353, "st": 3}, {"t": "2004-03-03", "v": 2.169, "b": 2.699, "st": 3}, {"t": "2004-03-15", "v": 2.14, "b": 2.645, "st": 3}, {"t": "2004-03-25", "v": 2.144, "b": 2.649, "st": 3}, {"t": "2004-04-06", "v": 2.182, "b": 2.713, "st": 3}, {"t": "2004-04-16", "v": 2.116, "b": 2.594, "st": 3}, {"t": "2004-04-28", "v": 2.133, "b": 2.622, "st": 4}, {"t": "2004-05-12", "v": 2.135, "b": 2.627, "st": 4}, {"t": "2004-05-24", "v": 2.129, "b": 2.62, "st": 4}, {"t": "2004-06-03", "v": 2.041, "b": 2.51, "st": 3}, {"t": "2004-06-15", "v": 2.057, "b": 2.535, "st": 3}, {"t": "2004-06-25", "v": 2.037, "b": 2.498, "st": 3}, {"t": "2004-07-07", "v": 2.022, "b": 2.47, "st": 3}, {"t": "2004-07-19", "v": 2.0, "b": 2.431, "st": 3}, {"t": "2004-07-29", "v": 1.957, "b": 2.353, "st": 2}, {"t": "2004-08-10", "v": 1.939, "b": 2.225, "st": 1}, {"t": "2004-08-20", "v": 1.943, "b": 2.292, "st": 1}, {"t": "2004-09-01", "v": 1.931, "b": 2.315, "st": 3}, {"t": "2004-09-15", "v": 1.934, "b": 2.32, "st": 3}, {"t": "2004-09-27", "v": 1.929, "b": 2.309, "st": 3}, {"t": "2004-10-07", "v": 1.945, "b": 2.334, "st": 3}, {"t": "2004-10-19", "v": 1.959, "b": 2.357, "st": 3}, {"t": "2004-10-29", "v": 1.939, "b": 2.326, "st": 4}, {"t": "2004-11-10", "v": 1.914, "b": 2.288, "st": 3}, {"t": "2004-11-22", "v": 1.887, "b": 2.239, "st": 3}, {"t": "2004-12-02", "v": 1.889, "b": 2.277, "st": 4}, {"t": "2004-12-14", "v": 1.909, "b": 2.307, "st": 4}, {"t": "2004-12-24", "v": 1.987, "b": 2.402, "st": 4}, {"t": "2005-01-06", "v": 1.948, "b": 2.355, "st": 4}, {"t": "2005-01-18", "v": 1.946, "b": 2.353, "st": 3}, {"t": "2005-01-28", "v": 1.94, "b": 2.342, "st": 3}, {"t": "2005-02-16", "v": 1.942, "b": 2.345, "st": 4}, {"t": "2005-02-28", "v": 1.948, "b": 2.351, "st": 4}, {"t": "2005-03-10", "v": 1.962, "b": 2.368, "st": 4}, {"t": "2005-03-22", "v": 2.001, "b": 2.415, "st": 4}, {"t": "2005-04-01", "v": 2.032, "b": 2.456, "st": 4}, {"t": "2005-04-13", "v": 2.037, "b": 2.463, "st": 4}, {"t": "2005-04-25", "v": 2.032, "b": 2.457, "st": 4}, {"t": "2005-05-09", "v": 2.022, "b": 2.445, "st": 3}, {"t": "2005-05-19", "v": 2.009, "b": 2.425, "st": 3}, {"t": "2005-05-31", "v": 2.02, "b": 2.442, "st": 3}, {"t": "2005-06-10", "v": 2.037, "b": 2.466, "st": 4}, {"t": "2005-06-22", "v": 2.038, "b": 2.468, "st": 3}, {"t": "2005-07-04", "v": 2.044, "b": 2.478, "st": 3}, {"t": "2005-07-14", "v": 2.049, "b": 2.487, "st": 4}, {"t": "2005-07-26", "v": 2.026, "b": 2.46, "st": 3}, {"t": "2005-08-05", "v": 2.055, "b": 2.509, "st": 3}, {"t": "2005-08-17", "v": 2.031, "b": 2.473, "st": 3}, {"t": "2005-08-29", "v": 2.069, "b": 2.537, "st": 3}, {"t": "2005-09-09", "v": 2.115, "b": 2.6, "st": 5}, {"t": "2005-09-21", "v": 2.286, "b": 2.766, "st": 5}, {"t": "2005-10-03", "v": 2.384, "b": 2.86, "st": 5}, {"t": "2005-10-13", "v": 2.52, "b": 2.987, "st": 5}, {"t": "2005-10-25", "v": 2.588, "b": 3.051, "st": 5}, {"t": "2005-11-04", "v": 2.728, "b": 3.212, "st": 4}, {"t": "2005-11-16", "v": 2.671, "b": 3.159, "st": 4}, {"t": "2005-11-28", "v": 2.603, "b": 3.082, "st": 3}, {"t": "2005-12-08", "v": 2.636, "b": 3.131, "st": 3}, {"t": "2005-12-20", "v": 2.62, "b": 3.118, "st": 4}, {"t": "2005-12-30", "v": 2.587, "b": 3.075, "st": 3}, {"t": "2006-01-12", "v": 2.569, "b": 3.042, "st": 3}, {"t": "2006-01-25", "v": 2.61, "b": 3.109, "st": 3}, {"t": "2006-02-13", "v": 2.689, "b": 3.245, "st": 4}, {"t": "2006-02-23", "v": 3.069, "b": 3.689, "st": 5}, {"t": "2006-03-07", "v": 3.544, "b": 4.133, "st": 5}, {"t": "2006-03-17", "v": 3.875, "b": 4.432, "st": 5}, {"t": "2006-03-29", "v": 4.233, "b": 4.748, "st": 5}, {"t": "2006-04-10", "v": 4.997, "b": 5.404, "st": 5}, {"t": "2006-04-20", "v": 5.346, "b": 5.698, "st": 5}, {"t": "2006-05-04", "v": 5.738, "b": 6.013, "st": 4}, {"t": "2006-05-16", "v": 5.379, "b": 5.645, "st": 4}, {"t": "2006-05-26", "v": 5.206, "b": 5.454, "st": 3}, {"t": "2006-06-07", "v": 5.198, "b": 5.446, "st": 3}, {"t": "2006-06-19", "v": 5.032, "b": 5.195, "st": 3}, {"t": "2006-06-29", "v": 4.989, "b": 5.123, "st": 3}, {"t": "2006-07-11", "v": 4.937, "b": 5.04, "st": 2}, {"t": "2006-07-21", "v": 4.878, "b": 4.729, "st": 1}, {"t": "2006-08-02", "v": 4.862, "b": 3.998, "st": 1}, {"t": "2006-08-14", "v": 4.871, "b": 4.646, "st": 1}, {"t": "2006-08-24", "v": 4.871, "b": 4.79, "st": 3}, {"t": "2006-09-06", "v": 5.141, "b": 5.176, "st": 3}, {"t": "2006-09-18", "v": 5.092, "b": 5.101, "st": 3}, {"t": "2006-09-28", "v": 5.218, "b": 5.277, "st": 3}, {"t": "2006-10-10", "v": 5.191, "b": 5.272, "st": 4}, {"t": "2006-10-20", "v": 5.193, "b": 5.284, "st": 3}, {"t": "2006-11-01", "v": 5.147, "b": 5.214, "st": 3}, {"t": "2006-11-13", "v": 5.26, "b": 5.373, "st": 4}, {"t": "2006-11-23", "v": 6.194, "b": 6.37, "st": 5}, {"t": "2006-12-05", "v": 6.254, "b": 6.446, "st": 4}, {"t": "2006-12-15", "v": 7.564, "b": 7.756, "st": 4}, {"t": "2006-12-27", "v": 7.36, "b": 7.546, "st": 4}, {"t": "2007-01-09", "v": 8.24, "b": 8.449, "st": 4}, {"t": "2007-01-19", "v": 9.978, "b": 10.231, "st": 4}, {"t": "2007-01-31", "v": 10.156, "b": 10.413, "st": 4}, {"t": "2007-02-12", "v": 10.282, "b": 10.543, "st": 4}, {"t": "2007-03-02", "v": 11.193, "b": 11.477, "st": 4}, {"t": "2007-03-14", "v": 10.867, "b": 11.142, "st": 4}, {"t": "2007-03-26", "v": 10.474, "b": 10.722, "st": 3}, {"t": "2007-04-05", "v": 10.288, "b": 10.49, "st": 3}, {"t": "2007-04-17", "v": 9.717, "b": 9.657, "st": 3}, {"t": "2007-05-03", "v": 9.49, "b": 9.375, "st": 1}, {"t": "2007-05-15", "v": 9.74, "b": 10.547, "st": 3}, {"t": "2007-05-25", "v": 9.934, "b": 10.896, "st": 4}, {"t": "2007-06-06", "v": 9.64, "b": 10.453, "st": 3}, {"t": "2007-06-18", "v": 9.671, "b": 10.44, "st": 2}, {"t": "2007-06-28", "v": 9.649, "b": 10.24, "st": 2}, {"t": "2007-07-10", "v": 9.664, "b": 10.23, "st": 2}, {"t": "2007-07-20", "v": 9.475, "b": 9.813, "st": 2}, {"t": "2007-08-01", "v": 10.109, "b": 9.231, "st": 1}, {"t": "2007-08-13", "v": 10.089, "b": 9.092, "st": 1}, {"t": "2007-08-23", "v": 10.108, "b": 8.876, "st": 1}, {"t": "2007-09-05", "v": 10.137, "b": 9.256, "st": 2}, {"t": "2007-09-17", "v": 10.14, "b": 9.347, "st": 2}, {"t": "2007-09-27", "v": 10.629, "b": 10.141, "st": 3}, {"t": "2007-10-09", "v": 11.251, "b": 10.974, "st": 4}, {"t": "2007-10-19", "v": 11.248, "b": 10.971, "st": 3}, {"t": "2007-10-31", "v": 10.993, "b": 10.651, "st": 3}, {"t": "2007-11-12", "v": 10.57, "b": 10.061, "st": 3}, {"t": "2007-11-22", "v": 10.453, "b": 9.772, "st": 2}, {"t": "2007-12-04", "v": 10.518, "b": 9.889, "st": 3}, {"t": "2007-12-14", "v": 10.05, "b": 9.221, "st": 1}, {"t": "2007-12-26", "v": 10.067, "b": 9.244, "st": 1}, {"t": "2008-01-09", "v": 10.086, "b": 8.784, "st": 1}, {"t": "2008-01-21", "v": 10.105, "b": 8.339, "st": 1}, {"t": "2008-01-31", "v": 10.125, "b": 8.441, "st": 1}, {"t": "2008-02-20", "v": 10.144, "b": 7.449, "st": 1}, {"t": "2008-03-03", "v": 10.163, "b": 6.352, "st": 1}, {"t": "2008-03-13", "v": 10.183, "b": 6.476, "st": 1}, {"t": "2008-03-25", "v": 10.202, "b": 4.966, "st": 1}, {"t": "2008-04-04", "v": 10.222, "b": 5.33, "st": 1}, {"t": "2008-04-18", "v": 10.241, "b": 5.373, "st": 1}, {"t": "2008-05-05", "v": 10.261, "b": 5.213, "st": 1}, {"t": "2008-05-15", "v": 10.28, "b": 4.667, "st": 1}, {"t": "2008-05-27", "v": 10.3, "b": 4.205, "st": 1}, {"t": "2008-06-06", "v": 10.319, "b": 3.842, "st": 1}, {"t": "2008-06-18", "v": 10.339, "b": 3.821, "st": 1}, {"t": "2008-06-30", "v": 10.359, "b": 3.994, "st": 1}, {"t": "2008-07-10", "v": 10.56, "b": 4.466, "st": 3}, {"t": "2008-07-22", "v": 10.713, "b": 4.579, "st": 3}, {"t": "2008-08-01", "v": 10.446, "b": 4.514, "st": 2}, {"t": "2008-08-13", "v": 10.508, "b": 4.64, "st": 2}, {"t": "2008-08-22", "v": 11.297, "b": 5.27, "st": 3}, {"t": "2008-09-05", "v": 11.777, "b": 5.586, "st": 3}, {"t": "2008-09-17", "v": 10.236, "b": 4.56, "st": 3}, {"t": "2008-09-29", "v": 10.608, "b": 4.79, "st": 3}, {"t": "2008-10-09", "v": 9.539, "b": 3.977, "st": 1}, {"t": "2008-10-21", "v": 9.493, "b": 3.799, "st": 1}, {"t": "2008-10-31", "v": 9.511, "b": 3.471, "st": 1}, {"t": "2008-11-12", "v": 9.412, "b": 3.423, "st": 2}, {"t": "2008-11-24", "v": 9.433, "b": 3.179, "st": 1}, {"t": "2008-12-04", "v": 9.451, "b": 3.086, "st": 1}, {"t": "2008-12-16", "v": 9.469, "b": 2.964, "st": 1}, {"t": "2008-12-26", "v": 9.474, "b": 3.045, "st": 2}, {"t": "2009-01-08", "v": 9.547, "b": 3.142, "st": 3}, {"t": "2009-01-20", "v": 9.339, "b": 3.029, "st": 2}, {"t": "2009-02-06", "v": 9.2, "b": 2.816, "st": 1}, {"t": "2009-02-18", "v": 9.215, "b": 2.551, "st": 1}, {"t": "2009-03-02", "v": 9.233, "b": 2.477, "st": 1}, {"t": "2009-03-12", "v": 9.25, "b": 2.51, "st": 2}, {"t": "2009-03-24", "v": 9.464, "b": 2.706, "st": 3}, {"t": "2009-04-03", "v": 10.383, "b": 3.103, "st": 3}, {"t": "2009-04-16", "v": 11.173, "b": 3.439, "st": 3}, {"t": "2009-04-28", "v": 10.535, "b": 3.157, "st": 3}, {"t": "2009-05-12", "v": 12.054, "b": 3.82, "st": 3}, {"t": "2009-05-22", "v": 12.56, "b": 4.046, "st": 3}, {"t": "2009-06-03", "v": 13.435, "b": 4.448, "st": 3}, {"t": "2009-06-15", "v": 14.469, "b": 4.935, "st": 3}, {"t": "2009-06-25", "v": 13.662, "b": 4.538, "st": 3}, {"t": "2009-07-07", "v": 13.546, "b": 4.476, "st": 3}, {"t": "2009-07-17", "v": 13.154, "b": 4.287, "st": 3}, {"t": "2009-07-29", "v": 13.794, "b": 4.58, "st": 3}, {"t": "2009-08-10", "v": 14.498, "b": 4.912, "st": 3}, {"t": "2009-08-20", "v": 14.973, "b": 5.139, "st": 3}, {"t": "2009-09-01", "v": 15.804, "b": 5.477, "st": 4}, {"t": "2009-09-14", "v": 16.06, "b": 5.566, "st": 4}, {"t": "2009-09-24", "v": 16.585, "b": 5.748, "st": 4}, {"t": "2009-10-06", "v": 15.927, "b": 5.52, "st": 4}, {"t": "2009-10-16", "v": 17.586, "b": 6.095, "st": 5}, {"t": "2009-10-28", "v": 17.321, "b": 5.999, "st": 4}, {"t": "2009-11-09", "v": 15.548, "b": 5.341, "st": 3}, {"t": "2009-11-19", "v": 16.077, "b": 5.601, "st": 3}, {"t": "2009-12-01", "v": 15.018, "b": 5.149, "st": 2}, {"t": "2009-12-11", "v": 14.272, "b": 4.442, "st": 2}, {"t": "2009-12-23", "v": 14.37, "b": 4.708, "st": 1}, {"t": "2010-01-05", "v": 15.132, "b": 5.325, "st": 3}, {"t": "2010-01-15", "v": 14.599, "b": 5.054, "st": 3}, {"t": "2010-01-27", "v": 14.235, "b": 4.864, "st": 2}, {"t": "2010-02-08", "v": 14.268, "b": 4.912, "st": 3}, {"t": "2010-02-25", "v": 14.341, "b": 4.95, "st": 3}, {"t": "2010-03-09", "v": 15.0, "b": 5.273, "st": 3}, {"t": "2010-03-19", "v": 14.696, "b": 5.16, "st": 3}, {"t": "2010-03-31", "v": 14.321, "b": 4.992, "st": 3}, {"t": "2010-04-12", "v": 14.743, "b": 5.199, "st": 3}, {"t": "2010-04-22", "v": 14.939, "b": 5.293, "st": 3}, {"t": "2010-05-07", "v": 15.2, "b": 5.42, "st": 4}, {"t": "2010-05-19", "v": 14.044, "b": 4.949, "st": 3}, {"t": "2010-05-31", "v": 14.101, "b": 5.074, "st": 3}, {"t": "2010-06-10", "v": 13.973, "b": 5.005, "st": 3}, {"t": "2010-06-22", "v": 14.217, "b": 5.126, "st": 3}, {"t": "2010-07-02", "v": 14.052, "b": 5.037, "st": 3}, {"t": "2010-07-14", "v": 14.131, "b": 5.073, "st": 3}, {"t": "2010-07-26", "v": 13.96, "b": 4.981, "st": 3}, {"t": "2010-08-05", "v": 13.801, "b": 4.862, "st": 2}, {"t": "2010-08-17", "v": 13.69, "b": 4.635, "st": 2}, {"t": "2010-08-27", "v": 13.505, "b": 4.291, "st": 1}, {"t": "2010-09-10", "v": 13.357, "b": 4.514, "st": 3}, {"t": "2010-09-22", "v": 13.424, "b": 4.539, "st": 3}, {"t": "2010-10-04", "v": 13.264, "b": 4.458, "st": 3}, {"t": "2010-10-14", "v": 13.54, "b": 4.587, "st": 3}, {"t": "2010-10-26", "v": 13.402, "b": 4.551, "st": 2}, {"t": "2010-11-05", "v": 13.501, "b": 4.573, "st": 3}, {"t": "2010-11-17", "v": 12.845, "b": 4.255, "st": 2}, {"t": "2010-11-29", "v": 13.223, "b": 4.464, "st": 3}, {"t": "2010-12-09", "v": 13.52, "b": 4.605, "st": 3}, {"t": "2010-12-21", "v": 13.916, "b": 4.818, "st": 4}, {"t": "2010-12-31", "v": 13.944, "b": 4.847, "st": 3}, {"t": "2011-01-13", "v": 13.937, "b": 4.841, "st": 3}, {"t": "2011-01-25", "v": 14.242, "b": 5.02, "st": 4}, {"t": "2011-02-14", "v": 14.584, "b": 5.141, "st": 4}, {"t": "2011-02-24", "v": 13.127, "b": 4.613, "st": 3}, {"t": "2011-03-08", "v": 13.418, "b": 4.754, "st": 3}, {"t": "2011-03-18", "v": 13.146, "b": 4.611, "st": 3}, {"t": "2011-03-30", "v": 13.133, "b": 4.6, "st": 3}, {"t": "2011-04-13", "v": 13.161, "b": 4.61, "st": 3}, {"t": "2011-04-25", "v": 13.261, "b": 4.656, "st": 3}, {"t": "2011-05-09", "v": 13.507, "b": 4.775, "st": 3}, {"t": "2011-05-19", "v": 12.864, "b": 4.449, "st": 3}, {"t": "2011-05-31", "v": 12.233, "b": 4.214, "st": 1}, {"t": "2011-06-10", "v": 12.339, "b": 4.45, "st": 3}, {"t": "2011-06-22", "v": 12.247, "b": 4.396, "st": 3}, {"t": "2011-07-04", "v": 11.977, "b": 4.254, "st": 3}, {"t": "2011-07-14", "v": 11.883, "b": 4.189, "st": 2}, {"t": "2011-07-26", "v": 11.829, "b": 4.094, "st": 1}, {"t": "2011-08-05", "v": 11.841, "b": 3.977, "st": 1}, {"t": "2011-08-17", "v": 11.864, "b": 3.935, "st": 1}, {"t": "2011-08-29", "v": 12.087, "b": 4.134, "st": 3}, {"t": "2011-09-09", "v": 13.022, "b": 4.599, "st": 4}, {"t": "2011-09-21", "v": 12.642, "b": 4.476, "st": 4}, {"t": "2011-10-03", "v": 12.032, "b": 4.221, "st": 3}, {"t": "2011-10-13", "v": 11.848, "b": 4.126, "st": 3}, {"t": "2011-10-25", "v": 11.743, "b": 4.094, "st": 3}, {"t": "2011-11-04", "v": 11.732, "b": 4.106, "st": 3}, {"t": "2011-11-16", "v": 11.343, "b": 3.909, "st": 3}, {"t": "2011-11-28", "v": 11.191, "b": 3.833, "st": 1}, {"t": "2011-12-08", "v": 11.187, "b": 3.816, "st": 2}, {"t": "2011-12-20", "v": 11.108, "b": 3.657, "st": 1}, {"t": "2011-12-30", "v": 11.125, "b": 3.516, "st": 1}, {"t": "2012-01-12", "v": 11.146, "b": 3.481, "st": 1}, {"t": "2012-01-31", "v": 11.586, "b": 3.88, "st": 3}, {"t": "2012-02-10", "v": 11.938, "b": 4.05, "st": 4}, {"t": "2012-02-22", "v": 12.258, "b": 4.184, "st": 4}, {"t": "2012-03-05", "v": 13.383, "b": 4.572, "st": 4}, {"t": "2012-03-15", "v": 12.933, "b": 4.419, "st": 4}, {"t": "2012-03-27", "v": 13.051, "b": 4.459, "st": 4}, {"t": "2012-04-09", "v": 13.193, "b": 4.507, "st": 4}, {"t": "2012-04-19", "v": 13.671, "b": 4.671, "st": 4}, {"t": "2012-05-03", "v": 13.722, "b": 4.688, "st": 4}, {"t": "2012-05-15", "v": 13.337, "b": 4.557, "st": 4}, {"t": "2012-05-25", "v": 12.834, "b": 4.374, "st": 3}, {"t": "2012-06-06", "v": 12.616, "b": 4.264, "st": 3}, {"t": "2012-06-18", "v": 12.815, "b": 4.356, "st": 3}, {"t": "2012-06-28", "v": 12.461, "b": 4.182, "st": 3}, {"t": "2012-07-10", "v": 12.202, "b": 4.054, "st": 2}, {"t": "2012-07-20", "v": 12.436, "b": 4.245, "st": 3}, {"t": "2012-08-01", "v": 12.216, "b": 4.126, "st": 3}, {"t": "2012-08-13", "v": 12.504, "b": 4.262, "st": 3}, {"t": "2012-08-23", "v": 11.823, "b": 3.928, "st": 3}, {"t": "2012-09-05", "v": 11.884, "b": 3.989, "st": 2}, {"t": "2012-09-17", "v": 11.893, "b": 4.018, "st": 2}, {"t": "2012-09-27", "v": 11.839, "b": 3.933, "st": 3}, {"t": "2012-10-09", "v": 11.853, "b": 3.937, "st": 3}, {"t": "2012-10-19", "v": 11.957, "b": 3.982, "st": 3}, {"t": "2012-10-31", "v": 11.757, "b": 3.884, "st": 3}, {"t": "2012-11-12", "v": 11.644, "b": 3.886, "st": 2}, {"t": "2012-11-22", "v": 11.587, "b": 3.832, "st": 3}, {"t": "2012-12-04", "v": 11.575, "b": 3.821, "st": 3}, {"t": "2012-12-14", "v": 11.795, "b": 3.922, "st": 3}, {"t": "2012-12-26", "v": 12.107, "b": 4.061, "st": 4}, {"t": "2013-01-09", "v": 13.334, "b": 4.488, "st": 5}, {"t": "2013-01-21", "v": 13.212, "b": 4.478, "st": 5}, {"t": "2013-01-31", "v": 14.21, "b": 4.798, "st": 5}, {"t": "2013-02-19", "v": 14.592, "b": 4.908, "st": 4}, {"t": "2013-03-01", "v": 14.178, "b": 4.772, "st": 4}, {"t": "2013-03-13", "v": 14.042, "b": 4.732, "st": 3}, {"t": "2013-03-25", "v": 14.554, "b": 4.936, "st": 4}, {"t": "2013-04-04", "v": 14.665, "b": 4.974, "st": 4}, {"t": "2013-04-16", "v": 14.097, "b": 4.781, "st": 3}, {"t": "2013-05-02", "v": 13.986, "b": 4.73, "st": 3}, {"t": "2013-05-14", "v": 14.219, "b": 4.839, "st": 3}, {"t": "2013-05-24", "v": 14.568, "b": 5.002, "st": 4}, {"t": "2013-06-05", "v": 14.925, "b": 5.146, "st": 4}, {"t": "2013-06-17", "v": 14.458, "b": 4.985, "st": 4}, {"t": "2013-06-27", "v": 14.122, "b": 4.83, "st": 3}, {"t": "2013-07-09", "v": 14.183, "b": 4.855, "st": 3}, {"t": "2013-07-19", "v": 14.563, "b": 5.038, "st": 4}, {"t": "2013-07-31", "v": 14.216, "b": 4.919, "st": 3}, {"t": "2013-08-12", "v": 14.382, "b": 4.995, "st": 3}, {"t": "2013-08-22", "v": 14.324, "b": 4.961, "st": 3}, {"t": "2013-09-04", "v": 13.837, "b": 4.715, "st": 2}, {"t": "2013-09-16", "v": 13.888, "b": 4.756, "st": 3}, {"t": "2013-09-26", "v": 14.087, "b": 4.851, "st": 3}, {"t": "2013-10-08", "v": 14.485, "b": 5.022, "st": 4}, {"t": "2013-10-18", "v": 14.415, "b": 5.008, "st": 3}, {"t": "2013-10-30", "v": 14.387, "b": 4.991, "st": 3}, {"t": "2013-11-11", "v": 14.436, "b": 5.011, "st": 3}, {"t": "2013-11-21", "v": 14.494, "b": 5.035, "st": 3}, {"t": "2013-12-03", "v": 14.681, "b": 5.116, "st": 4}, {"t": "2013-12-13", "v": 14.522, "b": 5.061, "st": 3}, {"t": "2013-12-25", "v": 14.484, "b": 5.044, "st": 3}, {"t": "2014-01-07", "v": 14.607, "b": 5.101, "st": 3}, {"t": "2014-01-17", "v": 15.41, "b": 5.436, "st": 4}, {"t": "2014-02-07", "v": 15.545, "b": 5.498, "st": 4}, {"t": "2014-02-19", "v": 16.351, "b": 5.781, "st": 4}, {"t": "2014-03-03", "v": 16.217, "b": 5.734, "st": 4}, {"t": "2014-03-13", "v": 16.835, "b": 5.952, "st": 4}, {"t": "2014-03-25", "v": 17.022, "b": 6.019, "st": 4}, {"t": "2014-04-04", "v": 16.729, "b": 5.93, "st": 3}, {"t": "2014-04-17", "v": 16.509, "b": 5.803, "st": 3}, {"t": "2014-04-29", "v": 16.476, "b": 5.78, "st": 3}, {"t": "2014-05-14", "v": 15.372, "b": 5.295, "st": 2}, {"t": "2014-05-26", "v": 15.45, "b": 5.441, "st": 3}, {"t": "2014-06-05", "v": 15.518, "b": 5.511, "st": 3}, {"t": "2014-06-17", "v": 15.943, "b": 5.723, "st": 3}, {"t": "2014-06-27", "v": 16.081, "b": 5.788, "st": 3}, {"t": "2014-07-09", "v": 16.338, "b": 5.916, "st": 3}, {"t": "2014-07-21", "v": 16.53, "b": 6.01, "st": 3}, {"t": "2014-07-31", "v": 16.388, "b": 5.961, "st": 3}, {"t": "2014-08-12", "v": 16.484, "b": 6.018, "st": 4}, {"t": "2014-08-22", "v": 16.859, "b": 6.201, "st": 3}, {"t": "2014-09-05", "v": 17.262, "b": 6.387, "st": 4}, {"t": "2014-09-17", "v": 16.937, "b": 6.257, "st": 3}, {"t": "2014-09-29", "v": 16.441, "b": 5.998, "st": 3}, {"t": "2014-10-09", "v": 16.92, "b": 6.243, "st": 3}, {"t": "2014-10-21", "v": 16.424, "b": 6.006, "st": 2}, {"t": "2014-10-31", "v": 16.483, "b": 6.008, "st": 2}, {"t": "2014-11-12", "v": 16.551, "b": 6.04, "st": 3}, {"t": "2014-11-24", "v": 16.147, "b": 5.825, "st": 2}, {"t": "2014-12-04", "v": 16.044, "b": 5.784, "st": 1}, {"t": "2014-12-16", "v": 15.945, "b": 5.351, "st": 1}, {"t": "2014-12-26", "v": 15.964, "b": 5.334, "st": 1}, {"t": "2015-01-09", "v": 16.09, "b": 5.697, "st": 3}, {"t": "2015-01-21", "v": 16.02, "b": 5.691, "st": 3}, {"t": "2015-02-02", "v": 16.054, "b": 5.704, "st": 3}, {"t": "2015-02-12", "v": 16.346, "b": 5.847, "st": 3}, {"t": "2015-03-04", "v": 16.663, "b": 6.004, "st": 4}, {"t": "2015-03-16", "v": 16.212, "b": 5.808, "st": 3}, {"t": "2015-03-26", "v": 15.736, "b": 5.562, "st": 3}, {"t": "2015-04-07", "v": 15.558, "b": 5.481, "st": 2}, {"t": "2015-04-17", "v": 15.743, "b": 5.683, "st": 3}, {"t": "2015-05-05", "v": 15.462, "b": 5.527, "st": 3}, {"t": "2015-05-15", "v": 15.172, "b": 5.374, "st": 3}, {"t": "2015-05-27", "v": 15.449, "b": 5.665, "st": 3}, {"t": "2015-06-08", "v": 15.701, "b": 5.798, "st": 3}, {"t": "2015-06-18", "v": 15.72, "b": 5.804, "st": 3}, {"t": "2015-06-30", "v": 15.992, "b": 5.931, "st": 3}, {"t": "2015-07-10", "v": 16.68, "b": 6.273, "st": 4}, {"t": "2015-07-22", "v": 16.738, "b": 6.299, "st": 4}, {"t": "2015-08-03", "v": 16.226, "b": 6.095, "st": 3}, {"t": "2015-08-13", "v": 15.933, "b": 5.943, "st": 3}, {"t": "2015-08-25", "v": 14.959, "b": 5.3, "st": 2}, {"t": "2015-09-07", "v": 15.167, "b": 5.549, "st": 3}, {"t": "2015-09-17", "v": 15.284, "b": 5.625, "st": 3}, {"t": "2015-09-29", "v": 15.268, "b": 5.612, "st": 3}, {"t": "2015-10-09", "v": 15.786, "b": 5.88, "st": 3}, {"t": "2015-10-21", "v": 15.837, "b": 5.902, "st": 3}, {"t": "2015-11-02", "v": 16.081, "b": 6.028, "st": 3}, {"t": "2015-11-12", "v": 16.144, "b": 6.056, "st": 3}, {"t": "2015-11-24", "v": 15.934, "b": 5.938, "st": 3}, {"t": "2015-12-04", "v": 15.534, "b": 5.716, "st": 2}, {"t": "2015-12-16", "v": 15.522, "b": 5.726, "st": 2}, {"t": "2015-12-28", "v": 15.553, "b": 5.699, "st": 3}, {"t": "2016-01-08", "v": 15.369, "b": 5.601, "st": 3}, {"t": "2016-01-20", "v": 14.939, "b": 5.294, "st": 1}, {"t": "2016-02-01", "v": 14.959, "b": 5.406, "st": 2}, {"t": "2016-02-18", "v": 15.081, "b": 5.525, "st": 3}, {"t": "2016-03-01", "v": 15.232, "b": 5.616, "st": 3}, {"t": "2016-03-11", "v": 15.54, "b": 5.773, "st": 4}, {"t": "2016-03-23", "v": 15.482, "b": 5.747, "st": 3}, {"t": "2016-04-04", "v": 15.129, "b": 5.558, "st": 3}, {"t": "2016-04-14", "v": 15.587, "b": 5.795, "st": 3}, {"t": "2016-04-27", "v": 15.856, "b": 5.94, "st": 4}, {"t": "2016-05-11", "v": 16.376, "b": 6.141, "st": 4}, {"t": "2016-05-23", "v": 16.295, "b": 6.11, "st": 4}, {"t": "2016-06-02", "v": 16.529, "b": 6.234, "st": 3}, {"t": "2016-06-14", "v": 16.572, "b": 6.254, "st": 4}, {"t": "2016-06-24", "v": 16.448, "b": 6.208, "st": 4}, {"t": "2016-07-06", "v": 17.095, "b": 6.495, "st": 4}, {"t": "2016-07-18", "v": 17.716, "b": 6.735, "st": 4}, {"t": "2016-07-28", "v": 17.259, "b": 6.571, "st": 3}, {"t": "2016-08-09", "v": 16.868, "b": 6.373, "st": 3}, {"t": "2016-08-19", "v": 17.342, "b": 6.623, "st": 4}, {"t": "2016-08-31", "v": 17.673, "b": 6.746, "st": 4}, {"t": "2016-09-13", "v": 17.299, "b": 6.597, "st": 3}, {"t": "2016-09-23", "v": 17.561, "b": 6.741, "st": 3}, {"t": "2016-10-05", "v": 17.805, "b": 6.87, "st": 4}, {"t": "2016-10-17", "v": 17.662, "b": 6.81, "st": 3}, {"t": "2016-10-27", "v": 17.603, "b": 6.769, "st": 3}, {"t": "2016-11-08", "v": 17.606, "b": 6.765, "st": 3}, {"t": "2016-11-18", "v": 17.558, "b": 6.733, "st": 3}, {"t": "2016-11-30", "v": 17.419, "b": 6.651, "st": 3}, {"t": "2016-12-12", "v": 17.331, "b": 6.597, "st": 3}, {"t": "2016-12-22", "v": 17.425, "b": 6.642, "st": 3}, {"t": "2017-01-04", "v": 17.628, "b": 6.747, "st": 3}, {"t": "2017-01-16", "v": 17.698, "b": 6.779, "st": 3}, {"t": "2017-02-02", "v": 18.168, "b": 7.032, "st": 3}, {"t": "2017-02-14", "v": 18.26, "b": 7.063, "st": 4}, {"t": "2017-02-24", "v": 18.472, "b": 7.145, "st": 4}, {"t": "2017-03-08", "v": 18.527, "b": 7.166, "st": 4}, {"t": "2017-03-20", "v": 18.479, "b": 7.151, "st": 3}, {"t": "2017-03-30", "v": 18.646, "b": 7.239, "st": 3}, {"t": "2017-04-12", "v": 18.688, "b": 7.256, "st": 3}, {"t": "2017-04-24", "v": 18.406, "b": 7.094, "st": 3}, {"t": "2017-05-08", "v": 18.589, "b": 7.189, "st": 3}, {"t": "2017-05-18", "v": 18.746, "b": 7.27, "st": 3}, {"t": "2017-05-30", "v": 18.916, "b": 7.382, "st": 4}, {"t": "2017-06-09", "v": 19.163, "b": 7.497, "st": 4}, {"t": "2017-06-21", "v": 19.603, "b": 7.674, "st": 4}, {"t": "2017-07-03", "v": 19.896, "b": 7.789, "st": 4}, {"t": "2017-07-13", "v": 19.881, "b": 7.783, "st": 4}, {"t": "2017-07-25", "v": 19.583, "b": 7.673, "st": 3}, {"t": "2017-08-04", "v": 19.987, "b": 7.887, "st": 4}, {"t": "2017-08-16", "v": 19.606, "b": 7.736, "st": 3}, {"t": "2017-08-28", "v": 19.673, "b": 7.773, "st": 3}, {"t": "2017-09-08", "v": 20.108, "b": 8.012, "st": 4}, {"t": "2017-09-20", "v": 20.219, "b": 8.059, "st": 4}, {"t": "2017-10-02", "v": 20.137, "b": 8.022, "st": 3}, {"t": "2017-10-12", "v": 20.386, "b": 8.159, "st": 3}, {"t": "2017-10-24", "v": 20.538, "b": 8.252, "st": 4}, {"t": "2017-11-03", "v": 20.955, "b": 8.437, "st": 4}, {"t": "2017-11-15", "v": 21.906, "b": 8.826, "st": 4}, {"t": "2017-11-27", "v": 23.296, "b": 9.386, "st": 4}, {"t": "2017-12-07", "v": 23.297, "b": 9.387, "st": 4}, {"t": "2017-12-19", "v": 23.614, "b": 9.514, "st": 4}, {"t": "2017-12-29", "v": 24.429, "b": 9.842, "st": 4}, {"t": "2018-01-11", "v": 26.016, "b": 10.482, "st": 4}, {"t": "2018-01-23", "v": 26.967, "b": 10.865, "st": 4}, {"t": "2018-02-02", "v": 27.427, "b": 11.05, "st": 4}, {"t": "2018-02-21", "v": 26.621, "b": 10.872, "st": 3}, {"t": "2018-03-05", "v": 26.57, "b": 10.935, "st": 4}, {"t": "2018-03-15", "v": 27.652, "b": 11.388, "st": 4}, {"t": "2018-03-27", "v": 28.453, "b": 11.717, "st": 4}, {"t": "2018-04-06", "v": 29.138, "b": 12.0, "st": 4}, {"t": "2018-04-18", "v": 27.721, "b": 11.385, "st": 3}, {"t": "2018-05-03", "v": 25.886, "b": 10.265, "st": 2}, {"t": "2018-05-15", "v": 26.18, "b": 10.735, "st": 3}, {"t": "2018-05-25", "v": 24.893, "b": 9.639, "st": 1}, {"t": "2018-06-06", "v": 24.899, "b": 10.345, "st": 3}, {"t": "2018-06-18", "v": 24.146, "b": 9.873, "st": 3}, {"t": "2018-06-28", "v": 23.892, "b": 9.574, "st": 2}, {"t": "2018-07-10", "v": 23.755, "b": 9.111, "st": 1}, {"t": "2018-07-20", "v": 23.8, "b": 9.334, "st": 2}, {"t": "2018-08-01", "v": 23.91, "b": 9.528, "st": 3}, {"t": "2018-08-13", "v": 24.331, "b": 9.78, "st": 3}, {"t": "2018-08-23", "v": 24.508, "b": 9.874, "st": 3}, {"t": "2018-09-05", "v": 24.194, "b": 9.684, "st": 3}, {"t": "2018-09-17", "v": 24.543, "b": 9.876, "st": 3}, {"t": "2018-09-27", "v": 25.039, "b": 10.154, "st": 3}, {"t": "2018-10-09", "v": 24.567, "b": 9.962, "st": 3}, {"t": "2018-10-19", "v": 23.831, "b": 9.584, "st": 2}, {"t": "2018-10-31", "v": 23.463, "b": 9.148, "st": 1}, {"t": "2018-11-12", "v": 23.485, "b": 9.181, "st": 2}, {"t": "2018-11-22", "v": 23.507, "b": 9.244, "st": 2}, {"t": "2018-12-04", "v": 24.12, "b": 9.588, "st": 3}, {"t": "2018-12-14", "v": 24.014, "b": 9.52, "st": 3}, {"t": "2018-12-26", "v": 23.162, "b": 8.918, "st": 1}, {"t": "2019-01-09", "v": 23.201, "b": 8.97, "st": 1}, {"t": "2019-01-21", "v": 23.32, "b": 9.111, "st": 3}, {"t": "2019-01-31", "v": 23.332, "b": 9.107, "st": 3}, {"t": "2019-02-19", "v": 24.351, "b": 9.644, "st": 4}, {"t": "2019-03-01", "v": 24.708, "b": 9.796, "st": 4}, {"t": "2019-03-13", "v": 25.359, "b": 10.054, "st": 4}, {"t": "2019-03-25", "v": 24.467, "b": 9.701, "st": 3}, {"t": "2019-04-04", "v": 24.806, "b": 9.869, "st": 3}, {"t": "2019-04-17", "v": 24.559, "b": 9.721, "st": 3}, {"t": "2019-05-02", "v": 24.687, "b": 9.785, "st": 3}, {"t": "2019-05-14", "v": 24.469, "b": 9.653, "st": 3}, {"t": "2019-05-24", "v": 24.568, "b": 9.7, "st": 3}, {"t": "2019-06-05", "v": 24.247, "b": 9.514, "st": 2}, {"t": "2019-06-17", "v": 24.183, "b": 9.47, "st": 2}, {"t": "2019-06-27", "v": 24.021, "b": 9.431, "st": 3}, {"t": "2019-07-09", "v": 24.472, "b": 9.691, "st": 3}, {"t": "2019-07-19", "v": 24.721, "b": 9.823, "st": 3}, {"t": "2019-07-31", "v": 24.9, "b": 9.917, "st": 3}, {"t": "2019-08-12", "v": 24.628, "b": 9.753, "st": 3}, {"t": "2019-08-22", "v": 25.029, "b": 9.973, "st": 3}, {"t": "2019-09-04", "v": 24.698, "b": 9.776, "st": 3}, {"t": "2019-09-16", "v": 24.929, "b": 9.899, "st": 3}, {"t": "2019-09-26", "v": 24.959, "b": 9.908, "st": 3}, {"t": "2019-10-08", "v": 24.929, "b": 9.882, "st": 3}, {"t": "2019-10-18", "v": 24.961, "b": 9.892, "st": 3}, {"t": "2019-10-30", "v": 25.182, "b": 10.009, "st": 3}, {"t": "2019-11-11", "v": 25.429, "b": 10.168, "st": 4}, {"t": "2019-11-21", "v": 24.9, "b": 9.879, "st": 3}, {"t": "2019-12-03", "v": 24.552, "b": 9.534, "st": 2}, {"t": "2019-12-13", "v": 24.647, "b": 9.662, "st": 2}, {"t": "2019-12-25", "v": 24.677, "b": 9.609, "st": 2}, {"t": "2020-01-07", "v": 24.643, "b": 9.589, "st": 3}, {"t": "2020-01-17", "v": 25.017, "b": 9.79, "st": 3}, {"t": "2020-02-05", "v": 24.094, "b": 9.259, "st": 1}, {"t": "2020-02-17", "v": 24.215, "b": 9.348, "st": 2}, {"t": "2020-02-27", "v": 24.057, "b": 8.984, "st": 1}, {"t": "2020-03-10", "v": 24.069, "b": 8.375, "st": 1}, {"t": "2020-03-20", "v": 24.115, "b": 7.097, "st": 1}, {"t": "2020-04-01", "v": 24.161, "b": 6.802, "st": 1}, {"t": "2020-04-14", "v": 24.232, "b": 7.674, "st": 2}, {"t": "2020-04-24", "v": 24.204, "b": 7.767, "st": 3}, {"t": "2020-05-08", "v": 25.036, "b": 8.137, "st": 3}, {"t": "2020-05-20", "v": 25.89, "b": 8.529, "st": 3}, {"t": "2020-06-01", "v": 26.453, "b": 8.787, "st": 3}, {"t": "2020-06-11", "v": 26.056, "b": 8.674, "st": 4}, {"t": "2020-06-23", "v": 26.001, "b": 8.682, "st": 3}, {"t": "2020-07-03", "v": 25.578, "b": 8.476, "st": 3}, {"t": "2020-07-15", "v": 26.065, "b": 8.699, "st": 4}, {"t": "2020-07-27", "v": 24.038, "b": 7.852, "st": 3}, {"t": "2020-08-06", "v": 24.819, "b": 8.4, "st": 2}, {"t": "2020-08-18", "v": 24.903, "b": 8.464, "st": 3}, {"t": "2020-08-28", "v": 25.603, "b": 8.79, "st": 4}, {"t": "2020-09-10", "v": 25.851, "b": 8.888, "st": 4}, {"t": "2020-09-22", "v": 26.356, "b": 9.062, "st": 4}, {"t": "2020-10-02", "v": 26.464, "b": 9.099, "st": 4}, {"t": "2020-10-14", "v": 27.345, "b": 9.402, "st": 4}, {"t": "2020-10-26", "v": 27.681, "b": 9.508, "st": 5}, {"t": "2020-11-05", "v": 26.993, "b": 9.378, "st": 3}, {"t": "2020-11-17", "v": 27.743, "b": 9.689, "st": 4}, {"t": "2020-11-27", "v": 28.997, "b": 10.102, "st": 5}, {"t": "2020-12-09", "v": 30.054, "b": 10.391, "st": 5}, {"t": "2020-12-21", "v": 31.602, "b": 10.811, "st": 5}, {"t": "2020-12-31", "v": 32.437, "b": 11.039, "st": 5}, {"t": "2021-01-13", "v": 35.571, "b": 11.861, "st": 4}, {"t": "2021-01-25", "v": 34.897, "b": 11.661, "st": 5}, {"t": "2021-02-04", "v": 32.314, "b": 11.122, "st": 3}, {"t": "2021-02-23", "v": 33.672, "b": 11.776, "st": 4}, {"t": "2021-03-05", "v": 33.434, "b": 11.687, "st": 4}, {"t": "2021-03-17", "v": 33.932, "b": 11.861, "st": 4}, {"t": "2021-03-29", "v": 33.578, "b": 11.757, "st": 4}, {"t": "2021-04-08", "v": 35.269, "b": 12.349, "st": 4}, {"t": "2021-04-20", "v": 36.222, "b": 12.683, "st": 4}, {"t": "2021-05-05", "v": 35.753, "b": 12.564, "st": 4}, {"t": "2021-05-17", "v": 35.826, "b": 12.587, "st": 4}, {"t": "2021-05-27", "v": 36.835, "b": 13.036, "st": 4}, {"t": "2021-06-08", "v": 37.001, "b": 13.199, "st": 5}, {"t": "2021-06-18", "v": 38.782, "b": 13.778, "st": 4}, {"t": "2021-06-30", "v": 39.814, "b": 14.086, "st": 4}, {"t": "2021-07-12", "v": 36.759, "b": 12.963, "st": 3}, {"t": "2021-07-22", "v": 36.676, "b": 12.937, "st": 3}, {"t": "2021-08-03", "v": 37.467, "b": 13.324, "st": 3}, {"t": "2021-08-13", "v": 37.942, "b": 13.571, "st": 4}, {"t": "2021-08-25", "v": 36.57, "b": 13.096, "st": 3}, {"t": "2021-09-08", "v": 37.08, "b": 13.336, "st": 3}, {"t": "2021-09-20", "v": 37.43, "b": 13.505, "st": 3}, {"t": "2021-09-30", "v": 37.29, "b": 13.421, "st": 3}, {"t": "2021-10-12", "v": 38.387, "b": 13.948, "st": 4}, {"t": "2021-10-22", "v": 38.218, "b": 13.892, "st": 4}, {"t": "2021-11-03", "v": 39.717, "b": 14.443, "st": 5}, {"t": "2021-11-15", "v": 40.754, "b": 14.766, "st": 4}, {"t": "2021-11-25", "v": 41.338, "b": 15.008, "st": 4}, {"t": "2021-12-07", "v": 39.843, "b": 14.468, "st": 3}, {"t": "2021-12-17", "v": 40.583, "b": 14.798, "st": 3}, {"t": "2021-12-29", "v": 40.724, "b": 14.858, "st": 3}, {"t": "2022-01-11", "v": 40.631, "b": 14.923, "st": 4}, {"t": "2022-01-21", "v": 40.126, "b": 14.729, "st": 3}, {"t": "2022-02-09", "v": 40.564, "b": 15.054, "st": 3}, {"t": "2022-02-21", "v": 40.694, "b": 15.108, "st": 3}, {"t": "2022-03-03", "v": 40.609, "b": 15.05, "st": 3}, {"t": "2022-03-15", "v": 39.642, "b": 14.527, "st": 3}, {"t": "2022-03-25", "v": 40.537, "b": 14.985, "st": 3}, {"t": "2022-04-06", "v": 41.023, "b": 15.229, "st": 3}, {"t": "2022-04-19", "v": 39.14, "b": 14.065, "st": 1}, {"t": "2022-04-29", "v": 38.876, "b": 13.668, "st": 1}, {"t": "2022-05-13", "v": 38.951, "b": 11.828, "st": 1}, {"t": "2022-05-25", "v": 39.025, "b": 12.684, "st": 1}, {"t": "2022-06-06", "v": 39.082, "b": 12.9, "st": 2}, {"t": "2022-06-16", "v": 38.47, "b": 12.366, "st": 1}, {"t": "2022-06-28", "v": 38.189, "b": 12.181, "st": 1}, {"t": "2022-07-08", "v": 38.261, "b": 11.713, "st": 1}, {"t": "2022-07-20", "v": 38.334, "b": 11.941, "st": 2}, {"t": "2022-08-01", "v": 38.63, "b": 12.314, "st": 2}, {"t": "2022-08-11", "v": 38.729, "b": 12.521, "st": 4}, {"t": "2022-08-23", "v": 39.203, "b": 12.708, "st": 3}, {"t": "2022-09-06", "v": 39.397, "b": 12.774, "st": 3}, {"t": "2022-09-16", "v": 38.482, "b": 12.34, "st": 3}, {"t": "2022-09-28", "v": 37.638, "b": 11.436, "st": 1}, {"t": "2022-10-10", "v": 37.622, "b": 10.425, "st": 1}, {"t": "2022-10-20", "v": 37.694, "b": 10.585, "st": 1}, {"t": "2022-11-01", "v": 37.766, "b": 10.338, "st": 1}, {"t": "2022-11-11", "v": 37.838, "b": 9.545, "st": 1}, {"t": "2022-11-23", "v": 37.91, "b": 9.46, "st": 1}, {"t": "2022-12-05", "v": 38.338, "b": 10.937, "st": 3}, {"t": "2022-12-15", "v": 37.829, "b": 10.553, "st": 3}, {"t": "2022-12-27", "v": 36.689, "b": 10.046, "st": 2}, {"t": "2023-01-09", "v": 36.923, "b": 10.542, "st": 3}, {"t": "2023-01-19", "v": 38.207, "b": 11.081, "st": 3}, {"t": "2023-02-07", "v": 37.211, "b": 10.658, "st": 3}, {"t": "2023-02-17", "v": 37.074, "b": 10.593, "st": 3}, {"t": "2023-03-01", "v": 36.642, "b": 10.406, "st": 2}, {"t": "2023-03-13", "v": 36.699, "b": 10.528, "st": 3}, {"t": "2023-03-23", "v": 36.593, "b": 10.451, "st": 3}, {"t": "2023-04-04", "v": 37.429, "b": 10.785, "st": 3}, {"t": "2023-04-14", "v": 36.828, "b": 10.529, "st": 3}, {"t": "2023-04-26", "v": 36.546, "b": 10.408, "st": 2}, {"t": "2023-05-11", "v": 36.714, "b": 10.571, "st": 3}, {"t": "2023-05-23", "v": 36.897, "b": 10.659, "st": 3}, {"t": "2023-06-02", "v": 37.561, "b": 10.908, "st": 4}, {"t": "2023-06-14", "v": 38.41, "b": 11.174, "st": 4}, {"t": "2023-06-26", "v": 38.913, "b": 11.32, "st": 4}, {"t": "2023-07-06", "v": 38.713, "b": 11.262, "st": 4}, {"t": "2023-07-18", "v": 40.356, "b": 11.741, "st": 5}, {"t": "2023-07-28", "v": 41.786, "b": 12.077, "st": 5}, {"t": "2023-08-09", "v": 42.928, "b": 12.34, "st": 5}, {"t": "2023-08-21", "v": 40.915, "b": 11.798, "st": 3}, {"t": "2023-08-31", "v": 42.031, "b": 12.241, "st": 3}, {"t": "2023-09-14", "v": 41.861, "b": 12.238, "st": 4}, {"t": "2023-09-26", "v": 39.59, "b": 11.38, "st": 3}, {"t": "2023-10-06", "v": 39.557, "b": 11.285, "st": 1}, {"t": "2023-10-18", "v": 39.089, "b": 11.034, "st": 3}, {"t": "2023-10-30", "v": 38.888, "b": 10.424, "st": 1}, {"t": "2023-11-09", "v": 38.949, "b": 11.139, "st": 2}, {"t": "2023-11-21", "v": 38.963, "b": 11.105, "st": 3}, {"t": "2023-12-01", "v": 38.822, "b": 11.022, "st": 3}, {"t": "2023-12-13", "v": 39.143, "b": 11.142, "st": 3}, {"t": "2023-12-25", "v": 39.252, "b": 11.177, "st": 3}, {"t": "2024-01-05", "v": 40.181, "b": 11.547, "st": 3}, {"t": "2024-01-17", "v": 40.4, "b": 11.625, "st": 4}, {"t": "2024-01-29", "v": 40.85, "b": 11.757, "st": 4}, {"t": "2024-02-15", "v": 41.61, "b": 12.025, "st": 3}, {"t": "2024-02-27", "v": 42.722, "b": 12.375, "st": 5}, {"t": "2024-03-08", "v": 43.088, "b": 12.474, "st": 5}, {"t": "2024-03-20", "v": 43.587, "b": 12.601, "st": 4}, {"t": "2024-04-01", "v": 44.328, "b": 12.815, "st": 4}, {"t": "2024-04-11", "v": 43.501, "b": 12.582, "st": 3}, {"t": "2024-04-24", "v": 42.004, "b": 12.056, "st": 2}, {"t": "2024-05-09", "v": 42.569, "b": 12.486, "st": 3}, {"t": "2024-05-21", "v": 43.275, "b": 12.771, "st": 4}, {"t": "2024-05-31", "v": 42.77, "b": 12.617, "st": 4}, {"t": "2024-06-12", "v": 43.904, "b": 13.002, "st": 4}, {"t": "2024-06-24", "v": 42.661, "b": 12.541, "st": 3}, {"t": "2024-07-04", "v": 43.298, "b": 12.799, "st": 3}, {"t": "2024-07-16", "v": 43.354, "b": 12.812, "st": 3}, {"t": "2024-07-26", "v": 42.452, "b": 12.421, "st": 3}, {"t": "2024-08-07", "v": 41.668, "b": 12.159, "st": 2}, {"t": "2024-08-19", "v": 42.294, "b": 12.616, "st": 3}, {"t": "2024-08-29", "v": 42.69, "b": 12.815, "st": 3}, {"t": "2024-09-12", "v": 42.128, "b": 12.564, "st": 3}, {"t": "2024-09-24", "v": 42.638, "b": 12.77, "st": 3}, {"t": "2024-10-04", "v": 42.513, "b": 12.706, "st": 3}, {"t": "2024-10-16", "v": 42.746, "b": 12.795, "st": 3}, {"t": "2024-10-28", "v": 42.192, "b": 12.548, "st": 2}, {"t": "2024-11-07", "v": 42.4, "b": 12.598, "st": 3}, {"t": "2024-11-19", "v": 41.419, "b": 12.052, "st": 1}, {"t": "2024-11-29", "v": 41.7, "b": 12.505, "st": 3}, {"t": "2024-12-11", "v": 42.11, "b": 12.689, "st": 3}, {"t": "2024-12-23", "v": 41.993, "b": 12.628, "st": 3}, {"t": "2025-01-03", "v": 41.828, "b": 12.546, "st": 3}, {"t": "2025-01-15", "v": 41.437, "b": 12.362, "st": 2}, {"t": "2025-02-03", "v": 41.646, "b": 12.53, "st": 3}, {"t": "2025-02-13", "v": 42.036, "b": 12.704, "st": 3}, {"t": "2025-02-25", "v": 42.932, "b": 13.032, "st": 4}, {"t": "2025-03-07", "v": 43.685, "b": 13.261, "st": 4}, {"t": "2025-03-19", "v": 43.638, "b": 13.246, "st": 4}, {"t": "2025-03-31", "v": 43.235, "b": 13.069, "st": 3}, {"t": "2025-04-11", "v": 39.746, "b": 12.225, "st": 1}, {"t": "2025-04-23", "v": 39.804, "b": 12.11, "st": 2}, {"t": "2025-05-08", "v": 40.729, "b": 12.698, "st": 3}, {"t": "2025-05-20", "v": 41.755, "b": 13.152, "st": 4}, {"t": "2025-05-30", "v": 42.129, "b": 13.326, "st": 4}, {"t": "2025-06-11", "v": 41.574, "b": 13.152, "st": 3}, {"t": "2025-06-23", "v": 42.601, "b": 13.582, "st": 3}, {"t": "2025-07-03", "v": 43.226, "b": 13.82, "st": 4}, {"t": "2025-07-15", "v": 46.097, "b": 14.607, "st": 5}, {"t": "2025-07-25", "v": 48.957, "b": 15.311, "st": 5}, {"t": "2025-08-06", "v": 50.656, "b": 15.737, "st": 5}, {"t": "2025-08-18", "v": 53.237, "b": 16.364, "st": 5}, {"t": "2025-08-28", "v": 55.048, "b": 16.809, "st": 5}, {"t": "2025-09-11", "v": 53.901, "b": 16.578, "st": 4}, {"t": "2025-09-23", "v": 53.204, "b": 16.353, "st": 3}, {"t": "2025-10-03", "v": 53.627, "b": 16.458, "st": 3}, {"t": "2025-10-15", "v": 56.463, "b": 17.58, "st": 4}, {"t": "2025-10-27", "v": 53.001, "b": 16.525, "st": 3}, {"t": "2025-11-06", "v": 52.857, "b": 16.426, "st": 3}, {"t": "2025-11-18", "v": 52.732, "b": 16.599, "st": 3}, {"t": "2025-11-28", "v": 53.455, "b": 16.91, "st": 3}, {"t": "2025-12-10", "v": 53.92, "b": 17.19, "st": 4}, {"t": "2025-12-22", "v": 54.247, "b": 17.51, "st": 3}, {"t": "2026-01-05", "v": 55.413, "b": 17.884, "st": 4}, {"t": "2026-01-15", "v": 57.655, "b": 18.648, "st": 5}, {"t": "2026-01-27", "v": 56.169, "b": 18.305, "st": 3}, {"t": "2026-02-06", "v": 54.319, "b": 17.555, "st": 3}, {"t": "2026-02-25", "v": 56.621, "b": 18.609, "st": 4}, {"t": "2026-03-09", "v": 51.076, "b": 16.528, "st": 3}, {"t": "2026-03-19", "v": 52.487, "b": 16.991, "st": 2}, {"t": "2026-03-31", "v": 52.118, "b": 16.745, "st": 1}, {"t": "2026-04-10", "v": 53.269, "b": 17.5, "st": 3}, {"t": "2026-04-17", "v": 54.686, "b": 18.172, "st": 3}];
+const bands=[{"s": "2000-07-28", "e": "2004-04-16", "c": "#eab308"}, {"s": "2004-04-28", "e": "2004-05-24", "c": "#22c55e"}, {"s": "2004-06-03", "e": "2004-07-19", "c": "#eab308"}, {"s": "2004-07-29", "e": "2004-07-29", "c": "#f97316"}, {"s": "2004-08-10", "e": "2004-08-20", "c": "#ef4444"}, {"s": "2004-09-01", "e": "2004-10-19", "c": "#eab308"}, {"s": "2004-10-29", "e": "2004-10-29", "c": "#22c55e"}, {"s": "2004-11-10", "e": "2004-11-22", "c": "#eab308"}, {"s": "2004-12-02", "e": "2005-01-06", "c": "#22c55e"}, {"s": "2005-01-18", "e": "2005-01-28", "c": "#eab308"}, {"s": "2005-02-16", "e": "2005-04-25", "c": "#22c55e"}, {"s": "2005-05-09", "e": "2005-05-31", "c": "#eab308"}, {"s": "2005-06-10", "e": "2005-06-10", "c": "#22c55e"}, {"s": "2005-06-22", "e": "2005-07-04", "c": "#eab308"}, {"s": "2005-07-14", "e": "2005-07-14", "c": "#22c55e"}, {"s": "2005-07-26", "e": "2005-08-29", "c": "#eab308"}, {"s": "2005-09-09", "e": "2005-10-25", "c": "#10b981"}, {"s": "2005-11-04", "e": "2005-11-16", "c": "#22c55e"}, {"s": "2005-11-28", "e": "2005-12-08", "c": "#eab308"}, {"s": "2005-12-20", "e": "2005-12-20", "c": "#22c55e"}, {"s": "2005-12-30", "e": "2006-01-25", "c": "#eab308"}, {"s": "2006-02-13", "e": "2006-02-13", "c": "#22c55e"}, {"s": "2006-02-23", "e": "2006-04-20", "c": "#10b981"}, {"s": "2006-05-04", "e": "2006-05-16", "c": "#22c55e"}, {"s": "2006-05-26", "e": "2006-06-29", "c": "#eab308"}, {"s": "2006-07-11", "e": "2006-07-11", "c": "#f97316"}, {"s": "2006-07-21", "e": "2006-08-14", "c": "#ef4444"}, {"s": "2006-08-24", "e": "2006-09-28", "c": "#eab308"}, {"s": "2006-10-10", "e": "2006-10-10", "c": "#22c55e"}, {"s": "2006-10-20", "e": "2006-11-01", "c": "#eab308"}, {"s": "2006-11-13", "e": "2006-11-13", "c": "#22c55e"}, {"s": "2006-11-23", "e": "2006-11-23", "c": "#10b981"}, {"s": "2006-12-05", "e": "2007-03-14", "c": "#22c55e"}, {"s": "2007-03-26", "e": "2007-04-17", "c": "#eab308"}, {"s": "2007-05-03", "e": "2007-05-03", "c": "#ef4444"}, {"s": "2007-05-15", "e": "2007-05-15", "c": "#eab308"}, {"s": "2007-05-25", "e": "2007-05-25", "c": "#22c55e"}, {"s": "2007-06-06", "e": "2007-06-06", "c": "#eab308"}, {"s": "2007-06-18", "e": "2007-07-20", "c": "#f97316"}, {"s": "2007-08-01", "e": "2007-08-23", "c": "#ef4444"}, {"s": "2007-09-05", "e": "2007-09-17", "c": "#f97316"}, {"s": "2007-09-27", "e": "2007-09-27", "c": "#eab308"}, {"s": "2007-10-09", "e": "2007-10-09", "c": "#22c55e"}, {"s": "2007-10-19", "e": "2007-11-12", "c": "#eab308"}, {"s": "2007-11-22", "e": "2007-11-22", "c": "#f97316"}, {"s": "2007-12-04", "e": "2007-12-04", "c": "#eab308"}, {"s": "2007-12-14", "e": "2008-06-30", "c": "#ef4444"}, {"s": "2008-07-10", "e": "2008-07-22", "c": "#eab308"}, {"s": "2008-08-01", "e": "2008-08-13", "c": "#f97316"}, {"s": "2008-08-22", "e": "2008-09-29", "c": "#eab308"}, {"s": "2008-10-09", "e": "2008-10-31", "c": "#ef4444"}, {"s": "2008-11-12", "e": "2008-11-12", "c": "#f97316"}, {"s": "2008-11-24", "e": "2008-12-16", "c": "#ef4444"}, {"s": "2008-12-26", "e": "2008-12-26", "c": "#f97316"}, {"s": "2009-01-08", "e": "2009-01-08", "c": "#eab308"}, {"s": "2009-01-20", "e": "2009-01-20", "c": "#f97316"}, {"s": "2009-02-06", "e": "2009-03-02", "c": "#ef4444"}, {"s": "2009-03-12", "e": "2009-03-12", "c": "#f97316"}, {"s": "2009-03-24", "e": "2009-08-20", "c": "#eab308"}, {"s": "2009-09-01", "e": "2009-10-06", "c": "#22c55e"}, {"s": "2009-10-16", "e": "2009-10-16", "c": "#10b981"}, {"s": "2009-10-28", "e": "2009-10-28", "c": "#22c55e"}, {"s": "2009-11-09", "e": "2009-11-19", "c": "#eab308"}, {"s": "2009-12-01", "e": "2009-12-11", "c": "#f97316"}, {"s": "2009-12-23", "e": "2009-12-23", "c": "#ef4444"}, {"s": "2010-01-05", "e": "2010-01-15", "c": "#eab308"}, {"s": "2010-01-27", "e": "2010-01-27", "c": "#f97316"}, {"s": "2010-02-08", "e": "2010-04-22", "c": "#eab308"}, {"s": "2010-05-07", "e": "2010-05-07", "c": "#22c55e"}, {"s": "2010-05-19", "e": "2010-07-26", "c": "#eab308"}, {"s": "2010-08-05", "e": "2010-08-17", "c": "#f97316"}, {"s": "2010-08-27", "e": "2010-08-27", "c": "#ef4444"}, {"s": "2010-09-10", "e": "2010-10-14", "c": "#eab308"}, {"s": "2010-10-26", "e": "2010-10-26", "c": "#f97316"}, {"s": "2010-11-05", "e": "2010-11-05", "c": "#eab308"}, {"s": "2010-11-17", "e": "2010-11-17", "c": "#f97316"}, {"s": "2010-11-29", "e": "2010-12-09", "c": "#eab308"}, {"s": "2010-12-21", "e": "2010-12-21", "c": "#22c55e"}, {"s": "2010-12-31", "e": "2011-01-13", "c": "#eab308"}, {"s": "2011-01-25", "e": "2011-02-14", "c": "#22c55e"}, {"s": "2011-02-24", "e": "2011-05-19", "c": "#eab308"}, {"s": "2011-05-31", "e": "2011-05-31", "c": "#ef4444"}, {"s": "2011-06-10", "e": "2011-07-04", "c": "#eab308"}, {"s": "2011-07-14", "e": "2011-07-14", "c": "#f97316"}, {"s": "2011-07-26", "e": "2011-08-17", "c": "#ef4444"}, {"s": "2011-08-29", "e": "2011-08-29", "c": "#eab308"}, {"s": "2011-09-09", "e": "2011-09-21", "c": "#22c55e"}, {"s": "2011-10-03", "e": "2011-11-16", "c": "#eab308"}, {"s": "2011-11-28", "e": "2011-11-28", "c": "#ef4444"}, {"s": "2011-12-08", "e": "2011-12-08", "c": "#f97316"}, {"s": "2011-12-20", "e": "2012-01-12", "c": "#ef4444"}, {"s": "2012-01-31", "e": "2012-01-31", "c": "#eab308"}, {"s": "2012-02-10", "e": "2012-05-15", "c": "#22c55e"}, {"s": "2012-05-25", "e": "2012-06-28", "c": "#eab308"}, {"s": "2012-07-10", "e": "2012-07-10", "c": "#f97316"}, {"s": "2012-07-20", "e": "2012-08-23", "c": "#eab308"}, {"s": "2012-09-05", "e": "2012-09-17", "c": "#f97316"}, {"s": "2012-09-27", "e": "2012-10-31", "c": "#eab308"}, {"s": "2012-11-12", "e": "2012-11-12", "c": "#f97316"}, {"s": "2012-11-22", "e": "2012-12-14", "c": "#eab308"}, {"s": "2012-12-26", "e": "2012-12-26", "c": "#22c55e"}, {"s": "2013-01-09", "e": "2013-01-31", "c": "#10b981"}, {"s": "2013-02-19", "e": "2013-03-01", "c": "#22c55e"}, {"s": "2013-03-13", "e": "2013-03-13", "c": "#eab308"}, {"s": "2013-03-25", "e": "2013-04-04", "c": "#22c55e"}, {"s": "2013-04-16", "e": "2013-05-14", "c": "#eab308"}, {"s": "2013-05-24", "e": "2013-06-17", "c": "#22c55e"}, {"s": "2013-06-27", "e": "2013-07-09", "c": "#eab308"}, {"s": "2013-07-19", "e": "2013-07-19", "c": "#22c55e"}, {"s": "2013-07-31", "e": "2013-08-22", "c": "#eab308"}, {"s": "2013-09-04", "e": "2013-09-04", "c": "#f97316"}, {"s": "2013-09-16", "e": "2013-09-26", "c": "#eab308"}, {"s": "2013-10-08", "e": "2013-10-08", "c": "#22c55e"}, {"s": "2013-10-18", "e": "2013-11-21", "c": "#eab308"}, {"s": "2013-12-03", "e": "2013-12-03", "c": "#22c55e"}, {"s": "2013-12-13", "e": "2014-01-07", "c": "#eab308"}, {"s": "2014-01-17", "e": "2014-03-25", "c": "#22c55e"}, {"s": "2014-04-04", "e": "2014-04-29", "c": "#eab308"}, {"s": "2014-05-14", "e": "2014-05-14", "c": "#f97316"}, {"s": "2014-05-26", "e": "2014-07-31", "c": "#eab308"}, {"s": "2014-08-12", "e": "2014-08-12", "c": "#22c55e"}, {"s": "2014-08-22", "e": "2014-08-22", "c": "#eab308"}, {"s": "2014-09-05", "e": "2014-09-05", "c": "#22c55e"}, {"s": "2014-09-17", "e": "2014-10-09", "c": "#eab308"}, {"s": "2014-10-21", "e": "2014-10-31", "c": "#f97316"}, {"s": "2014-11-12", "e": "2014-11-12", "c": "#eab308"}, {"s": "2014-11-24", "e": "2014-11-24", "c": "#f97316"}, {"s": "2014-12-04", "e": "2014-12-26", "c": "#ef4444"}, {"s": "2015-01-09", "e": "2015-02-12", "c": "#eab308"}, {"s": "2015-03-04", "e": "2015-03-04", "c": "#22c55e"}, {"s": "2015-03-16", "e": "2015-03-26", "c": "#eab308"}, {"s": "2015-04-07", "e": "2015-04-07", "c": "#f97316"}, {"s": "2015-04-17", "e": "2015-06-30", "c": "#eab308"}, {"s": "2015-07-10", "e": "2015-07-22", "c": "#22c55e"}, {"s": "2015-08-03", "e": "2015-08-13", "c": "#eab308"}, {"s": "2015-08-25", "e": "2015-08-25", "c": "#f97316"}, {"s": "2015-09-07", "e": "2015-11-24", "c": "#eab308"}, {"s": "2015-12-04", "e": "2015-12-16", "c": "#f97316"}, {"s": "2015-12-28", "e": "2016-01-08", "c": "#eab308"}, {"s": "2016-01-20", "e": "2016-01-20", "c": "#ef4444"}, {"s": "2016-02-01", "e": "2016-02-01", "c": "#f97316"}, {"s": "2016-02-18", "e": "2016-03-01", "c": "#eab308"}, {"s": "2016-03-11", "e": "2016-03-11", "c": "#22c55e"}, {"s": "2016-03-23", "e": "2016-04-14", "c": "#eab308"}, {"s": "2016-04-27", "e": "2016-05-23", "c": "#22c55e"}, {"s": "2016-06-02", "e": "2016-06-02", "c": "#eab308"}, {"s": "2016-06-14", "e": "2016-07-18", "c": "#22c55e"}, {"s": "2016-07-28", "e": "2016-08-09", "c": "#eab308"}, {"s": "2016-08-19", "e": "2016-08-31", "c": "#22c55e"}, {"s": "2016-09-13", "e": "2016-09-23", "c": "#eab308"}, {"s": "2016-10-05", "e": "2016-10-05", "c": "#22c55e"}, {"s": "2016-10-17", "e": "2017-02-02", "c": "#eab308"}, {"s": "2017-02-14", "e": "2017-03-08", "c": "#22c55e"}, {"s": "2017-03-20", "e": "2017-05-18", "c": "#eab308"}, {"s": "2017-05-30", "e": "2017-07-13", "c": "#22c55e"}, {"s": "2017-07-25", "e": "2017-07-25", "c": "#eab308"}, {"s": "2017-08-04", "e": "2017-08-04", "c": "#22c55e"}, {"s": "2017-08-16", "e": "2017-08-28", "c": "#eab308"}, {"s": "2017-09-08", "e": "2017-09-20", "c": "#22c55e"}, {"s": "2017-10-02", "e": "2017-10-12", "c": "#eab308"}, {"s": "2017-10-24", "e": "2018-02-02", "c": "#22c55e"}, {"s": "2018-02-21", "e": "2018-02-21", "c": "#eab308"}, {"s": "2018-03-05", "e": "2018-04-06", "c": "#22c55e"}, {"s": "2018-04-18", "e": "2018-04-18", "c": "#eab308"}, {"s": "2018-05-03", "e": "2018-05-03", "c": "#f97316"}, {"s": "2018-05-15", "e": "2018-05-15", "c": "#eab308"}, {"s": "2018-05-25", "e": "2018-05-25", "c": "#ef4444"}, {"s": "2018-06-06", "e": "2018-06-18", "c": "#eab308"}, {"s": "2018-06-28", "e": "2018-06-28", "c": "#f97316"}, {"s": "2018-07-10", "e": "2018-07-10", "c": "#ef4444"}, {"s": "2018-07-20", "e": "2018-07-20", "c": "#f97316"}, {"s": "2018-08-01", "e": "2018-10-09", "c": "#eab308"}, {"s": "2018-10-19", "e": "2018-10-19", "c": "#f97316"}, {"s": "2018-10-31", "e": "2018-10-31", "c": "#ef4444"}, {"s": "2018-11-12", "e": "2018-11-22", "c": "#f97316"}, {"s": "2018-12-04", "e": "2018-12-14", "c": "#eab308"}, {"s": "2018-12-26", "e": "2019-01-09", "c": "#ef4444"}, {"s": "2019-01-21", "e": "2019-01-31", "c": "#eab308"}, {"s": "2019-02-19", "e": "2019-03-13", "c": "#22c55e"}, {"s": "2019-03-25", "e": "2019-05-24", "c": "#eab308"}, {"s": "2019-06-05", "e": "2019-06-17", "c": "#f97316"}, {"s": "2019-06-27", "e": "2019-10-30", "c": "#eab308"}, {"s": "2019-11-11", "e": "2019-11-11", "c": "#22c55e"}, {"s": "2019-11-21", "e": "2019-11-21", "c": "#eab308"}, {"s": "2019-12-03", "e": "2019-12-25", "c": "#f97316"}, {"s": "2020-01-07", "e": "2020-01-17", "c": "#eab308"}, {"s": "2020-02-05", "e": "2020-02-05", "c": "#ef4444"}, {"s": "2020-02-17", "e": "2020-02-17", "c": "#f97316"}, {"s": "2020-02-27", "e": "2020-04-01", "c": "#ef4444"}, {"s": "2020-04-14", "e": "2020-04-14", "c": "#f97316"}, {"s": "2020-04-24", "e": "2020-06-01", "c": "#eab308"}, {"s": "2020-06-11", "e": "2020-06-11", "c": "#22c55e"}, {"s": "2020-06-23", "e": "2020-07-03", "c": "#eab308"}, {"s": "2020-07-15", "e": "2020-07-15", "c": "#22c55e"}, {"s": "2020-07-27", "e": "2020-07-27", "c": "#eab308"}, {"s": "2020-08-06", "e": "2020-08-06", "c": "#f97316"}, {"s": "2020-08-18", "e": "2020-08-18", "c": "#eab308"}, {"s": "2020-08-28", "e": "2020-10-14", "c": "#22c55e"}, {"s": "2020-10-26", "e": "2020-10-26", "c": "#10b981"}, {"s": "2020-11-05", "e": "2020-11-05", "c": "#eab308"}, {"s": "2020-11-17", "e": "2020-11-17", "c": "#22c55e"}, {"s": "2020-11-27", "e": "2020-12-31", "c": "#10b981"}, {"s": "2021-01-13", "e": "2021-01-13", "c": "#22c55e"}, {"s": "2021-01-25", "e": "2021-01-25", "c": "#10b981"}, {"s": "2021-02-04", "e": "2021-02-04", "c": "#eab308"}, {"s": "2021-02-23", "e": "2021-05-27", "c": "#22c55e"}, {"s": "2021-06-08", "e": "2021-06-08", "c": "#10b981"}, {"s": "2021-06-18", "e": "2021-06-30", "c": "#22c55e"}, {"s": "2021-07-12", "e": "2021-08-03", "c": "#eab308"}, {"s": "2021-08-13", "e": "2021-08-13", "c": "#22c55e"}, {"s": "2021-08-25", "e": "2021-09-30", "c": "#eab308"}, {"s": "2021-10-12", "e": "2021-10-22", "c": "#22c55e"}, {"s": "2021-11-03", "e": "2021-11-03", "c": "#10b981"}, {"s": "2021-11-15", "e": "2021-11-25", "c": "#22c55e"}, {"s": "2021-12-07", "e": "2021-12-29", "c": "#eab308"}, {"s": "2022-01-11", "e": "2022-01-11", "c": "#22c55e"}, {"s": "2022-01-21", "e": "2022-04-06", "c": "#eab308"}, {"s": "2022-04-19", "e": "2022-05-25", "c": "#ef4444"}, {"s": "2022-06-06", "e": "2022-06-06", "c": "#f97316"}, {"s": "2022-06-16", "e": "2022-07-08", "c": "#ef4444"}, {"s": "2022-07-20", "e": "2022-08-01", "c": "#f97316"}, {"s": "2022-08-11", "e": "2022-08-11", "c": "#22c55e"}, {"s": "2022-08-23", "e": "2022-09-16", "c": "#eab308"}, {"s": "2022-09-28", "e": "2022-11-23", "c": "#ef4444"}, {"s": "2022-12-05", "e": "2022-12-15", "c": "#eab308"}, {"s": "2022-12-27", "e": "2022-12-27", "c": "#f97316"}, {"s": "2023-01-09", "e": "2023-02-17", "c": "#eab308"}, {"s": "2023-03-01", "e": "2023-03-01", "c": "#f97316"}, {"s": "2023-03-13", "e": "2023-04-14", "c": "#eab308"}, {"s": "2023-04-26", "e": "2023-04-26", "c": "#f97316"}, {"s": "2023-05-11", "e": "2023-05-23", "c": "#eab308"}, {"s": "2023-06-02", "e": "2023-07-06", "c": "#22c55e"}, {"s": "2023-07-18", "e": "2023-08-09", "c": "#10b981"}, {"s": "2023-08-21", "e": "2023-08-31", "c": "#eab308"}, {"s": "2023-09-14", "e": "2023-09-14", "c": "#22c55e"}, {"s": "2023-09-26", "e": "2023-09-26", "c": "#eab308"}, {"s": "2023-10-06", "e": "2023-10-06", "c": "#ef4444"}, {"s": "2023-10-18", "e": "2023-10-18", "c": "#eab308"}, {"s": "2023-10-30", "e": "2023-10-30", "c": "#ef4444"}, {"s": "2023-11-09", "e": "2023-11-09", "c": "#f97316"}, {"s": "2023-11-21", "e": "2024-01-05", "c": "#eab308"}, {"s": "2024-01-17", "e": "2024-01-29", "c": "#22c55e"}, {"s": "2024-02-15", "e": "2024-02-15", "c": "#eab308"}, {"s": "2024-02-27", "e": "2024-03-08", "c": "#10b981"}, {"s": "2024-03-20", "e": "2024-04-01", "c": "#22c55e"}, {"s": "2024-04-11", "e": "2024-04-11", "c": "#eab308"}, {"s": "2024-04-24", "e": "2024-04-24", "c": "#f97316"}, {"s": "2024-05-09", "e": "2024-05-09", "c": "#eab308"}, {"s": "2024-05-21", "e": "2024-06-12", "c": "#22c55e"}, {"s": "2024-06-24", "e": "2024-07-26", "c": "#eab308"}, {"s": "2024-08-07", "e": "2024-08-07", "c": "#f97316"}, {"s": "2024-08-19", "e": "2024-10-16", "c": "#eab308"}, {"s": "2024-10-28", "e": "2024-10-28", "c": "#f97316"}, {"s": "2024-11-07", "e": "2024-11-07", "c": "#eab308"}, {"s": "2024-11-19", "e": "2024-11-19", "c": "#ef4444"}, {"s": "2024-11-29", "e": "2025-01-03", "c": "#eab308"}, {"s": "2025-01-15", "e": "2025-01-15", "c": "#f97316"}, {"s": "2025-02-03", "e": "2025-02-13", "c": "#eab308"}, {"s": "2025-02-25", "e": "2025-03-19", "c": "#22c55e"}, {"s": "2025-03-31", "e": "2025-03-31", "c": "#eab308"}, {"s": "2025-04-11", "e": "2025-04-11", "c": "#ef4444"}, {"s": "2025-04-23", "e": "2025-04-23", "c": "#f97316"}, {"s": "2025-05-08", "e": "2025-05-08", "c": "#eab308"}, {"s": "2025-05-20", "e": "2025-05-30", "c": "#22c55e"}, {"s": "2025-06-11", "e": "2025-06-23", "c": "#eab308"}, {"s": "2025-07-03", "e": "2025-07-03", "c": "#22c55e"}, {"s": "2025-07-15", "e": "2025-08-28", "c": "#10b981"}, {"s": "2025-09-11", "e": "2025-09-11", "c": "#22c55e"}, {"s": "2025-09-23", "e": "2025-10-03", "c": "#eab308"}, {"s": "2025-10-15", "e": "2025-10-15", "c": "#22c55e"}, {"s": "2025-10-27", "e": "2025-11-28", "c": "#eab308"}, {"s": "2025-12-10", "e": "2025-12-10", "c": "#22c55e"}, {"s": "2025-12-22", "e": "2025-12-22", "c": "#eab308"}, {"s": "2026-01-05", "e": "2026-01-05", "c": "#22c55e"}, {"s": "2026-01-15", "e": "2026-01-15", "c": "#10b981"}, {"s": "2026-01-27", "e": "2026-02-06", "c": "#eab308"}, {"s": "2026-02-25", "e": "2026-02-25", "c": "#22c55e"}, {"s": "2026-03-09", "e": "2026-03-09", "c": "#eab308"}, {"s": "2026-03-19", "e": "2026-03-19", "c": "#f97316"}, {"s": "2026-03-31", "e": "2026-03-31", "c": "#ef4444"}, {"s": "2026-04-10", "e": "2026-04-17", "c": "#eab308"}];
+const ctx=document.getElementById('ch').getContext('2d');
+const bandPlugin={
+  id:'bp',
+  beforeDraw(chart){
+    const {ctx:c,scales:{x,y}}=chart;
+    bands.forEach(b=>{
+      const x1=x.getPixelForValue(new Date(b.s).getTime());
+      const x2=x.getPixelForValue(new Date(b.e).getTime());
+      c.save();c.globalAlpha=0.13;c.fillStyle=b.c;
+      c.fillRect(x1,y.top,x2-x1,y.bottom-y.top);c.restore();
+    });
+  }
+};
+new Chart(ctx,{
+  type:'line',plugins:[bandPlugin],
+  data:{datasets:[
+    {label:'Multi-factor',data:tsData.map(d=>({x:new Date(d.t).getTime(),y:d.v})),
+      borderColor:'#2563eb',borderWidth:1.5,pointRadius:0,tension:0.1},
+    {label:'Buy & Hold',data:tsData.map(d=>({x:new Date(d.t).getTime(),y:d.b})),
+      borderColor:'#94a3b8',borderDash:[4,2],borderWidth:1,pointRadius:0,tension:0.1}
+  ]},
+  options:{animation:false,responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{position:'top',labels:{font:{size:11},boxWidth:18}},tooltip:{mode:'index',intersect:false}},
+    scales:{
+      x:{type:'time',time:{unit:'year'},grid:{display:false},ticks:{font:{size:10}}},
+      y:{type:'logarithmic',ticks:{font:{size:10}},grid:{color:'#f1f5f9'}}
+    }
+  }
+});
+const cards=[...document.querySelectorAll('.card')];
+document.querySelectorAll('.btn').forEach(btn=>{
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.btn').forEach(b=>b.classList.remove('on'));
+    this.classList.add('on');
+    const s=parseInt(this.dataset.s);
+    cards.forEach(c=>{
+      c.style.display=(s===0||parseInt(c.dataset.s)===s)?'':'none';
+    });
+  });
+});
+</script>
+</body></html>

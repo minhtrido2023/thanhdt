@@ -1,0 +1,8 @@
+# Telegram credentials — DO NOT commit
+telegram_config.json
+telegram_run_*.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo

@@ -1,0 +1,26 @@
+Loading static inputs ...
+
+Running grid:
+  A: patched, end=2026-05-15 (END=2026-05-15) ...
+  B: patched, end=2026-01-16 (END=2026-01-16) ...
+  C: patched, end=2025-12-31 (END=2025-12-31) ...
+  D: COMPUTED, end=2026-05-15 (END=2026-05-15) ...
+  E: COMPUTED, end=2025-12-31 (END=2025-12-31) ...
+
+====================================================================================================
+  V10 BASELINE DRIFT INVESTIGATION
+====================================================================================================
+Variant                         End           n_tr    CAGR%  Sharpe   MaxDD%  Calmar  Wealth
+--------------------------------------------------------------------------------------------
+A: patched, end=2026-05-15      2026-05-15     356    15.17    1.28    -15.1    1.01    5.73
+B: patched, end=2026-01-16      2026-01-16     353    16.58    1.41    -15.1    1.10    6.34
+C: patched, end=2025-12-31      2025-12-31     335    16.52    1.41    -15.1    1.10    6.26
+D: COMPUTED, end=2026-05-15     2026-05-15     427    16.14    1.25    -17.7    0.91    6.36
+E: COMPUTED, end=2025-12-31     2025-12-31     403    17.69    1.38    -14.7    1.20    7.05
+
+Memory reference (ba_system_definition.md):
+  'at 50B: CAGR 17.15%, Sharpe 1.21, DD -14.5%, Calmar 1.18, wealth 6.73× (12yr)'
+  Date of memory observation: ~April-May 2026 (before recent ticker data refresh)
+
+VNI for context (FULL each period):
+  2026-05-15: VNI CAGR=11.42%, final=1922, yrs=12.36

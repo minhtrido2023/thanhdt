@@ -1,0 +1,65 @@
+====================================================================================================
+  PRE-2014 STRESS TEST: BA v11 — LIVE Tinh Tế vs Tam Quan v3
+  Period: 2007-01-01 → 2013-12-31 | Init: 1B
+====================================================================================================
+
+Loading Release_Date (shared)...
+
+====================================================================================================
+  VARIANT: LIVE Tinh Tế  (state from tav2_bq.vnindex_5state)
+====================================================================================================
+  Loading signals (tav2_bq.vnindex_5state)...
+  237,669 raw signal rows
+  Top play_types:
+play_type
+PASS               86950
+AVOID_bear         78603
+WAIT               27715
+AVOID_faE          23452
+COMPOUNDER_HOLD    19077
+MOMENTUM_S_N        1413
+MOMENTUM_A           322
+MOMENTUM_N            59
+  After V11 filter: 141,886 signals (blocked 368 overheat)
+  Running sim...
+
+====================================================================================================
+  VARIANT: Tam Quan v3  (state from tav2_bq.vnindex_5state_tam_quan_stress)
+====================================================================================================
+  Loading signals (tav2_bq.vnindex_5state_tam_quan_stress)...
+  237,669 raw signal rows
+  Top play_types:
+play_type
+AVOID_bear             96093
+PASS                   77017
+WAIT                   23737
+AVOID_faE              20919
+COMPOUNDER_HOLD        18023
+MOMENTUM_S_N            1392
+MOMENTUM_A               327
+DEEP_VALUE_RECOVERY       80
+  After V11 filter: 138,879 signals (blocked 382 overheat)
+  Running sim...
+
+
+====================================================================================================
+  STRESS TEST RESULTS  (2007-01-01 → 2013-12-31, init 1B)
+====================================================================================================
+
+  Variant                   Final     CAGR   Sharpe     MaxDD   Calmar   Trades     WR
+  -------------------------------------------------------------------------------------
+  VNI buy&hold             0.681x   -5.35%    +0.19   -79.88%   -0.07
+  LIVE Tinh Tế             1.232B   +3.03%    +0.60   -12.16%   +0.25       17 +58.8%
+  Tam Quan v3              0.955B   -0.66%    -0.03   -34.79%   -0.02       25 +40.0%
+
+  📅 Year-by-year:
+  Year     Tinh Tế YoY%    Tam Quan YoY%        Δ
+  2007            +0.2%            +0.2%    +0.0pp
+  2008            +3.0%           -20.4%   -23.4pp
+  2009            +5.5%            +5.8%    +0.3pp
+  2010            -1.6%            -1.6%    +0.0pp
+  2011            +3.0%            +3.0%    -0.0pp
+  2012            +3.0%            +3.0%    +0.0pp
+  2013            +8.4%            +8.4%    -0.0pp
+
+💾 Saved NAV+trades CSVs

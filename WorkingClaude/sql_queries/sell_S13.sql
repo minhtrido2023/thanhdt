@@ -1,0 +1,1 @@
+SELECT t.ticker, t.time FROM `tav2_bq.ticker` AS t WHERE (t.time >= '2020-01-01' AND t.time <= '2026-04-03') AND (t.C_L1W>=1.15) AND (t.D_CMB_Peak_T1>0.89*t.D_CMB) AND (t.Close>1.15*t.MA10) AND (t.D_CMB_XFast<3.0) ORDER BY t.ticker, t.time

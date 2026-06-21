@@ -1,0 +1,6 @@
+# Python deps for the V4 + DT5G go-live package.
+# (BigQuery access is via the gcloud `bq` CLI — see README; no python BQ client needed.)
+pandas>=2.0
+numpy>=1.24
+yfinance>=0.2.40      # pull_us_market.py: ^GSPC + ^VIX
+# Google Cloud SDK (bq CLI) must be installed & authenticated separately — see README.
