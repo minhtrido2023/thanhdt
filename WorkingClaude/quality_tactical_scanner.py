@@ -37,7 +37,7 @@ print("="*120)
 
 # ─── STEP 1: Quality universe ────────────────────────────────────────────
 print("\n[1] Building quality universe ...")
-fa = pd.read_csv("fa_ratings_lh.csv", parse_dates=["time"])
+fa = pd.read_csv("data/fa_ratings_lh.csv", parse_dates=["time"])
 latest_q = fa["quarter"].max()
 print(f"  Latest quarter: {latest_q}")
 

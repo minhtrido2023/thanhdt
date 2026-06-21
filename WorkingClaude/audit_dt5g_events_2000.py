@@ -25,12 +25,12 @@ SNAME = {1: "CRISIS", 2: "BEAR", 3: "NEUTRAL", 4: "BULL", 5: "EX-BULL", 9: "none
 START = "2000-01-01"
 
 # ── base state (full history) + DT-4gate ──
-sf = pd.read_csv("vnindex_5state_tam_quan_v3_4b_full_history.csv")
+sf = pd.read_csv("data/vnindex_5state_tam_quan_v3_4b_full_history.csv")
 sf["time"] = pd.to_datetime(sf["time"]); sf = sf.sort_values("time").reset_index(drop=True)
 sf["state_dt"] = _dt_4gate(sf["state"].values.astype(int))
 
 # ── VNINDEX price (local) + MA200 ──
-vx = pd.read_csv("VNINDEX.csv"); vx["time"] = pd.to_datetime(vx["time"])
+vx = pd.read_csv("data/VNINDEX.csv"); vx["time"] = pd.to_datetime(vx["time"])
 vx = vx.sort_values("time").reset_index(drop=True)
 vx["MA200"] = vx["Close"].rolling(200, min_periods=50).mean()
 df = vx[["time", "Close", "MA200"]].merge(sf[["time", "state_dt"]], on="time", how="inner")
@@ -38,7 +38,7 @@ df = df.sort_values("time").reset_index(drop=True)
 df["state_dt"] = df["state_dt"].astype(int)
 
 # ── Pillar B US (T-1) ──
-us = pd.read_csv("us_market_history.csv", parse_dates=["time"]).sort_values("time")
+us = pd.read_csv("data/us_market_history.csv", parse_dates=["time"]).sort_values("time")
 key = df[["time"]].copy(); key["jt"] = key["time"] - pd.Timedelta(days=1)
 um = pd.merge_asof(key.sort_values("jt"), us.rename(columns={"time": "us_time"}),
                    left_on="jt", right_on="us_time", direction="backward").sort_values("time").reset_index(drop=True)

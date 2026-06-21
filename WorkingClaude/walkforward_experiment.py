@@ -28,7 +28,7 @@ print(SEP2)
 print("  WALK-FORWARD EXPERIMENT — IS: 2000–2020 | OOS: 2021–nay")
 print(SEP2)
 
-vni = pd.read_csv(os.path.join(WORKDIR, "VNINDEX.csv"), low_memory=False)
+vni = pd.read_csv(os.path.join(WORKDIR, "data/VNINDEX.csv"), low_memory=False)
 vni["time"] = pd.to_datetime(vni["time"])
 vni = vni.sort_values("time").reset_index(drop=True)
 for col in ["Open","High","Low","Close","Volume","VNINDEX_PE",
@@ -39,7 +39,7 @@ for col in ["Open","High","Low","Close","Volume","VNINDEX_PE",
     if col in vni.columns:
         vni[col] = pd.to_numeric(vni[col], errors="coerce")
 
-bp = os.path.join(WORKDIR, "breadth_data.csv")
+bp = os.path.join(WORKDIR, "data/breadth_data.csv")
 if os.path.exists(bp):
     br = pd.read_csv(bp); br["time"] = pd.to_datetime(br["time"])
     vni = vni.merge(br, on="time", how="left")

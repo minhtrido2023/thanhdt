@@ -24,7 +24,7 @@ import numpy as np
 import pandas as pd
 
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
-CACHE = os.path.join(WORKDIR, "intraday_full.pkl")
+CACHE = os.path.join(WORKDIR, "data/intraday_full.pkl")
 
 TOP30 = ["VIC","VHM","HPG","SHB","SSI","FPT","VIX","STB","MWG","MSN",
          "VCB","BSR","MBB","VPB","TCB","HDB","HCM","CTG","NVL","BID",
@@ -262,9 +262,9 @@ def main():
     print(f"  {len(events)} signal-events found")
 
     print("Adding forward returns...")
-    daily = pd.read_csv(os.path.join(WORKDIR,"daily_forward_full.csv"))
+    daily = pd.read_csv(os.path.join(WORKDIR,"data/daily_forward_full.csv"))
     events = add_forward_returns(events, daily)
-    events.to_csv(os.path.join(WORKDIR,"layer3_early_fire_events.csv"), index=False)
+    events.to_csv(os.path.join(WORKDIR,"data/layer3_early_fire_events.csv"), index=False)
 
     analyze(events)
     print("\nSaved: layer3_early_fire_events.csv")

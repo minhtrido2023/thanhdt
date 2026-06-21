@@ -50,7 +50,7 @@ last_st=None
 for d in vni_dates:
     if d in state_by_date: last_st=state_by_date[d]
     elif last_st is not None: state_by_date[d]=last_st
-vnx = pd.read_csv(os.path.join(W,"VNINDEX.csv"), usecols=["time","Close","MA200","D_RSI"], parse_dates=["time"])
+vnx = pd.read_csv(os.path.join(W,"data/VNINDEX.csv"), usecols=["time","Close","MA200","D_RSI"], parse_dates=["time"])
 vnx = vnx[vnx["time"] >= panel["time"].min()]
 etf = pd.read_csv(os.path.join(W,"data","e1vfvn30_daily.csv"), parse_dates=["time"])
 vn30_und = pd.Series(etf["Close"].values, index=etf["time"])
@@ -60,7 +60,7 @@ CONC_MAP = {1:0.0, 2:0.0, 3:1.0, 4:1.0, 5:0.8}
 conc_by_date = {d: CONC_MAP for d in vni_dates if int(sigAH.loc[d]) == 1}
 print(f"    concentrated days: {len(conc_by_date)}/{len(vni_dates)}")
 
-sig_b = pickle.load(open(os.path.join(W,"ba_v11_unified_12y_sig.pkl"),"rb"))
+sig_b = pickle.load(open(os.path.join(W,"data/ba_v11_unified_12y_sig.pkl"),"rb"))
 sig_b["time"] = pd.to_datetime(sig_b["time"])
 sig_b = sig_b[sig_b["time"] >= panel["time"].min()].copy()
 def sv_tight_keep(row):
@@ -80,11 +80,11 @@ sig_b.loc[sig_b["time"].isin(oh) & sig_b["play_type"].isin(BUY_TIERS), "play_typ
 sec_map = sig_b.dropna(subset=["sec"]).drop_duplicates("ticker").set_index("ticker")["sec"].to_dict()
 sig_mom = sig_b[["time","ticker","play_type","ta","Close"]].copy()
 
-with open(os.path.join(W,"earnings_surprise_data.pkl"),"rb") as f: fin = pickle.load(f)
+with open(os.path.join(W,"data/earnings_surprise_data.pkl"),"rb") as f: fin = pickle.load(f)
 fin["Release_Date"]=pd.to_datetime(fin["Release_Date"]); FLOOR=1e9
 fin["exp_B_MA"]=fin[["NP_P1","NP_P2","NP_P3","NP_P4"]].mean(axis=1)
 fin["surprise_B_MA"]=((fin["NP_P0"]-fin["exp_B_MA"])/np.maximum(np.abs(fin["exp_B_MA"]),FLOOR)).clip(-5,5)
-ev_class=pd.read_csv(os.path.join(W,"earnings_events_classified.csv"),parse_dates=["Release_Date"])
+ev_class=pd.read_csv(os.path.join(W,"data/earnings_events_classified.csv"),parse_dates=["Release_Date"])
 ev=ev_class.merge(fin[["ticker","quarter","Release_Date","surprise_B_MA"]],on=["ticker","quarter","Release_Date"],how="left")
 ev=ev.sort_values(["ticker","Release_Date"]).reset_index(drop=True); ev["surprise_B_MA"]=ev["surprise_B_MA"].fillna(0)
 LN2=np.log(2); HL=3.0; ev["prior_n_good"]=0; ev["pa_HL3"]=np.nan

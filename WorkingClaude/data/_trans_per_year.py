@@ -1,8 +1,8 @@
 import pandas as pd, numpy as np, os
 os.chdir(r"/home/trido/thanhdt/WorkingClaude")
-gate=pd.read_csv("vnindex_5state_dt_4gate.csv"); gate["time"]=pd.to_datetime(gate["time"])
-base=pd.read_csv("vnindex_5state_tam_quan_v3_4b_full_history.csv"); base["time"]=pd.to_datetime(base["time"])
-vni=pd.read_csv("VNINDEX.csv",usecols=["time","Close"]); vni["time"]=pd.to_datetime(vni["time"])
+gate=pd.read_csv("data/vnindex_5state_dt_4gate.csv"); gate["time"]=pd.to_datetime(gate["time"])
+base=pd.read_csv("data/vnindex_5state_tam_quan_v3_4b_full_history.csv"); base["time"]=pd.to_datetime(base["time"])
+vni=pd.read_csv("data/VNINDEX.csv",usecols=["time","Close"]); vni["time"]=pd.to_datetime(vni["time"])
 vni=vni.sort_values("time"); vni["ret"]=vni["Close"].pct_change()
 
 def per_year(df,col):

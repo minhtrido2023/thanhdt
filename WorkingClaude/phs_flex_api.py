@@ -55,7 +55,7 @@ def _phs_secret(key, default=""):
     if v:
         return v
     _path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                         "phs_secret.json")
+                         "secrets", "phs_secret.json")
     try:
         with open(_path, "r", encoding="utf-8") as _f:
             return json.load(_f).get(key, default)
@@ -113,7 +113,7 @@ class FlexClient:
         định trong tài liệu chỉ dùng được inquiry + market data).
         """
         path = path or os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                    "data", "phs_credentials.json")
+                                    "secrets", "phs_credentials.json")
         with open(path, encoding="utf-8") as f:
             d = json.load(f)
         for k in ("client_id", "client_secret"):

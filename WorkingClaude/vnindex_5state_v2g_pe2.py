@@ -50,7 +50,7 @@ BULL_PE_PX_RANK_L = 0.30     # Close rank < 0.30 (was 0.20)
 
 # ════════════════════ LOAD ════════════════════
 print("Loading cleaned VNINDEX data ...")
-vni = pd.read_csv(os.path.join(WORKDIR, "vnindex_full_2000_2026.csv"), low_memory=False)
+vni = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_full_2000_2026.csv"), low_memory=False)
 vni["time"] = pd.to_datetime(vni["time"])
 vni = vni.sort_values("time").reset_index(drop=True)
 n = len(vni)
@@ -492,7 +492,7 @@ for qe in qends:
             row[f"{nm}_cm"]   = m["calmar"]
     rows_q.append(row)
 qdf = pd.DataFrame(rows_q)
-qdf.to_csv(os.path.join(WORKDIR, "vnindex_5state_v2g_pe2_qwf.csv"), index=False)
+qdf.to_csv(os.path.join(WORKDIR, "data/vnindex_5state_v2g_pe2_qwf.csv"), index=False)
 print(f"Saved → vnindex_5state_v2g_pe2_qwf.csv  ({len(qdf)} snapshots)")
 
 print(f"\n--- QWF trailing-3Y MEDIAN across {len(qdf)} quarters ---")
@@ -537,5 +537,5 @@ out_df = pd.DataFrame({
     "pv_cmp07": pv_cmp[0.07], "pv_cmp10": pv_cmp[0.10],
     "pv_full": pv_full, "pv_bh": pv_bh,
 })
-out_df.to_csv(os.path.join(WORKDIR, "vnindex_5state_v2g_pe2_history.csv"), index=False)
+out_df.to_csv(os.path.join(WORKDIR, "data/vnindex_5state_v2g_pe2_history.csv"), index=False)
 print(f"\nSaved → vnindex_5state_v2g_pe2_history.csv")

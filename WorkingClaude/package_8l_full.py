@@ -16,7 +16,7 @@ ENTRY = [
     "pt_8l_quarterly.py",
     "telegram_8l_bot.py", "bot_8l_commands.py", "dna_report.py", "telegram_recommend.py",
 ]
-SECRET = {"telegram_config.json"}   # never ship real token; template shipped instead
+SECRET = {"secrets/telegram_config.json"}   # never ship real token; template shipped instead
 
 local_mods = {f[:-3] for f in os.listdir(WORK) if f.endswith(".py")}
 

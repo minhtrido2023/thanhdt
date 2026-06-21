@@ -50,7 +50,7 @@ import requests
 BASE_URL = "https://openapi.dnse.com.vn"
 API_VERSION = "2026-05-07"
 WORKDIR = os.path.dirname(os.path.abspath(__file__))
-CRED_FILE = os.path.join(WORKDIR, "data", "dnse_credentials.json")
+CRED_FILE = os.path.join(WORKDIR, "secrets", "dnse_credentials.json")
 TOKEN_CACHE = os.path.join(WORKDIR, "data", "dnse_trading_token.json")
 TRADING_TOKEN_TTL = 8 * 3600 - 300       # 8h trừ 5' đệm
 

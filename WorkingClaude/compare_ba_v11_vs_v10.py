@@ -170,5 +170,5 @@ for label, st, en in periods:
     print()
 
 # Save NAVs for plotting
-pd.DataFrame({"v10_v4":ba_v10,"v11_v8c":ba_v11}).to_csv("ba_v11_vs_v10_nav.csv")
+pd.DataFrame({"v10_v4":ba_v10,"v11_v8c":ba_v11}).to_csv("data/ba_v11_vs_v10_nav.csv")
 print("Saved ba_v11_vs_v10_nav.csv")

@@ -54,7 +54,7 @@ try:
     st["time"] = pd.to_datetime(st["time"])
 except Exception as e:
     print(f"  WARN: BQ DT5G that bai ({e}); doc local CSV.");
-    st = pd.read_csv(WD+"/vnindex_5state_dt5g_live.csv")[["time","state"]]
+    st = pd.read_csv(WD+"/data/vnindex_5state_dt5g_live.csv")[["time","state"]]
     st["time"] = pd.to_datetime(st["time"])
 f = f.merge(st, on="time", how="left")
 f["state"] = f["state"].ffill().fillna(3).astype(int)   # forward-fill; default NEUTRAL

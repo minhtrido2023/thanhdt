@@ -120,5 +120,5 @@ for name, nav in all_navs.items():
     chg = (n2022 / n2021 - 1) * 100
     print(f"  {name:30} {chg:+.2f}%")
 
-df.to_csv(os.path.join(WORKDIR, "capital_scaling_results.csv"), index=False)
+df.to_csv(os.path.join(WORKDIR, "data/capital_scaling_results.csv"), index=False)
 print("\n  Saved: capital_scaling_results.csv")

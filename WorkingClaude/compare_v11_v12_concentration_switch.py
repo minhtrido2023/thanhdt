@@ -29,7 +29,7 @@ from simulate_holistic_nav import bq
 # ─────── Load leg NAVs from previous run ──────────────────────────────────────
 print("="*100); print("  V11/V12 CONCENTRATION SWITCHER — 3 metrics, binary swap, v3.4b state"); print("="*100)
 print("\n[1] Loading cached leg NAVs from compare_v11_v12_v121_v34b run...")
-combo = pd.read_csv("compare_v11_v12_v121_v34b.csv", index_col=0, parse_dates=True)
+combo = pd.read_csv("data/compare_v11_v12_v121_v34b.csv", index_col=0, parse_dates=True)
 # nav_v11 = BAL + VN30 ; nav_v12 = BAL + LAGGED
 # To recover legs, we need raw NAVs. Re-run quick component recovery from sim.
 # Trick: each leg starts at BOOK_NAV=25B; their sum/2 = portfolio. We don't
@@ -45,7 +45,7 @@ combo = pd.read_csv("compare_v11_v12_v121_v34b.csv", index_col=0, parse_dates=Tr
 import re
 from simulate_holistic_nav import simulate
 
-with open("ba_v11_unified_12y_sig.pkl", "rb") as f: sig_B = pickle.load(f)
+with open("data/ba_v11_unified_12y_sig.pkl", "rb") as f: sig_B = pickle.load(f)
 sig_B["time"] = pd.to_datetime(sig_B["time"])
 with open("sim_v11_for_analyzer.py", "r", encoding="utf-8") as f: _content = f.read()
 def _extract(varname):
@@ -59,7 +59,7 @@ DEPOSIT = 0.0; BORROW = 0.10; ETF_STATES = {3: 0.7}   # cost model per user 2026
 TIER_BAL = ["MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","DEEP_VALUE_RECOVERY"]
 BUY_TIERS_V11 = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
                   "MOMENTUM_A","MOMENTUM_S_N","COMPOUNDER_BUY","DEEP_VALUE_RECOVERY","S_PRO"}
-STATE_CSV = "vnindex_5state_tam_quan_v3_4b_full_history.csv"
+STATE_CSV = "data/vnindex_5state_tam_quan_v3_4b_full_history.csv"
 
 prices_B = {tk: dict(zip(g["time"], g["Close"])) for tk, g in sig_B.groupby("ticker")}
 liq_map_B = {(r["ticker"], r["time"]): r["liq"] for _, r in sig_B.iterrows()}
@@ -119,19 +119,19 @@ nav_vn30["time"] = pd.to_datetime(nav_vn30["time"]); nav_vn30_s = nav_vn30.set_i
 print(f"  VN30: {nav_vn30_s.iloc[-1]/1e9:.2f}B")
 
 # LAGGED book
-with open("earnings_px.pkl","rb") as f: px_data = pickle.load(f)
+with open("data/earnings_px.pkl","rb") as f: px_data = pickle.load(f)
 px_data["time"] = pd.to_datetime(px_data["time"])
 px_close = px_data.pivot_table(index="time", columns="ticker", values="Close", aggfunc="first").sort_index().ffill(limit=5)
 master_idx = pd.DatetimeIndex(px_close.index).as_unit("ns"); px_close.index = master_idx
 all_dates = np.array(master_idx)
-with open("lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f); ov["time"] = pd.to_datetime(ov["time"])
+with open("data/lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f); ov["time"] = pd.to_datetime(ov["time"])
 px_open = ov.pivot_table(index="time", columns="ticker", values="Open", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 liq_l = ov.pivot_table(index="time", columns="ticker", values="Volume_3M_P50", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
-with open("earnings_surprise_data.pkl","rb") as f: fin = pickle.load(f)
+with open("data/earnings_surprise_data.pkl","rb") as f: fin = pickle.load(f)
 fin["Release_Date"] = pd.to_datetime(fin["Release_Date"]); FLOOR = 1e9
 fin["exp_B_MA"] = fin[["NP_P1","NP_P2","NP_P3","NP_P4"]].mean(axis=1)
 fin["surprise_B_MA"] = ((fin["NP_P0"] - fin["exp_B_MA"]) / np.maximum(np.abs(fin["exp_B_MA"]), FLOOR)).clip(-5, 5)
-ev_class = pd.read_csv("earnings_events_classified.csv", parse_dates=["Release_Date"])
+ev_class = pd.read_csv("data/earnings_events_classified.csv", parse_dates=["Release_Date"])
 ev = ev_class.merge(fin[["ticker","quarter","Release_Date","surprise_B_MA"]],
                      on=["ticker","quarter","Release_Date"], how="left")
 ev = ev.sort_values(["ticker","Release_Date"]).reset_index(drop=True)
@@ -382,6 +382,6 @@ for name, sigser in [("M1", sig_m1), ("M2", sig_m2), ("M3", sig_m3)]:
 out_df = pd.DataFrame({"v11_static":nav_v11_static, "v12_static":nav_v12_static,
                         "switch_m1":nav_m1, "switch_m2":nav_m2, "switch_m3":nav_m3, "vni":vni_n,
                         "sig_m1":sig_m1.reindex(common_idx), "sig_m2":sig_m2.reindex(common_idx), "sig_m3":sig_m3.reindex(common_idx)})
-out_df.to_csv("compare_v11_v12_concentration_switch.csv")
+out_df.to_csv("data/compare_v11_v12_concentration_switch.csv")
 print(f"\n  Saved: compare_v11_v12_concentration_switch.csv")
 print("\n" + "="*110); print("DONE.")

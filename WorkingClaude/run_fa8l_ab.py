@@ -18,7 +18,7 @@ TIER_BAL=["MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","DEEP_VALUE_RECOVERY","RE_
 BUY_TIERS_V11={"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
                "MOMENTUM_A","MOMENTUM_S_N","COMPOUNDER_BUY","DEEP_VALUE_RECOVERY","S_PRO","RE_BACKLOG_BUY"}
 MAX_POS=12; FULL_SIZE=0.10
-STATE_CSV="vnindex_5state_tam_quan_v3_4b_full_history.csv"
+STATE_CSV="data/vnindex_5state_tam_quan_v3_4b_full_history.csv"
 
 # ── shared data loaded once ───────────────────────────────────────────────
 print("[shared] VNI/open/state/universe...")
@@ -143,8 +143,8 @@ def run_variant(pkl, fa_table, tag):
     nav=(bal.loc[common]+v30.loc[common])
     return nav
 
-nav_base=run_variant("ba_v11_FAbase_sig.pkl","tav2_bq.fa_ratings","BASE")
-nav_8l  =run_variant("ba_v11_FA8l_sig.pkl","tav2_bq.fa_ratings_8l","FA8L")
+nav_base=run_variant("data/ba_v11_FAbase_sig.pkl","tav2_bq.fa_ratings","BASE")
+nav_8l  =run_variant("data/ba_v11_FA8l_sig.pkl","tav2_bq.fa_ratings_8l","FA8L")
 
 common=nav_base.index.intersection(nav_8l.index)
 nb=nav_base.loc[common]; n8=nav_8l.loc[common]

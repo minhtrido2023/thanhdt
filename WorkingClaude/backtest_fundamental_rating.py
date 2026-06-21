@@ -24,9 +24,9 @@ import matplotlib.dates as mdates
 
 PROJECT = "lithe-record-440915-m9"
 BQ_BIN  = r"bq"
-RATING_CSV = "fundamental_rating.csv"
-PRICE_CSV  = "fundamental_rating_prices.csv"
-OUT_NAV    = "backtest_fundamental_rating.csv"
+RATING_CSV = "data/fundamental_rating.csv"
+PRICE_CSV  = "data/fundamental_rating_prices.csv"
+OUT_NAV    = "data/backtest_fundamental_rating.csv"
 OUT_PNG    = "backtest_fundamental_rating.png"
 
 START      = "2015-04-01"   # First rebalance after 2014Q4 reports
@@ -124,7 +124,7 @@ print(f"  Price pivot: {price_pivot.shape[0]} days × {price_pivot.shape[1]} tic
 
 # ─── VNINDEX benchmark ──────────────────────────────────────────────────────
 print("Loading VNINDEX from VNINDEX.csv ...")
-vni = pd.read_csv("VNINDEX.csv", parse_dates=["time"], usecols=["time", "ticker", "Close"])
+vni = pd.read_csv("data/VNINDEX.csv", parse_dates=["time"], usecols=["time", "ticker", "Close"])
 vni = vni[vni["ticker"] == "VNINDEX"][["time", "Close"]].set_index("time").sort_index()
 vni = vni.loc[START:pd.Timestamp(END) + pd.Timedelta(days=10)]
 print(f"  {len(vni)} VNINDEX days")

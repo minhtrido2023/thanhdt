@@ -36,20 +36,20 @@ def spearman(x, y):
     return (rho, p)
 
 # ── Load VNINDEX ──
-v = pd.read_csv('_vni_full.csv', parse_dates=['time']).sort_values('time').reset_index(drop=True)
+v = pd.read_csv('data/_vni_full.csv', parse_dates=['time']).sort_values('time').reset_index(drop=True)
 # Merge PE from VNINDEX.csv (BQ ticker doesn't have VNINDEX PE)
-vcsv = pd.read_csv('VNINDEX.csv', parse_dates=['time'])
+vcsv = pd.read_csv('data/VNINDEX.csv', parse_dates=['time'])
 v = v.merge(vcsv[['time','Pe']], on='time', how='left')
 v['Pe'] = pd.to_numeric(v['Pe'], errors='coerce')
 
 # Breadth
-br = pd.read_csv('_breadth.csv', parse_dates=['time'])
+br = pd.read_csv('data/_breadth.csv', parse_dates=['time'])
 br['pct_above_ma50'] = br['above_ma50'] / br['total']
 br['pct_above_ma200'] = br['above_ma200'] / br['total']
 v = v.merge(br[['time','pct_above_ma50','pct_above_ma200']], on='time', how='left')
 
 # State
-st = pd.read_csv('_state.csv', parse_dates=['time'])
+st = pd.read_csv('data/_state.csv', parse_dates=['time'])
 v = v.merge(st, on='time', how='left')
 
 # Forward returns
@@ -106,8 +106,8 @@ v['breadth_div'] = np.where((v['price_slope5']>0) & (v['breadth_slope5']<0), -1,
                     np.where((v['price_slope5']<0) & (v['breadth_slope5']>0), +1, 0))
 
 # ── Load fires from prior analysis ──
-bear = pd.read_csv('div_bear_fires_quality.csv', parse_dates=['date'])
-bull = pd.read_csv('div_bull_fires_quality.csv', parse_dates=['date'])
+bear = pd.read_csv('data/div_bear_fires_quality.csv', parse_dates=['date'])
+bull = pd.read_csv('data/div_bull_fires_quality.csv', parse_dates=['date'])
 
 # Look up each new indicator at fire date
 new_cols = ['pe_rank','state','rvol_rank','adx14','bb_pctB','close_ma200',
@@ -229,6 +229,6 @@ filter_test(bull, 'BULL + close_hi252 <= 0.85 (deep below 52w)', bull['close_hi2
 filter_test(bull, 'BULL + bb_pctB <= 0.1 (deep oversold band)', bull['bb_pctB']<=0.1, 'fwd60')
 
 # Save
-bear.to_csv('div_bear_with_newind.csv', index=False)
-bull.to_csv('div_bull_with_newind.csv', index=False)
+bear.to_csv('data/div_bear_with_newind.csv', index=False)
+bull.to_csv('data/div_bull_with_newind.csv', index=False)
 print("\nSaved: div_bear_with_newind.csv, div_bull_with_newind.csv")

@@ -166,8 +166,8 @@ def td_offset(ref, off):
 
 lag_up, lag_recent = [], []
 try:
-    ev = pd.read_csv(os.path.join(WORKDIR, "earnings_events_classified.csv"), parse_dates=["Release_Date"])
-    with open(os.path.join(WORKDIR, "earnings_surprise_data.pkl"), "rb") as f: fin = pickle.load(f)
+    ev = pd.read_csv(os.path.join(WORKDIR, "data/earnings_events_classified.csv"), parse_dates=["Release_Date"])
+    with open(os.path.join(WORKDIR, "data/earnings_surprise_data.pkl"), "rb") as f: fin = pickle.load(f)
     fin["Release_Date"] = pd.to_datetime(fin["Release_Date"]); FLOOR = 1e9
     fin["exp_B_MA"] = fin[["NP_P1","NP_P2","NP_P3","NP_P4"]].mean(axis=1)
     fin["surprise_B_MA"] = ((fin["NP_P0"] - fin["exp_B_MA"]) / np.maximum(np.abs(fin["exp_B_MA"]), FLOOR)).clip(-5, 5)

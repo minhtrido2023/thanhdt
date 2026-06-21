@@ -186,8 +186,8 @@ if "breadth_new" in vni.columns:
     vni = vni.drop(columns=["breadth_new"])
 
 # Save
-out_path = os.path.join(WORKDIR, "vnindex_full_2000_2026.csv")
-backup_path = os.path.join(WORKDIR, "vnindex_full_2000_2026_pre_pe_clean.csv")
+out_path = os.path.join(WORKDIR, "data/vnindex_full_2000_2026.csv")
+backup_path = os.path.join(WORKDIR, "data/vnindex_full_2000_2026_pre_pe_clean.csv")
 if os.path.exists(out_path):
     import shutil
     shutil.copy2(out_path, backup_path)

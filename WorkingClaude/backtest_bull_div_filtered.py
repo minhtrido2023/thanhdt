@@ -15,13 +15,13 @@ import numpy as np
 from itertools import product
 
 # ── Load ──
-ba = pd.read_csv('ba_v11_nav.csv', parse_dates=['time']).sort_values('time').reset_index(drop=True)
-v = pd.read_csv('_vni_full.csv', parse_dates=['time']).sort_values('time').reset_index(drop=True)
+ba = pd.read_csv('data/ba_v11_nav.csv', parse_dates=['time']).sort_values('time').reset_index(drop=True)
+v = pd.read_csv('data/_vni_full.csv', parse_dates=['time']).sort_values('time').reset_index(drop=True)
 v['ret'] = v['Close'].pct_change().fillna(0.0)
 v['hi252'] = v['High'].rolling(252).max()
 v['close_hi252'] = v['Close']/v['hi252']
 
-bull = pd.read_csv('div_bull_with_newind.csv', parse_dates=['date'])
+bull = pd.read_csv('data/div_bull_with_newind.csv', parse_dates=['date'])
 
 # Build VNI return lookup
 vni_ret = v.set_index('time')['ret']
@@ -155,5 +155,5 @@ for margin, hold in product([0.20, 0.30, 0.50], [60, 90, 120]):
           f"{s['cagr']-nav_base_oos['cagr']:+8.2f}pp")
 
 # Save full-period grid
-pd.DataFrame(rows).to_csv('bull_div_filter_grid.csv', index=False)
+pd.DataFrame(rows).to_csv('data/bull_div_filter_grid.csv', index=False)
 print("\nSaved: bull_div_filter_grid.csv")

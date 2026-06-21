@@ -59,7 +59,7 @@ print("="*100)
 # 1) Load BA v11 signals + apply P3 overheat filter
 # ============================================================================
 print("\n[1/8] Loading BA v11 signals + P3 overheat ...")
-sig_cache_full = "ba_v11_unified_12y_sig.pkl"
+sig_cache_full = "data/ba_v11_unified_12y_sig.pkl"
 with open(sig_cache_full, "rb") as f: sig_all = pickle.load(f)
 sig_all["time"] = pd.to_datetime(sig_all["time"])
 # Filter to our window (with buffer for state lookup)
@@ -164,7 +164,7 @@ etf_v12_bal = etf_v11_bal.copy()
 # ============================================================================
 print("\n[5/8] v12 LAGGED HL_3y book sim (25B) ...")
 
-with open("earnings_px.pkl","rb") as f: px_data = pickle.load(f)
+with open("data/earnings_px.pkl","rb") as f: px_data = pickle.load(f)
 px_data["time"] = pd.to_datetime(px_data["time"])
 px_close = px_data.pivot_table(index="time", columns="ticker", values="Close", aggfunc="first").sort_index().ffill(limit=5)
 master_idx = pd.DatetimeIndex(px_close.index).as_unit("ns")
@@ -177,7 +177,7 @@ ov_fresh = bq(f"""SELECT t.ticker, t.time, t.Open, t.Volume_3M_P50
 FROM tav2_bq.ticker AS t WHERE t.time >= '2026-01-01' AND t.time <= '{END_DATE}' AND t.Close > 0""")
 ov_fresh["time"] = pd.to_datetime(ov_fresh["time"])
 # Merge with older cached
-with open("lagged_pos_ov.pkl","rb") as f: ov_old = pickle.load(f)
+with open("data/lagged_pos_ov.pkl","rb") as f: ov_old = pickle.load(f)
 ov_old["time"] = pd.to_datetime(ov_old["time"])
 ov = pd.concat([ov_old, ov_fresh], ignore_index=True).drop_duplicates(["ticker","time"], keep="last")
 px_open = ov.pivot_table(index="time", columns="ticker", values="Open", aggfunc="first").sort_index()
@@ -192,7 +192,7 @@ liq_l = liq_l.reindex(master_idx).ffill(limit=5)
 all_dates = np.array(master_idx)
 
 # Reload + recompute earnings events with HL_3y profile (including new Q1 2026 releases)
-ev_old = pd.read_csv("earnings_events_classified.csv", parse_dates=["Release_Date"])
+ev_old = pd.read_csv("data/earnings_events_classified.csv", parse_dates=["Release_Date"])
 # Fetch new events
 last_known = ev_old["Release_Date"].max()
 print(f"  Fetching new earnings events > {last_known.date()} ...")
@@ -429,7 +429,7 @@ out_df = pd.DataFrame({
     "v12_NAV_B": nav_v12 / 1e9,
     "VNI_norm": vni_n,
 })
-out_df.to_csv("paper_v11_v12_apr2026_nav.csv")
+out_df.to_csv("data/paper_v11_v12_apr2026_nav.csv")
 
 # Combined trade log
 trades_combined = []
@@ -443,7 +443,7 @@ for ev in events_v12_lag:
     trades_combined.append({**ev, "system":"v12"})
 trades_df = pd.DataFrame(trades_combined)
 if len(trades_df) > 0:
-    trades_df.to_csv("paper_v11_v12_apr2026_trades.csv", index=False)
+    trades_df.to_csv("data/paper_v11_v12_apr2026_trades.csv", index=False)
 
 # LAGGED open positions
 if len(positions_l) > 0:
@@ -460,7 +460,7 @@ if len(positions_l) > 0:
                           "days_held":(last_dt-pos["entry_dt"]).days,
                           "release_dt":pos["release_dt"]})
     open_df = pd.DataFrame(open_rows)
-    open_df.to_csv("paper_v12_lagged_open_positions.csv", index=False)
+    open_df.to_csv("data/paper_v12_lagged_open_positions.csv", index=False)
     print(f"\n  v12 LAGGED open positions ({len(open_df)}):")
     print(open_df.sort_values("days_held", ascending=False)[["ticker","entry_dt","entry_px","cur_px","unrealized_pct","days_held"]].to_string(index=False))
 

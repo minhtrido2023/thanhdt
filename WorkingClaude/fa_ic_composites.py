@@ -55,7 +55,7 @@ def composite(df, weights):
 
 
 def main():
-    df=pd.read_csv(os.path.join(WORKDIR,"fundamental_rating_all.csv"))
+    df=pd.read_csv(os.path.join(WORKDIR,"data/fundamental_rating_all.csv"))
     df["time"]=pd.to_datetime(df["time"])
     df=df.dropna(subset=["profit_3M"]).copy()
     IS=df[df["time"]<"2020-01-01"]; OOS=df[df["time"]>="2020-01-01"]

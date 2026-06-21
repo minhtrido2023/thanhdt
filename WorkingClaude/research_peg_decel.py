@@ -233,6 +233,6 @@ for tk in CASES:
                   f"O1Y={o1y:>+6.1f}% [{','.join(flags)}]")
 
 # Save
-df.to_csv("research_peg_decel_panel.csv", index=False)
+df.to_csv("data/research_peg_decel_panel.csv", index=False)
 print("\nSaved: research_peg_decel_panel.csv")
 print("DONE")

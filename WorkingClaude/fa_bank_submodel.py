@@ -131,7 +131,7 @@ def main():
     P("")
 
     # ── merge generic total_score for head-to-head ────────────────────────
-    gen=pd.read_csv(os.path.join(WORKDIR,"fundamental_rating_all.csv"))[["ticker","quarter","total_score","tier"]]
+    gen=pd.read_csv(os.path.join(WORKDIR,"data/fundamental_rating_all.csv"))[["ticker","quarter","total_score","tier"]]
     gen=gen.rename(columns={"tier":"gen_tier"})
     h2h=have.merge(gen,on=["ticker","quarter"],how="inner")
 
@@ -193,7 +193,7 @@ def main():
             "score_profit","score_growth","score_safety","score_value",
             "bank_score","bank_pct","bank_tier","profit_3M",
             "ROE_Trailing","ROE_Min5Y","ROA_P0","OwnEq_Cap_P0","NP_R","asset_growth","PB_self_z"]]
-    out.to_csv(os.path.join(WORKDIR,"fundamental_rating_banks.csv"),index=False)
+    out.to_csv(os.path.join(WORKDIR,"data/fundamental_rating_banks.csv"),index=False)
     with open(os.path.join(WORKDIR,"data","fa_bank_submodel.md"),"w",encoding="utf-8") as fh:
         fh.write("\n".join(lines))
     P("Saved fundamental_rating_banks.csv + data/fa_bank_submodel.md")

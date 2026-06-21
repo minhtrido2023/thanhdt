@@ -149,5 +149,5 @@ for sname, months in seasons.items():
         line += f" {wr:>+8.1f}% ({len(sub):>3})"
     print(line)
 
-df_res.to_csv(os.path.join(WORKDIR, "fresh_q_adaptive_results.csv"), index=False)
+df_res.to_csv(os.path.join(WORKDIR, "data/fresh_q_adaptive_results.csv"), index=False)
 print(f"\n  Saved: fresh_q_adaptive_results.csv")

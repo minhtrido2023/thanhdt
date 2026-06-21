@@ -22,8 +22,8 @@ import yfinance as yf
 import subprocess, io
 
 # ── Load all data ──
-ba = pd.read_csv('ba_v11_nav.csv', parse_dates=['time']).sort_values('time').reset_index(drop=True)
-state = pd.read_csv('_state.csv', parse_dates=['time'])
+ba = pd.read_csv('data/ba_v11_nav.csv', parse_dates=['time']).sort_values('time').reset_index(drop=True)
+state = pd.read_csv('data/_state.csv', parse_dates=['time'])
 vni_csv = subprocess.run(['bq','query','--use_legacy_sql=false','--project_id=lithe-record-440915-m9',
                           '--format=csv','--max_rows=20000','-q',
                           'SELECT t.time, t.Close FROM tav2_bq.ticker AS t WHERE t.ticker="VNINDEX" AND t.time>="2011-01-01" ORDER BY t.time'],
@@ -184,5 +184,5 @@ for th_high, scale in [(0.85, 0.7), (0.85, 0.5), (0.80, 0.7), (0.90, 0.5)]:
     print()
 
 # Save outputs
-df.to_csv('macro_overlay_data.csv', index=False)
+df.to_csv('data/macro_overlay_data.csv', index=False)
 print("Saved: macro_overlay_data.csv")

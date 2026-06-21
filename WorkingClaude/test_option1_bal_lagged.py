@@ -44,7 +44,7 @@ print("  OPTION 1 — BA v11 BAL + LAGGED HL_3y (replace VN30) vs current produc
 print("="*100)
 
 # ─── 1. Load BA v11 signals (cache) ──────────────────────────────────────
-sig_cache = "ba_v11_unified_12y_sig.pkl"
+sig_cache = "data/ba_v11_unified_12y_sig.pkl"
 with open(sig_cache, "rb") as f: sig = pickle.load(f)
 sig["time"] = pd.to_datetime(sig["time"])
 print(f"[1] BA v11 signals loaded: {len(sig):,} rows")
@@ -108,19 +108,19 @@ print(f"  BAL final at 25B init: {nav_bal_s.iloc[-1]/1e9:.2f}B")
 print("\n[5] Running LAGGED HL_3y at 25B ...")
 INIT_NAV_LAG = BOOK_NAV  # 25B
 
-with open("earnings_px.pkl","rb") as f: px_data = pickle.load(f)
+with open("data/earnings_px.pkl","rb") as f: px_data = pickle.load(f)
 px_data["time"] = pd.to_datetime(px_data["time"])
 px_close = px_data.pivot_table(index="time", columns="ticker", values="Close", aggfunc="first").sort_index().ffill(limit=5)
 master_idx = pd.DatetimeIndex(px_close.index).as_unit("ns")
 px_close.index = master_idx
 all_dates = np.array(master_idx)
 
-with open("lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
+with open("data/lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
 ov["time"] = pd.to_datetime(ov["time"])
 px_open = ov.pivot_table(index="time", columns="ticker", values="Open", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 liq_l   = ov.pivot_table(index="time", columns="ticker", values="Volume_3M_P50", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 
-ev = pd.read_csv("earnings_events_classified.csv", parse_dates=["Release_Date"])
+ev = pd.read_csv("data/earnings_events_classified.csv", parse_dates=["Release_Date"])
 ev = ev.sort_values(["ticker","Release_Date"]).reset_index(drop=True)
 
 LN2 = np.log(2); HL = 3.0
@@ -214,7 +214,7 @@ nav_combined = nav_bal_s.loc[common] + nav_lag_s.loc[common]
 nav_norm = nav_combined / TOTAL_NAV
 
 # Load existing BAL+VN30 production NAV
-ba_v11_prod = pd.read_csv("ba_v11_production_12y_nav.csv", index_col=0, parse_dates=True).iloc[:,0]
+ba_v11_prod = pd.read_csv("data/ba_v11_production_12y_nav.csv", index_col=0, parse_dates=True).iloc[:,0]
 ba_v11_prod = ba_v11_prod.loc[ba_v11_prod.index.intersection(common)]
 
 vni_aligned = vni.set_index("time")["Close"].reindex(common).ffill()
@@ -264,5 +264,5 @@ for label, st, en in periods:
 
 # Save
 out_df = pd.DataFrame({"CURRENT_BA+VN30": ba_v11_prod, "OPT1_BAL+LAGGED": nav_norm.loc[ba_v11_prod.index]})
-out_df.to_csv("option1_bal_lagged_vs_prod.csv")
+out_df.to_csv("data/option1_bal_lagged_vs_prod.csv")
 print("Saved: option1_bal_lagged_vs_prod.csv")

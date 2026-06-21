@@ -341,9 +341,9 @@ else:
     print("  (no open positions)")
 
 # Save files
-events_path = os.path.join(WORKDIR, "journal_v6_events.csv")
-nav_path = os.path.join(WORKDIR, "journal_v6_nav_daily.csv")
-open_path = os.path.join(WORKDIR, "journal_v6_open_positions.csv")
+events_path = os.path.join(WORKDIR, "data/journal_v6_events.csv")
+nav_path = os.path.join(WORKDIR, "data/journal_v6_nav_daily.csv")
+open_path = os.path.join(WORKDIR, "data/journal_v6_open_positions.csv")
 events_all.to_csv(events_path, index=False)
 nav_daily.to_csv(nav_path, index=False)
 pd.DataFrame(open_positions).to_csv(open_path, index=False)

@@ -97,7 +97,7 @@ def main():
     df["time"]=pd.to_datetime(df["time"]); df=df.sort_values("time").reset_index(drop=True)
 
     # ── build BASE (7-axis) + EW5 tiers from CSV, as-of join ──────────────
-    fa=pd.read_csv(os.path.join(WORKDIR,"fundamental_rating_all.csv"))
+    fa=pd.read_csv(os.path.join(WORKDIR,"data/fundamental_rating_all.csv"))
     fa["time"]=pd.to_datetime(fa["time"])
     fa["ew5"]=fa[[f"score_{a}" for a in EW5]].mean(axis=1)
     fa["ew5_pct"]=fa.groupby("quarter")["ew5"].rank(pct=True)

@@ -39,7 +39,7 @@ STATE_ALLOC = {1: "0%", 2: "20%", 3: "70%", 4: "100%", 5: "130%"}
 # LOAD DATA
 # ══════════════════════════════════════════════════════════════════════
 print("Loading VNINDEX.csv ...")
-vni = pd.read_csv(os.path.join(WORKDIR, "VNINDEX.csv"), low_memory=False)
+vni = pd.read_csv(os.path.join(WORKDIR, "data/VNINDEX.csv"), low_memory=False)
 vni["time"] = pd.to_datetime(vni["time"])
 vni = vni.sort_values("time").reset_index(drop=True)
 
@@ -65,7 +65,7 @@ for col in ["Open", "High", "Low", "Close", "Volume", "VNINDEX_PE",
 print(f"  VNINDEX rows: {len(vni)} | {vni['time'].min().date()} → {vni['time'].max().date()}")
 
 # Load Breadth
-breadth_path = os.path.join(WORKDIR, "breadth_data.csv")
+breadth_path = os.path.join(WORKDIR, "data/breadth_data.csv")
 if os.path.exists(breadth_path):
     breadth = pd.read_csv(breadth_path)
     breadth["time"] = pd.to_datetime(breadth["time"])
@@ -493,7 +493,7 @@ vni["state_dvg"]      = state_dvg
 vni["state"]          = state_smooth
 # Dump state CSV for downstream systems (TA-system Layer 2 integration)
 vni[["time", "state", "state_raw"]].to_csv(
-    os.path.join(WORKDIR, "vnindex_5state_history.csv"), index=False
+    os.path.join(WORKDIR, "data/vnindex_5state_history.csv"), index=False
 )
 vni["bear_dvg"]       = bear_mask.astype(int)
 vni["bull_dvg"]       = bull_mask.astype(int)

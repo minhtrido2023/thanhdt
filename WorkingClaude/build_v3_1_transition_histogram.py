@@ -28,11 +28,11 @@ FWD_DAYS = 5  # T+5 trading sessions
 
 # ── Load ────────────────────────────────────────────────────────────────
 print("Loading v3.1 state + close ...")
-st = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_1_full_history.csv"))
+st = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_1_full_history.csv"))
 st["time"] = pd.to_datetime(st["time"])
 st = st.sort_values("time").reset_index(drop=True)
 
-dr = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_dual_v3_full.csv"))
+dr = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_dual_v3_full.csv"))
 dr["time"] = pd.to_datetime(dr["time"])
 df = st.merge(dr[["time","Close"]], on="time", how="left").reset_index(drop=True)
 

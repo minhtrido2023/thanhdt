@@ -22,7 +22,7 @@ MAX_POS = 12
 print("="*80); print(f"  A/B: V11+TQ34b vs V11+Tinh_Te vs V12+Tinh_Te ({START_B}->{END_B})"); print("="*80)
 
 print("\n[1] Loading signals/prices/VNI/Open...")
-with open("ba_v11_unified_12y_sig.pkl","rb") as f: sig_B = pickle.load(f)
+with open("data/ba_v11_unified_12y_sig.pkl","rb") as f: sig_B = pickle.load(f)
 sig_B["time"] = pd.to_datetime(sig_B["time"])
 sig_B = sig_B[(sig_B["time"]>=START_B) & (sig_B["time"]<=END_B)].copy()
 with open("sim_v11_for_analyzer.py","r",encoding="utf-8") as f: _c = f.read()
@@ -48,7 +48,7 @@ vni_full["time"] = pd.to_datetime(vni_full["time"])
 
 print("\n[2] Loading 2 state series...")
 # TQ34b from CSV (clean)
-state_tq = pd.read_csv("vnindex_5state_tam_quan_v3_4b_full_history.csv")
+state_tq = pd.read_csv("data/vnindex_5state_tam_quan_v3_4b_full_history.csv")
 state_tq["time"] = pd.to_datetime(state_tq["time"])
 state_tq = state_tq[(state_tq["time"]>=START_B) & (state_tq["time"]<=END_B)][["time","state"]]
 # Tinh Tế from BQ archive

@@ -253,6 +253,6 @@ for name, nav in [("base", nav_b), ("shock-25", apply_shock(nav_b, peak_date, -0
 print(yr_table.round(2).to_string())
 
 
-pd.DataFrame(results_a).to_csv(os.path.join(WORKDIR, "round15_tactical.csv"), index=False)
-pd.DataFrame(holdout_results).to_csv(os.path.join(WORKDIR, "round15_holdout.csv"), index=False)
+pd.DataFrame(results_a).to_csv(os.path.join(WORKDIR, "data/round15_tactical.csv"), index=False)
+pd.DataFrame(holdout_results).to_csv(os.path.join(WORKDIR, "data/round15_holdout.csv"), index=False)
 print("\n  Saved: round15_*.csv")

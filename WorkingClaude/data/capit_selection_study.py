@@ -41,7 +41,7 @@ d = d.sort_values("entry")
 d = pd.merge_asof(d, r8, left_on="entry", right_on="time", by="ticker", direction="backward", suffixes=("", "_r8"))
 
 # ---------- 2. stock own 52w drawdown + historical rebound strength (causal, from earnings_px) ----------
-px = pickle.load(open("earnings_px.pkl", "rb")); px["time"] = pd.to_datetime(px["time"])
+px = pickle.load(open("data/earnings_px.pkl", "rb")); px["time"] = pd.to_datetime(px["time"])
 pxp = px.pivot_table(index="time", columns="ticker", values="Close", aggfunc="first").sort_index()
 def own_dd52(tk, e):
     if tk not in pxp.columns: return np.nan

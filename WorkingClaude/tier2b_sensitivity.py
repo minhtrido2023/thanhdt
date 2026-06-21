@@ -47,8 +47,8 @@ vni_csv = subprocess.run(['bq','query','--use_legacy_sql=false','--project_id=li
                           'SELECT t.time, t.Close FROM tav2_bq.ticker AS t WHERE t.ticker="VNINDEX" AND t.time>="2011-01-01" ORDER BY t.time'],
                          capture_output=True,text=True,shell=True).stdout
 vni = pd.read_csv(io.StringIO(vni_csv), parse_dates=['time']).rename(columns={'Close':'VNI'})
-state = pd.read_csv('_state.csv', parse_dates=['time'])
-ba = pd.read_csv('ba_v11_nav.csv', parse_dates=['time'])
+state = pd.read_csv('data/_state.csv', parse_dates=['time'])
+ba = pd.read_csv('data/ba_v11_nav.csv', parse_dates=['time'])
 
 dxy = yf.Ticker('DX-Y.NYB').history(start='2010-01-01', end='2026-05-20', auto_adjust=False)
 dxy = dxy[['Close']].rename(columns={'Close':'DXY'})

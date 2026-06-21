@@ -290,7 +290,7 @@ def main():
     print(f"  Saved NAV trace: {nav_path}")
 
     # Append to long-term tracking log
-    track_path = os.path.join(WORKDIR, "qwf_tracking_log.csv")
+    track_path = os.path.join(WORKDIR, "data/qwf_tracking_log.csv")
     track_row = {
         "snapshot_date": end_date,
         "trailing_3y_cagr_pct": t3y["cagr_pct"] if t3y else np.nan,

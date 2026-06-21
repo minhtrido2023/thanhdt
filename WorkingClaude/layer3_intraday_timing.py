@@ -263,7 +263,7 @@ def main():
 
     # Save results
     df_out = pd.DataFrame(results)
-    out_path = os.path.join(WORKDIR, "layer3_intraday_signals.csv")
+    out_path = os.path.join(WORKDIR, "data/layer3_intraday_signals.csv")
     df_out.to_csv(out_path, index=False)
 
     # Summary by verdict

@@ -37,19 +37,19 @@ print("="*100)
 
 # ─── 1. Load data ────────────────────────────────────────────────────────
 print("\n[1] Loading shared data ...")
-with open("earnings_px.pkl","rb") as f: px_data = pickle.load(f)
+with open("data/earnings_px.pkl","rb") as f: px_data = pickle.load(f)
 px_data["time"] = pd.to_datetime(px_data["time"])
 px_close = px_data.pivot_table(index="time", columns="ticker", values="Close", aggfunc="first").sort_index().ffill(limit=5)
 master_idx = pd.DatetimeIndex(px_close.index).as_unit("ns")
 px_close.index = master_idx
 all_dates = np.array(master_idx)
 
-with open("lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
+with open("data/lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
 ov["time"] = pd.to_datetime(ov["time"])
 px_open = ov.pivot_table(index="time", columns="ticker", values="Open", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 liq     = ov.pivot_table(index="time", columns="ticker", values="Volume_3M_P50", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 
-ev = pd.read_csv("earnings_events_classified.csv", parse_dates=["Release_Date"])
+ev = pd.read_csv("data/earnings_events_classified.csv", parse_dates=["Release_Date"])
 ev = ev.sort_values(["ticker","Release_Date"]).reset_index(drop=True)
 print(f"  Events: {len(ev):,}  | Tickers: {ev['ticker'].nunique()}")
 
@@ -244,7 +244,7 @@ for name, col, use_trend in configs:
           f"DD={r['full_DD']:>+6.1f}%  OOS={r['oos_CAGR']:>+6.2f}%  Y22={r['y22_CAGR']:>+6.1f}%  Q126={r['q126_CAGR']:>+6.1f}%")
 
 df = pd.DataFrame(results)
-df.to_csv("lagged_timedecay_results.csv", index=False)
+df.to_csv("data/lagged_timedecay_results.csv", index=False)
 
 print("\n" + "="*120)
 print("  RANKING by FULL CAGR")

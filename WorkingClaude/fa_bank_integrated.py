@@ -144,7 +144,7 @@ def main():
     P(f"daily signal rows {len(df):,} | {df['time'].min().date()}→{df['time'].max().date()}")
 
     # ── as-of join bank_tier (ICB 8355) ───────────────────────────────────
-    bk=pd.read_csv(os.path.join(WORKDIR,"fundamental_rating_banks.csv"))[["ticker","time","bank_tier"]]
+    bk=pd.read_csv(os.path.join(WORKDIR,"data/fundamental_rating_banks.csv"))[["ticker","time","bank_tier"]]
     bk["time"]=pd.to_datetime(bk["time"])
     bk=bk.sort_values("time")
     parts=[]

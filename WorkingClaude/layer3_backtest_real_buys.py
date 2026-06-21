@@ -20,7 +20,7 @@ def pos_for(seg):
     return POS_VND.get(seg, 1_000_000_000)
 
 def main():
-    j = pd.read_csv(os.path.join(WORKDIR, "journal_v6_extended_events.csv"))
+    j = pd.read_csv(os.path.join(WORKDIR, "data/journal_v6_extended_events.csv"))
     j["date"] = pd.to_datetime(j["date"])
     buys = j[j["action"]=="BUY"].sort_values("date").reset_index(drop=True)
     sells = j[j["action"]=="SELL"].sort_values("date").reset_index(drop=True)
@@ -101,7 +101,7 @@ def main():
             m = sub["ret_pct"].mean()
             print(f"  {e:18} + {x:18}  mean={m:>7.3f}%  lift={m-base:+.3f}pp")
 
-    df.to_csv(os.path.join(WORKDIR, "backtest_real_buys.csv"), index=False)
+    df.to_csv(os.path.join(WORKDIR, "data/backtest_real_buys.csv"), index=False)
     print("\nSaved: backtest_real_buys.csv")
 
 if __name__=="__main__":

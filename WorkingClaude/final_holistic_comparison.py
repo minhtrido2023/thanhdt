@@ -115,5 +115,5 @@ print(f"  {'VNINDEX_BH':35} {(vni_2022/vni_2021-1)*100:+.1f}%   "
 for name, (nav_df, trades_df, _) in results.items():
     nav_df.to_csv(os.path.join(WORKDIR, f"final_{name}_nav.csv"), index=False)
     trades_df.to_csv(os.path.join(WORKDIR, f"final_{name}_trades.csv"), index=False)
-summary.to_csv(os.path.join(WORKDIR, "final_holistic_summary.csv"), index=False)
+summary.to_csv(os.path.join(WORKDIR, "data/final_holistic_summary.csv"), index=False)
 print("\n  Saved: final_*.csv")

@@ -24,7 +24,7 @@ print("=" * 70)
 print("BUOC 1: Load VNINDEX.csv")
 print("=" * 70)
 
-vni = pd.read_csv(os.path.join(WORKDIR, "VNINDEX.csv"), low_memory=False)
+vni = pd.read_csv(os.path.join(WORKDIR, "data/VNINDEX.csv"), low_memory=False)
 vni["time"] = pd.to_datetime(vni["time"])
 vni = vni.sort_values("time").reset_index(drop=True)
 
@@ -180,7 +180,7 @@ print("\n" + "=" * 70)
 print("BUOC 5: Join profile_hit.csv voi VNINDEX context")
 print("=" * 70)
 
-prof = pd.read_csv(os.path.join(WORKDIR, "profile_hit.csv"), index_col=0, low_memory=False)
+prof = pd.read_csv(os.path.join(WORKDIR, "data/profile_hit.csv"), index_col=0, low_memory=False)
 prof["time"] = pd.to_datetime(prof["time"])
 prof = prof[prof["Sell_profit"].notna()].copy()
 

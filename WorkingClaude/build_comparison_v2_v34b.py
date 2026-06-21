@@ -19,16 +19,16 @@ STATE_COLOR  = {1:"#dc2626", 2:"#f97316", 3:"#9ca3af", 4:"#16a34a", 5:"#7c3aed"}
 STATE_BG     = {1:"#2d0a0a", 2:"#2d1500", 3:"#1a1f2e", 4:"#0a2d1a", 5:"#1a0a2d"}
 
 # ── Load data ──────────────────────────────────────────────────────────────────
-vni = pd.read_csv(os.path.join(WORKDIR, "VNINDEX.csv"))
+vni = pd.read_csv(os.path.join(WORKDIR, "data/VNINDEX.csv"))
 vni["time"] = pd.to_datetime(vni["time"])
 vni = vni.sort_values("time").reset_index(drop=True)
 vni["ret"] = vni["Close"].pct_change()
 
-v2 = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_history.csv"))
+v2 = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_history.csv"))
 v2["time"] = pd.to_datetime(v2["time"])
 v2 = v2.sort_values("time").reset_index(drop=True)
 
-v34b = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_4b_full_history.csv"))
+v34b = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_4b_full_history.csv"))
 v34b["time"] = pd.to_datetime(v34b["time"])
 v34b = v34b.sort_values("time").reset_index(drop=True)
 

@@ -34,7 +34,7 @@ TIER_WEIGHTS_V11 = {t: 0.10 for t in TIER_BAL}
 BUY_TIERS_V11 = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
                  "MOMENTUM_A","MOMENTUM_S_N","COMPOUNDER_BUY","DEEP_VALUE_RECOVERY","S_PRO","RE_BACKLOG_BUY"}
 MAX_POS = 12
-STATES = {"DT_4gate": "vnindex_5state_dt_4gate.csv", "DT4_MACRO": "vnindex_5state_dt4_macro.csv"}
+STATES = {"DT_4gate": "data/vnindex_5state_dt_4gate.csv", "DT4_MACRO": "data/vnindex_5state_dt4_macro.csv"}
 # cost-stress knobs (env): SLIP per-trade slippage, FRICT ETF rebalance friction
 SLIP = float(os.environ.get("SLIP", "0.001"))
 FRICT = float(os.environ.get("FRICT", "0.0015"))
@@ -43,7 +43,7 @@ print("=" * 96)
 print(f"  V5/V1 INTEGRATED — DT_4gate vs DT_4gate+MACRO  (slippage={SLIP:.4f}, ETF_friction={FRICT:.4f})")
 print("=" * 96)
 print("\n[1] Load signals + prices...")
-with open("ba_v11_unified_12y_sig.pkl", "rb") as f: sig_canon = pickle.load(f)
+with open("data/ba_v11_unified_12y_sig.pkl", "rb") as f: sig_canon = pickle.load(f)
 sig_canon["time"] = pd.to_datetime(sig_canon["time"])
 sig_canon = sig_canon[(sig_canon["time"] >= START_B) & (sig_canon["time"] <= END_B)].copy()
 with open("sim_v11_for_analyzer.py", "r", encoding="utf-8") as f: _c = f.read()

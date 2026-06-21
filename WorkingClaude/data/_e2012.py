@@ -1,6 +1,6 @@
 import pandas as pd, numpy as np, os
 os.chdir(r"/home/trido/thanhdt/WorkingClaude")
-v=pd.read_csv("VNINDEX.csv",usecols=["time","Close"]); v["time"]=pd.to_datetime(v["time"])
+v=pd.read_csv("data/VNINDEX.csv",usecols=["time","Close"]); v["time"]=pd.to_datetime(v["time"])
 nav=pd.read_csv("data/dt4g_macro_overlay_nav.csv"); nav["time"]=pd.to_datetime(nav["time"])
 d=nav.merge(v,on="time",how="left")
 seg=d[(d["time"]>="2012-04-18")&(d["time"]<="2012-07-31")].reset_index(drop=True)

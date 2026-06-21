@@ -75,7 +75,7 @@ results.append({"config":"VNINDEX_BH","hold_Q":"-","n_pos":"-","tier":"-","incl"
     "CAGR_oos24":bh_oos["metrics"]["CAGR"], "MaxDD_oos24":bh_oos["metrics"]["MaxDD"]})
 
 df = pd.DataFrame(results)
-df.to_csv("lh_matrix_results.csv", index=False)
+df.to_csv("data/lh_matrix_results.csv", index=False)
 
 # Pretty print
 print("\n" + "="*120)
@@ -87,5 +87,5 @@ print(df[cols_show].to_string(index=False, float_format=lambda x: f"{x:+.4f}" if
 
 # Save nav series for top performers
 nav_df = pd.DataFrame(nav_store)
-nav_df.to_csv("lh_nav_series.csv")
+nav_df.to_csv("data/lh_nav_series.csv")
 print("\nSaved lh_matrix_results.csv and lh_nav_series.csv")

@@ -23,7 +23,7 @@ DEPOSIT=0.0; BORROW=0.10; SWITCH_COST=0.005
 TIER_BAL=["MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","DEEP_VALUE_RECOVERY"]
 BUY_TIERS_V11={"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY","MOMENTUM_A",
                "MOMENTUM_S_N","COMPOUNDER_BUY","DEEP_VALUE_RECOVERY","S_PRO"}
-DT_CSV="vnindex_5state_dt_10_25_25.csv"; TQ_CSV="vnindex_5state_tam_quan_v3_4b_full_history.csv"
+DT_CSV="data/vnindex_5state_dt_10_25_25.csv"; TQ_CSV="data/vnindex_5state_tam_quan_v3_4b_full_history.csv"
 print("="*104); print("  PHASE 3 — parking-intensity sweep on DECOUPLE + mechanism control"); print("="*104)
 
 with open("data/dt_ens_legs.pkl","rb") as f: C=pickle.load(f)
@@ -32,7 +32,7 @@ m1=C["m1_126"].reindex(common).ffill().fillna(1).astype(int)
 m3=C["m3_126"].reindex(common).ffill().fillna(1).astype(int)
 
 print("\n[1] Reload data...")
-with open("ba_v11_unified_12y_sig.pkl","rb") as f: sig_B=pickle.load(f)
+with open("data/ba_v11_unified_12y_sig.pkl","rb") as f: sig_B=pickle.load(f)
 sig_B["time"]=pd.to_datetime(sig_B["time"])
 with open("sim_v11_for_analyzer.py","r",encoding="utf-8") as f: _c=f.read()
 VQU=re.search(r'^VNI_QUERY_UNIFIED\s*=\s*"""(.+?)"""',_c,re.MULTILINE|re.DOTALL).group(1)

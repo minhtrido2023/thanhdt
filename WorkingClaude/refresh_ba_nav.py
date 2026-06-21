@@ -78,7 +78,7 @@ ba_nav.name = "BA_50_50"
 
 # Save
 out = pd.DataFrame({"time": ba_nav.index, "BA_50_50": ba_nav.values})
-out.to_csv("ba_nav_refresh_2026-05.csv", index=False)
+out.to_csv("data/ba_nav_refresh_2026-05.csv", index=False)
 print(f"\nSaved ba_nav_refresh_2026-05.csv: {len(out)} rows, {out.time.min().date()} → {out.time.max().date()}")
 print(f"Final wealth: {ba_nav.iloc[-1]:.3f}x")
 

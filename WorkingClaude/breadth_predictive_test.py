@@ -27,7 +27,7 @@ def spearman(x, y):
     return ((rx-rx.mean())*(ry-ry.mean())).mean()/(sx*sy)
 
 # Load comparison data
-df = pd.read_csv('breadth_universe_comparison.csv', parse_dates=['time'])
+df = pd.read_csv('data/breadth_universe_comparison.csv', parse_dates=['time'])
 
 # Add VNI
 vni_csv = subprocess.run(['bq','query','--use_legacy_sql=false','--project_id=lithe-record-440915-m9',
@@ -37,7 +37,7 @@ vni_csv = subprocess.run(['bq','query','--use_legacy_sql=false','--project_id=li
 vni = pd.read_csv(io.StringIO(vni_csv), parse_dates=['time']).rename(columns={'Close':'VNI'})
 
 # Add state
-state = pd.read_csv('_state.csv', parse_dates=['time'])
+state = pd.read_csv('data/_state.csv', parse_dates=['time'])
 
 df = df.merge(vni, on='time').merge(state, on='time', how='left')
 df['state'] = df['state'].ffill()

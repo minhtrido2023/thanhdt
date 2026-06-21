@@ -128,12 +128,12 @@ try:
 except Exception as e: print("RATE_CYCLICAL inject skipped:",e)
 
 # ---- quality universe (compounder candidates) from fa_ratings_lh ----
-fa=pd.read_csv(os.path.join(WORKDIR,"fa_ratings_lh.csv")).sort_values(["ticker","quarter"])
+fa=pd.read_csv(os.path.join(WORKDIR,"data/fa_ratings_lh.csv")).sort_values(["ticker","quarter"])
 # FIX (2026-05-31, TV1 case): 25/687 names have NaN score in the latest lh snapshot → default to tier E
 # (data-pipeline artifact, NOT a real fundamental fail). Fall back to the main 7-axis fundamental_rating
 # tier where the lh score is NaN, so a broken latest-quarter doesn't wrongly exclude a good company.
 try:
-    _m=pd.read_csv(os.path.join(WORKDIR,"fundamental_rating_latest.csv")).sort_values(["ticker","quarter"]).groupby("ticker").tail(1).set_index("ticker")["tier"].to_dict()
+    _m=pd.read_csv(os.path.join(WORKDIR,"data/fundamental_rating_latest.csv")).sort_values(["ticker","quarter"]).groupby("ticker").tail(1).set_index("ticker")["tier"].to_dict()
     _nan=fa["score"].isna()
     fa.loc[_nan,"tier"]=fa.loc[_nan,"ticker"].map(_m).fillna(fa.loc[_nan,"tier"])
     print(f"FA NaN-score fallback applied to {int(_nan.sum())} rows (main-model tier)")

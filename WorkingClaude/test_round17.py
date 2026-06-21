@@ -171,7 +171,7 @@ for label in ["v10 baseline", "ST: exit on BEAR", "ST+PT: BEAR-exit + +30%"]:
               f"win {(q1_2026['ret_net']>0).mean()*100:.1f}%")
 
 # ─── Save ────────────────────────────────────────────────────────────────────
-out_path = os.path.join(WORKDIR, "round17_results.csv")
+out_path = os.path.join(WORKDIR, "data/round17_results.csv")
 df.to_csv(out_path, index=False)
 print(f"\n  Saved: {out_path}")
 

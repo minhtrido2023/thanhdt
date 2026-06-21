@@ -232,7 +232,7 @@ for bw_w, vn_w in [(1.0,0.0), (0.7,0.3), (0.5,0.5), (0.3,0.7), (0.0,1.0)]:
     print(f"  {name:30} | {m['cagr_pct']:>6.2f}% {m['sharpe']:>6.2f} "
           f"{m['max_dd_pct']:>6.1f}% {m['calmar']:>5.2f}")
 
-pd.DataFrame(results_a).to_csv(os.path.join(WORKDIR, "round12_v10.csv"), index=False)
-pd.DataFrame(hybrid_50b).to_csv(os.path.join(WORKDIR, "round12_hybrid.csv"), index=False)
-pd.DataFrame(combined).to_csv(os.path.join(WORKDIR, "round12_combined.csv"), index=False)
+pd.DataFrame(results_a).to_csv(os.path.join(WORKDIR, "data/round12_v10.csv"), index=False)
+pd.DataFrame(hybrid_50b).to_csv(os.path.join(WORKDIR, "data/round12_hybrid.csv"), index=False)
+pd.DataFrame(combined).to_csv(os.path.join(WORKDIR, "data/round12_combined.csv"), index=False)
 print("\n  Saved: round12_*.csv")

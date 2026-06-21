@@ -6,7 +6,7 @@ import pandas as pd
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
 
 def main():
-    df = pd.read_csv(os.path.join(WORKDIR, "layer3_early_fire_events.csv"))
+    df = pd.read_csv(os.path.join(WORKDIR, "data/layer3_early_fire_events.csv"))
     print(f"Total events: {len(df)}")
     print(f"Signals: {df['signal'].value_counts().to_dict()}")
 

@@ -46,9 +46,9 @@ def alt_score(df):
     return s
 
 def main():
-    a = pd.read_csv(os.path.join(WORKDIR, "layer3_backtest_eventsA_with_returns.csv"))
-    b = pd.read_csv(os.path.join(WORKDIR, "layer3_backtest_eventsB.csv"))
-    daily = pd.read_csv(os.path.join(WORKDIR, "daily_forward.csv"))
+    a = pd.read_csv(os.path.join(WORKDIR, "data/layer3_backtest_eventsA_with_returns.csv"))
+    b = pd.read_csv(os.path.join(WORKDIR, "data/layer3_backtest_eventsB.csv"))
+    daily = pd.read_csv(os.path.join(WORKDIR, "data/daily_forward.csv"))
     # Recompute fwd returns for B
     daily["time"] = pd.to_datetime(daily["time"]).dt.date
     daily = daily.sort_values(["ticker","time"]).reset_index(drop=True)

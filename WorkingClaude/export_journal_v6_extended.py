@@ -498,9 +498,9 @@ else:
     print("  (no open positions)")
 
 # Save files (with try/except per file in case any is open in Excel)
-events_path = os.path.join(WORKDIR, "journal_v6_extended_events.csv")
-nav_path = os.path.join(WORKDIR, "journal_v6_extended_nav_daily.csv")
-open_path = os.path.join(WORKDIR, "journal_v6_extended_open_positions.csv")
+events_path = os.path.join(WORKDIR, "data/journal_v6_extended_events.csv")
+nav_path = os.path.join(WORKDIR, "data/journal_v6_extended_nav_daily.csv")
+open_path = os.path.join(WORKDIR, "data/journal_v6_extended_open_positions.csv")
 
 def _safe_save(df, path):
     try:

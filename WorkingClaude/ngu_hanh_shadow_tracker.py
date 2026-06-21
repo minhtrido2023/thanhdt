@@ -41,7 +41,7 @@ import numpy as np
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
 BQ      = r"bq"
 PROJECT = "lithe-record-440915-m9"
-LOG_CSV = os.path.join(WORKDIR, "ngu_hanh_shadow_log.csv")
+LOG_CSV = os.path.join(WORKDIR, "data/ngu_hanh_shadow_log.csv")
 STAGE_START = pd.Timestamp("2026-05-21")  # when v3.1 was deployed
 SHADOW_DAYS_REQ = 14  # trading days before promote decision
 STATE_NAMES = {1:"CRISIS",2:"BEAR",3:"NEUTRAL",4:"BULL",5:"EX-BULL"}
@@ -87,7 +87,7 @@ def pull_latest_states():
     df = df.merge(bd[["time","breadth_t5","true_median_t5"]], on="time", how="left").sort_values("time")
     # Also load EW close from local cache
     try:
-        ew = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_ew_full.csv"))
+        ew = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_ew_full.csv"))
         ew["time"] = pd.to_datetime(ew["time"])
         ew = ew[["time","Close"]].rename(columns={"Close":"ew_close"})
         df = df.merge(ew, on="time", how="left")
@@ -98,20 +98,20 @@ def pull_latest_states():
 def get_context():
     """Get concentration_smooth + US shock cap for STAGE_START onwards."""
     try:
-        diag = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_1_clean.csv"))
+        diag = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_1_clean.csv"))
         # Not enough context in the staging CSV — read from full v3 diag instead if available
     except Exception:
         return pd.DataFrame()
     # Pull concentration from v3 full diag
-    if os.path.exists(os.path.join(WORKDIR, "vnindex_5state_dual_v3_full.csv")):
-        c = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_dual_v3_full.csv"))
+    if os.path.exists(os.path.join(WORKDIR, "data/vnindex_5state_dual_v3_full.csv")):
+        c = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_dual_v3_full.csv"))
         c["time"] = pd.to_datetime(c["time"])
         c = c[["time","concentration_smooth","alpha"]]
     else:
         c = pd.DataFrame(columns=["time","concentration_smooth","alpha"])
     # Pull US shock cap from us_market_history
-    if os.path.exists(os.path.join(WORKDIR, "us_market_history.csv")):
-        us = pd.read_csv(os.path.join(WORKDIR, "us_market_history.csv"))
+    if os.path.exists(os.path.join(WORKDIR, "data/us_market_history.csv")):
+        us = pd.read_csv(os.path.join(WORKDIR, "data/us_market_history.csv"))
         us["time"] = pd.to_datetime(us["time"])
         us = us[["time","vix","spx_dd_1y"]]
         def cap(r):

@@ -133,7 +133,7 @@ def main():
 
     # 5. FA snapshot
     print("\n[5/6] fundamental_rating_all.csv")
-    fa_path = Path(__file__).parent / "fundamental_rating_all.csv"
+    fa_path = Path(__file__).parent / "data/fundamental_rating_all.csv"
     fa_ok = fa_path.exists() and fa_path.stat().st_size > 1000
     ok &= check(f"File exists at {fa_path}",
                 fa_ok,

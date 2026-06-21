@@ -219,13 +219,13 @@ BUY_TIERS_B = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
 
 PHASE_B_VARIANTS = [
     ("LIVE Tinh Tế",       "BQ"),
-    ("v3 staging",         "vnindex_5state_dual_v3_staging.csv"),
+    ("v3 staging",         "data/vnindex_5state_dual_v3_staging.csv"),
     ("v3.1-clean overlay", "BQ:tav2_bq.vnindex_5state_tam_quan_v31_clean"),
 ]
 
 print("\n\n" + "="*100); print(f"PHASE B: post-2014 V11 backtest 2014-2026, 50B init"); print("="*100)
 
-with open("ba_v11_unified_12y_sig.pkl", "rb") as f: sig_B = pickle.load(f)
+with open("data/ba_v11_unified_12y_sig.pkl", "rb") as f: sig_B = pickle.load(f)
 with open("sim_v11_for_analyzer.py", "r", encoding="utf-8") as f: _content = f.read()
 def _extract(varname):
     m = re.search(rf'^{varname}\s*=\s*"""(.+?)"""', _content, re.MULTILINE | re.DOTALL)

@@ -13,8 +13,8 @@ Variant D: EMLC confirmation: only fire when BOTH DXY_rank high AND EMLC_rank_in
 import pandas as pd
 import numpy as np
 
-df = pd.read_csv('macro_lag_data.csv', parse_dates=['time'])
-ba = pd.read_csv('ba_v11_nav.csv', parse_dates=['time'])
+df = pd.read_csv('data/macro_lag_data.csv', parse_dates=['time'])
+ba = pd.read_csv('data/ba_v11_nav.csv', parse_dates=['time'])
 df = df.merge(ba[['time','BA_v11']], on='time', how='left')
 df['ba_ret'] = df['BA_v11'].pct_change().fillna(0.0)
 df = df[df['BA_v11'].notna()].reset_index(drop=True)

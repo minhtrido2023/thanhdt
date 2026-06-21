@@ -17,7 +17,7 @@ def bq(sql):
     if not r.stdout.strip(): raise RuntimeError(r.stderr[-700:])
     return pd.read_csv(StringIO(r.stdout.strip()))
 
-ev=pd.read_csv(f"{WORKDIR}/earnings_events_classified.csv",parse_dates=["Release_Date"])
+ev=pd.read_csv(f"{WORKDIR}/data/earnings_events_classified.csv",parse_dates=["Release_Date"])
 ev=ev.sort_values(["ticker","Release_Date"]).reset_index(drop=True)
 # faithful prior_n_good + pa_HL3 (decay HL=3y over prior NP_R>=15 events' post_ret)
 LN2=np.log(2); HL=3.0; ev["prior_n_good"]=0; ev["pa_HL3"]=np.nan

@@ -47,7 +47,7 @@ us["vix_ma60"] = us["vix"].rolling(60, min_periods=20).mean()
 us["vix_ma252"] = us["vix"].rolling(252, min_periods=60).mean()
 
 # Save
-out_path = os.path.join(WORKDIR, "us_market_history.csv")
+out_path = os.path.join(WORKDIR, "data/us_market_history.csv")
 us.to_csv(out_path, index=False)
 print(f"\nSaved → {out_path} ({len(us)} rows)")
 

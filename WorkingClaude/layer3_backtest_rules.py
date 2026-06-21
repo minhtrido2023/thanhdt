@@ -32,7 +32,7 @@ import numpy as np
 import pandas as pd
 
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
-CACHE = os.path.join(WORKDIR, "intraday_full.pkl")
+CACHE = os.path.join(WORKDIR, "data/intraday_full.pkl")
 
 TOP30 = ["VIC","VHM","HPG","SHB","SSI","FPT","VIX","STB","MWG","MSN",
          "VCB","BSR","MBB","VPB","TCB","HDB","HCM","CTG","NVL","BID",
@@ -166,7 +166,7 @@ def prep_session(df):
 def backtest_entry(intraday, hold_days=45):
     """For each (ticker, session), simulate each entry strategy → realized return at T+hold close."""
     # daily forwards
-    daily = pd.read_csv(os.path.join(WORKDIR, "daily_forward_full.csv"))
+    daily = pd.read_csv(os.path.join(WORKDIR, "data/daily_forward_full.csv"))
     daily["time"] = pd.to_datetime(daily["time"]).dt.date
     daily = daily.sort_values(["ticker","time"]).reset_index(drop=True)
     daily["Close"] = daily["Close"]/1000.0
@@ -223,7 +223,7 @@ def backtest_exit(intraday, entry_date_field="date"):
 
 def combine_entry_exit(intraday, hold_days=45):
     """End-to-end: entry on day D + exit on day D+hold → realized P&L per strategy combo."""
-    daily = pd.read_csv(os.path.join(WORKDIR, "daily_forward_full.csv"))
+    daily = pd.read_csv(os.path.join(WORKDIR, "data/daily_forward_full.csv"))
     daily["time"] = pd.to_datetime(daily["time"]).dt.date
     daily = daily.sort_values(["ticker","time"]).reset_index(drop=True)
     daily["Close"] = daily["Close"]/1000.0
@@ -322,17 +322,17 @@ def main():
 
     print("Running ENTRY backtest...")
     df_e = backtest_entry(intraday, hold_days=45)
-    df_e.to_csv(os.path.join(WORKDIR,"backtest_entry.csv"), index=False)
+    df_e.to_csv(os.path.join(WORKDIR,"data/backtest_entry.csv"), index=False)
     print(f"  {len(df_e)} entry-strategy events")
 
     print("\nRunning EXIT backtest...")
     df_x = backtest_exit(intraday)
-    df_x.to_csv(os.path.join(WORKDIR,"backtest_exit.csv"), index=False)
+    df_x.to_csv(os.path.join(WORKDIR,"data/backtest_exit.csv"), index=False)
     print(f"  {len(df_x)} exit-strategy events")
 
     print("\nRunning COMBINED entry+exit backtest (slower)...")
     df_c = combine_entry_exit(intraday, hold_days=45)
-    df_c.to_csv(os.path.join(WORKDIR,"backtest_combined.csv"), index=False)
+    df_c.to_csv(os.path.join(WORKDIR,"data/backtest_combined.csv"), index=False)
     print(f"  {len(df_c)} entry×exit combo events")
 
     report(df_e, df_x, df_c)

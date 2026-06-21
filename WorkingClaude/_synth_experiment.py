@@ -43,13 +43,13 @@ def bull_lock(committed, raw, bull_mask):
     return out
 
 # ---------- Load bases ----------
-tt  = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state.csv"))          # Tinh Te (state, state_raw)
-v34 = pd.read_csv(os.path.join(WORKDIR, "_cmp_v34b.csv"))               # v3.4b (state)
-v34r= pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_4b_full_history.csv"))
+tt  = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state.csv"))          # Tinh Te (state, state_raw)
+v34 = pd.read_csv(os.path.join(WORKDIR, "data/_cmp_v34b.csv"))               # v3.4b (state)
+v34r= pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_4b_full_history.csv"))
 for d in (tt, v34, v34r): d["time"] = pd.to_datetime(d["time"])
 
 # bull mask from VNINDEX: 6M (126-session) return > 15% AND Close > MA200
-vni = pd.read_csv(os.path.join(WORKDIR, "VNINDEX.csv"), usecols=["time","Close"])
+vni = pd.read_csv(os.path.join(WORKDIR, "data/VNINDEX.csv"), usecols=["time","Close"])
 vni["time"] = pd.to_datetime(vni["time"]); vni = vni.sort_values("time").reset_index(drop=True)
 vni["ma200"] = vni["Close"].rolling(200).mean()
 vni["r6m"]   = vni["Close"] / vni["Close"].shift(126) - 1

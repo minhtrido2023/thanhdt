@@ -32,7 +32,7 @@ sys.path.insert(0, WORKDIR)
 
 # Re-use NAV outputs from previous test (already computed)
 print("Loading saved NAVs from previous test ...")
-nav_df = pd.read_csv("ba_release_date_nav.csv", index_col=0, parse_dates=True)
+nav_df = pd.read_csv("data/ba_release_date_nav.csv", index_col=0, parse_dates=True)
 print(f"  Columns: {list(nav_df.columns)}")
 print(f"  Date range: {nav_df.index.min()} → {nav_df.index.max()}")
 
@@ -215,5 +215,5 @@ for p in bear_periods:
         "F0_dd_pct":  ((f0_p/f0_p.cummax()-1).min())*100,
         "SV_dd_pct":  ((sv_p/sv_p.cummax()-1).min())*100,
     })
-pd.DataFrame(detail).to_csv("state_var_bear_detail.csv", index=False)
+pd.DataFrame(detail).to_csv("data/state_var_bear_detail.csv", index=False)
 print("Saved state_var_bear_detail.csv")

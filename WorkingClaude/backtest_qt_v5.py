@@ -40,11 +40,11 @@ def bq_query(sql):
 
 # ─── 1. Extended FA universe (pre-2014 + current) ────────────────────────
 print("[1] Loading + extending FA universe ...", flush=True)
-fa_lh = pd.read_csv("fa_ratings_lh.csv", parse_dates=["time","Release_Date"])
+fa_lh = pd.read_csv("data/fa_ratings_lh.csv", parse_dates=["time","Release_Date"])
 fa_lh = fa_lh[["ticker","quarter","time","Release_Date","tier","score","sub"]]
 print(f"  fa_ratings_lh: {len(fa_lh):,} rows, {fa_lh['ticker'].nunique()} tickers, quarter range {fa_lh['quarter'].min()} → {fa_lh['quarter'].max()}")
 
-ext_cache = "qt_v5_fa_pre2014.pkl"
+ext_cache = "data/qt_v5_fa_pre2014.pkl"
 if os.path.exists(ext_cache):
     with open(ext_cache,"rb") as f: fa_pre = pickle.load(f)
     print(f"  Loaded pre-2014 cache: {len(fa_pre):,} rows")
@@ -84,7 +84,7 @@ print(f"  Quality entries (≥12Q history): {len(quality_at_q):,}")
 
 # ─── 2. Panel load + features ────────────────────────────────────────────
 print("\n[2] Loading TA panel cache ...", flush=True)
-with open("qt_panel_2014_2026.pkl","rb") as f: panel = pickle.load(f)
+with open("data/qt_panel_2014_2026.pkl","rb") as f: panel = pickle.load(f)
 panel["time"] = pd.to_datetime(panel["time"])
 panel = panel.sort_values(["ticker","time"]).reset_index(drop=True)
 
@@ -97,7 +97,7 @@ panel["ret_6m"]    = panel.groupby("ticker")["Close"].pct_change(126) * 100
 print(f"  Panel: {len(panel):,} rows")
 
 # ─── 3. Quarterly financial (PEG/NP_R/Revenue_YoY) ───────────────────────
-fin_cache = "qt_v4_fin.pkl"
+fin_cache = "data/qt_v4_fin.pkl"
 with open(fin_cache,"rb") as f: fin = pickle.load(f)
 fin["q_time"] = pd.to_datetime(fin["q_time"])
 fin["Release_Date"] = pd.to_datetime(fin["Release_Date"])
@@ -493,6 +493,6 @@ if len(trades_df) > 0:
         for tk, r in per_tk.head(15).iterrows():
             print(f"    {tk:<7} N={int(r['n']):2d}  avg={r['avg_ret']:+6.1f}%  cum={r['total_ret']:+7.1f}%  hold={r['avg_hold']:.0f}d")
 
-nav_df.to_csv("qt_v5_nav.csv")
-trades_df.to_csv("qt_v5_trades.csv", index=False)
+nav_df.to_csv("data/qt_v5_nav.csv")
+trades_df.to_csv("data/qt_v5_trades.csv", index=False)
 print("\nSaved: qt_v5_nav.csv, qt_v5_trades.csv")

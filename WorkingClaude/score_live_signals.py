@@ -29,13 +29,13 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import roc_auc_score
 
 # ── CONFIG ────────────────────────────────────────────────────────────────────
-DATA_FILE   = "profile_hit.csv"
+DATA_FILE   = "data/profile_hit.csv"
 PROJECT     = "lithe-record-440915-m9"
 BQ_BIN      = r"bq"
 BQ_CHUNK    = 110
 OUT_IMG     = "score_live_signals.png"
-OUT_CSV     = "live_scored.csv"
-MODEL_FILE  = "entry_quality_model.pkl"
+OUT_CSV     = "data/live_scored.csv"
+MODEL_FILE  = "data/entry_quality_model.pkl"
 TARGET_PCT  = 10.0
 TRAIN_YEAR  = 2024
 TODAY       = "2026-04-13"
@@ -467,7 +467,7 @@ if latest_df is not None and not latest_df.empty:
         print(screen_B[avail_b].head(20).to_string(index=False))
 
     # Save universe scan
-    latest_df.sort_values("score", ascending=False).to_csv("universe_scored.csv", index=False)
+    latest_df.sort_values("score", ascending=False).to_csv("data/universe_scored.csv", index=False)
     print(f"\n  Universe scan saved: universe_scored.csv ({len(latest_df):,} tickers)")
 else:
     print("  No latest BQ data returned")

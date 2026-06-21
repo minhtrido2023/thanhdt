@@ -34,8 +34,8 @@ BUY_TIERS_V11 = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
 MAX_POS = 12
 
 STATE_CSVS = {
-    "TQ34b":       "vnindex_5state_tam_quan_v3_4b_full_history.csv",
-    "DT_10_25_25": "vnindex_5state_dt_10_25_25.csv",
+    "TQ34b":       "data/vnindex_5state_tam_quan_v3_4b_full_history.csv",
+    "DT_10_25_25": "data/vnindex_5state_dt_10_25_25.csv",
 }
 
 FILTER_CFG = {
@@ -50,7 +50,7 @@ print("="*100)
 
 # ─── Common data load ────────────────────────────────────────────────────
 print("\n[1] Loading...")
-with open("ba_v11_unified_12y_sig.pkl","rb") as f: sig_canon = pickle.load(f)
+with open("data/ba_v11_unified_12y_sig.pkl","rb") as f: sig_canon = pickle.load(f)
 sig_canon["time"] = pd.to_datetime(sig_canon["time"])
 sig_canon = sig_canon[(sig_canon["time"]>=START_B) & (sig_canon["time"]<=END_B)].copy()
 

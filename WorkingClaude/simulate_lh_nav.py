@@ -17,15 +17,15 @@ from datetime import datetime
 _CACHE = {}
 def load_data():
     if "ratings" not in _CACHE:
-        r = pd.read_csv("fa_ratings_lh.csv", parse_dates=["time","Release_Date"])
+        r = pd.read_csv("data/fa_ratings_lh.csv", parse_dates=["time","Release_Date"])
         # When Release_Date missing, fallback = quarter end + 60 days (typical VN report deadline)
         r["effective_release"] = r["Release_Date"].fillna(r["time"] + pd.Timedelta(days=60))
         _CACHE["ratings"] = r
     if "prices" not in _CACHE:
-        p = pd.read_csv("prices_lh.csv", parse_dates=["time"])
+        p = pd.read_csv("data/prices_lh.csv", parse_dates=["time"])
         _CACHE["prices"] = p
     if "vnindex" not in _CACHE:
-        v = pd.read_csv("vnindex_lh.csv", parse_dates=["time"])
+        v = pd.read_csv("data/vnindex_lh.csv", parse_dates=["time"])
         v = v[v["Close"] > 100].sort_values("time").reset_index(drop=True)
         _CACHE["vnindex"] = v
     return _CACHE["ratings"], _CACHE["prices"], _CACHE["vnindex"]
@@ -94,8 +94,8 @@ def run_lh(
     state_lookup = None
     if crisis_gate:
         import os
-        if os.path.exists("vnindex_5state.csv"):
-            st = pd.read_csv("vnindex_5state.csv", parse_dates=["time"]).sort_values("time")
+        if os.path.exists("data/vnindex_5state.csv"):
+            st = pd.read_csv("data/vnindex_5state.csv", parse_dates=["time"]).sort_values("time")
             state_lookup = st.set_index("time")["state"].reindex(
                 pd.date_range(st["time"].min(), st["time"].max(), freq="D")).ffill()
         else:
@@ -136,7 +136,7 @@ def run_lh(
         # Build lookup: (ticker, quarter) -> np_yoy growth
         # Compute NP_TTM and growth from raw ratings file (need to re-pull from BQ)
         try:
-            growth_df = pd.read_csv("research_peg_decel_panel.csv", usecols=["ticker","quarter","NP_growth_yoy"])
+            growth_df = pd.read_csv("data/research_peg_decel_panel.csv", usecols=["ticker","quarter","NP_growth_yoy"])
             growth_lookup = {(r["ticker"], r["quarter"]): r["NP_growth_yoy"] for _, r in growth_df.iterrows()}
         except FileNotFoundError:
             print("WARN: growth panel not found; disabling growth_exclude")

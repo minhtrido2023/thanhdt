@@ -22,7 +22,7 @@ BQ = r"bq"
 
 # Load v2g_pe3c states
 print("Loading v2g_pe3c history ...")
-df = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_v2g_pe3_history.csv"))
+df = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_v2g_pe3_history.csv"))
 df["time"] = pd.to_datetime(df["time"])
 df = df.sort_values("time").reset_index(drop=True)
 state_v2g_pe3 = df["state_v2g_pe3"].values.astype(int)
@@ -65,7 +65,7 @@ VARIANTS = [
 # Also fetch state_raw from existing data (use the same for all variants since it's pre-smoothing)
 # state_raw doesn't exist in pe3 history — but we need it for the canonical 3-col output
 # Solution: read from previously deployed canonical file
-canonical = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_history.csv"))
+canonical = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_history.csv"))
 canonical["time"] = pd.to_datetime(canonical["time"])
 state_raw_by_t = dict(zip(canonical["time"], canonical["state_raw"]))
 

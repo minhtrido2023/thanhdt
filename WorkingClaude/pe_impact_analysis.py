@@ -6,9 +6,9 @@ import pandas as pd, numpy as np
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
 
 # OLD baseline state (BQ backup, OLD PE + clean Close/CMF)
-old = pd.read_csv(os.path.join(WORKDIR, "state_pre_pe.csv"), parse_dates=["time"])
+old = pd.read_csv(os.path.join(WORKDIR, "data/state_pre_pe.csv"), parse_dates=["time"])
 # Current state (NEW PE + clean Close/CMF — both clean now)
-new = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_4b_full_history.csv"), parse_dates=["time"])
+new = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_4b_full_history.csv"), parse_dates=["time"])
 new = new.rename(columns={"state":"state_new","state_raw":"raw_new"})
 df = old.merge(new, on="time", how="inner")
 chg = df[df.state_old != df.state_new].copy()

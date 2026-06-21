@@ -112,7 +112,7 @@ WHERE s.time BETWEEN DATE '{qstart}' AND DATE '{end}' ORDER BY s.time""")
             print(f"[get_macro_state] WARNING: BQ base state max={_bmax.date()} < requested end={end} "
                   f"→ base is STALE. Run the v3.4b refresh+deploy chain. (NOT falling back to local.)")
     except Exception as e:
-        _base_csv = os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_4b_full_history.csv")
+        _base_csv = os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_4b_full_history.csv")
         print(f"[get_macro_state] WARNING: BQ base read failed ({e}) → EMERGENCY local-CSV fallback "
               f"{_base_csv} (results may NOT reconcile with BQ — fix BQ access).")
         sf = pd.read_csv(_base_csv)
@@ -130,7 +130,7 @@ WHERE t.ticker='VNINDEX' AND t.time BETWEEN DATE '{qstart}' AND DATE '{end}' ORD
     df = df.dropna(subset=["state_dt"]).reset_index(drop=True); df["state_dt"] = df["state_dt"].astype(int)
 
     # ── Pillar B: US VIX/SPX, aligned to VN T-1 ──
-    us = pd.read_csv(os.path.join(WORKDIR, "us_market_history.csv"), parse_dates=["time"]).sort_values("time")
+    us = pd.read_csv(os.path.join(WORKDIR, "data/us_market_history.csv"), parse_dates=["time"]).sort_values("time")
     key = df[["time"]].copy(); key["jt"] = key["time"] - pd.Timedelta(days=1)
     um = pd.merge_asof(key.sort_values("jt"), us.rename(columns={"time": "us_time"}),
                        left_on="jt", right_on="us_time", direction="backward").sort_values("time").reset_index(drop=True)

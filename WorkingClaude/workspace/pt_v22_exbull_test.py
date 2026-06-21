@@ -62,11 +62,11 @@ last=None
 for d in vni_dates:
     if d in state_by_date: last=state_by_date[d]
     elif last is not None: state_by_date[d]=last
-vnx=pd.read_csv(os.path.join(W,"VNINDEX.csv"),usecols=["time","Close","MA200","D_RSI"],parse_dates=["time"])
+vnx=pd.read_csv(os.path.join(W,"data/VNINDEX.csv"),usecols=["time","Close","MA200","D_RSI"],parse_dates=["time"])
 vnx=vnx[vnx["time"]>=panel["time"].min()]
 etf=pd.read_csv(os.path.join(W,"data","e1vfvn30_daily_full.csv"),parse_dates=["time"])
 vn30_und=pd.Series(etf["Close"].values,index=etf["time"])
-sig_b=pickle.load(open(os.path.join(W,"ba_v11_unified_12y_sig.pkl"),"rb"))
+sig_b=pickle.load(open(os.path.join(W,"data/ba_v11_unified_12y_sig.pkl"),"rb"))
 sig_b["time"]=pd.to_datetime(sig_b["time"]); sig_b=sig_b[sig_b["time"]>=panel["time"].min()].copy()
 def svk(row):
     s,days=row["state5"],row["days_since_release"]
@@ -91,11 +91,11 @@ sig_b.loc[(sig_b["state5"]==5)&sig_b["play_type"].isin(EXB_MOM),"play_type"]="AV
 print(f"  [EXBULL fix] suppressed {_n_before} momentum signals in state5==5")
 sec_map=sig_b.dropna(subset=["sec"]).drop_duplicates("ticker").set_index("ticker")["sec"].to_dict()
 sig_mom=sig_b[["time","ticker","play_type","ta","Close"]].copy()
-with open(os.path.join(W,"earnings_surprise_data.pkl"),"rb") as f: fin=pickle.load(f)
+with open(os.path.join(W,"data/earnings_surprise_data.pkl"),"rb") as f: fin=pickle.load(f)
 fin["Release_Date"]=pd.to_datetime(fin["Release_Date"]); FLOOR=1e9
 fin["exp_B_MA"]=fin[["NP_P1","NP_P2","NP_P3","NP_P4"]].mean(axis=1)
 fin["surprise_B_MA"]=((fin["NP_P0"]-fin["exp_B_MA"])/np.maximum(np.abs(fin["exp_B_MA"]),FLOOR)).clip(-5,5)
-ev_class=pd.read_csv(os.path.join(W,"earnings_events_classified.csv"),parse_dates=["Release_Date"])
+ev_class=pd.read_csv(os.path.join(W,"data/earnings_events_classified.csv"),parse_dates=["Release_Date"])
 ev=ev_class.merge(fin[["ticker","quarter","Release_Date","surprise_B_MA"]],on=["ticker","quarter","Release_Date"],how="left")
 ev=ev.sort_values(["ticker","Release_Date"]).reset_index(drop=True); ev["surprise_B_MA"]=ev["surprise_B_MA"].fillna(0)
 LN2=np.log(2); HL=3.0; ev["prior_n_good"]=0; ev["pa_HL3"]=np.nan

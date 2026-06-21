@@ -82,11 +82,11 @@ def main():
         return report_state()
 
     # ─── Step 1: Load + refresh events ───────────────────────────────────
-    base_ev = pd.read_csv("earnings_events_classified.csv", parse_dates=["Release_Date"])
+    base_ev = pd.read_csv("data/earnings_events_classified.csv", parse_dates=["Release_Date"])
     last_known = base_ev["Release_Date"].max()
     print(f"[1] Cached events: {len(base_ev):,} (latest release {last_known.date()})")
 
-    cache_new_ev = "lagged_paper_new_events.pkl"
+    cache_new_ev = "data/lagged_paper_new_events.pkl"
     if args.refresh_bq or not os.path.exists(cache_new_ev) or (today - last_known).days > 5:
         print(f"[1] Fetching new events Release_Date > {last_known.date()} ...")
         new_ev_raw = bq_query(f"""
@@ -299,10 +299,10 @@ def main():
     open_df = pd.DataFrame(open_pos_rows)
 
     # ─── Step 8: Save outputs ────────────────────────────────────────────
-    nav_df.to_csv("lagged_paper_nav.csv")
-    trades_df.to_csv("lagged_paper_trades.csv", index=False)
-    open_df.to_csv("lagged_paper_positions.csv", index=False)
-    qual.to_csv("lagged_paper_qualified_signals.csv", index=False)
+    nav_df.to_csv("data/lagged_paper_nav.csv")
+    trades_df.to_csv("data/lagged_paper_trades.csv", index=False)
+    open_df.to_csv("data/lagged_paper_positions.csv", index=False)
+    qual.to_csv("data/lagged_paper_qualified_signals.csv", index=False)
     with open("lagged_paper_state.json","w") as f:
         json.dump({"start_date": str(start_date.date()), "last_run": str(today.date()),
                    "init_nav": INIT_NAV, "current_nav": float(nav_df["nav"].iloc[-1]) if len(nav_df)>0 else INIT_NAV,
@@ -392,11 +392,11 @@ def report_state():
     with open("lagged_paper_state.json") as f: state = json.load(f)
     print(f"📄 State summary:")
     for k,v in state.items(): print(f"  {k}: {v}")
-    if os.path.exists("lagged_paper_positions.csv"):
-        op = pd.read_csv("lagged_paper_positions.csv", parse_dates=["entry_dt","exit_dt","release_dt"])
+    if os.path.exists("data/lagged_paper_positions.csv"):
+        op = pd.read_csv("data/lagged_paper_positions.csv", parse_dates=["entry_dt","exit_dt","release_dt"])
         print(f"\n📌 {len(op)} open positions:"); print(op.to_string(index=False))
-    if os.path.exists("lagged_paper_trades.csv"):
-        tr = pd.read_csv("lagged_paper_trades.csv", parse_dates=["dt","entry_dt","release_dt"])
+    if os.path.exists("data/lagged_paper_trades.csv"):
+        tr = pd.read_csv("data/lagged_paper_trades.csv", parse_dates=["dt","entry_dt","release_dt"])
         sells = tr[tr["side"]=="SELL"]
         print(f"\n📈 {len(tr)} events / {len(sells)} closed trades")
         if len(sells):

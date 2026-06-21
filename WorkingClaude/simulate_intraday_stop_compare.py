@@ -21,7 +21,7 @@ from simulate_holistic_nav import (
 )
 
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
-LOWS_CACHE = os.path.join(WORKDIR, "intraday_stop_lows.csv")
+LOWS_CACHE = os.path.join(WORKDIR, "data/intraday_stop_lows.csv")
 
 LOWS_QUERY = """
 SELECT t.ticker, t.time, t.Low
@@ -115,7 +115,7 @@ def main():
             trades_df.to_csv(os.path.join(WORKDIR, f"intraday_stop_trades_{label}.csv"), index=False)
 
     df = pd.DataFrame(rows)
-    df.to_csv(os.path.join(WORKDIR, "intraday_stop_compare.csv"), index=False)
+    df.to_csv(os.path.join(WORKDIR, "data/intraday_stop_compare.csv"), index=False)
 
     print("\n" + "="*100)
     print("A/B COMPARISON")

@@ -218,8 +218,8 @@ if len(nav_in_window) > 1:
         print(f"  Avg Hold:   {avg_hold:>10.1f} days")
 
 # Save outputs
-trades_df.to_csv("sim_v11_jun2025_trades.csv", index=False)
-nav_df.to_csv("sim_v11_jun2025_nav.csv", index=False)
+trades_df.to_csv("data/sim_v11_jun2025_trades.csv", index=False)
+nav_df.to_csv("data/sim_v11_jun2025_nav.csv", index=False)
 if nav_log:
     pd.DataFrame(nav_log).to_csv("sim_v11_jun2025_navlog.csv", index=False)
 print(f"\n💾 Saved: sim_v11_jun2025_trades.csv, sim_v11_jun2025_nav.csv, sim_v11_jun2025_navlog.csv")

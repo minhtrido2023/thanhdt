@@ -33,9 +33,9 @@ from sklearn.metrics import roc_auc_score, classification_report
 from sklearn.inspection import permutation_importance
 
 # ── CONFIG ────────────────────────────────────────────────────────────────────
-DATA_FILE  = "profile_hit.csv"
+DATA_FILE  = "data/profile_hit.csv"
 OUT_IMG    = "analyze_deal_quality.png"
-OUT_CSV    = "deals_scored.csv"
+OUT_CSV    = "data/deals_scored.csv"
 TARGET_PCT = 10.0   # "good deal" threshold: Sell_profit > TARGET_PCT%
 MIN_PROFIT = 5.0    # min profit threshold for "acceptable" deal
 

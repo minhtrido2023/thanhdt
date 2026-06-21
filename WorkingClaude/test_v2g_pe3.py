@@ -35,7 +35,7 @@ DVG_MASK_START = "2007-01-01"
 
 # ════════════════════ LOAD ════════════════════
 print("Loading cleaned VNINDEX ...")
-vni = pd.read_csv(os.path.join(WORKDIR, "vnindex_full_2000_2026.csv"), low_memory=False)
+vni = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_full_2000_2026.csv"), low_memory=False)
 vni["time"] = pd.to_datetime(vni["time"])
 vni = vni.sort_values("time").reset_index(drop=True)
 n = len(vni)
@@ -434,7 +434,7 @@ for qe in qends:
     if m_bh: row["bh_cagr"] = m_bh["cagr"]*100
     qrows.append(row)
 qdf = pd.DataFrame(qrows)
-qdf.to_csv(os.path.join(WORKDIR, "vnindex_5state_v2g_pe3_qwf.csv"), index=False)
+qdf.to_csv(os.path.join(WORKDIR, "data/vnindex_5state_v2g_pe3_qwf.csv"), index=False)
 
 print(f"{'variant':<32} {'CAGR med':>10} {'Sh med':>8} {'DD med':>9} {'GREEN':>6} {'YELLOW':>7} {'RED':>5}")
 for nm in variants.keys():
@@ -463,5 +463,5 @@ out_df = pd.DataFrame({
     "pv_ref": pvs["ref (v2g_pe)"],
     "pv_bh": pv_bh,
 })
-out_df.to_csv(os.path.join(WORKDIR, "vnindex_5state_v2g_pe3_history.csv"), index=False)
+out_df.to_csv(os.path.join(WORKDIR, "data/vnindex_5state_v2g_pe3_history.csv"), index=False)
 print(f"\nSaved winner ({winner}) → vnindex_5state_v2g_pe3_history.csv")

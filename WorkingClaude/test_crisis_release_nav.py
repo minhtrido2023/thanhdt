@@ -17,7 +17,7 @@ TC, RAMP, SNAP = 0.001, 3, 0.03
 DEP, BOR = 0.06/252, 0.10/252
 W = {1:0.00, 2:0.20, 3:0.70, 4:1.00, 5:1.30}
 
-vix = pd.read_csv(f"{WORK}/VNINDEX.csv", parse_dates=["time"]).sort_values("time")
+vix = pd.read_csv(f"{WORK}/data/VNINDEX.csv", parse_dates=["time"]).sort_values("time")
 close_all = vix.set_index("time")["Close"]
 
 def nav(states: pd.Series, close: pd.Series):
@@ -77,7 +77,7 @@ if __name__ == "__main__":
     K = int(sys.argv[1]) if len(sys.argv) > 1 else 20
     margin = float(sys.argv[2]) if len(sys.argv) > 2 else 0.0
     hold = int(sys.argv[3]) if len(sys.argv) > 3 else 3
-    report("canonical_TinhTe", load("c", "vnindex_5state.csv"), K, margin, hold)
-    report("DT_10_25_25",      load("d", "vnindex_5state_dt_10_25_25.csv"), K, margin, hold)
-    report("v3.4b",            load("v", "vnindex_5state_tam_quan_v3_4b_full_history.csv"), K, margin, hold)
-    report("DT5G(state_raw)",  load("g", "vnindex_5state_dt5g_live.csv", col="state_raw"), K, margin, hold)
+    report("canonical_TinhTe", load("c", "data/vnindex_5state.csv"), K, margin, hold)
+    report("DT_10_25_25",      load("d", "data/vnindex_5state_dt_10_25_25.csv"), K, margin, hold)
+    report("v3.4b",            load("v", "data/vnindex_5state_tam_quan_v3_4b_full_history.csv"), K, margin, hold)
+    report("DT5G(state_raw)",  load("g", "data/vnindex_5state_dt5g_live.csv", col="state_raw"), K, margin, hold)

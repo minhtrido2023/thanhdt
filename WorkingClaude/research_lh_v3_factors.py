@@ -164,7 +164,7 @@ df["F_liq_decile"] = df.groupby("quarter")["Volume_3M_P50"].transform(lambda x: 
 
 # === MOMENTUM (from prices) ===
 print("Computing momentum factors from prices ...")
-prices = pd.read_csv("prices_lh.csv", parse_dates=["time"])
+prices = pd.read_csv("data/prices_lh.csv", parse_dates=["time"])
 px_close = prices.pivot_table(index="time", columns="ticker", values="Close", aggfunc="first").sort_index().ffill()
 ma200 = px_close.rolling(200, min_periods=100).mean()
 ret_12m = px_close.pct_change(252)
@@ -243,7 +243,7 @@ print(f"\n  {'factor':<25}{'IC_3M':>8}{'IC_6M':>8}{'IC_1Y':>8}{'IC_2Y':>8}{'N (a
 for _, r in ic_df.iterrows():
     print(f"  {r['factor']:<25}{r['O3M_ret']:>+8.4f}{r['O6M_ret']:>+8.4f}{r['O1Y_ret']:>+8.4f}{r['O2Y_ret']:>+8.4f}{int(r['n_O1Y_ret']):>12}")
 
-ic_df.to_csv("lh_v3_factor_ic.csv", index=False)
+ic_df.to_csv("data/lh_v3_factor_ic.csv", index=False)
 
 # ─── COMPOSITE SCORES ────────────────────────────────────────────────────
 print("\n" + "="*120)
@@ -341,7 +341,7 @@ for name in COMPOSITES:
 
 # Compare to current FA score (v8c_final via fa_ratings_lh)
 print("\n  Baseline FA v8c_final IC:")
-fa = pd.read_csv("fa_ratings_lh.csv", usecols=["ticker","quarter","score"])
+fa = pd.read_csv("data/fa_ratings_lh.csv", usecols=["ticker","quarter","score"])
 df = df.merge(fa, on=["ticker","quarter"], how="left", suffixes=("","_v8c"))
 for hzn in ["O3M_ret","O6M_ret","O1Y_ret","O2Y_ret"]:
     ic, _ = spearman_ic(df["score"], df[hzn])
@@ -367,6 +367,6 @@ for name in list(COMPOSITES.keys()) + ["score"]:
     print(f"  {label:<25}{top_med:>+15.2f}%{full_med:>+15.2f}%{spread:>+9.2f}pp{wr:>11.1f}%{big_loss:>11.1f}%")
 
 # Save panel
-df.to_csv("lh_v3_factor_panel.csv", index=False)
+df.to_csv("data/lh_v3_factor_panel.csv", index=False)
 print(f"\nSaved: lh_v3_factor_ic.csv, lh_v3_factor_panel.csv")
 print("DONE")

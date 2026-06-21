@@ -23,7 +23,7 @@ from simulate_state_timing import simulate_timing
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
 STATE_NAMES = {1:"CRISIS",2:"BEAR",3:"NEUTRAL",4:"BULL",5:"EX-BULL"}
 
-tq = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_4b_full_history.csv"))
+tq = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_4b_full_history.csv"))
 tq["time"] = pd.to_datetime(tq["time"])
 tq = tq.sort_values("time").reset_index(drop=True)
 mask14 = tq["time"] >= "2014-01-01"

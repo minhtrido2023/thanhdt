@@ -33,20 +33,20 @@ BUY_TIERS_V11 = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
 SWITCH_COST = 0.005
 
 STATE_VARIANTS = {
-    "TQ34b":       "vnindex_5state_tam_quan_v3_4b_full_history.csv",
-    "DT_10_25_25": "vnindex_5state_dt_10_25_25.csv",
-    "DT4_MACRO":   "vnindex_5state_dt4_macro.csv",   # validate macro overlay under ensemble (2026-05-29)
+    "TQ34b":       "data/vnindex_5state_tam_quan_v3_4b_full_history.csv",
+    "DT_10_25_25": "data/vnindex_5state_dt_10_25_25.csv",
+    "DT4_MACRO":   "data/vnindex_5state_dt4_macro.csv",   # validate macro overlay under ensemble (2026-05-29)
 }
 
 print("="*100); print("  V12.1 ENSEMBLE + STATE COMPARISON: TQ34b vs DT_10_25_25"); print("="*100)
 
 # Load cached M1+M3 signals (precomputed, state-independent for ensemble logic)
 print("\n[1] Loading M1+M3 cached signals + common data...")
-cached = pd.read_csv("compare_v11_v12_concentration_switch.csv", index_col=0, parse_dates=True)
+cached = pd.read_csv("data/compare_v11_v12_concentration_switch.csv", index_col=0, parse_dates=True)
 sig_m1 = cached["sig_m1"].dropna().astype(int)
 sig_m3 = cached["sig_m3"].dropna().astype(int)
 
-with open("ba_v11_unified_12y_sig.pkl", "rb") as f: sig_B = pickle.load(f)
+with open("data/ba_v11_unified_12y_sig.pkl", "rb") as f: sig_B = pickle.load(f)
 sig_B["time"] = pd.to_datetime(sig_B["time"])
 with open("sim_v11_for_analyzer.py", "r", encoding="utf-8") as f: _c = f.read()
 VNI_QUERY_UNIFIED = re.search(r'^VNI_QUERY_UNIFIED\s*=\s*"""(.+?)"""', _c, re.MULTILINE|re.DOTALL).group(1)
@@ -73,19 +73,19 @@ LIQ = {"liquidity_volume_pct":0.20,"max_fill_days":5,
 
 # ─── LAGGED leg (state-independent, runs ONCE) ──────────────────────────
 print("\n[2] LAGGED leg (state-independent, runs once)...")
-with open("earnings_px.pkl","rb") as f: px_data = pickle.load(f)
+with open("data/earnings_px.pkl","rb") as f: px_data = pickle.load(f)
 px_data["time"] = pd.to_datetime(px_data["time"])
 px_close = px_data.pivot_table(index="time", columns="ticker", values="Close", aggfunc="first").sort_index().ffill(limit=5)
 master_idx = pd.DatetimeIndex(px_close.index).as_unit("ns"); px_close.index = master_idx
 all_dates = np.array(master_idx)
-with open("lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f); ov["time"] = pd.to_datetime(ov["time"])
+with open("data/lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f); ov["time"] = pd.to_datetime(ov["time"])
 px_open = ov.pivot_table(index="time", columns="ticker", values="Open", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 liq_l = ov.pivot_table(index="time", columns="ticker", values="Volume_3M_P50", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
-with open("earnings_surprise_data.pkl","rb") as f: fin = pickle.load(f)
+with open("data/earnings_surprise_data.pkl","rb") as f: fin = pickle.load(f)
 fin["Release_Date"] = pd.to_datetime(fin["Release_Date"]); FLOOR = 1e9
 fin["exp_B_MA"] = fin[["NP_P1","NP_P2","NP_P3","NP_P4"]].mean(axis=1)
 fin["surprise_B_MA"] = ((fin["NP_P0"] - fin["exp_B_MA"]) / np.maximum(np.abs(fin["exp_B_MA"]), FLOOR)).clip(-5, 5)
-ev_class = pd.read_csv("earnings_events_classified.csv", parse_dates=["Release_Date"])
+ev_class = pd.read_csv("data/earnings_events_classified.csv", parse_dates=["Release_Date"])
 ev = ev_class.merge(fin[["ticker","quarter","Release_Date","surprise_B_MA"]],
                      on=["ticker","quarter","Release_Date"], how="left")
 ev = ev.sort_values(["ticker","Release_Date"]).reset_index(drop=True)

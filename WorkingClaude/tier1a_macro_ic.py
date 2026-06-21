@@ -53,7 +53,7 @@ csv = subprocess.run(['bq','query','--use_legacy_sql=false','--project_id=lithe-
 vni = pd.read_csv(io.StringIO(csv), parse_dates=['time']).rename(columns={'Close':'VNI'})
 vni.set_index('time', inplace=True)
 
-state = pd.read_csv('_state.csv', parse_dates=['time']).set_index('time')
+state = pd.read_csv('data/_state.csv', parse_dates=['time']).set_index('time')
 
 # ── Merge ──
 df = vni.join(dxy, how='left').join(vnd, how='left').join(state, how='left')
@@ -154,5 +154,5 @@ print(df.groupby('vnd_bin', observed=True).agg(
 ).round(4))
 
 # Save merged data for follow-up overlay backtest
-df.to_csv('macro_features.csv')
+df.to_csv('data/macro_features.csv')
 print("\nSaved: macro_features.csv")

@@ -26,7 +26,7 @@ STATE_NAMES = {1:"CRISIS", 2:"BEAR", 3:"NEUTRAL", 4:"BULL", 5:"EX-BULL"}
 
 # ── Load v2g source ──
 print("Loading v2g source ...")
-src = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_v2g_full_history.csv"))
+src = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_v2g_full_history.csv"))
 src["time"] = pd.to_datetime(src["time"])
 src = src.sort_values("time").reset_index(drop=True)
 print(f"  v2g source: {len(src)} rows, {src['time'].min().date()} → {src['time'].max().date()}")
@@ -35,7 +35,7 @@ print(f"  v2g source: {len(src)} rows, {src['time'].min().date()} → {src['time
 # 1. Backup all canonical files
 # ════════════════════════════════════════════════════════
 print("\n=== STEP 1: Backup canonical files ===")
-files_to_backup = ["vnindex_5state_history.csv", "vnindex_5state.csv", "vnindex_state_history.csv"]
+files_to_backup = ["data/vnindex_5state_history.csv", "data/vnindex_5state.csv", "data/vnindex_state_history.csv"]
 for fn in files_to_backup:
     src_p = os.path.join(WORKDIR, fn)
     if os.path.exists(src_p):
@@ -63,17 +63,17 @@ print("\n=== STEP 2: Write canonical CSVs ===")
 # 2a. vnindex_5state_history.csv (time, state, state_raw) — full 2000-now
 out1 = src[["time", "state_v2g", "state_raw"]].rename(columns={"state_v2g":"state"})
 out1["time"] = out1["time"].dt.strftime("%Y-%m-%d")
-out1.to_csv(os.path.join(WORKDIR, "vnindex_5state_history.csv"), index=False)
+out1.to_csv(os.path.join(WORKDIR, "data/vnindex_5state_history.csv"), index=False)
 print(f"  ✓ vnindex_5state_history.csv  ({len(out1)} rows, {out1['time'].iloc[0]} → {out1['time'].iloc[-1]})")
 
 # 2b. vnindex_5state.csv (time, state, state_raw) — full
 out2 = out1.copy()
-out2.to_csv(os.path.join(WORKDIR, "vnindex_5state.csv"), index=False)
+out2.to_csv(os.path.join(WORKDIR, "data/vnindex_5state.csv"), index=False)
 print(f"  ✓ vnindex_5state.csv          ({len(out2)} rows)")
 
 # 2c. vnindex_state_history.csv (time, Close, VNINDEX_PE, state, state_name, r_score_ema)
 #     Original schema includes Close + PE; pull PE from cached full
-full = pd.read_csv(os.path.join(WORKDIR, "vnindex_full_2000_2026.csv"))
+full = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_full_2000_2026.csv"))
 full["time"] = pd.to_datetime(full["time"])
 m = src[["time","Close","state_v2g","r_score_ema"]].merge(
     full[["time","VNINDEX_PE"]], on="time", how="left")
@@ -81,7 +81,7 @@ m = m.rename(columns={"state_v2g":"state"})
 m["state_name"] = m["state"].map(STATE_NAMES)
 m = m[["time","Close","VNINDEX_PE","state","state_name","r_score_ema"]]
 m["time"] = m["time"].dt.strftime("%Y-%m-%d")
-m.to_csv(os.path.join(WORKDIR, "vnindex_state_history.csv"), index=False)
+m.to_csv(os.path.join(WORKDIR, "data/vnindex_state_history.csv"), index=False)
 print(f"  ✓ vnindex_state_history.csv   ({len(m)} rows)")
 
 # ════════════════════════════════════════════════════════
@@ -110,11 +110,11 @@ os.unlink(load_csv)
 # ════════════════════════════════════════════════════════
 print("\n=== STEP 4: Verify ===")
 # Verify local CSVs
-for fn in ["vnindex_5state_history.csv", "vnindex_5state.csv"]:
+for fn in ["data/vnindex_5state_history.csv", "data/vnindex_5state.csv"]:
     df = pd.read_csv(os.path.join(WORKDIR, fn))
     print(f"  {fn}: {len(df)} rows, latest = {df['time'].iloc[-1]} state={df['state'].iloc[-1]}")
 
-df3 = pd.read_csv(os.path.join(WORKDIR, "vnindex_state_history.csv"))
+df3 = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_state_history.csv"))
 print(f"  vnindex_state_history.csv: {len(df3)} rows, latest = {df3['time'].iloc[-1]} state={df3['state'].iloc[-1]} ({df3['state_name'].iloc[-1]})")
 
 # Verify BQ table

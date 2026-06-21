@@ -12,8 +12,8 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="repla
 W = r"/home/trido/thanhdt/WorkingClaude"
 
 # ---- load v3.4b base + align VNINDEX returns for vol regime ----
-v34 = pd.read_csv(os.path.join(W, "_cmp_v34b.csv")); v34["time"] = pd.to_datetime(v34["time"])
-vni = pd.read_csv(os.path.join(W, "VNINDEX.csv"), usecols=["time","Close"]); vni["time"] = pd.to_datetime(vni["time"])
+v34 = pd.read_csv(os.path.join(W, "data/_cmp_v34b.csv")); v34["time"] = pd.to_datetime(v34["time"])
+vni = pd.read_csv(os.path.join(W, "data/VNINDEX.csv"), usecols=["time","Close"]); vni["time"] = pd.to_datetime(vni["time"])
 df = v34.merge(vni, on="time", how="left").sort_values("time").reset_index(drop=True)
 df["ret"] = df["Close"].pct_change().fillna(0.0)
 base = df["state"].values.astype(int)

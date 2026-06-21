@@ -194,7 +194,7 @@ print(f"  {len(df_nonre):,} non-RE rows")
 final = pd.concat([df_re_out, df_nonre], ignore_index=True)
 final = final.sort_values(["time","ticker"], ascending=[False, True])
 print(f"\n  Total fa_ratings_v9: {len(final):,} rows ({len(df_re_out):,} RE + {len(df_nonre):,} non-RE)")
-out_csv = "fa_ratings_v9.csv"
+out_csv = "data/fa_ratings_v9.csv"
 final.to_csv(out_csv, index=False)
 print(f"  Saved {out_csv}")
 

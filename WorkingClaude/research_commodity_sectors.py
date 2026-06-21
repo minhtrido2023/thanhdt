@@ -53,7 +53,7 @@ for grp, tks in COMMODITY_GROUPS.items():
             TICKER_GROUP[tk] = grp
 
 # ─── LOAD PANEL ──────────────────────────────────────────────────────────
-df = pd.read_csv("lh_v3_factor_panel_v2.csv", parse_dates=["time"])
+df = pd.read_csv("data/lh_v3_factor_panel_v2.csv", parse_dates=["time"])
 df["cmd_group"] = df["ticker"].map(TICKER_GROUP).fillna("OTHER")
 print(f"Loaded {len(df):,} rows")
 print(f"Ticker coverage in commodity groups: {(df['cmd_group']!='OTHER').sum() / len(df) * 100:.1f}%")
@@ -161,7 +161,7 @@ print("  COMBINED v8c + cycle_recovery composite vs v8c alone")
 print("="*120)
 
 if "v8c_score" not in df.columns:
-    fa = pd.read_csv("fa_ratings_lh.csv", usecols=["ticker","quarter","score"]).rename(columns={"score":"v8c_score"})
+    fa = pd.read_csv("data/fa_ratings_lh.csv", usecols=["ticker","quarter","score"]).rename(columns={"score":"v8c_score"})
     df_c = df.merge(fa, on=["ticker","quarter"], how="left")
 else:
     df_c = df.copy()
@@ -212,7 +212,7 @@ for grp, driver in KEY.items():
         print(f"  {r['quarter']:<10}{r['S_ret_6m_med']*100:>+11.1f}%{r['S_NP_peak_ratio_med']:>+10.2f}{r['S_GPM_change_med']*100:>+9.1f}%{r['S_NP_yoy_med']*100:>+9.1f}%{r['cycle_recovery']:>+16.2f}{r['cycle_overheat']:>+15.2f}")
 
 # Save
-df_c.to_csv("lh_v3_factor_panel_cycle.csv", index=False)
-sec_df.to_csv("lh_v3_sector_cycle.csv", index=False)
+df_c.to_csv("data/lh_v3_factor_panel_cycle.csv", index=False)
+sec_df.to_csv("data/lh_v3_sector_cycle.csv", index=False)
 print("\nSaved: lh_v3_factor_panel_cycle.csv, lh_v3_sector_cycle.csv")
 print("DONE")

@@ -48,7 +48,7 @@ def _save_pickle(obj, path):
 
 # ── 1. earnings_px.pkl — daily Close, incremental ──────────────────────────
 print("\n[1] earnings_px.pkl (daily Close)...")
-with open("earnings_px.pkl", "rb") as f: px = pickle.load(f)
+with open("data/earnings_px.pkl", "rb") as f: px = pickle.load(f)
 px["time"] = pd.to_datetime(px["time"])
 px_max = px["time"].max(); px_tks = set(px["ticker"].unique())
 print(f"  current: {len(px):,} rows, max {px_max.date()}, {len(px_tks)} tickers")
@@ -59,7 +59,7 @@ if len(new_px):
     new_px = new_px[new_px["ticker"].isin(px_tks)]
     px = (pd.concat([px, new_px], ignore_index=True)
           .drop_duplicates(["ticker", "time"]).sort_values(["ticker", "time"]).reset_index(drop=True))
-    _save_pickle(px, os.path.join(WORKDIR, "earnings_px.pkl"))
+    _save_pickle(px, os.path.join(WORKDIR, "data/earnings_px.pkl"))
     print(f"  +{len(new_px):,} rows -> {len(px):,} total, new max {px['time'].max().date()}")
 else:
     print("  already current, nothing to append")
@@ -67,7 +67,7 @@ else:
 
 # ── 2. lagged_pos_ov.pkl — daily Open + Volume_3M_P50, incremental ─────────
 print("\n[2] lagged_pos_ov.pkl (Open + Volume_3M_P50)...")
-with open("lagged_pos_ov.pkl", "rb") as f: ov = pickle.load(f)
+with open("data/lagged_pos_ov.pkl", "rb") as f: ov = pickle.load(f)
 ov["time"] = pd.to_datetime(ov["time"])
 ov_max = ov["time"].max(); ov_tks = set(ov["ticker"].unique())
 print(f"  current: {len(ov):,} rows, max {ov_max.date()}, {len(ov_tks)} tickers")
@@ -78,7 +78,7 @@ if len(new_ov):
     new_ov = new_ov[new_ov["ticker"].isin(ov_tks)]
     ov = (pd.concat([ov, new_ov], ignore_index=True)
           .drop_duplicates(["ticker", "time"]).sort_values(["ticker", "time"]).reset_index(drop=True))
-    _save_pickle(ov, os.path.join(WORKDIR, "lagged_pos_ov.pkl"))
+    _save_pickle(ov, os.path.join(WORKDIR, "data/lagged_pos_ov.pkl"))
     print(f"  +{len(new_ov):,} rows -> {len(ov):,} total, new max {ov['time'].max().date()}")
 else:
     print("  already current, nothing to append")
@@ -93,7 +93,7 @@ FROM tav2_bq.ticker_financial AS f
 WHERE f.Release_Date IS NOT NULL AND f.Release_Date >= '2009-01-01' AND f.NP_P0 IS NOT NULL""")
 fin["Release_Date"] = pd.to_datetime(fin["Release_Date"])
 fin["time"] = pd.to_datetime(fin["time"])
-_save_pickle(fin, os.path.join(WORKDIR, "earnings_surprise_data.pkl"))
+_save_pickle(fin, os.path.join(WORKDIR, "data/earnings_surprise_data.pkl"))
 print(f"  re-pulled {len(fin):,} events, Release_Date max {fin['Release_Date'].max().date()}")
 
 
@@ -103,7 +103,7 @@ ev = bq("""SELECT f.ticker, f.quarter, f.Release_Date, f.NP_R, f.Revenue_YoY_P0,
 FROM tav2_bq.ticker_financial AS f
 WHERE f.Release_Date IS NOT NULL AND f.Release_Date >= '2009-01-01' AND f.NP_R IS NOT NULL""")
 ev["Release_Date"] = pd.to_datetime(ev["Release_Date"])
-_save_pickle(ev, os.path.join(WORKDIR, "earnings_events.pkl"))
+_save_pickle(ev, os.path.join(WORKDIR, "data/earnings_events.pkl"))
 
 px_piv = px.pivot_table(index="time", columns="ticker", values="Close", aggfunc="first").sort_index().ffill(limit=5)
 all_dates_arr = np.array(px_piv.index)
@@ -145,7 +145,7 @@ for _, r in ev.iterrows():
                  "pre_ret": pre, "rel_ret": rel, "post_ret": post,
                  "pattern": classify(npr, pre, rel, post)})
 evdf = pd.DataFrame(rows)
-out_csv = os.path.join(WORKDIR, "earnings_events_classified.csv")
+out_csv = os.path.join(WORKDIR, "data/earnings_events_classified.csv")
 try:
     evdf.to_csv(out_csv, index=False)
 except PermissionError:

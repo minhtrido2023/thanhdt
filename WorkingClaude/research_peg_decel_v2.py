@@ -11,7 +11,7 @@ try: sys.stdout.reconfigure(encoding="utf-8")
 except Exception: pass
 import pandas as pd, numpy as np
 
-df = pd.read_csv("research_peg_decel_panel.csv", parse_dates=["time"])
+df = pd.read_csv("data/research_peg_decel_panel.csv", parse_dates=["time"])
 # Convert O1Y, O6M, O2Y from ratio to percent return
 for c in ["O6M","O1Y","O2Y"]:
     df[f"{c}_ret"] = (df[c] - 1) * 100
@@ -103,7 +103,7 @@ df["filter_HG_PEz1_decel"] = (df["was_high_growth"] == True) & (df["PE_z"] > 1.0
 df["filter_HG_decel"] = (df["was_high_growth"] == True) & (df["NP_growth_decel_from_4Q_max"] > 0.15)
 df["filter_growthturnneg"] = (df["was_high_growth"] == True) & (df["NP_growth_yoy"] < 0)
 
-prices = pd.read_csv("prices_lh.csv", parse_dates=["time"])
+prices = pd.read_csv("data/prices_lh.csv", parse_dates=["time"])
 for tk in CASES:
     tk_data = df[df["ticker"] == tk].sort_values("time")
     tk_px = prices[prices["ticker"] == tk].sort_values("time")

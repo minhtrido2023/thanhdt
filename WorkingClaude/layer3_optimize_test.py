@@ -44,9 +44,9 @@ def perf_stats(rets):
 
 # ---------- Test 1: 18 BUYs in journal ----------
 def test1():
-    j = pd.read_csv(os.path.join(WORKDIR, "journal_v6_extended_events.csv"))
+    j = pd.read_csv(os.path.join(WORKDIR, "data/journal_v6_extended_events.csv"))
     j["date"] = pd.to_datetime(j["date"])
-    a = pd.read_csv(os.path.join(WORKDIR, "layer3_backtest_eventsA_with_returns.csv"))
+    a = pd.read_csv(os.path.join(WORKDIR, "data/layer3_backtest_eventsA_with_returns.csv"))
     a["session_date"] = pd.to_datetime(a["session_date"])
 
     # match BUY with subsequent SELL (FIFO by ticker)
@@ -85,8 +85,8 @@ def test1():
 
 # ---------- Test 2: Filter sweep on Track B ----------
 def test2():
-    b = pd.read_csv(os.path.join(WORKDIR, "layer3_backtest_eventsB.csv"))
-    daily = pd.read_csv(os.path.join(WORKDIR, "daily_forward.csv"))
+    b = pd.read_csv(os.path.join(WORKDIR, "data/layer3_backtest_eventsB.csv"))
+    daily = pd.read_csv(os.path.join(WORKDIR, "data/daily_forward.csv"))
     daily["time"] = pd.to_datetime(daily["time"]).dt.date
     daily = daily.sort_values(["ticker","time"]).reset_index(drop=True)
     for k in [1,5,10,20,45]:

@@ -34,7 +34,7 @@ WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
 sys.path.insert(0, WORKDIR)
 
 LOG_CSV = os.path.join(WORKDIR, "data", "layer3_v4_shadow_log.csv")
-INTRADAY_PKL = os.path.join(WORKDIR, "intraday_full.pkl")
+INTRADAY_PKL = os.path.join(WORKDIR, "data/intraday_full.pkl")
 REPORT_MD = os.path.join(WORKDIR, "data", "layer3_v4_shadow_report.md")
 
 POSITION_VND = 1.25e9          # per book leg @ 50B NAV, 2-book, 10-pos

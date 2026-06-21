@@ -54,9 +54,9 @@ def bq_query(sql):
 
 # ─── 1. Extended FA ──────────────────────────────────────────────────────
 print("[1] Loading FA universe ...", flush=True)
-fa_lh = pd.read_csv("fa_ratings_lh.csv", parse_dates=["time","Release_Date"])
+fa_lh = pd.read_csv("data/fa_ratings_lh.csv", parse_dates=["time","Release_Date"])
 fa_lh = fa_lh[["ticker","quarter","time","Release_Date","tier","score","sub"]]
-with open("qt_v5_fa_pre2014.pkl","rb") as f: fa_pre = pickle.load(f)
+with open("data/qt_v5_fa_pre2014.pkl","rb") as f: fa_pre = pickle.load(f)
 fa = pd.concat([fa_pre, fa_lh], ignore_index=True).drop_duplicates(subset=["ticker","quarter"], keep="last")
 fa = fa.sort_values(["ticker","quarter"]).reset_index(drop=True)
 
@@ -77,7 +77,7 @@ print(f"  Quality entries: {len(quality_at_q):,}")
 
 # ─── 2. Panel ────────────────────────────────────────────────────────────
 print("\n[2] Loading TA panel ...", flush=True)
-with open("qt_panel_2014_2026.pkl","rb") as f: panel = pickle.load(f)
+with open("data/qt_panel_2014_2026.pkl","rb") as f: panel = pickle.load(f)
 panel["time"] = pd.to_datetime(panel["time"])
 panel = panel.sort_values(["ticker","time"]).reset_index(drop=True)
 panel["hi_52w"]     = panel.groupby("ticker")["Close"].transform(lambda x: x.rolling(252, min_periods=60).max())
@@ -86,7 +86,7 @@ panel["vs_MA200"]   = (panel["Close"]/panel["MA200"] - 1) * 100
 print(f"  Panel: {len(panel):,} rows")
 
 # ─── 3. Financial (with NP_P7 for 2Y CAGR) ───────────────────────────────
-fin_cache = "qt_v7_fin.pkl"
+fin_cache = "data/qt_v7_fin.pkl"
 if os.path.exists(fin_cache):
     with open(fin_cache,"rb") as f: fin = pickle.load(f)
     print(f"  Loaded financial cache: {len(fin):,} rows")
@@ -178,7 +178,7 @@ pe_d     = make_piv("PE")
 liq      = make_piv("Volume_3M_P50")
 
 # ─── 5. VNINDEX + BearDvg/BullDvg signals ────────────────────────────────
-vni_cache = "qt_v6_vni.pkl"
+vni_cache = "data/qt_v6_vni.pkl"
 with open(vni_cache,"rb") as f: vni_full = pickle.load(f)
 vni_full["time"] = pd.to_datetime(vni_full["time"])
 v = vni_full.set_index("time")
@@ -495,7 +495,7 @@ if len(trades_df) > 0:
         for tk, r in per_tk.head(15).iterrows():
             print(f"    {tk:<7} N={int(r['n']):2d}  avg={r['avg_ret']:+6.1f}%  cum={r['total_ret']:+7.1f}%  hold={r['avg_hold']:.0f}d")
 
-nav_df.to_csv("qt_v7_nav.csv")
-trades_df.to_csv("qt_v7_trades.csv", index=False)
-regime_df.to_csv("qt_v7_regime.csv", index=False)
+nav_df.to_csv("data/qt_v7_nav.csv")
+trades_df.to_csv("data/qt_v7_trades.csv", index=False)
+regime_df.to_csv("data/qt_v7_regime.csv", index=False)
 print("\nSaved: qt_v7_nav.csv, qt_v7_trades.csv, qt_v7_regime.csv")

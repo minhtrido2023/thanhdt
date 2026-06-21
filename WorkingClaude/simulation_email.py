@@ -85,7 +85,7 @@ PE_P95 = 0.95
 
 def load_hits():
     """Load profile_hit.csv, keep active strategies, add weight column."""
-    df = pd.read_csv(WORKDIR / 'profile_hit.csv',
+    df = pd.read_csv(WORKDIR / 'data/profile_hit.csv',
                      usecols=['filter', 'ticker', 'time', 'Open_1D',
                                'Sell_time', 'Sell_filter', 'Sell_profit'],
                      parse_dates=['time', 'Sell_time'])
@@ -108,7 +108,7 @@ def load_vnindex():
         'D_RSI_Min3M', 'D_RSI_Min3M_Close',
         'D_RSI_MinT3', 'D_MACDdiff', 'D_CMF', 'C_L1M', 'C_L1W', 'Close',
     ]
-    df = pd.read_csv(WORKDIR / 'VNINDEX.csv', usecols=needed_cols, parse_dates=['time'])
+    df = pd.read_csv(WORKDIR / 'data/VNINDEX.csv', usecols=needed_cols, parse_dates=['time'])
     return df.sort_values('time').reset_index(drop=True)
 
 

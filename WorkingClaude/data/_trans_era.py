@@ -1,8 +1,8 @@
 import pandas as pd, numpy as np, os
 os.chdir(r"/home/trido/thanhdt/WorkingClaude")
-gate=pd.read_csv("vnindex_5state_dt_4gate.csv"); gate["time"]=pd.to_datetime(gate["time"])
-base=pd.read_csv("vnindex_5state_tam_quan_v3_4b_full_history.csv"); base["time"]=pd.to_datetime(base["time"])
-vni=pd.read_csv("VNINDEX.csv",usecols=["time","Close"]); vni["time"]=pd.to_datetime(vni["time"]); vni=vni.sort_values("time"); vni["ret"]=vni["Close"].pct_change()
+gate=pd.read_csv("data/vnindex_5state_dt_4gate.csv"); gate["time"]=pd.to_datetime(gate["time"])
+base=pd.read_csv("data/vnindex_5state_tam_quan_v3_4b_full_history.csv"); base["time"]=pd.to_datetime(base["time"])
+vni=pd.read_csv("data/VNINDEX.csv",usecols=["time","Close"]); vni["time"]=pd.to_datetime(vni["time"]); vni=vni.sort_values("time"); vni["ret"]=vni["Close"].pct_change()
 def py(df,col):
     df=df.sort_values("time").copy(); df["yr"]=df["time"].dt.year; df["chg"]=(df[col]!=df[col].shift(1)).astype(int); df.iloc[0,df.columns.get_loc("chg")]=0
     return df.groupby("yr")["chg"].sum()

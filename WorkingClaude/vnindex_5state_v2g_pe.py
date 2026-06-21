@@ -35,7 +35,7 @@ DVG_MASK_START  = "2007-01-01"  # was 2011-01-01
 
 # ════════════════════ LOAD CLEANED DATA ════════════════════
 print("Loading cleaned VNINDEX data ...")
-src_path = os.path.join(WORKDIR, "vnindex_full_2000_2026.csv")
+src_path = os.path.join(WORKDIR, "data/vnindex_full_2000_2026.csv")
 vni = pd.read_csv(src_path, low_memory=False)
 vni["time"] = pd.to_datetime(vni["time"])
 vni = vni.sort_values("time").reset_index(drop=True)
@@ -549,7 +549,7 @@ for qe in qends:
                 row[f"{nm}_{yrs}Y_cm"]   = m["calmar"]
     rows.append(row)
 qdf = pd.DataFrame(rows)
-qdf.to_csv(os.path.join(WORKDIR, "vnindex_5state_v2g_pe_qwf.csv"), index=False)
+qdf.to_csv(os.path.join(WORKDIR, "data/vnindex_5state_v2g_pe_qwf.csv"), index=False)
 print(f"Saved → vnindex_5state_v2g_pe_qwf.csv  ({len(qdf)} snapshots)")
 
 print(f"\n--- QWF summary: trailing-3Y MEDIAN across all quarters ---")
@@ -596,5 +596,5 @@ out_df = pd.DataFrame({
     "pe_high": pe_high.astype(int), "bear_dvg": bear_mask.astype(int), "bull_dvg": bull_mask.astype(int),
     "pv_v2g_pe": pv_pe, "pv_v2g": pv_v2g, "pv_baseline": pv_base, "pv_bh": pv_bh,
 })
-out_df.to_csv(os.path.join(WORKDIR, "vnindex_5state_v2g_pe_history.csv"), index=False)
+out_df.to_csv(os.path.join(WORKDIR, "data/vnindex_5state_v2g_pe_history.csv"), index=False)
 print(f"\nSaved → vnindex_5state_v2g_pe_history.csv ({len(out_df)} rows)")

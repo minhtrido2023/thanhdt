@@ -13,7 +13,7 @@ from pathlib import Path
 import pandas as pd
 
 WORKDIR = Path(__file__).parent
-TRACKER_PATH = WORKDIR / 'sbv_macro_tracker.csv'
+TRACKER_PATH = WORKDIR / 'data/sbv_macro_tracker.csv'
 REPORT_PATH  = WORKDIR / 'sbv_macro_report.txt'
 DEPLOY_DATE  = date(2026, 5, 19)
 REPORT_DATE  = date(2027, 5, 19)

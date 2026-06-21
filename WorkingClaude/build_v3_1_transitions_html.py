@@ -32,15 +32,15 @@ RAMP = 3
 
 # ─────────────────────────────── 1. Load ───────────────────────────────
 print("Loading v3.1 state series + drivers ...")
-st = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_1_full_history.csv"))
+st = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_1_full_history.csv"))
 st["time"] = pd.to_datetime(st["time"])
 st = st.sort_values("time").reset_index(drop=True)
 
-dr = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_dual_v3_full.csv"))
+dr = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_dual_v3_full.csv"))
 dr["time"] = pd.to_datetime(dr["time"])
 dr = dr[["time","Close","r_score_raw","r_score_ew","alpha","concentration_smooth"]]
 
-diag = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_1_diag.csv"))
+diag = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_1_diag.csv"))
 diag["time"] = pd.to_datetime(diag["time"])
 diag = diag[["time","spx_dd_1y","vix","us_cap","override_fired"]]
 

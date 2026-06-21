@@ -34,7 +34,7 @@ from matplotlib.colors import Normalize
 from matplotlib.cm import ScalarMappable
 
 # ── CONFIG ────────────────────────────────────────────────────────────────────
-PROFILE_FILE = "profile_hit.csv"
+PROFILE_FILE = "data/profile_hit.csv"
 PROJECT      = "lithe-record-440915-m9"
 BQ_BIN       = r"bq"
 OUT_IMG      = "analyze_sell_patterns.png"

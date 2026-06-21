@@ -45,7 +45,7 @@ df = live.merge(stag, on="time", how="inner")
 # Pull VNI + EW + breadth
 vni = bq_csv(f"SELECT t.time, t.Close AS vni_close FROM tav2_bq.ticker AS t WHERE t.ticker='VNINDEX' AND t.time BETWEEN '{START}' AND '2026-05-21'")
 vni["time"] = pd.to_datetime(vni["time"])
-ew = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_ew_full.csv"))
+ew = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_ew_full.csv"))
 ew["time"] = pd.to_datetime(ew["time"])
 ew = ew[(ew["time"]>=START) & (ew["time"]<="2026-05-21")][["time","Close"]].rename(columns={"Close":"ew_close"})
 breadth_sql = f"""

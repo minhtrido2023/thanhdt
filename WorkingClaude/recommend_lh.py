@@ -47,12 +47,12 @@ snap_dt = pd.Timestamp(sys.argv[1]) if len(sys.argv) > 1 else pd.Timestamp.today
 print(f"LH picks @ {snap_dt.date()}")
 
 # 1) Load ratings
-ratings = pd.read_csv("fa_ratings_lh.csv", parse_dates=["time", "Release_Date"])
+ratings = pd.read_csv("data/fa_ratings_lh.csv", parse_dates=["time", "Release_Date"])
 latest_q = ratings.sort_values("quarter").iloc[-1]["quarter"]
 print(f"Latest quarter in fa_ratings_lh: {latest_q}")
 
 # 2) Check CRISIS gate (today's state)
-state_df = pd.read_csv("vnindex_5state.csv", parse_dates=["time"]).sort_values("time")
+state_df = pd.read_csv("data/vnindex_5state.csv", parse_dates=["time"]).sort_values("time")
 recent_state = state_df[state_df["time"] <= snap_dt].iloc[-1]
 print(f"Current 5-state regime: state={recent_state['state']} (1=CRISIS, 2=BEAR, 3=NEU, 4=BULL, 5=EX-BULL) @ {recent_state['time'].date()}")
 if recent_state["state"] == 1:

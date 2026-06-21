@@ -15,7 +15,7 @@ START_DATE = "2026-04-01"  # paper-trade window start (canonical)
 def detect_end_date(bq_check=False) -> str:
     cands = [pd.Timestamp(datetime.now().date()) - pd.Timedelta(days=1)]
     try:
-        with open(os.path.join(WORKDIR, "lagged_pos_ov.pkl"), "rb") as f:
+        with open(os.path.join(WORKDIR, "data/lagged_pos_ov.pkl"), "rb") as f:
             ov = pickle.load(f)
         cands.append(pd.to_datetime(ov["time"]).max())
     except Exception:

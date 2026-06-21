@@ -23,19 +23,19 @@ INIT_NAV = 50e9
 
 # ─── 1. Rebuild LAGGED 2025 trades + per-ticker returns ──────────────────
 print("[1] Loading + computing LAGGED 2025 trade ledger ...")
-with open("earnings_px.pkl","rb") as f: px_data = pickle.load(f)
+with open("data/earnings_px.pkl","rb") as f: px_data = pickle.load(f)
 px_data["time"] = pd.to_datetime(px_data["time"])
 px_close = px_data.pivot_table(index="time", columns="ticker", values="Close", aggfunc="first").sort_index().ffill(limit=5)
 master_idx = pd.DatetimeIndex(px_close.index).as_unit("ns")
 px_close.index = master_idx
 all_dates = np.array(master_idx)
 
-with open("lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
+with open("data/lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
 ov["time"] = pd.to_datetime(ov["time"])
 px_open = ov.pivot_table(index="time", columns="ticker", values="Open", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 liq = ov.pivot_table(index="time", columns="ticker", values="Volume_3M_P50", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 
-ev = pd.read_csv("earnings_events_classified.csv", parse_dates=["Release_Date"])
+ev = pd.read_csv("data/earnings_events_classified.csv", parse_dates=["Release_Date"])
 ev = ev.sort_values(["ticker","Release_Date"]).reset_index(drop=True)
 
 LN2 = np.log(2); HL = 3.0
@@ -174,7 +174,7 @@ print(f"\n  Actual avg (25d hold): {actual_avg:+.2f}%")
 
 # ─── 4. Sector / ticker mix ──────────────────────────────────────────────
 print("\n[4] Sector/ticker analysis ...")
-fa = pd.read_csv("fa_ratings_lh.csv", parse_dates=["time"])
+fa = pd.read_csv("data/fa_ratings_lh.csv", parse_dates=["time"])
 fa_uni = fa.sort_values("quarter").drop_duplicates("ticker", keep="last")[["ticker","sub","MktCap"]]
 
 y25_with_sub = y25_trades.merge(fa_uni, on="ticker", how="left")

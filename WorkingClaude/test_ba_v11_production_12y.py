@@ -54,7 +54,7 @@ print("="*100)
 
 # ─── 1. Load signals ─────────────────────────────────────────────────────
 import pickle
-sig_cache = "ba_v11_unified_12y_sig.pkl"
+sig_cache = "data/ba_v11_unified_12y_sig.pkl"
 if os.path.exists(sig_cache):
     with open(sig_cache, "rb") as f: sig = pickle.load(f)
     print(f"[1] Loaded signal cache: {len(sig):,} rows")
@@ -159,7 +159,7 @@ nav_vn30_s = nav_vn30.set_index("time")["nav"]
 common = nav_bal_s.index.intersection(nav_vn30_s.index)
 nav_total = nav_bal_s.loc[common] + nav_vn30_s.loc[common]
 nav_norm = nav_total / TOTAL_NAV  # normalize starting at 1.0
-nav_norm.to_csv("ba_v11_production_12y_nav.csv")
+nav_norm.to_csv("data/ba_v11_production_12y_nav.csv")
 print(f"  Final NAV: {nav_total.iloc[-1]/1e9:.2f}B (start 50B)  →  Wealth multiple: {nav_norm.iloc[-1]:.2f}x")
 
 def window_metrics(nav, start, end):

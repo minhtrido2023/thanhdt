@@ -25,13 +25,13 @@ print("="*70); print("Tam Quan v3.1 — v3 + US shock override"); print("="*70)
 
 # Load existing v3 full-history state
 print("\n[1] Load v3 full-history + US market")
-v3 = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_full_history.csv"))
+v3 = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_full_history.csv"))
 v3["time"] = pd.to_datetime(v3["time"])
 v3 = v3.sort_values("time").reset_index(drop=True)
-v3_diag = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_full_history_diag.csv"))
+v3_diag = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_full_history_diag.csv"))
 v3_diag["time"] = pd.to_datetime(v3_diag["time"])
 
-us = pd.read_csv(os.path.join(WORKDIR, "us_market_history.csv"))
+us = pd.read_csv(os.path.join(WORKDIR, "data/us_market_history.csv"))
 us["time"] = pd.to_datetime(us["time"])
 
 # Align US data to VN dates (most recent US day ≤ VN_day - 1)
@@ -109,11 +109,11 @@ out_staging = pd.DataFrame({
     "state": v3["state_v3_1_smooth"].astype(int),
     "state_raw": v3["state_raw"].astype(int),
 })
-out_staging.to_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_1_full_history.csv"), index=False)
+out_staging.to_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_1_full_history.csv"), index=False)
 
 diag = v3[["time","spx_close","vix","spx_dd_1y","spx_ret_60d",
            "us_cap","state_raw","state","state_v3_1","state_v3_1_smooth","override_fired"]].copy()
-diag.to_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_1_diag.csv"), index=False)
+diag.to_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_1_diag.csv"), index=False)
 
 # ─────────────────────────────────────────────────────────────────────
 # [5] Summary

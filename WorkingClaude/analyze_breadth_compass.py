@@ -27,7 +27,7 @@ def load():
     br = pd.read_csv(f"{WORKDIR}/data/breadth_prune_daily.csv", parse_dates=["time"])
     br = br[br["n"] >= MIN_NAMES].copy()
     st = pd.read_csv(f"{WORKDIR}/data/dt5g_state_series.csv", parse_dates=["time"])
-    vni = pd.read_csv(f"{WORKDIR}/VNINDEX.csv", usecols=["time", "Close"], parse_dates=["time"])
+    vni = pd.read_csv(f"{WORKDIR}/data/VNINDEX.csv", usecols=["time", "Close"], parse_dates=["time"])
     vni = vni.rename(columns={"Close": "vni"})
 
     df = st.merge(br[["time", "n", "breadth", "ew_ret"]], on="time", how="inner")

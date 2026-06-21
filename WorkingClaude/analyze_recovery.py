@@ -12,7 +12,7 @@ import numpy as np, pandas as pd
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
 
 # ── Rebuild states (giong backtest_workflow.py) ────────────────────────────
-vni = pd.read_csv(WORKDIR + "/VNINDEX.csv", low_memory=False)
+vni = pd.read_csv(WORKDIR + "/data/VNINDEX.csv", low_memory=False)
 vni["time"] = pd.to_datetime(vni["time"])
 vni = vni.sort_values("time").reset_index(drop=True)
 for col in ["Open","High","Low","Close","Volume","VNINDEX_PE",
@@ -23,8 +23,8 @@ for col in ["Open","High","Low","Close","Volume","VNINDEX_PE",
     if col in vni.columns:
         vni[col] = pd.to_numeric(vni[col], errors="coerce")
 
-if os.path.exists(WORKDIR+"/breadth_data.csv"):
-    br = pd.read_csv(WORKDIR+"/breadth_data.csv")
+if os.path.exists(WORKDIR+"/data/breadth_data.csv"):
+    br = pd.read_csv(WORKDIR+"/data/breadth_data.csv")
     br["time"] = pd.to_datetime(br["time"])
     vni = vni.merge(br, on="time", how="left")
 else:

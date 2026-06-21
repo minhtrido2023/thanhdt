@@ -14,8 +14,8 @@ import numpy as np, pandas as pd
 WD=r"/home/trido/thanhdt/WorkingClaude"
 
 v=pd.read_csv(WD+"/data/5sys_prodspec_201401_202605_dt5g.csv"); v["time"]=pd.to_datetime(v["time"])
-f=pd.read_csv(WD+"/vn30f1m_raw.csv"); f["time"]=pd.to_datetime(f["time"]); f=f.sort_values("time").reset_index(drop=True)
-ds=pd.read_csv(WD+"/vnindex_5state_dt5g_live.csv"); ds["time"]=pd.to_datetime(ds["time"])
+f=pd.read_csv(WD+"/data/vn30f1m_raw.csv"); f["time"]=pd.to_datetime(f["time"]); f=f.sort_values("time").reset_index(drop=True)
+ds=pd.read_csv(WD+"/data/vnindex_5state_dt5g_live.csv"); ds["time"]=pd.to_datetime(ds["time"])
 f=f.merge(ds[["time","state"]],on="time",how="left")
 c=f["close"].values; n=len(f)
 f["ret"]=f["close"].pct_change()

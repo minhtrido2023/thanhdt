@@ -24,9 +24,9 @@ WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
 STATE_NAMES = {1:"CRISIS",2:"BEAR",3:"NEUTRAL",4:"BULL",5:"EX-BULL"}
 
 # Reproduce the 31 fire dates by running the v3.3 logic
-v31 = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_1_full_history.csv"))
+v31 = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_1_full_history.csv"))
 v31["time"] = pd.to_datetime(v31["time"]); v31 = v31.sort_values("time").reset_index(drop=True)
-dual = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_dual_v3_full.csv"))
+dual = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_dual_v3_full.csv"))
 dual["time"] = pd.to_datetime(dual["time"])
 dual["r_dual"] = dual["alpha"]*dual["r_score_raw"] + (1-dual["alpha"])*dual["r_score_ew"]
 

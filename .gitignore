@@ -84,3 +84,11 @@ Thumbs.db
 # ---- Claude Code local settings (machine-specific) ------------------
 .claude/settings.local.json
 **/.claude/settings.local.json
+
+# ---- Secrets folder: NEVER track contents (values live only on server)
+# (README is force-added so the structure is documented for resume)
+secrets/
+**/secrets/
+
+# ---- One-off migration helper ---------------------------------------
+_reorg_migrate.py

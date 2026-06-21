@@ -162,7 +162,7 @@ for yr in sorted(set(y0.index) | set(y1.index) | set(y2.index)):
 
 # Save
 out_df = pd.DataFrame([p0, p1, p2])
-out_df.to_csv(os.path.join(WORKDIR, "production_etf_results.csv"), index=False)
+out_df.to_csv(os.path.join(WORKDIR, "data/production_etf_results.csv"), index=False)
 print(f"\n  Saved: production_etf_results.csv")
 
 # Also save NAV traces
@@ -172,5 +172,5 @@ nav_traces = pd.DataFrame({
     "P1_nav_b": n1.values / 1e9,
     "P2_nav_b": n2.values / 1e9,
 })
-nav_traces.to_csv(os.path.join(WORKDIR, "production_etf_nav_traces.csv"), index=False)
+nav_traces.to_csv(os.path.join(WORKDIR, "data/production_etf_nav_traces.csv"), index=False)
 print(f"  NAV traces: production_etf_nav_traces.csv")

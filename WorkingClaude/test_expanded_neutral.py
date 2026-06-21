@@ -251,5 +251,5 @@ for _, r in df.iterrows():
           f"ΔDD {r['max_dd_pct']-base['max_dd_pct']:+.1f}pp, "
           f"ΔDep {r['avg_dep_pct']-base['avg_dep_pct']:+.1f}pp")
 
-df.to_csv(os.path.join(WORKDIR, "expanded_neutral_results.csv"), index=False)
+df.to_csv(os.path.join(WORKDIR, "data/expanded_neutral_results.csv"), index=False)
 print(f"\n  Saved: expanded_neutral_results.csv")

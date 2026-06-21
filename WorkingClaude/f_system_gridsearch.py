@@ -12,7 +12,7 @@ from itertools import product
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
 
 # ── Full pipeline (copy tu f_system_backtest.py) ─────────────────────────────
-vni = pd.read_csv(WORKDIR + "/VNINDEX.csv", low_memory=False)
+vni = pd.read_csv(WORKDIR + "/data/VNINDEX.csv", low_memory=False)
 vni["time"] = pd.to_datetime(vni["time"])
 vni = vni.sort_values("time").reset_index(drop=True)
 for col in ["Open","High","Low","Close","Volume","VNINDEX_PE",
@@ -436,7 +436,7 @@ for yr in sorted(vni["time"].dt.year.unique()):
     print(f"  {yr:>4}{oos}  {p(rb)}  {p(rh)}  {p(rBH)}  F{beat_h}H  F{beat_bh}BH")
 
 # ── Save results CSV ──────────────────────────────────────────────────────────
-csv_out = WORKDIR + "/f_system_gridsearch.csv"
+csv_out = WORKDIR + "/data/f_system_gridsearch.csv"
 df_s.to_csv(csv_out, index=False)
 print(f"\nGrid search results saved: {csv_out}")
 print(f"Total combos: {len(df_s)}")

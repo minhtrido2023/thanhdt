@@ -23,7 +23,7 @@ WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
 os.chdir(WORKDIR)
 
 # Load NAVs
-ba_nav = pd.read_csv("ba_v11_production_12y_nav.csv", index_col=0, parse_dates=True)
+ba_nav = pd.read_csv("data/ba_v11_production_12y_nav.csv", index_col=0, parse_dates=True)
 ba_nav.columns = ["BA_v11"]
 print(f"BA v11 NAV: {len(ba_nav)} days, {ba_nav.index.min().date()} → {ba_nav.index.max().date()}")
 print(f"  Final: {ba_nav['BA_v11'].iloc[-1]:.3f}x  ({(ba_nav['BA_v11'].iloc[-1]-1)*100:+.1f}%)")
@@ -35,19 +35,19 @@ print(f"  Final: {ba_nav['BA_v11'].iloc[-1]:.3f}x  ({(ba_nav['BA_v11'].iloc[-1]-
 # Quick re-build of LAGGED HL_3y NAV for comparison window
 import pickle
 print("\n[Setup] Building LAGGED HL_3y NAV for comparison ...")
-with open("earnings_px.pkl","rb") as f: px_data = pickle.load(f)
+with open("data/earnings_px.pkl","rb") as f: px_data = pickle.load(f)
 px_data["time"] = pd.to_datetime(px_data["time"])
 px_close = px_data.pivot_table(index="time", columns="ticker", values="Close", aggfunc="first").sort_index().ffill(limit=5)
 master_idx = pd.DatetimeIndex(px_close.index).as_unit("ns")
 px_close.index = master_idx
 all_dates = np.array(master_idx)
 
-with open("lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
+with open("data/lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
 ov["time"] = pd.to_datetime(ov["time"])
 px_open = ov.pivot_table(index="time", columns="ticker", values="Open", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 liq     = ov.pivot_table(index="time", columns="ticker", values="Volume_3M_P50", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 
-ev = pd.read_csv("earnings_events_classified.csv", parse_dates=["Release_Date"])
+ev = pd.read_csv("data/earnings_events_classified.csv", parse_dates=["Release_Date"])
 ev = ev.sort_values(["ticker","Release_Date"]).reset_index(drop=True)
 
 # HL_3y profile + post_min=5 (production)
@@ -214,5 +214,5 @@ print(f"  High correlation (>0.7)    → similar bets, less diversification")
 
 # Save
 combo = pd.DataFrame({"BA_v11": ba_n, "LAGGED_HL3y": lag_n})
-combo.to_csv("compare_lagged_vs_ba_navs.csv")
+combo.to_csv("data/compare_lagged_vs_ba_navs.csv")
 print("\nSaved: compare_lagged_vs_ba_navs.csv")

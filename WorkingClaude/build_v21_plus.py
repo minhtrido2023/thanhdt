@@ -51,7 +51,7 @@ print(f"  Last state: {STATE_NAMES.get(int(df_live['state'].iloc[-1]))} on {df_l
 
 # ---- 2. VNI data for BTC computation ----------------------------------------
 print("\n[2] Load VNI data for BTC_R6M...")
-vni = pd.read_csv(os.path.join(WORKDIR, "VNINDEX.csv"))
+vni = pd.read_csv(os.path.join(WORKDIR, "data/VNINDEX.csv"))
 vni["time"] = pd.to_datetime(vni["time"])
 vni = vni.sort_values("time").reset_index(drop=True)
 # Must cover all BQ LIVE dates
@@ -72,7 +72,7 @@ print(f"  BTC_R6M active: {BTC_arr.sum()} days = {BTC_arr.mean()*100:.1f}%")
 
 # ---- 3. US shock override ---------------------------------------------------
 print("\n[3] Align US market data...")
-us = pd.read_csv(os.path.join(WORKDIR, "us_market_history.csv"))
+us = pd.read_csv(os.path.join(WORKDIR, "data/us_market_history.csv"))
 us["time"] = pd.to_datetime(us["time"])
 us_dates = sorted(us["time"].tolist())
 
@@ -135,7 +135,7 @@ def rsi14(c):
 rsi_arr  = rsi14(close)
 
 # Concentration smooth from v3 dual full (same series as TQ34b)
-dr = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_dual_v3_full.csv"))
+dr = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_dual_v3_full.csv"))
 dr["time"] = pd.to_datetime(dr["time"])
 df = df.merge(dr[["time","concentration_smooth"]], on="time", how="left")
 conc_arr = df["concentration_smooth"].values
@@ -199,7 +199,7 @@ out = pd.DataFrame({
     "time":  df["time"].dt.strftime("%Y-%m-%d"),
     "state": result.astype(int)
 })
-out.to_csv(os.path.join(WORKDIR, "vnindex_5state_v21_plus.csv"), index=False)
+out.to_csv(os.path.join(WORKDIR, "data/vnindex_5state_v21_plus.csv"), index=False)
 
 # ---- 8. Stats ---------------------------------------------------------------
 print("\n" + "="*70)
@@ -215,7 +215,7 @@ def stay_stats(states):
     return np.array(runs)
 
 # Load TQ34b for comparison
-tq = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_4b_full_history.csv"))
+tq = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_4b_full_history.csv"))
 tq["time"] = pd.to_datetime(tq["time"])
 
 # Mask post-2014 for comparison

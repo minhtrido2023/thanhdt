@@ -62,7 +62,7 @@ dt5g_raw['time'] = pd.to_datetime(dt5g_raw['time'])
 dt5g = dt5g_raw.set_index('time')['state'].astype(int)
 
 # 2. VNINDEX from CSV
-vni = pd.read_csv(os.path.join(WORKDIR, "VNINDEX.csv"))
+vni = pd.read_csv(os.path.join(WORKDIR, "data/VNINDEX.csv"))
 vni['time'] = pd.to_datetime(vni['time'])
 vni = vni.set_index('time').sort_index()
 vni_close = vni['Close'].astype(float)
@@ -462,7 +462,7 @@ for h in horizons:
             'p10': sub.quantile(0.1), 'p90': sub.quantile(0.9)
         })
 pd.DataFrame(rows_csv).to_csv(
-    os.path.join(WORKDIR, "euphoria_exbull_event_study.csv"), index=False)
+    os.path.join(WORKDIR, "data/euphoria_exbull_event_study.csv"), index=False)
 print("  Saved: euphoria_exbull_event_study.csv")
 
 print("\n" + "="*65)

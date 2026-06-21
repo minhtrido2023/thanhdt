@@ -28,8 +28,8 @@ OOS_START = pd.Timestamp("2024-01-01")
 
 VARIANTS = [
     ("LIVE Tinh Tế",       "BQ"),
-    ("v1 Dual α=0.50",     "vnindex_5state_dual_a50_staging.csv"),
-    ("v2 Dynamic-α",       "vnindex_5state_dual_v2_staging.csv"),
+    ("v1 Dual α=0.50",     "data/vnindex_5state_dual_a50_staging.csv"),
+    ("v2 Dynamic-α",       "data/vnindex_5state_dual_v2_staging.csv"),
 ]
 
 print("="*100)
@@ -37,7 +37,7 @@ print(f"  V11 — 3-variant test: LIVE | v1 α=0.50 | v2 Dynamic-α")
 print(f"  Period: {START_DATE} → {END_DATE} | NAV: {TOTAL_NAV/1e9:.0f}B")
 print("="*100)
 
-sig_cache = "ba_v11_unified_12y_sig.pkl"
+sig_cache = "data/ba_v11_unified_12y_sig.pkl"
 with open(sig_cache, "rb") as f: sig = pickle.load(f)
 print(f"[shared] Loaded signal cache: {len(sig):,} rows")
 

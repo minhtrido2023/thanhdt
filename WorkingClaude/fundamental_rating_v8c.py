@@ -26,7 +26,7 @@ import numpy as np, pandas as pd
 
 PROJECT = "lithe-record-440915-m9"
 BQ_BIN  = r"bq"
-OUT_CSV = "fundamental_rating_v8c.csv"
+OUT_CSV = "data/fundamental_rating_v8c.csv"
 TIERS = [("A",0.90,1.00),("B",0.70,0.90),("C",0.40,0.70),("D",0.15,0.40),("E",0.00,0.15)]
 
 # Manual classification: residential developers (split out of REIT)

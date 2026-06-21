@@ -32,26 +32,26 @@ print("="*100)
 
 # Load data
 print("\n[Setup] Loading caches ...")
-with open("earnings_px.pkl","rb") as f: px_data = pickle.load(f)
+with open("data/earnings_px.pkl","rb") as f: px_data = pickle.load(f)
 px_data["time"] = pd.to_datetime(px_data["time"])
 px_close = px_data.pivot_table(index="time", columns="ticker", values="Close", aggfunc="first").sort_index().ffill(limit=5)
 master_idx = pd.DatetimeIndex(px_close.index).as_unit("ns")
 px_close.index = master_idx
 all_dates = np.array(master_idx)
 
-with open("lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
+with open("data/lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
 ov["time"] = pd.to_datetime(ov["time"])
 px_open = ov.pivot_table(index="time", columns="ticker", values="Open", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 liq = ov.pivot_table(index="time", columns="ticker", values="Volume_3M_P50", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 
 # Compute surprise + HL_3y profile
-with open("earnings_surprise_data.pkl","rb") as f: fin = pickle.load(f)
+with open("data/earnings_surprise_data.pkl","rb") as f: fin = pickle.load(f)
 fin["Release_Date"] = pd.to_datetime(fin["Release_Date"])
 FLOOR = 1e9
 fin["exp_B_MA"] = fin[["NP_P1","NP_P2","NP_P3","NP_P4"]].mean(axis=1)
 fin["surprise_B_MA"] = ((fin["NP_P0"] - fin["exp_B_MA"]) / np.maximum(np.abs(fin["exp_B_MA"]), FLOOR)).clip(-5, 5)
 
-ev_class = pd.read_csv("earnings_events_classified.csv", parse_dates=["Release_Date"])
+ev_class = pd.read_csv("data/earnings_events_classified.csv", parse_dates=["Release_Date"])
 ev = ev_class.merge(fin[["ticker","quarter","Release_Date","surprise_B_MA"]],
                      on=["ticker","quarter","Release_Date"], how="left")
 ev = ev.sort_values(["ticker","Release_Date"]).reset_index(drop=True)
@@ -198,7 +198,7 @@ for name, mask, hold in variants:
     print(f"  {name:<22}{hold:>6}{r['sched_N']:>8d}{r['trades']:>8d}{r['WR']:>6.1f}%{r['avg_ret']:>+9.2f}%{r['CAGR']:>+8.2f}%{r['Sharpe']:>+5.2f}{r['DD']:>+7.1f}%{r['Calmar']:>+5.2f}{r['Y22']:>+7.1f}%{r['Q126']:>+8.1f}%")
 
 df = pd.DataFrame(results)
-df.to_csv("surprise_v6_extended_results.csv", index=False)
+df.to_csv("data/surprise_v6_extended_results.csv", index=False)
 
 # Top by Calmar (best risk-adj)
 print(f"\n  🏆 TOP 3 by CAGR:")

@@ -6,7 +6,7 @@ import pandas as pd
 
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
 
-vni = pd.read_csv(os.path.join(WORKDIR, "VNINDEX.csv"), low_memory=False)
+vni = pd.read_csv(os.path.join(WORKDIR, "data/VNINDEX.csv"), low_memory=False)
 vni["time"] = pd.to_datetime(vni["time"])
 vni = vni.sort_values("time").reset_index(drop=True)
 
@@ -18,7 +18,7 @@ for col in ["Open","High","Low","Close","Volume","VNINDEX_PE",
     if col in vni.columns:
         vni[col] = pd.to_numeric(vni[col], errors="coerce")
 
-breadth_path = os.path.join(WORKDIR, "breadth_data.csv")
+breadth_path = os.path.join(WORKDIR, "data/breadth_data.csv")
 if os.path.exists(breadth_path):
     breadth = pd.read_csv(breadth_path)
     breadth["time"] = pd.to_datetime(breadth["time"])
@@ -240,7 +240,7 @@ vni["r_score_ema"] = r_score_ema
 
 # Export full state history
 out_df = vni[["time","Close","VNINDEX_PE","state","state_name","r_score_ema"]].copy()
-out_path = os.path.join(WORKDIR, "vnindex_state_history.csv")
+out_path = os.path.join(WORKDIR, "data/vnindex_state_history.csv")
 out_df.to_csv(out_path, index=False)
 print(f"Exported {len(out_df)} rows to vnindex_state_history.csv")
 

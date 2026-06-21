@@ -179,7 +179,7 @@ for label, st, en in periods:
                  "v4_sharpe": m4["sharpe"], "v4re_sharpe": m4r["sharpe"],
                  "v4_mdd": m4["max_dd_pct"], "v4re_mdd": m4r["max_dd_pct"]})
 
-pd.DataFrame(rows).to_csv("ba_canonical_v4_vs_re_backlog.csv", index=False)
+pd.DataFrame(rows).to_csv("data/ba_canonical_v4_vs_re_backlog.csv", index=False)
 print("Saved ba_canonical_v4_vs_re_backlog.csv")
 
 print("\nTrade counts:")
@@ -193,7 +193,7 @@ if len(re_bk_trades):
     pnl_col = "pnl_pct" if "pnl_pct" in re_bk_trades.columns else ("return_pct" if "return_pct" in re_bk_trades.columns else None)
     if pnl_col:
         print(f"  Mean PnL: {re_bk_trades[pnl_col].mean():.2f}%  Median: {re_bk_trades[pnl_col].median():.2f}%  WR: {(re_bk_trades[pnl_col]>0).mean()*100:.1f}%")
-    re_bk_trades.to_csv("re_backlog_trades.csv", index=False)
+    re_bk_trades.to_csv("data/re_backlog_trades.csv", index=False)
     print("  Saved re_backlog_trades.csv")
 else:
     print("\n  (No RE_BACKLOG_BUY trades fired — signal may be too restrictive)")

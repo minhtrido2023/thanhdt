@@ -47,7 +47,7 @@ for tk in ["DGC", "FPT"]:
     fin["time"] = pd.to_datetime(fin["time"])
 
     # FA tier history
-    fa = pd.read_csv("fa_ratings_lh.csv")
+    fa = pd.read_csv("data/fa_ratings_lh.csv")
     fa_tk = fa[fa["ticker"]==tk].sort_values("quarter").tail(12)
 
     print(f"\n--- Fundamentals last 12Q ---")

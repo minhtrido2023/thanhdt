@@ -43,14 +43,14 @@ print("="*70)
 # Load r_score_raw + r_score_ew from previous artifacts
 # ─────────────────────────────────────────────────────────────────────
 print("\n[1] Load r_scores + concentration history")
-ew_full = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_ew_full.csv"))
+ew_full = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_ew_full.csv"))
 ew_full["time"] = pd.to_datetime(ew_full["time"])
 # ew_full has r_score (= r_score_ew)
 ew_full = ew_full.rename(columns={"r_score": "r_score_ew"})
 
 # Need r_score_raw — recompute by running same logic as canonical on raw VNI
 # Re-use cached VNI pickle.
-vni = pd.read_pickle(os.path.join(WORKDIR, "_cache_vnindex_2000_now.pkl"))
+vni = pd.read_pickle(os.path.join(WORKDIR, "data/_cache_vnindex_2000_now.pkl"))
 vni["time"] = pd.to_datetime(vni["time"])
 vni = vni.sort_values("time").reset_index(drop=True)
 
@@ -139,7 +139,7 @@ vni["r_score_raw"] = r_score_raw
 # ─────────────────────────────────────────────────────────────────────
 print("[4] Merge EW r_score + concentration history")
 df = vni.merge(ew_full[["time", "r_score_ew"]], on="time", how="left")
-conc = pd.read_csv(os.path.join(WORKDIR, "concentration_history.csv"))
+conc = pd.read_csv(os.path.join(WORKDIR, "data/concentration_history.csv"))
 conc["time"] = pd.to_datetime(conc["time"])
 df = df.merge(conc[["time", "concentration_score"]], on="time", how="left")
 
@@ -262,12 +262,12 @@ out_staging = pd.DataFrame({
     "state": df["state"].astype(int),
     "state_raw": df["state_raw"].astype(int),
 })
-out_staging.to_csv(os.path.join(WORKDIR, "vnindex_5state_dual_v2_staging.csv"), index=False)
+out_staging.to_csv(os.path.join(WORKDIR, "data/vnindex_5state_dual_v2_staging.csv"), index=False)
 
 diag = df[["time", "Close", "concentration_score", "concentration_smooth", "alpha",
            "r_score_raw", "r_score_ew", "r_dual", "r_dual_ema",
            "state_raw", "state"]].copy()
-diag.to_csv(os.path.join(WORKDIR, "vnindex_5state_dual_v2_full.csv"), index=False)
+diag.to_csv(os.path.join(WORKDIR, "data/vnindex_5state_dual_v2_full.csv"), index=False)
 
 # ─────────────────────────────────────────────────────────────────────
 # Summary

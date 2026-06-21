@@ -30,7 +30,7 @@ TARGET   = 10.0
 
 # ── LOAD ─────────────────────────────────────────────────────────────────────
 print("Loading ...")
-df = pd.read_csv("profile_hit.csv")
+df = pd.read_csv("data/profile_hit.csv")
 df["time"] = pd.to_datetime(df["time"])
 
 closed = df[df["Sell_filter"] != "Hold"].copy()
@@ -312,7 +312,7 @@ if hold_results:
     print(f"\n  Conv >= 4: {(hold_best['conv_score']>=4).sum()} tickers")
     print(f"  Conv >= 3: {(hold_best['conv_score']>=3).sum()} tickers")
     print(f"  Conv >= 2: {(hold_best['conv_score']>=2).sum()} tickers")
-    hold_best.to_csv("hold_convergence_scored.csv", index=False)
+    hold_best.to_csv("data/hold_convergence_scored.csv", index=False)
     print(f"  Saved: hold_convergence_scored.csv")
 else:
     hold_enr  = pd.DataFrame()
@@ -472,6 +472,6 @@ print("Chart saved: analyze_filter_sequence.png")
 print(f"\n{'='*70}")
 print("KEY FINDINGS — Multi-Filter Convergence")
 print(f"{'='*70}")
-enriched.to_csv("enriched_with_convergence.csv", index=False)
+enriched.to_csv("data/enriched_with_convergence.csv", index=False)
 print(f"\nSaved: enriched_with_convergence.csv  |  hold_convergence_scored.csv")
 print("\nDone.")

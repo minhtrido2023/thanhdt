@@ -38,9 +38,9 @@ ALLOC = {1:0.0, 2:0.2, 3:0.7, 4:1.0, 5:1.3}
 
 # ══ Load data ══
 print("Loading data...")
-vni = pd.read_csv('VNINDEX.csv', parse_dates=['time']).sort_values('time').reset_index(drop=True)
+vni = pd.read_csv('data/VNINDEX.csv', parse_dates=['time']).sort_values('time').reset_index(drop=True)
 vni = vni[vni['time']>='2014-01-01'].reset_index(drop=True)
-br_data = pd.read_csv('breadth_universe_comparison.csv', parse_dates=['time'])
+br_data = pd.read_csv('data/breadth_universe_comparison.csv', parse_dates=['time'])
 vni = vni.merge(br_data[['time','br_prune','br_hsx']], on='time', how='left')
 # Average breadth
 vni['br_avg'] = (vni['br_prune'] + vni['br_hsx']) / 2
@@ -255,5 +255,5 @@ out = pd.DataFrame({'time': vni['time']})
 for label, r in results.items():
     short = label.split('.')[0]
     out[f'state_{short}'] = r['states']
-out.to_csv('breadth_ensemble_states.csv', index=False)
+out.to_csv('data/breadth_ensemble_states.csv', index=False)
 print("\nSaved: breadth_ensemble_states.csv")

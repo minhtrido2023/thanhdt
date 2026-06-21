@@ -36,7 +36,7 @@ def bq_query(sql):
 
 # ─── 1. Quality universe (relaxed) ───────────────────────────────────────
 print("[1] Building relaxed quality universe ...", flush=True)
-fa = pd.read_csv("fa_ratings_lh.csv", parse_dates=["time","Release_Date"])
+fa = pd.read_csv("data/fa_ratings_lh.csv", parse_dates=["time","Release_Date"])
 fa = fa.sort_values(["ticker","quarter"]).reset_index(drop=True)
 
 quality_at_q = {}
@@ -57,7 +57,7 @@ print(f"  Quality lookup: {len(quality_at_q):,} entries (relaxed: ≥8Q, ≥50% 
 
 # ─── 2. Load cached TA panel ─────────────────────────────────────────────
 print("\n[2] Loading TA panel from cache ...", flush=True)
-panel_path = "qt_panel_2014_2026.pkl"
+panel_path = "data/qt_panel_2014_2026.pkl"
 with open(panel_path, "rb") as f:
     panel = pickle.load(f)
 print(f"  Loaded {len(panel):,} rows")
@@ -76,7 +76,7 @@ panel["rsi"] = panel["D_RSI"] * 100
 
 # ─── 3. Load 5-state regime + compute turn windows ──────────────────────
 print("\n[3] Loading 5-state regime + detecting turn windows ...", flush=True)
-state = pd.read_csv("vnindex_5state.csv", parse_dates=["time"]).sort_values("time").reset_index(drop=True)
+state = pd.read_csv("data/vnindex_5state.csv", parse_dates=["time"]).sort_values("time").reset_index(drop=True)
 state["state_prev"] = state["state"].shift(1)
 # Turn UP: state transitions from {1,2} to >=3
 state["turn_up"] = ((state["state_prev"].isin([1,2])) & (state["state"] >= 3)).astype(int)
@@ -398,6 +398,6 @@ if len(trades_df) > 0:
     for mode, g in exits.groupby("entry_mode"):
         print(f"    {mode:<14}: N={len(g):3d}, avg_ret={g['ret_pct'].mean():+6.1f}%, WR={(g['ret_pct']>0).mean()*100:.1f}%")
 
-nav_df.to_csv("qt_v2_nav.csv")
-trades_df.to_csv("qt_v2_trades.csv", index=False)
+nav_df.to_csv("data/qt_v2_nav.csv")
+trades_df.to_csv("data/qt_v2_trades.csv", index=False)
 print("\nSaved: qt_v2_nav.csv, qt_v2_trades.csv")

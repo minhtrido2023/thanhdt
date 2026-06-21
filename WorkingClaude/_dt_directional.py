@@ -33,7 +33,7 @@ def asym_dir(states, default, enter_crisis, exit_crisis, enter_exbull, exit_exbu
         out[t] = committed
     return out
 
-v34 = pd.read_csv(os.path.join(W, "_cmp_v34b.csv")); v34["time"] = pd.to_datetime(v34["time"])
+v34 = pd.read_csv(os.path.join(W, "data/_cmp_v34b.csv")); v34["time"] = pd.to_datetime(v34["time"])
 base = v34["state"].values.astype(int)
 mask_m = v34["time"].values >= np.datetime64("2014-01-01")
 

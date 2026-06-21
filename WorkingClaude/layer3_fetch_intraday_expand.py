@@ -11,7 +11,7 @@ WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
 sys.path.insert(0, os.path.join(WORKDIR, "stockquery"))
 from stockquery_agent import StockQuery
 
-INTRADAY_PKL = os.path.join(WORKDIR, "intraday_full.pkl")
+INTRADAY_PKL = os.path.join(WORKDIR, "data/intraday_full.pkl")
 START_DATE = "2023-09-01"
 END_DATE   = "2026-05-12"
 SAVE_EVERY = 10

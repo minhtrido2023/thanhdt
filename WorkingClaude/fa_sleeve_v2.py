@@ -67,7 +67,7 @@ def main():
     months=me.index[(me.index>=pd.Timestamp("2014-01-01"))&(me.index<=pd.Timestamp("2026-05-15"))]
 
     # VNINDEX PE expanding percentile (point-in-time, min 252 daily obs)
-    vni=pd.read_csv(os.path.join(WORKDIR,"VNINDEX.csv"))
+    vni=pd.read_csv(os.path.join(WORKDIR,"data/VNINDEX.csv"))
     vni["time"]=pd.to_datetime(vni["time"]); vni=vni.sort_values("time")
     pe=vni.set_index("time")["VNINDEX_PE"].dropna()
     pe_pct=pe.expanding(min_periods=252).apply(lambda x: (x.iloc[-1]>=x).mean(), raw=False)

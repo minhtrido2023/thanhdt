@@ -44,7 +44,7 @@ LOW_N = 30
 
 SIG_PKL = os.path.join(WORKDIR, "kelly_q3_out", "_signals_v11_12y.pkl")
 ALT_PKL = os.path.join(WORKDIR, "kelly_q3_out", "_alt_hybrid.pkl")
-TIER_STATS_CSV = os.path.join(WORKDIR, "kelly_q3_tier_stats.csv")
+TIER_STATS_CSV = os.path.join(WORKDIR, "data/kelly_q3_tier_stats.csv")
 
 PERIODS = [
     ("FULL 2014-2026",  "2014-01-02", "2026-04-03"),
@@ -100,7 +100,7 @@ for _, r in stats.iterrows():
         "note": f"small_n_keep_flat (n<{LOW_N})" if r["n"] < LOW_N else "",
     })
 disp = pd.DataFrame(rows_disp).sort_values("sharpe_per_trade", ascending=False).reset_index(drop=True)
-disp.to_csv(os.path.join(WORKDIR, "kelly_q3_v3_tier_weights.csv"), index=False)
+disp.to_csv(os.path.join(WORKDIR, "data/kelly_q3_v3_tier_weights.csv"), index=False)
 print("\nWeights table:")
 print(disp.to_string(index=False, float_format=lambda x: f"{x:.3f}"))
 

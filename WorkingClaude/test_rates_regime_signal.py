@@ -23,7 +23,7 @@ px = bq("""SELECT p.time, p.Close, s.state FROM tav2_bq.ticker AS p
 JOIN tav2_bq.vnindex_5state_dt_4gate AS s ON s.time=p.time
 WHERE p.ticker='VNINDEX' ORDER BY p.time""")
 px["time"] = pd.to_datetime(px["time"]); px["state"] = px["state"].astype(int)
-m = pd.read_csv("macro_daily.csv", parse_dates=["time"])[["time", "lending_rate", "cpi_yoy"]]
+m = pd.read_csv("data/macro_daily.csv", parse_dates=["time"])[["time", "lending_rate", "cpi_yoy"]]
 df = px.merge(m, on="time", how="left").sort_values("time").reset_index(drop=True)
 df["lending_rate"] = df["lending_rate"].ffill(); df["cpi_yoy"] = df["cpi_yoy"].ffill()
 df = df.dropna(subset=["lending_rate"]).reset_index(drop=True)

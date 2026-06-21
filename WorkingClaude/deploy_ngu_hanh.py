@@ -89,14 +89,14 @@ def to_staging(source_csv, codename=None):
     out = pd.DataFrame({"time": df["time"], "state": df[state_col].astype(int)})
     if raw_col is None:
         # fetch state_raw from existing LIVE
-        canonical = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_history.csv"))
+        canonical = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_history.csv"))
         canonical["time"] = pd.to_datetime(canonical["time"]).dt.strftime("%Y-%m-%d")
         raw_map = dict(zip(canonical["time"], canonical["state_raw"]))
         out["state_raw"] = out["time"].map(raw_map).fillna(3).astype(int)
     else:
         out["state_raw"] = df[raw_col].astype(int)
     # Local CSV
-    out_local = os.path.join(WORKDIR, "vnindex_5state_staging.csv")
+    out_local = os.path.join(WORKDIR, "data/vnindex_5state_staging.csv")
     out.to_csv(out_local, index=False)
     print(f"  Wrote local: {out_local} ({len(out)} rows)")
     # BQ upload
@@ -136,7 +136,7 @@ def promote(archive_as=None):
         print(f"  ✗ archive FAILED: {r.stderr[:200]}"); sys.exit(1)
     print("    BQ archived")
     # Local backup
-    for fn in ["vnindex_5state.csv", "vnindex_5state_history.csv", "vnindex_state_history.csv"]:
+    for fn in ["data/vnindex_5state.csv", "data/vnindex_5state_history.csv", "data/vnindex_state_history.csv"]:
         src = os.path.join(WORKDIR, fn)
         if os.path.exists(src):
             ext = "_archive_" + archive_as
@@ -152,16 +152,16 @@ def promote(archive_as=None):
         print(f"  ✗ promote FAILED: {r.stderr[:200]}"); sys.exit(1)
     print("    BQ live updated")
     # Local: staging.csv → live CSVs
-    staging_csv = os.path.join(WORKDIR, "vnindex_5state_staging.csv")
+    staging_csv = os.path.join(WORKDIR, "data/vnindex_5state_staging.csv")
     if os.path.exists(staging_csv):
         df = pd.read_csv(staging_csv)
-        df.to_csv(os.path.join(WORKDIR, "vnindex_5state.csv"), index=False)
-        df.to_csv(os.path.join(WORKDIR, "vnindex_5state_history.csv"), index=False)
+        df.to_csv(os.path.join(WORKDIR, "data/vnindex_5state.csv"), index=False)
+        df.to_csv(os.path.join(WORKDIR, "data/vnindex_5state_history.csv"), index=False)
         # Legacy schema (recompute Close + PE + r_score_ema from cached data if available)
         try:
-            pe3 = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_v2g_pe3_history.csv"))
-            full = pd.read_csv(os.path.join(WORKDIR, "vnindex_full_2000_2026.csv"), low_memory=False)
-            v2gf = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_v2g_full_history.csv"))
+            pe3 = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_v2g_pe3_history.csv"))
+            full = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_full_2000_2026.csv"), low_memory=False)
+            v2gf = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_v2g_full_history.csv"))
             pe3["time"] = pd.to_datetime(pe3["time"])
             full["time"] = pd.to_datetime(full["time"])
             v2gf["time"] = pd.to_datetime(v2gf["time"])
@@ -175,7 +175,7 @@ def promote(archive_as=None):
             df["r_score_ema"] = df["time"].map(rs_map)
             out3 = df[["time","Close","VNINDEX_PE","state","state_name","r_score_ema"]]
             out3["time"] = out3["time"].dt.strftime("%Y-%m-%d")
-            out3.to_csv(os.path.join(WORKDIR, "vnindex_state_history.csv"), index=False)
+            out3.to_csv(os.path.join(WORKDIR, "data/vnindex_state_history.csv"), index=False)
         except Exception as e:
             print(f"  warning: legacy schema rebuild skipped ({e})")
         print(f"    Local CSVs updated from staging")
@@ -191,7 +191,7 @@ def drop_staging():
     cmd = f'"{BQ}" rm -f -t --project_id={PROJECT} {DATASET}.{STAGING_TABLE}'
     r = bq_run(cmd)
     print(f"  BQ: {'OK' if r.returncode==0 else 'FAIL'}")
-    staging_csv = os.path.join(WORKDIR, "vnindex_5state_staging.csv")
+    staging_csv = os.path.join(WORKDIR, "data/vnindex_5state_staging.csv")
     if os.path.exists(staging_csv):
         os.unlink(staging_csv); print(f"  Local: dropped")
 
@@ -217,11 +217,11 @@ def rollback_to(codename):
     # Local: restore from corresponding local archive if exists
     local_archive = os.path.join(WORKDIR, f"vnindex_5state_archive_{codename}.csv")
     if os.path.exists(local_archive):
-        shutil.copy2(local_archive, os.path.join(WORKDIR, "vnindex_5state.csv"))
-        shutil.copy2(local_archive, os.path.join(WORKDIR, "vnindex_5state_history.csv"))
+        shutil.copy2(local_archive, os.path.join(WORKDIR, "data/vnindex_5state.csv"))
+        shutil.copy2(local_archive, os.path.join(WORKDIR, "data/vnindex_5state_history.csv"))
         h = os.path.join(WORKDIR, f"vnindex_state_history_archive_{codename}.csv")
         if os.path.exists(h):
-            shutil.copy2(h, os.path.join(WORKDIR, "vnindex_state_history.csv"))
+            shutil.copy2(h, os.path.join(WORKDIR, "data/vnindex_state_history.csv"))
         print(f"  ✓ Local CSVs restored from {local_archive}")
 
 if __name__ == "__main__":

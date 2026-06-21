@@ -8,9 +8,9 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="repla
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
 
 SERIES = {
-    "Tinh_Te":     "vnindex_5state.csv",
-    "v3.4b":       "_cmp_v34b.csv",
-    "DT_10_25_25": "vnindex_5state_dt_10_25_25.csv",
+    "Tinh_Te":     "data/vnindex_5state.csv",
+    "v3.4b":       "data/_cmp_v34b.csv",
+    "DT_10_25_25": "data/vnindex_5state_dt_10_25_25.csv",
 }
 
 def n_transitions(df, start=None):

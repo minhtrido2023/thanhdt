@@ -161,8 +161,8 @@ print(f"    n_stops shown: {len(stop_trades)}, total stops: {(trades_df['reason'
 
 # Save
 df_a = pd.DataFrame(sec_rot_results)
-df_a.to_csv(os.path.join(WORKDIR, "sector_rotation_50B.csv"), index=False)
+df_a.to_csv(os.path.join(WORKDIR, "data/sector_rotation_50B.csv"), index=False)
 df_b = pd.DataFrame(hc_bal_results)
-df_b.to_csv(os.path.join(WORKDIR, "hc_vs_bal_scaling.csv"), index=False)
-trades_df.to_csv(os.path.join(WORKDIR, "exit_analysis_trades.csv"), index=False)
+df_b.to_csv(os.path.join(WORKDIR, "data/hc_vs_bal_scaling.csv"), index=False)
+trades_df.to_csv(os.path.join(WORKDIR, "data/exit_analysis_trades.csv"), index=False)
 print(f"\n  Saved: sector_rotation_50B.csv, hc_vs_bal_scaling.csv, exit_analysis_trades.csv")

@@ -47,7 +47,7 @@ def run_ewv1(tv_price, liq_min, tag, topn=0):
     return pd.read_csv(os.path.join(WORKDIR, f"vnindex_5state_ew_full{tag}.csv"), parse_dates=["time"])
 
 # VNINDEX forward returns (the regime we predict / trade)
-vni = pd.read_csv("VNINDEX.csv", usecols=["time","Close"]); vni["time"] = pd.to_datetime(vni["time"])
+vni = pd.read_csv("data/VNINDEX.csv", usecols=["time","Close"]); vni["time"] = pd.to_datetime(vni["time"])
 vni = vni.sort_values("time").reset_index(drop=True)
 for h in (5,20,60):
     vni[f"fwd{h}"] = vni["Close"].shift(-h)/vni["Close"] - 1

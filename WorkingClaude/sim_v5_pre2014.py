@@ -124,8 +124,8 @@ sig["days_since_release"] = ds
 
 print(f"[3] Load state series + VNI metrics...")
 state_dfs = {}
-for name, csv in [("TQ34b","vnindex_5state_tam_quan_v3_4b_full_history.csv"),
-                  ("DT","vnindex_5state_dt_10_25_25.csv")]:
+for name, csv in [("TQ34b","data/vnindex_5state_tam_quan_v3_4b_full_history.csv"),
+                  ("DT","data/vnindex_5state_dt_10_25_25.csv")]:
     sdf = pd.read_csv(csv)
     sdf["time"] = pd.to_datetime(sdf["time"])
     sdf = sdf[(sdf["time"]>=pd.Timestamp("2006-01-01")) & (sdf["time"]<=pd.Timestamp(END))][["time","state"]]

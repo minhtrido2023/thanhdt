@@ -36,7 +36,7 @@ STATE_WEIGHT = {1:0.0, 2:0.2, 3:0.7, 4:1.0, 5:1.3}
 
 SHADOW_START = pd.Timestamp("2026-05-21")   # day v3.3b promoted to STAGING NEXT
 SHADOW_END   = pd.Timestamp("2026-06-04")   # +2 weeks
-LOG_FILE     = os.path.join(WORKDIR, "shadow_log_v3_3b.csv")
+LOG_FILE     = os.path.join(WORKDIR, "data/shadow_log_v3_3b.csv")
 
 def bq_query(sql):
     # Use stdin for SQL — avoids Windows cmd quoting issues

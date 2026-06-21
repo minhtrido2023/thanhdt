@@ -25,7 +25,7 @@ from pathlib import Path
 
 WORKDIR = Path(__file__).parent
 STATE_PATH = WORKDIR / 'bull_div_boost_state.json'
-LOG_PATH   = WORKDIR / 'bull_div_boost_log.csv'
+LOG_PATH   = WORKDIR / 'data/bull_div_boost_log.csv'
 
 # Tuning (from OOS-best conservative pick — see backtest_plan_a.py)
 HOLD_DAYS  = 60   # boost window length in trading sessions

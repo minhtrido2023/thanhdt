@@ -163,5 +163,5 @@ for yr in sorted(set(y_v0.index)):
     print(f"  {yr:<8} {a:>14.2f}× {b:>19.2f}×")
 
 # Save
-df_res.to_csv(os.path.join(WORKDIR, "etf_parking_results.csv"), index=False)
+df_res.to_csv(os.path.join(WORKDIR, "data/etf_parking_results.csv"), index=False)
 print(f"\n  Saved: etf_parking_results.csv")

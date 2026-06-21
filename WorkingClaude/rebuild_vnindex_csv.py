@@ -41,14 +41,14 @@ print(f"  OHLCV: {len(ohlcv):,} rows, {ohlcv['time'].min().date()} → {ohlcv['t
 
 # Read current VNINDEX.csv (Pe data)
 print("Reading current VNINDEX.csv (Pe + trading_session)...")
-cur = pd.read_csv(os.path.join(WORKDIR, "VNINDEX.csv"))
+cur = pd.read_csv(os.path.join(WORKDIR, "data/VNINDEX.csv"))
 cur["time"] = pd.to_datetime(cur["time"], format="mixed")
 print(f"  Pe data: {len(cur):,} rows, {cur['time'].min().date()} → {cur['time'].max().date()}")
 
 # Backup current CSV
 import shutil
-backup = os.path.join(WORKDIR, "VNINDEX_pe_only.csv")
-shutil.copy(os.path.join(WORKDIR, "VNINDEX.csv"), backup)
+backup = os.path.join(WORKDIR, "data/VNINDEX_pe_only.csv")
+shutil.copy(os.path.join(WORKDIR, "data/VNINDEX.csv"), backup)
 print(f"  Backed up Pe-only file: {backup}")
 
 # For dates after BQ's max, use user's CSV Index as Close + approximate OHL
@@ -73,5 +73,5 @@ print(f"  Last 3 rows:")
 print(merged.tail(3).to_string(index=False))
 
 # Save back as VNINDEX.csv (script-compatible format)
-merged.to_csv(os.path.join(WORKDIR, "VNINDEX.csv"), index=False)
+merged.to_csv(os.path.join(WORKDIR, "data/VNINDEX.csv"), index=False)
 print(f"\n  Saved enhanced VNINDEX.csv with OHLCV + Pe ({merged['time'].max().date()})")

@@ -114,7 +114,7 @@ if state == 2:
         dd_now, vn_cooling = -99.0, False
     vix_note = ""
     try:
-        u = pd.read_csv(os.path.join(WORKDIR, "us_market_history.csv"),
+        u = pd.read_csv(os.path.join(WORKDIR, "data/us_market_history.csv"),
                         parse_dates=["time"]).sort_values("time")
         _vc = bool(u["vix"].iloc[-1] <= u["vix"].rolling(20).max().iloc[-1] * 0.85)
         vix_note = f", VIX-cooling={_vc} (tham khao)"

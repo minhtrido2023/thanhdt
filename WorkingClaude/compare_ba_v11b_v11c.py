@@ -152,5 +152,5 @@ for label, st, en in periods:
           f"{m11c['calmar']-m10['calmar']:>+8.2f}{m11c['wealth']-m10['wealth']:>+8.2f}")
     print()
 
-pd.DataFrame({"v10_v4":ba_v10,"v11b":ba_v11b,"v11c":ba_v11c}).to_csv("ba_v11bc_vs_v10_nav.csv")
+pd.DataFrame({"v10_v4":ba_v10,"v11b":ba_v11b,"v11c":ba_v11c}).to_csv("data/ba_v11bc_vs_v10_nav.csv")
 print("Saved ba_v11bc_vs_v10_nav.csv")

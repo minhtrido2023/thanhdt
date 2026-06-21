@@ -200,7 +200,7 @@ print(df_multi[["name", "cagr_pct", "sharpe", "max_dd_pct", "calmar", "wealth_x"
     ].to_string(index=False, float_format=lambda x: f"{x:.2f}"))
 
 # Save
-df_scale.to_csv(os.path.join(WORKDIR, "scaling_extended.csv"), index=False)
-df_sec.to_csv(os.path.join(WORKDIR, "sector_limit_50B.csv"), index=False)
-df_multi.to_csv(os.path.join(WORKDIR, "multi_strategy_50B.csv"), index=False)
+df_scale.to_csv(os.path.join(WORKDIR, "data/scaling_extended.csv"), index=False)
+df_sec.to_csv(os.path.join(WORKDIR, "data/sector_limit_50B.csv"), index=False)
+df_multi.to_csv(os.path.join(WORKDIR, "data/multi_strategy_50B.csv"), index=False)
 print("\n  Saved: scaling_extended.csv, sector_limit_50B.csv, multi_strategy_50B.csv")

@@ -45,7 +45,7 @@ print("="*100)
 
 # ─── 1. BAL book at 25B (reuse production code) ──────────────────────────
 print("\n[1] Running BA v11 BAL book at 25B ...")
-with open("ba_v11_unified_12y_sig.pkl", "rb") as f: sig = pickle.load(f)
+with open("data/ba_v11_unified_12y_sig.pkl", "rb") as f: sig = pickle.load(f)
 sig["time"] = pd.to_datetime(sig["time"])
 vni_full = bq(f"""SELECT t.time, t.Close, t.MA200, t.D_RSI
 FROM tav2_bq.ticker AS t WHERE t.ticker = 'VNINDEX' AND t.time BETWEEN DATE '{START_DATE}' AND DATE '{END_DATE}' ORDER BY t.time""")
@@ -92,25 +92,25 @@ print(f"  BAL final at 25B: {nav_bal_s.iloc[-1]/1e9:.2f}B  | trades: {len(trades
 # ─── 2. LAGGED V5 book at 25B ────────────────────────────────────────────
 print("\n[2] Running LAGGED V5 (NP_R + surprise B_MA) at 25B ...")
 
-with open("earnings_px.pkl","rb") as f: px_data = pickle.load(f)
+with open("data/earnings_px.pkl","rb") as f: px_data = pickle.load(f)
 px_data["time"] = pd.to_datetime(px_data["time"])
 px_close = px_data.pivot_table(index="time", columns="ticker", values="Close", aggfunc="first").sort_index().ffill(limit=5)
 master_idx = pd.DatetimeIndex(px_close.index).as_unit("ns")
 px_close.index = master_idx
 all_dates = np.array(master_idx)
-with open("lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
+with open("data/lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
 ov["time"] = pd.to_datetime(ov["time"])
 px_open = ov.pivot_table(index="time", columns="ticker", values="Open", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 liq_l = ov.pivot_table(index="time", columns="ticker", values="Volume_3M_P50", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 
 # Compute surprise
-with open("earnings_surprise_data.pkl","rb") as f: fin = pickle.load(f)
+with open("data/earnings_surprise_data.pkl","rb") as f: fin = pickle.load(f)
 fin["Release_Date"] = pd.to_datetime(fin["Release_Date"])
 FLOOR = 1e9
 fin["exp_B_MA"] = fin[["NP_P1","NP_P2","NP_P3","NP_P4"]].mean(axis=1)
 fin["surprise_B_MA"] = ((fin["NP_P0"] - fin["exp_B_MA"]) / np.maximum(np.abs(fin["exp_B_MA"]), FLOOR)).clip(-5, 5)
 
-ev_class = pd.read_csv("earnings_events_classified.csv", parse_dates=["Release_Date"])
+ev_class = pd.read_csv("data/earnings_events_classified.csv", parse_dates=["Release_Date"])
 ev_v5 = ev_class.merge(fin[["ticker","quarter","Release_Date","surprise_B_MA"]],
                         on=["ticker","quarter","Release_Date"], how="left")
 # V5 filter
@@ -187,9 +187,9 @@ common = nav_bal_s.index.intersection(nav_lag_s.index)
 nav_v13 = (nav_bal_s.loc[common] + nav_lag_s.loc[common]) / TOTAL_NAV  # normalize
 
 # v11 production (already saved)
-ba_v11_prod = pd.read_csv("ba_v11_production_12y_nav.csv", index_col=0, parse_dates=True).iloc[:,0]
+ba_v11_prod = pd.read_csv("data/ba_v11_production_12y_nav.csv", index_col=0, parse_dates=True).iloc[:,0]
 # v12 from option1 result (saved earlier)
-v12 = pd.read_csv("option1_bal_lagged_vs_prod.csv", index_col=0, parse_dates=True)["OPT1_BAL+LAGGED"]
+v12 = pd.read_csv("data/option1_bal_lagged_vs_prod.csv", index_col=0, parse_dates=True)["OPT1_BAL+LAGGED"]
 
 common_all = nav_v13.index.intersection(ba_v11_prod.index).intersection(v12.index)
 nav_v13 = nav_v13.loc[common_all]
@@ -255,5 +255,5 @@ for wn, sw, ew in windows:
 
 # ─── 6. Save ─────────────────────────────────────────────────────────────
 out_df = pd.DataFrame({"v11":nav_v11, "v12":nav_v12, "v13":nav_v13})
-out_df.to_csv("v13_tam_the_comparison.csv")
+out_df.to_csv("data/v13_tam_the_comparison.csv")
 print("\nSaved: v13_tam_the_comparison.csv")

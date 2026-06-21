@@ -162,7 +162,7 @@ sig_sf["time"] = pd.to_datetime(sig_sf["time"])
 print(f"  Rows: {len(sig_sf):,}")
 
 # Compare distribution vs canonical
-with open(os.path.join(WORKDIR, "ba_v11_unified_12y_sig.pkl"),"rb") as f:
+with open(os.path.join(WORKDIR, "data/ba_v11_unified_12y_sig.pkl"),"rb") as f:
     sig_canon = pickle.load(f)
 sig_canon["time"] = pd.to_datetime(sig_canon["time"])
 
@@ -184,7 +184,7 @@ if agree < 95:
     print(f"  Sample mismatch:")
     print(m[m['ta_c'] != m['ta_s']].head())
 
-out_path = os.path.join(WORKDIR, "ba_v11_state_free_sig.pkl")
+out_path = os.path.join(WORKDIR, "data/ba_v11_state_free_sig.pkl")
 sig_sf.to_pickle(out_path)
 print(f"\n[4] Saved -> {out_path}")
 print(f"  Cols: {sig_sf.columns.tolist()}")

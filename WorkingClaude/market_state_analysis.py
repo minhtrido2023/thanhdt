@@ -13,7 +13,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 # --- 1. LOAD DATA ---
-CSV_PATH = r'/home/trido/thanhdt/WorkingClaude/VNINDEX.csv'
+CSV_PATH = r'/home/trido/thanhdt/WorkingClaude/data/VNINDEX.csv'
 
 cols_needed = [
     'time', 'Close', 'VNINDEX_PE', 'O3M',

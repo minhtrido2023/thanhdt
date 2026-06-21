@@ -22,7 +22,7 @@ def bq_query(sql):
     if r.returncode != 0: raise RuntimeError(r.stderr[:500])
     return pd.read_csv(StringIO(r.stdout.strip()))
 
-fa = pd.read_csv("fa_ratings_lh.csv")
+fa = pd.read_csv("data/fa_ratings_lh.csv")
 
 results = {}
 for tk in ["HDG", "HHV"]:

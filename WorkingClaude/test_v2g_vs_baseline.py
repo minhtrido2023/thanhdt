@@ -289,5 +289,5 @@ for ts in y_orig.index:
 
 # Save
 df_res = pd.DataFrame(results)
-df_res.to_csv(os.path.join(WORKDIR, "v2g_vs_original_results.csv"), index=False)
+df_res.to_csv(os.path.join(WORKDIR, "data/v2g_vs_original_results.csv"), index=False)
 print(f"\n  Saved: v2g_vs_original_results.csv")

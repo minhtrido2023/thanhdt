@@ -19,7 +19,7 @@ sys.path.insert(0, r"/home/trido/thanhdt/WorkingClaude/stockquery")
 from stockquery_agent import StockQuery
 
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
-CACHE = os.path.join(WORKDIR, "intraday_full.pkl")
+CACHE = os.path.join(WORKDIR, "data/intraday_full.pkl")
 
 PLAY_RULE = {
     "COMPOUNDER_BUY":      "E1_T1115_LIM",
@@ -210,7 +210,7 @@ def simulate_pair(p, intraday):
 
 def main():
     print("Loading journal + intraday cache...")
-    j = pd.read_csv(os.path.join(WORKDIR, "journal_v6_extended_events.csv"))
+    j = pd.read_csv(os.path.join(WORKDIR, "data/journal_v6_extended_events.csv"))
     j["date"] = pd.to_datetime(j["date"])
     with open(CACHE,"rb") as f: intraday = pickle.load(f)
     print(f"  {len(intraday)} tickers in cache")
@@ -240,7 +240,7 @@ def main():
     df = pd.DataFrame([r for r in results if "skipped" not in r])
     skipped = [r for r in results if "skipped" in r]
     print(f"\n{len(df)} simulated, {len(skipped)} skipped")
-    df.to_csv(os.path.join(WORKDIR, "layer3_backfill_results.csv"), index=False)
+    df.to_csv(os.path.join(WORKDIR, "data/layer3_backfill_results.csv"), index=False)
 
     print("\n" + "="*100)
     print("SUMMARY")

@@ -32,7 +32,7 @@ fin = bq("""SELECT f.ticker, f.quarter, f.time, f.Release_Date,
 FROM tav2_bq.ticker_financial AS f
 WHERE f.Release_Date IS NOT NULL AND f.Release_Date >= '2009-01-01' AND f.NP_P0 IS NOT NULL""")
 fin["Release_Date"] = pd.to_datetime(fin["Release_Date"]); fin["time"] = pd.to_datetime(fin["time"])
-save(fin, "earnings_surprise_data.pkl")
+save(fin, "data/earnings_surprise_data.pkl")
 universe = sorted(fin["ticker"].dropna().unique())
 print(f"  LAG universe = {len(universe)} earnings tickers")
 inl = ",".join(f"'{t}'" for t in universe)
@@ -43,7 +43,7 @@ px = bq(f"""SELECT t.ticker, t.time, t.Close FROM tav2_bq.ticker AS t
 WHERE t.ticker IN ({inl}) AND t.time >= DATE '2011-01-01' AND t.Close > 0""")
 px["time"] = pd.to_datetime(px["time"])
 px = px.drop_duplicates(["ticker","time"]).sort_values(["ticker","time"]).reset_index(drop=True)
-save(px, "earnings_px.pkl")
+save(px, "data/earnings_px.pkl")
 
 # ── 2. lagged_pos_ov.pkl  (ticker, time, Open, Volume_3M_P50) ──
 print("[2] lagged_pos_ov.pkl ...")
@@ -51,13 +51,13 @@ ov = bq(f"""SELECT t.ticker, t.time, t.Open, t.Volume_3M_P50 FROM tav2_bq.ticker
 WHERE t.ticker IN ({inl}) AND t.time >= DATE '2011-01-01' AND t.Close > 0""")
 ov["time"] = pd.to_datetime(ov["time"])
 ov = ov.drop_duplicates(["ticker","time"]).sort_values(["ticker","time"]).reset_index(drop=True)
-save(ov, "lagged_pos_ov.pkl")
+save(ov, "data/lagged_pos_ov.pkl")
 
 # ── verify all 3 reload cleanly + coverage check vs events CSV ──
 print("\n[verify] reload + coverage:")
-for nm in ["earnings_surprise_data.pkl","earnings_px.pkl","lagged_pos_ov.pkl"]:
+for nm in ["data/earnings_surprise_data.pkl","data/earnings_px.pkl","data/lagged_pos_ov.pkl"]:
     o = pickle.load(open(f"{WD}/{nm}","rb"))
     print(f"  {nm}: reload OK, {len(o):,} rows, time max {pd.to_datetime(o['time']).max().date()}")
-ev = pd.read_csv(f"{WD}/earnings_events_classified.csv")
+ev = pd.read_csv(f"{WD}/data/earnings_events_classified.csv")
 miss = set(ev["ticker"].unique()) - set(universe)
 print(f"  events_classified tickers not in LAG universe: {len(miss)} {sorted(miss)[:10]}")

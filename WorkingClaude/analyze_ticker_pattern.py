@@ -33,7 +33,7 @@ print("=" * 70)
 print("BƯỚC 1: Load profile_hit.csv và tính per-ticker stats")
 print("=" * 70)
 
-df = pd.read_csv(os.path.join(WORKDIR, "profile_hit.csv"), index_col=0, low_memory=False)
+df = pd.read_csv(os.path.join(WORKDIR, "data/profile_hit.csv"), index_col=0, low_memory=False)
 print(f"Total rows: {len(df):,} | Tickers: {df['ticker'].nunique()} | Filters: {df['filter'].nunique()}")
 print(f"Filters: {sorted(df['filter'].unique())}")
 
@@ -355,7 +355,7 @@ print(good_list[['ticker', 'deal_count', 'filter_count', 'filters_hit',
                  'median_profit', 'winrate', 'good_rate']].head(30).to_string(index=False))
 
 # Save full results
-ts_valid.to_csv(os.path.join(WORKDIR, "ticker_pattern_stats.csv"), index=False)
+ts_valid.to_csv(os.path.join(WORKDIR, "data/ticker_pattern_stats.csv"), index=False)
 print(f"\nSaved: ticker_pattern_stats.csv ({len(ts_valid)} tickers)")
 
 # ─────────────────────────────────────────────

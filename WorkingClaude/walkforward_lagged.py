@@ -176,7 +176,7 @@ for cfg_name, cfg_params in configs.items():
     print()
 
 res_df = pd.DataFrame(results)
-res_df.to_csv("lagged_pos_walkforward.csv", index=False)
+res_df.to_csv("data/lagged_pos_walkforward.csv", index=False)
 
 # Summary: IS vs OOS comparison
 print("\n" + "="*100)

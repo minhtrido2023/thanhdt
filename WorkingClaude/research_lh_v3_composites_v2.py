@@ -21,7 +21,7 @@ try: sys.stdout.reconfigure(encoding="utf-8")
 except Exception: pass
 import pandas as pd, numpy as np
 
-df = pd.read_csv("lh_v3_factor_panel.csv", parse_dates=["time"])
+df = pd.read_csv("data/lh_v3_factor_panel.csv", parse_dates=["time"])
 print(f"Loaded panel: {len(df):,} rows")
 
 # Add reverse momentum (mean reversion signal)
@@ -85,7 +85,7 @@ for name, w_dict in COMPOSITES_V2.items():
     df[name] = sum(parts) / sum(w_dict.values())
 
 # Also recompute baseline v8c
-fa = pd.read_csv("fa_ratings_lh.csv", usecols=["ticker","quarter","score"]).rename(columns={"score":"v8c_score"})
+fa = pd.read_csv("data/fa_ratings_lh.csv", usecols=["ticker","quarter","score"]).rename(columns={"score":"v8c_score"})
 df = df.merge(fa, on=["ticker","quarter"], how="left")
 
 # IC analysis
@@ -157,5 +157,5 @@ for name in ["C8_ultra_value", "C10_contrarian", "C6_smart_value", "v8c_score"]:
         o1y = sub["O1Y_ret"].iloc[0] if "O1Y_ret" in sub.columns else np.nan
         print(f"    {tk} @ {q}: score={score:.3f}  pct={pct:.2f}  O1Y_after={o1y:+.1f}%")
 
-df.to_csv("lh_v3_factor_panel_v2.csv", index=False)
+df.to_csv("data/lh_v3_factor_panel_v2.csv", index=False)
 print("\nSaved: lh_v3_factor_panel_v2.csv")

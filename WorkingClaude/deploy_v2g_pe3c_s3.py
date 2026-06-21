@@ -36,7 +36,7 @@ STATE_NAMES = {1:"CRISIS", 2:"BEAR", 3:"NEUTRAL", 4:"BULL", 5:"EX-BULL"}
 
 # ════════════════════ 1. Build state series in-memory (so we can write all 4 stores) ════════════════════
 print("Building D_pe3c_s3 state series from local v2g_pe3c + smoothing ...")
-pe3 = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_v2g_pe3_history.csv"))
+pe3 = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_v2g_pe3_history.csv"))
 pe3["time"] = pd.to_datetime(pe3["time"])
 pe3 = pe3.sort_values("time").reset_index(drop=True)
 state_raw_v2g_pe3 = pe3["state_v2g_pe3"].values.astype(int)
@@ -76,23 +76,23 @@ for s in [1,2,3,4,5]:
     print(f"    state {s}: {n} ({n/len(state_s3)*100:.1f}%)")
 
 # Load state_raw from previous canonical for the 3-col schema
-canonical_prev = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_history.csv"))
+canonical_prev = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_history.csv"))
 canonical_prev["time"] = pd.to_datetime(canonical_prev["time"])
 state_raw_by_t = dict(zip(canonical_prev["time"], canonical_prev["state_raw"]))
 state_raw_arr = pe3["time"].map(state_raw_by_t).fillna(3).astype(int).values
 
 # Load PE_clean + r_score_ema for legacy schema
-full = pd.read_csv(os.path.join(WORKDIR, "vnindex_full_2000_2026.csv"), low_memory=False)
+full = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_full_2000_2026.csv"), low_memory=False)
 full["time"] = pd.to_datetime(full["time"])
 pe_by_t = dict(zip(full["time"], full["VNINDEX_PE_clean"]))
-v2g_full = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_v2g_full_history.csv"))
+v2g_full = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_v2g_full_history.csv"))
 v2g_full["time"] = pd.to_datetime(v2g_full["time"])
 rscore_by_t = dict(zip(v2g_full["time"], v2g_full["r_score_ema"]))
 close_by_t = dict(zip(pe3["time"], pe3["Close"]))
 
 # ════════════════════ 2. Backup ════════════════════
 print(f"\n=== STEP 1: Backup current canonical → {SUFFIX} ===")
-for fn in ["vnindex_5state_history.csv", "vnindex_5state.csv", "vnindex_state_history.csv"]:
+for fn in ["data/vnindex_5state_history.csv", "data/vnindex_5state.csv", "data/vnindex_state_history.csv"]:
     p = os.path.join(WORKDIR, fn)
     if os.path.exists(p):
         bak = p.replace(".csv", f"{SUFFIX}.csv")
@@ -114,10 +114,10 @@ out1 = pd.DataFrame({
     "state": state_s3.astype(int),
     "state_raw": state_raw_arr.astype(int),
 })
-out1.to_csv(os.path.join(WORKDIR, "vnindex_5state_history.csv"), index=False)
+out1.to_csv(os.path.join(WORKDIR, "data/vnindex_5state_history.csv"), index=False)
 print(f"  ✓ vnindex_5state_history.csv  ({len(out1)} rows, latest={out1['time'].iloc[-1]} state={out1['state'].iloc[-1]})")
 
-out1.to_csv(os.path.join(WORKDIR, "vnindex_5state.csv"), index=False)
+out1.to_csv(os.path.join(WORKDIR, "data/vnindex_5state.csv"), index=False)
 print(f"  ✓ vnindex_5state.csv         ({len(out1)} rows)")
 
 # Legacy schema
@@ -129,7 +129,7 @@ out3 = pd.DataFrame({
     "state_name": pd.Series(state_s3).map(STATE_NAMES).values,
     "r_score_ema": pe3["time"].map(rscore_by_t).values,
 })
-out3.to_csv(os.path.join(WORKDIR, "vnindex_state_history.csv"), index=False)
+out3.to_csv(os.path.join(WORKDIR, "data/vnindex_state_history.csv"), index=False)
 print(f"  ✓ vnindex_state_history.csv  ({len(out3)} rows)")
 
 # ════════════════════ 4. Overwrite BQ table ════════════════════
@@ -149,10 +149,10 @@ os.unlink(load_csv)
 
 # ════════════════════ 5. Verify ════════════════════
 print("\n=== STEP 4: Verify ===")
-for fn in ["vnindex_5state_history.csv", "vnindex_5state.csv"]:
+for fn in ["data/vnindex_5state_history.csv", "data/vnindex_5state.csv"]:
     df = pd.read_csv(os.path.join(WORKDIR, fn))
     print(f"  {fn}: {len(df)} rows, latest = {df['time'].iloc[-1]} state={df['state'].iloc[-1]}")
-df3 = pd.read_csv(os.path.join(WORKDIR, "vnindex_state_history.csv"))
+df3 = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_state_history.csv"))
 print(f"  vnindex_state_history.csv: {len(df3)} rows, latest = {df3['time'].iloc[-1]} state={df3['state'].iloc[-1]} ({df3['state_name'].iloc[-1]})")
 
 print(f"  Querying BQ table ...")

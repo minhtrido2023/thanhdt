@@ -65,12 +65,12 @@ if __name__=="__main__":
     if init:
         print("[INIT] seeding vintage reference...")
         # historical point 1: bak pkl (as-of 2026-05-20 build, 2014+ market state5)
-        bak="ba_v11_unified_12y_sig.pkl.bak_stale_20260520"
+        bak="data/ba_v11_unified_12y_sig.pkl.bak_stale_20260520"
         if os.path.exists(bak):
             save_snapshot(pkl_state(bak), "2026-05-20", "pkl.bak_stale (May20 build)")
         # historical point 2: current rebuilt pkl (as-of 2026-05-28 build)
-        if os.path.exists("ba_v11_unified_12y_sig.pkl"):
-            save_snapshot(pkl_state("ba_v11_unified_12y_sig.pkl"), "2026-05-28", "pkl current (May28 rebuild, full)")
+        if os.path.exists("data/ba_v11_unified_12y_sig.pkl"):
+            save_snapshot(pkl_state("data/ba_v11_unified_12y_sig.pkl"), "2026-05-28", "pkl current (May28 rebuild, full)")
         # today's authoritative full-history snapshot from BQ LIVE table
         save_snapshot(current_state(), today, f"BQ {STATE_TABLE} (full 2000+)")
         # README

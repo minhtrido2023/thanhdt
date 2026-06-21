@@ -29,12 +29,12 @@ STATE_NAMES = {1:"CRISIS",2:"BEAR",3:"NEUTRAL",4:"BULL",5:"EX-BULL"}
 RSI_THR = 55
 
 # Load
-v31 = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_1_full_history.csv"))
+v31 = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_1_full_history.csv"))
 v31["time"] = pd.to_datetime(v31["time"]); v31 = v31.sort_values("time").reset_index(drop=True)
-v3_stg = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_dual_v3_staging.csv"))
+v3_stg = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_dual_v3_staging.csv"))
 v3_stg["time"] = pd.to_datetime(v3_stg["time"])
 v3_stg = v3_stg.rename(columns={"state": "state_v3"})
-dr  = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_dual_v3_full.csv"))
+dr  = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_dual_v3_full.csv"))
 dr["time"] = pd.to_datetime(dr["time"])
 
 df = v31.merge(v3_stg[["time","state_v3"]], on="time", how="left").merge(
@@ -150,11 +150,11 @@ for label, t_in, t_out in variants:
 # State distribution comparison
 print("\nState distribution comparison:")
 print(f"{'State':<10}{'v3.1':>8}{'v3.3b':>8}{'v3.4b':>8}{'v3.5a':>8}{'v3.5b':>8}{'v3.5c':>8}")
-v33b = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_3b_full_history.csv"))["state"].values
-v34b = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_4b_full_history.csv"))["state"].values
-v35a = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_5a_full_history.csv"))["state"].values
-v35b = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_5b_full_history.csv"))["state"].values
-v35c = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_5c_full_history.csv"))["state"].values
+v33b = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_3b_full_history.csv"))["state"].values
+v34b = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_4b_full_history.csv"))["state"].values
+v35a = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_5a_full_history.csv"))["state"].values
+v35b = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_5b_full_history.csv"))["state"].values
+v35c = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_5c_full_history.csv"))["state"].values
 for s in [1,2,3,4,5]:
     p1   = (v31_state==s).mean()*100
     p3b  = (v33b==s).mean()*100

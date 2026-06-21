@@ -18,11 +18,11 @@ except Exception: pass
 import pandas as pd, numpy as np
 
 # ─── Load data ───────────────────────────────────────────────────────────
-trades = pd.read_csv("lagged_pos_trades.csv", parse_dates=["dt","entry_dt","release_dt"])
+trades = pd.read_csv("data/lagged_pos_trades.csv", parse_dates=["dt","entry_dt","release_dt"])
 sells  = trades[trades["side"]=="SELL"].copy()
 print(f"Total sells: {len(sells)}")
 
-vni = pd.read_csv("VNINDEX.csv", parse_dates=["time"])
+vni = pd.read_csv("data/VNINDEX.csv", parse_dates=["time"])
 vni = vni[["time","Close"]].rename(columns={"Close":"vni_close"}).set_index("time").sort_index()
 vni["vni_ma200"] = vni["vni_close"].rolling(200, min_periods=100).mean()
 vni["vni_3m_ret"] = vni["vni_close"].pct_change(63) * 100
@@ -57,7 +57,7 @@ print("="*90)
 # We have entry_px (T+5 from release), release_dt
 # Compute pre-release move: how much did stock move from -30d to -1d pre-release?
 import pickle
-with open("earnings_px.pkl","rb") as f: px = pickle.load(f)
+with open("data/earnings_px.pkl","rb") as f: px = pickle.load(f)
 px["time"] = pd.to_datetime(px["time"])
 px_piv = px.pivot_table(index="time", columns="ticker", values="Close", aggfunc="first").sort_index().ffill(limit=5)
 all_dates = np.array(px_piv.index)
@@ -89,8 +89,8 @@ print("\n" + "="*90)
 print("  H4: Universe composition — what sectors/types are in LAGGED_POS?")
 print("="*90)
 # Read FA ratings for ticker info (ICB_Code, MktCap)
-fa = pd.read_csv("fa_ratings_lh.csv", parse_dates=["time"])
-prof = pd.read_csv("ticker_reaction_profile.csv", index_col=0)
+fa = pd.read_csv("data/fa_ratings_lh.csv", parse_dates=["time"])
+prof = pd.read_csv("data/ticker_reaction_profile.csv", index_col=0)
 universe = prof[(prof["avg_post_good"] >= 5.0) & (prof["n_good"] >= 4)].index.tolist()
 fa_uni = fa[fa["ticker"].isin(universe)].sort_values("quarter").drop_duplicates("ticker", keep="last")
 print(f"  Universe size with FA data: {len(fa_uni)}/{len(universe)}")

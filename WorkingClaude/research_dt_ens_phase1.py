@@ -37,7 +37,7 @@ print("="*104); print("  PHASE 1 — harness validation + E0 switch cadence/hori
 # 1. Common data
 # ───────────────────────────────────────────────────────────────────────────
 print("\n[1] Loading BA v11 signals + common data...")
-with open("ba_v11_unified_12y_sig.pkl", "rb") as f: sig_B = pickle.load(f)
+with open("data/ba_v11_unified_12y_sig.pkl", "rb") as f: sig_B = pickle.load(f)
 sig_B["time"] = pd.to_datetime(sig_B["time"])
 with open("sim_v11_for_analyzer.py", "r", encoding="utf-8") as f: _c = f.read()
 VNI_QUERY_UNIFIED = re.search(r'^VNI_QUERY_UNIFIED\s*=\s*"""(.+?)"""', _c, re.MULTILINE|re.DOTALL).group(1)
@@ -66,19 +66,19 @@ LIQ = {"liquidity_volume_pct":0.20,"max_fill_days":5,
 # 2. LAGGED V12.1 leg (state-independent, runs once)
 # ───────────────────────────────────────────────────────────────────────────
 print("\n[2] LAGGED V12.1 leg (state-independent)...")
-with open("earnings_px.pkl","rb") as f: px_data = pickle.load(f)
+with open("data/earnings_px.pkl","rb") as f: px_data = pickle.load(f)
 px_data["time"] = pd.to_datetime(px_data["time"])
 px_close = px_data.pivot_table(index="time", columns="ticker", values="Close", aggfunc="first").sort_index().ffill(limit=5)
 master_idx = pd.DatetimeIndex(px_close.index).as_unit("ns"); px_close.index = master_idx
 all_dates = np.array(master_idx)
-with open("lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f); ov["time"] = pd.to_datetime(ov["time"])
+with open("data/lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f); ov["time"] = pd.to_datetime(ov["time"])
 px_open = ov.pivot_table(index="time", columns="ticker", values="Open", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 liq_l = ov.pivot_table(index="time", columns="ticker", values="Volume_3M_P50", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
-with open("earnings_surprise_data.pkl","rb") as f: fin = pickle.load(f)
+with open("data/earnings_surprise_data.pkl","rb") as f: fin = pickle.load(f)
 fin["Release_Date"] = pd.to_datetime(fin["Release_Date"]); FLOOR = 1e9
 fin["exp_B_MA"] = fin[["NP_P1","NP_P2","NP_P3","NP_P4"]].mean(axis=1)
 fin["surprise_B_MA"] = ((fin["NP_P0"] - fin["exp_B_MA"]) / np.maximum(np.abs(fin["exp_B_MA"]), FLOOR)).clip(-5, 5)
-ev_class = pd.read_csv("earnings_events_classified.csv", parse_dates=["Release_Date"])
+ev_class = pd.read_csv("data/earnings_events_classified.csv", parse_dates=["Release_Date"])
 ev = ev_class.merge(fin[["ticker","quarter","Release_Date","surprise_B_MA"]],
                      on=["ticker","quarter","Release_Date"], how="left")
 ev = ev.sort_values(["ticker","Release_Date"]).reset_index(drop=True)
@@ -241,7 +241,7 @@ def run_state_legs(svt_csv, label, park_ff=None, park_etf_states=ETF_STATES):
     return nav_bal_s, nav_vn30_s
 
 print("\n[3] BAL+VN30 under TQ34b (canonical)...")
-nav_bal_tq, nav_vn30_tq = run_state_legs("vnindex_5state_tam_quan_v3_4b_full_history.csv", "TQ34b")
+nav_bal_tq, nav_vn30_tq = run_state_legs("data/vnindex_5state_tam_quan_v3_4b_full_history.csv", "TQ34b")
 
 # ───────────────────────────────────────────────────────────────────────────
 # 4. M1/M3 at multiple horizons (BQ recompute)

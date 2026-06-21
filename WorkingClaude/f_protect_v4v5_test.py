@@ -21,12 +21,12 @@ v=v[["time","V4_V121_ENS_TQ34b","V5_V4_KellyQ2","VNI"]].rename(
     columns={"V4_V121_ENS_TQ34b":"V4","V5_V4_KellyQ2":"V5"})
 
 # ---- VN30F1M + realized vol + DT5G state ----
-f1=pd.read_csv(WD+"/vn30f1m_raw.csv"); f1["time"]=pd.to_datetime(f1["time"])
+f1=pd.read_csv(WD+"/data/vn30f1m_raw.csv"); f1["time"]=pd.to_datetime(f1["time"])
 f1=f1.sort_values("time").reset_index(drop=True)
 f1["lr"]=np.log(f1["close"]/f1["close"].shift(1)); f1["fret"]=f1["close"].pct_change()
 SPYf=len(f1)/((f1.time.iloc[-1]-f1.time.iloc[0]).days/365.25)
 f1["rv"]=f1["lr"].rolling(20).std()*np.sqrt(SPYf); TGT=float(np.nanmedian(f1["rv"]))
-ds=pd.read_csv(WD+"/vnindex_5state_dt5g_live.csv"); ds["time"]=pd.to_datetime(ds["time"])
+ds=pd.read_csv(WD+"/data/vnindex_5state_dt5g_live.csv"); ds["time"]=pd.to_datetime(ds["time"])
 f1=f1.merge(ds[["time","state"]],on="time",how="left")
 
 # ---- build F sleeve daily returns ----

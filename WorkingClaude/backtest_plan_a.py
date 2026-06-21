@@ -12,13 +12,13 @@ import pandas as pd
 import numpy as np
 from itertools import product
 
-ba = pd.read_csv('ba_v11_nav.csv', parse_dates=['time']).sort_values('time').reset_index(drop=True)
-v  = pd.read_csv('_vni_full.csv', parse_dates=['time']).sort_values('time').reset_index(drop=True)
+ba = pd.read_csv('data/ba_v11_nav.csv', parse_dates=['time']).sort_values('time').reset_index(drop=True)
+v  = pd.read_csv('data/_vni_full.csv', parse_dates=['time']).sort_values('time').reset_index(drop=True)
 v['ret'] = v['Close'].pct_change().fillna(0.0)
 v['hi252'] = v['High'].rolling(252).max()
 v['close_hi252'] = v['Close']/v['hi252']
 
-bull = pd.read_csv('div_bull_with_newind.csv', parse_dates=['date'])
+bull = pd.read_csv('data/div_bull_with_newind.csv', parse_dates=['date'])
 ba['ba_ret'] = ba['BA_v11'].pct_change().fillna(0.0)
 
 dates = pd.DatetimeIndex(sorted(set(ba['time']) & set(v['time'])))
@@ -125,5 +125,5 @@ df_oos = df_oos.sort_values('score', ascending=False)
 print("\n=== PLAN A OOS leaderboard (composite score = dCAGR + 20*(Sh - baseline)) ===")
 print(df_oos[['lift','hold','n_fires','cagr','sharpe','dd','calmar','dCAGR','score']].head(10).to_string(index=False))
 
-df.to_csv('plan_a_grid.csv', index=False)
+df.to_csv('data/plan_a_grid.csv', index=False)
 print("\nSaved: plan_a_grid.csv")

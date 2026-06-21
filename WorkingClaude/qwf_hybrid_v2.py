@@ -56,12 +56,12 @@ def slice_metrics(nav, start, end):
 
 # ---- Load NAV series ----
 print("Loading BA NAV ...")
-if os.path.exists("ba_nav_refresh_2026-05.csv"):
-    ba_df = pd.read_csv("ba_nav_refresh_2026-05.csv", parse_dates=["time"]).sort_values("time").set_index("time")
+if os.path.exists("data/ba_nav_refresh_2026-05.csv"):
+    ba_df = pd.read_csv("data/ba_nav_refresh_2026-05.csv", parse_dates=["time"]).sort_values("time").set_index("time")
     ba_nav = ba_df["BA_50_50"]
     print(f"  Using refreshed BA NAV → range {ba_nav.index.min().date()} to {ba_nav.index.max().date()}")
 else:
-    ba_df = pd.read_csv("f_ba_mix_nav_traces.csv", parse_dates=["time"]).sort_values("time").set_index("time")
+    ba_df = pd.read_csv("data/f_ba_mix_nav_traces.csv", parse_dates=["time"]).sort_values("time").set_index("time")
     ba_nav = ba_df["BA_50_50"]
     print(f"  ⚠ Using OLD BA NAV (refresh not found) → ends {ba_nav.index.max().date()}")
 
@@ -69,9 +69,9 @@ print("Running LH_gated ...")
 lh_g = run_lh(hold_quarters=4, n_positions=10, tier_set=("A","B"), incl_sub="all",
                refresh_mode="staggered", crisis_gate=True)["nav"]["nav"]
 
-vn_df = pd.read_csv("vnindex_lh.csv", parse_dates=["time"])
+vn_df = pd.read_csv("data/vnindex_lh.csv", parse_dates=["time"])
 vn_df = vn_df[vn_df["Close"] > 100].sort_values("time").set_index("time")["Close"]
-state_df = pd.read_csv("vnindex_5state.csv", parse_dates=["time"]).sort_values("time").set_index("time")
+state_df = pd.read_csv("data/vnindex_5state.csv", parse_dates=["time"]).sort_values("time").set_index("time")
 
 common_start = max(ba_nav.index.min(), lh_g.index.min(), vn_df.index.min())
 common_end = min(ba_nav.index.max(), lh_g.index.max(), vn_df.index.max())

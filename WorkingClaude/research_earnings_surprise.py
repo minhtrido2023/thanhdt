@@ -52,7 +52,7 @@ print("  EARNINGS SURPRISE / PEAD RESEARCH")
 print("="*100)
 
 # ─── 1. Pull NP_P0..NP_P7 for all events ─────────────────────────────────
-nq_cache = "earnings_surprise_data.pkl"
+nq_cache = "data/earnings_surprise_data.pkl"
 if os.path.exists(nq_cache):
     with open(nq_cache, "rb") as f: fin = pickle.load(f)
     print(f"[1] Loaded cache: {len(fin):,} events")
@@ -119,7 +119,7 @@ for m in ["A_linear","B_MA","C_YoY","D_LastQ","E_Seasonal"]:
 
 # ─── 3. Merge with post_ret data ─────────────────────────────────────────
 print("\n[3] Merging with post-release returns ...")
-ev_class = pd.read_csv("earnings_events_classified.csv", parse_dates=["Release_Date"])
+ev_class = pd.read_csv("data/earnings_events_classified.csv", parse_dates=["Release_Date"])
 print(f"  Classified events: {len(ev_class):,}")
 
 merged = fin.merge(
@@ -239,6 +239,6 @@ out_cols = ["ticker","quarter","Release_Date","NP_R","Revenue_YoY_P0",
             "exp_A_linear","exp_B_MA","exp_C_YoY","exp_D_LastQ","exp_E_Seasonal",
             "surprise_A_linear","surprise_B_MA","surprise_C_YoY","surprise_D_LastQ","surprise_E_Seasonal",
             "pre_ret","rel_ret","post_ret"]
-merged[out_cols].to_csv("earnings_surprise_research.csv", index=False)
-ic_df.to_csv("earnings_surprise_IC.csv", index=False)
+merged[out_cols].to_csv("data/earnings_surprise_research.csv", index=False)
+ic_df.to_csv("data/earnings_surprise_IC.csv", index=False)
 print("\nSaved: earnings_surprise_research.csv, earnings_surprise_IC.csv")

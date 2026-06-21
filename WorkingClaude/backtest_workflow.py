@@ -67,7 +67,7 @@ print("=" * 72)
 print("BACKTEST WORKFLOW — VNINDEX 5-STATE SYSTEM (α=0.40, ms=7)")
 print("=" * 72)
 
-vni = pd.read_csv(os.path.join(WORKDIR, "VNINDEX.csv"), low_memory=False)
+vni = pd.read_csv(os.path.join(WORKDIR, "data/VNINDEX.csv"), low_memory=False)
 vni["time"] = pd.to_datetime(vni["time"])
 vni = vni.sort_values("time").reset_index(drop=True)
 for col in ["Open","High","Low","Close","Volume","VNINDEX_PE",
@@ -78,7 +78,7 @@ for col in ["Open","High","Low","Close","Volume","VNINDEX_PE",
     if col in vni.columns:
         vni[col] = pd.to_numeric(vni[col], errors="coerce")
 
-breadth_path = os.path.join(WORKDIR, "breadth_data.csv")
+breadth_path = os.path.join(WORKDIR, "data/breadth_data.csv")
 if os.path.exists(breadth_path):
     br = pd.read_csv(breadth_path)
     br["time"] = pd.to_datetime(br["time"])

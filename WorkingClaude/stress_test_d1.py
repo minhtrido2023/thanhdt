@@ -154,7 +154,7 @@ for adv in ADV_GRID:
         })
 
 grid_df = pd.DataFrame(grid_results)
-grid_df.to_csv("stress_d1_grid.csv", index=False)
+grid_df.to_csv("data/stress_d1_grid.csv", index=False)
 
 print("\nSensitivity grid results (Δ vs v4 baseline):")
 print(f"{'adv':>5}{'ta':>5}{'n_sig':>7}{'n_tr':>5}{'tr_mn%':>8}{'tr_WR':>7}"

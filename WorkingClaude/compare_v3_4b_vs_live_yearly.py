@@ -26,7 +26,7 @@ STATE_NAMES = {1:"CRISIS",2:"BEAR",3:"NEUTRAL",4:"BULL",5:"EX-BULL"}
 ORDER = {"CRISIS":1,"BEAR":2,"NEUTRAL":3,"BULL":4,"EX-BULL":5}
 
 # ── Load close ────────────────────────────────────────────────────────
-dr = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_dual_v3_full.csv"))
+dr = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_dual_v3_full.csv"))
 dr["time"] = pd.to_datetime(dr["time"])
 close_by_time = dict(zip(dr["time"], dr["Close"]))
 
@@ -38,8 +38,8 @@ def load_states(path):
     return df[df["Close"].notna()].reset_index(drop=True)
 
 variants = {
-    "LIVE Tinh Tế": load_states("vnindex_5state_history.csv"),
-    "v3.4b Định Tâm": load_states("vnindex_5state_tam_quan_v3_4b_full_history.csv"),
+    "LIVE Tinh Tế": load_states("data/vnindex_5state_history.csv"),
+    "v3.4b Định Tâm": load_states("data/vnindex_5state_tam_quan_v3_4b_full_history.csv"),
 }
 
 def analyze(df, label):

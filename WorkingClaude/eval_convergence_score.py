@@ -28,7 +28,7 @@ plt.rcParams.update({
 TRAIN_YEAR = 2019
 
 # ── LOAD ─────────────────────────────────────────────────────────────────────
-df = pd.read_csv("enriched_with_convergence.csv")
+df = pd.read_csv("data/enriched_with_convergence.csv")
 df["time"] = pd.to_datetime(df["time"])
 df["year"] = df["time"].dt.year
 

@@ -39,16 +39,16 @@ BREADTH_TH = 0.50          # US cap allowed only if Breadth_MA200 < this (and va
 BREADTH_MIN_UNIVERSE = 100 # breadth invalid below this many stocks (nascent market)
 
 # ── data ──
-sf = pd.read_csv("vnindex_5state_tam_quan_v3_4b_full_history.csv"); sf["time"]=pd.to_datetime(sf["time"])
+sf = pd.read_csv("data/vnindex_5state_tam_quan_v3_4b_full_history.csv"); sf["time"]=pd.to_datetime(sf["time"])
 sf = sf.sort_values("time").reset_index(drop=True); sf["state_dt"]=_dt_4gate(sf["state"].values.astype(int))
-vx = pd.read_csv("VNINDEX.csv"); vx["time"]=pd.to_datetime(vx["time"]); vx=vx.sort_values("time").reset_index(drop=True)
+vx = pd.read_csv("data/VNINDEX.csv"); vx["time"]=pd.to_datetime(vx["time"]); vx=vx.sort_values("time").reset_index(drop=True)
 vx["MA200"]=vx["Close"].rolling(200,min_periods=50).mean()
 dd_=vx["Close"].diff(); upm=dd_.clip(lower=0); dnm=(-dd_).clip(lower=0)
 rs=upm.ewm(alpha=1/14,adjust=False).mean()/dnm.ewm(alpha=1/14,adjust=False).mean().replace(0,np.nan)
 vx["D_RSI"]=(100-100/(1+rs))/100.0
 df=vx[["time","Close","MA200","D_RSI"]].merge(sf[["time","state_dt"]],on="time",how="inner").sort_values("time").reset_index(drop=True)
 df["state_dt"]=df["state_dt"].astype(int)
-us=pd.read_csv("us_market_history.csv",parse_dates=["time"]).sort_values("time")
+us=pd.read_csv("data/us_market_history.csv",parse_dates=["time"]).sort_values("time")
 key=df[["time"]].copy(); key["jt"]=key["time"]-pd.Timedelta(days=1)
 um=pd.merge_asof(key.sort_values("jt"),us.rename(columns={"time":"us_time"}),left_on="jt",right_on="us_time",direction="backward").sort_values("time").reset_index(drop=True)
 df=df.merge(um[["time","vix","spx_dd_1y","vix_ma252"]],on="time",how="left")

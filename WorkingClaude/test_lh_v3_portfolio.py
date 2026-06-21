@@ -19,8 +19,8 @@ from simulate_lh_nav import run_lh, compute_metrics, _CACHE
 INIT_NAV = 50e9
 
 # Load factor panel v2
-df = pd.read_csv("lh_v3_factor_panel_v2.csv", parse_dates=["time"])
-fa_orig = pd.read_csv("fa_ratings_lh.csv", parse_dates=["time","Release_Date"])
+df = pd.read_csv("data/lh_v3_factor_panel_v2.csv", parse_dates=["time"])
+fa_orig = pd.read_csv("data/fa_ratings_lh.csv", parse_dates=["time","Release_Date"])
 
 # For each composite candidate, build a fa_ratings_lh-style file
 TIER_BANDS = [("A",0.90,1.00),("B",0.70,0.90),("C",0.40,0.70),("D",0.15,0.40),("E",0.00,0.15)]
@@ -66,15 +66,15 @@ for comp in CANDIDATES:
     print(f"\n--- {comp} ---", flush=True)
     fname = f"fa_ratings_lh_{comp}.csv"
     # Swap files
-    os.rename("fa_ratings_lh.csv", "fa_ratings_lh.csv.bak")
-    os.rename(fname, "fa_ratings_lh.csv")
+    os.rename("data/fa_ratings_lh.csv", "fa_ratings_lh.csv.bak")
+    os.rename(fname, "data/fa_ratings_lh.csv")
     try:
         _CACHE.clear()
         results[comp] = run_lh(hold_quarters=4, n_positions=10, tier_set=("A","B"), incl_sub="all",
                                 refresh_mode="staggered", crisis_gate=True, init_nav=INIT_NAV)
     finally:
-        os.rename("fa_ratings_lh.csv", fname)
-        os.rename("fa_ratings_lh.csv.bak", "fa_ratings_lh.csv")
+        os.rename("data/fa_ratings_lh.csv", fname)
+        os.rename("fa_ratings_lh.csv.bak", "data/fa_ratings_lh.csv")
 
 # Report metrics
 print("\n" + "="*120)
@@ -106,7 +106,7 @@ print("  5-TICKER LIFECYCLE (BEST COMPOSITE vs v8c)")
 print("="*120)
 
 CASES = ["VCS","DGC","VNM","FPT","MWG"]
-prices = pd.read_csv("prices_lh.csv", parse_dates=["time"])
+prices = pd.read_csv("data/prices_lh.csv", parse_dates=["time"])
 
 for label in ["v8c_baseline", "C7_balanced_VQC", "C6_smart_value"]:
     if label not in results: continue

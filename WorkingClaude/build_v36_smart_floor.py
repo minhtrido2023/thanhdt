@@ -46,7 +46,7 @@ print("="*70)
 
 # ---- 1. Load TQ34b ----------------------------------------------------------
 print("\n[1] Load TQ34b state...")
-tq = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_4b_full_history.csv"))
+tq = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_4b_full_history.csv"))
 tq["time"] = pd.to_datetime(tq["time"])
 tq = tq.sort_values("time").reset_index(drop=True)
 print(f"  TQ34b: {len(tq)} rows | {tq['time'].iloc[0].date()} -> {tq['time'].iloc[-1].date()}")
@@ -71,7 +71,7 @@ tq["vn_quiet"] = (tq["refi"] <= VN_REFI_MAX) & (tq["refi_chg_90d"] <= VN_REFI_CH
 
 # ---- 3. US macro data -------------------------------------------------------
 print("\n[3] Align US market data...")
-us = pd.read_csv(os.path.join(WORKDIR, "us_market_history.csv"))
+us = pd.read_csv(os.path.join(WORKDIR, "data/us_market_history.csv"))
 us["time"] = pd.to_datetime(us["time"])
 us_dates = sorted(us["time"].tolist())
 def nearest_us(t):
@@ -87,7 +87,7 @@ tq["both_quiet"] = tq["vn_quiet"] & tq["us_quiet"]
 
 # ---- 4. VNINDEX 12m return --------------------------------------------------
 print("\n[4] Load VNINDEX data for VNI_12m momentum...")
-vni = pd.read_csv(os.path.join(WORKDIR, "VNINDEX.csv"))
+vni = pd.read_csv(os.path.join(WORKDIR, "data/VNINDEX.csv"))
 vni["time"] = pd.to_datetime(vni["time"])
 tq = tq.merge(vni[["time","Close","VNINDEX_PE_PERCENTILE"]].rename(columns={"Close":"vni_close"}),
               on="time", how="left")
@@ -236,7 +236,7 @@ out = pd.DataFrame({
     "state":     state_chosen.astype(int),
     "state_raw": tq["state_raw"].astype(int) if "state_raw" in tq.columns else state_chosen.astype(int),
 })
-out_path = os.path.join(WORKDIR, "vnindex_5state_v36_smart_floor.csv")
+out_path = os.path.join(WORKDIR, "data/vnindex_5state_v36_smart_floor.csv")
 out.to_csv(out_path, index=False)
 
 # ---- 10. Final summary for chosen threshold ---------------------------------

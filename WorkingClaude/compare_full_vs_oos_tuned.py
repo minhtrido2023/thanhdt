@@ -97,4 +97,4 @@ for tier_set, full_name, oos_name in pairs:
               f"DD={oos['max_dd_pct']-full['max_dd_pct']:+.1f}pp  "
               f"Cal={oos['calmar']-full['calmar']:+.2f}")
 
-df.to_csv(os.path.join(WORKDIR, "compare_full_vs_oos.csv"), index=False)
+df.to_csv(os.path.join(WORKDIR, "data/compare_full_vs_oos.csv"), index=False)

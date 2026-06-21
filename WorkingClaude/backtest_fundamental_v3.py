@@ -19,7 +19,7 @@ import numpy as np, pandas as pd
 import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-PRICE_CSV = "fundamental_rating_prices.csv"
+PRICE_CSV = "data/fundamental_rating_prices.csv"
 START     = "2015-04-01"
 END       = "2025-04-01"
 SPLIT     = "2020-04-01"          # boundary between IS and OOS
@@ -42,10 +42,10 @@ plt.rcParams.update({
 
 # ─── Load data ───────────────────────────────────────────────────────────────
 print("Loading ...")
-rating_q4  = pd.read_csv("fundamental_rating.csv");      rating_q4["time"]  = pd.to_datetime(rating_q4["time"])
-rating_all = pd.read_csv("fundamental_rating_all.csv");  rating_all["time"] = pd.to_datetime(rating_all["time"])
+rating_q4  = pd.read_csv("data/fundamental_rating.csv");      rating_q4["time"]  = pd.to_datetime(rating_q4["time"])
+rating_all = pd.read_csv("data/fundamental_rating_all.csv");  rating_all["time"] = pd.to_datetime(rating_all["time"])
 
-state_df = pd.read_csv("vnindex_state_history.csv", parse_dates=["time"])
+state_df = pd.read_csv("data/vnindex_state_history.csv", parse_dates=["time"])
 state_df["alloc"] = state_df["state"].map(STATE_ALLOC)
 state_df = state_df.set_index("time")[["state","alloc"]].sort_index()
 
@@ -54,7 +54,7 @@ price_pivot = prices.pivot_table(index="time", columns="ticker", values="Close",
 print(f"  Q4-only ratings: {len(rating_q4):,}, all: {len(rating_all):,}")
 print(f"  State days: {len(state_df):,}, prices: {price_pivot.shape}")
 
-vni = pd.read_csv("VNINDEX.csv", parse_dates=["time"], usecols=["time","ticker","Close"])
+vni = pd.read_csv("data/VNINDEX.csv", parse_dates=["time"], usecols=["time","ticker","Close"])
 vni = vni[vni["ticker"]=="VNINDEX"][["time","Close"]].set_index("time").sort_index()
 vni = vni.loc[START:pd.Timestamp(END) + pd.Timedelta(days=10)]
 
@@ -169,7 +169,7 @@ for mode in ["yearly", "combo"]:
         print(f"  {mode:<8}{int(r['N']):>4}  {r['cagr']*100:>7.2f}%{r['sharpe']:>8.2f}"
               f"{r['maxdd']*100:>7.1f}%{r['calmar']:>8.2f}{r['final']:>8.2f}x")
     print()
-sweep_df.to_csv("backtest_fundamental_v3_topN.csv", index=False)
+sweep_df.to_csv("data/backtest_fundamental_v3_topN.csv", index=False)
 
 # ─── (ii) IS/OOS split for selected strategies ──────────────────────────────
 print("=== (ii) IS/OOS Split — robustness check ===")
@@ -222,7 +222,7 @@ for name, nav in isoos_strategies.items():
     print()
 
 isoos_df = pd.DataFrame(isoos_rows)
-isoos_df.to_csv("backtest_fundamental_v3_isoos.csv", index=False)
+isoos_df.to_csv("data/backtest_fundamental_v3_isoos.csv", index=False)
 
 # ─── Plot ────────────────────────────────────────────────────────────────────
 fig = plt.figure(figsize=(16, 12))

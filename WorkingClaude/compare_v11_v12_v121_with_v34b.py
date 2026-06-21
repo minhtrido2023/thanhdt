@@ -27,14 +27,14 @@ DEPOSIT = 0.0; BORROW = 0.10; ETF_STATES = {3: 0.7}   # cost model per user 2026
 TIER_BAL = ["MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","DEEP_VALUE_RECOVERY"]
 BUY_TIERS_V11 = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
                   "MOMENTUM_A","MOMENTUM_S_N","COMPOUNDER_BUY","DEEP_VALUE_RECOVERY","S_PRO"}
-STATE_CSV = "vnindex_5state_tam_quan_v3_4b_full_history.csv"
+STATE_CSV = "data/vnindex_5state_tam_quan_v3_4b_full_history.csv"
 
 print("="*100); print(f"  V11 vs V12 vs V12.1 — ALL under Tam Quan v3.4b 'Định Tâm' state"); print("="*100)
 print(f"  Period: {START_B} → {END_B}   |   NAV: 50B (25B / 25B split)")
 
 # ─────── 1. Load signals + state + universe ──────────────────────────────────
 print("\n[1] Loading signals, prices, state...")
-with open("ba_v11_unified_12y_sig.pkl", "rb") as f: sig_B = pickle.load(f)
+with open("data/ba_v11_unified_12y_sig.pkl", "rb") as f: sig_B = pickle.load(f)
 sig_B["time"] = pd.to_datetime(sig_B["time"])
 with open("sim_v11_for_analyzer.py", "r", encoding="utf-8") as f: _content = f.read()
 def _extract(varname):
@@ -110,22 +110,22 @@ print(f"  VN30 final: {nav_vn30_s.iloc[-1]/1e9:.2f}B")
 
 # ─────── 4. LAGGED HL_3y leg (V12 / V12.1) ───────────────────────────────────
 print("\n[4] Building LAGGED HL_3y schedule (state-independent)...")
-with open("earnings_px.pkl","rb") as f: px_data = pickle.load(f)
+with open("data/earnings_px.pkl","rb") as f: px_data = pickle.load(f)
 px_data["time"] = pd.to_datetime(px_data["time"])
 px_close = px_data.pivot_table(index="time", columns="ticker", values="Close", aggfunc="first").sort_index().ffill(limit=5)
 master_idx = pd.DatetimeIndex(px_close.index).as_unit("ns")
 px_close.index = master_idx
 all_dates = np.array(master_idx)
-with open("lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
+with open("data/lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
 ov["time"] = pd.to_datetime(ov["time"])
 px_open = ov.pivot_table(index="time", columns="ticker", values="Open", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 liq_l = ov.pivot_table(index="time", columns="ticker", values="Volume_3M_P50", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
-with open("earnings_surprise_data.pkl","rb") as f: fin = pickle.load(f)
+with open("data/earnings_surprise_data.pkl","rb") as f: fin = pickle.load(f)
 fin["Release_Date"] = pd.to_datetime(fin["Release_Date"])
 FLOOR = 1e9
 fin["exp_B_MA"] = fin[["NP_P1","NP_P2","NP_P3","NP_P4"]].mean(axis=1)
 fin["surprise_B_MA"] = ((fin["NP_P0"] - fin["exp_B_MA"]) / np.maximum(np.abs(fin["exp_B_MA"]), FLOOR)).clip(-5, 5)
-ev_class = pd.read_csv("earnings_events_classified.csv", parse_dates=["Release_Date"])
+ev_class = pd.read_csv("data/earnings_events_classified.csv", parse_dates=["Release_Date"])
 ev = ev_class.merge(fin[["ticker","quarter","Release_Date","surprise_B_MA"]],
                      on=["ticker","quarter","Release_Date"], how="left")
 ev = ev.sort_values(["ticker","Release_Date"]).reset_index(drop=True)
@@ -277,6 +277,6 @@ for yr in range(2014, 2027):
 
 # Save
 out_df = pd.DataFrame({"v11":nav_v11, "v12":nav_v12, "v12.1":nav_v121, "vni":vni_n})
-out_df.to_csv("compare_v11_v12_v121_v34b.csv")
+out_df.to_csv("data/compare_v11_v12_v121_v34b.csv")
 print(f"\n  Saved daily NAV: compare_v11_v12_v121_v34b.csv")
 print("\n" + "="*110); print("DONE.")

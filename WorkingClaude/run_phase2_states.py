@@ -23,8 +23,8 @@ CANDIDATES = [
     ("price_500m", {"TV_PRICE":"1","LIQ_MIN":str(5e8),"TOPN":"0"}),
     ("topn_100",   {"TV_PRICE":"1","LIQ_MIN":"0","TOPN":"100"}),
 ]
-V34B = "vnindex_5state_tam_quan_v3_4b_full_history.csv"
-EWF  = "vnindex_5state_ew_full.csv"; EWS = "vnindex_5state_ew_staging.csv"
+V34B = "data/vnindex_5state_tam_quan_v3_4b_full_history.csv"
+EWF  = "data/vnindex_5state_ew_full.csv"; EWS = "data/vnindex_5state_ew_staging.csv"
 PROD = V34B + ".bak_closegate_20260601"   # current prod (close-500M) state
 
 def run(cmd, env=None):

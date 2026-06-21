@@ -277,5 +277,5 @@ yr_breakdown["profit_factor"] = (
 )
 print(yr_breakdown.to_string(float_format=lambda x: f"{x:.2f}"))
 
-trades_df.to_csv(os.path.join(WORKDIR, "aggressive_trades_full.csv"), index=False)
+trades_df.to_csv(os.path.join(WORKDIR, "data/aggressive_trades_full.csv"), index=False)
 print("\n  Saved: aggressive_trades_full.csv")

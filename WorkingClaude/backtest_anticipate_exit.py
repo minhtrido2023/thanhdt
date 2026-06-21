@@ -20,8 +20,8 @@ import numpy as np
 from itertools import product
 
 # --- Load ---
-ba = pd.read_csv('ba_v11_nav.csv', parse_dates=['time']).sort_values('time').reset_index(drop=True)
-vni = pd.read_csv('VNINDEX.csv', parse_dates=['time']).sort_values('time').reset_index(drop=True)
+ba = pd.read_csv('data/ba_v11_nav.csv', parse_dates=['time']).sort_values('time').reset_index(drop=True)
+vni = pd.read_csv('data/VNINDEX.csv', parse_dates=['time']).sort_values('time').reset_index(drop=True)
 vni['Pe'] = pd.to_numeric(vni['Pe'], errors='coerce')
 vni['pe_rank'] = vni['Pe'].expanding(min_periods=252).apply(
     lambda s: s.rank(pct=True).iloc[-1], raw=False
@@ -65,7 +65,7 @@ def bullish_div(close, rsi, K=20):
 vni['bull_div'] = bullish_div(vni['Close'], vni['rsi14'], K=20)
 
 # Load state
-state = pd.read_csv('_state.csv', parse_dates=['time'])
+state = pd.read_csv('data/_state.csv', parse_dates=['time'])
 
 # Merge
 df = ba.merge(vni[['time','Close','Pe','pe_rank','vni_ret','rsi14','bull_div']], on='time', how='left')
@@ -197,5 +197,5 @@ for d, pr, dr, dv in fires:
     fwd120 = df['Close'].iloc[min(idx+120,len(df)-1)] / df['Close'].iloc[idx] - 1
     print(f"  {d.date()}: PE={pr:.3f} CRISIS={dr} VNI fwd60={fwd60*100:+.2f}% fwd120={fwd120*100:+.2f}%")
 
-res_nodiv.to_csv('anticipate_exit_grid_nodiv.csv', index=False)
-res_div.to_csv('anticipate_exit_grid_div.csv', index=False)
+res_nodiv.to_csv('data/anticipate_exit_grid_nodiv.csv', index=False)
+res_div.to_csv('data/anticipate_exit_grid_div.csv', index=False)

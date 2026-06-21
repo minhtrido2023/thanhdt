@@ -33,20 +33,20 @@ BUY_TIERS_B = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
 
 # 8 variants: baseline v3.1, no-filter v3.3, and 6 conc thresholds
 VARIANTS = [
-    ("v3.1 baseline",   "vnindex_5state_tam_quan_v3_1_full_history.csv"),
-    ("v3.3 (no filter)","vnindex_5state_tam_quan_v3_3_full_history.csv"),
-    ("v3.3 t≤0.40",     "vnindex_5state_tam_quan_v3_3_t40_full_history.csv"),
-    ("v3.3 t≤0.45",     "vnindex_5state_tam_quan_v3_3_t45_full_history.csv"),
-    ("v3.3 t≤0.50",     "vnindex_5state_tam_quan_v3_3_t50_full_history.csv"),
-    ("v3.3 t≤0.55",     "vnindex_5state_tam_quan_v3_3_t55_full_history.csv"),
-    ("v3.3 t≤0.60",     "vnindex_5state_tam_quan_v3_3_t60_full_history.csv"),
-    ("v3.3 t≤0.65",     "vnindex_5state_tam_quan_v3_3_t65_full_history.csv"),
-    ("v3.3 t≤0.70",     "vnindex_5state_tam_quan_v3_3_t70_full_history.csv"),
+    ("v3.1 baseline",   "data/vnindex_5state_tam_quan_v3_1_full_history.csv"),
+    ("v3.3 (no filter)","data/vnindex_5state_tam_quan_v3_3_full_history.csv"),
+    ("v3.3 t≤0.40",     "data/vnindex_5state_tam_quan_v3_3_t40_full_history.csv"),
+    ("v3.3 t≤0.45",     "data/vnindex_5state_tam_quan_v3_3_t45_full_history.csv"),
+    ("v3.3 t≤0.50",     "data/vnindex_5state_tam_quan_v3_3_t50_full_history.csv"),
+    ("v3.3 t≤0.55",     "data/vnindex_5state_tam_quan_v3_3_t55_full_history.csv"),
+    ("v3.3 t≤0.60",     "data/vnindex_5state_tam_quan_v3_3_t60_full_history.csv"),
+    ("v3.3 t≤0.65",     "data/vnindex_5state_tam_quan_v3_3_t65_full_history.csv"),
+    ("v3.3 t≤0.70",     "data/vnindex_5state_tam_quan_v3_3_t70_full_history.csv"),
 ]
 
 print("="*100); print("Walk-forward robustness sweep: v3.3 conc threshold"); print("="*100)
 
-with open("ba_v11_unified_12y_sig.pkl", "rb") as f: sig_B = pickle.load(f)
+with open("data/ba_v11_unified_12y_sig.pkl", "rb") as f: sig_B = pickle.load(f)
 with open("sim_v11_for_analyzer.py", "r", encoding="utf-8") as f: _content = f.read()
 def _extract(varname):
     m = re.search(rf'^{varname}\s*=\s*"""(.+?)"""', _content, re.MULTILINE | re.DOTALL)

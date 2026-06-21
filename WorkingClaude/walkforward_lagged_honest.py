@@ -24,26 +24,26 @@ BQ = r"bq"
 INIT_NAV = 50e9
 
 print("[1] Loading data ...")
-with open("earnings_px.pkl","rb") as f: px = pickle.load(f)
+with open("data/earnings_px.pkl","rb") as f: px = pickle.load(f)
 px["time"] = pd.to_datetime(px["time"])
 px_close = px.pivot_table(index="time", columns="ticker", values="Close", aggfunc="first").sort_index().ffill(limit=5)
 master_idx = pd.DatetimeIndex(px_close.index).as_unit("ns")
 px_close.index = master_idx
 all_dates = np.array(master_idx)
 
-with open("lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
+with open("data/lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
 ov["time"] = pd.to_datetime(ov["time"])
 px_open = ov.pivot_table(index="time", columns="ticker", values="Open", aggfunc="first").sort_index()
 liq     = ov.pivot_table(index="time", columns="ticker", values="Volume_3M_P50", aggfunc="first").sort_index()
 px_open = px_open.reindex(master_idx).ffill(limit=5)
 liq     = liq.reindex(master_idx).ffill(limit=5)
 
-ev_classified = pd.read_csv("earnings_events_classified.csv", parse_dates=["Release_Date"])
+ev_classified = pd.read_csv("data/earnings_events_classified.csv", parse_dates=["Release_Date"])
 ev_classified = ev_classified.sort_values(["ticker","Release_Date"]).reset_index(drop=True)
 print(f"  Events: {len(ev_classified):,}")
 
 # FA for sector
-fa = pd.read_csv("fa_ratings_lh.csv", parse_dates=["time"])
+fa = pd.read_csv("data/fa_ratings_lh.csv", parse_dates=["time"])
 fa_uni = fa.sort_values("quarter").drop_duplicates("ticker", keep="last")[["ticker","sub","MktCap"]]
 ticker_sub = dict(zip(fa_uni["ticker"], fa_uni["sub"]))
 
@@ -233,7 +233,7 @@ for cfg_name, cfg_params in configs.items():
     print()
 
 res_df = pd.DataFrame(results)
-res_df.to_csv("lagged_pos_walkforward_honest.csv", index=False)
+res_df.to_csv("data/lagged_pos_walkforward_honest.csv", index=False)
 
 print("\n" + "="*120)
 print("  IS vs OOS comparison (honest)")

@@ -99,7 +99,7 @@ def main():
     nf=raw[keep].copy()
 
     # merge with FA composite + profit_3M
-    fa=pd.read_csv(os.path.join(WORKDIR,"fundamental_rating_all.csv"))
+    fa=pd.read_csv(os.path.join(WORKDIR,"data/fundamental_rating_all.csv"))
     fa["time"]=pd.to_datetime(fa["time"])
     df=fa.merge(nf,on=["ticker","quarter"],how="left").dropna(subset=["profit_3M"]).copy()
     w=np.ones(len(EW5))

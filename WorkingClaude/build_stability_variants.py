@@ -145,10 +145,10 @@ def simulate_weights(weights, vni_df, start_date, tc=0.001, deposit_apy=0.06, bo
 
 
 # ------ Load data -----------------------------------------------------------
-tq = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_4b_full_history.csv"))
+tq = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_4b_full_history.csv"))
 tq["time"] = pd.to_datetime(tq["time"])
 tq = tq.sort_values("time").reset_index(drop=True)
-vni = pd.read_csv(os.path.join(WORKDIR, "VNINDEX.csv"), usecols=["time","Close"])
+vni = pd.read_csv(os.path.join(WORKDIR, "data/VNINDEX.csv"), usecols=["time","Close"])
 vni["time"] = pd.to_datetime(vni["time"])
 df = vni.merge(tq[["time","state"]], on="time", how="inner").dropna(subset=["state"]).reset_index(drop=True)
 

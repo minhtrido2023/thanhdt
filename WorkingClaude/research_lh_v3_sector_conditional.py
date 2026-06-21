@@ -21,7 +21,7 @@ from simulate_lh_nav import run_lh, compute_metrics, _CACHE
 INIT_NAV = 50e9
 
 # ─── LOAD PANEL ──────────────────────────────────────────────────────────
-df = pd.read_csv("lh_v3_factor_panel_cycle.csv", parse_dates=["time"])
+df = pd.read_csv("data/lh_v3_factor_panel_cycle.csv", parse_dates=["time"])
 print(f"Panel: {len(df):,} rows")
 
 # ─── SECTOR CLASSIFICATION (3 buckets) ───────────────────────────────────
@@ -199,11 +199,11 @@ df_o["pct"] = df_o.groupby("quarter")["C13_sector_cond"].rank(pct=True)
 df_o["tier"] = df_o["pct"].apply(tier_of)
 df_o["score"] = df_o["C13_sector_cond"]
 
-fa_orig = pd.read_csv("fa_ratings_lh.csv", parse_dates=["time","Release_Date"])
+fa_orig = pd.read_csv("data/fa_ratings_lh.csv", parse_dates=["time","Release_Date"])
 meta = fa_orig[["ticker","quarter","time","Release_Date","sub","ICB_Code","MktCap","Volume_3M_P50","Close"]]
 out = meta.merge(df_o[["ticker","quarter","score","pct","tier"]], on=["ticker","quarter"], how="inner")
 out = out.dropna(subset=["score","tier"]).sort_values(["quarter","ticker"]).reset_index(drop=True)
-out.to_csv("fa_ratings_lh_C13_sector_cond.csv", index=False)
+out.to_csv("data/fa_ratings_lh_C13_sector_cond.csv", index=False)
 print(f"\nBuilt fa_ratings_lh_C13: {len(out):,} rows, tier dist: {out['tier'].value_counts().to_dict()}")
 
 # Backup and run
@@ -217,15 +217,15 @@ res_v8c = run_lh(hold_quarters=4, n_positions=10, tier_set=("A","B"), incl_sub="
                   refresh_mode="staggered", crisis_gate=True, init_nav=INIT_NAV)
 
 print("\n--- C13 sector-conditional ---", flush=True)
-os.rename("fa_ratings_lh.csv", "fa_ratings_lh.csv.bak")
-os.rename("fa_ratings_lh_C13_sector_cond.csv", "fa_ratings_lh.csv")
+os.rename("data/fa_ratings_lh.csv", "fa_ratings_lh.csv.bak")
+os.rename("data/fa_ratings_lh_C13_sector_cond.csv", "data/fa_ratings_lh.csv")
 try:
     _CACHE.clear()
     res_c13 = run_lh(hold_quarters=4, n_positions=10, tier_set=("A","B"), incl_sub="all",
                       refresh_mode="staggered", crisis_gate=True, init_nav=INIT_NAV)
 finally:
-    os.rename("fa_ratings_lh.csv", "fa_ratings_lh_C13_sector_cond.csv")
-    os.rename("fa_ratings_lh.csv.bak", "fa_ratings_lh.csv")
+    os.rename("data/fa_ratings_lh.csv", "data/fa_ratings_lh_C13_sector_cond.csv")
+    os.rename("fa_ratings_lh.csv.bak", "data/fa_ratings_lh.csv")
 
 # Metrics
 periods = [
@@ -251,7 +251,7 @@ print("\n" + "="*120)
 print("  5-TICKER LIFECYCLE (v8c vs C13)")
 print("="*120)
 CASES = ["VCS","DGC","VNM","FPT","MWG","HPG","BSR","VHC"]
-prices = pd.read_csv("prices_lh.csv", parse_dates=["time"])
+prices = pd.read_csv("data/prices_lh.csv", parse_dates=["time"])
 for tk in CASES:
     p = prices[prices["ticker"]==tk].sort_values("time")
     if len(p) == 0: continue

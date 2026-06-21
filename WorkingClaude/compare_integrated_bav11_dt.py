@@ -40,11 +40,11 @@ BUY_TIERS_V11 = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
 MAX_POS = 12
 
 STATE_CSVS = {
-    "TQ34b":         "vnindex_5state_tam_quan_v3_4b_full_history.csv",
-    "DT_5_15_15":    "vnindex_5state_dt_5_15_15.csv",
-    "DT_7_20_20":    "vnindex_5state_dt_7_20_20.csv",
-    "DT_10_25_25":   "vnindex_5state_dt_10_25_25.csv",
-    "DT_15_30_25":   "vnindex_5state_dt_15_30_25.csv",
+    "TQ34b":         "data/vnindex_5state_tam_quan_v3_4b_full_history.csv",
+    "DT_5_15_15":    "data/vnindex_5state_dt_5_15_15.csv",
+    "DT_7_20_20":    "data/vnindex_5state_dt_7_20_20.csv",
+    "DT_10_25_25":   "data/vnindex_5state_dt_10_25_25.csv",
+    "DT_15_30_25":   "data/vnindex_5state_dt_15_30_25.csv",
 }
 
 print("="*100)
@@ -53,7 +53,7 @@ print("="*100)
 
 # ─── Load common signals ─────────────────────────────────────────────────
 print("\n[1] Loading signals + prices + VNI...")
-with open("ba_v11_unified_12y_sig.pkl","rb") as f: sig_B = pickle.load(f)
+with open("data/ba_v11_unified_12y_sig.pkl","rb") as f: sig_B = pickle.load(f)
 sig_B["time"] = pd.to_datetime(sig_B["time"])
 sig_B = sig_B[(sig_B["time"]>=START_B) & (sig_B["time"]<=END_B)].copy()
 with open("sim_v11_for_analyzer.py","r",encoding="utf-8") as f: _c = f.read()

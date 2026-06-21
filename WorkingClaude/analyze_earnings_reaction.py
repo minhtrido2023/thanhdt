@@ -51,7 +51,7 @@ def bq_query(sql):
     return pd.read_csv(StringIO(r.stdout.strip()))
 
 # ─── 1. Pull release events ──────────────────────────────────────────────
-ev_cache = "earnings_events.pkl"
+ev_cache = "data/earnings_events.pkl"
 if os.path.exists(ev_cache):
     with open(ev_cache,"rb") as f: ev = pickle.load(f)
     print(f"[1] Loaded events cache: {len(ev):,} events")
@@ -69,7 +69,7 @@ else:
     print(f"  Pulled {len(ev):,} events from {ev['ticker'].nunique()} tickers")
 
 # ─── 2. Pull daily prices (Close only) for tickers in events ─────────────
-px_cache = "earnings_px.pkl"
+px_cache = "data/earnings_px.pkl"
 if os.path.exists(px_cache):
     with open(px_cache,"rb") as f: px = pickle.load(f)
     print(f"[2] Loaded price cache: {len(px):,} rows")
@@ -229,7 +229,7 @@ for pat, g in evdf.groupby("pattern"):
     print(f"  {pat:<20}{len(g):>6}{avg_pre:>+9.2f}%{avg_rel:>+9.2f}%{avg_post:>+9.2f}%{total:>+9.2f}%")
 
 # ─── 8. Save outputs ─────────────────────────────────────────────────────
-evdf.to_csv("earnings_events_classified.csv", index=False)
-prof.to_csv("ticker_reaction_profile.csv")
+evdf.to_csv("data/earnings_events_classified.csv", index=False)
+prof.to_csv("data/ticker_reaction_profile.csv")
 print("\nSaved: earnings_events_classified.csv (events), ticker_reaction_profile.csv (per-ticker)")
 print(f"\nUse `ticker_reaction_profile.csv` as input factor for valuation models.")

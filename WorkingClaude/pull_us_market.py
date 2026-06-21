@@ -62,7 +62,7 @@ if _trimmed:
     print(f"  trimmed {_trimmed} trailing incomplete session(s); feed ends {us['time'].iloc[-1].date()}")
 
 # Save
-out_path = os.path.join(WORKDIR, "us_market_history.csv")
+out_path = os.path.join(WORKDIR, "data/us_market_history.csv")
 us.to_csv(out_path, index=False)
 print(f"\nSaved → {out_path} ({len(us)} rows)")
 

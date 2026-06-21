@@ -145,6 +145,6 @@ for _, r in delta_df.iterrows():
         verdict = "❌ POSSIBLE OVERFIT — significant OOS drop"
     print(f"  {cfg:30} ΔCAGR={cagr_change:+5.1f}pp ΔSharpe={sharpe_change:+.2f}  {verdict}")
 
-df.to_csv(os.path.join(WORKDIR, "walkforward_results.csv"), index=False)
-delta_df.to_csv(os.path.join(WORKDIR, "walkforward_deltas.csv"), index=False)
+df.to_csv(os.path.join(WORKDIR, "data/walkforward_results.csv"), index=False)
+delta_df.to_csv(os.path.join(WORKDIR, "data/walkforward_deltas.csv"), index=False)
 print("\n  Saved: walkforward_results.csv, walkforward_deltas.csv")

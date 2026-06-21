@@ -32,8 +32,8 @@ import numpy as np, pandas as pd
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
-BASE_CSV = os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_4b_full_history.csv")
-OUT_CSV  = os.path.join(WORKDIR, "vnindex_5state_dt_4gate.csv")
+BASE_CSV = os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_4b_full_history.csv")
+OUT_CSV  = os.path.join(WORKDIR, "data/vnindex_5state_dt_4gate.csv")
 
 PARAMS = dict(default=10, enter_crisis=25, exit_crisis=10, enter_exbull=25, exit_exbull=10)
 CRISIS, EXBULL = 1, 5

@@ -22,12 +22,12 @@ import pandas as pd, numpy as np
 from simulate_lh_nav import run_lh, compute_metrics
 
 # Load all data
-ba_traces = pd.read_csv("f_ba_mix_nav_traces.csv", parse_dates=["time"]).sort_values("time").set_index("time")
+ba_traces = pd.read_csv("data/f_ba_mix_nav_traces.csv", parse_dates=["time"]).sort_values("time").set_index("time")
 ba_nav = ba_traces["BA_50_50"]
-vn_df = pd.read_csv("vnindex_lh.csv", parse_dates=["time"])
+vn_df = pd.read_csv("data/vnindex_lh.csv", parse_dates=["time"])
 vn_df = vn_df[vn_df["Close"] > 100].sort_values("time").set_index("time")["Close"]
-state_df = pd.read_csv("vnindex_5state.csv", parse_dates=["time"]).sort_values("time").set_index("time")
-ratings = pd.read_csv("fa_ratings_lh.csv", parse_dates=["time"])
+state_df = pd.read_csv("data/vnindex_5state.csv", parse_dates=["time"]).sort_values("time").set_index("time")
+ratings = pd.read_csv("data/fa_ratings_lh.csv", parse_dates=["time"])
 
 print("Running LH_gated (same as QWF) ...")
 lh_g = run_lh(hold_quarters=4, n_positions=10, tier_set=("A","B"), incl_sub="all",

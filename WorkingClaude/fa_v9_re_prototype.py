@@ -222,7 +222,7 @@ out_cols = ["ticker","quarter","time","tier_old","tier_v9",
             "score_growth","score_health","score_valuation",
             "AdvCust_P0","AdvCust_YoY","AdvCust_QoQ","RevCoverage","UnearnRev_P0",
             "Revenue_P0","NP_R","profit_3M"]
-m[out_cols].sort_values(["ticker","time"]).to_csv("fa_v9_re_prototype.csv", index=False)
+m[out_cols].sort_values(["ticker","time"]).to_csv("data/fa_v9_re_prototype.csv", index=False)
 print("  Saved fa_v9_re_prototype.csv")
 
 # ─── 7. Validation summary ─────────────────────────────────────────────────────

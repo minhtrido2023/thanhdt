@@ -47,7 +47,7 @@ TARGET_W = {1:0.00, 2:0.20, 3:0.70, 4:1.00, 5:1.30}
 STATE_NAMES = {1:"CRISIS", 2:"BEAR", 3:"NEUTRAL", 4:"BULL", 5:"EX-BULL"}
 
 # ════════════════════ LOAD FROM BQ ════════════════════
-cache_path = os.path.join(WORKDIR, "vnindex_full_2000_2026.csv")
+cache_path = os.path.join(WORKDIR, "data/vnindex_full_2000_2026.csv")
 if os.path.exists(cache_path):
     print(f"Loading cached {cache_path} ...")
     vni = pd.read_csv(cache_path)
@@ -522,7 +522,7 @@ out_df = pd.DataFrame({
     "weight_v2g": w_v2g,
     "weight_baseline": w_base,
 })
-out_df.to_csv(os.path.join(WORKDIR, "vnindex_5state_v2g_full_history.csv"), index=False)
+out_df.to_csv(os.path.join(WORKDIR, "data/vnindex_5state_v2g_full_history.csv"), index=False)
 print(f"\nSaved → vnindex_5state_v2g_full_history.csv  ({len(out_df)} rows)")
 
 # ════════════════════ QWF: rolling 1Y, 3Y, 5Y at quarter-ends ════════════════════
@@ -557,7 +557,7 @@ for qe in qends:
                 row[f"{nm}_{yrs}Y_cm"]   = m["calmar"]
     qend_rows.append(row)
 qdf = pd.DataFrame(qend_rows)
-qdf.to_csv(os.path.join(WORKDIR, "vnindex_5state_v2g_qwf.csv"), index=False)
+qdf.to_csv(os.path.join(WORKDIR, "data/vnindex_5state_v2g_qwf.csv"), index=False)
 print(f"Saved → vnindex_5state_v2g_qwf.csv  ({len(qdf)} quarter snapshots)")
 
 # Snapshot most recent + trailing-3Y traffic light

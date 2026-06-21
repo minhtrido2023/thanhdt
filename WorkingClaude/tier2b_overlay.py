@@ -15,8 +15,8 @@ Test integrated BA stack.
 import pandas as pd
 import numpy as np
 
-df = pd.read_csv('tier2b_sbv_panel.csv', parse_dates=['time'])
-ba = pd.read_csv('ba_v11_nav.csv', parse_dates=['time'])
+df = pd.read_csv('data/tier2b_sbv_panel.csv', parse_dates=['time'])
+ba = pd.read_csv('data/ba_v11_nav.csv', parse_dates=['time'])
 df = df.merge(ba[['time','BA_v11']], on='time', how='left')
 df['ba_ret'] = df['BA_v11'].pct_change().fillna(0.0)
 df = df[df['BA_v11'].notna()].reset_index(drop=True)
@@ -160,4 +160,4 @@ for th_h, sc, th_l, sc_l in [(0.5,0.7,-0.5,1.15), (1.0,0.7,-1.0,1.2)]:
     print()
 
 # Save
-df.to_csv('tier2b_overlay_data.csv', index=False)
+df.to_csv('data/tier2b_overlay_data.csv', index=False)

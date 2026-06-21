@@ -41,7 +41,7 @@ print(f"  Total NAV = 50B (25B BAL + 25B LAGGED)")
 print("="*100)
 
 # 1. Load BA v11 signals + filter to window
-with open("ba_v11_unified_12y_sig.pkl","rb") as f: sig = pickle.load(f)
+with open("data/ba_v11_unified_12y_sig.pkl","rb") as f: sig = pickle.load(f)
 sig["time"] = pd.to_datetime(sig["time"])
 sw = pd.Timestamp(START_DATE); ew = pd.Timestamp(END_DATE)
 sig = sig[(sig["time"] >= sw) & (sig["time"] <= ew)].copy()
@@ -103,19 +103,19 @@ print(f"  Closed trades: {len(trades_bal)}   final: {nav_bal_s.iloc[-1]/1e9:.2f}
 # 5. LAGGED HL_3y @ 25B
 print(f"\n[5] LAGGED HL_3y @ 25B ...")
 INIT_NAV_LAG = BOOK_NAV
-with open("earnings_px.pkl","rb") as f: px_data = pickle.load(f)
+with open("data/earnings_px.pkl","rb") as f: px_data = pickle.load(f)
 px_data["time"] = pd.to_datetime(px_data["time"])
 px_close = px_data.pivot_table(index="time", columns="ticker", values="Close", aggfunc="first").sort_index().ffill(limit=5)
 master_idx = pd.DatetimeIndex(px_close.index).as_unit("ns")
 px_close.index = master_idx
 all_dates = np.array(master_idx)
 
-with open("lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
+with open("data/lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
 ov["time"] = pd.to_datetime(ov["time"])
 px_open = ov.pivot_table(index="time", columns="ticker", values="Open", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 liq_l   = ov.pivot_table(index="time", columns="ticker", values="Volume_3M_P50", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 
-ev = pd.read_csv("earnings_events_classified.csv", parse_dates=["Release_Date"])
+ev = pd.read_csv("data/earnings_events_classified.csv", parse_dates=["Release_Date"])
 ev = ev.sort_values(["ticker","Release_Date"]).reset_index(drop=True)
 
 # Build prior_avg_post_good_HL3y per release event (uses full history before each release)
@@ -261,5 +261,5 @@ print(f"  BAL closed trades: {len(trades_bal)}   LAGGED entries: {len(sched_lag)
 # Save
 out_df = pd.DataFrame({"BAL_25B": nav_bal_s.loc[common], "LAGGED_25B": nav_lag_s.loc[common],
                       "v12_TOTAL_50B": nav_combined, "VNI_norm": vni_n*TOTAL_NAV})
-out_df.to_csv("v12_amduong_window_2025_06_09_nav.csv")
+out_df.to_csv("data/v12_amduong_window_2025_06_09_nav.csv")
 print(f"\n  Saved daily NAV -> v12_amduong_window_2025_06_09_nav.csv")

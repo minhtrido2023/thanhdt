@@ -21,7 +21,7 @@ BUY_TIERS_V11={"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
 MAX_POS=12
 print("="*100); print("  PROD-SPEC V12 state test: TQ34b vs LIVE vs DT4 (BAL parking)"); print("="*100)
 print("\n[1] Load...")
-with open("ba_v11_unified_12y_sig.pkl","rb") as f: sig_B=pickle.load(f)
+with open("data/ba_v11_unified_12y_sig.pkl","rb") as f: sig_B=pickle.load(f)
 sig_B["time"]=pd.to_datetime(sig_B["time"]); sig_B=sig_B[(sig_B["time"]>=START_B)&(sig_B["time"]<=END_B)].copy()
 with open("sim_v11_for_analyzer.py","r",encoding="utf-8") as f: _c=f.read()
 VQU=re.search(r'^VNI_QUERY_UNIFIED\s*=\s*"""(.+?)"""',_c,re.MULTILINE|re.DOTALL).group(1)
@@ -51,8 +51,8 @@ def to_ff(sdf):
         if s is not None: last=s
         ff[d]=last
     return ff
-sdf_tq=load_ff_csv("vnindex_5state_tam_quan_v3_4b_full_history.csv")
-sdf_dt=load_ff_csv("vnindex_5state_dt_10_25_25.csv")
+sdf_tq=load_ff_csv("data/vnindex_5state_tam_quan_v3_4b_full_history.csv")
+sdf_dt=load_ff_csv("data/vnindex_5state_dt_10_25_25.csv")
 sdf_live=load_ff_bq()
 ff_tq=to_ff(sdf_tq); ff_dt=to_ff(sdf_dt); ff_live=to_ff(sdf_live)
 # confirm LIVE vs TQ identity
@@ -121,18 +121,18 @@ bal_tq=run_bal(sig_tq,ff_tq,"BAL_TQ"); bal_live=run_bal(sig_live,ff_live,"BAL_LI
 
 # LAGGED v12 (no S2) + v121 (S2)
 print("\n[4] LAGGED...")
-with open("earnings_px.pkl","rb") as f: px_data=pickle.load(f)
+with open("data/earnings_px.pkl","rb") as f: px_data=pickle.load(f)
 px_data["time"]=pd.to_datetime(px_data["time"])
 px_close=px_data.pivot_table(index="time",columns="ticker",values="Close",aggfunc="first").sort_index().ffill(limit=5)
 master_idx=pd.DatetimeIndex(px_close.index).as_unit("ns"); px_close.index=master_idx; all_dates=np.array(master_idx)
-with open("lagged_pos_ov.pkl","rb") as f: ov=pickle.load(f); ov["time"]=pd.to_datetime(ov["time"])
+with open("data/lagged_pos_ov.pkl","rb") as f: ov=pickle.load(f); ov["time"]=pd.to_datetime(ov["time"])
 px_open=ov.pivot_table(index="time",columns="ticker",values="Open",aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 liq_l=ov.pivot_table(index="time",columns="ticker",values="Volume_3M_P50",aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
-with open("earnings_surprise_data.pkl","rb") as f: fin=pickle.load(f)
+with open("data/earnings_surprise_data.pkl","rb") as f: fin=pickle.load(f)
 fin["Release_Date"]=pd.to_datetime(fin["Release_Date"]); FLOOR=1e9
 fin["exp_B_MA"]=fin[["NP_P1","NP_P2","NP_P3","NP_P4"]].mean(axis=1)
 fin["surprise_B_MA"]=((fin["NP_P0"]-fin["exp_B_MA"])/np.maximum(np.abs(fin["exp_B_MA"]),FLOOR)).clip(-5,5)
-ev_class=pd.read_csv("earnings_events_classified.csv",parse_dates=["Release_Date"])
+ev_class=pd.read_csv("data/earnings_events_classified.csv",parse_dates=["Release_Date"])
 ev=ev_class.merge(fin[["ticker","quarter","Release_Date","surprise_B_MA"]],on=["ticker","quarter","Release_Date"],how="left")
 ev=ev.sort_values(["ticker","Release_Date"]).reset_index(drop=True); ev["surprise_B_MA"]=ev["surprise_B_MA"].fillna(0)
 LN2=np.log(2); HL=3.0; ev["prior_n_good"]=0; ev["pa_HL3"]=np.nan

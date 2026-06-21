@@ -51,7 +51,7 @@ for i, cfg in enumerate(configs_v2):
         print(f" ERROR: {e}"); continue
 
 df = pd.DataFrame(results_v2)
-df.to_csv("lagged_pos_tune_v2.csv", index=False)
+df.to_csv("data/lagged_pos_tune_v2.csv", index=False)
 
 # Add round-1 winners for comparison
 round1 = pd.DataFrame([
@@ -62,7 +62,7 @@ round1 = pd.DataFrame([
     {"name":"R1_top100",      "n_trades":243,"WR":70.37,"avg_ret":14.23,"full_CAGR":16.00,"full_Sharpe":1.87,"full_DD":-11.42,"full_Calmar":1.40,"oos_CAGR":11.93,"oos_Sharpe":1.20,"y22_CAGR":14.52,"q126_CAGR":21.29,"final_nav":348.06},
 ])
 combined = pd.concat([round1, df], ignore_index=True)
-combined.to_csv("lagged_pos_tune_combined.csv", index=False)
+combined.to_csv("data/lagged_pos_tune_combined.csv", index=False)
 
 print("\n" + "="*130)
 print("  TOP 10 BY CAGR (R1 winners + v2)")

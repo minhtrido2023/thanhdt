@@ -36,7 +36,7 @@ POSITION_VND = 1.25e9
 FILL_CAP = 0.20
 T1_TOP_ADV = 50e9
 
-INTRADAY_PKL = os.path.join(WORKDIR, "intraday_full.pkl")
+INTRADAY_PKL = os.path.join(WORKDIR, "data/intraday_full.pkl")
 
 BUY_TIERS_V11 = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
                   "MOMENTUM_A","MOMENTUM_S_N","COMPOUNDER_BUY","DEEP_VALUE_RECOVERY","S_PRO",
@@ -240,19 +240,19 @@ print(f"  BAL final: {nav_bal.set_index('time')['nav'].iloc[-1]/1e9:.4f}B")
 # 5. Run LAGGED book @ 25B (transparent loop with event emission)
 # ============================================================================
 print("\n[5] Running LAGGED book @ 25B (transparent)...")
-with open("earnings_px.pkl","rb") as f: px_data = pickle.load(f)
+with open("data/earnings_px.pkl","rb") as f: px_data = pickle.load(f)
 px_data["time"] = pd.to_datetime(px_data["time"])
 px_close = px_data.pivot_table(index="time", columns="ticker", values="Close", aggfunc="first").sort_index().ffill(limit=5)
 master_idx = pd.DatetimeIndex(px_close.index).as_unit("ns")
 px_close.index = master_idx
 all_dates = np.array(master_idx)
 
-with open("lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
+with open("data/lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
 ov["time"] = pd.to_datetime(ov["time"])
 px_open = ov.pivot_table(index="time", columns="ticker", values="Open", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 liq_l = ov.pivot_table(index="time", columns="ticker", values="Volume_3M_P50", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 
-ev = pd.read_csv("earnings_events_classified.csv", parse_dates=["Release_Date"])
+ev = pd.read_csv("data/earnings_events_classified.csv", parse_dates=["Release_Date"])
 ev = ev.sort_values(["ticker","Release_Date"]).reset_index(drop=True)
 LN2 = np.log(2); HL = 3.0
 ev["pa_HL3"] = np.nan; ev["prior_n_good"] = 0

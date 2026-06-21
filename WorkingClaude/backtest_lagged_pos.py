@@ -34,7 +34,7 @@ LIQ_MIN_VND   = 2e9
 
 # ─── 1. Load profiles + events ───────────────────────────────────────────
 print("[1] Loading profiles + events ...", flush=True)
-prof = pd.read_csv("ticker_reaction_profile.csv", index_col=0)
+prof = pd.read_csv("data/ticker_reaction_profile.csv", index_col=0)
 # Filter on actual alpha-after-release performance, not just frequency
 mask = (prof["avg_post_good"] >= POST_RET_MIN) & (prof["n_good"] >= N_GOOD_MIN)
 universe = prof[mask].index.tolist()
@@ -43,14 +43,14 @@ print(f"  Top 10 by avg_post_good:")
 for tk, r in prof[mask].nlargest(10, "avg_post_good").iterrows():
     print(f"    {tk:<7} N_good={int(r['n_good']):3d}  avg_post_good={r['avg_post_good']:>+6.1f}%  avg_rel_good={r['avg_rel_good']:>+6.1f}%  avg_pre_good={r['avg_pre_good']:>+6.1f}%")
 
-events = pd.read_csv("earnings_events_classified.csv", parse_dates=["Release_Date"])
+events = pd.read_csv("data/earnings_events_classified.csv", parse_dates=["Release_Date"])
 events = events[events["ticker"].isin(universe)]
 events = events[events["NP_R"] >= NPR_MIN * 100]
 print(f"  Good-earnings events in universe (NP_R ≥ {NPR_MIN*100:.0f}%): {len(events)}")
 
 # ─── 2. Load price pivot ─────────────────────────────────────────────────
 print("\n[2] Loading price cache ...", flush=True)
-with open("earnings_px.pkl","rb") as f: px = pickle.load(f)
+with open("data/earnings_px.pkl","rb") as f: px = pickle.load(f)
 px["time"] = pd.to_datetime(px["time"])
 px_close = px.pivot_table(index="time", columns="ticker", values="Close", aggfunc="first").sort_index().ffill(limit=5)
 master_idx = pd.DatetimeIndex(px_close.index).as_unit("ns")
@@ -73,7 +73,7 @@ def bq_query(sql):
     if r.returncode != 0: raise RuntimeError(r.stderr[:500])
     return pd.read_csv(StringIO(r.stdout.strip()))
 
-ov_cache = "lagged_pos_ov.pkl"
+ov_cache = "data/lagged_pos_ov.pkl"
 if os.path.exists(ov_cache):
     with open(ov_cache,"rb") as f: ov = pickle.load(f)
     print(f"  Loaded cache: {len(ov):,} rows")
@@ -263,6 +263,6 @@ if len(sells) > 0:
     for y, r in yr.iterrows():
         print(f"    {y}: N={int(r['n']):3d}  WR={r['wr']:>5.1f}%  avg={r['avg']:+6.2f}%  cum={r['total']:+7.1f}%")
 
-nav_df.to_csv("lagged_pos_nav.csv")
-trades_df.to_csv("lagged_pos_trades.csv", index=False)
+nav_df.to_csv("data/lagged_pos_nav.csv")
+trades_df.to_csv("data/lagged_pos_trades.csv", index=False)
 print("\nSaved: lagged_pos_nav.csv, lagged_pos_trades.csv")

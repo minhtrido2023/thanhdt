@@ -55,7 +55,7 @@ print("="*70)
 
 # ---- 1. Load TQ34b -----------------------------------------------------------
 print("\n[1] Load TQ34b state + state_raw...")
-tq = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_4b_full_history.csv"))
+tq = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_4b_full_history.csv"))
 tq["time"] = pd.to_datetime(tq["time"])
 tq = tq.sort_values("time").reset_index(drop=True)
 print(f"  TQ34b: {len(tq)} rows | {tq['time'].iloc[0].date()} -> {tq['time'].iloc[-1].date()}")
@@ -80,7 +80,7 @@ tq["vn_quiet"] = (tq["refi"] <= VN_REFI_MAX) & (tq["refi_chg_90d"] <= VN_REFI_CH
 
 # ---- 3. US macro data --------------------------------------------------------
 print("\n[3] Align US market data...")
-us = pd.read_csv(os.path.join(WORKDIR, "us_market_history.csv"))
+us = pd.read_csv(os.path.join(WORKDIR, "data/us_market_history.csv"))
 us["time"] = pd.to_datetime(us["time"])
 us_dates = sorted(us["time"].tolist())
 def nearest_us(t):
@@ -96,7 +96,7 @@ tq["both_quiet"] = tq["vn_quiet"] & tq["us_quiet"]
 
 # ---- 4. VNINDEX 12m return ---------------------------------------------------
 print("\n[4] Load VNINDEX 12m return...")
-vni = pd.read_csv(os.path.join(WORKDIR, "VNINDEX.csv"), usecols=["time","Close"])
+vni = pd.read_csv(os.path.join(WORKDIR, "data/VNINDEX.csv"), usecols=["time","Close"])
 vni["time"] = pd.to_datetime(vni["time"])
 tq = tq.merge(vni.rename(columns={"Close":"vni_close"}), on="time", how="left")
 tq["vni_r12m"] = tq["vni_close"].pct_change(252)
@@ -181,15 +181,15 @@ print(f"\n  {'Variant':<35} {'NAV(B)':>7} {'CAGR':>8} {'Sharpe':>7} {'MaxDD':>7}
 print("  " + "-"*80)
 
 # Baseline: TQ34b
-tq_path = os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_4b_full_history.csv")
+tq_path = os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_4b_full_history.csv")
 res_tq = simulate_timing(tq_path, start_date="2014-01-01")
 print(f"  {'TQ34b (baseline)':<35} {res_tq['final_nav']/1e9:>7.3f} {res_tq['cagr']*100:>+7.2f}% "
       f"{res_tq['sharpe']:>7.2f} {res_tq['max_dd']*100:>+7.1f}% {res_tq['calmar']:>7.2f}  {'baseline':>8}")
 
 # v3.5 and v3.6 for reference
 for label, path in [
-    ("v3.5 macro floor", "vnindex_5state_v35_macro_floor.csv"),
-    ("v3.6 smart floor R12m<30%", "vnindex_5state_v36_smart_floor.csv"),
+    ("v3.5 macro floor", "data/vnindex_5state_v35_macro_floor.csv"),
+    ("v3.6 smart floor R12m<30%", "data/vnindex_5state_v36_smart_floor.csv"),
 ]:
     full_path = os.path.join(WORKDIR, path)
     if os.path.exists(full_path):
@@ -340,7 +340,7 @@ while i < len(tq):
         i += 1
 
 # ---- 10. Save best variant ---------------------------------------------------
-out_path = os.path.join(WORKDIR, "vnindex_5state_v37_fast_exit.csv")
+out_path = os.path.join(WORKDIR, "data/vnindex_5state_v37_fast_exit.csv")
 out = pd.DataFrame({
     "time":      tq["time"].dt.strftime("%Y-%m-%d"),
     "state":     best_state.astype(int),

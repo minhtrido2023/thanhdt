@@ -22,19 +22,19 @@ INIT_NAV = 50e9
 
 # ─── Load data ───────────────────────────────────────────────────────────
 print("[Setup] Loading shared data ...", flush=True)
-with open("earnings_px.pkl","rb") as f: px_data = pickle.load(f)
+with open("data/earnings_px.pkl","rb") as f: px_data = pickle.load(f)
 px_data["time"] = pd.to_datetime(px_data["time"])
 px_close = px_data.pivot_table(index="time", columns="ticker", values="Close", aggfunc="first").sort_index().ffill(limit=5)
 master_idx = pd.DatetimeIndex(px_close.index).as_unit("ns")
 px_close.index = master_idx
 all_dates = np.array(master_idx)
 
-with open("lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
+with open("data/lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
 ov["time"] = pd.to_datetime(ov["time"])
 px_open = ov.pivot_table(index="time", columns="ticker", values="Open", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 liq     = ov.pivot_table(index="time", columns="ticker", values="Volume_3M_P50", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 
-ev = pd.read_csv("earnings_events_classified.csv", parse_dates=["Release_Date"])
+ev = pd.read_csv("data/earnings_events_classified.csv", parse_dates=["Release_Date"])
 ev = ev.sort_values(["ticker","Release_Date"]).reset_index(drop=True)
 
 # ─── Compute HL_3y profile (no lookahead) ────────────────────────────────
@@ -256,7 +256,7 @@ print(f"  Years positive: {(an_df['CAGR']>0).sum()}/{len(an_df)}  | Worst year: 
 print(f"  Best year: {an_df.loc[an_df['CAGR'].idxmax(),'year']} {an_df['CAGR'].max():+.2f}%")
 
 # Save
-pd.DataFrame(wf_results).to_csv("validate_hl3y_walkforward.csv", index=False)
-pd.DataFrame(tune_results).to_csv("validate_hl3y_tune.csv", index=False)
-pd.DataFrame(annual_results).to_csv("validate_hl3y_annual.csv", index=False)
+pd.DataFrame(wf_results).to_csv("data/validate_hl3y_walkforward.csv", index=False)
+pd.DataFrame(tune_results).to_csv("data/validate_hl3y_tune.csv", index=False)
+pd.DataFrame(annual_results).to_csv("data/validate_hl3y_annual.csv", index=False)
 print("\nSaved: validate_hl3y_walkforward.csv, validate_hl3y_tune.csv, validate_hl3y_annual.csv")

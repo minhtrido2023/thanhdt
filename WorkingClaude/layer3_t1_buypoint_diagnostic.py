@@ -43,7 +43,7 @@ START_DATE = "2023-09-15"   # intraday data starts 2023-09-11
 END_DATE   = "2026-05-12"   # intraday data ends 2026-05-12
 BOOK_NAV   = 25e9            # one book (BAL) — same as production 50/50
 
-INTRADAY_PKL = os.path.join(WORKDIR, "intraday_full.pkl")
+INTRADAY_PKL = os.path.join(WORKDIR, "data/intraday_full.pkl")
 
 # Fees (mirror simulate_holistic_nav constants)
 TC_BUY = 0.001

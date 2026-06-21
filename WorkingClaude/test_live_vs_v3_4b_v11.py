@@ -27,13 +27,13 @@ BUY_TIERS_B = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
                 "MOMENTUM_A","MOMENTUM_S_N","COMPOUNDER_BUY","DEEP_VALUE_RECOVERY","S_PRO"}
 
 VARIANTS = [
-    ("LIVE Tinh Tế",      "vnindex_5state_history.csv"),
-    ("v3.4b Định Tâm",    "vnindex_5state_tam_quan_v3_4b_full_history.csv"),
+    ("LIVE Tinh Tế",      "data/vnindex_5state_history.csv"),
+    ("v3.4b Định Tâm",    "data/vnindex_5state_tam_quan_v3_4b_full_history.csv"),
 ]
 
 print("="*100); print("V11 12y backtest: LIVE Tinh Tế vs v3.4b Định Tâm"); print("="*100)
 
-with open("ba_v11_unified_12y_sig.pkl", "rb") as f: sig_B = pickle.load(f)
+with open("data/ba_v11_unified_12y_sig.pkl", "rb") as f: sig_B = pickle.load(f)
 with open("sim_v11_for_analyzer.py", "r", encoding="utf-8") as f: _content = f.read()
 def _extract(varname):
     m = re.search(rf'^{varname}\s*=\s*"""(.+?)"""', _content, re.MULTILINE | re.DOTALL)

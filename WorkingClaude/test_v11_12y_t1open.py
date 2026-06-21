@@ -274,5 +274,5 @@ df_out = pd.DataFrame([{"period": r["period"],
                          "B_cagr": r["B"]["cagr_pct"], "B_sharpe": r["B"]["sharpe"],
                          "B_dd": r["B"]["max_dd_pct"], "B_wealth": r["B"]["wealth_x"]}
                         for r in results])
-df_out.to_csv(os.path.join(WORKDIR, "v11_12y_t1open_validation.csv"), index=False)
+df_out.to_csv(os.path.join(WORKDIR, "data/v11_12y_t1open_validation.csv"), index=False)
 print(f"  Saved: v11_12y_t1open_validation.csv")

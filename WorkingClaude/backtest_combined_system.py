@@ -32,7 +32,7 @@ from datetime import timedelta
 import warnings
 warnings.filterwarnings('ignore')
 
-CSV_PATH = r"/home/trido/thanhdt/WorkingClaude/VNINDEX.csv"
+CSV_PATH = r"/home/trido/thanhdt/WorkingClaude/data/VNINDEX.csv"
 
 NEEDED = ['time','Close','MA200','D_RSI','D_CMF','D_MACDdiff',
           'VNINDEX_PE','Change_3M','Change_1M']

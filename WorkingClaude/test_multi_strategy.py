@@ -149,5 +149,5 @@ v21 = vni_nav[vni_nav.index.year == 2021].iloc[-1]
 v22 = vni_nav[vni_nav.index.year == 2022].iloc[-1]
 print(f"  {'VNINDEX_BH':30} {(v22/v21-1)*100:+.2f}%")
 
-df.to_csv(os.path.join(WORKDIR, "multi_strategy_results.csv"), index=False)
+df.to_csv(os.path.join(WORKDIR, "data/multi_strategy_results.csv"), index=False)
 print("\n  Saved: multi_strategy_results.csv")

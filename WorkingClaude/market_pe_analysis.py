@@ -30,8 +30,8 @@ plt.rcParams.update({
 })
 
 # ── LOAD DATA ──────────────────────────────────────────────────────────────────
-pe  = pd.read_csv("market_pe_monthly.csv")
-vni = pd.read_csv("vnindex_data.csv")
+pe  = pd.read_csv("data/market_pe_monthly.csv")
+vni = pd.read_csv("data/vnindex_data.csv")
 
 pe["month"]  = pd.to_datetime(pe["month"])
 vni["time"]  = pd.to_datetime(vni["time"])

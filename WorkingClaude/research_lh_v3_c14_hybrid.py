@@ -20,7 +20,7 @@ from simulate_lh_nav import run_lh, compute_metrics, _CACHE
 
 INIT_NAV = 50e9
 
-df = pd.read_csv("lh_v3_factor_panel_cycle.csv", parse_dates=["time"])
+df = pd.read_csv("data/lh_v3_factor_panel_cycle.csv", parse_dates=["time"])
 
 COMMODITY_CYCLICAL = {"STEEL","OIL_GAS","RUBBER","AQUACULTURE","SHIPPING","CHEMICAL","COAL","SUGAR","CEMENT","PAPER_PULP","AVIATION"}
 df["bucket"] = df["cmd_group"].apply(lambda g: "CYCLICAL" if g in COMMODITY_CYCLICAL else "STANDARD")
@@ -104,7 +104,7 @@ def tier_of(pct):
     return "E"
 
 # Build ratings file for each candidate
-fa_orig = pd.read_csv("fa_ratings_lh.csv", parse_dates=["time","Release_Date"])
+fa_orig = pd.read_csv("data/fa_ratings_lh.csv", parse_dates=["time","Release_Date"])
 meta = fa_orig[["ticker","quarter","time","Release_Date","sub","ICB_Code","MktCap","Volume_3M_P50","Close"]]
 
 results = {"v8c_baseline": None}
@@ -124,15 +124,15 @@ for name in ["C14_hybrid_v2","C15_v8c_cycle_tilt","C16_balanced"]:
     out.to_csv(fname, index=False)
 
     print(f"\n--- {name} ---", flush=True)
-    os.rename("fa_ratings_lh.csv", "fa_ratings_lh.csv.bak")
-    os.rename(fname, "fa_ratings_lh.csv")
+    os.rename("data/fa_ratings_lh.csv", "fa_ratings_lh.csv.bak")
+    os.rename(fname, "data/fa_ratings_lh.csv")
     try:
         _CACHE.clear()
         results[name] = run_lh(hold_quarters=4, n_positions=10, tier_set=("A","B"), incl_sub="all",
                                 refresh_mode="staggered", crisis_gate=True, init_nav=INIT_NAV)
     finally:
-        os.rename("fa_ratings_lh.csv", fname)
-        os.rename("fa_ratings_lh.csv.bak", "fa_ratings_lh.csv")
+        os.rename("data/fa_ratings_lh.csv", fname)
+        os.rename("fa_ratings_lh.csv.bak", "data/fa_ratings_lh.csv")
 
 # Metrics
 periods = [
@@ -162,7 +162,7 @@ print("\n" + "="*120)
 print("  5-TICKER LIFECYCLE — KEY VARIANTS")
 print("="*120)
 CASES = ["VCS","DGC","VNM","FPT","HPG","BSR","VHC","HAH","GVR"]
-prices = pd.read_csv("prices_lh.csv", parse_dates=["time"])
+prices = pd.read_csv("data/prices_lh.csv", parse_dates=["time"])
 for tk in CASES:
     p = prices[prices["ticker"]==tk].sort_values("time")
     if len(p) == 0: continue

@@ -25,7 +25,7 @@ WORKDIR = os.environ.get("STATE_WORKDIR", os.path.dirname(os.path.abspath(__file
 PROJECT = "lithe-record-440915-m9"
 DATASET = "tav2_bq"
 LIVE_TABLE = "vnindex_5state"
-SOURCE_CSV = "vnindex_5state_tam_quan_v3_4b_full_history.csv"
+SOURCE_CSV = "data/vnindex_5state_tam_quan_v3_4b_full_history.csv"
 
 TS = datetime.now().strftime("%Y%m%d_%H%M%S")
 BACKUP_TABLE = f"vnindex_5state_archive_tinh_te_{TS}"

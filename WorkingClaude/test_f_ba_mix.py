@@ -270,7 +270,7 @@ for ts in ba_y.index:
     ba_prev, fb_prev, m80_prev, m70_prev = ba_v, fb_v, m80_v, m70_v
 
 # ─── Save ────────────────────────────────────────────────────────────────────
-out_path = os.path.join(WORKDIR, "f_ba_mix_results.csv")
+out_path = os.path.join(WORKDIR, "data/f_ba_mix_results.csv")
 df.to_csv(out_path, index=False)
 print(f"\n  Saved: {out_path}")
 
@@ -286,5 +286,5 @@ nav_traces = pd.DataFrame({
     "BA80_FBal20": mix80.values,
     "BA70_FBal30": mix70.values,
 })
-nav_traces.to_csv(os.path.join(WORKDIR, "f_ba_mix_nav_traces.csv"), index=False)
+nav_traces.to_csv(os.path.join(WORKDIR, "data/f_ba_mix_nav_traces.csv"), index=False)
 print(f"  NAV traces: f_ba_mix_nav_traces.csv")

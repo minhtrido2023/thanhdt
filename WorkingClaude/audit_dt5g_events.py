@@ -44,7 +44,7 @@ m["Close"] = m["Close"].ffill(); m["MA200"] = m["MA200"].ffill()
 m["bull"] = ((m["Close"] / m["Close"].shift(P["refi_chg_win"]) - 1 > P["bull_r6m"]) & (m["Close"] > m["MA200"])).shift(1).fillna(False)
 
 # US inputs (T-1) for driver attribution
-us = pd.read_csv("us_market_history.csv", parse_dates=["time"]).sort_values("time")
+us = pd.read_csv("data/us_market_history.csv", parse_dates=["time"]).sort_values("time")
 key = m[["time"]].copy(); key["jt"] = key["time"] - pd.Timedelta(days=1)
 um = pd.merge_asof(key.sort_values("jt"), us.rename(columns={"time": "us_time"}),
                    left_on="jt", right_on="us_time", direction="backward").sort_values("time").reset_index(drop=True)

@@ -24,7 +24,7 @@ PROBLEM_TICKERS = ["VCS", "DGC", "VNM", "FPT", "MWG"]
 
 # ─── Generate LH score v2 (with growth gate) ─────────────────────────────
 print("Generating LH ratings v2 (with growth-direction gate) ...")
-r1 = pd.read_csv("fa_ratings_lh.csv", parse_dates=["time"])
+r1 = pd.read_csv("data/fa_ratings_lh.csv", parse_dates=["time"])
 
 # Pull NP_TTM and Revenue history for growth signal
 import subprocess, tempfile
@@ -75,7 +75,7 @@ print(f"  A→B demotions: {n_a_demoted}, B→C demotions: {n_b_demoted}")
 # Save v2 ratings (overwrite tier column for downstream)
 r2_save = r2.copy()
 r2_save["tier"] = r2_save["tier_v2"]  # Use v2 tier
-r2_save.drop(columns=["tier_v2"]).to_csv("fa_ratings_lh_v2.csv", index=False)
+r2_save.drop(columns=["tier_v2"]).to_csv("data/fa_ratings_lh_v2.csv", index=False)
 
 # Verify on problem tickers
 print("\n  Tier changes on problem tickers:")
@@ -104,34 +104,34 @@ COMMON = dict(hold_quarters=4, n_positions=10, tier_set=("A","B"), incl_sub="all
               refresh_mode="staggered", crisis_gate=True, init_nav=INIT_NAV)
 
 VARIANTS = [
-    ("BASELINE",   {"ratings_file": "fa_ratings_lh.csv",    "trail_pct": None}),
-    ("A_trail25",  {"ratings_file": "fa_ratings_lh.csv",    "trail_pct": 0.25}),
-    ("A_trail30",  {"ratings_file": "fa_ratings_lh.csv",    "trail_pct": 0.30}),
-    ("A_trail35",  {"ratings_file": "fa_ratings_lh.csv",    "trail_pct": 0.35}),
-    ("B_v2score",  {"ratings_file": "fa_ratings_lh_v2.csv", "trail_pct": None}),
-    ("C_v2+t25",   {"ratings_file": "fa_ratings_lh_v2.csv", "trail_pct": 0.25}),
-    ("C_v2+t30",   {"ratings_file": "fa_ratings_lh_v2.csv", "trail_pct": 0.30}),
-    ("C_v2+t35",   {"ratings_file": "fa_ratings_lh_v2.csv", "trail_pct": 0.35}),
+    ("BASELINE",   {"ratings_file": "data/fa_ratings_lh.csv",    "trail_pct": None}),
+    ("A_trail25",  {"ratings_file": "data/fa_ratings_lh.csv",    "trail_pct": 0.25}),
+    ("A_trail30",  {"ratings_file": "data/fa_ratings_lh.csv",    "trail_pct": 0.30}),
+    ("A_trail35",  {"ratings_file": "data/fa_ratings_lh.csv",    "trail_pct": 0.35}),
+    ("B_v2score",  {"ratings_file": "data/fa_ratings_lh_v2.csv", "trail_pct": None}),
+    ("C_v2+t25",   {"ratings_file": "data/fa_ratings_lh_v2.csv", "trail_pct": 0.25}),
+    ("C_v2+t30",   {"ratings_file": "data/fa_ratings_lh_v2.csv", "trail_pct": 0.30}),
+    ("C_v2+t35",   {"ratings_file": "data/fa_ratings_lh_v2.csv", "trail_pct": 0.35}),
 ]
 
 results = {}
 for label, cfg in VARIANTS:
     print(f"\n→ {label} (ratings={cfg['ratings_file']}, trail={cfg['trail_pct']})")
     # Swap ratings file by temp renaming
-    if cfg["ratings_file"] != "fa_ratings_lh.csv":
-        if os.path.exists("fa_ratings_lh.csv"):
-            os.rename("fa_ratings_lh.csv", "fa_ratings_lh.csv.bak")
-        os.rename(cfg["ratings_file"], "fa_ratings_lh.csv")
+    if cfg["ratings_file"] != "data/fa_ratings_lh.csv":
+        if os.path.exists("data/fa_ratings_lh.csv"):
+            os.rename("data/fa_ratings_lh.csv", "fa_ratings_lh.csv.bak")
+        os.rename(cfg["ratings_file"], "data/fa_ratings_lh.csv")
     _CACHE.clear()  # force reload with new ratings
     try:
         res = run_lh(**COMMON, trail_pct=cfg["trail_pct"])
         results[label] = res
     finally:
         # restore
-        if cfg["ratings_file"] != "fa_ratings_lh.csv":
-            os.rename("fa_ratings_lh.csv", cfg["ratings_file"])
+        if cfg["ratings_file"] != "data/fa_ratings_lh.csv":
+            os.rename("data/fa_ratings_lh.csv", cfg["ratings_file"])
             if os.path.exists("fa_ratings_lh.csv.bak"):
-                os.rename("fa_ratings_lh.csv.bak", "fa_ratings_lh.csv")
+                os.rename("fa_ratings_lh.csv.bak", "data/fa_ratings_lh.csv")
 
 # ─── METRICS ─────────────────────────────────────────────────────────────
 periods = [
@@ -167,7 +167,7 @@ print("\n" + "="*120)
 print("5-TICKER LIFECYCLE — Did the variant exit each peak-reversal stock?")
 print("="*120)
 
-prices = pd.read_csv("prices_lh.csv", parse_dates=["time"])
+prices = pd.read_csv("data/prices_lh.csv", parse_dates=["time"])
 
 for tk in PROBLEM_TICKERS:
     print(f"\n─── {tk} ───")

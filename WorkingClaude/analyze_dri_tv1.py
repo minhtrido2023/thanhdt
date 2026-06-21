@@ -62,7 +62,7 @@ for tk in ["DRI", "TV1"]:
     """)
     fin["time"] = pd.to_datetime(fin["time"])
 
-    fa = pd.read_csv("fa_ratings_lh.csv")
+    fa = pd.read_csv("data/fa_ratings_lh.csv")
     fa_tk = fa[fa["ticker"]==tk].sort_values("quarter")
 
     print(f"\n--- Fundamentals last 12Q ---")

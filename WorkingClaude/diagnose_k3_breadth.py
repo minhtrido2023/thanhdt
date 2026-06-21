@@ -100,5 +100,5 @@ for _, r in m26.iterrows():
           f"{flag_k3:>5}{flag_b30:>7}{flag_b40:>7}")
 
 # Save full breadth for later use
-m.to_csv("breadth_full.csv", index=False)
+m.to_csv("data/breadth_full.csv", index=False)
 print(f"\nSaved breadth_full.csv ({len(m)} rows)")

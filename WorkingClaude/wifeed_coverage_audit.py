@@ -43,7 +43,7 @@ except Exception:
     pass
 
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
-OUT_CSV = os.path.join(WORKDIR, "wifeed_coverage_report.csv")
+OUT_CSV = os.path.join(WORKDIR, "data/wifeed_coverage_report.csv")
 
 # ---------------------------------------------------------------------------
 # CONFIG — endpoint WiFeed (chỉnh lại cho khớp tài liệu API của bạn khi có key)

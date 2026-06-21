@@ -54,7 +54,7 @@ E4_LOOKBACK      = 15      # days to look back for oversold
 
 # ════════════════════ LOAD ════════════════════
 print("Loading VNINDEX.csv ...")
-vni = pd.read_csv(os.path.join(WORKDIR, "VNINDEX.csv"), low_memory=False)
+vni = pd.read_csv(os.path.join(WORKDIR, "data/VNINDEX.csv"), low_memory=False)
 vni["time"] = pd.to_datetime(vni["time"])
 vni = vni.sort_values("time").reset_index(drop=True)
 # Rename Pe → VNINDEX_PE for compatibility
@@ -80,7 +80,7 @@ spy = len(vni) / (cal_days/365.25) if cal_days > 0 else 252
 print(f"  sessions/year = {spy:.1f}")
 
 # Breadth
-bp = os.path.join(WORKDIR, "breadth_data.csv")
+bp = os.path.join(WORKDIR, "data/breadth_data.csv")
 if os.path.exists(bp):
     br = pd.read_csv(bp); br["time"] = pd.to_datetime(br["time"])
     br["breadth"] = pd.to_numeric(br["breadth"], errors="coerce")
@@ -714,7 +714,7 @@ out_g = pd.DataFrame({
     "pv_baseline": pv_b,
     "pv_bh": pv_bh,
 })
-out_g.to_csv(os.path.join(WORKDIR, "vnindex_5state_v2g_history.csv"), index=False)
+out_g.to_csv(os.path.join(WORKDIR, "data/vnindex_5state_v2g_history.csv"), index=False)
 print(f"\nSaved → vnindex_5state_v2g_history.csv  ({len(out_g)} rows)")
 
 # Stats summary
@@ -731,10 +731,10 @@ print(f"  Final NV: {pv_v2g[-1]/1e9:.2f}B vs baseline {pv_b[-1]/1e9:.2f}B  vs B&
 out = pd.DataFrame({"time": vni["time"], "state_v2": state_final,
                     "state_raw": state_raw, "gate_flag": gate_flag,
                     "r_score_ema": r_score_ema, "pv_v2": pv, "pv_bh": pv_bh})
-out.to_csv(os.path.join(WORKDIR, "vnindex_5state_v2_history.csv"), index=False)
+out.to_csv(os.path.join(WORKDIR, "data/vnindex_5state_v2_history.csv"), index=False)
 print(f"\nSaved → vnindex_5state_v2_history.csv")
 
 # Save events
 ev_df = pd.DataFrame(gate_events)
-ev_df.to_csv(os.path.join(WORKDIR, "vnindex_5state_v2_gate_events.csv"), index=False)
+ev_df.to_csv(os.path.join(WORKDIR, "data/vnindex_5state_v2_gate_events.csv"), index=False)
 print(f"Saved → vnindex_5state_v2_gate_events.csv  (n={len(gate_events)})")

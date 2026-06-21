@@ -50,7 +50,7 @@ POSITION_VND = 1.25e9  # 10% of BOOK_NAV
 FILL_CAP   = 0.20
 T1_TOP_ADV = 50e9
 
-INTRADAY_PKL = os.path.join(WORKDIR, "intraday_full.pkl")
+INTRADAY_PKL = os.path.join(WORKDIR, "data/intraday_full.pkl")
 
 BUY_TIERS_V11 = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
                   "MOMENTUM_A","MOMENTUM_S_N","COMPOUNDER_BUY","DEEP_VALUE_RECOVERY","S_PRO",
@@ -64,9 +64,9 @@ TIER_WEIGHTS_FLAT = {t: FLAT_WEIGHT for t in TIER_BAL}
 
 # Stage1/Stage3 cache files
 SIG_PKL    = os.path.join(OUTDIR, "_signals_v11_12y.pkl")
-TRADES_CSV = os.path.join(WORKDIR, "ba_trades_v11_tier_labels.csv")  # deliverable
-TIER_STATS_CSV   = os.path.join(WORKDIR, "kelly_q3_tier_stats.csv")
-TIER_WEIGHTS_CSV = os.path.join(WORKDIR, "kelly_q3_tier_weights.csv")
+TRADES_CSV = os.path.join(WORKDIR, "data/ba_trades_v11_tier_labels.csv")  # deliverable
+TIER_STATS_CSV   = os.path.join(WORKDIR, "data/kelly_q3_tier_stats.csv")
+TIER_WEIGHTS_CSV = os.path.join(WORKDIR, "data/kelly_q3_tier_weights.csv")
 SIM_RESULTS_CSV  = os.path.join(OUTDIR, "_sim_results.csv")
 SIM_TRADES_FLAT  = os.path.join(OUTDIR, "_sim_trades_flat.csv")
 SIM_TRADES_KELLY = os.path.join(OUTDIR, "_sim_trades_kelly.csv")

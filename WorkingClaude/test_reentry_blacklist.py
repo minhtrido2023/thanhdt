@@ -96,6 +96,6 @@ for _, r in df_agg.iterrows():
           f"ΔDD={r['max_dd_pct']-base_agg['max_dd_pct']:+.1f}pp "
           f"Δtrades={int(r['n_trades']-base_agg['n_trades']):+d}")
 
-df_bal.to_csv(os.path.join(WORKDIR, "blacklist_results_BAL.csv"), index=False)
-df_agg.to_csv(os.path.join(WORKDIR, "blacklist_results_AGG.csv"), index=False)
+df_bal.to_csv(os.path.join(WORKDIR, "data/blacklist_results_BAL.csv"), index=False)
+df_agg.to_csv(os.path.join(WORKDIR, "data/blacklist_results_AGG.csv"), index=False)
 print("\n  Saved: blacklist_results_BAL.csv, blacklist_results_AGG.csv")

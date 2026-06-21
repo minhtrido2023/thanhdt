@@ -259,7 +259,7 @@ for t, r in ret_by_tier_all.get("v10 / equal-weight", {}).items():
     print(f"    {t:<22} {r:>+6.2f}%")
 
 # ─── Save ────────────────────────────────────────────────────────────────────
-out_path = os.path.join(WORKDIR, "round16_results.csv")
+out_path = os.path.join(WORKDIR, "data/round16_results.csv")
 df.to_csv(out_path, index=False)
 print(f"\n  Saved: {out_path}")
 

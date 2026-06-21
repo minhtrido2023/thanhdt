@@ -29,7 +29,7 @@ def bq(sql):
     return pd.read_csv(StringIO(r.stdout.strip()))
 
 # universe: quality names + land/IP/RE + commodity + validation pair
-fa=pd.read_csv(os.path.join(W,"fa_ratings_lh.csv")).sort_values(["ticker","quarter"])
+fa=pd.read_csv(os.path.join(W,"data/fa_ratings_lh.csv")).sort_values(["ticker","quarter"])
 fa["is_ab"]=fa["tier"].isin(["A","B"]).astype(int); fa["qn"]=fa.groupby("ticker").cumcount()+1
 fa["pct_AB"]=fa.groupby("ticker")["is_ab"].cumsum()/fa["qn"]*100
 last=fa.groupby("ticker").tail(1)

@@ -16,7 +16,7 @@ import time
 from phs_flex_api import FlexClient, FlexError, FlexStream
 
 WORKDIR = os.path.dirname(os.path.abspath(__file__))
-CRED_FILE = os.path.join(WORKDIR, "data", "phs_credentials.json")
+CRED_FILE = os.path.join(WORKDIR, "secrets", "phs_credentials.json")
 
 
 def load_credentials():

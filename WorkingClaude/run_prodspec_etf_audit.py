@@ -24,7 +24,7 @@ BUY_TIERS_V11={"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
 MAX_POS=12; SWITCH_COST=0.005
 print("="*100); print("  INTEGRITY AUDIT — V4/V5 ETF leg: VNINDEX proxy vs real E1VFVN30"); print("="*100)
 print("\n[1] Load...")
-with open("ba_v11_unified_12y_sig.pkl","rb") as f: sig_B=pickle.load(f)
+with open("data/ba_v11_unified_12y_sig.pkl","rb") as f: sig_B=pickle.load(f)
 sig_B["time"]=pd.to_datetime(sig_B["time"]); sig_B=sig_B[(sig_B["time"]>=START_B)&(sig_B["time"]<=END_B)].copy()
 with open("sim_v11_for_analyzer.py","r",encoding="utf-8") as f: _c=f.read()
 VQU=re.search(r'^VNI_QUERY_UNIFIED\s*=\s*"""(.+?)"""',_c,re.MULTILINE|re.DOTALL).group(1)
@@ -60,7 +60,7 @@ open_prices={tk:dict(zip(g["time"],g["open_price"])) for tk,g in opens_df.groupb
 vni_full=bq(f"""SELECT t.time,t.Close,t.MA200,t.D_RSI FROM tav2_bq.ticker AS t
 WHERE t.ticker='VNINDEX' AND t.time BETWEEN DATE '{START_B}' AND DATE '{END_B}' ORDER BY t.time""")
 vni_full["time"]=pd.to_datetime(vni_full["time"])
-sdf_tq=pd.read_csv("vnindex_5state_tam_quan_v3_4b_full_history.csv"); sdf_tq["time"]=pd.to_datetime(sdf_tq["time"])
+sdf_tq=pd.read_csv("data/vnindex_5state_tam_quan_v3_4b_full_history.csv"); sdf_tq["time"]=pd.to_datetime(sdf_tq["time"])
 sdf_tq=sdf_tq[(sdf_tq["time"]>=START_B)&(sdf_tq["time"]<=END_B)][["time","state"]]
 sbd=dict(zip(sdf_tq["time"],sdf_tq["state"])); ff_tq={}; last=None
 for d in vni_dates_B:
@@ -130,18 +130,18 @@ bal_kel_px=run_bal(ETF_KELLY,vn30_proxy,"BAL_KEL_proxy");   vn30_kel_px=run_vn30
 bal_kel_re=run_bal(ETF_KELLY,vn30_real,"BAL_KEL_real");     vn30_kel_re=run_vn30(ETF_KELLY,vn30_real,"VN30_KEL_real")
 
 print("\n[4] LAGGED v121...")
-with open("earnings_px.pkl","rb") as f: px_data=pickle.load(f)
+with open("data/earnings_px.pkl","rb") as f: px_data=pickle.load(f)
 px_data["time"]=pd.to_datetime(px_data["time"])
 px_close=px_data.pivot_table(index="time",columns="ticker",values="Close",aggfunc="first").sort_index().ffill(limit=5)
 master_idx=pd.DatetimeIndex(px_close.index).as_unit("ns"); px_close.index=master_idx; all_dates=np.array(master_idx)
-with open("lagged_pos_ov.pkl","rb") as f: ov=pickle.load(f); ov["time"]=pd.to_datetime(ov["time"])
+with open("data/lagged_pos_ov.pkl","rb") as f: ov=pickle.load(f); ov["time"]=pd.to_datetime(ov["time"])
 px_open=ov.pivot_table(index="time",columns="ticker",values="Open",aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 liq_l=ov.pivot_table(index="time",columns="ticker",values="Volume_3M_P50",aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
-with open("earnings_surprise_data.pkl","rb") as f: fin=pickle.load(f)
+with open("data/earnings_surprise_data.pkl","rb") as f: fin=pickle.load(f)
 fin["Release_Date"]=pd.to_datetime(fin["Release_Date"]); FLOOR=1e9
 fin["exp_B_MA"]=fin[["NP_P1","NP_P2","NP_P3","NP_P4"]].mean(axis=1)
 fin["surprise_B_MA"]=((fin["NP_P0"]-fin["exp_B_MA"])/np.maximum(np.abs(fin["exp_B_MA"]),FLOOR)).clip(-5,5)
-ev_class=pd.read_csv("earnings_events_classified.csv",parse_dates=["Release_Date"])
+ev_class=pd.read_csv("data/earnings_events_classified.csv",parse_dates=["Release_Date"])
 ev=ev_class.merge(fin[["ticker","quarter","Release_Date","surprise_B_MA"]],on=["ticker","quarter","Release_Date"],how="left")
 ev=ev.sort_values(["ticker","Release_Date"]).reset_index(drop=True); ev["surprise_B_MA"]=ev["surprise_B_MA"].fillna(0)
 LN2=np.log(2); HL=3.0; ev["prior_n_good"]=0; ev["pa_HL3"]=np.nan
@@ -205,7 +205,7 @@ def run_lagged(init):
 lag=run_lagged(BOOK_NAV); print(f"  LAG v121: {lag.iloc[-1]/1e9:.2f}B")
 
 print("\n[5] Ensemble...")
-cached=pd.read_csv("compare_v11_v12_concentration_switch.csv",index_col=0,parse_dates=True)
+cached=pd.read_csv("data/compare_v11_v12_concentration_switch.csv",index_col=0,parse_dates=True)
 sig_m1=cached["sig_m1"].dropna().astype(int)
 m3r_df=bq("""WITH base AS (SELECT t.time,t.ticker,
   SAFE_DIVIDE(t.Close,LAG(t.Close,126) OVER (PARTITION BY t.ticker ORDER BY t.time))-1 AS r6,

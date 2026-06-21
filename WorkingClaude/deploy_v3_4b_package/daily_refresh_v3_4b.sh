@@ -13,8 +13,8 @@
 #   5. Upload to BQ tav2_bq.vnindex_5state (replace LIVE)
 #
 # UPSTREAM PREREQUISITES (must exist before this script runs):
-#   $STATE_WORKDIR/vnindex_5state_dual_v3_staging.csv  (from raw factor pipeline)
-#   $STATE_WORKDIR/vnindex_5state_dual_v3_full.csv     (from raw factor pipeline)
+#   $STATE_WORKDIR/data/vnindex_5state_dual_v3_staging.csv  (from raw factor pipeline)
+#   $STATE_WORKDIR/data/vnindex_5state_dual_v3_full.csv     (from raw factor pipeline)
 #
 # These are the SAME files used by the previous LIVE Tinh Tế (v2g_pe3c_s3)
 # pipeline — re-use existing infrastructure.

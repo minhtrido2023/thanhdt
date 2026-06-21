@@ -26,12 +26,12 @@ RSI_THR = 55
 CONC_THR = 0.55
 
 # Load all
-v31 = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_1_full_history.csv"))
+v31 = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_1_full_history.csv"))
 v31["time"] = pd.to_datetime(v31["time"]); v31 = v31.sort_values("time").reset_index(drop=True)
-v3_stg = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_dual_v3_staging.csv"))
+v3_stg = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_dual_v3_staging.csv"))
 v3_stg["time"] = pd.to_datetime(v3_stg["time"])
 v3_stg = v3_stg.rename(columns={"state": "state_v3"})
-dr  = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_dual_v3_full.csv"))
+dr  = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_dual_v3_full.csv"))
 dr["time"] = pd.to_datetime(dr["time"])
 df = v31.merge(v3_stg[["time","state_v3"]], on="time", how="left").merge(
     dr[["time","Close","concentration_smooth"]], on="time", how="left").reset_index(drop=True)

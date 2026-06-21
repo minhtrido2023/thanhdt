@@ -15,8 +15,8 @@ except Exception: pass
 import pandas as pd, numpy as np
 
 # Load ratings + prices
-fa = pd.read_csv("fa_ratings_lh.csv", parse_dates=["time"])
-prices = pd.read_csv("prices_lh.csv", parse_dates=["time"])
+fa = pd.read_csv("data/fa_ratings_lh.csv", parse_dates=["time"])
+prices = pd.read_csv("data/prices_lh.csv", parse_dates=["time"])
 
 # For each ticker, find first A-tier quarter and compute price appreciation to peak / to today
 ticker_summary = []
@@ -122,7 +122,7 @@ print("\n" + "="*120)
 print("  COHORT-CUT VICTIMS — system held only 1Y, but stock continued to multi-year peak")
 print("="*120)
 # Top single trades from earlier analysis that had MUCH bigger subsequent runs
-tp = pd.read_csv("lh_v1_trade_pairs.csv", parse_dates=["entry_dt","exit_dt"])
+tp = pd.read_csv("data/lh_v1_trade_pairs.csv", parse_dates=["entry_dt","exit_dt"])
 tp_closed = tp[tp["status"]=="CLOSED"].copy()
 
 # For each closed trade, find max price after exit
@@ -153,7 +153,7 @@ for _, r in v_df.head(25).iterrows():
     print(f"  {r['ticker']:<7}{r['exit_dt'].strftime('%Y-%m-%d'):<13}{r['exit_px']:>10.0f}{r['post_exit_peak_px']:>14.0f}{r['days_after_exit_to_peak']:>12}{r['missed_pct']:>+9.1f}%{r['trade_ret']:>+9.1f}%")
 
 # Save
-qualified.to_csv("true_compounders_universe.csv", index=False)
-elite.to_csv("elite_compounders.csv", index=False)
-v_df.to_csv("cohort_cut_victims.csv", index=False)
+qualified.to_csv("data/true_compounders_universe.csv", index=False)
+elite.to_csv("data/elite_compounders.csv", index=False)
+v_df.to_csv("data/cohort_cut_victims.csv", index=False)
 print("\nSaved: true_compounders_universe.csv, elite_compounders.csv, cohort_cut_victims.csv")

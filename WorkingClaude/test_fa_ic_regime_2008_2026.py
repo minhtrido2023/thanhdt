@@ -290,7 +290,7 @@ for axis in AXES:
     print(row)
 
 # ─── Save & summary ────────────────────────────────────────────────────────
-pd.DataFrame(results).to_csv("fa_ic_regime_results.csv", index=False)
+pd.DataFrame(results).to_csv("data/fa_ic_regime_results.csv", index=False)
 print("\nSaved fa_ic_regime_results.csv")
 
 # Categorize

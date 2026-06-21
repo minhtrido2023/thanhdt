@@ -14,7 +14,7 @@ from simulate_holistic_nav import bq, VNI_QUERY
 from test_round14_stability import SIGNAL_V10
 
 # ─── Load trades & cached signal data ─────────────────────────────────
-trades = pd.read_csv("sim_v11_jun2025_trades.csv")
+trades = pd.read_csv("data/sim_v11_jun2025_trades.csv")
 trades["entry_date"] = pd.to_datetime(trades["entry_date"])
 trades["exit_date"] = pd.to_datetime(trades["exit_date"])
 trades = trades.sort_values("entry_date").reset_index(drop=True)

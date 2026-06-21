@@ -79,7 +79,7 @@ def classify_sector(ticker):
     return "OTHER"
 
 # ─── Load trades ─────────────────────────────────────────────────────
-trades = pd.read_csv("sim_v11_jun2025_trades.csv")
+trades = pd.read_csv("data/sim_v11_jun2025_trades.csv")
 trades["entry_date"] = pd.to_datetime(trades["entry_date"])
 trades["exit_date"] = pd.to_datetime(trades["exit_date"])
 trades["sec_group"] = trades["ticker"].apply(classify_sector)
@@ -276,7 +276,7 @@ print("  📊 COMPREHENSIVE PORTFOLIO METRICS — Jun 2025 → Mar 2026")
 print("="*100)
 
 # Load NAV
-nav = pd.read_csv("sim_v11_jun2025_nav.csv")
+nav = pd.read_csv("data/sim_v11_jun2025_nav.csv")
 nav["time"] = pd.to_datetime(nav["time"])
 START = pd.Timestamp("2025-06-09"); END = pd.Timestamp("2026-05-14")
 nav_w = nav[(nav["time"]>=START) & (nav["time"]<=END)].copy()
@@ -394,5 +394,5 @@ print(sec_summary.to_string(index=False, float_format="%.2f"))
 
 # Save outputs
 review[["ticker","entry_date","exit_date","ret_net","sec_group","NP_TTM_growth","ret_12M",
-        "Cash_MktCap","PE_z","close_ma200","review_flags"]].to_csv("portfolio_review_jun2025.csv", index=False)
+        "Cash_MktCap","PE_z","close_ma200","review_flags"]].to_csv("data/portfolio_review_jun2025.csv", index=False)
 print("\n💾 Saved portfolio_review_jun2025.csv")

@@ -50,9 +50,9 @@ OOS_START = pd.Timestamp("2024-01-01")
 # Variants to test
 VARIANTS = [
     ("LIVE Tinh Tế",   "BQ"),
-    ("Dual α=0.40",    "vnindex_5state_dual_a40_staging.csv"),
-    ("Dual α=0.50",    "vnindex_5state_dual_a50_staging.csv"),
-    ("Dual α=0.60",    "vnindex_5state_dual_a60_staging.csv"),
+    ("Dual α=0.40",    "data/vnindex_5state_dual_a40_staging.csv"),
+    ("Dual α=0.50",    "data/vnindex_5state_dual_a50_staging.csv"),
+    ("Dual α=0.60",    "data/vnindex_5state_dual_a60_staging.csv"),
 ]
 
 print("="*100)
@@ -61,7 +61,7 @@ print(f"  Period: {START_DATE} → {END_DATE} | NAV: {TOTAL_NAV/1e9:.0f}B")
 print("="*100)
 
 # ─── Shared data: signals (cached) + VNI prices + sec_map + top30 ─────────
-sig_cache = "ba_v11_unified_12y_sig.pkl"
+sig_cache = "data/ba_v11_unified_12y_sig.pkl"
 if os.path.exists(sig_cache):
     with open(sig_cache, "rb") as f: sig = pickle.load(f)
     print(f"[shared] Loaded signal cache: {len(sig):,} rows")

@@ -29,7 +29,7 @@ import numpy as np, pandas as pd
 
 PROJECT = "lithe-record-440915-m9"
 BQ_BIN  = r"bq"
-OUT_CSV = "fundamental_rating_v5.csv"
+OUT_CSV = "data/fundamental_rating_v5.csv"
 
 WEIGHTS = {"quality":0.18,"stability":0.18,"cash":0.18,"shareholder":0.15,
            "growth":0.13,"health":0.08,"valuation":0.10}

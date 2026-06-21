@@ -132,10 +132,10 @@ def lag_edge_health():
     Writes the rolling series to data/lag_edge_health.csv (auto-updated)."""
     import pickle
     try:
-        with open(WORKDIR + r"/earnings_px.pkl", "rb") as f: px = pickle.load(f)
+        with open(WORKDIR + r"/data/earnings_px.pkl", "rb") as f: px = pickle.load(f)
         px["time"] = pd.to_datetime(px["time"])
         pxc = px.pivot_table(index="time", columns="ticker", values="Close", aggfunc="first").sort_index().ffill(limit=5)
-        ev = pd.read_csv(WORKDIR + r"/earnings_events_classified.csv", parse_dates=["Release_Date"])
+        ev = pd.read_csv(WORKDIR + r"/data/earnings_events_classified.csv", parse_dates=["Release_Date"])
     except Exception as e:
         print(f"[lag-edge] skipped: {e}")
         return None

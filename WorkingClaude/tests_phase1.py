@@ -18,10 +18,10 @@ INIT_NAV = 50e9
 
 # Load NAVs
 print("Loading NAVs ...")
-ba = pd.read_csv("ba_v11_nav.csv", parse_dates=["time"]).sort_values("time").set_index("time")["BA_v11"]
+ba = pd.read_csv("data/ba_v11_nav.csv", parse_dates=["time"]).sort_values("time").set_index("time")["BA_v11"]
 lh_g = run_lh(hold_quarters=4, n_positions=10, tier_set=("A","B"), incl_sub="all",
                refresh_mode="staggered", crisis_gate=True)["nav"]["nav"]
-vn = pd.read_csv("vnindex_lh.csv", parse_dates=["time"])
+vn = pd.read_csv("data/vnindex_lh.csv", parse_dates=["time"])
 vn = vn[vn["Close"] > 100].sort_values("time").set_index("time")["Close"]
 
 common_start = max(ba.index.min(), lh_g.index.min(), vn.index.min())
@@ -107,7 +107,7 @@ for pname in ["PRE_2024", "OOS_2024+", "Y2022_crash", "Q1_2026_BEAR"]:
     for _, r in sub.iterrows():
         print(f"  {r['weight']:<22}  CAGR={r['CAGR']:>+7.2%}  Sh={r['Sharpe']:>+5.2f}  DD={r['MaxDD']:>+6.2%}  alpha={r['alpha_vs_vni']:>+6.2%}")
 
-grid_df.to_csv("phase1_capital_allocation.csv", index=False)
+grid_df.to_csv("data/phase1_capital_allocation.csv", index=False)
 
 print("\n" + "="*120)
 print("TEST 2 — Rolling 1Y correlation BA v11 vs LH gated (daily returns)")
@@ -149,7 +149,7 @@ for label, s, e in stress_periods:
     c = sub_ba.corr(sub_lh)
     print(f"  {label:<20} ({s} → {e}, N={len(sub_ba)}): corr = {c:+.4f}")
 
-roll_corr.to_csv("phase1_rolling_corr.csv", header=["corr_BA_LH"])
+roll_corr.to_csv("data/phase1_rolling_corr.csv", header=["corr_BA_LH"])
 
 print("\n" + "="*120)
 print("TEST 3 — Black-swan stress test on hybrid 50/50 (BA v11 + LH gated, qtrly)")

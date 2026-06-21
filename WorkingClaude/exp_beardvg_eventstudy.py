@@ -8,7 +8,7 @@ import numpy as np, pandas as pd
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"; os.chdir(WORKDIR)
 
-vni = pd.read_pickle("_cache_vnindex_2000_now.pkl"); vni["time"] = pd.to_datetime(vni["time"])
+vni = pd.read_pickle("data/_cache_vnindex_2000_now.pkl"); vni["time"] = pd.to_datetime(vni["time"])
 vni = vni.sort_values("time").reset_index(drop=True)
 close = vni["Close"].values.astype(float); n = len(close)
 cmf = vni["D_CMF"].values.astype(float)

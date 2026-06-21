@@ -43,7 +43,7 @@ HIST_MIN    = 252
 STATE_NAMES = {1:"CRISIS",2:"BEAR",3:"NEUTRAL",4:"BULL",5:"EX-BULL"}
 DVG_MASK_START = "2007-01-01"
 
-CACHE_UNIV_FULL = os.path.join(WORKDIR, "_cache_universe_2005_now.pkl")
+CACHE_UNIV_FULL = os.path.join(WORKDIR, "data/_cache_universe_2005_now.pkl")
 
 print("="*70); print("Tam Quan v3 — FULL HISTORY (2006-now) for stress test"); print("="*70)
 
@@ -81,7 +81,7 @@ else:
 print(f"  Universe: {len(univ):,} rows | {univ['time'].min().date()} → {univ['time'].max().date()}")
 
 # Load VNI
-vni = pd.read_pickle(os.path.join(WORKDIR, "_cache_vnindex_2000_now.pkl"))
+vni = pd.read_pickle(os.path.join(WORKDIR, "data/_cache_vnindex_2000_now.pkl"))
 vni["time"] = pd.to_datetime(vni["time"])
 vni = vni.sort_values("time").reset_index(drop=True)
 
@@ -214,7 +214,7 @@ print(f"  Composite series: {len(df)} rows | pre={len(pre)} post={len(post)}")
 # Save full EW for reuse
 ew_out = df.copy()
 ew_out["f_Breadth"] = ew_out["breadth"]
-ew_out.to_csv(os.path.join(WORKDIR, "vnindex_5state_ew_full_history.csv"), index=False)
+ew_out.to_csv(os.path.join(WORKDIR, "data/vnindex_5state_ew_full_history.csv"), index=False)
 
 # ─────────────────────────────────────────────────────────────────────
 # Step 6: Recompute factors on composite Close + EW r_score
@@ -560,9 +560,9 @@ staging_out = pd.DataFrame({
     "state": master["state"].astype(int),
     "state_raw": master["state_raw"].astype(int),
 })
-staging_out.to_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_full_history.csv"), index=False)
+staging_out.to_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_full_history.csv"), index=False)
 master[["time","Close","concentration_smooth","alpha","r_score_raw","r_score_ew",
-        "state_raw","state"]].to_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_full_history_diag.csv"), index=False)
+        "state_raw","state"]].to_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_full_history_diag.csv"), index=False)
 
 # Summary
 print("\n" + "="*70); print("STRESS TEST SUMMARY"); print("="*70)

@@ -27,7 +27,7 @@ live = live.rename(columns={"state":"state_live", "state_raw":"raw_live"})
 
 # Load EW staging
 print("Loading EW staging ...")
-ew = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_ew_staging.csv"))
+ew = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_ew_staging.csv"))
 ew["time"] = pd.to_datetime(ew["time"])
 ew = ew.rename(columns={"state":"state_ew", "state_raw":"raw_ew"})
 

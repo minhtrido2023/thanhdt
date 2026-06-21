@@ -104,7 +104,7 @@ if fresh is not None and len(fresh):
 print(f"  Price rows: {len(px):,}")
 
 # FA ratings (latest)
-fa = pd.read_csv("fa_ratings_lh.csv", parse_dates=["time"])
+fa = pd.read_csv("data/fa_ratings_lh.csv", parse_dates=["time"])
 latest_q = fa["quarter"].max()
 fa_latest = fa[fa["ticker"].isin(WHITELIST.keys()) & (fa["quarter"]==latest_q)]
 print(f"  FA latest quarter: {latest_q} ({len(fa_latest)} of {len(WHITELIST)} found)")
@@ -238,7 +238,7 @@ if len(dgc_px) > 0:
 print(f"\n{'='*100}")
 print(f"  SECTOR CYCLE STATUS (for cyclical whitelist holdings)")
 print(f"{'='*100}")
-sec_cycle_path = "lh_v3_sector_cycle.csv"
+sec_cycle_path = "data/lh_v3_sector_cycle.csv"
 if os.path.exists(sec_cycle_path):
     sec = pd.read_csv(sec_cycle_path)
     latest_sec_q = sec["quarter"].max()

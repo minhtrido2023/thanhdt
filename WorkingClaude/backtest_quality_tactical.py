@@ -38,7 +38,7 @@ def bq_query(sql):
 
 # ─── 1. Build quality universe from FA history ───────────────────────────
 print("[1] Building quality universe from FA history ...", flush=True)
-fa = pd.read_csv("fa_ratings_lh.csv", parse_dates=["time","Release_Date"])
+fa = pd.read_csv("data/fa_ratings_lh.csv", parse_dates=["time","Release_Date"])
 fa = fa.sort_values(["ticker","quarter"]).reset_index(drop=True)
 
 # Per-quarter universe: rolling check ≥70% A+B over last 12Q
@@ -62,7 +62,7 @@ print(f"  Quality lookup built: {len(quality_at_q):,} (ticker, quarter) entries"
 
 # ─── 2. Pull TA + price + volume panel ───────────────────────────────────
 print("\n[2] Pulling TA panel from BQ (2014-2026) ...", flush=True)
-panel_path = "qt_panel_2014_2026.pkl"
+panel_path = "data/qt_panel_2014_2026.pkl"
 if os.path.exists(panel_path):
     import pickle
     with open(panel_path, "rb") as f:
@@ -420,6 +420,6 @@ if len(trades_df) > 0:
             print(f"  {tk:<7}{int(r['n']):>4}{r['avg_ret']:>+9.1f}%{r['total_ret']:>+9.1f}%{r['avg_hold']:>9.0f}d")
 
 # Save
-nav_df.to_csv("qt_backtest_nav.csv")
-trades_df.to_csv("qt_backtest_trades.csv", index=False)
+nav_df.to_csv("data/qt_backtest_nav.csv")
+trades_df.to_csv("data/qt_backtest_trades.csv", index=False)
 print("\nSaved: qt_backtest_nav.csv, qt_backtest_trades.csv")

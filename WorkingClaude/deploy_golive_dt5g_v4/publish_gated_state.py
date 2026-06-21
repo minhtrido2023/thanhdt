@@ -27,7 +27,7 @@ PROJECT = "lithe-record-440915-m9"
 BQ_TABLE = f"{PROJECT}:tav2_bq.vnindex_5state_dt5g_live"
 WARMUP_START = "2014-01-01"     # SIGNAL_V11 state-join needs history; gate warms DT4 from 2014
 END = datetime.now().strftime("%Y-%m-%d")
-LOCAL_CSV = os.path.join(WORKDIR, "vnindex_5state_dt5g_live.csv")
+LOCAL_CSV = os.path.join(WORKDIR, "data/vnindex_5state_dt5g_live.csv")
 STATE_JSON = os.path.join(WORKDIR, "deploy_golive_dt5g_v4", "golive_state_today.json")
 
 print("=" * 88); print(f"  PUBLISH GATED STATE (DT5G, fail-safe)  -> {END}"); print("=" * 88)

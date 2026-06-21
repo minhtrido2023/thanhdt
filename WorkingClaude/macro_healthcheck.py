@@ -95,7 +95,7 @@ state_fresh = ticker_fresh = us_fresh = True
 
 # 1. LOCAL v3.4b base-state CSV (rebuilt daily from BQ ticker via ew_v1->...->v3.4b chain;
 #    this is what macro_state_live now reads — NOT the lagging BQ v34b_clean table).
-V34B_CSV = os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_4b_full_history.csv")
+V34B_CSV = os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_4b_full_history.csv")
 try:
     _b = pd.read_csv(V34B_CSV)
     d = pd.to_datetime(_b["time"]).max().date()
@@ -118,10 +118,10 @@ else:
 # 3. US feed
 us = None
 try:
-    us = pd.read_csv(os.path.join(WORKDIR, "us_market_history.csv"), parse_dates=["time"]).sort_values("time")
-    us_fresh = add_source("us_market_history.csv", us["time"].iloc[-1].date(), US_MAX_TDAYS)
+    us = pd.read_csv(os.path.join(WORKDIR, "data/us_market_history.csv"), parse_dates=["time"]).sort_values("time")
+    us_fresh = add_source("data/us_market_history.csv", us["time"].iloc[-1].date(), US_MAX_TDAYS)
 except Exception as e:
-    us_fresh = add_source("us_market_history.csv", None, US_MAX_TDAYS)
+    us_fresh = add_source("data/us_market_history.csv", None, US_MAX_TDAYS)
     add_check("us_csv_read", False, "SEV1", str(e))
 
 # 4. SBV refi (age is INFO only — stable refi for years is NORMAL; can't auto-detect a
@@ -319,7 +319,7 @@ ping = os.environ.get("MACRO_HEALTH_PING", "0") == "1"
 if status != "HEALTHY" or ping:
     try:
         import json as _j
-        cfg = _j.load(open(os.path.join(WORKDIR, "telegram_config.json"), encoding="utf-8"))
+        cfg = _j.load(open(os.path.join(WORKDIR, "secrets/telegram_config.json"), encoding="utf-8"))
         from telegram_recommend import send_telegram_text
         msg = build_alert_text() if status != "HEALTHY" else \
               f"✅ MACRO HEALTH OK @ {NOW:%Y-%m-%d %H:%M} | source={recommended} | macro={macro_now}"

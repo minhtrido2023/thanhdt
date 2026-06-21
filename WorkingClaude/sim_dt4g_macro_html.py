@@ -33,7 +33,7 @@ INIT = 1_000_000_000
 # ── 1. load real data ───────────────────────────────────────────────────────
 print("[1] Loading NAV path + macro state + REAL BQ VNINDEX...")
 nav = pd.read_csv(os.path.join(WORKDIR, "data", "dt4g_macro_overlay_nav.csv"), parse_dates=["time"])
-ms = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_dt4_macro.csv"), parse_dates=["time"])[["time", "state"]]
+ms = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_dt4_macro.csv"), parse_dates=["time"])[["time", "state"]]
 ms = ms.rename(columns={"state": "mstate"})
 vni = bq("SELECT t.time,t.Close FROM tav2_bq.ticker AS t WHERE t.ticker='VNINDEX' ORDER BY t.time")
 vni["time"] = pd.to_datetime(vni["time"])

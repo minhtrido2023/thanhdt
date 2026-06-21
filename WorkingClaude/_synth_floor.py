@@ -22,8 +22,8 @@ def asym_commit(states, default_min, target_state_min):
         out[t] = committed
     return out
 
-tt  = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state.csv"))
-v34 = pd.read_csv(os.path.join(WORKDIR, "_cmp_v34b.csv"))
+tt  = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state.csv"))
+v34 = pd.read_csv(os.path.join(WORKDIR, "data/_cmp_v34b.csv"))
 for d in (tt, v34): d["time"] = pd.to_datetime(d["time"])
 m = v34.rename(columns={"state":"v34"}).merge(
     tt.rename(columns={"state":"tt","state_raw":"tt_raw"}), on="time", how="inner"

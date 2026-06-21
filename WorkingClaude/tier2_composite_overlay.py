@@ -15,8 +15,8 @@ Variants:
 import pandas as pd
 import numpy as np
 
-df = pd.read_csv('tier2_macro_panel.csv', parse_dates=['time'])
-ba = pd.read_csv('ba_v11_nav.csv', parse_dates=['time'])
+df = pd.read_csv('data/tier2_macro_panel.csv', parse_dates=['time'])
+ba = pd.read_csv('data/ba_v11_nav.csv', parse_dates=['time'])
 df = df.merge(ba[['time','BA_v11']], on='time', how='left')
 df['ba_ret'] = df['BA_v11'].pct_change().fillna(0.0)
 df = df[df['BA_v11'].notna()].reset_index(drop=True)
@@ -163,5 +163,5 @@ for k in [0.15, 0.20, 0.30, 0.10]:
 
 # Save
 df[['time','macro_score','DXY_rank252_z','EEM_ret60_z','DXY_mom60_lag60_z','state','ba_ret']].to_csv(
-    'macro_composite_signal.csv', index=False)
+    'data/macro_composite_signal.csv', index=False)
 print("Saved: macro_composite_signal.csv")

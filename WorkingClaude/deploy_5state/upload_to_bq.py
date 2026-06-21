@@ -52,7 +52,7 @@ def main():
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
-    src = os.path.join(WORKDIR, "vnindex_5state_history.csv")
+    src = os.path.join(WORKDIR, "data/vnindex_5state_history.csv")
     if not os.path.exists(src):
         print(f"ERROR: {src} not found. Run vnindex_5state_system.py first.",
               file=sys.stderr)

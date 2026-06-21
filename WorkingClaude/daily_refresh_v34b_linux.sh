@@ -50,7 +50,7 @@ cp vnindex_5state_tam_quan_v3_1_clean.csv vnindex_5state_tam_quan_v3_1_full_hist
 step "[7] build_v3_4_bull_aware.py";       $PY deploy_v3_4b_package/build_v3_4_bull_aware.py || die "v3_4b"
 step "[8] build_dt_4gate.py (local, non-fatal)"; $PY build_dt_4gate.py || echo "  WARN: dt_4gate failed (non-fatal)"
 
-CSV="vnindex_5state_tam_quan_v3_4b_full_history.csv"
+CSV="data/vnindex_5state_tam_quan_v3_4b_full_history.csv"
 LOCAL_MAX="$(tail -1 "$CSV" | cut -d, -f1)"
 echo "local v3.4b CSV max date = $LOCAL_MAX"
 [ -n "$LOCAL_MAX" ] || die "v3.4b CSV empty"

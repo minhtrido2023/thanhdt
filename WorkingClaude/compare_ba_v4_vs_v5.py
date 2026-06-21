@@ -115,5 +115,5 @@ for strat in STRATEGIES:
 print(f"{'VNINDEX_BH':<22}{'baseline':<14}{vni_cagr*100:>8.2f}{vni_sharpe:>8.2f}"
       f"{vni_dd*100:>9.1f}{(vni_cagr/abs(vni_dd) if vni_dd<0 else 0):>8.2f}")
 
-pd.DataFrame(rows).to_csv("ba_v4_v5_compare.csv", index=False)
+pd.DataFrame(rows).to_csv("data/ba_v4_v5_compare.csv", index=False)
 print("\nSaved ba_v4_v5_compare.csv")

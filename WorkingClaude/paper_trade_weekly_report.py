@@ -27,8 +27,8 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
 sys.path.insert(0, WORKDIR)
 
-ENTRIES_FILE = os.path.join(WORKDIR, "paper_trade_entries.csv")
-EXITS_FILE = os.path.join(WORKDIR, "paper_trade_exits.csv")
+ENTRIES_FILE = os.path.join(WORKDIR, "data/paper_trade_entries.csv")
+EXITS_FILE = os.path.join(WORKDIR, "data/paper_trade_exits.csv")
 LOG_FILE = os.path.join(WORKDIR, "paper_trade_weekly_log.txt")
 
 from telegram_recommend import load_config, send_telegram_text, send_telegram_document
@@ -158,8 +158,8 @@ def main():
 
     if args.attach_csv:
         for fp, caption in [
-            (ENTRIES_FILE, "paper_trade_entries.csv"),
-            (EXITS_FILE, "paper_trade_exits.csv"),
+            (ENTRIES_FILE, "data/paper_trade_entries.csv"),
+            (EXITS_FILE, "data/paper_trade_exits.csv"),
         ]:
             if os.path.exists(fp):
                 r = send_telegram_document(token, chat_id, fp, caption=caption)

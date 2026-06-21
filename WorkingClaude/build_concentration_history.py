@@ -27,9 +27,9 @@ import numpy as np
 import pandas as pd
 
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
-CACHE_TICKER = os.path.join(WORKDIR, "_cache_universe_2013_now.pkl")
-CACHE_VNI    = os.path.join(WORKDIR, "_cache_vnindex_2000_now.pkl")
-EW_FULL_CSV  = os.path.join(WORKDIR, "vnindex_5state_ew_full.csv")
+CACHE_TICKER = os.path.join(WORKDIR, "data/_cache_universe_2013_now.pkl")
+CACHE_VNI    = os.path.join(WORKDIR, "data/_cache_vnindex_2000_now.pkl")
+EW_FULL_CSV  = os.path.join(WORKDIR, "data/vnindex_5state_ew_full.csv")
 VIN_FAMILY   = {"VIC", "VHM", "VPL", "VRE"}
 
 print("="*70)
@@ -163,7 +163,7 @@ conc["concentration_score"] = conc.apply(composite, axis=1)
 # ─────────────────────────────────────────────────────────────────────
 # Save + summary
 # ─────────────────────────────────────────────────────────────────────
-out_path = os.path.join(WORKDIR, "concentration_history.csv")
+out_path = os.path.join(WORKDIR, "data/concentration_history.csv")
 conc.to_csv(out_path, index=False)
 print(f"\n[6] Saved → {out_path}")
 print(f"\nSUMMARY")

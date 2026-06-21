@@ -29,16 +29,16 @@ BUY_TIERS_B = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
                 "MOMENTUM_A","MOMENTUM_S_N","COMPOUNDER_BUY","DEEP_VALUE_RECOVERY","S_PRO"}
 
 VARIANTS = [
-    ("v3.1 baseline",     "vnindex_5state_tam_quan_v3_1_full_history.csv"),
-    ("v3.3 RSI gate",     "vnindex_5state_tam_quan_v3_3_full_history.csv"),
-    ("v3.3b conc≤0.55",   "vnindex_5state_tam_quan_v3_3b_full_history.csv"),
-    ("v3.3c conc≤0.45",   "vnindex_5state_tam_quan_v3_3c_full_history.csv"),
+    ("v3.1 baseline",     "data/vnindex_5state_tam_quan_v3_1_full_history.csv"),
+    ("v3.3 RSI gate",     "data/vnindex_5state_tam_quan_v3_3_full_history.csv"),
+    ("v3.3b conc≤0.55",   "data/vnindex_5state_tam_quan_v3_3b_full_history.csv"),
+    ("v3.3c conc≤0.45",   "data/vnindex_5state_tam_quan_v3_3c_full_history.csv"),
 ]
 
 print("="*100); print("V11 12y backtest: v3.1 vs v3.3 vs v3.3b vs v3.3c"); print("="*100)
 
 # Shared data
-with open("ba_v11_unified_12y_sig.pkl", "rb") as f: sig_B = pickle.load(f)
+with open("data/ba_v11_unified_12y_sig.pkl", "rb") as f: sig_B = pickle.load(f)
 with open("sim_v11_for_analyzer.py", "r", encoding="utf-8") as f: _content = f.read()
 def _extract(varname):
     m = re.search(rf'^{varname}\s*=\s*"""(.+?)"""', _content, re.MULTILINE | re.DOTALL)

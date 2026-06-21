@@ -138,5 +138,5 @@ m2021 = multi[multi.index.year == 2021].iloc[-1]
 m2022 = multi[multi.index.year == 2022].iloc[-1]
 print(f"  {'MULTI_50BALall_25AGG_25HC':30} {(m2022/m2021-1)*100:+.2f}%")
 
-df.to_csv(os.path.join(WORKDIR, "optimal_combo_results.csv"), index=False)
+df.to_csv(os.path.join(WORKDIR, "data/optimal_combo_results.csv"), index=False)
 print("\n  Saved: optimal_combo_results.csv")

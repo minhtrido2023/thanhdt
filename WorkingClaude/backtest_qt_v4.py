@@ -48,7 +48,7 @@ def bq_query(sql):
 
 # ─── 1. Quality universe (giữ v1) ────────────────────────────────────────
 print("[1] Building quality universe from FA history ...", flush=True)
-fa = pd.read_csv("fa_ratings_lh.csv", parse_dates=["time","Release_Date"])
+fa = pd.read_csv("data/fa_ratings_lh.csv", parse_dates=["time","Release_Date"])
 fa = fa.sort_values(["ticker","quarter"]).reset_index(drop=True)
 
 quality_at_q = {}
@@ -67,7 +67,7 @@ for tk, g in fa.groupby("ticker"):
 print(f"  Quality lookup built: {len(quality_at_q):,} entries")
 
 print("\n[2] Loading TA panel cache ...", flush=True)
-with open("qt_panel_2014_2026.pkl","rb") as f:
+with open("data/qt_panel_2014_2026.pkl","rb") as f:
     panel = pickle.load(f)
 panel["time"] = pd.to_datetime(panel["time"])
 print(f"  Panel: {len(panel):,} rows")
@@ -81,7 +81,7 @@ panel["pb_z"] = ((panel["PB"]-panel["PB_MA5Y"])/panel["PB_SD5Y"].replace(0,np.na
 panel["vs_MA200_pct"] = (panel["Close"]/panel["MA200"] - 1) * 100
 
 # ─── 3. Pull quarterly financial (PEG/NP_R/Revenue_YoY) ──────────────────
-fin_cache = "qt_v4_fin.pkl"
+fin_cache = "data/qt_v4_fin.pkl"
 if os.path.exists(fin_cache):
     with open(fin_cache,"rb") as f: fin = pickle.load(f)
     print(f"  Loaded financial cache: {len(fin):,} rows")
@@ -439,6 +439,6 @@ if len(trades_df) > 0:
         for tk, r in per_tk.head(15).iterrows():
             print(f"    {tk:<7} N={int(r['n']):2d}  avg={r['avg_ret']:+6.1f}%  cum={r['total_ret']:+7.1f}%  hold={r['avg_hold']:.0f}d")
 
-nav_df.to_csv("qt_v4_nav.csv")
-trades_df.to_csv("qt_v4_trades.csv", index=False)
+nav_df.to_csv("data/qt_v4_nav.csv")
+trades_df.to_csv("data/qt_v4_trades.csv", index=False)
 print("\nSaved: qt_v4_nav.csv, qt_v4_trades.csv")

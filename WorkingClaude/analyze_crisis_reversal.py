@@ -16,9 +16,9 @@ import pandas as pd
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
 
 # Load state history + VNINDEX
-sh = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_history.csv"))
+sh = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_history.csv"))
 sh["time"] = pd.to_datetime(sh["time"])
-vni = pd.read_csv(os.path.join(WORKDIR, "VNINDEX.csv"), low_memory=False)
+vni = pd.read_csv(os.path.join(WORKDIR, "data/VNINDEX.csv"), low_memory=False)
 vni["time"] = pd.to_datetime(vni["time"])
 vni = vni.sort_values("time").reset_index(drop=True)
 df = sh.merge(vni, on="time", how="left")

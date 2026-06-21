@@ -37,7 +37,7 @@ import numpy as np
 WORKDIR = Path(__file__).parent
 EVENTS_PATH = WORKDIR / 'sbv_refi_events.json'
 STATE_PATH = WORKDIR / 'sbv_macro_state.json'
-LOG_PATH   = WORKDIR / 'sbv_macro_log.csv'
+LOG_PATH   = WORKDIR / 'data/sbv_macro_log.csv'
 
 # ── Tuning (from sensitivity-validated optimum) ──
 LAG_DAYS = 90

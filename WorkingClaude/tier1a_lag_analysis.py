@@ -73,7 +73,7 @@ vni_csv = subprocess.run(['bq','query','--use_legacy_sql=false','--project_id=li
                          capture_output=True,text=True,shell=True).stdout
 vni = pd.read_csv(io.StringIO(vni_csv), parse_dates=['time']).set_index('time')
 vni.columns = ['VNI']
-state = pd.read_csv('_state.csv', parse_dates=['time']).set_index('time')
+state = pd.read_csv('data/_state.csv', parse_dates=['time']).set_index('time')
 
 df = vni.join(macro, how='left').join(state, how='left')
 df['state'] = df['state'].ffill()
@@ -149,6 +149,6 @@ for _, r in top_cands.iterrows():
     print(f"{f:22s} {k:>4d} {h:>4d} {ic_full:+8.3f} {ic_is:+8.3f} {ic_oos:+8.3f} {'YES' if cons else 'no':>11s}")
 
 # Save
-df.to_csv('macro_lag_data.csv')
-rec.to_csv('macro_lag_ic.csv', index=False)
+df.to_csv('data/macro_lag_data.csv')
+rec.to_csv('data/macro_lag_ic.csv', index=False)
 print("\nSaved: macro_lag_data.csv, macro_lag_ic.csv")

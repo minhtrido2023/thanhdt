@@ -21,21 +21,21 @@ INIT_NAV = 50e9
 
 # ─── 1. Run LAGGED honest CAND_B → save NAV ──────────────────────────────
 print("[1] Loading LAGGED data ...")
-with open("earnings_px.pkl","rb") as f: px = pickle.load(f)
+with open("data/earnings_px.pkl","rb") as f: px = pickle.load(f)
 px["time"] = pd.to_datetime(px["time"])
 px_close = px.pivot_table(index="time", columns="ticker", values="Close", aggfunc="first").sort_index().ffill(limit=5)
 master_idx = pd.DatetimeIndex(px_close.index).as_unit("ns")
 px_close.index = master_idx
 all_dates = np.array(master_idx)
 
-with open("lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
+with open("data/lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
 ov["time"] = pd.to_datetime(ov["time"])
 px_open = ov.pivot_table(index="time", columns="ticker", values="Open", aggfunc="first").sort_index()
 liq     = ov.pivot_table(index="time", columns="ticker", values="Volume_3M_P50", aggfunc="first").sort_index()
 px_open = px_open.reindex(master_idx).ffill(limit=5)
 liq     = liq.reindex(master_idx).ffill(limit=5)
 
-ev_classified = pd.read_csv("earnings_events_classified.csv", parse_dates=["Release_Date"])
+ev_classified = pd.read_csv("data/earnings_events_classified.csv", parse_dates=["Release_Date"])
 ev_classified = ev_classified.sort_values(["ticker","Release_Date"]).reset_index(drop=True)
 ev_classified["prior_n_good"] = 0
 ev_classified["prior_avg_post_good"] = np.nan
@@ -126,12 +126,12 @@ for dt in sim_days:
 
 lagged_nav_df = pd.DataFrame(nav_history).set_index("date")
 lagged_nav = lagged_nav_df["nav"] / INIT_NAV  # normalize to 1.0
-lagged_nav.to_csv("lagged_honest_candb_nav.csv")
+lagged_nav.to_csv("data/lagged_honest_candb_nav.csv")
 print(f"  LAGGED CAND_B final: {lagged_nav.iloc[-1]:.3f}x ({(lagged_nav.iloc[-1]-1)*100:+.1f}%)")
 
 # ─── 3. Load BA v11 BASELINE NAV ─────────────────────────────────────────
 print("\n[3] Loading BA v11 BASELINE NAV ...")
-ba_df = pd.read_csv("ba_v11_lagged_factor_nav.csv", index_col=0, parse_dates=True)
+ba_df = pd.read_csv("data/ba_v11_lagged_factor_nav.csv", index_col=0, parse_dates=True)
 ba_nav = ba_df["BASELINE"]
 print(f"  BA v11 BASELINE final: {ba_nav.iloc[-1]:.3f}x ({(ba_nav.iloc[-1]-1)*100:+.1f}%)")
 
@@ -146,7 +146,7 @@ ba_norm  = ba_aligned / ba_aligned.iloc[0]
 lag_norm = lag_aligned / lag_aligned.iloc[0]
 
 # VNI for comparison
-vni = pd.read_csv("VNINDEX.csv", parse_dates=["time"])
+vni = pd.read_csv("data/VNINDEX.csv", parse_dates=["time"])
 vni = vni.set_index("time").sort_index()
 vni_aligned = vni["Close"].reindex(common).ffill()
 vni_norm = vni_aligned / vni_aligned.iloc[0]
@@ -202,5 +202,5 @@ for label, st, en in periods:
 
 # Save
 combo_df = pd.DataFrame(hybrids)
-combo_df.to_csv("hybrid_ba_lagged_nav.csv")
+combo_df.to_csv("data/hybrid_ba_lagged_nav.csv")
 print("Saved: hybrid_ba_lagged_nav.csv")

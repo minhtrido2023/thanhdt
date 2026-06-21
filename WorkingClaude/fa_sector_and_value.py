@@ -31,7 +31,7 @@ def ic(x,y):
 
 def main():
     lines=[]; P=lambda s="":(print(s),lines.append(s))
-    df=pd.read_csv(os.path.join(WORKDIR,"fundamental_rating_all.csv"))
+    df=pd.read_csv(os.path.join(WORKDIR,"data/fundamental_rating_all.csv"))
     df["time"]=pd.to_datetime(df["time"])
     df=df.dropna(subset=["profit_3M"]).copy()
     df["sector"]=(df["ICB_Code"]//1000).astype("Int64")

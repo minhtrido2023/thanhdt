@@ -28,10 +28,10 @@ STATE_NAMES = {1:"CRISIS",2:"BEAR",3:"NEUTRAL",4:"BULL",5:"EX-BULL"}
 THRESHOLD = 0.60   # r_dual cutoff for CRISIS→NEUTRAL direct upgrade
 
 # Load v3.1 + dual scores
-v31 = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_1_full_history.csv"))
+v31 = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_1_full_history.csv"))
 v31["time"] = pd.to_datetime(v31["time"]); v31 = v31.sort_values("time").reset_index(drop=True)
 
-dual = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_dual_v3_full.csv"))
+dual = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_dual_v3_full.csv"))
 dual["time"] = pd.to_datetime(dual["time"])
 dual["r_dual"] = dual["alpha"]*dual["r_score_raw"] + (1-dual["alpha"])*dual["r_score_ew"]
 
@@ -98,6 +98,6 @@ out = pd.DataFrame({
     "state":     result.astype(int),
     "state_raw": df["state_raw"].astype(int),
 })
-out_path = os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_2_full_history.csv")
+out_path = os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_2_full_history.csv")
 out.to_csv(out_path, index=False)
 print(f"\n✓ Saved: {out_path}")

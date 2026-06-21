@@ -44,9 +44,9 @@ w("")
 # ───────────────────────────────────────────────────────────────────────────
 # [A] DATA PREP
 # ───────────────────────────────────────────────────────────────────────────
-us  = pd.read_csv(os.path.join(WORKDIR, "us_market_history.csv"))
+us  = pd.read_csv(os.path.join(WORKDIR, "data/us_market_history.csv"))
 us["time"] = pd.to_datetime(us["time"])
-vni = pd.read_pickle(os.path.join(WORKDIR, "_cache_vnindex_2000_now.pkl"))
+vni = pd.read_pickle(os.path.join(WORKDIR, "data/_cache_vnindex_2000_now.pkl"))
 vni["time"] = pd.to_datetime(vni["time"])
 vni["vni_close"] = pd.to_numeric(vni["Close"], errors="coerce")
 
@@ -422,8 +422,8 @@ w("5. Lưu ý lịch sử có 3 trường hợp **VN decoupled** với US (2000-
 w("")
 
 # save outputs
-df.to_csv(os.path.join(WORKDIR, "research_us_vn_correlation.csv"), index=False)
+df.to_csv(os.path.join(WORKDIR, "data/research_us_vn_correlation.csv"), index=False)
 with open(REPORT, "w", encoding="utf-8") as f:
     f.write("\n".join(lines))
 print("\n[OK] Report ->", REPORT)
-print("[OK] Data   ->", os.path.join(WORKDIR, "research_us_vn_correlation.csv"))
+print("[OK] Data   ->", os.path.join(WORKDIR, "data/research_us_vn_correlation.csv"))

@@ -54,7 +54,7 @@ EXBULL_DD_THR  = -0.15   # DD 60 phiên từng < -15% (đã có selloff đủ s�
 # LOAD DATA
 # ══════════════════════════════════════════════════════════════════════
 print("Loading data...")
-vni = pd.read_csv(os.path.join(WORKDIR, "VNINDEX.csv"), low_memory=False)
+vni = pd.read_csv(os.path.join(WORKDIR, "data/VNINDEX.csv"), low_memory=False)
 vni["time"] = pd.to_datetime(vni["time"])
 vni = vni.sort_values("time").reset_index(drop=True)
 for c in ["Open","High","Low","Close","Volume","VNINDEX_PE",
@@ -63,12 +63,12 @@ for c in ["Open","High","Low","Close","Volume","VNINDEX_PE",
           "D_RSI_Min1W_Close","D_RSI_MinT3","D_MACDdiff","D_CMF","C_L1M","C_L1W"]:
     if c in vni.columns: vni[c] = pd.to_numeric(vni[c], errors="coerce")
 
-breadth = pd.read_csv(os.path.join(WORKDIR, "breadth_data.csv"))
+breadth = pd.read_csv(os.path.join(WORKDIR, "data/breadth_data.csv"))
 breadth["time"] = pd.to_datetime(breadth["time"])
 vni = vni.merge(breadth, on="time", how="left")
 
 # Load macro daily
-macro = pd.read_csv(os.path.join(WORKDIR, "macro_daily.csv"))
+macro = pd.read_csv(os.path.join(WORKDIR, "data/macro_daily.csv"))
 macro["time"] = pd.to_datetime(macro["time"])
 vni = vni.merge(macro[["time","lending_rate","cpi_yoy","usdvnd","usdvnd_1y_chg","macro_regime"]],
                 on="time", how="left")

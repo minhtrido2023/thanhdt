@@ -19,20 +19,20 @@ def bq(sql):
         except: pass
     return pd.read_csv(StringIO(r.stdout.strip()))
 
-fa=pd.read_csv(os.path.join(WORKDIR,"fa_ratings_lh.csv"),parse_dates=["time","Release_Date"])
+fa=pd.read_csv(os.path.join(WORKDIR,"data/fa_ratings_lh.csv"),parse_dates=["time","Release_Date"])
 fa=fa.sort_values(["ticker","quarter"]).reset_index(drop=True)
 fa["eff_release"]=fa["Release_Date"].fillna(fa["time"]+pd.Timedelta(days=60))
 fa["is_ab"]=fa["tier"].isin(["A","B"]).astype(int); fa["qnum"]=fa.groupby("ticker").cumcount()+1
 fa["pct_AB"]=fa.groupby("ticker")["is_ab"].cumsum()/fa["qnum"]*100; fa["valid_hist"]=fa["qnum"]>=12
 
-panel=pickle.load(open(os.path.join(WORKDIR,"qt_panel_2014_2026.pkl"),"rb"))
+panel=pickle.load(open(os.path.join(WORKDIR,"data/qt_panel_2014_2026.pkl"),"rb"))
 panel["time"]=pd.to_datetime(panel["time"]); panel=panel.sort_values(["ticker","time"]).reset_index(drop=True)
 panel["hi52"]=panel.groupby("ticker")["Close"].transform(lambda x:x.rolling(252,min_periods=60).max())
 panel["dd52"]=(panel["Close"]/panel["hi52"]-1)*100
 panel["pe_z"]=((panel["PE"]-panel["PE_MA5Y"])/panel["PE_SD5Y"].replace(0,np.nan)).clip(-10,10)
 panel["pb_z"]=((panel["PB"]-panel["PB_MA5Y"])/panel["PB_SD5Y"].replace(0,np.nan)).clip(-10,10)
 panel["liqv"]=panel["Volume_3M_P50"]*panel["Close"]
-fin=pickle.load(open(os.path.join(WORKDIR,"qt_v4_fin.pkl"),"rb"))
+fin=pickle.load(open(os.path.join(WORKDIR,"data/qt_v4_fin.pkl"),"rb"))
 fin["eff_release"]=pd.to_datetime(fin["Release_Date"]).fillna(pd.to_datetime(fin["q_time"])+pd.Timedelta(days=60))
 panel=panel.sort_values("time")
 panel=pd.merge_asof(panel,fa.sort_values("eff_release")[["ticker","eff_release","tier","pct_AB","valid_hist","MktCap"]].rename(columns={"eff_release":"time"}),on="time",by="ticker",direction="backward")

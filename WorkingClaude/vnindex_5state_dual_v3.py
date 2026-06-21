@@ -41,15 +41,15 @@ print("="*70); print("v3 — Dual + Tinh Tế pipeline"); print("="*70)
 # Load: cached VNI + EW factors + concentration
 # ─────────────────────────────────────────────────────────────────────
 print("\n[1] Load cached data")
-vni = pd.read_pickle(os.path.join(WORKDIR, "_cache_vnindex_2000_now.pkl"))
+vni = pd.read_pickle(os.path.join(WORKDIR, "data/_cache_vnindex_2000_now.pkl"))
 vni["time"] = pd.to_datetime(vni["time"])
 vni = vni.sort_values("time").reset_index(drop=True)
 
-ew_full = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_ew_full.csv"))
+ew_full = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_ew_full.csv"))
 ew_full["time"] = pd.to_datetime(ew_full["time"])
 ew_full = ew_full.rename(columns={"r_score":"r_score_ew"})
 
-conc = pd.read_csv(os.path.join(WORKDIR, "concentration_history.csv"))
+conc = pd.read_csv(os.path.join(WORKDIR, "data/concentration_history.csv"))
 conc["time"] = pd.to_datetime(conc["time"])
 
 # ─────────────────────────────────────────────────────────────────────
@@ -363,12 +363,12 @@ out = pd.DataFrame({
     "state": df["state"].astype(int),
     "state_raw": df["state_raw"].astype(int),
 })
-out.to_csv(os.path.join(WORKDIR, "vnindex_5state_dual_v3_staging.csv"), index=False)
+out.to_csv(os.path.join(WORKDIR, "data/vnindex_5state_dual_v3_staging.csv"), index=False)
 
 # Full diag
 diag = df[["time","Close","concentration_smooth","alpha",
            "r_score_raw","r_score_ew","state_raw","state"]].copy()
-diag.to_csv(os.path.join(WORKDIR, "vnindex_5state_dual_v3_full.csv"), index=False)
+diag.to_csv(os.path.join(WORKDIR, "data/vnindex_5state_dual_v3_full.csv"), index=False)
 
 print("\n" + "="*70); print("SUMMARY"); print("="*70)
 post = df[df["time"]>="2014-01-01"]

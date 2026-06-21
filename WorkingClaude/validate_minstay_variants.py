@@ -38,7 +38,7 @@ def min_stay_filter(states, min_days):
     return out
 
 # Load
-tq = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_4b_full_history.csv"))
+tq = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_4b_full_history.csv"))
 tq["time"] = pd.to_datetime(tq["time"])
 tq = tq.sort_values("time").reset_index(drop=True)
 state_base = tq["state"].values.astype(int)
@@ -128,7 +128,7 @@ ms14 = state_ms15[mask14]
 # Find segments where ms15 differs from base
 # For each base segment that got absorbed, find: original state, dur, absorbed-to-state,
 # and VNI return during that period
-vni = pd.read_csv(os.path.join(WORKDIR, "VNINDEX.csv"), usecols=["time","Close"])
+vni = pd.read_csv(os.path.join(WORKDIR, "data/VNINDEX.csv"), usecols=["time","Close"])
 vni["time"] = pd.to_datetime(vni["time"])
 vni_map = vni.set_index("time")["Close"]
 

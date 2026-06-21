@@ -23,19 +23,19 @@ os.chdir(WORKDIR)
 INIT_NAV = 50e9
 
 print("[Setup] Loading shared data ...", flush=True)
-with open("earnings_px.pkl","rb") as f: px_data = pickle.load(f)
+with open("data/earnings_px.pkl","rb") as f: px_data = pickle.load(f)
 px_data["time"] = pd.to_datetime(px_data["time"])
 px_close = px_data.pivot_table(index="time", columns="ticker", values="Close", aggfunc="first").sort_index().ffill(limit=5)
 master_idx = pd.DatetimeIndex(px_close.index).as_unit("ns")
 px_close.index = master_idx
 all_dates = np.array(master_idx)
 
-with open("lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
+with open("data/lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
 ov["time"] = pd.to_datetime(ov["time"])
 px_open = ov.pivot_table(index="time", columns="ticker", values="Open", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 liq     = ov.pivot_table(index="time", columns="ticker", values="Volume_3M_P50", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 
-ev = pd.read_csv("earnings_events_classified.csv", parse_dates=["Release_Date"])
+ev = pd.read_csv("data/earnings_events_classified.csv", parse_dates=["Release_Date"])
 ev = ev.sort_values(["ticker","Release_Date"]).reset_index(drop=True)
 
 # ─── Compute 3 profile variants ──────────────────────────────────────────
@@ -203,7 +203,7 @@ for nm, pcol, ncol, eoff in configs:
           f"{r['OOS']:>+9.2f}%{r['Y22']:>+8.2f}%{r['Q126']:>+8.2f}%{r['N']:>5d}")
 
 df = pd.DataFrame(results)
-df.to_csv("verify_hl3y_results.csv", index=False)
+df.to_csv("data/verify_hl3y_results.csv", index=False)
 
 # ─── Δ analysis ──────────────────────────────────────────────────────────
 control = df[df["name"]=="HL3_T5_CONTROL"].iloc[0]

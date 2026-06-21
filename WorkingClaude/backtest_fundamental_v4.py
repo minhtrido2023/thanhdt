@@ -38,8 +38,8 @@ import matplotlib.pyplot as plt
 
 PROJECT   = "lithe-record-440915-m9"
 BQ_BIN    = r"bq"
-PRICE_CSV = "fundamental_rating_prices.csv"
-TECH_CSV  = "fundamental_rating_tech.csv"   # cache for tech indicators
+PRICE_CSV = "data/fundamental_rating_prices.csv"
+TECH_CSV  = "data/fundamental_rating_tech.csv"   # cache for tech indicators
 START     = "2015-04-01"
 END       = "2025-04-01"
 SPLIT     = "2020-04-01"
@@ -80,8 +80,8 @@ def bq_query(sql, label=""):
 
 # ─── Load ratings + state + prices ──────────────────────────────────────────
 print("Loading ...")
-rating = pd.read_csv("fundamental_rating_all.csv"); rating["time"] = pd.to_datetime(rating["time"])
-state_df = pd.read_csv("vnindex_state_history.csv", parse_dates=["time"])
+rating = pd.read_csv("data/fundamental_rating_all.csv"); rating["time"] = pd.to_datetime(rating["time"])
+state_df = pd.read_csv("data/vnindex_state_history.csv", parse_dates=["time"])
 state_df["alloc"] = state_df["state"].map(STATE_ALLOC)
 state_df = state_df.set_index("time")[["state","alloc"]].sort_index()
 prices = pd.read_csv(PRICE_CSV, parse_dates=["time"])
@@ -288,7 +288,7 @@ nav_baseline_overlay = sweep_results[TOP_N_DEFAULT]["baseline_overlay"]
 nav_v4_overlay       = sweep_results[TOP_N_DEFAULT]["v4_overlay"]
 
 # VNINDEX B&H
-vni = pd.read_csv("VNINDEX.csv", parse_dates=["time"], usecols=["time","ticker","Close"])
+vni = pd.read_csv("data/VNINDEX.csv", parse_dates=["time"], usecols=["time","ticker","Close"])
 vni = vni[vni["ticker"]=="VNINDEX"][["time","Close"]].set_index("time").sort_index().loc[START:pd.Timestamp(END)+pd.Timedelta(days=10)]
 vni_nav = pd.DataFrame({"nav": vni["Close"] / vni["Close"].iloc[0]})
 
@@ -330,7 +330,7 @@ for name, nav in strategies.items():
               f"{m['maxdd']*100:>7.1f}%{m['calmar']:>8.2f}")
     print()
 
-pd.DataFrame(isoos_rows).to_csv("backtest_fundamental_v4_isoos.csv", index=False)
+pd.DataFrame(isoos_rows).to_csv("data/backtest_fundamental_v4_isoos.csv", index=False)
 
 # ─── Top-N sweep summary ────────────────────────────────────────────────────
 print("\n=== Top-N Sweep (v4 Tech-weighted + Overlay vs Baseline + Overlay) ===")
@@ -350,11 +350,11 @@ for N in TOP_N_LIST:
     print(f"  {N:>3}  {m_bl['cagr']*100:>17.2f}%  {m_v4['cagr']*100:>11.2f}%  "
           f"{m_v4['maxdd']*100:>12.1f}%  {m_v4['calmar']:>14.2f}  "
           f"{m_v4_is['cagr']*100:>8.2f}%  {m_v4_oos['cagr']*100:>9.2f}%")
-pd.DataFrame(sweep_rows).to_csv("backtest_fundamental_v4_sweep.csv", index=False)
+pd.DataFrame(sweep_rows).to_csv("data/backtest_fundamental_v4_sweep.csv", index=False)
 
 # ─── Save NAVs ──────────────────────────────────────────────────────────────
 combo = pd.concat([s["nav"].rename(name) for name, s in strategies.items()], axis=1).sort_index()
-combo.to_csv("backtest_fundamental_v4.csv")
+combo.to_csv("data/backtest_fundamental_v4.csv")
 
 # ─── Plot ────────────────────────────────────────────────────────────────────
 fig, axes = plt.subplots(2, 1, figsize=(15, 11), gridspec_kw={"height_ratios":[3, 1.3]})

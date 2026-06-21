@@ -21,7 +21,7 @@ TIER_BAL=["MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","DEEP_VALUE_RECOVERY","RE_
 BUY_TIERS_V11={"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
                "MOMENTUM_A","MOMENTUM_S_N","COMPOUNDER_BUY","DEEP_VALUE_RECOVERY","S_PRO","RE_BACKLOG_BUY"}
 MAX_POS=12; FULL_SIZE=0.10; WEAK_SIZE=0.05
-STATE_CSV="vnindex_5state_tam_quan_v3_4b_full_history.csv"
+STATE_CSV="data/vnindex_5state_tam_quan_v3_4b_full_history.csv"
 
 print("[shared] VNI/open/state/universe...")
 with open("sim_v11_for_analyzer.py","r",encoding="utf-8") as f: _c=f.read()
@@ -73,7 +73,7 @@ def sv_tight_keep(row):
 
 # ── load book signal (OLD fa play_types) + D1 + SV_TIGHT + overheat ──────────
 print("[signal] FAbase book + D1 + SV_TIGHT + overheat...")
-sig=pickle.load(open("ba_v11_FAbase_sig.pkl","rb")); sig["time"]=pd.to_datetime(sig["time"])
+sig=pickle.load(open("data/ba_v11_FAbase_sig.pkl","rb")); sig["time"]=pd.to_datetime(sig["time"])
 sig=sig[(sig["time"]>=START_B)&(sig["time"]<=END_B)].copy()
 d1=bq(f"""
 WITH adv_dated AS (SELECT f.ticker,f.time AS f_time,SAFE_DIVIDE(f.AdvCust_P0,NULLIF(f.AdvCust_P4,0))-1 AS adv_yoy,

@@ -70,7 +70,7 @@ for idx, (tier_name, mp, h, sl) in enumerate(combos):
         print(f"  [{idx+1}/{len(combos)}] eta={eta:.0f}s")
 
 df = pd.DataFrame(results).sort_values("sharpe", ascending=False)
-df.to_csv(os.path.join(WORKDIR, "finetune_oos_grid.csv"), index=False)
+df.to_csv(os.path.join(WORKDIR, "data/finetune_oos_grid.csv"), index=False)
 
 print("\n" + "═" * 110)
 print("  OOS (2020-2026) — TOP 15 BY SHARPE")

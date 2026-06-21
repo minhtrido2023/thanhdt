@@ -34,7 +34,7 @@ N_GOOD_MIN_FOR_FILTER = 4
 
 # ─── 1. Build rolling profile lookup (no lookahead) ──────────────────────
 print("[1] Building rolling prior_avg_post_good lookup ...", flush=True)
-ev = pd.read_csv("earnings_events_classified.csv", parse_dates=["Release_Date"])
+ev = pd.read_csv("data/earnings_events_classified.csv", parse_dates=["Release_Date"])
 ev = ev.sort_values(["ticker","Release_Date"]).reset_index(drop=True)
 ev["prior_n_good"] = 0
 ev["prior_avg_post_good"] = np.nan
@@ -61,7 +61,7 @@ print(f"  Lookup table: {len(ev_lookup):,} rows")
 
 # ─── 2. Load BA v11 SIGNAL_V10 + VNI ─────────────────────────────────────
 print("\n[2] Loading BA v11 signals (this may take 2-3 min) ...", flush=True)
-sig_cache = "ba_v11_sig_cache.pkl"
+sig_cache = "data/ba_v11_sig_cache.pkl"
 if os.path.exists(sig_cache):
     with open(sig_cache, "rb") as f: sig = pickle.load(f)
     print(f"  Loaded cache: {len(sig):,} signals")
@@ -204,5 +204,5 @@ for label, st, en in periods:
 
 # Save NAVs
 combo = pd.DataFrame({v: results[v] for v in variants})
-combo.to_csv("ba_v11_lagged_factor_nav.csv")
+combo.to_csv("data/ba_v11_lagged_factor_nav.csv")
 print("Saved: ba_v11_lagged_factor_nav.csv")

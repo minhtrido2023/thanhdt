@@ -33,12 +33,12 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import roc_auc_score
 
 # ── CONFIG ────────────────────────────────────────────────────────────────────
-DATA_FILE   = "profile_hit.csv"
+DATA_FILE   = "data/profile_hit.csv"
 PROJECT     = "lithe-record-440915-m9"
 BQ_BIN      = r"bq"
 BQ_CHUNK    = 120
 OUT_IMG     = "analyze_entry_quality.png"
-OUT_CSV     = "entry_quality_scored.csv"
+OUT_CSV     = "data/entry_quality_scored.csv"
 TARGET_PCT  = 10.0   # "good deal" = Sell_profit > 10%
 TRAIN_YEAR  = 2024   # train on <= 2024, test on 2025+
 

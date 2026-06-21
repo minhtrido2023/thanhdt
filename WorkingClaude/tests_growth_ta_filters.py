@@ -105,7 +105,7 @@ for label, _ in VARIANTS:
     print()
 
 # ─── EXIT TIMING ON 5 CASES ──────────────────────────────────────────────
-prices = pd.read_csv("prices_lh.csv", parse_dates=["time"])
+prices = pd.read_csv("data/prices_lh.csv", parse_dates=["time"])
 print("\n" + "="*120)
 print("5-TICKER LIFECYCLE — entry/exit timing relative to peak")
 print("="*120)

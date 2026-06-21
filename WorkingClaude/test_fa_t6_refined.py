@@ -294,7 +294,7 @@ for sec in ["BANK","REIT","INSURANCE","SECURITIES","DEFAULT"]:
 
 # ─── 7. Save summary ────────────────────────────────────────────────────────
 summary = pd.concat(all_out, ignore_index=True)
-summary.to_csv("fa_t6_refined_results.csv", index=False)
+summary.to_csv("data/fa_t6_refined_results.csv", index=False)
 print("\nSaved fa_t6_refined_results.csv")
 piv = summary.pivot_table(index="tier", columns="variant", values="median").reindex(["A","B","C","D","E"])
 print("\nMedian profit_3M by tier × variant:")

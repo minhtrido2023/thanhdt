@@ -35,11 +35,11 @@ STATE_NAMES = {1:"CRISIS",2:"BEAR",3:"NEUTRAL",4:"BULL",5:"EX-BULL"}
 ORDER = {"CRISIS":1,"BEAR":2,"NEUTRAL":3,"BULL":4,"EX-BULL":5}
 
 # ── Load ───────────────────────────────────────────────────────────────
-st = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_1_full_history.csv"))
+st = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_1_full_history.csv"))
 st["time"] = pd.to_datetime(st["time"]); st = st.sort_values("time").reset_index(drop=True)
-dr = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_dual_v3_full.csv"))
+dr = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_dual_v3_full.csv"))
 dr["time"] = pd.to_datetime(dr["time"])
-diag = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_1_diag.csv"))
+diag = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_1_diag.csv"))
 diag["time"] = pd.to_datetime(diag["time"])
 df = st.merge(dr[["time","Close","r_score_raw","r_score_ew","alpha","concentration_smooth"]],
               on="time", how="left").merge(

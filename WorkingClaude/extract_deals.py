@@ -23,7 +23,7 @@ import pandas as pd
 BASE_DIR   = Path(r"/home/trido/thanhdt/WorkingClaude")
 FILTER_F   = BASE_DIR / "filter.json"
 DICT_F     = BASE_DIR / "bigquery_dictionary.json"
-OUT_CSV    = BASE_DIR / "deals.csv"
+OUT_CSV    = BASE_DIR / "data/deals.csv"
 OUT_SUM    = BASE_DIR / "deals_summary.csv"
 
 PROJECT    = "lithe-record-440915-m9"

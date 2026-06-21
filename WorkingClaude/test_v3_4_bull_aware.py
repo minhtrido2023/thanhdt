@@ -24,16 +24,16 @@ BUY_TIERS_B = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
                 "MOMENTUM_A","MOMENTUM_S_N","COMPOUNDER_BUY","DEEP_VALUE_RECOVERY","S_PRO"}
 
 VARIANTS = [
-    ("v3.1 baseline",     "vnindex_5state_tam_quan_v3_1_full_history.csv"),
-    ("v3.3b Cẩn Thận",    "vnindex_5state_tam_quan_v3_3b_full_history.csv"),
-    ("v3.4a RP_loose",    "vnindex_5state_tam_quan_v3_4a_full_history.csv"),
-    ("v3.4b R6M",         "vnindex_5state_tam_quan_v3_4b_full_history.csv"),
-    ("v3.4c RP strict",   "vnindex_5state_tam_quan_v3_4c_full_history.csv"),
+    ("v3.1 baseline",     "data/vnindex_5state_tam_quan_v3_1_full_history.csv"),
+    ("v3.3b Cẩn Thận",    "data/vnindex_5state_tam_quan_v3_3b_full_history.csv"),
+    ("v3.4a RP_loose",    "data/vnindex_5state_tam_quan_v3_4a_full_history.csv"),
+    ("v3.4b R6M",         "data/vnindex_5state_tam_quan_v3_4b_full_history.csv"),
+    ("v3.4c RP strict",   "data/vnindex_5state_tam_quan_v3_4c_full_history.csv"),
 ]
 
 print("="*100); print("V11 12y backtest: v3.1 vs v3.3b vs v3.4 bull-aware variants"); print("="*100)
 
-with open("ba_v11_unified_12y_sig.pkl", "rb") as f: sig_B = pickle.load(f)
+with open("data/ba_v11_unified_12y_sig.pkl", "rb") as f: sig_B = pickle.load(f)
 with open("sim_v11_for_analyzer.py", "r", encoding="utf-8") as f: _content = f.read()
 def _extract(varname):
     m = re.search(rf'^{varname}\s*=\s*"""(.+?)"""', _content, re.MULTILINE | re.DOTALL)

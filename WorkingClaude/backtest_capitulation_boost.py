@@ -21,8 +21,8 @@ import numpy as np
 from itertools import product
 
 # --- Load ---
-ba = pd.read_csv('ba_v11_nav.csv', parse_dates=['time']).sort_values('time').reset_index(drop=True)
-vni = pd.read_csv('VNINDEX.csv', parse_dates=['time']).sort_values('time').reset_index(drop=True)
+ba = pd.read_csv('data/ba_v11_nav.csv', parse_dates=['time']).sort_values('time').reset_index(drop=True)
+vni = pd.read_csv('data/VNINDEX.csv', parse_dates=['time']).sort_values('time').reset_index(drop=True)
 vni['Pe'] = pd.to_numeric(vni['Pe'], errors='coerce')
 vni['pe_rank'] = vni['Pe'].expanding(min_periods=252).apply(
     lambda s: s.rank(pct=True).iloc[-1], raw=False
@@ -30,7 +30,7 @@ vni['pe_rank'] = vni['Pe'].expanding(min_periods=252).apply(
 vni['vni_ret'] = vni['Close'].pct_change().fillna(0.0)
 
 # Load state machine (exported via: bq query ... --max_rows=10000 > _state.csv)
-state = pd.read_csv('_state.csv', parse_dates=['time'])
+state = pd.read_csv('data/_state.csv', parse_dates=['time'])
 
 # --- Merge ---
 df = ba.merge(vni[['time','Close','Pe','pe_rank','vni_ret']], on='time', how='left')
@@ -152,7 +152,7 @@ for pe_th, min_crisis, exit_window, margin_pct, hold_days in product(
               f"{s['sharpe']:5.2f} {s['dd']:7.2f} {s['calmar']:6.2f}")
 
 results = pd.DataFrame(results)
-results.to_csv('capitulation_boost_grid.csv', index=False)
+results.to_csv('data/capitulation_boost_grid.csv', index=False)
 print()
 print("=== TOP 10 by CAGR ===")
 print(results.nlargest(10, 'cagr')[['pe_th','min_crisis','exit_window','margin','hold','n_fire','cagr','dCAGR','sharpe','dd','calmar']].to_string(index=False))

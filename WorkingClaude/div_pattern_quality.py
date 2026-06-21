@@ -32,7 +32,7 @@ def spearmanr(x, y):
     p = 2*(1 - 0.5*(1+erf(abs(z)/sqrt(2))))
     return (rho, p)
 
-df = pd.read_csv('_vni_div.csv', parse_dates=['time']).sort_values('time').reset_index(drop=True)
+df = pd.read_csv('data/_vni_div.csv', parse_dates=['time']).sort_values('time').reset_index(drop=True)
 print(f"Loaded {len(df)} rows, {df['time'].min().date()} -> {df['time'].max().date()}")
 
 # Forward returns
@@ -282,6 +282,6 @@ print("\n=== WALK-FORWARD: BULL (train 2011-2018, test 2019-2026) ===")
 bull_wf = walk_forward(bull_df, bull_feats, target_sign_negative_means_good=False)
 
 # Save outputs
-bear_df.to_csv('div_bear_fires_quality.csv', index=False)
-bull_df.to_csv('div_bull_fires_quality.csv', index=False)
+bear_df.to_csv('data/div_bear_fires_quality.csv', index=False)
+bull_df.to_csv('data/div_bull_fires_quality.csv', index=False)
 print("\nSaved: div_bear_fires_quality.csv, div_bull_fires_quality.csv")

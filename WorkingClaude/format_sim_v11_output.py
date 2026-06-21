@@ -9,8 +9,8 @@ INIT_NAV = 50e9
 MAX_POS = 10
 TARGET_PER_POS = INIT_NAV / MAX_POS  # 5B per pick (approx, equal-weight)
 
-trades = pd.read_csv("sim_v11_jun2025_trades.csv")
-nav = pd.read_csv("sim_v11_jun2025_nav.csv")
+trades = pd.read_csv("data/sim_v11_jun2025_trades.csv")
+nav = pd.read_csv("data/sim_v11_jun2025_nav.csv")
 trades["entry_date"] = pd.to_datetime(trades["entry_date"])
 trades["exit_date"] = pd.to_datetime(trades["exit_date"])
 nav["time"] = pd.to_datetime(nav["time"])

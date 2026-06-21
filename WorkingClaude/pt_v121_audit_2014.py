@@ -142,11 +142,11 @@ print("[7] LAGGED @25B (HL_3y S2, no parking, BQ prices)...")
 # extended calendar + earnings schedule (same as pt_v23 LAG, BQ-sourced)
 cal=bq(VNI_QUERY.format(start="2013-06-01",end=END_DATE)); cal["time"]=pd.to_datetime(cal["time"])
 all_dates=np.array(sorted(cal["time"].unique()),dtype="datetime64[ns]")
-with open("earnings_surprise_data.pkl","rb") as f: fin=pickle.load(f)
+with open("data/earnings_surprise_data.pkl","rb") as f: fin=pickle.load(f)
 fin["Release_Date"]=pd.to_datetime(fin["Release_Date"]); FLOOR=1e9
 fin["exp_B_MA"]=fin[["NP_P1","NP_P2","NP_P3","NP_P4"]].mean(axis=1)
 fin["surprise_B_MA"]=((fin["NP_P0"]-fin["exp_B_MA"])/np.maximum(np.abs(fin["exp_B_MA"]),FLOOR)).clip(-5,5)
-evc=pd.read_csv("earnings_events_classified.csv",parse_dates=["Release_Date"])
+evc=pd.read_csv("data/earnings_events_classified.csv",parse_dates=["Release_Date"])
 evm=evc.merge(fin[["ticker","quarter","Release_Date","surprise_B_MA"]],on=["ticker","quarter","Release_Date"],how="left")
 evm=evm.sort_values(["ticker","Release_Date"]).reset_index(drop=True); evm["surprise_B_MA"]=evm["surprise_B_MA"].fillna(0)
 LN2=np.log(2);HL=3.0; evm["prior_n_good"]=0; evm["pa_HL3"]=np.nan

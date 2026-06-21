@@ -28,7 +28,7 @@ def min_stay_causal_asym(states, default_min, target_state_min):
         out[t] = committed
     return out
 
-tq = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_4b_full_history.csv"))
+tq = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_4b_full_history.csv"))
 tq["time"] = pd.to_datetime(tq["time"])
 tq = tq.sort_values("time").reset_index(drop=True)
 state_base = tq["state"].values.astype(int)

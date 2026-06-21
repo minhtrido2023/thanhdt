@@ -46,8 +46,8 @@ LIQ_MIN     = float(os.environ.get("LIQ_MIN", 5e8))   # 500M VND/day rolling 60d
 HIST_MIN    = 252        # min sessions of history per ticker to be eligible
 STATE_NAMES = {1:"CRISIS", 2:"BEAR", 3:"NEUTRAL", 4:"BULL", 5:"EX-BULL"}
 
-CACHE_TICKER = os.path.join(WORKDIR, "_cache_universe_2013_now.pkl")
-CACHE_VNI    = os.path.join(WORKDIR, "_cache_vnindex_2000_now.pkl")
+CACHE_TICKER = os.path.join(WORKDIR, "data/_cache_universe_2013_now.pkl")
+CACHE_VNI    = os.path.join(WORKDIR, "data/_cache_vnindex_2000_now.pkl")
 
 # ──────────────────────────────────────────────────────────────────────
 # DATA PULL (cached)

@@ -64,7 +64,7 @@ WHERE p.ticker='VNINDEX' ORDER BY p.time""")
 px["time"] = pd.to_datetime(px["time"]); px["state"] = px["state"].astype(int)
 px = px.dropna(subset=["Close", "state"]).sort_values("time").reset_index(drop=True)
 
-us = pd.read_csv("us_market_history.csv", parse_dates=["time"]).sort_values("time")
+us = pd.read_csv("data/us_market_history.csv", parse_dates=["time"]).sort_values("time")
 # align US to VN T-1 (US closes before next VN session): merge_asof on (vn_time - 1d)
 key = px[["time"]].copy(); key["jt"] = key["time"] - pd.Timedelta(days=1)
 um = pd.merge_asof(key.sort_values("jt"), us.rename(columns={"time": "us_time"}),
@@ -254,7 +254,7 @@ sm = np.where(capped, np.minimum(st_arr, cap), st_arr)
 sm = np.where((~capped) & easing_conf & (sm < NEUTRAL), NEUTRAL, sm).astype(int)
 n_def = int((sm < st_arr).sum()); n_rec = int((sm > st_arr).sum())
 pd.DataFrame({"time": px["time"].dt.strftime("%Y-%m-%d"), "state": sm, "state_raw": sm}).to_csv(
-    os.path.join(WORKDIR, "vnindex_5state_dt4_macro.csv"), index=False)
+    os.path.join(WORKDIR, "data/vnindex_5state_dt4_macro.csv"), index=False)
 print(f"  macro-state CSV: {n_def} days de-risked (cap), {n_rec} days re-risked (easing floor)")
 
 # annual

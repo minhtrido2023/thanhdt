@@ -45,7 +45,7 @@ print("  CAPACITY SCALING — Option 1 (BAL + LAGGED + ETF)")
 print("="*100)
 
 # Load shared data
-with open("ba_v11_unified_12y_sig.pkl", "rb") as f: sig = pickle.load(f)
+with open("data/ba_v11_unified_12y_sig.pkl", "rb") as f: sig = pickle.load(f)
 sig["time"] = pd.to_datetime(sig["time"])
 vni_full = bq(f"""SELECT t.time, t.Close, t.MA200, t.D_RSI FROM tav2_bq.ticker AS t
 WHERE t.ticker = 'VNINDEX' AND t.time BETWEEN DATE '{START_DATE}' AND DATE '{END_DATE}' ORDER BY t.time""")
@@ -91,17 +91,17 @@ def run_bal(book_nav):
     return nav_bal.set_index("time")["nav"], trades_bal
 
 # LAGGED setup
-with open("earnings_px.pkl","rb") as f: px_data = pickle.load(f)
+with open("data/earnings_px.pkl","rb") as f: px_data = pickle.load(f)
 px_data["time"] = pd.to_datetime(px_data["time"])
 px_close = px_data.pivot_table(index="time", columns="ticker", values="Close", aggfunc="first").sort_index().ffill(limit=5)
 master_idx = pd.DatetimeIndex(px_close.index).as_unit("ns")
 px_close.index = master_idx
 all_dates = np.array(master_idx)
-with open("lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
+with open("data/lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
 ov["time"] = pd.to_datetime(ov["time"])
 px_open = ov.pivot_table(index="time", columns="ticker", values="Open", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 liq_l = ov.pivot_table(index="time", columns="ticker", values="Volume_3M_P50", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
-ev = pd.read_csv("earnings_events_classified.csv", parse_dates=["Release_Date"])
+ev = pd.read_csv("data/earnings_events_classified.csv", parse_dates=["Release_Date"])
 ev = ev.sort_values(["ticker","Release_Date"]).reset_index(drop=True)
 LN2 = np.log(2); HL = 3.0
 ev["pa_HL3"] = np.nan; ev["prior_n_good"] = 0
@@ -234,5 +234,5 @@ base = df.iloc[0]
 for _, r in df.iloc[1:].iterrows():
     print(f"    Total {r['total_b']}B: CAGR Δ {r['CAGR']-base['CAGR']:+.2f}pp  | Sh Δ {r['Sharpe']-base['Sharpe']:+.2f}  | LAG capped {r['lag_capped_pct']:.0f}%")
 
-df.to_csv("capacity_option1_results.csv", index=False)
+df.to_csv("data/capacity_option1_results.csv", index=False)
 print("\nSaved: capacity_option1_results.csv")

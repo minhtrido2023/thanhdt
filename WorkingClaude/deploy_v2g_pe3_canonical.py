@@ -31,14 +31,14 @@ STATE_NAMES = {1:"CRISIS", 2:"BEAR", 3:"NEUTRAL", 4:"BULL", 5:"EX-BULL"}
 
 # ════════════════════ 1. Load v2g_pe3 + merge state_raw + r_score_ema ════════════════════
 print("Loading v2g_pe3 history ...")
-pe3 = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_v2g_pe3_history.csv"))
+pe3 = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_v2g_pe3_history.csv"))
 pe3["time"] = pd.to_datetime(pe3["time"])
 pe3 = pe3.sort_values("time").reset_index(drop=True)
 print(f"  pe3 rows={len(pe3)}  range={pe3['time'].min().date()} → {pe3['time'].max().date()}")
 
 # Merge state_raw + r_score_ema from previous v2g_full history
 print("Loading previous v2g_full history (for state_raw + r_score_ema) ...")
-prev = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_v2g_full_history.csv"))
+prev = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_v2g_full_history.csv"))
 prev["time"] = pd.to_datetime(prev["time"])
 merged = pe3.merge(prev[["time", "state_raw", "r_score_ema"]], on="time", how="left", suffixes=("", "_prev"))
 # Use prev r_score_ema where pe3 doesn't have it
@@ -48,7 +48,7 @@ print(f"  merged rows={len(merged)}")
 
 # Load VNINDEX_PE_clean for legacy schema
 print("Loading vnindex_full_2000_2026.csv (for VNINDEX_PE_clean) ...")
-full = pd.read_csv(os.path.join(WORKDIR, "vnindex_full_2000_2026.csv"), low_memory=False)
+full = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_full_2000_2026.csv"), low_memory=False)
 full["time"] = pd.to_datetime(full["time"])
 merged = merged.merge(full[["time", "VNINDEX_PE_clean"]], on="time", how="left")
 
@@ -57,7 +57,7 @@ merged["state"] = merged["state_v2g_pe3"]
 
 # ════════════════════ 2. Backup canonical stores ════════════════════
 print(f"\n=== STEP 1: Backup canonical stores → {SUFFIX} ===")
-for fn in ["vnindex_5state_history.csv", "vnindex_5state.csv", "vnindex_state_history.csv"]:
+for fn in ["data/vnindex_5state_history.csv", "data/vnindex_5state.csv", "data/vnindex_state_history.csv"]:
     p = os.path.join(WORKDIR, fn)
     if os.path.exists(p):
         bak = p.replace(".csv", f"{SUFFIX}.csv")
@@ -80,11 +80,11 @@ out1 = merged[["time", "state", "state_raw"]].copy()
 out1["time"] = out1["time"].dt.strftime("%Y-%m-%d")
 out1["state"] = out1["state"].astype("Int64")
 out1["state_raw"] = out1["state_raw"].astype("Int64")
-out1.to_csv(os.path.join(WORKDIR, "vnindex_5state_history.csv"), index=False)
+out1.to_csv(os.path.join(WORKDIR, "data/vnindex_5state_history.csv"), index=False)
 print(f"  ✓ vnindex_5state_history.csv  ({len(out1)} rows, latest={out1['time'].iloc[-1]} state={out1['state'].iloc[-1]})")
 
 # 3b. vnindex_5state.csv (same)
-out1.to_csv(os.path.join(WORKDIR, "vnindex_5state.csv"), index=False)
+out1.to_csv(os.path.join(WORKDIR, "data/vnindex_5state.csv"), index=False)
 print(f"  ✓ vnindex_5state.csv         ({len(out1)} rows)")
 
 # 3c. vnindex_state_history.csv (legacy schema)
@@ -94,7 +94,7 @@ out3["state_name"] = out3["state"].map(STATE_NAMES)
 out3 = out3[["time", "Close", "VNINDEX_PE", "state", "state_name", "r_score_ema"]]
 out3["time"] = out3["time"].dt.strftime("%Y-%m-%d")
 out3["state"] = out3["state"].astype("Int64")
-out3.to_csv(os.path.join(WORKDIR, "vnindex_state_history.csv"), index=False)
+out3.to_csv(os.path.join(WORKDIR, "data/vnindex_state_history.csv"), index=False)
 print(f"  ✓ vnindex_state_history.csv  ({len(out3)} rows)")
 
 # ════════════════════ 4. Overwrite BQ table ════════════════════
@@ -115,10 +115,10 @@ os.unlink(load_csv)
 
 # ════════════════════ 5. Verify ════════════════════
 print("\n=== STEP 4: Verify ===")
-for fn in ["vnindex_5state_history.csv", "vnindex_5state.csv"]:
+for fn in ["data/vnindex_5state_history.csv", "data/vnindex_5state.csv"]:
     df = pd.read_csv(os.path.join(WORKDIR, fn))
     print(f"  {fn}: {len(df)} rows, latest = {df['time'].iloc[-1]} state={df['state'].iloc[-1]}")
-df3 = pd.read_csv(os.path.join(WORKDIR, "vnindex_state_history.csv"))
+df3 = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_state_history.csv"))
 print(f"  vnindex_state_history.csv: {len(df3)} rows, latest = {df3['time'].iloc[-1]} state={df3['state'].iloc[-1]} ({df3['state_name'].iloc[-1]})")
 
 # Check BQ

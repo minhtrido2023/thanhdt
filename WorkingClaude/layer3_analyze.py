@@ -68,10 +68,10 @@ def factor_ic(df, factors, ret_cols):
     return pd.DataFrame(rows)
 
 def main():
-    daily = pd.read_csv(os.path.join(WORKDIR, "daily_forward.csv"))
+    daily = pd.read_csv(os.path.join(WORKDIR, "data/daily_forward.csv"))
 
     # Track A
-    a = pd.read_csv(os.path.join(WORKDIR, "layer3_backtest_eventsA.csv"))
+    a = pd.read_csv(os.path.join(WORKDIR, "data/layer3_backtest_eventsA.csv"))
     a = add_forward_returns(a, daily)
     print("="*90)
     print("TRACK A — 18 actual BA-system BUYs (intraday-available window)")
@@ -86,10 +86,10 @@ def main():
     print("\nFull Track A table:")
     cols = ["ticker","session_date","verdict","score","play_type","ret_overnight","ret_5","ret_10","ret_20"]
     print(a[cols].to_string(index=False))
-    a.to_csv(os.path.join(WORKDIR, "layer3_backtest_eventsA_with_returns.csv"), index=False)
+    a.to_csv(os.path.join(WORKDIR, "data/layer3_backtest_eventsA_with_returns.csv"), index=False)
 
     # Track B
-    b = pd.read_csv(os.path.join(WORKDIR, "layer3_backtest_eventsB.csv"))
+    b = pd.read_csv(os.path.join(WORKDIR, "data/layer3_backtest_eventsB.csv"))
     b = add_forward_returns(b, daily)
     print("\n" + "="*90)
     print(f"TRACK B — top30 x sessions ({len(b)} events; with ret_20: {b['ret_20'].notna().sum()})")
@@ -103,7 +103,7 @@ def main():
     factors = ["score","pct_above_vwap","trend_1h","vol_burst","last_bar_green",
                "last_vs_vwap","day_chg","pos_in_range","late_chg","rsi15m","macdh"]
     ic = factor_ic(b, factors, ["ret_overnight","ret_5","ret_10","ret_20"])
-    ic.to_csv(os.path.join(WORKDIR, "layer3_factor_ic.csv"), index=False)
+    ic.to_csv(os.path.join(WORKDIR, "data/layer3_factor_ic.csv"), index=False)
     print("\nFactor IC (Spearman, Track B):")
     print(ic.pivot(index="factor", columns="ret", values="ic_spearman").to_string())
     print("\np-values:")

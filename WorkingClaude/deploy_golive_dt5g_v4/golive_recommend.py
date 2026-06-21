@@ -128,7 +128,7 @@ vn30 = select_book(today, universe=top30)
 # ── 4. ensemble mode today (M1 cached + M3r live, AND-hold) → which 2nd leg ──
 mode_today, mode_label = 1, "VN30 (V11-mode)"
 try:
-    cached = pd.read_csv(os.path.join(WORKDIR, "compare_v11_v12_concentration_switch.csv"), index_col=0, parse_dates=True)
+    cached = pd.read_csv(os.path.join(WORKDIR, "data/compare_v11_v12_concentration_switch.csv"), index_col=0, parse_dates=True)
     sig_m1 = cached["sig_m1"].dropna().astype(int)
     m3 = bq(f"""WITH base AS (SELECT t.time,t.ticker,
       SAFE_DIVIDE(t.Close,LAG(t.Close,126) OVER (PARTITION BY t.ticker ORDER BY t.time))-1 AS r6,
@@ -153,8 +153,8 @@ except Exception as e:
 # ── 5. LAGGED entries due today (only relevant if LAGGED-mode) ──
 lagged_due = []
 try:
-    with open(os.path.join(WORKDIR, "earnings_events_classified.csv")) as _f: pass
-    ev = pd.read_csv(os.path.join(WORKDIR, "earnings_events_classified.csv"), parse_dates=["Release_Date"])
+    with open(os.path.join(WORKDIR, "data/earnings_events_classified.csv")) as _f: pass
+    ev = pd.read_csv(os.path.join(WORKDIR, "data/earnings_events_classified.csv"), parse_dates=["Release_Date"])
     ev = ev.sort_values(["ticker", "Release_Date"]).reset_index(drop=True)
     LN2 = np.log(2); HL = 3.0; ev["prior_n_good"] = 0; ev["pa_HL3"] = np.nan
     for tk, g in ev.groupby("ticker"):

@@ -251,5 +251,5 @@ for plabel, st, en in periods:
               f"{m['calmar']:>8.2f}{n:>8d}{delta_str}")
 
 # Save
-pd.DataFrame({k: v[0] for k, v in results.items()}).to_csv("ba_release_date_nav.csv")
+pd.DataFrame({k: v[0] for k, v in results.items()}).to_csv("data/ba_release_date_nav.csv")
 print("\nSaved ba_release_date_nav.csv")

@@ -22,13 +22,13 @@ print("  HYBRID BA v11 + LAGGED HL_3y — Final Test")
 print("="*100)
 
 # Load aligned NAVs
-df = pd.read_csv("compare_lagged_vs_ba_navs.csv", index_col=0, parse_dates=True)
+df = pd.read_csv("data/compare_lagged_vs_ba_navs.csv", index_col=0, parse_dates=True)
 print(f"NAVs loaded: {len(df)} days  ({df.index.min().date()} → {df.index.max().date()})")
 print(f"  BA v11 final: {df['BA_v11'].iloc[-1]:.3f}x")
 print(f"  LAGGED HL_3y final: {df['LAGGED_HL3y'].iloc[-1]:.3f}x")
 
 # VNI baseline
-vni = pd.read_csv("VNINDEX.csv", parse_dates=["time"])
+vni = pd.read_csv("data/VNINDEX.csv", parse_dates=["time"])
 vni = vni.set_index("time").sort_index()
 vni_n = vni["Close"].reindex(df.index).ffill()
 vni_n = vni_n / vni_n.iloc[0]
@@ -93,6 +93,6 @@ print(f"\n  🏆 Best Sharpe: {best_sh} → Sh {fm_df.loc[best_sh,'Sharpe']:.2f}
 print(f"  🏆 Best Calmar: {best_cal} → Cal {fm_df.loc[best_cal,'Calmar']:.2f}, CAGR {fm_df.loc[best_cal,'CAGR']:.2f}%, DD {fm_df.loc[best_cal,'DD']:.2f}%")
 
 # Save
-pd.DataFrame(hybrids).to_csv("hybrid_ba_lagged_hl3y_nav.csv")
-fm_df.to_csv("hybrid_ba_lagged_hl3y_metrics.csv")
+pd.DataFrame(hybrids).to_csv("data/hybrid_ba_lagged_hl3y_nav.csv")
+fm_df.to_csv("data/hybrid_ba_lagged_hl3y_metrics.csv")
 print("\nSaved: hybrid_ba_lagged_hl3y_nav.csv, hybrid_ba_lagged_hl3y_metrics.csv")

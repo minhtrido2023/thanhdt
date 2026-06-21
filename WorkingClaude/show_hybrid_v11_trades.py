@@ -24,7 +24,7 @@ BA_NAV = TOTAL_NAV * 0.5  # 25B
 LH_NAV = TOTAL_NAV * 0.5  # 25B
 
 # ─── COMPUTE OVERHEATED DATES (P3 filter) ───────────────────────────────
-vn = pd.read_csv("vnindex_lh.csv", parse_dates=["time"])
+vn = pd.read_csv("data/vnindex_lh.csv", parse_dates=["time"])
 vn = vn[vn["Close"] > 100].sort_values("time").reset_index(drop=True)
 vn["MA200"] = vn["Close"].rolling(200, min_periods=200).mean()
 overheated = set(vn[vn["Close"] / vn["MA200"] > 1.30]["time"])
@@ -35,8 +35,8 @@ for d in overheated_in_window[:10]:
 
 # ─── LOAD BA TRADES, APPLY P3 FILTER ────────────────────────────────────
 print("\n─── BA leg trades (baseline v10 with P3 patch applied) ───")
-ba_bal = pd.read_csv("ba_trades_bal_refresh.csv", parse_dates=["entry_date","exit_date"])
-ba_vn30 = pd.read_csv("ba_trades_vn30_refresh.csv", parse_dates=["entry_date","exit_date"])
+ba_bal = pd.read_csv("data/ba_trades_bal_refresh.csv", parse_dates=["entry_date","exit_date"])
+ba_vn30 = pd.read_csv("data/ba_trades_vn30_refresh.csv", parse_dates=["entry_date","exit_date"])
 
 # Filter to window (trades with entry OR exit in window)
 def slice_trades(df, start, end):
@@ -100,7 +100,7 @@ print("  HYBRID NAV TRAJECTORY (25B BA + 25B LH from 2025-06-01)")
 print("="*120)
 
 # Load BA NAV
-ba_nav_full = pd.read_csv("ba_v11_nav.csv", parse_dates=["time"]).sort_values("time").set_index("time")["BA_v11"]
+ba_nav_full = pd.read_csv("data/ba_v11_nav.csv", parse_dates=["time"]).sort_values("time").set_index("time")["BA_v11"]
 ba_nav_win = ba_nav_full[(ba_nav_full.index >= START) & (ba_nav_full.index <= END)]
 ba_nav_norm = BA_NAV * ba_nav_win / ba_nav_win.iloc[0]
 
@@ -120,7 +120,7 @@ print(f"\n  {'Month':<12}{'BA NAV (B)':>14}{'LH NAV (B)':>14}{'Hybrid NAV (B)':>
 ba_monthly = ba_aligned.resample("ME").last()
 lh_monthly = lh_aligned.resample("ME").last()
 hyb_monthly = hybrid_nav.resample("ME").last()
-vn_full = pd.read_csv("vnindex_lh.csv", parse_dates=["time"])
+vn_full = pd.read_csv("data/vnindex_lh.csv", parse_dates=["time"])
 vn_full = vn_full[vn_full["Close"] > 100].sort_values("time").set_index("time")["Close"]
 vn_win = vn_full[(vn_full.index >= START) & (vn_full.index <= END)]
 vn_norm = vn_win / vn_win.iloc[0]
@@ -167,8 +167,8 @@ for _, t in lh_trades_win.iterrows():
     all_trades.append({"date":t["dt"],"side":t["side"],"ticker":t["ticker"],"price":t["px"],"leg":"LH"})
 
 tr_df = pd.DataFrame(all_trades).sort_values("date").reset_index(drop=True)
-tr_df.to_csv("hybrid_v11_trades_2025-06_to_now.csv", index=False)
+tr_df.to_csv("data/hybrid_v11_trades_2025-06_to_now.csv", index=False)
 
 nav_df = pd.DataFrame({"BA_NAV":ba_aligned,"LH_NAV":lh_aligned,"Hybrid_NAV":hybrid_nav,"VNI":vn_norm * TOTAL_NAV})
-nav_df.to_csv("hybrid_v11_nav_2025-06_to_now.csv")
+nav_df.to_csv("data/hybrid_v11_nav_2025-06_to_now.csv")
 print(f"\nSaved: hybrid_v11_trades_2025-06_to_now.csv ({len(tr_df)} events), hybrid_v11_nav_2025-06_to_now.csv")

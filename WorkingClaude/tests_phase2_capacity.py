@@ -30,7 +30,7 @@ END_DATE = shn.END_DATE
 TIER_BAL = ["MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","DEEP_VALUE_RECOVERY"]
 
 # ─── LOAD CACHE FROM PHASE 1 ─────────────────────────────────────────────
-CACHE_FILE = "ba_patches_signal_cache.pkl"
+CACHE_FILE = "data/ba_patches_signal_cache.pkl"
 if not os.path.exists(CACHE_FILE):
     print(f"ERROR: {CACHE_FILE} not found. Run backtest_ba_patches.py first."); sys.exit(1)
 
@@ -128,7 +128,7 @@ def metrics_window(nav, start, end, nav_size=50e9):
     nav_v = nav_size * s / s.iloc[0]
     return compute_metrics(nav_v, start, end)
 
-vn_df = pd.read_csv("vnindex_lh.csv", parse_dates=["time"])
+vn_df = pd.read_csv("data/vnindex_lh.csv", parse_dates=["time"])
 vn_df = vn_df[vn_df["Close"] > 100].sort_values("time").set_index("time")["Close"]
 
 periods = [
@@ -159,9 +159,9 @@ for pname, ps, pe in periods:
                      "H60_CAGR":m_60["CAGR"],"H60_Sharpe":m_60["Sharpe"],"H60_MaxDD":m_60["MaxDD"],"H60_Calmar":m_60["Calmar"]})
 
 # Save
-pd.DataFrame(rows).to_csv("phase2_capacity_results.csv", index=False)
+pd.DataFrame(rows).to_csv("data/phase2_capacity_results.csv", index=False)
 # Save NAVs
 out = {"BA_"+k: v for k,v in ba_navs.items()}
 out.update({"LH_"+k: v for k,v in lh_navs.items()})
-pd.DataFrame(out).to_csv("phase2_navs.csv")
+pd.DataFrame(out).to_csv("data/phase2_navs.csv")
 print("\nSaved: phase2_capacity_results.csv, phase2_navs.csv")

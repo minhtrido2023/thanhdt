@@ -242,7 +242,7 @@ for plabel, ps, pe in PERIODS:
     print()
 
 df = pd.DataFrame(all_results)
-df.to_csv(os.path.join(WORKDIR, "compare_v11_5state_versions.csv"), index=False)
+df.to_csv(os.path.join(WORKDIR, "data/compare_v11_5state_versions.csv"), index=False)
 print(f"\nSaved → compare_v11_5state_versions.csv")
 
 # Per-source state distribution log (sanity check)

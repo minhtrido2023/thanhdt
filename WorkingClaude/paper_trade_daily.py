@@ -27,8 +27,8 @@ sys.path.insert(0, r"/home/trido/thanhdt/WorkingClaude/stockquery")
 from stockquery_agent import StockQuery
 
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
-ENTRIES_FILE = os.path.join(WORKDIR, "paper_trade_entries.csv")
-EXITS_FILE = os.path.join(WORKDIR, "paper_trade_exits.csv")
+ENTRIES_FILE = os.path.join(WORKDIR, "data/paper_trade_entries.csv")
+EXITS_FILE = os.path.join(WORKDIR, "data/paper_trade_exits.csv")
 LOG_FILE = os.path.join(WORKDIR, "paper_trade_log.txt")
 
 # ---- Configuration ----

@@ -54,7 +54,7 @@ last=None
 for d in vni_dates:
     if d in state_by_date: last=state_by_date[d]
     elif last is not None: state_by_date[d]=last
-vnx=pd.read_csv(os.path.join(W,"VNINDEX.csv"),usecols=["time","Close","MA200","D_RSI"],parse_dates=["time"])
+vnx=pd.read_csv(os.path.join(W,"data/VNINDEX.csv"),usecols=["time","Close","MA200","D_RSI"],parse_dates=["time"])
 vnx=vnx[vnx["time"]>=panel["time"].min()]
 etf=pd.read_csv(os.path.join(W,"data","e1vfvn30_daily_full.csv"),parse_dates=["time"])
 vn30_und=pd.Series(etf["Close"].values,index=etf["time"])
@@ -62,7 +62,7 @@ vn30_und=pd.Series(etf["Close"].values,index=etf["time"])
 # --- compass panel + conc ---
 bc=pd.read_csv(os.path.join(W,"data","breadth_compass_panel.csv"),parse_dates=["time"]).sort_values("time").reset_index(drop=True)
 bc["b_mom10"]=bc["breadth_s"]-bc["breadth_s"].shift(10)
-cs=pd.read_csv(os.path.join(W,"compare_v11_v12_concentration_switch.csv"),parse_dates=["time"])
+cs=pd.read_csv(os.path.join(W,"data/compare_v11_v12_concentration_switch.csv"),parse_dates=["time"])
 m1=cs["sig_m1"].astype(int).values; m3=cs["sig_m3"].astype(int).values
 cur=m1[0]; mode=[]
 for a,b in zip(m1,m3):
@@ -94,7 +94,7 @@ OVR_W={d:{1:0.7,2:0.7,3:0.7} for d in WARM}
 OVR_D={d:{3:0.0} for d in DANG}
 OVR_WD={**OVR_D,**OVR_W}  # disjoint by construction (state split)
 
-sig_b=pickle.load(open(os.path.join(W,"ba_v11_unified_12y_sig.pkl"),"rb"))
+sig_b=pickle.load(open(os.path.join(W,"data/ba_v11_unified_12y_sig.pkl"),"rb"))
 sig_b["time"]=pd.to_datetime(sig_b["time"]); sig_b=sig_b[sig_b["time"]>=panel["time"].min()].copy()
 def svk(row):
     s,days=row["state5"],row["days_since_release"]
@@ -113,11 +113,11 @@ sig_b.loc[sig_b["time"].isin(oh)&sig_b["play_type"].isin(BUY_TIERS),"play_type"]
 sec_map=sig_b.dropna(subset=["sec"]).drop_duplicates("ticker").set_index("ticker")["sec"].to_dict()
 sig_mom=sig_b[["time","ticker","play_type","ta","Close"]].copy()
 
-with open(os.path.join(W,"earnings_surprise_data.pkl"),"rb") as f: fin=pickle.load(f)
+with open(os.path.join(W,"data/earnings_surprise_data.pkl"),"rb") as f: fin=pickle.load(f)
 fin["Release_Date"]=pd.to_datetime(fin["Release_Date"]); FLOOR=1e9
 fin["exp_B_MA"]=fin[["NP_P1","NP_P2","NP_P3","NP_P4"]].mean(axis=1)
 fin["surprise_B_MA"]=((fin["NP_P0"]-fin["exp_B_MA"])/np.maximum(np.abs(fin["exp_B_MA"]),FLOOR)).clip(-5,5)
-ev_class=pd.read_csv(os.path.join(W,"earnings_events_classified.csv"),parse_dates=["Release_Date"])
+ev_class=pd.read_csv(os.path.join(W,"data/earnings_events_classified.csv"),parse_dates=["Release_Date"])
 ev=ev_class.merge(fin[["ticker","quarter","Release_Date","surprise_B_MA"]],on=["ticker","quarter","Release_Date"],how="left")
 ev=ev.sort_values(["ticker","Release_Date"]).reset_index(drop=True); ev["surprise_B_MA"]=ev["surprise_B_MA"].fillna(0)
 LN2=np.log(2); HL=3.0; ev["prior_n_good"]=0; ev["pa_HL3"]=np.nan

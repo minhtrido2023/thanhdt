@@ -25,8 +25,8 @@ sys.path.insert(0, r"/home/trido/thanhdt/WorkingClaude/stockquery")
 from stockquery_agent import StockQuery
 
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
-CACHE_BIG = os.path.join(WORKDIR, "intraday_full.pkl")
-CACHE_TOP30 = os.path.join(WORKDIR, "intraday_top30.pkl")
+CACHE_BIG = os.path.join(WORKDIR, "data/intraday_full.pkl")
+CACHE_TOP30 = os.path.join(WORKDIR, "data/intraday_top30.pkl")
 
 TOP30 = ["VIC","VHM","HPG","SHB","SSI","FPT","VIX","STB","MWG","MSN",
          "VCB","BSR","MBB","VPB","TCB","HDB","HCM","CTG","NVL","BID",
@@ -116,7 +116,7 @@ def build_panel(intraday):
     return pd.DataFrame(rows)
 
 def add_forward_closes(panel):
-    daily = pd.read_csv(os.path.join(WORKDIR, "daily_forward_full.csv"))
+    daily = pd.read_csv(os.path.join(WORKDIR, "data/daily_forward_full.csv"))
     daily["time"] = pd.to_datetime(daily["time"]).dt.date
     daily = daily.sort_values(["ticker","time"]).reset_index(drop=True)
     for col in ["Close","Open"]:
@@ -217,7 +217,7 @@ def main():
     print(f"\nTotal cached: {len(intraday)} tickers")
 
     # Step 2: Get daily forward closes via BQ
-    if not os.path.exists(os.path.join(WORKDIR, "daily_forward_full.csv")):
+    if not os.path.exists(os.path.join(WORKDIR, "data/daily_forward_full.csv")):
         print("\nFetching daily forward closes from BQ...")
         import subprocess
         tickers_sql = ",".join([f'"{t}"' for t in all_tickers])
@@ -246,7 +246,7 @@ def main():
         slippage_model(panel, seg, pos_vnd)
         net_advantage(panel, seg, pos_vnd)
 
-    panel.to_csv(os.path.join(WORKDIR,"layer3_full_panel.csv"), index=False)
+    panel.to_csv(os.path.join(WORKDIR,"data/layer3_full_panel.csv"), index=False)
     print(f"\nSaved panel: layer3_full_panel.csv  ({len(panel)} rows)")
 
 if __name__=="__main__":

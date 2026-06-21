@@ -159,7 +159,7 @@ for r in results[1:]:
 
 # Save
 df_out = pd.DataFrame(results)
-df_out.to_csv(os.path.join(WORKDIR, "etf_realistic_comparison.csv"), index=False)
+df_out.to_csv(os.path.join(WORKDIR, "data/etf_realistic_comparison.csv"), index=False)
 print(f"\n  Saved: etf_realistic_comparison.csv")
 
 print()

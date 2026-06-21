@@ -19,7 +19,7 @@ WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
 # ══════════════════════════════════════════════════════════════════════
 # LOAD DATA
 # ══════════════════════════════════════════════════════════════════════
-vni = pd.read_csv(os.path.join(WORKDIR, "VNINDEX.csv"), low_memory=False)
+vni = pd.read_csv(os.path.join(WORKDIR, "data/VNINDEX.csv"), low_memory=False)
 vni["time"] = pd.to_datetime(vni["time"])
 vni = vni.sort_values("time").reset_index(drop=True)
 vni = vni[vni["time"] >= "2016-01-01"].copy().reset_index(drop=True)

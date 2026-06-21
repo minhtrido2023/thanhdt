@@ -15,7 +15,7 @@ import numpy as np, pandas as pd
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
 
 # ── Load data ────────────────────────────────────────────────────────────────
-vni = pd.read_csv(WORKDIR + "/VNINDEX.csv", low_memory=False)
+vni = pd.read_csv(WORKDIR + "/data/VNINDEX.csv", low_memory=False)
 vni["time"] = pd.to_datetime(vni["time"])
 vni = vni.sort_values("time").reset_index(drop=True)
 for col in ["Open","High","Low","Close","Volume","VNINDEX_PE",

@@ -207,7 +207,7 @@ print("="*100)
 # Read previous IC results if available
 prev = None
 try:
-    prev = pd.read_csv("fa_ic_regime_results.csv")
+    prev = pd.read_csv("data/fa_ic_regime_results.csv")
     print("\nLoaded fa_ic_regime_results.csv (2014-2026 IC)")
 except FileNotFoundError:
     print("  fa_ic_regime_results.csv not available")

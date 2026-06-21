@@ -290,8 +290,8 @@ for yr in range(2007, 2014):
     print(f"  {yr:<6}{s_nav/1e9:>11.3f}B{e_nav/1e9:>11.3f}B{yoy:>+7.1f}%{len(tr_yr):>8d}{stop_rate:>+8.1f}%")
 
 # Save
-trades_v10.to_csv("sim_v10_pre2014_trades.csv", index=False)
-trades_v11.to_csv("sim_v11_pre2014_trades.csv", index=False)
-nav_v10.to_csv("sim_v10_pre2014_nav.csv", index=False)
-nav_v11.to_csv("sim_v11_pre2014_nav.csv", index=False)
+trades_v10.to_csv("data/sim_v10_pre2014_trades.csv", index=False)
+trades_v11.to_csv("data/sim_v11_pre2014_trades.csv", index=False)
+nav_v10.to_csv("data/sim_v10_pre2014_nav.csv", index=False)
+nav_v11.to_csv("data/sim_v11_pre2014_nav.csv", index=False)
 print(f"\n💾 Saved trade/nav CSVs (sim_v10_pre2014_*.csv, sim_v11_pre2014_*.csv)")

@@ -190,5 +190,5 @@ for nm, b, v in [("v4",tr_v4b,tr_v4v), ("D1_RE",tr_d1b,tr_d1v),
 # Save CONSTR trades for inspection
 co_trades = tr_3bb[tr_3bb["play_type"] == "CONSTR_BACKLOG_BUY"].copy() if "play_type" in tr_3bb.columns else pd.DataFrame()
 if len(co_trades):
-    co_trades.to_csv("constr_backlog_trades.csv", index=False)
+    co_trades.to_csv("data/constr_backlog_trades.csv", index=False)
     print(f"\n  Saved constr_backlog_trades.csv ({len(co_trades)} rows)")

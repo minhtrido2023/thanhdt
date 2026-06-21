@@ -53,7 +53,7 @@ def slice_metrics(nav, start, end):
 
 # ---- Load BA v11 NAV (P3 patch enabled) ----
 print("Loading BA v11 NAV (BA v10 + P3 overheated filter) ...")
-ba_df = pd.read_csv("ba_v11_nav.csv", parse_dates=["time"]).sort_values("time").set_index("time")
+ba_df = pd.read_csv("data/ba_v11_nav.csv", parse_dates=["time"]).sort_values("time").set_index("time")
 ba_nav = ba_df["BA_v11"]
 print(f"  BA v11 NAV range {ba_nav.index.min().date()} to {ba_nav.index.max().date()}, final {ba_nav.iloc[-1]:.3f}x")
 
@@ -61,9 +61,9 @@ print("Running LH_gated ...")
 lh_g = run_lh(hold_quarters=4, n_positions=10, tier_set=("A","B"), incl_sub="all",
                refresh_mode="staggered", crisis_gate=True)["nav"]["nav"]
 
-vn_df = pd.read_csv("vnindex_lh.csv", parse_dates=["time"])
+vn_df = pd.read_csv("data/vnindex_lh.csv", parse_dates=["time"])
 vn_df = vn_df[vn_df["Close"] > 100].sort_values("time").set_index("time")["Close"]
-state_df = pd.read_csv("vnindex_5state.csv", parse_dates=["time"]).sort_values("time").set_index("time")
+state_df = pd.read_csv("data/vnindex_5state.csv", parse_dates=["time"]).sort_values("time").set_index("time")
 
 common_start = max(ba_nav.index.min(), lh_g.index.min(), vn_df.index.min())
 common_end = min(ba_nav.index.max(), lh_g.index.max(), vn_df.index.max())

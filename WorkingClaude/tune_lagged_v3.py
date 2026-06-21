@@ -70,7 +70,7 @@ for i, cfg in enumerate(configs_v3):
         print(f" ERROR: {e}"); continue
 
 df = pd.DataFrame(results_v3)
-df.to_csv("lagged_pos_tune_v3.csv", index=False)
+df.to_csv("data/lagged_pos_tune_v3.csv", index=False)
 
 print("\n" + "="*135)
 print("  TOP 10 BY CAGR (R3)")

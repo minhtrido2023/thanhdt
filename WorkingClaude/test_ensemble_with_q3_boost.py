@@ -26,7 +26,7 @@ TW_Q3 = {"MEGA": 0.10, "MOMENTUM": 0.10, "MOMENTUM_N": 0.14,
          "MOMENTUM_S": 0.14, "DEEP_VALUE_RECOVERY": 0.10}
 BUY_TIERS_V11 = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
                   "MOMENTUM_A","MOMENTUM_S_N","COMPOUNDER_BUY","DEEP_VALUE_RECOVERY","S_PRO"}
-STATE_CSV = "vnindex_5state_tam_quan_v3_4b_full_history.csv"
+STATE_CSV = "data/vnindex_5state_tam_quan_v3_4b_full_history.csv"
 SWITCH_COST = 0.005
 
 print("="*100); print("  ROLLING M3 + V12.1 LAGGED ensemble test"); print("="*100)
@@ -59,7 +59,7 @@ print(f"  M3r range: {m3r.dropna().min():.3f} to {m3r.dropna().max():.3f}")
 
 # Load cached M1 signal from previous run (it's daily and unchanged)
 print("\n[2] Loading M1 signal from cache...")
-cached = pd.read_csv("compare_v11_v12_concentration_switch.csv", index_col=0, parse_dates=True)
+cached = pd.read_csv("data/compare_v11_v12_concentration_switch.csv", index_col=0, parse_dates=True)
 sig_m1 = cached["sig_m1"].dropna().astype(int)
 
 # Build M3r binary signal (expanding median, T+1)
@@ -74,7 +74,7 @@ print(f"  M3r signal days: {len(sig_m3r)}")
 
 # ─── 3. Re-run 3 legs + V12.1 LAGGED variant ────────────────────────────────
 print("\n[3] Re-running legs (BAL / VN30 / LAGGED-v12 / LAGGED-v121)...")
-with open("ba_v11_unified_12y_sig.pkl", "rb") as f: sig_B = pickle.load(f)
+with open("data/ba_v11_unified_12y_sig.pkl", "rb") as f: sig_B = pickle.load(f)
 sig_B["time"] = pd.to_datetime(sig_B["time"])
 with open("sim_v11_for_analyzer.py", "r", encoding="utf-8") as f: _content = f.read()
 def _extract(varname):
@@ -140,19 +140,19 @@ nav_vn30["time"] = pd.to_datetime(nav_vn30["time"]); nav_vn30_s = nav_vn30.set_i
 print(f"  VN30: {nav_vn30_s.iloc[-1]/1e9:.2f}B")
 
 # LAGGED books (v12 fixed-8% and v12.1 S2)
-with open("earnings_px.pkl","rb") as f: px_data = pickle.load(f)
+with open("data/earnings_px.pkl","rb") as f: px_data = pickle.load(f)
 px_data["time"] = pd.to_datetime(px_data["time"])
 px_close = px_data.pivot_table(index="time", columns="ticker", values="Close", aggfunc="first").sort_index().ffill(limit=5)
 master_idx = pd.DatetimeIndex(px_close.index).as_unit("ns"); px_close.index = master_idx
 all_dates = np.array(master_idx)
-with open("lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f); ov["time"] = pd.to_datetime(ov["time"])
+with open("data/lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f); ov["time"] = pd.to_datetime(ov["time"])
 px_open = ov.pivot_table(index="time", columns="ticker", values="Open", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 liq_l = ov.pivot_table(index="time", columns="ticker", values="Volume_3M_P50", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
-with open("earnings_surprise_data.pkl","rb") as f: fin = pickle.load(f)
+with open("data/earnings_surprise_data.pkl","rb") as f: fin = pickle.load(f)
 fin["Release_Date"] = pd.to_datetime(fin["Release_Date"]); FLOOR = 1e9
 fin["exp_B_MA"] = fin[["NP_P1","NP_P2","NP_P3","NP_P4"]].mean(axis=1)
 fin["surprise_B_MA"] = ((fin["NP_P0"] - fin["exp_B_MA"]) / np.maximum(np.abs(fin["exp_B_MA"]), FLOOR)).clip(-5, 5)
-ev_class = pd.read_csv("earnings_events_classified.csv", parse_dates=["Release_Date"])
+ev_class = pd.read_csv("data/earnings_events_classified.csv", parse_dates=["Release_Date"])
 ev = ev_class.merge(fin[["ticker","quarter","Release_Date","surprise_B_MA"]],
                      on=["ticker","quarter","Release_Date"], how="left")
 ev = ev.sort_values(["ticker","Release_Date"]).reset_index(drop=True)
@@ -366,7 +366,7 @@ for yr in range(2014, 2027):
 print("\n" + "="*100)
 print("  M3 STATIC vs M3r ROLLING (lookahead check)")
 print("="*100)
-sig_m3_old = pd.read_csv("compare_v11_v12_concentration_switch.csv", index_col=0, parse_dates=True)["sig_m3"].dropna().astype(int)
+sig_m3_old = pd.read_csv("data/compare_v11_v12_concentration_switch.csv", index_col=0, parse_dates=True)["sig_m3"].dropna().astype(int)
 m3_old = sig_m3_old.reindex(common_idx).ffill().fillna(1).astype(int)
 overlap = (m3_old.values == m3r.values).mean()*100
 print(f"  Signal agreement (M3 static vs M3r rolling): {overlap:.1f}%")
@@ -389,6 +389,6 @@ out_df = pd.DataFrame({
     "AH_v12":nav_AH_v12,"AH_v121":nav_AH_v121,
     "AV_v12":nav_AV_v12,"AV_v121":nav_AV_v121,
     "vni":vni_n,"sig_AND_hold":sig_AND_hold,"sig_AND_v11":sig_AND_v11,"sig_m3r":sig_m3r.reindex(common_idx)})
-out_df.to_csv("test_rolling_m3_v121_ensemble.csv")
+out_df.to_csv("data/test_rolling_m3_v121_ensemble.csv")
 print(f"\n  Saved: test_rolling_m3_v121_ensemble.csv")
 print("\n" + "="*120); print("DONE.")

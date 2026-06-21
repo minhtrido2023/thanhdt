@@ -28,7 +28,7 @@ from datetime import timedelta
 import warnings
 warnings.filterwarnings('ignore')
 
-CSV_PATH = r"/home/trido/thanhdt/WorkingClaude/VNINDEX.csv"
+CSV_PATH = r"/home/trido/thanhdt/WorkingClaude/data/VNINDEX.csv"
 
 NEEDED = ['time','Close','MA200','D_RSI','D_CMF','D_MACDdiff',
           'VNINDEX_PE','Change_3M','Change_1M']
@@ -437,7 +437,7 @@ print(f"""
 
 # Save lich su phan bo
 df[['time','Close','VNINDEX_PE','D_RSI','P3M_pct','alloc_state','zone','stock_pct','cash_pct']].to_csv(
-    r"/home/trido/thanhdt/WorkingClaude/allocation_history.csv",
+    r"/home/trido/thanhdt/WorkingClaude/data/allocation_history.csv",
     index=False
 )
 print("\nLich su phan bo da luu → allocation_history.csv")

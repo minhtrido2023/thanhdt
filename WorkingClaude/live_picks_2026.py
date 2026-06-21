@@ -61,7 +61,7 @@ def tech_multiplier(close, ma50, ma200, macd_diff, cmb_bottom_5d, np_r):
     return base
 
 # ─── Load latest ratings ────────────────────────────────────────────────────
-df = pd.read_csv("fundamental_rating_all.csv", parse_dates=["time"])
+df = pd.read_csv("data/fundamental_rating_all.csv", parse_dates=["time"])
 cutoff = TODAY - pd.Timedelta(days=MAX_AGE)
 valid = df[(df["time"] <= TODAY) & (df["time"] >= cutoff)]
 latest = valid.sort_values("time").groupby("ticker").tail(1)
@@ -160,7 +160,7 @@ vni_p0, vni_p1, vni_ret, vni_d = ytd_return("VNINDEX")
 print(f"\nVNINDEX YTD: {vni_p0:.2f} -> {vni_p1:.2f} = {vni_ret:+.2f}% (as of {vni_d.date()})")
 
 # ─── Current 5-state ────────────────────────────────────────────────────────
-state_df = pd.read_csv("vnindex_state_history.csv", parse_dates=["time"]).sort_values("time")
+state_df = pd.read_csv("data/vnindex_state_history.csv", parse_dates=["time"]).sort_values("time")
 state_today = state_df[state_df["time"] <= TODAY].iloc[-1]
 sc = int(state_today["state"]); sn = state_today["state_name"]
 alloc = STATE_ALLOC[sc]
@@ -229,5 +229,5 @@ if clean:
           f"effective stocks {overlay_invested*100:.0f}%, rest in cash@6%/yr  "
           f"-> net YTD ~ {overlay_ret:+.2f}%")
 
-pd.DataFrame(rows).to_csv("live_picks_2026.csv", index=False)
+pd.DataFrame(rows).to_csv("data/live_picks_2026.csv", index=False)
 print(f"\nSaved -> live_picks_2026.csv")

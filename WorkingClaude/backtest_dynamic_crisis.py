@@ -31,12 +31,12 @@ BASE_CAP = {2: 0.60, 3: 1.00, 4: 1.15, 5: 1.30}
 # LOAD DATA
 # ══════════════════════════════════════════════════════════════════════
 print("Loading data...")
-vni = pd.read_csv(os.path.join(WORKDIR,"VNINDEX.csv"), low_memory=False)
+vni = pd.read_csv(os.path.join(WORKDIR,"data/VNINDEX.csv"), low_memory=False)
 vni["time"] = pd.to_datetime(vni["time"])
 vni = vni.sort_values("time").reset_index(drop=True)
 for col in ["Close","D_RSI","D_MACDdiff","D_CMF","VNINDEX_PE"]:
     if col in vni.columns: vni[col] = pd.to_numeric(vni[col], errors="coerce")
-b_path = os.path.join(WORKDIR,"breadth_data.csv")
+b_path = os.path.join(WORKDIR,"data/breadth_data.csv")
 if os.path.exists(b_path):
     b = pd.read_csv(b_path); b["time"] = pd.to_datetime(b["time"])
     b["breadth"] = pd.to_numeric(b["breadth"], errors="coerce")

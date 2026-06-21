@@ -45,7 +45,7 @@ print("  OPTION 2 APPROXIMATION — varying BAL/LAGGED sizes")
 print("="*100)
 
 # Load signals
-with open("ba_v11_unified_12y_sig.pkl", "rb") as f: sig = pickle.load(f)
+with open("data/ba_v11_unified_12y_sig.pkl", "rb") as f: sig = pickle.load(f)
 sig["time"] = pd.to_datetime(sig["time"])
 
 # P3 overheat
@@ -94,18 +94,18 @@ def run_bal(book_nav):
     return nav_bal.set_index("time")["nav"]
 
 # Load LAGGED setup
-with open("earnings_px.pkl","rb") as f: px_data = pickle.load(f)
+with open("data/earnings_px.pkl","rb") as f: px_data = pickle.load(f)
 px_data["time"] = pd.to_datetime(px_data["time"])
 px_close = px_data.pivot_table(index="time", columns="ticker", values="Close", aggfunc="first").sort_index().ffill(limit=5)
 master_idx = pd.DatetimeIndex(px_close.index).as_unit("ns")
 px_close.index = master_idx
 all_dates = np.array(master_idx)
-with open("lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
+with open("data/lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
 ov["time"] = pd.to_datetime(ov["time"])
 px_open = ov.pivot_table(index="time", columns="ticker", values="Open", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 liq_l = ov.pivot_table(index="time", columns="ticker", values="Volume_3M_P50", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 
-ev = pd.read_csv("earnings_events_classified.csv", parse_dates=["Release_Date"])
+ev = pd.read_csv("data/earnings_events_classified.csv", parse_dates=["Release_Date"])
 ev = ev.sort_values(["ticker","Release_Date"]).reset_index(drop=True)
 LN2 = np.log(2); HL = 3.0
 ev["pa_HL3"] = np.nan; ev["prior_n_good"] = 0
@@ -218,7 +218,7 @@ for name, bal_n, lag_n, _ in configs:
     combined[name] = total / TOTAL
 
 # Load Current production
-ba_v11_prod = pd.read_csv("ba_v11_production_12y_nav.csv", index_col=0, parse_dates=True).iloc[:,0]
+ba_v11_prod = pd.read_csv("data/ba_v11_production_12y_nav.csv", index_col=0, parse_dates=True).iloc[:,0]
 
 # Common index
 common = ba_v11_prod.index
@@ -272,5 +272,5 @@ for label, st, en in periods:
 
 # Save
 out = pd.DataFrame({"CURRENT": ba_v11_prod, **combined})
-out.to_csv("option2_approximation_navs.csv")
+out.to_csv("data/option2_approximation_navs.csv")
 print("Saved: option2_approximation_navs.csv")

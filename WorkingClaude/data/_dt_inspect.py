@@ -1,7 +1,7 @@
 import pandas as pd, numpy as np, glob, os
 os.chdir(r"/home/trido/thanhdt/WorkingClaude")
 def ntrans(s): a=np.asarray(s); return int((a[1:]!=a[:-1]).sum())
-files=["vnindex_5state_tam_quan_v3_4b_full_history.csv"]+sorted(glob.glob("vnindex_5state_dt_*.csv"))
+files=["data/vnindex_5state_tam_quan_v3_4b_full_history.csv"]+sorted(glob.glob("vnindex_5state_dt_*.csv"))
 for f in files:
     d=pd.read_csv(f); d["time"]=pd.to_datetime(d["time"])
     col="state" if "state" in d.columns else d.columns[1]

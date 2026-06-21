@@ -27,7 +27,7 @@ import matplotlib.pyplot as plt
 
 PROJECT   = "lithe-record-440915-m9"
 BQ_BIN    = r"bq"
-PRICE_CSV = "fundamental_rating_prices.csv"
+PRICE_CSV = "data/fundamental_rating_prices.csv"
 START     = "2015-04-01"
 END       = "2025-04-01"
 TC        = 0.001    # 0.1% per side
@@ -64,14 +64,14 @@ def bq_query(sql, label=""):
 
 # ─── Load ratings ────────────────────────────────────────────────────────────
 print("Loading ratings ...")
-rating_q4  = pd.read_csv("fundamental_rating.csv");      rating_q4["time"]  = pd.to_datetime(rating_q4["time"])
-rating_all = pd.read_csv("fundamental_rating_all.csv");  rating_all["time"] = pd.to_datetime(rating_all["time"])
+rating_q4  = pd.read_csv("data/fundamental_rating.csv");      rating_q4["time"]  = pd.to_datetime(rating_q4["time"])
+rating_all = pd.read_csv("data/fundamental_rating_all.csv");  rating_all["time"] = pd.to_datetime(rating_all["time"])
 print(f"  Q4-only:    {len(rating_q4):,} rows")
 print(f"  All-quarter:{len(rating_all):,} rows")
 
 # ─── Load 5-state history ───────────────────────────────────────────────────
 print("Loading 5-state history ...")
-state_df = pd.read_csv("vnindex_state_history.csv", parse_dates=["time"])
+state_df = pd.read_csv("data/vnindex_state_history.csv", parse_dates=["time"])
 state_df["alloc"] = state_df["state"].map(STATE_ALLOC)
 state_df = state_df.set_index("time")[["state","state_name","alloc"]].sort_index()
 print(f"  {len(state_df):,} state days, {state_df.index.min().date()} to {state_df.index.max().date()}")
@@ -161,7 +161,7 @@ price_pivot = prices.pivot_table(index="time", columns="ticker", values="Close",
 print(f"  Price pivot: {price_pivot.shape[0]} days x {price_pivot.shape[1]} tickers")
 
 # ─── VNINDEX ────────────────────────────────────────────────────────────────
-vni = pd.read_csv("VNINDEX.csv", parse_dates=["time"], usecols=["time","ticker","Close"])
+vni = pd.read_csv("data/VNINDEX.csv", parse_dates=["time"], usecols=["time","ticker","Close"])
 vni = vni[vni["ticker"]=="VNINDEX"][["time","Close"]].set_index("time").sort_index()
 vni = vni.loc[START:pd.Timestamp(END) + pd.Timedelta(days=10)]
 vni_nav = pd.DataFrame({"nav": vni["Close"] / vni["Close"].iloc[0]})
@@ -262,7 +262,7 @@ combo = pd.concat(
     [r["nav"].rename(name) for name, r in results.items()] + [vni_nav["nav"].rename("VNINDEX")],
     axis=1
 ).sort_index()
-combo.to_csv("backtest_fundamental_v2.csv")
+combo.to_csv("data/backtest_fundamental_v2.csv")
 print(f"\nSaved NAV -> backtest_fundamental_v2.csv")
 
 # ─── Plot ────────────────────────────────────────────────────────────────────

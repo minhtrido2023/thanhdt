@@ -180,6 +180,6 @@ for season_name, months in SEASONS.items():
           f"{delta:>+9.2f}pp {arrow}  {skipped:>+5d} trades")
 
 # Save trade logs per variant
-f0_t.to_csv(os.path.join(WORKDIR, "fresh_q_f0_trades.csv"), index=False)
-f1_t.to_csv(os.path.join(WORKDIR, "fresh_q_f1_trades.csv"), index=False)
+f0_t.to_csv(os.path.join(WORKDIR, "data/fresh_q_f0_trades.csv"), index=False)
+f1_t.to_csv(os.path.join(WORKDIR, "data/fresh_q_f1_trades.csv"), index=False)
 print(f"\n  Saved: fresh_q_f0_trades.csv, fresh_q_f1_trades.csv")

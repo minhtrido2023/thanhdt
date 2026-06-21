@@ -26,15 +26,15 @@ OOS_START = pd.Timestamp("2024-01-01")
 
 VARIANTS = [
     ("LIVE Tinh Tế",       "BQ"),
-    ("v2 Dynamic (canon)", "vnindex_5state_dual_v2_staging.csv"),
-    ("v3 Dyn+TinhTế pipe", "vnindex_5state_dual_v3_staging.csv"),
+    ("v2 Dynamic (canon)", "data/vnindex_5state_dual_v2_staging.csv"),
+    ("v3 Dyn+TinhTế pipe", "data/vnindex_5state_dual_v3_staging.csv"),
 ]
 
 print("="*100)
 print(f"  V11 — LIVE | v2 (canonical pipe) | v3 (Tinh Tế pipe)")
 print("="*100)
 
-sig_cache = "ba_v11_unified_12y_sig.pkl"
+sig_cache = "data/ba_v11_unified_12y_sig.pkl"
 with open(sig_cache, "rb") as f: sig = pickle.load(f)
 print(f"[shared] {len(sig):,} sig rows")
 

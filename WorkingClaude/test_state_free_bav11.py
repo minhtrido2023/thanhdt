@@ -36,7 +36,7 @@ TIER_WEIGHTS_V11 = {t: 0.10 for t in TIER_BAL}
 BUY_TIERS_V11 = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
                   "MOMENTUM_A","MOMENTUM_S_N","COMPOUNDER_BUY","DEEP_VALUE_RECOVERY","S_PRO","RE_BACKLOG_BUY"}
 MAX_POS = 12
-STATE_CSV_TQ34B = "vnindex_5state_tam_quan_v3_4b_full_history.csv"
+STATE_CSV_TQ34B = "data/vnindex_5state_tam_quan_v3_4b_full_history.csv"
 
 print("="*100)
 print("  STATE-FREE BA v11 PROGRESSION TEST")
@@ -44,8 +44,8 @@ print("="*100)
 
 # ─── Common setup ────────────────────────────────────────────────────────
 print("\n[1] Loading canonical + state_free signals...")
-with open("ba_v11_unified_12y_sig.pkl","rb") as f: sig_canon = pickle.load(f)
-with open("ba_v11_state_free_sig.pkl","rb") as f: sig_sf    = pickle.load(f)
+with open("data/ba_v11_unified_12y_sig.pkl","rb") as f: sig_canon = pickle.load(f)
+with open("data/ba_v11_state_free_sig.pkl","rb") as f: sig_sf    = pickle.load(f)
 sig_canon["time"] = pd.to_datetime(sig_canon["time"])
 sig_sf["time"]    = pd.to_datetime(sig_sf["time"])
 sig_canon = sig_canon[(sig_canon["time"]>=START_B) & (sig_canon["time"]<=END_B)].copy()

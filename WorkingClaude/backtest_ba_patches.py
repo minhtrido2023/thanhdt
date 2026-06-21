@@ -112,7 +112,7 @@ TIER_BAL_P1 = TIER_BAL_BL + ["MOMENTUM_QUALITY"]
 # ─────────────────────────────────────────────────────────────────────────
 # CACHE SIGNALS
 # ─────────────────────────────────────────────────────────────────────────
-CACHE_FILE = "ba_patches_signal_cache.pkl"
+CACHE_FILE = "data/ba_patches_signal_cache.pkl"
 if os.path.exists(CACHE_FILE):
     print(f"Loading cached signals from {CACHE_FILE} ...", flush=True)
     with open(CACHE_FILE, "rb") as f:
@@ -284,7 +284,7 @@ for period_name, p_start, p_end in periods:
         print(f"  {label:<14}{m['CAGR']:>+10.2%}{m['Sharpe']:>+10.2f}{m['MaxDD']:>+10.2%}{m['Calmar']:>+10.2f}{m['wealth']:>+10.2f}")
 
 # Save
-pd.DataFrame(all_rows).to_csv("ba_patches_results.csv", index=False)
+pd.DataFrame(all_rows).to_csv("data/ba_patches_results.csv", index=False)
 nav_df = pd.DataFrame({k: v for k, v in results.items()})
-nav_df.to_csv("ba_patches_nav.csv")
+nav_df.to_csv("data/ba_patches_nav.csv")
 print("\nSaved: ba_patches_results.csv, ba_patches_nav.csv")

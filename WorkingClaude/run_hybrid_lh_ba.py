@@ -17,12 +17,12 @@ from simulate_lh_nav import run_lh, compute_metrics, load_data
 INIT_NAV = 50e9
 
 # Load BA NAV (already normalized to 1.0 start)
-ba_traces = pd.read_csv("f_ba_mix_nav_traces.csv", parse_dates=["time"]).sort_values("time").set_index("time")
+ba_traces = pd.read_csv("data/f_ba_mix_nav_traces.csv", parse_dates=["time"]).sort_values("time").set_index("time")
 ba_nav = ba_traces["BA_50_50"]
 print(f"BA NAV range: {ba_nav.index.min().date()} -> {ba_nav.index.max().date()}, final {ba_nav.iloc[-1]:.2f}x")
 
 # Load VNINDEX for benchmark
-vn_df = pd.read_csv("vnindex_lh.csv", parse_dates=["time"])
+vn_df = pd.read_csv("data/vnindex_lh.csv", parse_dates=["time"])
 vn_df = vn_df[vn_df["Close"] > 100].sort_values("time").set_index("time")["Close"]
 
 # Run LH variants
@@ -146,11 +146,11 @@ for period_name, (s_dt, e_dt) in periods.items():
         print(f"{name:<32}{period_name:<32}{m['CAGR']:>+9.4f}{m['Sharpe']:>+9.4f}{m['MaxDD']:>+9.4f}{m['Calmar']:>+9.4f}")
     print()
 
-pd.DataFrame(rows).to_csv("hybrid_lh_ba_results.csv", index=False)
+pd.DataFrame(rows).to_csv("data/hybrid_lh_ba_results.csv", index=False)
 
 # Save nav series for plotting
 nav_out = pd.DataFrame({k: INIT_NAV * v / v.iloc[0] for k, v in scenarios.items()})
-nav_out.to_csv("hybrid_lh_ba_nav.csv")
+nav_out.to_csv("data/hybrid_lh_ba_nav.csv")
 
 # 2022 monthly detail for crash defense check
 print("\n=== 2022 monthly returns ===")
@@ -162,6 +162,6 @@ for name in ["BA_only","LH_only","LH_gated","Hybrid_50/50_rebal_qtrly","Hybrid_5
     mret_2022[name] = m
 m22df = pd.DataFrame(mret_2022)
 print(m22df.to_string(float_format=lambda x: f"{x:+.2%}" if pd.notna(x) else "N/A"))
-m22df.to_csv("hybrid_2022_monthly.csv")
+m22df.to_csv("data/hybrid_2022_monthly.csv")
 
 print("\nWrote: hybrid_lh_ba_results.csv, hybrid_lh_ba_nav.csv, hybrid_2022_monthly.csv")

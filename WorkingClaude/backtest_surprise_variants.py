@@ -49,20 +49,20 @@ print("="*100)
 
 # ─── Load data ───────────────────────────────────────────────────────────
 print("\n[Setup] Loading price + financial caches ...")
-with open("earnings_px.pkl","rb") as f: px_data = pickle.load(f)
+with open("data/earnings_px.pkl","rb") as f: px_data = pickle.load(f)
 px_data["time"] = pd.to_datetime(px_data["time"])
 px_close = px_data.pivot_table(index="time", columns="ticker", values="Close", aggfunc="first").sort_index().ffill(limit=5)
 master_idx = pd.DatetimeIndex(px_close.index).as_unit("ns")
 px_close.index = master_idx
 all_dates = np.array(master_idx)
 
-with open("lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
+with open("data/lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
 ov["time"] = pd.to_datetime(ov["time"])
 px_open = ov.pivot_table(index="time", columns="ticker", values="Open", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 liq = ov.pivot_table(index="time", columns="ticker", values="Volume_3M_P50", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 
 # Surprise data
-with open("earnings_surprise_data.pkl","rb") as f: fin = pickle.load(f)
+with open("data/earnings_surprise_data.pkl","rb") as f: fin = pickle.load(f)
 fin["Release_Date"] = pd.to_datetime(fin["Release_Date"])
 FLOOR = 1e9
 fin["exp_B_MA"] = fin[["NP_P1","NP_P2","NP_P3","NP_P4"]].mean(axis=1)
@@ -71,7 +71,7 @@ fin["surprise_B_MA"] = fin["surprise_B_MA"].clip(-5, 5)
 print(f"  Events with B_MA surprise: {fin['surprise_B_MA'].notna().sum():,}")
 
 # Existing classified events (has pre/rel/post returns)
-ev_class = pd.read_csv("earnings_events_classified.csv", parse_dates=["Release_Date"])
+ev_class = pd.read_csv("data/earnings_events_classified.csv", parse_dates=["Release_Date"])
 ev_class = ev_class.sort_values(["ticker","Release_Date"]).reset_index(drop=True)
 print(f"  Classified events: {len(ev_class):,}")
 
@@ -261,7 +261,7 @@ for name, mask in variants:
     print(f"  {name:<24}{r['sched_N']:>10d}{r['trades']:>8d}{r['WR']:>6.1f}%{r['avg_ret']:>+9.2f}%{r['CAGR']:>+8.2f}%{r['Sharpe']:>+7.2f}{r['DD']:>+7.1f}%{r['Calmar']:>+7.2f}{r['OOS_24']:>+8.1f}%{r['Y22']:>+8.1f}%{r['Q126']:>+8.1f}%")
 
 results_df = pd.DataFrame(results)
-results_df.to_csv("surprise_variants_results.csv", index=False)
+results_df.to_csv("data/surprise_variants_results.csv", index=False)
 
 # Best by CAGR
 if len(results_df) > 0:

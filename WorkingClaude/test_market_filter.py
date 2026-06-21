@@ -18,7 +18,7 @@ SPY=243.4
 NAMES={1:"CRISIS",2:"BEAR",3:"NEUTRAL",4:"BULL",5:"EX-BULL"}
 
 # ─── Load data ────────────────────────────────────────────────────────────────
-vni = pd.read_csv(os.path.join(WORKDIR,"VNINDEX.csv"), low_memory=False)
+vni = pd.read_csv(os.path.join(WORKDIR,"data/VNINDEX.csv"), low_memory=False)
 vni["time"] = pd.to_datetime(vni["time"])
 vni = vni.sort_values("time").reset_index(drop=True)
 num_cols = ["Open","High","Low","Close","Volume","VNINDEX_PE",
@@ -29,7 +29,7 @@ num_cols = ["Open","High","Low","Close","Volume","VNINDEX_PE",
 for c in num_cols:
     if c in vni.columns:
         vni[c] = pd.to_numeric(vni[c], errors="coerce")
-breadth = pd.read_csv(os.path.join(WORKDIR,"breadth_data.csv"))
+breadth = pd.read_csv(os.path.join(WORKDIR,"data/breadth_data.csv"))
 breadth["time"] = pd.to_datetime(breadth["time"])
 vni = vni.merge(breadth, on="time", how="left")
 n = len(vni)

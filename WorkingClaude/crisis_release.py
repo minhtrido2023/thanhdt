@@ -97,14 +97,14 @@ def segments(state: pd.Series, value=CRISIS):
 if __name__ == "__main__":
     import sys
     WORK = r"/home/trido/thanhdt/WorkingClaude"
-    vix = pd.read_csv(f"{WORK}/VNINDEX.csv", parse_dates=["time"])
+    vix = pd.read_csv(f"{WORK}/data/VNINDEX.csv", parse_dates=["time"])
     close = vix.set_index("time")["Close"].sort_index()
 
     families = {
-        "canonical_TinhTe": "vnindex_5state.csv",
-        "DT_10_25_25":      "vnindex_5state_dt_10_25_25.csv",
-        "v3.4b":            "vnindex_5state_tam_quan_v3_4b_full_history.csv",
-        "DT5G(state_raw)":  "vnindex_5state_dt5g_live.csv",
+        "canonical_TinhTe": "data/vnindex_5state.csv",
+        "DT_10_25_25":      "data/vnindex_5state_dt_10_25_25.csv",
+        "v3.4b":            "data/vnindex_5state_tam_quan_v3_4b_full_history.csv",
+        "DT5G(state_raw)":  "data/vnindex_5state_dt5g_live.csv",
     }
     K = int(sys.argv[1]) if len(sys.argv) > 1 else 20
     margin = float(sys.argv[2]) if len(sys.argv) > 2 else 0.0

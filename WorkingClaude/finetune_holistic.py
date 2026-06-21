@@ -82,7 +82,7 @@ def main():
     df = df.sort_values("sharpe", ascending=False)
 
     # Save full grid
-    df.to_csv(os.path.join(WORKDIR, "finetune_full_grid.csv"), index=False)
+    df.to_csv(os.path.join(WORKDIR, "data/finetune_full_grid.csv"), index=False)
 
     # Top 15 by Sharpe
     print("\n" + "═" * 110)

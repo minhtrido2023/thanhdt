@@ -26,14 +26,14 @@ _CACHE = {}
 
 def load_data():
     if "ratings" not in _CACHE:
-        r = pd.read_csv("fa_ratings_lh.csv", parse_dates=["time","Release_Date"])
+        r = pd.read_csv("data/fa_ratings_lh.csv", parse_dates=["time","Release_Date"])
         r["effective_release"] = r["Release_Date"].fillna(r["time"] + pd.Timedelta(days=60))
         _CACHE["ratings"] = r
     if "prices" not in _CACHE:
-        p = pd.read_csv("prices_lh.csv", parse_dates=["time"])
+        p = pd.read_csv("data/prices_lh.csv", parse_dates=["time"])
         _CACHE["prices"] = p
     if "vnindex" not in _CACHE:
-        v = pd.read_csv("vnindex_lh.csv", parse_dates=["time"])
+        v = pd.read_csv("data/vnindex_lh.csv", parse_dates=["time"])
         v = v[v["Close"] > 100].sort_values("time").reset_index(drop=True)
         _CACHE["vnindex"] = v
     return _CACHE["ratings"], _CACHE["prices"], _CACHE["vnindex"]
@@ -90,8 +90,8 @@ def run_lh_v2(
     # Load 5-state
     state_lookup = None
     if crisis_gate:
-        if os.path.exists("vnindex_5state.csv"):
-            st = pd.read_csv("vnindex_5state.csv", parse_dates=["time"]).sort_values("time")
+        if os.path.exists("data/vnindex_5state.csv"):
+            st = pd.read_csv("data/vnindex_5state.csv", parse_dates=["time"]).sort_values("time")
             state_lookup = st.set_index("time")["state"].reindex(
                 pd.date_range(st["time"].min(), st["time"].max(), freq="D")).ffill()
 
@@ -334,7 +334,7 @@ if __name__ == "__main__":
     # 5-ticker lifecycle
     print("\n=== 5-TICKER LIFECYCLE ===")
     CASES = ["VCS","DGC","VNM","FPT","MWG"]
-    prices = pd.read_csv("prices_lh.csv", parse_dates=["time"])
+    prices = pd.read_csv("data/prices_lh.csv", parse_dates=["time"])
     for tk in CASES:
         p = prices[prices["ticker"]==tk].sort_values("time")
         peak_dt = p.loc[p["Close"].idxmax(), "time"]

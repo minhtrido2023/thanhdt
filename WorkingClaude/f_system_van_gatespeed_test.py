@@ -15,7 +15,7 @@ import numpy as np, pandas as pd
 WD = r"/home/trido/thanhdt/WorkingClaude"
 
 # ---- VN30F1M returns + realized vol (master index = futures dates) ----
-f1 = pd.read_csv(WD+"/vn30f1m_raw.csv"); f1["time"]=pd.to_datetime(f1["time"])
+f1 = pd.read_csv(WD+"/data/vn30f1m_raw.csv"); f1["time"]=pd.to_datetime(f1["time"])
 f1 = f1.sort_values("time").reset_index(drop=True)
 f1["lr"] = np.log(f1["close"]/f1["close"].shift(1))
 f1["ret"] = f1["close"].pct_change()

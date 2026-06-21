@@ -24,7 +24,7 @@ def bq(sql):
 print("Pulling 3 breadth versions...")
 
 # v1: production breadth from ticker_prune (current 5-state input)
-br_prune = pd.read_csv('breadth_data.csv', parse_dates=['time'])
+br_prune = pd.read_csv('data/breadth_data.csv', parse_dates=['time'])
 br_prune.columns = ['time','br_prune']
 print(f"  v1 ticker_prune: n={len(br_prune)}")
 
@@ -105,5 +105,5 @@ big_flip = (df['rank_diff'].abs() > 0.10).sum()
 print(f"  Sessions with |rank diff| > 10pp: {big_flip} ({100*big_flip/len(df):.1f}%)")
 
 # Save for further use
-df.to_csv('breadth_universe_comparison.csv', index=False)
+df.to_csv('data/breadth_universe_comparison.csv', index=False)
 print("\nSaved: breadth_universe_comparison.csv")

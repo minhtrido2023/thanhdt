@@ -23,7 +23,7 @@ import numpy as np
 import pandas as pd
 
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
-CACHE = os.path.join(WORKDIR, "intraday_full.pkl")
+CACHE = os.path.join(WORKDIR, "data/intraday_full.pkl")
 
 TOP30 = ["VIC","VHM","HPG","SHB","SSI","FPT","VIX","STB","MWG","MSN",
          "VCB","BSR","MBB","VPB","TCB","HDB","HCM","CTG","NVL","BID",
@@ -42,7 +42,7 @@ SEGMENT_MAP = {**{t:"TOP30" for t in TOP30},
 def main():
     print("Loading intraday + daily...")
     with open(CACHE,"rb") as f: intraday = pickle.load(f)
-    daily = pd.read_csv(os.path.join(WORKDIR,"daily_forward_full.csv"))
+    daily = pd.read_csv(os.path.join(WORKDIR,"data/daily_forward_full.csv"))
     daily["time"] = pd.to_datetime(daily["time"]).dt.date
     daily["Close"] = daily["Close"]/1000.0
     daily = daily.sort_values(["ticker","time"]).reset_index(drop=True)
@@ -142,7 +142,7 @@ def main():
                         })
 
     df_res = pd.DataFrame(all_rows)
-    df_res.to_csv(os.path.join(WORKDIR,"layer3_sell_anticipate.csv"), index=False)
+    df_res.to_csv(os.path.join(WORKDIR,"data/layer3_sell_anticipate.csv"), index=False)
     print(f"\nTotal sell-event rows: {len(df_res)}")
 
     print("\n" + "="*100)

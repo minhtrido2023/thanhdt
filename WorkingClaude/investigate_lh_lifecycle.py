@@ -24,8 +24,8 @@ import pandas as pd, numpy as np
 TICKERS = ["VCS", "DGC", "VNM", "FPT", "MWG"]
 
 # Load ratings + prices
-ratings = pd.read_csv("fa_ratings_lh.csv", parse_dates=["time"])
-prices = pd.read_csv("prices_lh.csv", parse_dates=["time"])
+ratings = pd.read_csv("data/fa_ratings_lh.csv", parse_dates=["time"])
+prices = pd.read_csv("data/prices_lh.csv", parse_dates=["time"])
 
 for tk in TICKERS:
     print(f"\n{'='*100}")

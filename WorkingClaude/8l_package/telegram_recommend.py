@@ -29,7 +29,7 @@ WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
 sys.path.insert(0, WORKDIR)
 # Note: recommend_holistic.py wraps sys.stdout at import time; rely on that.
 
-CONFIG_PATH = os.path.join(WORKDIR, "telegram_config.json")
+CONFIG_PATH = os.path.join(WORKDIR, "secrets/telegram_config.json")
 TG_MAX_MSG = 4000   # Telegram limit is 4096; leave margin
 
 

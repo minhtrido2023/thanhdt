@@ -28,7 +28,7 @@ sys.path.insert(0, WORKDIR)
 
 from simulate_holistic_nav import simulate, metrics, bq, VNI_QUERY, START_DATE, END_DATE
 
-CACHE_FILE = "test_state_p3_cache.pkl"
+CACHE_FILE = "data/test_state_p3_cache.pkl"
 TIER_BAL = ["MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","DEEP_VALUE_RECOVERY"]
 OOS_START = pd.Timestamp("2024-01-01")
 
@@ -216,5 +216,5 @@ for plabel, st, en in periods:
               f"{m['calmar']:>8.2f}{ntr:>8d}{delta}")
 
 # Save NAVs
-pd.DataFrame({k: v[0] for k, v in results.items()}).to_csv("ba_v4_adaptive_overheat.csv")
+pd.DataFrame({k: v[0] for k, v in results.items()}).to_csv("data/ba_v4_adaptive_overheat.csv")
 print("\nSaved ba_v4_adaptive_overheat.csv")

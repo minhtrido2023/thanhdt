@@ -48,8 +48,8 @@ FLAT = 0.10
 
 SIG_PKL = os.path.join(WORKDIR, "kelly_q3_out", "_signals_v11_12y.pkl")
 ALT_PKL = os.path.join(WORKDIR, "kelly_q3_out", "_alt_hybrid.pkl")
-TIER_STATS_CSV = os.path.join(WORKDIR, "kelly_q3_tier_stats.csv")
-TRADES_CSV = os.path.join(WORKDIR, "ba_trades_v11_tier_labels.csv")
+TIER_STATS_CSV = os.path.join(WORKDIR, "data/kelly_q3_tier_stats.csv")
+TRADES_CSV = os.path.join(WORKDIR, "data/ba_trades_v11_tier_labels.csv")
 
 PERIODS = [
     ("FULL 2014-2026",  "2014-01-02", "2026-04-03"),
@@ -127,7 +127,7 @@ for _, r in stats.iterrows():
                       "delta_pp": (w - FLAT) * 100,
                       "note": note})
 disp = pd.DataFrame(disp_rows).sort_values("kelly_continuous", ascending=False).reset_index(drop=True)
-disp.to_csv(os.path.join(WORKDIR, "kelly_q3_v2_tier_weights.csv"), index=False)
+disp.to_csv(os.path.join(WORKDIR, "data/kelly_q3_v2_tier_weights.csv"), index=False)
 print(disp.to_string(index=False, float_format=lambda x: f"{x:.3f}"))
 print(f"\n  Verify divergence:")
 for k, v in proposed.items():

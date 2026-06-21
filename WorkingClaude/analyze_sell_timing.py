@@ -59,7 +59,7 @@ def bq_query(sql, max_rows=200000):
 
 # ── LOAD PROFILE HIT ─────────────────────────────────────────────────────────
 print("Loading profile_hit.csv...")
-df = pd.read_csv("profile_hit.csv")
+df = pd.read_csv("data/profile_hit.csv")
 df["time"] = pd.to_datetime(df["time"])
 df["Sell_time"] = pd.to_datetime(df["Sell_time"])
 df["year"] = df["time"].dt.year

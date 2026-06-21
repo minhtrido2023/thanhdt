@@ -37,13 +37,13 @@ ALLOC_NEW = {2: 0.50, 3: 0.85, 4: 1.00, 5: 1.20}
 # LOAD DATA
 # ══════════════════════════════════════════════════════════════════════
 print("Loading data...")
-vni = pd.read_csv(os.path.join(WORKDIR,"VNINDEX.csv"), low_memory=False)
+vni = pd.read_csv(os.path.join(WORKDIR,"data/VNINDEX.csv"), low_memory=False)
 vni["time"] = pd.to_datetime(vni["time"])
 vni = vni.sort_values("time").reset_index(drop=True)
 for col in ["Close","D_RSI","D_MACDdiff","D_CMF","VNINDEX_PE"]:
     if col in vni.columns: vni[col]=pd.to_numeric(vni[col],errors="coerce")
 
-breadth_path = os.path.join(WORKDIR,"breadth_data.csv")
+breadth_path = os.path.join(WORKDIR,"data/breadth_data.csv")
 if os.path.exists(breadth_path):
     b=pd.read_csv(breadth_path); b["time"]=pd.to_datetime(b["time"])
     b["breadth"]=pd.to_numeric(b["breadth"],errors="coerce")

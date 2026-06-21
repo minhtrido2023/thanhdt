@@ -59,12 +59,12 @@ print("[1] VNINDEX price + MA200/RSI (BQ); v3.4b base (2000+ CSV); US; SBV...")
 px = bq("""SELECT p.time, p.Close, p.MA200, p.D_RSI FROM tav2_bq.ticker AS p
 WHERE p.ticker='VNINDEX' ORDER BY p.time""")
 px["time"] = pd.to_datetime(px["time"]); px = px.dropna(subset=["Close"]).sort_values("time").reset_index(drop=True)
-base = pd.read_csv("vnindex_5state_tam_quan_v3_4b_full_history.csv")
+base = pd.read_csv("data/vnindex_5state_tam_quan_v3_4b_full_history.csv")
 base["time"] = pd.to_datetime(base["time"])
 px = px.merge(base[["time", "state"]].rename(columns={"state": "base_state"}), on="time", how="inner")
 px = px.dropna(subset=["base_state"]).reset_index(drop=True); px["base_state"] = px["base_state"].astype(int)
 
-us = pd.read_csv("us_market_history.csv", parse_dates=["time"]).sort_values("time")
+us = pd.read_csv("data/us_market_history.csv", parse_dates=["time"]).sort_values("time")
 key = px[["time"]].copy(); key["jt"] = key["time"] - pd.Timedelta(days=1)
 um = pd.merge_asof(key.sort_values("jt"), us.rename(columns={"time": "us_time"}),
                    left_on="jt", right_on="us_time", direction="backward").sort_values("time").reset_index(drop=True)

@@ -8,8 +8,8 @@ WORKDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(WORKDIR, "data")
 PLAN_DIR = os.path.join(DATA_DIR, "trade_plans")
 EXEC_DIR = os.path.join(DATA_DIR, "execution_logs")
-CONFIG_FILE = os.path.join(DATA_DIR, "trading_bot_config.json")
-ACCOUNTS_FILE = os.path.join(DATA_DIR, "trading_bot_accounts.json")
+CONFIG_FILE = os.path.join(os.path.dirname(DATA_DIR), "secrets", "trading_bot_config.json")
+ACCOUNTS_FILE = os.path.join(os.path.dirname(DATA_DIR), "secrets", "trading_bot_accounts.json")
 STOP_FILE = os.path.join(DATA_DIR, "BOT_STOP")          # tạo file này → bot dừng + hủy lệnh treo
 
 DEFAULTS = {

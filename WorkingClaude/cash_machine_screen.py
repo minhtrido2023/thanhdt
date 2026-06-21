@@ -34,7 +34,7 @@ def bq(sql):
     return pd.read_csv(StringIO(r.stdout.strip()))
 
 # quality universe + always include VCS/DGC for validation
-fa=pd.read_csv(os.path.join(WORKDIR,"fa_ratings_lh.csv")).sort_values(["ticker","quarter"])
+fa=pd.read_csv(os.path.join(WORKDIR,"data/fa_ratings_lh.csv")).sort_values(["ticker","quarter"])
 fa["is_ab"]=fa["tier"].isin(["A","B"]).astype(int); fa["qn"]=fa.groupby("ticker").cumcount()+1
 fa["pct_AB"]=fa.groupby("ticker")["is_ab"].cumsum()/fa["qn"]*100
 last=fa.groupby("ticker").tail(1)

@@ -220,7 +220,7 @@ m_show["vni_ratio"] = m_show["vni_ratio"].round(3)
 m_show = m_show.sort_values("entry_date")
 print(m_show.to_string(index=False))
 
-m.to_csv("diagnose_2026_trades.csv", index=False)
+m.to_csv("data/diagnose_2026_trades.csv", index=False)
 print(f"\nSaved diagnose_2026_trades.csv")
 
 # Recovery rally check: when did state5 shift from BEAR/CRISIS to NEUTRAL+

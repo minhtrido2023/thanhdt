@@ -72,7 +72,7 @@ tp_df = pd.DataFrame(trade_pairs)
 print(f"Trade pairs: {len(tp_df)} (closed: {(tp_df['status']=='CLOSED').sum()}, open: {(tp_df['status']=='OPEN').sum()})")
 
 # For open trades, mark-to-market with latest price
-prices = pd.read_csv("prices_lh.csv", parse_dates=["time"])
+prices = pd.read_csv("data/prices_lh.csv", parse_dates=["time"])
 latest_px = prices.sort_values("time").groupby("ticker")["Close"].last()
 for i, row in tp_df.iterrows():
     if row["status"] == "OPEN":
@@ -138,7 +138,7 @@ for _, r in long_hold.iterrows():
 print("\n" + "="*120)
 print("  FA SCORE QUALITY CONSISTENCY — tickers in A tier most quarters")
 print("="*120)
-fa = pd.read_csv("fa_ratings_lh.csv")
+fa = pd.read_csv("data/fa_ratings_lh.csv")
 fa_a = fa[fa["tier"]=="A"].groupby("ticker").size().sort_values(ascending=False)
 fa_ab = fa[fa["tier"].isin(["A","B"])].groupby("ticker").size().sort_values(ascending=False)
 total_q = fa.groupby("ticker").size()
@@ -157,8 +157,8 @@ for tk, r in quality_df.head(25).iterrows():
     print(f"  {tk:<7}{int(r['n_A_quarters']):>13}{int(r['n_AB_quarters']):>11}{int(r['n_total_quarters']):>13}{r['pct_A']:>7.1f}%")
 
 # Save outputs
-tp_df.to_csv("lh_v1_trade_pairs.csv", index=False)
-ticker_summary.to_csv("lh_v1_ticker_summary.csv")
-quality_df.to_csv("lh_v1_quality_consistency.csv")
+tp_df.to_csv("data/lh_v1_trade_pairs.csv", index=False)
+ticker_summary.to_csv("data/lh_v1_ticker_summary.csv")
+quality_df.to_csv("data/lh_v1_quality_consistency.csv")
 print("\nSaved: lh_v1_trade_pairs.csv, lh_v1_ticker_summary.csv, lh_v1_quality_consistency.csv")
 print("DONE")

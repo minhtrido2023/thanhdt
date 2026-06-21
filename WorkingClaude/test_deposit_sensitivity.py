@@ -181,10 +181,10 @@ for cash_y in [0.0, 0.005, 0.01, 0.03, 0.05, 0.08, 0.115]:
     print(f"  {label:<15} {est*100:>+9.2f}%")
 
 # ─── Save ──────────────────────────────────────────────────────────────────
-df_rate.to_csv(os.path.join(WORKDIR, "deposit_sensitivity.csv"), index=False)
-pd.DataFrame(state_stats).to_csv(os.path.join(WORKDIR, "deployment_per_state.csv"), index=False)
-yearly.to_csv(os.path.join(WORKDIR, "deployment_yearly.csv"))
-nav_baseline.to_csv(os.path.join(WORKDIR, "nav_with_deployment.csv"), index=False)
+df_rate.to_csv(os.path.join(WORKDIR, "data/deposit_sensitivity.csv"), index=False)
+pd.DataFrame(state_stats).to_csv(os.path.join(WORKDIR, "data/deployment_per_state.csv"), index=False)
+yearly.to_csv(os.path.join(WORKDIR, "data/deployment_yearly.csv"))
+nav_baseline.to_csv(os.path.join(WORKDIR, "data/nav_with_deployment.csv"), index=False)
 
 print(f"\n  Saved:")
 print(f"    deposit_sensitivity.csv")

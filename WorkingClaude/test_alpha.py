@@ -9,13 +9,13 @@ DEPOSIT_R=0.06/252; BORROW_R=0.10/252
 TARGET_W={1:0.00,2:0.20,3:0.70,4:1.00,5:1.30}
 SPY = 243.4  # sessions/year
 
-vni = pd.read_csv(os.path.join(WORKDIR,"VNINDEX.csv"), low_memory=False)
+vni = pd.read_csv(os.path.join(WORKDIR,"data/VNINDEX.csv"), low_memory=False)
 vni["time"] = pd.to_datetime(vni["time"])
 vni = vni.sort_values("time").reset_index(drop=True)
 for col in ["Open","High","Low","Close","Volume","VNINDEX_PE"]:
     if col in vni.columns:
         vni[col] = pd.to_numeric(vni[col], errors="coerce")
-breadth = pd.read_csv(os.path.join(WORKDIR,"breadth_data.csv"))
+breadth = pd.read_csv(os.path.join(WORKDIR,"data/breadth_data.csv"))
 breadth["time"] = pd.to_datetime(breadth["time"])
 vni = vni.merge(breadth, on="time", how="left")
 

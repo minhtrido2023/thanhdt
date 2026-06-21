@@ -17,7 +17,7 @@ BUY_TIERS={"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY","MOMEN
            "MOMENTUM_S_N","COMPOUNDER_BUY","DEEP_VALUE_RECOVERY","S_PRO","RE_BACKLOG_BUY"}
 MAX_POS=12; POSITION_VND=1.25e9; FILL_CAP=0.20; T1_TOP_ADV=50e9
 print("[load] pkl signal + processing (prod-spec style)...")
-sig_B=pickle.load(open("ba_v11_unified_12y_sig.pkl","rb")); sig_B["time"]=pd.to_datetime(sig_B["time"])
+sig_B=pickle.load(open("data/ba_v11_unified_12y_sig.pkl","rb")); sig_B["time"]=pd.to_datetime(sig_B["time"])
 sig_B=sig_B[(sig_B["time"]>=START_B)&(sig_B["time"]<=END_B)].copy()
 with open("sim_v11_for_analyzer.py","r",encoding="utf-8") as f: _c=f.read()
 VQU=re.search(r'^VNI_QUERY_UNIFIED\s*=\s*"""(.+?)"""',_c,re.MULTILINE|re.DOTALL).group(1)
@@ -34,7 +34,7 @@ WHERE t.time BETWEEN DATE '{START_B}' AND DATE '{END_B}' AND t.ticker IN (SELECT
 opens_df["time"]=pd.to_datetime(opens_df["time"]); open_prices={tk:dict(zip(g["time"],g["open_price"])) for tk,g in opens_df.groupby("ticker")}
 vni_full=bq(f"SELECT t.time,t.Close,t.MA200,t.D_RSI FROM tav2_bq.ticker AS t WHERE t.ticker='VNINDEX' AND t.time BETWEEN DATE '{START_B}' AND DATE '{END_B}' ORDER BY t.time")
 vni_full["time"]=pd.to_datetime(vni_full["time"])
-sdf=pd.read_csv("vnindex_5state_tam_quan_v3_4b_full_history.csv"); sdf["time"]=pd.to_datetime(sdf["time"])
+sdf=pd.read_csv("data/vnindex_5state_tam_quan_v3_4b_full_history.csv"); sdf["time"]=pd.to_datetime(sdf["time"])
 sdf=sdf[(sdf["time"]>=START_B)&(sdf["time"]<=END_B)][["time","state"]]
 sbd=dict(zip(sdf["time"],sdf["state"])); state_ff={}; last=None
 for d in vni_dates_B:
@@ -72,7 +72,7 @@ sec_map=bq("SELECT DISTINCT t.ticker,CAST(FLOOR(t.ICB_Code/1000) AS INT64) AS s 
 LIQ={"liquidity_volume_pct":0.20,"max_fill_days":5,"liquidity_lookup":liq_map_B,"exit_slippage_tiered":True}
 # HYBRID alt prices (pt style)
 print("[load] HYBRID alt-fill...")
-intr=pickle.load(open("intraday_full.pkl","rb")); adv_by={}; pa,va,pt1,vt1={},{},{},{}
+intr=pickle.load(open("data/intraday_full.pkl","rb")); adv_by={}; pa,va,pt1,vt1={},{},{},{}
 for tk,bars in intr.items():
     if bars is None or bars.empty: continue
     b=bars.copy(); b["time"]=pd.to_datetime(b["time"]); b["d"]=b["time"].dt.normalize()

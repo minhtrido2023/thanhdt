@@ -27,13 +27,13 @@ MIN_DEAL_DATE  = "2015-01-01"
 
 # ─── Load data ───────────────────────────────────────────────────────────────
 print("Loading profile_hit.csv ...")
-hits = pd.read_csv(f"{WORKDIR}/profile_hit.csv", parse_dates=["time"])
+hits = pd.read_csv(f"{WORKDIR}/data/profile_hit.csv", parse_dates=["time"])
 hits = hits[hits["time"] >= MIN_DEAL_DATE].copy()
 print(f"  {len(hits):,} deals from {MIN_DEAL_DATE} onward")
 print(f"  {hits['ticker'].nunique()} unique tickers | {hits['filter'].nunique()} strategies")
 
 print("Loading fundamental_rating_all.csv ...")
-rat = pd.read_csv(f"{WORKDIR}/fundamental_rating_all.csv", parse_dates=["time"])
+rat = pd.read_csv(f"{WORKDIR}/data/fundamental_rating_all.csv", parse_dates=["time"])
 rat = rat.sort_values(["ticker", "time"]).reset_index(drop=True)
 print(f"  {len(rat):,} (ticker, quarter) ratings | {rat['ticker'].nunique()} tickers")
 print(f"  Quarters: {rat['quarter'].nunique()} | Date range: {rat['time'].min().date()} -> {rat['time'].max().date()}")
@@ -251,4 +251,4 @@ else:
     print("  mismatch (short-term technical deals may not depend on 8-quarter fundamentals).")
 
 print(f"\nOutput: rank_profile_hits_results.csv")
-recent_top.to_csv(f"{WORKDIR}/rank_profile_hits_results.csv", index=False)
+recent_top.to_csv(f"{WORKDIR}/data/rank_profile_hits_results.csv", index=False)

@@ -84,7 +84,7 @@ def fmt(v, kind="float", baseline=None, metric=None):
 
 # ---- Build series ----
 print("Loading BA NAV ...")
-ba_traces = pd.read_csv("f_ba_mix_nav_traces.csv", parse_dates=["time"]).sort_values("time").set_index("time")
+ba_traces = pd.read_csv("data/f_ba_mix_nav_traces.csv", parse_dates=["time"]).sort_values("time").set_index("time")
 ba_nav = ba_traces["BA_50_50"]
 
 print("Running LH_gated ...")
@@ -93,7 +93,7 @@ lh_gated = run_lh(hold_quarters=4, n_positions=10, tier_set=("A","B"), incl_sub=
 lh_g_nav = lh_gated["nav"]["nav"]
 
 print("Loading VNINDEX ...")
-vn_df = pd.read_csv("vnindex_lh.csv", parse_dates=["time"])
+vn_df = pd.read_csv("data/vnindex_lh.csv", parse_dates=["time"])
 vn_df = vn_df[vn_df["Close"] > 100].sort_values("time").set_index("time")["Close"]
 
 # Common range
@@ -212,7 +212,7 @@ for r in qwf_rows:
     elif r["window"] == "Trailing 1Y":
         log_row.update({"trail1Y_CAGR":r["CAGR"], "trail1Y_Sharpe":r["Sharpe"]})
 log_df = pd.DataFrame([log_row])
-log_file = "qwf_hybrid_tracking_log.csv"
+log_file = "data/qwf_hybrid_tracking_log.csv"
 import os
 if os.path.exists(log_file):
     log_df.to_csv(log_file, mode="a", header=False, index=False)

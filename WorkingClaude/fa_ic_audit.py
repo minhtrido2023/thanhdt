@@ -67,7 +67,7 @@ def main():
         print(s); lines.append(s)
 
     # ── Load FA scores ────────────────────────────────────────────────────
-    df = pd.read_csv(os.path.join(WORKDIR, "fundamental_rating_all.csv"))
+    df = pd.read_csv(os.path.join(WORKDIR, "data/fundamental_rating_all.csv"))
     df["time"] = pd.to_datetime(df["time"])
     df = df.sort_values("time").reset_index(drop=True)
 

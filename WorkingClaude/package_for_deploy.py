@@ -20,7 +20,7 @@ TIER1_RUNTIME = [
     "simulate_holistic_nav.py",
     "signal_v10_sql.py",
     "requirements.txt",
-    "fundamental_rating_all.csv",
+    "data/fundamental_rating_all.csv",
 ]
 
 TIER2_CONFIG = [

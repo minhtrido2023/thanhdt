@@ -108,7 +108,7 @@ vni_csv = subprocess.run(['bq','query','--use_legacy_sql=false','--project_id=li
                          capture_output=True,text=True,shell=True).stdout
 vni = pd.read_csv(io.StringIO(vni_csv), parse_dates=['time']).set_index('time')
 vni.columns = ['VNI']
-state = pd.read_csv('_state.csv', parse_dates=['time']).set_index('time')
+state = pd.read_csv('data/_state.csv', parse_dates=['time']).set_index('time')
 
 df = vni.join(mac, how='left').join(state, how='left')
 df['state'] = df['state'].ffill()
@@ -213,6 +213,6 @@ for _, r in rec[rec['horizon']==60].nlargest(20, 'abs_ic').iterrows():
     print(f"{f:22s} {l:>4d} {raw_ic:+8.3f} {pic:+20.3f}")
 
 # Save
-df.to_csv('tier2_macro_panel.csv')
-rec.to_csv('tier2_macro_ic.csv', index=False)
+df.to_csv('data/tier2_macro_panel.csv')
+rec.to_csv('data/tier2_macro_ic.csv', index=False)
 print("\nSaved: tier2_macro_panel.csv, tier2_macro_ic.csv")

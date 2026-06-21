@@ -199,5 +199,5 @@ for label, max_days in [
         print(f"    STOP hits (earnings entries): {stops} ({stops/len(es_trades)*100:.1f}%)")
 
 # Save
-df_res.to_csv(os.path.join(WORKDIR, "fresh_q_filter_results.csv"), index=False)
+df_res.to_csv(os.path.join(WORKDIR, "data/fresh_q_filter_results.csv"), index=False)
 print(f"\n  Saved: fresh_q_filter_results.csv")

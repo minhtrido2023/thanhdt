@@ -19,7 +19,7 @@ from layer3_backfill_simulation import (PLAY_RULE, STOP_PCT, S2_DAYCHG_THR, S2_B
                                           prep_session, match_pairs)
 
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
-CACHE = os.path.join(WORKDIR, "intraday_full.pkl")
+CACHE = os.path.join(WORKDIR, "data/intraday_full.pkl")
 
 def check_stop_variants(day_bars, stop_lvl):
     """Return dict variant -> hit_price or None."""
@@ -97,7 +97,7 @@ def run_variant(intraday, pairs, variant):
 
 def main():
     print("Loading...")
-    j = pd.read_csv(os.path.join(WORKDIR, "journal_v6_extended_events.csv"))
+    j = pd.read_csv(os.path.join(WORKDIR, "data/journal_v6_extended_events.csv"))
     j["date"] = pd.to_datetime(j["date"])
     with open(CACHE,"rb") as f: intraday = pickle.load(f)
     pairs = match_pairs(j)
@@ -115,7 +115,7 @@ def main():
         print(f"  mean lift: {df['lift_pp'].mean():+.3f}pp  sum: {df['lift_pp'].sum():+.2f}pp  hit_rate: {(df['lift_pp']>0).mean()*100:.1f}%")
 
     combined = pd.concat(all_rows, ignore_index=True)
-    combined.to_csv(os.path.join(WORKDIR,"layer3_stop_variants.csv"), index=False)
+    combined.to_csv(os.path.join(WORKDIR,"data/layer3_stop_variants.csv"), index=False)
 
     print("\n" + "="*100)
     print("VARIANT COMPARISON")

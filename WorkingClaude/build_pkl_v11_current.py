@@ -11,7 +11,7 @@ WORKDIR=r"/home/trido/thanhdt/WorkingClaude"; os.chdir(WORKDIR); sys.path.insert
 from simulate_holistic_nav import bq
 from signal_v11_sql import SIGNAL_V11
 
-PKL="ba_v11_unified_12y_sig.pkl"; START="2014-01-01"; END="2026-05-26"
+PKL="data/ba_v11_unified_12y_sig.pkl"; START="2014-01-01"; END="2026-05-26"
 TIER_BAL={'MEGA','MOMENTUM','MOMENTUM_N','MOMENTUM_S','DEEP_VALUE_RECOVERY','RE_BACKLOG_BUY'}
 
 # 1. backup

@@ -47,7 +47,7 @@ def main():
     lines=[]; P=lambda s="":(print(s),lines.append(s))
 
     # ── load data ─────────────────────────────────────────────────────────
-    fa=pd.read_csv(os.path.join(WORKDIR,"fa_ratings_lh.csv"),parse_dates=["time","Release_Date"])
+    fa=pd.read_csv(os.path.join(WORKDIR,"data/fa_ratings_lh.csv"),parse_dates=["time","Release_Date"])
     fa=fa.sort_values(["ticker","quarter"]).reset_index(drop=True)
     fa["eff_release"]=fa["Release_Date"].fillna(fa["time"]+pd.Timedelta(days=60))
     # rolling pct_AB (>=12Q history) per ticker
@@ -57,7 +57,7 @@ def main():
     fa["pct_AB"]=fa["cum_ab"]/fa["qnum"]*100
     fa["valid_hist"]=fa["qnum"]>=12
 
-    panel=pickle.load(open(os.path.join(WORKDIR,"qt_panel_2014_2026.pkl"),"rb"))
+    panel=pickle.load(open(os.path.join(WORKDIR,"data/qt_panel_2014_2026.pkl"),"rb"))
     panel["time"]=pd.to_datetime(panel["time"])
     panel=panel.sort_values(["ticker","time"]).reset_index(drop=True)
     panel["hi52"]=panel.groupby("ticker")["Close"].transform(lambda x:x.rolling(252,min_periods=60).max())
@@ -67,7 +67,7 @@ def main():
     panel["vs200"]=(panel["Close"]/panel["MA200"]-1)*100
     panel["liqv"]=panel["Volume_3M_P50"]*panel["Close"]
 
-    fin=pickle.load(open(os.path.join(WORKDIR,"qt_v4_fin.pkl"),"rb"))
+    fin=pickle.load(open(os.path.join(WORKDIR,"data/qt_v4_fin.pkl"),"rb"))
     fin["eff_release"]=pd.to_datetime(fin["Release_Date"]).fillna(pd.to_datetime(fin["q_time"])+pd.Timedelta(days=60))
     fin=fin.sort_values(["ticker","eff_release"])
     fin["prev_NP_R"]=fin.groupby("ticker")["NP_R"].shift(1)

@@ -77,7 +77,7 @@ def size_of(state, grind):
 # ── data ────────────────────────────────────────────────────────────────────
 print("[1] Loading data...")
 panel = pd.read_csv(os.path.join(W,"data",PANEL_FILE), parse_dates=["time"])  # hole-free: no per-day liq/PE row filter (gating belongs at signal level)
-sig_b = pickle.load(open(os.path.join(W,"ba_v11_unified_12y_sig.pkl"),"rb"))
+sig_b = pickle.load(open(os.path.join(W,"data/ba_v11_unified_12y_sig.pkl"),"rb"))
 sig_b["time"] = pd.to_datetime(sig_b["time"])
 sig_b = sig_b[sig_b["time"] >= panel["time"].min()].copy()
 
@@ -90,7 +90,7 @@ for d in vni_dates:
     if d in state_by_date: last_st = state_by_date[d]
     elif last_st is not None: state_by_date[d] = last_st
 
-vnx = pd.read_csv(os.path.join(W,"VNINDEX.csv"), usecols=["time","Close","MA200","D_RSI"], parse_dates=["time"])
+vnx = pd.read_csv(os.path.join(W,"data/VNINDEX.csv"), usecols=["time","Close","MA200","D_RSI"], parse_dates=["time"])
 vnx = vnx[vnx["time"] >= panel["time"].min()]
 etf = pd.read_csv(os.path.join(W,"data","e1vfvn30_daily.csv"), parse_dates=["time"])
 vn30_und = pd.Series(etf["Close"].values, index=etf["time"])

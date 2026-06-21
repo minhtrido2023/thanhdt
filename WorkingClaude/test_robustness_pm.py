@@ -127,5 +127,5 @@ for _, r in pm_rows.iterrows():
           f"ΔDD={r['max_dd_pct']-base_pm['max_dd_pct']:+5.1f}pp  "
           f"ΔCalmar={r['calmar']-base_pm['calmar']:+.2f}")
 
-df.to_csv(os.path.join(WORKDIR, "robustness_pm_results.csv"), index=False)
+df.to_csv(os.path.join(WORKDIR, "data/robustness_pm_results.csv"), index=False)
 print("\n  Saved: robustness_pm_results.csv")

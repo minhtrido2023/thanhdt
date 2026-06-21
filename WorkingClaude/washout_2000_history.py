@@ -10,7 +10,7 @@ try: sys.stdout.reconfigure(encoding="utf-8")
 except Exception: pass
 import numpy as np, pandas as pd
 W=r"/home/trido/thanhdt/WorkingClaude"
-v=pd.read_csv(os.path.join(W,"VNINDEX.csv"),parse_dates=["time"]).sort_values("time").reset_index(drop=True)
+v=pd.read_csv(os.path.join(W,"data/VNINDEX.csv"),parse_dates=["time"]).sort_values("time").reset_index(drop=True)
 v=v[["time","Close","Breadth_MA20","VNINDEX_RSI"]].copy()
 C=v["Close"].values; N=len(v)
 DECL=20; FWD=60; GRIND_MAX=90

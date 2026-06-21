@@ -101,7 +101,7 @@ vni_csv = subprocess.run(['bq','query','--use_legacy_sql=false','--project_id=li
                          capture_output=True,text=True,shell=True).stdout
 vni = pd.read_csv(io.StringIO(vni_csv), parse_dates=['time']).set_index('time')
 vni.columns = ['VNI']
-state = pd.read_csv('_state.csv', parse_dates=['time']).set_index('time')
+state = pd.read_csv('data/_state.csv', parse_dates=['time']).set_index('time')
 
 # Get DXY
 dxy = yf.Ticker('DX-Y.NYB').history(start='2010-01-01', end='2026-05-20', auto_adjust=False)
@@ -230,5 +230,5 @@ ic_v2_oos = spearman(df_oos2['macro_v2'], df_oos2['fwd60'])
 print(f"\nmacro_v2 fwd60: IS={ic_v2_is:+.3f}, OOS={ic_v2_oos:+.3f}")
 
 # Save
-df.to_csv('tier2b_sbv_panel.csv', index=False)
+df.to_csv('data/tier2b_sbv_panel.csv', index=False)
 print("\nSaved: tier2b_sbv_panel.csv")

@@ -214,4 +214,4 @@ out = pd.DataFrame({
 }).set_index("time")
 out["vni_norm"] = _vni.set_index("time")["Close"].reindex(out.index, method="ffill")
 out["vni_norm"] = out["vni_norm"] / out["vni_norm"].iloc[0]
-out.to_csv("system_current_nav.csv")
+out.to_csv("data/system_current_nav.csv")

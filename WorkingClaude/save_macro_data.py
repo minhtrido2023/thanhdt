@@ -30,7 +30,7 @@ try:
     df_fx = df_fx.reset_index()[["Date","Close"]].rename(columns={"Date":"time","Close":"usdvnd"})
     df_fx["time"] = pd.to_datetime(df_fx["time"]).dt.normalize()
     df_fx = df_fx.dropna().sort_values("time").reset_index(drop=True)
-    path_fx = os.path.join(WORKDIR, "macro_usdvnd.csv")
+    path_fx = os.path.join(WORKDIR, "data/macro_usdvnd.csv")
     df_fx.to_csv(path_fx, index=False)
     print(f"   Saved {len(df_fx)} rows: {df_fx['time'].iloc[0].date()} to {df_fx['time'].iloc[-1].date()}")
     print(f"   Range: {df_fx['usdvnd'].min():.0f} - {df_fx['usdvnd'].max():.0f} VND/USD")
@@ -85,7 +85,7 @@ def classify_macro(row):
     return "neutral"
 
 df_macro["macro_regime"] = df_macro.apply(classify_macro, axis=1)
-path_macro = os.path.join(WORKDIR, "macro_annual.csv")
+path_macro = os.path.join(WORKDIR, "data/macro_annual.csv")
 df_macro.to_csv(path_macro, index=False)
 print(f"   Saved macro_annual.csv ({len(df_macro)} rows)")
 print(df_macro[["year","lending_rate","cpi_yoy","usdvnd_annual","usdvnd_chg","macro_regime"]].tail(12).to_string(index=False))
@@ -111,7 +111,7 @@ if "df_fx" in dir() and len(df_fx) > 0:
     # 3-month rolling change
     df_daily["usdvnd_3m_chg"] = df_daily["usdvnd"].pct_change(63) * 100
 
-path_daily = os.path.join(WORKDIR, "macro_daily.csv")
+path_daily = os.path.join(WORKDIR, "data/macro_daily.csv")
 df_daily[["time","lending_rate","cpi_yoy","usdvnd","usdvnd_1y_chg","usdvnd_3m_chg","macro_regime"]].to_csv(
     path_daily, index=False)
 print(f"   Saved macro_daily.csv ({len(df_daily)} rows)")

@@ -135,7 +135,7 @@ def fetch_intraday_bulk(tickers, start="2025-08-12", end="2026-05-12"):
 
 def build_track_a(intraday_data):
     """For each BUY event in journal, compute features on the event date's session."""
-    j = pd.read_csv(os.path.join(WORKDIR, "journal_v6_extended_events.csv"))
+    j = pd.read_csv(os.path.join(WORKDIR, "data/journal_v6_extended_events.csv"))
     j = j[j["action"]=="BUY"].copy()
     j["date"] = pd.to_datetime(j["date"])
     j = j[j["date"]>=pd.Timestamp("2025-08-12")].copy()
@@ -170,7 +170,7 @@ def build_track_b(intraday_data):
 
 def main():
     # tickers we need: top30 + unique BUY tickers
-    j = pd.read_csv(os.path.join(WORKDIR, "journal_v6_extended_events.csv"))
+    j = pd.read_csv(os.path.join(WORKDIR, "data/journal_v6_extended_events.csv"))
     j = j[j["action"]=="BUY"]; j["date"]=pd.to_datetime(j["date"])
     buy_tickers = j[j["date"]>=pd.Timestamp("2025-08-12")]["ticker"].unique().tolist()
     all_tickers = sorted(set(TOP30) | set(buy_tickers))
@@ -181,7 +181,7 @@ def main():
     # Track A
     print("Building Track A (actual BA-system BUYs)...")
     a = build_track_a(intraday)
-    a.to_csv(os.path.join(WORKDIR, "layer3_backtest_eventsA.csv"), index=False)
+    a.to_csv(os.path.join(WORKDIR, "data/layer3_backtest_eventsA.csv"), index=False)
     print(f"  Track A: {len(a)} events  -> layer3_backtest_eventsA.csv")
     if len(a):
         print(f"  Verdicts: {a['verdict'].value_counts().to_dict()}")
@@ -189,7 +189,7 @@ def main():
     # Track B
     print("\nBuilding Track B (top30 x all sessions)...")
     b = build_track_b({tk: intraday[tk] for tk in TOP30 if tk in intraday})
-    b.to_csv(os.path.join(WORKDIR, "layer3_backtest_eventsB.csv"), index=False)
+    b.to_csv(os.path.join(WORKDIR, "data/layer3_backtest_eventsB.csv"), index=False)
     print(f"  Track B: {len(b)} events  -> layer3_backtest_eventsB.csv")
     if len(b):
         print(f"  Verdicts: {b['verdict'].value_counts().to_dict()}")

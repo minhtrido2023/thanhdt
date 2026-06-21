@@ -34,7 +34,7 @@ def bq_query(sql):
 
 # ─── 1. Quality universe (same as v2) ────────────────────────────────────
 print("[1] Building quality universe (relaxed) ...", flush=True)
-fa = pd.read_csv("fa_ratings_lh.csv", parse_dates=["time","Release_Date"])
+fa = pd.read_csv("data/fa_ratings_lh.csv", parse_dates=["time","Release_Date"])
 fa = fa.sort_values(["ticker","quarter"]).reset_index(drop=True)
 quality_at_q = {}
 for tk, g in fa.groupby("ticker"):
@@ -52,7 +52,7 @@ print(f"  Quality lookup: {len(quality_at_q):,} entries")
 
 # ─── 2. Load panel + compute features ────────────────────────────────────
 print("\n[2] Loading panel + computing features ...", flush=True)
-with open("qt_panel_2014_2026.pkl", "rb") as f:
+with open("data/qt_panel_2014_2026.pkl", "rb") as f:
     panel = pickle.load(f)
 panel = panel.sort_values(["ticker","time"]).reset_index(drop=True)
 panel["hi_52w"] = panel.groupby("ticker")["Close"].transform(
@@ -68,7 +68,7 @@ print(f"  Loaded {len(panel):,} rows")
 
 # ─── 3. 5-state + bull_age tracking ──────────────────────────────────────
 print("\n[3] Loading 5-state + computing bull_age ...", flush=True)
-state = pd.read_csv("vnindex_5state.csv", parse_dates=["time"]).sort_values("time").reset_index(drop=True)
+state = pd.read_csv("data/vnindex_5state.csv", parse_dates=["time"]).sort_values("time").reset_index(drop=True)
 state["state_prev"] = state["state"].shift(1)
 
 # Bull_age: consecutive days in state >= 4
@@ -498,6 +498,6 @@ if len(trades_df) > 0:
     for phase, g in exits.groupby("entry_phase"):
         print(f"    {phase:<14}: N={len(g):3d}, avg_ret={g['ret_pct'].mean():+6.1f}%, WR={(g['ret_pct']>0).mean()*100:.1f}%")
 
-nav_df.to_csv("qt_v3_nav.csv")
-trades_df.to_csv("qt_v3_trades.csv", index=False)
+nav_df.to_csv("data/qt_v3_nav.csv")
+trades_df.to_csv("data/qt_v3_trades.csv", index=False)
 print("\nSaved: qt_v3_nav.csv, qt_v3_trades.csv")

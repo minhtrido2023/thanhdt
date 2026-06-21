@@ -200,7 +200,7 @@ for axis in WEIGHTS:
     rho, t_stat, p = spearman_corr(sub[f"score_{axis}"], sub["profit_3M"])
     print(f"    {axis:<13}  IC={rho:+.4f}  t={t_stat:+.2f}  p={p:.4f}  current_weight={WEIGHTS[axis]:.2f}")
 
-ic_df.to_csv("fa_ic_results.csv", index=False)
+ic_df.to_csv("data/fa_ic_results.csv", index=False)
 print("\n  Saved fa_ic_results.csv")
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -258,7 +258,7 @@ for name, cond_fn in candidates:
     print(f"{name:<45}{len(sub):>5}{med:>+8.2f}%{mean:>+8.2f}%{wr:>7.1f}{d_wr:>+7.1f}{d_med:>+7.2f}{marker}")
     elite_results.append({"condition": name, "N": len(sub), "median": med, "mean": mean, "WR": wr})
 
-pd.DataFrame(elite_results).to_csv("fa_elite_a_subsegments.csv", index=False)
+pd.DataFrame(elite_results).to_csv("data/fa_elite_a_subsegments.csv", index=False)
 print(f"\n  Reference: A tier baseline WR={wr_A:.1f}%, median={med_A:.2f}%")
 print("  Saved fa_elite_a_subsegments.csv")
 
@@ -362,7 +362,7 @@ for name, sub in variants:
     print(f"{name:<48}{r['N']:>6}{r['median']:>+9.2f}%{r['mean']:>+9.2f}%{r['WR']:>+8.1f}%{marker}")
     rows.append(r)
 
-pd.DataFrame(rows).to_csv("fa_persistence_results.csv", index=False)
+pd.DataFrame(rows).to_csv("data/fa_persistence_results.csv", index=False)
 print("\n  Saved fa_persistence_results.csv")
 
 # Persistent tier ordering (compare to baseline tier)

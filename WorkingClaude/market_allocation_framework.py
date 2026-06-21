@@ -446,7 +446,7 @@ print("=" * 70)
 print("LOAD VNINDEX.csv va tinh Market Score toan lich su")
 print("=" * 70)
 
-vni = pd.read_csv(os.path.join(WORKDIR, "VNINDEX.csv"), low_memory=False)
+vni = pd.read_csv(os.path.join(WORKDIR, "data/VNINDEX.csv"), low_memory=False)
 vni["time"] = pd.to_datetime(vni["time"])
 vni = vni.sort_values("time").reset_index(drop=True)
 vni = vni[vni["time"] >= "2016-01-01"].copy()  # Chi tu 2016 khi co VNINDEX_PE
@@ -754,6 +754,6 @@ print("""
 """)
 
 # Save
-score_df.to_csv(os.path.join(WORKDIR, "market_score_history.csv"), index=False)
+score_df.to_csv(os.path.join(WORKDIR, "data/market_score_history.csv"), index=False)
 print(f"Saved: market_score_history.csv ({len(score_df):,} rows)")
 print("\nDone!")

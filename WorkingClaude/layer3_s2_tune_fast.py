@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
-CACHE = os.path.join(WORKDIR, "intraday_full.pkl")
+CACHE = os.path.join(WORKDIR, "data/intraday_full.pkl")
 
 TOP30 = ["VIC","VHM","HPG","SHB","SSI","FPT","VIX","STB","MWG","MSN",
          "VCB","BSR","MBB","VPB","TCB","HDB","HCM","CTG","NVL","BID",
@@ -47,7 +47,7 @@ def main():
     print(f"  Total bars: {len(bars)}")
 
     # forward returns for each (ticker, session_date)
-    daily = pd.read_csv(os.path.join(WORKDIR,"daily_forward_full.csv"))
+    daily = pd.read_csv(os.path.join(WORKDIR,"data/daily_forward_full.csv"))
     daily["time"] = pd.to_datetime(daily["time"]).dt.date
     daily["Close"] = daily["Close"]/1000.0
     daily = daily.sort_values(["ticker","time"]).reset_index(drop=True)
@@ -107,7 +107,7 @@ def main():
         print(f"  d_thr={dthr:>3} b_win={bwin} b_min={bmin}: n_fire={n_fire:>5} FP={row['FP_rate']:>5.1f}% lift_ALL={row.get('ALL_lift',np.nan):+.3f}pp  lift_TOP30={row.get('TOP30_lift',np.nan):+.3f}pp")
 
     df = pd.DataFrame(results)
-    df.to_csv(os.path.join(WORKDIR,"layer3_s2_grid.csv"), index=False)
+    df.to_csv(os.path.join(WORKDIR,"data/layer3_s2_grid.csv"), index=False)
 
     print("\n" + "="*110)
     print("TOP 10 by TOP30 lift T+45 (n_fire >= 50)")

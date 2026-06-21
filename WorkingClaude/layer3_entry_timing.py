@@ -31,7 +31,7 @@ sys.path.insert(0, r"/home/trido/thanhdt/WorkingClaude/stockquery")
 from stockquery_agent import StockQuery
 
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
-CACHE = os.path.join(WORKDIR, "intraday_top30.pkl")
+CACHE = os.path.join(WORKDIR, "data/intraday_top30.pkl")
 
 TOP30 = ["VIC","VHM","HPG","SHB","SSI","FPT","VIX","STB","MWG","MSN",
          "VCB","BSR","MBB","VPB","TCB","HDB","HCM","CTG","NVL","BID",
@@ -136,7 +136,7 @@ def build_entry_panel(intraday):
     return pd.DataFrame(rows)
 
 def add_forward_closes(panel):
-    daily = pd.read_csv(os.path.join(WORKDIR, "daily_forward.csv"))
+    daily = pd.read_csv(os.path.join(WORKDIR, "data/daily_forward.csv"))
     daily["time"] = pd.to_datetime(daily["time"]).dt.date
     daily = daily.sort_values(["ticker","time"]).reset_index(drop=True)
     # BigQuery daily Close is in raw VND; vnstock 15m close is in thousand VND.
@@ -231,7 +231,7 @@ def main():
     panel = build_entry_panel(intraday)
     print(f"Built panel: {len(panel)} (ticker, session) entries")
     panel = add_forward_closes(panel)
-    panel.to_csv(os.path.join(WORKDIR, "layer3_entry_panel.csv"), index=False)
+    panel.to_csv(os.path.join(WORKDIR, "data/layer3_entry_panel.csv"), index=False)
     analyze(panel)
 
 if __name__=="__main__":

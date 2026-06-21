@@ -35,7 +35,7 @@ WORKDIR = os.path.dirname(os.path.abspath(__file__)) if "__file__" in dir() else
 
 # Pre-2014: VNINDEX.csv chứa ngày giao dịch thực (bao gồm 3 ngày/tuần pre-2007)
 vni_raw = pd.read_csv(
-    os.path.join(WORKDIR, "VNINDEX.csv"),
+    os.path.join(WORKDIR, "data/VNINDEX.csv"),
     usecols=["time", "Close", "VNINDEX_RSI", "VNINDEX_CMF", "VNINDEX_MACDdiff"],
     low_memory=False
 )
@@ -47,7 +47,7 @@ for col in ["VNINDEX_RSI", "VNINDEX_CMF", "VNINDEX_MACDdiff"]:
 print(f"Pre-2014 (VNINDEX.csv): {len(df_pre14)} sessions  ({df_pre14['time'].min().date()} → {df_pre14['time'].max().date()})")
 
 # 2014-2026: BQ data
-df_bq = pd.read_csv(os.path.join(WORKDIR, "vnindex_data.csv"))
+df_bq = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_data.csv"))
 df_bq["time"] = pd.to_datetime(df_bq["time"])
 print(f"Post-2014 (BQ data)  : {len(df_bq)} sessions  ({df_bq['time'].min().date()} → {df_bq['time'].max().date()})")
 

@@ -369,7 +369,7 @@ results.append(t6_out)
 # ─── 7. Consolidated summary ────────────────────────────────────────────────
 print("\n" + "="*70); print("CONSOLIDATED SUMMARY"); print("="*70)
 all_df = pd.concat(results, ignore_index=True)
-all_df.to_csv("fa_ext_results.csv", index=False)
+all_df.to_csv("data/fa_ext_results.csv", index=False)
 print("Saved fa_ext_results.csv")
 # Pivot for quick comparison
 piv = all_df.pivot_table(index="tier", columns="variant", values="median").reindex(["A","B","C","D","E"])

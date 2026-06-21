@@ -24,9 +24,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from .config import DATA_DIR, EXEC_DIR
 from .vn_market import normalize_price_vnd
 
-PAPER_STATE_FILE = os.path.join(DATA_DIR, "bot_paper_account.json")  # legacy (label main)
-DEFAULT_CREDENTIALS = os.path.join(DATA_DIR, "phs_credentials.json")
-DEFAULT_DNSE_CREDENTIALS = os.path.join(DATA_DIR, "dnse_credentials.json")
+PAPER_STATE_FILE = os.path.join(os.path.dirname(DATA_DIR), "secrets", "bot_paper_account.json")  # legacy (label main)
+DEFAULT_CREDENTIALS = os.path.join(os.path.dirname(DATA_DIR), "secrets", "phs_credentials.json")
+DEFAULT_DNSE_CREDENTIALS = os.path.join(os.path.dirname(DATA_DIR), "secrets", "dnse_credentials.json")
 
 # Pool FlexClient theo credentials file: nhiều tiểu khoản chung 1 login dùng chung
 # client + token (login lại nhiều lần có thể vô hiệu token cũ của nhau).
@@ -214,7 +214,7 @@ class PHSBroker(BrokerBase):
             return self
         if not self.client.access_token:
             raise RuntimeError(f"PHS login thất bại ({self.label}) — kiểm tra "
-                               f"{self.credentials_file or 'data/phs_credentials.json'}")
+                               f"{self.credentials_file or 'secrets/phs_credentials.json'}")
         if self.account_id is None:
             accs = self.client.sub_accounts()
             self._log_raw("sub_accounts", accs)

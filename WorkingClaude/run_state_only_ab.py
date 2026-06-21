@@ -28,13 +28,13 @@ SNAP_TOL = 0.03  # if |Δw|<3% snap immediately
 SPY = 252.0
 
 # Load VNI from clean cache (Downloads CSV converted earlier)
-vni = pd.read_pickle(os.path.join(WORKDIR, "_cache_vnindex_2000_now.pkl"))
+vni = pd.read_pickle(os.path.join(WORKDIR, "data/_cache_vnindex_2000_now.pkl"))
 vni["time"] = pd.to_datetime(vni["time"])
 vni = vni.sort_values("time").reset_index(drop=True)
 vni = vni[vni["time"] >= "2014-01-01"].copy().reset_index(drop=True)
 
 # Load 2 state series
-state_tq = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_4b_full_history.csv"))
+state_tq = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_4b_full_history.csv"))
 state_tq["time"] = pd.to_datetime(state_tq["time"])
 
 state_tt = bq("""SELECT s.time, s.state FROM `lithe-record-440915-m9.tav2_bq.vnindex_5state_archive_tinh_te_20260525_220329` AS s

@@ -65,15 +65,15 @@ print(f"\n  LH final NAV: {lh_nav_w.iloc[-1]/1e9:.3f}B ({(lh_nav_w.iloc[-1]/LH_N
 # refresh_ba_with_trades.py captures actual trades from a full continuous sim. For a fresh start
 # at 2025-06-01, BA would also start empty and quickly fill up. The earliest entries in our log
 # after START are 2025-06-04+. We'll filter to entries on/after START.
-ba_bal = pd.read_csv("ba_trades_bal_refresh.csv", parse_dates=["entry_date","exit_date"])
-ba_vn30 = pd.read_csv("ba_trades_vn30_refresh.csv", parse_dates=["entry_date","exit_date"])
+ba_bal = pd.read_csv("data/ba_trades_bal_refresh.csv", parse_dates=["entry_date","exit_date"])
+ba_vn30 = pd.read_csv("data/ba_trades_vn30_refresh.csv", parse_dates=["entry_date","exit_date"])
 
 # Only include trades with entry IN window (= fresh-start assumption: no inherited positions)
 ba_bal_fresh = ba_bal[(ba_bal["entry_date"] >= START) & (ba_bal["entry_date"] <= END)].copy()
 ba_vn30_fresh = ba_vn30[(ba_vn30["entry_date"] >= START) & (ba_vn30["entry_date"] <= END)].copy()
 
 # P3 overheated filter (none active in this window per prior check)
-vn = pd.read_csv("vnindex_lh.csv", parse_dates=["time"])
+vn = pd.read_csv("data/vnindex_lh.csv", parse_dates=["time"])
 vn = vn[vn["Close"] > 100].sort_values("time").reset_index(drop=True)
 vn["MA200"] = vn["Close"].rolling(200, min_periods=200).mean()
 overheated = set(vn[vn["Close"] / vn["MA200"] > 1.30]["time"])

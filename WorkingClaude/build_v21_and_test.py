@@ -22,7 +22,7 @@ print("="*80)
 print("  STEP 1: Build v2.1 = v2 + US circuit breaker + SBV circuit breaker")
 print("="*80)
 
-v2 = pd.read_csv("vnindex_5state_history.csv"); v2["time"] = pd.to_datetime(v2["time"])
+v2 = pd.read_csv("data/vnindex_5state_history.csv"); v2["time"] = pd.to_datetime(v2["time"])
 us = pd.read_csv("deploy_v3_4b_package/us_market_history.csv"); us["time"] = pd.to_datetime(us["time"])
 with open("sbv_refi_events.json") as f: sbv_raw = json.load(f)
 
@@ -94,7 +94,7 @@ v2["state_v21"] = s_21
 # Save v2.1
 out_v21 = v2[["time","state_v21"]].rename(columns={"state_v21":"state"})
 out_v21["time"] = out_v21["time"].dt.strftime("%Y-%m-%d")
-out_v21.to_csv("vnindex_5state_v21.csv", index=False)
+out_v21.to_csv("data/vnindex_5state_v21.csv", index=False)
 print(f"  Saved: vnindex_5state_v21.csv ({len(out_v21)} rows)")
 
 # Segment stats helper
@@ -109,7 +109,7 @@ def seg_stats(arr):
             "le5": sum(1 for x in segs if x <= 5),
             "le7": sum(1 for x in segs if x <= 7)}
 
-v34b = pd.read_csv("vnindex_5state_tam_quan_v3_4b_full_history.csv")
+v34b = pd.read_csv("data/vnindex_5state_tam_quan_v3_4b_full_history.csv")
 v34b["time"] = pd.to_datetime(v34b["time"])
 
 # Filter to same period
@@ -151,7 +151,7 @@ BUY_TIERS = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
 MAX_POS = 12; SWITCH_COST = 0.005
 
 print("\n[1] Loading signals + prices...")
-with open("ba_v11_unified_12y_sig.pkl","rb") as f: sig_B = pickle.load(f)
+with open("data/ba_v11_unified_12y_sig.pkl","rb") as f: sig_B = pickle.load(f)
 sig_B["time"] = pd.to_datetime(sig_B["time"])
 sig_B = sig_B[(sig_B["time"]>=START_B) & (sig_B["time"]<=END_B)].copy()
 with open("sim_v11_for_analyzer.py","r",encoding="utf-8") as f: _c = f.read()
@@ -182,7 +182,7 @@ def make_state_ff(df_state, dates):
     return ff
 
 # TQ34b
-state_tq_df = pd.read_csv("vnindex_5state_tam_quan_v3_4b_full_history.csv")
+state_tq_df = pd.read_csv("data/vnindex_5state_tam_quan_v3_4b_full_history.csv")
 state_tq_df["time"] = pd.to_datetime(state_tq_df["time"])
 state_tq_df = state_tq_df[(state_tq_df["time"]>=START_B)&(state_tq_df["time"]<=END_B)]
 state_ff_tq = make_state_ff(state_tq_df, vni_dates)
@@ -194,7 +194,7 @@ state_live_df["time"] = pd.to_datetime(state_live_df["time"])
 state_ff_live = make_state_ff(state_live_df, vni_dates)
 
 # v2.1 (local)
-v21_df = pd.read_csv("vnindex_5state_v21.csv"); v21_df["time"] = pd.to_datetime(v21_df["time"])
+v21_df = pd.read_csv("data/vnindex_5state_v21.csv"); v21_df["time"] = pd.to_datetime(v21_df["time"])
 v21_df = v21_df[(v21_df["time"]>=START_B)&(v21_df["time"]<=END_B)]
 state_ff_v21 = make_state_ff(v21_df, vni_dates)
 
@@ -318,18 +318,18 @@ vn_v21_b  = run_vn30(sig_v21,state_ff_v21, {3:0.7}, "VN30_v21_base")
 vn_v21_k  = run_vn30(sig_v21,state_ff_v21, {3:1.0}, "VN30_v21_kelly")
 
 print("\n[6] LAGGED v121...")
-with open("earnings_px.pkl","rb") as f: px_data = pickle.load(f)
+with open("data/earnings_px.pkl","rb") as f: px_data = pickle.load(f)
 px_data["time"] = pd.to_datetime(px_data["time"])
 px_close = px_data.pivot_table(index="time",columns="ticker",values="Close",aggfunc="first").sort_index().ffill(limit=5)
 midx = pd.DatetimeIndex(px_close.index).as_unit("ns"); px_close.index = midx; all_dt = np.array(midx)
-with open("lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f); ov["time"] = pd.to_datetime(ov["time"])
+with open("data/lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f); ov["time"] = pd.to_datetime(ov["time"])
 px_open = ov.pivot_table(index="time",columns="ticker",values="Open",aggfunc="first").sort_index().reindex(midx).ffill(limit=5)
 liq_l = ov.pivot_table(index="time",columns="ticker",values="Volume_3M_P50",aggfunc="first").sort_index().reindex(midx).ffill(limit=5)
-with open("earnings_surprise_data.pkl","rb") as f: fin = pickle.load(f)
+with open("data/earnings_surprise_data.pkl","rb") as f: fin = pickle.load(f)
 fin["Release_Date"] = pd.to_datetime(fin["Release_Date"])
 fin["exp_B_MA"] = fin[["NP_P1","NP_P2","NP_P3","NP_P4"]].mean(axis=1)
 fin["surprise_B_MA"] = ((fin["NP_P0"]-fin["exp_B_MA"])/np.maximum(np.abs(fin["exp_B_MA"]),1e9)).clip(-5,5)
-ev = pd.read_csv("earnings_events_classified.csv",parse_dates=["Release_Date"])
+ev = pd.read_csv("data/earnings_events_classified.csv",parse_dates=["Release_Date"])
 ev = ev.merge(fin[["ticker","quarter","Release_Date","surprise_B_MA"]],on=["ticker","quarter","Release_Date"],how="left")
 ev = ev.sort_values(["ticker","Release_Date"]).reset_index(drop=True); ev["surprise_B_MA"] = ev["surprise_B_MA"].fillna(0)
 LN2 = np.log(2); HL = 3.0; ev["prior_n_good"]=0; ev["pa_HL3"]=np.nan
@@ -385,7 +385,7 @@ def run_lag(init_nav,sw=pd.Timestamp(START_B),ew=pd.Timestamp(END_B)):
 nav_lag = run_lag(BOOK_NAV); print(f"    LAG v121: {nav_lag.iloc[-1]/1e9:.3f}B")
 
 print("\n[7] M1+M3r ensemble...")
-cached = pd.read_csv("compare_v11_v12_concentration_switch.csv",index_col=0,parse_dates=True)
+cached = pd.read_csv("data/compare_v11_v12_concentration_switch.csv",index_col=0,parse_dates=True)
 sig_m1 = cached["sig_m1"].dropna().astype(int)
 m3r_q = """WITH base AS (SELECT t.time, t.ticker,
   SAFE_DIVIDE(t.Close,LAG(t.Close,126) OVER (PARTITION BY t.ticker ORDER BY t.time))-1 AS ret_6m,

@@ -23,9 +23,9 @@ WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
 print("="*70); print("US-VN Linkage Analysis"); print("="*70)
 
 # Load
-us = pd.read_csv(os.path.join(WORKDIR, "us_market_history.csv"))
+us = pd.read_csv(os.path.join(WORKDIR, "data/us_market_history.csv"))
 us["time"] = pd.to_datetime(us["time"])
-vni = pd.read_pickle(os.path.join(WORKDIR, "_cache_vnindex_2000_now.pkl"))
+vni = pd.read_pickle(os.path.join(WORKDIR, "data/_cache_vnindex_2000_now.pkl"))
 vni["time"] = pd.to_datetime(vni["time"])
 
 print(f"\n[1] Data: US {len(us)} rows | VN {len(vni)} rows")
@@ -149,7 +149,7 @@ for y in sorted(vn_join["year"].dropna().unique()):
     print(f"  {int(y):<6} {n_lvl1:>8d} {n_lvl2:>8d} {n_lvl3:>8d} {n_simple:>18d}")
 
 # Save artifact
-out_path = os.path.join(WORKDIR, "us_shock_signal_analysis.csv")
+out_path = os.path.join(WORKDIR, "data/us_shock_signal_analysis.csv")
 vn_join[["time","vni_close","spx_close","vix","spx_ret_20d","spx_ret_60d","spx_dd_1y",
          "spx_ma200_dev","vix_ma252","vni_dd_1y",
          "lvl1_cap_NEUTRAL","lvl2_cap_BEAR","lvl3_cap_CRISIS","us_shock_bear_cap"]].to_csv(out_path, index=False)

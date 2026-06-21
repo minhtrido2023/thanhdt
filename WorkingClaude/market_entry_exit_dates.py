@@ -12,7 +12,7 @@ from datetime import timedelta
 import warnings
 warnings.filterwarnings('ignore')
 
-CSV_PATH = r"/home/trido/thanhdt/WorkingClaude/VNINDEX.csv"
+CSV_PATH = r"/home/trido/thanhdt/WorkingClaude/data/VNINDEX.csv"
 
 NEEDED = ['time','Close','MA200','D_RSI','D_CMF','D_MACDdiff','VNINDEX_PE','Change_3M','Change_1M']
 df = pd.read_csv(CSV_PATH, usecols=lambda c: c in NEEDED, low_memory=False)
@@ -402,7 +402,7 @@ for idx, (ed, ep, xd, xp, h, r, st) in enumerate(pairs_c, 1):
                  'exit_date': xd, 'exit_vnindex': xp, 'hold_days': h, 'return_pct': r, 'status': st})
 
 pd.DataFrame(rows).to_csv(
-    r"/home/trido/thanhdt/WorkingClaude/market_entry_exit_list.csv",
+    r"/home/trido/thanhdt/WorkingClaude/data/market_entry_exit_list.csv",
     index=False, encoding='utf-8-sig'
 )
 print("\nDa luu ra market_entry_exit_list.csv")

@@ -43,8 +43,8 @@ EW_START    = pd.Timestamp("2014-01-01")
 ALPHAS      = [0.30, 0.40, 0.50, 0.60, 0.70]  # raw weight (1-α = EW weight)
 STATE_NAMES = {1:"CRISIS", 2:"BEAR", 3:"NEUTRAL", 4:"BULL", 5:"EX-BULL"}
 
-CACHE_VNI    = os.path.join(WORKDIR, "_cache_vnindex_2000_now.pkl")
-EW_FULL_CSV  = os.path.join(WORKDIR, "vnindex_5state_ew_full.csv")
+CACHE_VNI    = os.path.join(WORKDIR, "data/_cache_vnindex_2000_now.pkl")
+EW_FULL_CSV  = os.path.join(WORKDIR, "data/vnindex_5state_ew_full.csv")
 
 print("=" * 70)
 print("Dual-system 5-state — α-sweep build")

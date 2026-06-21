@@ -34,9 +34,9 @@ import numpy as np, pandas as pd
 
 PROJECT = "lithe-record-440915-m9"
 BQ_BIN  = r"bq"
-OUT_CSV    = "fundamental_rating.csv"
-OUT_ALL    = "fundamental_rating_all.csv"
-OUT_LATEST = "fundamental_rating_latest.csv"
+OUT_CSV    = "data/fundamental_rating.csv"
+OUT_ALL    = "data/fundamental_rating_all.csv"
+OUT_LATEST = "data/fundamental_rating_latest.csv"
 
 WEIGHTS = {
     "quality":     0.18,

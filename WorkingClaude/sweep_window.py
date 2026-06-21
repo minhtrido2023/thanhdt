@@ -32,7 +32,7 @@ STATE_NAMES = {1: "CRISIS", 2: "BEAR", 3: "NEUTRAL", 4: "BULL", 5: "EX-BULL"}
 
 # ── LOAD DATA ─────────────────────────────────────────────────────────
 print("Loading VNINDEX.csv ...")
-vni = pd.read_csv(os.path.join(WORKDIR, "VNINDEX.csv"), low_memory=False)
+vni = pd.read_csv(os.path.join(WORKDIR, "data/VNINDEX.csv"), low_memory=False)
 vni["time"] = pd.to_datetime(vni["time"])
 vni = vni.sort_values("time").reset_index(drop=True)
 
@@ -45,7 +45,7 @@ for col in ["Open", "High", "Low", "Close", "Volume", "VNINDEX_PE"]:
         vni[col] = pd.to_numeric(vni[col], errors="coerce")
 
 # Breadth (optional)
-breadth_path = os.path.join(WORKDIR, "breadth_data.csv")
+breadth_path = os.path.join(WORKDIR, "data/breadth_data.csv")
 if os.path.exists(breadth_path):
     breadth = pd.read_csv(breadth_path)
     breadth["time"] = pd.to_datetime(breadth["time"])

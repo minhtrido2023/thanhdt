@@ -47,7 +47,7 @@ print(f"  BA V11 + LAGGED FACTOR — 12y test on PRODUCTION baseline (19.42%)")
 print("="*100)
 
 # ─── 1. Load v11 signals (from cache) ────────────────────────────────────
-sig_cache = "ba_v11_unified_12y_sig.pkl"
+sig_cache = "data/ba_v11_unified_12y_sig.pkl"
 with open(sig_cache, "rb") as f: sig = pickle.load(f)
 print(f"[1] Loaded V11 signals: {len(sig):,} rows")
 
@@ -71,7 +71,7 @@ print(f"  Blocked {mask.sum():,} signals via P3")
 
 # ─── 3. Build rolling LAGGED profile + merge ─────────────────────────────
 print("\n[3] Building rolling LAGGED profile (no lookahead) ...")
-ev = pd.read_csv("earnings_events_classified.csv", parse_dates=["Release_Date"])
+ev = pd.read_csv("data/earnings_events_classified.csv", parse_dates=["Release_Date"])
 ev = ev.sort_values(["ticker","Release_Date"]).reset_index(drop=True)
 ev["prior_n_good"] = 0; ev["prior_avg_post_good"] = np.nan
 for tk, g in ev.groupby("ticker"):
@@ -226,5 +226,5 @@ for label, st, en in periods:
     print()
 
 combo = pd.DataFrame({v: results[v] for v in ["BASELINE","BONUS","BLACK","BOTH"]})
-combo.to_csv("ba_v11_production_lagged_nav.csv")
+combo.to_csv("data/ba_v11_production_lagged_nav.csv")
 print("Saved: ba_v11_production_lagged_nav.csv")

@@ -22,18 +22,18 @@ TC, TAX, BORROW, INIT, RF = 0.001, 0.001, 0.10, 1_000_000_000, 0.0
 DEPOSIT = 0.0   # tiền gửi không kỳ hạn = 0%/yr (user spec)
 
 # ── full-history data (local) ──
-STATE_CSV = os.environ.get("STATE_CSV", "vnindex_5state_tam_quan_v3_4b_full_history.csv")
+STATE_CSV = os.environ.get("STATE_CSV", "data/vnindex_5state_tam_quan_v3_4b_full_history.csv")
 print(f"[state] {STATE_CSV}")
 sf = pd.read_csv(STATE_CSV); sf["time"] = pd.to_datetime(sf["time"])
 sf = sf.sort_values("time").reset_index(drop=True); sf["state_dt"] = _dt_4gate(sf["state"].values.astype(int))
-vx = pd.read_csv("VNINDEX.csv"); vx["time"] = pd.to_datetime(vx["time"]); vx = vx.sort_values("time").reset_index(drop=True)
+vx = pd.read_csv("data/VNINDEX.csv"); vx["time"] = pd.to_datetime(vx["time"]); vx = vx.sort_values("time").reset_index(drop=True)
 vx["MA200"] = vx["Close"].rolling(200, min_periods=50).mean()
 d = vx["Close"].diff(); up = d.clip(lower=0); dn = (-d).clip(lower=0)
 rs = up.ewm(alpha=1/14, adjust=False).mean() / dn.ewm(alpha=1/14, adjust=False).mean().replace(0, np.nan)
 vx["D_RSI"] = (100 - 100/(1+rs)) / 100.0
 df = vx[["time","Close","MA200","D_RSI"]].merge(sf[["time","state_dt"]], on="time", how="inner").sort_values("time").reset_index(drop=True)
 df["state_dt"] = df["state_dt"].astype(int)
-us = pd.read_csv("us_market_history.csv", parse_dates=["time"]).sort_values("time")
+us = pd.read_csv("data/us_market_history.csv", parse_dates=["time"]).sort_values("time")
 key = df[["time"]].copy(); key["jt"] = key["time"] - pd.Timedelta(days=1)
 um = pd.merge_asof(key.sort_values("jt"), us.rename(columns={"time":"us_time"}), left_on="jt", right_on="us_time", direction="backward").sort_values("time").reset_index(drop=True)
 df = df.merge(um[["time","vix","spx_dd_1y","vix_ma252"]], on="time", how="left")

@@ -27,12 +27,12 @@ STATE_NAMES = {1:"CRISIS",2:"BEAR",3:"NEUTRAL",4:"BULL",5:"EX-BULL"}
 print("="*70); print("v3.1-clean = v3 STAGING + US override overlay"); print("="*70)
 
 # Load v3 staging
-v3 = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_dual_v3_staging.csv"))
+v3 = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_dual_v3_staging.csv"))
 v3["time"] = pd.to_datetime(v3["time"])
 v3 = v3.sort_values("time").reset_index(drop=True)
 print(f"  v3 staging: {len(v3)} rows | {v3['time'].iloc[0].date()} → {v3['time'].iloc[-1].date()}")
 
-us = pd.read_csv(os.path.join(WORKDIR, "us_market_history.csv"))
+us = pd.read_csv(os.path.join(WORKDIR, "data/us_market_history.csv"))
 us["time"] = pd.to_datetime(us["time"])
 
 # Align US (most recent US ≤ VN-1)
@@ -93,7 +93,7 @@ out = pd.DataFrame({
     "state": v3["state_v3_1_clean"].astype(int),
     "state_raw": v3["state_raw"].astype(int),
 })
-out.to_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_1_clean.csv"), index=False)
+out.to_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_1_clean.csv"), index=False)
 
 # Compare distributions
 print(f"\nState distribution comparison:")

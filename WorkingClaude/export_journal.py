@@ -186,9 +186,9 @@ for _, t in last_trades.iterrows():
     })
 
 # ─── Save outputs ────────────────────────────────────────────────────────────
-events_path = os.path.join(WORKDIR, "journal_events.csv")
-nav_path = os.path.join(WORKDIR, "journal_nav_daily.csv")
-open_path = os.path.join(WORKDIR, "journal_open_positions.csv")
+events_path = os.path.join(WORKDIR, "data/journal_events.csv")
+nav_path = os.path.join(WORKDIR, "data/journal_nav_daily.csv")
+open_path = os.path.join(WORKDIR, "data/journal_open_positions.csv")
 events_df.to_csv(events_path, index=False)
 nav_daily.to_csv(nav_path, index=False)
 pd.DataFrame(open_positions).to_csv(open_path, index=False)

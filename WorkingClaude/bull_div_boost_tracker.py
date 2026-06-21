@@ -27,7 +27,7 @@ from pathlib import Path
 import pandas as pd
 
 WORKDIR = Path(__file__).parent
-TRACKER_PATH = WORKDIR / 'bull_div_boost_tracker.csv'
+TRACKER_PATH = WORKDIR / 'data/bull_div_boost_tracker.csv'
 REPORT_PATH = WORKDIR / 'bull_div_boost_report.txt'
 DEPLOY_DATE = date(2026, 5, 19)
 REPORT_DATE = date(2027, 5, 19)  # 12 months after deploy

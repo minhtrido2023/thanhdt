@@ -27,7 +27,7 @@ warnings.filterwarnings('ignore')
 # ─────────────────────────────────────────────
 # 1. LOAD DATA
 # ─────────────────────────────────────────────
-CSV_PATH = r"/home/trido/thanhdt/WorkingClaude/VNINDEX.csv"
+CSV_PATH = r"/home/trido/thanhdt/WorkingClaude/data/VNINDEX.csv"
 
 NEEDED_COLS = [
     'time', 'Close', 'MA200',
@@ -816,7 +816,7 @@ for sig, name in SYSTEMS:
 curves['VNINDEX_Close'] = df['Close'].values
 curves['state_5SM'] = states7
 curves.to_csv(
-    r"/home/trido/thanhdt/WorkingClaude/market_timing_equity_curves.csv",
+    r"/home/trido/thanhdt/WorkingClaude/data/market_timing_equity_curves.csv",
     index=False
 )
 print("\nEquity curves saved to market_timing_equity_curves.csv")

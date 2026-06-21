@@ -31,9 +31,9 @@ VGB_1Y = {2000:.075,2001:.07,2002:.075,2003:.08,2004:.085,2005:.085,2006:.08,200
           2024:.02,2025:.025,2026:.027}
 
 # ── full-history data (local) ──
-sf = pd.read_csv("vnindex_5state_tam_quan_v3_4b_full_history.csv"); sf["time"] = pd.to_datetime(sf["time"])
+sf = pd.read_csv("data/vnindex_5state_tam_quan_v3_4b_full_history.csv"); sf["time"] = pd.to_datetime(sf["time"])
 sf = sf.sort_values("time").reset_index(drop=True); sf["state_dt"] = _dt_4gate(sf["state"].values.astype(int))
-vx = pd.read_csv("VNINDEX.csv"); vx["time"] = pd.to_datetime(vx["time"]); vx = vx.sort_values("time").reset_index(drop=True)
+vx = pd.read_csv("data/VNINDEX.csv"); vx["time"] = pd.to_datetime(vx["time"]); vx = vx.sort_values("time").reset_index(drop=True)
 vx["MA200"] = vx["Close"].rolling(200, min_periods=50).mean()
 # Wilder RSI14 (for the up-trend NEUTRAL boost; applied identically to all arms)
 d = vx["Close"].diff(); up = d.clip(lower=0); dn = (-d).clip(lower=0)
@@ -41,7 +41,7 @@ rs = up.ewm(alpha=1/14, adjust=False).mean() / dn.ewm(alpha=1/14, adjust=False).
 vx["D_RSI"] = (100 - 100/(1+rs)) / 100.0
 df = vx[["time","Close","MA200","D_RSI"]].merge(sf[["time","state_dt"]], on="time", how="inner").sort_values("time").reset_index(drop=True)
 df["state_dt"] = df["state_dt"].astype(int)
-us = pd.read_csv("us_market_history.csv", parse_dates=["time"]).sort_values("time")
+us = pd.read_csv("data/us_market_history.csv", parse_dates=["time"]).sort_values("time")
 key = df[["time"]].copy(); key["jt"] = key["time"] - pd.Timedelta(days=1)
 um = pd.merge_asof(key.sort_values("jt"), us.rename(columns={"time":"us_time"}), left_on="jt", right_on="us_time", direction="backward").sort_values("time").reset_index(drop=True)
 df = df.merge(um[["time","vix","spx_dd_1y","vix_ma252"]], on="time", how="left")

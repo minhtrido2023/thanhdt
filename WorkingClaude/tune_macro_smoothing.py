@@ -38,7 +38,7 @@ JOIN tav2_bq.vnindex_5state_dt_4gate AS s ON s.time=p.time
 WHERE p.ticker='VNINDEX' ORDER BY p.time""")
 px["time"] = pd.to_datetime(px["time"]); px["state"] = px["state"].astype(int)
 px = px.dropna(subset=["Close", "state"]).reset_index(drop=True)
-us = pd.read_csv("us_market_history.csv", parse_dates=["time"]).sort_values("time")
+us = pd.read_csv("data/us_market_history.csv", parse_dates=["time"]).sort_values("time")
 key = px[["time"]].copy(); key["jt"] = key["time"] - pd.Timedelta(days=1)
 um = pd.merge_asof(key.sort_values("jt"), us.rename(columns={"time": "us_time"}),
                    left_on="jt", right_on="us_time", direction="backward").sort_values("time").reset_index(drop=True)

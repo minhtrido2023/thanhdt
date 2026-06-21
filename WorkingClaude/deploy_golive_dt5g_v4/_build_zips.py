@@ -24,7 +24,7 @@ ZIP1 = [  # DT5G state engine
 ]
 ZIP2 = [  # V4 + DT5G recommender (RETIRED 2026-06-12 — superseded by ZIP3; kept for reproducibility)
     "signal_v11_sql.py", "simulate_holistic_nav.py",
-    "compare_v11_v12_concentration_switch.csv", "earnings_events_classified.csv",
+    "data/compare_v11_v12_concentration_switch.csv", "data/earnings_events_classified.csv",
     "deploy_golive_dt5g_v4/golive_recommend.py", "deploy_golive_dt5g_v4/golive_daily.bat",
     "deploy_golive_dt5g_v4/requirements.txt",
     "deploy_golive_dt5g_v4/README.md",
@@ -39,12 +39,12 @@ ZIP3 = [  # V2.3 + DT5G recommender (replaces ZIP2 in production, 2026-06-12).
     "deploy_golive_dt5g_v4/README_zip3_v23.md",
     "deploy_golive_dt5g_v4/requirements.txt",
     "signal_v11_sql.py", "simulate_holistic_nav.py",
-    "earnings_events_classified.csv", "earnings_surprise_data.pkl",
+    "data/earnings_events_classified.csv", "data/earnings_surprise_data.pkl",
     # optional Telegram desk report (V2.3 layout) + its display dependencies
     "telegram_recommend.py", "telegram_config.template.json",
-    "recommend_holistic.py", "fundamental_rating_all.csv", "data/rating_8l.csv",
+    "recommend_holistic.py", "data/fundamental_rating_all.csv", "data/rating_8l.csv",
 ]
-BLOCK = {"telegram_config.json"}  # never ship secrets
+BLOCK = {"secrets/telegram_config.json"}  # never ship secrets
 
 def build(name, items):
     path = os.path.join(DIST, name)

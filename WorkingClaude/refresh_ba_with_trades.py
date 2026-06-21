@@ -63,10 +63,10 @@ nav_vn30, trades_vn30 = simulate(sig_vn30, prices_vn30, vni_dates,
 nav_vn30["time"] = pd.to_datetime(nav_vn30["time"])
 
 # Save trades + individual NAVs
-trades_bal.to_csv("ba_trades_bal_refresh.csv", index=False)
-trades_vn30.to_csv("ba_trades_vn30_refresh.csv", index=False)
-nav_bal.to_csv("ba_nav_bal_refresh.csv", index=False)
-nav_vn30.to_csv("ba_nav_vn30_refresh.csv", index=False)
+trades_bal.to_csv("data/ba_trades_bal_refresh.csv", index=False)
+trades_vn30.to_csv("data/ba_trades_vn30_refresh.csv", index=False)
+nav_bal.to_csv("data/ba_nav_bal_refresh.csv", index=False)
+nav_vn30.to_csv("data/ba_nav_vn30_refresh.csv", index=False)
 print(f"Saved: ba_trades_bal_refresh.csv ({len(trades_bal)} trades), ba_trades_vn30_refresh.csv ({len(trades_vn30)} trades)", flush=True)
 print(f"       ba_nav_bal_refresh.csv ({len(nav_bal)} days), ba_nav_vn30_refresh.csv ({len(nav_vn30)} days)", flush=True)
 print("DONE", flush=True)

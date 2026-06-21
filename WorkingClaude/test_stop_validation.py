@@ -246,6 +246,6 @@ for pname, _, _ in PERIODS:
           f"{s20['max_dd_pct']:>+9.1f}%  {s25['max_dd_pct']:>+9.1f}%")
 
 # ─── Save ───────────────────────────────────────────────────────────
-out_path = os.path.join(WORKDIR, "stop_validation_results.csv")
+out_path = os.path.join(WORKDIR, "data/stop_validation_results.csv")
 df.to_csv(out_path, index=False)
 print(f"\n  Saved: {out_path}")

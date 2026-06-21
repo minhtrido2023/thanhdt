@@ -158,7 +158,7 @@ for label, st, en in periods:
                  "v4_calmar": m4["calmar"], "v5_calmar": m5["calmar"],
                  "v4_wealth": m4["wealth_x"], "v5_wealth": m5["wealth_x"]})
 
-pd.DataFrame(rows).to_csv("ba_canonical_v4_v5_compare.csv", index=False)
+pd.DataFrame(rows).to_csv("data/ba_canonical_v4_v5_compare.csv", index=False)
 print("Saved ba_canonical_v4_v5_compare.csv")
 
 # Trade counts

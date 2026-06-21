@@ -231,6 +231,6 @@ for name, params in PM_TESTS:
           f"{m['max_dd_pct']:>6.1f}% {m['calmar']:>5.2f} "
           f"{m['n_trades']:>7d}")
 
-trades_ref.to_csv(os.path.join(WORKDIR, "round14_trades.csv"), index=False)
-pd.DataFrame(pm_results).to_csv(os.path.join(WORKDIR, "round14_pm.csv"), index=False)
+trades_ref.to_csv(os.path.join(WORKDIR, "data/round14_trades.csv"), index=False)
+pd.DataFrame(pm_results).to_csv(os.path.join(WORKDIR, "data/round14_pm.csv"), index=False)
 print("\n  Saved: round14_*.csv")

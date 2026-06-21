@@ -133,7 +133,7 @@ def get_compass():
             mom = "BLEED" if (m40 == m40 and m40 < -0.10) else ("HEAL" if (m40 == m40 and m40 > 0.10) else "FLAT")
             conc, conc_asof = None, ""
             try:
-                cs = pd.read_csv(os.path.join(W, "compare_v11_v12_concentration_switch.csv"),
+                cs = pd.read_csv(os.path.join(W, "data/compare_v11_v12_concentration_switch.csv"),
                                  usecols=["time", "sig_m1", "sig_m3"])
                 cur = int(cs["sig_m1"].iloc[0])
                 for a, bb in zip(cs["sig_m1"].astype(int), cs["sig_m3"].astype(int)):

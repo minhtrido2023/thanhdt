@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 
 PROJECT  = "lithe-record-440915-m9"
 BQ_BIN   = r"bq"
-MODEL_F  = "entry_quality_model.pkl"
+MODEL_F  = "data/entry_quality_model.pkl"
 
 DARK_BG="#0f1117"; PANEL_BG="#1a1d27"; GRID_CLR="#2a2d3a"; TEXT_CLR="#e0e0e0"
 BLUE="#4fa3e0"; GREEN="#4ecb71"; RED="#e05c5c"; YELLOW="#f0c060"
@@ -190,7 +190,7 @@ print(screen_C[avail_c].head(30).to_string(index=False))
 print(f"\n{'='*70}")
 print(f"ACTIVE HOLDS — Grade D (low quality, consider reviewing)")
 print(f"{'='*70}")
-hold = pd.read_csv("live_scored.csv")
+hold = pd.read_csv("data/live_scored.csv")
 grade_d = hold[hold["grade"]=="D"].sort_values("score")
 print(f"  {len(grade_d)} positions:\n")
 cols_d = ["filter","ticker","time","score","D_RSI","D_MACDdiff","ROE_Min3Y","pe_vs_hist","strat_tier"]
@@ -198,9 +198,9 @@ avail_d = [c for c in cols_d if c in grade_d.columns]
 print(grade_d[avail_d].to_string(index=False))
 
 # ── SAVE ─────────────────────────────────────────────────────────────────────
-df.sort_values("score", ascending=False).to_csv("universe_scored.csv", index=False)
-screen_A.to_csv("screen_A.csv", index=False)
-screen_B.to_csv("screen_B.csv", index=False)
+df.sort_values("score", ascending=False).to_csv("data/universe_scored.csv", index=False)
+screen_A.to_csv("data/screen_A.csv", index=False)
+screen_B.to_csv("data/screen_B.csv", index=False)
 print(f"\nSaved: universe_scored.csv | screen_A.csv | screen_B.csv")
 
 # ── CHART ────────────────────────────────────────────────────────────────────

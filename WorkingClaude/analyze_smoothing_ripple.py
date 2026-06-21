@@ -67,7 +67,7 @@ def smooth_pipeline(states):
     return s
 
 # ---------- Load data --------------------------------------------------------
-tq = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_4b_full_history.csv"))
+tq = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_4b_full_history.csv"))
 tq["time"] = pd.to_datetime(tq["time"])
 tq = tq.sort_values("time").reset_index(drop=True)
 
@@ -113,7 +113,7 @@ print("-"*72)
 #   - both VN macro and US macro quiet
 #   - VNI R12m at trigger < 30%
 # We use the existing v3.6 CSV
-v36_path = os.path.join(WORKDIR, "vnindex_5state_v36_smart_floor.csv")
+v36_path = os.path.join(WORKDIR, "data/vnindex_5state_v36_smart_floor.csv")
 v36 = pd.read_csv(v36_path)
 v36["time"] = pd.to_datetime(v36["time"])
 v36 = v36.sort_values("time").reset_index(drop=True)
@@ -147,7 +147,7 @@ def refi_chg(t):
 tq["refi_chg_90d"] = tq["time"].apply(refi_chg)
 tq["vn_quiet"] = (tq["refi"] <= 6.5) & (tq["refi_chg_90d"] <= 0.5)
 
-us = pd.read_csv(os.path.join(WORKDIR, "us_market_history.csv"))
+us = pd.read_csv(os.path.join(WORKDIR, "data/us_market_history.csv"))
 us["time"] = pd.to_datetime(us["time"])
 us_dates = sorted(us["time"].tolist())
 def nearest_us(t):
@@ -162,7 +162,7 @@ tq["us_quiet"] = (tq["vix"] < 25.0) & (tq["spx_dd_1y"] > -0.10)
 tq["both_quiet"] = tq["vn_quiet"] & tq["us_quiet"]
 
 # VNI R12m at trigger (gate open = first day of each CRISIS run)
-vni = pd.read_csv(os.path.join(WORKDIR, "VNINDEX.csv"), usecols=["time","Close"])
+vni = pd.read_csv(os.path.join(WORKDIR, "data/VNINDEX.csv"), usecols=["time","Close"])
 vni["time"] = pd.to_datetime(vni["time"])
 vni = vni.sort_values("time").reset_index(drop=True)
 vni["r12m"] = vni["Close"].pct_change(252)

@@ -220,7 +220,7 @@ def bq(sql: str) -> pd.DataFrame:
 
 def load_fa_full(target_date: str) -> pd.DataFrame:
     """Load latest FA snapshot per ticker (≤ target_date) from cached CSV."""
-    fa = pd.read_csv(os.path.join(WORKDIR, "fundamental_rating_all.csv"))
+    fa = pd.read_csv(os.path.join(WORKDIR, "data/fundamental_rating_all.csv"))
     fa["time"] = pd.to_datetime(fa["time"])
     fa = fa[fa["time"] <= pd.Timestamp(target_date)]
     fa = fa.sort_values("time").groupby("ticker").tail(1).reset_index(drop=True)

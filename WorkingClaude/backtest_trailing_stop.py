@@ -31,7 +31,7 @@ from matplotlib.colors import LinearSegmentedColormap
 # ── CONFIG ────────────────────────────────────────────────────────────────────
 TX_FILE    = "transactions_email_special_2026-04-07_15.14.47.jsonl"
 LOGS_FILE  = "portfolio_email_special_2026-04-07_15.14.52.jsonl"
-VOL_RANK   = "ticker_volume_rank.csv"   # pre-fetched earlier
+VOL_RANK   = "data/ticker_volume_rank.csv"   # pre-fetched earlier
 PROJECT    = "lithe-record-440915-m9"
 OUT_IMG    = "backtest_trailing_stop.png"
 BQ_CHUNK   = 150

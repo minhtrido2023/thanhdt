@@ -15,7 +15,7 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 import numpy as np, pandas as pd
 
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
-vni = pd.read_csv(WORKDIR + "/VNINDEX.csv", low_memory=False)
+vni = pd.read_csv(WORKDIR + "/data/VNINDEX.csv", low_memory=False)
 vni["time"] = pd.to_datetime(vni["time"]); vni = vni.sort_values("time").reset_index(drop=True)
 for c in ["Open","High","Low","Close","Volume","VNINDEX_PE","D_RSI","D_RSI_T1W","D_RSI_Max1W",
           "D_RSI_Max3M","D_RSI_Min1W","D_RSI_Min3M","D_RSI_Max1W_Close","D_RSI_Max3M_Close",
@@ -164,7 +164,7 @@ def msf(s_,m=7):
 st_codien = msf(rmode(st_dvg,15),7)   # BASELINE Co Dien state
 
 # ---- DT5G live state (merge by time) ----
-dt=pd.read_csv(WORKDIR+"/vnindex_5state_dt5g_live.csv"); dt["time"]=pd.to_datetime(dt["time"])
+dt=pd.read_csv(WORKDIR+"/data/vnindex_5state_dt5g_live.csv"); dt["time"]=pd.to_datetime(dt["time"])
 mp=dict(zip(dt["time"],dt["state"]))
 st_dt5g=np.array([int(mp.get(t, 0)) for t in vni["time"]])  # 0 = no DT5G data (pre-2014)
 
@@ -173,7 +173,7 @@ ret_spot=np.full(n,np.nan)
 for t in range(1,n):
     if underlying[t-1]>0: ret_spot[t]=underlying[t]/underlying[t-1]-1
 # VN30F1M actual close-to-close return (roll embedded in continuous series)
-f1=pd.read_csv(WORKDIR+"/vn30f1m_raw.csv"); f1["time"]=pd.to_datetime(f1["time"])
+f1=pd.read_csv(WORKDIR+"/data/vn30f1m_raw.csv"); f1["time"]=pd.to_datetime(f1["time"])
 fmap=dict(zip(f1["time"],f1["close"]))
 f1c=np.array([fmap.get(t, np.nan) for t in vni["time"]])
 ret_fut=np.full(n,np.nan)

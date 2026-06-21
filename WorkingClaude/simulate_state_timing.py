@@ -67,7 +67,7 @@ def simulate_timing(state_df_or_path, start_date="2014-01-01", end_date=None,
     st = st.sort_values("time").reset_index(drop=True)
 
     # --- Load VNINDEX ---
-    vni = pd.read_csv(os.path.join(WORKDIR, "VNINDEX.csv"), usecols=["time","Close"])
+    vni = pd.read_csv(os.path.join(WORKDIR, "data/VNINDEX.csv"), usecols=["time","Close"])
     vni["time"] = pd.to_datetime(vni["time"])
     vni = vni.sort_values("time").reset_index(drop=True)
 
@@ -180,7 +180,7 @@ if __name__ == "__main__":
     print("="*70)
 
     start = "2014-01-01"
-    tq_path = os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_4b_full_history.csv")
+    tq_path = os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_4b_full_history.csv")
 
     # Buy-and-hold benchmark (state=4 all days = 100% VNINDEX)
     tq = pd.read_csv(tq_path)
@@ -194,13 +194,13 @@ if __name__ == "__main__":
     print_result("TQ34b", res_tq, ref=res_bh)
 
     # v3.5 if available
-    v35 = os.path.join(WORKDIR, "vnindex_5state_v35_macro_floor.csv")
+    v35 = os.path.join(WORKDIR, "data/vnindex_5state_v35_macro_floor.csv")
     if os.path.exists(v35):
         res_v35 = simulate_timing(v35, start_date=start)
         print_result("v3.5 macro floor", res_v35, ref=res_tq)
 
     # v3.6 if available
-    v36 = os.path.join(WORKDIR, "vnindex_5state_v36_smart_floor.csv")
+    v36 = os.path.join(WORKDIR, "data/vnindex_5state_v36_smart_floor.csv")
     if os.path.exists(v36):
         res_v36 = simulate_timing(v36, start_date=start)
         print_result("v3.6 smart floor", res_v36, ref=res_tq)

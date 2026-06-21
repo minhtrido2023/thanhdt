@@ -41,7 +41,7 @@ ETF_Q2_ONLY  = {3: 1.0}   # proposed
 TIER_BAL = ["MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","DEEP_VALUE_RECOVERY"]
 BUY_TIERS_V11 = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
                   "MOMENTUM_A","MOMENTUM_S_N","COMPOUNDER_BUY","DEEP_VALUE_RECOVERY","S_PRO"}
-STATE_CSV = "vnindex_5state_tam_quan_v3_4b_full_history.csv"
+STATE_CSV = "data/vnindex_5state_tam_quan_v3_4b_full_history.csv"
 
 print("="*100)
 print("  KELLY Q2_ONLY EFFECT — V11 vs V12.1 architectures (TRUE prod ETF schedule)")
@@ -51,7 +51,7 @@ print("="*100)
 
 # --- Load data ---------------------------------------------------------------
 print("\n[1] Loading signals, prices, state...")
-with open("ba_v11_unified_12y_sig.pkl", "rb") as f: sig_B = pickle.load(f)
+with open("data/ba_v11_unified_12y_sig.pkl", "rb") as f: sig_B = pickle.load(f)
 sig_B["time"] = pd.to_datetime(sig_B["time"])
 with open("sim_v11_for_analyzer.py", "r", encoding="utf-8") as f: _content = f.read()
 def _extract(varname):
@@ -138,13 +138,13 @@ print(f"  VN30 q2 final:   {nav_vn30_q2.iloc[-1]/1e9:.2f}B")
 
 # --- Run LAGGED V12.1 leg ONCE (no ETF dependency) --------------------------
 print("\n[LAGGED V12.1] (state-independent, no ETF, run once)")
-with open("earnings_px.pkl","rb") as f: px_data = pickle.load(f)
+with open("data/earnings_px.pkl","rb") as f: px_data = pickle.load(f)
 px_data["time"] = pd.to_datetime(px_data["time"])
 px_close = px_data.pivot_table(index="time", columns="ticker", values="Close", aggfunc="first").sort_index().ffill(limit=5)
 master_idx = pd.DatetimeIndex(px_close.index).as_unit("ns")
 px_close.index = master_idx
 all_dates = np.array(master_idx)
-with open("lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
+with open("data/lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
 ov["time"] = pd.to_datetime(ov["time"])
 
 def run_lagged_book(init_nav, use_s2_sizing, sw=pd.Timestamp(START_B), ew=pd.Timestamp(END_B)):

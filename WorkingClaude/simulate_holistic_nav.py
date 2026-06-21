@@ -1362,7 +1362,7 @@ def main():
     for name, (nav_df, trades_df, m) in results.items():
         nav_df.to_csv(os.path.join(WORKDIR, f"sim_{name}_nav.csv"), index=False)
         trades_df.to_csv(os.path.join(WORKDIR, f"sim_{name}_trades.csv"), index=False)
-    summary.to_csv(os.path.join(WORKDIR, "sim_holistic_summary.csv"), index=False)
+    summary.to_csv(os.path.join(WORKDIR, "data/sim_holistic_summary.csv"), index=False)
     print("\nOutputs saved: sim_*_nav.csv, sim_*_trades.csv, sim_holistic_summary.csv")
 
 

@@ -28,7 +28,7 @@ BUY_TIERS_B = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
                 "MOMENTUM_A","MOMENTUM_S_N","COMPOUNDER_BUY","DEEP_VALUE_RECOVERY","S_PRO"}
 
 # All 14 BTC variants + baseline
-VARIANTS = [("v3.1 baseline", "vnindex_5state_tam_quan_v3_1_full_history.csv")]
+VARIANTS = [("v3.1 baseline", "data/vnindex_5state_tam_quan_v3_1_full_history.csv")]
 for h, ts in [(120, [5,10,15,20,25,30]), (60, [5,8,12,15]), (180, [15,20,25,30])]:
     h_label = {60:"3M", 120:"6M", 180:"9M"}[h]
     for t in ts:
@@ -37,7 +37,7 @@ for h, ts in [(120, [5,10,15,20,25,30]), (60, [5,8,12,15]), (180, [15,20,25,30])
         VARIANTS.append((name, csv))
 
 print("="*100); print(f"V11 12y backtest: {len(VARIANTS)} BTC sweep variants"); print("="*100)
-with open("ba_v11_unified_12y_sig.pkl", "rb") as f: sig_B = pickle.load(f)
+with open("data/ba_v11_unified_12y_sig.pkl", "rb") as f: sig_B = pickle.load(f)
 with open("sim_v11_for_analyzer.py", "r", encoding="utf-8") as f: _content = f.read()
 def _extract(varname):
     m = re.search(rf'^{varname}\s*=\s*"""(.+?)"""', _content, re.MULTILINE | re.DOTALL)

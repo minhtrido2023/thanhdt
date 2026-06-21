@@ -18,14 +18,14 @@ print("="*100)
 print("  WALK-FORWARD VALIDATION — Option 1 (BAL+LAGGED+ETF) vs Current (BAL+VN30+ETF)")
 print("="*100)
 
-df = pd.read_csv("option1_bal_lagged_vs_prod.csv", index_col=0, parse_dates=True)
+df = pd.read_csv("data/option1_bal_lagged_vs_prod.csv", index_col=0, parse_dates=True)
 df.columns = ["Current", "Opt1"]
 print(f"NAVs loaded: {len(df)} days  ({df.index.min().date()} → {df.index.max().date()})")
 print(f"  Current final: {df['Current'].iloc[-1]:.3f}x")
 print(f"  Opt1 final:    {df['Opt1'].iloc[-1]:.3f}x")
 
 # VNI
-vni = pd.read_csv("VNINDEX.csv", parse_dates=["time"])
+vni = pd.read_csv("data/VNINDEX.csv", parse_dates=["time"])
 vni_n = vni.set_index("time")["Close"].reindex(df.index).ffill()
 vni_n = vni_n / vni_n.iloc[0]
 
@@ -127,4 +127,4 @@ print(f"\n  Opt1 beats Cur on CAGR: {(roll_df['Opt1_CAGR']>roll_df['Cur_CAGR']).
 print(f"  Opt1 beats Cur on Sharpe: {(roll_df['Opt1_Sh']>roll_df['Cur_Sh']).sum()}/{len(roll_df)}")
 
 print("\nSaved: validate_option1_walkforward.csv")
-roll_df.to_csv("validate_option1_walkforward.csv", index=False)
+roll_df.to_csv("data/validate_option1_walkforward.csv", index=False)

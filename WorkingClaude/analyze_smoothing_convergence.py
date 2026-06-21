@@ -55,7 +55,7 @@ def smooth(states, mode_w=3, ms=2):
     s = min_stay_filter(s, ms)
     return s
 
-tq = pd.read_csv(os.path.join(WORKDIR, "vnindex_5state_tam_quan_v3_4b_full_history.csv"))
+tq = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_4b_full_history.csv"))
 tq["time"] = pd.to_datetime(tq["time"])
 tq = tq.sort_values("time").reset_index(drop=True)
 state_tq = tq["state"].values.astype(int)

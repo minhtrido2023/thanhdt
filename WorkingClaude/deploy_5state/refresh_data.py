@@ -142,7 +142,7 @@ def main():
               f"có ít tác dụng. Yêu cầu upstream pipeline backfill PE.")
     vni["ticker"] = "VNINDEX"
 
-    out_vni = os.path.join(WORKDIR, "VNINDEX.csv")
+    out_vni = os.path.join(WORKDIR, "data/VNINDEX.csv")
     if os.path.exists(out_vni):
         shutil.copy(out_vni, out_vni + ".bak")
     vni.to_csv(out_vni, index=False)
@@ -152,7 +152,7 @@ def main():
     print("\n[2/2] Fetching daily breadth (% ticker_prune above MA50) ...")
     breadth = bq_query(BREADTH_SQL.format(since=args.since))
     breadth["time"] = pd.to_datetime(breadth["time"])
-    out_br = os.path.join(WORKDIR, "breadth_data.csv")
+    out_br = os.path.join(WORKDIR, "data/breadth_data.csv")
     if os.path.exists(out_br):
         shutil.copy(out_br, out_br + ".bak")
     breadth.to_csv(out_br, index=False)

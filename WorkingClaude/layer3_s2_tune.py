@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
-CACHE = os.path.join(WORKDIR, "intraday_full.pkl")
+CACHE = os.path.join(WORKDIR, "data/intraday_full.pkl")
 
 TOP30 = ["VIC","VHM","HPG","SHB","SSI","FPT","VIX","STB","MWG","MSN",
          "VCB","BSR","MBB","VPB","TCB","HDB","HCM","CTG","NVL","BID",
@@ -122,7 +122,7 @@ def main():
     print("Computing per-bar features...")
     per_bar = {tk: compute_per_bar(df) for tk, df in intraday.items()}
 
-    daily = pd.read_csv(os.path.join(WORKDIR,"daily_forward_full.csv"))
+    daily = pd.read_csv(os.path.join(WORKDIR,"data/daily_forward_full.csv"))
     daily["time"] = pd.to_datetime(daily["time"]).dt.date
     daily["Close"] = daily["Close"]/1000.0
     daily = daily.sort_values(["ticker","time"]).reset_index(drop=True)
@@ -138,7 +138,7 @@ def main():
     ))
     print(f"Total combos: {len(grid)}")
     df_res = run_grid(per_bar, fwd_map, grid)
-    df_res.to_csv(os.path.join(WORKDIR,"layer3_s2_grid.csv"), index=False)
+    df_res.to_csv(os.path.join(WORKDIR,"data/layer3_s2_grid.csv"), index=False)
 
     print("\n" + "="*100)
     print("TOP S2 variants by TOP30 lift T+45 (n_fire >= 100, FP_rate < 80%)")

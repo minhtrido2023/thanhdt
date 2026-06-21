@@ -124,6 +124,6 @@ for name, s in results.items():
     for q, r in worst.items():
         print(f"    {q}: {r:+.2f}%")
 
-qdf2.to_csv(os.path.join(WORKDIR, "quarterly_returns.csv"))
-yr_agg.to_csv(os.path.join(WORKDIR, "yearly_returns.csv"))
+qdf2.to_csv(os.path.join(WORKDIR, "data/quarterly_returns.csv"))
+yr_agg.to_csv(os.path.join(WORKDIR, "data/yearly_returns.csv"))
 print("\n  Saved: quarterly_returns.csv, yearly_returns.csv")

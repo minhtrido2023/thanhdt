@@ -59,7 +59,7 @@ S4_PERSIST_DAYS  = 20
 
 # ════════════════════ LOAD ════════════════════
 print("Loading cleaned VNINDEX ...")
-vni = pd.read_csv(os.path.join(WORKDIR, "vnindex_full_2000_2026.csv"), low_memory=False)
+vni = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_full_2000_2026.csv"), low_memory=False)
 vni["time"] = pd.to_datetime(vni["time"])
 vni = vni.sort_values("time").reset_index(drop=True)
 n = len(vni)
