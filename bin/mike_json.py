@@ -115,12 +115,13 @@ def cmd_fleet_status(a):
                 disp = "dead"
         except Exception:
             pass
-        rows.append((r.get("agent_id", "?"), disp, hb, age, r.get("current_task", "")))
+        rows.append((r.get("agent_id", "?"), r.get("kind", "child"), disp, hb, age,
+                     r.get("current_task", "")))
     print("# Fleet status — %s UTC\n" % n.strftime("%Y-%m-%dT%H:%M:%S"))
-    print("| agent | status | last_heartbeat | age(min) | current_task |")
-    print("|---|---|---|---|---|")
+    print("| agent | kind | status | last_heartbeat | age(min) | current_task |")
+    print("|---|---|---|---|---|---|")
     for row in rows:
-        print("| %s | %s | %s | %s | %s |" % row)
+        print("| %s | %s | %s | %s | %s | %s |" % row)
 
 
 def cmd_settings(a):
