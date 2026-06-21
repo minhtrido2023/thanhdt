@@ -1,0 +1,5 @@
+# Hot runtime transport / ephemeral state — not part of the durable KB audit trail.
+bus/
+logs/
+locks/
+state/

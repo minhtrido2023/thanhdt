@@ -1,0 +1,17 @@
+[Unit]
+Description=Claude agent %i (Mike fleet, remote-control)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/trido/thanhdt/WorkingClaude/mike/agents/%i
+# claude launcher needs node + its own ~/.local/bin on PATH; HOME is set by systemd --user.
+Environment=PATH=/home/trido/.local/bin:/usr/local/bin:/usr/bin:/bin
+Environment=AGENT_ID=%i
+ExecStart=/home/trido/.local/bin/claude remote-control --name "%i"
+Restart=on-failure
+RestartSec=20
+
+[Install]
+WantedBy=default.target
