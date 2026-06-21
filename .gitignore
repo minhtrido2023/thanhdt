@@ -3,3 +3,12 @@ bus/
 logs/
 locks/
 state/
+
+# keep empty runtime dirs in git
+!bus/
+bus/*
+!bus/inbox/ !bus/registry/ !bus/directives/
+bus/inbox/* bus/registry/* bus/directives/*
+!bus/*/.gitkeep
+!agents/ agents/*/ !agents/.gitkeep
+!logs/ logs/* !logs/.gitkeep

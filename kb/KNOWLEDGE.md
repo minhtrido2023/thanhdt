@@ -1,7 +1,4 @@
 # Mike fleet — KNOWLEDGE (canonical log)
 
-## Consolidation 2026-06-21T10:02:52Z
-- [2026-06-21T10:02:52Z] con-research/finding — vnm-breakout: {"ticker": "VNM", "signal": "breakout MA200"}
-
-## Consolidation 2026-06-21T10:02:52Z
-- [2026-06-21T10:02:52Z] con-backtest/finding — vnm-bt-result: {"winrate": 0.58, "trades": 40}
+> Append-only log of consolidated fleet events, written by `bin/consolidate.sh` every 30 min.
+> Mike curates/summarizes this interactively. Children read the distilled `context_pack.md`, not this file.
