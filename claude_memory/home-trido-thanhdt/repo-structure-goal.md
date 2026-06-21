@@ -15,4 +15,4 @@ User is backing up `/home/trido/thanhdt` to a **private** GitHub repo (`github.c
 
 **Why:** user explicitly wants the folder "cleaned completely", not just gitignored — physical reorg into data/ + secrets/.
 
-**How to apply:** keep secrets and large data OUT of git; the repo is code/docs only. Server is shared (OS account `trido`) so credentials use a repo-scoped fine-grained PAT. See [[poc-not-live]].
+**How to apply:** keep secrets and large data OUT of git; the repo is code/docs only. Server is shared (OS account `trido`) so credentials use a repo-scoped fine-grained PAT. The reorg is DONE (data→`data/`, secrets→`secrets/`, 1721 path refs rewritten). See [[poc-not-live]] and [[github-backup]] for the live backup workflow.
