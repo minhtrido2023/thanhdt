@@ -50,6 +50,9 @@ def main():
 
     tp = rec.get("transcript", "")
     print("=== %s (%s) ===" % (label, rec.get("session_type", rec.get("kind", "?"))))
+    title = rec.get("title")
+    if title and title != label:
+        print("desktop title: %s" % title)
     print("status=%s  pid=%s  cwd=%s" % (rec.get("status", "?"), rec.get("pid", "?"), rec.get("cwd", "?")))
     if not tp or not os.path.exists(tp):
         print("(no transcript available)")

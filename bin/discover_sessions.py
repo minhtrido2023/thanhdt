@@ -60,6 +60,31 @@ def transcript_path(cwd, session_id):
     return p if os.path.exists(p) else ""
 
 
+def latest_ai_title(tp):
+    """The human-readable title Claude Code shows in its desktop 'Recents' list.
+
+    It lives in the transcript as `{"type":"ai-title","aiTitle":"..."}` lines and is
+    rewritten as the conversation evolves, so the LAST one is the current title.
+    Returns None on any problem (missing file, parse error, no ai-title yet)."""
+    if not tp or not os.path.exists(tp):
+        return None
+    title = None
+    try:
+        with open(tp, encoding="utf-8") as f:
+            for line in f:
+                if '"ai-title"' not in line:
+                    continue
+                try:
+                    e = json.loads(line)
+                except Exception:
+                    continue
+                if e.get("type") == "ai-title" and e.get("aiTitle"):
+                    title = e["aiTitle"]
+    except Exception:
+        return None
+    return title
+
+
 def safe(label):
     return re.sub(r"[^A-Za-z0-9_-]", "_", label) or "unknown"
 
@@ -127,9 +152,22 @@ def main():
         seen[lbl] = True
 
         cwd = cwd0
+        tp = transcript_path(cwd, sess.get("sessionId", ""))
+        # `title` = the name the user sees in Claude Code desktop, so Mike's reports line
+        # up with that UI. Named/remote/resume/child sessions are launched WITH a name and
+        # the desktop shows it (the ai-title is ignored for them); anonymous interactive
+        # sessions show their generated ai-title instead.
+        title = sess.get("name")
+        if not title and (typ in ("remote-control", "resume", "named") or kind == "child"):
+            title = label
+        if not title:
+            title = latest_ai_title(tp)
+        if not title:
+            title = label
         rec = {
             "agent_id": lbl,
             "kind": kind,
+            "title": title,
             "status": sess.get("status", "running"),
             "current_task": "%s · cwd=%s" % (typ, cwd or "?"),
             "last_heartbeat": now_iso(),
@@ -137,7 +175,7 @@ def main():
             "session_type": typ,
             "session_id": sess.get("sessionId", ""),
             "cwd": cwd,
-            "transcript": transcript_path(cwd, sess.get("sessionId", "")),
+            "transcript": tp,
         }
         tmp = os.path.join(REG_DIR, ".%s.tmp" % lbl)
         with open(tmp, "w", encoding="utf-8") as f:
