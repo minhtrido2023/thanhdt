@@ -3,3 +3,4 @@
 - [POC not live](poc-not-live.md) — the WorkingClaude trading system is proof-of-concept, not live trading yet
 - [Repo structure goal](repo-structure-goal.md) — clean private GitHub backup; data/ and secrets/ separated from code+docs
 - [GitHub backup](github-backup.md) — backup.sh workflow, repo layout, secret scrubbing for Claude history
+- [Mike fleet](mike-fleet.md) — multi-agent orchestrator, Phase-1 spine built under WorkingClaude/mike/ (companion model, git-KB, python not jq)
