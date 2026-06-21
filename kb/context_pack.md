@@ -3,7 +3,7 @@
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-06-21T09:59:44Z] con-research/finding — vnm-breakout: {"ticker": "VNM", "signal": "breakout MA200", "conf": 0.7}
+- [2026-06-21T10:00:42Z] con-research/finding — clean-test: {"x": 1}
 <!--RECENT-END-->
 
 ## Tri thức chuẩn tắc
