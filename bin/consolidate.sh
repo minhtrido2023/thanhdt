@@ -9,7 +9,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 KB="$ROOT/kb"; BUS="$ROOT/bus"; STATE="$ROOT/state/offsets"
 PY="$ROOT/bin/mike_json.py"
-mkdir -p "$KB" "$BUS"/inbox "$BUS"/registry "$STATE" "$ROOT/locks"
+mkdir -p "$KB" "$BUS"/inbox "$BUS"/registry "$BUS"/directives "$STATE" "$ROOT/locks" "$ROOT/logs"
 shopt -s nullglob
 
 # --- single writer ---
