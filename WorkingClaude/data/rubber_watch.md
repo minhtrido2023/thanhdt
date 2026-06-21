@@ -19,6 +19,7 @@ _Cập nhật 2026-06-19 · nguồn: regionalert (SGX SICOM RSS3, USD/kg) + SunS
 
 ## Ngưỡng cảnh báo (đã duyệt)
 - 🟡 **WATCH → Taylor**: |WoW| ≥ 7% hoặc |4 tuần| ≥ 15% — rà mô hình/dự báo nhóm cao su.
+- 🟡 **WATCH 3-tháng → Taylor**: |3 tháng| ≥ 18% (xu hướng trườn) → **chạy lại mô hình 8L** xem có đổi đánh giá nhóm cao su không.
 - 🔴 **ALERT → Bill + Taylor** (+Telegram): |WoW| ≥ 12% hoặc |3 tháng| ≥ 25% hoặc phá biên 52 tuần — Bill quyết kế hoạch vị thế.
 - CP cao su theo dõi: GVR, PHR, DPR, DRI, TRC, HRC
 - Lưu ý: truyền dẫn giá mủ → lợi nhuận trễ ~1 quý; GVR còn chịu chi phối câu chuyện chuyển đổi đất. Giá biến động là điều kiện cần, Taylor phán materiality.

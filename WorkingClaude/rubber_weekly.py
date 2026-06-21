@@ -52,7 +52,7 @@ SS_URL  = "https://www.sunsirs.com/uk/prodetail-586.html"   # China natural rubb
 UA      = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120 Safari/537.36"
 
 # --- alert thresholds (percent) -------------------------------------------------
-WATCH_WOW, WATCH_4WK = 7.0, 15.0
+WATCH_WOW, WATCH_4WK, WATCH_3MO = 7.0, 15.0, 18.0   # 3mo p75 hist = slow-trend catch
 ALERT_WOW, ALERT_3MO = 12.0, 25.0
 STOCKS = ["GVR", "PHR", "DPR", "DRI", "TRC", "HRC"]
 
@@ -185,6 +185,8 @@ def classify(m):
         reasons.append(f"WoW {wow:+.1f}% (>= ±{WATCH_WOW:.0f}%)")
     if c4w is not None and abs(c4w) >= WATCH_4WK:
         reasons.append(f"4 tuần {c4w:+.1f}% (>= ±{WATCH_4WK:.0f}%)")
+    if c3m is not None and abs(c3m) >= WATCH_3MO:   # slow grind (18-25%); >=25% is ALERT above
+        reasons.append(f"3 tháng {c3m:+.1f}% (>= ±{WATCH_3MO:.0f}%)")
     if reasons:
         return "WATCH", reasons
     return "INFO", []
@@ -248,15 +250,20 @@ def telegram(text):
 def fire(tier, reasons, m):
     direction = "TĂNG" if (m["wow"] or m["c3m"] or m["c4w"] or 0) > 0 else "GIẢM"
     audience = ["Taylor", "DollarBill"] if tier == "ALERT" else ["Taylor"]
+    is_3mo_watch = any("3 tháng" in r for r in reasons)
+    if tier == "ALERT":
+        action = "Taylor rà mô hình/dự báo nhóm cao su; Bill cân nhắc kế hoạch hành động vị thế"
+    elif is_3mo_watch:
+        action = ("Taylor CHẠY LẠI mô hình 8L xem có đổi đánh giá nhóm cao su không "
+                  "(xu hướng 3 tháng vượt ±18%)")
+    else:
+        action = "Taylor rà xem input giá đã lệch giả định mô hình chưa (nhóm cao su)"
     payload = {"tier": tier, "direction": direction, "rss3_usdkg": round(m["latest"], 3),
                "date": str(m["latest_dt"].date()), "reasons": reasons, "audience": audience,
                "wow_pct": None if m["wow"] is None else round(m["wow"], 1),
                "cum4wk_pct": None if m["c4w"] is None else round(m["c4w"], 1),
                "cum3mo_pct": None if m["c3m"] is None else round(m["c3m"], 1),
-               "stocks": STOCKS,
-               "action": ("Taylor rà mô hình/dự báo nhóm cao su; Bill cân nhắc kế hoạch hành động vị thế"
-                          if tier == "ALERT" else
-                          "Taylor rà xem input giá đã lệch giả định mô hình chưa (nhóm cao su)")}
+               "stocks": STOCKS, "action": action}
     bus("finding", f"rubber {tier}: cao su {direction} {m['latest']:.2f} USD/kg", payload)
 
     if tier == "ALERT":
@@ -297,6 +304,7 @@ def render_note(m, tier, reasons, today):
     L += ["",
           "## Ngưỡng cảnh báo (đã duyệt)",
           f"- 🟡 **WATCH → Taylor**: |WoW| ≥ {WATCH_WOW:.0f}% hoặc |4 tuần| ≥ {WATCH_4WK:.0f}% — rà mô hình/dự báo nhóm cao su.",
+          f"- 🟡 **WATCH 3-tháng → Taylor**: |3 tháng| ≥ {WATCH_3MO:.0f}% (xu hướng trườn) → **chạy lại mô hình 8L** xem có đổi đánh giá nhóm cao su không.",
           f"- 🔴 **ALERT → Bill + Taylor** (+Telegram): |WoW| ≥ {ALERT_WOW:.0f}% hoặc |3 tháng| ≥ {ALERT_3MO:.0f}% hoặc phá biên 52 tuần — Bill quyết kế hoạch vị thế.",
           f"- CP cao su theo dõi: {', '.join(STOCKS)}",
           "- Lưu ý: truyền dẫn giá mủ → lợi nhuận trễ ~1 quý; GVR còn chịu chi phối câu chuyện chuyển đổi đất. Giá biến động là điều kiện cần, Taylor phán materiality.", ""]
