@@ -85,6 +85,13 @@ for link in "$WANTS"/mike@*.service; do
 done
 
 echo
+# Account-wide 5-hour usage (shared ceiling for the whole fleet + every other session).
+read -r upct utok uturns ureset <<<"$(python3 "$ROOT/bin/usage_watch.py" --oneline 2>/dev/null)"
+if [ -n "${upct:-}" ]; then
+  uflag=""; [ "${upct%%.*}" -ge "${USAGE_WARN_PCT:-80}" ] 2>/dev/null && { degraded=1; uflag="  ⚠ near limit — ease off / pause"; }
+  printf "5-hour account usage (est): ~%s%%  (%s turns, oldest frees ~%s)%s\n" "$upct" "${uturns:-?}" "${ureset:-?}" "$uflag"
+fi
+echo
 echo "Recent watchdog alerts (last 8):"
 tail -n 8 "$ROOT/logs/watchdog.log" 2>/dev/null | sed 's/^/  /' || echo "  (no watchdog.log yet)"
 

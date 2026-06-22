@@ -60,13 +60,22 @@ Watchdog bắt **2 kiểu chết** (vì `systemctl is-active` KHÔNG đủ — h
   so với `CTX_LIMIT` (mặc định 1M). Watchdog log cảnh báo (debounce ở `state/ctxwarn/<id>`) khi vượt
   `CTX_WARN_PCT=85%`. **Việc COMPACT là tự động sẵn của Claude Code** (auto-compact mặc định ON, fire
   ~90%+) cho TỪNG phiên — Mike KHÔNG `/compact` hộ phiên khác được (companion model), chỉ canh + cảnh báo.
+- **`bin/usage_watch.py`** + cảnh báo trong watchdog: canh **trần 5-giờ của TÀI KHOẢN** (cả fleet + mọi
+  phiên khác dùng CHUNG một ví usage → một phiên ngốn nhiều là cả đội chạm trần). Tổng output-token mọi
+  phiên trong cửa sổ 5h, hiệu chỉnh theo app `/usage` (`USAGE_TOKENS_AT_100`, seed 2026-06-22: ~1.15M≈22%
+  → ~5.2M=100%). Watchdog log cảnh báo (debounce ở `state/usagewarn`) khi vượt `USAGE_WARN_PCT=80%`.
+  fleet_health in 1 dòng "5-hour account usage (est)". **Là ƯỚC LƯỢNG** (không có API chính thức) → cập
+  nhật lại calib từ app khi lệch. **Không tự resume hộ phiên khác được** (companion model) — giá trị chính
+  là PHÒNG NGỪA: cảnh báo sớm để giãn việc nặng trước khi chạm tường; Mike có thể tự `ScheduleWakeup` việc
+  của CHÍNH nó tới lúc cửa sổ roll.
 - **2 việc chỉ con người làm tay** (restart không cứu): (a) **logout** → `claude login` + restart;
   (b) **zombie dai dẳng** → mở agent trong app Claude để re-pair. Watchdog chỉ phát hiện + log, không tự sửa.
 
 ## Công cụ
 - `bin/append_event.sh`, `bin/heartbeat.sh`, `bin/consolidate.sh`, `bin/publish_context.sh`,
   `bin/spawn_child.sh`, `bin/watchdog.sh`, `bin/fleet_health.sh`, `bin/is_serving.py`,
-  `bin/context_watch.py`, `bin/session_brief.py`, `bin/discover_sessions.py`, helper JSON `bin/mike_json.py`.
+  `bin/context_watch.py`, `bin/usage_watch.py`, `bin/session_brief.py`, `bin/discover_sessions.py`,
+  helper JSON `bin/mike_json.py`.
 - `claude agents` (dashboard mọi phiên nền), Monitor (stream live giữa hai nhịp 30').
 - Ghi mọi quyết định điều phối thành event `decision` để audit:
   `bin/append_event.sh Mike decision "<chủ đề>" '<json>'`.

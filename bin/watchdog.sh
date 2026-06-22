@@ -117,3 +117,15 @@ for link in "$WANTS"/mike@*.service; do
   fi
 done
 [ "$found" = 1 ] || notify "no enabled mike@ units found in $WANTS"
+
+# --- Account-wide 5-hour usage watch (shared ceiling for the whole fleet). Log once on the
+# up-crossing of USAGE_WARN_PCT so heavy work can be paced BEFORE everyone hits the wall.
+# Debounced via state/usagewarn so it doesn't repeat every run.
+read -r upct _utok _uturns ureset <<<"$(python3 "$ROOT/bin/usage_watch.py" --oneline 2>/dev/null)"
+umark="$ROOT/state/usagewarn"
+if [ -n "${upct:-}" ] && [ "${upct%%.*}" -ge "${USAGE_WARN_PCT:-80}" ] 2>/dev/null; then
+  [ -f "$umark" ] || notify "ACCOUNT 5-hour usage ~${upct}% (est) — approaching the shared limit; oldest usage frees ~${ureset:-?}. Pace heavy Opus work until the window rolls."
+  echo "$upct" > "$umark"
+else
+  rm -f "$umark" 2>/dev/null || true
+fi
