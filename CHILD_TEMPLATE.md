@@ -24,3 +24,10 @@ Nhiệm vụ: {{DESC}}
   File `kb/memory/{{AGENT_ID}}.md` này được bơm vào đầu MỖI phiên (kể cả sau restart/logout) — đây là cách
   bạn "tự nhớ" để tiếp mạch, không bắt đầu lại từ đầu. Phiên trước cũng được tự recap, nhưng cái BẠN chủ
   động ghi mới là cao tín hiệu. (`remember.sh {{AGENT_ID}} --show` để xem, `--set` để viết lại toàn bộ.)
+- **Resume KHÔNG ma sát khi bị cắt**: nếu việc đang DANG DỞ mà có nguy cơ bị cắt (chạm trần 5h của tài
+  khoản, context sắp auto-compact, hay cuối một mạch dài) → ghi NGAY trạng thái dở + bước kế cụ thể:
+  ```bash
+  {{ROOT}}/bin/remember.sh {{AGENT_ID}} "ĐANG DỞ: <việc/đang ở đâu> | NEXT: <bước kế tiếp cụ thể>"
+  ```
+  Lần sau (bạn mở lại / sau khi limit reset) chỉ cần nói "tiếp tục" là chạy đúng chỗ — KHÔNG phải giải
+  thích lại từ đầu. (Mike không tự đánh thức bạn được; cơ chế này biến việc resume thành một-từ.)
