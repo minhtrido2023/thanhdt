@@ -22,8 +22,8 @@ now=$(date -u +%s)
 degraded=0
 
 printf "Mike fleet health  —  %s\n" "$(date -u +%FT%TZ)"
-printf "%-14s %-9s %-9s %-4s %-13s %-7s %-8s %s\n" AGENT STATE SUB RST UPTIME STREAK HB-AGE "LAST HEARTBEAT"
-printf -- "%.0s-" {1..96}; echo
+printf "%-14s %-8s %-8s %-4s %-12s %-7s %-7s %s\n" AGENT STATE SERVING RST UPTIME STREAK HB-AGE "LAST HEARTBEAT"
+printf -- "%.0s-" {1..92}; echo
 
 for link in "$WANTS"/mike@*.service; do
   unit="$(basename "$link")"
@@ -59,16 +59,23 @@ for link in "$WANTS"/mike@*.service; do
     fi
   fi
 
-  flag=""
-  if [ "$active" != "active" ]; then degraded=1; flag="  <== DOWN"; fi
-  if [ "${streak:-0}" -ge 3 ] 2>/dev/null; then degraded=1; flag="  <== LIKELY LOGGED OUT (re-login needed)"; fi
-  # stale heartbeat while the unit is up = possible zombie/idle — flag for a session_brief look.
-  if [ "$active" = "active" ] && [ -z "$flag" ] && [ "${hs:-0}" -gt 0 ] && [ "$(( now - hs ))" -gt "${STALE_SEC:-10800}" ]; then
-    flag="  <== STALE ${hbage} (check: bin/session_brief.py $id)"
-  fi
   unset hs
+  # Authoritative liveness: is the agent actually serving a session? (systemd "active" can lie —
+  # a host can be up yet serving nothing = the zombie that killed Mafee.)
+  if [ "$active" = "active" ] && python3 "$ROOT/bin/is_serving.py" "$id" 2>/dev/null; then
+    serve="yes"
+  elif [ "$active" = "active" ]; then serve="NO"; else serve="-"; fi
 
-  printf "%-14s %-9s %-9s %-4s %-13s %-7s %-8s %s%s\n" "$id" "$active" "$sub" "$nrst" "$up" "$streak" "$hbage" "$hb" "$flag"
+  flag=""
+  if [ "$active" != "active" ]; then
+    degraded=1
+    if [ "${streak:-0}" -ge 3 ]; then flag="  <== DOWN/LOGGED-OUT (claude login + restart)"; else flag="  <== DOWN"; fi
+  elif [ "$serve" = "NO" ]; then
+    degraded=1
+    if [ "${streak:-0}" -ge 3 ]; then flag="  <== ZOMBIE PERSISTENT — re-pair in Claude app"; else flag="  <== ZOMBIE (active but not serving)"; fi
+  fi
+
+  printf "%-14s %-8s %-8s %-4s %-12s %-7s %-7s %s%s\n" "$id" "$active" "$serve" "$nrst" "$up" "$streak" "$hbage" "$hb" "$flag"
 done
 
 echo
@@ -77,7 +84,9 @@ tail -n 8 "$ROOT/logs/watchdog.log" 2>/dev/null | sed 's/^/  /' || echo "  (no w
 
 if [ "$degraded" = 1 ]; then
   echo
-  echo "⚠ Some agents degraded. If STREAK ≥ 3 → that agent's claude.ai token likely expired:"
-  echo "    1) re-auth that agent (claude login in its session/dir), 2) systemctl --user restart mike@<id>"
+  echo "⚠ Degraded agents:"
+  echo "   • DOWN              → watchdog auto-restarts; if STREAK≥3 it's a logout: \`claude login\` + \`systemctl --user restart mike@<id>\`"
+  echo "   • ZOMBIE (SERVING=NO) → host up but serving nothing. A plain restart does NOT fix it →"
+  echo "                          open the agent in the Claude mobile/desktop app (claude.ai/code) to re-establish its session."
 fi
 exit "$degraded"
