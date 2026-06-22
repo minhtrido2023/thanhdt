@@ -53,15 +53,20 @@ Watchdog bắt **2 kiểu chết** (vì `systemctl is-active` KHÔNG đủ — h
     không serving → escalate "MANUAL: mở agent trong app Claude / `claude login`" rồi ngừng restart.
   - Đếm bad-streak ở `state/flap/<unit>`. **Log-only**; chỉ gọi `bin/notify.sh` nếu file đó tồn tại.
 - **`bin/fleet_health.sh`** (chạy tay bất kỳ lúc nào): bảng sức khỏe — STATE, **SERVING** (yes/NO từ
-  is_serving), NRestarts, uptime, STREAK, HB-AGE. Cờ **DOWN** / **ZOMBIE (active but not serving)** /
-  **ZOMBIE PERSISTENT → re-pair in Claude app**. exit 1 nếu có agent degraded.
+  is_serving), **CTX** (% context của hội thoại sống), NRestarts, uptime, STREAK, LAST HB. Cờ **DOWN** /
+  **ZOMBIE** / **ZOMBIE PERSISTENT → re-pair in Claude app** / **context cao**. exit 1 nếu degraded.
+- **`bin/context_watch.py`** + cảnh báo trong watchdog: canh độ dài hội thoại để không phiên nào gãy vì
+  quá dài. Đọc token thực tế ở lượt assistant cuối của transcript sống (input+cache ≈ context đang dùng)
+  so với `CTX_LIMIT` (mặc định 1M). Watchdog log cảnh báo (debounce ở `state/ctxwarn/<id>`) khi vượt
+  `CTX_WARN_PCT=85%`. **Việc COMPACT là tự động sẵn của Claude Code** (auto-compact mặc định ON, fire
+  ~90%+) cho TỪNG phiên — Mike KHÔNG `/compact` hộ phiên khác được (companion model), chỉ canh + cảnh báo.
 - **2 việc chỉ con người làm tay** (restart không cứu): (a) **logout** → `claude login` + restart;
   (b) **zombie dai dẳng** → mở agent trong app Claude để re-pair. Watchdog chỉ phát hiện + log, không tự sửa.
 
 ## Công cụ
 - `bin/append_event.sh`, `bin/heartbeat.sh`, `bin/consolidate.sh`, `bin/publish_context.sh`,
   `bin/spawn_child.sh`, `bin/watchdog.sh`, `bin/fleet_health.sh`, `bin/is_serving.py`,
-  `bin/session_brief.py`, `bin/discover_sessions.py`, helper JSON `bin/mike_json.py`.
+  `bin/context_watch.py`, `bin/session_brief.py`, `bin/discover_sessions.py`, helper JSON `bin/mike_json.py`.
 - `claude agents` (dashboard mọi phiên nền), Monitor (stream live giữa hai nhịp 30').
 - Ghi mọi quyết định điều phối thành event `decision` để audit:
   `bin/append_event.sh Mike decision "<chủ đề>" '<json>'`.

@@ -21,12 +21,16 @@ set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LOG="$ROOT/logs/watchdog.log"
 FLAP="$ROOT/state/flap"          # one file per unit holding the consecutive-bad count
-mkdir -p "$ROOT/logs" "$FLAP"
+CTXW="$ROOT/state/ctxwarn"       # one file per agent: marks "already warned at this high context"
+mkdir -p "$ROOT/logs" "$FLAP" "$CTXW"
 shopt -s nullglob
 
 # Consecutive bad checks (≈ runs × cron interval) before escalating from "transient" to
 # "persistent / needs a human". 3 × 10 min ≈ 30 min.
 ESCALATE_AFTER="${WATCHDOG_ESCALATE_AFTER:-3}"
+# Warn (log only) when a conversation's context passes this % of the limit — ahead of the
+# session's built-in auto-compact (~90%+). Just visibility; compaction is the session's own job.
+CTX_WARN="${CTX_WARN_PCT:-85}"
 
 # cron has no systemd-user session env — without these, `systemctl --user` can't reach the bus.
 export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
@@ -67,6 +71,18 @@ for link in "$WANTS"/mike@*.service; do
       prev="$(cat "$cnt_file" 2>/dev/null || echo 0)"
       [ "${prev:-0}" -ge "$ESCALATE_AFTER" ] && notify "$unit RECOVERED (now serving) after $prev bad checks"
       rm -f "$cnt_file"
+    fi
+    # Context-fullness watch: log once when a conversation crosses CTX_WARN% so a long chat is
+    # visible BEFORE the built-in auto-compact (~90%+) fires. Debounced via state/ctxwarn/<id>
+    # (log on the up-crossing, clear when it drops back) so we don't repeat every run. The
+    # actual compaction is the session's own built-in job — Mike can't /compact another session.
+    pct="$(python3 "$ROOT/bin/context_watch.py" "$id" 2>/dev/null | awk '{print $3}')"
+    mark="$CTXW/$id"
+    if [ -n "$pct" ] && [ "$pct" != "-" ] && [ "${pct%%.*}" -ge "$CTX_WARN" ] 2>/dev/null; then
+      [ -f "$mark" ] || notify "$unit context ${pct}% of limit — large chat; built-in auto-compact will fire near ~90%. (FYI; no action needed.)"
+      echo "$pct" > "$mark"
+    else
+      rm -f "$mark" 2>/dev/null || true
     fi
     continue
   fi

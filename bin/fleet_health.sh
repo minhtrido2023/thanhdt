@@ -22,7 +22,7 @@ now=$(date -u +%s)
 degraded=0
 
 printf "Mike fleet health  —  %s\n" "$(date -u +%FT%TZ)"
-printf "%-14s %-8s %-8s %-4s %-12s %-7s %-7s %s\n" AGENT STATE SERVING RST UPTIME STREAK HB-AGE "LAST HEARTBEAT"
+printf "%-14s %-8s %-8s %-7s %-4s %-11s %-7s %s\n" AGENT STATE SERVING CTX RST UPTIME STREAK "LAST HB"
 printf -- "%.0s-" {1..92}; echo
 
 for link in "$WANTS"/mike@*.service; do
@@ -66,6 +66,10 @@ for link in "$WANTS"/mike@*.service; do
     serve="yes"
   elif [ "$active" = "active" ]; then serve="NO"; else serve="-"; fi
 
+  # Context fullness of the live conversation (built-in auto-compacts ~90%+; this warns earlier).
+  read -r ctok climit cpct <<<"$(python3 "$ROOT/bin/context_watch.py" "$id" 2>/dev/null)"
+  if [ "${cpct:-_}" = "_" ] || [ "$ctok" = "-" ]; then ctxcol="-"; else ctxcol="${cpct}%"; fi
+
   flag=""
   if [ "$active" != "active" ]; then
     degraded=1
@@ -73,9 +77,11 @@ for link in "$WANTS"/mike@*.service; do
   elif [ "$serve" = "NO" ]; then
     degraded=1
     if [ "${streak:-0}" -ge 3 ]; then flag="  <== ZOMBIE PERSISTENT — re-pair in Claude app"; else flag="  <== ZOMBIE (active but not serving)"; fi
+  elif [ -n "${cpct:-}" ] && [ "${cpct%%.*}" -ge "${CTX_WARN_PCT:-80}" ] 2>/dev/null; then
+    flag="  <== context ${cpct}% — auto-compact will fire soon"
   fi
 
-  printf "%-14s %-8s %-8s %-4s %-12s %-7s %-7s %s%s\n" "$id" "$active" "$serve" "$nrst" "$up" "$streak" "$hbage" "$hb" "$flag"
+  printf "%-14s %-8s %-8s %-7s %-4s %-11s %-7s %s%s\n" "$id" "$active" "$serve" "$ctxcol" "$nrst" "$up" "$streak" "$hb" "$flag"
 done
 
 echo
