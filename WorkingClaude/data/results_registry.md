@@ -116,4 +116,49 @@ custom30V parking trong NEUTRAL + **custom30B trong BULL/EXBULL** (state-spliced
 6. **FSCORE robustly thêm marginal TRONG gate** (+0.031 pooled; IS +0.059/OOS +0.025) — **nhiều hơn cả rating**. Ứng viên enhancer selection (chưa test trong custom30V).
 7. **LEAD chưa chốt:** SECURITIES cfy IC **+0.246** (pooled, n~34/q) — cashflow-yield áp đảo ở chứng khoán; cần IS/OOS split trước khi tin (financials hiện giữ v2, không dùng cfy).
 
+**THREAD (b)(c) REFRAME (2026-06-22): production V2.4 là RATING-BLIND trong cổng + selector yieldcombo đơn giản.** `custompitg = (quality=none, q2m5, gate=3)` ⇒ rating chỉ là CỔNG nhị phân ≤3, **level 1-vs-2 không làm gì** (QTILT chỉ sống ở mode audit `custompitgq`; trọng số namecap; chọn mã = yieldcombo rank(1/PE)+rank(1/PCF), đều rating-blind). ⇒ **nới cap-2 trong bull = mỹ phẩm** (cyclical cap-2 vẫn ≤3 = đã trong cổng); `cfo_normy` (thread b) cũng chỉ ở screener + mode audit, KHÔNG ở yieldcombo. Cả (b)(c) bản gốc đều ngoài production path.
+
+**THREAD (c) ĐÓNG — value thắng MỌI regime, không có edge regime-SELECTION (2026-06-22, `probe_regime_momentum.py`).** fwd-profit_2M IC theo state DT5G: DOWN ey +0.148 / mom **−0.105**; NEUTRAL ey +0.107 / mom +0.030; **BULL ey +0.156 (t13, MẠNH NHẤT) / mom +0.002 (ZERO)**. Momentum(mom200) KHÔNG vượt value trong bull; value(1/PE) áp đảo mọi state, đỉnh ở BULL. ⇒ **không build selector regime-aware momentum**; giải thích R6 custom30B(pemom) WASH @50B (mom200 vô-edge). **Đòn bẩy regime duy nhất có cơ sở = EXPOSURE không phải SELECTION**: value edge đỉnh ở bull ⇒ park NHIỀU hơn ở bull với CÙNG value selection = bull-park (R5 +0.49pp marginal, đã có). *(SECURITIES cfy +0.246 = ẢO, chỉ 4 quý đủ N_MIN, đã loại — lens value chứng khoán thật = ey/ps.)* DT5G encoding: 1=CRISIS 2=BEAR 3=NEUTRAL 4=BULL 5=EXBULL.
+
+**THREAD (b) ĐÓNG — v3 composite là IS-OVERFIT, GIỮ yieldcombo đơn giản cho V2.4 (2026-06-22, backtest thật, drift-controlled).**
+- **Lệnh (cùng phiên, chỉ khác `BASKET_SELECT`):**
+  ```bash
+  # candidate v3latest:
+  NAV_TOTAL_B=50 ETF_LIQ=custompitg BASKET_WT=namecap BASKET_SELECT=v3latest PARK_STATES="3:0.7" AUDIT_END=2026-06-19 $DNA_PYEXE pt_v23_audit_2014.py v23a none postbull 0 edge
+  # baseline yieldcombo (production): BASKET_SELECT=yieldcombo, còn lại y hệt
+  ```
+- **CSV:** v3latest = `data/v23_..._etfliqcustompitg_wtnamecap_v3latest.csv` (đã preserve; ⚠️ `BASKET_SELECT` KHÔNG có hậu tố filename → v3latest từng ghi đè CSV R3, đã tách & khôi phục baseline).
+- **Metric CONTEMPORANEOUS (cùng data state, đã khử drift):** yieldcombo FULL **28.60%** (IS 27.93 / **OOS 29.18**) Sh1.89 DD−18.9 | v3latest FULL **28.87%** (IS **29.33** / **OOS 28.40**) Sh1.91 DD−18.7 | self-check **0 VND** cả hai; recompute CSV khớp FULL.
+- **Verdict:** v3latest +0.27pp FULL nhưng **dồn hết IS (+1.40), OOS THUA −0.78pp** → **IS-overfit, trượt chữ-ký robust** (PASS=cả hai dương). yieldcombo OOS tốt hơn. **GIỮ yieldcombo `rank(1/PE)+rank(1/PCF)`** cho production; KHÔNG nhận v3 composite làm selector.
+- *Lưu ý drift:* R3 pinned 28.26 (snapshot 2026-06-15/19) đã trôi → **28.60** phiên này do as-of republish; dùng cặp contemporaneous trên cho đối chứng v3-vs-combo (KHÔNG so v3latest mới với R3 cũ).
+
+## ⭐🟢 RECOVERY-PARK in FULL V2.4 harness — CLEAN WIN (2026-06-22, self-check 0 VND)
+Recovery-deploy WIRED into pt_v23 (env `RECOVERY_PARK` via `cash_etf_states_by_date` hook; extend parking into CRISIS/BEAR when median liquid-universe pb_z deep-cheap, depth-scaled; pb_z causal prior-month). Survives ON TOP of the existing capit arm.
+- **Lệnh (clean deploy config wmax=0.9):**
+  ```bash
+  NAV_TOTAL_B=50 ETF_LIQ=custompitg BASKET_WT=namecap BASKET_SELECT=yieldcombo PARK_STATES="3:0.7" \
+  RECOVERY_PARK=1 RECOVERY_WMAX=0.9 RECOVERY_PBZ_DEEP=-0.7 AUDIT_END=2026-06-19 $DNA_PYEXE pt_v23_audit_2014.py v23a none postbull 0 edge
+  ```
+- **CSV:** `data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark90z70.csv`
+- **Metric (contemporaneous, restored data):** baseline R3 **29.92%**/Sh1.96/DD−18.5/Cal1.61 → **recovery wmax0.9 30.71%**/Sh1.98/**DD−17.5**/Cal1.76 | both self-check **0 VND**. Δ **+0.79pp CAGR, −1.0pp MaxDD (BETTER), +0.15 Calmar**. Fires 59 deep-cheap CRISIS/BEAR days (COVID+SCB).
+- **Self-check note:** wmax=1.0 gives 30.97% but cash-flow err 12,628 VND (parking frac=1.0 edge: no cash cushion for JIT sweep). wmax=0.9 leaves cushion → EXACT 0 VND, captures ~all upside (−0.26pp vs 1.0). **Deploy 0.9.**
+- **First real V2.4 enhancement of the 2026-06-21/22 session** that adds return AND cuts drawdown AND passes strict audit AND survives capit. Grounded in user conviction + value-IC-strongest-in-DOWN + large-n cheapness→payoff.
+- **Caveat:** fires 59 days/2 episodes (COVID+SCB), all OOS (IS had no deep-cheap crisis) → opportunity-capture/fail-safe profile like DT5G, not a statistically-robust re-tunable knob.
+
+**UPDATE 2026-06-22 — BEST CLEAN config + "margin" correction:**
+- **Deploy config (clean, leverage-free): `RECOVERY_PARK=1 RECOVERY_WMAX=0.95 RECOVERY_PBZ_DEEP=-0.5`** → CAGR **31.81%** / Sh **2.02** / MaxDD **−16.4%** / Calmar **1.94** | self-check **0 VND**. vs baseline R3 29.92%: **+1.89pp CAGR, −2.1pp MaxDD (BETTER), +0.33 Calmar**. CSV `..._recpark95z50.csv`.
+- **CORRECTION:** the parking vehicle CANNOT use margin (engine `simulate_holistic_nav.py` line 197: "ETF parking never uses margin"; buy caps at available cash). So earlier `wmax=1.5` was NOT leverage — it was a STEEPER idle-cash deployment (deploy ~full cash at MODERATE cheap pb_z~−0.5). The +1.9pp/−2.1pp DD is **LEVERAGE-FREE** (no borrow, no margin-call risk) — better than margin.
+- **Self-check root:** `etf_frac=1.0` (deploy 100% pool = zero cash cushion) → JIT-sweep rounding residual (12.6k–54k VND, transient, final-NAV exact). Cap at **0.95** (5% cushion) → EXACT 0 VND, captures ~all upside (31.81 ≥ the dirty 1.0/1.5 runs).
+- **Robust family (all beat baseline, better DD):** 0.9/−0.7 → 30.71% (gentle) … 0.95/−0.5 → 31.81% (aggressive). Deployment aggressiveness = (wmax, deep); same 59 fire-days. **Deploy 0.95/−0.5 (clean best).**
+- **REAL margin (>100%)** would need `max_gross_exposure` on the STOCK book (real borrow, cash<0) — SEPARATE mechanism, riskier, optional future build; idle-cash 0.95 already captures the cheap-deploy edge leverage-free. **trading_rules v1.3 regime-cap 1.5x = for that future margin path, not this idle-cash config.**
+- Status: PROPOSED V2.4 add, paper → user go-live approval + Spyros review.
+
+## 🟢 RECOVERY-DEPLOY (valuation-conditioned re-risk) — thesis CONFIRMED, rare-firing opportunity-capture (2026-06-22)
+Luận điểm user: cơ hội bất đối xứng ở phục hồi CRISIS→BEAR + định giá rẻ, KHÔNG phải đòn bẩy EXBULL. Validated qua 2 bước:
+- **Event-study** (`probe_recovery_signal.py`): deploy trong CRISIS/BEAR fwd-6M VNINDEX = naive +0.2% vs **+cheap(med pb_z≤−0.3) +19.8% win100%**; rate signals (refi/deposit) LAG & không phân biệt. Gate định-giá-vs-lịch-sử tự lọc dao rơi: **né mid-2022 (pb_z +0.75 = vẫn đắt dù −25% từ đỉnh), bắt COVID-2020 (pb_z −0.78)**. ⇒ KHÔNG cần overlay lãi suất; KHÔNG hồi sinh EASING_FLOOR.
+- **Allocation backtest** (`backtest_recovery_alloc.py`, VNINDEX-exposure, deposit-thật+borrow10%+T+1+ramp3+TC0.1%): baseline DT5G-curve 14.7%/Sh1.18/DD−18.4 → recovery mild(C.35/B.55) **15.3%/Sh1.21/DD−18.4** → deep(C.70/B.70) 15.8%/Sh1.24. **MaxDD KHÔNG đổi** (deploy chỉ khi rẻ=gần đáy). Self-check: T+1 lag, pb_z/deposit causal, fire 59 phiên.
+- **BẢN CHẤT (trung thực):** IS 2014-19 y hệt (14.3%) — signal CHƯA BAO GIỜ fire in-sample; toàn bộ edge = **2 episode/59 phiên (COVID + post-SCB), đều OOS**. Profile = DT5G: opportunity-capture hiếm nổ, DD-free khi nổ, KHÔNG robust thống kê từ 2 sự kiện. **Deploy CONSERVATIVE (mild), đừng tune sâu.** Caveat: VNINDEX-proxy, chưa wire vào custom30V allocator (baseline 14.7≠V2.4 28; đây là increment exposure-timing).
+
+**META — 8L research 2026-06-21/22: 4 enhancement ứng viên ĐỀU trượt OOS/mỹ phẩm** → FSCORE-tilt (âm), rating-tilt (dilutive), momentum-regime (no edge), v3-composite (IS-overfit). **Production simple yieldcombo = robust-optimal đã được xác nhận** → de-risk go-live 2026-06-30 (đừng thêm phức tạp).
+
 **THREAD (a) — FSCORE enhancer: proxy NEGATIVE (2026-06-21, `probe_fscore_select.py`).** Pre-backtest proxy (top-30 of top-60 liquid, gate≤3, equal-wt mean profit_2M, 47 quý): thêm `FS_W*rank(FSCORE)` vào điểm yieldcombo **LÀM TỆ** mọi trọng số (FS_W 0.25/0.5/0.75/1.0 = −0.27/−0.34/−0.24/−0.46pp vs base 3.80%), cả IS(1.55) lẫn OOS(5.79), win%q<50. **Vì sao:** IC-biên +0.041 của FSCORE là hiệu ứng *chiều rộng* (~1000 mã gate); KHÔNG sống trong rổ top-30-value cô đặc giữa 60 mã thanh khoản mà custom30V build (FSCORE bị nén + kéo ngược trục value). ⇒ **Đừng đốt full backtest cho dạng tilt ngây thơ**; chuyển hướng: FSCORE làm GATE đáy (loại bottom-FSCORE khỏi pool trước khi rank value) hoặc dạng interaction, chỉ backtest form nào vượt base trong proxy trước. *(Proxy không NAV/cost; full pt_v23 vẫn là trọng tài cuối.)*

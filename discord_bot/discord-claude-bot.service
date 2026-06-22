@@ -1,0 +1,18 @@
+[Unit]
+Description=Discord <-> Claude Code bridge
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=trido
+WorkingDirectory=/home/trido/thanhdt/discord_bot
+Environment=HOME=/home/trido
+Environment=PATH=/home/trido/.local/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=/home/trido/thanhdt/discord_bot/venv/bin/python /home/trido/thanhdt/discord_bot/bot.py
+Restart=on-failure
+RestartSec=5
+# logs -> journalctl -u discord-claude-bot -f
+
+[Install]
+WantedBy=multi-user.target

@@ -255,11 +255,21 @@ BULL_PARK_EXT_LO  = float(os.environ.get("BULL_PARK_EXT_LO", "0.10"))    # ext<=
 BULL_PARK_EXT_HI  = float(os.environ.get("BULL_PARK_EXT_HI", "0.30"))
 _bullpark_tag = "" if not BULL_PARK_COND else f"_bullpark{int(BULL_PARK_BREADTH*100)}f{int(BULL_PARK_FRAC*100)}"
 _c30b_tag = "" if os.environ.get("BULL_VEHICLE_C30B", "0") != "1" else f"_c30bfl{os.environ.get('C30B_FLOOR','5')}"
+# RECOVERY-PARK (Taylor 2026-06-22): deploy idle cash into the custom30V parking vehicle in CRISIS/BEAR
+# ONLY when the market is GENUINELY cheap vs 5Y history (median liquid-universe pb_z deep-negative),
+# depth-scaled (bet bigger the cheaper). pb_z-vs-own-history is the falling-knife filter (rejected the
+# Jun-2022 "cheap-vs-peak but expensive-vs-history" bounce; fired at COVID). Env-gated, default OFF ->
+# cash_etf_states_by_date=None -> byte-identical to production R3. wmax<=1.0 = idle-cash only (no margin).
+RECOVERY_PARK      = os.environ.get("RECOVERY_PARK", "0") == "1"
+RECOVERY_PBZ_START = float(os.environ.get("RECOVERY_PBZ_START", "-0.3"))   # begin scaling at this cheapness
+RECOVERY_PBZ_DEEP  = float(os.environ.get("RECOVERY_PBZ_DEEP", "-0.7"))    # full deploy at/below this
+RECOVERY_WMAX      = float(os.environ.get("RECOVERY_WMAX", "1.0"))         # max park frac (<=1.0 = no margin)
+_recpark_tag = "" if not RECOVERY_PARK else f"_recpark{int(RECOVERY_WMAX*100)}z{int(abs(RECOVERY_PBZ_DEEP)*100)}"
 AUDIT_PATH  = os.path.join(WORKDIR, "data",
                            {"v23a": "v23_golive_audit_2014_now.csv",
                             "v23c": "v23c_golive_audit_2014_now.csv",
                             "v22base": "v22base_audit_2014_now.csv",
-                            "singlebook": "singlebook_audit_2014_now.csv"}.get(MODE, MODE+"_audit.csv").replace(".csv", _capsuf + _matsuf + _liqsuf + _park_tag + _wt_tag + _sz_tag + _qt_tag + _bullpark_tag + _c30b_tag + _NAV_TAG + _START_TAG + ".csv"))
+                            "singlebook": "singlebook_audit_2014_now.csv"}.get(MODE, MODE+"_audit.csv").replace(".csv", _capsuf + _matsuf + _liqsuf + _park_tag + _wt_tag + _sz_tag + _qt_tag + _bullpark_tag + _c30b_tag + _recpark_tag + _NAV_TAG + _START_TAG + ".csv"))
 
 BUY_TIERS_V11 = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
                  "MOMENTUM_A","MOMENTUM_S_N","COMPOUNDER_BUY","DEEP_VALUE_RECOVERY","S_PRO",
@@ -868,13 +878,42 @@ GROUP BY t.time""")
                 if frac > 0.01: base[st] = frac; _nfire += 1
         BULL_PARK_BY_DATE[d] = base
     print(f"  [bull-park] ON breadth>={BULL_PARK_BREADTH} frac{BULL_PARK_FRAC} ext-taper[{BULL_PARK_EXT_LO},{BULL_PARK_EXT_HI}] -> {_nfire} bull-days deploy")
+# RECOVERY-PARK per-date override: extend parking into CRISIS/BEAR when GENUINELY cheap (median pb_z deep),
+# depth-scaled. Causal: uses PRIOR completed month's median pb_z (no look-ahead). Merges onto BULL_PARK
+# (recovery handles states 1/2, bull handles 4/5 -> compatible). OFF -> None -> byte-identical to prod.
+RECOVERY_PARK_BY_DATE = None
+if RECOVERY_PARK:
+    _mc = bq(f"""SELECT FORMAT_DATE('%Y-%m', t.time) ym,
+      APPROX_QUANTILES(SAFE_DIVIDE(t.PB - t.PB_MA5Y, NULLIF(t.PB_SD5Y,0)), 2)[OFFSET(1)] AS med_pbz
+    FROM tav2_bq.ticker_prune AS t WHERE t.PB_SD5Y>0 AND t.Trading_Value_1M_P50>3e9
+      AND t.time BETWEEN DATE '{START_DATE}' AND DATE '{END_DATE}' GROUP BY ym""")
+    _pbz_m = {r["ym"]: r["med_pbz"] for _, r in _mc.iterrows()}
+    def _pbz_asof(dd):
+        pm = (pd.Timestamp(dd).to_period("M") - 1).strftime("%Y-%m")   # prior completed month (causal)
+        return _pbz_m.get(pm, np.nan)
+    RECOVERY_PARK_BY_DATE = {}; _nrec = 0
+    for d in vni_dates:
+        base = dict(BULL_PARK_BY_DATE[d]) if BULL_PARK_BY_DATE else dict(PARK_STATES_DICT)
+        st = int(state_ff.get(d) or 3)
+        if st in (1, 2):
+            z = _pbz_asof(d)
+            if pd.notna(z) and z <= RECOVERY_PBZ_START:
+                frac = float(np.clip((RECOVERY_PBZ_START - z) / (RECOVERY_PBZ_START - RECOVERY_PBZ_DEEP), 0.0, 1.0))
+                base_st = float(PARK_STATES_DICT.get(st, 0.0))
+                w = base_st + frac * (RECOVERY_WMAX - base_st)
+                if w > base_st + 0.01:
+                    base[st] = w; _nrec += 1
+        RECOVERY_PARK_BY_DATE[d] = base
+    print(f"  [recovery-park] ON pbz[{RECOVERY_PBZ_START}->{RECOVERY_PBZ_DEEP}] wmax{RECOVERY_WMAX} "
+          f"-> {_nrec} deep-cheap CRISIS/BEAR days deploy idle cash into custom30V")
+PARK_BY_DATE = RECOVERY_PARK_BY_DATE if RECOVERY_PARK else BULL_PARK_BY_DATE
 BAL_KW = dict(allowed_tiers=RS["allowed_tiers"], max_positions=MAX_POS_V11,
               hold_days=45, stop_loss=-0.20, min_hold=2, slippage=0.0, init_nav=BAL_NAV,
               sector_limit_per_sector={8: 4}, ticker_sector_map=sec_map,
               sector_cap_exempt_tiers=RS["sector_cap_exempt"],
               tier_weights_by_state=RS["tier_weights_by_state"],
               deposit_annual=0.0, borrow_annual=0.10, state_by_date=state_ff,
-              cash_etf_states=PARK_STATES_DICT, cash_etf_states_by_date=BULL_PARK_BY_DATE, vn30_underlying=vn30_underlying,
+              cash_etf_states=PARK_STATES_DICT, cash_etf_states_by_date=PARK_BY_DATE, vn30_underlying=vn30_underlying,
               etf_mgmt_fee_annual=0.0, etf_tracking_drag_annual=0.0, etf_rebalance_friction=0.0015,
               open_prices=open_prices, t1_open_exec=True,
               entry_alt_prices=None,           # AUDIT: BQ-verifiable T+1 Open fills only
@@ -904,7 +943,7 @@ LAG_KW = dict(allowed_tiers=["LAG_HI","LAG_LO"], max_positions=12,
               hold_days_by_tier={"LAG_HI": 25, "LAG_LO": 25},
               tier_position_limit={"LAG_HI": 12, "LAG_LO": 12},
               deposit_annual=0.0, borrow_annual=0.10, state_by_date=state_ff,
-              cash_etf_states=PARK_STATES_DICT, cash_etf_states_by_date=BULL_PARK_BY_DATE, vn30_underlying=vn30_underlying,
+              cash_etf_states=PARK_STATES_DICT, cash_etf_states_by_date=PARK_BY_DATE, vn30_underlying=vn30_underlying,
               etf_mgmt_fee_annual=0.0, etf_tracking_drag_annual=0.0, etf_rebalance_friction=0.0015,
               open_prices=opens_lag, t1_open_exec=True, force_close_eod=False, **ETF_LIQ_KW)
 if capit_events:

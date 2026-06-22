@@ -1,5 +1,5 @@
-🛰️ V2.3 (DT5G) REPORT — 2026-06-19
-Sent: 2026-06-19 18:00 (next session T+1 entry)
+🛰️ V2.3 (DT5G) REPORT — 2026-06-22
+Sent: 2026-06-22 18:00 (next session T+1 entry)
 Market regime (DT5G): 🟡 NEUTRAL (state=3)
 Strategy: V2.3 = BAL | LAG static (always-on, no ensemble switch) + allocator + CAPIT v2
 BAL: max=12 · 10%/pos (book) · hold 45d · stop -20% · Fin/RE cap 4 · 8L≥4 half-size in BEAR/CRISIS
@@ -13,8 +13,8 @@ Không có signal — giữ cash cho book này.
 Không có entry PEAD đến hạn — giữ vị thế LAG hiện có (hold 25td, NO stop) + parking.
 🧯 CAPIT v2: breadth oversold 0.0% &lt; gate 30% — dormant
 📊 Universe distribution
-  BA-core: 0 mã | Compounder/info: 7 mã
-  Wait/Pass/Avoid: 248 mã
+  BA-core: 0 mã | Compounder/info: 4 mã
+  Wait/Pass/Avoid: 249 mã
 💡 Execution checklist (T+1 next session)
   • Vốn: BAL 35% / LAG 65% NAV (rebal CHỈ khi lệch &gt;10pp)
   • BAL: 0 pos × 10% book · stop -20% · hold 45d
@@ -22,16 +22,16 @@ Không có entry PEAD đến hạn — giữ vị thế LAG hiện có (hold 25t
   • Cash dư cả 2 book → 70% E1VFVN30
 🛰️ MARKET-STATE ENGINE — DT5G (gated live)
 
-As of:   2026-06-19
+As of:   2026-06-22
 Source:  DT5G + macro overlay
 
 🔄 DT5G transitions từ 2026-04-01
 
-Số ngày: 55   |   transitions: 0
+Số ngày: 56   |   transitions: 0
   (không có transition — state ổn định)
 
 📊 V2.3 LIVE paper-trade — forward OOS track
-V2.3: chạy từ 2026-06-11 — NAV 50.145B (+0.29%) sau 6 phiên.
+V2.3: chạy từ 2026-06-11 — NAV 49.881B (-0.24%) sau 7 phiên.
 🧪 Benchmark / control arms (paper-trade nền)
 
 V4 12.1 ⭐ctrl 2026-06-01 →  -1.41% (14p)

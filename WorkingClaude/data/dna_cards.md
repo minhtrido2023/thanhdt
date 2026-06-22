@@ -80,12 +80,6 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MARGIN_PEAK (GPM pctile 0.86)
    Runway/TAM:   MODERATE [DOMESTIC]  (rev CAGR +11% vs prior +7%)
 
-━━ CTR [COMPOUNDER]  CHEAP_1lens  (PE15.3 pe_z-0.8 PEG0.66 dd-22%)
-   Engine: COMPOUNDER◆  (ROIC 21%, asset-growth +22%, dilut3y +0%)
-   Moat:   WEAK/commodity []  (GPM 7%, ROE 30%)
-   Margin-cycle: MID (GPM pctile 0.39)
-   Runway/TAM:   MODERATE [DOMESTIC]  (rev CAGR +15% vs prior +23%)
-
 ━━ D2D [COMPOUNDER]  VALUE_TRAP→event_check ASSET_PLAY→NAV  (PE4.0 pe_z-0.8 PEGnan dd-21%)
    Engine: -  (ROIC 16%, asset-growth -6%, dilut3y +0%)
    Moat:   MODERATE []  (GPM 50%, ROE 14%)
@@ -93,14 +87,14 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MID (GPM pctile 0.71)
    Runway/TAM:   CAPTURING [DOMESTIC]  (rev CAGR +68% vs prior -42%)
 
-━━ DHA [COMPOUNDER]  CHEAP_QUALITY  (PE6.5 pe_z-0.6 PEG0.87 dd-29%)
+━━ DHA [COMPOUNDER]  CHEAP_QUALITY  (PE6.4 pe_z-0.6 PEG0.85 dd-29%)
    Engine: COMPOUNDER  (ROIC 18%, asset-growth +3%, dilut3y -0%)
    Moat:   MODERATE []  (GPM 37%, ROE 18%)
    5F-Moat: NARROW [LOCATION] · risk#1: Construction-stone quarry (NNC archetype) = haul-radius location monopoly + scarce mining licenses, fortress B/S (D/E 0.08), Southern-infra tailwind (NP_YoY -40%->+178% as Long Thanh/ring-roads bite). #1 risk: largest quarry Thanh Phu 2 (818k m3/yr) license EXPIRES Dec-2028 = ~2.5yr reserve cliff; only 3 quarries (concentration), mitigated by Ninh Thuan acquisition. pb_z +0.18 fair (asof 2026-06-05)
    Margin-cycle: MARGIN_PEAK (GPM pctile 0.95)
    Runway/TAM:   MATURE/FLAT [DOMESTIC]  (rev CAGR +4% vs prior +5%)
 
-━━ DTD [COMPOUNDER]  VALUE_TRAP→event_check ASSET_PLAY→NAV  (PE7.2 pe_z+0.5 PEGnan dd-34%)
+━━ DTD [COMPOUNDER]  VALUE_TRAP→event_check ASSET_PLAY→NAV  (PE6.3 pe_z+0.5 PEGnan dd-42%)
    Engine: COMPOUNDER  (ROIC 23%, asset-growth +8%, dilut3y +55%)
    Moat:   STRONG []  (GPM 54%, ROE 18%)
    5F-Moat: NARROW [LOCATION] · risk#1: Thanh Dat = small IP developer (KCN Dong Van III, Ha Nam ~65% owned, >70% of rev) — IDC/NTC location archetype (finite permitted land in Japanese-FDI corridor); trades BELOW BOOK (PB 0.58, pb_z -0.87) with low REAL leverage (RealLev 0.03, headline D/E is deferred IP-lease rev not debt). #1 risk: lumpy land-sale revenue (NP_YoY -91% to +633%) + single-flagship-IP concentration + thin 1.8bn liq (asof 2026-06-05)
@@ -122,14 +116,14 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MARGIN_BOTTOM (GPM pctile 0.02)
    Runway/TAM:   CAPTURING [DOMESTIC]  (rev CAGR +27% vs prior +15%)
 
-━━ HDG [COMPOUNDER]  VALUE_TRAP→event_check ASSET_PLAY→NAV  (PE12.7 pe_z-0.0 PEGnan dd-41%)
+━━ HDG [COMPOUNDER]  VALUE_TRAP→event_check ASSET_PLAY→NAV  (PE13.2 pe_z+0.0 PEGnan dd-32%)
    Engine: YIELD◆  (ROIC 13%, asset-growth -2%, dilut3y +51%)
    Moat:   MODERATE []  (GPM 62%, ROE 15%)
    ⚑ ASSET-PLAY: value on NAV/SOTP (lumpy non-operating NP, asset-heavy) — PE/PEG misleading
    Margin-cycle: MARGIN_PEAK (GPM pctile 0.92)
    Runway/TAM:   MATURE/FLAT [DOMESTIC]  (rev CAGR -10% vs prior -4%)
 
-━━ IDC [COMPOUNDER]  VALUE_TRAP→event_check ASSET_PLAY→NAV  (PE8.6 pe_z-0.3 PEGnan dd-19%)
+━━ IDC [COMPOUNDER]  VALUE_TRAP→event_check ASSET_PLAY→NAV  (PE8.5 pe_z-0.3 PEGnan dd-19%)
    Engine: COMPOUNDER  (ROIC 21%, asset-growth +10%, dilut3y +15%)
    Moat:   STRONG []  (GPM 35%, ROE 30%)
    5F-Moat: NARROW [LOCATION/REGULATORY] · risk#1: Dual moat real but bounded — IP leasable land finite (~580ha core, ~3-4yr runway) + contested (BCM/KBC/SIP/SZC); IP land-lease revenue lumpy/one-time recognition (post-2022 shift flatters ROE5Y/GPM); captive regulated utilities (power dist/water/BOT) = the recurring ballast lifting it above pure cyclical; part yield-play (40% payout); ROIC_Min5Y only 6.3% (asof 2026-06-05)
@@ -137,34 +131,34 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MID (GPM pctile 0.67)
    Runway/TAM:   SATURATING [DOMESTIC]  (rev CAGR +2% vs prior +16%)
 
-━━ LHG [COMPOUNDER]  CHEAP_1lens ASSET_PLAY→NAV  (PE4.8 pe_z-1.0 PEG2.53 dd-17%)
+━━ LHG [COMPOUNDER]  CHEAP_1lens ASSET_PLAY→NAV  (PE4.7 pe_z-1.0 PEG2.47 dd-18%)
    Engine: COMPOUNDER  (ROIC 13%, asset-growth +4%, dilut3y +0%)
    Moat:   MODERATE []  (GPM 51%, ROE 15%)
    ⚑ ASSET-PLAY: value on NAV/SOTP (lumpy non-operating NP, asset-heavy) — PE/PEG misleading
    Margin-cycle: MID (GPM pctile 0.47)
    Runway/TAM:   MATURE/FLAT [DOMESTIC]  (rev CAGR +0% vs prior -0%)
 
-━━ LIX [COMPOUNDER]  CHEAP_1lens  (PE9.3 pe_z+0.9 PEGnan dd-25%)
+━━ LIX [COMPOUNDER]  CHEAP_1lens  (PE9.4 pe_z+0.9 PEGnan dd-25%)
    Engine: COMPOUNDER  (ROIC 25%, asset-growth +7%, dilut3y +100%)
    Moat:   MODERATE []  (GPM 22%, ROE 23%)
    Margin-cycle: MID (GPM pctile 0.65)
    Runway/TAM:   MATURE/FLAT [DOMESTIC]  (rev CAGR +5% vs prior -0%)
 
-━━ NCT [COMPOUNDER]  CHEAP_QUALITY  (PE5.7 pe_z-2.0 PEG0.09 dd-10%)
+━━ NCT [COMPOUNDER]  CHEAP_QUALITY  (PE5.7 pe_z-2.0 PEG0.09 dd-11%)
    Engine: COMPOUNDER  (ROIC 60%, asset-growth +13%, dilut3y +0%)
    Moat:   STRONG [infra(cargo)]  (GPM 47%, ROE 54%)
    5F-Moat: NARROW [LOCATION/REGULATORY] · risk#1: Noi Bai air-cargo terminal (Hanoi, SCS analogue) = scarce on-airport concession, elite asset-light economics (ROIC_Min5Y 54%, ROE_Min5Y 50%, near-zero leverage) BUT THREE handlers (NCT/ALS/ACSV — not SCS's duopoly) + ACV favors its own ACSV → caps pricing power/share (NARROW not WIDE). NP re-accelerating +64.5%; pb_z -1.61 cheap vs own history; heavy dividend payer (asof 2026-06-05)
    Margin-cycle: MARGIN_BOTTOM (GPM pctile 0.17)
    Runway/TAM:   CAPTURING [DOMESTIC]  (rev CAGR +22% vs prior -0%)
 
-━━ NNC [COMPOUNDER]  CHEAP_QUALITY  (PE5.6 pe_z-1.3 PEG0.04 dd-42%)
+━━ NNC [COMPOUNDER]  CHEAP_QUALITY  (PE5.6 pe_z-1.3 PEG0.04 dd-43%)
    Engine: COMPOUNDER◆  (ROIC 16%, asset-growth +18%, dilut3y +0%)
    Moat:   MODERATE []  (GPM 50%, ROE 18%)
    5F-Moat: NARROW [LOCATION] · risk#1: Single-asset concentration ~94% revenue on Mui Tau/Tan Lap quarry (Binh Phuoc, licensed to 2043 ~20yr life) — original Nui Nho pit expired 2019/closing so NOT near-term depletion as previously tagged; haul-radius location monopoly real but finite-life + cyclical (ROIC_Min5Y ~1% in license-gap yrs); Long Thanh infra demand tailwind; very thin liquidity = sizing-constrained (asof 2026-06-05)
    Margin-cycle: MARGIN_PEAK (GPM pctile 1.00)
    Runway/TAM:   CAPTURING [DOMESTIC]  (rev CAGR +69% vs prior -44%)
 
-━━ NTC [COMPOUNDER]  VALUE_TRAP→event_check ASSET_PLAY→NAV  (PE11.3 pe_z-0.8 PEGnan dd-19%)
+━━ NTC [COMPOUNDER]  VALUE_TRAP→event_check ASSET_PLAY→NAV  (PE11.3 pe_z-0.9 PEGnan dd-20%)
    Engine: COMPOUNDER◆  (ROIC 13%, asset-growth +10%, dilut3y +0%)
    Moat:   STRONG []  (GPM 55%, ROE 34%)
    5F-Moat: NARROW [LOCATION] · risk#1: Nam Tan Uyen industrial park (Binh Duong FDI corridor) = scarce-licensed-land LOCATION moat (IDC/DTD family); NTU-1&2 100% occupied, growth engine = NTU-3 (346ha, infra done Q4-2026). Headline ROE_Min5Y 26.9% carried by Phuoc Hoa/VRG associate dividends NOT core IP (ROIC_Min5Y only 4.0% = holding-co distortion); lumpy land-recognition; pb_z -1.63 cheap vs own history but 0.6bn liq (asof 2026-06-05)
@@ -172,7 +166,7 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MARGIN_BOTTOM (GPM pctile 0.03)
    Runway/TAM:   CAPTURING [DOMESTIC]  (rev CAGR +34% vs prior +12%)
 
-━━ NTP [COMPOUNDER]  CHEAP_1lens  (PE10.1 pe_z+1.9 PEG0.51 dd-29%)
+━━ NTP [COMPOUNDER]  CHEAP_1lens  (PE10.1 pe_z+1.9 PEG0.51 dd-15%)
    Engine: COMPOUNDER◆  (ROIC 16%, asset-growth +6%, dilut3y +32%)
    Moat:   STRONG []  (GPM 31%, ROE 20%)
    5F-Moat: NARROW [BRAND/DISTRIBUTION] · risk#1: Northern-VN #1 plastic pipe (BMP=south) — 50yr brand + entrenched dealer/installer network = real regional duopoly moat (GPM flat ~31% across 8Q = pass-through pricing, NOT a resin windfall, earnings volume-driven); but REGIONAL not national + Hoa Sen/Dekko competition + 80-85% imported PVC resin price-taker (HDPE+45%/PVC+31% YTD 2026 margin headwind). Entry L (pb_z +1.31 expensive) (asof 2026-06-05)
@@ -199,28 +193,28 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MARGIN_PEAK (GPM pctile 0.77)
    Runway/TAM:   MATURE/FLAT [EXPORT]  (rev CAGR +6% vs prior +6%)
 
-━━ PVC [COMPOUNDER]  CHEAP_1lens  (PE34.6 pe_z-0.8 PEGnan dd-37%)
+━━ PVC [COMPOUNDER]  CHEAP_1lens  (PE34.8 pe_z-0.8 PEGnan dd-37%)
    Engine: LOWROIC_GROWTH  (ROIC 2%, asset-growth +11%, dilut3y +62%)
    Moat:   WEAK/commodity []  (GPM 7%, ROE 2%)
    ⛽ OIL[UPSTREAM_SVC·LEVEL, profit lag ~5Q]: dung dịch khoan; theo hoạt động khoan (level dầu, trễ)
    Margin-cycle: MARGIN_BOTTOM (GPM pctile 0.21)
    Runway/TAM:   DURABLE [DOMESTIC]  (rev CAGR +20% vs prior +15%)
 
-━━ PVD [COMPOUNDER]  CHEAP_QUALITY  (PE14.5 pe_z-0.4 PEG0.14 dd-31%)
+━━ PVD [COMPOUNDER]  CHEAP_QUALITY  (PE15.0 pe_z-0.4 PEG0.15 dd-29%)
    Engine: LOWROIC_GROWTH  (ROIC 3%, asset-growth +10%, dilut3y +0%)
    Moat:   WEAK/commodity []  (GPM 19%, ROE 3%)
    ⛽ OIL[UPSTREAM_SVC·LEVEL, profit lag ~5Q]: P/B dẫn earnings ~4Q → mua theo dầu-cao-bền + P/B, KHÔNG chờ earnings; beta-cao, GPM trễ 5-6Q (cấu trúc 8-12Q)
    Margin-cycle: MID (GPM pctile 0.65)
    Runway/TAM:   CAPTURING [DOMESTIC]  (rev CAGR +33% vs prior +2%)
 
-━━ PVG [COMPOUNDER]  CHEAP_QUALITY  (PE15.1 pe_z+0.0 PEG0.38 dd-35%)
+━━ PVG [COMPOUNDER]  CHEAP_QUALITY  (PE14.9 pe_z+0.0 PEG0.38 dd-37%)
    Engine: -  (ROIC -1%, asset-growth -3%, dilut3y +10%)
    Moat:   WEAK/commodity []  (GPM 7%, ROE 2%)
    ⛽ OIL[GAS_DOWN·INVERSE_MARGIN, profit lag ~1Q]: phân phối LPG; biên ép khi dầu tăng
    Margin-cycle: MARGIN_BOTTOM (GPM pctile 0.24)
    Runway/TAM:   DURABLE [DOMESTIC]  (rev CAGR +15% vs prior +9%)
 
-━━ PVP [COMPOUNDER]  CHEAP_QUALITY  (PE8.1 pe_z+1.1 PEG0.09 dd-9%)
+━━ PVP [COMPOUNDER]  CHEAP_QUALITY  (PE8.4 pe_z+1.2 PEG0.10 dd-6%)
    Engine: LOWROIC_GROWTH◆  (ROIC 9%, asset-growth +8%, dilut3y +10%)
    Moat:   WEAK/commodity []  (GPM 12%, ROE 12%)
    ⛽ OIL[TANKER·FREIGHT_NOT_OIL]: tàu dầu thô (charter dài hạn); ổn định, ít theo dầu spot
@@ -228,14 +222,14 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MID (GPM pctile 0.49)
    Runway/TAM:   CAPTURING [DOMESTIC]  (rev CAGR +21% vs prior -1%)
 
-━━ PVS [COMPOUNDER]  CHEAP_QUALITY  (PE10.3 pe_z-1.5 PEG0.41 dd-29%)
+━━ PVS [COMPOUNDER]  CHEAP_QUALITY  (PE10.5 pe_z-1.4 PEG0.41 dd-27%)
    Engine: LOWROIC_GROWTH◆  (ROIC -1%, asset-growth +13%, dilut3y +7%)
    Moat:   WEAK/commodity []  (GPM 7%, ROE 8%)
    ⛽ OIL[UPSTREAM_SVC·LEVEL, profit lag ~5Q]: EPC/M&C backlog dầu khí; trễ dài như PVD; hưởng đầu tư thượng nguồn
    Margin-cycle: MID (GPM pctile 0.61)
    Runway/TAM:   CAPTURING [DOMESTIC]  (rev CAGR +29% vs prior +1%)
 
-━━ PVT [COMPOUNDER]  CHEAP_QUALITY  (PE9.2 pe_z+2.2 PEG0.19 dd-27%)
+━━ PVT [COMPOUNDER]  CHEAP_QUALITY  (PE9.3 pe_z+2.2 PEG0.19 dd-27%)
    Engine: LOWROIC_GROWTH◆  (ROIC 10%, asset-growth +15%, dilut3y +45%)
    Moat:   WEAK/commodity []  (GPM 14%, ROE 14%)
    ⛽ OIL[TANKER·FREIGHT_NOT_OIL]: ⚠ KHÔNG phải oil-profit play: lợi nhuận theo CƯỚC tanker thế giới + đội tàu, dầu chỉ là chi phí nhiên liệu (NP~oil 0.07). Xem khung freight-rate (RATE_CYCLICAL)
@@ -243,20 +237,20 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MID (GPM pctile 0.47)
    Runway/TAM:   CAPTURING [DOMESTIC]  (rev CAGR +24% vs prior +7%)
 
-━━ SCS [COMPOUNDER]  CHEAP_QUALITY  (PE6.4 pe_z-0.9 PEG3.20 dd-20%)
+━━ SCS [COMPOUNDER]  CHEAP_QUALITY  (PE6.3 pe_z-0.9 PEG3.15 dd-21%)
    Engine: COMPOUNDER  (ROIC 47%, asset-growth +8%, dilut3y +2%)
    Moat:   STRONG [infra-monopoly(cargo)]  (GPM 78%, ROE 47%)
    5F-Moat: NARROW [REGULATORY/LOCATION] · risk#1: Air-cargo terminal duopoly at Tan Son Nhat (only SCS vs TCS) = elite concession economics (ROIC_Min5Y 36%, GPM 78%) but single-asset pinned to one aging airport; Long Thanh (opens ~2026) re-tenders cargo rights via ACV — if SCS loses LTIA Terminal-2 concession, intl volume migrates off TSN (binary regulatory event caps WIDE); growth decelerating post-recovery + CIT-incentive expiry (asof 2026-06-05)
    Margin-cycle: MID (GPM pctile 0.38)
    Runway/TAM:   DURABLE [DOMESTIC]  (rev CAGR +16% vs prior +0%)
 
-━━ SIP [COMPOUNDER]  CHEAP_1lens  (PE9.5 pe_z+0.6 PEGnan dd-18%)
+━━ SIP [COMPOUNDER]  CHEAP_1lens  (PE9.4 pe_z+0.6 PEGnan dd-19%)
    Engine: COMPOUNDER  (ROIC 16%, asset-growth +12%, dilut3y +166%)
    Moat:   MODERATE []  (GPM 16%, ROE 30%)
    Margin-cycle: MARGIN_PEAK (GPM pctile 0.90)
    Runway/TAM:   MODERATE [DOMESTIC]  (rev CAGR +14% vs prior +9%)
 
-━━ TCL [COMPOUNDER]  CHEAP_QUALITY  (PE5.4 pe_z-2.2 PEG0.28 dd-12%)
+━━ TCL [COMPOUNDER]  CHEAP_QUALITY  (PE5.4 pe_z-2.1 PEG0.28 dd-11%)
    Engine: COMPOUNDER  (ROIC 22%, asset-growth +7%, dilut3y +0%)
    Moat:   WEAK/commodity []  (GPM 14%, ROE 23%)
    Margin-cycle: MARGIN_BOTTOM (GPM pctile 0.03)
@@ -269,14 +263,14 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MARGIN_PEAK (GPM pctile 0.85)
    Runway/TAM:   MATURE/FLAT [DOMESTIC]  (rev CAGR -12% vs prior +3%)
 
-━━ VCS [COMPOUNDER]  VALUE_TRAP→event_check  (PE9.4 pe_z+0.3 PEGnan dd-24%)
+━━ VCS [COMPOUNDER]  VALUE_TRAP→event_check  (PE9.0 pe_z+0.3 PEGnan dd-28%)
    Engine: -  (ROIC 20%, asset-growth -3%, dilut3y +0%)
    Moat:   STRONG [TECH+BRAND(global TM)]  (GPM 26%, ROE 22%)
    5F-Moat: NARROW [BRAND/PROCESS] · risk#1: Silicosis/engineered-stone ban contagion (AU banned 2024-07, CA pending) shrinks core high-silica category + 20-46% US tariff on VN; US share already 80%->25%, rev down 12 straight Q; durable part = Breton-licensed process+scale+input self-supply, but historical edge was US-ADD-on-China regulatory arbitrage now reversing against VN (asof 2026-06-05)
    Margin-cycle: MARGIN_BOTTOM (GPM pctile 0.13)
    Runway/TAM:   MATURE/FLAT [EXPORT]  (rev CAGR -9% vs prior -4%)
 
-━━ VGC [COMPOUNDER]  VALUE_TRAP→event_check  (PE15.0 pe_z-0.2 PEGnan dd-33%)
+━━ VGC [COMPOUNDER]  VALUE_TRAP→event_check  (PE14.9 pe_z-0.2 PEGnan dd-33%)
    Engine: COMPOUNDER◆  (ROIC 14%, asset-growth +4%, dilut3y +0%)
    Moat:   MODERATE []  (GPM 29%, ROE 17%)
    5F-Moat: NARROW [LOCATION/REGULATORY] · risk#1: Only the industrial-park land-bank segment (~70% gross profit) is the moat (scarce licensed N-VN land, Samsung/Amkor anchored, >86% occupancy); building-materials (glass glut/gas-cost/Chinese imports) = cyclical drag; IP land finite → must re-buy scarce land (capex+leverage); GELEX control + deferred state divestment overhang (quant STRONG/rating1 overstated) (asof 2026-06-05)
@@ -290,28 +284,35 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MID (GPM pctile 0.39)
    Runway/TAM:   SATURATING [DOMESTIC]  (rev CAGR -16% vs prior +15%)
 
-━━ VNM [COMPOUNDER]  CHEAP_QUALITY  (PE12.0 pe_z-1.4 PEG0.22 dd-20%)
+━━ VNM [COMPOUNDER]  CHEAP_QUALITY  (PE11.9 pe_z-1.4 PEG0.22 dd-20%)
    Engine: -  (ROIC 24%, asset-growth +1%, dilut3y +0%)
    Moat:   STRONG [BRAND(dairy)]  (GPM 42%, ROE 29%)
    5F-Moat: WIDE [BRAND/DISTRIBUTION] · risk#1: Permanent domestic share ceiling — premium fresh-milk leaking to TH True Milk (~30-45% of fresh) + FTA zero-tariff dairy imports nibble the premium edge; moat is mature/TRIMMED not expanding (ROIC5Y drifted 31.5%->24.4%); core mass-market distribution+brand+scale intact (survived self-inflicted 2024-25 channel restructuring, fortress B/S real-lev 0.28, ROIC_Min5Y 22.5%) (asof 2026-06-05)
    Margin-cycle: MID (GPM pctile 0.58)
    Runway/TAM:   MATURE/FLAT [DOMESTIC]  (rev CAGR +4% vs prior +2%)
 
-━━ VOS [COMPOUNDER]  VALUE_TRAP→event_check  (PE4.9 pe_z-0.1 PEGnan dd-32%)
+━━ VOS [COMPOUNDER]  VALUE_TRAP→event_check  (PE4.8 pe_z-0.1 PEGnan dd-33%)
    Engine: LOWROIC_GROWTH  (ROIC 10%, asset-growth +9%, dilut3y +0%)
    Moat:   WEAK/commodity []  (GPM 8%, ROE 28%)
    🚢 FREIGHT[DRY_BULK·BDI·NP~+0.55]  (BDI now 2659,real): thuần BDI (NP~BDI +0.55, NPM +0.58): LỖ ở đáy cước, lãi khi BDI vọt. ⚠ bẫy đỉnh-cước rõ nhất nhóm
    Margin-cycle: MID (GPM pctile 0.74)
    Runway/TAM:   SATURATING [DOMESTIC]  (rev CAGR +10% vs prior +20%)
 
-━━ BIC [COMPOUNDER]  NOT_CHEAP ASSET_PLAY→NAV  (PE10.3 pe_z+2.7 PEGnan dd-24%)
+━━ BIC [COMPOUNDER]  NOT_CHEAP ASSET_PLAY→NAV  (PE10.2 pe_z+2.7 PEGnan dd-25%)
    Engine: LOWROIC_GROWTH  (ROIC -23%, asset-growth +13%, dilut3y +72%)
    Moat:   MODERATE []  (GPM 16%, ROE 16%)
    ⚑ ASSET-PLAY: value on NAV/SOTP (lumpy non-operating NP, asset-heavy) — PE/PEG misleading
    Margin-cycle: MID (GPM pctile 0.68)
    Runway/TAM:   MODERATE [DOMESTIC]  (rev CAGR +14% vs prior +18%)
 
-━━ BSR [COMPOUNDER]  CHEAP_1lens  (PE10.0 pe_z+0.2 PEG0.01 dd-31%)
+━━ BMP [COMPOUNDER]  NOT_CHEAP  (PE10.0 pe_z+0.5 PEG1.69 dd-15%)
+   Engine: COMPOUNDER  (ROIC 41%, asset-growth +7%, dilut3y +0%)
+   Moat:   STRONG [BRAND(pipes S/Central)]  (GPM 47%, ROE 32%)
+   5F-Moat: NARROW [BRAND/DISTRIBUTION/COST] · risk#1: 47% GPM is a transient PVC-resin-cost windfall reverting toward ~43% as resin reflates (HDPE +45%/PVC +31% YTD 2026); lost share 27%->23% in 2024, defended only via 5-yr-high discounting (19.7% disc/rev) = not pricing power; ROIC_Min5Y 13.5%/ROE_Min5Y 9% floors confirm cyclical; ~100% payout (148.6% div) = saturated cash-cow; SCG resin-supply cost edge real but commodity-based (asof 2026-06-05)
+   Margin-cycle: MARGIN_PEAK (GPM pctile 1.00)
+   Runway/TAM:   MODERATE [DOMESTIC]  (rev CAGR -1% vs prior +10%)
+
+━━ BSR [COMPOUNDER]  CHEAP_1lens  (PE10.1 pe_z+0.2 PEG0.01 dd-30%)
    Engine: LOWROIC_GROWTH  (ROIC 10%, asset-growth +11%, dilut3y +61%)
    Moat:   WEAK/commodity []  (GPM 10%, ROE 15%)
    ⛽ OIL[REFINE·DIRECTION+CRACK, profit lag ~0Q]: momentum theo HƯỚNG dầu; LỖ khi dầu sập (60% quý dầu giảm>10% lỗ, NRV tồn kho); lãi đột biến khi dầu vọt (2026Q1 +8265 tỷ). Crack(level) R²0.56=động lực chính
@@ -325,20 +326,26 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MID (GPM pctile 0.29)
    Runway/TAM:   SATURATING [DOMESTIC]  (rev CAGR +9% vs prior +21%)
 
-━━ DHG [COMPOUNDER]  CHEAP_1lens  (PE13.5 pe_z+0.4 PEG0.73 dd-9%)
+━━ CTR [COMPOUNDER]  CHEAP_1lens  (PE15.6 pe_z-0.7 PEG0.67 dd-21%)
+   Engine: COMPOUNDER◆  (ROIC 21%, asset-growth +22%, dilut3y +0%)
+   Moat:   WEAK/commodity []  (GPM 7%, ROE 30%)
+   Margin-cycle: MID (GPM pctile 0.39)
+   Runway/TAM:   MODERATE [DOMESTIC]  (rev CAGR +15% vs prior +23%)
+
+━━ DHG [COMPOUNDER]  CHEAP_1lens  (PE13.6 pe_z+0.5 PEG0.73 dd-9%)
    Engine: YIELD◆  (ROIC 22%, asset-growth +3%, dilut3y +0%)
    Moat:   STRONG [BRAND(pharma)]  (GPM 48%, ROE 22%)
    5F-Moat: WIDE [BRAND/DISTRIBUTION] · risk#1: Vietnam's #1 domestic pharma — widest distribution moat (~30,000 OTC pharmacies, 3,546 chain stores, 3,200 hospitals, 34 branches) + 40yr brand + 2 Japan-GMP lines, Taisho (JP) 51% parent; durable WIDE (ROIC_Min5Y 19.4%, GPM 44->48%). BUT mature/low-growth (RevYoY ~flat, moat protects margins not compounding) + generic price competition; entry L (PB 2.79/pb_z +0.05 no discount, 0.76bn liq) (asof 2026-06-05)
    Margin-cycle: MID (GPM pctile 0.74)
    Runway/TAM:   MATURE/FLAT [DOMESTIC]  (rev CAGR +4% vs prior +6%)
 
-━━ DMC [COMPOUNDER]  CHEAP_QUALITY  (PE9.8 pe_z-0.2 PEG0.78 dd-9%)
+━━ DMC [COMPOUNDER]  CHEAP_QUALITY  (PE10.1 pe_z-0.0 PEG0.81 dd-5%)
    Engine: COMPOUNDER  (ROIC 14%, asset-growth +5%, dilut3y +0%)
    Moat:   MODERATE []  (GPM 20%, ROE 13%)
    Margin-cycle: MARGIN_BOTTOM (GPM pctile 0.03)
    Runway/TAM:   MODERATE [DOMESTIC]  (rev CAGR +9% vs prior +3%)
 
-━━ DVP [COMPOUNDER]  CHEAP_1lens ASSET_PLAY→NAV  (PE8.4 pe_z+0.9 PEGnan dd-11%)
+━━ DVP [COMPOUNDER]  CHEAP_1lens ASSET_PLAY→NAV  (PE8.4 pe_z+0.9 PEGnan dd-5%)
    Engine: -  (ROIC 17%, asset-growth +2%, dilut3y +0%)
    Moat:   STRONG []  (GPM 57%, ROE 23%)
    5F-Moat: NARROW [LOCATION] · risk#1: Dinh Vu (Hai Phong) container port = location/concession moat (GMD archetype) BUT shallow river terminal structurally losing larger-vessel cargo to upstream Lach Huyen deep-water (6 berths live 2026, area throughput +34% to 1.2M TEU); high-return (ROE_Min5Y 20.6%, GPM 43->57%) + dividend payer but eroding share. pb_z +0.83 no margin of safety (asof 2026-06-05)
@@ -346,21 +353,21 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MARGIN_PEAK (GPM pctile 0.98)
    Runway/TAM:   MATURE/FLAT [DOMESTIC]  (rev CAGR +1% vs prior +2%)
 
-━━ FPT [COMPOUNDER]  CHEAP_1lens  (PE12.6 pe_z-0.6 PEG0.88 dd-35%)
+━━ FPT [COMPOUNDER]  CHEAP_1lens  (PE12.4 pe_z-0.6 PEG0.86 dd-35%)
    Engine: COMPOUNDER◆  (ROIC 18%, asset-growth +5%, dilut3y +55%)
    Moat:   STRONG [TECH(software export)]  (GPM 36%, ROE 27%)
    5F-Moat: NARROW [SWITCHING/COST/SCALE] · risk#1: GenAI coding agents commoditize the IT labor-arbitrage model (same substitution that crashed TCS/Infosys/Wipro 2026, ~20-30% of traditional outsourcing rev at risk ~18mo); Japan relationship lock-in is the durable edge; wage inflation narrows arbitrage; durable WIDE telecom leg being deconsolidated out of core FY2026 — realized durability WIDE-grade but forward break-risk caps at NARROW (asof 2026-06-05)
    Margin-cycle: MID (GPM pctile 0.53)
    Runway/TAM:   MODERATE [EXPORT]  (rev CAGR +13% vs prior +17%)
 
-━━ GAS [COMPOUNDER]  NOT_CHEAP  (PE16.9 pe_z+1.1 PEG2.49 dd-37%)
+━━ GAS [COMPOUNDER]  NOT_CHEAP  (PE17.0 pe_z+1.2 PEG2.50 dd-37%)
    Engine: YIELD◆  (ROIC 20%, asset-growth +2%, dilut3y +26%)
    Moat:   WEAK/commodity []  (GPM 12%, ROE 19%)
    ⛽ OIL[GAS_MID·LEVEL, profit lag ~1Q]: giá bán khí neo FO (trượt ngắn) → NP/Rev lag 0-1Q, biên ỔN ĐỊNH ~20% bất kể dầu; dầu chi phối doanh thu KHÔNG biên. Trục 2 = sản lượng khí (mỏ mới/điện)
    Margin-cycle: MARGIN_BOTTOM (GPM pctile 0.04)
    Runway/TAM:   DURABLE [DOMESTIC]  (rev CAGR +16% vs prior +9%)
 
-━━ GMD [COMPOUNDER]  CHEAP_1lens  (PE17.4 pe_z+0.5 PEG0.53 dd-6%)
+━━ GMD [COMPOUNDER]  CHEAP_1lens  (PE17.1 pe_z+0.4 PEG0.52 dd-8%)
    Engine: LOWROIC_GROWTH  (ROIC 9%, asset-growth +16%, dilut3y +42%)
    Moat:   MODERATE []  (GPM 46%, ROE 16%)
    5F-Moat: NARROW [LOCATION/REGULATORY] · risk#1: Deep-water concession/location edge REAL but contested — Cai Mep-Thi Vai cluster overbuilt (Gemalink vs SSIT/TCIT/CMIT/SP-PSA) + Lach Huyen & MSC Can Gio mega-port add capacity; tariffs govt-banded (price-taker); buyers=concentrated shipping alliances; headline ROE inflated by one-off port-stake sale gains, true through-cycle ROIC only 6.5-9% (quant STRONG overstated) (asof 2026-06-05)
@@ -368,7 +375,7 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MARGIN_PEAK (GPM pctile 0.95)
    Runway/TAM:   DURABLE [DOMESTIC]  (rev CAGR +16% vs prior +15%)
 
-━━ MCH [COMPOUNDER]  NOT_CHEAP  (PE23.9 pe_z+1.9 PEG1.98 dd-30%)
+━━ MCH [COMPOUNDER]  NOT_CHEAP  (PE24.3 pe_z+1.9 PEG2.01 dd-29%)
    Engine: -  (ROIC 24%, asset-growth +2%, dilut3y +81%)
    Moat:   STRONG [BRAND(consumer)]  (GPM 46%, ROE 36%)
    5F-Moat: NARROW [BRAND/DISTRIBUTION] · risk#1: Brand moat is category-specific (fortress fish/soy/chili sauces ~53-69% share, only contested #2 in noodles vs Acecook 35%); 2025 Direct-Coverage rollout caused 3 straight down quarters (FSCORE->1-2); distribution leans on related-party WinCommerce (captive but private-label conflict); PB 9.5x no margin of safety (asof 2026-06-05)
@@ -381,7 +388,7 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MARGIN_BOTTOM (GPM pctile 0.22)
    Runway/TAM:   MATURE/FLAT [DOMESTIC]  (rev CAGR -2% vs prior n/a)
 
-━━ MWG [COMPOUNDER]  CHEAP_1lens  (PE14.0 pe_z-0.4 PEG0.19 dd-17%)
+━━ MWG [COMPOUNDER]  CHEAP_1lens  (PE13.8 pe_z-0.4 PEG0.18 dd-18%)
    Engine: LOWROIC_GROWTH  (ROIC 10%, asset-growth +8%, dilut3y +0%)
    Moat:   MODERATE [SCALE+exec(retail)]  (GPM 20%, ROE 17%)
    Margin-cycle: MID (GPM pctile 0.65)
@@ -394,7 +401,7 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MID (GPM pctile 0.60)
    Runway/TAM:   MODERATE [DOMESTIC]  (rev CAGR +6% vs prior +9%)
 
-━━ PHP [COMPOUNDER]  CHEAP_1lens  (PE12.7 pe_z-0.2 PEG0.11 dd-6%)
+━━ PHP [COMPOUNDER]  CHEAP_1lens  (PE12.6 pe_z-0.3 PEG0.11 dd-7%)
    Engine: LOWROIC_GROWTH  (ROIC 10%, asset-growth +13%, dilut3y +0%)
    Moat:   MODERATE []  (GPM 50%, ROE 13%)
    Margin-cycle: MARGIN_PEAK (GPM pctile 1.00)
@@ -414,7 +421,7 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MARGIN_PEAK (GPM pctile 1.00)
    Runway/TAM:   MATURE/FLAT [DOMESTIC]  (rev CAGR -8% vs prior +0%)
 
-━━ SGP [COMPOUNDER]  CHEAP_1lens  (PE12.6 pe_z-0.5 PEG0.42 dd-27%)
+━━ SGP [COMPOUNDER]  CHEAP_1lens  (PE12.3 pe_z-0.5 PEG0.41 dd-29%)
    Engine: LOWROIC_GROWTH  (ROIC 7%, asset-growth +3%, dilut3y +0%)
    Moat:   MODERATE []  (GPM 32%, ROE 15%)
    5F-Moat: NONE [NONE] · risk#1: Quant moat FALSE-POSITIVE — Saigon Port's legacy HCMC river ports (Nha Rong-Khanh Hoi) being SHUT/relocated for urban redevelopment = operating concession being EXTINGUISHED not defended; hollow core (ROIC_Min5Y 3.0%, ROE_Min5Y 6.3%). Real value = riverfront LAND monetization (~1,200bn relocation gain pending since 2018) + distressed Cai Mep JV stakes (SP-PSA/SSIT/CMIT). An asset-play/sum-of-parts, NOT a franchise moat; one broker SELL (asof 2026-06-05)
@@ -422,14 +429,14 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MARGIN_BOTTOM (GPM pctile 0.14)
    Runway/TAM:   MATURE/FLAT [DOMESTIC]  (rev CAGR +7% vs prior -1%)
 
-━━ TLG [COMPOUNDER]  CHEAP_QUALITY  (PE9.7 pe_z+0.9 PEG0.21 dd-18%)
+━━ TLG [COMPOUNDER]  CHEAP_QUALITY  (PE9.8 pe_z+1.0 PEG0.21 dd-16%)
    Engine: COMPOUNDER  (ROIC 18%, asset-growth +9%, dilut3y +24%)
    Moat:   STRONG []  (GPM 50%, ROE 19%)
    5F-Moat: WIDE [BRAND/DISTRIBUTION] · risk#1: Vietnam #1 stationery (~60% pen share, brands Thien Long/Bizner/FlexOffice) — asymmetric brand+3800-POS distribution+scale a new entrant can't buy (validated by Kokuyo JP paying ~4700bn for >65% control); durable WIDE (ROIC_Min5Y 16.6%, GPM rising 45->50%). #1 risk: secular handwriting/paper decline + shrinking school-age cohort slowly erode core TAM. Entry L (PB ~2.0/pb_z +1.9 expensive, thin liq) (asof 2026-06-05)
    Margin-cycle: MARGIN_PEAK (GPM pctile 1.00)
    Runway/TAM:   MATURE/FLAT [DOMESTIC]  (rev CAGR +6% vs prior +5%)
 
-━━ VSA [COMPOUNDER]  CHEAP_1lens  (PE11.2 pe_z+1.0 PEGnan dd-18%)
+━━ VSA [COMPOUNDER]  CHEAP_1lens  (PE11.1 pe_z+0.9 PEGnan dd-19%)
    Engine: -  (ROIC 5%, asset-growth -9%, dilut3y +0%)
    Moat:   WEAK/commodity []  (GPM 9%, ROE 9%)
    🚢 FREIGHT[DRY_BULK·BDI·NP~+0.00]  (BDI now 2659,real): tín hiệu yếu/nhiễu (thanh khoản nhỏ); danh nghĩa bulk
@@ -443,20 +450,13 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MID (GPM pctile 0.39)
    Runway/TAM:   MATURE/FLAT [DOMESTIC]  (rev CAGR -2% vs prior +0%)
 
-━━ BMP [COMPOUNDER]  CHEAP_1lens  (PE9.5 pe_z+0.3 PEG1.61 dd-19%)
-   Engine: COMPOUNDER  (ROIC 41%, asset-growth +7%, dilut3y +0%)
-   Moat:   STRONG [BRAND(pipes S/Central)]  (GPM 47%, ROE 32%)
-   5F-Moat: NARROW [BRAND/DISTRIBUTION/COST] · risk#1: 47% GPM is a transient PVC-resin-cost windfall reverting toward ~43% as resin reflates (HDPE +45%/PVC +31% YTD 2026); lost share 27%->23% in 2024, defended only via 5-yr-high discounting (19.7% disc/rev) = not pricing power; ROIC_Min5Y 13.5%/ROE_Min5Y 9% floors confirm cyclical; ~100% payout (148.6% div) = saturated cash-cow; SCG resin-supply cost edge real but commodity-based (asof 2026-06-05)
-   Margin-cycle: MARGIN_PEAK (GPM pctile 1.00)
-   Runway/TAM:   MODERATE [DOMESTIC]  (rev CAGR -1% vs prior +10%)
-
 ━━ CVT [COMPOUNDER]  VALUE_TRAP→event_check  (PE23.3 pe_z+1.5 PEGnan dd-9%)
    Engine: YIELD◆  (ROIC 6%, asset-growth +2%, dilut3y +0%)
    Moat:   WEAK/commodity []  (GPM 9%, ROE 8%)
    Margin-cycle: MARGIN_BOTTOM (GPM pctile 0.02)
    Runway/TAM:   MODERATE [DOMESTIC]  (rev CAGR +5% vs prior +11%)
 
-━━ HAH [COMPOUNDER]  CHEAP_QUALITY  (PE8.0 pe_z+0.6 PEG0.28 dd-24%)
+━━ HAH [COMPOUNDER]  CHEAP_QUALITY  (PE7.9 pe_z+0.6 PEG0.28 dd-25%)
    Engine: COMPOUNDER◆  (ROIC 20%, asset-growth +23%, dilut3y +168%)
    Moat:   STRONG []  (GPM 40%, ROE 25%)
    🚢 FREIGHT[CONTAINER·SCFI/FBX·NP~+0.61]: NP~cước lag2Q +0.61: bùng nổ 2021-22 theo container; 2024-26 đội tàu mở rộng + Red Sea NỚI khỏi spot (NP đỉnh mới dù cước tb). ⚠ rate-cyclical: PE thấp trên EPS đỉnh-cước = bẫy
@@ -492,7 +492,7 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MARGIN_PEAK (GPM pctile 0.85)
    Runway/TAM:   DURABLE [DOMESTIC]  (rev CAGR +19% vs prior +4%)
 
-━━ VTO [COMPOUNDER]  CHEAP_QUALITY ASSET_PLAY→NAV  (PE6.4 pe_z-0.4 PEG0.11 dd-22%)
+━━ VTO [COMPOUNDER]  CHEAP_QUALITY ASSET_PLAY→NAV  (PE6.4 pe_z-0.4 PEG0.11 dd-15%)
    Engine: -  (ROIC 8%, asset-growth -3%, dilut3y +0%)
    Moat:   WEAK/commodity []  (GPM 27%, ROE 8%)
    ⛽ OIL[TANKER·FREIGHT_NOT_OIL]: cước tanker + charter; không theo giá dầu trực tiếp
@@ -501,7 +501,7 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MARGIN_PEAK (GPM pctile 0.98)
    Runway/TAM:   MATURE/FLAT [DOMESTIC]  (rev CAGR -2% vs prior -7%)
 
-━━ CSV [CYCLICAL]  NOT_CHEAP  (PE13.5 pe_z+0.7 PEGnan dd-37%)  | caustic_soda pctile0.67 [AMPLE/glut] → WAIT 
+━━ CSV [CYCLICAL]  NOT_CHEAP  (PE13.5 pe_z+0.7 PEGnan dd-38%)  | caustic_soda pctile0.67 [AMPLE/glut] → WAIT 
    Engine: COMPOUNDER  (ROIC 20%, asset-growth +8%, dilut3y +150%)
    Moat:   MODERATE []  (GPM 24%, ROE 18%)
    5F-Moat: NARROW [COST/SCALE] · risk#1: Dominant southern-VN caustic-soda/chlor-alkali producer (sticky industrial demand, ROIC_Min5Y 14.3% decent floor) but commodity price-taker; caustic soda BEARISH 2026 ($690-740/MT range, alumina demand soft + Chinese chlor-alkali capacity glut), NP_YoY -18% margin squeeze; expensive now (PE 15, pb_z +0.57) = NOT a contrarian buy. FIXED 2026-06-05: COMMODITY_MAP now maps CSV->caustic_soda (own NaOH cycle, AMPLE/glut), was wrongly dap (asof 2026-06-05)
@@ -520,13 +520,13 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MID (GPM pctile 0.35)
    Runway/TAM:   MODERATE [STRUCTURAL]  (rev CAGR +1% vs prior +11%)
 
-━━ NKG [CYCLICAL]  VALUE_TRAP→event_check  (PE39.0 pe_z+1.8 PEGnan dd-33%)  | iron_ore pctile0.50 [RESPONSIVE] → WAIT 
+━━ NKG [CYCLICAL]  VALUE_TRAP→event_check  (PE38.8 pe_z+1.8 PEGnan dd-33%)  | iron_ore pctile0.50 [RESPONSIVE] → WAIT 
    Engine: -  (ROIC 7%, asset-growth -1%, dilut3y +70%)
    Moat:   WEAK/commodity []  (GPM 4%, ROE 12%)
    Margin-cycle: MARGIN_BOTTOM (GPM pctile 0.16)
    Runway/TAM:   SATURATING [STRUCTURAL]  (rev CAGR -12% vs prior +20%)
 
-━━ DCM [CYCLICAL]  CHEAP_QUALITY  (PE8.3 pe_z-0.2 PEG0.09 dd-27%)  | urea pctile0.90 [AMPLE/soft] → cyclical-PEAK 
+━━ DCM [CYCLICAL]  CHEAP_QUALITY  (PE8.4 pe_z-0.2 PEG0.09 dd-26%)  | urea pctile0.90 [AMPLE/soft] → cyclical-PEAK 
    Engine: COMPOUNDER  (ROIC 17%, asset-growth +10%, dilut3y +0%)
    Moat:   MODERATE []  (GPM 24%, ROE 22%)
    ⛽ OIL[FERT_ENERGY·CO_CYCLICAL, profit lag ~1Q]: như DPM; ure neo năng lượng toàn cầu; dùng khung cyclical ure
@@ -539,7 +539,7 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MARGIN_PEAK (GPM pctile 0.76)
    Runway/TAM:   CAPTURING [DOMESTIC]  (rev CAGR +26% vs prior +23%)
 
-━━ DGC [CYCLICAL]  VALUE_TRAP→event_check  (PE7.0 pe_z-0.5 PEGnan dd-53%)  | dap pctile0.88 [BALANCED] → cyclical-PEAK 
+━━ DGC [CYCLICAL]  VALUE_TRAP→event_check  (PE7.5 pe_z-0.4 PEGnan dd-50%)  | dap pctile0.88 [BALANCED] → cyclical-PEAK 
    Engine: COMPOUNDER  (ROIC 29%, asset-growth +18%, dilut3y +0%)
    Moat:   STRONG [SCALE+vert-integ]  (GPM 29%, ROE 37%)
    5F-Moat: NARROW [COST/LOCATION] · risk#1: Earnings phosphorus/P4 + DAP price-cycle driven (ROIC peak-to-trough wide: ROIC_Min5Y ~14% vs ROIC5Y ~29%) = real cost edge (captive apatite + 56% national P4 capacity) but cyclical not through-cycle; apatite Field-25 depletion + Nghi Son chlor-alkali capex execution risk; China P4 export-quota tailwind is exogenous/reversible (asof 2026-06-05)
@@ -554,21 +554,21 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MARGIN_BOTTOM (GPM pctile 0.18)
    Runway/TAM:   SATURATING [DOMESTIC]  (rev CAGR +4% vs prior +27%)
 
-━━ DPR [CYCLICAL]  CHEAP_QUALITY ASSET_PLAY→NAV  (PE10.7 pe_z+0.3 PEG0.18 dd-15%)  | rubber pctile1.00 [DEFICIT] → ELEVATED-SUPPORTED 
+━━ DPR [CYCLICAL]  CHEAP_QUALITY ASSET_PLAY→NAV  (PE10.6 pe_z+0.3 PEG0.18 dd-16%)  | rubber pctile1.00 [DEFICIT] → ELEVATED-SUPPORTED 
    Engine: LOWROIC_GROWTH◆  (ROIC 8%, asset-growth +5%, dilut3y +100%)
    Moat:   MODERATE [land-bank(rubber)]  (GPM 38%, ROE 11%)
    ⚑ ASSET-PLAY: value on NAV/SOTP (lumpy non-operating NP, asset-heavy) — PE/PEG misleading
    Margin-cycle: MARGIN_PEAK (GPM pctile 0.76)
    Runway/TAM:   MATURE/FLAT [DOMESTIC]  (rev CAGR +4% vs prior +8%)
 
-━━ DRI [CYCLICAL]  CHEAP_QUALITY  (PE5.9 pe_z-1.2 PEG0.15 dd-9%)  | rubber pctile1.00 [DEFICIT] → ELEVATED-SUPPORTED 
+━━ DRI [CYCLICAL]  CHEAP_QUALITY  (PE5.9 pe_z-1.2 PEG0.15 dd-10%)  | rubber pctile1.00 [DEFICIT] → ELEVATED-SUPPORTED 
    Engine: -  (ROIC 20%, asset-growth +2%, dilut3y +0%)
    Moat:   MODERATE []  (GPM 38%, ROE 16%)
    5F-Moat: NARROW [LOCATION/COST] · risk#1: Rubber-plantation land/cost edge but commodity price-taker; rubber at 95th-pctile / 9-yr high ($2.30/kg Jun-2026 +43% YoY on Thai-flood supply deficit) = PEAK earnings (GPM 38%, NP+40%) — cyclical framework 'GOOD regime' → poor fwd (1Y med -0%/46% win); contrarian rule = WAIT for commodity trough + stock dislocation, not now (pb_z +0.44 not cheap); ROE_Min5Y 10.7% modest cyclical floor (asof 2026-06-05)
    Margin-cycle: MID (GPM pctile 0.57)
    Runway/TAM:   MODERATE [DOMESTIC]  (rev CAGR +15% vs prior +5%)
 
-━━ GVR [CYCLICAL]  CHEAP_1lens  (PE22.3 pe_z-0.5 PEG0.25 dd-23%)  | rubber pctile1.00 [DEFICIT] → ELEVATED-SUPPORTED 
+━━ GVR [CYCLICAL]  CHEAP_1lens  (PE21.9 pe_z-0.5 PEG0.24 dd-25%)  | rubber pctile1.00 [DEFICIT] → ELEVATED-SUPPORTED 
    Engine: -  (ROIC 6%, asset-growth +2%, dilut3y +0%)
    Moat:   WEAK/commodity []  (GPM 28%, ROE 8%)
    Margin-cycle: MID (GPM pctile 0.74)
@@ -580,13 +580,13 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MID (GPM pctile 0.71)
    Runway/TAM:   DURABLE [DOMESTIC]  (rev CAGR +18% vs prior +3%)
 
-━━ LAS [CYCLICAL]  VALUE_TRAP→event_check  (PE12.6 pe_z-0.3 PEGnan dd-34%)  | dap pctile0.88 [BALANCED] → cyclical-PEAK 
+━━ LAS [CYCLICAL]  VALUE_TRAP→event_check  (PE12.6 pe_z-0.4 PEGnan dd-35%)  | dap pctile0.88 [BALANCED] → cyclical-PEAK 
    Engine: LOWROIC_GROWTH  (ROIC 8%, asset-growth +4%, dilut3y +0%)
    Moat:   WEAK/commodity []  (GPM 14%, ROE 9%)
    Margin-cycle: MARGIN_BOTTOM (GPM pctile 0.12)
    Runway/TAM:   MATURE/FLAT [DOMESTIC]  (rev CAGR +5% vs prior +6%)
 
-━━ PHR [CYCLICAL]  CHEAP_1lens ASSET_PLAY→NAV  (PE13.3 pe_z+0.3 PEG0.07 dd-9%)  | rubber pctile1.00 [DEFICIT] → ELEVATED-SUPPORTED 
+━━ PHR [CYCLICAL]  CHEAP_1lens ASSET_PLAY→NAV  (PE13.1 pe_z+0.3 PEG0.07 dd-10%)  | rubber pctile1.00 [DEFICIT] → ELEVATED-SUPPORTED 
    Engine: -  (ROIC 7%, asset-growth +1%, dilut3y +0%)
    Moat:   MODERATE []  (GPM 27%, ROE 18%)
    ⚑ ASSET-PLAY: value on NAV/SOTP (lumpy non-operating NP, asset-heavy) — PE/PEG misleading
@@ -599,19 +599,19 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MID (GPM pctile 0.73)
    Runway/TAM:   MATURE/FLAT [DOMESTIC]  (rev CAGR -46% vs prior -4%)
 
-━━ SMC [CYCLICAL]  CHEAP_QUALITY  (PE4.0 pe_z+0.5 PEG0.00 dd-37%)  | iron_ore pctile0.50 [RESPONSIVE] → WAIT 
+━━ SMC [CYCLICAL]  CHEAP_QUALITY  (PE3.9 pe_z+0.5 PEG0.00 dd-38%)  | iron_ore pctile0.50 [RESPONSIVE] → WAIT 
    Engine: -  (ROIC -1%, asset-growth -19%, dilut3y +0%)
    Moat:   WEAK/commodity []  (GPM -0%, ROE -6%)
    Margin-cycle: MARGIN_BOTTOM (GPM pctile 0.10)
    Runway/TAM:   MODERATE [DOMESTIC]  (rev CAGR -33% vs prior +8%)
 
-━━ TRC [CYCLICAL]  CHEAP_QUALITY  (PE8.3 pe_z-0.9 PEG0.20 dd-9%)  | rubber pctile1.00 [DEFICIT] → ELEVATED-SUPPORTED 
+━━ TRC [CYCLICAL]  CHEAP_QUALITY  (PE8.1 pe_z-1.0 PEG0.19 dd-11%)  | rubber pctile1.00 [DEFICIT] → ELEVATED-SUPPORTED 
    Engine: LOWROIC_GROWTH◆  (ROIC 6%, asset-growth +6%, dilut3y +3%)
    Moat:   WEAK/commodity []  (GPM 31%, ROE 8%)
    Margin-cycle: MARGIN_PEAK (GPM pctile 0.76)
    Runway/TAM:   CAPTURING [DOMESTIC]  (rev CAGR +21% vs prior +17%)
 
-━━ GEG [COMPOUNDER]  VALUE_TRAP→event_check  (PE9.5 pe_z-1.1 PEGnan dd-25%)
+━━ GEG [COMPOUNDER]  VALUE_TRAP→event_check  (PE9.6 pe_z-1.1 PEGnan dd-20%)
    Engine: LOWROIC_GROWTH  (ROIC 7%, asset-growth +5%, dilut3y +11%)
    Moat:   WEAK/commodity []  (GPM 52%, ROE 7%)
    Margin-cycle: MID (GPM pctile 0.34)
@@ -623,7 +623,7 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MID (GPM pctile 0.27)
    Runway/TAM:   MODERATE [DOMESTIC]  (rev CAGR +15% vs prior -1%)
 
-━━ POW [COMPOUNDER]  CHEAP_QUALITY  (PE13.4 pe_z-0.8 PEG0.08 dd-16%)
+━━ POW [COMPOUNDER]  CHEAP_QUALITY  (PE14.0 pe_z-0.7 PEG0.08 dd-12%)
    Engine: LOWROIC_GROWTH◆  (ROIC 5%, asset-growth +15%, dilut3y +31%)
    Moat:   WEAK/commodity []  (GPM 14%, ROE 6%)
    Margin-cycle: MID (GPM pctile 0.68)
@@ -641,13 +641,13 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MID (GPM pctile 0.28)
    Runway/TAM:   MATURE/FLAT [DOMESTIC]  (rev CAGR +7% vs prior -7%)
 
-━━ HIO [COMPOUNDER]  CHEAP_QUALITY  (PE3.9 pe_z-0.9 PEG0.00 dd-15%)
+━━ HIO [COMPOUNDER]  CHEAP_QUALITY  (PE3.8 pe_z-0.9 PEG0.00 dd-18%)
    Engine: YIELD◆  (ROIC 8%, asset-growth n/a, dilut3y +100%)
    Moat:   WEAK/commodity []  (GPM 40%, ROE 5%)
    Margin-cycle: n/a
    Runway/TAM:   n/a [DOMESTIC]  (rev CAGR n/a vs prior n/a)
 
-━━ PGV [COMPOUNDER]  CHEAP_QUALITY  (PE6.1 pe_z-0.1 PEG0.01 dd-14%)
+━━ PGV [COMPOUNDER]  CHEAP_QUALITY  (PE6.1 pe_z-0.1 PEG0.01 dd-15%)
    Engine: -  (ROIC 8%, asset-growth -7%, dilut3y +0%)
    Moat:   MODERATE []  (GPM 17%, ROE 12%)
    Margin-cycle: MARGIN_PEAK (GPM pctile 1.00)
@@ -665,7 +665,7 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MID (GPM pctile 0.62)
    Runway/TAM:   MATURE/FLAT [DOMESTIC]  (rev CAGR +0% vs prior +7%)
 
-━━ TTA [COMPOUNDER]  CHEAP_QUALITY  (PE8.0 pe_z-0.6 PEG0.20 dd-10%)
+━━ TTA [COMPOUNDER]  CHEAP_QUALITY  (PE8.2 pe_z-0.5 PEG0.21 dd-8%)
    Engine: -  (ROIC 10%, asset-growth -3%, dilut3y +13%)
    Moat:   WEAK/commodity []  (GPM 56%, ROE 9%)
    Margin-cycle: MARGIN_BOTTOM (GPM pctile 0.21)
@@ -684,18 +684,18 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Runway/TAM:   MATURE/FLAT [DOMESTIC]  (rev CAGR +2% vs prior n/a)
 
 ━━ BGE [COMPOUNDER]  VALUE_TRAP→event_check  (PE62.8 pe_z+nan PEGnan dd-52%)
-   Engine: -  (ROIC 2%, asset-growth n/a, dilut3y n/a)
+   Engine: -  (ROIC 2%, asset-growth n/a, dilut3y +0%)
    Moat:   WEAK/commodity []  (GPM 48%, ROE -3%)
    Margin-cycle: n/a
    Runway/TAM:   n/a [DOMESTIC]  (rev CAGR n/a vs prior n/a)
 
-━━ BTP [COMPOUNDER]  CHEAP_QUALITY  (PE8.7 pe_z-0.6 PEG0.06 dd-29%)
+━━ BTP [COMPOUNDER]  CHEAP_QUALITY  (PE8.8 pe_z-0.5 PEG0.06 dd-29%)
    Engine: YIELD◆  (ROIC -1%, asset-growth -7%, dilut3y +0%)
    Moat:   WEAK/commodity []  (GPM 18%, ROE 5%)
    Margin-cycle: MARGIN_PEAK (GPM pctile 0.97)
    Runway/TAM:   MATURE/FLAT [DOMESTIC]  (rev CAGR -22% vs prior -35%)
 
-━━ HND [COMPOUNDER]  CHEAP_QUALITY  (PE13.1 pe_z-0.4 PEG0.44 dd-14%)
+━━ HND [COMPOUNDER]  CHEAP_QUALITY  (PE13.0 pe_z-0.5 PEG0.43 dd-15%)
    Engine: YIELD◆  (ROIC 7%, asset-growth -5%, dilut3y +0%)
    Moat:   WEAK/commodity []  (GPM 5%, ROE 7%)
    Margin-cycle: MID (GPM pctile 0.26)
@@ -707,25 +707,25 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MID (GPM pctile 0.69)
    Runway/TAM:   MATURE/FLAT [DOMESTIC]  (rev CAGR -22% vs prior -14%)
 
-━━ ND2 [COMPOUNDER]  VALUE_TRAP→event_check  (PE8.2 pe_z-0.5 PEGnan dd-11%)
+━━ ND2 [COMPOUNDER]  VALUE_TRAP→event_check  (PE8.4 pe_z-0.4 PEGnan dd-9%)
    Engine: YIELD◆  (ROIC 16%, asset-growth -6%, dilut3y +0%)
    Moat:   STRONG []  (GPM 69%, ROE 22%)
    Margin-cycle: MARGIN_PEAK (GPM pctile 0.76)
    Runway/TAM:   MODERATE [DOMESTIC]  (rev CAGR -0% vs prior +8%)
 
-━━ PIC [COMPOUNDER]  NOT_CHEAP  (PE14.4 pe_z+0.1 PEGnan dd-35%)
+━━ PIC [COMPOUNDER]  NOT_CHEAP  (PE14.5 pe_z+0.1 PEGnan dd-35%)
    Engine: -  (ROIC 11%, asset-growth -6%, dilut3y +0%)
    Moat:   MODERATE []  (GPM 46%, ROE 10%)
    Margin-cycle: MID (GPM pctile 0.30)
    Runway/TAM:   SATURATING [DOMESTIC]  (rev CAGR -2% vs prior +21%)
 
-━━ PPC [COMPOUNDER]  CHEAP_QUALITY  (PE14.9 pe_z+0.7 PEG0.18 dd-16%)
+━━ PPC [COMPOUNDER]  CHEAP_QUALITY  (PE14.8 pe_z+0.7 PEG0.18 dd-16%)
    Engine: -  (ROIC 0%, asset-growth -1%, dilut3y +0%)
    Moat:   WEAK/commodity []  (GPM 3%, ROE 7%)
    Margin-cycle: MID (GPM pctile 0.31)
    Runway/TAM:   MODERATE [DOMESTIC]  (rev CAGR +8% vs prior -15%)
 
-━━ REE [COMPOUNDER]  CHEAP_1lens  (PE11.9 pe_z+1.0 PEG0.71 dd-19%)
+━━ REE [COMPOUNDER]  CHEAP_1lens  (PE12.1 pe_z+1.0 PEG0.72 dd-18%)
    Engine: LOWROIC_GROWTH◆  (ROIC 8%, asset-growth +6%, dilut3y +52%)
    Moat:   MODERATE []  (GPM 37%, ROE 14%)
    Margin-cycle: MID (GPM pctile 0.69)
@@ -761,7 +761,7 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MID (GPM pctile 0.53)
    Runway/TAM:   MODERATE [DOMESTIC]  (rev CAGR -3% vs prior +10%)
 
-━━ CHP [COMPOUNDER]  NOT_CHEAP  (PE10.1 pe_z+0.3 PEGnan dd-10%)
+━━ CHP [COMPOUNDER]  NOT_CHEAP  (PE10.3 pe_z+0.4 PEGnan dd-9%)
    Engine: -  (ROIC 17%, asset-growth -6%, dilut3y +7%)
    Moat:   STRONG []  (GPM 55%, ROE 19%)
    Margin-cycle: MID (GPM pctile 0.57)
@@ -779,13 +779,13 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MID (GPM pctile 0.27)
    Runway/TAM:   MODERATE [DOMESTIC]  (rev CAGR -4% vs prior +11%)
 
-━━ DRL [COMPOUNDER]  CHEAP_QUALITY  (PE8.9 pe_z-0.1 PEGnan dd-17%)
+━━ DRL [COMPOUNDER]  CHEAP_QUALITY  (PE8.9 pe_z-0.0 PEGnan dd-17%)
    Engine: -  (ROIC 54%, asset-growth -3%, dilut3y +0%)
    Moat:   STRONG []  (GPM 64%, ROE 46%)
    Margin-cycle: MID (GPM pctile 0.26)
    Runway/TAM:   MODERATE [DOMESTIC]  (rev CAGR -3% vs prior +11%)
 
-━━ GHC [COMPOUNDER]  CHEAP_1lens  (PE7.4 pe_z-0.2 PEGnan dd-13%)
+━━ GHC [COMPOUNDER]  CHEAP_1lens  (PE7.6 pe_z-0.1 PEGnan dd-12%)
    Engine: -  (ROIC 13%, asset-growth -3%, dilut3y +0%)
    Moat:   MODERATE []  (GPM 59%, ROE 16%)
    Margin-cycle: MID (GPM pctile 0.35)
@@ -797,25 +797,25 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MARGIN_PEAK (GPM pctile 0.87)
    Runway/TAM:   MODERATE [DOMESTIC]  (rev CAGR +10% vs prior +14%)
 
-━━ HJS [COMPOUNDER]  CHEAP_1lens  (PE13.7 pe_z+0.7 PEG0.21 dd-9%)
+━━ HJS [COMPOUNDER]  CHEAP_1lens  (PE13.9 pe_z+0.8 PEG0.22 dd-7%)
    Engine: -  (ROIC 18%, asset-growth -0%, dilut3y +0%)
    Moat:   MODERATE []  (GPM 45%, ROE 16%)
    Margin-cycle: MID (GPM pctile 0.53)
    Runway/TAM:   MATURE/FLAT [DOMESTIC]  (rev CAGR -9% vs prior -0%)
 
-━━ HNA [COMPOUNDER]  CHEAP_1lens  (PE10.2 pe_z-0.8 PEG0.08 dd-10%)
+━━ HNA [COMPOUNDER]  CHEAP_QUALITY  (PE9.6 pe_z-0.9 PEG0.07 dd-15%)
    Engine: -  (ROIC 10%, asset-growth +1%, dilut3y +0%)
    Moat:   MODERATE []  (GPM 52%, ROE 11%)
    Margin-cycle: MARGIN_PEAK (GPM pctile 0.81)
    Runway/TAM:   SATURATING [DOMESTIC]  (rev CAGR +1% vs prior +28%)
 
-━━ HPD [COMPOUNDER]  CHEAP_QUALITY  (PE4.8 pe_z-2.7 PEG0.02 dd-10%)
+━━ HPD [COMPOUNDER]  CHEAP_QUALITY  (PE4.8 pe_z-2.6 PEG0.02 dd-10%)
    Engine: -  (ROIC 17%, asset-growth -8%, dilut3y +0%)
    Moat:   STRONG []  (GPM 64%, ROE 19%)
    Margin-cycle: MARGIN_PEAK (GPM pctile 0.88)
    Runway/TAM:   n/a [DOMESTIC]  (rev CAGR n/a vs prior n/a)
 
-━━ ISH [COMPOUNDER]  CHEAP_1lens  (PE12.8 pe_z+0.7 PEG0.08 dd-11%)
+━━ ISH [COMPOUNDER]  CHEAP_1lens  (PE12.7 pe_z+0.7 PEG0.08 dd-12%)
    Engine: -  (ROIC 19%, asset-growth -4%, dilut3y +0%)
    Moat:   MODERATE []  (GPM 57%, ROE 16%)
    Margin-cycle: MID (GPM pctile 0.69)
@@ -858,13 +858,13 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MARGIN_PEAK (GPM pctile 0.97)
    Runway/TAM:   SATURATING [DOMESTIC]  (rev CAGR -4% vs prior +21%)
 
-━━ SEB [COMPOUNDER]  CHEAP_QUALITY  (PE9.3 pe_z+0.2 PEG0.47 dd-18%)
+━━ SEB [COMPOUNDER]  CHEAP_QUALITY  (PE9.6 pe_z+0.4 PEG0.48 dd-15%)
    Engine: -  (ROIC 29%, asset-growth -2%, dilut3y +0%)
    Moat:   STRONG []  (GPM 65%, ROE 30%)
    Margin-cycle: MID (GPM pctile 0.58)
    Runway/TAM:   SATURATING [DOMESTIC]  (rev CAGR -6% vs prior +17%)
 
-━━ SHP [COMPOUNDER]  CHEAP_1lens  (PE10.4 pe_z+0.6 PEG0.06 dd-7%)
+━━ SHP [COMPOUNDER]  CHEAP_1lens  (PE10.4 pe_z+0.6 PEG0.06 dd-1%)
    Engine: YIELD◆  (ROIC 22%, asset-growth -7%, dilut3y +0%)
    Moat:   STRONG []  (GPM 60%, ROE 22%)
    Margin-cycle: MARGIN_PEAK (GPM pctile 0.75)
@@ -894,7 +894,7 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MARGIN_PEAK (GPM pctile 0.97)
    Runway/TAM:   MODERATE [DOMESTIC]  (rev CAGR +12% vs prior -4%)
 
-━━ VPD [COMPOUNDER]  CHEAP_QUALITY  (PE8.2 pe_z-0.7 PEG0.04 dd-17%)
+━━ VPD [COMPOUNDER]  CHEAP_QUALITY  (PE8.3 pe_z-0.7 PEG0.04 dd-8%)
    Engine: YIELD◆  (ROIC 17%, asset-growth -3%, dilut3y +0%)
    Moat:   MODERATE []  (GPM 57%, ROE 15%)
    Margin-cycle: MARGIN_PEAK (GPM pctile 0.86)
@@ -906,7 +906,7 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MID (GPM pctile 0.39)
    Runway/TAM:   SATURATING [DOMESTIC]  (rev CAGR +7% vs prior +27%)
 
-━━ LSS [COMPOUNDER]  VALUE_TRAP→event_check  (PE6.9 pe_z-0.8 PEGnan dd-17%)
+━━ LSS [COMPOUNDER]  VALUE_TRAP→event_check  (PE7.1 pe_z-0.7 PEGnan dd-15%)
    Engine: LOWROIC_GROWTH  (ROIC 5%, asset-growth +5%, dilut3y +21%)
    Moat:   WEAK/commodity []  (GPM 13%, ROE 4%)
    Margin-cycle: MID (GPM pctile 0.66)
@@ -919,13 +919,13 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MID (GPM pctile 0.64)
    Runway/TAM:   MODERATE [DOMESTIC]  (rev CAGR +9% vs prior +6%)
 
-━━ SBT [COMPOUNDER]  NOT_CHEAP  (PE25.4 pe_z+1.9 PEG1.85 dd-15%)
+━━ SBT [COMPOUNDER]  NOT_CHEAP  (PE25.5 pe_z+1.9 PEG1.86 dd-15%)
    Engine: LOWROIC_GROWTH  (ROIC 5%, asset-growth +11%, dilut3y +35%)
    Moat:   WEAK/commodity []  (GPM 9%, ROE 8%)
    Margin-cycle: MARGIN_BOTTOM (GPM pctile 0.06)
    Runway/TAM:   SATURATING [DOMESTIC]  (rev CAGR +5% vs prior +26%)
 
-━━ SLS [COMPOUNDER]  VALUE_TRAP→event_check  (PE5.1 pe_z+0.9 PEGnan dd-23%)
+━━ SLS [COMPOUNDER]  VALUE_TRAP→event_check  (PE5.1 pe_z+0.9 PEGnan dd-24%)
    Engine: COMPOUNDER  (ROIC 28%, asset-growth +12%, dilut3y +0%)
    Moat:   MODERATE []  (GPM 24%, ROE 36%)
    5F-Moat: NARROW [LOCATION/COST] · risk#1: Son La Sugar (northern cane belt) = policy-protected cane-sugar producer, integrated grower-miller, high quality for sugar (ROIC_Min5Y 18.6%, ROE_Min5Y 21.9%) BUT commodity price-taker. Sugar regime WEAK now (world price crash + smuggling glut; Thai AD duty 47.64% EXTENDED eff 16-Jun-2026 so import-protection intact, real hit = world price+smuggling) → GPM 40->24%, NP_YoY -82%. Sugar TREND-rule = AVOID weak-regime despite cheap PB 0.82/pb_z -1.71 (falling knife) (asof 2026-06-05)
