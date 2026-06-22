@@ -47,9 +47,10 @@ Watchdog bắt **2 kiểu chết** (vì `systemctl is-active` KHÔNG đủ — h
 - **`bin/watchdog.sh`** (cron 10'): với mỗi unit enabled:
   - **DOWN** (unit không active) → restart; ≥`WATCHDOG_ESCALATE_AFTER=3` lần liên tiếp → log "PERSISTENT
     DOWN — likely OAuth logout: `claude login` + restart".
-  - **ZOMBIE** (active nhưng `is_serving`=false) → thử **1** restart, vẫn không serving thì escalate
-    "MANUAL FIX: mở agent trong app Claude (claude.ai/code) để lập lại session" rồi **ngừng restart**
-    (đã kiểm chứng 2026-06-22: restart KHÔNG cứu được zombie Mafee → không churn vô ích).
+  - **ZOMBIE** (active nhưng `is_serving`=false) → **tự sửa**: `clear_bridge` (dời `bridge-pointer.json`
+    kẹt để host xin environment MỚI) + restart. Đã kiểm chứng 2026-06-22: plain restart KHÔNG cứu
+    được Mafee, nhưng xoá bridge-pointer + restart → serving sau ~10s. Nếu sau `ESCALATE_AFTER` vẫn
+    không serving → escalate "MANUAL: mở agent trong app Claude / `claude login`" rồi ngừng restart.
   - Đếm bad-streak ở `state/flap/<unit>`. **Log-only**; chỉ gọi `bin/notify.sh` nếu file đó tồn tại.
 - **`bin/fleet_health.sh`** (chạy tay bất kỳ lúc nào): bảng sức khỏe — STATE, **SERVING** (yes/NO từ
   is_serving), NRestarts, uptime, STREAK, HB-AGE. Cờ **DOWN** / **ZOMBIE (active but not serving)** /

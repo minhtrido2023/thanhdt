@@ -37,6 +37,17 @@ notify() {  # notify "<message>"
   [ -x "$ROOT/bin/notify.sh" ] && "$ROOT/bin/notify.sh" "[Mike watchdog] $1" || true
 }
 
+# clear_bridge <id> — move aside a stale remote-control bridge pointer so the host provisions
+# a FRESH environment on restart. VERIFIED fix for the Mafee zombie (2026-06-22): the host was
+# pinned to a stuck environment via bridge-pointer.json and never reached "Ready"; removing it
+# + restart → serving in ~10s. Safe: only called for a NOT-serving agent; the file is recreated.
+clear_bridge() {
+  local enc bp
+  enc="$(printf '%s' "$ROOT/agents/$1" | sed 's#/#-#g')"
+  bp="$HOME/.claude/projects/$enc/bridge-pointer.json"
+  [ -f "$bp" ] && mv -f "$bp" "$bp.stale.$(date -u +%s)" 2>/dev/null || true
+}
+
 # Source of truth for "should be running" = the enabled instances (symlinks in *.wants).
 WANTS="$HOME/.config/systemd/user/default.target.wants"
 found=0
@@ -74,17 +85,17 @@ for link in "$WANTS"/mike@*.service; do
     systemctl --user reset-failed "$unit" 2>/dev/null || true
     systemctl --user restart "$unit" 2>>"$LOG" || notify "$unit restart FAILED"
   else
-    # --- Mode 2: ZOMBIE — active but not serving. Restart was VERIFIED not to recover this
-    # (Mafee, 2026-06-22), so don't churn — try ONE restart on first sight, then escalate to
-    # a manual-fix log and stop restarting (avoids pointless flapping of a stuck host).
+    # --- Mode 2: ZOMBIE — active but not serving. A PLAIN restart does NOT recover this
+    # (Mafee, 2026-06-22); the working fix is clear_bridge + restart (fresh environment).
     if [ "$cnt" = 1 ]; then
-      notify "$unit ZOMBIE — host active but NOT serving a session (#1). Trying one restart."
+      notify "$unit ZOMBIE — active but NOT serving (#1). Auto-recovery: clear stale bridge-pointer + restart."
+      clear_bridge "$id"
       systemctl --user reset-failed "$unit" 2>/dev/null || true
       systemctl --user restart "$unit" 2>>"$LOG" || notify "$unit restart FAILED"
     elif [ "$cnt" -lt "$ESCALATE_AFTER" ]; then
-      notify "$unit ZOMBIE — still not serving after restart (#$cnt). Will escalate at $ESCALATE_AFTER."
+      notify "$unit ZOMBIE — still not serving after bridge reset (#$cnt). Will escalate at $ESCALATE_AFTER."
     elif [ "$cnt" = "$ESCALATE_AFTER" ]; then
-      notify "$unit ZOMBIE PERSISTENT — restart does NOT recover it. MANUAL FIX: open $id in the Claude mobile/desktop app (claude.ai/code) to re-establish its remote-control session, or re-pair the agent. (watchdog will stop restarting it now.)"
+      notify "$unit ZOMBIE PERSISTENT — auto-recovery (bridge reset + restart) didn't help. MANUAL: open $id in the Claude app (claude.ai/code), or check \`claude login\`. (watchdog stops restarting it now.)"
     fi
     # cnt > ESCALATE_AFTER: stay silent (already flagged); bin/fleet_health.sh shows it on demand.
   fi

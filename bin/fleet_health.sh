@@ -86,7 +86,8 @@ if [ "$degraded" = 1 ]; then
   echo
   echo "⚠ Degraded agents:"
   echo "   • DOWN              → watchdog auto-restarts; if STREAK≥3 it's a logout: \`claude login\` + \`systemctl --user restart mike@<id>\`"
-  echo "   • ZOMBIE (SERVING=NO) → host up but serving nothing. A plain restart does NOT fix it →"
-  echo "                          open the agent in the Claude mobile/desktop app (claude.ai/code) to re-establish its session."
+  echo "   • ZOMBIE (SERVING=NO) → host up but serving nothing. Watchdog auto-recovers (clear stale"
+  echo "                          bridge-pointer + restart). If STREAK≥3 it's stuck → open the agent in"
+  echo "                          the Claude app (claude.ai/code) or check \`claude login\`."
 fi
 exit "$degraded"
