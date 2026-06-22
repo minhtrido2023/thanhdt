@@ -19,6 +19,13 @@ if [ -s "$KB/context_pack.md" ]; then
   cat "$KB/context_pack.md"
 fi
 
+# Personal working memory (curated by the agent via remember.sh) — durable across restarts,
+# higher-signal than the raw recap below. The agent's own priorities / open threads / next steps.
+if [ -s "$KB/memory/$id.md" ]; then
+  echo "[Working memory CỦA BẠN — ưu tiên & việc đang mở bạn tự ghi; tiếp tục từ đây:]"
+  cat "$KB/memory/$id.md"
+fi
+
 # Continuity: recap this agent's OWN previous session so a restart continues the thread
 # (the durable KB above is fleet-wide facts; this is the in-flight conversation/work).
 if [ -n "${MIKE_CWD:-}" ]; then
