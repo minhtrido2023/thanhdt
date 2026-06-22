@@ -19,6 +19,12 @@ if [ -s "$KB/context_pack.md" ]; then
   cat "$KB/context_pack.md"
 fi
 
+# Continuity: recap this agent's OWN previous session so a restart continues the thread
+# (the durable KB above is fleet-wide facts; this is the in-flight conversation/work).
+if [ -n "${MIKE_CWD:-}" ]; then
+  python3 "$ROOT/bin/recap_prev.py" "$MIKE_CWD" "${MIKE_SID:-}" 12 2>/dev/null || true
+fi
+
 # Surface any NEW directive Mike assigned to this agent (once, via offset cache).
 source "$ROOT/hooks/_directives.sh"
 exit 0
