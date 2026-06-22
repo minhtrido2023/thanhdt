@@ -2,6 +2,10 @@
 Description=Claude agent %i (Mike fleet, remote-control)
 After=network-online.target
 Wants=network-online.target
+# If it crash-loops fast (e.g. OAuth expired), stop after 5 tries/5min so it's a visible
+# failure instead of a silent spin — watchdog/journal then shows the real cause.
+StartLimitIntervalSec=300
+StartLimitBurst=5
 
 [Service]
 Type=simple
@@ -10,8 +14,9 @@ WorkingDirectory=/home/trido/thanhdt/WorkingClaude/mike/agents/%i
 Environment=PATH=/home/trido/.local/bin:/usr/local/bin:/usr/bin:/bin
 Environment=AGENT_ID=%i
 ExecStart=/home/trido/.local/bin/claude remote-control --name "%i"
-Restart=on-failure
-RestartSec=20
+# always: remote-control exits 0 on client-disconnect, so on-failure would leave it dead.
+Restart=always
+RestartSec=10
 
 [Install]
 WantedBy=default.target
