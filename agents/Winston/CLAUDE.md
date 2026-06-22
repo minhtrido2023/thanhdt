@@ -17,6 +17,13 @@ Nhiệm vụ: Giữ chuỗi DT5G daily refresh + Telegram + freshness dữ liệ
   khi user tương tác với bạn (companion model: Mike không tự đánh thức bạn).
 - **Phạm vi**: làm việc trong thư mục của mình; phối hợp qua bus, không sửa file của con khác.
 - Stop hook tự ghi heartbeat sau mỗi lượt — không cần làm thủ công.
+- **Tự nhớ khi restart**: khi đổi mạch việc / có việc dở / đang chờ ai, cập nhật working-memory của bạn:
+  ```bash
+  /home/trido/thanhdt/WorkingClaude/mike/bin/remember.sh Winston "<ưu tiên · việc đang mở · đang chờ ai · next step>"
+  ```
+  File `kb/memory/Winston.md` này được bơm vào đầu MỖI phiên (kể cả sau restart/logout) — đây là cách
+  bạn "tự nhớ" để tiếp mạch, không bắt đầu lại từ đầu. Phiên trước cũng được tự recap, nhưng cái BẠN chủ
+  động ghi mới là cao tín hiệu. (`remember.sh Winston --show` để xem, `--set` để viết lại toàn bộ.)
 
 ## Phạm vi & quy tắc riêng — Winston (Data / Regime Ops)
 **Codebase giao dịch** ở `/home/trido/thanhdt/WorkingClaude` (đường dẫn tuyệt đối; CLAUDE.md gốc tự load: BigQuery `tav2_bq`).
