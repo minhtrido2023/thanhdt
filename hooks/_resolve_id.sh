@@ -5,7 +5,12 @@
 #     friendly fleet label and use that.
 #   - Self-exclude: if the resolved id is in $MIKE_EXCLUDE (default "tri"), exit 0 silently
 #     so excluded sessions never participate (tri shares a cwd with retrofitted sessions).
+#   - Hard opt-out: if $MIKE_SKIP is set, exit 0 immediately (before any work). Used by
+#     non-fleet sessions that share a hooked cwd — e.g. the ccdb Discord bot injects
+#     MIKE_SKIP=1 via its CCDB_CLI_ENV_FILE overlay so its Claude subprocesses run no
+#     fleet hooks. Inert for every normal fleet session, so the fleet is unaffected.
 # Requires: $ROOT set by the caller. Reads stdin ONCE (the harness closes it, so safe).
+[ -n "${MIKE_SKIP:-}" ] && exit 0
 id="${1:-}"
 _payload="$(cat 2>/dev/null || true)"
 # Pull session_id (line 1) and cwd (line 2) — separate lines tolerate spaces in cwd.
