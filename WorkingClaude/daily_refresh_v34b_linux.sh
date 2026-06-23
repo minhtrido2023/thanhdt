@@ -30,7 +30,7 @@ step() { echo; echo "--- $* ---"; }
 
 # --- 1. upstream local rebuild (produces vnindex_5state_tam_quan_v3_4b_full_history.csv) ---
 step "[1] clear pkl caches"
-rm -f _cache_vnindex_2000_now.pkl _cache_universe_2013_now.pkl
+rm -f data/_cache_vnindex_2000_now.pkl data/_cache_universe_2013_now.pkl
 
 step "[2] pull_us_market.py"
 $PY pull_us_market.py || die "pull_us_market"
@@ -46,7 +46,7 @@ done
 step "[4] build_concentration_history.py"; $PY build_concentration_history.py || die "concentration"
 step "[5] vnindex_5state_dual_v3.py";      $PY vnindex_5state_dual_v3.py      || die "dual_v3"
 step "[6] build_v3_1_clean.py";            $PY deploy_v3_4b_package/build_v3_1_clean.py || die "v3_1_clean"
-cp vnindex_5state_tam_quan_v3_1_clean.csv vnindex_5state_tam_quan_v3_1_full_history.csv || die "cp v3_1"
+cp data/vnindex_5state_tam_quan_v3_1_clean.csv data/vnindex_5state_tam_quan_v3_1_full_history.csv || die "cp v3_1"
 step "[7] build_v3_4_bull_aware.py";       $PY deploy_v3_4b_package/build_v3_4_bull_aware.py || die "v3_4b"
 step "[8] build_dt_4gate.py (local, non-fatal)"; $PY build_dt_4gate.py || echo "  WARN: dt_4gate failed (non-fatal)"
 
@@ -87,6 +87,15 @@ LIVE_MAX="$(bq query --use_legacy_sql=false --format=csv --project_id="$PJ" \
   'SELECT MAX(time) FROM tav2_bq.vnindex_5state_dt5g_live' 2>/dev/null | tail -1)"
 echo "  _v34b_clean max=$BASE_MAX   dt5g_live max=$LIVE_MAX   (local=$LOCAL_MAX)"
 [ "$BASE_MAX" = "$LOCAL_MAX" ] || echo "  WARN: base BQ ($BASE_MAX) != local ($LOCAL_MAX)"
+
+# --- 6. update macro_health ---
+step "[14] macro_healthcheck.py (update macro_health.json)"
+$PY macro_healthcheck.py || echo "  WARN: macro_healthcheck failed (non-fatal)"
+
+# --- 7. local BQ snapshot (cache for Taylor experiments) ---
+step "[15] Building local BQ snapshot..."
+cd "$WORKDIR_8L" && $PY scripts/build_snapshot.py >> data/daily_refresh.log 2>&1 \
+  && echo "  snapshot OK" || echo "  WARN: build_snapshot failed (non-fatal)"
 
 # rolling 30-day log cleanup
 find data -name 'refresh_v34b_linux_*.log' -mtime +30 -delete 2>/dev/null

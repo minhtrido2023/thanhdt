@@ -1,9 +1,7 @@
-⚠️ MACRO HEALTH FAILED (SEV SEV1) @ 2026-06-22 15:30
--> use state source: DT4_only
+⚠️ MACRO HEALTH DEGRADED (SEV SEV2) @ 2026-06-23 15:31
+-> use state source: DT5G_macro
 market stress: False (vix_elevated=False, vni_below_ma200=False)
 failing checks:
-  [SEV1] bq_ticker_query: unsupported operand type(s) for -: 'datetime.date' and 'NaTType'
-  [INFO] sbv_verify_reminder: last SBV refi event 1099d old (4.5%) — MANUALLY VERIFY vs SBV; cannot auto-detect a missed rate change
-  [SEV1] macro_probe: get_macro_state failed: 'time'
-stale/missing sources:
-  bq_ticker_vnindex: MISSING / unreadable
+  [INFO] sbv_verify_reminder: last SBV refi event 1100d old (4.5%) — MANUALLY VERIFY vs SBV; cannot auto-detect a missed rate change
+  [SEV2] missed_runs: 2 trading days since last successful run (2026-06-19)
+macro now: {'date': '2026-06-22', 'state': 3, 'state_dt4': 3, 'cap': 9, 'easing': False, 'active': False}

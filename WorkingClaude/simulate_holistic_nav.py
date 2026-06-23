@@ -14,8 +14,19 @@ Strategies:
   - VNINDEX baseline: B&H
 
 Computed metrics: CAGR, Sharpe, Sortino, MaxDD, Calmar, win rate, turnover.
+
+LOCAL_SNAPSHOT_DIR mode (env var):
+  Set LOCAL_SNAPSHOT_DIR=<path> to bypass BigQuery and load data from local parquet snapshots.
+  Expected files: signal_YYYYMMDD.parquet, vni_YYYYMMDD.parquet (latest by filename sort).
+  The bq() function intercepts calls and routes by SQL content:
+    - SQL containing 'play_type' or 'fa_ratings' → loads signal snapshot
+    - SQL containing 'VNINDEX' and 'Close'        → loads vni snapshot
+    - Otherwise → falls through to real BQ (with a warning)
+  Date filtering is applied by parsing DATE '{start}' / DATE '{end}' from the SQL string.
+  Zero downstream changes — only the data-loading layer is patched.
 """
 import os
+import re
 import subprocess
 import sys
 from io import StringIO
@@ -26,6 +37,56 @@ import pandas as pd
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
 PROJECT = "lithe-record-440915-m9"
 BQ_BIN = r"bq"
+
+# ─── LOCAL SNAPSHOT MODE ──────────────────────────────────────────────────────
+# Set LOCAL_SNAPSHOT_DIR env var to bypass BigQuery entirely.
+# Winston's pipeline writes: signal_YYYYMMDD.parquet, vni_YYYYMMDD.parquet
+# into that directory.  bq() intercepts by SQL content and loads the latest file.
+_LOCAL_SNAPSHOT_DIR = os.environ.get("LOCAL_SNAPSHOT_DIR", "").strip()
+
+_SNAPSHOT_CACHE: dict = {}  # avoid re-loading within same process
+
+
+def _load_local_snapshot(name: str) -> pd.DataFrame:
+    """Load latest parquet snapshot for `name` (signal|vni|...).
+
+    Searches _LOCAL_SNAPSHOT_DIR for files matching <name>_*.parquet and
+    returns the last one by sorted filename (YYYYMMDD suffix → lexical sort
+    matches chronological sort).  Raises FileNotFoundError if none found.
+    """
+    import glob
+    pattern = os.path.join(_LOCAL_SNAPSHOT_DIR, f"{name}_*.parquet")
+    files = sorted(glob.glob(pattern))
+    if not files:
+        raise FileNotFoundError(
+            f"No local snapshot found for '{name}' (pattern: {pattern}). "
+            f"Make sure Winston's snapshot pipeline has run and "
+            f"LOCAL_SNAPSHOT_DIR={_LOCAL_SNAPSHOT_DIR!r} is correct."
+        )
+    chosen = files[-1]  # latest by filename sort
+    print(f"[LOCAL_SNAPSHOT] loading {os.path.basename(chosen)} for '{name}'", flush=True)
+    return pd.read_parquet(chosen)
+
+
+def _extract_date(sql: str, key: str):
+    """Extract date string from SQL pattern like DATE '{key}' where key is 'start' or 'end'.
+
+    Returns date string (e.g. '2014-01-01') or None if not found.
+    """
+    pattern = rf"DATE\s+'\{{{{?{re.escape(key)}}}}}?'"
+    m = re.search(pattern, sql)
+    if m:
+        # Already-substituted form: DATE '2014-01-01'
+        pass
+    # Try already-substituted literal dates around the template position:
+    # Support both DATE '{start}' (template, not yet substituted) and DATE '2014-01-01'
+    # We look for the first DATE '...' for start and the second for end.
+    date_hits = re.findall(r"DATE\s+'(\d{4}-\d{2}-\d{2})'", sql)
+    if key == "start" and len(date_hits) >= 1:
+        return date_hits[0]
+    if key == "end" and len(date_hits) >= 2:
+        return date_hits[1]
+    return None
 
 # Simulation parameters
 START_DATE = "2014-01-01"
@@ -128,6 +189,50 @@ ORDER BY t.time
 
 
 def bq(sql: str) -> pd.DataFrame:
+    # ── LOCAL SNAPSHOT INTERCEPT ──────────────────────────────────────────────
+    if _LOCAL_SNAPSHOT_DIR:
+        # Route by SQL content to determine which snapshot to load
+        _sql_upper = sql.upper()
+        if "PLAY_TYPE" in _sql_upper or "FA_RATINGS" in _sql_upper or "FA_TIER" in _sql_upper:
+            name = "signal"
+        elif "VNINDEX" in _sql_upper and "CLOSE" in _sql_upper:
+            name = "vni"
+        else:
+            name = None  # unknown query type — fall through to real BQ with a warning
+
+        if name is not None:
+            if name not in _SNAPSHOT_CACHE:
+                _SNAPSHOT_CACHE[name] = _load_local_snapshot(name)
+            df = _SNAPSHOT_CACHE[name].copy()
+
+            # Parse date range from the SQL to filter the snapshot
+            start_str = _extract_date(sql, "start")
+            if df.empty:
+                return df
+
+            # Normalize time column to date objects for comparison
+            time_col = "time" if "time" in df.columns else df.columns[0]
+            df[time_col] = pd.to_datetime(df[time_col]).dt.date
+
+            if start_str:
+                start_d = pd.to_datetime(start_str).date()
+                df = df[df[time_col] >= start_d]
+            end_str = _extract_date(sql, "end")
+            if end_str:
+                end_d = pd.to_datetime(end_str).date()
+                df = df[df[time_col] <= end_d]
+
+            # Restore datetime dtype (callers expect pd.Timestamp)
+            df[time_col] = pd.to_datetime(df[time_col])
+            return df.reset_index(drop=True)
+        else:
+            print(
+                f"[LOCAL_SNAPSHOT] WARNING: cannot route SQL to a local snapshot "
+                f"(no 'play_type'/'fa_ratings'/'VNINDEX' keyword found). "
+                f"Falling through to real BigQuery. SQL preview: {sql[:120]!r}",
+                flush=True,
+            )
+    # ── ORIGINAL BIGQUERY PATH ────────────────────────────────────────────────
     import tempfile
     with tempfile.NamedTemporaryFile("w", suffix=".sql", delete=False, encoding="utf-8") as f:
         f.write(sql)
@@ -609,10 +714,14 @@ def simulate(signals_df, prices, vni_dates, *,
 
         # 4) Cash earns deposit rate (parameterized; default 0%/yr; set positive to enable)
         #    Negative cash (margin) charged borrow_annual (default 10%/yr per CLAUDE.md cost model).
+        #    _interest_today = the cash change from interest (no tx row); recorded so the per-session
+        #    cash-flow self-check can reconcile it (>0 = deposit earned, <0 = borrow interest paid).
+        _cash_pre_int = cash
         if cash > 0 and deposit_annual > 0:
             cash *= (1 + deposit_annual / 252)
         if cash < 0 and borrow_annual > 0:
             cash *= (1 + borrow_annual / 252)  # cash<0 grows MORE negative (interest expense)
+        _interest_today = cash - _cash_pre_int
 
         # 4b) ETF management fee / tracking drag — applied as shares shrink on each lot
         # (Daily MTM happens via _etf_mark on demand; no separate compounding step.)
@@ -1108,6 +1217,7 @@ def simulate(signals_df, prices, vni_dates, *,
             "cash_pct": cash / nav * 100 if nav > 0 else 0,
             "cash_etf_pct": cash_etf_val / nav * 100 if nav > 0 else 0,
             "deployed_pct": (positions_mv + pending_mv) / nav * 100 if nav > 0 else 0,
+            "interest": float(_interest_today),   # deposit/borrow interest (no tx row) — for self-check reconcile
             "state": state_by_date.get(today) if state_by_date else None,
         })
 

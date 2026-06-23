@@ -35,6 +35,7 @@ run "[8] pt_v12_macro"          pt_v12_macro.py
 run "[11] pt_v4_dt5g"           pt_v4_dt5g.py
 run "[12] pt_v22_dt5g (V2.3)"   pt_v22_dt5g.py
 run "[13] golive_recommend_v23" deploy_golive_dt5g_v4/golive_recommend_v23.py
+run "[13b] push_recommend_v23_to_bq" mike/agents/Mafee/push_recommend_v23_to_bq.py
 run "[14] papertrade_compare"   papertrade_compare.py
 # --- sleeves / shadows / alerts ---
 run "[15] vol_spike_hedge_pt"   vol_spike_hedge_pt.py

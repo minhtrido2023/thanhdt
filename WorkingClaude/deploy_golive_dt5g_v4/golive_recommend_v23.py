@@ -257,6 +257,19 @@ WHERE p.time = DATE '{bd.date()}' AND p.ROE_Min5Y>=0.12 AND p.ROIC5Y>=0.10 AND p
 
 # ── 7. emit recommendations (CSV + MD + status JSON) ──
 etf_frac = ETF_PARK.get(state_today, 0.0)
+
+# fetch parking basket early — used for both CSV rows and MD text
+_park_basket = None
+_park_rebal_date = None
+if etf_frac > 0:
+    try:
+        import custom30
+        _park_basket = custom30.current(bq)
+        if len(_park_basket):
+            _park_rebal_date = str(_park_basket["rebal_date"].iloc[0])
+    except Exception as _e:
+        print(f"  WARNING: custom30 lookup failed: {_e}")
+
 recs = []
 for _, r in bal.iterrows():
     recs.append({"book": "BAL", "ticker": r["ticker"], "play_type": r["play_type"],
@@ -275,6 +288,14 @@ for tk in basket:
     recs.append({"book": "CAPIT", "ticker": tk, "play_type": "CAPIT_GOLDEN",
                  "ta": None, "close": None, "sector": sec_map.get(tk),
                  "weight_pct": round(capit_size / max(len(basket), 1) * 100, 2), "status": "WASHOUT"})
+# parking basket — advisory rows (book=PARK, weight_pct = within-basket cap-weight %)
+if _park_basket is not None:
+    for pr in _park_basket.itertuples():
+        recs.append({"book": "PARK", "ticker": pr.ticker, "play_type": "CUSTOM30_8L",
+                     "ta": float(pr.rating_8l) if pd.notna(pr.rating_8l) else None,
+                     "close": None, "sector": None,
+                     "weight_pct": round(float(pr.weight) * 100, 4),
+                     "status": "PARK_ADVISORY"})
 rec_df = pd.DataFrame(recs, columns=["book","ticker","play_type","ta","close","sector","weight_pct","status"])
 csv_path = os.path.join(OUTDIR, f"golive_v23_recommendations_{END}.csv")
 rec_df.to_csv(csv_path, index=False)
@@ -291,6 +312,8 @@ status = {
     "dd52w": round(dd52_now, 1), "vn_cooling": vn_cool_now,
     "n_bal": int(len(bal)), "n_lag_upcoming": len(lag_up), "n_lag_recent": len(lag_recent),
     "n_capit_basket": len(basket),
+    "n_park": len(_park_basket) if _park_basket is not None else 0,
+    "park_rebal_date": _park_rebal_date,
 }
 with open(os.path.join(WORKDIR, "data", "golive_v23_status.json"), "w", encoding="utf-8") as f:
     json.dump(status, f, ensure_ascii=False, indent=2)
@@ -308,17 +331,14 @@ if state_today == 2:
 if state_today == 1:
     L.append(f"- ⚠️ **CRISIS** — BAL chỉ Fresh-Q ≤30d, mã rating≥4 half-size; theo dõi CAPIT washout (cơ hội capitulation-buy).")
 if etf_frac > 0:
-    # parking vehicle = published 8L custom30 basket (namecap), read from BQ (single source).
-    try:
-        import custom30
-        _cb = custom30.current(bq)
-        _top = " · ".join(f"{r.ticker} {r.weight*100:.0f}%" for r in _cb.head(8).itertuples())
+    if _park_basket is not None:
+        _top = " · ".join(f"{r.ticker} {r.weight*100:.0f}%" for r in _park_basket.head(8).itertuples())
         L.append(f"- **Parking (cả 2 book):** park **{etf_frac*100:.0f}%** cash nhàn rỗi vào "
-                 f"**rổ 8L custom30** (`tav2_bq.custom30_8l`, cap-weight namecap≤10%, {len(_cb)} mã)"
+                 f"**rổ 8L custom30** (`tav2_bq.custom30_8l`, cap-weight namecap≤10%, {len(_park_basket)} mã)"
                  + (" (NEUTRAL)" if state_today == 3 else "") + f"\n    - top: {_top} …")
-    except Exception as _e:
+    else:
         L.append(f"- **Parking (cả 2 book):** park **{etf_frac*100:.0f}%** cash nhàn rỗi vào rổ 8L custom30 "
-                 f"(`tav2_bq.custom30_8l`) — lookup lỗi: {_e}")
+                 f"(`tav2_bq.custom30_8l`) — lookup lỗi (xem log)")
 else:
     L.append(f"- **Parking:** {etf_frac*100:.0f}% (state {state_today} → KHÔNG park, giữ cash phòng thủ)")
 L.append(f"\n## BAL book ({(1-w_tgt)*100:.0f}% NAV target) — {len(bal)} picks\n")

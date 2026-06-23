@@ -44,6 +44,7 @@ os.chdir(WORKDIR)
 
 import simulate_holistic_nav as shn
 from simulate_holistic_nav import simulate, bq, VNI_QUERY, TC_BUY, TC_SELL, CG_TAX
+from deposit_rate_vn import DEPOSIT_EVENTS
 from signal_v11_sql import SIGNAL_V11
 from pt_dates import detect_end_date
 
@@ -264,7 +265,49 @@ RECOVERY_PARK      = os.environ.get("RECOVERY_PARK", "0") == "1"
 RECOVERY_PBZ_START = float(os.environ.get("RECOVERY_PBZ_START", "-0.3"))   # begin scaling at this cheapness
 RECOVERY_PBZ_DEEP  = float(os.environ.get("RECOVERY_PBZ_DEEP", "-0.7"))    # full deploy at/below this
 RECOVERY_WMAX      = float(os.environ.get("RECOVERY_WMAX", "1.0"))         # max park frac (<=1.0 = no margin)
-_recpark_tag = "" if not RECOVERY_PARK else f"_recpark{int(RECOVERY_WMAX*100)}z{int(abs(RECOVERY_PBZ_DEEP)*100)}"
+# DEPOSIT-GATE (Taylor 2026-06-23): money-condition multiplier m on the recovery deploy. m=clip((CEIL-dep)/
+# (CEIL-FLOOR),0,1). High deposit (tight money, big cash opp-cost) -> m->0 -> hold cash even if pb_z cheap;
+# learned from the 2011-extension (deploying into 2012's 14%-deposit crisis LOST to cash). FLOOR=7.5 (dormant)
+# = no change to 2014-26 (deposit never >7.5% in that era), pure forward insurance; FLOOR=6 (active) trims the
+# 2022 SCB-hike deploy. Default ON when RECOVERY_PARK; set RECOVERY_DEP_GATE=0 to disable (pre-gate behaviour).
+RECOVERY_DEP_GATE  = os.environ.get("RECOVERY_DEP_GATE", "1") == "1"
+RECOVERY_DEP_FLOOR = float(os.environ.get("RECOVERY_DEP_FLOOR", "0.075"))  # deposit at/below -> deploy fully (m=1)
+RECOVERY_DEP_CEIL  = float(os.environ.get("RECOVERY_DEP_CEIL",  "0.12"))   # deposit at/above -> no deploy (m=0)
+# GATE MODE (Taylor 2026-06-23): "deposit" = deposit-LEVEL gate (above); "fed" = market Fed-spread gate =
+# (1/VNINDEX_PE) - deposit (earnings yield vs cash). Fed is a RICHER money-van: captures BOTH stock cheapness
+# AND the cash hurdle in one number (user's '1/PE thi truong vs lai gui'); VNINDEX_PE sane back to 2006 (only
+# per-stock t.PE is corrupt). Fed is dormant in 2014-26 too (every fire window spread >= +1.8% > ceil) but
+# smarter in a future crisis (deploys if stocks are cheap-enough even at moderately high rates).
+RECOVERY_GATE_MODE = os.environ.get("RECOVERY_GATE_MODE", "deposit")       # "deposit" | "fed"
+RECOVERY_FED_FLOOR = float(os.environ.get("RECOVERY_FED_FLOOR", "0.0"))    # spread at/below -> no deploy (m=0)
+RECOVERY_FED_CEIL  = float(os.environ.get("RECOVERY_FED_CEIL",  "0.015"))  # spread at/above -> deploy fully (m=1)
+_gate_on = RECOVERY_PARK and RECOVERY_DEP_GATE
+_depg_tag = "" if not _gate_on else (f"_fedg{int(RECOVERY_FED_CEIL*1000)}" if RECOVERY_GATE_MODE == "fed"
+                                     else f"_depg{int(RECOVERY_DEP_FLOOR*1000)}")
+# REAL-MARGIN branch (Taylor 2026-06-23): unlike recovery-park (idle-cash only, gross<=100%), this lets the
+# CAPIT deep-washout arm borrow up to (MGE-1)*NAV (real leverage, cash<0, charged borrow_annual=10%/yr). The
+# borrow room is restricted to CAPIT plays (MGE_CAPIT_ONLY) so leverage lands ONLY in deep-cheap washouts, NOT
+# in normal/EXBULL buys (matches the thesis + trading_rules deep_cheap_recovery_override). 0/<=1 = OFF (leverage-
+# free, the go-live default). The CAPIT washout size gets a borrow headroom on top of its cash-based size.
+BORROW_ANNUAL  = float(os.environ.get("BORROW_ANNUAL", "0.10"))         # margin borrow rate (era-aware override)
+MGE            = float(os.environ.get("MGE", "0"))                         # gross cap, e.g. 1.3 / 1.5; <=1 = off
+MGE_CAPIT_ONLY = os.environ.get("MGE_CAPIT_ONLY", "1") == "1"              # borrow room usable ONLY by CAPIT plays
+_mge = MGE if MGE > 1.0 else None
+_mge_tag = "" if not _mge else f"_mge{int(round(MGE*100))}{'cap' if MGE_CAPIT_ONLY else 'all'}"
+# Part-2 LEVER-GATE (gates ONLY the borrow headroom of the CAPIT arm; the cash-based size is untouched):
+#   none      -> borrow headroom always full (current behaviour)
+#   deposit   -> scale headroom by deposit money-condition m=clip((CEIL-dep)/(CEIL-FLOOR))  (reuses RECOVERY_DEP_*)
+#   fedborrow -> scale by CARRY vs the BORROW rate: mf=clip((eyield-borrow-FLOOR)/(CEIL-FLOOR)). Stands aside when
+#                the market earnings-yield (1/VNINDEX_PE) does NOT beat the borrow cost -> e.g. COVID-3/2020
+#                (eyield ~9.7% < borrow 10%) -> NO lever there -> avoids the -32.5% 1.5x tail. fail-CLOSED if PE NA.
+MGE_GATE      = os.environ.get("MGE_GATE", "none").lower()                 # none | deposit | fedborrow
+MGE_FED_FLOOR = float(os.environ.get("MGE_FED_FLOOR", "0.0"))              # eyield-borrow spread floor (m=0 at/below)
+MGE_FED_CEIL  = float(os.environ.get("MGE_FED_CEIL", "0.02"))              # spread at/above -> full lever (m=1)
+_mge_gate_m   = (lambda dd: 1.0)                                           # placeholder; real fn set in recovery block
+if _mge and MGE_GATE != "none":
+    _mge_tag += "_lg" + (("fed%d" % int(MGE_FED_CEIL*1000)) if MGE_GATE == "fedborrow" else "dep")
+_recpark_tag = "" if not RECOVERY_PARK else f"_recpark{int(RECOVERY_WMAX*100)}z{int(abs(RECOVERY_PBZ_DEEP)*100)}{_depg_tag}"
+_recpark_tag = _recpark_tag + _mge_tag
 AUDIT_PATH  = os.path.join(WORKDIR, "data",
                            {"v23a": "v23_golive_audit_2014_now.csv",
                             "v23c": "v23c_golive_audit_2014_now.csv",
@@ -282,7 +325,7 @@ ALLOC_REBAL_TC    = 0.001
 ALLOC_REBAL_BAND  = 0.10
 
 WASHOUT_GATE = 0.30
-CAPIT_HOLD   = 60
+CAPIT_HOLD   = int(os.environ.get("CAPIT_HOLD", "60"))   # Part-2: raise to hold levered custom30V to the rebalance cycle
 def capit_base(state, dd52w, vn_cooling):
     if state == 1: return 1.0
     if state == 3: return 0.75
@@ -822,6 +865,13 @@ def add_capit_arm(sig_book, base_nav_df, tw_base, tag, book_prices):
         if CAPIT_EVENT_CAP is not None and wt > CAPIT_EVENT_CAP:
             print(f"    [cap] {tag} E{i} {e['date'].date()}: wt {wt:.3f} -> {CAPIT_EVENT_CAP:.3f} (per-event cap)")
             wt = CAPIT_EVENT_CAP
+        if _mge and MGE_CAPIT_ONLY:                         # real-margin: borrow headroom ON TOP (deep-washout only)
+            _lgm = _mge_gate_m(d)                           # Part-2 lever-gate (deposit / fed-vs-borrow / none)
+            _head = e["size"] * (_mge - 1.0) * _lgm         # scale borrow with washout conviction AND money-condition
+            if MGE_GATE != "none":
+                print(f"    [lever-gate {MGE_GATE}] {tag} E{i} {d.date()}: m={_lgm:.2f} "
+                      f"head {e['size']*(_mge-1.0):.3f} -> {_head:.3f}")
+            wt += _head
         if wt <= 0.005: continue
         pt = f"CAPIT{tag}_E{i}"
         shn.TIER_PRIORITY[pt] = 95
@@ -891,7 +941,48 @@ if RECOVERY_PARK:
     def _pbz_asof(dd):
         pm = (pd.Timestamp(dd).to_period("M") - 1).strftime("%Y-%m")   # prior completed month (causal)
         return _pbz_m.get(pm, np.nan)
-    RECOVERY_PARK_BY_DATE = {}; _nrec = 0
+    # deposit-gate: causal deposit rate as-of date d (ffill from announced DEPOSIT_EVENTS, no look-ahead)
+    _dep_evt = sorted((pd.Timestamp(dt), v / 100.0) for dt, v in DEPOSIT_EVENTS)
+    def _dep_asof(dd):
+        dd = pd.Timestamp(dd); rate = _dep_evt[0][1]
+        for t, v in _dep_evt:
+            if t <= dd: rate = v
+            else: break
+        return rate
+    # fed-gate: causal prior-month market earnings yield (1/VNINDEX_PE); VNINDEX_PE sane back to 2006
+    _eym = {}
+    if RECOVERY_GATE_MODE == "fed" or MGE_GATE == "fedborrow":
+        _pe = bq(f"""SELECT FORMAT_DATE('%Y-%m', t.time) ym, ANY_VALUE(t.VNINDEX_PE) vpe
+          FROM tav2_bq.ticker_prune AS t WHERE t.VNINDEX_PE>0
+          AND t.time BETWEEN DATE '{START_DATE}' AND DATE '{END_DATE}' GROUP BY ym""")
+        _eym = {r["ym"]: (1.0 / r["vpe"]) for _, r in _pe.iterrows() if r["vpe"] and r["vpe"] > 0}
+    def _eyield_asof(dd):
+        pm = (pd.Timestamp(dd).to_period("M") - 1).strftime("%Y-%m")   # prior completed month (causal)
+        return _eym.get(pm, np.nan)
+    def _dep_m(dd):
+        if not RECOVERY_DEP_GATE: return 1.0
+        if RECOVERY_GATE_MODE == "fed":
+            ey = _eyield_asof(dd)
+            if pd.isna(ey): return 1.0                                 # fail-open if PE missing
+            spread = ey - _dep_asof(dd)
+            return float(np.clip((spread - RECOVERY_FED_FLOOR) /
+                                 (RECOVERY_FED_CEIL - RECOVERY_FED_FLOOR), 0.0, 1.0))
+        return float(np.clip((RECOVERY_DEP_CEIL - _dep_asof(dd)) /
+                             (RECOVERY_DEP_CEIL - RECOVERY_DEP_FLOOR), 0.0, 1.0))
+    # Part-2 lever-gate fn (gates the CAPIT borrow headroom). deposit reuses the dep money-condition;
+    # fedborrow compares the market earnings-yield against the BORROW cost (not deposit).
+    def _mge_gate_m(dd):
+        if MGE_GATE == "deposit":
+            return float(np.clip((RECOVERY_DEP_CEIL - _dep_asof(dd)) /
+                                 (RECOVERY_DEP_CEIL - RECOVERY_DEP_FLOOR), 0.0, 1.0))
+        if MGE_GATE == "fedborrow":
+            ey = _eyield_asof(dd)
+            if pd.isna(ey): return 0.0                                 # fail-CLOSED: never borrow blind
+            spread = ey - BORROW_ANNUAL                                # carry vs the borrow rate
+            return float(np.clip((spread - MGE_FED_FLOOR) /
+                                 (MGE_FED_CEIL - MGE_FED_FLOOR), 0.0, 1.0))
+        return 1.0
+    RECOVERY_PARK_BY_DATE = {}; _nrec = 0; _msum = 0.0
     for d in vni_dates:
         base = dict(BULL_PARK_BY_DATE[d]) if BULL_PARK_BY_DATE else dict(PARK_STATES_DICT)
         st = int(state_ff.get(d) or 3)
@@ -899,12 +990,20 @@ if RECOVERY_PARK:
             z = _pbz_asof(d)
             if pd.notna(z) and z <= RECOVERY_PBZ_START:
                 frac = float(np.clip((RECOVERY_PBZ_START - z) / (RECOVERY_PBZ_START - RECOVERY_PBZ_DEEP), 0.0, 1.0))
+                m = _dep_m(d)                                          # money-condition gate
                 base_st = float(PARK_STATES_DICT.get(st, 0.0))
-                w = base_st + frac * (RECOVERY_WMAX - base_st)
+                w = base_st + m * frac * (RECOVERY_WMAX - base_st)
                 if w > base_st + 0.01:
-                    base[st] = w; _nrec += 1
+                    base[st] = w; _nrec += 1; _msum += m
         RECOVERY_PARK_BY_DATE[d] = base
-    print(f"  [recovery-park] ON pbz[{RECOVERY_PBZ_START}->{RECOVERY_PBZ_DEEP}] wmax{RECOVERY_WMAX} "
+    if RECOVERY_DEP_GATE and _nrec:
+        _gp = (f"fed-spread floor{RECOVERY_FED_FLOOR:.3f}/ceil{RECOVERY_FED_CEIL:.3f}"
+               if RECOVERY_GATE_MODE == "fed"
+               else f"deposit floor{RECOVERY_DEP_FLOOR:.3f}/ceil{RECOVERY_DEP_CEIL:.2f}")
+        _gtxt = f"{RECOVERY_GATE_MODE}-gate ON {_gp} (avg m={_msum/_nrec:.2f})"
+    else:
+        _gtxt = "money-gate OFF"
+    print(f"  [recovery-park] ON pbz[{RECOVERY_PBZ_START}->{RECOVERY_PBZ_DEEP}] wmax{RECOVERY_WMAX} | {_gtxt} "
           f"-> {_nrec} deep-cheap CRISIS/BEAR days deploy idle cash into custom30V")
 PARK_BY_DATE = RECOVERY_PARK_BY_DATE if RECOVERY_PARK else BULL_PARK_BY_DATE
 BAL_KW = dict(allowed_tiers=RS["allowed_tiers"], max_positions=MAX_POS_V11,
@@ -912,7 +1011,7 @@ BAL_KW = dict(allowed_tiers=RS["allowed_tiers"], max_positions=MAX_POS_V11,
               sector_limit_per_sector={8: 4}, ticker_sector_map=sec_map,
               sector_cap_exempt_tiers=RS["sector_cap_exempt"],
               tier_weights_by_state=RS["tier_weights_by_state"],
-              deposit_annual=0.0, borrow_annual=0.10, state_by_date=state_ff,
+              deposit_annual=0.0, borrow_annual=BORROW_ANNUAL, state_by_date=state_ff,
               cash_etf_states=PARK_STATES_DICT, cash_etf_states_by_date=PARK_BY_DATE, vn30_underlying=vn30_underlying,
               etf_mgmt_fee_annual=0.0, etf_tracking_drag_annual=0.0, etf_rebalance_friction=0.0015,
               open_prices=open_prices, t1_open_exec=True,
@@ -927,6 +1026,11 @@ else:
     sig_balC, tw_balC, ex_balC = sig_f, RS["tier_weights"], {}
 events_bal, etf_bal = [], []
 kwA = dict(BAL_KW); kwA["allowed_tiers"] = list(RS["allowed_tiers"]) + [t for t in tw_balC if t.startswith("CAPIT")]
+if _mge:                                                    # real-margin: open the gross cap, restrict room to CAPIT
+    kwA["max_gross_exposure"] = _mge
+    kwA["margin_tiers"] = set(t for t in tw_balC if t.startswith("CAPIT")) if MGE_CAPIT_ONLY else None
+    print(f"  [real-margin] max_gross_exposure={_mge} | margin_tiers="
+          f"{'CAPIT-only' if MGE_CAPIT_ONLY else 'ALL'} | borrow {BAL_KW['borrow_annual']*100:.0f}%/yr")
 nav_bal, _ = simulate(sig_balC, prices, vni_dates, tier_weights=tw_balC,
                       event_log=events_bal, etf_log=etf_bal,
                       name="v23audit_BAL", **merge_extra(kwA, ex_balC), **LIQ_FULL)
@@ -942,7 +1046,7 @@ LAG_KW = dict(allowed_tiers=["LAG_HI","LAG_LO"], max_positions=12,
               stop_exempt_tiers={"LAG_HI","LAG_LO"},
               hold_days_by_tier={"LAG_HI": 25, "LAG_LO": 25},
               tier_position_limit={"LAG_HI": 12, "LAG_LO": 12},
-              deposit_annual=0.0, borrow_annual=0.10, state_by_date=state_ff,
+              deposit_annual=0.0, borrow_annual=BORROW_ANNUAL, state_by_date=state_ff,
               cash_etf_states=PARK_STATES_DICT, cash_etf_states_by_date=PARK_BY_DATE, vn30_underlying=vn30_underlying,
               etf_mgmt_fee_annual=0.0, etf_tracking_drag_annual=0.0, etf_rebalance_friction=0.0015,
               open_prices=opens_lag, t1_open_exec=True, force_close_eod=False, **ETF_LIQ_KW)
@@ -1092,7 +1196,10 @@ for book, navdf, init in [("BAL", nb, BAL_NAV), ("LAG", nl, LAG_NAV)]:
     cash = navdf["cash"].loc[common]
     dcash = cash.diff(); dcash.iloc[0] = cash.iloc[0] - init
     f_full = f.reindex(common).fillna(0.0)
-    err = (dcash - f_full).abs().max()
+    # deposit/borrow interest mutates cash WITHOUT a tx row -> add to expected flows so margin runs reconcile
+    interest = (navdf["interest"].loc[common].fillna(0.0) if "interest" in navdf.columns
+                else pd.Series(0.0, index=common))
+    err = (dcash - f_full - interest).abs().max()
     selfcheck[f"cash_flow_identity_max_err_vnd_{book}"] = float(err)
     # final NAV identity: cash + stocks marks + etf marks == nav
     mtm_sum = sum(r["sell_amount"] for r in mtm_rows if r["book"] == book)

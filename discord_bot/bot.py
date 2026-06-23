@@ -27,7 +27,9 @@ MODEL = CONFIG.get("model")  # optional, e.g. "claude-opus-4-8"
 CLAUDE_BIN = CONFIG.get("claude_bin", "claude")
 RUN_TIMEOUT = int(CONFIG.get("timeout_seconds", 900))
 MAX_TURNS = CONFIG.get("max_turns")          # optional int cap on agentic turns
-REQUIRE_MENTION = bool(CONFIG.get("require_mention", False))
+# Threads the bot opens auto-archive after this many minutes of inactivity
+# (Discord allows 60, 1440, 4320, 10080).
+THREAD_ARCHIVE_MIN = int(CONFIG.get("thread_archive_minutes", 1440))
 
 # ------------------------------------------------------------ state
 def load_state():
@@ -106,6 +108,20 @@ def chunk(text, n=1900):
         out.append(text)
     return out
 
+def thread_name(prompt, n=60):
+    """Short, single-line title for an auto-created thread (Discord cap 100)."""
+    name = " ".join((prompt or "").split())[:n].strip()
+    return name or "Claude"
+
+def strip_mention(content):
+    """Remove the bot's @mention tokens from the message text."""
+    if client.user is None:
+        return content.strip()
+    return (content
+            .replace(f"<@{client.user.id}>", "")
+            .replace(f"<@!{client.user.id}>", "")
+            .strip())
+
 intents = discord.Intents.default()
 intents.message_content = True
 client = discord.Client(intents=intents)
@@ -133,24 +149,53 @@ async def on_message(msg):
     if ALLOWED_CHANNELS and msg.channel.id not in ALLOWED_CHANNELS:
         return
 
-    # optional: require an @mention in busy channels
+    is_dm = msg.guild is None
+    is_thread = isinstance(msg.channel, discord.Thread)
     mentioned = client.user in msg.mentions
-    if REQUIRE_MENTION and not mentioned:
-        return
-    if mentioned:
-        content = content.replace(client.user.mention, "").replace(f"<@!{client.user.id}>", "").strip()
-    if not content:
+
+    # Only respond when @mentioned — except in DMs, where the 1:1 is already explicit.
+    if not is_dm and not mentioned:
         return
 
-    cid = str(msg.channel.id)
+    if mentioned:
+        content = strip_mention(content)
+    if not content:
+        await msg.channel.send("👋 Tag me with a request, e.g. `@me what changed in git today?`")
+        return
+
+    # Where the reply goes:
+    #   • DM             -> the DM channel
+    #   • inside a thread -> that same thread
+    #   • in a channel    -> a NEW thread anchored to the user's message
+    if is_dm or is_thread:
+        target = msg.channel
+    else:
+        try:
+            target = await msg.create_thread(
+                name=thread_name(content),
+                auto_archive_duration=THREAD_ARCHIVE_MIN,
+            )
+        except discord.Forbidden:
+            await msg.channel.send(
+                "⚠️ I need **Create Public Threads** and **Send Messages in Threads** "
+                "to answer in a thread. Grant those to my role (Server Settings → Roles), "
+                "or tag me inside an existing thread."
+            )
+            return
+        except discord.HTTPException as e:
+            await msg.channel.send(f"⚠️ couldn't create a thread: {e}")
+            return
+
+    cid = str(target.id)
     if content in ("!reset", "!new"):
         state.pop(cid, None)
         save_state(state)
-        await msg.channel.send("🔄 Session reset — next message starts a fresh Claude conversation.")
+        await target.send("🔄 Session reset — next message starts a fresh Claude conversation.")
         return
     if content in ("!help", "!commands"):
-        await msg.channel.send("I bridge this channel to Claude Code on the server.\n"
-                               "`!reset` new session · `!whoami` show IDs · each thread = its own session.")
+        await target.send("Tag me with a request. In a channel I reply in a new thread; "
+                          "in a thread I continue it.\n"
+                          "`!reset` new session · `!whoami` show IDs.")
         return
 
     lock = get_lock(cid)
@@ -160,13 +205,18 @@ async def on_message(msg):
         except discord.HTTPException:
             pass
     async with lock:
-        async with msg.channel.typing():
+        async with target.typing():
             sid, reply = await run_claude(content, state.get(cid))
         if sid:
             state[cid] = sid
             save_state(state)
-        for part in chunk(reply):
-            await msg.channel.send(part)
+        for i, part in enumerate(chunk(reply)):
+            # First chunk replies directly to the tagging message (reply-reference);
+            # follow-up chunks are plain sends in the same thread.
+            if i == 0 and is_thread:
+                await target.send(part, reference=msg, mention_author=False)
+            else:
+                await target.send(part)
 
 if __name__ == "__main__":
     if not TOKEN or TOKEN.startswith("PASTE_"):
