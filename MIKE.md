@@ -51,7 +51,10 @@ Watchdog bắt **2 kiểu chết** (vì `systemctl is-active` KHÔNG đủ — h
     kẹt để host xin environment MỚI) + restart. Đã kiểm chứng 2026-06-22: plain restart KHÔNG cứu
     được Mafee, nhưng xoá bridge-pointer + restart → serving sau ~10s. Nếu sau `ESCALATE_AFTER` vẫn
     không serving → escalate "MANUAL: mở agent trong app Claude / `claude login`" rồi ngừng restart.
-  - Đếm bad-streak ở `state/flap/<unit>`. **Log-only**; chỉ gọi `bin/notify.sh` nếu file đó tồn tại.
+  - Đếm bad-streak ở `state/flap/<unit>`. Gọi `bin/notify.sh "<msg>"` → **đẩy cảnh báo ra Telegram**
+    (bot `@AbV6_bot`, cred `secrets/telegram_config.json`). notify.sh tự dedup (cùng tin <`NOTIFY_DEDUP_SEC`=300s
+    chỉ log không gửi lại), luôn exit 0 (không làm gãy watchdog), kill-switch `MIKE_NOTIFY_OFF=1` hoặc file
+    `state/NOTIFY_OFF`. Tắt push tạm: `touch state/NOTIFY_OFF`.
 - **`bin/fleet_health.sh`** (chạy tay bất kỳ lúc nào): bảng sức khỏe — STATE, **SERVING** (yes/NO từ
   is_serving), **CTX** (% context của hội thoại sống), NRestarts, uptime, STREAK, LAST HB. Cờ **DOWN** /
   **ZOMBIE** / **ZOMBIE PERSISTENT → re-pair in Claude app** / **context cao**. exit 1 nếu degraded.
@@ -75,7 +78,7 @@ Watchdog bắt **2 kiểu chết** (vì `systemctl is-active` KHÔNG đủ — h
 - `bin/append_event.sh`, `bin/heartbeat.sh`, `bin/consolidate.sh`, `bin/publish_context.sh`,
   `bin/spawn_child.sh`, `bin/watchdog.sh`, `bin/fleet_health.sh`, `bin/is_serving.py`,
   `bin/context_watch.py`, `bin/usage_watch.py`, `bin/session_brief.py`, `bin/discover_sessions.py`,
-  helper JSON `bin/mike_json.py`.
+  `bin/notify.sh` (push cảnh báo ra Telegram — dùng bởi watchdog), helper JSON `bin/mike_json.py`.
 - `claude agents` (dashboard mọi phiên nền), Monitor (stream live giữa hai nhịp 30').
 - Ghi mọi quyết định điều phối thành event `decision` để audit:
   `bin/append_event.sh Mike decision "<chủ đề>" '<json>'`.
