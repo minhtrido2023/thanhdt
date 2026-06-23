@@ -61,6 +61,24 @@ def fmt_event(e):
     )
 
 
+# Short one-liner for INJECTION (hooks/context_pack). Payload truncated hard —
+# full detail lives in KNOWLEDGE.md. Keeps cross-agent injects ~140 chars/event
+# instead of the 1–3 KB raw JSON blobs.
+SHORT_CAP = 160
+
+
+def short(e):
+    p = e.get("payload")
+    ps = p if isinstance(p, str) else json.dumps(p, ensure_ascii=False)
+    ps = " ".join(ps.split())
+    if len(ps) > SHORT_CAP:
+        ps = ps[:SHORT_CAP] + " …"
+    return "- [%s] %s/%s — %s: %s" % (
+        e.get("ts", "")[:19], e.get("agent_id", "?"), e.get("event_type", "?"),
+        e.get("topic", ""), ps,
+    )
+
+
 def cmd_event(a):
     aid, etype, topic, payload, kbver = a
     try:
@@ -80,14 +98,41 @@ def cmd_heartbeat(a):
     out({"agent_id": aid, "status": status, "current_task": task, "last_heartbeat": now_iso()})
 
 
+def _as_int(s, default=0):
+    try:
+        return int(str(s).strip())
+    except Exception:
+        return default
+
+
 def cmd_recent(a):
-    inbox_dir = a[0]
-    limit = int(a[1]) if len(a) > 1 else 20
-    evs = load_jsonl(sorted(glob.glob(os.path.join(inbox_dir, "*.jsonl"))))
-    evs = [e for e in evs if e.get("event_type") in ("finding", "answer", "decision")]
-    evs.sort(key=lambda e: e.get("ts", ""), reverse=True)
-    for e in evs[:limit]:
-        print(fmt_event(e))
+    """recent <delta_jsonl> [limit] — last N already-summarized lines for context_pack."""
+    fp = a[0]
+    limit = _as_int(a[1], 8) if len(a) > 1 else 8
+    for r in load_jsonl([fp])[-limit:]:
+        if r.get("line"):
+            print(r["line"])
+
+
+def cmd_delta_append(a):
+    """delta-append <new_events_jsonl> <version> — emit {v,line} for each NEW event.
+    The consolidator appends this to kb/recent_delta.jsonl, tagged with the version
+    that ingested it, so the hook can serve each agent only what it hasn't seen."""
+    ver = _as_int(a[1], 0)
+    for e in load_jsonl([a[0]]):
+        if e.get("event_type") in ("finding", "answer", "decision"):
+            out({"v": ver, "line": short(e)})
+
+
+def cmd_delta_since(a):
+    """delta-since <delta_jsonl> <seen_version> [limit] — TRUE per-agent delta:
+    only lines whose ingest-version > seen, chronological, capped."""
+    fp = a[0]
+    seen = _as_int(a[1], -1)
+    limit = _as_int(a[2], 15) if len(a) > 2 else 15
+    fresh = [r for r in load_jsonl([fp]) if _as_int(r.get("v"), -1) > seen and r.get("line")]
+    for r in fresh[-limit:]:
+        print(r["line"])
 
 
 def cmd_format_events(a):
@@ -126,7 +171,9 @@ def cmd_fleet_status(a):
 
 
 def cmd_settings(a):
-    hooks_dir, aid = a
+    """settings <hooks_dir> <agent_id> [model] — wires the 3 hooks; sets model when given."""
+    hooks_dir, aid = a[0], a[1]
+    model = a[2] if len(a) > 2 else None
     def hook(name, script):
         return {name: [{"hooks": [{"type": "command",
                                    "command": "%s/%s %s" % (hooks_dir, script, aid)}]}]}
@@ -134,10 +181,13 @@ def cmd_settings(a):
     s["hooks"].update(hook("SessionStart", "session_start.sh"))
     s["hooks"].update(hook("UserPromptSubmit", "user_prompt_submit.sh"))
     s["hooks"].update(hook("Stop", "stop.sh"))
+    if model:
+        s["model"] = model
     print(json.dumps(s, indent=2, ensure_ascii=False))
 
 
 CMDS = {"event": cmd_event, "heartbeat": cmd_heartbeat, "recent": cmd_recent,
+        "delta-append": cmd_delta_append, "delta-since": cmd_delta_since,
         "format-events": cmd_format_events, "fleet-status": cmd_fleet_status,
         "settings": cmd_settings}
 

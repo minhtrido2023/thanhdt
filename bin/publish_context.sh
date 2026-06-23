@@ -12,8 +12,8 @@ mkdir -p "$KB"
 
 ver="$(tr -dc '0-9' < "$KB/version.txt" 2>/dev/null || true)"; ver="${ver:-0}"
 
-# RECENT = latest 20 finding/answer/decision events across all children (newest first).
-recent="$(python3 "$PY" recent "$BUS/inbox" 20 2>/dev/null || true)"
+# RECENT = last 8 already-summarized lines from the per-version delta log (short, not raw JSON).
+recent="$(python3 "$PY" recent "$KB/recent_delta.jsonl" 8 2>/dev/null || true)"
 [ -n "${recent//[[:space:]]/}" ] || recent="(chưa có sự kiện nào)"
 
 # printf '%s' prints $recent literally — no shell interpretation of payload contents.

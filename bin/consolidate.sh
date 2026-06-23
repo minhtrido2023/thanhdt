@@ -37,7 +37,13 @@ if [ -s "$NEW" ]; then
   } >> "$KB/KNOWLEDGE.md"
 
   ver="$(tr -dc '0-9' < "$KB/version.txt" 2>/dev/null || true)"; ver="${ver:-0}"
-  echo "$((ver + 1))" > "$KB/version.txt"
+  newver=$((ver + 1)); echo "$newver" > "$KB/version.txt"
+
+  # Per-version delta log: append THIS run's new events (summarized, tagged with
+  # the version that ingested them) so the hook can serve each agent a TRUE delta.
+  python3 "$PY" delta-append "$NEW" "$newver" >> "$KB/recent_delta.jsonl" 2>/dev/null || true
+  tail -n 400 "$KB/recent_delta.jsonl" > "$KB/.rd.tmp" 2>/dev/null && mv -f "$KB/.rd.tmp" "$KB/recent_delta.jsonl" || true
+
   "$ROOT/bin/publish_context.sh"
 
   if [ ! -d "$ROOT/.git" ]; then git -C "$ROOT" init -q; fi
