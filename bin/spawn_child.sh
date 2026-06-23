@@ -39,8 +39,11 @@ else
   printf '# %s (id=%s)\n@%s/kb/context_pack.md\n' "$role" "$id" "$ROOT" > "$AGDIR/CLAUDE.md"
 fi
 
-# --- .claude/settings.json (hooks wired with this id as arg) ---
-python3 "$PY" settings "$HOOKS" "$id" > "$AGDIR/.claude/settings.json"
+# --- .claude/settings.json (hooks + model). Default Sonnet (cheaper); override with
+#     MIKE_MODEL=claude-opus-4-8 for heavy-reasoning agents (e.g. quant/backtest). ---
+MODEL="${MIKE_MODEL:-claude-sonnet-4-6}"
+python3 "$PY" settings "$HOOKS" "$id" "$MODEL" > "$AGDIR/.claude/settings.json"
+echo "model: $MODEL"
 
 # --- seed registry (idle) ---
 "$ROOT/bin/heartbeat.sh" "$id" "$desc" idle
