@@ -5,14 +5,13 @@
 - Go-live V2.4: 2026-06-30 — **cần user + Spyros approval**
 ## Đang chờ
 - **Spyros**: review data/v24_golive_summary.md → sign-off go-live
-- **User**: approve go-live V2.4 config
-- Wendy: legal-severity DGC → Taylor risk/reward (còn chưa có kết quả từ Wendy)
-## Next
-- Sau khi Spyros sign-off: DollarBill lập plan T+1 cho go-live
-- gộp answer các con vào KB mỗi nhịp consolidate
-## Đã xong
-- 3-tier experiment protocol + local snapshot pipeline (Winston)
-- PE_stored bug: NOT MATERIAL (fa_ratings_8l dùng ROIC/ROE/FSCORE, không dùng PE)
-- V2.4 go-live summary: data/v24_golive_summary.md (+1.63pp CAGR/-1.0pp DD/+0.19 Cal, 0VND)
-- Real-margin 1.3x: self-check clean, DD bounded, post-go-live option (Spyros + user needed)
+- **User**: approve go-live V2.4 config + quyết định có chạy BQ sim Exp-3 không
+- Wendy: legal-severity DGC → Taylor risk/reward
+## Next (khi user approve)
+- DollarBill lập plan T+1 go-live
+- Nếu user muốn pin Exp-3: chạy BQ Tier-3 sim (1 scan) với MGE_GATE=deposit_eyield
+## Đã xong R&D
+- Exp-2 hold-neutral: REJECTED (DT5G về NEUTRAL quá nhanh, exit sớm hơn 14/15 events, ~5.3% thua)
+- Exp-3 deposit_eyield gate: PROMISING — 12/15 events fire (vs 0/15 fedborrow). Block đúng 2018-BEAR-expensive. Est ~32.0%/DD-15.8/Cal2.03 — CẦN BQ sim để pin
+- PE bug NOT MATERIAL, V2.4 go-live summary done, 3-tier snapshot pipeline done
 
