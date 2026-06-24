@@ -11,13 +11,16 @@
 4. RECOVERY_PARK trigger không mở rộng | 5. trading_rules v1.6 trước 2026-06-30
 6. get_gated_state() duy nhất | 7. Review 90d sau nếu episode 3 fire
 ## Kill-switch (Spyros): SBV>7.5% / pb_z>-0.3 intra-episode / DD>-12% circuit breaker
-## Real-margin R&D — TẤT CẢ GATES ĐÃ THỬ (2026-06-24)
-- fedborrow (10%): DEAD — 0 events (eyield 5.7-9.1% < 10% borrow cấu trúc VN)
-- deposit_eyield: REJECTED — misfire COVID 2020, DD -31.7% (BQ-pinned)
-- conviction (CRISIS+postbull+PillarB): FAIL — Pillar B dormant trong CRISIS (DT5G đã cap trước), -2.01pp vs baseline
-- KLUẬN: không có gate khả thi nào tìm được. DT5G đã làm hầu hết việc của conviction gate rồi.
-- Next option: unconditional leverage (no gate) cần Spyros riêng, hoặc SHELF real-margin R&D
-## R&D notes
-- PE correction: applied to rating_8l.py
-- Per-year breakdown (V2.4 equivalent): 1 năm âm/13 năm (2022: -4.3%), 2020 MaxDD -31.5% OK
+## Real-margin R&D — tổng kết (đã đóng 2026-06-24)
+- fedborrow gate: DEAD (cấu trúc VN)
+- deposit_eyield: REJECTED (DD-31.7%)
+- conviction gate: FAIL (PillarB redundant với DT5G)
+- MGE_GATE=none: không cải thiện (postbull size=0 × leverage = 0)
+- deep-value override: hypothesis sai (2022-04 pb_z=+1.72, không rẻ)
+- Gradual+capit Test B (BQ-pinned): REJECT — CAGR +0.05pp vs V2.4-LF nhưng MaxDD -30% vs -17.5% (12pp tệ hơn). Leverage 2022 multi-event cluster amplify dips không tỷ lệ.
+- INSIGHT: Tier-1 vs BQ discrepancy đã mislead — Tier-1 baseline cũng xấu (-31.6%) nên Test B trông better, nhưng BQ V2.4-LF baseline thực ra tốt hơn (-17.5%).
+## Gradual entry (Test A, no leverage) — chưa BQ verify
+- Tier-1: +0.46pp CAGR, better DD. Cần BQ Tier-3 để biết thực có additive không.
+- Nếu pass BQ: có thể wire vào V2.4 như "smoother entry" upgrade (không cần Spyros vì no leverage)
+## R&D notes: PE correction applied to rating_8l.py
 
