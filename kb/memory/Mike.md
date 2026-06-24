@@ -2,17 +2,28 @@
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
 
 ## Ưu tiên
-- Go-live V2.4: 2026-06-30 — **cần user + Spyros approval**
+- Go-live V2.4: 2026-06-30 — **Spyros CONDITIONAL GO ✓ — chờ user approval**
 ## Đang chờ
-- **Spyros**: review data/v24_golive_summary.md → sign-off go-live
-- **User**: approve go-live V2.4 config
+- **User**: approve go-live V2.4 — mọi điều kiện Spyros đã rõ ràng
 - Wendy: legal-severity DGC → Taylor risk/reward
-## Next (khi user approve)
-- DollarBill lập plan T+1 go-live
+## Spyros conditions (V2.4 go-live)
+1. RECOVERY_WMAX=0.95 giữ nguyên
+2. DEP_FLOOR=7.5% DORMANT không hạ
+3. max_gross_exposure=1.0 enforce cứng trong Mafee
+4. RECOVERY_PARK trigger KHÔNG mở rộng ngoài {CRISIS,BEAR}+pb_z≤-0.5
+5. trading_rules v1.6 wire trước 2026-06-30
+6. get_gated_state() là nguồn regime duy nhất
+7. Review 90 ngày sau go-live nếu episode 3 fire
+## Kill-switch (Spyros)
+- SBV rate > 7.5% → suspend RECOVERY_PARK
+- pb_z median > -0.3 trong khi episode active → forced unwind
+- Intra-episode DD > -12% từ entry → circuit breaker
+## Real-margin 1.3x (post-go-live, chưa live)
+- Cần: paper ≥90 ngày + per-year breakdown từ Taylor + sandbox Mafee test
+- MGE=1.5x: BLOCK vĩnh viễn. deposit_eyield gate: BLOCK (DD-31.7% confirmed)
 ## R&D đã đóng
-- Exp-2 hold-neutral: REJECTED (DT5G về NEUTRAL quá nhanh, exit sớm 14/15 events, ~5.3% thua)
-- Exp-3 deposit_eyield: REJECTED BQ-pinned (CAGR 29.73%/DD-31.7%/Cal 0.94 — tệ hơn V2.4-LF). Bug: gate fire vào COVID-2020 (eyield>deposit nhưng market đắt). fedborrow-dormant (32.22%/DD-15.5%/Cal 2.08) vẫn là best margin gate.
-- PE bug NOT MATERIAL, V2.4 go-live summary done, 3-tier snapshot pipeline done
-## Margin upgrade conclusion
-- **MGE=1.3 fedborrow-dormant** là cấu hình margin tốt nhất, chưa go-live (cần Spyros + user trước khi live)
+- Exp-2 hold-neutral: REJECTED
+- Exp-3 deposit_eyield: REJECTED BQ-pinned (DD-31.7%)
+- fedborrow-dormant (32.22%/DD-15.5%/Cal 2.08): post-go-live candidate, Spyros pending 90d
+- PE bug NOT MATERIAL
 
