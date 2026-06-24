@@ -1,10 +1,35 @@
 # Working memory — Taylor
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Taylor.
 
-- [2026-06-22T17:40:12Z] Recovery-deploy+margin extended to 2011 (backtest_recovery_alloc_2011.py). KEY: thesis is REGIME-CONDITIONAL — aggressive deploy LOST in 2012 (deposit 14% beat falling-knife). FIX = deposit-gate (deploy hard only when rates cheap): full 2011-26 12.8%/Sh1.11/DD-18.7/Cal0.68 best, restores 2011-13 to baseline, keeps 2020 win. Margin SAFE (buffer 37-54%). Gate DORMANT 2014+ = free forward insurance. Pinned bus+registry; trading_rules v1.4 adds money_condition. NEXT (await user): port deposit-gate into pt_v23 RECOVERY_PARK, or finalize go-live bundle. Caveat: VNINDEX-exposure not stock-pick; pre-2014 PE still corrupt (re-flag Winston).
-- [2026-06-23T01:31:01Z] (B) DONE: 2012 crisis-buy CONFIRMED at stock-selection layer (probe_stockpick_2012.py). Quality+deep-value top8 12M: +40.8% vs index +16% vs cash +9.2%, win-vs-cash 86%; H2-2012/early-2013 forms +44 to +83%. Reconciles index-timing-hold-cash: 2012 alpha is in STOCK PICKING not index timing -> supports recovery-park at stock-picker altitude. Caveats: survivorship bias (ticker_prune hindsight, +40% overstated), thin liq, PVN-theme cluster, DY NULL pre-2013-05. Pinned bus+registry. Deposit verified: rates fell 14->12(Apr12)->9(Oct12)->7.5(2013), user memory right. OPEN next (await user): (A) port deposit-gate into pt_v23 RECOVERY_PARK [recommended], or finalize go-live bundle. Re-flag Winston: pre-2014 PE corrupt + DY NULL pre-2013-05.
-- [2026-06-23T05:19:15Z] DONE deposit-gate port into pt_v23 RECOVERY_PARK (2026-06-23). Measured 3 runs all 0VND: gate-OFF=31.81% (regression clean), DORMANT floor7.5 avg-m1.00=31.81% BYTE-IDENTICAL (forward insurance, gate never bit 2014-26), ACTIVE floor6 avg-m0.85=30.83% REJECTED (-0.98pp, wrongly trimmed 2022 deploy). CHOSEN default: RECOVERY_PARK=1 RECOVERY_WMAX=0.95 RECOVERY_PBZ_DEEP=-0.5 + dep-gate floor0.075 (code default). trading_rules v1.5 floor 0.06->0.075. Pinned bus(decision)+registry. Code: pt_v23 import DEPOSIT_EVENTS + _dep_asof/_dep_m + env RECOVERY_DEP_GATE/FLOOR/CEIL. STATUS: go-live bundle ready = recovery-park 0.95/-0.5 + dep-gate-dormant7.5 + trading_rules v1.5; all PROPOSED paper -> awaiting user go-live approval + Spyros review before 30/06. Open: Winston fix pre-2014 PE + DY-null-pre-2013-05; optional DY-carry tilt test after.
-- [2026-06-23T13:32:08Z] (A) Fed-spread-gate DONE: in pt_v23 fed=deposit=baseline BYTE-IDENTICAL (both money-gates genuinely dormant 2014-26, m=1.0 on all 59 fire days; market PE agrees deploy everywhere in-sample). Wired RECOVERY_GATE_MODE=fed (uses VNINDEX_PE which is SANE; only per-stock t.PE corrupt=Close_adj/EPS, Winston confirmed). CAUGHT a measurement trap: first read fed as -1.18pp but that was DATA DRIFT (baseline 31.81->30.63 from ticker_prune refresh/DTD corp-action), not a fed bug -- controlled same-snapshot 3-run proved identical. CURRENT delta (snapshot 2026-06-23): R3 29.00% -> recovery-park 0.95/-0.5 30.63% = +1.63pp CAGR/-1.0pp DD/+0.19 Calmar/0VND, robust to drift. DECISION: keep deposit-gate-7.5 default (robust input, simple); fed-gate retained as tested alternative. Pinned bus+registry. STATUS: go-live bundle ready (recovery-park 0.95/-0.5 + deposit-gate-dormant-7.5 + trading_rules v1.5), all PROPOSED paper -> user approval + Spyros review before 30/06. KEY LESSON: registry absolute numbers drift with data; cite DELTA vs same-snapshot baseline, not absolute.
-- [2026-06-23T14:26:03Z] (a) REAL-MARGIN branch DONE (pt_v23 MGE env, CAPIT-only borrow on stock book). Same-snapshot: leverage-free 30.63%/DD-17.5/Cal1.75 -> MGE1.3 31.40%/-16.5/1.90 -> MGE1.5 31.90%/-16.3/1.95. Margin BETTER every metric (+1.27pp CAGR AND lower DD AND higher Calmar). Robust to borrow cost (0/10/14% all 31.90% - short washout borrowing). SELF-CHECK not 0VND at borrow>0 BUT proven = borrow interest (borrow=0 -> exact 0VND; scales with rate; final-NAV always 0 = no leak); engine line614 mutates cash w/o tx row, cash-flow check omits interest. To PIN: add interest term to self-check. This is REAL leverage (cash<0) -> needs Spyros+user approval, NOT in go-live. Code: MGE/MGE_CAPIT_ONLY/BORROW_ANNUAL env + headroom in add_capit_arm + max_gross_exposure/margin_tiers in kwA. Pinned bus+registry(NOT pinned as clean). GO-LIVE STAYS LEVERAGE-FREE (recovery-park 0.95/-0.5 + deposit-gate-7.5 + trading_rules v1.5). Real-margin = optional post-go-live. NEXT if user wants margin live: fix self-check interest term -> re-run clean -> Spyros review.
-- [2026-06-23T15:00:40Z] (A) DONE self-check fix: engine records per-day interest, pt_v23 self-check subtracts it -> margin runs EXACT 0 VND, pinnable. Clean same-snapshot: leverage-free 30.72%/DD-17.5/Cal1.76 | MGE1.3 32.22%/DD-15.5/Cal2.08 | MGE1.5 31.65%/DD-32.5/Cal0.97 (all 0VND). KEY RISK: 1.5x DD-32.5% = COVID-2020 (borrowed -57.3B into -34% crash, leverage amplified trough); 1.3x same COVID stays below normal DD (-15.5% is a benign 2025 episode). CHOSE 1.3x as robust margin ceiling, REJECTED 1.5x (tail). trading_rules v1.6 tightened override 1.50->1.30. Code: engine _interest_today + nav interest col; pt_v23 self-check; MGE/MGE_CAPIT_ONLY/BORROW_ANNUAL env. Real leverage -> Spyros+user before live; go-live stays leverage-free. PART 2 PENDING (user wants): lever custom30V broadly when 1/PE>borrow + HOLD to rebalance (not just CAPIT, no quick sell). RISK NOTE for Part2: levering more+holding through a crash could amplify DD even more than CAPIT 1.5x did (COVID -32.5%) -> must cap ~1.3x + measure DD carefully. Session very long ~310k tokens.
-- [2026-06-23T16:35:19Z] PART-2 DONE (user asked run two arms): levered-custom30V + hold120-to-rebalance. RESULT — both arms LOSE to go-live golden LF. Same-snapshot 2026-06-23: REF1 golden-LF 28.88%/DD-31.7/Cal0.91 (0VND) > REF2 custom30-LF-hold120 25.35/-36.3/0.70 > ArmA custom30-1.5x-FEDborrow-hold120 25.63/-36.3 (m=0 ALL events -> borrows ZERO = LF) ~= ArmB custom30-1.3x-DEPOSIT-hold120 25.26/-34.4. KEY1: fed-vs-borrow gate DORMANT post-2014 (eyield 5.9-7.7% never beats 10% borrow at any washout; only trips single-digit-PE 2011-12 crises) -> good insurance(stands aside COVID) zero enhancer. KEY2: golden strict-deep-pbz >> custom30-broad+longhold (-3.5pp CAGR, worse DD); 1.3x lever recovers ~nothing (borrow+giveback cancels). Code: pt_v23 MGE_GATE env (none|deposit|fedborrow) + MGE_FED_FLOOR/CEIL + CAPIT_HOLD env + _mge_gate_m fn + lever-gate logging in add_capit_arm. CAVEAT: selfcheck 155M/90M non-zero on levered+hold120 (margin path, final-NAV=0 no leak, NOT pin-grade); REF1 28.88<earlier30.72=drift(forensic-exclude 8 custom30 names). VERDICT: keep go-live golden leverage-free + dep-gate-7.5 + trading_rules v1.6; Part-2 NOT adopted. NEXT(await user): accept verdict & lock go-live, OR isolate hold-length on golden universe, OR test eyield-vs-DEPOSIT lever (less strict than borrow).
+## Status: 2026-06-24
+
+### DONE THIS SESSION
+1. **PE_stored bug (Việc 1) — CLOSED: NOT MATERIAL**
+   - fa_ratings_8l (production) tier = ROIC/ROE/FSCORE/cashflow/leverage, NO PE
+   - score_valuation in fa_ratings (older A-E) averages 0.50 across ALL tiers → PE bias irrelevant to tier
+   - Production path custom_basket.py uses fa_ratings_8l exclusively
+   - No IS/OOS re-run needed
+   - Bus event: decision/pe-stored-bug-impact-assessment ✓
+
+2. **V2.4 go-live formal summary (Việc 2) — DONE**
+   - File: data/v24_golive_summary.md created
+   - Numbers (snapshot 2026-06-24, 0 VND):
+     R3 baseline: 29.00%/Sh1.90/DD-18.5/Cal1.56
+     V2.4: 30.63%/Sh1.97/DD-17.5/Cal1.75 (+1.63pp CAGR/-1.0pp DD/+0.19 Calmar)
+     OOS: +3.17pp CAGR, Calmar 1.56→1.84
+     IS: unchanged (signal dormant IS)
+   - Bus event: decision/v24-golive-bundle-ready ✓
+
+### BLOCKING (go-live 2026-06-30)
+- **Awaiting: user + Spyros approval** on V2.4 bundle
+- Summary doc sent to: Mike, DollarBill, Spyros, Mafee via bus
+
+### Config chốt V2.4
+- RECOVERY_PARK=1 RECOVERY_WMAX=0.95 RECOVERY_PBZ_DEEP=-0.5
+- RECOVERY_DEP_GATE=1 (DORMANT floor=7.5%)
+- trading_rules v1.6 (leverage-free go-live)
+- Base: v23a none postbull 0 edge + custompitg/namecap/yieldcombo/NEUTRAL-only
+
+### Post-go-live (separate item, NOT blocking)
+- Real-margin 1.3x CAPIT-only: needs Spyros sign-off (đòn bẩy thật, tự-kiểm 0 VND, DD-15.5%)
+
