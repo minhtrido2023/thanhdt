@@ -9,30 +9,20 @@
 
 ## Đang chờ
 - **User**: approve go-live V2.4 (LF config)
-- **Spyros**: exp8-risk-review — dispatched bg, đang review MGE=1.3 CAPIT-ONLY
-- **Taylor**: exp8-mge-sensitivity — dispatched bg, test MGE 1.2/1.3/1.4/1.5
 - Wendy: legal-severity DGC → Taylor risk/reward
-- **BQ admin**: OShares cho 3 ticker còn pending (VVS lần 2, LHC, LBE)
 
-## Corp-action pending (còn lại — 2026-06-24)
-- VVS|2026-06-23: bonus lần 2 (~48%), OShares chưa update (43.05M → ~63.7M)
-- LHC|2026-06-24: bonus ~108%, không có trong ticker_prune (illiquid) → cần shares_outstanding_live
-- LBE|2026-06-24: bonus ~78%, không có trong ticker_prune (illiquid) → cần shares_outstanding_live
-
-## Quy tắc daily corp-action check
-- So sánh OShares trước/sau ex_date trong ticker_prune
-- Cash div → OShares không đổi = EXPECTED, xóa khỏi pending (VCS, LCG, AMS đã làm mẫu)
-- Stock bonus → OShares phải tăng tương ứng gross_adj_pct; nếu chưa → giữ pending
-- Illiquid (không có trong prune) → cần Winston add vào shares_outstanding_live thủ công
+## Corp-action pending — SẠCH (2026-06-24)
+- corp_action_pending.json = {} (rỗng)
+- Quy tắc: chỉ track ticker có trong ticker_prune (ADV 3M ≥ 1 tỷ VND). Ngoài prune = illiquid, không giao dịch, bỏ qua.
+- Quy tắc detect: Cash div → OShares không đổi = expected. Stock bonus → so OShares trước/sau ex_date trong ticker_prune. CẢNH BÁO: Price có thể bị stale (ETL bug, VVS June 2026) → cross-check với ngày trước ex_date thực sự, không phải ngày kề trước.
 
 ## Spyros conditions (V2.4 go-live — unchanged)
 1. RECOVERY_WMAX=0.95 | 2. DEP_FLOOR=7.5% DORMANT | 3. max_gross=1.0 enforce cứng
 4. RECOVERY_PARK trigger không mở rộng | 5. trading_rules v1.6 trước 2026-06-30
 6. get_gated_state() duy nhất | 7. Review 90d sau nếu episode 3 fire
 
-## R&D real-margin — ĐÃ ĐÓNG (2026-06-24)
 ## V2.5 building blocks (post-go-live)
-- Exp-8 Test A: CAPIT vol-1.7x/3M + MGE=1.3 — awaiting Spyros + MGE sensitivity
+- Exp-8 Test A: CAPIT vol-1.7x/3M + MGE=1.3 — Spyros reviewed, MGE sensitivity confirmed sweet spot
 - RECOVERY_GRADUAL=1 + RECOVERY_ACCEL=1: genuine improvement vs plain gradual
 
 ## Kill-switch (Spyros): SBV>7.5% / pb_z>-0.3 intra-episode / DD>-12% circuit breaker
