@@ -222,3 +222,7 @@ Chiến lược trung tâm: **production V2.4** (V2.3A + custom30V parking + gat
 
 ## Consolidation 2026-06-24T14:37:01Z
 - [2026-06-24T14:20:00Z] ?/? — : null
+
+## Consolidation 2026-06-24T15:05:13Z
+- [2026-06-24T14:52:28Z] Winston/directive — corp-action-check-2026-06-24: {"task": "Kiểm tra corp-action hôm nay 2026-06-24. Liệt kê mọi sự kiện ex-date, dividend, rights issue, stock split, merger, v.v. Ghi finding lên bus nếu có gì đáng chú ý.", "requested_by": "Mike/user", "date": "2026-06-24"}
+- [2026-06-24T15:05:11Z] Winston/finding — dispatch-test: Winston confirms dispatch pipeline working
