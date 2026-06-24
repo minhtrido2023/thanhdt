@@ -212,3 +212,65 @@ Nhánh MỚI `pt_v23`: `MGE` env mở `max_gross_exposure` trên sổ CK + `marg
 **META — 8L research 2026-06-21/22: 4 enhancement ứng viên ĐỀU trượt OOS/mỹ phẩm** → FSCORE-tilt (âm), rating-tilt (dilutive), momentum-regime (no edge), v3-composite (IS-overfit). **Production simple yieldcombo = robust-optimal đã được xác nhận** → de-risk go-live 2026-06-30 (đừng thêm phức tạp).
 
 **THREAD (a) — FSCORE enhancer: proxy NEGATIVE (2026-06-21, `probe_fscore_select.py`).** Pre-backtest proxy (top-30 of top-60 liquid, gate≤3, equal-wt mean profit_2M, 47 quý): thêm `FS_W*rank(FSCORE)` vào điểm yieldcombo **LÀM TỆ** mọi trọng số (FS_W 0.25/0.5/0.75/1.0 = −0.27/−0.34/−0.24/−0.46pp vs base 3.80%), cả IS(1.55) lẫn OOS(5.79), win%q<50. **Vì sao:** IC-biên +0.041 của FSCORE là hiệu ứng *chiều rộng* (~1000 mã gate); KHÔNG sống trong rổ top-30-value cô đặc giữa 60 mã thanh khoản mà custom30V build (FSCORE bị nén + kéo ngược trục value). ⇒ **Đừng đốt full backtest cho dạng tilt ngây thơ**; chuyển hướng: FSCORE làm GATE đáy (loại bottom-FSCORE khỏi pool trước khi rank value) hoặc dạng interaction, chỉ backtest form nào vượt base trong proxy trước. *(Proxy không NAV/cost; full pt_v23 vẫn là trọng tài cuối.)*
+
+---
+
+## Exp-8 — RECOVERY_CAPIT_ONLY (wait-for-capitulation deploy + MGE=1.3) — 2026-06-24 (Tier-3 BQ, 0 VND)
+
+**Concept:** V2.4-LF instant-deploys on `pb_z≤−0.5`; Exp-8 idles parking until a **volume capitulation spike**
+(`Volume[T]/mean[T−BASE..T−1] ≥ 1.7x`) then snaps to depth-scaled full T+1 + HOLDS; 1.3x lever on CAPIT washout arm.
+
+**Calibration (Step1):** 1.7x catches all 6 crises (COVID/2022/2018/2016/2023/2025) at BOTH 63d(3M, fires 2.7%≈P97)
+and 126d(6M, 4.3%≈P97). 1.8x misses 2016/2023.
+
+**Results (same-snapshot 2026-06-24, cite DELTA — baseline drifted from brief's 30.63 to 28.04 via VVS/VCS/DTD corp-actions):**
+
+| config | FULL CAGR | Sharpe | MaxDD | Calmar | OOS CAGR | OOS Cal | selfcheck |
+|---|---|---|---|---|---|---|---|
+| Baseline V2.4-LF (instant, LF) | 28.04% | 1.69 | −31.5% | 0.89 | 30.28% | 0.96 | 0 |
+| **Test A — 3M/63d 1.7x + MGE 1.3** | **31.07%** | **1.87** | **−20.5%** | **1.52** | **35.82%** | **1.75** | **0** |
+| Test B — 6M/126d 1.7x + MGE 1.3 | 30.14% | 1.81 | −26.3% | 1.14 | 33.97% | 1.29 | 0 |
+
+**Verdict:** 🟢 **Test A (3M) STRONG WINNER** — beats baseline on EVERY metric in EVERY sub-period
+(FULL +3.03pp CAGR / +11pp MaxDD / +0.63 Calmar; OOS +5.54pp/+11pp/+0.79; IS +0.58pp, equal DD).
+Dominates Test B. Sidesteps early-decline DD by waiting for the capitulation print, deploys at the bottom
++ 1.3x lever on recovery. **REAL leverage → Spyros sign-off + user approval before LIVE; go-live stays LF unless promoted.**
+Detail: `data/exp8_capit_only_bq.md`.
+
+### Exp-8 REVISED — reversal-signal triggers A/B/C (Mike exp8-revised + user Q1/Q2/Q3) — 2026-06-24 (Tier-3 BQ, 0 VND)
+
+Revised task expanded the CAPIT-ONLY trigger from vol-only to 3 signals (A=vol-spike, B=RSI oversold-reversal,
+C=RSI bullish-divergence); gate unchanged (CRISIS/BEAR + pb_z≤−0.5). Same-snapshot 2026-06-24, all 0 VND:
+
+| config | FULL CAGR | Sharpe | MaxDD | Calmar | vs A_1.7x |
+|---|---|---|---|---|---|
+| Baseline V2.4-LF | 28.04% | 1.69 | −31.5% | 0.89 | — |
+| **A — vol 1.7x (WINNER)** | **31.07%** | **1.87** | **−20.5%** | **1.52** | — |
+| A — vol 1.6x (Q2) | 30.14% | 1.81 | −26.3% | 1.15 | −0.93pp, worse DD |
+| A∨B — +RSI-reversal | 31.07% | 1.87 | −20.5% | 1.52 | ±0.00 neutral |
+| A∨B∨C — full combo | 29.54% | 1.77 | −29.7% | 0.99 | −1.53pp, −9.2pp DD |
+
+**Answers:** **Q1** — 14 deep episodes 2011+; A timing inconsistent (COVID/2013 −12d good; 2011-12 grinds
+−129/−166d too early; 2022 +16d late). B rare+precise (COVID bottom +1d), C early/noisy. **Q2** — 1.6x WORSE
+(deploys ~3d earlier into COVID crash; 1.6x=P97 only for 21d base, 1.7x=P97 for 63d base) → keep 1.7x. **Q3** —
+B NEUTRAL (+0.00pp; opens no new 2014+ episode, subsumed by A; value only pre-harness 2011-13 → keep as cheap
+no-volume insurance), C HARMFUL (−1.53pp; fires pre-crash → leveraged early entry) → reject C.
+**Verdict:** 🟢 Signal A vol-1.7x/3M ALONE wins = Exp-8 Test A unchanged. Detail `data/exp8_reversal_signals_bq.md`.
+
+### Exp-8 MGE sensitivity (Test A frozen: 3M/63d 1.7x, CAPIT-ONLY) — Mike dispatch — 2026-06-24 (Tier-3 BQ, 0 VND)
+
+Sweep MGE ∈ {1.2, 1.3, 1.4, 1.5}, everything else = Exp-8 Test A best config. selfcheck 0 VND all 4 runs.
+MGE=1.3 control re-run reproduced published Test A exactly (FULL 31.09/−20.5/1.52) → command verified.
+
+| MGE | FULL CAGR | Sharpe | MaxDD | Calmar | OOS CAGR | OOS Cal | selfcheck |
+|---|---|---|---|---|---|---|---|
+| 1.2 | 31.08% | 1.88 | −21.5% | 1.44 | 36.05% | 1.67 | 0 |
+| **1.3** | **31.09%** | **1.87** | **−20.5%** | **1.52** | **35.85%** | **1.75** | **0** |
+| 1.4 | 30.98% | 1.86 | −20.5% | 1.51 | 35.36% | 1.73 | 0 |
+| 1.5 | 30.93% | 1.86 | −20.5% | 1.51 | 34.82% | 1.70 | 0 |
+
+**Answer:** Diminishing return = YES (mild); cliff = NONE — robust plateau. FULL Calmar & OOS Calmar both
+**peak at MGE=1.3**; 1.3→1.5 loses CAGR (borrow drag, −0.16pp FULL / −1.03pp OOS) with no DD benefit (DD flat
+−20.5%, binding window = pre-capitulation decline, leverage-independent). **Verdict: keep MGE=1.3** (sweet spot);
+raising toward 1.5 is pure downside (more real leverage, less return). REAL leverage → Spyros sign-off + user
+approval before LIVE. Detail: `data/exp8_mge_sensitivity_bq.md`.

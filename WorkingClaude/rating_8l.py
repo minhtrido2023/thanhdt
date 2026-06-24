@@ -80,7 +80,7 @@ SELECT t.ticker, t.ICB_Code,
   t.CF_OA_P0, t.CF_OA_P1, t.CF_OA_P2, t.CF_OA_P3,
   t.NP_P0, t.NP_P1, t.NP_P2, t.NP_P3,
   t.PB, t.PE, t.PCF, ROUND(SAFE_DIVIDE(t.PB-t.PB_MA5Y, NULLIF(t.PB_SD5Y,0)),2) AS pb_z,
-  t.Close, t.OShares,
+  t.Close, t.Price, t.OShares,
   ROUND(t.Trading_Value_1M_P50/1e9,2) AS liq_bn,
   ROUND((SAFE_DIVIDE(t.Close,t.HI_3M_T1)-1)*100,1) AS drop_pct
 FROM tav2_bq.ticker_1m AS t, L
@@ -459,6 +459,10 @@ def main():
     # PRIMARY stable yield axis = earnings yield (1/PE). Chosen over 1/PCF (user 2026-06-16: CFO not always
     # positive over 4Q -> sign-unstable/cyclical, only ~67% populated). 1/PE: 94-100% populated, highest
     # signal persistence (0.96 vs 0.90), 11/13yr-consistent, equal-or-better IC. (EVEB/DY tested & rejected.)
+    # PE_stored = Close_adj/EPS; correct to unadjusted price basis: PE_true = PE * (Price/Close).
+    # Live impact ≈ 0 (Price≈Close when no recent bonus); fixes historical inflate of earn_yield pre-2016.
+    _pe_adj_factor = np.where(out["Close"] > 0, out["Price"] / out["Close"], 1.0)
+    out["PE"] = np.where(out["PE"] > 0, (out["PE"] * _pe_adj_factor).round(2), out["PE"])
     out["earn_yield"] = np.where(out["PE"] > 0, (1.0 / out["PE"]).round(4), np.nan)
     # SALES yield = 1/PS, current-price PS = mktcap/TTM-revenue. Value-IC validated 2026-06-19: PS is the
     # DOMINANT value lens for CONSUMER/RETAIL (IC +0.135) and strong broadly (+0.072, 99% cov) -> v3 lens.

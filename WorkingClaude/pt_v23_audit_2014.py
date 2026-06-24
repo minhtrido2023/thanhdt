@@ -82,6 +82,8 @@ def _argf(i):  # parse float-or-"none"/"off" positional
         return sys.argv[i]
     return None
 CAPIT_EVENT_CAP = float(_argf(2)) if _argf(2) is not None else None
+# Exp-2 (Taylor 2026-06-24): hold CAPIT until state returns to >= NEUTRAL instead of fixed 60td.
+CAPIT_HOLD_NEUTRAL = os.environ.get("CAPIT_HOLD_NEUTRAL", "0") == "1"
 # CAPIT universe (env, 2026-06-16): "golden" (prod) = deep pb_z<-1 + strict-quality from ticker_prune;
 # "custom30" = user reframe (liquid custom30 + pb_z<CAPIT_PBZ). Measured IN V2.3 production here (vs the
 # isolated V4-faithful harness). Default golden = byte-identical production.
@@ -238,13 +240,15 @@ else:
 _capsuf = "" if CAPIT_EVENT_CAP is None else f"_cap{int(round(CAPIT_EVENT_CAP*100))}"
 _matsuf = "" if MATURITY is None else (f"_mat{MATURITY}" + (f"_shrink{int(round(EW2D_SHRINK*100))}" if MATURITY in ("ew2d", "postbull") and abs(EW2D_SHRINK - 0.30) > 1e-9 else ""))
 _matsuf += "_edge" if USE_EDGE_ALLOC else ""
+_matsuf += "_holdneutral" if CAPIT_HOLD_NEUTRAL else ""
 LABEL = {"v23a": "V2.3A (allocator + CAPIT)",
          "v23c": "V2.3C (static 50/50 + CAPIT)",
          "v22base": "V2.2-base (static 50/50, NO CAPIT)",
          "singlebook": "SINGLE-BOOK (gated custom30 + CAPIT-on-idle)"}.get(MODE, MODE) \
         + (f" + per-event cap {int(round(CAPIT_EVENT_CAP*100))}%" if CAPIT_EVENT_CAP else "") \
         + (f" + maturity:{MATURITY}" if MATURITY else "") \
-        + (f" + edge-cond-allocator(thr{EDGE_THR:.0f}%)" if USE_EDGE_ALLOC else "")
+        + (f" + edge-cond-allocator(thr{EDGE_THR:.0f}%)" if USE_EDGE_ALLOC else "") \
+        + (" + hold-neutral(capit)" if CAPIT_HOLD_NEUTRAL else "")
 # Conditional BULL-PARK (mechanism test 2026-06-20): deploy idle cash into the parking basket (custom30V)
 # in BULL/EXBULL ONLY when breadth is BROAD (>= thr), soft-tapered by index extension (VNI/MA200). Env-gated,
 # default OFF -> cash_etf_states_by_date=None -> byte-identical to production. WHAT/WHEN study (item 21):
@@ -300,14 +304,95 @@ _mge_tag = "" if not _mge else f"_mge{int(round(MGE*100))}{'cap' if MGE_CAPIT_ON
 #   fedborrow -> scale by CARRY vs the BORROW rate: mf=clip((eyield-borrow-FLOOR)/(CEIL-FLOOR)). Stands aside when
 #                the market earnings-yield (1/VNINDEX_PE) does NOT beat the borrow cost -> e.g. COVID-3/2020
 #                (eyield ~9.7% < borrow 10%) -> NO lever there -> avoids the -32.5% 1.5x tail. fail-CLOSED if PE NA.
-MGE_GATE      = os.environ.get("MGE_GATE", "none").lower()                 # none | deposit | fedborrow
+MGE_GATE      = os.environ.get("MGE_GATE", "none").lower()                 # none | deposit | fedborrow | deposit_eyield | conviction
 MGE_FED_FLOOR = float(os.environ.get("MGE_FED_FLOOR", "0.0"))              # eyield-borrow spread floor (m=0 at/below)
 MGE_FED_CEIL  = float(os.environ.get("MGE_FED_CEIL", "0.02"))              # spread at/above -> full lever (m=1)
+# deposit_eyield gate (Exp-3 Taylor 2026-06-24): gate lever by carry vs DEPOSIT (not BORROW).
+# m = clip((eyield-deposit-FLOOR)/(CEIL-FLOOR), 0, 1). Eyield(1/PE_market) 5.9-7.7% > deposit 3-6% in most
+# 2014-26 washout episodes -> gate fires more than fedborrow (vs borrow 10% which never fires post-2014).
+# Uses same FLOOR/CEIL as fedborrow for spread (MGE_FED_FLOOR / MGE_FED_CEIL). Fail-closed if PE NA.
+# conviction gate (Taylor 2026-06-24): lever ONLY when all 3 simultaneously: DT5G state=CRISIS(1) +
+# postbull_clear (postbull_mult>=1.0, i.e. not a post-bull shallow drawdown) + US Pillar B OFF (VIX<=35
+# AND spx_dd_1y>=-25%). Logic: VN-specific crash that is NOT US contagion AND not a post-bull trap =>
+# highest-conviction recovery setup. Loaded from us_market_history.csv (causal: T-1 VN alignment).
 _mge_gate_m   = (lambda dd: 1.0)                                           # placeholder; real fn set in recovery block
+assert MGE_GATE in ("none", "deposit", "fedborrow", "deposit_eyield", "conviction"), f"MGE_GATE must be none|deposit|fedborrow|deposit_eyield|conviction, got {MGE_GATE!r}"
+# DEEP-VALUE POSTBULL OVERRIDE (Taylor 2026-06-24, Exp-5b): when MATURITY=="postbull" zeroes a CAPIT
+# event because the market is post-strong-bull + shallow decline, but the UNIVERSE is genuinely CHEAP
+# (median liquid-universe pb_z deep-negative), override the postbull guard and restore normal size.
+# Hypothesis: postbull guard correctly filters momentum-overhang washouts, but wrongly blocks 2022-type
+# events where the market corrected AND got cheap vs 5Y history (pb_z deeply negative = genuine value).
+# Implementation: post-pass on capit_events AFTER _pbz_asof() is available (requires RECOVERY_PARK=1
+# so the pb_z monthly median data is already loaded).
+# DEEP_VALUE_PBZ=-1.0 = strict (only fire when pb_z < -1.0, well below 5Y median PB)
+# DEEP_VALUE_PBZ=-0.8 = slightly less strict
+# DEEP_VALUE_PBZ=-99  = OFF (default, never fires)
+DEEP_VALUE_PBZ = float(os.environ.get("DEEP_VALUE_PBZ", "-99"))  # default OFF
+# RECOVERY-GRADUAL V2 (Taylor 2026-06-24, Exp-6): instead of instant full-deploy when pb_z ≤ start,
+# spread entry over RECOVERY_DAYS trading days (accumulation campaign), then allow a volume capitulation
+# event to trigger full-remaining deploy early.
+# Design:
+#   • Episode starts when (CRISIS/BEAR + pb_z ≤ PBZ_START) first fires.
+#   • Each day: frac += target_frac / RECOVERY_DAYS  (capped at target_frac).
+#   • If vol_ratio (VNINDEX Volume / rolling-21d mean, causal T-1) ≥ CAPIT_VOL: snap to target_frac.
+#   • RECOVERY_LEVER_ON_CAPIT=1: on capitulation day, use MGE wmax instead of RECOVERY_WMAX.
+#   • Episode ends (resets) when state exits CRISIS/BEAR OR pb_z rises above PBZ_START.
+# Calibration note: vol_ratio peaks at COVID=1.65x, 2022=1.91x, 2018=1.83x, 2016=1.91x (21d rolling).
+# CAPIT_VOL=1.6 catches all major crashes. 2.0+ misses COVID and 2022 entirely.
+RECOVERY_GRADUAL      = os.environ.get("RECOVERY_GRADUAL", "0") == "1"      # default OFF
+RECOVERY_DAYS         = int(os.environ.get("RECOVERY_DAYS", "10"))           # days to spread entry
+RECOVERY_CAPIT_VOL    = float(os.environ.get("RECOVERY_CAPIT_VOL", "1.6"))  # vol_ratio threshold
+RECOVERY_LEVER_ON_CAPIT = os.environ.get("RECOVERY_LEVER_ON_CAPIT", "0") == "1"  # use MGE wmax on capit
+# CAPIT-ONLY mode (Taylor 2026-06-24, Exp-8): NO instant-deploy, NO gradual accumulation. The recovery-park
+# parking stays at 0 (base) until a volume CAPITULATION spike vs a 3M/6M baseline fires, then snaps to FULL
+# target on T+1 and HOLDS until reset. Reuses the gradual state machine but disables the daily step and the
+# accel/gradual episode-start (episode enters ONLY on a capit fire). RECOVERY_CAPIT_BASE = rolling-mean window
+# for the vol_ratio denominator (63 = ~3M, 126 = ~6M) instead of the 21d used by RECOVERY_GRADUAL.
+# Calibrated (Exp-8 Step1): threshold 1.7x catches all 6 crises (COVID/2022/2018/2016/2023/2025) at BOTH
+# BASE=63 (fires 2.7% of days, P97) and BASE=126 (4.3%, P97). 1.8x starts missing 2016+2023.
+RECOVERY_CAPIT_ONLY = os.environ.get("RECOVERY_CAPIT_ONLY", "0") == "1"     # default OFF
+RECOVERY_CAPIT_BASE = int(os.environ.get("RECOVERY_CAPIT_BASE", "63"))      # vol_ratio baseline window (63|126)
+# Exp-8 REVISED (Mike exp8-revised): expand the CAPIT-ONLY trigger beyond vol-spike (Signal A) to VNINDEX
+# technical reversal signals. ANY enabled signal firing (inside the CRISIS/BEAR + pb_z gate) -> full deploy:
+#   Signal B (RECOVERY_SIG_B): RSI oversold-reversal — D_RSI_VNINDEX<0.30 for >=3 consecutive days AND turning
+#                              up (D_RSI[T] > D_RSI[T-3] + 0.02). Rare & precise (lands at capitulation bottom).
+#   Signal C (RECOVERY_SIG_C): RSI bullish-divergence — in a 10d window Close[T] is a new low but D_RSI[T] >
+#                              D_RSI at the prior in-window Close-low. Earlier but noisier (high false-positive).
+# D_RSI_VNINDEX pulled from BQ (VNINDEX row, 0-1 scale, full coverage 2011+). Causal: all use T / T-3 / trailing.
+RECOVERY_SIG_B = os.environ.get("RECOVERY_SIG_B", "0") == "1"
+RECOVERY_SIG_C = os.environ.get("RECOVERY_SIG_C", "0") == "1"
+if RECOVERY_CAPIT_ONLY:
+    RECOVERY_GRADUAL = True   # CAPIT-ONLY runs ON the gradual machine (vol load + episode loop), step disabled
+# ACCELERATING-DECLINE FILTER (Taylor 2026-06-24, Exp-7):
+# Gate the GRADUAL campaign start on an "accelerating decline" signal:
+#   dd_5d  = Close[T-1] / Close[T-6]  - 1   (5-day return, fully causal T-1)
+#   dd_10d = Close[T-1] / Close[T-11] - 1   (10-day return)
+#   accel_ok = (dd_5d < -0.03) OR (dd_5d < dd_10d * 0.6)
+# Meaning: 5-day decline >= 3% ("falling fast"), OR recent 5d pace > 1.67x the 10d pace (accelerating).
+# When RECOVERY_ACCEL=1:
+#   - Gradual campaign STARTS only when CRISIS/BEAR + pb_z ≤ PBZ_START AND accel_ok
+#   - Volume capit trigger fires regardless of accel_ok (capit override = deploy instantly even if no campaign yet)
+#   - If capit fires before accel_ok (e.g., sudden spike before accelerating decline), it's still caught
+# Default OFF: byte-identical to RECOVERY_GRADUAL=1 behaviour.
+RECOVERY_ACCEL = os.environ.get("RECOVERY_ACCEL", "0") == "1"
+_accel_tag = "_accel" if (RECOVERY_PARK and RECOVERY_GRADUAL and RECOVERY_ACCEL) else ""
+_grad_tag = ("" if not (RECOVERY_PARK and RECOVERY_GRADUAL) else
+             (f"_capitonly{RECOVERY_CAPIT_BASE}cv{int(RECOVERY_CAPIT_VOL*10)}" if RECOVERY_CAPIT_ONLY else
+              f"_grad{RECOVERY_DAYS}cv{int(RECOVERY_CAPIT_VOL*10)}") +
+             ("B" if RECOVERY_SIG_B else "") + ("C" if RECOVERY_SIG_C else "") +
+             ("lev" if RECOVERY_LEVER_ON_CAPIT else "") + _accel_tag)
 if _mge and MGE_GATE != "none":
-    _mge_tag += "_lg" + (("fed%d" % int(MGE_FED_CEIL*1000)) if MGE_GATE == "fedborrow" else "dep")
+    if MGE_GATE in ("fedborrow", "deposit_eyield"):
+        _mge_tag += "_lg" + ("depeye%d" % int(MGE_FED_CEIL*1000) if MGE_GATE == "deposit_eyield"
+                             else "fed%d" % int(MGE_FED_CEIL*1000))
+    elif MGE_GATE == "conviction":
+        _mge_tag += "_lgconv"
+    else:
+        _mge_tag += "_lgdep"
 _recpark_tag = "" if not RECOVERY_PARK else f"_recpark{int(RECOVERY_WMAX*100)}z{int(abs(RECOVERY_PBZ_DEEP)*100)}{_depg_tag}"
 _recpark_tag = _recpark_tag + _mge_tag
+_dvo_tag = "" if DEEP_VALUE_PBZ <= -90 else f"_dvo{int(abs(DEEP_VALUE_PBZ)*10)}"
+_recpark_tag = _recpark_tag + _dvo_tag + _grad_tag
 AUDIT_PATH  = os.path.join(WORKDIR, "data",
                            {"v23a": "v23_golive_audit_2014_now.csv",
                             "v23c": "v23c_golive_audit_2014_now.csv",
@@ -326,6 +411,7 @@ ALLOC_REBAL_BAND  = 0.10
 
 WASHOUT_GATE = 0.30
 CAPIT_HOLD   = int(os.environ.get("CAPIT_HOLD", "60"))   # Part-2: raise to hold levered custom30V to the rebalance cycle
+# CAPIT_HOLD_NEUTRAL defined early (before _matsuf) near CAPIT_EVENT_CAP; see Exp-2 note there.
 def capit_base(state, dd52w, vn_cooling):
     if state == 1: return 1.0
     if state == 3: return 0.75
@@ -735,9 +821,10 @@ if USE_CAPIT and len(ws):
             mat = maturity_mult(dd_now) if st == 1 else 1.0
             if MATURITY and st == 1 and mat < 1.0:
                 print(f"    [maturity:{MATURITY}] {d0.date()} CRISIS dd52={dd_now:.1f}% -> size x{mat:.2f} ({size:.2f}->{size*mat:.2f})")
+        size_premat = size   # save pre-maturity size for deep-value override post-pass
         size *= mat
         capit_events.append({"date": d0, "state": st, "grind": grind, "size": size, "dd": dd_now,
-                             "cool": vn_cool_at(d0)})
+                             "cool": vn_cool_at(d0), "_size_premat": size_premat, "_mat": mat})
         print(f"  washout {d0.date()}: state={st} grind={grind} dd52={dd_now:.1f}% cool={vn_cool_at(d0)} -> size={size:.2f}")
 
 _basket_cache = {}
@@ -846,8 +933,22 @@ LAG_TW = {"LAG_HI": 0.10, "LAG_LO": 0.08}
 # ============================================================================
 # 5b. CAPIT arm builder (two-pass, identical to go-live)
 # ============================================================================
+def _sessions_to_neutral(d0):
+    """Return number of trading sessions from d0 until first session with state >= 3 (NEUTRAL).
+    Floor=10 (T+3 buffer), ceiling=CAPIT_HOLD (fallback if no NEUTRAL found in remaining history)."""
+    try:
+        i0 = vni_dates.index(d0)
+    except ValueError:
+        return CAPIT_HOLD
+    for j in range(i0 + 1, len(vni_dates)):
+        if int(state_ff.get(vni_dates[j], 1) or 1) >= 3:
+            hold = j - i0
+            return max(hold, 10)   # floor: never less than 10 sessions
+    return CAPIT_HOLD              # no NEUTRAL found -> fall back to fixed hold
+
 def add_capit_arm(sig_book, base_nav_df, tw_base, tag, book_prices):
     rows, tw2, tiers = [], dict(tw_base), []
+    tier_hold = {}    # per-tier hold days (only populated when CAPIT_HOLD_NEUTRAL)
     if not capit_events:
         return sig_book, tw2, {}
     basecash = (base_nav_df.set_index("time")["cash_pct"] / 100.0).clip(lower=0)
@@ -866,9 +967,19 @@ def add_capit_arm(sig_book, base_nav_df, tw_base, tag, book_prices):
             print(f"    [cap] {tag} E{i} {e['date'].date()}: wt {wt:.3f} -> {CAPIT_EVENT_CAP:.3f} (per-event cap)")
             wt = CAPIT_EVENT_CAP
         if _mge and MGE_CAPIT_ONLY:                         # real-margin: borrow headroom ON TOP (deep-washout only)
-            _lgm = _mge_gate_m(d)                           # Part-2 lever-gate (deposit / fed-vs-borrow / none)
+            _lgm = _mge_gate_m(d)                           # Part-2 lever-gate (deposit / fed-vs-borrow / conviction / none)
             _head = e["size"] * (_mge - 1.0) * _lgm         # scale borrow with washout conviction AND money-condition
-            if MGE_GATE != "none":
+            if MGE_GATE == "conviction":
+                _st_cv  = int(state_ff.get(d) or state_by_date.get(d, 3) or 3)
+                _pb_cv  = _pillar_b_asof(d)
+                _pbc_cv = (postbull_mult(d) >= 1.0)
+                _reason = ("LEVER" if _lgm > 0 else
+                           ("state not CRISIS" if _st_cv != 1 else
+                            ("postbull blocked" if not _pbc_cv else "Pillar B active")))
+                print(f"    [lever-gate conviction] {tag} E{i} {d.date()}: "
+                      f"state={_st_cv} postbull_clear={_pbc_cv} pillar_b={_pb_cv} "
+                      f"m={_lgm:.1f} head={e['size']*(_mge-1.0):.3f}->{_head:.3f} => {_reason}")
+            elif MGE_GATE != "none":
                 print(f"    [lever-gate {MGE_GATE}] {tag} E{i} {d.date()}: m={_lgm:.2f} "
                       f"head {e['size']*(_mge-1.0):.3f} -> {_head:.3f}")
             wt += _head
@@ -879,9 +990,15 @@ def add_capit_arm(sig_book, base_nav_df, tw_base, tag, book_prices):
         for t in names:
             rows.append({"time": d, "ticker": t, "play_type": pt, "ta": 500.0,
                          "Close": book_prices[t][d]})
+        # Exp-2: per-event hold until state >= NEUTRAL (different for each event)
+        if CAPIT_HOLD_NEUTRAL:
+            hd = _sessions_to_neutral(d)
+            tier_hold[pt] = hd
+            print(f"    [hold-neutral] {tag} E{i} {d.date()}: hold={hd}td (fixed={CAPIT_HOLD}td)")
     if not tiers:
         return sig_book, tw2, {}
-    extra = dict(hold_days_by_tier={t: CAPIT_HOLD for t in tiers},
+    hold_map = tier_hold if CAPIT_HOLD_NEUTRAL else {t: CAPIT_HOLD for t in tiers}
+    extra = dict(hold_days_by_tier=hold_map,
                  stop_exempt_tiers=set(tiers), slot_exempt_tiers=set(tiers),
                  tier_position_limit={t: 15 for t in tiers})
     if CAPIT_STOP is not None:                          # cutloss for capit (liquid custom30 can exit; golden can't)
@@ -951,7 +1068,7 @@ if RECOVERY_PARK:
         return rate
     # fed-gate: causal prior-month market earnings yield (1/VNINDEX_PE); VNINDEX_PE sane back to 2006
     _eym = {}
-    if RECOVERY_GATE_MODE == "fed" or MGE_GATE == "fedborrow":
+    if RECOVERY_GATE_MODE == "fed" or MGE_GATE in ("fedborrow", "deposit_eyield"):
         _pe = bq(f"""SELECT FORMAT_DATE('%Y-%m', t.time) ym, ANY_VALUE(t.VNINDEX_PE) vpe
           FROM tav2_bq.ticker_prune AS t WHERE t.VNINDEX_PE>0
           AND t.time BETWEEN DATE '{START_DATE}' AND DATE '{END_DATE}' GROUP BY ym""")
@@ -969,8 +1086,41 @@ if RECOVERY_PARK:
                                  (RECOVERY_FED_CEIL - RECOVERY_FED_FLOOR), 0.0, 1.0))
         return float(np.clip((RECOVERY_DEP_CEIL - _dep_asof(dd)) /
                              (RECOVERY_DEP_CEIL - RECOVERY_DEP_FLOOR), 0.0, 1.0))
+    # conviction gate: US Pillar B lookup (causal: T-1 VN alignment, same as macro_state_live.py).
+    # VIX > 35 OR spx_dd_1y < -0.25 => Pillar B active => block lever.
+    # us_market_history.csv: T-1 aligned (the US close from the prior calendar day, already present).
+    _us_pb = {}
+    if MGE_GATE == "conviction":
+        _usm = pd.read_csv(os.path.join(WORKDIR, "data", "us_market_history.csv"), parse_dates=["time"])
+        _usm = _usm.sort_values("time").reset_index(drop=True)
+        # Build T-1 aligned lookup: for each VN date d, use the most recent US row with time < d (T-1 causal)
+        _us_dates = _usm["time"].values
+        _us_vix   = _usm["vix"].values
+        _us_spxdd = _usm["spx_dd_1y"].values
+        for _vnd in vni_dates:
+            _vnd_np = np.datetime64(_vnd)
+            _idx = np.searchsorted(_us_dates, _vnd_np, side="left") - 1   # last US row strictly before VN date
+            if _idx < 0:
+                _us_pb[_vnd] = True    # no US data -> fail-CLOSED (block lever)
+            else:
+                _v = float(_us_vix[_idx]) if not np.isnan(float(_us_vix[_idx])) else 0.0
+                _d = float(_us_spxdd[_idx]) if not np.isnan(float(_us_spxdd[_idx])) else 0.0
+                _us_pb[_vnd] = (_v > 35.0) or (_d < -0.25)
+        _npb_active = sum(1 for v in _us_pb.values() if v)
+        print(f"  [conviction-gate] US Pillar B loaded: {_npb_active}/{len(_us_pb)} VN dates have Pillar B active "
+              f"(VIX>35 or SPX-dd1y<-25%)")
+    def _pillar_b_asof(dd):
+        """Return True if US Pillar B active on VN date dd (causal T-1). fail-CLOSED if no data."""
+        dd = pd.Timestamp(dd)
+        if dd in _us_pb: return _us_pb[dd]
+        # fallback: find nearest prior key
+        keys = sorted(k for k in _us_pb if k <= dd)
+        return _us_pb[keys[-1]] if keys else True
     # Part-2 lever-gate fn (gates the CAPIT borrow headroom). deposit reuses the dep money-condition;
-    # fedborrow compares the market earnings-yield against the BORROW cost (not deposit).
+    # fedborrow compares the market earnings-yield against the BORROW cost (not deposit);
+    # deposit_eyield (Exp-3) compares eyield vs DEPOSIT rate instead — fires whenever stocks yield >
+    # deposit (more episodes than fedborrow, all post-2014 washout windows should qualify).
+    # conviction (Taylor 2026-06-24): binary gate — m=1.0 only when CRISIS + postbull_clear + Pillar B off.
     def _mge_gate_m(dd):
         if MGE_GATE == "deposit":
             return float(np.clip((RECOVERY_DEP_CEIL - _dep_asof(dd)) /
@@ -981,8 +1131,93 @@ if RECOVERY_PARK:
             spread = ey - BORROW_ANNUAL                                # carry vs the borrow rate
             return float(np.clip((spread - MGE_FED_FLOOR) /
                                  (MGE_FED_CEIL - MGE_FED_FLOOR), 0.0, 1.0))
+        if MGE_GATE == "deposit_eyield":
+            ey = _eyield_asof(dd)
+            if pd.isna(ey): return 0.0                                 # fail-CLOSED: no PE -> no lever
+            spread = ey - _dep_asof(dd)                                # carry vs deposit (not borrow)
+            m = float(np.clip((spread - MGE_FED_FLOOR) /
+                              (MGE_FED_CEIL - MGE_FED_FLOOR), 0.0, 1.0))
+            return m
+        if MGE_GATE == "conviction":
+            st  = int(state_ff.get(pd.Timestamp(dd)) or state_by_date.get(pd.Timestamp(dd), 3) or 3)
+            pb  = _pillar_b_asof(dd)                                   # True = US panic (block)
+            pbc = (postbull_mult(pd.Timestamp(dd)) >= 1.0)             # True = clear (not blocked)
+            return 1.0 if (st == 1 and pbc and not pb) else 0.0
         return 1.0
+    # GRADUAL V2: load VNINDEX volume for vol_ratio lookup (causal: T-1 rolling 21d mean)
+    if RECOVERY_GRADUAL:
+        _vol_path = os.path.join(WORKDIR, "data", "snapshots", "vnivol_20260624.parquet")
+        _vvol = pd.read_parquet(_vol_path)[["time", "Volume"]].copy()
+        _vvol["time"] = pd.to_datetime(_vvol["time"])
+        _vvol = _vvol.sort_values("time").reset_index(drop=True)
+        # Causal vol_ratio: rolling BASE-day mean shifted by 1 (T uses mean of [T-BASE, T-1]).
+        # BASE = RECOVERY_CAPIT_BASE (63/126) in CAPIT-ONLY mode (Exp-8); else 21 (gradual Exp-6).
+        _GRAD_BASE = RECOVERY_CAPIT_BASE if RECOVERY_CAPIT_ONLY else 21
+        _vvol["_volma"] = _vvol["Volume"].rolling(_GRAD_BASE, min_periods=max(10, _GRAD_BASE // 3)).mean().shift(1)
+        _vvol["vol_ratio"] = _vvol["Volume"] / _vvol["_volma"]
+        _vol_ratio_by_date = dict(zip(_vvol["time"], _vvol["vol_ratio"]))
+        # Exp-8 REVISED: VNINDEX RSI reversal signals B/C (pulled from BQ, causal).
+        _sigB_by_date = {}; _sigC_by_date = {}
+        if RECOVERY_SIG_B or RECOVERY_SIG_C:
+            _rsi = bq(f"""SELECT t.time, t.Close, t.D_RSI FROM tav2_bq.ticker AS t
+              WHERE t.ticker='VNINDEX' AND t.D_RSI IS NOT NULL
+              AND t.time BETWEEN DATE '{START_DATE}' AND DATE '{END_DATE}' ORDER BY t.time""")
+            _rsi["time"] = pd.to_datetime(_rsi["time"]); _rsi = _rsi.sort_values("time").reset_index(drop=True)
+            _r = _rsi["D_RSI"]; _c = _rsi["Close"]
+            # Signal B: D_RSI<0.30 for >=3 consecutive days AND turning up (R[T] > R[T-3]+0.02)
+            _lt = _r < 0.30
+            _dur = _lt.groupby((~_lt).cumsum()).cumsum()
+            _rsi["sigB"] = _lt & (_dur >= 3) & (_r > _r.shift(3) + 0.02)
+            # Signal C: 10d-window bullish divergence — Close[T] new in-window low but D_RSI[T] > D_RSI@prior-low
+            _sigC = [False] * len(_rsi)
+            for _i in range(10, len(_rsi)):
+                _w = _rsi.iloc[_i-9:_i+1]
+                if _c.iloc[_i] > _w["Close"].iloc[:-1].min():
+                    continue
+                _pl = _w["Close"].iloc[:-1].idxmin()
+                _sigC[_i] = bool(_r.iloc[_i] > _r.loc[_pl])
+            _rsi["sigC"] = _sigC
+            _sigB_by_date = dict(zip(_rsi["time"], _rsi["sigB"]))
+            _sigC_by_date = dict(zip(_rsi["time"], _rsi["sigC"]))
+            print(f"  [recovery-RSI-signals] B={'ON' if RECOVERY_SIG_B else 'off'} ({int(_rsi['sigB'].sum())} fires) "
+                  f"C={'ON' if RECOVERY_SIG_C else 'off'} ({int(_rsi['sigC'].sum())} fires) — VNINDEX D_RSI from BQ")
+        # WMAX to use on capitulation day (if LEVER_ON_CAPIT and MGE > 1.0)
+        _capit_wmax = (MGE if (RECOVERY_LEVER_ON_CAPIT and MGE > 1.0) else RECOVERY_WMAX)
+        if RECOVERY_CAPIT_ONLY:
+            print(f"  [recovery-CAPIT-ONLY] Exp-8: NO instant/gradual deploy; parking idles until vol_ratio "
+                  f">= {RECOVERY_CAPIT_VOL:.1f}x vs {_GRAD_BASE}d baseline ({'3M' if _GRAD_BASE==63 else '6M' if _GRAD_BASE==126 else str(_GRAD_BASE)+'d'}), "
+                  f"then snap-to-full + HOLD. capit_wmax={_capit_wmax:.2f}")
+        else:
+            print(f"  [recovery-gradual] GRADUAL=ON days={RECOVERY_DAYS} capit_vol={RECOVERY_CAPIT_VOL:.1f}x base={_GRAD_BASE}d "
+                  f"capit_wmax={_capit_wmax:.2f} (calibrated: COVID≈1.65x, 2022≈1.91x, 2025≈2.26x)")
+        # ACCEL FILTER (Exp-7): build dd_5d and dd_10d from VNINDEX Close (causal T-1)
+        # At day T: uses Close[T-1]/Close[T-6]-1 and Close[T-1]/Close[T-11]-1
+        # Source: vni_close_by_date (already loaded from BQ; covers full backtest window)
+        if RECOVERY_ACCEL:
+            _vni_close_s = pd.Series(vni_close_by_date).sort_index()
+            _vni_close_shift1  = _vni_close_s.shift(1)   # T-1 close (causal: most recent known)
+            _vni_close_shift6  = _vni_close_s.shift(6)   # T-6 close (5 trading days ago vs T-1)
+            _vni_close_shift11 = _vni_close_s.shift(11)  # T-11 close (10 trading days ago vs T-1)
+            _dd5d_s  = _vni_close_shift1 / _vni_close_shift6  - 1.0
+            _dd10d_s = _vni_close_shift1 / _vni_close_shift11 - 1.0
+            _accel_ok_s = (_dd5d_s < -0.03) | (_dd5d_s < _dd10d_s * 0.6)
+            _dd5d_by_date    = _dd5d_s.to_dict()
+            _dd10d_by_date   = _dd10d_s.to_dict()
+            _accel_ok_by_date = _accel_ok_s.to_dict()
+            print(f"  [accel-filter] RECOVERY_ACCEL=ON: dd_5d<-3% OR dd_5d<dd_10d*0.6 (T-1 causal)")
+    # --- RECOVERY_PARK_BY_DATE loop ---
     RECOVERY_PARK_BY_DATE = {}; _nrec = 0; _msum = 0.0
+    # Gradual state machine (only active when RECOVERY_GRADUAL=1)
+    _grad_episode_active = False      # are we inside an active episode?
+    _grad_episode_day    = 0          # how many days into current episode
+    _grad_current_frac   = 0.0        # accumulated frac so far this episode
+    _grad_target_frac    = 0.0        # target frac for this episode (from pb_z depth)
+    _grad_logs           = []         # per-episode log for reporting
+    # Accel-filter episode tracking (only when RECOVERY_ACCEL=1)
+    _accel_ep_start      = None       # date when CRISIS/BEAR + pb_z ≤ START first triggered (before accel_ok)
+    _accel_ep_accel_date = None       # first date within episode where accel_ok fired
+    _accel_ep_capit_date = None       # first capit fire in this episode
+    _accel_logs          = []         # [accel-filter] per-episode log entries
     for d in vni_dates:
         base = dict(BULL_PARK_BY_DATE[d]) if BULL_PARK_BY_DATE else dict(PARK_STATES_DICT)
         st = int(state_ff.get(d) or 3)
@@ -992,10 +1227,124 @@ if RECOVERY_PARK:
                 frac = float(np.clip((RECOVERY_PBZ_START - z) / (RECOVERY_PBZ_START - RECOVERY_PBZ_DEEP), 0.0, 1.0))
                 m = _dep_m(d)                                          # money-condition gate
                 base_st = float(PARK_STATES_DICT.get(st, 0.0))
-                w = base_st + m * frac * (RECOVERY_WMAX - base_st)
+                if RECOVERY_GRADUAL:
+                    # Compute the "full" target weight for this day (what instant-deploy would set)
+                    _tgt = base_st + m * frac * (RECOVERY_WMAX - base_st)
+                    # ACCEL FILTER: check accelerating-decline condition (causal T-1)
+                    _this_accel_ok = True   # default: no accel filter = always OK
+                    if RECOVERY_CAPIT_ONLY:
+                        # Exp-8: episode may ONLY be entered by a capit fire (no instant/gradual/accel start).
+                        # Before a capit, _grad_current_frac stays 0 (idle); after, the keep-frac branch HOLDS it.
+                        _this_accel_ok = False
+                    if RECOVERY_ACCEL:
+                        _this_accel_ok = bool(_accel_ok_by_date.get(pd.Timestamp(d), False))
+                        # Track episode start (when CRISIS/BEAR + pb_z fires, even before accel_ok)
+                        if _accel_ep_start is None:
+                            _accel_ep_start = pd.Timestamp(d)
+                        if _this_accel_ok and _accel_ep_accel_date is None:
+                            _accel_ep_accel_date = pd.Timestamp(d)
+                    # Check capitulation (volume spike on this day)
+                    _vr = _vol_ratio_by_date.get(pd.Timestamp(d), np.nan)
+                    _sigA = (not np.isnan(_vr)) and (_vr >= RECOVERY_CAPIT_VOL)
+                    _sigB = RECOVERY_SIG_B and bool(_sigB_by_date.get(pd.Timestamp(d), False))
+                    _sigC = RECOVERY_SIG_C and bool(_sigC_by_date.get(pd.Timestamp(d), False))
+                    _capit_fired = _sigA or _sigB or _sigC      # Exp-8 REVISED: ANY reversal signal fires
+                    # CAPIT OVERRIDE: fire even if accel_ok not met yet (strongest signal)
+                    _episode_entry_ok = _this_accel_ok or _capit_fired
+                    if _episode_entry_ok:
+                        if not _grad_episode_active:
+                            # Episode just started (either accel_ok OR capit override)
+                            _grad_episode_active = True
+                            _grad_episode_day    = 1
+                            _grad_current_frac   = 0.0
+                            _grad_target_frac    = _tgt
+                            if RECOVERY_ACCEL and not _this_accel_ok and _capit_fired:
+                                # Capit override: note that accel wasn't met but capit fired
+                                if _accel_ep_accel_date is None:
+                                    _accel_ep_accel_date = pd.Timestamp(d)  # capit counts as accel confirmation
+                        else:
+                            # Episode continuing: update target (pb_z/money-gate may drift)
+                            _grad_episode_day   += 1
+                            _grad_target_frac    = _tgt   # track current day's target
+                        if _capit_fired:
+                            if RECOVERY_ACCEL and _accel_ep_capit_date is None:
+                                _accel_ep_capit_date = pd.Timestamp(d)
+                            # Snap to full target (possibly with leverage wmax)
+                            _full_wmax = _capit_wmax if RECOVERY_LEVER_ON_CAPIT else RECOVERY_WMAX
+                            _capit_tgt = base_st + m * frac * (_full_wmax - base_st)
+                            _grad_current_frac = _capit_tgt
+                            _5d = _dd5d_by_date.get(pd.Timestamp(d), float('nan')) if RECOVERY_ACCEL else float('nan')
+                            _10d = _dd10d_by_date.get(pd.Timestamp(d), float('nan')) if RECOVERY_ACCEL else float('nan')
+                            _sig_tag = "+".join([s for s, on in [("A", _sigA), ("B", _sigB), ("C", _sigC)] if on])
+                            _grad_logs.append(f"  [RECOVERY-CAPIT] {pd.Timestamp(d).date()} sig={_sig_tag} vol_ratio="
+                                              f"{_vr:.2f}x -> FULL DEPLOY frac={_grad_current_frac:.3f} "
+                                              f"(ep_day={_grad_episode_day})" +
+                                              (f" dd5d={_5d:.2%} dd10d={_10d:.2%}" if RECOVERY_ACCEL and not np.isnan(_5d) else ""))
+                        else:
+                            # Gradual step: add 1/N of target per day
+                            _daily_step = _grad_target_frac / RECOVERY_DAYS
+                            _grad_current_frac = min(_grad_current_frac + _daily_step, _grad_target_frac)
+                        w = _grad_current_frac
+                    else:
+                        # No entry yet (CAPIT-ONLY idling pre-spike, or accel filter not met): HOLD current frac
+                        w = _grad_current_frac   # keep whatever we already deployed (0 if no episode yet)
+                        if RECOVERY_ACCEL:       # these debug vars only exist when accel dicts are built
+                            _5d = _dd5d_by_date.get(pd.Timestamp(d), float('nan'))
+                            _10d = _dd10d_by_date.get(pd.Timestamp(d), float('nan'))
+                else:
+                    # Original instant-deploy logic
+                    w = base_st + m * frac * (RECOVERY_WMAX - base_st)
                 if w > base_st + 0.01:
                     base[st] = w; _nrec += 1; _msum += m
+            else:
+                # pb_z rose above threshold: reset episode
+                if RECOVERY_GRADUAL and _grad_episode_active:
+                    # Log the completed episode (accel filter) before resetting
+                    if RECOVERY_ACCEL and _accel_ep_start is not None:
+                        _5d_ep = _dd5d_by_date.get(_accel_ep_start, float('nan'))
+                        _10d_ep = _dd10d_by_date.get(_accel_ep_start, float('nan'))
+                        _accel_logs.append({
+                            "episode_start": _accel_ep_start.date() if _accel_ep_start else None,
+                            "dd_5d_start": f"{_5d_ep:.2%}" if not np.isnan(_5d_ep) else "N/A",
+                            "dd_10d_start": f"{_10d_ep:.2%}" if not np.isnan(_10d_ep) else "N/A",
+                            "accel_first_date": _accel_ep_accel_date.date() if _accel_ep_accel_date else "NEVER",
+                            "capit_date": _accel_ep_capit_date.date() if _accel_ep_capit_date else "NONE",
+                            "end_reason": "pb_z_above_threshold",
+                        })
+                    _grad_episode_active = False
+                    _grad_current_frac   = 0.0
+                    _grad_episode_day    = 0
+                if RECOVERY_ACCEL:
+                    _accel_ep_start = None; _accel_ep_accel_date = None; _accel_ep_capit_date = None
+        else:
+            # State exited CRISIS/BEAR: reset episode
+            if RECOVERY_GRADUAL and _grad_episode_active:
+                if RECOVERY_ACCEL and _accel_ep_start is not None:
+                    _5d_ep = _dd5d_by_date.get(_accel_ep_start, float('nan'))
+                    _10d_ep = _dd10d_by_date.get(_accel_ep_start, float('nan'))
+                    _accel_logs.append({
+                        "episode_start": _accel_ep_start.date() if _accel_ep_start else None,
+                        "dd_5d_start": f"{_5d_ep:.2%}" if not np.isnan(_5d_ep) else "N/A",
+                        "dd_10d_start": f"{_10d_ep:.2%}" if not np.isnan(_10d_ep) else "N/A",
+                        "accel_first_date": _accel_ep_accel_date.date() if _accel_ep_accel_date else "NEVER",
+                        "capit_date": _accel_ep_capit_date.date() if _accel_ep_capit_date else "NONE",
+                        "end_reason": "state_exit",
+                    })
+                _grad_episode_active = False
+                _grad_current_frac   = 0.0
+                _grad_episode_day    = 0
+            if RECOVERY_ACCEL:
+                _accel_ep_start = None; _accel_ep_accel_date = None; _accel_ep_capit_date = None
         RECOVERY_PARK_BY_DATE[d] = base
+    if RECOVERY_GRADUAL and _grad_logs:
+        print(f"  [recovery-gradual] {len(_grad_logs)} capitulation event(s) detected:")
+        for _gl in _grad_logs:
+            print(_gl)
+    if RECOVERY_ACCEL and _accel_logs:
+        print(f"  [accel-filter] {len(_accel_logs)} episode(s):")
+        for _al in _accel_logs:
+            print(f"    ep_start={_al['episode_start']} dd5d={_al['dd_5d_start']} dd10d={_al['dd_10d_start']}"
+                  f" accel_date={_al['accel_first_date']} capit={_al['capit_date']} end={_al['end_reason']}")
     if RECOVERY_DEP_GATE and _nrec:
         _gp = (f"fed-spread floor{RECOVERY_FED_FLOOR:.3f}/ceil{RECOVERY_FED_CEIL:.3f}"
                if RECOVERY_GATE_MODE == "fed"
@@ -1003,8 +1352,30 @@ if RECOVERY_PARK:
         _gtxt = f"{RECOVERY_GATE_MODE}-gate ON {_gp} (avg m={_msum/_nrec:.2f})"
     else:
         _gtxt = "money-gate OFF"
-    print(f"  [recovery-park] ON pbz[{RECOVERY_PBZ_START}->{RECOVERY_PBZ_DEEP}] wmax{RECOVERY_WMAX} | {_gtxt} "
+    _grad_info = (f" | GRADUAL={RECOVERY_DAYS}d capit={RECOVERY_CAPIT_VOL:.1f}x" if RECOVERY_GRADUAL else "")
+    print(f"  [recovery-park] ON pbz[{RECOVERY_PBZ_START}->{RECOVERY_PBZ_DEEP}] wmax{RECOVERY_WMAX} | {_gtxt}{_grad_info} "
           f"-> {_nrec} deep-cheap CRISIS/BEAR days deploy idle cash into custom30V")
+    # DEEP-VALUE POSTBULL OVERRIDE post-pass (Exp-5b, Taylor 2026-06-24):
+    # Now that _pbz_asof() is available, re-examine any capit_events that were zeroed by the
+    # postbull guard (_mat < 1.0 and _size_premat > 0 but size==0). If the universe pb_z at that
+    # date is below DEEP_VALUE_PBZ threshold, restore size to _size_premat (pre-maturity value).
+    if DEEP_VALUE_PBZ > -90:
+        _dvo_count = 0
+        for _e in capit_events:
+            if _e.get("_mat", 1.0) < 1.0 and _e["_size_premat"] > 0.005 and _e["size"] <= 0.005:
+                _d_ev = _e["date"]
+                _z = _pbz_asof(_d_ev)
+                if pd.notna(_z) and _z < DEEP_VALUE_PBZ:
+                    _old_size = _e["size"]
+                    _e["size"] = _e["_size_premat"]
+                    _dvo_count += 1
+                    print(f"  [deep-value-override] {_d_ev.date()}: postbull zeroed but pb_z={_z:.2f} < "
+                          f"{DEEP_VALUE_PBZ:.1f} -> override size {_old_size:.2f} -> {_e['size']:.2f}")
+                else:
+                    _z_str = f"{_z:.2f}" if pd.notna(_z) else "nan"
+                    print(f"  [deep-value-override] {_d_ev.date()}: postbull zeroed, pb_z={_z_str} "
+                          f"NOT below {DEEP_VALUE_PBZ:.1f} -> still blocked")
+        print(f"  [deep-value-override] {_dvo_count} events restored (threshold pb_z<{DEEP_VALUE_PBZ:.1f})")
 PARK_BY_DATE = RECOVERY_PARK_BY_DATE if RECOVERY_PARK else BULL_PARK_BY_DATE
 BAL_KW = dict(allowed_tiers=RS["allowed_tiers"], max_positions=MAX_POS_V11,
               hold_days=45, stop_loss=-0.20, min_hold=2, slippage=0.0, init_nav=BAL_NAV,
