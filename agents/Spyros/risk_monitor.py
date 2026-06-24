@@ -31,8 +31,12 @@ APPEND_EVENT = WORKDIR / "mike/bin/append_event.sh"
 # Ngưỡng rủi ro
 DD_THRESHOLD = 0.25       # Drawdown từ đỉnh >= 25% → halt
 CONC_THRESHOLD = 0.20     # 1 mã > 20% NAV → cảnh báo
-MARGIN_LIMIT = 1.0        # Gross exposure > 100% → cảnh báo (không có margin thật)
+MARGIN_WARN = 1.0         # Gross exposure > 100% → soft warning (bus finding, không phải breach cứng)
+MARGIN_HARD = 1.30        # Gross exposure > 130% → HALT (trading_rules.json absolute ceiling, aligned với deep_cheap_recovery_override)
 FILL_TOLERANCE = 0.05     # Lệch fill vs plan > 5% weight → flag
+# NOTE (Spyros 2026-06-24): MARGIN_HARD=1.30 aligned với trading_rules v1.6 (Exp-8 CAPIT arm MGE=1.3 approved
+# conditionally — 1.0→1.30 là vùng hợp lệ khi CAPIT arm đang chạy CRISIS/BEAR + pb_z≤-0.7 + money_condition).
+# HALT chỉ khi > 1.30 (vi phạm ceiling tuyệt đối). Mức 1.0 chỉ là soft-warn.
 
 
 def load_eod(target_date: str | None = None) -> dict | None:
@@ -99,15 +103,24 @@ def check_concentration(positions: list[dict], nav: float) -> list[dict]:
 
 
 def check_margin(positions: list[dict], nav: float, cash: float) -> dict:
-    """Kiểm tra đòn bẩy / gross exposure."""
+    """Kiểm tra đòn bẩy / gross exposure.
+    MARGIN_WARN (1.0): soft warning — bus finding, KHÔNG phải hard breach (CAPIT arm 1.3x là OK).
+    MARGIN_HARD (1.30): vi phạm ceiling tuyệt đối → HALT + bus error.
+    """
     total_long = sum(
         float(pos.get("market_value") or pos.get("value") or 0)
         for pos in positions
         if float(pos.get("market_value") or pos.get("value") or 0) > 0
     )
     gross_exposure = total_long / nav if nav > 0 else 0
-    breach = gross_exposure > MARGIN_LIMIT
-    return {"gross_exposure": gross_exposure, "total_long": total_long, "breach": breach}
+    soft_warn = gross_exposure > MARGIN_WARN
+    hard_breach = gross_exposure > MARGIN_HARD
+    return {
+        "gross_exposure": gross_exposure,
+        "total_long": total_long,
+        "soft_warn": soft_warn,
+        "breach": hard_breach,  # breach cứng chỉ khi > 1.30 (absolute ceiling)
+    }
 
 
 def check_fill_vs_plan(positions: list[dict], plan: dict, nav: float) -> list[dict]:
@@ -168,7 +181,8 @@ def run_monitor(target_date: str | None = None, dry_run: bool = False) -> int:
             "thresholds": {
                 "dd_halt": f">={DD_THRESHOLD*100:.0f}%",
                 "conc_warn": f">{CONC_THRESHOLD*100:.0f}% NAV",
-                "margin": f"gross>{MARGIN_LIMIT*100:.0f}%",
+                "margin_soft_warn": f"gross>{MARGIN_WARN*100:.0f}%",
+                "margin_hard_halt": f"gross>{MARGIN_HARD*100:.0f}%",
                 "fill_tol": f">{FILL_TOLERANCE*100:.0f}%"
             }
         }, dry_run)
@@ -205,8 +219,17 @@ def run_monitor(target_date: str | None = None, dry_run: bool = False) -> int:
     margin_result = check_margin(positions, nav, cash)
     print(f"Gross exposure: {margin_result['gross_exposure']*100:.1f}%")
     if margin_result["breach"]:
-        breaches.append(f"MARGIN gross={margin_result['gross_exposure']*100:.1f}%")
-        append_bus("error", "risk-breach-margin", margin_result, dry_run)
+        # Hard breach > 1.30: vi phạm ceiling tuyệt đối → HALT
+        breaches.append(f"MARGIN gross={margin_result['gross_exposure']*100:.1f}% > {MARGIN_HARD*100:.0f}%")
+        halt_bot(f"Gross exposure {margin_result['gross_exposure']*100:.1f}% vượt hard ceiling {MARGIN_HARD*100:.0f}%", dry_run)
+        append_bus("error", "risk-breach-margin-hard", margin_result, dry_run)
+    elif margin_result["soft_warn"]:
+        # Soft warn 1.0→1.30: OK khi CAPIT arm đang chạy, chỉ log finding
+        print(f"INFO: Gross exposure {margin_result['gross_exposure']*100:.1f}% > {MARGIN_WARN*100:.0f}% (OK nếu CAPIT arm active)")
+        append_bus("finding", "risk-margin-elevated", {
+            **margin_result,
+            "note": "1.0-1.30x range: valid when CAPIT arm active (CRISIS/BEAR + pb_z<=-0.7 + money_cond)"
+        }, dry_run)
 
     # 4. Fill vs plan
     if plan:
