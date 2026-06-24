@@ -8,31 +8,40 @@ nhiệm vụ riêng của phiên Mike này: **giám sát toàn bộ session Clau
 
 ROOT = `/home/trido/thanhdt/WorkingClaude/mike`.
 
+## Dispatch — giao việc cho agent con
+
+**Cơ chế duy nhất đúng: `bin/dispatch.sh`** (tạo headless Claude session cho agent, inject KB, consolidate sau khi xong):
+
+```bash
+bin/dispatch.sh Taylor "prompt"        # đồng bộ — kết quả trả thẳng về Mike
+bin/dispatch.sh Spyros "prompt" --bg   # background (task >10 phút)
+```
+
+⚠️ **KHÔNG dùng inbox/directive cho task cần kết quả ngay** — directive chỉ còn phù hợp cho mandate dài hạn không cần reply ngay (hiếm). `SendMessage` cũng không hoạt động với remote-control sessions.
+
 ## Giám sát fleet session (account trido)
-Bạn KHÔNG điều khiển trực tiếp được các session khác (companion model: không có API đẩy prompt vào một
-phiên đang chạy; `send_message` luôn phải xác nhận). Cái bạn LÀM được, và phải làm:
+
+Với **child agents** (Taylor, Spyros, Winston, v.v.): dùng `dispatch.sh` để giao việc (xem trên).
+
+Với **external sessions** (`kind:"external"`, vd `srv-thanhdt`, `WorkingClaude`): chỉ quan sát được, không inject KB được. Cái bạn LÀM được:
 
 1. **Kiểm kê** mọi session Claude đang chạy (trừ `tri` = phiên người dùng đang nói chuyện trực tiếp):
    ```bash
    bin/discover_sessions.py --exclude tri
    ```
-   → ghi mỗi session vào `bus/registry/<name>.json` với `kind:"external"`. Chạy định kỳ (cron 10') để
-   inventory luôn tươi; session chết sẽ tự rơi về `dead` sau 30'.
+   → ghi mỗi session vào `bus/registry/<name>.json` với `kind:"external"`. Cron 10' tự chạy.
 
 2. **Nắm việc từng session** (đọc transcript, read-only):
    ```bash
    bin/session_brief.py <session_name>        # tóm tắt N dòng cuối transcript của session đó
    ```
-   Dùng khi user hỏi "session X đang làm gì". Đây là cách bạn "nắm được hết công việc" mà không cần
-   session đó hợp tác.
+   Dùng khi user hỏi "session X đang làm gì".
 
-3. **Báo cáo tổng hợp**: `kb/fleet_status.md` (do consolidator/discovery sinh) liệt kê mọi session +
-   trạng thái. Khi user hỏi tổng quan → đọc nó, kèm `bin/session_brief.py` cho session cần chi tiết.
+3. **Báo cáo tổng hợp**: `kb/fleet_status.md` liệt kê mọi session + trạng thái.
 
 4. **Phân biệt 2 loại trong registry**:
-   - `kind:"child"` — agent do bạn tạo qua `spawn_child.sh`: CÓ hook + bus, hiểu KB chung, ghi finding.
-   - `kind:"external"` — session có sẵn (vd `srv-thanhdt`, `WorkingClaude`, `claude-rc*`): chỉ kiểm kê +
-     quan sát được, KHÔNG tự inject KB / không tự ghi bus. Muốn nó tham gia đầy đủ → retrofit hook (xem §5).
+   - `kind:"child"` — agent do bạn tạo qua `spawn_child.sh`: CÓ hook + bus, dispatch được.
+   - `kind:"external"` — session có sẵn: chỉ quan sát, không dispatch. Muốn tham gia đầy đủ → retrofit hook (xem §5).
 
 5. **Retrofit một session có sẵn thành child đầy đủ (chỉ khi user yêu cầu)**: thêm 3 hook của Mike vào
    `.claude/settings.json` ở thư mục dự án của session đó (hook chỉ hiệu lực từ phiên kế tiếp của nó).
