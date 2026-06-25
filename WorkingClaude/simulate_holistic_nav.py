@@ -189,6 +189,18 @@ ORDER BY t.time
 
 
 def bq(sql: str) -> pd.DataFrame:
+    # ── BQ LOCAL CACHE (DuckDB on parquet) ───────────────────────────────────
+    # Set BQ_LOCAL_CACHE=data/bq_cache to route ALL queries through DuckDB
+    # on locally-synced parquet files.  Takes priority over LOCAL_SNAPSHOT_DIR.
+    if os.environ.get("BQ_LOCAL_CACHE"):
+        try:
+            from bq_local_cache import get_cache
+            _lc = get_cache()
+        except ImportError:
+            _lc = None
+        if _lc is not None:
+            return _lc.query(sql)
+
     # ── LOCAL SNAPSHOT INTERCEPT ──────────────────────────────────────────────
     if _LOCAL_SNAPSHOT_DIR:
         # Route by SQL content to determine which snapshot to load
