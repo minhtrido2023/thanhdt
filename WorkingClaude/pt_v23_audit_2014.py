@@ -296,8 +296,15 @@ _depg_tag = "" if not _gate_on else (f"_fedg{int(RECOVERY_FED_CEIL*1000)}" if RE
 BORROW_ANNUAL  = float(os.environ.get("BORROW_ANNUAL", "0.10"))         # margin borrow rate (era-aware override)
 MGE            = float(os.environ.get("MGE", "0"))                         # gross cap, e.g. 1.3 / 1.5; <=1 = off
 MGE_CAPIT_ONLY = os.environ.get("MGE_CAPIT_ONLY", "1") == "1"              # borrow room usable ONLY by CAPIT plays
+# FORCE_REAL_LEVER (Taylor 2026-06-25): the default MGE_CAPIT_ONLY adds a fixed (MGE-1) borrow HEADROOM on top of a
+# cash-funded slug — but in a washout the book is cash-rich (other arms sold off), so that headroom almost never
+# binds (prior audit: combined gross maxed 0.995@1.3 / 0.966@1.5, borrow ~0 VND). To MEASURE the true cost of real
+# >100% leverage we must FORCE it: when FORCE_REAL_LEVER=1, scale the WHOLE cash-funded CAPIT slug by the MGE
+# multiple (wt = cash_slug × (1+(MGE-1)×lgm)) so it deploys MGE× the free cash → cash goes negative → genuine gross
+# >100% → real borrow charged at borrow_annual. Excess = max(0, gross-1)×NAV pays borrow/252 each day (engine).
+FORCE_REAL_LEVER = os.environ.get("FORCE_REAL_LEVER", "0") == "1"          # force genuine >100% gross (real borrow)
 _mge = MGE if MGE > 1.0 else None
-_mge_tag = "" if not _mge else f"_mge{int(round(MGE*100))}{'cap' if MGE_CAPIT_ONLY else 'all'}"
+_mge_tag = "" if not _mge else f"_mge{int(round(MGE*100))}{'cap' if MGE_CAPIT_ONLY else 'all'}{'_real' if FORCE_REAL_LEVER else ''}"
 # Part-2 LEVER-GATE (gates ONLY the borrow headroom of the CAPIT arm; the cash-based size is untouched):
 #   none      -> borrow headroom always full (current behaviour)
 #   deposit   -> scale headroom by deposit money-condition m=clip((CEIL-dep)/(CEIL-FLOOR))  (reuses RECOVERY_DEP_*)
@@ -361,6 +368,11 @@ RECOVERY_CAPIT_BASE = int(os.environ.get("RECOVERY_CAPIT_BASE", "63"))      # vo
 # D_RSI_VNINDEX pulled from BQ (VNINDEX row, 0-1 scale, full coverage 2011+). Causal: all use T / T-3 / trailing.
 RECOVERY_SIG_B = os.environ.get("RECOVERY_SIG_B", "0") == "1"
 RECOVERY_SIG_C = os.environ.get("RECOVERY_SIG_C", "0") == "1"
+# Signal-C as a CONFIRM (not a standalone trigger): A/B deploy only if C armed within the last K sessions.
+# C arm = "bottom approaching" (RSI recovering + price flat after a washout); A = capitulation confirm. This
+# de-risks A's worst failure (firing leveraged too early in a slow L-grind, e.g. 2012: A-only −166d → A∧C −4d).
+RECOVERY_C_CONFIRM = os.environ.get("RECOVERY_C_CONFIRM", "0") == "1"
+RECOVERY_C_ARM_K   = int(os.environ.get("RECOVERY_C_ARM_K", "30"))
 if RECOVERY_CAPIT_ONLY:
     RECOVERY_GRADUAL = True   # CAPIT-ONLY runs ON the gradual machine (vol load + episode loop), step disabled
 # ACCELERATING-DECLINE FILTER (Taylor 2026-06-24, Exp-7):
@@ -379,7 +391,8 @@ _accel_tag = "_accel" if (RECOVERY_PARK and RECOVERY_GRADUAL and RECOVERY_ACCEL)
 _grad_tag = ("" if not (RECOVERY_PARK and RECOVERY_GRADUAL) else
              (f"_capitonly{RECOVERY_CAPIT_BASE}cv{int(RECOVERY_CAPIT_VOL*10)}" if RECOVERY_CAPIT_ONLY else
               f"_grad{RECOVERY_DAYS}cv{int(RECOVERY_CAPIT_VOL*10)}") +
-             ("B" if RECOVERY_SIG_B else "") + ("C" if RECOVERY_SIG_C else "") +
+             ("B" if RECOVERY_SIG_B else "") +
+             (("Ccf%d" % RECOVERY_C_ARM_K if RECOVERY_C_CONFIRM else "C") if RECOVERY_SIG_C else "") +
              ("lev" if RECOVERY_LEVER_ON_CAPIT else "") + _accel_tag)
 if _mge and MGE_GATE != "none":
     if MGE_GATE in ("fedborrow", "deposit_eyield"):
@@ -966,7 +979,13 @@ def add_capit_arm(sig_book, base_nav_df, tw_base, tag, book_prices):
         if CAPIT_EVENT_CAP is not None and wt > CAPIT_EVENT_CAP:
             print(f"    [cap] {tag} E{i} {e['date'].date()}: wt {wt:.3f} -> {CAPIT_EVENT_CAP:.3f} (per-event cap)")
             wt = CAPIT_EVENT_CAP
-        if _mge and MGE_CAPIT_ONLY:                         # real-margin: borrow headroom ON TOP (deep-washout only)
+        if _mge and MGE_CAPIT_ONLY and FORCE_REAL_LEVER:    # FORCE genuine >100%: scale the WHOLE cash slug by MGE
+            _lgm = _mge_gate_m(d)
+            _mult = 1.0 + (_mge - 1.0) * _lgm               # e.g. 1.3 at lgm=1 -> deploy 1.3x the free-cash slug
+            _wt_pre = wt
+            wt = wt * _mult                                 # excess (wt-cash) funded by real borrow in the engine
+            print(f"    [force-real-lever {tag}] E{i} {d.date()}: m={_lgm:.2f} wt {_wt_pre:.3f} -> {wt:.3f} (x{_mult:.2f})")
+        elif _mge and MGE_CAPIT_ONLY:                       # real-margin: borrow headroom ON TOP (deep-washout only)
             _lgm = _mge_gate_m(d)                           # Part-2 lever-gate (deposit / fed-vs-borrow / conviction / none)
             _head = e["size"] * (_mge - 1.0) * _lgm         # scale borrow with washout conviction AND money-condition
             if MGE_GATE == "conviction":
@@ -1168,19 +1187,22 @@ if RECOVERY_PARK:
             _lt = _r < 0.30
             _dur = _lt.groupby((~_lt).cumsum()).cumsum()
             _rsi["sigB"] = _lt & (_dur >= 3) & (_r > _r.shift(3) + 0.02)
-            # Signal C: 10d-window bullish divergence — Close[T] new in-window low but D_RSI[T] > D_RSI@prior-low
-            _sigC = [False] * len(_rsi)
-            for _i in range(10, len(_rsi)):
-                _w = _rsi.iloc[_i-9:_i+1]
-                if _c.iloc[_i] > _w["Close"].iloc[:-1].min():
-                    continue
-                _pl = _w["Close"].iloc[:-1].idxmin()
-                _sigC[_i] = bool(_r.iloc[_i] > _r.loc[_pl])
-            _rsi["sigC"] = _sigC
+            # Signal C (REFINED, Exp-8 v2 per user + DT5G D_RSI_BullDvg): a leading bottom-approaching ARM —
+            # RSI rising vs 3M ago AND price flat/up <=6% vs 3M ago (selling absorbed, no rally yet), after a
+            # genuine 3M washout (rolling-63d RSI min < 0.40) and not yet recovered (RSI < 0.60). Causal.
+            _rmin3m = _r.rolling(63, min_periods=20).min()
+            _rsi["Carm"] = ((_r > _r.shift(63) + 0.02) & (_c <= _c.shift(63) * 1.06) &
+                            (_rmin3m < 0.40) & (_r < 0.60))
+            # C is a CONFIRM (RECOVERY_C_CONFIRM=1): A/B may deploy only if C armed within last K sessions.
+            # As a standalone trigger (RECOVERY_C_CONFIRM=0) C fires deploy directly (early — was harmful in v1).
+            _rsi["Carmed"] = _rsi["Carm"].rolling(RECOVERY_C_ARM_K, min_periods=1).max().fillna(0).astype(bool)
+            _rsi["sigC"] = _rsi["Carm"] if not RECOVERY_C_CONFIRM else False
             _sigB_by_date = dict(zip(_rsi["time"], _rsi["sigB"]))
             _sigC_by_date = dict(zip(_rsi["time"], _rsi["sigC"]))
+            _carmed_by_date = dict(zip(_rsi["time"], _rsi["Carmed"]))
             print(f"  [recovery-RSI-signals] B={'ON' if RECOVERY_SIG_B else 'off'} ({int(_rsi['sigB'].sum())} fires) "
-                  f"C={'ON' if RECOVERY_SIG_C else 'off'} ({int(_rsi['sigC'].sum())} fires) — VNINDEX D_RSI from BQ")
+                  f"C={'ON' if RECOVERY_SIG_C else 'off'} (arm {int(_rsi['Carm'].sum())} fires, "
+                  f"mode={'CONFIRM K=%d' % RECOVERY_C_ARM_K if RECOVERY_C_CONFIRM else 'trigger'}) — VNINDEX D_RSI from BQ")
         # WMAX to use on capitulation day (if LEVER_ON_CAPIT and MGE > 1.0)
         _capit_wmax = (MGE if (RECOVERY_LEVER_ON_CAPIT and MGE > 1.0) else RECOVERY_WMAX)
         if RECOVERY_CAPIT_ONLY:
@@ -1248,7 +1270,10 @@ if RECOVERY_PARK:
                     _sigA = (not np.isnan(_vr)) and (_vr >= RECOVERY_CAPIT_VOL)
                     _sigB = RECOVERY_SIG_B and bool(_sigB_by_date.get(pd.Timestamp(d), False))
                     _sigC = RECOVERY_SIG_C and bool(_sigC_by_date.get(pd.Timestamp(d), False))
-                    _capit_fired = _sigA or _sigB or _sigC      # Exp-8 REVISED: ANY reversal signal fires
+                    if RECOVERY_SIG_C and RECOVERY_C_CONFIRM:   # C as confirm: A/B deploy only if C armed recently
+                        _capit_fired = (_sigA or _sigB) and bool(_carmed_by_date.get(pd.Timestamp(d), False))
+                    else:                                       # ANY enabled signal fires (Exp-8 REVISED OR-trigger)
+                        _capit_fired = _sigA or _sigB or _sigC
                     # CAPIT OVERRIDE: fire even if accel_ok not met yet (strongest signal)
                     _episode_entry_ok = _this_accel_ok or _capit_fired
                     if _episode_entry_ok:
@@ -1430,6 +1455,9 @@ else:
     sig_lagC, tw_lagC, ex_lagC = sig_lag, dict(LAG_TW), {}
 events_lag, etf_lag = [], []
 kwB = dict(LAG_KW); kwB["allowed_tiers"] = ["LAG_HI","LAG_LO"] + [t for t in tw_lagC if t.startswith("CAPIT")]
+if _mge:                                                    # mirror BAL: open the gross cap on LAG so its CAPIT arm can borrow too
+    kwB["max_gross_exposure"] = _mge
+    kwB["margin_tiers"] = set(t for t in tw_lagC if t.startswith("CAPIT")) if MGE_CAPIT_ONLY else None
 nav_lag, _ = simulate(sig_lagC, prices_lag, vni_dates, tier_weights=tw_lagC,
                       event_log=events_lag, etf_log=etf_lag,
                       name="v23audit_LAG", **merge_extra(kwB, ex_lagC), **LIQ_LAG)
@@ -1578,6 +1606,30 @@ for book, navdf, init in [("BAL", nb, BAL_NAV), ("LAG", nl, LAG_NAV)]:
     selfcheck[f"final_nav_identity_err_vnd_{book}"] = nav_id_err
     print(f"  [selfcheck {book}] cash-flow identity max err = {err:,.0f} VND; "
           f"final NAV identity err = {nav_id_err:,.0f} VND")
+
+# --- BORROW-COST + GROSS instrumentation (real-lever audit) ---
+# gross exposure = (nav - cash)/nav (= stocks+ETF / nav); >1.0 means real >100% leverage (cash<0).
+# borrow cost = -sum(interest where interest<0); deposit credit = sum(interest where interest>0).
+_borrow_report = {}
+for book, navdf in [("BAL", nb), ("LAG", nl)]:
+    intr = navdf["interest"].fillna(0.0) if "interest" in navdf.columns else pd.Series(0.0, index=navdf.index)
+    borrow = float(-intr[intr < 0].sum())
+    gross = ((navdf["nav"] - navdf["cash"]) / navdf["nav"])
+    n_borrow_days = int((navdf["cash"] < 0).sum())
+    _borrow_report[book] = {"borrow_vnd": borrow, "max_gross": float(gross.max()),
+                            "min_cash_vnd": float(navdf["cash"].min()), "n_borrow_days": n_borrow_days}
+    selfcheck[f"borrow_cost_vnd_{book}"] = borrow
+    selfcheck[f"max_gross_{book}"] = float(gross.max())
+_borrow_total = sum(v["borrow_vnd"] for v in _borrow_report.values())
+selfcheck["borrow_cost_total_vnd"] = _borrow_total
+# combined gross (both 25B books summed at reference)
+_comb_gross = ((navb_c - nb["cash"].loc[common]) + (navl_c - nl["cash"].loc[common])) / (navb_c + navl_c)
+selfcheck["max_gross_combined"] = float(_comb_gross.max())
+print(f"  [borrow-audit] total borrow cost = {_borrow_total:,.0f} VND "
+      f"(BAL {_borrow_report['BAL']['borrow_vnd']:,.0f} / LAG {_borrow_report['LAG']['borrow_vnd']:,.0f}); "
+      f"max gross BAL {_borrow_report['BAL']['max_gross']:.3f} LAG {_borrow_report['LAG']['max_gross']:.3f} "
+      f"combined {_comb_gross.max():.3f}; borrow-days BAL {_borrow_report['BAL']['n_borrow_days']} "
+      f"LAG {_borrow_report['LAG']['n_borrow_days']}")
 
 # --- SELF-CHECK 2: combination recurrence replay ---
 if USE_LAG_ALLOCATOR:
