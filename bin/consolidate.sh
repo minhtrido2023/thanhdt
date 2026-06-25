@@ -50,6 +50,17 @@ if [ -s "$NEW" ]; then
   git -C "$ROOT" add -A 2>/dev/null || true
   git -C "$ROOT" commit -q -m "consolidate $(date -u +%FT%TZ) (KB v$(cat "$KB/version.txt"))" 2>/dev/null || true
   echo "$(date -u +%FT%TZ) consolidated new events → KB v$(cat "$KB/version.txt")"
+
+  # --- 2b. push new events to Discord #mike channel ---
+  discord_summary="$(python3 "$PY" format-events "$NEW" 2>/dev/null | head -n 8 || true)"
+  if [ -n "${discord_summary//[[:space:]]/}" ]; then
+    has_question="$(grep -c '"event_type":"question"\|"event_type": "question"' "$NEW" 2>/dev/null || echo 0)"
+    if [ "$has_question" -gt 0 ]; then
+      "$ROOT/bin/notify_discord.sh" "$discord_summary" "CẦN Ý KIẾN — KB v$(cat "$KB/version.txt")" 16711680 || true
+    else
+      "$ROOT/bin/notify_discord.sh" "$discord_summary" "Fleet Updates — KB v$(cat "$KB/version.txt")" 3447003 || true
+    fi
+  fi
 else
   # Ensure context_pack exists even with no events yet.
   [ -f "$KB/context_pack.md" ] || "$ROOT/bin/publish_context.sh"
