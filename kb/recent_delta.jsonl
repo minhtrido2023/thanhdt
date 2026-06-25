@@ -80,3 +80,4 @@
 {"v": 57, "line": "- [2026-06-25T01:46:57] Taylor/finding — exp8-mge-why-1.5-loses: gap is sizing/path drag NOT borrow: {\"dispatch\": \"Mike/user: why MGE1.5 loses 1.03pp OOS CAGR vs 1.3 (35.85->34.82) = ~4x the ~0.26%/yr borrow-drag estimate\", \"verdict\": \"PREMISE WRONG — gap is NO …"}
 {"v": 58, "line": "- [2026-06-25T01:55:52] Winston/finding — discord-pipeline-test: {\"status\": \"ok\", \"message\": \"auto Discord notify working\"}"}
 {"v": 59, "line": "- [2026-06-25T01:56:44] Winston/finding — discord-e2e-final: end-to-end pipeline confirmed"}
+{"v": 60, "line": "- [2026-06-25T02:50:27] Taylor/finding — Exp-8 FORCE_REAL_LEVER measured: real >100% leverage barely materialises (45.9M VND borrow / 12.47y), forcing it is net-negative on CAGR: {\"dispatch\": \"Mike — 2-step task: (1) add FORCE_REAL_LEVER env, (2) run Tier-3 A∧C-confirm K40 + MGE1.3 + FORCE_REAL_LEVER=1\", \"step1\": \"FORCE_REAL_LEVER=1 ALRE …"}
