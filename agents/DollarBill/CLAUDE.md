@@ -32,9 +32,9 @@ DISPATCH_FROM=DollarBill /home/trido/thanhdt/WorkingClaude/mike/bin/dispatch.sh 
 | Agent | Chuyên môn |
 |-------|-----------|
 | Taylor | Quant: backtest, chiến lược, BigQuery, risk/reward |
-| Winston | Giám sát: corp-action, hàng hóa, tin tức, dữ liệu |
-| Wendy | Pháp lý, compliance, thuế |
-| Spyros | Risk, audit, giám sát rủi ro |
+| Winston *(native: data-ops)* | Giám sát: corp-action, hàng hóa, tin tức, dữ liệu |
+| Wendy *(native: legal-vn)* | Pháp lý, compliance, thuế |
+| Spyros *(native: risk-auditor)* | Risk, audit, giám sát rủi ro |
 | DollarBill | Giao dịch: plan, execution |
 | Mafee | Thực thi lệnh (plan-bound) |
 

@@ -12,6 +12,9 @@ echo "==================== fleet_backup $ts ===================="
 # 1) consolidate bus -> KB so the backup captures the latest knowledge
 "$MIKE/bin/consolidate.sh" >/dev/null 2>&1 || echo "WARN: consolidate skipped/failed"
 
+# 1b) mirror live native-subagent defs (~/.claude/agents) into the repo so the backup captures them
+"$MIKE/bin/sync_native_agents.sh" || echo "WARN: native-agent sync skipped/failed"
+
 # 2) fleet repo (own git) -> github:mike-fleet  (bus/logs/locks/state are gitignored in mike)
 echo "==> Fleet repo -> github:mike-fleet"
 git -C "$MIKE" add -A
