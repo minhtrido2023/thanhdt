@@ -368,3 +368,20 @@ funded from cash), **NOT real leverage**. Consistent with FORCE_REAL_LEVER (forc
 and the MGE-sensitivity finding (gap = sizing/path-drag, not borrow). **The 31.31% A∧C-confirm result is
 LEVERAGE-FREE (0 VND borrowed)** → no margin risk to clear with Spyros for THIS config. Prior "REAL leverage
 MGE 1.3" labels on Exp-8 decisions are corrected to "nominal MGE cap, non-binding / sizing knob".
+
+---
+## 🆕 S2 LEVER-AT-BOTTOM via margin-able PARKING (Taylor 2026-06-25) — overturns "structurally infeasible"
+> Engine rebuild: parking vehicle (custom30V) made MARGIN-ABLE (`simulate_holistic_nav.py` step 6c `etf_lever_by_date`). On A∧C-confirm deep-bottom days, inject a levered custom30V buy = frac×NAV funded by BORROW (cash<0 → gross>1), capped by MGE, protected by the S4 margin-call, unwinds via the 4c prefill sell. This is the production realization the earlier (b)-thread wrongly called impossible. ALL margin knobs gated OFF by default.
+- **LEVER cmd:**
+  ```bash
+  BQ_CACHE_THREADS=1 RECOVERY_PARK=1 RECOVERY_WMAX=0.95 RECOVERY_PBZ_DEEP=-0.5 RECOVERY_CAPIT_ONLY=1 \
+  RECOVERY_CAPIT_VOL=1.7 RECOVERY_CAPIT_BASE=63 RECOVERY_SIG_C=1 RECOVERY_C_CONFIRM=1 RECOVERY_C_ARM_K=30 \
+  RECOVERY_LEVER_PARK=1 RECOVERY_LEVER_FRAC=0.30 MGE=1.3 MGE_CAPIT_ONLY=1 MARGIN_CALL=1 MGE_HARD=1.45 MGE_FLOOR=1.30 \
+  NAV_TOTAL_B=50 ETF_LIQ=custompitg BASKET_WT=namecap BASKET_SELECT=yieldcombo PARK_STATES="3:0.7" \
+  AUDIT_END=2026-06-19 $DNA_PYEXE pt_v23_audit_2014.py v23a none postbull 0 edge
+  ```
+- **BASE (leverage-free, same recovery, drop RECOVERY_LEVER_PARK/MGE/MARGIN_CALL):** CAGR **28.91%** / Sharpe 1.81 / MaxDD −20.4% / Calmar 1.42 | self-check 0 VND. CSV `..._recpark95z50_depg75_capitonly63cv17Ccf30.csv`
+- **LEVER:** CAGR **30.10%** / Sharpe **1.85** / MaxDD **−20.4%** / Calmar **1.47** | self-check **0 VND** (BAL+LAG) | S2 fired **4 bottom-dates**, max gross **1.27**, borrow 336.6M. CSV `..._recpark95z50_depg75_mge130cap_capitonly63cv17Ccf30.csv`
+- **Δ = +1.19pp CAGR, +0.04 Sharpe, MaxDD IDENTICAL, +0.05 Calmar** — adds return WITHOUT extra drawdown.
+- **Per-year:** edge concentrated 2014 (+7.77) / 2021 (+8.29, COVID-bottom payoff) / 2025 (+4.26); small drag 2024 (−3.24) / 2019 (−1.17) / 2022 (−1.08). Appears in BOTH IS(2014) and OOS(2021/25) — not regime-confined.
+- **Caveats:** LOW-SAMPLE (4 bottoms/12y, edge rests on ~2 big correct calls); 1 snapshot; S4 margin-call did NOT fire (gross 1.27 < hard 1.45 — protection is insurance, untested here); needs A∧C-confirm + deposit-gate to avoid false bottoms. **Go-live default stays leverage-free; S2 = opt-in.** threads=1 deterministic.

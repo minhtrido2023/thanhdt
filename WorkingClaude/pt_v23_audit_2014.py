@@ -309,6 +309,11 @@ MARGIN_CALL = os.environ.get("MARGIN_CALL", "0") == "1"                    # ena
 MGE_HARD    = float(os.environ.get("MGE_HARD", "0"))                       # breach trigger; 0 => cap+0.15 (engine default)
 MGE_FLOOR   = float(os.environ.get("MGE_FLOOR", "0"))                      # post-call target; 0 => cap (engine default)
 mc_log_bal, mc_log_lag = [], []
+# S5 REGIME-DELEVERAGE (Taylor 2026-06-25): cut gross to REGIME_DELEVER_CAP in CRISIS(1)+BEAR(2). OPTIONAL
+# (default OFF); conflicts with lever-at-bottom (buys INTO crisis). For momentum-style levered books.
+REGIME_DELEVER     = os.environ.get("REGIME_DELEVER", "0") == "1"          # enable S5
+REGIME_DELEVER_CAP = float(os.environ.get("REGIME_DELEVER_CAP", "1.0"))    # max gross in CRISIS/BEAR
+rd_log_bal, rd_log_lag = [], []
 _mge = MGE if MGE > 1.0 else None
 _mge_tag = "" if not _mge else f"_mge{int(round(MGE*100))}{'cap' if MGE_CAPIT_ONLY else 'all'}{'_real' if FORCE_REAL_LEVER else ''}"
 # Part-2 LEVER-GATE (gates ONLY the borrow headroom of the CAPIT arm; the cash-based size is untouched):
@@ -386,6 +391,11 @@ RECOVERY_C_ARM_K   = int(os.environ.get("RECOVERY_C_ARM_K", "30"))
 # restricted to this sleeve via MGE_CAPIT_ONLY, so leverage lands ONLY at confirmed bottoms, never at the top.
 RECOVERY_LEVER_BOTTOM = os.environ.get("RECOVERY_LEVER_BOTTOM", "0") == "1"
 RECOVERY_LEVER_FRAC   = float(os.environ.get("RECOVERY_LEVER_FRAC", "0.30"))   # borrowed stock weight per bottom
+# S2 LEVER-AT-BOTTOM via PARKING (Taylor 2026-06-25): route the SAME A∧C-confirm bottom dates to the engine's
+# margin-able parking path (etf_lever_by_date) — the fast-deploy custom30V vehicle bought on borrow, capped by
+# MGE, protected by S4 margin-call. This is the production realization the earlier "structurally infeasible"
+# verdict said was impossible. Requires MGE>1. Default OFF.
+RECOVERY_LEVER_PARK   = os.environ.get("RECOVERY_LEVER_PARK", "0") == "1"
 _lever_dates = []   # filled by the recovery state machine on each A∧C-confirm fire
 if RECOVERY_CAPIT_ONLY:
     RECOVERY_GRADUAL = True   # CAPIT-ONLY runs ON the gradual machine (vol load + episode loop), step disabled
@@ -1322,7 +1332,7 @@ if RECOVERY_PARK:
                             _full_wmax = _capit_wmax if RECOVERY_LEVER_ON_CAPIT else RECOVERY_WMAX
                             _capit_tgt = base_st + m * frac * (_full_wmax - base_st)
                             _grad_current_frac = _capit_tgt
-                            if RECOVERY_LEVER_BOTTOM:        # record this confirmed bottom for the margin sleeve
+                            if RECOVERY_LEVER_BOTTOM or RECOVERY_LEVER_PARK:   # record this confirmed bottom (stock sleeve OR S2 parking)
                                 _lever_dates.append(pd.Timestamp(d))
                             _5d = _dd5d_by_date.get(pd.Timestamp(d), float('nan')) if RECOVERY_ACCEL else float('nan')
                             _10d = _dd10d_by_date.get(pd.Timestamp(d), float('nan')) if RECOVERY_ACCEL else float('nan')
@@ -1476,6 +1486,13 @@ if _mge:                                                    # real-margin: open 
         if MGE_HARD > 0: kwA["mge_hard"] = MGE_HARD
         if MGE_FLOOR > 0: kwA["mge_floor"] = MGE_FLOOR
         print(f"  [S4 margin-call BAL] ON | hard={MGE_HARD or (_mge+0.15):.2f} floor={MGE_FLOOR or _mge:.2f}")
+    if REGIME_DELEVER:
+        kwA["regime_delever_on"] = True; kwA["regime_delever_log"] = rd_log_bal
+        kwA["regime_delever_targets"] = {1: REGIME_DELEVER_CAP, 2: REGIME_DELEVER_CAP}
+        print(f"  [S5 regime-delever BAL] ON | cap={REGIME_DELEVER_CAP:.2f} in CRISIS+BEAR")
+    if RECOVERY_LEVER_PARK and _lever_dates:
+        kwA["etf_lever_by_date"] = {pd.Timestamp(d): RECOVERY_LEVER_FRAC for d in set(_lever_dates)}
+        print(f"  [S2 lever-park BAL] ON | {len(set(_lever_dates))} bottom-dates × frac {RECOVERY_LEVER_FRAC:.2f} (margin parking, cap MGE {_mge})")
     print(f"  [real-margin] max_gross_exposure={_mge} | margin_tiers="
           f"{'CAPIT-only' if MGE_CAPIT_ONLY else 'ALL'} | borrow {BAL_KW['borrow_annual']*100:.0f}%/yr")
 nav_bal, _ = simulate(sig_balC, prices, vni_dates, tier_weights=tw_balC,
@@ -1513,6 +1530,11 @@ if _mge:                                                    # mirror BAL: open t
         kwB["margin_call_on"] = True; kwB["margin_call_log"] = mc_log_lag
         if MGE_HARD > 0: kwB["mge_hard"] = MGE_HARD
         if MGE_FLOOR > 0: kwB["mge_floor"] = MGE_FLOOR
+    if REGIME_DELEVER:
+        kwB["regime_delever_on"] = True; kwB["regime_delever_log"] = rd_log_lag
+        kwB["regime_delever_targets"] = {1: REGIME_DELEVER_CAP, 2: REGIME_DELEVER_CAP}
+    if RECOVERY_LEVER_PARK and _lever_dates:
+        kwB["etf_lever_by_date"] = {pd.Timestamp(d): RECOVERY_LEVER_FRAC for d in set(_lever_dates)}
 nav_lag, _ = simulate(sig_lagC, prices_lag, vni_dates, tier_weights=tw_lagC,
                       event_log=events_lag, etf_log=etf_lag,
                       name="v23audit_LAG", **merge_extra(kwB, ex_lagC), **LIQ_LAG)
@@ -1715,6 +1737,15 @@ if MARGIN_CALL:
             print(f"      {_d}: gross {r['gross_before']:.3f}->{r['gross_after']:.3f}  sold {r['sell_vnd']/1e9:.3f}B  (hard {r['mge_hard']:.2f}/floor {r['mge_floor']:.2f})")
     else:
         print(f"  [S4 margin-call] ON but 0 fires (gross never breached hard cap)")
+if REGIME_DELEVER:
+    _rd_all = rd_log_bal + rd_log_lag
+    selfcheck["regime_delever_fires"] = len(_rd_all)
+    if _rd_all:
+        _rw = max(_rd_all, key=lambda r: r["gross_before"])
+        print(f"  [S5 regime-delever] {len(rd_log_bal)} BAL + {len(rd_log_lag)} LAG fires; cap {REGIME_DELEVER_CAP:.2f}; "
+              f"worst gross {_rw['gross_before']:.3f}->{_rw['gross_after']:.3f} (state {_rw['state']}, sold {_rw['sell_vnd']/1e9:.3f}B)")
+    else:
+        print(f"  [S5 regime-delever] ON but 0 fires (gross never above cap in CRISIS/BEAR)")
 
 # --- SELF-CHECK 2: combination recurrence replay ---
 if USE_LAG_ALLOCATOR:
