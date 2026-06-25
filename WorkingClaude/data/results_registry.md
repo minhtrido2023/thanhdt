@@ -12,6 +12,7 @@
 3. **Lưu ý mutation as-of**: kể cả pin AUDIT_END, nếu `custom30v_8l`/`fa_ratings_8l` bị republish sau đó, tái-chạy có thể lệch nhẹ → khi đó **CSV mới là chuẩn**. Muốn đông cứng tuyệt đối: giữ CSV (đã đủ cho đối chứng từng VND).
 4. **Mọi số mới đáng nhớ → thêm 1 dòng vào bảng dưới** (label, lệnh, AUDIT_END, CSV, metric, self-check). Đây là việc bắt buộc, không tùy hứng.
 5. Self-check 0 VND (BAL+LAG cash-flow identity + final-NAV identity) là điều kiện CẦN để một dòng được ghi.
+6. **`BQ_CACHE_THREADS=1` BẮT BUỘC cho mọi số pin (từ 2026-06-25).** Phát hiện: DuckDB cache đa-luồng (threads=4 cũ) trả rows THỨ TỰ NGẪU NHIÊN khi query thiếu `ORDER BY` → ops order-dependent (drop_duplicates keep-first) chọn row khác → CÙNG config + CÙNG AUDIT_END + CÙNG as-of vẫn ra số KHÁC mỗi run (spread ~0.2pp baseline, tới ~2.7pp ở config bull-park). Self-check 0 VND KHÔNG bắt được (mỗi run reconcile nội bộ); CSV-recompute cũng KHÔNG cứu (mỗi run ghi CSV khác). FIX: `BQ_CACHE_THREADS=1` nay là DEFAULT trong `bq_local_cache.py` (Winston commit `1325bf2`) → deterministic (chứng minh R3a==R3b bit-for-bit). Số pin TRƯỚC 2026-06-25 = threads=4 1-sample → coi là ƯỚC LƯỢNG, không tái lập chính xác.
 
 ## MÔI TRƯỜNG
 ```bash
@@ -30,6 +31,17 @@ Họ config = **V2.3A (argv `v23a none postbull 0 edge`) + custom30V parking (ET
 - **DEPLOY (live <150B) = R3: NEUTRAL-only** — CAGR 28.26%/**Sharpe 1.87**/DD−18.8/Cal1.50 @50B. + gated-overflow ON (insurance +1.17pp OOS, paper-gated 2026-06-30).
 - **Bull-park (N0.7+B0.7) = tùy chọn ≥150B** — R2 @50B 29.24%/Cal1.56 nhưng **Sharpe THẤP hơn (1.82)** + lumpy (hại 2024/25). KHÔNG mặc định <150B.
 - Capacity: nhỏ NAV cao hơn (R1 @20B 31.69 > R2 @50B 29.24), decay theo vốn.
+
+### 🔁 RE-PIN 2026-06-25 — threads=1 DETERMINISTIC (thay số threads=4 1-sample ở trên)
+> Chạy lại R1/R2/R3 với `BQ_CACHE_THREADS=1`, CÙNG `AUDIT_END=2026-06-19`, lệnh y hệt. Số dưới là **tái lập được** (R3a==R3b bit-for-bit). Chênh so số cũ = threads-determinism + data-drift 6 ngày gộp; KHÔNG tách được. **Số cũ (threads=4) coi là ước lượng; số này là chuẩn mới.**
+
+| Config | Lệnh (thêm `BQ_CACHE_THREADS=1` vào đầu) | CAGR cũ→mới | Sharpe | MaxDD | Calmar | self-check |
+|---|---|---|---|---|---|---|
+| **R3 ⭐ LIVE** (NEUTRAL-only @50B, `PARK_STATES="3:0.7"`) | …yieldcombo PARK_STATES="3:0.7" AUDIT_END=2026-06-19 | 28.26 → **28.05** (−0.21, **ROBUST**) | 1.86 | −17.5 | 1.60 | 0 VND, R3a==R3b ✓ |
+| R1 (bull-park @20B, `PARK_STATES="3:0.7,4:0.7"`) | NAV_TOTAL_B=20 …PARK_STATES="3:0.7,4:0.7" | 31.69 → **29.01** (−2.68) | 1.77 | −18.1 | 1.60 | 0 VND |
+| R2 (bull-park @50B, `PARK_STATES="3:0.7,4:0.7"`) | NAV_TOTAL_B=50 …PARK_STATES="3:0.7,4:0.7" | 29.24 → **28.01** (−1.23) | 1.74 | −17.5 | 1.60 | 0 VND |
+
+**Đọc:** LIVE config R3 BỀN (−0.21pp, Calmar/MaxDD còn TỐT hơn) → go-live không đổi bản chất; ~**28%** là số tái lập được. Config bull-park (R1/R2, nghiên cứu) nhạy hơn với threads (nhiều order-dependent selection ở thêm state BULL) → rớt 1–2.7pp; lợi thế bull-park vs NEUTRAL-only NHỎ hơn từng nghĩ. *(Engine = working-tree có margin-changes của Taylor gated OFF; đã verify byte-identical khi off, FIX4 inert ở config parking vì total_sold_vnd>0.)*
 
 ## BẢNG KẾT QUẢ ĐÃ PIN
 
@@ -257,6 +269,35 @@ B NEUTRAL (+0.00pp; opens no new 2014+ episode, subsumed by A; value only pre-ha
 no-volume insurance), C HARMFUL (−1.53pp; fires pre-crash → leveraged early entry) → reject C.
 **Verdict:** 🟢 Signal A vol-1.7x/3M ALONE wins = Exp-8 Test A unchanged. Detail `data/exp8_reversal_signals_bq.md`.
 
+### Exp-8 — FORCE_REAL_LEVER measurement (A∧C-confirm K=40, MGE=1.3) — Mike dispatch — 2026-06-25 (Tier-3 BQ)
+
+Goal: force genuine >100% gross (`FORCE_REAL_LEVER=1`, new env knob — scales the WHOLE cash-funded CAPIT
+slug by MGE instead of adding a borrow HEADROOM that almost never binds) to MEASURE the true real-borrow cost.
+Config: `RECOVERY_CAPIT_ONLY=1 RECOVERY_CAPIT_VOL=1.7 RECOVERY_CAPIT_BASE=63 RECOVERY_SIG_C=1
+RECOVERY_C_CONFIRM=1 RECOVERY_C_ARM_K=40 MGE=1.3 MGE_CAPIT_ONLY=1 FORCE_REAL_LEVER=1`.
+(Env note: rebuilt `data/earnings_surprise_data.pkl` from BQ — old pkl was `datetime64[us]`, unloadable under
+linux pandas 2.3.3/numpy 1.26.4; re-pull is deterministic quarterly NP, identical values, now `[ns]`.)
+
+| metric | FORCE_REAL_LEVER=1 | baseline A∧C-confirm K40 (headroom, no force) |
+|---|---|---|
+| FULL CAGR | **23.60%** | 31.81% |
+| Sharpe(252) | 1.75 | 1.92 |
+| MaxDD | **−18.0%** | −20.6% |
+| Calmar | 1.31 | 1.54 |
+| Final NAV (50B start) | 702.46B | — |
+
+**Total real borrow interest = 45.92M VND** over 12.47y (BAL 0 / LAG 45.92M); max gross BAL 1.000 / **LAG 1.124**
+/ **combined 1.000**; borrow-days BAL 11 / LAG 83. **Selfcheck:** final-NAV identity = **0 VND both books** (audit
+pass); cash-flow per-session max err BAL 0 / LAG 3.10M VND (~8.5e-6 of the 362B LAG book, real-margin path residual,
+washes out — final NAV exact). Audit CSV `data/v23_golive_audit_2014_now_mge130cap_real.csv` (13,463 rows).
+
+**Verdict:** even when FORCED, real >100% leverage barely materialises — combined gross caps at **1.000** (the two
+25B books net out; only LAG momentarily hits 1.124), so total borrow over 12.47y is a trivial **45.9M VND** (~0.0007%/yr).
+Forcing the ×1.3 slug-scaling is NET-NEGATIVE on returns (CAGR 31.81→23.60, −8.2pp) for ~zero financing benefit —
+it is a SIZING/path-drag distortion, not financing. Directly confirms the prior "MGE=1.5 loses = sizing not borrow"
+finding at a stronger setting: **real leverage is not the lever**; keep MGE as the cash-funded CAPIT headroom (rarely
+binds), do NOT force genuine margin. MaxDD did tighten (−20.6→−18.0%) but at a heavy CAGR cost (Calmar 1.54→1.31 worse).
+
 ### Exp-8 MGE sensitivity (Test A frozen: 3M/63d 1.7x, CAPIT-ONLY) — Mike dispatch — 2026-06-24 (Tier-3 BQ, 0 VND)
 
 Sweep MGE ∈ {1.2, 1.3, 1.4, 1.5}, everything else = Exp-8 Test A best config. selfcheck 0 VND all 4 runs.
@@ -274,3 +315,56 @@ MGE=1.3 control re-run reproduced published Test A exactly (FULL 31.09/−20.5/1
 −20.5%, binding window = pre-capitulation decline, leverage-independent). **Verdict: keep MGE=1.3** (sweet spot);
 raising toward 1.5 is pure downside (more real leverage, less return). REAL leverage → Spyros sign-off + user
 approval before LIVE. Detail: `data/exp8_mge_sensitivity_bq.md`.
+
+### Exp-8 v2 — refined Signal C as CONFIRM (user idea + DT5G BullDvg) — 2026-06-25 (Tier-3 BQ, 0 VND)
+
+User: C is early but flags "bottom approaching" → use as leading ARM, A = capitulation confirm (never deploy C alone).
+Refined C per DT5G `_BullDvg`: RSI[T]>RSI[T−63]+0.02 ∧ Close[T]≤Close[T−63]×1.06 ∧ rolling-63d RSI-min<0.40 ∧ RSI<0.60.
+Deploy = (A∨B) ∧ C-armed-within-K. Same-snapshot 2026-06-25, all 0 VND:
+
+| config | CAGR | Sharpe | MaxDD | Calmar | vs A-only |
+|---|---|---|---|---|---|
+| A-only 1.7x | 31.07% | 1.87 | −20.5% | 1.52 | — |
+| **A∧C-confirm K=30** | **31.31%** | 1.91 | −20.6% | 1.52 | +0.24pp, =DD |
+| **A∧C-confirm K=40** | **31.81%** | 1.92 | −20.6% | 1.54 | +0.74pp, =DD |
+
+**Verdict:** 🟢 A∧C-confirm SUPERSEDES A-only — C-confirm suppressed premature 2022 levered fires (A-only
+11-16→12-06 → A∧C only confirmed 12-06) → higher return at equal DD; COVID preserved; and FIXES the 2012
+slow-grind early-fire (A-only −166d → A∧C −4d, pre-harness = the Spyros tail-risk, closed at 0 in-sample cost).
+Reverses v1 "C harmful" (that was C-as-standalone-trigger w/ crude 10d divergence). K=30 conservative default.
+Real leverage MGE 1.3 → Spyros + user before LIVE. Detail `data/exp8_reversal_signals_bq.md`.
+
+### Exp-8 — WHY MGE=1.5 loses 1.03pp OOS CAGR vs 1.3 (user Q via Mike) — 2026-06-25 (decomposed from sweep CSVs, 0 VND)
+
+User: MGE1.5 loses 1.03pp OOS CAGR (35.85→34.82) ≈ 4× the ~0.26%/yr borrow-drag estimate — why? **Answer: the
+premise is wrong — the gap is NOT borrow drag; it is a position-SIZING tilt with negative path return.**
+- **Leverage almost never fires:** combined gross max **0.995 (1.3) / 0.966 (1.5)** over the WHOLE 2014-2026 run —
+  book is cash-covered always. Actual OOS borrow interest: **1.3 = 0 VND; 1.5 = 2.73M VND / 2 borrow-days in 6.5yr
+  = 0.0002 %/yr** (~1000× smaller than 0.26%/yr; the estimate prices a borrow that never happens).
+- **What MGE is here:** `MGE_CAPIT_ONLY` = an arm SIZE-CAP multiplier funded from idle cash, not >100% financing.
+  1.5 deploys a bigger CAPIT recovery position (+13–25B more stocks in 2020-Aug / 2021-Mar up-legs; unwinds −17/−25B in 2021 H2).
+- **Mechanism = gain-then-larger-giveback (volatility/path drag), compounded.** navratio 1.5/1.3 ran **+1.59% (2021-03-31)
+  → −2.03% (2021-12-31) → −4.79% (2026-06-19)**. Per-yr gap (pp): 2020 +0.25 / **2021 −2.31** / 2022 −0.47 / 2023 +0.06 /
+  2024 −0.25 / 2025 −0.56 / **2026-H1 −1.63**. Lumpy & episode-bound (the opposite of a flat 10%/yr carry).
+- **Hypotheses:** (1) arm worse in sub-periods = YES, primary. (2) compounding×volatility = YES. (3) capacity/150% gross
+  = NO (gross never near 150%, cash-covered). (4) CAPIT_STOP early exit = MINOR (36 vs 34 stops; path artifact).
+- **Verdict:** confirms MGE=1.3 sweet spot; MaxDD pins −20.5% flat 1.3→1.5 (no real >100% tail). Past 1.3 you buy MORE
+  of a tilt with negative path-return for ~zero financing benefit. Detail: `data/exp8_mge_why_15_loses.md`.
+
+### ⚠️ CORRECTION (2026-06-25, user-verified) — Exp-8 "MGE 1.3" config borrows 0 VND; it is LEVERAGE-FREE
+
+User skeptic-checked the A∧C-confirm K30 MGE1.3 config. Measured from the audit CSV (`...capitonly63cv17Ccf30.csv`):
+- **Total borrowed = 0 VND** (BAL & LAG cash min = 0; 26 "cash<0" days are exactly-0 rounding, deepest 0 VND).
+- **Total interest 12.5y = 0 VND.** **Gross exposure max = 1.0000** — never exceeded 100%.
+- Every CAPIT deploy (2020-03-12 g0.962 / 2020-04-21 / 2022-12-06 g0.951 / 2023-04-06 g0.957) funded from
+  **parked idle cash** (cash stayed positive) — no borrow.
+
+**Root cause:** CAPIT-ONLY deploys only in CRISIS/BEAR capitulation = when the book is cash-heavy (custom30
+de-risked), so there's always enough cash; gross stays ≤ WMAX 0.95; the MGE 1.3 cap never binds. It would only
+bind if the book were already ≥100% invested when CAPIT fires — which never happens in a crisis.
+
+**Reframe:** in CAPIT-ONLY mode, `MGE` is a **CAPIT sizing multiplier** (raises the washout-arm deploy weight,
+funded from cash), **NOT real leverage**. Consistent with FORCE_REAL_LEVER (forcing it → only 45.9M VND/12.5y)
+and the MGE-sensitivity finding (gap = sizing/path-drag, not borrow). **The 31.31% A∧C-confirm result is
+LEVERAGE-FREE (0 VND borrowed)** → no margin risk to clear with Spyros for THIS config. Prior "REAL leverage
+MGE 1.3" labels on Exp-8 decisions are corrected to "nominal MGE cap, non-binding / sizing knob".

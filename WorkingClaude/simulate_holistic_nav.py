@@ -313,6 +313,15 @@ def simulate(signals_df, prices, vni_dates, *,
              cash_etf_states_by_date=None,   # optional dict {pd.Timestamp: {state: etf_frac}} — per-date override of cash_etf_states (e.g. concentration-tilted parking); falls back to cash_etf_states when date absent
              max_gross_exposure=None,        # optional float (e.g. 1.5 = V6-v3 margin<=150%): stock buys may draw cash negative down to -(mge-1)*NAV; negative cash pays borrow_annual; ETF parking never uses margin
              margin_tiers=None,              # optional set of play_types ALLOWED to use the margin room (e.g. crisis-capit only); None = all tiers when max_gross_exposure is set
+             # --- S4 MARGIN-CALL / FORCE-DELEVERAGE (Taylor 2026-06-25, margin engine rebuild) ---
+             # When ON: if live gross G=(stocks+pending+etf)/NAV breaches mge_hard mid-hold (price drop),
+             # force-sell stock pro-rata to bring G back to mge_floor — the missing risk primitive a real
+             # margin account has. Intraday execution at today's marked price. Logged as MARGIN_CALL tx so
+             # the per-session self-check reconciles to 0 VND. Default OFF → production byte-identical.
+             margin_call_on=False,           # enable S4 force-deleverage
+             mge_hard=None,                  # gross breach trigger; None → max_gross_exposure + 0.15
+             mge_floor=None,                 # post-call target gross; None → max_gross_exposure
+             margin_call_log=None,           # optional list to capture margin-call events
 
              lows=None,                    # dict {ticker: {date: daily_low}} for INTRADAY_LOW stop mode
              stop_mode="CLOSE",            # "CLOSE" (default, today's close) or "INTRADAY_LOW" (today's low touches stop)
@@ -423,6 +432,12 @@ def simulate(signals_df, prices, vni_dates, *,
     abandoned_partial = 0
     _entry_seq = 0       # monotonic counter for unique holding_id
 
+    # S4 margin-call defaults: trigger at mge_hard (cap + 0.15 buffer), delever back to mge_floor (cap).
+    _mc_on = bool(margin_call_on and max_gross_exposure is not None)
+    _mc_hard = (mge_hard if mge_hard is not None
+                else (max_gross_exposure + 0.15 if max_gross_exposure is not None else None))
+    _mc_floor = (mge_floor if mge_floor is not None else max_gross_exposure)
+
     sig_filtered = signals_df[signals_df["play_type"].isin(allowed_tiers)].copy()
     sig_by_date = {d: g for d, g in sig_filtered.groupby("time")}
     date_idx = {d: i for i, d in enumerate(vni_dates)}
@@ -518,6 +533,71 @@ def simulate(signals_df, prices, vni_dates, *,
             pos["days_held"] += 1
             pos.setdefault("peak_price", pos["entry_price"])
             pos.setdefault("partial_taken", set())
+
+        # 1b) S4 MARGIN-CALL / FORCE-DELEVERAGE — fires when live gross breaches the hard cap mid-hold.
+        #     Reads positions marked to today's price (step 1). A real margin account, in a crash,
+        #     is force-liquidated by the broker to defend maintenance margin; this models exactly that:
+        #     sell stock PRO-RATA at today's price until gross falls back to mge_floor. Intraday execution
+        #     (conservative — no escape). Logged as MARGIN_CALL event_log rows so the per-session cash-flow
+        #     self-check reconciles to 0 VND. Default OFF (margin_call_on=False) → production untouched.
+        if _mc_on and positions:
+            _pmv = sum(p["shares"] * p["last_price"] for p in positions.values())
+            _pend_mv = sum(p["filled_shares"] * p.get("last_seen_price", 0)
+                           for p in pending_entries if p["filled_shares"] > 0)
+            _etf_mv = _etf_mark(today)
+            _nav_now = cash + _etf_mv + _pmv + _pend_mv
+            if _nav_now > 0 and _pmv > 0:
+                _gross_now = (_pmv + _pend_mv + _etf_mv) / _nav_now
+                if _gross_now > _mc_hard:
+                    # VND of stock to sell so gross → mge_floor. A sale leaves NAV ~unchanged (only
+                    # fees leak), so target sell ≈ (gross-floor)*NAV; cap at total stock value.
+                    _sell_vnd = min((_gross_now - _mc_floor) * _nav_now, _pmv)
+                    _sell_frac = _sell_vnd / _pmv     # pro-rata trim across every open position
+                    for tk in list(positions.keys()):
+                        pos = positions[tk]
+                        px = pos["last_price"]
+                        if px is None or pd.isna(px):
+                            continue
+                        sh = pos["shares"] * _sell_frac
+                        if sh <= 0:
+                            continue
+                        gross_v = sh * px                       # clean market value (pre fee)
+                        proceeds = gross_v * sell_cost_factor   # after TC+tax
+                        cash += proceeds
+                        fee = gross_v - proceeds
+                        cb_chunk = pos["cost_basis"] * _sell_frac
+                        pos["shares"] -= sh
+                        pos["cost_basis"] -= cb_chunk
+                        ret_gross = (px / pos["entry_price"]) - 1
+                        ret_net = (proceeds / cb_chunk) - 1 if cb_chunk > 0 else 0.0
+                        trades.append({
+                            "ticker": tk, "entry_date": pos["entry_date"], "exit_date": today,
+                            "entry_price": pos["entry_price"], "exit_price": px,
+                            "ret_gross": ret_gross, "ret_net": ret_net,
+                            "reason": "MARGIN_CALL", "days_held": pos["days_held"],
+                            "play_type": pos.get("play_type", "?"), "exit_extra_slip": 0.0,
+                        })
+                        if event_log is not None:
+                            event_log.append({
+                                "ymd": today, "ticker": tk, "action": "sell",
+                                "buy_amount": 0.0, "sell_amount": float(gross_v),
+                                "fee": float(max(fee, 0.0)), "adj_price": float(px),
+                                "shares": float(sh),
+                                "holding_id": pos.get("holding_id", f"{tk}_MC"),
+                                "play_type": pos.get("play_type", "?"),
+                                "cash_after": float(cash), "reason": "MARGIN_CALL",
+                            })
+                        if pos["shares"] <= 1e-9:
+                            del positions[tk]
+                    if margin_call_log is not None:
+                        _pmv2 = sum(p["shares"] * p["last_price"] for p in positions.values())
+                        _nav2 = cash + _etf_mv + _pmv2 + _pend_mv
+                        margin_call_log.append({
+                            "ymd": today, "gross_before": float(_gross_now),
+                            "gross_after": float((_pmv2 + _pend_mv + _etf_mv) / _nav2) if _nav2 > 0 else 0.0,
+                            "sell_vnd": float(_sell_vnd), "nav": float(_nav_now),
+                            "mge_hard": float(_mc_hard), "mge_floor": float(_mc_floor),
+                        })
 
         # State-transition exit: if today's state triggers exit, mark positions
         today_state = None
@@ -791,6 +871,16 @@ def simulate(signals_df, prices, vni_dates, *,
                             remaining = 0
                     etf_lots = new_lots
                     total_sold_vnd = sum(x[2] for x in sold)
+                    # FIX #4 (Taylor 2026-06-25, margin engine rebuild): charge friction ONLY when ETF was
+                    # actually sold. On real margin (cash<0) total_cash_pool goes negative -> a phantom sell
+                    # target is computed, but with etf_lots empty nothing sells (total_sold_vnd=0); the old
+                    # code still deducted friction on the phantom target AND never logged it (the etf_log
+                    # branch below requires total_sold_vnd>0) -> an unlogged friction cash leak (up to ~3.1M/
+                    # session at gross 1.12) that broke the self-check on margin days. In no-margin production
+                    # the transient pool is ~0 so phantom friction is ~0 -> byte-identical (verified FIX4
+                    # on==off == 630.62B, self-check 0). The fix has teeth only when truly levered.
+                    if total_sold_vnd <= 0:
+                        friction = 0.0
                     cash = cash + total_sold_vnd - friction
                     if etf_log is not None and total_sold_vnd > 0:
                         for idx, (lot_ref, sold_shares, sold_vnd, sold_cost) in enumerate(sold):
@@ -1229,6 +1319,10 @@ def simulate(signals_df, prices, vni_dates, *,
             "cash_pct": cash / nav * 100 if nav > 0 else 0,
             "cash_etf_pct": cash_etf_val / nav * 100 if nav > 0 else 0,
             "deployed_pct": (positions_mv + pending_mv) / nav * 100 if nav > 0 else 0,
+            # Live gross exposure G = (stocks + pending + ETF) / NAV. >1.0 = real >100% leverage
+            # (cash<0). Pure instrumentation (no behavior change); the margin-call mechanic (S4)
+            # and regime-deleverage (S5) read this. Equivalent to (nav-cash)/nav.
+            "gross": (positions_mv + pending_mv + cash_etf_val) / nav if nav > 0 else 0.0,
             "interest": float(_interest_today),   # deposit/borrow interest (no tx row) — for self-check reconcile
             "state": state_by_date.get(today) if state_by_date else None,
         })

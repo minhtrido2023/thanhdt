@@ -303,6 +303,12 @@ MGE_CAPIT_ONLY = os.environ.get("MGE_CAPIT_ONLY", "1") == "1"              # bor
 # multiple (wt = cash_slug × (1+(MGE-1)×lgm)) so it deploys MGE× the free cash → cash goes negative → genuine gross
 # >100% → real borrow charged at borrow_annual. Excess = max(0, gross-1)×NAV pays borrow/252 each day (engine).
 FORCE_REAL_LEVER = os.environ.get("FORCE_REAL_LEVER", "0") == "1"          # force genuine >100% gross (real borrow)
+# S4 MARGIN-CALL (Taylor 2026-06-25, margin engine rebuild): force-deleverage when live gross breaches
+# MGE_HARD mid-hold (price drop) — the missing risk primitive a real margin account has. Default OFF.
+MARGIN_CALL = os.environ.get("MARGIN_CALL", "0") == "1"                    # enable S4 force-deleverage
+MGE_HARD    = float(os.environ.get("MGE_HARD", "0"))                       # breach trigger; 0 => cap+0.15 (engine default)
+MGE_FLOOR   = float(os.environ.get("MGE_FLOOR", "0"))                      # post-call target; 0 => cap (engine default)
+mc_log_bal, mc_log_lag = [], []
 _mge = MGE if MGE > 1.0 else None
 _mge_tag = "" if not _mge else f"_mge{int(round(MGE*100))}{'cap' if MGE_CAPIT_ONLY else 'all'}{'_real' if FORCE_REAL_LEVER else ''}"
 # Part-2 LEVER-GATE (gates ONLY the borrow headroom of the CAPIT arm; the cash-based size is untouched):
@@ -373,6 +379,14 @@ RECOVERY_SIG_C = os.environ.get("RECOVERY_SIG_C", "0") == "1"
 # de-risks A's worst failure (firing leveraged too early in a slow L-grind, e.g. 2012: A-only −166d → A∧C −4d).
 RECOVERY_C_CONFIRM = os.environ.get("RECOVERY_C_CONFIRM", "0") == "1"
 RECOVERY_C_ARM_K   = int(os.environ.get("RECOVERY_C_ARM_K", "30"))
+# LEVER-AT-BOTTOM (Exp-8 v3, user 2026-06-25): on each A∧C-confirm deploy (a confirmed capitulation bottom),
+# ALSO buy custom30 on REAL margin — a dedicated CAPITLEV stock sleeve sized to RECOVERY_LEVER_FRAC of NAV,
+# funded by borrow (parking already used the cash). Routed through the CAPIT-stock margin path (the V2-proven
+# 0-VND-reconciling path) — NOT the parking-margin path (which double-charges interest on cash_etf). Borrow is
+# restricted to this sleeve via MGE_CAPIT_ONLY, so leverage lands ONLY at confirmed bottoms, never at the top.
+RECOVERY_LEVER_BOTTOM = os.environ.get("RECOVERY_LEVER_BOTTOM", "0") == "1"
+RECOVERY_LEVER_FRAC   = float(os.environ.get("RECOVERY_LEVER_FRAC", "0.30"))   # borrowed stock weight per bottom
+_lever_dates = []   # filled by the recovery state machine on each A∧C-confirm fire
 if RECOVERY_CAPIT_ONLY:
     RECOVERY_GRADUAL = True   # CAPIT-ONLY runs ON the gradual machine (vol load + episode loop), step disabled
 # ACCELERATING-DECLINE FILTER (Taylor 2026-06-24, Exp-7):
@@ -970,6 +984,16 @@ def add_capit_arm(sig_book, base_nav_df, tw_base, tag, book_prices):
         d = e["date"]
         names = [t for t in capit_basket(d) if t in book_prices and d in book_prices[t]]
         if len(names) < 3: continue
+        if e.get("lever"):                                  # LEVER-AT-BOTTOM: fixed borrowed stock weight
+            wt = RECOVERY_LEVER_FRAC                         # parking already used the cash -> this draws cash<0
+            pt = f"CAPITLEV{tag}_E{i}"
+            shn.TIER_PRIORITY[pt] = 96
+            tw2[pt] = wt / len(names); tiers.append(pt)
+            for t in names:
+                rows.append({"time": d, "ticker": t, "play_type": pt, "ta": 500.0, "Close": book_prices[t][d]})
+            if CAPIT_HOLD_NEUTRAL:
+                tier_hold[pt] = _sessions_to_neutral(d)
+            continue
         pos = basecash.index.searchsorted(d)
         cf = float(basecash.iloc[max(0, pos-2):pos+1].mean()) if len(basecash) else 0.0
         wt = e["size"] * max(cf, 0.0)
@@ -1298,6 +1322,8 @@ if RECOVERY_PARK:
                             _full_wmax = _capit_wmax if RECOVERY_LEVER_ON_CAPIT else RECOVERY_WMAX
                             _capit_tgt = base_st + m * frac * (_full_wmax - base_st)
                             _grad_current_frac = _capit_tgt
+                            if RECOVERY_LEVER_BOTTOM:        # record this confirmed bottom for the margin sleeve
+                                _lever_dates.append(pd.Timestamp(d))
                             _5d = _dd5d_by_date.get(pd.Timestamp(d), float('nan')) if RECOVERY_ACCEL else float('nan')
                             _10d = _dd10d_by_date.get(pd.Timestamp(d), float('nan')) if RECOVERY_ACCEL else float('nan')
                             _sig_tag = "+".join([s for s, on in [("A", _sigA), ("B", _sigB), ("C", _sigC)] if on])
@@ -1402,6 +1428,26 @@ if RECOVERY_PARK:
                           f"NOT below {DEEP_VALUE_PBZ:.1f} -> still blocked")
         print(f"  [deep-value-override] {_dvo_count} events restored (threshold pb_z<{DEEP_VALUE_PBZ:.1f})")
 PARK_BY_DATE = RECOVERY_PARK_BY_DATE if RECOVERY_PARK else BULL_PARK_BY_DATE
+# LEVER-AT-BOTTOM: inject ONE levered custom30 stock event per confirmed-bottom episode (dedup fires within
+# 20 trading days). These become CAPITLEV_* plays in add_capit_arm (fixed borrowed weight RECOVERY_LEVER_FRAC).
+if RECOVERY_LEVER_BOTTOM and _lever_dates:
+    _ld = sorted(set(_lever_dates)); _kept = []
+    for _d in _ld:
+        if not _kept or (_d - _kept[-1]).days > 28:   # ~20 trading days = one entry per bottom
+            _kept.append(_d)
+    # CAPITLEV carries the FULL custom30 exposure (RECOVERY_LEVER_FRAC = gross target, e.g. 1.30); to stop the
+    # parking from absorbing the cash (parking is cash-bounded so stock+parking would stay ≤1.0), SUPPRESS the
+    # recovery parking over each episode's hold window so CAPITLEV's stock buy draws cash<0 = real borrow.
+    _vdi = {d: i for i, d in enumerate(vni_dates)}
+    for _d in _kept:
+        capit_events.append({"date": _d, "state": int(state_ff.get(_d) or 1), "grind": False,
+                             "size": RECOVERY_LEVER_FRAC, "dd": 0.0, "cool": False, "lever": True})
+        _i0 = _vdi.get(_d)
+        if _i0 is not None and RECOVERY_PARK_BY_DATE is not None:
+            for _j in range(_i0, min(_i0 + CAPIT_HOLD + 1, len(vni_dates))):
+                RECOVERY_PARK_BY_DATE[vni_dates[_j]] = dict(PARK_STATES_DICT)   # drop recovery boost → no parking competition
+    print(f"  [lever-at-bottom] {len(_kept)} episode(s) -> CAPITLEV carries custom30 gross={RECOVERY_LEVER_FRAC} "
+          f"(parking suppressed over {CAPIT_HOLD}d hold so the buy borrows): {[d.date().isoformat() for d in _kept]}")
 BAL_KW = dict(allowed_tiers=RS["allowed_tiers"], max_positions=MAX_POS_V11,
               hold_days=45, stop_loss=-0.20, min_hold=2, slippage=0.0, init_nav=BAL_NAV,
               sector_limit_per_sector={8: 4}, ticker_sector_map=sec_map,
@@ -1425,6 +1471,11 @@ kwA = dict(BAL_KW); kwA["allowed_tiers"] = list(RS["allowed_tiers"]) + [t for t 
 if _mge:                                                    # real-margin: open the gross cap, restrict room to CAPIT
     kwA["max_gross_exposure"] = _mge
     kwA["margin_tiers"] = set(t for t in tw_balC if t.startswith("CAPIT")) if MGE_CAPIT_ONLY else None
+    if MARGIN_CALL:
+        kwA["margin_call_on"] = True; kwA["margin_call_log"] = mc_log_bal
+        if MGE_HARD > 0: kwA["mge_hard"] = MGE_HARD
+        if MGE_FLOOR > 0: kwA["mge_floor"] = MGE_FLOOR
+        print(f"  [S4 margin-call BAL] ON | hard={MGE_HARD or (_mge+0.15):.2f} floor={MGE_FLOOR or _mge:.2f}")
     print(f"  [real-margin] max_gross_exposure={_mge} | margin_tiers="
           f"{'CAPIT-only' if MGE_CAPIT_ONLY else 'ALL'} | borrow {BAL_KW['borrow_annual']*100:.0f}%/yr")
 nav_bal, _ = simulate(sig_balC, prices, vni_dates, tier_weights=tw_balC,
@@ -1458,6 +1509,10 @@ kwB = dict(LAG_KW); kwB["allowed_tiers"] = ["LAG_HI","LAG_LO"] + [t for t in tw_
 if _mge:                                                    # mirror BAL: open the gross cap on LAG so its CAPIT arm can borrow too
     kwB["max_gross_exposure"] = _mge
     kwB["margin_tiers"] = set(t for t in tw_lagC if t.startswith("CAPIT")) if MGE_CAPIT_ONLY else None
+    if MARGIN_CALL:
+        kwB["margin_call_on"] = True; kwB["margin_call_log"] = mc_log_lag
+        if MGE_HARD > 0: kwB["mge_hard"] = MGE_HARD
+        if MGE_FLOOR > 0: kwB["mge_floor"] = MGE_FLOOR
 nav_lag, _ = simulate(sig_lagC, prices_lag, vni_dates, tier_weights=tw_lagC,
                       event_log=events_lag, etf_log=etf_lag,
                       name="v23audit_LAG", **merge_extra(kwB, ex_lagC), **LIQ_LAG)
@@ -1598,7 +1653,24 @@ for book, navdf, init in [("BAL", nb, BAL_NAV), ("LAG", nl, LAG_NAV)]:
     # deposit/borrow interest mutates cash WITHOUT a tx row -> add to expected flows so margin runs reconcile
     interest = (navdf["interest"].loc[common].fillna(0.0) if "interest" in navdf.columns
                 else pd.Series(0.0, index=common))
-    err = (dcash - f_full - interest).abs().max()
+    _resid = (dcash - f_full - interest)
+    err = _resid.abs().max()
+    if os.environ.get("SC_DEBUG") and err > 1e6:   # locate offending days
+        _top = _resid.abs().sort_values(ascending=False).head(6)
+        print(f"  [SC_DEBUG {book}] top residual days (dcash - flows - interest):")
+        for _dt, _ in _top.items():
+            print(f"     {pd.Timestamp(_dt).date()}  resid={_resid.loc[_dt]:>+18,.0f}  dcash={dcash.loc[_dt]:>+18,.0f} "
+                  f" flows={f_full.loc[_dt]:>+18,.0f}  int={interest.loc[_dt]:>+14,.0f}")
+        # DEEP dump for the single worst day: every all_tx flow row for (book, day) from the SAME objects
+        _wd = _top.index[0]
+        _rows = flows_tx[(flows_tx["book"] == book) & (flows_tx["ymd"] == _wd)]
+        print(f"  [SC_DEBUG {book}] worst day {pd.Timestamp(_wd).date()} — {len(_rows)} flow rows; "
+              f"cash[d]={cash.loc[_wd]:,.0f} cash[d-1]={cash.shift(1).loc[_wd]:,.0f} int={interest.loc[_wd]:,.0f}")
+        for _, _r in _rows.iterrows():
+            print(f"       {_r['action']:<5} {str(_r.get('ticker','?')):<10} buy={_r.get('buy_amount',0):>16,.0f} "
+                  f"sell={_r.get('sell_amount',0):>16,.0f} fee={_r.get('fee',0):>12,.0f} net={_r['net']:>16,.0f} "
+                  f"{str(_r.get('play_type','?')):<10} {str(_r.get('reason','?'))}")
+        print(f"       SUM net flows = {_rows['net'].sum():,.0f}  (vs needed dcash-int = {dcash.loc[_wd]-interest.loc[_wd]:,.0f})")
     selfcheck[f"cash_flow_identity_max_err_vnd_{book}"] = float(err)
     # final NAV identity: cash + stocks marks + etf marks == nav
     mtm_sum = sum(r["sell_amount"] for r in mtm_rows if r["book"] == book)
@@ -1630,6 +1702,19 @@ print(f"  [borrow-audit] total borrow cost = {_borrow_total:,.0f} VND "
       f"max gross BAL {_borrow_report['BAL']['max_gross']:.3f} LAG {_borrow_report['LAG']['max_gross']:.3f} "
       f"combined {_comb_gross.max():.3f}; borrow-days BAL {_borrow_report['BAL']['n_borrow_days']} "
       f"LAG {_borrow_report['LAG']['n_borrow_days']}")
+if MARGIN_CALL:
+    _mc_all = mc_log_bal + mc_log_lag
+    selfcheck["margin_call_fires"] = len(_mc_all)
+    if _mc_all:
+        _wost = max(_mc_all, key=lambda r: r["gross_before"])
+        print(f"  [S4 margin-call] {len(mc_log_bal)} BAL + {len(mc_log_lag)} LAG fires; "
+              f"worst breach gross {_wost['gross_before']:.3f}->{_wost['gross_after']:.3f} on {_wost['ymd'].date() if hasattr(_wost['ymd'],'date') else _wost['ymd']} "
+              f"(sold {_wost['sell_vnd']/1e9:.3f}B)")
+        for r in _mc_all[:8]:
+            _d = r['ymd'].date() if hasattr(r['ymd'],'date') else r['ymd']
+            print(f"      {_d}: gross {r['gross_before']:.3f}->{r['gross_after']:.3f}  sold {r['sell_vnd']/1e9:.3f}B  (hard {r['mge_hard']:.2f}/floor {r['mge_floor']:.2f})")
+    else:
+        print(f"  [S4 margin-call] ON but 0 fires (gross never breached hard cap)")
 
 # --- SELF-CHECK 2: combination recurrence replay ---
 if USE_LAG_ALLOCATOR:

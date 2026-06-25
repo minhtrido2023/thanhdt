@@ -4,5 +4,6 @@ export PATH="$PATH:/home/trido/google-cloud-sdk/bin"
 export CLOUDSDK_CONFIG=/home/trido/thanhdt/gcloud_dtienthanh   # dtienthanh@gmail.com = BQ read-WRITE
 export DNA_PYEXE=/home/trido/thanhdt/wc_venv/bin/python
 export TZ=Asia/Ho_Chi_Minh
+export BQ_LOCAL_CACHE=data/bq_cache
 VENV_PY=/home/trido/thanhdt/wc_venv/bin/python
 cd "$WORKDIR_8L"

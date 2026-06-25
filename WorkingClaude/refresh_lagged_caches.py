@@ -35,7 +35,16 @@ print("=" * 80)
 
 
 def _save_pickle(obj, path):
-    """Write atomically-ish; fall back to .new if locked (OneDrive/Excel)."""
+    """Write atomically-ish; fall back to .new if locked (OneDrive/Excel).
+    Force datetime64 → ns and StringDtype → object for cross-numpy compat."""
+    obj = obj.copy()
+    for c in obj.columns:
+        if pd.api.types.is_datetime64_any_dtype(obj[c]):
+            obj[c] = obj[c].astype("datetime64[ns]")   # us/ms → ns avoids NotImplementedError on older numpy
+        elif hasattr(obj[c], "dtype") and str(obj[c].dtype) in ("string", "StringDtype"):
+            obj[c] = obj[c].astype(object)
+        elif isinstance(obj[c].dtype, pd.StringDtype):
+            obj[c] = obj[c].astype(object)
     try:
         with open(path, "wb") as f: pickle.dump(obj, f)
         return path
