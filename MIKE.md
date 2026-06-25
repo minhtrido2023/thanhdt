@@ -57,15 +57,21 @@ Khi thấy event_type `question` trong KB delta, Mike phải:
    `bus/directives/X.jsonl` chỉ còn dùng cho **mandate dài hạn** (setup ban đầu, quy tắc vĩnh viễn không cần reply ngay). Với mọi task cần kết quả → **dùng `dispatch.sh`**, không dùng directive/inbox.
 
 ## Chọn agent nào cho việc gì
-| Agent | Chuyên môn | Khi nào dispatch |
-|-------|-----------|-----------------|
-| **Taylor** | Quant: backtest, chiến lược, BigQuery, risk/reward | Phân tích kỹ thuật, test chiến lược, query BQ |
-| **Winston** | Giám sát: corp-action, hàng hóa, tin tức | Kiểm tra sự kiện, cập nhật dữ liệu, monitor |
-| **Wendy** | Pháp lý, compliance, thuế | Câu hỏi pháp lý, quy định, thuế CK |
-| **Spyros** | Risk, audit, giám sát rủi ro | Review rủi ro, self-check, audit kết quả |
-| **DollarBill** | Giao dịch: plan, execution | Lập plan giao dịch, chuẩn bị lệnh |
-| **Mafee** | Thực thi lệnh (plan-bound) | Chạy lệnh trong plan đã duyệt |
-| **quant-skeptic** | **Phản biện R&D (công tố)** — cố BÁC BỎ finding của Taylor | Sau mỗi finding/backtest quan trọng, TRƯỚC khi wire vào production |
+**2 lớp (cập nhật 2026-06-25):** *companion daemon* (persistent, systemd) chỉ còn **Taylor + DollarBill + Mafee** (R&D lineage + execution). Mọi vai trò khác là **native subagent on-demand** — gọi `Agent(subagent_type="<name>")` khi Mike interactive, hoặc `dispatch.sh <Id>` headless (vẫn chạy, KHÔNG cần daemon).
+
+| Vai trò | Lớp | Cách gọi | Khi nào |
+|-------|-----|----------|---------|
+| **Taylor** (Quant: backtest, chiến lược, BQ, risk/reward) | companion | `dispatch.sh Taylor "..."` | R&D, test chiến lược, query BQ |
+| **DollarBill** (plan giao dịch) | companion | `dispatch.sh DollarBill "..."` | Lập plan, chuẩn bị lệnh |
+| **Mafee** (thực thi plan-bound) | companion | `dispatch.sh Mafee "..."` | Chạy lệnh trong plan đã duyệt |
+| **quant-skeptic** (phản biện R&D — công tố) | native | `bin/verify_finding.sh` / `Agent(subagent_type="quant-skeptic")` | Sau finding quan trọng, TRƯỚC khi wire |
+| **data-ops** (was Winston: DT5G/BQ freshness, pipeline health, feeds) | native | `Agent(subagent_type="data-ops")` / `dispatch.sh Winston "..."` | Check freshness/pipeline/corp-action |
+| **corp-scanner** (corp-action scan hẹp) | native | `Agent(subagent_type="corp-scanner")` | Quét tách/cổ tức một phiên |
+| **risk-auditor** (was Spyros: DD/concentration/leverage/recon, read-only) | native | `Agent(subagent_type="risk-auditor")` / `dispatch.sh Spyros "..."` | Review rủi ro, audit EOD, recon fill↔plan |
+| **legal-vn** (was Wendy: luật CK/thuế/DN VN, có trích nguồn) | native | `Agent(subagent_type="legal-vn")` / `dispatch.sh Wendy "..."` | Câu hỏi pháp lý/thuế/compliance |
+| **fleet-scout** ("agent X đang làm gì") | native | `Agent(subagent_type="fleet-scout")` | Tra trạng thái session nhanh |
+
+> **Lưu ý chuyển đổi 2026-06-25:** Winston/Spyros/Wendy đã **gỡ daemon** (`systemctl --user disable --now`) → bớt gánh watchdog + ví usage 5h. Tri thức + working memory (`kb/memory/<id>.md`) GIỮ NGUYÊN trên đĩa; thư mục `agents/<id>/` giữ để audit. Cần chạy lại như daemon: `systemctl --user enable --now mike@<id>`. Realtime risk monitor là **`risk_monitor.py` (deterministic)**, không phải daemon LLM — đó mới là gate giám sát liên tục khi go-live.
 
 ## Tier phản biện — verify finding của Taylor (bắt buộc trước khi wire)
 Mọi finding R&D quan trọng (backtest, đổi config production, claim CAGR/Sharpe) phải qua một

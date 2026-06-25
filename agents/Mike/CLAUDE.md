@@ -94,11 +94,15 @@ Trước khi dispatch companion session, đánh giá nhanh:
 
 | Task type | Tier | Cách giao |
 |---|---|---|
-| BQ query nhanh, data check, corp scan | **Tier 2 — native agent** | `Agent(subagent_type="bq-analyst", ...)` hoặc `Agent(subagent_type="corp-scanner", ...)` |
-| "agent X đang làm gì?" nhanh | **Tier 2** | `Agent(subagent_type="fleet-scout", ...)` |
-| **Phản biện finding R&D (bác bỏ trước khi wire)** | **Tier 2 — verifier** | `bin/verify_finding.sh [--topic …]` (headless) hoặc `Agent(subagent_type="quant-skeptic", ...)` (interactive) |
-| R&D experiment, backtest, review rủi ro | **Tier 1 — companion** | `bin/dispatch.sh Taylor/Spyros "..."` |
-| Data ops phức tạp, execution | **Tier 1 — companion** | `bin/dispatch.sh Winston/Mafee "..."` |
+| BQ query nhanh, data check | **Tier 2 — native** | `Agent(subagent_type="bq-analyst", ...)` |
+| Data/regime freshness, pipeline health, feeds | **Tier 2 — native** | `Agent(subagent_type="data-ops", ...)` (was Winston) |
+| Corp-action scan hẹp | **Tier 2 — native** | `Agent(subagent_type="corp-scanner", ...)` |
+| Review rủi ro / audit EOD / recon fill↔plan | **Tier 2 — native** | `Agent(subagent_type="risk-auditor", ...)` (was Spyros) |
+| Câu hỏi pháp lý/thuế/compliance VN | **Tier 2 — native** | `Agent(subagent_type="legal-vn", ...)` (was Wendy) |
+| "agent X đang làm gì?" nhanh | **Tier 2 — native** | `Agent(subagent_type="fleet-scout", ...)` |
+| **Phản biện finding R&D (bác bỏ trước khi wire)** | **Tier 2 — verifier** | `bin/verify_finding.sh [--topic …]` hoặc `Agent(subagent_type="quant-skeptic", ...)` |
+| R&D experiment, backtest (cần lineage) | **Tier 1 — companion** | `bin/dispatch.sh Taylor "..."` |
+| Lập plan / thực thi lệnh (live) | **Tier 1 — companion** | `bin/dispatch.sh DollarBill/Mafee "..."` |
 | Query 1 câu đơn giản | **Tier 3 — inline** | `Agent(prompt="...", ...)` không cần subagent_type |
 
 **Khi nào dùng native agent (Tier 2):**
@@ -106,12 +110,14 @@ Trước khi dispatch companion session, đánh giá nhanh:
 - One-shot, kết quả trả về ngay trong lượt này
 - Không cần write code phức tạp, chỉ cần query/scan/read
 
-**Khi nào dùng companion (Tier 1):**
-- Task cần context từ các experiment/conversation trước (Taylor R&D, Spyros risk review)
-- Task dài, nhiều bước, cần working memory
-- Execution live (Mafee, DollarBill)
+**Khi nào dùng companion (Tier 1) — CHỈ còn Taylor + DollarBill + Mafee:**
+- Task cần context tích lũy từ experiment trước (Taylor R&D lineage)
+- Execution live cần working memory + audit trail (Mafee, DollarBill)
+- Mọi vai trò khác (data-ops, risk-auditor, legal-vn) đã chuyển native on-demand 2026-06-25
+  (gỡ daemon → bớt watchdog + ví usage; tri thức/working-memory giữ trên đĩa, dispatch.sh vẫn chạy headless).
 
-Native agent definitions: `~/.claude/agents/` (bq-analyst, corp-scanner, fleet-scout).
+Native agent definitions: `~/.claude/agents/` (bq-analyst, **data-ops**, corp-scanner,
+**risk-auditor**, **legal-vn**, fleet-scout, quant-skeptic).
 Minimal KB cho native agents: `kb/context_mini.md` (~150 tokens thay vì 1700).
 
 ## Việc thường lệ của bạn
