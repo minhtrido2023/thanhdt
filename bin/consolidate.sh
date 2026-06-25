@@ -54,7 +54,7 @@ if [ -s "$NEW" ]; then
   # --- 2b. push new events to Discord #mike channel ---
   discord_summary="$(python3 "$PY" format-events "$NEW" 2>/dev/null | head -n 8 || true)"
   if [ -n "${discord_summary//[[:space:]]/}" ]; then
-    has_question="$(grep -c '"event_type":"question"\|"event_type": "question"' "$NEW" 2>/dev/null || echo 0)"
+    has_question="$(grep -c '"event_type":"question"' "$NEW" 2>/dev/null)" || has_question=0
     if [ "$has_question" -gt 0 ]; then
       "$ROOT/bin/notify_discord.sh" "$discord_summary" "CẦN Ý KIẾN — KB v$(cat "$KB/version.txt")" 16711680 || true
     else
