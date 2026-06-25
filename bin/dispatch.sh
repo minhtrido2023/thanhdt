@@ -34,7 +34,9 @@ mkdir -p "$ROOT/logs"
 ts="$(date -u +%Y%m%d_%H%M%S)"
 logfile="$ROOT/logs/dispatch_${id}_${ts}.log"
 
-dispatch_prompt="[DISPATCH từ Mike] $prompt
+from="${DISPATCH_FROM:-Mike}"
+
+dispatch_prompt="[DISPATCH từ $from] $prompt
 
 Khi hoàn thành, GHI KẾT QUẢ lên bus bằng:
   $ROOT/bin/append_event.sh $id finding \"<chủ đề>\" '<payload>'
