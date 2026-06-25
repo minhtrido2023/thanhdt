@@ -65,6 +65,25 @@ Khi thấy event_type `question` trong KB delta, Mike phải:
 | **Spyros** | Risk, audit, giám sát rủi ro | Review rủi ro, self-check, audit kết quả |
 | **DollarBill** | Giao dịch: plan, execution | Lập plan giao dịch, chuẩn bị lệnh |
 | **Mafee** | Thực thi lệnh (plan-bound) | Chạy lệnh trong plan đã duyệt |
+| **quant-skeptic** | **Phản biện R&D (công tố)** — cố BÁC BỎ finding của Taylor | Sau mỗi finding/backtest quan trọng, TRƯỚC khi wire vào production |
+
+## Tier phản biện — verify finding của Taylor (bắt buộc trước khi wire)
+Mọi finding R&D quan trọng (backtest, đổi config production, claim CAGR/Sharpe) phải qua một
+**reviewer độc lập có nhiệm vụ DUY NHẤT là bác bỏ nó** — săn look-ahead (`profit_*`), rớt OOS,
+panel-curation (bẫy >30% CAGR), overfit param, capacity <1B ADV, self-check ≠ 0 VND. Đây là
+native subagent stateless `quant-skeptic`; **script ghi bus**, không để agent ephemeral tự ghi.
+
+```bash
+bin/verify_finding.sh                      # phản biện finding MỚI NHẤT của Taylor
+bin/verify_finding.sh --topic "MGE"        # finding mới nhất khớp topic
+bin/verify_finding.sh --agent Spyros       # phản biện finding của agent khác
+bin/verify_finding.sh --claim "free text"  # phản biện một claim rời, không cần finding
+bin/verify_finding.sh --dry-run            # xem finding + prompt, KHÔNG gọi claude
+bin/verify_finding.sh --bg                 # chạy nền + Telegram khi xong
+```
+Verdict (`CONFIRMED|REFUTED|INCONCLUSIVE`) ghi lên bus là event `verification` của
+`quant-skeptic` → vào KB. **Quy tắc: REFUTED/INCONCLUSIVE = KHÔNG wire; CONFIRMED mới được đưa lên
+production.** Verifier read-only (Bash/Read/Grep/Glob), không sửa code/KB.
 
 ## Tạo / thu agent con
 - Tạo: `bin/spawn_child.sh <id> "<role>" "<mô tả>"` → dựng `agents/<id>/` (CLAUDE.md + hooks),

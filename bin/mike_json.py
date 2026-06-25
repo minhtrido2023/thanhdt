@@ -120,7 +120,7 @@ def cmd_delta_append(a):
     that ingested it, so the hook can serve each agent only what it hasn't seen."""
     ver = _as_int(a[1], 0)
     for e in load_jsonl([a[0]]):
-        if e.get("event_type") in ("finding", "answer", "decision"):
+        if e.get("event_type") in ("finding", "answer", "decision", "verification"):
             out({"v": ver, "line": short(e)})
 
 

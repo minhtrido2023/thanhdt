@@ -68,6 +68,52 @@ bin/remember.sh Mike --show     # xem lại
 ```
 Nguyên tắc: việc gì quan trọng mà chỉ nằm trong chat sẽ mất khi restart → đẩy vào working memory hoặc KB.
 
+## Parallel dispatch — chạy nhiều việc cùng lúc
+
+Khi có N việc độc lập, đừng chạy tuần tự — dispatch song song:
+
+```bash
+# Parallel dispatch (background), đợi cả 2 xong
+bin/dispatch.sh Taylor "phân tích kỹ thuật VNM" --bg &
+bin/dispatch.sh Winston "corp-action scan hôm nay" --bg &
+wait
+# Kết quả nằm trên bus, consolidate.sh đã tự chạy sau mỗi dispatch
+```
+
+Hoặc dùng Agent tool trực tiếp từ Mike (inline, không cần companion):
+```
+# Trong response của Mike — gọi cùng lúc (Claude sẽ chạy parallel):
+Agent(prompt="query BQ freshness ticker"), Agent(prompt="query BQ freshness ticker_prune")
+```
+
+**Rule**: N việc độc lập → dispatch/Agent song song. Việc phụ thuộc nhau → tuần tự.
+
+## Hybrid agent routing — 3 tiers
+
+Trước khi dispatch companion session, đánh giá nhanh:
+
+| Task type | Tier | Cách giao |
+|---|---|---|
+| BQ query nhanh, data check, corp scan | **Tier 2 — native agent** | `Agent(subagent_type="bq-analyst", ...)` hoặc `Agent(subagent_type="corp-scanner", ...)` |
+| "agent X đang làm gì?" nhanh | **Tier 2** | `Agent(subagent_type="fleet-scout", ...)` |
+| **Phản biện finding R&D (bác bỏ trước khi wire)** | **Tier 2 — verifier** | `bin/verify_finding.sh [--topic …]` (headless) hoặc `Agent(subagent_type="quant-skeptic", ...)` (interactive) |
+| R&D experiment, backtest, review rủi ro | **Tier 1 — companion** | `bin/dispatch.sh Taylor/Spyros "..."` |
+| Data ops phức tạp, execution | **Tier 1 — companion** | `bin/dispatch.sh Winston/Mafee "..."` |
+| Query 1 câu đơn giản | **Tier 3 — inline** | `Agent(prompt="...", ...)` không cần subagent_type |
+
+**Khi nào dùng native agent (Tier 2):**
+- Task không cần accumulated context của companion
+- One-shot, kết quả trả về ngay trong lượt này
+- Không cần write code phức tạp, chỉ cần query/scan/read
+
+**Khi nào dùng companion (Tier 1):**
+- Task cần context từ các experiment/conversation trước (Taylor R&D, Spyros risk review)
+- Task dài, nhiều bước, cần working memory
+- Execution live (Mafee, DollarBill)
+
+Native agent definitions: `~/.claude/agents/` (bq-analyst, corp-scanner, fleet-scout).
+Minimal KB cho native agents: `kb/context_mini.md` (~150 tokens thay vì 1700).
+
 ## Việc thường lệ của bạn
 - Khi user giao việc mới cần một agent chuyên trách → `spawn_child.sh <id> "<role>" "<mô tả>"`, rồi nhắc
   user `systemctl --user enable --now mike@<id>` (hoặc tự chạy nếu được phép).
