@@ -57,13 +57,13 @@ Khi thấy event_type `question` trong KB delta, Mike phải:
    `bus/directives/X.jsonl` chỉ còn dùng cho **mandate dài hạn** (setup ban đầu, quy tắc vĩnh viễn không cần reply ngay). Với mọi task cần kết quả → **dùng `dispatch.sh`**, không dùng directive/inbox.
 
 ## Chọn agent nào cho việc gì
-**2 lớp (cập nhật 2026-06-25):** *companion daemon* (persistent, systemd) chỉ còn **Taylor + DollarBill + Mafee** (R&D lineage + execution). Mọi vai trò khác là **native subagent on-demand** — gọi `Agent(subagent_type="<name>")` khi Mike interactive, hoặc `dispatch.sh <Id>` headless (vẫn chạy, KHÔNG cần daemon).
+**2 lớp (cập nhật 2026-06-25):** *companion daemon* (persistent, systemd) chỉ còn **Mike (orchestrator) + Taylor (R&D lineage)**. **DollarBill + Mafee = companion NGỦ tới go-live** (daemon đã tắt để app gọn; vẫn dispatch headless được; khi chạy thật Mike bật lại: `systemctl --user enable --now mike@DollarBill mike@Mafee`). Mọi vai trò khác là **native subagent on-demand** — `Agent(subagent_type="<name>")` khi Mike interactive, hoặc `dispatch.sh <Id>` headless (KHÔNG cần daemon).
 
 | Vai trò | Lớp | Cách gọi | Khi nào |
 |-------|-----|----------|---------|
 | **Taylor** (Quant: backtest, chiến lược, BQ, risk/reward) | companion | `dispatch.sh Taylor "..."` | R&D, test chiến lược, query BQ |
-| **DollarBill** (plan giao dịch) | companion | `dispatch.sh DollarBill "..."` | Lập plan, chuẩn bị lệnh |
-| **Mafee** (thực thi plan-bound) | companion | `dispatch.sh Mafee "..."` | Chạy lệnh trong plan đã duyệt |
+| **DollarBill** (plan giao dịch) | companion *(daemon ngủ tới go-live)* | `dispatch.sh DollarBill "..."` | Lập plan, chuẩn bị lệnh |
+| **Mafee** (thực thi plan-bound) | companion *(daemon ngủ tới go-live)* | `dispatch.sh Mafee "..."` | Chạy lệnh trong plan đã duyệt |
 | **quant-skeptic** (phản biện R&D — công tố) | native | `bin/verify_finding.sh` / `Agent(subagent_type="quant-skeptic")` | Sau finding quan trọng, TRƯỚC khi wire |
 | **data-ops** (was Winston: DT5G/BQ freshness, pipeline health, feeds) | native | `Agent(subagent_type="data-ops")` / `dispatch.sh Winston "..."` | Check freshness/pipeline/corp-action |
 | **corp-scanner** (corp-action scan hẹp) | native | `Agent(subagent_type="corp-scanner")` | Quét tách/cổ tức một phiên |

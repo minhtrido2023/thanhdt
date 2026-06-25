@@ -17,6 +17,16 @@ Chiến lược trung tâm: **production V2.4** (V2.3A + custom30V parking + gat
 
 **Mô hình ủy quyền lệnh (an toàn tiền thật):** Taylor đặt rule (user duyệt) → Bill lập plan `data/plan_<acct>_<T+1>.json` (user duyệt) → Mafee chỉ thực thi lệnh CÓ trong plan, trong hạn mức cứng (`trading_bot/config.py` + `data/trading_rules.json`); paper full-auto, live trong hạn mức, **không tự chế lệnh**. Spyros giám sát + `data/BOT_STOP`. Handoff = file `data/` + bus (companion model, không push prompt). DNSE live OK (số tiểu khoản ở `secrets`); **PHS live BLOCKED** (chờ credential).
 
+### BQ Local Cache (DuckDB) — giảm BQ latency cho fleet (2026-06-25)
+- **Cơ chế**: 12 bảng BQ → parquet local (`data/bq_cache/`), query qua DuckDB thay vì network. Tốc độ: 10-130ms/query (vs 5-15s BQ).
+- **Kích hoạt**: env var `BQ_LOCAL_CACHE=data/bq_cache` → mọi lời gọi `bq()` (từ `simulate_holistic_nav.py`) tự route sang DuckDB.
+- **Đã wire**: `wc_env.sh` (tất cả cron jobs) + `dispatch.sh` (tất cả fleet agent dispatch). Mọi script dùng `bq()` đều đi qua cache tự động.
+- **Sync daily**: cron 23:45 ICT (`sync_bq_cache_daily.sh --delta`). Verify so sánh row count + max date vs BQ; manifest phải `verified=true` trước khi cache được dùng.
+- **Bảng lớn**: `ticker` (3.47M rows) lưu per-year (`data/bq_cache/ticker/YYYY.parquet`), DuckDB đọc glob. `ticker_prune` (752K) là single file.
+- **SQL translation**: SAFE_DIVIDE→macro, INT64→BIGINT, DATE_DIFF→DATEDIFF, ARRAY_AGG→ARG_MAX, DATE_TRUNC/DATE_SUB/DATE_ADD, FORMAT_DATE→strftime. VARCHAR→DATE auto-cast cho cột date.
+- **Fallback**: nếu cache chưa verify hoặc thiếu bảng → `bq()` vẫn gọi BQ bình thường (không bị gãy).
+- **Files**: `bq_local_cache.py` (engine), `sync_bq_cache.py` (sync+verify), `sync_bq_cache_daily.sh` (cron wrapper).
+
 ## Consolidation 2026-06-21T15:08:57Z
 - [2026-06-21T15:07:56Z] Mike/decision — create-fleet: {"theme": "Billions", "strategy": "production V2.4 go-live 2026-06-30", "roster": ["Mafee=execution(DNSE/PHS)", "DollarBill=portfolio-manager", "Taylor=quant/algo", "Wendy=legal-VN", "Spyros=risk&compliance", "Winston=data/regime-ops"], "autonomy": "Mafee semi-auto: paper full-auto; live only orders in approved plan within hard limits; Spyros owns BOT_STOP kill-switch", "date": "2026-06-21"}
 
@@ -279,3 +289,6 @@ Chiến lược trung tâm: **production V2.4** (V2.3A + custom30V parking + gat
 
 ## Consolidation 2026-06-25T10:06:49Z
 - [2026-06-25T10:06:49Z] Bob/decision — Dọn nhất quán hybrid: annotate peer-dispatch tables (native) + auto-sync native defs vào fleet repo: {"item1_peer_dispatch": "annotated Winston/Wendy/Spyros rows in all 6 agent CLAUDE.md with their native equivalent (data-ops/legal-vn/risk-auditor); dispatch.sh to them still works headless, annotation is for clarity", "item2_auto_sync": "bin/sync_native_agents.sh mirrors ~/.claude/agents/*.md -> mike/agents_native/ (live=source of truth, one-direction); wired into fleet_backup.sh step 1b so every daily push captures latest native defs; README preserved", "status": "both done + tested (sync idempotent, 6/6 files annotated 3/3 rows)"}
+
+## Consolidation 2026-06-25T10:32:16Z
+- [2026-06-25T10:32:16Z] Bob/decision — Tắt daemon DollarBill+Mafee (ngủ tới go-live) — còn 2 companion daemon Mike+Taylor: {"action": "reduce live companion footprint to minimum before go-live", "disabled": ["mike@DollarBill", "mike@Mafee"], "remaining_daemons": ["Mike (orchestrator)", "Taylor (R&D lineage)"], "reason": "Bill/Mafee idle (no live trading yet, go-live 2026-06-30); fewer always-on remote-control sessions = cleaner app list + less watchdog/usage", "NOT_converted_to_native": "execution agents keep companion form (need working memory + audit trail); only the daemon is off", "reactivate_at_golive": "Mike runs: systemctl --user enable --now mike@DollarBill mike@Mafee", "preserved": "agents/<id>/ + kb/memory/<id>.md intact; dispatch.sh still works headless", "in_flight": "none ĐANG DỞ; Mafee TODO noted (step3 bot_execute PAPER waits DollarBill plan; push_recommend_v23 cron wiring) — unaffected, cron-independent", "app_cleanup_note": "stale server-side remote-control dupes need one-time manual remove in app; no claude CLI to delete server sessions", "watchdog_now": ["Mike", "Taylor"]}

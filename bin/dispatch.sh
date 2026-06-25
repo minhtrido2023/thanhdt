@@ -42,6 +42,11 @@ Khi hoàn thành, GHI KẾT QUẢ lên bus bằng:
   $ROOT/bin/append_event.sh $id finding \"<chủ đề>\" '<payload>'
 (hoặc decision/answer tùy loại). Đây là phiên headless — kết quả PHẢI nằm trên bus để fleet thấy."
 
+export BQ_LOCAL_CACHE=data/bq_cache
+if ! python3 "$ROOT/../preflight_bq_cache.py" --offline >/dev/null 2>&1; then
+  echo "WARNING: BQ cache preflight failed — queries will fall back to BQ network" >&2
+  unset BQ_LOCAL_CACHE
+fi
 cd "$AGENT_DIR"
 
 if [ "$bg" = "--bg" ]; then

@@ -110,9 +110,12 @@ Trước khi dispatch companion session, đánh giá nhanh:
 - One-shot, kết quả trả về ngay trong lượt này
 - Không cần write code phức tạp, chỉ cần query/scan/read
 
-**Khi nào dùng companion (Tier 1) — CHỈ còn Taylor + DollarBill + Mafee:**
-- Task cần context tích lũy từ experiment trước (Taylor R&D lineage)
-- Execution live cần working memory + audit trail (Mafee, DollarBill)
+**Companion daemon (Tier 1) đang chạy — CHỈ còn Mike + Taylor:**
+- **Taylor** — R&D cần context tích lũy (experiment lineage).
+- **DollarBill + Mafee** — companion execution nhưng **daemon NGỦ tới go-live** (idle, chưa giao dịch
+  thật). Khi chạy thật: `systemctl --user enable --now mike@DollarBill mike@Mafee`. Vẫn dispatch
+  headless được lúc cần (`dispatch.sh DollarBill/Mafee "..."`); KHÔNG chuyển native vì execution cần
+  working memory + audit trail.
 - Mọi vai trò khác (data-ops, risk-auditor, legal-vn) đã chuyển native on-demand 2026-06-25
   (gỡ daemon → bớt watchdog + ví usage; tri thức/working-memory giữ trên đĩa, dispatch.sh vẫn chạy headless).
 
