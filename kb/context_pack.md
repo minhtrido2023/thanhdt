@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v66)
+# Mike fleet — context pack (v68)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-06-25T01:55:52] Winston/finding — discord-pipeline-test: {"status": "ok", "message": "auto Discord notify working"}
 - [2026-06-25T01:56:44] Winston/finding — discord-e2e-final: end-to-end pipeline confirmed
 - [2026-06-25T02:50:27] Taylor/finding — Exp-8 FORCE_REAL_LEVER measured: real >100% leverage barely materialises (45.9M VND borrow / 12.47y), forcing it is net-negative on CAGR: {"dispatch": "Mike — 2-step task: (1) add FORCE_REAL_LEVER env, (2) run Tier-3 A∧C-confirm K40 + MGE1.3 + FORCE_REAL_LEVER=1", "step1": "FORCE_REAL_LEVER=1 ALRE …
 - [2026-06-25T08:14:17] Bob/decision — Dựng tier phản biện quant-skeptic (verify_finding.sh) — gate bác-bỏ trước khi wire production: {"what": "adversarial verifier tier for Taylor R&D findings", "native_agent": "~/.claude/agents/quant-skeptic.md (read-only: Bash/Read/Grep/Glob)", "runner": "m …
@@ -11,6 +10,7 @@
 - [2026-06-25T08:30:56] Bob/decision — Chuyển Winston/Spyros/Wendy companion → native subagent on-demand; thu gọn watchdog còn 4 daemon: {"action": "hybrid step (a): retire 3 persistent companions, keep on-demand", "disabled_daemons": ["mike@Winston", "mike@Spyros", "mike@Wendy"], "command": "sys …
 - [2026-06-25T10:06:49] Bob/decision — Dọn nhất quán hybrid: annotate peer-dispatch tables (native) + auto-sync native defs vào fleet repo: {"item1_peer_dispatch": "annotated Winston/Wendy/Spyros rows in all 6 agent CLAUDE.md with their native equivalent (data-ops/legal-vn/risk-auditor); dispatch.sh …
 - [2026-06-25T10:32:16] Bob/decision — Tắt daemon DollarBill+Mafee (ngủ tới go-live) — còn 2 companion daemon Mike+Taylor: {"action": "reduce live companion footprint to minimum before go-live", "disabled": ["mike@DollarBill", "mike@Mafee"], "remaining_daemons": ["Mike (orchestrator …
+- [2026-06-25T10:50:50] Mike/decision — bq-local-cache-live: {"what": "BQ Local Cache (DuckDB) đã live — 12 bảng BQ cached parquet, query ~100ms thay vì 5-15s", "env": "BQ_LOCAL_CACHE=data/bq_cache đã wire sẵn trong wc_en …
 <!--RECENT-END-->
 
 ## Tri thức chung của đội (canonical — Mike biên tập; MỌI agent phải nắm)
@@ -44,6 +44,7 @@ Vận hành chiến lược **production V2.4**, **go-live 2026-06-30**, trên T
 ### Hạ tầng giao dịch
 - `trading_bot/` (brokers/executor/plan) sẵn sàng. **DNSE live OK** (số tiểu khoản nằm trong `secrets/`, KHÔNG ghi ở KB). **PHS live BLOCKED** (chờ client credential, lỗi `-700003`) → PHS chạy paper.
 - **Ủy quyền lệnh (an toàn tiền thật):** Taylor đặt rule (user duyệt) → Bill lập plan `data/plan_<acct>_<T+1>.json` (user duyệt) → **Mafee chỉ thực thi lệnh CÓ trong plan**, trong hạn mức cứng (`trading_bot/config.py` + `data/trading_rules.json`); paper full-auto, live trong limit, **KHÔNG tự chế lệnh**. Spyros giám sát + kill-switch `data/BOT_STOP`. Handoff = file `data/` + bus (companion model).
+- **BQ Local Cache (DuckDB)**: 12 bảng BQ cached → parquet local (`data/bq_cache/`), query qua DuckDB ~100ms thay vì 5-15s BQ. Env `BQ_LOCAL_CACHE=data/bq_cache` đã wire trong `wc_env.sh` + `dispatch.sh` → mọi `bq()` call tự route local. Sync daily 23:45 ICT + preflight check. Fallback: cache chưa verify → `bq()` tự gọi BQ bình thường.
 
 ### Quy chuẩn làm việc (bắt buộc — khoa học & auditable)
 1. Backtest phải **auditable**: self-check 0 VND + recompute từ CSV + **walk-forward IS(2014–19)/OOS(2020+) TRƯỚC khi wire**. Edge full-period mà rớt OOS = overfit → loại.
