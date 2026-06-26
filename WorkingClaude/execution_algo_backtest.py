@@ -19,7 +19,7 @@ PART = 0.10            # max fraction of a bar's volume a resting limit can capt
 N_LADDER = 5
 BAND = 0.004          # ladder band: 0.4% below arrival (buy)
 K_TWAP = 8
-SAMPLE_EVERY = 3      # sample every 3rd day (speed)
+SAMPLE_EVERY = 8      # thinned for the 5-size grid
 
 # Liquidity tier by median daily turnover (VND): crude large/mid split
 LIQ = {}
@@ -59,6 +59,23 @@ def sim_ladder(bars, arrival, Q):
         take = Q - filled; cost += take * bars["close"].iloc[-1]; filled = Q
     return cost / Q, pr
 
+DIP_OFFSET_BPS = 15.0     # dip-cross: post limit ~15bps below arrival, hope to catch an intraday dip
+def sim_dip(bars, arrival, Q):
+    """Mafee's dip-cross: rest a limit DIP_OFFSET below arrival; fill the dip (capture offset+spread);
+    unfilled at EOD -> forced ATC cross. At tiny order size this fills easily -> the dip saving is kept."""
+    L = arrival * (1 - DIP_OFFSET_BPS / 1e4)
+    filled = 0.0; cost = 0.0
+    fill_px = L * (1 - HALF_SPREAD_BPS / 1e4)
+    for _, b in bars.iterrows():
+        if filled >= Q: break
+        if b["low"] <= L:
+            take = min(Q - filled, PART * b["volume"])
+            filled += take; cost += take * fill_px
+    pr = filled / Q
+    if filled < Q:
+        take = Q - filled; cost += take * bars["close"].iloc[-1]; filled = Q
+    return cost / Q, pr
+
 def sim_twap(bars, arrival, Q):
     """K marketable slices; each at slice VWAP, + sqrt market impact growing with order size (pays spread)."""
     n = len(bars)
@@ -89,9 +106,9 @@ for f in sorted(glob.glob(f"{DDIR}/*.csv")):
         dayvol = bars["volume"].sum()
         if arrival <= 0 or dayvol <= 0: continue
         vwap = (((bars["high"] + bars["low"] + bars["close"]) / 3) * bars["volume"]).sum() / dayvol
-        for pct in (0.01, 0.05, 0.15):
+        for pct in (0.001, 0.005, 0.01, 0.05, 0.15):   # 0.1% ≈ 1B-NAV regime; 1-15% ≈ 50-150B
             Q = pct * dayvol
-            for algo, fn in (("PASSIVE", sim_passive), ("LADDER", sim_ladder), ("TWAP", sim_twap)):
+            for algo, fn in (("DIP", sim_dip), ("LADDER", sim_ladder), ("TWAP", sim_twap)):
                 avg, fr = fn(bars, arrival, Q)
                 rows.append({"ticker": tk, "tier": tier, "pct_adv": pct, "algo": algo,
                              "is_bps": (avg / arrival - 1) * 1e4,           # vs arrival (buy: + = worse), spread+impact incl
@@ -101,9 +118,10 @@ for f in sorted(glob.glob(f"{DDIR}/*.csv")):
 R = pd.DataFrame(rows)
 print(f"=== Execution backtest: {R['ticker'].nunique()} names, {len(R)//9} order-days, BUY side ===")
 print(f"(IS = avg fill vs arrival price, bps. Lower = better. PASSIVE/LADDER capture spread on top; TWAP pays it.)\n")
-print("--- mean implementation shortfall (bps vs arrival; spread+impact included; lower=better) by order-size ---")
+print("--- mean implementation shortfall (bps vs arrival; spread+impact incl; lower=better) by order-size ---")
+print("    (0.1% ADV ≈ 1B-NAV launch on liquid names | 1-15% ≈ 50-150B NAV)")
 print(R.groupby(["pct_adv", "algo"])["is_bps"].mean().unstack().round(1).to_string())
-print("\n--- passive/ladder FILL RATE (before forced ATC) — the non-fill risk ---")
+print("\n--- DIP/LADDER FILL RATE (before forced ATC) — non-fill risk (~1.0 at tiny size = no penalty) ---")
 print(R[R.algo != "TWAP"].groupby(["pct_adv", "algo"])["fill_rate"].mean().unstack().round(3).to_string())
 print("\n--- IS variability (std bps) — execution RISK, lower=more predictable ---")
 print(R.groupby(["pct_adv", "algo"])["is_bps"].std().unstack().round(1).to_string())
