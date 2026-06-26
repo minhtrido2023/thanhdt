@@ -31,6 +31,12 @@ from .config import EXEC_DIR, STOP_FILE
 from .vn_market import session_phase, tick_size, round_price, round_lot, LOT
 
 
+def _parse_hhmm(s):
+    """'HH:MM' → dt.time."""
+    h, m = s.split(":")
+    return dt.time(int(h), int(m))
+
+
 class Executor:
 
     def __init__(self, plan, broker, cfg, shared=None):
@@ -143,22 +149,64 @@ class Executor:
             return None
         return h[-1][1] / best[1] - 1.0
 
-    def _decide_cross(self, o, now):
-        """→ (cross: bool, note). cross_mode="dip" (S2, backtest 2026-06-12): giá 15'
-        vừa đi NGƯỢC hướng lệnh → cross ngay (mua sau dip / bán sau nhịp tăng);
-        vừa chạy CÙNG hướng → passive chờ hồi (mean-reversion 15-30').
-        Thiếu lịch sử giá → cross (fallback = hành vi cũ, fail-safe)."""
+    def _decide_cross(self, o, now, q=None):
+        """→ (cross: bool, note).
+
+        cross_mode="adaptive" (default): DIP khi order_value/ADV < threshold,
+          TWAP (always cross) khi >=. ADV proxy = q.day_volume × giá hiện tại.
+        cross_mode="always": cross mọi slice (TWAP, archived).
+        cross_mode="dip": S2 mean-reversion 15' (archived).
+        Urgency "high" → cross ngay bất kể mode.
+        """
         if o.urgency == "high":
             return True, ""
-        if self.cfg.get("cross_mode", "always") != "dip":
-            return (bool(self.cfg["buy_cross_spread"]) if o.side == "buy" else True), ""
+        mode = self.cfg.get("cross_mode", "adaptive")
+        if mode == "adaptive":
+            return self._decide_cross_adaptive(o, now, q)
+        if mode == "dip":
+            r = self._r15(o.ticker, now)
+            if r is None:
+                return True, "dip:no-hist"
+            side = 1 if o.side == "buy" else -1
+            if r * side <= 0:
+                return True, f"dip:cross r15={r*100:+.2f}%"
+            return False, f"dip:passive r15={r*100:+.2f}%"
+        # "always" or unknown → TWAP
+        return (bool(self.cfg["buy_cross_spread"]) if o.side == "buy" else True), ""
+
+    def _decide_cross_adaptive(self, o, now, q):
+        """SIZE-ADAPTIVE: DIP khi order_value/ADV < threshold; TWAP khi >=.
+
+        ADV proxy = q.day_volume (shares khớp hôm nay) × giá tham chiếu.
+        Thiếu dữ liệu volume → TWAP (fail-safe, đảm bảo fill).
+        DIP nhánh: dùng r15 mean-reversion; thiếu lịch sử → cross (safe).
+        """
+        ps = self.state["parents"][o.id]
+        remaining = o.qty - ps["filled"]
+        threshold = self.cfg.get("adaptive_cross_adv_threshold", 0.01)
+
+        ref_px = ((q.ask or q.bid or q.last) if q else None) or o.ref_price
+        order_value = remaining * ref_px if ref_px else 0
+
+        use_twap = True
+        ratio_str = "no-vol"
+        if q and getattr(q, "day_volume", None) and q.day_volume > 0 and ref_px > 0:
+            adv_value = q.day_volume * ref_px
+            ratio = order_value / adv_value
+            ratio_str = f"{ratio*100:.2f}%"
+            use_twap = ratio >= threshold
+
+        if use_twap:
+            return True, f"adp:twap(ratio={ratio_str}>={threshold*100:.0f}%ADV)"
+
+        # Small order → DIP (mean-reversion 15')
         r = self._r15(o.ticker, now)
         if r is None:
-            return True, "dip:no-hist"
+            return True, f"adp:dip(ratio={ratio_str},no-hist→cross)"
         side = 1 if o.side == "buy" else -1
         if r * side <= 0:
-            return True, f"dip:cross r15={r*100:+.2f}%"
-        return False, f"dip:passive r15={r*100:+.2f}%"
+            return True, f"adp:dip(ratio={ratio_str},r15={r*100:+.2f}%→cross)"
+        return False, f"adp:dip(ratio={ratio_str},r15={r*100:+.2f}%→passive)"
 
     def _limit_price(self, o, q, cross=True):
         """Giá LO cho lệnh con; None = không đặt được (thiếu quote)."""
@@ -256,12 +304,39 @@ class Executor:
                 except Exception as e:
                     self._journal("CANCEL_FAIL", o, c["oid"], note=str(e))
 
+    def _fill_timing_mult(self, o, now):
+        """Fill-Timing Layer (Layer-3): trả interval multiplier theo cửa sổ tối ưu.
+        1.0 = tốc độ bình thường (trong cửa sổ); N = interval × N (ngoài cửa sổ).
+        BUY: tập trung 10:45-11:15 (đáy intraday); sáng sớm = slow; chiều = normal.
+        SELL: tập trung Open 09:15-09:45 (morning premium); còn lại = slow.
+        """
+        if not self.cfg.get("fill_timing_enabled", True):
+            return 1.0
+        if o.urgency == "high":
+            return 1.0
+        if self.cfg.get("fill_timing_live_gate", True) and self.cfg.get("mode") != "paper":
+            return 1.0
+        t = now.time()
+        mult = self.cfg.get("fill_timing_outside_mult", 4.0)
+        if o.side == "buy":
+            # Phiên chiều (13:00+): morning premium không còn → tốc độ bình thường
+            if t >= dt.time(13, 0):
+                return 1.0
+            ws = _parse_hhmm(self.cfg.get("buy_window_start", "10:45"))
+            we = _parse_hhmm(self.cfg.get("buy_window_end", "11:15"))
+            return 1.0 if ws <= t < we else mult
+        else:  # sell: tập trung ở Open
+            ws = _parse_hhmm(self.cfg.get("sell_window_start", "09:15"))
+            we = _parse_hhmm(self.cfg.get("sell_window_end", "09:45"))
+            return 1.0 if ws <= t < we else mult
+
     def _place_slices(self, now, phase):
-        interval = self.cfg["slice_interval_min"] * 60
+        base_interval = self.cfg["slice_interval_min"] * 60
         for o in sorted(self.plan.orders, key=lambda x: x.priority):
             ps = self.state["parents"][o.id]
             if ps["done"] or self._open_child(ps):
                 continue
+            interval = base_interval * self._fill_timing_mult(o, now)
             if ps["last_slice_ts"]:
                 since = (now - dt.datetime.fromisoformat(ps["last_slice_ts"])).total_seconds()
                 if since < interval and ps["children"]:
@@ -270,7 +345,7 @@ class Executor:
             if q is None or not q.ok():
                 self._journal("NO_QUOTE", o, note="thiếu quote — thử lại sau")
                 continue
-            cross, dip_note = self._decide_cross(o, now)
+            cross, dip_note = self._decide_cross(o, now, q)
             px = self._limit_price(o, q, cross)
             if px is None:
                 continue
@@ -295,8 +370,13 @@ class Executor:
             self.shared[o.ticker] = self.shared.get(o.ticker, 0) + qty  # reserve quota
             ps["last_slice_ts"] = now.isoformat(timespec="seconds")
             capped = (o.side == "buy" and cross and q.ask and px < q.ask)
+            ft_mult = self._fill_timing_mult(o, now)
+            ft_note = (f"ft:in-window" if ft_mult == 1.0 and self.cfg.get("fill_timing_enabled")
+                       else f"ft:out×{ft_mult:.0f}" if self.cfg.get("fill_timing_enabled")
+                       else "")
             notes = [n for n in (dip_note,
-                                 "nằm chờ tại trần đuổi" if capped else "") if n]
+                                 "nằm chờ tại trần đuổi" if capped else "",
+                                 ft_note) if n]
             self._journal("PLACE", o, oid, qty, px, note="; ".join(notes))
 
     def _atc_sweep(self):

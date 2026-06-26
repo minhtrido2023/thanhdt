@@ -1,5 +1,5 @@
-🛰️ V2.3 (DT5G) REPORT — 2026-06-25
-Sent: 2026-06-25 18:00 (next session T+1 entry)
+🛰️ V2.3 (DT5G) REPORT — 2026-06-26
+Sent: 2026-06-26 18:00 (next session T+1 entry)
 Market regime (DT5G): 🟡 NEUTRAL (state=3)
 Strategy: V2.3 = BAL | LAG static (always-on, no ensemble switch) + allocator + CAPIT v2
 BAL: max=12 · 10%/pos (book) · hold 45d · stop -20% · Fin/RE cap 4 · 8L≥4 half-size in BEAR/CRISIS
@@ -13,8 +13,8 @@ Không có signal — giữ cash cho book này.
 Không có entry PEAD đến hạn — giữ vị thế LAG hiện có (hold 25td, NO stop) + parking.
 🧯 CAPIT v2: breadth oversold 0.0% &lt; gate 30% — dormant
 📊 Universe distribution
-  BA-core: 0 mã | Compounder/info: 11 mã
-  Wait/Pass/Avoid: 242 mã
+  BA-core: 0 mã | Compounder/info: 5 mã
+  Wait/Pass/Avoid: 245 mã
 💡 Execution checklist (T+1 next session)
   • Vốn: BAL 35% / LAG 65% NAV (rebal CHỈ khi lệch &gt;10pp)
   • BAL: 0 pos × 10% book · stop -20% · hold 45d
@@ -23,53 +23,22 @@ Không có entry PEAD đến hạn — giữ vị thế LAG hiện có (hold 25t
 🛰️ MARKET-STATE ENGINE — DT5G (gated live)
 
 As of:   2026-06-25
-Source:  DT5G + macro overlay
+Source:  DT4-only (macro feed degraded → fail-safe)
 
+⚠️ DT5G as-of 2026-06-25 trễ hơn signal date 2026-06-26 — dùng state công bố gần nhất (DT5G dormant/sticky trong regime lành tính).
 🔄 DT5G transitions từ 2026-04-01
 
 Số ngày: 59   |   transitions: 0
   (không có transition — state ổn định)
 
-📊 V2.3 LIVE paper-trade — forward OOS track
-V2.3: chạy từ 2026-06-11 — NAV 50.640B (+1.28%) sau 10 phiên.
-🧪 Benchmark / control arms (paper-trade nền)
+📊 V2.4 GO-LIVE paper-trade
+V2.4 = V2.3A + custom30V parking + RECOVERY_PARK (recovery-park idle cash, leverage-free). R3 NEUTRAL-only @50B: CAGR 30.63% / Sharpe 1.97 / DD −17.5% / Calmar 1.75 (OOS 2020+ CAGR 32.14%).
 
-V4 12.1 ⭐ctrl 2026-06-01 →  -0.00% (18p)
-V11 SongSinh  2026-04-01 →  +9.61% (58p)
-V12 AmDuong   2026-04-01 →  +1.39% (58p)
+Plan:    paper_20260627_v1 (paper)
+T+1:     2026-06-27  acct=paper_1B
+State:   NEUTRAL (src DT4_only_fallback)
+Rule:    custom30V_parking_only  bull-park=DISABLED_NAV_below_150B
+Deploy:  22 mã · 0.978B / 1.000B (2.19% cash)
 
-V4 12.1 = control arm của OOS showdown vs V2.3 (ensemble-switch, rời production 2026-06-12). Ret% tính từ ngày start mỗi sim — không so trực tiếp giữa sim khác start.
-🛡️ VOL-SPIKE HEDGE cho V5 (paper-trade → 30/06)
-
-As of:  2026-06-25   VN30F=2006.4
-rv10 = 10.7%   ngưỡng = 20.8%
-CÒ: 🟢 OFF (flat) — không hedge
-------------------------------
-Paper 13 phiên | hedge ON 0
-V5 only   : +nan%
-V5+hedge  : +nan%
-Đóng góp  : +nanpp (+0đ)
-
-⚙️ F-SYSTEM sleeve riêng (DT5G+Van, paper → 30/06)
-
-As of:  2026-06-25   VN30F=2006.4
-DT5G=NEUTRAL  base=+0.70 x scale=1.26
-Position = +0.89
-🟢 Phiên kế: LONG 44 HĐ VN30F
-  (notional 8,858,033,927)
-------------------------------
-Sleeve base 10B | 14 phiên
-Return    : +0.92%
-NAV       : 10,091,519,426
-
-📈 ORB intraday VN30F (paper-trade live)
-
-Data: 2026-06-25 14:45:00  VN30F=2006.4
-Rule: 09:30 dấu OR(09:00-09:30)
-  → long/short giữ đến 14:30, no stop
-Phiên kế: 5 HĐ (sleeve 1B)
-------------------------------
-Phiên cuối 2026-06-25: SHORT 🔴-0.18%
-13 phiên | WR 62% | Sharpe 6.51
-Cum +2.67% | NAV 1,026,704,634
-
+Top: VCB 10%, BID 10%, VHM 10%, CTG 10%, TCB 8%, VPB 8%, MBB 8%, HPG 7% … (+14 mã)
+NAV track: go-live 2026-06-30 — chờ phiên giao dịch đầu (paper).

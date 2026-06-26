@@ -63,6 +63,8 @@ def main():
                     help="broker cho --probe")
     ap.add_argument("--send-otp", default=None, metavar="LABEL",
                     help="gửi email OTP cho account DNSE (email_otp) rồi thoát")
+    ap.add_argument("--auto-otp", action="store_true",
+                    help="tự động gửi + đọc OTP qua Gmail API cho account DNSE live")
     args = ap.parse_args()
 
     if args.probe:
@@ -81,6 +83,25 @@ def main():
         print(f"✅ đã gửi OTP vào email (hạn 2 phút) — chạy lại với "
               f"--otp {args.send_otp}=<mã>")
         return 0
+
+    if args.auto_otp:
+        from gmail_otp_reader import fetch_dnse_otp
+        auto_profiles = pick_accounts(load_accounts(base), args.account)
+        for p in auto_profiles:
+            cred_file = p.get("credentials_file")
+            if not cred_file:
+                continue
+            c = get_dnse_client(cred_file)
+            if c.has_trading_token():
+                print(f"[{p['label']}] trading-token còn hạn — bỏ qua OTP")
+                continue
+            print(f"[{p['label']}] gửi email OTP...")
+            c.send_email_otp()
+            print(f"[{p['label']}] chờ OTP từ Gmail (tối đa 90s)...")
+            otp_code = fetch_dnse_otp(timeout=90)
+            c.create_trading_token(otp_code)
+            print(f"[{p['label']}] ✅ trading-token OK (hạn 8h)")
+
     profiles = pick_accounts(load_accounts(base), args.account)
     otp_by_label, otp_common = parse_otp(args.otp)
     plan_date = args.date or dt.date.today().strftime("%Y-%m-%d")
@@ -101,7 +122,7 @@ def main():
             print(f"[{p['label']}] plan {plan_date} không có lệnh — bỏ qua")
             continue
         otp = otp_by_label.get(p["label"], otp_common)
-        if cfg["mode"] == "live" and otp is None:
+        if cfg["mode"] == "live" and otp is None and not args.auto_otp:
             print(f"⚠ [{p['label']}] mode live chưa có --otp: nếu otp_token cache "
                   f"còn hạn vẫn chạy được, hết hạn lệnh sẽ bị từ chối.")
         broker = make_broker(cfg, otp=otp, profile=p).connect()

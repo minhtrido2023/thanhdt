@@ -32,11 +32,16 @@ DEFAULTS = {
     "slice_interval_min": 8,          # phút giữa 2 lệnh con cùng một parent
     "poll_interval_sec": 20,          # chu kỳ poll sổ lệnh + quote
     "chase_ticks": 1,                 # mua: đặt bid + n tick (passive); 0 = đặt ngay bid
-    "buy_cross_spread": True,         # (cross_mode="always") True: mua đặt thẳng giá ask
-    "cross_mode": "dip",              # "dip": S2 dip-cross (backtest 2026-06-12, −3.5bps/side)
-                                      #   giá 15' vừa đi NGƯỢC hướng lệnh → cross,
-                                      #   vừa chạy CÙNG hướng → passive chờ hồi;
-                                      # "always": cross mọi slice (hành vi cũ)
+    "buy_cross_spread": True,          # True: mua đặt thẳng giá ask (marketable)
+    "cross_mode": "adaptive",         # "adaptive" (default, user+Taylor 2026-06-26): DIP khi
+                                      #   order_value/ADV < adaptive_cross_adv_threshold, else
+                                      #   TWAP. @1B hầu hết lệnh <0.1% ADV → DIP tự nhiên;
+                                      #   khi NAV lớn shift TWAP không cần reconfig.
+                                      # "always": TWAP — cross mọi slice (archived; Taylor
+                                      #   backtest: fill-rate hơn dip 3.5bps nhưng variance 2×).
+                                      # "dip": S2 mean-reversion (archived — beat by adaptive).
+    "adaptive_cross_adv_threshold": 0.01,  # 1% ADV: dưới ngưỡng → DIP; trên → TWAP.
+                                           # Taylor backtest: DIP fill 0.90→0.38 khi >1% ADV.
     "dip_window_min": 15,             # cửa sổ return quyết định cross/passive
     "px_sample_sec": 60,              # chu kỳ ghi giá vào px_hist (tính r15)
     "max_chase_pct_buy": 0.015,       # trần đuổi giá mua = ref_plan × (1+1.5%)
@@ -44,6 +49,18 @@ DEFAULTS = {
     "atc_remainder_sell": True,       # phần bán còn sót → quét ATC
     "atc_remainder_buy": False,       # phần mua còn sót → mặc định bỏ (mai plan mới tự sync)
     "paper_fee_rate": 0.0015,         # phí mô phỏng paper (0.15% mỗi chiều)
+
+    # --- fill-timing (Layer-3 WHEN-to-fill, đặt trên adaptive cross_mode) ---
+    # Taylor backtest 16 names 9670 ticker-days: Open là giờ TỆ nhất mua (+18.7bps),
+    # 11:15 là đáy intraday (+1.1bps). SELL: Open là TỐT nhất (+18.7bps morning premium).
+    # Lợi ~17.6bps/lệnh mua vs Open, ~5-6bps vs uniform/VWAP (edge trung bình, std cao).
+    "fill_timing_enabled": True,      # True: side-aware schedule; False: uniform (tắt hẳn)
+    "fill_timing_live_gate": True,    # True: chỉ paper; live cần user tắt thủ công (real money)
+    "buy_window_start": "10:45",      # BUY: đầu cửa sổ tập trung (ICT)
+    "buy_window_end": "11:15",        # BUY: cuối cửa sổ (đáy intraday)
+    "sell_window_start": "09:15",     # SELL: tập trung ở Open (đỉnh morning premium)
+    "sell_window_end": "09:45",       # SELL: cuối cửa sổ Open
+    "fill_timing_outside_mult": 4.0,  # interval × mult ngoài cửa sổ (8min → 32min mặc định)
 
     # --- an toàn ---
     "max_orders_per_day": 60,         # tổng số parent order tối đa trong 1 plan

@@ -1,0 +1,44 @@
+🛰️ V2.3 (DT5G) REPORT — 2026-06-26
+Sent: 2026-06-26 18:00 (next session T+1 entry)
+Market regime (DT5G): 🟡 NEUTRAL (state=3)
+Strategy: V2.3 = BAL | LAG static (always-on, no ensemble switch) + allocator + CAPIT v2
+BAL: max=12 · 10%/pos (book) · hold 45d · stop -20% · Fin/RE cap 4 · 8L≥4 half-size in BEAR/CRISIS
+LAG: PEAD T+5 entry · hold 25td · NO stop · LAG_HI 10% / LAG_LO 8% (book)
+ETF parking: 70% idle cash → E1VFVN30 (NEUTRAL, cả 2 book)
+Guards: SV_TIGHT Fresh-Q · overheat P3 · AVOID_exbull (momentum chặn ở state 5)
+⚖️ Allocator w_LAG: target 65% (state 3) · current 50% → 🔁 REBALANCE — band ±10pp breached
+📋 BOOK A — BAL (momentum, allocator-weighted)
+Không có signal — giữ cash cho book này.
+📋 BOOK B — LAG (PEAD always-on, 65% NAV target)
+Không có entry PEAD đến hạn — giữ vị thế LAG hiện có (hold 25td, NO stop) + parking.
+🧯 CAPIT v2: breadth oversold 0.0% &lt; gate 30% — dormant
+📊 Universe distribution
+  BA-core: 0 mã | Compounder/info: 5 mã
+  Wait/Pass/Avoid: 245 mã
+💡 Execution checklist (T+1 next session)
+  • Vốn: BAL 35% / LAG 65% NAV (rebal CHỈ khi lệch &gt;10pp)
+  • BAL: 0 pos × 10% book · stop -20% · hold 45d
+  • LAG: 0 entry mới (10/8% book) · NO stop · hold 25td
+  • Cash dư cả 2 book → 70% E1VFVN30
+🛰️ MARKET-STATE ENGINE — DT5G (gated live)
+
+As of:   2026-06-25
+Source:  DT4-only (macro feed degraded → fail-safe)
+
+⚠️ DT5G as-of 2026-06-25 trễ hơn signal date 2026-06-26 — dùng state công bố gần nhất (DT5G dormant/sticky trong regime lành tính).
+🔄 DT5G transitions từ 2026-04-01
+
+Số ngày: 59   |   transitions: 0
+  (không có transition — state ổn định)
+
+📊 V2.4 GO-LIVE paper-trade
+V2.4 = V2.3A + custom30V parking + RECOVERY_PARK (recovery-park idle cash, leverage-free). R3 NEUTRAL-only @50B: CAGR 30.63% / Sharpe 1.97 / DD −17.5% / Calmar 1.75 (OOS 2020+ CAGR 32.14%).
+
+Plan:    paper_20260627_v1 (paper)
+T+1:     2026-06-27  acct=paper_1B
+State:   NEUTRAL (src DT4_only_fallback)
+Rule:    custom30V_parking_only  bull-park=DISABLED_NAV_below_150B
+Deploy:  22 mã · 0.978B / 1.000B (2.19% cash)
+
+Top: VCB 10%, BID 10%, VHM 10%, CTG 10%, TCB 8%, VPB 8%, MBB 8%, HPG 7% … (+14 mã)
+NAV track: go-live 2026-06-30 — chờ phiên giao dịch đầu (paper).

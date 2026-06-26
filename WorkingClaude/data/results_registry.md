@@ -401,3 +401,93 @@ MGE 1.3" labels on Exp-8 decisions are corrected to "nominal MGE cap, non-bindin
 **S4 stress (#8):** mechanics validated — tight cap (hard 1.10) → S4 fires, force-trims gross→floor, self-check 0. BUT at a sane cap (MGE+0.15) S4 rarely binds: the **regime-prefill unwind deleverages first** (state→CRISIS drops the parking target → sells the levered ETF). A wrong-way lever (bypassing the A∧C gate, levering the 2022 top) cost **MaxDD −20.4→−30.7%** → **the A∧C entry gate is the primary protection, S4 is the backstop.**
 
 **Net verdict:** lever-at-bottom is real + auditable (0 VND), best at **MGE 1.3–1.5, NAV ≤~50–100B**, opt-in. **Go-live default stays leverage-free.**
+
+---
+## 🔴 #12 DEEP-DISCOUNT SINGLE-NAME SLEEVE — PROXY-GATE FAIL, do NOT escalate to harness (Taylor 2026-06-26)
+Proxy `deep_discount_proxy.py` (cache threads=1, no NAV sim — the cheap gate per registry discipline "proxy first, only harness forms that beat base IS *and* OOS"). Event = QUALITY (ROIC5Y>0.08 & ROE_Min5Y>0 & FSCORE>=5) at own deep discount pbz=(PB−PB_MA5Y)/PB_SD5Y ≤ −1.5; fwd = profit_2M (T+40). Baseline-to-beat = SAME quality universe, non-discount (pbz>0).
+- **SCALE BUG FOUND:** `profit_2M` is ALREADY in PERCENT (median 0.93%, p5 −21%, p95 +33%). The earlier `deep_discount_probe.py`/finding multiplied by 100 → reported means were 100× too big (e.g. "1058%"). Winrates unaffected (sign-based); means corrected here.
+- **Q1 (IS<2020 / OOS≥2020 × DT5G state) — FAIL both-halves:** the NEUTRAL/BULL edge is **OOS-ONLY**.
+  - NEUTRAL(3): deep IS **53.9%/1.37%** vs base **56.1%/4.35%** (deep WORSE in-sample); OOS deep 58.7%/3.34% vs base 50.9%/2.49% (better).
+  - BULL(4): deep IS **42.0%/−1.57%** vs base 47.5%/−0.15% (worse, n=119); OOS deep 60.5% win vs 59.0% but **mean 4.55 < 7.25** (deep wins more often, smaller — base quality rallies harder in bull).
+  - Where deep-disc DOES shine = CRISIS(1) OOS **78%** / BEAR(2) OOS **64%** — but that is exactly what **recovery-park / CAPIT already capture** (they fire in states 1,2). The "missed NEUTRAL/BULL" thesis does not survive the IS/OOS split.
+- **Q2 (LAG additivity):** the LAG-orthogonal subset (YoY NP growth <0.15) actually carries the edge (OOS 62.2% > overlap 54.2%) → signal is orthogonal to LAG's earnings-momentum. A tick, but MOOT given Q1.
+- **Q3 (value additivity vs custom30V's 1/PE):** within cheap_PE, deep_pbz 60.2%/**3.78** vs not_deep 57.6%/**5.05** (deep higher winrate but LOWER mean); within exp_PE deep_pbz 50.6% < not_deep 54.1% (deep WORSE). ⇒ own-pbz does NOT add return beyond cheap-by-PE; custom30V's `rank(1/PE)` already sits in the better cell.
+- **VERDICT 🔴:** sleeve is **fragile (OOS-recovery-conditional, rests on ~2 dislocation episodes) AND redundant** — with recovery-park/CAPIT for the crisis states where it truly works, and with custom30V's 1/PE value rank for the calm states. Costs/turnover would only worsen it. **Per discipline → NOT escalated to a full pt_v23 harness; PARKED.** Considered-and-rejected refinement: have recovery-park pick single-name-pbz quality instead of the market basket — Q3 shows single-name pbz doesn't beat the 1/PE rank already used, so unpromising too.
+
+---
+## 🔴 #11 LIQUIDITY-TILTED custom30 @150B — REFUTED, keep production pool=60 (Taylor 2026-06-26, threads=1, all 0 VND)
+Thesis: @150B custom30V parking is capacity-bound → tilt the basket toward liquidity (raise ADV) to free idle-cash deployment. Lever was the wrong fix (registry #10: lever @150B −0.95pp). Tested liquidity-tilt via the EXISTING `BASKET_CFO_POOL` knob (no code change): shrink the value-rank pool 60→30, progressively trading value-alpha for liquidity (pool=30 = pure top-30 liquidity). Absolute liquidity floor (`BASKET_LIQ_FLOOR_B` 10–20) was rejected as inert — gated rank-60 liq is already ~50–125 bn VND/day, the floor never binds.
+- **Config:** `BQ_CACHE_THREADS=1 BASKET_CFO_POOL=<P> NAV_TOTAL_B=150 ETF_LIQ=custompitg BASKET_WT=namecap BASKET_SELECT=yieldcombo PARK_STATES="3:0.7" AUDIT_END=2026-06-19 $DNA_PYEXE pt_v23_audit_2014.py v23a none postbull 0 edge` (core V2.4 NEUTRAL-only, no recovery extras — isolates the parking-basket-liquidity variable). Logs `data/liqtilt_logs/`.
+
+| pool | CAGR | Sharpe | MaxDD | Calmar | selfcheck |
+|---|---|---|---|---|---|
+| **60 (baseline=production)** | **24.54%** | **1.68** | **−15.0%** | **1.64** | 0 VND |
+| 45 | 23.88 | 1.66 | −16.6 | 1.44 | 0 |
+| 40 | 23.87 | 1.65 | −15.5 | 1.54 | 0 |
+| 35 | 21.83 | 1.54 | −17.8 | 1.22 | 0 |
+| 30 (pure top-30 liquidity) | 22.19 | 1.60 | −17.5 | 1.27 | 0 |
+
+- **VERDICT 🔴 REFUTED:** liquidity-tilt is **monotonically worse** — baseline pool=60 dominates on EVERY metric; shrinking to more-liquid names loses 0.7–2.7pp CAGR AND worse DD/Calmar/Sharpe. The value-alpha given up (restricting the 1/PE rank to fewer names) exceeds any capacity relief gained.
+- **REFRAME (the real insight):** the parking basket was NOT the @150B bottleneck — its top-60 pool is already liquid enough (rank-60 ≈ 50–125 bn/day). The ~3.5pp decay 50B→150B is dominated by the **STOCK BOOKS** (BAL momentum + LAG PEAD at ~75B/book hitting their own name-impact limits) — which liquidity-tilting the *parking* basket cannot fix. ⇒ keep production custom30V (pool=60, full value-rank); do not liquidity-tilt. Above ~100B the right response is accept the known capacity decay (or scale the stock-book breadth — separate work), not degrade the parking selector.
+- Combined with #10 (lever @150B −0.95pp): **at 150B neither lever nor liquidity-tilt helps**; the strategy is simply capacity-bound at the stock-book level. Both are small-account features (≤~50–100B).
+
+---
+## 🟢 CRISIS-OPPORTUNITY AUDIT 2013→now — "are we missing good entries?" (Taylor 2026-06-26, `episode_recovery_audit.py`)
+12 distinct VNINDEX drawdown troughs (local-min, dd≤−12%, confirmed by ≥+12% rebound). For each: fwd 6M/12M index return (the opportunity), valuation at trough (market PE 5y-pctile + liquid-universe median own-pbz = recovery-park's signal), DT5G state, and whether our deep-cheap re-risk gate (CRISIS/BEAR ∧ pbz_med≤−0.5) fires.
+
+| trough | dd% | PE_pctile5y | pbz_med | state | fwd6M | fwd12M | recpark |
+|---|---|---|---|---|---|---|---|
+| 2014-05 | −15.4 | 0.26 | −0.46 | CRISIS | 17.3 | 7.0 | no |
+| 2014-12 | −19.1 | 0.25 | 0.31 | NEUTRAL | 14.2 | 8.9 | no |
+| 2015-05 | −17.4 | 0.03 | −0.03 | NEUTRAL | 14.1 | 17.7 | no |
+| 2015-08 | −17.8 | 0.00 | 0.08 | NEUTRAL | 6.8 | 25.4 | no |
+| 2016-01 | −18.6 | 0.01 | 0.17 | NEUTRAL | 25.7 | 31.7 | no |
+| 2018-07 | −25.8 | **0.87** | −0.61 | NEUTRAL | −0.6 | 10.0 | no |
+| 2019-01 | −27.1 | 0.46 | −0.69 | NEUTRAL | 11.4 | 9.3 | no |
+| 2020-03 | −45.3 | 0.00 | −1.39 | BEAR | 37.5 | **76.4** | **YES** |
+| 2022-11 | −40.3 | 0.00 | −1.07 | CRISIS | 16.9 | 20.8 | **YES** |
+| 2023-10 | −32.7 | 0.15 | −0.51 | CRISIS | 21.6 | 21.1 | **YES** |
+| 2025-04 | −25.9 | 0.05 | −0.75 | **BULL** | 49.9 | **55.4** | **no** ← gap |
+| 2026-03 | −16.4 | 0.44 | −0.61 | NEUTRAL | 17.1 | 17.1 | no |
+
+- **VERDICT: NOT missing meaningfully.** Two mechanisms cover the field: (a) in NEUTRAL/BULL we're already ~70–100% invested → we PARTICIPATE in those pullback-recoveries (2015-08, 2016-01, 2025-04) by default; (b) in CRISIS/BEAR we deploy idle cash when cheap. Of the 3 cheap CRISIS/BEAR troughs (2020/2022/2023) recovery-park caught **all 3** — the three deepest dislocations.
+- **Gate is DISCRIMINATING, not just absent:** mean fwd12M where recpark fires **39.4%** vs **20.3%** where it doesn't. It correctly SKIPS low-payoff scares (2014-05 +7%, 2018-07 −0.6%/6M while **PE-pctile 0.87 = expensive despite −26%**, 2019-01 +9%) — chasing every −15% dip would be punished by these duds.
+- **ONE GENUINE NARROW GAP = fast-crash-in-bull (2025-04 tariff):** deep-cheap (pbz −0.75 ≤ −0.5, PE-pctile 0.05) with a **+55% 12M** rebound, but recovery-park did NOT fire because the crash was too FAST for DT5G to leave BULL (state filter = CRISIS/BEAR only). We still PARTICIPATED at ~100% (fully invested in BULL, rode the recovery) — the only thing missed = LEVERING the bottom (S2/CAPIT lever, which is small-account ≤100B & risk-additive anyway). Among the 4 pbz-cheap-but-state-blocked troughs (2018-07/2019-01/2025-04/2026-03), only 2025-04 was a big-payoff miss; the others were correctly low-payoff → the state filter is mostly right.
+- **Stock-pick nuance (positive):** this is INDEX-level participation; our recovery-park/custom30V deploys QUALITY+VALUE names, which historically rebound HARDER than the index (registry 2012 stock-pick: +40–83% vs index +16%). So realized capture ≥ the index fwd-returns shown.
+- **Testable follow-up (offered, not built):** make the deep-cheap re-risk trigger **state-BLIND but capitulation-CONFIRMED** (A∧C-confirm vol-spike, regardless of DT5G state) → would catch 2025-04 without re-admitting the 2018/2019 NEUTRAL duds IF the vol-capitulation print distinguishes them. Caveat: n=1 bull-crash, lever is small-account, risk-additive → test before any claim.
+
+---
+## 🟢 STATE-BLIND + PE_pctile deep-cheap re-risk — validated refinement to the LEVER config (Taylor 2026-06-26, threads=1, all 0 VND)
+User crisis-audit follow-up: drop the CRISIS/BEAR state filter on the recovery deploy/lever, replace with an ABSOLUTE-cheapness gate (VNINDEX_PE 5y-pctile≤0.20) alongside the existing own-pbz≤−0.5 — so deploy fires in genuine fear regardless of DT5G state, catching fast-crash-in-bull that the state filter blocks. **User insight (confirmed): pb_z alone does NOT separate traps** (2018-07 pb_z −0.61 & 2019-01 −0.69 both "cheap" by pbz) — **PE_pctile is the discriminator** (2018-07 PE_pct 0.87=expensive, 2025-04 PE_pct 0.05=cheap).
+- **Proxy** `state_blind_gate_test.py` (causal daily event-study): G2 (state-blind & pbz≤−0.5 & PE_pct≤0.20) covers good troughs **4/4**, duds **0/2**, fwd6M mean **18.9% (100% positive)** vs state-gated G0 10.6%/3-of-4. pbz-only (G1) admits both duds. → escalate.
+- **Code** (pt_v23, default OFF = byte-identical): env `RECOVERY_STATE_BLIND` + `RECOVERY_PE_PCT_MAX`; causal `_pe_pct_asof` (prior-month VNINDEX_PE 5y rolling pctile); gate `_state_ok = (st in 1,2) or (STATE_BLIND and pe_ok)`. CRISIS/BEAR stay eligible (no regression).
+- **Harness @50B same-snapshot** (LF base `RECOVERY_PARK=1 WMAX=0.95 PBZ_DEEP=-0.5`; LEVER adds `CAPIT_ONLY=1 CAPIT_VOL=1.7 BASE=63 SIG_C=1 C_CONFIRM=1 ARM_K=30 LEVER_PARK=1 LEVER_FRAC=0.30 MGE=1.3 MGE_CAPIT_ONLY=1 MARGIN_CALL=1`):
+
+| run | CAGR | Sharpe | MaxDD | Calmar | borrow | selfcheck |
+|---|---|---|---|---|---|---|
+| A LF state-gated (control) | 29.13 | 1.74 | −30.9 | 0.94 | 0 | 0 |
+| B LF state-blind+PE | 29.14 | 1.74 | −30.9 | 0.94 | 0 | 0 |
+| C LEVER state-gated (S2) | 29.75 | 1.82 | −20.6 | 1.45 | 297M | 0 |
+| **D LEVER state-blind+PE** | **30.21** | **1.84** | **−20.6** | **1.47** | 396M | 0 |
+
+- **VERDICT 🟢 (honest):** **LF state-blind = no benefit** (A≈B; in BULL/NEUTRAL already invested → no idle cash to deploy → needs lever). **LEVER state-blind = +0.46pp CAGR, +0.02 Sharpe/Calmar, MaxDD IDENTICAL −20.6%, 0 VND** — strictly dominates the state-gated lever. **Walk-forward: IS 2014-19 BYTE-IDENTICAL per-year** (state-blind never fires in-sample → no overfit, IS-inert); the entire edge is OOS and concentrates in **2023 (+6.04pp/yr)** — the post-SCB cheap recovery where state-blind+PE levered the NEUTRAL/BULL recovery days the state filter blocked (S2 lever dates 4→7: +2023-04/06/12). The motivating 2025-tariff case nets ~0 (already fully invested by the bounce). 
+- **CAVEATS:** REAL margin (borrow 396M, gross 1.27 → **Spyros + user approval before LIVE**); **small-account only** (#10: @150B lever capacity-bound −0.95pp); opportunity-capture resting on ~1-2 OOS episodes (don't re-tune). **Go-live stays LEVERAGE-FREE — unaffected.** Recommendation: IF/when the S2 lever is deployed (small-account, post-go-live), use state-blind+PE — it strictly dominates state-gated. Default stays OFF.
+
+---
+## 🔴 KELLY-SIZED LEVERAGE + HOLD-AS-NEUTRAL — both REJECTED by backtest (Taylor 2026-06-26, threads=1, all 0 VND)
+User: 'we borrow too little; size with Bayes+Kelly' + 'state-blind → assume NEUTRAL, hold the custom30V core through regime flips, only margin-call trims.' Built `kelly_lever_sizing.py` (Bayes-shrunk Kelly + MAE ruin cap) and `RECOVERY_HOLD_NEUTRAL` (floor parking at NEUTRAL weight in every state), swept MGE {1.3,1.5,1.8,2.0} @50B with state-blind + hold-neutral.
+- **Kelly/Bayes analysis:** the bet (deep-cheap+capit, 4 episodes) IS high-quality — mean fwd6M 23.7%, std 10.9%, **Sharpe(6M) 2.17, win 100%, worst episode +11.2%**. Naive full-Kelly 15.6x; Bayes-shrunk half-Kelly 3.5–6.7x (still huge). **Binding constraint = margin-call ruin, not Kelly:** worst MAE63 = **−26.2%** (COVID fell another 26% AFTER the signal) → at 30% maintenance margin, max gross ~**2.0x**.
+
+| MGE (+state-blind+hold-N) | CAGR | Sharpe | MaxDD | Calmar | gross | S4 fires |
+|---|---|---|---|---|---|---|
+| **D = MGE1.3, NO hold-neutral (KEEPER)** | **30.21** | **1.84** | **−20.6** | **1.47** | 1.27 | — |
+| 1.3 + hold-neutral | 29.32 | 1.53 | −28.4 | 1.03 | 1.27 | 0 |
+| 1.5 + hold-neutral | 28.13 | 1.47 | −29.3 | 0.96 | 1.49 | 0 |
+| 1.8 + hold-neutral | 28.30 | 1.49 | −28.4 | 1.00 | 1.80 | 0 |
+| 2.0 + hold-neutral | 27.97 | 1.47 | −28.4 | 0.99 | 2.00 | 0 |
+
+- **VERDICT 🔴 BOTH REJECTED:**
+  1. **Hold-as-neutral HURTS** (E vs D: −0.89pp CAGR, −0.31 Sharpe, **MaxDD −20.6%→−28.4%**) — flooring parking at 0.7 in EVERY state holds custom30V THROUGH crises = strips the de-risk that DT5G/parking provide. "Returns to neutral eventually" is true for the index but holding levered through the drawdown is path-punished (compound from a lower base + borrow accrues through the hold).
+  2. **Higher leverage does NOT pay** — 1.3→2.0x monotonically WORSE (29.32→27.97%); S4 margin-call NEVER fires (gross < hard cap) so it's "safe" but return-negative. The system is **return-limited at ~1.3–1.5x, well below the ~2.0x ruin cap** — confirms+extends the prior "MGE>1.5 = sizing/path-drag, gain-then-larger-giveback" finding even with reduced forced-selling.
+- **Why Kelly said 'big' but reality says 1.3x:** Kelly priced an ISOLATED single-shot bet (Sharpe 2.17 to a fixed horizon); the live portfolio compounds continuously — leverage interacts with the whole book's path (giveback + borrow carry + opportunity cost). The backtest captures this; Kelly doesn't. **Modest leverage (~1.3x) + KEEP crisis de-risk (no hold-neutral) is the disciplined answer.**
+- **KEEPER unchanged = D (state-blind + PE gate + lever MGE 1.3, no hold-neutral): 30.21/1.84/−20.6/0 VND.** Go-live stays leverage-free. `RECOVERY_HOLD_NEUTRAL` kept OFF as a documented dead-end knob.

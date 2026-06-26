@@ -396,6 +396,26 @@ RECOVERY_LEVER_FRAC   = float(os.environ.get("RECOVERY_LEVER_FRAC", "0.30"))   #
 # MGE, protected by S4 margin-call. This is the production realization the earlier "structurally infeasible"
 # verdict said was impossible. Requires MGE>1. Default OFF.
 RECOVERY_LEVER_PARK   = os.environ.get("RECOVERY_LEVER_PARK", "0") == "1"
+# STATE-BLIND deep-cheap re-risk (Taylor 2026-06-26, user crisis-audit follow-up): drop the CRISIS/BEAR
+# state filter on the recovery deploy/lever, but require an ABSOLUTE-cheapness gate PE_pctile5y <= MAX so the
+# deploy still fires ONLY in genuine fear. Catches fast-crash-in-bull (2025 tariff: BULL state blocked it today,
+# but PE_pctile 0.05 + pb_z -0.75 = real-cheap, +55% 12M) WITHOUT re-admitting the cheap-by-pbz-but-EXPENSIVE
+# duds (2018-07 pb_z -0.61 yet PE_pctile 0.87; 2019-01 PE_pctile 0.46). pb_z = own-history timing, PE_pctile =
+# absolute market cheapness; BOTH required (proxy state_blind_gate_test.py: G2 catches good 4/4, duds 0/2,
+# fwd6M 18.9% vs state-gated 10.6%). CRISIS/BEAR stay eligible as before (no regression). Default OFF +
+# PE_PCT_MAX=1.0 inert => byte-identical to state-gated production.
+RECOVERY_STATE_BLIND = os.environ.get("RECOVERY_STATE_BLIND", "0") == "1"
+RECOVERY_PE_PCT_MAX  = float(os.environ.get("RECOVERY_PE_PCT_MAX", "1.0"))   # absolute-cheapness gate (VNINDEX_PE 5y pctile)
+# HOLD-AS-NEUTRAL (Taylor 2026-06-26, user req): once we deploy custom30V on a state-blind deep-cheap dip,
+# treat the holding as a NEUTRAL core — floor the parking weight at the NEUTRAL policy in EVERY state (assume
+# neutral, the stable attractor), so the bought-cheap quality basket is HELD + quarterly-rebalanced rather than
+# unwound on a regime flip. The leverage on top still delevers when cheap passes / on S4 margin-call; only the
+# unlevered core persists. Default OFF => byte-identical (per-state parking policy unchanged).
+# REJECTED (Taylor 2026-06-26 backtest @50B): flooring parking at NEUTRAL in EVERY state holds custom30V
+# THROUGH crises = strips the de-risk -> −0.89pp CAGR AND MaxDD −20.6%→−28.4% vs no-hold (D). Kept OFF as a
+# documented dead-end; the sensible 'don't churn the core' part is already in NEUTRAL-only parking + quarterly rebal.
+RECOVERY_HOLD_NEUTRAL = os.environ.get("RECOVERY_HOLD_NEUTRAL", "0") == "1"
+_HOLD_FLOOR = float(PARK_STATES_DICT.get(3, 0.0)) if RECOVERY_HOLD_NEUTRAL else 0.0   # NEUTRAL parking weight
 # S4 STRESS hook (Taylor 2026-06-26): force a levered parking inject on arbitrary dates (comma-sep YYYY-MM-DD),
 # BYPASSING the A∧C gate — to stress the margin-call by levering INTO a fall (e.g. the 2022 top). Test-only.
 LEVER_STRESS_DATES = os.environ.get("LEVER_STRESS_DATES", "")
@@ -1132,6 +1152,20 @@ if RECOVERY_PARK:
     def _eyield_asof(dd):
         pm = (pd.Timestamp(dd).to_period("M") - 1).strftime("%Y-%m")   # prior completed month (causal)
         return _eym.get(pm, np.nan)
+    # absolute-cheapness gate: causal prior-month VNINDEX_PE 5y-percentile (low pctile = market historically
+    # cheap = genuine fear). Used by the state-blind recovery path (RECOVERY_STATE_BLIND/PE_PCT_MAX).
+    _PE_GATE_ON = RECOVERY_STATE_BLIND or RECOVERY_PE_PCT_MAX < 1.0
+    _pepct = {}
+    if _PE_GATE_ON:
+        _pe2 = bq(f"""SELECT FORMAT_DATE('%Y-%m', t.time) ym, ANY_VALUE(t.VNINDEX_PE) vpe
+          FROM tav2_bq.ticker_prune AS t WHERE t.VNINDEX_PE>0
+          AND t.time BETWEEN DATE '{START_DATE}' AND DATE '{END_DATE}' GROUP BY ym ORDER BY ym""")
+        _pe2 = _pe2[_pe2["vpe"] > 0].reset_index(drop=True)
+        _pe2["pct5y"] = _pe2["vpe"].rolling(60, min_periods=24).apply(lambda s: (s.iloc[-1] >= s).mean())
+        _pepct = {r["ym"]: r["pct5y"] for _, r in _pe2.iterrows() if pd.notna(r["pct5y"])}
+    def _pe_pct_asof(dd):
+        pm = (pd.Timestamp(dd).to_period("M") - 1).strftime("%Y-%m")   # prior completed month (causal)
+        return _pepct.get(pm, np.nan)
     def _dep_m(dd):
         if not RECOVERY_DEP_GATE: return 1.0
         if RECOVERY_GATE_MODE == "fed":
@@ -1280,7 +1314,15 @@ if RECOVERY_PARK:
     for d in vni_dates:
         base = dict(BULL_PARK_BY_DATE[d]) if BULL_PARK_BY_DATE else dict(PARK_STATES_DICT)
         st = int(state_ff.get(d) or 3)
-        if st in (1, 2):
+        if RECOVERY_HOLD_NEUTRAL:                 # assume-neutral: hold custom30V core at NEUTRAL weight in every state
+            base[st] = max(base.get(st, 0.0), _HOLD_FLOOR)
+        # STATE-BLIND eligibility: CRISIS/BEAR always eligible (unchanged); when RECOVERY_STATE_BLIND, a
+        # non-crisis state (NEUTRAL/BULL/EXBULL) is eligible ONLY if the absolute-cheapness gate confirms
+        # (prior-month VNINDEX_PE 5y-pctile <= PE_PCT_MAX). Default (not state-blind) => _state_ok = st in (1,2).
+        _pep = _pe_pct_asof(d) if _PE_GATE_ON else np.nan
+        _pe_ok = pd.notna(_pep) and _pep <= RECOVERY_PE_PCT_MAX
+        _state_ok = (st in (1, 2)) or (RECOVERY_STATE_BLIND and _pe_ok)
+        if _state_ok:
             z = _pbz_asof(d)
             if pd.notna(z) and z <= RECOVERY_PBZ_START:
                 frac = float(np.clip((RECOVERY_PBZ_START - z) / (RECOVERY_PBZ_START - RECOVERY_PBZ_DEEP), 0.0, 1.0))

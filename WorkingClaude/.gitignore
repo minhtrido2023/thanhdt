@@ -2,6 +2,9 @@
 telegram_config.json
 telegram_run_*.log
 
+# Secrets — credentials, tokens, API keys
+secrets/
+
 # Python
 __pycache__/
 *.pyc

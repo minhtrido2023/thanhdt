@@ -309,12 +309,15 @@ class DNSEBroker(BrokerBase):
     can_trade_live = True
 
     def __init__(self, account_id=None, otp=None, quote_only=False,
-                 credentials_file=None, label="main"):
+                 credentials_file=None, label="main", auto_otp=False,
+                 loan_package_id=None):
         self.account_id = account_id
         self.label = label
         self._otp = otp
+        self._auto_otp = auto_otp
         self.quote_only = quote_only
         self.credentials_file = credentials_file
+        self._loan_package_id = loan_package_id  # per-account override; applied after connect()
         self.client = None
         self._quote_cache = {}      # symbol -> (ts, Quote)
         self._secdef_cache = {}     # symbol -> dict (trần/sàn/ref — tĩnh trong ngày)
@@ -337,6 +340,27 @@ class DNSEBroker(BrokerBase):
         if self._otp is not None and not self.client.has_trading_token():
             self.client.create_trading_token(self._otp)
             print(f"[dnse] trading-token đã tạo ({self.label}, hạn 8h)")
+        if self._auto_otp and not self.client.has_trading_token():
+            import time as _time
+            from gmail_otp_reader import fetch_dnse_otp, _build_gmail_service, _save_last_id
+            print(f"[dnse] auto-OTP: pre-mark latest OTP email ({self.label})...")
+            try:
+                svc = _build_gmail_service()
+                q2 = 'from:noreply@mail.dnse.com.vn subject:"Xác thực với Email OTP"'
+                resp = svc.users().messages().list(userId="me", q=q2, maxResults=1).execute()
+                msgs = resp.get("messages", [])
+                if msgs:
+                    _save_last_id(msgs[0]["id"])
+            except Exception:
+                pass
+            print(f"[dnse] auto-OTP: gửi email OTP ({self.label})...")
+            send_ts = _time.time()
+            self.client.send_email_otp()
+            otp = fetch_dnse_otp(timeout=120, sent_after=send_ts)
+            self.client.create_trading_token(otp)
+            print(f"[dnse] auto-OTP: trading-token OK ({self.label}, hạn 8h)")
+        if self._loan_package_id is not None:
+            self.client.loan_package_id = self._loan_package_id
         if not self.client.has_trading_token():
             print(f"[dnse] ⚠ chưa có trading-token ({self.label}) — inquiry OK, "
                   f"đặt lệnh sẽ bị từ chối (cần --otp; email_otp: gửi mã bằng "
@@ -444,6 +468,47 @@ class DNSEBroker(BrokerBase):
         r = self.client.cancel_order(self.account_id, order_id)
         self._log_raw("cancel_order", {"order_id": order_id, "resp": r})
         return r
+
+    def modify_order(self, order_id, qty, price):
+        """Sửa lệnh LO trên DNSE. QUIRK đã verify 2026-06-26:
+        DNSE luôn trả HTTP 500 'REMOTE_SERVER_ERROR' khi modify thành công
+        (implement modify = cancel + re-place phía server, response bị lỗi).
+        Old order bị Canceled, new order_id xuất hiện với price/qty mới.
+
+        Returns: new_oid (str) nếu tìm được, None nếu không (caller dùng cancel+replace).
+        """
+        from dnse_api import DNSEError as _DNSEError
+        try:
+            r = self.client.modify_order(self.account_id, order_id, qty=qty, price=price)
+            new_oid = str(qget(r, "id", "orderid", "orderId") or "")
+            self._log_raw("modify_order", {"req": [order_id, qty, price],
+                                           "resp": r, "new_oid": new_oid})
+            return new_oid or None
+        except _DNSEError as e:
+            # 500 REMOTE_SERVER_ERROR = DNSE modify quirk — re-poll for new order_id
+            if e.status == 500 and "REMOTE_SERVER_ERROR" in str(
+                    (e.payload or {}).get("code", "")):
+                self._log_raw("modify_order", {
+                    "req": [order_id, qty, price],
+                    "quirk": "HTTP 500 but success expected — re-polling",
+                    "old_oid": order_id})
+                import time as _time
+                _time.sleep(1)
+                updates = self.poll_orders()
+                old = updates.get(str(order_id))
+                if old and not old.is_dead:
+                    return None  # modify thực ra chưa xong
+                # Tìm order mới nhất còn sống (heuristic: id số lớn nhất)
+                candidates = [(int(k), k) for k, u in updates.items()
+                              if not u.is_dead and k != str(order_id)]
+                if candidates:
+                    new_oid = str(max(candidates)[1])
+                    self._log_raw("modify_order_new_oid", {
+                        "old_oid": order_id, "new_oid": new_oid,
+                        "price": price, "qty": qty})
+                    return new_oid
+                return None
+            raise  # khác 500 REMOTE_SERVER_ERROR → re-raise
 
     def poll_orders(self):
         r = self.client.orders(self.account_id)
@@ -642,7 +707,8 @@ def make_broker(cfg, otp=None, need_quotes=True, profile=None, quote_src=None):
     if cfg["mode"] == "live":
         return BROKER_CLASSES[btype](account_id=p.get("account_id"), otp=otp,
                                      credentials_file=p.get("credentials_file"),
-                                     label=p["label"])
+                                     label=p["label"],
+                                     loan_package_id=p.get("loan_package_id"))
     if quote_src is None and need_quotes:
         quote_src = get_quote_source(btype, p.get("credentials_file"))
     return PaperBroker(init_cash=cfg["paper_init_cash"],

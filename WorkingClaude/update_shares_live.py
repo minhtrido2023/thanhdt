@@ -46,10 +46,12 @@ FACTOR_TOL = 0.005          # 0.5% tolerance on the validation gate
 PAR_VALUE  = 10000.0        # VND par (cash dividend % is on par)
 
 # --- universe scan thresholds (validated against ticker_prune, 2026-06) ----------
-SCAN_UNIVERSE   = "tav2_bq.ticker_prune"   # quality/investable universe (low noise)
-SCAN_STEP_MIN   = 0.02     # factor must step up >= +2% (into the ~1.0 regime)
-SCAN_RAW_GAP    = -0.01    # raw Price must actually gap down (a real ex, not re-anchor)
-SCAN_ADJ_CONT   = 0.07     # adjusted series stays continuous (|adj return| < ceiling)
+SCAN_UNIVERSE    = "tav2_bq.ticker_prune"  # quality/investable universe (low noise)
+# v2 thresholds — detect ex-date via Close_adj DROP + Price frozen (ETL lag 2-4d)
+# Old logic (factor step-up + Price gap-down) was detecting the ETL catch-up date
+# (when Price finally catches up to Close), NOT the real ex-date. Replaced 2026-06-26.
+SCAN_ADJ_DROP_MIN = 0.03   # adj Close must DROP >= 3% on real ex-date
+SCAN_RAW_FLAT_MAX = 0.015  # raw Price stays nearly flat (<1.5%) — ETL frozen; 1.0% seen on EVG 2026-06-19
 
 # --- Operator-confirmed corporate actions (authoritative announcement figures).
 #     Used when vnstock events host is unreachable. stock_div_ratio = new shares
@@ -138,7 +140,9 @@ def vnstock_events_split(ticker):
 
 # ----------------------------------------------------------------- core ---------
 def detect_ex(factor_df):
-    """Return (ex_date, cum_factor) of the most recent factor reset, or (None,None)."""
+    """[DEPRECATED — may catch ETL catch-up events, not real ex-dates]
+    Return (ex_date, cum_factor) of the most recent factor change, or (None,None).
+    Use detect_ex_v2() instead for reliable detection."""
     if factor_df.empty or len(factor_df) < 3:
         return None, None
     f = factor_df.reset_index(drop=True)
@@ -149,8 +153,36 @@ def detect_ex(factor_df):
     if last_change is None:
         return None, None
     ex_date = str(pd.to_datetime(f.loc[last_change, "time"]).date())
-    cum_factor = float(f.loc[last_change-1, "factor"])   # factor on last cum day
+    cum_factor = float(f.loc[last_change-1, "factor"])
     return ex_date, cum_factor
+
+
+def detect_ex_v2(factor_df):
+    """Detect real corp-action ex-date: Close_adj drops >=3% while Price_raw stays
+    flat (<1%). BQ ETL freezes Price for 2-4 days after the real ex-date; the old
+    factor-step-up method fired on the day Price finally caught up (false positive).
+
+    Returns (ex_date_str, adj_pre_vnd, adj_drop_pct) or (None, None, None).
+    adj_drop_pct is negative (e.g. -6.91 for DDV 2026-06-19).
+    """
+    if factor_df.empty or len(factor_df) < 3:
+        return None, None, None
+    f = factor_df.reset_index(drop=True)
+    candidates = []
+    for i in range(1, len(f)):
+        adj_pre = float(f.loc[i-1, "adj"])
+        if adj_pre <= 0:
+            continue
+        adj_ret = (float(f.loc[i, "adj"]) - adj_pre) / adj_pre
+        raw_pre = float(f.loc[i-1, "raw"])
+        raw_ret = abs((float(f.loc[i, "raw"]) - raw_pre) / raw_pre) if raw_pre > 0 else 1.0
+        if adj_ret <= -SCAN_ADJ_DROP_MIN and raw_ret < SCAN_RAW_FLAT_MAX:
+            candidates.append((i, adj_pre, adj_ret * 100))
+    if not candidates:
+        return None, None, None
+    last_i, adj_pre, adj_drop_pct = candidates[-1]
+    ex_date = str(pd.to_datetime(f.loc[last_i, "time"]).date())
+    return ex_date, adj_pre, adj_drop_pct
 
 
 def process(ticker, write=True):
@@ -158,11 +190,13 @@ def process(ticker, write=True):
     fac = bq_price_factor(ticker)
     if fac.empty:
         print("  no BQ price data"); return None
-    det_ex, cum_factor = detect_ex(fac)
+    det_ex_v2, adj_pre_v2, adj_drop_v2 = detect_ex_v2(fac)
     prev_osh, q = bq_latest_oshares(ticker)
     print(f"  BQ OShares (latest, {q}): {prev_osh:,}" if prev_osh else "  BQ OShares: n/a")
-    print(f"  detected ex-date: {det_ex} (cum factor {cum_factor})" if det_ex
-          else "  no corporate action detected in window")
+    if det_ex_v2:
+        print(f"  detected ex-date (v2): {det_ex_v2} adj_pre={adj_pre_v2:,.0f} drop={adj_drop_v2:.2f}%")
+    else:
+        print("  no corp-action detected in window (v2 logic: adj_drop>3%, price_flat<1%)")
 
     actions = CORP_ACTIONS.get(ticker, [])
     if not actions:
@@ -247,65 +281,64 @@ def _save_pending(d):
 
 
 def scan_universe(days=5):
-    """Scan ticker_prune for NEW corporate-action ex-dates (factor reset) not yet
-    in shares_outstanding_live, alert (Winston+Taylor). Detection only — no write.
+    """Scan ticker_prune for NEW corporate-action ex-dates not yet in
+    shares_outstanding_live, alert (Winston+Taylor). Detection only — no write.
 
-    A real ex-date: factor (=Close/Price) steps UP to ~1.0, raw Price gaps DOWN by
-    ~the step, AND the adjusted series stays continuous (gap absorbed into the
-    factor). Re-anchor artifacts (raw flat while adj jumps) and flip-flops are
-    filtered out. Restricted to ticker_prune to suppress illiquid noise."""
+    v2 logic (2026-06-26): detect REAL ex-date as Close_adj drops >=3% while
+    Price_raw stays nearly flat (<1%). BQ ETL freezes Price for 2-4 days after
+    the real ex-date; the OLD factor-step-up logic fired on the catch-up day
+    (when Price finally drops to match Close) — producing false positives like
+    DDV/EVG/SBG 2026-06-25 when the real ex-date was 2026-06-19."""
     sql = f"""
     WITH ff AS (
       SELECT t.ticker, t.time, t.Close, t.Price,
-             t.Close/NULLIF(t.Price,0) AS factor,
-             LAG(t.Close/NULLIF(t.Price,0)) OVER (PARTITION BY t.ticker ORDER BY t.time) AS pf,
              LAG(t.Close) OVER (PARTITION BY t.ticker ORDER BY t.time) AS pc,
              LAG(t.Price) OVER (PARTITION BY t.ticker ORDER BY t.time) AS pp
       FROM {SCAN_UNIVERSE} AS t
       WHERE t.time >= DATE_SUB(CURRENT_DATE(), INTERVAL {int(days)} DAY)
     )
     SELECT ff.time AS ex_date, ff.ticker,
-           ROUND((ff.factor/ff.pf - 1)*100, 2) AS factor_step_pct,  -- gross adj % = max stock ratio
-           ROUND((ff.Price/ff.pp - 1)*100, 2) AS raw_gap_pct,
-           ROUND((ff.Close/ff.pc - 1)*100, 2) AS adj_return_pct
+           ROUND((ff.Close/ff.pc - 1)*100, 2) AS adj_drop_pct,
+           ROUND((ff.Price/ff.pp - 1)*100, 2) AS raw_chg_pct,
+           ROUND(ff.pc * ABS(ff.Close/ff.pc - 1), 0) AS est_div_vnd
     FROM ff
     LEFT JOIN {TABLE} s ON s.ticker=ff.ticker AND s.ex_date=ff.time
-    WHERE ff.pf IS NOT NULL AND s.ticker IS NULL
-      AND (ff.factor/ff.pf - 1) >  {SCAN_STEP_MIN}
-      AND (ff.Price/ff.pp - 1)   <  {SCAN_RAW_GAP}
-      AND ABS(ff.Close/ff.pc - 1) < {SCAN_ADJ_CONT}
-    ORDER BY ff.time DESC, ABS(ff.factor/ff.pf - 1) DESC"""
+    WHERE ff.pc IS NOT NULL AND ff.pp IS NOT NULL AND s.ticker IS NULL
+      AND (ff.Close/ff.pc - 1)       <= -{SCAN_ADJ_DROP_MIN}
+      AND ABS(ff.Price/ff.pp - 1)    <   {SCAN_RAW_FLAT_MAX}
+    ORDER BY ff.time DESC, ABS(ff.Close/ff.pc - 1) DESC"""
     df = bq_df(sql)
     print(f"\n=== scan {SCAN_UNIVERSE} last {days}d -> {len(df)} unhandled candidate(s) ===")
     if df.empty:
         print("  none"); return []
 
     pend = _load_pending()
-    # ISO-week stamp for weekly re-reminder dedup (no Date.now in helpers -> derive
-    # the week from CURRENT_DATE via BQ once)
     cur_wk = bq_df("SELECT FORMAT_DATE('%G-W%V', CURRENT_DATE()) AS wk").iloc[0]["wk"]
     fresh = []
     for _, r in df.iterrows():
         key = f"{r['ticker']}|{r['ex_date']}"
         last_wk = pend.get(key)
-        print(f"  {r['ticker']:5s} ex {r['ex_date']}  gross_adj {r['factor_step_pct']:+.1f}%  "
-              f"raw_gap {r['raw_gap_pct']:+.1f}%  adj_cont {r['adj_return_pct']:+.1f}%"
+        print(f"  {r['ticker']:5s} ex {r['ex_date']}  adj_drop {r['adj_drop_pct']:+.1f}%  "
+              f"raw_chg {r['raw_chg_pct']:+.1f}%  est_div ≈{r['est_div_vnd']:,.0f} VND/share"
               + ("" if last_wk != cur_wk else "   (already alerted this week)"))
         if last_wk != cur_wk:
             fresh.append(r); pend[key] = cur_wk
     _save_pending(pend)
 
     for r in fresh:
-        bus("finding", f"corp-action MỚI: {r['ticker']} reset hệ số giá ex {r['ex_date']}",
+        est_div = float(r["est_div_vnd"])
+        bus("finding", f"corp-action MỚI: {r['ticker']} ex-date {r['ex_date']}",
             {"ticker": r["ticker"], "ex_date": str(r["ex_date"]),
-             "gross_adj_pct": float(r["factor_step_pct"]),
-             "raw_gap_pct": float(r["raw_gap_pct"]),
-             "adj_continuity_pct": float(r["adj_return_pct"]),
+             "adj_drop_pct": float(r["adj_drop_pct"]),
+             "raw_chg_pct": float(r["raw_chg_pct"]),
+             "est_div_vnd_per_share": est_div,
+             "est_div_pct_par": round(est_div / PAR_VALUE * 100, 1),
+             "detection_v2": True,
              "audience": ["Winston", "Taylor"],
-             "action": ("Winston: kiểm công bố VSD/cafef -> phân loại cash/stock; "
-                        "stock -> thêm CORP_ACTIONS + chạy `--ticker " + r["ticker"] + "`; "
+             "action": ("Winston: xác nhận VSD/cafef -> phân loại cash/stock (adj_drop>3%+Price_flat=real ex-date, KHÔNG phải ETL catch-up); "
+                        "stock-bonus (OShares tăng) -> thêm CORP_ACTIONS + `--ticker " + r["ticker"] + "`; "
                         "cash-only -> `--ack-cash " + r["ticker"] + ":" + str(r["ex_date"]) + "`. "
-                        "Taylor: PE/PB mã này có thể méo tới khi OShares được sửa.")})
+                        "Taylor: PE/PB mã này méo tới khi OShares cập nhật.")})
     print(f"  -> alerted {len(fresh)} new (others deduped this week)")
     return fresh
 

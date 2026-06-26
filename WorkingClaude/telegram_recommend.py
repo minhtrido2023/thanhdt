@@ -173,6 +173,106 @@ def _read_pt_nav(logs_rel_path: str):
         return None
 
 
+def build_orb_section() -> str:
+    """ORB intraday VN30F paper-trade block (ring-fenced, monitored separately from V2.4).
+    Reads data/orb_pt_status.json written by orb_pt.py."""
+    path = os.path.join(WORKDIR, "data", "orb_pt_status.json")
+    if not os.path.exists(path):
+        return ""
+    try:
+        import json as _json
+        s = _json.load(open(path, encoding="utf-8"))
+    except Exception:
+        return ""
+    nav = s.get("nav", 0)
+    base = s.get("sleeve_base", 1_000_000_000)
+    cum_ret = s.get("cum_ret", 0) * 100
+    wr = s.get("wr", 0) * 100
+    sharpe = s.get("sharpe", 0)
+    n_days = s.get("n_days", 0)
+    last_sig = s.get("last_sig", 0)
+    sig_label = "🟢 LONG" if last_sig > 0 else ("🔴 SHORT" if last_sig < 0 else "⬜ FLAT")
+    last_net = s.get("last_net", 0) * 100
+    asof = s.get("asof_bar", "")[:10]
+    vn30f = s.get("latest_vn30f", 0)
+    lines = [
+        "",
+        "<b>📈 ORB intraday VN30F (paper — ring-fenced, theo dõi riêng)</b>",
+        "<pre>",
+        f"Từ {s.get('window_start','')} — {n_days} phiên | asof {asof}",
+        f"VN30F : {vn30f:,.0f}  |  Hôm nay: {sig_label} ({last_net:+.2f}%)",
+        f"NAV   : {nav/1e9:.3f}B  ({cum_ret:+.2f}% từ đầu)",
+        f"WR    : {wr:.1f}%  |  Sharpe: {sharpe:.2f}",
+        "</pre>",
+    ]
+    return "\n".join(lines)
+
+
+def build_v24_paper_section() -> str:
+    """V2.4 GO-LIVE paper-trade block (production strategy, go-live 2026-06-30).
+    Reads the latest data/plan_paper_*.json (DollarBill's T+1 paper plan) for config +
+    deployment detail, and the V2.4 paper-trade NAV log once the go-live engine starts
+    logging. Falls back gracefully before the first live session.
+    Replaces the old V2.3 LIVE forward-track + benchmark/control-arm blocks (2026-06-26)."""
+    GOLIVE_DATE = "2026-06-30"
+    lines = ["", "<b>📊 V2.4 GO-LIVE paper-trade</b>"]
+
+    # Config + performance reference (CSV-pinned same-snapshot 2026-06-24, self-check 0 VND;
+    # source data/v24_golive_summary.md). Live config = R3 NEUTRAL-only @50B.
+    lines.append("<i>V2.4 = V2.3A + custom30V parking + RECOVERY_PARK (recovery-park idle cash, "
+                 "leverage-free). R3 NEUTRAL-only @50B: CAGR 30.63% / Sharpe 1.97 / DD −17.5% / "
+                 "Calmar 1.75 (OOS 2020+ CAGR 32.14%).</i>")
+
+    # Latest paper plan (DollarBill writes data/plan_paper_<T+1>.json)
+    plan = None
+    try:
+        cands = sorted(glob.glob(os.path.join(WORKDIR, "data", "plan_paper_*.json")))
+        if cands:
+            with open(cands[-1], encoding="utf-8") as f:
+                plan = json.load(f)
+    except Exception:
+        plan = None
+
+    if plan:
+        meta = plan.get("_meta", {})
+        mc = plan.get("market_context", {})
+        summ = plan.get("summary", {})
+        alloc = plan.get("allocation_strategy", {})
+        nav0 = plan.get("starting_nav", 0) or 0
+        inv = summ.get("total_invested_vnd", 0) or 0
+        lines.append("<pre>")
+        lines.append(f"Plan:    {meta.get('plan_id','?')} ({meta.get('mode','?')})")
+        lines.append(f"T+1:     {meta.get('applies_to_date','?')}  acct={meta.get('account','?')}")
+        lines.append(f"State:   {mc.get('market_state','?')} (src {mc.get('state_source','?')})")
+        lines.append(f"Rule:    {alloc.get('rule','?')}  bull-park={alloc.get('bull_park','?')}")
+        lines.append(f"Deploy:  {summ.get('total_positions','?')} mã · "
+                     f"{inv/1e9:.3f}B / {nav0/1e9:.3f}B ({summ.get('cash_pct','?')}% cash)")
+        lines.append("</pre>")
+        pos = plan.get("target_positions", [])
+        if pos:
+            top = pos[:8]
+            tline = ", ".join(f"{_esc(p.get('ticker'))} {float(p.get('target_weight_pct',0)):.0f}%"
+                              for p in top)
+            more = f" … (+{len(pos)-len(top)} mã)" if len(pos) > len(top) else ""
+            lines.append(f"<i>Top: {tline}{more}</i>")
+    else:
+        lines.append("<i>Chưa có plan paper (data/plan_paper_*.json) — chờ DollarBill lập plan T+1.</i>")
+
+    # Forward NAV track (once the go-live paper engine starts logging)
+    nav = None
+    for cand in ("data/pt_v24_dt5g_logs.csv", "data/pt_v24_logs.csv"):
+        nav = _read_pt_nav(cand)
+        if nav:
+            break
+    if nav and nav["n"] > 1:
+        lines.append(f"<i>NAV: <b>chạy từ {nav['start']}</b> — {nav['nav']/1e9:.3f}B "
+                     f"({nav['ret']:+.2f}%) sau {nav['n']} phiên.</i>")
+    else:
+        lines.append(f"<i>NAV track: go-live {GOLIVE_DATE} — chờ phiên giao dịch đầu (paper).</i>")
+
+    return "\n".join(lines)
+
+
 def build_dt5g_section(target_date: str, dt5g_state, dt5g_asof, dt5g_source) -> tuple:
     """Build the DT5G market-state section (engine status + transitions + paper-trade
     systems incl. V4 12.1). Returns (message_text, csv_path) for attachment."""
@@ -219,36 +319,9 @@ def build_dt5g_section(target_date: str, dt5g_state, dt5g_asof, dt5g_source) -> 
         h["state_name"] = h["state"].map(state_names)
         h.to_csv(csv_path, index=False)
 
-    # V2.3 LIVE forward track (production) + benchmark control arms (V4 demoted 2026-06-12)
-    lines.append("")
-    lines.append("<b>📊 V2.3 LIVE paper-trade — forward OOS track</b>")
-    v23 = _read_pt_nav("data/pt_v22_dt5g_logs.csv")
-    if v23 is None:
-        lines.append("<i>V2.3 logs chưa có (pt_v22_dt5g.py chưa chạy?).</i>")
-    elif v23["n"] <= 1:
-        lines.append(f"<i>V2.3: khởi tạo 50B, <b>chạy từ {v23['start']}</b> — chờ phiên giao dịch đầu tiên.</i>")
-    else:
-        lines.append(f"<i>V2.3: <b>chạy từ {v23['start']}</b> — NAV {v23['nav']/1e9:.3f}B ({v23['ret']:+.2f}%) sau {v23['n']} phiên.</i>")
-
-    lines.append("")
-    lines.append("<b>🧪 Benchmark / control arms (paper-trade nền)</b>")
-    lines.append("<pre>")
-    # V121_ENS / V121_Kelly (ensemble switch) removed 2026-06-16 — faithful-audit edge
-    # was a reduced-harness artifact (16.85% < V11/V2.3); dropped from daily comparison.
-    bench = [
-        ("V4 12.1 ⭐ctrl", "data/pt_v4_dt5g_logs.csv"),
-        ("V11 SongSinh ", "data/pt_v11_tq34b_logs.csv"),
-        ("V12 AmDuong  ", "data/pt_v12_macro_logs.csv"),
-    ]
-    for nm, path in bench:
-        b = _read_pt_nav(path)
-        if b:
-            lines.append(f"{nm} {str(b['start'])} → {b['ret']:+6.2f}% ({b['n']}p)")
-        else:
-            lines.append(f"{nm} (logs n/a)")
-    lines.append("</pre>")
-    lines.append("<i>V4 12.1 = control arm của OOS showdown vs V2.3 (ensemble-switch, rời production "
-                 "2026-06-12). Ret% tính từ ngày start mỗi sim — không so trực tiếp giữa sim khác start.</i>")
+    # V2.4 GO-LIVE paper-trade (production strategy) — replaces the old V2.3 LIVE forward
+    # track + benchmark/control-arm blocks (cleanup 2026-06-26, dispatch from Mike).
+    lines.append(build_v24_paper_section())
 
     return "\n".join(lines), csv_path
 
@@ -414,95 +487,6 @@ def build_message(target: str, state5, state_label: str,
     return "\n".join(lines)
 
 
-def build_vol_spike_hedge_section() -> str:
-    """Block VOL-SPIKE HEDGE cho V5 (paper-trade tạm thời → 2026-06-30).
-    Đọc data/vol_spike_hedge_status.json do vol_spike_hedge_pt.py ghi ở papertrade_daily.bat."""
-    path = os.path.join(WORKDIR, "data", "vol_spike_hedge_status.json")
-    if not os.path.exists(path):
-        return ""
-    try:
-        with open(path, encoding="utf-8") as fp:
-            s = json.load(fp)
-    except Exception:
-        return ""
-    on = s.get("signal_on", False)
-    lines = ["", "<b>🛡️ VOL-SPIKE HEDGE cho V5 (paper-trade → 30/06)</b>", "<pre>"]
-    lines.append(f"As of:  {s.get('asof','?')}   VN30F={s.get('vn30f','?')}")
-    lines.append(f"rv10 = {s.get('rv10',0)*100:.1f}%   ngưỡng = {s.get('threshold',0)*100:.1f}%")
-    if on:
-        lines.append(f"CÒ: 🔴 ON (SHORT)")
-        lines.append(f"→ Đặt phiên kế: SHORT {s.get('reco_contracts',0)} HĐ VN30F")
-        lines.append(f"  (notional {s.get('reco_notional',0):,.0f})")
-    else:
-        lines.append(f"CÒ: 🟢 OFF (flat) — không hedge")
-    if s.get("window_started"):
-        lines.append("-"*30)
-        lines.append(f"Paper {s.get('n_days',0)} phiên | hedge ON {s.get('on_days',0)}")
-        lines.append(f"V5 only   : {s.get('v5_only_ret',0)*100:+.2f}%")
-        lines.append(f"V5+hedge  : {s.get('v5_hedged_ret',0)*100:+.2f}%")
-        lines.append(f"Đóng góp  : {s.get('hedge_pp',0):+.2f}pp ({s.get('hedge_vnd',0):+,.0f}đ)")
-    else:
-        lines.append("(paper-trade chờ phiên NAV đầu trong cửa sổ)")
-    lines.append("</pre>")
-    return "\n".join(lines)
-
-
-def build_f_sleeve_section() -> str:
-    """Block F-SYSTEM STANDALONE sleeve (DT5G+Van, paper-trade → 2026-06-30).
-    Đọc data/f_sleeve_status.json do f_sleeve_pt.py ghi ở papertrade_daily.bat."""
-    path = os.path.join(WORKDIR, "data", "f_sleeve_status.json")
-    if not os.path.exists(path):
-        return ""
-    try:
-        with open(path, encoding="utf-8") as fp:
-            s = json.load(fp)
-    except Exception:
-        return ""
-    side = s.get("side", "FLAT")
-    emoji = "🟢" if side == "LONG" else ("🔴" if side == "SHORT" else "⚪")
-    lines = ["", "<b>⚙️ F-SYSTEM sleeve riêng (DT5G+Van, paper → 30/06)</b>", "<pre>"]
-    lines.append(f"As of:  {s.get('asof','?')}   VN30F={s.get('vn30f','?')}")
-    lines.append(f"DT5G={s.get('state_name','?')}  base={s.get('base',0):+.2f} x scale={s.get('applied_scale',0):.2f}")
-    lines.append(f"Position = {s.get('position',0):+.2f}")
-    lines.append(f"{emoji} Phiên kế: {side} {s.get('reco_contracts',0)} HĐ VN30F")
-    lines.append(f"  (notional {s.get('reco_notional',0):,.0f})")
-    if s.get("window_started"):
-        lines.append("-"*30)
-        lines.append(f"Sleeve base {s.get('sleeve_base',0)/1e9:.0f}B | {s.get('n_days',0)} phiên")
-        lines.append(f"Return    : {s.get('sleeve_ret',0)*100:+.2f}%")
-        lines.append(f"NAV       : {s.get('sleeve_nav',0):,.0f}")
-    lines.append("</pre>")
-    return "\n".join(lines)
-
-
-def build_orb_section() -> str:
-    """Block ORB intraday VN30F (paper-trade live). Đọc data/orb_pt_status.json do orb_pt.py ghi."""
-    path = os.path.join(WORKDIR, "data", "orb_pt_status.json")
-    if not os.path.exists(path):
-        return ""
-    try:
-        with open(path, encoding="utf-8") as fp:
-            s = json.load(fp)
-    except Exception:
-        return ""
-    lines = ["", "<b>📈 ORB intraday VN30F (paper-trade live)</b>", "<pre>"]
-    lines.append(f"Data: {s.get('asof_bar','?')}  VN30F={s.get('latest_vn30f','?')}")
-    lines.append("Rule: 09:30 dấu OR(09:00-09:30)")
-    lines.append("  → long/short giữ đến 14:30, no stop")
-    lines.append(f"Phiên kế: {s.get('reco_contracts',0)} HĐ (sleeve {s.get('sleeve_base',0)/1e9:.0f}B)")
-    if s.get("window_started"):
-        side = "LONG" if s.get("last_sig",0) > 0 else "SHORT"
-        em = "🟢" if s.get("last_net",0) >= 0 else "🔴"
-        lines.append("-"*30)
-        lines.append(f"Phiên cuối {s.get('last_date','?')}: {side} {em}{s.get('last_net',0)*100:+.2f}%")
-        lines.append(f"{s.get('n_days',0)} phiên | WR {s.get('wr',0)*100:.0f}% | Sharpe {s.get('sharpe',0):.2f}")
-        lines.append(f"Cum {s.get('cum_ret',0)*100:+.2f}% | NAV {s.get('nav',0):,.0f}")
-    else:
-        lines.append("(chờ phiên hoàn chỉnh đầu tiên)")
-    lines.append("</pre>")
-    return "\n".join(lines)
-
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("date", nargs="?", help="Target date YYYY-MM-DD (default: latest)")
@@ -616,20 +600,10 @@ def main():
     state_section, state_csv_path = build_dt5g_section(target, dt5g_state, dt5g_asof, dt5g_source)
     message = message + "\n" + state_section
 
-    # Append VOL-SPIKE HEDGE block (paper-trade tạm thời cho V5 → 2026-06-30)
-    hedge_section = build_vol_spike_hedge_section()
-    if hedge_section:
-        message = message + "\n" + hedge_section
-
-    # Append F-SYSTEM standalone sleeve block (DT5G+Van paper-trade → 2026-06-30)
-    fsleeve_section = build_f_sleeve_section()
-    if fsleeve_section:
-        message = message + "\n" + fsleeve_section
-
-    # Append ORB intraday block (paper-trade live)
+    # Append ORB intraday paper-trade block (ring-fenced, monitored separately)
     orb_section = build_orb_section()
     if orb_section:
-        message = message + "\n" + orb_section
+        message = message + orb_section
 
     # Save full universe CSV (for attachment + audit log)
     out_csv = os.path.join(WORKDIR, f"holistic_{target}.csv")
@@ -660,19 +634,6 @@ def main():
         ok = r.get("ok", False)
         print(f"  Chunk {i}/{len(chunks)} ({len(ch)} chars): {'✓ sent' if ok else '✗ ' + str(r)}")
         time.sleep(0.5)  # rate limit safety
-
-    # AMH Cockpit (V6 Tứ Trụ allocation + #1 edge-health/capit-edge + #4 ecology) as a separate message
-    cockpit_path = os.path.join(WORKDIR, "data", "amh_cockpit.md")
-    if os.path.exists(cockpit_path):
-        try:
-            with open(cockpit_path, encoding="utf-8") as f:
-                cockpit = f.read().strip()
-            for i, ch in enumerate(split_message(cockpit), 1):
-                r = send_telegram_text(bot_token, chat_id, ch)
-                print(f"  Cockpit {i} ({len(ch)} chars): {'✓ sent' if r.get('ok') else '✗ ' + str(r)}")
-                time.sleep(0.5)
-        except Exception as e:
-            print(f"  [cockpit] skipped: {e}")
 
     # Send CSV attachments (BA books only — not full universe to save bandwidth)
     if not args.no_attach:
