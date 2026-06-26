@@ -396,6 +396,9 @@ RECOVERY_LEVER_FRAC   = float(os.environ.get("RECOVERY_LEVER_FRAC", "0.30"))   #
 # MGE, protected by S4 margin-call. This is the production realization the earlier "structurally infeasible"
 # verdict said was impossible. Requires MGE>1. Default OFF.
 RECOVERY_LEVER_PARK   = os.environ.get("RECOVERY_LEVER_PARK", "0") == "1"
+# S4 STRESS hook (Taylor 2026-06-26): force a levered parking inject on arbitrary dates (comma-sep YYYY-MM-DD),
+# BYPASSING the A∧C gate — to stress the margin-call by levering INTO a fall (e.g. the 2022 top). Test-only.
+LEVER_STRESS_DATES = os.environ.get("LEVER_STRESS_DATES", "")
 _lever_dates = []   # filled by the recovery state machine on each A∧C-confirm fire
 if RECOVERY_CAPIT_ONLY:
     RECOVERY_GRADUAL = True   # CAPIT-ONLY runs ON the gradual machine (vol load + episode loop), step disabled
@@ -1493,6 +1496,10 @@ if _mge:                                                    # real-margin: open 
     if RECOVERY_LEVER_PARK and _lever_dates:
         kwA["etf_lever_by_date"] = {pd.Timestamp(d): RECOVERY_LEVER_FRAC for d in set(_lever_dates)}
         print(f"  [S2 lever-park BAL] ON | {len(set(_lever_dates))} bottom-dates × frac {RECOVERY_LEVER_FRAC:.2f} (margin parking, cap MGE {_mge})")
+    if LEVER_STRESS_DATES:
+        _ss = {pd.Timestamp(x.strip()): RECOVERY_LEVER_FRAC for x in LEVER_STRESS_DATES.split(",") if x.strip()}
+        kwA["etf_lever_by_date"] = {**kwA.get("etf_lever_by_date", {}), **_ss}
+        print(f"  [S4-STRESS BAL] forced lever inject on {list(_ss.keys())} (bypass gate)")
     print(f"  [real-margin] max_gross_exposure={_mge} | margin_tiers="
           f"{'CAPIT-only' if MGE_CAPIT_ONLY else 'ALL'} | borrow {BAL_KW['borrow_annual']*100:.0f}%/yr")
 nav_bal, _ = simulate(sig_balC, prices, vni_dates, tier_weights=tw_balC,
@@ -1535,6 +1542,9 @@ if _mge:                                                    # mirror BAL: open t
         kwB["regime_delever_targets"] = {1: REGIME_DELEVER_CAP, 2: REGIME_DELEVER_CAP}
     if RECOVERY_LEVER_PARK and _lever_dates:
         kwB["etf_lever_by_date"] = {pd.Timestamp(d): RECOVERY_LEVER_FRAC for d in set(_lever_dates)}
+    if LEVER_STRESS_DATES:
+        _ss = {pd.Timestamp(x.strip()): RECOVERY_LEVER_FRAC for x in LEVER_STRESS_DATES.split(",") if x.strip()}
+        kwB["etf_lever_by_date"] = {**kwB.get("etf_lever_by_date", {}), **_ss}
 nav_lag, _ = simulate(sig_lagC, prices_lag, vni_dates, tier_weights=tw_lagC,
                       event_log=events_lag, etf_log=etf_lag,
                       name="v23audit_LAG", **merge_extra(kwB, ex_lagC), **LIQ_LAG)

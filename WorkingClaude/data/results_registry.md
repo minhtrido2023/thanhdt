@@ -385,3 +385,19 @@ MGE 1.3" labels on Exp-8 decisions are corrected to "nominal MGE cap, non-bindin
 - **Δ = +1.19pp CAGR, +0.04 Sharpe, MaxDD IDENTICAL, +0.05 Calmar** — adds return WITHOUT extra drawdown.
 - **Per-year:** edge concentrated 2014 (+7.77) / 2021 (+8.29, COVID-bottom payoff) / 2025 (+4.26); small drag 2024 (−3.24) / 2019 (−1.17) / 2022 (−1.08). Appears in BOTH IS(2014) and OOS(2021/25) — not regime-confined.
 - **Caveats:** LOW-SAMPLE (4 bottoms/12y, edge rests on ~2 big correct calls); 1 snapshot; S4 margin-call did NOT fire (gross 1.27 < hard 1.45 — protection is insurance, untested here); needs A∧C-confirm + deposit-gate to avoid false bottoms. **Go-live default stays leverage-free; S2 = opt-in.** threads=1 deterministic.
+
+### S2 follow-ups — MGE sensitivity + capacity + S4 stress (Taylor 2026-06-26, threads=1, self-check 0)
+**MGE/lever-depth sweep @50B (frac = MGE−1):**
+| MGE | CAGR | Sharpe | MaxDD | Calmar | gross | borrow |
+|---|---|---|---|---|---|---|
+| lev-free | 28.91 | 1.81 | −20.4 | 1.42 | 1.00 | 0 |
+| 1.3 | 30.10 | 1.85 | −20.4 | 1.47 | 1.27 | 337M |
+| **1.5 ⭐** | **30.32** | 1.85 | −20.3 | 1.50 | 1.48 | 639M |
+| 1.7 | 30.04 | 1.84 | −19.9 | 1.51 | 1.69 | 858M |
+→ **Optimal MGE 1.5** (peak CAGR). Plateau 1.3–1.5; **>1.5 degrades** (borrow drag outpaces return — 1.7 CAGR falls, 2021 payoff 93.78<97.37). MaxDD doesn't worsen (lever deploys AT the bottom, after the drawdown).
+
+**Capacity (#10) — DECISIVE:** edge is capacity-bound. @50B LEVER +1.41pp; **@150B LEVER −0.95pp** (BASE 25.97 vs LEVER 25.02; gross still 1.48 but custom30V illiquidity at scale kills the recovery alpha). → **small-account feature (≤~50–100B); OFF above ~100B.**
+
+**S4 stress (#8):** mechanics validated — tight cap (hard 1.10) → S4 fires, force-trims gross→floor, self-check 0. BUT at a sane cap (MGE+0.15) S4 rarely binds: the **regime-prefill unwind deleverages first** (state→CRISIS drops the parking target → sells the levered ETF). A wrong-way lever (bypassing the A∧C gate, levering the 2022 top) cost **MaxDD −20.4→−30.7%** → **the A∧C entry gate is the primary protection, S4 is the backstop.**
+
+**Net verdict:** lever-at-bottom is real + auditable (0 VND), best at **MGE 1.3–1.5, NAV ≤~50–100B**, opt-in. **Go-live default stays leverage-free.**
