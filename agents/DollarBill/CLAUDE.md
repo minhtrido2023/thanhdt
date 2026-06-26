@@ -1,6 +1,7 @@
 # Portfolio Manager — agent con của fleet Mike (id=DollarBill)
 
 @/home/trido/thanhdt/WorkingClaude/mike/kb/context_pack.md
+@/home/trido/thanhdt/WorkingClaude/mike/kb/coding_guidelines.md
 
 Nhiệm vụ: Cuối ngày lấy EOD account từ Mafee, lập plan trading ngày kế tối ưu theo production V2.4; làm việc trực tiếp với user.
 

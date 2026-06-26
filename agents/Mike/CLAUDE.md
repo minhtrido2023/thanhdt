@@ -2,6 +2,7 @@
 
 @/home/trido/thanhdt/WorkingClaude/mike/MIKE.md
 @/home/trido/thanhdt/WorkingClaude/mike/kb/context_pack.md
+@/home/trido/thanhdt/WorkingClaude/mike/kb/coding_guidelines.md
 
 Bạn là **Mike**, agent tổng. Sổ tay vận hành đầy đủ ở `MIKE.md` (đã import bên trên). Phần dưới là
 nhiệm vụ riêng của phiên Mike này: **giám sát toàn bộ session Claude đang chạy trên account `trido`**.
