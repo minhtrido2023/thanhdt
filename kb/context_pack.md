@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v85)
+# Mike fleet — context pack (v87)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-06-26T04:10:09] Mike/finding — ddv-exdate-correction: {"verdict": "WRONG_EXDATE", "confirmed_by": "VietStock_screenshot_user_2026-06-26", "ticker": "DDV", "vendor_exdate": "2026-06-19", "actual_exchange_exdate": "2 …
 - [2026-06-26T04:35:40] Mike/decision — data-pipeline-architecture-confirmed: {"summary": "Pipeline architecture confirmed from DAILY_DATA_PIPELINE.md", "bq_close_source": "VCI via vnstock3 get_historical_symbol() — backward-adjusted; sam …
 - [2026-06-26T04:51:26] Taylor/finding — trading-rules-v1.7-kill-switch: {"summary": "Added macro_kill_switches section to trading_rules.json (v1.6->v1.7) ahead of go-live 2026-06-30, implementing the 3 RECOVERY_PARK suspends Spyros  …
 - [2026-06-26T04:58:51] DollarBill/decision — plan-paper-20260627: {"plan_id": "paper_20260627_v1", "date": "2026-06-27", "mode": "paper", "starting_nav": 1000000000, "market_state": "NEUTRAL", "state_source": "DT4_only_fallbac …
@@ -11,6 +10,7 @@
 - [2026-06-26T05:01:43] DollarBill/answer — golive-account-ack: {"dispatch_from": "Mike", "account_label": "SpaceX", "account_id": "0002023347", "broker": "DNSE", "nav_initial": 1000000000, "status": "acknowledged", "notes": …
 - [2026-06-26T05:00:51] Mike/decision — spaceX-account-wired: {"account_id": "0002023347", "label": "SpaceX", "broker": "dnse", "nav_init": 1000000000, "file": "secrets/trading_bot_accounts.json", "status": "added, enabled …
 - [2026-06-26T05:02:25] Mafee/answer — golive-spacex-account-ack: {"dispatch_from": "Mike", "account_label": "SpaceX", "account_id": "0002023347", "broker": "DNSE", "nav_initial": 1000000000, "current_status": "enabled=false,  …
+- [2026-06-26T05:57:00] Mike/decision — auto-otp-gmail-live: {"summary": "Auto-OTP pipeline live: gmail_otp_reader.py đọc DNSE OTP từ Gmail (OAuth2 gmail.readonly). bot_execute.py --auto-otp tự động gửi+đọc+tạo trading to …
 <!--RECENT-END-->
 
 ## Tri thức chung của đội (canonical — Mike biên tập; MỌI agent phải nắm)
@@ -44,6 +44,7 @@ Vận hành chiến lược **production V2.4**, **go-live 2026-06-30**, trên T
 ### Hạ tầng giao dịch
 - `trading_bot/` (brokers/executor/plan) sẵn sàng. **DNSE live OK** (số tiểu khoản nằm trong `secrets/`, KHÔNG ghi ở KB). **PHS live BLOCKED** (chờ client credential, lỗi `-700003`) → PHS chạy paper.
 - **Ủy quyền lệnh (an toàn tiền thật):** Taylor đặt rule (user duyệt) → Bill lập plan `data/plan_<acct>_<T+1>.json` (user duyệt) → **Mafee chỉ thực thi lệnh CÓ trong plan**, trong hạn mức cứng (`trading_bot/config.py` + `data/trading_rules.json`); paper full-auto, live trong limit, **KHÔNG tự chế lệnh**. Spyros giám sát + kill-switch `data/BOT_STOP`. Handoff = file `data/` + bus (companion model).
+- **Auto-OTP (Gmail API)**: DNSE trading token (8h) tự động lấy qua `bot_execute.py --auto-otp`. Flow: gửi email OTP → `gmail_otp_reader.py` poll Gmail (`gmail.readonly` OAuth2) → trích 6 số → `create_trading_token()`. Credential: `secrets/gmail_oauth_token.json`. **Mafee chạy `--auto-otp` thay vì `--otp` trên các ngày giao dịch (T2–T6)**, trước 09:15 ICT. Fallback nếu Gmail lỗi: token cache còn hạn vẫn chạy; hết hạn → cảnh báo Telegram, user can thiệp thủ công.
 - **BQ Local Cache (DuckDB)**: 12 bảng BQ cached → parquet local (`data/bq_cache/`), query qua DuckDB ~100ms thay vì 5-15s BQ. Env `BQ_LOCAL_CACHE=data/bq_cache` đã wire trong `wc_env.sh` + `dispatch.sh` → mọi `bq()` call tự route local. Sync daily 23:45 ICT + preflight check. Fallback: cache chưa verify → `bq()` tự gọi BQ bình thường.
 
 ### Quy chuẩn làm việc (bắt buộc — khoa học & auditable)
