@@ -2,28 +2,26 @@
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
 
 ## Ưu tiên
-- Go-live V2.4: 2026-06-30 — **Spyros CONDITIONAL GO ✓ — chờ user approval**
+- **Go-live V2.4: 2026-07-01 08:00 ICT** — cron tự động flip SpaceX enabled=true + restart Bill+Mafee
 
-## Fleet (2026-06-26)
-- DollarBill + Mafee: ĐANG CHẠY, paper mode — cả 2 đã nhận SpaceX account info
-- Mike + Taylor: active, serving
+## Fleet (2026-07-01)
+- DollarBill + Mafee: ĐANG CHẠY paper mode — dry-run đến 30/06
+- Mike + Taylor: active
 
-## Go-live account — WIRED ✓
-- **SpaceX** = tiểu khoản DNSE **0002023347**, NAV 1B VND tiền thật
-- `enabled=false` trong trading_bot_accounts.json — bật khi user flip trading_rules
-- dnse_main (0001743768) = TK riêng, KHÔNG phải go-live V2.4
+## Go-live — ĐÃ SETUP HOÀN TOÀN
+- SpaceX / 0002023347 / DNSE: 1B VND, enabled=false (cron flip 01/07 08:00 ICT)
+- trading_rules v1.7: applies_to=live, approved_by=user, live_effective=2026-07-01 ✓
+- Cron: `0 1 1 7 * golive_01jul.sh` — tự flip + restart + Telegram notify
+- Script: mike/bin/golive_01jul.sh
 
-## Chỉ còn 2 bước để go-live (30/06)
-1. User flip `applies_to → "live"` + `approved_by → "user"` trong `/home/trido/thanhdt/WorkingClaude/data/trading_rules.json`
-2. Set `enabled=true` cho SpaceX trong `secrets/trading_bot_accounts.json`
+## Telegram report (Taylor đang dọn)
+- Xoá: VOL-SPIKE V5, F-SYSTEM, ORB, AMH Cockpit V6, V2.3 NAV-only
+- Thêm: V2.4 paper-trade section với buy/sell detail từ plan files
 
-## Paper dry-run đang chạy
-- Plan 2026-06-27 đã tạo (DollarBill) — state NEUTRAL, custom30V basket
+## Paper dry-run (nay đến 30/06)
+- Plan 2026-06-27 đã tạo (state NEUTRAL, custom30V basket)
+- Bill tạo plan T+1 mỗi EOD; Mafee paper-execute; Telegram report daily 18:00 ICT
 
-## Spyros conditions — TẤT CẢ ĐÃ ĐỦ ✓
-1. RECOVERY_WMAX=0.95 ✓ | 2. DEP_FLOOR=7.5% DORMANT ✓ | 3. max_gross=1.0 ✓
-4. RECOVERY_PARK trigger ✓ | 5. trading_rules v1.7 ✓ | 6. get_gated_state() ✓ | 7. Review 90d ✓
-
-## Advisory (không phải blocker)
-- Wendy: legal-severity DGC (trong custom30V rank 21, HOSE audit ngoại trừ)
+## Advisory
+- DGC trong custom30V rank 21 — Wendy legal check (không phải blocker)
 
