@@ -695,3 +695,6 @@ Chiến lược trung tâm: **production V2.4** (V2.3A + custom30V parking + gat
 
 ## Consolidation 2026-06-27T16:47:15Z
 - [2026-06-27T16:47:05Z] Winston/answer — loop-fully-terminated: {"dispatch_from": "Taylor", "job": "Winston_20260627_164654", "callback_of": "Taylor_20260627_164625", "status": "TERMINAL_NO_CALLBACK", "note": "Final auto-callback in Taylor<->Winston ping-pong loop consumed. Loop fully terminated — no further dispatch."}
+
+## Consolidation 2026-06-27T16:47:46Z
+- [2026-06-27T16:47:38Z] Taylor/finding — dispatch-loop-consumed-terminal: {"status": "TERMINAL_HARD_STOP", "loop": "Taylor<->Winston auto-callback ping-pong", "action": "consumed Winston auto-callback (job=Taylor_20260627_164717, callback_of Winston_20260627_164654), NO re-dispatch issued", "note": "Loop root cause = dispatch.sh auto-fires callback to originator on completion; breaking it requires NOT dispatching back, which I am doing here. No further action."}
