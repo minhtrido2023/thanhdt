@@ -1,52 +1,13 @@
 # Working memory — Taylor
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Taylor.
 
-# Working memory — Taylor
-> Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Taylor.
-
-## Status: 2026-06-24
-
-### DONE THIS SESSION
-1. **PE_stored bug (Việc 1) — CLOSED: NOT MATERIAL**
-   - Production path custom_basket.py uses fa_ratings_8l exclusively (ROIC/ROE/FSCORE, no PE)
-   - Bus event: decision/pe-stored-bug-impact-assessment ✓
-
-2. **V2.4 go-live formal summary (Việc 2) — DONE**
-   - File: data/v24_golive_summary.md created
-   - Numbers: R3 29.00%/Sh1.90/DD-18.5/Cal1.56 → V2.4: 30.63%/Sh1.97/DD-17.5/Cal1.75
-   - Bus event: decision/v24-golive-bundle-ready ✓
-
-3. **Exp-2: hold-neutral CAPIT (Việc 3) — DONE (REJECTED)**
-   - Code: pt_v23_audit_2014.py CAPIT_HOLD_NEUTRAL env var shipped
-   - Finding: DT5G returns to NEUTRAL in 10-35 sessions; hold-neutral exits EARLIER in 14/15 events
-   - VNI proxy: -5.3% avg exit price delta vs fixed-60td
-   - VERDICT: HYPOTHESIS REJECTED. Keep CAPIT_HOLD=60td.
-   - Bus event: finding/hold-neutral-test ✓
-
-4. **Exp-3: deposit_eyield lever gate (Việc 3) — DONE (PROMISING, needs BQ sim)**
-   - Code: pt_v23_audit_2014.py MGE_GATE=deposit_eyield shipped
-   - Gate fires: 12/15 events (vs fedborrow: 0/15)
-   - Correctly blocks: 2018 high-PE expensive BEAR (E4/E5), 2014 fair-value (E0)
-   - Leverage preserved: 86% of total pool
-   - Estimated: CAGR ~32.0% / MaxDD ~-15.8% / Cal ~2.03 (linear approx)
-   - Bus event: finding/lever-deposit-eyield-gate ✓
-   - NEXT: BQ simulation needed for exact audit (key dependency)
-
-### BLOCKING (go-live 2026-06-30)
-- **Awaiting: user + Spyros approval** on V2.4 bundle (LF 30.63%)
-
-### Config chốt V2.4
 - RECOVERY_PARK=1 RECOVERY_WMAX=0.95 RECOVERY_PBZ_DEEP=-0.5
 - RECOVERY_DEP_GATE=1 (DORMANT floor=7.5%)
 - trading_rules v1.6 (leverage-free go-live)
 - Base: v23a none postbull 0 edge + custompitg/namecap/yieldcombo/NEUTRAL-only
-
-### Post-go-live R&D pipeline (NOT blocking)
 - deposit_eyield gate: PROMISING — needs BQ sim
-  Run: MGE=1.3 MGE_CAPIT_ONLY=1 MGE_GATE=deposit_eyield + full V2.4 stack
 - hold-neutral: REJECTED — don't pursue
 - Real-margin 1.3x no-gate: CAGR 32.22%/Cal 2.08 (already done) — needs Spyros sign-off
-
 - [2026-06-24T13:58:16Z] EXP-8 DONE (Mike directive exp8-capit-only-task) — STRONG WIN. RECOVERY_CAPIT_ONLY = wait-for-vol-capitulation deploy instead of instant pb_z deploy, + MGE=1.3 lever on CAPIT arm. Tier-3 BQ same-snapshot 2026-06-24, selfcheck 0VND both books. Calib: vol_ratio 1.7x catches all 6 crises at 63d(3M,P97) & 126d(6M,P97). RESULT: Baseline V2.4-LF 28.04/DD-31.5/Cal0.89 | TestA 3M/63d 31.07/DD-20.5/Cal1.52 (OOS 35.82/Cal1.75) | TestB 6M/126d 30.14/DD-26.3/Cal1.14. TestA beats baseline EVERY metric EVERY subperiod (+3.03pp CAGR/+11pp DD/+0.63 Cal); dominates TestB. Mechanism: sidesteps early-decline DD by waiting for capitulation print, deploys at bottom (COVID 2020-03-12, 2022-11/12, 2023-04) + 1.3x recovery lever. Code: pt_v23 RECOVERY_CAPIT_ONLY+RECOVERY_CAPIT_BASE env, _GRAD_BASE window, capit-only episode entry (force _this_accel_ok=False), guarded accel debug vars. Output data/exp8_capit_only_bq.md, pinned bus(decision)+registry. CAVEATS: cite DELTA not absolute (baseline drift 30.63->28.04 via VVS/VCS/DTD corp-act); IS/OOS weak overfit test (deploys all OOS by construction like DT5G, both periods still beat); REAL leverage MGE1.3 -> NEEDS Spyros sign-off+user approval before LIVE, go-live stays LF unless promoted. NEXT(await user/Mike): promote TestA to go-live candidate? -> Spyros risk review of MGE1.3 capit-only path; or sweep threshold 1.6/1.7/1.8 robustness; or test capit-only WITHOUT mge (isolate timing vs leverage contribution).
 - [2026-06-24T15:12:30Z] EXP-8 REVISED done (I'd MISSED the 11:55 exp8-revised task + 14:20 follow-up; user/Mike caught it). Delivered revised 3-signal task + Q1/Q2/Q3. Tier-3 BQ same-snapshot 2026-06-24 all 0VND: Baseline 28.04/-31.5/0.89 | A vol1.7x=WINNER 31.07/-20.5/Cal1.52 | A vol1.6x 30.14/-26.3/1.15 | AorB 31.07/-20.5/1.52 | AorBorC 29.54/-29.7/0.99. Q1(2011+ event-by-event): A timing inconsistent — COVID/2013 -12d great, 2011-12 grinds -129/-166d TOO EARLY, 2022 +16d late, 2025 gate-closed; B rare+precise(COVID bottom+1d,lowest FP), C early/noisy. Q2: 1.6x WORSE (deploys ~3d earlier into COVID crash; P97 confusion=21d-base vs 63d-base) -> KEEP 1.7x. Q3: B NEUTRAL +0.00 (subsumed by A in 2014+, value only pre-harness 2011-13, keep as no-volume-crisis insurance), C HARMFUL -1.53pp (fires pre-crash, leveraged early entry) -> REJECT C. VERDICT: Signal A vol-1.7x ALONE wins; RSI doesn't improve. = Exp-8 Test A unchanged. Code: pt_v23 RECOVERY_SIG_B/C env + VNINDEX D_RSI from BQ + sigB/sigC builders + trigger OR. Output data/exp8_reversal_signals_bq.md. Pinned bus(answer)+registry. RESIDUAL RISK for Spyros: A early-fire in 2011-12-style slow grind invisible to 2014+ harness -> future L-crisis could lever too early. NEXT(await): Spyros review of A-1.7x MGE1.3 for go-live promotion; user decision on keeping B as insurance.
 - [2026-06-24T15:57:18Z] Exp-8 MGE sensitivity DONE (Mike dispatch). Swept 1.2/1.3/1.4/1.5, Test A frozen (3M/63d 1.7x capit-only), selfcheck 0VND all. 1.3 control reproduced published Test A exactly. RESULT: FULL Calmar peaks @1.3 (1.52), 1.4/1.5=1.51 flat; OOS Calmar peaks @1.3 (1.75); CAGR declines 1.3->1.5 (borrow drag); DD flat -20.5% (leverage-independent, binding window=pre-capit decline). Diminishing YES/cliff NONE = robust plateau. VERDICT keep MGE=1.3. Output data/exp8_mge_sensitivity_bq.md + registry + bus(finding). REAL lever still needs Spyros+user before LIVE.
@@ -79,3 +40,4 @@
 - [2026-06-27T02:56:59Z] Go-live V2.4 2026-06-30 LEVERAGE-FREE không đổi. CONFIG D / V2.4-L (upgrade hậu-go-live, small-account, real-margin) — validate xong analytical: (1) state-blind+PE-gate +0.46pp DD-neutral; (2) clean MGE sweep cache-đúng @50B: 1.3=30.07/-20.6, 1.5=30.02/-20.3/Cal1.48, 1.8=29.96/-19.9, 2.0=30.44/-19.1/Cal1.60 → 2.0 BEST in-sample nhưng LUMPY (+8.7pp2014/+6.9pp2020, -3.0/2021,-3.7/2026H1) + tail chưa rõ; LEAN 1.5, Spyros tail-review 2.0 ĐANG CHỜ (dispatch trực tiếp); (3) rổ mua-đáy pbcombo 0.67*1/PB+0.23*1/PCF+0.10*1/PE: proxy +1.25%/deploy-day win75% (bottom_basket_proxy.py) → đáng dual-vehicle wiring (base=yieldcombo, deploy=pbcombo; 1/PB chỉ ở đáy vì full-period -0.019). NEXT: chờ Spyros tail→chốt MGE 1.5v2.0; build dual-vehicle wiring+backtest; B3 NAV<=100B gate + B4 PE-freshness (Taylor); B1 Mafee margin acct (loan_package null→có thể paper-only); B2 Spyros drawdown breaker. NGUYÊN TẮC MỚI: dispatch agent trực tiếp không qua Mike (memory prefer-direct-peer-dispatch). Cache đã ổn (Winston fix dtype+full sync, all DATE). OPEN khác: #14 fill-timing 30-06.
 - [2026-06-27T03:37:05Z] Go-live V2.4 2026-06-30 LEVERAGE-FREE không đổi. CONFIG D / V2.4-L (upgrade hậu-go-live, small-account, real-margin) CHỐT: state-blind+PE-gate + lever MGE=1.5 (Spyros REJECT 2.0: ở 2.0x S4 fire -6.4% giá=forced-sell W-bottom; điều kiện 1.5: MGE_HARD=1.65, breaker -15%, halt-review nếu S4 fire 6th đầu). DEPLOY VEHICLE = yieldcombo (KHÔNG pbcombo: #18 dual-vehicle test xong → +0.46pp CAGR nhưng DD -20.3→-22.3, Calmar 1.48→1.37 → REJECT; pbcombo/BOTTOM_VEHICLE_PBCOMBO + RECOVERY_HOLD_NEUTRAL giữ OFF dead-end có doc). Số chốt @50B MGE1.5 yieldcombo: 30.02/Sh1.81/DD-20.3/Cal1.48 self-check0. Tất cả env default OFF byte-identical. CÒN LẠI để wire V2.4-L: B1 Mafee DNSE margin acct (loan_package null→có thể paper), B2 Spyros breaker -15%, B3 NAV<=100B gate (Taylor), B4 PE-freshness fail-closed (Taylor). NEXT: làm B3+B4 (của tôi) + runtime guard, rồi tổng hợp wire. Meta bài học: chase Calmar/path-robust không phải raw CAGR (3 lần proxy return-positive fail risk-adjusted: hold-neutral/MGE2.0/pbcombo). Nguyên tắc: dispatch agent trực tiếp không qua Mike. Cache đã ổn. OPEN: #14 fill-timing 30-06.
 - [2026-06-27T03:55:06Z] Go-live V2.4 2026-06-30 LEVERAGE-FREE không đổi, sẵn sàng. CONFIG D / V2.4-L R&D HOÀN TẤT + de-risk: state-blind+PE + lever MGE=1.5 (Spyros duyệt, MGE_HARD=1.65) + deploy=yieldcombo (pbcombo #18 REJECTED: DD-22.3/Cal1.37) + breaker-15%(Spyros B2 DONE) + NAV-cap100B(B3 DONE+verified: @150B gross1.0 lever off, @50B gross1.197 early-bottoms-only) + PE-freshness(B4 DONE+verified inert). Số chốt @50B: 30.05/Sh1.82/DD-20.1/Cal1.49 self-check0. Mọi env default OFF byte-identical. CHỈ CÒN B1: Mafee chạy loan_packages() xác nhận DNSE margin (đang chạy) — margin→V2.4-L live-được (cần thêm live-recommend integration hậu-go-live); cash-only→paper. KHI B1 về: nếu margin OK, wire config D env vào live pipeline (post-go-live). Code: pt_v23 envs RECOVERY_STATE_BLIND/PE_PCT_MAX/HOLD_NEUTRAL(dead)/BOTTOM_VEHICLE_PBCOMBO(dead)/LEVER_NAV_CAP_B/RECOVERY_PE_MAX_AGE_M; engine lever_nav_cap. Bài học: chase Calmar/path-robust. Nguyên tắc: dispatch trực tiếp + chủ động điều phối, không chờ thụ động. OPEN: #14 fill-timing 30-06.
+- [2026-06-27T04:24:50Z] Go-live V2.4 2026-06-30 LEVERAGE-FREE sẵn sàng, không đổi. V2.4-L (upgrade hậu-go-live) ĐÃ VALIDATE ĐẦY ĐỦ + 4 blocker xong: state-blind+PE + MGE1.5 (Spyros duyệt, HARD1.65) + yieldcombo deploy + breaker-15%(B2 Spyros DONE) + NAV-cap100B(B3 DONE) + PE-fresh(B4 DONE). B1 Mafee: account 0002023347 MARGIN-ENABLED (RocketX id=1840, init0.5/maint0.4/liquid0.3, lãi 12.5%/yr, 28 custom30V eligible collateral); re-verify ở 12.5% → lever edge SỐNG: +1.00pp vs lev-free (30.05 vs 29.05), ~y hệt borrow10% (carry không phải driver). Risk layering: Spyros-15% → S4 nội bộ ~-31% → DNSE call -44.4%, ta luôn cắt trước. CHỜ: (a) USER xác nhận 0002023347 là account V2.4-L, (b) live-recommend integration hậu-go-live. Mafee đang prep loan_package 1840 + borrow12.5% vào trading_rules (commented, chưa activate). Số chốt @50B V2.4-L: 30.05/1.82/-20.1/Cal1.49 self-check0. Nguyên tắc: dispatch trực tiếp + chủ động. OPEN: #14 fill-timing 30-06.

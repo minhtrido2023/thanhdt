@@ -1,63 +1,63 @@
-# Fleet status — 2026-06-27T03:50:47 UTC
+# Fleet status — 2026-06-27T04:07:01 UTC
 
 | agent | title (desktop) | kind | status | last_heartbeat | age(min) | current_task |
 |---|---|---|---|---|---|---|
-| 11111111 | 11111111 | child | dead | 2026-06-22T15:03:03Z | 6527 |  |
-| 11e09c95 | 11e09c95 | child | dead | 2026-06-25T08:21:37Z | 2609 |  |
-| 2313fbff | Kiểm tra service chạy trên Claude | external | dead | 2026-06-25T06:30:01Z | 2720 | interactive · cwd=/workspace/claude-code-discord-bridge |
-| 29834db6 | 29834db6 | child | dead | 2026-06-23T15:05:05Z | 5085 |  |
-| 3be55726 | Tự động thêm env và restart ứng dụng | external | dead | 2026-06-23T07:50:01Z | 5520 | interactive · cwd=/workspace/claude-code-discord-bridge |
-| 480a14a5-5986-45fc-bbbc-0927d7536f8b | 480a14a5-5986-45fc-bbbc-0927d7536f8b | child | dead | 2026-06-26T21:33:03Z | 377 |  |
-| 480a14a5 | 480a14a5 | child | dead | 2026-06-26T21:27:38Z | 383 |  |
-| 4ba0428c-2367-4415-9535-ef18038c5f6f | 4ba0428c-2367-4415-9535-ef18038c5f6f | child | dead | 2026-06-23T15:00:28Z | 5090 |  |
-| 4ba0428c | 4ba0428c | child | dead | 2026-06-22T17:19:22Z | 6391 |  |
-| 4bbb8993 | Tích hợp Kronos để đọc ngôn ngữ thị trường | external | idle | 2026-06-27T03:50:01Z | 0 | interactive · cwd=/home/trido/thanhdt/WorkingClaude |
-| 55a416a5 | 55a416a5 | external | dead | 2026-06-25T03:20:01Z | 2910 | interactive · cwd=/home/trido/thanhdt/WorkingClaude |
-| 5cca543a | 5cca543a | child | dead | 2026-06-23T05:44:20Z | 5646 |  |
-| 60b4e95e | 60b4e95e | child | dead | 2026-06-23T15:12:30Z | 5078 |  |
-| 61ccd76d | 61ccd76d | child | dead | 2026-06-26T21:40:07Z | 370 |  |
-| 61ea30ab | Xây dựng và cải thiện custom30 | external | idle | 2026-06-27T03:50:01Z | 0 | interactive · cwd=/home/trido/thanhdt/WorkingClaude |
-| 69dc7ecd | 69dc7ecd | child | dead | 2026-06-25T11:51:40Z | 2399 |  |
-| 6ed16a65 | Giảm thiểu các phản hồi không cần thiết từ chat | external | dead | 2026-06-23T07:30:01Z | 5540 | interactive · cwd=/workspace/claude-code-discord-bridge |
-| 745d5248-735f-4649-8801-a7122e776406 | 745d5248-735f-4649-8801-a7122e776406 | child | dead | 2026-06-26T21:21:58Z | 388 |  |
-| 745d5248 | 745d5248 | child | dead | 2026-06-26T21:18:13Z | 392 |  |
-| 75a8c042 | 75a8c042 | external | dead | 2026-06-25T05:20:01Z | 2790 | interactive · cwd=/home/trido/thanhdt/WorkingClaude |
-| 8602c506 | Kiểm tra những tính năng mới | external | dead | 2026-06-24T17:10:01Z | 3520 | interactive · cwd=/home/trido/thanhdt |
-| 9db4a8d3 | Kiểm tra sessions bị mất trên Claude Code | external | shell | 2026-06-27T03:50:01Z | 0 | interactive · cwd=/home/trido/thanhdt/WorkingClaude |
-| Bob | Bob | external | idle | 2026-06-27T03:50:01Z | 0 | remote-control · cwd=/home/trido/thanhdt |
-| DollarBill | DollarBill | child | running | 2026-06-27T03:50:01Z | 0 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/DollarBill |
-| Mafee | Mafee | child | running | 2026-06-27T03:50:01Z | 0 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mafee |
-| Mafee_1589218 | Mafee | child | running | 2026-06-27T03:50:01Z | 0 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mafee |
-| Mafee_1631932 | Mafee | child | dead | 2026-06-26T07:00:01Z | 1250 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mafee |
-| Mafee_1636813 | Mafee | child | dead | 2026-06-26T07:10:01Z | 1240 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mafee |
-| Mafee_1649590 | Mafee | child | dead | 2026-06-26T07:50:01Z | 1200 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mafee |
-| Mike | Mike | child | running | 2026-06-27T03:50:01Z | 0 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Mike_1051877 | Mike | child | dead | 2026-06-25T02:30:01Z | 2960 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Mike_1523744 | Mike | child | dead | 2026-06-26T01:40:01Z | 1570 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Mike_1535580 | Mike | child | dead | 2026-06-26T02:20:01Z | 1530 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Mike_36658 | Mike | child | dead | 2026-06-24T16:10:01Z | 3580 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Mike_800186 | Mike | child | dead | 2026-06-24T15:20:01Z | 3630 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Mike_809904 | Mike | child | dead | 2026-06-24T15:40:01Z | 3610 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Spyros | Spyros | child | working | 2026-06-27T03:50:45Z | 0 |  |
-| Taylor | Taylor | child | running | 2026-06-27T03:50:01Z | 0 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Taylor_1038723 | Taylor | child | dead | 2026-06-25T02:20:01Z | 2970 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Taylor_3555297 | Taylor | child | dead | 2026-06-26T06:10:01Z | 1300 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Taylor_807412 | Taylor | child | dead | 2026-06-24T15:50:01Z | 3600 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Wendy | Wendy | child | dead | 2026-06-26T15:24:58Z | 745 |  |
-| Winston | Winston | child | dead | 2026-06-27T02:16:11Z | 94 |  |
-| Winston_1970085 | Winston | child | dead | 2026-06-27T01:50:01Z | 120 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Winston |
-| Winston_36675 | Winston | child | dead | 2026-06-24T16:10:01Z | 3580 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Winston |
-| WorkingClaude | WorkingClaude | child | dead | 2026-06-26T05:57:36Z | 1313 |  |
-| bfe07d50 | bfe07d50 | child | dead | 2026-06-23T05:41:36Z | 5649 |  |
-| d49385d0-b783-46d9-90af-5e6ad82c3e8d | d49385d0-b783-46d9-90af-5e6ad82c3e8d | child | dead | 2026-06-26T21:17:12Z | 393 |  |
-| d49385d0 | d49385d0 | child | dead | 2026-06-23T15:35:10Z | 5055 |  |
-| d49ab2a1-9870-413c-803c-14c266429972 | d49ab2a1-9870-413c-803c-14c266429972 | child | dead | 2026-06-23T15:35:29Z | 5055 |  |
-| d49ab2a1 | d49ab2a1 | child | dead | 2026-06-23T15:33:13Z | 5057 |  |
-| d4fac88a-686e-4e03-a3f7-3ec532797acf | d4fac88a-686e-4e03-a3f7-3ec532797acf | child | dead | 2026-06-23T05:46:17Z | 5644 |  |
-| d4fac88a | d4fac88a | child | dead | 2026-06-23T05:21:17Z | 5669 |  |
-| d5de9996 | d5de9996 | child | dead | 2026-06-22T15:08:30Z | 6522 |  |
-| df94a54e | df94a54e | child | dead | 2026-06-23T15:26:37Z | 5064 |  |
-| f2545328-3223-4b6c-9ac1-4d4ceab40808 | f2545328-3223-4b6c-9ac1-4d4ceab40808 | child | dead | 2026-06-22T15:02:58Z | 6527 |  |
-| f2545328 | f2545328 | child | dead | 2026-06-22T15:02:45Z | 6528 |  |
-| srv-migrate-dt5g-timing-study | srv-migrate-dt5g-timing-study | external | idle | 2026-06-27T03:50:01Z | 0 | resume · cwd=/home/trido/thanhdt/WorkingClaude |
-| srv-thanhdt | srv-thanhdt | external | idle | 2026-06-27T03:50:01Z | 0 | remote-control · cwd=/home/trido/thanhdt |
+| 11111111 | 11111111 | child | dead | 2026-06-22T15:03:03Z | 6543 |  |
+| 11e09c95 | 11e09c95 | child | dead | 2026-06-25T08:21:37Z | 2625 |  |
+| 2313fbff | Kiểm tra service chạy trên Claude | external | dead | 2026-06-25T06:30:01Z | 2737 | interactive · cwd=/workspace/claude-code-discord-bridge |
+| 29834db6 | 29834db6 | child | dead | 2026-06-23T15:05:05Z | 5101 |  |
+| 3be55726 | Tự động thêm env và restart ứng dụng | external | dead | 2026-06-23T07:50:01Z | 5537 | interactive · cwd=/workspace/claude-code-discord-bridge |
+| 480a14a5-5986-45fc-bbbc-0927d7536f8b | 480a14a5-5986-45fc-bbbc-0927d7536f8b | child | dead | 2026-06-26T21:33:03Z | 393 |  |
+| 480a14a5 | 480a14a5 | child | dead | 2026-06-26T21:27:38Z | 399 |  |
+| 4ba0428c-2367-4415-9535-ef18038c5f6f | 4ba0428c-2367-4415-9535-ef18038c5f6f | child | dead | 2026-06-23T15:00:28Z | 5106 |  |
+| 4ba0428c | 4ba0428c | child | dead | 2026-06-22T17:19:22Z | 6407 |  |
+| 4bbb8993 | Tích hợp Kronos để đọc ngôn ngữ thị trường | external | idle | 2026-06-27T04:00:01Z | 7 | interactive · cwd=/home/trido/thanhdt/WorkingClaude |
+| 55a416a5 | 55a416a5 | external | dead | 2026-06-25T03:20:01Z | 2927 | interactive · cwd=/home/trido/thanhdt/WorkingClaude |
+| 5cca543a | 5cca543a | child | dead | 2026-06-23T05:44:20Z | 5662 |  |
+| 60b4e95e | 60b4e95e | child | dead | 2026-06-23T15:12:30Z | 5094 |  |
+| 61ccd76d | 61ccd76d | child | dead | 2026-06-26T21:40:07Z | 386 |  |
+| 61ea30ab | Xây dựng và cải thiện custom30 | external | idle | 2026-06-27T04:00:01Z | 7 | interactive · cwd=/home/trido/thanhdt/WorkingClaude |
+| 69dc7ecd | 69dc7ecd | child | dead | 2026-06-25T11:51:40Z | 2415 |  |
+| 6ed16a65 | Giảm thiểu các phản hồi không cần thiết từ chat | external | dead | 2026-06-23T07:30:01Z | 5557 | interactive · cwd=/workspace/claude-code-discord-bridge |
+| 745d5248-735f-4649-8801-a7122e776406 | 745d5248-735f-4649-8801-a7122e776406 | child | dead | 2026-06-26T21:21:58Z | 405 |  |
+| 745d5248 | 745d5248 | child | dead | 2026-06-26T21:18:13Z | 408 |  |
+| 75a8c042 | 75a8c042 | external | dead | 2026-06-25T05:20:01Z | 2807 | interactive · cwd=/home/trido/thanhdt/WorkingClaude |
+| 8602c506 | Kiểm tra những tính năng mới | external | dead | 2026-06-24T17:10:01Z | 3537 | interactive · cwd=/home/trido/thanhdt |
+| 9db4a8d3 | Kiểm tra sessions bị mất trên Claude Code | external | shell | 2026-06-27T04:00:01Z | 7 | interactive · cwd=/home/trido/thanhdt/WorkingClaude |
+| Bob | Bob | external | idle | 2026-06-27T04:00:01Z | 7 | remote-control · cwd=/home/trido/thanhdt |
+| DollarBill | DollarBill | child | running | 2026-06-27T04:00:01Z | 7 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/DollarBill |
+| Mafee | Mafee | child | running | 2026-06-27T04:00:01Z | 7 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mafee |
+| Mafee_1589218 | Mafee | child | running | 2026-06-27T03:50:01Z | 17 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mafee |
+| Mafee_1631932 | Mafee | child | dead | 2026-06-26T07:00:01Z | 1267 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mafee |
+| Mafee_1636813 | Mafee | child | dead | 2026-06-26T07:10:01Z | 1257 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mafee |
+| Mafee_1649590 | Mafee | child | dead | 2026-06-26T07:50:01Z | 1217 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mafee |
+| Mike | Mike | child | running | 2026-06-27T04:00:01Z | 7 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Mike_1051877 | Mike | child | dead | 2026-06-25T02:30:01Z | 2977 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Mike_1523744 | Mike | child | dead | 2026-06-26T01:40:01Z | 1587 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Mike_1535580 | Mike | child | dead | 2026-06-26T02:20:01Z | 1547 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Mike_36658 | Mike | child | dead | 2026-06-24T16:10:01Z | 3597 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Mike_800186 | Mike | child | dead | 2026-06-24T15:20:01Z | 3647 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Mike_809904 | Mike | child | dead | 2026-06-24T15:40:01Z | 3627 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Spyros | Spyros | child | working | 2026-06-27T03:50:45Z | 16 |  |
+| Taylor | Taylor | child | running | 2026-06-27T04:00:01Z | 7 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
+| Taylor_1038723 | Taylor | child | dead | 2026-06-25T02:20:01Z | 2987 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
+| Taylor_3555297 | Taylor | child | dead | 2026-06-26T06:10:01Z | 1317 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
+| Taylor_807412 | Taylor | child | dead | 2026-06-24T15:50:01Z | 3617 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
+| Wendy | Wendy | child | dead | 2026-06-26T15:24:58Z | 762 |  |
+| Winston | Winston | child | dead | 2026-06-27T02:16:11Z | 110 |  |
+| Winston_1970085 | Winston | child | dead | 2026-06-27T01:50:01Z | 137 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Winston |
+| Winston_36675 | Winston | child | dead | 2026-06-24T16:10:01Z | 3597 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Winston |
+| WorkingClaude | WorkingClaude | child | dead | 2026-06-26T05:57:36Z | 1329 |  |
+| bfe07d50 | bfe07d50 | child | dead | 2026-06-23T05:41:36Z | 5665 |  |
+| d49385d0-b783-46d9-90af-5e6ad82c3e8d | d49385d0-b783-46d9-90af-5e6ad82c3e8d | child | dead | 2026-06-26T21:17:12Z | 409 |  |
+| d49385d0 | d49385d0 | child | dead | 2026-06-23T15:35:10Z | 5071 |  |
+| d49ab2a1-9870-413c-803c-14c266429972 | d49ab2a1-9870-413c-803c-14c266429972 | child | dead | 2026-06-23T15:35:29Z | 5071 |  |
+| d49ab2a1 | d49ab2a1 | child | dead | 2026-06-23T15:33:13Z | 5073 |  |
+| d4fac88a-686e-4e03-a3f7-3ec532797acf | d4fac88a-686e-4e03-a3f7-3ec532797acf | child | dead | 2026-06-23T05:46:17Z | 5660 |  |
+| d4fac88a | d4fac88a | child | dead | 2026-06-23T05:21:17Z | 5685 |  |
+| d5de9996 | d5de9996 | child | dead | 2026-06-22T15:08:30Z | 6538 |  |
+| df94a54e | df94a54e | child | dead | 2026-06-23T15:26:37Z | 5080 |  |
+| f2545328-3223-4b6c-9ac1-4d4ceab40808 | f2545328-3223-4b6c-9ac1-4d4ceab40808 | child | dead | 2026-06-22T15:02:58Z | 6544 |  |
+| f2545328 | f2545328 | child | dead | 2026-06-22T15:02:45Z | 6544 |  |
+| srv-migrate-dt5g-timing-study | srv-migrate-dt5g-timing-study | external | idle | 2026-06-27T04:00:01Z | 7 | resume · cwd=/home/trido/thanhdt/WorkingClaude |
+| srv-thanhdt | srv-thanhdt | external | idle | 2026-06-27T04:00:01Z | 7 | remote-control · cwd=/home/trido/thanhdt |
