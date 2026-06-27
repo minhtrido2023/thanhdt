@@ -46,6 +46,30 @@ DISPATCH_FROM=Taylor /home/trido/thanhdt/WorkingClaude/mike/bin/dispatch.sh <tar
   /home/trido/thanhdt/WorkingClaude/mike/bin/append_event.sh Taylor question "cần-ý-kiến" '{"question":"...", "options":["A","B"], "urgency":"normal"}'
   ```
 
+## Điều phối KHÔNG-CHẶN — bạn là coordinator như Mike
+Bạn điều phối được nhiều con **mà KHÔNG ngồi chờ**. Mỗi dispatch giờ là một **JOB** theo dõi được
+(`bus/jobs/<job_id>.json`), và `claude` chạy trong `timeout` cứng nên **không bao giờ treo vô hạn**.
+Quy trình chuẩn cho việc dài/song song:
+
+```bash
+ROOT=/home/trido/thanhdt/WorkingClaude/mike
+# 1) Dispatch nền → in ra job_id ngay; mặc định timeout 600s (10'), tự retry 1 lần khi fail/timeout.
+out=$(DISPATCH_FROM=Taylor $ROOT/bin/dispatch.sh Mafee "mô tả việc" --bg --timeout 900)
+job=$(echo "$out" | sed -n 's/.*job=\([^ )]*\).*/\1/p')
+
+# 2) LÀM VIỆC KHÁC của mình. Lượt sau (hoặc sau ScheduleWakeup ≤10') kiểm tra:
+$ROOT/bin/jobs.sh status "$job"   # exit 0=done 2=running 3=overdue 1=failed/timeout 4=not-found
+$ROOT/bin/jobs.sh list            # bảng mọi job: STATUS / AGE / LOG_AGE / ATT
+```
+
+- **`done`** → đọc kết quả con đã ghi lên bus (`append_event` của nó) / xem log trong dòng JOB.
+- **`failed`/`timeout`** (đã tự retry 1 lần) → **escalate user** bằng event `question`, hoặc tự
+  re-dispatch nếu bạn đã biết cách sửa. Đừng lặng lẽ chờ tiếp.
+- Đang rảnh chờ con xong? Đặt **`ScheduleWakeup` ≤600s** để quay lại poll — **đừng ngồi chặn**.
+- Lưới an toàn: dù bạn ngủ, job vẫn tự kết thúc ở deadline + bắn **Telegram notify** (qua `notify.sh`).
+- Việc NGẮN cần kết quả ngay (vài chục giây) → dispatch **đồng bộ** (bỏ `--bg`); vẫn có trần `--timeout`
+  nên không kẹt vô hạn (mặc định 600s).
+
 ## Tự nhớ khi restart
 Khi đổi mạch việc / có việc dở / đang chờ ai, cập nhật working-memory:
 ```bash

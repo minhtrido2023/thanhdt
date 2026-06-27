@@ -134,15 +134,24 @@ Watchdog bắt **2 kiểu chết** (vì `systemctl is-active` KHÔNG đủ — h
   (b) **zombie dai dẳng** → mở agent trong app Claude để re-pair. Watchdog chỉ phát hiện + log, không tự sửa.
 
 ## Công cụ
-- **`bin/dispatch.sh <id> "prompt" [--bg]`** — dispatch việc cho agent (headless `claude -p`). Đồng bộ
-  (mặc định) hoặc bất đồng bộ (`--bg`). Log ở `logs/dispatch_<id>_<ts>.log`.
+- **`bin/dispatch.sh <id> "prompt" [--bg] [--timeout SEC] [--retries N]`** — dispatch việc cho agent
+  (headless `claude -p`). Đồng bộ (mặc định) hoặc bất đồng bộ (`--bg`). Log ở `logs/dispatch_<id>_<ts>.log`.
+  **Điều phối KHÔNG-CHẶN (2026-06-27):** mỗi dispatch là một **JOB** ở `bus/jobs/<job_id>.json`; `claude`
+  bọc trong `timeout` (mặc định 600s) nên **không bao giờ treo vô hạn**. `--bg` trả `job_id` **tức thì**
+  (kể cả khi caller dùng `$(...)`), tự **retry 1 lần** (`--retries`, mặc định 1) khi fail/timeout rồi
+  Telegram notify. **Đừng ngồi chờ** — fan-out `--bg` nhiều con, theo dõi bằng `bin/jobs.sh`, dùng
+  `ScheduleWakeup` để quay lại poll. Đồng bộ dùng cho việc ngắn cần kết quả ngay (vẫn có trần `--timeout`).
   **Routing guards (2026-06-27):** (a) **self-dispatch** (`from==id`) → chặn; (b) **target Mike** chỉ
   cho `DISPATCH_FROM=user` — agent muốn tới Mike phải **escalate** bằng event `question`, KHÔNG spawn
   Mike lạnh để điều phối (đảo cấp + nest headless). Dispatch xuống/ngang bình thường không đổi.
+- **`bin/jobs.sh {list | status <job_id> | wait <job_id> [--timeout SEC]}`** — poll job board (read-only).
+  `status` exit-code: `0=done 2=running 3=overdue 1=failed/timeout 4=not-found`. `list` in STATUS/AGE/
+  LOG_AGE/ATT (LOG_AGE = giây từ lần log ghi cuối → liveness mềm: nghi treo khi log đứng mà chưa tới deadline).
 - `bin/append_event.sh`, `bin/heartbeat.sh`, `bin/consolidate.sh`, `bin/publish_context.sh`,
   `bin/spawn_child.sh`, `bin/watchdog.sh`, `bin/fleet_health.sh`, `bin/is_serving.py`,
   `bin/context_watch.py`, `bin/usage_watch.py`, `bin/session_brief.py`, `bin/discover_sessions.py`,
-  `bin/notify.sh` (push cảnh báo ra Telegram — dùng bởi watchdog), helper JSON `bin/mike_json.py`.
+  `bin/notify.sh` (push cảnh báo ra Telegram — dùng bởi watchdog), `bin/jobs.sh` (poll job board),
+  helper JSON `bin/mike_json.py` (gồm `job-set/job-list/job-get`).
 - `claude agents` (dashboard mọi phiên nền), Monitor (stream live giữa hai nhịp 30').
 - Ghi mọi quyết định điều phối thành event `decision` để audit:
   `bin/append_event.sh Mike decision "<chủ đề>" '<json>'`.
