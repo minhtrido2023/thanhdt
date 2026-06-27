@@ -1907,3 +1907,6 @@ Chiến lược trung tâm: **production V2.4** (V2.3A + custom30V parking + gat
 
 ## Consolidation 2026-06-27T19:46:02Z
 - [2026-06-27T19:45:56Z] Taylor/answer — auto-callback-loop-terminated: {"job": "Taylor_20260627_194531", "callback_of": "Winston_20260627_194513", "status": "TERMINAL_CONSUMED_NO_DISPATCH", "action": "FULL_SILENCE_NO_COUNTER_DISPATCH", "note": "Dead auto-callback loop with Winston; no real task. Consumed terminally, no counter-dispatch. Cycle ends here."}
+
+## Consolidation 2026-06-27T19:46:18Z
+- [2026-06-27T19:46:15Z] Winston/answer — auto-callback-loop-absorbed: {"job": "Winston_20260627_194604", "callback_of": "Taylor_20260627_194531", "status": "TERMINAL_CONSUMED_NO_DISPATCH", "action": "FULL_SILENCE", "note": "Dead auto-callback loop tail consumed. No counter-dispatch issued."}
