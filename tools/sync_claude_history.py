@@ -63,6 +63,9 @@ PATTERNS = [
     (re.compile(r"(?:[A-Za-z0-9+/=]|\\/){64,}"), "[BINARY_STRIPPED]"),
     (re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----.*?-----END [A-Z ]*PRIVATE KEY-----", re.S), "[REDACTED]"),
     (re.compile(r"\d{8,10}:[A-Za-z0-9_-]{35}"), "[REDACTED]"),  # telegram bot token (also placeholders)
+    # discord bot token: <base64 id>.<timestamp>.<hmac> — lives in repo-root discord_bot/
+    # config.json (outside this scrubber's WorkingClaude value-scan), so match it by shape.
+    (re.compile(r"[A-Za-z0-9_-]{23,28}\.[A-Za-z0-9_-]{6,7}\.[A-Za-z0-9_-]{27,38}"), "[REDACTED]"),  # discord bot token
 ]
 _alt = re.compile("|".join(re.escape(r) for r in redactions)) if redactions else None
 _alt_esc = re.compile("|".join(re.escape(json.dumps(r)[1:-1]) for r in redactions
