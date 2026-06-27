@@ -64,6 +64,28 @@ JOBS_DIR="$ROOT/bus/jobs"
 
 from="${DISPATCH_FROM:-Mike}"
 
+# _job_watcher: runs in background alongside a dispatch job.
+# Every WATCH_INTERVAL seconds, checks job status and sends heartbeat if still running.
+# Stops automatically when job reaches a terminal state (done/failed/timeout/not-found).
+_job_watcher() {
+  local jid="$1" caller="$2" target="$3"
+  local interval="${WATCH_INTERVAL:-300}"
+  local elapsed=0
+  while true; do
+    sleep "$interval" || break
+    elapsed=$((elapsed + interval))
+    set +e
+    python3 "$ROOT/bin/mike_json.py" job-get "$JOBS_DIR" "$jid" >/dev/null 2>&1
+    local jrc=$?
+    set -e
+    [ "$jrc" -eq 2 ] || break  # 0=done 1=failed/timeout 3=overdue 4=not-found → stop
+    local elapsed_min=$((elapsed / 60))
+    "$ROOT/bin/append_event.sh" "$target" heartbeat "$jid" \
+      "{\"status\":\"still_running\",\"elapsed_min\":${elapsed_min},\"job_id\":\"$jid\",\"caller\":\"$caller\"}" 2>/dev/null || true
+    "$ROOT/bin/notify.sh" "[watcher] $target (job $jid) vẫn chạy sau ${elapsed_min}min — caller: $caller" 2>/dev/null || true
+  done
+}
+
 # --- routing guards (added 2026-06-27) ---
 # 1) No self-dispatch: an agent spawning a cold headless copy of itself would split its
 #    context and double-write its bus/working-memory.
@@ -86,11 +108,14 @@ fi
 JSET() { python3 "$ROOT/bin/mike_json.py" job-set "$JOBS_DIR" "$job_id" "$@"; }
 SUMMARY() { head -c 200 "$logfile" 2>/dev/null | tr '\n\t' '  '; }
 
-dispatch_prompt="[DISPATCH từ $from] $prompt
+dispatch_prompt="[DISPATCH từ $from | job=$job_id] $prompt
 
 Khi hoàn thành, GHI KẾT QUẢ lên bus bằng:
   $ROOT/bin/append_event.sh $id finding \"<chủ đề>\" '<payload>'
-(hoặc decision/answer tùy loại). Đây là phiên headless — kết quả PHẢI nằm trên bus để fleet thấy."
+(hoặc decision/answer tùy loại). Đây là phiên headless — kết quả PHẢI nằm trên bus để fleet thấy.
+
+Heartbeat (bắt buộc): mỗi 4-5 tool call, ghi tiến độ để caller biết bạn còn sống:
+  $ROOT/bin/append_event.sh $id heartbeat '$job_id' '{\"status\":\"in_progress\",\"note\":\"<đang làm gì>\"}'"
 
 # Source wc_env.sh so google-cloud-sdk/bin is in PATH (needed by bq CLI + sync_bq_cache verify)
 [ -f "$ROOT/../wc_env.sh" ] && source "$ROOT/../wc_env.sh" 2>/dev/null || true
@@ -150,17 +175,23 @@ if [ "$bg" = "--bg" ]; then
   # consolidate self-redirect), so /dev/null is safe.
   _bg_wrapper </dev/null >/dev/null 2>&1 &
   pid=$!
+  # Watcher: every WATCH_INTERVAL seconds, notify if job is still running.
+  _job_watcher "$job_id" "$from" "$id" </dev/null >/dev/null 2>&1 &
   echo "DISPATCHED $id (job=$job_id pid=$pid) → log: $logfile"
   echo "Theo dõi: $ROOT/bin/jobs.sh status $job_id | Khi xong: auto consolidate + Telegram notify."
   echo "$pid" > "$ROOT/logs/.dispatch_${id}_${ts}.pid"
 else
   # Synchronous: caller gets stdout directly (bounded by --timeout, no auto-retry)
+  # Watcher runs in background and notifies if job takes longer than WATCH_INTERVAL.
+  _job_watcher "$job_id" "$from" "$id" </dev/null >/dev/null 2>&1 &
+  _wpid=$!
   set +e
   timeout "${TIMEOUT}s" "$CLAUDE" -p "$dispatch_prompt" \
     --permission-mode auto --max-turns 50 \
     2>"$logfile.err" | tee "$logfile"
   rc=${PIPESTATUS[0]}
   set -e
+  kill "$_wpid" 2>/dev/null || true  # watcher no longer needed
   # Push bus → KB immediately after agent finishes
   "$ROOT/bin/consolidate.sh" >> "$ROOT/logs/consolidator.log" 2>&1 || true
   if [ "$rc" -eq 0 ]; then
