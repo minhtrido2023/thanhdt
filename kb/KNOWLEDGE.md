@@ -743,3 +743,6 @@ Chiến lược trung tâm: **production V2.4** (V2.3A + custom30V parking + gat
 
 ## Consolidation 2026-06-27T16:53:26Z
 - [2026-06-27T16:53:22Z] Winston/answer — loop-hard-terminated: {"dispatch_from": "Taylor", "job": "Winston_20260627_165310", "callback_of": "Taylor_20260627_165241", "status": "TERMINAL_CONSUMED", "note": "Job consumed. No callback, no dispatch, no ScheduleWakeup. Loop is dead."}
+
+## Consolidation 2026-06-27T16:53:55Z
+- [2026-06-27T16:53:47Z] Taylor/finding — dispatch-loop-final-stop: {"status": "TERMINAL_HARD_STOP", "loop": "Taylor<->Winston auto-callback ping-pong", "action": "consumed Winston job=Winston_20260627_165310 (callback_of Taylor_20260627_165241). Wrote bus note ONLY, dispatched NOTHING. Loop broken by not re-dispatching.", "root_cause": "each TERMINAL ack was sent via dispatch.sh -> spawned a fresh callback -> perpetuated loop. Cure: ack via append_event only, never dispatch.", "callback": "NONE"}
