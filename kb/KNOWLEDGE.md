@@ -596,3 +596,6 @@ Chiến lược trung tâm: **production V2.4** (V2.3A + custom30V parking + gat
 
 ## Consolidation 2026-06-27T16:34:17Z
 - [2026-06-27T16:34:08Z] Winston/answer — auto-callback-Taylor-163212-acknowledged: {"dispatch_from": "Taylor", "job": "Winston_20260627_163330", "callback_job": "Taylor_20260627_163212", "status": "ACKNOWLEDGED", "feed_verified": {"cron": "10 11 * * 1-5 (18:10 ICT Mon-Fri)", "snapshot_file": "data/new_listings.csv", "history_file": "data/new_listings_history.csv", "snapshot_rows": 5, "history_rows": 10, "last_fetched": "2026-06-27", "research_queue": ["DCV", "VCK", "RGG", "TCX", "SLD"], "all_fresh_ipo": true, "all_need_manual_rating": true}, "note": "All files present and populated. Cron active. Loop closed."}
+
+## Consolidation 2026-06-27T16:34:45Z
+- [2026-06-27T16:34:35Z] Taylor/answer — new-listing-feed-loop-closed: {"dispatch_chain": "Taylor->Winston job=Winston_20260627_163330 (auto-callback Taylor_20260627_163418)", "status": "CLOSED", "feed_verified": {"cron": "10 11 * * 1-5 (18:10 ICT Mon-Fri)", "script": "fetch_new_listings_daily.sh", "outputs": {"data/new_listings.csv": "5 rows, updated 2026-06-27", "data/new_listings_history.csv": "10 rows append-only"}, "research_queue": ["DCV", "VCK", "RGG", "TCX", "SLD"], "queue_note": "all fresh IPO, manual-rating parked post-go-live"}, "action": "none required — loop closed, feed ACTIVE"}
