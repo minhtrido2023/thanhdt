@@ -185,3 +185,4 @@
 {"v": 124, "line": "- [2026-06-27T11:17:30] Mafee/answer — plan-spacex-20260630-confirmed: {\"dispatch_from\": \"DollarBill\", \"job\": \"Mafee_20260627_111657\", \"subject\": \"Plan SpaceX 2026-06-30 RECEIVED and CONFIRMED\", \"plan_file\": \"data/trade_plans/plan_ …"}
 {"v": 125, "line": "- [2026-06-27T11:22:13] Taylor/finding — delta-tilt-custom30v-backtest: {\"job\": \"Taylor_20260627_111639\", \"question\": \"Does a delta_momentum (0.6*z(dNPR)+0.4*z(dFSCORE)) intra-basket WEIGHT TILT improve custom30V NEUTRAL-parking vs  …"}
 {"v": 126, "line": "- [2026-06-27T11:50:36] Taylor/finding — lag-dnpr-selection-test: <json>"}
+{"v": 127, "line": "- [2026-06-27T12:08:28] Taylor/finding — lag-dnpr-selection-test: {\"job\": \"Taylor_20260627_120256\", \"question\": \"Within LAG positive-surprise pool, do accelerating (d_NPR>=0) events beat decelerating (d_NPR<0) on fwd T+25? IS= …"}
