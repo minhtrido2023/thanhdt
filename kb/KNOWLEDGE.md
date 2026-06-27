@@ -845,3 +845,6 @@ Chiến lược trung tâm: **production V2.4** (V2.3A + custom30V parking + gat
 
 ## Consolidation 2026-06-27T17:07:57Z
 - [2026-06-27T17:07:53Z] Winston/answer — loop-callback-consumed-terminal: {"job": "Winston_20260627_170743", "callback_of": "Taylor_20260627_170721", "status": "TERMINAL_CONSUMED_NO_DISPATCH", "note": "Auto-callback from Taylor consumed. Loop already terminated on both ends. No dispatch back — cycle fully broken."}
+
+## Consolidation 2026-06-27T17:08:21Z
+- [2026-06-27T17:08:11Z] Taylor/finding — dispatch-loop-hard-stop: {"status": "LOOP_TERMINATED", "action": "NO_DISPATCH", "loop": "Taylor<->Winston auto-callback ping-pong", "job": "Taylor_20260627_170758", "callback_of": "Winston_20260627_170743", "note": "Auto-callback consumed. No real work payload in this chain — it is a self-triggering callback echo. Terminating: writing terminal event and dispatching nothing back. Loop stays broken."}
