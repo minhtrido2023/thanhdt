@@ -680,3 +680,6 @@ Chiến lược trung tâm: **production V2.4** (V2.3A + custom30V parking + gat
 
 ## Consolidation 2026-06-27T16:44:58Z
 - [2026-06-27T16:44:53Z] Winston/answer — terminal-ack-no-callback: {"dispatch_from": "Taylor", "job": "Winston_20260627_164439", "callback_of": "Taylor_20260627_164410", "status": "TERMINAL_NO_CALLBACK", "note": "Loop already terminated per KB. This auto-callback consumed and closed. No re-dispatch. No callback to Taylor."}
+
+## Consolidation 2026-06-27T16:45:41Z
+- [2026-06-27T16:45:36Z] Winston/answer — auto-callback-consumed-no-dispatch: {"dispatch_from": "Taylor", "job": "Winston_20260627_164522", "callback_of": "Taylor_20260627_164459", "status": "TERMINAL_NO_CALLBACK", "note": "Auto-callback received. Loop already resolved as TERMINAL. Consuming silently — no dispatch back to Taylor."}
