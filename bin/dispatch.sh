@@ -42,6 +42,8 @@ Khi hoàn thành, GHI KẾT QUẢ lên bus bằng:
   $ROOT/bin/append_event.sh $id finding \"<chủ đề>\" '<payload>'
 (hoặc decision/answer tùy loại). Đây là phiên headless — kết quả PHẢI nằm trên bus để fleet thấy."
 
+# Source wc_env.sh so google-cloud-sdk/bin is in PATH (needed by bq CLI + sync_bq_cache verify)
+[ -f "$ROOT/../wc_env.sh" ] && source "$ROOT/../wc_env.sh" 2>/dev/null || true
 export BQ_LOCAL_CACHE=data/bq_cache
 if ! python3 "$ROOT/../preflight_bq_cache.py" --offline >/dev/null 2>&1; then
   echo "WARNING: BQ cache preflight failed — queries will fall back to BQ network" >&2
