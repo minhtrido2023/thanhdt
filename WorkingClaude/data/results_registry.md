@@ -491,3 +491,50 @@ User: 'we borrow too little; size with Bayes+Kelly' + 'state-blind → assume NE
   2. **Higher leverage does NOT pay** — 1.3→2.0x monotonically WORSE (29.32→27.97%); S4 margin-call NEVER fires (gross < hard cap) so it's "safe" but return-negative. The system is **return-limited at ~1.3–1.5x, well below the ~2.0x ruin cap** — confirms+extends the prior "MGE>1.5 = sizing/path-drag, gain-then-larger-giveback" finding even with reduced forced-selling.
 - **Why Kelly said 'big' but reality says 1.3x:** Kelly priced an ISOLATED single-shot bet (Sharpe 2.17 to a fixed horizon); the live portfolio compounds continuously — leverage interacts with the whole book's path (giveback + borrow carry + opportunity cost). The backtest captures this; Kelly doesn't. **Modest leverage (~1.3x) + KEEP crisis de-risk (no hold-neutral) is the disciplined answer.**
 - **KEEPER unchanged = D (state-blind + PE gate + lever MGE 1.3, no hold-neutral): 30.21/1.84/−20.6/0 VND.** Go-live stays leverage-free. `RECOVERY_HOLD_NEUTRAL` kept OFF as a documented dead-end knob.
+
+---
+## 🟡 CLEAN MGE sweep config D (state-blind+PE, NO hold-neutral) @50B — full 4-point curve (Taylor 2026-06-27, stable cache, all 0 VND)
+CORRECTION: an earlier 2-point read (1.3/1.5 only, on an incomplete cache missing financial rows) led me to over-extrapolate "1.3≈1.5, higher MGE useless." The full 4-point curve on the corrected/stable cache (ticker_prune 753,172 + financial 66,386 + all time=DATE, post Winston fix) REFUTES that.
+
+| MGE | CAGR | Sharpe | MaxDD | Calmar | gross | S4 |
+|---|---|---|---|---|---|---|
+| 1.3 (Spyros-approved) | 30.07 | 1.82 | −20.6 | 1.46 | 1.27 | 0 fires |
+| 1.5 | 30.02 | 1.81 | −20.3 | 1.48 | 1.48 | 0 fires |
+| 1.8 | 29.96 | 1.82 | −19.9 | 1.50 | 1.80 | 0 fires |
+| **2.0** | **30.44** | **1.83** | **−19.1** | **1.60** | 2.00 | 0 fires |
+
+- **2.0 dominates in-sample** (best CAGR/DD/Calmar). MaxDD IMPROVES monotonically with leverage (−20.6→−19.1) — mechanical: the lever deploys AFTER the A∧C capitulation (post-drawdown) so it amplifies the recovery, not the fall; S4 never fires (gross caps cleanly).
+- **BUT the edge is LUMPY** (per-year 1.3→2.0): +8.7pp 2014 / +6.9pp 2020 (the big crisis-bottom lever payoffs) but −3.0pp 2021 / −1.2pp 2022 / −3.7pp **2026-H1** (worse in the most recent regime, near go-live). Sharpe ~flat (1.82→1.83) = extra return bought with extra lumpiness. Profile = opportunity-capture (n~2 big episodes), not a smooth edge.
+- **BINDING question = OUT-OF-history tail at gross 2.0:** a crash worse than COVID (MAE < −26%, the historical worst) would force-sell hard at gross 2.0 — backtest can't show it. Spyros approved only 1.3 (S4 fires −31.5% from entry). **MGE 2.0 dispatched to Spyros for tail re-review.**
+- **Taylor lean (pending Spyros):** **MGE 1.5** as robust default (captures most DD/Calmar gain −20.3/1.48, modest real leverage, far less tail than 2.0); **2.0 = aggressive opt-in IF Spyros clears the gross-2.0 tail AND lumpy/worse-2026-H1 accepted**; **1.3 = conservative Spyros-cleared floor**. Go-live stays leverage-free regardless.
+
+---
+## 🔴 #18 DUAL-VEHICLE pbcombo (1/PB-heavy at bottoms) — harness REJECTS (worse risk-adjusted), keep yieldcombo (Taylor 2026-06-27, 0 VND)
+Wired regime-conditional deploy vehicle: base parking = yieldcombo, deep-cheap deploy-HOLDING days = pbcombo (0.67·1/PB+0.23·1/PCF+0.10·1/PE, crisis-IC weights). Built at basket-build, spliced AFTER the recovery loop on the actual deploy-holding dates (mirror BULL_VEHICLE_C30B). Env `BOTTOM_VEHICLE_PBCOMBO`, default OFF = byte-identical. Spliced 194 deep-cheap deploy-holding days (all 2020+).
+- **@50B MGE1.5 (state-blind+PE), same-snapshot, both self-check 0:**
+
+| | CAGR | Sharpe | MaxDD | Calmar |
+|---|---|---|---|---|
+| OFF (yieldcombo) | 30.02 | 1.81 | −20.3 | **1.48** |
+| ON (pbcombo bottoms) | **30.48** | 1.84 | **−22.3** | 1.37 |
+
+- **VERDICT 🔴 REJECT:** pbcombo deploy = **+0.46pp CAGR but MaxDD −20.3→−22.3 (deeper) and Calmar 1.48→1.37 (WORSE).** Per-year: 2020 COVID −4.3pp (deep-value falls harder in the crash) / 2021 +10.9pp (rebounds harder) — 1/PB names have higher path volatility. The #18 proxy (+1.25%/deploy-day forward return) was REAL but only measured RETURN; the harness exposes the path/DD cost the proxy missed. Risk-adjusted WORSE → not worth +0.46pp CAGR for +2pp drawdown, especially with Spyros risk-first (he rejected MGE 2.0 for the same path-risk logic).
+- **KEEP yieldcombo as the deploy vehicle.** `BOTTOM_VEHICLE_PBCOMBO` + `pbcombo` selector kept OFF as a tested-and-documented dead-end (like RECOVERY_HOLD_NEUTRAL). Optional unexplored: a LIGHTER 1/PB tilt (e.g. 0.3 PB) might trade less DD for less return — not pursued (tuning risk + Spyros risk-first + go-live proximity).
+- **Meta:** 3rd time this session a return-positive proxy/in-sample signal failed on the risk-adjusted/path dimension (hold-neutral, MGE 2.0, pbcombo). Pattern: chase Calmar/path-robustness, not raw CAGR.
+
+---
+## 🟢 V2.4-L BLOCKERS B3 + B4 — implemented + verified (Taylor 2026-06-27, self-check 0)
+- **B3 NAV≤100B lever auto-disable** (Spyros condition + #10 capacity): engine `lever_nav_cap` param checks prior-session NAV per lever-date, skips the inject when NAV>cap; pt_v23 `LEVER_NAV_CAP_B` (default 100). Dynamic (works as live NAV grows). **Verified @MGE1.5 yieldcombo:** @150B → gross **1.000** (lever fully OFF, start>cap) ✓; @50B → gross 1.197 (levers only early <100B bottoms, auto-off on 2023/2025 high-NAV bottoms). @50B CAGR **30.05** ≥ uncapped 30.02 (drops capacity-bound late levers that don't help) — safer AND marginally better. Default-safe; engine `lever_nav_cap=None` = byte-identical for non-lever runs.
+- **B4 PE-freshness fail-closed:** `_pe_pct_asof` returns NaN when prior-month VNINDEX_PE absent OR feed stale >`RECOVERY_PE_MAX_AGE_M` (2) months → `_pe_ok=False` → state-blind lever DISABLED → falls to leverage-free. Inert historically (PE always fresh → byte-identical); it is the LIVE feed-freeze guard.
+- **V2.4-L final @50B (all gates on, MGE1.5, yieldcombo deploy): CAGR 30.05 / Sharpe 1.82 / MaxDD −20.1 / Calmar 1.49 / self-check 0.**
+- **Blocker status:** B2 (Spyros episode breaker −15%) DONE; B3+B4 DONE+verified; **B1 (Mafee DNSE margin account / loan_package_id) = only remaining** → if cash-only, V2.4-L runs paper, core V2.4 lives leverage-free.
+
+---
+## 📛 NAMING (user 2026-06-27): **V2.5 = V2.4 + leverage** — canonical
+- **V2.4** = leverage-free core (custom30V NEUTRAL-only parking + recovery-park leverage-free). **Go-live 2026-06-30.**
+- **V2.5** = V2.4 + the LEVERAGE layer (was "V2.4-L"; renamed for simplicity). The ONLY difference vs V2.4 = leverage.
+  - = state-blind + PE-gate recovery-LEVER, **MGE 1.5** (Spyros-approved, MGE_HARD 1.65), deploy vehicle = yieldcombo (pbcombo rejected), + safety stack: 4 entry-guards + episode breaker −15% (Spyros) + NAV≤100B auto-disable (B3) + PE-freshness fail-closed (B4).
+  - **Account: 0002023347** (DNSE RocketX margin, loan_package_id=1840, borrow 12.5%/yr, 28 custom30V eligible collateral) — user-confirmed 2026-06-27.
+  - **@50B: 30.05% / Sharpe 1.82 / MaxDD −20.1 / Calmar 1.49 / self-check 0** at real 12.5% borrow (lever net +1.00pp vs leverage-free).
+  - Risk layering (Mafee-confirmed): Spyros −15% NAV → S4 internal ~−31% NAV → DNSE call −44.4% **portfolio** (=−66.7% NAV @1.5x). System always cuts well before the broker.
+  - **Status:** R&D-complete, all 4 blockers cleared. Live-activation = POST-go-live (needs live-recommend integration). Go-live 2026-06-30 = V2.4 leverage-free, unaffected. All V2.5 env knobs default OFF = byte-identical.

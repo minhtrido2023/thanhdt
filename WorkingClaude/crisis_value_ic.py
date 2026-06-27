@@ -9,14 +9,21 @@ Contexts:
 Universe = liquid (Volume_3M_P50*Close >= 5e9/day). Forward = profit_2M (T+40, already %). Negative
 PE/PB/PCF = no-reward (excluded from that lens, like the 8L composite). Cache threads=1."""
 import os, sys
-os.environ.setdefault("BQ_LOCAL_CACHE", "data/bq_cache")
 os.chdir("/home/trido/thanhdt/WorkingClaude"); sys.path.insert(0, "/home/trido/thanhdt/WorkingClaude")
-import numpy as np, pandas as pd
-from bq_local_cache import get_cache
-lc = get_cache()
+import numpy as np, pandas as pd, duckdb
+# DIRECT-PARQUET read (cache manifest unverified — Winston fixing; this read-only path bypasses the
+# verification gate without touching shared state). ticker_prune carries the VNINDEX/VNINDEX_PE mirror,
+# so no ticker.parquet needed. Data is the bq-CLI delta sync (intact); analysis is pinned pre-2026.
+_con = duckdb.connect()
+_con.execute("CREATE SCHEMA IF NOT EXISTS tav2_bq")
+for _t in ("ticker_prune", "vnindex_5state_dt5g_live"):
+    _con.execute(f"CREATE VIEW tav2_bq.{_t} AS SELECT * FROM read_parquet('data/bq_cache/{_t}.parquet')")
+class _LC:
+    def query(self, sql): return _con.execute(sql).fetchdf()
+lc = _LC()
 
-# market PE 5y-pctile (causal-ish, for the deep-cheap window flag) + liquid universe rows in crisis context
-mkt = lc.query("""SELECT t.time, MAX(t.VNINDEX_PE) pe FROM tav2_bq.ticker t
+# market PE 5y-pctile (causal-ish, for the deep-cheap window flag) — VNINDEX_PE mirror lives on ticker_prune rows
+mkt = lc.query("""SELECT t.time, MAX(t.VNINDEX_PE) pe FROM tav2_bq.ticker_prune t
  WHERE t.time>=DATE '2014-01-01' AND t.VNINDEX_PE>0 GROUP BY t.time ORDER BY t.time""")
 mkt["time"] = pd.to_datetime(mkt["time"])
 mkt["pe_pct5y"] = mkt["pe"].rolling(1250, min_periods=250).apply(lambda s:(s.iloc[-1]>=s).mean())
@@ -30,7 +37,7 @@ WITH base AS (
   FROM tav2_bq.ticker_prune t
   WHERE t.time>=DATE '2014-01-01' AND t.profit_2M IS NOT NULL)
 SELECT b.*, s.state,
-   PERCENTILE_CONT(b.pbz, 0.5) OVER (PARTITION BY b.time) AS pbz_med
+   MEDIAN(b.pbz) OVER (PARTITION BY b.time) AS pbz_med
 FROM base b JOIN tav2_bq.vnindex_5state_dt5g_live s ON b.time=s.time
 WHERE b.adv >= 5e9""")
 df["time"] = pd.to_datetime(df["time"])

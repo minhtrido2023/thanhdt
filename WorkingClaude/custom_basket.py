@@ -239,10 +239,14 @@ FROM tav2_bq.ticker t WHERE t.D_RSI IS NOT NULL AND t.time BETWEEN DATE '{eff_st
 GROUP BY t.ticker, q""")
         _r["q"] = pd.to_datetime(_r["q"])
         return _r.pivot_table(index="q", columns="ticker", values="r")
-    cfo_piv = None; pe_piv = None; pcf_piv = None; mom_piv = None; rsi_piv = None
+    cfo_piv = None; pe_piv = None; pcf_piv = None; mom_piv = None; rsi_piv = None; pb_piv = None
     if SELECT_MODE == "yieldcombo":
         # custom30V: liquidity is GATE only; rank PURELY by combined value-yield rank(1/PE)+rank(1/PCF)
         pe_piv = _yield_piv("PE"); pcf_piv = _yield_piv("PCF")
+    elif SELECT_MODE == "pbcombo":
+        # BOTTOM-DEPLOY vehicle (#18, Taylor 2026-06-27): 1/PB dominates at deep-cheap bottoms (crisis-IC
+        # +0.222 vs −0.019 full-period) → weight 0.67*rank(1/PB)+0.23*rank(1/PCF)+0.10*rank(1/PE).
+        pb_piv = _yield_piv("PB"); pcf_piv = _yield_piv("PCF"); pe_piv = _yield_piv("PE")
     elif SELECT_MODE == "petop":
         pe_piv = _yield_piv("PE")
     elif SELECT_MODE == "pemom":
@@ -333,6 +337,17 @@ GROUP BY t.ticker, q""")
             pe_r  = pd.Series({t:(pe_s.get(t,np.nan)  if pe_s  is not None else np.nan) for t,_ in pool}).rank(pct=True).fillna(0.5)
             pcf_r = pd.Series({t:(pcf_s.get(t,np.nan) if pcf_s is not None else np.nan) for t,_ in pool}).rank(pct=True).fillna(0.5)
             score = {t: pe_r[t] + pcf_r[t] for t,_ in pool}
+            gated = sorted(pool, key=lambda tr: score[tr[0]], reverse=True)
+        elif SELECT_MODE == "pbcombo" and gated:
+            # bottom-deploy: 1/PB-heavy crisis-IC weights (0.67/0.23/0.10) within the liquid+gated pool.
+            pool = gated[:CFO_POOL]
+            pb_s  = pb_piv.loc[src_q]  if (pb_piv  is not None and src_q in pb_piv.index)  else None
+            pcf_s = pcf_piv.loc[src_q] if (pcf_piv is not None and src_q in pcf_piv.index) else None
+            pe_s  = pe_piv.loc[src_q]  if (pe_piv  is not None and src_q in pe_piv.index)  else None
+            pb_r  = pd.Series({t:(pb_s.get(t,np.nan)  if pb_s  is not None else np.nan) for t,_ in pool}).rank(pct=True).fillna(0.5)
+            pcf_r = pd.Series({t:(pcf_s.get(t,np.nan) if pcf_s is not None else np.nan) for t,_ in pool}).rank(pct=True).fillna(0.5)
+            pe_r  = pd.Series({t:(pe_s.get(t,np.nan)  if pe_s  is not None else np.nan) for t,_ in pool}).rank(pct=True).fillna(0.5)
+            score = {t: 0.67*pb_r[t] + 0.23*pcf_r[t] + 0.10*pe_r[t] for t,_ in pool}
             gated = sorted(pool, key=lambda tr: score[tr[0]], reverse=True)
         elif SELECT_MODE in ("petop", "pemom") and gated:
             # custom30B bull sleeve: liquidity = floor/GATE only; rank by 1/PE (bull IC champion),

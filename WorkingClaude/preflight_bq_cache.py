@@ -162,12 +162,15 @@ def check_spot_bq():
             return
 
         import subprocess
+        _bq_bin = os.environ.get("BQ_BIN", "/home/trido/google-cloud-sdk/bin/bq")
+        _sdk_bin = os.path.dirname(_bq_bin)
+        _env = {**os.environ, "PATH": os.environ.get("PATH", "") + ":" + _sdk_bin}
         result = subprocess.run(
-            ["bq", "query", "--use_legacy_sql=false", "--format=json",
+            [_bq_bin, "query", "--use_legacy_sql=false", "--format=json",
              "--project_id=lithe-record-440915-m9",
              "SELECT t.time, t.Close FROM tav2_bq.ticker AS t "
              "WHERE t.ticker='VNINDEX' ORDER BY t.time DESC LIMIT 1"],
-            capture_output=True, text=True, timeout=30,
+            capture_output=True, text=True, timeout=30, env=_env,
         )
         if result.returncode != 0:
             err(f"spot check: bq CLI failed — {result.stderr[:200]}")

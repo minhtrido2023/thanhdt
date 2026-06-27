@@ -8,4 +8,9 @@ cd /home/trido/thanhdt/WorkingClaude
 source wc_env.sh
 
 python3 sync_bq_cache.py --delta 2>&1
-python3 preflight_bq_cache.py 2>&1
+PREFLIGHT_OUT=$(python3 preflight_bq_cache.py 2>&1)
+echo "$PREFLIGHT_OUT"
+if echo "$PREFLIGHT_OUT" | grep -q "RESULT: FAIL"; then
+  /home/trido/thanhdt/WorkingClaude/mike/bin/notify.sh \
+    "[BQ cache] sync_bq_cache_daily FAIL — preflight không pass. Xem data/bq_cache/sync.log để debug." 2>/dev/null || true
+fi

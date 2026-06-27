@@ -11,17 +11,37 @@ Cache dir: data/bq_cache/ (relative to WORKDIR).
 Manifest: data/bq_cache/manifest.json — records row counts, max dates, verification.
 """
 import argparse
+import io
 import json
 import os
+import subprocess
 import sys
 import time
 
 import pandas as pd
 
 WORKDIR = "/home/trido/thanhdt/WorkingClaude"
+
+# Columns that must be stored as date32 (not VARCHAR) in parquet.
+# quarter is intentionally excluded — it's a string like "2025Q3".
+DATE_COLS = {"time", "Release_Date", "rebal_date", "effective_from", "effective_to"}
+
+
+def _apply_date_dtypes(df: pd.DataFrame) -> pd.DataFrame:
+    """Cast known date columns from string → datetime.date so parquet stores date32."""
+    for col in DATE_COLS:
+        if col in df.columns and df[col].dtype == object:
+            df[col] = pd.to_datetime(df[col], errors="coerce").dt.date
+    return df
 CACHE_DIR = os.path.join(WORKDIR, "data", "bq_cache")
 PROJECT = "lithe-record-440915-m9"
 MANIFEST_PATH = os.path.join(CACHE_DIR, "manifest.json")
+
+# Use bq CLI (gcloud auth login creds) — no ADC/Application-Default required
+BQ_BIN = os.environ.get("BQ_BIN", "/home/trido/google-cloud-sdk/bin/bq")
+# bq internally calls gcloud (same SDK dir); ensure it's on PATH for subprocess calls
+_SDK_BIN = os.path.dirname(BQ_BIN)
+_SUBPROCESS_ENV = {**os.environ, "PATH": os.environ.get("PATH", "") + ":" + _SDK_BIN}
 
 # ── Table definitions ────────────────────────────────────────────────────────
 # Each table: full SQL for initial download, partition column for delta,
@@ -164,47 +184,33 @@ def log(msg: str):
     print(f"{ts} {msg}", flush=True)
 
 
-_bq_client = None
-_bq_client_ts = 0
+def bq_query_to_df(sql: str, max_rows: int = 10_000_000) -> pd.DataFrame:
+    """Run a BQ query via bq CLI subprocess, return DataFrame.
 
-def _get_bq_client(force_refresh=False):
-    global _bq_client, _bq_client_ts
-    now = time.time()
-    if _bq_client is not None and not force_refresh and (now - _bq_client_ts) < 2400:
-        return _bq_client
-    import subprocess as _sp
-    from google.cloud import bigquery
-    try:
-        _bq_client = bigquery.Client(project=PROJECT)
-    except Exception:
-        token = _sp.run(
-            ["gcloud", "auth", "print-access-token"],
-            capture_output=True, text=True, check=True,
-        ).stdout.strip()
-        from google.oauth2.credentials import Credentials
-        _bq_client = bigquery.Client(
-            project=PROJECT, credentials=Credentials(token)
-        )
-    _bq_client_ts = now
-    return _bq_client
-
-
-def bq_query_to_df(sql: str) -> pd.DataFrame:
-    """Run a BQ query via Python SDK, return DataFrame.
-
-    Refreshes the auth token if it expires mid-stream (gcloud tokens last ~60 min).
+    Uses gcloud auth login credentials (no ADC/Application-Default required).
     """
     sql = sql.format(project=PROJECT)
-    for attempt in range(2):
-        client = _get_bq_client(force_refresh=(attempt > 0))
-        try:
-            job = client.query(sql)
-            return job.to_dataframe(create_bqstorage_client=False)
-        except Exception as e:
-            if "refresh" in str(e).lower() and attempt == 0:
-                log(f"  Token expired, refreshing...")
-                continue
-            raise
+    result = subprocess.run(
+        [
+            BQ_BIN, "query",
+            "--use_legacy_sql=false",
+            f"--project_id={PROJECT}",
+            "--format=csv",
+            f"--max_rows={max_rows}",
+        ],
+        input=sql,
+        capture_output=True,
+        text=True,
+        timeout=300,
+        env=_SUBPROCESS_ENV,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"bq CLI error: {result.stderr.strip()}")
+    stdout = result.stdout.strip()
+    if not stdout:
+        return pd.DataFrame()
+    df = pd.read_csv(io.StringIO(stdout))
+    return _apply_date_dtypes(df)
 
 
 def load_manifest() -> dict:
@@ -345,8 +351,35 @@ def download_table(name: str, config: dict, manifest: dict, delta: bool):
     log(f"  {name}: {len(df)} rows, {size_mb:.1f} MB")
 
 
+def _check_parquet_date_dtypes(pq_path: str) -> list:
+    """Return list of 'col:type' for DATE_COLS stored as non-date in parquet schema."""
+    try:
+        import pyarrow.parquet as pq
+        path = pq_path.rstrip("/")
+        if pq_path.endswith("/"):
+            files = [
+                os.path.join(path, f)
+                for f in os.listdir(path)
+                if f.endswith(".parquet")
+            ]
+            if not files:
+                return []
+            schema = pq.read_schema(files[0])
+        else:
+            schema = pq.read_schema(path)
+        bad = []
+        for field in schema:
+            if field.name in DATE_COLS:
+                t = str(field.type)
+                if "date" not in t.lower():
+                    bad.append(f"{field.name}:{t}")
+        return bad
+    except Exception as e:
+        return [f"schema_read_error:{e}"]
+
+
 def verify_all(manifest: dict) -> bool:
-    """Compare local cache against BQ row counts and max dates."""
+    """Compare local cache against BQ row counts, max dates, and date column dtypes."""
     log("Verifying cache against BigQuery...")
     all_ok = True
     for name, config in TABLES.items():
@@ -356,9 +389,11 @@ def verify_all(manifest: dict) -> bool:
             all_ok = False
             continue
 
-        pq_path = os.path.join(CACHE_DIR, table_info["file"])
-        if not os.path.exists(pq_path):
-            log(f"  {name}: parquet file missing")
+        file_ref = table_info.get("file", f"{name}.parquet")
+        pq_path = os.path.join(CACHE_DIR, file_ref)
+        # chunked tables store a trailing slash dir; single tables store .parquet
+        if not os.path.exists(pq_path.rstrip("/")):
+            log(f"  {name}: parquet file/dir missing ({pq_path})")
             all_ok = False
             continue
 
@@ -389,13 +424,20 @@ def verify_all(manifest: dict) -> bool:
             local_max = "n/a"
             date_ok = True
 
-        if cnt_ok and date_ok:
+        # dtype check: date columns must NOT be stored as VARCHAR/string in parquet
+        dtype_bad = _check_parquet_date_dtypes(pq_path)
+
+        if cnt_ok and date_ok and not dtype_bad:
             log(f"  {name}: OK ({local_cnt} rows, max={local_max})")
         else:
-            log(
-                f"  {name}: MISMATCH — local {local_cnt} vs BQ {bq_cnt}, "
-                f"max local={local_max} vs BQ={bq_max}"
-            )
+            issues = []
+            if not cnt_ok:
+                issues.append(f"count local={local_cnt} vs BQ={bq_cnt}")
+            if not date_ok:
+                issues.append(f"max_time local={local_max} vs BQ={bq_max}")
+            if dtype_bad:
+                issues.append(f"DTYPE_MISMATCH {dtype_bad}")
+            log(f"  {name}: FAIL — {'; '.join(issues)}")
             all_ok = False
 
     manifest["verified"] = all_ok

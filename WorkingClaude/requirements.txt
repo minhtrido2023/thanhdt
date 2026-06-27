@@ -8,11 +8,13 @@ numpy>=1.24.0,<2.0.0
 # HTTP for Telegram bot API
 requests>=2.31.0,<3.0.0
 
-# Google Cloud (alternative to bq CLI if direct API access preferred)
-# Uncomment if migrating from bq CLI to native Python BigQuery client:
-# google-cloud-bigquery>=3.13.0
-# google-auth>=2.23.0
-# db-dtypes>=1.1.0  # for BigQuery DataFrame conversion
+# Google Cloud — required for sync_bq_cache.py and BQ local cache
+google-cloud-bigquery>=3.13.0
+google-auth>=2.23.0
+db-dtypes>=1.1.0  # for BigQuery DataFrame conversion
+
+# DuckDB — required for bq_local_cache.py (local parquet cache queries)
+duckdb==1.5.4
 
 # Optional: matplotlib for chart generation in Telegram (if send_charts=true)
 # matplotlib>=3.7.0

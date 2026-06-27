@@ -334,6 +334,7 @@ def simulate(signals_df, prices, vni_dates, *,
              # (cash<0 → gross>1), capped by max_gross_exposure, protected by S4 margin-call, unwinds via the
              # 4c prefill sell as regime/pool normalizes. Default OFF (etf_lever_by_date=None).
              etf_lever_by_date=None,         # dict {pd.Timestamp: lever_frac} — levered parking buy on these dates
+             lever_nav_cap=None,             # B3 (#10 capacity): if prior-session NAV > this, auto-disable the lever (small-account only). None=no cap.
 
              lows=None,                    # dict {ticker: {date: daily_low}} for INTRADAY_LOW stop mode
              stop_mode="CLOSE",            # "CLOSE" (default, today's close) or "INTRADAY_LOW" (today's low touches stop)
@@ -1348,7 +1349,9 @@ def simulate(signals_df, prices, vni_dates, *,
         #     margin-able — the production realization of lever-at-bottom. Capped so gross ≤ max_gross_exposure;
         #     S4 margin-call protects the downside; unwinds via the 4c prefill sell as the pool normalizes.
         #     Borrow interest charged on the resulting cash<0 (step 4). Logged buy_etf → self-check 0 VND.
-        if etf_lever_by_date and today in etf_lever_by_date and vn30_underlying is not None:
+        _nav_for_cap = nav_history[-1]["nav"] if nav_history else nav_init   # B3: causal prior-session NAV
+        if (etf_lever_by_date and today in etf_lever_by_date and vn30_underlying is not None
+                and not (lever_nav_cap is not None and _nav_for_cap > lever_nav_cap)):   # B3: lever auto-OFF above small-account cap
             _lf = etf_lever_by_date[today]
             _px_lev = vn30_underlying.get(today)
             if _lf > 0 and _px_lev is not None and not pd.isna(_px_lev) and _px_lev > 0:

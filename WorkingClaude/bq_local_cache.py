@@ -92,12 +92,17 @@ class BQLocalCache:
                 if c[0] in self._DATE_COLS and c[1] == "VARCHAR"
             ]
             if to_cast:
+                print(
+                    f"[BQ_LOCAL_CACHE] {table_name}: casting VARCHAR→DATE "
+                    f"for {to_cast} (parquet has wrong dtype — re-run sync_bq_cache.py)",
+                    flush=True,
+                )
                 self.conn.execute(f"DROP VIEW {table_name}")
                 parts = []
                 cast_set = set(to_cast)
                 for c in cols:
                     if c[0] in cast_set:
-                        parts.append(f"CAST({c[0]} AS DATE) AS {c[0]}")
+                        parts.append(f"TRY_CAST({c[0]} AS DATE) AS {c[0]}")
                     else:
                         parts.append(c[0])
                 self.conn.execute(
@@ -242,6 +247,14 @@ def get_cache(cache_dir: str | None = None) -> BQLocalCache | None:
         n = len(_cache_instance.manifest.get("tables", {}))
         print(f"[BQ_LOCAL_CACHE] ready — {n} tables from {cache_dir}", flush=True)
         return _cache_instance
+    except (ImportError, ModuleNotFoundError) as e:
+        print(
+            f"[BQ_LOCAL_CACHE] WARNING: BQ_LOCAL_CACHE is set but duckdb import failed "
+            f"({e}) — FALLING BACK TO REAL BQ (non-deterministic, slow, costs money). "
+            f"Fix: pip install duckdb==1.5.4",
+            flush=True,
+        )
+        return None
     except Exception as e:
-        print(f"[BQ_LOCAL_CACHE] init failed: {e}", flush=True)
+        print(f"[BQ_LOCAL_CACHE] init failed: {e} — falling back to real BQ", flush=True)
         return None

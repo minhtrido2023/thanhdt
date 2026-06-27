@@ -67,3 +67,28 @@ journalctl -u discord-claude-bot -f      # live logs
 See `config.example.json`. Notable: `permission_mode`
 (`bypassPermissions|acceptEdits|auto|dontAsk|plan`), `model` (e.g.
 `claude-opus-4-8`), `require_mention`, `allowed_channel_ids`, `timeout_seconds`.
+
+## Restart / supervisor (cron + scripts, no systemd)
+
+The bot is kept alive by **cron + idempotent scripts** (ported from the Slack-bot
+design) instead of systemd, so restarts never need `sudo`.
+
+- `run.sh`     — the real foreground bot process (sources optional `.env`, exec's python).
+- `start.sh`   — idempotent launcher: no-op if already alive, else `nohup run.sh`. Writes `bot.pid`.
+- `restart.sh` — kill → wait ≤30s → SIGKILL stragglers → `start.sh`. `--delay N` sleeps N s before killing.
+- `stop.sh`    — kill only (cron revives within 5 min; comment out cron to stop for good).
+
+Crontab (supervisor):
+```
+@reboot      /home/trido/thanhdt/discord_bot/start.sh
+*/5 * * * *  /home/trido/thanhdt/discord_bot/start.sh
+```
+
+**Self-restart from a chat turn** (after editing code/config) — must detach so the
+reply posts before the bot that posts it is replaced:
+```
+setsid /home/trido/thanhdt/discord_bot/restart.sh --delay 20 >/dev/null 2>&1 </dev/null &
+```
+Discord users on the allowlist can also send `!restart` (same detached+delayed path).
+
+To stop for good: comment out the two crontab lines, then `./stop.sh`.

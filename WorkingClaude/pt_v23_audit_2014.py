@@ -396,6 +396,10 @@ RECOVERY_LEVER_FRAC   = float(os.environ.get("RECOVERY_LEVER_FRAC", "0.30"))   #
 # MGE, protected by S4 margin-call. This is the production realization the earlier "structurally infeasible"
 # verdict said was impossible. Requires MGE>1. Default OFF.
 RECOVERY_LEVER_PARK   = os.environ.get("RECOVERY_LEVER_PARK", "0") == "1"
+# BLOCKER-3 (Spyros condition, #10 capacity): hard NAV cap that auto-DISABLES the lever above a small-account
+# threshold (lever is capacity-bound >~100B: @150B it cost −0.95pp). Engine checks prior-session NAV per lever
+# date → skips the inject when NAV>cap (dynamic, works as live NAV grows). Default 100B.
+LEVER_NAV_CAP_B = float(os.environ.get("LEVER_NAV_CAP_B", "100"))
 # STATE-BLIND deep-cheap re-risk (Taylor 2026-06-26, user crisis-audit follow-up): drop the CRISIS/BEAR
 # state filter on the recovery deploy/lever, but require an ABSOLUTE-cheapness gate PE_pctile5y <= MAX so the
 # deploy still fires ONLY in genuine fear. Catches fast-crash-in-bull (2025 tariff: BULL state blocked it today,
@@ -416,6 +420,13 @@ RECOVERY_PE_PCT_MAX  = float(os.environ.get("RECOVERY_PE_PCT_MAX", "1.0"))   # a
 # documented dead-end; the sensible 'don't churn the core' part is already in NEUTRAL-only parking + quarterly rebal.
 RECOVERY_HOLD_NEUTRAL = os.environ.get("RECOVERY_HOLD_NEUTRAL", "0") == "1"
 _HOLD_FLOOR = float(PARK_STATES_DICT.get(3, 0.0)) if RECOVERY_HOLD_NEUTRAL else 0.0   # NEUTRAL parking weight
+# BOTTOM-DEPLOY VEHICLE (#18, Taylor 2026-06-27): on deep-cheap deploy-HOLDING days, the parking/levered
+# lots track a 1/PB-heavy 'pbcombo' basket (crisis-IC: 1/PB +0.222 at bottoms vs −0.019 full-period)
+# instead of yieldcombo; base parking stays yieldcombo otherwise (regime-conditional selector). Built at
+# basket-build, SPLICED after the recovery loop on the ACTUAL deploy-holding dates (vehicle matches lots).
+# Mirrors BULL_VEHICLE_C30B. Default OFF => byte-identical.
+BOTTOM_VEHICLE_PBCOMBO = os.environ.get("BOTTOM_VEHICLE_PBCOMBO", "0") == "1"
+_pbcombo_level = None; _pbcombo_adv = None; _deepcheap_deploy_dates = set()
 # S4 STRESS hook (Taylor 2026-06-26): force a levered parking inject on arbitrary dates (comma-sep YYYY-MM-DD),
 # BYPASSING the A∧C gate — to stress the margin-call by levering INTO a fall (e.g. the 2022 top). Test-only.
 LEVER_STRESS_DATES = os.environ.get("LEVER_STRESS_DATES", "")
@@ -686,6 +697,21 @@ GROUP BY t.time ORDER BY t.time""")
                 if state_by_date.get(_d) in (4, 5): etf_adv_lookup[_d] = _av
             print(f"  [BULL VEHICLE] custom30B spliced on bull/exbull days (pemom, floor={_envB['BASKET_LIQ_FLOOR_B']}B, "
                   f"mom={_envB['BASKET_MOM_W']}); {len(sorted(_memB['ticker'].unique()))} c30B union names")
+        # BOTTOM VEHICLE = pbcombo (#18): BUILD the 1/PB-heavy level here; SPLICE later on the actual
+        # deep-cheap deploy-holding dates (known only after the recovery loop). Same PIT params as the base.
+        if BOTTOM_VEHICLE_PBCOMBO:
+            _envP = {"BASKET_SELECT": "pbcombo"}; _saveP = {k: os.environ.get(k) for k in _envP}
+            os.environ.update({k: str(v) for k, v in _envP.items()})
+            _qP, _rebP, _gateP = _PIT_PARAMS[ETF_LIQ]
+            _lvlP, _advP, _memP, _bxP = cb.build_pit(bq, START_DATE, END_DATE, quality=_qP, rebal=_rebP,
+                                                     gate_rating=_gateP, weight_scheme=BASKET_WT, top_n=BASKET_TOPN,
+                                                     name_cap=BASKET_NAMECAP, qtilt=BASKET_QTILT)
+            for k, v in _saveP.items():
+                if v is None: os.environ.pop(k, None)
+                else: os.environ[k] = v
+            _pbcombo_level = _lvlP; _pbcombo_adv = _advP
+            print(f"  [BOTTOM VEHICLE] pbcombo built ({len(sorted(_memP['ticker'].unique()))} union names) "
+                  f"— splice on deep-cheap deploy-holding days (post recovery loop)")
     if not _IS_CUSTOM:
         _a["time"] = pd.to_datetime(_a["time"])
         _a["adv"] = _a["tv"].rolling(60, min_periods=20).mean()
@@ -1163,9 +1189,20 @@ if RECOVERY_PARK:
         _pe2 = _pe2[_pe2["vpe"] > 0].reset_index(drop=True)
         _pe2["pct5y"] = _pe2["vpe"].rolling(60, min_periods=24).apply(lambda s: (s.iloc[-1] >= s).mean())
         _pepct = {r["ym"]: r["pct5y"] for _, r in _pe2.iterrows() if pd.notna(r["pct5y"])}
+    _pe_last_month = max(_pepct.keys()) if _pepct else None
+    _PE_MAX_AGE_M = int(os.environ.get("RECOVERY_PE_MAX_AGE_M", "2"))   # B4: max months the PE feed may lag
     def _pe_pct_asof(dd):
+        # BLOCKER-4: PE-freshness FAIL-CLOSED. Need the prior completed month's VNINDEX_PE present AND the feed
+        # not stale (latest PE month within _PE_MAX_AGE_M of dd). Missing/stale -> NaN -> _pe_ok=False ->
+        # state-blind lever DISABLED -> falls back to leverage-free (safe). Inert historically (PE always fresh).
         pm = (pd.Timestamp(dd).to_period("M") - 1).strftime("%Y-%m")   # prior completed month (causal)
-        return _pepct.get(pm, np.nan)
+        if pm not in _pepct:
+            return np.nan                                              # prior-month PE absent (stale/missing feed)
+        if _pe_last_month is not None:
+            _lag_m = (pd.Timestamp(dd).to_period("M") - pd.Period(_pe_last_month, "M")).n
+            if _lag_m > _PE_MAX_AGE_M:
+                return np.nan                                         # feed frozen >_PE_MAX_AGE_M months -> fail-closed
+        return _pepct[pm]
     def _dep_m(dd):
         if not RECOVERY_DEP_GATE: return 1.0
         if RECOVERY_GATE_MODE == "fed":
@@ -1402,6 +1439,7 @@ if RECOVERY_PARK:
                     w = base_st + m * frac * (RECOVERY_WMAX - base_st)
                 if w > base_st + 0.01:
                     base[st] = w; _nrec += 1; _msum += m
+                    if BOTTOM_VEHICLE_PBCOMBO: _deepcheap_deploy_dates.add(pd.Timestamp(d))
             else:
                 # pb_z rose above threshold: reset episode
                 if RECOVERY_GRADUAL and _grad_episode_active:
@@ -1503,6 +1541,18 @@ if RECOVERY_LEVER_BOTTOM and _lever_dates:
                 RECOVERY_PARK_BY_DATE[vni_dates[_j]] = dict(PARK_STATES_DICT)   # drop recovery boost → no parking competition
     print(f"  [lever-at-bottom] {len(_kept)} episode(s) -> CAPITLEV carries custom30 gross={RECOVERY_LEVER_FRAC} "
           f"(parking suppressed over {CAPIT_HOLD}d hold so the buy borrows): {[d.date().isoformat() for d in _kept]}")
+# BOTTOM-VEHICLE splice (#18): on the deep-cheap deploy-HOLDING dates, the parking vehicle tracks pbcombo
+# (1/PB-heavy) daily returns instead of yieldcombo, chained (cumprod) so held lots MTM on the active basket
+# with no transition jump. ADV also spliced so the 20%-ADV parking cap uses pbcombo's liquidity there.
+if BOTTOM_VEHICLE_PBCOMBO and _pbcombo_level and _deepcheap_deploy_dates:
+    _sV = pd.Series(vn30_underlying).sort_index()
+    _sP = pd.Series(_pbcombo_level).reindex(_sV.index)
+    _isdc = pd.Series([d in _deepcheap_deploy_dates for d in _sV.index], index=_sV.index)
+    _r = _sV.pct_change().where(~_isdc, _sP.pct_change()).fillna(0.0)
+    vn30_underlying = ((1 + _r).cumprod() * float(_sV.iloc[0])).to_dict(); CUSTOM_LEVEL = vn30_underlying
+    for _d in _deepcheap_deploy_dates:
+        if _pbcombo_adv and _d in _pbcombo_adv: etf_adv_lookup[_d] = _pbcombo_adv[_d]   # in-place → ETF_LIQ_KW sees it
+    print(f"  [BOTTOM VEHICLE] pbcombo spliced on {len(_deepcheap_deploy_dates)} deep-cheap deploy-holding days")
 BAL_KW = dict(allowed_tiers=RS["allowed_tiers"], max_positions=MAX_POS_V11,
               hold_days=45, stop_loss=-0.20, min_hold=2, slippage=0.0, init_nav=BAL_NAV,
               sector_limit_per_sector={8: 4}, ticker_sector_map=sec_map,
@@ -1537,7 +1587,8 @@ if _mge:                                                    # real-margin: open 
         print(f"  [S5 regime-delever BAL] ON | cap={REGIME_DELEVER_CAP:.2f} in CRISIS+BEAR")
     if RECOVERY_LEVER_PARK and _lever_dates:
         kwA["etf_lever_by_date"] = {pd.Timestamp(d): RECOVERY_LEVER_FRAC for d in set(_lever_dates)}
-        print(f"  [S2 lever-park BAL] ON | {len(set(_lever_dates))} bottom-dates × frac {RECOVERY_LEVER_FRAC:.2f} (margin parking, cap MGE {_mge})")
+        kwA["lever_nav_cap"] = LEVER_NAV_CAP_B * 1e9   # B3: auto-disable lever above small-account cap
+        print(f"  [S2 lever-park BAL] ON | {len(set(_lever_dates))} bottom-dates × frac {RECOVERY_LEVER_FRAC:.2f} (margin parking, cap MGE {_mge}, NAV-cap {LEVER_NAV_CAP_B:.0f}B)")
     if LEVER_STRESS_DATES:
         _ss = {pd.Timestamp(x.strip()): RECOVERY_LEVER_FRAC for x in LEVER_STRESS_DATES.split(",") if x.strip()}
         kwA["etf_lever_by_date"] = {**kwA.get("etf_lever_by_date", {}), **_ss}
@@ -1584,6 +1635,7 @@ if _mge:                                                    # mirror BAL: open t
         kwB["regime_delever_targets"] = {1: REGIME_DELEVER_CAP, 2: REGIME_DELEVER_CAP}
     if RECOVERY_LEVER_PARK and _lever_dates:
         kwB["etf_lever_by_date"] = {pd.Timestamp(d): RECOVERY_LEVER_FRAC for d in set(_lever_dates)}
+        kwB["lever_nav_cap"] = LEVER_NAV_CAP_B * 1e9   # B3: auto-disable lever above small-account cap
     if LEVER_STRESS_DATES:
         _ss = {pd.Timestamp(x.strip()): RECOVERY_LEVER_FRAC for x in LEVER_STRESS_DATES.split(",") if x.strip()}
         kwB["etf_lever_by_date"] = {**kwB.get("etf_lever_by_date", {}), **_ss}
