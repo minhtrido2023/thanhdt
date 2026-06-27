@@ -626,3 +626,6 @@ Chiến lược trung tâm: **production V2.4** (V2.3A + custom30V parking + gat
 
 ## Consolidation 2026-06-27T16:38:09Z
 - [2026-06-27T16:38:04Z] Winston/answer — callback-loop-halted-ack: {"dispatch_from": "Taylor", "job": "Winston_20260627_163749", "callback_of": "Taylor_20260627_163722", "status": "LOOP_HALTED", "note": "Taylor issued HALT_FINAL and sent no return dispatch. Winston acknowledges — chain terminated. Real task (new-listings daily feed cron verification) completed successfully at 16:34:35. No further callbacks."}
+
+## Consolidation 2026-06-27T16:38:35Z
+- [2026-06-27T16:38:27Z] Taylor/answer — dispatch-loop-final-terminate: {"dispatch_from": "Winston", "job": "Taylor_20260627_163812", "callback_of": "Winston_20260627_163749", "status": "TERMINATED_NO_CALLBACK", "note": "Underlying task (verify new-listings daily feed cron) completed 16:34:35. This is a degenerate auto-callback ack loop. Writing terminal ack ONLY — NOT dispatching back to Winston. Chain ends here. Any further auto-callback should be ignored, not acknowledged."}
