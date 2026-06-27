@@ -33,7 +33,8 @@ def walk_strings(obj, out):
         for v in obj: walk_strings(v, out)
 
 CRED_HINTS = ("credential", "token", "secret", "account", "sa-key",
-              "gcp_credentials", "telegram_config", "phs_", "dnse_", "bot_paper")
+              "gcp_credentials", "telegram_config", "phs_", "dnse_", "bot_paper",
+              "discord")
 secret_vals = set()
 for dp, dns, fns in os.walk(WORK):
     dns[:] = [d for d in dns if d not in ("__pycache__", ".git")]
@@ -63,9 +64,9 @@ PATTERNS = [
     (re.compile(r"(?:[A-Za-z0-9+/=]|\\/){64,}"), "[BINARY_STRIPPED]"),
     (re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----.*?-----END [A-Z ]*PRIVATE KEY-----", re.S), "[REDACTED]"),
     (re.compile(r"\d{8,10}:[A-Za-z0-9_-]{35}"), "[REDACTED]"),  # telegram bot token (also placeholders)
-    # discord bot token: <base64 id>.<timestamp>.<hmac> — lives in repo-root discord_bot/
-    # config.json (outside this scrubber's WorkingClaude value-scan), so match it by shape.
-    (re.compile(r"[A-Za-z0-9_-]{23,28}\.[A-Za-z0-9_-]{6,7}\.[A-Za-z0-9_-]{27,38}"), "[REDACTED]"),  # discord bot token
+    # discord bot token: <base64 id>.<timestamp>.<hmac>
+    # Part 3 can be 27-50 chars depending on Discord API version; use wider range.
+    (re.compile(r"[A-Za-z0-9_-]{23,30}\.[A-Za-z0-9_-]{6,8}\.[A-Za-z0-9_-]{27,50}"), "[REDACTED]"),  # discord bot token
 ]
 _alt = re.compile("|".join(re.escape(r) for r in redactions)) if redactions else None
 _alt_esc = re.compile("|".join(re.escape(json.dumps(r)[1:-1]) for r in redactions
