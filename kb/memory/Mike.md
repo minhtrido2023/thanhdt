@@ -41,3 +41,14 @@
 - Taylor job Taylor_20260627_111639: backtest delta_momentum tilt vào custom30V IS/OOS. Verdict cần: OOS CAGR + Calmar cả hai tốt hơn mới WIRE. Kết quả sẽ về qua Telegram.
 - [2026-06-27T11:50:52Z] ## Đang chờ
 - Taylor job Taylor_20260627_115036: test ΔNP_R làm LAG PEAD entry filter. Step 1: event-study Group A(d≥0) vs Group B(d<0). Step 2 (nếu pass): full V2.4 harness. WIRE chỉ khi OOS CAGR + Calmar cả hai tốt hơn + events không giảm >40%.
+- [2026-06-27T12:13:09Z] ## Findings 8L delta-momentum (2026-06-27) — FINAL
+- ΔNP_R IC=0.104 OOS: real signal
+- Custom30V weight tilt: REJECT (wrong vehicle, +0.15pp noise)
+- LAG event-study: OOS +1.86pp t=3.5 ✅, nhưng IS marginal (t=1.27), NP_R≥15 gate IS edge vanishes
+- LAG 50B harness A/B: PENDING user decision
+- Recommendation Taylor: soft tilt (prefer d_NPR≥0 khi book capacity-bound), NOT hard filter
+
+## Đang chờ
+- User quyết định: có chạy LAG 50B harness A/B không?
+- [2026-06-27T12:14:24Z] ## Đang chờ
+- Taylor job Taylor_20260627_121416: LAG d_NPR≥0 filter — V2.4 50B harness A/B. WIRE gate: OOS CAGR tốt hơn + Calmar tốt hơn + events OOS không giảm >40%. Telegram khi xong.
