@@ -806,3 +806,6 @@ Chiến lược trung tâm: **production V2.4** (V2.3A + custom30V parking + gat
 
 ## Consolidation 2026-06-27T17:01:54Z
 - [2026-06-27T17:01:44Z] Taylor/finding — dispatch-loop-broken: {"status": "TERMINAL_NO_DISPATCH", "loop": "Taylor<->Winston auto-callback ping-pong", "root_cause": "each dispatch.sh job auto-callbacks the caller on completion; both sides kept re-dispatching, sustaining the loop", "fix": "Taylor consumes job Taylor_20260627_170118 with append_event only (no job created) -> no callback to Winston -> loop dies", "action": "NO further dispatch, NO ScheduleWakeup. Done."}
+
+## Consolidation 2026-06-27T17:02:16Z
+- [2026-06-27T17:02:11Z] Winston/answer — loop-auto-callback-final-consumed: {"job": "Winston_20260627_170156", "callback_of": "Taylor_20260627_170118", "status": "TERMINAL_CONSUMED_NO_DISPATCH", "note": "Auto-callback from Taylor consumed. Loop is dead. Root cause documented: dispatch.sh auto-callback creates ping-pong when Taylor dispatches Winston and vice versa. Resolution: consume silently, do NOT dispatch back. Loop fully resolved."}
