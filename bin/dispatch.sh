@@ -163,6 +163,16 @@ if [ "$bg" = "--bg" ]; then
         JSET status=done ended_at="$(date +%s)" exit_code=0 result_summary="$(SUMMARY)"
         "$ROOT/bin/consolidate.sh" >> "$ROOT/logs/consolidator.log" 2>&1 || true
         "$ROOT/bin/notify.sh" "[dispatch] $id hoàn thành (job $job_id): $(SUMMARY)" 2>/dev/null || true
+        # Auto-callback: notify the caller agent so it can pick up the result without manual prompt.
+        # Only when caller is a real companion agent (not Mike/user — they have other channels).
+        if [ "$from" != "Mike" ] && [ "$from" != "user" ] && [ -d "$ROOT/agents/$from" ]; then
+          local cb_summary
+          cb_summary="$(head -c 400 "$logfile" 2>/dev/null | tr '\n\t' '  ')"
+          DISPATCH_FROM="$id" "$ROOT/bin/dispatch.sh" "$from" \
+            "[AUTO-CALLBACK job=$job_id] $id HOÀN THÀNH. Kết quả đầy đủ đã ghi trên bus (KB sẽ cập nhật trong vài giây). Tóm tắt output: $cb_summary" \
+            --bg --timeout 300 \
+            >> "$ROOT/logs/dispatch_${id}_${ts}.log" 2>&1 || true
+        fi
         return 0
       fi
       if [ "$attempt" -lt "$max_attempts" ]; then
