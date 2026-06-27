@@ -25,3 +25,5 @@
 ## Advisory
 - DGC trong custom30V rank 21 — Wendy legal check (không phải blocker)
 
+- [2026-06-27T10:59:55Z] ## Đang chờ
+- Taylor job Taylor_20260627_105942: validate IC của 4 delta signals (ΔFSCORE, ΔNP_R acceleration, ΔCashCycle, ΔRevenue) cho 8L screener — IS/OOS walk-forward. Khi xong: quyết định wire delta nào vào screener (tiebreaker hay value_score adjustment).
