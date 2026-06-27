@@ -788,6 +788,24 @@ ev["_forbid"] = [(tk in _forx) and (rd >= _forx[tk]) for tk, rd in zip(ev["ticke
 _m = (ev["NP_R"] >= 15) & (ev["prior_n_good"] >= 4) & (ev["pa_HL3"] >= 5)
 if _LAG_NONOP: _m &= ~ev["_nonop"]
 if _LAG_FOR:   _m &= ~ev["_forbid"]
+# --- LAG d_NPR earnings-ACCELERATION filter (Taylor 2026-06-27, NEW research; default OFF=byte-identical) ---
+# Step-1 event study (lag_dnpr_eventstudy.py): in the gated LAG pool, events whose YoY earnings growth is
+# ACCELERATING (d_NPR>=0) beat decelerating (d_NPR<0) OOS +0.81pp mean 25-sess return, Sharpe 1.34 vs 1.06.
+# d_NPR = (NP_P0/NP_P4-1) - (NP_P1/NP_P5-1), PIT single-row vintage from earnings_surprise_data.pkl (=`fin`),
+# guards NP_P4>0 & NP_P5>0 (else NaN). MODE 1=strict (keep d_NPR>=0 only, drop NaN); 2=lenient (drop only
+# confirmed d_NPR<0, keep NaN turnarounds — preserves N/diversification).
+_LAG_DNPR = os.environ.get("LAG_DNPR_FILTER", "0")
+if _LAG_DNPR in ("1", "2"):
+    _f4, _f5 = fin["NP_P4"], fin["NP_P5"]
+    _fd = fin[["ticker", "quarter"]].copy()
+    _fd["d_NPR"] = np.where((_f4 > 0) & (_f5 > 0), (fin["NP_P0"]/_f4 - 1) - (fin["NP_P1"]/_f5 - 1), np.nan)
+    _dmap = _fd.dropna(subset=["d_NPR"]).set_index(["ticker", "quarter"])["d_NPR"]
+    ev["_dnpr"] = ev.set_index(["ticker", "quarter"]).index.map(_dmap).to_numpy(dtype=float)
+    _before = int(_m.sum())
+    if _LAG_DNPR == "1":   _m &= (ev["_dnpr"] >= 0)            # strict: NaN -> False -> dropped
+    else:                  _m &= ~(ev["_dnpr"] < 0)           # lenient: only confirmed decel dropped
+    print(f"  [LAG dNPR filter mode={_LAG_DNPR}] {_before} -> {int(_m.sum())} entries "
+          f"(dropped {_before-int(_m.sum())}; NaN d_NPR in pool kept={'no' if _LAG_DNPR=='1' else 'yes'})")
 e_hl3 = ev[_m].copy()
 print(f"  [LAG gate] non_op={_LAG_NONOP} forensic={_LAG_FOR} -> {len(e_hl3)} entries "
       f"(dropped {int((~_m & (ev['NP_R']>=15)&(ev['prior_n_good']>=4)&(ev['pa_HL3']>=5)).sum())} by gates)")

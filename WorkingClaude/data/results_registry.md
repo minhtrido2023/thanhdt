@@ -538,3 +538,90 @@ Wired regime-conditional deploy vehicle: base parking = yieldcombo, deep-cheap d
   - **@50B: 30.05% / Sharpe 1.82 / MaxDD −20.1 / Calmar 1.49 / self-check 0** at real 12.5% borrow (lever net +1.00pp vs leverage-free).
   - Risk layering (Mafee-confirmed): Spyros −15% NAV → S4 internal ~−31% NAV → DNSE call −44.4% **portfolio** (=−66.7% NAV @1.5x). System always cuts well before the broker.
   - **Status:** R&D-complete, all 4 blockers cleared. Live-activation = POST-go-live (needs live-recommend integration). Go-live 2026-06-30 = V2.4 leverage-free, unaffected. All V2.5 env knobs default OFF = byte-identical.
+
+## 2026-06-27 — Earnings Responsiveness Beta for LAG/PEAD (Taylor)
+**Q:** Should LAG (PEAD book) add a filter favoring stocks that react strongly+correctly to earnings?
+**Data:** 22 liquid VN large-caps (custom30V core: banks+HPG/DGC/VHC/FPT/MWG/PNJ...), 924 clean earnings events 2015–2026.
+**Method (look-ahead-safe):** SUE proxy = `NP_R` (seasonal-random-walk YoY surprise, NP_P0/NP_P4−1, require NP_P4>0, winsor ±200%). Anchor = `ticker_financial.Release_Date`. react_adj = (Close[+5]/Close[pre]−1) − VNINDEX same window; drift_adj = (Close[+40]/Close[+5]−1) − VNINDEX. Responsiveness beta = OLS slope react_adj~SUE per ticker. CSV: /tmp/earnings_events.csv (regen via BQ query in job Taylor_20260627_065705).
+**Results:**
+- Responsiveness beta WEAK: mean R²=0.058, only 5/22 names |t|>2. Top responders = big banks (CTG/VCB/MBB), not low-coverage names.
+- PEAD drift (pos-SUE tercile, +5→+40d, mkt-adj): LO-responsiveness group +4.97% (t=3.78) vs HI-responsiveness +1.02% (t=1.19, ns). PEAD spread pos−neg: LO +2.93pp (t=1.86) vs HI −0.36pp. → filter runs OPPOSITE to hypothesis (under-reaction → drift).
+- Effect is mean-driven/outlier-skewed: baseline pos-SUE drift mean +3.05% but **median +0.66%, %>0=53%** (≈coin-flip); pos-vs-neg median gap ~0. corr(react_adj,drift_adj)≈0 (no event-level continuation).
+**Verdict: NO** — do not add high-earnings-responsiveness filter to LAG. Theoretically backwards (PEAD = under-reaction anomaly) and empirically too noisy in liquid universe (PEAD weakest where coverage/liquidity highest — KB illiquidity premium <1B ADV). **CONDITIONAL next lever:** if an earnings tilt is wanted, tilt on **fresh high-SUE** (NP_R top tercile + sessions-since-Release_Date < drift window), NOT responsiveness — and backtest in the actual (broader/less-liquid) LAG universe first; median-flat PEAD here means it needs proper validation.
+
+---
+
+### custom30B BULL-parking vehicle — walk-forward @1B/5B (Taylor 2026-06-27, job Taylor_20260627_103040)
+Mike dispatch: at go-live scale (1B-5B), does custom30B out-park custom30V (and cash) in DT5G BULL/EXBULL periods; lower the 150B bull-park threshold? **Method:** isolated BULL-days-only basket return (NOT full V2.4 blend). build_pit top30/gate≤3/q2m5/namecap0.10. custom30V=yieldcombo; custom30B=pemom MOM_W=1.0 LIQ_FLOOR_B=5 (R6 spec). DT5G state from `vnindex_5state_dt5g_live`, bull mask {4,5}. Cash=0%. CAGR annualised over BULL-time only.
+- **Script:** `c30b_bull_walkforward.py` | **CSV:** `data/c30b_bull_walkforward.csv` (per-day V/B/cash bull returns) | AUDIT_END=2026-06-19 | **self-check:** custom30B FULL cum recomputed from CSV = 305.2250% vs in-mem 305.2250% (diff 3.2e-12pp ≈ 0) ✓ | BQ_CACHE_THREADS=1.
+- **Bull-days in window:** 465 total. **IS 2014-19 = 53 days (≈only 2018 melt-up; 2014/15/16/19 had ZERO bull days)**; OOS 2020-26 = 412 (2021 alone=183). → structurally only ~1 distinct IS bull regime → weak walk-forward by construction.
+- **Metrics (CAGR bull-time / Sharpe / MaxDD):** FULL custom30V 87.35%/2.41/−20.8, custom30B 113.47%/2.75/−20.3 (**B−V +26.1pp/+0.34Sh**). **IS** V 278.75%/4.38, B 270.80%/4.11 (**B−V −7.95pp/−0.27 — B LOSES IS**). **OOS** V 71.13%/2.12, B 98.83%/2.54 (**B−V +27.70pp/+0.43 — B WINS OOS**). Both vehicles ≫ cash (cash=0% in bull).
+- **Capacity:** NON-binding at go-live. Basket 60-sess ADV ~9–11 **trillion** VND; deploy@1B≈210M total / 21M max single name, @5B≈1050M/105M; per-name 20%-ADV cap ~60–73B ⟹ OK by ~1000×. The 150B gate is NOT a capacity constraint at 1-5B.
+- **TC:** per-rebalance turnover V=33.5% / B=30.2% → ~0.24–0.27%/yr drag (quarterly, 2-side, 10bp). Negligible.
+- **VERDICT: custom30B vehicle = FAIL walk-forward / do-not-deploy.** Edge sign FLIPS IS(−8pp)→OOS(+28pp); full-period +26pp is entirely the single 2020-21/2024-25 bull regime (regime-luck), not a robust selection edge — consistent with **THREAD(c)** (mom200 IC≈+0.002 in bull = ZERO; value 1/PE dominates) and **R6** (faithful full-system: B vs V +0.57pp @20B, WASH @50B). Reconciliation: +26pp bull-time × ~15% bull-fraction × ~0.21 deploy ≈ +0.8pp/yr full-system ≈ R6's +0.57pp @20B.
+- **Threshold recommendation:** (1) Capacity allows bull-park at go-live 1-5B — 150B is a Sharpe/lumpiness gate, not capacity. (2) Default stays **bull-park OFF <150B = R3 NEUTRAL-only** (Sharpe 1.87>1.82, custom30B/V bull-park hurts 2024/25). (3) IF bull-park is ever enabled, use **custom30V** (robust value vehicle), NOT custom30B (no walk-forward-robust edge). Do not lower a threshold to deploy a non-robust feature.
+
+## Delta/momentum signals — IC validation for 8L screener (2026-06-27, Taylor)
+**Question:** Do "improving" stocks (positive delta) earn higher forward returns? Validate 4 delta signals.
+**Method:** event-panel `/tmp/delta_panel.parquet` — ticker_financial deltas joined ASOF to first ticker_prune session ≥ Release_Date (no look-ahead; signal known at release, fwd return measured forward). Filters: gap≤15d, liq Trading_Value_1M_P50≥3bn. IC = Spearman(signal, profit_1M/2M) — profit_* TRAINING-ONLY, used for IC eval only. n≈7.8k events FULL / 4.2k in 8L rating≤3 (rating_8l.csv whitelist; caveat: snapshot membership → mild survivorship on universe, not on signal). IS=2014-19, OOS=2020-26.
+**Signal defs (all: positive=improving):** d_FSCORE=FSCORE−FSCORE_P1; d_NPR=NP_R − NP_R(lag4Q) gated NP_P4>0 (earnings YoY *acceleration*); d_CashCyc=CashCycle_P4−CashCycle_P0 (cycle shortened), fin routes excl; d_Revenue=Revenue_YoY_P0−Revenue_YoY_P4 (rev accel).
+
+| signal | univ | IC_2M | t | IS_2M | OOS_2M | consist | verdict |
+|--------|------|-------|---|-------|--------|---------|---------|
+| d_NPR | QUAL | 0.083 | 5.1 | 0.021 | 0.104 | 11/13 | **WIRE (strongest)** |
+| d_FSCORE | QUAL | 0.057 | 3.7 | 0.017 | 0.073 | 10/14 | **WIRE** |
+| d_Revenue | QUAL | 0.051 | 3.3 | 0.086 | 0.041 | 12/14 | optional (redundant w/ d_NPR, corr .34) |
+| d_CashCyc | QUAL | 0.002 | ~0 | 0.009 | -0.007 | 7/14 | **REJECT** (no edge) |
+| composite2 (z d_NPR+d_FSCORE) | QUAL | 0.073 | 4.7 | 0.014 | 0.097 | — | use for profit_1M; d_NPR alone best for 2M |
+
+Quintile profit_2M (QUAL, monotonic): d_NPR Q1=1.71% Q3=4.58% Q5=6.02% (+4.3pp); d_FSCORE +2.8pp; composite +4.0pp.
+**Caveat:** edge concentrated OOS (2020+); IS weak/near-zero for all (regime: post-2020 VN reacts more to earnings). But these are raw economic deltas (NO param fit) → not overfit; PEAD/earnings-momentum is robust anomaly.
+**Wiring:** d_NPR (primary) as a SEPARATE `delta_momentum` column → use as tiebreaker sort within a rating bucket and/or bounded ±1 sub-rank notch (never cross rating tiers). Do NOT fold into value_score (contaminates value axis). d_NPR overlaps LAG/PEAD SUE (level) but is acceleration (2nd deriv) — novel use in 8L = quality-trajectory tiebreaker. Live signal uses only point-in-time financials (no profit_* leak).
+
+## Delta_momentum WEIGHT TILT inside custom30V parking basket — IS/OOS backtest (2026-06-27, Taylor, job Taylor_20260627_111639)
+**Q (Mike dispatch):** Does tilting custom30V intra-basket weights toward improving-fundamentals names (ΔNP_R + ΔFSCORE, weights 0.6/0.4 from the IC study above) BEAT plain namecap custom30V in V2.4 NEUTRAL parking? WIRE only if BOTH OOS CAGR and OOS Calmar improve (no DD trade-off), net of extra intra-basket turnover.
+**Script:** `data/delta_tilt_backtest.py` (new; NO production code touched) | AUDIT_END=2026-06-19 | DT5G state `vnindex_5state_dt5g_live`.
+**Method:** `cb.build_pit(yieldcombo, quality=none, gate_rating=3, rebal=q2m5, weight_scheme=namecap)` called ONCE → baseline NAV + membership + raw panel. **Membership UNCHANGED by tilt** (top-30-by-yieldcombo stays; only weights move). PIT delta from `ticker_financial` as-of `Release_Date` (no look-ahead): d_NPR=(NP_P0/NP_P4−1)−(NP_P1/NP_P5−1) [req NP_P4>0 & NP_P5>0], d_FSCORE=FSCORE−FSCORE_P1. Per rebal: z-score within the 30 basket names → dm=0.6·z(dNPR)+0.4·z(dFSCORE) → tilt_factor=1+0.15·clip(dm,±2) (≤±30% weight adj), missing→1.0. NAV reconstructed by me for both variants; tilt pays EXTRA intra-basket turnover TC=0.5·Σ|w_tilt−w_cap|·TC each rebal. Same DT5G overlay + cost model as `custom30v_singlebook_faithful.py` (TC=0.3%, borrow 10%/yr, rebal_turn 0.35).
+**Self-check:** reconstructed baseline (tilt_factor=1) vs build_pit level_dict → max daily-return abs diff **3.3e-16 ≈ 0** ✓.
+
+| Window | Metric | Baseline | Delta_Tilt | Diff |
+|--------|--------|----------|------------|------|
+| FULL | CAGR% | 23.64 | 23.75 | +0.11 |
+| FULL | Calmar | 1.19 | 1.21 | +0.02 |
+| IS 2014-19 | CAGR% | 20.04 | 20.11 | +0.07 |
+| IS 2014-19 | Calmar | 1.31 | 1.31 | −0.00 |
+| OOS 2020+ | CAGR% | 27.06 | 27.21 | **+0.15** |
+| OOS 2020+ | Sharpe | 1.42 | 1.42 | +0.01 |
+| OOS 2020+ | MaxDD% | −19.9 | −19.6 | +0.3 |
+| OOS 2020+ | Calmar | 1.36 | 1.39 | **+0.03** |
+
+**Tilt footprint (why so small):** avg intra-basket weight MAE tilt-vs-cap = **0.132%**, avg one-way extra turnover/rebal = 1.98%, avg top-10 set changes/rebal = 0.38 names. The namecap (cap-weight, 0.10 cap) structure leaves almost no room — mega-caps already at the 10% cap can't tilt up; the ±15% lever only nudges the small-weight tail.
+**VERDICT: technically PASS the WIRE rule (OOS CAGR +0.15pp AND OOS Calmar +0.03 both improve, IS also +0.07, DD improves, no overfit signature) — BUT magnitude is WITHIN NOISE.** Effect is the SAME signal already validated by the IC study (d_NPR/d_FSCORE PEAD), here applied as a within-basket reweight where the parking vehicle is cap-weighted+capped → the tilt cannot express itself (MAE 0.13%). **Recommendation: DO NOT wire as a standalone custom30V feature** — +0.15pp OOS doesn't justify added production complexity/turnover bookkeeping. The delta_momentum signal pays off where it has room to act = the **8L SCREENER tiebreaker / LAG selection** (per the IC study), NOT as a parking-basket weight tilt. Direction is right; the vehicle is wrong.
+
+## Event-study: ΔNP_R (earnings-acceleration) selection inside LAG/PEAD pool (2026-06-27, Taylor, job Taylor_20260627_120256)
+**Q (Mike dispatch):** Within the LAG positive-surprise pool, do accelerating-growth events (d_NPR>=0) earn higher forward T+25 than decelerating (d_NPR<0)? IS=2014-19 / OOS=2020+.
+**Script:** `lag_dnpr_event_study.py` (new; NO production code touched) | events `data/earnings_events_classified.csv` | d_NPR from `data/bq_cache/ticker_financial.parquet` | T+25 prices from `data/bq_cache/ticker_prune.parquet`. Pool CSV → `data/lag_dnpr_pool.csv` (6181 events).
+**Method (book-faithful):** entry=Release_Date+5 sessions (Open), exit=Release_Date+30 sessions (Open) on GLOBAL session calendar (ffill≤5) = 25-session hold, open-to-open %. d_NPR PIT = (NP_P0/NP_P4−1)−(NP_P1/NP_P5−1), guard NP_P4=0|NP_P5=0→NaN. Pool gate (task) = NP_R>0. Means winsorized 1%/tail; spreads/t-stats on RAW (Welch). NOTE: `earnings_surprise_data.pkl` unreadable in pandas 2.3.3 (2D-datetime block bug) → rebuilt d_NPR direct from BQ-cache parquet (auditable).
+
+| Window | A d_NPR≥0 mean% | A hit% | A Sh | B d_NPR<0 mean% | B hit% | B Sh | spread(raw) | Welch t |
+|--------|----------------|--------|------|----------------|--------|------|-------------|---------|
+| IS 2014-19  | 4.19 (n=1471) | 58.1 | 0.31 | 2.88 (n=753)  | 57.0 | 0.16 | +0.96pp | 1.27 |
+| OOS 2020+   | 6.38 (n=2545) | 63.4 | 0.40 | 4.54 (n=1220) | 57.5 | 0.30 | +1.86pp | **3.49** |
+| FULL 2011+  | 5.55 (n=4150) | 61.4 | 0.37 | 3.91 (n=2031) | 57.3 | 0.24 | +1.54pp | **3.59** |
+
+**Robustness on the ACTUAL deployed LAG entry gate (NP_R>=15, not NP_R>0):** IS A 4.12% vs B 3.87% (+0.25pp, hit −0.4pp → ~0 in-sample); OOS A 6.49% vs B 4.96% (+1.53pp, hit +4.6pp). Edge holds OOS but ~vanishes IS once the surprise gate is already tight.
+**VERDICT: PASS as an event-level SELECTION signal** — d_NPR≥0 beats d_NPR<0 on forward T+25 with sign-consistent IS+OOS, OOS significant (t=3.5, +1.86pp, hit +5.9pp, higher Sharpe). Confirms the IC-study recommendation (job …105942) that delta_momentum acts where it has room = LAG selection. **BUT do NOT hard-wire as a filter yet:** (1) IS spread not significant (t=1.27); (2) on the live NP_R>=15 gate the IS marginal edge ≈0 (+0.25pp); (3) two analogous tilts were 50B-harness-REJECTED today (finer-3-tier-SUE −0.66pp CAGR; namecap weight-tilt +0.15pp within-noise). → Candidate for a SOFT LAG entry tilt (prefer d_NPR≥0 names when book is capacity-constrained at 12 slots), gated behind a faithful 50B V2.4 harness A/B before any LIVE change.
+
+## V2.4 50B harness A/B: LAG d_NPR>=0 hard filter (2026-06-27, Taylor, job Taylor_20260627_121416)
+**Q (Mike dispatch):** Event-study (job …120256) found accel events (d_NPR>=0) beat decel +1.86pp OOS (t=3.49). Harness-confirm before wiring: baseline LAG vs LAG+d_NPR>=0 filter in the production-style 50B two-book system (Book A BAL 25B + Book B SWITCHED 25B with the LAGGED earnings-drift schedule).
+**Script:** `data/lag_harness_dnpr.py` (new; NO production code touched). Faithful clone of `pt_v4_full_faithful.py` (same `simulate_holistic_nav` engine, TC=0.3% round-trip, borrow 10%/yr, 20%-ADV/5-day fills, DT5G state `daily_comovement_dt5g.csv`, ETF parking {3:0.7}). Only change: LAG entry schedule built twice — A=prodspec gate (NP_R>=15 & prior_n_good>=4 & pa_HL3>=5); B=same + d_NPR>=0. Book A (BAL) identical → run once; Book B run twice; total=A+B. NAV CSVs `data/lag_harness_dnpr_nav_*.csv`, JSON `data/lag_harness_dnpr_results.json`. AUDIT_END=2026-06-09.
+**Recon note:** `earnings_surprise_data.pkl` unreadable (pandas 2.3.3 2D-datetime bug) → surprise_B_MA (HI/LO split) AND d_NPR rebuilt from `data/bq_cache/ticker_financial.parquet` (NP_P0..P5), merged on (ticker,quarter,Release_Date); guard denom==0→NaN. d_NPR=(NP_P0/NP_P4−1)−(NP_P1/NP_P5−1).
+**Filter footprint:** LAG schedule 2345→1630 entries (−715, −30.5%). OOS 1577→1125 (−28.7%).
+
+| Window | N_evt A | N_evt B | CAGR_A | CAGR_B | dCAGR | DD_A | DD_B | Cal_A | Cal_B | dCal |
+|--------|---------|---------|--------|--------|-------|------|------|-------|-------|------|
+| FULL       | 2345 | 1630 | 13.09 | 11.65 | **−1.44** | −21.3 | −28.8 | 0.61 | 0.40 | −0.21 |
+| IS 2014-19 |  751 |  497 |  7.87 |  5.00 | **−2.87** | −21.3 | −28.8 | 0.37 | 0.17 | −0.20 |
+| OOS 2020+  | 1577 | 1125 | 18.19 | 18.23 | +0.04 | −18.9 | −18.5 | 0.96 | 0.99 | +0.03 |
+
+**VERDICT: DO NOT WIRE.** The literal WIRE rule (OOS CAGR↑ AND Calmar↑ AND drop≤40%) technically passes on OOS — but the OOS gain is **+0.04pp CAGR / +0.03 Calmar = pure noise**, while the filter **destroys IS (−2.87pp CAGR, Calmar −0.20) and FULL (−1.44pp, MaxDD −7.5pp worse)**. A hard filter that breaks even OOS by noise but costs ~3pp IS and worsens full-period DD fails walk-forward robustness in spirit. Mirrors today's pattern (finer-3-tier-SUE −0.66pp; namecap weight-tilt +0.15pp within-noise): d_NPR is a real but SMALL selection signal that does NOT survive as a hard harness event-drop. Dropping 30% of LAG events shrinks the opportunity set/diversification (decel events still hit 57%); the isolated event-study spread doesn't translate through 12-slot limits + sizing + book dilution. **Keep d_NPR at most as a SOFT tiebreaker when the LAG book is capacity-constrained, NOT a hard filter.** Caveat: absolute CAGR here (13% FULL / 18% OOS) is the always-on V4-faithful two-book ensemble level, lower than the V2.4 R3 NEUTRAL-only headline — but the A/B DELTA is what's valid and it is internally consistent.
