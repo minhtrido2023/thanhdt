@@ -39,3 +39,5 @@
 - Chờ user quyết định: wire vào rating_8l.py hay chỉ expose cột mới?
 - [2026-06-27T11:16:47Z] ## Đang chờ
 - Taylor job Taylor_20260627_111639: backtest delta_momentum tilt vào custom30V IS/OOS. Verdict cần: OOS CAGR + Calmar cả hai tốt hơn mới WIRE. Kết quả sẽ về qua Telegram.
+- [2026-06-27T11:50:52Z] ## Đang chờ
+- Taylor job Taylor_20260627_115036: test ΔNP_R làm LAG PEAD entry filter. Step 1: event-study Group A(d≥0) vs Group B(d<0). Step 2 (nếu pass): full V2.4 harness. WIRE chỉ khi OOS CAGR + Calmar cả hai tốt hơn + events không giảm >40%.

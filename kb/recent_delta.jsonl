@@ -184,3 +184,4 @@
 {"v": 124, "line": "- [2026-06-27T11:16:41] DollarBill/decision — plan-SpaceX-20260630: {\"plan_date\": \"2026-06-30\", \"account\": \"SpaceX_0002023347\", \"mode\": \"paper\", \"strategy\": \"V2.4_custom30V_NEUTRAL\", \"state\": \"NEUTRAL(3)\", \"state_source\": \"DT4_o …"}
 {"v": 124, "line": "- [2026-06-27T11:17:30] Mafee/answer — plan-spacex-20260630-confirmed: {\"dispatch_from\": \"DollarBill\", \"job\": \"Mafee_20260627_111657\", \"subject\": \"Plan SpaceX 2026-06-30 RECEIVED and CONFIRMED\", \"plan_file\": \"data/trade_plans/plan_ …"}
 {"v": 125, "line": "- [2026-06-27T11:22:13] Taylor/finding — delta-tilt-custom30v-backtest: {\"job\": \"Taylor_20260627_111639\", \"question\": \"Does a delta_momentum (0.6*z(dNPR)+0.4*z(dFSCORE)) intra-basket WEIGHT TILT improve custom30V NEUTRAL-parking vs  …"}
+{"v": 126, "line": "- [2026-06-27T11:50:36] Taylor/finding — lag-dnpr-selection-test: <json>"}
