@@ -36,6 +36,24 @@ logfile="$ROOT/logs/dispatch_${id}_${ts}.log"
 
 from="${DISPATCH_FROM:-Mike}"
 
+# --- routing guards (added 2026-06-27) ---
+# 1) No self-dispatch: an agent spawning a cold headless copy of itself would split its
+#    context and double-write its bus/working-memory.
+if [ "$from" = "$id" ]; then
+  echo "ERROR: self-dispatch blocked ($from -> $id). You are already this agent; just do the work." >&2
+  exit 2
+fi
+# 2) Target Mike only from the user. Mike is the up-escalation / user-facing point, NOT a
+#    dispatch target — agents escalate UP via a 'question' event, they do not spawn a cold Mike
+#    to orchestrate (that inverts the hierarchy + nests headless sessions). Human override:
+#    DISPATCH_FROM=user bin/dispatch.sh Mike "...".
+if [ "$id" = "Mike" ] && [ "$from" != "user" ]; then
+  echo "ERROR: '$from' cannot dispatch Mike. To reach Mike, ESCALATE:" >&2
+  echo "  $ROOT/bin/append_event.sh $from question \"<chủ đề>\" '{\"question\":\"...\",\"options\":[\"A\",\"B\"],\"urgency\":\"normal\"}'" >&2
+  echo "  (Mike picks it up → user decides → Mike dispatches back. Human override: DISPATCH_FROM=user.)" >&2
+  exit 2
+fi
+
 dispatch_prompt="[DISPATCH từ $from] $prompt
 
 Khi hoàn thành, GHI KẾT QUẢ lên bus bằng:

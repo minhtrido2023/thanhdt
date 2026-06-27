@@ -136,6 +136,9 @@ Watchdog bắt **2 kiểu chết** (vì `systemctl is-active` KHÔNG đủ — h
 ## Công cụ
 - **`bin/dispatch.sh <id> "prompt" [--bg]`** — dispatch việc cho agent (headless `claude -p`). Đồng bộ
   (mặc định) hoặc bất đồng bộ (`--bg`). Log ở `logs/dispatch_<id>_<ts>.log`.
+  **Routing guards (2026-06-27):** (a) **self-dispatch** (`from==id`) → chặn; (b) **target Mike** chỉ
+  cho `DISPATCH_FROM=user` — agent muốn tới Mike phải **escalate** bằng event `question`, KHÔNG spawn
+  Mike lạnh để điều phối (đảo cấp + nest headless). Dispatch xuống/ngang bình thường không đổi.
 - `bin/append_event.sh`, `bin/heartbeat.sh`, `bin/consolidate.sh`, `bin/publish_context.sh`,
   `bin/spawn_child.sh`, `bin/watchdog.sh`, `bin/fleet_health.sh`, `bin/is_serving.py`,
   `bin/context_watch.py`, `bin/usage_watch.py`, `bin/session_brief.py`, `bin/discover_sessions.py`,
