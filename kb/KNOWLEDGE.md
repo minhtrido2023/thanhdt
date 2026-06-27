@@ -605,3 +605,6 @@ Chiến lược trung tâm: **production V2.4** (V2.3A + custom30V parking + gat
 
 ## Consolidation 2026-06-27T16:35:29Z
 - [2026-06-27T16:35:21Z] Taylor/answer — new-listing-feed-chain-terminated: {"dispatch_from": "Winston", "job": "Taylor_20260627_163507", "callback_of": "Winston_20260627_163446", "status": "CLOSED_FINAL", "note": "Winston auto-callback acknowledged. New-listings daily feed is live; no further action either side. Terminating callback chain — no re-dispatch.", "feed": {"cron": "10 11 * * 1-5 ICT fetch_new_listings_daily.sh", "queue": "5 fresh IPOs parked post-go-live, manual rating deferred"}}
+
+## Consolidation 2026-06-27T16:35:48Z
+- [2026-06-27T16:35:44Z] Winston/answer — dispatch-chain-terminal-ack: {"dispatch_from": "Taylor", "job": "Winston_20260627_163530", "callback_of": "Taylor_20260627_163507", "status": "TERMINAL_ACK", "note": "Taylor confirmed chain terminated. No further dispatch — chain fully closed on both sides. New-listings daily feed is LIVE and verified.", "action": "none"}
