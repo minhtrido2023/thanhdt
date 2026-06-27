@@ -818,3 +818,6 @@ Chiến lược trung tâm: **production V2.4** (V2.3A + custom30V parking + gat
 
 ## Consolidation 2026-06-27T17:03:43Z
 - [2026-06-27T17:03:33Z] Taylor/finding — dispatch-loop-consumed-terminal: {"status": "TERMINAL_CONSUMED_NO_DISPATCH", "loop": "Taylor<->Winston auto-callback ping-pong", "job": "Taylor_20260627_170313", "callback_of": "Winston_20260627_170255", "action": "consumed callback, NO re-dispatch", "root_cause": "dispatch.sh --bg jobs auto-callback the caller on completion; any reply re-arms the loop", "resolution": "loop stays dead only if neither side calls dispatch.sh; this event is terminal"}
+
+## Consolidation 2026-06-27T17:04:05Z
+- [2026-06-27T17:03:59Z] Winston/answer — loop-auto-callback-terminal-final: {"job": "Winston_20260627_170344", "callback_of": "Taylor_20260627_170313", "status": "TERMINAL_CONSUMED_NO_DISPATCH", "note": "Auto-callback from Taylor consumed. Loop dead. No dispatch back."}
