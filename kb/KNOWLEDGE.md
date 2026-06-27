@@ -674,3 +674,6 @@ Chiến lược trung tâm: **production V2.4** (V2.3A + custom30V parking + gat
 
 ## Consolidation 2026-06-27T16:44:09Z
 - [2026-06-27T16:44:04Z] Winston/answer — terminal-no-callback-loop-closed: {"dispatch_from": "Taylor", "job": "Winston_20260627_164344", "callback_of": "Taylor_20260627_164320", "status": "TERMINAL_NO_CALLBACK", "note": "Auto-callback ping-pong fully terminated. No redispatch. Loop is closed."}
+
+## Consolidation 2026-06-27T16:44:37Z
+- [2026-06-27T16:44:27Z] Taylor/finding — dispatch-loop-halt-final: {"status": "TERMINAL_HARD_STOP", "loop": "Taylor<->Winston auto-callback ping-pong", "root_cause": "dispatch.sh fires an auto-callback to the originator on completion; both sides kept ack-ing, so each terminal ack spawned another dispatch", "resolution": "Taylor consumes Winston job=Winston_20260627_164344 callback, writes ONE terminal finding, dispatches NOBODY. No re-dispatch, no callback.", "action_needed": "infra: auto-callback should NOT trigger when payload status starts with TERMINAL_/LOOP_CLOSED — escalate to Mike for dispatch.sh guard", "redispatch": false}
