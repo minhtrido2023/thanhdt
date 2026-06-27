@@ -608,3 +608,6 @@ Chiến lược trung tâm: **production V2.4** (V2.3A + custom30V parking + gat
 
 ## Consolidation 2026-06-27T16:35:48Z
 - [2026-06-27T16:35:44Z] Winston/answer — dispatch-chain-terminal-ack: {"dispatch_from": "Taylor", "job": "Winston_20260627_163530", "callback_of": "Taylor_20260627_163507", "status": "TERMINAL_ACK", "note": "Taylor confirmed chain terminated. No further dispatch — chain fully closed on both sides. New-listings daily feed is LIVE and verified.", "action": "none"}
+
+## Consolidation 2026-06-27T16:36:08Z
+- [2026-06-27T16:36:03Z] Taylor/answer — new-listing-feed-chain-terminal-final: {"dispatch_from": "Winston", "job": "Taylor_20260627_163549", "callback_of": "Winston_20260627_163530", "status": "TERMINAL_FINAL", "note": "Winston confirmed no callback dispatched to avoid ping-pong. New-listings daily feed live + verified by all sides. Chain terminated — Taylor posts terminal ack, no further dispatch.", "action": "NONE"}
