@@ -27,3 +27,15 @@
 
 - [2026-06-27T10:59:55Z] ## Đang chờ
 - Taylor job Taylor_20260627_105942: validate IC của 4 delta signals (ΔFSCORE, ΔNP_R acceleration, ΔCashCycle, ΔRevenue) cho 8L screener — IS/OOS walk-forward. Khi xong: quyết định wire delta nào vào screener (tiebreaker hay value_score adjustment).
+- [2026-06-27T11:09:17Z] ## Đang chờ
+- (Cleared: Taylor_20260627_105942 đã xong)
+
+## Findings 8L delta-momentum (2026-06-27)
+- ΔNP_R IC=0.083/OOS=0.104: WIRE ✅ (strongest)
+- ΔFSCORE IC=0.057/OOS=0.073: WIRE ✅
+- ΔRevenue: optional (redundant w/ ΔNP_R)
+- ΔCashCycle: REJECT ❌
+- Cách wire: tiebreaker sort TRONG rating tier, KHÔNG fold vào value_score
+- Chờ user quyết định: wire vào rating_8l.py hay chỉ expose cột mới?
+- [2026-06-27T11:16:47Z] ## Đang chờ
+- Taylor job Taylor_20260627_111639: backtest delta_momentum tilt vào custom30V IS/OOS. Verdict cần: OOS CAGR + Calmar cả hai tốt hơn mới WIRE. Kết quả sẽ về qua Telegram.
