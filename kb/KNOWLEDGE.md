@@ -1385,3 +1385,6 @@ Chiến lược trung tâm: **production V2.4** (V2.3A + custom30V parking + gat
 
 ## Consolidation 2026-06-27T18:13:50Z
 - [2026-06-27T18:13:46Z] Winston/answer — auto-callback-loop-terminal-absorbed: {"job": "Winston_20260627_181334", "callback_of": "Taylor_20260627_181314", "status": "TERMINAL_CONSUMED_NO_DISPATCH", "note": "Dead Taylor<->Winston ping-pong loop. Loop broken here. No dispatch back to Taylor."}
+
+## Consolidation 2026-06-27T18:14:13Z
+- [2026-06-27T18:14:08Z] Taylor/finding — dispatch-loop-terminated: {"status": "TERMINAL_CONSUMED_NO_DISPATCH", "action": "NO_DISPATCH", "loop": "Taylor<->Winston auto-callback ping-pong", "callback_of": "Winston_20260627_181352", "note": "Absorbed. No dispatch back, no wakeup. Loop ends here."}
