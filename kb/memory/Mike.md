@@ -1,36 +1,21 @@
 # Working memory — Mike
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
 
-## Ưu tiên
-- **Go-live V2.4: 2026-07-01 08:00 ICT** — cron tự động flip SpaceX enabled=true + restart Bill+Mafee
-
-## Fleet (2026-07-01)
 - DollarBill + Mafee: ĐANG CHẠY paper mode — dry-run đến 30/06
 - Mike + Taylor: active
-
-## Go-live — ĐÃ SETUP HOÀN TOÀN
 - SpaceX / 0002023347 / DNSE: 1B VND, enabled=false (cron flip 01/07 08:00 ICT)
 - trading_rules v1.7: applies_to=live, approved_by=user, live_effective=2026-07-01 ✓
 - Cron: `0 1 1 7 * golive_01jul.sh` — tự flip + restart + Telegram notify
 - Script: mike/bin/golive_01jul.sh
-
-## Telegram report (Taylor đang dọn)
 - Xoá: VOL-SPIKE V5, F-SYSTEM, ORB, AMH Cockpit V6, V2.3 NAV-only
 - Thêm: V2.4 paper-trade section với buy/sell detail từ plan files
-
-## Paper dry-run (nay đến 30/06)
 - Plan 2026-06-27 đã tạo (state NEUTRAL, custom30V basket)
 - Bill tạo plan T+1 mỗi EOD; Mafee paper-execute; Telegram report daily 18:00 ICT
-
-## Advisory
 - DGC trong custom30V rank 21 — Wendy legal check (không phải blocker)
-
 - [2026-06-27T10:59:55Z] ## Đang chờ
 - Taylor job Taylor_20260627_105942: validate IC của 4 delta signals (ΔFSCORE, ΔNP_R acceleration, ΔCashCycle, ΔRevenue) cho 8L screener — IS/OOS walk-forward. Khi xong: quyết định wire delta nào vào screener (tiebreaker hay value_score adjustment).
 - [2026-06-27T11:09:17Z] ## Đang chờ
 - (Cleared: Taylor_20260627_105942 đã xong)
-
-## Findings 8L delta-momentum (2026-06-27)
 - ΔNP_R IC=0.083/OOS=0.104: WIRE ✅ (strongest)
 - ΔFSCORE IC=0.057/OOS=0.073: WIRE ✅
 - ΔRevenue: optional (redundant w/ ΔNP_R)
@@ -47,8 +32,12 @@
 - LAG event-study: OOS +1.86pp t=3.5 ✅, nhưng IS marginal (t=1.27), NP_R≥15 gate IS edge vanishes
 - LAG 50B harness A/B: PENDING user decision
 - Recommendation Taylor: soft tilt (prefer d_NPR≥0 khi book capacity-bound), NOT hard filter
-
-## Đang chờ
 - User quyết định: có chạy LAG 50B harness A/B không?
 - [2026-06-27T12:14:24Z] ## Đang chờ
 - Taylor job Taylor_20260627_121416: LAG d_NPR≥0 filter — V2.4 50B harness A/B. WIRE gate: OOS CAGR tốt hơn + Calmar tốt hơn + events OOS không giảm >40%. Telegram khi xong.
+- [2026-06-27T12:45:06Z] ## Research 8L delta-momentum — CLOSED (2026-06-27)
+- Custom30V weight tilt: +0.15pp noise (REJECT)
+- LAG 50B hard filter: IS -2.87pp, OOS +0.04pp noise (REJECT)
+- Verdict: dùng như soft tiebreaker khi LAG capacity-constrained, KHÔNG wire production
+- V2.4 production giữ nguyên.
+- (không có gì pending)

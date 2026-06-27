@@ -71,6 +71,9 @@ _job_watcher() {
   local jid="$1" caller="$2" target="$3"
   local interval="${WATCH_INTERVAL:-300}"
   local elapsed=0
+  # Capture Discord thread ID at dispatch time (set by ccdb-mike before starting Claude).
+  local discord_thread_id
+  discord_thread_id="${DISCORD_THREAD_ID:-$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)}"
   while true; do
     sleep "$interval" || break
     elapsed=$((elapsed + interval))
@@ -82,7 +85,14 @@ _job_watcher() {
     local elapsed_min=$((elapsed / 60))
     "$ROOT/bin/append_event.sh" "$target" heartbeat "$jid" \
       "{\"status\":\"still_running\",\"elapsed_min\":${elapsed_min},\"job_id\":\"$jid\",\"caller\":\"$caller\"}" 2>/dev/null || true
-    "$ROOT/bin/notify.sh" "[watcher] $target (job $jid) vẫn chạy sau ${elapsed_min}min — caller: $caller" 2>/dev/null || true
+    # Post to the user's Discord thread if we know its ID.
+    if [ -n "$discord_thread_id" ]; then
+      "$ROOT/bin/notify_thread.sh" \
+        "⏰ **$target** vẫn đang chạy (${elapsed_min}m) — job \`$jid\`. Sẽ notify khi xong." \
+        "$discord_thread_id" 2>/dev/null || true
+    else
+      "$ROOT/bin/notify.sh" "[watcher] $target (job $jid) vẫn chạy sau ${elapsed_min}min — caller: $caller" 2>/dev/null || true
+    fi
   done
 }
 
