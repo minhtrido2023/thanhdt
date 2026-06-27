@@ -1,0 +1,286 @@
+{
+  "accounts": [
+    {
+      "id": "0002023347",
+      "type": "?",
+      "margin_enabled": false,
+      "loan_packages": [],
+      "collateral_check": {
+        "VCB": {
+          "eligible": true,
+          "packages": [
+            {
+              "id": 1841,
+              "name": "GD Tiền mặt",
+              "initialRate": 1.0,
+              "interestRate": 0.125,
+              "liquidRate": 0.3,
+              "maintenanceRate": 0.4,
+              "type": "M",
+              "brokerFirmBuyingFeeRate": 0.0007,
+              "brokerFirmSellingFeeRate": 0.0007
+            },
+            {
+              "id": 1840,
+              "name": "RocketX",
+              "initialRate": 0.5,
+              "interestRate": 0.125,
+              "liquidRate": 0.3,
+              "maintenanceRate": 0.4,
+              "type": "M",
+              "brokerFirmBuyingFeeRate": 0.0007,
+              "brokerFirmSellingFeeRate": 0.0007
+            }
+          ]
+        },
+        "HPG": {
+          "eligible": true,
+          "packages": [
+            {
+              "id": 1841,
+              "name": "GD Tiền mặt",
+              "initialRate": 1.0,
+              "interestRate": 0.125,
+              "liquidRate": 0.3,
+              "maintenanceRate": 0.4,
+              "type": "M",
+              "brokerFirmBuyingFeeRate": 0.0007,
+              "brokerFirmSellingFeeRate": 0.0007
+            },
+            {
+              "id": 1840,
+              "name": "RocketX",
+              "initialRate": 0.5,
+              "interestRate": 0.125,
+              "liquidRate": 0.3,
+              "maintenanceRate": 0.4,
+              "type": "M",
+              "brokerFirmBuyingFeeRate": 0.0007,
+              "brokerFirmSellingFeeRate": 0.0007
+            }
+          ]
+        },
+        "ACB": {
+          "eligible": true,
+          "packages": [
+            {
+              "id": 1841,
+              "name": "GD Tiền mặt",
+              "initialRate": 1.0,
+              "interestRate": 0.125,
+              "liquidRate": 0.3,
+              "maintenanceRate": 0.4,
+              "type": "M",
+              "brokerFirmBuyingFeeRate": 0.0007,
+              "brokerFirmSellingFeeRate": 0.0007
+            },
+            {
+              "id": 1840,
+              "name": "RocketX",
+              "initialRate": 0.5,
+              "interestRate": 0.125,
+              "liquidRate": 0.3,
+              "maintenanceRate": 0.4,
+              "type": "M",
+              "brokerFirmBuyingFeeRate": 0.0007,
+              "brokerFirmSellingFeeRate": 0.0007
+            }
+          ]
+        },
+        "MBB": {
+          "eligible": true,
+          "packages": [
+            {
+              "id": 1841,
+              "name": "GD Tiền mặt",
+              "initialRate": 1.0,
+              "interestRate": 0.125,
+              "liquidRate": 0.3,
+              "maintenanceRate": 0.4,
+              "type": "M",
+              "brokerFirmBuyingFeeRate": 0.0007,
+              "brokerFirmSellingFeeRate": 0.0007
+            },
+            {
+              "id": 1840,
+              "name": "RocketX",
+              "initialRate": 0.5,
+              "interestRate": 0.125,
+              "liquidRate": 0.3,
+              "maintenanceRate": 0.4,
+              "type": "M",
+              "brokerFirmBuyingFeeRate": 0.0007,
+              "brokerFirmSellingFeeRate": 0.0007
+            }
+          ]
+        },
+        "CTG": {
+          "eligible": true,
+          "packages": [
+            {
+              "id": 1841,
+              "name": "GD Tiền mặt",
+              "initialRate": 1.0,
+              "interestRate": 0.125,
+              "liquidRate": 0.3,
+              "maintenanceRate": 0.4,
+              "type": "M",
+              "brokerFirmBuyingFeeRate": 0.0007,
+              "brokerFirmSellingFeeRate": 0.0007
+            },
+            {
+              "id": 1840,
+              "name": "RocketX",
+              "initialRate": 0.5,
+              "interestRate": 0.125,
+              "liquidRate": 0.3,
+              "maintenanceRate": 0.4,
+              "type": "M",
+              "brokerFirmBuyingFeeRate": 0.0007,
+              "brokerFirmSellingFeeRate": 0.0007
+            }
+          ]
+        }
+      },
+      "loan_packages_error": "HTTP 500: Error in backend service"
+    },
+    {
+      "id": "0001743768",
+      "type": "?",
+      "margin_enabled": false,
+      "loan_packages": [],
+      "collateral_check": {
+        "VCB": {
+          "eligible": true,
+          "packages": [
+            {
+              "id": 1258,
+              "name": "ZaloPay",
+              "type": "N",
+              "brokerFirmBuyingFeeRate": 0.0007,
+              "brokerFirmSellingFeeRate": 0.0007
+            }
+          ]
+        },
+        "HPG": {
+          "eligible": true,
+          "packages": [
+            {
+              "id": 1258,
+              "name": "ZaloPay",
+              "type": "N",
+              "brokerFirmBuyingFeeRate": 0.0007,
+              "brokerFirmSellingFeeRate": 0.0007
+            }
+          ]
+        },
+        "ACB": {
+          "eligible": true,
+          "packages": [
+            {
+              "id": 1258,
+              "name": "ZaloPay",
+              "type": "N",
+              "brokerFirmBuyingFeeRate": 0.0007,
+              "brokerFirmSellingFeeRate": 0.0007
+            }
+          ]
+        },
+        "MBB": {
+          "eligible": true,
+          "packages": [
+            {
+              "id": 1258,
+              "name": "ZaloPay",
+              "type": "N",
+              "brokerFirmBuyingFeeRate": 0.0007,
+              "brokerFirmSellingFeeRate": 0.0007
+            }
+          ]
+        },
+        "CTG": {
+          "eligible": true,
+          "packages": [
+            {
+              "id": 1258,
+              "name": "ZaloPay",
+              "type": "N",
+              "brokerFirmBuyingFeeRate": 0.0007,
+              "brokerFirmSellingFeeRate": 0.0007
+            }
+          ]
+        }
+      },
+      "loan_packages_error": "HTTP 500: Error in backend service"
+    },
+    {
+      "id": "0002023348",
+      "type": "?",
+      "margin_enabled": false,
+      "loan_packages": [],
+      "collateral_check": {
+        "VCB": {
+          "eligible": true,
+          "packages": [
+            {
+              "id": 1122,
+              "name": "GD Tiền mặt",
+              "type": "N",
+              "brokerFirmBuyingFeeRate": 0.0007,
+              "brokerFirmSellingFeeRate": 0.0007
+            }
+          ]
+        },
+        "HPG": {
+          "eligible": true,
+          "packages": [
+            {
+              "id": 1122,
+              "name": "GD Tiền mặt",
+              "type": "N",
+              "brokerFirmBuyingFeeRate": 0.0007,
+              "brokerFirmSellingFeeRate": 0.0007
+            }
+          ]
+        },
+        "ACB": {
+          "eligible": true,
+          "packages": [
+            {
+              "id": 1122,
+              "name": "GD Tiền mặt",
+              "type": "N",
+              "brokerFirmBuyingFeeRate": 0.0007,
+              "brokerFirmSellingFeeRate": 0.0007
+            }
+          ]
+        },
+        "MBB": {
+          "eligible": true,
+          "packages": [
+            {
+              "id": 1122,
+              "name": "GD Tiền mặt",
+              "type": "N",
+              "brokerFirmBuyingFeeRate": 0.0007,
+              "brokerFirmSellingFeeRate": 0.0007
+            }
+          ]
+        },
+        "CTG": {
+          "eligible": true,
+          "packages": [
+            {
+              "id": 1122,
+              "name": "GD Tiền mặt",
+              "type": "N",
+              "brokerFirmBuyingFeeRate": 0.0007,
+              "brokerFirmSellingFeeRate": 0.0007
+            }
+          ]
+        }
+      },
+      "loan_packages_error": "HTTP 500: Error in backend service"
+    }
+  ]
+}
