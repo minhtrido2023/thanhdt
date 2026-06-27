@@ -1,4 +1,4 @@
-# Fleet status — 2026-06-27T18:19:43 UTC
+# Fleet status — 2026-06-27T18:19:58 UTC
 
 | agent | title (desktop) | kind | status | last_heartbeat | age(min) | current_task |
 |---|---|---|---|---|---|---|
@@ -19,7 +19,7 @@
 | 61ea30ab | Xây dựng và cải thiện custom30 | external | idle | 2026-06-27T18:10:01Z | 9 | interactive · cwd=/home/trido/thanhdt/WorkingClaude |
 | 69dc7ecd | 69dc7ecd | child | dead | 2026-06-25T11:51:40Z | 3268 |  |
 | 6ed16a65 | Giảm thiểu các phản hồi không cần thiết từ chat | external | dead | 2026-06-23T07:30:01Z | 6409 | interactive · cwd=/workspace/claude-code-discord-bridge |
-| 745d5248-735f-4649-8801-a7122e776406 | 745d5248-735f-4649-8801-a7122e776406 | child | dead | 2026-06-26T21:21:58Z | 1257 |  |
+| 745d5248-735f-4649-8801-a7122e776406 | 745d5248-735f-4649-8801-a7122e776406 | child | dead | 2026-06-26T21:21:58Z | 1258 |  |
 | 745d5248 | 745d5248 | child | dead | 2026-06-26T21:18:13Z | 1261 |  |
 | 75a8c042 | 75a8c042 | external | dead | 2026-06-25T05:20:01Z | 3659 | interactive · cwd=/home/trido/thanhdt/WorkingClaude |
 | 8602c506 | Kiểm tra những tính năng mới | external | dead | 2026-06-24T17:10:01Z | 4389 | interactive · cwd=/home/trido/thanhdt |
@@ -41,7 +41,7 @@
 | Mike_36658 | Mike | child | dead | 2026-06-27T11:50:01Z | 389 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
 | Mike_800186 | Mike | child | dead | 2026-06-24T15:20:01Z | 4499 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
 | Mike_809904 | Mike | child | dead | 2026-06-24T15:40:01Z | 4479 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Spyros | Spyros | child | dead | 2026-06-27T03:50:45Z | 868 |  |
+| Spyros | Spyros | child | dead | 2026-06-27T03:50:45Z | 869 |  |
 | Taylor | Taylor | child | working | 2026-06-27T18:19:42Z | 0 |  |
 | Taylor_1038723 | Taylor | child | dead | 2026-06-25T02:20:01Z | 3839 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
 | Taylor_2261386 | Taylor | child | dead | 2026-06-27T16:50:01Z | 89 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
@@ -50,8 +50,8 @@
 | Taylor_2379711 | Taylor | child | running | 2026-06-27T18:10:01Z | 9 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
 | Taylor_3555297 | Taylor | child | dead | 2026-06-27T17:40:01Z | 39 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
 | Taylor_807412 | Taylor | child | dead | 2026-06-24T15:50:01Z | 4469 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Wendy | Wendy | child | dead | 2026-06-26T15:24:58Z | 1614 |  |
-| Winston | Winston | child | working | 2026-06-27T18:19:22Z | 0 |  |
+| Wendy | Wendy | child | dead | 2026-06-26T15:24:58Z | 1615 |  |
+| Winston | Winston | child | working | 2026-06-27T18:19:56Z | 0 |  |
 | Winston_1970085 | Winston | child | dead | 2026-06-27T01:50:01Z | 989 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Winston |
 | Winston_36675 | Winston | child | dead | 2026-06-24T16:10:01Z | 4449 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Winston |
 | WorkingClaude | WorkingClaude | child | dead | 2026-06-27T05:19:10Z | 780 |  |
@@ -64,7 +64,7 @@
 | d4fac88a | d4fac88a | child | dead | 2026-06-23T05:21:17Z | 6538 |  |
 | d5de9996 | d5de9996 | child | dead | 2026-06-22T15:08:30Z | 7391 |  |
 | df94a54e | df94a54e | child | dead | 2026-06-23T15:26:37Z | 5933 |  |
-| f2545328-3223-4b6c-9ac1-4d4ceab40808 | f2545328-3223-4b6c-9ac1-4d4ceab40808 | child | dead | 2026-06-22T15:02:58Z | 7396 |  |
-| f2545328 | f2545328 | child | dead | 2026-06-22T15:02:45Z | 7396 |  |
+| f2545328-3223-4b6c-9ac1-4d4ceab40808 | f2545328-3223-4b6c-9ac1-4d4ceab40808 | child | dead | 2026-06-22T15:02:58Z | 7397 |  |
+| f2545328 | f2545328 | child | dead | 2026-06-22T15:02:45Z | 7397 |  |
 | srv-migrate-dt5g-timing-study | srv-migrate-dt5g-timing-study | external | idle | 2026-06-27T18:10:01Z | 9 | resume · cwd=/home/trido/thanhdt/WorkingClaude |
 | srv-thanhdt | srv-thanhdt | external | idle | 2026-06-27T18:10:01Z | 9 | remote-control · cwd=/home/trido/thanhdt |
