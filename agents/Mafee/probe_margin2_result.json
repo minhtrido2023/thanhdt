@@ -1,0 +1,295 @@
+{
+  "account": "0001743768",
+  "loan_packages_by_symbol": {
+    "ACB": [
+      {
+        "id": 1258,
+        "name": "ZaloPay",
+        "type": "N",
+        "brokerFirmBuyingFeeRate": 0.0007,
+        "brokerFirmSellingFeeRate": 0.0007
+      }
+    ],
+    "BID": [
+      {
+        "id": 1258,
+        "name": "ZaloPay",
+        "type": "N",
+        "brokerFirmBuyingFeeRate": 0.0007,
+        "brokerFirmSellingFeeRate": 0.0007
+      }
+    ],
+    "CTG": [
+      {
+        "id": 1258,
+        "name": "ZaloPay",
+        "type": "N",
+        "brokerFirmBuyingFeeRate": 0.0007,
+        "brokerFirmSellingFeeRate": 0.0007
+      }
+    ],
+    "DBC": [
+      {
+        "id": 1258,
+        "name": "ZaloPay",
+        "type": "N",
+        "brokerFirmBuyingFeeRate": 0.0007,
+        "brokerFirmSellingFeeRate": 0.0007
+      }
+    ],
+    "DCM": [
+      {
+        "id": 1258,
+        "name": "ZaloPay",
+        "type": "N",
+        "brokerFirmBuyingFeeRate": 0.0007,
+        "brokerFirmSellingFeeRate": 0.0007
+      }
+    ],
+    "EVF": [
+      {
+        "id": 1258,
+        "name": "ZaloPay",
+        "type": "N",
+        "brokerFirmBuyingFeeRate": 0.0007,
+        "brokerFirmSellingFeeRate": 0.0007
+      }
+    ],
+    "HAH": [
+      {
+        "id": 1258,
+        "name": "ZaloPay",
+        "type": "N",
+        "brokerFirmBuyingFeeRate": 0.0007,
+        "brokerFirmSellingFeeRate": 0.0007
+      }
+    ],
+    "HDB": [
+      {
+        "id": 1258,
+        "name": "ZaloPay",
+        "type": "N",
+        "brokerFirmBuyingFeeRate": 0.0007,
+        "brokerFirmSellingFeeRate": 0.0007
+      }
+    ],
+    "HHV": [
+      {
+        "id": 1258,
+        "name": "ZaloPay",
+        "type": "N",
+        "brokerFirmBuyingFeeRate": 0.0007,
+        "brokerFirmSellingFeeRate": 0.0007
+      }
+    ],
+    "HPG": [
+      {
+        "id": 1258,
+        "name": "ZaloPay",
+        "type": "N",
+        "brokerFirmBuyingFeeRate": 0.0007,
+        "brokerFirmSellingFeeRate": 0.0007
+      }
+    ],
+    "IDC": [
+      {
+        "id": 1258,
+        "name": "ZaloPay",
+        "type": "N",
+        "brokerFirmBuyingFeeRate": 0.0007,
+        "brokerFirmSellingFeeRate": 0.0007
+      }
+    ],
+    "LPB": [
+      {
+        "id": 1258,
+        "name": "ZaloPay",
+        "type": "N",
+        "brokerFirmBuyingFeeRate": 0.0007,
+        "brokerFirmSellingFeeRate": 0.0007
+      }
+    ],
+    "MBB": [
+      {
+        "id": 1258,
+        "name": "ZaloPay",
+        "type": "N",
+        "brokerFirmBuyingFeeRate": 0.0007,
+        "brokerFirmSellingFeeRate": 0.0007
+      }
+    ],
+    "MBS": [
+      {
+        "id": 1258,
+        "name": "ZaloPay",
+        "type": "N",
+        "brokerFirmBuyingFeeRate": 0.0007,
+        "brokerFirmSellingFeeRate": 0.0007
+      }
+    ],
+    "MSB": [
+      {
+        "id": 1258,
+        "name": "ZaloPay",
+        "type": "N",
+        "brokerFirmBuyingFeeRate": 0.0007,
+        "brokerFirmSellingFeeRate": 0.0007
+      }
+    ],
+    "PVT": [
+      {
+        "id": 1258,
+        "name": "ZaloPay",
+        "type": "N",
+        "brokerFirmBuyingFeeRate": 0.0007,
+        "brokerFirmSellingFeeRate": 0.0007
+      }
+    ],
+    "SHB": [
+      {
+        "id": 1258,
+        "name": "ZaloPay",
+        "type": "N",
+        "brokerFirmBuyingFeeRate": 0.0007,
+        "brokerFirmSellingFeeRate": 0.0007
+      }
+    ],
+    "SHS": [
+      {
+        "id": 1258,
+        "name": "ZaloPay",
+        "type": "N",
+        "brokerFirmBuyingFeeRate": 0.0007,
+        "brokerFirmSellingFeeRate": 0.0007
+      }
+    ],
+    "TCB": [
+      {
+        "id": 1258,
+        "name": "ZaloPay",
+        "type": "N",
+        "brokerFirmBuyingFeeRate": 0.0007,
+        "brokerFirmSellingFeeRate": 0.0007
+      }
+    ],
+    "TPB": [
+      {
+        "id": 1258,
+        "name": "ZaloPay",
+        "type": "N",
+        "brokerFirmBuyingFeeRate": 0.0007,
+        "brokerFirmSellingFeeRate": 0.0007
+      }
+    ],
+    "VCB": [
+      {
+        "id": 1258,
+        "name": "ZaloPay",
+        "type": "N",
+        "brokerFirmBuyingFeeRate": 0.0007,
+        "brokerFirmSellingFeeRate": 0.0007
+      }
+    ],
+    "VGC": [
+      {
+        "id": 1258,
+        "name": "ZaloPay",
+        "type": "N",
+        "brokerFirmBuyingFeeRate": 0.0007,
+        "brokerFirmSellingFeeRate": 0.0007
+      }
+    ],
+    "VHC": [
+      {
+        "id": 1258,
+        "name": "ZaloPay",
+        "type": "N",
+        "brokerFirmBuyingFeeRate": 0.0007,
+        "brokerFirmSellingFeeRate": 0.0007
+      }
+    ],
+    "VHM": [
+      {
+        "id": 1258,
+        "name": "ZaloPay",
+        "type": "N",
+        "brokerFirmBuyingFeeRate": 0.0007,
+        "brokerFirmSellingFeeRate": 0.0007
+      }
+    ],
+    "VIB": [
+      {
+        "id": 1258,
+        "name": "ZaloPay",
+        "type": "N",
+        "brokerFirmBuyingFeeRate": 0.0007,
+        "brokerFirmSellingFeeRate": 0.0007
+      }
+    ],
+    "VIX": [
+      {
+        "id": 1258,
+        "name": "ZaloPay",
+        "type": "N",
+        "brokerFirmBuyingFeeRate": 0.0007,
+        "brokerFirmSellingFeeRate": 0.0007
+      }
+    ],
+    "VND": [
+      {
+        "id": 1258,
+        "name": "ZaloPay",
+        "type": "N",
+        "brokerFirmBuyingFeeRate": 0.0007,
+        "brokerFirmSellingFeeRate": 0.0007
+      }
+    ],
+    "VPB": [
+      {
+        "id": 1258,
+        "name": "ZaloPay",
+        "type": "N",
+        "brokerFirmBuyingFeeRate": 0.0007,
+        "brokerFirmSellingFeeRate": 0.0007
+      }
+    ]
+  },
+  "collateral_summary": {
+    "eligible_count": 28,
+    "ineligible_count": 0,
+    "eligible_tickers": [
+      "ACB",
+      "BID",
+      "CTG",
+      "DBC",
+      "DCM",
+      "EVF",
+      "HAH",
+      "HDB",
+      "HHV",
+      "HPG",
+      "IDC",
+      "LPB",
+      "MBB",
+      "MBS",
+      "MSB",
+      "PVT",
+      "SHB",
+      "SHS",
+      "TCB",
+      "TPB",
+      "VCB",
+      "VGC",
+      "VHC",
+      "VHM",
+      "VIB",
+      "VIX",
+      "VND",
+      "VPB"
+    ],
+    "ineligible_tickers": [],
+    "all_loan_package_ids": [
+      "1258"
+    ]
+  }
+}
