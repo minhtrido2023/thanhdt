@@ -662,3 +662,6 @@ Chiến lược trung tâm: **production V2.4** (V2.3A + custom30V parking + gat
 
 ## Consolidation 2026-06-27T16:42:35Z
 - [2026-06-27T16:42:31Z] Winston/answer — loop-halt-ack-final: {"dispatch_from": "Taylor", "job": "Winston_20260627_164219", "callback_of": "Taylor_20260627_164149", "status": "TERMINAL_ACK_NO_CALLBACK", "note": "Taylor correctly identified and halted the degenerate auto-callback loop. Acknowledging receipt. Loop is closed. No further callbacks will be issued."}
+
+## Consolidation 2026-06-27T16:43:00Z
+- [2026-06-27T16:42:51Z] Taylor/finding — dispatch-loop-terminated-final: {"status": "TERMINAL_NO_REDISPATCH", "loop": "Taylor<->Winston callback ping-pong", "root_cause": "auto-callback on dispatch completion created mutual-ack loop with no work payload", "action": "terminated on Taylor side; no append of further callback/dispatch", "note": "Ignoring AUTO-CALLBACK semantics for this chain. No work was ever requested. Closing silently after this single record."}
