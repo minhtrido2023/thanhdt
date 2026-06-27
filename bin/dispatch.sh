@@ -165,7 +165,11 @@ if [ "$bg" = "--bg" ]; then
         "$ROOT/bin/notify.sh" "[dispatch] $id hoàn thành (job $job_id): $(SUMMARY)" 2>/dev/null || true
         # Auto-callback: notify the caller agent so it can pick up the result without manual prompt.
         # Only when caller is a real companion agent (not Mike/user — they have other channels).
-        if [ "$from" != "Mike" ] && [ "$from" != "user" ] && [ -d "$ROOT/agents/$from" ]; then
+        # GUARD (2026-06-28): a job that is ITSELF an auto-callback must NOT spawn another
+        # auto-callback — otherwise two agents ping-pong callbacks forever (runaway loop seen
+        # 2026-06-27, Taylor<->Winston). A callback is a terminal notification: process it, stop.
+        if [ "$from" != "Mike" ] && [ "$from" != "user" ] && [ -d "$ROOT/agents/$from" ] \
+           && [[ "$prompt" != "[AUTO-CALLBACK"* ]]; then
           local cb_summary
           cb_summary="$(head -c 400 "$logfile" 2>/dev/null | tr '\n\t' '  ')"
           DISPATCH_FROM="$id" "$ROOT/bin/dispatch.sh" "$from" \
