@@ -197,7 +197,8 @@ def cmd_job_set(a):
         if "=" not in kv:
             continue
         k, v = kv.split("=", 1)
-        obj[k] = v
+        # Sanitize: head -c may cut a multibyte sequence, producing surrogates.
+        obj[k] = v.encode("utf-8", errors="replace").decode("utf-8")
     tmp = fp + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(obj, f, ensure_ascii=False)

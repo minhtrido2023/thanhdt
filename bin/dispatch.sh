@@ -192,6 +192,15 @@ if [ "$bg" = "--bg" ]; then
     JSET status="$fstatus" ended_at="$(date +%s)" exit_code="$rc" result_summary="$(SUMMARY)"
     "$ROOT/bin/consolidate.sh" >> "$ROOT/logs/consolidator.log" 2>&1 || true
     "$ROOT/bin/notify.sh" "[dispatch] $id $why sau $max_attempts lần (job $job_id) — xem $logfile" 2>/dev/null || true
+    # Also notify the caller agent on failure so it can decide to retry or escalate.
+    # Same guard: no callback for auto-callback jobs (prevent loop on failure path too).
+    if [ "$from" != "Mike" ] && [ "$from" != "user" ] && [ -d "$ROOT/agents/$from" ] \
+       && [[ "$prompt" != "[AUTO-CALLBACK"* ]]; then
+      DISPATCH_FROM="$id" "$ROOT/bin/dispatch.sh" "$from" \
+        "[AUTO-CALLBACK-FAIL job=$job_id status=$fstatus] $id $why. Kết quả chưa ghi bus. Cần retry hoặc escalate." \
+        --bg --timeout 300 \
+        >> "$ROOT/logs/dispatch_${id}_${ts}.log" 2>&1 || true
+    fi
   }
   # Detach the wrapper's std fds so it does NOT hold the caller's stdout pipe open —
   # otherwise `out=$(dispatch.sh ... --bg)` would block until the job finishes (it
