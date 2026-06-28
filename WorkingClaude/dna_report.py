@@ -62,7 +62,16 @@ def get_regime():
     val = None
     if len(d):
         st = int(d.iloc[0]["state"]); nm, wt, em = STATE_MAP.get(st, ("?", "?", "⚪"))
-        val = {"state": st, "name": nm, "weight": wt, "emoji": em, "asof": str(d.iloc[0]["time"])}
+        asof = str(d.iloc[0]["time"])
+        # Freshness guard (OPS-7/DQ-6): warn if dt5g_live table is stale (>2 calendar days).
+        try:
+            from datetime import date
+            lag = (date.today() - pd.Timestamp(asof).date()).days
+            stale_flag = lag > 2  # allow weekend; >2 days = genuine freeze
+        except Exception:
+            stale_flag = False
+        val = {"state": st, "name": nm, "weight": wt, "emoji": em, "asof": asof,
+               "stale": stale_flag}
     _REGIME_CACHE.update(t=time.time(), val=val)
     return val
 
@@ -338,7 +347,8 @@ def build_report(tk):
         L.append("Giá/định giá: n/a (không lấy được dữ liệu live)")
     if reg:
         edge = "FA-edge mạnh" if reg["state"] <= 2 else ("FA-edge yếu" if reg["state"] >= 3 else "")
-        L.append(f"Regime : {reg['emoji']} <b>{reg['name']}</b> ({reg['weight']}) · {edge}  <i>[{reg['asof']}]</i>")
+        stale_warn = " ⚠️ <b>STALE</b>" if reg.get("stale") else ""
+        L.append(f"Regime : {reg['emoji']} <b>{reg['name']}</b> ({reg['weight']}) · {edge}  <i>[{reg['asof']}]</i>{stale_warn}")
     comp = build_compass_line()
     if comp:
         L.append(comp)
