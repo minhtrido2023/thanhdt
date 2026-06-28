@@ -217,19 +217,51 @@ GROUP BY t.time ORDER BY t.time""")
     return out
 
 
-def get_gated_state(start, end, bq=None, health_path=None, max_health_age_min=1440):
+def _alert(msg):
+    """Best-effort out-of-band alert. NEVER raises — alerting must not break the state path.
+    Tries Telegram (secrets/telegram_config.json), then the fleet notify.sh, else prints."""
+    try:
+        import json, requests
+        cfg = json.load(open(os.path.join(WORKDIR, "secrets/telegram_config.json"), encoding="utf-8"))
+        requests.post(f"https://api.telegram.org/bot{cfg['bot_token']}/sendMessage",
+                      data={"chat_id": cfg["chat_id"], "text": msg}, timeout=8)
+        return
+    except Exception:
+        pass
+    try:
+        import subprocess
+        nsh = os.path.join(WORKDIR, "mike/bin/notify.sh")
+        if os.path.exists(nsh):
+            subprocess.run([nsh, msg], timeout=8)
+            return
+    except Exception:
+        pass
+    print(f"[macro_state_live._alert] (no channel) {msg}")
+
+
+def get_gated_state(start, end, bq=None, health_path=None, max_health_age_min=1440,
+                    max_state_age_days=2, alert=True):
     """FAIL-SAFE production state source. Returns the macro (DT5G) state ONLY when the
     latest macro_healthcheck.py report says the feeds are trustworthy; otherwise reverts
     to DT4-only (the base state). Fail-CLOSED: a missing / stale / FAILED health report
     => DT4_only (never trust a stale or broken macro cap).
 
-    Returns DataFrame[time, state, base_state, macro_state, source]; production code should
-    consume the `state` column. `source` ∈ {DT5G_macro, DT4_only}. Reason is printed.
+    Frozen-state guard (DQ-6): on a LIVE call, if the recomputed state engine has frozen
+    relative to the live market (base state lags VNINDEX by > `max_state_age_days` trading
+    days — the ffill-frozen failure class, 2026-06-02) the gate is fail-CLOSED to DT4 and a
+    Telegram alert fires. Holiday-proof: state and price both freeze together on Tet/weekends,
+    so the trading-day lag only grows when the engine is genuinely stuck while the market trades.
+
+    Returns DataFrame[time, state, base_state, macro_state, source, stale]; production code
+    should consume the `state` column. `source` ∈ {DT5G_macro, DT4_only, DT4_STALE}. Reason
+    is printed.
     """
     import json, os
     from datetime import datetime
     if health_path is None:
         health_path = os.path.join(WORKDIR, "data", "macro_health.json")
+    if bq is None:
+        from simulate_holistic_nav import bq as _bq; bq = _bq
     m = get_macro_state(start, end, bq=bq)          # has BOTH 'state' (macro) and 'state_dt4' (base)
     use_macro, reason = False, "no health report -> DT4_only (fail-closed)"
     try:
@@ -243,11 +275,43 @@ def get_gated_state(start, end, bq=None, health_path=None, max_health_age_min=14
             reason = f"health={h.get('status')} rec={h.get('recommended_state_source')} -> DT4_only"
     except Exception as e:
         reason = f"health report unreadable ({e}) -> DT4_only"
-    src = "DT5G_macro" if use_macro else "DT4_only"
+
+    # ── Frozen-state guard (DQ-6): only on LIVE calls (end within ~10d of now); backtests
+    #    pay nothing and never alarm. A frozen engine silently disables the risk gate. ──
+    stale = False
+    try:
+        live_lag = (datetime.now().date() - pd.Timestamp(end).date()).days
+    except Exception:
+        live_lag = 0
+    if live_lag <= 10:
+        state_max = pd.Timestamp(m["time"].max()).date()
+        try:
+            # VNINDEX (clustered by ticker -> cheap): count trading days the engine is behind.
+            vf = bq(f"""SELECT MAX(t.time) AS mx,
+                               COUNTIF(t.time > DATE '{state_max}') AS gap
+                        FROM tav2_bq.ticker AS t
+                        WHERE t.ticker='VNINDEX' AND t.time >= DATE '{state_max}'""")
+            tgap = int(vf["gap"].iloc[0]) if len(vf) else 0
+            mkt_max = vf["mx"].iloc[0] if len(vf) else None
+            if tgap > max_state_age_days:
+                stale = True
+                reason += (f" | STATE FROZEN: base max={state_max} is {tgap} trading days behind "
+                           f"VNINDEX max={mkt_max} (> {max_state_age_days}) -> fail-CLOSED DT4")
+        except Exception as e:
+            # Live call but cannot confirm freshness -> conservative fail-CLOSED + alert.
+            stale = True
+            reason += f" | freshness check failed ({e}) -> fail-CLOSED DT4"
+    if stale:
+        use_macro = False
+        if alert:
+            _alert(f"⚠️ DT5G FROZEN/unverifiable — {reason}. get_gated_state failed CLOSED to DT4 "
+                   f"(no macro cap). Re-run the v3.4b refresh + DT5G publish chain. (go-live 2026-06-30)")
+
+    src = "DT5G_macro" if use_macro else ("DT4_STALE" if stale else "DT4_only")
     chosen = (m["state"] if use_macro else m["state_dt4"]).astype(int)
     out = pd.DataFrame({"time": m["time"], "state": chosen,
                         "base_state": m["state_dt4"].astype(int),
-                        "macro_state": m["state"].astype(int), "source": src})
+                        "macro_state": m["state"].astype(int), "source": src, "stale": stale})
     print(f"[get_gated_state] {src}: {reason}")
     return out
 
