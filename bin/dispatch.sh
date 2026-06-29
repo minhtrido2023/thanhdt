@@ -163,6 +163,13 @@ if [ "$bg" = "--bg" ]; then
         JSET status=done ended_at="$(date +%s)" exit_code=0 result_summary="$(SUMMARY)"
         "$ROOT/bin/consolidate.sh" >> "$ROOT/logs/consolidator.log" 2>&1 || true
         "$ROOT/bin/notify.sh" "[dispatch] $id hoàn thành (job $job_id): $(SUMMARY)" 2>/dev/null || true
+        # Discord thread notification — always, regardless of who dispatched.
+        # This is what the user sees in the active session thread.
+        local _tid; _tid="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
+        if [ -n "$_tid" ]; then
+          local _preview; _preview="$(head -c 200 "$logfile" 2>/dev/null | tr '\n\t' '  ')"
+          "$ROOT/bin/notify_thread.sh" "✅ **$id** xong (job \`${job_id}\`): $_preview" "$_tid" 2>/dev/null || true
+        fi
         # Auto-callback: notify the caller agent so it can pick up the result without manual prompt.
         # Only when caller is a real companion agent (not Mike/user — they have other channels).
         # GUARD (2026-06-28): a job that is ITSELF an auto-callback must NOT spawn another
@@ -192,6 +199,10 @@ if [ "$bg" = "--bg" ]; then
     JSET status="$fstatus" ended_at="$(date +%s)" exit_code="$rc" result_summary="$(SUMMARY)"
     "$ROOT/bin/consolidate.sh" >> "$ROOT/logs/consolidator.log" 2>&1 || true
     "$ROOT/bin/notify.sh" "[dispatch] $id $why sau $max_attempts lần (job $job_id) — xem $logfile" 2>/dev/null || true
+    local _tid; _tid="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
+    if [ -n "$_tid" ]; then
+      "$ROOT/bin/notify_thread.sh" "❌ **$id** $why (job \`${job_id}\`). Xem log: $logfile" "$_tid" 2>/dev/null || true
+    fi
     # Also notify the caller agent on failure so it can decide to retry or escalate.
     # Same guard: no callback for auto-callback jobs (prevent loop on failure path too).
     if [ "$from" != "Mike" ] && [ "$from" != "user" ] && [ -d "$ROOT/agents/$from" ] \

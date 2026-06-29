@@ -70,6 +70,25 @@ $ROOT/bin/jobs.sh list            # bảng mọi job: STATUS / AGE / LOG_AGE / A
 - Việc NGẮN cần kết quả ngay (vài chục giây) → dispatch **đồng bộ** (bỏ `--bg`); vẫn có trần `--timeout`
   nên không kẹt vô hạn (mặc định 600s).
 
+**⚠️ QUY TẮC BẮT BUỘC — đồng bộ vs bất đồng bộ:**
+
+| Tình huống | Cách dispatch | Cấm |
+|---|---|---|
+| User đang chờ kết quả trong conversation | `dispatch.sh X "..." ` (ĐỒNG BỘ, không `--bg`) | ❌ KHÔNG dùng `--bg` |
+| Task nền dài (>10 phút), user biết sẽ check sau | `dispatch.sh X "..." --bg` | ❌ KHÔNG hứa "tự báo lại" |
+| Fan-out nhiều task song song, không cần gộp ngay | `--bg` cho tất cả, dùng `jobs.sh` poll | ❌ KHÔNG hứa "tự báo lại" |
+
+**`--bg` = bạn THOÁT khỏi conversation ngay lập tức.** Auto-callback sẽ spawn headless session MỚI
+(không phải bạn), user không thấy kết quả đó trừ khi tự hỏi. **TUYỆT ĐỐI không nói "tôi sẽ tự
+báo lại" hay "sẽ report khi xong" sau khi dùng `--bg`** — đó là lời hứa không thực hiện được.
+
+Nếu cần dispatch Mafee và báo kết quả cho user trong cùng conversation:
+```bash
+# ĐÚNG: đồng bộ, Taylor chờ Mafee xong rồi mới trả lời user
+result=$(DISPATCH_FROM=Taylor $ROOT/bin/dispatch.sh Mafee "mô tả việc" --timeout 900)
+echo "$result"   # kết quả hiện ra ngay, Taylor tổng hợp và trả user
+```
+
 ## Tự nhớ khi restart
 Khi đổi mạch việc / có việc dở / đang chờ ai, cập nhật working-memory:
 ```bash
