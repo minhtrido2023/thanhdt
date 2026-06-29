@@ -4,6 +4,9 @@
 > Nguồn: phân tích kỹ thuật nội bộ (data quality + operations)  
 > Tài liệu gốc: `DAILY_DATA_PIPELINE.md` v2026-06-25
 
+> **STATUS: CLOSED 2026-06-29**  
+> BQ admin (Đinh Tiến Thành) xác nhận: các issues liên quan đã được fix hoặc đã có mitigation sẵn (email alert, retry). Phần lớn issues còn lại là false positive do review từ doc mà không có access code thực trên kaffa. Các fix phía consumer (DQ-6, DQ-10, bq_freshness_check, SBV weekly) đã committed.
+
 ---
 
 ## Tóm tắt điều hành
