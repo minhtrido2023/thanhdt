@@ -46,6 +46,7 @@ STATE_MAX_TDAYS  = 3      # BQ DT4 state table: stale if > N trading days behind
 TICKER_MAX_TDAYS = 3      # BQ ticker VNINDEX
 US_MAX_TDAYS     = 3      # us_market_history.csv (US calendar; T-1 aligned)
 SBV_STALE_DAYS   = 550    # SBV refi: INFO reminder to verify if last event older than this
+SBV_VERIFY_MAX_DAYS = 14  # fire sbv_verify_reminder if last manual/auto verify > this many days ago
 FROZEN_WINDOW    = 10     # frozen-feed: VIX identical across last N rows -> dead feed
 VIX_RANGE        = (5.0, 150.0)
 SPXDD_RANGE      = (-1.0, 0.20)
@@ -133,10 +134,28 @@ try:
     sbv_age = (TODAY - last_ev).days
     sources.append({"name": "sbv_refi_events", "as_of": str(last_ev), "age": sbv_age,
                     "ok": True, "detail": f"refi={refi_now}% last_event={last_ev} age={sbv_age}d (INFO)"})
-    if sbv_age > SBV_STALE_DAYS:
+    # sbv_verify_reminder: fire based on last_verified in sbv_verify_log.json (updated by
+    # check_sbv_weekly.sh every Friday), not on the age of the last SBV event.
+    # Weekly check → threshold is 14 calendar days (2 weeks = enough buffer for Friday cron).
+    sbv_verify_log_path = os.path.join(DATADIR, "sbv_verify_log.json")
+    verify_age_days = None
+    try:
+        vlog = json.loads(open(sbv_verify_log_path, encoding="utf-8").read())
+        last_v = pd.to_datetime(vlog.get("last_verified")).date()
+        verify_age_days = (TODAY - last_v).days
+    except Exception:
+        pass  # file missing → verify_age_days stays None
+
+    if verify_age_days is None:
+        # No verify log yet — fall back to legacy: warn if SBV event age > SBV_STALE_DAYS
+        if sbv_age > SBV_STALE_DAYS:
+            add_check("sbv_verify_reminder", False, "INFO",
+                      f"last SBV refi event {sbv_age}d old ({refi_now}%) — run check_sbv_weekly.sh "
+                      f"to initialise sbv_verify_log.json (no verify record found)")
+    elif verify_age_days > SBV_VERIFY_MAX_DAYS:
         add_check("sbv_verify_reminder", False, "INFO",
-                  f"last SBV refi event {sbv_age}d old ({refi_now}%) — MANUALLY VERIFY vs SBV; "
-                  f"cannot auto-detect a missed rate change")
+                  f"last SBV verify {verify_age_days}d ago (> {SBV_VERIFY_MAX_DAYS}d) — "
+                  f"check_sbv_weekly.sh should run Fridays; current rate {refi_now}% (event: {last_ev})")
 except Exception as e:
     sources.append({"name": "sbv_refi_events", "as_of": None, "age": None, "ok": False,
                     "detail": f"unreadable: {e}"})

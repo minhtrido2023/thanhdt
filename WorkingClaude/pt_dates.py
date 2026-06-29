@@ -26,7 +26,7 @@ def detect_end_date(bq_check=False) -> str:
             r = subprocess.run(
                 ["bq", "query", "--use_legacy_sql=false",
                  "--project_id=lithe-record-440915-m9", "--format=csv",
-                 "SELECT MAX(s.time) FROM tav2_bq.vnindex_5state AS s"],
+                 "SELECT MAX(s.time) FROM tav2_bq.vnindex_5state_dt5g_live AS s"],
                 capture_output=True, text=True, timeout=30)
             lines = [l for l in r.stdout.splitlines() if l and not l.startswith("f0_")]
             if lines:

@@ -56,7 +56,7 @@ def bq_csv(sql):
     return pd.read_csv(io.StringIO(r.stdout))
 
 def pull_latest_states():
-    live = bq_csv("SELECT s.time, s.state FROM tav2_bq.vnindex_5state AS s ORDER BY s.time DESC LIMIT 80")
+    live = bq_csv("SELECT s.time, s.state FROM tav2_bq.vnindex_5state_dt5g_live AS s ORDER BY s.time DESC LIMIT 80")
     stag = bq_csv("SELECT s.time, s.state FROM tav2_bq.vnindex_5state_staging AS s ORDER BY s.time DESC LIMIT 80")
     vni  = bq_csv("SELECT t.time, t.Close FROM tav2_bq.ticker AS t WHERE t.ticker='VNINDEX' ORDER BY t.time DESC LIMIT 100")
     # Broad-market T+5 benchmarks: EW close + breadth (% advances on prune universe)

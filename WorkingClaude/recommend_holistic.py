@@ -168,7 +168,7 @@ LEFT JOIN vni_max3m AS vmax ON vmax.time = t.time
 LEFT JOIN (
   SELECT t.time, ARRAY_AGG(s.state ORDER BY s.time DESC LIMIT 1)[OFFSET(0)] AS state
   FROM (SELECT DISTINCT time FROM ticker_data) AS t
-  LEFT JOIN tav2_bq.vnindex_5state AS s ON s.time <= t.time
+  LEFT JOIN tav2_bq.vnindex_5state_dt5g_live AS s ON s.time <= t.time
   GROUP BY t.time
 ) AS s5 ON s5.time = t.time
 -- Days since latest quarterly Release_Date (Fresh-Q filter, round 19 adoption)

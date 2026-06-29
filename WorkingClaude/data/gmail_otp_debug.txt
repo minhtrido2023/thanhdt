@@ -1,0 +1,3 @@
+timeout after 16 attempts
+query: from:noreply@mail.dnse.com.vn subject:"Xác thực với Email OTP" newer_than:3m
+last_seen: 19f11395023816f6

@@ -625,3 +625,40 @@ Quintile profit_2M (QUAL, monotonic): d_NPR Q1=1.71% Q3=4.58% Q5=6.02% (+4.3pp);
 | OOS 2020+  | 1577 | 1125 | 18.19 | 18.23 | +0.04 | −18.9 | −18.5 | 0.96 | 0.99 | +0.03 |
 
 **VERDICT: DO NOT WIRE.** The literal WIRE rule (OOS CAGR↑ AND Calmar↑ AND drop≤40%) technically passes on OOS — but the OOS gain is **+0.04pp CAGR / +0.03 Calmar = pure noise**, while the filter **destroys IS (−2.87pp CAGR, Calmar −0.20) and FULL (−1.44pp, MaxDD −7.5pp worse)**. A hard filter that breaks even OOS by noise but costs ~3pp IS and worsens full-period DD fails walk-forward robustness in spirit. Mirrors today's pattern (finer-3-tier-SUE −0.66pp; namecap weight-tilt +0.15pp within-noise): d_NPR is a real but SMALL selection signal that does NOT survive as a hard harness event-drop. Dropping 30% of LAG events shrinks the opportunity set/diversification (decel events still hit 57%); the isolated event-study spread doesn't translate through 12-slot limits + sizing + book dilution. **Keep d_NPR at most as a SOFT tiebreaker when the LAG book is capacity-constrained, NOT a hard filter.** Caveat: absolute CAGR here (13% FULL / 18% OOS) is the always-on V4-faithful two-book ensemble level, lower than the V2.4 R3 NEUTRAL-only headline — but the A/B DELTA is what's valid and it is internally consistent.
+
+## WORKFLOW STEP 3.5 — Bootstrap robustness (process decision, 2026-06-29, Taylor)
+**Decision:** Bootstrap robustness becomes a **standing workflow step (3.5)**, placed AFTER walk-forward IS/OOS (step 3) and BEFORE/AT wiring (step 4). It is NOT a new screen for exploratory variants — it runs ONLY when a config is one of: (a) being promoted to production/go-live, (b) a leverage/sizing decision, (c) Spyros needs a quantified DD tail to calibrate the breaker. Tool: **`bootstrap_nav.py <audit_csv> [baseline_csv]`** (merged from the now-deleted `bootstrap_robustness.py` + `bootstrap_v25_compare.py`; circular block bootstrap L=21d, B=4000, seed=12345 → deterministic).
+**Why add it:** it changed a real decision — V2.4 DD anchor moved from −18% (single historical path) to **~−29% (5th-pct)**; historical MaxDD is one draw and under-states the tail. The 5th-pct MaxDD is the correct sizing/psychological anchor.
+**Why placed at the END, not as a screen:** running CIs on every variant = the multiple-testing trap (compute 50 CIs, one looks great by luck). This season 6 rejected variants were NOT bootstrapped; only the 2 real go-live candidates (V2.4, V2.5) were. The cost is near-zero once the audit NAV CSV exists (the audit is run anyway).
+**Relation to walk-forward (complement, not replacement):** walk-forward = "edge survives unseen TIME / not period-overfit" (structural, pass/fail GATE). Bootstrap = "given this return distribution, how much could LUCK swing it + where is the DD tail" (sampling, NOT pass/fail).
+**Output discipline:** bootstrap is a **sizing/confidence input for Spyros**, NOT an auto-reject threshold. Spyros owns the risk-gate call (precedent: bootstrap quantified the tail → Spyros chose MGE 1.5 ok / 2.0 reject). Always quote the honest limit: sampling-only, regime-blind → a LOWER bound on true uncertainty.
+**Pinned reference numbers (`bootstrap_nav.py /tmp/golive_daily_nav.csv`, reproduced 2026-06-29):** V2.4 go-live CAGR act 27.8% / 5th 18.6% / 95th 37.8%; Sharpe 5th 1.22; MaxDD act −17.6% / 5th −28.6%; P(loss)=0%, P(DD<−30%)=3.3%, P(DD<−40%)=0.2%. V2.5 MGE1.5 (small-acct profile, lever-on throughout): CAGR 30.4% / 5th 20.3%; DD_5th −30.5%; P(<−30%)=5.6%, P(<−40%)=0.4%.
+
+## Gap-adaptive fill study (proxy) — Layer-3 should adapt to abnormal open (2026-06-29, Taylor)
+**Q (user):** buy-list name shows an abnormal open move vs its ~1M intraday pattern (e.g. +3% at open) — should fill timing adapt? **Script:** `gap_adaptive_proxy.py` (DuckDB on `data/bq_cache/ticker_prune.parquet`, deterministic). Universe = liquid quality-gated, 2014+, liquidity floor 5B/day, |gap|<=0.15 (VN band; beyond=corp-action). gap_z = (Open/Close_T1−1) / trailing-20d causal realized-vol. intraday = Close/Open−1 (maps onto Layer-3 Open-vs-ATC choice). fwd20 = profit_1M (research only). N=408,622 ticker-days, 392 names. Walk-forward IS 2014-19 / OOS 2020+.
+
+**FINDING 1 — EXECUTION (intraday give-back), the headline. STRONG, MONOTONIC, IS+OOS-STABLE:**
+| gap_z bucket | N | intraday (Open→Close) | t | fwd20 |
+|---|---|---|---|---|
+| z<−2 (big DOWN) | 3,395 | **+356 bps** (recovers) | 41 | +1.03% |
+| −2..−1 | 10,201 | +189 bps | 46 | +0.95% |
+| −1..1 (normal) | 382,428 | −5 bps | −11 | +0.92% |
+| 1..2 | 10,392 | −105 bps | −39 | +2.13% |
+| z>2 (big UP) | 2,206 | **−246 bps** (gives back) | −33 | +3.35% |
+IS up-gap −324bps / down-gap +445bps; OOS up-gap −208bps / down-gap +323bps — direction + magnitude stable both windows. → **Classic intraday overreaction mean-reversion, HUGE (±2.5–3.5%), dwarfs TC ~0.3%.** Decision: on a buy-list name, abnormal **UP-gap → DON'T chase, wait to ATC/limit (save ~2.5%)**; abnormal **DOWN-gap → BUY AT OPEN, capture ~3.5% recovery**. Two-sided.
+
+**FINDING 2 — THESIS/alpha (forward drift), book-specific, secondary:** up-gap fwd20 +3.35% (>normal +0.92%) — but the extra drift is a **MOMENTUM** phenomenon (mom-proxy up-gap +3.64%), **NOT PEAD** (earnings-fresh up-gap fwd20 −0.28%, t=−0.4 = noise). Down-gap fwd20 ≈ normal (not a falling knife on average) → confirms down-gap is a fine entry. So the gap is informative about the thesis ONLY for momentum names; for LAG/PEAD the gap is pure execution noise (drift over weeks swamps it).
+
+**ACTIONABLE DELTA vs current Layer-3:** current rule (non-TOP → 11:15/ATC) ALREADY waits → it is correct on UP-gaps (don't chase). The value is the **DOWN-gap side: current rule pays ~+356 bps vs open by waiting through the recovery.** → Proposed refinement: Layer-3 becomes **gap_z-conditional** — flip to BUY-AT-OPEN on abnormal down-gap (z<−2). Pure execution, zero added risk (alpha call already made by buy-list); free-insurance + small edge.
+
+**CAVEATS:** (1) gap_z is a DAILY proxy for intraday abnormality (full-universe intraday bars absent) — Close/Open−1 IS definitionally intraday, so give-back is real, but the within-day PATH (give back by 11:15 vs only ATC) needs the 16-name true-intraday set (`data/intraday_1m`) to set the exact target time → next step before wiring. (2) Falling-knife risk on down-gap is the ALPHA decision (buy-list), NOT execution — clean separation. (3) Capturability: don't market-buy into up-gap; use ATC/limit. **Gate before LIVE:** Mafee fill-rule tweak, user-approved (real-money execution change).
+
+### Cross-check on TRUE intraday (16 names, 1-min, 2023-09..2026-06) — `gap_path_crosscheck.py`
+Confirms the daily-proxy DIRECTION on real intraday + sets the wiring target time. 10,632 ticker-days.
+| bucket | N | ATC vs open | t | 11:15 vs open | % move done by 11:15 |
+|---|---|---|---|---|---|
+| z<−2 DOWN | 162 | **+181 bps** (recovers) | 9.9 | +101 bps | 56% |
+| z>2 UP | 83 | **−156 bps** (gives back) | −5.2 | −134 bps | 86% |
+Monotonic across buckets (−1..1 ≈ −9bps). Magnitudes smaller than full-universe daily (down +356/up −246) because these 16 are all large/mid liquid names (revert less than the full liquid tail) → **edge SCALES UP on smaller liquid names we actually park in.**
+**WIRING SPEC (clean):** DOWN-gap path is POSITIVE at every checkpoint → **OPEN (09:15) is the day's cheapest entry**; waiting to 11:15 costs ~+100bps, to ATC ~+180bps. UP-gap give-back is **86% done by 11:15** → current Layer-3 (non-TOP→11:15) already correct. → **Proposed gap_z-conditional Layer-3:** if `gap_z < −2` on a buy-list name → override to **BUY-AT-OPEN (09:15)**; else keep v4 hybrid (non-TOP→11:15 / TOP→ATC). UP-gap needs no change. Pure execution, zero alpha risk. Did NOT pull vnstock — daily(408k rows) + 16-name intraday triangulate cleanly; more 1-min names would be marginal (vnstock 1-min history ≈ recent window only).
+**NEXT:** draft the rule for Mafee (gap_z source = causal T-1 rvol; buy-list membership; LIVE needs user approval). Magnitude-by-liquidity cut available from daily data if needed for EV/blast-radius.

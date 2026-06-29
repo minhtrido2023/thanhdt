@@ -110,7 +110,7 @@ fa_latest = fa[fa["ticker"].isin(WHITELIST.keys()) & (fa["quarter"]==latest_q)]
 print(f"  FA latest quarter: {latest_q} ({len(fa_latest)} of {len(WHITELIST)} found)")
 
 # State
-sql_state = f'SELECT s.time, s.state, s.state_raw FROM tav2_bq.vnindex_5state AS s WHERE s.time <= "{snap_dt.date()}" ORDER BY s.time DESC LIMIT 30'
+sql_state = f'SELECT s.time, s.state, s.state_raw FROM tav2_bq.vnindex_5state_dt5g_live AS s WHERE s.time <= "{snap_dt.date()}" ORDER BY s.time DESC LIMIT 30'
 state = bq_query(sql_state)
 state["time"] = pd.to_datetime(state["time"])
 cur_state = state.iloc[0]

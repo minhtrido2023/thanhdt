@@ -30,6 +30,8 @@ import time
 from .config import EXEC_DIR, STOP_FILE
 from .vn_market import session_phase, tick_size, round_price, round_lot, LOT
 
+_GAP_Z_DOWN_THRESHOLD = -2.0  # gap_z < this on a BUY → full-speed 09:15-09:45
+
 
 def _parse_hhmm(s):
     """'HH:MM' → dt.time."""
@@ -50,6 +52,10 @@ class Executor:
         self.state_file = os.path.join(EXEC_DIR, f"exec_{tag}_state.json")
         self.journal_file = os.path.join(EXEC_DIR, f"exec_{tag}_journal.csv")
         self.report_file = os.path.join(EXEC_DIR, f"exec_{tag}_report.md")
+        self._gap_ref = {}      # ticker -> {prior_close, rvol_20d}; loaded once at startup
+        self._gap_z_cache = {}  # ticker -> gap_z or None (None = fail-safe, no override)
+        self._last_gap_override = {}  # ticker -> gap_z; populated when override fires this tick
+        self._load_gap_ref_data()
         self.state = self._load_state()
 
     # ------------------------------------------------------------ state/journal
@@ -304,6 +310,75 @@ class Executor:
                 except Exception as e:
                     self._journal("CANCEL_FAIL", o, c["oid"], note=str(e))
 
+    # ------------------------------------------------------------ gap-adaptive helpers
+
+    def _load_gap_ref_data(self):
+        """Load prior_close + rvol_20d for buy tickers from local parquet at startup.
+        Fail-safe: missing/stale/invalid data leaves _gap_ref empty (no override fires).
+        """
+        if not self.cfg.get("gap_adaptive_enabled", False):
+            return
+        cache_dir = os.environ.get(
+            "BQ_LOCAL_CACHE",
+            os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                         "data", "bq_cache"))
+        parquet_path = os.path.join(cache_dir, "ticker_prune.parquet")
+        if not os.path.exists(parquet_path):
+            print(f"[exec:{self.label}] gap_adaptive: {parquet_path} not found — fail-safe")
+            return
+        try:
+            import pandas as pd
+            import pyarrow.parquet as _pq
+            tickers = [o.ticker for o in self.plan.orders if o.side == "buy"]
+            if not tickers:
+                return
+            today = pd.Timestamp(self.plan.plan_date)
+            # ignore_metadata=True bypasses BQ dbdate pandas extension type annotation
+            table = _pq.read_table(parquet_path, columns=["time", "ticker", "Close"])
+            df = table.to_pandas(ignore_metadata=True)
+            df["time"] = pd.to_datetime(df["time"])
+            df = df[df["ticker"].isin(set(tickers))]
+            df = df[df["time"] < today].sort_values("time")
+            for ticker in tickers:
+                tk = df[df["ticker"] == ticker].tail(22)  # need 21 prices → 20 returns
+                if len(tk) < 2:
+                    continue
+                prior_close = float(tk["Close"].iloc[-1])
+                rets = tk["Close"].pct_change().dropna()
+                if len(rets) < 5:
+                    continue
+                rvol = float(rets.tail(20).std())
+                if rvol > 0:
+                    self._gap_ref[ticker] = {"prior_close": prior_close, "rvol_20d": rvol}
+        except Exception as e:
+            print(f"[exec:{self.label}] gap_adaptive: load error — {e}, fail-safe")
+
+    def _cache_gap_z(self, ticker, q):
+        """Compute + cache gap_z for ticker from first post-09:15 quote (once per session).
+        None in cache = fail-safe (no override). Absent from cache = not yet computed.
+        """
+        ref = self._gap_ref.get(ticker)
+        if not ref or ref.get("rvol_20d", 0) <= 0:
+            self._gap_z_cache[ticker] = None  # no ref → fail-safe
+            return
+        today_open = q.last or q.ref
+        if not today_open or today_open <= 0:
+            return  # price not available yet; retry on next call
+        prior_close = ref["prior_close"]
+        rvol_20d = ref["rvol_20d"]
+        gap_raw = today_open / prior_close - 1.0
+        if abs(gap_raw) > 0.15:  # corp-action guard
+            self._gap_z_cache[ticker] = None
+            return
+        # Floor guard: open at/near daily limit-down means one-way continuation (legal/regulatory
+        # blowup), the OPPOSITE of the mean-reversion this override assumes → fail-safe suppress.
+        limit_floor = (q.floor if (q.floor and q.floor > 0)
+                       else prior_close * (1 - self.cfg.get("gap_floor_band", 0.07)))
+        if today_open <= limit_floor * 1.005:  # within 0.5% of floor → treat as limit-down
+            self._gap_z_cache[ticker] = None
+            return
+        self._gap_z_cache[ticker] = gap_raw / rvol_20d
+
     def _fill_timing_mult(self, o, now):
         """Fill-Timing Layer (Layer-3): trả interval multiplier theo cửa sổ tối ưu.
         1.0 = tốc độ bình thường (trong cửa sổ); N = interval × N (ngoài cửa sổ).
@@ -319,6 +394,15 @@ class Executor:
         t = now.time()
         mult = self.cfg.get("fill_timing_outside_mult", 4.0)
         if o.side == "buy":
+            # Gap-adaptive override: abnormal DOWN-gap → full speed at open 09:15-09:45
+            self._last_gap_override.pop(o.ticker, None)
+            if self.cfg.get("gap_adaptive_enabled", False):
+                gap_z = self._gap_z_cache.get(o.ticker)
+                if gap_z is not None and gap_z < _GAP_Z_DOWN_THRESHOLD:
+                    if dt.time(9, 15) <= t < dt.time(9, 45):
+                        self._last_gap_override[o.ticker] = gap_z
+                        return 1.0
+                    # After 09:45: fall through to normal rule
             # Phiên chiều (13:00+): morning premium không còn → tốc độ bình thường
             if t >= dt.time(13, 0):
                 return 1.0
@@ -336,6 +420,13 @@ class Executor:
             ps = self.state["parents"][o.id]
             if ps["done"] or self._open_child(ps):
                 continue
+            # Populate gap_z cache before interval decision (gap_adaptive BUY only)
+            if (o.side == "buy" and self.cfg.get("gap_adaptive_enabled", False)
+                    and o.ticker not in self._gap_z_cache
+                    and now.time() >= dt.time(9, 15)):
+                q_pre = self.broker.get_quote(o.ticker)
+                if q_pre and q_pre.ok():
+                    self._cache_gap_z(o.ticker, q_pre)
             interval = base_interval * self._fill_timing_mult(o, now)
             if ps["last_slice_ts"]:
                 since = (now - dt.datetime.fromisoformat(ps["last_slice_ts"])).total_seconds()
@@ -371,12 +462,14 @@ class Executor:
             ps["last_slice_ts"] = now.isoformat(timespec="seconds")
             capped = (o.side == "buy" and cross and q.ask and px < q.ask)
             ft_mult = self._fill_timing_mult(o, now)
+            gap_note = (f"GAP_OPEN_OVERRIDE gap_z={self._last_gap_override[o.ticker]:.2f}"
+                        if o.ticker in self._last_gap_override else "")
             ft_note = (f"ft:in-window" if ft_mult == 1.0 and self.cfg.get("fill_timing_enabled")
                        else f"ft:out×{ft_mult:.0f}" if self.cfg.get("fill_timing_enabled")
                        else "")
             notes = [n for n in (dip_note,
                                  "nằm chờ tại trần đuổi" if capped else "",
-                                 ft_note) if n]
+                                 gap_note, ft_note) if n]
             self._journal("PLACE", o, oid, qty, px, note="; ".join(notes))
 
     def _atc_sweep(self):

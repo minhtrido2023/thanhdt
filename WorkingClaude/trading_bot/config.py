@@ -62,6 +62,10 @@ DEFAULTS = {
     "sell_window_end": "09:45",       # SELL: cuối cửa sổ Open
     "fill_timing_outside_mult": 4.0,  # interval × mult ngoài cửa sổ (8min → 32min mặc định)
 
+    # --- gap-adaptive fill (Layer-3 extension, PAPER only until user approves LIVE) ---
+    "gap_adaptive_enabled": False,    # DEFAULT OFF; set True only for paper. LIVE needs user approval.
+    "gap_floor_band": 0.07,           # fallback floor band when broker doesn't expose floor price (HOSE default).
+
     # --- an toàn ---
     "max_orders_per_day": 60,         # tổng số parent order tối đa trong 1 plan
     "max_daily_gross_value": 20_000_000_000,  # tổng GTGD tối đa 1 ngày (VND)

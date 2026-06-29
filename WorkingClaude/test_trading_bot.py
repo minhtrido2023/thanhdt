@@ -8,6 +8,7 @@ slicing/fill/journal/report + ĐA TÀI KHOẢN (plan riêng từng account, ch�
   python test_trading_bot.py
 """
 
+import datetime as dt
 import json
 import os
 import shutil
@@ -209,4 +210,183 @@ assert db.get_cash() == 123_000_000
 
 print("\n✅ TEST PASS — plan + slicing + fill + multi-account + fleet quota "
       "+ DNSE mapping đều đúng")
+
+# ============ 4) gap-adaptive fill timing (paper, gap_adaptive_enabled) ============
+from trading_bot.plan import PlannedOrder, TradePlan
+
+print("\n--- gap-adaptive fill timing tests ---")
+
+gap_order = PlannedOrder(id="BUY-GAP-01", ticker="GAPTEST", side="buy",
+                         qty=1000, ref_price=10_000)
+gap_plan = TradePlan(
+    plan_date="2026-06-29", signal_date="2026-06-28",
+    strategy="test", strategy_version="1", state=3, state_name="NEUTRAL",
+    nav_basis={}, orders=[gap_order], account="gaptest",
+)
+gcfg = dict(cfgmod.DEFAULTS)
+gcfg.update({
+    "mode": "paper",
+    "gap_adaptive_enabled": True,
+    "fill_timing_enabled": True,
+    "fill_timing_live_gate": True,
+    "fill_timing_outside_mult": 4.0,
+    "buy_window_start": "10:45",
+    "buy_window_end": "11:15",
+})
+gap_broker = PaperBroker(init_cash=1_000_000_000, fee_rate=0.0015,
+                          quote_source=fq, label="gaptest").connect()
+gap_exec = Executor(gap_plan, gap_broker, gcfg, shared={})
+
+# Bypass parquet by directly setting ref data (prior_close=10000, rvol=0.02)
+# Then set gap_z = -3.0 (genuine down-gap, well below -2 threshold)
+gap_exec._gap_ref["GAPTEST"] = {"prior_close": 10_000.0, "rvol_20d": 0.02}
+gap_exec._gap_z_cache["GAPTEST"] = -3.0   # gap_z < -2.0 → override active
+
+# Test 1a: down-gap at 09:30 (inside 09:15-09:45 window) → must return 1.0
+t_in = dt.datetime(2026, 6, 29, 9, 30)
+m_in = gap_exec._fill_timing_mult(gap_order, t_in)
+assert m_in == 1.0, f"[FAIL] down-gap in window: expected 1.0, got {m_in}"
+print(f"  [1a] down-gap 09:30 in-window  → mult={m_in} ✓")
+
+# Test 1b: down-gap at 09:50 (after window) → falls through to normal rule (mult=4)
+t_after = dt.datetime(2026, 6, 29, 9, 50)
+m_after = gap_exec._fill_timing_mult(gap_order, t_after)
+assert m_after == gcfg["fill_timing_outside_mult"], \
+    f"[FAIL] down-gap after window: expected {gcfg['fill_timing_outside_mult']}, got {m_after}"
+print(f"  [1b] down-gap 09:50 after-window → mult={m_after} ✓")
+
+# Test 2a: up-gap (gap_z = +1.5) → normal rule, same as feature-disabled
+gap_exec._gap_z_cache["GAPTEST"] = 1.5
+m_up = gap_exec._fill_timing_mult(gap_order, t_in)
+assert m_up == gcfg["fill_timing_outside_mult"], \
+    f"[FAIL] up-gap: expected {gcfg['fill_timing_outside_mult']}, got {m_up}"
+print(f"  [2a] up-gap 09:30                → mult={m_up} (normal rule) ✓")
+
+# Test 2b: gap_adaptive_enabled=False with down-gap → byte-identical to current rule
+gcfg_off = dict(gcfg)
+gcfg_off["gap_adaptive_enabled"] = False
+gap_exec_off = Executor(gap_plan, gap_broker, gcfg_off, shared={})
+gap_exec_off._gap_z_cache["GAPTEST"] = -3.0  # would trigger, but feature is OFF
+m_off = gap_exec_off._fill_timing_mult(gap_order, t_in)
+assert m_off == gcfg["fill_timing_outside_mult"], \
+    f"[FAIL] feature disabled: expected {gcfg['fill_timing_outside_mult']}, got {m_off}"
+print(f"  [2b] feature disabled, down-gap  → mult={m_off} (normal rule) ✓")
+
+# Test 3: rvol missing → no override (fail-safe to normal rule)
+gap_exec._gap_z_cache.pop("GAPTEST", None)   # clear cache so _cache_gap_z would run
+gap_exec._gap_ref.pop("GAPTEST", None)        # no ref data = rvol missing
+# Simulate what _cache_gap_z does when ref is missing: sets None
+gap_exec._gap_z_cache["GAPTEST"] = None
+m_noref = gap_exec._fill_timing_mult(gap_order, t_in)
+assert m_noref == gcfg["fill_timing_outside_mult"], \
+    f"[FAIL] rvol missing: expected {gcfg['fill_timing_outside_mult']}, got {m_noref}"
+print(f"  [3]  rvol missing → gap_z=None  → mult={m_noref} (fail-safe) ✓")
+
+# Test 3b: ticker absent from cache entirely (not yet computed) → also fail-safe
+gap_exec._gap_z_cache.pop("GAPTEST", None)
+m_absent = gap_exec._fill_timing_mult(gap_order, t_in)
+assert m_absent == gcfg["fill_timing_outside_mult"], \
+    f"[FAIL] cache absent: expected {gcfg['fill_timing_outside_mult']}, got {m_absent}"
+print(f"  [3b] cache absent (not computed) → mult={m_absent} (fail-safe) ✓")
+
+# Test 4: SELL side is always unchanged (gap_adaptive never touches sell)
+sell_order = PlannedOrder(id="SELL-GAP-01", ticker="GAPTEST", side="sell",
+                          qty=1000, ref_price=10_000)
+gap_exec._gap_z_cache["GAPTEST"] = -3.0  # down-gap, but this is a sell
+t_sell_in = dt.datetime(2026, 6, 29, 9, 25)   # inside sell window
+m_sell = gap_exec._fill_timing_mult(sell_order, t_sell_in)
+assert m_sell == 1.0, f"[FAIL] sell in 09:15-09:45 should be 1.0 (sell window), got {m_sell}"
+t_sell_out = dt.datetime(2026, 6, 29, 10, 0)   # outside sell window
+m_sell_out = gap_exec._fill_timing_mult(sell_order, t_sell_out)
+assert m_sell_out == gcfg["fill_timing_outside_mult"], \
+    f"[FAIL] sell outside window should be mult, got {m_sell_out}"
+print(f"  [4]  SELL unchanged (in={m_sell} out={m_sell_out}) ✓")
+
+print("\n✅ gap-adaptive fill timing: all 7 assertions PASS")
+
+# ============ 5) floor guard + journal marker + per-account config ============
+import csv as _csv
+print("\n--- gap floor guard + journal marker tests ---")
+
+# 5a: open AT floor → _cache_gap_z sets None → override suppressed
+q_at_floor = brk.Quote({"symbol": "GAPTEST", "lastPrice": 9_300, "refPrice": 10_000,
+                         "floor": 9_300, "ceiling": 10_700,
+                         "totalTrading": 10_000_000, "exchange": "HOSE"})
+gap_exec._gap_ref["GAPTEST"] = {"prior_close": 10_000.0, "rvol_20d": 0.02}
+gap_exec._gap_z_cache.pop("GAPTEST", None)
+gap_exec._cache_gap_z("GAPTEST", q_at_floor)
+assert gap_exec._gap_z_cache.get("GAPTEST") is None, \
+    f"[FAIL] open at floor: gap_z should be None, got {gap_exec._gap_z_cache.get('GAPTEST')}"
+m_5a = gap_exec._fill_timing_mult(gap_order, t_in)
+assert m_5a == gcfg["fill_timing_outside_mult"], \
+    f"[FAIL] at floor: expected {gcfg['fill_timing_outside_mult']}, got {m_5a}"
+print(f"  [5a] open at floor (9300=floor) → gap_z=None → mult={m_5a} (fail-safe) ✓")
+
+# 5b: open above floor (-5% vs floor at -7%) with genuine down-gap → override fires
+q_above_floor = brk.Quote({"symbol": "GAPTEST", "lastPrice": 9_500, "refPrice": 10_000,
+                            "floor": 9_300, "ceiling": 10_700,
+                            "totalTrading": 10_000_000, "exchange": "HOSE"})
+gap_exec._gap_z_cache.pop("GAPTEST", None)
+gap_exec._cache_gap_z("GAPTEST", q_above_floor)
+gz_5b = gap_exec._gap_z_cache.get("GAPTEST")
+assert gz_5b is not None and gz_5b < -2.0, \
+    f"[FAIL] above-floor down-gap: expected gap_z<-2, got {gz_5b}"
+m_5b = gap_exec._fill_timing_mult(gap_order, t_in)  # t_in = 09:30, in window
+assert m_5b == 1.0, f"[FAIL] above-floor down-gap at 09:30: expected 1.0, got {m_5b}"
+print(f"  [5b] open above floor (9500, floor=9300) gap_z={gz_5b:.2f} → mult={m_5b} ✓")
+
+# 5c: journal marker 'GAP_OPEN_OVERRIDE gap_z=...' in PLACE note when override fires
+class _GapTestQuotes:
+    client = object()
+    def connect(self): return self
+    def get_quote(self, sym):
+        if sym == "GAPTEST":
+            return brk.Quote({"symbol": "GAPTEST", "lastPrice": 9_500, "refPrice": 10_000,
+                              "bidPrice1": 9_500, "offerPrice1": 9_500,
+                              "floor": 9_300, "ceiling": 10_700,
+                              "totalTrading": 10_000_000, "exchange": "HOSE"})
+        return None
+
+from trading_bot.plan import PlannedOrder as _PO, TradePlan as _TP
+gap_order_j = _PO(id="BUY-GAP-J1", ticker="GAPTEST", side="buy",
+                  qty=1000, ref_price=10_000)
+gap_plan_j = _TP(plan_date="2026-06-29", signal_date="2026-06-28",
+                 strategy="test", strategy_version="1", state=3, state_name="NEUTRAL",
+                 nav_basis={}, orders=[gap_order_j], account="gapjournal")
+gcfg_j = dict(gcfg)
+gcfg_j.update({"slice_interval_min": 0, "poll_interval_sec": 0,
+               "max_child_value": 200_000_000, "min_order_value": 1_000_000})
+gap_broker_j = PaperBroker(init_cash=1_000_000_000, fee_rate=0.0015,
+                            quote_source=_GapTestQuotes(), label="gapjournal").connect()
+gap_exec_j = Executor(gap_plan_j, gap_broker_j, gcfg_j, shared={})
+gap_exec_j._gap_z_cache["GAPTEST"] = -3.0  # genuine down-gap, no floor suppression
+t_journal = dt.datetime(2026, 6, 29, 9, 30)
+gap_exec_j.step(t_journal, "MORNING", cont=True)
+with open(gap_exec_j.journal_file, newline="", encoding="utf-8") as _f:
+    _rows = list(_csv.DictReader(_f))
+place_notes = [r["note"] for r in _rows if r["event"] == "PLACE"]
+assert place_notes, f"[FAIL] no PLACE events in journal: {[r['event'] for r in _rows]}"
+assert any("GAP_OPEN_OVERRIDE" in n for n in place_notes), \
+    f"[FAIL] journal marker missing from PLACE note: {place_notes}"
+assert any("gap_z=" in n for n in place_notes), \
+    f"[FAIL] gap_z value missing from journal note: {place_notes}"
+print(f"  [5c] journal marker present: '{place_notes[0]}' ✓")
+
+# 5d: per-account config — verify DNSE live accounts do NOT inherit gap_adaptive=True
+from trading_bot.config import load_config, load_accounts
+_cfg = load_config()
+assert _cfg["gap_adaptive_enabled"] is False, "DEFAULTS must stay gap_adaptive_enabled=False"
+_profiles = load_accounts(_cfg)
+_paper_main = next((p for p in _profiles if p["label"] == "main"), None)
+_dnse_live = [p for p in _profiles if p.get("broker") == "dnse" and p.get("mode") == "live"]
+assert _paper_main is not None, "[FAIL] 'main' account not found"
+assert _paper_main["cfg"]["gap_adaptive_enabled"] is True, \
+    f"[FAIL] main paper: expected gap_adaptive_enabled=True, got {_paper_main['cfg']['gap_adaptive_enabled']}"
+for _p in _dnse_live:
+    assert _p["cfg"].get("gap_adaptive_enabled", False) is False, \
+        f"[FAIL] {_p['label']} live: gap_adaptive_enabled must be False, got {_p['cfg'].get('gap_adaptive_enabled')}"
+print(f"  [5d] per-account config: main paper=True, DNSE live accounts={[p['label'] for p in _dnse_live]} all False ✓")
+
+print("\n✅ floor guard + journal marker + per-account config: all assertions PASS")
+
 shutil.rmtree(TMP, ignore_errors=True)

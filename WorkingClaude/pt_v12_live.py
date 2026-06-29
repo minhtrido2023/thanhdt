@@ -2,7 +2,7 @@
 """V12 'AM DUONG' + LIVE Ngũ Hành "Tinh Tế" / "Sâu Sắc" 5-state — transparent sim
    2025-01-01 -> 2026-05-19, 50B NAV.
 
-5-state source: `tav2_bq.vnindex_5state` (LIVE production, v2g_pe3c_s3).
+5-state source: `tav2_bq.vnindex_5state_dt5g_live` (LIVE production, DT5G).
 
 Architecture (per ba_v12_am_duong_spec.md):
   - 25B BAL leg: BA v11 stack (SV_TIGHT + P3 + RE_BACKLOG + V6 ETF parking)
@@ -104,7 +104,7 @@ for i,(tk,t) in enumerate(zip(sig["ticker"].values, sig["time"].values)):
     ds_arr[i] = np.nan if idx==0 else (pd.Timestamp(t)-arr[idx-1]).days
 sig["days_since_release"] = ds_arr
 
-state_df = bq(f"""SELECT s.time, s.state FROM tav2_bq.vnindex_5state AS s
+state_df = bq(f"""SELECT s.time, s.state FROM tav2_bq.vnindex_5state_dt5g_live AS s
 WHERE s.time BETWEEN DATE '{START_DATE}' AND DATE '{END_DATE}'""")
 state_df["time"] = pd.to_datetime(state_df["time"])
 state_by_date = dict(zip(state_df["time"], state_df["state"]))
@@ -141,7 +141,7 @@ SELECT t.ticker, t.time, fa.fa_tier,
   SAFE_DIVIDE(t.NP_P0, t.NP_P4)-1 AS np_yoy,
   fin.Revenue_YoY_P0 AS rev_yoy, adv.adv_yoy, s5.state AS state5
 FROM tav2_bq.ticker AS t
-LEFT JOIN tav2_bq.vnindex_5state AS s5 ON s5.time = t.time
+LEFT JOIN tav2_bq.vnindex_5state_dt5g_live AS s5 ON s5.time = t.time
 LEFT JOIN fa_dated AS fa ON fa.ticker=t.ticker AND t.time>=fa.f_time AND (fa.next_f_time IS NULL OR t.time<fa.next_f_time)
 LEFT JOIN fin_dated AS fin ON fin.ticker=t.ticker AND t.time>=fin.fin_time AND (fin.next_fin_time IS NULL OR t.time<fin.next_fin_time)
 LEFT JOIN adv_dated AS adv ON adv.ticker=t.ticker AND t.time>=adv.f_time AND (adv.next_f_time IS NULL OR t.time<adv.next_f_time)

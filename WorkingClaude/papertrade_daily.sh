@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # papertrade_daily.sh  — Linux port of papertrade_daily.bat
-# Daily EOD: refresh feeds -> publish DT5G -> 4 sims + V2.3/V4 prod -> recommend
-# -> dashboards/alerts. Continue-on-error per step (one bad step must not kill the
-# rest), each step logged. Schedule via cron ~15:30 ICT trading days.
+# Daily EOD: refresh feeds -> 4 sims + V2.3/V4 prod -> dashboards/alerts.
+# DT5G publish + recommends đã CHUYỂN sang bq_freshness_check.sh (17:30 ICT).
+# Continue-on-error per step (one bad step must not kill the rest), each step logged.
+# Schedule via cron ~15:30 ICT trading days.
 #
 # NOTE: the Windows [0a2] rebuild_state_from_ticker.bat step is omitted — the
 # v3.4b base + local state CSVs are refreshed nightly by daily_refresh_v34b_linux.sh.
@@ -12,7 +13,7 @@ export STATE_WORKDIR="$WORKDIR_8L"
 PY="$DNA_PYEXE"; cd "$WORKDIR_8L"
 LOG="data/papertrade_run_$(date +%Y-%m-%d).log"
 exec >>"$LOG" 2>&1
-echo "===== papertrade_daily (linux) START $(date) acct=$(gcloud config get-value account 2>/dev/null) ====="
+echo "===== papertrade_daily (linux) START $(TZ='Asia/Ho_Chi_Minh' date +'%Y-%m-%d %H:%M ICT') acct=$(gcloud config get-value account 2>/dev/null) ====="
 
 run() {  # run() "<label>" <script> [args...]   -- never aborts the pipeline
   echo; echo "--- $1 ---"
@@ -25,7 +26,6 @@ run "[1] pull_us_market"        pull_us_market.py
 run "[2] refresh_lagged_caches" refresh_lagged_caches.py
 run "[3] snapshot_state_vintage" snapshot_state_vintage.py
 run "[4] macro_healthcheck"     macro_healthcheck.py
-run "[5] publish_gated_state"   deploy_golive_dt5g_v4/publish_gated_state.py
 run "[6] custom30_history"      custom30_history.py
 # --- sims + production books ---
 run "[7] pt_v11_tq34b"          pt_v11_tq34b.py
@@ -34,8 +34,6 @@ run "[8] pt_v12_macro"          pt_v12_macro.py
 # reduced-harness artifact (faithful audit 16.85% < V11/V2.3); dropped from daily comparison.
 run "[11] pt_v4_dt5g"           pt_v4_dt5g.py
 run "[12] pt_v22_dt5g (V2.3)"   pt_v22_dt5g.py
-run "[13] golive_recommend_v23" deploy_golive_dt5g_v4/golive_recommend_v23.py
-run "[13b] push_recommend_v23_to_bq" mike/agents/Mafee/push_recommend_v23_to_bq.py
 run "[14] papertrade_compare"   papertrade_compare.py
 # --- sleeves / shadows / alerts ---
 run "[15] vol_spike_hedge_pt"   vol_spike_hedge_pt.py
@@ -58,4 +56,4 @@ fi
 
 # rolling 30-day log cleanup
 find data -name 'papertrade_run_*.log' -mtime +30 -delete 2>/dev/null
-echo; echo "===== papertrade_daily (linux) DONE $(date) ====="
+echo; echo "===== papertrade_daily (linux) DONE $(TZ='Asia/Ho_Chi_Minh' date +'%Y-%m-%d %H:%M ICT') ====="

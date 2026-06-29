@@ -75,7 +75,7 @@ WITH fa_dated AS (
 ),
 state5_table AS (
   SELECT s5.time AS s5_time, s5.state AS state5
-  FROM tav2_bq.vnindex_5state AS s5
+  FROM tav2_bq.vnindex_5state_dt5g_live AS s5
 ),
 base AS (
   SELECT

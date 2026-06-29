@@ -1,6 +1,6 @@
 # Paper-Trade Comparison — 5 Systems
 
-*Generated: 2026-06-26 15:39*
+*Generated: 2026-06-29 15:36*
 
 *Window: 2026-04-01 → 2026-06-25 (85 calendar days)*
 
@@ -14,17 +14,17 @@
 | **V11 Song Sinh + KELLY + DT5G ⭐** | 54.543B | +9.25% | +46.25% | 19.33% | +2.08 | -6.85% | +6.75 |
 | **V12 Âm Dương (BAL+LAGGED) + DT5G ⭐** | 50.997B | +2.05% | +9.10% | 8.59% | +1.07 | -4.67% | +1.95 |
 | **V4 12.1 (V121_ENS + BASE) + DT5G — fresh 2026-06-01** | 49.853B | -0.24% | -3.60% | 7.04% | -0.45 | -2.31% | -1.56 |
-| **V2.3 = V2.2 (BAL|LAG static + park) + capit — fresh 2026-06-11 ⭐** | 50.378B | +0.76% | +21.69% | 6.73% | +2.85 | -0.53% | +41.12 |
+| **V2.3 = V2.2 (BAL|LAG static + park) + capit — fresh 2026-06-11 ⭐** | 50.342B | +0.68% | +19.46% | 6.50% | +2.67 | -0.53% | +36.88 |
 | **VNINDEX Buy & Hold (rebased 50B)** | 54.702B | +9.40% | +47.14% | 16.52% | +2.45 | -7.13% | +6.61 |
 
 ## Delta vs V23 (production baseline)
 
 | System | ΔRet | ΔDD | Verdict |
 |---|---|---|---|
-| V11 Song Sinh + KELLY + DT5G ⭐ | +8.49pp | -6.33pp | Return better, DD worse |
-| V12 Âm Dương (BAL+LAGGED) + DT5G ⭐ | +1.29pp | -4.14pp | Return better, DD worse |
-| V4 12.1 (V121_ENS + BASE) + DT5G — fresh 2026-06-01 | -1.00pp | -1.78pp | Both worse |
-| VNINDEX Buy & Hold (rebased 50B) | +8.65pp | -6.60pp | Return better, DD worse |
+| V11 Song Sinh + KELLY + DT5G ⭐ | +8.57pp | -6.33pp | Return better, DD worse |
+| V12 Âm Dương (BAL+LAGGED) + DT5G ⭐ | +1.36pp | -4.14pp | Return better, DD worse |
+| V4 12.1 (V121_ENS + BASE) + DT5G — fresh 2026-06-01 | -0.92pp | -1.78pp | Both worse |
+| VNINDEX Buy & Hold (rebased 50B) | +8.72pp | -6.60pp | Return better, DD worse |
 
 ## Grind lens — current drawdown & recent momentum
 
@@ -53,8 +53,8 @@
 | 2026-06-01 | 53.95B | 51.28B | 49.97B | — | 54.16B |
 | 2026-06-08 | 52.68B | 50.01B | 48.88B | — | 52.57B |
 | 2026-06-15 | 52.45B | 49.61B | 49.01B | 50.10B | 52.83B |
-| 2026-06-22 | 54.03B | 50.62B | 49.51B | 50.50B | 54.55B |
-| 2026-06-25 | 54.54B | 51.00B | 49.85B | 50.38B | 54.70B |
+| 2026-06-22 | 54.03B | 50.62B | 49.51B | 50.46B | 54.55B |
+| 2026-06-25 | 54.54B | 51.00B | 49.85B | 50.34B | 54.70B |
 
 ## Files
 
