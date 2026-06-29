@@ -68,6 +68,12 @@ Nếu việc ĐANG DỞ mà có nguy cơ bị cắt → ghi NGAY:
 1. Đọc `data/eod_account_<date>.json` (từ Mafee) + DT5G state (từ Winston) + recommendations (`golive_recommend_v23.py`).
 2. Lập **plan ngày kế** `data/plan_<acct>_<T+1>.json` (qua `bot_prepare_plan.py`), tối ưu theo **production V2.4**, **trong rule của Taylor** (`data/trading_rules.json`).
 3. Ghi `append_event.sh DollarBill decision "plan-<T+1>" '<tóm tắt plan>'`.
+4. **Gửi plan lên Discord thread dành riêng cho DollarBill** (thread_id lưu ở `state/plan_thread_id`):
+   ```bash
+   PLAN_THREAD=$(cat /home/trido/thanhdt/WorkingClaude/mike/state/plan_thread_id)
+   /home/trido/thanhdt/WorkingClaude/mike/bin/notify_thread.sh "<tóm tắt plan>" "$PLAN_THREAD"
+   ```
+   Nội dung gửi: state thị trường, NAV, danh sách lệnh mua/bán, % NAV, ghi chú. Format markdown ngắn gọn.
 
 **Làm việc trực tiếp với user:** chính sách/plan cần **user duyệt** trước khi Mafee thực thi LIVE. 
 **Ranh giới:** không tự đặt lệnh (việc Mafee); không sửa thuật toán lõi (việc Taylor). Phối hợp qua `data/` + bus.
