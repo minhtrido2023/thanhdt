@@ -1,6 +1,6 @@
 # Paper-Trade Comparison — 5 Systems
 
-*Generated: 2026-06-29 15:36*
+*Generated: 2026-06-30 15:38*
 
 *Window: 2026-04-01 → 2026-06-25 (85 calendar days)*
 
@@ -11,20 +11,20 @@
 
 | System | Final NAV | Total Ret | CAGR | Vol (ann) | Sharpe | Max DD | Calmar |
 |---|---|---|---|---|---|---|---|
-| **V11 Song Sinh + KELLY + DT5G ⭐** | 54.543B | +9.25% | +46.25% | 19.33% | +2.08 | -6.85% | +6.75 |
-| **V12 Âm Dương (BAL+LAGGED) + DT5G ⭐** | 50.997B | +2.05% | +9.10% | 8.59% | +1.07 | -4.67% | +1.95 |
+| **V11 Song Sinh + KELLY + DT5G ⭐** | 54.341B | +8.85% | +43.94% | 19.33% | +2.00 | -6.81% | +6.45 |
+| **V12 Âm Dương (BAL+LAGGED) + DT5G ⭐** | 50.892B | +1.84% | +8.13% | 8.58% | +0.96 | -4.65% | +1.75 |
 | **V4 12.1 (V121_ENS + BASE) + DT5G — fresh 2026-06-01** | 49.853B | -0.24% | -3.60% | 7.04% | -0.45 | -2.31% | -1.56 |
-| **V2.3 = V2.2 (BAL|LAG static + park) + capit — fresh 2026-06-11 ⭐** | 50.342B | +0.68% | +19.46% | 6.50% | +2.67 | -0.53% | +36.88 |
+| **V2.3 = V2.2 (BAL|LAG static + park) + capit — fresh 2026-06-11 ⭐** | 50.379B | +0.76% | +21.76% | 6.72% | +2.86 | -0.53% | +41.25 |
 | **VNINDEX Buy & Hold (rebased 50B)** | 54.702B | +9.40% | +47.14% | 16.52% | +2.45 | -7.13% | +6.61 |
 
 ## Delta vs V23 (production baseline)
 
 | System | ΔRet | ΔDD | Verdict |
 |---|---|---|---|
-| V11 Song Sinh + KELLY + DT5G ⭐ | +8.57pp | -6.33pp | Return better, DD worse |
-| V12 Âm Dương (BAL+LAGGED) + DT5G ⭐ | +1.36pp | -4.14pp | Return better, DD worse |
-| V4 12.1 (V121_ENS + BASE) + DT5G — fresh 2026-06-01 | -0.92pp | -1.78pp | Both worse |
-| VNINDEX Buy & Hold (rebased 50B) | +8.72pp | -6.60pp | Return better, DD worse |
+| V11 Song Sinh + KELLY + DT5G ⭐ | +8.09pp | -6.28pp | Return better, DD worse |
+| V12 Âm Dương (BAL+LAGGED) + DT5G ⭐ | +1.08pp | -4.12pp | Return better, DD worse |
+| V4 12.1 (V121_ENS + BASE) + DT5G — fresh 2026-06-01 | -1.00pp | -1.78pp | Both worse |
+| VNINDEX Buy & Hold (rebased 50B) | +8.65pp | -6.60pp | Return better, DD worse |
 
 ## Grind lens — current drawdown & recent momentum
 
@@ -46,15 +46,15 @@
 | 2026-04-08 | 53.02B | 51.09B | — | — | 51.57B |
 | 2026-04-15 | 52.54B | 50.97B | — | — | 52.87B |
 | 2026-04-22 | 53.84B | 51.33B | — | — | 54.53B |
-| 2026-05-04 | 54.21B | 50.98B | — | — | 54.44B |
-| 2026-05-11 | 55.44B | 51.43B | — | — | 55.65B |
-| 2026-05-18 | 55.36B | 51.72B | — | — | 56.61B |
-| 2026-05-25 | 54.78B | 51.00B | — | — | 55.38B |
-| 2026-06-01 | 53.95B | 51.28B | 49.97B | — | 54.16B |
-| 2026-06-08 | 52.68B | 50.01B | 48.88B | — | 52.57B |
-| 2026-06-15 | 52.45B | 49.61B | 49.01B | 50.10B | 52.83B |
-| 2026-06-22 | 54.03B | 50.62B | 49.51B | 50.46B | 54.55B |
-| 2026-06-25 | 54.54B | 51.00B | 49.85B | 50.34B | 54.70B |
+| 2026-05-04 | 54.02B | 50.89B | — | — | 54.44B |
+| 2026-05-11 | 55.24B | 51.32B | — | — | 55.65B |
+| 2026-05-18 | 55.16B | 51.62B | — | — | 56.61B |
+| 2026-05-25 | 54.57B | 50.90B | — | — | 55.38B |
+| 2026-06-01 | 53.76B | 51.18B | 49.97B | — | 54.16B |
+| 2026-06-08 | 52.49B | 49.91B | 48.88B | — | 52.57B |
+| 2026-06-15 | 52.27B | 49.52B | 49.01B | 50.10B | 52.83B |
+| 2026-06-22 | 53.83B | 50.52B | 49.51B | 50.50B | 54.55B |
+| 2026-06-25 | 54.34B | 50.89B | 49.85B | 50.38B | 54.70B |
 
 ## Files
 

@@ -214,6 +214,9 @@ WHERE r.time <= DATE '{end_date}' ORDER BY r.ticker, r.time""")
     CFO_POOL  = int(os.environ.get("BASKET_CFO_POOL", "60"))
     _YM = os.environ.get("BASKET_YIELD_METRIC", "pcf").lower()   # "pe" = stable earnings yield (preferred)
     SELECT_MODE = os.environ.get("BASKET_SELECT", "blend").lower()  # "blend" (liq+lam*yield) | "yieldcombo" (custom30V)
+    # AUDIT-ONLY hard exclude (env BASKET_EXCLUDE="HVN,VJC,..."; prod default empty = byte-identical).
+    # Tests whether a Permanent Exclude List (sector-sweep flagged structural value-traps) helps the basket.
+    EXCLUDE = {x.strip().upper() for x in os.environ.get("BASKET_EXCLUDE", "").split(",") if x.strip()}
     # BULL sleeve (custom30B) audit knobs (env, prod default OFF): absolute liquidity floor + 1/PE-led selectors.
     # LIQ_FLOOR_B = min prior-quarter avg secondary liq (VND bn/day) to ENTER (deploy more capital, ~10 = user).
     # SELECT_MODE 'petop' = pure rank(1/PE) (bull IC champion +0.161). 'pemom' = rank(1/PE)+MOM_W*rank(mom200).
@@ -324,6 +327,7 @@ GROUP BY t.ticker, q""")
         # gated candidates in liquidity order (HARD SAFETY GATE: investment-grade as-of 8L rating)
         gated = []
         for tk in ranked:
+            if tk in EXCLUDE: continue                                  # audit-only permanent exclude
             rt = rating_asof(tk, d)
             if gate_rating is not None and not (pd.notna(rt) and rt <= gate_rating): continue
             if quality == "filter" and not (pd.notna(rt) and rt <= 3): continue

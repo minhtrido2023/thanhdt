@@ -1,5 +1,5 @@
-🛰️ V2.3 (DT5G) REPORT — 2026-06-29
-Sent: 2026-06-29 18:00 (next session T+1 entry)
+🛰️ V2.3 (DT5G) REPORT — 2026-06-30
+Sent: 2026-06-30 18:00 (next session T+1 entry)
 Market regime (DT5G): 🟡 NEUTRAL (state=3)
 Strategy: V2.3 = BAL | LAG static (always-on, no ensemble switch) + allocator + CAPIT v2
 BAL: max=12 · 10%/pos (book) · hold 45d · stop -20% · Fin/RE cap 4 · 8L≥4 half-size in BEAR/CRISIS
@@ -13,8 +13,8 @@ Không có signal — giữ cash cho book này.
 Không có entry PEAD đến hạn — giữ vị thế LAG hiện có (hold 25td, NO stop) + parking.
 🧯 CAPIT v2: breadth oversold 8.2% &lt; gate 30% — dormant
 📊 Universe distribution
-  BA-core: 0 mã | Compounder/info: 6 mã
-  Wait/Pass/Avoid: 244 mã
+  BA-core: 1 mã | Compounder/info: 12 mã
+  Wait/Pass/Avoid: 236 mã
 💡 Execution checklist (T+1 next session)
   • Vốn: BAL 35% / LAG 65% NAV (rebal CHỈ khi lệch &gt;10pp)
   • BAL: 0 pos × 10% book · stop -20% · hold 45d
@@ -22,13 +22,12 @@ Không có entry PEAD đến hạn — giữ vị thế LAG hiện có (hold 25t
   • Cash dư cả 2 book → 70% E1VFVN30
 🛰️ MARKET-STATE ENGINE — DT5G (gated live)
 
-As of:   2026-06-25
-Source:  DT4-only (macro feed degraded → fail-safe)
+As of:   2026-06-30
+Source:  DT5G + macro overlay
 
-⚠️ DT5G as-of 2026-06-25 trễ hơn signal date 2026-06-29 — dùng state công bố gần nhất (DT5G dormant/sticky trong regime lành tính).
 🔄 DT5G transitions từ 2026-04-01
 
-Số ngày: 59   |   transitions: 0
+Số ngày: 62   |   transitions: 0
   (không có transition — state ổn định)
 
 📊 V2.4 GO-LIVE paper-trade
