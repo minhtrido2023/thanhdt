@@ -32,6 +32,31 @@ if [ -n "${MIKE_CWD:-}" ]; then
   python3 "$ROOT/bin/recap_prev.py" "$MIKE_CWD" "${MIKE_SID:-}" 6 2>/dev/null || true
 fi
 
+# Job board audit: surface any OVERDUE jobs immediately on restart (Mike only — coordinator owns the board).
+if [ "$id" = "Mike" ] && [ -d "$ROOT/bus/jobs" ]; then
+  NOW="$(date +%s)"
+  overdue_out=""
+  for _jf in "$ROOT/bus/jobs"/*.json; do
+    [ -f "$_jf" ] || continue
+    read -r _jst _jdl _jto _jprompt < <(python3 -c "
+import json,sys
+d=json.load(open(sys.argv[1]))
+print(d.get('status','?'), d.get('deadline',0), d.get('to','?'), repr(d.get('prompt_summary','')[:80]))
+" "$_jf" 2>/dev/null) || continue
+    [ "$_jst" = "running" ] || continue
+    [ "$_jdl" -gt 0 ] && [ "$NOW" -gt "$_jdl" ] || continue
+    _jid="$(basename "$_jf" .json)"
+    _jmin="$(( (NOW - _jdl) / 60 ))"
+    overdue_out="${overdue_out}  ⚠️ OVERDUE $_jid (→$_jto, ${_jmin}min quá hạn): $_jprompt\n"
+  done
+  if [ -n "$overdue_out" ]; then
+    echo ""
+    echo "[CẢNH BÁO — JOB BOARD CÓ TÁC VỤ QUÁ HẠN — xử lý trước khi nhận việc mới:]"
+    printf '%b' "$overdue_out"
+    echo "Kiểm tra: bin/jobs.sh list | Đánh xong: python3 bin/mike_json.py job-set bus/jobs <id> status=done"
+  fi
+fi
+
 # Surface any NEW directive Mike assigned to this agent (once, via offset cache).
 source "$ROOT/hooks/_directives.sh"
 exit 0

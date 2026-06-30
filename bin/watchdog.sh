@@ -118,6 +118,36 @@ for link in "$WANTS"/mike@*.service; do
 done
 [ "$found" = 1 ] || notify "no enabled mike@ units found in $WANTS"
 
+# --- Job board OVERDUE scan — catches dispatch jobs stuck in 'running' past their deadline.
+# Common root cause: the claude process was killed before JSET status=done/failed could run
+# (timeout race, container restart, OOM). Alert once per job (debounced in state/overdue/).
+JOBS_DIR="$ROOT/bus/jobs"
+OVERDUE_DIR="$ROOT/state/overdue"
+mkdir -p "$OVERDUE_DIR"
+if [ -d "$JOBS_DIR" ]; then
+  _now="$(date +%s)"
+  for _jf in "$JOBS_DIR"/*.json; do
+    [ -f "$_jf" ] || continue
+    read -r _jst _jdl _jfrom _jto _jprompt < <(python3 -c "
+import json,sys
+d=json.load(open(sys.argv[1]))
+print(d.get('status','?'), d.get('deadline',0), d.get('from','?'), d.get('to','?'), repr(d.get('prompt_summary','')[:80]))
+" "$_jf" 2>/dev/null) || continue
+    [ "$_jst" = "running" ] || continue
+    [ "$_jdl" -gt 0 ] && [ "$_now" -gt "$_jdl" ] || continue
+    _jid="$(basename "$_jf" .json)"
+    _omark="$OVERDUE_DIR/$_jid"
+    [ -f "$_omark" ] && continue  # already alerted
+    _jmin="$(( (_now - _jdl) / 60 ))"
+    notify "JOB OVERDUE: $_jid ($_jfrom→$_jto, ${_jmin}min past deadline). Prompt: $_jprompt. Fix: bin/jobs.sh status $_jid"
+    touch "$_omark"
+    _tid="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
+    if [ -n "${_tid:-}" ]; then
+      "$ROOT/bin/notify_thread.sh" "⚠️ **Job OVERDUE** \`$_jid\` ($_jfrom→$_jto, ${_jmin}min quá hạn). Kiểm tra: \`bin/jobs.sh status $_jid\`" "$_tid" 2>/dev/null || true
+    fi
+  done
+fi
+
 # --- Account-wide 5-hour usage watch (shared ceiling for the whole fleet). Log once on the
 # up-crossing of USAGE_WARN_PCT so heavy work can be paced BEFORE everyone hits the wall.
 # Debounced via state/usagewarn so it doesn't repeat every run.

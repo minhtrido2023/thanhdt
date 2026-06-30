@@ -224,6 +224,12 @@ if [ "$bg" = "--bg" ]; then
   echo "DISPATCHED $id (job=$job_id pid=$pid) → log: $logfile"
   echo "Theo dõi: $ROOT/bin/jobs.sh status $job_id | Khi xong: auto consolidate + Telegram notify."
   echo "$pid" > "$ROOT/logs/.dispatch_${id}_${ts}.pid"
+  # Immediate Discord notify so user sees task is in flight (don't wait for watcher heartbeat)
+  { _dtid="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
+    if [ -n "${_dtid:-}" ]; then
+      _dp="$(printf '%s' "$prompt" | head -c 120 | tr '\n\t' '  ')"
+      "$ROOT/bin/notify_thread.sh" "🚀 **$id** nhận việc (job \`$job_id\`): $_dp… Sẽ notify khi xong." "$_dtid" 2>/dev/null || true
+    fi; } &
 else
   # Synchronous: caller gets stdout directly (bounded by --timeout, no auto-retry)
   # Watcher runs in background and notifies if job takes longer than WATCH_INTERVAL.
