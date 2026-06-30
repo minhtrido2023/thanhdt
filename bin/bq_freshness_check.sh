@@ -20,7 +20,7 @@ QUIET="${1:-}"
 PROJECT="lithe-record-440915-m9"
 MAX_PRICE_LAG=2      # trading days: cho phép gap weekend/nghỉ lễ
 MAX_STATE_LAG=2      # trading days cho DT5G regime
-MAX_FIN_LAG=30       # calendar days: financial data cập nhật theo quý
+MAX_FIN_LAG=90       # calendar days: financial data quarterly (Q1 results ~Apr, gap có thể 60-85 ngày)
 TODAY="$(date +%Y-%m-%d)"
 NOW_ICT="$(TZ='Asia/Ho_Chi_Minh' date +'%H:%M ICT')"
 FAILED=0
