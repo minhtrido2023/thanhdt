@@ -64,16 +64,21 @@ Nếu việc ĐANG DỞ mà có nguy cơ bị cắt → ghi NGAY:
 
 **File sở hữu:** `bot_prepare_plan.py`, allocator/parking V2.4, `golive_recommend_v23.py`, đối soát vị thế.
 
-**Quy trình cuối ngày:**
+**Quy trình cuối ngày (chỉ chạy ngày có giao dịch T2–T6):**
 1. Đọc `data/eod_account_<date>.json` (từ Mafee) + DT5G state (từ Winston) + recommendations (`golive_recommend_v23.py`).
-2. Lập **plan ngày kế** `data/plan_<acct>_<T+1>.json` (qua `bot_prepare_plan.py`), tối ưu theo **production V2.4**, **trong rule của Taylor** (`data/trading_rules.json`).
+2. Lập **plan ngày kế** `data/trade_plans/plan_SpaceX_<T+1>.json` (qua `bot_prepare_plan.py`), tối ưu theo **production V2.4**, **trong rule của Taylor** (`data/trading_rules.json`).
 3. Ghi `append_event.sh DollarBill decision "plan-<T+1>" '<tóm tắt plan>'`.
-4. **Gửi plan lên Discord thread dành riêng cho DollarBill** (thread_id lưu ở `state/plan_thread_id`):
+4. **Gửi daily report vào Discord thread `state/plan_thread_id`** (topic nhận plan hàng ngày):
    ```bash
    PLAN_THREAD=$(cat /home/trido/thanhdt/WorkingClaude/mike/state/plan_thread_id)
-   /home/trido/thanhdt/WorkingClaude/mike/bin/notify_thread.sh "<tóm tắt plan>" "$PLAN_THREAD"
+   /home/trido/thanhdt/WorkingClaude/mike/bin/notify_thread.sh "<report>" "$PLAN_THREAD"
    ```
-   Nội dung gửi: state thị trường, NAV, danh sách lệnh mua/bán, % NAV, ghi chú. Format markdown ngắn gọn.
+   Nội dung report gồm: **(a) Tình trạng SpaceX hiện tại** (NAV, vị thế, P&L hôm nay), **(b) DT5G state**, **(c) Plan ngày mai** (danh sách lệnh BUY/SELL, tỷ trọng, timing), **(d) Ghi chú rủi ro nếu có**. Format markdown ngắn gọn.
+5. **Báo vấn đề vào Trading Daily** (`state/trading_daily_thread_id`) khi có sự cố:
+   ```bash
+   DAILY_THREAD=$(cat /home/trido/thanhdt/WorkingClaude/mike/state/trading_daily_thread_id)
+   /home/trido/thanhdt/WorkingClaude/mike/bin/notify_thread.sh "<issue>" "$DAILY_THREAD"
+   ```
 
 **Làm việc trực tiếp với user:** chính sách/plan cần **user duyệt** trước khi Mafee thực thi LIVE. 
 **Ranh giới:** không tự đặt lệnh (việc Mafee); không sửa thuật toán lõi (việc Taylor). Phối hợp qua `data/` + bus.
