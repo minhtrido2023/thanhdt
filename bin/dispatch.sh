@@ -65,19 +65,24 @@ JOBS_DIR="$ROOT/bus/jobs"
 from="${DISPATCH_FROM:-Mike}"
 
 # _job_watcher: runs in background alongside a dispatch job.
-# Milestone-based Discord alerts (NOT every fixed interval) to avoid spamming the thread.
-# Schedule: check every 60s; Discord notify only at 10m, 30m, then every 60m after that.
-# Max 2 Discord progress messages per job — done/fail notify handles the rest.
-# Bus heartbeat (internal, silent) still fires every check to record liveness.
-# Stops automatically when job reaches a terminal state (done/failed/timeout/not-found).
+# Two distinct alert tracks:
+#   ANOMALY track (fires immediately, no cap): empty log after 60s, stale log >120s with no update.
+#   PROGRESS track (milestone only, max 2): 10m and 30m "still running" messages.
+# Bus heartbeat fires every 60s poll regardless (internal, not sent to Discord).
 _job_watcher() {
-  local jid="$1" caller="$2" target="$3"
-  local poll=60                          # how often to check (seconds) — lightweight
+  local jid="$1" caller="$2" target="$3" logfile_path="$4"
+  local poll=60
   local elapsed=0 discord_notified=0
+  local log_stale_alerted=0 log_empty_alerted=0
   local discord_thread_id
   discord_thread_id="${DISCORD_THREAD_ID:-$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)}"
-  # Milestones (seconds) at which to post a Discord progress message (max 2 total).
-  local milestones="600 1800"  # 10 min, 30 min; after that silence until done/fail
+  local milestones="600 1800"  # 10 min, 30 min; max 2 Discord progress messages total
+
+  _discord() {
+    [ -n "$discord_thread_id" ] \
+      && "$ROOT/bin/notify_thread.sh" "$1" "$discord_thread_id" 2>/dev/null || true
+  }
+
   while true; do
     sleep "$poll" || break
     elapsed=$((elapsed + poll))
@@ -85,27 +90,42 @@ _job_watcher() {
     python3 "$ROOT/bin/mike_json.py" job-get "$JOBS_DIR" "$jid" >/dev/null 2>&1
     local jrc=$?
     set -e
-    [ "$jrc" -eq 2 ] || break  # 0=done 1=failed/timeout 3=overdue 4=not-found → stop
+    [ "$jrc" -eq 2 ] || break  # non-running terminal state → stop watching
+
     local elapsed_min=$((elapsed / 60))
-    # Bus heartbeat — internal, always (so KB knows job is alive)
+
+    # Bus heartbeat (internal always)
     "$ROOT/bin/append_event.sh" "$target" heartbeat "$jid" \
-      "{\"status\":\"still_running\",\"elapsed_min\":${elapsed_min},\"job_id\":\"$jid\",\"caller\":\"$caller\"}" 2>/dev/null || true
-    # Discord: only at milestones, and only up to 2 times
+      "{\"status\":\"still_running\",\"elapsed_min\":${elapsed_min},\"job_id\":\"$jid\"}" 2>/dev/null || true
+
+    # --- ANOMALY track: fast-fail detection ---
+    # 1) Log empty at 60s → claude likely never started (auth/quota/crash on init)
+    if [ "$elapsed" -eq 60 ] && [ "$log_empty_alerted" -eq 0 ]; then
+      if [ ! -s "${logfile_path:-/dev/null}" ]; then
+        log_empty_alerted=1
+        _discord "⚠️ **$target** job \`$jid\`: log trống sau 60s — claude có thể không start được (auth/quota/crash). Kiểm tra: \`tail $logfile_path\`"
+      fi
+    fi
+    # 2) Log stale >120s (file exists but mtime hasn't moved) → claude started but stuck/hung
+    if [ "$log_stale_alerted" -eq 0 ] && [ -f "${logfile_path:-}" ] && [ -s "${logfile_path:-}" ]; then
+      local log_mtime log_age_s
+      log_mtime="$(stat -c '%Y' "$logfile_path" 2>/dev/null || echo 0)"
+      log_age_s="$(( $(date +%s) - log_mtime ))"
+      if [ "$log_age_s" -ge 120 ]; then
+        log_stale_alerted=1
+        _discord "⚠️ **$target** job \`$jid\`: log không cập nhật ${log_age_s}s — có thể bị stuck. Kiểm tra: \`tail $logfile_path\`"
+      fi
+    fi
+
+    # --- PROGRESS track: milestone only, max 2 ---
     [ "$discord_notified" -lt 2 ] || continue
     local hit=0
     for ms in $milestones; do
-      # fire when elapsed crosses a milestone (within this poll window)
       [ "$elapsed" -ge "$ms" ] && [ "$((elapsed - poll))" -lt "$ms" ] && { hit=1; break; }
     done
     [ "$hit" -eq 1 ] || continue
     discord_notified=$((discord_notified + 1))
-    if [ -n "$discord_thread_id" ]; then
-      "$ROOT/bin/notify_thread.sh" \
-        "⏰ **$target** vẫn đang chạy (${elapsed_min}m) — job \`$jid\`. Sẽ notify khi xong." \
-        "$discord_thread_id" 2>/dev/null || true
-    else
-      "$ROOT/bin/notify.sh" "[watcher] $target (job $jid) vẫn chạy sau ${elapsed_min}min" 2>/dev/null || true
-    fi
+    _discord "⏰ **$target** vẫn đang chạy (${elapsed_min}m) — job \`$jid\`. Sẽ notify khi xong."
   done
 }
 
@@ -232,8 +252,8 @@ if [ "$bg" = "--bg" ]; then
   # consolidate self-redirect), so /dev/null is safe.
   _bg_wrapper </dev/null >/dev/null 2>&1 &
   pid=$!
-  # Watcher: every WATCH_INTERVAL seconds, notify if job is still running.
-  _job_watcher "$job_id" "$from" "$id" </dev/null >/dev/null 2>&1 &
+  # Watcher: milestone progress + anomaly detection (empty/stale log).
+  _job_watcher "$job_id" "$from" "$id" "$logfile" </dev/null >/dev/null 2>&1 &
   echo "DISPATCHED $id (job=$job_id pid=$pid) → log: $logfile"
   echo "Theo dõi: $ROOT/bin/jobs.sh status $job_id | Khi xong: auto consolidate + Telegram notify."
   echo "$pid" > "$ROOT/logs/.dispatch_${id}_${ts}.pid"
@@ -245,8 +265,8 @@ if [ "$bg" = "--bg" ]; then
     fi; } &
 else
   # Synchronous: caller gets stdout directly (bounded by --timeout, no auto-retry)
-  # Watcher runs in background and notifies if job takes longer than WATCH_INTERVAL.
-  _job_watcher "$job_id" "$from" "$id" </dev/null >/dev/null 2>&1 &
+  # Watcher runs in background: milestone progress + anomaly detection (empty/stale log).
+  _job_watcher "$job_id" "$from" "$id" "$logfile" </dev/null >/dev/null 2>&1 &
   _wpid=$!
   set +e
   timeout "${TIMEOUT}s" "$CLAUDE" -p "$dispatch_prompt" \
