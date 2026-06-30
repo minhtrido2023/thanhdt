@@ -2280,3 +2280,7 @@ Chiến lược trung tâm: **production V2.4** (V2.3A + custom30V parking + gat
 - [2026-06-30T13:23:48Z] Mafee/heartbeat — Mafee_20260630_130646: {"status": "still_running", "elapsed_min": 17, "job_id": "Mafee_20260630_130646"}
 - [2026-06-30T13:24:49Z] Mafee/heartbeat — Mafee_20260630_130646: {"status": "still_running", "elapsed_min": 18, "job_id": "Mafee_20260630_130646"}
 - [2026-06-30T13:25:49Z] Mafee/heartbeat — Mafee_20260630_130646: {"status": "still_running", "elapsed_min": 19, "job_id": "Mafee_20260630_130646"}
+
+## Consolidation 2026-06-30T15:07:01Z
+- [2026-06-30T14:51:22Z] Mike/status — preflight-2026-06-30: {"result": "RED", "checks": ["✅ BOT_STOP: CLEAR", "❌ Plan 2026-06-30 KHÔNG TÌM THẤY — DollarBill chưa lập plan hoặc BQ stale.", "✅ macro_health: HEALTHY (DT5G_macro, file 2.9h tuổi)", "✅ Gmail OAuth: có refresh_token (tự refresh khi cần)", "⚠️  BQ ticker_prune: lag=Error in query string: Error processing job 'lithe-d — giá ref_price trong plan có thể cũ; kiểm tra trước khi đặt lệnh."]}
+- [2026-06-30T14:51:51Z] Mike/status — preflight-2026-06-30: {"result": "RED", "checks": ["✅ BOT_STOP: CLEAR", "❌ Plan 2026-06-30 KHÔNG TÌM THẤY — DollarBill chưa lập plan hoặc BQ stale.", "✅ macro_health: HEALTHY (DT5G_macro, file 3.0h tuổi)", "✅ Gmail OAuth: có refresh_token (tự refresh khi cần)", "✅ BQ ticker_prune: lag=0d ✓"]}
