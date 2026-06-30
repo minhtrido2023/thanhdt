@@ -106,14 +106,17 @@ _job_watcher() {
         _discord "⚠️ **$target** job \`$jid\`: log trống sau 60s — claude có thể không start được (auth/quota/crash). Kiểm tra: \`tail $logfile_path\`"
       fi
     fi
-    # 2) Log stale >120s (file exists but mtime hasn't moved) → claude started but stuck/hung
-    if [ "$log_stale_alerted" -eq 0 ] && [ -f "${logfile_path:-}" ] && [ -s "${logfile_path:-}" ]; then
+    # 2) Log no output after 120s — covers both: empty log (never got output) or stale log
+    #    (got some output then froze). The -s check was wrong: empty file is the worst case.
+    if [ "$log_stale_alerted" -eq 0 ] && [ "$elapsed" -ge 120 ] && [ -n "${logfile_path:-}" ]; then
       local log_mtime log_age_s
       log_mtime="$(stat -c '%Y' "$logfile_path" 2>/dev/null || echo 0)"
       log_age_s="$(( $(date +%s) - log_mtime ))"
       if [ "$log_age_s" -ge 120 ]; then
         log_stale_alerted=1
-        _discord "⚠️ **$target** job \`$jid\`: log không cập nhật ${log_age_s}s — có thể bị stuck. Kiểm tra: \`tail $logfile_path\`"
+        local _why="log không cập nhật ${log_age_s}s"
+        [ ! -s "${logfile_path}" ] && _why="log trống ${log_age_s}s (claude start được nhưng chưa ra output)"
+        _discord "⚠️ **$target** job \`$jid\`: $_why — có thể bị stuck. Kiểm tra: \`tail $logfile_path\`"
       fi
     fi
 
