@@ -25,9 +25,34 @@ import csv
 import datetime as dt
 import json
 import os
+import subprocess
 import time
 
 from .config import EXEC_DIR, STOP_FILE
+
+# Root of the Mike fleet (two levels up from trading_bot/).
+_MIKE_ROOT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                          "mike")
+_APPEND_EVENT = os.path.join(_MIKE_ROOT, "bin", "append_event.sh")
+
+
+def _publish_bot_event(event_type: str, topic: str, payload: dict) -> None:
+    """Push a bot event to the Mike fleet bus (fire-and-forget, never raises).
+
+    event_type: "error" | "status" | "finding"
+    topic: short slug, e.g. "STEP_FAIL" or "fill_lagging"
+    payload: dict serialised to JSON
+    """
+    if not os.path.isfile(_APPEND_EVENT):
+        return
+    try:
+        subprocess.Popen(
+            [_APPEND_EVENT, "Mafee", event_type, topic, json.dumps(payload, ensure_ascii=False)],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            close_fds=True,
+        )
+    except Exception:
+        pass
 from .vn_market import session_phase, tick_size, round_price, round_lot, LOT
 
 _GAP_Z_DOWN_THRESHOLD = -2.0  # gap_z < this on a BUY → full-speed 09:15-09:45
@@ -57,6 +82,7 @@ class Executor:
         self._last_gap_override = {}  # ticker -> gap_z; populated when override fires this tick
         self._load_gap_ref_data()
         self.state = self._load_state()
+        self._step_fail_count = 0   # consecutive STEP_FAIL counter for escalation
 
     # ------------------------------------------------------------ state/journal
 
@@ -600,13 +626,40 @@ def run_session(executors, once=False, max_cycles=None, force_phase=None):
         statuses = []
         for e in executors:
             try:
-                statuses.append(e.step(now, phase, cont))
+                s = e.step(now, phase, cont)
+                e._step_fail_count = 0
+                statuses.append(s)
             except Exception as ex:   # 1 account lỗi không kéo chết account khác
                 e._journal("STEP_FAIL", note=str(ex))
+                e._step_fail_count += 1
+                # Escalate to Mike bus after 3 consecutive failures (transient errors are expected)
+                if e._step_fail_count == 3:
+                    _publish_bot_event("error", "STEP_FAIL", {
+                        "account": e.label, "error": str(ex),
+                        "consecutive": e._step_fail_count, "phase": phase,
+                        "note": "Bot gặp lỗi liên tiếp — cần kiểm tra. Xem execution_logs/."
+                    })
                 statuses.append(False)
         if all(statuses):
             print("[exec] ✅ tất cả account đã khớp đủ")
             break
+
+        # Fill-lagging check: 30 min before MORNING close (11:00), warn if <40% filled
+        if phase == "MORNING" and now.time() >= dt.time(11, 0):
+            for e in executors:
+                ps = e.state.get("parents", {})
+                if not ps:
+                    continue
+                total_plan = sum(p.get("qty", 0) for p in ps.values())
+                total_fill = sum(p.get("filled", 0) for p in ps.values())
+                fill_rate = total_fill / total_plan if total_plan else 1.0
+                if fill_rate < 0.4 and not e.state.get("_fill_lag_warned"):
+                    e.state["_fill_lag_warned"] = True
+                    _publish_bot_event("status", "fill_lagging", {
+                        "account": e.label, "fill_rate_pct": round(fill_rate * 100, 1),
+                        "note": f"Chỉ fill {fill_rate*100:.0f}% trước 11:00 — còn phiên chiều nhưng cần chú ý.",
+                        "action_hint": "Xem execution_logs để quyết định có chuyển ATC không."
+                    })
 
         if phase == "CLOSED" and not force_phase:
             print("[exec] hết phiên — dừng")
