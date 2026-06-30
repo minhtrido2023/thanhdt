@@ -2234,3 +2234,25 @@ Chiến lược trung tâm: **production V2.4** (V2.3A + custom30V parking + gat
 - [2026-06-30T11:59:59Z] Winston/heartbeat — Winston_20260630_114958: {"status": "still_running", "elapsed_min": 10, "job_id": "Winston_20260630_114958", "caller": "Mike"}
 - [2026-06-30T12:04:59Z] Winston/heartbeat — Winston_20260630_114958: {"status": "still_running", "elapsed_min": 15, "job_id": "Winston_20260630_114958", "caller": "Mike"}
 - [2026-06-30T12:05:45Z] Winston/heartbeat — Winston_20260630_114958: {"status": "in_progress", "note": "macro_health đã HEALTHY (18:54). Đang điều tra root cause missed_runs=4 và tại sao v3.4b base bị stuck ở 2026-06-19 từ Jun 25-30"}
+
+## Consolidation 2026-06-30T12:57:35Z
+- [2026-06-30T12:31:17Z] DollarBill/heartbeat — DollarBill_20260630_123019: {"status": "in_progress", "note": "Đọc xong plan cũ + macro_health. Đang tạo plan_SpaceX_2026-07-01-v2 với state_source=DT5G_macro và BUY orders."}
+- [2026-06-30T12:31:19Z] DollarBill/heartbeat — DollarBill_20260630_123019: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260630_123019", "caller": "Mike"}
+- [2026-06-30T12:42:43Z] DollarBill/heartbeat — DollarBill_20260630_124143: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260630_124143", "caller": "Mike"}
+- [2026-06-30T12:43:43Z] DollarBill/heartbeat — DollarBill_20260630_124143: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20260630_124143", "caller": "Mike"}
+- [2026-06-30T12:44:43Z] DollarBill/heartbeat — DollarBill_20260630_124143: {"status": "still_running", "elapsed_min": 3, "job_id": "DollarBill_20260630_124143", "caller": "Mike"}
+- [2026-06-30T12:45:43Z] DollarBill/heartbeat — DollarBill_20260630_124143: {"status": "still_running", "elapsed_min": 4, "job_id": "DollarBill_20260630_124143", "caller": "Mike"}
+- [2026-06-30T12:46:43Z] DollarBill/heartbeat — DollarBill_20260630_124143: {"status": "still_running", "elapsed_min": 5, "job_id": "DollarBill_20260630_124143", "caller": "Mike"}
+- [2026-06-30T12:47:43Z] DollarBill/heartbeat — DollarBill_20260630_124143: {"status": "still_running", "elapsed_min": 6, "job_id": "DollarBill_20260630_124143", "caller": "Mike"}
+- [2026-06-30T12:48:43Z] DollarBill/heartbeat — DollarBill_20260630_124143: {"status": "still_running", "elapsed_min": 7, "job_id": "DollarBill_20260630_124143", "caller": "Mike"}
+- [2026-06-30T12:49:43Z] DollarBill/heartbeat — DollarBill_20260630_124143: {"status": "still_running", "elapsed_min": 8, "job_id": "DollarBill_20260630_124143", "caller": "Mike"}
+- [2026-06-30T12:50:43Z] DollarBill/heartbeat — DollarBill_20260630_124143: {"status": "still_running", "elapsed_min": 9, "job_id": "DollarBill_20260630_124143", "caller": "Mike"}
+- [2026-06-30T12:51:43Z] DollarBill/heartbeat — DollarBill_20260630_124143: {"status": "still_running", "elapsed_min": 10, "job_id": "DollarBill_20260630_124143", "caller": "Mike"}
+- [2026-06-30T12:52:44Z] DollarBill/heartbeat — DollarBill_20260630_124143: {"status": "still_running", "elapsed_min": 11, "job_id": "DollarBill_20260630_124143", "caller": "Mike"}
+- [2026-06-30T12:53:44Z] DollarBill/heartbeat — DollarBill_20260630_124143: {"status": "still_running", "elapsed_min": 12, "job_id": "DollarBill_20260630_124143", "caller": "Mike"}
+- [2026-06-30T12:54:39Z] DollarBill/heartbeat — DollarBill_20260630_124143: {"status": "in_progress", "note": "plan_SpaceX_2026-07-01.json v2 xác nhận tồn tại — 23 BUY orders, state=NEUTRAL DT5G_macro. Đang append decision + notify Discord."}
+- [2026-06-30T12:54:44Z] DollarBill/heartbeat — DollarBill_20260630_124143: {"status": "still_running", "elapsed_min": 13, "job_id": "DollarBill_20260630_124143", "caller": "Mike"}
+- [2026-06-30T12:55:44Z] DollarBill/heartbeat — DollarBill_20260630_124143: {"status": "still_running", "elapsed_min": 14, "job_id": "DollarBill_20260630_124143", "caller": "Mike"}
+- [2026-06-30T12:56:44Z] DollarBill/heartbeat — DollarBill_20260630_124143: {"status": "still_running", "elapsed_min": 15, "job_id": "DollarBill_20260630_124143", "caller": "Mike"}
+- [2026-06-30T12:57:27Z] DollarBill/answer — DollarBill_20260630_124143: {"job": "DollarBill_20260630_124143", "status": "PENDING_USER_APPROVAL", "plan_file": "data/trade_plans/plan_SpaceX_2026-07-01.json", "plan_version": "v2", "summary": {"state": "NEUTRAL", "state_source": "DT5G_macro", "macro_health": "HEALTHY", "nav_basis": 1000000000, "order_count": 23, "total_est_value": 937950000, "total_pct_nav": 93.795, "timing": "BUY@11:15 ICT", "book": "custom30V_parking"}, "blocker": "human-in-the-loop gate — auto-mode classifier bloqueou append decision com Ready-for-execution. Plan completo e verificado mas requer aprovação explícita do user antes de Mafee executar live.", "discord_notified": true, "next_step": "User duyệt plan → Mafee run --auto-otp trước 09:15 + execute 23 BUY lúc 11:15 ICT ngày 2026-07-01"}
+- [2026-06-30T12:35:51Z] Mike/decision — spacex-go-live-enabled: {"action": "SpaceX account 0002023347 enabled=true", "authorized_by": "user", "timestamp": "2026-06-30", "note": "User chốt go-live 2026-07-01. Flip enabled=false→true trong secrets/trading_bot_accounts.json."}
