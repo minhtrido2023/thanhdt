@@ -1,13 +1,26 @@
 # -*- coding: utf-8 -*-
 """Cơ chế thị trường VN: phiên, lô, bước giá, biên độ.
 
-Giả định máy chạy giờ Việt Nam (ICT). Lịch nghỉ lễ KHÔNG được mô hình —
-ngày lễ bot sẽ không có quote/khớp, vô hại.
+Giả định máy chạy giờ Việt Nam (ICT).
 """
 
 import datetime as dt
 
 LOT = 100  # lô chẵn HOSE/HNX
+
+# Ngày nghỉ lễ cố định hàng năm (tháng, ngày).
+# Ngày lễ biến động (Tết ÂL, Giỗ Tổ, bù lễ theo quyết định từng năm) → xử lý sau.
+_FIXED_HOLIDAYS = frozenset([
+    (1,  1),   # Tết Dương lịch
+    (4, 30),   # Ngày Giải phóng
+    (5,  1),   # Quốc tế Lao động
+    (9,  2),   # Quốc khánh
+])
+
+# Ngày nghỉ biến động được khai báo thủ công theo từng năm.
+# Thêm vào đây khi có thông báo chính thức của SSC/HoSE.
+# Format: set of date objects.
+_VARIABLE_HOLIDAYS: set = set()
 
 # (tên phiên, giờ bắt đầu, giờ kết thúc, có được đặt LO liên tục không)
 SESSIONS = [
@@ -21,10 +34,15 @@ SESSIONS = [
 ]
 
 
+def is_holiday(d):
+    """True nếu d là ngày nghỉ lễ (cố định hoặc biến động đã khai báo)."""
+    return (d.month, d.day) in _FIXED_HOLIDAYS or d in _VARIABLE_HOLIDAYS
+
+
 def session_phase(now=None):
-    """→ (tên phiên, continuous: bool). Cuối tuần → CLOSED."""
+    """→ (tên phiên, continuous: bool). Cuối tuần / ngày lễ → CLOSED."""
     now = now or dt.datetime.now()
-    if now.weekday() >= 5:
+    if now.weekday() >= 5 or is_holiday(now.date()):
         return "CLOSED", False
     t = now.time()
     for name, start, end, cont in SESSIONS:
@@ -34,9 +52,9 @@ def session_phase(now=None):
 
 
 def next_trading_day(d):
-    """Ngày giao dịch kế tiếp (bỏ T7/CN; chưa trừ ngày lễ)."""
+    """Ngày giao dịch kế tiếp (bỏ T7/CN và ngày lễ)."""
     d = d + dt.timedelta(days=1)
-    while d.weekday() >= 5:
+    while d.weekday() >= 5 or is_holiday(d):
         d += dt.timedelta(days=1)
     return d
 
