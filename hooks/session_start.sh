@@ -14,6 +14,13 @@ cache="${XDG_CACHE_HOME:-$HOME/.cache}/mike_kbver_$id"
 mkdir -p "$(dirname "$cache")"
 printf '%s' "$cur" > "$cache"
 
+# Persist the active Discord thread so _bg_wrapper can post to it even after this session ends.
+# DISCORD_THREAD_ID is injected by the CCDB bot when it launches Mike's session.
+if [ "$id" = "Mike" ] && [ -n "${DISCORD_THREAD_ID:-}" ]; then
+  mkdir -p "$ROOT/agents/Mike/state"
+  printf '%s' "$DISCORD_THREAD_ID" > "$ROOT/agents/Mike/state/ccdb_thread_id"
+fi
+
 if [ -s "$KB/context_pack.md" ]; then
   echo "[Mike KB v$cur] Bối cảnh chung của fleet (đọc trước khi làm, không hỏi lại điều đã ghi ở đây):"
   cat "$KB/context_pack.md"
