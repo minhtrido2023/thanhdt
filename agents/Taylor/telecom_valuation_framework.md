@@ -108,8 +108,15 @@ AND Revenue_YoY_P0 > 0           # subscribers/ARPU growing (proxy)
 # EXCLUDE VGI-type: EVEB never cheap + ROIC5Y < 5 = turnaround, screen elsewhere
 ```
 
-Script: `telecom_screen.py` (point-in-time, monthly, ASOF-joined financials; runs on full `ticker`
-because the names are not in `ticker_prune` historically).
+Script: `telecom_screen.py` (point-in-time, monthly snapshots on full `ticker`; NPM-rising via 6m-lag).
+
+**Screen result (100 monthly snapshots, 2017-2026, universe FOX/VGI/CTR/TTN):**
+- **FLAGGED** (cheap EVEB + margin/moat confirm): n=**10**, avg fwd-12M **+142.7%**, winrate **100%**
+- **UNFLAGGED** (expensive / not confirming): n=90, avg fwd-12M +34.2%, winrate 64%
+- **SPREAD = +108.5pp.** Clean, monotone — but **n=10 is thin** and the +34% unflagged baseline shows
+  these high-beta UPCOM names ran hot generally in the 2020-2021 / 2023 bull windows. The lens adds real
+  timing edge (+108pp by waiting for cheap EVEB), but the small-n + structural illiquidity is why this is
+  a lens, not a book. Output: `data/telecom_screen_entries.csv`.
 
 ---
 
