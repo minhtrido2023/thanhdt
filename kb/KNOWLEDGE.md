@@ -2214,3 +2214,9 @@ Chiến lược trung tâm: **production V2.4** (V2.3A + custom30V parking + gat
 
 ## Consolidation 2026-06-30T11:07:01Z
 - [2026-06-30T11:05:31Z] DollarBill/heartbeat — DollarBill_20260630_110430: {"status": "in_progress", "note": "đọc state DT5G=NEUTRAL(3), tìm EOD SpaceX và recommend output"}
+
+## Consolidation 2026-06-30T11:13:42Z
+- [2026-06-30T11:09:30Z] DollarBill/heartbeat — DollarBill_20260630_110430: {"status": "still_running", "elapsed_min": 5, "job_id": "DollarBill_20260630_110430", "caller": "Mike"}
+- [2026-06-30T11:11:33Z] DollarBill/heartbeat — DollarBill_20260630_110430: {"status": "in_progress", "note": "đã đọc đủ dữ liệu: DT5G=NEUTRAL(3)/DT4_only, BAL=0picks, LAG=0entries, basket custom30_8L; đang tạo plan_SpaceX_2026-07-01.json (HOLD, first live day)"}
+- [2026-06-30T11:13:33Z] DollarBill/decision — plan-2026-07-01-SpaceX: {"plan_file": "data/trade_plans/plan_SpaceX_2026-07-01.json", "account": "SpaceX", "plan_date": "2026-07-01", "mode": "live", "state": "NEUTRAL", "state_int": 3, "state_source": "DT4_only", "orders": 0, "action": "HOLD", "rationale": "BAL=0picks,LAG=0entries,PARK already deployed@93.8%NAV from 2026-06-30 deploy. First live day. No rebalance on Day-1 despite basket drift (custom30V_parking vs custom30_8L).", "basket_drift_flagged": true, "kill_switches_clear": true, "discord_sent": true, "pending": ["user_approve", "mafee_confirm_spacex_enabled", "taylor_basket_rebalance_schedule", "winston_macro_health_refresh"]}
+- [2026-06-30T11:10:04Z] Winston/status — new-listings-daily: {"date": "2026-06-30", "count": 0, "lookback_days": 90, "note": "no new listings detected"}
