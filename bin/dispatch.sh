@@ -65,33 +65,46 @@ JOBS_DIR="$ROOT/bus/jobs"
 from="${DISPATCH_FROM:-Mike}"
 
 # _job_watcher: runs in background alongside a dispatch job.
-# Every WATCH_INTERVAL seconds, checks job status and sends heartbeat if still running.
+# Milestone-based Discord alerts (NOT every fixed interval) to avoid spamming the thread.
+# Schedule: check every 60s; Discord notify only at 10m, 30m, then every 60m after that.
+# Max 2 Discord progress messages per job — done/fail notify handles the rest.
+# Bus heartbeat (internal, silent) still fires every check to record liveness.
 # Stops automatically when job reaches a terminal state (done/failed/timeout/not-found).
 _job_watcher() {
   local jid="$1" caller="$2" target="$3"
-  local interval="${WATCH_INTERVAL:-300}"
-  local elapsed=0
-  # Capture Discord thread ID at dispatch time (set by ccdb-mike before starting Claude).
+  local poll=60                          # how often to check (seconds) — lightweight
+  local elapsed=0 discord_notified=0
   local discord_thread_id
   discord_thread_id="${DISCORD_THREAD_ID:-$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)}"
+  # Milestones (seconds) at which to post a Discord progress message (max 2 total).
+  local milestones="600 1800"  # 10 min, 30 min; after that silence until done/fail
   while true; do
-    sleep "$interval" || break
-    elapsed=$((elapsed + interval))
+    sleep "$poll" || break
+    elapsed=$((elapsed + poll))
     set +e
     python3 "$ROOT/bin/mike_json.py" job-get "$JOBS_DIR" "$jid" >/dev/null 2>&1
     local jrc=$?
     set -e
     [ "$jrc" -eq 2 ] || break  # 0=done 1=failed/timeout 3=overdue 4=not-found → stop
     local elapsed_min=$((elapsed / 60))
+    # Bus heartbeat — internal, always (so KB knows job is alive)
     "$ROOT/bin/append_event.sh" "$target" heartbeat "$jid" \
       "{\"status\":\"still_running\",\"elapsed_min\":${elapsed_min},\"job_id\":\"$jid\",\"caller\":\"$caller\"}" 2>/dev/null || true
-    # Post to the user's Discord thread if we know its ID.
+    # Discord: only at milestones, and only up to 2 times
+    [ "$discord_notified" -lt 2 ] || continue
+    local hit=0
+    for ms in $milestones; do
+      # fire when elapsed crosses a milestone (within this poll window)
+      [ "$elapsed" -ge "$ms" ] && [ "$((elapsed - poll))" -lt "$ms" ] && { hit=1; break; }
+    done
+    [ "$hit" -eq 1 ] || continue
+    discord_notified=$((discord_notified + 1))
     if [ -n "$discord_thread_id" ]; then
       "$ROOT/bin/notify_thread.sh" \
         "⏰ **$target** vẫn đang chạy (${elapsed_min}m) — job \`$jid\`. Sẽ notify khi xong." \
         "$discord_thread_id" 2>/dev/null || true
     else
-      "$ROOT/bin/notify.sh" "[watcher] $target (job $jid) vẫn chạy sau ${elapsed_min}min — caller: $caller" 2>/dev/null || true
+      "$ROOT/bin/notify.sh" "[watcher] $target (job $jid) vẫn chạy sau ${elapsed_min}min" 2>/dev/null || true
     fi
   done
 }
