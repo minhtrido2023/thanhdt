@@ -14,12 +14,24 @@
 ## Chờ user quyết định
 - V2.5 live-recommend integration: **2026-07-07** (trigger tự động)
 
-## Cron quan trọng (ICT)
+## Workflow ngày trading (SpaceX, T2-T6, giờ ICT)
+1. **17:30** — `bq_freshness_check.sh`: BQ fresh → dispatch DollarBill lập plan T+1
+2. **19:30** — `send_plan_report.sh`: gửi plan T+1 vào Trading Daily thread (duyệt trước 08:45 sáng mai)
+3. **08:45** — `preflight_check.sh`: kiểm tra sẵn sàng trước giờ mở cửa (GREEN/RED)
+4. **09:05** — `run_bot.sh --auto-otp`: thực thi plan (phiên sáng)
+5. **09:00-14:55** — `bot_heartbeat.sh` mỗi 5': giám sát liveness + digest fill mới
+6. **11:30** — dừng bot giờ nghỉ trưa
+7. **13:00** — `run_bot.sh --auto-otp`: resume phiên chiều
+8. **~14:50** — phiên đóng (ATC), bot tự cancel lệnh treo, ghi `exec_*_report.md`
+9. **15:00** — `eod_trading_report.sh`: **báo cáo tổng kết EOD** (thêm 2026-07-01) — đọc `state.json`
+   (giá khớp thực từng lệnh), tính tổng lệnh/mua-bán/khớp đủ-một phần-chưa khớp/tổng giá trị VND,
+   post vào Trading Daily thread.
+
+Toàn bộ notify của chuỗi trên gộp về **1 Discord thread — Trading Daily (1521470705563340910)**.
+
+## Cron quan trọng khác (ICT)
 | Giờ | Lịch | Việc |
 |---|---|---|
-| 09:05 | T2-T6 | `run_bot.sh --auto-otp` — thực thi plan |
-| 17:30 | T2-T6 | BQ freshness check → DollarBill lập plan T+1 |
-| 19:30 | T2-T6 | send_plan_report.sh → Telegram + Discord |
 | 23:45 | T2-T6 | sync_bq_cache_daily.sh |
 | 02:00 | Daily | kb_nightly.sh — archive events, trim memory |
 | 02:00 | Thứ 6 | kb_nightly.sh → dispatch Mike editorial KB review |

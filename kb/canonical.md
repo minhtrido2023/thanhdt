@@ -38,6 +38,9 @@ pbcombo dual-vehicle (Calmar 1.48→1.37); gq_score growth gate (−IC); composi
 - BQ Local Cache (DuckDB, threads=1): `data/bq_cache/`, ~100ms vs 5-15s BQ. Sync 23:45 ICT.
 - Auto-OTP Gmail: `gmail_otp_reader.py` dùng `internalDate` filter (KHÔNG `newer_than`).
 - PHS: **BLOCKED** (lỗi -700003, chờ credential) → paper only.
+- **Workflow ngày trading đầy đủ** (T2-T6): BQ freshness(17:30) → plan T+1(19:30) → preflight(08:45)
+  → execute sáng(09:05) → resume chiều(13:00) → **EOD report(15:00, `eod_trading_report.sh`, thêm
+  2026-07-01)**. Toàn bộ post vào 1 Discord thread — Trading Daily (1521470705563340910).
 
 ### Kiến trúc fleet
 - Companion daemon: **Mike + Taylor** only. Bill/Mafee headless on-demand.
