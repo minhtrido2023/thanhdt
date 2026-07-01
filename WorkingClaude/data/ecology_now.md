@@ -1,6 +1,6 @@
 🌊 *Ecology Dashboard* (AMH#4, 2026-06-30, DT5G=NEUTRAL)
-Breadth: 33% >MA200 | 33% >MA50  (n=3)
-A Opportunity (dispersion pctile): 14%  (CROWDED/macro)
-B Uniformity: 60%  (breadth-extremity 33%)
-C Mood: -1.60 (pctile 6%) -> PANIC  | madness 1.60 | pb_z med -0.81
-⚠️ DIVERGENCE: index up 60d but breadth only 33% (narrow leadership, late-cycle tell)
+Breadth: 38% >MA200 | 38% >MA50  (n=237)
+A Opportunity (dispersion pctile): 35%  (CROWDED/macro)
+B Uniformity: 45%  (breadth-extremity 24%)
+C Mood: -0.85 (pctile 23%) -> PANIC  | madness 0.85 | pb_z med -0.50
+⚠️ DIVERGENCE: index up 60d but breadth only 38% (narrow leadership, late-cycle tell)

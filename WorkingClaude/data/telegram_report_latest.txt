@@ -1,5 +1,5 @@
-🛰️ V2.3 (DT5G) REPORT — 2026-06-30
-Sent: 2026-06-30 18:00 (next session T+1 entry)
+🛰️ V2.3 (DT5G) REPORT — 2026-07-01
+Sent: 2026-07-01 18:00 (next session T+1 entry)
 Market regime (DT5G): 🟡 NEUTRAL (state=3)
 Strategy: V2.3 = BAL | LAG static (always-on, no ensemble switch) + allocator + CAPIT v2
 BAL: max=12 · 10%/pos (book) · hold 45d · stop -20% · Fin/RE cap 4 · 8L≥4 half-size in BEAR/CRISIS
@@ -11,10 +11,10 @@ Guards: SV_TIGHT Fresh-Q · overheat P3 · AVOID_exbull (momentum chặn ở sta
 Không có signal — giữ cash cho book này.
 📋 BOOK B — LAG (PEAD always-on, 65% NAV target)
 Không có entry PEAD đến hạn — giữ vị thế LAG hiện có (hold 25td, NO stop) + parking.
-🧯 CAPIT v2: breadth oversold 8.2% &lt; gate 30% — dormant
+🧯 CAPIT v2: breadth oversold 3.0% &lt; gate 30% — dormant
 📊 Universe distribution
-  BA-core: 1 mã | Compounder/info: 12 mã
-  Wait/Pass/Avoid: 236 mã
+  BA-core: 0 mã | Compounder/info: 15 mã
+  Wait/Pass/Avoid: 229 mã
 💡 Execution checklist (T+1 next session)
   • Vốn: BAL 35% / LAG 65% NAV (rebal CHỈ khi lệch &gt;10pp)
   • BAL: 0 pos × 10% book · stop -20% · hold 45d
@@ -22,12 +22,12 @@ Không có entry PEAD đến hạn — giữ vị thế LAG hiện có (hold 25t
   • Cash dư cả 2 book → 70% E1VFVN30
 🛰️ MARKET-STATE ENGINE — DT5G (gated live)
 
-As of:   2026-06-30
+As of:   2026-07-01
 Source:  DT5G + macro overlay
 
 🔄 DT5G transitions từ 2026-04-01
 
-Số ngày: 62   |   transitions: 0
+Số ngày: 63   |   transitions: 0
   (không có transition — state ổn định)
 
 📊 V2.4 GO-LIVE paper-trade
@@ -43,8 +43,8 @@ Top: VCB 10%, BID 10%, VHM 10%, CTG 10%, TCB 8%, VPB 8%, MBB 8%, HPG 7% … (+14
 NAV track: go-live 2026-06-30 — chờ phiên giao dịch đầu (paper).
 📈 ORB intraday VN30F (paper — ring-fenced, theo dõi riêng)
 
-Từ 2026-06-09 — 15 phiên | asof 2026-06-29
-VN30F : 2,010  |  Hôm nay: 🔴 SHORT (+0.06%)
-NAV   : 1.029B  (+2.93% từ đầu)
-WR    : 66.7%  |  Sharpe: 6.67
+Từ 2026-06-09 — 17 phiên | asof 2026-07-01
+VN30F : 2,014  |  Hôm nay: 🟢 LONG (+0.26%)
+NAV   : 1.037B  (+3.73% từ đầu)
+WR    : 70.6%  |  Sharpe: 7.82
 

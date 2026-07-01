@@ -126,7 +126,7 @@ Wired into `papertrade_daily.bat` as **step [0/6]** (runs before all sims). Afte
 ## End-June decision reminder (LOCAL scheduled task, 2026-05-28)
 
 Note: `/schedule` skill creates REMOTE cloud agents that CANNOT access local paper-trade data → wrong tool. Used a LOCAL Windows Task Scheduler task instead. (Confirmed `PaperTrade3Sys` task IS live and runs `papertrade_daily.bat` daily — so it now executes the new refresh step [0/6] + pt_v12_dt4 step [3/6]; data will be current by the reminder date.)
-- **Task `DT4DecisionReview`**: one-time, **[REDACTED] 09:00 local** (Mon). Runs `dt4_decision_review.bat` → `dt4_decision_review.py`: refreshes papertrade_compare.py, extracts the V12_DT4-vs-TQ34b A/B block + headline table, writes `data/DT4_DECISION_REVIEW.md` (with decision instructions), best-effort MessageBox popup.
+- **Task `DT4DecisionReview`**: one-time, **[REDACTED]29 09:00 local** (Mon). Runs `dt4_decision_review.bat` → `dt4_decision_review.py`: refreshes papertrade_compare.py, extracts the V12_DT4-vs-TQ34b A/B block + headline table, writes `data/DT4_DECISION_REVIEW.md` (with decision instructions), best-effort MessageBox popup.
 - Hardened via PowerShell: DisallowStartIfOnBatteries=False, StopIfGoingOnBatteries=False, StartWhenAvailable=True (fires even on battery / catches up if machine was off).
 - Latest A/B reading (window → 05-26): V12_DT4 vs TQ34b ΔRet +1.33pp, ΔDD -0.01pp, verdict 🟢 SWITCH.
 

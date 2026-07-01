@@ -247,6 +247,21 @@ class Executor:
             return True, f"adp:dip(ratio={ratio_str},r15={r*100:+.2f}%→cross)"
         return False, f"adp:dip(ratio={ratio_str},r15={r*100:+.2f}%→passive)"
 
+    def _buy_chase_pct(self, ticker):
+        """Buy chase-cap %: static max_chase_pct_buy, optionally widened by 20d realised vol
+        (clamp(k*rvol_20d, static, ceil)) when chase_cap_vol_scale_enabled. Monotone-safe (never
+        below the static cap) and fail-safe to static when disabled or rvol_20d absent/<=0."""
+        static = self.cfg["max_chase_pct_buy"]
+        if not self.cfg.get("chase_cap_vol_scale_enabled", False):
+            return static
+        ref = self._gap_ref.get(ticker)
+        rvol = ref.get("rvol_20d") if ref else None
+        if not rvol or rvol <= 0:
+            return static
+        k = self.cfg.get("chase_cap_vol_k", 2.0)
+        ceil = self.cfg.get("chase_cap_vol_ceil", 0.04)
+        return min(max(k * rvol, static), ceil)
+
     def _limit_price(self, o, q, cross=True, extreme=False):
         """Giá LO cho lệnh con; None = không đặt được (thiếu quote).
 
@@ -257,7 +272,7 @@ class Executor:
         last = q.last or q.ref or o.ref_price
         tick = tick_size(last, o.ticker, ex)
         if o.side == "buy":
-            cap = o.ref_price * (1 + self.cfg["max_chase_pct_buy"])
+            cap = o.ref_price * (1 + self._buy_chase_pct(o.ticker))
             if q.ceiling:
                 cap = min(cap, q.ceiling)
             desired = (q.ask if (cross and q.ask) else
@@ -427,7 +442,8 @@ class Executor:
         Fail-safe: missing/stale/invalid data leaves _gap_ref empty (no override fires).
         """
         if not (self.cfg.get("gap_adaptive_enabled", False)
-                or self.cfg.get("extreme_regime_enabled", False)):
+                or self.cfg.get("extreme_regime_enabled", False)
+                or self.cfg.get("chase_cap_vol_scale_enabled", False)):
             return
         cache_dir = os.environ.get(
             "BQ_LOCAL_CACHE",

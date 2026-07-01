@@ -66,6 +66,31 @@ DEFAULTS = {
     "gap_adaptive_enabled": False,    # DEFAULT OFF; set True only for paper. LIVE needs user approval.
     "gap_floor_band": 0.07,           # fallback floor band when broker doesn't expose floor price (HOSE default).
 
+    # --- vol-scaled buy chase-cap (patch#3, Taylor 2026-07-01, backtest CONFIRMED tail-insurance) ---
+    # Widen ONLY the buy chase ceiling on high-vol names so a static 1.5% cap doesn't 0-fill a whole
+    # basket on correlated gap-up mornings (the go-live failure: 2025-04-10 static missed 12/12 names).
+    #   cap_pct = clamp(k * rvol_20d, floor=max_chase_pct_buy, ceil=chase_cap_vol_ceil)
+    # Monotone-safe (floor == static cap → only widens, never tightens); fail-safe to the static cap
+    # when rvol_20d is missing/<=0. Independent of allocator/selection (touches only _limit_price buy).
+    # Backtest (chase_cap_backtest.py, quant-skeptic CONFIRMED): fill 97.5→99.3%, +6.6bps common-case
+    # entry cost, tail-catch trades +5.9% fwd20 / win 68%; NET ~0 on avg → INSURANCE, not return-enhancer.
+    # DEFAULT OFF; LIVE enable needs explicit user sign-off after paper-trading.
+    "chase_cap_vol_scale_enabled": False,  # DEFAULT OFF — paper only until user approves LIVE.
+    "chase_cap_vol_k": 2.0,                # k in clamp(k*rvol_20d, static, ceil).
+    "chase_cap_vol_ceil": 0.04,            # hard ceiling on the widened buy cap (never chase beyond +4%).
+
+    # --- EXTREME-regime execution gate (Taylor 2026-07-01, backtest-validated tail-insurance) ---
+    # Always-on risk gate that only trips in confirmed abnormal DOWN moves. SELL → sell-to-floor
+    # (chase down to the daily floor instead of stranding at the −3% cap); BUY → pause (T+1 re-sync).
+    # Backtest (data/extreme_regime_backtest.md, quant-skeptic CONFIRMED): compresses the sell tail
+    # (worst −13.4%→−6.9%, dispersion 3.8→0.3pp, same-day fill 0→100%) for ~1pp mean cost — insurance,
+    # NOT a return-enhancer. DEFAULT OFF; LIVE enable needs explicit user sign-off after paper-trading.
+    "extreme_regime_enabled": False,  # DEFAULT OFF — deliberate activation only.
+    "extreme_band": 0.03,             # SELL/BUY trip when last within 3% of the daily floor (near limit-down).
+    "extreme_move_z": 3.0,            # …or when r15 down-move exceeds z × 20d realised vol.
+    "extreme_slice_mult": 0.25,       # shorten cancel/reprice cadence ×0.25 (~2min) to chase the falling book.
+    "extreme_cooldown_min": 15,       # once tripped, stay active this long (debounce flicker).
+
     # --- an toàn ---
     "max_orders_per_day": 60,         # tổng số parent order tối đa trong 1 plan
     "max_daily_gross_value": 20_000_000_000,  # tổng GTGD tối đa 1 ngày (VND)

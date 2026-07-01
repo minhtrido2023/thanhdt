@@ -993,3 +993,123 @@ Scheduled self-note to review whether to evolve the 8L composite via a *purely m
   | ICW (pos-IC, IS-fit, 5ax) | +0.1397 | +0.0894 | +0.1025 | +6.69pp |
   Robust-signed (CORE4/EW5 beat CUR7 in BOTH IS & OOS on IC) AND simpler — opposite of overfit. BUT OOS magnitude tiny (+0.0045), tradeable **decile spread a WASH** (CORE4 5.89<CUR7 6.53; EW5 6.83 marginal), and this 7-axis linear composite is **NOT in production** (rating_8l.py v2 = 2-axis quality-scorecard × pb_z).
 - **GO-LIVE VERDICT: NO — keep production as-is for the 2026-06-30 go-live.** (a) Trading selector = yieldcombo (rating-blind); rating gate = binary ≤3 → a rating-composite tweak barely moves NAV. (b) Registry already ruled **v3-composite-AS-SELECTOR = IS-overfit** (OOS −0.78pp, THREAD b 06-22) — settled. (c) The value-lens v3 is already live and re-confirmed robust → nothing to change. (d) The fa_ic "drop health+valuation" is clean IC hygiene but targets a legacy composite, doesn't widen the tradeable spread, immaterial magnitude. (e) META + go-live-today rule: de-risk, don't add complexity. **Durable export:** IF a linear multi-axis rating ever becomes production, DROP health+valuation (negative IC); equal-weight CORE4 is the robust-simplest form. Optional post-go-live hygiene only — must clear a NAV self-check backtest first; NOT a go-live blocker or enhancer.
+
+---
+## Composite (8L axis-2 value_score_v2) as ENTRY SELECTOR — NO GO-LIVE (2026-07-01, Taylor)
+**Q:** Does 8L axis-2 composite `value_score_v2` (0.35·pb_z-rel + 0.65·(1/PE sector-neutral) + CFO-3Y confirm ± + track-record bonus + TRAP-gate ROE_Min3Y<0), used as a monthly top-N equal-weight ENTRY SELECTOR, beat the production parking basket custom30V (yieldcombo 1/PE+1/PCF top-30)?
+**Cmd:** `python3 composite_selector_backtest.py` (self-contained, reads only `data/value_panel_2014.csv`; composite replicated byte-faithful from `rating_8l.py` L466-611). AUDIT_END 2026-06-18. TC=0.1%/side, equal-weight, monthly rebal, 150 month-end snaps.
+**Result (gross panel, same engine both):**
+| selector | Full CAGR | OOS CAGR | Sharpe(F) | MaxDD(F) |
+|---|---|---|---|---|
+| custom30V yieldcombo top20 | 57.05% | 64.76% | 2.24 | -26.2% |
+| composite+TRAP top20 | 45.83% | 50.11% | 2.12 | -19.2% |
+| custom30V yieldcombo top30 | 50.58% | 61.15% | 2.17 | -24.7% |
+| composite+TRAP top30 | 43.50% | 50.33% | 2.19 | -19.8% |
+- Head-to-head: composite LOSES every window — top20 Full **−11.22pp** / OOS **−14.65pp**; top30 Full **−7.08pp** / OOS **−10.81pp**.
+- By-year (top30): composite beats custom30V only **5/13 yrs**; loses the big-return years hard (2016 −20.8, 2017 −24.0, 2020 −25.7, 2021 −71.5pp). Not an IS artifact — OOS gap is WIDER than IS.
+- LIQUID variant (turnover≥1bn, parking-realistic): composite 17.9-18.5% vs custom30V 24.9-26.2% — still loses, worse Sharpe (0.74 vs 1.01) and equal/worse DD.
+- NOTE: raw 40-65% panel CAGRs are the known curated-panel/survivorship/no-capacity inflation (auditable live ceiling ~25.7%@50B). The **relative** comparison on identical engine is the valid signal.
+**Why it loses:** composite is a quality-cheap DIAGNOSTIC (rating-display) design. Sector-neutralizing 1/PE strips the low-PE-sector tilt that earns return in VN; track-record/proven5y bonuses tilt to priced-in quality (rating_8l.py's own note: highest-track-record names underperform on return). It trades ~7-15pp CAGR for modestly lower DD — wrong tradeoff for a parking sleeve whose job is return on idle cash (DD already managed by DT5G gate + book alloc).
+**VERDICT: NO GO-LIVE as entry/parking selector. Keep composite as-is = diagnostic/rating display axis. custom30V remains the parking selector. Production V2.4 unchanged.**
+
+## EXTREME-regime execution gate — backtest validation (Taylor, 2026-07-01, job Taylor_20260701_052919)
+Validates the mechanism in `exec_extreme_regime_proposal.md` §3 BEFORE production wire. Data: vnstock VCI 15m intraday (only reaches 2023-10-30 → **2022 crash NOT replayable intraday**), 18 Tier-1 names × 8 market-wide crash episodes (2024-04..2026-03). Scripts: `fetch_intraday_cache.py`, `extreme_replay.py`; raw `data/extreme_replay.csv`; doc `data/extreme_regime_backtest.md`.
+
+**SELL side** — static −3% cap strands same-day (gap-lock) on **22/126 down-sells (17%)** [Rev2: NaN pad-bar filter fixed]. On those:
+| n=22 | NORMAL static→carry | EXTREME sell-to-floor |
+|---|---|---|
+| mean exit | −5.55% | −6.55% (**−1.0pp**) |
+| worst-case | **−13.4%** | −6.9% |
+| std | 3.8pp | **0.3pp** |
+| same-day fill | 0% | 100% |
+Split: Apr-2025 multi-day CASCADE **+2.63pp** (avoids next −7% day) vs Mar-2026 1-day DIP **−3.08pp** (locks bottom, misses bounce). Beat NORMAL on 9/22 (41%) but losses bounded, wins avoid the fat left tail.
+
+**BUY-pause** — pausing = **−1.07pp** worse mean entry (skips cheapest day), tail p95 +5.6pp protects vs cascade.
+
+**VERDICT: MECHANISM VALIDATED AS TAIL-INSURANCE, NOT a return-enhancer** — trades ~1pp mean for tail compression (worst −13.4%→−6.9%, std 3.8→0.3pp, fill 0→100%). Same profile as DT5G ("insurance, not return"). Causally can't distinguish cascade vs dip → bounds outcome either way. Net-benefit sign is regime-dependent and NOT cleanly establishable (no 2022 intraday, no order-book, thin dip-dominated sample). **→ Code DEFAULT-OFF per approved design; deliberate activation only; do NOT re-tune to history.**
+
+**Step-2 — quant-skeptic verify: CONFIRMED (medium confidence)** [2026-07-01]. First pass was INCONCLUSIVE on 3 audit defects; Rev2 closed all: (1) VCI NaN 23:45 pad-bar dropped → down-day filter fires, denominator corrected 144(mislabelled)→**126** real <−3%-close sells, strand 17%; (2) buy-pause leg now scripted + persisted `data/extreme_replay_buy.csv` (n=126); (3) tautological self-check replaced by a genuine independent recompute from raw parquet vs CSV — **IDENTITY PASS to 1e-9**. Skeptic re-ran extreme_replay.py: every headline number reproduced exactly. Disclosed weakness (thin 2-episode / 14-of-22-from-one-day sample; carry-to-next-close assumption) honestly stated; finding scoped to mechanism-validity/tail-insurance, not a robust return edge → CONFIRMED. Log `mike/logs/verify_20260701_060116.log`.
+
+**Step-3 — coded DEFAULT-OFF** [2026-07-01]. `config.py`: +`extreme_regime_enabled=False`, `extreme_band=0.03`, `extreme_move_z=3.0`, `extreme_slice_mult=0.25`, `extreme_cooldown_min=15`. `executor.py`: `_extreme_regime()` (2-poll confirm + cooldown; trigger (i) within-band-of-floor [backtest-validated] OR (ii) r15 down-move > z×rvol_20d; fail-safe→False), `_extreme_slice_mult()`, sell-to-floor branch in `_limit_price`, buy-pause + faster cadence in `_place_slices`/`_cancel_stale`. **NORMAL path byte-identical when OFF** (diff = 86 ins / 6 gated-line edits, each ×1.0/False-preserving). Regression self-check `extreme_regime_selfcheck.py`: **14/14 PASS** — OFF byte-identical (sell caps at −3%, buy places normally, mult ×1.0), ON fires (2-poll arm, sell→floor, buy paused + EXTREME_PAUSE journaled, cadence ×0.25).
+
+**Paper-trade gate decision (Taylor): 4 weeks (~20 sessions) flag-ON in PAPER only, NOT calendar-wait for a real episode.** Rationale: feature trips only in rare extreme moves → even 3-month calendar paper likely observes ZERO episodes, so calendar time proves nothing about the extreme path. Binding validation instead = (a) episode-level backtest CONFIRMED [done]; (b) **week-1 synthetic stress-injection** through the live paper wiring (feed a fabricated quote sequence to floor / >3σ r15, assert arm→sell-to-floor→buy-pause→cadence, no real crash needed); (c) **~4 weeks / ~20 paper sessions** with the flag ON to prove **ZERO false-triggers on benign days** + zero NORMAL-path interference under real live-data noise; (d) explicit **user sign-off** before any LIVE enable. Why 4 weeks not 2 / not a quarter: 2 wks (~10 sessions) is thin for a zero-false-trigger claim across varied conditions; a quarter is the fleet norm for RETURN edges (must survive OOS) but this is default-OFF insurance, not return — waiting for a possibly-absent tail event adds no info beyond backtest+injection. **Live remains DEFAULT-OFF; Taylor did NOT enable anywhere.**
+
+**Paper-trading START (Taylor, 2026-07-01, job Taylor_20260701_083148) — USER APPROVED live in-session.** Enabled `extreme_regime_enabled=True` **PAPER-ONLY** via the `main` paper-account `overrides` in `secrets/trading_bot_accounts.json` (same paper-only pattern as `gap_adaptive_enabled`). Verified through the REAL `load_config()`/`load_accounts()` resolution: paper `main`=True, `SpaceX`/live=**False**, `RocketX`/`dnse_main`=False, global `DEFAULTS`=**False** (untouched). Approved params unchanged: band 0.03 / z 3.0 / slice_mult 0.25 / cooldown 15.
+- **Week-1 stress-injection: 24/24 PASS** (`mike/agents/Taylor/stress_extreme_regime.py`, drives the genuine `Executor` + real `Quote` objects via a recording FakeBroker, not a re-impl). Proven through the real code path: (1) ARM 2-poll confirm on trigger (i) near-floor limit-down AND (ii) r15<−3σ, cooldown≈15min set; (2) armed SELL → `_place_slices` prices at daily **floor 18600** (sell-to-floor) vs NORMAL stranded at ref×(1−3%)=19400; (3) armed BUY → **EXTREME_PAUSE**, no `place_order`; (4) `_extreme_slice_mult`=0.25 → `_cancel_stale` cancels a 3-min child (2-min thresh armed) that OFF (8-min) keeps. **Negative controls:** NORMAL quote never arms over 10 polls; **LIVE (SpaceX) effective cfg never arms** on the same limit-down stress + slice_mult stays 1.0. No real `SpaceX`/`main` execution logs touched (throwaway labels; verified live files unmodified).
+- **Window: start 2026-07-01 → target end ~2026-07-28 (~20 T2–T6 sessions).** Remaining conditions before any LIVE enable (all must hold): (a) **ZERO false-triggers** across ~4 weeks / ~20 benign paper sessions under real live-data noise; (b) **zero NORMAL-path interference**; (c) explicit **user sign-off**. **Live stays DEFAULT-OFF — Taylor did NOT enable anywhere on live.**
+
+## Vol-scaled buy chase-cap (patch#3) — NET entry-quality backtest (Taylor, 2026-07-01, job Taylor_20260701_102950)
+User-approved direction (from job Taylor_20260701_102033). Proposal: buy chase ceiling
+`cap_pct = clamp(k*rvol_20d, floor=0.015, ceil=0.04)`, k=2.0; `cap = ref*(1+cap_pct)`. Monotone-safe
+(floor == current static `max_chase_pct_buy` → only widens, never tightens), fail-safe to static 1.5%
+when `rvol_20d` missing/≤0, independent of allocator/selection (touches ONLY `_limit_price` buy branch).
+Motivation = go-live failure: static 1.5% cap 0-filled a whole 9-bank basket on a gap-up morning.
+
+**Substrate** `data/intraday_1m` — 16 liquid VN names, 1-min bars 2023-10..2026-04, **4487 gap-up
+decisions**. Real fill CEILING sim (matches `executor.py::_limit_price`): `L=ref*(1+cap)`; fill iff
+intraday_low≤L; fill_price=`min(open,L)` (pessimistic-consistent for BOTH caps → fair comparison).
+`rvol_20d` & forward returns from the same daily-close series. Scripts: `mike/agents/Taylor/chase_cap_backtest.py`
+(+ `chase_cap_backtest_raw.csv`), self-check `chase_cap_selfcheck.py`. Self-check ALL PASS (identity 0.0,
+monotone, raw-recompute err 0.0).
+
+| metric | static 1.5% | vol-scale | Δ |
+|---|---|---|---|
+| fill-rate on gap-ups | 97.5% | 99.3% | +1.8pp |
+| fill-rate on BINDING subset (open>ref×1.015, 12.1% of gap-ups) | 79.4% | 94.5% | **+15pp** |
+| entry-price, both-filled (n=4375) | — | +6.6 bps worse (worse on only 9.8%) | cost |
+| NET captured fwd20 / decision (miss=0) | +1.65% | +1.69% | +0.04pp (t=1.26, **NOT sig**) |
+
+- **Value is in the TAIL, not the average.** Trades static MISSES but vol CATCHES: n=82, fwd20 mean
+  **+5.90%** / median +3.91% / **win 68%** (real breakout winners). Benefit/cost asymmetry **≈1.67×**
+  (48380 vs 28888 bps-days). Correlated broad gap-up mornings replay the go-live 0-fill failure:
+  **2025-04-10 static missed 12/12 names, 2026-04-08 10/11, 2025-04-11 6/10** (post-tariff V-bounces).
+- **Robust plateau** (not overfit): k/ceil grid NET Δ +0.026..+0.054pp flat across k∈[1.5,3.0]×ceil∈[3,5]%;
+  k=2.0/ceil=4% sits mid-plateau. `floor=0.015` pinned to the static cap by construction (monotone-safe).
+- **Per-year** Δ consistent positive sign +0.03..+0.05pp (2023/24/25/26).
+- **Caveats (disclosed):** 16 LIQUID names only — illiquid tail has thinner books, gap-ups less likely to
+  dip back → static misses MORE there, so this is a **LOWER bound** on the benefit (untested). Daily-proxy
+  fill (zero size-impact — 50B basket chasing +4% into correlated gap-ups may slip beyond model). ~2.5y,
+  tail events rare → thin on the exact tail. Single-name fwd return, no allocator interaction (by design).
+
+**VERDICT: TAIL-INSURANCE / fill-reliability fix, NOT an average return-enhancer** (same class as DT5G +
+EXTREME-regime). Average NET ~0 but favorable asymmetry + fixes the real correlated-basket 0-fill go-live
+failure at trivial common-case cost (+6.6bps, monotone-safe, fail-safe). Do NOT re-tune to history.
+
+**quant-skeptic verify: CONFIRMED (high confidence)** [2026-07-01, log `mike/logs/verify_20260701_103636.log`].
+Re-ran the script from scratch → byte-identical headlines; independently reproduced the k/ceil grid; verified
+no look-ahead (cap uses only prior-20d vol, fill uses execution-day intraday low), floor pinned to static
+(monotone/fail-safe), correctly classed insurance-not-return. Killer objection = zero size-impact in the fill
+model / thin tail / liquid-only — disclosed and mitigated by DEFAULT-OFF + paper-validate + sign-off.
+
+**Coded DEFAULT-OFF** [2026-07-01]. `config.py`: +`chase_cap_vol_scale_enabled=False`, `chase_cap_vol_k=2.0`,
+`chase_cap_vol_ceil=0.04`. `executor.py`: `_buy_chase_pct()` helper (static when OFF / rvol absent; else
+`clamp(k*rvol_20d, static, ceil)`), used in `_limit_price` buy branch; `_load_gap_ref_data` guard widened to
+load `rvol_20d` when the flag is on. **OFF byte-identical** (helper returns static → cap path unchanged).
+Regression self-check `chase_cap_selfcheck.py`: **ALL PASS** — shipped default OFF, OFF==static exactly,
+ON==clamp(k*rvol,static,ceil) across low/mid/high vol, fail-safe (rvol=0/<0/absent→static), monotone+bounded.
+
+**Paper-trade gate (Taylor recommendation): ~2 weeks / ~10 paper sessions flag-ON in PAPER only** — SHORTER
+than EXTREME's 4 weeks because this fires on **ordinary gap-ups** (not a rare tail), so dozens of cap-widening
+events accrue per week. Validation target = wiring correctness on live quotes + fail-safe when rvol cache
+absent + **zero NORMAL-path interference on non-gap days** + skeptic's rerun (REAL fill vs the `min(open,L)`
+daily-proxy, esp. correlated broad gap-ups at target NAV).
+
+**Paper-trade ACTIVATED** [2026-07-01, user-approved via Mike dispatch Taylor_20260701_105729]. Set
+`chase_cap_vol_scale_enabled=True` in the `main` paper account `overrides` **only** (k=2.0, ceil=0.04 as
+coded). Verified through the REAL `load_config()`/`load_accounts()` resolution: paper(main)=True,
+**SpaceX/live=False, global DEFAULT=False**, other paper accounts (ab_cross/ab_dip)=False. Backup of the
+accounts file: `secrets/trading_bot_accounts.json.bak.20260701`. **Executor-path stress harness
+`mike/agents/Taylor/stress_vol_scale_chase_cap.py`: 15/15 PASS** — drives the genuine
+`Executor._buy_chase_pct`/`_limit_price` via a recording FakeBroker + real `Quote` objects (not a re-impl):
+(0) wiring proof, (1) WIDEN clamps to ceil / returns k*rvol in-band, (2) MONOTONE never below static,
+(3) FAIL-SAFE rvol absent/0/<0→static, (4) paper limit sits at ref×(1+ceil)=20800 > static-cap 20300,
+(5) **NEG CONTROL: live(SpaceX) effective cfg ignores rvol → static cap 20300** on the identical high-rvol
+quote. No real `main`/`SpaceX` exec logs touched (throwaway plan label). **Start 2026-07-01, target end
+~2026-07-14 (~10 paper sessions).** Conditions before any LIVE enable: (a) clean paper run — wiring
+correct on live quotes + fail-safe when rvol cache absent, (b) zero NORMAL-path interference on non-gap
+days, (c) skeptic rerun REAL fill vs `min(open,L)` proxy on correlated broad gap-ups at target NAV,
+(d) explicit user sign-off. **Live stays DEFAULT-OFF.**
+
+_(prior status line, now superseded by the activation above:)_ **Live stays DEFAULT-OFF; Taylor did NOT enable
+anywhere.** Paper enable = set `chase_cap_vol_scale_enabled=True` in the `main` paper-account `overrides`
+(same paper-only pattern as `gap_adaptive_enabled`/`extreme_regime_enabled`) — awaiting user/Mike OK.
