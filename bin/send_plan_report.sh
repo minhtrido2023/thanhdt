@@ -17,7 +17,7 @@ NOW_ICT="$(TZ='Asia/Ho_Chi_Minh' date +'%H:%M ICT')"
 DISCORD_PLAN_CHANNEL="1521183164364754974"
 
 # Tìm plan file mới nhất (Bill ghi vào data/plan_SpaceX_<date>.json)
-PLAN_FILE="$(ls -t "$WORKDIR"/data/plan_SpaceX_*.json 2>/dev/null | head -1)"
+PLAN_FILE="$(ls -t "$WORKDIR"/data/trade_plans/plan_SpaceX_*.json 2>/dev/null | head -1)"
 
 if [ -z "$PLAN_FILE" ] || [ ! -f "$PLAN_FILE" ]; then
   MSG="⚠️ [$TODAY $NOW_ICT] Plan T+1 KHÔNG TÌM THẤY — BQ có thể stale hoặc DollarBill chưa chạy. Kiểm tra: mike/logs/bq_freshness.log"
@@ -36,9 +36,10 @@ try:
         plan = json.load(f)
 
     acct   = plan.get("account", "SpaceX")
-    date   = plan.get("date", "?")
-    state  = plan.get("market_state", plan.get("state", "?"))
-    nav    = plan.get("nav_estimate", plan.get("nav", None))
+    date   = plan.get("plan_date", plan.get("date", "?"))
+    state  = plan.get("state_name", plan.get("market_state", plan.get("state", "?")))
+    nav    = plan.get("nav_basis", {}).get("account_nav") if isinstance(plan.get("nav_basis"), dict) \
+             else plan.get("nav_estimate", plan.get("nav", None))
     orders = plan.get("orders", [])
 
     lines = [f"📋 PLAN T+1 — {acct} ({date}) | {today} {now_ict}"]
@@ -54,8 +55,9 @@ try:
             side   = o.get("side","?")
             ticker = o.get("ticker","?")
             qty    = o.get("quantity", o.get("qty","?"))
-            price  = o.get("price","ATO/ATC")
-            lines.append(f"  {side} {ticker} x{qty} @ {price}")
+            price  = o.get("ref_price", o.get("price","ATO/ATC"))
+            price_str = f"{price:,.0f}" if isinstance(price, (int, float)) else price
+            lines.append(f"  {side} {ticker} x{qty} @ {price_str}")
         if len(orders) > 10:
             lines.append(f"  ... +{len(orders)-10} lệnh khác")
     else:
