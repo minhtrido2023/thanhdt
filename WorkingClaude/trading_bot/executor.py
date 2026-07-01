@@ -80,6 +80,7 @@ class Executor:
         self._gap_ref = {}      # ticker -> {prior_close, rvol_20d}; loaded once at startup
         self._gap_z_cache = {}  # ticker -> gap_z or None (None = fail-safe, no override)
         self._last_gap_override = {}  # ticker -> gap_z; populated when override fires this tick
+        self._extreme_state = {}      # ticker -> {"n": confirm-count, "until": iso}; EXTREME-regime gate
         self._load_gap_ref_data()
         self.state = self._load_state()
         self._step_fail_count = 0   # consecutive STEP_FAIL counter for escalation
@@ -240,8 +241,12 @@ class Executor:
             return True, f"adp:dip(ratio={ratio_str},r15={r*100:+.2f}%→cross)"
         return False, f"adp:dip(ratio={ratio_str},r15={r*100:+.2f}%→passive)"
 
-    def _limit_price(self, o, q, cross=True):
-        """Giá LO cho lệnh con; None = không đặt được (thiếu quote)."""
+    def _limit_price(self, o, q, cross=True, extreme=False):
+        """Giá LO cho lệnh con; None = không đặt được (thiếu quote).
+
+        extreme=True (EXTREME-regime SELL only): nới sàn đuổi từ ref×(1−3%) xuống thẳng
+        q.floor để bán tới sàn (thoát dứt điểm) thay vì nằm kẹt tại −3% khi giá gap thủng.
+        """
         ex = q.exchange or "HOSE"
         last = q.last or q.ref or o.ref_price
         tick = tick_size(last, o.ticker, ex)
@@ -259,6 +264,8 @@ class Executor:
             floor_cap = o.ref_price * (1 - self.cfg["max_chase_pct_sell"])
             if q.floor:
                 floor_cap = max(floor_cap, q.floor)
+            if extreme and q.floor:
+                floor_cap = q.floor          # EXTREME sell-to-floor: bỏ trần −3%, đuổi xuống sàn
             if cross:
                 desired = q.bid if q.bid else last - self.cfg["chase_ticks"] * tick
             else:   # passive sell: nằm ở ask chờ nhịp hồi chạm tới
@@ -326,7 +333,7 @@ class Executor:
             if not c:
                 continue
             age = (now - dt.datetime.fromisoformat(c["ts"])).total_seconds()
-            if age > max_age:
+            if age > max_age * self._extreme_slice_mult(o, now):  # ×1.0 khi OFF (byte-identical)
                 try:
                     self.broker.cancel_order(c["oid"])
                     c["status"] = "cancelled"
@@ -342,7 +349,8 @@ class Executor:
         """Load prior_close + rvol_20d for buy tickers from local parquet at startup.
         Fail-safe: missing/stale/invalid data leaves _gap_ref empty (no override fires).
         """
-        if not self.cfg.get("gap_adaptive_enabled", False):
+        if not (self.cfg.get("gap_adaptive_enabled", False)
+                or self.cfg.get("extreme_regime_enabled", False)):
             return
         cache_dir = os.environ.get(
             "BQ_LOCAL_CACHE",
@@ -355,7 +363,9 @@ class Executor:
         try:
             import pandas as pd
             import pyarrow.parquet as _pq
-            tickers = [o.ticker for o in self.plan.orders if o.side == "buy"]
+            tickers = ([o.ticker for o in self.plan.orders]              # EXTREME: cả sell (sell-to-floor)
+                       if self.cfg.get("extreme_regime_enabled", False)
+                       else [o.ticker for o in self.plan.orders if o.side == "buy"])
             if not tickers:
                 return
             today = pd.Timestamp(self.plan.plan_date)
@@ -440,6 +450,58 @@ class Executor:
             we = _parse_hhmm(self.cfg.get("sell_window_end", "09:45"))
             return 1.0 if ws <= t < we else mult
 
+    def _extreme_regime(self, o, q, now):
+        """EXTREME_DOWN gate (proposal §3c) — ADDITIVE, gated by extreme_regime_enabled (default OFF).
+
+        Trả True chỉ khi mã đang trong nhịp GIẢM bất thường đã xác nhận:
+          (i)  last nằm trong extreme_band của SÀN ngày (cận limit-down) — chỉ cần quote, HOẶC
+          (ii) r15 giảm mạnh hơn extreme_move_z × rvol_20d (rvol lấy từ _gap_ref nếu đã nạp).
+        Cần 2 poll liên tiếp xác nhận mới kích; đã kích thì giữ active extreme_cooldown_min phút
+        (debounce nhiễu). Fail-safe: thiếu dữ liệu → False (NORMAL). Không bao giờ raise.
+        """
+        if not self.cfg.get("extreme_regime_enabled", False):
+            return False
+        st = self._extreme_state.setdefault(o.ticker, {"n": 0, "until": None})
+        if st["until"] and now < dt.datetime.fromisoformat(st["until"]):
+            return True                      # đang trong cooldown → giữ active
+        try:
+            last = q.last or q.ref
+            if not last or last <= 0:
+                st["n"] = 0
+                return False
+            trig = False
+            floor = q.floor if (q.floor and q.floor > 0) else None
+            if floor and last <= floor * (1 + self.cfg.get("extreme_band", 0.03)):
+                trig = True                  # (i) cận sàn — trigger backtest đã validate
+            if not trig:                     # (ii) nhịp giảm intraday bất thường vs rvol 20d
+                ref = self._gap_ref.get(o.ticker)
+                rvol = ref.get("rvol_20d") if ref else None
+                if rvol and rvol > 0:
+                    r = self._r15(o.ticker, now)
+                    if r is not None and r < -self.cfg.get("extreme_move_z", 3.0) * rvol:
+                        trig = True
+            if not trig:
+                st["n"] = 0
+                return False
+            st["n"] += 1
+            if st["n"] >= 2:                 # 2-poll confirm → kích + đặt cooldown
+                st["until"] = (now + dt.timedelta(
+                    minutes=self.cfg.get("extreme_cooldown_min", 15))).isoformat(timespec="seconds")
+                return True
+            return False
+        except Exception:
+            return False
+
+    def _extreme_slice_mult(self, o, now):
+        """1.0 bình thường; extreme_slice_mult khi mã đang active EXTREME (rút ngắn nhịp
+        cancel/reprice để đuổi kịp sổ lệnh tụt). Đọc state đã armed, KHÔNG gọi quote lại."""
+        if not self.cfg.get("extreme_regime_enabled", False):
+            return 1.0
+        st = self._extreme_state.get(o.ticker)
+        if st and st.get("until") and now < dt.datetime.fromisoformat(st["until"]):
+            return self.cfg.get("extreme_slice_mult", 0.25)
+        return 1.0
+
     def _place_slices(self, now, phase):
         base_interval = self.cfg["slice_interval_min"] * 60
         for o in sorted(self.plan.orders, key=lambda x: x.priority):
@@ -462,8 +524,14 @@ class Executor:
             if q is None or not q.ok():
                 self._journal("NO_QUOTE", o, note="thiếu quote — thử lại sau")
                 continue
+            extreme_down = self._extreme_regime(o, q, now)
+            if extreme_down and o.side == "buy":
+                self._journal("EXTREME_PAUSE", o, note="EXTREME_DOWN → tạm dừng mua, T+1 re-sync")
+                continue
             cross, dip_note = self._decide_cross(o, now, q)
-            px = self._limit_price(o, q, cross)
+            if extreme_down:                 # o.side == "sell" (buy đã pause ở trên)
+                cross, dip_note = True, "EXTREME_DOWN sell-to-floor"
+            px = self._limit_price(o, q, cross, extreme=extreme_down)
             if px is None:
                 continue
             qty = self._child_qty(o, ps, q, px)
@@ -576,8 +644,8 @@ class Executor:
                  f"*Strategy*: {self.plan.strategy} v{self.plan.strategy_version} | "
                  f"*Broker*: {self.broker.name} | "
                  f"*Generated*: {dt.datetime.now():%Y-%m-%d %H:%M}", "",
-                 "| order | ticker | side | plan qty | filled | % | ref px | children |",
-                 "|---|---|---|---:|---:|---:|---:|---:|"]
+                 "| order | ticker | side | plan qty | filled | % | ref px | avg fill px | children |",
+                 "|---|---|---|---:|---:|---:|---:|---:|---:|"]
         tot_plan = tot_fill = 0
         for o in self.plan.orders:
             ps = self.state["parents"][o.id]
@@ -587,9 +655,10 @@ class Executor:
             avg = (sum(c["filled"] * (c["price"] or o.ref_price) for c in fills) /
                    max(1, sum(c["filled"] for c in fills))) if fills else 0
             tot_fill += ps["filled"] * (avg or o.ref_price)
+            avg_disp = f"{avg:,.0f}" if avg else "-"
             lines.append(f"| {o.id} | {o.ticker} | {o.side} | {o.qty:,} | "
                          f"{ps['filled']:,} | {pct:.0f}% | {o.ref_price:,.0f} | "
-                         f"{len(ps['children'])} |")
+                         f"{avg_disp} | {len(ps['children'])} |")
         lines += ["", f"*Plan gross*: {tot_plan/1e6:,.0f}M | "
                       f"*Executed*: {tot_fill/1e6:,.0f}M "
                       f"({100*tot_fill/tot_plan if tot_plan else 0:.0f}%)"]
