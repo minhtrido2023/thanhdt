@@ -10,6 +10,8 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WC_ROOT="$(cd "$ROOT/.." && pwd)"
+# Source wc_env.sh to get TZ=Asia/Ho_Chi_Minh (required for session_phase to use ICT)
+[ -f "$WC_ROOT/wc_env.sh" ] && source "$WC_ROOT/wc_env.sh" 2>/dev/null || true
 
 ACCOUNT="SpaceX"
 PLAN_DATE="$(date +%Y-%m-%d)"
