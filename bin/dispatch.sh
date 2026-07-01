@@ -64,6 +64,16 @@ JOBS_DIR="$ROOT/bus/jobs"
 
 from="${DISPATCH_FROM:-Mike}"
 
+# Per-agent Discord thread override — some agents' output belongs in a fixed topic
+# regardless of which thread Mike's live session happens to be active in right now
+# (root cause of thread-leak incidents 2026-07-01: dynamic ccdb_thread_id points at
+# whatever thread last invoked Mike). Add entries here as the user requests them.
+_agent_thread_override() {
+  case "$1" in
+    DollarBill) echo "1521183164364754974" ;;  # DollarBill trading-plan channel
+  esac
+}
+
 # _job_watcher: runs in background alongside a dispatch job.
 # Two distinct alert tracks:
 #   ANOMALY track (fires immediately, no cap): empty log after 60s, stale log >120s with no update.
@@ -75,7 +85,8 @@ _job_watcher() {
   local elapsed=0 discord_notified=0
   local log_stale_alerted=0 log_empty_alerted=0
   local discord_thread_id
-  discord_thread_id="${DISCORD_THREAD_ID:-$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)}"
+  discord_thread_id="${DISCORD_THREAD_ID:-$(_agent_thread_override "$target")}"
+  [ -n "$discord_thread_id" ] || discord_thread_id="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
   local milestones="600 1800"  # 10 min, 30 min; max 2 Discord progress messages total
 
   _discord() {
@@ -202,7 +213,8 @@ if [ "$bg" = "--bg" ]; then
         # Discord thread notification — always, regardless of who dispatched.
         # Use env var (set at dispatch time, inherited by bg subshell) then fall back to file.
         # tail -c 500: last bytes of log = agent's conclusion, not context-loading preamble.
-        local _tid; _tid="${DISCORD_THREAD_ID:-$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)}"
+        local _tid; _tid="${DISCORD_THREAD_ID:-$(_agent_thread_override "$id")}"
+        [ -n "$_tid" ] || _tid="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
         if [ -n "$_tid" ]; then
           local _preview; _preview="$(tail -c 500 "$logfile" 2>/dev/null | tr '\n\t' '  ')"
           "$ROOT/bin/notify_thread.sh" "✅ **$id** xong (job \`${job_id}\`): $_preview" "$_tid" 2>/dev/null || true
