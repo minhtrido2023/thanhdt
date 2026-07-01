@@ -164,6 +164,8 @@ def cmd_fleet_status(a):
                 disp = "dead"
         except Exception:
             pass
+        if disp == "dead" and m > 2880:  # hide sessions dead >48h
+            continue
         rows.append((r.get("agent_id", "?"), r.get("title", r.get("agent_id", "?")),
                      r.get("kind", "child"), disp, hb, age,
                      r.get("current_task", "")))

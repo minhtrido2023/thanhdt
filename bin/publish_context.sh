@@ -24,13 +24,18 @@ recent="$(python3 "$PY" recent "$KB/recent_delta.jsonl" 8 2>/dev/null || true)"
   printf '## MỚI NHẤT — kết quả gần đây từ toàn fleet\n'
   printf '%s\n' "$recent"
   printf '<!--RECENT-END-->\n\n'
-  # Curated canonical knowledge (Mike-edited) — injected into every agent at SessionStart.
+  # Current operations — tình trạng live hiện tại (Mike-maintained).
+  if [ -s "$KB/current_ops.md" ]; then
+    cat "$KB/current_ops.md"
+    printf '\n'
+  fi
+  # Canonical knowledge (Mike-edited, single source of truth).
   if [ -s "$KB/canonical.md" ]; then
     cat "$KB/canonical.md"
     printf '\n'
   fi
   printf '## Nguồn chuẩn tắc đầy đủ\n'
-  printf 'Lịch sử/chi tiết: kb/KNOWLEDGE.md (Mike biên tập). Trạng thái fleet: kb/fleet_status.md.\n'
+  printf 'Chi tiết: kb/KNOWLEDGE.md (§1-9). Events: kb/events_buffer.md. Fleet: kb/fleet_status.md.\n'
 } > "$KB/context_pack.md"
 
 echo "published context_pack v$ver"
