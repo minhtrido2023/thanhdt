@@ -52,7 +52,7 @@ cd "$WC_ROOT"
 OTP_FLAG=""
 [ "$AUTO_OTP" = true ] && OTP_FLAG="--auto-otp"
 # shellcheck disable=SC2086
-python bot_execute.py --account "$ACCOUNT" --date "$PLAN_DATE" $OTP_FLAG \
+python3 bot_execute.py --account "$ACCOUNT" --date "$PLAN_DATE" $OTP_FLAG \
   2>&1 | tee -a "$LOG"
 rc=${PIPESTATUS[0]}
 set -e
