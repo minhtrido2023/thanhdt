@@ -19,3 +19,4 @@
 - Sector sweep 15 ngành: sector_watchlist_framework.md đã ghi (Taylor)
 
 ## Không có gì pending hiện tại
+- [2026-07-01T09:28:55Z] TẠM THỜI (2026-07-01): model đổi sang claude-opus-4-8/high vì claude-sonnet-5 bị lỗi classifier 'temporarily unavailable' liên tục (chặn Edit/Bash). File: agents/Mike/.claude/settings.json. RESET lại claude-sonnet-5 vào ngày mai (2026-07-02) nếu lỗi đã hết — user yêu cầu tự reset, không cần hỏi lại.
