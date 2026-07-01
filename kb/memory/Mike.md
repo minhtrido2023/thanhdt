@@ -20,3 +20,4 @@
 
 ## Không có gì pending hiện tại
 - [2026-07-01T09:28:55Z] TẠM THỜI (2026-07-01): model đổi sang claude-opus-4-8/high vì claude-sonnet-5 bị lỗi classifier 'temporarily unavailable' liên tục (chặn Edit/Bash). File: agents/Mike/.claude/settings.json. RESET lại claude-sonnet-5 vào ngày mai (2026-07-02) nếu lỗi đã hết — user yêu cầu tự reset, không cần hỏi lại.
+- [2026-07-01T10:17:32Z] Đang xử lý: 2 patch executor.py (churn-guard + tick-retry + fix đếm-đôi extreme-poll) đã code + quant-skeptic CONFIRMED, CHƯA commit git (uncommitted: trading_bot/executor.py +94/-3, 3 file selfcheck mới chưa track: churn_guard_selfcheck.py, tick_retry_selfcheck.py, extreme_regime_selfcheck.py). Đang hỏi user: commit luôn hay tiếp tục patch#3 (trần đuổi mua 1.5% quá chặt — cần hỏi Taylor trước, không tự quyết) trước khi commit. Restart sang opus-4-8 theo yêu cầu user vì sonnet-5 classifier lỗi 'temporarily unavailable' lặp lại chặn Edit/Bash nhiều lần trong phiên này.
