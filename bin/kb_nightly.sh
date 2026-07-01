@@ -16,7 +16,7 @@ cd "$ROOT"
 KEEP_DAYS="${KB_KEEP_DAYS:-3}"        # hot-tier retention for raw events
 MEM_WARN_KB="${KB_MEM_WARN_KB:-5}"    # alert threshold per agent memory file
 LOG="$ROOT/logs/kb_nightly.log"
-KNOWLEDGE="$ROOT/kb/KNOWLEDGE.md"
+EVENTS_BUFFER="$ROOT/kb/events_buffer.md"
 
 log() { echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] $*" | tee -a "$LOG"; }
 
@@ -32,7 +32,7 @@ log "Archiving consolidator blocks older than $CUTOFF (keep_days=$KEEP_DAYS)..."
 ARCHIVE_DATE=$(date -u +%Y-%m-%d)
 ARCHIVE_FILE="$ROOT/kb/archive/${ARCHIVE_DATE}-nightly.md"
 
-python3 - "$KNOWLEDGE" "$CUTOFF" "$ARCHIVE_FILE" <<'PYEOF'
+python3 - "$EVENTS_BUFFER" "$CUTOFF" "$ARCHIVE_FILE" <<'PYEOF'
 import sys, re, pathlib, datetime
 
 knowledge_path = pathlib.Path(sys.argv[1])

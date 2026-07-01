@@ -2,7 +2,8 @@
 # consolidate.sh — mechanical Phase-1 consolidator (no LLM, no BigQuery).
 # Runs from cron every 30 min. Single-writer (flock). Steps:
 #   1. Gather NEW events from each child's inbox (line-offset tracking → no re-ingestion).
-#   2. If any new: append them to KNOWLEDGE.md, bump version, rebuild context_pack, commit.
+#   2. If any new: append them to events_buffer.md (episodic), bump version, rebuild context_pack, commit.
+#      NOTE: KNOWLEDGE.md is canonical-only (Mike-edited). Raw events go to events_buffer.md.
 #   3. Always refresh kb/fleet_status.md (derived dead-detection; never mutates child files).
 set -euo pipefail
 
@@ -30,11 +31,11 @@ done
 
 # --- 2. if new knowledge: log + bump + republish + commit ---
 if [ -s "$NEW" ]; then
-  [ -f "$KB/KNOWLEDGE.md" ] || printf '# Mike fleet — KNOWLEDGE (canonical log)\n' > "$KB/KNOWLEDGE.md"
+  [ -f "$KB/events_buffer.md" ] || printf '# events_buffer — episodic buffer (consolidator-managed, do not edit)\n# Archive: kb_nightly.sh moves entries older than KEEP_DAYS to kb/archive/\n\n' > "$KB/events_buffer.md"
   {
     printf '\n## Consolidation %s\n' "$(date -u +%FT%TZ)"
     python3 "$PY" format-events "$NEW" 2>/dev/null || true
-  } >> "$KB/KNOWLEDGE.md"
+  } >> "$KB/events_buffer.md"
 
   ver="$(tr -dc '0-9' < "$KB/version.txt" 2>/dev/null || true)"; ver="${ver:-0}"
   newver=$((ver + 1)); echo "$newver" > "$KB/version.txt"

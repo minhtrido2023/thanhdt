@@ -1,8 +1,9 @@
 # Mike fleet — KNOWLEDGE (canonical)
 
-> **Nguồn sự thật của toàn đội.** Được Mike biên tập thủ công, consolidator chỉ append.
-> Agent đọc `context_pack.md` (distilled, ~8KB). File này dành cho tra cứu sâu và weekly review.
-> Raw event log: `kb/archive/`. **Curated lần cuối: 2026-06-30 (Mike). KB v640.**
+> **Nguồn sự thật của toàn đội — canonical-only, Mike biên tập thủ công.**
+> Consolidator KHÔNG ghi vào đây (raw events → `kb/events_buffer.md`). File này ổn định.
+> Agent đọc `context_pack.md` (~8KB, distilled). File này dành cho tra cứu sâu và weekly editorial.
+> Raw event log: `kb/events_buffer.md` (hot, 7 ngày) + `kb/archive/` (lịch sử). **Curated: 2026-07-01 (Mike).**
 
 ---
 
