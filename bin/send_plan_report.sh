@@ -79,15 +79,15 @@ if orders:
     buys  = [o for o in orders if str(o.get("side","")).upper() in ("BUY","MUA","B")]
     sells = [o for o in orders if str(o.get("side","")).upper() in ("SELL","BAN","S")]
     lines.append(f"Lệnh: {len(buys)} mua, {len(sells)} bán ({len(orders)} tổng)")
-    for o in orders[:10]:
+    # Full list, no truncation — notify_thread.sh chunks across multiple Discord
+    # messages if this exceeds the ~2000-char single-message limit.
+    for o in orders:
         side   = o.get("side","?")
         ticker = o.get("ticker","?")
         qty    = o.get("quantity", o.get("qty","?"))
         price  = o.get("ref_price", o.get("price","ATO/ATC"))
         price_str = f"{price:,.0f}" if isinstance(price, (int, float)) else price
         lines.append(f"  {side} {ticker} x{qty} @ {price_str}")
-    if len(orders) > 10:
-        lines.append(f"  ... +{len(orders)-10} lệnh khác")
 else:
     lines.append("Không có lệnh (giữ nguyên danh mục).")
 
