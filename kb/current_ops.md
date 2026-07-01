@@ -15,12 +15,6 @@
 ## Chờ user quyết định
 - V2.5 live-recommend integration: **2026-07-07** (trigger tự động)
 
-## Thay đổi tạm thời — cần dọn lại
-- **Model Mike**: đổi `claude-sonnet-5` → `claude-opus-4-8` (effort high) ngày 2026-07-01 vì
-  sonnet-5 lỗi classifier "temporarily unavailable" liên tục (chặn Edit/Bash). File:
-  `agents/Mike/.claude/settings.json`. **RESET lại `claude-sonnet-5` vào 2026-07-02 nếu lỗi đã
-  hết** (user yêu cầu tự làm, không cần hỏi lại — chỉ cần verify lỗi hết trước khi reset).
-
 ## Workflow ngày trading (SpaceX, T2-T6, giờ ICT)
 1. **17:30** — `bq_freshness_check.sh`: BQ fresh → dispatch DollarBill lập plan T+1
 2. **19:30** — `send_plan_report.sh`: gửi plan T+1 vào Trading Daily thread (duyệt trước 08:45 sáng mai)
