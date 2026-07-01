@@ -88,9 +88,7 @@ def main():
         from gmail_otp_reader import fetch_dnse_otp
         auto_profiles = pick_accounts(load_accounts(base), args.account)
         for p in auto_profiles:
-            cred_file = p.get("credentials_file")
-            if not cred_file:
-                continue
+            cred_file = p.get("credentials_file")  # None → get_dnse_client uses default
             c = get_dnse_client(cred_file)
             if c.has_trading_token():
                 print(f"[{p['label']}] trading-token còn hạn — bỏ qua OTP")

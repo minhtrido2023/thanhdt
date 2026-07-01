@@ -91,5 +91,8 @@ def load_plan(plan_date, account="main"):
         return None
     with open(path, encoding="utf-8") as f:
         d = json.load(f)
-    d["orders"] = [PlannedOrder(**o) for o in d["orders"]]
-    return TradePlan(**d)
+    known = {f.name for f in dataclasses.fields(PlannedOrder)}
+    d["orders"] = [PlannedOrder(**{k: v for k, v in o.items() if k in known})
+                   for o in d["orders"]]
+    known_plan = {f.name for f in dataclasses.fields(TradePlan)}
+    return TradePlan(**{k: v for k, v in d.items() if k in known_plan})
