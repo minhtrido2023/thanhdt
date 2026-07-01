@@ -57,13 +57,20 @@ Khi thấy event_type `question` trong KB delta, Mike phải:
    `bus/directives/X.jsonl` chỉ còn dùng cho **mandate dài hạn** (setup ban đầu, quy tắc vĩnh viễn không cần reply ngay). Với mọi task cần kết quả → **dùng `dispatch.sh`**, không dùng directive/inbox.
 
 ## Chọn agent nào cho việc gì
-**2 lớp (cập nhật 2026-06-25):** *companion daemon* (persistent, systemd) chỉ còn **Mike (orchestrator) + Taylor (R&D lineage)**. **DollarBill + Mafee = companion NGỦ tới go-live** (daemon đã tắt để app gọn; vẫn dispatch headless được; khi chạy thật Mike bật lại: `systemctl --user enable --now mike@DollarBill mike@Mafee`). Mọi vai trò khác là **native subagent on-demand** — `Agent(subagent_type="<name>")` khi Mike interactive, hoặc `dispatch.sh <Id>` headless (KHÔNG cần daemon).
+**1 lớp duy nhất (cập nhật 2026-07-01):** *companion daemon* (persistent, systemd) chỉ còn **Mike** —
+đầu mối duy nhất user tương tác trực tiếp (Discord/desktop/mobile). **Mọi agent khác đều
+headless/native on-demand**, gọi bởi Mike, KHÔNG có daemon riêng, KHÔNG user tự mở session trực
+tiếp. Lý do: `dispatch.sh` luôn tạo tiến trình `claude -p` độc lập — daemon riêng của 1 agent
+KHÔNG được dùng bởi cơ chế dispatch (mỗi lần gọi là phiên mới, liên tục dựa vào
+`kb/memory/<id>.md` + KB, không phải conversation sống của daemon) → daemon phụ không tạo giá trị
+thực tế, chỉ tốn tài nguyên + rủi ro vận hành (watchdog, ZOMBIE-fix, duplicate-environment — xem
+sự cố Taylor 2026-07-01).
 
 | Vai trò | Lớp | Cách gọi | Khi nào |
 |-------|-----|----------|---------|
-| **Taylor** (Quant: backtest, chiến lược, BQ, risk/reward) | companion | `dispatch.sh Taylor "..."` | R&D, test chiến lược, query BQ |
-| **DollarBill** (plan giao dịch) | companion *(daemon ngủ tới go-live)* | `dispatch.sh DollarBill "..."` | Lập plan, chuẩn bị lệnh |
-| **Mafee** (thực thi plan-bound) | companion *(daemon ngủ tới go-live)* | `dispatch.sh Mafee "..."` | Chạy lệnh trong plan đã duyệt |
+| **Taylor** (Quant: backtest, chiến lược, BQ, risk/reward) | headless on-demand | `dispatch.sh Taylor "..."` | R&D, test chiến lược, query BQ |
+| **DollarBill** (plan giao dịch) | headless on-demand | `dispatch.sh DollarBill "..."` | Lập plan, chuẩn bị lệnh |
+| **Mafee** (thực thi plan-bound) | headless on-demand | `dispatch.sh Mafee "..."` | Chạy lệnh trong plan đã duyệt |
 | **quant-skeptic** (phản biện R&D — công tố) | native | `bin/verify_finding.sh` / `Agent(subagent_type="quant-skeptic")` | Sau finding quan trọng, TRƯỚC khi wire |
 | **data-ops** (was Winston: DT5G/BQ freshness, pipeline health, feeds) | native | `Agent(subagent_type="data-ops")` / `dispatch.sh Winston "..."` | Check freshness/pipeline/corp-action |
 | **corp-scanner** (corp-action scan hẹp) | native | `Agent(subagent_type="corp-scanner")` | Quét tách/cổ tức một phiên |
@@ -71,7 +78,13 @@ Khi thấy event_type `question` trong KB delta, Mike phải:
 | **legal-vn** (was Wendy: luật CK/thuế/DN VN, có trích nguồn) | native | `Agent(subagent_type="legal-vn")` / `dispatch.sh Wendy "..."` | Câu hỏi pháp lý/thuế/compliance |
 | **fleet-scout** ("agent X đang làm gì") | native | `Agent(subagent_type="fleet-scout")` | Tra trạng thái session nhanh |
 
-> **Lưu ý chuyển đổi 2026-06-25:** Winston/Spyros/Wendy đã **gỡ daemon** (`systemctl --user disable --now`) → bớt gánh watchdog + ví usage 5h. Tri thức + working memory (`kb/memory/<id>.md`) GIỮ NGUYÊN trên đĩa; thư mục `agents/<id>/` giữ để audit. Cần chạy lại như daemon: `systemctl --user enable --now mike@<id>`. Realtime risk monitor là **`risk_monitor.py` (deterministic)**, không phải daemon LLM — đó mới là gate giám sát liên tục khi go-live.
+> **Lịch sử chuyển đổi:** Winston/Spyros/Wendy gỡ daemon 2026-06-25; DollarBill/Mafee gỡ daemon
+> 2026-06-30 (đã go-live, chạy headless on-demand ổn định); **Taylor gỡ daemon 2026-07-01** (user
+> quyết định — daemon không được dispatch.sh sử dụng, chỉ gây nhiễu). Tri thức + working memory
+> (`kb/memory/<id>.md`) GIỮ NGUYÊN trên đĩa cho mọi agent; thư mục `agents/<id>/` giữ để audit.
+> Cần bật lại 1 agent làm daemon (hiếm khi cần): `systemctl --user enable --now mike@<id>`.
+> Realtime risk monitor là **`risk_monitor.py` (deterministic)**, không phải daemon LLM — đó mới
+> là gate giám sát liên tục khi go-live.
 
 ## Tier phản biện — verify finding của Taylor (bắt buộc trước khi wire)
 Mọi finding R&D quan trọng (backtest, đổi config production, claim CAGR/Sharpe) phải qua một

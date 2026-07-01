@@ -54,7 +54,12 @@
 
 ## 3. Kiến trúc Fleet & Dispatch
 
-**Companion daemon (systemd):** Chỉ còn **Mike + Taylor**. DollarBill/Mafee headless on-demand. Winston/Spyros/Wendy đã gỡ daemon (2026-06-25) → native subagent `Agent(subagent_type=...)`.
+**Companion daemon (systemd):** **CHỈ Mike** (2026-07-01, kiến trúc 1-tầng chốt). Mọi agent khác
+headless/native on-demand qua `dispatch.sh` — không có daemon riêng, không user tự mở session trực
+tiếp. Lịch sử gỡ daemon: Winston/Spyros/Wendy (2026-06-25) → native subagent
+`Agent(subagent_type=...)`; DollarBill/Mafee (2026-06-30, sau go-live ổn định); Taylor
+(2026-07-01, cuối cùng — lý do: `dispatch.sh` không dùng conversation sống của daemon phụ, nên
+daemon phụ không tạo giá trị, chỉ gây rủi ro vận hành — xem sự cố duplicate-environment Taylor).
 
 **Cơ chế dispatch đúng:** `bin/dispatch.sh` (headless `claude -p`). Directive/inbox deprecated cho task — chỉ dùng cho mandate dài hạn.
 

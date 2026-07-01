@@ -89,36 +89,44 @@ Agent(prompt="query BQ freshness ticker"), Agent(prompt="query BQ freshness tick
 
 **Rule**: N việc độc lập → dispatch/Agent song song. Việc phụ thuộc nhau → tuần tự.
 
-## Hybrid agent routing — 3 tiers
+## Agent routing — 2 tiers (Mike = daemon duy nhất, cập nhật 2026-07-01)
 
-Trước khi dispatch companion session, đánh giá nhanh:
+**Mike là companion daemon DUY NHẤT còn lại.** Mọi agent khác (Taylor, DollarBill, Mafee,
+data-ops, risk-auditor, legal-vn, corp-scanner, quant-skeptic, fleet-scout, ...) đều
+**headless/native on-demand** — không daemon riêng, không user tự mở session trực tiếp. Lý do:
+`dispatch.sh` luôn tạo tiến trình `claude -p` độc lập, không dùng conversation sống của daemon
+phụ → daemon phụ không tạo giá trị (continuity đã do `kb/memory/<id>.md` + KB đảm nhiệm), chỉ
+tốn tài nguyên + rủi ro vận hành. Taylor gỡ daemon 2026-07-01 (cuối cùng còn lại ngoài Mike);
+DollarBill/Mafee gỡ 2026-06-30; Winston/Spyros/Wendy gỡ 2026-06-25.
+
+Trước khi dispatch, đánh giá nhanh:
 
 | Task type | Tier | Cách giao |
 |---|---|---|
-| BQ query nhanh, data check | **Tier 2 — native** | `Agent(subagent_type="bq-analyst", ...)` |
-| Data/regime freshness, pipeline health, feeds | **Tier 2 — native** | `Agent(subagent_type="data-ops", ...)` (was Winston) |
-| Corp-action scan hẹp | **Tier 2 — native** | `Agent(subagent_type="corp-scanner", ...)` |
-| Review rủi ro / audit EOD / recon fill↔plan | **Tier 2 — native** | `Agent(subagent_type="risk-auditor", ...)` (was Spyros) |
-| Câu hỏi pháp lý/thuế/compliance VN | **Tier 2 — native** | `Agent(subagent_type="legal-vn", ...)` (was Wendy) |
-| "agent X đang làm gì?" nhanh | **Tier 2 — native** | `Agent(subagent_type="fleet-scout", ...)` |
-| **Phản biện finding R&D (bác bỏ trước khi wire)** | **Tier 2 — verifier** | `bin/verify_finding.sh [--topic …]` hoặc `Agent(subagent_type="quant-skeptic", ...)` |
-| R&D experiment, backtest (cần lineage) | **Tier 1 — companion** | `bin/dispatch.sh Taylor "..."` |
-| Lập plan / thực thi lệnh (live) | **Tier 1 — companion** | `bin/dispatch.sh DollarBill/Mafee "..."` |
-| Query 1 câu đơn giản | **Tier 3 — inline** | `Agent(prompt="...", ...)` không cần subagent_type |
+| BQ query nhanh, data check | **native** | `Agent(subagent_type="bq-analyst", ...)` |
+| Data/regime freshness, pipeline health, feeds | **native** | `Agent(subagent_type="data-ops", ...)` (was Winston) |
+| Corp-action scan hẹp | **native** | `Agent(subagent_type="corp-scanner", ...)` |
+| Review rủi ro / audit EOD / recon fill↔plan | **native** | `Agent(subagent_type="risk-auditor", ...)` (was Spyros) |
+| Câu hỏi pháp lý/thuế/compliance VN | **native** | `Agent(subagent_type="legal-vn", ...)` (was Wendy) |
+| "agent X đang làm gì?" nhanh | **native** | `Agent(subagent_type="fleet-scout", ...)` |
+| **Phản biện finding R&D (bác bỏ trước khi wire)** | **native — verifier** | `bin/verify_finding.sh [--topic …]` hoặc `Agent(subagent_type="quant-skeptic", ...)` |
+| R&D experiment, backtest, query BQ (cần lineage/working memory) | **headless dispatch** | `bin/dispatch.sh Taylor "..."` |
+| Lập plan / thực thi lệnh (live) | **headless dispatch** | `bin/dispatch.sh DollarBill/Mafee "..."` |
+| Query 1 câu đơn giản | **inline** | `Agent(prompt="...", ...)` không cần subagent_type |
 
-**Khi nào dùng native agent (Tier 2):**
-- Task không cần accumulated context của companion
+**Khi nào dùng native agent:**
+- Task không cần working memory tích lũy của agent đó
 - One-shot, kết quả trả về ngay trong lượt này
 - Không cần write code phức tạp, chỉ cần query/scan/read
 
-**Companion daemon (Tier 1) đang chạy — CHỈ còn Mike + Taylor:**
-- **Taylor** — R&D cần context tích lũy (experiment lineage).
-- **DollarBill + Mafee** — companion execution nhưng **daemon NGỦ tới go-live** (idle, chưa giao dịch
-  thật). Khi chạy thật: `systemctl --user enable --now mike@DollarBill mike@Mafee`. Vẫn dispatch
-  headless được lúc cần (`dispatch.sh DollarBill/Mafee "..."`); KHÔNG chuyển native vì execution cần
-  working memory + audit trail.
-- Mọi vai trò khác (data-ops, risk-auditor, legal-vn) đã chuyển native on-demand 2026-06-25
-  (gỡ daemon → bớt watchdog + ví usage; tri thức/working-memory giữ trên đĩa, dispatch.sh vẫn chạy headless).
+**Khi nào dùng headless dispatch (Taylor/DollarBill/Mafee):**
+- Cần đọc/ghi working memory (`kb/memory/<id>.md`) để giữ mạch nghiên cứu/thực thi qua nhiều lượt
+- Task ghi code, chạy backtest, hoặc thao tác trading thật (plan-bound)
+- KHÔNG cần daemon để làm việc này — `dispatch.sh` tự inject KB + working memory vào mỗi phiên
+  headless mới, độc lập với bất kỳ daemon nào
+
+**Bật lại 1 agent làm daemon** (hiếm khi cần, ví dụ user muốn tự mở session trực tiếp không qua
+Mike): `systemctl --user enable --now mike@<id>`. Mặc định: KHÔNG bật, tránh lộn xộn hybrid.
 
 Native agent definitions: `~/.claude/agents/` (bq-analyst, **data-ops**, corp-scanner,
 **risk-auditor**, **legal-vn**, fleet-scout, quant-skeptic).

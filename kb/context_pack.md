@@ -103,7 +103,7 @@ pbcombo dual-vehicle (Calmar 1.48→1.37); gq_score growth gate (−IC); composi
   2026-07-01)**. Toàn bộ post vào 1 Discord thread — Trading Daily (1521470705563340910).
 
 ### Kiến trúc fleet
-- Companion daemon: **Mike + Taylor** only. Bill/Mafee headless on-demand.
+- Companion daemon: **CHỈ Mike**. Mọi agent khác (Taylor, Bill, Mafee, v.v.) headless/native on-demand.
 - Winston/Spyros/Wendy = native subagent `Agent(subagent_type=...)`, không còn daemon.
 - Dispatch đúng: `bin/dispatch.sh`. Directive = mandate dài hạn only (deprecated cho task).
 - Self-dispatch chặn. Agent → Mike phải escalate (event `question`), KHÔNG spawn Mike headless.
