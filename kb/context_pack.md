@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v666)
+# Mike fleet — context pack (v667)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-01T10:15:05] Mike/finding — executor-2-bugs-fixed-quant-skeptic-CONFIRMED: {"summary": "Mike tu review + code 2 patch cho trading_bot/executor.py (production SpaceX) sua 2 bug tim tu du lieu that go-live 2026-07-01, sau khi user cho ph …
 - [2026-07-01T10:17:32] Mike/decision — restart-to-opus-live: {"reason": "sonnet-5 classifier temporarily-unavailable lap lai chan Edit/Bash nhieu lan trong phien, user tu config model=claude-opus-4-8 trong settings.json v …
 - [2026-07-01T10:22:26] Taylor/finding — patch#3 static chase-cap → volatility-scaled (recommend): {"job": "Taylor_20260701_102033", "question": "max_chase_pct_buy=1.5% static cap → whole 9-bank basket 0-fill on gap-up go-live day. Keep, widen, or vol-scale?" …
 - [2026-07-01T10:33:08] Mike/decision — model-default-sonnet5-final: {"summary": "User chot mac dinh lau dai: claude-sonnet-5, effort high. Da thu Opus 4.8 khong khac biet ro ret. Loi classifier temporarily-unavailable la chap ch …
@@ -11,6 +10,7 @@
 - [2026-07-01T10:38:53] quant-skeptic/verification — VERIFY: vol-scale-chase-cap NET entry-quality backtest: {"finding_topic": "vol-scale-chase-cap NET entry-quality backtest", "verdict": "CONFIRMED", "confidence": "high", "checks": {"look_ahead_leak": "pass — rvol_20d …
 - [2026-07-01T10:42:05] Taylor/decision — vol-scale chase-cap patch#3 CONFIRMED + coded default-OFF: {"job": "Taylor_20260701_102950", "verify": "quant-skeptic CONFIRMED high-confidence (log verify_20260701_103636.log): byte-identical reproduce, k/ceil grid rep …
 - [2026-07-01T10:51:22] DollarBill/decision — plan-2026-07-02: {"date": "2026-07-02", "file": "data/trade_plans/plan_SpaceX_2026-07-02.json", "state": "NEUTRAL-3 DT5G_macro", "action": "BUY 11 remaining positions (day-2 dep …
+- [2026-07-01T11:01:37] Taylor/decision — vol-scale chase-cap patch#3 — PAPER-TRADING activated: {"job": "Taylor_20260701_105729", "approved_by": "user via Mike dispatch", "action": "set chase_cap_vol_scale_enabled=True in main paper-account overrides ONLY  …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -23,6 +23,7 @@
 
 ## Đang R&D
 - **Taylor · EXTREME-regime gate PAPER-TRADING** (bắt đầu 2026-07-01, user duyệt trực tiếp): `extreme_regime_enabled=True` CHỈ trên account paper `main` (override trong `trading_bot_accounts.json`); global default + SpaceX/live GIỮ `False`. Week-1 stress-injection PASS 24/24 (`stress_extreme_regime.py`: arm 2-poll · sell-to-floor · buy-pause · cadence ×0.25 + negative controls). **Target kết thúc ~2026-07-28 (~20 phiên).** 3 điều kiện còn lại trước LIVE: (a) ZERO false-trigger qua ~4 tuần benign, (b) không can thiệp NORMAL-path, (c) user sign-off. **KHÔNG bật gì ở live.**
+- **Taylor · vol-scale buy chase-cap (patch#3) PAPER-TRADING** (bắt đầu 2026-07-01, user duyệt trực tiếp): `chase_cap_vol_scale_enabled=True` CHỈ trên account paper `main` (override trong `trading_bot_accounts.json`, k=2.0/ceil=0.04); global default + SpaceX/live GIỮ `False`. Executor-path stress PASS 15/15 (`stress_vol_scale_chase_cap.py`: wiring · WIDEN clamp-to-ceil · MONOTONE · fail-safe rvol absent/0/<0 · paper limit > static + NEG-control live→static). **Target kết thúc ~2026-07-14 (~10 phiên — ngắn hơn EXTREME vì fire trên gap-up thường, tích event nhanh).** Điều kiện trước LIVE: (a) paper sạch (wiring đúng trên quote thật + fail-safe khi thiếu rvol cache), (b) không can thiệp NORMAL-path ngày non-gap, (c) skeptic rerun REAL-fill vs `min(open,L)` proxy trên correlated gap-up @NAV target, (d) user sign-off. **KHÔNG bật gì ở live.**
 - **Taylor**: sector sweep #10+ (chờ Mike dispatch)
 - **Taylor**: fill-timing review `execution_quality_review.py` (kết quả 2026-06-30 chưa xử lý — cần chạy)
 - **V2.5**: R&D-complete, DISABLED. Reminder: 2026-07-07 Mike hỏi user go-ahead integration.
@@ -43,7 +44,13 @@
    (giá khớp thực từng lệnh), tính tổng lệnh/mua-bán/khớp đủ-một phần-chưa khớp/tổng giá trị VND,
    post vào Trading Daily thread.
 
-Toàn bộ notify của chuỗi trên gộp về **1 Discord thread — Trading Daily (1521470705563340910)**.
+**2 Discord thread tách biệt (chốt 2026-07-01):**
+- **Trading Daily (1521470705563340910)** — nội dung NGÀY THỰC THI: preflight, run_bot, heartbeat,
+  EOD report, BQ freshness.
+- **DollarBill plan channel (1521183164364754974)** — riêng cho việc LẬP KẾ HOẠCH của DollarBill
+  (`send_plan_report.sh`, và mọi `dispatch.sh DollarBill ...` khác dù cron hay ad-hoc). Root cause
+  thread-leak (dispatch notify theo thread Mike đang active) đã fix ở tầng `dispatch.sh` qua hàm
+  `_agent_thread_override` — route CỐ ĐỊNH cho DollarBill bất kể Mike gọi từ topic nào.
 
 ## Cron quan trọng khác (ICT)
 | Giờ | Lịch | Việc |
