@@ -129,7 +129,9 @@ def main():
         executors.append(Executor(plan, broker, cfg, shared=shared_fills))
 
     if not executors:
-        sys.exit(f"❌ không có account nào có plan thực thi cho {plan_date}.")
+        print(f"ℹ️ không có account nào có plan/lệnh cho {plan_date} — không phải lỗi, "
+              f"chỉ là ngày không giao dịch. Thoát bình thường.")
+        return 0
 
     run_session(executors, once=args.once, max_cycles=args.max_cycles,
                 force_phase=args.force_phase)
