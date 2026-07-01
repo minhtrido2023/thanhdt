@@ -28,9 +28,8 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-_tid="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
+_tid="1521470705563340910"  # Trading Daily thread — mọi giao dịch hàng ngày gộp về đây
 _discord() {
-  [ -n "${_tid:-}" ] || return 0
   "$ROOT/bin/notify_thread.sh" "$1" "$_tid" 2>/dev/null || true
 }
 

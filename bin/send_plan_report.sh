@@ -12,8 +12,8 @@ WORKDIR="${WORKDIR_8L:-/home/trido/thanhdt/WorkingClaude}"
 TODAY="$(date +%Y-%m-%d)"
 NOW_ICT="$(TZ='Asia/Ho_Chi_Minh' date +'%H:%M ICT')"
 
-# Discord: mike fleet plan channel — topic 1521183164364754974 (server 1519342571812421753)
-DISCORD_PLAN_CHANNEL="1521183164364754974"
+# Discord: Trading Daily thread — mọi nội dung giao dịch hàng ngày gộp về 1 topic.
+DISCORD_PLAN_CHANNEL="1521470705563340910"
 
 # Tìm plan file mới nhất (Bill ghi vào data/plan_SpaceX_<date>.json)
 PLAN_FILE="$(ls -t "$WORKDIR"/data/plan_SpaceX_*.json 2>/dev/null | head -1)"

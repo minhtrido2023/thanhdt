@@ -21,7 +21,8 @@ WC_ROOT="$(cd "$ROOT/.." && pwd)"
 
 ACCOUNT="${1:?usage: bot_heartbeat.sh <account> [plan_date] [thread_id]}"
 PLAN_DATE="${2:-$(TZ=Asia/Ho_Chi_Minh date +%Y-%m-%d)}"
-THREAD_ID="${3:-$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || echo '')}"
+# Trading Daily thread — mọi giao dịch hàng ngày gộp về 1 thread cố định.
+THREAD_ID="${3:-1521470705563340910}"
 
 JOURNAL="$WC_ROOT/data/execution_logs/exec_${ACCOUNT}_${PLAN_DATE}_journal.csv"
 PLAN_FILE="$WC_ROOT/data/trade_plans/plan_${ACCOUNT}_${PLAN_DATE}.json"

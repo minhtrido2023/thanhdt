@@ -11,7 +11,9 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WORKDIR="${WORKDIR_8L:-/home/trido/thanhdt/WorkingClaude}"
 TODAY="$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)"
 NOW_ICT="$(TZ='Asia/Ho_Chi_Minh' date +'%H:%M ICT')"
-DISCORD_TRADING_THREAD="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || echo '')"
+# Trading Daily — mọi nội dung giao dịch hàng ngày gộp về 1 thread cố định (không phụ thuộc
+# session Mike gần nhất mở từ thread nào).
+DISCORD_TRADING_THREAD="1521470705563340910"
 
 FAILED=0
 LINES=()

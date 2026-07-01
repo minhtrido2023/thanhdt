@@ -28,8 +28,8 @@ PYEOF
 # Notify
 "$ROOT/bin/notify.sh" "🚀 GO-LIVE V2.4 — 2026-07-01: SpaceX LIVE. bot_execute sẽ khởi động lúc 09:05 ICT." 2>/dev/null || true
 
-_tid="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
-[ -n "${_tid:-}" ] && "$ROOT/bin/notify_thread.sh" "🚀 **GO-LIVE V2.4** — 2026-07-01 SpaceX LIVE. bot_execute khởi động 09:05 ICT (cron). Theo dõi log: logs/run_bot_SpaceX_2026-07-01.log" "$_tid" 2>/dev/null || true
+_tid="1521470705563340910"  # Trading Daily thread
+"$ROOT/bin/notify_thread.sh" "🚀 **GO-LIVE V2.4** — 2026-07-01 SpaceX LIVE. bot_execute khởi động 09:05 ICT (cron). Theo dõi log: logs/run_bot_SpaceX_2026-07-01.log" "$_tid" 2>/dev/null || true
 
 "$ROOT/bin/append_event.sh" Mike decision "golive-executed-2026-07-01" \
   '{"summary":"SpaceX enabled=true verified, bot_execute via cron 09:05 ICT","account":"0002023347","date":"2026-07-01"}' || true

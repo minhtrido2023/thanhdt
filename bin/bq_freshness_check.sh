@@ -28,8 +28,8 @@ FAILED=0
 WORKDIR="${WORKDIR_8L:-/home/trido/thanhdt/WorkingClaude}"
 PY="${DNA_PYEXE:-python3}"
 
-# Discord channels (giờ Việt Nam — ICT)
-DISCORD_STALE_CHANNEL="1521181579408572536"   # EOD alert channel (stale / lỗi)
+# Discord: Trading Daily thread — mọi nội dung giao dịch hàng ngày gộp về 1 topic.
+DISCORD_STALE_CHANNEL="1521470705563340910"
 
 _check() {
   local label="$1" table="$2" col="$3" max_lag_days="$4" lag_unit="$5"
