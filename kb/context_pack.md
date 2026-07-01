@@ -1,16 +1,16 @@
-# Mike fleet — context pack (v657)
+# Mike fleet — context pack (v658)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-01T05:48:28] Taylor/finding — extreme-regime backtest (Step1): {"job": "Taylor_20260701_052919", "step": "1 of 3 — backtest validation", "topic": "EXTREME execution regime gate", "data": "vnstock VCI 15m intraday, 18 Tier-1 …
-- [2026-07-01T05:55:25] quant-skeptic/verification — VERIFY: extreme-regime backtest (Step1): {"finding_topic": "extreme-regime backtest (Step1)", "verdict": "INCONCLUSIVE", "confidence": "medium", "checks": {"look_ahead_leak": "pass — no profit_*/O*/Pat …
-- [2026-07-01T05:58:06] Taylor/finding — extreme-regime backtest (Step1 Rev2): {"job": "Taylor_20260701_052919", "rev": 2, "addresses": "quant-skeptic INCONCLUSIVE audit gaps", "fixes": ["NaN 23:45 pad-bar dropped → down-day filter fires → …
 - [2026-07-01T06:01:10] Taylor/finding — extreme-regime backtest Rev2 (audit gaps closed): {"job": "Taylor_20260701_052919", "step": "1 of 3 — backtest validation (Rev2, post quant-skeptic)", "topic": "EXTREME execution regime gate", "supersedes": "ex …
 - [2026-07-01T06:01:19] quant-skeptic/verification — VERIFY: extreme-regime backtest (Step1 Rev2): {"finding_topic": "extreme-regime backtest (Step1 Rev2)", "verdict": "CONFIRMED", "confidence": "high", "checks": {"look_ahead_leak": "pass — replay uses only s …
 - [2026-07-01T06:03:38] quant-skeptic/verification — VERIFY: extreme-regime backtest Rev2 (audit gaps closed): {"finding_topic": "extreme-regime backtest Rev2 (audit gaps closed)", "verdict": "CONFIRMED", "confidence": "medium", "checks": {"look_ahead_leak": "pass — no p …
 - [2026-07-01T06:12:21] Taylor/decision — extreme-regime gate CODED default-OFF (3-step complete): {"job": "Taylor_20260701_052919", "step": "2+3 of 3 — verify CONFIRMED + code", "verify": {"verdict": "CONFIRMED", "confidence": "medium", "note": "Rev2 closed  …
 - [2026-07-01T08:01:55] Taylor/finding — trading_bot/config.py head: {"job": "Taylor_20260701_080017", "file": "trading_bot/config.py", "first_3_lines": ["# -*- coding: utf-8 -*-", "\"\"\"Cấu hình bot — đọc/ghi data/trading_bot_c …
+- [2026-07-01T08:17:38] Mike/decision — eod-trading-report-added: {"summary": "Thêm bước EOD trading report vào workflow ngày trading (SpaceX). Script bin/eod_trading_report.sh: tổng lệnh, mua/ban, gia khop thuc, tong gia tri  …
+- [2026-07-01T08:19:19] Mike/decision — eod-report-cron-live: {"summary": "Cron 15:00 ICT eod_trading_report.sh da len lich (T2-T6). Note: commit executor.py fix trong repo WorkingClaude vo tinh gop chung code EXTREME-regi …
+- [2026-07-01T08:38:50] Taylor/decision — EXTREME-regime gate PAPER-TRADING started (user-approved): {"job": "Taylor_20260701_083148", "action": "paper-trading window OPENED — extreme_regime_enabled=True PAPER-ONLY", "user_approval": "direct in-session 2026-07- …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -22,6 +22,7 @@
 - **AlphaLens Paper**: FPT/ACB/MBB/HDB, tracking vs VNINDEX đến 2026-09-30. DollarBill phụ trách.
 
 ## Đang R&D
+- **Taylor · EXTREME-regime gate PAPER-TRADING** (bắt đầu 2026-07-01, user duyệt trực tiếp): `extreme_regime_enabled=True` CHỈ trên account paper `main` (override trong `trading_bot_accounts.json`); global default + SpaceX/live GIỮ `False`. Week-1 stress-injection PASS 24/24 (`stress_extreme_regime.py`: arm 2-poll · sell-to-floor · buy-pause · cadence ×0.25 + negative controls). **Target kết thúc ~2026-07-28 (~20 phiên).** 3 điều kiện còn lại trước LIVE: (a) ZERO false-trigger qua ~4 tuần benign, (b) không can thiệp NORMAL-path, (c) user sign-off. **KHÔNG bật gì ở live.**
 - **Taylor**: sector sweep #10+ (chờ Mike dispatch)
 - **Taylor**: fill-timing review `execution_quality_review.py` (kết quả 2026-06-30 chưa xử lý — cần chạy)
 - **V2.5**: R&D-complete, DISABLED. Reminder: 2026-07-07 Mike hỏi user go-ahead integration.
@@ -29,12 +30,24 @@
 ## Chờ user quyết định
 - V2.5 live-recommend integration: **2026-07-07** (trigger tự động)
 
-## Cron quan trọng (ICT)
+## Workflow ngày trading (SpaceX, T2-T6, giờ ICT)
+1. **17:30** — `bq_freshness_check.sh`: BQ fresh → dispatch DollarBill lập plan T+1
+2. **19:30** — `send_plan_report.sh`: gửi plan T+1 vào Trading Daily thread (duyệt trước 08:45 sáng mai)
+3. **08:45** — `preflight_check.sh`: kiểm tra sẵn sàng trước giờ mở cửa (GREEN/RED)
+4. **09:05** — `run_bot.sh --auto-otp`: thực thi plan (phiên sáng)
+5. **09:00-14:55** — `bot_heartbeat.sh` mỗi 5': giám sát liveness + digest fill mới
+6. **11:30** — dừng bot giờ nghỉ trưa
+7. **13:00** — `run_bot.sh --auto-otp`: resume phiên chiều
+8. **~14:50** — phiên đóng (ATC), bot tự cancel lệnh treo, ghi `exec_*_report.md`
+9. **15:00** — `eod_trading_report.sh`: **báo cáo tổng kết EOD** (thêm 2026-07-01) — đọc `state.json`
+   (giá khớp thực từng lệnh), tính tổng lệnh/mua-bán/khớp đủ-một phần-chưa khớp/tổng giá trị VND,
+   post vào Trading Daily thread.
+
+Toàn bộ notify của chuỗi trên gộp về **1 Discord thread — Trading Daily (1521470705563340910)**.
+
+## Cron quan trọng khác (ICT)
 | Giờ | Lịch | Việc |
 |---|---|---|
-| 09:05 | T2-T6 | `run_bot.sh --auto-otp` — thực thi plan |
-| 17:30 | T2-T6 | BQ freshness check → DollarBill lập plan T+1 |
-| 19:30 | T2-T6 | send_plan_report.sh → Telegram + Discord |
 | 23:45 | T2-T6 | sync_bq_cache_daily.sh |
 | 02:00 | Daily | kb_nightly.sh — archive events, trim memory |
 | 02:00 | Thứ 6 | kb_nightly.sh → dispatch Mike editorial KB review |
@@ -85,6 +98,9 @@ pbcombo dual-vehicle (Calmar 1.48→1.37); gq_score growth gate (−IC); composi
 - BQ Local Cache (DuckDB, threads=1): `data/bq_cache/`, ~100ms vs 5-15s BQ. Sync 23:45 ICT.
 - Auto-OTP Gmail: `gmail_otp_reader.py` dùng `internalDate` filter (KHÔNG `newer_than`).
 - PHS: **BLOCKED** (lỗi -700003, chờ credential) → paper only.
+- **Workflow ngày trading đầy đủ** (T2-T6): BQ freshness(17:30) → plan T+1(19:30) → preflight(08:45)
+  → execute sáng(09:05) → resume chiều(13:00) → **EOD report(15:00, `eod_trading_report.sh`, thêm
+  2026-07-01)**. Toàn bộ post vào 1 Discord thread — Trading Daily (1521470705563340910).
 
 ### Kiến trúc fleet
 - Companion daemon: **Mike + Taylor** only. Bill/Mafee headless on-demand.
