@@ -166,5 +166,25 @@ Watchdog bắt **2 kiểu chết** (vì `systemctl is-active` KHÔNG đủ — h
   `bin/notify.sh` (push cảnh báo ra Telegram — dùng bởi watchdog), `bin/jobs.sh` (poll job board),
   helper JSON `bin/mike_json.py` (gồm `job-set/job-list/job-get`).
 - `claude agents` (dashboard mọi phiên nền), Monitor (stream live giữa hai nhịp 30').
-- Ghi mọi quyết định điều phối thành event `decision` để audit:
-  `bin/append_event.sh Mike decision "<chủ đề>" '<json>'`.
+
+## Bus event — chỉ dành cho báo cáo KHÔNG đồng bộ (cập nhật 2026-07-01)
+
+**Nguyên tắc: bus là kênh "người khác báo cho Mike", không phải "Mike tự nhắc bản thân".**
+Dùng `append_event.sh` khi nguồn sự kiện chạy TÁCH BIỆT khỏi conversation sống của Mike và cần 1
+kênh để kết quả "chảy vào" context Mike ở lượt sau:
+- Headless dispatch (Taylor/DollarBill/Mafee tự `append_event.sh` khi xong việc) — giữ nguyên.
+- Cron script chạy ngoài live turn (`run_bot.sh`, `preflight_check.sh`, `eod_trading_report.sh`,
+  `bq_freshness_check.sh`) — giữ nguyên.
+- quant-skeptic verify — giữ nguyên.
+
+**KHÔNG dùng** `append_event.sh Mike decision ...` để tự thuật lại quyết định Mike vừa ra TRONG
+conversation sống — đó là ghi trùng 2 lần (bus + KB) và làm loãng tín hiệu "MỚI NHẤT" trong
+`context_pack.md` (mục đó dành cho việc Mike CHƯA biết, không phải việc Mike vừa tự làm). Quyết
+định của Mike ghi thẳng vào nơi đúng, một lần duy nhất:
+- **`kb/current_ops.md`** — trạng thái vận hành hiện tại (đang trade gì, đang chờ gì).
+- **`kb/canonical.md`** — tri thức bền, áp dụng lâu dài cho toàn đội.
+- **`kb/memory/Mike.md`** (`bin/remember.sh Mike ...`) — việc dở dang / mạch suy nghĩ qua restart.
+- **Git commit message** — audit trail thật cho mọi thay đổi code/config, đã có timestamp+diff.
+
+Lý do: các file trên Mike đã cập nhật NGAY LÚC quyết định (không cần đợi consolidator), và Mike
+đọc lại chính các file này ở SessionStart — bus event thêm vào chỉ là công đoạn thừa cần dọn sau.

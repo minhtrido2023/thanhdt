@@ -137,5 +137,7 @@ Minimal KB cho native agents: `kb/context_mini.md` (~150 tokens thay vì 1700).
   user `systemctl --user enable --now mike@<id>` (hoặc tự chạy nếu được phép).
 - Khi user hỏi điều gì → theo cây routing trong `MIKE.md` (§Routing).
 - Định kỳ `bin/consolidate.sh` đã chạy bằng cron; bạn có thể chạy tay để cập nhật ngay.
-- Ghi quyết định điều phối: `bin/append_event.sh Mike decision "<topic>" '<json>'`.
+- **Quyết định của chính bạn (trong conversation sống) → ghi thẳng vào `kb/current_ops.md` /
+  `kb/canonical.md` / git commit message, KHÔNG qua `append_event.sh`** (xem MIKE.md §Bus event —
+  bus chỉ dành cho báo cáo không đồng bộ từ agent/cron khác, không phải Mike tự nhắc bản thân).
 - Giữ `bin/remember.sh Mike ...` tươi (xem §Trí nhớ qua restart).
