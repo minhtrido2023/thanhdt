@@ -248,7 +248,8 @@ if [ "$bg" = "--bg" ]; then
     JSET status="$fstatus" ended_at="$(date +%s)" exit_code="$rc" result_summary="$(SUMMARY)"
     "$ROOT/bin/consolidate.sh" >> "$ROOT/logs/consolidator.log" 2>&1 || true
     "$ROOT/bin/notify.sh" "[dispatch] $id $why sau $max_attempts lần (job $job_id) — xem $logfile" 2>/dev/null || true
-    local _tid; _tid="${DISCORD_THREAD_ID:-$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)}"
+    local _tid; _tid="${DISCORD_THREAD_ID:-$(_agent_thread_override "$id")}"
+    [ -n "$_tid" ] || _tid="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
     if [ -n "$_tid" ]; then
       "$ROOT/bin/notify_thread.sh" "❌ **$id** $why (job \`${job_id}\`). Xem log: $logfile" "$_tid" 2>/dev/null || true
     fi
@@ -274,7 +275,8 @@ if [ "$bg" = "--bg" ]; then
   echo "Theo dõi: $ROOT/bin/jobs.sh status $job_id | Khi xong: auto consolidate + Telegram notify."
   echo "$pid" > "$ROOT/logs/.dispatch_${id}_${ts}.pid"
   # Immediate Discord notify so user sees task is in flight (don't wait for watcher heartbeat)
-  { _dtid="${DISCORD_THREAD_ID:-$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)}"
+  { _dtid="${DISCORD_THREAD_ID:-$(_agent_thread_override "$id")}"
+    [ -n "$_dtid" ] || _dtid="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
     if [ -n "${_dtid:-}" ]; then
       _dp="$(printf '%s' "$prompt" | head -c 120 | tr '\n\t' '  ')"
       "$ROOT/bin/notify_thread.sh" "🚀 **$id** nhận việc (job \`$job_id\`): $_dp… Sẽ notify khi xong." "$_dtid" 2>/dev/null || true

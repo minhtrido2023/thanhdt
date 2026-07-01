@@ -28,7 +28,13 @@
    (giá khớp thực từng lệnh), tính tổng lệnh/mua-bán/khớp đủ-một phần-chưa khớp/tổng giá trị VND,
    post vào Trading Daily thread.
 
-Toàn bộ notify của chuỗi trên gộp về **1 Discord thread — Trading Daily (1521470705563340910)**.
+**2 Discord thread tách biệt (chốt 2026-07-01):**
+- **Trading Daily (1521470705563340910)** — nội dung NGÀY THỰC THI: preflight, run_bot, heartbeat,
+  EOD report, BQ freshness.
+- **DollarBill plan channel (1521183164364754974)** — riêng cho việc LẬP KẾ HOẠCH của DollarBill
+  (`send_plan_report.sh`, và mọi `dispatch.sh DollarBill ...` khác dù cron hay ad-hoc). Root cause
+  thread-leak (dispatch notify theo thread Mike đang active) đã fix ở tầng `dispatch.sh` qua hàm
+  `_agent_thread_override` — route CỐ ĐỊNH cho DollarBill bất kể Mike gọi từ topic nào.
 
 ## Cron quan trọng khác (ICT)
 | Giờ | Lịch | Việc |

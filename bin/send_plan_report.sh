@@ -12,8 +12,9 @@ WORKDIR="${WORKDIR_8L:-/home/trido/thanhdt/WorkingClaude}"
 TODAY="$(date +%Y-%m-%d)"
 NOW_ICT="$(TZ='Asia/Ho_Chi_Minh' date +'%H:%M ICT')"
 
-# Discord: Trading Daily thread — mọi nội dung giao dịch hàng ngày gộp về 1 topic.
-DISCORD_PLAN_CHANNEL="1521470705563340910"
+# Discord: DollarBill trading-plan channel — tách riêng khỏi Trading Daily (2026-07-01,
+# user chỉ đạo) để tránh spam các topic khác khi Mike dispatch DollarBill từ bất kỳ đâu.
+DISCORD_PLAN_CHANNEL="1521183164364754974"
 
 # Tìm plan file mới nhất (Bill ghi vào data/plan_SpaceX_<date>.json)
 PLAN_FILE="$(ls -t "$WORKDIR"/data/plan_SpaceX_*.json 2>/dev/null | head -1)"
