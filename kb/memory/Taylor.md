@@ -22,3 +22,4 @@
 - Fresh-high-SUE / d_NPR / SUE-tilt / pbcombo / hold-neutral / MGE2.0 / liq-tilt / deep-discount / stability-floor / gq_score / fair-value: TẤT CẢ REJECTED. Giữ LAG binary as-is.
 - Rating audit: HVN documented exception, stability floor REJECTED (−0.45pp). Giữ nguyên production.
 - Bootstrap robustness: tool = `bootstrap_nav.py`; chạy SAU walk-forward TRƯỚC wire, KHÔNG screen mọi biến thể.
+- [2026-07-01T06:12:21Z] EXTREME-regime exec gate: 3-step DONE (backtest CONFIRMED, coded default-OFF, self-check 14/14). NEXT: paper-test 4wk flag-ON in PAPER only + week-1 synthetic injection; LIVE enable needs USER duyet. Code: config.py+executor.py (extreme_regime_enabled=False). Files: extreme_regime_selfcheck.py, extreme_replay.py, data/extreme_regime_backtest.md.
