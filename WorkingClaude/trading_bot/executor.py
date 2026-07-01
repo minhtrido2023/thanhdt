@@ -81,6 +81,9 @@ class Executor:
         self._gap_z_cache = {}  # ticker -> gap_z or None (None = fail-safe, no override)
         self._last_gap_override = {}  # ticker -> gap_z; populated when override fires this tick
         self._extreme_state = {}      # ticker -> {"n": confirm-count, "until": iso}; EXTREME-regime gate
+        self._extreme_cache = {}      # (ticker, now) -> bool; memoise _extreme_regime_raw so a
+                                       # cycle where BOTH _cancel_stale (via _would_be_unchanged)
+                                       # AND _place_slices ask only mutates the 2-poll counter once
         self._load_gap_ref_data()
         self.state = self._load_state()
         self._step_fail_count = 0   # consecutive STEP_FAIL counter for escalation
@@ -93,11 +96,14 @@ class Executor:
                 st = json.load(f)
             if st.get("plan_created_at") == self.plan.created_at:
                 print(f"[exec:{self.label}] resume từ {self.state_file}")
+                st.setdefault("exchange_override", {})  # state cũ (trước fix) chưa có key này
                 return st
             print(f"[exec:{self.label}] ⚠ plan đã đổi so với state cũ — state mới")
         return {"plan_date": self.plan.plan_date,
                 "plan_created_at": self.plan.created_at,
                 "px_hist": {},          # ticker -> [[ts, last], …] phục vụ r15 (dip-cross)
+                "exchange_override": {},  # ticker -> "HOSE"|"HNX" học được sau 1 lần bị từ chối
+                                          # tick-size (xem _is_invalid_tick_lot + _place_slices)
                 "parents": {o.id: {"filled": 0, "done": False, "atc_sent": False,
                                    "children": [], "last_slice_ts": None}
                             for o in self.plan.orders}}
@@ -247,7 +253,7 @@ class Executor:
         extreme=True (EXTREME-regime SELL only): nới sàn đuổi từ ref×(1−3%) xuống thẳng
         q.floor để bán tới sàn (thoát dứt điểm) thay vì nằm kẹt tại −3% khi giá gap thủng.
         """
-        ex = q.exchange or "HOSE"
+        ex = self.state.get("exchange_override", {}).get(o.ticker) or q.exchange or "HOSE"
         last = q.last or q.ref or o.ref_price
         tick = tick_size(last, o.ticker, ex)
         if o.side == "buy":
@@ -275,6 +281,45 @@ class Executor:
             if q.ceiling:
                 px = min(px, q.ceiling)
         return px if px and px > 0 else None
+
+    @staticmethod
+    def _is_invalid_tick_lot(e):
+        """True nếu lỗi broker là do giá không đúng bước giá (tick), KHÔNG phải lý do khác
+        (hết tiền, sai mã, mất phiên...). Xác nhận thật từ log live 2026-07-01 (SHS/MBS):
+        DNSE trả 'HTTP 400: Invalid price lot' khi giá tính theo bước giá HOSE (10/50/100 theo
+        vùng giá) bị áp nhầm cho mã HNX/UPCOM (bước giá cố định 100đ) hoặc ngược lại."""
+        if getattr(e, "status", None) != 400:
+            return False
+        return "price lot" in str(e).lower() or "invalid price" in str(e).lower()
+
+    def _retry_tick_mismatch(self, o, q, cross, extreme_down, px, qty, err):
+        """Khi place_order lỗi vì SAI BƯỚC GIÁ (xem `_is_invalid_tick_lot`): thử lại NGAY MỘT
+        LẦN với quy ước bước giá còn lại (HOSE↔HNX/UPCOM — UPCOM dùng chung tick cố định 100đ
+        với HNX nên chỉ cần đảo 2 chiều). Không tự đoán/khẳng định `exchange` thật của DNSE trả
+        về gì — chỉ suy ra từ chính phản hồi CÓ THẬT của broker, không look-ahead, không giả định.
+        Thành công → cache lại exchange đúng cho mã này (self.state, bền qua resume) để các lần
+        sau tính đúng ngay từ đầu, không cần thử-sai lại. Trả (oid, px_mới) hoặc None nếu không
+        áp dụng/không sửa được (caller giữ nguyên PLACE_FAIL cũ, không đổi hành vi)."""
+        if not self._is_invalid_tick_lot(err):
+            return None
+        overrides = self.state.setdefault("exchange_override", {})
+        if o.ticker in overrides:
+            return None   # đã học rồi mà vẫn lỗi → không phải do tick, đừng thử vòng lặp vô hạn
+        ex_used = q.exchange or "HOSE"
+        ex_alt = "HNX" if ex_used == "HOSE" else "HOSE"
+        overrides[o.ticker] = ex_alt          # tạm học để _limit_price dùng ngay bước giá thay thế
+        px_alt = self._limit_price(o, q, cross, extreme=extreme_down)
+        if px_alt is None or px_alt == px:
+            overrides.pop(o.ticker, None)
+            return None
+        try:
+            oid = self.broker.place_order(o.ticker, qty, o.side, price=px_alt)
+        except Exception:
+            overrides.pop(o.ticker, None)     # vẫn lỗi ở exchange thay thế → không phải do tick, bỏ học
+            return None
+        self._journal("TICK_RETRY_OK", o, oid, qty, px_alt,
+                      note=f"'{ex_used}' tick sai ({err}) → thử '{ex_alt}' OK, cache lại cho {o.ticker}")
+        return oid, px_alt
 
     def _child_qty(self, o, ps, q, px):
         remaining = o.qty - ps["filled"]
@@ -325,6 +370,33 @@ class Executor:
                 ps["done"] = True
                 self._journal("DONE", o, note=f"khớp đủ {o.qty:,}")
 
+    def _would_be_unchanged(self, o, ps, c, now):
+        """True nếu huỷ lệnh con `c` ngay bây giờ rồi đặt lại (theo đúng logic _place_slices)
+        sẽ cho ra CÙNG giá + KL — khi đó huỷ+đặt-lại là vô nghĩa, chỉ mất ưu tiên FIFO.
+        Chỉ áp dụng khi lệnh con chưa khớp gì (an toàn: có fill rồi luôn refresh như cũ).
+        Lỗi bất kỳ → False (fail-safe: hành vi cũ, cứ huỷ)."""
+        if c.get("filled", 0) != 0:
+            return False
+        try:
+            q = self.broker.get_quote(o.ticker)
+            if q is None or not q.ok():
+                return False
+            extreme_down = self._extreme_regime(o, q, now)
+            if extreme_down and o.side == "buy":
+                return False  # sẽ chuyển EXTREME_PAUSE (không đặt gì) — khác hẳn, phải huỷ
+            cross, _ = self._decide_cross(o, now, q)
+            if extreme_down:
+                cross = True
+            px = self._limit_price(o, q, cross, extreme=extreme_down)
+            if px is None:
+                return False
+            qty = self._child_qty(o, ps, q, px)
+            if qty < LOT:
+                return False
+            return px == c["price"] and abs(qty - c["qty"]) < LOT
+        except Exception:
+            return False
+
     def _cancel_stale(self, now):
         max_age = self.cfg["slice_interval_min"] * 60
         for o in self.plan.orders:
@@ -334,6 +406,11 @@ class Executor:
                 continue
             age = (now - dt.datetime.fromisoformat(c["ts"])).total_seconds()
             if age > max_age * self._extreme_slice_mult(o, now):  # ×1.0 khi OFF (byte-identical)
+                if self._would_be_unchanged(o, ps, c, now):
+                    c["ts"] = now.isoformat(timespec="seconds")  # reset đồng hồ tuổi, GIỮ NGUYÊN lệnh
+                    self._journal("REFRESH_SKIP", o, c["oid"], c["qty"], c["price"],
+                                  note=f"giá/KL không đổi sau {age/60:.0f}p — giữ FIFO, không huỷ")
+                    continue
                 try:
                     self.broker.cancel_order(c["oid"])
                     c["status"] = "cancelled"
@@ -451,6 +528,16 @@ class Executor:
             return 1.0 if ws <= t < we else mult
 
     def _extreme_regime(self, o, q, now):
+        """Wrapper memoize theo (ticker, now) quanh `_extreme_regime_raw` — trong 1 chu kỳ step(),
+        cả `_would_be_unchanged` (qua _cancel_stale) LẪN `_place_slices` đều cần biết trạng thái
+        EXTREME; nếu gọi thẳng hàm mutating bên dưới 2 lần sẽ đếm-đôi bộ đếm 2-poll-confirm (kích
+        chỉ sau 1 chu kỳ thay vì 2, phá vỡ debounce chống nhiễu). Chỉ tính THẬT 1 lần/(ticker, now)."""
+        key = (o.ticker, now)
+        if key not in self._extreme_cache:
+            self._extreme_cache[key] = self._extreme_regime_raw(o, q, now)
+        return self._extreme_cache[key]
+
+    def _extreme_regime_raw(self, o, q, now):
         """EXTREME_DOWN gate (proposal §3c) — ADDITIVE, gated by extreme_regime_enabled (default OFF).
 
         Trả True chỉ khi mã đang trong nhịp GIẢM bất thường đã xác nhận:
@@ -458,6 +545,7 @@ class Executor:
           (ii) r15 giảm mạnh hơn extreme_move_z × rvol_20d (rvol lấy từ _gap_ref nếu đã nạp).
         Cần 2 poll liên tiếp xác nhận mới kích; đã kích thì giữ active extreme_cooldown_min phút
         (debounce nhiễu). Fail-safe: thiếu dữ liệu → False (NORMAL). Không bao giờ raise.
+        Gọi qua wrapper `_extreme_regime` — KHÔNG gọi trực tiếp (tránh đếm-đôi, xem docstring trên).
         """
         if not self.cfg.get("extreme_regime_enabled", False):
             return False
@@ -547,8 +635,11 @@ class Executor:
             try:
                 oid = self.broker.place_order(o.ticker, qty, o.side, price=px)
             except Exception as e:
-                self._journal("PLACE_FAIL", o, qty=qty, price=px, note=str(e))
-                continue
+                retry = self._retry_tick_mismatch(o, q, cross, extreme_down, px, qty, e)
+                if retry is None:
+                    self._journal("PLACE_FAIL", o, qty=qty, price=px, note=str(e))
+                    continue
+                oid, px = retry
             ps["children"].append({"oid": oid, "qty": qty, "price": px, "filled": 0,
                                    "status": "open",
                                    "ts": now.isoformat(timespec="seconds")})
