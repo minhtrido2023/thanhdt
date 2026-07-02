@@ -19,17 +19,39 @@ Giết process giữa chừng vô hại — chạy lại là resume từ state �
 
 import argparse
 import datetime as dt
+import fcntl
 import json
+import os
 import sys
 
 if hasattr(sys.stdout, "reconfigure"):  # console Windows cp1252 → utf-8
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
-from trading_bot.config import load_config, load_accounts, pick_accounts
+from trading_bot.config import load_config, load_accounts, pick_accounts, EXEC_DIR
 from trading_bot.brokers import make_broker, get_quote_source, get_dnse_client
 from trading_bot.plan import load_plan
 from trading_bot.executor import Executor, run_session
+
+_LOCK_HANDLES = []  # giữ sống file descriptor để lock tồn tại suốt vòng đời process
+
+
+def _acquire_account_lock(label, plan_date):
+    """Khoá độc quyền per (account, plan_date) — chống 2 tiến trình bot_execute.py cùng
+    chạy 1 account/ngày (vd heartbeat autoheal đua với cron đúng giờ, 2026-07-02: cả 2
+    process cùng khớp đủ toàn bộ plan độc lập → mua GẤP ĐÔI mọi lệnh, tài khoản âm tiền).
+    Trả True nếu giữ được khoá (tiếp tục chạy); False nếu process khác đang giữ (bỏ qua
+    account này, KHÔNG phải lỗi — tiến trình kia đang xử lý đúng rồi)."""
+    os.makedirs(EXEC_DIR, exist_ok=True)
+    path = os.path.join(EXEC_DIR, f"exec_{label}_{plan_date}.lock")
+    f = open(path, "a")
+    try:
+        fcntl.flock(f.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        f.close()
+        return False
+    _LOCK_HANDLES.append(f)  # không đóng — giữ khoá tới khi process thoát
+    return True
 
 
 def parse_otp(items):
@@ -118,6 +140,10 @@ def main():
             continue
         if not plan.orders:
             print(f"[{p['label']}] plan {plan_date} không có lệnh — bỏ qua")
+            continue
+        if not _acquire_account_lock(p["label"], plan_date):
+            print(f"[{p['label']}] ⚠ đã có tiến trình bot_execute.py khác đang xử lý "
+                  f"{plan_date} (lock đang giữ) — bỏ qua, KHÔNG chạy trùng.")
             continue
         otp = otp_by_label.get(p["label"], otp_common)
         if cfg["mode"] == "live" and otp is None and not args.auto_otp:
