@@ -54,6 +54,7 @@ def _publish_bot_event(event_type: str, topic: str, payload: dict) -> None:
     except Exception:
         pass
 from .vn_market import session_phase, tick_size, round_price, round_lot, LOT
+from .brokers import qget
 
 _GAP_Z_DOWN_THRESHOLD = -2.0  # gap_z < this on a BUY → full-speed 09:15-09:45
 
@@ -131,8 +132,16 @@ class Executor:
                 self.shared[ticker] = self.shared.get(ticker, 0) - unfilled
 
     def _save_state(self):
-        with open(self.state_file, "w", encoding="utf-8") as f:
+        # Atomic write (tmp + os.replace): _save_state() now runs far more often (right
+        # after every place_order, not just once per cycle — see _ghost_tickers), so a
+        # kill mid-write is more likely to be hit; a direct overwrite could truncate
+        # state.json exactly when the idempotency guard needs it most. os.replace is a
+        # single atomic rename on POSIX — readers always see either the old or new file,
+        # never a partial one.
+        tmp = self.state_file + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
             json.dump(self.state, f, indent=2, ensure_ascii=False)
+        os.replace(tmp, self.state_file)
 
     def _journal(self, event, o=None, child_oid="", qty="", price="", note=""):
         new = not os.path.exists(self.journal_file)
@@ -385,6 +394,42 @@ class Executor:
                 ps["done"] = True
                 self._journal("DONE", o, note=f"khớp đủ {o.qty:,}")
 
+    def _ghost_tickers(self, updates):
+        """Idempotency guard — 2nd independent defense beyond fcntl.flock (added sau sự cố
+        double-buy 2026-07-02: 2 process cùng khớp đủ 1 plan độc lập vì flock lúc đó chưa có).
+        flock (bot_execute.py._acquire_account_lock) chặn 2 process CÙNG CHẠY; nhưng nếu process
+        bị kill NGAY SAU broker.place_order() thành công nhưng TRƯỚC _save_state() kịp ghi (ví dụ
+        OOM-kill/crash/reboot), lệnh đó tồn tại thật ở broker nhưng state.json không biết —
+        lần chạy kế tiếp (dù chạy tuần tự, giữ lock đàng hoàng) sẽ đặt lệnh MỚI cho phần "còn
+        thiếu" và double-buy lại, DNSE không hỗ trợ client idempotency-key nên không thể nhờ
+        broker dedupe hộ.
+
+        Vì vậy: mỗi step() đối chiếu sổ lệnh broker sống (updates = poll_orders(), gồi TOÀN BỘ
+        lệnh trong ngày, không chỉ oid đã biết) với oid đã ghi trong state. Mã nào có lệnh
+        broker KHÔNG nằm trong state (và lệnh đó có filled>0 hoặc còn sống — lệnh chết/0 fill an
+        toàn bỏ qua) → trả về NGAY, KHÔNG tự suy đoán rồi gộp vào state (nguy cơ map sai field
+        broker → filled/price sai còn tệ hơn); _place_slices/_atc_sweep phải TẠM DỪNG mã đó và
+        báo người thật xử lý — cùng triết lý fail-safe-pause với WAIT_CASH/WAIT_QUOTA.
+
+        UNPAUSE (thủ công, không có auto-resume — đúng chủ đích, human-in-the-loop): mã bị pause
+        sẽ đứng cả ngày cho tới khi người thật thêm oid "ma" đó vào state["parents"][id]["children"]
+        của mã tương ứng (đối soát bằng dnse_raw_<date>.jsonl hoặc broker.poll_orders() trực tiếp,
+        rồi sửa exec_<label>_<date>_state.json tay hoặc script đối soát), sau đó _ghost_tickers sẽ
+        không còn thấy oid đó "lạ" nữa ở chu kỳ kế tiếp. Không tự resume vì auto-reconcile rủi ro
+        map sai field hơn là mất 1 ngày không mua/bán thêm mã đó."""
+        known_oids = {c["oid"] for ps in self.state["parents"].values() for c in ps["children"]}
+        plan_tickers = {o.ticker for o in self.plan.orders}
+        ghosts = set()
+        for oid, u in updates.items():
+            if oid in known_oids:
+                continue
+            if u.filled_qty <= 0 and u.is_dead:
+                continue  # chết, chưa khớp gì — không rủi ro tiền/CP, bỏ qua an toàn
+            sym = qget(u.raw, "symbol", "instrument", "code") if isinstance(u.raw, dict) else None
+            if sym in plan_tickers:
+                ghosts.add(sym)
+        return ghosts
+
     def _would_be_unchanged(self, o, ps, c, now):
         """True nếu huỷ lệnh con `c` ngay bây giờ rồi đặt lại (theo đúng logic _place_slices)
         sẽ cho ra CÙNG giá + KL — khi đó huỷ+đặt-lại là vô nghĩa, chỉ mất ưu tiên FIFO.
@@ -606,12 +651,14 @@ class Executor:
             return self.cfg.get("extreme_slice_mult", 0.25)
         return 1.0
 
-    def _place_slices(self, now, phase):
+    def _place_slices(self, now, phase, ghost_tickers=()):
         base_interval = self.cfg["slice_interval_min"] * 60
         for o in sorted(self.plan.orders, key=lambda x: x.priority):
             ps = self.state["parents"][o.id]
             if ps["done"] or self._open_child(ps):
                 continue
+            if o.ticker in ghost_tickers:
+                continue  # idempotency guard — xem _ghost_tickers
             # Populate gap_z cache before interval decision (gap_adaptive BUY only)
             if (o.side == "buy" and self.cfg.get("gap_adaptive_enabled", False)
                     and o.ticker not in self._gap_z_cache
@@ -672,12 +719,18 @@ class Executor:
                                  "nằm chờ tại trần đuổi" if capped else "",
                                  gap_note, ft_note) if n]
             self._journal("PLACE", o, oid, qty, px, note="; ".join(notes))
+            # Idempotency: ghi state NGAY sau khi broker xác nhận đặt lệnh, không đợi hết
+            # step() mới lưu — thu hẹp cửa sổ "lệnh đã đặt nhưng state chưa biết" (từ cả
+            # 1 chu kỳ đa mã xuống 1 lần ghi JSON) nếu process bị kill giữa chừng.
+            self._save_state()
 
-    def _atc_sweep(self):
+    def _atc_sweep(self, ghost_tickers=()):
         for o in self.plan.orders:
             ps = self.state["parents"][o.id]
             if ps["done"] or ps["atc_sent"]:
                 continue
+            if o.ticker in ghost_tickers:
+                continue  # idempotency guard — xem _ghost_tickers
             flag = (self.cfg["atc_remainder_sell"] if o.side == "sell"
                     else self.cfg["atc_remainder_buy"])
             if not flag:
@@ -701,6 +754,7 @@ class Executor:
                                        "ts": dt.datetime.now().isoformat(timespec="seconds")})
                 ps["atc_sent"] = True
                 self._journal("ATC", o, oid, remaining, note="quét ATC phần còn lại")
+                self._save_state()  # idempotency: ghi ngay, xem note ở _place_slices
             except Exception as e:
                 self._journal("ATC_FAIL", o, note=str(e))
 
@@ -725,10 +779,31 @@ class Executor:
 
     def step(self, now, phase, cont):
         """Một chu kỳ cho account này. → True nếu mọi parent đã xong."""
+        ghost_tickers = set()
         try:
-            self._sync_fills(self.broker.poll_orders())
+            updates = self.broker.poll_orders()
+            self._sync_fills(updates)
+            ghost_tickers = self._ghost_tickers(updates)
+            for t in ghost_tickers - self.state.setdefault("_ghost_warned", {}).keys():
+                self.state["_ghost_warned"][t] = now.isoformat(timespec="seconds")
+                self._journal("GHOST_ORDER", note=f"{t}: lệnh broker không có trong state — "
+                                                   f"TẠM DỪNG mã này, cần người kiểm tra")
+                _publish_bot_event("error", "GHOST_ORDER_DETECTED", {
+                    "account": self.label, "ticker": t, "plan_date": self.plan.plan_date,
+                    "note": "Lệnh tồn tại ở broker nhưng state.json không biết (khả năng crash "
+                            "giữa place_order và _save_state). Bot ĐÃ TỰ DỪNG đặt lệnh mới cho "
+                            "mã này để tránh double-buy — cần đối soát tay rồi mới cho tiếp tục."
+                })
         except Exception as e:
+            # Fail-safe, NOT fail-open: poll_orders() is what the ghost guard depends on to
+            # see broker-side state. If it just errored, we have NO visibility this cycle —
+            # blindly proceeding with an empty ghost_tickers would silently bypass the guard
+            # (quant-skeptic killer objection, verify_finding.sh 2026-07-02). So on a poll
+            # failure, block placement for EVERY plan ticker this cycle (same skip path as a
+            # confirmed ghost) instead of assuming "no ghosts". _cancel_stale is unaffected
+            # (age-based, doesn't need fresh poll data); next cycle's poll retries normally.
             self._journal("POLL_FAIL", note=str(e))
+            ghost_tickers = {o.ticker for o in self.plan.orders}
         if self.all_done:
             self._save_state()
             return True
@@ -738,9 +813,9 @@ class Executor:
             self._journal("PX_HIST_FAIL", note=str(e))
         if cont:
             self._cancel_stale(now)
-            self._place_slices(now, phase)
+            self._place_slices(now, phase, ghost_tickers)
         elif phase == "ATC":
-            self._atc_sweep()
+            self._atc_sweep(ghost_tickers)
         self._save_state()
         return self.all_done
 

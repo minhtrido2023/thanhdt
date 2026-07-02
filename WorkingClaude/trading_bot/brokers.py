@@ -627,7 +627,12 @@ class PaperBroker(BrokerBase):
         for oid in list(self.state["open_orders"]):
             self._try_fill(oid)
         self._save()
-        return {oid: OrderUpdate(oid, o["status"], o["filled"], o.get("avg_price"))
+        # raw={"symbol": ...}: without it Executor._ghost_tickers() (executor.py) can
+        # never resolve a symbol for a paper order (qget(None, ...) -> None), so paper
+        # trading could never rehearse the idempotency guard — same shape as the real
+        # DNSEBroker.poll_orders(), which always sets raw to the full broker order row.
+        return {oid: OrderUpdate(oid, o["status"], o["filled"], o.get("avg_price"),
+                                 raw={"symbol": o["symbol"]})
                 for oid, o in self.state["open_orders"].items()}
 
     # ----- fill engine -----
