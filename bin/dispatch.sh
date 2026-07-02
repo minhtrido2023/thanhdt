@@ -267,7 +267,30 @@ if [ "$bg" = "--bg" ]; then
   # otherwise `out=$(dispatch.sh ... --bg)` would block until the job finishes (it
   # inherits fd1). The wrapper writes nothing to stdout (claude→logfile, notify/
   # consolidate self-redirect), so /dev/null is safe.
-  _bg_wrapper </dev/null >/dev/null 2>&1 &
+  #
+  # setsid: put the wrapper in its OWN session, detached from the caller's process
+  # group/controlling terminal. Without this, a plain `&` background job is still a
+  # child of the same session as whoever called dispatch.sh (e.g. Mike's own live
+  # Claude Code turn) — if THAT session dies/restarts (context compaction, crash,
+  # reconnect), the "background" job can die or become orphaned with it, leaving its
+  # job-board entry stuck at status=running forever (incident 2026-07-02: job
+  # Taylor_20260702_113418 died this way, 0-byte log, marked OVERDUE, required a
+  # fresh re-dispatch). setsid is the standard Unix daemonization primitive for this
+  # (see setsid(1); double-fork/detach pattern, Stevens "Advanced Programming in the
+  # UNIX Environment").
+  #
+  # setsid execs a COMMAND (execvp), not a shell function directly — so the function
+  # and every variable/function it closes over (JSET, SUMMARY, and the vars they use)
+  # must be exported and re-entered via `bash -c`. Verified empirically: a plain
+  # `setsid _bg_wrapper &` silently fails to find "_bg_wrapper" as a command.
+  export -f _bg_wrapper JSET SUMMARY
+  export ROOT JOBS_DIR job_id from id ts TIMEOUT RETRIES CLAUDE dispatch_prompt logfile prompt
+  if command -v setsid >/dev/null 2>&1; then
+    setsid bash -c '_bg_wrapper' </dev/null >/dev/null 2>&1 &
+  else
+    _bg_wrapper </dev/null >/dev/null 2>&1 &
+  fi
+  disown 2>/dev/null || true
   pid=$!
   # Watcher: milestone progress + anomaly detection (empty/stale log).
   _job_watcher "$job_id" "$from" "$id" "$logfile" </dev/null >/dev/null 2>&1 &
