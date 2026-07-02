@@ -177,6 +177,17 @@ lines.append(f"**Tổng giá trị giao dịch: {tot_value_filled/1e6:,.1f}M / k
              f"({fill_rate:.0f}%)**")
 
 print("\n".join(lines))
+
+# Ghi mismatch ra file máy-đọc-được (nếu có) để bash phía dưới quyết định có kích hoạt
+# kiểm toán độc lập hay không — tách khỏi text Discord để không phải parse markdown.
+mismatch_file = os.path.join(os.path.dirname(state_file), f'eod_mismatch_{account}_{plan_date}.json')
+if mismatches:
+    with open(mismatch_file, 'w', encoding='utf-8') as f:
+        json.dump({'account': account, 'plan_date': plan_date,
+                   'mismatches': [{'ticker': s, 'state_filled': i, 'broker_filled': r, 'diff': d}
+                                  for s, i, r, d in mismatches]}, f, ensure_ascii=False, indent=2)
+elif os.path.exists(mismatch_file):
+    os.remove(mismatch_file)  # ngày trước có lệch, hôm nay sạch -> dọn cờ cũ
 PYEOF
 )"
 
@@ -184,3 +195,23 @@ echo "$REPORT"
 "$ROOT/bin/notify_thread.sh" "$REPORT" "$TRADING_THREAD" 2>/dev/null || true
 "$ROOT/bin/append_event.sh" Mafee status "eod-trading-report" \
   "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\"}" 2>/dev/null || true
+
+# Phương án B (user duyệt 2026-07-02): kiểm toán độc lập CÓ ĐIỀU KIỆN — chỉ kích hoạt
+# risk-auditor khi đối soát cơ học phía trên đã phát hiện lệch, không chạy tốn kém mỗi
+# ngày. Dispatch headless (không phải Agent() — cron không có phiên Claude sống).
+MISMATCH_FILE="$WC_ROOT/data/execution_logs/eod_mismatch_${ACCOUNT}_${PLAN_DATE}.json"
+if [ -f "$MISMATCH_FILE" ]; then
+  _discord_thread="1521470705563340910"
+  "$ROOT/bin/notify_thread.sh" "🔍 Phát hiện lệch đối soát — tự động kích hoạt kiểm toán độc lập (risk-auditor)..." "$_discord_thread" 2>/dev/null || true
+  DISPATCH_FROM=Mafee "$ROOT/bin/dispatch.sh" Spyros \
+    "$(cat <<PROMPT
+EOD reconciliation vừa phát hiện LỆCH giữa state nội bộ và broker thật cho account $ACCOUNT ngày $PLAN_DATE (xem chi tiết: $MISMATCH_FILE). Bạn là risk-auditor — kiểm toán độc lập việc này:
+1. Đọc $MISMATCH_FILE để biết chính xác mã nào lệch bao nhiêu.
+2. Tự đối chiếu lại độc lập từ dnse_raw_${PLAN_DATE}.jsonl + state.json + plan gốc — xác nhận số liệu đúng như file mismatch báo, KHÔNG tin sẵn.
+3. Điều tra nguyên nhân khả dĩ: có process bot_execute.py chạy trùng không (kiểm tra log run_bot*/autoheal* quanh thời điểm), hay lý do khác (cancel/reprice, modify-order quirk DNSE, lỗi đồng bộ khác)?
+4. Đánh giá tác động: lệch làm portfolio vượt giới hạn trading_rules.json nào không (concentration, gross exposure)?
+5. Kết luận rõ: đây có phải sự cố NGHIÊM TRỌNG cần escalate ngay cho user, hay là sai lệch nhỏ/false-positive của chính cơ chế đối soát (vd do lệnh bị modify đổi order id, dedup sai)?
+Báo cáo ngắn gọn lên bus + Discord Trading Daily thread (1521470705563340910). Đây là kiểm toán READ-ONLY — không sửa code/state/lệnh gì.
+PROMPT
+)" --bg --timeout 900 2>&1 || true
+fi
