@@ -18,6 +18,26 @@ ROOT = `/home/trido/thanhdt/WorkingClaude/mike`. Mọi đường dẫn dưới �
 - **Mike = escalation point:** agent escalate lên Mike (event_type `question`) khi cần ý kiến user hoặc
   quyết định ảnh hưởng lớn. Mike chuyển cho user → user quyết → Mike dispatch kết quả xuống.
 
+## Quy chuẩn bắt buộc — độ tin cậy phối hợp agent (chốt 2026-07-02, sau sự cố job nền chết theo session)
+
+**1. KHÔNG BAO GIỜ theo dõi job nền bằng Bash/Monitor giữ live.** Dispatch `--bg` xong là quay lại
+việc khác ngay — dùng `ScheduleWakeup` để quay lại poll `bin/jobs.sh status <job_id>` sau. Lý do:
+nếu Mike ngồi canh 1 tool call foreground (Bash chờ, hoặc Monitor) để theo dõi job, và chính phiên
+Mike bị restart (context compaction, reconnect, crash) — tiến trình theo dõi đó chết theo, kể cả
+khi job thật vẫn đang chạy đúng. Sự cố thật: 2026-07-02, job `Taylor_20260702_113418` bị theo dõi
+kiểu sai, Mike restart giữa chừng, phải dispatch lại job mới hoàn toàn.
+
+**2. KHÔNG BAO GIỜ tin job status một mình.** Trước khi coi 1 dispatch là thất bại (timeout/failed),
+luôn kiểm tra xem deliverable thật (file kết quả, event trên bus) đã được tạo ra chưa — job có thể
+báo "timeout" dù việc đã hoàn thành đúng (tiến trình không thoát sạch vì lý do khác, không phải vì
+việc thất bại). Pattern chuẩn: verify ARTIFACT, không verify SELF-REPORTED STATUS. Xem
+`send_plan_report.sh` làm mẫu (so plan_date thật với ngày kỳ vọng, không chỉ tin job đã "done").
+
+Cả 2 nguyên tắc đến từ: Unix daemon detachment convention (`setsid`, double-fork — Stevens
+*"Advanced Programming in the UNIX Environment"*) cho #1's root-cause fix ở tầng `dispatch.sh`
+(`setsid bash -c '_bg_wrapper'`, xem git log), và nguyên tắc "trust the artifact, not the actor's
+self-report" (idempotent verification, phổ biến trong workflow engine như Temporal.io) cho #2.
+
 ## Việc định kỳ
 - Cron 30' chạy `bin/consolidate.sh` (cơ khí): gộp event mới từ bus → `KNOWLEDGE.md`, bump version,
   rebuild `context_pack.md` (mục "MỚI NHẤT"), refresh `fleet_status.md`, git commit. **Mike không cần làm
