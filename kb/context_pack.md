@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v683)
+# Mike fleet — context pack (v684)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-02T04:31:55] Taylor/finding — double-buy 2026-07-02 — risk assessment + trim/hold plan (T+1 hold, T+2 trim-to-target): {"job": "Taylor_20260702_042442", "incident": "double-buy SpaceX 2026-07-02 — all 11/11 day-2 buys filled 2x (bug fixed by Mike, commit 503aa2f, non-recurring)" …
 - [2026-07-02T04:51:19] DollarBill/decision — plan-2026-07-03+trim-07-06-staged: {"date": "2026-07-03", "file": "data/trade_plans/plan_SpaceX_2026-07-03.json", "state": "NEUTRAL-3 DT5G_macro (carry-forward)", "action": "HOLD — 0 orders (no B …
 - [2026-07-02T05:11:12] Mike/decision — trim-plan-07-06-approved: {"summary": "User da duyet trim plan 2026-07-06 (ban dung phan du gap doi sau su co double-buy 07-02, dua ve 1x ke hoach ban dau) da soan san trong plan_SpaceX_ …
 - [2026-07-02T05:29:03] quant-skeptic/verification — VERIFY: ad-hoc claim: {"finding_topic": "ad-hoc claim — broker-reconciliation in eod_trading_report.sh cross-checks dnse_raw vs state.json to catch the 2026-07-02 double-buy state.js …
@@ -11,6 +10,7 @@
 - [2026-07-02T05:53:45] Spyros/finding — eod-mismatch-SpaceX-07-02-audit: {"job": "Spyros_20260702_054751", "audit_type": "independent_eod_reconciliation", "account": "SpaceX", "date": "2026-07-02", "verdict": "CONFIRMED — mismatch RE …
 - [2026-07-02T08:03:56] Spyros/finding — eod-reaudit-SpaceX-07-02-FINAL: {"job": "Spyros_20260702_080003", "audit_type": "independent_reaudit_eod_reconciliation", "account": "SpaceX", "date": "2026-07-02", "dispatch_from": "Mafee", " …
 - [2026-07-02T08:06:13] Mafee/answer — callback-Spyros-reaudit-07-02-processed: {"job": "Mafee_20260702_080524", "callback_from": "Spyros_20260702_080003", "spyros_verdict": "CONFIRMED REAL — double-buy 11/11 tickers at 2x, no false positiv …
+- [2026-07-02T10:35:58] DollarBill/decision — plan-2026-07-03-eod-confirmed: {"date": "2026-07-03", "file": "data/trade_plans/plan_SpaceX_2026-07-03.json", "version": "v2", "state": "NEUTRAL-3 DT5G_macro (confirmed 17:30:30 ICT)", "actio …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -51,6 +51,12 @@
   (`send_plan_report.sh`, và mọi `dispatch.sh DollarBill ...` khác dù cron hay ad-hoc). Root cause
   thread-leak (dispatch notify theo thread Mike đang active) đã fix ở tầng `dispatch.sh` qua hàm
   `_agent_thread_override` — route CỐ ĐỊNH cho DollarBill bất kể Mike gọi từ topic nào.
+
+**Duyệt plan — LUÔN mirror vào DollarBill plan channel (thêm 2026-07-02, user chỉ đạo):** khi
+user duyệt/thảo luận duyệt plan trực tiếp với Mike ở BẤT KỲ topic Discord nào khác (không riêng
+plan channel), Mike vẫn xử lý ngay tại chỗ (không ép user đổi topic), NHƯNG phải
+`notify_thread.sh` xác nhận vào **1521183164364754974** ngay sau đó — channel này luôn là bản ghi
+đầy đủ mọi lần duyệt, dù hội thoại thật diễn ra ở đâu. Lý do: tránh rải rác/loãng topic khác.
 
 **Escalation khi plan T+1 không sẵn sàng (thêm 2026-07-01, sau sự cố DollarBill "timeout" nhưng
 plan thực ra đã ghi xong — dispatch.sh job status không đáng tin 100%):** `send_plan_report.sh`
