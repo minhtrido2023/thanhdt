@@ -28,7 +28,7 @@ sim doesn't, BUT the **state CONSTRUCTION** does. `vnindex_5state_ew_v1.py` buil
 composite that feeds all 7 factors. Line 127 `tv = Close*Volume`, gate `tv_avg60 >= 5e8 (500M)`
 defines the eligible EW universe → breadth (%>MA50), ret_ew, cmf_med → composite EW close →
 r_score → **state**. Close-tv shrinks the basket in old years (genuinely-liquid mid-caps with
-real tv>500M but Close-tv<500M wrongly excluded). Dev's causal chain CONFIRMED.
+real tv>500M but Close-tv<500M wrongly excluded). Dev's causal chain [REDACTED]D.
 Fix: `tv = COALESCE(Price,Close)*Volume`; `log_ret`/`above_ma50` STAY on Close (returns/MA50
 must use adjusted). Added `t.Price` to query; MUST `rm _cache_universe_2013_now.pkl` (cache bug).
 Backup: vnindex_5state_ew_full.csv.bak_closegate_20260601.

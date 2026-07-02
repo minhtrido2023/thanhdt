@@ -1113,3 +1113,76 @@ days, (c) skeptic rerun REAL fill vs `min(open,L)` proxy on correlated broad gap
 _(prior status line, now superseded by the activation above:)_ **Live stays DEFAULT-OFF; Taylor did NOT enable
 anywhere.** Paper enable = set `chase_cap_vol_scale_enabled=True` in the `main` paper-account `overrides`
 (same paper-only pattern as `gap_adaptive_enabled`/`extreme_regime_enabled`) — awaiting user/Mike OK.
+
+---
+
+## Wyckoff distribution/euphoria warning-layer — AUDIT (observe-only) — REFUTED, dashboard-only
+**Job Taylor_20260701_171827 · 2026-07-02 · builder `wyckoff_warning_logger.py` · Huong-2 first step (observe-only).**
+NOT wired anywhere (not live, not paper). Pure evidence build per the guardrail Taylor self-set: theory-anchored
+thresholds, coarse grid, NO fit-to-history; stop at dashboard if the evidence bar fails.
+
+**Two theory-grounded signals** (all inputs lagged 1 session — causal; universe<100 names → no-warn fail-safe),
+backfilled 2014→2026-06 from the local BQ parquet cache (composition-robust ratios only):
+- **A · breadth divergence** = VNINDEX within 5% of its 6M high WHILE breadth (% of `ticker_prune` > MA200)
+  fell ≥ a_delta pp vs 3M ago (distribution near the high). Grid a_delta ∈ {8,10,12}pp.
+- **B · effort-vs-result / volume** = B-dry (index +≥5–8% over 3M but market-wide median `Volume/Volume_1M` ≤1
+  on the advance → no demand) OR B-climax (median `Volume/Volume_1M` ≥1.6–2.0 on a 10-session advance → blow-off).
+
+**Ground truth** = DT5G onsets from `vnindex_5state_dt5g_live` 2014+: 15 de-risk onsets (enter BEAR/CRISIS from
+≥NEUTRAL) + 2 EX-BULL peaks. (DT5G onset lags the actual VNINDEX price peak by a **median 34 sessions**.)
+
+**Verdict: REFUTED — no predictive edge.** The naive hit-rate is high (ANY-signal 13/15) but is a pure
+**duty-cycle artifact** — the combined signal is ON **36.5%** of all days, so over any 60-session pre-onset
+window it almost always fires by chance. The decisive test is **base-rate lift** (fire-rate in the pre-event
+window ÷ fire-rate in benign periods):
+
+| signal | duty | lift vs DT5G onset | lift vs actual price-peak | leads price-peak | med actionable lead |
+|---|---|---|---|---|---|
+| A breadth-div | 10.9% | **0.15×** | **0.34×** | 5/15 | 10s |
+| B volume | 28.6% | **0.74×** | **0.75×** | 13/15 | **1s** (coincident) |
+| A∨B | 36.5% | **0.56×** | **0.62×** | 13/15 | **1s** (coincident) |
+
+Every configuration in the whole grid has **lift < 1.0** — the signals fire *less* before tops than in benign
+uptrends, and when they "hit" it is at median lead ~1 session (coincident, not leading). EX-BULL climax = 1/2
+(n=2, no basis) and **zero fires** at the 2.0× threshold (fragile).
+**Root cause:** near-high + breadth-strength + price-up-3M are conditions of *healthy benign uptrends*; by the
+time a real top forms breadth has already broken and the index is off its high, so these "strength" preconditions
+are actually rarer pre-top. Classic Wyckoff distribution needs price *structure* (trading ranges, up-thrusts,
+springs), which breadth+volume aggregates alone do not expose.
+
+**Decision (guardrail-compliant):** STOP at dashboard level. Do **NOT** wire into any gate — not DT5G, not live,
+**not even paper**. No auto-trade proposal. Artifacts kept for the observe-only dashboard: `wyckoff_warning_logger.py`,
+`data/wyckoff_warning_panel.csv` (daily series + signals), `data/wyckoff_warning_grid.csv` (full grid audit).
+"Step 2" (any gating integration) is moot given the refute; would need user/Mike sign-off anyway and there is
+no evidence to support it.
+
+## Fixed-window fill-timing edge — go/no-go for LIVE (2026-07-02, Taylor)
+**Q (user via Mike):** live SpaceX bot mua ngay 09:15 (vì `fill_timing_live_gate=True` → live bypass, mult=1.0); khung giờ BUY 10:45-11:15 / SELL 09:15-09:45 (`_fill_timing_mult`, executor.py:511) chỉ chạy ở paper. Khung giờ này có edge thật không → có nên tắt gate để bật cho live?
+**Mechanism (đọc code):** KHÔNG phải hard-lock — là interval multiplier mềm. Trong cửa sổ mult=1.0 (retry bình thường), ngoài cửa sổ interval×4 (`fill_timing_outside_mult`) → lệnh CHỈ *tập trung* vào cửa sổ, vẫn khớp ngoài cửa sổ nếu treo lâu. Nên capture LIVE < edge backtest sạch. `gap_adaptive_enabled` (default OFF) là override riêng cho down-gap → buy-at-open.
+**Prior work:** review 2026-06-30 (`execution_quality_review.py`) CHỈ check MECHANICS (adherence/reject/directional) — theo thiết kế của chính nó, edge 5-17bps KHÔNG đo được trong cửa sổ 2 ngày (noise/ngày 110-220bps >> edge). Edge validate qua NHIỀU TUẦN. Gap studies (dòng 637-664) đã confirm DIRECTION IS/OOS-stable trên daily proxy 408k rows + 16-name intraday.
+**Evidence NÀY — `intraday_fill_timing.py` + IS/OOS split inline (16 tên true 1-min, 9670 ticker-days, 2023-09..2026-06), ref=prior-close:**
+| edge (bps, +=window giúp) | FULL | IS <2025 | OOS ≥2025 |
+|---|---|---|---|
+| BUY: open→11:15 rẻ hơn | **+17.6 (t12.0)** | +17.6 (t9.3) | +17.7 (t8.0) |
+| SELL: open giàu hơn ATC | +11.8 (t5.6) | +14.7 (t5.2) | +9.3 (t3.0) |
+| SELL: open giàu hơn 11:15 | +17.6 (t12.0) | +17.6 (t9.3) | +17.7 (t8.0) |
+vs day-VWAP: open +13.8bps (TRÊN trung bình ngày=xấu để mua), 11:15 −5.4bps (DƯỚI trung bình=tốt để mua). Per-name: **15/16 tên buy_edge dương** (chỉ NNC −49bps, tên mỏng). → khung giờ config **đúng hướng CẢ hai chiều, IS/OOS-stable, cross-section nhất quán.**
+**CAVEAT (vì sao KHÔNG flip live ngay):** (1) đây là backtest SẠCH giả định giao dịch ĐÚNG giá 11:15/open; cơ chế live là cadence-mềm → capture thực chỉ 1 phần. (2) noise/trade >> edge; 11:15 chỉ là giá rẻ nhất 29% số ngày → edge là mean-tilt mỏng, không phải win/trade tin cậy. (3) 16 tên large/mid; edge scale-up trên tên nhỏ (gap study) NHƯNG capturability tên mỏng chưa test. (4) CHƯA có: NET-of-capturability trên paper fills thật + quant-skeptic verify + user sign-off. EV thô ≈ ~17bps/side × turnover ~ cùng cỡ TC drag 0.32%/yr — real nhưng KHÔNG needle-mover.
+**VERDICT:** giả thuyết ĐÃ được xác nhận thực nghiệm (không phải lý thuyết suông) & IS/OOS-robust. NHƯNG **KHÔNG flip `fill_timing_live_gate` ngay** trên evidence sạch này. Paper ĐANG chạy khung giờ (đó là mục đích của live_gate) → đã là vehicle validate. **Path đúng (theo precedent vol-scale/extreme):** để paper tích ~3-4 tuần fills → chạy `execution_quality_review.py` xác nhận (a) mechanics sạch + (b) paper fills THỰC hiện thực ~17bps net capture/slippage → quant-skeptic verify NET-of-noise → user sign-off → khi đó mới flip live. Live-behavior change: KHÔNG tự bật.
+
+## custom30V weekly/monthly 8L-rating OVERLAY (hybrid) — go/no-go (2026-07-02, Taylor)
+**Q (user via Mike):** thay vì chỉ rebal quý, thêm overlay TUẦN: mỗi tuần nếu có tên 8L rating≤2 (golden/strong, AAA/AA/A) đang "nổi lên" mà chưa có trong custom30V → swap ra 1-2 tên yếu nhất (theo yieldcombo rank). Mục tiêu: refresh basket nhanh hơn quý. Có nên làm không?
+**Method (`custom30v_hybrid.py`, auditable):** BASE = `custom_basket.build_pit(yieldcombo, q2m5, gate3, namecap0.10)` AUTHORITATIVE; overlay chạy trên grid tuần/tháng TRONG mỗi quý, reset về base pick mỗi q2m5 rebal. Candidate = liquid-pool tên rating_asof(gd)≤2, chưa trong basket, có yield score; OUT = ≤2 tên yieldcombo thấp nhất. Swap iff rating(cand) ≤ rating(weak) − NOTCH. Re-chain namecap **byte-faithful** (self-check max rel diff **8.88e-16** vs build_pit). TC swap thêm = 0.1%/side (sum|dw|≈2·nswap/30). Metric = BASKET INDEX (selector-isolated), walk-forward IS(2014-19)/OOS(2020+)/Full — đúng phương pháp `custom30v_select_audit.py`.
+**Kết quả — MỌI variant THUA baseline (net-of-swap-TC, ΔCAGR):**
+| variant | swaps | ΔFull | ΔOOS | ghi chú |
+|---|---|---|---|---|
+| baseline custom30V | 0 | — (29.96/OOS36.98) | — | mechanical quarterly only |
+| H_wk_n1 (tuần, notch≥1) | 616 | **−3.61pp** | **−6.91pp** | aggressive nhất → tệ nhất |
+| H_wk_n2 (tuần, notch≥2) | 117 | −0.39pp | −0.69pp | ít swap nhất → gần baseline |
+| H_wk_n1_cheaper (+guard rẻ hơn) | 237 | −1.29pp | −0.89pp | guard cắt ½ damage |
+| H_mo_n1 (tháng, notch≥1) | 278 | −1.19pp | −1.21pp | |
+**Diễn giải (3 verdict):**
+1. **Overlay LÀM XẤU ĐI, không bao giờ cải thiện CAGR** — mọi variant/window đều âm. Monotone: càng swap nhiều càng tệ (616 swaps → −3.61pp; 117 swaps → −0.39pp).
+2. **Nguyên nhân = CÙNG cơ chế quality-tilt đã refute sáng nay (composite-as-selector), KHÔNG phải TC artifact.** Bằng chứng: gross vs net-TC chỉ chênh ~0.42pp (H_wk_n1 gross 26.77 vs net 26.35) → damage đến từ SELECTION change, không phải turnover cost. Swap ra tên yieldcombo-thấp (= tên sector-PE-thấp/deep-value = NGUỒN return của VN value) để lấy tên rating≤2 (quality-priced-in) = cắt đúng low-PE tilt. Xác nhận: "cheaper guard" (chỉ swap nếu cand cũng rẻ hơn) giảm damage −3.61→−1.29pp — vì ngừng bán tilt value đi; phần còn âm là whipsaw/redundant swap.
+3. **Cadence: GIỮ QUÝ.** Tuần strictly tệ nhất; tháng tệ hơn quý. Lý do NGOÀI backtest: 8L rating chỉ đổi theo QUÝ (per-ticker 48 updates/12yr = 4/năm, staggered theo release date) → poll dưới-quý KHÔNG có thông tin fundamental mới để hành động, chỉ thêm whipsaw quanh các update lệch pha. Premise "refresh nhanh hơn" là ILLUSORY — không thể refresh nhanh hơn dữ liệu nền. Mechanical quarterly rebal đã bắt trọn rating migration ở đúng cadence mà data hỗ trợ.
+**VERDICT: DO NOT WIRE.** custom30V giữ nguyên mechanical yieldcombo top-30 / cap0.10 / quarterly. Overlay là liều nhỏ của cùng thuốc quality-tilt đã fail full-dose. (H_wk_n1 có giảm MaxDD Full −39.2→−33.9 & Calmar Full 0.76→0.79 nhưng THUA OOS Calmar 0.94→0.90 + mất 3.6pp CAGR → không phải trade hấp dẫn; custom30V là return-sleeve, DT5G lo risk-gating.)

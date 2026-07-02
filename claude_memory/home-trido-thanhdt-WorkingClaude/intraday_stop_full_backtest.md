@@ -34,7 +34,7 @@ For MEGA, 3 stops fire in both modes (price decisively breaks; close confirms). 
 
 **Scaling math:** 41 TP × ~5pp save vs 13 FP × ~10pp loss + re-entry friction → net −4.31pp CAGR confirmed. NOT worth the −1.78pp MaxDD improvement.
 
-**Final production decision (CONFIRMED across 3 sample sizes):**
+**Final production decision ([REDACTED]across 3 sample sizes):**
 - Universe synthetic (51K events): said +8.5pp/event ⚠️ MISLEADING
 - BA-system backfill (18 events): said −5.4pp/event
 - Full 12-year embed (255 trades): says **−4.31pp CAGR**

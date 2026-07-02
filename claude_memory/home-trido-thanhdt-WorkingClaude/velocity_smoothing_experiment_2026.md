@@ -28,7 +28,7 @@ User idea [REDACTED]03: tầng smooth nhãn (mode15 + min_stay7) là equal-weigh
 **VERDICT (integrated sweep):** DT5G KHÔNG quá đà cho V5 (đúng đỉnh); nhưng dùng 1 state cho mọi hệ chưa tối ưu — BASE nên dùng DT nhẹ hơn. Files: data/_dts_*.log, data/5sys_prodspec_*_DTS_*.csv.
 
 **FULL-HISTORY CRASH-DD TEST ([REDACTED]03, research-only, exp_dt_fullhist.py):** áp DT-gate light/prod/heavy lên base Cổ Điển (state_dvg, reliable 2011+; 2008 KHÔNG test được — mọi base warm sau 2009/2011), pure-index per-crisis DD.
-- **"smooth nặng → crash-DD xấu" CONFIRMED + NGHIÊM TRỌNG**: COVID DD raw −5.8% vs DT prod/heavy **−24.5%** (4×). Cả Cổ Điển + v3.4b base đồng ý chiều DD (robust); chỉ CAGR optimum base-dependent (v3.4b→DT_10_25_25 đỉnh; Cổ Điển→raw/light đỉnh, vì state_dvg đã de-risk nhanh sẵn nên DT chỉ làm chậm = hại).
+- **"smooth nặng → crash-DD xấu" [REDACTED]+ NGHIÊM TRỌNG**: COVID DD raw −5.8% vs DT prod/heavy **−24.5%** (4×). Cả Cổ Điển + v3.4b base đồng ý chiều DD (robust); chỉ CAGR optimum base-dependent (v3.4b→DT_10_25_25 đỉnh; Cổ Điển→raw/light đỉnh, vì state_dvg đã de-risk nhanh sẵn nên DT chỉ làm chậm = hại).
 - **INSIGHT giải thích thiết kế DT5G**: DT cần 25 phiên cam kết CRISIS > độ dài cú COVID (~25 phiên) → **DT base cấu trúc KHÔNG kịp crash nhanh**. → macro gate (VIX>35 cap) = lớp phản ứng NHANH; DT = lớp chống whipsaw CHẬM. Phân vai có chủ đích; COVID được macro gate cứu (VIX 82), KHÔNG phải DT base.
 - **"BASE muốn DT nhẹ" củng cố, lý do = crash-DD protection** (dt light COVID −7.8% vs prod −24.5%); nhưng đừng nhẹ quá (raw=210 trans=whipsaw). dt_5_15_15 (~90 trans) = sweet spot.
 - Caveat: Cổ Điển base ≠ production magnitude (−24.5% là artifact, DT5G live có macro cứu COVID). Files: exp_dt_fullhist.py.

@@ -9,7 +9,7 @@ metadata:
 
 **trading_bot (built [REDACTED]12)** — bot giao dịch tự động trên [[phs_flex_api_wrapper_2026]], plan từ V2.3 ([[version_naming_v23_2026]]).
 
-- **2 bước**: `bot_prepare_plan.py` (EOD, sau golive_recommend_v23 + pt_v22_dt5g) → `data/trade_plans/plan_<T+1>.json`; `bot_execute.py` (chạy xuyên phiên T+1) → journal/state/report trong `data/execution_logs/`.
+- **2 bước**: `bot_prepare_plan.py` (EOD, sau golive_recommend_v23 + pt_v22_dt5g) → `data/trade_plans/plan_<T+1>.json`; `bot_execute.py` (chạy xuyên phiên T+1) → journal/state/report trong `[REDACTED]ogs/`.
 - **Strategy versioning**: `trading_bot/strategies.py` REGISTRY; V23Strategy = mirror paper book scale theo NAV (`scale = NAV_thật/NAV_paper`); target = paper positions ∪ recs T+1 (BAL FULL/HALF, LAG "UPCOMING T+1", CAPIT nếu fired) ∪ ETF park; lệnh = diff vs danh mục thật; exit paper sync trễ 1 phiên (chấp nhận v1).
 - **Executor slicing**: 1 lệnh con sống/parent; qty ≤ min(200M, 10% KL ngày); mua chase trần ref×1.015, bán sàn ref×0.97; treo quá 8' → hủy đặt lại; ATC sweep phần bán sót; resume từ state; kill = file `data/BOT_STOP`.
 - **Mode paper (mặc định)**: quote THẬT PHS datafeed (quote-only, không cần login), khớp mô phỏng, tiền ảo `data/bot_paper_account.json`. **Live blocked** chờ PHS cấp client_id/secret (-700003); khi có: `bot_execute.py --mode live --otp <SmartOTP>`.

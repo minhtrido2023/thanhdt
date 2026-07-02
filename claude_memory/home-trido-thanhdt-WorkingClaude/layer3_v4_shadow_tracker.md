@@ -36,7 +36,7 @@ Baseline for alpha computation = **T+1 BQ.Open** (the old canonical rule).
 `alpha_vs_open_pp = (p_open - p_applied) / p_open × 100`
 
 Positive alpha = we paid LESS than baseline (good).
-Negative alpha = we paid MORE than baseline (bad).
+[REDACTED] alpha = we paid MORE than baseline (bad).
 
 ## Daily workflow
 

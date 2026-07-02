@@ -16,8 +16,8 @@ User ([REDACTED]20) raised 2 gaps: (1) golden-cell (pb_z) chỉ nhìn lịch-s�
 **LAYER 1 — FORENSIC REGISTRY (`data/forensic_flags.csv`)** = persistence (giải đúng "không nhớ"). Cols: ticker,flag_type,severity(exclude|watch),date,source,note. Mirror moat_tags.csv nhưng cờ ÂM. Seeded: **KSF (related_party, exclude)**, CTF (distress_cashburn, watch).
 
 **ĐÃ MỞ RỘNG TOÀN BỘ trade-universe + cap rating (user chọn "mạnh nhất", [REDACTED]20) — exclude áp 4 nơi, date-aware NO hindsight (chỉ từ flag date trở đi):**
-1. `rating_8l.py` live: FORENSIC global → force zone 4_TRAP + loại golden-floor + **cap rating≥4** (out top30/buynow/live-custom30). KSF rating 2→4 ✓verified.
-2. `custom_basket.build_pit.rating_asof`: nếu d≥flag_date → return 5 (KSF rớt custom30/V2.3 forward; KSF vốn KHÔNG có trong custom30_8l hiện tại).
+1. `rating_8l.py` live: FORENSIC global → force zone 4_TRAP + loại golden-floor + **cap rating≥4** (out top30/buynow/live-[REDACTED]). KSF rating 2→4 ✓verified.
+2. `custom_basket.build_pit.rating_asof`: nếu d≥flag_date → return 5 (KSF rớt [REDACTED]/V2.3 forward; KSF vốn KHÔNG có trong [REDACTED]_8l hiện tại).
 3. BQ `fa_ratings_8l` (source cho golive direct-read + audits): **surgical INSERT row (KSF,[REDACTED]20,5,E)** — vì row mới nhất của KSF là 2026-04-29 (<flag) nên phải APPEND row tại flag date (không sửa row cũ). golive QUALIFY latest → KSF=5 (half-size bear/crisis). Lịch sử giữ rating 2.
 4. Publisher code baked: `rating_8l_history.py` (CREATE OR REPLACE fa_ratings_8l) + `build_rating_8l_history.py` (pkl) APPEND override row @flag date → next full republish tự tái tạo. (KHÔNG full-republish lúc fix vì recompute có thể đổi rating mã khác = rủi; dùng surgical insert.)
 PIT-honest: cap chỉ từ [REDACTED]20, backtest lịch sử KSF giữ rating thật (ta không biết trước).

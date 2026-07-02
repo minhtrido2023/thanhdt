@@ -30,7 +30,7 @@ Scripts: `layer3_backfill_simulation.py` (main), `layer3_backfill_stop_variants.
 **Production decision (paper_trade_daily.py):**
 - `STOP_MODE = "SHADOW"` (default): log every intraday stop event but don't exit
 - `STOP_MODE = "ACTIVE"` available for future enabling after more data
-- Adds `STOP_EOD_CONFIRMED` exit when EoD close ≤ stop_lvl (matches journal-style stop)
+- Adds `STOP_EOD_[REDACTED]D` exit when EoD close ≤ stop_lvl (matches journal-style stop)
 - Keeps entry rules (T1115 / S2) and X1 sell timing — these showed small positive lift on TIME exits
 
 **Bigger takeaway about backtest design:**

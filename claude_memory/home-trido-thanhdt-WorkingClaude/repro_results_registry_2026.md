@@ -7,7 +7,7 @@ metadata:
   originSessionId: 9db4a8d3-af8f-423f-8d4c-e1e32d8b77bb
 ---
 
-**VẤN ĐỀ (user nêu [REDACTED]19):** hỏi lại cùng một kết quả backtest ở session khác → không tái tạo được. Gốc rễ: backtest chạy live-forward, `END_DATE=detect_end_date()` (data mới nhất) DỊCH mỗi ngày + bảng as-of (`custom30v_8l`/`fa_ratings_8l`) republish → CÙNG config KHÁC số (vd baseline 30.96→31.69 sau 5 phiên). Không phải bug, là data window trôi.
+**VẤN ĐỀ (user nêu [REDACTED]19):** hỏi lại cùng một kết quả backtest ở session khác → không tái tạo được. Gốc rễ: backtest chạy live-forward, `END_DATE=detect_end_date()` (data mới nhất) DỊCH mỗi ngày + bảng as-of (`[REDACTED]v_8l`/`fa_ratings_8l`) republish → CÙNG config KHÁC số (vd baseline 30.96→31.69 sau 5 phiên). Không phải bug, là data window trôi.
 
 **GIẢI PHÁP (deployed [REDACTED]19) = `data/results_registry.md`** (trong repo). Mỗi số công bố được PIN: lệnh chạy đầy đủ (argv+env) + `AUDIT_END` cố định + đường dẫn CSV đông cứng + metric + self-check. **Quy tắc:**
 1. Số công bố PHẢI pin `AUDIT_END` (vd `AUDIT_END=[REDACTED]19`) — không pin = trôi, vô nghĩa đối chứng.

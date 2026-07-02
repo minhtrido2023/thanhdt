@@ -43,7 +43,7 @@ originSessionId: 70c13426-2492-456b-9547-d14c8cf8fcb7
   - Same PM as BAL (no Fin/RE limit, VN30 inherently diversified)
 
 ### Costs
-- TC 0.1% per side, CG tax 0.1% on sales, slippage tiered (0.1% base + 0.1-0.5% extra at large position sizes)
+- TC 0.1% per side, CG tax [REDACTED]sales, slippage tiered (0.1% base + 0.1-0.5% extra at large position sizes)
 
 ### Validated metrics (from memory ba_v11_production_proposal.md)
 - FULL 12y: CAGR **19.37%** / Sharpe **1.41** / MaxDD **-16.1%** / Calmar **1.20**
