@@ -88,7 +88,8 @@ def short(e):
 
 
 def cmd_event(a):
-    aid, etype, topic, payload, kbver = a
+    aid, etype, topic, payload, kbver = a[:5]
+    trace_id = a[5] if len(a) > 5 and a[5] else None
     try:
         p = json.loads(payload)
     except Exception:
@@ -97,8 +98,14 @@ def cmd_event(a):
         v = int(kbver)
     except Exception:
         v = 0
-    out({"event_id": str(uuid.uuid4()), "ts": now_iso(), "agent_id": aid,
-         "event_type": etype, "topic": topic, "payload": p, "kb_version": v})
+    e = {"event_id": str(uuid.uuid4()), "ts": now_iso(), "agent_id": aid,
+         "event_type": etype, "topic": topic, "payload": p, "kb_version": v}
+    if trace_id:
+        e["trace_id"] = trace_id  # job_id of the dispatch this event was produced under,
+                                   # when known — lets fleet_scout/session_brief follow one
+                                   # dispatch chain (caller -> agent -> auto-callback) across
+                                   # multiple bus events instead of only prompt_summary text.
+    out(e)
 
 
 def cmd_heartbeat(a):

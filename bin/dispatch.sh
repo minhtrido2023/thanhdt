@@ -99,6 +99,7 @@ ts="$(date -u +%Y%m%d_%H%M%S)"
 logfile="$ROOT/logs/dispatch_${id}_${ts}.log"
 job_id="${id}_${ts}"
 JOBS_DIR="$ROOT/bus/jobs"
+export JOB_ID="$job_id"  # picked up by append_event.sh as the default trace_id (see there)
 
 from="${DISPATCH_FROM:-Mike}"
 

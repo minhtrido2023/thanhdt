@@ -1,0 +1,35 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/trido/thanhdt/WorkingClaude/mike/hooks/session_start.sh _trace_test"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/trido/thanhdt/WorkingClaude/mike/hooks/user_prompt_submit.sh _trace_test"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/trido/thanhdt/WorkingClaude/mike/hooks/stop.sh _trace_test"
+          }
+        ]
+      }
+    ]
+  },
+  "model": "claude-sonnet-4-6"
+}
