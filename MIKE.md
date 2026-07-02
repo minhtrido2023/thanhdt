@@ -38,6 +38,30 @@ Cả 2 nguyên tắc đến từ: Unix daemon detachment convention (`setsid`, d
 (`setsid bash -c '_bg_wrapper'`, xem git log), và nguyên tắc "trust the artifact, not the actor's
 self-report" (idempotent verification, phổ biến trong workflow engine như Temporal.io) cho #2.
 
+**3. Circuit breaker per-agent (thêm 2026-07-02).** `dispatch.sh` tự đếm lỗi liên tiếp mỗi agent
+(`state/circuit/<id>.json`); sau `DISPATCH_CIRCUIT_THRESHOLD` lần (mặc định 3) TRIPPED — dispatch
+tiếp bị chặn (`exit 4`) trong `DISPATCH_CIRCUIT_COOLDOWN` giây (mặc định 1800), tự reset sau cooldown
+(1 lần thử lại). Ép chạy bất chấp: `DISPATCH_FORCE=1`. Netflix Hystrix / Nygard *"Release It!"*.
+
+**4. Idempotency guard cho đặt lệnh thật (thêm 2026-07-02).** `Executor._ghost_tickers()` trong
+`trading_bot/executor.py` (repo WorkingClaude) — lớp phòng thủ THỨ HAI độc lập với `fcntl.flock`
+(commit `503aa2f`), đóng residual gap mà quant-skeptic phát hiện: process bị kill NGAY SAU
+`place_order()` thành công nhưng TRƯỚC `_save_state()` → lệnh "ma" tồn tại ở broker nhưng state
+không biết → lần chạy sau (dù giữ lock đúng) sẽ đặt lại. Mỗi `step()` đối chiếu sổ lệnh broker sống
+với state; mã nào có lệnh không rõ nguồn gốc → TẠM DỪNG đặt lệnh mã đó (fail-safe-pause, không tự
+suy đoán gộp vào state) + báo bus. `_save_state()` cũng chạy ngay sau mỗi lần đặt lệnh thành công
+(không đợi hết `step()`) để thu hẹp cửa sổ crash. Nếu `poll_orders()` tự lỗi → fail-safe TOÀN BỘ mã
+trong plan (không fail-open). Xem chi tiết + self-check trong `kb/INCIDENTS.md` (mục 2026-07-02
+double-buy) và `ghost_order_selfcheck.py` ở root WorkingClaude.
+
+**5. `trace_id` trong bus event (thêm 2026-07-02).** `append_event.sh` giờ nhận `trace_id` tùy chọn
+(arg thứ 5), tự fallback về `$JOB_ID` (dispatch.sh export sẵn vào môi trường agent headless) — nối
+mọi event của MỘT chuỗi dispatch (caller → agent → auto-callback) mà không cần agent tự truyền tay.
+
+**Nhật ký sự cố đầy đủ (blameless postmortem):** `kb/INCIDENTS.md` — mọi sự cố ảnh hưởng hoạt động
+thật, root cause, fix, bài học. Cập nhật mỗi khi có sự cố mới (không phải mọi bug, chỉ sự cố ảnh
+hưởng workflow sống hoặc cần người can thiệp ngoài happy path).
+
 ## Việc định kỳ
 - Cron 30' chạy `bin/consolidate.sh` (cơ khí): gộp event mới từ bus → `KNOWLEDGE.md`, bump version,
   rebuild `context_pack.md` (mục "MỚI NHẤT"), refresh `fleet_status.md`, git commit. **Mike không cần làm

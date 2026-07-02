@@ -1,0 +1,193 @@
+# Incidents — Mike fleet
+
+Blameless postmortem log (Google SRE convention): what broke, why, the fix, the lesson.
+Every entry traces to a verifiable artifact (commit hash, bus event, memory file) — no
+incident is recorded from memory alone. Newest first.
+
+**When to add an entry:** anything that broke a live workflow, cost real money/time, or
+required a human to intervene outside the normal happy path — not every bug, and not
+things caught in review before they ever ran (that's a normal fix, not an incident).
+
+**Format:** Date · What happened · Root cause · Fix · Lesson (with a `[[memory-link]]` or
+commit hash where one exists).
+
+---
+
+## 2026-07-02 — Double-buy: 2 concurrent bot_execute.py processes fill the same plan 2x
+
+**What happened:** SpaceX live account bought all 11 planned tickers at exactly 2x
+quantity (~456M → ~912M VND), pushing gross exposure to 140.8% NAV and breaching the
+10% single-name cap on 4 bank tickers (BID 19.8%, CTG 19.3%, VPB 15.6%, MBB 15.0%).
+
+**Root cause:** `bot_heartbeat.sh`'s autoheal fired at 09:00:01 ICT (before the scheduled
+09:05 cron), launching a second `bot_execute.py` for SpaceX while the first was already
+running. Neither process knew about the other — separate memory, separate participation
+quota, cash-check against a broker balance that didn't reflect the other's concurrent
+spend — so both independently filled the entire plan. At the time, no lock existed
+between two `bot_execute.py` invocations for the same (account, date).
+
+**Fix:** `_acquire_account_lock()` added to `bot_execute.py` — exclusive `fcntl.flock` on
+`data/execution_logs/exec_{label}_{plan_date}.lock`, held for the whole process lifetime.
+A second process for the same account+date fails to acquire it and skips that account
+instead of running a duplicate session. Commit `503aa2f` (WorkingClaude repo).
+Self-check: `concurrent_lock_selfcheck.py`.
+
+**Residual gap found by quant-skeptic (2026-07-02T05:29 VERIFY):** flock blocks
+*concurrent* double-runs, but not a *sequential* one — if a process is killed right after
+`broker.place_order()` succeeds but before `_save_state()` persists it, the order exists
+at the broker but state.json doesn't know it; a later run (even holding the lock
+correctly) would re-place it. **Closed same day**: `Executor._ghost_tickers()` in
+`executor.py` cross-checks the broker's live order book against state on every cycle and
+fail-safe-pauses (not auto-adopts) any plan ticker with an untracked order, plus
+`_save_state()` now runs immediately after each placement instead of once per cycle.
+Self-check: `ghost_order_selfcheck.py` (8/8, incl. a poll-failure fail-safe test added
+after quant-skeptic's second review found the guard failed OPEN on a `poll_orders()`
+exception).
+
+**Resolution:** Trim plan approved by user, executed 2026-07-06 (sell the doubled half of
+each position back to 1x). T+2 settlement meant no forced-sale risk before then.
+`data/BOT_STOP` correctly stayed clear (bug fixed, no loss spiral).
+
+**Lesson:** A single preventive control (flock) closes the *known* failure mode but not
+every failure mode in that class — an independent reviewer re-attacking the same
+incident with a different angle (sequential vs concurrent) found a second real gap the
+same day. Real-money order-placement code gets a second, independent defense even after
+the first fix is confirmed; see [[risk-reward-calculated-not-avoidance]] for how the
+fleet reasons about downside vs. paralysis.
+
+---
+
+## 2026-07-02 — Background dispatch job died when the coordinator's own session restarted
+
+**What happened:** Job `Taylor_20260702_113418` was dispatched `--bg`, appeared to hang,
+then was found dead (0-byte log, job board stuck at `status=running` past deadline →
+OVERDUE) with no error trace. Had to be re-dispatched from scratch.
+
+**Root cause:** The background job was being watched via a foreground Bash/Monitor call
+inside Mike's own live conversation. Mike's session itself restarted mid-watch (context
+compaction/reconnect) and the watching process died with it — taking the "background"
+job along, because a plain `&` background job is still a child of the same session as
+whoever called `dispatch.sh`.
+
+**Fix:** `dispatch.sh --bg` now runs its wrapper via `setsid bash -c '_bg_wrapper'`,
+detaching it into its own session so it survives the caller's session dying (standard
+Unix daemonization — Stevens, *Advanced Programming in the UNIX Environment*). Required
+`export -f` for every function (not just variables) the wrapper closes over, since
+`setsid` execs a command via `execvp`, not through bash's function table — verified
+empirically that a plain `setsid _bg_wrapper &` silently fails to find `_bg_wrapper` as a
+command. Bundled into consolidate commit `5e79a25`.
+
+**Codified as a standing rule** (MIKE.md, commit `d7c2121`): never watch a background job
+with a foreground Bash/Monitor call that keeps the coordinator's own turn open — dispatch
+`--bg`, move on, use `ScheduleWakeup` to come back and poll `bin/jobs.sh status <job_id>`.
+Paired with a second rule from the same review: verify the real deliverable artifact
+before treating a dispatch as failed, never trust self-reported job status alone (a job
+can report "timeout" even though the underlying work finished correctly).
+
+**Lesson:** Coordination code that *watches* work is itself a process with a lifecycle —
+if the watcher's lifecycle is coupled to the coordinator's own conversation, the
+coordinator's own instability (context limits, reconnects) becomes a source of job
+failures unrelated to the actual work.
+
+---
+
+## 2026-06-27/28 — Taylor↔Winston auto-callback ping-pong (runaway dispatch loop)
+
+**What happened:** Two agents auto-callback-notified each other's completion in a loop
+with no terminal condition — Taylor's completion triggered a callback dispatch to
+Winston, whose own completion (of processing that callback) triggered a callback back to
+Taylor, indefinitely.
+
+**Fix:** `dispatch.sh`'s auto-callback logic now guards against callback-of-a-callback: a
+job whose prompt is itself `[AUTO-CALLBACK...]` does not spawn another auto-callback — it
+is treated as terminal (process the result, stop). See the `GUARD (2026-06-28)` comment
+in `bin/dispatch.sh` (`_bg_wrapper`, both the success and failure notification paths).
+
+**Lesson:** Any "notify the caller when done" convenience feature between autonomous
+agents needs an explicit termination condition from day one — a bidirectional
+notification pattern is a cycle waiting to happen.
+
+---
+
+## 2026-06-22 — Mafee ZOMBIE: systemd reports healthy, agent isn't actually serving
+
+**What happened:** `systemctl is-active` reported the Mafee unit as active/healthy, but
+the agent wasn't actually serving any session — host process alive, journal said "Ready",
+but no live session existed. A plain `systemctl restart` did NOT recover it (verified).
+
+**Root cause:** The remote-control bridge was pinned to a stuck environment via a stale
+`bridge-pointer.json` and never reached a real "Ready" state for a new session, even
+though the systemd unit itself looked fine from the outside.
+
+**Fix:** `bin/is_serving.py` — a liveness oracle stronger than `systemctl is-active`,
+checking for an actual live session record. `bin/watchdog.sh` now detects two distinct
+failure modes (DOWN vs ZOMBIE) and, for ZOMBIE, auto-recovers by moving the stale
+`bridge-pointer.json` aside (`clear_bridge()`) before restarting — forcing the host to
+provision a fresh environment. Verified: plain restart alone did not recover Mafee;
+clear_bridge + restart did, serving again in ~10s. Commits `da3c173` (detection),
+`4e1c59b` (auto-recovery).
+
+**Lesson:** "The process is running" and "the process is doing its job" are different
+claims — a health check that only verifies the former will report false-healthy on a
+whole class of failures. Verify the actual deliverable/behavior, not just liveness (same
+principle as the artifact-vs-self-report rule from the 2026-07-02 job-watching incident).
+
+---
+
+## 2026-07-01 — Go-live day-1: 5 bugs, none caught by rehearsal
+
+**What happened:** SpaceX bot failed to place any live orders on go-live morning; 5
+distinct bugs had to be fixed in sequence before it worked. User feedback: "these are
+basic errors that rehearsal should have caught — not acceptable."
+
+1. **`python` not on PATH on Linux** — `run_bot.sh` called `python` instead of `python3`
+   (script written/tested on Windows, never run in Linux production before go-live).
+2. **`PlannedOrder` rejected extra fields from DollarBill's plan JSON** — DollarBill's v2
+   plan format added `est_value`/`weight_pct`/`timing`; `load_plan()` didn't filter to
+   known dataclass fields before construction → `TypeError`.
+3. **Auto-OTP silently skipped when `credentials_file: null`** — guard written for
+   "not a DNSE account" also matched a legitimate DNSE account using the default
+   credentials file, so it ran with no trading token → 1300+ `PLACE_FAIL`.
+4. **`TZ` not set → `session_phase()` returned PRE during market hours** — `run_bot.sh`
+   didn't source `wc_env.sh`; server ran UTC, `session_phase()` hardcodes ICT hours, so
+   the bot connected and loaded the plan but placed zero orders.
+5. **`nohup ... &` inside a single Bash tool call didn't survive across tool calls** —
+   when Mike manually restarted the bot mid-incident (not via cron/systemd), the sandbox
+   reaped the process group ~5 min after that tool call "finished," silently killing 9
+   in-flight orders with no monitoring. Fixed by using `setsid` (verified via
+   `ps -o pid,ppid,pgid,sid` showing PGID=SID=PID) instead of `nohup`.
+
+**Fix:** All 5 patched same day; full detail and the resulting rehearsal checklist in
+[[feedback-golive-day1-bugs]] (memory).
+
+**Lesson:** A rehearsal that doesn't run in the actual production environment (Linux
+cron, real plan JSON from the actual upstream producer, real credentials shape, real TZ)
+doesn't actually rehearse the failure modes that matter — every one of these 5 bugs was
+an environment/integration gap, not a logic bug that a dev-machine test would have caught.
+
+---
+
+## Open / not-yet-hardened
+
+- **quant-skeptic's second recommendation on the ghost-order guard** (2026-07-02,
+  `is_dead` heuristic in `brokers.py:126` matches single characters `f`/`x` inside a
+  status string, which is broad) — not yet tightened to an explicit DNSE status
+  allowlist. Low urgency: a false-negative there only means a genuinely-dead order is
+  treated as a live ghost (extra caution, fails safe), not the reverse.
+
+- **No official "unpause" for a ghosted ticker** (raised by an independent third-party
+  review, 2026-07-02, after verifying the guard mechanism against real DNSE data —
+  6,338 orders in `dnse_raw_2026-07-02.jsonl`, confirmed `poll_orders()` returns the
+  full daily book, `symbol` field maps correctly, oid types are consistently `str`). A
+  ticker that trips the ghost guard stays paused for the rest of the session until a
+  human manually reconciles the untracked oid into `state["parents"][id]["children"]`
+  (cross-check against `dnse_raw_<date>.jsonl` or a direct `poll_orders()` call). This
+  is accepted-by-design (human-in-the-loop, no auto-reconcile — see the field-mapping
+  risk noted in the double-buy entry above) but now has an explicit runbook note in
+  `_ghost_tickers()`'s docstring so an operator isn't left guessing. **Fixed same
+  review round:** (a) `_save_state()` was a direct overwrite, not atomic — now
+  tmp-file + `os.replace()`, since it runs far more often post-idempotency-fix (after
+  every `place_order`, not once per cycle) so a kill-mid-write is more likely to be
+  hit; (b) `PaperBroker.poll_orders()` built `OrderUpdate` with `raw=None`, so the
+  guard could never resolve a symbol in paper mode and paper trading could never
+  rehearse it — now passes `raw={"symbol": ...}` matching the real broker's shape.

@@ -16,6 +16,32 @@
 ## Chờ user quyết định
 - V2.5 live-recommend integration: **2026-07-07** (trigger tự động)
 
+## Reliability hardening (2026-07-02, theo yêu cầu user — 4 việc AgentOps)
+Đã triển khai đủ 4 mục theo thứ tự ưu tiên, chi tiết + self-check trong `kb/INCIDENTS.md` và
+`MIKE.md` §Quy chuẩn bắt buộc:
+1. **Circuit breaker** per-agent trong `dispatch.sh` (`state/circuit/<id>.json`).
+2. **Idempotency guard** (`Executor._ghost_tickers`, `trading_bot/executor.py`) — lớp phòng thủ
+   THỨ HAI cho double-buy, đóng residual gap quant-skeptic tìm thấy sau flock fix (503aa2f).
+   quant-skeptic CONFIRMED (verify_finding.sh 2026-07-02T13:48, sau khi vá killer objection
+   poll-fail-open). **⚠️ CHƯA COMMIT** trong repo WorkingClaude/thanhdt (chỉ nightly backup.sh
+   00:00 ICT auto-commit, không phải per-dispatch như repo mike) — nhưng ĐÃ live-effective ngay
+   cho lần chạy `bot_execute.py` kế tiếp (Python import thẳng từ file, không qua build step).
+   May mắn: 07-03 là ngày HOLD (0 lệnh) → còn buffer tới 07-06 (trim plan, 11 lệnh SELL) để user
+   review trước khi guard này thực sự bị exercise trên tiền thật.
+3. **trace_id** trong bus event (`append_event.sh`, fallback tự động qua `$JOB_ID`).
+4. **`kb/INCIDENTS.md`** — backfill 5 sự cố đã biết (double-buy, job chết theo session, callback
+   ping-pong, Mafee zombie, go-live day-1 5 bugs).
+
+**Review vòng 2 (2026-07-02, bên thứ ba độc lập)** — verify lại cơ chế bằng dữ liệu DNSE thật
+(6.338 lệnh `dnse_raw_2026-07-02.jsonl`), xác nhận cơ chế đúng, tìm thêm 2 gap không-chặn +
+1 note vận hành, cả 3 đã fix/ghi ngay trong lượt: (a) `_save_state()` không atomic → giờ
+tmp+`os.replace()`; (b) `PaperBroker.poll_orders()` trả `raw=None` → guard là no-op trên paper,
+giờ trả `raw={"symbol":...}` giống broker thật, paper trading diễn tập được; (c) không có quy
+trình "unpause" chính thức — đã ghi rõ trong docstring `_ghost_tickers()` (executor.py) + KB
+(chấp nhận theo thiết kế: unpause thủ công, không auto-reconcile). `ghost_order_selfcheck.py`
+giờ 12/12 (thêm I/J cho 2 fix trên, verify catch-regression bằng cách revert-tạm rồi phục hồi).
+**Vẫn CHƯA commit** — vẫn đang chờ user xác nhận trước 07-06.
+
 ## Workflow ngày trading (SpaceX, T2-T6, giờ ICT)
 1. **17:30** — `bq_freshness_check.sh`: BQ fresh → dispatch DollarBill lập plan T+1
 2. **19:30** — `send_plan_report.sh`: gửi plan T+1 vào Trading Daily thread (duyệt trước 08:45 sáng mai)
