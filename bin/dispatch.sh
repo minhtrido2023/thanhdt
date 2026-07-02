@@ -56,6 +56,44 @@ if [ ! -d "$AGENT_DIR" ]; then
   exit 1
 fi
 
+# Circuit breaker: after CIRCUIT_THRESHOLD consecutive failed/timeout dispatches to the
+# SAME agent, stop dispatching to it for CIRCUIT_COOLDOWN seconds instead of hammering a
+# chronically-broken agent (Netflix Hystrix / Nygard "Release It!" pattern). Auto-resets
+# on cooldown expiry (one trial allowed). Override for a deliberate manual retry:
+# DISPATCH_FORCE=1 bin/dispatch.sh ...
+CIRCUIT_DIR="$ROOT/state/circuit"
+CIRCUIT_THRESHOLD="${DISPATCH_CIRCUIT_THRESHOLD:-3}"
+CIRCUIT_COOLDOWN="${DISPATCH_CIRCUIT_COOLDOWN:-1800}"
+if [ "${DISPATCH_FORCE:-}" != "1" ]; then
+  set +e
+  _cc_out="$(python3 "$ROOT/bin/mike_json.py" circuit-check "$CIRCUIT_DIR" "$id")"
+  _cc_rc=$?
+  set -e
+  if [ "$_cc_rc" -ne 0 ]; then
+    echo "ERROR: circuit breaker OPEN for '$id' ($_cc_out) — $CIRCUIT_THRESHOLD+ lỗi liên tiếp, đang cooldown." >&2
+    echo "  Bỏ qua dispatch này. Ép chạy bất chấp: DISPATCH_FORCE=1 bin/dispatch.sh $id ..." >&2
+    exit 4
+  fi
+fi
+
+# _circuit_record <agent_id> <success|fail> — call after a dispatch reaches a terminal
+# state. On the failure that trips the breaker, notify (Telegram + Discord thread).
+_circuit_record() {
+  local _cr_out _cr_rc
+  set +e
+  _cr_out="$(python3 "$ROOT/bin/mike_json.py" circuit-record "$CIRCUIT_DIR" "$1" "$2" "$CIRCUIT_THRESHOLD" "$CIRCUIT_COOLDOWN")"
+  _cr_rc=$?
+  set -e
+  if [ "$2" = "fail" ] && [ "$_cr_rc" -eq 1 ]; then
+    "$ROOT/bin/notify.sh" "[circuit-breaker] $1 TRIPPED ($_cr_out) — dispatch tạm dừng ${CIRCUIT_COOLDOWN}s." 2>/dev/null || true
+    local _cbtid; _cbtid="${DISCORD_THREAD_ID:-$(_agent_thread_override "$1")}"
+    [ -n "$_cbtid" ] || _cbtid="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
+    if [ -n "$_cbtid" ]; then
+      "$ROOT/bin/notify_thread.sh" "🔴 **Circuit breaker OPEN** cho **$1** ($_cr_out) — $CIRCUIT_THRESHOLD+ lỗi liên tiếp, tạm dừng dispatch ${CIRCUIT_COOLDOWN}s. Ép chạy: \`DISPATCH_FORCE=1\`." "$_cbtid" 2>/dev/null || true
+    fi
+  fi
+}
+
 mkdir -p "$ROOT/logs"
 ts="$(date -u +%Y%m%d_%H%M%S)"
 logfile="$ROOT/logs/dispatch_${id}_${ts}.log"
@@ -208,6 +246,7 @@ if [ "$bg" = "--bg" ]; then
       set -e
       if [ "$rc" -eq 0 ]; then
         JSET status=done ended_at="$(date +%s)" exit_code=0 result_summary="$(SUMMARY)"
+        _circuit_record "$id" success
         "$ROOT/bin/consolidate.sh" >> "$ROOT/logs/consolidator.log" 2>&1 || true
         "$ROOT/bin/notify.sh" "[dispatch] $id hoàn thành (job $job_id): $(SUMMARY)" 2>/dev/null || true
         # Discord thread notification — always, regardless of who dispatched.
@@ -246,6 +285,7 @@ if [ "$bg" = "--bg" ]; then
     local fstatus=failed why="THẤT BẠI"
     if [ "$rc" -eq 124 ]; then fstatus=timeout; why="QUÁ HẠN (timeout ${TIMEOUT}s)"; fi
     JSET status="$fstatus" ended_at="$(date +%s)" exit_code="$rc" result_summary="$(SUMMARY)"
+    _circuit_record "$id" fail
     "$ROOT/bin/consolidate.sh" >> "$ROOT/logs/consolidator.log" 2>&1 || true
     "$ROOT/bin/notify.sh" "[dispatch] $id $why sau $max_attempts lần (job $job_id) — xem $logfile" 2>/dev/null || true
     local _tid; _tid="${DISCORD_THREAD_ID:-$(_agent_thread_override "$id")}"
@@ -283,8 +323,9 @@ if [ "$bg" = "--bg" ]; then
   # and every variable/function it closes over (JSET, SUMMARY, and the vars they use)
   # must be exported and re-entered via `bash -c`. Verified empirically: a plain
   # `setsid _bg_wrapper &` silently fails to find "_bg_wrapper" as a command.
-  export -f _bg_wrapper JSET SUMMARY
-  export ROOT JOBS_DIR job_id from id ts TIMEOUT RETRIES CLAUDE dispatch_prompt logfile prompt
+  export -f _bg_wrapper JSET SUMMARY _agent_thread_override _circuit_record
+  export ROOT JOBS_DIR job_id from id ts TIMEOUT RETRIES CLAUDE dispatch_prompt logfile prompt \
+         CIRCUIT_DIR CIRCUIT_THRESHOLD CIRCUIT_COOLDOWN
   if command -v setsid >/dev/null 2>&1; then
     setsid bash -c '_bg_wrapper' </dev/null >/dev/null 2>&1 &
   else
@@ -320,6 +361,7 @@ else
   "$ROOT/bin/consolidate.sh" >> "$ROOT/logs/consolidator.log" 2>&1 || true
   if [ "$rc" -eq 0 ]; then
     JSET status=done ended_at="$(date +%s)" exit_code=0 result_summary="$(SUMMARY)"
+    _circuit_record "$id" success
   else
     fstatus=failed
     if [ "$rc" -eq 124 ]; then
@@ -329,6 +371,7 @@ else
       echo "WARNING: dispatch $id kết thúc bất thường (exit=$rc, job $job_id) — xem $logfile.err" >&2
     fi
     JSET status="$fstatus" ended_at="$(date +%s)" exit_code="$rc" result_summary="$(SUMMARY)"
+    _circuit_record "$id" fail
     exit "$rc"
   fi
 fi

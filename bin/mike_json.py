@@ -16,6 +16,10 @@ Centralizes all JSON building/reading so the shell scripts depend only on python
       -> markdown fleet table; status shown as "dead" when last_heartbeat > 30 min old
   settings <hooks_dir> <agent_id>
       -> a child's .claude/settings.json wiring the 3 hooks
+  circuit-check <state_dir> <agent_id>
+      -> exit 0 (closed) / 1 (open) — per-agent dispatch circuit breaker
+  circuit-record <state_dir> <agent_id> <success|fail> [threshold] [cooldown_sec]
+      -> updates the counter; exit 1 if this call tripped the breaker
 """
 import sys, os, json, uuid, glob, datetime
 
@@ -283,6 +287,77 @@ def cmd_job_get(a):
     sys.exit(1)  # failed / timeout / unknown
 
 
+# --- circuit breaker (state/circuit/<id>.json) ---
+# Per-agent consecutive-failure counter for dispatch.sh. Trips (blocks new dispatches)
+# after N consecutive failed/timeout jobs; auto-resets to closed after a cooldown window
+# (simple trial-on-expiry, not full half-open — this guards against runaway repeated
+# dispatch to a chronically-broken agent, not a high-frequency traffic breaker).
+
+def _circuit_path(state_dir, agent_id):
+    return os.path.join(state_dir, agent_id + ".json")
+
+
+def _circuit_load(state_dir, agent_id):
+    try:
+        with open(_circuit_path(state_dir, agent_id), encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {"fails": 0, "tripped_until": 0}
+
+
+def _circuit_save(state_dir, agent_id, obj):
+    os.makedirs(state_dir, exist_ok=True)
+    fp = _circuit_path(state_dir, agent_id)
+    tmp = fp + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(obj, f, ensure_ascii=False)
+    os.replace(tmp, fp)
+
+
+def cmd_circuit_check(a):
+    """circuit-check <state_dir> <agent_id> — exit 0 (closed/allowed) or 1 (open/blocked).
+    Auto-clears an expired trip (cooldown passed) before checking, allowing a trial dispatch."""
+    state_dir, agent_id = a[0], a[1]
+    obj = _circuit_load(state_dir, agent_id)
+    n = now_epoch()
+    tripped_until = _as_int(obj.get("tripped_until"), 0)
+    if tripped_until and n >= tripped_until:
+        obj = {"fails": 0, "tripped_until": 0}
+        _circuit_save(state_dir, agent_id, obj)
+        tripped_until = 0
+    if tripped_until and n < tripped_until:
+        print("OPEN fails=%s tripped_until=%s remaining_s=%s" % (
+            obj.get("fails", "?"), tripped_until, tripped_until - n))
+        sys.exit(1)
+    print("CLOSED fails=%s" % obj.get("fails", 0))
+    sys.exit(0)
+
+
+def cmd_circuit_record(a):
+    """circuit-record <state_dir> <agent_id> <success|fail> [threshold] [cooldown_sec]
+    -> updates the counter; exit 0 normally, exit 1 if this call TRIPPED the breaker
+    (caller should notify on exit 1)."""
+    state_dir, agent_id, result = a[0], a[1], a[2]
+    threshold = _as_int(a[3], 3) if len(a) > 3 else 3
+    cooldown = _as_int(a[4], 1800) if len(a) > 4 else 1800
+    obj = _circuit_load(state_dir, agent_id)
+    n = now_epoch()
+    if result == "success":
+        _circuit_save(state_dir, agent_id, {"fails": 0, "tripped_until": 0})
+        print("CLOSED fails=0")
+        sys.exit(0)
+    fails = _as_int(obj.get("fails"), 0) + 1
+    if fails >= threshold:
+        tripped_until = n + cooldown
+        _circuit_save(state_dir, agent_id, {"fails": fails, "tripped_until": tripped_until,
+                                            "last_fail_at": n})
+        print("TRIPPED fails=%s tripped_until=%s cooldown_s=%s" % (fails, tripped_until, cooldown))
+        sys.exit(1)
+    _circuit_save(state_dir, agent_id, {"fails": fails, "tripped_until": 0, "last_fail_at": n})
+    print("fails=%s/%s" % (fails, threshold))
+    sys.exit(0)
+
+
 def cmd_settings(a):
     """settings <hooks_dir> <agent_id> [model] — wires the 3 hooks; sets model when given."""
     hooks_dir, aid = a[0], a[1]
@@ -303,6 +378,7 @@ CMDS = {"event": cmd_event, "heartbeat": cmd_heartbeat, "recent": cmd_recent,
         "delta-append": cmd_delta_append, "delta-since": cmd_delta_since,
         "format-events": cmd_format_events, "fleet-status": cmd_fleet_status,
         "job-set": cmd_job_set, "job-list": cmd_job_list, "job-get": cmd_job_get,
+        "circuit-check": cmd_circuit_check, "circuit-record": cmd_circuit_record,
         "settings": cmd_settings}
 
 
