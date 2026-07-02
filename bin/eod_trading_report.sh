@@ -28,10 +28,10 @@ if [ ! -f "$PLAN_FILE" ] || [ ! -f "$STATE_FILE" ]; then
   exit 0
 fi
 
-REPORT="$(python3 - "$PLAN_FILE" "$STATE_FILE" "$ACCOUNT" "$PLAN_DATE" << 'PYEOF'
-import sys, json
+REPORT="$(python3 - "$PLAN_FILE" "$STATE_FILE" "$ACCOUNT" "$PLAN_DATE" "$WC_ROOT" << 'PYEOF'
+import sys, json, os
 
-plan_file, state_file, account, plan_date = sys.argv[1:5]
+plan_file, state_file, account, plan_date, wc_root = sys.argv[1:6]
 
 with open(plan_file, encoding='utf-8') as f:
     plan = json.load(f)
@@ -40,6 +40,60 @@ with open(state_file, encoding='utf-8') as f:
 
 orders_by_id = {o['id']: o for o in plan.get('orders', [])}
 parents = state.get('parents', {})
+
+# ---- Đối soát fill THẬT (broker) vs state.json nội bộ ------------------------
+# state.json["parents"][*]["filled"] bị CAP ở qty_plan (xem Executor._sync_fills:
+# `ps["filled"] = min(total, o.qty)`) — nếu có 2 tiến trình cùng khớp 1 lệnh (như
+# sự cố double-buy 2026-07-02), state.json vẫn báo "đúng 100% kế hoạch", che mất
+# sự cố hoàn toàn. Đối soát trực tiếp với dnse_raw_{date}.jsonl (log thô từ DNSE,
+# account-agnostic theo ngày) để phát hiện lệch — không phụ thuộc vào state nội bộ
+# của chính tiến trình có thể đã bị lỗi.
+plan_tickers = {o.get('ticker') for o in plan.get('orders', [])}
+dnse_raw_file = os.path.join(wc_root, 'data', 'execution_logs', f'dnse_raw_{plan_date}.jsonl')
+real_filled_by_ticker = {}
+reconciled = False
+if os.path.exists(dnse_raw_file):
+    reconciled = True
+    latest_by_oid = {}
+    with open(dnse_raw_file, encoding='utf-8') as f:
+        for line in f:
+            try:
+                rec = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            kind = rec.get('kind')
+            seen = []
+            if kind == 'orders':
+                seen = rec.get('payload', {}).get('orders') or []
+            elif kind == 'place_order':
+                r = rec.get('payload', {}).get('resp') or {}
+                if r.get('id') is not None:
+                    seen = [r]
+            for o in seen:
+                oid, sym = o.get('id'), o.get('symbol')
+                if oid is None or sym not in plan_tickers:
+                    continue
+                latest_by_oid[oid] = o  # ghi đè -> giữ bản ghi MỚI NHẤT mỗi order id thật
+    for o in latest_by_oid.values():
+        fq = o.get('fillQuantity') or 0
+        if fq > 0:
+            sym = o.get('symbol')
+            real_filled_by_ticker[sym] = real_filled_by_ticker.get(sym, 0) + fq
+
+state_filled_by_ticker = {}
+for oid, p in parents.items():
+    o = orders_by_id.get(oid, {})
+    sym = o.get('ticker')
+    if sym:
+        state_filled_by_ticker[sym] = state_filled_by_ticker.get(sym, 0) + p.get('filled', 0)
+
+mismatches = []
+if reconciled:
+    for sym in plan_tickers:
+        real = real_filled_by_ticker.get(sym, 0)
+        internal = state_filled_by_ticker.get(sym, 0)
+        if real != internal:
+            mismatches.append((sym, internal, real, real - internal))
 
 rows = []
 tot_value_planned = 0
@@ -88,6 +142,22 @@ rows.sort(key=lambda r: -r['value'])
 
 lines = []
 lines.append(f"📊 **EOD Trading Report — {account} ({plan_date})**")
+if mismatches:
+    lines.append("")
+    lines.append("🚨 **CẢNH BÁO ĐỐI SOÁT — FILL THẬT (broker) ≠ STATE NỘI BỘ** — "
+                  "khả năng có tiến trình chạy trùng hoặc lỗi đồng bộ:")
+    for sym, internal, real, diff in sorted(mismatches, key=lambda x: -abs(x[3])):
+        lines.append(f"  ⚠️ {sym}: state báo {internal:,} nhưng broker thật khớp "
+                      f"{real:,} (lệch {diff:+,})")
+    lines.append("👉 Kiểm tra ngay — xem có process bot_execute.py trùng lặp, "
+                  "hoặc đối chiếu dnse_raw_{}.jsonl thủ công.".format(plan_date))
+    lines.append("")
+elif reconciled:
+    lines.append("✅ Đối soát broker: fill thật khớp đúng state nội bộ, không lệch.")
+    lines.append("")
+else:
+    lines.append("ℹ️ Không đối soát được (không có dnse_raw log — bình thường nếu account paper).")
+    lines.append("")
 lines.append(f"Tổng lệnh: **{len(rows)}** ({n_buy} mua / {n_sell} bán) | "
              f"Khớp đủ: {n_full} | Khớp một phần: {n_partial} | Chưa khớp: {n_zero}")
 lines.append("")
