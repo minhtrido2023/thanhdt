@@ -159,3 +159,26 @@ if [ -n "${upct:-}" ] && [ "${upct%%.*}" -ge "${USAGE_WARN_PCT:-80}" ] 2>/dev/nu
 else
   rm -f "$umark" 2>/dev/null || true
 fi
+
+# --- Pipeline staleness watch (watch-the-watcher) — catches a pipeline that stopped
+# refreshing even though its OWN healthcheck only alerts when it successfully runs. Root
+# cause of the 2026-06-30 "DT5G stuck 11 days" incident: macro_healthcheck.py's Telegram
+# alert fires on DEGRADED/FAILED, but nothing external notices if the pipeline never runs
+# at all (cron miss, an earlier step in daily_refresh_v34b_linux.sh crashing first). This
+# check is independent of that pipeline (separate cron entry via watchdog.sh) and just reads
+# the artifact's own self-reported "ts". Debounced per key via state/stalewarn/<key>.
+STALEWARN_DIR="$ROOT/state/stalewarn"
+mkdir -p "$STALEWARN_DIR"
+while read -r skey sage smax sflag; do
+  [ -n "${skey:-}" ] || continue
+  smark="$STALEWARN_DIR/$skey"
+  if [ "$sflag" = "1" ]; then
+    [ -f "$smark" ] || notify "PIPELINE STALE: $skey last updated ${sage}h ago (max ${smax}h) — pipeline may have stopped running. Kiểm tra cron + \`python3 $ROOT/bin/staleness_watch.py\`."
+    echo "$sage" > "$smark"
+  elif [ "$sflag" = "2" ]; then
+    [ -f "$smark" ] || notify "PIPELINE UNKNOWN: $skey artifact missing/unparseable — worse than stale, pipeline may never have run or output is broken. Kiểm tra: \`python3 $ROOT/bin/staleness_watch.py\`."
+    echo "unknown" > "$smark"
+  else
+    rm -f "$smark" 2>/dev/null || true
+  fi
+done <<<"$(python3 "$ROOT/bin/staleness_watch.py" --oneline 2>/dev/null)"
