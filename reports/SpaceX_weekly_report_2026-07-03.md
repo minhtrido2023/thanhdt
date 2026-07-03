@@ -8,6 +8,19 @@
 
 ---
 
+> **📌 ĐÍNH CHÍNH (03/07/2026, sau khi phát hành bản đầu):** Bản đầu của báo cáo này dùng nhầm
+> field giá vốn ước tính (`avg_cost` "ref_px_approx" trong file snapshot nội bộ) làm giá vốn thật
+> để tính lãi/lỗ từng mã — field đó **không phải giá khớp lệnh thật**, chỉ là giá tham chiếu ước
+> tính. Hậu quả cụ thể: báo cáo cũ ghi VHM lỗ chưa thực hiện −6,4%, trong khi giá vốn thật (khớp
+> lệnh thật từ broker) là 149.800đ/cp và giá đóng cửa 03/07 là 151.600đ/cp → **VHM thực chất LÃI
+> chưa thực hiện +1,20%**, đúng như phản ánh của người phụ trách quỹ. Toàn bộ bảng lãi/lỗ theo mã
+> trong báo cáo này đã được **tính lại từ log gốc của broker** (không phải file tóm tắt trung gian)
+> và xác minh chéo độc lập — xem Mục 7 (Phương pháp luận) để biết cơ chế xác minh mới. **NAV tổng
+> (993.598.747 VND) không đổi** — số liệu này vốn chỉ phụ thuộc giá thị trường × khối lượng đã đối
+> soát broker, không phụ thuộc giá vốn, nên không bị ảnh hưởng bởi lỗi trên.
+
+---
+
 ## 1. TÓM TẮT ĐIỀU HÀNH (Executive Summary)
 
 Tài khoản SpaceX chính thức đi vào vận hành thực (go-live) ngày **01/07/2026**, khởi động với NAV
@@ -29,9 +42,12 @@ tỷ trọng về đúng **94,7%** theo thiết kế chiến lược vào phiên
 Không có rủi ro vay margin, không có lệnh bán ép giá (forced-sale) trong toàn bộ thời gian xử lý.
 
 Trong 3 phiên đầu, hiệu suất tài khoản thấp hơn VN-Index khoảng **0,75 điểm phần trăm**, chủ yếu do biến
-động giá thị trường bình thường trên danh mục (đặc biệt VHM −6,4%) chứ không liên quan đến sự cố vận
-hành. Với chỉ 3 phiên dữ liệu, con số này **chưa có ý nghĩa thống kê** — chưa thể dùng để đánh giá hiệu
-quả chiến lược; báo cáo các tuần tiếp theo sẽ cho bức tranh đầy đủ hơn.
+động giá thị trường bình thường trên danh mục — hai mã đóng góp lỗ chưa thực hiện lớn nhất là **BID
+(−1,72%, −3,41tr VND)** và **LPB (−5,03%, −2,43tr VND)** — chứ không liên quan đến sự cố vận hành ở Mục
+4. Ngược lại, một số mã đang lãi chưa thực hiện, dẫn đầu là **VHM (+1,20%)** và **MBS (+5,39%)**. Tổng
+lãi/lỗ chưa thực hiện toàn danh mục: **−9,76 triệu VND (−0,69% trên phần cổ phiếu)**. Với chỉ 3 phiên dữ
+liệu, mọi con số này **chưa có ý nghĩa thống kê** — chưa thể dùng để đánh giá hiệu quả chiến lược; báo
+cáo các tuần tiếp theo sẽ cho bức tranh đầy đủ hơn.
 
 ---
 
@@ -66,8 +82,9 @@ Không đặt lệnh mua/bán mới. Đây là quyết định thận trọng: d
 nhân sự cố, xác nhận độc lập, và triển khai lớp kiểm soát bổ sung trước khi tiếp tục giao dịch — ưu
 tiên an toàn vốn hơn tốc độ xử lý.
 
-**Tổng giá trị giao dịch trong tuần:** ~1.404,7 triệu VND (492,6tr + 912,1tr) · phí giao dịch ước tính
-~1,4 triệu VND (0,1%/lượt) — số liệu chờ đối soát chính thức với sao kê broker.
+**Tổng giá trị giao dịch trong tuần:** 1.408,2 triệu VND (giá vốn thật, đã xác minh qua
+`verify_account_snapshot.py` — xem Mục 7) · phí giao dịch ước tính ~1,4 triệu VND (0,1%/lượt) — số liệu
+phí chờ đối soát chính thức với sao kê broker (giá vốn gốc đã xác minh, chỉ phí giao dịch còn ước tính).
 
 ---
 
@@ -177,10 +194,16 @@ cửa (08:45) → thực thi phiên sáng (09:05) → thực thi phiên chiều 
 
 ## 7. PHỤ LỤC — PHƯƠNG PHÁP LUẬN & LƯU Ý QUAN TRỌNG
 
-- **Cơ sở tính NAV:** giá đóng cửa thị trường ngày 03/07/2026 nhân với khối lượng đã đối soát với sàn,
-  cộng tiền mặt ròng (bao gồm nghĩa vụ thanh toán T+2). Giá vốn dùng để tính lãi/lỗ chưa thực hiện là
-  giá tham chiếu ước tính nội bộ (chưa phải giá khớp bình quân chính thức từ sao kê broker) — số liệu có
-  thể điều chỉnh nhẹ khi đối soát chính thức hoàn tất.
+- **Cơ sở tính NAV & giá vốn (đã nâng cấp cơ chế xác minh sau đính chính ngày 03/07/2026):** giá đóng
+  cửa thị trường ngày 03/07/2026 (BigQuery) nhân với khối lượng đã đối soát với sàn, cộng tiền mặt ròng
+  (bao gồm nghĩa vụ thanh toán T+2). Giá vốn từng mã lấy từ **`bin/verify_account_snapshot.py`** — script
+  mới, đọc trực tiếp log gốc lệnh khớp từ API broker (`dnse_raw_*.jsonl`, field `averagePrice`/
+  `fillQuantity` do chính DNSE trả về), **cross-check độc lập** với journal lệnh khớp nội bộ
+  (`exec_*_journal.csv`, event `FILL`) và với snapshot đã được kiểm toán độc lập trước đó
+  (`eod_account_*.json`). Nếu 3 nguồn lệch số lượng vượt ngưỡng, script báo lỗi và **không** cho phép
+  dùng số liệu để viết báo cáo — không còn tự ý dùng field giá ước tính trung gian (`ref_px_approx`)
+  làm giá vốn thật như bản đầu của báo cáo này đã mắc lỗi. Toàn bộ 23 mã trong báo cáo này đã chạy qua
+  script và **verified=True** (0 lệch số lượng giữa broker thật, journal nội bộ, và snapshot kiểm toán).
 - **Track record còn rất ngắn (3 phiên):** mọi so sánh hiệu suất với VN-Index trong báo cáo này **chỉ
   mang tính mô tả**, chưa đủ ý nghĩa thống kê để đánh giá hiệu quả chiến lược. Cần tối thiểu vài tháng dữ
   liệu để có kết luận đáng tin cậy.

@@ -476,3 +476,16 @@
 
 ## Consolidation 2026-07-03T12:28:12Z
 - [2026-07-03T12:28:06Z] Winston/finding — wake-test-rule8: {"ok": true}
+
+## Consolidation 2026-07-03T12:43:17Z
+- [2026-07-03T12:43:04Z] Mafee/heartbeat — Mafee_20260703_124204: {"status": "still_running", "elapsed_min": 1, "job_id": "Mafee_20260703_124204"}
+- [2026-07-03T12:43:04Z] Mafee/finding — dnse-balance-spacex-20260703: {"account": "0002023347", "timestamp": "2026-07-03T12:45 ICT", "stock": {"totalCash": 8257, "availableCash": 0, "depositInterest": 8257, "totalDebt": 409863737, "depositFeeAmount": 378, "withdrawableCash": -378}, "match_screenshot": {"totalCash_ok": true, "totalDebt_delta_vnd": 1, "nav_from_app": 988629520}, "margin_diagnosis": "REAL margin loan đang tính lãi — totalDebt=409,863,737 VND khớp screenshot (lệch 1 VND timing). depositFeeAmount=378 VND là phí/lãi đang tích. KHÔNG phải T+2 payable — T+2 payable hiển thị ở receivables/settlements, không phải totalDebt với depositFeeAmount. Dữ liệu 07-02 09:46 ghi totalDebt=0 là đúng tại thời điểm đó (trước khi margin được rút). Hiện tại margin đang hoạt động.", "raw_log": "data/execution_logs/dnse_raw_2026-07-03.jsonl"}
+- [2026-07-03T12:36:10Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "in_progress", "note": "starting: reading registry R3 command + pt_v23_audit_2014.py to reproduce baseline"}
+- [2026-07-03T12:36:55Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260703_123555"}
+- [2026-07-03T12:37:56Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260703_123555"}
+- [2026-07-03T12:38:03Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "in_progress", "note": "baseline R3 park=0.7 running (fallback real BQ, cache unverified); polling"}
+- [2026-07-03T12:38:57Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260703_123555"}
+- [2026-07-03T12:39:57Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260703_123555"}
+- [2026-07-03T12:40:57Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260703_123555"}
+- [2026-07-03T12:41:57Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260703_123555"}
+- [2026-07-03T12:42:57Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260703_123555"}

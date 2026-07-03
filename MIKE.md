@@ -158,6 +158,12 @@ việc Mike restart chưa ai kiểm chứng thực tế (không tài liệu nào
 phủ định). Cần quan sát lần dùng thật và ghi kết quả (verified/không) vào đây hoặc
 `kb/INCIDENTS.md` theo khuôn "verified 2026-0X-XX" đã dùng ở nơi khác trong file này.
 
+**Verified 2026-07-03 (happy-path, KHÔNG restart)**: dispatch thật Winston `--bg` (job chạy 14s) +
+wrapper Agent(haiku, nền) theo đúng template trên → task-notification đánh thức turn Mike NGAY khi
+job xong (~vài giây), thay vì chờ hết fallback 600s. Cơ chế chính hoạt động đúng. **Vẫn CHƯA
+verified**: trường hợp Mike restart giữa lúc wrapper đang chờ (notification có sống sót không) —
+chỉ quan sát được khi tình cờ xảy ra; khi đó ghi kết quả vào đây.
+
 ## Việc định kỳ
 - Cron 30' chạy `bin/consolidate.sh` (cơ khí): gộp event mới từ bus → `KNOWLEDGE.md`, bump version,
   rebuild `context_pack.md` (mục "MỚI NHẤT"), refresh `fleet_status.md`, git commit. **Mike không cần làm

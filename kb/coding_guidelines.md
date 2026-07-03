@@ -88,3 +88,28 @@ send a message, write a shared file, call an API that isn't naturally idempotent
 - Writes to shared state files must be atomic (`tmp` + `os.replace`/`os.rename`), never a
   direct overwrite — a kill mid-write must never leave a half-written file for the next run
   to trust.
+
+## 6. Verify Report Data Provenance (client-facing numbers)
+
+**A field's name and a plausible-looking value are not verification.** Root cause of the
+2026-07-03 weekly-report incident: a P&L calc read `avg_cost_vnd` out of a snapshot file whose
+own metadata labeled that field `"source": "ref_px_approx"` (an approximate reference price,
+captured for an unrelated audit purpose) and reported it as real cost basis — flipping VHM's
+week from a gain to a fabricated −6.4% loss. The number looked like a real VND price, so it went
+unchecked into a document meant for clients.
+
+Before any number reaches a report (daily/weekly/monthly, or any client-facing artifact):
+- Trace it back to the system that is *authoritative* for that fact — for trade prices/fills,
+  that is the broker's own fill confirmation (`dnse_raw_*.jsonl`'s `averagePrice`/
+  `fillQuantity`), never a downstream summary file written for a different purpose.
+- Cross-check against a second independent source (internal execution journal `FILL` events,
+  an already-audited snapshot) before trusting either — see `bin/verify_account_snapshot.py`,
+  the only script now permitted to compute cost-basis/P&L for a SpaceX trading report. If two
+  independent sources disagree beyond a tight tolerance, fail loudly (non-zero exit) — do not
+  silently pick one and proceed.
+- Aggregate totals can be accidentally right while per-item attribution is wrong (NAV here only
+  depends on quantity × market price, not cost basis, so it happened to survive unscathed) —
+  don't let a correct-looking total substitute for verifying the breakdown a client will read.
+- This is the same principle as [[verify-real-facts-dont-self-invent]] and the artifact-vs-
+  self-report rule (MIKE.md §Quy chuẩn bắt buộc mục 2) applied to report generation: verify the
+  artifact, don't trust a field because its value looks plausible.
