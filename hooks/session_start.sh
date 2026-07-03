@@ -66,4 +66,19 @@ fi
 
 # Surface any NEW directive Mike assigned to this agent (once, via offset cache).
 source "$ROOT/hooks/_directives.sh"
+
+# Explicit "ready" confirmation (user feedback 2026-07-03): the host's own "Compacting...
+# vẫn đang xử lý Xm" progress UI stops updating before giving an unambiguous final signal,
+# so after a big compact the user has no way to tell "still working" from "done and idle"
+# apart from just trying a new message. This fires LAST in the hook — after KB/memory/job
+# board/directives are all loaded — so it's a truthful "actually ready" signal, not a guess
+# fired before startup work is done. Fire-and-forget: never blocks/breaks session start if
+# Discord is unreachable. Fires on every SessionStart (fresh start, compact-resume, or a
+# watchdog-triggered restart) — all of those are cases where the user benefits from knowing
+# Mike just became ready again.
+if [ "$id" = "Mike" ] && [ -n "${DISCORD_THREAD_ID:-}" ]; then
+  "$ROOT/bin/notify_thread.sh" "🟢 Đã resume xong — sẵn sàng nhận việc tiếp." "$DISCORD_THREAD_ID" \
+    >/dev/null 2>&1 || true
+fi
+
 exit 0
