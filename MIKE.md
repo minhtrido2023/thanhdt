@@ -62,6 +62,28 @@ mọi event của MỘT chuỗi dispatch (caller → agent → auto-callback) m�
 thật, root cause, fix, bài học. Cập nhật mỗi khi có sự cố mới (không phải mọi bug, chỉ sự cố ảnh
 hưởng workflow sống hoặc cần người can thiệp ngoài happy path).
 
+**6. Auto-resume sau khi hết usage limit tài khoản (thêm 2026-07-03, theo yêu cầu user).**
+`dispatch.sh` giờ phân biệt "task lỗi thật" với "hết usage limit 5h chung của tài khoản"
+(`bin/usage_watch.py`) — dấu hiệu: log khớp cụm "usage limit"/"rate limit"/"429"/... HOẶC
+`usage_watch.py --oneline` cho thấy PCT ≥95% tại thời điểm lỗi. Khi khớp: **KHÔNG** coi là
+fail thật (không trip circuit breaker, không auto-callback-fail) — ghi 1 record vào
+`bus/pending_resumes/<job_id>.json` (agent, prompt gốc, resume_at ước tính từ reset-time của
+`usage_watch.py` + buffer 10'), rồi **`bin/resume_pending.py`** (cron mới, mỗi 10') tự động
+`dispatch.sh` lại đúng agent đó với prompt "TIẾP TỤC từ working memory, đừng làm lại từ đầu"
+khi tới giờ. Áp dụng cho **mọi agent dispatch qua `dispatch.sh`** (Taylor/DollarBill/Mafee/...)
+vì cơ chế nằm ở tầng dùng chung, không phải riêng agent nào — đúng ý "toàn team Mike" user yêu
+cầu. Chặn lặp vô hạn: `DISPATCH_MAX_USAGE_RESUMES` (mặc định 3) — quá trần thì rơi về xử lý
+fail bình thường (có trip circuit breaker), phòng trường hợp đây thực ra là bug thật chứ
+không phải usage limit, đội lốt mãi mãi dưới vỏ "đang chờ reset". Đồng bộ (không `--bg`) báo
+hiệu bằng **exit code 5** (khác `exit $rc` của fail thật) — Mike gọi `dispatch.sh` đồng bộ mà
+nhận exit 5 nghĩa là task ĐÃ được queue tự resume, không phải task thất bại, nên báo user đúng
+kiểu "đang chờ tự chạy tiếp" chứ không phải "lỗi". **Giới hạn đã biết:** cơ chế này chỉ cứu
+được headless dispatch qua `dispatch.sh` (Taylor research task headless, v.v.) — KHÔNG cứu
+được phiên tương tác của chính Mike (nếu turn hiện tại của Mike bị rate-limit giữa chừng thì
+turn đó chết, không có cách nào Mike tự lên lịch resume chính mình từ một turn đã chết); với
+Mike, cách phòng ngừa tốt nhất là tự theo dõi `usage_watch.py` khi làm việc dài hơi và báo
+trước cho user thay vì để rơi vào giữa chừng.
+
 ## Việc định kỳ
 - Cron 30' chạy `bin/consolidate.sh` (cơ khí): gộp event mới từ bus → `KNOWLEDGE.md`, bump version,
   rebuild `context_pack.md` (mục "MỚI NHẤT"), refresh `fleet_status.md`, git commit. **Mike không cần làm
@@ -220,6 +242,11 @@ Watchdog bắt **2 kiểu chết** (vì `systemctl is-active` KHÔNG đủ — h
   coverage kiểm chứng: mỗi `finding` của agent trong N ngày gần nhất có `verification` khớp
   `trace_id` chưa. Không tự đoán "quan trọng hay không" (tránh fragile keyword-classifier) — chỉ
   hiện dữ liệu, Mike/user tự quyết định UNVERIFIED nào đáng lo.
+- **`bin/resume_pending.py`** (thêm 2026-07-03, cron `*/10 * * * *`) — fire mọi record đến hạn
+  trong `bus/pending_resumes/` (do `dispatch.sh` ghi khi phát hiện dispatch fail vì hết usage
+  limit tài khoản, không phải task lỗi thật) bằng cách `dispatch.sh` lại agent đó với prompt
+  "tiếp tục từ working memory". Đây là cơ chế đứng sau việc task tự động research không còn
+  cần user quay lại nhắc "tiếp tục" sau khi hết giờ usage limit — xem §Quy chuẩn bắt buộc mục 6.
 - `claude agents` (dashboard mọi phiên nền), Monitor (stream live giữa hai nhịp 30').
 
 ## Bus event — chỉ dành cho báo cáo KHÔNG đồng bộ (cập nhật 2026-07-01)

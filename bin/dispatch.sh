@@ -25,6 +25,15 @@
 # Examples:
 #   bin/dispatch.sh Taylor "Phân tích kỹ thuật VNM"
 #   bin/dispatch.sh Winston "Kiểm tra corp-action hôm nay" --bg --timeout 1200
+#
+# Usage-limit-aware auto-resume (added 2026-07-03): a failure that looks like the ACCOUNT's
+# shared 5-hour usage window (bin/usage_watch.py) is exhausted — not a real task failure —
+# is NOT retried/failed normally. It's queued in bus/pending_resumes/ and automatically
+# re-dispatched by bin/resume_pending.py (cron, every 10 min) once the window has rolled
+# over, capped at DISPATCH_MAX_USAGE_RESUMES (default 3) consecutive resumes. Exit code 5
+# (sync mode) or job status "usage_limited" (--bg) signals this — distinct from a real
+# failure/timeout. Does not trip the circuit breaker (an account-wide constraint isn't the
+# agent's fault). See the _maybe_schedule_usage_resume comment below for the full rationale.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -92,6 +101,87 @@ _circuit_record() {
       "$ROOT/bin/notify_thread.sh" "🔴 **Circuit breaker OPEN** cho **$1** ($_cr_out) — $CIRCUIT_THRESHOLD+ lỗi liên tiếp, tạm dừng dispatch ${CIRCUIT_COOLDOWN}s. Ép chạy: \`DISPATCH_FORCE=1\`." "$_cbtid" 2>/dev/null || true
     fi
   fi
+}
+
+# --- usage-limit-aware auto-resume (added 2026-07-03) ---
+# A headless dispatch can fail not because the TASK is broken but because the ACCOUNT's
+# shared rolling 5-hour usage window (bin/usage_watch.py) is exhausted — every session on
+# this login draws from the same ceiling. Treating that as a normal agent failure is wrong
+# twice over: it would wrongly trip the circuit breaker (punishing an agent for an
+# account-wide constraint, not its own behavior), and it leaves the task dead until a human
+# comes back and re-prompts it manually — exactly the friction the user asked to remove
+# (2026-07-03: "task tự động research bị limit token, chờ reset mới chạy tiếp"). Instead:
+# detect the usage-limit shape, write a one-shot record to bus/pending_resumes/, and let
+# bin/resume_pending.py (cron, every 10 min) re-dispatch automatically once the window
+# has rolled over. Capped at DISPATCH_MAX_USAGE_RESUMES consecutive resumes so a GENUINE
+# recurring bug can't hide behind "still waiting for reset" forever.
+_current_resume_count() {  # parse "[RESUME sau usage-limit #<n> ..." prefix from $prompt, else 0
+  if [[ "$prompt" =~ RESUME\ sau\ usage-limit\ \#([0-9]+) ]]; then
+    echo "${BASH_REMATCH[1]}"
+  else
+    echo 0
+  fi
+}
+
+_looks_like_usage_limit() {  # <logfile> [<err_logfile>] -> 0 if the failure looks usage-limit-shaped
+  local lf="$1" ef="${2:-}" tail_text
+  tail_text="$(tail -c 4000 "$lf" 2>/dev/null)"
+  [ -n "$ef" ] && tail_text="$tail_text$(tail -c 4000 "$ef" 2>/dev/null)"
+  if printf '%s' "$tail_text" | grep -qiE \
+      'usage limit|rate.?limit|resets at|quota exceeded|limit reached|rate_limit_error|"status":[[:space:]]*429'; then
+    return 0
+  fi
+  # Corroborate with the account-wide estimate — catches wording changes in future CLI
+  # versions that the phrase list above doesn't know about yet.
+  local pct
+  pct="$(python3 "$ROOT/bin/usage_watch.py" --oneline 2>/dev/null | awk '{print $1}')"
+  [ -n "$pct" ] && [ "${pct%%.*}" -ge "${DISPATCH_USAGE_LIMIT_PCT:-95}" ] 2>/dev/null
+}
+
+_parse_reset_epoch() {  # "HH:MMZ" -> epoch of the next future occurrence (today or tomorrow UTC)
+  local hhmm="$1" hh mm today_epoch now_epoch
+  [ -z "$hhmm" ] || [ "$hhmm" = "?" ] && return
+  hh="${hhmm%%:*}"; mm="${hhmm#*:}"; mm="${mm%Z}"
+  now_epoch="$(date +%s)"
+  today_epoch="$(date -u -d "today ${hh}:${mm}" +%s 2>/dev/null)" || return
+  if [ "$today_epoch" -le "$now_epoch" ]; then
+    echo "$((today_epoch + 86400))"
+  else
+    echo "$today_epoch"
+  fi
+}
+
+# _maybe_schedule_usage_resume <logfile> [<err_logfile>] -> 0 if a resume WAS scheduled
+# (caller must treat this dispatch as "pending", NOT as a real failure/success — skip
+# circuit-breaker bookkeeping and auto-callback), 1 if not usage-limit-shaped (or the
+# resume cap was hit) -> caller proceeds with normal failure handling.
+_maybe_schedule_usage_resume() {
+  local lf="$1" ef="${2:-}"
+  _looks_like_usage_limit "$lf" "$ef" || return 1
+  local n; n="$(_current_resume_count)"
+  local cap="${DISPATCH_MAX_USAGE_RESUMES:-3}"
+  if [ "$n" -ge "$cap" ]; then
+    "$ROOT/bin/notify.sh" "[dispatch] $id: usage-limit-like failure lặp lại $((n + 1)) lần liên tiếp (job $job_id) — DỪNG auto-resume (chạm trần $cap), có thể KHÔNG PHẢI usage limit thật. Cần người kiểm tra: $lf" 2>/dev/null || true
+    return 1
+  fi
+  local reset_hhmm resume_at
+  reset_hhmm="$(python3 "$ROOT/bin/usage_watch.py" --oneline 2>/dev/null | awk '{print $4}')"
+  resume_at="$(_parse_reset_epoch "$reset_hhmm")"
+  [ -n "$resume_at" ] || resume_at=$(( $(date +%s) + 5 * 3600 ))  # unknown reset -> assume full window
+  resume_at=$((resume_at + ${DISPATCH_USAGE_RESUME_BUFFER:-600}))
+  mkdir -p "$ROOT/bus/pending_resumes"
+  printf '%s' "$prompt" | python3 "$ROOT/bin/mike_json.py" pending-resume-set \
+    "$ROOT/bus/pending_resumes/${job_id}.json" "$id" "$from" "$job_id" "$resume_at" "$((n + 1))"
+  JSET status=usage_limited ended_at="$(date +%s)" \
+       result_summary="account usage limit — auto-resume scheduled at epoch $resume_at (attempt $((n + 1))/$cap)"
+  local resume_ict; resume_ict="$(TZ=Asia/Ho_Chi_Minh date -d "@$resume_at" '+%H:%M %d/%m' 2>/dev/null || echo '?')"
+  "$ROOT/bin/notify.sh" "[dispatch] $id: tài khoản hết usage limit (job $job_id) — KHÔNG PHẢI lỗi task. Tự động resume lúc ~${resume_ict} ICT (lần thử #$((n + 1))/$cap)." 2>/dev/null || true
+  local _tid; _tid="${DISCORD_THREAD_ID:-$(_agent_thread_override "$id")}"
+  [ -n "$_tid" ] || _tid="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
+  if [ -n "$_tid" ]; then
+    "$ROOT/bin/notify_thread.sh" "⏳ **$id** hết usage limit tài khoản (job \`$job_id\`) — không phải lỗi task. TỰ ĐỘNG resume lúc ~${resume_ict} ICT. Không cần làm gì." "$_tid" 2>/dev/null || true
+  fi
+  return 0
 }
 
 mkdir -p "$ROOT/logs"
@@ -276,6 +366,13 @@ if [ "$bg" = "--bg" ]; then
         fi
         return 0
       fi
+      # Check for a usage-limit-shaped failure on EVERY attempt, not just after retries are
+      # exhausted — no point burning the remaining retries immediately against a still-full
+      # account window.
+      if _maybe_schedule_usage_resume "$logfile"; then
+        "$ROOT/bin/consolidate.sh" >> "$ROOT/logs/consolidator.log" 2>&1 || true
+        return 0
+      fi
       if [ "$attempt" -lt "$max_attempts" ]; then
         JSET status=retrying exit_code="$rc"
         attempt=$((attempt + 1))
@@ -325,7 +422,9 @@ if [ "$bg" = "--bg" ]; then
   # and every variable/function it closes over (JSET, SUMMARY, and the vars they use)
   # must be exported and re-entered via `bash -c`. Verified empirically: a plain
   # `setsid _bg_wrapper &` silently fails to find "_bg_wrapper" as a command.
-  export -f _bg_wrapper JSET SUMMARY _agent_thread_override _circuit_record
+  export -f _bg_wrapper JSET SUMMARY _agent_thread_override _circuit_record \
+            _maybe_schedule_usage_resume _looks_like_usage_limit _parse_reset_epoch \
+            _current_resume_count
   export ROOT JOBS_DIR job_id from id ts TIMEOUT RETRIES CLAUDE dispatch_prompt logfile prompt \
          CIRCUIT_DIR CIRCUIT_THRESHOLD CIRCUIT_COOLDOWN
   if command -v setsid >/dev/null 2>&1; then
@@ -365,6 +464,11 @@ else
     JSET status=done ended_at="$(date +%s)" exit_code=0 result_summary="$(SUMMARY)"
     _circuit_record "$id" success
   else
+    if _maybe_schedule_usage_resume "$logfile" "$logfile.err"; then
+      echo "NOTE: dispatch $id (job $job_id) hết usage limit tài khoản — KHÔNG PHẢI lỗi task." >&2
+      echo "      Đã tự động lên lịch resume (bin/resume_pending.py sẽ tự chạy lại, không cần làm gì)." >&2
+      exit 5
+    fi
     fstatus=failed
     if [ "$rc" -eq 124 ]; then
       fstatus=timeout

@@ -22,12 +22,9 @@
 1. **Circuit breaker** per-agent trong `dispatch.sh` (`state/circuit/<id>.json`).
 2. **Idempotency guard** (`Executor._ghost_tickers`, `trading_bot/executor.py`) — lớp phòng thủ
    THỨ HAI cho double-buy, đóng residual gap quant-skeptic tìm thấy sau flock fix (503aa2f).
-   quant-skeptic CONFIRMED (verify_finding.sh 2026-07-02T13:48, sau khi vá killer objection
-   poll-fail-open). **⚠️ CHƯA COMMIT** trong repo WorkingClaude/thanhdt (chỉ nightly backup.sh
-   00:00 ICT auto-commit, không phải per-dispatch như repo mike) — nhưng ĐÃ live-effective ngay
-   cho lần chạy `bot_execute.py` kế tiếp (Python import thẳng từ file, không qua build step).
-   May mắn: 07-03 là ngày HOLD (0 lệnh) → còn buffer tới 07-06 (trim plan, 11 lệnh SELL) để user
-   review trước khi guard này thực sự bị exercise trên tiền thật.
+   quant-skeptic CONFIRMED (verify_finding.sh 2026-07-02T13:48). Review vòng 2 (bên thứ ba, xem
+   dưới) thêm 2 fix nữa. **Đã commit** repo WorkingClaude/thanhdt commit `e1d9b7c` (user duyệt
+   2026-07-02T15:30).
 3. **trace_id** trong bus event (`append_event.sh`, fallback tự động qua `$JOB_ID`).
 4. **`kb/INCIDENTS.md`** — backfill 5 sự cố đã biết (double-buy, job chết theo session, callback
    ping-pong, Mafee zombie, go-live day-1 5 bugs).
@@ -40,7 +37,25 @@ giờ trả `raw={"symbol":...}` giống broker thật, paper trading diễn t�
 trình "unpause" chính thức — đã ghi rõ trong docstring `_ghost_tickers()` (executor.py) + KB
 (chấp nhận theo thiết kế: unpause thủ công, không auto-reconcile). `ghost_order_selfcheck.py`
 giờ 12/12 (thêm I/J cho 2 fix trên, verify catch-regression bằng cách revert-tạm rồi phục hồi).
-**Vẫn CHƯA commit** — vẫn đang chờ user xác nhận trước 07-06.
+**Đã commit** cùng lần với vòng 1 — commit `e1d9b7c` gộp cả 2 vòng review.
+
+## Usage-limit auto-resume (2026-07-03, theo yêu cầu user)
+User gặp vấn đề: task tự động research bị dừng giữa chừng khi tài khoản hết usage limit 5h
+(`bin/usage_watch.py`), phải tự quay lại nhắc "tiếp tục". Đã tự động hóa cho **mọi agent qua
+`dispatch.sh`** (không riêng agent nào — Taylor/DollarBill/Mafee/... đều được):
+- `dispatch.sh` phát hiện dispatch fail vì usage-limit (log khớp cụm từ HOẶC
+  `usage_watch.py` PCT≥95%) → KHÔNG coi là fail thật (không trip circuit breaker) → ghi
+  `bus/pending_resumes/<job_id>.json` (resume_at = reset-time ước tính + buffer 10').
+- **`bin/resume_pending.py`** (cron mới, `*/10 * * * *`) tự fire record đến hạn, dispatch lại
+  đúng agent với prompt "đọc working memory, tiếp tục — đừng làm lại từ đầu".
+- Chặn lặp vô hạn: tối đa 3 lần auto-resume liên tiếp (`DISPATCH_MAX_USAGE_RESUMES`), quá trần
+  → rơi về xử lý fail thật (có trip circuit breaker) — phòng trường hợp đây là bug thật chứ
+  không phải usage limit thật.
+- Test end-to-end đầy đủ (fake usage-limit CLI, sync + `--bg`, cap boundary n=2/n=3, resume
+  chain thật qua `resume_pending.py`) — tất cả đúng như thiết kế.
+- **Giới hạn đã biết:** chỉ cứu headless dispatch, KHÔNG cứu được phiên tương tác trực tiếp
+  của chính Mike (nếu turn hiện tại của Mike bị rate-limit thì turn đó chết hẳn, không tự
+  lên lịch resume chính nó được). Chi tiết: `MIKE.md` §Quy chuẩn bắt buộc mục 6.
 
 ## Workflow ngày trading (SpaceX, T2-T6, giờ ICT)
 1. **17:30** — `bq_freshness_check.sh`: BQ fresh → dispatch DollarBill lập plan T+1

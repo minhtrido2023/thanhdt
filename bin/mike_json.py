@@ -20,6 +20,9 @@ Centralizes all JSON building/reading so the shell scripts depend only on python
       -> exit 0 (closed) / 1 (open) — per-agent dispatch circuit breaker
   circuit-record <state_dir> <agent_id> <success|fail> [threshold] [cooldown_sec]
       -> updates the counter; exit 1 if this call tripped the breaker
+  pending-resume-set <path> <agent_id> <from> <orig_job_id> <resume_at_epoch> <resume_count>
+      -> writes a bus/pending_resumes/<job_id>.json record; prompt text read from STDIN
+         (avoids shell-quoting a large/multiline string as a CLI arg)
 """
 import sys, os, json, uuid, glob, datetime
 
@@ -466,6 +469,26 @@ def cmd_circuit_record(a):
     sys.exit(0)
 
 
+# --- usage-limit auto-resume (bus/pending_resumes/<job_id>.json) ---
+# See dispatch.sh's _maybe_schedule_usage_resume for when these get written, and
+# bin/resume_pending.py (cron) for when they get fired.
+
+def cmd_pending_resume_set(a):
+    """pending-resume-set <path> <agent_id> <from> <orig_job_id> <resume_at_epoch>
+    <resume_count> — prompt text read from STDIN (avoids shell-quoting a large/multiline
+    string as a CLI arg). Atomic write."""
+    fp, agent_id, frm, orig_job_id, resume_at, resume_count = a
+    prompt = sys.stdin.read()
+    obj = {"agent": agent_id, "from": frm, "orig_job_id": orig_job_id,
+           "resume_at": _as_int(resume_at), "resume_count": _as_int(resume_count),
+           "prompt": prompt, "created_at": now_iso()}
+    os.makedirs(os.path.dirname(fp), exist_ok=True)
+    tmp = fp + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(obj, f, ensure_ascii=False)
+    os.replace(tmp, fp)
+
+
 def cmd_settings(a):
     """settings <hooks_dir> <agent_id> [model] — wires the 3 hooks; sets model when given."""
     hooks_dir, aid = a[0], a[1]
@@ -487,6 +510,7 @@ CMDS = {"event": cmd_event, "heartbeat": cmd_heartbeat, "recent": cmd_recent,
         "format-events": cmd_format_events, "fleet-status": cmd_fleet_status,
         "job-set": cmd_job_set, "job-list": cmd_job_list, "job-get": cmd_job_get,
         "circuit-check": cmd_circuit_check, "circuit-record": cmd_circuit_record,
+        "pending-resume-set": cmd_pending_resume_set,
         "settings": cmd_settings, "trace": cmd_trace,
         "verify-coverage": cmd_verify_coverage}
 
