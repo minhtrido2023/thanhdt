@@ -60,12 +60,31 @@ def load_jsonl(paths):
     return rows
 
 
+# Verdict-prominent rendering for `verification` events (quant-skeptic output). MIKE.md
+# codifies "REFUTED/INCONCLUSIVE = KHÔNG wire" as a hard team rule, but until now that verdict
+# sat buried inside a raw JSON payload, indistinguishable at a skim from any other event in the
+# feed that gets injected into every agent's context. A rule a human has to read carefully to
+# not violate is a rule that gets violated under time pressure — surfacing the verdict as the
+# first thing visible (not swept in JSON) is the same "ground truth over self-report" principle
+# already applied to trading (verify artifact, not job status): don't make the reader dig.
+_VERDICT_MARK = {"CONFIRMED": "✅ CONFIRMED", "REFUTED": "❌ REFUTED",
+                  "INCONCLUSIVE": "⚠️ INCONCLUSIVE"}
+
+
+def _verdict_prefix(e):
+    if e.get("event_type") != "verification":
+        return ""
+    p = e.get("payload")
+    v = p.get("verdict") if isinstance(p, dict) else None
+    return (_VERDICT_MARK[v] + " ") if v in _VERDICT_MARK else ""
+
+
 def fmt_event(e):
     p = e.get("payload")
     ps = p if isinstance(p, str) else json.dumps(p, ensure_ascii=False)
-    return "- [%s] %s/%s — %s: %s" % (
+    return "- [%s] %s/%s — %s%s: %s" % (
         e.get("ts", ""), e.get("agent_id", "?"), e.get("event_type", "?"),
-        e.get("topic", ""), ps,
+        _verdict_prefix(e), e.get("topic", ""), ps,
     )
 
 
@@ -81,9 +100,9 @@ def short(e):
     ps = " ".join(ps.split())
     if len(ps) > SHORT_CAP:
         ps = ps[:SHORT_CAP] + " …"
-    return "- [%s] %s/%s — %s: %s" % (
+    return "- [%s] %s/%s — %s%s: %s" % (
         e.get("ts", "")[:19], e.get("agent_id", "?"), e.get("event_type", "?"),
-        e.get("topic", ""), ps,
+        _verdict_prefix(e), e.get("topic", ""), ps,
     )
 
 
@@ -301,6 +320,51 @@ def cmd_trace(a):
         print(fmt_event(e))
 
 
+def cmd_verify_coverage(a):
+    """verify-coverage <bus_dir> <agent_id> [days] — audit report, NOT a gate: every `finding`
+    from <agent_id> in the last N days (default 14), and whether a `verification` event with
+    the same trace_id exists anywhere on the bus. Deliberately does not guess "importance" —
+    that judgment stays with Mike/user (MIKE.md: "finding R&D quan trọng" is reviewed by a
+    human, not a keyword classifier); this just makes the coverage visible instead of requiring
+    a manual grep across every inbox. Findings predating the 2026-07-03 trace_id fix show
+    trace=none (can't be correlated retroactively) rather than being reported as unverified.
+    Exit 0 always (report tool, not pass/fail) — read the table."""
+    bus_dir, agent_id = a[0], a[1]
+    days = _as_int(a[2], 14) if len(a) > 2 else 14
+    inbox_dir = os.path.join(bus_dir, "inbox")
+    agent_fp = os.path.join(inbox_dir, agent_id + ".jsonl")
+    if not os.path.exists(agent_fp):
+        print("no inbox for agent '%s'" % agent_id)
+        return
+    cutoff = (datetime.datetime.utcnow() - datetime.timedelta(days=days)).strftime(TS_FMT)
+    findings = [e for e in load_jsonl([agent_fp])
+                if e.get("event_type") == "finding" and e.get("ts", "") >= cutoff]
+    if not findings:
+        print("no `finding` events from %s in the last %d days" % (agent_id, days))
+        return
+    verifications = {}  # trace_id -> verdict
+    for fn in sorted(glob.glob(os.path.join(inbox_dir, "*.jsonl"))):
+        for e in load_jsonl([fn]):
+            if e.get("event_type") == "verification" and e.get("trace_id"):
+                p = e.get("payload")
+                verifications[e["trace_id"]] = p.get("verdict", "?") if isinstance(p, dict) else "?"
+    print("%-20s %-26s %-30s %-12s" % ("ts", "trace_id", "topic", "verified"))
+    n_unverified = 0
+    for e in sorted(findings, key=lambda e: e.get("ts", "")):
+        tid = e.get("trace_id")
+        if not tid:
+            status = "trace=none"
+        elif tid in verifications:
+            status = verifications[tid]
+        else:
+            status = "UNVERIFIED"
+            n_unverified += 1
+        print("%-20s %-26s %-30s %-12s" % (e.get("ts", "")[:19], (tid or "-")[:26],
+                                            e.get("topic", "")[:30], status))
+    print("\n%d finding(s), %d with a trace_id but no matching verification" %
+          (len(findings), n_unverified))
+
+
 def cmd_job_get(a):
     """job-get <jobs_dir> <job_id> — print one job; exit code reflects state.
     0=done 2=running 3=overdue 1=failed/timeout 4=not-found."""
@@ -423,7 +487,8 @@ CMDS = {"event": cmd_event, "heartbeat": cmd_heartbeat, "recent": cmd_recent,
         "format-events": cmd_format_events, "fleet-status": cmd_fleet_status,
         "job-set": cmd_job_set, "job-list": cmd_job_list, "job-get": cmd_job_get,
         "circuit-check": cmd_circuit_check, "circuit-record": cmd_circuit_record,
-        "settings": cmd_settings, "trace": cmd_trace}
+        "settings": cmd_settings, "trace": cmd_trace,
+        "verify-coverage": cmd_verify_coverage}
 
 
 def main():
