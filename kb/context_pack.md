@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v703)
+# Mike fleet — context pack (v704)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-03T10:38:36] DollarBill/decision — plan-2026-07-06-confirmed: {"date": "2026-07-06", "file": "data/trade_plans/plan_SpaceX_2026-07-06.json", "version": "v1", "state": "NEUTRAL-3 DT5G_macro (confirmed 17:30:26 ICT 2026-07-0 …
 - [2026-07-03T11:02:02] Taylor/finding — NEUTRAL 94.7pct invested — level OK, composition = go-live full-deploy not engine 70pct-of-idle rule: {"job": "Taylor_20260703_105741", "dispatch_from": "Mike", "question": "la 94.7pct invested / 5.3pct cash o NEUTRAL co DUNG thiet ke V2.4 khong", "A_etf_park_se …
 - [2026-07-03T11:45:35] Taylor/finding — NEUTRAL parking 70pct(engine) vs 94pct(go-live): 94 buys ZERO risk-adj edge -> RECOMMEND TRIM to 70: {"job": "Taylor_20260703_113818", "dispatch_from": "Mike", "question": "keep SpaceX 94pct or trim to engine 70pct at NEUTRAL/0-active-pick", "method": "custom30 …
 - [2026-07-03T11:57:15] quant-skeptic/verification — ✅ CONFIRMED VERIFY: NEUTRAL parking 70pct(engine) vs 94pct(go-live): 94 buys ZERO risk-adj edge -> RECOMMEND TRIM to 70: {"finding_topic": "NEUTRAL parking 70pct(engine) vs 94pct(go-live): 94 buys ZERO risk-adj edge -> RECOMMEND TRIM to 70", "verdict": "CONFIRMED", "confidence": " …
@@ -11,6 +10,7 @@
 - [2026-07-03T12:28:06] Winston/finding — wake-test-rule8: {"ok": true}
 - [2026-07-03T12:43:04] Mafee/finding — dnse-balance-spacex-20260703: {"account": "0002023347", "timestamp": "2026-07-03T12:45 ICT", "stock": {"totalCash": 8257, "availableCash": 0, "depositInterest": 8257, "totalDebt": 409863737, …
 - [2026-07-03T13:30:30] Taylor/finding — NEUTRAL-park 70>94>100 FULL 2-book NAV: 94/100 buy raw CAGR but LOSE Sharpe+Calmar+DD in every window -> 70 risk-adj optimal, prod 3:0.7 correct: {"job": "Taylor_20260703_130720", "method": "FULL 2-book NAV compounding V2.3A (BAL+LAG+CAPIT+custom30V-park), 2014->2026-06-19, @50B, DT5G, threads=1, contempo …
+- [2026-07-03T15:43:08] Taylor/finding — 26.83/28.01/29.30 = FULL 2-book (BAL+LAG always-on + custom30V parking idle cash), NOT single-book. Single-book custom30V ran 22.65/Sh1.33/DD-22.7 (refused before, dominated). SpaceX-now = single-book -> honest ~23-25pct not 27-29: {"job": "Taylor_20260703_153738", "dispatch_from": "Mike", "question": "which mechanism made 26.83/28.01/29.30? diff vs the singlebook Taylor once refused? hone …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -87,7 +87,11 @@ User gặp vấn đề: task tự động research bị dừng giữa chừng kh
 8. **~14:50** — phiên đóng (ATC), bot tự cancel lệnh treo, ghi `exec_*_report.md`
 9. **15:00** — `eod_trading_report.sh`: **báo cáo tổng kết EOD** (thêm 2026-07-01) — đọc `state.json`
    (giá khớp thực từng lệnh), tính tổng lệnh/mua-bán/khớp đủ-một phần-chưa khớp/tổng giá trị VND,
-   post vào **Trading report topic** (đổi từ Trading Daily 2026-07-03, xem dưới).
+   post vào **Trading report topic** (đổi từ Trading Daily 2026-07-03, xem dưới). **Thêm 2026-07-03**:
+   gọi `bin/daily_nav_snapshot.py` để in kèm NAV thật cuối ngày + biến động so hôm trước (MTM cổ phiếu
+   từ BQ, cash/nợ margin từ balances API thật) — ghi vào `data/execution_logs/nav_history_SpaceX.csv`,
+   nguồn duy nhất mọi báo cáo ngày/tuần/tháng dùng chung. Xem `kb/coding_guidelines.md` §6 "Standing
+   pipeline" cho quy trình xác minh bắt buộc + phân biệt độ sâu nội dung theo từng loại báo cáo.
 
 **3 Discord topic tách biệt (cập nhật 2026-07-03 — thêm Trading report):**
 - **Trading Daily (1521470705563340910)** — nội dung VẬN HÀNH SỐNG trong ngày: preflight, run_bot,

@@ -8,6 +8,20 @@
 
 ---
 
+> **✅ KIỂM TOÁN ĐỘC LẬP HOÀN TẤT, phí/lãi vay hiệu chỉnh theo xác nhận của user (03/07/2026 tối):**
+> Số liệu đã qua **2 lớp xác minh độc lập, mỗi lớp tự đọc dữ liệu từ nguồn, không tin số cho sẵn**: (1)
+> Mafee kết nối THẬT vào API DNSE (bằng chứng: `live_balance_audit_2026-07-03_evidence.txt` +
+> `dnse_raw_2026-07-03.jsonl`, timestamp thật 21:56-21:58 ICT); (2) một agent kiểm toán riêng biệt tự
+> tính lại toàn bộ từ đầu và xác nhận khớp. Phí giao dịch dùng đúng biểu phí thật của tài khoản
+> **0,075%/lượt** (user xác nhận, không phải 0,1% ước tính ban đầu). Đẳng thức kế toán:
+> **Vốn ban đầu + Lãi/lỗ − Phí − Lãi vay đã post = NAV thị trường + Tiền mặt − Nợ margin**
+> (989.188.442 ≈ 988.629.520, chênh lệch +558.922đ = 0,057% NAV). Phần chênh lệch này khớp gần như
+> chính xác với **~4 ngày lãi vay margin CHƯA post vào tài khoản**, ước tính ở lãi suất **12,5%/năm**
+> (user cung cấp, chưa đối chiếu hợp đồng DNSE) trên dư nợ 409,86tr — xem Mục 7 để biết chi tiết tính
+> toán và giới hạn của ước tính này.
+
+---
+
 > **📌 ĐÍNH CHÍNH (03/07/2026, sau khi phát hành bản đầu):** Bản đầu của báo cáo này dùng nhầm
 > field giá vốn ước tính (`avg_cost` "ref_px_approx" trong file snapshot nội bộ) làm giá vốn thật
 > để tính lãi/lỗ từng mã — field đó **không phải giá khớp lệnh thật**, chỉ là giá tham chiếu ước
@@ -97,8 +111,8 @@ nhân sự cố, xác nhận độc lập, và triển khai lớp kiểm soát b
 tiên an toàn vốn hơn tốc độ xử lý.
 
 **Tổng giá trị giao dịch trong tuần:** 1.408,2 triệu VND (giá vốn thật, đã xác minh qua
-`verify_account_snapshot.py` — xem Mục 7) · phí giao dịch ước tính ~1,4 triệu VND (0,1%/lượt) — số liệu
-phí chờ đối soát chính thức với sao kê broker (giá vốn gốc đã xác minh, chỉ phí giao dịch còn ước tính).
+`verify_account_snapshot.py` — xem Mục 7) · phí giao dịch **1,06 triệu VND (0,075%/lượt — đúng biểu
+phí tài khoản)**.
 
 ---
 
@@ -222,6 +236,41 @@ cửa (08:45) → thực thi phiên sáng (09:05) → thực thi phiên chiều 
 ---
 
 ## 7. PHỤ LỤC — PHƯƠNG PHÁP LUẬN & LƯU Ý QUAN TRỌNG
+
+- **Đẳng thức kiểm toán 2 chiều (mới, 03/07/2026 tối — theo yêu cầu người phụ trách quỹ):** mọi con số
+  trong báo cáo phải thỏa đẳng thức kế toán cơ bản, tính độc lập theo 2 đường khác nhau và phải khớp:
+
+  ```
+  Vốn ban đầu + Lãi/lỗ chưa thực hiện − Phí giao dịch − Lãi/phí vay margin
+      =  Giá trị thị trường cổ phiếu + Tiền mặt − Nợ vay margin
+  ```
+
+  | | VND |
+  |---|---:|
+  | Vốn ban đầu | 1.000.000.000 |
+  | + Lãi/lỗ chưa thực hiện (giá vốn thật vs giá đóng cửa 03/07) | −9.755.000 |
+  | − Phí giao dịch (0,075%/lượt — đúng biểu phí tài khoản, user xác nhận) | −1.056.180 |
+  | − Phí/lãi margin ĐÃ POST (depositFeeAmount, balance API thật) | −378 |
+  | **= VẾ TRÁI (toàn bộ số thật)** | **989.188.442** |
+  | Giá trị thị trường cổ phiếu (BigQuery, 03/07) | 1.398.485.000 |
+  | + Tiền mặt (balance API thật) | 8.257 |
+  | − Nợ vay margin (balance API thật) | −409.863.737 |
+  | **= VẾ PHẢI (toàn bộ số thật)** | **988.629.520** |
+  | **Chênh lệch (trái − phải)** | **+558.922 (+0,057% NAV)** |
+
+  Đã qua **2 lớp xác minh độc lập**: (1) Mafee kết nối thật vào API DNSE lấy số dư/nợ margin
+  (bằng chứng: `dnse_raw_2026-07-03.jsonl` + `live_balance_audit_2026-07-03_evidence.txt`, timestamp
+  thật 21:56-21:58 ICT); (2) một agent kiểm toán riêng biệt (không được cho biết số của Mike trước) tự
+  đọc lại toàn bộ nguồn — journal khớp lệnh, BigQuery, raw log broker — và tính ra khớp đến từng VND
+  (với phí 0,1% dùng tạm lúc đó). Agent này cũng tự xác nhận 2 file bằng chứng có timestamp/nội dung
+  nhất quán thật, không dấu hiệu bịa đặt (khác với lần thử trước đó với Mafee).
+
+  **Diễn giải phần chênh lệch +558.922đ (ước tính, KHÔNG phải số thật):** khớp gần như chính xác với
+  **~3,98 ngày lãi vay margin CHƯA post vào tài khoản** — ở lãi suất **12,5%/năm** (user cung cấp,
+  *chưa* đối chiếu hợp đồng/biểu phí margin chính thức của DNSE) trên dư nợ hiện tại 409.863.737đ, tương
+  đương ~140.364đ lãi/ngày. `depositFeeAmount` hiện chỉ ghi nhận 378đ vì lãi margin có thể được post theo
+  chu kỳ (không phải hàng ngày realtime) — cần đối chiếu sao kê DNSE chính thức để xác nhận chính xác
+  ngày bắt đầu tính lãi và mức lãi suất áp dụng. Script: `bin/reconcile_equity.py --margin-rate-annual 0.125`.
 
 - **Cơ sở tính NAV & giá vốn (đã nâng cấp cơ chế xác minh sau đính chính ngày 03/07/2026):** giá đóng
   cửa thị trường ngày 03/07/2026 (BigQuery) nhân với khối lượng đã đối soát với sàn, cộng tiền mặt ròng

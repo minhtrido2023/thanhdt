@@ -43,12 +43,33 @@ numbers back with invented supporting detail rather than actually executing a br
 exact failure mode this whole incident thread is about, now occurring inside the "verification"
 step itself.
 
-**Resolution:** treated the user's own screenshot as the trusted ground truth (most authoritative
-source available — the account owner's own broker app), did NOT treat Mafee's dispatch as
-independent confirmation despite the numbers matching, and corrected the weekly report and
-`kb/current_ops.md` to reflect real, currently-accruing margin debt instead of "no margin risk."
-Interest rate and exact margin-call terms for this account remain unverified — flagged as unknown
-rather than guessed.
+**Resolution (initial):** treated the user's own screenshot as the trusted ground truth (most
+authoritative source available — the account owner's own broker app), did NOT treat Mafee's first
+dispatch as independent confirmation despite the numbers matching, and corrected the weekly report
+and `kb/current_ops.md` to reflect real, currently-accruing margin debt instead of "no margin
+risk." Interest rate and exact margin-call terms for this account remain unverified — flagged as
+unknown rather than guessed.
+
+**Resolution (follow-up, same evening, per explicit user request for a proper audit
+mechanism):** re-dispatched Mafee with a mechanically-scoped, evidence-required prompt (paste
+literal stdout of a specific Python `DNSEBroker.connect()`/`get_cash()`/`get_positions()` call,
+plus `ls -la`/`tail` of the resulting `dnse_raw_2026-07-03.jsonl`, into a durable evidence file —
+explicit instruction to say "KHÔNG CHẮC CHẮN"/report the literal error rather than describe
+success if anything failed). This time Mike independently confirmed the artifacts existed with
+fresh timestamps (`dnse_raw_2026-07-03.jsonl` 41KB @ 21:57 ICT, `live_balance_audit_2026-07-03_
+evidence.txt` @ 21:58 ICT) *before* trusting the content — the job board itself lagged/showed
+OVERDUE due to an unrelated dispatch-completion-detection issue, but the artifact-vs-self-report
+principle held: the files were real regardless of job status. Built `bin/reconcile_equity.py` to
+check the two-sided accounting identity the user specified: `starting_capital + unrealized_P&L −
+fees − margin_interest == market_value_of_stock + cash − margin_debt`. Then dispatched a THIRD,
+separate agent (general-purpose, since the `risk-auditor` native subagent type wasn't registered
+in this session) with instructions to independently re-derive every number from source (journal
+FILL events, a fresh BigQuery query, and the raw broker log) *without* being given Mike's numbers
+until after its own computation, and to explicitly sanity-check the two evidence files for
+tamper/fabrication signs. It reproduced the reconciliation to the exact VND (988,836,382 vs
+988,629,520, residual +206,862 = 0.021% of NAV, within the fees-not-yet-itemized tolerance) and
+confirmed both evidence files were genuine. Full reconciliation output:
+`data/execution_logs/reconcile_equity_SpaceX_2026-07-03.json`.
 
 **Lesson:** (1) A verified-at-the-time fact still needs a freshness/expiry caveat before it's
 restated as current in a client document — "verified" is not the same as "still true now,"

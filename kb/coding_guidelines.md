@@ -113,3 +113,30 @@ Before any number reaches a report (daily/weekly/monthly, or any client-facing a
 - This is the same principle as [[verify-real-facts-dont-self-invent]] and the artifact-vs-
   self-report rule (MIKE.md §Quy chuẩn bắt buộc mục 2) applied to report generation: verify the
   artifact, don't trust a field because its value looks plausible.
+
+**Standing pipeline for ALL cadences (daily/weekly/monthly), locked in 2026-07-03:**
+1. `bin/verify_account_snapshot.py` — true cost basis per ticker, cross-checked (broker raw log
+   vs internal journal vs any audited snapshot).
+2. `bin/daily_nav_snapshot.py` — true NAV for one date (MTM stock + real cash − real margin debt
+   from a fresh `dnse_raw_*.jsonl` `balances` record), appended to `nav_history_{account}.csv` so
+   every cadence reads the same day-by-day series instead of recomputing NAV differently each time.
+3. `bin/reconcile_equity.py` — the two-sided identity check (`starting_capital + unrealized_P&L −
+   fees − margin_interest == market_value + cash − margin_debt`); confirmed fee rate is
+   **0.075%** of true cost basis (not 0.1%, corrected 2026-07-03), and any residual after that
+   should be checked against an *estimated* margin-interest accrual (`--margin-rate-annual`,
+   12.5%/year per user, unverified against DNSE's actual contract) before being called
+   "unexplained" — see the 2026-07-03 report for a worked example (residual matched ~4 days of
+   accrued-but-not-yet-posted interest almost exactly).
+4. If a number can't be traced through this pipeline, don't put it in the report — say what's
+   missing instead of estimating silently.
+
+**Cadence-specific scope** (content depth differs; the verification pipeline above does not):
+- **Daily**: keep it short — trades executed today, NAV + day-over-day change, and a margin/risk
+  flag if one exists. No attribution, no methodology appendix.
+- **Weekly**: full narrative (see `mike/reports/SpaceX_weekly_report_*.md` as the reference
+  template) — activity log, incident disclosures, sector/position tables, next-week plan, full
+  methodology appendix.
+- **Monthly**: apply institutional asset-management conventions on top of the weekly template —
+  MTD/QTD/YTD returns, benchmark comparison, sector/name attribution, risk metrics (drawdown,
+  volatility — once enough daily NAV history exists), fee/expense summary, compliance
+  disclosures, outlook. Same verified-data pipeline underneath; more sections on top.

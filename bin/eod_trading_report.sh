@@ -191,8 +191,13 @@ elif os.path.exists(mismatch_file):
 PYEOF
 )"
 
-echo "$REPORT"
-"$ROOT/bin/notify_thread.sh" "$REPORT" "$TRADING_THREAD" 2>/dev/null || true
+NAV_SECTION="$(python3 "$ROOT/bin/daily_nav_snapshot.py" --account "$ACCOUNT" --date "$PLAN_DATE" 2>&1)"
+FULL_REPORT="$REPORT
+
+$NAV_SECTION"
+
+echo "$FULL_REPORT"
+"$ROOT/bin/notify_thread.sh" "$FULL_REPORT" "$TRADING_THREAD" 2>/dev/null || true
 "$ROOT/bin/append_event.sh" Mafee status "eod-trading-report" \
   "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\"}" 2>/dev/null || true
 
