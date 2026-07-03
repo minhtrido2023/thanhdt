@@ -1,6 +1,8 @@
-⚠️ MACRO HEALTH DEGRADED (SEV SEV2) @ 2026-06-30 18:39
--> use state source: DT5G_macro
+⚠️ MACRO HEALTH FAILED (SEV SEV1) @ 2026-07-03 08:00
+-> use state source: DT4_only
 market stress: False (vix_elevated=False, vni_below_ma200=False)
 failing checks:
-  [SEV2] missed_runs: 4 trading days since last successful run (2026-06-24)
-macro now: {'date': '2026-06-30', 'state': 3, 'state_dt4': 3, 'cap': 9, 'easing': False, 'active': False}
+  [SEV1] bq_ticker_query: Command '"bq" query --use_legacy_sql=false --project_id=lithe-record-440915-m9 --format=csv --max_rows=2000000 < "/tmp/tmpaeszp_1x.sql"' returned non-zero exit status 127.
+  [SEV1] macro_probe: get_macro_state failed: Command '"bq" query --use_legacy_sql=false --project_id=lithe-record-440915-m9 --format=csv --max_rows=2000000 < "/tmp/tmpoglbutll.sql"' returned non-zero exit status 127.
+stale/missing sources:
+  bq_ticker_vnindex: MISSING / unreadable

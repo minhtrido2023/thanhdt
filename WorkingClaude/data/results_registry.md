@@ -1186,3 +1186,115 @@ vs day-VWAP: open +13.8bps (TRÊN trung bình ngày=xấu để mua), 11:15 −5
 2. **Nguyên nhân = CÙNG cơ chế quality-tilt đã refute sáng nay (composite-as-selector), KHÔNG phải TC artifact.** Bằng chứng: gross vs net-TC chỉ chênh ~0.42pp (H_wk_n1 gross 26.77 vs net 26.35) → damage đến từ SELECTION change, không phải turnover cost. Swap ra tên yieldcombo-thấp (= tên sector-PE-thấp/deep-value = NGUỒN return của VN value) để lấy tên rating≤2 (quality-priced-in) = cắt đúng low-PE tilt. Xác nhận: "cheaper guard" (chỉ swap nếu cand cũng rẻ hơn) giảm damage −3.61→−1.29pp — vì ngừng bán tilt value đi; phần còn âm là whipsaw/redundant swap.
 3. **Cadence: GIỮ QUÝ.** Tuần strictly tệ nhất; tháng tệ hơn quý. Lý do NGOÀI backtest: 8L rating chỉ đổi theo QUÝ (per-ticker 48 updates/12yr = 4/năm, staggered theo release date) → poll dưới-quý KHÔNG có thông tin fundamental mới để hành động, chỉ thêm whipsaw quanh các update lệch pha. Premise "refresh nhanh hơn" là ILLUSORY — không thể refresh nhanh hơn dữ liệu nền. Mechanical quarterly rebal đã bắt trọn rating migration ở đúng cadence mà data hỗ trợ.
 **VERDICT: DO NOT WIRE.** custom30V giữ nguyên mechanical yieldcombo top-30 / cap0.10 / quarterly. Overlay là liều nhỏ của cùng thuốc quality-tilt đã fail full-dose. (H_wk_n1 có giảm MaxDD Full −39.2→−33.9 & Calmar Full 0.76→0.79 nhưng THUA OOS Calmar 0.94→0.90 + mất 3.6pp CAGR → không phải trade hấp dẫn; custom30V là return-sleeve, DT5G lo risk-gating.)
+
+## NEUTRAL parking exposure 70% (engine) vs 94% (go-live) — 2026-07-03 (job Taylor_20260703_113818)
+**Q:** SpaceX go-live sits ~94% invested in custom30V at NEUTRAL / 0 active BAL+LAG picks
+("custom30V_parking_full_deploy", DollarBill hand-set). Engine rule ETF_PARK={3:0.7} parks 70% of
+IDLE cash → with 0 deals, idle=100% → engine-approved target = 70% invested / 30% cash. 94 is ~24pp
+above the tested level and was never backtested. Script: `neutral_exposure_70_vs_94.py`; audit CSV
+`data/neutral_exposure_70_vs_94.csv`. Basket = custom30V (yieldcombo) PIT via `custom_basket.build_pit`
+(gate_rating=3, namecap 0.10, q2m5); DT5G state `vnindex_5state_dt5g_live`; cash@0%.
+- **A (NEUTRAL-day static hold, 70 vs 94):** Sharpe IDENTICAL (FULL 1.57/1.57, IS 1.45/1.45, OOS
+  1.76/1.76); Calmar ~equal (1.50/1.53). annRet 22.25→29.88% (×1.34 = 0.94/0.70), MaxDD −14.9→−19.5%.
+  → exposure scaling is Sharpe-NEUTRAL: 94 buys ZERO risk-adjusted edge, pure leverage-up.
+- **B (fwd path from every NEUTRAL day):** basket drifts up in NEUTRAL (median 1Y +17.8% @70). 94 scales
+  both: 1Y med ret +17.8→+24.1, withinDD −11.4→−15.1. Tail 6M/1Y 5th-pct withinDD −23/−24% @70 →
+  −30/−31% @94 (bad-case crosses −30%).
+- **C (reversal):** from a NEUTRAL day P(hit BEAR/CRISIS) = 12.3%/20s, 21.6%/40s, 31.1%/60s (NEUTRAL is
+  a genuine transition state). Reversal-episode worst-DD: STATIC hold median −6.2→−8.3 (Δ−2.1pp),
+  5th-pct −23.2→−30.1 (Δ−6.9pp). **DT5G-GATED (realistic — gate cuts parked sleeve on flip): worst-DD
+  IDENTICAL 70/94** (median −5.5/−5.5, 5th-pct −14.0/−14.0) → reversal tail of 94 is neutralized IFF
+  the gate manages the 94% (engine ETF pre-fill-sell does; a hand-parked position outside gate mgmt does not).
+- **Verdict:** No data supports 94>70. Risk-adjusted-equivalent; 94 just runs the NEUTRAL sleeve ~34%
+  hotter than the tested/approved V2.4 (whose DD −18.8% / bootstrap 5th-pct −28.6% anchor was built on the
+  70%-of-idle rule). RECOMMEND TRIM SpaceX to engine 70% unless user deliberately mandates a hotter risk
+  profile (a user decision, not DollarBill's to set). Self-check: annRet ratio 29.88/22.25=1.343=0.94/0.70 ✓.
+  Caveat: NEUTRAL day-counts overlap-inflated (not iid); Sharpe-neutrality is a math identity so robust,
+  reversal freqs directional. R&D only — no trade/plan change without user+quant-skeptic sign-off.
+
+---
+## NEUTRAL exposure sweep + V2.5-stack question (Taylor 2026-07-03, job Taylor_20260703_120555)
+Follow-up to the CONFIRMED "70 vs 94" finding. Method: static hold on NEUTRAL days, custom30V
+yieldcombo PIT basket (gate3/namecap/q2m5), DT5G state, cash@0%, port=e·rb. Script
+`neutral_exposure_sweep.py` → `data/neutral_exposure_sweep.csv`.
+
+**CÂU A — 94% is NOT a special ceiling; the whole 70→100% band is Sharpe-neutral, no inflection.**
+| exp | FULL annRet | Sharpe | MaxDD | Calmar | fwd-6M 5th-pct DD |
+|---|---|---|---|---|---|
+| 70% | 22.25 | 1.57 | −14.85 | 1.498 | −23.27 |
+| 80% | 25.43 | 1.57 | −16.83 | 1.511 | −26.21 |
+| 85% | 27.02 | 1.57 | −17.81 | 1.517 | −27.64 |
+| 90% | 28.61 | 1.57 | −18.78 | 1.524 | −29.05 |
+| 94% | 29.88 | 1.57 | −19.55 | 1.529 | −30.16 |
+| 100% | 31.79 | 1.57 | −20.69 | 1.536 | −31.80 |
+- **Sharpe EXACTLY invariant** 70→100 (FULL 1.57 / IS 1.45 / OOS 1.76 flat) — math confirmed (e cancels).
+- **annRet exactly LINEAR** (22.25×e/0.70 reproduces every cell).
+- **MaxDD SUB-linear**: DD/exp ratio shrinks monotonically −21.22→−20.69 (FULL) → DD grows *slower*
+  than exposure. **No steepening, no knee anywhere.** ΔMaxDD/+step is flat-to-declining (~−1pp/+5pp);
+  5th-pct fwd-DD tail smooth & monotone, no discontinuity at 94.
+- **Calmar RISES** with exposure (1.498→1.536 FULL; same IS/OOS) — return linear, DD sub-linear → more
+  exposure = mildly BETTER Calmar. On risk-adjusted metrics 100% ≥ 94% ≥ 70%; they are equivalent.
+- **VERDICT: 94% is an arbitrary point** (DollarBill go-live full-deploy), NOT a risk-optimized ceiling.
+  The 70↔94 choice is a pure raw-DD-tolerance decision with ZERO risk-adjusted edge either way —
+  consistent with the prior "94 buys zero risk-adj edge → trim to engine 70" finding.
+
+**CÂU B — 94%-NEUTRAL and V2.5 MGE=1.5 are DISJOINT regimes; they do NOT stack to 141% gross.**
+- Code proof: `simulate_holistic_nav.py:314` "ETF parking never uses margin"; `:1148-1149`
+  `_mg_ok = margin_tiers is None OR play_type in margin_tiers`; `pt_v23_audit_2014.py:1591`
+  `margin_tiers={CAPIT plays}` under MGE_CAPIT_ONLY=1 (default). S2 lever (`etf_lever_by_date`) fires
+  ONLY on `_lever_dates`, appended ONLY when `_capit_fired` (`pt_v23:1430-31`) = capitulation, which
+  fires ONLY in CRISIS/BEAR washout. At NEUTRAL no CAPIT → no lever date → parking gross ≤1.0.
+  **94%×1.5=141% is UNREACHABLE** (the parking sleeve is leverage-free by construction). Account cap
+  `max_gross_exposure_pct=1.5` (trading_rules) is a Mafee CEILING, not a target.
+- **Two MGE=1.5 variants clarified:**
+  - *REJECTED (registry 2026-06-23, line 212-214):* MGE=1.5 GENERAL (MGE_CAPIT_ONLY=0, margin_tiers=None)
+    → levers WHOLE book always → dove −57.3B into COVID −34% crash → **MaxDD −32.5%, Calmar 0.97**, fragile. LOẠI.
+  - *V2.5 "R&D-complete" (trading_rules v1.9 / S2 lever-park):* MGE=1.5 + MGE_CAPIT_ONLY=1 +
+    RECOVERY_LEVER_PARK=1, gated A∧C-confirm + pb_z≤−0.5 + PE_pctile5y≤0.20 → leverage lands ONLY at
+    confirmed deep bottoms AFTER the drawdown → **MaxDD −20.1%, Calmar 1.49, +1.00pp vs LF @borrow 12.5%.**
+  - Same number, OPPOSITE risk — the difference is WHERE the lever lands. A∧C entry gate = primary
+    protection (bypass it → MaxDD −30.7%, reverts toward the rejected profile, registry line 401).
+- **Total-risk answer:** raising NEUTRAL base to 94 (vs 70) and enabling V2.5 are additive across the
+  CYCLE but NEVER simultaneous in gross (NEUTRAL-park vs CRISIS/BEAR-washout-lever are time-disjoint).
+  Portfolio MaxDD ≈ max(NEUTRAL-regime DD ~−19.5%, washout-lever DD ~−20%) ≈ −20%, NOT a stacked −30%+.
+
+## 🟢 NEUTRAL-park 70 vs 94 vs 100 — FULL 2-book NAV compounding (Taylor 2026-07-03, job _130720, threads=1, self-check 0 VND ×3)
+**Real full-system NAV** (V2.3A: BAL momentum + LAG PEAD + CAPIT sleeve + custom30V parking, 2014-01-02→2026-06-19,
+@50B, DT5G state, contemporaneous batch — REPLACES the 2 detached numbers 22.25/29.88/31.79 of earlier findings).
+Config: `BQ_CACHE_THREADS=1 NAV_TOTAL_B=50 ETF_LIQ=custompitg BASKET_WT=namecap BASKET_SELECT=yieldcombo PARK_STATES=<X> AUDIT_END=2026-06-19 $DNA_PYEXE pt_v23_audit_2014.py v23a none postbull 0 edge`. IS/OOS sliced from combined_nav DAILY (FULL reproduces script print exactly).
+
+| PARK | FULL CAGR | Sharpe | MaxDD | Calmar | IS CAGR/Sh/Cal | OOS CAGR/Sh/Cal |
+|---|---|---|---|---|---|---|
+| 0.70 | 26.83% | 1.78 | −16.5% | 1.63 | 25.21/1.71/1.58 | 28.32/1.83/1.72 |
+| 0.94 | 28.01% | 1.66 | −18.8% | 1.49 | 26.64/1.56/1.48 | 29.28/1.75/1.56 |
+| 1.00 | 29.30% | 1.65 | −19.3% | 1.52 | 26.74/1.49/1.52 | 31.71/1.79/1.65 |
+
+- **Raw CAGR rises monotone** with parking (+1.2pp/step) BUT **Sharpe falls monotone (1.78→1.66→1.65), MaxDD worsens monotone (−16.5→−18.8→−19.3), Calmar drops (1.63→1.49→1.52).** Pattern holds in BOTH IS and OOS halves — not an artifact.
+- **70% DOMINATES on every risk-adjusted metric** (best Sharpe+Calmar, shallowest DD) in all 3 windows; 94/100 win only on raw CAGR.
+- **Refines the 12:11 static-hold sweep**: that isolated-sleeve sweep showed Sharpe≈invariant/Calmar rising, but in the REAL integrated 2-book compounding the extra NEUTRAL parking beta is CORRELATED with book drawdowns → adds return but MORE-than-proportional risk → 94/100 are risk-adjusted **WORSE**, not neutral. STRENGTHENS the prior quant-skeptic-CONFIRMED "trim 94→70": the +1.2pp raw give-up from 94→70 buys +0.12 Sharpe / +0.14 Calmar / +2.3pp shallower DD. **70 = risk-adjusted-optimal parking; production default 3:0.7 is correct.**
+- Drift note: 0.7 here=26.83 vs pin 28.05/28.26 (−1.2..1.4pp) = normal as-of data-drift (registry line 145); used contemporaneous pair per methodology. AUDIT_END=2026-06-19, threads=1, self-check 0 VND all 3 runs.
+
+## 🟢 SINGLE-BOOK custom30V vs FULL 2-book V2.4 — which mechanism made 26.83/28.01/29.30? (Taylor 2026-07-03, job _153738)
+**Question (user):** the 26.83/28.01/29.30% table — is that custom30V-as-a-single-book (the thing Taylor once refused), or the full 2-book engine? And what is the HONEST number for SpaceX's current state (running like single-book custom30V)?
+
+**Mechanism that made 26.83/28.01/29.30 = FULL 2-BOOK, not single-book.**
+- Cmd: `BQ_CACHE_THREADS=1 NAV_TOTAL_B=50 ETF_LIQ=custompitg BASKET_WT=namecap BASKET_SELECT=yieldcombo PARK_STATES=<0.7|0.94|1.0> AUDIT_END=2026-06-19 $DNA_PYEXE pt_v23_audit_2014.py v23a none postbull 0 edge` (registry table L1264-1275).
+- `pt_v23_audit_2014.py` = V2.3A 2-book NAV: **Book BAL 25B (momentum SIGNAL_V11) + Book LAG 25B (PEAD/earnings-drift), BOTH always-on 2014→2026**, active picks most days. custom30V only PARKS idle cash when a book has no deal. `PARK_STATES=3:X` sets the parking % of the IDLE pool in NEUTRAL — it does NOT change the whole NAV. TC=0.1%/side (production audit engine).
+
+**Single-book custom30V (the mechanism Taylor refused) = `custom30v_singlebook_faithful.py`.** WHOLE NAV = custom30V, NO BAL/LAG. DT5G exposure ladder `W_STATE={1:0,2:0.2,3:0.7,4:1.0,5:1.3}`. Costs: TC=0.3% (slippage-incl), borrow 10%/yr on EXBULL leverage, quarterly rebal TC. **RAN 2026-07-03 (contemporaneous, BQ live-fallback, self-consistent w build_pit):**
+
+| Book | Cost | FULL CAGR/Sh/DD/Cal | IS 2014-19 | OOS 2020+ |
+|---|---|---|---|---|
+| **Single-book custom30V (yieldcombo)** | TC0.3%+borrow | **22.65 / 1.33 / −22.7 / 1.00** | 16.98 / 1.16 / −22.7 | 28.15 / 1.47 / −19.9 |
+| Single-book v3comp (full 8L value) | TC0.3%+borrow | 28.37 / 1.63 / −19.6 / 1.44 | 22.83 / 1.56 / −15.0 | 33.74 / 1.71 / −19.6 |
+| **FULL 2-book, PARK 0.70** | TC0.1% | **26.83 / 1.78 / −16.5 / 1.63** | 25.21/1.71/1.58 | 28.32/1.83/1.72 |
+| FULL 2-book, PARK 0.94 | TC0.1% | 28.01 / 1.66 / −18.8 / 1.49 | 26.64/1.56/1.48 | 29.28/1.75/1.56 |
+
+- **The 26.83 (2-book) beats 22.65 (single-book) by ~4pp CAGR AND is far better risk-adj (Sharpe 1.78 vs 1.33, DD −16.5 vs −22.7).** Two drivers: (a) BAL momentum + LAG PEAD active alpha books (~2-3pp); (b) higher avg exposure (2-book runs 90-100% invested vs single-book NEUTRAL-ladder 70%) + cheaper TC convention (0.1 vs 0.3, ~0.5-1pp). On like-for-like TC0.1%, single-book custom30V ≈ 24-25% FULL.
+- **Why single-book was refused before (confirmed):** yieldcombo single-book is a real strategy but strictly DOMINATED by the 2-book (worse CAGR + worse Sharpe + deeper DD), and even single-book v3comp beats yieldcombo — custom30V's value is as the PARKING sleeve inside the 2-book, not standalone. Same family verdict as all 9 sector-compounder sweeps ("real signal, NOT a standalone book").
+
+**HONEST number for SpaceX RIGHT NOW (0 active BAL/LAG, all 23 = custom30V parking, ~94% invested @NEUTRAL):**
+- SpaceX is currently running as **single-book custom30V**, NOT the 2-book. So the honest reference is the single-book row, NOT 26.83/28.01/29.30 (those credit BAL+LAG alpha SpaceX isn't harvesting).
+- At the 70% NEUTRAL ladder: **~22.6% CAGR / Sh 1.33 / DD −22.7%.** SpaceX runs NEUTRAL at ~94% (not 70%), which adds ~+1-2pp raw CAGR but worsens risk-adj (from the 70→94 sweep: more parking beta correlated w drawdowns). Net honest estimate for current composition: **CAGR ≈ 23-25%, Sharpe ≈ 1.25-1.35, MaxDD ≈ −23 to −25%.**
+- **Gap vs the table: the 26.83-29.30% headline OVER-states SpaceX's current expectation by ~3-5pp CAGR, ~0.4-0.5 Sharpe, ~6-8pp shallower DD** — the missing piece is the BAL momentum + LAG PEAD books actually holding active picks. Restore the 2-book (rotate parking→active on signal) to reach the table; stay all-parking and expect the single-book profile.
+- Caveat: single-book_faithful is a selector-isolated sim (NAV from build_pit level ×DT5G ladder ×costs), self-consistent w build_pit (delta-tilt recon 3.3e-16), NOT a full 2-book cash-flow NAV; TC0.3% vs the 2-book table's 0.1% — direction robust, exact pp not identical cost basis.
