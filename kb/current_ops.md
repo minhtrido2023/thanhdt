@@ -1,13 +1,25 @@
 # Current Operations — Mike fleet
 > Mike cập nhật thủ công khi có thay đổi trạng thái quan trọng. Đọc trước mọi thứ khác khi restart.
-> Cập nhật lần cuối: 2026-07-01
+> Cập nhật lần cuối: 2026-07-03
 
 ## Đang trading (LIVE)
-- **SpaceX** (DNSE 0002023347): V2.4 LIVE từ 2026-07-01. 23 vị thế, 93.8% NAV (thiết kế gốc). run_bot.sh
-  09:05 ICT mỗi T2-T6. ⚠️ **Đang có nợ margin THẬT ~409,86tr VND** (xác nhận qua ảnh chụp app DNSE thật
-  03/07 19:37 — không phải chỉ T+2 float như ghi nhận ban đầu 02/07 09:46; xem `kb/INCIDENTS.md` entry
-  2026-07-03 "Real margin debt went unreported"). Dự kiến giảm dần sau khi lệnh trim 06/07 tất toán +
-  T+2 cho tiền bán về — theo dõi sát chi phí lãi qua cuối tuần.
+- **SpaceX** (DNSE 0002023347): V2.4 LIVE từ 2026-07-01. 23 vị thế, hiện 141.4% NAV (do sự cố double-buy
+  07-02, chưa unwind). run_bot.sh 09:05 ICT mỗi T2-T6. ⚠️ **Đang có nợ margin THẬT ~409,86tr VND** (xác
+  nhận qua ảnh chụp app DNSE thật 03/07 19:37 — không phải chỉ T+2 float như ghi nhận ban đầu 02/07
+  09:46; xem `kb/INCIDENTS.md` entry 2026-07-03 "Real margin debt went unreported").
+  **Đã duyệt (2026-07-03, event Mike/decision `plan-07-06-v2-trim-70pct`): trim GỘP về đúng 70% NEUTRAL
+  target** (không chỉ khôi phục 1x như plan v1 cũ) — `data/trade_plans/plan_SpaceX_2026-07-06_v2.json`,
+  bán tổng ~710M VND (71.8% NAV) trong 1 phiên 07-06 09:00-10:30, Mafee đã authorized, không cần duyệt
+  lại. Sau thực thi kỳ vọng: exposure 141.4%→69.6%, dọn sạch 8 mã basket drift (LPB/MSB/VHC/HAH/VIB/
+  VGC/DCM/MBS), margin debt→0 sau T+2 settle 07-08. **Lý do 70% (không phải 93.8-94.7% go-live gốc):**
+  DollarBill từng tự đặt target_equity_pct=93.8% lúc go-live KHÔNG qua backtest — user chất vấn trực
+  tiếp, Taylor backtest full 2-book NAV thật xác nhận 70% thắng tuyệt đối mọi metric risk-adjusted
+  (Sharpe 1.78 vs 1.66, Calmar 1.63 vs 1.49, DD -16.5% vs -18.8%, job `Taylor_20260703_130720`, quant-
+  skeptic CONFIRMED). Đã chính thức hoá thành `trading_rules.json` v2.1 section `neutral_parking`
+  (default 0.70 của phần idle cash khi BAL/LAG rỗng, KHÔNG phải trần tổng cổ phiếu — khi 2 book có deal
+  thật tổng cổ phiếu có thể vượt xa 70%, đúng thiết kế) + cơ chế `risk_dial_override` (muốn park≠0.70
+  bắt buộc field `risk_dial_confirmed_by_user`+`risk_dial_warning_acknowledged`, thiếu 1 trong 2 →
+  Mafee tự block plan).
 - **AlphaLens Paper**: FPT/ACB/MBB/HDB, tracking vs VNINDEX đến 2026-09-30. DollarBill phụ trách.
 
 ## Đang R&D

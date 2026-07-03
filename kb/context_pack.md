@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v706)
+# Mike fleet — context pack (v707)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-03T11:57:15] quant-skeptic/verification — ✅ CONFIRMED VERIFY: NEUTRAL parking 70pct(engine) vs 94pct(go-live): 94 buys ZERO risk-adj edge -> RECOMMEND TRIM to 70: {"finding_topic": "NEUTRAL parking 70pct(engine) vs 94pct(go-live): 94 buys ZERO risk-adj edge -> RECOMMEND TRIM to 70", "verdict": "CONFIRMED", "confidence": " …
 - [2026-07-03T12:11:54] Taylor/finding — NEUTRAL exposure sweep 70-100pct: 94 NOT a special ceiling (whole band Sharpe-neutral, no inflection) + V2.5-lever does NOT stack to 141pct (disjoint regimes): {"job": "Taylor_20260703_120555", "dispatch_from": "Mike", "method": "static hold NEUTRAL days, custom30V yieldcombo PIT (gate3/namecap/q2m5), DT5G state, cash@ …
 - [2026-07-03T12:28:06] Winston/finding — wake-test-rule8: {"ok": true}
 - [2026-07-03T12:43:04] Mafee/finding — dnse-balance-spacex-20260703: {"account": "0002023347", "timestamp": "2026-07-03T12:45 ICT", "stock": {"totalCash": 8257, "availableCash": 0, "depositInterest": 8257, "totalDebt": 409863737, …
@@ -11,18 +10,31 @@
 - [2026-07-03T15:43:08] Taylor/finding — 26.83/28.01/29.30 = FULL 2-book (BAL+LAG always-on + custom30V parking idle cash), NOT single-book. Single-book custom30V ran 22.65/Sh1.33/DD-22.7 (refused before, dominated). SpaceX-now = single-book -> honest ~23-25pct not 27-29: {"job": "Taylor_20260703_153738", "dispatch_from": "Mike", "question": "which mechanism made 26.83/28.01/29.30? diff vs the singlebook Taylor once refused? hone …
 - [2026-07-03T16:39:49] Taylor/finding — neutral_parking codified in trading_rules.json v2.1 — 70pct-of-idle engine default + risk_dial_override gate (Mafee blocks !=0.70 w/o user-confirm): {"job": "Taylor_20260703_163804", "dispatch_from": "Mike", "action": "POLICY WRITE (not research)", "file": "data/trading_rules.json", "version": "1.9->2.1", "n …
 - [2026-07-03T16:48:55] DollarBill/decision — plan-07-06-v2-trim-70pct: {"plan_file": "data/trade_plans/plan_SpaceX_2026-07-06_v2.json", "supersedes": "plan_SpaceX_2026-07-06.json (v1)", "requires_user_approval": true, "decision_gop …
+- [2026-07-03T17:03:21] Mike/decision — plan-07-06-v2-trim-70pct: {"plan_file": "data/trade_plans/plan_SpaceX_2026-07-06_v2.json", "supersedes": "plan_SpaceX_2026-07-06.json (v1)", "requires_user_approval": false, "approved_at …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
 > Mike cập nhật thủ công khi có thay đổi trạng thái quan trọng. Đọc trước mọi thứ khác khi restart.
-> Cập nhật lần cuối: 2026-07-01
+> Cập nhật lần cuối: 2026-07-03
 
 ## Đang trading (LIVE)
-- **SpaceX** (DNSE 0002023347): V2.4 LIVE từ 2026-07-01. 23 vị thế, 93.8% NAV (thiết kế gốc). run_bot.sh
-  09:05 ICT mỗi T2-T6. ⚠️ **Đang có nợ margin THẬT ~409,86tr VND** (xác nhận qua ảnh chụp app DNSE thật
-  03/07 19:37 — không phải chỉ T+2 float như ghi nhận ban đầu 02/07 09:46; xem `kb/INCIDENTS.md` entry
-  2026-07-03 "Real margin debt went unreported"). Dự kiến giảm dần sau khi lệnh trim 06/07 tất toán +
-  T+2 cho tiền bán về — theo dõi sát chi phí lãi qua cuối tuần.
+- **SpaceX** (DNSE 0002023347): V2.4 LIVE từ 2026-07-01. 23 vị thế, hiện 141.4% NAV (do sự cố double-buy
+  07-02, chưa unwind). run_bot.sh 09:05 ICT mỗi T2-T6. ⚠️ **Đang có nợ margin THẬT ~409,86tr VND** (xác
+  nhận qua ảnh chụp app DNSE thật 03/07 19:37 — không phải chỉ T+2 float như ghi nhận ban đầu 02/07
+  09:46; xem `kb/INCIDENTS.md` entry 2026-07-03 "Real margin debt went unreported").
+  **Đã duyệt (2026-07-03, event Mike/decision `plan-07-06-v2-trim-70pct`): trim GỘP về đúng 70% NEUTRAL
+  target** (không chỉ khôi phục 1x như plan v1 cũ) — `data/trade_plans/plan_SpaceX_2026-07-06_v2.json`,
+  bán tổng ~710M VND (71.8% NAV) trong 1 phiên 07-06 09:00-10:30, Mafee đã authorized, không cần duyệt
+  lại. Sau thực thi kỳ vọng: exposure 141.4%→69.6%, dọn sạch 8 mã basket drift (LPB/MSB/VHC/HAH/VIB/
+  VGC/DCM/MBS), margin debt→0 sau T+2 settle 07-08. **Lý do 70% (không phải 93.8-94.7% go-live gốc):**
+  DollarBill từng tự đặt target_equity_pct=93.8% lúc go-live KHÔNG qua backtest — user chất vấn trực
+  tiếp, Taylor backtest full 2-book NAV thật xác nhận 70% thắng tuyệt đối mọi metric risk-adjusted
+  (Sharpe 1.78 vs 1.66, Calmar 1.63 vs 1.49, DD -16.5% vs -18.8%, job `Taylor_20260703_130720`, quant-
+  skeptic CONFIRMED). Đã chính thức hoá thành `trading_rules.json` v2.1 section `neutral_parking`
+  (default 0.70 của phần idle cash khi BAL/LAG rỗng, KHÔNG phải trần tổng cổ phiếu — khi 2 book có deal
+  thật tổng cổ phiếu có thể vượt xa 70%, đúng thiết kế) + cơ chế `risk_dial_override` (muốn park≠0.70
+  bắt buộc field `risk_dial_confirmed_by_user`+`risk_dial_warning_acknowledged`, thiếu 1 trong 2 →
+  Mafee tự block plan).
 - **AlphaLens Paper**: FPT/ACB/MBB/HDB, tracking vs VNINDEX đến 2026-09-30. DollarBill phụ trách.
 
 ## Đang R&D
