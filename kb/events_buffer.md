@@ -408,3 +408,7 @@
 - [2026-07-03T02:05:02Z] Mafee/status — bot-start: {"account": "SpaceX", "plan_date": "2026-07-03", "auto_otp": true}
 - [2026-07-03T02:05:13Z] Mafee/status — bot-done: {"account": "SpaceX", "plan_date": "2026-07-03", "elapsed_s": 11, "rc": 0}
 - [2026-07-03T01:45:08Z] Mike/status — preflight-2026-07-03: {"result": "GREEN", "checks": ["✅ BOT_STOP: CLEAR", "✅ Plan 2026-07-03: 0 lệnh, ~0.000B VND, state=NEUTRAL (DT5G_macro), approved=user", "✅ macro_health: HEALTHY (DT5G_macro, file 9.4h tuổi)", "✅ Gmail OAuth: có refresh_token (tự refresh khi cần)", "✅ BQ ticker_prune: lag=1d ✓"]}
+
+## Consolidation 2026-07-03T06:00:03Z
+- [2026-07-03T06:00:02Z] Mafee/status — bot-start: {"account": "SpaceX", "plan_date": "2026-07-03", "auto_otp": true}
+- [2026-07-03T06:00:03Z] Mafee/status — bot-done: {"account": "SpaceX", "plan_date": "2026-07-03", "elapsed_s": 1, "rc": 0}
