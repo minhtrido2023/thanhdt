@@ -438,6 +438,11 @@ if [ "$bg" = "--bg" ]; then
   _job_watcher "$job_id" "$from" "$id" "$logfile" </dev/null >/dev/null 2>&1 &
   echo "DISPATCHED $id (job=$job_id pid=$pid) → log: $logfile"
   echo "Theo dõi: $ROOT/bin/jobs.sh status $job_id | Khi xong: auto consolidate + Telegram notify."
+  # Fast wake-on-completion snippet (MIKE.md §Quy chuẩn 8): nếu Mike muốn hành động sớm trên
+  # kết quả, gọi wrapper Agent nền bọc `jobs.sh wait` để harness task-notification đánh thức
+  # đúng lúc job xong (~15-30s) thay vì chờ hết ScheduleWakeup. In sẵn để khỏi soạn lại từ trí nhớ.
+  _ww=$((TIMEOUT * (RETRIES + 1) + 60))
+  echo "Follow-up nhanh (bỏ qua nếu fire-and-forget): Agent(prompt=\"Run: $ROOT/bin/jobs.sh wait $job_id --timeout $_ww; nếu status!=done chạy $ROOT/bin/trace.sh $job_id; CHỈ báo status+result literal, KHÔNG retry/quyết định\", run_in_background: true, model: \"haiku\") — ScheduleWakeup fallback ~$((_ww + 300))s" >&2
   echo "$pid" > "$ROOT/logs/.dispatch_${id}_${ts}.pid"
   # Immediate Discord notify so user sees task is in flight (don't wait for watcher heartbeat)
   { _dtid="${DISCORD_THREAD_ID:-$(_agent_thread_override "$id")}"

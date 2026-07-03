@@ -102,6 +102,62 @@ trong phiên), KHÔNG phải giải pháp chắc chắn 100% như headless — M
 "chắc chắn sẽ tự resume", mà phải nói rõ "đã đặt cron trong phiên, xác suất cao sẽ tự chạy
 tiếp, nhưng nếu phiên tôi bị restart giữa chừng thì cron này mất, anh vẫn cần quay lại nhắc."
 
+**8. Fast wake-on-completion sau `dispatch.sh ... --bg` (thêm 2026-07-03, theo yêu cầu user —
+nghiên cứu bằng 3 Explore agent + 1 Plan agent, đọc thẳng code, không suy đoán).** Vấn đề: Mike
+dispatch `--bg` rồi `ScheduleWakeup` 1 khoảng cố định (vd 1200s) để quay lại — nhưng Taylor xong
+sớm hơn nhiều, Discord đã báo GẦN NHƯ TỨC THÌ (`_bg_wrapper` gọi `notify_thread.sh` ngay khi
+`claude -p` exit thành công, 0s delay), mà phiên sống của Mike vẫn ngủ tới đúng chu kỳ mới xử lý.
+Đã xác nhận 2 hướng KHÔNG dùng được: (a) Discord không đánh thức được phiên sống —
+`discord_bot/bot.py`'s `on_message` chủ động bỏ qua mọi message do bot/script đăng
+(`if msg.author.bot: return`); phiên remote-control của Mike hoàn toàn thụ động, chỉ xử lý turn
+mới khi người thật gõ hoặc `ScheduleWakeup` tự bắn. (b) Auto-callback có sẵn trong `dispatch.sh`
+(khi job xong, tự dispatch lại `from` với prompt `[AUTO-CALLBACK...]`, không bao giờ tự lặp —
+fix cho vòng lặp Taylor↔Winston 2026-06-27) không dùng được cho Mike: dù gỡ guard chặn
+target=Mike, `dispatch.sh Mike "..."` spawn **1 tiến trình Mike lạnh hoàn toàn mới**, không phải
+đánh thức phiên đang nói chuyện với user.
+
+**Phát hiện mấu chốt**: nút thắt không phải "phát hiện chậm" (Discord đã 0s) mà là "tín hiệu đã
+có, không có kênh đưa vào lại turn sống". `bin/jobs.sh wait <job_id> [--timeout SEC]` đã có sẵn
+(poll mỗi 15s vào job board bền vững `bus/jobs/*.json`, không cần cơ chế phát hiện mới). **Giải
+pháp**: dùng `Agent(run_in_background: true)` bọc `jobs.sh wait` làm kênh dẫn tín hiệu vào lại
+turn sống — tận dụng cơ chế `<task-notification>` gốc của harness (đã kiểm chứng hoạt động ổn
+định nhiều lần ngay trong phiên nghiên cứu ra rule này).
+
+**Khi nào dùng** (theo Ý ĐỊNH, không phải thời lượng job): dùng khi Mike kết thúc turn hiện tại
+mà thực sự muốn hành động sớm trên kết quả (user đang chờ, hoặc Mike có bước kế tiếp phụ thuộc
+job này). BỎ QUA cho fire-and-forget thật (research/backtest fan-out dài, không ai chờ theo giờ
+cụ thể) — Discord notify + KB consolidate hiện tại đã đủ.
+
+**Cách dùng** — sau mỗi `dispatch.sh ... --bg` rơi vào trường hợp trên:
+```
+Agent(prompt="Run: bin/jobs.sh wait <job_id> --timeout <wrapper_timeout>; nếu status != done,
+chạy bin/trace.sh <job_id>; CHỈ báo lại field status + result literal, KHÔNG tự ý
+retry/quyết định/đánh giá thành-bại", run_in_background: true, model: "haiku")
+```
+Scope cố tình hẹp: wrapper KHÔNG được gọi `dispatch.sh`, KHÔNG tự retry, KHÔNG editorialize —
+quyền quyết định bước tiếp theo luôn ở Mike khi tỉnh dậy, không phải ở wrapper.
+
+**Công thức timeout** (bám retry thật của dispatch.sh, KHÔNG dùng `--timeout` gốc trực tiếp vì
+job có thể đang ở lần thử thứ 2):
+```
+wrapper_wait_timeout = TIMEOUT × (RETRIES + 1) + 60
+ScheduleWakeup_fallback = wrapper_wait_timeout + 300   (đệm an toàn)
+```
+`dispatch.sh` in sẵn snippet này ra stderr ngay sau dòng "Theo dõi:" để khỏi soạn lại từ trí nhớ.
+
+**Fan-out song song → 1 wrapper cho cả batch**, không phải 1 wrapper/job: prompt wrapper lặp
+tuần tự `jobs.sh wait job1 && jobs.sh wait job2 && ...` rồi tổng hợp.
+
+**Vẫn giữ `ScheduleWakeup` làm fallback** (khoảng theo công thức trên, không phải đoán ngắn) —
+đây là lớp XẾP CHỒNG lên cơ chế cũ, không thay thế. Xấu nhất (Mike restart giữa lúc chờ,
+task-notification mất) = suy biến đúng về hành vi hôm nay: không mất dữ liệu job/bus (nằm ở
+`bus/jobs/*.json`, độc lập tiến trình), chỉ chậm hơn, ScheduleWakeup fallback vẫn tự bắn.
+
+⚠️ **Giới hạn chưa xác minh**: độ bền của `Agent(run_in_background)` task-notification qua CHÍNH
+việc Mike restart chưa ai kiểm chứng thực tế (không tài liệu nào trong codebase khẳng định hay
+phủ định). Cần quan sát lần dùng thật và ghi kết quả (verified/không) vào đây hoặc
+`kb/INCIDENTS.md` theo khuôn "verified 2026-0X-XX" đã dùng ở nơi khác trong file này.
+
 ## Việc định kỳ
 - Cron 30' chạy `bin/consolidate.sh` (cơ khí): gộp event mới từ bus → `KNOWLEDGE.md`, bump version,
   rebuild `context_pack.md` (mục "MỚI NHẤT"), refresh `fleet_status.md`, git commit. **Mike không cần làm

@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v698)
+# Mike fleet — context pack (v699)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-02T13:59:30] _trace_test/answer — trace-check-job-id-result: {"job": "_trace_test_20260702_135911", "command": "echo TRACE_CHECK=$JOB_ID", "output": "TRACE_CHECK=_trace_test_20260702_135911", "verdict": "JOB_ID propagated …
 - [2026-07-03T00:14:21] Winston/finding — trace-fix-smoketest: {"ok": true}
 - [2026-07-03T08:00:06] Winston/finding — sbv-weekly-check-2026-07-03: {"date": "2026-07-03", "current_rate": 4.5, "fetch_status": "fetch_failed", "rate_changed": false, "note": "fetch_failed_assumed_unchanged", "verify_log": "/hom …
 - [2026-07-03T10:38:36] DollarBill/decision — plan-2026-07-06-confirmed: {"date": "2026-07-06", "file": "data/trade_plans/plan_SpaceX_2026-07-06.json", "version": "v1", "state": "NEUTRAL-3 DT5G_macro (confirmed 17:30:26 ICT 2026-07-0 …
@@ -11,6 +10,7 @@
 - [2026-07-03T11:45:35] Taylor/finding — NEUTRAL parking 70pct(engine) vs 94pct(go-live): 94 buys ZERO risk-adj edge -> RECOMMEND TRIM to 70: {"job": "Taylor_20260703_113818", "dispatch_from": "Mike", "question": "keep SpaceX 94pct or trim to engine 70pct at NEUTRAL/0-active-pick", "method": "custom30 …
 - [2026-07-03T11:57:15] quant-skeptic/verification — ✅ CONFIRMED VERIFY: NEUTRAL parking 70pct(engine) vs 94pct(go-live): 94 buys ZERO risk-adj edge -> RECOMMEND TRIM to 70: {"finding_topic": "NEUTRAL parking 70pct(engine) vs 94pct(go-live): 94 buys ZERO risk-adj edge -> RECOMMEND TRIM to 70", "verdict": "CONFIRMED", "confidence": " …
 - [2026-07-03T12:11:54] Taylor/finding — NEUTRAL exposure sweep 70-100pct: 94 NOT a special ceiling (whole band Sharpe-neutral, no inflection) + V2.5-lever does NOT stack to 141pct (disjoint regimes): {"job": "Taylor_20260703_120555", "dispatch_from": "Mike", "method": "static hold NEUTRAL days, custom30V yieldcombo PIT (gate3/namecap/q2m5), DT5G state, cash@ …
+- [2026-07-03T12:28:06] Winston/finding — wake-test-rule8: {"ok": true}
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -83,15 +83,21 @@ User gặp vấn đề: task tự động research bị dừng giữa chừng kh
 8. **~14:50** — phiên đóng (ATC), bot tự cancel lệnh treo, ghi `exec_*_report.md`
 9. **15:00** — `eod_trading_report.sh`: **báo cáo tổng kết EOD** (thêm 2026-07-01) — đọc `state.json`
    (giá khớp thực từng lệnh), tính tổng lệnh/mua-bán/khớp đủ-một phần-chưa khớp/tổng giá trị VND,
-   post vào Trading Daily thread.
+   post vào **Trading report topic** (đổi từ Trading Daily 2026-07-03, xem dưới).
 
-**2 Discord thread tách biệt (chốt 2026-07-01):**
-- **Trading Daily (1521470705563340910)** — nội dung NGÀY THỰC THI: preflight, run_bot, heartbeat,
-  EOD report, BQ freshness.
+**3 Discord topic tách biệt (cập nhật 2026-07-03 — thêm Trading report):**
+- **Trading Daily (1521470705563340910)** — nội dung VẬN HÀNH SỐNG trong ngày: preflight, run_bot,
+  heartbeat, BQ freshness. (EOD report đã CHUYỂN sang Trading report — xem dưới.)
 - **DollarBill plan channel (1521183164364754974)** — riêng cho việc LẬP KẾ HOẠCH của DollarBill
   (`send_plan_report.sh`, và mọi `dispatch.sh DollarBill ...` khác dù cron hay ad-hoc). Root cause
   thread-leak (dispatch notify theo thread Mike đang active) đã fix ở tầng `dispatch.sh` qua hàm
   `_agent_thread_override` — route CỐ ĐỊNH cho DollarBill bất kể Mike gọi từ topic nào.
+- **Trading report (1522576692638388364, thêm 2026-07-03, user chỉ đạo)** — kênh DUY NHẤT cho
+  **báo cáo tổng hợp** trading ngày/tuần/tháng (khác với alert vận hành sống ở Trading Daily). Đã
+  chuyển đích `eod_trading_report.sh` (báo cáo EOD + cảnh báo đối soát mismatch) sang topic này.
+  Báo cáo tuần/tháng (khi Mike tự soạn thủ công theo yêu cầu user, vd báo cáo tuần go-live SpaceX
+  2026-07-03) cũng đích đến topic này. User cũng dùng topic này để giao các yêu cầu vận hành liên
+  quan đến báo cáo trading.
 
 **Duyệt plan — LUÔN mirror vào DollarBill plan channel (thêm 2026-07-02, user chỉ đạo):** khi
 user duyệt/thảo luận duyệt plan trực tiếp với Mike ở BẤT KỲ topic Discord nào khác (không riêng
