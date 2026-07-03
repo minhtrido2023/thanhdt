@@ -84,6 +84,24 @@ turn đó chết, không có cách nào Mike tự lên lịch resume chính mìn
 Mike, cách phòng ngừa tốt nhất là tự theo dõi `usage_watch.py` khi làm việc dài hơi và báo
 trước cho user thay vì để rơi vào giữa chừng.
 
+**7. Khi CHÍNH phiên Mike sắp hết usage limit giữa 1 task dài (thêm 2026-07-03, chỉ đạo
+user).** Mục 6 chỉ cứu headless dispatch, không cứu phiên tương tác sống của Mike. Quy tắc:
+khi đang làm 1 task dài chưa xong và tự kiểm `bin/usage_watch.py` thấy tài khoản đang ở mức
+cao (≥~85%), Mike phải **chủ động báo TRƯỚC cho user ngay lúc đó** (đừng đợi tới lúc thật sự
+bị cắt giữa chừng) và **tự đề xuất dùng `CronCreate`** để đặt 1 job one-shot NGAY TRONG
+phiên hiện tại (`recurring: false`, giờ = ước tính reset từ `usage_watch.py` + đệm), prompt =
+tiếp tục task đang dở. Đây là ý user chỉ đạo trực tiếp: "lúc đó bạn nhắc tôi để bạn tạo cron
+tự động trước khi hết token là hợp lý nhất."
+
+⚠️ **Giới hạn PHẢI nói rõ cho user mỗi lần dùng cách này** (khác hẳn `resume_pending.py` ở
+mục 6): `CronCreate` là **session-only, chỉ sống trong bộ nhớ của phiên hiện tại, không ghi
+ra đĩa** (theo mô tả chính thức của tool). Nếu phiên Mike bị restart trong lúc chờ (watchdog
+phát hiện DOWN/ZOMBIE rồi restart unit, hoặc crash thật) → job đó MẤT theo, không cách nào
+phục hồi từ bên ngoài. Đây là phòng ngừa tốt nhất hiện có (chủ động báo trước + đặt cron
+trong phiên), KHÔNG phải giải pháp chắc chắn 100% như headless — Mike không được nói kiểu
+"chắc chắn sẽ tự resume", mà phải nói rõ "đã đặt cron trong phiên, xác suất cao sẽ tự chạy
+tiếp, nhưng nếu phiên tôi bị restart giữa chừng thì cron này mất, anh vẫn cần quay lại nhắc."
+
 ## Việc định kỳ
 - Cron 30' chạy `bin/consolidate.sh` (cơ khí): gộp event mới từ bus → `KNOWLEDGE.md`, bump version,
   rebuild `context_pack.md` (mục "MỚI NHẤT"), refresh `fleet_status.md`, git commit. **Mike không cần làm
