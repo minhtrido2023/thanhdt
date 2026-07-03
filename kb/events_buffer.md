@@ -412,3 +412,6 @@
 ## Consolidation 2026-07-03T06:00:03Z
 - [2026-07-03T06:00:02Z] Mafee/status — bot-start: {"account": "SpaceX", "plan_date": "2026-07-03", "auto_otp": true}
 - [2026-07-03T06:00:03Z] Mafee/status — bot-done: {"account": "SpaceX", "plan_date": "2026-07-03", "elapsed_s": 1, "rc": 0}
+
+## Consolidation 2026-07-03T08:07:01Z
+- [2026-07-03T08:00:06Z] Winston/finding — sbv-weekly-check-2026-07-03: {"date": "2026-07-03", "current_rate": 4.5, "fetch_status": "fetch_failed", "rate_changed": false, "note": "fetch_failed_assumed_unchanged", "verify_log": "/home/trido/thanhdt/WorkingClaude/data/sbv_verify_log.json"}
