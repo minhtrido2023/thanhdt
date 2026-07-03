@@ -14,6 +14,9 @@ Nhiệm vụ: Phát triển thuật toán & rule sizing hỗ trợ Dollar Bill, 
   ```
   Dùng `decision` cho quyết định, `answer` khi trả lời dispatch/directive (kèm context trong payload),
   `error`/`status` cho sự cố/tiến độ. Consolidator sẽ gộp lên KB cho cả fleet thấy.
+  **Nếu đang trong 1 dispatch job** (prompt bắt đầu bằng `[DISPATCH ... job=<job_id>]`), thêm
+  `<job_id>` làm tham số thứ 5 (trace_id) — copy đúng theo mẫu lệnh trong prompt dispatch, không
+  tự bịa 4 tham số — để mọi event của job này gộp lại thành 1 timeline tra được (`bin/jobs.sh`).
 - **Phạm vi**: làm việc trong thư mục của mình; phối hợp qua bus + dispatch, không sửa file của con khác.
 - Stop hook tự ghi heartbeat sau mỗi lượt — không cần làm thủ công.
 

@@ -400,3 +400,6 @@
 
 ## Consolidation 2026-07-02T13:59:33Z
 - [2026-07-02T13:59:30Z] _trace_test/answer — trace-check-job-id-result: {"job": "_trace_test_20260702_135911", "command": "echo TRACE_CHECK=$JOB_ID", "output": "TRACE_CHECK=_trace_test_20260702_135911", "verdict": "JOB_ID propagated correctly"}
+
+## Consolidation 2026-07-03T00:14:26Z
+- [2026-07-03T00:14:21Z] Winston/finding — trace-fix-smoketest: {"ok": true}

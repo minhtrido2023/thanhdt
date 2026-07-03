@@ -264,6 +264,43 @@ def cmd_job_list(a):
         ))
 
 
+def cmd_trace(a):
+    """trace <bus_dir> <trace_id> — every bus event (any agent's inbox) sharing this
+    trace_id (= a dispatch job_id, by convention), sorted chronologically. Prints the
+    job record first if bus_dir/jobs/<trace_id>.json exists. Exit 1 if no events found."""
+    bus_dir, trace_id = a[0], a[1]
+    jobs_fp = os.path.join(bus_dir, "jobs", trace_id + ".json")
+    if os.path.exists(jobs_fp):
+        try:
+            with open(jobs_fp, encoding="utf-8") as f:
+                jo = json.load(f)
+            print("=== job %s ===" % trace_id)
+            for k in ("from", "to", "status", "started_at", "ended_at", "exit_code", "logfile"):
+                if k in jo:
+                    print("%-12s %s" % (k + ":", jo[k]))
+            print()
+        except Exception:
+            pass
+    events = []
+    for fn in sorted(glob.glob(os.path.join(bus_dir, "inbox", "*.jsonl"))):
+        for ln in open(fn, encoding="utf-8"):
+            ln = ln.strip()
+            if not ln:
+                continue
+            try:
+                e = json.loads(ln)
+            except Exception:
+                continue
+            if e.get("trace_id") == trace_id:
+                events.append(e)
+    events.sort(key=lambda e: e.get("ts", ""))
+    if not events:
+        print("no bus events found with trace_id=%s" % trace_id)
+        sys.exit(1)
+    for e in events:
+        print(fmt_event(e))
+
+
 def cmd_job_get(a):
     """job-get <jobs_dir> <job_id> — print one job; exit code reflects state.
     0=done 2=running 3=overdue 1=failed/timeout 4=not-found."""
@@ -386,7 +423,7 @@ CMDS = {"event": cmd_event, "heartbeat": cmd_heartbeat, "recent": cmd_recent,
         "format-events": cmd_format_events, "fleet-status": cmd_fleet_status,
         "job-set": cmd_job_set, "job-list": cmd_job_list, "job-get": cmd_job_get,
         "circuit-check": cmd_circuit_check, "circuit-record": cmd_circuit_record,
-        "settings": cmd_settings}
+        "settings": cmd_settings, "trace": cmd_trace}
 
 
 def main():

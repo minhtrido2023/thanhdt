@@ -41,7 +41,7 @@ done
 SKEPTIC_SYS="$(awk 'NR==1&&/^---$/{f=1;next} f&&/^---$/{f=0;next} !f' "$AGENT_DEF")"
 
 # --- select the finding to attack ---
-finding_topic=""; finding_json=""
+finding_topic=""; finding_json=""; finding_trace_id=""
 if [ -n "$claim" ]; then
   finding_topic="ad-hoc claim"
   finding_json="$(printf '{"topic":"ad-hoc claim","payload":%s}' "$(printf '%s' "$claim" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')")"
@@ -65,11 +65,14 @@ if not pick:
     sys.exit(3)
 finding={"topic":pick.get("topic",""), "event_id":pick.get("event_id",""),
          "ts":pick.get("ts",""), "payload":pick.get("payload")}
-print(json.dumps({"topic":pick.get("topic",""), "finding":finding}, ensure_ascii=False))
+print(json.dumps({"topic":pick.get("topic",""), "finding":finding,
+                   "trace_id":pick.get("trace_id","")}, ensure_ascii=False))
 PY
 )" || { echo "ERROR: no matching '$agent' finding (substr='$topic_substr')" >&2; exit 1; }
   finding_topic="$(printf '%s' "$sel" | python3 -c 'import json,sys; print(json.load(sys.stdin)["topic"])')"
   finding_json="$(printf '%s' "$sel" | python3 -c 'import json,sys; print(json.dumps(json.load(sys.stdin)["finding"], ensure_ascii=False))')"
+  # Propagate the source finding's trace_id so its verdict lands in the same job timeline.
+  finding_trace_id="$(printf '%s' "$sel" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("trace_id") or "")')"
 fi
 
 # --- build the adversarial prompt ---
@@ -122,8 +125,9 @@ obj.setdefault("finding_topic", topic)
 print(json.dumps(obj, ensure_ascii=False))
 PY
 )"
-  # write the verification event to the bus (deterministic, outside the agent)
-  "$ROOT/bin/append_event.sh" "$REVIEWER_ID" verification "VERIFY: $finding_topic" "$verdict_json" >/dev/null
+  # write the verification event to the bus (deterministic, outside the agent) — carry the
+  # source finding's trace_id (if any) so finding + verdict land in the same job timeline.
+  "$ROOT/bin/append_event.sh" "$REVIEWER_ID" verification "VERIFY: $finding_topic" "$verdict_json" "$finding_trace_id" >/dev/null
   "$ROOT/bin/consolidate.sh" >> "$ROOT/logs/consolidator.log" 2>&1 || true
 
   verdict="$(printf '%s' "$verdict_json" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("verdict","?"))')"

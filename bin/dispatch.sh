@@ -146,7 +146,7 @@ _job_watcher() {
 
     # Bus heartbeat (internal always)
     "$ROOT/bin/append_event.sh" "$target" heartbeat "$jid" \
-      "{\"status\":\"still_running\",\"elapsed_min\":${elapsed_min},\"job_id\":\"$jid\"}" 2>/dev/null || true
+      "{\"status\":\"still_running\",\"elapsed_min\":${elapsed_min},\"job_id\":\"$jid\"}" "$jid" 2>/dev/null || true
 
     # --- ANOMALY track: fast-fail detection ---
     # 1) Log empty at 60s → claude likely never started (auth/quota/crash on init)
@@ -206,12 +206,13 @@ SUMMARY() { head -c 200 "$logfile" 2>/dev/null | tr '\n\t' '  '; }
 
 dispatch_prompt="[DISPATCH từ $from | job=$job_id] $prompt
 
-Khi hoàn thành, GHI KẾT QUẢ lên bus bằng:
-  $ROOT/bin/append_event.sh $id finding \"<chủ đề>\" '<payload>'
+Khi hoàn thành, GHI KẾT QUẢ lên bus bằng (tham số cuối '$job_id' là trace_id — LUÔN giữ
+nguyên literal này, KHÔNG đổi tên biến — để mọi event của job này gộp lại được thành 1 timeline):
+  $ROOT/bin/append_event.sh $id finding \"<chủ đề>\" '<payload>' '$job_id'
 (hoặc decision/answer tùy loại). Đây là phiên headless — kết quả PHẢI nằm trên bus để fleet thấy.
 
 Heartbeat (bắt buộc): mỗi 4-5 tool call, ghi tiến độ để caller biết bạn còn sống:
-  $ROOT/bin/append_event.sh $id heartbeat '$job_id' '{\"status\":\"in_progress\",\"note\":\"<đang làm gì>\"}'"
+  $ROOT/bin/append_event.sh $id heartbeat '$job_id' '{\"status\":\"in_progress\",\"note\":\"<đang làm gì>\"}' '$job_id'"
 
 # Source wc_env.sh so google-cloud-sdk/bin is in PATH (needed by bq CLI + sync_bq_cache verify)
 [ -f "$ROOT/../wc_env.sh" ] && source "$ROOT/../wc_env.sh" 2>/dev/null || true

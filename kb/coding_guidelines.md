@@ -59,3 +59,32 @@ For multi-step tasks, state a brief plan:
 ```
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+
+## 5. Idempotent Side Effects
+
+**Any script that can be killed mid-run and re-run must not repeat an external action.**
+
+Root cause of the 2026-07-02 double-buy incident: a headless process crashed after
+`broker.place_order()` succeeded but before it persisted that fact locally. The next run,
+holding the lock correctly, had no way to know the order already existed and placed a
+duplicate. A lock (flock/circuit-breaker) only stops two runs from overlapping — it does
+nothing for one run dying mid-write. Fixed in `trading_bot/executor.py` (`_ghost_tickers` +
+atomic `_save_state`, commit `e1d9b7c`); apply the same reasoning to every new script, not
+just that one.
+
+Before writing any script that calls an external system with a side effect (place an order,
+send a message, write a shared file, call an API that isn't naturally idempotent):
+- Ask: "if this process is killed right after the external call succeeds but before local
+  state is saved, what does the next run do?" If the answer is "repeats the action," that's
+  a bug, not an edge case.
+- Prefer checking the external system's own source of truth (broker's live order book,
+  the sent-messages log, etc.) over trusting only local state — local state can lag reality.
+- When you can't tell whether an action already happened, **fail-safe pause and flag for a
+  human** — do not guess-and-merge into local state, and do not silently proceed as if
+  nothing happened. Guessing wrong is worse than stopping.
+- Persist "the action happened" as close to the actual external call as possible (write
+  immediately after, not batched at the end of a longer loop) — this shrinks the crash
+  window rather than closing it, but every bit of shrinkage matters.
+- Writes to shared state files must be atomic (`tmp` + `os.replace`/`os.rename`), never a
+  direct overwrite — a kill mid-write must never leave a half-written file for the next run
+  to trust.

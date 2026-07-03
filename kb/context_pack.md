@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v688)
+# Mike fleet — context pack (v689)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-02T05:53:45] Spyros/finding — eod-mismatch-SpaceX-07-02-audit: {"job": "Spyros_20260702_054751", "audit_type": "independent_eod_reconciliation", "account": "SpaceX", "date": "2026-07-02", "verdict": "CONFIRMED — mismatch RE …
 - [2026-07-02T08:03:56] Spyros/finding — eod-reaudit-SpaceX-07-02-FINAL: {"job": "Spyros_20260702_080003", "audit_type": "independent_reaudit_eod_reconciliation", "account": "SpaceX", "date": "2026-07-02", "dispatch_from": "Mafee", " …
 - [2026-07-02T08:06:13] Mafee/answer — callback-Spyros-reaudit-07-02-processed: {"job": "Mafee_20260702_080524", "callback_from": "Spyros_20260702_080003", "spyros_verdict": "CONFIRMED REAL — double-buy 11/11 tickers at 2x, no false positiv …
 - [2026-07-02T10:35:58] DollarBill/decision — plan-2026-07-03-eod-confirmed: {"date": "2026-07-03", "file": "data/trade_plans/plan_SpaceX_2026-07-03.json", "version": "v2", "state": "NEUTRAL-3 DT5G_macro (confirmed 17:30:30 ICT)", "actio …
@@ -11,6 +10,7 @@
 - [2026-07-02T12:53:02] Taylor/finding — ping-ack: {"job": "Taylor_20260702_125254", "reply": "OK", "note": "ack ping tu Mike"}
 - [2026-07-02T13:50:47] quant-skeptic/verification — VERIFY: ad-hoc claim: {"finding_topic": "ad-hoc claim — idempotency-key/ghost-order defense (2nd layer beyond fcntl.flock) in executor.py", "verdict": "CONFIRMED", "confidence": "med …
 - [2026-07-02T13:59:30] _trace_test/answer — trace-check-job-id-result: {"job": "_trace_test_20260702_135911", "command": "echo TRACE_CHECK=$JOB_ID", "output": "TRACE_CHECK=_trace_test_20260702_135911", "verdict": "JOB_ID propagated …
+- [2026-07-03T00:14:21] Winston/finding — trace-fix-smoketest: {"ok": true}
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -30,6 +30,32 @@
 
 ## Chờ user quyết định
 - V2.5 live-recommend integration: **2026-07-07** (trigger tự động)
+
+## Reliability hardening (2026-07-02, theo yêu cầu user — 4 việc AgentOps)
+Đã triển khai đủ 4 mục theo thứ tự ưu tiên, chi tiết + self-check trong `kb/INCIDENTS.md` và
+`MIKE.md` §Quy chuẩn bắt buộc:
+1. **Circuit breaker** per-agent trong `dispatch.sh` (`state/circuit/<id>.json`).
+2. **Idempotency guard** (`Executor._ghost_tickers`, `trading_bot/executor.py`) — lớp phòng thủ
+   THỨ HAI cho double-buy, đóng residual gap quant-skeptic tìm thấy sau flock fix (503aa2f).
+   quant-skeptic CONFIRMED (verify_finding.sh 2026-07-02T13:48, sau khi vá killer objection
+   poll-fail-open). **⚠️ CHƯA COMMIT** trong repo WorkingClaude/thanhdt (chỉ nightly backup.sh
+   00:00 ICT auto-commit, không phải per-dispatch như repo mike) — nhưng ĐÃ live-effective ngay
+   cho lần chạy `bot_execute.py` kế tiếp (Python import thẳng từ file, không qua build step).
+   May mắn: 07-03 là ngày HOLD (0 lệnh) → còn buffer tới 07-06 (trim plan, 11 lệnh SELL) để user
+   review trước khi guard này thực sự bị exercise trên tiền thật.
+3. **trace_id** trong bus event (`append_event.sh`, fallback tự động qua `$JOB_ID`).
+4. **`kb/INCIDENTS.md`** — backfill 5 sự cố đã biết (double-buy, job chết theo session, callback
+   ping-pong, Mafee zombie, go-live day-1 5 bugs).
+
+**Review vòng 2 (2026-07-02, bên thứ ba độc lập)** — verify lại cơ chế bằng dữ liệu DNSE thật
+(6.338 lệnh `dnse_raw_2026-07-02.jsonl`), xác nhận cơ chế đúng, tìm thêm 2 gap không-chặn +
+1 note vận hành, cả 3 đã fix/ghi ngay trong lượt: (a) `_save_state()` không atomic → giờ
+tmp+`os.replace()`; (b) `PaperBroker.poll_orders()` trả `raw=None` → guard là no-op trên paper,
+giờ trả `raw={"symbol":...}` giống broker thật, paper trading diễn tập được; (c) không có quy
+trình "unpause" chính thức — đã ghi rõ trong docstring `_ghost_tickers()` (executor.py) + KB
+(chấp nhận theo thiết kế: unpause thủ công, không auto-reconcile). `ghost_order_selfcheck.py`
+giờ 12/12 (thêm I/J cho 2 fix trên, verify catch-regression bằng cách revert-tạm rồi phục hồi).
+**Vẫn CHƯA commit** — vẫn đang chờ user xác nhận trước 07-06.
 
 ## Workflow ngày trading (SpaceX, T2-T6, giờ ICT)
 1. **17:30** — `bq_freshness_check.sh`: BQ fresh → dispatch DollarBill lập plan T+1
