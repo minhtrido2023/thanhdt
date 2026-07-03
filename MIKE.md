@@ -208,7 +208,18 @@ Watchdog bắt **2 kiểu chết** (vì `systemctl is-active` KHÔNG đủ — h
   `bin/spawn_child.sh`, `bin/watchdog.sh`, `bin/fleet_health.sh`, `bin/is_serving.py`,
   `bin/context_watch.py`, `bin/usage_watch.py`, `bin/session_brief.py`, `bin/discover_sessions.py`,
   `bin/notify.sh` (push cảnh báo ra Telegram — dùng bởi watchdog), `bin/jobs.sh` (poll job board),
-  helper JSON `bin/mike_json.py` (gồm `job-set/job-list/job-get`).
+  helper JSON `bin/mike_json.py` (gồm `job-set/job-list/job-get/trace/verify-coverage`).
+- **`bin/trace.sh <job_id> [--log]`** (thêm 2026-07-03) — gộp job record + mọi bus event cùng
+  `trace_id` (=job_id) thành 1 timeline, thay vì grep tay nhiều file. `append_event.sh` tự truyền
+  `trace_id` khi agent copy đúng mẫu lệnh trong prompt dispatch (tham số thứ 5).
+- **`bin/staleness_watch.py`** (thêm 2026-07-03) — watch-the-watcher cho pipeline tự báo cáo
+  freshness qua field `ts` (hiện có `data/macro_health.json`); nối vào `watchdog.sh` cron 10',
+  phân biệt STALE (quá cũ) vs UNKNOWN (mất/hỏng file). Thêm artifact mới vào `WATCH` trong script
+  khi có pipeline khác từng gây sự cố tương tự.
+- **`bin/verification_audit.sh <agent_id> [days]`** (thêm 2026-07-03) — báo cáo (KHÔNG phải gate)
+  coverage kiểm chứng: mỗi `finding` của agent trong N ngày gần nhất có `verification` khớp
+  `trace_id` chưa. Không tự đoán "quan trọng hay không" (tránh fragile keyword-classifier) — chỉ
+  hiện dữ liệu, Mike/user tự quyết định UNVERIFIED nào đáng lo.
 - `claude agents` (dashboard mọi phiên nền), Monitor (stream live giữa hai nhịp 30').
 
 ## Bus event — chỉ dành cho báo cáo KHÔNG đồng bộ (cập nhật 2026-07-01)
