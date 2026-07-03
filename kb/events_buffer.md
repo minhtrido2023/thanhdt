@@ -489,3 +489,32 @@
 - [2026-07-03T12:40:57Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260703_123555"}
 - [2026-07-03T12:41:57Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260703_123555"}
 - [2026-07-03T12:42:57Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260703_123555"}
+
+## Consolidation 2026-07-03T13:05:57Z
+- [2026-07-03T12:43:57Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260703_123555"}
+- [2026-07-03T12:44:44Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "in_progress", "note": "baseline park=0.7 at phase 4b LAG price fetch chunk 3/4; real-BQ slow but progressing"}
+- [2026-07-03T12:44:57Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260703_123555"}
+- [2026-07-03T12:45:57Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260703_123555"}
+- [2026-07-03T12:46:58Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260703_123555"}
+- [2026-07-03T12:47:58Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260703_123555"}
+- [2026-07-03T12:48:03Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "in_progress", "note": "baseline done 26.83pct (data-drift vs pinned 28.05, methodology confirmed 0VND); launched park=0.94 + park=1.0 in parallel"}
+- [2026-07-03T12:48:58Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260703_123555"}
+- [2026-07-03T12:49:58Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260703_123555"}
+- [2026-07-03T12:50:48Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "in_progress", "note": "park 0.94 + 1.0 both at phase 3 price load; parallel real-BQ"}
+- [2026-07-03T12:50:58Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20260703_123555"}
+- [2026-07-03T12:51:16Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "in_progress", "note": "step1 reproducing R3 baseline PARK_STATES=3:0.7"}
+- [2026-07-03T12:51:58Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20260703_123555"}
+- [2026-07-03T12:52:58Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20260703_123555"}
+- [2026-07-03T12:53:58Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20260703_123555"}
+- [2026-07-03T12:54:58Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20260703_123555"}
+- [2026-07-03T12:55:58Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20260703_123555"}
+- [2026-07-03T12:56:58Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20260703_123555"}
+- [2026-07-03T12:57:59Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20260703_123555"}
+- [2026-07-03T12:58:59Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "still_running", "elapsed_min": 23, "job_id": "Taylor_20260703_123555"}
+- [2026-07-03T12:59:59Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20260703_123555"}
+- [2026-07-03T13:00:59Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "still_running", "elapsed_min": 25, "job_id": "Taylor_20260703_123555"}
+- [2026-07-03T13:01:59Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "still_running", "elapsed_min": 26, "job_id": "Taylor_20260703_123555"}
+- [2026-07-03T13:02:59Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "still_running", "elapsed_min": 27, "job_id": "Taylor_20260703_123555"}
+- [2026-07-03T13:03:59Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "still_running", "elapsed_min": 28, "job_id": "Taylor_20260703_123555"}
+- [2026-07-03T13:04:59Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "still_running", "elapsed_min": 29, "job_id": "Taylor_20260703_123555"}
+- [2026-07-03T13:05:30Z] Taylor/heartbeat — Taylor_20260703_123555: {"status": "in_progress", "note": "baseline 3:0.7 gives FULL 26.83 vs pin 28.26 (-1.43pp) - diagnosing drift before step2"}

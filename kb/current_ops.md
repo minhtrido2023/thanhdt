@@ -3,7 +3,11 @@
 > Cập nhật lần cuối: 2026-07-01
 
 ## Đang trading (LIVE)
-- **SpaceX** (DNSE 0002023347): V2.4 LIVE từ 2026-07-01. 23 vị thế, 93.8% NAV. run_bot.sh 09:05 ICT mỗi T2-T6.
+- **SpaceX** (DNSE 0002023347): V2.4 LIVE từ 2026-07-01. 23 vị thế, 93.8% NAV (thiết kế gốc). run_bot.sh
+  09:05 ICT mỗi T2-T6. ⚠️ **Đang có nợ margin THẬT ~409,86tr VND** (xác nhận qua ảnh chụp app DNSE thật
+  03/07 19:37 — không phải chỉ T+2 float như ghi nhận ban đầu 02/07 09:46; xem `kb/INCIDENTS.md` entry
+  2026-07-03 "Real margin debt went unreported"). Dự kiến giảm dần sau khi lệnh trim 06/07 tất toán +
+  T+2 cho tiền bán về — theo dõi sát chi phí lãi qua cuối tuần.
 - **AlphaLens Paper**: FPT/ACB/MBB/HDB, tracking vs VNINDEX đến 2026-09-30. DollarBill phụ trách.
 
 ## Đang R&D

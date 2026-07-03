@@ -19,6 +19,17 @@
 > (993.598.747 VND) không đổi** — số liệu này vốn chỉ phụ thuộc giá thị trường × khối lượng đã đối
 > soát broker, không phụ thuộc giá vốn, nên không bị ảnh hưởng bởi lỗi trên.
 
+> **📌 ĐÍNH CHÍNH THỨ HAI (03/07/2026 tối, sau khi user gửi ảnh chụp app DNSE thật):** Bản trước
+> của báo cáo này (Mục 4 cũ) khẳng định "không có rủi ro vay margin ... dư nợ vay = 0 VND". Đây là
+> **SAI ở thời điểm hiện tại**. Ảnh chụp app DNSE của user (03/07 19:37) cho thấy tài khoản đang có
+> **nợ margin THẬT: 409.863.737 VND**, đang tính phí/lãi. Số 0 VND trong bản trước lấy từ 1 lần đọc
+> API broker thật lúc 02/07 09:46 ICT (KHÔNG phải bịa — có log gốc) — đúng tại thời điểm đó, nhưng
+> đã **cũ**: giữa lúc đó và tối 03/07, DNSE đã chuyển phần tiền mặt âm (từ sự cố double-buy) thành
+> **khoản vay margin chính thức, có tính lãi**. Báo cáo trước không cảnh báo số liệu có thể đã lỗi
+> thời trước khi đưa vào bản chính thức. Đã sửa toàn bộ Mục 1 và Mục 4 bên dưới theo số liệu thật.
+> **Lãi suất/điều khoản margin cụ thể của tài khoản này CHƯA xác minh được** — không đoán số, cần
+> tra cứu thêm trước khi định lượng chi phí lãi chính xác.
+
 ---
 
 ## 1. TÓM TẮT ĐIỀU HÀNH (Executive Summary)
@@ -29,9 +40,12 @@ Tài khoản SpaceX chính thức đi vào vận hành thực (go-live) ngày **
 | Chỉ tiêu | Giá trị |
 |---|---|
 | NAV đầu kỳ (01/07/2026) | 1.000.000.000 VND |
-| NAV cuối kỳ, theo giá thị trường (03/07/2026) | **993.598.747 VND** |
-| Thay đổi NAV trong kỳ | **−6.401.253 VND (−0,64%)** |
+| Tài sản ròng cuối kỳ, số THẬT từ app DNSE (03/07/2026 19:37) | **988.629.520 VND** |
+| Thay đổi trong kỳ | **−11.370.480 VND (−1,14%)** |
 | VN-Index cùng kỳ (30/06 → 03/07) | 1.860,01 → 1.862,08 (**+0,11%**) |
+| — trong đó: Cổ phiếu (giá thị trường 03/07) | 1.398.485.000 VND |
+| — trong đó: Tiền mặt | 8.257 VND |
+| — trong đó: **Nợ margin thật (đang tính lãi)** | **−409.863.737 VND** |
 | Số phiên giao dịch | 3/3 (01/07, 02/07 thực hiện lệnh; 03/07 tạm dừng chủ động — xem mục 3) |
 | Số mã đang nắm giữ | 23 |
 | Tỷ trọng cổ phiếu/NAV (thời điểm báo cáo) | 140,7%* |
@@ -104,13 +118,21 @@ sách quản trị rủi ro nội bộ (đạt 19,8% / 19,3% / 15,6% / 15,0%).
 (so khớp dữ liệu lệnh nội bộ với sổ lệnh thực từ sàn), và được xác nhận độc lập lần thứ hai bởi một quy
 trình kiểm toán tách biệt trước khi hành động khắc phục được phê duyệt.
 
-**Không phát sinh rủi ro tài chính bất thường:**
-- Đây **không phải** vay margin — số dư tiền mặt âm tạm thời (~−405 triệu VND) là khoản phải thanh toán
-  theo cơ chế **T+2 tiêu chuẩn của thị trường chứng khoán Việt Nam** (2 ngày làm việc để hoàn tất thanh
-  toán sau khi khớp lệnh), xác nhận trực tiếp từ API số dư của công ty chứng khoán: dư nợ vay = 0 VND,
-  lãi suất phát sinh = 0 VND.
-- Vì cơ chế T+2, không có áp lực phải bán tháo trước ngày 06/07 — có đủ thời gian lên kế hoạch xử lý
-  một cách có trật tự, đã được phê duyệt ngay trong ngày phát hiện sự cố.
+**Cập nhật rủi ro tài chính (đính chính tối 03/07/2026 — xem banner đầu báo cáo):**
+- Tại thời điểm phát hiện sự cố (02/07 09:46 ICT), số dư tiền mặt âm (~−405 triệu VND) được xác nhận qua
+  API broker là dư nợ vay = 0 VND — tức lúc đó vẫn là khoản phải thanh toán T+2 thông thường, chưa phải
+  margin.
+- **Tuy nhiên, tính đến tối 03/07/2026, tình trạng đã thay đổi:** ảnh chụp app DNSE thật của người phụ
+  trách quỹ cho thấy khoản thiếu hụt tiền mặt nói trên **đã được chuyển thành khoản vay margin chính
+  thức, đang tính phí/lãi** — dư nợ margin hiện tại: **409.863.737 VND**. Đây là chi phí thật, không
+  phải chỉ là số dư âm kỹ thuật chờ thanh toán nữa.
+- **Lãi suất margin cụ thể của tài khoản chưa được xác minh** — cần tra cứu hợp đồng/biểu phí với DNSE
+  trước khi định lượng chính xác chi phí lãi phát sinh qua cuối tuần (Thứ Bảy 04/07 – Chủ Nhật 05/07)
+  cho đến khi lệnh trim Thứ Hai 06/07 tất toán (lưu ý: tiền bán ra từ trim cũng cần thêm T+2 để về tài
+  khoản, nên khoản nợ margin nhiều khả năng KHÔNG hết ngay trong ngày 06/07 mà kéo dài thêm 1-2 ngày
+  làm việc — cần theo dõi sát và cân nhắc có nên nộp thêm tiền mặt để đóng sớm khoản vay hay không).
+- Không có dấu hiệu bị gọi ký quỹ bổ sung (margin call) tại thời điểm báo cáo, nhưng đây là điểm cần
+  theo dõi liên tục cho đến khi vị thế được tất toán về đúng kế hoạch.
 
 **Biện pháp khắc phục (đã triển khai, có kiểm thử độc lập trước khi đưa vào production):**
 1. Bổ sung cơ chế khóa độc quyền (exclusive lock) — đảm bảo không thể có 2 tiến trình đặt lệnh cùng lúc
@@ -131,32 +153,37 @@ trọng cổ phiếu/NAV trở về **94,7%** — đúng thiết kế chiến l�
 
 ### 5.1 Phân bổ theo ngành
 
-| Ngành | Giá trị thị trường (VND) | % NAV |
+*Bảng dưới dùng số THẬT từ app DNSE (03/07 19:37) làm mẫu số Tài sản ròng — xem đính chính thứ hai đầu
+báo cáo.*
+
+| Ngành | Giá trị thị trường (VND) | % Tài sản ròng |
 |---|---:|---:|
-| Ngân hàng | 1.143.830.000 | 115,1%* |
+| Ngân hàng | 1.143.830.000 | 115,7%* |
 | Bất động sản | 90.960.000 | 9,2% |
 | Thép | 62.775.000 | 6,3% |
 | Chứng khoán | 45.480.000 | 4,6% |
-| Vật liệu xây dựng | 17.380.000 | 1,7% |
+| Vật liệu xây dựng | 17.380.000 | 1,8% |
 | Hóa chất/Phân bón | 14.140.000 | 1,4% |
 | Thủy sản/Thực phẩm | 5.930.000 | 0,6% |
 | Vận tải/Logistics | 5.190.000 | 0,5% |
-| **Tổng cổ phiếu** | **1.398.485.000** | **140,7%*** |
-| Tiền mặt (T+2 float) | −404.886.253 | −40,7%* |
-| **NAV** | **993.598.747** | **100%** |
+| **Tổng cổ phiếu** | **1.398.485.000** | **141,4%*** |
+| Tiền mặt | 8.257 | 0,0% |
+| **Nợ margin (đang tính lãi)** | **−409.863.737** | **−41,5%*** |
+| **Tài sản ròng (số thật từ DNSE)** | **988.629.520** | **100%** |
 
-*\* Tỷ trọng ngành Ngân hàng và tổng tỷ trọng cổ phiếu phản ánh đúng con số TẠM THỜI trước khi xử lý sự
-cố mục 4. Sau trim (dự kiến 06/07): Ngân hàng ước còn ~73,5% NAV, tổng cổ phiếu ~95,0% NAV, tiền mặt
-~5,0% NAV — xem chi tiết mục 6.*
+*\* Tỷ trọng ngành Ngân hàng, tổng tỷ trọng cổ phiếu, và tỷ trọng nợ margin phản ánh đúng con số TẠM THỜI
+trước khi xử lý sự cố mục 4. Sau trim (dự kiến 06/07, có thể trễ thêm 1-2 ngày làm việc do T+2 trên tiền
+bán ra — xem mục 4): Ngân hàng ước còn ~73,5% NAV, tổng cổ phiếu ~95,0% NAV, nợ margin ước về gần 0 sau
+khi tiền bán trim về tài khoản — xem chi tiết mục 6.*
 
 ### 5.2 Top vị thế tập trung nhất (đơn lẻ) — hiện tại vs. sau xử lý
 
-| Mã | % NAV hiện tại | % NAV dự kiến sau trim (06/07) | Giới hạn chính sách |
+| Mã | % Tài sản ròng hiện tại | % dự kiến sau trim (06/07) | Giới hạn chính sách |
 |---|---:|---:|---:|
-| BID | 19,6% | 9,8% | 10,0% |
-| CTG | 19,2% | 9,6% | 10,0% |
+| BID | 19,7% | 9,8% | 10,0% |
+| CTG | 19,3% | 9,6% | 10,0% |
 | VPB | 15,7% | 7,8% | 10,0% |
-| MBB | 14,9% | 7,5% | 10,0% |
+| MBB | 15,0% | 7,5% | 10,0% |
 
 Sau khi trim hoàn tất, toàn bộ danh mục tuân thủ giới hạn tập trung 10%/mã theo chính sách quản trị rủi
 ro.
@@ -167,8 +194,10 @@ ro.
 
 **Thứ Hai 06/07/2026 — Ưu tiên số 1: Xử lý dứt điểm sự cố mục 4**
 - Bán phần vượt trội của 11 mã (đưa về đúng 1x khối lượng kế hoạch gốc). Không mua mới trong phiên này.
-- Kết quả dự kiến: NAV ~993,6 triệu VND (không đổi đáng kể do chỉ điều chỉnh khối lượng, không phải
-  thay đổi chiến lược), tỷ trọng cổ phiếu ~95,0% NAV, tiền mặt đệm ~5,0% NAV.
+- Kết quả dự kiến: tỷ trọng cổ phiếu ~95,0% Tài sản ròng, tiền bán ra ~454 triệu VND dùng để trả bớt nợ
+  margin — **nhưng tiền bán ra cần thêm T+2 mới thực sự về tài khoản**, nên dư nợ margin nhiều khả năng
+  chưa về 0 ngay trong ngày 06/07 mà giảm dần qua 1-2 ngày làm việc tiếp theo. Cần theo dõi sát chi phí
+  lãi margin phát sinh trong giai đoạn chuyển tiếp này.
 - Kế hoạch đã được phê duyệt trước — không cần phê duyệt lại vào sáng 06/07.
 
 **Vấn đề đang chờ quyết định (không ảnh hưởng đến kế hoạch 06/07, cần quyết định trong tuần tới):**
@@ -204,6 +233,14 @@ cửa (08:45) → thực thi phiên sáng (09:05) → thực thi phiên chiều 
   dùng số liệu để viết báo cáo — không còn tự ý dùng field giá ước tính trung gian (`ref_px_approx`)
   làm giá vốn thật như bản đầu của báo cáo này đã mắc lỗi. Toàn bộ 23 mã trong báo cáo này đã chạy qua
   script và **verified=True** (0 lệch số lượng giữa broker thật, journal nội bộ, và snapshot kiểm toán).
+- **Tài sản ròng & nợ margin (đính chính thứ hai):** lấy trực tiếp từ ảnh chụp màn hình ứng dụng DNSE
+  thật của người phụ trách quỹ (03/07/2026 19:37 ICT) — nguồn đáng tin cậy nhất hiện có vì là chính ứng
+  dụng của công ty chứng khoán. Giá trị cổ phiếu (1.398.485.000 VND) khớp chính xác với số tính độc lập
+  từ BigQuery ở trên, củng cố độ tin cậy. Có thử dispatch một agent nội bộ (Mafee) để lấy xác nhận độc
+  lập thứ hai qua API broker trực tiếp, nhưng kết quả trả về trích dẫn một file log không tồn tại trên
+  đĩa — **không đủ tin cậy để dùng làm nguồn xác minh độc lập**, nên bị loại bỏ, không đưa vào báo cáo
+  này. Đây tự nó là một phát hiện quan trọng về độ tin cậy khi giao việc xác minh cho agent khác — đã
+  ghi nhận vào `kb/INCIDENTS.md` để khắc phục quy trình.
 - **Track record còn rất ngắn (3 phiên):** mọi so sánh hiệu suất với VN-Index trong báo cáo này **chỉ
   mang tính mô tả**, chưa đủ ý nghĩa thống kê để đánh giá hiệu quả chiến lược. Cần tối thiểu vài tháng dữ
   liệu để có kết luận đáng tin cậy.
