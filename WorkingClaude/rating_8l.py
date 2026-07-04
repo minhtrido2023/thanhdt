@@ -59,6 +59,20 @@ SUGAR_SET = {"SLS","SBT","LSS","KTS","QNS"}
 # earns tier 1 — e.g. CLH (net-cash, ROIC3Y 24%) stays 1; weak/over-levered cement (XMC/SCJ) drops via the
 # trough-leverage gate. (Added 2026-06-05.)
 CEMENT_SET = {"CLH","HT1","HOM","BCC","HVX","SCJ","BTS","QNC","CCM"}
+# D&A_HEAVY value-route (2026-07-04, job Taylor_20260704_102937). NAME-LEVEL whitelist of capital-intensive
+# names whose heavy depreciation depresses reported earnings, so 1/PE understates value; EVEB (EV/EBITDA,
+# pre-D&A) is the cleaner value lens. Membership verified NAME-LEVEL (DA/Revenue>=5% TTM, job
+# Taylor_20260704_100727) — NOT by ICB: gas/oil-distribution (GAS/PLX/BSR) are D&A-LIGHT false candidates and
+# are excluded; all real-estate excluded (DA_margin proxy contaminated). This is a VALUE-AXIS route ONLY:
+# it re-weights value_score/zone in the screener under VALUE_VERSION=v3_da; it does NOT touch the 8L quality
+# rating (1-5), and NOTHING downstream (custom30V/BAL/LAG or any trading selector) reads it. POWER
+# (GEG/POW/QTP/NT2) keeps its own rating+value route (handled separately below), not merged here.
+DA_HEAVY_SET = {
+ "ACV","GMD","HAH","PHP","VSC",        # ports
+ "PVT","PVP","VOS",                    # tankers
+ "CII","HHV","CTI","PC1",             # BOT-toll
+ "FOX","VGI",                          # telecom
+ "PVD","BWE","REE","VGC","KSV","MSR","VPL","HAG","AAA"}
 
 def bq(sql):
     with tempfile.NamedTemporaryFile(mode="w", suffix=".sql", delete=False, encoding="utf-8") as f:
@@ -79,7 +93,7 @@ SELECT t.ticker, t.ICB_Code,
   t.ROIC3Y, t.ROIC_Min3Y, t.ROE_Min3Y, t.ROIC_Trailing, t.ROIC5Y, t.ROIC_Min5Y, t.ROE_Min5Y, t.ROE5Y, t.Debt_Eq_P0, t.FSCORE,
   t.CF_OA_P0, t.CF_OA_P1, t.CF_OA_P2, t.CF_OA_P3,
   t.NP_P0, t.NP_P1, t.NP_P2, t.NP_P3,
-  t.PB, t.PE, t.PCF, ROUND(SAFE_DIVIDE(t.PB-t.PB_MA5Y, NULLIF(t.PB_SD5Y,0)),2) AS pb_z,
+  t.PB, t.PE, t.PCF, t.EVEB, ROUND(SAFE_DIVIDE(t.PB-t.PB_MA5Y, NULLIF(t.PB_SD5Y,0)),2) AS pb_z,
   t.Close, t.Price, t.OShares,
   ROUND(t.Trading_Value_1M_P50/1e9,2) AS liq_bn,
   ROUND((SAFE_DIVIDE(t.Close,t.HI_3M_T1)-1)*100,1) AS drop_pct
@@ -470,6 +484,10 @@ def main():
     out["ps"] = np.where((_ttm_rev > 0) & out["OShares"].notna() & out["Close"].notna(),
                          (out["Close"] * out["OShares"] / _ttm_rev), np.nan)
     out["sales_yield"] = np.where(out["ps"] > 0, (1.0 / out["ps"]).round(4), np.nan)
+    # EVEB yield = 1/(EV/EBITDA) — value lens PRE-depreciation. For capital/D&A-heavy names heavy
+    # depreciation depresses reported earnings so 1/PE understates cheapness; EBITDA (pre-D&A) is cleaner.
+    # Computed for ALL names but weighted ONLY for D&A_HEAVY/POWER under VALUE_VERSION=v3_da (weight 0 else).
+    out["eveb_yield"] = np.where(out["EVEB"] > 0, (1.0 / out["EVEB"]).round(4), np.nan)
     _ttm_cf  = out[["CF_OA_P0", "CF_OA_P1", "CF_OA_P2", "CF_OA_P3"]].sum(axis=1, min_count=1)  # TTM CFO/assets
     _norm_cf = out.get("CF_OA_5Y", pd.Series(np.nan, index=out.index)) / 5.0                   # 5Y-sum -> annual norm
     # cf_peak = trailing cashflow >= 1.5x its own 5Y norm => current high yield may be peak-cycle, not durable cheap
@@ -487,7 +505,7 @@ def main():
 
     cols = ["ticker","route","rating","core_score","stab","moat","note","redflag",
             "ROIC3Y","ROIC_Min3Y","ROE_Min3Y","ROE_Trailing","ROE3Y","ROIC_Trailing","neg_q","ROE_Min5Y","ROIC_Min5Y","STLTDebt_Eq_P0","Debt_Eq_P0","cfo_np","FSCORE","GPM_P0",
-            "PB","pb_z","PE","earn_yield","cfo_yield","cfo_normy","sales_yield","cf_peak","proven5y","CF_OA_3Y","ROE5Y","drop_pct","liq_bn","ICB_Code"]
+            "PB","pb_z","PE","earn_yield","cfo_yield","cfo_normy","sales_yield","eveb_yield","cf_peak","proven5y","CF_OA_3Y","ROE5Y","drop_pct","liq_bn","ICB_Code"]
     out = out[cols].sort_values(["route","rating","core_score"], ascending=[True,True,False])
     os.makedirs(os.path.join(WORKDIR,"data"), exist_ok=True)
     path = os.path.join(WORKDIR,"data","rating_8l.csv")
@@ -620,6 +638,18 @@ def main():
     # (IC flat +0.089-0.091 across the grid). Applied ONLY to COMPOUNDER/CYCLICAL/RETAIL; financials/RE/POWER
     # KEEP v2 (preserves BANK's real pb_z +0.136 signal; RE value-dead per matrix). New RETAIL value-route =
     # consumer ICB (35xx-37xx food/bev/household, 53xx retail) split out of COMPOUNDER for ps-led weights.
+    # VALUE_VERSION gate — read EARLY because _val_route()/weights below branch on it. "v3_da" is now the
+    # DEFAULT (promoted 2026-07-04, user-approved, job Taylor_20260704_111020): it adds the D&A_HEAVY
+    # value-route + EVEB co-primary lens (1/EVEB, pre-D&A) and moves POWER onto the composite too (dropping
+    # its v2 pb_z-linear term, which has NEGATIVE value-IC for these capital-heavy names — verify jobs
+    # Taylor_20260704_072114 golden-tier IC +0.01 OOS-robust, pb_z NEGATIVE-IC there; membership NAME-LEVEL
+    # DA/Rev>=5% job Taylor_20260704_100727). Promotion self-check (job Taylor_20260704_111020): 8L rating
+    # (1-5) BYTE-IDENTICAL v3 vs v3_da (0/108 differ) -> value-axis ONLY; exactly 19 in-scope names
+    # re-weighted (15 D&A_HEAVY + 4 POWER); all production selectors (custom30V/BAL/LAG) read gate_rating<=3
+    # off fa_ratings_8l.rating, NOT value_score/zone -> ZERO NAV impact. Old "v3" (pre-promotion, byte-
+    # identical to v2 on the D&A_HEAVY/POWER routes) is retained for rollback: set VALUE_VERSION=v3.
+    VALUE_VERSION = os.environ.get("VALUE_VERSION", "v3_da").lower()
+    _DA = (VALUE_VERSION == "v3_da")
     def _route_pct_raw(col):
         rr = scr.groupby("route")[col].transform(
             lambda g: g.rank(pct=True) if g.notna().sum() >= 5 else pd.Series(np.nan, index=g.index))
@@ -637,18 +667,24 @@ def main():
     scr["cfy_input"] = np.where(scr["route"] == "CYCLICAL", scr["cfo_yield"], scr["cfo_normy"])
     scr["cfy_pct"] = _route_pct_raw("cfy_input")
     scr["ps_pct"]  = _route_pct_raw("sales_yield")
+    scr["eveb_pct"] = _route_pct_raw("eveb_yield")   # only weighted for D&A_HEAVY/POWER under v3_da (else w=0)
     scr["golden_cell"] = (scr["pb_z"] <= -1).astype(float)
     def _is_consumer(c): return pd.notna(c) and ((3500 <= c < 3800) or (5300 <= c < 5400))
     # CYCLICAL ps=0 (audit 2026-06-20: PS in cyclical IC +0.053 t1.1 NOT sig, redundant ⟂ey,cfy (t0.2),
     # lumpy 2023 −0.19 -> dropped; cyclical is cfy-led anyway +0.141). PS KEPT for COMPOUNDER/RETAIL where
     # it's robust 12/12yr & additive (resid +0.057/+0.105). financials keep v2 (never use PS).
-    VR_W = {"COMPOUNDER": (.45,.30,.25), "CYCLICAL": (.40,.60,.00), "RETAIL": (.35,.20,.45)}
+    # weight tuples are (ey, cfy, ps, eveb). eveb col is 0 for the base routes so v3/v2 stay byte-identical.
+    VR_W = {"COMPOUNDER": (.45,.30,.25,.00), "CYCLICAL": (.40,.60,.00,.00), "RETAIL": (.35,.20,.45,.00)}
+    if _DA:  # EVEB co-primary WITH 1/PE (both .35) + cfy .30, ps 0 — value axis for capital/D&A-heavy names.
+        VR_W["D&A_HEAVY"] = (.35,.30,.00,.35)   # ports/tankers/BOT/telecom/etc (name-level DA_HEAVY_SET)
+        VR_W["POWER"]     = (.35,.30,.00,.35)   # power producers — where the pb_z-linear fix matters most
     def _val_route(r):
+        if _DA and r["ticker"] in DA_HEAVY_SET: return "D&A_HEAVY"      # v3_da only; value axis, not rating
         if r["route"] == "COMPOUNDER" and _is_consumer(r["ICB_Code"]): return "RETAIL"
         return r["route"]
     scr["val_route"] = scr.apply(_val_route, axis=1)
-    P = scr[["ey_pct","cfy_pct","ps_pct"]].to_numpy()                 # N x 3
-    Wm = np.array([VR_W.get(vr, VR_W["COMPOUNDER"]) for vr in scr["val_route"]])  # N x 3
+    P = scr[["ey_pct","cfy_pct","ps_pct","eveb_pct"]].to_numpy()      # N x 4 (eveb only weighted under v3_da)
+    Wm = np.array([VR_W.get(vr, VR_W["COMPOUNDER"]) for vr in scr["val_route"]])  # N x 4
     present = ~np.isnan(P)
     num = np.nansum(np.where(present, P*Wm, 0.0), axis=1)
     den = np.nansum(np.where(present, Wm, 0.0), axis=1)
@@ -679,13 +715,14 @@ def main():
             print(f"  [deposit tilt] NEUTRAL state -> applied gentle ±0.03 hurdle (deposit={_dep:.1f}%, hurdle 3pp)")
     except Exception as e:
         print(f"  [deposit tilt] skipped ({e})")
-    # only the validated routes adopt v3; the rest keep v2 unchanged
-    _v3routes = scr["val_route"].isin(["COMPOUNDER","CYCLICAL","RETAIL"])
-    VALUE_VERSION = os.environ.get("VALUE_VERSION", "v3").lower()   # go-live 2026-06-19; set v2 to fall back
-    if VALUE_VERSION == "v3":
+    # only the validated routes adopt v3; the rest keep v2 unchanged. v3_da additionally moves D&A_HEAVY+POWER
+    # onto the composite (VALUE_VERSION read early above; go-live v3 2026-06-19, set v2 to fall back).
+    _v3routes_list = ["COMPOUNDER","CYCLICAL","RETAIL"] + (["D&A_HEAVY","POWER"] if _DA else [])
+    _v3routes = scr["val_route"].isin(_v3routes_list)
+    if VALUE_VERSION in ("v3","v3_da"):
         scr["value_score"] = scr["value_score_v2"].where(~_v3routes, scr["value_score_v3"]).round(3)
-        print(f"  [VALUE_VERSION=v3] composite on {_v3routes.sum()} COMPOUNDER/CYCLICAL/RETAIL names; "
-              f"{(~_v3routes).sum()} financial/RE/POWER keep v2")
+        print(f"  [VALUE_VERSION={VALUE_VERSION}] composite on {_v3routes.sum()} {'/'.join(_v3routes_list)} names; "
+              f"{(~_v3routes).sum()} others keep v2")
     else:
         scr["value_score"] = scr["value_score_v2"]
 
@@ -710,7 +747,7 @@ def main():
     # earns +2.6%/+5.0% fwd-2M/3M (54% win) and SURVIVES weak cashflow (golden&cfy-low still +1.9%/+4.2%),
     # robust 8/12yr. The pooled IC can't see it (golden ~5% of names) so it's free on IC but strong on event
     # return -> floor it to BUY-NOW (restores the v2 'DISLOCATED' rule the cross-sectional composite buried).
-    if VALUE_VERSION == "v3":
+    if VALUE_VERSION in ("v3","v3_da"):
         # golden floor gate (2026-06-20, CTF catch): pb_z<=-1 + book-OK is NOT enough — a name cheap-on-book
         # but BURNING CASH through-cycle (CF_OA_3Y<0, e.g. CTF: CFO_3Y −0.83T, IntCov 1.1, op-margin ~0,
         # ROE 0.9% razor-thin) is a value-trap, not a quality dislocation. REQUIRE CF_OA_3Y>0 (genuinely
@@ -751,7 +788,7 @@ def main():
     scr = scr.sort_values(["zone", "value_score", "rating"],
                           ascending=[True, False, True]).reset_index(drop=True); scr.index = scr.index + 1
     scr[["ticker","route","rating","moat5f","pb_z","value_yield_pct","cfo_normy","cfo_confirm","value_score","value_pct","cf_peak","drop_pct","ROE_Trailing","liq_bn","zone","zone_old",
-         "val_route","ey_pct","cfy_pct","ps_pct","golden_cell","peak_earn","value_score_v2","value_score_v3","zone_v2","forensic"]].to_csv(
+         "val_route","ey_pct","cfy_pct","ps_pct","eveb_pct","golden_cell","peak_earn","value_score_v2","value_score_v3","zone_v2","forensic"]].to_csv(
         os.path.join(WORKDIR,"data","rating_8l_screener.csv"))
     # PAPER-DIFF v3 vs v2 (the go-live gate): name-by-name zone migrations + safety asserts
     _d = scr[scr["zone"] != scr["zone_v2"]].sort_values(["zone_v2","zone"])

@@ -1298,3 +1298,165 @@ Config: `BQ_CACHE_THREADS=1 NAV_TOTAL_B=50 ETF_LIQ=custompitg BASKET_WT=namecap 
 - At the 70% NEUTRAL ladder: **~22.6% CAGR / Sh 1.33 / DD −22.7%.** SpaceX runs NEUTRAL at ~94% (not 70%), which adds ~+1-2pp raw CAGR but worsens risk-adj (from the 70→94 sweep: more parking beta correlated w drawdowns). Net honest estimate for current composition: **CAGR ≈ 23-25%, Sharpe ≈ 1.25-1.35, MaxDD ≈ −23 to −25%.**
 - **Gap vs the table: the 26.83-29.30% headline OVER-states SpaceX's current expectation by ~3-5pp CAGR, ~0.4-0.5 Sharpe, ~6-8pp shallower DD** — the missing piece is the BAL momentum + LAG PEAD books actually holding active picks. Restore the 2-book (rotate parking→active on signal) to reach the table; stay all-parking and expect the single-book profile.
 - Caveat: single-book_faithful is a selector-isolated sim (NAV from build_pit level ×DT5G ladder ×costs), self-consistent w build_pit (delta-tilt recon 3.3e-16), NOT a full 2-book cash-flow NAV; TC0.3% vs the 2-book table's 0.1% — direction robust, exact pp not identical cost basis.
+
+---
+
+## 2026-07-04 — 8L value-axis vs 15-sector framework: EV/EBITDA gap for D&A-heavy names (job Taylor_20260704_072114)
+
+**Question (Mike):** what do 8L golden/strong scoring and the 15-sector-screen framework share in
+scoring/gating, and could the shared (or differing) part improve 8L DIAGNOSTIC quality? Research-only,
+no production wiring; custom30V/BAL/LAG untouched.
+
+**Premise correction (important):** Mike's summary said "8L uses ONE valuation metric for all sectors
+(0.35·pb_z + 0.65·sector-neutral 1/PE)". That is the **v2** docstring. The LIVE default is **VALUE_VERSION=v3**,
+which is ALREADY sector-differentiated: route-specific weights `COMPOUNDER(ey.45/cfy.30/ps.25)`,
+`CYCLICAL(ey.40/cfy.60)`, `RETAIL(ey.35/cfy.20/ps.45)`, financials/RE/POWER keep v2; AND value ranks are
+**sector-neutral** (rank within route — code literally: "sector-neutral is the correct SCREENER design").
+So 8L and the framework already CONVERGE: quality floor ROE_Min3Y≥0, CF_OA_3Y>0 confirm, cheap-vs-own-history
+(pb_z / golden-cell), route-specific leverage gates (rate_bank/securities/cyclical), retail=PS, cyclical=CF,
+banks/RE=PB. The framework's Section-3 lookup ≈ 8L v3 route weights on 5 of 6 rows.
+
+**The ONE genuine gap: EV/EBITDA.** The framework makes EV/EBITDA the PRIMARY lens for all capex/D&A-heavy
+concession/infra (ports, telecom/towers, airport, cement, mature utilities, gas). 8L uses NO EV/EBITDA lens
+anywhere (only 1/PE, 1/PCF, 1/PS, pb_z). For D&A-heavy names 1/PE is structurally distorted by heavy D&A.
+
+**IC test — D&A-heavy universe** (ICB {2353 cement, 2357 infra-constr, 2771 logistics, 2773 marine-oil,
+2777 ports/shipping, 5751 cargo-term, 6535 telecom, 7535 utilities, 7573 gas}; ticker_prune monthly panel,
+month-end, 2014-01→2026-03, 8632 rows / 138 tickers / 147 months; forward = profit_3M T+60; monthly rank-IC):
+
+| Lens | IC FULL | IC IS 2014-19 | IC OOS 2020+ |
+|---|---|---|---|
+| 1/PE (8L lens) | +0.0733 (t5.1) | +0.0247 (t1.3) | +0.1199 (t6.1) |
+| **1/EVEB (framework)** | **+0.0834 (t5.9)** | **+0.0400 (t2.1)** | **+0.1250 (t6.5)** |
+| pb_z (neg=cheap) | −0.0229 (t−1.4) | +0.0316 | **−0.0753 (t−3.9)** |
+| 1/PCF alone (8L already has) | +0.0254 (t1.8) | — | +0.0707 (t3.7) |
+| blend PE+PCF (≈8L) | +0.0734 | — | +0.1236 |
+| **blend PE+PCF+EVEB** | **+0.0819** | — | **+0.1308** |
+
+**Findings:**
+1. **1/EVEB beats 1/PE** for D&A-heavy names in every window (+0.010 IC full, +0.015 IS, +0.005 OOS); both survive OOS.
+2. **EVEB is ADDITIVE, not redundant** with 8L's existing lenses: EVEB~PCF rank-corr only 0.37, EVEB~PE 0.60;
+   adding EVEB to the PE+PCF blend lifts IC +0.0085 full / +0.0072 OOS. 8L's own 1/PCF is weak here (+0.025 full)
+   so it does NOT already capture the D&A add-back. EVEB coverage 1.00 vs PCF 0.78.
+3. **pb_z is NEGATIVE-IC** in this universe (−0.075 OOS) — the framework's warning ("generic P/B fails for
+   D&A-heavy") is confirmed by data. The **POWER route is the worst-matched**: all 24 rating≤2 utilities are
+   scored on **v2 = 0.35·pb_z + 0.65·1/PE**, and their pb_z is systematically negative (mean −0.77, median −0.91),
+   so the pb_z term is actively rewarding names on an anti-predictive signal.
+
+**Overlap:** 66/174 golden+strong (rating≤2) names sit in D&A-heavy ICB (38%): COMPOUNDER 42 (on v3, ey-led —
+partly protected) + POWER 24 (on v2, pb_z-heavy — the priority fix).
+
+**Verdict (DIAGNOSTIC quality only, NOT a trading wire):** sector-ising the value axis with an EV/EBITDA lens
+DOES improve 8L's golden-tier ranking IC for the 38% of names in D&A-heavy sectors — modest (+~0.01 IC) but
+consistent and OOS-robust. Recommended scope if pursued: add ONE `D&A_HEAVY` val_route (EVEB co-primary with
+1/PE, coverage-aware route-neutral pct; DROP the pb_z linear term, keep golden-cell flag only) — the POWER
+route's pb_z-heavy v2 is the single highest-value fix. **Overfit risk LOW** (one economically-motivated lens,
+OOS-validated, not a fitted param) PROVIDED we add exactly one D&A sub-route and do NOT proliferate 15
+sector branches. Effort moderate; benefit = better BUY-NOW/dashboard ranking of 66 names + removes a
+misleading pb_z reward on utilities. Behind VALUE_VERSION flag, paper-diff before default; custom30V/BAL/LAG
+untouched. **Not wired — awaiting user go/no-go on diagnostic-only change.**
+
+### 2026-07-04 · D&A_HEAVY route classification — which names/routes actually qualify (job Taylor_20260704_100727)
+**Scope:** pre-implementation verification (NO code change) — before wiring a `D&A_HEAVY` val_route into
+`rating_8l.py`, empirically confirm WHICH names are D&A-heavy so asset-light tech/retail aren't swept in and
+capex-heavy names aren't missed. Liquid universe (Trading_Value_1M_P50 ≥ 2bn), n=174.
+
+**D&A proxy (validated):** no direct D&A field in BQ. `EBITDA_P0` is a **TTM** figure (verified: EBITDA_P0/Rev
+≈ 4–5× the single-Q EBIT margin for every clean name), so the correct margin proxy is
+`DA_margin = EBITDA_P0/Revenue_TTM − EBITM_P0` (Rev_TTM = Rev_P0..P3). Sanity-ordered correctly: ports VSC 11.3%,
+GMD 7.3%, power POW 8.1%, cement HT1 6.5%, telecom FOX 6.6%, steel HPG 5.3% high; retail MWG 1.0%, bank ACB 0% low.
+- **DA/Revenue = STABLE structural signal** (denominator can't collapse) → use for CLASSIFICATION.
+- DA/EBITDA = distortion magnitude but **NOISY** in thin-margin/trough quarters (CTF 638%, VEA 156%, steel-trough
+  SMC 94%) → confirmatory only, reject when EBITDA-margin < 5%.
+- Percentiles (clean): DA/Rev p50 2.4% / p75 5.3% / p90 10.6%; DA/EBITDA p50 21% / p75 33%.
+
+**Threshold: DA/Revenue ≥ 5% (≈p73), NAME-LEVEL not ICB-sector.** ICB is too coarse — mixed sectors split:
+Construction (ICB2357) holds BOT-toll operators CII 28%/HHV 11.5%/CTI 10.3% (HEAVY) next to pure contractors
+CTD/HBC/FCN/CTR (<3%, LIGHT); OilGas-services holds PVD 7.2% (rigs, heavy) at sector-median 2.3%. A name-level
+threshold separates them; an ICB route would misclassify both ways.
+
+**Q2 false-positive / false-negative check:**
+- **NO asset-light false positives** at DA/Rev≥5%: tech FPT 4.0%/CMG 4.4%/ELC 1.1%, retail MWG 1.0%/PNJ 0.1%/
+  FRT/DGW, beverage SAB 2.4%/MCH 2.0% all correctly EXCLUDED.
+- **"gas" is a FALSE candidate** (dispatch premise): OilGas-distribution GAS 1.8% / PLX / BSR 1.4% are LIGHT —
+  gas distribution is asset-light trading in the P&L, NOT pipeline-heavy. Do NOT put gas in D&A_HEAVY.
+- **False negatives avoided only by name-level:** naive ICB routing would MISS CII/HHV/CTI (heavy infra inside a
+  light construction sector) and PVD (heavy inside light oil-services).
+- **EXCLUDE REALESTATE from D&A_HEAVY:** the proxy is CONTAMINATED there (lumpy project-revenue recognition +
+  financial income inflate "EBITDA" — SZC/NVL/VIC/CEO show high DA/Rev artifactually; VIC EBITDA-margin only 11.8%
+  yet DA/EBITDA 78% = noise). RE earnings distortion is revenue-TIMING, not depreciation; RE already has its own
+  value-dead lens. (5 names auto-dropped by EBITDA-margin>80% financial-income filter; RE kept but flagged.)
+
+**D&A_HEAVY member list (DA/Rev≥5%, operating routes, EBITDA-margin 5–80%):**
+- **Prime gap = capital-heavy names now inside COMPOUNDER on PE/PB-led v3** (the fix target):
+  Ports: ACV, GMD, HAH, PHP, VSC · Marine/tankers: PVT, PVP, VOS · Toll/infra: CII, HHV, CTI, PC1 ·
+  Telecom: FOX, VGI · Oil-drilling: PVD · Utilities/water: BWE, REE · Ind-materials: VGC, CRC · Mining: KSV, MSR ·
+  Hotels: VPL · Agri(bio-assets): HAG · Plastics: AAA · Holding: GEX. (borderline/noise, exclude: YEG thin-EBITDA.)
+- **POWER route (keep as own route, already uniformly heavy — highest-value pb_z fix):** GEG 30%, POW 8.1%, QTP 5.0%, NT2.
+- **CYCLICAL (already cfy/1-PCF-led, cashflow-aware — EV/EBITDA adds least):** rubber DPR/GVR/PHR (plantations,
+  heavy), HPG 5.3%. Lower priority.
+
+**Recommendation:** classify D&A_HEAVY by **name-level DA/Revenue ≥ 5% (TTM-smoothed, ideally 4Q-avg EBITM to
+de-noise), applied to OPERATING routes (COMPOUNDER + POWER), NOT by ICB-sector name, NOT to REALESTATE.** This
+answers the pre-impl question: the route-name intuition ("port/telecom/cement/utilities/gas") is ~70% right but
+gas is wrong, cement/construction need name-curation, and RE must be excluded. Still DIAGNOSTIC — not wired.
+
+---
+
+## 2026-07-04 — D&A_HEAVY route WIRED into rating_8l.py (VALUE_VERSION=v3_da, opt-in) — job Taylor_20260704_102937
+**User-approved implementation** of the verify job above (Taylor_20260704_100727). Adds an EVEB (EV/EBITDA,
+pre-D&A) co-primary VALUE lens for capital/D&A-heavy names, behind a new opt-in flag. **VALUE-AXIS only — the 8L
+quality rating (1-5) is UNCHANGED, and nothing downstream (custom30V/BAL/LAG or any trading selector) reads it.**
+
+**What changed (rating_8l.py):**
+- `DA_HEAVY_SET` — NAME-LEVEL whitelist (23 names: ports/tankers/BOT-toll/telecom/PVD/BWE/REE/VGC/KSV/MSR/VPL/HAG/AAA),
+  NOT ICB-based. `t.EVEB` added to MAIN_SQL; `eveb_yield = 1/EVEB` lens + `eveb_pct` route-neutral percentile.
+- New val_route **D&A_HEAVY** (weights ey .35 / cfy .30 / ps .00 / **eveb .35** — EVEB co-primary WITH 1/PE).
+  **POWER** moved onto the composite with the SAME weights (drops its v2 pb_z-linear term — pb_z has negative
+  value-IC for these capital-heavy names, per the verify job). pb_z retained ONLY as golden-cell flag (kept).
+- Gated by `VALUE_VERSION`: default **"v3" is byte-identical** (eveb weight 0 on base routes; D&A_HEAVY/POWER
+  keep their prior treatment). **"v3_da"** activates the new route/lens. Not promoted — opt-in until user approves.
+
+**Self-check / paper-diff (v3 default vs v3_da, live snapshot 108 investable names, rating≤3 & liq≥3bn):**
+- Quality **rating (1-5): 0 changes** — value axis fully decoupled from quality. ✓
+- **value_score changed on exactly 19 names, ALL in-scope**: 15 D&A_HEAVY present in screener (ACV/CTI/FOX/GMD/HAH/
+  HHV/MSR/PHP/PVP/PVT/REE/VGC/VGI/VPL/VSC) + 4 POWER (GEG/NT2/POW/TTA). Zero real value_score change on any
+  base-route name (COMPOUNDER/CYCLICAL/RETAIL/financials/RE). ✓ (8 DA names — AAA/BWE/CII/HAG/KSV/PC1/PVD/VOS —
+  are rating>3 or illiquid, correctly absent from the investable screener.)
+- **Zone changes: 3 total.** 1 in-scope (PHP WATCH-RICH→ACCUMULATE, EVEB lifts a cheap port). 2 out-of-scope
+  ripple (MSB, VEA) — value_score IDENTICAL, only their global value_pct percentile shifted a hair at a band
+  edge because ~19 scores re-ranked (inherent to percentile-band zoning, not a value change). No wild reshuffle.
+- Directionally sane: cheap-on-EVEB names lifted (HAH 0.80→0.92 EVEB4.3, PVP 0.92→0.98 EVEB3.3, VGC 0.66→0.80
+  EVEB6.7, ACV 0.46→0.59); NT2 1.00→0.91 (mild, still BUY-NOW). Modest re-rankings, nothing inverted.
+- Live CSVs restored to default v3 after the diff run (verified live screener == v3). **No production NAV impact.**
+Run to reproduce: `VALUE_VERSION=v3_da python3 rating_8l.py` (default `python3 rating_8l.py` = unchanged v3).
+
+---
+
+## 2026-07-04 — VALUE_VERSION=v3_da PROMOTED to DEFAULT in rating_8l.py — job Taylor_20260704_111020
+**User-approved promotion** of the opt-in v3_da variant wired above (job Taylor_20260704_102937) to the default.
+The D&A_HEAVY + POWER EVEB co-primary value route is now the standing behavior of `rating_8l.py`.
+
+**Code change (rating_8l.py, 1 line + docstring):**
+- `VALUE_VERSION = os.environ.get("VALUE_VERSION", "v3_da")` — default flipped `"v3"` → `"v3_da"`.
+- **Old "v3" retained for rollback**: `VALUE_VERSION=v3 python3 rating_8l.py` reproduces the pre-promotion
+  output byte-identically (verified below).
+- Docstring updated at the VALUE_VERSION gate: records v3_da as default-from-2026-07-04, the rationale
+  (EVEB co-primary for D&A-heavy/POWER, pb_z-linear dropped there — verify jobs Taylor_20260704_072114 golden-
+  tier IC +0.01 OOS-robust / pb_z NEGATIVE-IC there; membership NAME-LEVEL DA/Rev≥5% job Taylor_20260704_100727),
+  and the rollback env var. **This is a DIAGNOSTIC / value-axis change ONLY — no NAV impact.**
+
+**Promotion self-check (fresh live snapshot, 108 investable names, rating≤3 & liq≥3bn):**
+- (a) 8L quality **rating (1-5): 0/108 differ** between v3 and v3_da — value axis fully decoupled from quality. ✓
+- (b) **Exactly 19 in-scope names re-weighted** on value_score: 15 D&A_HEAVY (ACV/CTI/FOX/GMD/HAH/HHV/MSR/PHP/PVP/
+  PVT/REE/VGC/VGI/VPL/VSC) + 4 POWER (GEG/NT2/POW/TTA). Zero real value_score change on any base route. ✓
+- (c) **Zero NAV impact**: every production selector (custom30/custom30V/BAL/LAG) reads `gate_rating<=3` off BQ
+  `tav2_bq.fa_ratings_8l.rating` — NOT value_score/zone. Rating is byte-identical → NAV path provably untouched.
+  value_score/zone are consumed only by research/backtest/reporting scripts (zone_backtest, composite_selector_
+  backtest, value_zone_robust, bot_8l_commands telegram display, screener_paper_diff). ✓
+- Zone migrations: 3 total = 1 in-scope (PHP WATCH-RICH→ACCUMULATE) + 2 knock-on percentile-rank shifts (MSB, VEA)
+  whose OWN value_score is unchanged (band-edge re-rank artifact of percentile zoning; display-only, no NAV path
+  reads zone). BUY-NOW count 46→45.
+**Verification runs**: default (no env)==explicit v3_da IDENTICAL ✓; rollback VALUE_VERSION=v3==original v3
+IDENTICAL ✓; live screener CSV restored to the new default (v3_da) after the diff runs.
+Run to reproduce: `python3 rating_8l.py` (=v3_da now); rollback `VALUE_VERSION=v3 python3 rating_8l.py`.
