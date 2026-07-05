@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v728)
+# Mike fleet — context pack (v729)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-05T09:06:24] Taylor/finding — Wave1/H6a MAX5_1M lottery-exclusion overlay — proxy FAIL, H6a closed (no harness): {"job": "Taylor_20260705_085946", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY tier-2 proxy; probe_max5_exclude.py new file only; NO production change (pt_v …
 - [2026-07-05T09:08:05] Taylor/finding — Wave1/H8: H8a LAG-capacity BINDS ~always (d_NPR→propose TIEBREAKER not filter); H8b foreign-flow data ABSENT (CLOSED): {"job": "Taylor_20260705_085949", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY reads/counts, NO production change (probe_lag_capacity_h8a.py new file only)" …
 - [2026-07-05T10:07:43] Taylor/finding — Wave1/H7 EVEB route-aware yieldcombo swap (D&A_HEAVY) — TIER-2 proxy FAIL, H7 closed: {"job": "Taylor_20260705_100229", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY proxy; probe_route_eveb_h7.py new file only; NO production change (rating_8l. …
 - [2026-07-05T11:01:45] Taylor/finding — Wave1/H3 vol-managed BAL exposure — FULL-NAV harness FAIL, H3 closed (Cederburg OOS-failure reproduced on VN): {"job": "Taylor_20260705_100245", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY, env VOLMANAGE_BAL OFF-default byte-identical baseline; NO production change" …
@@ -11,6 +10,7 @@
 - [2026-07-05T14:35:09] Taylor/finding — Wave1/H8a-tiebreaker LOO — CONFIRMED-LUMPY-DO-NOT-WIRE (core test drop-2021+2023: trt LOSES −1.53pp CAGR / −0.08 Calmar; edge = reshuffle-luck of 2 boom years): {"job": "Taylor_20260705_143219", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY LOO recompute from frozen DAILY NAV CSVs (loo_h8a_dnpr.py new file only); NO  …
 - [2026-07-05T14:42:25] quant-skeptic/verification — ✅ CONFIRMED VERIFY: Wave1/H8a-tiebreaker LOO — CONFIRMED-LUMPY-DO-NOT-WIRE (core test drop-2021+2023: trt LOSES −1.53pp CAGR / −0.08 Calmar; edge = reshuffle-luck of 2 boom years): {"finding_topic": "Wave1/H8a-tiebreaker LOO — CONFIRMED-LUMPY-DO-NOT-WIRE (core drop-2021+2023: trt LOSES −1.53pp CAGR / −0.08 Calmar; edge = reshuffle-luck of  …
 - [2026-07-05T14:49:54] Taylor/finding — Wave1/H8a-tiebreaker full per-year LOO (completeness annex) — verdict UNCHANGED CONFIRMED-LUMPY-DO-NOT-WIRE; edge carried by 2023 (primary −1.61pp) + 2021 (runner-up −1.14pp), 2024 biggest dragger (+1.25pp): {"job": "Taylor_20260705_144651", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY completeness annex; ZERO backtest re-run; reads only 2 frozen DAILY NAV CSVs  …
+- [2026-07-05T15:42:05] Winston/finding — vcb-fx-feed-built: {"script": "vcb_fx_feed.py", "csv": "data/vcb_fx_rate.csv", "log": "logs/vcb_fx_feed.log", "status": "DONE_CRON_PENDING", "csv_rows": 3, "sample": {"2026-07-05" …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -41,7 +41,7 @@
 - **Taylor · EXTREME-regime gate PAPER-TRADING** (bắt đầu 2026-07-01, user duyệt trực tiếp): `extreme_regime_enabled=True` CHỈ trên account paper `main` (override trong `trading_bot_accounts.json`); global default + SpaceX/live GIỮ `False`. Week-1 stress-injection PASS 24/24 (`stress_extreme_regime.py`: arm 2-poll · sell-to-floor · buy-pause · cadence ×0.25 + negative controls). **Target kết thúc ~2026-07-28 (~20 phiên).** 3 điều kiện còn lại trước LIVE: (a) ZERO false-trigger qua ~4 tuần benign, (b) không can thiệp NORMAL-path, (c) user sign-off. **KHÔNG bật gì ở live.**
 - **Taylor · vol-scale buy chase-cap (patch#3) PAPER-TRADING** (bắt đầu 2026-07-01, user duyệt trực tiếp): `chase_cap_vol_scale_enabled=True` CHỈ trên account paper `main` (override trong `trading_bot_accounts.json`, k=2.0/ceil=0.04); global default + SpaceX/live GIỮ `False`. Executor-path stress PASS 15/15 (`stress_vol_scale_chase_cap.py`: wiring · WIDEN clamp-to-ceil · MONOTONE · fail-safe rvol absent/0/<0 · paper limit > static + NEG-control live→static). **Target kết thúc ~2026-07-14 (~10 phiên — ngắn hơn EXTREME vì fire trên gap-up thường, tích event nhanh).** Điều kiện trước LIVE: (a) paper sạch (wiring đúng trên quote thật + fail-safe khi thiếu rvol cache), (b) không can thiệp NORMAL-path ngày non-gap, (c) skeptic rerun REAL-fill vs `min(open,L)` proxy trên correlated gap-up @NAV target, (d) user sign-off. **KHÔNG bật gì ở live.**
 - **Taylor**: sector sweep #10+ (chờ Mike dispatch)
-- **Taylor**: fill-timing review `execution_quality_review.py` (kết quả 2026-06-30 chưa xử lý — cần chạy)
+- **Taylor · fill-timing khung giờ (BUY 10:45-11:15 / SELL 09:15-09:45)**: ĐÃ xử lý xong 2026-07-02 (job Taylor_20260702_031608, note cũ ở dòng này lỗi thời). Edge THẬT & IS/OOS-stable (BUY tại 11:15 rẻ hơn open +17.6bps/lệnh, t=12.0; SELL tại open đúng, +11.8bps vs ATC) nhưng **KHÔNG flip `fill_timing_live_gate` ngay** — cần paper tích lũy ~3-4 tuần fill (từ go-live 2026-07-01, mới ~3-4 phiên) để `execution_quality_review.py` xác nhận NET-of-noise capture (noise 110-220bps >> edge 17bps) → quant-skeptic → user sign-off mới flip. Checkpoint tự nhiên: ~cuối tháng 7.
 - **V2.5**: R&D-complete, DISABLED. Reminder: 2026-07-07 Mike hỏi user go-ahead integration.
 
 ## Chờ user quyết định
