@@ -754,3 +754,46 @@
 - [2026-07-05T10:07:32Z] Taylor/heartbeat — Taylor_20260705_100229: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260705_100229"}
 - [2026-07-05T10:07:43Z] Taylor/finding — Wave1/H7 EVEB route-aware yieldcombo swap (D&A_HEAVY) — TIER-2 proxy FAIL, H7 closed: {"job": "Taylor_20260705_100229", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY proxy; probe_route_eveb_h7.py new file only; NO production change (rating_8l.py/selectors untouched)", "hypothesis": "for D&A_HEAVY names swap yieldcombo 1/PCF leg -> 1/EVEB (pre-D&A cleaner value lens); names outside route keep base", "design": "top-60 liquid gate rating<=3, pick top-30 by yieldcombo, 47 quarters; PE/PCF/EVEB re-pulled FRESH from tav2_bq.ticker at exact quarter-end (ticker,time) so all 3 legs share one adjustment basis (frozen panel PE drifted 1.32x from live via per-ticker price adjust); base=rank(1/PE)+rank(1/PCF) all names, H7=swap PCF->EVEB leg for 24 DA_HEAVY names verbatim from rating_8l.py", "bar": "TIER-2 HIGH: H7-base >= +0.30pp in BOTH IS(2014-19) AND OOS(2020+) [not just >=base like H1/H6a, prior low because close relative composite-v3-as-selector rejected globally -0.78pp OOS]", "result": {"da_in_pool_mean": 4.0, "swap_changed_top30": "22/47q", "base_mean2M": 2.87, "H7_mean2M": 2.88, "dIS_pp": 0.09, "dOOS_pp": -0.06, "winq": 0.3}, "verdict": "FAIL — dIS +0.09 (<bar) AND dOOS -0.06 (negative); H7 CLOSED at proxy tier, no soft-penalty/variant/NAV harness attempted (per plan for low prior)", "why": "swap touches only ~4 names/quarter and is a minor leg-2 rank tweak -> selection barely changes; EVEB golden-tier IC in D&A_HEAVY was only +0.01 OOS-robust (thin), matches low prior", "guardrails": "direct BQ no cache, PIT strict, profit_* only as target never feature, rating_8l.py/production untouched; v3_da remains diagnostic value-axis only (no NAV consumer)"}
 - [2026-07-05T10:07:47Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260705_100245"}
+
+## Consolidation 2026-07-05T10:25:26Z
+- [2026-07-05T10:08:00Z] Taylor/heartbeat — Taylor_20260705_100258: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260705_100258"}
+- [2026-07-05T10:08:47Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:09:00Z] Taylor/heartbeat — Taylor_20260705_100258: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260705_100258"}
+- [2026-07-05T10:09:34Z] Taylor/heartbeat — Taylor_20260705_100258: {"status": "in_progress", "note": "CONCURRENCY NOTE: sibling Wave1/H3 (VOLMANAGE_BAL) actively editing pt_v23_audit_2014.py same time. Both OFF-default orthogonal env gates. Applying surgical gated edits + will ast-verify before run. simulate_holistic_nav.py fund_tiebreak_col param already added."}
+- [2026-07-05T10:09:47Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:10:00Z] Taylor/heartbeat — Taylor_20260705_100258: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260705_100258"}
+- [2026-07-05T10:10:47Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:11:00Z] Taylor/heartbeat — Taylor_20260705_100258: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260705_100258"}
+- [2026-07-05T10:11:47Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:11:52Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "in_progress", "note": "overlay code xong (syntax OK); local BQ cache verified=False do stale-vs-today, dựng temp cache verified cho AUDIT_END=2026-06-19; đang chạy baseline R3"}
+- [2026-07-05T10:12:00Z] Taylor/heartbeat — Taylor_20260705_100258: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260705_100258"}
+- [2026-07-05T10:12:47Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:13:00Z] Taylor/heartbeat — Taylor_20260705_100258: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260705_100258"}
+- [2026-07-05T10:13:48Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:14:01Z] Taylor/heartbeat — Taylor_20260705_100258: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260705_100258"}
+- [2026-07-05T10:14:48Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:15:01Z] Taylor/heartbeat — Taylor_20260705_100258: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260705_100258"}
+- [2026-07-05T10:15:31Z] Taylor/heartbeat — Taylor_20260705_100258: {"status": "in_progress", "note": "H8a code already wired from prior interrupted run; engine diff verified OFF byte-identical; now checking driver diff before running A/B"}
+- [2026-07-05T10:15:48Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:16:01Z] Taylor/heartbeat — Taylor_20260705_100258: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260705_100258"}
+- [2026-07-05T10:16:48Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:17:01Z] Taylor/heartbeat — Taylor_20260705_100258: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260705_100258"}
+- [2026-07-05T10:17:48Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:18:01Z] Taylor/heartbeat — Taylor_20260705_100258: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20260705_100258"}
+- [2026-07-05T10:18:48Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:18:59Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "in_progress", "note": "baseline R3 xong (27.34%/1.81/-17.6/1.55, self-check 0 VND); chạy 3 overlay variants song song (mult 1.0/0.8/1.2)"}
+- [2026-07-05T10:19:01Z] Taylor/heartbeat — Taylor_20260705_100258: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20260705_100258"}
+- [2026-07-05T10:19:48Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:19:54Z] Taylor/heartbeat — Taylor_20260705_100258: {"status": "in_progress", "note": "real-BQ fallback was non-deterministic; built isolated verified local cache /tmp/h8a_cache (data@06-19=AUDIT_END); relaunching A/B threads=1"}
+- [2026-07-05T10:20:01Z] Taylor/heartbeat — Taylor_20260705_100258: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20260705_100258"}
+- [2026-07-05T10:20:48Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:21:01Z] Taylor/heartbeat — Taylor_20260705_100258: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20260705_100258"}
+- [2026-07-05T10:21:48Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:22:01Z] Taylor/heartbeat — Taylor_20260705_100258: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20260705_100258"}
+- [2026-07-05T10:22:48Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:23:01Z] Taylor/heartbeat — Taylor_20260705_100258: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20260705_100258"}
+- [2026-07-05T10:23:48Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:24:01Z] Taylor/heartbeat — Taylor_20260705_100258: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20260705_100258"}
+- [2026-07-05T10:24:17Z] Taylor/heartbeat — Taylor_20260705_100258: {"status": "in_progress", "note": "A/B running on correct R3 config (custompitg/yieldcombo, threads=1, verified cache); baseline done, treatment running; metrics+delta script ready"}
+- [2026-07-05T10:24:49Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:25:01Z] Taylor/heartbeat — Taylor_20260705_100258: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20260705_100258"}
