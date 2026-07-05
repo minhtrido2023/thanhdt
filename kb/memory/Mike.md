@@ -32,3 +32,4 @@ nền khi tổng hợp cuối chương trình.
   cơ chế chính, wrapper chỉ là phụ (không spawn nữa nếu đã có ScheduleWakeup).
 - Budget Taylor: đã dùng 7 dispatch call (2 fail do usage-limit, không tính unique-work) / ≤16.
 
+- [2026-07-05T10:06:16Z] LESSON (2026-07-05): backtick markdown trong dispatch.sh prompt (double-quoted bash string) bị bash coi là command substitution → nội dung trong backtick bị XÓA TRẮNG (không phải lỗi tool, lỗi cách tôi viết lệnh). Đã xảy ra 2 lần (H3 BAL_VOL_TARGET, H8a-tiebreaker LAG_FUND_DNPR_TIEBREAK) — thiệt hại nhỏ (chỉ mất tên biến đề xuất, Taylor tự đặt tên được). TỪ NAY: không dùng backtick trong prompt text truyền qua Bash tool double-quote; viết tên biến/file bằng chữ thường không backtick, hoặc dùng single-quote cho toàn bộ prompt argument.
