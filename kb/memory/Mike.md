@@ -30,3 +30,4 @@ work, chỉ là thực thi backtest đã sẵn code) khi có phiên rảnh/timeo
    headless — cân nhắc tách baseline (cache lại) và treatment thành 2 dispatch riêng nếu cần.
 5. Wrapper Agent(haiku, background) chờ job dài KHÔNG đáng tin — dùng ScheduleWakeup làm chính.
 
+- [2026-07-05T14:42:42Z] H8a-tiebreaker ĐÃ ĐÓNG: LOO xác nhận CONFIRMED-LUMPY-DO-NOT-WIRE (drop 2021+2023 → treatment LOSES −1.53pp CAGR/−0.08 Calmar; drop 2024 → edge phồng +2.86pp = dấu hiệu overfit theo năm kinh điển). Env LAG_FUND_DNPR giữ OFF-default vĩnh viễn. Đang chạy verify_finding.sh (task bmm7t91zr) để quant-skeptic phản biện độc lập đóng vòng cuối. R&D Q3 program: mọi hạng mục đã xong (H2 chính thức hoá commit c27d967, H8a-tiebreaker đóng). Không còn việc mở.
