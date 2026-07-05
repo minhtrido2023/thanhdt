@@ -464,11 +464,16 @@ _recpark_tag = "" if not RECOVERY_PARK else f"_recpark{int(RECOVERY_WMAX*100)}z{
 _recpark_tag = _recpark_tag + _mge_tag
 _dvo_tag = "" if DEEP_VALUE_PBZ <= -90 else f"_dvo{int(abs(DEEP_VALUE_PBZ)*10)}"
 _recpark_tag = _recpark_tag + _dvo_tag + _grad_tag
+# vol-managed BAL overlay tag — REQUIRED so an overlay run never overwrites the baseline R3 CSV
+_vm_tag = ("" if os.environ.get("VOLMANAGE_BAL", "0") != "1"
+           else f"_volmanw{os.environ.get('VOLMANAGE_WIN','126')}m{str(os.environ.get('VOLMANAGE_TGT_MULT','1.0')).replace('.','')}")
+# Wave1/H8a LAG funding-priority reorder tag — keeps the treatment CSV off the baseline R3 path
+_dnpr_tag = "_dnprREORDER" if os.environ.get("LAG_FUND_DNPR", "0") == "1" else ""
 AUDIT_PATH  = os.path.join(WORKDIR, "data",
                            {"v23a": "v23_golive_audit_2014_now.csv",
                             "v23c": "v23c_golive_audit_2014_now.csv",
                             "v22base": "v22base_audit_2014_now.csv",
-                            "singlebook": "singlebook_audit_2014_now.csv"}.get(MODE, MODE+"_audit.csv").replace(".csv", _capsuf + _matsuf + _liqsuf + _park_tag + _wt_tag + _sz_tag + _qt_tag + _bullpark_tag + _c30b_tag + _recpark_tag + _NAV_TAG + _START_TAG + ".csv"))
+                            "singlebook": "singlebook_audit_2014_now.csv"}.get(MODE, MODE+"_audit.csv").replace(".csv", _capsuf + _matsuf + _liqsuf + _park_tag + _wt_tag + _sz_tag + _qt_tag + _bullpark_tag + _c30b_tag + _recpark_tag + _vm_tag + _dnpr_tag + _NAV_TAG + _START_TAG + ".csv"))
 
 BUY_TIERS_V11 = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
                  "MOMENTUM_A","MOMENTUM_S_N","COMPOUNDER_BUY","DEEP_VALUE_RECOVERY","S_PRO",
@@ -479,6 +484,20 @@ MAX_POS_V11 = 12
 STATE_LAG_WEIGHT  = {1: 0.50, 2: 0.00, 3: 0.65, 4: 0.65, 5: 0.65}
 ALLOC_REBAL_TC    = 0.001
 ALLOC_REBAL_BAND  = 0.10
+
+# --- Wave1/H3 (Taylor 2026-07-05): VOL-MANAGED BAL exposure overlay (RESEARCH, OFF-default) ---
+# DD-cutter, NOT a selector (Barroso & Santa-Clara 2015 JFE). Cederburg-O'Doherty-Wang-Yan 2020 JFE
+# warn vol-managed momentum OFTEN FAILS OOS, esp. under turnover cost + small-cap/illiquid — hence the
+# explicit turnover/TC reporting below is a PASS condition, not just Sharpe/Calmar.
+# w_BAL_eff = w_BAL x min(1, sigma_target / sigma_realized_win); sigma = rolling vol of the BAL book's
+# OWN causal return series (uses only returns strictly before the day it scales). sigma_target = MEDIAN
+# of that vol over IS 2014-2019, computed ONCE (NOT tuned/swept). The scaled-out fraction sits in the
+# BAL book's cash (deposit=0). VOLMANAGE_BAL unset -> the combine loop is byte-identical to baseline.
+VOLMANAGE_BAL       = os.environ.get("VOLMANAGE_BAL", "0") == "1"
+VOLMANAGE_WIN       = int(os.environ.get("VOLMANAGE_WIN", "126"))        # realized-vol window (fixed, not swept)
+VOLMANAGE_TGT_MULT  = float(os.environ.get("VOLMANAGE_TGT_MULT", "1.0")) # sensitivity ONLY: x sigma_target (0.8/1.0/1.2)
+VOLMANAGE_TC        = float(os.environ.get("VOLMANAGE_TC", "0.00075"))   # 0.075%/side TC on the cash<->stock resize
+VOLMANAGE_IS_END    = os.environ.get("VOLMANAGE_IS_END", "2019-12-31")   # sigma_target calibration window end
 
 WASHOUT_GATE = 0.30
 CAPIT_HOLD   = int(os.environ.get("CAPIT_HOLD", "60"))   # Part-2: raise to hold levered custom30V to the rebalance cycle
@@ -756,6 +775,10 @@ ev = ev_class.merge(fin[["ticker","quarter","Release_Date","surprise_B_MA"]],
                     on=["ticker","quarter","Release_Date"], how="left")
 ev = ev.sort_values(["ticker","Release_Date"]).reset_index(drop=True)
 ev["surprise_B_MA"] = ev["surprise_B_MA"].fillna(0)
+# d_NPR = quarter-over-quarter change in reported YoY net-profit ratio (earnings-growth
+# ACCELERATION). >=0 = accelerating. Used ONLY as a within-tier LAG funding-priority tiebreak
+# when LAG_FUND_DNPR=1 (Wave1/H8a A/B, 2026-07-05); NaN (first event) treated as neutral (0).
+ev["d_NPR"] = ev.groupby("ticker")["NP_R"].diff()
 LN2 = np.log(2); HL = 3.0
 ev["prior_n_good"] = 0; ev["pa_HL3"] = np.nan
 for tk, g in ev.groupby("ticker"):
@@ -776,6 +799,11 @@ for tk, g in ev.groupby("ticker"):
 #     LAG monetizes peak via drift (audit: peak median HIGHER in NEUTRAL/BULL/EXBULL).
 _LAG_NONOP = os.environ.get("LAG_NONOP_FILTER", "0") == "1"   # OFF: audit showed +0.44pp CAGR but -2.2pp MaxDD (concentration); not robust
 _LAG_FOR  = os.environ.get("LAG_FORENSIC_GATE", "1") == "1"   # ON: forward insurance vs riding confirmed fraud/related-party
+# Wave1/H8a (Taylor 2026-07-05, RESEARCH OFF-default): within-tier LAG funding-priority reorder.
+# When cash-constrained (H8 audit: LAG book oversubscribed ~6x, binds 92% of entries), fund names
+# with higher d_NPR (earnings-growth acceleration) FIRST inside the SAME surprise tier — a REORDER
+# only, never drops any event (contrast the rejected d_NPR HARD FILTER, job …121416, -1.44pp FULL).
+_LAG_FUND_DNPR = os.environ.get("LAG_FUND_DNPR", "0") == "1"
 _qm = bq("SELECT f.ticker,f.quarter,f.NPM_P0,f.EBITM_P0 FROM tav2_bq.ticker_financial f WHERE f.quarter IS NOT NULL")
 ev = ev.merge(_qm, on=["ticker","quarter"], how="left")
 ev["_nonop"] = (ev["NPM_P0"] > 1.2 * ev["EBITM_P0"]) & ev["EBITM_P0"].notna()
@@ -806,7 +834,8 @@ for _, row in e_hl3.iterrows():
     sd = offset_date(entry, -1)
     if sd is None: continue
     lag_cand.append({"sd": sd, "ticker": tk, "surprise": row["surprise_B_MA"],
-                     "release": row["Release_Date"], "np_r": row["NP_R"]})
+                     "release": row["Release_Date"], "np_r": row["NP_R"],
+                     "d_npr": row.get("d_NPR", np.nan)})
 print(f"  LAG candidate events in window: {len(lag_cand)}")
 
 # ============================================================================
@@ -1022,9 +1051,11 @@ for c in lag_cand:
     if pd.isna(px_sd) or px_sd <= 0: continue
     lag_rows.append({"time": sd, "ticker": tk,
                      "play_type": _lag_ptype(c["surprise"]),
-                     "ta": 400.0, "Close": float(px_sd)})
-sig_lag = pd.DataFrame(lag_rows, columns=["time","ticker","play_type","ta","Close"])
-print(f"  LAG signals in window: {len(sig_lag)}")
+                     "ta": 400.0, "Close": float(px_sd),
+                     "_fund_tb": (0.0 if pd.isna(c.get("d_npr")) else float(c["d_npr"]))})
+_lag_cols = ["time","ticker","play_type","ta","Close"] + (["_fund_tb"] if _LAG_FUND_DNPR else [])
+sig_lag = pd.DataFrame(lag_rows, columns=_lag_cols)
+print(f"  LAG signals in window: {len(sig_lag)}  [fund_dnpr_reorder={_LAG_FUND_DNPR}]")
 shn.TIER_PRIORITY.update({"LAG_TOP": 90, "LAG_HI": 88, "LAG_LO": 82})
 LAG_TW = ({"LAG_TOP": 0.11, "LAG_HI": 0.09, "LAG_LO": 0.08} if LAG_SUE_TILT
           else {"LAG_HI": 0.10, "LAG_LO": 0.08})
@@ -1626,6 +1657,7 @@ LAG_KW = dict(allowed_tiers=list(_LAG_BASE_TIERS), max_positions=12,
               deposit_annual=0.0, borrow_annual=BORROW_ANNUAL, state_by_date=state_ff,
               cash_etf_states=PARK_STATES_DICT, cash_etf_states_by_date=PARK_BY_DATE, vn30_underlying=vn30_underlying,
               etf_mgmt_fee_annual=0.0, etf_tracking_drag_annual=0.0, etf_rebalance_friction=0.0015,
+              fund_tiebreak_col=("_fund_tb" if _LAG_FUND_DNPR else None),   # Wave1/H8a within-tier reorder (OFF-default None = byte-identical)
               open_prices=opens_lag, t1_open_exec=True, force_close_eod=False, **ETF_LIQ_KW)
 if capit_events:
     nav_lag0, _ = simulate(sig_lag, prices_lag, vni_dates, tier_weights=LAG_TW,
@@ -1686,8 +1718,9 @@ def w_lag_target(i):
         return 0.65 if (pd.notna(m) and m >= EDGE_THR) else 0.50
     return STATE_LAG_WEIGHT.get(s, 0.5)
 
-if USE_LAG_ALLOCATOR:
-    # V2.3A — state-conditional band-only allocator on the two 25B reference ledgers
+_vm_report = {}   # populated only when the vol-managed BAL overlay is active
+if USE_LAG_ALLOCATOR and not VOLMANAGE_BAL:
+    # V2.3A — state-conditional band-only allocator on the two 25B reference ledgers (BASELINE PATH)
     cap_b_a = np.empty(len(common)); cap_l_a = np.empty(len(common))
     w0 = w_lag_target(0)
     cb = (1.0 - w0) * TOTAL_NAV; cl = w0 * TOTAL_NAV
@@ -1707,6 +1740,61 @@ if USE_LAG_ALLOCATOR:
         cap_b_a[i] = cb; cap_l_a[i] = cl
     combined_nav = pd.Series(cap_b_a + cap_l_a, index=common)
     print(f"  {n_rebal} band rebalances; final combined = {combined_nav.iloc[-1]/1e9:.4f}B")
+elif USE_LAG_ALLOCATOR and VOLMANAGE_BAL:
+    # V2.3A + VOL-MANAGED BAL overlay (Wave1/H3). The BAL sleeve splits into stock (cb) + cash (cc);
+    # cb participates at m = min(1, sigma_target/sigma_realized_win) of the BAL unit, cc = rest (deposit=0).
+    # cap_b = cb+cc (full BAL book value incl. its cash) -> combined = cap_b + cap_l identity preserved.
+    # sigma_realized is CAUSAL: sigma[i] uses BAL returns rb[i-win .. i-1] only (never rb[i], which it scales).
+    _sig = pd.Series(rb, index=common).rolling(VOLMANAGE_WIN).std().shift(1)   # shift(1) => strictly prior window
+    _is_mask = _sig.index <= pd.Timestamp(VOLMANAGE_IS_END)
+    _sig_is = _sig[_is_mask].dropna()
+    sigma_target = float(_sig_is.median()) * VOLMANAGE_TGT_MULT
+    m_arr = np.ones(len(common))
+    _sv = _sig.values
+    for i in range(len(common)):
+        if np.isfinite(_sv[i]) and _sv[i] > 0:
+            m_arr[i] = min(1.0, sigma_target / _sv[i])
+    dep_daily = 0.0   # idle cash earns deposit_annual=0.0 in this sim (matches BAL/LAG book config)
+    cap_b_a = np.empty(len(common)); cap_l_a = np.empty(len(common))
+    n_volrebal = 0; vol_turnover_vnd = 0.0; vol_cost_vnd = 0.0
+    w0 = w_lag_target(0); m0 = m_arr[0]
+    unit0 = (1.0 - w0) * TOTAL_NAV
+    cb = m0 * unit0; cc = (1.0 - m0) * unit0; cl = w0 * TOTAL_NAV
+    for i in range(len(common)):
+        if i > 0:
+            cb *= (1.0 + rb[i]); cc *= (1.0 + dep_daily); cl *= (1.0 + rl[i])
+        unit = cb + cc; P = unit + cl; w_tgt = w_lag_target(i)
+        w_tgt_a[i] = w_tgt
+        # (1) LAG band rebalance — BAL unit (cb+cc) vs LAG, same band mechanic; keep BAL stock/cash ratio
+        if P > 0 and abs(cl / P - w_tgt) > ALLOC_REBAL_BAND:
+            w_pre = cl / P
+            cost = ALLOC_REBAL_TC * abs(w_tgt * P - cl)
+            P -= cost
+            cl = w_tgt * P; unit_new = (1.0 - w_tgt) * P
+            frac_cb = cb / unit if unit > 0 else m_arr[i]
+            cb = frac_cb * unit_new; cc = (1.0 - frac_cb) * unit_new; unit = unit_new
+            n_rebal += 1; rebal_cost_a[i] = cost
+            rebal_rows.append({"ymd": common[i], "state": states_c[i], "value": cost,
+                               "reason": f"w_LAG {w_pre:.4f} -> {w_tgt:.2f} (band ±{ALLOC_REBAL_BAND:.2f})"})
+        # (2) BAL vol-scale — retarget stock share to m x unit; TC on the resized notional
+        m = m_arr[i]; tgt_cb = m * unit; d_notional = abs(tgt_cb - cb)
+        if d_notional > 1.0:
+            cost = VOLMANAGE_TC * d_notional
+            unit -= cost
+            cb = m * unit; cc = (1.0 - m) * unit
+            n_volrebal += 1; vol_turnover_vnd += d_notional; vol_cost_vnd += cost
+        cap_b_a[i] = cb + cc; cap_l_a[i] = cl
+    combined_nav = pd.Series(cap_b_a + cap_l_a, index=common)
+    _mean_m = float(np.mean(m_arr)); _scaled_days = int(np.sum(m_arr < 0.999))
+    _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+                  "tgt_mult": VOLMANAGE_TGT_MULT, "mean_m": _mean_m, "scaled_days": _scaled_days,
+                  "n_days": len(common), "n_volrebal": n_volrebal,
+                  "vol_turnover_vnd": vol_turnover_vnd, "vol_cost_vnd": vol_cost_vnd, "tc": VOLMANAGE_TC}
+    print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f}%  "
+          f"mean m={_mean_m:.3f}  scaled days={_scaled_days}/{len(common)} ({_scaled_days/len(common)*100:.0f}%)")
+    print(f"  {n_rebal} LAG band rebalances + {n_volrebal} BAL vol-resizes; "
+          f"vol turnover {vol_turnover_vnd/1e9:.2f}B, TC drag {vol_cost_vnd/1e6:.2f}M VND")
+    print(f"  final combined = {combined_nav.iloc[-1]/1e9:.4f}B")
 else:
     # V2.3C — static plain-sum: each book runs at its 25B reference, combined = navb + navl.
     # No rebalancing, no friction; cap_bal/cap_lag ARE the raw book NAVs.
@@ -1865,7 +1953,24 @@ if REGIME_DELEVER:
         print(f"  [S5 regime-delever] ON but 0 fires (gross never above cap in CRISIS/BEAR)")
 
 # --- SELF-CHECK 2: combination recurrence replay ---
-if USE_LAG_ALLOCATOR:
+if USE_LAG_ALLOCATOR and VOLMANAGE_BAL:
+    # independent replay of the 3-sleeve (BAL stock / BAL cash / LAG) vol-managed recurrence
+    w0 = w_lag_target(0); m0 = m_arr[0]; u0 = (1.0 - w0) * TOTAL_NAV
+    cb2 = m0 * u0; cc2 = (1.0 - m0) * u0; cl2 = w0 * TOTAL_NAV
+    for i in range(len(common)):
+        if i > 0:
+            cb2 *= (1.0 + rb[i]); cc2 *= (1.0 + 0.0); cl2 *= (1.0 + rl[i])
+        u2 = cb2 + cc2; P2 = u2 + cl2; wt = w_lag_target(i)
+        if P2 > 0 and abs(cl2 / P2 - wt) > ALLOC_REBAL_BAND:
+            P2 -= ALLOC_REBAL_TC * abs(wt * P2 - cl2)
+            cl2 = wt * P2; un2 = (1.0 - wt) * P2
+            fcb = cb2 / u2 if u2 > 0 else m_arr[i]
+            cb2 = fcb * un2; cc2 = (1.0 - fcb) * un2; u2 = un2
+        m = m_arr[i]; dn = abs(m * u2 - cb2)
+        if dn > 1.0:
+            u2 -= VOLMANAGE_TC * dn; cb2 = m * u2; cc2 = (1.0 - m) * u2
+    alloc_err = abs((cb2 + cc2 + cl2) - combined_nav.iloc[-1])   # 3 sleeves: BAL stock + BAL cash + LAG
+elif USE_LAG_ALLOCATOR:
     cb2 = (1.0 - w_lag_target(0)) * TOTAL_NAV
     cl2 = w_lag_target(0) * TOTAL_NAV
     for i in range(len(common)):
@@ -2057,6 +2162,8 @@ metric_rows = [("final_nav_vnd", combined_nav.iloc[-1]),
                ("n_capit_events_fired", sum(1 for e in capit_events if e["size"] > 0.005))]
 metric_rows += [(k, v) for k, v in m_sys.items()]
 metric_rows += [("vni_bh_" + k, v) for k, v in m_vni.items()]
+if _vm_report:
+    metric_rows += [("volmanage_" + k, v) for k, v in _vm_report.items()]
 metric_rows += list(selfcheck.items())
 metric_df = pd.DataFrame([{"record_type":"METRIC","key":k,"value":v} for k,v in metric_rows])
 

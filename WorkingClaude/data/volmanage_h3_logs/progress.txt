@@ -1,0 +1,9 @@
+[17:32:14] START baseline
+[17:38:44] DONE baseline exit=0 ->  Final NAV 1,016.23B  CAGR 27.34%  Sharpe(252) 1.81  MaxDD -17.6%  Calmar 1.55
+[17:38:44] START vm_mult1.0
+[17:45:11] DONE vm_mult1.0 exit=0 ->  Final NAV 768.02B  CAGR 24.51%  Sharpe(252) 1.76  MaxDD -16.1%  Calmar 1.52
+[17:45:11] START vm_mult0.8
+[17:51:41] DONE vm_mult0.8 exit=0 ->  Final NAV 661.12B  CAGR 23.02%  Sharpe(252) 1.75  MaxDD -15.2%  Calmar 1.51
+[17:51:41] START vm_mult1.2
+[17:58:10] DONE vm_mult1.2 exit=0 ->  Final NAV 862.54B  CAGR 25.68%  Sharpe(252) 1.78  MaxDD -17.0%  Calmar 1.51
+[17:58:10] ALL COMPLETE

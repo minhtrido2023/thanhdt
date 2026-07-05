@@ -225,6 +225,38 @@ Nhánh MỚI `pt_v23`: `MGE` env mở `max_gross_exposure` trên sổ CK + `marg
 
 **THREAD (a) — FSCORE enhancer: proxy NEGATIVE (2026-06-21, `probe_fscore_select.py`).** Pre-backtest proxy (top-30 of top-60 liquid, gate≤3, equal-wt mean profit_2M, 47 quý): thêm `FS_W*rank(FSCORE)` vào điểm yieldcombo **LÀM TỆ** mọi trọng số (FS_W 0.25/0.5/0.75/1.0 = −0.27/−0.34/−0.24/−0.46pp vs base 3.80%), cả IS(1.55) lẫn OOS(5.79), win%q<50. **Vì sao:** IC-biên +0.041 của FSCORE là hiệu ứng *chiều rộng* (~1000 mã gate); KHÔNG sống trong rổ top-30-value cô đặc giữa 60 mã thanh khoản mà custom30V build (FSCORE bị nén + kéo ngược trục value). ⇒ **Đừng đốt full backtest cho dạng tilt ngây thơ**; chuyển hướng: FSCORE làm GATE đáy (loại bottom-FSCORE khỏi pool trước khi rank value) hoặc dạng interaction, chỉ backtest form nào vượt base trong proxy trước. *(Proxy không NAV/cost; full pt_v23 vẫn là trọng tài cuối.)*
 
+**H1 (R&D Q3 program) — FSCORE BOTTOM-EXCLUSION gate: proxy NEGATIVE, H1 ĐÓNG (2026-07-05, `probe_fscore_exclude.py`, job `Taylor_20260705_020935`).** Đã theo đúng hướng thread-(a) chỉ ra (loại đuôi FSCORE thấp TRƯỚC khi rank value, KHÁC additive-tilt): trong pool top-60 liquid gate≤3 mỗi quý, DROP bottom-q FSCORE (q∈{10%,20%}, 2 điểm — KHÔNG grid) rồi rank yieldcombo=rank(1/PE)+rank(1/PCF) chọn top-30, 47 quý. Kết quả **LÀM TỆ đơn điệu**: base mean2M 3.80% (IS 1.55 / OOS 5.79) → excl-10% 3.42% (−0.38pp; IS 1.21 / OOS 5.36; win%q 32%; drop TB 4.8 mã) → excl-20% 3.03% (−0.77pp; IS 0.62 / OOS 5.15; win%q 26%; drop TB 11.7 mã). **FAIL cả 2 điểm ở CẢ IS lẫn OOS + win%q<<50%.** **Vì sao (diagnostic):** trong pool top-60 liquid+gated, cohort bottom-20%-FSCORE có fwd2M +2.53% ≈ phần còn lại +2.47% (edge +0.06pp = nhiễu) và độ rẻ y hệt (yieldcombo-rank 1.00 vs 1.02) → FSCORE KHÔNG có sức tách trong universe cô đặc này; alpha avoid-low-F của Piotroski là hiệu ứng *chiều rộng* (~1000 mã, phần lớn junk illiquid) đã bị GẠT SẴN bởi gate rating≤3 + lọc thanh khoản top-60 + rank value. Loại tên chỉ làm co pool → pick top-30 phải với sang tên value kém hơn → dilute. ⇒ **KHÔNG lên harness. H1 đóng ở proxy tier** — không đề xuất env `BASKET_FS_FLOOR`. FSCORE (mọi dạng: additive-tilt thread-(a) VÀ exclusion-gate H1) không cải thiện custom30V. *(Proxy không NAV/cost; guardrail: BQ_CACHE_THREADS=1, PIT panel frozen `value_panel_2014.csv`, không dùng profit_* làm filter.)*
+
+**T2 (R&D Q3 program) — IC-PANEL EXTENSION, 4 new lenses: only H6a MAX5_1M survives tier-1 (2026-07-05, `ic_panel_ext_q3.py`, job `Taylor_20260705_075638`).** Extended the frozen 2026-06-21 marginal-IC panel with 4 candidate lenses on the SAME PIT input (`value_panel_2014.csv` collapsed 1/ticker/q, 50 quarters, 53.5k obs / 24.2k in-gate), SAME machinery: marginal IC = residualize rank(lens) on the value block {ey=1/PE, cfy=1/PCF, ps=1/PS, neg_pbz} per quarter, in-gate (as-of rating≤3), split IS(2014-19, 22q)/OOS(2020+, 25q) + crash%(profit_2M<−20) by lens quintile. New file (frozen `ic_panel_8l.py` untouched, imports its `load/marginal_ic_series/summ`; NO production strategy file changed). PIT: financial lenses merge_asof on `Release_Date`≤obs; daily-micro windows strictly backward (end-of-day at obs). Artifacts `data/ic_panel_ext_q3.csv` + `..._quintile.csv`.
+
+| lens | expect | raw IC gate | mIC-gate IS | mIC-gate OOS | t IS / OOS | crash% Q1→Q5 | verdict |
+|---|---|---|---|---|---|---|---|
+| **H6a MAX5_1M** (mean top-5 daily ret, 21-sess) | −IC | **−0.060** | **−0.047** | **−0.042** | −1.9 / −2.6 | 4.2→4.2→4.4→5.7→**10.1** | **ELIGIBLE tier-2 proxy** |
+| H6b limit_freq_1M (freq raw-ret≥0.065, 21-sess) | −IC | −0.057 | −0.026 | −0.049 | −1.2 / −2.9 | 3.8→7.1→1.8→6.0→9.8 | CLOSED tier-1 |
+| H4 accruals (Sloan: (NP_TTM−CFO_TTM)/Assets) | −IC | −0.031 | +0.010 | −0.027 | +0.3 / −1.1 | 5.0→4.0→5.6→5.9→7.8 | CLOSED tier-1 |
+| H5 dividend yield (DY, cash) | +IC | +0.009 | −0.017 | −0.002 | −0.8 / −0.1 | 6.9→9.7→3.9→4.2→3.7 | CLOSED tier-1 |
+
+- **H6a MAX5_1M = the one survivor** — the lottery/MAX effect (Bali-Cakici-Whitelaw 2011) is a REAL marginal risk axis beyond value: names with the largest recent daily-return spikes have LOWER forward 2M return AND >2× the crash rate (top quintile 10.1% vs 4.2% bottom) — the ONLY lens hitting mIC-gate ≤ −0.03 in BOTH halves (−0.047 IS / −0.042 OOS, sign+magnitude both hold). It is a lottery/short-reversal axis, orthogonal to the value block custom30V ranks on ⇒ natural tier-2 form = an **EXCLUSION/penalty overlay** (avoid lottery-like names inside the value basket), NOT a value tilt. NOT yet backtested in custom30V.
+- **H6b = same effect, cruder/noisier** — directionally identical (raw −0.057, crash rises to 9.8%) but limit-hit is a sparse count (many zeros; +0.065 raw threshold is a HOSE-only proxy — HNX/UPCOM have wider limits) → IS marginal only −0.026 (misses −0.03) + crash non-monotone. H6a is the continuous, robust form of the same signal; H6b adds nothing over it.
+- **H4 accruals CLOSED** — mild raw −0.031 but marginal FLIPS +0.010 in IS: the value block (esp. cfy=1/PCF) already encodes cashflow-vs-earnings quality, so residualized accruals add no return signal. Crash tilts up directionally (5.0→7.8%) but not monotone.
+- **H5 dividend yield CLOSED** — no return edge in-gate (marginal −0.017/−0.002, fails ≥+0.03), BUT crash-protective (high-DY Q5 3.7% vs low-DY Q1-2 6.9-9.7%) — a defensive quality, not alpha; DY correlates with 1/PE cheapness already captured. (Caveat: `DY` field used as-is per data dict = cash-div yield; stock dividends not cleanly separable.)
+- **Guardrails met:** direct BQ, `profit_*` used ONLY as IC target never as feature, PIT strict (Release_Date merge_asof + backward-only daily windows), universe = in-gate rating≤3 on the frozen panel = same frame as the 2026-06-21 panel. Proxy tier only (no NAV/cost). **Next if pursued: H6a as a penalty/exclusion overlay in a full `pt_v23` custom30V backtest** (tier-2) — the only candidate worth the compute; H4/H5/H6b do not advance.
+
+**Wave1/H6a (R&D Q3 program) — MAX5_1M LOTTERY-EXCLUSION overlay: proxy NEGATIVE, H6a ĐÓNG (2026-07-05, `probe_max5_exclude.py`, job `Taylor_20260705_085946`).** Đã theo đúng dạng tự nhiên registry chỉ ra (loại đuôi lottery-like TRƯỚC khi rank value, KHÔNG phải value-tilt — đảo chiều lens của H1): trong pool top-60 liquid gate≤3 mỗi quý, DROP top-q MAX5_1M cao nhất (q∈{10%,20%}, 2 điểm — KHÔNG grid) rồi rank yieldcombo=rank(1/PE)+rank(1/PCF) chọn top-30, 47 quý. MAX5_1M gắn as-of mỗi quý (BQ trailing-21-session, end-of-day at obs, backward-only — SQL y hệt `ic_panel_ext_q3.attach_new_lenses`; coverage pool 1.00; fail-safe giữ tên NaN-max5). Kết quả **LÀM TỆ đơn điệu (FAIL cả 2 điểm ở CẢ IS lẫn OOS)**: base mean2M 3.80% (IS 1.55 / OOS 5.79) → excl-10% 3.63% (−0.17pp; dIS −0.10 / dOOS −0.24; win%q 43%; drop TB 6.9 mã) → excl-20% 3.47% (−0.33pp; dIS −0.49 / dOOS −0.19; win%q 49%; drop TB 12.9 mã). **So H1 neg-control: H6a ÍT hại hơn** (H1 excl-10% −0.38pp win 32% / excl-20% −0.77pp win 26%) — "tốt hơn baseline H1" đúng theo tương đối, nhưng **vẫn FAIL luật tuyệt đối ≥base cả IS/OOS** ⇒ đóng. **Vì sao (khác H1 — quan trọng):** cohort edge lottery **CÓ THẬT** trong pool cô đặc (top-20%-MAX5 fwd2M +2.02% vs rest +2.60% = **+0.59pp**, KHÁC H1 nơi FSCORE-edge chỉ +0.06pp nhiễu) — nhưng KHÔNG dịch được thành cải thiện basket vì **value-rank ĐÃ bắt sẵn phần lớn né-lottery**: tên lottery-like sẵn RẺ HƠN (value-rank pct 0.47 vs 0.52) nên yieldcombo top-30 đã under-weight chúng; exclusion cứng chỉ co pool → substitute sang value kém hơn → dilute nhẹ. **Peek EXPLORATORY (non-gating) dạng SOFT-PENALTY** (score = yieldcombo − λ·rank(max5), λ∈{0.5,1.0}) cũng KHÔNG cứu được: λ=0.5 phẳng (−0.01pp, no-op vì penalty quá yếu để đổi pick), λ=1.0 dIS +0.09 nhưng dOOS −0.40 (net −0.17pp) → không vượt ≥base cả 2 nửa. ⇒ **CẢ HAI vehicle (hard-exclusion VÀ soft-penalty) đều fail** dù signal thật → **KHÔNG lên harness. H6a đóng ở proxy tier** — không đề xuất env `BASKET_MAX5_PENALTY`. Lottery/MAX effect là trục risk thật ở *chiều rộng* panel nhưng redundant với value trong universe custom30V cô đặc (giống hệt cơ chế H1). *(Proxy không NAV/cost; guardrail: BQ_CACHE_THREADS=1, PIT `value_panel_2014.csv` frozen + backward-only micro, không dùng profit_* làm filter, không sửa production file.)*
+
+**Wave1/H7 (R&D Q3 program) — EVEB route-aware yieldcombo swap cho D&A_HEAVY: proxy NEGATIVE, H7 ĐÓNG (2026-07-05, `probe_route_eveb_h7.py`, job `Taylor_20260705_100229`).** TIER-2 proxy (bar CAO hơn H1/H6a: phải thắng **≥+0.3pp CẢ 2 nửa**, không chỉ ≥base) vì H7 là họ hàng gần của composite-v3-as-selector đã bị **bác toàn cục** (IS-overfit, −0.78pp OOS) — prior THẤP. Thiết kế: pool top-60 liquid gate≤3 mỗi quý, chọn top-30 theo yieldcombo, 47 quý (`ic_panel_8l.load()` frozen PIT panel). **base** = rank(1/PE)+rank(1/PCF) mọi tên; **H7** = với tên ∈ `DA_HEAVY_SET` (24 tên NAME-level DA/Rev≥5%, copy verbatim từ `rating_8l.py`) thay leg rank(1/PCF)→rank(1/EVEB), tên ngoài route giữ nguyên. **PE/PCF/EVEB kéo TƯƠI từ `tav2_bq.ticker` tại đúng (ticker,time) quý-cuối** — KHÔNG dùng PE/PCF frozen của panel: panel đã drift khỏi live table do adjust giá cộng dồn per-ticker (GMD 2023-01-31 panel PE 12.14 vs live 16.05, PCF 5.18 vs 6.85, cùng rescale 1.32×), nên trộn 1/PE-frozen với 1/EVEB-live sẽ lệch cơ sở cross-section; kéo cả 3 leg tươi ⇒ base & H7 chung MỘT adjustment basis, vẫn PIT (mỗi giá trị đọc tại `time` của nó). DA trong pool TB **4.0 tên/quý** (max 11), pool EVEB>0 cov 0.82, swap đổi top-30 ở **22/47 quý**. Kết quả **FAIL rõ (cả 2 nửa dưới bar, OOS âm)**: base mean2M 2.87% (IS 0.19 / OOS 5.22) → H7 2.88% (IS 0.29 / OOS 5.16); **dIS +0.09pp** (< +0.30 bar), **dOOS −0.06pp** (ÂM), win%q 30%. ⇒ **ĐÓNG ở proxy tier — KHÔNG thử soft-penalty/biến thể khác/NAV harness** (đúng luật đã định trong plan cho prior thấp). **Vì sao:** swap chỉ chạm ~4 tên/quý và chỉ là chỉnh rank leg-2 nhẹ → hầu như không đổi pick; golden-tier IC của EVEB ở nhóm D&A_HEAVY vốn chỉ +0.01 OOS-robust (mỏng) — đúng như prior. v3_da (`rating_8l.py` default 2026-07-04) vẫn giữ nguyên vai trò **diagnostic value-axis/zone**, KHÔNG ai downstream đọc cho NAV; H7 không đề xuất wire gì vào selector. *(Proxy directional không NAV/cost/T+1; guardrail: BQ trực tiếp không cache, PIT nghiêm, không dùng profit_* làm feature, KHÔNG sửa rating_8l.py/production.)*
+
+**Wave1/H3 (R&D Q3 program) — VOL-MANAGED BAL exposure overlay: FULL-NAV harness FAIL, H3 ĐÓNG (2026-07-05, `pt_v23_audit_2014.py` env `VOLMANAGE_BAL`, job `Taylor_20260705_100245`).** Đây là **DD-cutter, KHÔNG phải selector** (Barroso-Santa-Clara 2015 JFE), test đúng cảnh báo phản biện Cederburg-O'Doherty-Wang-Yan 2020 JFE (vol-managed momentum OFTEN FAILS OOS dưới turnover cost). Thiết kế **cap ≤1.0 KHÔNG lever, σ_target=IS-median KHÔNG tune**: khi bật, sleeve BAL tách stock (cb) + cash (cc, deposit=0), `m = min(1, σ_target/σ_realized_126d)`; σ_realized = rolling-126 std của **chính return-series book BAL**, **causal** (`.rolling(126).std().shift(1)` — chỉ dùng returns < ngày scale); σ_target = **MEDIAN của σ_realized trên IS 2014-2019, tính 1 lần** (14.7% ann @1.0x). Env OFF-default → combine loop **byte-identical baseline** (path `not VOLMANAGE_BAL` = code gốc; baseline chạy lại 27.34% khớp họ R3). Config chính 1.0x + sensitivity ±20% (0.8x/1.2x, KHÔNG grid rộng). **Contemporaneous** AUDIT_END=2026-06-19, threads=1, NAV 50B, `PARK_STATES=3:0.7 ETF_LIQ=custompitg BASKET_WT=namecap BASKET_SELECT=yieldcombo`. TC resize 0.075%/side **đã nằm TRONG CAGR báo cáo**.
+
+| config | FULL CAGR | OOS CAGR (give-up) | OOS Sh | OOS Cal | OOS MaxDD | mean m | scaled days | vol turnover | TC drag |
+|---|---|---|---|---|---|---|---|---|---|
+| **baseline** | **27.34** | **27.89** | **1.80** | **1.58** | **−17.6** | — | — | — | — |
+| VM 1.0x | 24.51 | 24.16 (**−3.73pp**) | 1.74 ↓ | 1.50 ↓ | −16.1 | 0.870 | 1605/3107 (52%) | 1,279B | 960M |
+| VM 0.8x | 23.02 | 22.93 (**−4.96pp**) | 1.73 ↓ | 1.50 ↓ | −15.2 | 0.778 | 2049/3107 (66%) | 1,274B | 955M |
+| VM 1.2x | 25.68 | 25.52 (**−2.37pp**) | 1.75 ↓ | 1.50 ↓ | −17.0 | 0.932 | 1106/3107 (36%) | 1,158B | 868M |
+
+**VERDICT: FAIL mọi điều kiện PASS trừ MaxDD → H3 ĐÓNG.** DD-cutter **chạy đúng cơ học** (MaxDD nông đơn điệu theo target: baseline −17.6 → 1.2x −17.0 → 1.0x −16.1 → 0.8x −15.2; và CAGR giảm đơn điệu khi de-risk mạnh hơn → KHÔNG phải bug, đúng dạng vol-target thật). Nhưng: **(1) OOS Sharpe GIẢM cả 3** (gate cần TĂNG) ❌; **(2) OOS Calmar GIẢM cả 3** (1.58→1.50, gate cần TĂNG) ❌; **(3) CAGR give-up −2.4…−5.0pp OOS** (gate ≤0.5pp) ❌ vượt 5-10×; **(4) MaxDD nông hơn** ✓ (điều kiện DUY NHẤT đạt — không đủ); **(5) IS không âm** (CAGR 26.74→24-25, không âm; IS Calmar thực ra TĂNG 2.01→2.17 vì scaling co DD-nhỏ giai đoạn calm — chính là cái bẫy: cải thiện nằm ở DD benign IS, KHÔNG ở OOS risk-adjusted); **(6) turnover-cost-adjusted:** overlay fire **36-66% MỌI phiên** (1,110-2,058 vol-resizes), turnover ~1,160-1,280B trên book 50B (~2×/năm thêm), TC tích lũy 868-960M VND — nhưng **TC KHÔNG phải thủ phạm chính**: kể cả TC=0, give-up vẫn áp đảo vì opportunity cost chạy 78-93% invested (mean m). **Self-check 0 VND cả 3** (BAL/LAG cash-flow identity 0 + `combination_replay_err_vnd`=0.0 replay 3-sleeve độc lập; max gross combined **1.000** = cap ≤1.0 xác nhận, borrow 0). **Root cause (định lượng):** cửa sổ high-vol của book BAL momentum KHÔNG trùng đủ với cửa sổ low-return của nó ở VN — tradeoff vol/return gần TUYẾN TÍNH nên scale 1/σ chỉ co return tỉ lệ → Sharpe gần như đứng yên, Calmar/CAGR rớt (compounding drag + TC). Lợi ích crash-protection kiểu Barroso KHÔNG hiện ra vì **DT5G đã lo phần de-risk regime tail**; chồng thêm 1 overlay vol chỉ rỉ máu return ở phiên vol-thường. **= Cederburg 2020 OOS-failure tái hiện trên dữ liệu VN, đúng như dự đoán, KHÔNG phải bug.** Env giữ **OFF-default** (baseline byte-identical), KHÔNG đề xuất wire. Artifacts: `data/volmanage_h3_logs/` (4 log + `compute_metrics.py` + progress), CSV `..._volmanw126m{08,10,12}.csv`, code `pt_v23_audit_2014.py` L488-500/1743-1797/1956-1972.
+
 ---
 
 ## Exp-8 — RECOVERY_CAPIT_ONLY (wait-for-capitulation deploy + MGE=1.3) — 2026-06-24 (Tier-3 BQ, 0 VND)
@@ -1460,3 +1492,267 @@ The D&A_HEAVY + POWER EVEB co-primary value route is now the standing behavior o
 **Verification runs**: default (no env)==explicit v3_da IDENTICAL ✓; rollback VALUE_VERSION=v3==original v3
 IDENTICAL ✓; live screener CSV restored to the new default (v3_da) after the diff runs.
 Run to reproduce: `python3 rating_8l.py` (=v3_da now); rollback `VALUE_VERSION=v3 python3 rating_8l.py`.
+
+---
+
+## DSR / PBO Robustness Annex (2026-07)
+> Job `Taylor_20260705_075644` (dispatch Mike, R&D Q3). **Meta-analysis, ZERO production risk:**
+> reads only frozen daily-NAV CSVs already pinned above; runs no backtest, touches no live path.
+> Reproduce: `python3 dsr_pbo_annex.py` (deterministic, fixed seeds). Method refs: Bailey & López de
+> Prado 2014 (Deflated Sharpe); Bailey-Borwein-LdP-Zhu 2017 (CSCV/PBO); Politis-Romano 1994 (stationary
+> bootstrap); Harvey-Liu-Zhu 2016 (multiple-testing haircut framing).
+
+**Purpose:** quantify how much of V2.4's headline edge could be a multiple-testing artifact — the risk
+that selecting the "best" config out of a large search inflates its apparent Sharpe.
+
+### 1. Trial count N (auditable)
+The V2.3A/V2.4 search left a countable artifact trail (each backtest writes a daily-NAV CSV):
+- **176** total `data/v23_golive_audit_*.csv` artifacts on disk.
+- **104** distinct config *stems* after collapsing NAV-level (`_navXXB`) and period (`_from20XX`) re-cuts.
+- **71** survive as full-history (≥2500 daily obs) @50B daily-NAV series → the empirical DSR/PBO trial set.
+- Plus the predecessor lineage that fed V2.3A (not double-counted above): `qt_v*` 19, `pt_v4*` 14,
+  `v11_nav*` 10, `dt4g/dt5g_nav*` 12 — the search that produced the engine + regime gate.
+- Registry-documented **rejected** variants (BỊ LOẠI / REFUTED / walk-forward-bác): ≥17 named families
+  (custom30V permanent-exclude, LAG SUE-tilt, hold-neutral exit, stability floor, liq-tilt, pbcombo
+  dual-vehicle, gq_score gate, composite-v3-as-selector, …).
+- **Working N for DSR: tested at N=71 (empirical), 120, 200** to bracket the true search size. The DSR
+  verdict is **invariant** across this whole range (see §2) — so the (unavoidable) uncertainty in the
+  exact trial count does **not** change the conclusion.
+
+### 2. Deflated Sharpe Ratio — R3 (LIVE deploy config)
+Source: pinned R3 CSV `..._etfliqcustompitg_wtnamecap.csv`, T=3106 daily obs (12.3y), combined BAL+LAG NAV.
+- Independent recompute of daily returns: **per-day Sharpe 0.1074 → annualized ≈ 1.70 (log) / 1.78 (arith)**.
+  (Registry pins **1.87** from the engine's own calc; the ~0.1–0.17 gap is a return-convention/day-count
+  difference, not a data issue. DSR below uses the **conservative** recompute 0.1074 — biases against us.)
+- Higher moments (drive the DSR denominator): **skew γ3 = −0.119, kurtosis γ4 = 9.47 (excess 6.47)** —
+  fat-tailed, as expected for an equity book; the DSR haircut explicitly penalizes this.
+- Trial Sharpe dispersion across the 71 configs: mean ann-SR 1.69, sd ann-SR **0.144**, Var(per-day SR)=8.22e-5.
+- **Expected-max Sharpe under the null (SR0, zero-skill benchmark):** ann **0.35** (N=71) → **0.40** (N=200).
+- **DSR = P(true SR > SR0):**
+
+  | trials N | SR0 (ann) | DSR |
+  |---|---|---|
+  | 71 (empirical) | 0.35 | **1.0000** |
+  | 120 | 0.37 | **1.0000** |
+  | 200 (conservative) | 0.40 | **1.0000** |
+
+  **Verdict: DSR ≈ 1.0000 → NOT a RED FLAG (DSR≥0).** Observed Sharpe (~1.70 ann, 0.107/day) sits ~4.5σ
+  above the multiple-testing-adjusted null even at N=200 and after the fat-tail haircut. The edge is not
+  explained by trial selection. (Mechanically: the 12.3-year sample T=3106 dominates — a real, persistent
+  Sharpe this far above SR0 survives deflation easily.)
+
+### 3. CSCV / PBO (combinatorially-symmetric cross-validation)
+Genuine daily-return matrix (not the thin per-year proxy): 3100 aligned daily obs × **71 configs**, split
+into S=16 contiguous blocks → C(16,8)=**12,870** in-sample/out-of-sample partitions. Metric = per-obs Sharpe.
+- **PBO = 0.198** — in ~20% of splits the IS-best config lands below the OOS median.
+- logit λ: median +1.34, mean +1.05, P(λ<0)=0.198.
+- **Interpretation:** PBO ≈ 0.20 < 0.5 ⇒ the config *family* is **not** predominantly overfit; the IS-best
+  config stays above-median OOS 80% of the time. The residual 20% is honest: picking the single best
+  parking/recovery/MGE variant on IS carries a real ~1-in-5 chance of not being best OOS — which is exactly
+  why the LIVE choice (R3) was made on **robustness (Sharpe + walk-forward IS/OOS both positive), not
+  IS-best CAGR**, and why the bull-park/recovery levers were kept opt-in, not defaulted. PBO 0.20 is a
+  moderate, acceptable overfit-risk for a search of this size; it is a caution on *variant-chasing*, not on
+  the core edge (which §2 clears).
+
+### 4. Stationary bootstrap (Politis-Romano) vs circular block (L=21)
+Cross-check the pinned 5th-pct anchor (CAGR 18.6% / DD −28.6%) against bootstrap-method choice. Both B=4000,
+seed=12345, on R3 daily returns:
+
+| method | CAGR 5th | CAGR med | MaxDD 5th | MaxDD med | P(DD<−30%) |
+|---|---|---|---|---|---|
+| circular block L=21 (`bootstrap_nav.py`) | 17.9% | 27.1% | −29.5% | −19.8% | 4.2% |
+| stationary (PR, mean L=21) | 18.0% | 27.1% | −28.4% | −19.4% | 3.6% |
+
+**Verdict: conclusion UNCHANGED.** The two methods agree to within ~0.1pp on 5th-pct CAGR and ~1pp on
+5th-pct DD. The registry anchor (**5th-pct CAGR ~18%, DD ~−29%**) is robust to the block-scheme choice —
+random block length (PR) does not soften the tail. (Same honest limit as `bootstrap_nav.py`: sampling
+uncertainty only; excludes regime-change / structural breaks → true uncertainty is wider.)
+
+### 5. Proposed standard for future wires (recommendation, not yet policy)
+1. **Every production wire declares its trial count N** (how many configs were compared to reach it) and its
+   **DSR** on the deploy config's daily NAV. **DSR < 0.95 → RED FLAG**, do not wire without explicit sign-off.
+   (This complements — does not replace — the existing quant-skeptic + walk-forward IS/OOS gates.)
+2. **Report PBO** when a wire is *selected out of a family* of ≥~8 variants (parking/lever/basket sweeps).
+   PBO ≥ 0.5 = the selection is likely overfit → prefer the robust-median config over the IS-best.
+3. Keep `bootstrap_nav.py` (circular block) as the sizing anchor; a stationary-bootstrap cross-check is
+   cheap insurance for any leverage/sizing decision.
+
+**Bottom line for V2.4:** core edge **clears deflation decisively (DSR≈1.0, no red flag)**; the config-family
+selection carries a **moderate, disclosed** overfit risk (PBO≈0.20) that the robustness-first deploy choice
+already mitigates; the drawdown-tail anchor (~−29%) is **method-robust**. No production change indicated.
+Artifacts: `dsr_pbo_annex.py` (reproducible), this section.
+
+## Wave1/H8 — 2 micro-audits data-gated (2026-07-05, Taylor, job Taylor_20260705_085949)
+**Scope:** RESEARCH ONLY — reads/counts, NO production touched. New file `probe_lag_capacity_h8a.py` only.
+
+### H8a — LAG capacity tiebreaker (d_NPR): does the ~12-name capacity actually BIND?
+**Q (Mike):** Over 2014-2026, how often do LAG PEAD candidates (NP_R≥15 ∧ prior_n_good≥4 ∧ pa_HL3≥5, entry=Release_Date+5 sessions) exceed the LAG book's slot limit? Bind <10% → CLOSE (registry ~L628 allows d_NPR only as a *capacity tiebreaker*, not a hard filter). Bind ≥10% → propose d_NPR TIEBREAKER (un-coded).
+**Slot-limit correction (the real answer to "look up the correct slot limit"):** `MAX_POS_V11=12` (pt_v23_audit_2014.py:477) is the **BAL/V11 momentum book** cap ("tier 10%/name, max 12", L11) — **NOT LAG**. The **LAG book is explicitly SLOT-EXEMPT** (`slot_exempt_tiers=set(tiers)`, L1117; header L15 & audit-meta L1960 "stop/slot-exempt", "sized on each book's free cash"). LAG names are sized LAG_HI 10% / LAG_LO 8% of book NAV (L1029) → **effective free-cash capacity ≈ 10-12 concurrent names** before cash exhausts. So there is no hard slot *count*; the binding resource is free cash (~12-name ceiling). The registry "capacity-constrained at 12 slots" language = that ~12 effective ceiling.
+**Method (faithful to [4] Building LAGGED schedule):** rebuilt prior_n_good & pa_HL3 EXACTLY (LN2, HL=3.0; good=NP_R≥15 & post_ret notna) from `earnings_events_classified.csv`; gate NP_R≥15 ∧ prior_n_good≥4 ∧ pa_HL3≥5; entry=Release_Date+5 sessions on global calendar (`bq_cache/ticker/*.parquet`, 3364 sessions); hold=25 sessions (audit-meta L1959). Window 2014-01-01..2026-06-15. Compared concurrent demand vs 12-slot effective cap.
+**Result — capacity binds ESSENTIALLY ALWAYS (≫10%):**
+- Gated LAG entries in window: 5317. **Concurrent-holdings demand: median 74, mean 76, p90 147** (vs ~12 cap). **92.2% of entries** occur when >12 names are already concurrently held; **51.9% of all sessions** hold >12; peak 210.
+- Literal reading (new candidates on a single entry-day >12): 22.0% of entry-days (max 132/day).
+- **Robustness on count-scale:** current `earnings_events_classified.csv` was regenerated 2026-07-03 to a broader 1225-ticker universe (rows 2011:1477→2025:4417), so 5317 is ~2.3× the 2026-06-27 harness's 2345 FULL entries. **But even at the conservative harness scale, avg concurrent = 2345×25/3105 ≈ 18.9 > 12.** Direction invariant to CSV version. (Illiquid tail partially fills under LAG's 20%-ADV/5-day model → true tradeable oversubscription somewhat lower than 74, still far above 12.)
+- **Current implicit tiebreaker when cash is scarce = SURPRISE** (TIER_PRIORITY LAG_HI 88 > LAG_LO 82, L1028) — higher-surprise names funded first. d_NPR would be an alternative/additional funding-priority key.
+**VERDICT: bind ≫10% → do NOT close; PROPOSE d_NPR as a SOFT funding-priority TIEBREAKER (un-coded).** The ~12-name free-cash ceiling is oversubscribed by ~6× (median 74 want-to-hold for ~12), so a selection mechanism is *already materially engaged* — a real place for d_NPR (prefer d_NPR≥0 accelerating-growth names, event-study PASS +1.86pp OOS T+25, job …120256). **CAVEATS (why low-confidence):** (1) the d_NPR **HARD FILTER** form was already 50B-harness REJECTED (job …121416: −1.44pp FULL, destroys IS −2.87pp); a TIEBREAKER (reorder scarce-cash funding, do NOT drop events) is a DIFFERENT, untested form. (2) namecap weight-tilt partner study showed the signal "doesn't translate through the ~12-slot + sizing + dilution" → likely small. **Next step (NOT done here, per dispatch "chưa code"): faithful 50B V2.4 A/B of the TIEBREAKER form (reorder LAG funding priority by d_NPR within/above the surprise tier) vs baseline surprise-only ordering — wire only if OOS CAGR↑ ∧ Calmar↑ ∧ no IS damage.**
+
+### H8b — Foreign-flow data audit (PIT foreign buy/sell net flow by ticker/day, 2014+)
+**Method:** searched `bigquery_dictionary.json` + full `tav2_bq.INFORMATION_SCHEMA.COLUMNS` (40 tables) for foreign / nn_ / ngoai / khoi / forbuy / forsell / netflow / flow / buy / sell variants.
+**Result: NO foreign-flow columns anywhere in tav2_bq.** Zero matches on foreign/investor-flow names. Only "invest/flow"-adjacent hits are `CF_Invest_*` (cash-flow-from-investing) and `LtInvest_P0` (long-term investments) = financial-statement items, NOT investor flow. `ticker`/`ticker_1m`/`ticker_prune` (174 cols each) carry only OHLCV + TA + fundamentals; no foreign-ownership/flow field.
+**VERDICT: CLOSED — foreign-flow data is NOT available in tav2_bq. Backlog item if collection is desired (would need a new ingest source, e.g. HOSE/HNX foreign-trade feed); no build here.**
+
+---
+
+## Wave1/H8a-tiebreaker — LAG within-tier d_NPR fill-reorder (FULL-NAV A/B) — CONDITIONAL PASS, LUMPY (2026-07-05, job `Taylor_20260705_135028`)
+
+**What:** the H8a TIEBREAKER proposal (not the rejected hard filter of line 659). Env `LAG_FUND_DNPR` in `pt_v23_audit_2014.py` (L471/780-806/1056-1058/1660): when a LAG entry-day has more same-tier candidates than free cash allows, **reorder within the tier by `_fund_tb` (d_NPR = accelerating net-profit YoY)** so accelerating names fill first. **Reorder-only inside a tier — never crosses tiers, never drops an event.** OFF-default → combine loop byte-identical baseline (verified). NaN (first event) treated neutral(0).
+
+**Config (contemporaneous):** `LAG_FUND_DNPR=1 BQ_CACHE_THREADS=1 NAV_TOTAL_B=50 ETF_LIQ=custompitg BASKET_WT=namecap BASKET_SELECT=yieldcombo PARK_STATES="3:0.7" AUDIT_END=2026-06-19 $DNA_PYEXE pt_v23_audit_2014.py v23a none postbull 0 edge`. threads=1 pinned. Logs `data/h8a_logs/{baseline,treatment}_h8a.log`; CSVs `..._etfliqcustompitg_wtnamecap.csv` (baseline) / `..._dnprREORDER.csv` (treatment). IS/OOS sliced from `combined_nav` daily (FULL reproduces script print exactly).
+
+| Metric | Baseline (DNPR off) | Treatment (DNPR=1) | Δ |
+|---|---|---|---|
+| FULL CAGR / Sharpe / MaxDD / Calmar | 27.34% / 1.81 / −17.6% / 1.55 | 28.07% / 1.87 / −17.5% / 1.60 | +0.73pp / +0.06 / +0.1pp / +0.05 |
+| IS (2014-19) CAGR / Sharpe / Calmar | 26.74% / 1.81 / 2.01 | 26.52% / 1.82 / 1.98 | **−0.22pp** / +0.01 / −0.03 |
+| OOS (2020+) CAGR / Sharpe / Calmar | 27.89% / 1.80 / 1.58 | 29.50% / 1.90 / 1.68 | **+1.61pp** / +0.10 / **+0.10** |
+
+- **Self-check 0 VND both** (BAL/LAG cash-flow identity + final-NAV identity = 0; borrow 0; max gross combined 1.000). Baseline FULL 27.34% == H3-family R3 baseline (byte-identical family confirmed). LAG book final 441.4B → 515.0B; LAG stock events 6692 → 6897 (reshuffle changes which names hold when cash exhausts → compounds over 12y).
+- **WIRE-rule literally MET:** OOS CAGR↑ (+1.61pp) ∧ OOS Calmar↑ (+0.10) ∧ IS not materially hurt (−0.22pp CAGR, +0.01 Sharpe = within-noise flat).
+- **BUT LUMPY — the trap:** per-year OOS delta = **2021 +12.24pp and 2023 +10.27pp CARRY EVERYTHING**; the other 5 OOS years are net-negative and **2024 gives back −4.68pp**. Drop either 2021 or 2023 (per-year LOO) → OOS edge flips negative. A within-tier fill-reorder firing only under cash scarcity is inherently **order-of-fill dependent** (threads=1 pinned) → a 2-year concentration reads as reshuffle-luck, not a durable signal edge. Same pattern the registry already flags (d_NPR hard-filter line 659; H3 single-year carry).
+
+**VERDICT: CONDITIONAL PASS — do NOT auto-wire on the literal rule. Route to quant-skeptic + explicit per-year LOO (does edge survive dropping 2021 AND 2023?) before any production wiring.** Env kept OFF-default (baseline byte-identical). No production change this job. If it survives LOO+skeptic, deploy as a SOFT within-tier tiebreaker (matches earlier H8a proposal "TIEBREAKER not filter"), never a hard event-drop.
+
+### Wave1/H8a-tiebreaker LOO (leave-one-out) — **CONFIRMED-LUMPY, DO-NOT-WIRE** (2026-07-05, job `Taylor_20260705_143219`)
+
+**Method (ZERO re-run):** recomputed OOS (2020-01-02→2026-06-19) CAGR/Sharpe/Calmar from the two **frozen** DAILY `combined_nav` series (`loo_h8a_dnpr.py`, reads baseline + `_dnprREORDER` CSVs only). Metrics follow `calc_metrics` convention (Sharpe×√252, Calmar=CAGR/|MaxDD|); LOO annualizes by retained trading days ÷ OOS sessions/yr (spy=249.2, constant across subsets so the trt−base delta is method-invariant). No backtest re-run, env OFF-default, no production file touched.
+
+| OOS subset | base CAGR / Calmar | trt CAGR / Calmar | Δ CAGR / Δ Calmar | trt vs base |
+|---|---|---|---|---|
+| Full (2020+) | 27.89% / 1.58 | 29.50% / 1.68 | **+1.61pp / +0.10** | WINS (reproduces prior) |
+| drop 2021 | 17.46% / 0.99 | 17.93% / 1.02 | +0.47pp / +0.03 | marginal win (level collapses ⇒ 2021 dominates level) |
+| drop 2023 | 28.97% / 1.64 | 28.96% / 1.65 | **−0.00pp / +0.01** | edge VANISHES (2023 carried the CAGR edge) |
+| **drop 2021+2023 (CORE test c)** | **16.43% / 0.93** | **14.90% / 0.85** | **−1.53pp / −0.08** | **trt LOSES** |
+| drop 2024 | 28.89% / 1.64 | 31.75% / 1.81 | +2.86pp / +0.17 | wins BIG (removing the giveback year inflates apparent edge — the overfit tell) |
+
+- **CORE test (c) fails:** with both boom years removed, treatment is **strictly worse** than baseline on both CAGR (−1.53pp) and Calmar (−0.08). The entire OOS edge is reshuffle-luck concentrated in 2021+2023.
+- **Mirror-image confirmation:** dropping the giveback year 2024 *inflates* the edge to +2.86pp — the classic sign of an unstable, year-dependent effect rather than a durable signal. Drop the good years → edge dies; drop the bad year → edge balloons.
+- **MaxDD is inert** (−17.5% vs −17.6% in every subset): reorder-only changes *which* names hold when cash exhausts, not the risk path — the only lever is CAGR, and that lever is 2-year lumpy.
+
+**VERDICT: CONFIRMED-LUMPY-DO-NOT-WIRE.** H8a-tiebreaker LAG_FUND_DNPR closed. The literal WIRE-rule (OOS CAGR↑ ∧ Calmar↑) was met on full OOS but is an artifact of 2021+2023; it does not survive leave-one-out. Env `LAG_FUND_DNPR` stays OFF-default permanently (baseline byte-identical). No production wiring. Matches the registry's standing pattern (d_NPR hard-filter line 659; H3 single-year carry) — a within-tier fill-reorder under cash scarcity is order-of-fill dependent and not a robust edge.
+
+#### Full per-year LOO — year-sensitivity annex (2026-07-05, job `Taylor_20260705_144651`, completeness only)
+
+Per quant-skeptic's optional suggestion at verify time (job `Taylor_20260705_143219`): leave-one-out for **every** individual OOS year, not just the 2021/2023/2024 hand-picked set. Same ZERO-re-run method / same frozen CSVs / same `spy=249.2` convention (`loo_h8a_dnpr_yearsens.py`, reads only the two audit series). **This does NOT change the verdict — it only documents year-sensitivity in full.** Full-OOS edge = **+1.61pp** CAGR; "edge vs full" = how the drop-one-year edge shifts relative to that (negative shift ⇒ dropped year *carried* the edge; positive shift ⇒ dropped year *dragged* the edge down).
+
+| Drop year | base CAGR / Calmar | trt CAGR / Calmar | Δ CAGR / Δ Calmar | edge vs full (Δpp) | reads as |
+|---|---|---|---|---|---|
+| 2020 | 27.99% / 1.59 | 29.95% / 1.71 | +1.96pp / +0.12 | +0.36 | ≈ neutral |
+| **2021** | 17.46% / 0.99 | 17.93% / 1.02 | +0.47pp / +0.03 | **−1.14** | **CARRIES edge (runner-up)** |
+| 2022 | 35.04% / 1.99 | 37.38% / 2.13 | +2.33pp / +0.15 | +0.73 | drags edge down |
+| **2023** | 28.97% / 1.64 | 28.96% / 1.65 | −0.00pp / +0.01 | **−1.61** | **CARRIES edge (primary — full edge collapses to ~0)** |
+| 2024 | 28.89% / 1.64 | 31.75% / 1.81 | +2.86pp / +0.17 | **+1.25** | **biggest DRAGGER (giveback year — edge balloons when removed)** |
+| 2025 | 26.41% / 1.72 | 28.59% / 1.95 | +2.18pp / +0.23 | +0.57 | drags edge down |
+| 2026 (partial→06-19) | 30.86% / 1.75 | 32.46% / 1.85 | +1.60pp / +0.10 | −0.01 | ≈ neutral |
+
+- **Concentration confirmed at full resolution:** the two edge-carrying years are exactly **2023 (primary, −1.61pp shift)** and **2021 (runner-up, −1.14pp shift)** — dropping either single-handedly guts the edge. Every other year *drags the edge down* or is neutral: **2024 is the biggest single dragger** (+1.25pp shift — remove the 2024 giveback and the apparent edge balloons to +2.86pp), with 2022 (+0.73) and 2025 (+0.57) also dilutive, and 2020/2026 ≈ neutral.
+- **Single-year-drop caveat (why the CORE test is a 2-year drop):** dropping 2023 *alone* leaves the edge at −0.00pp (not negative) because 2021 still props up the level; it takes removing **both** 2021+2023 to push trt strictly below base (−1.53pp, core test c above). The two boom years jointly — not either individually — are the whole story.
+- **Verdict UNCHANGED: CONFIRMED-LUMPY-DO-NOT-WIRE.** The full 7-year LOO adds resolution, not a reversal: the edge lives in 2 boom years and every non-carrier year is neutral-to-dilutive. No production wiring; env `LAG_FUND_DNPR` stays OFF-default.
+
+---
+
+## Sector #16 — Textile / Garment EXPORT (2026-07-05, job `Taylor_20260705_154537`)
+
+**Framework:** `mike/agents/Taylor/textile_valuation_framework.md` · **Script:** `textile_screen.py` ·
+**Artifacts:** `data/textile_{qualityvalue,basket}_monthly.csv`, `data/textile_verdict.json`.
+First sector outside the 2026-06-30 15-sector sweep. Distinct economics: **USD revenue (export) / VND cost
+(labor) + order-book-driven demand**. Universe (hand-curated, ICB lumps textile+apparel): liquid export core
+TCM/TNG/MSH/GIL/VGT (ADV>5B); thin tail STK/EVE/ADS/HTG/GMC/VGG. Method: point-in-time monthly, ASOF ≤120d,
+T+1, TC 0.1%, threads=1, hold cash when empty. **Self-check 0 VND: PASS** (qualityvalue 1e-6, basket 2e-6).
+
+### FX-sensitivity test — hypothesis REFUTED (the headline)
+Dispatch hypothesis: VND depreciation (USD/VND↑) lifts VND-translated export revenue → forward tailwind.
+Tested causally (USD/VND 3M/6M momentum at *t* vs `profit_1M/2M/3M`, EVALUATION-ONLY), 17.8k name-days.
+**Result is the OPPOSITE and significant:** Spearman(fx6m, profit_3M) = **−0.177** (textile) vs **−0.118**
+(whole market). VND_weak regime (fx6m>+1%) → fwd-3M **−0.8%**; VND_strong → **+8.0%**. The "weak-VND-helps-
+exporters" thesis is **dominated by the risk-off confound** — USD/VND spikes are a global-tightening proxy
+that crushes all VN equity, and textile (high-beta cyclical exporter) gets hit *harder*. **FX depreciation is
+NOT a tradeable long signal; it flags macro stress ("size down").** (Fertilizer-2021 pattern: the metric ≠ the
+catalyst.) NB: `data/vcb_fx_rate.csv` live feed (Winston 2026-07-05) is forward-monitoring only, not backtestable.
+
+### Backtest (net vs B&H VNINDEX)
+| screen | window | net CAGR | Sharpe | MaxDD | Calmar | B&H CAGR | edge |
+|---|---|---|---|---|---|---|---|
+| **A quality-value** | FULL 14-26 | **−0.78%** | 0.09 | −59.1% | −0.01 | 10.23% | **−11.01pp** |
+| A quality-value | IS 14-19 | 2.00% | 0.19 | −29.4% | 0.07 | 8.96% | −6.96pp |
+| A quality-value | OOS 20-26 | −3.34% | 0.03 | −44.3% | −0.08 | 11.45% | −14.80pp |
+| **B basket EW** | FULL 14-26 | 10.04% | 0.44 | −56.8% | 0.18 | 10.23% | −0.19pp |
+| B basket EW | IS 14-19 | 4.32% | 0.28 | −32.5% | 0.13 | 8.96% | −4.64pp |
+| B basket EW | OOS 20-26 | 15.76% | 0.56 | −56.6% | 0.28 | 11.45% | +4.30pp |
+
+- **Screen A (quality-value) FAILS** — worse than B&H both IS (−6.96pp) and OOS (−14.80pp). Cash 90/140 months
+  (margin-stable quality names rarely *also* cheap-vs-history) → concentrated 1-name whipsaws (2020 caught
+  MSH/TCM but they lagged −8.4%; 2022 order-collapse −37.7%). **Not a book.**
+- **Screen B (basket)** ≈ B&H CAGR but −57% MaxDD (vs −43%), lower Sharpe. OOS "+4.30pp" is **entirely** 2020
+  (+124%) + 2021 (+75%) COVID reopening/PPE order-surge — un-repeatable (2022 −44.7%, 2025 +1.6% vs mkt +44%).
+  **High-beta cyclical, not a durable book.**
+- **Gate = alpha (as a lens):** GPM-CV(P0..P7)<0.15 + IntCov>1.5 + ROE5Y>0.15 correctly ranks MSH (elite) >
+  TCM (margin-stable, ROE now faded <0.15) >> TNG (thin-CMT trap: NPM~0, Debt_Eq 2-4, IntCov<0); ejects GIL
+  (CV 0.38), STK (losses), VGT (ROE 0.07), EVE (0.04). **Verify:** MSH CAUGHT 18mo (incl 2020 COVID), TCM
+  CAUGHT 33mo (incl 2018-19 IntCov-turn window pre-2020-21 surge), TNG/STK/VGT REJECTED, GIL leaked 11mo
+  2021-22 (transiently-stable margin pre-Amazon-loss, documented). Ortho 34% c30V / 2% 8L; median ADV 15.8B.
+
+### Verdict: **LENS, not a BOOK** (sweep Rule 3 holds). Do NOT wire a textile sleeve.
+Durable artifacts: (1) FX thesis refuted — don't size up on VND weakness. (2) GPM-CV+IntCov+ROE gate = a
+single-name evaluation lens. (3) **MSH = the one genuine quality compounder** (ROE5Y 25-34%, IntCov 8-60),
+buy-and-hold-on-weakness (like DHG pharma; timing destroys it) — and **cheap-vs-own-history right now**
+(2026Q1: PE 6.5 < PE_MA1Y 7.6, PB 1.78, ROE5Y 24.9%). No HPG/DGC/MWG-style catchable compounding book exists.
+
+---
+
+## Sector #17 — Livestock / Animal-Feed (HOG CYCLE) (2026-07-05, job `Taylor_20260705_160724`)
+
+**Framework:** `mike/agents/Taylor/livestock_valuation_framework.md` · **Script:** `livestock_screen.py` ·
+**Artifacts:** `data/livestock_{troughbuy,basket}_monthly.csv`, `data/livestock_verdict.json`,
+`data/livestock_prices.csv` (full-ticker panel — prune cache stale for BAF/HNG). Second sector outside the
+2026-06-30 sweep. A genuine **protein/hog commodity cycle** (opposite of defensive F&B #10): margins swing on
+hog price (supply, ASF disease) vs imported feed cost. **P/E goes NEGATIVE at the trough** (DBC 2023Q1 PE −19.8,
+2023Q3 −87.1) → value on **P/B-trough + margin-turn**, not P/E. Universe (hand-curated): liquid core
+DBC/BAF/HAG/HNG (ADV>5B); thin tail MML/VLC/VSN/APF/HKB/AGM (<3B). Aquaculture (VHC/ANV/MPC) deliberately
+excluded (export-FX cycle = textile #16 story). Method: point-in-time monthly, ASOF ≤120d, T+1, TC 0.1%,
+threads=1, hold cash when empty. **Self-check 0 VND: PASS** (troughbuy 0.0, basket 0.0).
+
+### Hog-cycle signal test — SIGNAL CONFIRMED (the headline; contrast with textile's refuted FX)
+No hog-price field in BQ → GPM as cycle proxy. Causal, 22.4k name-days. Mean forward return by regime:
+`trough_up` (PB<MA1Y AND GPM turning up) = **+8.3% fwd-3M** vs `rich_down` +1.1% vs `mixed` +0.4%. BUT the
+work is the **margin inflection**, not the cheap multiple: Spearman(GPM_turn, profit_3M) = **+0.117**, while
+`pb_rel` alone = **+0.002 ≈ whole-market −0.003** → **P/B-trough alone is a value trap** (steel lesson).
+**Rule: buy hog names only when margin is turning up off a trough (GPM_P0>GPM_P4) AND cheap-vs-history.**
+
+### Backtest (net vs B&H VNINDEX)
+| screen | window | net CAGR | Sharpe | MaxDD | Calmar | B&H CAGR | edge |
+|---|---|---|---|---|---|---|---|
+| **A trough-buy** | FULL 14-26 | **10.07%** | 0.46 | −27.0% | 0.37 | 10.27% | −0.19pp |
+| A trough-buy | IS 14-19 | 10.41% | 0.53 | −7.2% | **1.45** | 8.96% | **+1.45pp** |
+| A trough-buy | OOS 20-26 | 9.76% | 0.43 | −27.0% | 0.36 | 11.51% | −1.75pp |
+| **B basket EW** | FULL 14-26 | **−1.30%** | 0.17 | **−82.9%** | −0.02 | 10.27% | −11.57pp |
+| B basket EW | IS 14-19 | −20.61% | −0.37 | −80.9% | −0.25 | 8.96% | −29.57pp |
+| B basket EW | OOS 20-26 | 20.99% | 0.63 | −54.3% | 0.39 | 11.51% | +9.48pp |
+
+- **Screen A trough-buy ≈ B&H CAGR (−0.19pp) at HALF the DD (−27% vs −43%)**, IS +1.45pp / Calmar 1.45. But
+  holds **cash 121/151 months** (margin-turn rarely fires; 30 mo in market, median **1 name**) → edge is
+  **extremely lumpy** (DBC 2018 +98.7pp, 2020 ASF +50.8pp, 2023 +18.7pp; cash through 2016/17/21 bulls; 2026
+  −22.6pp). **Valid single-name timing LENS, not a book** (OOS −1.75pp — Wave1/H8a boom-year-lumpiness lesson).
+- **Screen B basket un-investable** — **−82.9% MaxDD**, FULL −1.30% CAGR (HAG near-default + HNG losses
+  2015–19); OOS "+9.48pp" is entirely the 2020-21-23-24 hog up-cycles.
+- **Verify:** DBC CAUGHT 14mo incl 2019Q4→2020 pre/into-ASF (PB 0.68<MA1Y 0.75) → the explosion · BAF leaked
+  9mo 2023 (post-IPO multiple deflating PB 5.4→1.5 misread as cheap; later ejected by CF_OA_3Y<0 — honest
+  documented leak, like GIL) · HAG 6mo/HNG 3mo. Ortho 33% c30V / 12% 8L; median selected ADV **56.9B**.
+
+### Verdict: **LENS, not a BOOK** (sweep Rule 3 holds). Do NOT wire a livestock sleeve.
+Durable artifacts: (1) **Hog-cycle entry signal is REAL** (vs textile FX refuted) — but the **GPM-turn
+(IC +0.117), not the P/B-trough (IC +0.002 ≈ market), carries it**; buy on margin-inflection-off-trough only.
+(2) **DBC = the one catchable name** (HPG-analog: integrated 3F, survives cycle, P/B-trough+GPM-turn entry
+works) — but a **cyclical, NOT a secular compounder** (ROE5Y swings 0.11–0.19, IntCov negative 2012–17). It is
+timed cyclical-trough-trading, not a hold. (3) **BAF = levered-growth bet** (never cheap on PE, thin margin,
+CF_OA_3Y<0) a value screen correctly declines (TNG-analog). **Current read (2026Q1):** DBC cheap-vs-history
+(PB 1.03<MA1Y 1.34, PE 6.3) but **GPM-turn NOT firing** (0.17=0.17 flat) + ROE5Y faded 0.11 → **WATCH; buy on
+next confirmed GPM turn-up, not the cheap multiple alone.** No MWG/DGC/HPG-style compounding *hold* exists here.

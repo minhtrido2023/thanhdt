@@ -388,6 +388,10 @@ def simulate(signals_df, prices, vni_dates, *,
                                              # When set, overrides T+1 Open sell price with intraday-derived alternative.
                                              # Note: STOP exits also re-priced. Falls back to Open if (tk, today) missing.
              exit_fill_mode="open",          # label only
+             fund_tiebreak_col=None,         # OPTIONAL str: name of a numeric column in signals_df used as an EXTRA
+                                             # within-tier funding-priority key (desc), inserted BETWEEN tier priority
+                                             # and `ta`. Only reorders same-tier candidates when cash is scarce (all
+                                             # candidates fund when cash is ample -> no NAV effect). None = byte-identical.
              name="sim"):
     """
     Realistic simulation (production default, 2026-05-12+):
@@ -951,6 +955,9 @@ def simulate(signals_df, prices, vni_dates, *,
         future = [p for p in pending_entries if p["exec_start_date"] > today]
 
         def pri(item):
+            if fund_tiebreak_col is not None:
+                return (-TIER_PRIORITY.get(item["play_type"], 0),
+                        -item.get("_fund_tb", 0.0), -item["ta"])
             return (-TIER_PRIORITY.get(item["play_type"], 0), -item["ta"])
         active.sort(key=pri)
 
@@ -1269,7 +1276,11 @@ def simulate(signals_df, prices, vni_dates, *,
                 exec_date = vni_dates[next_idx]
                 todays_sig = sig_by_date[today].copy()
                 todays_sig["_pri"] = todays_sig["play_type"].map(TIER_PRIORITY).fillna(0)
-                todays_sig = todays_sig.sort_values(["_pri", "ta"], ascending=[False, False])
+                if fund_tiebreak_col is not None and fund_tiebreak_col in todays_sig.columns:
+                    todays_sig["_ftb"] = pd.to_numeric(todays_sig[fund_tiebreak_col], errors="coerce").fillna(0.0)
+                    todays_sig = todays_sig.sort_values(["_pri", "_ftb", "ta"], ascending=[False, False, False])
+                else:
+                    todays_sig = todays_sig.sort_values(["_pri", "ta"], ascending=[False, False])
                 held_or_pending = set(positions.keys()) | {p["ticker"] for p in pending_entries}
                 for _, sig in todays_sig.iterrows():
                     if sig["ticker"] in held_or_pending:
@@ -1289,6 +1300,7 @@ def simulate(signals_df, prices, vni_dates, *,
                         "first_fill_date": None,
                         "last_seen_price": sig["Close"],
                         "seq_id": _entry_seq,
+                        "_fund_tb": float(sig["_ftb"]) if "_ftb" in todays_sig.columns else 0.0,
                     })
                     held_or_pending.add(sig["ticker"])
                     if len(pending_entries) + len(positions) >= max_positions * 3:
