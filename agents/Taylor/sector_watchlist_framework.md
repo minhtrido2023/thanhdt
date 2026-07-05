@@ -33,6 +33,7 @@ DT5G regime today = **BULL (state 3, to 2026-06-25)** — risk-on; the euphoria 
 | **DHG** | PE (buy & hold) | quality floor ROE5Y>0.15, ROIC5Y>0.15 | PE 13.6<MA5Y 15.1, ROIC 0.22 | **Quality — accumulate** | Buy-and-hold, **no timing** |
 | **DBD** | PE (buy & hold) | quality floor | ROE5Y 0.181, ROIC 0.178; PE 17 not cheap | **Hold-quality, not cheap** | Buy-and-hold |
 | **DMC / IMP** | — | ROE5Y<0.15 | DMC 0.126 / IMP 0.138 | **Quality-floor REJECT** | Exclude |
+| **MSH** *(textile, sector #16, added 2026-07-05)* | PE vs PE_MA1Y | PE<PE_MA1Y (+ROE5Y>0.15, IntCov>1.5, GPM-CV<0.15) | PE **6.5** < MA1Y 7.6, ROE5Y **0.249**, IntCov 7.7 | **IN ENTRY WINDOW (cheap-vs-history + elite quality)** | Buy-and-hold-on-weakness single-name (timing destroys it); NOT a book |
 
 ---
 
@@ -88,6 +89,8 @@ To evaluate any single stock, find its sector and use the primary metric (second
 | **Pharma** | generics/distrib | **PE** (buy-and-hold) | ROE5Y>0.15 AND ROIC5Y>0.15 | TIMING destroys it — hold, don't trade |
 | **Aviation** | airport concession | EV/EBITDA + ROIC | FCF | value-uncapturable / microcap-thin |
 | | airline | P/B<1 distress + IntCov | NP>0, CF_OA>0 | no trough-buy exists (see exclude list) |
+| **Textile/garment export** | FOB/integrated (MSH/TCM) | **PE vs PE_MA1Y** (EVEB noisy) | **GPM-CV<0.15 + IntCov>1.5 + ROE5Y>0.15** | margin-stability gate is the lens; MSH=elite, TCM=faded. Screen FAILS as a book (−11pp) → lens only |
+| | CMT scale (TNG, tail) | — | fails IntCov (neg) / NPM~0 / Debt_Eq 2-4 | thin-margin leverage trap; growth-bet not value. **FX: weak-VND is a NEGATIVE fwd signal (risk-off proxy), not a tailwind** |
 
 ---
 
