@@ -1,30 +1,26 @@
-# Fleet status — 2026-07-05T02:14:02 UTC
+# Fleet status — 2026-07-05T07:07:01 UTC
 
 | agent | title (desktop) | kind | status | last_heartbeat | age(min) | current_task |
 |---|---|---|---|---|---|---|
-| DollarBill | DollarBill | child | dead | 2026-07-03T16:49:14Z | 2004 |  |
-| Mafee | Mafee | child | dead | 2026-07-03T12:43:16Z | 2250 |  |
-| Mike | Mike | child | working | 2026-07-05T02:11:31Z | 2 |  |
-| Mike_1169795 | mike-80 | child | dead | 2026-07-03T05:00:01Z | 2714 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Mike_1185896 | mike-24 | child | dead | 2026-07-03T05:30:01Z | 2684 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Mike_1190882 | mike-77 | child | dead | 2026-07-03T05:40:01Z | 2674 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Mike_1254171 | mike-3e | child | dead | 2026-07-03T08:30:01Z | 2504 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Mike_1310529 | mike-29 | child | dead | 2026-07-03T10:50:01Z | 2364 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Mike_1346126 | mike-c9 | child | dead | 2026-07-03T11:50:01Z | 2304 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Mike_1353704 | mike-34 | child | dead | 2026-07-03T12:00:01Z | 2294 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Mike_1356634 | mike-02 | child | dead | 2026-07-03T12:00:01Z | 2294 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Mike_1369214 | mike-5e | child | dead | 2026-07-03T12:20:01Z | 2274 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Mike_1375192 | mike-f1 | child | dead | 2026-07-03T12:30:01Z | 2264 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Mike_1382725 | mike-c3 | child | dead | 2026-07-03T13:30:01Z | 2204 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Mike_1385288 | mike-52 | child | dead | 2026-07-03T12:50:01Z | 2244 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Mike_1450923 | mike-03 | child | dead | 2026-07-03T15:10:01Z | 2104 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Mike_1466389 | mike-35 | child | dead | 2026-07-03T15:40:01Z | 2074 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Mike_1468800 | mike-be | child | dead | 2026-07-03T15:40:01Z | 2074 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Mike_1497583 | mike-10 | child | dead | 2026-07-03T16:50:01Z | 2004 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Mike_1798822 | mike-ad | child | dead | 2026-07-04T07:20:01Z | 1134 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Mike_1886040 | mike-14 | child | dead | 2026-07-04T11:10:01Z | 904 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Mike_832219 | Mike | child | dead | 2026-07-04T03:40:01Z | 1354 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Taylor | Taylor | child | working | 2026-07-05T02:14:01Z | 0 |  |
-| Winston | Winston | child | dead | 2026-07-03T12:28:12Z | 2265 |  |
-| WorkingClaude | WorkingClaude | external | dead | 2026-07-03T05:38:08Z | 2675 | remote-control · cwd=/home/trido/thanhdt/WorkingClaude |
-| workingclaude-20 | workingclaude-20 | child | dead | 2026-07-03T11:57:15Z | 2296 |  |
+| DollarBill | DollarBill | child | dead | 2026-07-03T16:49:14Z | 2297 |  |
+| Mafee | Mafee | child | dead | 2026-07-03T12:43:16Z | 2543 |  |
+| Mike | Mike | child | running | 2026-07-05T07:00:01Z | 7 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Mike_1254171 | mike-3e | child | dead | 2026-07-03T08:30:01Z | 2797 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Mike_1310529 | mike-29 | child | dead | 2026-07-03T10:50:01Z | 2657 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Mike_1346126 | mike-c9 | child | dead | 2026-07-03T11:50:01Z | 2597 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Mike_1353704 | mike-34 | child | dead | 2026-07-03T12:00:01Z | 2587 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Mike_1356634 | mike-02 | child | dead | 2026-07-03T12:00:01Z | 2587 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Mike_1369214 | mike-5e | child | dead | 2026-07-03T12:20:01Z | 2567 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Mike_1375192 | mike-f1 | child | dead | 2026-07-03T12:30:01Z | 2557 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Mike_1382725 | mike-c3 | child | dead | 2026-07-03T13:30:01Z | 2497 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Mike_1385288 | mike-52 | child | dead | 2026-07-03T12:50:01Z | 2537 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Mike_1450923 | mike-03 | child | dead | 2026-07-03T15:10:01Z | 2397 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Mike_1466389 | mike-35 | child | dead | 2026-07-03T15:40:01Z | 2367 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Mike_1468800 | mike-be | child | dead | 2026-07-03T15:40:01Z | 2367 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Mike_1497583 | mike-10 | child | dead | 2026-07-03T16:50:01Z | 2297 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Mike_1798822 | mike-ad | child | dead | 2026-07-04T07:20:01Z | 1427 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Mike_1886040 | mike-14 | child | dead | 2026-07-04T11:10:01Z | 1197 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Mike_832219 | Mike | child | dead | 2026-07-04T03:40:01Z | 1647 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Taylor | Taylor | child | dead | 2026-07-05T02:14:01Z | 293 |  |
+| Winston | Winston | child | dead | 2026-07-03T12:28:12Z | 2558 |  |
+| workingclaude-20 | workingclaude-20 | child | dead | 2026-07-03T11:57:15Z | 2589 |  |

@@ -1,29 +1,31 @@
 # Working memory — Mike
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
 
-## Trạng thái fleet hiện tại (2026-06-30)
-- **Taylor**: active (companion R&D)
-- **DollarBill**: active, plan SpaceX 2026-07-01 đã tạo (state NEUTRAL)
-- **Mafee**: running (paper mode cho đến go-live)
-- **Winston/Spyros/Wendy**: native on-demand (daemon đã tắt 2026-06-25)
+## R&D Q3 program (review 8L + V2.4/V2.5, plan file li-n-quan-n-thi-t-wondrous-zephyr.md, user duyệt 2026-07-05)
 
-## Go-live 2026-07-01
-- Cron `0 1 1 7 * golive_01jul.sh` — tự flip SpaceX/DNSE + Telegram notify lúc 08:00 ICT
-- trading_rules v1.7: applies_to=live, approved_by=user, live_effective=2026-07-01 ✓
-- Account SpaceX / 0002023347 / DNSE: 1B VND, enabled=false → flip ngày mai
+### Sự cố usage-limit 2026-07-05 (đã xử lý)
+3 deep-research workflow Phase A (A2/A3/A5) bắn song song ~100 sub-agent/cái đã ăn hết usage-limit
+5h chung tài khoản → khiến Taylor T2 (panel-ext H4/H5/H6) + T3 (DSR/PBO annex) fail ngay ("session
+limit resets 2pm ICT"), KHÔNG được auto-queue vào bus/pending_resumes (cơ chế mục 6 không bắt được
+ca này — cần điều tra thêm sau, không chặn tiến độ). Window đã reset (usage 4% lúc 14:55 ICT) →
+đã dispatch lại T2=Taylor_20260705_075638, T3=Taylor_20260705_075644, có wrapper haiku nền chờ.
+BÀI HỌC: từ nay KHÔNG bắn >1 deep-research workflow cùng lúc với dispatch Taylor headless đang
+chạy — chúng ăn chung usage-limit tài khoản.
 
-## Research đã đóng (custom30V sweep 2026-06-30)
-- Permanent Exclude × custom30V: không overlap (tất cả 7 tên nằm ngoài top-30)
-- Backtest re-run excluding 7 tên: DO NOT WIRE (OOS đi ngang, IS -0.2pp)
-- custom30V production giữ nguyên (30 mã, cap 0.10)
-- Sector sweep 15 ngành: sector_watchlist_framework.md đã ghi (Taylor)
+### Kết quả đã có (thật, verify được)
+- **T1/H1 FSCORE bottom-exclusion**: FAIL ở tầng proxy → H1 ĐÓNG, không lên harness (Taylor_20260705_020935).
+- **A2 quality-exclusion, A3 vol-managed, A5 EM/VN factor**: workflow "completed" nhưng lớp adversarial-verify
+  bị usage-limit đánh sập TOÀN BỘ (hàng trăm lỗi "session limit" khi verify từng claim) → summary tự
+  động ghi "all refuted" là ARTIFACT của lỗi hạ tầng, KHÔNG PHẢI nội dung sai. Raw claims vẫn trích
+  nguồn thật (JFE/JF/ScienceDirect/JFQA — Barroso-Santa-Clara 2015, Cederburg 2020, Piotroski/Verdad
+  exclusion-vs-tilt, Hanauer-Lauterbach EM value, momentum-VN 2007-2015 study...) — dùng làm literature
+  grounding directional, KHÔNG cite như "verified fact". Không re-run 3 cái này (quá tốn, ~1.4M token/cái).
+- **A1 multiple-testing/DSR**: đang chạy (wf_0746eead-02e), bắn riêng lẻ sau khi rút bài học trên.
 
-## Không có gì pending hiện tại
-- [2026-07-01T09:28:55Z] TẠM THỜI (2026-07-01): model đổi sang claude-opus-4-8/high vì claude-sonnet-5 bị lỗi classifier 'temporarily unavailable' liên tục (chặn Edit/Bash). File: agents/Mike/.claude/settings.json. RESET lại claude-sonnet-5 vào ngày mai (2026-07-02) nếu lỗi đã hết — user yêu cầu tự reset, không cần hỏi lại.
-- [2026-07-01T10:17:32Z] Đang xử lý: 2 patch executor.py (churn-guard + tick-retry + fix đếm-đôi extreme-poll) đã code + quant-skeptic CONFIRMED, CHƯA commit git (uncommitted: trading_bot/executor.py +94/-3, 3 file selfcheck mới chưa track: churn_guard_selfcheck.py, tick_retry_selfcheck.py, extreme_regime_selfcheck.py). Đang hỏi user: commit luôn hay tiếp tục patch#3 (trần đuổi mua 1.5% quá chặt — cần hỏi Taylor trước, không tự quyết) trước khi commit. Restart sang opus-4-8 theo yêu cầu user vì sonnet-5 classifier lỗi 'temporarily unavailable' lặp lại chặn Edit/Bash nhiều lần trong phiên này.
-- [2026-07-01T10:32:45Z] Model Mike CHỐT mặc định lâu dài: claude-sonnet-5, effort high (2026-07-01). User đánh giá Sonnet 5 lỗi classifier ít hơn khi gọi agents, lỗi 'temporarily unavailable' là chập chờn hạ tầng Anthropic, chấp nhận sống chung. Đã thử Opus 4.8 không khác biệt rõ rệt. KHÔNG cần đổi qua lại nữa trừ khi user yêu cầu.
-- [2026-07-02T15:31:56Z] ĐANG LÀM: user yêu cầu nghiên cứu thông lệ ngành mới nhất về agent management, đối chiếu hệ thống fleet hiện tại → giải pháp chống lỗi kinh niên. Deep-research workflow đang chạy nền (run wf_e0817a45-805). Đã kiểm kê xong incident nội bộ (KNOWLEDGE.md §8 + git log 06/2026 + memory day-1 bugs). Khi workflow xong: tổng hợp gap analysis + đề xuất.
-- [2026-07-03T00:43:38Z] XONG: nghiên cứu agent-ops + đối chiếu fleet (2026-07-02/03). Đã vá: (1) coding_guidelines §5 idempotent side-effects, (2) trace_id fix — dispatch.sh/verify_finding.sh/6×CLAUDE.md/mike_json.py/bin/trace.sh (verify bằng dispatch thật, tested), (3) bin/staleness_watch.py + watchdog.sh watch-the-watcher cho macro_health.json (root cause DT5G-stuck-11-ngày). Commit c4216ca + 769354e. Còn treo: P2 (phân loại độ tin cậy bus event theo mức) — chưa làm, không tự mở rộng thêm trừ khi user yêu cầu.
-- [2026-07-03T01:23:13Z] XONG toàn bộ P0/P1/P2 nghiên cứu agent-ops (2026-07-02/03): (1) coding_guidelines §5, (2) trace_id fix + bin/trace.sh, (3) staleness_watch.py watch-the-watcher, (4) verdict-prominent rendering + verification_audit.sh coverage report. Commit: c4216ca, 769354e, af5cb75, 98bb1c7. Tất cả đã test bằng dữ liệu thật/giả lập trước khi commit, đã đăng ký vào MIKE.md §Công cụ. Không còn việc treo từ nghiên cứu này.
-- [2026-07-03T12:30:04Z] XONG rule 8 fast-wake (2026-07-03): sau dispatch --bg cần theo dõi sát → gọi Agent(run_in_background,haiku) bọc jobs.sh wait làm kênh dẫn task-notification vào turn sống, giữ ScheduleWakeup làm fallback dài. MIKE.md §Quy chuẩn 8 + snippet in sẵn ở dispatch.sh. Verified happy-path (Winston test, wake ~vài giây). Restart-survival chưa verified (chờ quan sát). Commit c9a949a.
-- [2026-07-05T02:11:21Z] R&D Q3 program (review 8L+V2.4/V2.5, plan user duyệt 2026-07-05, plan file li-n-quan-n-thi-t-wondrous-zephyr.md): Wave 0 ĐÃ BẮN — Taylor T1=H1 FSCORE-exclusion proxy (Taylor_20260705_020935), T2=panel-ext H4 accruals/H5 DY/H6 MAX+limit-hit (Taylor_20260705_021003), T3=H2 DSR/PBO annex (Taylor_20260705_021021), đều --bg timeout 3600. Deep-research đợt 1: A3 vol-managed (w2jopsz3l), A2 quality-exclusion (wgclbia1v), A5 EM/VN factor (weigkt9zh). CÒN PHẢI BẮN: A1 multiple-testing, A4 lottery/MAX, A6 ML-limits (đợt 2, nhịp sau). Budget: Taylor ≤16 dispatch, 4 fail liên tiếp = PAUSE. Wave 1 sau khi T1/T2 về: H1 harness nếu proxy pass, H3 sau memo A3, H7 proxy, H8 audit.
+### Còn lại theo plan
+- A4 (lottery/MAX) + A6 (ML-limits): CHƯA bắn — bắn SAU KHI T2/T3 xong (tránh chồng usage lần nữa).
+- Wave 1: H1 đã đóng (không cần harness). H3 (vol-managed BAL) chờ đọc xong A3 nội dung thật (dù
+  verify-layer hỏng, nội dung Barroso-SC/Cederburg vẫn dùng được để thiết kế). H7 proxy, H8 audit —
+  chưa bắn, chờ T2/T3 xong trước (ưu tiên panel-extension vì 3 hypothesis H4/H5/H6 phụ thuộc nó).
+- Budget Taylor: đã dùng 3 dispatch thật (1 xong H1, 2 đang chạy lại T2/T3) trong ngân sách ≤16.
+
