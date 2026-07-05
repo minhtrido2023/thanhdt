@@ -34,6 +34,7 @@ DT5G regime today = **BULL (state 3, to 2026-06-25)** — risk-on; the euphoria 
 | **DBD** | PE (buy & hold) | quality floor | ROE5Y 0.181, ROIC 0.178; PE 17 not cheap | **Hold-quality, not cheap** | Buy-and-hold |
 | **DMC / IMP** | — | ROE5Y<0.15 | DMC 0.126 / IMP 0.138 | **Quality-floor REJECT** | Exclude |
 | **MSH** *(textile, sector #16, added 2026-07-05)* | PE vs PE_MA1Y | PE<PE_MA1Y (+ROE5Y>0.15, IntCov>1.5, GPM-CV<0.15) | PE **6.5** < MA1Y 7.6, ROE5Y **0.249**, IntCov 7.7 | **IN ENTRY WINDOW (cheap-vs-history + elite quality)** | Buy-and-hold-on-weakness single-name (timing destroys it); NOT a book |
+| **DBC** *(livestock/hog, sector #17, added 2026-07-05)* | P/B trough **+ GPM-turn** | PB<PB_MA1Y **AND** GPM_P0>GPM_P4 (+CF_OA_3Y>0, IntCov>1) | PB **1.03**<MA1Y 1.34 (cheap ✓) but **GPM flat 0.17=0.17 (turn NOT firing)**, ROE5Y faded 0.11 | **WATCH — value half present, margin-inflection half NOT yet** | High-beta cyclical-timing single-name; buy on next GPM turn-up, NOT the cheap multiple alone; NOT a book |
 
 ---
 
@@ -130,6 +131,11 @@ To evaluate any single stock, find its sector and use the primary metric (second
 **TIER 3 — tactical / trough (high-beta, size small):**
 - **PVT** — P/B 0.87 trough, EVEB 3.8, profitable (ROE5Y 0.136). Cleanest oil-svc/tanker trough.
 - **HAH** — EVEB 4.3, ROE5Y 0.246 — cheap container cyclical (not a P/B trough but cheap on EV/EBITDA).
+- **DBC** *(livestock/hog #17)* — cheap-vs-history (PB 1.03<MA1Y 1.34, PE 6.3) but the **margin-inflection
+  trigger (GPM_P0>GPM_P4) is NOT firing** (0.17=0.17 flat) → **WATCH, not buy yet.** The hog-cycle pays on the
+  GPM turn-up off a trough, not the cheap multiple alone (P/B-trough alone is a value trap, IC ≈ market). Buy on
+  the next confirmed GPM turn-up; high-beta, size small, DT5G caps gross. NOT a secular compounder (ROE5Y swings
+  0.11–0.19) — cyclical-timing only.
 
 **BUY-AND-HOLD (no timing — accumulate on weakness, never trade the screen):**
 - **DHG** — PE 13.6 < MA5Y 15.1, ROIC5Y 0.22, Taisho moat. The quality pharma anchor.
