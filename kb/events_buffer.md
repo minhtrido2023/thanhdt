@@ -797,3 +797,47 @@
 - [2026-07-05T10:24:17Z] Taylor/heartbeat — Taylor_20260705_100258: {"status": "in_progress", "note": "A/B running on correct R3 config (custompitg/yieldcombo, threads=1, verified cache); baseline done, treatment running; metrics+delta script ready"}
 - [2026-07-05T10:24:49Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20260705_100245"}
 - [2026-07-05T10:25:01Z] Taylor/heartbeat — Taylor_20260705_100258: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20260705_100258"}
+
+## Consolidation 2026-07-05T11:02:18Z
+- [2026-07-05T10:25:49Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 23, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:26:49Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:27:49Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 25, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:28:11Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "in_progress", "note": "resuming H3 vol-managed BAL; overlay code already in working tree, verifying impl before backtest"}
+- [2026-07-05T10:28:49Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 26, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:29:49Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 27, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:30:49Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 28, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:31:49Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 29, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:32:49Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 30, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:33:42Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "in_progress", "note": "4 backtests running (baseline + VM mult 0.8/1.0/1.2), AUDIT_END=2026-06-19 threads=1; polling"}
+- [2026-07-05T10:33:50Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 31, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:34:50Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 32, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:35:50Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 33, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:36:50Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 34, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:37:50Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 35, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:38:50Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 36, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:39:50Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 37, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:40:50Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 38, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:41:50Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 39, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:42:06Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "in_progress", "note": "baseline done 27.34/1.81/-17.6/1.55; VM runs computing"}
+- [2026-07-05T10:42:51Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 40, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:43:51Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 41, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:44:51Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 42, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:45:51Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 43, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:46:51Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 44, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:47:51Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 45, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:48:51Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 46, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:49:51Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 47, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:50:51Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 48, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:51:51Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 49, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:51:58Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "in_progress", "note": "3/4 done; VM 1.0=24.51/1.76/-16.1/1.52, 0.8=23.02/1.75/-15.2/1.51 all below baseline 27.34/1.81/-17.6/1.55; last run 1.2x + IS/OOS compute next"}
+- [2026-07-05T10:52:51Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 50, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:53:51Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 51, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:54:51Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 52, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:55:51Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 53, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:56:51Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 54, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:57:52Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 55, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:58:52Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 56, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T10:59:52Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 57, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T11:00:52Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 58, "job_id": "Taylor_20260705_100245"}
+- [2026-07-05T11:01:45Z] Taylor/finding — Wave1/H3 vol-managed BAL exposure — FULL-NAV harness FAIL, H3 closed (Cederburg OOS-failure reproduced on VN): {"job": "Taylor_20260705_100245", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY, env VOLMANAGE_BAL OFF-default byte-identical baseline; NO production change", "design": "DD-cutter not selector; w_BAL_eff=w_BAL*min(1,sigma_target/sigma_realized_126d) causal shift(1); sigma_target=IS-2014-2019 median (14.7% ann) computed ONCE not tuned; cap<=1.0 no lever; TC 0.075%/side inside CAGR; main 1.0x + sens 0.8x/1.2x; AUDIT_END=2026-06-19 threads=1 NAV50B PARK_STATES=3:0.7", "baseline_full": "27.34/Sh1.81/DD-17.6/Cal1.55", "baseline_oos": "CAGR27.89/Sh1.80/Cal1.58/DD-17.6", "vm_oos": {"1.0x": "24.16(-3.73pp)/Sh1.74dn/Cal1.50dn/DD-16.1", "0.8x": "22.93(-4.96pp)/Sh1.73dn/Cal1.50dn/DD-15.2", "1.2x": "25.52(-2.37pp)/Sh1.75dn/Cal1.50dn/DD-17.0"}, "verdict": "FAIL all PASS conditions except MaxDD -> H3 CLOSED. OOS Sharpe DOWN all3, OOS Calmar DOWN all3 (1.58->1.50), CAGR give-up 2.4-5.0pp OOS (gate<=0.5pp) 5-10x over. MaxDD monotone shallower (only pass, insufficient). IS Calmar UP 2.01->2.17 = the trap (benign-IS DD shrink not OOS risk-adj). Turnover 36-66% of ALL sessions, ~1160-1280B on 50B book, TC 868-960M but TC NOT the killer - opportunity cost of running 78-93% invested (mean m) dominates even at TC=0.", "selfcheck": "0 VND all3 (BAL/LAG cashflow + combination_replay_err_vnd=0.0; max gross 1.000 cap<=1.0 confirmed, borrow 0)", "root_cause": "BAL momentum high-vol windows NOT disproportionately its low-return windows in VN; vol/return tradeoff ~linear so 1/sigma scaling just scales return down -> Sharpe flat, Calmar/CAGR fall (compounding drag+TC). Barroso crash-protection doesnt materialize because DT5G already handles tail-regime de-risk; 2nd vol overlay bleeds return in normal-vol sessions. = Cederburg-ODoherty-Wang-Yan 2020 JFE OOS-failure reproduced on VN, as predicted, NOT a bug.", "next": "env stays OFF-default, NOT proposed for wire; H3 closed at harness tier", "artifacts": "data/volmanage_h3_logs/ (4 logs+compute_metrics.py+progress); CSV ..._volmanw126m{08,10,12}.csv; code pt_v23_audit_2014.py L488-500/1743-1797/1956-1972; registry Wave1/H3"}
+- [2026-07-05T11:01:52Z] Taylor/heartbeat — Taylor_20260705_100245: {"status": "still_running", "elapsed_min": 59, "job_id": "Taylor_20260705_100245"}
