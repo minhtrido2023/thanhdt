@@ -861,3 +861,23 @@
 - [2026-07-05T11:24:03Z] Taylor/heartbeat — Taylor_20260705_110959: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260705_110959"}
 - [2026-07-05T11:25:03Z] Taylor/heartbeat — Taylor_20260705_110959: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20260705_110959"}
 - [2026-07-05T11:25:42Z] Taylor/heartbeat — Taylor_20260705_110959: {"status": "in_progress", "note": "H8a A/B runs executing (baseline then treatment, seq, threads=1, AUDIT_END=2026-06-19); waiting for completion"}
+
+## Consolidation 2026-07-05T14:07:01Z
+- [2026-07-05T13:50:41Z] Taylor/heartbeat — Taylor_20260705_135028: {"status": "in_progress", "note": "resume H8a lần 3 — verify code intact + tìm command mẫu H3"}
+- [2026-07-05T13:51:29Z] Taylor/heartbeat — Taylor_20260705_135028: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260705_135028"}
+- [2026-07-05T13:52:30Z] Taylor/heartbeat — Taylor_20260705_135028: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260705_135028"}
+- [2026-07-05T13:53:30Z] Taylor/heartbeat — Taylor_20260705_135028: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260705_135028"}
+- [2026-07-05T13:54:30Z] Taylor/heartbeat — Taylor_20260705_135028: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260705_135028"}
+- [2026-07-05T13:55:31Z] Taylor/heartbeat — Taylor_20260705_135028: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260705_135028"}
+- [2026-07-05T13:56:31Z] Taylor/heartbeat — Taylor_20260705_135028: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260705_135028"}
+- [2026-07-05T13:57:31Z] Taylor/heartbeat — Taylor_20260705_135028: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260705_135028"}
+- [2026-07-05T13:58:11Z] Taylor/heartbeat — Taylor_20260705_135028: {"status": "in_progress", "note": "baseline DONE 27.34% 0VND; chạy treatment LAG_FUND_DNPR=1"}
+- [2026-07-05T13:58:31Z] Taylor/heartbeat — Taylor_20260705_135028: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260705_135028"}
+- [2026-07-05T13:59:31Z] Taylor/heartbeat — Taylor_20260705_135028: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260705_135028"}
+- [2026-07-05T14:00:31Z] Taylor/heartbeat — Taylor_20260705_135028: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260705_135028"}
+- [2026-07-05T14:01:32Z] Taylor/heartbeat — Taylor_20260705_135028: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260705_135028"}
+- [2026-07-05T14:02:32Z] Taylor/heartbeat — Taylor_20260705_135028: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260705_135028"}
+- [2026-07-05T14:03:32Z] Taylor/heartbeat — Taylor_20260705_135028: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260705_135028"}
+- [2026-07-05T14:04:32Z] Taylor/heartbeat — Taylor_20260705_135028: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260705_135028"}
+- [2026-07-05T14:05:32Z] Taylor/heartbeat — Taylor_20260705_135028: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20260705_135028"}
+- [2026-07-05T14:06:32Z] Taylor/heartbeat — Taylor_20260705_135028: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20260705_135028"}
