@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v725)
+# Mike fleet — context pack (v726)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-05T02:13:44] Taylor/finding — H1 FSCORE bottom-exclusion gate — proxy FAIL, H1 closed (no harness): {"job": "Taylor_20260705_020935", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY proxy, NO production change (probe_fscore_exclude.py new file only)", "hypoth …
 - [2026-07-05T08:02:55] Taylor/finding — DSR/PBO Robustness Annex V2.4 — edge clears deflation (DSR≈1.0, no red flag); config-selection overfit moderate (PBO≈0.20); DD-tail anchor method-robust: {"job": "Taylor_20260705_075644", "dispatch_from": "Mike", "scope": "META-ANALYSIS ZERO-RISK — reads frozen NAV CSVs only, NO backtest re-run, NO production cha …
 - [2026-07-05T08:04:29] Taylor/finding — IC-panel ext 4 lens — chỉ H6a MAX5_1M SỐNG tier-1 (lottery effect, mIC-gate −0.047 IS/−0.042 OOS, crash Q5 10.1% vs Q1 4.2%); H4/H5/H6b CLOSED: {"job": "Taylor_20260705_075638", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY proxy panel-extension; ic_panel_8l.py FROZEN untouched; NO production strateg …
 - [2026-07-05T09:06:24] Taylor/finding — Wave1/H6a MAX5_1M lottery-exclusion overlay — proxy FAIL, H6a closed (no harness): {"job": "Taylor_20260705_085946", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY tier-2 proxy; probe_max5_exclude.py new file only; NO production change (pt_v …
@@ -11,6 +10,7 @@
 - [2026-07-05T10:07:43] Taylor/finding — Wave1/H7 EVEB route-aware yieldcombo swap (D&A_HEAVY) — TIER-2 proxy FAIL, H7 closed: {"job": "Taylor_20260705_100229", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY proxy; probe_route_eveb_h7.py new file only; NO production change (rating_8l. …
 - [2026-07-05T11:01:45] Taylor/finding — Wave1/H3 vol-managed BAL exposure — FULL-NAV harness FAIL, H3 closed (Cederburg OOS-failure reproduced on VN): {"job": "Taylor_20260705_100245", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY, env VOLMANAGE_BAL OFF-default byte-identical baseline; NO production change" …
 - [2026-07-05T14:07:02] Taylor/finding — Wave1/H8a-tiebreaker LAG d_NPR within-tier fill-reorder — FULL-NAV A/B CONDITIONAL PASS but LUMPY (OOS +1.61pp carried entirely by 2021+2023; needs LOO+skeptic before wiring): {"job": "Taylor_20260705_135028", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY full-NAV A/B; env LAG_FUND_DNPR OFF-default byte-identical baseline; NO produ …
+- [2026-07-05T14:35:09] Taylor/finding — Wave1/H8a-tiebreaker LOO — CONFIRMED-LUMPY-DO-NOT-WIRE (core test drop-2021+2023: trt LOSES −1.53pp CAGR / −0.08 Calmar; edge = reshuffle-luck of 2 boom years): {"job": "Taylor_20260705_143219", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY LOO recompute from frozen DAILY NAV CSVs (loo_h8a_dnpr.py new file only); NO  …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -204,6 +204,17 @@ pbcombo dual-vehicle (Calmar 1.48→1.37); gq_score growth gate (−IC); composi
 2. No look-ahead: `profit_*` chỉ train, KHÔNG filter live.
 3. Pin kết quả: `data/results_registry.md`. Ghi bus ngay (`append_event.sh`).
 4. Human-in-the-loop: Taylor (rules) → Bill (plan, user duyệt) → Mafee (plan-bound only).
+5. **Multiple-testing discipline (chốt 2026-07-05, R&D Q3 program H2, Bailey-López de Prado):** mọi
+   wire production khai báo **N trials** (số config đã so sánh để tới đó) + **DSR** (Deflated Sharpe
+   Ratio) trên NAV daily của config sắp deploy. **DSR < 0.95 → RED FLAG**, không wire nếu chưa có
+   sign-off rõ ràng (bổ sung cho, không thay thế, gate quant-skeptic + walk-forward IS/OOS hiện có).
+   Khi wire được chọn từ 1 họ ≥~8 biến thể (parking/lever/basket sweep): báo thêm **PBO** (Probability
+   of Backtest Overfitting, CSCV) — PBO≥0.5 = ưu tiên config robust-trung vị thay vì IS-best. Kèm
+   **per-year leave-one-out** khi edge OOS mỏng năm — 1-2 năm carry hết edge = reshuffle-luck, không
+   phải signal bền (bài học Wave1/H8a-tiebreaker 2026-07-05: OOS CAGR/Calmar tăng đúng luật nhưng
+   toàn bộ đến từ 2021+2023, LOO rớt → route qua skeptic trước khi wire). V2.4/R3 đã qua chuẩn DSR/PBO
+   (DSR≈1.0, PBO≈0.20 — xem `data/results_registry.md` mục "DSR / PBO Robustness Annex", script
+   `dsr_pbo_annex.py`).
 
 ### Cổ phiếu — quy tắc nhanh
 - **BANNED vĩnh viễn**: PC1, VVS, KSF, NKG, HSG, HVN, VJC, NVL, GEG, SBA, DMC/IMP/TRA, TOS, VTP.
