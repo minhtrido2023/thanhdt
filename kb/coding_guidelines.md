@@ -140,3 +140,50 @@ Before any number reaches a report (daily/weekly/monthly, or any client-facing a
   MTD/QTD/YTD returns, benchmark comparison, sector/name attribution, risk metrics (drawdown,
   volatility — once enough daily NAV history exists), fee/expense summary, compliance
   disclosures, outlook. Same verified-data pipeline underneath; more sections on top.
+
+## 7. Onboarding a New Account With Legacy/Excluded Holdings
+
+**When an account brought under management already holds positions the bot didn't buy** (e.g.
+ZaloPay/0001743768, onboarded 2026-07-06 with a pre-existing 47%-NAV DGC position kept for its
+own investment thesis while under an active HOSE trading restriction), don't hand-roll a one-off
+workaround — use the general mechanism, since more accounts of this shape are expected
+(user, 2026-07-06: "xử lý case này để về sau quản lý nhiều loại tài khoản hơn mà không gặp vấn đề"):
+
+1. **Declare it in config, not code**: set `"excluded_tickers": [...]` on the account's profile
+   in `secrets/trading_bot_accounts.json` (field added to `ACCOUNT_DEFAULTS` in
+   `trading_bot/config.py`). Empty by default for every other account.
+2. **Enforcement lives in ONE place**: `trading_bot.plan.filter_excluded_tickers()`, called from
+   `bot_execute.py` immediately after `load_plan()` — this makes it apply no matter how the plan
+   was generated (DollarBill's LLM-authored JSON, `bot_prepare_plan.py`'s templated strategy, or
+   a hand-edited file), so a plan generator forgetting the exclusion can never actually place a
+   forbidden order. Never rely on the plan generator remembering to leave the ticker out.
+3. **Size the strategy against `active_nav`, not total NAV**: `bin/compute_active_nav.py --account
+   <label>` computes `total_nav − market_value(excluded_tickers)` from LIVE broker
+   positions/prices (no dependency on our own execution journal, unlike
+   `verify_account_snapshot.py`/`daily_nav_snapshot.py` — those need fill history WE recorded,
+   which doesn't exist for a position the account already held before bot management). Whoever
+   builds the plan (DollarBill, or Mike dispatching it) must use this number as the allocation
+   basis — sizing V2.4 targets against total NAV when a third of it is locked in an excluded
+   position tries to deploy capital that isn't actually available.
+4. **Known gap, not yet closed**: `daily_nav_snapshot.py`'s P&L computation still assumes
+   journal-tracked fills for cost basis, so it can't yet produce a correct unrealized-P&L
+   breakdown for legacy positions (NAV/active_nav are correct today via
+   `compute_active_nav.py`; a P&L-capable version for legacy-position accounts is separate future
+   work — needed before any report that compares this account's *return*, not just its NAV,
+   against a clean-slate account like SpaceX).
+5. **Test it**: `excluded_tickers_selfcheck.py` is the reference — covers empty/None config
+   no-op, single/multi-ticker exclusion, the all-excluded edge case, and exact-case-only
+   matching (a lowercase config typo must not silently fail to exclude). Extend this file rather
+   than writing a parallel one when the mechanism itself changes.
+
+**A test-infrastructure lesson from the same work session:** re-running the full selfcheck suite
+after this change (per user's "backtest cẩn thận" instruction) surfaced a real, pre-existing bug
+across several *other* selfcheck files: `Executor.__init__` eagerly loads `state.json` from the
+DEFAULT `(account, plan_date)` path *before* any test code gets a chance to redirect it to a
+tmpdir — so a stale file left by an earlier run (this file's own, or another selfcheck reusing
+the literal account tag `"selfcheck"`) silently corrupts the next run's starting state. Every
+selfcheck driving `Executor` needs BOTH a unique account tag (not shared across files) AND a
+module-load-time cleanup of any stale fixture at the default path — see
+`ghost_order_selfcheck.py`'s `TAG` comment for the full pattern. A selfcheck suite that only
+passes on a clean checkout and silently flakes on repeated runs is not verifying what it claims
+to.

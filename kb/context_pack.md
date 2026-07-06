@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v752)
+# Mike fleet — context pack (v753)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-06T05:13:14] Taylor/finding — 20-sector consolidated classification + harvesting-workflow proposal — Section 0 & 7 added to sector_watchlist_framework.md (RESEARCH/SYNTHESIS, no code, production untouched): {"job": "Taylor_20260706_050653", "dispatch_from": "Mike", "scope": "Triage all 20 sector/archetype frameworks into A/B/C + design a harvesting workflow (propos …
 - [2026-07-06T05:50:41] Taylor/finding — technical-stabilization filter on WATCH — REFUTED as return filter, only trims deep-DD tail (insurance not alpha); keep WATCH->BUY on fundamentals: {"job": "Taylor_20260706_054234", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY, new file technical_stabilization_test.py + registry pin; production untouche …
 - [2026-07-06T06:38:39] Taylor/finding — sector_lens_monitor.py built — Group-A 6-state weekly watchlist monitor (Section 7): {"job": "Taylor_20260706_062405", "dispatch_from": "Mike", "scope": "RESEARCH/MONITOR-ONLY, production untouched (custom30V/BAL/LAG/rating_8l.py unchanged). New …
 - [2026-07-06T06:47:16] Taylor/finding — sector_lens_monitor.py built — weekly 6-state Group-A watchlist monitor: {"job": "Taylor_20260706_062405", "dispatch_from": "Mike", "scope": "Built Section-7 Harvesting-Workflow tool (user-approved). RESEARCH/MONITOR-ONLY, production …
@@ -11,6 +10,7 @@
 - [2026-07-06T07:31:25] quant-skeptic/verification — ✅ CONFIRMED VERIFY: STRONG-tier (screaming-buy) calibration for Group-A sector lenses — 3 ADD / 3 NO-STRONG-by-design: {"finding_topic": "STRONG-tier (screaming-buy) calibration for Group-A sector lenses — 3 ADD / 3 NO-STRONG-by-design", "verdict": "CONFIRMED", "confidence": "hi …
 - [2026-07-06T07:42:39] Mafee/finding — zalopay-account-check-2026-07-06: {"account_id": "0001743768", "label": "ZaloPay", "executed": true, "cash_vnd": 4919378, "positions": {"DGC": {"total": 10000, "sellable": 10000}, "MSH": {"total …
 - [2026-07-06T07:48:36] Taylor/finding — STRONG-tier robustness follow-up (quant-skeptic CONFIRMED) — Tech/FPT bootstrap + Banking/Securities plateau sweep: {"job": "Taylor_20260706_074228", "dispatch_from": "Mike", "scope": "RESEARCH/display-only, production untouched (custom30V/BAL/LAG/rating_8l.py unchanged). Ext …
+- [2026-07-06T08:35:27] Taylor/finding — sector_lens_monitor integrated into daily 8L Telegram report + 8L-rating DOUBLE-CONFIRM cross-check: {"job": "Taylor_20260706_082923", "dispatch_from": "Mike", "scope": "RESEARCH/MONITOR-ONLY, production untouched (custom30V/BAL/LAG/rating_8l.py unchanged)", "s …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -52,6 +52,27 @@
   chừng. Cũng commit luôn fix `trading_bot/plan.py` (id/ref_price normalize cho schema v2, commit
   `7a2a145`) đã hotfix trên đĩa từ sáng nhưng chưa commit. Chi tiết: `kb/INCIDENTS.md` 2026-07-06
   (entry thứ 2 cùng ngày).
+- **ZaloPay** (DNSE 0001743768, tên cũ `dnse_main`, đổi tên 2026-07-06): V2.4 LIVE từ 2026-07-06
+  (user quyết định). **CASH-ONLY** (không margin, package "ZaloPay" id=1258 type N) — cơ hội so
+  sánh V2.4 có-margin (SpaceX) vs không-margin. Tài khoản có 7 vị thế CŨ (giữ từ trước khi bot
+  quản lý, không có lịch sử FILL trong journal nội bộ): DGC/MSH/TCM/TLG/VHC/VIB/VPB. **DGC (47,2%
+  NAV) EXCLUDED khỏi rebalancing** qua field mới `excluded_tickers` trong
+  `secrets/trading_bot_accounts.json` (enforce cứng ở `bot_execute.py` qua
+  `trading_bot.plan.filter_excluded_tickers()`, không phụ thuộc plan generator nhớ đúng) — lý do:
+  đang bị HOSE hạn chế giao dịch (QĐ 448, chỉ khớp định kỳ, cắt margin) + cảnh báo (QĐ 544, kiểm
+  toán ngoại trừ) do lãnh đạo bị khởi tố hình sự 17/03/2026, ước gỡ hạn chế ~11-12/2026 (xem
+  legal-vn/Wendy research 2026-06-21/26/29 — Điều 42 QĐ 22 cần đủ 2 điều kiện: khắc phục nguyên
+  nhân + 6 tháng sạch CBTT liên tục). Taylor giữ DGC vì lý do đầu tư (target 70-75k/12-18 tháng,
+  +37% EV, 65% xác suất, briefing 2026-06-29), KHÔNG phải vì kẹt thanh khoản.
+  NAV thật go-live (xác nhận API 2026-07-06T07:42): **tổng NAV 1.011.470.378đ, active NAV (loại
+  DGC, dùng làm cơ sở target V2.4) 534.470.378đ** — dùng `bin/compute_active_nav.py --account
+  ZaloPay` để tính lại khi cần (không phụ thuộc lịch sử journal, đọc trực tiếp balance/positions
+  thật + giá BQ). **Known gap:** `daily_nav_snapshot.py` chưa tính đúng P&L cho vị thế legacy này
+  (cần lịch sử FILL nội bộ mà account không có) — NAV/active_nav đã đúng, phần P&L breakdown cho
+  báo cáo cần việc riêng sau. Cơ chế `excluded_tickers` viết TỔNG QUÁT (không riêng ZaloPay) để
+  dùng cho account tương lai có vị thế legacy tương tự — xem `kb/coding_guidelines.md` §7. Chi
+  tiết đầy đủ + 10 selfcheck: `kb/INCIDENTS.md` không có entry riêng (không phải sự cố, là setup
+  bình thường) — xem commit `87392be` (WorkingClaude repo).
 - **AlphaLens Paper**: FPT/ACB/MBB/HDB, tracking vs VNINDEX đến 2026-09-30. DollarBill phụ trách.
 
 ## Đang R&D
