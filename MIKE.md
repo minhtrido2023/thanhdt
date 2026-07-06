@@ -123,10 +123,12 @@ pháp**: dùng `Agent(run_in_background: true)` bọc `jobs.sh wait` làm kênh 
 turn sống — tận dụng cơ chế `<task-notification>` gốc của harness (đã kiểm chứng hoạt động ổn
 định nhiều lần ngay trong phiên nghiên cứu ra rule này).
 
-**Khi nào dùng** (theo Ý ĐỊNH, không phải thời lượng job): dùng khi Mike kết thúc turn hiện tại
-mà thực sự muốn hành động sớm trên kết quả (user đang chờ, hoặc Mike có bước kế tiếp phụ thuộc
-job này). BỎ QUA cho fire-and-forget thật (research/backtest fan-out dài, không ai chờ theo giờ
-cụ thể) — Discord notify + KB consolidate hiện tại đã đủ.
+**Khi nào dùng — SỬA 2026-07-06 (phản hồi user, xem incident dưới)**: mặc định LUÔN dùng, kể cả
+chuỗi research fan-out dài tự trị (sector sweep #1-20, v.v.) — KHÔNG còn ngoại lệ "fire-and-forget
+research". Lý do đảo ngược: 1 sweep nhiều bước mà mỗi bước lãng phí 15-25' chờ timer dài (xem
+incident) cộng dồn thành hàng giờ lãng phí thật trong 1 ngày — dù không ai "chờ theo giờ cụ thể",
+tổng thời gian trôi qua vẫn là chi phí thật. Ngoại lệ DUY NHẤT còn lại: 1 job đứng riêng, không có
+bước kế tiếp phụ thuộc vào nó (rất hiếm — hầu hết dispatch của Mike đều có bước sau).
 
 **Cách dùng** — sau mỗi `dispatch.sh ... --bg` rơi vào trường hợp trên:
 ```
@@ -137,21 +139,42 @@ retry/quyết định/đánh giá thành-bại", run_in_background: true, model:
 Scope cố tình hẹp: wrapper KHÔNG được gọi `dispatch.sh`, KHÔNG tự retry, KHÔNG editorialize —
 quyền quyết định bước tiếp theo luôn ở Mike khi tỉnh dậy, không phải ở wrapper.
 
-**Công thức timeout** (bám retry thật của dispatch.sh, KHÔNG dùng `--timeout` gốc trực tiếp vì
-job có thể đang ở lần thử thứ 2):
+**Công thức timeout cho wrapper** (bám retry thật của dispatch.sh, KHÔNG dùng `--timeout` gốc
+trực tiếp vì job có thể đang ở lần thử thứ 2) — không đổi, vẫn dùng cho `jobs.sh wait --timeout`
+BÊN TRONG wrapper:
 ```
 wrapper_wait_timeout = TIMEOUT × (RETRIES + 1) + 60
-ScheduleWakeup_fallback = wrapper_wait_timeout + 300   (đệm an toàn)
 ```
-`dispatch.sh` in sẵn snippet này ra stderr ngay sau dòng "Theo dõi:" để khỏi soạn lại từ trí nhớ.
+`dispatch.sh` in sẵn số này ra stderr ngay sau dòng "Theo dõi:" để khỏi soạn lại từ trí nhớ.
+
+**ScheduleWakeup fallback — SỬA 2026-07-06: poll ngắn lặp lại, KHÔNG phải 1 lần chờ dài theo
+worst-case.** Trước đây dùng `wrapper_wait_timeout + 300` (~26' cho timeout/retries mặc định) làm
+1 lần chờ DUY NHẤT — đúng an toàn nhưng sai hiệu quả: hầu hết job (xem sector sweep hôm nay) xong
+trong 5-15', nghĩa là tới 15-20' mỗi lần bị lãng phí chờ không cần thiết nếu wrapper's task-
+notification không sống sót qua 1 lần Mike restart (xem giới hạn chưa xác minh dưới). Thay bằng:
+đặt `ScheduleWakeup` ngắn (**240-270s** — dưới ngưỡng cache-miss 300s của chính tool, xem mô tả
+ScheduleWakeup) chỉ để check `bin/jobs.sh status <job_id>`; nếu chưa `done` → đặt lại 1 lần
+ScheduleWakeup ngắn nữa (không editorialize, không retry job); nếu `done` → xử lý kết quả + dispatch
+bước kế tiếp ngay. Đây chính là mẫu "actively polling external state" mà ScheduleWakeup tự khuyến
+nghị dùng khoảng ngắn, không phải khoảng dài đoán trước. Worst-case (job thật sự cần hết
+`wrapper_wait_timeout`) vẫn được phủ — chỉ là qua NHIỀU lần check ngắn thay vì 1 lần chờ dài, nên
+không mất an toàn, chỉ nhanh hơn nhiều ở trường hợp phổ biến (job xong sớm).
 
 **Fan-out song song → 1 wrapper cho cả batch**, không phải 1 wrapper/job: prompt wrapper lặp
-tuần tự `jobs.sh wait job1 && jobs.sh wait job2 && ...` rồi tổng hợp.
+tuần tự `jobs.sh wait job1 && jobs.sh wait job2 && ...` rồi tổng hợp. ScheduleWakeup ngắn ở trên
+áp dụng y hệt — check trạng thái CẢ batch, chưa xong hết thì đặt lại ngắn tiếp.
 
-**Vẫn giữ `ScheduleWakeup` làm fallback** (khoảng theo công thức trên, không phải đoán ngắn) —
-đây là lớp XẾP CHỒNG lên cơ chế cũ, không thay thế. Xấu nhất (Mike restart giữa lúc chờ,
-task-notification mất) = suy biến đúng về hành vi hôm nay: không mất dữ liệu job/bus (nằm ở
-`bus/jobs/*.json`, độc lập tiến trình), chỉ chậm hơn, ScheduleWakeup fallback vẫn tự bắn.
+**Vẫn giữ `ScheduleWakeup` làm fallback** (giờ là poll ngắn lặp lại, không phải 1 lần dài) — đây
+là lớp XẾP CHỒNG lên task-notification của wrapper, không thay thế. Xấu nhất (Mike restart giữa
+lúc chờ, task-notification mất) = vẫn tự phục hồi ở lần ScheduleWakeup ngắn kế tiếp (≤270s sau),
+KHÔNG rơi về khoảng chờ dài cũ — đây chính là điểm sửa so với thiết kế cũ.
+
+**Incident 2026-07-06 (feedback user, thêm mục #8 cần sửa)**: chuỗi Taylor sector-sweep #17-20
+(hog/feed leadlag, construction, SOE, holdco) chạy suốt 2026-07-05→06, mỗi job Mike->Taylor xong
+trong 5-15' thật nhưng dùng ScheduleWakeup dài theo quy tắc "fire-and-forget research" CŨ — user
+quan sát thấy lãng phí thời gian chờ rõ rệt cộng dồn qua nhiều bước, đúng bằng lý do đảo ngược quy
+tắc ở trên. Không phải bug code — quy tắc VIẾT SAI (che khuất bởi lo ngại "đừng phiền vì job dài
+không ai chờ", trong khi thực tế TỔNG thời gian trôi qua vẫn tính).
 
 ⚠️ **Giới hạn chưa xác minh**: độ bền của `Agent(run_in_background)` task-notification qua CHÍNH
 việc Mike restart chưa ai kiểm chứng thực tế (không tài liệu nào trong codebase khẳng định hay

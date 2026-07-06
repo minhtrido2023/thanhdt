@@ -13,6 +13,37 @@ commit hash where one exists).
 
 ---
 
+## 2026-07-06 — Fast-wake-on-completion rule wrongly excluded long research fan-out chains
+
+**What happened:** User observed that during the Taylor sector-sweep chain (#17-20:
+hog/feed leadlag, construction, SOE, holdco frameworks, 2026-07-05→06), individual
+Mike→Taylor dispatch jobs regularly finished in 5-15 minutes, but Mike didn't pick up the
+result and dispatch the next step until a much longer `ScheduleWakeup` fallback fired —
+wasting real wall-clock time compounding across many sequential hops in one day.
+
+**Root cause:** Not a code bug — the *rule itself* was wrong. MIKE.md's §Quy chuẩn bắt
+buộc mục 8 ("fast wake-on-completion") explicitly told Mike to SKIP the fast-wake
+`Agent(run_in_background)` wrapper for "fire-and-forget research fan-out, nobody waiting
+on a specific hour" — which is exactly what a long sequential sector-sweep chain looks
+like from the outside, even though each hop's result *does* determine the next dispatch.
+The `ScheduleWakeup` fallback formula (`wrapper_wait_timeout + 300`, ~26 min for default
+timeout/retries) was also designed as a single worst-case wait, not a short recurring
+poll — so even where used, it was tuned for safety over responsiveness.
+
+**Fix:** MIKE.md mục 8 rewritten (2026-07-06): drop the research-fan-out exception —
+default to ALWAYS using the fast-wake wrapper for any dispatch with a dependent next
+step (nearly all of them). Replace the long single-wait `ScheduleWakeup` fallback with a
+short recurring poll (~240-270s, under the tool's own cache-miss threshold): check
+`jobs.sh status`, reschedule another short wakeup if still running, act immediately if
+done. Same worst-case coverage, much better common-case latency.
+
+**Lesson:** A rule scoped by *intent* ("is anyone urgently waiting?") missed the real
+cost driver, which was *cumulative* idle time across many automated hops, not any single
+hop's urgency. For a multi-step autonomous pipeline, treat every hop as if the next step
+depends on it — because in a chain, it always does.
+
+---
+
 ## 2026-07-06 — Approved plan v2 would have been silently skipped for stale v1 (caught ~15 min before execution)
 
 **What happened:** User asked Mike to "check today's operations." Two plan files existed for
