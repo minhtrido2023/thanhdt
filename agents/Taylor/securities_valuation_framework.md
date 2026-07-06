@@ -82,3 +82,16 @@ Three benchmarks: VNINDEX B&H, **EW broker-basket B&H** (own the whole sector, a
   the DT5G edge itself is NOT single-event (also 2018 + 2022).
 - Median selected ADV 21.2B → genuinely tradeable (unlike pharma/tech/telecom). Orthogonality:
   custom30V 33.5% | 8L top-25 6.9%.
+
+---
+
+## STRONG tier (screaming-buy) — walk-forward calibrated (job Taylor_20260706_070219)
+
+**STRONG = PB < 0.75** (deep-value, on top of the existing inflection + DT5G gate); `0<PB<1.8` +
+inflection + gate-open but PB ≥ 0.75 = **ACCUMULATE**. Method: pooled ICB=8777 broker universe, depth =
+(1.8−PB)/1.8, quintiles, IS/OOS, weekly. In ALL the step is at Q3→Q4 (**PB≈0.75**: fwd-1M 2.1→4.5%, 3M
+7.0→8.9%) and the Q4 elevation **holds in both** IS (fwd-1M +3.3%) and OOS (+3.5%). The very deepest
+bucket (Q5, PB<0.42) is spectacular OOS (**+9.3%/1M, +27%/3M**) but **weak in IS** — so the *robust* line
+is **PB<0.75, not deeper** (don't chase the OOS-only extreme). Edge is OOS-loaded (the sector's
+documented character) and already DT5G-gated → STRONG is effectively a **crisis-only** trigger. **Live
+2026-07-06:** none at STRONG (SSI 1.66 / VCI 1.59 / VND 1.25 / HCM 2.02 — all ≥ 0.75; HCM > 1.8 cap).

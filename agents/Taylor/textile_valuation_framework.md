@@ -147,3 +147,15 @@ The durable, transferable artifacts:
 No HPG/DGC/MWG-style catchable *compounding* book exists here: MSH is quality-but-rarely-cheap (buy-the-crash,
 not a screen), TCM's ROE5Y has faded below 0.15, and TNG's multibagger was a thin-margin/high-leverage
 *growth* bet a quality-value screen correctly declines. Watchlist single-name (MSH) only.
+
+---
+
+## STRONG tier — TESTED, REJECTED: ACCUMULATE-only (job Taylor_20260706_070219)
+
+Ran the same depth-quintile calibration (pooled ICB=3763, gate ROE5Y>0.15 & IntCov>1.5, depth=
+1−PE/PE_MA1Y, IS/OOS, weekly). **No robust deep-discount step**: in-sample the *middle* depth bucket
+(Q3) pays best (fwd-1M +3.4%) while the deepest bucket (Q5) is weak IS (+1.5%, hit 36%); OOS flips and
+says Q5 is best (+2.6%/1M). The **sign disagreement at the extreme** = a red flag, not a break — so **no
+STRONG tier is defined for textile** (would be fabricating a threshold). Textile stays **ACCUMULATE-only**
+(PE < PE_MA1Y). MSH (single watchlist name) is quality-but-rarely-cheap; accumulate-on-weakness, never a
+"screaming buy" line.

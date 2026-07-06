@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v747)
+# Mike fleet — context pack (v748)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-06T02:30:49] Taylor/finding — hog-FEED margin-spread completes DBC GPM signal — 2022 false-positive FIXED (feed overlay CONFIRMED for DBC, REFUTED for BAF); NOW read = feed turned back up +10% => DBC WATCH holds harder: {"job": "Taylor_20260706_022555", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY follow-up to hog leadlag (Taylor_20260706_014930); new file hog_feed_spread.p …
 - [2026-07-06T03:47:30] Taylor/finding — sector#18 construction contractors (EPC/GC) framework — LENS-NOT-BOOK, no buy; the deliverable is a RISK/EXCLUSION framework. P/E unusable (POC accounting), P/B-trough is a TRAP (IC -0.065, worse than market), only CF_OA is correct-signed. AR-quality gate = valid exclusion filter (dodges -62%->-18% DD, rejected HBC through its entire crisis) but too restrictive to trade (cash 84% of months). LIVE: HTN = HBC-repeat in progress (DSO 2425, AR/Rev 49x, PB 0.46=trap) => AVOID.: {"job": "Taylor_20260706_033659", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY, new files only (construction_screen.py + construction_valuation_framework.md …
 - [2026-07-06T04:09:58] Taylor/finding — sector#19 SOE-governance archetype — LENS-NOT-BOOK, NOT-A-GATE (cross-cutting governance note like 5F moat). State ownership is a MILD RETURN DRAG (state% IC -0.034; SOE fwd T+60 3.16% vs priv 4.25%; SOE-broad basket 9.45% vs identical-sector private-peer 14.50% ~-5pp/yr). NO governance discount to buy — flagships trade a PREMIUM (SOE/priv PB power 1.02x/banks 1.33x/insurance 2.12x). DY on an SOE = a POLICY variable not FCF, bifurcated (cash-cows GAS/VEA pay up vs state banks forced to RETAIN for CAR); the high-DY yield play is a documented INCOME TRAP (cash-cow price-CAGR 4.53% + ~4.5pp div = ~9.0% total-return STILL lags B&H 10.23%, -58% DD). Thin float is the one measurable signature: turnover vs state% Spearman -0.51, SOE median turnover 0.18 vs priv 0.44 (high-lock flagships ACV/GAS/VCB/VEA/BID starved; POW/NT2/PLX/VNM liquid exceptions). Do NOT wire; production untouched.: {"job": "Taylor_20260706_040038", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY, new files only (soe_governance_screen.py + soe_governance_framework.md + dat …
 - [2026-07-06T04:39:36] Taylor/finding — sector#20 holding-company/conglomerate SOTP archetype — LENS-NOT-BOOK, valuation METHOD not a gate. A blended P/E/P/B on a conglomerate is meaningless (VIC PB 11.3 with once-NEGATIVE NPM = VinFast option value, not property); value the parts. coverage=ParentMC/Σ(stake×listed-sub MC) gives a clean split: MSN 0.70×/GEX 0.77× DISCOUNT (real holdco leverage 1.8-6.7 + complexity) vs VIC 4.07×/GVR 14.8× PREMIUM (unlisted optionality — VinFast, landbank; GVR listed rubber subs only ~7% of cap). KEY: discount does NOT mean-revert — deep discount is a TRAP: pooled coverage-z IC +0.073/+0.054/+0.036 WRONG-SIGNED (premium-momentum not reversion), discount-tilt basket LOSES -8.1pp Full DD -57.6%, series trend/de-rate (MSN/GEX trend-t -0.68/-0.62). Any EW-all edge (+1.4pp) is 100% OOS-luck (IS -19.1pp/OOS +16.2pp = VIC+GVR run-up). Premium=optionality that deflates in CRISIS (GVR 14.7×→7.2×). DO NOT WIRE. Production untouched.: {"job": "Taylor_20260706_042831", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY new files only (holdco_sotp_screen.py + holdco_sotp_valuation_framework.md +  …
@@ -11,6 +10,7 @@
 - [2026-07-06T05:50:41] Taylor/finding — technical-stabilization filter on WATCH — REFUTED as return filter, only trims deep-DD tail (insurance not alpha); keep WATCH->BUY on fundamentals: {"job": "Taylor_20260706_054234", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY, new file technical_stabilization_test.py + registry pin; production untouche …
 - [2026-07-06T06:38:39] Taylor/finding — sector_lens_monitor.py built — Group-A 6-state weekly watchlist monitor (Section 7): {"job": "Taylor_20260706_062405", "dispatch_from": "Mike", "scope": "RESEARCH/MONITOR-ONLY, production untouched (custom30V/BAL/LAG/rating_8l.py unchanged). New …
 - [2026-07-06T06:47:16] Taylor/finding — sector_lens_monitor.py built — weekly 6-state Group-A watchlist monitor: {"job": "Taylor_20260706_062405", "dispatch_from": "Mike", "scope": "Built Section-7 Harvesting-Workflow tool (user-approved). RESEARCH/MONITOR-ONLY, production …
+- [2026-07-06T07:13:39] Taylor/finding — STRONG-tier (screaming-buy) calibration for Group-A sector lenses — 3 ADD / 3 NO-STRONG-by-design: {"job": "Taylor_20260706_070219", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY backtest to define STRONG lines; new file sector_strong_threshold.py; code ch …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -116,7 +116,9 @@ User gặp vấn đề: task tự động research bị dừng giữa chừng kh
 4. **08:45** — `preflight_check.sh`: kiểm tra sẵn sàng trước giờ mở cửa (GREEN/RED)
 5. **09:05** — `run_bot.sh --auto-otp`: thực thi plan (phiên sáng)
 6. **09:00-14:55** — `bot_heartbeat.sh` mỗi 5': giám sát liveness + digest fill mới
-7. **11:30** — dừng bot giờ nghỉ trưa
+7. **11:30** — dừng bot giờ nghỉ trưa (`pkill -f "[b]ot_execute.py --account SpaceX"`, sửa 2026-07-06
+   tối — pattern cũ tự khớp luôn dòng lệnh gọi chính nó qua `sh -c`, xem `kb/INCIDENTS.md`; vô hại
+   vì `session_phase()` đã tự idle đúng qua trưa dù pkill không hiệu quả, nhưng vẫn cần fix cho đúng)
 8. **12:45** — `ops_health_check.sh --label "Trước phiên chiều"` (thêm 2026-07-06) — kiểm tra lại toàn
    bộ khâu vận hành sau phiên sáng, trước khi resume phiên chiều — cùng nội dung kiểm tra như bước 3,
    chạy lại để bắt vấn đề phát sinh trong phiên sáng trước khi vào phiên chiều.

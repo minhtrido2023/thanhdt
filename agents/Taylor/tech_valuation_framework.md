@@ -81,3 +81,17 @@ a monthly rotation, and not a sector book.**
 - **CTR** is the only VN name at the global ROIC bar but is **telecom-infra**, not software.
 - Entry windows the lens flags as cheap-and-quality: **2018 (post-divestment), 2022–23 (IT-spend
   slowdown), 2025/2026Q1 (PE 13–20 vs MA1Y 19–27)** — FPT is in such a window now.
+
+---
+
+## STRONG tier (screaming-buy) — walk-forward calibrated (job Taylor_20260706_070219)
+
+**STRONG = PE < PE_MA1Y × 0.75** (25% below own 1Y mean); `PE < PE_MA1Y × 0.9` but ≥ ×0.75 =
+**ACCUMULATE**. Method: pooled ICB=9537 (FPT-dominant), gate ROIC5Y>0.12 & ROE5Y>0.15, depth =
+1−PE/PE_MA1Y, quintiles, IS/OOS, weekly. Q5 (depth ≥ ~0.25) is the best fwd-return bucket in **both** IS
+(fwd-1M +3.5% / hit 83%) and OOS (fwd-3M +7.3%); and the framework's named great entries — **2018
+post-divestment (PE/MA1Y=0.71 → depth 0.29)** and **2022-23 IT-slowdown** — all sit at depth 0.25-0.29.
+Sample is thin (one dominant name) → this is **corroborated-by-episode, not a standalone statistical
+break**; treat as a high-conviction display tier, still routed through the human chain. **Live
+2026-07-06: FPT PE 12.4 < 0.75×PE_MA1Y (14.0) → STRONG** — a 2018/2022-class deep entry (the only
+Group-A name at STRONG today).

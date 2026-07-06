@@ -79,20 +79,20 @@ DT5G regime today = **BULL (state 3, to 2026-06-25)** — risk-on; the euphoria 
 2. **RICH_WAIT** — passes the gate but is currently EXPENSIVE vs its own history.
 3. **WATCH** — passes the gate + cheap, but no confirmed turn/catalyst yet.
 4. **ARMED** — *(only for a fast-proxy/slow-confirm sector; today ONLY DBC via the hog-feed spread)* early-warning has turned supportive, not yet confirmed.
-5. **BUY** — confirmed entry; sub-mode **STRONG** (deep in window) vs **ACCUMULATE** (moderate), using each framework's OWN thresholds (only CTR defines a STRONG line: EVEB<9).
+5. **BUY** — confirmed entry; sub-mode **STRONG** (deep in window) vs **ACCUMULATE** (moderate), using each framework's OWN thresholds. **STRONG lines (all walk-forward-calibrated — depth-quintile fwd-return step surviving OOS, job Taylor_20260706_070219):** CTR `EVEB<9` · Banking `discount≥0.45` · Tech/FPT `PE<PE_MA1Y×0.75` · Securities `PB<0.75`. **Textile/Pharma/Logistics are ACCUMULATE-ONLY BY DESIGN** — tested and no robust STRONG break: pharma depth-return is flat (buy-and-hold anchor, timing adds nothing); logistics deepest bucket underperforms IS (high-beta tactical — do NOT size up when "cheaper still"); textile IS/OOS disagree at the extreme (no break to trust). See each `*_valuation_framework.md`.
 6. **STALE** — data feed not fresh → fail-safe holds the last known state, never fabricates.
 
 | Name / group | Primary metric | Entry condition | Current value (2026-06-29) | State | Deploy mode |
 |---|---|---|---|---|---|
 | **CTR** | EV/EBITDA | <9 strong · <11 accumulate (+ROIC5Y>20, ROE_TTM>25) | EVEB **9.9** | **BUY · ACCUMULATE** (mid-bucket [9,11), not the <9 screaming buy) | Watchlist single-name; capturable book |
-| **FPT** | PE vs PE_MA1Y | PE < PE_MA1Y×0.9 (+ROIC5Y>0.12, ROE5Y>0.15) | PE **12.4** vs MA1Y×0.9 = **16.8** | **BUY · ACCUMULATE** (in entry window, cheap vs own history) | Single-name lens; strongest active signal |
+| **FPT** | PE vs PE_MA1Y | **STRONG PE<×0.75** · accum PE<×0.9 (+ROIC5Y>0.12, ROE5Y>0.15) | PE **12.4** < ×0.75 = **14.0** | **BUY · STRONG** (2018/2022-class deep entry; only Group-A name at STRONG today) | Single-name lens; strongest active signal |
 | **FOX** | EV/EBITDA | pullback to <8 (mature-telecom band 4–8x) | EVEB **12.0** | **RICH_WAIT** (rich) | Watchlist only *(not in monitor universe)* |
-| **MBB** | P/B vs Gordon justPB | PB < justPB (ROE5Y, COE0.13, g0.05) | PB 1.40 vs **justPB 2.21** | **BUY · ACCUMULATE** (cheap) | Banking compounder (archetype A) |
+| **MBB** | P/B vs Gordon justPB | **STRONG disc≥0.45** · accum PB<justPB (ROE5Y, COE0.13, g0.05) | PB 1.33 vs **justPB 2.21** (disc 40%) | **BUY · ACCUMULATE** (cheap; <45% → not STRONG) | Banking compounder (archetype A) |
 | **ACB** | P/B vs justPB | same | PB 1.22 vs **2.25** | **BUY · ACCUMULATE** (widest discount) | Banking compounder |
 | **HDB** | P/B vs justPB | same; ROE_Min3Y 0.241 (best) | PB 1.54 vs **2.34** | **BUY · ACCUMULATE** (best ROE floor) | Banking compounder |
 | **TCB** | P/B vs justPB | same | PB 1.25 vs **1.55** | **BUY · ACCUMULATE** (modestly cheap, thinner margin) | Banking compounder |
 | **VCB** | P/B vs justPB | same | PB 2.14 vs **1.93** | **RICH_WAIT** (archetype B — premium justified by forward-ROE only; value screen can't catch) | Skip on a value screen |
-| **SSI** | P/B (+ROE inflection) | PB∈(0,1.8) · ROE_TTM>ROE3Y · IntCov>1.5 | PB 1.68 · 0.139>0.118 ✓ | **BUY · ACCUMULATE** (qualifies; DT5G gate open) | Securities screen (DT5G-gated) |
+| **SSI** | P/B (+ROE inflection) | **STRONG PB<0.75** · accum PB∈(0,1.8) · ROE_TTM>ROE3Y · IntCov>1.5 | PB 1.67 · 0.139>0.118 ✓ | **BUY · ACCUMULATE** (qualifies; PB≫0.75 → not STRONG; DT5G-gated crisis-only) | Securities screen (DT5G-gated) |
 | **VCI** | same | same | PB 1.78 · 0.092>0.083 ✓ | **BUY · ACCUMULATE** (qualifies, marginal) | Securities screen |
 | **VND** | same | same | PB 1.18 · 0.106 vs ROE3Y 0.108 | **WATCH** (fails inflection — TTM just below 3Y) | Watch for re-cross |
 | **HCM** | same | same | **PB 2.10 > 1.8** | **EXCLUDED** (euphoria cap) | — |

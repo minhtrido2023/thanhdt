@@ -77,3 +77,18 @@ and is broad** (2020 +70, 2021 +60, 2023 +20, 2024 +19pp). BUT three honesty cav
 leveraged book.** The framework's lasting value is the *valuation method* (P/B-vs-ROE, archetype split,
 asset-quality-via-ROE-floor) for sizing bank exposure inside V2.4 — not a separate book whose beta/return is
 already captured by custom30V. Real-NPL/CAR overlay for live sizing → `bank_lens_v3.py` (vnstock).
+
+---
+
+## STRONG tier (screaming-buy) — walk-forward calibrated (job Taylor_20260706_070219)
+
+**STRONG = discount ≥ 0.45** (i.e. `PB ≤ 0.55 × justPB`, justPB=(ROE5Y−0.05)/0.08); below that but
+`PB < justPB` = **ACCUMULATE**.
+
+Method (same as CTR EVEB<9): pooled the ICB=8355 bank universe, applied the live gate (ROE5Y≥0.12 &
+ROE_Min3Y≥0.08), split the in-window population into discount quintiles, measured forward return
+(profit_1M/2M/3M, EVAL-ONLY), weekly-sampled, IS(2014-19)/OOS(2020-26). **A real OOS-surviving step at
+Q5**: deepest-discount bucket (disc ≥ 0.46) → fwd-1M **+3.7%** / 3M **+11.8%** / hit **69%** vs ~+1.6% /
++5% / 54% for Q1-Q4. OOS confirms (Q5 +3.68%/1M, +11.8%/3M, hit 69%); IS thin but Q5 positive. 0.45
+rounds the ALL/OOS Q5 floors (0.462/0.468). **Live 2026-07-06:** no bank at STRONG — ACB 41% / MBB 40%
+/ HDB 35% / TCB 18% all ACCUMULATE (ACB closest). VCB premium (RICH). STRONG is a rare crisis-level tier.

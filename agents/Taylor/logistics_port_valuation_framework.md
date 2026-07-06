@@ -129,3 +129,14 @@ pure-plays are sub-2B ADV, flag illiquidity instead of excluding):
 ---
 
 ## 5. Results — see `data/results_registry.md` (job Taylor_20260630_054646) and bus finding.
+
+---
+
+## STRONG tier — TESTED, REJECTED BY DESIGN: ACCUMULATE-only (job Taylor_20260706_070219)
+
+Depth-quintile calibration (pooled ICB=2777+2773, gate ROE5Y>0.15 & Debt_Eq<2.0, depth via EV/EBITDA
+cheapness, IS/OOS, weekly): **the deepest cheapness bucket UNDERPERFORMS** — IS says the middle bucket
+pays best (Q3 fwd-1M +1.9%) while the deepest (Q5) is weak (+0.85%); OOS is non-clean (Q1/Q2 as good as
+Q5). So "cheaper still" is **not** a reason to size up — exactly the high-beta-tactical risk the framework
+warns about. **No STRONG tier for logistics**; PVT/HAH stay **ACCUMULATE-only, size-small**. (Deep PB/EVEB
+here is a trap-detector needing the CF_OA>0 + Debt_Eq<2 confirmation, not a conviction dial.)

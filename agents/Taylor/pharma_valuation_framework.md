@@ -53,3 +53,14 @@ low-turnover lens** that under-returns VNINDEX in bull years and protects in dra
 **watchlist/risk lens, not a standalone book**. The interesting questions are (a) does the PE-MA
 mean-reversion entry add anything over buy-and-hold the same names, and (b) does it hold OOS once the
 universe thins to DHG+IMP.
+
+---
+
+## STRONG tier — TESTED, REJECTED BY DESIGN: ACCUMULATE-only, permanent (job Taylor_20260706_070219)
+
+Depth-quintile calibration (pooled ICB=4577, gate ROE5Y>0.15 & ROIC5Y>0.15, depth=1−PE/PE_MA5Y, IS/OOS,
+weekly) answers question (a) above directly: **depth vs forward return is FLAT** — the deepest PE-discount
+bucket does NOT beat the shallowest in either regime (ALL fwd-1M Q1 2.06% vs Q5 1.78%; IS Q1 best; OOS Q1
+best). This is the **data confirming the buy-and-hold-anchor thesis**: timing pharma on cheapness adds
+nothing, so there is **no screaming-buy tier** — only accumulate-on-weakness (PE < PE_MA5Y). DHG stays
+**ACCUMULATE-only, permanent**.
