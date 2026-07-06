@@ -95,7 +95,8 @@ _circuit_record() {
   set -e
   if [ "$2" = "fail" ] && [ "$_cr_rc" -eq 1 ]; then
     "$ROOT/bin/notify.sh" "[circuit-breaker] $1 TRIPPED ($_cr_out) — dispatch tạm dừng ${CIRCUIT_COOLDOWN}s." 2>/dev/null || true
-    local _cbtid; _cbtid="${DISCORD_THREAD_ID:-$(_agent_thread_override "$1")}"
+    local _cbtid; _cbtid="$(_job_thread_id "$job_id")"
+    [ -n "$_cbtid" ] || _cbtid="${DISCORD_THREAD_ID:-$(_agent_thread_override "$1")}"
     [ -n "$_cbtid" ] || _cbtid="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
     if [ -n "$_cbtid" ]; then
       "$ROOT/bin/notify_thread.sh" "🔴 **Circuit breaker OPEN** cho **$1** ($_cr_out) — $CIRCUIT_THRESHOLD+ lỗi liên tiếp, tạm dừng dispatch ${CIRCUIT_COOLDOWN}s. Ép chạy: \`DISPATCH_FORCE=1\`." "$_cbtid" 2>/dev/null || true
@@ -176,7 +177,8 @@ _maybe_schedule_usage_resume() {
        result_summary="account usage limit — auto-resume scheduled at epoch $resume_at (attempt $((n + 1))/$cap)"
   local resume_ict; resume_ict="$(TZ=Asia/Ho_Chi_Minh date -d "@$resume_at" '+%H:%M %d/%m' 2>/dev/null || echo '?')"
   "$ROOT/bin/notify.sh" "[dispatch] $id: tài khoản hết usage limit (job $job_id) — KHÔNG PHẢI lỗi task. Tự động resume lúc ~${resume_ict} ICT (lần thử #$((n + 1))/$cap)." 2>/dev/null || true
-  local _tid; _tid="${DISCORD_THREAD_ID:-$(_agent_thread_override "$id")}"
+  local _tid; _tid="$(_job_thread_id "$job_id")"
+  [ -n "$_tid" ] || _tid="${DISCORD_THREAD_ID:-$(_agent_thread_override "$id")}"
   [ -n "$_tid" ] || _tid="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
   if [ -n "$_tid" ]; then
     "$ROOT/bin/notify_thread.sh" "⏳ **$id** hết usage limit tài khoản (job \`$job_id\`) — không phải lỗi task. TỰ ĐỘNG resume lúc ~${resume_ict} ICT. Không cần làm gì." "$_tid" 2>/dev/null || true
@@ -203,6 +205,20 @@ _agent_thread_override() {
   esac
 }
 
+# _job_thread_id <job_id> — the Discord topic THIS SPECIFIC job was dispatched from, persisted
+# on the job record at dispatch time (added 2026-07-06, fixes cross-topic notification leak).
+# Root cause: an agent like Taylor serves MULTIPLE topics (user's "8L research" vs "vĩ mô"
+# topics both dispatch to Taylor) — _agent_thread_override only fits an agent whose output
+# ALWAYS belongs to ONE fixed topic (DollarBill), and the old env-var/state-file fallback
+# chain resolves to whatever topic Mike's LIVE session happens to be in at NOTIFICATION time,
+# not the topic that actually asked for this job — so a job dispatched from "8L" while Mike
+# later becomes active in "vĩ mô" would report its completion into "vĩ mô" instead. Reading
+# the job's OWN persisted field removes this ambiguity regardless of the exact mechanism
+# that made a live/global source unreliable (env staleness, restart, concurrent topics, ...).
+_job_thread_id() {
+  python3 "$ROOT/bin/mike_json.py" job-field "$JOBS_DIR" "$1" discord_thread_id 2>/dev/null
+}
+
 # _job_watcher: runs in background alongside a dispatch job.
 # Two distinct alert tracks:
 #   ANOMALY track (fires immediately, no cap): empty log after 60s, stale log >120s with no update.
@@ -214,7 +230,8 @@ _job_watcher() {
   local elapsed=0 discord_notified=0
   local log_stale_alerted=0 log_empty_alerted=0
   local discord_thread_id
-  discord_thread_id="${DISCORD_THREAD_ID:-$(_agent_thread_override "$target")}"
+  discord_thread_id="$(_job_thread_id "$jid")"
+  [ -n "$discord_thread_id" ] || discord_thread_id="${DISCORD_THREAD_ID:-$(_agent_thread_override "$target")}"
   [ -n "$discord_thread_id" ] || discord_thread_id="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
   local milestones="600 1800"  # 10 min, 30 min; max 2 Discord progress messages total
 
@@ -316,10 +333,15 @@ cd "$AGENT_DIR"
 echo "JOB $job_id (from=$from, timeout=${TIMEOUT}s) → $ROOT/bin/jobs.sh status $job_id" >&2
 
 # Record the job in 'running' before the first attempt so it is visible immediately.
+# discord_thread_id: capture the CALLING topic ONCE, here, at dispatch time — every
+# notification for this job reads it back via _job_thread_id instead of re-deriving a
+# "current" topic later (see _job_thread_id comment for why that was the actual bug).
 _start_ts="$(date +%s)"
+_dtid0="${DISCORD_THREAD_ID:-$(_agent_thread_override "$id")}"
+[ -n "$_dtid0" ] || _dtid0="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
 JSET job_id="$job_id" from="$from" to="$id" status=running attempt=1 \
      max_attempts=$((RETRIES + 1)) started_at="$_start_ts" \
-     deadline=$((_start_ts + TIMEOUT)) logfile="$logfile" \
+     deadline=$((_start_ts + TIMEOUT)) logfile="$logfile" discord_thread_id="$_dtid0" \
      prompt_summary="$(printf '%s' "$prompt" | head -c 160 | tr '\n\t' '  ')"
 
 if [ "$bg" = "--bg" ]; then
@@ -341,10 +363,12 @@ if [ "$bg" = "--bg" ]; then
         _circuit_record "$id" success
         "$ROOT/bin/consolidate.sh" >> "$ROOT/logs/consolidator.log" 2>&1 || true
         "$ROOT/bin/notify.sh" "[dispatch] $id hoàn thành (job $job_id): $(SUMMARY)" 2>/dev/null || true
-        # Discord thread notification — always, regardless of who dispatched.
-        # Use env var (set at dispatch time, inherited by bg subshell) then fall back to file.
+        # Discord thread notification — always, regardless of who dispatched. Read the
+        # topic THIS job was dispatched from (persisted at dispatch time), not whatever
+        # topic Mike happens to be active in right now (see _job_thread_id comment).
         # tail -c 500: last bytes of log = agent's conclusion, not context-loading preamble.
-        local _tid; _tid="${DISCORD_THREAD_ID:-$(_agent_thread_override "$id")}"
+        local _tid; _tid="$(_job_thread_id "$job_id")"
+        [ -n "$_tid" ] || _tid="${DISCORD_THREAD_ID:-$(_agent_thread_override "$id")}"
         [ -n "$_tid" ] || _tid="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
         if [ -n "$_tid" ]; then
           local _preview; _preview="$(tail -c 500 "$logfile" 2>/dev/null | tr '\n\t' '  ')"
@@ -387,7 +411,8 @@ if [ "$bg" = "--bg" ]; then
     _circuit_record "$id" fail
     "$ROOT/bin/consolidate.sh" >> "$ROOT/logs/consolidator.log" 2>&1 || true
     "$ROOT/bin/notify.sh" "[dispatch] $id $why sau $max_attempts lần (job $job_id) — xem $logfile" 2>/dev/null || true
-    local _tid; _tid="${DISCORD_THREAD_ID:-$(_agent_thread_override "$id")}"
+    local _tid; _tid="$(_job_thread_id "$job_id")"
+    [ -n "$_tid" ] || _tid="${DISCORD_THREAD_ID:-$(_agent_thread_override "$id")}"
     [ -n "$_tid" ] || _tid="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
     if [ -n "$_tid" ]; then
       "$ROOT/bin/notify_thread.sh" "❌ **$id** $why (job \`${job_id}\`). Xem log: $logfile" "$_tid" 2>/dev/null || true
@@ -424,7 +449,7 @@ if [ "$bg" = "--bg" ]; then
   # `setsid _bg_wrapper &` silently fails to find "_bg_wrapper" as a command.
   export -f _bg_wrapper JSET SUMMARY _agent_thread_override _circuit_record \
             _maybe_schedule_usage_resume _looks_like_usage_limit _parse_reset_epoch \
-            _current_resume_count
+            _current_resume_count _job_thread_id
   export ROOT JOBS_DIR job_id from id ts TIMEOUT RETRIES CLAUDE dispatch_prompt logfile prompt \
          CIRCUIT_DIR CIRCUIT_THRESHOLD CIRCUIT_COOLDOWN
   if command -v setsid >/dev/null 2>&1; then
@@ -451,7 +476,8 @@ if [ "$bg" = "--bg" ]; then
   echo "  + nếu wrapper không sống sót qua restart: ScheduleWakeup NGẮN ~240-270s (poll jobs.sh status, đặt lại nếu chưa done) — KHÔNG đặt 1 lần chờ dài." >&2
   echo "$pid" > "$ROOT/logs/.dispatch_${id}_${ts}.pid"
   # Immediate Discord notify so user sees task is in flight (don't wait for watcher heartbeat)
-  { _dtid="${DISCORD_THREAD_ID:-$(_agent_thread_override "$id")}"
+  { _dtid="$(_job_thread_id "$job_id")"
+    [ -n "$_dtid" ] || _dtid="${DISCORD_THREAD_ID:-$(_agent_thread_override "$id")}"
     [ -n "$_dtid" ] || _dtid="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
     if [ -n "${_dtid:-}" ]; then
       _dp="$(printf '%s' "$prompt" | head -c 120 | tr '\n\t' '  ')"

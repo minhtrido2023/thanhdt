@@ -23,6 +23,8 @@ Centralizes all JSON building/reading so the shell scripts depend only on python
   pending-resume-set <path> <agent_id> <from> <orig_job_id> <resume_at_epoch> <resume_count>
       -> writes a bus/pending_resumes/<job_id>.json record; prompt text read from STDIN
          (avoids shell-quoting a large/multiline string as a CLI arg)
+  job-field <jobs_dir> <job_id> <field_name>
+      -> print one field's raw value (exit 1 if job/field missing) — e.g. discord_thread_id
 """
 import sys, os, json, uuid, glob, datetime
 
@@ -383,7 +385,7 @@ def cmd_job_get(a):
     disp = _job_display_status(o, n)
     for k in ("job_id", "from", "to", "status", "attempt", "max_attempts",
               "started_at", "deadline", "ended_at", "exit_code", "pid",
-              "logfile", "prompt_summary", "result_summary"):
+              "logfile", "prompt_summary", "result_summary", "discord_thread_id"):
         if k in o:
             print("%-15s %s" % (k + ":", o[k]))
     print("%-15s %s" % ("display:", disp))
@@ -396,6 +398,24 @@ def cmd_job_get(a):
     if st in ("running", "retrying"):
         sys.exit(2)
     sys.exit(1)  # failed / timeout / unknown
+
+
+def cmd_job_field(a):
+    """job-field <jobs_dir> <job_id> <field_name> — print just that field's raw value.
+    Exit 1 (empty stdout) if the job or field is missing. For shell code that needs ONE
+    value (e.g. discord_thread_id) without parsing the full job-get output."""
+    jobs_dir, job_id, field = a[0], a[1], a[2]
+    fp = _job_path(jobs_dir, job_id)
+    try:
+        with open(fp, encoding="utf-8") as f:
+            o = json.load(f)
+    except Exception:
+        sys.exit(1)
+    v = o.get(field, "")
+    if not v:
+        sys.exit(1)
+    print(v)
+    sys.exit(0)
 
 
 # --- circuit breaker (state/circuit/<id>.json) ---
@@ -509,6 +529,7 @@ CMDS = {"event": cmd_event, "heartbeat": cmd_heartbeat, "recent": cmd_recent,
         "delta-append": cmd_delta_append, "delta-since": cmd_delta_since,
         "format-events": cmd_format_events, "fleet-status": cmd_fleet_status,
         "job-set": cmd_job_set, "job-list": cmd_job_list, "job-get": cmd_job_get,
+        "job-field": cmd_job_field,
         "circuit-check": cmd_circuit_check, "circuit-record": cmd_circuit_record,
         "pending-resume-set": cmd_pending_resume_set,
         "settings": cmd_settings, "trace": cmd_trace,
