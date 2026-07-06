@@ -1,7 +1,6 @@
 # Working memory — Taylor
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Taylor.
 
-- V2.4 @50B R3 chốt: CAGR 28.05% / Sharpe 1.87 / DD −18.8% / Calmar 1.50. threads=1 (commit 1325bf2).
 - Bootstrap DD anchor: 5th-pct = −28.6% (KHÔNG phải −18%). P(DD<−30%)=3.3%. Plan sizing dựa −29%.
 - V2.5 = V2.4 + lever MGE=1.5 (HARD=1.65, breaker−15%, NAV-cap 100B). Account = 0002023347 (margin RocketX id=1840, borrow 12.5%). @50B: 30.05/1.82/−20.1/Cal1.49.
 - Blockers B1-B4: DONE. trading_rules v1.9 v25_leverage DISABLED.
@@ -41,3 +40,4 @@
 - [2026-07-06T09:47:58Z] ConvergePort (job _093329) DONE+LAUNCHED paper 2026-07-06: double-confirm converge book (8L rating<=2 AND sector-lens BUY) + idle->custom30V. Backtest +5.0pp CAGR vs custom30V thuan (23.9 vs 18.7), Sharpe +0.23, IS+OOS both, LOO-stable, DSR 0.998. Equal-weight (STRONG tilt dropped). Files: converge_portfolio_backtest.py, converge_report.py, data/converge_portfolio_paper.json, framework md, results_registry pinned, newdeals_daily_report.py §3 wired. Review 2026-10-06.
 - [2026-07-06T10:43:34Z] ConvergePort-as-active-book audit (job Taylor_20260706_103815) DONE: wiring CORRECT, result REAL (12.05% CAGR), REFUTED as prod replacement (vs R3 28.05%). Pinned registry + bus + fixed 3 stale labels. No open items.
 - [2026-07-06T11:06:51Z] Job Taylor_20260706_105930 XONG: fetch real NSO CPI YoY qua chart-embed (13mo 2025-06..2026-06, hard cap - chart evergreen rolling, no history/gold/USD). cpi_vn.py overlay real lên proxy. Confidence-loss study re-run: kết luận KHÔNG đổi (strict regime vẫn rare/not-tradeable, NOT wired). Ghi registry+bus xong. | NEXT: chờ Mike dispatch (sector sweep #10+)
+- [2026-07-06T11:08:50Z] Job Taylor_20260706_105646 (real NSO CPI retry#2) DONE 2026-07-06: fetched real CPI YoY 13m (2025-06..2026-06) via NSO chart-embed, updated cpi_vn.py + registry + bus finding. Confidence-loss study rerun = CONCLUSION UNCHANGED (not tradeable, not wired). NSO caps at ~13m (evergreen rolling chart, no historical charts, no gold/USD chart).
