@@ -1079,3 +1079,15 @@
 - [2026-07-06T10:25:28Z] Taylor/heartbeat — Taylor_20260706_095725: {"status": "in_progress", "note": "fixed LAG pickle (rebuild fin from cache in CONVERGE mode); relaunched 50B run"}
 - [2026-07-06T10:25:29Z] Taylor/heartbeat — Taylor_20260706_095725: {"status": "still_running", "elapsed_min": 28, "job_id": "Taylor_20260706_095725"}
 - [2026-07-06T10:26:29Z] Taylor/heartbeat — Taylor_20260706_095725: {"status": "still_running", "elapsed_min": 29, "job_id": "Taylor_20260706_095725"}
+
+## Consolidation 2026-07-06T10:35:16Z
+- [2026-07-06T10:31:48Z] DollarBill/heartbeat — DollarBill_20260706_103104: {"status": "in_progress", "note": "Đang đọc recommendations 07-06 và trading_rules để lập plan T+1"}
+- [2026-07-06T10:32:04Z] DollarBill/heartbeat — DollarBill_20260706_103104: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260706_103104"}
+- [2026-07-06T10:33:05Z] DollarBill/heartbeat — DollarBill_20260706_103104: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20260706_103104"}
+- [2026-07-06T10:34:05Z] DollarBill/heartbeat — DollarBill_20260706_103104: {"status": "still_running", "elapsed_min": 3, "job_id": "DollarBill_20260706_103104"}
+- [2026-07-06T10:34:45Z] DollarBill/heartbeat — DollarBill_20260706_103104: {"status": "in_progress", "note": "Plan file ghi xong, đang ghi decision lên bus và chuẩn bị Discord report"}
+- [2026-07-06T10:34:49Z] DollarBill/decision — plan-2026-07-07: {"plan_date": "2026-07-07", "account": "SpaceX", "action": "HOLD", "orders": 0, "state": "NEUTRAL(3)", "state_source": "DT4_only", "nav_vnd": 983002349, "exposure_pct": 69.5, "target_pct": 70.0, "margin_debt_vnd": 409863737, "margin_clears": "2026-07-08", "positions_count": 15, "basket_drift": 0, "reason": "69.5%≈70% target, 0 BAL/LAG signals, all 15 in-basket, debt settle T+2=07-08", "plan_file": "data/trade_plans/plan_SpaceX_2026-07-07.json"}
+- [2026-07-06T10:35:05Z] DollarBill/heartbeat — DollarBill_20260706_103104: {"status": "still_running", "elapsed_min": 4, "job_id": "DollarBill_20260706_103104"}
+- [2026-07-06T10:35:11Z] DollarBill/finding — plan-SpaceX-2026-07-07-complete: {"plan_date": "2026-07-07", "status": "complete", "action": "HOLD", "orders": 0, "nav_vnd": 983002349, "exposure_pct": 69.5, "positions_count": 15, "basket_drift": 0, "margin_debt_vnd": 409863737, "margin_clears": "2026-07-08", "discord_sent": true, "plan_file": "data/trade_plans/plan_SpaceX_2026-07-07.json", "dt5g_state": "NEUTRAL(3)", "dt5g_source": "DT4_only"}
+- [2026-07-06T10:34:18Z] Taylor/heartbeat — Taylor_20260706_103318: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260706_103318"}
+- [2026-07-06T10:34:29Z] Taylor/heartbeat — Taylor_20260706_103318: {"status": "in_progress", "note": "NSO chart embed OK: 13 tháng CPI YoY thật (Jan-2026=2.53% vs proxy 4.5%). Đang tìm lịch sử dài về 2011"}
