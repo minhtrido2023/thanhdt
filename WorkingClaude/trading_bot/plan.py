@@ -92,7 +92,20 @@ def load_plan(plan_date, account="main"):
     with open(path, encoding="utf-8") as f:
         d = json.load(f)
     known = {f.name for f in dataclasses.fields(PlannedOrder)}
-    d["orders"] = [PlannedOrder(**{k: v for k, v in o.items() if k in known})
-                   for o in d["orders"]]
+    orders = []
+    for o in d["orders"]:
+        filtered = {k: v for k, v in o.items() if k in known}
+        # DollarBill's rebalance/trim plan schema (v2+) uses different field names
+        # for the same concepts — normalize instead of crashing.
+        if "id" not in filtered:
+            filtered["id"] = f"{o.get('side', '?').upper()}-{o.get('ticker', '?')}-{o.get('priority', 0):02d}"
+        if "ref_price" not in filtered:
+            ref = o.get("mtm_price_ref") or o.get("ref_price") or o.get("price")
+            if ref is None:
+                raise ValueError(f"order {filtered.get('id')} thiếu ref_price/mtm_price_ref — "
+                                  f"không có cơ sở giá tham chiếu để đặt lệnh.")
+            filtered["ref_price"] = ref
+        orders.append(PlannedOrder(**filtered))
+    d["orders"] = orders
     known_plan = {f.name for f in dataclasses.fields(TradePlan)}
     return TradePlan(**{k: v for k, v in d.items() if k in known_plan})
