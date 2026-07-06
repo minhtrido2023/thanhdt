@@ -60,6 +60,14 @@ DT5G regime today = **BULL (state 3, to 2026-06-25)** — risk-on; the euphoria 
 
 > *Corollary (capture-failure law):* a backward quality floor (ROE5Y/ROIC5Y>15%) structurally **ejects forward growth-build stories** — IMP's ETC build-out, VTP's scale-up, VCB/PNJ's margin-turnaround. These are real businesses the screen *cannot* catch without look-ahead. Accept the miss; do not loosen the floor to chase them.
 
+> **GOVERNANCE OVERLAY — State-Owned-Enterprise archetype** *(cross-cutting note, sector #19, added 2026-07-06; NOT a sector row — apply on TOP of the name's own sector metric whenever the State controls >50% / de-facto).* Source: `soe_governance_framework.md`. Confirmed on GAS/PLX/POW/NT2/VCB/CTG/BID/BVH/SAB/VNM vs matched private peers, 2014→2026, self-check 0 VND PASS.
+> 1. **State ownership is a mild return DRAG, never a factor to harvest** — `state_pct` IC(3M) **−0.034**; SOE mean fwd T+60 **3.16% vs private 4.25%**; an EW SOE-controlled basket makes **9.45% vs 14.50% for the identical-sector private-peer basket (~−5pp/yr)**. **Don't overweight a name FOR being a state blue-chip.**
+> 2. **No governance discount to buy — flagships trade a PREMIUM** (SOE/private avg PB: power 1.02×, banks 1.33×, insurance 2.12×). VCB/BVH/GAS/SAB/VNM earn a scarcity/blue-chip premium that outweighs the float/policy discount. A cheap-PB SOE (BSR/PLX) is cheap for a policy/cyclical reason, not a mispricing.
+> 3. **DY on an SOE is a POLICY variable, not a free-cash-flow signal** — bifurcated: budget-payout cash-cows (GAS/VEA) vs regulator-forced *retention* (state banks pay stock-div + retain for CAR). The high-DY "yield play" is a documented **INCOME TRAP**: cash-cow basket price-CAGR 4.53% + ~4.5pp div ≈ 9.0% total-return **still lags B&H 10.23% with −58% DD**. (Behavioral reason reinforcing Rule 2's data-gap.)
+> 4. **Thin float is the measurable signature** — annual share turnover ∝ −state% (**Spearman −0.51**); SOE median turnover 0.18 vs private 0.44. Size the **high-lock flagships (ACV/GAS/VCB/VEA/BID)** for the *locked* float, not the headline ADV. **Liquid exceptions:** POW/NT2/PLX/VNM (deep public float, retail favorites) — read the turnover, don't assume.
+> 5. **Policy price-control caps upside asymmetrically** (PLX 2022 fuel-ceiling losses in a record-oil year; POW/NT2 sell to the EVN single-buyer at administered PPA) **+ state action is discrete event risk** (SAB 2017 divest-to-ThaiBev windfall; VNM SCIC divestment overhang = structural seller). Un-modellable in BQ — carry as a qualitative flag.
+> **Verdict: a governance LENS, not a book and not a gate** (don't wire; state blue-chips are already handled by their own sector frameworks — banking archetype-B, energy). No buy-watchlist or exclude-list changes.
+
 ---
 
 ## Section 3 — Sector → primary-metric lookup
