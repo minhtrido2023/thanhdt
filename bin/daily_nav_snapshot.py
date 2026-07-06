@@ -155,11 +155,14 @@ def main():
                        "cash": f"{cash:.0f}", "margin_debt": f"{debt:.0f}",
                        "balance_ts": bal["ts"]})
     hist_rows.sort(key=lambda r: r["date"])
+    fieldnames = ["date", "nav", "mtm_stock", "cash", "margin_debt", "balance_ts"]
     with open(hist_path, "w", encoding="utf-8", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=["date", "nav", "mtm_stock", "cash", "margin_debt",
-                                          "balance_ts"])
+        # extrasaction="ignore": lịch sử cũ có thể mang field từ version trước của script
+        # (vd cột đã bỏ) — không để 1 dòng cũ làm hỏng cả file (đã xảy ra 2026-07-06: mất
+        # sạch 2 dòng lịch sử vì ValueError giữa chừng writerows(), file bị truncate dở dang).
+        w = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
         w.writeheader()
-        w.writerows(hist_rows)
+        w.writerows({k: row.get(k, "") for k in fieldnames} for row in hist_rows)
 
     since_inception = nav - args.starting_capital
     since_inception_pct = since_inception / args.starting_capital * 100
