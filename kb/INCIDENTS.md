@@ -91,6 +91,20 @@ cost driver, which was *cumulative* idle time across many automated hops, not an
 hop's urgency. For a multi-step autonomous pipeline, treat every hop as if the next step
 depends on it — because in a chain, it always does.
 
+**Recurrence same day, deeper root cause found:** the very next `--bg` dispatch after this
+fix (`Taylor_20260706_070219`, STRONG-tier calibration) skipped the wrapper AGAIN — Taylor
+finished in ~12 min (bus finding posted 07:13:39Z) but Mike only picked it up when the user
+manually pinged ~6-18 min later. Cause: MIKE.md's prose was rewritten, but the *literal
+reminder text `dispatch.sh` prints after every `--bg` call* (meant to remove reliance on
+remembering the rule from context) still said "bỏ qua nếu fire-and-forget" — the exact old
+wording — so the live signal Mike actually sees every dispatch kept nudging the old,
+now-wrong behavior. Fixed in `bin/dispatch.sh` (commit `3add2e5`): reminder rewritten to
+"⚠️ BẮT BUỘC" (mandatory, no skip clause), wording synced to the short-recurring-poll
+`ScheduleWakeup` guidance. **Lesson #2:** when a rule changes, the runtime-printed
+reminder/prompt text that operationalizes it is a SEPARATE artifact from the docs prose —
+grep for the old wording and fix both in the same change, don't assume updating the prose
+alone propagates.
+
 ---
 
 ## 2026-07-06 — Approved plan v2 would have been silently skipped for stale v1 (caught ~15 min before execution)
