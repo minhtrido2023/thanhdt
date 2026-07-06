@@ -94,16 +94,25 @@ except Exception as e:
 # ── TIER 1: freshness of the 4 sources ───────────────────────────────────────
 state_fresh = ticker_fresh = us_fresh = True
 
-# 1. LOCAL v3.4b base-state CSV (rebuilt daily from BQ ticker via ew_v1->...->v3.4b chain;
-#    this is what macro_state_live now reads — NOT the lagging BQ v34b_clean table).
-V34B_CSV = os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_4b_full_history.csv")
-try:
-    _b = pd.read_csv(V34B_CSV)
-    d = pd.to_datetime(_b["time"]).max().date()
-    state_fresh = add_source("local_v34b_state_csv", d, STATE_MAX_TDAYS)
-except Exception as e:
+# 1. v3.4b base state, primary source = BQ `vnindex_5state_tam_quan_v34b_clean` (per
+#    macro_state_live.py's 2026-06-02 change: reads BQ first, local CSV is an EMERGENCY
+#    fallback only used when the BQ read itself throws — so THIS check must track the BQ
+#    table, not the local CSV, to mean anything about the real production input.
+#    Bug found 2026-07-06: this used to read data/vnindex_5state_tam_quan_v3_4b_full_history.csv,
+#    a path daily_refresh_v34b_linux.sh's build step never writes to (it saves to WORKDIR
+#    root) — that data/ copy was a frozen one-off from 2026-06-30, so this check had been
+#    silently comparing against a file nothing updates, for over a week, until the age
+#    crossed STATE_MAX_TDAYS and produced a false SEV1/FAILED (see kb/INCIDENTS.md).
+if bq is not None:
+    try:
+        r = bq("SELECT MAX(s.time) AS mx FROM tav2_bq.vnindex_5state_tam_quan_v34b_clean AS s")
+        d = pd.to_datetime(r["mx"].iloc[0]).date()
+        state_fresh = add_source("local_v34b_state_csv", d, STATE_MAX_TDAYS)
+    except Exception as e:
+        state_fresh = add_source("local_v34b_state_csv", None, STATE_MAX_TDAYS)
+        add_check("v34b_csv_read", False, "SEV1", str(e))
+else:
     state_fresh = add_source("local_v34b_state_csv", None, STATE_MAX_TDAYS)
-    add_check("v34b_csv_read", False, "SEV1", str(e))
 # 2. BQ ticker VNINDEX (upstream source the rebuild chain pulls from)
 if bq is not None:
     try:
