@@ -165,3 +165,65 @@ durable, transferable artifacts:
 to 0.11**. So it is a *watch* — the value half of the setup is present, but the margin-inflection half (the part
 that actually pays) has not fired. **Buy DBC on the next confirmed GPM turn-up, not on the cheap multiple
 alone.** (Sizing small, high-beta tactical — DT5G state caps gross.)
+
+---
+
+## Part 7 — Live hog-price feed as a GPM leading indicator (added 2026-07-06, job Taylor_20260706_014930)
+
+Now that a real hog-price feed exists (`data/hog_price_vn.csv`, Winston, weekly 3 regions, North from
+2019-01-04; Central/South only from 2024) we can test the follow-up: **does the weekly hog price LEAD the
+quarterly reported GPM — i.e. warn of a GPM-turn earlier than the financial statement?** DBC is a North-based
+producer → the **North (Bắc)** series is used for the full 2019+ history. Script: `hog_gpm_leadlag.py`.
+
+**Method (strict PIT).** Hog price during quarter Q is fully known by Q-end, ~30–45 days *before* GPM_Q is
+filed (`Release_Date`). So the contemporaneous quarter-average hog price is already a legitimate ~1–1.5-month
+early read on GPM_Q. Quarterly-mean North hog, transformed to YoY (`hog_yoy`, the turn metric) and level;
+Spearman vs GPM level, YoY-turn (`GPM_P0−GPM_P4`) and QoQ, at leads L=0/1/2 quarters. DBC 25–29 usable
+quarters, BAF 17–19 (IPO 2021).
+
+**Result — the hog-price turn IS a real leading/coincident indicator for GPM (economically sound, not FX-style
+noise):**
+
+| Signal (DBC) | vs GPM level | vs GPM YoY-turn | lead |
+|---|---|---|---|
+| `hog_yoy` @ Q−0 (contemporaneous) | +0.13 | **+0.45** (p=.02) | mechanical ~45–90d early read |
+| `hog_yoy` @ Q−1 | +0.25 | **+0.55** (p<.01) | +1 quarter |
+| `hog_yoy` @ Q−2 | +0.47 | **+0.68** (p<.01) | +2 quarters (peak corr) |
+| `hog_lvl` @ Q−0..2 | +0.50→+0.62 | +0.41→+0.56 | level co-moves strongly |
+
+- **Turn-sign agreement (DBC):** hog_yoy sign == GPM-turn sign **76%** contemporaneous, **71%** at 1-quarter
+  lead. So when hog rolls over, GPM turns down ~3 of 4 times, and hog rolls first.
+- **BAF (purer pure-play farmer)** is even tighter contemporaneously: hog level vs GPM level **+0.76**,
+  hog_yoy vs GPM-turn +0.60 (L0) / +0.62 (L1). Makes sense — a pure hog-farmer's margin maps almost directly
+  to hog price; the integrated DBC dilutes it with feed/eggs/RE segments.
+- **QoQ is useless** (corr ~0.05–0.14, sign 50%) — the quarter-average series is too smooth QoQ; **only the YoY
+  transform carries signal.** Use `hog_yoy`, not raw QoQ.
+
+**Cycle-window consistency (the convincing part):** 2019–20 ASF (hog_yoy +65→+96% ↔ GPM-turn +0.036→+0.122,
+peaks coincide); 2021 roll-over (hog_yoy went negative 2021Q2, GPM-turn negative the *same* quarter and stayed
+so — hog gave the warning ~5 weeks before the 2021-08 filing); 2024 recovery (hog_yoy +7.8% 2024Q1 ↔ GPM-turn
++0.055). **Most recent (2025→26):** hog_yoy turned **negative in 2025Q3–Q4** (−9.2%, −12.7%) while reported GPM
+was still rising — and GPM then **rolled over in 2026Q1** (GPM_P0 0.184→0.170, turn −0.002). The hog downturn
+led the GPM softening by ~1–2 quarters, exactly as the lag structure predicts.
+
+**Critical caveat — hog price is only HALF the margin spread.** GPM = f(hog price − feed cost). In **2022** hog
+recovered (hog_yoy +16→+21% 2022H2) yet GPM-turn stayed **deeply negative** (−0.083→−0.112) because the
+corn/soy feed cost spiked (Ukraine). Hog price alone will miss a margin squeeze driven by the *cost* side. So
+the hog-turn is a **necessary-but-not-sufficient EARLY-WARNING**, never a standalone margin forecast. (A feed
+cost series would complete it — Winston's remit if wanted.) Small-sample (DBC ≤29q, BAF ≤19q), North-only for
+history, no hard IS/OOS — treat the exact lag (L1–2 peak) as *supportive, not proven* (confounded by YoY
+autocorrelation); the **contemporaneous 76% turn-sign match is the solid, mechanically-guaranteed part.**
+
+**NOW read (data through 2026-06-27).** Latest North hog: 2026Q2 mean **66,113 VND/kg, yoy −2.5%, qoq −5.9%**
+(faded from 2026Q1's 70,230). **The leading indicator is pointing DOWN, not up** → DBC's 2026Q2 GPM (to be
+filed ~late-July 2026) is likely flat-to-soft, **no margin inflection imminent.** This **independently confirms
+the Part-6 WATCH verdict a quarter early**: the value half is present but neither the reported GPM-turn *nor*
+the hog leading indicator is firing an up-turn. **No early buy-trigger. WATCH holds.**
+
+**Entry-rule update (overlay, does NOT replace the GPM-turn confirmation):**
+- **Amber (early-warning, from the weekly feed):** `hog_yoy` (North quarterly mean vs year-ago) turns **positive
+  and rising** off a trough → margin inflection *likely* 0–2 quarters out → move DBC from WATCH to ARMED, start
+  monitoring. This can fire ~1 quarter before the financial statement.
+- **Green (act):** the reported `GPM_P0 > GPM_P4` turn confirms (the Part-6 trigger). The hog amber never
+  substitutes for this green — feed-cost can veto (2022). Buy on green, sized small/tactical, DT5G-gated.
+- Fail-safe: hog feed stale/missing → no amber, fall back to the pure financial-statement GPM-turn (status quo).
