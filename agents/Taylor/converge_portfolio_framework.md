@@ -222,3 +222,72 @@ same `excluded_tickers` pattern used for ZaloPay/DGC).
 (`data/converge_portfolio_paper.json`, equal-weight, launched 2026-07-06) is unaffected — this only
 sizes what a *real* deployment could be, if/when that decision is taken (routes Taylor → DollarBill
 → user → Mafee as always).
+
+---
+
+## 7. UNION (OR) alternative — REFUTED (job Taylor_20260706_114506)
+
+**Question (user via Mike).** The double-confirm set (AlphaLens BUY **AND** 8L golden) is thin —
+mean 4.0 names, **17.3% of days 0 names**. Does switching **AND → OR (UNION)** fix the "too few
+deals" problem *without* hurting risk-adjusted performance? Should the launched paper book switch
+from double-confirm to UNION?
+
+**UNION definition (no new conditions invented — per dispatch).**
+`member(name,t) = [name ∈ sector_lens Group-A ∧ sector-lens status==BUY]  OR  [name ∈ rating_8l.py
+BUY-NOW list at t]`, where BUY-NOW is rating_8l.py's OWN screen (L568-576): `rating(as-of)≤3 ∧
+liq_bn≥3.0 ∧ pb_z≤-0.3 ∧ ¬(ROE_Min3Y<0)`. *(NB: the dispatch parenthetical said "ROE_Min5Y≥0"; the
+actual BUY-NOW code uses the **ROE_Min3Y<0** chronic-destroyer guard — I used the real code per
+"don't redefine".)* Equal-weight `min(0.20, 1/n)` + parking, symmetric to double-confirm.
+
+**Engine.** Same fractional paper-sim as §3 (`converge_union_test.py`; baseline / double-confirm /
+UNION all in one identical engine; custom30V parking; DT5G-as-of gate; T+1; threads=1; self-check
+weight-sum `|dev−1|` = 2.2e-16 = 0 VND leak). **Why this frame, not the fullharness `CONVERGE_BOOK`
+single-book replacement:** that frame is already REFUTED (12.05% vs R3 28.05%) and uses a *fixed*
+per-name WPN=0.11 which clips at cash-exhaustion once breadth >9 (UNION runs 30-100 names → ordering
+artifact). The fractional sim (weights sum to 1.0) handles arbitrary breadth and is scale-invariant
+(job _105156), so **NAV=20B is irrelevant to the return sim** — it only enters the ADV capacity
+overlay below. Double-confirm here reproduces the §3 headline **exactly** (23.86% / Sharpe 1.11 /
+Calmar 0.52), validating the engine is identical.
+
+**Breadth (does UNION fix "too few deals"? — YES, completely).**
+| set | mean-when-active | max | empty days |
+|---|---|---|---|
+| double-confirm (AND) | 4.0 | 9 | **515/2970 (17.3%)** |
+| BUY-NOW golden arm alone | 33.1 | 104 | 0 (0.0%) |
+| **UNION (OR)** | **36.1** | **107** | **0/2970 (0.0%)** |
+
+Live 2026-06-26: UNION = **65 names** vs double-confirm 9. The golden BUY-NOW arm is a *broad*
+deep-value screen (~33 names/day), so UNION is never empty.
+
+**Performance (FULL 2014-08→2026-06, TC=0.1%) — UNION is decisively WORSE.**
+| Config | CAGR | Sharpe | MaxDD | Calmar | turnover |
+|---|---|---|---|---|---|
+| custom30V thuần (baseline) | 18.75% | 0.87 | −45.9% | 0.41 | ~0 |
+| double-confirm (AND) | **23.86%** | **1.11** | −46.1% | **0.52** | 4.14×/yr |
+| **UNION (OR)** | **12.07%** | **0.64** | **−55.9%** | **0.22** | **12.89×/yr** |
+
+**Δ vs baseline: UNION −6.68pp CAGR / −0.23 Sharpe / −0.19 Calmar / MaxDD −10pp WORSE.** Worse in
+BOTH IS (6.71% vs 12.72% baseline) and OOS (16.76% vs 24.03%). UNION underperforms even *pure
+custom30V parking* — and by 11.8pp vs double-confirm. TC sensitivity: UNION 12.07%→9.22% @0.3%
+(turnover really bites at 12.9×/yr).
+
+**Why it fails (mechanistic).** (1) The golden BUY-NOW arm is a broad 8L deep-value list that
+heavily **overlaps custom30V itself** (both are 8L/value over the liquid universe) — so UNION ≈ an
+equal-weight broad-value book, a *worse-constructed* custom30V (equal-weight vs yieldcombo cap-weight)
+with churn added. (2) Equal-weighting 30-100 deeply-dislocated (pb_z≤−0.3) names *maximises* exposure
+to the cheapest/most-distressed names right as they fall → MaxDD −55.9% (falling-knife). (3) Turnover
+3× higher (names constantly cross the pb_z≤−0.3 boundary). (4) The double-confirm edge WAS the
+**AND-selectivity** — two independent lenses agreeing = high conviction, few names; OR destroys
+exactly that.
+
+**Capacity @20B — NOT the constraint.** UNION spreads thin (65 names × ~1.5% = 0.31B/name), so 64/65
+live names are OK, only DHG at WATCH (1.27 build-days). Capacity is *easier* than double-confirm —
+but irrelevant, because performance already fails.
+
+**Verdict — DO NOT switch to UNION. Keep double-confirm.** UNION "solves" the empty-days problem, but
+**that problem was never real: an empty double-confirm day = 100% custom30V parking = automatic
+safety, not a defect** (exactly Mike's framing in the dispatch, confirmed by data). Trading OR-breadth
+for AND-selectivity converts a high-conviction concentrated sleeve into a churning broad-value book
+that loses to plain parking. The current paper book (double-confirm equal-weight) stays as launched.
+Output: `converge_union_test.py`, `data/converge_union_test_nav.csv`,
+`data/converge_union_test_summary.json`.

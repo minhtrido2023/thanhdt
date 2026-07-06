@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v771)
+# Mike fleet — context pack (v772)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-06T10:13:31] Taylor/finding — macro confidence-loss combined-regime: hypothesis SUPPORTED only in strict all-4-binding form, but too few episodes (5) to be tradeable — NOT wired: {"job": "Taylor_20260706_100438", "dispatch_from": "Mike", "scope": "RESEARCH/DISPLAY-ONLY, production untouched (custom30V/BAL/LAG/rating_8l.py/macro_state_liv …
 - [2026-07-06T10:34:49] DollarBill/decision — plan-2026-07-07: {"plan_date": "2026-07-07", "account": "SpaceX", "action": "HOLD", "orders": 0, "state": "NEUTRAL(3)", "state_source": "DT4_only", "nav_vnd": 983002349, "exposu …
 - [2026-07-06T10:35:11] DollarBill/finding — plan-SpaceX-2026-07-07-complete: {"plan_date": "2026-07-07", "status": "complete", "action": "HOLD", "orders": 0, "nav_vnd": 983002349, "exposure_pct": 69.5, "positions_count": 15, "basket_drif …
 - [2026-07-06T10:43:24] Taylor/finding — ConvergePort-as-active-book audit: wiring CORRECT (not a bug), result REAL — but REFUTED as production replacement (12.05% vs R3 28.05% CAGR): {"job": "Taylor_20260706_103815", "audited_job": "Taylor_20260706_095725", "scope": "AUDIT/RESEARCH-ONLY, production untouched (custom30V/BAL/LAG/rating_8l.py u …
@@ -11,6 +10,7 @@
 - [2026-07-06T11:06:32] Taylor/finding — Real NSO CPI YoY fetched via chart-embed (13mo, 2025-06..2026-06); confidence-loss regime study re-run — conclusion UNCHANGED (still not tradeable): {"job": "Taylor_20260706_105930", "dispatch_from": "Mike", "scope": "RESEARCH/DISPLAY-ONLY, production untouched (custom30V/BAL/LAG/rating_8l.py/macro_state_liv …
 - [2026-07-06T11:08:36] Taylor/finding — Real NSO CPI YoY fetched via chart-embed (13m, 2025-06..2026-06) + confidence-loss study re-run — CONCLUSION UNCHANGED, not wired: {"job": "Taylor_20260706_105646", "supersedes_attempts": ["Taylor_20260706_103318 (timeout)", "Taylor_20260706_105930 (did disk work, no bus post)"], "scope": " …
 - [2026-07-06T11:18:43] Taylor/finding — bottom-recovery regime (rates↓+RE-cold+gold↓+cheap): REFUTED as early bottom signal — combo fires 5-8mo AFTER trough, only 2 episodes, single-episode carry, gold-version never fires: {"job": "Taylor_20260706_111335", "dispatch_from": "Mike", "scope": "RESEARCH/DISPLAY-ONLY, production untouched (custom30V/BAL/LAG/rating_8l.py/macro_state_liv …
+- [2026-07-06T12:05:30] Taylor/finding — ConvergePort UNION(OR) alternative REFUTED: fixes empty-days (17.3%→0%) but destroys edge — 12.07% CAGR loses even to pure custom30V parking (18.75%); keep double-confirm(AND): {"job": "Taylor_20260706_114506", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY, production untouched (custom30V/BAL/LAG/rating_8l.py + double-confirm paper  …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -170,6 +170,13 @@ User gặp vấn đề: task tự động research bị dừng giữa chừng kh
   (`send_plan_report.sh`, và mọi `dispatch.sh DollarBill ...` khác dù cron hay ad-hoc). Root cause
   thread-leak (dispatch notify theo thread Mike đang active) đã fix ở tầng `dispatch.sh` qua hàm
   `_agent_thread_override` — route CỐ ĐỊNH cho DollarBill bất kể Mike gọi từ topic nào.
+- **Per-job thread routing tổng quát (thêm 2026-07-06)** — `_agent_thread_override` chỉ đúng cho
+  agent LUÔN thuộc 1 topic cố định (DollarBill). Nhưng Taylor phục vụ NHIỀU topic song song (vd
+  user tách riêng "nghiên cứu 8L" và "nghiên cứu vĩ mô", cả 2 đều dispatch Taylor) — báo cáo hoàn
+  thành từng job phải về ĐÚNG topic đã yêu cầu job đó, không phải topic Mike đang hoạt động lúc
+  job xong. Fix: `dispatch.sh` giờ ghi `discord_thread_id` NGAY vào job record lúc dispatch (chụp
+  1 lần, không đổi), mọi thông báo (nhận việc/xong/fail/circuit-breaker/usage-limit) đọc lại field
+  này qua `_job_thread_id <job_id>` thay vì suy ra "topic hiện tại". Xem `kb/INCIDENTS.md`.
 - **Trading report (1522576692638388364, thêm 2026-07-03, user chỉ đạo)** — kênh DUY NHẤT cho
   **báo cáo tổng hợp** trading ngày/tuần/tháng (khác với alert vận hành sống ở Trading Daily). Đã
   chuyển đích `eod_trading_report.sh` (báo cáo EOD + cảnh báo đối soát mismatch) sang topic này.

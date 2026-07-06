@@ -1,7 +1,6 @@
 # Working memory — Taylor
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Taylor.
 
-- Bootstrap DD anchor: 5th-pct = −28.6% (KHÔNG phải −18%). P(DD<−30%)=3.3%. Plan sizing dựa −29%.
 - V2.5 = V2.4 + lever MGE=1.5 (HARD=1.65, breaker−15%, NAV-cap 100B). Account = 0002023347 (margin RocketX id=1840, borrow 12.5%). @50B: 30.05/1.82/−20.1/Cal1.49.
 - Blockers B1-B4: DONE. trading_rules v1.9 v25_leverage DISABLED.
 - **Reminder lên Mike 2026-07-07** (trigger trig_015A): hỏi user go-ahead build V2.5 live-recommend integration.
@@ -41,3 +40,4 @@
 - [2026-07-06T10:43:34Z] ConvergePort-as-active-book audit (job Taylor_20260706_103815) DONE: wiring CORRECT, result REAL (12.05% CAGR), REFUTED as prod replacement (vs R3 28.05%). Pinned registry + bus + fixed 3 stale labels. No open items.
 - [2026-07-06T11:06:51Z] Job Taylor_20260706_105930 XONG: fetch real NSO CPI YoY qua chart-embed (13mo 2025-06..2026-06, hard cap - chart evergreen rolling, no history/gold/USD). cpi_vn.py overlay real lên proxy. Confidence-loss study re-run: kết luận KHÔNG đổi (strict regime vẫn rare/not-tradeable, NOT wired). Ghi registry+bus xong. | NEXT: chờ Mike dispatch (sector sweep #10+)
 - [2026-07-06T11:08:50Z] Job Taylor_20260706_105646 (real NSO CPI retry#2) DONE 2026-07-06: fetched real CPI YoY 13m (2025-06..2026-06) via NSO chart-embed, updated cpi_vn.py + registry + bus finding. Confidence-loss study rerun = CONCLUSION UNCHANGED (not tradeable, not wired). NSO caps at ~13m (evergreen rolling chart, no historical charts, no gold/USD chart).
+- [2026-07-06T12:05:36Z] IDLE. Last: job Taylor_20260706_114506 DONE — ConvergePort UNION(OR) alternative REFUTED. UNION fixes empty-days (17.3%->0%, mean breadth 3.95->36.1, 65 live names) but destroys edge: FULL CAGR 12.07% vs double-confirm 23.86% vs baseline 18.75% — UNION loses even to pure custom30V parking (-6.68pp), DD -55.9% vs -46%, Calmar 0.22, turnover 12.9x/yr. Loses IS+OOS. Cause: golden BUY-NOW arm=broad deep-value overlapping custom30V -> falling-knife; AND-selectivity WAS the edge. Verdict: keep double-confirm, empty day=auto-safe parking not a defect. Capacity@20B fine but moot. Pinned registry + framework §7 + bus. Artifacts converge_union_test.py + summary json/csv. NEXT: chờ Mike dispatch.
