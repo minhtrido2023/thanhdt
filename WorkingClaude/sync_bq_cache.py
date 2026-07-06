@@ -19,6 +19,18 @@ import sys
 import time
 
 import pandas as pd
+import pyarrow.parquet as _pq
+
+# Đăng ký extension dtype "dbdate" của google (nếu package có) TRƯỚC mọi read_parquet —
+# một số chunk parquet cũ trên đĩa (vd ticker/2026.parquet, ghi bởi phiên bản trước dùng
+# BigQuery to_dataframe) mang dtype này; thiếu import thì pd.read_parquet crash
+# "TypeError: data type 'dbdate' not understood". Chính crash đó làm delta sync bảng
+# `ticker` chết ÂM THẦM mỗi đêm từ ~2026-06-26 → cache thối → macro_healthcheck đọc
+# VNINDEX từ cache báo stale 7 ngày → FAILED/SEV1 giả (2026-07-06, kb/INCIDENTS.md).
+try:
+    import db_dtypes  # noqa: F401  (side-effect import: registers dbdate/dbtime dtypes)
+except ImportError:
+    pass
 
 WORKDIR = "/home/trido/thanhdt/WorkingClaude"
 
@@ -262,7 +274,10 @@ def download_table(name: str, config: dict, manifest: dict, delta: bool):
             for yr in chunk_years:
                 yr_path = os.path.join(chunk_dir, f"{yr}.parquet")
                 if yr < max_year and os.path.exists(yr_path):
-                    yr_rows = len(pd.read_parquet(yr_path, columns=[col]))
+                    # Chỉ cần ĐẾM dòng — dùng parquet metadata thay vì đọc cả cột qua
+                    # pandas: rẻ hơn nhiều và miễn nhiễm với dtype lạ trong file cũ
+                    # (dbdate crash ở trên xảy ra đúng tại dòng này trước khi sửa).
+                    yr_rows = _pq.read_metadata(yr_path).num_rows
                     total_rows += yr_rows
                     continue
                 yr_sql = (
@@ -289,7 +304,13 @@ def download_table(name: str, config: dict, manifest: dict, delta: bool):
         if max_cached:
             log(f"  {name}: delta from {max_cached}")
             col = config["partition_col"]
-            delta_sql = config["sql"] + f" AND t.{col} > '{max_cached}'"
+            # SQL gốc có WHERE (vd ticker: WHERE t.time >= '2013-01-01') → nối AND;
+            # KHÔNG có WHERE (vd các bảng vnindex_5state*) → phải mở WHERE mới. Trước
+            # 2026-07-06 luôn nối cứng "AND" → SQL sai cú pháp cho nhóm bảng sau, delta
+            # các bảng đó fail ÂM THẦM mỗi đêm (bq CLI error với stderr trống) — cache
+            # vnindex_5state* kẹt vĩnh viễn ở ngày full-download gần nhất.
+            joiner = "AND" if "WHERE" in config["sql"].upper() else "WHERE"
+            delta_sql = config["sql"] + f" {joiner} t.{col} > '{max_cached}'"
             new_df = bq_query_to_df(delta_sql)
             if new_df.empty:
                 log(f"  {name}: no new rows")
