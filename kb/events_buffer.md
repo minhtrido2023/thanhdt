@@ -1344,3 +1344,7 @@
 - [2026-07-06T15:50:58Z] DollarBill/heartbeat — DollarBill_20260706_154756: {"status": "still_running", "elapsed_min": 3, "job_id": "DollarBill_20260706_154756"}
 - [2026-07-06T15:51:58Z] DollarBill/heartbeat — DollarBill_20260706_154756: {"status": "still_running", "elapsed_min": 4, "job_id": "DollarBill_20260706_154756"}
 - [2026-07-06T15:52:47Z] DollarBill/answer — plan-zalopay-transition-day1: {"job": "DollarBill_20260706_154756", "status": "DONE", "plan_file": "data/trade_plans/plan_ZaloPay_2026-07-07.json", "plan_date": "2026-07-07", "account": "ZaloPay", "action": "TRANSITION_START", "orders": 2, "sell": "MSH 200cp @ 32700 = 6.54M (proceeds 6.535M sau phí)", "buy": "VCB 100cp @ 61200 = 6.12M (VHM loại: 1 lô=15.4M > proceeds)", "cash_after": "5,329,883 VND", "transition_schedule": "MSH(07-07)→TLG(07-08)→TCM(07-09)→VHC(07-10)→VIB(07-11)", "approved_by": null, "requires_user_approval": true}
+
+## Consolidation 2026-07-06T16:07:01Z
+- [2026-07-06T16:05:11Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-07-06", "delivered_via": "fallback"}
+- [2026-07-06T15:58:47Z] Mike/status — preflight-ZaloPay-2026-07-06: {"result": "RED", "checks": ["✅ BOT_STOP: CLEAR", "❌ Plan ZaloPay 2026-07-06 KHÔNG TÌM THẤY — DollarBill chưa lập plan hoặc BQ stale.", "❌ macro_health=FAILED (SEV1) — DT5G chạy DT4_only. Kiểm tra data pipeline.", "✅ Gmail OAuth: có refresh_token (tự refresh khi cần)", "✅ BQ ticker_prune: lag=0d ✓"]}
