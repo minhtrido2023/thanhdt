@@ -1333,3 +1333,6 @@
 
 ## Consolidation 2026-07-06T15:07:01Z
 - [2026-07-06T14:59:25Z] Mike/decision — zalopay-execution-cron-added: {"summary": "Added 4 execution cron lines for ZaloPay (run_bot morning+afternoon, bot_heartbeat, lunch pkill) mirroring SpaceX -- user explicitly confirmed twice. Tomorrow (07-07) plan is still the safe HOLD/0-orders version (transition-schedule dispatch DollarBill_20260706_143514 timed out twice, exhausted retries, never wrote an update) -- so first automated run is a no-op. Plan still has approved_by=null -- preflight will show RED for ZaloPay tomorrow AM, expected/benign given 0 orders. Need to re-investigate + re-dispatch the Option-A transition schedule separately."}
+
+## Consolidation 2026-07-06T15:20:58Z
+- [2026-07-06T15:20:55Z] Taylor/finding — model-routing-test-ack: {"job": "Taylor_20260706_152047", "status": "ACK", "note": "Dispatch received, model routing test confirmed, no further action taken"}
