@@ -227,3 +227,65 @@ the hog leading indicator is firing an up-turn. **No early buy-trigger. WATCH ho
 - **Green (act):** the reported `GPM_P0 > GPM_P4` turn confirms (the Part-6 trigger). The hog amber never
   substitutes for this green — feed-cost can veto (2022). Buy on green, sized small/tactical, DT5G-gated.
 - Fail-safe: hog feed stale/missing → no amber, fall back to the pure financial-statement GPM-turn (status quo).
+
+---
+
+## Part 8 — FEED-COST spread completes the margin proxy (added 2026-07-06, job Taylor_20260706_022555)
+
+Part 7's own caveat — "hog price is only HALF the margin spread; GPM = f(hog − feed cost); 2022 hog
+recovered but GPM stayed negative because feed spiked" — is now testable. Winston built the feed side
+(job Winston_20260706_021459): `data/maize_monthly.csv` + `data/soybean_meal_monthly.csv` (World Bank
+Pink Sheet, USD/mt, monthly 2006-04+). Script: `hog_feed_spread.py`.
+
+**Method (unit-safe).** Feed and hog are NOT comparable in levels (world USD/mt vs VN VND/kg — scale,
+FX, pass-through all differ), so **everything is % change (YoY) or rolling-z, never raw levels mixed.**
+Feed "basket" = a physical-tonnage-weighted $/mt cost of the pig-feed mix — **base case corn:soybean-meal
+= 60:40** (corn is the energy bulk, SBM the protein; the non-imported remainder — bran, additives — is
+assumed to track these two). `spread_yoy = hog_yoy − feed_yoy`. Tested at feed_lag 0 and 1 quarter
+(imported feed inventories hit COGS with an inventory lag). DBC 25 usable quarters, BAF 17.
+
+**Result — the feed overlay is a REAL value-add, but only for DBC (the integrated 3F name):**
+
+| Signal vs DBC GPM-turn | corr | turn-sign agree |
+|---|---|---|
+| `hog_yoy` alone (Part 7) | +0.445 | 76% |
+| `spread_yoy` feed_lag=0 | +0.514 | 80% |
+| **`spread_yoy` feed_lag=1q** | **+0.617** | **84%** |
+| `spread_z` feed_lag=1q | +0.637 | — |
+
+- **The 2022 false-positive is FIXED — the whole point of the exercise.** Hog-alone WRONGLY flagged
+  margin-UP in 2022Q3/Q4 (hog_yoy +15.7%/+20.5%); the spread correctly said DOWN (feed_yoy +16.9%/+24.0%
+  → spread −1.1%/−3.5%), matching the *actual* deeply-negative GPM-turn (−0.083/−0.112). Both quarters
+  flip from WRONG→OK. (One new near-zero miss appears — 2023Q2 spread +13% vs gpm_turn −0.012, a flat
+  quarter — net still a clear gain.)
+- **Weight-robust:** corr +0.512→+0.522 and sign-agree 76→80% across corn:sbm = 50:50 / 60:40 / 70:30 —
+  the result is not an artifact of the exact mix.
+- **BAF: the overlay HURTS** (sign-agree 76%→59%, corr +0.598→+0.407). BAF is a pure-play hog farmer —
+  its margin maps almost directly to hog price; the *world* feed series adds noise, not signal (different
+  sourcing/cost structure). Economically sound: only the **integrated feed-consumer DBC** has a big enough
+  imported-feed COGS line for the world feed price to explain margin. **→ The feed overlay is DBC-only.**
+
+**Caveats.** Small sample (DBC 25q, BAF 17q), world feed price ≠ DBC's actual delivered input cost
+(FX/hedging/domestic-milling/inventory all intervene — the feed_lag=1q that maximises corr is itself a
+crude proxy for that inventory pass-through). No hard IS/OOS. The **mechanically-solid, non-overfit part
+is the 2022 sign-flip** (feed clearly outran hog → margin clearly fell — that is arithmetic, not a fitted
+lag). Treat the exact +0.617 corr as *supportive*, the 2022 fix as *proven*.
+
+**NOW read (data through 2026-06-27) — the spread is MORE cautious than hog-alone.** For the last filed
+quarter (2026Q1) spread_yoy −0.038 ≈ the flat gpm_turn −0.002. For **2026Q2** (hog+feed known, GPM not yet
+filed): hog_yoy **−2.5%** AND **feed_yoy has turned back UP to +10.1%** (maize+SBM bottomed 2025Q3 and are
+recovering) → **spread_yoy −12.6%, the most negative reading since 2023.** So the feed side is now *adding*
+to the squeeze, not offsetting it. **This reinforces the Part-6/7 WATCH a notch harder**: not only is hog
+flat-to-down, the cost side is rising into it. No up-inflection; if anything the near-term margin outlook
+is softer than hog-alone implied. **WATCH holds.**
+
+**Entry-rule upgrade (supersedes the Part-7 Amber for DBC; Part-7 hog-alone remains the fallback / the
+BAF rule):**
+- **Amber (early-warning, DBC only):** `spread_yoy` (= hog_yoy − feed_yoy, feed lagged 1q, 60:40 basket)
+  turns **positive and rising** off a trough → margin inflection likely 0–2q out → WATCH→ARMED. This is
+  strictly better than the Part-7 hog-alone Amber: it will NOT arm on a hog rally that a feed-cost spike
+  is eating (the 2022 trap). Both the hog rise AND feed not-outpacing must line up.
+- **Green (act) unchanged:** reported `GPM_P0 > GPM_P4` confirms. The spread Amber is early-warning, never
+  a substitute for the confirmed financial-statement turn.
+- **BAF keeps the Part-7 hog-alone rule** (feed overlay refuted for it). Fail-safe unchanged: feed OR hog
+  feed stale/missing → drop the overlay, fall back to hog-alone, then to the pure GPM-turn.
