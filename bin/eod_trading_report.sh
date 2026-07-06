@@ -226,9 +226,23 @@ $WATERFALL_SECTION"
 fi
 
 echo "$FULL_REPORT"
-"$ROOT/bin/notify_thread.sh" "$FULL_REPORT" "$TRADING_THREAD" 2>/dev/null || true
+# Báo cáo client-facing KHÔNG được rơi im lặng (sự cố 2026-07-06: topic Trading report bị
+# Missing Access — bot mất quyền/thread archive — notify fail bị `|| true` nuốt, user không
+# nhận được report ngày và không ai biết). Fallback 2 tầng khi post thất bại: (1) Telegram
+# qua notify.sh, (2) Trading Daily thread kèm cảnh báo — và luôn ghi bus event nêu rõ kênh
+# nào nhận được.
+TRADING_DAILY_THREAD="1521470705563340910"
+DELIVERED_VIA="trading_report_thread"
+if ! "$ROOT/bin/notify_thread.sh" "$FULL_REPORT" "$TRADING_THREAD" 2>>"$ROOT/logs/eod_notify_errors.log"; then
+  DELIVERED_VIA="fallback"
+  FALLBACK_HEADER="⚠️ **Topic Trading report đang không truy cập được (bot Missing Access) — gửi tạm qua kênh dự phòng.**"
+  "$ROOT/bin/notify.sh" "$FALLBACK_HEADER
+$FULL_REPORT" 2>/dev/null || true
+  "$ROOT/bin/notify_thread.sh" "$FALLBACK_HEADER
+$FULL_REPORT" "$TRADING_DAILY_THREAD" 2>/dev/null || true
+fi
 "$ROOT/bin/append_event.sh" Mafee status "eod-trading-report" \
-  "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\"}" 2>/dev/null || true
+  "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"delivered_via\":\"$DELIVERED_VIA\"}" 2>/dev/null || true
 
 # Phương án B (user duyệt 2026-07-02): kiểm toán độc lập CÓ ĐIỀU KIỆN — chỉ kích hoạt
 # risk-auditor khi đối soát cơ học phía trên đã phát hiện lệch, không chạy tốn kém mỗi
