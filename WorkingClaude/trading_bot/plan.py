@@ -109,3 +109,19 @@ def load_plan(plan_date, account="main"):
     d["orders"] = orders
     known_plan = {f.name for f in dataclasses.fields(TradePlan)}
     return TradePlan(**{k: v for k, v in d.items() if k in known_plan})
+
+
+def filter_excluded_tickers(plan, excluded_tickers):
+    """Loại bỏ mọi order cho mã trong `excluded_tickers` (legacy/special-situation holding
+    ngoài rebalancing tự động — xem ACCOUNT_DEFAULTS trong config.py). Enforce cứng ở tầng
+    này — không phụ thuộc vào việc plan generator (DollarBill/bot_prepare_plan.py) có nhớ
+    loại trừ đúng hay không, để account nào cũng an toàn dù plan tạo ra thế nào.
+
+    Trả về (plan đã lọc, list order đã bị chặn) — KHÔNG sửa plan tại chỗ, để caller tự log/báo.
+    """
+    excluded = set(excluded_tickers or [])
+    if not excluded:
+        return plan, []
+    blocked = [o for o in plan.orders if o.ticker in excluded]
+    plan.orders = [o for o in plan.orders if o.ticker not in excluded]
+    return plan, blocked

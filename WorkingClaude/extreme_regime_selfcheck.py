@@ -11,12 +11,22 @@ Asserts:
 Run: python extreme_regime_selfcheck.py   (exit 0 = all pass, non-zero = a check failed)
 """
 import datetime as dt
+import glob
+import os
 import sys
 
-from trading_bot.config import DEFAULTS
+from trading_bot.config import DEFAULTS, EXEC_DIR
 from trading_bot.plan import PlannedOrder, TradePlan
 from trading_bot.executor import Executor
 from trading_bot.vn_market import round_price
+
+# Executor.__init__ eagerly loads state.json from the DEFAULT (account, plan_date) path
+# BEFORE any test code can redirect it — a stale file from an earlier run (same account
+# tag) silently corrupts this run's starting state (found 2026-07-06, see
+# ghost_order_selfcheck.py's TAG comment for the full explanation).
+TAG = "selfcheck-extreme"
+for _f in glob.glob(os.path.join(EXEC_DIR, f"exec_{TAG}_*")):
+    os.remove(_f)
 
 REF = 50_000.0
 FLOOR = round(REF * 0.93, -1)     # HOSE −7% daily floor
@@ -56,7 +66,7 @@ def make_exec(cfg_over, orders):
     cfg = dict(DEFAULTS); cfg.update(cfg_over); cfg["mode"] = "paper"
     plan = TradePlan(plan_date="2099-01-01", signal_date="2099-01-01", strategy="tst",
                      strategy_version="0", state=3, state_name="NEUTRAL",
-                     nav_basis={}, orders=orders, account="selfcheck",
+                     nav_basis={}, orders=orders, account=TAG,
                      created_at="2099-01-01T00:00:00")
     # floor-locked quote: last at floor, bid stuck at floor (nobody buying above it)
     quotes = {"TST": FakeQuote(last=FLOOR, bid=FLOOR, ask=round(FLOOR + 100, -2))}

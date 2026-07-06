@@ -29,10 +29,16 @@ import sys
 
 from trading_bot.config import DEFAULTS, EXEC_DIR
 
-# Fresh journal files each run — the journal path is keyed by account tag + plan_date and
-# opened in APPEND mode, so a stale file from a prior run (or another scenario reusing the
-# same tag) would leak old CANCEL_STALE/REFRESH_SKIP rows into this run's assertions.
+# Fresh journal AND state files each run — the journal path is keyed by account tag +
+# plan_date and opened in APPEND mode, so a stale file from a prior run (or another
+# scenario reusing the same tag) would leak old CANCEL_STALE/REFRESH_SKIP rows into this
+# run's assertions. Also wipe state.json: Executor.__init__ eagerly loads it BEFORE any
+# test code can override paths, so a stale "done"/filled state from an earlier run makes
+# _place_slices silently skip everything this run (found 2026-07-06 — journal-only
+# cleanup here was incomplete, state.json was still leaking across runs).
 for _f in glob.glob(os.path.join(EXEC_DIR, "exec_selfcheck-*_journal.csv")):
+    os.remove(_f)
+for _f in glob.glob(os.path.join(EXEC_DIR, "exec_selfcheck-*_state.json")):
     os.remove(_f)
 from trading_bot.plan import PlannedOrder, TradePlan
 from trading_bot.executor import Executor

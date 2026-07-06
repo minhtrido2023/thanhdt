@@ -27,6 +27,7 @@ rehearse the guard (now passes raw={"symbol": ...} matching the real broker's sh
 
 Run: python ghost_order_selfcheck.py   (exit 0 = all pass)
 """
+import glob
 import os
 import sys
 
@@ -34,7 +35,18 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from trading_bot.brokers import OrderUpdate  # noqa: E402
 from trading_bot.plan import PlannedOrder, TradePlan  # noqa: E402
 from trading_bot.executor import Executor  # noqa: E402
-from trading_bot.config import load_config  # noqa: E402
+from trading_bot.config import load_config, EXEC_DIR  # noqa: E402
+
+# Executor.__init__ eagerly loads state.json from the DEFAULT (account, plan_date) path
+# BEFORE make_executor() below gets a chance to redirect state_file to a tmpdir — so a
+# stale file left by an EARLIER run of this (or any other) selfcheck sharing the same
+# account tag corrupts this run's starting state. Found 2026-07-06 while adding the
+# excluded_tickers feature: several selfchecks failed with KeyError after repeated runs.
+# Fix: unique per-file tag + wipe any leftover fixture before each run (same pattern as
+# concurrent_lock_selfcheck.py's TAG cleanup).
+TAG = "selfcheck-ghost"
+for f in glob.glob(os.path.join(EXEC_DIR, f"exec_{TAG}_*")):
+    os.remove(f)
 
 fails = []
 
@@ -70,7 +82,7 @@ def make_executor(tmpdir, orders):
     plan = TradePlan(plan_date="2099-01-01", signal_date="2099-01-01", strategy="selfcheck",
                      strategy_version="0", state=3, state_name="NEUTRAL",
                      nav_basis={"account_nav": 1e9, "scale": 1.0}, orders=orders,
-                     account="selfcheck", created_at="2099-01-01T00:00:00")
+                     account=TAG, created_at="2099-01-01T00:00:00")
     cfg = load_config()
     cfg["mode"] = "paper"
     ex = Executor(plan, _NullBroker(), cfg, shared={})

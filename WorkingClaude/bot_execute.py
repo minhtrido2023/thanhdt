@@ -30,7 +30,7 @@ if hasattr(sys.stdout, "reconfigure"):  # console Windows cp1252 → utf-8
 
 from trading_bot.config import load_config, load_accounts, pick_accounts, EXEC_DIR
 from trading_bot.brokers import make_broker, get_quote_source, get_dnse_client
-from trading_bot.plan import load_plan
+from trading_bot.plan import load_plan, filter_excluded_tickers
 from trading_bot.executor import Executor, run_session
 
 _LOCK_HANDLES = []  # giữ sống file descriptor để lock tồn tại suốt vòng đời process
@@ -138,6 +138,13 @@ def main():
             print(f"[{p['label']}] không có plan cho {plan_date} — bỏ qua "
                   f"(chạy bot_prepare_plan.py trước)")
             continue
+        before = len(plan.orders)
+        plan, blocked = filter_excluded_tickers(plan, p.get("excluded_tickers"))
+        if blocked:
+            print(f"[{p['label']}] ⚠ BỎ {len(blocked)}/{before} lệnh cho mã "
+                  f"excluded_tickers={sorted({o.ticker for o in blocked})}: "
+                  f"{[o.ticker for o in blocked]} — không bao giờ tự động giao dịch "
+                  f"các mã này (xem trading_bot_accounts.json).")
         if not plan.orders:
             print(f"[{p['label']}] plan {plan_date} không có lệnh — bỏ qua")
             continue

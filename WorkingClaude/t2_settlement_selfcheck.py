@@ -21,6 +21,7 @@ ghost-order fail-safe-block in `step()`'s poll_orders() handling).
 Run: python t2_settlement_selfcheck.py   (exit 0 = all pass)
 """
 import datetime as dt
+import glob
 import os
 import sys
 import tempfile
@@ -28,7 +29,16 @@ import tempfile
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from trading_bot.plan import PlannedOrder, TradePlan  # noqa: E402
 from trading_bot.executor import Executor  # noqa: E402
-from trading_bot.config import load_config  # noqa: E402
+from trading_bot.config import load_config, EXEC_DIR  # noqa: E402
+
+# Executor.__init__ eagerly loads state.json from the DEFAULT (account, plan_date) path
+# BEFORE make_executor() below can redirect it to a tmpdir — a stale file from an earlier
+# run (this file's own, or any other selfcheck that used the same account tag) silently
+# corrupts this run's starting state. Found 2026-07-06 while adding excluded_tickers; see
+# ghost_order_selfcheck.py's TAG comment for the full explanation.
+TAG = "selfcheck-t2"
+for _f in glob.glob(os.path.join(EXEC_DIR, f"exec_{TAG}_*")):
+    os.remove(_f)
 
 fails = []
 
@@ -91,7 +101,7 @@ def make_executor(tmpdir, orders, positions, forbidden_tickers=()):
     plan = TradePlan(plan_date="2099-01-01", signal_date="2099-01-01", strategy="selfcheck",
                      strategy_version="0", state=3, state_name="NEUTRAL",
                      nav_basis={"account_nav": 1e9, "scale": 1.0}, orders=orders,
-                     account="selfcheck", created_at="2099-01-01T00:00:00")
+                     account=TAG, created_at="2099-01-01T00:00:00")
     cfg = load_config()
     cfg["mode"] = "paper"
     broker = _RecordingBroker(positions, forbidden_tickers)

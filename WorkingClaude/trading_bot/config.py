@@ -106,6 +106,14 @@ ACCOUNT_DEFAULTS = {
     "account_id": None,         # None → tiểu khoản đầu tiên của login/key đó
     "note": "",
     "overrides": {},            # override bất kỳ khóa nào của config chung cho riêng account
+    "excluded_tickers": [],     # mã KHÔNG BAO GIỜ tự động mua/bán (legacy/special-situation
+                                # holding nằm ngoài rebalancing V2.4 — vd DGC trong tài khoản
+                                # ZaloPay, đang hạn chế giao dịch HOSE). Enforce cứng ở
+                                # bot_execute.py (lọc plan.orders) — không phụ thuộc vào việc
+                                # plan generator có nhớ loại trừ đúng hay không. Dùng
+                                # `bin/compute_active_nav.py` để tính NAV thực sự khả dụng cho
+                                # chiến lược (= account_nav − giá trị thị trường các mã này) khi
+                                # lên plan/backtest/báo cáo cho account có field này khác rỗng.
 }
 
 
