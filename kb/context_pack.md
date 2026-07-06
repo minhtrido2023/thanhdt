@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v761)
+# Mike fleet — context pack (v762)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-06T08:35:27] Taylor/finding — sector_lens_monitor integrated into daily 8L Telegram report + 8L-rating DOUBLE-CONFIRM cross-check: {"job": "Taylor_20260706_082923", "dispatch_from": "Mike", "scope": "RESEARCH/MONITOR-ONLY, production untouched (custom30V/BAL/LAG/rating_8l.py unchanged)", "s …
 - [2026-07-06T08:43:56] Taylor/finding — eval_sec DT5G gate off-by-one FIXED (0-based -> 1-based); securities STRONG-tier calibration UNCHANGED: {"job": "Taylor_20260706_083933", "dispatch_from": "Mike", "scope": "RESEARCH/MONITOR-ONLY, production untouched (custom30V/BAL/LAG/rating_8l.py unchanged). Fil …
 - [2026-07-06T09:07:38] Mafee/finding — spacex-balance-recheck-2026-07-06-1602: {"account_id": "0002023347", "label": "SpaceX", "executed": true, "api_call_time": "~16:10 ICT", "results": {"totalDebt": 409863737, "totalDebt_match_screenshot …
 - [2026-07-06T09:13:08] Mafee/finding — spacex-balance-fresh-2026-07-06-1612: {"account_id": "0002023347", "label": "SpaceX", "executed": true, "log_ts": "2026-07-06T16:12:27", "method": "DNSEBroker.get_cash()+_log_raw()", "logged_to_json …
@@ -11,6 +10,7 @@
 - [2026-07-06T09:26:23] Mafee/finding — spacex-positions-eod-2026-07-06: {"account_id": "0002023347", "label": "SpaceX", "executed": true, "source": "DNSE_API_raw", "cash_vnd": 709276086, "total_debt_vnd": 409863737, "stock_value_ope …
 - [2026-07-06T09:45:18] Mafee/finding — spacex-atc-close-price-2026-07-06: {"account_id": "0002023347", "label": "SpaceX", "executed": true, "date": "2026-07-06", "source": "close_price(boardId=G1)+latest_trade(boardId=G1)", "api_agree …
 - [2026-07-06T09:47:58] Taylor/finding — ConvergePort double-confirm paper portfolio — backtested +5.0pp vs custom30V, LAUNCHED paper (equal-weight): {"job": "Taylor_20260706_093329", "dispatch_from": "Mike", "scope": "RESEARCH/PAPER-ONLY, production untouched (custom30V/BAL/LAG/rating_8l.py unchanged)", "str …
+- [2026-07-06T09:52:45] Taylor/finding — macro-corr study: VNINDEX vs gold/USDVND/DXY/lãi suất — chỉ lãi suất SBV có quan hệ ổn định, còn lại là noise/spurious: {"job": "Taylor_20260706_094519", "dispatch_from": "Mike", "scope": "RESEARCH/DISPLAY-ONLY, production untouched (custom30V/BAL/LAG/rating_8l.py/macro_state_liv …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -26,6 +26,11 @@
   16:12 ICT, xem `kb/INCIDENTS.md` 2026-07-06 "CORRECTION"). **NAV xác nhận đúng: 983.002.349 VND**
   (khớp chính xác ảnh chụp app: Tiền 709.276.086 + Cổ phiếu 683.590.000 − Nợ 409.863.737). Nợ margin
   sẽ giảm khi tiền bán thật sự settle T+2 (08/07). 15 vị thế còn lại. run_bot.sh 09:05 ICT mỗi T2-T6.
+  **Cập nhật cùng ngày:** `verify_account_snapshot.py` từng dùng BQ Close (sync đêm 23:45) cho MTM
+  cùng ngày → NAV đã post lúc 15:00 dùng nhầm giá 07-03 (688,38tr thay vì 683,59tr thật). Đã vá: dùng
+  `close_price()`/`latest_trade()` DNSE boardId=G1 khi `--asof`=hôm nay (verified khớp app tới đồng),
+  BQ vẫn dùng cho ngày quá khứ. `nav_history_SpaceX.csv` dòng 07-06 đã sửa lại đúng. Chi tiết:
+  `kb/INCIDENTS.md` 2026-07-06 "Two wrong end-of-day market price sources".
   **Đã duyệt (2026-07-03, event Mike/decision `plan-07-06-v2-trim-70pct`): trim GỘP về đúng 70% NEUTRAL
   target** (không chỉ khôi phục 1x như plan v1 cũ) — `data/trade_plans/plan_SpaceX_2026-07-06_v2.json`,
   bán tổng ~710M VND (71.8% NAV) trong 1 phiên 07-06 09:00-10:30, Mafee đã authorized, không cần duyệt
