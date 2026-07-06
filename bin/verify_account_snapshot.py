@@ -21,6 +21,7 @@ Fail-safe: nếu số lượng cổ phiếu tính từ dnse_raw không khớp br
 script THOÁT với exit != 0 và in cảnh báo rõ ràng — không tự đoán số liệu để báo cáo tiếp.
 """
 import argparse
+import datetime as _dt
 import glob
 import json
 import os
@@ -148,6 +149,34 @@ def bq_close_prices(tickers, as_of_date):
     return {r["ticker"]: float(r["Close"]) for r in rows}, None
 
 
+def dnse_close_prices(tickers):
+    """Giá khớp ATC thật trong ngày qua API DNSE (boardId=G1, đơn vị nghìn đồng).
+
+    Chỉ dùng khi --asof LÀ HÔM NAY: BQ tav2_bq.ticker chỉ sync đêm (23:45 ICT) nên
+    khi eod_trading_report.sh chạy 15:00 ICT cùng ngày, BQ CHƯA CÓ giá đóng cửa hôm
+    đó — bq_close_prices() lặng lẽ rơi về giá của ngày giao dịch gần nhất trước đó
+    (2026-07-06: rơi về 07-03, lệch ~4.79tr VND cho SpaceX). Bug phát hiện 2026-07-06
+    khi user đối chiếu bảng giá với app thật — field positions().marketPrice CŨNG sai
+    (không phải giá ATC) nên không dùng; verify_finding: close_price()/latest_trade()
+    boardId=G1 khớp 100% với nhau và khớp chính xác tới đồng với ảnh chụp app DNSE.
+    """
+    sys.path.insert(0, WC_ROOT)
+    from trading_bot.brokers import get_dnse_client
+    client = get_dnse_client()
+    prices = {}
+    for tk in tickers:
+        try:
+            r = client.close_price(tk)
+        except Exception:
+            continue
+        entries = (r or {}).get("prices") or []
+        g1 = next((e for e in entries
+                   if e.get("boardId") == "G1" and e.get("closePrice")), None)
+        if g1:
+            prices[tk] = float(g1["closePrice"]) * 1000
+    return prices
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--account", required=True)
@@ -226,6 +255,18 @@ def main():
         print(f"XÁC MINH THẤT BẠI — không lấy được giá BQ: {perr}", file=sys.stderr)
         sys.exit(3)
 
+    price_source = {tk: "bq_close" for tk in prices}
+    if args.asof == _dt.date.today().isoformat():
+        dnse_prices = dnse_close_prices(tickers)
+        for tk, px in dnse_prices.items():
+            prices[tk] = px
+            price_source[tk] = "dnse_atc_g1"
+        missing_today = [tk for tk in tickers if price_source.get(tk) != "dnse_atc_g1"]
+        if missing_today:
+            warnings.append(
+                f"WARN dùng giá BQ (có thể trễ vài ngày do BQ chỉ sync đêm) thay vì "
+                f"giá ATC DNSE hôm nay cho: {missing_today}")
+
     positions = []
     total_cost = total_mtm = 0.0
     for tk in tickers:
@@ -241,7 +282,8 @@ def main():
         total_cost += cv
         total_mtm += mv
         positions.append({"ticker": tk, "qty": qty, "true_avg_cost": round(cost, 1),
-                           "mtm_price": px, "cost_value": cv, "mtm_value": mv,
+                           "mtm_price": px, "mtm_price_source": price_source.get(tk, "bq_close"),
+                           "cost_value": cv, "mtm_value": mv,
                            "unrealized_pnl": mv - cv,
                            "unrealized_pnl_pct": (mv - cv) / cv * 100 if cv else 0})
 
