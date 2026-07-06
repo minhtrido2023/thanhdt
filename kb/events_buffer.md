@@ -1305,3 +1305,28 @@
 - [2026-07-06T14:25:57Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-07-06"}
 - [2026-07-06T14:31:06Z] Mafee/heartbeat — Mafee_20260706_143005: {"status": "still_running", "elapsed_min": 1, "job_id": "Mafee_20260706_143005"}
 - [2026-07-06T14:31:31Z] Mafee/finding — spacex-balance-refresh-2026-07-06-2135: {"executed": true, "account": "SpaceX", "account_id": "0002023347", "evidence_file": "data/execution_logs/spacex_balance_refresh_2026-07-06_2135_evidence.txt", "totalCash_vnd": 709276086, "availableCash_vnd": 0, "totalDebt_vnd": 409998721, "withdrawableCash_vnd": -785, "note": "get_cash() returned 0.0 (bug: reads availableCash=0 first via qget, not totalCash); real cash = totalCash=709.3M, debt=410.0M. Debt increased ~135K from KB record (409,863,737) = margin interest accruing. No orders placed."}
+
+## Consolidation 2026-07-06T14:55:16Z
+- [2026-07-06T14:36:14Z] DollarBill/heartbeat — DollarBill_20260706_143514: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260706_143514"}
+- [2026-07-06T14:36:59Z] DollarBill/heartbeat — DollarBill_20260706_143514: {"status": "in_progress", "note": "đọc plan ZaloPay xong, đang lấy basket weights + kiểm tra liquidity"}
+- [2026-07-06T14:37:14Z] DollarBill/heartbeat — DollarBill_20260706_143514: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20260706_143514"}
+- [2026-07-06T14:38:15Z] DollarBill/heartbeat — DollarBill_20260706_143514: {"status": "still_running", "elapsed_min": 3, "job_id": "DollarBill_20260706_143514"}
+- [2026-07-06T14:39:15Z] DollarBill/heartbeat — DollarBill_20260706_143514: {"status": "still_running", "elapsed_min": 4, "job_id": "DollarBill_20260706_143514"}
+- [2026-07-06T14:40:15Z] DollarBill/heartbeat — DollarBill_20260706_143514: {"status": "still_running", "elapsed_min": 5, "job_id": "DollarBill_20260706_143514"}
+- [2026-07-06T14:41:15Z] DollarBill/heartbeat — DollarBill_20260706_143514: {"status": "still_running", "elapsed_min": 6, "job_id": "DollarBill_20260706_143514"}
+- [2026-07-06T14:42:15Z] DollarBill/heartbeat — DollarBill_20260706_143514: {"status": "still_running", "elapsed_min": 7, "job_id": "DollarBill_20260706_143514"}
+- [2026-07-06T14:43:15Z] DollarBill/heartbeat — DollarBill_20260706_143514: {"status": "still_running", "elapsed_min": 8, "job_id": "DollarBill_20260706_143514"}
+- [2026-07-06T14:43:44Z] DollarBill/heartbeat — DollarBill_20260706_143514: {"status": "in_progress", "note": "tính xong allocation 4 ngày, đang viết plan JSON"}
+- [2026-07-06T14:44:15Z] DollarBill/heartbeat — DollarBill_20260706_143514: {"status": "still_running", "elapsed_min": 9, "job_id": "DollarBill_20260706_143514"}
+- [2026-07-06T14:45:16Z] DollarBill/heartbeat — DollarBill_20260706_143514: {"status": "still_running", "elapsed_min": 10, "job_id": "DollarBill_20260706_143514"}
+- [2026-07-06T14:46:16Z] DollarBill/heartbeat — DollarBill_20260706_143514: {"status": "still_running", "elapsed_min": 11, "job_id": "DollarBill_20260706_143514"}
+- [2026-07-06T14:47:16Z] DollarBill/heartbeat — DollarBill_20260706_143514: {"status": "still_running", "elapsed_min": 12, "job_id": "DollarBill_20260706_143514"}
+- [2026-07-06T14:47:26Z] DollarBill/heartbeat — DollarBill_20260706_143514: {"status": "in_progress", "note": "Đọc xong NAV/positions. Đang tra cứu custom30V basket weights để tính orders ngày mai"}
+- [2026-07-06T14:48:16Z] DollarBill/heartbeat — DollarBill_20260706_143514: {"status": "still_running", "elapsed_min": 13, "job_id": "DollarBill_20260706_143514"}
+- [2026-07-06T14:49:16Z] DollarBill/heartbeat — DollarBill_20260706_143514: {"status": "still_running", "elapsed_min": 14, "job_id": "DollarBill_20260706_143514"}
+- [2026-07-06T14:50:16Z] DollarBill/heartbeat — DollarBill_20260706_143514: {"status": "still_running", "elapsed_min": 15, "job_id": "DollarBill_20260706_143514"}
+- [2026-07-06T14:51:17Z] DollarBill/heartbeat — DollarBill_20260706_143514: {"status": "still_running", "elapsed_min": 16, "job_id": "DollarBill_20260706_143514"}
+- [2026-07-06T14:52:17Z] DollarBill/heartbeat — DollarBill_20260706_143514: {"status": "still_running", "elapsed_min": 17, "job_id": "DollarBill_20260706_143514"}
+- [2026-07-06T14:53:17Z] DollarBill/heartbeat — DollarBill_20260706_143514: {"status": "still_running", "elapsed_min": 18, "job_id": "DollarBill_20260706_143514"}
+- [2026-07-06T14:54:17Z] DollarBill/heartbeat — DollarBill_20260706_143514: {"status": "still_running", "elapsed_min": 19, "job_id": "DollarBill_20260706_143514"}
+- [2026-07-06T14:33:45Z] Mike/decision — eod-nav-correction-2026-07-06: {"summary": "EOD report SpaceX 2026-07-06 posted wrong NAV (688,509,567) due to cross-account balance contamination bug (dnse_raw file shared across accounts, no account tagging). Corrected NAV 982,867,365 verified via fresh API call. Fixed at root: brokers.py _log_raw now tags account_no/label, daily_nav_snapshot.py latest_balance() filters by account. Discord post failed HTTP 500 (bridge issue), Telegram correction sent instead.", "discord_post_failed": true}
