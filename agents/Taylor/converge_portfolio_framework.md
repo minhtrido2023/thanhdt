@@ -291,3 +291,78 @@ for AND-selectivity converts a high-conviction concentrated sleeve into a churni
 that loses to plain parking. The current paper book (double-confirm equal-weight) stays as launched.
 Output: `converge_union_test.py`, `data/converge_union_test_nav.csv`,
 `data/converge_union_test_summary.json`.
+
+---
+
+## 8. Does the active book follow the DT5G exposure schedule? MaxDD source + state-gate test (job Taylor_20260706_121242)
+
+Follow-up to the full-harness-as-active-book audit (§6, job _103815). Mike asked: does the
+double-confirm **active** book throttle its per-name exposure by DT5G state (CRISIS 0% / BEAR 20% /
+NEUTRAL 70% / BULL 100% / EX-BULL 130%), does CAPIT actually apply to it, and is the deep MaxDD
+caused by a *missing* state-gate on the active book? Answered by reading the code, then tested by
+adding the gate.
+
+### 8.1 Code-verified answers (converge_fullharness_test.py, no guessing)
+1. **Is the active book state-throttled?** **NO.** When `CONVERGE_BOOK=1`, entry/exit is *purely
+   membership-driven* (join double-confirm → buy at T+1 open; leave → force-close), and every
+   state-sensitive knob is explicitly disabled: `tier_weights_by_state=None` (L1709),
+   `stop_loss=-0.999`, `hold_days=1e9`, sector caps off. The DT5G regime-size halving that BAL uses
+   (`weak buy-rows halved to 5% in BEAR/CRISIS`) is **not** applied to ConvergePort names. So in
+   CRISIS/BEAR the active book stays at whatever double-confirm membership dictates — it does **not**
+   scale down. *(Native BAL/LAG also don't hard-gate by state either — they thin out only because
+   momentum/PEAD signals naturally dry up in bad tape; that organic thinning does not exist for a
+   fundamentals+sector-lens membership book, which is exactly why the active book can sit near-full
+   in a drawdown.)*
+2. **Does CAPIT apply to the ConvergePort book?** **YES.** `add_capit_arm(sig_f, …)` (L1737) grafts
+   the CAPIT washout-buyer onto the **same** BAL-slot signal frame that now carries ConvergePort, so
+   the printed `CAPIT=ON` washout events *are* part of this book (not an independent sleeve summed on
+   top). CAPIT deploys idle book cash into deep-value bottom-fish during washouts.
+3. **Is `{3:0.7}` parking the ONLY total-exposure throttle?** **YES.** The custom30V idle-cash
+   parking follows the production DT5G schedule `{1:0, 2:0.2, 3:0.7, 4:1.0, 5:1.0}` on *unused* book
+   cash — it is the **only** state-aware exposure control in the ungated run, and it does **nothing to
+   money already held in active positions**. In CRISIS/BEAR, if the book is fully invested in
+   double-confirm names, parking has no idle cash to gate → the active exposure rides the drawdown.
+
+### 8.2 Where the deep MaxDD actually comes from
+The dispatch quoted **−46.1%**; that is the **standalone paper sleeve** number (§3,
+`converge_portfolio_backtest.py`, simpler sim, raw-ungated parking). The **full production harness**
+as-active-book (§6) is **−38.4%** (50B, real `simulate()` engine, TC 0.15/0.15/0.1, borrow 10%). Both
+are with the active book **ungated**. The DD is dominated by **universe concentration**, not the
+missing gate: 16 candidate names, double-confirm breadth **mean 4 active / max 9**, **17% of sessions
+have 0 names** (→ those days are auto-parked, safe). A 4-name equal-weight equity book with no
+state-throttle simply takes the full market hit in 2022/2025 washouts.
+
+### 8.3 State-gate test — added `CONV_STATE_GATE` and re-ran (50B, FULL 2014→2026-06)
+Added an **opt-in** flag (`CONV_STATE_GATE=1`, default OFF → byte-identical to the ungated run,
+converge_fullharness_test.py L1712-1732). It makes the active book obey the DT5G ceiling
+`{1:0, 2:0.2, 3:0.7, 4:1.0, 5:1.0}` two ways: (a) `tier_weights_by_state` caps NEW entry size to
+`WPN × ceiling`; (b) `state_exit_map={1:1.0, 2:0.8, 3:0.3}` actively **trims held positions** to the
+CRISIS(flush)/BEAR(80% trim)/NEUTRAL(30% trim) ceiling. Disclosed caveat: the trim applies to the
+whole BAL slot, so it **also flushes the CAPIT crisis-buyer in CRISIS/BEAR** — i.e. it sells the
+bottom-fisher exactly when CAPIT is designed to buy.
+
+| Config (50B, CAPIT ON, same parking) | CAGR | Sharpe | MaxDD | Calmar |
+|---|---|---|---|---|
+| **Ungated active book** (baseline, §6) | **12.05%** | 0.85 | **−38.4%** | 0.31 |
+| **State-gated active book** (`CONV_STATE_GATE=1`) | **5.74%** | 0.66 | **−19.4%** | 0.30 |
+| — IS 2014-19 | 6.14% | 0.76 | −13.1% | 0.47 |
+| — OOS 2020-now | 5.38% | 0.58 | −19.4% | 0.28 |
+| *(reference)* 2-book V2.4 R3 | 28.05% | 1.86 | −17.5% | 1.60 |
+
+### 8.4 Verdict — state-gating the active book is NOT the fix
+The gate **works mechanically** and does what was asked — it **halves MaxDD (−38.4% → −19.4%**, down
+to production's ~−17.5% neighborhood). **But it more-than-halves CAGR (12.05% → 5.74%)**: the trade is
+~1:1 return-for-drawdown, so **Calmar is flat (0.31 → 0.30)** and **Sharpe gets *worse* (0.85 →
+0.66)**. It buys no risk-adjusted improvement — it just scales the whole (already-losing-to-R3) book
+down. **Root cause of the give-up:** forcing a de-risk on a value/mean-reversion + CAPIT book in
+CRISIS/BEAR sells into washouts and misses the recovery — the exact wrong side for this book type
+(same lesson as the archived hold-neutral-exit / vol-managed-BAL experiments: throttling a
+mean-reverting book by regime destroys its convexity).
+
+**Conclusion:** the deep MaxDD is a **small-concentrated-universe** artifact (4-name modal book), NOT
+a missing state-gate — and *adding* the gate proves it, because gating shrinks return and risk
+together with **zero Calmar gain and worse Sharpe**. ConvergePort remains a **capacity-limited paper
+sleeve on idle cash** (§6: ~10–15B ex-DHG), **NOT** a replacement for the 2-book V2.4 active engine,
+whose −17.5% DD comes from genuine BAL/LAG breadth + allocator + parking working together, not from a
+single throttle. `CONV_STATE_GATE` stays **default-OFF** (research flag only); nothing wired to
+production. Output: `converge_fullharness_test.py` (+`CONV_STATE_GATE`), `/tmp/conv_stategate.log`.
