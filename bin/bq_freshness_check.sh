@@ -94,9 +94,25 @@ _run_pipeline "[pipeline-1] publish_gated_state"      deploy_golive_dt5g_v4/publ
 _run_pipeline "[pipeline-2] golive_recommend_v23"     deploy_golive_dt5g_v4/golive_recommend_v23.py
 _run_pipeline "[pipeline-3] push_recommend_v23_to_bq" mike/agents/Mafee/push_recommend_v23_to_bq.py
 
-echo; echo "--- [pipeline-4] dispatch DollarBill lập plan T+1 ---"
-"$ROOT/bin/dispatch.sh" DollarBill \
-  "Lập plan T+1 cho tài khoản SpaceX. Đọc DT5G từ deploy_golive_dt5g_v4/golive_state_today.json và recommend output mới nhất trong data/. Ghi plan vào data/plan_SpaceX_<ngày_mai>.json. Ngày hôm nay: $TODAY (ICT)." \
-  --bg 2>/dev/null || echo "  [WARN] dispatch DollarBill fail — check mike/logs/"
+# [pipeline-4] dispatch DollarBill lập plan T+1 — lặp qua MỌI account live (enabled=true,
+# mode=live, broker=dnse trong secrets/trading_bot_accounts.json), không hardcode SpaceX —
+# thêm account mới vào file đó là tự động có plan T+1, không cần sửa gì ở đây. Xem
+# kb/account_onboarding_runbook.md.
+LIVE_LABELS="$(cd "$WORKDIR" && python3 -c "from trading_bot.config import live_dnse_labels; print(' '.join(live_dnse_labels()))")"
+for ACCT in $LIVE_LABELS; do
+  echo; echo "--- [pipeline-4] dispatch DollarBill lập plan T+1 cho $ACCT ---"
+  HAS_EXCL="$(cd "$WORKDIR" && python3 -c "
+from trading_bot.config import load_config, load_accounts
+p = next(a for a in load_accounts(load_config()) if a['label'] == '$ACCT')
+print('yes' if p.get('excluded_tickers') else 'no')
+" 2>/dev/null)"
+  NAV_NOTE=""
+  if [ "$HAS_EXCL" = "yes" ]; then
+    NAV_NOTE=" Tài khoản này có excluded_tickers (vị thế legacy ngoài rebalancing) — dùng \`bin/compute_active_nav.py --account $ACCT\` để lấy NAV khả dụng làm cơ sở sizing, KHÔNG dùng tổng NAV account."
+  fi
+  "$ROOT/bin/dispatch.sh" DollarBill \
+    "Lập plan T+1 cho tài khoản $ACCT. Đọc DT5G từ deploy_golive_dt5g_v4/golive_state_today.json và recommend output mới nhất trong data/. Ghi plan vào data/plan_${ACCT}_<ngày_mai>.json. Ngày hôm nay: $TODAY (ICT).${NAV_NOTE}" \
+    --bg 2>/dev/null || echo "  [WARN] dispatch DollarBill cho $ACCT fail — check mike/logs/"
+done
 
 echo; echo "=== EOD PIPELINE DONE — $(TZ='Asia/Ho_Chi_Minh' date +'%H:%M ICT') ==="

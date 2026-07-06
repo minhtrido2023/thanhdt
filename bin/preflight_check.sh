@@ -15,6 +15,18 @@ NOW_ICT="$(TZ='Asia/Ho_Chi_Minh' date +'%H:%M ICT')"
 # session Mike gần nhất mở từ thread nào).
 DISCORD_TRADING_THREAD="1521470705563340910"
 
+# --account LABEL — mặc định SpaceX để giữ nguyên hành vi cũ khi gọi không kèm cờ (vd tay).
+# Cron thật gọi qua for_each_live_account.sh (lặp mọi account enabled=live/dnse) — thêm
+# account mới vào secrets/trading_bot_accounts.json là script này tự chạy cho account đó,
+# không cần sửa gì ở đây. Xem kb/account_onboarding_runbook.md.
+ACCOUNT="SpaceX"
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --account) ACCOUNT="$2"; shift 2 ;;
+    *) echo "Unknown arg: $1" >&2; exit 1 ;;
+  esac
+done
+
 FAILED=0
 LINES=()
 
@@ -30,16 +42,16 @@ else
 fi
 
 # ── 2. Plan hôm nay tồn tại + đã approve ─────────────────────────────────────
-PLAN_FILE="$WORKDIR/data/trade_plans/plan_SpaceX_${TODAY}.json"
+PLAN_FILE="$WORKDIR/data/trade_plans/plan_${ACCOUNT}_${TODAY}.json"
 # fallback: plan_<account>_<date>.json nếu tên khác
 if [ ! -f "$PLAN_FILE" ]; then
-  PLAN_FILE="$(ls -t "$WORKDIR"/data/plan_SpaceX_${TODAY}.json \
-                      "$WORKDIR"/data/trade_plans/plan_SpaceX_${TODAY}.json \
-                      "$WORKDIR"/data/plan_*_${TODAY}.json 2>/dev/null | head -1 || true)"
+  PLAN_FILE="$(ls -t "$WORKDIR"/data/plan_${ACCOUNT}_${TODAY}.json \
+                      "$WORKDIR"/data/trade_plans/plan_${ACCOUNT}_${TODAY}.json \
+                      "$WORKDIR"/data/plan_${ACCOUNT}_*_${TODAY}.json 2>/dev/null | head -1 || true)"
 fi
 
 if [ -z "${PLAN_FILE:-}" ] || [ ! -f "${PLAN_FILE:-}" ]; then
-  _fail "Plan $TODAY KHÔNG TÌM THẤY — DollarBill chưa lập plan hoặc BQ stale."
+  _fail "Plan $ACCOUNT $TODAY KHÔNG TÌM THẤY — DollarBill chưa lập plan hoặc BQ stale."
 else
   PLAN_INFO=$(python3 - "$PLAN_FILE" 2>/dev/null <<'PY'
 import json, sys
@@ -67,9 +79,9 @@ PY
   IFS='|' read -r _approved _mafee _mode _n_orders _est _state_nm _src _flags <<< "$PLAN_INFO"
 
   if [ "$_flags" = "OK" ]; then
-    _ok "Plan $TODAY: $_n_orders lệnh, ~${_est}B VND, state=$_state_nm ($_src), approved=$_approved"
+    _ok "Plan $ACCOUNT $TODAY: $_n_orders lệnh, ~${_est}B VND, state=$_state_nm ($_src), approved=$_approved"
   else
-    _fail "Plan $TODAY: $_flags — orders=$_n_orders approved=$_approved mafee=$_mafee"
+    _fail "Plan $ACCOUNT $TODAY: $_flags — orders=$_n_orders approved=$_approved mafee=$_mafee"
   fi
 fi
 
@@ -143,7 +155,7 @@ else
   STATUS_TEXT="RED — CÓ VẤN ĐỀ, kiểm tra trước khi bot chạy"
 fi
 
-MSG="$STATUS_ICON **Preflight $TODAY $NOW_ICT** — $STATUS_TEXT"$'\n'
+MSG="$STATUS_ICON **Preflight $ACCOUNT $TODAY $NOW_ICT** — $STATUS_TEXT"$'\n'
 for line in "${LINES[@]}"; do MSG+="$line"$'\n'; done
 
 "$ROOT/bin/notify.sh" "$MSG" 2>/dev/null || true
@@ -152,7 +164,7 @@ if [ -n "${DISCORD_TRADING_THREAD:-}" ]; then
   "$ROOT/bin/notify_thread.sh" "$MSG" "$DISCORD_TRADING_THREAD" 2>/dev/null || true
 fi
 
-"$ROOT/bin/append_event.sh" Mike status "preflight-$TODAY" \
+"$ROOT/bin/append_event.sh" Mike status "preflight-${ACCOUNT}-$TODAY" \
   "{\"result\":\"$([ $FAILED -eq 0 ] && echo GREEN || echo RED)\",\"checks\":$(python3 -c "import json; print(json.dumps($(printf '[%s]' "$(IFS=,; printf '"%s",' "${LINES[@]}" | sed 's/,$//') ")))" 2>/dev/null || echo '[]')}" \
   2>/dev/null || true
 

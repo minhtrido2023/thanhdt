@@ -16,7 +16,17 @@ WC_ROOT="$(cd "$ROOT/.." && pwd)"
 WORKDIR="${WORKDIR_8L:-/home/trido/thanhdt/WorkingClaude}"
 TODAY="$(date +%Y-%m-%d)"
 NOW_ICT="$(TZ='Asia/Ho_Chi_Minh' date +'%H:%M ICT')"
+
+# --account LABEL — mặc định SpaceX để giữ nguyên hành vi cũ khi gọi không kèm cờ. Cron
+# thật gọi qua for_each_live_account.sh (lặp mọi account enabled=live/dnse) — xem
+# kb/account_onboarding_runbook.md.
 ACCOUNT="SpaceX"
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --account) ACCOUNT="$2"; shift 2 ;;
+    *) echo "Unknown arg: $1" >&2; exit 1 ;;
+  esac
+done
 
 # Discord: DollarBill trading-plan channel — tách riêng khỏi Trading Daily (2026-07-01,
 # user chỉ đạo) để tránh spam các topic khác khi Mike dispatch DollarBill từ bất kỳ đâu.
@@ -105,7 +115,7 @@ if [ "$STATUS" = "ESCALATE" ]; then
   echo "$MSG"
   "$ROOT/bin/notify.sh" "$MSG" 2>/dev/null || true
   "$ROOT/bin/notify_thread.sh" "$MSG" "$DISCORD_PLAN_CHANNEL" 2>/dev/null || true
-  "$ROOT/bin/append_event.sh" Mike question "plan-t1-not-ready" \
+  "$ROOT/bin/append_event.sh" Mike question "plan-t1-not-ready-${ACCOUNT}" \
     "{\"reason\":\"$REASON\",\"detail\":$(python3 -c 'import json,sys; print(json.dumps(sys.argv[1]))' "$DETAIL"),\"expected_date\":\"$EXPECTED_DATE\",\"account\":\"$ACCOUNT\",\"checked_at\":\"$TODAY $NOW_ICT\"}" \
     2>/dev/null || true
   exit 0

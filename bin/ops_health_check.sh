@@ -19,16 +19,20 @@ WC_ROOT="$(cd "$ROOT/.." && pwd)"
 TRADING_DAILY_THREAD="1521470705563340910"
 
 LABEL="Kiểm tra vận hành"
+# --account LABEL — mặc định SpaceX để giữ nguyên hành vi cũ khi gọi không kèm cờ. Cron
+# thật gọi qua for_each_live_account.sh (lặp mọi account enabled=live/dnse) — xem
+# kb/account_onboarding_runbook.md.
+ACCOUNT="SpaceX"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --label) LABEL="$2"; shift 2 ;;
+    --account) ACCOUNT="$2"; shift 2 ;;
     *) echo "Unknown arg: $1" >&2; exit 1 ;;
   esac
 done
 
 TODAY="$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)"
 NOW_ICT="$(TZ='Asia/Ho_Chi_Minh' date '+%Y-%m-%d %H:%M ICT')"
-ACCOUNT="SpaceX"
 
 REPORT="$(python3 - "$WC_ROOT" "$TODAY" "$ACCOUNT" << 'PYEOF'
 import glob, json, os, sys, subprocess, csv
@@ -188,12 +192,12 @@ REPORT_BODY="$(echo "$REPORT" | grep -v '__WARN_COUNT__')"
 PREFLIGHT_TAIL=""
 PREFLIGHT_WARN=0
 if [ -f "$WC_ROOT/data/trade_plans/plan_${ACCOUNT}_${TODAY}.json" ]; then
-  PREFLIGHT_TAIL="$(bash "$ROOT/bin/preflight_check.sh" 2>/dev/null | grep -E '^\s*(✅|❌|⚠️)' | sed 's/^/  /')"
+  PREFLIGHT_TAIL="$(bash "$ROOT/bin/preflight_check.sh" --account "$ACCOUNT" 2>/dev/null | grep -E '^\s*(✅|❌|⚠️)' | sed 's/^/  /')"
   PREFLIGHT_WARN="$(echo "$PREFLIGHT_TAIL" | grep -cE '⚠️|❌')"
 fi
 WARN_COUNT=$(( ${WARN_COUNT:-0} + ${PREFLIGHT_WARN:-0} ))
 
-MSG="🩺 **${LABEL} — kiểm tra vận hành ${NOW_ICT}**
+MSG="🩺 **${ACCOUNT} — ${LABEL} — kiểm tra vận hành ${NOW_ICT}**
 ${REPORT_BODY}"
 if [ -n "$PREFLIGHT_TAIL" ]; then
   MSG="${MSG}
@@ -213,5 +217,5 @@ fi
 
 echo "$MSG"
 "$ROOT/bin/notify_thread.sh" "$MSG" "$TRADING_DAILY_THREAD" 2>/dev/null || true
-"$ROOT/bin/append_event.sh" Mike status "ops-health-check-${TODAY}" \
-  "{\"label\":\"${LABEL}\",\"warn_count\":${WARN_COUNT:-0}}" 2>/dev/null || true
+"$ROOT/bin/append_event.sh" Mike status "ops-health-check-${ACCOUNT}-${TODAY}" \
+  "{\"account\":\"${ACCOUNT}\",\"label\":\"${LABEL}\",\"warn_count\":${WARN_COUNT:-0}}" 2>/dev/null || true
