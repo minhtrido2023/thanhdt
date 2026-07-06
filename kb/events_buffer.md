@@ -1348,3 +1348,6 @@
 ## Consolidation 2026-07-06T16:07:01Z
 - [2026-07-06T16:05:11Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-07-06", "delivered_via": "fallback"}
 - [2026-07-06T15:58:47Z] Mike/status — preflight-ZaloPay-2026-07-06: {"result": "RED", "checks": ["✅ BOT_STOP: CLEAR", "❌ Plan ZaloPay 2026-07-06 KHÔNG TÌM THẤY — DollarBill chưa lập plan hoặc BQ stale.", "❌ macro_health=FAILED (SEV1) — DT5G chạy DT4_only. Kiểm tra data pipeline.", "✅ Gmail OAuth: có refresh_token (tự refresh khi cần)", "✅ BQ ticker_prune: lag=0d ✓"]}
+
+## Consolidation 2026-07-06T17:00:01Z
+- [2026-07-06T16:11:30Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-07-06", "delivered_via": "trading_report_thread"}

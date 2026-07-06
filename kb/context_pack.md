@@ -1,4 +1,4 @@
-# Mike fleet — context pack (v783)
+# Mike fleet — context pack (v784)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
@@ -114,7 +114,11 @@ không thể đảo ngược: bot tự đặt lệnh thật lần đầu, không
   ZaloPay) khi tính lại báo cáo EOD hôm nay. Đã vá tận gốc (`trading_bot/brokers.py` gắn
   account_no/label mọi bản ghi log, `daily_nav_snapshot.py` lọc đúng account) + verify lại
   đúng 982.867.365đ + gửi đính chính (Telegram — Discord "Trading report" lỗi HTTP 500,
-  không phải do nội dung). Chi tiết: `kb/INCIDENTS.md` 2026-07-06.
+  không phải do nội dung). Chi tiết: `kb/INCIDENTS.md` 2026-07-06. **Topic Trading report đã
+  THÔNG lại ~23:45 cùng tối**: root cause = private thread, bot rớt membership khi archive —
+  unarchive KHÔNG đủ, user phải @mention bot trong topic để thêm lại. Report EOD chính thức
+  đã gửi vào topic. eod_trading_report.sh giờ có fallback Telegram+Trading Daily khi post fail
+  (không bao giờ rơi im lặng nữa).
 - **AlphaLens Paper**: FPT/ACB/MBB/HDB, tracking vs VNINDEX đến 2026-09-30. DollarBill phụ trách.
 
 ## Đang R&D
