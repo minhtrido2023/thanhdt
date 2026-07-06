@@ -165,6 +165,24 @@ TABLES = {
             FROM `{project}.tav2_bq.custom30v_8l` AS t
         """,
     },
+    # custom30_8l (no "v") = the production table golive_recommend_v23.py reads for the
+    # NEUTRAL-state idle-cash parking basket (custom30.py/custom30_history.py's "single
+    # source of truth"). Missing from this cache config until 2026-07-06 — every daily
+    # recommendation run silently fell back to "lookup lỗi" for the parking sleeve (no
+    # live-trade impact found the day this was caught: SpaceX's plan was a HOLD). Verified
+    # 2026-07-06 both tables currently hold identical content (1440 rows, same max
+    # rebal_date) — added as its own cache entry rather than reusing custom30v_8l's, since
+    # they are two distinct BQ tables that could diverge.
+    "custom30_8l": {
+        "sql": """
+            SELECT * FROM `{project}.tav2_bq.custom30_8l` AS t
+        """,
+        "partition_col": None,  # no time column — always full
+        "verify_sql": """
+            SELECT COUNT(*) AS cnt
+            FROM `{project}.tav2_bq.custom30_8l` AS t
+        """,
+    },
     "risk_rating": {
         "sql": """
             SELECT DISTINCT * FROM `{project}.tav2_bq.risk_rating` AS t
@@ -473,7 +491,7 @@ def main():
         target_tables = args.tables or list(TABLES.keys())
         # Sort: small tables first (fast feedback), big tables last
         size_order = {
-            "custom30v_8l": 0, "risk_rating": 1,
+            "custom30v_8l": 0, "custom30_8l": 0, "risk_rating": 1,
             "vnindex_5state": 2, "vnindex_5state_dt5g_live": 2,
             "vnindex_5state_tam_quan_v34b_clean": 2,
             "vnindex_5state_dt_4gate": 2,
