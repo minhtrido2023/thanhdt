@@ -162,6 +162,20 @@ def pick_accounts(profiles, labels=None):
     return [p for p in profiles if p["enabled"]]
 
 
+def live_dnse_labels(path=ACCOUNTS_FILE):
+    """Danh sách label các account THẬT đang chạy tự động hàng ngày (enabled=True,
+    mode="live", broker="dnse") — dùng bởi mọi script cron dùng-chung (preflight,
+    ops_health_check, send_plan_report, eod_trading_report, bq_freshness_check) để lặp
+    qua TẤT CẢ account live thay vì hardcode 1 tên. Thêm account mới vào
+    trading_bot_accounts.json với enabled=true/mode=live/broker=dnse là tự động được các
+    script này nhận, KHÔNG cần sửa code/cron riêng (xem kb/account_onboarding_runbook.md).
+    """
+    cfg = load_config()
+    profiles = load_accounts(cfg, path=path)
+    return [p["label"] for p in profiles
+            if p["enabled"] and p["cfg"]["mode"] == "live" and p["broker"] == "dnse"]
+
+
 def load_config(path=CONFIG_FILE):
     cfg = dict(DEFAULTS)
     if os.path.exists(path):
