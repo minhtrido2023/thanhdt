@@ -187,3 +187,34 @@ module-load-time cleanup of any stale fixture at the default path — see
 `ghost_order_selfcheck.py`'s `TAG` comment for the full pattern. A selfcheck suite that only
 passes on a clean checkout and silently flakes on repeated runs is not verifying what it claims
 to.
+
+## 8. Never Write Experiment Output to a Canonical / Registry-Pinned Filename
+
+**Root cause of the 2026-07-06 R3-CSV overwrite:** `pt_v23_audit_2014.py` builds its output
+filename ONLY from a subset of env knobs (`_capsuf _matsuf _liqsuf _park_tag _wt_tag …`).
+Two config axes that materially change the result — **`BASKET_SELECT`** and the
+**combination mode** (allocator vs V2.3C static 50/50) — have **no filename suffix**. So an
+experiment run with a different `BASKET_SELECT`/combination silently wrote to the exact
+canonical R3 path `..._etfliqcustompitg_wtnamecap.csv` (producing CAGR 17.5%, w_lag_tgt blank),
+clobbering the registry-pinned production baseline. Same failure mode as the earlier `v3latest`
+episode (registry line ~142). A lock wouldn't help — both runs were legitimate, just colliding
+on an output name.
+
+Rules when a script's output feeds `data/results_registry.md` or any pinned baseline:
+
+- **Any config axis that changes the numbers MUST change the filename.** If a script derives its
+  output path from env vars, every result-affecting knob needs a suffix tag — or the run must
+  pass an explicit `OUT_CSV=` override. Before running an experiment variant, check whether your
+  changed knob is actually reflected in the output filename; if not, set an explicit distinct
+  output path.
+- **Experiment/ad-hoc runs write to a clearly non-canonical name** — add an experiment suffix
+  (`_exp_<what>`, `_probeNNN`, dispatcher job-id) so a canonical pinned CSV is never a possible
+  target. Treat the registry-pinned filenames as read-only artifacts owned by the pinned command.
+- **Regenerating a pinned baseline: use the EXACT pinned command AND the pinned interpreter.**
+  The registry pins `$DNA_PYEXE` (= `/home/trido/thanhdt/wc_venv/bin/python`, pandas 3), NOT
+  system `python3` (pandas 2.3, which cannot unpickle `data/earnings_surprise_data.pkl` — raises
+  `NotImplementedError` in `NDArrayBacked.__setstate__`). Copy the command verbatim including
+  `$DNA_PYEXE`; don't substitute `python3` even if a prompt writes it that way.
+- **After regenerating, verify before trusting**: metric in expected range, `self-check 0 VND`,
+  and an independent recompute from the CSV (`extract_peryear.py <CSV>`) matching the print — then
+  note the regeneration in the registry so the overwrite episode is auditable.
