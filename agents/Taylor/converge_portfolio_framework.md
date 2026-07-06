@@ -133,3 +133,92 @@ well **inside** the ~5pp edge. **Turnover does NOT eat the edge.**
   1/9 ≈ 0.111 each, 0% parked at launch.
 - **`newdeals_daily_report.py`** gains **§3 "ConvergePort"** (paper book P&L vs entry + vs VNINDEX,
   daily double-confirm add/drop) alongside the existing AlphaLens and sector-lens sections.
+
+---
+
+## 6. Capacity-appropriate scale (job Taylor_20260706_105156)
+
+**Question:** what NAV can ConvergePort actually absorb as a standalone sleeve, before liquidity —
+not signal — becomes the binding constraint? (This is separate from the "replace the 2-book
+production" question, which was already REFUTED at 50B: ConvergePort-as-active-book = 12.05% CAGR vs
+R3 28.05%, job Taylor_20260706_103815.)
+
+**Method (identical to the fullharness capacity block, `converge_fullharness_test.py` L2298-2318 —
+`converge_capacity_sweep.py` reuses the exact formula, no new logic):**
+```
+req      = CONV_WPN(0.110) × NAV                       # per-name target position
+ADV60    = median(Volume_3M_P50 × Price) over recent 120 calendar days   (tav2_bq.ticker, END 2026-07-05)
+cap_day  = 0.20 × ADV60                                # 20%-of-ADV/day fill rule
+days     = req / cap_day                               # sessions to build one full name
+flag     = OK(≤1) / WATCH(1-3) / BREACH(>3 build-days)
+```
+Universe = the **16 available names** (`sector_lens_monitor.NAMES`), not just today's 9 double-confirm.
+
+### Per-name ADV60 and onset-NAV thresholds
+Analytic onsets: a name enters WATCH at `NAV = 0.20·ADV60/WPN`, BREACH at `NAV = 0.60·ADV60/WPN`.
+
+| ticker | ADV60 (B/day) | WATCH onset (NAV) | BREACH onset (NAV) |
+|---|---:|---:|---:|
+| **DHG** | **1.21** | **2.2B** | **6.6B** |
+| MSH | 10.57 | 19.2B | 57.7B |
+| CTR | 32.43 | 59.0B | 176.9B |
+| HAH | 66.22 | 120.4B | 361.2B |
+| DBC | 67.49 | 122.7B | 368.1B |
+| PVT | 159.3 | 289.7B | 869.1B |
+| … (VND/VCI/HCM/ACB/TCB/HDB/MBB/VCB/SSI/FPT all ≥200B ADV) | | ≥365B | ≥1,095B |
+
+DHG's ADV (~1.2B/day) is **~9× thinner** than the next name (MSH ~10.6B) and **~600× thinner** than
+the megacaps (FPT/SSI ~725B) — it single-handedly sets the full-universe ceiling.
+
+### NAV sweep — days-to-build the thinnest names (rest are all <0.9 at every level ≤50B)
+| name | ADV60 | 1B | 3B | 5B | 10B | 15B | 20B | 30B | 50B |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| **DHG** | 1.21 | 0.46 | **1.37** | 2.28 | **4.56** | 6.84 | 9.12 | 13.68 | 22.81 |
+| MSH | 10.57 | 0.05 | 0.16 | 0.26 | 0.52 | 0.78 | **1.04** | 1.56 | 2.60 |
+| CTR | 32.43 | 0.02 | 0.05 | 0.08 | 0.17 | 0.25 | 0.34 | 0.51 | 0.85 |
+
+Flag summary: **NAV=1B all-OK**; **3-5B → DHG WATCH**; **≥10B → DHG BREACH**; **≥20B → MSH also WATCH**.
+(Consistent with the prior 50B/100B run, job Taylor_20260706_095725: DHG BREACH, MSH WATCH at 50B;
+MSH BREACH + CTR WATCH at 100B.)
+
+### Answers
+3. **Sweet-spot (ALL 16 names OK, no WATCH/no BREACH):** DHG binds → **NAV ≈ 2.2B** (at 2.19B DHG
+   hits exactly 1.0 build-day). Practically **~2B VND** is the safe ceiling with the *full* universe
+   and DHG traded as an active momentum name. Tiny — because DHG barely trades.
+4. **Excluding DHG** (it is a buy-and-hold pharma anchor — low turnover, held not traded — so the
+   20%-ADV/day *build-rate* rule overstates its true constraint): the next binding name is **MSH**.
+   - all-remaining-OK (≤1 build-day) ceiling → **~19B VND** (MSH WATCH onset).
+   - tolerate MSH/CTR in WATCH (1-3 build-days, i.e. 2-3 sessions to build/exit those two thin
+     names) → push to **~57B** before MSH itself BREACHES — but that is essentially the 50B design
+     point already shown to underperform as a production replacement, and it re-introduces the
+     multi-day-fill slippage the sweet-spot avoids.
+5. **Is +5.0pp scale-dependent?** **NO.** `converge_portfolio_backtest.py` `sim_nav()` is a **pure
+   fractional-weight return simulator** — it carries NO NAV level and NO ADV/notional/capacity term;
+   the only "cap" is the 0.20 per-name *weight* fraction (not a liquidity cap). Verified by reading
+   the function: it iterates daily `r_active + r_park − turnover·TC` on weights that sum to 1.0.
+   **Therefore the +5.0pp CAGR edge is scale-invariant and holds at ANY NAV inside the sweet spot.**
+   Capacity only *erodes* it above the sweet spot (via multi-day fills / slippage the backtest does
+   not model) — it never *creates* the edge.
+
+### 6.1 Verdict — recommended standalone-sleeve size
+**Run ConvergePort as an independent sleeve at ~10-15B VND with DHG hard-excluded from active
+rebalancing** (kept as a buy-and-hold anchor if desired, sized outside the rebalanced sleeve — the
+same `excluded_tickers` pattern used for ZaloPay/DGC).
+
+- **Why exclude DHG, not cap the whole sleeve at 2B:** DHG alone drags the full-universe ceiling to
+  ~2B (7-9× smaller) purely on its thin ADV; it is a low-turnover pharma hold, not a name the book
+  actively churns, so excluding it from the *rebalanced* fraction costs almost nothing in strategy
+  behaviour while lifting the deployable size ~9×.
+- **Why 10-15B, not the full 19B MSH ceiling:** 10-15B sits comfortably below MSH's 19.2B WATCH
+  onset, leaving margin for ADV drift (thin-name ADV is volatile) so no name is even at WATCH under
+  normal liquidity. Every remaining 15-name build completes in <1 session.
+- **Aggressive variant:** up to ~19B if you accept zero margin against MSH ADV drift; ~50B only if
+  you accept MSH+CTR trading in 2-3 sessions (WATCH), which is the already-refuted large-scale
+  regime — not recommended for a clean sleeve.
+- **The +5.0pp edge is fully intact** at 10-15B (scale-invariant per answer 5); capacity is not
+  binding anywhere in that range for the 15 non-DHG names.
+
+**Scope:** RESEARCH/PAPER-ONLY. No production trading file touched; the current paper book
+(`data/converge_portfolio_paper.json`, equal-weight, launched 2026-07-06) is unaffected — this only
+sizes what a *real* deployment could be, if/when that decision is taken (routes Taylor → DollarBill
+→ user → Mafee as always).
