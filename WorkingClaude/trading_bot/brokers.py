@@ -145,8 +145,19 @@ class BrokerBase:
         try:
             os.makedirs(EXEC_DIR, exist_ok=True)
             with open(self._raw_log, "a", encoding="utf-8") as f:
+                # account_no/label ở TOP-LEVEL record (không chỉ trong payload) — bắt buộc
+                # từ 2026-07-06 khi 2 account live cùng broker dùng CHUNG 1 file theo ngày
+                # (dnse_raw_{date}.jsonl không phân biệt account trong tên file). Trước đó
+                # chỉ 1 account (SpaceX) nên chưa lộ; ZaloPay go-live cùng ngày làm record
+                # "balances" của 2 account xen kẽ, khiến latest_balance() lấy nhầm account
+                # (xem kb/INCIDENTS.md 2026-07-06 — NAV SpaceX báo sai 688.5tr vì đọc balance
+                # ZaloPay). "kind" khác như orders/place_order vốn đã có accountNo riêng
+                # trong payload nên không bị ảnh hưởng, nhưng thêm ở đây cho MỌI kind để
+                # nhất quán và phòng ngừa các payload khác thiếu accountNo.
                 f.write(json.dumps({"ts": dt.datetime.now().isoformat(timespec="seconds"),
-                                    "kind": kind, "payload": payload},
+                                    "kind": kind, "account_no": getattr(self, "account_id", None),
+                                    "account_label": getattr(self, "label", None),
+                                    "payload": payload},
                                    ensure_ascii=False, default=str) + "\n")
         except OSError:
             pass
