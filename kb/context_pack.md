@@ -1,16 +1,16 @@
-# Mike fleet — context pack (v784)
+# Mike fleet — context pack (v785)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-06T13:14:38] Taylor/finding — review-mốc-3-tháng ConvergePort paper: lý do là chu-kỳ-cơ-chế + seam BCTC, KHÔNG phải DSR: {"job": "Taylor_20260706_131247", "dispatch_from": "Mike", "scope": "CLARIFICATION-ONLY, no new backtest, production untouched", "question": "tại sao review đún …
-- [2026-07-06T13:44:07] Taylor/finding — DC-book NEUTRAL waterfall PAPER sleeve IMPLEMENTED (gated main-only, selfcheck 35/35, production byte-identical): {"job": "Taylor_20260706_132553", "dispatch_from": "Mike", "type": "IMPLEMENTATION (user-approved paper trial, not research)", "what": "Wired DC-book NEUTRAL id …
 - [2026-07-06T13:47:25] Mike/decision — dc-book-waterfall-cron-added: {"summary": "Added dedicated cron 15:05 ICT (5 8 * * 1-5) for dc_book_waterfall_paper.py --update — fixes gap Taylor flagged: eod_trading_report.sh early-exits  …
 - [2026-07-06T14:31:31] Mafee/finding — spacex-balance-refresh-2026-07-06-2135: {"executed": true, "account": "SpaceX", "account_id": "0002023347", "evidence_file": "data/execution_logs/spacex_balance_refresh_2026-07-06_2135_evidence.txt",  …
 - [2026-07-06T14:33:45] Mike/decision — eod-nav-correction-2026-07-06: {"summary": "EOD report SpaceX 2026-07-06 posted wrong NAV (688,509,567) due to cross-account balance contamination bug (dnse_raw file shared across accounts, n …
 - [2026-07-06T14:59:25] Mike/decision — zalopay-execution-cron-added: {"summary": "Added 4 execution cron lines for ZaloPay (run_bot morning+afternoon, bot_heartbeat, lunch pkill) mirroring SpaceX -- user explicitly confirmed twic …
 - [2026-07-06T15:20:55] Taylor/finding — model-routing-test-ack: {"job": "Taylor_20260706_152047", "status": "ACK", "note": "Dispatch received, model routing test confirmed, no further action taken"}
 - [2026-07-06T15:52:47] DollarBill/answer — plan-zalopay-transition-day1: {"job": "DollarBill_20260706_154756", "status": "DONE", "plan_file": "data/trade_plans/plan_ZaloPay_2026-07-07.json", "plan_date": "2026-07-07", "account": "Zal …
+- [2026-07-06T17:47:28] Taylor/finding — DC-waterfall deep-dive: bảng số full-NAV đầy đủ + 3 câu mở rộng (NEUTRAL-only đúng, waterfall thuần thắng, quarterly đáng cân nhắc): {"job": "Taylor_20260706_173317", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY, production + paper sleeve untouched", "N_trials_declared": 10, "method": "ov …
+- [2026-07-06T17:23:39] Winston/finding — ops-autofix-selfcheck-verified: {"job": "Winston_20260706_171843", "context_label": "test-selfcheck-label", "verdict": "PASS with 1 real bug caught", "chain_e2e": "OK - checker->ops_autofix->d …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -25,6 +25,16 @@ không thấy khác biệt rõ rệt; lần này user chủ động yêu cầu �
 cố hạ tầng. **Đã áp dụng**: user xác nhận "Restart ngay" → `systemctl --user restart mike@Mike.service` chạy
 lúc 15:39:50 UTC 2026-07-06 (PID mới 3268950, active). Mike hiện chạy **Fable 5** từ thời điểm
 này. Phiên hội thoại tiếp nối bình thường qua KB + working memory (đúng thiết kế continuity).
+
+## Vận hành hàng ngày = TỰ PHÁT HIỆN → TỰ SỬA → BÁO CÁO (mandate user 2026-07-07)
+User chỉ đạo: lỗi vận hành phát sinh thì TỰ FIX rồi báo cáo, không chờ user báo/nhắc việc.
+Tài liệu chuẩn tắc: **`kb/ops_runbook.md`** (timeline ngày, mỗi bước check gì, ranh giới tự
+sửa). Cơ chế: `bin/ops_autofix.sh` — checker phát hiện lỗi → dispatch Winston (fable) chẩn
+đoán + sửa + verify + báo Trading Daily; đã wire vào `ops_health_check.sh` (08:20/12:45) và
+`sync_bq_cache_daily.sh` (23:45). Cooldown 1h/vấn đề chống bão dispatch. **Ranh giới cứng
+(không bao giờ tự sửa, escalate question + Telegram):** trade plan, trading_rules.json,
+logic đặt lệnh, crontab dòng thực thi, xoá dữ liệu, BOT_STOP. Mike trong phiên sống thấy
+lỗi ops → tự sửa trực tiếp cùng ranh giới đó, không cần chờ checker.
 
 ## Onboarding account mới cho team Mike (thêm 2026-07-06, user yêu cầu chuẩn hoá quy trình)
 Khi user nói "giao quyền quản lý tài khoản X cho team Mike" → làm theo
