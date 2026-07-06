@@ -67,35 +67,47 @@
 
 ---
 
-## Section 1 — Signal Map (current, 2026-06-29)
+## Section 1 — Signal Map (6-state standardized; live via `sector_lens_monitor.py`)
 
 DT5G regime today = **BULL (state 3, to 2026-06-25)** — risk-on; the euphoria caps are NOT engaged.
 *(Note: this corrects the dispatch's "NEUTRAL" assumption — the live `vnindex_5state_dt5g_live` table reads BULL.)*
 
-| Name / group | Primary metric | Entry condition | Current value | Status | Deploy mode |
+> **Standardized 2026-07-06** (job `Taylor_20260706_062405`). The old free-text status labels are replaced by the **6-state model** below; the numeric content is unchanged (point-in-time **2026-06-29** BQ rows). This table is now **regenerated live** by `sector_lens_monitor.py` (root `WorkingClaude/`, read-only, weekly), which reads the BQ DuckDB cache + the DBC hog/feed overlay, evaluates each framework's OWN entry condition, writes `data/sector_lens_status_<date>.csv`, and alerts only on a **state transition**. Run it for the current read; the values frozen here are the 2026-06-29 baseline.
+
+**The 6 states** (a name is exactly one):
+1. **EXCLUDED** — fails a hard gate (quality floor / leverage / forensic flag / euphoria cap).
+2. **RICH_WAIT** — passes the gate but is currently EXPENSIVE vs its own history.
+3. **WATCH** — passes the gate + cheap, but no confirmed turn/catalyst yet.
+4. **ARMED** — *(only for a fast-proxy/slow-confirm sector; today ONLY DBC via the hog-feed spread)* early-warning has turned supportive, not yet confirmed.
+5. **BUY** — confirmed entry; sub-mode **STRONG** (deep in window) vs **ACCUMULATE** (moderate), using each framework's OWN thresholds (only CTR defines a STRONG line: EVEB<9).
+6. **STALE** — data feed not fresh → fail-safe holds the last known state, never fabricates.
+
+| Name / group | Primary metric | Entry condition | Current value (2026-06-29) | State | Deploy mode |
 |---|---|---|---|---|---|
-| **CTR** | EV/EBITDA | <9 strong · <11 accumulate (+ROIC5Y>20, ROE_TTM>25) | EVEB **9.9** | **ACCUMULATE** (mid-bucket, not screaming) | Watchlist single-name; capturable book |
-| **FPT** | PE vs PE_MA1Y | PE < PE_MA1Y×0.9 (+ROIC5Y>0.12, ROE5Y>0.15) | PE **12.4** vs MA1Y×0.9 = **16.8** | **IN ENTRY WINDOW** (cheap vs own history) | Single-name lens; strongest active signal |
-| **FOX** | EV/EBITDA | pullback to <8 (mature-telecom band 4–8x) | EVEB **12.0** | **WAIT** (rich) | Watchlist only |
-| **MBB** | P/B vs Gordon justPB | PB < justPB (ROE5Y, COE0.13, g0.05) | PB 1.40 vs **justPB 2.21** | **CHEAP — BUY zone** | Banking compounder (archetype A) |
-| **ACB** | P/B vs justPB | same | PB 1.22 vs **2.25** | **CHEAP — BUY zone** | Banking compounder |
-| **HDB** | P/B vs justPB | same; ROE_Min3Y 0.241 (best) | PB 1.54 vs **2.34** | **CHEAP — BUY zone** | Banking compounder |
-| **TCB** | P/B vs justPB | same | PB 1.25 vs **1.55** | **Modestly cheap** | Banking compounder (thinner margin) |
-| **VCB** | P/B vs justPB | same | PB 2.14 vs **1.93** | **NOT cheap on value** (archetype B — forward-ROE only) | Skip on a value screen |
-| **SSI** | P/B (+ROE inflection) | PB∈(0,1.8) · ROE_TTM>ROE3Y · IntCov>1.5 | PB 1.68 · 0.139>0.118 ✓ | **QUALIFIES** | Securities screen (DT5G-gated) |
-| **VCI** | same | same | PB 1.78 · 0.092>0.083 ✓ | **QUALIFIES (marginal)** | Securities screen |
-| **VND** | same | same | PB 1.18 · 0.106 vs ROE3Y 0.108 | **FAILS inflection** (TTM just below 3Y) | Watch for re-cross |
+| **CTR** | EV/EBITDA | <9 strong · <11 accumulate (+ROIC5Y>20, ROE_TTM>25) | EVEB **9.9** | **BUY · ACCUMULATE** (mid-bucket [9,11), not the <9 screaming buy) | Watchlist single-name; capturable book |
+| **FPT** | PE vs PE_MA1Y | PE < PE_MA1Y×0.9 (+ROIC5Y>0.12, ROE5Y>0.15) | PE **12.4** vs MA1Y×0.9 = **16.8** | **BUY · ACCUMULATE** (in entry window, cheap vs own history) | Single-name lens; strongest active signal |
+| **FOX** | EV/EBITDA | pullback to <8 (mature-telecom band 4–8x) | EVEB **12.0** | **RICH_WAIT** (rich) | Watchlist only *(not in monitor universe)* |
+| **MBB** | P/B vs Gordon justPB | PB < justPB (ROE5Y, COE0.13, g0.05) | PB 1.40 vs **justPB 2.21** | **BUY · ACCUMULATE** (cheap) | Banking compounder (archetype A) |
+| **ACB** | P/B vs justPB | same | PB 1.22 vs **2.25** | **BUY · ACCUMULATE** (widest discount) | Banking compounder |
+| **HDB** | P/B vs justPB | same; ROE_Min3Y 0.241 (best) | PB 1.54 vs **2.34** | **BUY · ACCUMULATE** (best ROE floor) | Banking compounder |
+| **TCB** | P/B vs justPB | same | PB 1.25 vs **1.55** | **BUY · ACCUMULATE** (modestly cheap, thinner margin) | Banking compounder |
+| **VCB** | P/B vs justPB | same | PB 2.14 vs **1.93** | **RICH_WAIT** (archetype B — premium justified by forward-ROE only; value screen can't catch) | Skip on a value screen |
+| **SSI** | P/B (+ROE inflection) | PB∈(0,1.8) · ROE_TTM>ROE3Y · IntCov>1.5 | PB 1.68 · 0.139>0.118 ✓ | **BUY · ACCUMULATE** (qualifies; DT5G gate open) | Securities screen (DT5G-gated) |
+| **VCI** | same | same | PB 1.78 · 0.092>0.083 ✓ | **BUY · ACCUMULATE** (qualifies, marginal) | Securities screen |
+| **VND** | same | same | PB 1.18 · 0.106 vs ROE3Y 0.108 | **WATCH** (fails inflection — TTM just below 3Y) | Watch for re-cross |
 | **HCM** | same | same | **PB 2.10 > 1.8** | **EXCLUDED** (euphoria cap) | — |
-| **PVT** | P/B trough | P/B<1 + CF_OA>0 + NP>0 | PB **0.87**, EVEB 3.8 | **TROUGH — buy candidate** | Oil-svc/tanker, high-beta tactical |
-| **HAH** | EV/EBITDA | EVEB cheap + ROE strong | EVEB **4.3**, ROE5Y 0.246 | **CHEAP** (container shipper, cyclical) | Tactical cyclical |
-| **VSC** | P/B / EVEB | port; EVEB MA1Y was distorted | PB 1.04, EVEB 10.4, ROE5Y 0.093 | **Marginal** (weak ROIC) | Watch |
-| **PVD** | P/B trough | high-beta oil bet only | PB 1.04, ROE5Y 0.029 | **Tactical only** (no quality) | Risk-on tactical, never core |
-| **GMD** | EV/EBITDA | EVEB cheap vs build-phase | EVEB **15.0** (rich) | **WAIT** | Watch |
-| **DHG** | PE (buy & hold) | quality floor ROE5Y>0.15, ROIC5Y>0.15 | PE 13.6<MA5Y 15.1, ROIC 0.22 | **Quality — accumulate** | Buy-and-hold, **no timing** |
-| **DBD** | PE (buy & hold) | quality floor | ROE5Y 0.181, ROIC 0.178; PE 17 not cheap | **Hold-quality, not cheap** | Buy-and-hold |
-| **DMC / IMP** | — | ROE5Y<0.15 | DMC 0.126 / IMP 0.138 | **Quality-floor REJECT** | Exclude |
-| **MSH** *(textile, sector #16, added 2026-07-05)* | PE vs PE_MA1Y | PE<PE_MA1Y (+ROE5Y>0.15, IntCov>1.5, GPM-CV<0.15) | PE **6.5** < MA1Y 7.6, ROE5Y **0.249**, IntCov 7.7 | **IN ENTRY WINDOW (cheap-vs-history + elite quality)** | Buy-and-hold-on-weakness single-name (timing destroys it); NOT a book |
-| **DBC** *(livestock/hog, sector #17, added 2026-07-05)* | P/B trough **+ GPM-turn** | PB<PB_MA1Y **AND** GPM_P0>GPM_P4 (+CF_OA_3Y>0, IntCov>1) | PB **1.03**<MA1Y 1.34 (cheap ✓) but **GPM flat 0.17=0.17 (turn NOT firing)**, ROE5Y faded 0.11 | **WATCH — value half present, margin-inflection half NOT yet** | High-beta cyclical-timing single-name; buy on next GPM turn-up, NOT the cheap multiple alone; NOT a book |
+| **PVT** | P/B trough | P/B<0.9 + CF_OA_3Y>0 + Debt_Eq<2.0 | PB **0.87**, EVEB 3.8 | **BUY · ACCUMULATE** (trough; tactical, size small) | Oil-svc/tanker, high-beta tactical |
+| **HAH** | EV/EBITDA | EVEB<10 + ROE5Y>0.15 + CF_OA_3Y>0 | EVEB **4.3**, ROE5Y 0.246 | **BUY · ACCUMULATE** (cheap cyclical container shipper) | Tactical cyclical |
+| **VSC** | P/B / EVEB | port; EVEB MA1Y was distorted | PB 1.04, EVEB 10.4, ROE5Y 0.093 | **WATCH** (weak ROIC) | Watch *(not in monitor universe)* |
+| **PVD** | P/B trough | high-beta oil bet only | PB 1.04, ROE5Y 0.029 | **WATCH** (no quality; tactical only) | Risk-on tactical, never core *(not in monitor universe)* |
+| **GMD** | EV/EBITDA | EVEB cheap vs build-phase | EVEB **15.0** (rich) | **RICH_WAIT** | Watch *(not in monitor universe)* |
+| **DHG** | PE (buy & hold) | PE<PE_MA5Y + ROE5Y>0.15 + ROIC5Y>0.15 | PE 13.6<MA5Y 15.1, ROIC 0.22 | **BUY · ACCUMULATE** (quality anchor, no timing) | Buy-and-hold, **no timing** |
+| **DBD** | PE (buy & hold) | quality floor | ROE5Y 0.181, ROIC 0.178; PE 17 not cheap | **RICH_WAIT** (hold-quality, not cheap) | Buy-and-hold *(not in monitor universe)* |
+| **DMC / IMP** | — | ROE5Y<0.15 | DMC 0.126 / IMP 0.138 | **EXCLUDED** (quality-floor reject) | Exclude *(not in monitor universe)* |
+| **MSH** *(textile, sector #16)* | PE vs PE_MA1Y | PE<PE_MA1Y (+ROE5Y>0.15, IntCov>1.5); GPM-CV = elite-ranking context | PE **6.5** < MA1Y 7.6, ROE5Y **0.249**, IntCov 7.7 | **BUY · ACCUMULATE** (in entry window, elite quality) | Buy-and-hold-on-weakness single-name (timing destroys it); NOT a book |
+| **DBC** *(livestock/hog, sector #17)* | P/B trough **+ GPM-turn** | PB<PB_MA1Y **AND** GPM_P0>GPM_P4 (+CF_OA_3Y>0, IntCov>1); ARMED via hog-feed spread | PB **1.03**<MA1Y 1.34 (cheap ✓) but **GPM flat 0.17≈0.17 (turn ✗)**; hog↓/feed↑ spread not supportive | **WATCH** (value half present, margin-inflection half NOT yet, early-warning not supportive) | High-beta cyclical-timing single-name; ARMED→BUY on GPM turn-up, NOT the cheap multiple alone; NOT a book |
+
+> **MSH GPM-CV note (2026-07-06):** the textile framework's `GPM_CV(P0..P7)<0.15` is used as a **ranking/elite-tier lens** (framework line 139: "correctly ranks MSH elite > TCM >> TNG"), NOT a hard binary gate for the single-name deploy. MSH's operative entry gates are `PE<PE_MA1Y ∧ ROE5Y>0.15 ∧ IntCov>1.5`. Its trailing GPM-CV has ticked to **~0.178 (above the nominal 0.15 line) purely because margin is RISING** (monotone 0.13→0.22 inflates trailing CV) — still far from the erratic ~0.38 crowd the gate rejects. `sector_lens_monitor.py` reports the CV transparently as quality context and does **not** hard-exclude MSH on it. Flagged for the user: if a strict CV<0.15 hard gate is ever wanted, MSH would need the threshold relaxed (~0.18) or a detrended CV — a calibration choice, not a code bug.
 
 ---
 
