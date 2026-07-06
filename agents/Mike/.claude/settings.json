@@ -31,7 +31,7 @@
       }
     ]
   },
-  "model": "claude-sonnet-5",
+  "model": "claude-fable-5",
   "effortLevel": "high",
   "permissions": {
     "allow": [

@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v781)
+# Mike fleet — context pack (v782)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-06T13:44:28] DollarBill/answer — plan-zalopay-t1-complete: {"job": "DollarBill_20260706_133802", "status": "DONE", "plan_file": "data/trade_plans/plan_ZaloPay_2026-07-07.json", "plan_date": "2026-07-07", "account": "Zal …
 - [2026-07-06T13:14:38] Taylor/finding — review-mốc-3-tháng ConvergePort paper: lý do là chu-kỳ-cơ-chế + seam BCTC, KHÔNG phải DSR: {"job": "Taylor_20260706_131247", "dispatch_from": "Mike", "scope": "CLARIFICATION-ONLY, no new backtest, production untouched", "question": "tại sao review đún …
 - [2026-07-06T13:44:07] Taylor/finding — DC-book NEUTRAL waterfall PAPER sleeve IMPLEMENTED (gated main-only, selfcheck 35/35, production byte-identical): {"job": "Taylor_20260706_132553", "dispatch_from": "Mike", "type": "IMPLEMENTATION (user-approved paper trial, not research)", "what": "Wired DC-book NEUTRAL id …
 - [2026-07-06T13:47:25] Mike/decision — dc-book-waterfall-cron-added: {"summary": "Added dedicated cron 15:05 ICT (5 8 * * 1-5) for dc_book_waterfall_paper.py --update — fixes gap Taylor flagged: eod_trading_report.sh early-exits  …
@@ -11,11 +10,21 @@
 - [2026-07-06T14:33:45] Mike/decision — eod-nav-correction-2026-07-06: {"summary": "EOD report SpaceX 2026-07-06 posted wrong NAV (688,509,567) due to cross-account balance contamination bug (dnse_raw file shared across accounts, n …
 - [2026-07-06T14:59:25] Mike/decision — zalopay-execution-cron-added: {"summary": "Added 4 execution cron lines for ZaloPay (run_bot morning+afternoon, bot_heartbeat, lunch pkill) mirroring SpaceX -- user explicitly confirmed twic …
 - [2026-07-06T15:20:55] Taylor/finding — model-routing-test-ack: {"job": "Taylor_20260706_152047", "status": "ACK", "note": "Dispatch received, model routing test confirmed, no further action taken"}
+- [2026-07-06T15:52:47] DollarBill/answer — plan-zalopay-transition-day1: {"job": "DollarBill_20260706_154756", "status": "DONE", "plan_file": "data/trade_plans/plan_ZaloPay_2026-07-07.json", "plan_date": "2026-07-07", "account": "Zal …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
 > Mike cập nhật thủ công khi có thay đổi trạng thái quan trọng. Đọc trước mọi thứ khác khi restart.
 > Cập nhật lần cuối: 2026-07-06
+
+## Model mặc định của chính Mike — đổi sang Fable 5 (2026-07-06, user yêu cầu trực tiếp)
+`agents/Mike/.claude/settings.json` đã sửa `"model"` từ `claude-sonnet-5` → `claude-fable-5`
+(effortLevel giữ nguyên "high"). **Đây thay thế quyết định cũ "model-default-sonnet5-final"
+(2026-07-01, KB archive `2026-07-05-nightly.md`)** — lúc đó chốt Sonnet 5 sau khi thử Opus 4.8
+không thấy khác biệt rõ rệt; lần này user chủ động yêu cầu đổi sang Fable 5, không phải do sự
+cố hạ tầng. **Đã áp dụng**: user xác nhận "Restart ngay" → `systemctl --user restart mike@Mike.service` chạy
+lúc 15:39:50 UTC 2026-07-06 (PID mới 3268950, active). Mike hiện chạy **Fable 5** từ thời điểm
+này. Phiên hội thoại tiếp nối bình thường qua KB + working memory (đúng thiết kế continuity).
 
 ## Onboarding account mới cho team Mike (thêm 2026-07-06, user yêu cầu chuẩn hoá quy trình)
 Khi user nói "giao quyền quản lý tài khoản X cho team Mike" → làm theo

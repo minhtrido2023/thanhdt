@@ -2,6 +2,15 @@
 > Mike cập nhật thủ công khi có thay đổi trạng thái quan trọng. Đọc trước mọi thứ khác khi restart.
 > Cập nhật lần cuối: 2026-07-06
 
+## Model mặc định của chính Mike — đổi sang Fable 5 (2026-07-06, user yêu cầu trực tiếp)
+`agents/Mike/.claude/settings.json` đã sửa `"model"` từ `claude-sonnet-5` → `claude-fable-5`
+(effortLevel giữ nguyên "high"). **Đây thay thế quyết định cũ "model-default-sonnet5-final"
+(2026-07-01, KB archive `2026-07-05-nightly.md`)** — lúc đó chốt Sonnet 5 sau khi thử Opus 4.8
+không thấy khác biệt rõ rệt; lần này user chủ động yêu cầu đổi sang Fable 5, không phải do sự
+cố hạ tầng. **Đã áp dụng**: user xác nhận "Restart ngay" → `systemctl --user restart mike@Mike.service` chạy
+lúc 15:39:50 UTC 2026-07-06 (PID mới 3268950, active). Mike hiện chạy **Fable 5** từ thời điểm
+này. Phiên hội thoại tiếp nối bình thường qua KB + working memory (đúng thiết kế continuity).
+
 ## Onboarding account mới cho team Mike (thêm 2026-07-06, user yêu cầu chuẩn hoá quy trình)
 Khi user nói "giao quyền quản lý tài khoản X cho team Mike" → làm theo
 `kb/account_onboarding_runbook.md` theo đúng thứ tự, không tự bịa quy trình. Tóm tắt: cron
