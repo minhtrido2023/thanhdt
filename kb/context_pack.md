@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v779)
+# Mike fleet — context pack (v780)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-06T13:06:49] Taylor/finding — NEUTRAL waterfall + soft-glide: Part1 DC-below-BAL/LAG CONFIRMED (user waterfall ordering correct, +~1pp/yr full-V2.4 / +3.5pp SpaceX-now, insurance-grade DSR0.775); Part2 soft-threshold glide REFUTED across 4 indicators (Sharpe FLAT 0.83 whole fixed ladder = pure beta, glide=disguised risk-dial not signal): {"job": "Taylor_20260706_125540", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY, production untouched (custom30V/BAL/LAG/rating_8l.py/trading_rules.json/DC-p …
 - [2026-07-06T13:43:55] DollarBill/decision — plan-ZaloPay-2026-07-07: {"plan_file": "data/trade_plans/plan_ZaloPay_2026-07-07.json", "plan_date": "2026-07-07", "account": "ZaloPay", "orders": 0, "action": "HOLD", "active_nav": 525 …
 - [2026-07-06T13:44:28] DollarBill/answer — plan-zalopay-t1-complete: {"job": "DollarBill_20260706_133802", "status": "DONE", "plan_file": "data/trade_plans/plan_ZaloPay_2026-07-07.json", "plan_date": "2026-07-07", "account": "Zal …
 - [2026-07-06T13:14:38] Taylor/finding — review-mốc-3-tháng ConvergePort paper: lý do là chu-kỳ-cơ-chế + seam BCTC, KHÔNG phải DSR: {"job": "Taylor_20260706_131247", "dispatch_from": "Mike", "scope": "CLARIFICATION-ONLY, no new backtest, production untouched", "question": "tại sao review đún …
@@ -11,6 +10,7 @@
 - [2026-07-06T13:47:25] Mike/decision — dc-book-waterfall-cron-added: {"summary": "Added dedicated cron 15:05 ICT (5 8 * * 1-5) for dc_book_waterfall_paper.py --update — fixes gap Taylor flagged: eod_trading_report.sh early-exits  …
 - [2026-07-06T14:31:31] Mafee/finding — spacex-balance-refresh-2026-07-06-2135: {"executed": true, "account": "SpaceX", "account_id": "0002023347", "evidence_file": "data/execution_logs/spacex_balance_refresh_2026-07-06_2135_evidence.txt",  …
 - [2026-07-06T14:33:45] Mike/decision — eod-nav-correction-2026-07-06: {"summary": "EOD report SpaceX 2026-07-06 posted wrong NAV (688,509,567) due to cross-account balance contamination bug (dnse_raw file shared across accounts, n …
+- [2026-07-06T14:59:25] Mike/decision — zalopay-execution-cron-added: {"summary": "Added 4 execution cron lines for ZaloPay (run_bot morning+afternoon, bot_heartbeat, lunch pkill) mirroring SpaceX -- user explicitly confirmed twic …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -92,6 +92,20 @@ không thể đảo ngược: bot tự đặt lệnh thật lần đầu, không
   dùng cho account tương lai có vị thế legacy tương tự — xem `kb/coding_guidelines.md` §7. Chi
   tiết đầy đủ + 10 selfcheck: `kb/INCIDENTS.md` không có entry riêng (không phải sự cố, là setup
   bình thường) — xem commit `87392be` (WorkingClaude repo).
+  **Cập nhật 2026-07-06 tối (user xác nhận 2 lần):** đã thêm 4 dòng cron thực thi thật
+  (`run_bot.sh --account ZaloPay` sáng/chiều, `bot_heartbeat.sh ZaloPay`, lunch-pkill) —
+  ZaloPay giờ tự động y hệt SpaceX. **Plan 07-07 hiện tại vẫn là HOLD/0 lệnh** (bản nháp
+  transition Option A — bán dần VIB/VHC/TCM/TLG/MSH, mua custom30V thay thế, user đã chọn
+  hướng A — dispatch DollarBill 2 lần đều timeout/treo, KHÔNG ghi được file cập nhật, cần
+  dispatch lại + điều tra nguyên nhân treo) → phiên chạy tự động ĐẦU TIÊN sáng mai
+  (2026-07-07) sẽ không làm gì (an toàn). `approved_by` vẫn null → preflight 08:45 mai sẽ
+  báo RED cho ZaloPay (NOT_APPROVED) — ĐÃ BIẾT TRƯỚC, vô hại vì 0 lệnh. **Bug nghiêm trọng
+  phát hiện + đã vá cùng tối:** `dnse_raw_{date}.jsonl` dùng chung cho MỌI account theo
+  ngày, bản ghi "balances" không gắn account → NAV SpaceX báo sai 688,5tr (lẫn balance
+  ZaloPay) khi tính lại báo cáo EOD hôm nay. Đã vá tận gốc (`trading_bot/brokers.py` gắn
+  account_no/label mọi bản ghi log, `daily_nav_snapshot.py` lọc đúng account) + verify lại
+  đúng 982.867.365đ + gửi đính chính (Telegram — Discord "Trading report" lỗi HTTP 500,
+  không phải do nội dung). Chi tiết: `kb/INCIDENTS.md` 2026-07-06.
 - **AlphaLens Paper**: FPT/ACB/MBB/HDB, tracking vs VNINDEX đến 2026-09-30. DollarBill phụ trách.
 
 ## Đang R&D
