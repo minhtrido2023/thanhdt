@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# dispatch.sh <agent_id> "prompt" [--bg] [--timeout SEC] [--retries N]
+# dispatch.sh <agent_id> "prompt" [--bg] [--timeout SEC] [--retries N] [--model NAME]
 #
 # Run a HEADLESS Claude session as the specified agent. The session inherits the
 # agent's CLAUDE.md + hooks (KB context injection, bus writes, heartbeat).
@@ -21,10 +21,17 @@
 # Options:
 #   --timeout SEC  hard cap per attempt (default 600 = 10 min)
 #   --retries N    extra attempts after the first, --bg only (default 1)
+#   --model NAME   model alias for this dispatch (sonnet|opus|haiku|fable). Omit to
+#                  use the CLI's own default. Model choice is per-DISPATCH, not
+#                  per-agent-identity — the same agent (e.g. Taylor) does both
+#                  mechanical lookups and deep R&D, so the CALLER judges complexity
+#                  per task and passes --model explicitly when it's warranted (see
+#                  MIKE.md §Model routing for the 3-question heuristic).
 #
 # Examples:
 #   bin/dispatch.sh Taylor "Phân tích kỹ thuật VNM"
 #   bin/dispatch.sh Winston "Kiểm tra corp-action hôm nay" --bg --timeout 1200
+#   bin/dispatch.sh Taylor "Thiết kế backtest mới, nhiều giả thuyết" --model fable
 #
 # Usage-limit-aware auto-resume (added 2026-07-03): a failure that looks like the ACCOUNT's
 # shared 5-hour usage window (bin/usage_watch.py) is exhausted — not a real task failure —
@@ -47,6 +54,7 @@ shift 2
 bg=""
 TIMEOUT=600
 RETRIES=1
+MODEL=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --bg) bg="--bg" ;;
@@ -54,10 +62,18 @@ while [ $# -gt 0 ]; do
     --timeout=*) TIMEOUT="${1#*=}" ;;
     --retries) RETRIES="${2:?--retries needs a value}"; shift ;;
     --retries=*) RETRIES="${1#*=}" ;;
+    --model) MODEL="${2:?--model needs a value}"; shift ;;
+    --model=*) MODEL="${1#*=}" ;;
     *) echo "ERROR: unknown argument '$1'" >&2; exit 1 ;;
   esac
   shift
 done
+case "$MODEL" in
+  ""|sonnet|opus|haiku|fable) ;;
+  *) echo "ERROR: --model '$MODEL' không hợp lệ — dùng sonnet|opus|haiku|fable." >&2; exit 1 ;;
+esac
+MODEL_FLAG=""
+[ -n "$MODEL" ] && MODEL_FLAG="--model $MODEL"
 
 AGENT_DIR="$ROOT/agents/$id"
 if [ ! -d "$AGENT_DIR" ]; then
@@ -342,6 +358,7 @@ _dtid0="${DISCORD_THREAD_ID:-$(_agent_thread_override "$id")}"
 JSET job_id="$job_id" from="$from" to="$id" status=running attempt=1 \
      max_attempts=$((RETRIES + 1)) started_at="$_start_ts" \
      deadline=$((_start_ts + TIMEOUT)) logfile="$logfile" discord_thread_id="$_dtid0" \
+     model="${MODEL:-default}" \
      prompt_summary="$(printf '%s' "$prompt" | head -c 160 | tr '\n\t' '  ')"
 
 if [ "$bg" = "--bg" ]; then
@@ -355,7 +372,7 @@ if [ "$bg" = "--bg" ]; then
       JSET status=running attempt="$attempt" started_at="$astart" deadline=$((astart + TIMEOUT))
       set +e
       timeout "${TIMEOUT}s" "$CLAUDE" -p "$dispatch_prompt" \
-        --permission-mode auto --max-turns 50 > "$logfile" 2>&1
+        --permission-mode auto --max-turns 50 $MODEL_FLAG > "$logfile" 2>&1
       rc=$?
       set -e
       if [ "$rc" -eq 0 ]; then
@@ -451,7 +468,7 @@ if [ "$bg" = "--bg" ]; then
             _maybe_schedule_usage_resume _looks_like_usage_limit _parse_reset_epoch \
             _current_resume_count _job_thread_id
   export ROOT JOBS_DIR job_id from id ts TIMEOUT RETRIES CLAUDE dispatch_prompt logfile prompt \
-         CIRCUIT_DIR CIRCUIT_THRESHOLD CIRCUIT_COOLDOWN
+         CIRCUIT_DIR CIRCUIT_THRESHOLD CIRCUIT_COOLDOWN MODEL_FLAG
   if command -v setsid >/dev/null 2>&1; then
     setsid bash -c '_bg_wrapper' </dev/null >/dev/null 2>&1 &
   else
@@ -490,7 +507,7 @@ else
   _wpid=$!
   set +e
   timeout "${TIMEOUT}s" "$CLAUDE" -p "$dispatch_prompt" \
-    --permission-mode auto --max-turns 50 \
+    --permission-mode auto --max-turns 50 $MODEL_FLAG \
     2>"$logfile.err" | tee "$logfile"
   rc=${PIPESTATUS[0]}
   set -e

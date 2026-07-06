@@ -255,6 +255,35 @@ sự cố Taylor 2026-07-01).
 > Realtime risk monitor là **`risk_monitor.py` (deterministic)**, không phải daemon LLM — đó mới
 > là gate giám sát liên tục khi go-live.
 
+## Model routing — Sonnet 5 vs Fable 5 theo độ phức tạp task (thêm 2026-07-06, user yêu cầu)
+
+`dispatch.sh` giờ nhận `--model NAME` (`sonnet|opus|haiku|fable`, validate ngay khi parse — sai giá
+trị thì exit 1 trước khi có side effect nào). Không truyền → giữ nguyên hành vi cũ (model mặc định
+của CLI). Áp dụng cho cả 2 nhánh (`--bg` và đồng bộ). Native subagent (`Agent(subagent_type=...)`)
+đã có sẵn tham số `model` — không cần sửa gì thêm ở đó.
+
+**Nguyên tắc: model chọn theo TASK, không phải theo AGENT cố định** — cùng một Taylor lúc thì chạy
+1 query BQ cơ học, lúc thì thiết kế backtest/giả thuyết mới; gắn cứng "Taylor = Fable" sẽ sai một
+nửa số lần. Người quyết định là **Mike, tại thời điểm dispatch**, bằng 3 câu hỏi:
+
+| # | Câu hỏi | YES → |
+|---|---|---|
+| Q1 | Tra cứu/query/check cơ học, có 1 đáp án đúng rõ ràng? | **Sonnet 5** (mặc định, omit `--model`) |
+| Q2 | Cần cân nhắc trade-off, tổng hợp nhiều nguồn, sinh giả thuyết mới, hoặc phản biện/soi lỗi tinh vi? | **Fable 5** (`--model fable`) |
+| Q3 | Chạm production/live-trading thật, chưa có template sẵn để theo? | **Fable 5** bất kể Q1 |
+
+Không chắc → mặc định Sonnet 5 (tiết kiệm, tránh dùng model đắt cho việc thường lệ).
+
+**Gợi ý xác suất ban đầu theo loại việc** (không phải rule cứng theo tên agent):
+- Sonnet 5: `bq-analyst`, `fleet-scout`, `corp-scanner`, `data-ops` (freshness/pipeline, rule-based),
+  `Mafee` (thực thi plan-bound, không phán đoán), `ops_health_check`/`preflight_check`-style.
+- Fable 5: `Taylor` khi làm R&D/backtest mới/sinh giả thuyết, `quant-skeptic` (bản chất việc là chủ
+  động săn lỗi tinh vi), `DollarBill` khi plan có trade-off không tầm thường, `risk-auditor`/
+  `legal-vn` khi câu hỏi mang tính diễn giải (khác lookup đơn giản).
+
+Ví dụ: `bin/dispatch.sh Taylor "Thiết kế backtest mới cho sector X, nhiều giả thuyết" --model fable`
+vs `bin/dispatch.sh Taylor "Query PE hiện tại của VNM" ` (omit `--model` → Sonnet 5 mặc định).
+
 ## Tier phản biện — verify finding của Taylor (bắt buộc trước khi wire)
 Mọi finding R&D quan trọng (backtest, đổi config production, claim CAGR/Sharpe) phải qua một
 **reviewer độc lập có nhiệm vụ DUY NHẤT là bác bỏ nó** — săn look-ahead (`profit_*`), rớt OOS,
@@ -316,8 +345,10 @@ Watchdog bắt **2 kiểu chết** (vì `systemctl is-active` KHÔNG đủ — h
   (b) **zombie dai dẳng** → mở agent trong app Claude để re-pair. Watchdog chỉ phát hiện + log, không tự sửa.
 
 ## Công cụ
-- **`bin/dispatch.sh <id> "prompt" [--bg] [--timeout SEC] [--retries N]`** — dispatch việc cho agent
-  (headless `claude -p`). Đồng bộ (mặc định) hoặc bất đồng bộ (`--bg`). Log ở `logs/dispatch_<id>_<ts>.log`.
+- **`bin/dispatch.sh <id> "prompt" [--bg] [--timeout SEC] [--retries N] [--model NAME]`** — dispatch
+  việc cho agent (headless `claude -p`). Đồng bộ (mặc định) hoặc bất đồng bộ (`--bg`). Log ở
+  `logs/dispatch_<id>_<ts>.log`. `--model` (`sonnet|opus|haiku|fable`, omit = default CLI) chọn theo
+  độ phức tạp TASK — xem §Model routing.
   **Điều phối KHÔNG-CHẶN (2026-06-27):** mỗi dispatch là một **JOB** ở `bus/jobs/<job_id>.json`; `claude`
   bọc trong `timeout` (mặc định 600s) nên **không bao giờ treo vô hạn**. `--bg` trả `job_id` **tức thì**
   (kể cả khi caller dùng `$(...)`), tự **retry 1 lần** (`--retries`, mặc định 1) khi fail/timeout rồi
