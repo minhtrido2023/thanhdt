@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v743)
+# Mike fleet — context pack (v744)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-06T01:38:57] Winston/finding — hog-price-feed-built: {"job": "Winston_20260706_012953", "dispatch_from": "Mike", "scope": "Build hog price feed từ 3tres3.com/vn — 3 miền Bắc/Trung/Nam", "status": "DONE_CRON_PENDIN …
 - [2026-07-06T01:55:24] Taylor/finding — hog-price leading indicator for GPM (DBC/BAF) — CONFIRMED but one-sided early-warning overlay; NOW read = hog DOWN yoy -2.5% => DBC WATCH holds a quarter early: {"job": "Taylor_20260706_014930", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY follow-up to livestock #17; new files only (hog_gpm_leadlag.py) + append live …
 - [2026-07-06T02:16:45] Winston/finding — maize-soybean-meal-feed-built: {"job": "Winston_20260706_021459", "dispatch_from": "Mike", "scope": "Mở rộng auto_update_commodity_wb.py — thêm 2 series nguyên liệu thức ăn chăn nuôi (Maize,  …
 - [2026-07-06T02:30:49] Taylor/finding — hog-FEED margin-spread completes DBC GPM signal — 2022 false-positive FIXED (feed overlay CONFIRMED for DBC, REFUTED for BAF); NOW read = feed turned back up +10% => DBC WATCH holds harder: {"job": "Taylor_20260706_022555", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY follow-up to hog leadlag (Taylor_20260706_014930); new file hog_feed_spread.p …
@@ -11,6 +10,7 @@
 - [2026-07-06T04:09:58] Taylor/finding — sector#19 SOE-governance archetype — LENS-NOT-BOOK, NOT-A-GATE (cross-cutting governance note like 5F moat). State ownership is a MILD RETURN DRAG (state% IC -0.034; SOE fwd T+60 3.16% vs priv 4.25%; SOE-broad basket 9.45% vs identical-sector private-peer 14.50% ~-5pp/yr). NO governance discount to buy — flagships trade a PREMIUM (SOE/priv PB power 1.02x/banks 1.33x/insurance 2.12x). DY on an SOE = a POLICY variable not FCF, bifurcated (cash-cows GAS/VEA pay up vs state banks forced to RETAIN for CAR); the high-DY yield play is a documented INCOME TRAP (cash-cow price-CAGR 4.53% + ~4.5pp div = ~9.0% total-return STILL lags B&H 10.23%, -58% DD). Thin float is the one measurable signature: turnover vs state% Spearman -0.51, SOE median turnover 0.18 vs priv 0.44 (high-lock flagships ACV/GAS/VCB/VEA/BID starved; POW/NT2/PLX/VNM liquid exceptions). Do NOT wire; production untouched.: {"job": "Taylor_20260706_040038", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY, new files only (soe_governance_screen.py + soe_governance_framework.md + dat …
 - [2026-07-06T04:39:36] Taylor/finding — sector#20 holding-company/conglomerate SOTP archetype — LENS-NOT-BOOK, valuation METHOD not a gate. A blended P/E/P/B on a conglomerate is meaningless (VIC PB 11.3 with once-NEGATIVE NPM = VinFast option value, not property); value the parts. coverage=ParentMC/Σ(stake×listed-sub MC) gives a clean split: MSN 0.70×/GEX 0.77× DISCOUNT (real holdco leverage 1.8-6.7 + complexity) vs VIC 4.07×/GVR 14.8× PREMIUM (unlisted optionality — VinFast, landbank; GVR listed rubber subs only ~7% of cap). KEY: discount does NOT mean-revert — deep discount is a TRAP: pooled coverage-z IC +0.073/+0.054/+0.036 WRONG-SIGNED (premium-momentum not reversion), discount-tilt basket LOSES -8.1pp Full DD -57.6%, series trend/de-rate (MSN/GEX trend-t -0.68/-0.62). Any EW-all edge (+1.4pp) is 100% OOS-luck (IS -19.1pp/OOS +16.2pp = VIC+GVR run-up). Premium=optionality that deflates in CRISIS (GVR 14.7×→7.2×). DO NOT WIRE. Production untouched.: {"job": "Taylor_20260706_042831", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY new files only (holdco_sotp_screen.py + holdco_sotp_valuation_framework.md +  …
 - [2026-07-06T05:13:14] Taylor/finding — 20-sector consolidated classification + harvesting-workflow proposal — Section 0 & 7 added to sector_watchlist_framework.md (RESEARCH/SYNTHESIS, no code, production untouched): {"job": "Taylor_20260706_050653", "dispatch_from": "Mike", "scope": "Triage all 20 sector/archetype frameworks into A/B/C + design a harvesting workflow (propos …
+- [2026-07-06T05:50:41] Taylor/finding — technical-stabilization filter on WATCH — REFUTED as return filter, only trims deep-DD tail (insurance not alpha); keep WATCH->BUY on fundamentals: {"job": "Taylor_20260706_054234", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY, new file technical_stabilization_test.py + registry pin; production untouche …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -108,13 +108,21 @@ User gặp vấn đề: task tự động research bị dừng giữa chừng kh
 ## Workflow ngày trading (SpaceX, T2-T6, giờ ICT)
 1. **17:30** — `bq_freshness_check.sh`: BQ fresh → dispatch DollarBill lập plan T+1
 2. **19:30** — `send_plan_report.sh`: gửi plan T+1 vào Trading Daily thread (duyệt trước 08:45 sáng mai)
-3. **08:45** — `preflight_check.sh`: kiểm tra sẵn sàng trước giờ mở cửa (GREEN/RED)
-4. **09:05** — `run_bot.sh --auto-otp`: thực thi plan (phiên sáng)
-5. **09:00-14:55** — `bot_heartbeat.sh` mỗi 5': giám sát liveness + digest fill mới
-6. **11:30** — dừng bot giờ nghỉ trưa
-7. **13:00** — `run_bot.sh --auto-otp`: resume phiên chiều
-8. **~14:50** — phiên đóng (ATC), bot tự cancel lệnh treo, ghi `exec_*_report.md`
-9. **15:00** — `eod_trading_report.sh`: **báo cáo tổng kết EOD** (thêm 2026-07-01) — đọc `state.json`
+3. **08:20** — `ops_health_check.sh --label "Trước phiên sáng"` (thêm 2026-07-06, theo yêu cầu user) —
+   kiểm tra vận hành tự động TRƯỚC preflight: xung đột file plan (bài học sự cố 07-06), lỗi lặp lại
+   bất thường trong journal (loại trừ WAIT_T2_SETTLEMENT/mẫu T+2 đã biết), circuit breaker, câu hỏi
+   (question) chưa trả lời trong 48h — post tóm tắt vào **Trading Daily** (vận hành sống, không phải
+   Trading report). Script: `bin/ops_health_check.sh`.
+4. **08:45** — `preflight_check.sh`: kiểm tra sẵn sàng trước giờ mở cửa (GREEN/RED)
+5. **09:05** — `run_bot.sh --auto-otp`: thực thi plan (phiên sáng)
+6. **09:00-14:55** — `bot_heartbeat.sh` mỗi 5': giám sát liveness + digest fill mới
+7. **11:30** — dừng bot giờ nghỉ trưa
+8. **12:45** — `ops_health_check.sh --label "Trước phiên chiều"` (thêm 2026-07-06) — kiểm tra lại toàn
+   bộ khâu vận hành sau phiên sáng, trước khi resume phiên chiều — cùng nội dung kiểm tra như bước 3,
+   chạy lại để bắt vấn đề phát sinh trong phiên sáng trước khi vào phiên chiều.
+9. **13:00** — `run_bot.sh --auto-otp`: resume phiên chiều
+10. **~14:50** — phiên đóng (ATC), bot tự cancel lệnh treo, ghi `exec_*_report.md`
+11. **15:00** — `eod_trading_report.sh`: **báo cáo tổng kết EOD** (thêm 2026-07-01) — đọc `state.json`
    (giá khớp thực từng lệnh), tính tổng lệnh/mua-bán/khớp đủ-một phần-chưa khớp/tổng giá trị VND,
    post vào **Trading report topic** (đổi từ Trading Daily 2026-07-03, xem dưới). **Thêm 2026-07-03**:
    gọi `bin/daily_nav_snapshot.py` để in kèm NAV thật cuối ngày + biến động so hôm trước (MTM cổ phiếu
@@ -124,7 +132,8 @@ User gặp vấn đề: task tự động research bị dừng giữa chừng kh
 
 **3 Discord topic tách biệt (cập nhật 2026-07-03 — thêm Trading report):**
 - **Trading Daily (1521470705563340910)** — nội dung VẬN HÀNH SỐNG trong ngày: preflight, run_bot,
-  heartbeat, BQ freshness. (EOD report đã CHUYỂN sang Trading report — xem dưới.)
+  heartbeat, BQ freshness, `ops_health_check.sh` (08:20 + 12:45, thêm 2026-07-06). (EOD report đã
+  CHUYỂN sang Trading report — xem dưới.)
 - **DollarBill plan channel (1521183164364754974)** — riêng cho việc LẬP KẾ HOẠCH của DollarBill
   (`send_plan_report.sh`, và mọi `dispatch.sh DollarBill ...` khác dù cron hay ad-hoc). Root cause
   thread-leak (dispatch notify theo thread Mike đang active) đã fix ở tầng `dispatch.sh` qua hàm
