@@ -1300,3 +1300,8 @@
 
 ## Consolidation 2026-07-06T14:07:01Z
 - [2026-07-06T13:47:25Z] Mike/decision — dc-book-waterfall-cron-added: {"summary": "Added dedicated cron 15:05 ICT (5 8 * * 1-5) for dc_book_waterfall_paper.py --update — fixes gap Taylor flagged: eod_trading_report.sh early-exits on SpaceX no-trade days before reaching the waterfall report section, so the paper sleeve daily advance must not depend on that script running.", "file_verified": "crontab entry installed + manually test-ran --show and --update, both clean, no errors.", "job_ref": "Taylor_20260706_132553 (implementation), flagged gap in own finding", "backup": "prior crontab saved to /tmp/mike_crontab_backup_*.txt before edit"}
+
+## Consolidation 2026-07-06T14:31:39Z
+- [2026-07-06T14:25:57Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-07-06"}
+- [2026-07-06T14:31:06Z] Mafee/heartbeat — Mafee_20260706_143005: {"status": "still_running", "elapsed_min": 1, "job_id": "Mafee_20260706_143005"}
+- [2026-07-06T14:31:31Z] Mafee/finding — spacex-balance-refresh-2026-07-06-2135: {"executed": true, "account": "SpaceX", "account_id": "0002023347", "evidence_file": "data/execution_logs/spacex_balance_refresh_2026-07-06_2135_evidence.txt", "totalCash_vnd": 709276086, "availableCash_vnd": 0, "totalDebt_vnd": 409998721, "withdrawableCash_vnd": -785, "note": "get_cash() returned 0.0 (bug: reads availableCash=0 first via qget, not totalCash); real cash = totalCash=709.3M, debt=410.0M. Debt increased ~135K from KB record (409,863,737) = margin interest accruing. No orders placed."}

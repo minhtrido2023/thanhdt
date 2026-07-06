@@ -53,10 +53,22 @@ def today_sell_value(account, date):
     return sum(qty * price for _, qty, price in latest_by_child.values())
 
 
-def latest_balance(raw_path):
+def latest_balance(raw_path, account_no=None):
+    """Bản ghi 'balances' MỚI NHẤT cho ĐÚNG account_no trong file dnse_raw_{date}.jsonl.
+
+    Bug 2026-07-06 (kb/INCIDENTS.md): file này dùng CHUNG cho MỌI account cùng ngày (tên
+    file chỉ theo ngày, không theo account) — trước khi ZaloPay go-live cùng ngày với
+    SpaceX, chỉ 1 account nên không lộ. Khi 2 account cùng gọi balances() trong 1 ngày,
+    bản ghi xen kẽ — lấy "bản ghi cuối cùng" mù quáng có thể lấy NHẦM account, gây báo NAV
+    sai (SpaceX báo 688.5tr thay vì 983.0tr thật do lẫn balance của ZaloPay). Field
+    account_no được _log_raw() ghi thêm từ 2026-07-06 (trading_bot/brokers.py); bản ghi cũ
+    hơn không có field này — nếu account_no được truyền vào mà không lọc được gì, RAISE rõ
+    ràng thay vì âm thầm dùng bản ghi có thể sai account.
+    """
     if not os.path.exists(raw_path):
         return None
     latest = None
+    seen_other_account = False
     with open(raw_path, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
@@ -66,8 +78,16 @@ def latest_balance(raw_path):
                 rec = json.loads(line)
             except json.JSONDecodeError:
                 continue
-            if rec.get("kind") == "balances":
-                latest = rec
+            if rec.get("kind") != "balances":
+                continue
+            if account_no is not None and rec.get("account_no") not in (None, account_no):
+                seen_other_account = True
+                continue
+            latest = rec
+    if latest is None and seen_other_account:
+        raise RuntimeError(
+            f"dnse_raw file có bản ghi balances nhưng KHÔNG bản nào khớp account_no="
+            f"{account_no!r} — file này dùng chung cho nhiều account, tránh dùng nhầm.")
     return latest
 
 
@@ -88,6 +108,17 @@ def main():
     ap.add_argument("--starting-capital", type=float, default=1_000_000_000)
     args = ap.parse_args()
 
+    # account_no: dùng --account-no nếu có, else tự tra secrets/trading_bot_accounts.json
+    # theo label — tránh phải nhớ truyền tay mỗi lần gọi (và là điều kiện BẮT BUỘC để lọc
+    # đúng account trong dnse_raw_{date}.jsonl dùng chung, xem latest_balance()).
+    account_no = args.account_no
+    if not account_no:
+        sys.path.insert(0, WC_ROOT)
+        from trading_bot.config import load_config, load_accounts
+        _profiles = load_accounts(load_config())
+        _match = next((p for p in _profiles if p["label"] == args.account), None)
+        account_no = _match.get("account_id") if _match else None
+
     dates = trading_dates_with_fills(args.account, args.date)
     if not dates:
         print(f"ℹ️ [{args.date}] Chưa có ngày giao dịch nào cho {args.account} — bỏ qua NAV snapshot.")
@@ -97,8 +128,8 @@ def main():
     cmd = [sys.executable, os.path.join(MIKE_BIN, "verify_account_snapshot.py"),
            "--account", args.account, "--dates", ",".join(dates), "--asof", args.date,
            "--out", snapshot_out]
-    if args.account_no:
-        cmd += ["--account-no", args.account_no]
+    if account_no:
+        cmd += ["--account-no", account_no]
     r = subprocess.run(cmd, capture_output=True, text=True)
     if r.returncode not in (0,):
         print(f"❌ verify_account_snapshot.py thất bại (rc={r.returncode}) — KHÔNG tính NAV, "
@@ -109,7 +140,11 @@ def main():
     mtm_stock = snap["total_mtm_value"]
 
     raw_path = os.path.join(EXEC_DIR, f"dnse_raw_{args.date}.jsonl")
-    bal = latest_balance(raw_path)
+    try:
+        bal = latest_balance(raw_path, account_no=account_no)
+    except RuntimeError as e:
+        print(f"⚠️ [{args.date}] {e}", file=sys.stderr)
+        return 2
     if bal is None:
         print(f"⚠️ [{args.date}] Không có record balances thật trong {raw_path} — "
               f"KHÔNG tính NAV (tránh dùng số ước tính/cũ).", file=sys.stderr)
