@@ -651,7 +651,7 @@ class Executor:
             return self.cfg.get("extreme_slice_mult", 0.25)
         return 1.0
 
-    def _place_slices(self, now, phase, ghost_tickers=()):
+    def _place_slices(self, now, phase, ghost_tickers=(), positions=None):
         base_interval = self.cfg["slice_interval_min"] * 60
         for o in sorted(self.plan.orders, key=lambda x: x.priority):
             ps = self.state["parents"][o.id]
@@ -689,6 +689,22 @@ class Executor:
             if qty < LOT:
                 self._journal("WAIT_QUOTA", o, note="hết quota participation/đợi KL")
                 continue
+            if o.side == "sell" and positions is not None:
+                # KL "total" có thể gồm cổ phiếu mua chưa qua T+2 (chưa bán được) —
+                # broker phân biệt total vs sellable (xem BrokerBase.get_positions).
+                # Cap theo sellable thay vì để place_order() tự trả HTTP 400 mỗi slice —
+                # tránh lặp vô ích hàng trăm lần/phiên khi lô hàng vẫn đang chờ T+2 về
+                # (quan sát 2026-07-06: ~2000 lần PLACE_FAIL "Trade quantity not enough"
+                # trên đúng các mã mua T-2 phiên trước, tự hết khi sang phiên chiều T+2).
+                sellable = (positions.get(o.ticker) or {}).get("sellable")
+                if sellable is not None:
+                    cap = round_lot(sellable)
+                    if cap < LOT:
+                        self._journal("WAIT_T2_SETTLEMENT", o, note=(
+                            f"chỉ {sellable:,} cp sellable (có thể đang chờ T+2 về) — "
+                            f"chưa đặt lệnh bán, thử lại chu kỳ sau"))
+                        continue
+                    qty = min(qty, cap)
             if o.side == "buy":
                 need = qty * px * 1.0025
                 if self.broker.get_cash() < need:
@@ -724,7 +740,7 @@ class Executor:
             # 1 chu kỳ đa mã xuống 1 lần ghi JSON) nếu process bị kill giữa chừng.
             self._save_state()
 
-    def _atc_sweep(self, ghost_tickers=()):
+    def _atc_sweep(self, ghost_tickers=(), positions=None):
         for o in self.plan.orders:
             ps = self.state["parents"][o.id]
             if ps["done"] or ps["atc_sent"]:
@@ -746,6 +762,15 @@ class Executor:
             remaining = round_lot(o.qty - ps["filled"])
             if remaining < LOT:
                 continue
+            if o.side == "sell" and positions is not None:
+                sellable = (positions.get(o.ticker) or {}).get("sellable")
+                if sellable is not None:
+                    cap = round_lot(sellable)
+                    if cap < LOT:
+                        self._journal("WAIT_T2_SETTLEMENT", o, note=(
+                            f"ATC: chỉ {sellable:,} cp sellable (có thể đang chờ T+2 về) — bỏ qua"))
+                        continue
+                    remaining = min(remaining, cap)
             try:
                 oid = self.broker.place_order(o.ticker, remaining, o.side,
                                               price=None, order_type="ATC")
@@ -811,11 +836,21 @@ class Executor:
             self._record_prices(now, phase)
         except Exception as e:
             self._journal("PX_HIST_FAIL", note=str(e))
+        positions = None
+        if any(o.side == "sell" for o in self.plan.orders):
+            try:
+                positions = self.broker.get_positions()
+            except Exception as e:
+                # Degrade gracefully (not fail-safe-block): sellable-cap is a retry-noise
+                # optimization, not a correctness guard like the ghost-order poll above —
+                # on failure just fall back to today's existing behavior (attempt the sell,
+                # let the broker's own HTTP 400 reject it if not actually sellable yet).
+                self._journal("POSITIONS_FAIL", note=str(e))
         if cont:
             self._cancel_stale(now)
-            self._place_slices(now, phase, ghost_tickers)
+            self._place_slices(now, phase, ghost_tickers, positions)
         elif phase == "ATC":
-            self._atc_sweep(ghost_tickers)
+            self._atc_sweep(ghost_tickers, positions)
         self._save_state()
         return self.all_done
 

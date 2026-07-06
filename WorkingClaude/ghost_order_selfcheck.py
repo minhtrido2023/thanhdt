@@ -169,8 +169,8 @@ with tempfile.TemporaryDirectory() as tmp:
     seen = {}
     real_place_slices = ex2._place_slices
     real_atc_sweep = ex2._atc_sweep
-    ex2._place_slices = lambda now, phase, ghost_tickers=(): seen.update(place_slices=set(ghost_tickers))
-    ex2._atc_sweep = lambda ghost_tickers=(): seen.update(atc_sweep=set(ghost_tickers))
+    ex2._place_slices = lambda now, phase, ghost_tickers=(), positions=None: seen.update(place_slices=set(ghost_tickers))
+    ex2._atc_sweep = lambda ghost_tickers=(), positions=None: seen.update(atc_sweep=set(ghost_tickers))
     ex2.step(_dt.datetime(2099, 1, 1, 9, 20), "MORNING", True)
     check("H1 step() passes ALL plan tickers as ghosted when poll_orders() raises",
           seen.get("place_slices") == {"POLLFAIL1"}, detail=str(seen))
