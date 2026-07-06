@@ -92,6 +92,7 @@ To evaluate any single stock, find its sector and use the primary metric (second
 | | airline | P/B<1 distress + IntCov | NP>0, CF_OA>0 | no trough-buy exists (see exclude list) |
 | **Textile/garment export** | FOB/integrated (MSH/TCM) | **PE vs PE_MA1Y** (EVEB noisy) | **GPM-CV<0.15 + IntCov>1.5 + ROE5Y>0.15** | margin-stability gate is the lens; MSH=elite, TCM=faded. Screen FAILS as a book (−11pp) → lens only |
 | | CMT scale (TNG, tail) | — | fails IntCov (neg) / NPM~0 / Debt_Eq 2-4 | thin-margin leverage trap; growth-bet not value. **FX: weak-VND is a NEGATIVE fwd signal (risk-off proxy), not a tailwind** |
+| **Construction contractors** *(EPC/GC, sector #18, added 2026-07-06)* | civil/industrial GC (CTD/VCG/HBC/FCN/LCG/C4G/HTN…) | **CF_OA + Debt_Eq trend + DSO *trend*** (NEVER P/E or P/B) | CF_OA_P0>0 ∧ CF_OA_3Y>0 ∧ DSO not deteriorating ∧ IntCov>1.5 ∧ DE<2.5 = an **EXCLUSION filter, not entry** | POC accounting → **P/E unusable** (noise); **P/B-trough is a TRAP** (IC −0.065, worse than mkt; cheap-P/B = the AR-distressed names; equity collapse inverts P/B UP mid-crisis). Screen = LENS not book (in cash 84% of months, OOS≈flat) — but dodges −62%→−18% DD. Exclude BOT-toll (CII/HHV/CTI/PC1→D&A_HEAVY) + CTR (telecom ICB-trap). **No buy candidate.** |
 
 ---
 
@@ -110,6 +111,8 @@ To evaluate any single stock, find its sector and use the primary metric (second
 | **GEG, PC1, SBA (renewables)** | Un-screenable — look expensive + 1.6–2.5x levered + FCF-negative *while building* FIT assets; the windfall is a policy event, not a financial signal. Documented failure. |
 | **DMC, IMP, TRA (pharma)** | ROE5Y<0.15 quality-floor reject (IMP = the documented ETC-growth capture failure); also going illiquid. |
 | **TOS** | Best fundamentals of the Viettel-logistics trio but ADV ~1.08B → un-tradeable. Watchlist/lens only. |
+| **HTN (Hưng Thịnh Incons)** *(construction, added 2026-07-06)* | **Live HBC-repeat in progress** — 2026Q1 DSO **2,425 days**, AR/Revenue **49×**, PE −114, receivables collapse tied to a stressed captive developer. **P/B 0.46 is the trap, not a value entry. AVOID.** |
+| **HBC (Hòa Bình CG)** *(construction, added 2026-07-06)* | The 2022-23 receivables blow-up (Carillion-VN): CF_OA negative while booking POC profit, DSO 139→386, Debt_Eq 3→**162** (equity near-wiped). Cheap P/B *led into* the wipeout. Restructuring, not investable — the canonical contractor AR-trap case study. |
 
 *Point-in-time (not permanent):* **VCB** and **HCM** are excluded *today* — VCB is archetype-B (premium P/B justified only by forward ROE; a value screen can't catch it), HCM is above the PB<1.8 euphoria cap. Both can re-qualify when price/regime change.
 

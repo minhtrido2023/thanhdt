@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v738)
+# Mike fleet — context pack (v739)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-05T16:20:22] Taylor/finding — sector#17 livestock/animal-feed hog-cycle framework — LENS-NOT-BOOK; hog-cycle signal CONFIRMED (unlike textile FX) but GPM-turn carries it not P/B-trough; DBC sole catchable name (cyclical-timing, currently cheap-but-margin-flat=WATCH): {"job": "Taylor_20260705_160724", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY, new files only (livestock_screen.py + livestock_valuation_framework.md + dat …
 - [2026-07-05T16:34:13] Winston/finding — heo-hoi-price-sources-research: {"job": "Winston_20260705_162915", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY: đánh giá nguồn dữ liệu giá heo hơi VN; KHÔNG xây feed/scraper", "verdict":  …
 - [2026-07-05T17:15:47] Winston/finding — 3tres3-feasibility-check-option-a: {"job": "Winston_20260705_170721", "dispatch_from": "Mike", "scope": "RESEARCH feasibility — 3tres3.com/vn truy cập + dữ liệu giá heo hơi 3 miền VN", "verdict": …
 - [2026-07-05T17:17:02] Winston/answer — 3tres3-option-a-final-verdict: {"job": "Winston_20260705_170721", "dispatch_from": "Mike", "verdict": "FEASIBLE cho mục tiêu thực tế — GO với Option A", "summary": {"registration": "MIỄN PHÍ  …
@@ -11,6 +10,7 @@
 - [2026-07-06T01:55:24] Taylor/finding — hog-price leading indicator for GPM (DBC/BAF) — CONFIRMED but one-sided early-warning overlay; NOW read = hog DOWN yoy -2.5% => DBC WATCH holds a quarter early: {"job": "Taylor_20260706_014930", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY follow-up to livestock #17; new files only (hog_gpm_leadlag.py) + append live …
 - [2026-07-06T02:16:45] Winston/finding — maize-soybean-meal-feed-built: {"job": "Winston_20260706_021459", "dispatch_from": "Mike", "scope": "Mở rộng auto_update_commodity_wb.py — thêm 2 series nguyên liệu thức ăn chăn nuôi (Maize,  …
 - [2026-07-06T02:30:49] Taylor/finding — hog-FEED margin-spread completes DBC GPM signal — 2022 false-positive FIXED (feed overlay CONFIRMED for DBC, REFUTED for BAF); NOW read = feed turned back up +10% => DBC WATCH holds harder: {"job": "Taylor_20260706_022555", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY follow-up to hog leadlag (Taylor_20260706_014930); new file hog_feed_spread.p …
+- [2026-07-06T03:47:30] Taylor/finding — sector#18 construction contractors (EPC/GC) framework — LENS-NOT-BOOK, no buy; the deliverable is a RISK/EXCLUSION framework. P/E unusable (POC accounting), P/B-trough is a TRAP (IC -0.065, worse than market), only CF_OA is correct-signed. AR-quality gate = valid exclusion filter (dodges -62%->-18% DD, rejected HBC through its entire crisis) but too restrictive to trade (cash 84% of months). LIVE: HTN = HBC-repeat in progress (DSO 2425, AR/Rev 49x, PB 0.46=trap) => AVOID.: {"job": "Taylor_20260706_033659", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY, new files only (construction_screen.py + construction_valuation_framework.md …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -43,6 +43,15 @@
   approved=user" đúng như kỳ vọng. Tiện thể vá 2 lỗi hiển thị trong `preflight_check.sh` (field
   `approved_by`/`mafee_authorized` thiếu ở plan gốc gây báo NOT_APPROVED giả; field `est_value_vnd`
   vs `est_value` sai tên gây hiển thị `0.000B` giả). Chi tiết đầy đủ: `kb/INCIDENTS.md` 2026-07-06.
+  **Cập nhật 2026-07-06 giữa phiên sáng:** phát hiện bot lặp ~2000 lần `HTTP 400: Trade quantity
+  not enough` từ 09:12 ICT trên đúng 11 mã mua 02/07 (chưa qua T+2 — DNSE chỉ nhả sellable từ
+  **phiên chiều** của ngày T+2, không phải từ đầu phiên sáng). Đã vá `trading_bot/executor.py`
+  (commit `2cee603`): `step()` gọi `get_positions()` 1 lần/chu kỳ, cap qty bán theo `sellable`
+  thật hoặc bỏ qua (`WAIT_T2_SETTLEMENT`) thay vì để broker tự từ chối. Fix này CHỈ có hiệu lực
+  từ lần restart tự nhiên tiếp theo (nghỉ trưa 11:30 → resume 13:00), không restart tay giữa
+  chừng. Cũng commit luôn fix `trading_bot/plan.py` (id/ref_price normalize cho schema v2, commit
+  `7a2a145`) đã hotfix trên đĩa từ sáng nhưng chưa commit. Chi tiết: `kb/INCIDENTS.md` 2026-07-06
+  (entry thứ 2 cùng ngày).
 - **AlphaLens Paper**: FPT/ACB/MBB/HDB, tracking vs VNINDEX đến 2026-09-30. DollarBill phụ trách.
 
 ## Đang R&D
