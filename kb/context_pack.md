@@ -1,21 +1,31 @@
-# Mike fleet — context pack (v775)
+# Mike fleet — context pack (v776)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-06T10:43:24] Taylor/finding — ConvergePort-as-active-book audit: wiring CORRECT (not a bug), result REAL — but REFUTED as production replacement (12.05% vs R3 28.05% CAGR): {"job": "Taylor_20260706_103815", "audited_job": "Taylor_20260706_095725", "scope": "AUDIT/RESEARCH-ONLY, production untouched (custom30V/BAL/LAG/rating_8l.py u …
-- [2026-07-06T10:56:26] Taylor/finding — ConvergePort capacity-appropriate scale: sweet-spot ~2B full-universe (DHG binds), ~10-15B recommended with DHG excluded; +5.0pp edge scale-invariant: {"job": "Taylor_20260706_105156", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY, production untouched (custom30V/BAL/LAG/rating_8l.py/paper book unchanged)", …
-- [2026-07-06T11:06:32] Taylor/finding — Real NSO CPI YoY fetched via chart-embed (13mo, 2025-06..2026-06); confidence-loss regime study re-run — conclusion UNCHANGED (still not tradeable): {"job": "Taylor_20260706_105930", "dispatch_from": "Mike", "scope": "RESEARCH/DISPLAY-ONLY, production untouched (custom30V/BAL/LAG/rating_8l.py/macro_state_liv …
-- [2026-07-06T11:08:36] Taylor/finding — Real NSO CPI YoY fetched via chart-embed (13m, 2025-06..2026-06) + confidence-loss study re-run — CONCLUSION UNCHANGED, not wired: {"job": "Taylor_20260706_105646", "supersedes_attempts": ["Taylor_20260706_103318 (timeout)", "Taylor_20260706_105930 (did disk work, no bus post)"], "scope": " …
 - [2026-07-06T11:18:43] Taylor/finding — bottom-recovery regime (rates↓+RE-cold+gold↓+cheap): REFUTED as early bottom signal — combo fires 5-8mo AFTER trough, only 2 episodes, single-episode carry, gold-version never fires: {"job": "Taylor_20260706_111335", "dispatch_from": "Mike", "scope": "RESEARCH/DISPLAY-ONLY, production untouched (custom30V/BAL/LAG/rating_8l.py/macro_state_liv …
 - [2026-07-06T12:05:30] Taylor/finding — ConvergePort UNION(OR) alternative REFUTED: fixes empty-days (17.3%→0%) but destroys edge — 12.07% CAGR loses even to pure custom30V parking (18.75%); keep double-confirm(AND): {"job": "Taylor_20260706_114506", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY, production untouched (custom30V/BAL/LAG/rating_8l.py + double-confirm paper  …
 - [2026-07-06T12:32:13] Taylor/finding — ConvergePort active-book DT5G state-gate: NOT the fix — halves MaxDD (-38.4%→-19.4%) but more-than-halves CAGR (12.05%→5.74%), Calmar FLAT 0.31→0.30, Sharpe WORSE. Deep DD = small-universe artifact not missing gate: {"job": "Taylor_20260706_121242", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY, production untouched (CONV_STATE_GATE default-OFF, custom30V/BAL/LAG/R3/pape …
 - [2026-07-06T13:06:49] Taylor/finding — NEUTRAL waterfall + soft-glide: Part1 DC-below-BAL/LAG CONFIRMED (user waterfall ordering correct, +~1pp/yr full-V2.4 / +3.5pp SpaceX-now, insurance-grade DSR0.775); Part2 soft-threshold glide REFUTED across 4 indicators (Sharpe FLAT 0.83 whole fixed ladder = pure beta, glide=disguised risk-dial not signal): {"job": "Taylor_20260706_125540", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY, production untouched (custom30V/BAL/LAG/rating_8l.py/trading_rules.json/DC-p …
+- [2026-07-06T13:43:55] DollarBill/decision — plan-ZaloPay-2026-07-07: {"plan_file": "data/trade_plans/plan_ZaloPay_2026-07-07.json", "plan_date": "2026-07-07", "account": "ZaloPay", "orders": 0, "action": "HOLD", "active_nav": 525 …
+- [2026-07-06T13:44:28] DollarBill/answer — plan-zalopay-t1-complete: {"job": "DollarBill_20260706_133802", "status": "DONE", "plan_file": "data/trade_plans/plan_ZaloPay_2026-07-07.json", "plan_date": "2026-07-07", "account": "Zal …
+- [2026-07-06T13:14:38] Taylor/finding — review-mốc-3-tháng ConvergePort paper: lý do là chu-kỳ-cơ-chế + seam BCTC, KHÔNG phải DSR: {"job": "Taylor_20260706_131247", "dispatch_from": "Mike", "scope": "CLARIFICATION-ONLY, no new backtest, production untouched", "question": "tại sao review đún …
+- [2026-07-06T13:44:07] Taylor/finding — DC-book NEUTRAL waterfall PAPER sleeve IMPLEMENTED (gated main-only, selfcheck 35/35, production byte-identical): {"job": "Taylor_20260706_132553", "dispatch_from": "Mike", "type": "IMPLEMENTATION (user-approved paper trial, not research)", "what": "Wired DC-book NEUTRAL id …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
 > Mike cập nhật thủ công khi có thay đổi trạng thái quan trọng. Đọc trước mọi thứ khác khi restart.
-> Cập nhật lần cuối: 2026-07-03
+> Cập nhật lần cuối: 2026-07-06
+
+## Onboarding account mới cho team Mike (thêm 2026-07-06, user yêu cầu chuẩn hoá quy trình)
+Khi user nói "giao quyền quản lý tài khoản X cho team Mike" → làm theo
+`kb/account_onboarding_runbook.md` theo đúng thứ tự, không tự bịa quy trình. Tóm tắt: cron
+dùng-chung (preflight/ops-health-check/send-plan-report/eod-report/dispatch-DollarBill) đã
+tổng quát hoá qua `trading_bot.config.live_dnse_labels()` + `bin/for_each_live_account.sh` —
+account mới `enabled:true/mode:live/broker:dnse` trong `trading_bot_accounts.json` tự động
+được các bước này nhận, KHÔNG cần sửa cron. Riêng 4 dòng cron THỰC THI THẬT (`run_bot.sh`,
+`bot_heartbeat.sh`, lunch-pkill) KHÔNG tự động — luôn hỏi user xác nhận trước khi thêm (điểm
+không thể đảo ngược: bot tự đặt lệnh thật lần đầu, không người duyệt giữa chừng).
 
 ## Đang trading (LIVE)
 - **SpaceX** (DNSE 0002023347): V2.4 LIVE từ 2026-07-01. **Trim 07-06 ĐÃ HOÀN TẤT** (23/23 lệnh bán,
@@ -90,6 +100,26 @@
 - **Taylor**: sector sweep #10+ (chờ Mike dispatch)
 - **Taylor · fill-timing khung giờ (BUY 10:45-11:15 / SELL 09:15-09:45)**: ĐÃ xử lý xong 2026-07-02 (job Taylor_20260702_031608, note cũ ở dòng này lỗi thời). Edge THẬT & IS/OOS-stable (BUY tại 11:15 rẻ hơn open +17.6bps/lệnh, t=12.0; SELL tại open đúng, +11.8bps vs ATC) nhưng **KHÔNG flip `fill_timing_live_gate` ngay** — cần paper tích lũy ~3-4 tuần fill (từ go-live 2026-07-01, mới ~3-4 phiên) để `execution_quality_review.py` xác nhận NET-of-noise capture (noise 110-220bps >> edge 17bps) → quant-skeptic → user sign-off mới flip. Checkpoint tự nhiên: ~cuối tháng 7.
 - **V2.5**: R&D-complete, DISABLED. Reminder: 2026-07-07 Mike hỏi user go-ahead integration.
+- **Taylor · DC-book (ConvergePort) NEUTRAL idle-cash waterfall PAPER-TRADING** (bắt đầu 2026-07-06,
+  user duyệt trực tiếp, job `Taylor_20260706_125540` + `Taylor_20260706_131247`): khi NEUTRAL và
+  BAL/LAG rỗng (đúng tình trạng SpaceX từ ~04/2026), thứ tự ưu tiên giải ngân phần tiền rảnh:
+  **BAL/LAG (full trước, không đổi) → DC book/ConvergePort (double-confirm sector-lens BUY ∧ 8L
+  rating≤2, capacity ~10-15B ex-DHG) → custom30V (phần còn lại)**. Khi BAL/LAG có deal trở lại → rút
+  ưu tiên ngược lại, bán custom30V trước rồi mới đến DC book (reverse-unwind). Backtest xác nhận: DC
+  làm top-priority (thay BAL/LAG) = REFUTE mạnh (12.05% CAGR/DD-38.4% vs R3 28.05%/DD-18.8%); DC làm
+  lớp giữa (đúng thứ tự trên) = +5.0pp trên sleeve parking, ước tính +3.5pp/năm cho SpaceX-now. **Caveat
+  quan trọng: DSR phần excess này chỉ 0.775 (<0.95 ngưỡng an toàn) — bảo hiểm hợp lý, CHƯA phải alpha
+  tin cậy cao** → lý do bắt buộc phải paper trước, không wire live ngay. Chạy CHỈ trên account paper
+  `main` (override trong `trading_bot_accounts.json`), global default + SpaceX/live GIỮ nguyên (không
+  đổi gì). **Đã thêm vào EOD daily report** (theo yêu cầu user 2026-07-06) — xem section paper sleeve
+  trong `eod_trading_report.sh` output.
+  **Review = EVENT-ANCHORED, KHÔNG PHẢI ngày cố định** (user quyết định 2026-07-06, sau khi Taylor tự
+  đính chính lý do "3 tháng" không phải vì DSR mà vì chu-kỳ cơ chế): mốc review = khi chu kỳ
+  reverse-unwind ĐẦU TIÊN (LAG dự kiến refill cuối 07, job `Taylor_20260704_033932`) hoàn tất + settle
+  4-6 tuần sau đó. Sàn ~2 tháng (đủ thấy trọn unwind+settle), trần ~2026-10-06 (tránh mùa BCTC Q3).
+  Nếu LAG refill trượt lịch → mốc review trượt theo, KHÔNG giữ cứng 10-06. **Mike + Taylor cùng theo
+  sát diễn biến portfolio để đề xuất ngày review cụ thể khi đủ điều kiện** — không tự động, không
+  phải 1 con số đã chốt sẵn.
 
 ## Chờ user quyết định
 - V2.5 live-recommend integration: **2026-07-07** (trigger tự động)

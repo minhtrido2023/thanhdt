@@ -201,9 +201,29 @@ PYEOF
 )"
 
 NAV_SECTION="$(python3 "$ROOT/bin/daily_nav_snapshot.py" --account "$ACCOUNT" --date "$PLAN_DATE" 2>&1)"
+
+# --- DC-book NEUTRAL idle-cash WATERFALL — PAPER sleeve monitor (Taylor 2026-07-06, job
+#     Taylor_20260706_132553; user-approved paper trial after research Taylor_20260706_125540).
+#     Self-contained paper sleeve on account `main`, gated by dc_book_waterfall_enabled (default
+#     OFF → --section prints ""); touches NO production plan/executor. --section advances the
+#     sleeve once (idempotent per close) then renders. Fail-safe: never raises, empty when
+#     disabled. Shown ONCE per day (per-date flag) so it doesn't duplicate if more than one
+#     account's EOD report runs — account-agnostic, so it appears on whichever report runs first.
+WATERFALL_SECTION=""
+_WF_FLAG="$WC_ROOT/data/execution_logs/waterfall_eod_shown_${PLAN_DATE}.flag"
+if [ ! -f "$_WF_FLAG" ]; then
+  WATERFALL_SECTION="$(cd "$WC_ROOT" && timeout 200 python3 dc_book_waterfall_paper.py --section --account main 2>/dev/null || true)"
+  [ -n "$WATERFALL_SECTION" ] && : > "$_WF_FLAG"   # claim the day's slot only if it rendered
+fi
+
 FULL_REPORT="$REPORT
 
 $NAV_SECTION"
+if [ -n "$WATERFALL_SECTION" ]; then
+  FULL_REPORT="$FULL_REPORT
+
+$WATERFALL_SECTION"
+fi
 
 echo "$FULL_REPORT"
 "$ROOT/bin/notify_thread.sh" "$FULL_REPORT" "$TRADING_THREAD" 2>/dev/null || true

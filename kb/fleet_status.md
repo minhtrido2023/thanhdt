@@ -1,9 +1,9 @@
-# Fleet status — 2026-07-06T13:07:02 UTC
+# Fleet status — 2026-07-06T13:07:27 UTC
 
 | agent | title (desktop) | kind | status | last_heartbeat | age(min) | current_task |
 |---|---|---|---|---|---|---|
-| DollarBill | DollarBill | child | dead | 2026-07-06T10:35:15Z | 151 |  |
-| Mafee | Mafee | child | dead | 2026-07-06T09:45:25Z | 201 |  |
+| DollarBill | DollarBill | child | dead | 2026-07-06T10:35:15Z | 152 |  |
+| Mafee | Mafee | child | dead | 2026-07-06T09:45:25Z | 202 |  |
 | Mike | Mike | child | running | 2026-07-06T13:00:01Z | 7 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
 | Mike_2716957 | mike-66 | child | dead | 2026-07-06T01:40:01Z | 687 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
 | Mike_2725428 | mike-c0 | child | dead | 2026-07-06T01:50:01Z | 677 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
@@ -37,7 +37,7 @@
 | Mike_3121659 | mike-12 | child | dead | 2026-07-06T11:50:01Z | 77 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
 | Mike_3166881 | mike-5a | child | running | 2026-07-06T13:00:01Z | 7 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
 | Mike_832219 | Mike | child | dead | 2026-07-06T11:00:01Z | 127 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Taylor | taylor-63 | child | running | 2026-07-06T13:00:01Z | 7 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
+| Taylor | Taylor | child | working | 2026-07-06T13:07:26Z | 0 |  |
 | Taylor_2312129 | taylor-88 | child | dead | 2026-07-05T08:00:01Z | 1747 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
 | Taylor_2334942 | taylor-3c | child | dead | 2026-07-05T09:00:01Z | 1687 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
 | Taylor_2358904 | taylor-21 | child | dead | 2026-07-05T10:20:01Z | 1607 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
@@ -45,5 +45,5 @@
 | Taylor_3078252 | taylor-33 | child | dead | 2026-07-06T10:40:01Z | 147 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
 | Taylor_3096232 | taylor-9b | child | dead | 2026-07-06T11:00:01Z | 127 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
 | Winston | Winston | child | dead | 2026-07-06T02:16:58Z | 650 |  |
-| workingclaude-8c | workingclaude-8c | child | dead | 2026-07-06T07:31:25Z | 335 |  |
-| workingclaude-f2 | workingclaude-f2 | child | dead | 2026-07-05T14:42:25Z | 1344 |  |
+| workingclaude-8c | workingclaude-8c | child | dead | 2026-07-06T07:31:25Z | 336 |  |
+| workingclaude-f2 | workingclaude-f2 | child | dead | 2026-07-05T14:42:25Z | 1345 |  |
