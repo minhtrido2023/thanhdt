@@ -1,23 +1,15 @@
 # Working memory — Taylor
-> Cập nhật mỗi khi đổi mạch việc. Chỉ giữ trạng thái hiện tại + open items.
+> Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Taylor.
 
-## Trạng thái hiện tại (2026-06-30)
-- Go-live 2026-07-01 V2.4 leverage-free — CONFIRMED, không đổi. SpaceX 0002023347, 1B VND.
 - V2.4 @50B R3 chốt: CAGR 28.05% / Sharpe 1.87 / DD −18.8% / Calmar 1.50. threads=1 (commit 1325bf2).
 - Bootstrap DD anchor: 5th-pct = −28.6% (KHÔNG phải −18%). P(DD<−30%)=3.3%. Plan sizing dựa −29%.
-
-## V2.5 (post-go-live, chưa live)
 - V2.5 = V2.4 + lever MGE=1.5 (HARD=1.65, breaker−15%, NAV-cap 100B). Account = 0002023347 (margin RocketX id=1840, borrow 12.5%). @50B: 30.05/1.82/−20.1/Cal1.49.
 - Blockers B1-B4: DONE. trading_rules v1.9 v25_leverage DISABLED.
 - **Reminder lên Mike 2026-07-07** (trigger trig_015A): hỏi user go-ahead build V2.5 live-recommend integration.
 - Cần: port lever/recovery harness → recommend_tomorrow.py → paper vài tuần → flip live.
-
-## Open tasks
 - **#14 fill-timing review** — `execution_quality_review.py` schedule chạy 2026-06-30 18:30Z. Gate: CƠ CHẾ (window-adherence, 0 reject), KHÔNG gate bps (4 phiên quá ngắn). PASS → flip `fill_timing_live_gate=True`; FAIL → PENDING+report.
 - **Sector sweeps** — đã xong #1–9 (retail/bank/RE/logistics/telecom/fertchem/rubber/steel/energy). Tất cả landing = lens/tilt, không phải standalone book (ngoại trừ banking có OOS edge nhưng 74% redundant với custom30V). **Await Mike dispatch** cho #10 hoặc synthesis.
 - **New-listing feed** — 5 IPOs queued (DCV/VCK/RGG/TCX/SLD): thiếu lịch sử → parked post-go-live cho manual 8L research.
-
-## Đã đóng (KHÔNG cần nhớ lại)
 - Margin engine rebuild (S2/S4/S5/FIX4): DONE, committed 88fbbe5. Gated OFF byte-identical.
 - Fresh-high-SUE / d_NPR / SUE-tilt / pbcombo / hold-neutral / MGE2.0 / liq-tilt / deep-discount / stability-floor / gq_score / fair-value: TẤT CẢ REJECTED. Giữ LAG binary as-is.
 - Rating audit: HVN documented exception, stability floor REJECTED (−0.45pp). Giữ nguyên production.
@@ -48,3 +40,4 @@
 - [2026-07-06T09:23:22Z] newdeals_daily_report.py DONE+tested (msg builds 1500ch, both sections OK). BLOCKED: ccdb bot lacks access to New-deals thread 1523612826260734112 (Discord 403/50001) — Mike/user phải add bot vào thread hoặc confirm id, rồi re-run + add cron '0 23 * * 0-4' (06:00 ICT). Refactored sector_lens_monitor: compute_status() extracted, console output unchanged.
 - [2026-07-06T09:47:58Z] ConvergePort (job _093329) DONE+LAUNCHED paper 2026-07-06: double-confirm converge book (8L rating<=2 AND sector-lens BUY) + idle->custom30V. Backtest +5.0pp CAGR vs custom30V thuan (23.9 vs 18.7), Sharpe +0.23, IS+OOS both, LOO-stable, DSR 0.998. Equal-weight (STRONG tilt dropped). Files: converge_portfolio_backtest.py, converge_report.py, data/converge_portfolio_paper.json, framework md, results_registry pinned, newdeals_daily_report.py §3 wired. Review 2026-10-06.
 - [2026-07-06T10:43:34Z] ConvergePort-as-active-book audit (job Taylor_20260706_103815) DONE: wiring CORRECT, result REAL (12.05% CAGR), REFUTED as prod replacement (vs R3 28.05%). Pinned registry + bus + fixed 3 stale labels. No open items.
+- [2026-07-06T11:06:51Z] Job Taylor_20260706_105930 XONG: fetch real NSO CPI YoY qua chart-embed (13mo 2025-06..2026-06, hard cap - chart evergreen rolling, no history/gold/USD). cpi_vn.py overlay real lên proxy. Confidence-loss study re-run: kết luận KHÔNG đổi (strict regime vẫn rare/not-tradeable, NOT wired). Ghi registry+bus xong. | NEXT: chờ Mike dispatch (sector sweep #10+)
