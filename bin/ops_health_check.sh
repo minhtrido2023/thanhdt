@@ -219,3 +219,12 @@ echo "$MSG"
 "$ROOT/bin/notify_thread.sh" "$MSG" "$TRADING_DAILY_THREAD" 2>/dev/null || true
 "$ROOT/bin/append_event.sh" Mike status "ops-health-check-${ACCOUNT}-${TODAY}" \
   "{\"account\":\"${ACCOUNT}\",\"label\":\"${LABEL}\",\"warn_count\":${WARN_COUNT:-0}}" 2>/dev/null || true
+
+# Tự sửa thay vì chỉ cảnh báo (mandate user 2026-07-07, xem kb/ops_runbook.md) — trừ
+# trường hợp DUY NHẤT plan chưa duyệt/chưa có (việc của user, autofix không tạo/duyệt
+# plan được). ops_autofix.sh tự chống lặp (cooldown 1h/label).
+if [ "${WARN_COUNT:-0}" -gt 0 ]; then
+  if echo "$MSG" | grep -vE "NOT_APPROVED|KHÔNG TÌM THẤY" | grep -qE '⚠️|❌'; then
+    "$ROOT/bin/ops_autofix.sh" "ops-health-${ACCOUNT}" "$MSG" 2>/dev/null || true
+  fi
+fi

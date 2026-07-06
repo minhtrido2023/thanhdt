@@ -1,0 +1,72 @@
+# OPS RUNBOOK — Vận hành trading hàng ngày (tự phát hiện → tự sửa → báo cáo)
+
+> Mandate user 2026-07-07: *"quản lý hệ thống vận hành chung cho trading mỗi ngày, bất cứ
+> khi nào phát sinh lỗi thì tự động fix bug, không thụ động chờ báo lỗi... tự fix rồi báo
+> cáo lại"*. Đây là tài liệu chuẩn tắc: timeline mỗi ngày, mỗi bước kiểm tra gì, lỗi thì
+> ai tự sửa, khi nào phải hỏi user. Mike đọc file này mỗi phiên; MỌI checker lỗi đều gọi
+> `bin/ops_autofix.sh` thay vì chỉ cảnh báo suông.
+
+## Nguyên tắc phân quyền tự sửa (áp dụng mọi bước)
+
+| Loại vấn đề | Hành động |
+|---|---|
+| Bug code script report/check/pipeline/cache, cache thối, report không gửi được, lock/flag kẹt, daemon phụ trợ chết | **TỰ SỬA** (ops_autofix → Winston/fable) + verify + báo Trading Daily |
+| Chạm tiền thật: trade plan, trading_rules.json, logic đặt lệnh executor/brokers, crontab dòng thực thi, xoá dữ liệu, BOT_STOP | **KHÔNG tự sửa** — escalate (bus `question` + Telegram) và dừng |
+| Bot execution chết giữa phiên | `bot_heartbeat.sh` TỰ RESTART (có sẵn); restart fail → Telegram khẩn |
+| Số liệu client-facing sai đã gửi | Sửa nguồn + GỬI ĐÍNH CHÍNH ngay kênh cũ (không im lặng sửa) |
+
+Chống bão: mỗi vấn đề (label) chỉ autofix 1 lần/giờ — tái diễn trong cooldown = fix trước
+chưa ăn → notify "cần người xem", không dispatch lặp vô hạn.
+
+## Timeline ngày giao dịch (T2–T6, giờ ICT) — bước / kiểm tra gì / lỗi thì sao
+
+| Giờ | Bước (cron) | Kiểm tra | Khi lỗi |
+|---|---|---|---|
+| 23:15 (đêm trước) | `daily_refresh_v34b_linux.sh` | v3.4b base + DT5G publish tới BQ, macro_health.json HEALTHY | Log `!!! ABORT` → autofix; macro_health FAILED kéo dài → xem mục "Macro health" dưới |
+| 23:45 (đêm trước) | `sync_bq_cache_daily.sh` | **Cache verified OK toàn bộ bảng** (không chỉ preflight) | Verify FAILED → **autofix tự động** (đã wire 2026-07-07) — bài học: cache thối âm thầm 10 ngày gây false-SEV1 |
+| 17:30 (chiều trước) | `bq_freshness_check.sh` | BQ fresh → pipeline EOD → dispatch DollarBill lập plan T+1 **cho MỌI account live** | STALE → block DollarBill + alert (có sẵn); dispatch fail → check `bus/jobs`, circuit breaker |
+| 19:30 (tối trước) | `send_plan_report.sh` (per account) | Plan T+1 TỒN TẠI THẬT, đúng ngày, đúng schema (verify artifact, không tin job status) | Escalate bus `question` + Telegram (có sẵn) — plan cần user duyệt, KHÔNG tự tạo |
+| 08:20 | `ops_health_check.sh` (per account) | BOT_STOP, xung đột file plan, lỗi lặp journal, circuit breaker, question tồn, đối chiếu preflight | WARN > 0 → **autofix tự động** (wire 2026-07-07) + vẫn post cảnh báo như cũ |
+| 08:45 | `preflight_check.sh` (per account) | Plan hôm nay tồn tại + approved + macro_health + Gmail OTP + BQ lag | RED vì plan thiếu/chưa duyệt → USER phải xử lý (không autofix); RED vì hạ tầng → autofix |
+| 09:05 | `run_bot.sh` (per account) | Bot chạy, đặt lệnh theo plan | — (thực thi thật, autofix KHÔNG đụng) |
+| 09:00–14:55 | `bot_heartbeat.sh` /5' (per account) | Bot sống, có tiến triển fill | Chết → TỰ RESTART; restart fail → Telegram khẩn (có sẵn) |
+| 11:30 | lunch pkill (per account) | Bot dừng nghỉ trưa | pkill fail vô hại (session_phase tự idle) |
+| 12:45 | `ops_health_check.sh` lần 2 | Như 08:20 + bắt vấn đề phát sinh phiên sáng | Như 08:20 |
+| 13:00 | `run_bot.sh` resume (per account) | Resume state, chạy phiên chiều | Như 09:05 |
+| 15:00 | `eod_trading_report.sh` (per account) | Report khớp lệnh + NAV verify-pipeline + đối soát broker≠state | Crash → autofix; kênh Discord hỏng → ĐÃ CÓ fallback Telegram+Trading Daily tự động |
+| 15:05 | `dc_book_waterfall_paper.py --update` | Paper sleeve DC-book cập nhật | Lỗi → autofix (paper, không chạm tiền thật) |
+| Mỗi 10' | `watchdog.sh` | Session Mike sống, macro_health staleness (`staleness_watch.py`) | Tự restart/clear-bridge (có sẵn) |
+
+## Nơi kết quả đổ về (đọc mỗi sáng, KHÔNG cần user nhắc)
+
+- **Trading Daily** (1521470705563340910): mọi alert vận hành sống + báo cáo autofix.
+- **Trading report** (1522576692638388364): report EOD/tuần/tháng. ⚠️ private thread — bot
+  rớt membership khi archive; nếu 403 Missing Access → nhờ user @mention bot trong topic
+  (đã có fallback tự động trong lúc chờ).
+- **DollarBill plan channel** (1521183164364754974): plan T+1 + mọi record duyệt plan.
+- Bus `question` events = việc CHỜ USER — Mike phải chủ động trình user, không để tồn >48h
+  (ops_health_check tự bắt).
+
+## Macro health — phân biệt 3 tầng khi FAILED (bài học 2026-07-06, 3 bug chồng nhau)
+
+1. **BQ upstream thật** stale? → verify trực tiếp `bq query MAX(time)` — nếu stale thật:
+   việc của data-ops (Winston), thường do daily_refresh/ingest hỏng.
+2. **Cache cục bộ** (data/bq_cache) thối? → `sync_bq_cache.py --verify`; lệch → resync
+   (autofix được). Nhớ: env có cache "verified" sẽ đọc cache, env cache-fail đọc BQ thật —
+   2 env có thể cho 2 kết quả khác nhau với CÙNG câu query.
+3. **Chính checker sai** (đường dẫn chết, nguồn sai)? → so kết quả checker với query tay
+   cùng nguồn — nếu lệch: bug checker (autofix được).
+   Fail-safe khi chưa rõ: hệ thống tự rơi về DT4_only (an toàn, chỉ mất lớp macro-cap).
+
+## Nhật ký & kinh nghiệm
+
+- Mọi sự cố ảnh hưởng workflow sống → `kb/INCIDENTS.md` (blameless, có commit hash).
+- Fix xong PHẢI verify artifact thật (chạy lại checker, đối chiếu số thật) — không tin
+  self-report của agent/job status (MIKE.md §Quy chuẩn #2).
+- Số đã gửi cho user mà phát hiện sai → đính chính NGAY trên kênh đã gửi, không âm thầm sửa.
+- Bug ở 1 script → grep các script khác làm việc TƯƠNG TỰ (bài học 07-06: 3 bug cùng dạng
+  "logic trùng lặp không đồng bộ" trong 1 ngày).
+
+## Lược sử
+2026-07-07: viết lần đầu + wire autofix vào ops_health_check.sh & sync_bq_cache_daily.sh
+(sau chuỗi sự cố 07-06: EOD crash, NAV sai 2 lần, cache thối 10 ngày, false-SEV1 macro).

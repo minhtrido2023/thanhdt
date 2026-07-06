@@ -11,6 +11,16 @@ cố hạ tầng. **Đã áp dụng**: user xác nhận "Restart ngay" → `syst
 lúc 15:39:50 UTC 2026-07-06 (PID mới 3268950, active). Mike hiện chạy **Fable 5** từ thời điểm
 này. Phiên hội thoại tiếp nối bình thường qua KB + working memory (đúng thiết kế continuity).
 
+## Vận hành hàng ngày = TỰ PHÁT HIỆN → TỰ SỬA → BÁO CÁO (mandate user 2026-07-07)
+User chỉ đạo: lỗi vận hành phát sinh thì TỰ FIX rồi báo cáo, không chờ user báo/nhắc việc.
+Tài liệu chuẩn tắc: **`kb/ops_runbook.md`** (timeline ngày, mỗi bước check gì, ranh giới tự
+sửa). Cơ chế: `bin/ops_autofix.sh` — checker phát hiện lỗi → dispatch Winston (fable) chẩn
+đoán + sửa + verify + báo Trading Daily; đã wire vào `ops_health_check.sh` (08:20/12:45) và
+`sync_bq_cache_daily.sh` (23:45). Cooldown 1h/vấn đề chống bão dispatch. **Ranh giới cứng
+(không bao giờ tự sửa, escalate question + Telegram):** trade plan, trading_rules.json,
+logic đặt lệnh, crontab dòng thực thi, xoá dữ liệu, BOT_STOP. Mike trong phiên sống thấy
+lỗi ops → tự sửa trực tiếp cùng ranh giới đó, không cần chờ checker.
+
 ## Onboarding account mới cho team Mike (thêm 2026-07-06, user yêu cầu chuẩn hoá quy trình)
 Khi user nói "giao quyền quản lý tài khoản X cho team Mike" → làm theo
 `kb/account_onboarding_runbook.md` theo đúng thứ tự, không tự bịa quy trình. Tóm tắt: cron
