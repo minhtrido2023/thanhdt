@@ -44,12 +44,14 @@ FALLBACK_URL = ("https://thedocs.worldbank.org/en/doc/"
 # 8L file -> (cột Pink Sheet, số thập phân, dải hợp lệ để bắt lỗi parse)
 # (mirror rebuild_commodity_wb.py:MAP + thêm sanity band)
 MAP = {
-    "iron_ore": ("Iron ore, cfr spot", 2, (20, 400)),    # $/dmtu
-    "urea":     ("Urea ",              2, (50, 1500)),    # $/mt (lưu ý dấu cách cuối header WB)
-    "dap":      ("DAP",                2, (100, 1500)),   # $/mt
-    "rubber":   ("Rubber, RSS3",       3, (0.5, 12)),     # $/kg (8L dùng RSS3)
-    "sugar":    ("Sugar, world",       3, (0.05, 1.5)),   # $/kg
-    "brent":    ("Crude oil, Brent",   2, (10, 300)),     # $/bbl
+    "iron_ore":     ("Iron ore, cfr spot", 2, (20, 400)),    # $/dmtu
+    "urea":         ("Urea ",              2, (50, 1500)),    # $/mt (lưu ý dấu cách cuối header WB)
+    "dap":          ("DAP",                2, (100, 1500)),   # $/mt
+    "rubber":       ("Rubber, RSS3",       3, (0.5, 12)),     # $/kg (8L dùng RSS3)
+    "sugar":        ("Sugar, world",       3, (0.05, 1.5)),   # $/kg
+    "brent":        ("Crude oil, Brent",   2, (10, 300)),     # $/bbl
+    "maize":        ("Maize",              2, (30, 500)),     # $/mt — ngô hạt; hist 38-348, buffer 30-500
+    "soybean_meal": ("Soybean meal",       2, (60, 800)),     # $/mt — khô đậu tương; hist 69-651, buffer 60-800
 }
 
 UA = {"User-Agent": "Mozilla/5.0 (8L-commodity-updater)"}

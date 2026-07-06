@@ -1,0 +1,48 @@
+=== SpaceX (DNSE 0002023347) — Fresh Balance Log Evidence ===
+Date: 2026-07-06
+Job: Mafee_20260706_091114
+
+--- STEP 1: get_cash() via DNSEBroker ---
+Command: python3 -c "from trading_bot.brokers import DNSEBroker; b = DNSEBroker(account_id='0002023347', credentials_file=None, label='SpaceX'); b.connect(); cash = b.get_cash(); print('CASH_RESULT:', cash)"
+Output:
+  [dnse] kết nối OK [SpaceX] tiểu khoản 0002023347
+  CASH_RESULT: 0.0
+Note: 0.0 vì availableCash=0 (tất cả đã dùng hết / đang trong vị thế); ĐÚNG logic — không phải lỗi.
+
+--- STEP 2: Raw balances() call + forced _log_raw ---
+Command: python3 -c "... b.client.balances('0002023347') + b._log_raw('balances', bal) ..."
+RAW_LOG path: /home/trido/thanhdt/WorkingClaude/data/execution_logs/dnse_raw_2026-07-06.jsonl
+RAW balances response:
+{
+  "stock": {
+    "totalCash": 709276086,
+    "availableCash": 0,
+    "depositInterest": 8257,
+    "totalDebt": 409863737,
+    "depositFeeAmount": 378,
+    "secureAmount": 0,
+    "orderSecured": 0,
+    "withdrawableCash": -378,
+    "cashDividendReceiving": 0
+  },
+  "derivative": {
+    "pendingDepositWithdraw": 0,
+    "remainSecure": 0,
+    "usedSecure": 0,
+    "pendingSecure": 0,
+    "holdTaxAndFee": 0,
+    "totalLoanDebt": 0
+  }
+}
+Log entry written at: 2026-07-06T16:12:27 (confirmed by tail of jsonl)
+
+--- STEP 3: tail -c 800 dnse_raw_2026-07-06.jsonl (confirmed fresh entry) ---
+Last entry in file:
+{"ts": "2026-07-06T16:12:27", "kind": "balances", "payload": {"stock": {"totalCash": 709276086, "availableCash": 0, "depositInterest": 8257, "totalDebt": 409863737, "depositFeeAmount": 378, "secureAmount": 0, "orderSecured": 0, "withdrawableCash": -378, "cashDividendReceiving": 0}, "derivative": {"pendingDepositWithdraw": 0, "remainSecure": 0, "usedSecure": 0, "pendingSecure": 0, "holdTaxAndFee": 0, "totalLoanDebt": 0}}}
+
+--- SUMMARY ---
+totalCash:       709,276,086 VND (~709.3M)
+availableCash:   0 VND
+totalDebt:       409,863,737 VND (~409.9M)  [margin debt]
+depositInterest: 8,257 VND
+withdrawableCash: -378 VND (net margin owed after adjust)

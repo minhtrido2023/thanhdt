@@ -1,0 +1,26 @@
+=== NEUTRAL glide-path sleeve backtest | 2014-08-05..2026-06-25 | 2969 sessions ===
+custom30V parking vehicle | TC=0.001 | NEUTRAL days=1820
+
+config           avgPark  FULL_CAGR  Sharpe   MaxDD  Calmar  IS_CAGR  OOS_CAGR
+------------------------------------------------------------------------------
+fixed_70           0.700      7.90%    0.83  -15.1%    0.52    8.99%     6.99%
+fixed_80           0.800      8.99%    0.83  -17.1%    0.53   10.25%     7.96%
+fixed_90           0.900     10.07%    0.83  -19.1%    0.53   11.49%     8.91%
+GLIDE_50_70        0.793      8.63%    0.82  -17.1%    0.50    9.49%     7.93%
+GLIDE_45_75        0.793      8.64%    0.82  -17.2%    0.50    9.48%     7.95%
+INV_GLIDE_50_70    0.807      9.05%    0.81  -17.3%    0.52   10.59%     7.79%
+GLIDE_breadth_pct   0.780      8.79%    0.84  -17.4%    0.50    9.73%     8.01%
+GLIDE_mom60        0.791      8.56%    0.80  -18.8%    0.46   10.03%     7.36%
+GLIDE_madist       0.791      8.98%    0.84  -16.5%    0.54   10.25%     7.93%
+GLIDE_rsi          0.795      8.78%    0.83  -17.5%    0.50    9.97%     7.81%
+
+self-check fixed_70 sleeve final NAV recompute = 2.467829 (identity OK, 0-VND leak)
+
+--- KEY CONTRASTS (FULL) ---
+GLIDE_50_70 avg park 0.793  vs matching fixed rung:
+  GLIDE   CAGR 8.63%  Sharpe 0.82  Calmar 0.50  DD -17.1%
+  fixed70 CAGR 7.90%  Sharpe 0.83  Calmar 0.52  DD -15.1%
+  Δ vs fixed70: +0.74pp CAGR, -0.01 Sharpe
+  fixed80 (≈glide avg park) CAGR 8.99%  Sharpe 0.83  Calmar 0.53
+  GLIDE vs fixed80 (SAME avg deployment → isolates breadth TIMING): -0.35pp CAGR, -0.01 Sharpe
+  INV-GLIDE (neg control) CAGR 9.05%  Sharpe 0.81  (should be WORSE than GLIDE if breadth timing real)

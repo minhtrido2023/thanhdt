@@ -1756,3 +1756,777 @@ timed cyclical-trough-trading, not a hold. (3) **BAF = levered-growth bet** (nev
 CF_OA_3Y<0) a value screen correctly declines (TNG-analog). **Current read (2026Q1):** DBC cheap-vs-history
 (PB 1.03<MA1Y 1.34, PE 6.3) but **GPM-turn NOT firing** (0.17=0.17 flat) + ROE5Y faded 0.11 → **WATCH; buy on
 next confirmed GPM turn-up, not the cheap multiple alone.** No MWG/DGC/HPG-style compounding *hold* exists here.
+
+## Hog price → GPM leading-indicator test (DBC/BAF) — 2026-07-06 (job Taylor_20260706_014930)
+Follow-up to livestock #17: real weekly hog feed now exists (`data/hog_price_vn.csv`, Winston; North 2019+,
+Central/South 2024+). Q: does the weekly hog price LEAD reported quarterly GPM (early-warning vs waiting for the
+financial statement)? Script `mike/agents/Taylor/hog_gpm_leadlag.py`. North (Bắc) series (DBC is North-based),
+quarterly mean, PIT (hog-quarter known ~30–45d before GPM `Release_Date`). Spearman, DBC 25–29q / BAF 17–19q.
+
+**Verdict: YES — hog-price TURN is a genuine leading/coincident indicator for GPM (economically sound, not FX
+noise), but ONE-SIDED (misses feed cost) → EARLY-WARNING overlay, NOT a standalone forecast or GPM-turn
+replacement.**
+- DBC `hog_yoy` vs `GPM_P0−GPM_P4`: **+0.45 (L0, ~45–90d mechanical early read), +0.55 (L1), +0.68 (L2 peak)**;
+  hog level vs GPM level +0.50→+0.62. **Turn-sign agreement 76% (L0) / 71% (L1)** — hog rolls first, GPM follows.
+- BAF (purer pure-play) tighter contemporaneous: hog-lvl vs GPM-lvl **+0.76**, hog_yoy vs GPM-turn +0.60/+0.62.
+- **QoQ useless (sign 50%)** — quarter-avg too smooth QoQ; only the **YoY transform** carries signal.
+- Cycle consistency: 2019–20 ASF (hog +65→96% ↔ GPM-turn +0.036→0.122), 2021 roll-over (hog neg 2021Q2 → GPM
+  neg same q, ~5wk before 2021-08 filing), 2024 recovery. 2025→26: hog_yoy neg 2025Q3–Q4 → GPM rolled over
+  2026Q1 (0.184→0.170), lead ~1–2q as predicted.
+- **CAVEAT (2022):** hog recovered (+16→21%) but GPM-turn stayed −0.083→−0.112 (corn/soy feed spike) → hog =
+  half the spread; necessary-not-sufficient. Small-sample, North-only history, no hard IS/OOS; exact lag (L1–2)
+  = supportive-not-proven (YoY autocorr); the **76% L0 turn-sign match is the solid mechanically-guaranteed part.**
+- **NOW (data ≤2026-06-27):** North hog 2026Q2 = 66,113 (**yoy −2.5%, qoq −5.9%**, faded from Q1 70,230) →
+  indicator DOWN → DBC 2026Q2 GPM (files ~late-Jul) flat-to-soft, **no inflection imminent → WATCH holds** (now
+  confirmed a quarter EARLY by hog, independent of the financial statement). No early buy-trigger.
+- **Rule added (Part 7, overlay only):** Amber = `hog_yoy` turns positive/rising off trough → WATCH→ARMED
+  (fires ~1q early); Green = reported `GPM_P0>GPM_P4` still required to act (feed-cost can veto, 2022); feed
+  stale → no amber, fall back to pure GPM-turn. RESEARCH-only, no production change.
+
+## Hog−FEED margin-spread proxy (completes the GPM signal) — 2026-07-06 (job Taylor_20260706_022555)
+Follow-up to the hog leading-indicator test above: Winston built the feed side (job Winston_20260706_021459) —
+`data/maize_monthly.csv` + `data/soybean_meal_monthly.csv` (World Bank Pink Sheet, USD/mt, monthly 2006-04+).
+Q: does `spread = hog − feed_cost` explain GPM BETTER than hog alone, and does it FIX the 2022 false-positive
+(hog recovered but GPM stayed deeply negative because corn/soy spiked)? Script `mike/agents/Taylor/hog_feed_spread.py`.
+**Unit-safe:** feed (USD/mt) & hog (VND/kg) never mixed in levels — all YoY / rolling-z. Feed basket = physical-
+tonnage-weighted $/mt of the pig-feed mix, base **corn:sbm 60:40** (sensitivity 50:50 & 70:30). `spread_yoy =
+hog_yoy − feed_yoy`, tested at feed_lag 0 & 1q (imported-feed inventory pass-through). DBC 25q, BAF 17q. Self-check
+n/a (correlation study, no NAV sim). 0 look-ahead (hog+feed of quarter Q known before GPM_Q `Release_Date`).
+
+**Verdict: feed overlay is a REAL value-add — but ONLY for DBC (integrated 3F). BAF (pure farmer) REFUTED.**
+- **DBC:** hog-alone corr(GPM-turn) +0.445 / sign-agree 76% → **spread_yoy feed_lag=1q +0.617 / 84%** (spread_z
+  +0.637). Weight-robust: corr +0.512→+0.522, sign-agree 76→80% across 50:50 / 60:40 / 70:30.
+- **THE 2022 TEST PASSED (the point):** hog-alone WRONGLY said margin-UP 2022Q3/Q4 (hog_yoy +15.7%/+20.5%);
+  spread correctly said DOWN (feed_yoy +16.9%/+24.0% → spread −1.1%/−3.5%) matching actual GPM-turn −0.083/−0.112.
+  Both quarters flip WRONG→OK. Feed clearly outran hog → margin clearly fell = arithmetic, not a fitted lag → the
+  **non-overfit, mechanically-solid part of the finding.** (One new near-flat miss: 2023Q2 spread +13% vs turn
+  −0.012.)
+- **BAF: overlay HURTS** — sign-agree 76%→59%, corr +0.598→+0.407. Pure-play farmer margin maps directly to hog;
+  world feed adds noise not signal (different sourcing). **→ feed overlay is DBC-only; BAF keeps hog-alone.**
+- **Caveats:** small n (DBC 25q/BAF 17q); world feed ≠ DBC delivered input cost (FX/hedge/milling/inventory — the
+  corr-max feed_lag=1q is itself a crude inventory-lag proxy); no hard IS/OOS. Exact +0.617 = supportive; the 2022
+  fix = proven.
+- **NOW (data ≤2026-06-27):** spread MORE cautious than hog-alone. 2026Q2 hog_yoy −2.5% AND feed_yoy turned back
+  UP +10.1% (maize+sbm bottomed 2025Q3, recovering) → **spread_yoy −12.6%, most negative since 2023** → cost side
+  now adding to the squeeze. **Reinforces WATCH a notch harder; no up-inflection; DBC WATCH holds.**
+- **Rule upgrade (Part 8):** DBC Amber now = `spread_yoy` (hog_yoy−feed_yoy, feed lag1, 60:40) turns positive &
+  rising off trough (won't arm on a hog rally a feed spike is eating — the 2022 trap). Green unchanged (reported
+  `GPM_P0>GPM_P4` required to act). BAF keeps Part-7 hog-alone. Fail-safe: feed/hog stale → hog-alone → pure
+  GPM-turn. RESEARCH-only, no production change.
+
+## Construction contractors (civil/industrial EPC) — sector #18 — 2026-07-06 (job Taylor_20260706_033659)
+Framework `mike/agents/Taylor/construction_valuation_framework.md`; screen `construction_screen.py` →
+`data/construction_{arquality,basket,pbtrough}_monthly.csv` + `data/construction_verdict.json`. Universe (hand-
+curated, liquid ADV-2024+>5B): CTD VCG HBC FCN LCG C4G HTN DPG VC3 DC4 G36. EXCLUDES BOT-toll asset-owners
+CII/HHV/CTI/PC1 (→ rating_8l D&A_HEAVY) + telecom-infra CTR (ICB trap) + RE developers (sector #3). Monthly EW,
+TC 0.1%, hold-cash-when-empty, ASOF financials (STALE≤120d), threads=1. **Self-check 0 VND PASS** (arquality 0.0,
+basket 4e-6, pbtrough 3e-6). IS 2014-19 thin (liquid breadth only from ~2019: C4G/HTN'19, G36'20, DC4'21).
+
+**VERDICT: LENS, NOT A BOOK (Rule 3). No watchlist buy candidate. Deliverable = a RISK/EXCLUSION framework.**
+
+**PART 1 signal test** (Spearman IC vs fwd profit_1M/2M/3M, eval-only; 25,341 name-days):
+- **`pb_rel`=PB/PB_MA1Y (trough proxy): IC(3M) −0.065 WRONG-SIGNED** — cheaper-vs-history → WORSE fwd return =
+  the P/B-trough TRAP. **20× more negative than whole-market baseline (−0.003)** → sector-specific, sharper than
+  steel. `dso_chg` −0.030 (correct sign, weak). `ar_rev` +0.002 (noise; AR level is structural). **`cfoa`=CF_OA_P0
+  +0.052 = the ONLY reliably correct-signed factor** (cash-generative outperform), but weak.
+- Regime mean fwd-T60: clean 5.5% / mixed 6.3% / stressed 3.8% (n 2754/7112/15475) → quality gate avoids the worst
+  tercile, does NOT beat mixed → **edge is risk-reduction, not return.**
+
+**PART 2 backtests** (Full 2014-2026 / OOS 2020-26 edge vs B&H VNINDEX):
+| Screen | Full CAGR | Full MaxDD | Full Calmar | OOS edge | Months held | Read |
+|---|---|---|---|---|---|---|
+| A — AR-quality (cheap ∧ CF_OA>0 ∧ CF_OA_3Y>0 ∧ DSO_P0≤DSO_P4·1.15 ∧ IntCov>1.5 ∧ DE<2.5) | 3.1% | **−18.0%** | 0.17 | +0.2% CAGR (≈flat), −11.2pp | **25/148 (cash 84%)** | RISK FILTER not a book |
+| B — sector basket (EW beta) | 15.0% | **−62.7%** | 0.24 | −3.1pp, Sharpe −0.20 | 147/148 | pure high-beta; Calmar=B&H |
+| C — naive P/B-trough (no quality gate) | 1.3% | **−70.4%** | 0.02 | −9.8pp | 134/148 | the documented TRAP |
+
+**Counterfactual (the point):** Screen A **REJECTED HBC through the entire 2022-24 crisis (0 months)**; Screen C
+(naive value) **walked into HBC Oct-2022→Apr-2023 = INTO the −1.2T loss + equity wipeout**. Screen A distinct picks
+ever = {VCG,LCG,FCN,DPG} (never HBC, never CTD). Ortho vs custom30V 4% / 8L-top25 16%; median sel ADV 32B.
+
+**HBC crisis anatomy + early-warning (confirmed):** the tell fired ~3q before the 2022Q4 −1,202B loss = **CF_OA_P0
+persistently NEGATIVE while P&L still showed profit (2022Q1-Q3), Debt_Eq already >3 & rising** (POC profit =
+fictional receivables, Carillion-UK-2018 parallel). P/B a DOUBLE trap: cheap-P/B (0.84-1.03) led into the wipeout,
+then P/B mechanically SPIKED to 5.5 mid-crisis as equity collapsed (DSO 139→386, Debt_Eq 3→162). **Read distress via
+CF_OA + leverage trend + DSO *trend*, never P/E (POC noise: CTD PE swung −65.6→+140→+322) or P/B.**
+
+**⚠️ LIVE 2026 finding — HTN (Hưng Thịnh Incons) = HBC-repeat in progress.** 2026Q1: DSO **2,425d** (was 1,485 yoy),
+AR/Rev **49×**, PE −114, DE 3.66 — receivables collapse tied to a stressed captive developer. **P/B 0.46 is the trap,
+not a value entry. AVOID.** HBC still stressed (DSO 473 rising, DE 7.14). No construction name is a catchable
+compounder; best discretionary action = WATCH VCG/CTD for a cash-confirmed working-capital turn (tactical, DT5G-gated,
+small), never a core sleeve. **Not wired; production untouched.**
+
+## State-Owned-Enterprise (SOE) GOVERNANCE archetype — sector #19 — 2026-07-06 (job Taylor_20260706_040038)
+Framework `mike/agents/Taylor/soe_governance_framework.md`; screen `soe_governance_screen.py` →
+`data/soe_{broad,privpeer,cashcow}_monthly.csv` + `data/soe_governance_verdict.json`. **NOT a sector — a
+cross-cutting GOVERNANCE NOTE** (like 5F moat): state-controlled names (state>50%/de-facto) scattered across
+already-screened sectors (GAS/PLX energy#9, POW/NT2 power, VCB/CTG/BID banking, BVH insurance). No BQ ownership
+field → state% hand-curated from public structure. Monthly EW, TC 0.1%, ADV≥10B gate, hold-cash-when-empty,
+ASOF financials (STALE≤120d), threads=1. **Self-check 0 VND PASS** (broad 4e-6, privpeer 7e-6, cashcow 2e-6).
+
+**VERDICT: GOVERNANCE LENS, NOT A BOOK and NOT a gate (Rule 3). State ownership = a mild return DRAG + a risk
+lens; it does not select, does not discount-harvest. Do NOT wire.**
+
+**PART 0 — FLOAT SIGNATURE (the one cleanly-measurable feature):** annual share turnover = ΣVolume/OShares (2024-25).
+SOE median **0.181** vs private **0.443** (~2.4× thinner). **Spearman(state%, turnover) = −0.51** (monotone: more
+state → thinner float). Most float-starved = the high-lock flagships **ACV 0.040 · VCB 0.105 · GAS 0.115 · VEA 0.117
+· BID 0.124.** Liquid EXCEPTIONS (retail favorites, deep-enough public float): POW 0.691, NT2 0.650, VNM 0.428,
+PLX 0.406 → "SOE=illiquid" is true for high-lock flagships, NOT universal.
+
+**PART 1 — SIGNAL TEST (Spearman IC vs fwd profit_1M/2M/3M, eval-only; 63,679 name-days, 25 names):**
+- **`state_pct` IC(3M) −0.034 (mildly NEGATIVE)** — governance is a small forward drag, not a factor. Mean fwd
+  T+60 **SOE 3.16% vs PRIV 4.25%** (~1pp/quarter drag, consistent at T+20/40/60).
+- `turnover` +0.019, `DY` +0.027 ≈ zero (liquidity/yield don't rescue). `PB` −0.174 = generic value factor, NOT
+  SOE-specific. `pb_rel` −0.052 weak.
+
+**PART 2 — VALUATION DISCOUNT REFUTED (SOE vs private, same sub-sector, 2014+ avg):** flagship trades PREMIUM,
+not discount. power SOE/PRIV PB **1.02×**, banks **1.33×**, insurance **2.12×** (BVH). Index-heavyweight state
+flagships (VCB/BVH/GAS/SAB PB5.8/VNM PB6.2) earn a scarcity/blue-chip premium that outweighs the governance+float
+discount. **No "buy cheap SOE" edge** — a cheap-PB SOE is cheap for a policy/cyclical reason.
+
+**PART 3 — BACKTESTS (Full 2014-2026 / OOS 2020-26 edge vs B&H VNINDEX):**
+| Basket | Full CAGR | Sharpe | Full MaxDD | OOS edge | Read |
+|---|---|---|---|---|---|
+| A — SOE-controlled broad (GAS/PLX/POW/NT2/BSR/VCB/CTG/BID/BVH/VNM) | 9.45% | 0.48 | −48.1% | +0.06pp | lags B&H −0.78pp, worse Sharpe/DD |
+| B — private-peer matched (REE/HDG/GEG/ACB/MBB/TCB/VPB/HDB/BMI/QNS) | **14.50%** | 0.69 | −49.4% | **+9.79pp** | control group CLOBBERS SOE, same sectors |
+| C — SOE high-DY cash-cow (GAS/PLX/POW/NT2/BSR/PPC) | **4.53%** | 0.30 | **−58.2%** | +0.44pp | IS −11.67pp, Calmar 0.08 |
+
+**INCOME-TRAP proof (C):** price-only CAGR 4.53% **+ ~4.5pp/yr gross div ≈ 9.0% total-return, STILL lags B&H
+10.23%** with −58% DD → the "stable high dividend" does NOT compensate for price stagnation. **A-vs-B (9.45% vs
+14.50%, same sectors) = state control is a ~5pp/yr realized drag** (directional — B carries more high-beta banks;
+but A & C each lag B&H independently, no matching assumption needed).
+
+**Policy case studies (qualitative event layer):** PLX 2022 (fuel price-ceiling losses in a record-oil year —
+policy caps upside); POW/NT2 (EVN single-buyer administered PPA — margin policy-set); SAB 2017 (state divested
+53.59% → ThaiBev at premium — event windfall); VCB/CTG/BID (SBV forced stock-div + retention for CAR — dividend
+policy INVERTED vs cash-cow story); GAS/VEA (PVN/MoIT pull cash up — genuine budget-payout cash-cows); VNM (SCIC
+~36% divestment overhang = structural seller). **5 governance rules → sector_watchlist_framework.md Section 2.
+No buy watchlist add, no exclude-list add** (flagships handled by their own sector frameworks). Production untouched.
+
+---
+
+## Sector #20 — HOLDING COMPANY / CONGLOMERATE SOTP (Taylor_20260706_042831, 2026-07-06)
+**LENS-NOT-BOOK — a VALUATION METHOD (SOTP), not a sector, not a gate.** Files: `holdco_sotp_screen.py`,
+`mike/agents/Taylor/holdco_sotp_valuation_framework.md`, `data/holdco_{all,discount}_monthly.csv`,
+`data/holdco_sotp_verdict.json`. Self-check 0 VND PASS (all 0e0 / discount 0e0), threads=1, walk-forward
+IS(2016-19)/OOS(2020-26). Universe = 4 listed parents with BQ-measurable listed subs.
+
+**coverage = ParentMarketCap / Σ(stake × listed-subsidiary MarketCap)**, MC = unadjusted Price × OShares(ASOF).
+Stakes = public economic stakes held constant (documented limit; level sensitive, trend/signal-sign invariant).
+
+**PART 0 — SNAPSHOT (2026-06-26): a clean PREMIUM/DISCOUNT split driven by what the UNLISTED part carries.**
+| Parent | Parent MC | Listed-stake val | coverage | reading |
+|---|---|---|---|---|
+| VIC | 1,757tn | 432tn (VHM 64.9%) | **4.07×** | +307% PREMIUM (VinFast optionality) |
+| GVR | 128tn | 8.7tn (PHR+DPR+TRC) | **14.8×** | +1376% PREMIUM (landbank; listed subs only ~7% of cap) |
+| MSN | 104tn | 149tn (MCH 68%+TCB 15%) | **0.70×** | −30% DISCOUNT (holdco leverage 1.8-2.9 + complexity) |
+| GEX | 27tn | 35tn (VGC 50%+GEE 79%) | **0.77×** | −23% DISCOUNT (classic holdco) |
+
+**PART 1 — blended parent multiples are a lie:** VIC NPM went NEGATIVE 2022 (VinFast) vs VHM +0.30-0.50;
+VIC Debt_Eq 3.0→6.7, PB 11.3 (option value) vs VHM PB 2.3. Cannot value VIC on any consolidated ratio.
+
+**PART 2/4 — the discount does NOT mean-revert; deep discount is a TRAP (thesis REFUTED):**
+- coverage is a TRENDING series: trend-vs-time MSN −0.68 / GEX −0.62 (secular de-rating), GVR +0.55
+  (premium re-rating); AR(1) half-lives 51-259d. Emerging-market discount that never closes.
+- pooled Spearman(own-history coverage-z, fwd profit_1M/2M/3M) = **+0.073/+0.054/+0.036** — WRONG-SIGNED for
+  the thesis = premium-MOMENTUM not discount-reversion. Buying deep discount predicts WORSE returns.
+- DISCOUNT-TILT basket (hold deepest-own-discount half) **LOSES**: Full CAGR 4.5% vs naive EW-all 14.0%,
+  DD −57.6%, Full edge −8.1pp. Even naive EW-all "+1.4pp Full" is 100% OOS-luck (IS 2016-19 −19.1pp /
+  OOS 2020-26 +16.2pp = VIC+GVR run-up), fails per-year-LOO.
+
+**PART 3 — premium = optionality that deflates violently in CRISIS:** GVR coverage 14.7× (BULL) → 7.2×
+(CRISIS). A premium holdco = a long unlisted call option, higher downside beta than its listed NAV; size as
+optionality. Discount widening is name-specific (MSN coverage RISES in BEAR — defensive MCH), no universal law.
+
+**VERDICT: valuation-DIAGNOSTIC LENS, not a book, not a gate — DO NOT WIRE** (N=4, discount is a trap, edge is
+OOS-luck). Use SOTP to understand what you pay for (listed NAV vs unlisted burn/landbank) + size optionality/
+leverage risk; never trade the discount. No buy-watchlist or exclude-list changes. Production untouched.
+Added as cross-cutting overlay #20 to `sector_watchlist_framework.md` Section 2 (after SOE overlay #19).
+
+---
+
+## Technical-stabilization filter on WATCH universe (job Taylor_20260706_054234, 2026-07-06) — RESEARCH-ONLY, REFUTED as return filter
+
+**Question (distinct from refuted momentum):** does a "downtrend has STOPPED/stabilized" technical
+confirmation improve forward return / avoid deeper drawdown when added on top of the WATCH universe
+(cheap-vs-history + quality gate), vs plain WATCH alone? Not "buy strength" (mom200 IC~0.002, already
+refuted) — the opposite: filter OUT falling knives (cheap but still dropping).
+
+**Setup** (`technical_stabilization_test.py`, threads=1, point-in-time, 2014-2026):
+- WATCH base (proxy for rating<=3 / BUY-NOW): golden floor `ROE_Min3Y>=0 & CF_OA_5Y>0` + cheap
+  `pb_z=(PB-PB_MA5Y)/PB_SD5Y<=-0.3` + liquid `Trading_Value_1M_P50>=3bn`. **118,395 daily events / 328 tickers.**
+- Stabilization flags (all use current/past fields only): `rsi_bounce` (D_RSI>D_RSI_Min3M+0.05),
+  `cmb_notbear` (D_CMB>=0), `price_off_low` (C_L1M>=1.05), `reclaim_ma50` (Close>=MA50),
+  `combo_rsi_px`, `combo_ma_cmb`; neg-ref `near_1m_low` (C_L1M<=1.02 = still pinned at 1M low).
+- Outcome profit_1M/2M/3M (eval only). Falling-knife = forward 40-sess min-drawdown <=-10% / -20%.
+- Honest unit = monthly-cohort spread (daily WATCH rows autocorrelated); t over ~140 monthly obs; IS/OOS split.
+
+**RESULT — stabilization HURTS return, only cuts the deep-DD tail (insurance, not alpha):**
+
+*Return spread (flagged − not-flagged), monthly-cohort:*
+| flag | profit_1M FULL (t) | IS / OOS 1M | median-robust 1M (t) |
+|---|---|---|---|
+| rsi_bounce | **-1.50% (t-4.3)** | -1.17 / -1.80 | -1.77% (t-5.4) |
+| cmb_notbear | **-1.51% (t-3.9)** | -1.24 / -1.73 | -1.78% (t-4.7) |
+| combo_ma_cmb | -0.86% (t-2.1) | -0.34 / -1.33 | -1.33% (t-3.5) |
+| reclaim_ma50 | -0.79% (t-2.0) | -0.25 / -1.29 | — |
+| price_off_low | -0.46% (t-1.5) noise | — | — |
+| **near_1m_low (STILL falling)** | **+0.55% (t+1.7)** | +0.43 / +0.66 | **+0.94% (t+3.2), hitM 62%** |
+
+- Every stabilization flag has NEGATIVE-to-zero forward-return spread, robust to outliers (median==mean)
+  and NEGATIVE in BOTH IS and OOS for rsi_bounce/cmb_notbear (t=-3 to -5). Waiting for stabilization
+  FORFEITS the mean-reversion premium that IS the cheap-universe edge.
+- The negative reference (`near_1m_low` = the still-falling knife) has POSITIVE spread (+0.94%, t+3.2,
+  62% of months) — within an already cheap+quality universe, the MORE beaten-down / still-falling names
+  earn MORE forward return. Classic VN mean-reversion; "wait for it to stop falling" = buy higher, earn less.
+- Per-year LOO (combo_ma_cmb, profit_2M): +6.1%(2017) but -7.7%(2022)/-4.7%(2026)/-2.7%(2020) — sign
+  scattered, no durable edge = noise, not signal.
+
+*Falling-knife (fwd 40-sess drawdown) — the ONE real effect:*
+| flag | %dd<=-10 f/nf | %dd<=-20 f/nf | mean dd f/nf |
+|---|---|---|---|
+| rsi_bounce | 28.3 / 33.5 | 9.1 / 13.2 | -7.62 / -9.02 |
+| cmb_notbear | 28.5 / 34.8 | 9.4 / 13.9 | -7.71 / -9.13 |
+| combo_ma_cmb | 28.1 / 29.7 | 8.1 / 11.1 | -7.45 / -8.12 |
+
+- Stabilization genuinely trims the DEEP-drawdown tail (dd<=-20%: ~13% → ~8-9%). But it trims the RIGHT
+  tail too (net return negative). Textbook insurance: lower left tail + lower right tail + net cost.
+
+**VERDICT:** (1) NO technical-stabilization filter improves walk-forward forward RETURN; rsi_bounce /
+cmb_notbear are significantly NEGATIVE (t≈-3 to -5, IS+OOS), the rest noise. (2) DO NOT add as a WATCH→BUY
+return filter — keep WATCH→BUY on fundamentals as-is. (3) The only real effect is deep-drawdown-tail
+reduction = a RISK GATE (insurance, costs return), same profile as DT5G — NOT wired, not requested for
+wiring; a risk observation only, un-vetted vs DSR/multiple-testing. Mirrors & extends the momentum-refuted
+result: in VN, buying cheap-and-still-falling beats waiting for the bounce. Artifact:
+`data/technical_stabilization_events.parquet`. sector_watchlist_framework.md intentionally NOT touched.
+
+---
+
+## sector_lens_monitor.py — Group-A watchlist 6-state monitor (job Taylor_20260706_062405, 2026-07-06)
+
+RESEARCH/MONITOR tool (read-only), NOT a backtest and NOT a production selector. Builds Section 7
+("Harvesting Workflow Proposal") of `mike/agents/Taylor/sector_watchlist_framework.md`, user-approved.
+Reads BQ DuckDB cache (`data/bq_cache/`, threads=1) latest `ticker` row (PE/PB/EVEB/PE_MA5Y) + latest
+`ticker_financial` row (fundamentals + PE_MA1Y/PB_MA1Y/GPM_P0..P7) + latest `vnindex_5state_dt5g_live`
+state + on-disk hog/feed feeds (DBC overlay). Evaluates each name against its OWN `*_framework.md`
+entry condition (formulas NOT re-invented) → one of 6 states: EXCLUDED / RICH_WAIT / WATCH / ARMED /
+BUY(STRONG|ACCUMULATE) / STALE. Writes `data/sector_lens_status_<date>.csv` (history) + diffs vs prior
+file → alerts ONLY on a state transition. Fail-safe: stale row/feed → HOLD last status (never fabricate).
+
+**Baseline run 2026-07-06** (DT5G=BULL/3; hog-feed spread_yoy −0.126, hog↓/feed↑ not supportive) —
+all 16 names reproduce the documented Section-0/1 statuses:
+| State | Names |
+|---|---|
+| BUY·ACCUMULATE | FPT, MBB, ACB, HDB, TCB, CTR(9.9 mid-bucket), SSI, VCI, PVT, HAH, MSH, DHG |
+| WATCH | DBC (value ✓, GPM-turn ✗, spread not supportive), VND (fails ROE inflection) |
+| RICH_WAIT | VCB (PB 2.19 ≥ justPB 1.93, archetype-B) |
+| EXCLUDED | HCM (PB 2.02 ≥ 1.8 euphoria cap) |
+
+Self-checks PASS: (a) 16/16 match known states; (b) transition diff fires correctly on a synthetic
+prior (FPT RICH_WAIT→BUY, DBC ARMED→WATCH); (c) STALE fail-safe holds prior status & is excluded from
+the transition-alert list (data-outage ≠ state change). **CTR** is the only lens with a STRONG tier
+(EVEB<9); it currently prints ACCUMULATE. **MSH** GPM-CV=0.178 > nominal 0.15 (rising-margin artifact) —
+CV used as elite-ranking context per framework line 139, NOT a hard exclude (documented; flag for user if
+a strict hard gate is ever wanted). No cron yet — run by hand; Mike to schedule after a few stable runs.
+Production untouched (custom30V/BAL/LAG/rating_8l.py unchanged).
+
+---
+
+### STRONG-tier (screaming-buy) calibration — Group-A sector lenses (job Taylor_20260706_070219, 2026-07-06)
+
+`sector_strong_threshold.py` — RESEARCH-ONLY. Defines a quantified STRONG tier (vs default ACCUMULATE)
+for the Group-A sectors that previously had none (only CTR had EVEB<9). **Method** (same as CTR<9): pool
+the ICB universe (single-name histories too thin), apply the live monitor gate, split the ACCUMULATE-
+eligible population by DEPTH into quintiles, measure forward return (profit_1M/2M/3M, EVAL-ONLY), weekly-
+sampled to cut overlap, walk-forward IS(2014-19)/OOS(2020-26). STRONG justified ONLY where a real step-up
+survives OOS; smooth/no-break/sign-disagreement → NO STRONG (do not fabricate a line).
+
+| Sector | STRONG line | Evidence (depth Q5 vs Q1-Q4) | Verdict |
+|---|---|---|---|
+| **Banking** (8355) | **discount ≥ 0.45** (PB≤0.55×justPB) | Q5 disc≥0.46: fwd-1M **+3.7%** / 3M **+11.8%** / hit **69%** vs ~+1.6%/+5%/54%. OOS confirms (+3.68%/1M, hit 69%) | ✅ **ADD** — clean OOS-surviving step |
+| **Tech/FPT** (9537) | **PE < PE_MA1Y×0.75** (depth≥0.25) | Q5 best in BOTH IS (+3.5%/1M, hit 83%) & OOS (+7.3%/3M); framework's named 2018/2022-23 entries all sit at depth 0.25-0.29 | ✅ **ADD** — thin sample, corroborated-by-episode |
+| **Securities** (8777) | **PB < 0.75** (already DT5G-gated) | ALL step Q3→Q4 at PB≈0.75 (2.1→4.5%/1M); Q4 holds both IS(+3.3%)&OOS(+3.5%); Q5/PB<0.42 huge OOS(+9.3%) but weak IS → robust line=0.75 not deeper | ✅ **ADD** — OOS-loaded, crisis-only trigger |
+| **Textile/MSH** (3763) | — | IS best = MIDDLE bucket (+3.4%); Q5 weak IS (hit 36%) but best OOS → sign disagreement at extreme | ❌ **NO STRONG** — no break to trust; ACCUMULATE-only |
+| **Pharma/DHG** (4577) | — | depth-return FLAT (Q1 ≈ Q5 both regimes; Q1 often best) | ❌ **NO STRONG BY DESIGN** — data confirms buy-and-hold anchor, timing adds nothing |
+| **Logistics/PVT+HAH** (2777/2773) | — | deepest bucket UNDERPERFORMS IS (middle pays best); OOS non-clean | ❌ **NO STRONG BY DESIGN** — high-beta tactical, don't size up "cheaper still" |
+
+**Live read 2026-07-06:** exactly ONE name hits a STRONG line — **FPT** (PE 12.4 < 0.75×PE_MA1Y 14.0),
+a 2018/2022-class deep entry; flips ACCUMULATE→STRONG in the monitor. Banking tops at ACB 41%/MBB 40%
+(<45%); securities all PB≥1.25 (≫0.75). Wired into `sector_lens_monitor.py` (eval_bank/eval_fpt/eval_sec)
++ the 6 `*_valuation_framework.md` docs + watchlist Section 5/table. STRONG here = a NECESSARY-NOT-
+SUFFICIENT display conviction upgrade; still routes through Taylor-validate→DollarBill-plan→user→Mafee.
+Production untouched (custom30V/BAL/LAG/rating_8l.py unchanged). Note: profit_* are forward-looking
+EVAL-ONLY (never a live filter); PE_MA1Y self-rolled 252d from daily PE for the study (STRONG expressed
+as a ratio → MA-source washes out).
+
+#### Follow-up robustness (quant-skeptic CONFIRMED → job Taylor_20260706_074228, 2026-07-06)
+
+Two add-ons requested by the verify pass (both display-only; NO threshold VALUE changed, production untouched).
+`sector_strong_threshold.py` extended (`tech_universe_check` + `bootstrap_fpt_strong` + `sensitivity_sweep`).
+
+**Việc 1 — Tech/FPT sample thinness.**
+- *Universe cannot be widened.* ICB 9537 USABLE (tradeable ≥1bn VND/day AND ever passes ROIC5Y>0.12 &
+  ROE5Y>0.15) = **[FPT] only**. ITD (1.12bn/day) & ICT (1.05bn/day) are liquid but quality-pass=0% (not
+  compounders); VLA passes quality 8% but 0.01bn/day = untradeable. FPT is the sole liquid quality tech name.
+- *Bootstrap CI (STRONG line depth≥0.25 = PE<0.75×PE_MA1Y).* The 26 STRONG weekly obs are only **~5 de-rating
+  episodes** (2018, 2020, 2025, 2026), and **IS is literally ONE episode (2018)** → n_eff, not 13. Episode-cluster
+  bootstrap (the honest resampler) vs i.i.d.-weekly (optimistic):
+
+  | Seg (n_eff) | horizon | point | iid-weekly 90%CI | **episode 90%CI** | P(>0) episode |
+  |---|---|---|---|---|---|
+  | ALL (5) | 1M | +3.22% | [+1.3,+5.4] | [+0.6,+14.2] | 0.98 |
+  | ALL (5) | 2M | +3.78% | [+0.4,+7.7] | **[−1.9,+14.4]** | 0.90 |
+  | ALL (5) | 3M | +5.32% | [+1.7,+9.4] | [−0.1,+17.6] | 0.95 |
+  | IS (1) | 1M | +3.68% | [+1.9,+5.4] | degenerate (1 cluster) | — |
+  | OOS (4) | 1M | +2.75% | [−0.6,+6.9] | [−0.3,+19.5] | 0.93 |
+  | OOS (4) | 2M | +3.01% | [−3.8,+11.7] | **[−3.0,+24.1]** | 0.62 |
+  | OOS (4) | 3M | +6.88% | [−3.4,+17.7] | [−2.4,+24.6] | 0.85 |
+
+  Direction is robust at **1M** (P(>0) ≈ 0.9–1.0) but the episode CIs are wide and **span 0 at 2M/3M**, and IS
+  rests on a single 2018 event — the magnitudes (+3.5%/+7.3%) are NOT precisely estimable.
+- **Verdict — KEEP the line (PE<0.75×PE_MA1Y), DOWNGRADE its confidence.** Loosening would dilute the depth step
+  (Q1–Q4 ≈ +0.5–1%); a hard companion-signal gate would over-engineer a necessary-not-sufficient display flag
+  (and the one candidate, technical-stabilization, was REFUTED as a return filter 2026-07-06). Fix = relabel
+  STRONG(FPT) as **LOW-CONFIDENCE / "watch-close, confirm independently"** (edited `eval_fpt` tag in
+  `sector_lens_monitor.py`), not a stat-standalone screaming buy.
+
+**Việc 2 — Banking & Securities plateau sweep** (forward return/hit over the trigger set at each line, IS+OOS):
+- *Banking* discount ∈ {0.40, 0.45, 0.50}: OOS p1M **3.08 / 3.39 / 4.72**, hit1M **0.65 / 0.67 / 0.74**, p3M
+  **9.5 / 10.9 / 14.2** — **clean MONOTONE ramp** (deeper = better at every step), NOT a spike at 0.45. Line is a
+  robust plateau; 0.45 sits mid-ramp with enough signals (OOS n=684) — 0.50 is even stronger but has zero IS
+  triggers (banks rarely traded that deep pre-2020) → **KEEP 0.45**.
+- *Securities* PB ∈ {0.70, 0.75, 0.80}: p1M ALL **4.40 / 4.48 / 4.14**, hit1M ALL **0.483 / 0.492 / 0.485**, OOS
+  p1M **8.12 / 7.79 / 7.00** — **flat plateau** (results barely move across the ±step); 0.70 marginally best OOS
+  but all three equivalent → **KEEP 0.75** (robust, not a single-point artifact).
+
+**Net:** no threshold value changes. Banking/Securities lines CONFIRMED as plateaus (robust). Tech/FPT line kept
+but relabeled LOW-CONFIDENCE (single-name, ~5 episodes, 1 IS). Still display/monitor only; routes through
+Taylor-validate→DollarBill-plan→user→Mafee. Production (custom30V/BAL/LAG/rating_8l.py) untouched.
+
+---
+
+## sector_lens_monitor → daily 8L Telegram + 8L-rating cross-check (job Taylor_20260706_082923, 2026-07-06)
+
+**What shipped** (research/monitor only — production custom30V/BAL/LAG/rating_8l.py UNTOUCHED):
+- `pt_8l_daily.sh` step **[9]** `sector_lens_monitor.py --telegram` (runs AFTER step [1] rating_8l so the
+  cross-check reads the same-day fresh `rating_8l.csv`; continue-on-error like every other step). User approved
+  **DAILY** cadence (was proposed weekly) — transitions matter, the script is light so a daily read is cheap.
+- `sector_lens_monitor.py` gains `--telegram`: sends to the **same 8L Telegram channel** (cfg chat_id via
+  `telegram_recommend.load_config`/`send_telegram_text`, identical wiring to cheap_pb_floor.py). NOT the Discord
+  Trading-report channel (that stays reserved for verified account numbers).
+- Message order (dispatch req 3): (a) **TRANSITIONS first** (`FPT: BUY·ACCUMULATE → BUY·STRONG`) or
+  "no transitions today"; (b) status table — BUY/ARMED always shown in full, WATCH/RICH_WAIT/EXCLUDED shown in
+  full only on a transition day else collapsed to a count line (anti-spam); (c) **8L cross-check** inline.
+
+**New logic worth pinning — DOUBLE-CONFIRM (two independent systems agree):**
+- For each Group-A name, look up its 8L composite-v3 rating from the same-day `rating_8l.csv`. Mark
+  **"✓✓ DOUBLE-CONFIRM"** iff `rating<=2` (golden/strong tier) AND sector-lens `status==BUY`. The sector-lens
+  (per-name valuation/timing screen) and the 8L rating (cross-sectional fundamental-quality rank) are
+  independent constructions, so simultaneous agreement is a genuine two-system consensus.
+- Deliberately **no narrative on any other combination** (rating>2+BUY, or rating≤2+RICH/WATCH/EXCLUDED): the
+  R# is shown next to every name for reference only — no derived interpretation from a single disagreeing data
+  point (dispatch req 3c; same discipline as no-over-fit / necessary-not-sufficient).
+- Live example 2026-07-06 (NEUTRAL/DT5G=3): ✓✓ on MBB/TCB/ACB (R2), HAH/DHG (R1), SSI/PVT/CTR (R2), FPT (R2,
+  STRONG); NO ✓✓ on VCB (R1 but RICH_WAIT), HDB/VCI/MSH (R3 BUY). Real Telegram send confirmed (`ok:True`).
+
+**Discovered (flagged, NOT fixed — out of scope, zero effect today):** `eval_sec` DT5G gate reads
+`state not in (0,1)` but the `vnindex_5state_dt5g_live.state` column is **1-based** (CRISIS=1, BEAR=2, NEUTRAL=3
+…). So the securities cash-gate closes only at CRISIS, staying **open in BEAR** (intended: cash in both). No
+output change at today's NEUTRAL(3); needs its own fix + skeptic re-verify (STRONG-tier calibration was verified
+against current behavior). Telegram label map was corrected to the 1-based convention in this job.
+
+## FIX: eval_sec DT5G gate off-by-one (0-based → 1-based) (job Taylor_20260706_083933, 2026-07-06)
+
+**Bug (flagged in job _082923 above, now fixed).** `sector_lens_monitor.py::eval_sec` closed the securities
+cash-gate with `state["state"] not in (0, 1)` — 0-based labels — but the `vnindex_5state_dt5g_live.state` column
+is **1-based** (1=CRISIS, 2=BEAR, 3=NEUTRAL, 4=BULL, 5=EX-BULL). Net effect: the gate closed only at CRISIS and
+stayed **OPEN in BEAR**, whereas the securities lens is a euphoria/de-risk cap meant to hold cash in **both** high-
+risk regimes.
+
+**Design intent confirmed (not re-invented).** The source framework backtest `securities_screen.py` is explicit —
+L37 "forced to CASH when DT5G state in {CRISIS,BEAR}", L72 "state in {1 CRISIS, 2 BEAR} = de-risk", L92
+`derisk = gate_dt5g and st in (1, 2)`. So the correct condition is `not in (1, 2)` (close at CRISIS **and** BEAR),
+matching the 1-based `state` column. `eval_sec` had merely copied the intent with 0-based labels.
+
+**Fix.** `gate_open = state["state"] not in (1, 2)` (+ corrected inline comment). No other logic changed;
+production custom30V/BAL/LAG/rating_8l.py untouched — this remains a research/monitor display tool.
+
+**Gate test (injected states, fully-qualifying fundamentals so only the gate decides):**
+| state | gate | result |
+|---|---|---|
+| CRISIS(1) | CLOSED | RICH_WAIT → cash |
+| BEAR(2)   | CLOSED | RICH_WAIT → cash  ← was BUY before fix |
+| NEUTRAL(3)| OPEN | BUY |
+| BULL(4)   | OPEN | BUY |
+| EX-BULL(5)| OPEN | BUY |
+
+**Re-verify STRONG calibration — UNCHANGED (conclusion holds).** `sector_strong_threshold.py::gate_and_depth`
+for Securities applies **only** the valuation gate (`pb>0 & pb<1.8`); it never applied the DT5G regime gate, so the
+STRONG=PB<0.75 line is calibrated on the depth-quintile distribution across all regimes and is **logically
+independent** of this fix. Re-ran `sector_strong_threshold.py`: output reproduces the pinned numbers exactly —
+Securities OOS deepest-PB Q5 = +9.34%/1M, plateau sweep thr 0.70/0.75/0.80 → p1M 4.40/4.48/4.14, p3M
+10.60/10.34/9.90, hit1M 0.483/0.492/0.485. PB<0.75 remains on a robust plateau. **STRONG-tier calibration
+conclusion stands; no threshold change.**
+
+---
+
+## ConvergePort — double-confirm converge paper portfolio (job Taylor_20260706_093329, 2026-07-06)
+
+**What.** A NEW paper portfolio at the intersection of AlphaLens (per-name sector-lens BUY) and
+Golden/Strong (8L rating≤2) = the DOUBLE-CONFIRM set from `sector_lens_monitor.py`. 2-layer like
+V2.4: active converge book (double-confirm names) + idle cash parked in custom30V. Script
+`converge_portfolio_backtest.py`; NAV audit `data/converge_portfolio_backtest_nav.csv`; paper book
+`data/converge_portfolio_paper.json`; framework `mike/agents/Taylor/converge_portfolio_framework.md`.
+RESEARCH/PAPER ONLY — production custom30V/BAL/LAG/rating_8l.py untouched.
+
+**Method (point-in-time, no look-ahead).** Sector-lens BUY decided by the EXACT `eval_*` functions
+imported from `sector_lens_monitor` (no rewrite); price-current PE/PB/EVEB from `ticker` at t;
+fundamentals as-of `ticker_financial.Release_Date≤t`; DT5G state as-of t (securities gate); 8L
+rating as-of `rating_8l_history.csv.eff_date≤t`. Weight = min(0.20, share) of NAV, idle→custom30V
+(published `custom30v_8l` basket, buy-and-hold drift). T+1 execution, threads=1. Self-check daily
+weight-sum max|dev−1| = **2.2e-16** (0 VND leak). 2014-08-05→2026-06-26, 2970 sessions.
+
+**Walk-forward (TC=0.1%):**
+| Config | FULL CAGR | Sharpe | Calmar | MaxDD | IS CAGR | OOS CAGR |
+|---|---|---|---|---|---|---|
+| custom30V thuần (BASELINE) | 18.75% | 0.87 | 0.41 | −45.9% | 12.72% | 24.03% |
+| ConvergePort equal-weight | **23.86%** | **1.11** | 0.52 | −46.1% | 14.22% | 32.54% |
+| ConvergePort tilt 1.5×STRONG | 23.74% | 1.10 | 0.52 | −46.0% | 14.22% | 32.30% |
+| AlphaLens-static (FPT/ACB/MBB/HDB) | 20.68% | 0.95 | 0.46 | −44.7% | 13.82% | 26.74% |
+
+**Deltas vs baseline (FULL):** EW **+5.11pp CAGR / +0.24 Sharpe / +0.11 Calmar**, DD flat. Edge in
+BOTH IS (+1.5pp) and OOS (+8.3pp). Dynamic double-confirm beats static 4-name AlphaLens by ~3pp.
+
+**Robustness.** Turnover EW 4.14×/yr; TC sensitivity 23.74%@0.1→22.58%@0.3% (−1.16pp << 5pp edge →
+turnover does NOT eat the edge). Leave-one-year-out full-period ΔCAGR ∈ [+3.42, +5.52]pp dropping
+ANY single year (even dropping best year 2024 → +3.42pp) → broad-based, NOT 1–2-year carried;
+positive yearly delta 9/13 years. DSR standalone EW **0.998** (n=3), **0.973** (n=16) → clears 0.95.
+N trials = 3 (tilt/equal/static), minimal multiple-testing.
+
+**Verdicts.** (1) Beats custom30V thuần: +5.0pp CAGR, yes clearly. (2) Turnover TC-robust, edge
+intact to 0.3%. (3) STRONG 1.5× tilt NOT worth it — equal-weight marginally better + lower turnover
+→ **launch equal-weight, drop tilt**. (4) → LAUNCH paper (9-name seed, entry 2026-07-06 @ 06-26
+prices, review 2026-10-06, benchmark VNINDEX 1871.91), wired as §3 of `newdeals_daily_report.py`.
+
+**Honest caveats.** Backtest parking = RAW ungated custom30V (DD −46%); production custom30V is
+DT5G-gated (lower DD) — relative comparison clean (same basket both sides), absolute DD not a gated
+book. Excess-over-baseline spread DSR=0.775 (<0.95): marginal edge over parking is statistically
+softer than the robust standalone book — expected (shared equity beta). PAPER, not a production wire.
+
+---
+## Macro "confidence-loss" combined-regime study — job Taylor_20260706_100438 (2026-07-06, RESEARCH/DISPLAY-ONLY)
+Follow-up to macro-corr job _094519. Tests user's SPECIFIC joint hypothesis (not pairwise corr):
+"gold↑ AND USD/VND↑ AND (CPI high OR deposit rate rising) = confidence-loss regime → bad for
+stocks: thin liquidity + broad decline." Scripts: `macro_confidence_regime.py`, `cpi_vn.py`,
+`deposit_rate_vn.py`. Data: VNI+fwd (macro_features.csv 2011+), market turnover SUM(Trading_Value)
+ticker_prune (BQ, 2011+), gold world (/tmp, 2016+), CPI YoY (**PROXY anchor** cpi_vn.py — no clean
+GSO monthly fetchable: FRED err / WorldBank+TE blocked), deposit rate (**PROXY** deposit_rate_vn.py).
+
+Results (fwd60 = 60-session fwd VNINDEX %, turn_rel = turnover/1y-median, baseline fwd60 +2.60% / turn 1.13x):
+| regime (all 6m-momentum) | fwd60 T / F | diff | fwd60 +% T | turn_rel T | vol20 T | n days / episodes |
+|---|---|---|---|---|---|---|
+| REG_A (gold↑&usd↑&(CPIhot OR dep↑)) | 2.58 / 3.26 | -0.68pp | 61% | 1.15x | 15.3% | 827 / many (weak) |
+| **REG_A_strict (gold↑&usd↑&CPI>4 AND dep↑)** | **-2.70 / 3.22** | **-5.92pp** | **35%** | **0.96x** | **23.4%** | **78 / 5** |
+| REG_B (drop gold: usd↑&stress) | 3.04 / 2.22 | +0.82pp (REVERSES) | 65% | 1.08x | 15.7% | 1753 / — |
+| REG_C (monetary stress alone) | 2.58 / 2.65 | -0.06pp (nil) | 61% | 1.12x | 15.6% | 2777 / — |
+
+REG_A_strict 5 lifetime episodes: 2018-05/06 (fwd60 **-9.9%**), 2019-07 (1d), 2022-12→2023-02
+(**+5.2%**, went UP), 2026-01 (fwd60 **-6.3%**), 2026-04/05 (pending). Outcomes MIXED, not uniformly bad.
+
+**Verdict:** user hypothesis SUPPORTED only in strict all-4-binding form (rare days genuinely show
+neg fwd return + thin liq <1x + high vol) — economically sensible. BUT thin & fragile: only ~5
+episodes (gold→2016+), mixed outcomes, effect collapses/reverses if ANY condition relaxed (OR→AND,
+drop gold, drop FX). Welch t=-11 is an OVERLAPPING-window artifact; true evidence = 5 episodes = too
+few to call a tradeable regime. Extends prior finding (only SBV rate had stable single-var link);
+conjunction beats single vars only in extreme form = flagging 2 known bad patches (2018-Q2, 2026-Q1),
+not a repeatable edge. USD/VND is a managed crawl-peg (≈always "up") → weak discriminator. **NOT wired**;
+largely redundant with DT5G (already de-risks 2018/2020/2022 via price+US/VIX). CPI/deposit = proxies —
+refine if clean GSO/Big-4 series surfaces before any reconsideration.
+
+---
+## ConvergePort AS FULL ACTIVE-BOOK REPLACEMENT (2-book V2.4 → 1 ConvergePort book) — 2026-07-06 (job Taylor_20260706_095725, audited by Taylor_20260706_103815)
+**Config:** `converge_fullharness_test.py` (production simulate() engine), `CONVERGE_BOOK=1 CONV_WPN=0.11`,
+50B, DT5G-gated custom30V parking {3:0.7}, CAPIT ON, TC 0.15/0.15/0.1, borrow 10%, threads=1, T+1 Open fills.
+Output: `data/v23_golive_audit_2014_now_CONVERGEPORT_wpn110.csv` (4,350 rows, self-check 0 VND both books).
+
+**What it tests:** replace BOTH active books (BAL momentum SIGNAL_V11 + LAG PEAD) with ONE active book =
+ConvergePort double-confirm (sector-lens BUY ∧ 8L rating≤2; 15-name watchlist; per-name fixed weight WPN=0.11).
+Wiring: ConvergePort carried in the BAL slot @50B (`sig_f`/`RS` overwritten at code lines 708/709), LAG made
+inert (1 VND, `sig_lag` zeroed line 1141), combine = static-sum (single active book). Everything else
+byte-identical to R3.
+
+**Result (FULL 2014-01-02→2026-06-19, 12.46y):** CAGR **12.05%** · Sharpe 0.85 · MaxDD **-38.4%** · Calmar 0.31.
+IS 2014-19 CAGR 14.84%/Sharpe 1.27/DD -18.5%; OOS 2020-now CAGR 9.51%/Sharpe 0.61/DD -38.4%.
+vs VNINDEX B&H CAGR 10.87%/Sharpe 0.66/DD -45.3%.
+
+**VERDICT — DO NOT WIRE (strong REFUTE).** As a full replacement for both active books, ConvergePort is
+FAR WORSE than production 2-book V2.4 R3 (CAGR 28.05% / Sharpe 1.86 / MaxDD -17.5% / Calmar 1.60, same
+engine/parking/50B/TC): **-16pp CAGR, ~½ the Sharpe, ~2× the drawdown.** Root cause = thin breadth: the
+double-confirm book is active on only ~83% of days, mean 3.9 names when active (17% of days 0 names →
+100% parking/cash), nowhere near enough names to carry a 50B active allocation. The momentum+PEAD 2-book
+engine is materially superior. ConvergePort's value (if any) is as a standalone paper sleeve / lens
+(see 2026-07-06 09:47 equal-weight paper launch vs custom30V), NOT as the production active book.
+
+**AUDIT NOTE (why this needed re-verification):** the run's printed labels were STALE and triggered a
+false "only BAL ran alone" alarm — header said "25B BAL + 25B LAG", "[6] BOOK A — BAL 25B", "[7] BOOK B —
+LAG 25B", and Book B logged "0 stock / final 0.0000B" while combined == BAL exactly. All EXPECTED artifacts
+of the single-active-book design (LAG inert at 1 VND → rounds to 0.0000B; combined == BAL because LAG≈0).
+Verified 3 independent ways the active book IS ConvergePort (not momentum): (a) code — sig_f/RS overwritten
+with ConvergePort at 708/709, no re-overwrite before simulate(), line-1254 re-empty skipped since
+IS_SINGLEBOOK=False in converge mode; (b) CSV play_types = only C_<ticker> (ConvergePort tiers) + CAPITB_* +
+ETF_PARK, ZERO momentum tiers; (c) all 330 C_ stock trades in BAL book, LAG 0 stock trades, nav_bal_ref
+50.0B→206.32B. The misleading labels were fixed (made CONVERGE_BOOK-conditional, lines 529/1257/1750) so
+future runs don't misread — NO re-run needed, the 12.05% number is the true correctly-wired result.
+
+## ConvergePort AS-ACTIVE-BOOK — DT5G STATE-GATE ON THE ACTIVE BOOK (does gating fix the deep MaxDD?) — 2026-07-06 (job Taylor_20260706_121242)
+**Question (Mike follow-up to _103815):** the as-active-book run has a deep MaxDD. Does the double-confirm
+**active** book throttle exposure by DT5G state, does CAPIT apply to it, and would adding a state-gate on
+the active book fix the drawdown?
+
+**Code-verified answers (converge_fullharness_test.py, not guessed):**
+1. **Active book state-throttled? NO.** Entry/exit is purely double-confirm membership-driven;
+   `tier_weights_by_state=None` (L1709), stops/hold/sector-caps disabled. The DT5G regime-size halving BAL
+   uses is NOT applied to ConvergePort names → the active book does not scale down in CRISIS/BEAR.
+2. **CAPIT applies? YES.** `add_capit_arm(sig_f,…)` (L1737) grafts the washout-buyer onto the SAME BAL-slot
+   frame carrying ConvergePort — the `CAPIT=ON` washout events are part of this book, not a separate sleeve.
+3. **`{3:0.7}` parking = ONLY total-exposure throttle? YES.** custom30V idle-cash parking follows DT5G
+   `{1:0,2:0.2,3:0.7,4:1.0,5:1.0}` on *unused* cash only — it does nothing to money already in active
+   positions, so a fully-invested book rides the drawdown in CRISIS/BEAR.
+
+**MaxDD provenance:** dispatch's −46.1% = the STANDALONE paper sleeve (converge_portfolio_backtest.py, §3,
+simpler sim). The full production harness as-active-book = **−38.4%** (both active-book-ungated). DD is
+dominated by **universe concentration** (16 candidates, double-confirm breadth mean 4 / max 9, 17% zero-name
+days), NOT the missing gate.
+
+**State-gate test (added opt-in `CONV_STATE_GATE=1`, default-OFF, L1712-1732):** active book obeys DT5G
+ceiling — `tier_weights_by_state` caps new entries; `state_exit_map={1:1.0,2:0.8,3:0.3}` trims held positions
+to CRISIS-flush/BEAR-80%/NEUTRAL-30%. Caveat (disclosed): trim also flushes the CAPIT crisis-buyer in
+CRISIS/BEAR (sells the bottom-fisher when it's meant to buy).
+
+| Config (50B, CAPIT ON, same parking, threads=1) | CAGR | Sharpe | MaxDD | Calmar |
+|---|---|---|---|---|
+| Ungated active book (baseline) | **12.05%** | 0.85 | **−38.4%** | 0.31 |
+| State-gated (`CONV_STATE_GATE=1`) FULL | **5.74%** | 0.66 | **−19.4%** | 0.30 |
+| — IS 2014-19 | 6.14% | 0.76 | −13.1% | 0.47 |
+| — OOS 2020-now | 5.38% | 0.58 | −19.4% | 0.28 |
+| *(ref)* 2-book V2.4 R3 | 28.05% | 1.86 | −17.5% | 1.60 |
+
+**VERDICT — state-gate is NOT the fix (keep default-OFF, nothing wired).** The gate halves MaxDD
+(−38.4%→−19.4%, to production's ~−17.5% neighborhood) but more-than-halves CAGR (12.05%→5.74%): ~1:1
+return-for-DD → **Calmar flat (0.31→0.30), Sharpe WORSE (0.85→0.66)**. No risk-adjusted gain — it just
+scales the (already-losing-to-R3) book down. Root cause of the give-up: forcing de-risk on a
+value/mean-reversion + CAPIT book in CRISIS/BEAR sells into washouts and misses the recovery (same lesson as
+hold-neutral-exit / vol-managed-BAL: throttling a mean-reverting book by regime kills its convexity). The
+deep MaxDD is a small-concentrated-universe artifact, not a missing state-gate — and adding the gate proves
+it. ConvergePort stays a capacity-limited paper sleeve on idle cash (~10-15B ex-DHG), NOT a 2-book
+replacement. Output: `converge_fullharness_test.py` (+`CONV_STATE_GATE`), `/tmp/conv_stategate.log`,
+framework §8.
+
+## ConvergePort — CAPACITY-APPROPRIATE STANDALONE-SLEEVE SIZE — 2026-07-06 (job Taylor_20260706_105156)
+**Question:** not "replace 2-book production" (already REFUTED at 50B, see above) — instead, what NAV can
+ConvergePort absorb as an *independent* sleeve before liquidity (not signal) binds?
+**Method:** `converge_capacity_sweep.py` reuses the EXACT capacity formula from
+`converge_fullharness_test.py` L2298-2318 (no new logic): `days_build = WPN(0.11)×NAV / (0.20×ADV60)`,
+ADV60 = recent-120d median of `Volume_3M_P50×Price` (tav2_bq.ticker, data END 2026-07-05); flag
+OK≤1 / WATCH 1-3 / BREACH>3 build-days. Universe = 16 available names (`sector_lens_monitor.NAMES`).
+Light (liqdf-only pull, no simulate() engine).
+
+**Per-name ADV60 & onset-NAV (WATCH=0.20·ADV/WPN, BREACH=0.60·ADV/WPN):**
+DHG ADV **1.21B/day** → WATCH@**2.2B**, BREACH@**6.6B** (thinnest, ~9× below next name).
+MSH 10.57B → WATCH@19.2B, BREACH@57.7B. CTR 32.4B → WATCH@59B. HAH/DBC ~66-67B → WATCH@~120B.
+PVT 159B → WATCH@290B. VND/VCI/HCM/ACB/TCB/HDB/MBB/VCB/SSI/FPT all ≥200B ADV → WATCH ≥365B.
+
+**Sweep (days_build, thin names; all others <0.9 at ≤50B):** DHG 1B→0.46, 3B→1.37(WATCH),
+5B→2.28, 10B→4.56(BREACH), 50B→22.81. MSH 20B→1.04(WATCH), 50B→2.60. CTR 50B→0.85.
+Flag by NAV: 1B all-OK · 3-5B DHG-WATCH · ≥10B DHG-BREACH · ≥20B +MSH-WATCH (matches prior
+50B/100B run job 095725: DHG BREACH+MSH WATCH @50B; MSH BREACH+CTR WATCH @100B).
+
+**Answers:** (3) Full-16-name sweet-spot (all OK) = **~2.2B** (DHG binds — it barely trades).
+(4) Exclude DHG (buy-and-hold pharma anchor, low turnover → build-rate rule overstates it) →
+next binding = MSH: all-OK to **~19B**, or **~57B** tolerating MSH/CTR in WATCH (= the refuted
+large-scale regime). (5) **+5.0pp CAGR is SCALE-INVARIANT** — verified `converge_portfolio_backtest.py`
+`sim_nav()` is a pure fractional-weight return sim (iterates `r_active+r_park−turnover·TC` on weights
+summing to 1.0), carries NO NAV/ADV/capacity term (only 0.20 per-name *weight* cap). Edge holds at any
+NAV inside the sweet spot; capacity only *erodes* it above, never creates it.
+
+**VERDICT — recommended standalone-sleeve size: ~10-15B VND with DHG hard-excluded from active
+rebalancing** (kept as buy-and-hold anchor sized outside the sleeve — same `excluded_tickers` pattern as
+ZaloPay/DGC). Rationale: excluding one thin low-turnover name lifts the deployable ceiling ~9× (2B→~19B);
+10-15B sits comfortably below MSH's 19.2B WATCH onset with margin for thin-name ADV drift, so no name is
+even at WATCH and every 15-name build completes <1 session; the +5.0pp edge is fully intact. Aggressive:
+≤19B (zero MSH-drift margin); 50B only if accepting the refuted large-scale WATCH regime — not
+recommended. RESEARCH/PAPER-ONLY, production untouched; current equal-weight paper book unaffected.
+Framework: `mike/agents/Taylor/converge_portfolio_framework.md` §6.
+
+---
+
+## ConvergePort — UNION (OR) alternative vs double-confirm (AND) — 2026-07-06 (job Taylor_20260706_114506)
+**RESEARCH-ONLY, production untouched (custom30V/BAL/LAG/rating_8l.py + double-confirm paper book unchanged).**
+**Question (user via Mike):** double-confirm (AlphaLens Group-A BUY **AND** 8L golden) is thin — mean
+3.95 names, **17.3% of days 0 names**. Does switching **AND → OR (UNION)** fix "too few deals" WITHOUT
+hurting risk-adj performance? Should the launched paper book switch to UNION?
+
+**UNION definition (no new conditions invented, per dispatch):** member(t) = [name∈sector_lens Group-A
+∧ status==BUY] **OR** [name∈rating_8l.py BUY-NOW list]. BUY-NOW = rating_8l.py's OWN pre-defined golden
+screen (rating≤3 ∧ liq_bn≥3.0 ∧ pb_z≤−0.3 ∧ NOT ROE_Min3Y<0). *Not* the refuted "rating≤2 anything"
+composite-as-selector. Enter when a name appears in UNION, exit when it leaves BOTH arms.
+**Engine:** `converge_union_test.py` — same fractional paper-sim as the §3/backtest frame (baseline /
+double-confirm / UNION in one identical engine; custom30V parking; DT5G-as-of gate; T+1; threads=1;
+min(CAP,1/n) equal-weight, weights sum 1.0 → **scale-invariant** return sim, so NAV=20B only feeds the
+ADV overlay, not the return). Self-check 0 VND: max|Σw−1|=2.2e-16 (UNION), 1.1e-16 (double-confirm).
+
+**Breadth — UNION DOES fix "too few deals" completely:**
+| book | mean-when-active | max | empty days |
+|---|---|---|---|
+| double-confirm (AND) | 3.95 | 9 | 515/2970 (**17.3%**) |
+| BUY-NOW golden arm alone | 33.1 | 104 | 0 (0.0%) |
+| **UNION (OR)** | **36.1** | **107** | **0 (0.0%)** |
+Live 2026-06-26: UNION = **65 names** (universe 297 ever) vs double-confirm 9.
+
+**Performance (FULL 2014-08→2026-06, TC=0.1%):**
+| book | CAGR | Sharpe | MaxDD | Calmar | turnover |
+|---|---|---|---|---|---|
+| custom30V thuần (baseline) | 18.75% | 0.87 | −45.9% | 0.41 | ~0 |
+| double-confirm (AND) | **23.86%** | **1.11** | −46.1% | **0.52** | 4.14×/yr |
+| **UNION (OR)** | **12.07%** | **0.64** | **−55.9%** | **0.22** | **12.89×/yr** |
+**Δ UNION vs baseline: −6.68pp CAGR / −0.23 Sharpe / −0.19 Calmar / MaxDD −10pp WORSE**, and −11.8pp
+vs double-confirm. Worse in BOTH IS (6.71% vs 12.72% baseline) and OOS (16.76% vs 24.03%). UNION loses
+even to *pure parking*. TC sensitivity: 12.07%→9.22% @0.3% (12.9×/yr churn bites hard).
+
+**Why UNION fails (mechanistic):** (1) golden BUY-NOW arm is a broad 8L deep-value list that heavily
+overlaps custom30V itself → UNION ≈ a *worse-built* custom30V (equal-weight vs yieldcombo cap-weight) +
+churn; (2) equal-weighting 30-100 pb_z≤−0.3 dislocated names = max exposure to the cheapest/most-
+distressed right as they fall → falling-knife DD −55.9%; (3) 3× turnover; (4) the double-confirm edge
+WAS the AND-selectivity (two lenses agreeing = high conviction) — OR destroys exactly that.
+
+**Capacity @20B — NOT the constraint (but moot):** 65 names × ~1.5% = 0.31B/name → 64/65 OK, only
+DHG at WATCH (1.27 build-days), 0 BREACH. Easier than double-confirm, but irrelevant given perf fails.
+
+**VERDICT — DO NOT switch to UNION; keep double-confirm.** UNION "solves" empty-days, but that problem
+was never real: an empty double-confirm day = 100% custom30V parking = **automatic safety, not a defect**
+(exactly Mike's framing, confirmed). Trading AND-selectivity for OR-breadth turns a high-conviction
+concentrated sleeve into a churning broad-value book that loses to plain parking. Launched paper book
+(double-confirm equal-weight) stays as-is. Artifacts: `converge_union_test.py`,
+`data/converge_union_test_nav.csv`, `data/converge_union_test_summary.json`. Framework §7.
+
+---
+
+### 2026-07-06 · Real NSO CPI YoY fetched (chart-embed) + confidence-loss study re-run — job Taylor_20260706_105930
+**RESEARCH/DISPLAY-ONLY, production untouched.** Prior job Taylor_20260706_100438 used a PROXY CPI
+anchor series (clean machine-readable GSO CPI could not be fetched then). This job fetched REAL
+headline CPI YoY from the NSO/GSO Highcharts **chart-embed** endpoint — no NLP/prose parsing:
+`https://www.nso.gov.vn/chart/cpi/embed/?show=chart` (slug "cpi", post id 24238) returns the raw
+Highcharts `series.data` array of `["M/YYYY", yoy_pct]` pairs. Method verified, fast, robust.
+(TLS cert verify skipped for nso.gov.vn ONLY, per user scope — `curl -k`.)
+
+**Data obtained (REAL, authoritative):** headline CPI YoY, 13 months **2025-06 → 2026-06**:
+3.57, 3.19, 3.24, 3.38, 3.25, 3.58, 3.48, **2.53** (Jan-26 dip), 3.35, **4.65, 5.46, 5.60**, 4.69.
+Also grabbed NSO "inflation" chart (average/bình-quân YoY, slug "inflation" id 24239), same window.
+
+**HARD LIMIT — history caps at ~13 months.** The NSO CPI chart is a SINGLE evergreen post with a
+ROLLING 13-month window (slides monthly); there are NO per-article historical charts (article pages
+are prose-only; probing older chart slugs/ids all 404). Real chart data reaches back only to
+2025-06. Older history (2011→2025-05) stays on the Tier-2 proxy anchors as documented fallback.
+**Gold/USD**: NSO articles are titled "…chỉ số giá vàng và …đô la Mỹ" but publish NO chart for them
+(prose only) — NOT fetchable by this method. Kept vnstock gold / macro USD/VND as before (skipped
+per job instruction to not stall on this).
+
+**cpi_vn.py updated**: `NSO_CPI_YOY_REAL` dict overlays real values onto the proxy for months present
+(`is_real_nso` flag added); proxy retained as fallback. Docstring rewritten with source/method/date/
+coverage/limitation. `NSO_CPI_YOY_AVG_REAL` kept for reference.
+
+**What the real data corrected vs proxy:** proxy modeled a smooth 2026 rise (Jan proxy 4.5); real print
+**DIPPED to 2.53 in Jan** then spiked LATER & sharper (Mar 4.65 → May 5.60 → Jun 4.69). Jan-2026 was a
+LOW, not a step-up. `cpi_yoy_chg3` now shows the true acceleration burst (+2.93 at Apr-26).
+
+**Confidence-loss regime study re-run (macro_confidence_regime.py) — CONCLUSION UNCHANGED.**
+The real CPI only touches the recent tail (macro_features ends 2026-05; fwd60 undefined there), so the
+strict all-4-binding regime (gold↑ ∧ USD↑ ∧ CPI>4 ∧ deposit↑) still reads the same:
+REG_A_strict n=62 (1.6% days), **fwd60 −2.44% vs baseline +2.60%**, fwd60+% 40%, turnover 0.84× (thin),
+vol 25.4% (high). Still a genuine risk-off signature. Real CPI cleaned the episode count to **3 distinct
+episodes** (2018-05, 2022-12→23-02, and the live/incomplete 2026-04→05) — proxy interpolation had padded
+extra in-between days. **Still too rare / incomplete-live to be tradeable → NOT wired** (same verdict as
+job _100438). The 2026 spike is REAL and DOES arm the strict regime now, but its fwd60 outcome is not yet
+observable (data edge). Frame saved `/tmp/macro_confidence_regime_frame.csv`.
+
+---
+## Bottom-recovery regime (symmetric opposite of confidence-loss) — job Taylor_20260706_111335 (2026-07-06, RESEARCH/DISPLAY-ONLY)
+Script: `bottom_recovery_regime.py`. Scope: production untouched (DT5G/custom30V/BAL/LAG/rating_8l.py unchanged). Does NOT propose re-enabling the easing floor.
+
+**User hypothesis:** after a high-rate period, when (1) rates ease + (2) real estate cold + (3) gold falls + (4) equities cheap vs own history → VNINDEX bottom/turn-up drawing capital back. Question: does the 4-way combo fire EARLIER / with LESS NOISE than the single "rates falling" signal (which EASING_FLOOR_ENABLED=False deemed untrustworthy alone)?
+
+**Data:** BQ ticker_prune 2007+ (RE sector = ICB 8633/8637 dev+services, 42+ names; VNINDEX_PE off stock rows), SBV refi (2006+), Big-4 deposit proxy, gold world (2016-07+ only — hard limit).
+
+**Result — hypothesis NOT supported as an early/tradeable bottom signal:**
+- **flag3** (rates-easing ∧ RE-cold ∧ cheap, no gold, 2008+): fwd60 +16.2% / fwd120 +22.0% / fwd250 +26.5% (hit 95–100%) vs baseline 1.7/3.5/7.4% — eye-popping BUT only **2 episodes ever**: 2012-09..12 and 2023-04..05.
+- **Fires LATE, not early:** 2012 episode fires **+248d** after the true price trough (2012-01, price already +15% off low); 2023 episode fires **+163d** after trough (2022-11, price already +14% off low). Missed all 4 classic bottoms (2009 GFC, 2012-01, 2020-03 COVID, 2022-11). It CONFIRMS a recovery already underway — it does not lead it. Directly refutes "fires earlier than rates-only."
+- **Single-episode carry:** LOO — drop 2012 → fwd120 collapses to 2.3% (≈baseline); the entire fwd120 edge is one episode. Not distinguishable from luck (same trap as Wave1/H8a & confidence-loss job).
+- **flag4 (+gold) NEVER fires** across 2016+ — gold rose during both easing recoveries (2023 banking stress), so the gold condition zeroes all overlap → the 4-way combo is non-operational on the only window where gold data exists.
+- **rates-only** baseline: 1112 sessions, fwd250 +18.2% (hit 88%) — noisier per-episode but far more episodes → the combo does NOT reduce noise, it just adds a multi-month LAG and shrinks to 2 lucky clusters.
+- **Live 2026-07-06:** flag3=FALSE (PE pctile 0.45 = not cheap; refi flat since 2023-06 + deposit flat = rates_easing FALSE). RE cold + gold falling only.
+
+**Verdict:** REFUTED as an early bottom indicator; NOT wired, NOT recommended for DT5G. Reinforces the standing decision — DT5G price-based re-risk would catch these recoveries EARLIER than this flag (which lags price 5–8 months). No case to re-enable easing floor. Same shape as confidence-loss study: strict combo looks great but too few episodes (2) + single-episode carry = untradeable.
+
+---
+## NEUTRAL idle-cash waterfall + SOFT-threshold glide — job Taylor_20260706_125540 (2026-07-06, RESEARCH-ONLY)
+User (via Mike) proposed (1) a WATERFALL for NEUTRAL idle cash: BAL/LAG full FIRST → **DC book
+(ConvergePort)** → custom30V residual; unwind reverse (sell custom30V first when BAL/LAG re-fill).
+Core Q: should DC be ranked BELOW BAL/LAG? (2) NEUTRAL as a SOFT threshold: glide cash 10-30%
+(park 0.90-0.70) by how NEUTRAL is "leaning" bear/bull, vs the approved fixed 70/30 (`trading_rules.json`
+v2.1 `neutral_parking`). Production untouched (custom30V/BAL/LAG/rating_8l.py/trading_rules.json unchanged).
+
+### PART 1 — Waterfall priority: DC book BELOW BAL/LAG is CONFIRMED CORRECT (decisive, from bracketing backtests)
+The ordering is pinned by two already-run full-harness backtests that bracket it:
+- **DC given TOP priority** (ConvergePort REPLACES BAL+LAG, job _095725): FULL CAGR **12.05%** / Sharpe
+  0.85 / MaxDD −38.4% / Calmar 0.31.
+- **BAL/LAG kept on top, R3** (DC absent): FULL CAGR **28.05%** / Sharpe 1.87 / MaxDD −18.8% / Calmar 1.50.
+- **DC as PARKING vehicle** (below BAL/LAG, idle-only; job _093329): **+5.0pp CAGR** vs custom30V parking
+  (23.86 vs 18.75), DSR standalone 0.998.
+⇒ Giving DC priority OVER BAL/LAG costs ~16pp CAGR and doubles DD; DC as the top of the *parking*
+waterfall (below BAL/LAG, above custom30V) adds +5pp on the parked sleeve. **User's waterfall ordering
+BAL/LAG → DC → custom30V is CORRECT — DC must rank BELOW BAL/LAG. Answer = YES, decisive.**
+- **Net effect on full V2.4:** parked sleeve = **19.0% of NAV mean full-history, 30.9% on NEUTRAL days,
+  max 69.2%** (measured from R3 audit DAILY `bal_etf_ref`+`lag_etf_ref`/`combined_nav`). Upgrading that
+  sleeve custom30V→DC-first ≈ +5.1pp × ~19% ≈ **+0.9-1.0pp/yr on total NAV full-history**; for **SpaceX-NOW
+  (BAL/LAG empty since ~04/2026, parked ~70%) ≈ +3.5pp** — the motivating scenario, where it matters most.
+- **Honest caveat (unchanged from _093329):** the DC-over-custom30V EXCESS has **DSR=0.775 (<0.95)** —
+  softer than the standalone book (shared equity beta). Ordering confirmed & direction positive, but the
+  parking-upgrade is insurance-grade, not high-confidence alpha → keep on PAPER (launched 07-06, review
+  2026-10-06) before any wire. **Reverse-unwind rule (sell custom30V before DC when BAL/LAG re-fill) is a
+  sound corollary** of the ordering (unwind lowest-conviction/most-liquid sleeve first) — no separate
+  backtest needed; execution detail (avoid DC↔BAL/custom30V wash-churn) for Mafee/DollarBill.
+
+### PART 2 — SOFT-threshold glide: REFUTED as a risk-adjusted improvement (4 indicators, neg-control clean)
+Script `neutral_glide_backtest.py`; output `data/neutral_glide_backtest_output.txt`. Testbed = the NEUTRAL
+parking SLEEVE in isolation (deploy park_frac into custom30V on NEUTRAL days, cash else; T+1; TC 0.1%;
+2014-08→2026-06, 2969 sessions, 1820 NEUTRAL). Self-check sleeve NAV identity OK (0-VND leak). NB the
+~8-10% sleeve CAGR is NOT a strategy return — the sleeve is in CASH on the 1149 non-NEUTRAL days by design;
+only the RELATIVE (glide vs fixed) comparison is meaningful.
+
+| config | avgPark | FULL CAGR | Sharpe | MaxDD | Calmar | IS | OOS |
+|---|---|---|---|---|---|---|---|
+| fixed_70 (APPROVED baseline) | 0.700 | 7.90% | **0.83** | −15.1% | 0.52 | 8.99% | 6.99% |
+| fixed_80 | 0.800 | 8.99% | **0.83** | −17.1% | 0.53 | 10.25% | 7.96% |
+| fixed_90 | 0.900 | 10.07% | **0.83** | −19.1% | 0.53 | 11.49% | 8.91% |
+| GLIDE breadth(%>MA200) | 0.793 | 8.63% | 0.82 | −17.1% | 0.50 | 9.49% | 7.93% |
+| GLIDE breadth (exp-pct) | 0.780 | 8.79% | 0.84 | −17.4% | 0.50 | 9.73% | 8.01% |
+| GLIDE VNI mom60 | 0.791 | 8.56% | 0.80 | −18.8% | 0.46 | 10.03% | 7.36% |
+| GLIDE VNI MA200-dist | 0.791 | 8.98% | 0.84 | −16.5% | 0.54 | 10.25% | 7.93% |
+| GLIDE VNI RSI | 0.795 | 8.78% | 0.83 | −17.5% | 0.50 | 9.97% | 7.81% |
+| INV-GLIDE breadth (neg ctrl) | 0.807 | 9.05% | 0.81 | −17.3% | 0.52 | — | — |
+
+**The decisive fact: Sharpe is FLAT at 0.83 across the ENTIRE fixed ladder (70→80→90).** Deploying more
+idle cash into custom30V in NEUTRAL trades raw CAGR against DD **1:1 (pure beta)** — no free lunch. So any
+glide overlay must lift Sharpe ABOVE 0.83 to add value. **None does:** best is MA200-distance (Sharpe 0.84,
+Calmar 0.54 — **+0.01 over the ladder = multiple-testing noise** from 4 indicators × mapping variants);
+momentum is actively WORSE (0.80/0.46); breadth/RSI ≈ ladder. The breadth glide's +0.74pp CAGR vs fixed_70
+is **purely "deploy more on average"** (avg park 0.79) — at the SAME avg deployment it is −0.35pp vs fixed_80,
+and the **negative control (park more when breadth LOW) is NOT beaten** (9.05% / 0.81) → breadth carries no
+within-NEUTRAL timing edge. **Economic reason: DT5G already does the regime timing; conditional on NEUTRAL,
+residual breadth/momentum/trend variation has no forward edge on the defensive custom30V basket.**
+
+**VERDICT Part 2:** the soft threshold is a **disguised risk-dial, not a signal** — it raises return only by
+raising average deployment, which the 2026-07-03 decision already settled (fixed **0.70 = risk-adjusted
+optimum**; higher park = proportionally worse DD, flat Sharpe/Calmar). **Do NOT wire a breadth/momentum/RSI
+glide.** If the user wants more deployment in benign NEUTRAL, that is the existing **`risk_dial_override`**
+governance lever (raise fixed park with explicit sign-off), NOT an indicator-driven auto-glide. Keep NEUTRAL
+parking at the fixed 0.70.

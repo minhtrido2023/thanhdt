@@ -1,13 +1,13 @@
 # Cao su (RSS3) — theo dõi tuần
 
-_Cập nhật 2026-07-02 · nguồn: regionalert (SGX SICOM RSS3, USD/kg) + SunSirs-586 (spot TQ)_
+_Cập nhật 2026-07-03 · nguồn: regionalert (SGX SICOM RSS3, USD/kg) + SunSirs-586 (spot TQ)_
 
 ## Trạng thái: **🟢 INFO**
 
 ## Giá & xu hướng
-- **Mới nhất:** 2.76 USD/kg (2026-07-02)
-- **vs tuần trước (WoW):** +1.0% (vs 2026-06-26)
-- **4 tuần:** —  ·  **3 tháng:** +10.0% (vs 2026-04-15)
+- **Mới nhất:** 2.78 USD/kg (2026-07-03)
+- **vs tuần trước (WoW):** +1.6% (vs 2026-06-26)
+- **4 tuần:** —  ·  **3 tháng:** +10.6% (vs 2026-04-15)
 
 | Tuần (giá đóng) | RSS3 USD/kg |
 |---|---|
@@ -17,7 +17,7 @@ _Cập nhật 2026-07-02 · nguồn: regionalert (SGX SICOM RSS3, USD/kg) + SunS
 | 2026-05-15 | 2.69 |
 | 2026-06-19 | 2.80 |
 | 2026-06-26 | 2.73 |
-| 2026-07-02 | 2.76 |
+| 2026-07-03 | 2.78 |
 
 ## Ngưỡng cảnh báo (đã duyệt)
 - 🟡 **WATCH → Taylor**: |WoW| ≥ 7% hoặc |4 tuần| ≥ 15% — rà mô hình/dự báo nhóm cao su.

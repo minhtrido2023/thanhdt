@@ -91,6 +91,16 @@ DEFAULTS = {
     "extreme_slice_mult": 0.25,       # shorten cancel/reprice cadence ×0.25 (~2min) to chase the falling book.
     "extreme_cooldown_min": 15,       # once tripped, stay active this long (debounce flicker).
 
+    # --- DC-book NEUTRAL idle-cash WATERFALL (Taylor 2026-07-06, user-approved paper trial) ---
+    # When DT5G=NEUTRAL and BAL/LAG have no qualifying deal, fill idle cash in priority:
+    #   BAL/LAG (unchanged) → DC book (ConvergePort double-confirm, 8L≤2 ∧ sector-lens BUY,
+    #   ex-DHG, cap 0.20/name) → custom30V. Reverse-unwind (custom30V first, DC book second)
+    #   when BAL/LAG get a deal back. Research: job Taylor_20260706_125540 (DC-below-BAL/LAG
+    #   CONFIRMED, +~1pp/yr full-V2.4, insurance-grade DSR 0.775). This flag ONLY gates the
+    #   self-contained PAPER sleeve (dc_book_waterfall_paper.py) — it touches NO production
+    #   plan builder / executor. DEFAULT OFF; ON only on paper account `main`.
+    "dc_book_waterfall_enabled": False,  # DEFAULT OFF — paper only.
+
     # --- an toàn ---
     "max_orders_per_day": 60,         # tổng số parent order tối đa trong 1 plan
     "max_daily_gross_value": 20_000_000_000,  # tổng GTGD tối đa 1 ngày (VND)

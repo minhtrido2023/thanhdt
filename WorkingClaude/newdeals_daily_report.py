@@ -1,0 +1,114 @@
+#!/usr/bin/env python3
+"""newdeals_daily_report.py — daily "New deals" Discord report.
+
+Combines TWO already-built, reusable data sources into ONE Discord message posted to the
+"New deals" topic (thread 1523612826260734112):
+
+  1. AlphaLens Paper Portfolio  — reuses alphalens_report.generate_section()
+     (FPT/ACB/MBB/HDB paper book P&L vs entry + vs VNINDEX benchmark).
+  2. Golden/Strong Watchlist    — reuses sector_lens_monitor.compute_status() +
+     build_telegram_message() + load_ratings(): the Group-A 6-state sector lens with the
+     8L-rating DOUBLE-CONFIRM cross-check (rating<=2 AND sector-lens BUY = two independent
+     systems agreeing) and same-day state transitions.
+
+RESEARCH / MONITOR ONLY — touches no production trading file (custom30V / BAL / LAG /
+rating_8l.py unchanged). This is an ADDITIONAL channel; it does not replace the pt_8l_daily
+Telegram digest or the AlphaLens block in DollarBill's plan report. A BUY surfaced here still
+routes through Taylor-validate -> DollarBill-plan -> user-approve -> Mafee.
+
+Fail-safe (dispatch req): if the BQ local cache is not fresh/readable (e.g. the overnight sync
+has not finished by 06:00 ICT), compute_status() raises -> we LOG the error and exit non-zero
+WITHOUT sending, so a malformed/empty message never reaches the channel.
+
+Job Taylor_20260706_091624.
+"""
+import os
+import sys
+import subprocess
+import datetime as dt
+
+ROOT = os.environ.get("WORKDIR", "/home/trido/thanhdt/WorkingClaude")
+sys.path.insert(0, ROOT)
+os.environ.setdefault("WORKDIR", ROOT)
+os.environ.setdefault("WORKDIR_8L", ROOT)
+
+THREAD_ID = "1523612826260734112"                 # Discord "New deals" topic
+NOTIFY = os.path.join(ROOT, "mike", "bin", "notify_thread.sh")
+
+
+def _log(msg: str) -> None:
+    ts = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"[{ts}] newdeals: {msg}", flush=True)
+
+
+def _html_to_discord(s: str) -> str:
+    """build_telegram_message() emits Telegram HTML (<b>/<i>); Discord renders markdown, not
+    HTML, so convert bold/italic. Both HTML tags map cleanly onto Discord's ** / * markers."""
+    return (s.replace("<b>", "**").replace("</b>", "**")
+             .replace("<i>", "*").replace("</i>", "*"))
+
+
+def build_message() -> str:
+    """Assemble the combined Discord message. Raises if the sector-lens evaluation cannot read
+    the cache (fatal -> caller aborts without sending)."""
+    today = dt.date.today().isoformat()
+
+    # ---- Section 2 first: sector lens is the hard dependency (raises on cache failure) ----
+    import sector_lens_monitor as slm
+    r = slm.compute_status()                      # raises on cache-read failure -> abort upstream
+    ratings = slm.load_ratings()
+    if not ratings:
+        _log("rating_8l.csv missing/unreadable — sending sector lens without 8L cross-check (R? shown).")
+    sector_tg = slm.build_telegram_message(
+        r["df"], r["transitions"], r["prior"], r["state"],
+        r["spread_yoy"], r["feed_ok"], r["feed_asof"], ratings)
+    sector_md = _html_to_discord(sector_tg)
+
+    # ---- Section 1: AlphaLens (returns a string; degrades to a ⚠️ line, never raises) ----
+    from alphalens_report import generate_section
+    alphalens_md = generate_section(as_of_date=today)
+
+    # ---- Section 3: ConvergePort paper book (double-confirm converge, job Taylor_20260706_093329).
+    # Reuse the sector-lens set already computed above (r["df"] + ratings) so we don't run
+    # compute_status() twice; degrades to a ⚠️ line, never raises.
+    from converge_report import generate_section as converge_section
+    live_dc = {}
+    for _, row in r["df"][r["df"]["status"] == "BUY"].iterrows():
+        rt = ratings.get(row["ticker"])
+        if rt is not None and int(rt) <= 2:
+            live_dc[row["ticker"]] = row["buy_mode"] or "ACCUMULATE"
+    converge_md = converge_section(as_of_date=today, live_set=live_dc)
+
+    header = f"🆕 **NEW DEALS — {today}**  ·  *research/monitor, not an order*"
+    parts = [
+        header,
+        "## AlphaLens Paper Portfolio\n" + alphalens_md,
+        "## Golden/Strong Watchlist (8L + Sector Lens)\n" + sector_md,
+        "## DC Book Paper Portfolio\n" + converge_md,
+    ]
+    return "\n\n".join(parts)
+
+
+def send(message: str) -> None:
+    subprocess.run([NOTIFY, message, THREAD_ID], check=True)
+
+
+def main() -> int:
+    try:
+        message = build_message()
+    except Exception as e:
+        _log(f"FATAL — could not build report (BQ cache not ready?): {e}. NOT sending.")
+        return 1
+
+    try:
+        send(message)
+    except Exception as e:
+        _log(f"FATAL — notify_thread.sh failed: {e}")
+        return 2
+
+    _log(f"sent OK ({len(message)} chars) to thread {THREAD_ID}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
