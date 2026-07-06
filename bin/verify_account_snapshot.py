@@ -34,7 +34,14 @@ BQ_PATH_PREFIX = "/home/trido/google-cloud-sdk/bin"
 
 
 def true_fills_from_dnse_raw(account_no, date):
-    """Trả về {ticker: (total_qty, total_value)} từ log thô broker cho 1 ngày."""
+    """Trả về {ticker: (net_qty, buy_qty, buy_value)} từ log thô broker cho 1 ngày.
+
+    net_qty = buy_qty - sell_qty (KL thật đang nắm giữ, để đối chiếu snapshot broker).
+    buy_qty/buy_value CHỈ tính từ lệnh MUA — giá vốn bình quân gia quyền không đổi khi
+    bán bớt (weighted-average costing chuẩn kế toán), nên KHÔNG được trộn giá bán vào.
+    Bug 2026-07-06 (kb/INCIDENTS.md): bản cũ cộng dồn fillQuantity bất kể side, nên ngày
+    có lệnh BÁN (trim 07-06) bị CỘNG thêm thay vì TRỪ, gây báo lệch số lượng giả.
+    """
     path = os.path.join(EXEC_DIR, f"dnse_raw_{date}.jsonl")
     if not os.path.exists(path):
         return None, f"missing dnse_raw_{date}.jsonl"
@@ -63,35 +70,61 @@ def true_fills_from_dnse_raw(account_no, date):
                     continue
                 latest_by_id[oid] = o  # ghi đè -> bản ghi mới nhất mỗi order id
 
-    agg = defaultdict(lambda: [0.0, 0.0])  # ticker -> [qty, value]
+    agg = defaultdict(lambda: [0.0, 0.0, 0.0])  # ticker -> [net_qty, buy_qty, buy_value]
     for o in latest_by_id.values():
         fq = o.get("fillQuantity") or 0
         if fq <= 0:
             continue
         sym = o.get("symbol")
         px = o.get("averagePrice") or o.get("price") or 0
-        agg[sym][0] += fq
-        agg[sym][1] += fq * px
-    return {tk: (v[0], v[1]) for tk, v in agg.items()}, None
+        side = str(o.get("side") or "").upper()
+        if side.startswith("NS") or side == "SELL":
+            agg[sym][0] -= fq
+        else:  # NB (Normal Buy) hoặc side khác chưa gặp -> mặc định coi là mua
+            agg[sym][0] += fq
+            agg[sym][1] += fq
+            agg[sym][2] += fq * px
+    return {tk: tuple(v) for tk, v in agg.items()}, None
 
 
 def true_fills_from_journal(account, date):
-    """Cross-check độc lập từ journal CSV nội bộ (event=FILL)."""
+    """Cross-check độc lập từ journal CSV nội bộ (event=FILL). Cùng nguyên tắc net_qty
+    (buy trừ sell) + cost basis chỉ từ buy như true_fills_from_dnse_raw() ở trên.
+
+    QUAN TRỌNG: Executor._sync_fills ghi `qty` = c["filled"] LŨY KẾ của child order tại
+    thời điểm đó (executor.py dòng ~386), KHÔNG PHẢI phần fill tăng thêm — 1 child có thể
+    xuất hiện nhiều dòng FILL khi khớp từng phần (vd 600 rồi 2100 lũy kế, không phải 600+2100).
+    Cộng dồn hết mọi dòng sẽ đếm trùng. Bug 2026-07-06 (kb/INCIDENTS.md): HDB báo lệch vì
+    cộng cả dòng lũy kế trung gian lẫn dòng cuối. Fix: chỉ giữ dòng CUỐI (theo ts) mỗi
+    child_oid, rồi mới cộng qua các child_oid khác nhau — giống hệt cách
+    true_fills_from_dnse_raw() dùng latest_by_id cho cùng lý do.
+    """
     path = os.path.join(EXEC_DIR, f"exec_{account}_{date}_journal.csv")
     if not os.path.exists(path):
         return None, f"missing exec_{account}_{date}_journal.csv"
     import csv
-    agg = defaultdict(lambda: [0.0, 0.0])
+    latest_by_child = {}  # child_oid -> (ts, ticker, side, cumulative_qty, price)
     with open(path, encoding="utf-8") as f:
         for row in csv.DictReader(f):
             if row.get("event") != "FILL":
                 continue
-            tk = row.get("ticker")
-            qty = float(row.get("qty") or 0)
-            price = float(row.get("price") or 0)
+            child_oid = row.get("child_oid")
+            ts = row.get("ts", "")
+            prev = latest_by_child.get(child_oid)
+            if prev is None or ts >= prev[0]:
+                latest_by_child[child_oid] = (
+                    ts, row.get("ticker"), str(row.get("side") or "").lower(),
+                    float(row.get("qty") or 0), float(row.get("price") or 0))
+
+    agg = defaultdict(lambda: [0.0, 0.0, 0.0])  # ticker -> [net_qty, buy_qty, buy_value]
+    for _, tk, side, qty, price in latest_by_child.values():
+        if side == "sell":
+            agg[tk][0] -= qty
+        else:
             agg[tk][0] += qty
-            agg[tk][1] += qty * price
-    return {tk: (v[0], v[1]) for tk, v in agg.items()}, None
+            agg[tk][1] += qty
+            agg[tk][2] += qty * price
+    return {tk: tuple(v) for tk, v in agg.items()}, None
 
 
 def bq_close_prices(tickers, as_of_date):
@@ -133,24 +166,26 @@ def main():
     dates = [d.strip() for d in args.dates.split(",") if d.strip()]
     warnings = []
 
-    raw_agg = defaultdict(lambda: [0.0, 0.0])
-    journal_agg = defaultdict(lambda: [0.0, 0.0])
+    raw_agg = defaultdict(lambda: [0.0, 0.0, 0.0])      # ticker -> [net_qty, buy_qty, buy_value]
+    journal_agg = defaultdict(lambda: [0.0, 0.0, 0.0])
     for date in dates:
         raw, err = true_fills_from_dnse_raw(args.account_no, date)
         if raw is None:
             warnings.append(f"FATAL: {err} — không có nguồn broker thật cho {date}")
             continue
-        for tk, (q, v) in raw.items():
-            raw_agg[tk][0] += q
-            raw_agg[tk][1] += v
+        for tk, (nq, bq, bv) in raw.items():
+            raw_agg[tk][0] += nq
+            raw_agg[tk][1] += bq
+            raw_agg[tk][2] += bv
 
         jr, jerr = true_fills_from_journal(args.account, date)
         if jr is None:
             warnings.append(f"WARN: {jerr} — bỏ qua cross-check journal cho {date}")
         else:
-            for tk, (q, v) in jr.items():
-                journal_agg[tk][0] += q
-                journal_agg[tk][1] += v
+            for tk, (nq, bq, bv) in jr.items():
+                journal_agg[tk][0] += nq
+                journal_agg[tk][1] += bq
+                journal_agg[tk][2] += bv
 
     if any(w.startswith("FATAL") for w in warnings):
         print("XÁC MINH THẤT BẠI — không đủ dữ liệu nguồn broker thật:", file=sys.stderr)
@@ -158,16 +193,16 @@ def main():
             print(" -", w, file=sys.stderr)
         sys.exit(2)
 
-    # cross-check dnse_raw vs journal (2 nguồn độc lập)
+    # cross-check dnse_raw vs journal (2 nguồn độc lập) — so KL NET (mua-bán), giá vốn chỉ từ mua
     for tk in set(raw_agg) | set(journal_agg):
-        rq, rv = raw_agg.get(tk, (0, 0))
-        jq, jv = journal_agg.get(tk, (0, 0))
+        rq, rbq, rbv = raw_agg.get(tk, (0, 0, 0))
+        jq, jbq, jbv = journal_agg.get(tk, (0, 0, 0))
         if rq == 0 and jq == 0:
             continue
         if abs(rq - jq) > 1e-6:
             warnings.append(f"WARN qty mismatch {tk}: dnse_raw={rq:.0f} journal={jq:.0f}")
-        r_avg = rv / rq if rq else 0
-        j_avg = jv / jq if jq else 0
+        r_avg = rbv / rbq if rbq else 0
+        j_avg = jbv / jbq if jbq else 0
         if r_avg and j_avg:
             diff_pct = abs(r_avg - j_avg) / r_avg * 100
             if diff_pct > args.tolerance_pct:
@@ -180,7 +215,7 @@ def main():
         snap = json.load(open(args.broker_snapshot, encoding="utf-8"))
         snap_qty = {p["ticker"]: p["qty"] for p in snap.get("positions", [])}
         for tk, q in snap_qty.items():
-            rq = raw_agg.get(tk, (0, 0))[0]
+            rq = raw_agg.get(tk, (0, 0, 0))[0]
             if abs(rq - q) > 1e-6:
                 warnings.append(
                     f"WARN qty vs broker-snapshot {tk}: dnse_raw={rq:.0f} snapshot={q:.0f}")
@@ -194,8 +229,10 @@ def main():
     positions = []
     total_cost = total_mtm = 0.0
     for tk in tickers:
-        qty, val = raw_agg[tk]
-        cost = val / qty if qty else 0
+        qty, buy_qty, buy_val = raw_agg[tk]
+        if qty <= 0:
+            continue  # đã bán hết (net_qty<=0) -> không còn nắm giữ, bỏ khỏi báo cáo vị thế
+        cost = buy_val / buy_qty if buy_qty else 0  # giá vốn bình quân CHỈ từ lệnh mua
         px = prices.get(tk)
         if px is None:
             warnings.append(f"WARN no BQ price for {tk} as of {args.asof}")

@@ -33,12 +33,21 @@ import sys, json, os
 
 plan_file, state_file, account, plan_date, wc_root = sys.argv[1:6]
 
-with open(plan_file, encoding='utf-8') as f:
-    plan = json.load(f)
+# Dùng trading_bot.plan.load_plan() thay vì tự json.load() + dictcomp trực tiếp trên orders
+# thô — plan_file có thể ở schema v2+ (DollarBill's combined-trim, dùng priority/mtm_price_ref
+# thay vì id/ref_price). load_plan() đã có sẵn shim normalize (trading_bot/plan.py) — tự parse
+# ở đây từng bị crash KeyError 'id' hôm 2026-07-06 (xem kb/INCIDENTS.md) đúng plan v2 mà
+# bot_execute.py xử lý bình thường vì nó qua load_plan() còn script này thì không.
+sys.path.insert(0, wc_root)
+from trading_bot.plan import load_plan as _load_plan
+
+plan_obj = _load_plan(plan_date, account=account)
 with open(state_file, encoding='utf-8') as f:
     state = json.load(f)
 
-orders_by_id = {o['id']: o for o in plan.get('orders', [])}
+orders_by_id = {o.id: {'ticker': o.ticker, 'side': o.side, 'qty': o.qty, 'ref_price': o.ref_price}
+                for o in plan_obj.orders}
+plan = {'orders': list(orders_by_id.values())}
 parents = state.get('parents', {})
 
 # ---- Đối soát fill THẬT (broker) vs state.json nội bộ ------------------------
