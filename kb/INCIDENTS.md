@@ -62,13 +62,37 @@ than asserted as fact — this netting behavior is inferred from the observed nu
 not confirmed via DNSE documentation. Flagged to re-verify against the real settled balance on
 T+2 (2026-07-08).
 
-**Why none of this reached the user wrong:** the fail-safe design already in place caught every
-one of these before publishing a number — `verify_account_snapshot.py` refuses to proceed on a
-detected mismatch (exit 1, no silent pick-one-side), and `daily_nav_snapshot.py` propagates that
-failure rather than substituting a guess. The EOD report crashed loudly (visible in the log) rather
-than posting a wrong order-fill summary. The cost was a missing Discord post and a delayed
-NAV/report, not a wrong number reaching anyone — exactly the tradeoff [[feedback-verify-report-
-numbers-not-estimates]] argues for.
+**CORRECTION (same evening, ~1h later): Bug 4's "margin netting" theory was WRONG.** User sent a
+real DNSE app screenshot at 16:02 ICT showing `totalDebt` **still 409,863,737** — unchanged, not
+paid off — with Tài sản ròng (net worth) = Tiền + Cổ phiếu − Nợ = 709,276,086 + 683,590,000 −
+409,863,737 = 983,002,349, matching the simple textbook formula exactly. Re-checked live via
+Mafee (independently verified by reading the raw evidence file, not just the summary): a fresh
+`balances()` call at 16:12 ICT now correctly returned `totalDebt=409,863,737` and
+`totalCash=709,276,086` — i.e., the EARLIER 14:42 ICT read (which showed `totalDebt=0`) was
+simply **stale** — the broker's balance figures hadn't finished an end-of-day reconciliation
+batch yet when queried mid-afternoon, not because the debt had actually been netted against sell
+proceeds. The entire "debt payoff" inference in Bug 4 above was explaining a data-freshness
+artifact as if it were real broker mechanics — a second-order version of the same mistake this
+whole incident thread is about (trusting a plausible-sounding number without tracing it back
+far enough). Fixed: removed the netting-estimate logic entirely, reverted to the simple
+`stock_mtm + totalCash − totalDebt` formula (exactly what the user asked for — "kiểm tra số liệu
+từ api dnse không nên đoán mò"), using whatever is the LATEST balance snapshot. Added a cheap
+staleness heuristic instead (warn if today had meaningful sell activity but cash didn't move
+commensurately) so a similarly-stale read gets flagged rather than quietly trusted. Also lost
+and had to manually restore 2 days of `nav_history_SpaceX.csv` rows in the process — a narrower
+`csv.DictWriter` fieldnames list raised `ValueError` partway through `writerows()` on a row
+carrying now-removed estimate-fields, truncating the file to just its header; fixed with
+`extrasaction="ignore"` plus explicit per-row key filtering.
+
+**Why none of this reached the user wrong (revised):** the fail-safe design caught bugs 1-3
+before publishing a number, but **bug 4's wrong estimate DID reach Discord** (via the EOD report
+re-run) before the user caught it with a real screenshot — the `nav_is_estimate` flag correctly
+labeled it as uncertain, but a labeled-uncertain wrong number is still a wrong number reaching
+someone. The actual save here was the user's own verification habit (checking against the real
+app), not the system's fail-safe design. Update to the lesson: a self-reported "estimate" label
+is not the same protection as the earlier bugs' hard fail (exit 1, nothing published) — when
+genuinely uncertain, the stronger move is to not publish a number at all (or wait for a fresher
+read) rather than publish a caveated guess.
 
 **Lesson:** a script that has only ever been exercised by one direction of real-world data (all
 buys, so far) has an untested code path (sells) sitting dormant — "it's been running fine" is not

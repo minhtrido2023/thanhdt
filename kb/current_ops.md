@@ -5,11 +5,12 @@
 ## Đang trading (LIVE)
 - **SpaceX** (DNSE 0002023347): V2.4 LIVE từ 2026-07-01. **Trim 07-06 ĐÃ HOÀN TẤT** (23/23 lệnh bán,
   710,5tr/710,1tr kế hoạch = 100%, không lệch đối soát broker) — exposure 141,4%→~70% NEUTRAL target
-  như kế hoạch, 8 mã basket-drift đã thoát hết (LPB/MSB/VHC/HAH/VIB/VGC/DCM/MBS), **nợ margin thật đã
-  về 0 ngay trong ngày** (không cần chờ hết T+2 — dư nợ 409,86tr có vẻ được trả thẳng từ tiền bán ngay
-  khi khớp, xem `kb/INCIDENTS.md` 2026-07-06 "EOD report + NAV computation"). NAV ước tính 994,1tr VND
-  (+0,55% so với hôm trước, ⚠️ CÒN LÀ ƯỚC TÍNH — cần đối chiếu số settle T+2 thật ngày 08/07 để xác
-  nhận). 15 vị thế còn lại. run_bot.sh 09:05 ICT mỗi T2-T6.
+  như kế hoạch, 8 mã basket-drift đã thoát hết (LPB/MSB/VHC/HAH/VIB/VGC/DCM/MBS). **Nợ margin thật
+  VẪN CÒN 409,86tr VND** (chưa trả — lần đọc API giữa chiều báo debt=0 là do balance CHƯA cập nhật
+  xong, không phải nợ đã được trả; xác nhận bằng ảnh chụp app DNSE thật của user + đọc lại API lúc
+  16:12 ICT, xem `kb/INCIDENTS.md` 2026-07-06 "CORRECTION"). **NAV xác nhận đúng: 983.002.349 VND**
+  (khớp chính xác ảnh chụp app: Tiền 709.276.086 + Cổ phiếu 683.590.000 − Nợ 409.863.737). Nợ margin
+  sẽ giảm khi tiền bán thật sự settle T+2 (08/07). 15 vị thế còn lại. run_bot.sh 09:05 ICT mỗi T2-T6.
   **Đã duyệt (2026-07-03, event Mike/decision `plan-07-06-v2-trim-70pct`): trim GỘP về đúng 70% NEUTRAL
   target** (không chỉ khôi phục 1x như plan v1 cũ) — `data/trade_plans/plan_SpaceX_2026-07-06_v2.json`,
   bán tổng ~710M VND (71.8% NAV) trong 1 phiên 07-06 09:00-10:30, Mafee đã authorized, không cần duyệt

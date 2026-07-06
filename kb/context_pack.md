@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v757)
+# Mike fleet — context pack (v758)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-06T07:13:39] Taylor/finding — STRONG-tier (screaming-buy) calibration for Group-A sector lenses — 3 ADD / 3 NO-STRONG-by-design: {"job": "Taylor_20260706_070219", "dispatch_from": "Mike", "scope": "RESEARCH-ONLY backtest to define STRONG lines; new file sector_strong_threshold.py; code ch …
 - [2026-07-06T07:31:25] quant-skeptic/verification — ✅ CONFIRMED VERIFY: STRONG-tier (screaming-buy) calibration for Group-A sector lenses — 3 ADD / 3 NO-STRONG-by-design: {"finding_topic": "STRONG-tier (screaming-buy) calibration for Group-A sector lenses — 3 ADD / 3 NO-STRONG-by-design", "verdict": "CONFIRMED", "confidence": "hi …
 - [2026-07-06T07:42:39] Mafee/finding — zalopay-account-check-2026-07-06: {"account_id": "0001743768", "label": "ZaloPay", "executed": true, "cash_vnd": 4919378, "positions": {"DGC": {"total": 10000, "sellable": 10000}, "MSH": {"total …
 - [2026-07-06T07:48:36] Taylor/finding — STRONG-tier robustness follow-up (quant-skeptic CONFIRMED) — Tech/FPT bootstrap + Banking/Securities plateau sweep: {"job": "Taylor_20260706_074228", "dispatch_from": "Mike", "scope": "RESEARCH/display-only, production untouched (custom30V/BAL/LAG/rating_8l.py unchanged). Ext …
@@ -11,6 +10,7 @@
 - [2026-07-06T08:43:56] Taylor/finding — eval_sec DT5G gate off-by-one FIXED (0-based -> 1-based); securities STRONG-tier calibration UNCHANGED: {"job": "Taylor_20260706_083933", "dispatch_from": "Mike", "scope": "RESEARCH/MONITOR-ONLY, production untouched (custom30V/BAL/LAG/rating_8l.py unchanged). Fil …
 - [2026-07-06T09:07:38] Mafee/finding — spacex-balance-recheck-2026-07-06-1602: {"account_id": "0002023347", "label": "SpaceX", "executed": true, "api_call_time": "~16:10 ICT", "results": {"totalDebt": 409863737, "totalDebt_match_screenshot …
 - [2026-07-06T09:13:08] Mafee/finding — spacex-balance-fresh-2026-07-06-1612: {"account_id": "0002023347", "label": "SpaceX", "executed": true, "log_ts": "2026-07-06T16:12:27", "method": "DNSEBroker.get_cash()+_log_raw()", "logged_to_json …
+- [2026-07-06T09:23:08] Taylor/finding — newdeals_daily_report built + tested — BLOCKED on Discord bot access to New-deals thread: {"job": "Taylor_20260706_091624", "dispatch_from": "Mike", "scope": "RESEARCH/MONITOR-ONLY, production untouched (custom30V/BAL/LAG/rating_8l.py unchanged)", "d …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -20,11 +20,12 @@
 ## Đang trading (LIVE)
 - **SpaceX** (DNSE 0002023347): V2.4 LIVE từ 2026-07-01. **Trim 07-06 ĐÃ HOÀN TẤT** (23/23 lệnh bán,
   710,5tr/710,1tr kế hoạch = 100%, không lệch đối soát broker) — exposure 141,4%→~70% NEUTRAL target
-  như kế hoạch, 8 mã basket-drift đã thoát hết (LPB/MSB/VHC/HAH/VIB/VGC/DCM/MBS), **nợ margin thật đã
-  về 0 ngay trong ngày** (không cần chờ hết T+2 — dư nợ 409,86tr có vẻ được trả thẳng từ tiền bán ngay
-  khi khớp, xem `kb/INCIDENTS.md` 2026-07-06 "EOD report + NAV computation"). NAV ước tính 994,1tr VND
-  (+0,55% so với hôm trước, ⚠️ CÒN LÀ ƯỚC TÍNH — cần đối chiếu số settle T+2 thật ngày 08/07 để xác
-  nhận). 15 vị thế còn lại. run_bot.sh 09:05 ICT mỗi T2-T6.
+  như kế hoạch, 8 mã basket-drift đã thoát hết (LPB/MSB/VHC/HAH/VIB/VGC/DCM/MBS). **Nợ margin thật
+  VẪN CÒN 409,86tr VND** (chưa trả — lần đọc API giữa chiều báo debt=0 là do balance CHƯA cập nhật
+  xong, không phải nợ đã được trả; xác nhận bằng ảnh chụp app DNSE thật của user + đọc lại API lúc
+  16:12 ICT, xem `kb/INCIDENTS.md` 2026-07-06 "CORRECTION"). **NAV xác nhận đúng: 983.002.349 VND**
+  (khớp chính xác ảnh chụp app: Tiền 709.276.086 + Cổ phiếu 683.590.000 − Nợ 409.863.737). Nợ margin
+  sẽ giảm khi tiền bán thật sự settle T+2 (08/07). 15 vị thế còn lại. run_bot.sh 09:05 ICT mỗi T2-T6.
   **Đã duyệt (2026-07-03, event Mike/decision `plan-07-06-v2-trim-70pct`): trim GỘP về đúng 70% NEUTRAL
   target** (không chỉ khôi phục 1x như plan v1 cũ) — `data/trade_plans/plan_SpaceX_2026-07-06_v2.json`,
   bán tổng ~710M VND (71.8% NAV) trong 1 phiên 07-06 09:00-10:30, Mafee đã authorized, không cần duyệt
