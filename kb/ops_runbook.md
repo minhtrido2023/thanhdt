@@ -70,3 +70,18 @@ chưa ăn → notify "cần người xem", không dispatch lặp vô hạn.
 ## Lược sử
 2026-07-07: viết lần đầu + wire autofix vào ops_health_check.sh & sync_bq_cache_daily.sh
 (sau chuỗi sự cố 07-06: EOD crash, NAV sai 2 lần, cache thối 10 ngày, false-SEV1 macro).
+
+## Phân domain tự sửa lỗi (cập nhật 2026-07-07 tối — thêm Wags + arch-reviewer)
+
+| Domain | Fixer | Reviewer | Cơ chế |
+|---|---|---|---|
+| Vận hành TRADING/data/pipeline/report (cache thối, report crash, BQ stale...) | Winston | — (quant-skeptic cho finding R&D) | `bin/ops_autofix.sh` |
+| ĐIỀU PHỐI giữa agent (dispatch treo/timeout, circuit breaker, question tồn, job board, bus, notification routing) | **Wags** | **arch-reviewer** (bắt buộc, tự động) | `bin/wags_autofix.sh` |
+
+`wags_autofix.sh` pipeline: Wags chẩn đoán + sửa (ranh giới: chỉ tooling điều phối, không
+trading) → arch-reviewer (`~/.claude/agents/arch-reviewer.md`, fable, 7 hướng tấn công
+kiến trúc) audit → **báo hoàn tất vào TOPIC ARCHITECTURE (1521475726329516122)**:
+CONFIRMED = ✅ xong; NEEDS_CHANGES/REFUTED = ⚠ cần người xem + bus question (không tự lặp
+vòng 2 — chống ping-pong). Review ad-hoc 1 finding Wags: `wags_autofix.sh --review-topic
+"<substr>"`. `ops_health_check.sh` tự route: cảnh báo circuit-breaker/question → Wags,
+còn lại → Winston.

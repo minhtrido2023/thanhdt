@@ -222,9 +222,16 @@ echo "$MSG"
 
 # Tự sửa thay vì chỉ cảnh báo (mandate user 2026-07-07, xem kb/ops_runbook.md) — trừ
 # trường hợp DUY NHẤT plan chưa duyệt/chưa có (việc của user, autofix không tạo/duyệt
-# plan được). ops_autofix.sh tự chống lặp (cooldown 1h/label).
+# plan được). Chia domain (mandate mở rộng 2026-07-07): lỗi ĐIỀU PHỐI giữa agent
+# (circuit breaker, question tồn đọng) → Wags (wags_autofix, có arch-reviewer audit);
+# lỗi vận hành trading/pipeline còn lại → Winston (ops_autofix). Cả 2 tự chống lặp 1h.
 if [ "${WARN_COUNT:-0}" -gt 0 ]; then
-  if echo "$MSG" | grep -vE "NOT_APPROVED|KHÔNG TÌM THẤY" | grep -qE '⚠️|❌'; then
+  COORD_WARN="$(echo "$MSG" | grep -E '⚠️|❌' | grep -E "Circuit breaker|câu hỏi \(question\)" || true)"
+  OTHER_WARN="$(echo "$MSG" | grep -E '⚠️|❌' | grep -vE "NOT_APPROVED|KHÔNG TÌM THẤY|Circuit breaker|câu hỏi \(question\)" || true)"
+  if [ -n "$COORD_WARN" ]; then
+    "$ROOT/bin/wags_autofix.sh" "coord-${ACCOUNT}-${TODAY}" "$COORD_WARN" 2>/dev/null || true
+  fi
+  if [ -n "$OTHER_WARN" ]; then
     "$ROOT/bin/ops_autofix.sh" "ops-health-${ACCOUNT}" "$MSG" 2>/dev/null || true
   fi
 fi
