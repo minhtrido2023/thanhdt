@@ -116,37 +116,75 @@ if [ "$TOTAL" -le "$LAST" ]; then
   exit 0
 fi
 
-DELTA="$(tail -n "+$((LAST + 1))" "$JOURNAL")"
 echo "$TOTAL" > "$LASTLINE_FILE"
 
-DONE_LINES="$(echo "$DELTA" | grep ',DONE,' || true)"
-FAIL_LINES="$(echo "$DELTA" | grep ',PLACE_FAIL,' || true)"
-PLACE_LINES="$(echo "$DELTA" | grep ',PLACE,' || true)"
-# FILL = khớp TỪNG PHẦN — trước 2026-07-07 message bỏ qua hoàn toàn dòng này, nên lệnh
-# đang khớp dở (vd MSH 100/200) hiển thị như "0 khớp" → user tưởng bot không chạy dù
-# broker đã khớp thật (false alarm sáng ZaloPay day-1). "DONE" chỉ đếm lệnh khớp ĐỦ.
-FILL_LINES="$(echo "$DELTA" | grep ',FILL,' || true)"
+# ── 3. Digest = SỔ LỆNH giống app DNSE (user yêu cầu 2026-07-07: message bot phải đối
+#    chiếu 1-1 được với sổ lệnh trong app — mỗi dòng 1 lệnh con: giờ đặt, Mua/Bán, mã,
+#    KL khớp/KL đặt, giá, trạng thái — thay vì thống kê event nội bộ PID/parent/delta
+#    "chẳng liên quan gì" với cái user nhìn thấy trong app).
+MSG="$(python3 - "$JOURNAL" "$ACCOUNT" "$NOW_ICT" "$N_ORDERS" << 'PYEOF'
+import csv, sys
+from collections import OrderedDict, defaultdict
 
-N_DONE="$(echo "$DONE_LINES" | grep -c . || true)"
-N_FAIL="$(echo "$FAIL_LINES" | grep -c . || true)"
-N_PLACE="$(echo "$PLACE_LINES" | grep -c . || true)"
-N_FILL="$(echo "$FILL_LINES" | grep -c . || true)"
+journal, account, now_ict, n_orders = sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4])
 
-DONE_TICKERS="$(echo "$DONE_LINES" | awk -F, '{print $4}' | sort -u | tr '\n' ',' | sed 's/,$//')"
-FAIL_TICKERS="$(echo "$FAIL_LINES" | awk -F, '{print $4}' | sort -u | tr '\n' ',' | sed 's/,$//')"
-FILL_DETAIL="$(echo "$FILL_LINES" | awk -F, '{printf "%s %s×%s@%s; ", $4, $5, $7, $8}' | sed 's/; $//')"
+children = OrderedDict()   # child_oid -> {ts,ticker,side,qty,limit_px,filled,fill_px,cancelled}
+parent_done = {}           # parent_id -> note
+parent_wait = {}           # parent_id -> (ticker, side, latest wait/fail note)
+parent_of_child = {}
 
-MSG="🟢 [$NOW_ICT] bot $ACCOUNT PID=$PID — $N_PLACE lệnh mới đặt, $N_FILL khớp mới, $N_DONE hoàn tất trọn lệnh"
-[ -n "$DONE_TICKERS" ] && MSG="$MSG (${DONE_TICKERS})"
-[ -n "$FILL_DETAIL" ] && MSG="$MSG. Khớp: ${FILL_DETAIL}"
-if [ "$N_FAIL" -gt 0 ]; then
-  MSG="$MSG; ⚠ $N_FAIL PLACE_FAIL (${FAIL_TICKERS})"
-fi
+with open(journal, encoding="utf-8") as f:
+    for row in csv.DictReader(f):
+        ev, pid = row["event"], row["parent_id"]
+        oid = row.get("child_oid") or ""
+        if ev == "PLACE":
+            children[oid] = {"ts": row["ts"][11:16], "ticker": row["ticker"],
+                             "side": row["side"], "qty": float(row["qty"] or 0),
+                             "limit_px": float(row["price"] or 0), "filled": 0.0,
+                             "fill_px": None, "cancelled": False}
+            parent_of_child[oid] = pid
+            parent_wait.pop(pid, None)
+        elif ev == "FILL" and oid in children:
+            c = children[oid]
+            c["filled"] = max(c["filled"], float(row["qty"] or 0))  # journal ghi lũy kế/child
+            c["fill_px"] = float(row["price"] or 0) or c["fill_px"]
+        elif ev in ("CANCEL", "CANCELLED") and oid in children:
+            children[oid]["cancelled"] = True
+        elif ev == "DONE":
+            parent_done[pid] = row.get("note") or "khớp đủ"
+            parent_wait.pop(pid, None)
+        elif ev in ("WAIT_CASH", "WAIT_QUOTA", "WAIT_T2_SETTLEMENT", "PLACE_FAIL") and pid not in parent_done:
+            reason = {"WAIT_CASH": "chờ sức mua", "WAIT_QUOTA": "chờ thanh khoản (giới hạn 10% KLGD)",
+                      "WAIT_T2_SETTLEMENT": "chờ hàng T+2 về"}.get(ev, row.get("note") or ev)
+            parent_wait[pid] = (row["ticker"], row["side"], reason)
 
-# Overall progress snapshot — nói rõ "trọn lệnh" để không đọc nhầm thành "chưa khớp gì"
-# khi đang có lệnh khớp một phần.
-DONE_ALL="$(awk -F, '$2=="DONE"{print $4}' "$JOURNAL" | sort -u | wc -l | tr -d ' ')"
-MSG="$MSG. Hoàn tất trọn lệnh: ${DONE_ALL}/${N_ORDERS} (lệnh khớp một phần chưa tính vào số này)."
+def px(v):        # 32500 -> "32.50" như app
+    return f"{v/1000:,.2f}" if v else "?"
+
+lines = [f"🟢 **Bot {account} — sổ lệnh {now_ict}**"]
+for oid, c in reversed(children.items()):   # mới nhất lên đầu, giống app
+    side = "BÁN" if c["side"] == "sell" else "MUA"
+    if c["cancelled"]:
+        status = "Hủy"
+    elif c["filled"] >= c["qty"] > 0:
+        status = "Khớp ✅"
+    elif c["filled"] > 0:
+        status = "Khớp một phần"
+    else:
+        status = "Chờ khớp"
+    shown_px = c["fill_px"] if c["fill_px"] else c["limit_px"]
+    lines.append(f"• {c['ts']}  {side} {c['ticker']}  {c['filled']:.0f}/{c['qty']:.0f} @ {px(shown_px)}  — {status}")
+
+for pid, (ticker, side, reason) in parent_wait.items():
+    side_vn = "BÁN" if side == "sell" else "MUA"
+    lines.append(f"• --:--  {side_vn} {ticker}  0/…  — chưa đặt ({reason})")
+
+n_parent_done = len(parent_done)
+lines.append(f"Kế hoạch hôm nay: hoàn tất {n_parent_done}/{n_orders} lệnh"
+             + (" — còn lại đang chờ điều kiện." if n_parent_done < n_orders else " — XONG."))
+print("\n".join(lines))
+PYEOF
+)"
 
 echo "$MSG"
 _notify "$MSG"
