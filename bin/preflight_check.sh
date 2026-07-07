@@ -68,8 +68,10 @@ rc        = d.get("risk_checks", {})
 rc_ok     = all("PASS" in str(v) or "CLEAR" in str(v) or "HEALTHY" in str(v) or "VALID" in str(v) or "N/A" in str(v)
                 for v in rc.values()) if rc else None
 flags = []
-if not approved:   flags.append("NOT_APPROVED")
-if not mafee_ok:   flags.append("MAFEE_NOT_AUTH")
+# Plan HOLD (0 lệnh) không có gì cho Mafee thực thi — approval/mafee-auth chỉ bắt buộc khi có lệnh thật.
+if n_orders > 0:
+    if not approved:   flags.append("NOT_APPROVED")
+    if not mafee_ok:   flags.append("MAFEE_NOT_AUTH")
 if mode != "live": flags.append(f"mode={mode}")
 if rc_ok is False: flags.append("RISK_CHECK_FAIL")
 print(f"{approved}|{mafee_ok}|{mode}|{n_orders}|{est_val:.3f}|{state_nm}|{src}|{'|'.join(flags) if flags else 'OK'}")
