@@ -122,22 +122,31 @@ echo "$TOTAL" > "$LASTLINE_FILE"
 DONE_LINES="$(echo "$DELTA" | grep ',DONE,' || true)"
 FAIL_LINES="$(echo "$DELTA" | grep ',PLACE_FAIL,' || true)"
 PLACE_LINES="$(echo "$DELTA" | grep ',PLACE,' || true)"
+# FILL = khớp TỪNG PHẦN — trước 2026-07-07 message bỏ qua hoàn toàn dòng này, nên lệnh
+# đang khớp dở (vd MSH 100/200) hiển thị như "0 khớp" → user tưởng bot không chạy dù
+# broker đã khớp thật (false alarm sáng ZaloPay day-1). "DONE" chỉ đếm lệnh khớp ĐỦ.
+FILL_LINES="$(echo "$DELTA" | grep ',FILL,' || true)"
 
 N_DONE="$(echo "$DONE_LINES" | grep -c . || true)"
 N_FAIL="$(echo "$FAIL_LINES" | grep -c . || true)"
 N_PLACE="$(echo "$PLACE_LINES" | grep -c . || true)"
+N_FILL="$(echo "$FILL_LINES" | grep -c . || true)"
 
 DONE_TICKERS="$(echo "$DONE_LINES" | awk -F, '{print $4}' | sort -u | tr '\n' ',' | sed 's/,$//')"
 FAIL_TICKERS="$(echo "$FAIL_LINES" | awk -F, '{print $4}' | sort -u | tr '\n' ',' | sed 's/,$//')"
+FILL_DETAIL="$(echo "$FILL_LINES" | awk -F, '{printf "%s %s×%s@%s; ", $4, $5, $7, $8}' | sed 's/; $//')"
 
-MSG="🟢 [$NOW_ICT] bot $ACCOUNT PID=$PID — $N_PLACE lệnh mới đặt, $N_DONE khớp xong"
+MSG="🟢 [$NOW_ICT] bot $ACCOUNT PID=$PID — $N_PLACE lệnh mới đặt, $N_FILL khớp mới, $N_DONE hoàn tất trọn lệnh"
 [ -n "$DONE_TICKERS" ] && MSG="$MSG (${DONE_TICKERS})"
+[ -n "$FILL_DETAIL" ] && MSG="$MSG. Khớp: ${FILL_DETAIL}"
 if [ "$N_FAIL" -gt 0 ]; then
   MSG="$MSG; ⚠ $N_FAIL PLACE_FAIL (${FAIL_TICKERS})"
 fi
 
-# Overall progress snapshot
+# Overall progress snapshot — nói rõ "trọn lệnh" để không đọc nhầm thành "chưa khớp gì"
+# khi đang có lệnh khớp một phần.
 DONE_ALL="$(awk -F, '$2=="DONE"{print $4}' "$JOURNAL" | sort -u | wc -l | tr -d ' ')"
-MSG="$MSG. Tổng đã khớp: ${DONE_ALL}/${N_ORDERS} tickers."
+MSG="$MSG. Hoàn tất trọn lệnh: ${DONE_ALL}/${N_ORDERS} (lệnh khớp một phần chưa tính vào số này)."
 
+echo "$MSG"
 _notify "$MSG"
