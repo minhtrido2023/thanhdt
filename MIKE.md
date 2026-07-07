@@ -246,6 +246,7 @@ sự cố Taylor 2026-07-01).
 | **risk-auditor** (was Spyros: DD/concentration/leverage/recon, read-only) | native | `Agent(subagent_type="risk-auditor")` / `dispatch.sh Spyros "..."` | Review rủi ro, audit EOD, recon fill↔plan |
 | **legal-vn** (was Wendy: luật CK/thuế/DN VN, có trích nguồn) | native | `Agent(subagent_type="legal-vn")` / `dispatch.sh Wendy "..."` | Câu hỏi pháp lý/thuế/compliance |
 | **fleet-scout** ("agent X đang làm gì") | native | `Agent(subagent_type="fleet-scout")` | Tra trạng thái session nhanh |
+| **Wags** (Fleet Ops Coordinator: triage job treo/sống qua HB_AGE, pattern độ tin cậy dispatch, escalation tồn đọng) | headless on-demand | `dispatch.sh Wags "..."` | Job nghi treo, dispatch fail lặp, audit chuỗi điều phối |
 
 > **Lịch sử chuyển đổi:** Winston/Spyros/Wendy gỡ daemon 2026-06-25; DollarBill/Mafee gỡ daemon
 > 2026-06-30 (đã go-live, chạy headless on-demand ổn định); **Taylor gỡ daemon 2026-07-01** (user

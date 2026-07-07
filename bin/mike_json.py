@@ -258,6 +258,42 @@ def _log_age(obj, n):
         return "-"
 
 
+def _hb_age(obj, n):
+    """Giây từ HEARTBEAT bus cuối cùng của job (agent headless ghi heartbeat mỗi phút vào
+    bus/inbox/<agent>.jsonl với trace_id=job_id). Đây mới là tín hiệu liveness ĐÚNG cho
+    job đang chạy — LOG_AGE vô dụng khi chạy vì _bg_wrapper chỉ ghi log lúc claude THOÁT
+    (log 0-byte suốt thời gian chạy → nhìn như treo dù agent sống; user hỏi 'Winston treo
+    rồi phải không?' 2026-07-07 chính vì đọc LOG_AGE). '-' = chưa thấy heartbeat nào."""
+    job_id = obj.get("job_id", "")
+    agent = obj.get("to", "")
+    if not job_id or not agent:
+        return "-"
+    inbox = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                         "bus", "inbox", agent + ".jsonl")
+    last_ts = None
+    try:
+        with open(inbox, encoding="utf-8") as f:
+            for line in f:
+                if job_id not in line:
+                    continue
+                try:
+                    rec = json.loads(line)
+                except Exception:
+                    continue
+                if rec.get("trace_id") == job_id or rec.get("topic") == job_id:
+                    last_ts = rec.get("ts") or last_ts
+    except Exception:
+        return "-"
+    if not last_ts:
+        return "-"
+    try:
+        import datetime as _dt
+        t = _dt.datetime.fromisoformat(last_ts.replace("Z", "+00:00"))
+        return str(n - int(t.timestamp()))
+    except Exception:
+        return "-"
+
+
 def _load_jobs(jobs_dir):
     rows = []
     for fp in glob.glob(os.path.join(jobs_dir, "*.json")):
@@ -276,14 +312,16 @@ def cmd_job_list(a):
     limit = _as_int(a[1], 20) if len(a) > 1 else 20
     n = now_epoch()
     rows = _load_jobs(jobs_dir)[:limit]
-    print("%-26s %-18s %-9s %6s %7s %4s" % ("JOB_ID", "FROM->TO", "STATUS", "AGE", "LOG_AGE", "ATT"))
+    print("%-26s %-18s %-9s %6s %7s %7s %4s" % ("JOB_ID", "FROM->TO", "STATUS", "AGE", "LOG_AGE", "HB_AGE", "ATT"))
     for o in rows:
         age = n - _as_int(o.get("started_at"), n)
-        print("%-26s %-18s %-9s %5ss %6ss %2s/%s" % (
+        # HB_AGE chỉ có nghĩa cho job đang chạy — job đã kết thúc in '-' cho đỡ tốn I/O.
+        hb = _hb_age(o, n) if o.get("status") == "running" else "-"
+        print("%-26s %-18s %-9s %5ss %6ss %6ss %2s/%s" % (
             o.get("job_id", "?")[:26],
             ("%s->%s" % (o.get("from", "?"), o.get("to", "?")))[:18],
             _job_display_status(o, n)[:9],
-            age, _log_age(o, n),
+            age, _log_age(o, n), hb,
             o.get("attempt", "?"), o.get("max_attempts", "?"),
         ))
 
@@ -390,6 +428,10 @@ def cmd_job_get(a):
             print("%-15s %s" % (k + ":", o[k]))
     print("%-15s %s" % ("display:", disp))
     print("%-15s %ss" % ("log_age:", _log_age(o, n)))
+    if o.get("status") == "running":
+        hb = _hb_age(o, n)
+        print("%-15s %ss  (heartbeat bus cuối — tín hiệu sống ĐÚNG khi đang chạy; "
+              "log chỉ ghi lúc kết thúc)" % ("hb_age:", hb))
     st = o.get("status", "?")
     if disp == "OVERDUE":
         sys.exit(3)
