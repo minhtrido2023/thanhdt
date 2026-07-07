@@ -37,7 +37,32 @@ def weekdays_between(d0, d1):
     return n
 
 
+def count_evidence_sessions(account, count_from=None):
+    """Số phiên executor CÓ EVIDENCE = số file journal exec_<account>_<date>_journal.csv
+    (loại fixture 2099; lọc date >= count_from nếu có)."""
+    pattern = os.path.join(WC_ROOT, f"data/execution_logs/exec_{account}_*_journal.csv")
+    dates = []
+    for f in glob.glob(pattern):
+        d = os.path.basename(f)[len(f"exec_{account}_"):-len("_journal.csv")]
+        if d.startswith("2099"):
+            continue
+        if count_from and d < count_from:
+            continue
+        dates.append(d)
+    return sorted(dates)
+
+
 def progress_line(prog, today):
+    pr = prog.get("progress") or {}
+    if pr.get("mode") == "evidence_sessions":
+        # Đếm phiên executor THẬT (file journal), không đếm ngày lịch — 1 ngày flag bật
+        # nhưng bot không chạy = 0 evidence, không được tính.
+        dates = count_evidence_sessions(pr["account"], pr.get("count_from"))
+        tgt = pr.get("target_sessions")
+        last = f", gần nhất {dates[-1]}" if dates else ""
+        return (f"📅 Tiến độ: **{len(dates)}/{tgt} phiên evidence** (đếm phiên executor "
+                f"thật có journal trên `{pr['account']}`, từ {pr.get('count_from', '?')}{last}) "
+                f"— {prog.get('end_or_trigger') or ''}")
     start = prog.get("start")
     end = prog.get("end")
     trigger = prog.get("end_or_trigger") or ""
@@ -157,6 +182,13 @@ PROBES = {
 
 def render_section(idx, prog, today):
     lines = [f"── **{idx}) {prog.get('name', prog.get('id', '?'))}** — owner: {prog.get('owner', 'n/a')}"]
+    if prog.get("status") == "paused":
+        lines.append(f"⏸ {prog.get('pause_reason', 'PAUSED')}")
+        lines.append(f"🎯 (mục tiêu gốc) {prog.get('objective', 'n/a')}")
+        srcs = prog.get("data_sources") or []
+        if srcs:
+            lines.append("🔍 Nguồn: " + " · ".join(f"`{s}`" for s in srcs))
+        return "\n".join(lines)
     lines.append(f"🎯 {prog.get('objective', 'n/a')}")
     lines.append(progress_line(prog, today))
     probe = prog.get("probe") or {}

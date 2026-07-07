@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "updated": "2026-07-07",
   "description": "Registry các chương trình PAPER-TRADING đang active — nguồn duy nhất cho paper_programs_daily_report.py. Thêm sleeve mới = thêm 1 entry (không sửa code render). Probe types: command | journal_scan | alphalens.",
   "programs": [
@@ -34,8 +34,9 @@
       "owner": "Taylor",
       "objective": "Gate phòng thủ intraday (arm 2-poll, sell-to-floor, buy-pause, cadence ×0.25) có ZERO false-trigger trong thị trường benign không? (stress-injection đã PASS 24/24)",
       "start": "2026-07-01",
-      "end": "2026-07-28",
-      "end_or_trigger": "~2026-07-28 (~20 phiên benign)",
+      "end": null,
+      "end_or_trigger": "20 phiên EVIDENCE (executor chạy thật trên paper main) từ phiên thật đầu tiên 2026-07-07 → ước ~2026-08-03. Mốc cũ 2026-07-28 bỏ — 07-01→07-06 flag bật nhưng 0 phiên executor = 0 evidence, không đếm.",
+      "progress": {"mode": "evidence_sessions", "account": "main", "target_sessions": 20, "count_from": "2026-07-07"},
       "gate_criteria": [
         {"text": "Stress-injection 24/24 PASS (arm 2-poll · sell-to-floor · buy-pause · cadence ×0.25 + negative controls)", "status": "pass", "note": "stress_extreme_regime.py, week-1"},
         {"text": "ZERO false-trigger qua ~4 tuần benign trên account paper main", "status": "pending"},
@@ -52,7 +53,7 @@
         "secrets/trading_bot_accounts.json (extreme_regime_enabled=true, chỉ paper main)",
         "stress_extreme_regime.py"
       ],
-      "notes": "Evidence tích lũy CHỈ khi executor chạy phiên trên account main — 0 phiên = 0 evidence, không tính là PASS."
+      "notes": "Evidence tích lũy CHỈ khi executor chạy phiên trên account main — 0 phiên = 0 evidence, không tính là PASS. Từ 2026-07-07: probe harness chạy paper main mỗi ngày T2-T6 (cron 08:52 sinh plan mike/bin/paper_main_probe_plan.py, executor 09:10 + 13:05, log mike/logs/run_bot_main_*.log)."
     },
     {
       "id": "vol_scale_chase_cap",
@@ -60,8 +61,9 @@
       "owner": "Taylor",
       "objective": "Nới trần đuổi mua theo realised vol 20d (clamp(k·rvol, static, ceil), k=2.0/ceil=0.04, monotone-safe, fail-safe về static) có wiring đúng trên quote thật không? (executor-path stress đã PASS 15/15)",
       "start": "2026-07-01",
-      "end": "2026-07-14",
-      "end_or_trigger": "~2026-07-14 (~10 phiên — fire trên gap-up thường, tích event nhanh)",
+      "end": null,
+      "end_or_trigger": "10 phiên EVIDENCE (executor chạy thật trên paper main) từ phiên thật đầu tiên 2026-07-07 → ước ~2026-07-20. Mốc cũ 2026-07-14 bỏ — 07-01→07-06 flag bật nhưng 0 phiên executor = 0 evidence, không đếm.",
+      "progress": {"mode": "evidence_sessions", "account": "main", "target_sessions": 10, "count_from": "2026-07-07"},
       "gate_criteria": [
         {"text": "Executor-path stress 15/15 PASS (wiring · WIDEN clamp-to-ceil · MONOTONE · fail-safe rvol absent/0/<0 · NEG-control)", "status": "pass", "note": "stress_vol_scale_chase_cap.py"},
         {"text": "Paper sạch: wiring đúng trên quote thật + fail-safe khi thiếu rvol cache", "status": "pending"},
@@ -79,7 +81,7 @@
         "secrets/trading_bot_accounts.json (chase_cap_vol_scale_enabled=true, chỉ paper main)",
         "stress_vol_scale_chase_cap.py"
       ],
-      "notes": "Cap-widen KHÔNG có marker riêng trong journal (áp silent trong _buy_chase_pct) — đo qua stress script + so limit price ngày gap-up; cần phiên executor paper + ngày gap mới có evidence tự động."
+      "notes": "Cap-widen KHÔNG có marker riêng trong journal (áp silent trong _buy_chase_pct) — đo qua stress script + so limit price ngày gap-up; cần phiên executor paper + ngày gap mới có evidence tự động. Từ 2026-07-07: probe harness chạy paper main mỗi ngày (6 BUY/phiên trên quote thật — xem entry extreme_regime cho cron)."
     },
     {
       "id": "fill_timing",
@@ -136,10 +138,12 @@
       "id": "ab_cross",
       "name": "A/B cross-mode (ab_cross vs ab_dip)",
       "owner": "Taylor",
+      "status": "paused",
+      "pause_reason": "PAUSED — chưa từng bắt đầu (0 phiên), và câu hỏi đã được trả lời bằng đường khác: cross_mode 'adaptive' được chọn làm production default từ 2026-06-26 (user+Taylor, backtest: always-TWAP hơn dip 3.5bps fill-rate nhưng variance 2×; adaptive beat cả hai). Giữ entry để mở lại nếu cần re-test ở NAV lớn.",
       "objective": "So sánh 2 chế độ đặt lệnh (cross ngay vs chờ dip) trên cùng plan — chế độ nào cho fill price tốt hơn NET?",
       "start": null,
       "end": null,
-      "end_or_trigger": "Chưa chốt — cần account ab_cross/ab_dip chạy phiên trước đã",
+      "end_or_trigger": "PAUSED 2026-07-07 (quyết định trong job Taylor_20260707_071130) — không wire cron cho ab_cross/ab_dip.",
       "gate_criteria": [
         {"text": "Cả 2 account A/B có phiên chạy song song đủ mẫu", "status": "pending"},
         {"text": "Khác biệt fill price có ý nghĩa thống kê trước khi kết luận", "status": "pending"}
