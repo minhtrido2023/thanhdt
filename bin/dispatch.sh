@@ -480,17 +480,18 @@ if [ "$bg" = "--bg" ]; then
   _job_watcher "$job_id" "$from" "$id" "$logfile" </dev/null >/dev/null 2>&1 &
   echo "DISPATCHED $id (job=$job_id pid=$pid) → log: $logfile"
   echo "Theo dõi: $ROOT/bin/jobs.sh status $job_id | Khi xong: auto consolidate + Telegram notify."
-  # Fast wake-on-completion snippet (MIKE.md §Quy chuẩn 8, sửa 2026-07-06: LUÔN dùng, không còn
-  # ngoại lệ "fire-and-forget" — 1 sweep nhiều bước mỗi bước bỏ qua wrapper cộng dồn thành hàng
-  # giờ lãng phí thật, xem kb/INCIDENTS.md). Gọi wrapper Agent nền bọc `jobs.sh wait` để harness
-  # task-notification đánh thức đúng lúc job xong (~15-30s). Fallback nếu wrapper không sống sót
-  # qua 1 lần Mike restart: ScheduleWakeup NGẮN lặp lại (~240-270s/lần), KHÔNG phải 1 lần chờ dài.
-  # In sẵn để khỏi soạn lại từ trí nhớ — ĐÂY LÀ BƯỚC BẮT BUỘC NGAY SAU DISPATCH NÀY, không phải
-  # tùy chọn.
+  # Fast wake-on-completion snippet (MIKE.md §Quy chuẩn 8; sửa 2026-07-07 incident
+  # agent-wrapper-monitor-gap): cơ chế CHÍNH = ScheduleWakeup poll NGẮN lặp lại (~240-270s) —
+  # không phụ thuộc schema Agent tool. Harness Fable-5 (Mike restart 2026-07-06) đã BỎ tham số
+  # run_in_background khỏi Agent tool; isolation:worktree KHÔNG phải background (chỉ cách ly git
+  # worktree, agent vẫn đồng bộ, tin nhắn cuối là kênh trả kết quả duy nhất — wrapper "sẽ báo
+  # lại" không bao giờ báo lại được). Wrapper Agent nền CHỈ dùng nếu schema phiên hiện tại thật
+  # sự có tham số nền. In sẵn để khỏi soạn lại từ trí nhớ — BẮT BUỘC ngay sau dispatch này.
   _ww=$((TIMEOUT * (RETRIES + 1) + 60))
-  echo "⚠️ BẮT BUỘC ngay sau dispatch này (MIKE.md §8, không còn ngoại lệ 'fire-and-forget'):" >&2
-  echo "  Agent(prompt=\"Run: $ROOT/bin/jobs.sh wait $job_id --timeout $_ww; nếu status!=done chạy $ROOT/bin/trace.sh $job_id; CHỈ báo status+result literal, KHÔNG retry/quyết định\", run_in_background: true, model: \"haiku\")" >&2
-  echo "  + nếu wrapper không sống sót qua restart: ScheduleWakeup NGẮN ~240-270s (poll jobs.sh status, đặt lại nếu chưa done) — KHÔNG đặt 1 lần chờ dài." >&2
+  echo "⚠️ BẮT BUỘC ngay sau dispatch này (MIKE.md §8, sửa 2026-07-07 — Agent tool KHÔNG còn run_in_background):" >&2
+  echo "  1) CƠ CHẾ CHÍNH: ScheduleWakeup NGẮN ~240-270s — mỗi lần tỉnh chạy '$ROOT/bin/jobs.sh status $job_id'; chưa done → đặt lại wakeup ngắn; done → xử lý ngay. KHÔNG đặt 1 lần chờ dài (worst-case chờ tối đa ~${_ww}s vẫn phủ qua nhiều lần poll)." >&2
+  echo "  2) CHỈ nếu schema tool phiên này THẬT SỰ có tham số nền (run_in_background trên Agent/Bash) mới thêm wrapper bọc '$ROOT/bin/jobs.sh wait $job_id --timeout $_ww'. isolation:worktree KHÔNG phải background — cấm dùng thay thế." >&2
+  echo "  3) SELF-CHECK: trước khi nói với user bất kỳ điều gì về trạng thái job này (đang chờ/xong/chết), chạy '$ROOT/bin/jobs.sh status $job_id' trong CÙNG turn — không nói từ trí nhớ." >&2
   echo "$pid" > "$ROOT/logs/.dispatch_${id}_${ts}.pid"
   # Immediate Discord notify so user sees task is in flight (don't wait for watcher heartbeat)
   { _dtid="$(_job_thread_id "$job_id")"

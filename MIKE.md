@@ -130,14 +130,38 @@ incident) cộng dồn thành hàng giờ lãng phí thật trong 1 ngày — d�
 tổng thời gian trôi qua vẫn là chi phí thật. Ngoại lệ DUY NHẤT còn lại: 1 job đứng riêng, không có
 bước kế tiếp phụ thuộc vào nó (rất hiếm — hầu hết dispatch của Mike đều có bước sau).
 
-**Cách dùng** — sau mỗi `dispatch.sh ... --bg` rơi vào trường hợp trên:
-```
-Agent(prompt="Run: bin/jobs.sh wait <job_id> --timeout <wrapper_timeout>; nếu status != done,
-chạy bin/trace.sh <job_id>; CHỈ báo lại field status + result literal, KHÔNG tự ý
-retry/quyết định/đánh giá thành-bại", run_in_background: true, model: "haiku")
-```
-Scope cố tình hẹp: wrapper KHÔNG được gọi `dispatch.sh`, KHÔNG tự retry, KHÔNG editorialize —
-quyền quyết định bước tiếp theo luôn ở Mike khi tỉnh dậy, không phải ở wrapper.
+**⚠️ SỬA 2026-07-07 (incident `agent-wrapper-monitor-gap`, chẩn đoán Wags job
+`Wags_20260707_142752`): template Agent(run_in_background) dưới đây KHÔNG còn chạy được
+nguyên văn.** Harness sau lần restart Mike sang Fable 5 (2026-07-06) đã BỎ tham số
+`run_in_background` khỏi Agent tool — schema hiện tại chỉ có
+`description/prompt/subagent_type/model/isolation` (xác nhận trực tiếp từ tool schema phiên
+Wags 2026-07-07). Ba quy tắc thay thế, theo thứ tự:
+1. **Cơ chế CHÍNH = ScheduleWakeup poll ngắn 240-270s** (mô tả chi tiết ở đoạn "ScheduleWakeup
+   fallback" dưới — nay thăng cấp từ fallback thành chính, vì nó không phụ thuộc schema Agent
+   tool): mỗi lần tỉnh chạy `bin/jobs.sh status <job_id>`, chưa done → đặt lại wakeup ngắn,
+   done → xử lý ngay.
+2. **`isolation: "worktree"` KHÔNG phải background** — nó chỉ tạo git worktree cách ly; agent
+   vẫn chạy ĐỒNG BỘ và tin nhắn cuối của nó là kênh trả kết quả DUY NHẤT. Một wrapper trả lời
+   "đã bắt đầu theo dõi, sẽ báo lại" là bất khả thi cơ học — nó không bao giờ báo lại được.
+   Sự cố thật 2026-07-07 chiều: Mike bọc job `Taylor_20260707_132048` bằng
+   Agent(isolation:worktree), wrapper trả lời sớm rồi thoát; job thật xong sạch ~13:32
+   (status:done, exit_code:0) mà Mike không hề biết, user phải tự hỏi "job die rồi hay bạn
+   không bao giờ biết" mới đi kiểm tra tay. Wrapper Agent nền CHỈ dùng lại nếu schema tool
+   phiên hiện tại THẬT SỰ có tham số nền (kiểm tra schema trước khi gọi, không đoán); khi đó
+   dùng template cũ: `Agent(prompt="Run: bin/jobs.sh wait <job_id> --timeout <wrapper_timeout>;
+   nếu status != done, chạy bin/trace.sh <job_id>; CHỈ báo lại field status + result literal,
+   KHÔNG tự ý retry/quyết định/đánh giá thành-bại", run_in_background: true, model: "haiku")`.
+3. **Self-check bắt buộc trước mọi phát ngôn về job nền**: đã nói với user bất kỳ điều gì về
+   trạng thái 1 job (đang chạy/đang chờ/chết/xong) thì trong CÙNG turn phải có 1 lần
+   `bin/jobs.sh status <job_id>` làm bằng chứng — không nói từ trí nhớ/suy đoán. (Lần THỨ HAI
+   trong ngày 2026-07-07 lỗi giám sát job nền: lần 1 = LOG_AGE nhìn như treo trong khi job sống
+   → sinh cột HB_AGE; lần 2 = wrapper sai cơ chế → mất tín hiệu hoàn tất. Cả hai đều là "khẳng
+   định trạng thái job không kèm bằng chứng jobs.sh".)
+`dispatch.sh --bg` đã in sẵn 3 bước này ra stderr sau dòng "Theo dõi:" — làm theo đúng bản in,
+không soạn lại từ trí nhớ.
+
+Scope wrapper (khi dùng được) cố tình hẹp: wrapper KHÔNG được gọi `dispatch.sh`, KHÔNG tự retry,
+KHÔNG editorialize — quyền quyết định bước tiếp theo luôn ở Mike khi tỉnh dậy, không phải ở wrapper.
 
 **Công thức timeout cho wrapper** (bám retry thật của dispatch.sh, KHÔNG dùng `--timeout` gốc
 trực tiếp vì job có thể đang ở lần thử thứ 2) — không đổi, vẫn dùng cho `jobs.sh wait --timeout`
@@ -176,10 +200,13 @@ quan sát thấy lãng phí thời gian chờ rõ rệt cộng dồn qua nhiều
 tắc ở trên. Không phải bug code — quy tắc VIẾT SAI (che khuất bởi lo ngại "đừng phiền vì job dài
 không ai chờ", trong khi thực tế TỔNG thời gian trôi qua vẫn tính).
 
-⚠️ **Giới hạn chưa xác minh**: độ bền của `Agent(run_in_background)` task-notification qua CHÍNH
-việc Mike restart chưa ai kiểm chứng thực tế (không tài liệu nào trong codebase khẳng định hay
-phủ định). Cần quan sát lần dùng thật và ghi kết quả (verified/không) vào đây hoặc
-`kb/INCIDENTS.md` theo khuôn "verified 2026-0X-XX" đã dùng ở nơi khác trong file này.
+⚠️ **Giới hạn chưa xác minh** *(MOOT từ 2026-07-07 — tham số `run_in_background` không còn
+trong schema Agent tool của harness hiện tại, xem SỬA 2026-07-07 ở trên; giữ đoạn này làm sử
+liệu, chỉ áp dụng lại nếu harness tương lai khôi phục tham số)*: độ bền của
+`Agent(run_in_background)` task-notification qua CHÍNH việc Mike restart chưa ai kiểm chứng
+thực tế (không tài liệu nào trong codebase khẳng định hay phủ định). Cần quan sát lần dùng
+thật và ghi kết quả (verified/không) vào đây hoặc `kb/INCIDENTS.md` theo khuôn
+"verified 2026-0X-XX" đã dùng ở nơi khác trong file này.
 
 **Verified 2026-07-03 (happy-path, KHÔNG restart)**: dispatch thật Winston `--bg` (job chạy 14s) +
 wrapper Agent(haiku, nền) theo đúng template trên → task-notification đánh thức turn Mike NGAY khi
