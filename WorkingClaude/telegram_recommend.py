@@ -600,10 +600,13 @@ def main():
     state_section, state_csv_path = build_dt5g_section(target, dt5g_state, dt5g_asof, dt5g_source)
     message = message + "\n" + state_section
 
-    # Append ORB intraday paper-trade block (ring-fenced, monitored separately)
-    orb_section = build_orb_section()
-    if orb_section:
-        message = message + orb_section
+    # ORB block GỠ 2026-07-07 (Taylor_20260707_132048, user mandate hợp nhất report paper):
+    # ORB giờ báo cáo qua Paper Programs Daily Report (Discord topic Trading report,
+    # mike/kb/paper_programs_registry.json entry orb_intraday) — gửi 2 nơi là trùng.
+    # Bỏ comment 3 dòng dưới để khôi phục section trong bản tin Telegram 18:00.
+    # orb_section = build_orb_section()
+    # if orb_section:
+    #     message = message + orb_section
 
     # Save full universe CSV (for attachment + audit log)
     out_csv = os.path.join(WORKDIR, f"holistic_{target}.csv")

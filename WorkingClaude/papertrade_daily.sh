@@ -36,17 +36,27 @@ run "[11] pt_v4_dt5g"           pt_v4_dt5g.py
 run "[12] pt_v22_dt5g (V2.3)"   pt_v22_dt5g.py
 run "[14] papertrade_compare"   papertrade_compare.py
 # --- sleeves / shadows / alerts ---
-run "[15] vol_spike_hedge_pt"   vol_spike_hedge_pt.py
-run "[16] f_sleeve_pt"          f_sleeve_pt.py
+# [15][16] RETIRED 2026-07-07 (job Taylor_20260707_132048) — paper window ĐÃ KẾT THÚC
+# 2026-06-30 (ENDDATE trong script); Telegram section đã gỡ 2026-06-26. Script/data giữ
+# nguyên cho audit — bỏ comment để chạy lại.
+#run "[15] vol_spike_hedge_pt"   vol_spike_hedge_pt.py
+#run "[16] f_sleeve_pt"          f_sleeve_pt.py
 run "[17] orb_pt"               orb_pt.py
-run "[18] pt_dt4_vs_tq34b_ab"   pt_dt4_vs_tq34b_ab.py
+# [18] RETIRED 2026-07-07 (Taylor_20260707_132048) — câu hỏi A/B "foundation nào go-live"
+# đã QUYẾT 2026-05-29 (DT5G live từ 06-02); không còn quyết định nào đọc report này.
+#run "[18] pt_dt4_vs_tq34b_ab"   pt_dt4_vs_tq34b_ab.py
 run "[19] crisis_alert_push"    crisis_alert_push.py
 run "[20] pt_capitulation_shadow" pt_capitulation_shadow.py
 run "[21] fetch_bdi_daily"      fetch_bdi_daily.py
 run "[22] edge_health_monitor"  edge_health_monitor.py --refresh
-run "[23] ecology_dashboard"    ecology_dashboard.py --refresh
-run "[24] amh_cockpit"          amh_cockpit.py
-run "[25] pt_sleeve_allocator"  pt_sleeve_allocator.py
+# [23][24][25] RETIRED 2026-07-07 (Taylor_20260707_132048) — arc V6 "Tứ Trụ"/AMH không
+# nằm trên roadmap production (V2.4→V2.5); amh_cockpit mất kênh gửi từ cleanup Telegram
+# 2026-06-26; pt_sleeve_allocator đọc V5 (V121_Kelly) trong compare5 vốn đã ngừng cập nhật
+# từ 2026-06-16 → input frozen. ecology_dashboard chạy lại ad-hoc khi cần macro-view.
+# Scripts/data giữ nguyên — bỏ comment để chạy lại.
+#run "[23] ecology_dashboard"    ecology_dashboard.py --refresh
+#run "[24] amh_cockpit"          amh_cockpit.py
+#run "[25] pt_sleeve_allocator"  pt_sleeve_allocator.py
 # --- weekly: phosphorus (Friday only; ICT Friday = dow 5) ---
 if [ "$(date +%u)" = "5" ]; then
   run "[26] phosphorus_dgc_weekly (Fri)" phosphorus_dgc_weekly.py
