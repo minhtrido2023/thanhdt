@@ -73,33 +73,69 @@ if "orders" not in plan:
     escalate("plan_missing_orders", f"{plan_file}: thiếu field 'orders' — schema không hợp lệ.")
     sys.exit(0)
 
-# --- Valid plan found: build normal summary ---
+# --- Valid plan found: render THÂN THIỆN (user feedback 2026-07-07: report cũ "khá khó
+# hiểu" — không rõ account nào, không rõ VÌ SAO plan như vậy). Áp cùng văn phong với
+# session_announce/heartbeat: account nổi bật, hành động + lý do bằng tiếng người,
+# trạng thái duyệt + chuyện gì xảy ra tiếp theo. ---
 date   = plan_date or "?"
 state  = plan.get("state_name", plan.get("market_state", plan.get("state", "?")))
-nav    = plan.get("nav_basis", {}).get("account_nav") if isinstance(plan.get("nav_basis"), dict) \
-         else plan.get("nav_estimate", plan.get("nav", None))
+src    = plan.get("state_source", "")
+nav_b  = plan.get("nav_basis") if isinstance(plan.get("nav_basis"), dict) else {}
+nav    = (nav_b.get("active_nav_vnd") or nav_b.get("account_nav")
+          or plan.get("nav_basis_vnd") or plan.get("nav_estimate"))
 orders = plan.get("orders", [])
+summary = plan.get("summary", {}) if isinstance(plan.get("summary"), dict) else {}
+action  = summary.get("action", "HOLD" if not orders else "TRADE")
+reasons = summary.get("reasons") or []
+approved = plan.get("approved_by")
+requires = plan.get("requires_user_approval", False)
 
-lines = [f"📋 PLAN T+1 — {acct} ({date}) | {today} {now_ict}"]
+lines = [f"📋 **Kế hoạch giao dịch ngày mai {date} — Account {acct}**"]
 
-nav_str = f"{nav:,.0f}đ" if isinstance(nav, (int, float)) else str(nav) if nav else "N/A"
-lines.append(f"Regime: {state} | NAV ước: {nav_str}")
+src_vn = " (nguồn DT5G đầy đủ)" if src == "DT5G_macro" else (f" (nguồn {src})" if src else "")
+nav_str = f"{nav:,.0f}đ" if isinstance(nav, (int, float)) else "n/a"
+lines.append(f"🧭 Thị trường: {state}{src_vn} · NAV cơ sở: {nav_str}")
+
+# Transition context nếu có (ZaloPay Option A)
+tsched = plan.get("transition_schedule") or []
+tday = next((t for t in tsched if t.get("date") == date), None)
+if tday:
+    lines.append(f"🔄 Lộ trình chuyển đổi danh mục: ngày {tday.get('day')}/{len(tsched)} theo kế hoạch Option A đã duyệt")
 
 if orders:
-    buys  = [o for o in orders if str(o.get("side","")).upper() in ("BUY","MUA","B")]
-    sells = [o for o in orders if str(o.get("side","")).upper() in ("SELL","BAN","S")]
-    lines.append(f"Lệnh: {len(buys)} mua, {len(sells)} bán ({len(orders)} tổng)")
-    # Full list, no truncation — notify_thread.sh chunks across multiple Discord
-    # messages if this exceeds the ~2000-char single-message limit.
+    buys  = [o for o in orders if str(o.get("side","")).lower() in ("buy","mua","b")]
+    sells = [o for o in orders if str(o.get("side","")).lower() in ("sell","ban","s")]
+    lines.append(f"🎯 Hành động: **{len(orders)} lệnh** ({len(sells)} bán, {len(buys)} mua):")
     for o in orders:
-        side   = o.get("side","?")
+        side_vn = "BÁN" if str(o.get("side","")).lower() in ("sell","ban","s") else "MUA"
         ticker = o.get("ticker","?")
         qty    = o.get("quantity", o.get("qty","?"))
-        price  = o.get("ref_price", o.get("price","ATO/ATC"))
-        price_str = f"{price:,.0f}" if isinstance(price, (int, float)) else price
-        lines.append(f"  {side} {ticker} x{qty} @ {price_str}")
+        price  = o.get("ref_price", o.get("mtm_price_ref", o.get("price")))
+        px = f"~{price:,.0f}đ" if isinstance(price, (int, float)) else "giá thị trường"
+        val = o.get("est_value_vnd", o.get("est_value"))
+        val_s = f" (~{val/1e6:,.1f}tr)" if isinstance(val, (int, float)) else ""
+        note = o.get("note", "")
+        note_s = f" — {note[:90]}" if note else ""
+        lines.append(f"  • {side_vn} {ticker} {qty}cp @ {px}{val_s}{note_s}")
 else:
-    lines.append("Không có lệnh (giữ nguyên danh mục).")
+    lines.append(f"🎯 Hành động: **GIỮ NGUYÊN (HOLD)** — không có lệnh nào ngày mai.")
+
+if reasons:
+    lines.append("💡 Vì sao:")
+    for r in reasons[:6]:
+        lines.append(f"  – {r}")
+
+if approved:
+    # approved_by có thể là chuỗi audit dài (ghi đủ căn cứ ủy quyền) — hiển thị gọn,
+    # chi tiết đầy đủ vẫn nằm trong file plan.
+    approver_short = str(approved).split("(")[0].strip() or str(approved)[:30]
+    lines.append(f"✅ Trạng thái: ĐÃ DUYỆT ({approver_short}) — bot tự thực thi 09:05 sáng mai, không cần thao tác gì thêm.")
+elif requires or orders:
+    lines.append("⏳ Trạng thái: **CHỜ DUYỆT** — chưa duyệt thì preflight 08:45 báo RED và bot KHÔNG đặt lệnh. Duyệt bằng cách nhắn Mike.")
+else:
+    lines.append("✅ Trạng thái: HOLD 0 lệnh — không cần duyệt, bot trực phiên đồng bộ trạng thái.")
+
+lines.append(f"_(DollarBill lập, gửi {today} {now_ict})_")
 
 print("OK")
 print("\n".join(lines))
