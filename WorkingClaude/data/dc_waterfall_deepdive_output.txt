@@ -1,0 +1,93 @@
+=== SELF-CHECK A — recompute base metrics vs audit METRIC rows ===
+  CAGR   0.273506  vs file 0.273438
+  Sharpe 1.8085  vs file 1.8085
+  MaxDD  -0.176271 vs file -0.176271
+  Calmar 1.5516  vs file 1.5512
+=== SELF-CHECK B — identity overlay max|r_new - r_base| = 0.00e+00
+=== SELF-CHECK C — parked>0 on non-NEUTRAL days: 0  | max w_park=0.699
+    parked days before sleeve history start (2014-08-05): 0 (delta=0 there, honest no-coverage)
+
+=== CÂU 0 — FULL V2.4 NAV: baseline R3 vs WATERFALL parking (paper config) ===
+audit: data/h3_baseline_R3.csv (2014-01-03 → 2026-06-19, 3106 sessions)
+parked sleeve: mean 24.1% NAV, NEUTRAL-days mean 39.2%, max 69.9%
+
+config                            win            CAGR  Sharpe  Sortino   MaxDD  Calmar
+--------------------------------------------------------------------------------------
+R3 baseline (custom30V parking)   FULL         27.35%    1.81     1.78  -17.6%    1.55
+R3 baseline (custom30V parking)   IS 2014-19   26.75%    1.81     1.88  -13.3%    2.01
+R3 baseline (custom30V parking)   OOS 2020+    27.94%    1.81     1.70  -17.6%    1.58
+
+WATERFALL DC→custom30V (paper cfg)FULL         27.68%    1.85     1.85  -15.5%    1.79
+WATERFALL DC→custom30V (paper cfg)IS 2014-19   27.01%    1.85     1.94  -13.1%    2.06
+WATERFALL DC→custom30V (paper cfg)OOS 2020+    28.33%    1.85     1.79  -15.5%    1.83
+
+DSR (full-NAV excess, N=10 trials): 0.111
+
+=== CÂU 1 — DC book state coverage: NEUTRAL-only vs +BULL vs +EXBULL ===
+  idle cash on BULL(4) days: n=406, mean 30.1% NAV, median 34.7%, p90 58.3%
+  idle cash on EXBULL(5) days: n=59, mean 28.1% NAV, median 32.9%, p90 51.1%
+config                            win            CAGR  Sharpe  Sortino   MaxDD  Calmar
+--------------------------------------------------------------------------------------
+(a) NEUTRAL-only (paper, wired)   FULL         27.68%    1.85     1.85  -15.5%    1.79
+(a) NEUTRAL-only (paper, wired)   IS 2014-19   27.01%    1.85     1.94  -13.1%    2.06
+(a) NEUTRAL-only (paper, wired)   OOS 2020+    28.33%    1.85     1.79  -15.5%    1.83
+
+(b) NEUTRAL+BULL                  FULL         28.57%    1.85     1.85  -15.5%    1.85
+(b) NEUTRAL+BULL                  IS 2014-19   26.92%    1.84     1.93  -13.1%    2.06
+(b) NEUTRAL+BULL                  OOS 2020+    30.14%    1.87     1.79  -15.5%    1.95
+
+(c) NEUTRAL+BULL+EXBULL           FULL         28.58%    1.84     1.83  -15.6%    1.83
+(c) NEUTRAL+BULL+EXBULL           IS 2014-19   26.92%    1.84     1.93  -13.1%    2.06
+(c) NEUTRAL+BULL+EXBULL           OOS 2020+    30.16%    1.84     1.77  -15.6%    1.93
+
+=== CÂU 2 — parked-sleeve split: pure waterfall vs fixed mixes (full-NAV level) ===
+config                            win            CAGR  Sharpe  Sortino   MaxDD  Calmar
+--------------------------------------------------------------------------------------
+waterfall thuần (DC ăn hết cap)   FULL         27.68%    1.85     1.85  -15.5%    1.79
+waterfall thuần (DC ăn hết cap)   IS 2014-19   27.01%    1.85     1.94  -13.1%    2.06
+waterfall thuần (DC ăn hết cap)   OOS 2020+    28.33%    1.85     1.79  -15.5%    1.83
+
+fixed 70/30 DC/c30V (turn 2.7x, TCdrag 0.27pp/yr sleeve)FULL         27.46%    1.83     1.83  -15.5%    1.77
+fixed 70/30 DC/c30V (turn 2.7x, TCdrag 0.27pp/yr sleeve)IS 2014-19   26.55%    1.82     1.90  -13.1%    2.03
+fixed 70/30 DC/c30V (turn 2.7x, TCdrag 0.27pp/yr sleeve)OOS 2020+    28.32%    1.84     1.77  -15.5%    1.83
+
+fixed 50/50 DC/c30V (turn 2.2x, TCdrag 0.22pp/yr sleeve)FULL         27.44%    1.83     1.83  -16.0%    1.72
+fixed 50/50 DC/c30V (turn 2.2x, TCdrag 0.22pp/yr sleeve)IS 2014-19   26.62%    1.82     1.91  -13.1%    2.03
+fixed 50/50 DC/c30V (turn 2.2x, TCdrag 0.22pp/yr sleeve)OOS 2020+    28.24%    1.83     1.77  -16.0%    1.76
+
+fixed 30/70 DC/c30V (turn 1.6x, TCdrag 0.16pp/yr sleeve)FULL         27.44%    1.82     1.82  -16.7%    1.65
+fixed 30/70 DC/c30V (turn 1.6x, TCdrag 0.16pp/yr sleeve)IS 2014-19   26.69%    1.82     1.91  -13.1%    2.04
+fixed 30/70 DC/c30V (turn 1.6x, TCdrag 0.16pp/yr sleeve)OOS 2020+    28.16%    1.82     1.75  -16.7%    1.69
+
+=== CÂU 3 — DC rebalance timing (sleeve-vehicle level + full-NAV) ===
+config                            win            CAGR  Sharpe  Sortino   MaxDD  Calmar
+--------------------------------------------------------------------------------------
+daily signal-driven (paper hiện tại) | turn 3.18x/yr TCdrag 0.32pp/yrFULL         27.54%    1.83     1.84  -15.5%    1.77
+daily signal-driven (paper hiện tại) | turn 3.18x/yr TCdrag 0.32pp/yrIS 2014-19   26.55%    1.82     1.90  -13.1%    2.03
+daily signal-driven (paper hiện tại) | turn 3.18x/yr TCdrag 0.32pp/yrOOS 2020+    28.48%    1.84     1.79  -15.5%    1.83
+
+event-driven (chỉ khi membership đổi) | turn 3.18x/yr TCdrag 0.32pp/yrFULL         27.54%    1.83     1.84  -15.5%    1.77
+event-driven (chỉ khi membership đổi) | turn 3.18x/yr TCdrag 0.32pp/yrIS 2014-19   26.55%    1.82     1.90  -13.1%    2.03
+event-driven (chỉ khi membership đổi) | turn 3.18x/yr TCdrag 0.32pp/yrOOS 2020+    28.48%    1.84     1.79  -15.5%    1.83
+
+quarterly (q2m5-style) | turn 0.76x/yr TCdrag 0.08pp/yrFULL         27.56%    1.84     1.84  -15.1%    1.83
+quarterly (q2m5-style) | turn 0.76x/yr TCdrag 0.08pp/yrIS 2014-19   26.99%    1.84     1.93  -13.1%    2.06
+quarterly (q2m5-style) | turn 0.76x/yr TCdrag 0.08pp/yrOOS 2020+    28.12%    1.83     1.77  -15.1%    1.86
+
+year  base_R3   (a)NEU-only  (b)+BULL   delta(b-a)  BULLdays
+2014     35.96%     35.96%     35.96%    +0.00pp   0
+2015     20.71%     21.68%     21.68%    +0.00pp   0
+2016     14.07%     15.11%     15.11%    +0.00pp   0
+2017     38.65%     37.88%     37.88%    +0.00pp   4
+2018     37.88%     39.69%     39.07%    -0.62pp   49
+2019     15.60%     11.75%     11.75%    +0.00pp   0
+2020     27.89%     26.64%     33.55%    +6.91pp   60
+2021    103.65%    105.31%    114.51%    +9.20pp   154
+2022     -5.02%     -5.84%     -5.84%    +0.00pp   0
+2023     22.15%     24.38%     24.38%    +0.00pp   0
+2024     22.65%     27.13%     26.73%    -0.40pp   70
+2025     36.26%     34.52%     33.77%    -0.75pp   57
+2026     -2.72%     -3.02%     -2.79%    +0.23pp   12
+
+LOO: drop best year (2021: +9.20pp) -> remaining delta sum +5.38pp
+CAGR headline (a) FULL=27.54%  (b) FULL=28.42%

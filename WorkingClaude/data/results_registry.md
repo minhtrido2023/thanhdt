@@ -74,6 +74,14 @@ Họ config = **V2.3A (argv `v23a none postbull 0 edge`) + custom30V parking (ET
   AUDIT_END=2026-06-19 $DNA_PYEXE pt_v23_audit_2014.py v23a none postbull 0 edge
   ```
 - **CSV:** `data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap.csv`
+  - ⚠️→✅ **REGENERATED 2026-07-06 (job Taylor_20260706_174921):** file này đã bị 1 run khác GHI ĐÈ
+    17:20 07-06 bằng cấu hình SAI (V2.3C STATIC 50/50 combination, w_lag_tgt trống → CAGR 17.5%, n_tx=1433).
+    Đã regenerate bằng ĐÚNG lệnh pinned dưới đây (interpreter = `$DNA_PYEXE`=wc_venv, KHÔNG phải system
+    python3 — pandas2.3 hệ thống unpickle `earnings_surprise_data.pkl` lỗi, venv pandas3 đọc OK). Kết quả
+    khớp R3-range: **CAGR 27.39% / Sharpe 1.81 / MaxDD −17.6% / Calmar 1.55, self-check 0 VND (BAL+LAG),
+    n_tx=11322, w_lag_tgt populated 3107/3107, combination=V2.3A ALLOCATOR** — khớp baseline data-snapshot
+    hiện tại (CÂU 0: 27.35/1.81/−17.6/1.55; IS 26.78 / OOS 27.94), chênh với 28.26 snapshot cũ = data-drift
+    adjusted-price (so RATIOS not levels, đúng META caveat). File giờ ĐÚNG là R3.
 - **Metric (snapshot 2026-06-19):** CAGR **28.26%** / Sharpe **1.87** / MaxDD −18.8% / Calmar 1.50 | self-check **0 VND** (BAL+LAG)
 - **Đối chứng:** `extract_peryear.py <CSV>` → FULL 28.26% (khớp); IS 27.84 / OOS 28.62; 2021 +90 / 2022 −5 / 2025 +36.
 - *So R2:* NEUTRAL-only Sharpe 1.87 > bull-park 1.82, CAGR 28.26 < 29.24 → bull-park đổi +1pp CAGR lấy −0.05 Sharpe + lag 2024/25. Live <150B chọn R3.
@@ -2530,3 +2538,139 @@ optimum**; higher park = proportionally worse DD, flat Sharpe/Calmar). **Do NOT 
 glide.** If the user wants more deployment in benign NEUTRAL, that is the existing **`risk_dial_override`**
 governance lever (raise fixed park with explicit sign-off), NOT an indicator-driven auto-glide. Keep NEUTRAL
 parking at the fixed 0.70.
+
+---
+## DC-book waterfall DEEP-DIVE — bảng số đầy đủ + 3 câu mở rộng — job Taylor_20260706_173317 (2026-07-06, RESEARCH-ONLY)
+Scripts: `dc_waterfall_deepdive.py` + `dc_waterfall_panel_build.py`; output `data/dc_waterfall_deepdive_output.txt`.
+Production + paper sleeve ĐANG CHẠY untouched. **N trials khai báo: 10** (3 state-policy × 4 mix × 3 timing, trừ trùng).
+
+**Phương pháp**: overlay-recomposition trên R3 full-harness DAILY audit (`data/h3_baseline_R3.csv`,
+pt_v23_audit v23a, AUDIT_END=2026-06-19, identity 0 VND): `r_new = r_base + w_park(t-1)·(r_wf − r_c30v)`,
+với r_wf/r_c30v = vehicle returns cùng framework (job _093329, TC 0.1%, T+1). Self-check 3 tầng PASS:
+(A) metrics recompute == METRIC rows trong audit; (B) overlay identity r_wf:=r_c30v → max|Δ|=0.00e+00;
+(C) parked>0 CHỈ trên NEUTRAL days, max w_park=0.699 (đúng PARK {3:0.7}). Parked sleeve = 24.1% NAV mean,
+39.2% trên NEUTRAL days, max 69.9%.
+⚠️ Baseline note: R3 tại data-snapshot này = 27.35%/1.81/−17.6/1.55 (pinned cũ 28.05 @Jun-20 snapshot —
+chênh = data-drift adjusted-price, so RATIOS not levels, đúng META caveat). Mọi so sánh dưới đây cùng 1 snapshot.
+✅ OPS FLAG RESOLVED (2026-07-06, job Taylor_20260706_174921): file canonical `v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap.csv`
+đã bị 1 run khác GHI ĐÈ 2026-07-06 17:20 (CAGR 17.5%, w_lag_tgt trống, V2.3C static combination — không phải R3).
+ĐÃ regenerate bằng lệnh pinned R3 (interpreter `$DNA_PYEXE`=wc_venv) → CAGR 27.39% / Sh 1.81 / DD −17.6% / Calmar
+1.55, self-check 0 VND, khớp R3-range. File giờ đúng chuẩn R3. Chi tiết + convention chống tái diễn: xem R3 block
+(§ REGENERATED note) và coding_guidelines §8.
+
+### CÂU 0 — Bảng chuẩn: FULL V2.4 NAV @50B, baseline R3 vs WATERFALL (đúng paper config: DC ex-DHG, equal-weight cap 0.20, daily signal-driven, NEUTRAL-only)
+| config | window | CAGR | Sharpe | Sortino | MaxDD | Calmar |
+|---|---|---|---|---|---|---|
+| R3 baseline (custom30V parking) | FULL | 27.35% | 1.81 | 1.78 | −17.6% | 1.55 |
+| | IS 2014-19 | 26.75% | 1.81 | 1.88 | −13.3% | 2.01 |
+| | OOS 2020+ | 27.94% | 1.81 | 1.70 | −17.6% | 1.58 |
+| **WATERFALL paper cfg (ex-DHG)** | FULL | **27.54%** | **1.83** | 1.84 | **−15.5%** | **1.77** |
+| | IS 2014-19 | 26.55% | 1.82 | 1.90 | −13.1% | 2.03 |
+| | OOS 2020+ | 28.48% | 1.84 | 1.79 | −15.5% | 1.83 |
+| (biến thể DHG-included, cross-check) | FULL | 27.68% | 1.85 | 1.85 | −15.5% | 1.79 |
+
+**Đọc**: giá trị chính của waterfall ở full-NAV = **giảm MaxDD −17.6→−15.5 (+2.1pp) và Calmar 1.55→1.77**,
+CAGR chỉ +0.19pp (IS −0.20pp / OOS +0.54pp — CAGR-edge mỏng và nghiêng OOS; riêng DD/Calmar cải thiện Ở CẢ
+IS VÀ OOS). **DSR của excess full-NAV (N=10) = 0.111 << 0.95** — khớp kết luận cũ (sleeve-level DSR 0.775):
+đây là INSURANCE-GRADE, không phải alpha — **giữ PAPER, không wire**, đúng quyết định event-anchored review.
+
+### CÂU 1 — State coverage: NEUTRAL-only vs +BULL vs +EXBULL → GIỮ NEUTRAL-ONLY
+Idle cash trong BULL KHÔNG nhỏ (materiality có thật): 406 ngày BULL, cash mean 30.1% NAV, p90 58.3%.
+Nhưng: (b) NEUTRAL+BULL FULL 28.42% (+0.88pp) Sharpe FLAT 1.85, IS ÂM (−0.09pp);
+(c) +EXBULL: +0.01pp, Sharpe GIẢM 1.85→1.84 → EXBULL vô giá trị.
+**Per-year LOO (quyết định)**: toàn bộ edge +BULL = 2020 (+6.91pp) + 2021 (+9.20pp); 2018 −0.62 / 2024 −0.40 /
+2025 −0.75 — 3 năm bull gần nhất đều ÂM. Drop 2020+2021 → tổng delta ÂM. Cùng chữ ký lumpy khiến bull-park
+custom30V bị loại (R2<R3) và cùng bẫy reshuffle-luck Wave1/H8a. **VERDICT: KHÔNG mở rộng, NEUTRAL-only đúng.**
+
+### CÂU 2 — Tỷ lệ DC/custom30V trong sleeve: WATERFALL THUẦN THẮNG TUYỆT ĐỐI, không đáng phức tạp hoá
+| sleeve split | FULL CAGR | Sharpe | MaxDD | Calmar |
+|---|---|---|---|---|
+| waterfall thuần (DC ăn hết cap) | 27.68% | 1.85 | −15.5% | 1.79 |
+| fixed 70/30 | 27.46% | 1.83 | −15.5% | 1.77 |
+| fixed 50/50 | 27.44% | 1.83 | −16.0% | 1.72 |
+| fixed 30/70 | 27.44% | 1.82 | −16.7% | 1.65 |
+Đơn điệu: càng ít DC càng kém CẢ CAGR lẫn DD (double-confirm chọn lọc hơn custom30V trung bình).
+Fixed ratio thêm turnover-phối trộn mà không thêm giá trị. **Giữ waterfall thuần như đã wire.**
+
+### CÂU 3 — Timing rebalance: hiện tại = DAILY signal-driven (xác nhận từ code `dc_book_waterfall_paper.advance()` — recompute target mỗi close); QUARTERLY đáng cân nhắc khi review
+| timing | turnover | TC drag (sleeve) | FULL | IS | OOS | MaxDD | Calmar |
+|---|---|---|---|---|---|---|---|
+| daily signal-driven (paper) | 3.18x/yr | 0.32pp/yr | 27.54% | 26.55% | 28.48% | −15.5% | 1.77 |
+| quarterly q2m5-style | 0.76x/yr | 0.08pp/yr | 27.56% | 26.99% | 28.12% | −15.1% | 1.83 |
+Event-driven ≡ daily trong frame target-weight (equal-weight không drift-model — không đo tách được ở đây).
+Quarterly: turnover ÷4, TC drag −0.24pp/yr, metrics ngang-đến-tốt-hơn (IS +0.44pp, Calmar 1.83 vs 1.77), đổi lại
+phản ứng chậm hơn khi 1 tên rớt double-confirm giữa quý. **KHÔNG đổi paper sleeve đang chạy** (per ràng buộc
+dispatch); đề xuất đưa "quarterly refresh" vào agenda mốc review event-anchored làm refinement duy nhất đáng thử.
+
+---
+
+## DC-waterfall tinh chỉnh 3 nhánh — overlap cap / liquidity floor / lịch rebal theo thống kê BCTC (2026-07-07, job Taylor_20260707_042827)
+
+**Scope**: RESEARCH-ONLY (paper sleeve + production untouched — input cho mốc review event-anchored).
+**Method**: overlay recomposition trên R3 audit (`data/h3_baseline_R3.csv`, self-check 0 VND identity),
+panel cache job _173317 (`dc_dbl_panel.csv` 00:42 2026-07-07). **N trials khai báo = 13** (5 timing + 4 overlap
++ 4 floor). threads=1. Scripts: `dc_release_date_stats.py`, `dc_rebal_timing_backtest.py`,
+`dc_overlap_cap_backtest.py`, `dc_liquidity_floor_backtest.py`.
+**Cache-consistency note (quan trọng cho mọi so sánh tương lai)**: file `converge_portfolio_backtest_nav.csv`
+(build 16:41 06/07, TRƯỚC sync BQ 23:45) lệch với rebuild cùng công thức trên cache 07/07 ở 227 ngày (max 8.3e-03
+daily — adjusted-Close revision toàn lịch sử). Mọi số dưới đây là SINGLE-CACHE (07/07): r_c30v, panel, vehicle
+cùng snapshot. Máy per-name tái lập park_ret đúng 2.8e-17 (self-check A).
+
+### NHÁNH C — Thống kê Release_Date thật (2014-2025, prune 508 tên, 20.575 báo cáo) → q2m5 GẦN TỐI ƯU
+Phân phối lag nộp (ngày lịch sau quarter-end) CỰC DỒN quanh deadline pháp lý ~30d:
+| mốc | Q1-Q3 đã nộp | Q4 đã nộp |
+|---|---|---|
+| lag 30d | 48.2% | 54.1% |
+| lag 33d | 85.2% | 90.6% |
+| **lag 36d (≈q2m5)** | **98.9%** | **96.2%** |
+| lag 40d | 99.0% | 99.5% |
+- p50/p80/p90/p95 = 31/33/34/34d (Q1-Q3); Q4 KHÔNG muộn hơn (30/33/33/34d) — `Release_Date` trong
+  `ticker_financial` là báo cáo QUÝ (chưa audit), giả thuyết "Q4 audited muộn" không áp vào bảng này.
+- Ổn định theo năm: p80 dao động 31-35d (2014-15 muộn nhất 34-35d, gần đây 31-32d) → mốc 36d robust mọi năm.
+- **Bias nộp muộn = KHÔNG XẤU, hơi ngược**: nhóm nộp sau p80 có NP-YoY median +11.2% vs +6.6% nhóm sớm,
+  %NP-giảm-YoY 39.8% vs 42.4%, %lỗ ngang nhau → không có adverse-selection penalty khi rebalance sớm.
+- WL16/c30v members: ~10% báo cáo nộp sau 33d (2020-25) — không phải đuôi bỏ qua được.
+**Backtest timing DC-refresh (full-NAV)**: daily 27.56%/Calmar 1.77; q2m5 27.60%/1.84; lag40 27.62%/1.85;
+lag33 27.77%/1.84; lag30 27.73%/1.85. Cả dải 30-40d nằm trong ±0.2pp, per-year delta đổi dấu liên tục
+(2019 +2.4→+3.5pp là sampling-luck 1 năm) → KHÔNG có edge "tươi sớm" thật giữa các mốc.
+**VERDICT C**: mốc kinh nghiệm q2m5 của user ĐƯỢC THỐNG KÊ XÁC NHẬN gần tối ưu (98.9% coverage, chỉ 2-3 ngày
+sau cụm deadline; sớm hơn không thêm gì, muộn hơn không cần). **Đề xuất: 1 LỊCH THỐNG NHẤT q2m5 cho CẢ DC book
+VÀ custom30V** (mã trùng net-out cùng ngày, giảm wash-churn) — khớp đề xuất "quarterly refresh" CÂU 3 job trước.
+
+### NHÁNH A — Mã trùng DC ∩ custom30V trong sleeve: CAP GỘP 0.15 = risk-control gần miễn phí
+Control (hiện tại, cộng dồn tự do): max eff-name-weight sleeve 28.7% (p99 28.4%!), = **20.1% NAV khi sleeve
+~70% NAV** — xuyên trần name_cap 10% NAV; 30.6% số ngày có tên >20% sleeve.
+| variant (full-NAV overlay) | FULL | IS | OOS | MaxDD | Calmar | max name @70%NAV | extraTC sleeve |
+|---|---|---|---|---|---|---|---|
+| (iii) control cộng dồn tự do | 27.57% | 26.56% | 28.53% | −15.5% | 1.77 | 20.1% NAV | 0 |
+| (ii) dedupe DC-loại-khỏi-c30V | 27.47% | 26.39% | 28.51% | −15.5% | 1.77 | 14.0% NAV | 0.04pp/yr |
+| (i) cap gộp X=0.20 | 27.53% | 26.49% | 28.52% | −15.5% | 1.77 | 14.0% NAV | 0.04pp/yr |
+| **(i) cap gộp X=0.15** | **27.46%** | 26.56% | 28.32% | **−15.3%** | **1.79** | **10.5% NAV** | 0.17pp/yr |
+Chi phí kiểm soát rủi ro concentration: −0.04 đến −0.11pp CAGR FULL — trong noise; X=0.15 duy nhất đưa
+exposure về đúng tinh thần trần 10% NAV (10.5%) và MaxDD/Calmar tốt nhất nhóm.
+**VERDICT A**: đề xuất **cap gộp X=0.15** khi wire (nếu qua review); dedupe = phương án nhì (đơn giản hơn,
+14% NAV). Control giữ nguyên cho paper đang chạy (per ràng buộc), nhưng con số 20.1% NAV/name là finding
+phải xử lý trước bất kỳ wire live nào.
+
+### NHÁNH B — Floor thanh khoản Trading_Value_1M_P50 ≥ 3B: KHÔNG phải no-op, là robustness CÓ LÃI nhẹ
+Kỳ vọng ban đầu ("8 mã hiện tại không đổi, chỉ DHG rớt") SAI một nửa — floor cắt cả lịch sử:
+- Floor 3B loại 15.0% name-days double-confirm: DHG 873/1075, **HAH 376/1296 (2016-19)**, **MSH 210/710
+  (2020-23)**, VCI 2/12. Floor 5B loại 18.1% (thêm MSH 374/710, VCI 12/12, CTR 12/426) — cắt vào signal thật.
+- Floor KHÔNG thay được hoàn toàn hard-exclude DHG: 3B vẫn cho DHG qua 202 ngày, 5B qua 78 ngày.
+- Set hiện tại (2026-07-06, 9 tên double-confirm): floor 3B loại đúng DHG (TV 0.4B), giữ 8 tên live (19-447B).
+| config (full-NAV) | FULL | IS | OOS | MaxDD | Calmar |
+|---|---|---|---|---|---|
+| paper (hard-exclude DHG, no floor) | 27.56% | 26.55% | 28.54% | −15.5% | 1.77 |
+| **floor 3B (DHG cho lại vào)** | **27.68%** | 26.64% | **28.69%** | **−14.9%** | **1.86** |
+| floor 5B | 27.54% | 26.89% | 28.17% | −15.0% | 1.84 |
+| floor 3B + DHG vẫn hard-exclude (diag) | 27.67% | 26.59% | 28.70% | −15.0% | 1.85 |
+Diagnostic chốt: gain của floor 3B đến từ LOẠI NGÀY KÉM THANH KHOẢN của HAH/MSH thời xưa, KHÔNG phải từ DHG
+(3B-có-DHG ≈ 3B-không-DHG). Cải thiện Ở CẢ IS VÀ OOS, nhưng +0.12pp là nhỏ — frame là ROBUSTNESS (loại đúng
+những name-day không trade nổi ở size thật), không phải alpha.
+**VERDICT B**: đề xuất **floor 3B** vào membership DC khi wire; 5B quá chặt (cắt MSH nửa lịch sử). DHG: floor
+3B đủ thay hard-exclude về mặt số (delta ≈0), chọn floor-only cho sạch cơ chế; hard-exclude giữ như double-safety
+nếu muốn (không tốn gì).
+
+**Tổng kết đề xuất cho mốc review event-anchored** (không đổi gì trước đó): (1) refresh q2m5 thống nhất
+DC+custom30V; (2) cap gộp per-name 0.15 sleeve; (3) floor thanh khoản 3B. Cả 3 = risk-control/robustness với
+chi phí CAGR ≈ 0 — nhất quán verdict DSR 0.775/0.111: sleeve là insurance, không phải alpha-engine.
