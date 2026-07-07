@@ -48,9 +48,23 @@ def _html_to_discord(s: str) -> str:
              .replace("<i>", "*").replace("</i>", "*"))
 
 
-def build_message() -> str:
-    """Assemble the combined Discord message. Raises if the sector-lens evaluation cannot read
-    the cache (fatal -> caller aborts without sending)."""
+def build_message():
+    """Assemble the combined Discord message + a change-detection flag.
+
+    User mandate 2026-07-07: "nếu có deal mới trong alpha lens hoặc golden strong, hoặc có
+    sự biến động mạnh về thứ hạng thì báo lại; nếu không thì mỗi ngày báo không có gì thay
+    đổi, để biết hệ thống vẫn vận hành bình thường." Every underlying section ALREADY
+    computes its own day-over-day diff (they were built for exactly this) — this function
+    only reads those existing signals instead of duplicating diff logic:
+      - Golden/Strong (sector lens): `transitions` list (empty prior = baseline, ALSO
+        treated as change-worthy so the user sees the first-ever snapshot).
+      - AlphaLens: an "EXIT ALERT" line in generate_section()'s own output (an entry
+        condition breach IS the "new deal" event for a buy-and-hold book).
+      - DC Book: "ENTER"/"EXIT" markers in converge_report's own live-vs-seed diff.
+
+    Returns (message: str, changed: bool). Raises if the sector-lens evaluation cannot
+    read the cache (fatal -> caller aborts without sending, unchanged from before).
+    """
     today = dt.date.today().isoformat()
 
     # ---- Section 2 first: sector lens is the hard dependency (raises on cache failure) ----
@@ -63,10 +77,12 @@ def build_message() -> str:
         r["df"], r["transitions"], r["prior"], r["state"],
         r["spread_yoy"], r["feed_ok"], r["feed_asof"], ratings)
     sector_md = _html_to_discord(sector_tg)
+    sector_changed = bool(r["transitions"]) or not r["prior"]   # baseline run also shown once
 
     # ---- Section 1: AlphaLens (returns a string; degrades to a ⚠️ line, never raises) ----
     from alphalens_report import generate_section
     alphalens_md = generate_section(as_of_date=today)
+    alphalens_changed = "EXIT ALERT" in alphalens_md
 
     # ---- Section 3: ConvergePort paper book (double-confirm converge, job Taylor_20260706_093329).
     # Reuse the sector-lens set already computed above (r["df"] + ratings) so we don't run
@@ -78,15 +94,29 @@ def build_message() -> str:
         if rt is not None and int(rt) <= 2:
             live_dc[row["ticker"]] = row["buy_mode"] or "ACCUMULATE"
     converge_md = converge_section(as_of_date=today, live_set=live_dc)
+    # Literal emoji markers converge_report.py itself uses for its live-vs-seed diff
+    # (see "🟢 ENTER"/"🔴 EXIT" in converge_report.generate_section) — not the bare
+    # words, to avoid false positives from unrelated text containing "enter"/"exit".
+    converge_changed = ("🟢 ENTER" in converge_md) or ("🔴 EXIT" in converge_md)
 
-    header = f"🆕 **NEW DEALS — {today}**  ·  *research/monitor, not an order*"
-    parts = [
-        header,
-        "## AlphaLens Paper Portfolio\n" + alphalens_md,
-        "## Golden/Strong Watchlist (8L + Sector Lens)\n" + sector_md,
-        "## DC Book Paper Portfolio\n" + converge_md,
-    ]
-    return "\n\n".join(parts)
+    changed = sector_changed or alphalens_changed or converge_changed
+
+    if changed:
+        header = f"🆕 **NEW DEALS — {today}**  ·  *research/monitor, not an order*"
+        parts = [
+            header,
+            "## AlphaLens Paper Portfolio\n" + alphalens_md,
+            "## Golden/Strong Watchlist (8L + Sector Lens)\n" + sector_md,
+            "## DC Book Paper Portfolio\n" + converge_md,
+        ]
+        return "\n\n".join(parts), True
+
+    # Không đổi gì hôm nay — 1 dòng "vẫn sống", KHÔNG phải im lặng (user: "để biết hệ
+    # thống vẫn vận hành bình thường" — phân biệt "không có tin" với "hệ thống chết").
+    quiet = (f"🆕 **NEW DEALS — {today}** — Không có deal mới / thay đổi thứ hạng đáng chú ý "
+             f"trong AlphaLens, Golden/Strong Watchlist, DC Book hôm nay. Hệ thống vẫn giám "
+             f"sát bình thường.")
+    return quiet, False
 
 
 def send(message: str) -> None:
@@ -95,7 +125,7 @@ def send(message: str) -> None:
 
 def main() -> int:
     try:
-        message = build_message()
+        message, changed = build_message()
     except Exception as e:
         _log(f"FATAL — could not build report (BQ cache not ready?): {e}. NOT sending.")
         return 1
@@ -105,6 +135,8 @@ def main() -> int:
     except Exception as e:
         _log(f"FATAL — notify_thread.sh failed: {e}")
         return 2
+
+    _log(f"changed={changed}")
 
     _log(f"sent OK ({len(message)} chars) to thread {THREAD_ID}")
     return 0
