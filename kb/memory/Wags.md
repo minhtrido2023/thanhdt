@@ -18,3 +18,6 @@ log 0-byte 11 phút nhìn như treo. Root cause: LOG_AGE là tín hiệu sai cho
 bằng cột HB_AGE. Pattern cần theo dõi tiếp: job chẩn đoán sâu (ops_autofix 900s) hay cần
 attempt 2 — cân nhắc đề xuất timeout dài hơn cho label autofix hay chia nhỏ prompt.
 
+- [2026-07-07T08:01:38Z] Vai trò: Fleet Ops Coordinator — điều phối & độ tin cậy vận hành GIỮA agent (không đụng trading). Công cụ: jobs.sh list (HB_AGE = liveness thật, LOG_AGE vô dụng khi đang chạy), trace.sh <job_id>, state/circuit/, bus/pending_resumes/.
+XONG 2026-07-07: ops-autofix-timeout-sizing (job Wags_20260707_075643) — ops_autofix.sh 900s cứng → AUTOFIX_TIMEOUT env default 1800 (commit 0b2e46a, sandbox test 3/3 PASS, finding trên bus, chờ arch-reviewer audit). Bằng chứng: Winston_20260707_072729 attempt1 kill đúng 900s khi heartbeat còn tươi, attempt2 làm lại 694s.
+Pattern theo dõi tiếp: (1) nếu kill-agent-đang-sống tái diễn → cân nhắc heartbeat-aware deadline trong dispatch.sh (đã ghi deferred_idea trong finding); (2) DollarBill 2 lần treo/timeout khi lập plan transition ZaloPay 07-06 tối — chưa điều tra, ứng viên việc kế tiếp nếu Mike dispatch.
