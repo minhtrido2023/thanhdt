@@ -53,6 +53,34 @@ def today_sell_value(account, date):
     return sum(qty * price for _, qty, price in latest_by_child.values())
 
 
+def broker_positions(account_label, account_no):
+    """Vị thế THẬT từ API broker (source of truth) → {sym: total_qty}.
+
+    Bug 2026-07-07 (kb/INCIDENTS.md): NAV từng lấy mtm_stock từ verify_account_snapshot.py
+    — tái dựng vị thế TỪ LỊCH SỬ FILL journal. Đúng cho account clean-slate (SpaceX), nhưng
+    account có vị thế legacy không có fill history (ZaloPay: DGC/VPB/VIB/VHC/TCM/TLG ~976tr)
+    bị BỎ SÓT toàn bộ → EOD report đăng NAV 17,5tr (-98%) lên Trading report. Nguyên tắc:
+    NAV đo TÀI SẢN THẬT → hỏi broker; journal chỉ dùng cho cost-basis/P&L attribution.
+    """
+    sys.path.insert(0, WC_ROOT)
+    from trading_bot.brokers import DNSEBroker
+    try:
+        b = DNSEBroker(account_id=account_no, quote_only=False, label=account_label)
+        b.connect()
+        pos = b.get_positions()
+        # Side effect CÓ CHỦ ĐÍCH: get_cash() ghi 1 bản ghi "balances" TƯƠI (kèm account
+        # tag) vào dnse_raw hôm nay — ngày HOLD bot không chạy lệnh nào nên không có bản
+        # ghi balance, latest_balance() sẽ không có gì để đọc nếu thiếu bước này.
+        try:
+            b.get_cash()
+        except Exception:
+            pass
+        return {sym: p["total"] for sym, p in pos.items() if p.get("total", 0) > 0}
+    except Exception as e:
+        print(f"⚠️ Không đọc được positions broker ({account_label}): {e}", file=sys.stderr)
+        return None
+
+
 def latest_balance(raw_path, account_no=None):
     """Bản ghi 'balances' MỚI NHẤT cho ĐÚNG account_no trong file dnse_raw_{date}.jsonl.
 
@@ -124,6 +152,8 @@ def main():
         print(f"ℹ️ [{args.date}] Chưa có ngày giao dịch nào cho {args.account} — bỏ qua NAV snapshot.")
         return 0
 
+    # verify_account_snapshot: giờ chỉ là CROSS-CHECK advisory (cost-basis/đối soát journal)
+    # — NAV không còn phụ thuộc nó (xem docstring broker_positions về bug 2026-07-07).
     snapshot_out = os.path.join(EXEC_DIR, f"verified_snapshot_{args.account}_{args.date}.json")
     cmd = [sys.executable, os.path.join(MIKE_BIN, "verify_account_snapshot.py"),
            "--account", args.account, "--dates", ",".join(dates), "--asof", args.date,
@@ -131,13 +161,32 @@ def main():
     if account_no:
         cmd += ["--account-no", account_no]
     r = subprocess.run(cmd, capture_output=True, text=True)
+    verify_warning = None
     if r.returncode not in (0,):
-        print(f"❌ verify_account_snapshot.py thất bại (rc={r.returncode}) — KHÔNG tính NAV, "
-              f"tránh báo số chưa xác minh.\nstderr: {r.stderr.strip()}", file=sys.stderr)
-        return r.returncode
+        verify_warning = (f"verify_account_snapshot (cross-check journal) rc={r.returncode} — "
+                          f"NAV vẫn tính từ vị thế broker thật; cần xem cost-basis/đối soát riêng.")
 
-    snap = json.load(open(snapshot_out, encoding="utf-8"))
-    mtm_stock = snap["total_mtm_value"]
+    # ── mtm_stock = vị thế BROKER THẬT × giá đóng cửa verified ──
+    positions = broker_positions(args.account, account_no)
+    if not positions:
+        print(f"❌ [{args.date}] Không lấy được vị thế broker — KHÔNG tính NAV "
+              f"(tránh đăng số thiếu vị thế).", file=sys.stderr)
+        return 2
+    sys.path.insert(0, MIKE_BIN)
+    from verify_account_snapshot import dnse_close_prices, bq_close_prices
+    import datetime as _dt
+    tickers = sorted(positions)
+    if args.date == _dt.date.today().isoformat():
+        prices = dnse_close_prices(tickers)
+    else:
+        prices, _perr = bq_close_prices(tickers, args.date)
+        prices = prices or {}
+    missing = [t for t in tickers if t not in prices]
+    if missing:
+        print(f"❌ [{args.date}] Thiếu giá đóng cửa verified cho {missing} — KHÔNG tính NAV "
+              f"(không đoán giá).", file=sys.stderr)
+        return 2
+    mtm_stock = sum(qty * prices[t] for t, qty in positions.items())
 
     raw_path = os.path.join(EXEC_DIR, f"dnse_raw_{args.date}.jsonl")
     try:
@@ -185,6 +234,19 @@ def main():
     day_change = nav - prev_nav
     day_change_pct = day_change / prev_nav * 100 if prev_nav else 0
 
+    # SANITY GUARD (bài học 2026-07-07: NAV -98.25% được auto-đăng lên Trading report vì
+    # không tầng nào chặn số phi lý): |biến động ngày| vượt ngưỡng → KHÔNG ghi lịch sử,
+    # KHÔNG in NAV — in cảnh báo escalate để con người xem. VNINDEX biên độ ±7%/ngày; NAV
+    # account biến động >15%/ngày gần như chắc chắn là bug dữ liệu (hoặc nạp/rút tiền lớn —
+    # trường hợp đó con người xác nhận rồi chạy lại với NAV_SANITY_MAX_PCT cao hơn).
+    sanity_max = float(os.environ.get("NAV_SANITY_MAX_PCT", "15"))
+    if abs(day_change_pct) > sanity_max:
+        print(f"🔴 NAV {args.date} ({args.account}) TỰ CHẶN KHÔNG ĐĂNG: {nav:,.0f} VND "
+              f"(biến động {day_change_pct:+.2f}%/ngày vượt ngưỡng ±{sanity_max:.0f}%) — "
+              f"gần như chắc chắn lỗi dữ liệu (vị thế thiếu/giá sai). Cần người kiểm tra; "
+              f"nếu là nạp/rút tiền thật → chạy lại với NAV_SANITY_MAX_PCT lớn hơn.")
+        return 3
+
     hist_rows = [row for row in hist_rows if row["date"] != args.date]
     hist_rows.append({"date": args.date, "nav": f"{nav:.0f}", "mtm_stock": f"{mtm_stock:.0f}",
                        "cash": f"{cash:.0f}", "margin_debt": f"{debt:.0f}",
@@ -211,6 +273,8 @@ def main():
         lines.append(f"   ⚠️ Đang có nợ margin thật {debt:,.0f} VND — theo dõi lãi vay tích lũy.")
     if stale_warning:
         lines.append(f"   ⚠️ {stale_warning}")
+    if verify_warning:
+        lines.append(f"   ℹ️ {verify_warning}")
     print("\n".join(lines))
 
     out = {"account": args.account, "date": args.date, "nav": nav,
