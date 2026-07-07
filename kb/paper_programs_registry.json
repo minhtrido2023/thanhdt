@@ -1,0 +1,161 @@
+{
+  "version": 1,
+  "updated": "2026-07-07",
+  "description": "Registry các chương trình PAPER-TRADING đang active — nguồn duy nhất cho paper_programs_daily_report.py. Thêm sleeve mới = thêm 1 entry (không sửa code render). Probe types: command | journal_scan | alphalens.",
+  "programs": [
+    {
+      "id": "dc_waterfall",
+      "name": "DC-book NEUTRAL idle-cash Waterfall",
+      "owner": "Taylor",
+      "objective": "Khi NEUTRAL và BAL/LAG rỗng, giải ngân tiền rảnh theo thứ tự BAL/LAG → DC book (double-confirm, ex-DHG) → custom30V có thắng để-nguyên-custom30V không? (backtest +5.0pp sleeve, DSR 0.775 = insurance-grade, chưa phải alpha tin cậy cao)",
+      "start": "2026-07-06",
+      "end": null,
+      "end_or_trigger": "Event-anchored: chu kỳ reverse-unwind ĐẦU TIÊN hoàn tất (LAG dự kiến refill cuối 07) + settle 4-6 tuần. Sàn ~2 tháng, trần 2026-10-06 (né mùa BCTC Q3). LAG refill trượt lịch → mốc trượt theo.",
+      "gate_criteria": [
+        {"text": "Trọn 1 chu kỳ deploy → reverse-unwind → settle trên paper, đúng thứ tự ưu tiên thiết kế", "status": "pending"},
+        {"text": "P&L sleeve NET-of-TC không mâu thuẫn backtest (+5.0pp/năm sleeve parking kỳ vọng)", "status": "pending"},
+        {"text": "User sign-off sau review event-anchored (Mike + Taylor đề xuất ngày khi đủ điều kiện)", "status": "pending"}
+      ],
+      "probe": {
+        "type": "command",
+        "cmd": ["python3", "dc_book_waterfall_paper.py", "--section", "--account", "main"],
+        "timeout": 200,
+        "max_chars": 1400
+      },
+      "data_sources": [
+        "data/dc_book_waterfall_paper_state.json",
+        "data/dc_book_waterfall_paper_nav.csv"
+      ],
+      "notes": "Sleeve clock chạy từ 2026-06-26 (backfill NAV cơ sở 1B); user duyệt paper 2026-07-06 (job Taylor_20260706_132553)."
+    },
+    {
+      "id": "extreme_regime",
+      "name": "EXTREME-regime gate",
+      "owner": "Taylor",
+      "objective": "Gate phòng thủ intraday (arm 2-poll, sell-to-floor, buy-pause, cadence ×0.25) có ZERO false-trigger trong thị trường benign không? (stress-injection đã PASS 24/24)",
+      "start": "2026-07-01",
+      "end": "2026-07-28",
+      "end_or_trigger": "~2026-07-28 (~20 phiên benign)",
+      "gate_criteria": [
+        {"text": "Stress-injection 24/24 PASS (arm 2-poll · sell-to-floor · buy-pause · cadence ×0.25 + negative controls)", "status": "pass", "note": "stress_extreme_regime.py, week-1"},
+        {"text": "ZERO false-trigger qua ~4 tuần benign trên account paper main", "status": "pending"},
+        {"text": "Không can thiệp NORMAL-path", "status": "pending"},
+        {"text": "User sign-off trước khi bật live", "status": "pending"}
+      ],
+      "probe": {
+        "type": "journal_scan",
+        "account": "main",
+        "markers": ["EXTREME_PAUSE", "EXTREME_SELL", "EXTREME_DOWN", "EXTREME_UP"]
+      },
+      "data_sources": [
+        "data/execution_logs/exec_main_*_journal.csv",
+        "secrets/trading_bot_accounts.json (extreme_regime_enabled=true, chỉ paper main)",
+        "stress_extreme_regime.py"
+      ],
+      "notes": "Evidence tích lũy CHỈ khi executor chạy phiên trên account main — 0 phiên = 0 evidence, không tính là PASS."
+    },
+    {
+      "id": "vol_scale_chase_cap",
+      "name": "Vol-scale buy chase-cap (patch#3)",
+      "owner": "Taylor",
+      "objective": "Nới trần đuổi mua theo realised vol 20d (clamp(k·rvol, static, ceil), k=2.0/ceil=0.04, monotone-safe, fail-safe về static) có wiring đúng trên quote thật không? (executor-path stress đã PASS 15/15)",
+      "start": "2026-07-01",
+      "end": "2026-07-14",
+      "end_or_trigger": "~2026-07-14 (~10 phiên — fire trên gap-up thường, tích event nhanh)",
+      "gate_criteria": [
+        {"text": "Executor-path stress 15/15 PASS (wiring · WIDEN clamp-to-ceil · MONOTONE · fail-safe rvol absent/0/<0 · NEG-control)", "status": "pass", "note": "stress_vol_scale_chase_cap.py"},
+        {"text": "Paper sạch: wiring đúng trên quote thật + fail-safe khi thiếu rvol cache", "status": "pending"},
+        {"text": "Không can thiệp NORMAL-path ngày non-gap", "status": "pending"},
+        {"text": "Skeptic rerun REAL-fill vs min(open,L) proxy trên correlated gap-up @NAV target", "status": "pending"},
+        {"text": "User sign-off trước khi bật live", "status": "pending"}
+      ],
+      "probe": {
+        "type": "journal_scan",
+        "account": "main",
+        "markers": []
+      },
+      "data_sources": [
+        "data/execution_logs/exec_main_*_journal.csv",
+        "secrets/trading_bot_accounts.json (chase_cap_vol_scale_enabled=true, chỉ paper main)",
+        "stress_vol_scale_chase_cap.py"
+      ],
+      "notes": "Cap-widen KHÔNG có marker riêng trong journal (áp silent trong _buy_chase_pct) — đo qua stress script + so limit price ngày gap-up; cần phiên executor paper + ngày gap mới có evidence tự động."
+    },
+    {
+      "id": "fill_timing",
+      "name": "Fill-timing window (BUY 10:45-11:15 / SELL 09:15-09:45)",
+      "owner": "Taylor",
+      "objective": "Edge backtest (BUY 11:15 rẻ hơn open +17.6bps t=12.0; SELL tại open +11.8bps vs ATC) có capture được NET-of-noise trên fill thật không? (noise 110-220bps >> edge 17bps → cần nhiều tuần)",
+      "start": "2026-07-01",
+      "end": "2026-07-31",
+      "end_or_trigger": "Checkpoint ~cuối tháng 7 (cần ~3-4 tuần fill tích lũy)",
+      "gate_criteria": [
+        {"text": "BUY window adherence cao (lệnh dồn 10:45-11:15)", "status": "pending"},
+        {"text": "SELL window adherence cao (lệnh tại open 09:15-09:45)", "status": "pending"},
+        {"text": "0 rejects/fails (hoặc từng cái được giải thích)", "status": "pending"},
+        {"text": "BUY fill không tệ hơn open đáng kể; SELL không thấp hơn open đáng kể", "status": "pending"},
+        {"text": "quant-skeptic → user sign-off mới flip fill_timing_live_gate", "status": "pending"}
+      ],
+      "probe": {
+        "type": "command",
+        "cmd": ["python3", "execution_quality_review.py"],
+        "timeout": 120,
+        "max_chars": 1600
+      },
+      "data_sources": [
+        "execution_quality_review.py",
+        "data/execution_logs/exec_*_journal.csv (ft-notes)"
+      ],
+      "notes": "Mechanics (window adherence) đo được sớm; EDGE bps cần nhiều tuần — không gate sớm trên bps."
+    },
+    {
+      "id": "alphalens",
+      "name": "AlphaLens Paper (FPT/ACB/MBB/HDB vs VNINDEX)",
+      "owner": "DollarBill",
+      "objective": "4 tên Tier-1 chọn bằng lens định giá (PE vs PE_MA1Y; PB vs Gordon justified-PB) có beat VNINDEX qua 3 tháng không? Buy-and-hold, equal-weight 25%/tên.",
+      "start": "2026-07-01",
+      "end": "2026-09-30",
+      "end_or_trigger": "2026-09-30 (audit: Taylor)",
+      "gate_criteria": [
+        {"text": "Excess return dương vs VNINDEX qua full window 3 tháng", "status": "pending"},
+        {"text": "Exit conditions per-name không bị vi phạm sớm (PE > PE_MA1Y / PB > justPB)", "status": "pending"},
+        {"text": "Audit độc lập bởi Taylor tại 2026-09-30", "status": "pending"}
+      ],
+      "probe": {
+        "type": "alphalens",
+        "json_path": "data/alphalens_paper.json",
+        "prices_parquet": "data/bq_cache/ticker_1m.parquet"
+      },
+      "data_sources": [
+        "data/alphalens_paper.json",
+        "data/bq_cache/ticker_1m.parquet (Close + VNINDEX, sync 23:45 ICT)"
+      ],
+      "notes": "Giá MTM từ BQ cache (close phiên gần nhất đã sync) — trong phiên sẽ trễ 1 ngày, đúng thiết kế EOD."
+    },
+    {
+      "id": "ab_cross",
+      "name": "A/B cross-mode (ab_cross vs ab_dip)",
+      "owner": "Taylor",
+      "objective": "So sánh 2 chế độ đặt lệnh (cross ngay vs chờ dip) trên cùng plan — chế độ nào cho fill price tốt hơn NET?",
+      "start": null,
+      "end": null,
+      "end_or_trigger": "Chưa chốt — cần account ab_cross/ab_dip chạy phiên trước đã",
+      "gate_criteria": [
+        {"text": "Cả 2 account A/B có phiên chạy song song đủ mẫu", "status": "pending"},
+        {"text": "Khác biệt fill price có ý nghĩa thống kê trước khi kết luận", "status": "pending"}
+      ],
+      "probe": {
+        "type": "command",
+        "cmd": ["python3", "bot_ab_report.py", "--days", "10"],
+        "timeout": 120,
+        "max_chars": 1200
+      },
+      "data_sources": [
+        "bot_ab_report.py",
+        "data/bot_paper_ab_cross.json",
+        "data/bot_paper_ab_dip.json"
+      ],
+      "notes": "Tính đến 2026-07-07 account ab_cross chưa chạy phiên nào — report sẽ nói thẳng điều đó."
+    }
+  ]
+}
