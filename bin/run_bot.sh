@@ -37,7 +37,21 @@ LOG="$ROOT/logs/run_bot_${ACCOUNT}_${PLAN_DATE}.log"
 mkdir -p "$ROOT/logs"
 
 ts_start="$(date +%s)"
-_discord "🤖 **bot_execute** khởi động — account **$ACCOUNT** plan $PLAN_DATE (auto-otp=$AUTO_OTP). Log: $LOG"
+# Message thân thiện, có nghĩa với người đọc (user yêu cầu 2026-07-07 — tường minh vận
+# hành): nói rõ bot vào phiên làm gì (mấy lệnh / HOLD), thay vì tên tiến trình + flag.
+_n_orders="$(python3 -c "
+import json
+try:
+    print(len(json.load(open('$WC_ROOT/data/trade_plans/plan_${ACCOUNT}_${PLAN_DATE}.json')).get('orders', [])))
+except Exception:
+    print('?')
+" 2>/dev/null)"
+_hr_ict="$(TZ='Asia/Ho_Chi_Minh' date +'%H:%M')"
+if [ "$_n_orders" = "0" ]; then
+  _discord "🤖 **Bot vào phiên ($_hr_ict)** — account **$ACCOUNT**: kế hoạch hôm nay là HOLD (không có lệnh) — bot trực phiên để đồng bộ trạng thái, không giao dịch gì."
+else
+  _discord "🤖 **Bot vào phiên ($_hr_ict)** — account **$ACCOUNT**: bắt đầu thực thi kế hoạch $PLAN_DATE (${_n_orders} lệnh). Sổ lệnh cập nhật mỗi 5 phút tại đây."
+fi
 
 "$ROOT/bin/append_event.sh" Mafee status "bot-start" \
   "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"auto_otp\":$AUTO_OTP}" 2>/dev/null || true
@@ -61,14 +75,14 @@ set -e
 ts_end="$(date +%s)"
 elapsed=$(( ts_end - ts_start ))
 
+_hr_end="$(TZ='Asia/Ho_Chi_Minh' date +'%H:%M')"
 if [ "$rc" -eq 0 ]; then
-  tail_preview="$(tail -c 300 "$LOG" 2>/dev/null | tr '\n' ' ')"
-  _discord "✅ **bot_execute** xong (${elapsed}s) — account **$ACCOUNT** $PLAN_DATE. Preview: $tail_preview"
+  _discord "✅ **Bot rời phiên ($_hr_end)** — account **$ACCOUNT** kết thúc đợt làm việc bình thường (chạy $((elapsed/60)) phút). Nếu đang giữa ngày: bot sẽ quay lại theo lịch (13:00 sau nghỉ trưa); cuối ngày: chờ báo cáo EOD 15:00."
   "$ROOT/bin/append_event.sh" Mafee status "bot-done" \
     "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"elapsed_s\":$elapsed,\"rc\":0}" 2>/dev/null || true
 else
   tail_preview="$(tail -c 300 "$LOG" 2>/dev/null | tr '\n' ' ')"
-  _discord "❌ **bot_execute** THẤT BẠI (rc=$rc, ${elapsed}s) — account **$ACCOUNT** $PLAN_DATE. Xem: $LOG. Preview: $tail_preview"
+  _discord "❌ **Bot gặp lỗi và dừng ($_hr_end)** — account **$ACCOUNT** (rc=$rc, chạy $((elapsed/60)) phút). Hệ thống giám sát sẽ tự khởi động lại nếu còn trong giờ giao dịch; chi tiết kỹ thuật: $LOG. Preview: $tail_preview"
   "$ROOT/bin/append_event.sh" Mafee error "bot-fail" \
     "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"elapsed_s\":$elapsed,\"rc\":$rc,\"log\":\"$LOG\"}" 2>/dev/null || true
 fi
