@@ -1425,3 +1425,6 @@
 ## Consolidation 2026-07-07T10:37:15Z
 - [2026-07-07T10:37:04Z] DollarBill/heartbeat — DollarBill_20260707_103101: {"status": "still_running", "elapsed_min": 6, "job_id": "DollarBill_20260707_103101"}
 - [2026-07-07T10:37:06Z] DollarBill/decision — plan-ZaloPay-2026-07-08: {"job": "DollarBill_20260707_103101", "plan_date": "2026-07-08", "account": "ZaloPay", "dt5g_state": "NEUTRAL(3)", "state_source": "DT5G_macro", "active_nav_vnd": 528911427, "transition_day": "2/5", "orders": [{"side": "sell", "ticker": "TLG", "qty": 200, "est_value_vnd": 9810000}, {"side": "buy", "ticker": "VHM", "qty": 100, "est_value_vnd": 15410000}], "basket_pct_after": 43.2, "basket_pct_target": 70.0, "cash_buffer_vnd": 497012, "fallback": "BID 300cp nếu VHM giá cao hơn ~159500", "requires_user_approval": true, "plan_file": "data/trade_plans/plan_ZaloPay_2026-07-08.json", "status": "WRITTEN — chờ user duyệt"}
+
+## Consolidation 2026-07-07T12:07:01Z
+- [2026-07-07T11:10:04Z] Winston/status — new-listings-daily: {"date": "2026-07-07", "count": 0, "lookback_days": 90, "note": "no new listings detected"}
