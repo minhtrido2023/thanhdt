@@ -22,11 +22,50 @@ TRADING_THREAD="1522576692638388364"  # Trading report (đổi từ Trading Dail
 PLAN_FILE="$WC_ROOT/data/trade_plans/plan_${ACCOUNT}_${PLAN_DATE}.json"
 STATE_FILE="$WC_ROOT/data/execution_logs/exec_${ACCOUNT}_${PLAN_DATE}_state.json"
 
-if [ ! -f "$PLAN_FILE" ] || [ ! -f "$STATE_FILE" ]; then
-  MSG="ℹ️ [$PLAN_DATE] Không có phiên giao dịch nào cho $ACCOUNT hôm nay (plan hoặc state file không tồn tại) — bỏ qua EOD report."
+# Mọi ngày PHẢI có 1 dòng báo cho account này — "im lặng" không phân biệt được với hệ
+# thống chết (user 2026-07-07). Trước đây "plan hoặc state thiếu" gộp chung 1 case rồi bỏ
+# qua — bug thật hôm nay: plan HOLD (0 lệnh) khiến bot_execute.py thoát ngay KHÔNG tạo
+# state file → bị coi như "không có phiên" → SpaceX không có report dù bot chạy đúng kế
+# hoạch. Giờ tách 3 case rõ ràng, luôn gửi 1 trong 3:
+N_ORDERS_TODAY="?"
+if [ -f "$PLAN_FILE" ]; then
+  N_ORDERS_TODAY="$(python3 -c "import json; print(len(json.load(open('$PLAN_FILE')).get('orders', [])))" 2>/dev/null || echo "?")"
+fi
+
+if [ ! -f "$PLAN_FILE" ]; then
+  # Case 1: KHÔNG CÓ plan — vấn đề thật (DollarBill chưa chạy/lỗi), không phải "ngày nghỉ".
+  MSG="🔴 **EOD $ACCOUNT ($PLAN_DATE)** — KHÔNG TÌM THẤY plan hôm nay. DollarBill có thể đã lỗi lúc 17:30/19:30 hôm qua — kiểm tra ngay, đây KHÔNG phải ngày nghỉ giao dịch bình thường."
   echo "$MSG"
+  "$ROOT/bin/notify_thread.sh" "$MSG" "$TRADING_THREAD" 2>/dev/null || true
+  "$ROOT/bin/append_event.sh" Mafee status "eod-trading-report" \
+    "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"delivered_via\":\"no_plan_alert\"}" 2>/dev/null || true
+  exit 0
+elif [ "$N_ORDERS_TODAY" = "0" ]; then
+  # Case 2: HOLD hợp lệ (0 lệnh) — không cần state file (bot_execute.py thoát sớm đúng
+  # thiết kế). Vẫn báo NAV để xác nhận hệ thống sống + số đúng, không phải im lặng.
+  # grep -v [dnse]: lọc log kết nối broker debug (connect()/token) — không thuộc về
+  # report client-facing, giữ minh bạch/gọn (user 2026-07-07).
+  NAV_SECTION="$(python3 "$ROOT/bin/daily_nav_snapshot.py" --account "$ACCOUNT" --date "$PLAN_DATE" 2>&1 | grep -v '^\[dnse\]')"
+  MSG="📊 **EOD Trading Report — $ACCOUNT ($PLAN_DATE)**
+✅ HOLD — kế hoạch hôm nay không có lệnh nào (đúng thiết kế, không phải lỗi). Bot đã trực phiên đồng bộ trạng thái.
+
+$NAV_SECTION"
+  echo "$MSG"
+  "$ROOT/bin/notify_thread.sh" "$MSG" "$TRADING_THREAD" 2>/dev/null || true
+  "$ROOT/bin/append_event.sh" Mafee status "eod-trading-report" \
+    "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"delivered_via\":\"hold_day\"}" 2>/dev/null || true
+  exit 0
+elif [ ! -f "$STATE_FILE" ]; then
+  # Case 3: CÓ lệnh trong plan nhưng KHÔNG có state file — bot chưa từng chạy/crash trước
+  # khi ghi state đầu tiên. Vấn đề thật, khác hẳn case 1/2.
+  MSG="🔴 **EOD $ACCOUNT ($PLAN_DATE)** — Plan có $N_ORDERS_TODAY lệnh nhưng KHÔNG có state file thực thi. Bot có thể chưa chạy được lần nào hôm nay (kiểm tra run_bot.sh log / bot_heartbeat) — cần xem ngay."
+  echo "$MSG"
+  "$ROOT/bin/notify_thread.sh" "$MSG" "$TRADING_THREAD" 2>/dev/null || true
+  "$ROOT/bin/append_event.sh" Mafee error "eod-trading-report" \
+    "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"delivered_via\":\"missing_state_alert\"}" 2>/dev/null || true
   exit 0
 fi
+# Case 4 (bình thường: có lệnh + có state) rơi xuống phần render đầy đủ bên dưới.
 
 REPORT="$(python3 - "$PLAN_FILE" "$STATE_FILE" "$ACCOUNT" "$PLAN_DATE" "$WC_ROOT" << 'PYEOF'
 import sys, json, os
@@ -200,30 +239,16 @@ elif os.path.exists(mismatch_file):
 PYEOF
 )"
 
-NAV_SECTION="$(python3 "$ROOT/bin/daily_nav_snapshot.py" --account "$ACCOUNT" --date "$PLAN_DATE" 2>&1)"
+NAV_SECTION="$(python3 "$ROOT/bin/daily_nav_snapshot.py" --account "$ACCOUNT" --date "$PLAN_DATE" 2>&1 | grep -v '^\[dnse\]')"
 
-# --- DC-book NEUTRAL idle-cash WATERFALL — PAPER sleeve monitor (Taylor 2026-07-06, job
-#     Taylor_20260706_132553; user-approved paper trial after research Taylor_20260706_125540).
-#     Self-contained paper sleeve on account `main`, gated by dc_book_waterfall_enabled (default
-#     OFF → --section prints ""); touches NO production plan/executor. --section advances the
-#     sleeve once (idempotent per close) then renders. Fail-safe: never raises, empty when
-#     disabled. Shown ONCE per day (per-date flag) so it doesn't duplicate if more than one
-#     account's EOD report runs — account-agnostic, so it appears on whichever report runs first.
-WATERFALL_SECTION=""
-_WF_FLAG="$WC_ROOT/data/execution_logs/waterfall_eod_shown_${PLAN_DATE}.flag"
-if [ ! -f "$_WF_FLAG" ]; then
-  WATERFALL_SECTION="$(cd "$WC_ROOT" && timeout 200 python3 dc_book_waterfall_paper.py --section --account main 2>/dev/null || true)"
-  [ -n "$WATERFALL_SECTION" ] && : > "$_WF_FLAG"   # claim the day's slot only if it rendered
-fi
+# DC-book NEUTRAL waterfall (paper sleeve) MOVED OUT 2026-07-07 — user mandate: mọi
+# paper-trading report gộp về MỘT nhóm (Paper Programs Daily Report,
+# bin/paper_programs_daily_report.sh) để tránh trùng lặp giữa các kênh. Nó đã có mặt đầy
+# đủ ở đó (registry chương trình #1) — không cần render lại ở đây nữa.
 
 FULL_REPORT="$REPORT
 
 $NAV_SECTION"
-if [ -n "$WATERFALL_SECTION" ]; then
-  FULL_REPORT="$FULL_REPORT
-
-$WATERFALL_SECTION"
-fi
 
 echo "$FULL_REPORT"
 # Báo cáo client-facing KHÔNG được rơi im lặng (sự cố 2026-07-06: topic Trading report bị
