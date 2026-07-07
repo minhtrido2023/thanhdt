@@ -77,7 +77,16 @@ elapsed=$(( ts_end - ts_start ))
 
 _hr_end="$(TZ='Asia/Ho_Chi_Minh' date +'%H:%M')"
 if [ "$rc" -eq 0 ]; then
-  _discord "✅ **Bot rời phiên ($_hr_end)** — account **$ACCOUNT** kết thúc đợt làm việc bình thường (chạy $((elapsed/60)) phút). Nếu đang giữa ngày: bot sẽ quay lại theo lịch (13:00 sau nghỉ trưa); cuối ngày: chờ báo cáo EOD 15:00."
+  # Nói rõ LÝ DO rời phiên (user feedback 2026-07-07 chiều: "bot vừa bật vừa tắt" đọc
+  # rất khó hiểu khi message không nói bot dừng vì XONG VIỆC hay vì lỗi).
+  if grep -q "tất cả account đã khớp đủ" "$LOG" 2>/dev/null; then
+    _reason="đã HOÀN TẤT toàn bộ kế hoạch hôm nay — không còn gì để làm, bot nghỉ (sổ lệnh chi tiết sẽ có trong heartbeat/EOD report)"
+  elif [ "$_n_orders" = "0" ]; then
+    _reason="kế hoạch hôm nay là HOLD — bot đã đồng bộ trạng thái xong và nghỉ"
+  else
+    _reason="kết thúc đợt làm việc bình thường; nếu đang giữa ngày bot sẽ quay lại theo lịch (13:00 sau nghỉ trưa), cuối ngày chờ báo cáo EOD 15:00"
+  fi
+  _discord "✅ **Bot rời phiên ($_hr_end)** — account **$ACCOUNT**: ${_reason} (chạy $((elapsed/60)) phút)."
   "$ROOT/bin/append_event.sh" Mafee status "bot-done" \
     "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"elapsed_s\":$elapsed,\"rc\":0}" 2>/dev/null || true
 else
