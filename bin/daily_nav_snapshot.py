@@ -16,6 +16,14 @@ import json
 import os
 import subprocess
 import sys
+import time as _time
+
+# Chuẩn hóa TZ = ICT cho TOÀN BỘ tiến trình (server chạy UTC): mọi timestamp script này
+# tạo ra (kể cả bản ghi balances do brokers._log_raw ghi hộ) phải CÙNG múi giờ với journal
+# của bot (bot chạy TZ ICT qua run_bot.sh) — thiếu dòng này, invariant so sánh
+# balance_ts vs fill_ts bên dưới so UTC với ICT và từ chối nhầm (bug tự cắn 2026-07-07).
+os.environ["TZ"] = "Asia/Ho_Chi_Minh"
+_time.tzset()
 
 WC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 EXEC_DIR = os.path.join(WC_ROOT, "data", "execution_logs")
@@ -201,6 +209,25 @@ def main():
 
     stock = bal["payload"]["stock"]
     cash, debt = stock["totalCash"], stock["totalDebt"]
+
+    # INVARIANT (bug 2026-07-07 lần 2, user chỉ ra): bản ghi balance phải MỚI HƠN cú khớp
+    # CUỐI CÙNG trong ngày — ngày vừa mua vừa bán, DNSE cập nhật tiền theo TỪNG khớp
+    # (mua khớp T0: totalCash → secureAmount trong vòng vài phút), snapshot chụp GIỮA
+    # 2 cú khớp sẽ lệch đúng bằng giá trị lệnh sau (ZaloPay: balance 13:00:02 vs VCB khớp
+    # 13:00:22 → NAV thừa 6,1tr vì cổ phiếu đã đếm VCB mà tiền chưa trừ).
+    jpath = os.path.join(EXEC_DIR, f"exec_{args.account}_{args.date}_journal.csv")
+    last_fill_ts = ""
+    if os.path.exists(jpath):
+        with open(jpath, encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                if row.get("event") == "FILL" and row.get("ts", "") > last_fill_ts:
+                    last_fill_ts = row["ts"]
+    if last_fill_ts and bal.get("ts", "") <= last_fill_ts:
+        print(f"❌ [{args.date}] Balance record ({bal.get('ts')}) CŨ HƠN cú khớp cuối cùng "
+              f"({last_fill_ts}) — tiền chưa phản ánh đủ lệnh đã khớp, KHÔNG tính NAV. "
+              f"Chạy lại script (nó tự đọc balance tươi qua broker_positions/get_cash).",
+              file=sys.stderr)
+        return 2
 
     # NAV = Tiền + Cổ phiếu − Nợ (đúng như app DNSE hiển thị "Tài sản ròng" — user xác nhận
     # 2026-07-06 bằng ảnh chụp thật, khớp chính xác đến từng đồng: 709.276.086 + 683.590.000
