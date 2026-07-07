@@ -18,11 +18,17 @@
 #
 # Chống bão dispatch: mỗi context-label chỉ autofix tối đa 1 lần / AUTOFIX_COOLDOWN giây
 # (mặc định 3600) — lần trùng trong cooldown chỉ notify, không dispatch thêm.
+#
+# Timeout: AUTOFIX_TIMEOUT giây/attempt (mặc định 1800). 900 cũ quá ngắn cho job chẩn-đoán-sâu
+# (Winston_20260707_072729: attempt 1 bị kill đúng 900s khi heartbeat còn tươi từng phút,
+# attempt 2 làm lại từ đầu mất thêm 694s — phí trọn 15' + 1 slot). Checker nào biết issue
+# nhẹ có thể tự hạ: AUTOFIX_TIMEOUT=600 ops_autofix.sh "<label>" "<details>".
 set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WC_ROOT="$(cd "$ROOT/.." && pwd)"
 TRADING_DAILY_THREAD="1521470705563340910"
 AUTOFIX_COOLDOWN="${AUTOFIX_COOLDOWN:-3600}"
+AUTOFIX_TIMEOUT="${AUTOFIX_TIMEOUT:-1800}"
 
 LABEL="${1:?usage: ops_autofix.sh \"<context-label>\" \"<issue-details>\"}"
 DETAILS="${2:-"(không có chi tiết kèm theo — đọc log của checker gọi tới)"}"
@@ -58,6 +64,6 @@ QUY TRÌNH BẮT BUỘC:
 3. CẤM TUYỆT ĐỐI (dù thấy 'cần thiết'): sửa trade plan, trading_rules.json, logic đặt lệnh executor/brokers, crontab dòng thực thi (run_bot/heartbeat/pkill), xoá dữ liệu, tạo/xoá BOT_STOP. Nếu root cause nằm ở đó → append_event.sh Winston question '<topic>' với mô tả + đề xuất, notify Telegram, rồi DỪNG.
 4. VERIFY artifact sau khi sửa (chạy lại checker/script bị lỗi, xác nhận hết lỗi thật) — không tin self-report.
 5. BÁO CÁO: notify_thread.sh vào thread $TRADING_DAILY_THREAD — ngắn gọn: hỏng gì, nguyên nhân, đã sửa gì, verify thế nào. Nếu ảnh hưởng workflow sống → thêm entry kb/INCIDENTS.md. Ghi bus event finding như thường lệ." \
-  --bg --timeout 900 --model fable 2>&1 | tail -3
+  --bg --timeout "$AUTOFIX_TIMEOUT" --model fable 2>&1 | tail -3
 
 echo "[ops_autofix] dispatched fixer for '$LABEL'"
