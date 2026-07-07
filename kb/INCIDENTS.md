@@ -797,6 +797,18 @@ ai đọc). Giá trị của `--verify` đã có sẵn trong sync script (nó Đ
 không ai/không cơ chế nào đọc kết quả verify đó → cân nhắc nối verify-fail vào notify.sh
 (mục Open bên dưới).
 
+**Addendum 2026-07-07 (Winston, job Winston_20260707_072729) — hệ quả downstream cuối cùng:**
+cùng cache thối này còn làm **các paper-sim trong `papertrade_daily.sh` kẹt ở 06-25** (Taylor
+phát hiện sáng 07-07: pt_v22 logs stale). Cơ chế: `refresh_lagged_caches.py` đọc cache thấy
+"already current" → `lagged_pos_ov.pkl` đóng băng → `detect_end_date()` (pt_dates.py) trả
+END_DATE cũ; đồng thời price panel từ cache `ticker` dừng 06-25 → summary/CSV pt_v22 cắt ở
+06-25. Tính chập chờn (07-01→07-03 lại "đúng") = những đêm cache init FAIL → script fallback
+BQ thật → data tươi; đêm cache init OK → dùng cache thối. KHÔNG có bug riêng trong pt_v22 —
+thuần hệ quả của bug sync đã vá (`b26091a`). Xử lý 07-07: rerun `refresh_lagged_caches.py` +
+`pt_v22_dt5g.py` với cache đã lành → toàn bộ artifact (pt_v22/pt_v4/pt_v11/pt_v12) fresh tới
+2026-07-06, period header = summary = 07-06. Cron 15:30 cùng ngày chạy lại toàn chuỗi như
+verify tự nhiên cuối.
+
 ---
 
 ## Open / not-yet-hardened
