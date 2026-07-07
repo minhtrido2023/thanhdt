@@ -1,15 +1,38 @@
 # Current Operations — Mike fleet
 > Mike cập nhật thủ công khi có thay đổi trạng thái quan trọng. Đọc trước mọi thứ khác khi restart.
-> Cập nhật lần cuối: 2026-07-06
+> Cập nhật lần cuối: 2026-07-07
 
-## Model mặc định của chính Mike — đổi sang Fable 5 (2026-07-06, user yêu cầu trực tiếp)
-`agents/Mike/.claude/settings.json` đã sửa `"model"` từ `claude-sonnet-5` → `claude-fable-5`
-(effortLevel giữ nguyên "high"). **Đây thay thế quyết định cũ "model-default-sonnet5-final"
-(2026-07-01, KB archive `2026-07-05-nightly.md`)** — lúc đó chốt Sonnet 5 sau khi thử Opus 4.8
-không thấy khác biệt rõ rệt; lần này user chủ động yêu cầu đổi sang Fable 5, không phải do sự
-cố hạ tầng. **Đã áp dụng**: user xác nhận "Restart ngay" → `systemctl --user restart mike@Mike.service` chạy
-lúc 15:39:50 UTC 2026-07-06 (PID mới 3268950, active). Mike hiện chạy **Fable 5** từ thời điểm
-này. Phiên hội thoại tiếp nối bình thường qua KB + working memory (đúng thiết kế continuity).
+## `mike@Mike.service` (remote-control daemon) đã TẮT HẲN (2026-07-07, user quyết định)
+User giờ chỉ dùng Discord để nói chuyện với Mike (tách nhiều topic tiện phân việc hơn hẳn so với
+ClaudeCode desktop app), gần như không dùng desktop app trực tiếp nữa (chỉ dự phòng lúc bất
+thường, vd lỗi version model không xử lý được qua Discord). Đã xác nhận qua điều tra process/
+systemd: **`mike@Mike.service`** ("Claude agent Mike, remote-control") và **`ccdb-mike.service`**
+(bridge Discord thật, nhận tin nhắn + spawn `claude -p --resume <thread-uuid>` cho MỖI topic) là
+**2 service độc lập hoàn toàn** — `ccdb-mike.service` KHÔNG phụ thuộc `mike@Mike.service` (xác
+nhận `systemctl --user show ccdb-mike.service` không có Requires/After/PartOf/BindsTo nào trỏ tới
+service kia). Đã `systemctl --user disable --now mike@Mike.service` — verify: service này
+`inactive (dead)`, còn `ccdb-mike.service` vẫn `active (running)` bình thường, Discord không hề
+gián đoạn. **Không cần sửa `bin/watchdog.sh`/`bin/fleet_health.sh`** — cả 2 script tự động iterate
+qua unit đang `enabled` (không hardcode tên `mike@Mike.service`), nên tự động bỏ qua unit đã tắt,
+không báo cảnh báo giả "DOWN"/"PERSISTENT DOWN" nữa.
+
+**Nếu cần bật lại** (vd muốn dùng lại tính năng remote-control của desktop app):
+`systemctl --user enable --now mike@Mike.service`.
+
+## Model mặc định của chính Mike — SỬA LẠI về Sonnet 5 (2026-07-07, user yêu cầu, đảo ngược quyết
+định 2026-07-06 đổi sang Fable 5)
+Đã đồng bộ **3 nơi** (phát hiện có 2 tầng cấu hình song song trong bridge, không chỉ 1 chỗ — xem
+[[reference-ccdb-model-config-layers]]):
+1. `agents/Mike/.claude/settings.json` → `"model": "claude-sonnet-5"`.
+2. `/workspace/ccdb-mike/.env` → `CCDB_MODEL=claude-sonnet-5` (đây là fallback thấp nhất, KHÔNG
+   phải nguồn quyết định thật nếu DB đã có row).
+3. **`/workspace/ccdb-mike/data/sessions.db` bảng `settings`** — đây mới là nguồn ưu tiên CAO NHẤT
+   (thread override > global > `.env`). Phát hiện 4 dòng rác sai format từ các lần `/model` trước
+   đó (`"Sonnet 5"`, `"sonnet 5"` có dấu cách — CLI từ chối, đây chính là lỗi user gặp ở 1 topic
+   khác). Đã dọn: xóa hết override riêng theo thread, chỉ giữ 1 giá trị global
+   `model.global.claude = "claude-sonnet-5"` (+ đồng bộ key legacy `claude_model` cho nhất quán
+   hiển thị). Không cần restart `ccdb-mike.service` — bridge tự đọc lại nguồn này mỗi lần spawn
+   session mới.
 
 ## Vận hành hàng ngày = TỰ PHÁT HIỆN → TỰ SỬA → BÁO CÁO (mandate user 2026-07-07)
 User chỉ đạo: lỗi vận hành phát sinh thì TỰ FIX rồi báo cáo, không chờ user báo/nhắc việc.
