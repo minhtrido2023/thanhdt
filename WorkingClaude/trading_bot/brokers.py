@@ -169,6 +169,15 @@ class BrokerBase:
         """Tiền mặt khả dụng (VND)."""
         raise NotImplementedError
 
+    def get_max_buy_qty(self, symbol, price):
+        """Sức mua tối đa (số CP) theo mã+giá từ CHÍNH broker, hoặc None nếu broker không
+        hỗ trợ/lỗi. Khác get_cash(): sức mua của broker thường ĐÃ TÍNH cả tiền bán chờ về
+        (T+0 reuse) mà availableCash chưa phản ánh — xác nhận thực nghiệm DNSE 2026-07-07
+        (ZaloPay cash-only: bán MSH 09:42, availableCash đứng yên nhưng ppse pp0Buy đã
+        cộng đủ tiền bán lúc 09:56, user dự đoán đúng). None = caller tự rơi về check
+        get_cash() cũ (fail-safe, không nới lỏng khi không chắc)."""
+        return None
+
     def get_positions(self):
         """→ {symbol: {"total": n, "sellable": n}}."""
         raise NotImplementedError
@@ -389,6 +398,18 @@ class DNSEBroker(BrokerBase):
                        "cashavailable", "totalcash", "cash", "balance",
                        default=0))
         return v or 0.0
+
+    def get_max_buy_qty(self, symbol, price):
+        """Sức mua tối đa theo mã+giá qua GET /accounts/{acc}/ppse (qmaxBuy). ppse đã tính
+        cả tiền bán chờ về T+0 — availableCash thì chưa (xem BrokerBase docstring). Mọi
+        lỗi → None (caller rơi về check get_cash cũ, không nới lỏng khi không chắc)."""
+        try:
+            r = self.client.ppse(self.account_id, symbol, int(price))
+            self._log_raw("ppse", {"symbol": symbol, "price": price, "resp": r})
+            v = _fnum(qget(r, "qmaxBuy", "qmaxbuy"))
+            return int(v) if v is not None and v >= 0 else None
+        except Exception:
+            return None
 
     def get_positions(self):
         r = self.client.positions(self.account_id)

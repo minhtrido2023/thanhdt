@@ -708,9 +708,20 @@ class Executor:
             if o.side == "buy":
                 need = qty * px * 1.0025
                 if self.broker.get_cash() < need:
-                    self._journal("WAIT_CASH", o, qty=qty, price=px,
-                                  note="thiếu tiền — chờ lệnh bán khớp")
-                    continue
+                    # availableCash chưa đủ ≠ hết sức mua: broker cộng tiền bán chờ về
+                    # (T+0 reuse) vào sức mua ppse TRƯỚC KHI availableCash cập nhật —
+                    # xác nhận thực nghiệm 2026-07-07 (ZaloPay: bán MSH 09:42, ppse đủ
+                    # tiền lúc 09:56, availableCash vẫn đứng yên; user dự đoán đúng cơ
+                    # chế). Hỏi CHÍNH broker trước khi kết luận thiếu tiền; broker không
+                    # hỗ trợ/lỗi → None → giữ WAIT_CASH như cũ (fail-safe). Nếu ppse nói
+                    # đủ mà thực tế không đủ, place_order sẽ bị broker từ chối → chỉ 1
+                    # dòng PLACE_FAIL, không rủi ro tiền.
+                    qmax = self.broker.get_max_buy_qty(o.ticker, px)
+                    if qmax is None or qmax < qty:
+                        self._journal("WAIT_CASH", o, qty=qty, price=px,
+                                      note="thiếu tiền — chờ lệnh bán khớp"
+                                      + (f" (sức mua broker {qmax} cp < {qty})" if qmax is not None else ""))
+                        continue
             try:
                 oid = self.broker.place_order(o.ticker, qty, o.side, price=px)
             except Exception as e:
