@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v803)
+# Mike fleet — context pack (v804)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-07T07:25:41] Taylor/finding — paper-main harness wired: cron + probe-plan generator, phiên evidence ĐẦU TIÊN đã chạy thật hôm nay (6/6 fill); registry v2 đếm evidence-sessions; ab_cross PAUSED: {"job": "Taylor_20260707_071130", "dispatch_from": "Mike", "scope": "PAPER-ONLY — account main (mode=paper, PaperBroker); SpaceX/ZaloPay/executor logic dùng chu …
 - [2026-07-07T07:53:12] Winston/finding — pt_v22-stale-resolved: hệ quả downstream của bug sync cache (đã vá b26091a) — artifacts đã fresh tới 2026-07-06, không có bug mới: {"job": "Winston_20260707_072729", "context_label": "papertrade-pt-v22-stale", "root_cause": "KHÔNG có bug riêng trong pt_v22 — cùng root cause với incident mac …
 - [2026-07-07T08:01:22] Wags/finding — wags-fix: ops-autofix-timeout-sizing — timeout 900 cứng → AUTOFIX_TIMEOUT env default 1800, sandbox test 3/3 PASS: {"job": "Wags_20260707_075643", "dispatch_from": "Mike", "pattern_confirmed": {"evidence_job": "Winston_20260707_072729 (ops_autofix chẩn đoán pt_v22 stale)", " …
 - [2026-07-07T08:05:40] arch-reviewer/verification — ✅ CONFIRMED ARCH-REVIEW: wags-fix: ops-autofix-timeout-sizing — timeout 900 cứng → AUTOFIX_TIMEOUT env default 1800, sandbox test 3/3 PASS: {"finding_topic": "wags-fix: ops-autofix-timeout-sizing — timeout 900 cứng → AUTOFIX_TIMEOUT env default 1800", "verdict": "CONFIRMED", "confidence": "high", "s …
@@ -11,20 +10,44 @@
 - [2026-07-07T10:36:35] DollarBill/finding — plan-SpaceX-2026-07-08-complete: {"job": "DollarBill_20260707_103102", "account": "SpaceX", "plan_date": "2026-07-08", "action": "HOLD", "orders": 0, "dt5g_state": "NEUTRAL(3)", "state_source": …
 - [2026-07-07T10:37:06] DollarBill/decision — plan-ZaloPay-2026-07-08: {"job": "DollarBill_20260707_103101", "plan_date": "2026-07-08", "account": "ZaloPay", "dt5g_state": "NEUTRAL(3)", "state_source": "DT5G_macro", "active_nav_vnd …
 - [2026-07-07T13:31:52] Taylor/finding — paper-trading reorg: audit 22 script papertrade_daily + KEEP/RETIRE + registry 9 chương trình — ORB/capit/engine-room vào report hợp nhất, 6 step retired, ORB Telegram gỡ trùng: {"job": "Taylor_20260707_132048", "dispatch_from": "Mike", "status": "DONE", "key_insight_pt_v22": "pt_v22_dt5g (V2.3) KHÔNG PHẢI paper mirror — nó là SỔ TÍN HI …
+- [2026-07-07T14:36:20] Wags/finding — wags-fix: agent-wrapper-monitor-gap — isolation:worktree ≠ background + run_in_background đã bị bỏ khỏi Agent schema Fable-5; sửa snippet dispatch.sh + MIKE.md §8, poll ngắn thăng cấp thành cơ chế chính: {"job": "Wags_20260707_142752", "dispatch_from": "Mike", "incident": "Mike dispatch Taylor_20260707_132048 --bg rồi bọc theo dõi bằng Agent(isolation:worktree)  …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
 > Mike cập nhật thủ công khi có thay đổi trạng thái quan trọng. Đọc trước mọi thứ khác khi restart.
-> Cập nhật lần cuối: 2026-07-06
+> Cập nhật lần cuối: 2026-07-07
 
-## Model mặc định của chính Mike — đổi sang Fable 5 (2026-07-06, user yêu cầu trực tiếp)
-`agents/Mike/.claude/settings.json` đã sửa `"model"` từ `claude-sonnet-5` → `claude-fable-5`
-(effortLevel giữ nguyên "high"). **Đây thay thế quyết định cũ "model-default-sonnet5-final"
-(2026-07-01, KB archive `2026-07-05-nightly.md`)** — lúc đó chốt Sonnet 5 sau khi thử Opus 4.8
-không thấy khác biệt rõ rệt; lần này user chủ động yêu cầu đổi sang Fable 5, không phải do sự
-cố hạ tầng. **Đã áp dụng**: user xác nhận "Restart ngay" → `systemctl --user restart mike@Mike.service` chạy
-lúc 15:39:50 UTC 2026-07-06 (PID mới 3268950, active). Mike hiện chạy **Fable 5** từ thời điểm
-này. Phiên hội thoại tiếp nối bình thường qua KB + working memory (đúng thiết kế continuity).
+## `mike@Mike.service` (remote-control daemon) đã TẮT HẲN (2026-07-07, user quyết định)
+User giờ chỉ dùng Discord để nói chuyện với Mike (tách nhiều topic tiện phân việc hơn hẳn so với
+ClaudeCode desktop app), gần như không dùng desktop app trực tiếp nữa (chỉ dự phòng lúc bất
+thường, vd lỗi version model không xử lý được qua Discord). Đã xác nhận qua điều tra process/
+systemd: **`mike@Mike.service`** ("Claude agent Mike, remote-control") và **`ccdb-mike.service`**
+(bridge Discord thật, nhận tin nhắn + spawn `claude -p --resume <thread-uuid>` cho MỖI topic) là
+**2 service độc lập hoàn toàn** — `ccdb-mike.service` KHÔNG phụ thuộc `mike@Mike.service` (xác
+nhận `systemctl --user show ccdb-mike.service` không có Requires/After/PartOf/BindsTo nào trỏ tới
+service kia). Đã `systemctl --user disable --now mike@Mike.service` — verify: service này
+`inactive (dead)`, còn `ccdb-mike.service` vẫn `active (running)` bình thường, Discord không hề
+gián đoạn. **Không cần sửa `bin/watchdog.sh`/`bin/fleet_health.sh`** — cả 2 script tự động iterate
+qua unit đang `enabled` (không hardcode tên `mike@Mike.service`), nên tự động bỏ qua unit đã tắt,
+không báo cảnh báo giả "DOWN"/"PERSISTENT DOWN" nữa.
+
+**Nếu cần bật lại** (vd muốn dùng lại tính năng remote-control của desktop app):
+`systemctl --user enable --now mike@Mike.service`.
+
+## Model mặc định của chính Mike — SỬA LẠI về Sonnet 5 (2026-07-07, user yêu cầu, đảo ngược quyết
+định 2026-07-06 đổi sang Fable 5)
+Đã đồng bộ **3 nơi** (phát hiện có 2 tầng cấu hình song song trong bridge, không chỉ 1 chỗ — xem
+[[reference-ccdb-model-config-layers]]):
+1. `agents/Mike/.claude/settings.json` → `"model": "claude-sonnet-5"`.
+2. `/workspace/ccdb-mike/.env` → `CCDB_MODEL=claude-sonnet-5` (đây là fallback thấp nhất, KHÔNG
+   phải nguồn quyết định thật nếu DB đã có row).
+3. **`/workspace/ccdb-mike/data/sessions.db` bảng `settings`** — đây mới là nguồn ưu tiên CAO NHẤT
+   (thread override > global > `.env`). Phát hiện 4 dòng rác sai format từ các lần `/model` trước
+   đó (`"Sonnet 5"`, `"sonnet 5"` có dấu cách — CLI từ chối, đây chính là lỗi user gặp ở 1 topic
+   khác). Đã dọn: xóa hết override riêng theo thread, chỉ giữ 1 giá trị global
+   `model.global.claude = "claude-sonnet-5"` (+ đồng bộ key legacy `claude_model` cho nhất quán
+   hiển thị). Không cần restart `ccdb-mike.service` — bridge tự đọc lại nguồn này mỗi lần spawn
+   session mới.
 
 ## Vận hành hàng ngày = TỰ PHÁT HIỆN → TỰ SỬA → BÁO CÁO (mandate user 2026-07-07)
 User chỉ đạo: lỗi vận hành phát sinh thì TỰ FIX rồi báo cáo, không chờ user báo/nhắc việc.
