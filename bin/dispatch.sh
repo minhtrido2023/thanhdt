@@ -397,7 +397,10 @@ if [ "$bg" = "--bg" ]; then
           # send_plan_report.sh already posts the authoritative structured render to this
           # same channel later the same day — this ping only needs to confirm completion.
           if [ "$id" = "DollarBill" ]; then
-            "$ROOT/bin/notify_thread.sh" "✅ **DollarBill** đã lập plan xong (job \`${job_id}\`) — report chi tiết sẽ đăng vào kênh này (send_plan_report.sh)." "$_tid" 2>/dev/null || true
+            # User feedback 2026-07-08: state the 19:30 ICT time explicitly so a short
+            # completion ping is never mistaken for "nothing else is coming" — the full
+            # structured report (targets/prices/reasons) always follows at that time.
+            "$ROOT/bin/notify_thread.sh" "✅ **DollarBill** đã lập plan xong (job \`${job_id}\`) — report chi tiết (mục tiêu mua/bán, giá dự kiến, lý do) sẽ đăng vào kênh này lúc **19:30 ICT** hôm nay." "$_tid" 2>/dev/null || true
           else
             local _preview; _preview="$(tail -c 500 "$logfile" 2>/dev/null | tr '\n\t' '  ')"
             "$ROOT/bin/notify_thread.sh" "✅ **$id** xong (job \`${job_id}\`): $_preview" "$_tid" 2>/dev/null || true
