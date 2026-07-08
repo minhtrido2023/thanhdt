@@ -388,8 +388,20 @@ if [ "$bg" = "--bg" ]; then
         [ -n "$_tid" ] || _tid="${DISCORD_THREAD_ID:-$(_agent_thread_override "$id")}"
         [ -n "$_tid" ] || _tid="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
         if [ -n "$_tid" ]; then
-          local _preview; _preview="$(tail -c 500 "$logfile" 2>/dev/null | tr '\n\t' '  ')"
-          "$ROOT/bin/notify_thread.sh" "✅ **$id** xong (job \`${job_id}\`): $_preview" "$_tid" 2>/dev/null || true
+          # DollarBill's plan-generation jobs route straight into the user-facing plan
+          # channel (_agent_thread_override) — a raw tail-c-500 preview strips newlines
+          # and cuts mid-sentence, which only looks acceptable for a short HOLD summary
+          # and reads as garbled/incomplete for longer multi-order reports (incident
+          # 2026-07-08: ZaloPay's genuinely detailed summary got chopped mid-word by the
+          # 500-char window while SpaceX's short HOLD summary happened to survive intact).
+          # send_plan_report.sh already posts the authoritative structured render to this
+          # same channel later the same day — this ping only needs to confirm completion.
+          if [ "$id" = "DollarBill" ]; then
+            "$ROOT/bin/notify_thread.sh" "✅ **DollarBill** đã lập plan xong (job \`${job_id}\`) — report chi tiết sẽ đăng vào kênh này (send_plan_report.sh)." "$_tid" 2>/dev/null || true
+          else
+            local _preview; _preview="$(tail -c 500 "$logfile" 2>/dev/null | tr '\n\t' '  ')"
+            "$ROOT/bin/notify_thread.sh" "✅ **$id** xong (job \`${job_id}\`): $_preview" "$_tid" 2>/dev/null || true
+          fi
         fi
         # Auto-callback: notify the caller agent so it can pick up the result without manual prompt.
         # Only when caller is a real companion agent (not Mike/user — they have other channels).
