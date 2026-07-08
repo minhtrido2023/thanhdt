@@ -22,7 +22,10 @@ CLAUDE="/home/trido/.local/bin/claude"
 AGENT_DEF="$HOME/.claude/agents/arch-reviewer.md"
 AUTOFIX_COOLDOWN="${AUTOFIX_COOLDOWN:-3600}"
 
-_notify_arch() { "$ROOT/bin/notify_thread.sh" "$1" "$ARCH_TOPIC" 2>/dev/null || true; }
+# stdout PHẢI câm: notify_thread.sh in {"status":"sent"} ra stdout, từng lọt vào
+# `tail -1` của caller và bị parse nhầm thành verdict (sự cố 2026-07-08, 2 question
+# wags-fix-not-confirmed giả dù arch-reviewer đã CONFIRMED).
+_notify_arch() { "$ROOT/bin/notify_thread.sh" "$1" "$ARCH_TOPIC" >/dev/null 2>&1 || true; }
 
 # ---------- arch-review 1 finding của Wags (dùng chung cho cả 2 mode) ----------
 _arch_review() {  # $1 = topic substring để chọn finding; in verdict_json ra stdout
@@ -124,7 +127,7 @@ PIPELOG="$ROOT/logs/wags_pipeline_$(date -u +%Y%m%d_%H%M%S).log"
 setsid bash -c '
   ROOT="'"$ROOT"'"; LABEL='"$(printf %q "$LABEL")"'; DETAILS='"$(printf %q "$DETAILS")"'
   ARCH_TOPIC="'"$ARCH_TOPIC"'"
-  _notify_arch() { "$ROOT/bin/notify_thread.sh" "$1" "$ARCH_TOPIC" 2>/dev/null || true; }
+  _notify_arch() { "$ROOT/bin/notify_thread.sh" "$1" "$ARCH_TOPIC" >/dev/null 2>&1 || true; }
 
   # 1) Wags fix (đồng bộ trong pipeline nền; timeout rộng vì job chẩn đoán sâu)
   out="$("$ROOT/bin/dispatch.sh" Wags "NHIỆM VỤ WAGS-AUTOFIX (issue điều phối giữa agent, mandate 2026-07-07): '"'"'$LABEL'"'"'
@@ -132,8 +135,17 @@ CHI TIẾT: $DETAILS
 Quy trình: (1) chẩn đoán từ artifact thật (jobs.sh list cột HB_AGE, trace.sh, bus, log) — đọc kb/ops_runbook.md + working memory của bạn trước; (2) SỬA trong ranh giới: được sửa tooling điều phối (dispatch.sh/jobs.sh/mike_json.py/ops_autofix/wags_autofix/checker) sau khi test, TUYỆT ĐỐI không đụng trading (plan/executor/cron thực thi/trading_rules); (3) verify artifact sau sửa (chạy lại lệnh lỗi, xác nhận hết); (4) ghi bus finding topic bắt đầu bằng '"'"'wags-fix: $LABEL'"'"' kèm root_cause/fix/verify/commit — arch-reviewer sẽ audit finding này, viết đủ bằng chứng." --timeout 1500 --retries 0 --model fable 2>&1)" || true
   echo "$out" >> "'"$PIPELOG"'"
 
-  # 2) arch-review finding vừa tạo
-  v="$("$ROOT/bin/wags_autofix.sh" --review-topic "wags-fix: $LABEL" 2>>"'"$PIPELOG"'" | tail -1)"
+  # 2) arch-review finding vừa tạo — KHÔNG tail -1 mù: chọn dòng JSON cuối có key
+  # "verdict" (chống output lạ chen vào stdout, vd {"status":"sent"} của notify)
+  v="$("$ROOT/bin/wags_autofix.sh" --review-topic "wags-fix: $LABEL" 2>>"'"$PIPELOG"'" | python3 -c "import json,sys
+last={}
+for ln in sys.stdin:
+    ln=ln.strip()
+    if not ln: continue
+    try: o=json.loads(ln)
+    except Exception: continue
+    if isinstance(o,dict) and \"verdict\" in o: last=o
+print(json.dumps(last, ensure_ascii=False))")"
   verdict="$(printf "%s" "$v" | python3 -c "import json,sys
 try: print(json.load(sys.stdin).get(\"verdict\",\"?\"))
 except Exception: print(\"?\")")"
