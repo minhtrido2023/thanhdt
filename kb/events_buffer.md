@@ -1399,3 +1399,33 @@
 - [2026-07-08T17:05:01Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "in_progress", "note": "phase 1 premise: đo fill-days/exit thực nghiệm từ cặp CSV cùng config 20B vs 50B (R1/R2)"}
 - [2026-07-08T17:05:04Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260708_170202"}
 - [2026-07-08T17:06:04Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260708_170202"}
+
+## Consolidation 2026-07-08T18:07:01Z
+- [2026-07-08T17:07:04Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260708_170202"}
+- [2026-07-08T17:08:02Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "in_progress", "note": "phase 1: 15/15 state-flip unwind xong trong 1 phiên ở CẢ 20B lẫn 50B (cap 20%ADV có enforce nhưng không bind) — đang tính ADV rổ để tìm ngưỡng NAV cap mới bind"}
+- [2026-07-08T17:08:04Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260708_170202"}
+- [2026-07-08T17:09:04Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260708_170202"}
+- [2026-07-08T17:10:05Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260708_170202"}
+- [2026-07-08T17:11:05Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260708_170202"}
+- [2026-07-08T17:11:39Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "in_progress", "note": "run 1/4 (20B park0.70) đang chạy nền; tính per-name unwind worst-era cho premise report"}
+- [2026-07-08T17:12:05Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260708_170202"}
+- [2026-07-08T17:13:05Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260708_170202"}
+- [2026-07-08T17:14:05Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260708_170202"}
+- [2026-07-08T17:15:05Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260708_170202"}
+- [2026-07-08T17:15:24Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "in_progress", "note": "5 run full-system đang chạy song song: 20B×{0.70,0.80,0.90,0.94} + anchor 50B×0.70 (đo drift vs bảng 130720). Canonical R3 CSV đã backup. Premise phase-1 đã xong: capacity KHÔNG phân biệt 20B vs 50B (15/15 flip unwind 1 phiên ở cả 2 NAV)"}
+- [2026-07-08T17:16:05Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260708_170202"}
+- [2026-07-08T17:17:06Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20260708_170202"}
+- [2026-07-08T17:17:31Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "in_progress", "note": "8 run grid contemporaneous {20B,50B}×{0.70,0.80,0.90,0.94} đang chạy song song (registry ghi drift −1.2pp giữa các batch as-of → cần grid cùng ngày để so slope sạch). Chờ ~30-60p"}
+- [2026-07-08T17:18:06Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20260708_170202"}
+- [2026-07-08T17:19:06Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20260708_170202"}
+- [2026-07-08T17:20:06Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20260708_170202"}
+- [2026-07-08T17:21:06Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20260708_170202"}
+- [2026-07-08T17:22:06Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20260708_170202"}
+- [2026-07-08T17:23:06Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20260708_170202"}
+- [2026-07-08T17:24:06Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20260708_170202"}
+- [2026-07-08T17:25:06Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "still_running", "elapsed_min": 23, "job_id": "Taylor_20260708_170202"}
+- [2026-07-08T17:25:54Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "in_progress", "note": "8/8 run xong, self-check 0 VND. Kết quả chính: slope risk-cost 70→90 ở 20B = −0.11 Sharpe/−0.14 Calmar (KHÔNG nhẹ hơn 50B: −0.09/−0.08), CAGR pickup chỉ +0.56pp (50B: +1.26pp). Premise đảo ngược. Đang làm per-year + bảng giá"}
+- [2026-07-08T17:26:06Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20260708_170202"}
+- [2026-07-08T17:27:06Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "still_running", "elapsed_min": 25, "job_id": "Taylor_20260708_170202"}
+- [2026-07-08T17:27:36Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "in_progress", "note": "đã đọc registry pin 50B (job _130720) + env knobs pt_v23_audit_2014.py; đang kiểm tra filename suffix cho NAV_TOTAL_B và cơ chế ADV cap trước khi chạy premise test"}
+- [2026-07-08T17:28:06Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "still_running", "elapsed_min": 26, "job_id": "Taylor_20260708_170202"}
