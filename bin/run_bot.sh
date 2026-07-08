@@ -94,6 +94,12 @@ else
   _discord "❌ **Bot gặp lỗi và dừng ($_hr_end)** — account **$ACCOUNT** (rc=$rc, chạy $((elapsed/60)) phút). Hệ thống giám sát sẽ tự khởi động lại nếu còn trong giờ giao dịch; chi tiết kỹ thuật: $LOG. Preview: $tail_preview"
   "$ROOT/bin/append_event.sh" Mafee error "bot-fail" \
     "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"elapsed_s\":$elapsed,\"rc\":$rc,\"log\":\"$LOG\"}" 2>/dev/null || true
+  # Mandate user 2026-07-07 (tự phát hiện → tự sửa): mọi lần bot fail đều tự cử agent
+  # chẩn đoán root cause qua ops_autofix.sh — cùng pattern ops_health_check.sh. Dispatch
+  # --bg bên trong nên không block; tự cooldown 1h/label chống bão. Trước đây nhánh này
+  # chỉ alert suông → không ai tự chẩn đoán (gap phát hiện sau sự cố OTP 2026-07-08).
+  "$ROOT/bin/ops_autofix.sh" "run-bot-fail-${ACCOUNT}-${PLAN_DATE}" \
+    "run_bot.sh --account $ACCOUNT (plan $PLAN_DATE) thoát rc=$rc sau $((elapsed/60)) phút. Log: $LOG. Tail: $tail_preview — Việc cần làm: (1) xác định root cause thật trong log; (2) kiểm tra bot đã tự hồi phục chưa (heartbeat autoheal, log $ROOT/logs/run_bot_${ACCOUNT}_autoheal_*.log + journal exec_${ACCOUNT}_${PLAN_DATE}_journal.csv trong data/execution_logs/); (3) nếu còn lệnh kẹt/bot chết trong giờ giao dịch → ưu tiên khôi phục an toàn trong ranh giới cho phép, còn lại escalate." 2>/dev/null || true
 fi
 
 "$ROOT/bin/consolidate.sh" >> "$ROOT/logs/consolidator.log" 2>&1 || true
