@@ -1391,3 +1391,11 @@
 
 ## Consolidation 2026-07-08T12:07:01Z
 - [2026-07-08T11:10:03Z] Winston/status — new-listings-daily: {"date": "2026-07-08", "count": 0, "lookback_days": 90, "note": "no new listings detected"}
+
+## Consolidation 2026-07-08T17:07:01Z
+- [2026-07-08T17:02:23Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "in_progress", "note": "bắt đầu: đọc engine pt_v23_audit_2014.py để hiểu NAV_TOTAL_B/PARK_STATES/ADV-cap wiring"}
+- [2026-07-08T17:03:03Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260708_170202"}
+- [2026-07-08T17:04:03Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260708_170202"}
+- [2026-07-08T17:05:01Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "in_progress", "note": "phase 1 premise: đo fill-days/exit thực nghiệm từ cặp CSV cùng config 20B vs 50B (R1/R2)"}
+- [2026-07-08T17:05:04Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260708_170202"}
+- [2026-07-08T17:06:04Z] Taylor/heartbeat — Taylor_20260708_170202: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260708_170202"}
