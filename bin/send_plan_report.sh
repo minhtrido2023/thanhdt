@@ -81,7 +81,7 @@ date   = plan_date or "?"
 state  = plan.get("state_name", plan.get("market_state", plan.get("state", "?")))
 src    = plan.get("state_source", "")
 nav_b  = plan.get("nav_basis") if isinstance(plan.get("nav_basis"), dict) else {}
-nav    = (nav_b.get("active_nav_vnd") or nav_b.get("account_nav")
+nav    = (nav_b.get("active_nav_vnd") or nav_b.get("nav_vnd") or nav_b.get("account_nav")
           or plan.get("nav_basis_vnd") or plan.get("nav_estimate"))
 orders = plan.get("orders", [])
 summary = plan.get("summary", {}) if isinstance(plan.get("summary"), dict) else {}
