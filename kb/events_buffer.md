@@ -1388,3 +1388,6 @@
 - [2026-07-08T10:37:02Z] DollarBill/heartbeat — DollarBill_20260708_103100: {"status": "still_running", "elapsed_min": 6, "job_id": "DollarBill_20260708_103100"}
 - [2026-07-08T10:37:20Z] DollarBill/heartbeat — DollarBill_20260708_103100: {"status": "in_progress", "note": "Đã ghi file plan_ZaloPay_2026-07-09.json. Đang ghi bus event và tóm tắt."}
 - [2026-07-08T10:37:31Z] DollarBill/decision — plan-ZaloPay-2026-07-09: {"plan_date": "2026-07-09", "account": "ZaloPay", "transition_day": "3/5", "state": "NEUTRAL(3) DT5G_macro", "action": "TRANSITION_DAY3", "orders": [{"side": "sell", "ticker": "TCM", "qty": 2310, "ref_px": 20100, "net_proceeds_vnd": 46396177}, {"side": "buy", "ticker": "VCB", "qty": 700, "ref_px": 61600, "total_cost_vnd": 43152340, "buffer_pct": 7.0}], "in_basket_before_pct": 43.2, "in_basket_after_pct": 51.3, "active_nav_vnd": 531236001, "approved_by": "user_bulk_preapproval_2026-07-06", "mafee_authorized": true, "plan_file": "data/trade_plans/plan_ZaloPay_2026-07-09.json"}
+
+## Consolidation 2026-07-08T12:07:01Z
+- [2026-07-08T11:10:03Z] Winston/status — new-listings-daily: {"date": "2026-07-08", "count": 0, "lookback_days": 90, "note": "no new listings detected"}
