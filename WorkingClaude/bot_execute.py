@@ -18,11 +18,13 @@ Giết process giữa chừng vô hại — chạy lại là resume từ state �
 """
 
 import argparse
+import contextlib
 import datetime as dt
 import fcntl
 import json
 import os
 import sys
+import time
 
 if hasattr(sys.stdout, "reconfigure"):  # console Windows cp1252 → utf-8
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -52,6 +54,26 @@ def _acquire_account_lock(label, plan_date):
         return False
     _LOCK_HANDLES.append(f)  # không đóng — giữ khoá tới khi process thoát
     return True
+
+
+@contextlib.contextmanager
+def _otp_flow_lock(cred_file):
+    """Khoá độc quyền LIÊN TIẾN TRÌNH cho trọn chu trình OTP (send → đọc Gmail → tạo
+    trading-token). Key theo file credentials: các account CHUNG login DNSE (SpaceX +
+    ZaloPay dùng chung secrets/dnse_credentials.json → chung hộp Gmail OTP + chung token
+    cache) phải chờ nhau; login khác nhau không chặn nhau. Sự cố 2026-07-08: 2 cron
+    09:05 chạy cùng giây, cả 2 cùng send_email_otp rồi cùng đọc Gmail với cùng cutoff →
+    cùng lấy 1 mã; bên submit sau dính INVALID_OTP ('have been used'). Blocking là chủ
+    đích — bên chờ tối đa ~95s (fetch của bên giữ khoá timeout 90s), xong reload token
+    cache là dùng chung token, khỏi cần OTP mới."""
+    os.makedirs(EXEC_DIR, exist_ok=True)
+    key = os.path.basename(cred_file) if cred_file else "default"
+    with open(os.path.join(EXEC_DIR, f"otp_{key}.lock"), "a") as f:
+        fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(f.fileno(), fcntl.LOCK_UN)
 
 
 def parse_otp(items):
@@ -115,12 +137,24 @@ def main():
             if c.has_trading_token():
                 print(f"[{p['label']}] trading-token còn hạn — bỏ qua OTP")
                 continue
-            print(f"[{p['label']}] gửi email OTP...")
-            c.send_email_otp()
-            print(f"[{p['label']}] chờ OTP từ Gmail (tối đa 90s)...")
-            otp_code = fetch_dnse_otp(timeout=90)
-            c.create_trading_token(otp_code)
-            print(f"[{p['label']}] ✅ trading-token OK (hạn 8h)")
+            with _otp_flow_lock(cred_file):
+                # Trong lúc chờ khoá, process khác (account chung login) có thể đã tạo
+                # token — reload cache từ đĩa rồi kiểm tra lại trước khi xin OTP mới.
+                c._load_token_cache()
+                if c.has_trading_token():
+                    print(f"[{p['label']}] trading-token vừa được tiến trình khác tạo "
+                          f"(chung login) — dùng chung, bỏ qua OTP")
+                    continue
+                print(f"[{p['label']}] gửi email OTP...")
+                sent_at = time.time()
+                c.send_email_otp()
+                print(f"[{p['label']}] chờ OTP từ Gmail (tối đa 90s)...")
+                # sent_after chặt (đúng khuyến nghị trong docstring fetch_dnse_otp):
+                # chỉ nhận email đến SAU request của chính mình (buffer 5s cho lệch
+                # đồng hồ), loại hẳn email OTP cũ/của request khác còn trong hộp thư.
+                otp_code = fetch_dnse_otp(timeout=90, sent_after=sent_at - 5)
+                c.create_trading_token(otp_code)
+                print(f"[{p['label']}] ✅ trading-token OK (hạn 8h)")
 
     profiles = pick_accounts(load_accounts(base), args.account)
     otp_by_label, otp_common = parse_otp(args.otp)
