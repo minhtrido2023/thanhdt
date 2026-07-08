@@ -229,7 +229,12 @@ if [ "${WARN_COUNT:-0}" -gt 0 ]; then
   COORD_WARN="$(echo "$MSG" | grep -E '⚠️|❌' | grep -E "Circuit breaker|câu hỏi \(question\)" || true)"
   OTHER_WARN="$(echo "$MSG" | grep -E '⚠️|❌' | grep -vE "NOT_APPROVED|KHÔNG TÌM THẤY|Circuit breaker|câu hỏi \(question\)" || true)"
   if [ -n "$COORD_WARN" ]; then
-    "$ROOT/bin/wags_autofix.sh" "coord-${ACCOUNT}-${TODAY}" "$COORD_WARN" 2>/dev/null || true
+    # Label KHÔNG kèm ACCOUNT: circuit breaker + question tồn đọng là trạng thái FLEET-WIDE
+    # (đọc state/circuit/* + bus/inbox/* toàn cục, nội dung y hệt cho mọi account) — label
+    # per-account làm loop for_each_live_account lách cooldown per-label của wags_autofix,
+    # dispatch 2 job Wags song song sửa cùng 1 issue (sự cố 2026-07-08: coord-SpaceX +
+    # coord-ZaloPay đụng độ khi cùng edit wags_autofix.sh).
+    "$ROOT/bin/wags_autofix.sh" "coord-${TODAY}" "$COORD_WARN (checker run: account=${ACCOUNT})" 2>/dev/null || true
   fi
   if [ -n "$OTHER_WARN" ]; then
     "$ROOT/bin/ops_autofix.sh" "ops-health-${ACCOUNT}" "$MSG" 2>/dev/null || true
