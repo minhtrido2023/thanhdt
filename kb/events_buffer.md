@@ -1428,3 +1428,7 @@
 
 ## Consolidation 2026-07-09T06:16:30Z
 - [2026-07-09T06:16:30Z] Mafee/status — bot-done: {"account": "ZaloPay", "plan_date": "2026-07-09", "elapsed_s": 988, "rc": 0}
+
+## Consolidation 2026-07-09T08:07:01Z
+- [2026-07-09T08:00:10Z] Mafee/status — eod-trading-report: {"account": "ZaloPay", "plan_date": "2026-07-09", "delivered_via": "trading_report_thread"}
+- [2026-07-09T08:00:21Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-07-09", "delivered_via": "hold_day"}
