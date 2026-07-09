@@ -265,6 +265,16 @@ _job_watcher() {
     set -e
     [ "$jrc" -eq 2 ] || break  # non-running terminal state → stop watching
 
+    # Hard lifetime cap (2026-07-09, cùng đợt fix cgroup-detach): watcher giờ được
+    # detach khỏi cgroup caller nên KHÔNG còn bị dọn "nhờ" caller chết nữa — nếu record
+    # kẹt 'running' vĩnh viễn (wrapper bị SIGKILL/OOM, không kịp finalize) thì watcher
+    # sẽ bất tử + heartbeat 60s/lần giữ HB_AGE tươi giả tạo, che đúng tín hiệu triage
+    # cần thấy. Quá deadline worst-case + 15' → bản thân đó LÀ anomaly: báo 1 lần rồi dừng.
+    if [ "$elapsed" -gt $((TIMEOUT * (RETRIES + 1) + 900)) ]; then
+      _discord "🧟 **$target** job \`$jid\`: record vẫn 'running' quá deadline worst-case +15m — wrapper có thể bị kill cứng (SIGKILL/OOM), record kẹt. Kiểm tra: \`$ROOT/bin/jobs.sh status $jid\`"
+      break
+    fi
+
     local elapsed_min=$((elapsed / 60))
 
     # Bus heartbeat (internal always)
