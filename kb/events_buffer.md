@@ -1631,3 +1631,7 @@
 - [2026-07-09T14:42:51Z] ZZTestHB/heartbeat — ZZTestHB_20260709_144226: {"status": "in_progress", "note": "fake-short 2"}
 - [2026-07-09T14:42:52Z] ZZTestHB/status — ZZTestHB_20260709_144226: {"status": "deadline_extended", "hb_age_s": 1, "extension": 1, "max_ext": 3, "source": "watcher"}
 - [2026-07-09T14:43:03Z] ZZTestHB/heartbeat — ZZTestHB_20260709_144226: {"status": "in_progress", "note": "fake-short 3"}
+
+## Consolidation 2026-07-09T14:43:59Z
+- [2026-07-09T14:43:22Z] Wags/heartbeat — Wags_20260709_142518: {"status": "still_running", "elapsed_min": 18, "job_id": "Wags_20260709_142518"}
+- [2026-07-09T14:43:28Z] ZZTestHB/heartbeat — ZZTestHB_20260709_144227: {"status": "still_running", "elapsed_min": 1, "job_id": "ZZTestHB_20260709_144227", "source": "watcher"}
