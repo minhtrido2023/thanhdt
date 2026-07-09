@@ -687,7 +687,31 @@ class Executor:
                 continue
             qty = self._child_qty(o, ps, q, px)
             if qty < LOT:
-                self._journal("WAIT_QUOTA", o, note="hết quota participation/đợi KL")
+                remaining = o.qty - ps["filled"]
+                if 0 < remaining < LOT:
+                    # Genuine odd lot (tổng qty không chia hết 100, vd TCM 2310cp = 23
+                    # lô + 10 lẻ) — round_lot() luôn làm tròn XUỐNG nên phần lẻ <LOT
+                    # KHÔNG BAO GIỜ tự thoát bằng cách chờ thêm, khác hẳn hết-quota
+                    # (tạm thời, tự hết khi có thêm KL). Log 1 lần duy nhất, không spam
+                    # mỗi chu kỳ với lý do sai (phát hiện 2026-07-09: ZaloPay TCM lặp
+                    # "WAIT_QUOTA" mỗi ~20s vô thời hạn, sai lý do — 10cp lẻ không phải
+                    # thiếu quota). Đặt lệnh lô lẻ cần marketType/orderCategory riêng
+                    # của DNSE — CHƯA xác minh, KHÔNG đoán cho lệnh thật; escalate.
+                    if not ps.get("odd_lot_flagged"):
+                        ps["odd_lot_flagged"] = True
+                        self._journal("ODD_LOT_UNSUPPORTED", o, note=(
+                            f"{remaining}cp lẻ (<1 lô) không đặt được qua đường lệnh "
+                            f"chuẩn — cần API lô lẻ riêng của DNSE (chưa xác minh, chưa "
+                            f"hỗ trợ). Không tự lặp cảnh báo mỗi chu kỳ."))
+                        self._save_state()
+                        _publish_bot_event("error", "ODD_LOT_UNSUPPORTED", {
+                            "account": self.label, "ticker": o.ticker,
+                            "order_id": o.id, "plan_date": self.plan.plan_date,
+                            "remaining_qty": remaining,
+                            "note": f"{remaining}cp lẻ không đặt được qua đường lệnh chuẩn — "
+                                    f"cần API lô lẻ riêng của DNSE (chưa xác minh)."})
+                else:
+                    self._journal("WAIT_QUOTA", o, note="hết quota participation/đợi KL")
                 continue
             if o.side == "sell" and positions is not None:
                 # KL "total" có thể gồm cổ phiếu mua chưa qua T+2 (chưa bán được) —
@@ -770,8 +794,24 @@ class Executor:
                     self._release_child(o.ticker, c)
                 except Exception:
                     pass
-            remaining = round_lot(o.qty - ps["filled"])
+            raw_remaining = o.qty - ps["filled"]
+            remaining = round_lot(raw_remaining)
             if remaining < LOT:
+                # Same odd-lot gap as _place_slices (round_lot floors, sub-LOT remainder
+                # never resolves) — flag once here too in case ATC sweep is the first
+                # place to see it (e.g. participation-quota masked it all session).
+                if 0 < raw_remaining < LOT and not ps.get("odd_lot_flagged"):
+                    ps["odd_lot_flagged"] = True
+                    self._journal("ODD_LOT_UNSUPPORTED", o, note=(
+                        f"ATC: {raw_remaining}cp lẻ (<1 lô) không đặt được qua đường lệnh "
+                        f"chuẩn — cần API lô lẻ riêng của DNSE (chưa xác minh, chưa hỗ trợ)."))
+                    self._save_state()
+                    _publish_bot_event("error", "ODD_LOT_UNSUPPORTED", {
+                        "account": self.label, "ticker": o.ticker,
+                        "order_id": o.id, "plan_date": self.plan.plan_date,
+                        "remaining_qty": raw_remaining,
+                        "note": f"ATC: {raw_remaining}cp lẻ không đặt được qua đường lệnh "
+                                f"chuẩn — cần API lô lẻ riêng của DNSE (chưa xác minh)."})
                 continue
             if o.side == "sell" and positions is not None:
                 sellable = (positions.get(o.ticker) or {}).get("sellable")
