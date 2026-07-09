@@ -37,9 +37,24 @@ def weekdays_between(d0, d1):
     return n
 
 
+def _journal_has_real_activity(path):
+    """True nếu journal có ít nhất 1 dòng PLACE/FILL/DONE — phân biệt phiên THẬT có đặt
+    lệnh với phiên chỉ toàn GHOST_ORDER/WAIT_QUOTA/WAIT_CASH (executor chạy nhưng làm 0 việc,
+    vd sự cố TZ 2026-07-08/09: journal tồn tại nhưng chỉ có GHOST_ORDER, 0 lệnh thật)."""
+    import csv
+    try:
+        with open(path, encoding="utf-8") as f:
+            return any(r.get("event") in ("PLACE", "FILL", "DONE")
+                       for r in csv.DictReader(f))
+    except OSError:
+        return False
+
+
 def count_evidence_sessions(account, count_from=None):
     """Số phiên executor CÓ EVIDENCE = số file journal exec_<account>_<date>_journal.csv
-    (loại fixture 2099; lọc date >= count_from nếu có)."""
+    MÀ THẬT SỰ có hoạt động đặt lệnh (PLACE/FILL/DONE) — không chỉ file tồn tại (loại fixture
+    2099; lọc date >= count_from nếu có). Một phiên bị ghost-guard/TZ-bug chặn hết (0 lệnh
+    thật) không được tính, dù journal file có tồn tại — xem _journal_has_real_activity."""
     pattern = os.path.join(WC_ROOT, f"data/execution_logs/exec_{account}_*_journal.csv")
     dates = []
     for f in glob.glob(pattern):
@@ -47,6 +62,8 @@ def count_evidence_sessions(account, count_from=None):
         if d.startswith("2099"):
             continue
         if count_from and d < count_from:
+            continue
+        if not _journal_has_real_activity(f):
             continue
         dates.append(d)
     return sorted(dates)
