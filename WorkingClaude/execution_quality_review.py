@@ -42,7 +42,10 @@ F = pd.DataFrame(fills)
 
 # ---- 2. journal CSVs: ft: window notes + errors ----
 jrows = []
-for f in sorted(glob.glob(f"{EXEC}/exec_*_journal.csv")):
+# PAPER (exec_main_*) only: live journals carry vacuous "ft:in-window" notes (live_gate forces
+# mult=1.0 before the window check — see _fill_timing_mult), which inflated adherence to ~98%
+# from live 09:15 buys. Found 2026-07-09 (job Taylor_20260709_101602).
+for f in sorted(glob.glob(f"{EXEC}/exec_main_*_journal.csv")):
     try: j = pd.read_csv(f); j["src"] = os.path.basename(f)
     except Exception: continue
     jrows.append(j)
