@@ -130,6 +130,27 @@ Before any number reaches a report (daily/weekly/monthly, or any client-facing a
 4. If a number can't be traced through this pipeline, don't put it in the report — say what's
    missing instead of estimating silently.
 
+**Bright-line rule — same-day data: DNSE API, never BigQuery (user directive, 2026-07-09).**
+BQ (`tav2_bq.ticker`/`ticker_1m`) only syncs overnight (`sync_bq_cache_daily.sh`, 23:45 ICT) —
+any script that runs *before* that sync completes and reads BQ for "today's" price/volume is
+reading **yesterday's** close, structurally, every single time (not an occasional staleness —
+BQ physically cannot have today's data yet). Concrete incident: 2026-07-09, DollarBill's T+1
+plan generator (`bq_freshness_check.sh`, dispatches ~17:30 ICT) priced 2 of 4 orders off BQ
+close (one day stale, off by up to +5.7%) while the other 2 happened to use a live DNSE quote
+correctly — the inconsistency itself is what let it go unnoticed. Rule going forward:
+- Any same-day/live calculation (order sizing, ref prices for a T+1 plan, live NAV/exposure
+  checks, anything a report will call "today's" number) MUST read DNSE (`dnse_api.py`
+  secdef/latest_trade/positions/balances) — never BQ — regardless of what hour the script runs.
+- BQ is fine ONLY for: (a) historical/backtest queries on past trading days, (b) same-day
+  queries run AFTER BigQuery's own daily sync has demonstrably completed (verify via
+  `bq_freshness_check.sh`'s own freshness gate, not by assuming "it's after 18:00 so it must be
+  synced" — confirm the gate passed).
+- When adding this constraint to a dispatch prompt (LLM-authored script/plan, e.g. DollarBill),
+  state it as an unconditional MUST with a concrete example of the wrong vs right source (see
+  `mike/bin/bq_freshness_check.sh`'s DollarBill prompt for the wording already in place) — a
+  general "verify your data" reminder does not reliably stop an LLM from reaching for whichever
+  source is easiest to query in the moment.
+
 **Cadence-specific scope** (content depth differs; the verification pipeline above does not):
 - **Daily**: keep it short — trades executed today, NAV + day-over-day change, and a margin/risk
   flag if one exists. No attribution, no methodology appendix.
