@@ -1,0 +1,77 @@
+PATH=/home/trido/google-cloud-sdk/bin:/home/trido/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+
+# ============================================================================
+# WorkingClaude server jobs. Tất cả thời gian = ICT (Giờ Việt Nam, UTC+7).
+# Disable the equivalent Windows Task Scheduler tasks to avoid double-runs.
+# ============================================================================
+# 8L/V2.3 EOD paper-trade + sims + dashboards (papertrade_daily.sh) — 15:30 ICT
+30 8  * * 1-5 /home/trido/thanhdt/WorkingClaude/papertrade_daily.sh      # 15:30 ICT
+# 8L ranking + DNA cards + surprise/PB-floor Telegram alerts (pt_8l_daily.bat)
+45 10 * * 1-5 /home/trido/thanhdt/WorkingClaude/pt_8l_daily.sh           # 17:45 ICT
+# 18:00 BA-system Telegram report (telegram_run_daily.bat -> telegram_recommend.py)
+0  11 * * 1-5 /home/trido/thanhdt/WorkingClaude/telegram_run_daily.sh    # 18:00 ICT
+# v3.4b base + DT5G live refresh (same-day, after ~22:30 ICT ticker ingest)
+15 16 * * 1-5 /home/trido/thanhdt/WorkingClaude/daily_refresh_v34b_linux.sh  # 23:15 ICT
+# World Bank CMO monthly commodity refresh (idempotent; 2 attempts vs late WB publish)
+0 1 5  * * /home/trido/thanhdt/WorkingClaude/auto_update_commodity_wb.sh   # 08:00 ICT, day 5
+0 1 10 * * /home/trido/thanhdt/WorkingClaude/auto_update_commodity_wb.sh   # 08:00 ICT, day 10
+# ============================================================================
+# Mike fleet orchestrator (added 2026-06-21T13:25:27Z)
+# ============================================================================
+# consolidate bus -> KB hourly (:07) — safety net only; dispatch auto-consolidates immediately
+7 * * * * /home/trido/thanhdt/WorkingClaude/mike/bin/consolidate.sh >> /home/trido/thanhdt/WorkingClaude/mike/logs/consolidator.log 2>&1
+# watchdog: restart dead mike@ units every 10 min
+*/10 * * * * /home/trido/thanhdt/WorkingClaude/mike/bin/watchdog.sh >> /home/trido/thanhdt/WorkingClaude/mike/logs/watchdog.log 2>&1
+# session inventory: track all account sessions except 'tri' every 10 min
+*/10 * * * * /usr/bin/python3 /home/trido/thanhdt/WorkingClaude/mike/bin/discover_sessions.py --exclude tri,WorkingClaude >> /home/trido/thanhdt/WorkingClaude/mike/logs/discover.log 2>&1
+# usage-limit auto-resume: fire any due bus/pending_resumes/* record every 10 min
+# (feature added 2026-07-03 — see dispatch.sh _maybe_schedule_usage_resume)
+*/10 * * * * /usr/bin/python3 /home/trido/thanhdt/WorkingClaude/mike/bin/resume_pending.py >> /home/trido/thanhdt/WorkingClaude/mike/logs/resume_pending.log 2>&1
+# Natural-rubber feed + DAILY WATCH/ALERT vs prior-week close (Winston/Data-Ops)
+30 11 * * 1-5 /home/trido/thanhdt/WorkingClaude/rubber_weekly.sh   # 18:30 ICT, Mon-Fri
+# daily GitHub backup (fleet mike-fleet branch + main workspace) at 00:00 ICT
+0 17 * * * /home/trido/thanhdt/WorkingClaude/mike/bin/fleet_backup.sh >> /home/trido/thanhdt/WorkingClaude/mike/logs/backup.log 2>&1
+# Corporate-action factor-reset scan -> alert Winston+Taylor (Data-Ops)
+40 11 * * 1-5 /home/trido/thanhdt/WorkingClaude/update_shares_live.sh   # 18:40 ICT, Mon-Fri
+# BQ local cache daily sync (delta + verify) — after v34b refresh @ 23:15 ICT
+45 16 * * 1-5 /home/trido/thanhdt/WorkingClaude/sync_bq_cache_daily.sh >> /home/trido/thanhdt/WorkingClaude/data/bq_cache/sync.log 2>&1   # 23:45 ICT
+# V2.4 go-live flip (one-shot 2026-07-01)
+# ============================================================================
+# Discord<->Claude bot supervisor (cron + idempotent scripts, no systemd)
+@reboot      /home/trido/thanhdt/discord_bot/start.sh
+*/5 * * * *  /home/trido/thanhdt/discord_bot/start.sh
+# New-listings feed: Winston daily 8L research queue (18:10 ICT Mon-Fri)
+10 11 * * 1-5 /home/trido/thanhdt/WorkingClaude/fetch_new_listings_daily.sh   # 18:10 ICT, Mon-Fri
+# BQ freshness check + EOD pipeline (DT5G/recommend/dispatch Bill) — 17:30 ICT
+30 10 * * 1-5 /home/trido/thanhdt/WorkingClaude/mike/bin/bq_freshness_check.sh --quiet >> /home/trido/thanhdt/WorkingClaude/mike/logs/bq_freshness.log 2>&1   # 17:30 ICT — BQ freshness + EOD pipeline + dispatch Bill
+30 12 * * 1-5 /home/trido/thanhdt/WorkingClaude/mike/bin/for_each_live_account.sh /home/trido/thanhdt/WorkingClaude/mike/bin/send_plan_report.sh >> /home/trido/thanhdt/WorkingClaude/mike/logs/send_plan_report.log 2>&1   # 19:30 ICT — gửi plan T+1 qua Telegram + Discord
+# SBV refi-rate weekly verify (Winston) — Friday 15:00 ICT / 08:00 UTC
+0 8 * * 5 /home/trido/thanhdt/WorkingClaude/mike/bin/check_sbv_weekly.sh >> /home/trido/thanhdt/WorkingClaude/logs/sbv_weekly.log 2>&1
+20 1 * * 1-5 /home/trido/thanhdt/WorkingClaude/mike/bin/for_each_live_account.sh /home/trido/thanhdt/WorkingClaude/mike/bin/ops_health_check.sh --label "Trước phiên sáng" >> /home/trido/thanhdt/WorkingClaude/mike/logs/ops_health.log 2>&1   # 08:20 ICT — kiểm tra vận hành tự động trước phiên sáng (theo yêu cầu user 2026-07-06)
+45 1 * * 1-5 /home/trido/thanhdt/WorkingClaude/mike/bin/for_each_live_account.sh /home/trido/thanhdt/WorkingClaude/mike/bin/preflight_check.sh >> /home/trido/thanhdt/WorkingClaude/mike/logs/preflight.log 2>&1   # 08:45 ICT — pre-execution readiness check
+# KB nightly cleanup - 02:00 ICT (19:00 UTC)
+0 19 * * * /home/trido/thanhdt/WorkingClaude/mike/bin/kb_nightly.sh >> /home/trido/thanhdt/WorkingClaude/mike/logs/kb_nightly.log 2>&1
+5 2 * * 1-5 /home/trido/thanhdt/WorkingClaude/mike/bin/run_bot.sh --account SpaceX --auto-otp >> /home/trido/thanhdt/WorkingClaude/mike/logs/run_bot_SpaceX_$(date +\%Y-\%m-\%d).log 2>&1   # 09:05 ICT — thực thi plan SpaceX
+5 2 * * 1-5 /home/trido/thanhdt/WorkingClaude/mike/bin/run_bot.sh --account ZaloPay --auto-otp >> /home/trido/thanhdt/WorkingClaude/mike/logs/run_bot_ZaloPay_$(date +\%Y-\%m-\%d).log 2>&1   # 09:05 ICT — thực thi plan ZaloPay
+*/5 2-7 * * 1-5 /home/trido/thanhdt/WorkingClaude/mike/bin/bot_heartbeat.sh SpaceX >> /home/trido/thanhdt/WorkingClaude/mike/logs/bot_heartbeat.log 2>&1   # every 5min 09:00-14:55 ICT — bot liveness + fill digest to Discord
+*/5 2-7 * * 1-5 /home/trido/thanhdt/WorkingClaude/mike/bin/bot_heartbeat.sh ZaloPay >> /home/trido/thanhdt/WorkingClaude/mike/logs/bot_heartbeat.log 2>&1   # every 5min 09:00-14:55 ICT — bot liveness + fill digest to Discord
+30 4 * * 1-5 pkill -f "[b]ot_execute.py --account SpaceX" >> /home/trido/thanhdt/WorkingClaude/mike/logs/lunch_stop.log 2>&1   # 11:30 ICT — dừng bot giờ nghỉ trưa (VN market lunch break)
+30 4 * * 1-5 pkill -f "[b]ot_execute.py --account ZaloPay" >> /home/trido/thanhdt/WorkingClaude/mike/logs/lunch_stop.log 2>&1   # 11:30 ICT — dừng bot giờ nghỉ trưa (VN market lunch break)
+31 4 * * 1-5 /home/trido/thanhdt/WorkingClaude/mike/bin/session_announce.sh lunch >> /home/trido/thanhdt/WorkingClaude/mike/logs/session_announce.log 2>&1   # 11:31 ICT — thông báo phiên sáng kết thúc + tiến độ
+1 6 * * 1-5 /home/trido/thanhdt/WorkingClaude/mike/bin/session_announce.sh afternoon >> /home/trido/thanhdt/WorkingClaude/mike/logs/session_announce.log 2>&1   # 13:01 ICT — thông báo phiên chiều bắt đầu
+50 7 * * 1-5 /home/trido/thanhdt/WorkingClaude/mike/bin/session_announce.sh close >> /home/trido/thanhdt/WorkingClaude/mike/logs/session_announce.log 2>&1   # 14:50 ICT — thông báo phiên đóng cửa + hẹn EOD report
+45 5 * * 1-5 /home/trido/thanhdt/WorkingClaude/mike/bin/for_each_live_account.sh /home/trido/thanhdt/WorkingClaude/mike/bin/ops_health_check.sh --label "Trước phiên chiều" >> /home/trido/thanhdt/WorkingClaude/mike/logs/ops_health.log 2>&1   # 12:45 ICT — kiểm tra vận hành tự động trước phiên chiều (theo yêu cầu user 2026-07-06)
+0 6 * * 1-5 /home/trido/thanhdt/WorkingClaude/mike/bin/run_bot.sh --account SpaceX --auto-otp >> /home/trido/thanhdt/WorkingClaude/mike/logs/run_bot_SpaceX_$(date +\%Y-\%m-\%d)_afternoon.log 2>&1   # 13:00 ICT — khởi động lại sau nghỉ trưa, resume state
+0 6 * * 1-5 /home/trido/thanhdt/WorkingClaude/mike/bin/run_bot.sh --account ZaloPay --auto-otp >> /home/trido/thanhdt/WorkingClaude/mike/logs/run_bot_ZaloPay_$(date +\%Y-\%m-\%d)_afternoon.log 2>&1   # 13:00 ICT — khởi động lại sau nghỉ trưa, resume state
+0 8 * * 1-5 /home/trido/thanhdt/WorkingClaude/mike/bin/for_each_live_account.sh /home/trido/thanhdt/WorkingClaude/mike/bin/eod_trading_report.sh >> /home/trido/thanhdt/WorkingClaude/mike/logs/eod_trading_report.log 2>&1   # 15:00 ICT — báo cáo tổng kết giao dịch cuối ngày
+20 8 * * 1-5 /home/trido/thanhdt/WorkingClaude/mike/bin/paper_programs_daily_report.sh --post >> /home/trido/thanhdt/WorkingClaude/mike/logs/paper_programs_report.log 2>&1   # 15:20 ICT — Paper Programs Daily Report vào Trading report topic
+5 8 * * 1-5 cd /home/trido/thanhdt/WorkingClaude && timeout 200 python3 dc_book_waterfall_paper.py --update >> /home/trido/thanhdt/WorkingClaude/mike/logs/dc_book_waterfall.log 2>&1   # 15:05 ICT — DC-book waterfall paper sleeve daily advance (independent of SpaceX trade status, per Taylor recommendation 2026-07-06)
+15 1 * * 1-5 /usr/bin/python3 /home/trido/thanhdt/WorkingClaude/vcb_fx_feed.py >> /home/trido/thanhdt/WorkingClaude/logs/vcb_fx_feed.log 2>&1   # 08:15 ICT Mon-Fri VCB USD/VND
+0 2 * * 1 /usr/bin/python3 /home/trido/thanhdt/WorkingClaude/hog_price_feed.py >> /home/trido/thanhdt/WorkingClaude/logs/hog_price_feed.log 2>&1   # 09:00 ICT Mon — hog price 3tres3
+0 23 * * 0-4 /usr/bin/python3 /home/trido/thanhdt/WorkingClaude/newdeals_daily_report.py >> /home/trido/thanhdt/WorkingClaude/logs/newdeals_daily_report.log 2>&1   # 06:00 ICT Mon-Fri
+
+# --- Paper main probe harness (Taylor, job Taylor_20260707_071130) — PAPER-ONLY, evidence cho EXTREME gate + vol-scale chase-cap ---
+52 1 * * 1-5 cd /home/trido/thanhdt/WorkingClaude && timeout 120 python3 mike/bin/paper_main_probe_plan.py >> /home/trido/thanhdt/WorkingClaude/mike/logs/paper_main_probe_plan.log 2>&1   # 08:52 ICT — sinh probe plan cho paper main
+10 2 * * 1-5 cd /home/trido/thanhdt/WorkingClaude && timeout 8400 python3 bot_execute.py --account main >> /home/trido/thanhdt/WorkingClaude/mike/logs/run_bot_main_$(date +\%Y-\%m-\%d).log 2>&1   # 09:10 ICT — phiên sáng paper main (không OTP, PaperBroker)
+32 4 * * 1-5 pkill -f "[b]ot_execute.py --account main" >> /home/trido/thanhdt/WorkingClaude/mike/logs/lunch_stop.log 2>&1   # 11:32 ICT — dừng paper main qua trưa
+5 6 * * 1-5 cd /home/trido/thanhdt/WorkingClaude && timeout 7200 python3 bot_execute.py --account main >> /home/trido/thanhdt/WorkingClaude/mike/logs/run_bot_main_$(date +\%Y-\%m-\%d)_afternoon.log 2>&1   # 13:05 ICT — phiên chiều paper main
