@@ -6,7 +6,14 @@
 #
 # Every dispatch is tracked as a JOB in bus/jobs/<job_id>.json (running → done /
 # failed / timeout). Poll it with bin/jobs.sh — a coordinator never has to block
-# blindly. The claude run is wrapped in `timeout` so it can NEVER hang forever.
+# blindly. The claude run is wrapped in a HEARTBEAT-AWARE deadline (_hb_aware_timeout,
+# 2026-07-09, thay `timeout` cứng): tới hạn TIMEOUT mà heartbeat bus CỦA AGENT còn tươi
+# (<DISPATCH_HB_FRESH_S, mặc định 120s) → gia hạn thêm 1 chu kỳ TIMEOUT thay vì giết một
+# job đang sống khỏe sắp xong (đã xảy ra 2 lần: Winston_20260707_072729,
+# Wags_20260709_134401). Trần tuyệt đối: tối đa DISPATCH_HB_MAX_EXTENSIONS (mặc định 3)
+# lần gia hạn = sống tối đa TIMEOUT×(N+1) mỗi attempt — hết trần thì giết thật dù
+# heartbeat vẫn tươi (chống heartbeat lặp vô nghĩa che job treo vô hạn). Job không
+# heartbeat (treo thật) vẫn chết đúng hạn gốc. Vẫn KHÔNG BAO GIỜ treo vô hạn.
 #
 # After the agent finishes, auto-runs consolidate.sh so bus findings land in KB
 # immediately (no waiting for the 30-min cron). In --bg mode, also pushes a
@@ -19,7 +26,9 @@
 #   immediately with a job_id and polls jobs.sh.
 #
 # Options:
-#   --timeout SEC  hard cap per attempt (default 600 = 10 min)
+#   --timeout SEC  deadline per attempt (default 600 = 10 min). NOT a hard kill: with a
+#                  fresh agent heartbeat the deadline extends, up to
+#                  DISPATCH_HB_MAX_EXTENSIONS more cycles (see _hb_aware_timeout).
 #   --retries N    extra attempts after the first, --bg only (default 1)
 #   --model NAME   model alias for this dispatch (sonnet|opus|haiku|fable). Omit to
 #                  use the CLI's own default. Model choice is per-DISPATCH, not
@@ -74,6 +83,12 @@ case "$MODEL" in
 esac
 MODEL_FLAG=""
 [ -n "$MODEL" ] && MODEL_FLAG="--model $MODEL"
+
+# Heartbeat-aware deadline knobs (see _hb_aware_timeout). MAX_EXT bounds the TOTAL
+# lifetime of one attempt at TIMEOUT×(MAX_EXT+1) — every worst-case computation below
+# (watcher zombie cap, wake-on-completion hint) must use that product, not bare TIMEOUT.
+MAX_EXT="${DISPATCH_HB_MAX_EXTENSIONS:-3}"
+HB_FRESH_S="${DISPATCH_HB_FRESH_S:-120}"
 
 AGENT_DIR="$ROOT/agents/$id"
 if [ ! -d "$AGENT_DIR" ]; then
@@ -270,16 +285,19 @@ _job_watcher() {
     # kẹt 'running' vĩnh viễn (wrapper bị SIGKILL/OOM, không kịp finalize) thì watcher
     # sẽ bất tử + heartbeat 60s/lần giữ HB_AGE tươi giả tạo, che đúng tín hiệu triage
     # cần thấy. Quá deadline worst-case + 15' → bản thân đó LÀ anomaly: báo 1 lần rồi dừng.
-    if [ "$elapsed" -gt $((TIMEOUT * (RETRIES + 1) + 900)) ]; then
+    if [ "$elapsed" -gt $((TIMEOUT * (MAX_EXT + 1) * (RETRIES + 1) + 900)) ]; then
       _discord "🧟 **$target** job \`$jid\`: record vẫn 'running' quá deadline worst-case +15m — wrapper có thể bị kill cứng (SIGKILL/OOM), record kẹt. Kiểm tra: \`$ROOT/bin/jobs.sh status $jid\`"
       break
     fi
 
     local elapsed_min=$((elapsed / 60))
 
-    # Bus heartbeat (internal always)
+    # Bus heartbeat (internal always). source=watcher: this ping proves the WATCHER is
+    # alive, not the agent — job-hb-age (heartbeat-aware deadline) filters it out so a
+    # hung agent can't look alive by proxy. status=still_running doubles as the legacy
+    # marker for the same filter.
     "$ROOT/bin/append_event.sh" "$target" heartbeat "$jid" \
-      "{\"status\":\"still_running\",\"elapsed_min\":${elapsed_min},\"job_id\":\"$jid\"}" "$jid" 2>/dev/null || true
+      "{\"status\":\"still_running\",\"elapsed_min\":${elapsed_min},\"job_id\":\"$jid\",\"source\":\"watcher\"}" "$jid" 2>/dev/null || true
 
     # --- ANOMALY track: fast-fail detection ---
     # 1) Log empty at 60s → claude likely never started (auth/quota/crash on init)
@@ -337,6 +355,58 @@ fi
 JSET() { python3 "$ROOT/bin/mike_json.py" job-set "$JOBS_DIR" "$job_id" "$@"; }
 SUMMARY() { head -c 200 "$logfile" 2>/dev/null | tr '\n\t' '  '; }
 
+# _hb_aware_timeout <cmd...> — drop-in replacement for `timeout ${TIMEOUT}s <cmd...>`
+# (added 2026-07-09, user-approved 'heartbeat-aware-deadline'; incidents
+# Winston_20260707_072729 + Wags_20260709_134401: hard timeout killed jobs whose bus
+# heartbeat was fresh to the minute — alive, working, nearly done).
+#
+# Behavior at each TIMEOUT deadline:
+#   * Last AGENT bus event < HB_FRESH_S old → the job is demonstrably working: extend
+#     the deadline one more TIMEOUT cycle instead of killing. Reads
+#     `mike_json.py job-hb-age` which EXCLUDES _job_watcher liveness pings — the watcher
+#     pings every 60s no matter what the agent does, so counting them would keep every
+#     genuinely-hung job "fresh" forever (that filter is the whole safety of this design).
+#   * Absolute cap: MAX_EXT extensions, then kill even with a fresh heartbeat — total
+#     lifetime ≤ TIMEOUT×(MAX_EXT+1). A pathological agent that only emits heartbeats
+#     while making no progress cannot live past the cap.
+#   * No/stale heartbeat at the deadline → kill on schedule (no mercy for a real hang).
+# Exit 124 on any deadline kill — same contract as timeout(1), so every rc==124 branch
+# downstream (retry, status=timeout, notify wording) keeps working unchanged.
+_hb_aware_timeout() {
+  local grace="${DISPATCH_KILL_GRACE_S:-10}"
+  local ext=0 pid now deadline hb waited
+  "$@" &
+  pid=$!
+  deadline=$(( $(date +%s) + TIMEOUT ))
+  while kill -0 "$pid" 2>/dev/null; do
+    now="$(date +%s)"
+    if [ "$now" -ge "$deadline" ]; then
+      hb="$(python3 "$ROOT/bin/mike_json.py" job-hb-age "$JOBS_DIR" "$job_id" 2>/dev/null || echo '-')"
+      if [ "$ext" -lt "$MAX_EXT" ] && [[ "$hb" =~ ^-?[0-9]+$ ]] && [ "$hb" -lt "$HB_FRESH_S" ]; then
+        ext=$((ext + 1))
+        deadline=$((now + TIMEOUT))
+        JSET deadline="$deadline" hb_extensions="$ext" 2>/dev/null || true
+        # Trace the extension on the bus. source=watcher: this event must NOT itself
+        # count as agent liveness at the next deadline (job-hb-age filters it out).
+        "$ROOT/bin/append_event.sh" "$id" status "$job_id" \
+          "{\"status\":\"deadline_extended\",\"hb_age_s\":$hb,\"extension\":$ext,\"max_ext\":$MAX_EXT,\"source\":\"watcher\"}" \
+          "$job_id" >/dev/null 2>&1 || true
+        continue
+      fi
+      kill -TERM "$pid" 2>/dev/null || true
+      waited=0
+      while [ "$waited" -lt "$grace" ] && kill -0 "$pid" 2>/dev/null; do
+        sleep 1; waited=$((waited + 1))
+      done
+      kill -KILL "$pid" 2>/dev/null || true
+      wait "$pid" 2>/dev/null
+      return 124
+    fi
+    sleep 5
+  done
+  wait "$pid"
+}
+
 dispatch_prompt="[DISPATCH từ $from | job=$job_id] $prompt
 
 Khi hoàn thành, GHI KẾT QUẢ lên bus bằng (tham số cuối '$job_id' là trace_id — LUÔN giữ
@@ -381,7 +451,7 @@ if [ "$bg" = "--bg" ]; then
       astart="$(date +%s)"
       JSET status=running attempt="$attempt" started_at="$astart" deadline=$((astart + TIMEOUT))
       set +e
-      timeout "${TIMEOUT}s" "$CLAUDE" -p "$dispatch_prompt" \
+      _hb_aware_timeout "$CLAUDE" -p "$dispatch_prompt" \
         --permission-mode auto --max-turns 50 $MODEL_FLAG > "$logfile" 2>&1
       rc=$?
       set -e
@@ -502,9 +572,9 @@ if [ "$bg" = "--bg" ]; then
   # `setsid _bg_wrapper &` silently fails to find "_bg_wrapper" as a command.
   export -f _bg_wrapper _job_watcher JSET SUMMARY _agent_thread_override _circuit_record \
             _maybe_schedule_usage_resume _looks_like_usage_limit _parse_reset_epoch \
-            _current_resume_count _job_thread_id
+            _current_resume_count _job_thread_id _hb_aware_timeout
   export ROOT JOBS_DIR job_id from id ts TIMEOUT RETRIES CLAUDE dispatch_prompt logfile prompt \
-         CIRCUIT_DIR CIRCUIT_THRESHOLD CIRCUIT_COOLDOWN MODEL_FLAG
+         CIRCUIT_DIR CIRCUIT_THRESHOLD CIRCUIT_COOLDOWN MODEL_FLAG MAX_EXT HB_FRESH_S
   # systemd-run --user needs the user manager socket; cron strips XDG_RUNTIME_DIR.
   export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
   _detach_ok=0
@@ -541,7 +611,7 @@ if [ "$bg" = "--bg" ]; then
   # worktree, agent vẫn đồng bộ, tin nhắn cuối là kênh trả kết quả duy nhất — wrapper "sẽ báo
   # lại" không bao giờ báo lại được). Wrapper Agent nền CHỈ dùng nếu schema phiên hiện tại thật
   # sự có tham số nền. In sẵn để khỏi soạn lại từ trí nhớ — BẮT BUỘC ngay sau dispatch này.
-  _ww=$((TIMEOUT * (RETRIES + 1) + 60))
+  _ww=$((TIMEOUT * (MAX_EXT + 1) * (RETRIES + 1) + 60))
   echo "⚠️ BẮT BUỘC ngay sau dispatch này (MIKE.md §8, sửa 2026-07-07 — Agent tool KHÔNG còn run_in_background):" >&2
   echo "  1) CƠ CHẾ CHÍNH: ScheduleWakeup NGẮN ~240-270s — mỗi lần tỉnh chạy '$ROOT/bin/jobs.sh status $job_id'; chưa done → đặt lại wakeup ngắn; done → xử lý ngay. KHÔNG đặt 1 lần chờ dài (worst-case chờ tối đa ~${_ww}s vẫn phủ qua nhiều lần poll)." >&2
   echo "  2) CHỈ nếu schema tool phiên này THẬT SỰ có tham số nền (run_in_background trên Agent/Bash) mới thêm wrapper bọc '$ROOT/bin/jobs.sh wait $job_id --timeout $_ww'. isolation:worktree KHÔNG phải background — cấm dùng thay thế." >&2
@@ -574,7 +644,7 @@ else
   }
   trap _sync_killed_guard TERM INT HUP
   set +e
-  timeout "${TIMEOUT}s" "$CLAUDE" -p "$dispatch_prompt" \
+  _hb_aware_timeout "$CLAUDE" -p "$dispatch_prompt" \
     --permission-mode auto --max-turns 50 $MODEL_FLAG \
     2>"$logfile.err" | tee "$logfile"
   rc=${PIPESTATUS[0]}

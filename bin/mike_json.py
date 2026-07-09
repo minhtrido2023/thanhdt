@@ -25,6 +25,9 @@ Centralizes all JSON building/reading so the shell scripts depend only on python
          (avoids shell-quoting a large/multiline string as a CLI arg)
   job-field <jobs_dir> <job_id> <field_name>
       -> print one field's raw value (exit 1 if job/field missing) — e.g. discord_thread_id
+  job-hb-age <jobs_dir> <job_id>
+      -> seconds since the job's last AGENT-written bus event ('-' if none); excludes
+         _job_watcher liveness pings — input to dispatch.sh heartbeat-aware deadline
 """
 import sys, os, json, uuid, glob, datetime
 
@@ -258,12 +261,27 @@ def _log_age(obj, n):
         return "-"
 
 
-def _hb_age(obj, n):
+def _is_watcher_event(rec):
+    """dispatch.sh's _job_watcher appends a liveness ping every 60s with the SAME
+    trace_id as the job. That ping only proves the WATCHER is alive — it fires
+    unconditionally while the job record says 'running', even when the agent itself
+    is hung. Any decision that means 'the agent is actually working' (heartbeat-aware
+    deadline extension) must exclude these. Markers: explicit source=watcher (new),
+    or the watcher's status=still_running payload shape (pre-marker records)."""
+    p = rec.get("payload")
+    if not isinstance(p, dict):
+        return False
+    return p.get("source") == "watcher" or p.get("status") == "still_running"
+
+
+def _hb_age(obj, n, agent_only=False):
     """Giây từ HEARTBEAT bus cuối cùng của job (agent headless ghi heartbeat mỗi phút vào
     bus/inbox/<agent>.jsonl với trace_id=job_id). Đây mới là tín hiệu liveness ĐÚNG cho
     job đang chạy — LOG_AGE vô dụng khi chạy vì _bg_wrapper chỉ ghi log lúc claude THOÁT
     (log 0-byte suốt thời gian chạy → nhìn như treo dù agent sống; user hỏi 'Winston treo
-    rồi phải không?' 2026-07-07 chính vì đọc LOG_AGE). '-' = chưa thấy heartbeat nào."""
+    rồi phải không?' 2026-07-07 chính vì đọc LOG_AGE). '-' = chưa thấy heartbeat nào.
+    agent_only=True: bỏ qua ping của _job_watcher (xem _is_watcher_event) — chỉ tính
+    event do CHÍNH agent ghi; dùng cho quyết định gia hạn deadline."""
     job_id = obj.get("job_id", "")
     agent = obj.get("to", "")
     if not job_id or not agent:
@@ -281,6 +299,8 @@ def _hb_age(obj, n):
                 except Exception:
                     continue
                 if rec.get("trace_id") == job_id or rec.get("topic") == job_id:
+                    if agent_only and _is_watcher_event(rec):
+                        continue
                     last_ts = rec.get("ts") or last_ts
     except Exception:
         return "-"
@@ -292,6 +312,22 @@ def _hb_age(obj, n):
         return str(n - int(t.timestamp()))
     except Exception:
         return "-"
+
+
+def cmd_job_hb_age(a):
+    """job-hb-age <jobs_dir> <job_id> — print seconds since the job's last AGENT-written
+    bus event ('-' if none). Watcher liveness pings are excluded (see _is_watcher_event) —
+    this is the input to dispatch.sh's heartbeat-aware deadline extension, where counting
+    the watcher's own 60s ping would keep every hung job looking alive forever."""
+    jobs_dir, job_id = a[0], a[1]
+    fp = _job_path(jobs_dir, job_id)
+    try:
+        with open(fp, encoding="utf-8") as f:
+            o = json.load(f)
+    except Exception:
+        print("-")
+        return
+    print(_hb_age(o, now_epoch(), agent_only=True))
 
 
 def _load_jobs(jobs_dir):
@@ -571,7 +607,7 @@ CMDS = {"event": cmd_event, "heartbeat": cmd_heartbeat, "recent": cmd_recent,
         "delta-append": cmd_delta_append, "delta-since": cmd_delta_since,
         "format-events": cmd_format_events, "fleet-status": cmd_fleet_status,
         "job-set": cmd_job_set, "job-list": cmd_job_list, "job-get": cmd_job_get,
-        "job-field": cmd_job_field,
+        "job-field": cmd_job_field, "job-hb-age": cmd_job_hb_age,
         "circuit-check": cmd_circuit_check, "circuit-record": cmd_circuit_record,
         "pending-resume-set": cmd_pending_resume_set,
         "settings": cmd_settings, "trace": cmd_trace,
