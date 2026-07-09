@@ -375,7 +375,16 @@ SUMMARY() { head -c 200 "$logfile" 2>/dev/null | tr '\n\t' '  '; }
 _hb_aware_timeout() {
   local grace="${DISPATCH_KILL_GRACE_S:-10}"
   local ext=0 pid now deadline hb waited
-  "$@" &
+  # setsid: child gets its OWN process group (pgid=pid) so the deadline kill below can
+  # take the WHOLE tree with `kill -- -pid`. Killing only the direct pid leaves orphaned
+  # grandchildren alive — and in the sync path an orphan holding the inherited stdout
+  # keeps the `| tee` pipe open, blocking dispatch.sh long past the kill (found in the
+  # 2026-07-09 verification run: hung-job test blocked ~300s on exactly this).
+  if command -v setsid >/dev/null 2>&1; then
+    setsid "$@" &
+  else
+    "$@" &
+  fi
   pid=$!
   deadline=$(( $(date +%s) + TIMEOUT ))
   while kill -0 "$pid" 2>/dev/null; do
@@ -393,12 +402,14 @@ _hb_aware_timeout() {
           "$job_id" >/dev/null 2>&1 || true
         continue
       fi
-      kill -TERM "$pid" 2>/dev/null || true
+      # Group kill first (whole tree), direct-pid kill as fallback when the child is
+      # not a group leader (setsid missing).
+      kill -TERM -- "-$pid" 2>/dev/null || kill -TERM "$pid" 2>/dev/null || true
       waited=0
       while [ "$waited" -lt "$grace" ] && kill -0 "$pid" 2>/dev/null; do
         sleep 1; waited=$((waited + 1))
       done
-      kill -KILL "$pid" 2>/dev/null || true
+      kill -KILL -- "-$pid" 2>/dev/null || kill -KILL "$pid" 2>/dev/null || true
       wait "$pid" 2>/dev/null
       return 124
     fi

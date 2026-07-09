@@ -1618,3 +1618,16 @@
 - [2026-07-09T14:36:18Z] ZZTestHB/heartbeat — ZZTestHB_20260709_143517: {"status": "still_running", "elapsed_min": 1, "job_id": "ZZTestHB_20260709_143517", "source": "watcher"}
 - [2026-07-09T14:36:27Z] ZZTestHB/heartbeat — ZZTestHB_20260709_143516: {"status": "in_progress", "note": "hb-forever"}
 - [2026-07-09T14:36:37Z] ZZTestHB/heartbeat — ZZTestHB_20260709_143516: {"status": "in_progress", "note": "hb-forever"}
+
+## Consolidation 2026-07-09T14:43:07Z
+- [2026-07-09T14:37:22Z] Wags/heartbeat — Wags_20260709_142518: {"status": "still_running", "elapsed_min": 12, "job_id": "Wags_20260709_142518"}
+- [2026-07-09T14:38:22Z] Wags/heartbeat — Wags_20260709_142518: {"status": "still_running", "elapsed_min": 13, "job_id": "Wags_20260709_142518"}
+- [2026-07-09T14:39:22Z] Wags/heartbeat — Wags_20260709_142518: {"status": "still_running", "elapsed_min": 14, "job_id": "Wags_20260709_142518"}
+- [2026-07-09T14:40:22Z] Wags/heartbeat — Wags_20260709_142518: {"status": "still_running", "elapsed_min": 15, "job_id": "Wags_20260709_142518"}
+- [2026-07-09T14:41:22Z] Wags/heartbeat — Wags_20260709_142518: {"status": "still_running", "elapsed_min": 16, "job_id": "Wags_20260709_142518"}
+- [2026-07-09T14:42:22Z] Wags/heartbeat — Wags_20260709_142518: {"status": "still_running", "elapsed_min": 17, "job_id": "Wags_20260709_142518"}
+- [2026-07-09T14:42:26Z] Wags/heartbeat — Wags_20260709_142518: {"status": "in_progress", "note": "test C PASS (trần 92s=30x3, ext=2). Tìm thấy + vá bug pipe-block (giết pid trực tiếp bỏ sót orphan giữ pipe tee) — setsid + group-kill. Re-run test B + A-rút-gọn"}
+- [2026-07-09T14:42:39Z] ZZTestHB/heartbeat — ZZTestHB_20260709_144226: {"status": "in_progress", "note": "fake-short 1"}
+- [2026-07-09T14:42:51Z] ZZTestHB/heartbeat — ZZTestHB_20260709_144226: {"status": "in_progress", "note": "fake-short 2"}
+- [2026-07-09T14:42:52Z] ZZTestHB/status — ZZTestHB_20260709_144226: {"status": "deadline_extended", "hb_age_s": 1, "extension": 1, "max_ext": 3, "source": "watcher"}
+- [2026-07-09T14:43:03Z] ZZTestHB/heartbeat — ZZTestHB_20260709_144226: {"status": "in_progress", "note": "fake-short 3"}
