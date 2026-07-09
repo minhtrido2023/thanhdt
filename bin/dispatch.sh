@@ -464,35 +464,64 @@ if [ "$bg" = "--bg" ]; then
   # inherits fd1). The wrapper writes nothing to stdout (claude→logfile, notify/
   # consolidate self-redirect), so /dev/null is safe.
   #
-  # setsid: put the wrapper in its OWN session, detached from the caller's process
-  # group/controlling terminal. Without this, a plain `&` background job is still a
-  # child of the same session as whoever called dispatch.sh (e.g. Mike's own live
-  # Claude Code turn) — if THAT session dies/restarts (context compaction, crash,
-  # reconnect), the "background" job can die or become orphaned with it, leaving its
-  # job-board entry stuck at status=running forever (incident 2026-07-02: job
-  # Taylor_20260702_113418 died this way, 0-byte log, marked OVERDUE, required a
-  # fresh re-dispatch). setsid is the standard Unix daemonization primitive for this
-  # (see setsid(1); double-fork/detach pattern, Stevens "Advanced Programming in the
-  # UNIX Environment").
+  # LIFETIME DETACH — session is NOT enough, the job must leave the caller's CGROUP
+  # (fix 2026-07-09, incident Taylor_20260708_170202 + 2 more in 3 days):
+  #   * setsid detaches only the SESSION (controlling terminal / process group). The
+  #     child still inherits the caller's systemd cgroup. Every service here runs with
+  #     KillMode=control-group (the default), so when the caller's service restarts —
+  #     e.g. ccdb-mike.service, the Discord bridge that spawns Mike's turns — systemd
+  #     SIGTERM/SIGKILLs EVERY pid left in that cgroup, setsid or not. That is exactly
+  #     how --bg jobs kept dying with the bridge and their job records stayed stuck at
+  #     status=running forever (never finalized).
+  #   * systemd-run --user --scope moves the child into its OWN transient run-*.scope
+  #     cgroup under user@.service, fully outside the caller's unit. Verified
+  #     empirically 2026-07-09: a scoped child SURVIVES `systemctl --user stop` of a
+  #     fake parent service, while a setsid-only child is killed (see
+  #     kb/INCIDENTS.md 2026-07-09). --scope forks/execs the command itself, so the
+  #     exported functions and env below carry over exactly like a normal fork
+  #     (verified: exported bash functions resolve inside the scope).
+  #   * The systemd-run middleman stays in the caller's cgroup and may be killed with
+  #     it — harmless: it does not forward SIGTERM to the scoped child (verified).
+  #   * Fallback chain: no systemd-run / no reachable user manager (rare: cron without
+  #     XDG_RUNTIME_DIR, non-systemd box) → setsid (old behavior) → plain &.
+  #     DISPATCH_CGROUP_DETACH=0 forces the setsid path (escape hatch for debugging).
   #
-  # setsid execs a COMMAND (execvp), not a shell function directly — so the function
-  # and every variable/function it closes over (JSET, SUMMARY, and the vars they use)
+  # Both spawn paths exec a COMMAND (execvp), not a shell function directly — so the
+  # function and everything it closes over (JSET, SUMMARY, and the vars they use)
   # must be exported and re-entered via `bash -c`. Verified empirically: a plain
   # `setsid _bg_wrapper &` silently fails to find "_bg_wrapper" as a command.
-  export -f _bg_wrapper JSET SUMMARY _agent_thread_override _circuit_record \
+  export -f _bg_wrapper _job_watcher JSET SUMMARY _agent_thread_override _circuit_record \
             _maybe_schedule_usage_resume _looks_like_usage_limit _parse_reset_epoch \
             _current_resume_count _job_thread_id
   export ROOT JOBS_DIR job_id from id ts TIMEOUT RETRIES CLAUDE dispatch_prompt logfile prompt \
          CIRCUIT_DIR CIRCUIT_THRESHOLD CIRCUIT_COOLDOWN MODEL_FLAG
-  if command -v setsid >/dev/null 2>&1; then
-    setsid bash -c '_bg_wrapper' </dev/null >/dev/null 2>&1 &
-  else
-    _bg_wrapper </dev/null >/dev/null 2>&1 &
+  # systemd-run --user needs the user manager socket; cron strips XDG_RUNTIME_DIR.
+  export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+  _detach_ok=0
+  if [ "${DISPATCH_CGROUP_DETACH:-1}" != "0" ] \
+     && command -v systemd-run >/dev/null 2>&1 \
+     && systemd-run --user --scope --quiet --collect /bin/true >/dev/null 2>&1; then
+    _detach_ok=1
   fi
+  _detached_spawn() {  # $1 = bash command string, $2 = human description
+    if [ "$_detach_ok" = "1" ]; then
+      systemd-run --user --scope --quiet --collect --description="$2" \
+        bash -c "$1" </dev/null >/dev/null 2>&1 &
+    elif command -v setsid >/dev/null 2>&1; then
+      setsid bash -c "$1" </dev/null >/dev/null 2>&1 &
+    else
+      bash -c "$1" </dev/null >/dev/null 2>&1 &
+    fi
+  }
+  _detached_spawn '_bg_wrapper' "mike-dispatch $job_id ($from → $id)"
   disown 2>/dev/null || true
   pid=$!
-  # Watcher: milestone progress + anomaly detection (empty/stale log).
-  _job_watcher "$job_id" "$from" "$id" "$logfile" </dev/null >/dev/null 2>&1 &
+  # Watcher: milestone progress + anomaly detection (empty/stale log). Detached the
+  # same way — if it stayed in the bridge cgroup it would die on bridge restart while
+  # the job lives on, silencing the bus heartbeats that jobs.sh HB_AGE triage relies
+  # on (job would look TREO while actually running).
+  _detached_spawn '_job_watcher "$job_id" "$from" "$id" "$logfile"' "mike-dispatch-watcher $job_id"
+  disown 2>/dev/null || true
   echo "DISPATCHED $id (job=$job_id pid=$pid) → log: $logfile"
   echo "Theo dõi: $ROOT/bin/jobs.sh status $job_id | Khi xong: auto consolidate + Telegram notify."
   # Fast wake-on-completion snippet (MIKE.md §Quy chuẩn 8; sửa 2026-07-07 incident
@@ -521,12 +550,26 @@ else
   # Watcher runs in background: milestone progress + anomaly detection (empty/stale log).
   _job_watcher "$job_id" "$from" "$id" "$logfile" </dev/null >/dev/null 2>&1 &
   _wpid=$!
+  # If dispatch.sh itself is killed mid-run (e.g. the caller's Bash tool 2-minute
+  # timeout SIGTERMs the whole process group — incident 2026-07-09,
+  # DollarBill_20260709_125326), finalize the job record instead of leaving it stuck
+  # at status=running forever. Best-effort: a straight SIGKILL cannot be trapped.
+  _sync_killed_guard() {
+    trap - TERM INT HUP
+    JSET status=failed ended_at="$(date +%s)" exit_code=143 \
+         result_summary="KILLED: dispatch.sh sync bị kill giữa chừng (caller chết/Bash-tool timeout?) — job record finalize bởi trap, không phải agent tự kết thúc" \
+         2>/dev/null || true
+    kill "$_wpid" 2>/dev/null || true
+    exit 143
+  }
+  trap _sync_killed_guard TERM INT HUP
   set +e
   timeout "${TIMEOUT}s" "$CLAUDE" -p "$dispatch_prompt" \
     --permission-mode auto --max-turns 50 $MODEL_FLAG \
     2>"$logfile.err" | tee "$logfile"
   rc=${PIPESTATUS[0]}
   set -e
+  trap - TERM INT HUP  # claude finished — normal finalize below owns the record now
   kill "$_wpid" 2>/dev/null || true  # watcher no longer needed
   # Push bus → KB immediately after agent finishes
   "$ROOT/bin/consolidate.sh" >> "$ROOT/logs/consolidator.log" 2>&1 || true

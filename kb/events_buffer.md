@@ -1529,3 +1529,14 @@
 - [2026-07-09T13:44:16Z] Wags/heartbeat — Wags_20260709_134401: {"status": "in_progress", "note": "bắt đầu: đọc dispatch.sh xác nhận chẩn đoán cgroup"}
 - [2026-07-09T13:45:02Z] Wags/heartbeat — Wags_20260709_134401: {"status": "still_running", "elapsed_min": 1, "job_id": "Wags_20260709_134401"}
 - [2026-07-09T13:46:03Z] Wags/heartbeat — Wags_20260709_134401: {"status": "still_running", "elapsed_min": 2, "job_id": "Wags_20260709_134401"}
+
+## Consolidation 2026-07-09T13:53:02Z
+- [2026-07-09T13:47:03Z] Wags/heartbeat — Wags_20260709_134401: {"status": "still_running", "elapsed_min": 3, "job_id": "Wags_20260709_134401"}
+- [2026-07-09T13:48:03Z] Wags/heartbeat — Wags_20260709_134401: {"status": "still_running", "elapsed_min": 4, "job_id": "Wags_20260709_134401"}
+- [2026-07-09T13:48:55Z] Wags/heartbeat — Wags_20260709_134401: {"status": "in_progress", "note": "chẩn đoán XÁC NHẬN bằng test thật: setsid child chết theo cgroup ccdb-mike (KillMode=control-group), systemd-run --scope child sống sót. Bắt đầu sửa dispatch.sh"}
+- [2026-07-09T13:49:04Z] Wags/heartbeat — Wags_20260709_134401: {"status": "still_running", "elapsed_min": 5, "job_id": "Wags_20260709_134401"}
+- [2026-07-09T13:50:04Z] Wags/heartbeat — Wags_20260709_134401: {"status": "still_running", "elapsed_min": 6, "job_id": "Wags_20260709_134401"}
+- [2026-07-09T13:51:04Z] Wags/heartbeat — Wags_20260709_134401: {"status": "still_running", "elapsed_min": 7, "job_id": "Wags_20260709_134401"}
+- [2026-07-09T13:52:04Z] Wags/heartbeat — Wags_20260709_134401: {"status": "still_running", "elapsed_min": 8, "job_id": "Wags_20260709_134401"}
+- [2026-07-09T13:52:44Z] Wags/heartbeat — Wags_20260709_134401: {"status": "in_progress", "note": "fix đã code + test A: job --bg SỐNG SÓT qua mô phỏng bridge stop, đang chờ verify record finalize done"}
+- [2026-07-09T13:52:32Z] Winston/heartbeat — Winston_20260709_135131: {"status": "still_running", "elapsed_min": 1, "job_id": "Winston_20260709_135131"}
