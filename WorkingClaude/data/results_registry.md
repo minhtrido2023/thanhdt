@@ -2674,3 +2674,30 @@ nếu muốn (không tốn gì).
 **Tổng kết đề xuất cho mốc review event-anchored** (không đổi gì trước đó): (1) refresh q2m5 thống nhất
 DC+custom30V; (2) cap gộp per-name 0.15 sleeve; (3) floor thanh khoản 3B. Cả 3 = risk-control/robustness với
 chi phí CAGR ≈ 0 — nhất quán verdict DSR 0.775/0.111: sleeve là insurance, không phải alpha-engine.
+
+## 2026-07-09 — NEUTRAL park sweep tại NAV nhỏ 20B vs 50B (premise check "NAV nhỏ → đẩy park 70→90 an toàn hơn") — job Taylor_20260709_012737 (kế thừa artifact Taylor_20260708_170202)
+**Câu hỏi (user qua Mike):** NAV ~20B có nên đẩy NEUTRAL parking 70% → 90%?
+**Cách chạy:** grid contemporaneous 8 run cùng ngày (tránh batch drift −1.2pp đã biết): {NAV_TOTAL_B=20,50} × PARK∈{0.70,0.80,0.90,0.94}, `$DNA_PYEXE pt_v23_audit_2014.py`, threads=1, self-check 0 VND **16/16 pass** (BAL+LAG × 8), borrow cost 0. Logs: `data/run_park_sweep_nav{20,50}_p{70,80,90,94}*.log`. CSVs: `..._nav20B.csv` (suffix mới NAV_TOTAL_B) + `park3-XX` tags; 50B p70 anchor: `data/park70_50B_anchor_20260709.csv`. Recompute độc lập từ CSV (extract-style, FULL/IS/OOS) khớp log ≤0.01. **N trials = 8** (1 họ sweep, quyết định = giữ nguyên status quo, không wire gì → không cần DSR mới).
+
+| NAV | park | FULL CAGR | Sharpe | MaxDD | Calmar | IS CAGR/Sh | OOS CAGR/Sh |
+|---|---|---|---|---|---|---|---|
+| 20B | 0.70 | 28.93% | 1.84 | −17.9% | 1.62 | 29.38/1.94 | 28.44/1.76 |
+| 20B | 0.80 | 29.56% | 1.81 | −19.0% | 1.55 | 29.75/1.85 | 29.32/1.77 |
+| 20B | 0.90 | 29.49% | 1.73 | −19.9% | 1.48 | 30.19/1.76 | 28.77/1.69 |
+| 20B | 0.94 | 30.03% | 1.73 | −20.4% | 1.47 | 30.18/1.72 | 29.82/1.73 |
+| 50B | 0.70 | 26.75% | 1.76 | −17.7% | 1.51 | 26.74/1.80 | 26.70/1.71 |
+| 50B | 0.80 | 27.10% | 1.70 | −18.9% | 1.43 | 26.05/1.66 | 28.04/1.73 |
+| 50B | 0.90 | 28.01% | 1.67 | −19.6% | 1.43 | 26.35/1.58 | 29.52/1.75 |
+| 50B | 0.94 | 28.89% | 1.69 | −19.6% | 1.48 | 27.86/1.61 | 29.80/1.77 |
+
+**Slope risk-cost 70→90:** 20B = **+0.56pp CAGR / −0.12 Sharpe / −0.14 Calmar / −2.0pp DD**; 50B = +1.26pp / −0.09 / −0.08 / −1.9pp. OOS còn rõ hơn: 20B chỉ +0.33pp CAGR với Sharpe −0.07; 50B +2.82pp với Sharpe +0.04.
+**Capacity phase-1:** ADV-cap 20%ADV enforce nhưng KHÔNG bind ở cả 2 NAV — 15/15 state-flip unwind xong trong 1 phiên. Kênh capacity không phân biệt 20B vs 50B.
+**VERDICT: premise REFUTED (đảo ngược).** Ở NAV nhỏ, tăng park mua ÍT CAGR hơn và trả NHIỀU risk hơn so với 50B — vì 2 book lõi ở 20B đã chạy giàu hơn (28.9% vs 26.8% baseline), phần park thêm chỉ cộng DD. **GIỮ park=0.70 ở mọi NAV hiện hành. Không đổi production/paper.** Nhất quán reference 50B cũ (70→94→100: Sharpe 1.78→1.66→1.65, job _130720; batch này 1.76→1.69, drift ~0.02 đã biết).
+**Ghi chú canonical (§8):** run anchor 50B p70 (đúng config pin R3, đúng $DNA_PYEXE) đã regenerate `..._etfliqcustompitg_wtnamecap.csv` as-of 2026-07-09 (drift −1.30pp vs pin 28.05% — đúng cỡ batch/as-of drift đã ghi nhận trong registry). Nội dung cũ (park94 từ job _130720) backup tại `data/park94_50B_job130720_backup.csv`.
+
+## 2026-07-09 — Audit fill thật SpaceX+ZaloPay từ go-live vs fill-timing edge (user nghi "mua xong lỗ ngay trong phiên") — job Taylor_20260709_101602
+**Nguồn:** broker raw `dnse_raw_2026-07-0*.jsonl` (final state per order-id, KHÔNG dùng journal-only vì 07-02 double-buy) × OHLC `data/bq_cache/ticker/2026.parquet`. 92 order khớp (59 BUY, 33 SELL); 58 BUY có OHLC (07-09 chưa sync), tổng mua 1.472B VND.
+**BUY value-weighted:** vsOpen **+3.4bps** (cơ chế khớp sạch — mua sát giá arrival, chase thấp); vsClose **+41.7bps** (≈ −6.5M MTM cuối phiên); vsLow +110.5bps; range-position 68%. **Per-day vsClose: 07-01 −21.0 / 07-02 +76.7 / 07-07 −32.6 / 07-08 −6.7** → toàn bộ tổn thất = 1 ngày 07-02 (deploy 915.6M lúc 09:15, bank fade cả phiên, ≈ −7.0M); 3/4 ngày mua CÓ LÃI tại close. Day-level mean +4.1bps, sd 49.6, n=4, **t=0.17** = nhiễu thuần. Power: noise 110-220bps cần **~156-625 buy-days** cho t=2 → live/paper KHÔNG BAO GIỜ tự chứng minh edge 17.6bps trong vài tuần; edge đứng trên backtest lịch sử (t=12.0) như thiết kế gate 30-06 (mechanics-gate, không phải edge-gate).
+**SELL (07-06 trim):** vsOpen −26.6bps VW, vsClose +105.4bps VW (bán sáng/13:00 trên ngày fade = tốt) — hướng khớp research SELL-at-open.
+**Bug đo lường tìm thấy + đã sửa:** `execution_quality_review.py` đếm cả journal LIVE, mà live-gate ép mult=1.0 → nhãn `ft:in-window` VÔ NGHĨA trên mọi lệnh live 09:15 → "98% adherence/410 placements" là GIẢ. Sau filter paper-only (exec_main_*): **6 placements / 1 phiên / 0 fill trong cửa sổ sáng 10:45-11:15** — cơ chế delay-BUY-sáng CHƯA TỪNG chạy thật lần nào (6 lệnh paper 07-07 đặt 14:19 = nhánh chiều mult=1.0 by design; main 07-08/09 không có lệnh). Evidence-rate ≈ 0 → checkpoint cuối-07 sẽ rỗng nếu không sửa lịch paper main chạy phiên sáng có BUY.
+**VERDICT:** cảm nhận user ĐÚNG về giá trị (−41.7bps VW) nhưng nguyên nhân = trôi thị trường 1 ngày 07-02, KHÔNG phải lỗi cơ chế khớp (vsOpen +3.4bps). KHÔNG đẩy nhanh flip toàn bộ (chi phí chờ hiện tại ~176k VND/100M mua, buy-volume đang nhỏ; ngày đắt thật là deploy lớn kế tiếp = LAG refill cuối 07 → checkpoint cuối-07 vẫn đúng thời điểm, flip TRƯỚC deploy đó nếu mechanics sạch). Điều kiện flip (mechanics): ≥5 phiên paper có BUY fill trong cửa sổ sáng + 0 reject + không lệnh treo bất thường → quant-skeptic → user sign-off. Option trung gian nếu user muốn sớm: pilot flip CHỈ ZaloPay (cash-only, lệnh nhỏ) trước SpaceX. Quyết định ở user.
