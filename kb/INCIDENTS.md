@@ -1115,6 +1115,66 @@ sáng theo thiết kế human-in-the-loop. Phiên chiều 13:00 bot restart vớ
 sell 10cp — fail-safe đúng); lệnh tay khớp/hủy xong thì guard tự nhả, bot tự bán nốt
 10cp lẻ bằng code mới nếu còn.
 
+## RETRO — 2026-07-09: 7 sự cố, 2 pattern xuyên suốt tái diễn từ trước, prevention cũ chưa đủ
+
+User yêu cầu trực tiếp cuối ngày: review toàn bộ lỗi hôm nay, phân loại MỚI/TÁI DIỄN,
+đánh giá fix đã hoàn chỉnh chưa, rút bài học tránh lặp lại "hết ngày này qua ngày khác".
+Đã lập cơ chế lặp lại việc này mỗi tối 22:00 ICT (`bin/daily_retro.sh`) — entry này là
+lần chạy đầu tiên, làm thủ công vì Mike có sẵn context trực tiếp trong ngày.
+
+**Danh sách 7 sự cố hôm nay (đã có entry chi tiết riêng ở trên/trong ngày, trừ mục 1 và 7):**
+
+| # | Sự cố | Mới/Tái diễn | Fix hoàn chỉnh? |
+|---|---|---|---|
+| 1 | dispatch `--bg` job chết khi cgroup bridge (ccdb-mike) restart (Taylor phát hiện 01:47) | **TÁI DIỄN** (lần 3 trong 3 ngày, xem Pattern A) | ĐANG SỬA (dispatch Wags job `Wags_20260709_134401`, chưa xong lúc viết entry này) |
+| 2 | `run_bot.sh` fail-branch báo lỗi giả khi cron lunch-pkill dừng bot đúng lịch (rc=143) | MỚI (lần đầu bot sống đủ lâu để chạm nhánh này, kể từ khi wire ops_autofix 07-08) | Hoàn chỉnh — sandbox verify biên cửa sổ 11:24/11:25/12:59/13:00 |
+| 3 | TCM 10cp lẻ kẹt vĩnh viễn dưới lý do sai "WAIT_QUOTA" (`round_lot()` làm tròn 0) | MỚI (lần đầu tài khoản có vị thế lẻ <1 lô cần bán) | Hoàn chỉnh cho đường LO phiên thường; CỐ Ý chưa mở rộng ATC (chưa xác minh) |
+| 4 | Paper-main cron thiếu TZ → session_phase sai cả sáng, 0 lệnh | **TÁI DIỄN** (cùng dạng TZ-trap đã gặp 2026-07-06 ở NAV snapshot, xem Pattern B) | Hoàn chỉnh về code + selfcheck; crontab cần user cài tay (đã đưa question) |
+| 5 | `execution_quality_review.py` đếm nhầm journal LIVE làm bằng chứng PAPER → "98% adherence" ảo | **TÁI DIỄN** (cùng dạng "đọc nhầm nguồn dữ liệu" — xem Pattern B, tiền lệ 07-03/07-06) | Hoàn chỉnh — verify lại đúng 6 placements/0 in-window trước khi commit |
+| 6 | DollarBill dùng giá đóng cửa BQ hôm trước (trễ 1 phiên) thay vì giá live cho BID/MBB | **TÁI DIỄN** (Pattern B, tiền lệ 07-03 cost-basis, 07-06 NAV×2, hôm nay lặp 2 lần liền — mục 5 và 6) | Hoàn chỉnh cho plan này (đã sửa + verify); GỐC đã vá (dispatch prompt bắt buộc live quote) |
+| 7 | Mike tự dispatch DollarBill fix thiếu `--bg` → Bash tool timeout 2' giết job, job record kẹt "running" | **TÁI DIỄN** (Pattern A, cùng dạng mục 1 và agent-wrapper-monitor-gap 07-07) | Hoàn chỉnh cho lần này (redispatch đúng cách); KHÔNG ngăn được Mike lặp lại thao tác sai lần sau |
+| 8 | `kb_nightly.sh` dispatch Mike editorial mỗi thứ Sáu bị chính guard self-dispatch chặn âm thầm, từ 2026-06-27 | MỚI phát hiện (đã âm ỉ ~2 tuần, không ai biết vì chạy nền `&` không kiểm exit code) | Hoàn chỉnh — thêm `DISPATCH_FROM=user`, đã verify bằng cách đọc log Friday trước xác nhận lỗi thật |
+
+**Pattern A (TÁI DIỄN LẦN 3, prevention cũ CHƯA ĐỦ) — job nền chết vì lifecycle bị buộc
+vào một tiến trình cha KHÔNG LIÊN QUAN.** 2026-07-07: `Agent(isolation:worktree)` không
+phải background thật, mất tín hiệu hoàn tất. Hôm nay 2 lần nữa dưới 2 dạng khác:
+cgroup bridge restart giết mọi `dispatch.sh --bg` con của nó (Taylor phát hiện); Mike tự
+quên `--bg` khiến Bash-tool-timeout giết job. **Prevention cũ (self-check `jobs.sh status`
+trước khi phát ngôn) chỉ giúp PHÁT HIỆN nhanh hơn — không NGĂN được job chết.** Quyết định
+hôm nay: dispatch Wags sửa TẬN GỐC (tách hoàn toàn `claude -p` khỏi cgroup/process-group
+của bridge, không chỉ dựa vào con người nhớ gõ đúng `--bg`) — nếu lần sửa này (job
+`Wags_20260709_134401`) không giải quyết được ở tầng process/cgroup thật, đây sẽ là lần
+tái diễn thứ 4 và cần đặt câu hỏi lớn hơn: có nên tách dispatch khỏi service bridge hoàn
+toàn (chạy như 1 service riêng) thay vì vá từng lớp.
+
+**Pattern B (TÁI DIỄN LẦN 4+, prevention cũ (coding_guidelines.md §6, viết sau sự cố
+07-03) CHƯA ĐỦ MẠNH) — code âm thầm đọc nhầm nguồn dữ liệu trễ/sai thay vì nguồn live/
+authoritative.** Tiền lệ: 07-03 báo cáo tuần dùng field ước tính làm cost-basis thật;
+07-06 NAV sai 2 lần (thiếu vị thế legacy, rồi lệch thời điểm snapshot); **hôm nay tái
+diễn LIÊN TIẾP 2 LẦN TRONG CÙNG 1 NGÀY** (execution_quality_review đếm nhầm journal live;
+DollarBill dùng giá BQ trễ 1 phiên) + 1 lần dạng gần giống (TZ-trap, cùng họ "môi trường
+thật ≠ giả định của code"). `coding_guidelines.md §6` đã viết nguyên tắc "Verify Report
+Data Provenance" từ 07-03 nhưng đây chỉ là 1 đoạn văn bản NHỚ ĐỂ ÁP DỤNG mỗi lần viết
+code mới — không có cơ chế BẮT BUỘC/CHECKLIST nào ép mọi report/pipeline script mới phải
+qua. **Đây là tín hiệu prevention hiện tại (viết nguyên tắc vào guidelines) không đủ —
+cần cơ chế CHỦ ĐỘNG hơn**, ví dụ: (a) một checklist ngắn bắt buộc chèn vào MỌI dispatch
+prompt liên quan report/plan-generation (tương tự cách hôm nay đã vá riêng lẻ cho
+DollarBill's bq_freshness_check.sh — nhưng đó là vá 1 điểm, không phải quy tắc chung),
+hoặc (b) 1 script kiểm tra tĩnh grep các pattern nguy hiểm quen thuộc (đọc BQ trong
+khung giờ BQ biết chắc chưa sync, đọc field có `_approx`/`_estimate` mà không cross-check)
+trước khi 1 report/plan mới được coi là "sẵn sàng". Chưa triển khai (b) — ghi lại đây làm
+việc cần làm, không tự ý làm ngay vì cần bàn phạm vi trước.
+
+**Đã dọn dẹp working memory + KB cuối ngày** (theo yêu cầu user "trước khi vào dreaming"):
+`kb/memory/Mike.md` viết lại gọn, `bin/consolidate.sh` chạy gộp bus→KB — phiên ngày mai
+sẽ refresh sạch, không mang theo transcript rác của hôm nay.
+
+**Cơ chế lặp lại từ ngày mai:** `bin/daily_retro.sh` (cron 22:00 ICT, TRƯỚC batch đêm
+23:15/23:45) — dispatch Mike headless đọc INCIDENTS.md + bus events trong ngày, tự phân
+loại mới/tái diễn, viết entry RETRO, dọn memory, báo Trading Daily. Nếu 1 pattern (như A
+hoặc B ở trên) còn tái diễn ở 2 lần RETRO liên tiếp → tự escalate câu hỏi cho user, không
+chỉ lặp lại lời khuyên "prevention" cũ vô ích.
+
 ## Open / not-yet-hardened
 
 - **quant-skeptic's second recommendation on the ghost-order guard** (2026-07-02,
