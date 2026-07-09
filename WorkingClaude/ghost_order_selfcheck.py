@@ -205,6 +205,12 @@ with tempfile.TemporaryDirectory() as tmp:
     #    paper trading could never rehearse this guard. Verify the fix: a paper order
     #    NOT tracked in state (synthetic — status != "open" so _try_fill/get_quote are
     #    never touched, no live quote source needed) is now correctly seen as a ghost.
+    #    ts must be TODAY: poll_orders() day-scopes like the real DNSE order book since
+    #    2026-07-09 (a cross-day paper order is yesterday's history, not a ghost — see
+    #    paper_main_window_selfcheck.py), and the ghost this check rehearses is the
+    #    same-day crash-between-place-and-save signature.
+    import datetime as _dt
+
     from trading_bot.brokers import PaperBroker
 
     pb = PaperBroker(label="selfcheck-ghost")
@@ -212,7 +218,8 @@ with tempfile.TemporaryDirectory() as tmp:
     pb.state = {"cash": 0, "positions": {}, "open_orders": {
         "P000001": {"symbol": "PAPERGHOST", "qty": 100, "side": "buy", "price": 20000,
                     "type": "LO", "filled": 100, "status": "Filled",
-                    "ts": "2099-01-01T09:15:00"}}, "fills": [], "next_id": 2}
+                    "ts": f"{_dt.date.today().isoformat()}T09:15:00"}},
+        "fills": [], "next_id": 2}
     ex3 = make_executor(tmp, [PlannedOrder(id="BUY-04", ticker="PAPERGHOST", side="buy",
                                            qty=1000, ref_price=20000)])
     paper_updates = pb.poll_orders()

@@ -656,8 +656,17 @@ class PaperBroker(BrokerBase):
         return {"orderId": order_id, "status": "cancelled"}
 
     def poll_orders(self):
-        for oid in list(self.state["open_orders"]):
-            self._try_fill(oid)
+        # Day-scope like the real broker: DNSEBroker.poll_orders() returns TODAY's order
+        # book only, but open_orders here persists across sessions (bot_paper_account.json)
+        # — returning all-time orders fed yesterday's FILLED orders to the ghost guard
+        # (Executor._ghost_tickers: not in today's fresh state + filled>0 → ghost), pausing
+        # every plan ticker each new day (observed 2026-07-08/09, all 6 probe tickers).
+        # Same filter on the fill loop: a stale "open" order from a prior day must not
+        # fill against today's ref price and mutate cash/positions.
+        today = dt.date.today().isoformat()
+        for oid, o in list(self.state["open_orders"].items()):
+            if o.get("ts", "")[:10] == today:
+                self._try_fill(oid)
         self._save()
         # raw={"symbol": ...}: without it Executor._ghost_tickers() (executor.py) can
         # never resolve a symbol for a paper order (qget(None, ...) -> None), so paper
@@ -665,7 +674,8 @@ class PaperBroker(BrokerBase):
         # DNSEBroker.poll_orders(), which always sets raw to the full broker order row.
         return {oid: OrderUpdate(oid, o["status"], o["filled"], o.get("avg_price"),
                                  raw={"symbol": o["symbol"]})
-                for oid, o in self.state["open_orders"].items()}
+                for oid, o in self.state["open_orders"].items()
+                if o.get("ts", "")[:10] == today}
 
     # ----- fill engine -----
     def _try_fill(self, oid):
