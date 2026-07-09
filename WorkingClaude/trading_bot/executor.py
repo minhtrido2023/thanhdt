@@ -53,7 +53,7 @@ def _publish_bot_event(event_type: str, topic: str, payload: dict) -> None:
         )
     except Exception:
         pass
-from .vn_market import session_phase, tick_size, round_price, round_lot, LOT
+from .vn_market import session_phase, tick_size, round_price, round_lot, LOT, now_ict
 from .brokers import qget
 
 _GAP_Z_DOWN_THRESHOLD = -2.0  # gap_z < this on a BUY → full-speed 09:15-09:45
@@ -151,7 +151,7 @@ class Executor:
                 w.writerow(["ts", "event", "parent_id", "ticker", "side",
                             "child_oid", "qty", "price", "filled_total", "note"])
             ps = self.state["parents"].get(o.id) if o else None
-            w.writerow([dt.datetime.now().isoformat(timespec="seconds"), event,
+            w.writerow([now_ict().isoformat(timespec="seconds"), event,
                         o.id if o else "", o.ticker if o else "",
                         o.side if o else "", child_oid, qty, price,
                         ps["filled"] if ps else "", note])
@@ -816,7 +816,7 @@ class Executor:
                                               price=None, order_type="ATC")
                 ps["children"].append({"oid": oid, "qty": remaining, "price": None,
                                        "filled": 0, "status": "open",
-                                       "ts": dt.datetime.now().isoformat(timespec="seconds")})
+                                       "ts": now_ict().isoformat(timespec="seconds")})
                 ps["atc_sent"] = True
                 self._journal("ATC", o, oid, remaining, note="quét ATC phần còn lại")
                 self._save_state()  # idempotency: ghi ngay, xem note ở _place_slices
@@ -900,7 +900,7 @@ class Executor:
         lines = [f"# Execution report — [{self.label}] {self.plan.plan_date}",
                  f"*Strategy*: {self.plan.strategy} v{self.plan.strategy_version} | "
                  f"*Broker*: {self.broker.name} | "
-                 f"*Generated*: {dt.datetime.now():%Y-%m-%d %H:%M}", "",
+                 f"*Generated*: {now_ict():%Y-%m-%d %H:%M}", "",
                  "| order | ticker | side | plan qty | filled | % | ref px | avg fill px | children |",
                  "|---|---|---|---:|---:|---:|---:|---:|---:|"]
         tot_plan = tot_fill = 0
@@ -938,7 +938,7 @@ def run_session(executors, once=False, max_cycles=None, force_phase=None):
     cycles = 0
     while True:
         cycles += 1
-        now = dt.datetime.now()
+        now = now_ict()  # luôn giờ ICT thật, bất kể TZ của process gọi vào — xem vn_market.py
         phase, cont = (force_phase, force_phase in ("MORNING", "AFTERNOON")) \
             if force_phase else session_phase(now)
 

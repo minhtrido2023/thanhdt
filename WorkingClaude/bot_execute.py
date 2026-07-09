@@ -34,6 +34,7 @@ from trading_bot.config import load_config, load_accounts, pick_accounts, EXEC_D
 from trading_bot.brokers import make_broker, get_quote_source, get_dnse_client
 from trading_bot.plan import load_plan, filter_excluded_tickers
 from trading_bot.executor import Executor, run_session
+from trading_bot.vn_market import today_ict
 
 _LOCK_HANDLES = []  # giữ sống file descriptor để lock tồn tại suốt vòng đời process
 
@@ -158,7 +159,7 @@ def main():
 
     profiles = pick_accounts(load_accounts(base), args.account)
     otp_by_label, otp_common = parse_otp(args.otp)
-    plan_date = args.date or dt.date.today().strftime("%Y-%m-%d")
+    plan_date = args.date or today_ict().strftime("%Y-%m-%d")
 
     shared_fills = {}                            # sổ participation chung của fleet
 

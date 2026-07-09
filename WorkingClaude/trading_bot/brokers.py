@@ -22,7 +22,7 @@ import uuid
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from .config import DATA_DIR, EXEC_DIR
-from .vn_market import normalize_price_vnd
+from .vn_market import normalize_price_vnd, now_ict, today_ict
 
 PAPER_STATE_FILE = os.path.join(os.path.dirname(DATA_DIR), "secrets", "bot_paper_account.json")  # legacy (label main)
 DEFAULT_CREDENTIALS = os.path.join(os.path.dirname(DATA_DIR), "secrets", "phs_credentials.json")
@@ -154,7 +154,7 @@ class BrokerBase:
                 # ZaloPay). "kind" khác như orders/place_order vốn đã có accountNo riêng
                 # trong payload nên không bị ảnh hưởng, nhưng thêm ở đây cho MỌI kind để
                 # nhất quán và phòng ngừa các payload khác thiếu accountNo.
-                f.write(json.dumps({"ts": dt.datetime.now().isoformat(timespec="seconds"),
+                f.write(json.dumps({"ts": now_ict().isoformat(timespec="seconds"),
                                     "kind": kind, "account_no": getattr(self, "account_id", None),
                                     "account_label": getattr(self, "label", None),
                                     "payload": payload},
@@ -225,7 +225,7 @@ class PHSBroker(BrokerBase):
         self._quote_cache = {}      # symbol -> (ts, Quote)
         self._quote_ttl = 3.0       # giây
         self._raw_log = os.path.join(
-            EXEC_DIR, f"phs_raw_{dt.date.today():%Y-%m-%d}.jsonl")
+            EXEC_DIR, f"phs_raw_{today_ict():%Y-%m-%d}.jsonl")
 
     def connect(self):
         self.client = get_flex_client(self.credentials_file)
@@ -343,7 +343,7 @@ class DNSEBroker(BrokerBase):
         self._secdef_cache = {}     # symbol -> dict (trần/sàn/ref — tĩnh trong ngày)
         self._quote_ttl = 3.0
         self._raw_log = os.path.join(
-            EXEC_DIR, f"dnse_raw_{dt.date.today():%Y-%m-%d}.jsonl")
+            EXEC_DIR, f"dnse_raw_{today_ict():%Y-%m-%d}.jsonl")
 
     def connect(self):
         self.client = get_dnse_client(self.credentials_file)
@@ -643,7 +643,7 @@ class PaperBroker(BrokerBase):
         self.state["open_orders"][oid] = {
             "symbol": symbol, "qty": int(qty), "side": side, "price": price,
             "type": order_type, "filled": 0, "status": "open",
-            "ts": dt.datetime.now().isoformat(timespec="seconds")}
+            "ts": now_ict().isoformat(timespec="seconds")}
         self._try_fill(oid)
         self._save()
         return oid
@@ -663,7 +663,7 @@ class PaperBroker(BrokerBase):
         # every plan ticker each new day (observed 2026-07-08/09, all 6 probe tickers).
         # Same filter on the fill loop: a stale "open" order from a prior day must not
         # fill against today's ref price and mutate cash/positions.
-        today = dt.date.today().isoformat()
+        today = today_ict().isoformat()
         for oid, o in list(self.state["open_orders"].items()):
             if o.get("ts", "")[:10] == today:
                 self._try_fill(oid)
@@ -723,7 +723,7 @@ class PaperBroker(BrokerBase):
         o["avg_price"] = fill_px
         o["status"] = "filled"
         self.state["fills"].append(
-            {"ts": dt.datetime.now().isoformat(timespec="seconds"), "order_id": oid,
+            {"ts": now_ict().isoformat(timespec="seconds"), "order_id": oid,
              "symbol": o["symbol"], "side": o["side"], "qty": qty,
              "price": fill_px, "fee": round(fee)})
 

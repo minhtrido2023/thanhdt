@@ -1,12 +1,26 @@
 # -*- coding: utf-8 -*-
 """Cơ chế thị trường VN: phiên, lô, bước giá, biên độ.
 
-Giả định máy chạy giờ Việt Nam (ICT).
+now_ict() luôn trả giờ ICT thật, KHÔNG phụ thuộc TZ của process/cron gọi vào — tránh lặp lại
+sự cố 2026-07-01 (run_bot.sh thiếu source wc_env.sh → session_phase thấy PRE suốt giờ MORNING)
+và 2026-07-08/09 (cron paper-main gọi bot_execute.py trực tiếp, cùng lỗi thiếu TZ, xem
+paper_main_window_selfcheck.py). Gốc rễ đã sửa Ở ĐÂY thay vì chỉ vá từng dòng cron.
 """
 
 import datetime as dt
+from zoneinfo import ZoneInfo
 
 LOT = 100  # lô chẵn HOSE/HNX
+_ICT = ZoneInfo("Asia/Ho_Chi_Minh")
+
+
+def now_ict():
+    """Giờ ICT hiện tại (naive datetime — so sánh trực tiếp được với SESSIONS)."""
+    return dt.datetime.now(_ICT).replace(tzinfo=None)
+
+
+def today_ict():
+    return now_ict().date()
 
 # Ngày nghỉ lễ cố định hàng năm (tháng, ngày).
 # Ngày lễ biến động (Tết ÂL, Giỗ Tổ, bù lễ theo quyết định từng năm) → xử lý sau.
@@ -40,8 +54,9 @@ def is_holiday(d):
 
 
 def session_phase(now=None):
-    """→ (tên phiên, continuous: bool). Cuối tuần / ngày lễ → CLOSED."""
-    now = now or dt.datetime.now()
+    """→ (tên phiên, continuous: bool). Cuối tuần / ngày lễ → CLOSED.
+    now=None → dùng now_ict() (đúng giờ ICT bất kể TZ của process gọi vào)."""
+    now = now or now_ict()
     if now.weekday() >= 5 or is_holiday(now.date()):
         return "CLOSED", False
     t = now.time()
