@@ -1601,3 +1601,20 @@
 - [2026-07-09T14:33:57Z] ZZTestHB/heartbeat — ZZTestHB_20260709_143311: {"status": "in_progress", "note": "fake-work 3"}
 - [2026-07-09T14:34:12Z] ZZTestHB/heartbeat — ZZTestHB_20260709_143311: {"status": "still_running", "elapsed_min": 1, "job_id": "ZZTestHB_20260709_143311", "source": "watcher"}
 - [2026-07-09T14:34:12Z] ZZTestHB/heartbeat — ZZTestHB_20260709_143311: {"status": "in_progress", "note": "fake-work 4"}
+
+## Consolidation 2026-07-09T14:36:49Z
+- [2026-07-09T14:35:16Z] Wags/heartbeat — Wags_20260709_142518: {"status": "in_progress", "note": "test A PASS (extend 1 lần, done 75s>40s). Chạy test B (treo thật) + C (trần N=2)"}
+- [2026-07-09T14:35:21Z] Wags/heartbeat — Wags_20260709_142518: {"status": "still_running", "elapsed_min": 10, "job_id": "Wags_20260709_142518"}
+- [2026-07-09T14:36:22Z] Wags/heartbeat — Wags_20260709_142518: {"status": "still_running", "elapsed_min": 11, "job_id": "Wags_20260709_142518"}
+- [2026-07-09T14:35:27Z] ZZTestHB/heartbeat — ZZTestHB_20260709_143516: {"status": "in_progress", "note": "hb-forever"}
+- [2026-07-09T14:35:37Z] ZZTestHB/heartbeat — ZZTestHB_20260709_143516: {"status": "in_progress", "note": "hb-forever"}
+- [2026-07-09T14:35:47Z] ZZTestHB/status — ZZTestHB_20260709_143516: {"status": "deadline_extended", "hb_age_s": 10, "extension": 1, "max_ext": 2, "source": "watcher"}
+- [2026-07-09T14:35:47Z] ZZTestHB/heartbeat — ZZTestHB_20260709_143516: {"status": "in_progress", "note": "hb-forever"}
+- [2026-07-09T14:35:57Z] ZZTestHB/heartbeat — ZZTestHB_20260709_143516: {"status": "in_progress", "note": "hb-forever"}
+- [2026-07-09T14:36:07Z] ZZTestHB/heartbeat — ZZTestHB_20260709_143516: {"status": "in_progress", "note": "hb-forever"}
+- [2026-07-09T14:36:17Z] ZZTestHB/heartbeat — ZZTestHB_20260709_143516: {"status": "still_running", "elapsed_min": 1, "job_id": "ZZTestHB_20260709_143516", "source": "watcher"}
+- [2026-07-09T14:36:17Z] ZZTestHB/status — ZZTestHB_20260709_143516: {"status": "deadline_extended", "hb_age_s": 10, "extension": 2, "max_ext": 2, "source": "watcher"}
+- [2026-07-09T14:36:17Z] ZZTestHB/heartbeat — ZZTestHB_20260709_143516: {"status": "in_progress", "note": "hb-forever"}
+- [2026-07-09T14:36:18Z] ZZTestHB/heartbeat — ZZTestHB_20260709_143517: {"status": "still_running", "elapsed_min": 1, "job_id": "ZZTestHB_20260709_143517", "source": "watcher"}
+- [2026-07-09T14:36:27Z] ZZTestHB/heartbeat — ZZTestHB_20260709_143516: {"status": "in_progress", "note": "hb-forever"}
+- [2026-07-09T14:36:37Z] ZZTestHB/heartbeat — ZZTestHB_20260709_143516: {"status": "in_progress", "note": "hb-forever"}
