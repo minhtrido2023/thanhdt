@@ -76,7 +76,15 @@ ts_end="$(date +%s)"
 elapsed=$(( ts_end - ts_start ))
 
 _hr_end="$(TZ='Asia/Ho_Chi_Minh' date +'%H:%M')"
-if [ "$rc" -eq 0 ]; then
+# Cron 11:30 ICT pkill bot qua giờ nghỉ trưa là dừng THEO LỊCH, không phải lỗi —
+# rc=143 (SIGTERM) trong cửa sổ 11:25-12:59 ICT không được rơi vào nhánh fail
+# (sự cố false-alarm 2026-07-09: dispatch ops_autofix + báo ❌ giả cho ZaloPay).
+_hm_end=$(( 10#$(TZ='Asia/Ho_Chi_Minh' date +'%H%M') ))
+if [ "$rc" -eq 143 ] && [ "$_hm_end" -ge 1125 ] && [ "$_hm_end" -lt 1300 ]; then
+  _discord "⏸️ **Bot tạm dừng nghỉ trưa theo lịch ($_hr_end)** — account **$ACCOUNT**: thị trường nghỉ trưa, bot sẽ tự quay lại lúc 13:00 để tiếp tục kế hoạch (chạy $((elapsed/60)) phút phiên sáng)."
+  "$ROOT/bin/append_event.sh" Mafee status "bot-lunch-stop" \
+    "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"elapsed_s\":$elapsed,\"rc\":$rc}" 2>/dev/null || true
+elif [ "$rc" -eq 0 ]; then
   # Nói rõ LÝ DO rời phiên (user feedback 2026-07-07 chiều: "bot vừa bật vừa tắt" đọc
   # rất khó hiểu khi message không nói bot dừng vì XONG VIỆC hay vì lỗi).
   if grep -q "tất cả account đã khớp đủ" "$LOG" 2>/dev/null; then
