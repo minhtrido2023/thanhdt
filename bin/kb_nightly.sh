@@ -129,7 +129,15 @@ _tid="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
 DOW=$(date -u +%u)  # 1=Mon … 7=Sun; 5=Fri
 if [ "$DOW" -eq 5 ]; then
     log "Friday → dispatching Mike for LLM editorial review of KNOWLEDGE.md..."
-    "$ROOT/bin/dispatch.sh" Mike \
+    # DISPATCH_FROM=user required: dispatch.sh blocks any non-user caller from targeting
+    # Mike (agents must escalate via a question event instead) AND blocks self-dispatch
+    # (from==id). This cron job's default $from is "Mike" (dispatch.sh's own default),
+    # which trips BOTH guards — found 2026-07-09 while setting up the daily retro: every
+    # Friday since the guard was added (2026-06-27) this dispatch has silently failed
+    # with "self-dispatch blocked (Mike -> Mike)" (confirmed in logs/kb_nightly.log,
+    # 2026-07-03 run), and nobody noticed because it launches in background with `&`
+    # and no exit-code check. DISPATCH_FROM=user is the documented human-override path.
+    DISPATCH_FROM=user "$ROOT/bin/dispatch.sh" Mike \
 "KB weekly editorial review (automated, Friday nightly).
 Bạn đang ở headless mode. Nhiệm vụ: đọc kb/KNOWLEDGE.md, kiểm tra 9 canonical sections có còn đúng không (facts đã outdate, mục nào nên update từ events gần đây trong context_pack.md), viết lại những section cần thiết, commit. KHÔNG xóa archive. Không cần hỏi user — đây là routine maintenance đã được user uỷ quyền. Sau khi xong: ghi sự thay đổi lên bus (append_event.sh Mike decision 'kb-weekly-editorial') và notify Telegram." \
         --timeout 900 >> "$LOG" 2>&1 &
