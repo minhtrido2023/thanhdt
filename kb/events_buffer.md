@@ -1401,3 +1401,6 @@
 
 ## Consolidation 2026-07-09T04:07:01Z
 - [2026-07-09T03:22:36Z] Mafee/error — GHOST_ORDER_DETECTED: {"account": "ZaloPay", "ticker": "TCM", "plan_date": "2026-07-09", "note": "Lệnh tồn tại ở broker nhưng state.json không biết (khả năng crash giữa place_order và _save_state). Bot ĐÃ TỰ DỪNG đặt lệnh mới cho mã này để tránh double-buy — cần đối soát tay rồi mới cho tiếp tục."}
+
+## Consolidation 2026-07-09T04:30:03Z
+- [2026-07-09T04:30:01Z] Mafee/error — bot-fail: {"account": "ZaloPay", "plan_date": "2026-07-09", "elapsed_s": 8700, "rc": 143, "log": "/home/trido/thanhdt/WorkingClaude/mike/logs/run_bot_ZaloPay_2026-07-09.log"}
