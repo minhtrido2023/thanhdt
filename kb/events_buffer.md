@@ -1425,3 +1425,6 @@
 
 ## Consolidation 2026-07-10T02:47:50Z
 - [2026-07-10T02:47:50Z] Mike/answer — cron-paper-main-can-cai: {"answered_by": "Mike (user duyệt trực tiếp 2026-07-10)", "status": "CLOSED — cài xong lịch luân phiên", "installed": "T2/T4/T6 09:10 ICT = SELL-window evidence (giữ nguyên); T3/T5 10:46 ICT = BUY-window evidence (10:45-11:15, mới); paper_main_early_check.sh đồng bộ theo — T2/T4/T6 vẫn 09:40, T3/T5 chuyển sang 11:16 (30phut sau 10:46) để không báo động giả", "verify": "diff crontab -l trước/sau cài khớp đúng dự kiến, không đổi gì ngoài 2 cặp dòng đã nêu; lunch-pkill 11:32 không đổi, vẫn áp cho cả 5 ngày nên T3/T5 run (bắt đầu 10:46) vẫn kịp dừng đúng giờ nghỉ trưa", "not_touched": "SpaceX/ZaloPay/afternoon paper-main run (13:05, không đổi) — chỉ sửa đúng 2 cặp dòng liên quan buổi sáng paper-main"}
+
+## Consolidation 2026-07-10T04:30:02Z
+- [2026-07-10T04:30:02Z] Mafee/status — bot-lunch-stop: {"account": "ZaloPay", "plan_date": "2026-07-10", "elapsed_s": 8700, "rc": 143}
