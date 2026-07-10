@@ -280,6 +280,55 @@ def _save_pending(d):
     with open(PENDING, "w") as f: json.dump(d, f, indent=2)
 
 
+BACKLOG_FILE = os.path.join(WORKDIR, "data", "corp_action_backlog.json")
+
+
+def _check_backlog(pend):
+    """Cross-check every alerted-but-unconfirmed pending item against
+    shares_outstanding_live (resolved via `--ticker` write OR `--ack-cash`) — pending.json
+    only tracks "already alerted this week" for dedup and was never reconciled against
+    what actually got resolved, so an item could sit alerted-forever with nothing to show
+    it (found 2026-07-10: DDV/EVG flagged 2026-06-25/26, still unresolved 2+ weeks later,
+    completely silent because scan_universe() only posts a bus event on NEW candidates,
+    never a status heartbeat when quiet). Removes resolved keys from `pend` in place,
+    writes data/corp_action_backlog.json for ops_health_check.sh to read (no BQ call
+    needed there), and returns (still_pending: list[dict], resolved_now: list[str])."""
+    if not pend:
+        _write_backlog([])
+        return [], []
+    try:
+        resolved_df = bq_df(f"SELECT ticker, ex_date FROM {TABLE}")
+        resolved = {f"{r.ticker}|{r.ex_date}" for r in resolved_df.itertuples()} if not resolved_df.empty else set()
+    except Exception as e:
+        print(f"  [warn] backlog check: could not query {TABLE}: {e}")
+        resolved = set()
+    today = datetime.now().date()
+    still_pending, resolved_now = [], []
+    for key, alerted_wk in list(pend.items()):
+        if key in resolved:
+            resolved_now.append(key)
+            del pend[key]
+            continue
+        ticker, ex_date = key.split("|", 1)
+        try:
+            days_pending = (today - datetime.strptime(ex_date, "%Y-%m-%d").date()).days
+        except ValueError:
+            days_pending = None
+        still_pending.append({"ticker": ticker, "ex_date": ex_date,
+                               "alerted_week": alerted_wk, "days_since_ex_date": days_pending})
+    if resolved_now:
+        _save_pending(pend)
+    _write_backlog(still_pending)
+    return still_pending, resolved_now
+
+
+def _write_backlog(still_pending):
+    os.makedirs(os.path.dirname(BACKLOG_FILE), exist_ok=True)
+    with open(BACKLOG_FILE, "w") as f:
+        json.dump({"checked_at": datetime.now().isoformat(timespec="seconds"),
+                    "pending": still_pending}, f, indent=2)
+
+
 def scan_universe(days=5):
     """Scan ticker_prune for NEW corporate-action ex-dates not yet in
     shares_outstanding_live, alert (Winston+Taylor). Detection only — no write.
@@ -310,7 +359,7 @@ def scan_universe(days=5):
     df = bq_df(sql)
     print(f"\n=== scan {SCAN_UNIVERSE} last {days}d -> {len(df)} unhandled candidate(s) ===")
     if df.empty:
-        print("  none"); return []
+        print("  none")
 
     pend = _load_pending()
     cur_wk = bq_df("SELECT FORMAT_DATE('%G-W%V', CURRENT_DATE()) AS wk").iloc[0]["wk"]
@@ -324,6 +373,27 @@ def scan_universe(days=5):
         if last_wk != cur_wk:
             fresh.append(r); pend[key] = cur_wk
     _save_pending(pend)
+
+    # Backlog reconciliation + unconditional daily heartbeat — scan_universe() previously
+    # only spoke up on a FRESH finding, so 13+ days of "0 candidates" (real, but also
+    # indistinguishable from a dead cron) went completely silent, and 2 already-alerted
+    # items (DDV/EVG, 2026-06-19) sat unresolved for 2+ weeks with nothing surfacing it
+    # (found 2026-07-10, user asked "is anyone still coordinating this daily?"). Always
+    # emit a status event now, mirroring fetch_new_listings.py's existing daily pattern.
+    still_pending, resolved_now = _check_backlog(pend)
+    stale_pending = [p for p in still_pending
+                     if p["days_since_ex_date"] is not None and p["days_since_ex_date"] > 7]
+    bus("status", "corp-action-scan-daily",
+        {"scanned_universe": SCAN_UNIVERSE, "candidates_this_run": len(df),
+         "fresh_alerts_this_run": len(fresh), "resolved_since_last_run": resolved_now,
+         "still_pending_count": len(still_pending), "still_pending": still_pending,
+         "stale_pending_over_7d": stale_pending})
+    if stale_pending:
+        print(f"  [WARN] {len(stale_pending)} corp-action item(s) alerted >7 ngày trước, "
+              f"vẫn CHƯA resolve trong {TABLE}: "
+              + ", ".join(f"{p['ticker']}|{p['ex_date']}" for p in stale_pending))
+    if df.empty and not fresh:
+        return []
 
     for r in fresh:
         est_div = float(r["est_div_vnd"])
