@@ -22,6 +22,32 @@ TRADING_THREAD="1522576692638388364"  # Trading report (đổi từ Trading Dail
 PLAN_FILE="$WC_ROOT/data/trade_plans/plan_${ACCOUNT}_${PLAN_DATE}.json"
 STATE_FILE="$WC_ROOT/data/execution_logs/exec_${ACCOUNT}_${PLAN_DATE}_state.json"
 
+# --- Gate DT4 (candidate streak clock) — bối cảnh CẤP THỊ TRƯỜNG (không theo account) ---
+# Tái dùng build_dt_gate_line() của dna_report.py (html=False → text sạch cho Discord
+# markdown, không thẻ <i>/<b>). Chỉ dùng ở case HOLD-day + full-render (không chèn vào
+# cảnh báo lỗi vận hành case 1/3 để không làm loãng cảnh báo). Fail-safe: mọi lỗi (thiếu
+# BQ cred / thiếu CSV hazard / import lỗi) → in "" → bỏ qua dòng lặng lẽ, KHÔNG crash report.
+# 2 account chạy report riêng cùng ngày sẽ hiện dòng này 2 lần — chấp nhận được (info thị trường).
+_dt_gate_line() {
+  cd "$WC_ROOT" && timeout 120 python3 -c "
+import sys
+sys.path.insert(0, '$WC_ROOT')
+try:
+    from dna_report import build_dt_gate_line
+    line = build_dt_gate_line(html=False)
+    if line:
+        print(line)
+except Exception:
+    pass
+" 2>/dev/null || true
+}
+# Trả về block (có newline dẫn đầu) khi có dữ liệu, "" khi lỗi/không có. Gọi LAZY — chỉ
+# ở case HOLD-day + full-render, tránh chạy BQ trong nhánh cảnh báo lỗi (case 1/3).
+_dt_gate_block() {
+  local line; line="$(_dt_gate_line)"
+  [ -n "$line" ] && printf '\n🛰️ %s' "$line"
+}
+
 # Mọi ngày PHẢI có 1 dòng báo cho account này — "im lặng" không phân biệt được với hệ
 # thống chết (user 2026-07-07). Trước đây "plan hoặc state thiếu" gộp chung 1 case rồi bỏ
 # qua — bug thật hôm nay: plan HOLD (0 lệnh) khiến bot_execute.py thoát ngay KHÔNG tạo
@@ -49,7 +75,7 @@ elif [ "$N_ORDERS_TODAY" = "0" ]; then
   MSG="📊 **EOD Trading Report — $ACCOUNT ($PLAN_DATE)**
 ✅ HOLD — kế hoạch hôm nay không có lệnh nào (đúng thiết kế, không phải lỗi). Bot đã trực phiên đồng bộ trạng thái.
 
-$NAV_SECTION"
+$NAV_SECTION$(_dt_gate_block)"
   echo "$MSG"
   "$ROOT/bin/notify_thread.sh" "$MSG" "$TRADING_THREAD" 2>/dev/null || true
   "$ROOT/bin/append_event.sh" Mafee status "eod-trading-report" \
@@ -248,7 +274,7 @@ NAV_SECTION="$(python3 "$ROOT/bin/daily_nav_snapshot.py" --account "$ACCOUNT" --
 
 FULL_REPORT="$REPORT
 
-$NAV_SECTION"
+$NAV_SECTION$(_dt_gate_block)"
 
 echo "$FULL_REPORT"
 # Báo cáo client-facing KHÔNG được rơi im lặng (sự cố 2026-07-06: topic Trading report bị
