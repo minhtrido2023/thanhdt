@@ -291,9 +291,11 @@ def build_dt_gate_line(html=True):
     if not c:
         return None
     B = (lambda s: f"<b>{s}</b>") if html else (lambda s: s)
+    asof = f"[{c['asof']}]"
+    asof = f"<i>{asof}</i>" if html else asof
     if not c["active"]:
         cn = STATE_MAP.get(c["committed"], ("?",))[0]
-        return f"Gate DT4: ✓ ổn định ({cn}) · không có candidate đang track  <i>[{c['asof']}]</i>"
+        return f"Gate DT4: ✓ ổn định ({cn}) · không có candidate đang track  {asof}"
     cn = STATE_MAP.get(c["cand"], ("?",))[0]
     comm = STATE_MAP.get(c["committed"], ("?",))[0]
     left = c["need"] - c["k"]
@@ -305,7 +307,7 @@ def build_dt_gate_line(html=True):
             base += f" [{c['lo']*100:.0f}–{c['hi']*100:.0f}%{ntxt}]"
     thin = " ⚠ mẫu mỏng, tham khảo" if c["thin"] else ""
     return (f"Gate DT4: ⏳ candidate {B(cn)} {c['k']}/{c['need']} (còn {left} phiên để commit, "
-            f"base giữ từ {c['start']}, committed {comm}){base}{thin}  <i>[{c['asof']}]</i>")
+            f"base giữ từ {c['start']}, committed {comm}){base}{thin}  {asof}")
 
 
 def build_market_alert():
