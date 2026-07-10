@@ -186,6 +186,32 @@ if pending_q:
 else:
     OK("Không có câu hỏi (question) nào đang chờ xử lý trong 48h qua.")
 
+# 6. Corp-action backlog (data/corp_action_backlog.json, ghi bởi update_shares_live.py
+#    --scan mỗi ngày 18:40 ICT — đọc file local, KHÔNG query BQ trực tiếp ở đây để giữ
+#    check này nhẹ/nhanh). Sự cố 2026-07-10: scan trước đây chỉ lên tiếng khi có candidate
+#    MỚI — DDV/EVG bị alert 2026-06-25/26 rồi im lặng 21 ngày không ai xử lý, không có gì
+#    phát hiện ra cho tới khi user tự hỏi. File backlog + cảnh báo này đóng đúng gap đó.
+backlog_path = os.path.join(wc_root, "data", "corp_action_backlog.json")
+if os.path.exists(backlog_path):
+    try:
+        backlog = json.load(open(backlog_path, encoding="utf-8"))
+        stale = [p for p in backlog.get("pending", [])
+                 if (p.get("days_since_ex_date") or 0) > 7]
+    except Exception as e:
+        stale = None
+        lines.append(f"ℹ️ Không đọc được corp_action_backlog.json: {e}")
+    if stale is not None:
+        if stale:
+            stale_keys = [f"{p.get('ticker')}|{p.get('ex_date')}" for p in stale]
+            W(f"{len(stale)} sự kiện corp-action đã alert >7 ngày trước, CHƯA resolve vào "
+              f"shares_outstanding_live: {stale_keys} "
+              f"— PE/PB các mã này có thể đang sai do OShares chưa cập nhật. Xử lý: Winston "
+              f"phân loại cash/stock rồi `update_shares_live.py --ticker <mã>` hoặc `--ack-cash <mã>:<ex_date>`.")
+        else:
+            OK("Corp-action backlog: không có sự kiện nào tồn đọng >7 ngày.")
+else:
+    lines.append("ℹ️ Chưa có data/corp_action_backlog.json — update_shares_live.py --scan (18:40 ICT) chưa chạy lần nào kể từ khi thêm check này.")
+
 print("\n".join(lines))
 print(f"__WARN_COUNT__={warn}")
 PYEOF
