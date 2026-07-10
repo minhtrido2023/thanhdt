@@ -148,32 +148,39 @@ else:
     OK("Circuit breaker: tất cả agent bình thường (0 tripped).")
 
 # 5. Câu hỏi (event_type=question) chưa được trả lời trong 48h gần nhất
+# 2 pass: answers gom TOÀN CỤC trước (append_event.sh ghi event vào file của TÁC GIẢ —
+# bus/inbox/<agent_id>.jsonl — nên answer của agent KHÁC người hỏi nằm ở file khác;
+# match trong-cùng-file như bản cũ khiến answer chéo-agent không bao giờ clear question,
+# wags_autofix bị dispatch lặp cho question đã trả lời — fix Wags 2026-07-10).
 import datetime as dt
 cutoff = dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=48)
 inbox_dir = os.path.join(wc_root, "mike", "bus", "inbox")
 pending_q = []
 if os.path.isdir(inbox_dir):
-    for p in glob.glob(os.path.join(inbox_dir, "*.jsonl")):
-        agent = os.path.basename(p).replace(".jsonl", "")
-        questions, answers = [], set()
-        with open(p, encoding="utf-8") as f:
+    files = glob.glob(os.path.join(inbox_dir, "*.jsonl"))
+    def iter_events(path):
+        with open(path, encoding="utf-8") as f:
             for line in f:
                 try:
-                    rec = json.loads(line)
+                    yield json.loads(line)
                 except Exception:
                     continue
-                ts = rec.get("ts", "")
-                try:
-                    ts_dt = dt.datetime.fromisoformat(ts.replace("Z", "+00:00"))
-                except Exception:
-                    continue
-                if rec.get("event_type") == "question" and ts_dt >= cutoff:
-                    questions.append(rec.get("topic"))
-                if rec.get("event_type") == "answer":
-                    answers.add(rec.get("topic"))
-        for q in questions:
-            if q not in answers:
-                pending_q.append(f"{agent}/{q}")
+    answers = set()
+    for p in files:
+        for rec in iter_events(p):
+            if rec.get("event_type") == "answer":
+                answers.add(rec.get("topic"))
+    for p in files:
+        agent = os.path.basename(p).replace(".jsonl", "")
+        for rec in iter_events(p):
+            if rec.get("event_type") != "question":
+                continue
+            try:
+                ts_dt = dt.datetime.fromisoformat(rec.get("ts", "").replace("Z", "+00:00"))
+            except Exception:
+                continue
+            if ts_dt >= cutoff and rec.get("topic") not in answers:
+                pending_q.append(f"{agent}/{rec.get('topic')}")
 if pending_q:
     W(f"Có {len(pending_q)} câu hỏi (question) trong 48h qua CHƯA thấy answer tương ứng: {pending_q}")
 else:
