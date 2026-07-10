@@ -516,7 +516,7 @@ diag = df[["time", "source", "Close", "VNINDEX_PE", "n_universe",
            "f_P3M", "f_P1M", "f_MA200", "f_RSI", "f_MACD", "f_CMF", "f_Breadth",
            "score", "r_score", "r_score_ema",
            "state_raw", "state"]].copy()
-diag_path = os.path.join(WORKDIR, f"vnindex_5state_ew_full{_OTAG}.csv")
+diag_path = os.path.join(WORKDIR, f"data/vnindex_5state_ew_full{_OTAG}.csv")
 diag.to_csv(diag_path, index=False)
 print(f"  → {diag_path}")
 
