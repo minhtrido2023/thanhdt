@@ -216,6 +216,98 @@ def build_compass_line(html=True):
     return line
 
 
+_DTCLOCK_CACHE = {"t": 0.0, "val": None}
+# Taylor's DT-gate hazard research dir: one source of truth for the gate logic + pinned
+# base-rate hazard tables (job Taylor_20260710_122230, self-checked 0-diff vs dt5g_live).
+_HAZ_DIR = os.path.join(W, "mike", "agents", "Taylor")
+
+
+def get_dt_gate_clock():
+    """DT 4-gate candidate 'streak clock' — READ-ONLY situational awareness (cached 5 min).
+
+    Replays the EXACT production DT 4-gate (via dt_gate_hazard_research.extract_episodes — the
+    same replication that self-checks 0-diff vs vnindex_5state_dt5g_live; we do NOT re-implement
+    the gate here to avoid spec drift) over the live v3.4b base series, and reports whichever
+    candidate state the gate is currently accumulating toward: its streak k, the commit
+    threshold `need` (10 for NEUTRAL/BEAR/BULL moves & CRISIS/EX-BULL exits, 25 to ENTER
+    CRISIS/EX-BULL), and the historical base-rate P(eventual commit | reached k) from Taylor's
+    pinned hazard table for that `need` group.
+
+    Purely informational — feeds NO sizing/allocator/threshold decision anywhere. Returns None
+    on any failure so the caller simply drops the line (never crashes the report)."""
+    if _DTCLOCK_CACHE["val"] is not None and (time.time() - _DTCLOCK_CACHE["t"]) < 300:
+        return _DTCLOCK_CACHE["val"]
+    val = None
+    try:
+        import sys
+        if _HAZ_DIR not in sys.path:
+            sys.path.insert(0, _HAZ_DIR)
+        from dt_gate_hazard_research import extract_episodes, dt_4gate
+        # v3.4b base series (== bare vnindex_5state), warmed from 2014 exactly like production.
+        b = _bq("SELECT t.time, t.state FROM tav2_bq.vnindex_5state_tam_quan_v34b_clean t "
+                "WHERE t.time>='2014-01-01' ORDER BY t.time", max_rows=8000)
+        if len(b) >= 100:
+            b = b.sort_values("time").reset_index(drop=True)
+            times = pd.to_datetime(b["time"]).values
+            raw = b["state"].astype(int).values
+            asof = str(pd.to_datetime(b["time"].iloc[-1]).date())
+            ep = extract_episodes(times, raw)
+            last = ep.iloc[-1].to_dict() if len(ep) else {}
+            if last.get("outcome") == "censored":   # a candidate is currently accumulating
+                cand, k, need = int(last["cand"]), int(last["length"]), int(last["need"])
+                committed = int(last["committed_from"])
+                grp = "need25_into_CRISIS_EXBULL" if need == 25 else "need10_other"
+                p = lo = hi = n = None
+                try:
+                    hz = pd.read_csv(os.path.join(_HAZ_DIR, f"data_dt_hazard_{grp}_full.csv"))
+                    row = hz[hz["k"] == k]
+                    if len(row):
+                        p = float(row["p_commit_given_k"].iloc[0])
+                        lo = float(row["lo"].iloc[0]); hi = float(row["hi"].iloc[0])
+                        n = int(row["n_resolved"].iloc[0])
+                except Exception:
+                    pass
+                val = {"active": True, "cand": cand, "k": k, "need": need,
+                       "committed": committed, "thin": need == 25,
+                       "start": str(pd.to_datetime(last["start"]).date()),
+                       "p": p, "lo": lo, "hi": hi, "n": n, "asof": asof}
+            else:   # no candidate running — gate is settled on its committed state
+                committed = int(dt_4gate(raw)[-1])
+                val = {"active": False, "committed": committed, "asof": asof}
+    except Exception as e:
+        import sys as _sys
+        print(f"[dna_report] dt_gate_clock skipped (fail-safe): {e}", file=_sys.stderr)
+        val = None
+    _DTCLOCK_CACHE.update(t=time.time(), val=val)
+    return val
+
+
+def build_dt_gate_line(html=True):
+    """One-line DT-gate candidate streak clock for the NOW block. None on data failure
+    (caller drops the line). Read-only situational awareness — NOT a signal to front-run
+    the gate (Taylor report §6-7: streak-length is weak info; the value is knowing a
+    candidate is loaded, which the state table already implies)."""
+    c = get_dt_gate_clock()
+    if not c:
+        return None
+    B = (lambda s: f"<b>{s}</b>") if html else (lambda s: s)
+    if not c["active"]:
+        cn = STATE_MAP.get(c["committed"], ("?",))[0]
+        return f"Gate DT4: ✓ ổn định ({cn}) · không có candidate đang track  <i>[{c['asof']}]</i>"
+    cn = STATE_MAP.get(c["cand"], ("?",))[0]
+    comm = STATE_MAP.get(c["committed"], ("?",))[0]
+    left = c["need"] - c["k"]
+    base = ""
+    if c["p"] is not None:
+        base = f" · P(commit|k={c['k']})≈{c['p']*100:.0f}%"
+        if c["lo"] == c["lo"] and c["hi"] == c["hi"]:
+            ntxt = f", n={c['n']}" if c["n"] is not None else ""
+            base += f" [{c['lo']*100:.0f}–{c['hi']*100:.0f}%{ntxt}]"
+    thin = " ⚠ mẫu mỏng, tham khảo" if c["thin"] else ""
+    return (f"Gate DT4: ⏳ candidate {B(cn)} {c['k']}/{c['need']} (còn {left} phiên để commit, "
+            f"base giữ từ {c['start']}, committed {comm}){base}{thin}  <i>[{c['asof']}]</i>")
+
+
 def build_market_alert():
     """Market-level capitulation message for the daily push. Returns None when DORMANT
     so the scheduler only pings on a real WATCH/STRONG signal."""
@@ -349,6 +441,9 @@ def build_report(tk):
         edge = "FA-edge mạnh" if reg["state"] <= 2 else ("FA-edge yếu" if reg["state"] >= 3 else "")
         stale_warn = " ⚠️ <b>STALE</b>" if reg.get("stale") else ""
         L.append(f"Regime : {reg['emoji']} <b>{reg['name']}</b> ({reg['weight']}) · {edge}  <i>[{reg['asof']}]</i>{stale_warn}")
+    dtline = build_dt_gate_line()
+    if dtline:
+        L.append(dtline)
     comp = build_compass_line()
     if comp:
         L.append(comp)
