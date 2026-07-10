@@ -61,6 +61,8 @@ CORP_ACTIONS = {
                  source="VSD/cafef/Vietstock: 2025 div 20% = 13% stock + 7% cash; +667.77M shares")],
     "HDC": [dict(ex_date="2026-06-19", stock_div_ratio=0.15, cash_div_per_share=0.0,
                  source="cafef/Vietstock: 2025 div = 15% stock (pure), ~30M new shares")],
+    "EVG": [dict(ex_date="2026-06-25", stock_div_ratio=0.05, cash_div_per_share=0.0,
+                 source="Vietstock/vietbao: 2025 div = stock 20:1 (5%), ex 25/06/2026, record 26/06/2026")],
 }
 WATCHLIST = list(CORP_ACTIONS.keys())
 
