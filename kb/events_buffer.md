@@ -1653,3 +1653,17 @@
 - [2026-07-10T17:18:07Z] Winston/heartbeat — Winston_20260710_170615: {"status": "in_progress", "note": "đã lấy diff reorg toàn chuỗi; đang đối chiếu writer/reader path hiện tại + mtime file thật"}
 - [2026-07-10T17:20:13Z] Winston/heartbeat — Winston_20260710_170615: {"status": "in_progress", "note": "tìm thấy 2 writer f-string bị sót thêm (bull_aware→root, ew_staging→root) + diag May-21 frozen; đang kiểm tra mức độ ảnh hưởng override_fired + dna_report input + cron"}
 - [2026-07-10T17:23:15Z] Winston/heartbeat — Winston_20260710_170615: {"status": "in_progress", "note": "CONFIRMED: bq_freshness_check -le cho qua lag=1 ngược intent comment (bằng chứng log 19:00 hôm nay ALL FRESH dù base stale); còn kiểm tra sync_bq_cache/dt_4gate + macro_healthcheck coverage rồi tổng hợp"}
+
+## Consolidation 2026-07-10T17:35:28Z
+- [2026-07-10T17:31:02Z] Mike/heartbeat — Mike_20260710_173001: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20260710_173001", "source": "watcher"}
+- [2026-07-10T17:32:02Z] Mike/heartbeat — Mike_20260710_173001: {"status": "still_running", "elapsed_min": 2, "job_id": "Mike_20260710_173001", "source": "watcher"}
+- [2026-07-10T17:33:03Z] Mike/heartbeat — Mike_20260710_173001: {"status": "still_running", "elapsed_min": 3, "job_id": "Mike_20260710_173001", "source": "watcher"}
+- [2026-07-10T17:34:03Z] Mike/heartbeat — Mike_20260710_173001: {"status": "still_running", "elapsed_min": 4, "job_id": "Mike_20260710_173001", "source": "watcher"}
+- [2026-07-10T17:34:43Z] Mike/heartbeat — Mike_20260710_173001: {"status": "in_progress", "note": "Đã verify artifact + viết addendum đóng RETRO 2026-07-10 vào INCIDENTS.md, chuẩn bị commit + dọn memory"}
+- [2026-07-10T17:35:03Z] Mike/heartbeat — Mike_20260710_173001: {"status": "still_running", "elapsed_min": 5, "job_id": "Mike_20260710_173001", "source": "watcher"}
+- [2026-07-10T17:35:28Z] Mike/heartbeat — Mike_20260710_173001: {"status": "in_progress", "note": "Đã dọn memory, chuẩn bị chạy consolidate.sh + post Trading Daily"}
+- [2026-07-10T17:31:31Z] Winston/heartbeat — Winston_20260710_173031: {"status": "still_running", "elapsed_min": 1, "job_id": "Winston_20260710_173031", "source": "watcher"}
+- [2026-07-10T17:32:32Z] Winston/heartbeat — Winston_20260710_173031: {"status": "still_running", "elapsed_min": 2, "job_id": "Winston_20260710_173031", "source": "watcher"}
+- [2026-07-10T17:33:33Z] Winston/heartbeat — Winston_20260710_173031: {"status": "still_running", "elapsed_min": 3, "job_id": "Winston_20260710_173031", "source": "watcher"}
+- [2026-07-10T17:34:01Z] Winston/heartbeat — Winston_20260710_173031: {"status": "in_progress", "note": "đã xác định chính xác 2 writer sót (bull_aware.py:165 root-write nhưng chain CHỦ ĐÍCH đọc root để bq load; ew_v1.py:510 ew_staging→root) + bug -le tại mike/bin/bq_freshness_check.sh:75 với MAX_STATE_LAG=1 siết 07-10 nhưng -le vẫn cho lag=1 qua; đang verify log 19:00 + consumer production của dt_4gate/ew_staging"}
+- [2026-07-10T17:34:33Z] Winston/heartbeat — Winston_20260710_173031: {"status": "still_running", "elapsed_min": 4, "job_id": "Winston_20260710_173031", "source": "watcher"}
