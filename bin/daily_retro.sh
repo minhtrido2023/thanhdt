@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
-# daily_retro.sh — cuối ngày (22:00 ICT), TRƯỚC các job batch đêm (23:15 refresh,
-# 23:45 BQ sync, 02:00 kb_nightly). Trả lời 3 câu user đặt ra 2026-07-09:
-#   1. Lỗi hôm nay là lỗi MỚI hay lỗi CŨ tái diễn?
+# daily_retro.sh — 00:30 ICT (dời từ 22:00, 2026-07-10 — sau khi cập nhật giờ chạy EOD
+# pipeline: daily_refresh 18:30 -> bq_freshness_check 19:00 -> send_plan_report 21:00),
+# chạy SAU fleet_backup (00:00) + sync_bq_cache_daily (23:45) đêm hôm trước, TRƯỚC
+# kb_nightly (02:00) — review được TRỌN VẸN cả ngày vừa qua, không sót job cuối ngày nào.
+# Trả lời 3 câu user đặt ra 2026-07-09:
+#   1. Lỗi hôm đó là lỗi MỚI hay lỗi CŨ tái diễn?
 #   2. Fix đã hoàn chỉnh, tránh được rủi ro lặp lại chưa, hay còn hở?
 #   3. Bài học chung nào để KHÔNG lặp lại kiểu lỗi này ngày này qua ngày khác?
 # Ghi kết quả thành 1 entry "RETRO — <ngày>" trong kb/INCIDENTS.md (theo đúng
@@ -11,10 +14,16 @@
 set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LOG="$ROOT/logs/daily_retro.log"
-TODAY="$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)"
+# Chạy 00:30 ICT = đã sang ngày lịch MỚI — review NGÀY VỪA KẾT THÚC (hôm qua theo giờ chạy),
+# không phải "hôm nay" theo đồng hồ lúc script chạy. Bug tiềm ẩn nếu dùng `date` trực tiếp:
+# sẽ tính nhầm sang ngày mới, không tìm thấy incident nào của ngày vừa review (cùng họ lỗi
+# off-by-one-day vừa sửa cho DollarBill/DT5G hôm nay).
+TODAY="$(TZ='Asia/Ho_Chi_Minh' date -d 'yesterday' +%Y-%m-%d 2>/dev/null \
+      || TZ='Asia/Ho_Chi_Minh' date -v-1d +%Y-%m-%d 2>/dev/null \
+      || python3 -c "import datetime; print((datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=7))) - datetime.timedelta(days=1)).strftime('%Y-%m-%d'))")"
 
 log() { echo "[$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%dT%H:%M:%S%z)] $*" | tee -a "$LOG"; }
-log "=== daily_retro START ($TODAY) ==="
+log "=== daily_retro START (reviewing $TODAY, chạy lúc $(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%dT%H:%M)) ==="
 
 # DISPATCH_FROM=user bắt buộc — xem fix 2026-07-09 kb_nightly.sh (Friday editorial
 # dispatch bị self-dispatch guard chặn âm thầm nhiều tuần vì thiếu dòng này).
