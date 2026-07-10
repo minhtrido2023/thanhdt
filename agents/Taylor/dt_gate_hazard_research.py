@@ -113,69 +113,74 @@ def bootstrap_pcommit(ep, need, n_boot=2000):
     return pd.DataFrame(dict(k=ks, lo=lo, hi=hi))
 
 
-# ── load base v3.4b, warm up from 2014 exactly like production ──
-base = pd.read_parquet(f"{BQC}/vnindex_5state_tam_quan_v34b_clean.parquet")
-base["time"] = pd.to_datetime(base["time"])
-base = base[base["time"] >= "2014-01-01"].sort_values("time").reset_index(drop=True)
-raw = base["state"].values.astype(int)
-times = base["time"].values
+# NOTE: everything below is the ad-hoc analysis driver. It is guarded by __main__ so the
+# gate functions above (dt_4gate / need_for / extract_episodes / hazard_table) can be imported
+# by other code (e.g. dna_report.py's candidate-streak clock) WITHOUT re-running the analysis
+# or hitting the parquet cache. Running `python dt_gate_hazard_research.py` behaves unchanged.
+if __name__ == "__main__":
+    # ── load base v3.4b, warm up from 2014 exactly like production ──
+    base = pd.read_parquet(f"{BQC}/vnindex_5state_tam_quan_v34b_clean.parquet")
+    base["time"] = pd.to_datetime(base["time"])
+    base = base[base["time"] >= "2014-01-01"].sort_values("time").reset_index(drop=True)
+    raw = base["state"].values.astype(int)
+    times = base["time"].values
 
-# ── self-check 1: replicated DT4 vs published dt5g_live ──
-dt4 = dt_4gate(raw)
-live = pd.read_parquet(f"{BQC}/vnindex_5state_dt5g_live.parquet")
-live["time"] = pd.to_datetime(live["time"])
-chk = base[["time"]].copy(); chk["dt4_repl"] = dt4
-chk = chk.merge(live.rename(columns={"state": "dt5g", "state_raw": "live_raw"}), on="time", how="inner")
-print(f"[selfcheck] overlap {len(chk)} rows; replicated-DT4 vs dt5g_live.state diffs: "
-      f"{(chk['dt4_repl'] != chk['dt5g']).sum()} (expected ~49 macro-cap sessions)")
-print(f"[selfcheck] replicated-DT4 vs dt5g_live.state_raw diffs: {(chk['dt4_repl'] != chk['live_raw']).sum()}")
-n_trans_base = int((np.diff(raw) != 0).sum())
-n_trans_dt4 = int((np.diff(dt4) != 0).sum())
-print(f"[selfcheck] base transitions 2014+: {n_trans_base}; DT4 transitions: {n_trans_dt4}")
+    # ── self-check 1: replicated DT4 vs published dt5g_live ──
+    dt4 = dt_4gate(raw)
+    live = pd.read_parquet(f"{BQC}/vnindex_5state_dt5g_live.parquet")
+    live["time"] = pd.to_datetime(live["time"])
+    chk = base[["time"]].copy(); chk["dt4_repl"] = dt4
+    chk = chk.merge(live.rename(columns={"state": "dt5g", "state_raw": "live_raw"}), on="time", how="inner")
+    print(f"[selfcheck] overlap {len(chk)} rows; replicated-DT4 vs dt5g_live.state diffs: "
+          f"{(chk['dt4_repl'] != chk['dt5g']).sum()} (expected ~49 macro-cap sessions)")
+    print(f"[selfcheck] replicated-DT4 vs dt5g_live.state_raw diffs: {(chk['dt4_repl'] != chk['live_raw']).sum()}")
+    n_trans_base = int((np.diff(raw) != 0).sum())
+    n_trans_dt4 = int((np.diff(dt4) != 0).sum())
+    print(f"[selfcheck] base transitions 2014+: {n_trans_base}; DT4 transitions: {n_trans_dt4}")
 
-# ── self-check 2: episode extraction consistency with gate ──
-ep = extract_episodes(times, raw)
-ep["start"] = pd.to_datetime(ep["start"]); ep["end"] = pd.to_datetime(ep["end"])
-n_commit = (ep["outcome"] == "commit").sum()
-print(f"[selfcheck] episodes: {len(ep)} total | commit {n_commit} | revert {(ep['outcome']=='revert').sum()} "
-      f"| censored {(ep['outcome']=='censored').sum()} — commits must equal DT4 transitions: {n_commit == n_trans_dt4}")
+    # ── self-check 2: episode extraction consistency with gate ──
+    ep = extract_episodes(times, raw)
+    ep["start"] = pd.to_datetime(ep["start"]); ep["end"] = pd.to_datetime(ep["end"])
+    n_commit = (ep["outcome"] == "commit").sum()
+    print(f"[selfcheck] episodes: {len(ep)} total | commit {n_commit} | revert {(ep['outcome']=='revert').sum()} "
+          f"| censored {(ep['outcome']=='censored').sum()} — commits must equal DT4 transitions: {n_commit == n_trans_dt4}")
 
-ep["group"] = np.where(ep["need"] == 25, "need25_into_CRISIS_EXBULL", "need10_other")
-ep["year"] = ep["start"].dt.year
-ep["period"] = np.where(ep["year"] <= 2019, "IS_2014_2019", "OOS_2020_now")
+    ep["group"] = np.where(ep["need"] == 25, "need25_into_CRISIS_EXBULL", "need10_other")
+    ep["year"] = ep["start"].dt.year
+    ep["period"] = np.where(ep["year"] <= 2019, "IS_2014_2019", "OOS_2020_now")
 
-print("\n=== episode summary by group/outcome ===")
-print(ep.groupby(["group", "outcome"]).size().unstack(fill_value=0))
-print("\n=== episodes by candidate state ===")
-print(ep.assign(cand_name=ep["cand"].map(STATE_NAME)).groupby(["group", "cand_name", "outcome"]).size().unstack(fill_value=0))
+    print("\n=== episode summary by group/outcome ===")
+    print(ep.groupby(["group", "outcome"]).size().unstack(fill_value=0))
+    print("\n=== episodes by candidate state ===")
+    print(ep.assign(cand_name=ep["cand"].map(STATE_NAME)).groupby(["group", "cand_name", "outcome"]).size().unstack(fill_value=0))
 
-for g, need in [("need10_other", 10), ("need25_into_CRISIS_EXBULL", 25)]:
-    sub = ep[ep["group"] == g]
-    print(f"\n================ {g} (need={need}) — FULL 2014+ ================")
-    ht = hazard_table(sub, need)
-    ci = bootstrap_pcommit(sub, need)
-    out = ht.merge(ci, on="k")
-    print(out.to_string(index=False, float_format=lambda x: f"{x:.3f}"))
-    out.to_csv(f"/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/data_dt_hazard_{g}_full.csv", index=False)
-    for per in ["IS_2014_2019", "OOS_2020_now"]:
-        s2 = sub[sub["period"] == per]
-        ht2 = hazard_table(s2, need)
-        ci2 = bootstrap_pcommit(s2, need)
-        o2 = ht2.merge(ci2, on="k")
-        print(f"\n---- {g} · {per} (episodes={len(s2)}, commits={(s2['outcome']=='commit').sum()}) ----")
-        print(o2[["k", "n_at_risk", "n_resolved", "p_commit_given_k", "lo", "hi"]]
-              .to_string(index=False, float_format=lambda x: f"{x:.3f}"))
-        o2.to_csv(f"/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/data_dt_hazard_{g}_{per}.csv", index=False)
+    for g, need in [("need10_other", 10), ("need25_into_CRISIS_EXBULL", 25)]:
+        sub = ep[ep["group"] == g]
+        print(f"\n================ {g} (need={need}) — FULL 2014+ ================")
+        ht = hazard_table(sub, need)
+        ci = bootstrap_pcommit(sub, need)
+        out = ht.merge(ci, on="k")
+        print(out.to_string(index=False, float_format=lambda x: f"{x:.3f}"))
+        out.to_csv(f"/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/data_dt_hazard_{g}_full.csv", index=False)
+        for per in ["IS_2014_2019", "OOS_2020_now"]:
+            s2 = sub[sub["period"] == per]
+            ht2 = hazard_table(s2, need)
+            ci2 = bootstrap_pcommit(s2, need)
+            o2 = ht2.merge(ci2, on="k")
+            print(f"\n---- {g} · {per} (episodes={len(s2)}, commits={(s2['outcome']=='commit').sum()}) ----")
+            print(o2[["k", "n_at_risk", "n_resolved", "p_commit_given_k", "lo", "hi"]]
+                  .to_string(index=False, float_format=lambda x: f"{x:.3f}"))
+            o2.to_csv(f"/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/data_dt_hazard_{g}_{per}.csv", index=False)
 
-# ── streak-length distribution of reverted episodes (where do candidates die?) ──
-print("\n=== revert length distribution (need10 group) ===")
-print(ep[(ep.group == "need10_other") & (ep.outcome == "revert")]["length"].value_counts().sort_index())
-print("\n=== revert length distribution (need25 group) ===")
-print(ep[(ep.group == "need25_into_CRISIS_EXBULL") & (ep.outcome == "revert")]["length"].value_counts().sort_index())
+    # ── streak-length distribution of reverted episodes (where do candidates die?) ──
+    print("\n=== revert length distribution (need10 group) ===")
+    print(ep[(ep.group == "need10_other") & (ep.outcome == "revert")]["length"].value_counts().sort_index())
+    print("\n=== revert length distribution (need25 group) ===")
+    print(ep[(ep.group == "need25_into_CRISIS_EXBULL") & (ep.outcome == "revert")]["length"].value_counts().sort_index())
 
-# ── per-year commit counts: is any single year carrying the pattern? (LOO flavor) ──
-print("\n=== commits per year ===")
-print(ep[ep.outcome == "commit"].groupby(["year", "group"]).size().unstack(fill_value=0))
+    # ── per-year commit counts: is any single year carrying the pattern? (LOO flavor) ──
+    print("\n=== commits per year ===")
+    print(ep[ep.outcome == "commit"].groupby(["year", "group"]).size().unstack(fill_value=0))
 
-ep.to_csv("/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/data_dt_gate_episodes.csv", index=False)
-print("\nsaved: data_dt_gate_episodes.csv + per-group hazard CSVs")
+    ep.to_csv("/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/data_dt_gate_episodes.csv", index=False)
+    print("\nsaved: data_dt_gate_episodes.csv + per-group hazard CSVs")
