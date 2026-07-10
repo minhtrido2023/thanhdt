@@ -28,6 +28,16 @@ QUY TRÌNH BẮT BUỘC (đọc bằng chứng thật, không suy đoán):
 2. Liệt kê MỌI bus event event_type=error/finding trong bus/inbox/*.jsonl có ts bắt đầu
    bằng '$TODAY' — đối chiếu xem có sự cố nào CHƯA được ghi vào INCIDENTS.md không (nếu
    có, đây là gap báo cáo cần ghi luôn bổ sung, không bỏ sót).
+2b. VERIFY ARTIFACT THẬT trước khi báo bất kỳ vấn đề nào là 'chưa xử lý'/'còn treo' — đây
+   là quy tắc BẮT BUỘC (bài học 2026-07-10: chính retro lần đầu đã sai — báo 1 câu hỏi
+   'crontab paper-main chưa cài' là còn mở CHỈ vì bus event question chưa có answer, trong
+   khi thực tế đã cài xong 3.5 tiếng trước đó, verify được ngay bằng \`crontab -l\`; đây
+   đúng là Pattern B mà chính retro đang đi bắt — tin trạng thái CŨ/GIÁN TIẾP thay vì đọc
+   THỰC TẾ HIỆN TẠI). Với MỖI câu hỏi/vấn đề đang định liệt là 'còn mở': nếu có artifact
+   kiểm chứng được trực tiếp (crontab -l, file tồn tại, nội dung code/config, giá trị API
+   thật), PHẢI đọc artifact đó ngay trước khi kết luận — KHÔNG suy ra tình trạng chỉ từ
+   việc có/không có event 'answer' khớp trên bus (bus có thể trễ, thiếu, hoặc người xử lý
+   quên ghi answer dù đã làm xong thật).
 3. Với MỖI sự cố tìm thấy, trả lời chính xác 3 câu bằng cách đọc lịch sử INCIDENTS.md
    (grep root-cause tương tự các ngày trước, KHÔNG đoán từ trí nhớ):
    a. MỚI hoàn toàn hay TÁI DIỄN (cùng dạng lỗi đã xảy ra ngày nào trước — trích dẫn
