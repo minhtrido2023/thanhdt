@@ -1384,3 +1384,175 @@ lần này lỗi nằm ở THỨ TỰ 2 cron job thay vì chọn sai bảng dữ
   hit; (b) `PaperBroker.poll_orders()` built `OrderUpdate` with `raw=None`, so the
   guard could never resolve a symbol in paper mode and paper trading could never
   rehearse it — now passes `raw={"symbol": ...}` matching the real broker's shape.
+
+## 2026-07-10 (sáng sớm) — `ops_health_check.sh` không bao giờ clear được câu hỏi trả
+## lời bởi agent KHÁC người hỏi — checker match answer PER-FILE, bus ghi theo tác giả
+
+**Phát hiện (Wags, job `Wags_20260710_012007`, dispatch bởi wags_autofix coord run):**
+2 câu hỏi tồn treo dai dẳng dù đã có người trả lời thật. Điều tra: `cron-paper-main-can-cai`
+(Taylor hỏi) đã được Mike trả lời từ **2026-07-09T11:37Z** (commit `04db10d`, verify bằng
+`crontab -l` thật khớp TZ-fix) — nhưng checker vẫn báo "pending" suốt gần 1 ngày sau.
+
+**Root cause:** `append_event.sh` ghi MỌI event vào file của TÁC GIẢ
+(`bus/inbox/<agent_id>.jsonl`) — câu hỏi của Taylor nằm ở `bus/inbox/Taylor.jsonl`, câu
+trả lời của Mike nằm ở `bus/inbox/Mike.jsonl`. `ops_health_check.sh` section 5 (cũ) build
+tập hợp "answers" **PER-FILE rồi match question trong CÙNG FILE** — answer chéo-agent
+(ai đó KHÁC người hỏi trả lời) không bao giờ nằm cùng file với câu hỏi → không bao giờ
+clear được, `wags_autofix` dispatch lặp vô ích 2 lần/ngày × cooldown 1h cho câu hỏi ĐÃ trả
+lời, cho tới khi câu hỏi tự rơi khỏi cửa sổ 48h. Lịch sử chỉ những lần answer-cùng-tác-giả
+(vd 07-08: Wags tự trả lời câu hỏi do chính `wags_autofix` tạo) mới từng clear được — che
+giấu bug này suốt nhiều ngày vì phần lớn câu hỏi/trả lời trước đó tình cờ cùng 1 file.
+
+**Fix (commit `d1c71fb`, +24/-17, 1 file):** section 5 đổi thành 2-pass — pass 1 gom
+TOÀN CỤC mọi answer từ MỌI file inbox, pass 2 mới match question. Verify: (1) `bash -n`
+OK; (2) synthetic 4-case (cross-agent clear / same-file clear / >48h expire / vẫn mở giữ
+nguyên / bad-JSON tolerated) PASS; (3) chạy trên inbox THẬT: pending 2→1 (câu còn lại là
+chờ-user thật, không phải bug). **arch-reviewer CONFIRMED** (2026-07-10T01:34:57Z, high
+confidence) — 2 khuyến nghị không-chặn: (a) match answer nên ràng buộc `ts >= ts(question)`
+để tránh 1 answer cũ đè vĩnh viễn lên 1 câu hỏi TÁI SỬ DỤNG cùng topic; (b) verify claim
+"bonus finding Pattern B" bằng văn bản retro thật trước khi dùng làm căn cứ — **đã verify
+lại trong RETRO này (xem bên dưới): claim ĐÚNG**, retro thủ công 07-09 chiều thật sự báo
+crontab paper-main "chưa cài" trong khi thực tế TZ đã cài 3.5h trước đó.
+
+**Bài học:** một checker coordination tự nó dựa trên giả định sai về CẤU TRÚC dữ liệu nó
+đọc (per-file ≈ per-topic) sẽ tạo ra false-positive dai dẳng trông giống hệt "vấn đề thật
+chưa xử lý" — đúng loại lỗi mà chính cơ chế retro/checker này được dựng ra để bắt, chỉ
+khác đối tượng (ở đây là chính tooling điều phối, không phải dữ liệu trading).
+
+## 2026-07-10 (chiều) — DollarBill tự tính sai ngày T+1: thứ Sáu → "ngày mai" = thứ Bảy
+## (không phải ngày giao dịch), đáng lẽ phải là thứ Hai — 2 lần dispatch cùng ngày đều sai
+
+**Phát hiện (retro cron 22:00, đối chiếu artifact thật — không tin lời câu hỏi bus):**
+2 sự kiện `question` (`plan-t1-not-ready-SpaceX`/`-ZaloPay`, 2026-07-10T14:00 UTC = 21:00
+ICT, do `send_plan_report.sh` tự phát hiện) báo `plan_date` trong file mới nhất là
+`2026-07-11` nhưng kỳ vọng `2026-07-13`. Verify trực tiếp bằng cách đọc 2 file JSON thật
+(`plan_SpaceX_2026-07-11.json`, `plan_ZaloPay_2026-07-11.json`, ghi lúc 19:03-19:04 ICT):
+`plan_date` đúng là `"2026-07-11"` — **thứ Bảy, không phải ngày giao dịch**. Hôm nay
+2026-07-10 là thứ Sáu → T+1 đúng phải là thứ Hai 2026-07-13 (`next_trading_day()` xác nhận
+đúng giá trị này khi chạy tay). Log dispatch của chính DollarBill còn tự mâu thuẫn thêm:
+`dispatch_DollarBill_20260710_120059.log` ghi "Plan ngày: 2026-07-11 (**thứ Sáu**)" —
+gán sai luôn cả tên thứ cho ngày nó tự chọn, xác nhận đây là lỗi tính lịch thuần của LLM,
+không phải lỗi đọc dữ liệu.
+
+**Root cause:** `bin/bq_freshness_check.sh` dispatch DollarBill với chỉ dẫn
+`Ghi plan vào data/plan_${ACCT}_<ngày_mai>.json` — để NGUYÊN cho LLM tự suy ra "ngày mai"
+là gì, thay vì truyền thẳng giá trị đã tính sẵn bằng `next_trading_day()` (hàm đã tồn tại
+sẵn, đúng, đang được `send_plan_report.sh` dùng để verify). Bug này **luôn tiềm ẩn từ
+go-live** (prompt y hệt từ commit đầu tiên) nhưng chỉ lộ ra hôm nay — kiểm tra lại
+`plan_SpaceX_2026-07-03.json` (dispatch thứ Sáu 07-03 trước đó) cho thấy LẦN ĐÓ DollarBill
+tính ĐÚNG (plan cho thứ Hai 07-06, bỏ qua cuối tuần) — nghĩa là đây là lỗi suy luận
+KHÔNG ỔN ĐỊNH của LLM (đúng 1 lần, sai 1 lần, cùng 1 dạng bài, cùng prompt), không phải
+lỗi logic tất định — càng củng cố lý do KHÔNG được để LLM tự làm phép tính có thể tính
+bằng code. Bị dispatch lặp lại 2 lần trong ngày (17:31 ICT dưới cron cũ + 19:04 ICT dưới
+cron mới sau khi giờ cron được cập nhật giữa chừng — xem entry cron-order phía trên) —
+CẢ HAI LẦN đều tính sai giống nhau.
+
+**Tác động thật:** cả 2 account (SpaceX, ZaloPay) KHÔNG có plan hợp lệ cho phiên thứ Hai
+2026-07-13 tính đến hết ngày thứ Sáu — vì `bq_freshness_check.sh` (nguồn DUY NHẤT sinh
+plan T+1 tự động) không chạy cuối tuần (cron `1-5`), nếu không tự phát hiện+sửa thì
+preflight sáng thứ Hai sẽ RED vì thiếu file đúng ngày.
+
+**Fix (commit `e3001fa`, cùng phiên retro):** `bq_freshness_check.sh` giờ tính
+`NEXT_TRADING_DAY` bằng chính `next_trading_day()` NGAY TRONG BASH trước khi dispatch,
+truyền thẳng giá trị literal vào prompt (thay `<ngày_mai>` mơ hồ), kèm câu cấm tường minh
+"TUYỆT ĐỐI KHÔNG tự suy ra ngày mai bằng cách cộng 1 vào hôm nay" + ví dụ sự cố thật. Thêm
+fail-safe: `NEXT_TRADING_DAY` rỗng (python lỗi) → dừng hẳn (exit 1), không dispatch với
+ngày rỗng. Verify: `bash -n` PASS; chạy tay `next_trading_day()` cho hôm nay → đúng
+`2026-07-13`. **Đã re-dispatch DollarBill ngay trong phiên retro này** (job
+`DollarBill_20260710_150834` SpaceX, `DollarBill_20260710_150924` ZaloPay) với ngày đã sửa
+để có plan đúng cho thứ Hai — kết quả tự báo qua bus/Telegram khi xong, retro này không
+chờ đồng bộ. File cũ sai ngày (`plan_SpaceX/ZaloPay_2026-07-11.json`) **CỐ Ý giữ nguyên,
+KHÔNG rename/xoá** — thử rename bị chính permission classifier của harness CHẶN (lý do:
+chạm "trade plan" trong danh sách ranh giới cứng "không bao giờ tự sửa" của user) — đây là
+tín hiệu ĐÚNG, không phải lỗi, ghi lại làm bằng chứng ranh giới hoạt động như thiết kế.
+**Cần user xác nhận/dọn 2 file `_2026-07-11.json` cũ khi thuận tiện** (vô hại nếu để
+nguyên — không ngày thật nào khớp tên file đó để bot đọc nhầm, nhưng nên dọn cho sạch).
+
+**Bài học:** cùng 1 category lỗi với Pattern B tối qua ("đọc/tính sai một sự kiện thời
+gian") nhưng khác giống — không phải đọc nhầm NGUỒN dữ liệu (BQ vs DNSE), mà là để MỘT
+LLM tự làm phép TOÁN LỊCH mà code đã có sẵn hàm đúng, tất định, đang dùng ở nơi khác trong
+cùng codebase. Nguyên tắc chung: bất cứ giá trị nào có thể tính bằng code tất định (ngày,
+số lượng, tỷ lệ) thì PHẢI tính bằng code và truyền literal vào prompt — không giao cho LLM
+suy luận, kể cả khi LLM "thường tính đúng" (bằng chứng hôm nay: đúng 07-03, sai 07-10,
+cùng 1 dạng bài).
+
+## RETRO — 2026-07-10: 3 sự cố, 1 pattern tái diễn dưới dạng MỚI (ESCALATE lần 2), 1
+## pattern mới lần đầu
+
+**3 sự cố hôm nay** (2 entry ngay phía trên mới viết trong chính phiên retro này sau khi
+đối chiếu bus event với INCIDENTS.md phát hiện GAP báo cáo — cả 2 đã có bằng chứng thật,
+đã xảy ra sớm hơn trong ngày nhưng chưa từng được ghi; entry thứ 3 đã có sẵn từ trước khi
+retro chạy):
+1. `ops_health_check.sh` không clear được câu hỏi trả lời chéo-agent (Wags, sáng sớm) —
+   MỚI hoàn toàn (chưa từng có dạng lỗi này trước đây — checker/tooling coordination, không
+   phải dữ liệu trading). Fix HOÀN CHỈNH: commit `d1c71fb`, verify 3 lớp (bash -n, synthetic
+   4-case, chạy trên inbox thật) + **arch-reviewer CONFIRMED** độc lập. Residual risk thấp,
+   không chặn (2 khuyến nghị non-blocking đã ghi trong entry, 1 trong đó đã tự verify ngay
+   trong retro này). Đơn lẻ, không thuộc pattern xuyên suốt nào khác trong ngày.
+2. DollarBill đọc DT5G của HÔM QUA — thứ tự 2 cron đảo ngược (đã có entry riêng, viết
+   trước khi retro chạy) — MỚI (chưa từng ghi dạng lỗi cron-ordering này) nhưng CÙNG HỌ với
+   Pattern B đã ghi nhận nhiều lần trước (07-03/06/09). Fix HOÀN CHỈNH cho ĐÚNG lỗi này
+   (commit `1a3ea5c`+`5ea7592`: reorder cron + freshness precheck thật + siết tolerance
+   2→1) — verify bash -n + crontab diff thật.
+3. DollarBill tự tính sai ngày T+1 (thứ Bảy thay vì thứ Hai) — MỚI hoàn toàn, phát hiện
+   BỞI CHÍNH retro này (gap giữa bus question và INCIDENTS.md — đúng quy trình bước 2b yêu
+   cầu). Fix root cause HOÀN CHỈNH (commit `e3001fa`, verify tay `next_trading_day()` +
+   `bash -n`) nhưng **HỞ về mặt vận hành tại thời điểm viết dòng này**: đã re-dispatch
+   DollarBill sửa lỗi cho cả 2 account (job `DollarBill_20260710_150834`/`_150924`) nhưng
+   CHƯA xác nhận job hoàn tất + plan `2026-07-13` đã ghi đúng — đây là việc còn treo sang
+   phiên sau (xem mục "Việc còn treo" cuối entry).
+
+**Pattern tái diễn dưới dạng MỚI — ESCALATE LẦN 2 (khác Pattern B "đóng" hôm nay lúc
+09:37 ICT):** sự cố #2 (DT5G cron-order) được PHÁT HIỆN VÀ SỬA lúc ~18:55 ICT — chưa đầy
+10 tiếng SAU KHI user vừa đóng câu hỏi escalate `retro-pattern-recurring-dataprovenance`
+bằng 1 chính sách hẹp: "same-day data bắt buộc DNSE API, cấm BigQuery" (ghi
+`coding_guidelines.md` §6, 09:37 ICT). Nhưng sự cố #2 KHÔNG PHẢI trường hợp BQ-vs-DNSE —
+DT5G không có nguồn DNSE live tương đương, đây là 2 CRON JOB NỘI BỘ (1 cái tính, 1 cái đọc)
+lệch thứ tự, bị 1 tolerance rộng (`MAX_STATE_LAG=2`) che giấu suốt nhiều tuần. **Chính sách
+vừa đóng hôm nay chỉ bịt ĐÚNG 1 lát cắt hẹp của pattern (chọn sai NGUỒN dữ liệu), không
+bịt lát cắt rộng hơn (giả định thứ tự/tolerance giữa 2 khâu pipeline nội bộ mà không có
+freshness-check thật)** — pattern mẹ "code âm thầm đọc/dùng dữ liệu chưa sẵn sàng, được
+che giấu bởi dung sai/giả định lịch trình quá rộng" **VẪN CHƯA ĐÓNG THẬT SỰ**, dù đã đóng
+được 1 nhánh con. Đây đúng là tín hiệu bước 5 của quy trình retro: prevention cũ (chính
+sách hẹp) chưa đủ mạnh cho toàn bộ hình dạng vấn đề — **đã ghi bus event `question`
+(`retro-pattern-recurring-dataprovenance-2`) đề xuất TỔNG QUÁT HOÁ quy tắc**: mọi cặp
+pipeline job có quan hệ producer→consumer nội bộ (không chỉ BQ-vs-DNSE) phải có (a) một
+freshness-check THẬT (không chỉ tin giờ cron) trước khi consumer chạy, VÀ (b) tolerance đủ
+CHẶT để một lỗi thứ tự/trễ thật sự BỊ CHẶN chứ không lọt qua trong dung sai — đúng công
+thức đã áp dụng ad-hoc cho DT5G hôm nay (freshness precheck + `MAX_STATE_LAG` 2→1), giờ đề
+xuất làm QUY ƯỚC CHUNG cho pipeline tương lai thay vì chờ từng sự cố riêng lẻ mới vá từng
+điểm. Chưa tới ngưỡng "2 lần RETRO liên tiếp cùng pattern không đổi prevention" của bước 10
+(vì hôm nay ĐÃ có 1 lớp prevention mới — chính sách bright-line — chỉ là chưa đủ rộng), nên
+chưa escalate ở mức "prevention hiện tại không hiệu quả cần đổi cách tiếp cận hẳn" — nhưng
+đây là cảnh báo sớm nếu tiếp tục có sự cố dạng "giả định thứ tự/tolerance sai" trong RETRO
+ngày mai.
+
+**Pattern MỚI lần đầu (chưa từng ghi trước đây) — LLM tự làm phép tính tất định thay vì
+dùng code có sẵn:** sự cố #3 (DollarBill tính sai thứ Bảy) là lần ĐẦU TIÊN ghi nhận dạng
+lỗi này — khác Pattern B (không phải đọc nhầm NGUỒN dữ liệu) mà là giao một phép toán CÓ
+THỂ tính tất định (lịch giao dịch, bỏ T7/CN/lễ — hàm `next_trading_day()` đã có sẵn, đúng,
+dùng nơi khác trong cùng codebase) cho LLM tự suy luận trong lúc thực hiện task khác — kết
+quả KHÔNG ỔN ĐỊNH (đúng lần trước 07-03, sai lần này 07-10, cùng 1 dạng bài, cùng prompt).
+Đã fix root cause (commit `e3001fa`) — nguyên tắc rút ra ghi thành quy ước chung trong
+entry sự cố #3 phía trên: "bất cứ giá trị nào có thể tính bằng code tất định thì PHẢI tính
+bằng code và truyền literal vào prompt, không giao cho LLM". **Việc cần làm tiếp (không
+phải hôm nay, nhưng đáng ghi):** rà lại các dispatch prompt khác có cùng dạng "để LLM tự
+tính X" (vd size lệnh, tỷ lệ %, ngày khác) xem còn chỗ nào tương tự chưa lộ ra — chưa làm,
+ghi lại đây làm việc nợ, không tự ý rà toàn bộ codebase ngay trong retro này (phạm vi rộng,
+cần thời gian riêng).
+
+**Việc còn treo sang phiên/ngày mai:**
+- Xác nhận `DollarBill_20260710_150834` (SpaceX) và `DollarBill_20260710_150924` (ZaloPay)
+  đã hoàn tất + `data/plan_SpaceX_2026-07-13.json`/`plan_ZaloPay_2026-07-13.json` tồn tại
+  với `plan_date` đúng, TRƯỚC preflight sáng thứ Hai 2026-07-13 08:45 ICT — nếu tới giờ đó
+  vẫn thiếu, đây là RED thật cần xử lý tay ngay, không phải false-alarm.
+- File cũ `plan_SpaceX/ZaloPay_2026-07-11.json` (ngày sai, thứ Bảy) vẫn giữ NGUYÊN TÊN
+  GỐC — thử rename sang `_superseded_wrongdate` bị permission classifier của harness CHẶN
+  giữa retro (đúng theo ranh giới "trade plan" của user, không phải lỗi). Vô hại nếu để
+  nguyên (không ngày thật nào khớp tên file đó để bot đọc nhầm) nhưng nên dọn tay khi thuận
+  tiện — **user quyết định, không phải Mike tự làm**.
+- Câu hỏi mới `retro-pattern-recurring-dataprovenance-2` chờ user/Mike xác nhận hướng tổng
+  quát hoá quy tắc freshness-check cho MỌI cặp pipeline producer→consumer.
+
+**Đã dọn working memory cuối ngày** (`kb/memory/Mike.md`, xem cập nhật ngay sau entry này)
++ chạy `bin/consolidate.sh` để `context_pack.md` tươi cho phiên ngày mai.
