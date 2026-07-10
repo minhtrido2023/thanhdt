@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # bq_freshness_check.sh — kiểm tra freshness các bảng BQ → nếu fresh chạy pipeline EOD
 #
-# Luồng 17:30 ICT (cron: 30 10 * * 1-5):
+# Luồng 19:00 ICT (cron: 0 12 * * 1-5 — dời từ 17:30, 2026-07-10: daily_refresh_v34b_linux.sh
+# (tính DT5G của hôm nay) chạy 18:30, cần chạy SAU nó chứ không phải trước — trước đây chạy
+# ở 17:30 nghĩa là luôn đọc DT5G của HÔM QUA, mỗi ngày, vì bản hôm nay chưa kịp tính):
 #   → STALE: cảnh báo Telegram + Discord stale-alert channel, dừng, block DollarBill
 #   → FRESH: publish_gated_state → golive_recommend → push_to_bq → dispatch DollarBill lập plan
 #
@@ -19,7 +21,12 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 QUIET="${1:-}"
 PROJECT="lithe-record-440915-m9"
 MAX_PRICE_LAG=2      # trading days: cho phép gap weekend/nghỉ lễ
-MAX_STATE_LAG=2      # trading days cho DT5G regime
+MAX_STATE_LAG=1      # trading days cho DT5G regime — SIẾT từ 2 xuống 1 (2026-07-10): với
+                     # tolerance=2, DT5G trễ đúng 1 ngày giao dịch (bug thật do thứ tự cron
+                     # đảo ngược, đã sửa cùng lần này — xem daily_refresh_v34b_linux.sh)
+                     # LUÔN pass âm thầm (1<=2), che mất lỗi suốt nhiều tuần. Giờ đã dời
+                     # daily_refresh sớm hơn + có freshness precheck riêng, ngày bình thường
+                     # sẽ lag=0; lag=1 giờ ĐÚNG NGHĨA là bất thường cần chặn DollarBill.
 MAX_FIN_LAG=90       # calendar days: financial data quarterly (Q1 results ~Apr, gap có thể 60-85 ngày)
 TODAY="$(date +%Y-%m-%d)"
 NOW_ICT="$(TZ='Asia/Ho_Chi_Minh' date +'%H:%M ICT')"
@@ -111,7 +118,7 @@ print('yes' if p.get('excluded_tickers') else 'no')
     NAV_NOTE=" Tài khoản này có excluded_tickers (vị thế legacy ngoài rebalancing) — dùng \`bin/compute_active_nav.py --account $ACCT\` để lấy NAV khả dụng làm cơ sở sizing, KHÔNG dùng tổng NAV account."
   fi
   "$ROOT/bin/dispatch.sh" DollarBill \
-    "Lập plan T+1 cho tài khoản $ACCT. Đọc DT5G từ deploy_golive_dt5g_v4/golive_state_today.json và recommend output mới nhất trong data/. Ghi plan vào data/plan_${ACCT}_<ngày_mai>.json. Ngày hôm nay: $TODAY (ICT).${NAV_NOTE} YÊU CẦU VĂN PHONG (user 2026-07-07): kết thúc final message bằng 3-5 dòng tóm tắt DỄ HIỂU cho người đọc không chuyên — bắt buộc nêu rõ: Account nào · plan ngày nào · hành động chính (HOLD hay mấy lệnh gì) · VÌ SAO 1-2 câu · trạng thái duyệt — vì message này được đăng nguyên văn vào Discord plan channel. Lệnh MUA size bằng tiền bán cùng ngày: trừ phí 0.075% + chừa biên giá, đừng size khít ref price. BẮT BUỘC VỀ GIÁ THAM CHIẾU (user 2026-07-09, tái diễn nhiều lần): mtm_price_ref/ref_price của MỌI mã trong plan phải lấy từ DNSE live quote (dnse_api.py secdef/latest_trade — giá đóng cửa THẬT hôm nay $TODAY) — TUYỆT ĐỐI KHÔNG dùng giá đóng cửa BQ ('ticker'/'ticker_1m' close) làm ref_price, vì BQ chỉ sync đêm 23:45 ICT nên tại giờ bạn chạy (~17:30) BQ luôn trễ ít nhất 1 ngày giao dịch — dùng BQ ở đây LUÔN cho ra giá sai/cũ, không phải thỉnh thoảng. Sự cố thật đã xảy ra: plan ZaloPay 07-10 có 2/4 mã (BID, MBB) dùng nhầm 'BQ close 07-08' lệch tới +5.7% so với giá đóng cửa thật 07-09, trong khi 2 mã còn lại dùng đúng DNSE live. Nếu DNSE live quote lỗi/thiếu cho 1 mã nào đó, ghi rõ note 'THIẾU GIÁ LIVE — cần kiểm tra tay' thay vì âm thầm dùng BQ thay thế." \
+    "Lập plan T+1 cho tài khoản $ACCT. Đọc DT5G từ deploy_golive_dt5g_v4/golive_state_today.json và recommend output mới nhất trong data/. Ghi plan vào data/plan_${ACCT}_<ngày_mai>.json. Ngày hôm nay: $TODAY (ICT).${NAV_NOTE} YÊU CẦU VĂN PHONG (user 2026-07-07): kết thúc final message bằng 3-5 dòng tóm tắt DỄ HIỂU cho người đọc không chuyên — bắt buộc nêu rõ: Account nào · plan ngày nào · hành động chính (HOLD hay mấy lệnh gì) · VÌ SAO 1-2 câu · trạng thái duyệt — vì message này được đăng nguyên văn vào Discord plan channel. Lệnh MUA size bằng tiền bán cùng ngày: trừ phí 0.075% + chừa biên giá, đừng size khít ref price. BẮT BUỘC VỀ GIÁ THAM CHIẾU (user 2026-07-09, tái diễn nhiều lần): mtm_price_ref/ref_price của MỌI mã trong plan phải lấy từ DNSE live quote (dnse_api.py secdef/latest_trade — giá đóng cửa THẬT hôm nay $TODAY) — TUYỆT ĐỐI KHÔNG dùng giá đóng cửa BQ ('ticker'/'ticker_1m' close) làm ref_price, vì BQ cache local chỉ sync đêm 23:45 ICT nên tại giờ bạn chạy (~19:00) BQ cache luôn trễ ít nhất 1 ngày giao dịch — dùng BQ ở đây LUÔN cho ra giá sai/cũ, không phải thỉnh thoảng. Sự cố thật đã xảy ra: plan ZaloPay 07-10 có 2/4 mã (BID, MBB) dùng nhầm 'BQ close 07-08' lệch tới +5.7% so với giá đóng cửa thật 07-09, trong khi 2 mã còn lại dùng đúng DNSE live. Nếu DNSE live quote lỗi/thiếu cho 1 mã nào đó, ghi rõ note 'THIẾU GIÁ LIVE — cần kiểm tra tay' thay vì âm thầm dùng BQ thay thế." \
     --bg 2>/dev/null || echo "  [WARN] dispatch DollarBill cho $ACCT fail — check mike/logs/"
 done
 
