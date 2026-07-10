@@ -1428,3 +1428,12 @@
 
 ## Consolidation 2026-07-10T04:30:02Z
 - [2026-07-10T04:30:02Z] Mafee/status — bot-lunch-stop: {"account": "ZaloPay", "plan_date": "2026-07-10", "elapsed_s": 8700, "rc": 143}
+
+## Consolidation 2026-07-10T06:00:03Z
+- [2026-07-10T06:00:02Z] Mafee/status — bot-start: {"account": "SpaceX", "plan_date": "2026-07-10", "auto_otp": true}
+- [2026-07-10T06:00:02Z] Mafee/status — bot-start: {"account": "ZaloPay", "plan_date": "2026-07-10", "auto_otp": true}
+- [2026-07-10T06:00:03Z] Mafee/status — bot-done: {"account": "SpaceX", "plan_date": "2026-07-10", "elapsed_s": 1, "rc": 0}
+- [2026-07-10T05:45:11Z] Mike/status — preflight-ZaloPay-2026-07-10: {"result": "GREEN", "checks": ["✅ BOT_STOP: CLEAR", "✅ Plan ZaloPay 2026-07-10: 4 lệnh, ~0.195B VND, state=NEUTRAL (DT5G_macro), approved=user (ủy quyền duyệt-gộp ngày 2-5 chốt 2026-07-06; áp dụng day 4/5 — day 3 sạch: TCM 2310cp sold, VCB 700cp bought — chờ xác nhận broker 07-09)", "✅ macro_health: HEALTHY (DT5G_macro, file 13.4h tuổi)", "✅ Gmail OAuth: có refresh_token (tự refresh khi cần)", "✅ BQ ticker_prune: lag=1d ✓"]}
+- [2026-07-10T05:45:11Z] Mike/status — ops-health-check-ZaloPay-2026-07-10: {"account": "ZaloPay", "label": "Trước phiên chiều", "warn_count": 0}
+- [2026-07-10T05:45:17Z] Mike/status — preflight-SpaceX-2026-07-10: {"result": "GREEN", "checks": ["✅ BOT_STOP: CLEAR", "✅ Plan SpaceX 2026-07-10: 0 lệnh, ~0.000B VND, state=NEUTRAL (DT5G_macro), approved=auto", "✅ macro_health: HEALTHY (DT5G_macro, file 13.4h tuổi)", "✅ Gmail OAuth: có refresh_token (tự refresh khi cần)", "✅ BQ ticker_prune: lag=1d ✓"]}
+- [2026-07-10T05:45:18Z] Mike/status — ops-health-check-SpaceX-2026-07-10: {"account": "SpaceX", "label": "Trước phiên chiều", "warn_count": 0}
