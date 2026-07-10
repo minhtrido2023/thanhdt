@@ -8,7 +8,11 @@
 # then republishes vnindex_5state_dt5g_live.
 #
 # Auth: sources wc_env.sh -> CLOUDSDK_CONFIG = dtienthanh@gmail.com (read-WRITE).
-# Schedule: cron Mon-Fri ~18:05 ICT (after market close + ticker ingest).
+# Schedule: cron Mon-Fri 18:30 ICT (after market close + ticker ingest; moved from a
+# drifted 23:15 ICT slot 2026-07-10 — verified ticker_prune/ticker ingest actually completes
+# well before 18:45 on a normal day, matching this script's own long-standing "~18:05" intent
+# that the crontab had silently drifted ~5h away from). Step [0] below verifies the day's
+# ingest is actually complete before computing, rather than trusting the clock alone.
 # Log: data/refresh_v34b_linux_<YYYY-MM-DD>.log  (rolling, 30-day cleanup)
 # ============================================================================
 set -uo pipefail
@@ -27,6 +31,32 @@ echo "==================================================================="
 
 die() { echo "!!! ABORT: $* (at $(date))"; exit 1; }
 step() { echo; echo "--- $* ---"; }
+
+# --- 0. freshness precheck: verify TODAY's ticker_prune ingest is actually complete before
+# computing on it. Found 2026-07-10 (user asked "does this really need to wait for the full
+# BQ sync?"): ticker_prune/ticker were BOTH already complete (normal-range row counts) well
+# before this job's old 23:15 ICT slot — the schedule had drifted ~5h later than this script's
+# own documented "~18:05 ICT" intent for no discovered reason, silently masked by
+# bq_freshness_check.sh's MAX_STATE_LAG=2 tolerance (1-day-stale always passed as "fine").
+# Rather than just picking a new fixed clock time and hoping it's always ready, verify the
+# real artifact: retry with a bounded wait instead of computing on an incomplete/stale day.
+step "[0] freshness precheck: today's ticker_prune ingest complete?"
+TODAY_ICT="$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)"
+MIN_TICKERS=200   # historical daily count is ~260-270; 200 comfortably excludes a partial trickle
+ready=0
+for attempt in $(seq 1 6); do
+  n="$(bq query --use_legacy_sql=false --project_id="$PJ" --format=csv --quiet \
+    "SELECT COUNT(DISTINCT ticker) FROM tav2_bq.ticker_prune WHERE time = DATE('$TODAY_ICT')" \
+    2>/dev/null | tail -1)"
+  n="${n:-0}"
+  if [ "$n" -ge "$MIN_TICKERS" ] 2>/dev/null; then
+    echo "  ready: ticker_prune has $n tickers for $TODAY_ICT (attempt $attempt)"
+    ready=1; break
+  fi
+  echo "  not ready yet: ticker_prune has ${n:-0} tickers for $TODAY_ICT (need >=$MIN_TICKERS) — attempt $attempt/6, waiting 15m"
+  [ "$attempt" -lt 6 ] && sleep 900
+done
+[ "$ready" = 1 ] || die "ticker_prune still incomplete for $TODAY_ICT after 6 attempts (~1.5h) — refusing to compute DT5G on a stale/partial day. bq_freshness_check.sh's own gate will BLOCK DollarBill downstream since vnindex_5state_dt5g_live won't advance today."
 
 # --- 1. upstream local rebuild (produces vnindex_5state_tam_quan_v3_4b_full_history.csv) ---
 step "[1] clear pkl caches"
