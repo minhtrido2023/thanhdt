@@ -239,3 +239,38 @@ Rules when a script's output feeds `data/results_registry.md` or any pinned base
 - **After regenerating, verify before trusting**: metric in expected range, `self-check 0 VND`,
   and an independent recompute from the CSV (`extract_peryear.py <CSV>`) matching the print — then
   note the regeneration in the registry so the overwrite episode is auditable.
+
+## 9. Check `mike/kb/data_registry.md` Before Wiring a New Data Source
+
+**Root cause of the 2026-07-11 SIGNAL_V11 base-leak:** four production/canonical consumers
+(`golive_recommend_v23.py`, `pt_v4_dt5g.py`, `pt_v22_dt5g.py`, `pt_v23_audit_2014.py`) were all
+silently reading `tav2_bq.vnindex_5state` (the v3.4b BASE — no DT-gate, no macro-cap, ~153
+transitions) instead of `tav2_bq.vnindex_5state_dt5g_live` (the actual production regime, 49
+transitions) — a trap already written up in `CLAUDE.md` ("many research scripts read bare
+`vnindex_5state` assuming it is DT5G"). The documentation existed; nothing forced a check
+against it before each new script picked a table name that *sounded* right. Concrete damage:
+the live paper-trading book `pt_v22_dt5g` entered 6 tickers on a fake BULL(4) signal that a
+correctly-sourced read would have shown as NEUTRAL(3).
+
+**Mandatory rule, user directive 2026-07-11:** before reading ANY data source (BQ table, local
+CSV/pickle/JSON, published state file) in new research or production code — check
+`mike/kb/data_registry.md` first.
+- If the source is listed as `CANONICAL` — use it directly.
+- If listed as `TRAP` — read the "Bẫy" column before touching it; there is almost always a
+  correctly-named sibling table/file to use instead.
+- If listed as `DEPRECATED/DEAD` — don't wire it into anything new; it may still exist for
+  historical reference only.
+- **If the source isn't in the registry at all** — don't assume it's safe by default. Add an
+  entry (status verified against real evidence — crontab, file mtime, code that writes it — not
+  guessed from the name) before wiring it in, or ask Winston/Mike to verify first.
+
+**Ownership**: Winston (data-ops) keeps the registry current ad-hoc whenever a new source
+surfaces in other work. A full periodic audit (re-verify every entry's freshness, sweep the
+codebase for sources still missing) is folded into the existing Friday KB editorial review
+(`kb_nightly.sh`'s headless Mike dispatch) rather than a separate new cron job.
+
+**When dispatching Taylor (or anyone) for new R&D**: the dispatch prompt should explicitly say
+"tra `mike/kb/data_registry.md` trước khi chọn nguồn dữ liệu, đặc biệt bảng market-state/regime"
+— matching the same pattern already used for DollarBill's DNSE-vs-BQ rule (§6). A general
+"verify your data" reminder does not reliably stop an LLM from reaching for whichever table name
+sounds closest to what it needs in the moment; naming the specific registry file does.
