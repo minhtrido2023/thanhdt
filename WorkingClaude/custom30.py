@@ -11,16 +11,19 @@ CLI:  python custom30.py [YYYY-MM-DD]
 """
 import os
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
-TABLE = "tav2_bq.custom30_8l"
+TABLE = "tav2_bq.custom30_8l"        # blend (liquidity-led) basket — pre-2026-06-30 live spec
+TABLE_V = "tav2_bq.custom30v_8l"     # custom30V (yieldcombo) — the V2.4 production parking basket
 
 
-def current(bq, asof=None):
+def current(bq, asof=None, table=TABLE):
     """Members of the basket effective on `asof` (default today), weight-descending.
-    `bq` = a query helper returning a DataFrame (e.g. simulate_holistic_nav.bq)."""
+    `bq` = a query helper returning a DataFrame (e.g. simulate_holistic_nav.bq).
+    `table` — pass TABLE_V for the V2.4 production parking basket (custom30V/yieldcombo);
+    default TABLE keeps the legacy blend basket for the audit scripts built on it."""
     cond = f"DATE '{asof}'" if asof else "CURRENT_DATE()"
     return bq(f"""SELECT t.ticker, t.weight, t.rating_8l, t.liq_rank, t.rebal_date
-FROM {TABLE} AS t
-WHERE t.rebal_date = (SELECT MAX(s.rebal_date) FROM {TABLE} AS s WHERE s.rebal_date <= {cond})
+FROM {table} AS t
+WHERE t.rebal_date = (SELECT MAX(s.rebal_date) FROM {table} AS s WHERE s.rebal_date <= {cond})
 ORDER BY t.weight DESC""")
 
 

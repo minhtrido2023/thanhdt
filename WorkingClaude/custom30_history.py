@@ -18,8 +18,9 @@ import custom_basket as cb
 
 NAME_CAP = 0.10
 START = "2014-01-02"; END = detect_end_date()
-# TABLE/CSV env-overridable (2026-06-17): publish custom30V (BASKET_SELECT=yieldcombo) to a shadow table
-# custom30v_8l for paper-diff vs the live custom30_8l, until the 2026-06-30 go-live cutover.
+# TABLE/CSV env-overridable (2026-06-17). Since 2026-07-11 papertrade_daily.sh runs this TWICE:
+# [6] default env -> custom30_8l (blend, legacy/audit) and [6b] BASKET_SELECT=yieldcombo +
+# CUSTOM30_TABLE=custom30v_8l -> the V2.4 PRODUCTION parking basket golive_recommend_v23.py reads.
 TABLE = os.environ.get("CUSTOM30_TABLE", "lithe-record-440915-m9:tav2_bq.custom30_8l")
 CSV = os.path.join(WORKDIR, "data", os.environ.get("CUSTOM30_CSV", "custom30_8l_publish.csv"))
 BQ = r"bq"

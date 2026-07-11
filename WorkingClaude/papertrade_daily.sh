@@ -27,6 +27,20 @@ run "[2] refresh_lagged_caches" refresh_lagged_caches.py
 run "[3] snapshot_state_vintage" snapshot_state_vintage.py
 run "[4] macro_healthcheck"     macro_healthcheck.py
 run "[6] custom30_history"      custom30_history.py
+# [6b] custom30V (yieldcombo) -> tav2_bq.custom30v_8l — the V2.4 PRODUCTION parking basket
+# (golive_recommend_v23.py reads this table; [6] custom30_8l = legacy blend, kept for audits).
+# Writer was orphaned 2026-06-18..2026-07-11 (shadow publish dropped after the 06-30 cutover);
+# revived 2026-07-11 (job Taylor_20260711_035824) — without it the table goes stale at the
+# next quarterly rebalance (~2026-08-05).
+echo; echo "--- [6b] custom30v_history (yieldcombo -> custom30v_8l) ---"
+if BASKET_SELECT=yieldcombo \
+   CUSTOM30_TABLE=lithe-record-440915-m9:tav2_bq.custom30v_8l \
+   CUSTOM30_CSV=custom30v_8l_publish.csv \
+   $PY custom30_history.py; then
+  echo "  [ok] custom30v_history"
+else
+  echo "  [FAIL exit $?] custom30v_history"
+fi
 # --- sims + production books ---
 run "[7] pt_v11_tq34b"          pt_v11_tq34b.py
 run "[8] pt_v12_macro"          pt_v12_macro.py

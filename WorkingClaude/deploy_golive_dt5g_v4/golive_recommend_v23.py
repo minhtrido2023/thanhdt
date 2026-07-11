@@ -264,7 +264,10 @@ _park_rebal_date = None
 if etf_frac > 0:
     try:
         import custom30
-        _park_basket = custom30.current(bq)
+        # V2.4 spec: parking = custom30V (yieldcombo, tav2_bq.custom30v_8l) — the basket the
+        # +7.4pp result was backtested on. NOT custom30_8l (blend), which this read until
+        # 2026-07-11 (mislabel bug: advisory said "custom30V" but served the blend basket).
+        _park_basket = custom30.current(bq, table=custom30.TABLE_V)
         if len(_park_basket):
             _park_rebal_date = str(_park_basket["rebal_date"].iloc[0])
     except Exception as _e:
@@ -291,7 +294,7 @@ for tk in basket:
 # parking basket — advisory rows (book=PARK, weight_pct = within-basket cap-weight %)
 if _park_basket is not None:
     for pr in _park_basket.itertuples():
-        recs.append({"book": "PARK", "ticker": pr.ticker, "play_type": "CUSTOM30_8L",
+        recs.append({"book": "PARK", "ticker": pr.ticker, "play_type": "CUSTOM30V_8L",
                      "ta": float(pr.rating_8l) if pd.notna(pr.rating_8l) else None,
                      "close": None, "sector": None,
                      "weight_pct": round(float(pr.weight) * 100, 4),
@@ -334,11 +337,11 @@ if etf_frac > 0:
     if _park_basket is not None:
         _top = " · ".join(f"{r.ticker} {r.weight*100:.0f}%" for r in _park_basket.head(8).itertuples())
         L.append(f"- **Parking (cả 2 book):** park **{etf_frac*100:.0f}%** cash nhàn rỗi vào "
-                 f"**rổ 8L custom30** (`tav2_bq.custom30_8l`, cap-weight namecap≤10%, {len(_park_basket)} mã)"
+                 f"**rổ custom30V** (`tav2_bq.custom30v_8l`, yieldcombo, cap-weight namecap≤10%, {len(_park_basket)} mã)"
                  + (" (NEUTRAL)" if state_today == 3 else "") + f"\n    - top: {_top} …")
     else:
-        L.append(f"- **Parking (cả 2 book):** park **{etf_frac*100:.0f}%** cash nhàn rỗi vào rổ 8L custom30 "
-                 f"(`tav2_bq.custom30_8l`) — lookup lỗi (xem log)")
+        L.append(f"- **Parking (cả 2 book):** park **{etf_frac*100:.0f}%** cash nhàn rỗi vào rổ custom30V "
+                 f"(`tav2_bq.custom30v_8l`) — lookup lỗi (xem log)")
 else:
     L.append(f"- **Parking:** {etf_frac*100:.0f}% (state {state_today} → KHÔNG park, giữ cash phòng thủ)")
 L.append(f"\n## BAL book ({(1-w_tgt)*100:.0f}% NAV target) — {len(bal)} picks\n")
