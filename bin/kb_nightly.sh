@@ -139,7 +139,11 @@ if [ "$DOW" -eq 5 ]; then
     # and no exit-code check. DISPATCH_FROM=user is the documented human-override path.
     DISPATCH_FROM=user "$ROOT/bin/dispatch.sh" Mike \
 "KB weekly editorial review (automated, Friday nightly).
-Bạn đang ở headless mode. Nhiệm vụ: đọc kb/KNOWLEDGE.md, kiểm tra 9 canonical sections có còn đúng không (facts đã outdate, mục nào nên update từ events gần đây trong context_pack.md), viết lại những section cần thiết, commit. KHÔNG xóa archive. Không cần hỏi user — đây là routine maintenance đã được user uỷ quyền. Sau khi xong: ghi sự thay đổi lên bus (append_event.sh Mike decision 'kb-weekly-editorial') và notify Telegram." \
+Bạn đang ở headless mode. Nhiệm vụ:
+1. Đọc kb/KNOWLEDGE.md, kiểm tra 9 canonical sections có còn đúng không (facts đã outdate, mục nào nên update từ events gần đây trong context_pack.md), viết lại những section cần thiết, commit.
+2. Chạy '$ROOT/bin/data_registry_audit.sh --bus' (audit correctness+freshness của kb/data_registry.md — user directive 2026-07-11, sau sự cố SIGNAL_V11 base-leak). Đọc output: FAIL = có regression thật (nguồn TRAP/DEAD bị đọc nhầm lại, hoặc writer chết) — PHẢI điều tra + escalate Winston/dispatch fix, KHÔNG bỏ qua. WARN = cần xem xét, ghi chú vào kb/data_registry.md 'Lịch sử' nếu là false-positive đã biết. Cập nhật dòng 'Last full audit: <date>' ở đầu file data_registry.md dù kết quả clean/warn/fail.
+3. Rà bất kỳ nguồn nào trong data_registry.md đã đánh dấu Status=DEPRECATED nhưng KHÔNG có dòng ⚠️ SUPERSEDED BY <nguồn mới> ON <date> — nếu thiếu, đó là vi phạm quy trình obsolete (xem 'Nguyên tắc bắt buộc' mục 5 trong file), cần bổ sung hoặc hỏi Winston.
+KHÔNG xóa archive. Không cần hỏi user cho việc 1-3 — đây là routine maintenance đã được user uỷ quyền. Sau khi xong: ghi sự thay đổi lên bus (append_event.sh Mike decision 'kb-weekly-editorial') và notify Telegram." \
         --timeout 900 >> "$LOG" 2>&1 &
     log "Editorial dispatch launched (background)."
 fi

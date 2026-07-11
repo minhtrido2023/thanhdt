@@ -5,6 +5,10 @@
 > GIẢ (xem `kb/INCIDENTS.md`). Đây là danh sách CHÍNH THỨC mọi nguồn dữ liệu (bảng BQ, file
 > local, file trạng thái publish) đang được paper-trading/production/nghiên cứu dùng.
 
+> **Last full audit: 2026-07-11** (seed + Taylor codebase sweep + `bin/data_registry_audit.sh` xây
+> mới, chạy sạch FAIL=0/WARN=0). Cập nhật dòng này mỗi lần review định kỳ (Friday) hoặc audit thủ
+> công chạy xong — xem mục 3 dưới.
+
 ## Nguyên tắc bắt buộc
 
 1. **Trước khi dùng 1 nguồn dữ liệu trong nghiên cứu/code MỚI — tra bảng này trước.** Nếu
@@ -19,12 +23,35 @@
      chiếu lịch sử.
 3. **Người review + tần suất:** Winston (data-ops) giữ danh sách này tươi — cập nhật ngay
    khi phát hiện nguồn dữ liệu mới trong lúc làm việc khác (không cần đợi review định kỳ).
-   Review định kỳ TOÀN BỘ danh sách (freshness thật + rà thêm nguồn mới chưa ghi) gắn vào
-   **review KB thứ Sáu hàng tuần** (`kb_nightly.sh`, đã có sẵn cơ chế dispatch Mike headless)
-   — Mike đọc danh sách, dispatch Winston verify từng nguồn còn "chưa review >30 ngày".
+   Review định kỳ TOÀN BỘ danh sách gắn vào **review KB thứ Sáu hàng tuần** (`kb_nightly.sh`
+   Phase 5, dispatch Mike headless) — cơ chế nay có 2 phần cụ thể, không chỉ là kế hoạch:
+   (a) chạy `bin/data_registry_audit.sh --bus` (script, không phải LLM tự đoán) — kiểm tra
+   CƠ HỌC 2 việc: (i) các file từng bị bug base-leak/mislabel (`signal_v11_sql.py`,
+   `pt_v4/pt_v22/pt_v23_audit`, `golive_recommend_v23.py`) chưa regress lại; (ii) freshness
+   thật của 3 nguồn rủi ro cao nhất (`vnindex_5state_dt5g_live`, `custom30v_8l`,
+   `fa_ratings_8l`) qua `bq show` trực tiếp, không suy đoán từ cache/mtime file phụ; (b) Mike
+   đọc kết quả FAIL/WARN, xử lý theo mục 5 dưới nếu là vấn đề obsolete/regression, cập nhật
+   dòng "Last full audit" ở đầu file. Ai muốn chạy tay ngoài lịch: `bin/data_registry_audit.sh`
+   (thêm `--bus` để ghi bus event, mặc định chỉ in ra màn hình).
 4. **Khi dispatch Taylor cho R&D mới:** prompt phải nhắc "tra `mike/kb/data_registry.md`
    trước khi chọn nguồn dữ liệu, đặc biệt bảng market-state/regime" — giống quy tắc đã có
    cho DollarBill (DNSE-vs-BQ, `coding_guidelines.md` §6).
+5. **Đánh dấu obsolete khi quyết định migrate khỏi 1 nguồn** (user chỉ đạo 2026-07-11, sau
+   phát hiện fa_ratings có thể bị thay bởi fa_ratings_8l) — BẮT BUỘC làm CẢ 3 bước sau CÙNG
+   lúc với commit cutover, không để thành TODO làm sau (nếu tách rời, đúng lúc đó là lúc dễ
+   dùng nhầm bản cũ nhất — bài học SIGNAL_V11 base-leak):
+   - (a) Đổi `Status` của nguồn cũ → `DEPRECATED` kèm dòng **⚠️ SUPERSEDED BY `<nguồn mới>`
+     ON `<ngày cutover>`** ngay trong ô "Bẫy", không chỉ đổi mỗi chữ Status.
+   - (b) Chạy sweep xác nhận (grep toàn codebase + `bin/data_registry_audit.sh`) KHÔNG còn
+     script production nào đọc nguồn cũ — nếu còn, liệt kê rõ tên file + lý do (vd "chỉ
+     script research lịch sử, không sửa"). Không được nói "chắc không còn ai đọc" mà không
+     grep thật.
+   - (c) Ghi 1 dòng vào "Lịch sử" cuối file: ngày cutover, nguồn cũ→mới, ai duyệt, có
+     PBO/DSR/quant-skeptic verify hay không (nếu là migration signal như fa_ratings→8l).
+   Ràng buộc riêng cho case `fa_ratings` cụ thể: quyết định migrate PHẢI qua backtest song
+   song + quant-skeptic + user sign-off trước (xem row `fa_ratings`/`fa_ratings_8l` — đây là
+   ĐỔI SIGNAL, 66% tier khác nhau, không phải data refresh đơn thuần), KHÔNG được đánh dấu
+   obsolete trước khi có kết quả đó.
 
 ---
 
@@ -182,3 +209,13 @@
   `tav2_bq.fa_ratings` STATIC không writer nhưng vẫn là input production SIGNAL_V11;
   `vnindex_5state_dt_4gate` BQ chết 06-02 nhưng CSV local sống (cache mirror bản chết);
   `data/vnindex_5state.csv` twin local của bảng trap; cache DuckDB mirror nguyên tên cả bảng trap.
+- 2026-07-11 (họp team, job Taylor_20260711_084145, quant-skeptic CONFIRMED): `custom30v_8l` đóng
+  gap (root cause = lịch thứ Bảy, không phải writer hỏng — xem row Custom30). `fa_ratings` →
+  khuyến nghị migrate sang `fa_ratings_8l` NHƯNG qua full validation (66% tier khác nhau = đổi
+  signal), CHƯA đánh dấu DEPRECATED — đang ở bước backtest song song (job Taylor_20260711_094714,
+  user duyệt hướng validate 2026-07-11). Xem mục 5 "Nguyên tắc bắt buộc" cho quy trình obsolete
+  đầy đủ, thêm cùng ngày theo yêu cầu user ("quản lý phần này phải thật sự cẩn trọng").
+- 2026-07-11: xây `bin/data_registry_audit.sh` (regression-guard cơ học cho 2 sự cố base-leak +
+  custom30-mislabel, freshness re-check 3 nguồn rủi ro cao nhất, reference-count snapshot cho
+  nguồn deprecated/dead) — wire vào Friday KB editorial review (`kb_nightly.sh` Phase 5). Chạy
+  thật lần đầu: FAIL=0/WARN=0, xác nhận cả regression-guard lẫn freshness đều đúng thực tế.
