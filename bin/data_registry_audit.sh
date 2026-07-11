@@ -96,7 +96,7 @@ check_bq_fresh() {
 
 check_bq_fresh "vnindex_5state_dt5g_live" 3  "DT5G production regime state"
 check_bq_fresh "custom30v_8l"             5  "custom30V parking basket (production money-path)"
-check_bq_fresh "fa_ratings_8l"            50 "8L fundamentals as-of (manual refresh, expect ~30-45d gaps)"
+check_bq_fresh "fa_ratings_8l"            9  "8L fundamentals as-of (cron weekly Sat 08:30 ICT since 2026-07-11, expect <7d gaps)"
 
 # ── C. Reference-count drift on known DEPRECATED/DEAD sources ──────────────────────────────
 # Not a pass/fail gate (some counts are expected to stay >0 forever, e.g. archived research
