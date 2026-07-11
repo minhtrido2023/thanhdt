@@ -1619,3 +1619,207 @@ tránh lấn phạm vi review của hôm nay).
 **Không tăng thêm escalation mới** cho pattern data-provenance (đã escalate lần 2 ở entry
 trên) — chưa đủ 2 chu kỳ RETRO liên tiếp với prevention KHÔNG ĐỔI (lần này là job kế nhiệm
 đóng nốt cùng 1 chu kỳ, không phải 1 ngày review mới phát hiện tái diễn).
+
+## 2026-07-11 — fa_ratings_8l weekly-refresh wrapper bắt đúng 1 lần BQ write "thành công
+## giả" (silent write failure) khi test tay bằng identity read-only — hoạt động ĐÚNG thiết
+## kế, nhưng identity của cron THẬT vẫn chưa xác nhận
+
+**Bối cảnh:** trong lúc chuẩn bị cron weekly refresh `fa_ratings_8l` (đề xuất Winston job
+`Winston_20260711_104135`, user duyệt cùng ngày), Mike chạy tay `bin/refresh_fa_ratings_8l.sh`
+để kiểm tra script trước khi commit. Script gọi `rating_8l_history.py` — hàm
+`refresh_bq_table()` trong file đó chạy mọi `bq` subprocess với `capture_output=True` và
+**không hề check returncode**, nên in ra dòng "refreshed BQ table tav2_bq.fa_ratings_8l"
+ngay cả khi lệnh `bq load`/`CREATE OR REPLACE` thất bại thật (permission denied vì phiên
+Mike dùng service account **read-only** `bq-reader-8l`).
+
+**Vì sao KHÔNG bị lừa:** `refresh_fa_ratings_8l.sh` được thiết kế đúng nguyên tắc MIKE.md
+#2 ("trust the artifact, not the self-report") — sau khi gọi python, wrapper tự `bq show`
+lại chính bảng `tav2_bq.fa_ratings_8l`, so `lastModifiedTime` với `START_EPOCH` của chính
+lần chạy này. Bảng KHÔNG hề nhích (`lastModified` vẫn là 2026-06-20, cũ hơn giờ chạy) →
+wrapper tự kết luận `FAIL_REASON` đúng, bắn `bin/append_event.sh Winston error
+fa_ratings_8l-refresh-failed` (bus event `73a3d13a…`, 2026-07-11T11:32:31Z = 18:32:31 ICT)
++ Discord Trading Daily — **không hề tin dòng in "refreshed" giả của python script**.
+Wrapper này chỉ được commit sau đó 13 phút (`dd7feb9`, 18:45:14 ICT) — nghĩa là test tay
+này chạy trên bản wrapper CHƯA commit, đúng lúc đang xác minh nó hoạt động trước khi đưa
+vào cron thật.
+
+**Root cause của LẦN FAIL cụ thể này:** không phải bug — đây là **permission mismatch của
+phiên test tay**, không phải của cron. Phiên interactive Mike mặc định dùng
+`bq-reader-8l` (service account read-only, an toàn theo thiết kế cho mọi truy vấn tương
+tác) — không đủ quyền ghi bảng. Cron THẬT (crontab dòng `30 1 * * 6 …` = 08:30 ICT thứ Bảy,
+cài cùng ngày) chưa từng chạy lần nào (lần đầu tiên sẽ là thứ Bảy **2026-07-18**), nên
+**identity mà cron thật sự dùng khi Mike không ngồi tương tác vẫn CHƯA được xác nhận** —
+nếu cron cũng chạy dưới identity read-only (vd nếu service account mặc định của toàn máy
+là read-only, chỉ phiên Mike mới override), thì fa_ratings_8l sẽ tiếp tục KHÔNG BAO GIỜ
+refresh được, chỉ khác là giờ sẽ FAIL ỒN ÀO (đúng thiết kế) thay vì lặng lẽ đứng yên như
+trước 2026-07-11.
+
+**Còn treo:** xác nhận identity cron thật dùng để ghi BQ — chỉ quan sát được khi cron tự
+chạy lần đầu thứ Bảy 07-18 (ghi vào `logs/fa_ratings_8l_refresh.log` + bus event
+`fa_ratings_8l-refresh-ok`/`-failed`). Nếu THẤT BẠI lần đầu vì cùng lý do quyền → cần cấp
+quyền ghi cho identity chạy cron (không phải sửa lại script — script đã đúng).
+
+**Bài học:** đây là ví dụ THỰC TẾ, CÙNG NGÀY của chính nguyên tắc mà `coding_guidelines.md`
+§9 vừa mới viết ra sau vụ SIGNAL_V11 base-leak buổi sáng — "đừng tin self-report, verify
+artifact thật". `refresh_fa_ratings_8l.sh` là wrapper ĐẦU TIÊN trong hệ thống áp dụng công
+thức này CHO CHÍNH BƯỚC GHI BQ (không chỉ đọc) — và nó bắt được lỗi thật ngay lần chạy thử
+đầu tiên. Không phải sự cố cần "sửa", mà là bằng chứng cơ chế phòng thủ hoạt động — nhưng
+câu hỏi vận hành gốc (quyền ghi BQ cho tiến trình cron không tương tác) vẫn mở, giống hệt
+tình trạng đã ghi trong `kb/current_ops.md` cho `fa_ratings` append-only refresh (cron
+09:15 ICT thứ Bảy, cùng vấn đề, chờ giải chung).
+
+## 2026-07-11 — 4 lần dispatch bị hard-timeout giữa việc nặng (Fable-model, đa bước) dù
+## fix "heartbeat-aware deadline" (2026-07-09) đã có hiệu lực — không mất dữ liệu lần nào,
+## nhưng tần suất cho thấy trần thời gian vẫn chưa đủ cho khối lượng việc thật
+
+**4 lần xảy ra trong đúng 1 ngày lịch ICT 2026-07-11** (job board `bus/jobs/*.json`, tất cả
+`attempt=2/2, exit_code=124`):
+1. `Winston_20260710_170615` (00:16–00:26 ICT — job_id mang giờ UTC dispatch nên tên có
+   `_170615` nhưng thực chạy đã sang ngày lịch ICT 07-11) — audit DT5G pipeline (EW-leg
+   path bug). Nối tiếp bởi `Winston_20260710_173031` (dispatch 00:30 ICT, done 00:38 ICT) —
+   hoàn tất sạch, quant-skeptic CONFIRMED 02:24:53Z.
+2. `Taylor_20260711_043508` (11:50–12:05 ICT) — fix HIGH/MEDIUM audit money-path freshness.
+   Nối tiếp bởi `Taylor_20260711_051033` (done) — prompt tiếp tục ghi rõ "đã commit thật:
+   F1 (`a7668f3`), F6 …" trước khi bị giết, không mất việc.
+3. `Winston_20260711_043611` (11:51–12:06 ICT) — fix MEDIUM audit freshness 8L/production.
+   Nối tiếp bởi `Winston_20260711_051109` (done, selfcheck 45/45, commit `4111009`).
+4. `Taylor_20260711_114557` (18:55–19:16 ICT) — bắt đầu Phase 0 re-tune SIGNAL_V11 trên
+   fa_ratings_8l. Nối tiếp bởi `Taylor_20260711_121933` (done) — prompt tiếp tục tự ghi
+   "công việc QUÁ NẶNG cho khung giờ đó, không phải lỗi cơ chế".
+
+**Cơ chế phục hồi hoạt động ĐÚNG cả 4/4 lần — 0 mất dữ liệu:** mỗi lần, Mike (trong phiên
+sống) tự phát hiện job `timeout`, đọc lại working memory + commit thật của agent, rồi
+dispatch job MỚI với prompt "TIẾP TỤC (trace `<job_id_cũ>`) — đừng làm lại từ đầu", đúng
+quy trình `MIKE.md` §Quy chuẩn bắt buộc mục 2 (verify artifact, không tin status tự báo).
+Cả 4 lần đều xác nhận công việc trước đó ĐÃ commit thật một phần trước khi bị giết.
+
+**Đây KHÔNG PHẢI tái diễn của bug `2026-07-09 (tối)` (agent ĐÃ XONG bị giết ngay trước khi
+kịp return)** — bug đó đã fix bằng heartbeat-aware deadline (`_hb_aware_timeout`, tối đa 3
+lần gia hạn `DISPATCH_HB_MAX_EXTENSIONS=3`, trần tuyệt đối `TIMEOUT×(N+1)`) và verify e2e
+4/4, không có bằng chứng nào cho thấy fix đó regressed. Đây là dạng KHÁC: agent **còn đang
+làm việc thật** (chưa hoàn tất hết danh sách fix/phase) khi chạm TRẦN TUYỆT ĐỐI của chính
+cơ chế gia hạn đó — với `TIMEOUT` mặc định 600s và 3 lần gia hạn, trần mỗi attempt là
+~2400s (40'), nhân 2 attempt (`--retries` mặc định 1) là tối đa ~80' — vẫn không đủ cho các
+task Fable-model nhiều bước (fix 7 phát hiện HIGH/MEDIUM, hay 1 phase audit+backtest đầy
+đủ) chạy trong 1 lần dispatch.
+
+**Còn hở — residual risk cụ thể:** cơ chế phục hồi hiện tại phụ thuộc HOÀN TOÀN vào Mike
+đang ở phiên sống, chú ý thấy job `timeout` trên job board, và tự tay soạn prompt "TIẾP
+TỤC" đúng ngữ cảnh. Không có cơ chế TỰ ĐỘNG làm việc này (khác với `resume_pending.py` —
+cơ chế đó CHỈ xử lý usage-limit, không xử lý timeout-vì-việc-nặng). Nếu 1 trong 4 lần này
+xảy ra khi KHÔNG có Mike tương tác sống theo dõi (vd trong 1 job headless dài không có
+người canh) → job đó sẽ kẹt ở `timeout` vô thời hạn, không ai tự nối tiếp.
+
+**Đối chiếu với tuyên bố "Pattern A coi như ĐÃ ĐÓNG, cần quan sát thêm ~1 tuần" (RETRO
+2026-07-09):** 07-10 (ngày quan sát đầu tiên) không có lần timeout nào (0/0 trong bus job
+board), nhưng 07-11 (ngày quan sát thứ 2) đã có NGAY 4 lần. Tuyên bố "đóng" cho lớp lỗi cụ
+thể (giết-nhầm-agent-đã-xong) vẫn ĐÚNG — không có bằng chứng nào cho thấy lớp đó tái phát.
+Nhưng cửa sổ quan sát "1 tuần sạch" mà 07-09 đặt ra **CHƯA ĐẠT** — vì đây là 1 biểu hiện
+KHÁC của cùng họ pattern (job nền chết giữa lúc còn sống/còn việc, cần con người phát hiện
++ can thiệp tay) tái xuất hiện ngay trong tuần quan sát. Theo đúng bước 5 của quy trình
+retro: đây là tín hiệu quan trọng cần prevention MẠNH HƠN, không chỉ ghi thêm 1 dòng nhận
+xét — xem đề xuất cụ thể ở entry RETRO tổng hợp bên dưới.
+
+## RETRO — 2026-07-11: 2 sự cố (cả 2 đều là GAP báo cáo — bus có bằng chứng nhưng chưa
+## từng ghi vào INCIDENTS.md trước retro này), 1 pattern xuyên suốt residual chưa đóng sạch
+
+**Bối cảnh ngày:** 2026-07-11 là thứ Bảy — toàn bộ cron vận hành giao dịch hằng ngày
+(`ops_health_check.sh`, `preflight_check.sh`, `run_bot.sh`) theo lịch chỉ chạy Thứ Hai-Sáu
+(`crontab -l`: `20 1 * * 1-5` / `45 5 * * 1-5`) **không chạy hôm nay — đây là hành vi ĐÚNG
+THIẾT KẾ, không phải sự cố** (tự kiểm tra trong retro này bằng cách đọc `crontab -l` +
+`stat logs/ops_health.log`, xác nhận log cuối là thứ Sáu 07-10 12:45 ICT, khớp lịch, TRÁNH
+được đúng loại lỗi "báo còn treo mà chưa verify artifact" mà chính retro này đi bắt). Ngày
+hôm nay gần như toàn bộ là R&D nặng: chuỗi fix DT5G/SIGNAL_V11 base-leak buổi sáng (đã có
+entry riêng phía trên, không nhắc lại) và dự án rebuild `fa_ratings` builder + re-tune
+SIGNAL_V11 trên `fa_ratings_8l` (context đầy đủ ở `kb/current_ops.md`).
+
+**Cả 2 sự cố dưới đây đều là GAP theo đúng nghĩa bước 2 của quy trình retro:** có bằng
+chứng thật trên bus (`bus/inbox/Winston.jsonl` error event + `bus/jobs/*.json` status
+`timeout`) từ sớm trong ngày, nhưng **chưa từng có entry INCIDENTS.md nào ghi lại** cho
+tới khi retro này chạy — cả 2 đã được viết bổ sung ở 2 entry ngay phía trên (trước entry
+tổng hợp này).
+
+| # | Sự cố | Phân loại | Nguồn gốc (bước/quy trình, không quy tội cá nhân) | Người ghi chép |
+|---|---|---|---|---|
+| 1 | `refresh_fa_ratings_8l.sh` bắt đúng 1 lần BQ write "thành công giả" khi test tay bằng identity read-only (`bq-reader-8l`) — cơ chế hoạt động đúng thiết kế | permission-credential | Bước soạn+test wrapper mới (trước khi cài cron) không có bước xác nhận identity ghi BQ của MÔI TRƯỜNG CHẠY THẬT (cron không tương tác) khác với môi trường TEST (phiên Mike tương tác, mặc định identity read-only an toàn) — 2 môi trường dùng identity khác nhau nhưng quy trình duyệt cron chưa có bước đối chiếu rõ ràng | Chưa ai ghi trước retro này — bus event `73a3d13a…` do chính wrapper tự `append_event.sh Winston error` lúc 18:32:31 ICT, nhưng không ai chuyển thành entry INCIDENTS.md cho tới bây giờ; retro tự bổ sung |
+| 2 | 4 lần dispatch bị hard-timeout giữa việc nặng Fable-model đa bước (00:16 / 11:50 / 11:51 / 18:55 ICT) — cả 4 lần tự phục hồi qua dispatch "TIẾP TỤC" tay, 0 mất dữ liệu | job-monitoring/lifecycle | Cơ chế `_hb_aware_timeout` (cài 07-09) gia hạn TRONG 1 attempt tới trần tuyệt đối `TIMEOUT×(N+1)` (~40'/attempt, ~80' cho 2 attempt) — bước THIẾT KẾ trần đó tính cho "phân biệt job-treo-thật với job-còn-sống", chưa có bước hiệu chỉnh trần theo KHỐI LƯỢNG VIỆC THẬT của loại dispatch nặng (`--model fable`, audit/fix nhiều phát hiện hoặc 1 phase R&D đầy đủ) — nên 1 job hoàn toàn sống, hoàn toàn có tiến triển thật vẫn chạm trần | Chưa ai ghi trước retro này — mỗi lần đều được chính Mike (phiên sống) tự phát hiện qua `jobs.sh status`, tự dispatch tiếp bằng trace, nhưng không ai viết entry INCIDENTS.md ghi lại các lần này cho tới bây giờ; retro tự bổ sung |
+
+**Sự cố 1 — 3 câu hỏi bắt buộc:**
+a. **MỚI hay TÁI DIỄN?** MỚI — chưa từng có entry nào trước đây ghi việc 1 wrapper tự
+   verify artifact NGAY SAU BƯỚC GHI BQ (write), khác với mọi lần "trust the artifact"
+   trước đây (MIKE.md #2, `coding_guidelines.md` §6) đều áp dụng cho việc ĐỌC dữ liệu
+   (report/plan). Đây là lần đầu áp dụng đúng công thức đó cho một bước GHI.
+b. **Fix hoàn chỉnh hay còn hở?** Cơ chế PHÁT HIỆN đã hoàn chỉnh (verify artifact thật,
+   không tin dòng in tự báo của `rating_8l_history.py`) — nhưng vấn đề GỐC (quyền ghi BQ
+   của identity chạy cron không tương tác) **vẫn HỞ**, chỉ xác nhận được khi cron tự chạy
+   thật lần đầu thứ Bảy **2026-07-18**. Điều kiện tái diễn: nếu identity cron thật CŨNG
+   thiếu quyền ghi (chưa loại trừ được) → refresh tiếp tục thất bại, chỉ khác là giờ thất
+   bại ồn ào (đúng thiết kế) thay vì âm thầm như trước khi có wrapper.
+c. **Đơn lẻ hay pattern?** Thuộc pattern rộng đã biết ("đừng tin self-report, verify
+   artifact thật") nhưng là DẤU MỐC TÍCH CỰC — không phải dấu hiệu lỗi lặp lại, mà là bằng
+   chứng nguyên tắc đó đang được áp dụng chủ động, đúng ngày mà bug SIGNAL_V11 base-leak
+   (buổi sáng cùng ngày) vừa nhắc lại lý do nguyên tắc này quan trọng.
+
+**Sự cố 2 — 3 câu hỏi bắt buộc:**
+a. **MỚI hay TÁI DIỄN?** TÁI DIỄN — cùng họ "Pattern A: job nền/dispatch chết hoặc bị cắt
+   ngang giữa lúc còn sống" đã ghi nhận nhiều lần: `2026-07-02` (job nền chết theo session
+   coordinator), `2026-06-27/28` (ping-pong callback), `2026-07-07` (Wags job bị giết ngay
+   sau khi xong), `2026-07-09 (tối)` (dạng giống 07-07, dẫn tới fix heartbeat-aware
+   deadline), `2026-07-09` (dispatch `--bg` chết theo cgroup, fix `systemd-run --scope`).
+b. **Fix hoàn chỉnh hay còn hở?** Lớp fix 07-09 (heartbeat-aware deadline) hoạt động ĐÚNG
+   cho đúng loại lỗi nó nhắm tới — **không có bằng chứng regression** (không có trường hợp
+   nào hôm nay là "agent đã xong bị giết trước khi return", cả 4 lần agent đều xác nhận
+   CÒN ĐANG LÀM DỞ khi bị giết, đúng công dụng thiết kế của trần tuyệt đối: phân biệt
+   "sống nhưng chưa xong" — vẫn bị cắt — với "sống và sắp xong" — cũng vẫn bị cắt, đây
+   chính là khoảng trống). Còn hở 2 điểm cụ thể: (i) không có cơ chế TỰ ĐỘNG redispatch khi
+   timeout thật (khác `resume_pending.py` — script đó CHỈ xử lý usage-limit); (ii) trần
+   thời gian mặc định (`TIMEOUT=600s`, 3 lần gia hạn) chưa hiệu chỉnh riêng theo loại
+   dispatch nặng.
+c. **Đơn lẻ hay pattern?** PATTERN rõ ràng, và đang DÀY LÊN: 4 lần trong đúng 1 ngày là tần
+   suất cao nhất từng ghi nhận cho họ lỗi này (các lần trước đều là 1 lần/ngày). Điểm khác
+   biệt quan trọng so với các lần trước: **không lần nào mất dữ liệu** — nghĩa là phần
+   "nguy hiểm" của pattern (mất việc/mất tiến độ) đã được kiểm soát tốt bởi quy trình
+   "verify artifact trước khi coi là fail" (MIKE.md #2), residual bây giờ thuần túy là
+   TOIL vận hành (Mike phải tự phát hiện + tự soạn lại prompt mỗi lần), không phải rủi ro
+   mất mát.
+
+**Pattern xuyên suốt — đối chiếu RETRO 07-09 (nơi Pattern A được tuyên bố "coi như ĐÃ ĐÓNG,
+cần quan sát thêm ~1 tuần"):** ngày quan sát đầu tiên (07-10) sạch (0 timeout), nhưng ngày
+quan sát thứ 2 (07-11, hôm nay) có ngay 4 lần — cửa sổ "1 tuần sạch" đã bị phá ngay khi mới
+bắt đầu. Đây KHÔNG phải bằng chứng fix 07-09 sai (lớp lỗi nó sửa không tái phát) mà là bằng
+chứng cửa sổ quan sát ban đầu **định nghĩa phạm vi hẹp hơn thực tế** — chỉ tính 1 kiểu chết
+(giết-nhầm-đã-xong) mà bỏ sót kiểu chết khác cùng họ (trần-quá-ngắn-cho-việc-thật-nặng).
+
+**Prevention MẠNH HƠN được đề xuất (không lặp lại "cần cơ chế mạnh hơn" suông — đề xuất cụ
+thể theo đúng yêu cầu bước 5):**
+- (a) Nâng `TIMEOUT`/số lần gia hạn mặc định riêng cho dispatch dùng `--model fable` (theo
+  đúng tinh thần model-routing đã có trong MIKE.md — model fable = task nặng, trade-off,
+  nên trần thời gian nên đi theo cùng logic, không dùng chung 1 con số với dispatch
+  `--model sonnet` việc nhẹ).
+- (b) Xây 1 cơ chế TỰ ĐỘNG continue-on-timeout, cùng dạng với `resume_pending.py` nhưng
+  trigger khác: khi `jobs.sh status` trả `timeout` VÀ có bằng chứng tiến triển thật (commit
+  mới sau `started_at` trong repo liên quan, hoặc working-memory agent vừa được ghi) → tự
+  dispatch lại với prompt "TIẾP TỤC (trace `<job_id>`)" giống hệt Mike đang làm tay — loại
+  bỏ phụ thuộc vào việc Mike đang ở phiên sống để phát hiện.
+- Không tự chọn (a) hay (b) thay user — đây là quyết định ảnh hưởng cơ chế dùng chung toàn
+  fleet, cần user duyệt hướng trước khi code.
+
+**Escalation:** chiếu đúng bước 10 (2 lần RETRO LIÊN TIẾP cùng pattern không đổi
+prevention), điều kiện này **CHƯA đạt theo nghĩa đen** — RETRO liền trước (07-10) không hề
+có sự cố timeout nào (không phải vì đã đóng, mà vì hôm đó không phát sinh). Nhưng vì tần
+suất hôm nay (4 lần/ngày, cao nhất từng ghi nhận) và bản chất "toil lặp lại cần con người
+canh" đã rõ, Mike CHỦ ĐỘNG ghi 1 bus event `question`
+(`retro-pattern-recurring-joblifecycle-fable-timeout`) đề xuất user chọn giữa hướng (a)/(b)
+ở trên — không chờ đủ 2 chu kỳ theo nghĩa đen mới hành động, vì bằng chứng hôm nay đã đủ
+mạnh để không cần chờ thêm 1 ngày nữa mới hỏi.
+
+**Việc còn treo sang ngày mai/tuần tới:**
+- fa_ratings_8l cron thật lần đầu: thứ Bảy **2026-07-18** 08:30 ICT — kiểm tra
+  `logs/fa_ratings_8l_refresh.log` + bus event `fa_ratings_8l-refresh-ok/-failed`.
+- fa_ratings append-only refresh cron thật lần đầu: cùng ngày 09:15 ICT (45' sau).
+- Câu hỏi mới `retro-pattern-recurring-joblifecycle-fable-timeout` chờ user chọn (a)/(b).
+- 3 mục chờ cron thứ Hai 07-13 (DT5G freshness) đã ghi ở `kb/current_ops.md`, không lặp
+  lại ở đây.
+
+**Đã dọn working memory cuối ngày** (`kb/memory/Mike.md`) + chạy `bin/consolidate.sh` để
+`context_pack.md` tươi cho phiên ngày mai — xem cập nhật ngay sau entry này.
