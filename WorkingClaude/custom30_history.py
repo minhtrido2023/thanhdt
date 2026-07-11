@@ -62,4 +62,4 @@ r = subprocess.run(cmd, capture_output=True, text=True, shell=True)
 print(r.stdout.strip()); print(r.stderr.strip())
 if r.returncode != 0:
     print("LOAD FAILED"); sys.exit(1)
-print(f"OK -> tav2_bq.custom30_8l  (current rebal {pd.Timestamp(rebals[-1]).date()}, {df[df['rebal_date']==pd.Timestamp(rebals[-1]).date()].shape[0]} mã)")
+print(f"OK -> {TABLE}  (current rebal {pd.Timestamp(rebals[-1]).date()}, {df[df['rebal_date']==pd.Timestamp(rebals[-1]).date()].shape[0]} mã)")
