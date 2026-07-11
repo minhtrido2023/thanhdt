@@ -56,16 +56,54 @@ QUY TRÌNH BẮT BUỘC (đọc bằng chứng thật, không suy đoán):
    c. Đây là lỗi ĐƠN LẺ hay thuộc 1 PATTERN xuyên suốt nhiều sự cố trong ngày/nhiều ngày
       (vd: 'luôn là do đọc nguồn dữ liệu trễ/cache thay vì live', 'luôn là do job chết
       lặng lẽ khi tiến trình cha bị giết mà không ai cập nhật trạng thái', v.v.)?
+3b. THÊM (user yêu cầu 2026-07-11) — mỗi sự cố phải có ĐỦ 3 trường trách nhiệm sau, viết
+   thành bảng (không phải văn xuôi rời rạc), tinh thần BLAMELESS (mục đích là biết sửa ở
+   BƯỚC/QUY TRÌNH nào, không phải quy tội cá nhân/agent):
+   - **Phân loại** (category): chọn 1 trong nhóm đã dùng trước đó nếu khớp, hoặc thêm nhóm
+     mới nếu thật sự không khớp nhóm nào — data-registry-accuracy, dispatch-orchestration,
+     job-monitoring/lifecycle, execution-money-path, permission-credential, scheduling-
+     timing, report-data-provenance, khác (ghi rõ). Mục đích: gộp sự cố theo NHÓM NGUYÊN
+     NHÂN qua nhiều ngày, không chỉ theo 'loại triệu chứng' bề mặt.
+   - **Nguồn gốc** (origin — bước/quy trình nào tạo ra lỗi, không phải 'ai đáng trách'):
+     ví dụ cụ thể đã xảy ra 2026-07-11 — data_registry.md ghi sai 'fa_ratings không có
+     writer' vì bước sweep ban đầu (job Taylor_20260711_080014) chỉ tìm file theo pattern
+     tên \`build_fa_ratings_*\`, bỏ sót \`fundamental_rating.py\` không theo pattern đó → gốc
+     lỗi là QUY TRÌNH SWEEP thiếu (grep theo tên, không theo nội dung/writer thật), không
+     phải 'Taylor sai'. Luôn viết theo khuôn 'quy trình/bước X thiếu Y', không viết 'agent
+     Z làm sai'.
+   - **Người ghi chép** (recorder): ai/tiến trình nào đã ghi entry chi tiết gốc của sự cố
+     này vào kb/INCIDENTS.md lúc phát hiện (thường là agent tự append_event.sh khi xong việc,
+     hoặc Mike ghi tay trong phiên sống) — trích dẫn job_id/trace_id nếu có. Nếu sự cố CHƯA
+     từng được ghi trước khi retro này chạy (phát hiện qua bước 2 ở trên) → ghi rõ 'chưa ai
+     ghi trước retro này, retro tự bổ sung' — đây tự nó là 1 dấu hiệu process gap cần nêu.
 4. Viết 1 entry MỚI '## RETRO — $TODAY: <n> sự cố, <m> pattern xuyên suốt' vào cuối
    kb/INCIDENTS.md, theo ĐÚNG format entry 'RETRO — 2026-07-07' đã có sẵn trong file
-   (đọc nó làm mẫu cấu trúc: Pattern N — mô tả, ví dụ cụ thể, Lesson, Prevention). Đừng
+   (đọc nó làm mẫu cấu trúc: Pattern N — mô tả, ví dụ cụ thể, Lesson, Prevention), MỞ RỘNG
+   bảng liệt kê sự cố để có thêm 2 cột 'Phân loại' và 'Nguồn gốc' theo mục 3b ở trên. Đừng
    lặp lại nội dung entry chi tiết từng sự cố đã có sẵn (những cái đó đã ghi rồi) — entry
    RETRO này là TỔNG HỢP + PHÂN LOẠI + BÀI HỌC XUYÊN SUỐT, không phải chép lại.
+4b. XÁC MINH ĐỘC LẬP bản nháp RETRO (user yêu cầu 2026-07-11: 'ai đảm bảo những ghi chép
+   này đã chính xác' — đây là câu trả lời). SAU KHI viết xong bản nháp (bước 4) nhưng
+   TRƯỚC KHI commit: gọi bin/dispatch.sh (đồng bộ, KHÔNG dùng --bg vì cần kết quả ngay
+   trong dispatch này) tới agent Wags (Fleet Ops Coordinator, đã có sẵn trong fleet, đúng
+   vai trò audit độ tin cậy vận hành), với nội dung yêu cầu Wags làm 3 việc: (1) tự grep
+   lại bus/inbox/*.jsonl (event error/finding) ngày $TODAY và đối chiếu xem bản nháp RETRO
+   có bỏ sót sự cố nào không — đừng tin danh sách bản nháp đã liệt kê, tự tìm lại; (2) xác
+   nhận mọi commit hash/job_id/số liệu trích dẫn trong bản nháp có thật và khớp (dùng git
+   show, jobs.sh status nếu job_id còn trong bus/jobs/); (3) xác nhận cột Nguồn gốc viết
+   đúng tinh thần blameless (mô tả bước/quy trình, không quy tội cá nhân/agent cụ thể).
+   Yêu cầu Wags trả lời CONFIRMED (không tìm ra sai sót) hoặc GAPS FOUND kèm danh sách cụ
+   thể — Wags KHÔNG tự sửa file, chỉ báo cáo lại.
+   Đọc kết quả Wags trả về, rồi:
+   - CONFIRMED → thêm dòng 'Verified by: Wags — CONFIRMED' vào cuối entry, commit luôn.
+   - GAPS FOUND → SỬA bản nháp theo đúng gaps Wags chỉ ra trước, rồi mới thêm dòng
+     'Verified by: Wags — gaps found and fixed: <tóm tắt>' và commit (không commit bản
+     nháp còn gap đã biết).
 5. Nếu phát hiện 1 pattern đã xuất hiện ở RETRO ngày trước đó (vd cùng dạng với RETRO
    2026-07-07) VẪN tái diễn hôm nay dù đã có 'Prevention' — đây là tín hiệu QUAN TRỌNG
    NHẤT cần nêu bật: prevention cũ chưa đủ mạnh, cần đề xuất prevention MẠNH HƠN (không
    chỉ lặp lại lời khuyên cũ).
-6. Commit thay đổi kb/INCIDENTS.md với message rõ ràng.
+6. Commit thay đổi kb/INCIDENTS.md với message rõ ràng (sau khi đã qua bước 4b).
 7. DỌN WORKING MEMORY cuối ngày (user yêu cầu 'trước khi vào dreaming, dọn dẹp bộ nhớ'):
    viết lại kb/memory/Mike.md (bin/remember.sh Mike --set) thành bản GỌN, sạch, phản ánh
    đúng trạng thái THẬT cuối ngày $TODAY: việc đang dở/đang chờ ai, quyết định quan trọng
