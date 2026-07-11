@@ -177,6 +177,30 @@ def dnse_close_prices(tickers):
     return prices
 
 
+def pnl_coverage_warnings(covered_tickers, live_positions):
+    """So vị thế broker THẬT vs các mã trace được fill history → cảnh báo RÕ RÀNG cho
+    từng vị thế legacy bị loại khỏi P&L (audit Taylor_20260711_031821 F6).
+
+    Script này tính cost-basis/P&L CHỈ từ fill history (dnse_raw + journal) — account
+    có vị thế mua từ TRƯỚC khi bot quản lý (ZaloPay: DGC/VPB/VIB/VHC/TCM/TLG/MSH) không
+    có fill nào nên bị bỏ qua. Trước đây bỏ qua IM LẶNG — bẫy cho weekly/monthly report
+    ZaloPay đầu tiên: P&L đọc như thể phủ 100% holdings trong khi thiếu cả nghìn tỷ vị
+    thế legacy (coding_guidelines §7.4). Bài toán TÍNH P&L cho legacy là việc riêng về
+    sau; việc của hàm này là không cho phép thiếu-mà-không-nói.
+
+    Trả về (warnings: [str], legacy_tickers: [str]). Pure function để selfcheck được.
+    """
+    if live_positions is None:
+        return (["WARN không đọc được positions broker — KHÔNG xác minh được P&L "
+                 "coverage (vị thế legacy không fill history có thể đang bị bỏ sót "
+                 "khỏi P&L mà không ai biết)"], [])
+    covered = set(covered_tickers)
+    legacy = [tk for tk in sorted(live_positions) if tk not in covered]
+    warns = [f"WARN position {tk} excluded from P&L — no fill history (legacy); "
+             f"tổng P&L bên dưới KHÔNG bao gồm mã này" for tk in legacy]
+    return warns, legacy
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--account", required=True)
@@ -287,12 +311,34 @@ def main():
                            "unrealized_pnl": mv - cv,
                            "unrealized_pnl_pct": (mv - cv) / cv * 100 if cv else 0})
 
+    # P&L coverage vs vị thế broker THẬT (F6): mã đang nắm giữ mà không trace được fill
+    # history (legacy, mua trước khi bot quản lý) trước đây bị bỏ qua ÂM THẦM khỏi P&L —
+    # giờ log rõ từng mã + gắn cờ pnl_coverage_complete để report sau này không đọc nhầm
+    # P&L partial thành P&L toàn account. Reuse broker_positions của daily_nav_snapshot
+    # (import trong hàm — daily_nav_snapshot import ngược lại module này cũng ở function
+    # level nên không tạo vòng import).
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from daily_nav_snapshot import broker_positions
+        live_pos = broker_positions(args.account, args.account_no)
+    except Exception as e:
+        print(f"⚠️ Không kiểm tra được P&L coverage (broker_positions lỗi: {e})",
+              file=sys.stderr)
+        live_pos = None
+    cov_warns, legacy_tickers = pnl_coverage_warnings(
+        [p["ticker"] for p in positions], live_pos)
+    warnings.extend(cov_warns)
+    for w in cov_warns:
+        print(f"⚠️ {w}", file=sys.stderr)
+
     result = {
         "account": args.account,
         "dates_included": dates,
         "asof": args.asof,
         "source": "dnse_raw (broker-native averagePrice/fillQuantity), cross-checked vs journal FILL events",
         "verified": not any(w.startswith("WARN qty") for w in warnings),
+        "pnl_coverage_complete": (live_pos is not None and not legacy_tickers),
+        "legacy_positions_excluded_from_pnl": legacy_tickers,
         "warnings": warnings,
         "positions": sorted(positions, key=lambda p: -p["unrealized_pnl"]),
         "total_cost_value": total_cost,
