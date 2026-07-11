@@ -21,12 +21,15 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 QUIET="${1:-}"
 PROJECT="lithe-record-440915-m9"
 MAX_PRICE_LAG=2      # trading days: cho phép gap weekend/nghỉ lễ
-MAX_STATE_LAG=1      # trading days cho DT5G regime — SIẾT từ 2 xuống 1 (2026-07-10): với
-                     # tolerance=2, DT5G trễ đúng 1 ngày giao dịch (bug thật do thứ tự cron
-                     # đảo ngược, đã sửa cùng lần này — xem daily_refresh_v34b_linux.sh)
-                     # LUÔN pass âm thầm (1<=2), che mất lỗi suốt nhiều tuần. Giờ đã dời
-                     # daily_refresh sớm hơn + có freshness precheck riêng, ngày bình thường
-                     # sẽ lag=0; lag=1 giờ ĐÚNG NGHĨA là bất thường cần chặn DollarBill.
+MAX_STATE_LAG=0      # trading days cho DT5G regime — SIẾT 2→1 (2026-07-10) rồi 1→0
+                     # (2026-07-11, audit Winston_20260710_173031): gate so sánh bằng -le
+                     # nên MAX_STATE_LAG=1 vẫn cho lag=1 PASS — đúng case "state trễ 1 ngày
+                     # cần chặn DollarBill" mà lần siết 07-10 nhắm tới lại là NO-OP (xảy ra
+                     # thật tối 07-10: daily_refresh 18:30 miss, check 19:00 vẫn ALL FRESH,
+                     # DollarBill lập plan trên state 07-09). daily_refresh giờ chạy 18:30
+                     # + precheck ingest riêng → ngày bình thường lag=0; lag>=1 (trading-day)
+                     # là bất thường → FAIL + block. Giữ -le, chỉ đổi ngưỡng (PRICE=2/FIN=90
+                     # đang đúng ngữ nghĩa -le, không đụng).
 MAX_FIN_LAG=90       # calendar days: financial data quarterly (Q1 results ~Apr, gap có thể 60-85 ngày)
 TODAY="$(date +%Y-%m-%d)"
 NOW_ICT="$(TZ='Asia/Ho_Chi_Minh' date +'%H:%M ICT')"

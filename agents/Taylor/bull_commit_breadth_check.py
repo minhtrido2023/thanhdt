@@ -90,11 +90,12 @@ M.to_csv(f"{WC}/mike/agents/Taylor/data_bull_breadth_series.csv")
 T.to_csv(f"{WC}/mike/agents/Taylor/data_bull_commit_snapshots.csv", index=False)
 
 # ── counterfactual: base state had the EW leg NOT gone stale ─────────
-# actual dual_v3 blend fell back to r_raw alone since 2026-06-22 (data/ ew_full
-# stale at 06-19 while ew_v1 writes fresh output to WORKDIR root).
+# actual dual_v3 blend fell back to r_raw alone 2026-06-22..07-10 (data/ ew_full
+# stale at 06-19 while ew_v1 wrote to WORKDIR root — fixed 498c3a6: ew_v1 now
+# writes data/ (canonical), root copy quarantined; read data/ like everyone else.
 dv = pd.read_csv(f"{WC}/data/vnindex_5state_dual_v3_full.csv")
 dv["time"] = pd.to_datetime(dv["time"])
-ew = pd.read_csv(f"{WC}/vnindex_5state_ew_full.csv")[["time", "r_score"]]
+ew = pd.read_csv(f"{WC}/data/vnindex_5state_ew_full.csv")[["time", "r_score"]]
 ew["time"] = pd.to_datetime(ew["time"])
 cf = dv.merge(ew.rename(columns={"r_score": "r_ew_fresh"}), on="time", how="left")
 a = cf["alpha"].values
