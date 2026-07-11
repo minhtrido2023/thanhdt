@@ -2,6 +2,33 @@
 > Mike cập nhật thủ công khi có thay đổi trạng thái quan trọng. Đọc trước mọi thứ khác khi restart.
 > Cập nhật lần cuối: 2026-07-11
 
+## fa_ratings → fa_ratings_8l: user CHỐT hướng (c) — dự án re-tune SIGNAL_V11 bucket trên 8L (2026-07-11)
+
+**Quyết định user (không phải quyết định thay user)**: sau khi backtest drop-in swap bị bác (cả 2
+mapping tier8l/rating8l đều kém baseline R3, OOS -3.55pp/-2.20pp, LOO âm mọi năm — xem finding
+Taylor_20260711_094714, quant-skeptic CONFIRMED), user chọn **hướng (c): re-tune bucket logic
+SIGNAL_V11 trên nền thang rating gốc của 8L (1-5), coi đây là ứng viên THAY THẾ CORE thật sự nếu
+kết quả tốt** — KHÔNG chọn (a) giữ static vá tạm, KHÔNG chọn (b) hybrid fallback chắp vá. Lý do user
+nêu rõ: "return phải dựa trên dữ liệu thật và đầy đủ... không né tránh... không dùng bất kỳ hình
+thức nào chỉ để chữa cháy mà không giải quyết vấn đề tận gốc."
+
+**Đây là dự án R&D đầy đủ, không phải patch nhanh** — 3 giai đoạn user yêu cầu: (1) team bàn luận
+cẩn thận lên plan, (2) chuẩn bị dữ liệu tốt, (3) cập nhật lại model. Đang ở giai đoạn 1+2 song song:
+- Taylor (fable, dispatch async): thiết kế phương pháp re-tune bucket (C/D momentum vs A/B
+  compounder vs E avoid) trên thang rating 8L gốc — không map cưỡng ép sang A-E như thử nghiệm vừa
+  bác. Phải theo đúng multiple-testing discipline (N trials khai báo, DSR/PBO, walk-forward IS/OOS,
+  per-year LOO) trước khi coi là ứng viên production.
+- data-ops/Winston (dispatch song song): chuẩn bị dữ liệu — fix cadence refresh `fa_ratings_8l`
+  hiện đang THỦ CÔNG (lần cuối 06-20), đây là rủi ro đã bị nhắc lại nhiều lần (mọi finding trước đều
+  flag "nếu migrate mà không wire refresh tự động = đổi bảng đóng băng lấy bảng đóng-băng-chậm-hơn").
+  Đề xuất cron + freshness-check, KHÔNG tự cài crontab — trình diff cho user duyệt trước.
+
+**Deadline nghiệp vụ thật vẫn còn nguyên**: `fa_ratings` đóng băng 05-10, sẽ sai dần khi BCTC
+Q2/2026 về (~cuối tháng 7) — dự án này cần có tiến độ rõ trước đó, dù không cần vội đổi ngay hôm nay.
+
+**Trước khi wire production**: bắt buộc qua đủ walk-forward IS/OOS + DSR/PBO + LOO + quant-skeptic
+CONFIRMED + user sign-off cuối cùng — không khác gì mọi thay đổi signal khác trong hệ thống.
+
 ## DT5G BULL-giả bug → audit freshness toàn hệ thống → CRITICAL basket fix → re-pin baseline R3
 ### CHUỖI ĐÃ KHÉP KÍN HOÀN TOÀN (2026-07-11), chỉ còn 3 mục chờ xác nhận qua cron thứ Hai 07-13
 

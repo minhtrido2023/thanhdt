@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v908)
+# Mike fleet — context pack (v909)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-11T06:58:51] quant-skeptic/verification — ✅ CONFIRMED VERIFY: F3 tracker fix DONE cả 2 bước: pt_v4/pt_v22 đọc dt5g_live (commit 0537514), sổ pt_v22 TỰ SẠCH qua full-replay — 6 vị thế BULL-giả biến mất, không cần can thiệp tay (commit 9149c0f), selfcheck 29/29: {"finding_topic": "F3 tracker fix DONE cả 2 bước: pt_v4/pt_v22 đọc dt5g_live (0537514), sổ pt_v22 tự sạch qua full-replay — 6 vị thế BULL-giả biến mất, không ca …
 - [2026-07-11T07:37:00] Taylor/finding — RE-PIN BASELINE R3 DONE (dt5g swap): số tham chiếu chính thức MỚI 28.82%/1.90/-15.7%/1.83 (commit 09724bc) + pt_v12_live KẾT LUẬN (b) không phải live consumer, không vá: {"job": "Taylor_20260711_070437", "trace_chain": ["Taylor_20260711_051033", "Taylor_20260711_064350", "Taylor_20260711_070437"], "status": "DONE_BOTH_TASKS", "t …
 - [2026-07-11T07:45:17] quant-skeptic/verification — ✅ CONFIRMED VERIFY: RE-PIN BASELINE R3 DONE (dt5g swap): số tham chiếu chính thức MỚI 28.82%/1.90/-15.7%/1.83 (commit 09724bc) + pt_v12_live KẾT LUẬN (b) không phải live consumer, không vá: {"finding_topic": "RE-PIN BASELINE R3 DONE (dt5g swap): số tham chiếu chính thức MỚI 28.82%/1.90/-15.7%/1.83 (commit 09724bc) + pt_v12_live KẾT LUẬN (b) không p …
 - [2026-07-11T08:12:34] Taylor/finding — Data registry sweep DONE: +8 section/~35 nguồn mới, 4 TRAP/rủi ro mới phát hiện (custom30_8l mislabel-tươi-hàng-ngày, fa_ratings STATIC vẫn là input production, dt_4gate BQ chết vs CSV sống, bq_cache mirror nguyên bảng trap): {"job": "Taylor_20260711_080014", "status": "DONE", "commit": "e5d0545 (mike repo, kb/data_registry.md)", "method": "grep toàn codebase mọi tav2_bq.* + file dat …
@@ -11,11 +10,39 @@
 - [2026-07-11T08:56:39] quant-skeptic/verification — ✅ CONFIRMED VERIFY: VIỆC 1 ĐÓNG custom30v_8l (root cause = lịch thứ Bảy, writer OK, đã chạy tay + verify 15:45 ICT) + VIỆC 2 khuyến nghị (b) migrate fa_ratings→fa_ratings_8l qua full validation, KHÔNG rebuild builder cũ: {"finding_topic": "VIỆC 1 ĐÓNG custom30v_8l (root cause = lịch thứ Bảy, writer OK, chạy tay + verify 15:45 ICT) + VIỆC 2 khuyến nghị (b) migrate fa_ratings→fa_r …
 - [2026-07-11T10:25:14] Taylor/finding — VALIDATE fa_ratings_8l migration — VERDICT KHÔNG MIGRATE drop-in: cả 2 mapping đều kém baseline R3, degradation dồn OOS (tier8l OOS -3.55pp, MaxDD sâu thêm 2pp, tail xấu đi), LOO âm mọi năm — giữ fa_ratings, cần quyết hướng Q2/2026 trước đầu tháng 8: {"job": "Taylor_20260711_094714", "status": "DONE_MEASURED", "verdict": "DO_NOT_MIGRATE_DROP_IN — số đo bác đề xuất swap thẳng; đây là căn cứ cho user quyết, kh …
 - [2026-07-11T10:29:34] quant-skeptic/verification — ✅ CONFIRMED VERIFY: VALIDATE fa_ratings_8l migration — VERDICT KHÔNG MIGRATE drop-in: cả 2 mapping đều kém baseline R3, degradation dồn OOS (tier8l OOS -3.55pp, MaxDD sâu thêm 2pp, tail xấu đi), LOO âm mọi năm — giữ fa_ratings, cần quyết hướng Q2/2026 trước đầu tháng 8: {"finding_topic": "VALIDATE fa_ratings_8l migration — VERDICT KHÔNG MIGRATE drop-in: cả 2 mapping đều kém baseline R3, degradation dồn OOS (tier8l OOS -3.55pp,  …
+- [2026-07-11T10:45:56] Winston/finding — ĐỀ XUẤT cron hoá fa_ratings_8l refresh (weekly Sat 08:30 ICT) + freshness-check WARN — chuẩn bị nền cho re-tune SIGNAL_V11, KHÔNG tự cài: {"job": "Winston_20260711_104135", "status": "DONE_PROPOSAL_ONLY", "verify_hien_trang": {"bq_show_lastModified": "2026-06-20 10:53:55 ICT (verify trực tiếp 07-1 …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
 > Mike cập nhật thủ công khi có thay đổi trạng thái quan trọng. Đọc trước mọi thứ khác khi restart.
 > Cập nhật lần cuối: 2026-07-11
+
+## fa_ratings → fa_ratings_8l: user CHỐT hướng (c) — dự án re-tune SIGNAL_V11 bucket trên 8L (2026-07-11)
+
+**Quyết định user (không phải quyết định thay user)**: sau khi backtest drop-in swap bị bác (cả 2
+mapping tier8l/rating8l đều kém baseline R3, OOS -3.55pp/-2.20pp, LOO âm mọi năm — xem finding
+Taylor_20260711_094714, quant-skeptic CONFIRMED), user chọn **hướng (c): re-tune bucket logic
+SIGNAL_V11 trên nền thang rating gốc của 8L (1-5), coi đây là ứng viên THAY THẾ CORE thật sự nếu
+kết quả tốt** — KHÔNG chọn (a) giữ static vá tạm, KHÔNG chọn (b) hybrid fallback chắp vá. Lý do user
+nêu rõ: "return phải dựa trên dữ liệu thật và đầy đủ... không né tránh... không dùng bất kỳ hình
+thức nào chỉ để chữa cháy mà không giải quyết vấn đề tận gốc."
+
+**Đây là dự án R&D đầy đủ, không phải patch nhanh** — 3 giai đoạn user yêu cầu: (1) team bàn luận
+cẩn thận lên plan, (2) chuẩn bị dữ liệu tốt, (3) cập nhật lại model. Đang ở giai đoạn 1+2 song song:
+- Taylor (fable, dispatch async): thiết kế phương pháp re-tune bucket (C/D momentum vs A/B
+  compounder vs E avoid) trên thang rating 8L gốc — không map cưỡng ép sang A-E như thử nghiệm vừa
+  bác. Phải theo đúng multiple-testing discipline (N trials khai báo, DSR/PBO, walk-forward IS/OOS,
+  per-year LOO) trước khi coi là ứng viên production.
+- data-ops/Winston (dispatch song song): chuẩn bị dữ liệu — fix cadence refresh `fa_ratings_8l`
+  hiện đang THỦ CÔNG (lần cuối 06-20), đây là rủi ro đã bị nhắc lại nhiều lần (mọi finding trước đều
+  flag "nếu migrate mà không wire refresh tự động = đổi bảng đóng băng lấy bảng đóng-băng-chậm-hơn").
+  Đề xuất cron + freshness-check, KHÔNG tự cài crontab — trình diff cho user duyệt trước.
+
+**Deadline nghiệp vụ thật vẫn còn nguyên**: `fa_ratings` đóng băng 05-10, sẽ sai dần khi BCTC
+Q2/2026 về (~cuối tháng 7) — dự án này cần có tiến độ rõ trước đó, dù không cần vội đổi ngay hôm nay.
+
+**Trước khi wire production**: bắt buộc qua đủ walk-forward IS/OOS + DSR/PBO + LOO + quant-skeptic
+CONFIRMED + user sign-off cuối cùng — không khác gì mọi thay đổi signal khác trong hệ thống.
 
 ## DT5G BULL-giả bug → audit freshness toàn hệ thống → CRITICAL basket fix → re-pin baseline R3
 ### CHUỖI ĐÃ KHÉP KÍN HOÀN TOÀN (2026-07-11), chỉ còn 3 mục chờ xác nhận qua cron thứ Hai 07-13
