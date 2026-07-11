@@ -1416,3 +1416,6 @@
 - [2026-07-11T12:05:24Z] Taylor/heartbeat — Taylor_20260711_114557: {"status": "in_progress", "note": "0b: 2 run diagnostic attribution-ladder (maskleg/legcov8l) đã launch nền trên harness pin R3. Đang viết script 0c IC/hit-rate query BQ thật"}
 - [2026-07-11T12:06:00Z] Taylor/status — Taylor_20260711_114557: {"status": "deadline_extended", "hb_age_s": 36, "extension": 1, "max_ext": 3, "source": "watcher"}
 - [2026-07-11T11:32:31Z] Winston/error — fa_ratings_8l-refresh-failed: {"reason": "table lastModified (2026-06-20 03:53:55) < run start — BQ write silently failed (refresh_bq_table() không check returncode)"}
+
+## Consolidation 2026-07-11T12:16:02Z
+- [2026-07-11T12:12:06Z] Taylor/heartbeat — Taylor_20260711_114557: {"status": "in_progress", "note": "0c XONG (IC/hit-rate 512 cells, BQ thật 142.6k obs weekly): rating8l có separation thật — IC âm nhất quán IS+OOS ở bull-momentum (ta140_s45 OOS -0.066..-0.111, hit r1 69.7%/r2 74.8% vs r5 48.0%) + compounder ctx (-0.04..-0.05); NEUTRAL flip dấu (+0.10 OOS ta140_s3). CP0 hướng GO. 0d PIT sạch: 0 dup, 87.7% khớp Release_Date, 10.7% fiscal+45, 0 gap âm, 879 rows republish-drift. 2 run diag 0b đang chạy"}
