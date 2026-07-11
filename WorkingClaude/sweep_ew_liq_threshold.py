@@ -44,7 +44,7 @@ def run_ewv1(tv_price, liq_min, tag, topn=0):
     r = subprocess.run([PY, "vnindex_5state_ew_v1.py"], env=env, capture_output=True, text=True)
     if r.returncode != 0:
         print(f"  [FAIL] {tag}\n{r.stderr[-800:]}"); return None
-    return pd.read_csv(os.path.join(WORKDIR, f"vnindex_5state_ew_full{tag}.csv"), parse_dates=["time"])
+    return pd.read_csv(os.path.join(WORKDIR, f"data/vnindex_5state_ew_full{tag}.csv"), parse_dates=["time"])
 
 # VNINDEX forward returns (the regime we predict / trade)
 vni = pd.read_csv("data/VNINDEX.csv", usecols=["time","Close"]); vni["time"] = pd.to_datetime(vni["time"])

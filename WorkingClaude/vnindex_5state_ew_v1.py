@@ -20,8 +20,10 @@ CMF: median D_CMF across eligible universe (post-2014); VNINDEX D_CMF (pre-2014)
 Breadth: % above MA50 on eligible universe.
 
 Outputs:
-  vnindex_5state_ew_staging.csv  → time, state, state_raw (uploadable via deploy_ngu_hanh.py)
-  vnindex_5state_ew_full.csv     → full diagnostics for inspection
+  data/vnindex_5state_ew_staging.csv → time, state, state_raw (uploadable via deploy_ngu_hanh.py)
+  data/vnindex_5state_ew_full.csv    → full diagnostics for inspection
+  (cả 2 ghi vào data/ — canonical path duy nhất; bug reorg 06-21 từng để writer ghi root
+   trong khi chain đọc data/ → EW-leg frozen 3 tuần, BULL candidate giả 07-10)
 """
 import sys, io, os, subprocess, tempfile
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
@@ -507,7 +509,7 @@ out_staging["time"] = pd.to_datetime(out_staging["time"]).dt.strftime("%Y-%m-%d"
 out_staging["state"]     = out_staging["state"].astype(int)
 out_staging["state_raw"] = out_staging["state_raw"].astype(int)
 _OTAG = os.environ.get("OUT_TAG", "")
-staging_path = os.path.join(WORKDIR, f"vnindex_5state_ew_staging{_OTAG}.csv")
+staging_path = os.path.join(WORKDIR, f"data/vnindex_5state_ew_staging{_OTAG}.csv")
 out_staging.to_csv(staging_path, index=False)
 print(f"  → {staging_path} ({len(out_staging)} rows)")
 

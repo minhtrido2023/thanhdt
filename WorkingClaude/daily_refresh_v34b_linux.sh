@@ -59,6 +59,11 @@ done
 [ "$ready" = 1 ] || die "ticker_prune still incomplete for $TODAY_ICT after 6 attempts (~1.5h) — refusing to compute DT5G on a stale/partial day. bq_freshness_check.sh's own gate will BLOCK DollarBill downstream since vnindex_5state_dt5g_live won't advance today."
 
 # --- 1. upstream local rebuild (produces vnindex_5state_tam_quan_v3_4b_full_history.csv) ---
+# Mốc thời gian cho post-chain freshness assertion (step [8b] dưới): mọi file output kỳ
+# vọng phải có mtime >= mốc này, nếu không chain die TRƯỚC khi publish BQ. Đặt SAU step
+# [0] (precheck có thể chờ tới ~1.5h) để không nới lỏng assertion oan.
+CHAIN_START_EPOCH="$(date +%s)"
+
 step "[1] clear pkl caches"
 rm -f data/_cache_vnindex_2000_now.pkl data/_cache_universe_2013_now.pkl
 
@@ -78,7 +83,45 @@ step "[5] vnindex_5state_dual_v3.py";      $PY vnindex_5state_dual_v3.py      ||
 step "[6] build_v3_1_clean.py";            $PY deploy_v3_4b_package/build_v3_1_clean.py || die "v3_1_clean"
 cp data/vnindex_5state_tam_quan_v3_1_clean.csv data/vnindex_5state_tam_quan_v3_1_full_history.csv || die "cp v3_1"
 step "[7] build_v3_4_bull_aware.py";       $PY deploy_v3_4b_package/build_v3_4_bull_aware.py || die "v3_4b"
+# build_v3_4_bull_aware.py ghi root CHỦ ĐÍCH (bq load bên dưới đọc root) — mirror sang
+# data/ để ~30 script research + build_dt_4gate.py (đọc data/) không bao giờ đọc bản
+# đóng băng nữa (audit Winston_20260710_173031: data/v3_4b frozen Jun-30 trong khi root
+# tươi hằng đêm → dt_4gate build lại mỗi đêm từ base cũ). Cùng pattern cp v3_1 ở trên.
+cp vnindex_5state_tam_quan_v3_4b_full_history.csv data/vnindex_5state_tam_quan_v3_4b_full_history.csv || die "cp v3_4b -> data/"
 step "[8] build_dt_4gate.py (local, non-fatal)"; $PY build_dt_4gate.py || echo "  WARN: dt_4gate failed (non-fatal)"
+
+# --- 1b. post-chain output freshness assertion (audit Winston_20260710_173031) ---
+# Cơ chế tổng quát chống writer-ghi-sai-path/step-sót: MỌI file output kỳ vọng của chain
+# compute (step 2-8) phải có mtime >= CHAIN_START_EPOCH. Thiếu/cũ → die + alert TRƯỚC
+# backup/deploy, để dữ liệu stale không bao giờ lên BQ production. Đây chính là lỗ hổng
+# để bug EW-leg (writer ghi root, chain đọc data/ frozen 06-19) sống 3 tuần không ai thấy.
+step "[8b] post-chain freshness assertion (mtime >= chain start)"
+REQUIRED_OUTPUTS=(
+  data/us_market_history.csv                             # step 2
+  data/vnindex_5state_ew_full.csv                        # step 3
+  data/vnindex_5state_ew_staging.csv                     # step 3
+  data/concentration_history.csv                         # step 4
+  data/vnindex_5state_dual_v3_staging.csv                # step 5
+  data/vnindex_5state_dual_v3_full.csv                   # step 5
+  data/vnindex_5state_tam_quan_v3_1_clean.csv            # step 6
+  data/vnindex_5state_tam_quan_v3_1_full_history.csv     # step 6 cp
+  vnindex_5state_tam_quan_v3_4b_full_history.csv         # step 7 (root, chủ đích — bq load đọc)
+  data/vnindex_5state_tam_quan_v3_4b_full_history.csv    # step 7 cp mirror
+)
+if ! ./assert_chain_outputs.sh "$CHAIN_START_EPOCH" "${REQUIRED_OUTPUTS[@]}"; then
+  ALERT="🛑 daily_refresh_v34b ABORT $(TZ='Asia/Ho_Chi_Minh' date '+%Y-%m-%d %H:%M ICT'): post-chain freshness assertion FAIL — có file output MISSING/STALE (writer sót hoặc ghi sai path). KHÔNG publish BQ. Xem $LOG."
+  /home/trido/thanhdt/WorkingClaude/mike/bin/notify.sh "$ALERT" 2>/dev/null || true
+  /home/trido/thanhdt/WorkingClaude/mike/bin/notify_thread.sh "$ALERT" "1521470705563340910" 2>/dev/null || true
+  die "post-chain freshness assertion FAILED — stale/missing intermediate, refusing to publish"
+fi
+# dt_4gate: ADVISORY only (step [8] non-fatal by design, consumer chỉ research/test —
+# audit xác nhận không nằm trên đường publish BQ). Stale/thiếu → alert rõ ràng nhưng
+# KHÔNG chặn publish production.
+if ! ./assert_chain_outputs.sh "$CHAIN_START_EPOCH" data/vnindex_5state_dt_4gate.csv; then
+  WMSG="⚠️ daily_refresh_v34b $(TZ='Asia/Ho_Chi_Minh' date '+%Y-%m-%d %H:%M ICT'): data/vnindex_5state_dt_4gate.csv MISSING/STALE (step [8] non-fatal, research-only) — chain vẫn tiếp tục publish, nhưng cần xem $LOG."
+  echo "  WARN: dt_4gate output stale/missing (advisory, không chặn publish)"
+  /home/trido/thanhdt/WorkingClaude/mike/bin/notify.sh "$WMSG" 2>/dev/null || true
+fi
 
 CSV="vnindex_5state_tam_quan_v3_4b_full_history.csv"  # build_v3_4_bull_aware.py saves to WORKDIR root (not data/)
 LOCAL_MAX="$(tail -1 "$CSV" | cut -d, -f1)"
