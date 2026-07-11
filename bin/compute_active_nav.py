@@ -13,7 +13,12 @@ có vị thế mua từ TRƯỚC khi bot quản lý (không có trong journal n�
 Nguồn số liệu:
   - Vị thế + cash/nợ margin: đọc trực tiếp balances/positions THẬT qua DNSEBroker
     (real-time, không phải file trung gian).
-  - Giá thị trường: BigQuery tav2_bq.ticker Close mới nhất.
+  - Giá thị trường: nếu --asof là HÔM NAY (hoặc bỏ trống) → giá DNSE live
+    (close_price boardId=G1, cùng nguồn verify_account_snapshot.dnse_close_prices);
+    BQ tav2_bq.ticker Close CHỈ dùng cho ngày quá khứ. Bright-line rule 2026-07-09
+    (kb/coding_guidelines.md §6): BQ chỉ sync đêm 23:45 ICT nên chạy intraday mà đọc
+    BQ là cầm chắc giá hôm-trước — script này là cơ sở sizing plan (DollarBill đọc
+    active_nav), giá stale ở đây = sai quy mô lệnh thật (audit Taylor_20260711_031821 F1).
 
 Dùng để: (1) DollarBill/Mike biết đúng cơ sở NAV khi lên plan cho account có
 excluded_tickers (target % phải tính trên active_nav, KHÔNG phải tổng NAV — nếu
@@ -74,11 +79,45 @@ def bq_close_prices(tickers, as_of_date=None):
     return {r["ticker"]: float(r["Close"]) for r in rows}, None
 
 
+def resolve_prices(tickers, asof):
+    """Chọn nguồn giá theo bright-line rule: hôm nay (hoặc None) → DNSE live,
+    ngày quá khứ → BQ Close. Mirror đúng nhánh asof==today của
+    verify_account_snapshot.py / daily_nav_snapshot.py — không tự chế logic mới.
+
+    Trả về (prices: {tk: px}, price_source: {tk: nguồn}, err: str|None).
+    Ticker DNSE thiếu giá (API hiccup) → fallback BQ từng mã + cảnh báo LỚN ra stderr
+    (đánh dấu nguồn 'bq_close_stale' để provenance trong output JSON không nói dối).
+    """
+    import datetime as _dt
+    today = _dt.date.today().isoformat()
+    if asof is None or asof == today:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from verify_account_snapshot import dnse_close_prices
+        prices = dnse_close_prices(tickers)
+        price_source = {tk: "dnse_g1" for tk in prices}
+        missing = [t for t in tickers if t not in prices]
+        if missing:
+            bq_px, err = bq_close_prices(missing)
+            if bq_px:
+                for tk, px in bq_px.items():
+                    prices[tk] = px
+                    price_source[tk] = "bq_close_stale"
+            print(f"⚠️ DNSE thiếu giá live cho {missing} — tạm dùng giá BQ (có thể trễ "
+                  f"≥1 ngày giao dịch, BQ chỉ sync đêm 23:45 ICT) — active_nav có thể lệch",
+                  file=sys.stderr)
+        return prices, price_source, None
+    prices, err = bq_close_prices(tickers, asof)
+    if prices is None:
+        return None, None, err
+    return prices, {tk: "bq_close" for tk in prices}, None
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--account", required=True, help="label trong trading_bot_accounts.json")
     ap.add_argument("--account-id", default=None, help="override account_id nếu cần")
-    ap.add_argument("--asof", default=None, help="ngày giá đóng cửa BQ (mặc định: mới nhất)")
+    ap.add_argument("--asof", default=None,
+                    help="ngày giá đóng cửa (mặc định/hôm nay: DNSE live; ngày quá khứ: BQ)")
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
 
@@ -97,7 +136,7 @@ def main():
         print(f"⚠️ Account {args.account} không có vị thế nào — active_nav = cash = {cash:,.0f}")
         return
 
-    prices, err = bq_close_prices(tickers, args.asof)
+    prices, price_source, err = resolve_prices(tickers, args.asof)
     if prices is None:
         print(f"❌ Không lấy được giá BQ: {err}", file=sys.stderr)
         sys.exit(3)
@@ -109,7 +148,7 @@ def main():
         qty = pos.get("total", 0)
         px = prices.get(tk)
         if px is None:
-            print(f"⚠️ Thiếu giá BQ cho {tk} — bỏ qua khỏi tổng (có thể làm lệch active_nav)",
+            print(f"⚠️ Thiếu giá cho {tk} — bỏ qua khỏi tổng (có thể làm lệch active_nav)",
                   file=sys.stderr)
             continue
         mv = qty * px
@@ -138,7 +177,8 @@ def main():
         "account": args.account, "account_id": account_id,
         "cash": cash, "total_stock_value": total_mv, "excluded_value": excluded_mv,
         "excluded_tickers": sorted(excluded), "total_nav": total_nav, "active_nav": active_nav,
-        "positions": [{"ticker": tk, "qty": qty, "price": px, "value": mv, "excluded": is_excl}
+        "positions": [{"ticker": tk, "qty": qty, "price": px, "value": mv, "excluded": is_excl,
+                        "price_source": price_source.get(tk, "?")}
                        for tk, qty, px, mv, is_excl in rows],
     }
     out_path = args.out or os.path.join(
