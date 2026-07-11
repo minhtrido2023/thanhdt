@@ -2,7 +2,7 @@
 
 *Period*: 2026-06-11 -> 2026-07-09 (0.077y, 21 trading days)
 
-*Init NAV*: 50B  |  *Final NAV*: 51.7217B  |  *Total ret*: +3.44%  |  *MaxDD*: -1.91%
+*Init NAV*: 50B  |  *Final NAV*: 51.2507B  |  *Total ret*: +2.50%  |  *MaxDD*: -1.43%
 
-*Books*: BAL 26.1550B | LAG 25.5124B  |  *CAPIT events*: 0
+*Books*: BAL 25.6854B | LAG 25.5115B  |  *CAPIT events*: 0
 
