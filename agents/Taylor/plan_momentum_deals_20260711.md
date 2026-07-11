@@ -1,5 +1,5 @@
 # PLAN — Phân tích deal thành công lịch sử của book Momentum → tìm pattern thật
-> Taylor, 2026-07-11 · job Taylor_20260711_163023 · trạng thái: **USER ĐÃ DUYỆT · CP0 = GO (Phase 0 xong, job Taylor_20260711_165407) — chờ duyệt sang Phase 1**
+> Taylor, 2026-07-11 · job Taylor_20260711_163023 · trạng thái: **CP0 = GO · CP1 = NO-GO (Phase 1 xong, job Taylor_20260711_225135) — không có pattern tách được, khuyến nghị đóng/thu hẹp kênh MOM — chờ quant-skeptic verify + user quyết**
 > Khuôn kỷ luật: giống plan_fa8l_retune_20260711.md — plan trước, pre-register trước, mới đốt compute.
 
 ## 0. Bối cảnh & mandate (từ user, 2026-07-11)
@@ -208,6 +208,69 @@ hay không là quyết định mở rộng scope, thuộc user, không tự quy�
 
 **DỪNG theo đúng quy trình — chờ Mike/user duyệt mới sang Phase 1** (contrast 13 feature, FDR 10%,
 IS/OOS/ex-2021, 1 logistic walk-forward; không mở thêm trial).
+
+## CP1 — KẾT QUẢ PHASE 1 (2026-07-12, job Taylor_20260711_225135) — **VERDICT: NO-GO**
+
+**Script**: `mike/agents/Taylor/momdeal/momdeal_phase1_contrast.py`
+**Outputs**: `data/momdeal_exp/{phase1_report.txt, phase1_feature_table.csv}`
+**Test ledger tuân thủ đúng**: 13 univariate (FDR-BH 10%) + 1 logistic walk-forward = 14 test khai báo,
+KHÔNG mở thêm test nào. Gate không nới.
+
+### Gate CP1 (pre-registered §6): ≥1 feature FDR-pass ∧ giữ dấu IS/OOS/ex-2021 ∧ |Cliff δ|≥0.15 → **0 survivor**
+
+| # | Feature | δ FULL (n=343S/293F) | p | FDR10% | δ IS14-19 (n=44/53) | δ OOS20+ | δ ex-2021 | Kết cục |
+|---|---|---|---|---|---|---|---|---|
+| F3 | ROIC_Trailing | **+0.116** | 0.014 | PASS | +0.045 | +0.108 | +0.104 | near-miss: dấu ổn định cả 3 era nhưng \|δ\|=0.116 < 0.15 |
+| F5 | Revenue_YoY_P0 | **+0.129** | 0.005 | PASS | +0.056 | +0.164 | +0.119 | near-miss: dấu ổn định cả 3 era nhưng \|δ\|=0.129 < 0.15 |
+| F1 rating | −0.019 | 0.67 | . | | | | | không phân tách ở MOM (nhưng PASS ở DVR — xem dưới) |
+| F2 route | V=0.137 | 0.064 | . | | | | | (Cramér's V; PASS mạnh ở DVR V=0.259) |
+| F4,T1-T5,C1-C3 | \|δ\|≤0.065 | ≥0.16 | . | | | | | không phân tách |
+
+- **Multivariate check**: logistic L2 (fixed C=1.0, không tune), walk-forward theo năm — chỉ 3 năm đủ
+  n (2021/2024/2025; 2022-23 kênh gần chết: 1+5 episode labeled): AUC 0.493/0.542/0.382, **mean 0.472**
+  — không có predictability tổng hợp.
+- **Sensitivity label** (2M+7/0, 2M+15/0, 3M+10/0): F3/F5 giữ dấu + nominal p<0.05 ở cả 3 biến thể —
+  là tín hiệu thật nhưng YẾU, không phải artifact của ngưỡng +10%.
+- **L1 consistency**: F3 +0.079 / F5 +0.043 cùng dấu với L2 (không mâu thuẫn). Riêng C1_log_tv (+0.397,
+  p=0.001) và T5 (+0.287) significant Ở L1 nhưng CẢ Ở RE_BACKLOG control (+0.331/+0.321) và δ≈0 ở L2 →
+  đúng nghi vấn §3: artifact của exit-rules/book path chung mọi kênh (mã to/thanh khoản sống sót exit
+  tốt hơn), KHÔNG phải entry pattern của momentum.
+
+### Trả lời trực tiếp câu hỏi trung tâm của user ("thành công MOM_N cũ có thực không")
+Phân bố label theo năm (family, L2): 2020 = 83S/24F (77% success), 2021 = 147S/110F — **2 năm này chiếm
+57% toàn bộ mẫu có label**; 2022-23 kênh gần như không fire (6 episode); 2025 = 32S/68F (32%). Không
+feature nào trong 13 feature pre-registered phân tách được thắng/thua một cách đủ mạnh + ổn định.
+→ **Thành công lịch sử của kênh MOM chủ yếu là dồn mẫu vào regime 2020-21, không phải pattern lặp lại
+được** — nhất quán với kết luận fa8l CP2 (quality-filter ngầm + 2021 outlier), nay được xác nhận bằng
+phân tích trực tiếp trên deal/episode.
+
+### Insight cấu trúc từ cohort đối chứng (không phải trial, chỉ mô tả)
+- **8L rating (F1) + route (F2) phân tách RÕ ở DVR** (rating δ=−0.127 p=0.002; route V=0.259 p=9e-9)
+  **nhưng KHÔNG phân tách ở MOM** — 8L "nhìn thấy" chất lượng deal ở kênh giá trị/hồi phục, còn thắng
+  thua của momentum trực giao với chất lượng 8L. Củng cố quan điểm user: 8L không "kém", chỉ là bản
+  thân momentum không có trục chất lượng để bám.
+- **F5 Revenue_YoY PASS ở CẢ 2 cohort cùng dấu** → đúng định nghĩa "filter chung" §5 — ứng viên golden
+  floor (δ nhỏ ~0.09-0.13; nếu muốn wire = trial MỚI cần user duyệt N-budget riêng, KHÔNG thuộc dự án này).
+- F3 ROIC_Trailing = MOM-only về mặt FDR nhưng δ quá nhỏ để làm rule.
+
+### Caveat khai báo
+1. IS-era mỏng (44S/53F) đúng như lường trước §8.3 — chỉ phát hiện được \|δ\|≳0.33 với power 80%;
+   IS-era một mình KHÔNG đủ để kết luận độc lập. Nhưng verdict NO-GO KHÔNG dựa vào IS: nó fail ngay
+   trên effect size FULL-sample (n=636, đủ power phát hiện δ=0.15) — không phải vấn đề thiếu mẫu.
+2. p-value rank-sum giả định độc lập; episode trùng cửa sổ thị trường vi phạm nhẹ → significance thật
+   chỉ YẾU HƠN báo cáo — mọi bias đều về phía ủng hộ NO-GO, không đảo chiều được verdict.
+3. Kết quả walk-forward AUC dựa trên 3 năm tính được — bản thân việc 2022-23 không đủ episode là
+   thông tin: kênh không fire trong bear/sideways.
+
+### Khuyến nghị (đúng khung §6 khi CP1 NO-GO — quyết định thuộc user)
+**Đóng hoặc thu hẹp kênh MOM_N/MOM_S**, tái phân bổ capacity về các kênh có cấu trúc đo được
+(DVR/RE_BACKLOG — nơi 8L rating/route thực sự phân tách thắng thua). Phase 2 harness KHÔNG chạy
+(không có candidate rule hợp lệ để đóng gói). Dự án dừng ĐÚNG QUY TRÌNH tại CP1.
+Nếu user muốn đi tiếp 1 trong 2 nhánh mở: (a) test F5 revenue-floor như golden-floor chung,
+(b) khai thác insight "8L phân tách ở DVR" thành rule sizing cho kênh DVR — cả 2 đều là dự án/trial
+MỚI cần duyệt N-budget riêng.
+
+**DỪNG chờ quant-skeptic verify + Mike/user quyết định** — không tự chạy Phase 2, không wire gì.
 
 ## 9. Việc user cần quyết để bắt đầu
 1. Duyệt định nghĩa label (§3 — ngưỡng +10%/0%, L2 chính + L1 check).
