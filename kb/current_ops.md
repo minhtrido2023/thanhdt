@@ -29,6 +29,24 @@ Q2/2026 về (~cuối tháng 7) — dự án này cần có tiến độ rõ tr�
 **Trước khi wire production**: bắt buộc qua đủ walk-forward IS/OOS + DSR/PBO + LOO + quant-skeptic
 CONFIRMED + user sign-off cuối cùng — không khác gì mọi thay đổi signal khác trong hệ thống.
 
+**Tiến độ (2026-07-11, cùng ngày, làm nhanh theo yêu cầu ưu tiên của user):**
+- Cron weekly refresh `fa_ratings_8l` (Winston đề xuất) → **user duyệt + đã cài** (commit dd7feb9,
+  thứ Bảy 08:30 ICT). Test tay thất bại vì phiên interactive Mike dùng service account read-only
+  (`bq-reader-8l`) — CHƯA rõ cron thật (crontab) chạy identity nào, xác nhận quanh lần chạy đầu
+  tiên **thứ Bảy 07-18**.
+- **Phase 0 XONG — CP0 = GO** (quant-skeptic CONFIRMED, high confidence): attribution ladder tách
+  được degradation của lần drop-in trước = do THANG ĐO (−2.29pp FULL/−4.34pp OOS), còn coverage
+  rộng hơn của 8L thực ra DƯƠNG (+0.88pp FULL/+1.34pp OOS) → giữ full coverage, dồn thiết kế vào
+  bucket rating=GATE theo ngữ cảnh. Lưu ý cần mang sang Phase 2: hiệu ứng coverage dương tập trung
+  nhiều ở năm 2021 — cần LOO loại bỏ năm đó trước khi tin hẳn.
+- **Phase 1 XONG — CP1 = PASS**: family 12 config đo bằng proxy BQ thật, 12/12 vượt baseline OOS.
+  **User đã chọn 3 finalist đưa vào Phase 2: F12_dvr_23, F1_gate_lean, F6_n_strict** (N-ledger đã
+  đóng 16/16 — Phase 2 chỉ kiểm chứng lại, không mở thêm trial mới).
+- **Chỉ đạo user cho Phase 2 (quan trọng)**: đánh giá phải nhìn TỔNG THỂ — cách 3 finalist phối hợp
+  với nhau và với framework hiện có, không chỉ so OOS đơn lẻ. Làm tuần tự, kiểm chứng chắc chắn từng
+  bước trước khi qua bước sau — tránh làm ẩu phải sửa lại sau.
+- Đang chờ: Phase 2 (full backtest 3 finalist theo tiêu chí CP2 đã khai báo trước, không nới).
+
 ## DT5G BULL-giả bug → audit freshness toàn hệ thống → CRITICAL basket fix → re-pin baseline R3
 ### CHUỖI ĐÃ KHÉP KÍN HOÀN TOÀN (2026-07-11), chỉ còn 3 mục chờ xác nhận qua cron thứ Hai 07-13
 
