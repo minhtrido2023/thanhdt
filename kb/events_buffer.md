@@ -1100,3 +1100,78 @@
 
 ## Consolidation 2026-07-11T04:19:03Z
 - [2026-07-11T04:19:03Z] quant-skeptic/verification — ⚠️ INCONCLUSIVE VERIFY: FIX XONG: production PARK advisory đổi sang rổ custom30V thật (custom30v_8l) + hồi sinh writer chết 06-18 — Winston đúng 100%, commit e02a75b, chờ cron 15:30 publish BQ: {"finding_topic": "FIX XONG: production PARK advisory đổi sang rổ custom30V thật (custom30v_8l) + hồi sinh writer chết 06-18 — Winston đúng 100%, commit e02a75b, chờ cron 15:30 publish BQ", "verdict": "INCONCLUSIVE", "confidence": "low", "summary": "VERDICT_JSON present but unparseable: Expecting property name enclosed in double quotes: line 18 column 1 (char 4350)", "checks": {}}
+
+## Consolidation 2026-07-11T05:05:12Z
+- [2026-07-11T04:35:41Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "in_progress", "note": "Đã đọc lại full audit report 031821. Bắt đầu fix F1 (compute_active_nav today→DNSE). Thứ tự: F1→F2→F5→F6→F7(nav atomic)→F3 (backtest riêng)"}
+- [2026-07-11T04:36:08Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260711_043508", "source": "watcher"}
+- [2026-07-11T04:37:09Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260711_043508", "source": "watcher"}
+- [2026-07-11T04:38:09Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260711_043508", "source": "watcher"}
+- [2026-07-11T04:39:10Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260711_043508", "source": "watcher"}
+- [2026-07-11T04:39:51Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "in_progress", "note": "Khảo sát code xong toàn bộ F1/F2/F5/F6/F7+F3. Phát hiện thêm: pt_v4/pt_v22 là forward tracker từ 2026-06 — đúng cửa sổ base-table bị nhiễm BULL giả (EW-leg bug), nên F3 backtest so sánh sẽ đo được contamination thật. Bắt đầu implement F1."}
+- [2026-07-11T04:40:10Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260711_043508", "source": "watcher"}
+- [2026-07-11T04:41:10Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260711_043508", "source": "watcher"}
+- [2026-07-11T04:42:10Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260711_043508", "source": "watcher"}
+- [2026-07-11T04:43:10Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260711_043508", "source": "watcher"}
+- [2026-07-11T04:44:10Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260711_043508", "source": "watcher"}
+- [2026-07-11T04:45:10Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260711_043508", "source": "watcher"}
+- [2026-07-11T04:46:11Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260711_043508", "source": "watcher"}
+- [2026-07-11T04:47:11Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260711_043508", "source": "watcher"}
+- [2026-07-11T04:47:40Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "in_progress", "note": "F1 committed a7668f3 (smoke test ZaloPay 6/6 dnse_g1), F7 committed 25e4d4e (atomic nav_history), F6 committed (test thật: DGC/VIB/VPB flagged legacy). F5 HOÃN tới khi Winston job 043611 xong (anh ấy đang sửa dở cùng file bq_freshness_check.sh chưa commit — tránh giẫm chân). Next: F2 (repo ngoài)."}
+- [2026-07-11T04:48:11Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260711_043508", "source": "watcher"}
+- [2026-07-11T04:49:11Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260711_043508", "source": "watcher"}
+- [2026-07-11T04:50:11Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20260711_043508", "source": "watcher"}
+- [2026-07-11T04:51:02Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "in_progress", "note": "resume job sau restart: F1/F6/F7 đã commit (a7668f3,500ad21,25e4d4e), tiếp tục F2 đang dở → F5 → selfcheck → F3+backtest"}
+- [2026-07-11T04:51:11Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20260711_043508", "source": "watcher"}
+- [2026-07-11T04:52:11Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20260711_043508", "source": "watcher"}
+- [2026-07-11T04:53:11Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20260711_043508", "source": "watcher"}
+- [2026-07-11T04:54:12Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20260711_043508", "source": "watcher"}
+- [2026-07-11T04:54:23Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "in_progress", "note": "F2 verified: test_trading_bot PASS + golive_recommend_v23 rerun OK header mới; chuẩn bị commit F2 rồi làm F5"}
+- [2026-07-11T04:55:12Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20260711_043508", "source": "watcher"}
+- [2026-07-11T04:56:12Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20260711_043508", "source": "watcher"}
+- [2026-07-11T04:56:30Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "in_progress", "note": "F5 committed (assertion mtime die-trước-dispatch). Tiếp: selfcheck money_path_freshness_selfcheck.py rồi F3+backtest"}
+- [2026-07-11T04:57:12Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20260711_043508", "source": "watcher"}
+- [2026-07-11T04:58:12Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "still_running", "elapsed_min": 23, "job_id": "Taylor_20260711_043508", "source": "watcher"}
+- [2026-07-11T04:59:12Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20260711_043508", "source": "watcher"}
+- [2026-07-11T05:00:01Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "in_progress", "note": "selfcheck money_path 21/21 PASS committed. Còn F3 (signal_v11 bảng dt5g_live) — bắt đầu đo diff 2 bảng state + play_type impact"}
+- [2026-07-11T05:00:12Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "still_running", "elapsed_min": 25, "job_id": "Taylor_20260711_043508", "source": "watcher"}
+- [2026-07-11T05:01:12Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "still_running", "elapsed_min": 26, "job_id": "Taylor_20260711_043508", "source": "watcher"}
+- [2026-07-11T05:02:12Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "still_running", "elapsed_min": 27, "job_id": "Taylor_20260711_043508", "source": "watcher"}
+- [2026-07-11T05:02:44Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "in_progress", "note": "F3 đo bước 1: diff base-vs-dt5g_live = 882 phiên/3121 (28.3%) KHÔNG phải ~49 như dispatch giả định (49 = DT5G-vs-DT4). Phát hiện thêm: pt_v23_audit_2014 baseline R3 cũng dùng bảng base cho play_type. Đang đo play_type flips + chuẩn bị backtest A/B"}
+- [2026-07-11T05:03:12Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "still_running", "elapsed_min": 28, "job_id": "Taylor_20260711_043508", "source": "watcher"}
+- [2026-07-11T05:04:12Z] Taylor/heartbeat — Taylor_20260711_043508: {"status": "still_running", "elapsed_min": 29, "job_id": "Taylor_20260711_043508", "source": "watcher"}
+- [2026-07-11T04:36:51Z] Winston/heartbeat — Winston_20260711_043611: {"status": "in_progress", "note": "đã đọc lại 2 audit report; bắt đầu đọc bq_freshness_check.sh + pt_8l_daily.sh + papertrade_daily.sh + risk_monitor.py + coding_guidelines §6"}
+- [2026-07-11T04:37:12Z] Winston/heartbeat — Winston_20260711_043611: {"status": "still_running", "elapsed_min": 1, "job_id": "Winston_20260711_043611", "source": "watcher"}
+- [2026-07-11T04:38:13Z] Winston/heartbeat — Winston_20260711_043611: {"status": "still_running", "elapsed_min": 2, "job_id": "Winston_20260711_043611", "source": "watcher"}
+- [2026-07-11T04:38:52Z] Winston/heartbeat — Winston_20260711_043611: {"status": "in_progress", "note": "đã đọc bq_freshness_check.sh + 2 chain script + risk_monitor.py + guidelines §6; đang query BQ calibrate ngưỡng cho ticker_1m/risk_rating/shares_outstanding_live/custom30*_8l"}
+- [2026-07-11T04:39:13Z] Winston/heartbeat — Winston_20260711_043611: {"status": "still_running", "elapsed_min": 3, "job_id": "Winston_20260711_043611", "source": "watcher"}
+- [2026-07-11T04:40:13Z] Winston/heartbeat — Winston_20260711_043611: {"status": "still_running", "elapsed_min": 4, "job_id": "Winston_20260711_043611", "source": "watcher"}
+- [2026-07-11T04:41:13Z] Winston/heartbeat — Winston_20260711_043611: {"status": "still_running", "elapsed_min": 5, "job_id": "Winston_20260711_043611", "source": "watcher"}
+- [2026-07-11T04:42:13Z] Winston/heartbeat — Winston_20260711_043611: {"status": "still_running", "elapsed_min": 6, "job_id": "Winston_20260711_043611", "source": "watcher"}
+- [2026-07-11T04:43:14Z] Winston/heartbeat — Winston_20260711_043611: {"status": "still_running", "elapsed_min": 7, "job_id": "Winston_20260711_043611", "source": "watcher"}
+- [2026-07-11T04:43:36Z] Winston/heartbeat — Winston_20260711_043611: {"status": "in_progress", "note": "calibrate xong (risk_rating ĐÃ CHẾT từ 2025Q4 — sẽ WARN-only; rebal spacing 92d→ngưỡng 98d; shares_outstanding updated_at daily). Cross-check custom30 map sạch. Bắt đầu sửa bq_freshness_check.sh"}
+- [2026-07-11T04:44:14Z] Winston/heartbeat — Winston_20260711_043611: {"status": "still_running", "elapsed_min": 8, "job_id": "Winston_20260711_043611", "source": "watcher"}
+- [2026-07-11T04:45:14Z] Winston/heartbeat — Winston_20260711_043611: {"status": "still_running", "elapsed_min": 9, "job_id": "Winston_20260711_043611", "source": "watcher"}
+- [2026-07-11T04:46:14Z] Winston/heartbeat — Winston_20260711_043611: {"status": "still_running", "elapsed_min": 10, "job_id": "Winston_20260711_043611", "source": "watcher"}
+- [2026-07-11T04:46:56Z] Winston/heartbeat — Winston_20260711_043611: {"status": "in_progress", "note": "fix#1 bq_freshness DONE commit 7cf6a82 (verified BQ thật: 2 WARN thật fire đúng — risk_rating 192d, custom30v_8l writer 23d). Đang fix#2: FAIL-alert cho pt_8l_daily.sh + papertrade_daily.sh"}
+- [2026-07-11T04:47:14Z] Winston/heartbeat — Winston_20260711_043611: {"status": "still_running", "elapsed_min": 11, "job_id": "Winston_20260711_043611", "source": "watcher"}
+- [2026-07-11T04:48:14Z] Winston/heartbeat — Winston_20260711_043611: {"status": "still_running", "elapsed_min": 12, "job_id": "Winston_20260711_043611", "source": "watcher"}
+- [2026-07-11T04:49:15Z] Winston/heartbeat — Winston_20260711_043611: {"status": "still_running", "elapsed_min": 13, "job_id": "Winston_20260711_043611", "source": "watcher"}
+- [2026-07-11T04:50:15Z] Winston/heartbeat — Winston_20260711_043611: {"status": "still_running", "elapsed_min": 14, "job_id": "Winston_20260711_043611", "source": "watcher"}
+- [2026-07-11T04:51:15Z] Winston/heartbeat — Winston_20260711_043611: {"status": "still_running", "elapsed_min": 15, "job_id": "Winston_20260711_043611", "source": "watcher"}
+- [2026-07-11T04:51:30Z] Winston/heartbeat — Winston_20260711_043611: {"status": "in_progress", "note": "bắt đầu: đọc lại audit report 031745 + files liên quan"}
+- [2026-07-11T04:52:15Z] Winston/heartbeat — Winston_20260711_043611: {"status": "still_running", "elapsed_min": 16, "job_id": "Winston_20260711_043611", "source": "watcher"}
+- [2026-07-11T04:53:15Z] Winston/heartbeat — Winston_20260711_043611: {"status": "still_running", "elapsed_min": 17, "job_id": "Winston_20260711_043611", "source": "watcher"}
+- [2026-07-11T04:54:15Z] Winston/heartbeat — Winston_20260711_043611: {"status": "still_running", "elapsed_min": 18, "job_id": "Winston_20260711_043611", "source": "watcher"}
+- [2026-07-11T04:54:28Z] Winston/heartbeat — Winston_20260711_043611: {"status": "in_progress", "note": "resume sau session cut: fix#1(7cf6a82)+fix#2(3f23c41) đã commit, F4 risk_monitor viết xong chưa commit. Còn: selfcheck bền vững 3 mục, comment by-design trading_bot, cross-check custom30, commit F4"}
+- [2026-07-11T04:55:15Z] Winston/heartbeat — Winston_20260711_043611: {"status": "still_running", "elapsed_min": 19, "job_id": "Winston_20260711_043611", "source": "watcher"}
+- [2026-07-11T04:56:15Z] Winston/heartbeat — Winston_20260711_043611: {"status": "still_running", "elapsed_min": 20, "job_id": "Winston_20260711_043611", "source": "watcher"}
+- [2026-07-11T04:57:15Z] Winston/heartbeat — Winston_20260711_043611: {"status": "still_running", "elapsed_min": 21, "job_id": "Winston_20260711_043611", "source": "watcher"}
+- [2026-07-11T04:58:15Z] Winston/heartbeat — Winston_20260711_043611: {"status": "still_running", "elapsed_min": 22, "job_id": "Winston_20260711_043611", "source": "watcher"}
+- [2026-07-11T04:58:58Z] Winston/heartbeat — Winston_20260711_043611: {"status": "in_progress", "note": "F4 commit 540d04c (test 9/9 PASS + regression PASS). Tiếp: item4 comment by-design trading_bot, item5 cross-check custom30, selfcheck bền vững"}
+- [2026-07-11T04:59:15Z] Winston/heartbeat — Winston_20260711_043611: {"status": "still_running", "elapsed_min": 23, "job_id": "Winston_20260711_043611", "source": "watcher"}
+- [2026-07-11T05:00:15Z] Winston/heartbeat — Winston_20260711_043611: {"status": "still_running", "elapsed_min": 24, "job_id": "Winston_20260711_043611", "source": "watcher"}
+- [2026-07-11T05:01:15Z] Winston/heartbeat — Winston_20260711_043611: {"status": "still_running", "elapsed_min": 25, "job_id": "Winston_20260711_043611", "source": "watcher"}
+- [2026-07-11T05:02:16Z] Winston/heartbeat — Winston_20260711_043611: {"status": "still_running", "elapsed_min": 26, "job_id": "Winston_20260711_043611", "source": "watcher"}
+- [2026-07-11T05:02:34Z] Winston/heartbeat — Winston_20260711_043611: {"status": "in_progress", "note": "item4 commit da6c88d; item5 cross-check XONG (sạch, không trap mới). Đang viết selfcheck bền vững freshness_ops_selfcheck.py (sandbox bq stub + chain FAIL alert + provenance)"}
+- [2026-07-11T05:03:16Z] Winston/heartbeat — Winston_20260711_043611: {"status": "still_running", "elapsed_min": 27, "job_id": "Winston_20260711_043611", "source": "watcher"}
+- [2026-07-11T05:04:16Z] Winston/heartbeat — Winston_20260711_043611: {"status": "still_running", "elapsed_min": 28, "job_id": "Winston_20260711_043611", "source": "watcher"}
