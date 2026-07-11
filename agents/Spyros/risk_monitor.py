@@ -58,6 +58,70 @@ FIRST_6M_END = date(2026, 12, 31)  # 6 tháng sau go-live → auto halt-review f
 RECOVERY_SLEEVES = {"recovery_park", "capit", "capitulation", "deep_cheap", "recovery",
                     "lever", "capit_arm", "recovery_arm"}
 
+# --- Provenance gate cho eod_account_*.json (2026-07-11, audit Taylor F4 / coding_guidelines §6) ---
+# eod_account_*.json là họ file trung gian mà §6 CẤM tin trực tiếp cho số liệu quyết định
+# (sự cố thật: file 07-02 do Mafee tự sinh, positions gắn source=ref_px_approx). Trước khi
+# dùng NAV/positions từ snapshot để quyết HALT, phải xác nhận file do đúng pipeline chuẩn
+# sinh ra (verify_account_snapshot.py → daily_nav_snapshot.py) VÀ NAV khớp chuỗi chuẩn
+# nav_history_{account}.csv. FAIL-SAFE: không xác định được nguồn gốc → coi là ĐÁNG NGỜ
+# (alert to + gắn cờ), NHƯNG mọi check HALT vẫn chạy trên số liệu đó — thà false-alarm
+# (halt oan trên data xấu) còn hơn miss-halt; provenance xấu KHÔNG BAO GIỜ chặn một HALT.
+CANONICAL_GENERATORS = ("daily_nav_snapshot", "verify_account_snapshot")
+NAV_HISTORY_DIR = WORKDIR / "data" / "execution_logs"
+NAV_XCHECK_TOL = 0.005    # 0.5%: cùng pipeline thì lệch chỉ là rounding
+
+
+def validate_eod_provenance(snap: dict) -> dict:
+    """Kiểm tra nguồn gốc EOD snapshot trước khi tin số liệu cho quyết định HALT.
+
+    Trả về {"trusted": bool, "reasons": [str, ...]}. KHÔNG chặn gì — caller vẫn chạy
+    đủ mọi risk check bất kể kết quả; hàm này chỉ quyết định có phải gào lên
+    "đang chấm rủi ro trên dữ liệu không rõ nguồn gốc" hay không.
+    """
+    reasons = []
+
+    gen = str(snap.get("generated_by") or snap.get("generator") or "").lower()
+    if not any(c in gen for c in CANONICAL_GENERATORS):
+        reasons.append(
+            f"generated_by={gen or '<missing>'!r} không thuộc pipeline chuẩn "
+            f"{CANONICAL_GENERATORS} (coding_guidelines §6)")
+
+    approx = [p.get("ticker", "?") for p in snap.get("positions", [])
+              if p.get("source") == "ref_px_approx"]
+    if approx:
+        reasons.append(
+            f"{len(approx)} position gắn source=ref_px_approx ({', '.join(approx[:5])}…) "
+            f"— đúng class sự cố weekly-report 2026-07-03")
+
+    # Cross-check NAV với chuỗi chuẩn nav_history_{account}.csv (nguồn duy nhất §6).
+    account = snap.get("account")
+    snap_date = snap.get("date")
+    nav = snap.get("nav_total") or snap.get("NAV") or snap.get("nav")
+    if not account or not snap_date or not nav:
+        reasons.append("thiếu account/date/nav — không đối chiếu được với nav_history chuẩn")
+    else:
+        hist_file = NAV_HISTORY_DIR / f"nav_history_{account}.csv"
+        row_nav = None
+        if hist_file.exists():
+            try:
+                for line in hist_file.read_text().splitlines()[1:]:
+                    parts = line.split(",")
+                    if parts and parts[0] == str(snap_date) and len(parts) > 1:
+                        row_nav = float(parts[1])
+            except Exception as e:
+                reasons.append(f"nav_history_{account}.csv không đọc được: {e}")
+        if row_nav is None:
+            if not reasons or not hist_file.exists():
+                reasons.append(
+                    f"không có dòng {snap_date} trong nav_history_{account}.csv để đối chiếu "
+                    f"(file {'thiếu' if not hist_file.exists() else 'có nhưng thiếu ngày'})")
+        elif abs(float(nav) - row_nav) > NAV_XCHECK_TOL * max(row_nav, 1.0):
+            reasons.append(
+                f"NAV snapshot {float(nav):,.0f} lệch chuỗi chuẩn {row_nav:,.0f} "
+                f">{NAV_XCHECK_TOL*100:.1f}% — hai nguồn bất đồng, fail loudly (§6)")
+
+    return {"trusted": not reasons, "reasons": reasons}
+
 
 # ---------------------------------------------------------------------------
 # Episode state helpers
@@ -400,6 +464,25 @@ def run_monitor(target_date: str | None = None, dry_run: bool = False) -> int:
         print("WARN: NAV = 0 trong snapshot — dữ liệu có vấn đề")
         return 0
 
+    # Provenance gate (§6) — CHỈ alert/gắn cờ, KHÔNG return sớm và KHÔNG chặn check nào:
+    # mọi ngưỡng HALT bên dưới vẫn chạy y nguyên trên snapshot này (fail-safe: provenance
+    # xấu + số liệu breach → vẫn HALT; thà false-alarm còn hơn miss vì nghi ngờ data).
+    prov = validate_eod_provenance(snap)
+    if not prov["trusted"]:
+        print(f"⚠️ PROVENANCE SUSPECT: snapshot không xác nhận được nguồn gốc "
+              f"({len(prov['reasons'])} lý do):")
+        for r in prov["reasons"]:
+            print(f"    - {r}")
+        send_alert(
+            "⚠️ Spyros risk_monitor: EOD snapshot KHÔNG rõ nguồn gốc "
+            f"({snap.get('account','?')} {snap.get('date','?')}) — vẫn chấm rủi ro trên số "
+            f"liệu này (fail-safe, HALT không bị chặn) nhưng số CLEAN từ nó KHÔNG đáng tin. "
+            f"Lý do: {'; '.join(prov['reasons'])[:400]}", dry_run)
+        append_bus("error", "risk-monitor-provenance-suspect", {
+            "account": snap.get("account"), "date": snap.get("date"),
+            "reasons": prov["reasons"],
+        }, dry_run)
+
     nav_history = load_nav_history()
     plan = load_plan(target_date)
     breaches = []
@@ -524,7 +607,8 @@ def run_monitor(target_date: str | None = None, dry_run: bool = False) -> int:
         print(f"\n[BREACH] {len(breaches)} vi phạm cứng: {'; '.join(breaches)}")
         return 1
     else:
-        print(f"\n[CLEAN] Tất cả ngưỡng OK (conc_warn={len(conc_violations)}, "
+        clean_label = "CLEAN" if prov["trusted"] else "CLEAN?(provenance-suspect)"
+        print(f"\n[{clean_label}] Tất cả ngưỡng OK (conc_warn={len(conc_violations)}, "
               f"episode={'active' if ep_result.get('active') else 'idle'})")
         append_bus("status", "risk-check-clean", {
             "nav": nav, "dd": dd_result["drawdown"],
@@ -532,6 +616,7 @@ def run_monitor(target_date: str | None = None, dry_run: bool = False) -> int:
             "conc_warns": len(conc_violations),
             "episode_active": ep_result.get("active", False),
             "episode_dd": ep_result.get("episode_dd"),
+            "provenance_trusted": prov["trusted"],
         }, dry_run)
         return 0
 
@@ -589,6 +674,131 @@ def test_episode_breaker():
     print("Episode-breaker test PASSED\n")
 
 
+def test_provenance():
+    """Test provenance gate (§6) — sandbox tmp, không đụng data thật, không alert thật.
+
+    Pin 2 tính chất fail-safe BẮT BUỘC (dispatch Winston_20260711_043611):
+      (1) provenance TỐT + breach thật → HALT vẫn nổ (gate không chặn/không làm chậm HALT);
+      (2) provenance XẤU → coi là đáng ngờ (alert), NHƯNG breach vẫn HALT (không fail-open,
+          không suppress) và CLEAN được gắn cờ không-đáng-tin.
+    """
+    import io
+    import tempfile
+    import contextlib
+
+    global DATA_DIR, NAV_HISTORY_DIR, EPISODE_STATE_FILE
+
+    print("--- Test provenance gate (§6) ---")
+    saved = (DATA_DIR, NAV_HISTORY_DIR, EPISODE_STATE_FILE)
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        DATA_DIR = tmp / "data"
+        NAV_HISTORY_DIR = tmp / "hist"
+        EPISODE_STATE_FILE = DATA_DIR / "recovery_episode_state.json"
+        DATA_DIR.mkdir()
+        NAV_HISTORY_DIR.mkdir()
+
+        def write_snap(day, nav, generated_by, extra=None):
+            snap = {"account": "TestAcct", "date": day, "generated_by": generated_by,
+                    "nav_total": nav, "cash": 0, "positions": [], "market_state": "NEUTRAL"}
+            snap.update(extra or {})
+            (DATA_DIR / f"eod_account_{day}.json").write_text(json.dumps(snap))
+            return snap
+
+        def write_hist(rows):
+            lines = ["date,nav,mtm_stock,cash,margin_debt,balance_ts"] + [
+                f"{d},{v},0,0,0,x" for d, v in rows]
+            (NAV_HISTORY_DIR / "nav_history_TestAcct.csv").write_text("\n".join(lines) + "\n")
+
+        # -- unit: các nhánh validate --
+        good = write_snap("2026-07-09", 70e9, "daily_nav_snapshot.py v1")
+        write_hist([("2026-07-09", 70e9)])
+        r = validate_eod_provenance(good)
+        assert r["trusted"], f"pipeline chuẩn + NAV khớp phải trusted: {r}"
+        print("  validate: generator chuẩn + NAV khớp nav_history → trusted: OK")
+
+        bad_gen = dict(good, generated_by="Mafee")
+        r = validate_eod_provenance(bad_gen)
+        assert not r["trusted"] and "generated_by" in r["reasons"][0]
+        print("  validate: generated_by=Mafee (đúng file thật 07-02) → suspect: OK")
+
+        r = validate_eod_provenance(dict(good, generated_by=""))
+        assert not r["trusted"], "generator thiếu phải suspect (mặc định NGHI, không tin)"
+        print("  validate: generated_by thiếu → suspect (fail-safe default): OK")
+
+        approx = dict(good, positions=[{"ticker": "VHM", "source": "ref_px_approx"}])
+        r = validate_eod_provenance(approx)
+        assert not r["trusted"] and "ref_px_approx" in r["reasons"][0]
+        print("  validate: position source=ref_px_approx → suspect: OK")
+
+        r = validate_eod_provenance(dict(good, nav_total=75e9))  # lệch 7% vs chuỗi chuẩn
+        assert not r["trusted"] and "lệch chuỗi chuẩn" in r["reasons"][0]
+        print("  validate: NAV lệch nav_history >0.5% → suspect (fail loudly §6): OK")
+
+        # -- integration (1): provenance TỐT + DD breach thật → rc=1, HALT không bị chặn --
+        write_snap("2026-07-08", 100e9, "daily_nav_snapshot.py")   # đỉnh
+        write_snap("2026-07-09", 70e9, "daily_nav_snapshot.py")   # -30% từ đỉnh
+        write_hist([("2026-07-08", 100e9), ("2026-07-09", 70e9)])
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            rc = run_monitor("2026-07-09", dry_run=True)
+        out = buf.getvalue()
+        assert rc == 1 and "DRAWDOWN" in out, f"rc={rc}; HALT thật phải nổ khi provenance tốt"
+        assert "PROVENANCE SUSPECT" not in out, "provenance tốt không được báo suspect"
+        print("  run_monitor: provenance TỐT + DD -30% → HALT nổ, không suspect: OK")
+
+        # -- integration (2): provenance XẤU + DD breach → VẪN HALT + báo suspect --
+        write_snap("2026-07-09", 70e9, "somebody_elses_script.py")
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            rc = run_monitor("2026-07-09", dry_run=True)
+        out = buf.getvalue()
+        assert rc == 1 and "DRAWDOWN" in out, "provenance xấu KHÔNG ĐƯỢC chặn HALT (fail-safe)"
+        assert "PROVENANCE SUSPECT" in out and "ALERT" in out
+        print("  run_monitor: provenance XẤU + DD -30% → VẪN HALT + alert suspect: OK")
+
+        # -- integration (3): provenance XẤU + số liệu clean → rc=0 NHƯNG không im lặng --
+        for f in DATA_DIR.glob("eod_account_*.json"):
+            f.unlink()
+        write_snap("2026-07-09", 100e9, "somebody_elses_script.py")
+        # Bắt payload bus THẬT thay vì grep dry-run print (print cắt 120 ký tự, cờ
+        # provenance_trusted nằm cuối dict sẽ bị cắt mất → false-fail).
+        bus_events = []
+        real_append_bus = globals()["append_bus"]
+        globals()["append_bus"] = (
+            lambda level, topic, payload, dry_run=False: bus_events.append((topic, payload)))
+        try:
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                rc = run_monitor("2026-07-09", dry_run=True)
+        finally:
+            globals()["append_bus"] = real_append_bus
+        out = buf.getvalue()
+        assert rc == 0, "số liệu clean vẫn rc=0 (WARN không phải breach)"
+        assert "PROVENANCE SUSPECT" in out and "CLEAN?(provenance-suspect)" in out
+        clean_evts = [p for t, p in bus_events if t == "risk-check-clean"]
+        assert clean_evts and clean_evts[0].get("provenance_trusted") is False, \
+            f"bus event clean phải mang cờ provenance_trusted=False: {clean_evts}"
+        assert any(t == "risk-monitor-provenance-suspect" for t, _ in bus_events), \
+            "provenance xấu phải phát bus event error riêng"
+        print("  run_monitor: provenance XẤU + clean → rc=0 nhưng CLEAN?(suspect) + alert: OK")
+
+        # -- integration (4): provenance TỐT + clean → rc=0, im lặng đúng nghĩa --
+        for f in DATA_DIR.glob("eod_account_*.json"):
+            f.unlink()
+        write_snap("2026-07-09", 100e9, "daily_nav_snapshot.py")
+        write_hist([("2026-07-09", 100e9)])
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            rc = run_monitor("2026-07-09", dry_run=True)
+        out = buf.getvalue()
+        assert rc == 0 and "PROVENANCE SUSPECT" not in out and "[CLEAN]" in out
+        print("  run_monitor: provenance TỐT + clean → rc=0, không noise: OK")
+
+    DATA_DIR, NAV_HISTORY_DIR, EPISODE_STATE_FILE = saved
+    print("Provenance test PASSED\n")
+
+
 # ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
@@ -602,6 +812,8 @@ if __name__ == "__main__":
                         help="Test kill-switch rồi exit")
     parser.add_argument("--test-episode-breaker", action="store_true",
                         help="Test S4 episode-drawdown logic rồi exit")
+    parser.add_argument("--test-provenance", action="store_true",
+                        help="Test provenance gate §6 (sandbox, không alert thật) rồi exit")
     parser.add_argument("--open-episode", metavar="NAV",
                         help="Thủ công mở episode với NAV (VND) này (kèm --date)")
     parser.add_argument("--close-episode", action="store_true",
@@ -616,6 +828,10 @@ if __name__ == "__main__":
 
     if args.test_episode_breaker:
         test_episode_breaker()
+        sys.exit(0)
+
+    if args.test_provenance:
+        test_provenance()
         sys.exit(0)
 
     if args.show_episode:
