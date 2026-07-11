@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v919)
+# Mike fleet — context pack (v920)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-11T10:29:34] quant-skeptic/verification — ✅ CONFIRMED VERIFY: VALIDATE fa_ratings_8l migration — VERDICT KHÔNG MIGRATE drop-in: cả 2 mapping đều kém baseline R3, degradation dồn OOS (tier8l OOS -3.55pp, MaxDD sâu thêm 2pp, tail xấu đi), LOO âm mọi năm — giữ fa_ratings, cần quyết hướng Q2/2026 trước đầu tháng 8: {"finding_topic": "VALIDATE fa_ratings_8l migration — VERDICT KHÔNG MIGRATE drop-in: cả 2 mapping đều kém baseline R3, degradation dồn OOS (tier8l OOS -3.55pp,  …
 - [2026-07-11T10:45:56] Winston/finding — ĐỀ XUẤT cron hoá fa_ratings_8l refresh (weekly Sat 08:30 ICT) + freshness-check WARN — chuẩn bị nền cho re-tune SIGNAL_V11, KHÔNG tự cài: {"job": "Winston_20260711_104135", "status": "DONE_PROPOSAL_ONLY", "verify_hien_trang": {"bq_show_lastModified": "2026-06-20 10:53:55 ICT (verify trực tiếp 07-1 …
 - [2026-07-11T10:47:24] Taylor/finding — PLAN re-tune SIGNAL_V11 trên 8L gốc (hướng c) SẴN SÀNG DUYỆT: 4 phase 07-13→25, family ≤12 config pre-registered N=16, CP0/CP1/CP2 go-no-go cứng, chẩn đoán drop-in fail = semantics durability-gate + coverage shift 99% vs 144-518 mã/năm — plan doc mike/agents/Taylor/plan_fa8l_retune_20260711.md: {"job": "Taylor_20260711_104100", "status": "PLAN_READY_FOR_USER_APPROVAL", "plan_doc": "mike/agents/Taylor/plan_fa8l_retune_20260711.md", "diagnosis": {"why_dr …
 - [2026-07-11T12:26:12] Taylor/finding — Phase 0 fa8l re-tune HOÀN TẤT — CP0 = GO: attribution ladder tách được degradation = THANG ĐO (-2.29pp FULL/-4.34pp OOS), coverage 8L DƯƠNG (+0.88pp) → Phase 1 giữ full coverage, redesign bucket rating=GATE; inventory consumer xong (T1-T7 single-source, D1/T8 = 6 copy inline phải vá cùng commit): {"job": "Taylor_20260711_121933 (tiếp nối 114557 timeout)", "status": "PHASE0_DONE_CP0_GO", "plan_doc": "mike/agents/Taylor/plan_fa8l_retune_20260711.md (sectio …
@@ -11,6 +10,7 @@
 - [2026-07-11T13:10:20] Taylor/finding — Phase 1 fa8l re-tune HOÀN TẤT — CP1 PASS: family 12 config pre-registered đo bằng proxy BQ thật, 12/12 OOS ≥ control legacy; finalist F12_dvr_23 (+1.73pp/2M OOS, breadth 20/tuần) > F1_gate_lean (spine +1.43) > F6_n_strict (optional, IS +1.88); N-ledger 16/16 đóng; chờ user duyệt trước Phase 2: {"job": "Taylor_20260711_125524", "status": "PHASE1_DONE_CP1_PASS", "plan_doc": "mike/agents/Taylor/plan_fa8l_retune_20260711.md (section 6 mới)", "structural_f …
 - [2026-07-11T14:24:10] Taylor/finding — Phase 2 fa8l re-tune HOÀN TẤT — CP2 NO-GO CẢ 3 FINALIST: full-harness bác proxy ranking (OOS tốt nhất F12 28.69/Cal1.70 vs base 31.59/2.01, LOO âm mọi năm kể cả ex-2021, tail xấu hơn 3.7-5.5% vs 1.5%); root cause = MOM_N gãy dưới NEUTRAL/DT5G + footprint legacy là quality-filter ngầm không tái tạo được — đề xuất 3 fallback chờ user quyết: {"job": "Taylor_20260711_133127", "status": "PHASE2_DONE_CP2_NOGO_ALL3", "plan_doc": "mike/agents/Taylor/plan_fa8l_retune_20260711.md (section 7 mới)", "registr …
 - [2026-07-11T14:33:32] quant-skeptic/verification — ✅ CONFIRMED VERIFY: Phase 2 fa8l re-tune HOÀN TẤT — CP2 NO-GO CẢ 3 FINALIST: full-harness bác proxy ranking (OOS tốt nhất F12 28.69/Cal1.70 vs base 31.59/2.01, LOO âm mọi năm kể cả ex-2021, tail xấu hơn 3.7-5.5% vs 1.5%); root cause = MOM_N gãy dưới NEUTRAL/DT5G + footprint legacy là quality-filter ngầm không tái tạo được — đề xuất 3 fallback chờ user quyết: {"finding_topic": "Phase 2 fa8l re-tune HOÀN TẤT — CP2 NO-GO CẢ 3 FINALIST: full-harness bác proxy ranking (OOS tốt nhất F12 28.69/Cal1.70 vs base 31.59/2.01, L …
+- [2026-07-11T14:57:16] Taylor/finding — REBUILD fa_ratings builder — FEASIBILITY = KHẢ THI (vượt kỳ vọng): builder gốc fundamental_rating.py VẪN CÒN NGUYÊN trong repo, lineage chứng minh 100% (12367/12367 rows khớp tier+score), reproduction test 82.3% exact/99.9% ±1 bậc — đề xuất refresh append-only để không rewrite lịch sử: {"job": "Taylor_20260711_145129", "status": "FEASIBILITY_CONFIRMED", "phat_hien_chinh": {"tien_de_dispatch_SAI": "Builder gốc KHÔNG hề mất. Nó là fundamental_ra …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -60,7 +60,42 @@ CONFIRMED + user sign-off cuối cùng — không khác gì mọi thay đổi si
 - **Chỉ đạo user cho Phase 2 (quan trọng)**: đánh giá phải nhìn TỔNG THỂ — cách 3 finalist phối hợp
   với nhau và với framework hiện có, không chỉ so OOS đơn lẻ. Làm tuần tự, kiểm chứng chắc chắn từng
   bước trước khi qua bước sau — tránh làm ẩu phải sửa lại sau.
-- Đang chờ: Phase 2 (full backtest 3 finalist theo tiêu chí CP2 đã khai báo trước, không nới).
+- **Phase 2 XONG — CP2 = NO-GO CẢ 3 FINALIST** (quant-skeptic CONFIRMED, high confidence, tự tái
+  lập khớp chính xác). F1/F6/F12 đều fail tiêu chí OOS + LOO (âm mọi năm kể cả ex-2021) + tail. Root
+  cause: trục MOMENTUM_N (kênh entry chính của BAL dưới NEUTRAL — state phổ biến nhất DT5G) gãy vì
+  thang rating 1-5 không tái tạo được "quality filter ngầm" mà tier C/D cũ vô tình tạo ra (loại được
+  junk nhỏ mà rating không loại được). F12 kết quả full-năm đẹp thực ra bị kéo bởi 1 năm outlier 2021
+  (+20.95pp riêng năm đó) — đúng lo ngại quant-skeptic nêu từ Phase 0.
+- **KẾT LUẬN DỰ ÁN hướng (c)**: đã đo trung thực và bị bác — re-tune bucket trên thang 8L gốc (theo
+  đúng pre-registered family, N=16/16, không mở thêm trial) KHÔNG cho ra ứng viên thay core khả thi.
+  Quy trình hoạt động ĐÚNG như thiết kế (bắt được hướng không khả thi trước khi wire production, không
+  phải thất bại của quy trình).
+- **3 fallback chờ user chọn** (không quyết thay user):
+  (i) giữ `fa_ratings` static, xử staleness riêng — caveat: edge control đo trên bảng lúc còn fresh,
+      không bảo chứng cho bảng đóng băng sau BCTC Q2/2026;
+  (ii) hybrid E-gate-only (chỉ thay T1 avoid bằng rating=5, giữ nguyên phần còn lại) — CHƯA ĐO, đây
+      LÀ trial mới cần user duyệt mở N-budget riêng nếu muốn thử;
+  (iii) rebuild legacy builder `fa_ratings` (builder gốc không còn trong repo) — giải quyết tận gốc
+      staleness, giữ nguyên semantics đã tune.
+  Deadline nghiệp vụ không đổi: BCTC Q2/2026 về ~cuối tháng 7, rebal quý ~08-05.
+
+**User CHỐT (iii) — rebuild legacy `fa_ratings` builder (2026-07-11).** Kèm chỉ đạo chiến lược lớn
+hơn, QUAN TRỌNG cho hướng nghiên cứu sắp tới:
+- Bản thân **book Momentum (MOM_N) hiện tại đã KHÔNG hiệu quả** (không riêng gì việc không tái tạo
+  được trên 8L) — cần làm lại chiến lược này, không chỉ vá cho hợp với nguồn dữ liệu mới.
+- User KHÔNG đồng ý với khung "8L kém hơn vì mất quality-filter ngầm" — quan điểm user: 8L áp dụng
+  lens riêng cho từng route/ngành nên rating PHẢI chính xác hơn, không phải kém đi. Nếu momentum
+  không tái tạo được trên nền 8L, đó là dấu hiệu bản thân pattern momentum cũ dễ vỡ/overfit
+  (dựa vào 1 "quality filter ngầm" tình cờ của tier cũ), KHÔNG phải lỗi của 8L.
+- **Hướng nghiên cứu tiếp theo (sau khi (iii) xong và verified)**: quay lại phân tích các deal
+  THÀNH CÔNG trong lịch sử của book — soi kỹ đặc điểm fundamentals + technical thật để tìm 1 pattern
+  hiệu quả, KHÔNG cố giữ momentum chỉ vì nó từng "vô tình" chạy được. Đây là dự án R&D riêng, MỚI,
+  không phải phần của việc rebuild fa_ratings.
+- **Thứ tự làm việc user yêu cầu**: tuần tự, "phần nào làm tốt phần đó trước" — (iii) rebuild
+  fa_ratings builder trước, verify xong mới bắt đầu dự án phân tích momentum/deals.
+- Nguyên tắc chốt cho cả 2 việc: dùng dữ liệu tươi, đánh giá đúng chuẩn mực (walk-forward IS/OOS,
+  DSR/PBO, LOO, quant-skeptic) — "không nên thấy pattern dễ overfit như momentum mà bị lay động"
+  (không giữ 1 pattern chỉ vì quen thuộc/lịch sử nếu số liệu thật không ủng hộ).
 
 ## DT5G BULL-giả bug → audit freshness toàn hệ thống → CRITICAL basket fix → re-pin baseline R3
 ### CHUỖI ĐÃ KHÉP KÍN HOÀN TOÀN (2026-07-11), chỉ còn 3 mục chờ xác nhận qua cron thứ Hai 07-13
