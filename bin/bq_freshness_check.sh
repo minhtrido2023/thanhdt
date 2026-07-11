@@ -192,9 +192,34 @@ fi
 echo "=== ALL FRESH — chạy EOD pipeline ==="
 cd "$WORKDIR"
 
+# Mốc thời gian gate xác nhận fresh — mọi artifact DollarBill sẽ đọc phải được ghi SAU mốc này
+# (audit Taylor_20260711_031821 F5: _run_pipeline fail chỉ WARN rồi vẫn tiếp tục ⇒ nếu
+# publish_gated_state/golive_recommend chết, DollarBill vẫn được dispatch và đọc file CŨ —
+# writer/reader split y hệt class bug DT5G path 06-21. Assertion mtime = die-trước-dispatch,
+# cùng pattern post-chain assertion của daily_refresh_v34b_linux.sh, Winston_20260711_023903.)
+PIPELINE_START_EPOCH="$(date +%s)"
+
 _run_pipeline "[pipeline-1] publish_gated_state"      deploy_golive_dt5g_v4/publish_gated_state.py
 _run_pipeline "[pipeline-2] golive_recommend_v23"     deploy_golive_dt5g_v4/golive_recommend_v23.py
 _run_pipeline "[pipeline-3] push_recommend_v23_to_bq" mike/agents/Mafee/push_recommend_v23_to_bq.py
+
+# _assert_fresh_artifact <label> <path> — file phải tồn tại và mtime >= PIPELINE_START_EPOCH,
+# nếu không: alert + exit 1 (KHÔNG dispatch DollarBill với artifact stale).
+_assert_fresh_artifact() {
+  local label="$1" path="$2" mtime
+  mtime="$(stat -c %Y "$path" 2>/dev/null || echo 0)"
+  if [ "$mtime" -lt "$PIPELINE_START_EPOCH" ]; then
+    local msg="⛔ ARTIFACT STALE $TODAY — $label ($path) mtime $(date -d @"$mtime" +'%F %T' 2>/dev/null || echo 'MISSING') < gate start $(date -d @"$PIPELINE_START_EPOCH" +'%F %T'). Pipeline step ghi file này đã FAIL — DollarBill bị BLOCK, không lập plan với dữ liệu cũ. Check mike/logs/bq_freshness.log"
+    "$ROOT/bin/notify_thread.sh" "$msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+    echo "=== FAILED (artifact stale: $label) — alert đã gửi, DollarBill KHÔNG được dispatch ==="
+    exit 1
+  fi
+  echo "  [fresh-ok] $label (mtime >= gate start)"
+}
+_assert_fresh_artifact "golive_state_today.json (DT5G state DollarBill đọc)" \
+  "$WORKDIR/deploy_golive_dt5g_v4/golive_state_today.json"
+_assert_fresh_artifact "golive_v23_recommendations (recommend output DollarBill đọc)" \
+  "$(ls -1t "$WORKDIR"/deploy_golive_dt5g_v4/out/golive_v23_recommendations_*.csv 2>/dev/null | head -1)"
 
 # [pipeline-4] dispatch DollarBill lập plan T+1 — lặp qua MỌI account live (enabled=true,
 # mode=live, broker=dnse trong secrets/trading_bot_accounts.json), không hardcode SpaceX —
