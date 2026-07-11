@@ -1,4 +1,4 @@
-# Fleet status — 2026-07-11T15:07:01 UTC
+# Fleet status — 2026-07-11T15:07:04 UTC
 
 | agent | title (desktop) | kind | status | last_heartbeat | age(min) | current_task |
 |---|---|---|---|---|---|---|
@@ -12,8 +12,9 @@
 | workingclaude-32 | workingclaude-32 | child | dead | 2026-07-11T07:45:16Z | 441 |  |
 | workingclaude-37 | workingclaude-37 | child | dead | 2026-07-11T02:57:58Z | 729 |  |
 | workingclaude-47 | workingclaude-47 | child | dead | 2026-07-11T12:58:46Z | 128 |  |
+| workingclaude-52 | workingclaude-52 | child | working | 2026-07-11T15:07:03Z | 0 |  |
 | workingclaude-62 | workingclaude-62 | child | dead | 2026-07-11T10:29:34Z | 277 |  |
-| workingclaude-73 | workingclaude-73 | child | dead | 2026-07-11T04:19:02Z | 647 |  |
+| workingclaude-73 | workingclaude-73 | child | dead | 2026-07-11T04:19:02Z | 648 |  |
 | workingclaude-7f | workingclaude-7f | child | dead | 2026-07-11T06:58:50Z | 488 |  |
 | workingclaude-83 | workingclaude-83 | child | dead | 2026-07-10T14:27:09Z | 1479 |  |
 | workingclaude-95 | workingclaude-95 | child | dead | 2026-07-10T01:34:56Z | 2252 |  |

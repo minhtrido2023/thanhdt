@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v921)
+# Mike fleet — context pack (v922)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-11T10:47:24] Taylor/finding — PLAN re-tune SIGNAL_V11 trên 8L gốc (hướng c) SẴN SÀNG DUYỆT: 4 phase 07-13→25, family ≤12 config pre-registered N=16, CP0/CP1/CP2 go-no-go cứng, chẩn đoán drop-in fail = semantics durability-gate + coverage shift 99% vs 144-518 mã/năm — plan doc mike/agents/Taylor/plan_fa8l_retune_20260711.md: {"job": "Taylor_20260711_104100", "status": "PLAN_READY_FOR_USER_APPROVAL", "plan_doc": "mike/agents/Taylor/plan_fa8l_retune_20260711.md", "diagnosis": {"why_dr …
 - [2026-07-11T12:26:12] Taylor/finding — Phase 0 fa8l re-tune HOÀN TẤT — CP0 = GO: attribution ladder tách được degradation = THANG ĐO (-2.29pp FULL/-4.34pp OOS), coverage 8L DƯƠNG (+0.88pp) → Phase 1 giữ full coverage, redesign bucket rating=GATE; inventory consumer xong (T1-T7 single-source, D1/T8 = 6 copy inline phải vá cùng commit): {"job": "Taylor_20260711_121933 (tiếp nối 114557 timeout)", "status": "PHASE0_DONE_CP0_GO", "plan_doc": "mike/agents/Taylor/plan_fa8l_retune_20260711.md (sectio …
 - [2026-07-11T12:58:47] quant-skeptic/verification — ✅ CONFIRMED VERIFY: Phase 0 fa8l re-tune HOÀN TẤT — CP0 = GO: attribution ladder tách được degradation = THANG ĐO (-2.29pp FULL/-4.34pp OOS), coverage 8L DƯƠNG (+0.88pp) → Phase 1 giữ full coverage, redesign bucket rating=GATE; inventory consumer xong (T1-T7 single-source, D1/T8 = 6 copy inline phải vá cùng commit): {"finding_topic": "Phase 0 fa8l re-tune — CP0=GO: attribution ladder isolates degradation=SCALE (-2.29pp FULL/-4.34pp OOS), coverage 8L POSITIVE (+0.88pp) → kee …
 - [2026-07-11T13:10:20] Taylor/finding — Phase 1 fa8l re-tune HOÀN TẤT — CP1 PASS: family 12 config pre-registered đo bằng proxy BQ thật, 12/12 OOS ≥ control legacy; finalist F12_dvr_23 (+1.73pp/2M OOS, breadth 20/tuần) > F1_gate_lean (spine +1.43) > F6_n_strict (optional, IS +1.88); N-ledger 16/16 đóng; chờ user duyệt trước Phase 2: {"job": "Taylor_20260711_125524", "status": "PHASE1_DONE_CP1_PASS", "plan_doc": "mike/agents/Taylor/plan_fa8l_retune_20260711.md (section 6 mới)", "structural_f …
@@ -11,6 +10,7 @@
 - [2026-07-11T14:33:32] quant-skeptic/verification — ✅ CONFIRMED VERIFY: Phase 2 fa8l re-tune HOÀN TẤT — CP2 NO-GO CẢ 3 FINALIST: full-harness bác proxy ranking (OOS tốt nhất F12 28.69/Cal1.70 vs base 31.59/2.01, LOO âm mọi năm kể cả ex-2021, tail xấu hơn 3.7-5.5% vs 1.5%); root cause = MOM_N gãy dưới NEUTRAL/DT5G + footprint legacy là quality-filter ngầm không tái tạo được — đề xuất 3 fallback chờ user quyết: {"finding_topic": "Phase 2 fa8l re-tune HOÀN TẤT — CP2 NO-GO CẢ 3 FINALIST: full-harness bác proxy ranking (OOS tốt nhất F12 28.69/Cal1.70 vs base 31.59/2.01, L …
 - [2026-07-11T14:57:16] Taylor/finding — REBUILD fa_ratings builder — FEASIBILITY = KHẢ THI (vượt kỳ vọng): builder gốc fundamental_rating.py VẪN CÒN NGUYÊN trong repo, lineage chứng minh 100% (12367/12367 rows khớp tier+score), reproduction test 82.3% exact/99.9% ±1 bậc — đề xuất refresh append-only để không rewrite lịch sử: {"job": "Taylor_20260711_145129", "status": "FEASIBILITY_CONFIRMED", "phat_hien_chinh": {"tien_de_dispatch_SAI": "Builder gốc KHÔNG hề mất. Nó là fundamental_ra …
 - [2026-07-11T15:07:04] quant-skeptic/verification — ✅ CONFIRMED VERIFY: REBUILD fa_ratings builder — FEASIBILITY = KHẢ THI (vượt kỳ vọng): builder gốc fundamental_rating.py VẪN CÒN NGUYÊN trong repo, lineage chứng minh 100% (12367/12367 rows khớp tier+score), reproduction test 82.3% exact/99.9% ±1 bậc — đề xuất refresh append-only để không rewrite lịch sử: {"finding_topic": "REBUILD fa_ratings builder — FEASIBILITY KHẢ THI: fundamental_rating.py is the original builder (lineage 100% 12367/12367), reproduction 82.3 …
+- [2026-07-11T15:48:03] Taylor/finding — REBUILD fa_ratings BƯỚC 2 HOÀN TẤT — cơ chế append-only refresh đã xây + dry-run verified: frozen match 82.51% exact/99.98% ±1 (đúng baseline 82.3/99.9, trên floor abort 70/99), publish DELETE+INSERT 1 transaction không đụng byte frozen nào, quý mới cohort<30 chưa append; wrapper cron + WARN-only checks xong — chờ Mike trình user duyệt dòng cron Sat 09:15 ICT: {"job": "Taylor_20260711_153405 (tiếp nối feasibility Taylor_20260711_145129)", "status": "DONE_PENDING_CRON_APPROVAL", "verify_thuc_nghiem_append_only": {"cach …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -96,6 +96,25 @@ hơn, QUAN TRỌNG cho hướng nghiên cứu sắp tới:
 - Nguyên tắc chốt cho cả 2 việc: dùng dữ liệu tươi, đánh giá đúng chuẩn mực (walk-forward IS/OOS,
   DSR/PBO, LOO, quant-skeptic) — "không nên thấy pattern dễ overfit như momentum mà bị lay động"
   (không giữ 1 pattern chỉ vì quen thuộc/lịch sử nếu số liệu thật không ủng hộ).
+
+**Tiến độ (iii) rebuild fa_ratings builder (2026-07-11, cùng ngày):**
+- Feasibility XONG (Taylor job Taylor_20260711_145129, quant-skeptic CONFIRMED high confidence):
+  builder gốc **chưa hề mất** — là `fundamental_rating.py` (repo root), registry ghi nhầm "không có
+  writer" (đã sửa). Lineage 100% khớp 12.367/12.367 rows lịch sử; reproduction test chạy lại hôm nay
+  = 82.3% khớp tier chính xác / 99.9% trong ±1 bậc; phủ tới 2026-07-08 gồm cả 2026Q2.
+- **Root cause phần lệch 18% (user xác nhận, 2026-07-11)**: BQ admin có điều chỉnh nhỏ tỉ lệ chia cổ
+  tức tiền mặt → giá điều chỉnh (adjusted Close) đổi nhẹ hồi tố → percentile trôi nhẹ gần ranh giới
+  tier. Đây là hiện tượng bình thường của nguồn dữ liệu, không phải lỗi công thức.
+- **User CHỐT mức độ an toàn cho quý cũ (nới so với đề xuất ban đầu của quant-skeptic)**: KHÔNG cần
+  đòi khớp tuyệt đối/byte-identical cho các quý đã đóng băng — "quý cũ nếu có thay đổi nhẹ vẫn đạt
+  tỉ lệ thống kê thì cũng không vấn đề gì". Nghĩa là: thiết kế append-only vẫn giữ nguyên hướng
+  (không chủ động re-rank lại quý cũ), nhưng nếu do dữ liệu giá gốc tự nhiên trôi (như trên) làm quý
+  cũ lệch nhẹ khi build lại, đó là chấp nhận được miễn còn đạt ngưỡng thống kê tương đương đã đo
+  (~82%/99.9%), KHÔNG cần chặn cứng bằng diff byte-để-byte như quant-skeptic đề xuất ban đầu.
+- **User duyệt: cho Taylor tiến hành bước tiếp theo** — xây cơ chế refresh append-only + cron weekly
+  (giống mẫu `fa_ratings_8l`) + wire freshness-check. Vẫn cần: (a) fix lỗi pandas-3 nhỏ ở khối cảnh
+  báo cuối script trước khi wire cron; (b) quyền ghi BQ vẫn là vấn đề mở giống fa_ratings_8l — chờ
+  kết quả cron 8L thật thứ Bảy 07-18 để áp dụng chung lời giải, không cần giải riêng.
 
 ## DT5G BULL-giả bug → audit freshness toàn hệ thống → CRITICAL basket fix → re-pin baseline R3
 ### CHUỖI ĐÃ KHÉP KÍN HOÀN TOÀN (2026-07-11), chỉ còn 3 mục chờ xác nhận qua cron thứ Hai 07-13
