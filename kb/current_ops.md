@@ -1,6 +1,35 @@
 # Current Operations — Mike fleet
 > Mike cập nhật thủ công khi có thay đổi trạng thái quan trọng. Đọc trước mọi thứ khác khi restart.
-> Cập nhật lần cuối: 2026-07-07
+> Cập nhật lần cuối: 2026-07-11
+
+## DT5G BULL-giả bug — FIX ĐÃ CONFIRMED, ĐANG CHỜ PUBLISH BQ theo phương án B (2026-07-11)
+Bug: reorg 06-21 (`10ae395`) làm writer `vnindex_5state_ew_v1.py:519` ghi lệch path, EW-leg đóng
+băng từ 06-22 → base v3.4b rơi về chấm điểm index-only → tạo candidate BULL GIẢ (streak 9/10 hết
+07-09, thiếu đúng 1 phiên mới commit). Breadth/thanh khoản thật lúc đó tệ hơn MỌI lần BULL commit
+thật 2014-2026 — không phải bull thật. **Live KHÔNG bị ảnh hưởng** — `dt5g_live` chưa từng commit
+BULL (DT-gate cần đủ 10 phiên, base lỗi chỉ giữ 9).
+
+Đã xong: fix 1 dòng (commit `498c3a6`), chạy lại local xác nhận NEUTRAL toàn bộ 06-15→07-10, BULL
+giả biến mất. **quant-skeptic CONFIRMED (2026-07-11, độ tin cậy cao)** — verify độc lập, tự tái tạo
+đúng diff-vs-BQ. Winston audit độc lập thêm: 2 file path-mismatch khác (ảnh hưởng thấp, không cần
+fix gấp) + 1 bug ở `bq_freshness_check.sh` (`-le` thay vì `-lt`, khiến freshness check báo FRESH
+giả — lý do bug gốc sống 3 tuần không bị phát hiện) + kết luận: TOÀN BỘ file trung gian của chain
+tính toán KHÔNG có freshness-check nào (đề xuất: assertion mtime chung cho mọi file output).
+
+**Quyết định user (2026-07-11): phương án B — zero-touch.** KHÔNG publish tay. Cron
+`daily_refresh_v34b_linux.sh` (thứ Hai 07-13, 18:30 ICT) sẽ tự chạy với code đã fix và publish
+đúng, ngoài harness (không bị chặn như headless Taylor).
+
+**Việc còn treo, cần Mike tự kiểm tra sau khi cron chạy (đừng quên qua restart):**
+1. Sau 18:30 ICT thứ Hai 07-13: query lại `tav2_bq.vnindex_5state_dt5g_live` xác nhận 06-24→07-13
+   = NEUTRAL(3), không có BULL(4) nào lọt qua; xác nhận có dòng 07-10, 07-13 mới.
+2. Re-dispatch Taylor chạy nốt bước 5-6 đã hoãn (verify dt5g_live NEUTRAL + `dt_gate_hazard_research.py`
+   self-check 0-diff sau publish).
+3. Winston's khuyến nghị (d) CHƯA quyết: `MAX_STATE_LAG=0` (1 dòng), chuẩn hoá path 1 nơi = `data/`,
+   assertion mtime chung cho chain, quarantine 3 file orphan — cần hỏi user có muốn làm tiếp không
+   (không tự làm, đây là thay đổi code pipeline production khác, dù rủi ro thấp hơn bug gốc).
+4. `daily_refresh_v34b_linux.sh` bị miss 1 lần hôm 07-10 vì schedule đổi 23:15→18:30 landed SAU mốc
+   18:30 cùng ngày (commit `1a3ea5c`) — one-time, không phải bug lặp lại, Winston đã confirm.
 
 ## `mike@Mike.service` (remote-control daemon) đã TẮT HẲN (2026-07-07, user quyết định)
 User giờ chỉ dùng Discord để nói chuyện với Mike (tách nhiều topic tiện phân việc hơn hẳn so với
