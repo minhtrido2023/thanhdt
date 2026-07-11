@@ -110,7 +110,9 @@ deals = tx.groupby("holding_id").apply(agg_holding).reset_index()
 deals["closed"] = (deals["n_sells"] > 0) & (np.abs(deals["sh_buy"] - deals["sh_sell"]) < 1.0)
 deals["net_ret"] = (deals["sell_amt"] - deals["fee_sell"]) / (deals["buy_amt"] + deals["fee_buy"]) - 1
 closed = deals[deals["closed"]].copy()
-R(f"    holdings total={len(deals):,}  closed={len(closed):,}  (survey: 2,258 closed)")
+PARKING = closed["play_type"].str.startswith(("ETF_PARK", "CUSTOM"))
+R(f"    holdings total={len(deals):,}  closed={len(closed):,}  closed ex-parking={int((~PARKING).sum()):,}"
+  f"  (survey: 2,258 closed — survey excluded parking sleeves)")
 
 deal_survey = {"MOMENTUM_N": 77, "MOMENTUM_S": 46, "RE_BACKLOG_BUY": 136, "DEEP_VALUE_RECOVERY": 247}
 closed["pt_base"] = closed["play_type"].str.replace("_W$", "", regex=True)
@@ -192,7 +194,8 @@ for df in (ep_j, dl_j):
     df["F4_cfoa_pos"]   = (df["CF_OA_P0"] > 0).astype("float").where(df["CF_OA_P0"].notna())
 
 # L2 labels: forward returns at entry (labels ONLY)
-ep_j["L2_success"] = np.where(ep_j["profit_2M"] >= 0.10, 1, np.where(ep_j["profit_2M"] <= 0.0, 0, np.nan))
+# profit_2M is in PERCENT units (verified empirically vs LEAD(Close,40)/Close-1: exact match x100)
+ep_j["L2_success"] = np.where(ep_j["profit_2M"] >= 10.0, 1, np.where(ep_j["profit_2M"] <= 0.0, 0, np.nan))
 ep_j["label_available"] = ep_j["profit_2M"].notna()
 dl_j["L1_success"] = np.where(dl_j["net_ret"] >= 0.10, 1, np.where(dl_j["net_ret"] <= 0.0, 0, np.nan))
 

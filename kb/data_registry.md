@@ -136,7 +136,7 @@
 
 | Nguồn | Status | Là gì | Ai ghi / cadence | Bẫy |
 |---|---|---|---|---|
-| `data/ba_v11_unified_12y_sig.pkl` | Research cache, frozen 2026-06-16 | Signal cache BAL/V11 cho ~90 script sim/tune | Rebuild tay (`build_state_free_signals.py`) khi cần | Production KHÔNG đọc file này (pt_v22/golive query BQ trực tiếp). Nghiên cứu "đến hôm nay" phải rebuild trước — chạy sim trên pkl cũ ra kết quả thiếu 1 tháng cuối mà không báo lỗi |
+| `data/ba_v11_unified_12y_sig.pkl` | Research cache — **rebuilt 2026-07-11 trên DT5G, max 2026-07-10** | Signal cache BAL/V11 cho ~90 script sim/tune | Rebuild tay khi cần. **Builder thật = `build_pkl_v11_current.py`** (dòng cũ ghi nhầm `build_state_free_signals.py` — script đó build bản state-FREE `ba_v11_state_free_sig.pkl` khác, chỉ ĐỌC pkl unified làm đối chứng; sửa 2026-07-11, job Taylor_20260711_165407). Bản rebuild DT5G: `mike/agents/Taylor/momdeal/rebuild_pkl_dt5g.py` | Production KHÔNG đọc file này (pt_v22/golive query BQ trực tiếp). ⚠️ Bản TRƯỚC 07-11 built trên bảng BASE (pre-F3) — state5/play_type bên trong là base, không phải DT5G; bản hiện tại đã verify 1.085/1.085 ngày divergent khớp `dt5g_live`. Backup bản base: `.bak_predt5g_20260711`. Sim đối chiếu kết quả cũ (trước 07-11) phải nhớ pkl đã ĐỔI cả state-source lẫn end-date |
 | `data/VNINDEX.csv` | Research snapshot, frozen 2026-06-16 | VNINDEX daily + indicator + PE offline (~87 script đọc) | Vài script research tự ghi lại khi chạy; không có cron | CLAUDE.md gốc mô tả như file chuẩn offline nhưng KHÔNG tự tươi — phân tích thị trường "hiện tại" phải kiểm tra max(time) trước, hoặc query BQ |
 | `data/fa_ratings_lh.csv` (05-15), `data/intraday_full.pkl` (05-17), `data/value_panel_2014.csv` (pinned PIT) | Research static | Panel nghiên cứu đông cứng (lh = long-history ratings; intraday study; value panel audit R3) | Không ai ghi định kỳ | `value_panel_2014.csv` đông cứng CHỦ ĐÍCH (input pinned của audit trong results_registry) — đừng refresh nó; 2 file kia stale tự nhiên |
 
@@ -216,6 +216,11 @@
   signal), CHƯA đánh dấu DEPRECATED — đang ở bước backtest song song (job Taylor_20260711_094714,
   user duyệt hướng validate 2026-07-11). Xem mục 5 "Nguyên tắc bắt buộc" cho quy trình obsolete
   đầy đủ, thêm cùng ngày theo yêu cầu user ("quản lý phần này phải thật sự cẩn trọng").
+- 2026-07-12 (Taylor, job Taylor_20260711_165407, momdeal Phase 0): sửa row `ba_v11_unified_12y_sig.pkl`
+  — builder ghi nhầm (`build_state_free_signals.py` → thật ra là `build_pkl_v11_current.py`); pkl rebuilt
+  trên `dt5g_live` (bản cũ base-leak pre-F3), backup `.bak_predt5g_20260711`. Phát hiện thêm:
+  `bigquery_dictionary.json` THIẾU định nghĩa họ cột `profit_*` (forward return, đơn vị **PHẦN TRĂM** —
+  verify thực nghiệm = `LEAD(Close,40)/Close−1 ×100` cho profit_2M) — Winston nên bổ sung dictionary.
 - 2026-07-11: xây `bin/data_registry_audit.sh` (regression-guard cơ học cho 2 sự cố base-leak +
   custom30-mislabel, freshness re-check 3 nguồn rủi ro cao nhất, reference-count snapshot cho
   nguồn deprecated/dead) — wire vào Friday KB editorial review (`kb_nightly.sh` Phase 5). Chạy

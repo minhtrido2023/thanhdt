@@ -1,5 +1,5 @@
 # PLAN — Phân tích deal thành công lịch sử của book Momentum → tìm pattern thật
-> Taylor, 2026-07-11 · job Taylor_20260711_163023 · trạng thái: **DRAFT chờ user duyệt** (chưa chạy Phase 0)
+> Taylor, 2026-07-11 · job Taylor_20260711_163023 · trạng thái: **USER ĐÃ DUYỆT · CP0 = GO (Phase 0 xong, job Taylor_20260711_165407) — chờ duyệt sang Phase 1**
 > Khuôn kỷ luật: giống plan_fa8l_retune_20260711.md — plan trước, pre-register trước, mới đốt compute.
 
 ## 0. Bối cảnh & mandate (từ user, 2026-07-11)
@@ -144,6 +144,70 @@ Mỗi CP: ghi finding lên bus + cập nhật plan doc này + **DỪNG chờ duy
 6. Nếu pattern tìm được hóa ra = "liquidity/size floor" (C1) — tức xác nhận giả thuyết quality
    filter ngầm — hành động đúng có thể là **thêm 1 floor vào golden floor chung** thay vì cứu kênh
    momentum riêng; quyết định đó thuộc user tại CP1.
+
+## CP0 — KẾT QUẢ PHASE 0 (2026-07-11/12, job Taylor_20260711_165407) — **VERDICT: GO**
+
+**Scripts**: `mike/agents/Taylor/momdeal/{rebuild_pkl_dt5g.py, momdeal_phase0_build.py, spotcheck_20deals.py}`
+**Outputs**: `data/momdeal_exp/{momdeal_episodes_phase0.csv (2.938 rows), momdeal_deals_phase0.csv (519 rows), phase0_report.txt}`
+
+### CP0 gate — cả 3 điều kiện PASS
+| Điều kiện | Kết quả |
+|---|---|
+| Dataset sạch (rebuild + PIT joins + audit no-look-ahead) | ✅ PASS — chi tiết dưới |
+| Coverage 8L tại entry ≥80% episode | ✅ **100.0%** MOM_FAMILY (789 ep) · 98.1% ALL (2.938 ep, phần thiếu = 53 ep DVR trước 2014-07-09 là ngày 8L bắt đầu) · 100.0% deals L1 |
+| N khớp khảo sát §2 ±10% | ✅ PASS — **CHÍNH XÁC TUYỆT ĐỐI 0% lệch** trên like-for-like (xem dưới) |
+
+### 1. Rebuild signal cache `ba_v11_unified_12y_sig.pkl` — pkl cũ ĐÚNG LÀ bị base-leak
+- Nghi ngờ trong plan **xác nhận đúng**: pkl frozen 06-16 built TRƯỚC fix F3 — state5 bên trong là bảng
+  BASE `vnindex_5state`. Rebuild bằng pattern F3 (`.replace` sang `vnindex_5state_dt5g_live`, giống
+  commit 0537514), END mở rộng 2026-05-15→**2026-07-10**. Backup: `.bak_predt5g_20260711`.
+- **Verify state source (gate cứng trong script, abort nếu fail)**: trên 1.085 ngày dt5g≠base (2014+),
+  pkl mới khớp dt5g **1.085/1.085, khớp base 0/1.085**. Cửa sổ BULL-giả 06-29→07-09: state5=[3] đúng.
+- Registry ghi SAI builder của pkl này (`build_state_free_signals.py` — script đó build bản state-FREE
+  khác, chỉ ĐỌC pkl unified làm đối chứng). Builder thật: `build_pkl_v11_current.py` (nay thêm bản DT5G
+  `momdeal/rebuild_pkl_dt5g.py`). Đã sửa registry.
+
+### 2. N reconciliation — tách bạch 2 tầng để so đúng like-for-like
+Khảo sát §2(b) đo trên pkl base 06-16 → so trên **pkl backup base** (like-for-like): MOM_N **87/87**,
+MOM_S **513/513**, MOMENTUM **129/129**, MEGA **10/10**, DVR **1.077/1.077** — khớp chính xác 100%.
+Deals từ CSV canonical: MOM_N **77/77**, MOM_S **46/46**, RE_BACKLOG **136/136**, DVR **247/247**;
+closed ex-parking 2.259 vs khảo sát 2.258 (lệch 1 = 0,04%; 2.816 tổng closed gồm 557 ETF_PARK/parking).
+
+**Dataset thật (pkl DT5G) — dịch chuyển ĐÃ LƯỜNG TRƯỚC, root cause = đổi nguồn state (đúng mục đích
+rebuild) + 1 tháng dữ liệu thêm:** MOM_N 87→**153**, MOM_S 513→**486**, MOMENTUM 129→**136**, MEGA
+10→**14**, DVR 1.077→**912**, và MOMENTUM_S_N (twin state-3 của MOM_S, ngoài family pre-registered)
+876→**1.237**. Cơ chế: DT5G nhiều ngày NEUTRAL hơn base (DT-gate kẹp cực trị) → tín hiệu dồn từ nhánh
+state-4/5 (S) sang nhánh state-3 (N/S_N). Family MOM tổng = **789 episode** (thay vì ~739), N contrast
+L2 có label = 786 (343 SUCCESS / 293 FAIL / 150 neutral-band) — đủ N như thiết kế.
+S_N được giữ trong CSV với cờ `cohort=DIAG_S_N` (KHÔNG thuộc family, chỉ diagnostic — đưa vào family
+hay không là quyết định mở rộng scope, thuộc user, không tự quyết).
+
+### 3. PIT joins + labels
+- 8L as-of `eff_date ≤ feature_date` (ASOF duckdb); technical tại ngày signal (episode) / T-1 (deal);
+  fundamentals as-of **Release_Date** (không phải quarter-end — chống leak BCTC chưa công bố).
+- **Bug bắt được khi build (đã sửa trước khi chốt)**: `profit_2M` đơn vị **PHẦN TRĂM** không phải
+  decimal (verify thực nghiệm khớp chính xác `LEAD(Close,40)/Close−1 ×100`; cột này KHÔNG có trong
+  `bigquery_dictionary.json` — dictionary thiếu toàn bộ họ `profit_*`). Ngưỡng label L2 đã sửa ≥10.0/≤0.0.
+- Linkage deal↔signal: pkl play_type tại T-1 == book play_type **100%** cho cả 4 kênh SIGNAL_V11
+  (MOM_N/S/MOMENTUM/DVR; RE_BACKLOG 0% — đúng, RE không phải play_type của SIGNAL_V11, entry từ sleeve RE riêng).
+
+### 4. Audit no-look-ahead (spot-check tay, seed cố định 20260711)
+- **20/20 deal PASS + 5/5 episode PASS** qua code path ĐỘC LẬP (pandas thuần per-ticker, không dùng
+  ASOF join của builder): tech row ≤ feature_date và là row cuối; 8L đúng row cuối ≤ feature_date và
+  row kế tiếp > feature_date; fin Release_Date ≤ feature_date; sig_date < entry_date (mua T+1).
+- **1 deal đối chiếu tay với BigQuery LIVE** (không qua cache): PDR_20150306_8 — D_RSI/C_L1M/Res_1Y/8L
+  rating/route khớp từng chữ số; điều kiện MOMENTUM_N tự tái lập đúng (ta=166≥155, state5=3, tier C,
+  days_since_release=31≤60).
+
+### 5. Bất thường ghi nhận (không chặn GO)
+1. Registry sai builder pkl (đã sửa, xem mục 1).
+2. `bigquery_dictionary.json` thiếu định nghĩa họ cột `profit_*` (đơn vị %) — nên bổ sung (việc nhỏ, Winston).
+3. Composition shift dưới DT5G (mục 2) — Phase 1 PHẢI per-year LOO như đã khai báo; lưu ý thêm: phần
+   lớn tăng MOM_N nằm ở era 2020+ (family 2014-19 chỉ 118 ep vs 671 ep 2020+) → contrast IS-era sẽ mỏng,
+   đã lường trong caveat §8.3.
+
+**DỪNG theo đúng quy trình — chờ Mike/user duyệt mới sang Phase 1** (contrast 13 feature, FDR 10%,
+IS/OOS/ex-2021, 1 logistic walk-forward; không mở thêm trial).
 
 ## 9. Việc user cần quyết để bắt đầu
 1. Duyệt định nghĩa label (§3 — ngưỡng +10%/0%, L2 chính + L1 check).
