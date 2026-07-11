@@ -45,7 +45,24 @@ CONFIRMED + user sign-off cuối cùng — không khác gì mọi thay đổi si
 - **Chỉ đạo user cho Phase 2 (quan trọng)**: đánh giá phải nhìn TỔNG THỂ — cách 3 finalist phối hợp
   với nhau và với framework hiện có, không chỉ so OOS đơn lẻ. Làm tuần tự, kiểm chứng chắc chắn từng
   bước trước khi qua bước sau — tránh làm ẩu phải sửa lại sau.
-- Đang chờ: Phase 2 (full backtest 3 finalist theo tiêu chí CP2 đã khai báo trước, không nới).
+- **Phase 2 XONG — CP2 = NO-GO CẢ 3 FINALIST** (quant-skeptic CONFIRMED, high confidence, tự tái
+  lập khớp chính xác). F1/F6/F12 đều fail tiêu chí OOS + LOO (âm mọi năm kể cả ex-2021) + tail. Root
+  cause: trục MOMENTUM_N (kênh entry chính của BAL dưới NEUTRAL — state phổ biến nhất DT5G) gãy vì
+  thang rating 1-5 không tái tạo được "quality filter ngầm" mà tier C/D cũ vô tình tạo ra (loại được
+  junk nhỏ mà rating không loại được). F12 kết quả full-năm đẹp thực ra bị kéo bởi 1 năm outlier 2021
+  (+20.95pp riêng năm đó) — đúng lo ngại quant-skeptic nêu từ Phase 0.
+- **KẾT LUẬN DỰ ÁN hướng (c)**: đã đo trung thực và bị bác — re-tune bucket trên thang 8L gốc (theo
+  đúng pre-registered family, N=16/16, không mở thêm trial) KHÔNG cho ra ứng viên thay core khả thi.
+  Quy trình hoạt động ĐÚNG như thiết kế (bắt được hướng không khả thi trước khi wire production, không
+  phải thất bại của quy trình).
+- **3 fallback chờ user chọn** (không quyết thay user):
+  (i) giữ `fa_ratings` static, xử staleness riêng — caveat: edge control đo trên bảng lúc còn fresh,
+      không bảo chứng cho bảng đóng băng sau BCTC Q2/2026;
+  (ii) hybrid E-gate-only (chỉ thay T1 avoid bằng rating=5, giữ nguyên phần còn lại) — CHƯA ĐO, đây
+      LÀ trial mới cần user duyệt mở N-budget riêng nếu muốn thử;
+  (iii) rebuild legacy builder `fa_ratings` (builder gốc không còn trong repo) — giải quyết tận gốc
+      staleness, giữ nguyên semantics đã tune.
+  Deadline nghiệp vụ không đổi: BCTC Q2/2026 về ~cuối tháng 7, rebal quý ~08-05.
 
 ## DT5G BULL-giả bug → audit freshness toàn hệ thống → CRITICAL basket fix → re-pin baseline R3
 ### CHUỖI ĐÃ KHÉP KÍN HOÀN TOÀN (2026-07-11), chỉ còn 3 mục chờ xác nhận qua cron thứ Hai 07-13
