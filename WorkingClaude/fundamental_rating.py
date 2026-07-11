@@ -34,9 +34,13 @@ import numpy as np, pandas as pd
 
 PROJECT = "lithe-record-440915-m9"
 BQ_BIN  = r"bq"
-OUT_CSV    = "data/fundamental_rating.csv"
-OUT_ALL    = "data/fundamental_rating_all.csv"
-OUT_LATEST = "data/fundamental_rating_latest.csv"
+# Windows `type` vs POSIX `cat` — script originally authored on Windows; cron runs on Linux.
+CAT_CMD = "type" if os.name == "nt" else "cat"
+# Overridable so refresh_fa_ratings.py can build to a staging dir without touching
+# the canonical CSVs (coding_guidelines §8 — never write experiments to canonical names).
+OUT_CSV    = os.environ.get("FA_OUT_CSV",    "data/fundamental_rating.csv")
+OUT_ALL    = os.environ.get("FA_OUT_ALL",    "data/fundamental_rating_all.csv")
+OUT_LATEST = os.environ.get("FA_OUT_LATEST", "data/fundamental_rating_latest.csv")
 
 WEIGHTS = {
     "quality":     0.18,
@@ -61,7 +65,7 @@ def bq_query(sql, label=""):
     with tempfile.NamedTemporaryFile(mode="w", suffix=".sql", delete=False, encoding="utf-8") as f:
         f.write(sql); tmp = f.name
     try:
-        cmd = (f'type "{tmp}" | "{BQ_BIN}" query --use_legacy_sql=false '
+        cmd = (f'{CAT_CMD} "{tmp}" | "{BQ_BIN}" query --use_legacy_sql=false '
                f'--project_id={PROJECT} --format=csv --max_rows=10000000')
         r = subprocess.run(cmd, capture_output=True, text=True, timeout=900, shell=True)
     finally:
@@ -316,6 +320,10 @@ for _, r in top.iterrows():
 STALE_DAYS  = 180
 LIKELY_DEAD = 400   # beyond this, assume delisted rather than pipeline error
 TODAY_TS = pd.Timestamp.today().normalize()
+# `time` is a string column (read straight from BQ CSV) — must parse before date math,
+# otherwise pandas 3 raises on Timestamp-minus-string and the script exits non-zero
+# after the CSVs are already saved (kills cron runs for a cosmetic warning block).
+latest_per_tk["time"] = pd.to_datetime(latest_per_tk["time"])
 latest_per_tk["rating_age"] = (TODAY_TS - latest_per_tk["time"]).dt.days
 
 ab_mask = latest_per_tk["tier"].isin(["A", "B"])
