@@ -291,20 +291,26 @@ def load_recommendations(signal_date_str):
     with open(csv_path, encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for r in reader:
+            # CSV field đổi tên 2026-07-11 (audit Taylor_20260711_031821 F2): "close" →
+            # "close_bq_stale_DO_NOT_USE_AS_REFPRICE" để LLM lập plan không với nhầm giá BQ
+            # stale làm ref_price. Cột BQ giữ tên "close" (bảng audit/history, schema ổn định);
+            # fallback đọc tên cũ cho CSV sinh trước ngày đổi.
+            _close = r.get("close_bq_stale_DO_NOT_USE_AS_REFPRICE", r.get("close"))
             row = {
                 "signal_date": signal_date_str,
                 "book":       r["book"],
                 "ticker":     r["ticker"],
                 "play_type":  r.get("play_type") or None,
                 "ta":         float(r["ta"]) if r.get("ta") not in (None, "", "None") else None,
-                "close":      float(r["close"]) if r.get("close") not in (None, "", "None") else None,
+                "close":      float(_close) if _close not in (None, "", "None") else None,
                 "sector":     int(float(r["sector"])) if r.get("sector") not in (None, "", "None") else None,
                 "weight_pct": float(r["weight_pct"]),
                 "status":     r["status"],
                 "extra":      None,
             }
             # capture any unknown CSV columns into extra
-            known_csv = {"book","ticker","play_type","ta","close","sector","weight_pct","status"}
+            known_csv = {"book","ticker","play_type","ta","close","sector","weight_pct","status",
+                         "close_bq_stale_DO_NOT_USE_AS_REFPRICE"}
             xtra = {k: v for k, v in r.items() if k not in known_csv and v not in (None, "")}
             if xtra:
                 row["extra"] = json.dumps(xtra, ensure_ascii=False)
