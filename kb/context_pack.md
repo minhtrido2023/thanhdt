@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v932)
+# Mike fleet — context pack (v933)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-11T15:48:03] Taylor/finding — REBUILD fa_ratings BƯỚC 2 HOÀN TẤT — cơ chế append-only refresh đã xây + dry-run verified: frozen match 82.51% exact/99.98% ±1 (đúng baseline 82.3/99.9, trên floor abort 70/99), publish DELETE+INSERT 1 transaction không đụng byte frozen nào, quý mới cohort<30 chưa append; wrapper cron + WARN-only checks xong — chờ Mike trình user duyệt dòng cron Sat 09:15 ICT: {"job": "Taylor_20260711_153405 (tiếp nối feasibility Taylor_20260711_145129)", "status": "DONE_PENDING_CRON_APPROVAL", "verify_thuc_nghiem_append_only": {"cach …
 - [2026-07-11T15:53:59] quant-skeptic/verification — ✅ CONFIRMED VERIFY: REBUILD fa_ratings BƯỚC 2 HOÀN TẤT — cơ chế append-only refresh đã xây + dry-run verified: frozen match 82.51% exact/99.98% ±1 (đúng baseline 82.3/99.9, trên floor abort 70/99), publish DELETE+INSERT 1 transaction không đụng byte frozen nào, quý mới cohort<30 chưa append; wrapper cron + WARN-only checks xong — chờ Mike trình user duyệt dòng cron Sat 09:15 ICT: {"finding_topic": "REBUILD fa_ratings BƯỚC 2 — append-only refresh mechanism built + dry-run verified (frozen 82.51%/99.98%, DELETE+INSERT transaction, cohort<3 …
 - [2026-07-11T16:13:01] Winston/finding — ARCHIVE 4 fa_ratings builder variants HOÀN TẤT: {"job": "Winston_20260711_160905", "status": "DONE", "archived": ["build_fa_ratings_v9.py", "build_fa_ratings_pre2014.py", "fundamental_rating_v5.py", "fundamen …
 - [2026-07-11T16:36:56] Taylor/finding — PLAN momentum-deals pattern discovery — scope xong, chờ user duyệt trước Phase 0: {"job": "Taylor_20260711_163023", "status": "PLAN_DONE_PENDING_USER_APPROVAL", "plan_doc": "mike/agents/Taylor/plan_momentum_deals_20260711.md", "khao_sat_N_da_ …
@@ -11,6 +10,7 @@
 - [2026-07-11T17:19:43] quant-skeptic/verification — ✅ CONFIRMED VERIFY: PLAN momentum-deals pattern discovery — scope xong, chờ user duyệt trước Phase 0: {"finding_topic": "PLAN momentum-deals pattern discovery — scope xong, chờ user duyệt trước Phase 0", "verdict": "CONFIRMED", "confidence": "high", "checks": {" …
 - [2026-07-11T22:59:12] Taylor/finding — momdeal Phase 1 HOÀN TẤT — CP1 = NO-GO (0/13 feature qua gate pre-registered): thành công lịch sử kênh MOM chủ yếu là dồn mẫu regime 2020-21, không phải pattern lặp lại được — khuyến nghị đóng/thu hẹp kênh MOM, Phase 2 KHÔNG chạy: {"job": "Taylor_20260711_225135", "status": "PHASE1_DONE_CP1_NOGO", "plan_doc": "mike/agents/Taylor/plan_momentum_deals_20260711.md (section CP1 moi)", "script" …
 - [2026-07-11T23:06:29] quant-skeptic/verification — ✅ CONFIRMED VERIFY: momdeal Phase 1 HOÀN TẤT — CP1 = NO-GO (0/13 feature qua gate pre-registered): thành công lịch sử kênh MOM chủ yếu là dồn mẫu regime 2020-21, không phải pattern lặp lại được — khuyến nghị đóng/thu hẹp kênh MOM, Phase 2 KHÔNG chạy: {"finding_topic": "momdeal Phase 1 CP1 = NO-GO (0/13 features pass pre-registered gate); historical MOM success is regime-concentrated 2020-21, not a repeatable …
+- [2026-07-11T23:28:09] Taylor/finding — PLAN DVR-8L sizing (nhánh b) — scope xong, chờ user duyệt, chưa chạy backtest: {"job": "Taylor_20260711_232012", "status": "PLAN_DONE_PENDING_USER_APPROVAL", "plan_doc": "mike/agents/Taylor/plan_dvr_8l_sizing_20260712.md", "huong_chon": "S …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -24,8 +24,34 @@ feature pre-registered dùng 8L, khung CP0-CP3, chấp nhận trước CP1-NO-GO
 Câu hỏi trọng tâm dự án đúng như user hỏi: "sự thành công của MOM_N cũ có thực không" — CP1 sẽ trả
 lời trực tiếp (nếu chỉ do dồn 2021 → thành công cũ là ảo giác mẫu nhỏ, không phải pattern thật).
 User hỏi về việc dùng 1 Discord topic riêng cho dự án này — Mike không tự tạo topic được, đã đề
-nghị user dùng lại topic nghiên cứu Taylor có sẵn hoặc tạo topic mới rồi báo lại. Chờ user xác nhận
-topic; Phase 0 đã dispatch không phụ thuộc việc này.
+nghị user dùng lại topic nghiên cứu Taylor có sẵn hoặc tạo topic mới rồi báo lại. User tạo topic
+mới **1525112292159651940**, đã lưu memory (`project-momentum-deals-topic-routing`) — dispatch
+tiếp theo dùng `DISCORD_THREAD_ID=1525112292159651940` override để route đúng kết quả.
+
+**Phase 0 XONG — CP0 = GO** (cả 3 gate PASS): dataset sạch, 8L coverage 100% family, N khớp khảo sát
+CHÍNH XÁC 0% lệch like-for-like; xác nhận pkl cũ đúng là base-leak pre-F3, rebuild DT5G verified
+1085/1085; bắt+sửa 1 bug label (profit_2M đơn vị %). quant-skeptic CONFIRMED high confidence.
+
+**Phase 1 XONG — CP1 = NO-GO** (quant-skeptic CONFIRMED high confidence, tự tái lập khớp chính xác):
+0/13 feature qua gate pre-registered (FDR10% + sign-stable IS/OOS/ex2021 + |Cliff δ|≥0.15). 2
+near-miss (ROIC_Trailing δ=+0.116, Revenue_YoY δ=+0.129 — FDR-pass + sign-stable nhưng effect size
+dưới ngưỡng). Multivariate AUC 0.472 (không có predictability). **Trả lời trực tiếp câu hỏi trung
+tâm của user**: thành công lịch sử MOM_N/MOM_S chủ yếu do dồn mẫu regime 2020-21 (57.2% tổng mẫu có
+nhãn) — không phải pattern lặp lại được, khớp kết luận fa8l CP2 nhưng đo trực tiếp trên deal/episode
+lần này. **Insight**: 8L rating+route phân tách RÕ ở DVR (đối chứng) nhưng KHÔNG ở MOM — xác nhận
+đúng quan điểm user "8L không kém, chỉ là momentum không có trục chất lượng để bám".
+
+**Khuyến nghị Taylor (chờ user quyết)**: đóng/thu hẹp kênh MOM_N/MOM_S, tái phân bổ vốn về DVR/
+RE_BACKLOG. 2 nhánh mở nếu muốn tiếp tục (đều là trial MỚI, cần duyệt N-budget riêng): (a) Revenue_YoY
+làm golden floor chung, (b) khai thác insight 8L-DVR thành rule sizing riêng. Phase 2 harness KHÔNG
+chạy (không có candidate rule hợp lệ). Dự án dừng đúng quy trình tại CP1, chờ user quyết bước tiếp.
+
+**User CHỌN nhánh (b)** (2026-07-11): khai thác insight "8L rating+route phân tách rõ ở DVR" thành
+rule sizing riêng cho kênh DVR. Đây là trial MỚI, ngoài phạm vi N-ledger 14 test đã đóng ở Phase 1 —
+Taylor cần scope/plan trước khi đo (đúng kỷ luật), không nhảy thẳng vào backtest. Dispatch scoping
+đã gửi, route qua Discord topic 1525112292159651940 (dự án này có topic riêng, tách khỏi vận hành
+chung — user tự nhận ra và yêu cầu tách, Mike xác nhận không tự chuyển phiên sống sang topic khác
+được, chỉ dispatch việc nền route đúng topic).
 
 ## fa_ratings → fa_ratings_8l: user CHỐT hướng (c) — dự án re-tune SIGNAL_V11 bucket trên 8L (2026-07-11)
 
