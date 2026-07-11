@@ -273,33 +273,37 @@ if etf_frac > 0:
     except Exception as _e:
         print(f"  WARNING: custom30 lookup failed: {_e}")
 
+# Field giá trong recs = Close BQ của NGÀY SIGNAL (trễ >=1 phiên lúc DollarBill đọc ~19:00).
+# Tên field cố tình xấu (audit Taylor_20260711_031821 F2): sự cố 07-09 cho thấy prompt cấm
+# không đủ ngăn LLM lấy field "close" tiện tay làm ref_price — đổi tên để ref_price bắt buộc
+# phải lấy từ DNSE live, không còn field "close" nào trong context lập plan để với nhầm.
 recs = []
 for _, r in bal.iterrows():
     recs.append({"book": "BAL", "ticker": r["ticker"], "play_type": r["play_type"],
-                 "ta": round(float(r["ta"]), 0), "close": round(float(r["Close"]), 1),
+                 "ta": round(float(r["ta"]), 0), "close_bq_stale_DO_NOT_USE_AS_REFPRICE": round(float(r["Close"]), 1),
                  "sector": int(r["sec"]) if pd.notna(r["sec"]) else None,
                  "weight_pct": r["weight"]*100, "status": "HALF_SIZE" if (r["weak"] and half_in_state) else "FULL"})
 for it in lag_up:
     recs.append({"book": "LAG", "ticker": it["ticker"], "play_type": it["tier"],
-                 "ta": None, "close": None, "sector": sec_map.get(it["ticker"]),
+                 "ta": None, "close_bq_stale_DO_NOT_USE_AS_REFPRICE": None, "sector": sec_map.get(it["ticker"]),
                  "weight_pct": LAG_TW[it["tier"]]*100, "status": f"UPCOMING {it['entry']}"})
 for it in lag_recent:
     recs.append({"book": "LAG", "ticker": it["ticker"], "play_type": it["tier"],
-                 "ta": None, "close": None, "sector": sec_map.get(it["ticker"]),
+                 "ta": None, "close_bq_stale_DO_NOT_USE_AS_REFPRICE": None, "sector": sec_map.get(it["ticker"]),
                  "weight_pct": LAG_TW[it["tier"]]*100, "status": f"ENTERED {it['entry']}"})
 for tk in basket:
     recs.append({"book": "CAPIT", "ticker": tk, "play_type": "CAPIT_GOLDEN",
-                 "ta": None, "close": None, "sector": sec_map.get(tk),
+                 "ta": None, "close_bq_stale_DO_NOT_USE_AS_REFPRICE": None, "sector": sec_map.get(tk),
                  "weight_pct": round(capit_size / max(len(basket), 1) * 100, 2), "status": "WASHOUT"})
 # parking basket — advisory rows (book=PARK, weight_pct = within-basket cap-weight %)
 if _park_basket is not None:
     for pr in _park_basket.itertuples():
         recs.append({"book": "PARK", "ticker": pr.ticker, "play_type": "CUSTOM30V_8L",
                      "ta": float(pr.rating_8l) if pd.notna(pr.rating_8l) else None,
-                     "close": None, "sector": None,
+                     "close_bq_stale_DO_NOT_USE_AS_REFPRICE": None, "sector": None,
                      "weight_pct": round(float(pr.weight) * 100, 4),
                      "status": "PARK_ADVISORY"})
-rec_df = pd.DataFrame(recs, columns=["book","ticker","play_type","ta","close","sector","weight_pct","status"])
+rec_df = pd.DataFrame(recs, columns=["book","ticker","play_type","ta","close_bq_stale_DO_NOT_USE_AS_REFPRICE","sector","weight_pct","status"])
 csv_path = os.path.join(OUTDIR, f"golive_v23_recommendations_{END}.csv")
 rec_df.to_csv(csv_path, index=False)
 
@@ -346,7 +350,7 @@ else:
     L.append(f"- **Parking:** {etf_frac*100:.0f}% (state {state_today} → KHÔNG park, giữ cash phòng thủ)")
 L.append(f"\n## BAL book ({(1-w_tgt)*100:.0f}% NAV target) — {len(bal)} picks\n")
 if len(bal):
-    L.append("| ticker | tier | 8L | ta | close | sector | weight (of book) |")
+    L.append("| ticker | tier | 8L | ta | close_bq_stale (CẤM dùng làm ref_price — giá BQ trễ ≥1 phiên, ref_price phải lấy DNSE live) | sector | weight (of book) |")
     L.append("|---|---|---:|---:|---:|---:|---:|")
     for _, r in bal.iterrows():
         rt = rating8l.get(r["ticker"]); rt = int(rt) if pd.notna(rt) and rt is not None else "-"

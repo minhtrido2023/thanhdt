@@ -105,7 +105,8 @@ class V23Strategy(StrategyBase):
         recs, recs_path = self._load_recs(signal_date)
         if recs is None:
             notes.append(f"KHÔNG thấy file khuyến nghị {recs_path} — plan chỉ sync mirror")
-            recs = pd.DataFrame(columns=["book", "ticker", "play_type", "ta", "close",
+            recs = pd.DataFrame(columns=["book", "ticker", "play_type", "ta",
+                                         "close_bq_stale_DO_NOT_USE_AS_REFPRICE",
                                          "sector", "weight_pct", "status"])
         paper = self._load_paper_book()
         if str(paper["ymd"])[:10] != str(signal_date)[:10]:
@@ -116,8 +117,13 @@ class V23Strategy(StrategyBase):
         account_nav = broker.get_nav()
         real_pos = broker.get_positions()
         scale = account_nav / paper["nav"] if paper["nav"] > 0 else 0.0
-        recs_close = {str(r["ticker"]): r.get("close")
-                      for _, r in recs.iterrows() if pd.notna(r.get("close"))}
+        # Field CSV đổi tên 2026-07-11 (audit Taylor_20260711_031821 F2): giá BQ của ngày
+        # signal — ở ĐÂY dùng hợp lệ vì chỉ là fallback bậc 2 SAU quote live trong _price()
+        # (paper-mirror), không phải ref_price plan live. Fallback tên cũ cho CSV cũ.
+        _cl = "close_bq_stale_DO_NOT_USE_AS_REFPRICE"
+        recs_close = {str(r["ticker"]): (r.get(_cl) if pd.notna(r.get(_cl)) else r.get("close"))
+                      for _, r in recs.iterrows()
+                      if pd.notna(r.get(_cl)) or pd.notna(r.get("close"))}
 
         # ---------- target portfolio (số CP, đã scale) ----------
         target = {}      # ticker -> qty
