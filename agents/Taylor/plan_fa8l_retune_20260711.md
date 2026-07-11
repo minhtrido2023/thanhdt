@@ -224,3 +224,43 @@ Headless session (Taylor dispatch) auth = `dtienthanh@gmail.com` (owner, CÓ quy
 interactive Mike (service account `bq-reader-8l`, READ-ONLY — lý do Mike test tay
 refresh_fa_ratings_8l.sh bị Access Denied). CHƯA rõ cron weekly (chạy độc lập cả 2 phiên) dùng
 identity nào — cần xác nhận trước/sau run đầu tiên Sat 07-18 08:30 ICT.
+
+## 7. Phase 2 — KẾT QUẢ (2026-07-11, job Taylor_20260711_133127) — **CP2 = NO-GO CẢ 3 FINALIST**
+
+### Thực thi (đúng spec mục 2)
+9 run full-harness pt_v23_audit 50B lệnh pin R3, harness `data/fa8l_exp/pt_v23_fa8l_phase2_20260711.py`
+(env FA8L_CFG={F1,F6,F12} × FA8L_COV={full,legfoot} × FA8L_RUN): self-check 0 VND cả 9, byte-repro
+r1==r2 cả 3 finalist, LAG book identical control (delta 100% nằm ở BAL — surgical). N-ledger giữ 16
+(không trial mới). Compare: `phase2_compare_20260711.py` → `phase2_compare_out_20260711.log`.
+
+### Kết quả vs baseline R3 (28.82 / OOS 31.59/Cal 2.01)
+| finalist | OOS full-cov | OOS legfoot | LOO min | ex-2021 | P(DD<−30%) | CP2 |
+|---|---|---|---|---|---|---|
+| F1_gate_lean | 25.13%/Cal 1.39 | 28.25/1.67 | −3.92pp | −2.99pp | 5.5% | **NO-GO** (fail 1,2,3) |
+| F6_n_strict | 28.32%/Cal 1.66 | 29.22/1.72 | −2.69pp | −2.02pp | 4.2% | **NO-GO** (fail 1,2,3) |
+| F12_dvr_23 | 28.69%/Cal 1.70 | 28.99/1.71 | −2.50pp | −2.50pp | 3.7% | **NO-GO** (fail 1,2,3) |
+
+PBO 0.199 pass, điều kiện 5 pass (edge âm nhất quán 2 policy — không đảo dấu), DSR=1.0 không phân
+biệt. **Cả 3 fail tiêu chí 1 + 2 + 3.** Per-year chung: thua 2020/2022/2025/2026; F12 2021 +20.95pp
+= 1-năm outlier (đúng lo ngại coverage-2021 user nêu).
+
+### Root cause proxy-vs-harness gap (TX attribution, không đốt trial)
+1. **MOM_N gãy**: control +44B OOS → F1 −35B/F12 −33B/F6 −25B (gate r≤3 không cứu). Lỗ dồn 2025–26
+   junk HHS/NNC/TV1/PVC — legacy MOM_N đòi tier C/D nên coverage-NULL bị loại = quality filter ngầm
+   không tái tạo được bằng rating 1–5 ở bất kỳ ngưỡng nào. Nặng nhất cho phối hợp DT5G (NEUTRAL =
+   state phổ biến nhất → MOM_N = kênh entry chính).
+2. DVR: r=3 sập +193→+50B OOS; r∈{2,3} hồi 1 phần (+116B) — vẫn −77B vs control.
+3. D1 ≤4 flood RE_BACKLOG (2020: 123 vs 80 entries) → displacement trong book 12-slot.
+4. Proxy top-20 signal-level không mô hình displacement/idle-cash/2022 (caveat đã khai Phase 1) —
+   bài học: proxy CHỈ để rank nội bộ family, không dự báo được dấu của harness delta.
+5. Đảo chiều 0b: dưới bucket redesign, full-coverage THÀNH ÂM vs legfoot (F1: 25.13 vs 28.25 OOS) —
+   "coverage +0.88pp" của 0b không chuyển giao; footprint legacy tự nó là filter.
+
+### Trạng thái dự án sau CP2
+NO-GO → theo plan mục 2: fallback trình user chọn (Phase 3 GO-path không kích hoạt):
+- (i) giữ `fa_ratings` static + chấp nhận/xử lý staleness riêng (caveat: edge control đo trên giá trị
+  lịch sử lúc bảng còn fresh — không bảo chứng cho bảng đóng băng sau mùa BCTC Q2);
+- (ii) hybrid E-gate-only (thay duy nhất T1 avoid bằng rating=5, giữ nguyên phần còn lại) — CHƯA ĐO,
+  nếu muốn đo là trial mới cần user duyệt mở N budget mới;
+- (iii) rebuild legacy builder fa_ratings (giải quyết tận gốc staleness, giữ semantics đã tune).
+Deadline nghiệp vụ không đổi: BCTC Q2/2026 về ~cuối 07, rebal quý ~08-05.
