@@ -301,6 +301,49 @@ with tempfile.TemporaryDirectory() as td:
           len(read(hist).splitlines()) == 3 and "stray_old_column" not in read(hist))
 
 # ══════════════════════════════════════════════════════════════════════════════
+print("F. F3 — SIGNAL_V11 state5 source: trackers read DT5G gated, books clean of fake-BULL entries")
+# ══════════════════════════════════════════════════════════════════════════════
+# Incident: SIGNAL_V11's SQL hardcodes the v3.4b BASE table (vnindex_5state) for state5;
+# golive_recommend_v23.py:77 patches it via .replace but pt_v4_dt5g/pt_v22_dt5g consumed it
+# raw — the 06-29→07-09 fake-BULL window (EW-leg freeze bug) put 6 fake entries in the
+# production signal book. Fix 2026-07-11 (job Taylor_20260711_064350): both trackers apply
+# the same .replace; the .replace target string must keep matching or it silently no-ops.
+sv_src = read(os.path.join(WC, "signal_v11_sql.py"))
+from signal_v11_sql import SIGNAL_V11  # noqa: E402
+
+REPL_TARGET = "tav2_bq.vnindex_5state AS s"
+DT5G_TABLE = "tav2_bq.vnindex_5state_dt5g_live"
+check("F1 SIGNAL_V11 raw SQL contains the .replace target exactly once (alias drift = silent no-op)",
+      SIGNAL_V11.count(REPL_TARGET) == 1, f"count={SIGNAL_V11.count(REPL_TARGET)}")
+
+patched = SIGNAL_V11.replace(REPL_TARGET, DT5G_TABLE + " AS s")
+base_left = re.findall(r"tav2_bq\.vnindex_5state\b(?!_)", patched)
+check("F2 patched SQL: zero bare base-table reads, exactly one dt5g_live read",
+      not base_left and patched.count("vnindex_5state_dt5g_live") == 1,
+      f"base_left={len(base_left)}")
+
+for fname in ("pt_v4_dt5g.py", "pt_v22_dt5g.py"):
+    src = read(os.path.join(WC, fname))
+    check(f"F3 {fname}: STATE_TABLE is dt5g_live AND SIGNAL_V11 goes through the .replace (no raw use)",
+          f'STATE_TABLE = "{DT5G_TABLE}"' in src
+          and f'SIGNAL_V11.replace("{REPL_TARGET}", STATE_TABLE + " AS s")' in src
+          and "bq(SIGNAL_V11.format" not in src)
+
+# Books regenerated post-fix must hold NO position opened on the fake-BULL signal
+# (tracker full-replays from START each run, so a clean book must stay clean).
+import csv as _csv  # noqa: E402
+FAKE_TICKERS = {"PVD", "TVN", "VCG", "TLD", "TPB", "ASP"}
+FAKE_LO, FAKE_HI = "2026-06-29", "2026-07-09"
+for book in ("pt_v4_dt5g", "pt_v22_dt5g"):
+    path = os.path.join(WC, "data", f"{book}_open_positions.csv")
+    with open(path, encoding="utf-8") as f:
+        rows = list(_csv.DictReader(f))
+    bad = [r for r in rows
+           if r["ticker"] in FAKE_TICKERS and FAKE_LO <= r["entry_date"] <= FAKE_HI]
+    check(f"F4 {book} open book: no fake-BULL-window entry survives replay",
+          not bad, f"bad={[(r['ticker'], r['entry_date']) for r in bad]}" if bad else f"{len(rows)} rows clean")
+
+# ══════════════════════════════════════════════════════════════════════════════
 print()
 if fails:
     print(f"❌ {len(fails)} FAILED: {fails}")

@@ -198,7 +198,10 @@ except Exception as ex:
 # 2. BA v11 signals + filters (identical layering to pt_v4_dt5g)
 # ============================================================================
 print("\n[2] Loading v11 signals + Release_Date + 5-state + overheat + D1...")
-sig = bq(SIGNAL_V11.format(start=START_DATE, end=END_DATE))
+# state5/play_type must come from the gated DT5G series, not the v3.4b base the raw
+# SIGNAL_V11 SQL hardcodes (mirror of golive_recommend_v23.py:77 — fix 2026-07-11)
+sig = bq(SIGNAL_V11.replace("tav2_bq.vnindex_5state AS s", STATE_TABLE + " AS s")
+                   .format(start=START_DATE, end=END_DATE))
 sig["time"] = pd.to_datetime(sig["time"])
 print(f"  signals: {len(sig):,} rows")
 
