@@ -119,6 +119,13 @@ def main():
         print("\nparsed:", q)
         return 0
 
+    # Config (và plan bên dưới) được đọc MỘT LẦN ở đây rồi ĐÓNG BĂNG trong RAM cho cả
+    # phiên bot — CHỦ ĐÍCH, không phải bug (ghi chú audit Winston_20260711_031745):
+    # executor phải chạy deterministic theo đúng bản config/plan đã duyệt lúc khởi động;
+    # hot-reload giữa phiên = lệnh đặt ra khác bản user đã duyệt. Hệ quả vận hành: sửa
+    # trading_rules.json / plan_*.json trên đĩa GIỮA phiên KHÔNG có hiệu lực cho tới lần
+    # restart tự nhiên kế tiếp (vd nghỉ trưa 11:30 → resume 13:00). Cần can thiệp ngay
+    # trong phiên: dùng kill-switch data/BOT_STOP, đừng sửa file rồi chờ bot tự thấy.
     base = load_config()
 
     if args.send_otp:
@@ -168,6 +175,8 @@ def main():
         cfg = dict(p["cfg"])
         if args.mode:
             cfg["mode"] = args.mode
+        # Plan cũng đóng băng theo phiên như config — xem ghi chú by-design tại
+        # load_config() phía trên.
         plan = load_plan(plan_date, account=p["label"])
         if plan is None:
             print(f"[{p['label']}] không có plan cho {plan_date} — bỏ qua "
