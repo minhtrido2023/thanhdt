@@ -64,6 +64,24 @@ CONFIRMED + user sign-off cuối cùng — không khác gì mọi thay đổi si
       staleness, giữ nguyên semantics đã tune.
   Deadline nghiệp vụ không đổi: BCTC Q2/2026 về ~cuối tháng 7, rebal quý ~08-05.
 
+**User CHỐT (iii) — rebuild legacy `fa_ratings` builder (2026-07-11).** Kèm chỉ đạo chiến lược lớn
+hơn, QUAN TRỌNG cho hướng nghiên cứu sắp tới:
+- Bản thân **book Momentum (MOM_N) hiện tại đã KHÔNG hiệu quả** (không riêng gì việc không tái tạo
+  được trên 8L) — cần làm lại chiến lược này, không chỉ vá cho hợp với nguồn dữ liệu mới.
+- User KHÔNG đồng ý với khung "8L kém hơn vì mất quality-filter ngầm" — quan điểm user: 8L áp dụng
+  lens riêng cho từng route/ngành nên rating PHẢI chính xác hơn, không phải kém đi. Nếu momentum
+  không tái tạo được trên nền 8L, đó là dấu hiệu bản thân pattern momentum cũ dễ vỡ/overfit
+  (dựa vào 1 "quality filter ngầm" tình cờ của tier cũ), KHÔNG phải lỗi của 8L.
+- **Hướng nghiên cứu tiếp theo (sau khi (iii) xong và verified)**: quay lại phân tích các deal
+  THÀNH CÔNG trong lịch sử của book — soi kỹ đặc điểm fundamentals + technical thật để tìm 1 pattern
+  hiệu quả, KHÔNG cố giữ momentum chỉ vì nó từng "vô tình" chạy được. Đây là dự án R&D riêng, MỚI,
+  không phải phần của việc rebuild fa_ratings.
+- **Thứ tự làm việc user yêu cầu**: tuần tự, "phần nào làm tốt phần đó trước" — (iii) rebuild
+  fa_ratings builder trước, verify xong mới bắt đầu dự án phân tích momentum/deals.
+- Nguyên tắc chốt cho cả 2 việc: dùng dữ liệu tươi, đánh giá đúng chuẩn mực (walk-forward IS/OOS,
+  DSR/PBO, LOO, quant-skeptic) — "không nên thấy pattern dễ overfit như momentum mà bị lay động"
+  (không giữ 1 pattern chỉ vì quen thuộc/lịch sử nếu số liệu thật không ủng hộ).
+
 ## DT5G BULL-giả bug → audit freshness toàn hệ thống → CRITICAL basket fix → re-pin baseline R3
 ### CHUỖI ĐÃ KHÉP KÍN HOÀN TOÀN (2026-07-11), chỉ còn 3 mục chờ xác nhận qua cron thứ Hai 07-13
 
