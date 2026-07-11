@@ -15,10 +15,27 @@ LOG="data/papertrade_run_$(date +%Y-%m-%d).log"
 exec >>"$LOG" 2>&1
 echo "===== papertrade_daily (linux) START $(TZ='Asia/Ho_Chi_Minh' date +'%Y-%m-%d %H:%M ICT') acct=$(gcloud config get-value account 2>/dev/null) ====="
 
+# FAIL vẫn continue-on-error (by design — 1 step hỏng không giết cả chain), NHƯNG đếm +
+# alert cuối chain: trước 2026-07-11 [FAIL] chỉ nằm trong log không ai biết (audit
+# Winston_20260711_031745 #4 — nếu custom30_history/[6b] chết thì PARK basket production
+# đóng băng im lặng đúng kiểu bug custom30v_8l 06-18→07-11).
+FAILS=0; FAILED_STEPS=""
 run() {  # run() "<label>" <script> [args...]   -- never aborts the pipeline
   echo; echo "--- $1 ---"
-  shift
-  if $PY "$@"; then echo "  [ok] $*"; else echo "  [FAIL exit $?] $*"; fi
+  local lbl="$1"; shift
+  if $PY "$@"; then echo "  [ok] $*"; else echo "  [FAIL exit $?] $*"; FAILS=$((FAILS+1)); FAILED_STEPS="$FAILED_STEPS $lbl"; fi
+}
+
+# Gọi cuối chain: >0 step FAIL → alert Telegram + Discord Trading Daily. Không đổi
+# continue-on-error, không làm chain exit≠0 — chỉ đảm bảo KHÔNG còn fail im lặng.
+notify_fails() {
+  local chain="$1"
+  [ "$FAILS" -eq 0 ] && return 0
+  local msg="⚠️ $chain $(date +%F): $FAILS step FAIL:$FAILED_STEPS — chi tiết: grep '\[FAIL' $WORKDIR_8L/$LOG"
+  # NOTIFY_BIN/NOTIFY_THREAD_BIN override được qua env — CHỈ dùng cho selfcheck (test hàm
+  # thật với stub, không gửi alert thật); production để trống = đường dẫn thật.
+  "${NOTIFY_BIN:-/home/trido/thanhdt/WorkingClaude/mike/bin/notify.sh}" "$msg" 2>/dev/null || true
+  "${NOTIFY_THREAD_BIN:-/home/trido/thanhdt/WorkingClaude/mike/bin/notify_thread.sh}" "$msg" "1521470705563340910" 2>/dev/null || true
 }
 
 # --- feeds + state ---
@@ -39,7 +56,7 @@ if BASKET_SELECT=yieldcombo \
    $PY custom30_history.py; then
   echo "  [ok] custom30v_history"
 else
-  echo "  [FAIL exit $?] custom30v_history"
+  echo "  [FAIL exit $?] custom30v_history"; FAILS=$((FAILS+1)); FAILED_STEPS="$FAILED_STEPS [6b]"
 fi
 # --- sims + production books ---
 run "[7] pt_v11_tq34b"          pt_v11_tq34b.py
@@ -78,6 +95,8 @@ else
   echo; echo "--- [26] phosphorus_dgc_weekly skipped (not Friday) ---"
 fi
 
+notify_fails "papertrade_daily"
+
 # rolling 30-day log cleanup
 find data -name 'papertrade_run_*.log' -mtime +30 -delete 2>/dev/null
-echo; echo "===== papertrade_daily (linux) DONE $(TZ='Asia/Ho_Chi_Minh' date +'%Y-%m-%d %H:%M ICT') ====="
+echo; echo "===== papertrade_daily (linux) DONE $(TZ='Asia/Ho_Chi_Minh' date +'%Y-%m-%d %H:%M ICT') — FAILS=$FAILS ====="

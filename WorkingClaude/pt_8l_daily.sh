@@ -19,7 +19,23 @@ LOG="data/pt_8l_daily_$(date +%Y-%m-%d).log"
 exec >>"$LOG" 2>&1
 echo "===== pt_8l_daily (linux) START $(date) acct=$(gcloud config get-value account 2>/dev/null) ====="
 
-run() { echo; echo "--- $1 ---"; shift; if $PY "$@"; then echo "  [ok] $*"; else echo "  [FAIL exit $?] $*"; fi; }
+# FAIL vẫn continue-on-error (một step hỏng không được giết cả chain — by design),
+# NHƯNG phải đếm + alert cuối chain: trước 2026-07-11 [FAIL] chỉ nằm trong log, không ai
+# biết (audit Winston_20260711_031745 #4 — orb_pt chết 4/8 phiên không ai hay).
+FAILS=0; FAILED_STEPS=""
+run() { echo; echo "--- $1 ---"; local lbl="$1"; shift; if $PY "$@"; then echo "  [ok] $*"; else echo "  [FAIL exit $?] $*"; FAILS=$((FAILS+1)); FAILED_STEPS="$FAILED_STEPS $lbl"; fi; }
+
+# Gọi cuối chain: >0 step FAIL → alert Telegram + Discord Trading Daily (không chặn gì cả,
+# chỉ đảm bảo KHÔNG còn fail im lặng). notify lỗi cũng không được làm chain exit≠0.
+notify_fails() {
+  local chain="$1"
+  [ "$FAILS" -eq 0 ] && return 0
+  local msg="⚠️ $chain $(date +%F): $FAILS step FAIL:$FAILED_STEPS — chi tiết: grep '\[FAIL' $WORKDIR_8L/$LOG"
+  # NOTIFY_BIN/NOTIFY_THREAD_BIN override được qua env — CHỈ dùng cho selfcheck (test hàm
+  # thật với stub, không gửi alert thật); production để trống = đường dẫn thật.
+  "${NOTIFY_BIN:-/home/trido/thanhdt/WorkingClaude/mike/bin/notify.sh}" "$msg" 2>/dev/null || true
+  "${NOTIFY_THREAD_BIN:-/home/trido/thanhdt/WorkingClaude/mike/bin/notify_thread.sh}" "$msg" "1521470705563340910" 2>/dev/null || true
+}
 
 run "[1] rating_8l"            rating_8l.py
 run "[2] unified_screener"     unified_screener.py
@@ -29,8 +45,14 @@ run "[5] vn30_8l"              vn30_8l.py
 run "[6] rank_8l_daily_alert"  rank_8l_daily_alert.py
 run "[7] cheap_pb_floor"       cheap_pb_floor.py
 echo; echo "--- [8] snapshot rank_8l (bot 'new') ---"
-$PY -c "import bot_8l_commands as b; print(b.snapshot_today())" && echo "  [ok] snapshot" || echo "  [FAIL] snapshot"
+if $PY -c "import bot_8l_commands as b; print(b.snapshot_today())"; then
+  echo "  [ok] snapshot"
+else
+  echo "  [FAIL] snapshot"; FAILS=$((FAILS+1)); FAILED_STEPS="$FAILED_STEPS [8]"
+fi
 run "[9] sector_lens_monitor"  sector_lens_monitor.py --telegram
 
+notify_fails "pt_8l_daily"
+
 find data -name 'pt_8l_daily_*.log' -mtime +30 -delete 2>/dev/null
-echo; echo "===== pt_8l_daily (linux) DONE $(date) ====="
+echo; echo "===== pt_8l_daily (linux) DONE $(date) — FAILS=$FAILS ====="
