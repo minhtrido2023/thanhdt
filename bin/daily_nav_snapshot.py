@@ -136,6 +136,24 @@ def load_history(account):
     return path, rows
 
 
+def _write_nav_history(hist_path, hist_rows, fieldnames):
+    """Atomic write (tmp + os.replace) — cùng pattern executor.py _save_state (review
+    vòng 2 2026-07-02, kb/coding_guidelines.md §5): nav_history là nguồn duy nhất mọi
+    báo cáo ngày/tuần/tháng dùng chung, kill mid-write không được để lại file truncate
+    dở dang (đã xảy ra 2026-07-06: mất 2 dòng lịch sử). os.replace = rename nguyên tử
+    trên POSIX — reader luôn thấy hoặc file cũ hoặc file mới, không bao giờ file dở.
+
+    extrasaction="ignore": lịch sử cũ có thể mang field từ version trước của script
+    (vd cột đã bỏ) — không để 1 dòng cũ làm hỏng cả file.
+    """
+    tmp = hist_path + ".tmp"
+    with open(tmp, "w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
+        w.writeheader()
+        w.writerows({k: row.get(k, "") for k in fieldnames} for row in hist_rows)
+    os.replace(tmp, hist_path)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--account", required=True)
@@ -280,13 +298,7 @@ def main():
                        "balance_ts": bal["ts"]})
     hist_rows.sort(key=lambda r: r["date"])
     fieldnames = ["date", "nav", "mtm_stock", "cash", "margin_debt", "balance_ts"]
-    with open(hist_path, "w", encoding="utf-8", newline="") as f:
-        # extrasaction="ignore": lịch sử cũ có thể mang field từ version trước của script
-        # (vd cột đã bỏ) — không để 1 dòng cũ làm hỏng cả file (đã xảy ra 2026-07-06: mất
-        # sạch 2 dòng lịch sử vì ValueError giữa chừng writerows(), file bị truncate dở dang).
-        w = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
-        w.writeheader()
-        w.writerows({k: row.get(k, "") for k in fieldnames} for row in hist_rows)
+    _write_nav_history(hist_path, hist_rows, fieldnames)
 
     since_inception = nav - args.starting_capital
     since_inception_pct = since_inception / args.starting_capital * 100
