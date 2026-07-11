@@ -113,3 +113,64 @@ Deadline thật: BCTC Q2/2026 về ~cuối 07 (fa_ratings static ngày càng sai
 5. **PIT risk bảng 8L** (0d): nếu phát hiện look-ahead trong eff_date → mọi số làm lại sau khi sửa bảng.
 6. **Republish drift**: bảng 8L republish làm as-of lệch nhẹ (registry đã ghi) → pin snapshot input
    (parquet cache ngày cố định) cho MỌI run trong dự án, so sánh nội bộ nhất quán.
+
+## 5. Phase 0 — KẾT QUẢ (2026-07-11, jobs Taylor_20260711_114557 + _121933) — **CP0 = GO**
+
+### 0a — Inventory consumer fa_ratings (hoàn chỉnh, verified bằng grep toàn codebase + crontab)
+Kiến trúc TỐT HƠN lo ngại — bucket logic T1–T7 chỉ có **1 nguồn**:
+- **Nhóm A (bucket T1–T7, single-source)**: `signal_v11_sql.py::SIGNAL_V11` — TẤT CẢ consumer chính
+  đều `import` (golive_recommend_v23, pt_v4_dt5g, pt_v22_dt5g, pt_v23_audit_2014, pt_v11_tq34b,
+  pt_v12_macro). Retune T1–T7 = sửa đúng 1 file.
+- **Nhóm B (D1 CTE / T8 `adv_yoy>0.5 & tier C/D → RE_BACKLOG_BUY`, COPY INLINE — phải vá CÙNG COMMIT
+  hoặc extract về signal_v11_sql khi cutover, bài học base-leak §9)**: 6 copy active =
+  `pt_v23_audit_2014.py:563` · `golive_recommend_v23.py:86` (LIVE money-path) · `pt_v4_dt5g.py:194` ·
+  `pt_v22_dt5g.py:246` (sổ tín hiệu prod) · `pt_v11_tq34b.py:196` · `pt_v12_macro.py:148` (2 paper A/B
+  step [7]/[8] còn chạy). +2 KHÔNG active: `pt_dt4_vs_tq34b_ab.py:175` (step [18] retired),
+  `sim_v11_live_window.py:175` (ad-hoc). **Khuyến nghị cutover: extract D1 CTE thành constant chung
+  trong signal_v11_sql.py** thay vì vá 6 chỗ.
+- **Nhóm C (tool ad-hoc, logic riêng, KHÔNG trong cron nào — verified 0 call-site)**:
+  `recommend_tomorrow.py` (T7-style ICB8×tier adjust dòng 76–77), `ta_score_daily.py` (dùng cả cột
+  `total_score` của fa_ratings — **cột này cần check tồn tại trong fa_ratings_8l ở Phase 1**, nếu
+  không có thì tool này freeze-legacy). Ưu tiên thấp, quyết định khi cutover.
+- **Nhóm D (infra, không cần đổi logic)**: `sync_bq_cache.py` (mirror CẢ 2 bảng — giữ mirror legacy
+  đến hết transition), `mike/bin/bq_freshness_check.sh` (đã WARN-only fa_ratings_8l lastModified≤9d),
+  `mike/bin/refresh_fa_ratings_8l.sh` (**cron weekly Sat 08:30 ICT ĐÃ CÀI — commit dd7feb9, user
+  approved 2026-07-11 → phụ thuộc #1 mục 4 ĐÃ GIẢI QUYẾT**, run schedule đầu tiên Sat 07-18).
+- Còn lại (~180 file match) = research/screen/archive, không phải production consumer.
+
+### 0b — Attribution ladder (2 run DIAGNOSTIC full-harness pin R3, dt5g_live, KHÔNG đốt candidate)
+| run | thang | coverage | FULL CAGR/Sh/DD/Calmar | OOS CAGR/Calmar |
+|---|---|---|---|---|
+| control legacy | legacy | legacy | 28.82%/1.83/−15.7/1.83 | 31.59%/2.01 |
+| diag_maskleg | **8L** | legacy | 26.53%/1.69/−17.7/1.50 | 27.25%/1.54 |
+| diag_legcov8l | legacy | **8L (COALESCE)** | 29.70%/1.88/−15.8/1.89 | 32.94%/2.09 |
+| tier8l drop-in | 8L | 8L | 27.15%/1.73/−17.7/1.53 | 28.04%/1.59 |
+
+**Kết luận attribution**: degradation drop-in = **hiệu ứng THANG ĐO** (scale −2.29pp FULL / −4.34pp
+OOS / OOS-Calmar −0.47); **coverage 8L thực ra DƯƠNG** (+0.88pp FULL / +1.34pp OOS / Calmar +0.08).
+Xấp xỉ cộng tính (interaction −0.26pp). Per-year: maskleg thua đậm đúng các năm bull-momentum
+(2020 −9.1 / 2021 −9.0 / 2025 −15.2pp) — khớp chẩn đoán semantics (C/D-momentum không tái tạo được
+từ trục durability). Caveat: edge coverage dồn 2021 (+22.4pp) — coverage không phải candidate độc
+lập, chỉ là design input. **Hàm ý thiết kế Phase 1: giữ FULL coverage 8L (bỏ lo NULL-branch), toàn
+bộ effort đổ vào redesign bucket theo hướng rating=GATE.** Script: `data/fa8l_exp/
+fa8l_diag_compare_0b_20260711.py`, CSV `v23_fa8l_diag_{maskleg,legcov8l}_20260711.csv`.
+
+### 0c — IC/hit-rate theo context (512 cells, 142.6k obs BQ thật, weekly-sampled, IS/OOS tách)
+rating8l CÓ separation thật, context-dependent: bull-momentum ctx IC âm nhất quán IS+OOS (ta140_s45
+OOS −0.066..−0.111; hit r1 69.7%/r2 74.8% vs r5 48.0% @profit_2M) + compounder ctx (−0.04..−0.05);
+NEUTRAL momentum FLIP DẤU (+0.10 OOS ta140_s3) → gate phải context/route-conditional, không phải
+tilt toàn cục. File: `data/fa8l_exp/ic_context_8l_20260711.csv` + `run_0c_ic_20260711.log`.
+
+### 0d — PIT audit fa_ratings_8l: SẠCH (0 dup, 87.7% khớp Release_Date, 10.7% fiscal+45, 0 gap âm,
+879 rows republish-drift → xử bằng pin snapshot input, mục 4.6).
+
+### Verdict CP0 (theo tiêu chí khai báo trước, không nới): **GO**
+Điều kiện DỪNG-SỚM ("IC ~0 cả IS+OOS mọi context, hit-rate flat") KHÔNG xảy ra — separation tồn tại
+và nhất quán IS+OOS ở các context cụ thể. N-ledger sau Phase 0: 2 drop-in (đã bác) + 2 diagnostic
+(0b) = 4/16 trial đã dùng; còn 12 slot cho family Phase 1 như khai báo.
+
+### Ghi chú môi trường (cho Mike báo user, ngoài phạm vi Phase 0)
+Headless session (Taylor dispatch) auth = `dtienthanh@gmail.com` (owner, CÓ quyền ghi BQ) ≠ phiên
+interactive Mike (service account `bq-reader-8l`, READ-ONLY — lý do Mike test tay
+refresh_fa_ratings_8l.sh bị Access Denied). CHƯA rõ cron weekly (chạy độc lập cả 2 phiên) dùng
+identity nào — cần xác nhận trước/sau run đầu tiên Sat 07-18 08:30 ICT.
