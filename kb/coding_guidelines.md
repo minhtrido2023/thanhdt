@@ -274,3 +274,37 @@ codebase for sources still missing) is folded into the existing Friday KB editor
 — matching the same pattern already used for DollarBill's DNSE-vs-BQ rule (§6). A general
 "verify your data" reminder does not reliably stop an LLM from reaching for whichever table name
 sounds closest to what it needs in the moment; naming the specific registry file does.
+
+## 10. When a File Becomes Canonical, Archive Its Superseded Variants in the Same Pass
+
+**Why this matters (user directive 2026-07-11):** the fa_ratings incident had two separate root
+causes on the same day — SIGNAL_V11 read the wrong *table* (§9, a data-source trap), and
+`data_registry.md` claimed `fundamental_rating.py`'s builder "had no writer in the codebase" when
+the builder was sitting at repo root the whole time, just under a name that didn't match the
+`build_fa_ratings_*` pattern this registry was seeded from. Confirming which file is canonical is
+only half the fix — the *other* half is that near-identical variant files (`build_fa_ratings_v9.py`,
+`build_fa_ratings_pre2014.py`, `fundamental_rating_v5.py`, `fundamental_rating_v8c.py` — all sitting
+in the same repo root, all producing a same-shaped rating output under a slightly different name)
+are exactly the kind of landmine that caused this confusion in the first place. Leaving them in
+place "for reference" is how the next agent (or human) doing a quick grep picks the wrong one.
+
+**Rule: when a script/file is confirmed canonical for a purpose** (a builder is identified as *the*
+one that produces a pinned table, a cron is installed pointing at a specific script, a migration
+decision names a specific file as the production source) — in the **same commit/session**:
+1. **Identify superseded variants** — files with a similar name/purpose that are NOT the confirmed
+   canonical one, and grep the whole repo (scripts + crontab) to confirm zero active callers
+   reference them. Never archive on a name-similarity guess alone; verify with a real grep.
+2. **`git mv` them into an `archive/` subdirectory** (preserving git history, not `rm`) — this is
+   reversible and auditable, unlike deletion, but it removes the file from the root namespace where
+   a casual `ls`/glob would surface it as a live candidate.
+3. **Update `mike/kb/data_registry.md`** to reflect the new archive path and mark the entry
+   `DEPRECATED` with a pointer to the confirmed canonical replacement (per §5's obsolete-marking
+   rule if this is a data-source migration, or a plain note if it's just script hygiene).
+4. **Do NOT apply this to genuine audit-trail artifacts** — rejected-hypothesis backtest CSVs, dry-run
+   logs proving a mechanism works, anything already namespaced into an experiment directory per §8
+   (`data/*_exp/`, `agents/<id>/probe_*/`). Those are inert data files kept as evidence, not scripts
+   that could be run by mistake — archiving them is unnecessary churn, not safety.
+
+**Periodic check**: `bin/data_registry_audit.sh`'s stale-duplicate scan (added 2026-07-11) flags
+repo-root files with a name similar to an already-CANONICAL registry entry that are NOT yet under
+`archive/` — surfaced in the Friday KB editorial review for a human/Winston decision, not auto-moved.

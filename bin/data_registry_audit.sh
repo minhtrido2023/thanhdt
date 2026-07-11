@@ -112,6 +112,26 @@ log "INFO vnindex_5state (bare) referenced in $(count_refs 'tav2_bq\.vnindex_5st
 log "INFO vnindex_5state_dt_4gate (BQ, dead since 06-02) referenced in $(count_refs 'tav2_bq\.vnindex_5state_dt_4gate') files -- registry baseline: ~20 research scripts"
 log "INFO fa_ratings (bare, static since 05-10) referenced in $(count_refs "tav2_bq\.fa_ratings[^_]") files -- registry baseline: ~50 scripts (still CANONICAL until migration decided)"
 
+# ── D. Stale-duplicate scan — un-archived variants of a confirmed-canonical file ───────────
+# WARN-only (coding_guidelines.md §10): flags repo-root files that are known superseded variants
+# of an already-canonical script and haven't been git-mv'd into archive/. Curated list, extend
+# whenever a new canonical/variant pair is confirmed -- deliberately NOT fuzzy-name-matching,
+# that invites false positives on unrelated files that just happen to share a word.
+log "--- D. Stale-duplicate scan (superseded variants not yet archived) ---"
+check_variant_archived() {
+  local canonical="$1"; shift
+  for variant in "$@"; do
+    if [ -f "$ROOT/$variant" ]; then
+      warn "$variant: superseded variant of canonical '$canonical' still at repo root (not archived) -- see coding_guidelines.md Section 10"
+    else
+      ok "$variant: not at repo root (archived or removed)"
+    fi
+  done
+}
+check_variant_archived "fundamental_rating.py" \
+  "build_fa_ratings_v9.py" "build_fa_ratings_pre2014.py" \
+  "fundamental_rating_v5.py" "fundamental_rating_v8c.py"
+
 log "=== SUMMARY: FAIL=$FAIL WARN=$WARN ==="
 
 if [ "${1:-}" = "--bus" ]; then
