@@ -52,6 +52,11 @@ MAX_TABLEMOD_AGE=4   # calendar days trên BQ lastModifiedTime (writer-alive; WA
 MAX_R8L_MOD_AGE=9    # calendar days trên fa_ratings_8l lastModifiedTime (writer-alive; WARN-only):
                      # cron weekly 08:30 ICT thứ Bảy (Winston 2026-07-11) → bình thường <7d; 9 cho phép
                      # 1 lần miss ngắn không chặn oan (dự án re-tune SIGNAL_V11 phụ thuộc bảng này tươi).
+MAX_FA_MOD_AGE=9     # calendar days trên fa_ratings lastModifiedTime (writer-alive; WARN-only):
+                     # append-only refresh cron weekly 09:15 ICT thứ Bảy (Taylor đề xuất 2026-07-11,
+                     # chờ user duyệt). Bảng static từ 05-10 → WARN mỗi ngày cho tới lần cron chạy
+                     # thành công đầu tiên — đó là tín hiệu ĐÚNG (SIGNAL_V11 fa_tier đang đọc tier
+                     # đóng băng), không phải false alarm. WARN không chặn plan.
 MAX_RR_QAGE=135      # calendar days từ NGÀY CUỐI QUÝ của MAX(quarter) trong risk_rating: 1 quý (92d)
                      # + 43d grace tính toán. GIẢ ĐỊNH (không chắc cadence gốc — chọn chặt theo dispatch):
                      # quý mới phải có rating trong ~1.5 tháng sau khi quý trước kết thúc. WARN-only:
@@ -183,6 +188,7 @@ _check "risk_rating (research, orphan)"   "tav2_bq.risk_rating" \
 _check_lastmod "custom30v_8l writer-alive"  "tav2_bq.custom30v_8l"  $MAX_TABLEMOD_AGE || true
 _check_lastmod "custom30_8l writer-alive"   "tav2_bq.custom30_8l"   $MAX_TABLEMOD_AGE || true
 _check_lastmod "fa_ratings_8l writer-alive" "tav2_bq.fa_ratings_8l" $MAX_R8L_MOD_AGE || true
+_check_lastmod "fa_ratings writer-alive"    "tav2_bq.fa_ratings"    $MAX_FA_MOD_AGE  || true
 
 [ "$WARNED" -gt 0 ] && echo "NOTE: $WARNED WARN non-blocking (đã post Discord Trading Daily) — pipeline vẫn chạy"
 

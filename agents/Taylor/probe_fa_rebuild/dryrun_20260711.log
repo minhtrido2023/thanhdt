@@ -1,0 +1,33 @@
+=== [1/6] Running fundamental_rating.py (full rebuild → staging) ===
+  TRA   2021Q4  4577.0  0.703  0.80 0.77 0.62 0.79 0.51 0.86 0.56   2.0   1.8  0.95  0.97
+  VCS   2025Q4  2353.0  0.702  0.87 0.69 0.67 0.84 0.42 0.90 0.50   9.5   9.1  0.74  0.92
+  BWE   2025Q4  7577.0  0.700  0.83 0.70 0.66 0.73 0.66 0.55 0.68   3.0   3.0  0.91  1.00
+  QNS   2025Q4  3577.0  0.699  0.81 0.67 0.68 0.82 0.53 0.66 0.67   8.3   7.7  0.87  0.93
+  DMC   2021Q4  4577.0  0.698  0.77 0.74 0.66 0.73 0.48 0.74 0.76   0.0   0.0  0.83  0.97
+  LBM   2025Q4  2353.0  0.695  0.91 0.64 0.64 0.80 0.59 0.72 0.45   8.3   8.3  0.65  0.86
+  SAB   2025Q4  3533.0  0.694  0.81 0.64 0.66 0.88 0.48 0.83 0.54   4.3   4.3  0.78  0.77
+  VGC   2025Q4  2353.0  0.693  0.88 0.62 0.76 0.67 0.61 0.62 0.56   0.0   0.0  1.00  1.00
+  C32   2021Q4  2353.0  0.688  0.85 0.57 0.61 0.79 0.59 0.71 0.71   4.4   4.4  0.87  1.00
+  CDN   2021Q4  2777.0  0.686  0.82 0.74 0.64 0.62 0.53 0.84 0.59   0.0   0.0  0.91  0.92
+
+======================================================================
+=== Data freshness OK: all A/B-tier tickers within 180 days ===
+======================================================================
+  (Informational: 53 A/B tickers with data >400d old — likely delisted/inactive, not actionable)
+=== [2/6] Downloading published table ===
+  published: 12,367 rows, 50 quarters, max quarter 2026Q1
+  open (re-rank): ['2025Q4', '2026Q1'] | frozen: 48 quarters
+=== [3/6] Statistical match on FROZEN quarters (rebuild vs published) ===
+  overlap 10,475/11,712 | exact tier 82.51% | ±1 tier 99.98% | mean |Δscore_pct| 0.0428
+  (baseline 2026-07-11: 82.27% / 99.91% — floors 70% / 99%)
+  NEW quarter 2026Q2: cohort 1 < 30 — NOT appended yet (as-of consumers keep extending the previous tier)
+  publishing quarters ['2025Q4', '2026Q1']: 694 rows (published had 655 in open quarters)
+=== [4/6] DRY-RUN — staged CSV written, BQ untouched ===
+  staging csv: /home/trido/thanhdt/WorkingClaude/data/fa_ratings_refresh/stage_publish.csv (694 rows)
+  would run:
+    bq load --replace (schema of live table) tav2_bq.fa_ratings_refresh_staging stage_publish.csv
+    BEGIN TRANSACTION;
+    DELETE FROM `lithe-record-440915-m9.tav2_bq.fa_ratings` WHERE quarter IN ('2025Q4', '2026Q1');
+    INSERT INTO `lithe-record-440915-m9.tav2_bq.fa_ratings` SELECT * FROM `lithe-record-440915-m9.tav2_bq.fa_ratings_refresh_staging`;
+    COMMIT TRANSACTION;
+DONE (dry-run) — skipped small new quarters: ['2026Q2']
