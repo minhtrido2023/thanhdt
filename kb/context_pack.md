@@ -1,4 +1,4 @@
-# Mike fleet — context pack (v901)
+# Mike fleet — context pack (v902)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
@@ -17,34 +17,42 @@
 > Mike cập nhật thủ công khi có thay đổi trạng thái quan trọng. Đọc trước mọi thứ khác khi restart.
 > Cập nhật lần cuối: 2026-07-11
 
-## DT5G BULL-giả bug — FIX ĐÃ CONFIRMED, ĐANG CHỜ PUBLISH BQ theo phương án B (2026-07-11)
-Bug: reorg 06-21 (`10ae395`) làm writer `vnindex_5state_ew_v1.py:519` ghi lệch path, EW-leg đóng
-băng từ 06-22 → base v3.4b rơi về chấm điểm index-only → tạo candidate BULL GIẢ (streak 9/10 hết
-07-09, thiếu đúng 1 phiên mới commit). Breadth/thanh khoản thật lúc đó tệ hơn MỌI lần BULL commit
-thật 2014-2026 — không phải bull thật. **Live KHÔNG bị ảnh hưởng** — `dt5g_live` chưa từng commit
-BULL (DT-gate cần đủ 10 phiên, base lỗi chỉ giữ 9).
+## DT5G BULL-giả bug → audit freshness toàn hệ thống → CRITICAL basket fix → re-pin baseline R3
+### CHUỖI ĐÃ KHÉP KÍN HOÀN TOÀN (2026-07-11), chỉ còn 3 mục chờ xác nhận qua cron thứ Hai 07-13
 
-Đã xong: fix 1 dòng (commit `498c3a6`), chạy lại local xác nhận NEUTRAL toàn bộ 06-15→07-10, BULL
-giả biến mất. **quant-skeptic CONFIRMED (2026-07-11, độ tin cậy cao)** — verify độc lập, tự tái tạo
-đúng diff-vs-BQ. Winston audit độc lập thêm: 2 file path-mismatch khác (ảnh hưởng thấp, không cần
-fix gấp) + 1 bug ở `bq_freshness_check.sh` (`-le` thay vì `-lt`, khiến freshness check báo FRESH
-giả — lý do bug gốc sống 3 tuần không bị phát hiện) + kết luận: TOÀN BỘ file trung gian của chain
-tính toán KHÔNG có freshness-check nào (đề xuất: assertion mtime chung cho mọi file output).
+**Khởi nguồn**: user nghi ngờ candidate BULL sắp commit của DT5G (breadth/thanh khoản yếu, không
+giống bull thật). Điều tra ra: reorg 06-21 (`10ae395`) làm writer `vnindex_5state_ew_v1.py:519` ghi
+lệch path, EW-leg đóng băng từ 06-22 → base v3.4b rơi về chấm điểm index-only → BULL GIẢ (streak
+9/10, thiếu 1 phiên mới commit). **Live KHÔNG bị ảnh hưởng sai** — `dt5g_live` chưa từng commit
+BULL. Fix 1 dòng (`498c3a6`) + quant-skeptic CONFIRMED.
 
-**Quyết định user (2026-07-11): phương án B — zero-touch.** KHÔNG publish tay. Cron
-`daily_refresh_v34b_linux.sh` (thứ Hai 07-13, 18:30 ICT) sẽ tự chạy với code đã fix và publish
-đúng, ngoài harness (không bị chặn như headless Taylor).
+**Mở rộng audit** (theo yêu cầu user "rà soát freshness toàn hệ thống 8L/production, không chỉ
+DT5G") phát hiện thêm, TẤT CẢ đã fix + verify (mỗi bước đều quant-skeptic CONFIRMED):
+- **CRITICAL**: rổ "custom30V" production thực ra là rổ BLEND (env-default sai), lệch 14/30 mã so
+  với rổ yieldcombo đã backtest — writer bảng thật `custom30v_8l` chết từ 06-18. Fix: hồi sinh
+  writer + trỏ advisory đúng bảng (`e02a75b`).
+- **HIGH**: `compute_active_nav.py` dùng giá BQ không gate cho sizing ZaloPay; `bq_freshness_check.sh`
+  có bug `-le`/`MAX_STATE_LAG` khiến báo FRESH giả (lý do bug gốc sống 3 tuần không ai biết).
+- **MEDIUM**: field `close` (BQ stale) rò vào context DollarBill không code-enforce; `risk_monitor.py`
+  HALT không check provenance; freshness-check chỉ phủ 3/8 bảng cần thiết; chuỗi 8L/papertrade
+  FAIL im lặng không alert.
+- **F3 (phát hiện lớn nhất)**: `signal_v11_sql.py` (dùng chung, entry gate BAL book) đọc bảng BASE
+  thay vì `dt5g_live` — sổ tín hiệu production (pt_v4/pt_v22, paper) đã mua theo BULL giả
+  (PVD/TVN/VCG/TLD/TPB/ASP). Fix tracker (`0537514`) — sổ **tự sửa sạch qua full-replay**, xác nhận
+  thực nghiệm, không cần can thiệp tay (`9149c0f`). Baseline R3 đã pin cũng dùng bảng base → **re-pin
+  lại** (`09724bc`): **CAGR 28.05%→28.82%, Sharpe 1.86→1.90, MaxDD -17.5%→-15.7%, Calmar 1.60→1.83**
+  — cải thiện toàn diện, DSR=1.0000/PBO=0.209 không suy giảm. Backup CSV cũ + banner SUPERSEDED
+  trong `data/results_registry.md`. `pt_v12_live.py` xác nhận KHÔNG phải production consumer (chết
+  từ 05-19), không cần vá.
 
-**Việc còn treo, cần Mike tự kiểm tra sau khi cron chạy (đừng quên qua restart):**
-1. Sau 18:30 ICT thứ Hai 07-13: query lại `tav2_bq.vnindex_5state_dt5g_live` xác nhận 06-24→07-13
-   = NEUTRAL(3), không có BULL(4) nào lọt qua; xác nhận có dòng 07-10, 07-13 mới.
-2. Re-dispatch Taylor chạy nốt bước 5-6 đã hoãn (verify dt5g_live NEUTRAL + `dt_gate_hazard_research.py`
-   self-check 0-diff sau publish).
-3. Winston's khuyến nghị (d) CHƯA quyết: `MAX_STATE_LAG=0` (1 dòng), chuẩn hoá path 1 nơi = `data/`,
-   assertion mtime chung cho chain, quarantine 3 file orphan — cần hỏi user có muốn làm tiếp không
-   (không tự làm, đây là thay đổi code pipeline production khác, dù rủi ro thấp hơn bug gốc).
-4. `daily_refresh_v34b_linux.sh` bị miss 1 lần hôm 07-10 vì schedule đổi 23:15→18:30 landed SAU mốc
-   18:30 cùng ngày (commit `1a3ea5c`) — one-time, không phải bug lặp lại, Winston đã confirm.
+**⚠️ Số tham chiếu V2.4 chính thức đã đổi** — CLAUDE.md/canonical.md ghi "R3 NEUTRAL-only @50B:
+CAGR 28.05%..." **ĐÃ LỖI THỜI**, cần cập nhật thành 28.82%/1.90/-15.7%/1.83 ở lần sửa KB tiếp theo.
+
+**Còn treo, chờ cron thứ Hai 07-13 18:30 ICT (Mike tự kiểm tra, đừng quên qua restart):**
+1. Query lại `tav2_bq.vnindex_5state_dt5g_live` xác nhận 06-24→07-13 = NEUTRAL(3), có dòng 07-10/07-13.
+2. `bq show tav2_bq.custom30v_8l` xác nhận writer đã hồi sinh (lastModified qua 06-18).
+3. `19:00 ICT freshness-check 8 bảng` chạy thật lần đầu — kỳ vọng 2 WARN hợp lệ, 0 false-block
+   (Winston đã test kỹ case này để không chặn nhầm publish quan trọng).
 
 ## `mike@Mike.service` (remote-control daemon) đã TẮT HẲN (2026-07-07, user quyết định)
 User giờ chỉ dùng Discord để nói chuyện với Mike (tách nhiều topic tiện phân việc hơn hẳn so với
