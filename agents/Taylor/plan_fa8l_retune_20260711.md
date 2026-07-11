@@ -169,6 +169,56 @@ tilt toàn cục. File: `data/fa8l_exp/ic_context_8l_20260711.csv` + `run_0c_ic_
 và nhất quán IS+OOS ở các context cụ thể. N-ledger sau Phase 0: 2 drop-in (đã bác) + 2 diagnostic
 (0b) = 4/16 trial đã dùng; còn 12 slot cho family Phase 1 như khai báo.
 
+## 6. Phase 1 — KẾT QUẢ (2026-07-11, job Taylor_20260711_125524) — **CP1 = PASS, 3 finalist**
+
+### Phát hiện cấu trúc trước khi thiết kế (đọc harness thật)
+- **TIER_BAL chỉ có 6 entry tier** (MEGA/MOMENTUM/MOMENTUM_N/MOMENTUM_S/DVR/RE_BACKLOG); S_PRO/
+  MOMENTUM_QUALITY/COMPOUNDER_BUY là bucket **INTERCEPT** (không vào sổ BAL). Điều kiện fa_tier ở
+  T2/T3 thực chất là router vào/ra entry set (weight phẳng 0.10, sort theo ta) — không phải tilt.
+- `regime_size_overlay.py` đã dùng rating8l≥4 halving nhưng CHỈ state≤2 → gate mới ở s45 bổ sung,
+  không double-count. T4/T6 compounder = intercept (không phải entry) → cố định rating≤2 theo
+  precedent DC-book, không đốt trial riêng.
+- Composition check: **entry set ~77% là DVR** (rating-3+growth+ta≥100) → trục DVR là đòn bẩy lớn
+  nhất, dùng reserve slot cho nó (F12, khai báo trước khi chạy).
+
+### Family 12 config (pre-registered; K0 control legacy không đếm trial)
+| cfg | khác spine | lý do (neo 0b/0c) |
+|---|---|---|
+| F1 gate_lean (SPINE) | avoid r=5; momentum ta-only; MOM_N không điều kiện; T7 drop; DVR r=3; D1 ≤4 | rating=GATE tối giản, full coverage (0b) |
+| F2 gate_strict45 | avoid r≥4 trong s45 | 0c bull-ctx r4 xấu |
+| F3 chasezone | r4 chặn chỉ ở ta≥155 | fragility hại nhất vùng chase |
+| F4 sec_adjust | +T7 SECURITIES r≤2/+10, r≥4/−10 | 0c sec IC −0.22 IS/−0.17 OOS |
+| F5 n_flip | MOM_N r≥3 | 0c NEUTRAL flip OOS +0.10 (risky) |
+| F6 n_strict | MOM_N r≤3 | đối trọng adversarial của F5 |
+| F7 dvr_merge | bỏ DVR | test bucket earn its keep |
+| F8 sec_avoid | avoid r5 + SECURITIES r≥4 | route-conditional gate |
+| F9 lean_combo | F1+F4+F5 | corner max-OOS-evidence |
+| F11 conservative | F2+F6+F4 | corner all-conservative |
+| F12 dvr_23 (RESERVE) | DVR r∈{2,3} | DVR=77% book; 0c hit r2>r3 |
+| F10 tier8l_ctl (đối chứng) | map A–E tier8l + avoid theo context | chứng minh redesign > map |
+
+### Kết quả proxy (weekly panel BQ thật 142.6k rows, top-20 theo ta, fwd 2M, paired vs K0)
+- **12/12 config OOS ≥ K0 control → CP1 PASS.** Điểm chung: core redesign (avoid-5 + bỏ chặn C/D +
+  DVR-8L + D1≤4 + bỏ T7-RE) mang lại phần lớn +1.2..1.7pp/2M OOS; từng trục riêng lẻ cộng ít —
+  khớp "rating=gate, not tilt".
+- **Finalist đề xuất (thứ tự):**
+  1. **F12_dvr_23** — OOS pairdiff **+1.73** (t_adj 0.77 cao nhất), breadth 20 mã/tuần (capacity tốt
+     nhất), hit2M 62.1%, per-year sạch nhất (2020 +0.41, 2021 +2.93, 2025 −0.08).
+  2. **F1_gate_lean** — spine tối giản, OOS +1.43, ít moving part nhất = ít overfit risk nhất.
+  3. **F6_n_strict** (optional #3) — duy nhất nâng IS đáng kể (+1.88) giữ OOS +1.22; caveat trục N
+     nhỏ mẫu (n=33-53) và không ổn định dấu (F5 flip thắng OOS thua IS → axis nhiễu).
+- **Loại**: F5/F9 (flip OOS-driven, bài học H8a); F7 (per-name tốt nhất nhưng breadth sập 14→4
+  mã/tuần → idle-cash risk ở NAV thật, ngược nguyên tắc coverage-positive 0b); F2/F11 (2025 âm);
+  F3/F4/F8 (≈F1, không earn thêm keep); F10 (đối chứng: OOS +0.12, 2025 −4.16 → bác map cơ học).
+- **Caveats trung thực**: mọi t_adj <1 (chưa significant ở mức signal — proxy chỉ để RANK, quyết
+  định ở Phase 2 full-harness + DSR/PBO); proxy không mô hình capacity/idle-cash/TC/overheat-dates;
+  2022 vắng trong paired diff (bear, không có tuần entry chung); IS momentum s4 hiếm dưới DT5G.
+- **N-ledger: 4 (trước) + 12 (11 family + 1 reserve F12) = 16/16 ĐÚNG cap khai báo.** Hết slot —
+  Phase 2 chỉ validate finalist đã đo (không phải trial mới theo Bailey-LdP; DSR Phase 2 dùng N=16).
+- Artifacts: `data/fa8l_exp/family_proxy_phase1_20260711.py` + `family_proxy_results_20260711.csv`
+  + panel pin `panel_weekly_fa8l_phase1_20260711.parquet` (mọi run Phase 2 so sánh nội bộ dùng
+  chung snapshot này, plan mục 4.6).
+
 ### Ghi chú môi trường (cho Mike báo user, ngoài phạm vi Phase 0)
 Headless session (Taylor dispatch) auth = `dtienthanh@gmail.com` (owner, CÓ quyền ghi BQ) ≠ phiên
 interactive Mike (service account `bq-reader-8l`, READ-ONLY — lý do Mike test tay
