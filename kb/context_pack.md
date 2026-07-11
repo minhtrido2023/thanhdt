@@ -1,4 +1,4 @@
-# Mike fleet — context pack (v925)
+# Mike fleet — context pack (v926)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
@@ -16,6 +16,16 @@
 # Current Operations — Mike fleet
 > Mike cập nhật thủ công khi có thay đổi trạng thái quan trọng. Đọc trước mọi thứ khác khi restart.
 > Cập nhật lần cuối: 2026-07-11
+
+## Dự án momentum-deals — user duyệt plan, Phase 0 bắt đầu (2026-07-11)
+
+User duyệt `mike/agents/Taylor/plan_momentum_deals_20260711.md` nguyên trạng (label +10%/0%, 13
+feature pre-registered dùng 8L, khung CP0-CP3, chấp nhận trước CP1-NO-GO là kết luận hợp lệ).
+Câu hỏi trọng tâm dự án đúng như user hỏi: "sự thành công của MOM_N cũ có thực không" — CP1 sẽ trả
+lời trực tiếp (nếu chỉ do dồn 2021 → thành công cũ là ảo giác mẫu nhỏ, không phải pattern thật).
+User hỏi về việc dùng 1 Discord topic riêng cho dự án này — Mike không tự tạo topic được, đã đề
+nghị user dùng lại topic nghiên cứu Taylor có sẵn hoặc tạo topic mới rồi báo lại. Chờ user xác nhận
+topic; Phase 0 đã dispatch không phụ thuộc việc này.
 
 ## fa_ratings → fa_ratings_8l: user CHỐT hướng (c) — dự án re-tune SIGNAL_V11 bucket trên 8L (2026-07-11)
 
