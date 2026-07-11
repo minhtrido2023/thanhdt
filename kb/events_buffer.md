@@ -1594,3 +1594,12 @@
 - [2026-07-11T16:58:09Z] Taylor/heartbeat — Taylor_20260711_165407: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260711_165407", "source": "watcher"}
 - [2026-07-11T16:59:00Z] Taylor/heartbeat — Taylor_20260711_165407: {"status": "in_progress", "note": "Xác nhận 2 phát hiện: (1) registry ghi sai builder pkl (build_state_free_signals.py không build unified pkl — builder thật là build_pkl_v11_current.py); (2) SIGNAL_V11 SQL gốc vẫn chứa bare vnindex_5state by-design, consumer phải .replace sang dt5g_live (pattern F3). Đang viết script rebuild pkl với dt5g_live, END=2026-07-10, có backup"}
 - [2026-07-11T16:59:09Z] Taylor/heartbeat — Taylor_20260711_165407: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260711_165407", "source": "watcher"}
+
+## Consolidation 2026-07-11T17:07:01Z
+- [2026-07-11T17:00:09Z] Taylor/heartbeat — Taylor_20260711_165407: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260711_165407", "source": "watcher"}
+- [2026-07-11T17:01:09Z] Taylor/heartbeat — Taylor_20260711_165407: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260711_165407", "source": "watcher"}
+- [2026-07-11T17:02:09Z] Taylor/heartbeat — Taylor_20260711_165407: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260711_165407", "source": "watcher"}
+- [2026-07-11T17:03:09Z] Taylor/heartbeat — Taylor_20260711_165407: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260711_165407", "source": "watcher"}
+- [2026-07-11T17:04:09Z] Taylor/heartbeat — Taylor_20260711_165407: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260711_165407", "source": "watcher"}
+- [2026-07-11T17:05:10Z] Taylor/heartbeat — Taylor_20260711_165407: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260711_165407", "source": "watcher"}
+- [2026-07-11T17:06:10Z] Taylor/heartbeat — Taylor_20260711_165407: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260711_165407", "source": "watcher"}
