@@ -28,7 +28,7 @@ Output:
 
 Point-in-time snapshot of the SAME logic as pt_v22_dt5g.py — NOT a NAV backtest.
 """
-import os, sys, io, json, pickle
+import os, sys, io, json
 from datetime import datetime, timedelta
 import numpy as np, pandas as pd
 
@@ -191,30 +191,23 @@ def td_offset(ref, off):
 
 lag_up, lag_recent = [], []
 try:
-    ev = pd.read_csv(os.path.join(WORKDIR, "data/earnings_events_classified.csv"), parse_dates=["Release_Date"])
-    with open(os.path.join(WORKDIR, "data/earnings_surprise_data.pkl"), "rb") as f: fin = pickle.load(f)
-    fin["Release_Date"] = pd.to_datetime(fin["Release_Date"]); FLOOR = 1e9
-    fin["exp_B_MA"] = fin[["NP_P1","NP_P2","NP_P3","NP_P4"]].mean(axis=1)
-    fin["surprise_B_MA"] = ((fin["NP_P0"] - fin["exp_B_MA"]) / np.maximum(np.abs(fin["exp_B_MA"]), FLOOR)).clip(-5, 5)
-    ev = ev.merge(fin[["ticker","quarter","Release_Date","surprise_B_MA"]],
-                  on=["ticker","quarter","Release_Date"], how="left")
-    ev["surprise_B_MA"] = ev["surprise_B_MA"].fillna(0)
-    ev = ev.sort_values(["ticker", "Release_Date"]).reset_index(drop=True)
-    LN2 = np.log(2); HL = 3.0; ev["prior_n_good"] = 0; ev["pa_HL3"] = np.nan
-    for tk, g in ev.groupby("ticker"):
-        hist = []
-        for ri in g.index.tolist():
-            row = ev.loc[ri]; cd = row["Release_Date"]; ev.at[ri, "prior_n_good"] = len(hist)
-            if hist:
-                da = pd.to_datetime([d for d, _ in hist]); pa = np.array([p for _, p in hist])
-                w = np.exp(-LN2 * ((cd - da).days.values / 365.25) / HL)
-                ev.at[ri, "pa_HL3"] = (pa * w).sum() / w.sum() if w.sum() > 0 else np.nan
-            if pd.notna(row["NP_R"]) and row["NP_R"] >= 15 and pd.notna(row["post_ret"]): hist.append((cd, row["post_ret"]))
-    cand = ev[(ev["NP_R"] >= 15) & (ev["prior_n_good"] >= 4) & (ev["pa_HL3"] >= 5)].copy()
-    cand = cand[cand["Release_Date"] >= pd.Timestamp(START)]
+    # Point-in-time candidate source (fix 2026-07-12, audit Taylor_20260712_121642 R1):
+    # events must be visible here FROM their release date. The old source
+    # (earnings_events_classified.csv) only surfaces an event once its release+30
+    # price mark exists — ~25 sessions AFTER the T+5 entry had already passed — so
+    # every new-release entry was silently missed. live_lag_candidates() takes event
+    # identity/NP_R/surprise from earnings_surprise_data.pkl (fresh daily, visible
+    # same-day) and prior_n_good/pa_HL3 from the classified CSV (priors are >=1
+    # quarter old, always fully windowed). The CSV keeps its exact old semantics for
+    # the backtest/full-replay path (pt_v23_audit_2014, pt_v22) — untouched.
+    from lag_live_schedule import live_lag_candidates
+    cand = live_lag_candidates(start=START)
+    print(f"  [lag-live] {len(cand)} events in window, {int(cand['qualify'].sum())} qualify"
+          + (f", release max {cand['Release_Date'].max().date()}" if len(cand) else ""))
+    cand = cand[cand["qualify"]]
     for _, row in cand.iterrows():
         entry, ahead = td_offset(row["Release_Date"], 5)
-        tier = "LAG_HI" if row["surprise_B_MA"] > 0.5 else "LAG_LO"
+        tier = row["tier"]
         item = {"ticker": row["ticker"], "tier": tier, "release": row["Release_Date"].date(),
                 "np_r": float(row["NP_R"]), "pa_hl3": float(row["pa_HL3"])}
         if entry is None and ahead is not None and 1 <= ahead <= 5:
