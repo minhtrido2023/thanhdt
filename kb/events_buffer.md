@@ -1467,3 +1467,60 @@
 - [2026-07-12T00:05:07Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260711_235305", "source": "watcher"}
 - [2026-07-12T00:05:34Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "in_progress", "note": "4 run @50B đang chạy song song (base/r1/r2/r3, threads=1 mỗi process, 34 cores). Chờ compute; spot-check script sẵn sàng"}
 - [2026-07-12T00:06:08Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+
+## Consolidation 2026-07-12T00:56:44Z
+- [2026-07-12T00:07:08Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:08:08Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:09:08Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:10:08Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:11:08Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:12:08Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:13:08Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:14:08Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:15:08Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:16:08Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 23, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:17:06Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "in_progress", "note": "đọc plan xong, bắt đầu bước 1: đọc regime_size_overlay + pt_v23 để viết module tilt"}
+- [2026-07-12T00:17:08Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:18:08Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 25, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:19:09Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 26, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:19:42Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "in_progress", "note": "phiên trước chết giữa chừng nhưng bước 1-2 ĐÃ XONG (module+4 run, 0VND cả 4). Headline: base 29.51 / R1 28.57 / R2 29.86 / R3 28.23 cùng-cache. R2 duy nhất dương +0.35pp nhưng gain dồn 2021 (+6.75pp) — đang extract per-year + LOO + spot-check PIT"}
+- [2026-07-12T00:20:09Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 27, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:21:09Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 28, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:22:09Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 29, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:23:09Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 30, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:24:09Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 31, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:25:10Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 32, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:25:32Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "in_progress", "note": "BẮT ĐƯỢC BUG: 4 run phiên trước THIẾU BASKET_SELECT=yieldcombo (default=blend, không có filename suffix/log — đúng bẫy §8 tái diễn). Basket 207 vs 210 names, base 29.51 thay vì 28.82. Vứt kết quả cũ, re-run cả 4 với đúng lệnh pin. Spot-check PIT 20/20 + wiring vẫn valid (không phụ thuộc basket)."}
+- [2026-07-12T00:26:10Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 33, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:27:10Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 34, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:28:10Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 35, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:29:10Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 36, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:30:10Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 37, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:31:10Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 38, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:32:10Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 39, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:33:10Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 40, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:34:10Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 41, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:35:10Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 42, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:35:42Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "in_progress", "note": "root cause thật: 4 run phiên trước + run verify đầu của tôi chạy KHÔNG source wc_env.sh → thiếu BQ_LOCAL_CACHE → hit LIVE BQ (giá đã bị admin điều chỉnh hồi tố) thay vì cache pin. Re-run cả 4 qua cache đúng chuẩn, base phải tái lập 28.82 trước."}
+- [2026-07-12T00:36:10Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 43, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:37:10Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 44, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:38:11Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 45, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:39:11Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 46, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:40:11Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 47, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:41:11Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 48, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:42:11Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 49, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:43:11Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 50, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:44:11Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 51, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:45:11Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 52, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:46:11Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 53, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:47:11Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 54, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:48:11Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 55, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:49:11Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 56, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:50:11Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 57, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:51:11Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 58, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:51:52Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "in_progress", "note": "4 run hợp lệ xong (cache pin, base BYTE-IDENTICAL canonical 28.82). R1 -0.63pp/R3 -0.85pp = FAIL. R2 +0.90pp Full, OOS 33.56/Cal 2.136 pass gate, LOO không âm mọi năm NHƯNG ex-2021 chỉ +0.014pp ≈ 0 (edge dồn 2021). Spot-check PIT 20/20+14/14 PASS. Đang chạy sensitivity h=7.5% + DSR."}
+- [2026-07-12T00:52:12Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 59, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:53:12Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 60, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:54:12Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 61, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:55:12Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 62, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+- [2026-07-12T00:56:12Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 63, "job_id": "Taylor_20260711_235305", "source": "watcher"}
