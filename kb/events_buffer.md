@@ -1816,3 +1816,65 @@
 - [2026-07-12T08:04:15Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260712_080114", "source": "watcher"}
 - [2026-07-12T08:05:15Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260712_080114", "source": "watcher"}
 - [2026-07-12T08:06:15Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+
+## Consolidation 2026-07-12T08:58:43Z
+- [2026-07-12T08:07:15Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:07:25Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "in_progress", "note": "Registry/cache check xong (dt5g_live OK, cache vintage T6 23:53 = cùng vintage re-pin R3). Phát hiện doc-bug: lệnh pin registry ghi BQ_LOCAL_CACHE=1 nhưng =1 rơi về live BQ âm thầm — dạng đúng data/bq_cache (log re-pin thật dùng đúng). Đang tạo tmp harness+builder _exp_qsleeve."}
+- [2026-07-12T08:08:15Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:09:16Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:10:16Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:11:16Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:12:16Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:12:19Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "in_progress", "note": "4 run song song đã phóng (control + Q8-NEU + Q12-NEU + QF8-NEU), wiring verified qua log (gate override + _exp_qsleeve tags đúng). Chờ ~15p. Trial 4 (BULL-ext) chạy sau khi có winner. Đang chuẩn bị tooling phân tích (extract_peryear/DSR/concentration)."}
+- [2026-07-12T08:13:16Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:14:17Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:15:17Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:16:17Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:17:17Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:18:17Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:19:17Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:19:40Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "in_progress", "note": "Trials 1-3 XONG: cả 3 NO-GO rõ (Q8 24.95/1.59/-22.1, Q12 24.91/1.63/-22.1, QF8 24.76/1.54/-24.7 vs control 27.84/1.84/-18.2; LOO âm cả 13 phép mọi trial; OOS edge Q8/Q12 = 2021-carry thuần, OOSex21 âm). Control byte-identical canonical + 0VND cả 4. Trial 4 (Q12+BULL-ext) đang chạy. Còn: concentration/capacity/turnover diagnostic + DSR + registry + finding."}
+- [2026-07-12T08:20:17Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:21:17Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:22:17Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:23:17Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:24:17Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 23, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:25:17Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:26:17Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 25, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:26:39Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "in_progress", "note": "đọc plan xong, bắt đầu: tra registry pinned command + custom_basket builder"}
+- [2026-07-12T08:27:18Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 26, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:28:18Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 27, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:29:18Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 28, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:30:18Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 29, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:31:18Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 30, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:31:38Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "in_progress", "note": "scope kỹ thuật xong: knobs sẵn có TOPN/WT=ew/PARK_STATES/LIQ_FLOOR; cần thêm gate-override + qfloor Đ2 (ticker_financial as-of Release_Date) + EXP_TAG. Bắt đầu sửa code."}
+- [2026-07-12T08:32:18Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 31, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:33:19Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 32, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:34:19Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 33, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:35:19Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 34, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:35:34Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "in_progress", "note": "Wave1 phóng (pid 2923758): ctrl+q8neu song song, rồi q12neu+qf8neu. Plumbing đã smoke-test: Đ1 6-8 tên/kỳ (2 kỳ đầu 2014 rỗng→flat level OK), Đ2 rất hẹp 1-6 tên (pass-rate 8%) — concentration gate sẽ phán. ETA wave1 ~25-30ph."}
+- [2026-07-12T08:36:19Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 35, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:37:19Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 36, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:38:19Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 37, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:39:19Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 38, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:40:19Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 39, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:41:19Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 40, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:42:19Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 41, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:43:19Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 42, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:44:19Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 43, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:45:19Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 44, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:46:19Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 45, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:47:20Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 46, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:48:20Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 47, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:49:20Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 48, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:50:20Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 49, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:51:17Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "in_progress", "note": "Wave1 XONG 4/4 self-check 0VND; ctrl tái lập pin CHÍNH XÁC (byte-identical canonical). Cả 3 trial FAIL gates: LOO âm mọi năm, IS -3..-6.8pp, OOS-edge q8/q12 = 2021-carry. Phát hiện attempt trước cùng job đã chạy 4 run byte-identical (double-verify determinism). Winner=q12; trial 4 (BULL-ext) đang chạy; tiếp: concentration diag + DSR."}
+- [2026-07-12T08:51:17Z] Taylor/status — Taylor_20260712_080114: {"status": "deadline_extended", "hb_age_s": 0, "extension": 1, "max_ext": 3, "source": "watcher"}
+- [2026-07-12T08:51:20Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 50, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:52:20Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 51, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:53:20Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 52, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:54:20Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 53, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:55:20Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 54, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:56:20Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 55, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:57:20Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 56, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+- [2026-07-12T08:58:20Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 57, "job_id": "Taylor_20260712_080114", "source": "watcher"}
