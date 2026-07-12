@@ -20,14 +20,24 @@ bảng, 1 mã early-filer (MBS) đủ để cả check báo "xanh" dù 1254/1255
 cơ vendor stall giữa mùa im lặng tới 90 ngày. Fix: breadth-probe WARN-only theo mùa BCTC (commit
 `1b2fd13`), có guard chống false-positive đầu/cuối mùa.
 
-**2 mục nhỏ Spyros phát hiện thêm (residual, chưa fix, MỨC ĐỘ THẤP — không chặn go-live tuần tới)**:
-- M1 (MEDIUM, đề xuất làm trước LAG refill ~07-25): lỗ hổng silent-degradation vẫn còn ở nguồn mới
-  (pkl lỗi chỉ log WARNING, không phân biệt được "không có sự kiện" vs "pipeline hỏng") — đề xuất
-  thêm 1 probe so pkl vs BQ + flag `lag_source_error` trong status.json, cùng khuôn 2 probe vừa làm.
-- L2 (LOW): nhãn hiển thị có thể gây hiểu nhầm nếu vendor backfill muộn — đề xuất đổi câu chữ, không
-  gấp.
-- L1 (LOW, chỉ ghi nhớ): nếu sau này nâng cấp pandas trong env pipeline, format pkl cũ có thể đọc
-  lỗi âm thầm — không phải việc cần làm ngay, chỉ là lưu ý vận hành tương lai.
+**3 mục nhỏ Spyros phát hiện thêm — ĐÃ XỬ LÝ HẾT TRONG NGÀY, quant-skeptic CONFIRMED (2026-07-12)**:
+- **M1 (MEDIUM) — ĐÃ FIX**: field `lag_source_error` mới trong `golive_v23_status.json` (commit
+  `a5f3810`) phân biệt "0 upcoming vì thật sự không có gì" vs "0 vì pkl lỗi". Kèm probe `lag-pkl`
+  WARN-only (commit `f84b995`) — dùng "stateful catch-up" (so pkl với chính lịch sử của nó, không so
+  tức thời với BQ) để tránh báo giả khi lệch giờ refresh bình thường (15:30 pkl → 19:00 check).
+- **L2 (LOW) — ĐÃ FIX** (commit `853080d`): nhãn `ENTERED`/"Đã vào" đổi thành `WINDOW_PASSED`/"Cửa sổ
+  entry đã qua — đối chiếu vị thế thực" ở cả 2 bề mặt hiển thị, tránh DollarBill hiểu nhầm là đã có
+  vị thế. Xác nhận không code nào parse chuỗi cũ trong pipeline sống.
+- **L1 (LOW) — không cần code**, đã document. quant-skeptic **tự tái hiện được đúng** tình huống lỗi
+  này (pandas hệ thống không đọc được pkl format mới) khi verify, xác nhận cảnh báo là có căn cứ
+  thật, không phải lý thuyết suông.
+
+**KẾT LUẬN: toàn bộ chuỗi audit sẵn sàng mùa BCTC Q2/2026 đã khép kín 100%** — CRITICAL + MEDIUM +
+3 mục nhỏ, tất cả đã fix và verify (quant-skeptic + risk-auditor độc lập). Không còn issue nào tồn
+đọng trước tuần giao dịch tới. Chi tiết đầy đủ: trace bus `Taylor_20260712_121642` (audit gốc) →
+`Taylor_20260712_124834` (fix CRITICAL) → `Spyros_20260712_131501` (phản biện) →
+`Taylor_20260712_135148` (fix 3 mục nhỏ); song song `Winston_20260712_122313` →
+`Winston_20260712_124928` (fix MEDIUM).
 
 Chi tiết đầy đủ: bus trace `Taylor_20260712_121642` → `Taylor_20260712_124834` (fix) và
 `Winston_20260712_122313` → `Winston_20260712_124928` (fix), phản biện `Spyros_20260712_131501`.

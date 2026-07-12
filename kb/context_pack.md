@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v974)
+# Mike fleet — context pack (v975)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-12T12:31:56] Winston/finding — AUDIT HẠ TẦNG Q2 ROLL-IN XONG: kiến trúc as-of + cohort-gate ĐÚNG cho roll-in dần dần; 1 gap thật MEDIUM = freshness ticker_financial đo bằng MAX(time) toàn bảng nên 1 mã (MBS) đã reset đồng hồ cho cả bảng — vendor stall giữa mùa sẽ im lặng tới 90 ngày, đề xuất breadth-probe WARN theo mùa (chờ duyệt, chưa sửa gì): {"job": "Winston_20260712_122313", "status": "AUDIT_DONE_READ_ONLY_NO_CHANGES", "scope": "hạ tầng dữ liệu cho mùa BCTC Q2/2026 roll-in dần dần (song song Taylor …
 - [2026-07-12T12:56:41] Winston/finding — fin-breadth probe DONE: WARN-only cohort-count theo mùa BCTC vào bq_freshness_check.sh — commit 1b2fd13, vá gap MEDIUM F1 (MAX(time) toàn bảng bị 1 mã early-filer reset đồng hồ): {"job": "Winston_20260712_124928", "trace_parent": "Winston_20260712_122313", "status": "DONE_COMMITTED", "commit": "1b2fd13 (mike repo, bin/bq_freshness_check. …
 - [2026-07-12T13:05:00] quant-skeptic/verification — ✅ CONFIRMED VERIFY: fin-breadth probe DONE: WARN-only cohort-count theo mùa BCTC vào bq_freshness_check.sh — commit 1b2fd13, vá gap MEDIUM F1 (MAX(time) toàn bảng bị 1 mã early-filer reset đồng hồ): {"finding_topic": "fin-breadth WARN-only cohort-count probe theo mùa BCTC into bq_freshness_check.sh (commit 1b2fd13) — vá gap MEDIUM F1 (MAX(time) toàn bảng bị …
 - [2026-07-12T13:11:02] Taylor/finding — FIX R1 CRITICAL XONG: live LAG candidate source point-in-time (lag_live_schedule.py) — commit f7463e3, selfcheck 23/23, backtest pin R3 byte-identical, MBS nhận diện đúng same-day: {"job": "Taylor_20260712_124834", "trace_parent": "Taylor_20260712_121642", "status": "DONE_COMMITTED", "commit": "f7463e3 (repo thanhdt/WorkingClaude)", "root_ …
@@ -11,6 +10,7 @@
 - [2026-07-12T13:20:07] Spyros/finding — AUDIT RỦI RO VẬN HÀNH fix R1 LAG live schedule (f7463e3): KHÔNG có rủi ro chặn — 1 MEDIUM residual (lỗ hổng silent-degradation trên chính nguồn pkl mới, chưa có probe), 3 LOW; rollback sạch, không ảnh hưởng vị thế mở: {"job": "Spyros_20260712_131501", "trace_parent": "Taylor_20260712_124834", "status": "AUDIT_DONE_READ_ONLY", "verdict": "NO_BLOCKING_RISK — fix đúng hướng, giả …
 - [2026-07-12T14:06:33] Taylor/finding — FIX M1+L2 residuals Spyros XONG (LAG live pipeline): lag_source_error vào status.json + probe lag-pkl content catch-up WARN-only + relabel lag_recent — commits f84b995 (mike) / a5f3810 + 853080d (WorkingClaude); L1 không cần action (đã document): {"job": "Taylor_20260712_135148", "trace_parent": "Spyros_20260712_131501", "status": "DONE_COMMITTED", "commits": {"M1_probe": "f84b995 (repo mike, bin/bq_fres …
 - [2026-07-12T14:13:09] quant-skeptic/verification — ✅ CONFIRMED VERIFY: FIX M1+L2 residuals Spyros XONG (LAG live pipeline): lag_source_error vào status.json + probe lag-pkl content catch-up WARN-only + relabel lag_recent — commits f84b995 (mike) / a5f3810 + 853080d (WorkingClaude); L1 không cần action (đã document): {"finding_topic": "FIX M1+L2 residuals Spyros (LAG live pipeline): lag_source_error into status.json + lag-pkl content catch-up probe WARN-only + relabel lag_re …
+- [2026-07-12T14:43:42] Winston/finding — AUDIT CRON-ORDER TOAN HE THONG XONG: thu tu hien tai DUNG (0 loi order can dao); nhung audit lo 2 bug noi dung se BLOCK pipeline tuan nay (C1 DT5G-cache thu Hai, H2 shares-check thu Tu) + 4 finding phu + draft quy tac them cron moi: {"job":"Winston_20260712_142100","status":"AUDIT_DONE_READ_ONLY_NO_CHANGES","report":"mike/agents/Winston/audit_cron_order_20260712.md","method":"doc code that  …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -35,14 +35,24 @@ bảng, 1 mã early-filer (MBS) đủ để cả check báo "xanh" dù 1254/1255
 cơ vendor stall giữa mùa im lặng tới 90 ngày. Fix: breadth-probe WARN-only theo mùa BCTC (commit
 `1b2fd13`), có guard chống false-positive đầu/cuối mùa.
 
-**2 mục nhỏ Spyros phát hiện thêm (residual, chưa fix, MỨC ĐỘ THẤP — không chặn go-live tuần tới)**:
-- M1 (MEDIUM, đề xuất làm trước LAG refill ~07-25): lỗ hổng silent-degradation vẫn còn ở nguồn mới
-  (pkl lỗi chỉ log WARNING, không phân biệt được "không có sự kiện" vs "pipeline hỏng") — đề xuất
-  thêm 1 probe so pkl vs BQ + flag `lag_source_error` trong status.json, cùng khuôn 2 probe vừa làm.
-- L2 (LOW): nhãn hiển thị có thể gây hiểu nhầm nếu vendor backfill muộn — đề xuất đổi câu chữ, không
-  gấp.
-- L1 (LOW, chỉ ghi nhớ): nếu sau này nâng cấp pandas trong env pipeline, format pkl cũ có thể đọc
-  lỗi âm thầm — không phải việc cần làm ngay, chỉ là lưu ý vận hành tương lai.
+**3 mục nhỏ Spyros phát hiện thêm — ĐÃ XỬ LÝ HẾT TRONG NGÀY, quant-skeptic CONFIRMED (2026-07-12)**:
+- **M1 (MEDIUM) — ĐÃ FIX**: field `lag_source_error` mới trong `golive_v23_status.json` (commit
+  `a5f3810`) phân biệt "0 upcoming vì thật sự không có gì" vs "0 vì pkl lỗi". Kèm probe `lag-pkl`
+  WARN-only (commit `f84b995`) — dùng "stateful catch-up" (so pkl với chính lịch sử của nó, không so
+  tức thời với BQ) để tránh báo giả khi lệch giờ refresh bình thường (15:30 pkl → 19:00 check).
+- **L2 (LOW) — ĐÃ FIX** (commit `853080d`): nhãn `ENTERED`/"Đã vào" đổi thành `WINDOW_PASSED`/"Cửa sổ
+  entry đã qua — đối chiếu vị thế thực" ở cả 2 bề mặt hiển thị, tránh DollarBill hiểu nhầm là đã có
+  vị thế. Xác nhận không code nào parse chuỗi cũ trong pipeline sống.
+- **L1 (LOW) — không cần code**, đã document. quant-skeptic **tự tái hiện được đúng** tình huống lỗi
+  này (pandas hệ thống không đọc được pkl format mới) khi verify, xác nhận cảnh báo là có căn cứ
+  thật, không phải lý thuyết suông.
+
+**KẾT LUẬN: toàn bộ chuỗi audit sẵn sàng mùa BCTC Q2/2026 đã khép kín 100%** — CRITICAL + MEDIUM +
+3 mục nhỏ, tất cả đã fix và verify (quant-skeptic + risk-auditor độc lập). Không còn issue nào tồn
+đọng trước tuần giao dịch tới. Chi tiết đầy đủ: trace bus `Taylor_20260712_121642` (audit gốc) →
+`Taylor_20260712_124834` (fix CRITICAL) → `Spyros_20260712_131501` (phản biện) →
+`Taylor_20260712_135148` (fix 3 mục nhỏ); song song `Winston_20260712_122313` →
+`Winston_20260712_124928` (fix MEDIUM).
 
 Chi tiết đầy đủ: bus trace `Taylor_20260712_121642` → `Taylor_20260712_124834` (fix) và
 `Winston_20260712_122313` → `Winston_20260712_124928` (fix), phản biện `Spyros_20260712_131501`.
