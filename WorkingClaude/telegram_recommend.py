@@ -373,7 +373,7 @@ def build_book_section(book_df: pd.DataFrame, label: str) -> str:
 
 def build_lag_section(lag_df: pd.DataFrame, w_tgt=None) -> str:
     """BOOK B — LAG (PEAD always-on). lag_df = raw rows from golive_v23 CSV
-    (ticker, play_type LAG_HI/LAG_LO, weight_pct, status UPCOMING/ENTERED)."""
+    (ticker, play_type LAG_HI/LAG_LO, weight_pct, status UPCOMING/WINDOW_PASSED)."""
     hdr = "📋 BOOK B — LAG (PEAD always-on"
     hdr += f", {w_tgt*100:.0f}% NAV target)" if w_tgt is not None else ")"
     if lag_df is None or lag_df.empty:
@@ -386,7 +386,7 @@ def build_lag_section(lag_df: pd.DataFrame, w_tgt=None) -> str:
         w = f"{float(r['weight_pct']):.0f}" if pd.notna(r.get("weight_pct")) else "-"
         lines.append(f"{_esc(r['ticker']):<7} {_esc(r['play_type']):<7} {w:>3} {_esc(r.get('status', '')):<20}")
     lines.append("</pre>")
-    lines.append("<i>UPCOMING = vào lệnh phiên tới (T+5 sau release) · ENTERED = đã vào · W% trên vốn book LAG</i>")
+    lines.append("<i>UPCOMING = vào lệnh phiên tới (T+5 sau release) · WINDOW_PASSED = cửa sổ entry đã qua, đối chiếu vị thế thực · W% trên vốn book LAG</i>")
     return "\n".join(lines)
 
 

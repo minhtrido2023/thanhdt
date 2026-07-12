@@ -313,7 +313,7 @@ for it in lag_up:
 for it in lag_recent:
     recs.append({"book": "LAG", "ticker": it["ticker"], "play_type": it["tier"],
                  "ta": None, "close_bq_stale_DO_NOT_USE_AS_REFPRICE": None, "sector": sec_map.get(it["ticker"]),
-                 "weight_pct": LAG_TW[it["tier"]]*100, "status": f"ENTERED {it['entry']}"})
+                 "weight_pct": LAG_TW[it["tier"]]*100, "status": f"WINDOW_PASSED {it['entry']}"})
 for tk in basket:
     recs.append({"book": "CAPIT", "ticker": tk, "play_type": "CAPIT_GOLDEN",
                  "ta": None, "close_bq_stale_DO_NOT_USE_AS_REFPRICE": None, "sector": sec_map.get(tk),
@@ -401,7 +401,11 @@ if lag_up:
 else:
     L.append("_(không có entry PEAD đến hạn phiên tới)_")
 if lag_recent:
-    L.append("\n_Đã vào trong các phiên gần nhất:_ " + ", ".join(f"{it['ticker']}({it['entry']})" for it in lag_recent))
+    # KHÔNG ghi "đã vào lệnh" — sự kiện vendor backfill muộn (Release_Date quá khứ) rơi thẳng vào
+    # nhóm này dù chưa từng có lệnh nào (audit L2 Spyros_20260712_131501); người/LLM đọc phải đối
+    # chiếu vị thế thực, không mặc định vị thế đã tồn tại.
+    L.append("\n_Cửa sổ entry đã qua trong các phiên gần nhất — đối chiếu vị thế thực, KHÔNG mặc định đã vào lệnh:_ "
+             + ", ".join(f"{it['ticker']}({it['entry']})" for it in lag_recent))
 if state_today == 2:
     L.append("\n⚠️ BEAR: allocator w_LAG=0 — KHÔNG cấp vốn entry LAG mới cho tới khi thoát BEAR.")
 L.append(f"\n## CAPIT v2 monitor\n")
