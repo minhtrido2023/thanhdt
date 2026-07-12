@@ -642,3 +642,25 @@ của toàn hệ thống).
 - `data/BOT_STOP`: tạo file = dừng mọi giao dịch tức thì
 - `state/NOTIFY_OFF`: tắt Telegram push tạm thời
 - V2.5: `trading_rules.json v1.7` → v25_leverage STATUS=DISABLED
+
+## Audit cron toàn hệ thống XONG (Winston_20260712_142100) — 2 fix đang dispatch (2026-07-12)
+User yêu cầu review thứ tự cron. Kết quả: **thứ tự ĐÚNG**, nhưng lộ 2 bug nội dung khẩn:
+- **C1 CRITICAL** (tự verify độc lập bằng code+BQ live, xác nhận đúng 100%): `publish_gated_state.py`
+  đọc DT5G qua `BQ_LOCAL_CACHE` (T-1) thay vì live — với `MAX_STATE_LAG=0` (siết 07-11), thứ Hai
+  07-13 19:00 sẽ FAIL, không dispatch DollarBill. Dispatch Taylor (fable) fix ngay hôm nay: job
+  `Taylor_20260712_151135`.
+- **H2 HIGH**: check `shares_outstanding_live` calibrate sai giả định → false-BLOCK ~thứ Tư 07-15.
+  Đề xuất hạ BLOCK→WARN — CHƯA dispatch, chờ quyết sau khi C1 xong.
+- Phụ: M5 (executor.py đọc ticker_prune.parquet monolith chết từ 06-26, ảnh hưởng 2 paper trial
+  evidence), M4 (sync_bq_cache thiếu `|| true`), M3 (optional reorder pt_8l/telegram sau 19:00).
+- Bản thảo quy tắc "thêm cron mới đặt giờ nào" ở Phần 5 `mike/agents/Winston/audit_cron_order_20260712.md`
+  — CHƯA chính thức hoá thành `kb/cron_registry.md`/coding_guidelines, còn nợ.
+
+User đồng thời yêu cầu dọn crontab paper-trading lạc hậu (dựa production hiện tại V2.4 + version
+numbering + research đã đóng: V2.5 lever NO-GO, Q-sleeve NO-GO, DVR-8L NO-GO, momentum-deals NO-GO
+đã production-thực-thi-rồi, fa8l CP2 NO-GO). Dispatch Winston (fable) research + đề xuất diff (KHÔNG
+tự sửa crontab thật): job `Winston_20260712_151206`. Việc còn đang chạy: EXTREME (~07-28), chase-cap
+(~07-14), fill-timing (~cuối tháng 7), DC-book (event-anchored) — KHÔNG được đụng.
+
+**Còn nợ sau khi 2 job trên xong**: verify C1 fix (quant-skeptic), quyết H2, formalize cron_registry.md,
+áp dụng diff dọn crontab (sau khi tôi review), dispatch Taylor xem lại M5 (2 paper trial evidence).

@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v975)
+# Mike fleet — context pack (v976)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-12T12:56:41] Winston/finding — fin-breadth probe DONE: WARN-only cohort-count theo mùa BCTC vào bq_freshness_check.sh — commit 1b2fd13, vá gap MEDIUM F1 (MAX(time) toàn bảng bị 1 mã early-filer reset đồng hồ): {"job": "Winston_20260712_124928", "trace_parent": "Winston_20260712_122313", "status": "DONE_COMMITTED", "commit": "1b2fd13 (mike repo, bin/bq_freshness_check. …
 - [2026-07-12T13:05:00] quant-skeptic/verification — ✅ CONFIRMED VERIFY: fin-breadth probe DONE: WARN-only cohort-count theo mùa BCTC vào bq_freshness_check.sh — commit 1b2fd13, vá gap MEDIUM F1 (MAX(time) toàn bảng bị 1 mã early-filer reset đồng hồ): {"finding_topic": "fin-breadth WARN-only cohort-count probe theo mùa BCTC into bq_freshness_check.sh (commit 1b2fd13) — vá gap MEDIUM F1 (MAX(time) toàn bảng bị …
 - [2026-07-12T13:11:02] Taylor/finding — FIX R1 CRITICAL XONG: live LAG candidate source point-in-time (lag_live_schedule.py) — commit f7463e3, selfcheck 23/23, backtest pin R3 byte-identical, MBS nhận diện đúng same-day: {"job": "Taylor_20260712_124834", "trace_parent": "Taylor_20260712_121642", "status": "DONE_COMMITTED", "commit": "f7463e3 (repo thanhdt/WorkingClaude)", "root_ …
 - [2026-07-12T13:19:24] quant-skeptic/verification — ✅ CONFIRMED VERIFY: FIX R1 CRITICAL XONG: live LAG candidate source point-in-time (lag_live_schedule.py) — commit f7463e3, selfcheck 23/23, backtest pin R3 byte-identical, MBS nhận diện đúng same-day: {"finding_topic": "FIX R1 CRITICAL: live LAG candidate source point-in-time (lag_live_schedule.py) — commit f7463e3, selfcheck 23/23, backtest pin R3 byte-ident …
@@ -11,6 +10,7 @@
 - [2026-07-12T14:06:33] Taylor/finding — FIX M1+L2 residuals Spyros XONG (LAG live pipeline): lag_source_error vào status.json + probe lag-pkl content catch-up WARN-only + relabel lag_recent — commits f84b995 (mike) / a5f3810 + 853080d (WorkingClaude); L1 không cần action (đã document): {"job": "Taylor_20260712_135148", "trace_parent": "Spyros_20260712_131501", "status": "DONE_COMMITTED", "commits": {"M1_probe": "f84b995 (repo mike, bin/bq_fres …
 - [2026-07-12T14:13:09] quant-skeptic/verification — ✅ CONFIRMED VERIFY: FIX M1+L2 residuals Spyros XONG (LAG live pipeline): lag_source_error vào status.json + probe lag-pkl content catch-up WARN-only + relabel lag_recent — commits f84b995 (mike) / a5f3810 + 853080d (WorkingClaude); L1 không cần action (đã document): {"finding_topic": "FIX M1+L2 residuals Spyros (LAG live pipeline): lag_source_error into status.json + lag-pkl content catch-up probe WARN-only + relabel lag_re …
 - [2026-07-12T14:43:42] Winston/finding — AUDIT CRON-ORDER TOAN HE THONG XONG: thu tu hien tai DUNG (0 loi order can dao); nhung audit lo 2 bug noi dung se BLOCK pipeline tuan nay (C1 DT5G-cache thu Hai, H2 shares-check thu Tu) + 4 finding phu + draft quy tac them cron moi: {"job":"Winston_20260712_142100","status":"AUDIT_DONE_READ_ONLY_NO_CHANGES","report":"mike/agents/Winston/audit_cron_order_20260712.md","method":"doc code that  …
+- [2026-07-12T15:20:49] Winston/finding — AUDIT DON DEP CRON PAPER-TRADING XONG: be mat cron da SACH — chi 1 diff (xoa dangling comment go-live flip); cac sim v11/v12/v4/compare la control-arms co chu dich (registry engine_room_oos, review 2026-12-01), pt_v22 = PRODUCTION signal book; pt_v12_live xac nhan khong nam trong lich nao; +4 finding phu (F2: cron edge_health DA ton tai, bug nam trong script): {"job": "Winston_20260712_151206", "status": "AUDIT_DONE_READ_ONLY_NO_CHANGES", "report": "mike/agents/Winston/audit_paper_cron_cleanup_20260712.md", "method":  …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -657,6 +657,28 @@ của toàn hệ thống).
 - `data/BOT_STOP`: tạo file = dừng mọi giao dịch tức thì
 - `state/NOTIFY_OFF`: tắt Telegram push tạm thời
 - V2.5: `trading_rules.json v1.7` → v25_leverage STATUS=DISABLED
+
+## Audit cron toàn hệ thống XONG (Winston_20260712_142100) — 2 fix đang dispatch (2026-07-12)
+User yêu cầu review thứ tự cron. Kết quả: **thứ tự ĐÚNG**, nhưng lộ 2 bug nội dung khẩn:
+- **C1 CRITICAL** (tự verify độc lập bằng code+BQ live, xác nhận đúng 100%): `publish_gated_state.py`
+  đọc DT5G qua `BQ_LOCAL_CACHE` (T-1) thay vì live — với `MAX_STATE_LAG=0` (siết 07-11), thứ Hai
+  07-13 19:00 sẽ FAIL, không dispatch DollarBill. Dispatch Taylor (fable) fix ngay hôm nay: job
+  `Taylor_20260712_151135`.
+- **H2 HIGH**: check `shares_outstanding_live` calibrate sai giả định → false-BLOCK ~thứ Tư 07-15.
+  Đề xuất hạ BLOCK→WARN — CHƯA dispatch, chờ quyết sau khi C1 xong.
+- Phụ: M5 (executor.py đọc ticker_prune.parquet monolith chết từ 06-26, ảnh hưởng 2 paper trial
+  evidence), M4 (sync_bq_cache thiếu `|| true`), M3 (optional reorder pt_8l/telegram sau 19:00).
+- Bản thảo quy tắc "thêm cron mới đặt giờ nào" ở Phần 5 `mike/agents/Winston/audit_cron_order_20260712.md`
+  — CHƯA chính thức hoá thành `kb/cron_registry.md`/coding_guidelines, còn nợ.
+
+User đồng thời yêu cầu dọn crontab paper-trading lạc hậu (dựa production hiện tại V2.4 + version
+numbering + research đã đóng: V2.5 lever NO-GO, Q-sleeve NO-GO, DVR-8L NO-GO, momentum-deals NO-GO
+đã production-thực-thi-rồi, fa8l CP2 NO-GO). Dispatch Winston (fable) research + đề xuất diff (KHÔNG
+tự sửa crontab thật): job `Winston_20260712_151206`. Việc còn đang chạy: EXTREME (~07-28), chase-cap
+(~07-14), fill-timing (~cuối tháng 7), DC-book (event-anchored) — KHÔNG được đụng.
+
+**Còn nợ sau khi 2 job trên xong**: verify C1 fix (quant-skeptic), quyết H2, formalize cron_registry.md,
+áp dụng diff dọn crontab (sau khi tôi review), dispatch Taylor xem lại M5 (2 paper trial evidence).
 
 ## Tri thức chung của đội (canonical — Mike biên tập; MỌI agent phải nắm)
 > Cập nhật 2026-07-01. Chi tiết: `kb/KNOWLEDGE.md`. Số liệu gốc: `data/results_registry.md`.

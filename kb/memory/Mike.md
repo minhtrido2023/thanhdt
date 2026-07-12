@@ -47,3 +47,4 @@ cause + verify artifact xong (plan 07-13 cả 2 account tồn tại đúng ngày
 
 ## Pattern A (job nền chết vì lifecycle) — ĐÃ ĐÓNG từ 07-09, không tái phát kể từ đó.
 
+- [2026-07-12T15:12:31Z] Đang chờ 2 job song song: Taylor_20260712_151135 (fix C1 CRITICAL - publish DT5G qua cache, deadline truoc 18:30 T2 07-13) + Winston_20260712_151206 (audit + de xuat don crontab paper-trading lac hau). Con no: verify C1 fix, quyet H2 (BLOCK->WARN), formalize kb/cron_registry.md tu Phan 5 audit report, apply diff don crontab sau khi Winston xong + toi review, dispatch Taylor xem M5 (2 paper trial bi anh huong boi ticker_prune.parquet chet tu 06-26).
