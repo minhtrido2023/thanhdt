@@ -469,16 +469,37 @@ _vm_tag = ("" if os.environ.get("VOLMANAGE_BAL", "0") != "1"
            else f"_volmanw{os.environ.get('VOLMANAGE_WIN','126')}m{str(os.environ.get('VOLMANAGE_TGT_MULT','1.0')).replace('.','')}")
 # Wave1/H8a LAG funding-priority reorder tag — keeps the treatment CSV off the baseline R3 path
 _dnpr_tag = "_dnprREORDER" if os.environ.get("LAG_FUND_DNPR", "0") == "1" else ""
+# DVR-8L sizing tilt (job Taylor_20260711_235305) — env DVR8L_TILT in {base,r1,r2,r3}; unset = OFF,
+# byte-identical baseline, no tag. "base" = no tilt but tagged output (contemporaneous control that
+# never touches the canonical R3 CSV, guidelines §8). DVR8L_HALF = sensitivity knob (default 0.05).
+DVR8L_TILT = os.environ.get("DVR8L_TILT", "").lower()
+DVR8L_HALF = float(os.environ.get("DVR8L_HALF", "0.05"))
+_dvr8l_tag = ("" if not DVR8L_TILT else
+              f"_exp_dvr8l{DVR8L_TILT}" + ("" if abs(DVR8L_HALF - 0.05) < 1e-9 else f"h{int(round(DVR8L_HALF*1000))}"))
+# MOM-channel closure measurement (job Taylor_20260712_012515) — env BAL_DROP_TIERS; unset = OFF,
+# byte-identical baseline, no tag. "none" = drop nothing but tagged output (contemporaneous control
+# that never touches the canonical R3 CSV, guidelines §8). Otherwise comma-separated play_types to
+# REMOVE from TIER_BAL (the BAL entry set), e.g. "MOMENTUM_N,MOMENTUM_S". Signals stay labeled in
+# SIGNAL_V11; the dropped tiers just can never open BAL positions.
+BAL_DROP_TIERS = [t.strip() for t in os.environ.get("BAL_DROP_TIERS", "").split(",") if t.strip()]
+_droptag = ("" if not BAL_DROP_TIERS else
+            "_exp_dropnone" if BAL_DROP_TIERS == ["none"] else
+            "_exp_drop" + "-".join(t.replace("MOMENTUM", "MOM").replace("_", "") for t in BAL_DROP_TIERS))
 AUDIT_PATH  = os.path.join(WORKDIR, "data",
                            {"v23a": "v23_golive_audit_2014_now.csv",
                             "v23c": "v23c_golive_audit_2014_now.csv",
                             "v22base": "v22base_audit_2014_now.csv",
-                            "singlebook": "singlebook_audit_2014_now.csv"}.get(MODE, MODE+"_audit.csv").replace(".csv", _capsuf + _matsuf + _liqsuf + _park_tag + _wt_tag + _sz_tag + _qt_tag + _bullpark_tag + _c30b_tag + _recpark_tag + _vm_tag + _dnpr_tag + _NAV_TAG + _START_TAG + ".csv"))
+                            "singlebook": "singlebook_audit_2014_now.csv"}.get(MODE, MODE+"_audit.csv").replace(".csv", _capsuf + _matsuf + _liqsuf + _park_tag + _wt_tag + _sz_tag + _qt_tag + _bullpark_tag + _c30b_tag + _recpark_tag + _vm_tag + _dnpr_tag + _dvr8l_tag + _droptag + _NAV_TAG + _START_TAG + ".csv"))
 
 BUY_TIERS_V11 = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
                  "MOMENTUM_A","MOMENTUM_S_N","COMPOUNDER_BUY","DEEP_VALUE_RECOVERY","S_PRO",
                  "RE_BACKLOG_BUY"}
 TIER_BAL = ["MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","DEEP_VALUE_RECOVERY","RE_BACKLOG_BUY"]
+if BAL_DROP_TIERS and BAL_DROP_TIERS != ["none"]:
+    _unknown_drop = [t for t in BAL_DROP_TIERS if t not in TIER_BAL]
+    assert not _unknown_drop, f"BAL_DROP_TIERS not in TIER_BAL: {_unknown_drop}"
+    TIER_BAL = [t for t in TIER_BAL if t not in BAL_DROP_TIERS]
+    print(f"  [MOM-closure probe] BAL entry set after BAL_DROP_TIERS={BAL_DROP_TIERS}: {TIER_BAL}")
 MAX_POS_V11 = 12
 
 STATE_LAG_WEIGHT  = {1: 0.50, 2: 0.00, 3: 0.65, 4: 0.65, 5: 0.65}
@@ -608,6 +629,12 @@ print(f"  [EXBULL fix] suppressed {int(mp4.sum())} momentum signals in EX-BULL (
 
 from regime_size_overlay import apply_regime_size
 sig_f, RS = apply_regime_size(sig_f, START_DATE, END_DATE, bq, base_tiers=TIER_BAL)
+
+# DVR-8L sizing tilt (env-gated; unset/"base" = no behavior change — see _dvr8l_tag above)
+if DVR8L_TILT in ("r1", "r2", "r3"):
+    from dvr8l_tilt import apply_dvr8l_tilt
+    sig_f, RS = apply_dvr8l_tilt(sig_f, RS, bq, END_DATE, DVR8L_TILT, half=DVR8L_HALF,
+                                 dump_dir=os.path.join(WORKDIR, "data", "dvr8l_exp"))
 
 # ---- BAL CFO-yield SELECTION BLEND (env BAL_CFO_BLEND; default 0 = byte-identical baseline) ----
 # Validated standalone 2026-06-16 (bal_cfo_yield_audit.py): nudging momentum picks toward high CFO-yield
