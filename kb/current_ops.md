@@ -17,6 +17,24 @@ allocator sang LAG (PEAD) vì edge bền hơn không — Mike đã tách rõ đ�
 (đổi w_LAG allocator, không chỉ xóa bucket momentum), chưa làm gì, chờ user quyết có muốn đo riêng
 không sau khi việc đóng kênh MOM xong.
 
+## Đo tác động đóng kênh MOM XONG (Scope A vs B, quant-skeptic CONFIRMED) — user yêu cầu tách MOM_N/MOM_S theo regime trước khi chốt (2026-07-12)
+
+Taylor đo xong Scope A (đóng MOM_N+MOM_S) vs Scope B (đóng cả family MEGA+MOMENTUM+MOM_N+MOM_S) so
+control R3 hiện tại (28.82/1.90/-15.7/1.83) — quant-skeptic CONFIRMED high confidence, tự tái lập
+khớp chính xác. **Phát hiện quan trọng: Scope B bị số đo BÁC** (kém control mọi cửa sổ kể cả 2024+)
+— kênh MOMENTUM/MEGA chung (chỉ chạy BULL/EXB) vẫn đóng góp thật, CP1/CP-DVR1 chỉ đo MOM_N/MOM_S
+nên không phủ được kết luận đó. Khuyến nghị ban đầu: Scope A (đóng MOM_N+MOM_S, giữ MOMENTUM/MEGA) —
+chi phí lịch sử -0.97pp FULL dồn 2017-2020, nhưng hậu-2021 hoà-tới-dương (+0.11 ex-2021/+1.03
+2022+/+0.65 2024+).
+
+**User CHỈ RA khoảng trống quan trọng trước khi duyệt cuối**: `MOM_N` chỉ chạy ở regime NEUTRAL,
+`MOM_S` chỉ chạy ở BULL/EXB — 2 tier "sống" ở 2 chế độ thị trường khác nhau, nhưng CP1 đo GỘP CHUNG
+cả 2 vào 1 "gia đình" vì MOM_N một mình quá ít mẫu để test riêng (87 episode). Nếu MOM_S có cùng bản
+chất "chỉ hiệu quả trong bull" như MOMENTUM/MEGA (vừa được Scope A-vs-B chứng minh còn đóng góp thật),
+đóng gộp MOM_S cùng MOM_N trong Scope A hiện tại có thể đang bỏ lỡ 1 kênh còn tốt. Mike đã dispatch
+Taylor kiểm tra lại: đo riêng Scope C (chỉ đóng MOM_N, giữ MOM_S+MOMENTUM+MEGA) so với Scope A/B,
+CHƯA sửa code sống, chờ kết quả trước khi chốt phạm vi cuối cùng.
+
 ## Dự án momentum-deals — user duyệt plan, Phase 0 bắt đầu (2026-07-11)
 
 User duyệt `mike/agents/Taylor/plan_momentum_deals_20260711.md` nguyên trạng (label +10%/0%, 13
