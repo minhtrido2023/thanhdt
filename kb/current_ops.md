@@ -2,6 +2,21 @@
 > Mike cập nhật thủ công khi có thay đổi trạng thái quan trọng. Đọc trước mọi thứ khác khi restart.
 > Cập nhật lần cuối: 2026-07-11
 
+## Dự án momentum-deals ĐÓNG, user duyệt đóng kênh MOM — production change đang scope (2026-07-11/12)
+
+Toàn chuỗi R&D đã đóng (Phase 1 CP1 NO-GO + nhánh (b) CP-DVR1 NO-GO, cả 2 quant-skeptic CONFIRMED —
+xem `plan_momentum_deals_20260711.md` + `plan_dvr_8l_sizing_20260712.md`). **User duyệt đóng/thu hẹp
+kênh MOM_N/MOM_S trong SIGNAL_V11 (production V2.4/R3)** — đây là thay đổi chạm production thật
+(SpaceX/ZaloPay live), KHÔNG phải chỉ R&D nữa, phải qua đúng quy trình: Taylor thiết kế + đo tác
+động đầy đủ (không chỉ tin kết luận R&D cũ, cần backtest riêng cho chính THAY ĐỔI XÓA BỎ momentum
+khỏi allocator, IS/OOS/LOO/DSR/PBO) → quant-skeptic verify → user sign-off cuối cùng → mới sửa
+`signal_v11_sql.py` thật. Dispatch scoping+backtest đã gửi.
+
+**User cũng nêu ý tưởng riêng (CHƯA quyết, cần đo riêng nếu muốn theo đuổi)**: có nên tăng tỷ trọng
+allocator sang LAG (PEAD) vì edge bền hơn không — Mike đã tách rõ đây là quyết định KHÁC, lớn hơn
+(đổi w_LAG allocator, không chỉ xóa bucket momentum), chưa làm gì, chờ user quyết có muốn đo riêng
+không sau khi việc đóng kênh MOM xong.
+
 ## Dự án momentum-deals — user duyệt plan, Phase 0 bắt đầu (2026-07-11)
 
 User duyệt `mike/agents/Taylor/plan_momentum_deals_20260711.md` nguyên trạng (label +10%/0%, 13
