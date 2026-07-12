@@ -190,6 +190,28 @@ _check_lastmod "custom30_8l writer-alive"   "tav2_bq.custom30_8l"   $MAX_TABLEMO
 _check_lastmod "fa_ratings_8l writer-alive" "tav2_bq.fa_ratings_8l" $MAX_R8L_MOD_AGE || true
 _check_lastmod "fa_ratings writer-alive"    "tav2_bq.fa_ratings"    $MAX_FA_MOD_AGE  || true
 
+# lag_edge_health.csv local-file mtime probe (Winston_20260712_121456)
+# WARN-only: silent-skip path trong edge_health_monitor.py — exception trong lag_edge_health()
+# khiến file đóng băng IM LẶNG trong khi step [22] vẫn báo [ok], bq_freshness_check là gate
+# cuối bắt được. Cùng ngưỡng MAX_TABLEMOD_AGE=4 (Fri chết→Mon age 3 PASS, Tue age 4 WARN).
+LAG_EDGE_FILE="$WORKDIR/data/lag_edge_health.csv"
+if [ -f "$LAG_EDGE_FILE" ]; then
+  lag_edge_age=$(( ( $(date +%s) - $(stat -c %Y "$LAG_EDGE_FILE") ) / 86400 ))
+  if [ "$lag_edge_age" -gt "$MAX_TABLEMOD_AGE" ]; then
+    warn_msg="🟡 LOCAL FILE WARN ($TODAY $NOW_ICT): lag_edge_health.csv age=${lag_edge_age}d (>${MAX_TABLEMOD_AGE}) — edge_health_monitor.py có thể đang silent-skip (exception trong lag_edge_health()). Kiểm tra papertrade_daily.sh step [22] log."
+    echo "WARN lag_edge_health.csv: age=${lag_edge_age}d (>${MAX_TABLEMOD_AGE}) — stale, non-blocking"
+    "$ROOT/bin/notify_thread.sh" "$warn_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+    WARNED=$((WARNED + 1))
+  else
+    [ -z "$QUIET" ] && echo "OK   lag_edge_health.csv: age=${lag_edge_age}d (≤${MAX_TABLEMOD_AGE})"
+  fi
+else
+  warn_msg="🟡 LOCAL FILE WARN ($TODAY $NOW_ICT): lag_edge_health.csv KHÔNG TỒN TẠI — edge_health_monitor chưa từng chạy hoặc đường dẫn sai."
+  echo "WARN lag_edge_health.csv: FILE KHÔNG TỒN TẠI — non-blocking"
+  "$ROOT/bin/notify_thread.sh" "$warn_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+  WARNED=$((WARNED + 1))
+fi
+
 [ "$WARNED" -gt 0 ] && echo "NOTE: $WARNED WARN non-blocking (đã post Discord Trading Daily) — pipeline vẫn chạy"
 
 if [ "$FAILED" -ne 0 ]; then
