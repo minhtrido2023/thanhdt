@@ -18,6 +18,9 @@
 #   tav2_bq.risk_rating               WARN  — research-only, KHÔNG consumer production (orphan, stale từ 2025Q4)
 #   ticker_financial breadth-probe    WARN  — đếm cohort quý mới trong mùa BCTC (MAX(time) toàn bảng
 #                                             bị 1 mã early-filer reset đồng hồ — audit Winston_20260712_122313 F1)
+#   earnings_surprise_data.pkl probe  WARN  — content catch-up pkl vs ticker_financial: nguồn LAG live
+#                                             candidacy, golive except-path nuốt lỗi im lặng
+#                                             (audit Spyros_20260712_131501 M1)
 #
 # Usage: bin/bq_freshness_check.sh [--quiet]
 set -uo pipefail
@@ -282,6 +285,67 @@ if [ "${IN_SEASON:-0}" = "1" ]; then
   fi
 else
   [ -z "$QUIET" ] && echo "SKIP fin-breadth: ngoài mùa BCTC (quý roll-in ${EXPECTED_Q:-?}, cửa sổ = qend+10d..qend+62d)"
+fi
+
+# earnings_surprise_data.pkl content-freshness probe (Taylor_20260712_135148, audit M1 Spyros_20260712_131501)
+# WARN-only: khối LAG trong golive_recommend_v23.py bọc try/except → pkl hỏng chỉ in WARNING vào log
+# 19:00, status.json ghi n_lag_upcoming=0 — không phân biệt được với "hôm nay không có sự kiện mới".
+# golive giờ ghi thêm lag_source_error vào golive_v23_status.json (except-path, máy đọc được); probe
+# này bắt nốt case còn lại: pkl ĐỌC ĐƯỢC nhưng NỘI DUNG đứng yên (refresh [2] chạy "ok" mà không kéo
+# được dữ liệu mới → mtime vẫn tươi, phải so content, không so mtime). Cách đo: mỗi ngày ghi cặp
+# (MAX(Release_Date) pkl, MAX(Release_Date) ticker_financial BQ — CÙNG filter re-pull của
+# refresh_lagged_caches.py [3] để diff = thuần pipeline-lag, không lẫn khác biệt filter) vào CSV
+# state; WARN khi pkl HÔM NAY vẫn chưa đuổi kịp bq_max đã thấy >= LAG_PKL_CATCHUP_DAYS ngày trước.
+# pkl full re-pull 15:30 ICT daily → healthy luôn đuổi kịp trong 1 phiên; 4 calendar days nuốt trọn
+# weekend + 1 miss transient. KHÔNG so diff pkl-vs-bq tức thời cùng ngày: filing mới rơi vào cửa
+# 15:30→19:00 làm pkl trễ 1 refresh là hành vi ĐÚNG, mà khoảng lệch Release_Date lúc đó có thể hàng
+# tuần (off-season) → false-fire. Đọc pkl bằng $PY (DNA_PYEXE): python3 hệ thống KHÔNG unpickle được
+# pkl pandas-3 (L1 Spyros) — pkl unreadable bằng CHÍNH env pipeline = đúng failure-mode golive sẽ
+# gặp lúc 19:00, WARN ngay không cần state. Ngoài mùa BCTC cả pkl lẫn BQ đứng yên cùng nhau → diff 0,
+# không false-positive → probe chạy quanh năm, không cần season-gate như fin-breadth.
+LAG_PKL_FILE="$WORKDIR/data/earnings_surprise_data.pkl"
+LAG_PKL_STATE_CSV="$WORKDIR/data/earnings_pkl_freshness.csv"
+LAG_PKL_CATCHUP_DAYS=4
+lag_pkl_max="$("$PY" -c "
+import pickle, pandas as pd
+with open('$LAG_PKL_FILE', 'rb') as f:
+    d = pickle.load(f)
+m = pd.to_datetime(d['Release_Date'], errors='coerce').dropna().max()
+print(m.date())
+" 2>/dev/null)"
+if [ -z "$lag_pkl_max" ]; then
+  warn_msg="🟡 LAG PKL WARN ($TODAY $NOW_ICT): earnings_surprise_data.pkl KHÔNG đọc được bằng env pipeline (\$DNA_PYEXE) — golive_recommend_v23 19:00 sẽ rơi except-path: n_lag_upcoming=0 GIẢ, check field lag_source_error trong data/golive_v23_status.json. Kiểm tra papertrade step [2] refresh_lagged_caches / env pandas."
+  echo "WARN lag-pkl: KHÔNG đọc được pkl bằng \$PY — non-blocking"
+  "$ROOT/bin/notify_thread.sh" "$warn_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+  WARNED=$((WARNED + 1))
+else
+  lag_bq_max="$(bq query --use_legacy_sql=false --project_id="$PROJECT" --format=csv --quiet "
+    SELECT MAX(t.Release_Date) FROM \`${PROJECT}.tav2_bq.ticker_financial\` AS t
+    WHERE t.Release_Date IS NOT NULL AND t.Release_Date >= '2009-01-01' AND t.NP_P0 IS NOT NULL" \
+    2>/dev/null | tail -1)"
+  if echo "$lag_bq_max" | grep -qE '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'; then
+    [ -f "$LAG_PKL_STATE_CSV" ] || echo "date,pkl_max_release,bq_max_release" > "$LAG_PKL_STATE_CSV"
+    # 1 dòng/ngày: chạy lại cùng ngày thì thay dòng cũ (giữ số đo mới nhất, giống fin-breadth)
+    grep -v "^$TODAY," "$LAG_PKL_STATE_CSV" > "$LAG_PKL_STATE_CSV.tmp" 2>/dev/null && mv "$LAG_PKL_STATE_CSV.tmp" "$LAG_PKL_STATE_CSV"
+    echo "$TODAY,$lag_pkl_max,$lag_bq_max" >> "$LAG_PKL_STATE_CSV"
+    # ref = bq_max của dòng GẦN NHẤT có tuổi >= CATCHUP_DAYS (so chuỗi YYYY-MM-DD = so ngày);
+    # chưa đủ lịch sử (mới wire) → ref rỗng → PASS (grace period, đúng thiết kế fin-breadth)
+    LAG_PKL_CUTOFF="$(date -d "-${LAG_PKL_CATCHUP_DAYS} days" +%Y-%m-%d)"
+    ref_bq_max=$(awk -F, -v cut="$LAG_PKL_CUTOFF" '$1<=cut {r=$3} END {print r}' "$LAG_PKL_STATE_CSV")
+    if [ -n "$ref_bq_max" ] && [ "$lag_pkl_max" \< "$ref_bq_max" ]; then
+      warn_msg="🟡 LAG PKL WARN ($TODAY $NOW_ICT): earnings_surprise_data.pkl content STALE — max(Release_Date) pkl=$lag_pkl_max vẫn chưa đuổi kịp BQ ticker_financial=$ref_bq_max đã thấy từ >=${LAG_PKL_CATCHUP_DAYS}d trước (re-pull 15:30 healthy đuổi kịp trong 1 phiên). Giữa mùa BCTC = LAG live candidacy mù sự kiện mới (đúng failure-mode gốc R1). Kiểm tra papertrade step [2] refresh_lagged_caches."
+      echo "WARN lag-pkl: pkl_max=$lag_pkl_max < bq_max=$ref_bq_max (đã thấy >=${LAG_PKL_CATCHUP_DAYS}d trước) — content stale, non-blocking"
+      "$ROOT/bin/notify_thread.sh" "$warn_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+      WARNED=$((WARNED + 1))
+    else
+      [ -z "$QUIET" ] && echo "OK   lag-pkl: pkl_max=$lag_pkl_max, bq_max=$lag_bq_max (catch-up ref >=${LAG_PKL_CATCHUP_DAYS}d: ${ref_bq_max:-chưa đủ lịch sử})"
+    fi
+  else
+    warn_msg="🟡 LAG PKL WARN ($TODAY $NOW_ICT): probe không query được MAX(Release_Date) ticker_financial (kết quả: '${lag_bq_max:-rỗng}') — không đo được content-freshness pkl hôm nay, kiểm tra bq/logs."
+    echo "WARN lag-pkl: bq query fail — non-blocking"
+    "$ROOT/bin/notify_thread.sh" "$warn_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+    WARNED=$((WARNED + 1))
+  fi
 fi
 
 [ "$WARNED" -gt 0 ] && echo "NOTE: $WARNED WARN non-blocking (đã post Discord Trading Daily) — pipeline vẫn chạy"
