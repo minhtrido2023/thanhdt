@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v941)
+# Mike fleet — context pack (v942)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-11T17:19:43] quant-skeptic/verification — ✅ CONFIRMED VERIFY: PLAN momentum-deals pattern discovery — scope xong, chờ user duyệt trước Phase 0: {"finding_topic": "PLAN momentum-deals pattern discovery — scope xong, chờ user duyệt trước Phase 0", "verdict": "CONFIRMED", "confidence": "high", "checks": {" …
 - [2026-07-11T22:59:12] Taylor/finding — momdeal Phase 1 HOÀN TẤT — CP1 = NO-GO (0/13 feature qua gate pre-registered): thành công lịch sử kênh MOM chủ yếu là dồn mẫu regime 2020-21, không phải pattern lặp lại được — khuyến nghị đóng/thu hẹp kênh MOM, Phase 2 KHÔNG chạy: {"job": "Taylor_20260711_225135", "status": "PHASE1_DONE_CP1_NOGO", "plan_doc": "mike/agents/Taylor/plan_momentum_deals_20260711.md (section CP1 moi)", "script" …
 - [2026-07-11T23:06:29] quant-skeptic/verification — ✅ CONFIRMED VERIFY: momdeal Phase 1 HOÀN TẤT — CP1 = NO-GO (0/13 feature qua gate pre-registered): thành công lịch sử kênh MOM chủ yếu là dồn mẫu regime 2020-21, không phải pattern lặp lại được — khuyến nghị đóng/thu hẹp kênh MOM, Phase 2 KHÔNG chạy: {"finding_topic": "momdeal Phase 1 CP1 = NO-GO (0/13 features pass pre-registered gate); historical MOM success is regime-concentrated 2020-21, not a repeatable …
 - [2026-07-11T23:28:09] Taylor/finding — PLAN DVR-8L sizing (nhánh b) — scope xong, chờ user duyệt, chưa chạy backtest: {"job": "Taylor_20260711_232012", "status": "PLAN_DONE_PENDING_USER_APPROVAL", "plan_doc": "mike/agents/Taylor/plan_dvr_8l_sizing_20260712.md", "huong_chon": "S …
@@ -11,6 +10,7 @@
 - [2026-07-12T01:14:26] quant-skeptic/verification — ✅ CONFIRMED VERIFY: CP-DVR1 KẾT QUẢ CHÍNH THỨC = NO-GO cả 3 rule — nhánh (b) đóng, toàn chuỗi momentum-deals ĐÓNG: {"finding_topic": "CP-DVR1 KẾT QUẢ CHÍNH THỨC = NO-GO cả 3 rule — nhánh (b) đóng, toàn chuỗi momentum-deals ĐÓNG", "verdict": "CONFIRMED", "confidence": "high", …
 - [2026-07-12T02:09:54] Taylor/finding — ĐO XONG tác động đóng kênh MOM (production scoping) — Scope A (−MOM_N,−MOM_S) = khuyến nghị ĐÓNG (governance, giá −0.97pp FULL nhưng hậu-2021 hoà-tới-dương); Scope B (đóng cả family) = BÁC bởi số đo, âm mọi cửa sổ — CHƯA sửa code sống, chờ user duyệt phạm vi: {"job": "Taylor_20260712_012515", "status": "MEASURE_DONE_PENDING_USER_SCOPE_APPROVAL", "plan_doc": "mike/agents/Taylor/plan_close_mom_20260712.md", "headline": …
 - [2026-07-12T02:16:38] quant-skeptic/verification — ✅ CONFIRMED VERIFY: ĐO XONG tác động đóng kênh MOM (production scoping) — Scope A (−MOM_N,−MOM_S) = khuyến nghị ĐÓNG (governance, giá −0.97pp FULL nhưng hậu-2021 hoà-tới-dương); Scope B (đóng cả family) = BÁC bởi số đo, âm mọi cửa sổ — CHƯA sửa code sống, chờ user duyệt phạm vi: {"finding_topic": "ĐO XONG tác động đóng kênh MOM (production scoping) — Scope A (−MOM_N,−MOM_S) khuyến nghị ĐÓNG (governance, −0.97pp FULL / hậu-2021 hoà-tới-d …
+- [2026-07-12T02:41:53] Taylor/finding — KIỂM TRA TÁCH MOM_N vs MOM_S XONG — cả 2 phần đo ĐỒNG THUẬN: giữ nguyên khuyến nghị SCOPE A (đóng MOM_N+MOM_S, giữ MOMENTUM/MEGA generic); Scope C (đóng chỉ MOM_N, giữ MOM_S) KÉM hơn Scope A ở OOS/2022+, MOM_S tách riêng 0/13 feature qua FDR: {"job": "Taylor_20260712_022816", "status": "MEASURE_DONE_RECOMMEND_SCOPE_A_UNCHANGED", "plan_doc": "mike/agents/Taylor/plan_close_mom_20260712.md (section 6 mo …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -31,6 +31,24 @@ khỏi allocator, IS/OOS/LOO/DSR/PBO) → quant-skeptic verify → user sign-off
 allocator sang LAG (PEAD) vì edge bền hơn không — Mike đã tách rõ đây là quyết định KHÁC, lớn hơn
 (đổi w_LAG allocator, không chỉ xóa bucket momentum), chưa làm gì, chờ user quyết có muốn đo riêng
 không sau khi việc đóng kênh MOM xong.
+
+## Đo tác động đóng kênh MOM XONG (Scope A vs B, quant-skeptic CONFIRMED) — user yêu cầu tách MOM_N/MOM_S theo regime trước khi chốt (2026-07-12)
+
+Taylor đo xong Scope A (đóng MOM_N+MOM_S) vs Scope B (đóng cả family MEGA+MOMENTUM+MOM_N+MOM_S) so
+control R3 hiện tại (28.82/1.90/-15.7/1.83) — quant-skeptic CONFIRMED high confidence, tự tái lập
+khớp chính xác. **Phát hiện quan trọng: Scope B bị số đo BÁC** (kém control mọi cửa sổ kể cả 2024+)
+— kênh MOMENTUM/MEGA chung (chỉ chạy BULL/EXB) vẫn đóng góp thật, CP1/CP-DVR1 chỉ đo MOM_N/MOM_S
+nên không phủ được kết luận đó. Khuyến nghị ban đầu: Scope A (đóng MOM_N+MOM_S, giữ MOMENTUM/MEGA) —
+chi phí lịch sử -0.97pp FULL dồn 2017-2020, nhưng hậu-2021 hoà-tới-dương (+0.11 ex-2021/+1.03
+2022+/+0.65 2024+).
+
+**User CHỈ RA khoảng trống quan trọng trước khi duyệt cuối**: `MOM_N` chỉ chạy ở regime NEUTRAL,
+`MOM_S` chỉ chạy ở BULL/EXB — 2 tier "sống" ở 2 chế độ thị trường khác nhau, nhưng CP1 đo GỘP CHUNG
+cả 2 vào 1 "gia đình" vì MOM_N một mình quá ít mẫu để test riêng (87 episode). Nếu MOM_S có cùng bản
+chất "chỉ hiệu quả trong bull" như MOMENTUM/MEGA (vừa được Scope A-vs-B chứng minh còn đóng góp thật),
+đóng gộp MOM_S cùng MOM_N trong Scope A hiện tại có thể đang bỏ lỡ 1 kênh còn tốt. Mike đã dispatch
+Taylor kiểm tra lại: đo riêng Scope C (chỉ đóng MOM_N, giữ MOM_S+MOMENTUM+MEGA) so với Scope A/B,
+CHƯA sửa code sống, chờ kết quả trước khi chốt phạm vi cuối cùng.
 
 ## Dự án momentum-deals — user duyệt plan, Phase 0 bắt đầu (2026-07-11)
 

@@ -182,3 +182,91 @@ file production để backtest == production) → **số tham chiếu V2.4 mới
 
 **5. Điều kiện trước khi sửa code sống (không đổi):** user duyệt phạm vi (A vs B vs giữ nguyên) +
 quant-skeptic verify finding này + tuân multiple-testing discipline (N=2 đã khai, LOO/DSR ở §4.4).
+
+---
+
+## 6. BỔ SUNG (job Taylor_20260712_022816) — tách MOM_N vs MOM_S trước khi chốt phạm vi
+
+**Bối cảnh (user chỉ đạo 2026-07-12):** MOM_N chỉ sống ở NEUTRAL, MOM_S chỉ sống ở BULL/EXB — CP1 đo
+GỘP 2 tier thành 1 family (MOM_N một mình chỉ 87 episode). Kết luận NO-GO đó không tách bạch được
+MOM_S. Trong khi MOMENTUM/MEGA generic (cùng điều kiện BULL/EXB như MOM_S) vừa đo là VẪN đóng góp
+thật (§4/§5) → nghi vấn hợp lý: Scope A có đang đóng oan MOM_S không?
+
+### 6.1 Pre-registration (khai TRƯỚC khi chạy, 2026-07-12)
+
+**Phần 1 — Scope C backtest (trial MỚI thứ 3, N-ledger backtest mở rộng 2→3):**
+- **Scope C = đóng CHỈ MOMENTUM_N** (giữ MOMENTUM_S + MOMENTUM + MEGA).
+- Lệnh = ĐÚNG lệnh pin R3 §3 + `BAL_DROP_TIERS=MOMENTUM_N`. Cùng cache vintage với 3 run §4
+  (cùng ngày 2026-07-12, sync BQ cache 23:45 hôm trước, chưa có sync mới xen giữa).
+- Đánh giá đúng kỷ luật §3: FULL/IS/OOS CAGR·Sharpe·MaxDD·Calmar, per-year delta 13 năm, LOO,
+  self-check 0 VND, recompute độc lập `extract_peryear.py`.
+- **Tiêu chí quyết định (khai trước):** nếu Scope C ≈ Scope A (chênh OOS/2022+/2024+ không đáng kể)
+  → giữ khuyến nghị Scope A. Nếu Scope C RÕ RÀNG tốt hơn Scope A trên các cửa sổ hậu-2021 (OOS,
+  2022+, 2024+) VÀ không tệ hơn đáng kể về risk (MaxDD/Calmar) → Scope C thay Scope A làm khuyến nghị.
+
+**Phần 2 — regime-split contrast trên dữ liệu Phase 1 CÓ SẴN (1 test bổ sung vào N-ledger phân
+tích, KHÔNG build lại dataset):**
+- Input: `data/momdeal_exp/momdeal_episodes_phase0.csv` nguyên trạng (Phase 0, đã CP0-verified).
+- Chạy lại 13 contrast CP1 RIÊNG cho 2 tập con: MOM_N (play_type=MOMENTUM_N, đều state5=3) và
+  MOM_S (play_type=MOMENTUM_S, state5∈{4,5}). Cùng gate CP1 (FDR-BH 10% + sign-stable + |δ|≥0.15),
+  không nới. MOM_N dự kiến THIN ở nhiều cell (n nhỏ) — báo trung thực, không ép kết luận.
+- Câu hỏi: MOM_S tách riêng có feature phân tách thắng/thua tốt hơn khi không bị pha loãng bởi MOM_N?
+
+**Quy tắc mâu thuẫn (khai trước):** nếu Phần 1 và Phần 2 mâu thuẫn (backtest nói giữ MOM_S nhưng
+feature nói MOM_S không có pattern riêng) → báo cả 2 kết quả thẳng, không hòa giải giả tạo.
+
+### 6.2 KẾT QUẢ (2026-07-12, cùng cache vintage với §4; self-check 0 VND; recompute độc lập
+`analyze_momclose_scopeC.py` khớp engine print 100% từng năm)
+
+**Phần 1 — Scope C backtest** (`..._exp_dropMOMN.csv`, log `mike/agents/Taylor/momdeal/scopeC_run.log`):
+
+| Run @50B | FULL CAGR | Sharpe | MaxDD | Calmar | IS | OOS | OOS ex-21 | 2022+ | 2024+ |
+|---|---|---|---|---|---|---|---|---|---|
+| control | 28.82% | 1.90 | −15.7% | 1.83 | 25.86% | 31.59% | 22.04% | 20.20% | 30.22% |
+| **Scope A** (−N,−S) | 27.84% | 1.84 | −18.2% | 1.53 | 23.15% | **32.30%** | **22.17%** | **21.30%** | 30.87% |
+| Scope B (−family) | 26.62% | 1.78 | −18.2% | 1.46 | 23.31% | 29.71% | 20.49% | 19.31% | 28.44% |
+| **Scope C** (−N only) | 27.50% | 1.85 | −17.8% | 1.54 | 23.39% | 31.37% | 21.91% | 20.44% | **31.18%** |
+
+**Scope C vs Scope A (C−A)**: FULL −0.34pp, OOS −0.93pp, OOS ex-2021 −0.26pp, 2022+ −0.86pp,
+2024+ +0.31pp; Sharpe/Calmar ≈ bằng (1.85/1.54 vs 1.84/1.53), MaxDD full −17.8 vs −18.2 (C nông
+hơn 0.4pp), MaxDD 2024+ −12.7 vs −11.8 (C sâu hơn 0.9pp). Per-year đáng chú ý: 2021 A +106.8 /
+C +99.8 / ctrl +100.2 — **ngay trong năm bong bóng, đóng thêm MOM_S còn TỐT hơn giữ**; 2025 giữ
+MOM_S vớt lại ~+0.9pp vs A (51.95 vs 51.01) nhưng vẫn dưới control 54.78. LOO Scope C: full-delta
+−1.32pp giữ âm ở cả 13 phép trung-hòa (−0.64…−1.73) — cùng chữ ký broad-based như A. DSR (N=3):
+A/B/C đều 1.0000 — không phân định.
+
+**Cơ chế (TX ledger)**: dưới Scope C, MOM_S fire NHIỀU hơn control (167+25_W=192 buys vs 146+41_W
+=187) — hấp thụ slot MOM_N nhả ra — mà kết quả vẫn ≤ Scope A hậu-2021. Tức là đóng góp biên của
+MOM_S khi kênh generic còn mở ≈ 0-tới-âm: nó chiếm vốn của MOMENTUM/MEGA (chặt hơn: ta≥155 + tier
+C/D) và custom30V parking. Trái ngược hẳn generic: gap A-vs-B (đóng generic) = −1.85pp OOS. **Giả
+thuyết "MOM_S giống MOMENTUM/MEGA vì cùng sống BULL/EXB" bị bác trực tiếp bằng số**: cùng regime
+nhưng giá trị biên khác nhau — generic là tập chọn lọc hơn, MOM_S là phần lỏng còn lại (ta≥140,
+không tier gate).
+
+**Phần 2 — regime-split contrast** (`phase1b_regime_split_report.txt`, gate CP1 nguyên trạng):
+- **MOM_N riêng** (125 labeled, 64S/61F; IS n=53): **0 survivor, 0 FDR-pass**. Tín hiệu thô mạnh
+  nhất: C3 days_since_release δ=−0.218 (p=0.035, sign-stable — vào sớm sau BCTC tốt hơn) và T3
+  vol_ratio δ=−0.182 sign-stable — đều không qua FDR.
+- **MOM_S riêng** (388 labeled, 205S/183F; **92% mẫu OOS20+, riêng 2021 = 47.7%**): **0 survivor,
+  0 FDR-pass** — còn yếu hơn pooled (pooled có 2 near-miss FDR-pass ROIC/RevYoY; tách riêng thì
+  RevYoY δ=+0.132 p=0.024 không qua nổi FDR trong subset). Không có trục chất lượng nào để chọn
+  thắng/thua BÊN TRONG kênh MOM_S.
+- Sanity: MOMENTUM_N 100% state5=3, MOMENTUM_S 100% state5∈{4,5} — split đúng thiết kế.
+
+**2 phần ĐỒNG THUẬN (không có mâu thuẫn phải báo):** backtest nói giữ MOM_S không thắng Scope A ở
+cửa sổ nào trọng yếu; feature contrast nói bên trong MOM_S không có pattern phân tách được. Câu
+chuyện nhất quán: MOM_S "trông có vẻ tốt trong bull" chỉ vì bull-era beta + dồn mẫu 2021, không
+phải selection edge — đúng chữ ký CP1 pooled.
+
+### 6.3 Khuyến nghị CUỐI CÙNG (thay §5.2 nếu user duyệt)
+
+**GIỮ NGUYÊN SCOPE A** (đóng MOMENTUM_N + MOMENTUM_S; giữ MOMENTUM + MEGA generic). Tiêu chí
+pre-registered §6.1 không đạt cho Scope C: không "rõ ràng tốt hơn" ở cửa sổ hậu-2021 nào ngoài
+2024+ (+0.31pp, đổi lại MaxDD 2024+ sâu hơn 0.9pp), và KÉM hơn ở OOS (−0.93pp), OOS ex-2021
+(−0.26pp), 2022+ (−0.86pp). Nghi vấn của user là đúng để kiểm tra (generic cùng-regime vẫn đóng
+góp thật) nhưng số đo trả lời dứt khoát: MOM_S không phải generic — cơ chế implement/re-pin/
+điều kiện ở §5.3–5.5 giữ nguyên cho Scope A.
+
+**N-ledger cập nhật**: backtest trials 2→**3** (A, B, C — DSR tính lại với N=3, đều 1.0000);
+phân tích thêm **1 view** (Phase 1b regime-split, cùng 13 feature + gate CP1, không nới, không
+feature mới). Không mở thêm trial nào khác.
