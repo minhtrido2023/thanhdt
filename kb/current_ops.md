@@ -667,3 +667,15 @@ tự sửa crontab thật): job `Winston_20260712_151206`. Việc còn đang ch�
 
 **Còn nợ sau khi 2 job trên xong**: verify C1 fix (quant-skeptic), quyết H2, formalize cron_registry.md,
 áp dụng diff dọn crontab (sau khi tôi review), dispatch Taylor xem lại M5 (2 paper trial evidence).
+
+## C1 CRITICAL (publish DT5G qua BQ_LOCAL_CACHE) — FIX + COMMIT + VERIFY XONG (2026-07-12)
+Fix: `deploy_golive_dt5g_v4/publish_gated_state.py` — `os.environ.pop('BQ_LOCAL_CACHE', None)` process-
+local trước import `macro_state_live` (commit `4995262`, repo WorkingClaude). Cả 2 attempt dispatch
+Taylor đều timeout (tự mở rộng phạm vi sang backfill C1b không cần thiết — Monday's daily_refresh tự
+recompute full window nên không cần backfill riêng); Mike tự verify code + tự commit + dispatch
+quant-skeptic bằng `--claim` (không có finding event chính thức từ Taylor do timeout).
+**quant-skeptic CONFIRMED (high confidence)**: độc lập tái lập cơ chế bằng Python replica thật (pop
+env → cache branch bypass → live path), xác nhận process-local (mỗi step trong daily_refresh/
+bq_freshness_check chạy subprocess riêng, không leak sang sibling), không side-effect logic khác.
+1 ghi chú tùy chọn (pop thêm `LOCAL_SNAPSHOT_DIR`) — hiện vô hại vì biến chưa được export ở đâu.
+**Xong, không còn gì treo cho C1.** H2 (shares_outstanding_live false-BLOCK ~07-15) vẫn CHƯA quyết.

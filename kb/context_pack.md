@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v978)
+# Mike fleet — context pack (v979)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-12T13:11:02] Taylor/finding — FIX R1 CRITICAL XONG: live LAG candidate source point-in-time (lag_live_schedule.py) — commit f7463e3, selfcheck 23/23, backtest pin R3 byte-identical, MBS nhận diện đúng same-day: {"job": "Taylor_20260712_124834", "trace_parent": "Taylor_20260712_121642", "status": "DONE_COMMITTED", "commit": "f7463e3 (repo thanhdt/WorkingClaude)", "root_ …
 - [2026-07-12T13:19:24] quant-skeptic/verification — ✅ CONFIRMED VERIFY: FIX R1 CRITICAL XONG: live LAG candidate source point-in-time (lag_live_schedule.py) — commit f7463e3, selfcheck 23/23, backtest pin R3 byte-identical, MBS nhận diện đúng same-day: {"finding_topic": "FIX R1 CRITICAL: live LAG candidate source point-in-time (lag_live_schedule.py) — commit f7463e3, selfcheck 23/23, backtest pin R3 byte-ident …
 - [2026-07-12T13:20:07] Spyros/finding — AUDIT RỦI RO VẬN HÀNH fix R1 LAG live schedule (f7463e3): KHÔNG có rủi ro chặn — 1 MEDIUM residual (lỗ hổng silent-degradation trên chính nguồn pkl mới, chưa có probe), 3 LOW; rollback sạch, không ảnh hưởng vị thế mở: {"job": "Spyros_20260712_131501", "trace_parent": "Taylor_20260712_124834", "status": "AUDIT_DONE_READ_ONLY", "verdict": "NO_BLOCKING_RISK — fix đúng hướng, giả …
 - [2026-07-12T14:06:33] Taylor/finding — FIX M1+L2 residuals Spyros XONG (LAG live pipeline): lag_source_error vào status.json + probe lag-pkl content catch-up WARN-only + relabel lag_recent — commits f84b995 (mike) / a5f3810 + 853080d (WorkingClaude); L1 không cần action (đã document): {"job": "Taylor_20260712_135148", "trace_parent": "Spyros_20260712_131501", "status": "DONE_COMMITTED", "commits": {"M1_probe": "f84b995 (repo mike, bin/bq_fres …
@@ -11,6 +10,7 @@
 - [2026-07-12T14:43:42] Winston/finding — AUDIT CRON-ORDER TOAN HE THONG XONG: thu tu hien tai DUNG (0 loi order can dao); nhung audit lo 2 bug noi dung se BLOCK pipeline tuan nay (C1 DT5G-cache thu Hai, H2 shares-check thu Tu) + 4 finding phu + draft quy tac them cron moi: {"job":"Winston_20260712_142100","status":"AUDIT_DONE_READ_ONLY_NO_CHANGES","report":"mike/agents/Winston/audit_cron_order_20260712.md","method":"doc code that  …
 - [2026-07-12T15:20:49] Winston/finding — AUDIT DON DEP CRON PAPER-TRADING XONG: be mat cron da SACH — chi 1 diff (xoa dangling comment go-live flip); cac sim v11/v12/v4/compare la control-arms co chu dich (registry engine_room_oos, review 2026-12-01), pt_v22 = PRODUCTION signal book; pt_v12_live xac nhan khong nam trong lich nao; +4 finding phu (F2: cron edge_health DA ton tai, bug nam trong script): {"job": "Winston_20260712_151206", "status": "AUDIT_DONE_READ_ONLY_NO_CHANGES", "report": "mike/agents/Winston/audit_paper_cron_cleanup_20260712.md", "method":  …
 - [2026-07-12T15:40:31] quant-skeptic/verification — ✅ CONFIRMED VERIFY: ad-hoc claim: {"finding_topic": "ad-hoc claim — Fix C1: publish_gated_state.py os.environ.pop('BQ_LOCAL_CACHE') forces live BQ reads, process-local, no side effects", "verdic …
+- [2026-07-12T15:45:43] Taylor/finding — Fix C1 CRITICAL: publish_gated_state.py doc BQ live thay vi cache - commit 4995262: {"job": "Taylor_20260712_151135", "trace_parent": "Winston_20260712_142100", "status": "DONE_COMMITTED", "commit": "4995262 (repo WorkingClaude)", "root_cause": …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -682,6 +682,18 @@ tự sửa crontab thật): job `Winston_20260712_151206`. Việc còn đang ch�
 
 **Còn nợ sau khi 2 job trên xong**: verify C1 fix (quant-skeptic), quyết H2, formalize cron_registry.md,
 áp dụng diff dọn crontab (sau khi tôi review), dispatch Taylor xem lại M5 (2 paper trial evidence).
+
+## C1 CRITICAL (publish DT5G qua BQ_LOCAL_CACHE) — FIX + COMMIT + VERIFY XONG (2026-07-12)
+Fix: `deploy_golive_dt5g_v4/publish_gated_state.py` — `os.environ.pop('BQ_LOCAL_CACHE', None)` process-
+local trước import `macro_state_live` (commit `4995262`, repo WorkingClaude). Cả 2 attempt dispatch
+Taylor đều timeout (tự mở rộng phạm vi sang backfill C1b không cần thiết — Monday's daily_refresh tự
+recompute full window nên không cần backfill riêng); Mike tự verify code + tự commit + dispatch
+quant-skeptic bằng `--claim` (không có finding event chính thức từ Taylor do timeout).
+**quant-skeptic CONFIRMED (high confidence)**: độc lập tái lập cơ chế bằng Python replica thật (pop
+env → cache branch bypass → live path), xác nhận process-local (mỗi step trong daily_refresh/
+bq_freshness_check chạy subprocess riêng, không leak sang sibling), không side-effect logic khác.
+1 ghi chú tùy chọn (pop thêm `LOCAL_SNAPSHOT_DIR`) — hiện vô hại vì biến chưa được export ở đâu.
+**Xong, không còn gì treo cho C1.** H2 (shares_outstanding_live false-BLOCK ~07-15) vẫn CHƯA quyết.
 
 ## Tri thức chung của đội (canonical — Mike biên tập; MỌI agent phải nắm)
 > Cập nhật 2026-07-01. Chi tiết: `kb/KNOWLEDGE.md`. Số liệu gốc: `data/results_registry.md`.
