@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v946)
+# Mike fleet — context pack (v947)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-12T01:10:13] Taylor/finding — CP-DVR1 KẾT QUẢ CHÍNH THỨC = NO-GO cả 3 rule — nhánh (b) đóng, toàn chuỗi momentum-deals ĐÓNG: {"job": "Taylor_20260712_010527", "status": "CPDVR1_CLOSED_NOGO", "plan_doc": "mike/agents/Taylor/plan_dvr_8l_sizing_20260712.md (section CP-DVR1 KET QUA)", "re …
 - [2026-07-12T01:14:26] quant-skeptic/verification — ✅ CONFIRMED VERIFY: CP-DVR1 KẾT QUẢ CHÍNH THỨC = NO-GO cả 3 rule — nhánh (b) đóng, toàn chuỗi momentum-deals ĐÓNG: {"finding_topic": "CP-DVR1 KẾT QUẢ CHÍNH THỨC = NO-GO cả 3 rule — nhánh (b) đóng, toàn chuỗi momentum-deals ĐÓNG", "verdict": "CONFIRMED", "confidence": "high", …
 - [2026-07-12T02:09:54] Taylor/finding — ĐO XONG tác động đóng kênh MOM (production scoping) — Scope A (−MOM_N,−MOM_S) = khuyến nghị ĐÓNG (governance, giá −0.97pp FULL nhưng hậu-2021 hoà-tới-dương); Scope B (đóng cả family) = BÁC bởi số đo, âm mọi cửa sổ — CHƯA sửa code sống, chờ user duyệt phạm vi: {"job": "Taylor_20260712_012515", "status": "MEASURE_DONE_PENDING_USER_SCOPE_APPROVAL", "plan_doc": "mike/agents/Taylor/plan_close_mom_20260712.md", "headline": …
 - [2026-07-12T02:16:38] quant-skeptic/verification — ✅ CONFIRMED VERIFY: ĐO XONG tác động đóng kênh MOM (production scoping) — Scope A (−MOM_N,−MOM_S) = khuyến nghị ĐÓNG (governance, giá −0.97pp FULL nhưng hậu-2021 hoà-tới-dương); Scope B (đóng cả family) = BÁC bởi số đo, âm mọi cửa sổ — CHƯA sửa code sống, chờ user duyệt phạm vi: {"finding_topic": "ĐO XONG tác động đóng kênh MOM (production scoping) — Scope A (−MOM_N,−MOM_S) khuyến nghị ĐÓNG (governance, −0.97pp FULL / hậu-2021 hoà-tới-d …
@@ -11,6 +10,7 @@
 - [2026-07-12T02:47:54] quant-skeptic/verification — ✅ CONFIRMED VERIFY: KIỂM TRA TÁCH MOM_N vs MOM_S XONG — cả 2 phần đo ĐỒNG THUẬN: giữ nguyên khuyến nghị SCOPE A (đóng MOM_N+MOM_S, giữ MOMENTUM/MEGA generic); Scope C (đóng chỉ MOM_N, giữ MOM_S) KÉM hơn Scope A ở OOS/2022+, MOM_S tách riêng 0/13 feature qua FDR: {"finding_topic": "Tách MOM_N vs MOM_S: giữ Scope A (đóng MOM_N+MOM_S); Scope C (đóng chỉ MOM_N) kém hơn Scope A ở OOS/2022+; MOM_S tách riêng 0/13 feature qua  …
 - [2026-07-12T03:44:08] Taylor/finding — SCOPE A ĐÃ THỰC THI + R3 RE-PIN 27.84/1.84/-18.2/1.53 — đóng MOM_N/MOM_S trong TIER_BAL 3 file production + harness, verify khớp chính xác, commit 4fbd492 (WC) + 9df396d (mike): { "job": "Taylor_20260712_025715", "status": "SCOPE_A_EXECUTED_REPIN_DONE", "commits": {"WorkingClaude": "4fbd492", "mike": "9df396d"}, "code_changes": { "files …
 - [2026-07-12T03:52:33] quant-skeptic/verification — ✅ CONFIRMED VERIFY: SCOPE A ĐÃ THỰC THI + R3 RE-PIN 27.84/1.84/-18.2/1.53 — đóng MOM_N/MOM_S trong TIER_BAL 3 file production + harness, verify khớp chính xác, commit 4fbd492 (WC) + 9df396d (mike): {"finding_topic": "SCOPE A executed + R3 re-pin 27.84/1.84/-18.2/1.53 — close MOM_N/MOM_S in TIER_BAL across 3 production files + harness, commit 4fbd492", "ver …
+- [2026-07-12T04:38:47] Winston/finding — VẤN ĐỀ (b) BQ-write-identity GIẢI QUYẾT XONG — fix source wc_env.sh + PUBLISH THẬT cả 2 bảng fa_ratings thành công hôm nay, sớm 6 ngày so với kế hoạch chờ cron 07-18: {"job": "Winston_20260712_043339", "status": "RESOLVED_REAL_PUBLISH_VERIFIED", "commit": "a9716f6 (mike repo)", "root_cause_confirmed": "Giả thuyết Mike ĐÚNG, x …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -62,6 +62,27 @@ cập nhật KB/CLAUDE.md. Đây là thay đổi production thật (chạm `goli
 + `pt_v22_dt5g.py` + `pt_v4_dt5g.py`) — dispatch Taylor thực thi + quant-skeptic verify code change
 trước khi coi là hoàn tất. Lưu ý: BAL/LAG book hiện đang rỗng (NEUTRAL parking từ ~04/2026) nên thay
 đổi này KHÔNG ép thoát vị thế nào đang mở, chỉ ảnh hưởng entry mới từ nay trở đi.
+
+## DỰ ÁN MOMENTUM-DEALS ĐÃ KHÉP KÍN HOÀN TOÀN — production LIVE (2026-07-12, commit 4fbd492 + 9df396d)
+
+Thực thi xong: **`MOMENTUM_N`/`MOMENTUM_S` đã bị bỏ khỏi `TIER_BAL`** ở 3 file production
+(`golive_recommend_v23.py` money-path, `pt_v22_dt5g.py`, `pt_v4_dt5g.py`) + harness
+`pt_v23_audit_2014.py` cùng commit — `signal_v11_sql.py` giữ nguyên (label MOM chỉ còn làm chẩn
+đoán, rollback = revert 1 dòng/file). Baseline R3 chính thức mới: **CAGR 27.84% / Sharpe 1.84 /
+MaxDD −18.2% / Calmar 1.53** (re-pin, byte-identical với bản đã quant-skeptic CONFIRMED trước đó).
+`kb/canonical.md` đã cập nhật số tham chiếu + ghi lại quyết định đóng kênh. quant-skeptic CONFIRMED
+(high confidence) cho CHÍNH việc sửa code — verify 4 file đúng ý, không side-effect, số liệu tái
+lập chính xác từ NAV thô.
+
+**Sự cố phụ bắt được + tự sửa trong lúc thực thi**: thiếu `BQ_LOCAL_CACHE` khiến 1 lần chạy rơi về
+đọc BQ sống thay vì cache pin — đã root-cause, sửa, ghi `BQ_LOCAL_CACHE=1` thành phần bắt buộc của
+lệnh pin từ nay. Phát hiện thêm: lần đo Scope C buổi sáng cùng ngày cũng dính lỗi tương tự (không
+ảnh hưởng kết luận chính Scope A) — đã chạy lại sạch, Scope A càng vững hơn ở các cửa sổ hậu-2021.
+
+**Hiệu lực thật**: BAL/LAG hiện đang rỗng (NEUTRAL parking từ ~04/2026) nên KHÔNG ép đóng vị thế nào
+đang mở — chỉ ảnh hưởng entry mới từ lần DollarBill lập plan tiếp theo trở đi.
+
+**Việc còn treo (không khẩn)**: dọn file tạm ở repo root (`pt_v23_scopeC_tmp_20260712.py`) khi tiện.
 
 ## Dự án momentum-deals — user duyệt plan, Phase 0 bắt đầu (2026-07-11)
 
@@ -538,7 +559,10 @@ Vận hành chiến lược **production V2.4**, **go-live 2026-07-01**, tài kh
 - = **V2.3A + custom30V parking (NEUTRAL) + gated-overflow (bear-washout) + HAG eq_flag fix**.
 - 2 book: **BAL** (momentum SIGNAL_V11, yieldcombo: 1/PE + 1/PCF) + **LAG** (PEAD/earnings drift).
 - Allocator w_LAG: {CRISIS 50 / BEAR 0 / NEUTRAL-BULL-EXBULL 65}, band ±10pp.
-- **R3 NEUTRAL-only @50B: CAGR 28.05% / Sharpe 1.87 / DD −18.8% / Calmar 1.50** (pin threads=1).
+- **R3 NEUTRAL-only @50B: CAGR 27.84% / Sharpe 1.84 / DD −18.2% / Calmar 1.53** (pin threads=1,
+  re-pin 2026-07-12 sau khi đóng kênh MOM_N/MOM_S trong TIER_BAL — commit `4fbd492`, quant-skeptic
+  CONFIRMED; xem `data/results_registry.md` + `plan_close_mom_20260712.md`). Số cũ 28.05%/28.82% đã
+  lỗi thời qua 2 lần re-pin (DT5G swap 07-11, rồi MOM closure 07-12).
 - Bootstrap 5th-pct: CAGR 18.6%, DD −28.6% (anchor DD ~−29%, KHÔNG phải −18%).
 - **NEUTRAL parking custom30V = phần tin cậy nhất: +7.4pp Full.** (30 mã, cap 0.10)
 - Bull parking: NAV ≥150B. **(30, 0.15) = OVERFIT**, walk-forward bác.
@@ -548,6 +572,14 @@ Vận hành chiến lược **production V2.4**, **go-live 2026-07-01**, tài kh
 custom30V permanent-exclude 7 tên (−1.0pp); LAG SUE-tilt 3 tầng (−0.66pp); hold-neutral exit (−47B);
 stability floor ROE_Min<0 (−0.45pp); liq-tilt custom30 (REFUTED); deep-discount sleeve (PARKED);
 pbcombo dual-vehicle (Calmar 1.48→1.37); gq_score growth gate (−IC); composite v3 as entry-selector (NO).
+
+### MOM_N/MOM_S ĐÃ ĐÓNG (2026-07-12) — không phải "thử bị loại", là thay đổi production chính thức
+Sau chuỗi R&D đầy đủ (momdeal Phase 1 CP1 NO-GO 0/13 feature → nhánh DVR-8L-sizing CP-DVR1 NO-GO →
+đo tác động Scope A/B → kiểm tra tách MOM_N-vs-MOM_S, tất cả quant-skeptic CONFIRMED), user duyệt
+đóng `MOMENTUM_N`+`MOMENTUM_S` khỏi `TIER_BAL` (giữ nguyên `MOMENTUM`/`MEGA` generic — Scope B đóng
+cả họ bị số đo bác, generic vẫn đóng góp thật). Lý do: thành công lịch sử của 2 tier này chủ yếu do
+dồn mẫu regime 2020-21, không phải pattern lặp lại được; hậu-2021 gần như hoà vốn. Chi tiết đầy đủ:
+`plan_close_mom_20260712.md`, `plan_dvr_8l_sizing_20260712.md`, `plan_momentum_deals_20260711.md`.
 
 ### DT5G — market regime gate
 - Production: `tav2_bq.vnindex_5state_dt5g_live` qua `get_gated_state()`.
