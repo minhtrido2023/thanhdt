@@ -1878,3 +1878,10 @@
 - [2026-07-12T08:56:20Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 55, "job_id": "Taylor_20260712_080114", "source": "watcher"}
 - [2026-07-12T08:57:20Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 56, "job_id": "Taylor_20260712_080114", "source": "watcher"}
 - [2026-07-12T08:58:20Z] Taylor/heartbeat — Taylor_20260712_080114: {"status": "still_running", "elapsed_min": 57, "job_id": "Taylor_20260712_080114", "source": "watcher"}
+
+## Consolidation 2026-07-12T09:07:01Z
+- [2026-07-12T09:03:46Z] Taylor/heartbeat — Taylor_20260712_090329: {"status": "in_progress", "note": "resume Q-sleeve: doc log 5 run + verify control tai lap truoc khi phan tich"}
+- [2026-07-12T09:04:29Z] Taylor/heartbeat — Taylor_20260712_090329: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260712_090329", "source": "watcher"}
+- [2026-07-12T09:04:38Z] Taylor/heartbeat — Taylor_20260712_090329: {"status": "in_progress", "note": "analyze xong: 4/4 trial LOO am moi nam, OOS = 2021-carry; dang chay concentration diag + DSR"}
+- [2026-07-12T09:05:30Z] Taylor/heartbeat — Taylor_20260712_090329: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260712_090329", "source": "watcher"}
+- [2026-07-12T09:06:31Z] Taylor/heartbeat — Taylor_20260712_090329: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260712_090329", "source": "watcher"}
