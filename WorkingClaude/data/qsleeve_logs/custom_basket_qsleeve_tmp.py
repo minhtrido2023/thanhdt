@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
-"""custom_basket.py — deterministic, BQ-reconstructable CUSTOM VN30-style parking basket.
+"""custom_basket_qsleeve_tmp.py — EXPERIMENT COPY of custom_basket.py (Q-SLEEVE family, job
+Taylor_20260712_080114, plan_quality_sleeve_20260712.md). DO NOT use in production.
+Only delta vs canonical: env BASKET_QFLOOR=1 adds the Đ2 quality-floor membership filter
+(ROE_Min5Y>=0.10 AND CF_OA_3Y>0 AND FSCORE>=5, as-of Release_Date) in build_pit().
+Unset (default) = byte-identical behaviour to canonical custom_basket.py.
 ================================================================================================
 §5 of SESSION_HANDOFF_2026-06-13: at large NAV the strict-E1VFVN30 parking cap strands idle cash.
 This module builds a high-capacity, rule-based liquid VN-equity beta vehicle to replace the ETF as
@@ -185,28 +189,33 @@ WHERE r.time <= DATE '{end_date}' ORDER BY r.ticker, r.time""")
         if not e: return np.nan
         i = bisect.bisect_right(e[0], d) - 1
         return float(e[1][i]) if i >= 0 else np.nan
-    # (2b) Đ2 QUALITY-FLOOR (env BASKET_QFLOOR=1, plan_quality_sleeve_20260712.md trial QF8-NEU).
-    # Fundamentals floor in PLACE OF the rating gate: ROE_Min5Y>=0.10 AND CF_OA_3Y>0 AND FSCORE>=5,
-    # missing = fail (hard gate semantics, same as gate_rating). As-of Release_Date, fallback
-    # time+45d when Release_Date is missing — PIT-honest, independent of fa_ratings* tables.
-    # Default OFF = byte-identical.
-    QFLOOR = os.environ.get("BASKET_QFLOOR", "") == "1"
+    # ---- Đ2 QUALITY-FLOOR (env BASKET_QFLOOR=1; default OFF = byte-identical) -------------------
+    # Membership floor: as-of ROE_Min5Y>=0.10 AND CF_OA_3Y>0 AND FSCORE>=5 from ticker_financial.
+    # PIT-honest: effective date = Release_Date (fallback time+45d when missing). Forensic-flagged
+    # names stay excluded from flag date (same rule as rating_asof) since the rating gate may be off.
+    QFLOOR = os.environ.get("BASKET_QFLOOR", "0") == "1"
     qf_by_tk = {}
     if QFLOOR:
-        qf = bq(f"""SELECT f.ticker, f.time, f.Release_Date, f.ROE_Min5Y, f.CF_OA_3Y, f.FSCORE
-FROM tav2_bq.ticker_financial f WHERE f.time <= DATE '{end_date}'""")
-        qf["time"] = pd.to_datetime(qf["time"])
-        qf["eff"] = pd.to_datetime(qf["Release_Date"]).fillna(qf["time"] + pd.Timedelta(days=45))
-        qf["ok"] = (qf["ROE_Min5Y"] >= 0.10) & (qf["CF_OA_3Y"] > 0) & (qf["FSCORE"] >= 5)
+        qf = bq(f"""SELECT f.ticker, COALESCE(f.Release_Date, DATE_ADD(f.time, INTERVAL 45 DAY)) AS eff,
+  f.ROE_Min5Y, f.CF_OA_3Y, f.FSCORE
+FROM tav2_bq.ticker_financial AS f WHERE f.time <= DATE '{end_date}' ORDER BY f.ticker, eff""")
+        qf["eff"] = pd.to_datetime(qf["eff"])
         qf = qf.sort_values(["ticker", "eff"])
-        qf_by_tk = {tk: (list(g["eff"]), list(g["ok"])) for tk, g in qf.groupby("ticker")}
-        print(f"  [qfloor Đ2] ROE_Min5Y>=0.10 & CF_OA_3Y>0 & FSCORE>=5 as-of Release_Date "
-              f"({len(qf_by_tk)} tickers, pass-rate latest {qf.groupby('ticker')['ok'].last().mean():.0%})")
-    def qfloor_asof(tk, d):
+        qf_by_tk = {tk: (list(g["eff"]),
+                         list(zip(g["ROE_Min5Y"], g["CF_OA_3Y"], g["FSCORE"])))
+                    for tk, g in qf.groupby("ticker")}
+        print(f"  [qfloor D2] ON: ROE_Min5Y>=0.10 & CF_OA_3Y>0 & FSCORE>=5, as-of Release_Date "
+              f"({len(qf_by_tk)} tickers with financials)")
+    def qfloor_pass(tk, d):
+        fd = _FORX.get(tk)
+        if fd is not None and pd.Timestamp(d) >= fd: return False  # forensic exclude
         e = qf_by_tk.get(tk)
         if not e: return False
-        i = bisect.bisect_right(e[0], d) - 1
-        return bool(e[1][i]) if i >= 0 else False
+        i = bisect.bisect_right(e[0], pd.Timestamp(d)) - 1
+        if i < 0: return False
+        roe, cf, fs = e[1][i]
+        return (pd.notna(roe) and float(roe) >= 0.10 and pd.notna(cf) and float(cf) > 0
+                and pd.notna(fs) and float(fs) >= 5)
     # (3) rebalance dates within [start,end]
     cal = bq(f"""SELECT DISTINCT t.time FROM tav2_bq.ticker t WHERE t.ticker='VNINDEX'
   AND t.time BETWEEN DATE '{eff_start}' AND DATE '{end_date}' ORDER BY t.time""")
@@ -353,7 +362,7 @@ GROUP BY t.ticker, q""")
             rt = rating_asof(tk, d)
             if gate_rating is not None and not (pd.notna(rt) and rt <= gate_rating): continue
             if quality == "filter" and not (pd.notna(rt) and rt <= 3): continue
-            if QFLOOR and not qfloor_asof(tk, d): continue              # Đ2 fundamentals floor (see 2b)
+            if QFLOOR and not qfloor_pass(tk, d): continue              # Đ2 fundamentals floor (qsleeve)
             gated.append((tk, rt))
         if SELECT_MODE == "yieldcombo" and gated:
             # custom30V: liquidity = GATE only (top-POOL tradability floor); rank PURELY by combined

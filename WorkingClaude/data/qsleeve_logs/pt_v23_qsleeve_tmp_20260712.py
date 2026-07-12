@@ -1,5 +1,13 @@
 # -*- coding: utf-8 -*-
-"""pt_v23_audit_2014.py — V2.3 GO-LIVE config re-simulated 2014-01-02 -> now, AUDIT EDITION.
+"""pt_v23_qsleeve_tmp_20260712.py — EXPERIMENT COPY of pt_v23_audit_2014.py (Q-SLEEVE family,
+job Taylor_20260712_080114, plan_quality_sleeve_20260712.md). DO NOT use for canonical pins.
+Deltas vs canonical harness:
+  1. imports custom_basket_qsleeve_tmp as cb (adds env BASKET_QFLOOR quality-floor Đ2).
+  2. env BASKET_GATE_RATING overrides the _PIT_PARAMS gate (int, or "none" to disable).
+  3. env QSLEEVE_TAG is REQUIRED — appended to the output CSV name as _exp_qsleeve_<tag>,
+     so this harness can never write a canonical/registry-pinned filename (guidelines §8).
+Original doc follows:
+pt_v23_audit_2014.py — V2.3 GO-LIVE config re-simulated 2014-01-02 -> now, AUDIT EDITION.
 =============================================================================================
 Purpose (user 2026-06-12): re-run the EXACT go-live V2.3 architecture (pt_v22_dt5g.py) over
 the full history 2014->now and emit ONE self-contained audit file that an independent bot can
@@ -200,6 +208,13 @@ _PIT_PARAMS = {"custompit":   ("none", "qstart", None),
                "custompitq":  ("tilt", "qstart", None),
                "custompitg":  ("none", "q2m5",   3),
                "custompitgq": ("tilt", "q2m5",   3)}
+# qsleeve: env BASKET_GATE_RATING overrides the gate element ("none" disables the rating gate,
+# e.g. for the Đ2 quality-floor run). Unset = canonical gates above.
+_g_ov = os.environ.get("BASKET_GATE_RATING")
+if _g_ov is not None:
+    _gv = None if _g_ov.strip().lower() == "none" else int(_g_ov)
+    _PIT_PARAMS = {k: (q, r, _gv) for k, (q, r, _) in _PIT_PARAMS.items()}
+    print(f"[qsleeve] BASKET_GATE_RATING override -> gate_rating={_gv}")
 ETF_LIQ_PCT = 0.20
 # PARKING-STATE POLICY (env PARK_STATES). Lever for the park-BULL experiment (2026-06-14):
 # extend idle-cash parking beyond NEUTRAL. Format "state:frac,..." e.g. "3:0.7,4:1.0" = park 70%
@@ -226,21 +241,6 @@ _wt_tag = "" if BASKET_WT == "capwt" else f"_wt{BASKET_WT}"
 BASKET_TOPN = int(os.environ.get("BASKET_TOPN", "30"))
 BASKET_NAMECAP = float(os.environ.get("BASKET_NAMECAP", "0.10"))
 _sz_tag = "" if (BASKET_TOPN == 30 and abs(BASKET_NAMECAP - 0.10) < 1e-9) else f"_n{BASKET_TOPN}_cap{int(round(BASKET_NAMECAP*100))}"
-# Q-SLEEVE audit knobs (plan_quality_sleeve_20260712.md, family N=5). All default OFF = byte-identical.
-# BASKET_GATE_RATING: override the _PIT_PARAMS gate for custom* vehicles ("2" = Đ1 strict gate,
-# "none" = no rating gate — used when BASKET_QFLOOR=1 replaces it with the Đ2 fundamentals floor,
-# which custom_basket reads from env directly). BASKET_LIQ_FLOOR_B is read by custom_basket too but
-# had no filename tag (§8 gap) — tagged here. EXP_TAG: explicit non-canonical output tag.
-_gate_raw = os.environ.get("BASKET_GATE_RATING", "").strip().lower()
-_qs_tag = ""
-if _gate_raw:
-    _gate_ovr = None if _gate_raw in ("none", "off") else int(_gate_raw)
-    _PIT_PARAMS = {k: (_q, _r, _gate_ovr) for k, (_q, _r, _g) in _PIT_PARAMS.items()}
-    _qs_tag += f"_gate{_gate_raw}"
-if os.environ.get("BASKET_QFLOOR", "") == "1": _qs_tag += "_qfloor"
-if os.environ.get("BASKET_LIQ_FLOOR_B", "").strip(): _qs_tag += f"_liqf{os.environ['BASKET_LIQ_FLOOR_B'].strip()}B"
-EXP_TAG = os.environ.get("EXP_TAG", "").strip()
-if EXP_TAG: _qs_tag += f"_exp_{EXP_TAG}"
 # Quality-TILT strength sweep (env BASKET_QTILT, dir B 2026-06-16). Only affects custompitgq
 # (quality=tilt). Presets or explicit "1:1.5,2:1.25,..."; "default" = module QTILT (None passthrough).
 _QTILT_PRESETS = {"default": None, "off": {1: 1.0, 2: 1.0, 3: 1.0, 4: 1.0, 5: 1.0},
@@ -502,11 +502,14 @@ BAL_DROP_TIERS = [t.strip() for t in os.environ.get("BAL_DROP_TIERS", "").split(
 _droptag = ("" if not BAL_DROP_TIERS else
             "_exp_dropnone" if BAL_DROP_TIERS == ["none"] else
             "_exp_drop" + "-".join(t.replace("MOMENTUM", "MOM").replace("_", "") for t in BAL_DROP_TIERS))
+# qsleeve: QSLEEVE_TAG is REQUIRED (KeyError if unset) — this harness must never be able to
+# write a canonical/registry-pinned filename (guidelines §8).
+_QS_TAG = "_exp_qsleeve_" + os.environ["QSLEEVE_TAG"].strip()
 AUDIT_PATH  = os.path.join(WORKDIR, "data",
                            {"v23a": "v23_golive_audit_2014_now.csv",
                             "v23c": "v23c_golive_audit_2014_now.csv",
                             "v22base": "v22base_audit_2014_now.csv",
-                            "singlebook": "singlebook_audit_2014_now.csv"}.get(MODE, MODE+"_audit.csv").replace(".csv", _capsuf + _matsuf + _liqsuf + _park_tag + _wt_tag + _sz_tag + _qs_tag + _qt_tag + _bullpark_tag + _c30b_tag + _recpark_tag + _vm_tag + _dnpr_tag + _dvr8l_tag + _droptag + _NAV_TAG + _START_TAG + ".csv"))
+                            "singlebook": "singlebook_audit_2014_now.csv"}.get(MODE, MODE+"_audit.csv").replace(".csv", _capsuf + _matsuf + _liqsuf + _park_tag + _wt_tag + _sz_tag + _qt_tag + _bullpark_tag + _c30b_tag + _recpark_tag + _vm_tag + _dnpr_tag + _dvr8l_tag + _droptag + _NAV_TAG + _START_TAG + _QS_TAG + ".csv"))
 
 BUY_TIERS_V11 = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
                  "MOMENTUM_A","MOMENTUM_S_N","COMPOUNDER_BUY","DEEP_VALUE_RECOVERY","S_PRO",
@@ -717,7 +720,7 @@ WHERE t.ticker IN ({",".join(f"'{x}'" for x in _top30)})
   AND t.time >= DATE_SUB(DATE '{START_DATE}', INTERVAL 200 DAY) AND t.time <= DATE '{END_DATE}'
 GROUP BY t.time ORDER BY t.time""")
     else:  # custom*: build the ex-VIC basket as the parking VEHICLE itself
-        import custom_basket as cb
+        import custom_basket_qsleeve_tmp as cb   # qsleeve experiment copy (BASKET_QFLOOR knob)
         if ETF_LIQ == "custom":   # static hindsight membership (fixed 2020-2025 liquidity selection)
             _cust = cb.select_members(bq)
             print(f"  [ETF-LIQ custom] ex-VIC cap-weighted basket (STATIC), {len(_cust)} names: {', '.join(_cust)}")
@@ -2137,7 +2140,7 @@ if _IS_CUSTOM:
      ("parking_vehicle", f"{PARK_TICKER} — synthetic ex-VIC basket (NOT E1VFVN30). Parking TX/MTM rows use "
                          f"ticker '{PARK_TICKER}'; verify adj_price against CUSTOM_BASKET levels (or rebuild from BQ)"),
      ("custom_basket_mode", ETF_LIQ + (" (PIT membership)" if _is_pit else " (static hindsight membership)")),
-     ("custom_basket_pit_params", f"quality={_pq} rebal={_preb} gate_rating={_pgate} weight_scheme={BASKET_WT} top_n={BASKET_TOPN} name_cap={BASKET_NAMECAP} qtilt={';'.join(f'{k}:{v}' for k,v in sorted((BASKET_QTILT if BASKET_QTILT is not None else __import__('custom_basket').QTILT).items()))}" if _is_pit else "n/a"),
+     ("custom_basket_pit_params", f"quality={_pq} rebal={_preb} gate_rating={_pgate} weight_scheme={BASKET_WT} top_n={BASKET_TOPN} name_cap={BASKET_NAMECAP} qtilt={';'.join(f'{k}:{v}' for k,v in sorted((BASKET_QTILT if BASKET_QTILT is not None else __import__('custom_basket_qsleeve_tmp').QTILT).items()))}" if _is_pit else "n/a"),
      ("custom_basket_members", ",".join(CUSTOM_MEMBERS) + ("" if not _is_pit else "  [UNION across quarters; see CUSTOM_MEMBERS rows for per-quarter]")),
      ("custom_basket_recipe", _recipe + " Per name per day: mcap = adjusted Close (tav2_bq.ticker) * OShares "
                               "(tav2_bq.ticker_financial as-of/ffilled). Daily return = SUM(w*mcap_t)/SUM(w*mcap_{t-1})-1 "

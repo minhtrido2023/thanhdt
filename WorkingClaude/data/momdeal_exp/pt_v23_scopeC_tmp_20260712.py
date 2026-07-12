@@ -226,21 +226,6 @@ _wt_tag = "" if BASKET_WT == "capwt" else f"_wt{BASKET_WT}"
 BASKET_TOPN = int(os.environ.get("BASKET_TOPN", "30"))
 BASKET_NAMECAP = float(os.environ.get("BASKET_NAMECAP", "0.10"))
 _sz_tag = "" if (BASKET_TOPN == 30 and abs(BASKET_NAMECAP - 0.10) < 1e-9) else f"_n{BASKET_TOPN}_cap{int(round(BASKET_NAMECAP*100))}"
-# Q-SLEEVE audit knobs (plan_quality_sleeve_20260712.md, family N=5). All default OFF = byte-identical.
-# BASKET_GATE_RATING: override the _PIT_PARAMS gate for custom* vehicles ("2" = Đ1 strict gate,
-# "none" = no rating gate — used when BASKET_QFLOOR=1 replaces it with the Đ2 fundamentals floor,
-# which custom_basket reads from env directly). BASKET_LIQ_FLOOR_B is read by custom_basket too but
-# had no filename tag (§8 gap) — tagged here. EXP_TAG: explicit non-canonical output tag.
-_gate_raw = os.environ.get("BASKET_GATE_RATING", "").strip().lower()
-_qs_tag = ""
-if _gate_raw:
-    _gate_ovr = None if _gate_raw in ("none", "off") else int(_gate_raw)
-    _PIT_PARAMS = {k: (_q, _r, _gate_ovr) for k, (_q, _r, _g) in _PIT_PARAMS.items()}
-    _qs_tag += f"_gate{_gate_raw}"
-if os.environ.get("BASKET_QFLOOR", "") == "1": _qs_tag += "_qfloor"
-if os.environ.get("BASKET_LIQ_FLOOR_B", "").strip(): _qs_tag += f"_liqf{os.environ['BASKET_LIQ_FLOOR_B'].strip()}B"
-EXP_TAG = os.environ.get("EXP_TAG", "").strip()
-if EXP_TAG: _qs_tag += f"_exp_{EXP_TAG}"
 # Quality-TILT strength sweep (env BASKET_QTILT, dir B 2026-06-16). Only affects custompitgq
 # (quality=tilt). Presets or explicit "1:1.5,2:1.25,..."; "default" = module QTILT (None passthrough).
 _QTILT_PRESETS = {"default": None, "off": {1: 1.0, 2: 1.0, 3: 1.0, 4: 1.0, 5: 1.0},
@@ -494,10 +479,8 @@ _dvr8l_tag = ("" if not DVR8L_TILT else
 # MOM-channel closure measurement (job Taylor_20260712_012515) — env BAL_DROP_TIERS; unset = OFF,
 # byte-identical baseline, no tag. "none" = drop nothing but tagged output (contemporaneous control
 # that never touches the canonical R3 CSV, guidelines §8). Otherwise comma-separated play_types to
-# REMOVE from TIER_BAL (the BAL entry set), e.g. "MOMENTUM". Signals stay labeled in
+# REMOVE from TIER_BAL (the BAL entry set), e.g. "MOMENTUM_N,MOMENTUM_S". Signals stay labeled in
 # SIGNAL_V11; the dropped tiers just can never open BAL positions.
-# NOTE 2026-07-12: MOMENTUM_N/MOMENTUM_S removed from the DEFAULT TIER_BAL below (user-approved
-# Scope A closure, matching the 3 production consumers) — dropping them via this knob now asserts.
 BAL_DROP_TIERS = [t.strip() for t in os.environ.get("BAL_DROP_TIERS", "").split(",") if t.strip()]
 _droptag = ("" if not BAL_DROP_TIERS else
             "_exp_dropnone" if BAL_DROP_TIERS == ["none"] else
@@ -506,12 +489,12 @@ AUDIT_PATH  = os.path.join(WORKDIR, "data",
                            {"v23a": "v23_golive_audit_2014_now.csv",
                             "v23c": "v23c_golive_audit_2014_now.csv",
                             "v22base": "v22base_audit_2014_now.csv",
-                            "singlebook": "singlebook_audit_2014_now.csv"}.get(MODE, MODE+"_audit.csv").replace(".csv", _capsuf + _matsuf + _liqsuf + _park_tag + _wt_tag + _sz_tag + _qs_tag + _qt_tag + _bullpark_tag + _c30b_tag + _recpark_tag + _vm_tag + _dnpr_tag + _dvr8l_tag + _droptag + _NAV_TAG + _START_TAG + ".csv"))
+                            "singlebook": "singlebook_audit_2014_now.csv"}.get(MODE, MODE+"_audit.csv").replace(".csv", _capsuf + _matsuf + _liqsuf + _park_tag + _wt_tag + _sz_tag + _qt_tag + _bullpark_tag + _c30b_tag + _recpark_tag + _vm_tag + _dnpr_tag + _dvr8l_tag + _droptag + _NAV_TAG + _START_TAG + ".csv"))
 
 BUY_TIERS_V11 = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
                  "MOMENTUM_A","MOMENTUM_S_N","COMPOUNDER_BUY","DEEP_VALUE_RECOVERY","S_PRO",
                  "RE_BACKLOG_BUY"}
-TIER_BAL = ["MEGA","MOMENTUM","DEEP_VALUE_RECOVERY","RE_BACKLOG_BUY"]  # MOM_N/MOM_S closed 2026-07-12 (CP1+CP-DVR1 NO-GO, user-approved Scope A — plan_close_mom_20260712.md)
+TIER_BAL = ["MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","DEEP_VALUE_RECOVERY","RE_BACKLOG_BUY"]
 if BAL_DROP_TIERS and BAL_DROP_TIERS != ["none"]:
     _unknown_drop = [t for t in BAL_DROP_TIERS if t not in TIER_BAL]
     assert not _unknown_drop, f"BAL_DROP_TIERS not in TIER_BAL: {_unknown_drop}"
