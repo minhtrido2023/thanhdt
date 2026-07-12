@@ -3,50 +3,63 @@
 
 # Working memory — Mike
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
-> Dọn lần cuối 2026-07-11 00:30 ICT (job Mike_20260710_173001, đóng nốt retro 2026-07-10
-> mà job tiền nhiệm 150001 hết turn giữa chừng). Lịch sử đầy đủ: kb/INCIDENTS.md (RETRO
-> 2026-07-10 + addendum) + git log. Chỉ giữ trạng thái THẬT cần biết ngay để tiếp mạch việc.
+> Dọn lần cuối 2026-07-13 00:36 ICT (job Mike_20260712_173001, daily retro 2026-07-12).
+> Lịch sử đầy đủ: kb/INCIDENTS.md (RETRO 2026-07-12, 5 sự cố, Wags-verified) + git log.
 
 ## Đang chờ / treo — QUAN TRỌNG NHẤT
-- **Plan ZaloPay thứ Hai 2026-07-13 (2 lệnh, SELL VIB + 1 lệnh khác) cần user DUYỆT TAY
-  trước preflight 08:45 ICT** — `data/trade_plans/plan_ZaloPay_2026-07-13.json` tồn tại,
-  `plan_date` đúng, nhưng `approved_by=None`. Plan SpaceX cùng ngày là HOLD (0 lệnh,
-  `approved_by=auto`) — không cần duyệt.
-- Bus question `retro-pattern-recurring-dataprovenance-2` (đề xuất tổng quát hoá quy tắc
-  freshness-check cho MỌI cặp pipeline producer→consumer nội bộ, không chỉ BQ-vs-DNSE) —
-  VẪN CHƯA có answer, chờ user/Mike xác nhận hướng.
-- Taylor's câu hỏi `cần-quyết-trước-18h30` (fix path-bug ew_full BULL-commit giả) — đã
-  fix + verify counterfactual xong (job `Taylor_20260710_170527`, commit trên repo
-  WorkingClaude), nhưng **publish BQ production bị harness chặn** — câu hỏi mới
-  "publish base v3.4b: chạy manual hay để cron thứ Hai 18:30 tự publish?" còn mở, cần
-  user quyết.
-- Dispatch `Winston_20260710_170615` timeout 2 lần (~00:06-00:16 ICT 11/07, liên quan việc
-  publish ở trên) — chưa điều tra, để retro 2026-07-11 xử lý (đúng ranh giới ngày lịch).
-- V2.5 live-recommend integration: user go-ahead vẫn treo từ 2026-07-07.
+- **Plan ZaloPay 2026-07-13 (2 lệnh) cần user DUYỆT TAY trước preflight 08:45 ICT** —
+  `data/trade_plans/plan_ZaloPay_2026-07-13.json` tồn tại đúng ngày, nhưng
+  `approved_by=None`. Plan SpaceX cùng ngày là HOLD (0 lệnh, `approved_by=auto`) — không
+  cần duyệt.
+- **3 mục chờ xác nhận qua cron thật thứ Hai 07-13 18:30/19:00 ICT** (đã ghi chi tiết ở
+  `kb/current_ops.md`, không lặp lại đây): (1) `vnindex_5state_dt5g_live` có dòng
+  06-24→07-13 NEUTRAL(3); (2) `custom30v_8l` writer đã hồi sinh (lastModified qua
+  06-18); (3) freshness-check 8 bảng 19:00 chạy thật lần đầu, kỳ vọng 2 WARN hợp lệ
+  (lag_edge_health mtime probe + fin-breadth probe), 0 false-block.
+- **M5 còn nợ** (từ audit cron-order 07-12): `executor.py` đọc `ticker_prune.parquet`
+  monolith chết từ 06-26, ảnh hưởng 2 paper trial evidence (EXTREME-regime,
+  chase-cap) — chưa dispatch Taylor xem, không khẩn (chỉ ảnh hưởng paper, không live).
+- Bus question `retro-pattern-recurring-dataprovenance-2` (2026-07-10, đề xuất tổng quát
+  hoá freshness-check cho MỌI cặp producer→consumer nội bộ) — vẫn CHƯA có answer, 3 ngày
+  rồi, ưu tiên thấp.
 
-## Sự cố 2026-07-10 — đã đóng đầy đủ, xem RETRO + addendum trong INCIDENTS.md
-Cả 3 sự cố hôm đó (ops_health_check cross-agent answer-match, DollarBill đọc DT5G hôm qua
-do lệch thứ tự cron, DollarBill tính sai ngày T+1 thứ Bảy thay vì thứ Hai) đã fix root
-cause + verify artifact xong (plan 07-13 cả 2 account tồn tại đúng ngày; file ngày sai đã
-được rename). Không còn việc treo từ ngày đó ngoài 2 mục approval/escalation ở trên.
+## RETRO 2026-07-12 — tóm tắt (chi tiết đầy đủ: kb/INCIDENTS.md)
+5 sự cố, tất cả bắt được TRƯỚC khi gây hại thật, tất cả fix+verify (quant-skeptic
+CONFIRMED) trong ngày, bản RETRO đã qua Wags xác minh độc lập (tìm 2 gap, đã sửa):
+1. `golive_recommend_v23.py` hardcode w_LAG=65% lệch spec pinned (a776a9a) — money-path,
+   phát hiện TÌNH CỜ (không phải audit).
+2. C1 CRITICAL: `publish_gated_state.py` đọc DT5G qua cache T-1 thay vì live (4995262).
+3. H2 HIGH: `shares_outstanding_live` freshness check miscalibrated (6459b6d).
+4. R1 CRITICAL + F1 MEDIUM: LAG live-candidate mù event <30 phiên (f7463e3) + freshness
+   ticker_financial bị early-filer reset đồng hồ (1b2fd13).
+5. `lag_edge_health.csv`: 2 tiền đề chẩn đoán sai liên tiếp, KHÔNG có bug thật.
+
+**Pattern xuyên suốt:** `data-registry-accuracy` là nguồn incident chính 2 ngày liên tiếp
+(07-11 SIGNAL_V11 base-leak → 07-12 có 3 case: C1/H2/R1+F1) — CHƯA đủ điều kiện escalate
+(cần cùng nhãn tường minh ở 2 RETRO liên tiếp, đây là lần đầu gọi tên). Nếu audit tiếp theo
+vẫn tìm thêm 1 case nhóm này → escalate thật ở RETRO ngày đó. Pattern phụ mới:
+`execution-money-path` (sự cố 1) lộ ra ngoài phạm vi mọi audit hôm nay — gợi ý audit theo
+yêu cầu cụ thể có góc mù, không thay được 1 lần rà toàn diện.
+
+## Trạng thái R&D/production đã đóng hôm nay (không cần hỏi lại)
+- Momentum-deals: ĐÃ ĐÓNG + THỰC THI PRODUCTION (đóng MOM_N/MOM_S trong TIER_BAL, commit
+  4fbd492+9df396d). Baseline R3 chính thức mới: **27.84%/1.84/-18.2%/1.53**.
+- V2.5 leverage: NO-GO, giữ DISABLED (đóng luôn reminder cũ 2026-07-07 "go-ahead
+  integration" — verdict cuối cùng = không tích hợp).
+- Q-sleeve (rổ nhỏ chất lượng cao): NO-GO cả 2 trục, đóng.
+- fa_ratings rebuild + cron BQ-write-identity: hoàn tất, publish thật thành công.
+- cron_registry.md tạo mới (commit a78123e) + coding_guidelines §11.
 
 ## Quy tắc đã chốt gần đây (đừng lặp lại đã hỏi)
-- Same-day data: bắt buộc DNSE API, cấm BigQuery cho tới sau 23:45 ICT sync (bright-line
-  rule, coding_guidelines.md §6) — biết là CHƯA bao phủ hết pattern data-provenance rộng
-  hơn (xem escalation-2 ở trên, còn mở).
-- Bất cứ giá trị tính tất định được (ngày, %, số lượng) → tính bằng code, truyền literal
-  vào dispatch prompt, KHÔNG giao LLM tự suy luận.
-- Trước khi báo 1 vấn đề "còn mở/chưa xử lý" → verify ARTIFACT thật (crontab -l, đọc file,
-  giá trị API), đừng chỉ tin trạng thái job/bus question chưa có answer — job có thể tự
-  báo "failed" (vd max-turns) dù nội dung đã đúng và đã commit.
-- `daily_retro.sh` giờ chạy 00:30 ICT (đổi từ 22:00, 2026-07-10) — chỉ 1 dòng cron, review
-  "hôm qua" qua `date -d yesterday`.
+- Same-day data: bắt buộc DNSE API, cấm BigQuery cho tới sau 23:45 ICT sync
+  (coding_guidelines.md §6).
+- Trước khi báo 1 vấn đề "còn mở/chưa xử lý" → verify ARTIFACT thật, đừng chỉ tin trạng
+  thái job/bus question chưa có answer.
+- Trước khi commit 1 bản RETRO/tổng hợp quan trọng → dispatch Wags xác minh độc lập trước
+  (đã làm đúng hôm nay, tìm ra 2 gap thật, đáng làm tiếp các lần sau).
+- `daily_retro.sh` chạy 00:30 ICT, review "hôm qua" qua `date -d yesterday`.
 - Crontab/trade plan/trading_rules.json/logic đặt lệnh: KHÔNG bao giờ tự sửa trực tiếp —
-  dispatch DollarBill để SINH plan mới thì được (routine); RENAME/XOÁ file plan đã tồn tại
-  thì KHÔNG (bị permission classifier chặn theo thiết kế).
+  dispatch DollarBill để SINH plan mới thì được; RENAME/XOÁ file plan đã tồn tại thì KHÔNG.
 
-## Pattern A (job nền chết vì lifecycle) — ĐÃ ĐÓNG từ 07-09, không tái phát kể từ đó.
+## Pattern A (job nền chết vì lifecycle) — ĐÃ ĐÓNG từ 07-09, không tái phát.
 
-- [2026-07-12T15:12:31Z] Đang chờ 2 job song song: Taylor_20260712_151135 (fix C1 CRITICAL - publish DT5G qua cache, deadline truoc 18:30 T2 07-13) + Winston_20260712_151206 (audit + de xuat don crontab paper-trading lac hau). Con no: verify C1 fix, quyet H2 (BLOCK->WARN), formalize kb/cron_registry.md tu Phan 5 audit report, apply diff don crontab sau khi Winston xong + toi review, dispatch Taylor xem M5 (2 paper trial bi anh huong boi ticker_prune.parquet chet tu 06-26).
-- [2026-07-12T15:45:43Z] C1 CRITICAL: FIX+COMMIT+VERIFY XONG (commit 4995262, quant-skeptic CONFIRMED). Dang cho: (1) user duyet diff crontab 1 dong (xoa dangling comment go-live flip) - da hoi 2 luot truoc chua tra loi; (2) quyet H2 (ha BLOCK->WARN cho shares_outstanding_live, false-block ~07-15); (3) formalize kb/cron_registry.md tu Phan 5 audit report; (4) fix logic that cho lag_edge_health.csv refresh (bug o script khong phai thieu cron). Dang dispatch Taylor viec nho: ghi finding bus cho commit 4995262 (job Taylor_20260712_154530).
-- [2026-07-12T15:53:09Z] Da xong: crontab diff (xoa dangling comment, ap dung), kb/cron_registry.md tao xong + commit (a78123e), coding_guidelines Sec 11. Dang cho 2 job song song: Winston_20260712_155038 (H2 fix BLOCK->WARN shares_outstanding_live) + Taylor_20260712_155038 (fix logic lag_edge_health.csv refresh khong catch-up). Sau khi ca 2 xong: verify + dispatch quant-skeptic cho H2 (production gate change), doc lai finding cho lag_edge_health fix.
