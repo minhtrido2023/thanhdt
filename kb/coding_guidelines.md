@@ -308,3 +308,31 @@ decision names a specific file as the production source) — in the **same commi
 **Periodic check**: `bin/data_registry_audit.sh`'s stale-duplicate scan (added 2026-07-11) flags
 repo-root files with a name similar to an already-CANONICAL registry entry that are NOT yet under
 `archive/` — surfaced in the Friday KB editorial review for a human/Winston decision, not auto-moved.
+
+## 11. Check `mike/kb/cron_registry.md` Before Adding or Changing a Cron Schedule
+
+**Root cause of the 2026-07-12 C1 CRITICAL incident:** `publish_gated_state.py` had been silently
+reading the DT5G base state through `BQ_LOCAL_CACHE` (always T-1) instead of live BigQuery for
+~2.5 weeks, because `wc_env.sh` exports that env var globally and the script's own comment ("SOURCE
+OF TRUTH = BigQuery... NOT a local CSV") stated an intent the code didn't actually enforce. Nobody
+had asked "what vintage does this publish step actually read, and does that survive a stricter
+freshness gate?" before the gate (`MAX_STATE_LAG`) was tightened to 0 on 2026-07-11 — at which point
+the mismatch became a structural, always-fails contradiction (Winston audit `Winston_20260712_142100`,
+fixed same day, commit `4995262`, quant-skeptic CONFIRMED).
+
+**Mandatory rule**: before adding a new cron entry or changing an existing one's schedule, read
+`mike/kb/cron_registry.md` first — it answers, per job, what it reads (source + vintage T/T-1),
+what it writes, who consumes the output, and what buffer/verify-artifact exists downstream. Answer
+its "4 câu hỏi bắt buộc" (đọc gì+vintage / nguồn tươi lúc nào — đo thật, không tin comment / cần T
+hay T-1 / ai tiêu thụ + deadline) before picking a time slot.
+
+**Update the registry in the SAME commit** as any crontab change (add/remove/reschedule a line) —
+same discipline as §9's data registry and §10's archive-on-canonicalize rule. A crontab change
+without a matching registry update is exactly how the next agent re-introduces a cache/vintage
+mismatch that "looks fine" until a downstream gate tightens.
+
+**A production "publish" script (writes a table/file other production consumers read as the
+current-day source of truth) must read its inputs live, never through a process-inherited cache
+env** — if the import chain can reach `BQ_LOCAL_CACHE`/`bq_local_cache`, unset it explicitly
+(`os.environ.pop(...)`) before the first query, process-locally (never edit `wc_env.sh` itself,
+which would break every OTHER script that legitimately wants the cache).
