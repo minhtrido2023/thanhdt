@@ -41,7 +41,7 @@
 | 18:10 (T2-T6) | `fetch_new_listings_daily.sh` | web listings | queue nghiên cứu 8L | Winston | — | — |
 | 18:30 (T2-T6) | `daily_refresh_v34b_linux.sh` (13 step) | ticker_prune BQ live (ingest xong ~17:30) | `vnindex_5state` (base) + `_v34b_clean` + `dt5g_live` (fix C1 07-12: publish đọc LIVE, không qua cache) | pt_8l/telegram hôm sau, bq_freshness 19:00, mọi consumer regime | ~90' worst-case + retry | step [13] mtime-assert |
 | 18:35 (T2-T6) | `rubber_weekly.sh` | web feed | rubber alert | Winston | lệch 5' so 18:30 (tránh trùng CPU) | — |
-| 18:40 (T2-T6) | `update_shares_live.sh --scan` | corp-action feed | detection-only alert (KHÔNG merge `updated_at` — chỉ MERGE khi xử lý tay) | Winston/Taylor | — | ⚠️ H2: freshness check calibrate sai giả định writer-daily, đang hạ BLOCK→WARN (2026-07-12) |
+| 18:40 (T2-T6) | `update_shares_live.sh --scan` | corp-action feed | detection-only alert (KHÔNG merge `updated_at` — chỉ MERGE khi xử lý tay) | Winston/Taylor | — | freshness check `shares_outstanding_live` hạ BLOCK→WARN (H2 fix, commit `6459b6d`, 2026-07-12) — cadence event-driven thật, không phải daily |
 | 19:00 (T2-T6) | `bq_freshness_check.sh --quiet` (pipeline BQ freshness + DT5G/recommend + dispatch Bill) | BQ live (không cache) cho freshness; pipeline-1 `publish_gated_state` (fix C1) | freshness log + golive recommend + bus | 21:00 send_plan, DollarBill | sau 18:30 (30') | `MAX(time)` từng bảng |
 | 19:00 (daily) | `kb_nightly.sh` | events_buffer | trim/archive | — | — | — |
 | 20:00 (daily) | *(giữ chỗ — không có job)* | | | | | |
@@ -63,8 +63,10 @@
 (blend audit / **production** `custom30v_8l`) → `[7][8][11][12] pt_v11/pt_v12/pt_v4/pt_v22` (control-arm
 `engine_room_oos` panel, review 2026-12-01 — **pt_v22 là PRODUCTION**, đọc bởi `trading_bot/strategies.py`)
 → `[14] papertrade_compare` (ghi `compare5.csv`, đọc bởi registry 15:20) → `[17] orb_pt` (trial mở, event-end)
-→ `[19][20][21][22]` alerts/feeds (`[22] edge_health_monitor --refresh` — ⚠️ bug logic đang fix 2026-07-12,
-xem `data/lag_edge_health.csv`) → `[26] phosphorus_dgc_weekly` (Fri only). Block RETIRED `[15][16][18][23][24][25]`
+→ `[19][20][21][22]` alerts/feeds (`[22] edge_health_monitor --refresh` — rebuild `data/lag_edge_health.csv`
+vô điều kiện mỗi lần chạy; dừng ở 2026-05-11 là ĐÚNG lịch sử mùa vụ (zero sự kiện NP_R 05-05→07-07),
+KHÔNG phải bug — điều tra + đóng 2026-07-12, `Taylor_20260712_155038`) → `[26] phosphorus_dgc_weekly`
+(Fri only). Block RETIRED `[15][16][18][23][24][25]`
 giữ nguyên comment-out (archive pattern, KHÔNG xoá — xem coding_guidelines §10).
 
 ## Quy tắc thêm cron mới — 4 câu hỏi bắt buộc trả lời TRƯỚC khi chọn giờ
@@ -106,5 +108,7 @@ BQ_LOCAL_CACHE` nếu import chain có thể dính cache (bài học C1).
 
 ## Log thay đổi
 - 2026-07-12: seed v1 từ audit `Winston_20260712_142100` + `Winston_20260712_151206`. Xoá 1 dòng
-  crontab dangling comment (`# V2.4 go-live flip`). Fix C1 (publish DT5G đọc live, commit `4995262`).
-  H2 (shares_outstanding_live BLOCK→WARN) đang dispatch.
+  crontab dangling comment (`# V2.4 go-live flip`). Fix C1 (publish DT5G đọc live, commit `4995262`,
+  quant-skeptic CONFIRMED). Fix H2 (shares_outstanding_live BLOCK→WARN, commit `6459b6d`). Điều tra
+  `lag_edge_health.csv` "staleness" → kết luận KHÔNG phải bug (job `Taylor_20260712_155038`, xem
+  `kb/current_ops.md`).
