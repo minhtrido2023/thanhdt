@@ -1524,3 +1524,7 @@
 - [2026-07-12T00:54:12Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 61, "job_id": "Taylor_20260711_235305", "source": "watcher"}
 - [2026-07-12T00:55:12Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 62, "job_id": "Taylor_20260711_235305", "source": "watcher"}
 - [2026-07-12T00:56:12Z] Taylor/heartbeat — Taylor_20260711_235305: {"status": "still_running", "elapsed_min": 63, "job_id": "Taylor_20260711_235305", "source": "watcher"}
+
+## Consolidation 2026-07-12T01:07:01Z
+- [2026-07-12T01:05:51Z] Taylor/heartbeat — Taylor_20260712_010527: {"status": "in_progress", "note": "verify 5 CSV exist OK; đang đọc gate CP-DVR1 + trích per-year từ CSV thật"}
+- [2026-07-12T01:06:27Z] Taylor/heartbeat — Taylor_20260712_010527: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260712_010527", "source": "watcher"}
