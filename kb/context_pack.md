@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v972)
+# Mike fleet — context pack (v973)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-12T12:24:46] quant-skeptic/verification — ✅ CONFIRMED VERIFY: lag_edge_health probe DONE: WARN-only mtime check vào bq_freshness_check.sh — commit f67e09a: {"finding_topic": "lag_edge_health probe DONE: WARN-only mtime check vào bq_freshness_check.sh — commit f67e09a", "verdict": "CONFIRMED", "confidence": "high",  …
 - [2026-07-12T12:28:34] Taylor/finding — AUDIT Q2-ROLLIN TÍN HIỆU XONG — 1 CRITICAL GAP THẬT: pipeline LAG live mù với event mới <30 phiên trong khi entry là T+5 → 100% entry LAG mùa Q2 sẽ bị miss trong plan DollarBill nếu không sửa trước ~07-25; MBS cụ thể không qualify (pa_HL3 4.06<5) nên chưa mất trade nào: {"job": "Taylor_20260712_121642", "status": "AUDIT_DONE_READ_ONLY", "report": "mike/agents/Taylor/audit_q2_rollin_signal_20260712.md", "findings": {"R1_CRITICAL …
 - [2026-07-12T12:31:56] Winston/finding — AUDIT HẠ TẦNG Q2 ROLL-IN XONG: kiến trúc as-of + cohort-gate ĐÚNG cho roll-in dần dần; 1 gap thật MEDIUM = freshness ticker_financial đo bằng MAX(time) toàn bảng nên 1 mã (MBS) đã reset đồng hồ cho cả bảng — vendor stall giữa mùa sẽ im lặng tới 90 ngày, đề xuất breadth-probe WARN theo mùa (chờ duyệt, chưa sửa gì): {"job": "Winston_20260712_122313", "status": "AUDIT_DONE_READ_ONLY_NO_CHANGES", "scope": "hạ tầng dữ liệu cho mùa BCTC Q2/2026 roll-in dần dần (song song Taylor …
 - [2026-07-12T12:56:41] Winston/finding — fin-breadth probe DONE: WARN-only cohort-count theo mùa BCTC vào bq_freshness_check.sh — commit 1b2fd13, vá gap MEDIUM F1 (MAX(time) toàn bảng bị 1 mã early-filer reset đồng hồ): {"job": "Winston_20260712_124928", "trace_parent": "Winston_20260712_122313", "status": "DONE_COMMITTED", "commit": "1b2fd13 (mike repo, bin/bq_freshness_check. …
@@ -11,11 +10,42 @@
 - [2026-07-12T13:11:02] Taylor/finding — FIX R1 CRITICAL XONG: live LAG candidate source point-in-time (lag_live_schedule.py) — commit f7463e3, selfcheck 23/23, backtest pin R3 byte-identical, MBS nhận diện đúng same-day: {"job": "Taylor_20260712_124834", "trace_parent": "Taylor_20260712_121642", "status": "DONE_COMMITTED", "commit": "f7463e3 (repo thanhdt/WorkingClaude)", "root_ …
 - [2026-07-12T13:19:24] quant-skeptic/verification — ✅ CONFIRMED VERIFY: FIX R1 CRITICAL XONG: live LAG candidate source point-in-time (lag_live_schedule.py) — commit f7463e3, selfcheck 23/23, backtest pin R3 byte-identical, MBS nhận diện đúng same-day: {"finding_topic": "FIX R1 CRITICAL: live LAG candidate source point-in-time (lag_live_schedule.py) — commit f7463e3, selfcheck 23/23, backtest pin R3 byte-ident …
 - [2026-07-12T13:20:07] Spyros/finding — AUDIT RỦI RO VẬN HÀNH fix R1 LAG live schedule (f7463e3): KHÔNG có rủi ro chặn — 1 MEDIUM residual (lỗ hổng silent-degradation trên chính nguồn pkl mới, chưa có probe), 3 LOW; rollback sạch, không ảnh hưởng vị thế mở: {"job": "Spyros_20260712_131501", "trace_parent": "Taylor_20260712_124834", "status": "AUDIT_DONE_READ_ONLY", "verdict": "NO_BLOCKING_RISK — fix đúng hướng, giả …
+- [2026-07-12T14:06:33] Taylor/finding — FIX M1+L2 residuals Spyros XONG (LAG live pipeline): lag_source_error vào status.json + probe lag-pkl content catch-up WARN-only + relabel lag_recent — commits f84b995 (mike) / a5f3810 + 853080d (WorkingClaude); L1 không cần action (đã document): {"job": "Taylor_20260712_135148", "trace_parent": "Spyros_20260712_131501", "status": "DONE_COMMITTED", "commits": {"M1_probe": "f84b995 (repo mike, bin/bq_fres …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
 > Mike cập nhật thủ công khi có thay đổi trạng thái quan trọng. Đọc trước mọi thứ khác khi restart.
 > Cập nhật lần cuối: 2026-07-12
+
+## Sẵn sàng mùa BCTC Q2/2026 — audit + fix CRITICAL/MEDIUM đã khép kín trong ngày (2026-07-12)
+User yêu cầu rà soát sau khi phát hiện MBS đã công bố BCTC Q2 (08/07) — xác nhận mùa Q2 đã bắt đầu
+thật (n=1 hiện tại). Dispatch song song Taylor (góc tín hiệu) + Winston (góc hạ tầng), cả 2 audit
+độc lập không trùng việc.
+
+**CRITICAL (Taylor) — ĐÃ FIX, CONFIRMED cả kỹ thuật (quant-skeptic) lẫn rủi ro vận hành (Spyros/
+risk-auditor)**: sổ LAG (PEAD, 50-65% NAV khi active) bị mù với sự kiện BCTC mới <30 phiên trong khi
+entry là T+5 — 100% entry LAG mùa Q2 sẽ bị bỏ lỡ trong im lặng nếu không sửa. Fix: module mới
+`lag_live_schedule.py` (commit `f7463e3`) tách nguồn — identity/NP_R từ pkl fresh-daily (biết ngay
+tại ngày release), điều kiện phụ vẫn từ CSV cũ (luôn đủ dữ liệu vì nhìn về quá khứ). Backtest pin R3
+byte-identical (không đổi số 27.84/1.84/-18.2/1.53). Bonus: fix còn dọn thêm 1 look-ahead 30-phiên
+ẩn khác trong logic cũ (sibling cùng ngày dùng giá trị tương lai) mà không ai từng phát hiện.
+
+**MEDIUM (Winston) — ĐÃ FIX, CONFIRMED**: freshness-check `ticker_financial` đo bằng MAX(time) toàn
+bảng, 1 mã early-filer (MBS) đủ để cả check báo "xanh" dù 1254/1255 mã còn lại chưa công bố — nguy
+cơ vendor stall giữa mùa im lặng tới 90 ngày. Fix: breadth-probe WARN-only theo mùa BCTC (commit
+`1b2fd13`), có guard chống false-positive đầu/cuối mùa.
+
+**2 mục nhỏ Spyros phát hiện thêm (residual, chưa fix, MỨC ĐỘ THẤP — không chặn go-live tuần tới)**:
+- M1 (MEDIUM, đề xuất làm trước LAG refill ~07-25): lỗ hổng silent-degradation vẫn còn ở nguồn mới
+  (pkl lỗi chỉ log WARNING, không phân biệt được "không có sự kiện" vs "pipeline hỏng") — đề xuất
+  thêm 1 probe so pkl vs BQ + flag `lag_source_error` trong status.json, cùng khuôn 2 probe vừa làm.
+- L2 (LOW): nhãn hiển thị có thể gây hiểu nhầm nếu vendor backfill muộn — đề xuất đổi câu chữ, không
+  gấp.
+- L1 (LOW, chỉ ghi nhớ): nếu sau này nâng cấp pandas trong env pipeline, format pkl cũ có thể đọc
+  lỗi âm thầm — không phải việc cần làm ngay, chỉ là lưu ý vận hành tương lai.
+
+Chi tiết đầy đủ: bus trace `Taylor_20260712_121642` → `Taylor_20260712_124834` (fix) và
+`Winston_20260712_122313` → `Winston_20260712_124928` (fix), phản biện `Spyros_20260712_131501`.
 
 ## LAG-weight (tăng tỷ trọng PEAD trong allocator) — ĐÓNG, chấp nhận câu trả lời mô tả (2026-07-12)
 User chấp nhận kết luận mô tả của Taylor (`plan_lag_weight_20260712.md`) là đủ — KHÔNG chạy family

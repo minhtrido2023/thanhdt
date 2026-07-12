@@ -2,6 +2,36 @@
 > Mike cập nhật thủ công khi có thay đổi trạng thái quan trọng. Đọc trước mọi thứ khác khi restart.
 > Cập nhật lần cuối: 2026-07-12
 
+## Sẵn sàng mùa BCTC Q2/2026 — audit + fix CRITICAL/MEDIUM đã khép kín trong ngày (2026-07-12)
+User yêu cầu rà soát sau khi phát hiện MBS đã công bố BCTC Q2 (08/07) — xác nhận mùa Q2 đã bắt đầu
+thật (n=1 hiện tại). Dispatch song song Taylor (góc tín hiệu) + Winston (góc hạ tầng), cả 2 audit
+độc lập không trùng việc.
+
+**CRITICAL (Taylor) — ĐÃ FIX, CONFIRMED cả kỹ thuật (quant-skeptic) lẫn rủi ro vận hành (Spyros/
+risk-auditor)**: sổ LAG (PEAD, 50-65% NAV khi active) bị mù với sự kiện BCTC mới <30 phiên trong khi
+entry là T+5 — 100% entry LAG mùa Q2 sẽ bị bỏ lỡ trong im lặng nếu không sửa. Fix: module mới
+`lag_live_schedule.py` (commit `f7463e3`) tách nguồn — identity/NP_R từ pkl fresh-daily (biết ngay
+tại ngày release), điều kiện phụ vẫn từ CSV cũ (luôn đủ dữ liệu vì nhìn về quá khứ). Backtest pin R3
+byte-identical (không đổi số 27.84/1.84/-18.2/1.53). Bonus: fix còn dọn thêm 1 look-ahead 30-phiên
+ẩn khác trong logic cũ (sibling cùng ngày dùng giá trị tương lai) mà không ai từng phát hiện.
+
+**MEDIUM (Winston) — ĐÃ FIX, CONFIRMED**: freshness-check `ticker_financial` đo bằng MAX(time) toàn
+bảng, 1 mã early-filer (MBS) đủ để cả check báo "xanh" dù 1254/1255 mã còn lại chưa công bố — nguy
+cơ vendor stall giữa mùa im lặng tới 90 ngày. Fix: breadth-probe WARN-only theo mùa BCTC (commit
+`1b2fd13`), có guard chống false-positive đầu/cuối mùa.
+
+**2 mục nhỏ Spyros phát hiện thêm (residual, chưa fix, MỨC ĐỘ THẤP — không chặn go-live tuần tới)**:
+- M1 (MEDIUM, đề xuất làm trước LAG refill ~07-25): lỗ hổng silent-degradation vẫn còn ở nguồn mới
+  (pkl lỗi chỉ log WARNING, không phân biệt được "không có sự kiện" vs "pipeline hỏng") — đề xuất
+  thêm 1 probe so pkl vs BQ + flag `lag_source_error` trong status.json, cùng khuôn 2 probe vừa làm.
+- L2 (LOW): nhãn hiển thị có thể gây hiểu nhầm nếu vendor backfill muộn — đề xuất đổi câu chữ, không
+  gấp.
+- L1 (LOW, chỉ ghi nhớ): nếu sau này nâng cấp pandas trong env pipeline, format pkl cũ có thể đọc
+  lỗi âm thầm — không phải việc cần làm ngay, chỉ là lưu ý vận hành tương lai.
+
+Chi tiết đầy đủ: bus trace `Taylor_20260712_121642` → `Taylor_20260712_124834` (fix) và
+`Winston_20260712_122313` → `Winston_20260712_124928` (fix), phản biện `Spyros_20260712_131501`.
+
 ## LAG-weight (tăng tỷ trọng PEAD trong allocator) — ĐÓNG, chấp nhận câu trả lời mô tả (2026-07-12)
 User chấp nhận kết luận mô tả của Taylor (`plan_lag_weight_20260712.md`) là đủ — KHÔNG chạy family
 backtest N=5. Tóm tắt: "LAG bền hơn MOM" đúng một nửa (bền hơn về bề rộng lịch sử, nhưng 2026 hiện
