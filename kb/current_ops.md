@@ -207,9 +207,20 @@ hơn, QUAN TRỌNG cho hướng nghiên cứu sắp tới:
   cũ lệch nhẹ khi build lại, đó là chấp nhận được miễn còn đạt ngưỡng thống kê tương đương đã đo
   (~82%/99.9%), KHÔNG cần chặn cứng bằng diff byte-để-byte như quant-skeptic đề xuất ban đầu.
 - **User duyệt: cho Taylor tiến hành bước tiếp theo** — xây cơ chế refresh append-only + cron weekly
-  (giống mẫu `fa_ratings_8l`) + wire freshness-check. Vẫn cần: (a) fix lỗi pandas-3 nhỏ ở khối cảnh
-  báo cuối script trước khi wire cron; (b) quyền ghi BQ vẫn là vấn đề mở giống fa_ratings_8l — chờ
-  kết quả cron 8L thật thứ Bảy 07-18 để áp dụng chung lời giải, không cần giải riêng.
+  (giống mẫu `fa_ratings_8l`) + wire freshness-check. (a) fix pandas-3 nhỏ: XONG (commit `7d89c28`).
+
+**VẤN ĐỀ (b) BQ-write-identity ĐÃ GIẢI QUYẾT XONG (2026-07-12, sớm 6 ngày so với kế hoạch chờ cron
+07-18)** — user duyệt trực tiếp cho test ghi thật ngay hôm nay thay vì chờ thụ động. Root cause xác
+nhận: cả 2 wrapper `refresh_fa_ratings_8l.sh`/`refresh_fa_ratings.sh` thiếu dòng `source wc_env.sh`
+(mọi script ghi-BQ-thành-công khác trong repo đều có dòng này để đặt `CLOUDSDK_CONFIG` sang tài
+khoản read-write `dtienthanh@gmail.com`; thiếu nó → rơi về default read-only `bq-reader-8l`). Fix 1
+dòng mỗi script (commit `a9716f6`, repo mike). **Test ghi THẬT (không phải dry-run) thành công cả 2
+bảng**, verify bằng `bq show` độc lập: `fa_ratings_8l` lastModified 06-20→**07-12**, rows
+52.433→52.449; `fa_ratings` lastModified 05-10→**07-12**, rows 12.367→12.406, invariant 48/48 quý
+đóng băng giữ nguyên (net delta +39 = đúng tổng 2 quý mở re-rank, số học khớp chính xác). quant-
+skeptic CONFIRMED độ tin cậy cao (tự tái hiện toàn bộ số liệu). Cron thứ Bảy 07-18 giờ chỉ là lần
+chạy scheduled đầu tiên bình thường (kỳ vọng OK), không còn câu hỏi identity treo — **dự án fa_ratings
+rebuild coi như hoàn tất**, chỉ còn theo dõi thụ động qua các lần chạy tự động.
 
 ## DT5G BULL-giả bug → audit freshness toàn hệ thống → CRITICAL basket fix → re-pin baseline R3
 ### CHUỖI ĐÃ KHÉP KÍN HOÀN TOÀN (2026-07-11), chỉ còn 3 mục chờ xác nhận qua cron thứ Hai 07-13
