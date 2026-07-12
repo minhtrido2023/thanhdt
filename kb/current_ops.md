@@ -35,6 +35,19 @@ chất "chỉ hiệu quả trong bull" như MOMENTUM/MEGA (vừa được Scope 
 Taylor kiểm tra lại: đo riêng Scope C (chỉ đóng MOM_N, giữ MOM_S+MOMENTUM+MEGA) so với Scope A/B,
 CHƯA sửa code sống, chờ kết quả trước khi chốt phạm vi cuối cùng.
 
+## KIỂM TRA TÁCH MOM_N vs MOM_S XONG — cả 2 phần đo ĐỒNG THUẬN: giữ nguyên khuyến nghị SCOPE A (2026-07-12)
+
+Scope C (chỉ đóng MOM_N, giữ MOM_S) kém hơn Scope A ở OOS/2022+ (quant-skeptic CONFIRMED, tự tái
+lập khớp chính xác). Phân tích lại đặc điểm tách riêng MOM_S: vẫn 0/13 FDR-pass, còn yếu hơn gộp
+chung. Cơ chế: MOM_S là phần lỏng lẻo còn sót lại của điều kiện momentum (không có bộ lọc chặt như
+MOMENTUM/MEGA), giữ nó không thêm giá trị mà còn chiếm vốn của kênh tốt hơn (ngay năm 2021 bong
+bóng, đóng cả 2 vẫn tốt hơn chỉ đóng MOM_N). **USER DUYỆT CUỐI CÙNG: tiến hành Scope A** — đóng
+MOM_N + MOM_S, giữ nguyên MOMENTUM/MEGA generic. Re-pin baseline R3 mới ≈27.84%/1.84/-18.2%/1.53 +
+cập nhật KB/CLAUDE.md. Đây là thay đổi production thật (chạm `golive_recommend_v23.py` money-path
++ `pt_v22_dt5g.py` + `pt_v4_dt5g.py`) — dispatch Taylor thực thi + quant-skeptic verify code change
+trước khi coi là hoàn tất. Lưu ý: BAL/LAG book hiện đang rỗng (NEUTRAL parking từ ~04/2026) nên thay
+đổi này KHÔNG ép thoát vị thế nào đang mở, chỉ ảnh hưởng entry mới từ nay trở đi.
+
 ## Dự án momentum-deals — user duyệt plan, Phase 0 bắt đầu (2026-07-11)
 
 User duyệt `mike/agents/Taylor/plan_momentum_deals_20260711.md` nguyên trạng (label +10%/0%, 13
