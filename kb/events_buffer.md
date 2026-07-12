@@ -1637,3 +1637,74 @@
 - [2026-07-12T03:04:17Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260712_025715", "source": "watcher"}
 - [2026-07-12T03:05:17Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260712_025715", "source": "watcher"}
 - [2026-07-12T03:06:17Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+
+## Consolidation 2026-07-12T03:44:52Z
+- [2026-07-12T03:07:17Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:08:17Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:09:18Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:10:18Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:10:51Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "in_progress", "note": "⚠️ re-pin run ra 28.28/1.89/-17.9/1.58 KHÔNG khớp 27.84/1.84/-18.2/1.53 đã đo — DỪNG theo chỉ đạo, đang điều tra nguyên nhân (diff CSV/log vs run đo sáng nay)"}
+- [2026-07-12T03:11:18Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:12:18Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:13:18Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:14:18Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:15:18Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:15:38Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "in_progress", "note": "root cause lệch số = run đầu thiếu BQ_LOCAL_CACHE (đọc live BQ thay vì DuckDB cache pin-vintage). Đang re-run với env đúng. Phát hiện phụ: scope C sáng nay cũng chạy live-BQ (trái khai báo cùng-cache-vintage §6.1) — sẽ báo trong finding"}
+- [2026-07-12T03:16:18Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:17:18Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:18:18Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:19:18Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:20:18Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 23, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:21:18Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:22:19Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 25, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:23:19Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 26, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:24:19Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 27, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:25:19Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 28, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:26:19Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 29, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:26:21Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "in_progress", "note": "re-pin VERIFY XONG: 27.84/1.84/-18.2/1.53 khớp chính xác, CSV canonical byte-identical với exp Scope A đã skeptic-verify, recompute độc lập khớp. Đang chạy thêm Scope C clean (cache vintage) để đóng phát hiện phụ scope-C-live-BQ trước khi commit"}
+- [2026-07-12T03:27:19Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 30, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:28:19Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 31, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:29:20Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 32, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:30:20Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 33, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:31:20Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 34, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:32:20Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 35, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:33:20Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 36, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:34:04Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "in_progress", "note": "bắt đầu: đọc plan_close_mom + xác nhận an toàn BAL/LAG rỗng"}
+- [2026-07-12T03:34:20Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 37, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:35:20Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 38, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:36:20Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 39, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:37:20Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 40, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:37:23Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "in_progress", "note": "attempt2 resume: xác nhận attempt1 đã sửa 4 file + re-pin xong (0VND, byte-identical exp Scope A) + Scope C clean xong (28.15 FULL nhưng 2021-carry, kết luận không đổi). Đang recompute độc lập từ CSV rồi làm registry/commit"}
+- [2026-07-12T03:38:20Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 41, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:39:20Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 42, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:40:20Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 43, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:40:42Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "in_progress", "note": "verify độc lập XONG (27.84/1.84/-18.2/1.53 + cửa sổ khớp; Scope C clean kém A cả 3 cửa sổ hậu-2021 → kết luận vững hơn). Đang ghi registry + plan doc rồi commit"}
+- [2026-07-12T03:41:20Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 44, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:42:21Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 45, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:43:21Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 46, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:44:08Z] Taylor/finding — SCOPE A ĐÃ THỰC THI + R3 RE-PIN 27.84/1.84/-18.2/1.53 — đóng MOM_N/MOM_S trong TIER_BAL 3 file production + harness, verify khớp chính xác, commit 4fbd492 (WC) + 9df396d (mike): {
+  "job": "Taylor_20260712_025715",
+  "status": "SCOPE_A_EXECUTED_REPIN_DONE",
+  "commits": {"WorkingClaude": "4fbd492", "mike": "9df396d"},
+  "code_changes": {
+    "files": ["deploy_golive_dt5g_v4/golive_recommend_v23.py:47 (money-path)", "pt_v22_dt5g.py:92 (so tin hieu prod)", "pt_v4_dt5g.py:61 (paper mirror)", "pt_v23_audit_2014.py:499 (harness default, cung commit de backtest==production)"],
+    "not_touched": "signal_v11_sql.py (label MOM giu lam diagnostics, dung plan §2); rollback = revert 1 dong/file",
+    "safety_precheck": "BAL/LAG live RONG (NEUTRAL parking ~04/2026) — khong vi the MOM nao bi ep thoat; PSI MOM_N_W trong so paper pt_v22 = case plan §2 da du lieu (exit theo rule)"
+  },
+  "repin": {
+    "numbers_new": "CAGR 27.84% / Sharpe 1.84 / MaxDD -18.2% / Calmar 1.53 | IS 23.15 / OOS 32.30",
+    "numbers_old": "28.82/1.90/-15.7/1.83 (pin 07-11 dt5g swap)",
+    "verify": "self-check 0 VND ca 2 book; CSV canonical BYTE-IDENTICAL voi _exp_dropMOMN-MOMS.csv (run do da quant-skeptic CONFIRMED) nen DSR 1.0000 carry nguyen; extract_peryear recompute doc lap khop chinh xac (FULL 27.84/IS 23.15/OOS 32.30); recompute Sharpe/MaxDD/cua so tu DAILY rows khop",
+    "log": "data/run_r3_repin_momclose_20260712_v2cache.log",
+    "backup": "..._pre_momclose_repin_20260712_backup.csv",
+    "registry": "entry moi 2026-07-12 — RE-PIN BASELINE R3 (dong kenh MOM) + banner dau file cap nhat"
+  },
+  "incident_caught": "run re-pin DAU thieu BQ_LOCAL_CACHE (roi ve live BQ) -> 28.28/1.89/-17.9/1.58 LECH -> DUNG dung chi dao, root-cause, re-run cache -> khop chinh xac. BQ_LOCAL_CACHE=1 tu nay la PHAN CUA lenh pin (da ghi registry). Canonical CSV sai ~15 phut Chu nhat 10:06-10:21 ICT, khong consumer nao doc",
+  "side_finding_closed": "run Scope C sang (job _022816) cung chay live-BQ, TRAI khai bao cung-cache-vintage §6.1. Re-run C sach (cache, 0 VND): 28.15/1.85/-18.1/1.56; OOS 32.38 / ex-2021 21.30 / 2022+ 20.48 / 2024+ 30.34 vs Scope A 32.30/21.92/21.30/30.87 -> C kem A o CA 3 cua so hau-2021 duoi vintage sach (ban live-BQ tung cho C nhinh 2024+, dao lai). KET LUAN GIU SCOPE A khong doi va VUNG HON; FULL-advantage cua C la 2021-carry (C +112.65 vs A +106.81). Phan 2 regime-split doc lap vintage. Plan doc §7 da dinh chinh §6.2",
+  "claude_md_proposal": {
+    "target": "CLAUDE.md goc WorkingClaude + kb/KNOWLEDGE.md canonical, muc V2.4 — chien luoc trung tam (Mike tu review + ap dung)",
+    "line_r3": "R3 NEUTRAL-only @50B: CAGR 27.84% / Sharpe 1.84 / DD -18.2% / Calmar 1.53 (pin threads=1, re-pin 2026-07-12 sau khi dong kenh MOM_N/MOM_S)",
+    "line_reason": "Kenh MOM_N/MOM_S DA DONG trong TIER_BAL tu 2026-07-12 (momdeal CP1 0/13 + CP-DVR1 NO-GO, quant-skeptic CONFIRMED, user duyet Scope A; GIU MOMENTUM/MEGA generic vi Scope B bi so do bac) — xem kb/current_ops.md + mike/agents/Taylor/plan_close_mom_20260712.md + registry entry 2026-07-12. BAL entry set gio = MEGA/MOMENTUM/DEEP_VALUE_RECOVERY/RE_BACKLOG_BUY",
+    "line_stale_note": "Luu y kem: dong Bootstrap
+- [2026-07-12T03:44:21Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "still_running", "elapsed_min": 47, "job_id": "Taylor_20260712_025715", "source": "watcher"}
+- [2026-07-12T03:44:25Z] Taylor/heartbeat — Taylor_20260712_025715: {"status": "done", "note": "finding + commit + memory xong, job hoàn tất"}
