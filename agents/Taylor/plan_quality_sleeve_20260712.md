@@ -232,3 +232,28 @@ w_LAG dormant) + re-pin baseline + quant-skeptic verify code change.
    lệ, không mở thêm biến thể extension khác (breadth-gate, EXBULL-only, v.v.) trong N này.
 3. Nếu duyệt: xác nhận scale **maintenance trial gọn** (1 checkpoint CP-QS1, ~2-3 ngày compute,
    không mở chương trình nhiều phase), NO-GO = đóng nhánh ghi registry.
+
+## 10. KẾT QUẢ — CP-QS1 = NO-GO CẢ 2 TRỤC (2026-07-12, job Taylor_20260712_080114 / _090329)
+
+Backtest đầy đủ 5 run (control + Q8-NEU/Q12-NEU/QF8-NEU/Q12-BULLEXT), self-check 0 VND, control
+tái lập pin R3 chính xác 27.84/1.84/−18.2/1.53. Kết quả vs gate §7:
+
+| | FULL | IS | OOS | LOO | Tail | Concentration | DSR excess |
+|---|---|---|---|---|---|---|---|
+| Q8-NEU | 24.95 | −6.48pp ✗ | 33.08/1.60 (Cal ✗) | âm mọi năm ✗ | −22.1 ✗ | excess âm | 0.035 ✗ |
+| Q12-NEU | 24.91 | −6.76pp ✗ | 33.29/1.78 (✓ nhưng 2021-carry) | âm mọi năm, ex20+21 −4.46pp ✗ | −22.1 ✗ | −99.8B ✗ | 0.020 ✗ |
+| QF8-NEU | 24.76 | −2.95pp ✗ | 29.09/1.54 ✗ | âm mọi năm ✗ | −24.7 ✗ | excess âm | 0.063 ✗ |
+| Q12-BULLEXT | 25.88 | −6.28pp ✗ | 34.78/1.87 (2020+2021 carry) | 2025 −19.5pp, 2018 −4.3pp ✗ | −22.1 ✗ | −131.4B ✗ | 0.095 ✗ |
+
+- OOS "đẹp" của Q12/BULLEXT = carry thuần 2021 (+24.3/+31.2pp riêng năm đó) — đúng chữ ký lỗi đã
+  bác ở MOM CP1 và fa8l F12. LOO âm ở MỌI năm bỏ-ra, cả 4 trial.
+- Concentration diagnostic: tổng excess sleeve-vs-custom30V trên vốn deployed ÂM (không có edge để
+  concentrate); max name 13.2% NAV > namecap 10% incumbent; NEUTRAL fill-shortfall p95 100%.
+- DSR excess (N=5, methodology dsr_pbo_annex): excess-SR ann âm cả 4 (−0.26…−0.48) → 0.02–0.10.
+- Trục BULL-extension: bị bác LẦN THỨ 5, chết đúng 3 năm gate riêng chỉ định (2018/2025).
+
+**Verdict: NO-GO cả trục "rổ nhỏ quality thay custom30V" lẫn trục "mở park sang BULL/EXBULL".
+Đóng nhánh, N-ledger 5/5 đóng sổ, không wire gì.** custom30V giữ nguyên vehicle parking production.
+Cơ chế giải thích: custom30V thắng nhờ breadth (30 tên/namecap 10%); cô đặc 8-12 tên mất
+diversification premium mà phần chọn lọc thêm không có alpha. Chi tiết: `data/results_registry.md`
+mục "2026-07-12 — Q-SLEEVE". Chờ quant-skeptic verify (Mike dispatch).
