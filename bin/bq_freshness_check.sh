@@ -12,7 +12,12 @@
 #   tav2_bq.vnindex_5state_dt5g_live  BLOCK — DT5G regime (pipeline step G)
 #   tav2_bq.ticker_financial          BLOCK — quarterly fundamentals (pipeline step H financial)
 #   tav2_bq.ticker_1m                 BLOCK — live screening snapshot (thêm 2026-07-11, audit Winston_20260711_031745 #3)
-#   tav2_bq.shares_outstanding_live   BLOCK — corp-action shares (writer corp_action_update_shares_live ~17:44 ICT daily)
+#   tav2_bq.shares_outstanding_live   WARN  — corp-action shares (sửa 2026-07-12, audit Winston_20260712_142100
+#                                             H2: cron update_shares_live.sh 18:40 chỉ chạy --scan detection-only,
+#                                             KHÔNG BAO GIỜ merge updated_at daily; mốc "~17:44 ICT daily" cũ là
+#                                             SAI — đó chỉ là 1 lần xử lý corp-action thủ công tình cờ. Cadence thật
+#                                             là event-driven, không phải daily, nên BLOCK trên lag≤2 sẽ false-block
+#                                             oan bất cứ khi nào không có corp-action nào cần xử lý tay trong 2 phiên)
 #   tav2_bq.custom30v_8l              BLOCK content-age + WARN writer-alive — V2.4 PRODUCTION parking basket
 #   tav2_bq.custom30_8l               BLOCK content-age + WARN writer-alive — legacy blend (audit consumers)
 #   tav2_bq.risk_rating               WARN  — research-only, KHÔNG consumer production (orphan, stale từ 2025Q4)
@@ -44,9 +49,10 @@ MAX_FIN_LAG=90       # calendar days: financial data quarterly (Q1 results ~Apr,
 # --- Ngưỡng cho các bảng mở rộng 2026-07-11 (audit Winston_20260711_031745 #3 — bài học
 # "custom30v_8l writer chết âm thầm 3 tuần"; mọi ngưỡng calibrate bằng query BQ thật, không bịa):
 MAX_1M_LAG=2         # trading days: ticker_1m cùng ingest upstream với ticker_prune → cùng ngưỡng PRICE=2
-MAX_SHARES_LAG=2     # trading days trên DATE(MAX(updated_at)): writer corp_action chạy ~17:44 ICT daily
-                     # (verify 07-11: max updated_at = 07-10 17:44 ICT) → lag bình thường = 0; cho phép 2
-                     # để 1 outage transient (writer đã có retry 3x) không chặn oan plan; ≥3 = writer chết.
+MAX_SHARES_LAG=2     # trading days trên DATE(MAX(updated_at)) — WARN-only từ 2026-07-12 (H2, xem dòng 15).
+                     # Ngưỡng giữ nguyên =2 (chỉ đổi mode, không đổi số) vì vẫn có ý nghĩa cảnh báo dù
+                     # cadence thật event-driven: lag>2 phiên liên tục vẫn đáng ngờ nếu có corp-action
+                     # đang chờ xử lý tay, chỉ là không còn đủ căn cứ để BLOCK cả pipeline vì nó.
 MAX_REBAL_AGE=98     # calendar days trên MAX(rebal_date) của custom30_8l/custom30v_8l: rebal q2m5 spacing
                      # thực tế 92d (05-02→05-05..., max shift lịch sử 1 ngày: 2024-05-06) + 6d grace.
                      # >98 = kỳ rebal kế tiếp KHÔNG materialize ~1 tuần sau hạn → đúng time-bomb 08-05.
@@ -183,7 +189,7 @@ _check "vnindex_5state_dt5g_live (DT5G)"  "tav2_bq.vnindex_5state_dt5g_live"  "t
 _check "ticker_financial (fundamentals)"  "tav2_bq.ticker_financial"          "t.time"  $MAX_FIN_LAG    "calendar" || true
 # --- mở rộng 2026-07-11 (audit Winston_20260711_031745 #3) ---
 _check "ticker_1m (live screening)"       "tav2_bq.ticker_1m"                 "t.time"  $MAX_1M_LAG     "trading"  || true
-_check "shares_outstanding_live (corp-action)" "tav2_bq.shares_outstanding_live" "DATE(t.updated_at)" $MAX_SHARES_LAG "trading" || true
+_check "shares_outstanding_live (corp-action)" "tav2_bq.shares_outstanding_live" "DATE(t.updated_at)" $MAX_SHARES_LAG "trading" "WARN" || true
 _check "custom30v_8l content (V2.4 PARK rebal-age)" "tav2_bq.custom30v_8l"    "t.rebal_date" $MAX_REBAL_AGE "calendar" || true
 _check "custom30_8l content (blend rebal-age)"      "tav2_bq.custom30_8l"     "t.rebal_date" $MAX_REBAL_AGE "calendar" || true
 # risk_rating không có cột DATE — đổi MAX(quarter) '2025Q4' thành ngày cuối quý rồi đo tuổi.
