@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v983)
+# Mike fleet — context pack (v984)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-12T14:43:42] Winston/finding — AUDIT CRON-ORDER TOAN HE THONG XONG: thu tu hien tai DUNG (0 loi order can dao); nhung audit lo 2 bug noi dung se BLOCK pipeline tuan nay (C1 DT5G-cache thu Hai, H2 shares-check thu Tu) + 4 finding phu + draft quy tac them cron moi: {"job":"Winston_20260712_142100","status":"AUDIT_DONE_READ_ONLY_NO_CHANGES","report":"mike/agents/Winston/audit_cron_order_20260712.md","method":"doc code that  …
 - [2026-07-12T15:20:49] Winston/finding — AUDIT DON DEP CRON PAPER-TRADING XONG: be mat cron da SACH — chi 1 diff (xoa dangling comment go-live flip); cac sim v11/v12/v4/compare la control-arms co chu dich (registry engine_room_oos, review 2026-12-01), pt_v22 = PRODUCTION signal book; pt_v12_live xac nhan khong nam trong lich nao; +4 finding phu (F2: cron edge_health DA ton tai, bug nam trong script): {"job": "Winston_20260712_151206", "status": "AUDIT_DONE_READ_ONLY_NO_CHANGES", "report": "mike/agents/Winston/audit_paper_cron_cleanup_20260712.md", "method":  …
 - [2026-07-12T15:40:31] quant-skeptic/verification — ✅ CONFIRMED VERIFY: ad-hoc claim: {"finding_topic": "ad-hoc claim — Fix C1: publish_gated_state.py os.environ.pop('BQ_LOCAL_CACHE') forces live BQ reads, process-local, no side effects", "verdic …
 - [2026-07-12T15:45:43] Taylor/finding — Fix C1 CRITICAL: publish_gated_state.py doc BQ live thay vi cache - commit 4995262: {"job": "Taylor_20260712_151135", "trace_parent": "Winston_20260712_142100", "status": "DONE_COMMITTED", "commit": "4995262 (repo WorkingClaude)", "root_cause": …
@@ -11,6 +10,7 @@
 - [2026-07-12T15:57:17] Taylor/finding — REFUTED premise: lag_edge_health.csv KHONG co bug catch-up — series structurally current (VN earnings off-season), tu-advance ~08/2026; KHONG sua code: {"job": "Taylor_20260712_155038", "trace_parent": "Winston_20260712_151206", "status": "NO_BUG_NO_CHANGE — bao cao lai truoc khi dong cham code (dung dispatch i …
 - [2026-07-12T15:59:17] quant-skeptic/verification — ✅ CONFIRMED VERIFY: ad-hoc claim: {"finding_topic": "ad-hoc claim — Fix H2 HIGH (mike 6459b6d): shares_outstanding_live freshness check BLOCK→WARN because cron runs --scan detection-only, no dai …
 - [2026-07-12T16:01:42] quant-skeptic/verification — ✅ CONFIRMED VERIFY: ad-hoc claim: {"finding_topic": "ad-hoc claim — H2 HIGH fix: shares_outstanding_live freshness check BLOCK→WARN (mike commit 6459b6d)", "verdict": "CONFIRMED", "confidence":  …
+- [2026-07-12T16:02:11] quant-skeptic/verification — ✅ CONFIRMED VERIFY: FIX H2 HIGH XONG: shares_outstanding_live freshness check BLOCK->WARN (commit 6459b6d repo mike) — verify sandbox PASS: WARN return 0, khong set FAILED, khong chan pipeline 19:00/DollarBill: {"finding_topic": "FIX H2 HIGH: shares_outstanding_live freshness check BLOCK->WARN (commit 6459b6d repo mike, bin/bq_freshness_check.sh) — sandbox verify WARN  …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -65,16 +65,27 @@ LAG book giới hạn bởi deal-flow (chỉ deploy ~42% vốn) nên tăng trầ
 Phần fix bug đi kèm (spec-drift w_LAG trong `golive_recommend_v23.py`) đã xong + quant-skeptic
 CONFIRMED riêng (commit `a776a9a`). Không mở N-budget mới cho hướng này trừ khi có dữ liệu mới.
 
-## `lag_edge_health.csv` staleness — ĐÃ GIẢI QUYẾT, tiền đề ban đầu SAI (2026-07-12, cập nhật)
-Ghi chú gốc (dòng này, trước sửa) nói "KHÔNG có lịch refresh tự động" — **SAI ở 2 điểm**, xác nhận
-qua 2 job Winston sau đó (`Winston_20260712_114800` rồi `Winston_20260712_121456`), và tái xác nhận
-độc lập lần 3 qua audit crontab hôm nay (`Winston_20260712_151206`, finding F2): `edge_health_monitor.py
---refresh` **ĐÃ nằm trong lịch daily** (`papertrade_daily.sh` step [22], từ trước 2026-06-21) và chạy
-`[ok]` đều đặn — bug thật nằm TRONG SCRIPT (`--refresh` chỉ re-pull panel IC hàng tháng, không catch-up
-chuỗi LAG edge), không phải thiếu cron. Việc "wire cron" ban đầu là thừa — đã KHÔNG làm, thay vào đó
-thêm probe WARN-only mtime-check vào `bq_freshness_check.sh` (commit `f67e09a`, job `_121456`) để ít
-nhất cảnh báo khi file quá cũ so ngưỡng, trong lúc bug refresh-logic thật còn chờ fix riêng (chưa có
-job fix logic — cần dispatch nếu muốn giải quyết tận gốc trước khi LAG refill cuối tháng 7).
+## `lag_edge_health.csv` staleness — KHÔNG PHẢI BUG, đã đóng hoàn toàn (2026-07-12, đính chính lần 3)
+Chuỗi tiền đề sai liên tiếp, mỗi lần đào sâu hơn lại lộ ra tiền đề TRƯỚC đó cũng sai:
+1. Ban đầu: "KHÔNG có lịch refresh tự động" — SAI, `Winston_20260712_114800`/`_121456` xác nhận cron có.
+2. Sau đó: "cron có nhưng `--refresh` không catch-up chuỗi LAG edge, bug nằm trong script" — CŨNG SAI.
+   Dispatch `Taylor_20260712_155038` (yêu cầu fix logic) trả về: **premise sai, không có bug, KHÔNG
+   sửa code** (đúng kỷ luật báo cáo lại thay vì tự mở rộng khi thực tế khác dự kiến). Bằng chứng:
+   `lag_edge_health()` chạy VÔ ĐIỀU KIỆN mỗi lần invoke (không phụ thuộc flag `--refresh`), rebuild
+   toàn bộ series từ cache daily mỗi lần. Input tươi (`earnings_px.pkl` tới 07-10, `earnings_events_
+   classified.csv` rebuild daily). BQ live xác nhận **zero** sự kiện NP_R từ 05-05→07-07 (khoảng trống
+   giữa 2 mùa BCTC — có thật, không phải lỗi). Sự kiện kế tiếp (MBS Q2, rel 07-08) cần hold 25 phiên
+   mới đủ điều kiện vào series, hoàn tất **~08-19**. Pattern mùa vụ 2012-2025 xác nhận: mọi năm series
+   đều dừng ~05-09..05-11 rồi nhảy tiếp ~07-15..07-26 — dừng ở 05-11 ngày 07-12 là ĐÚNG lịch sử. Chạy
+   thử thật: CSV ghi đè (mtime advance) nhưng md5 byte-identical — đây chính là "mtime tươi/content cũ"
+   bị 2 lần trước đọc nhầm thành staleness.
+3. **Kết luận cuối cùng: verdict TROUGH hiện tại (mean12 +0.45%, n=631) là số đúng và tươi nhất có thể
+   có — w_LAG gate đọc đúng dữ liệu, KHÔNG có gap production.** Probe WARN-only mtime-check (commit
+   `f67e09a`) vẫn giữ nguyên, vô hại (chỉ cảnh báo khi mtime quá cũ so ngưỡng, không liên quan gì tới
+   nhầm lẫn content này). Không cần action nào thêm.
+4. **Falsifiable check cho tương lai** (Taylor đề xuất, chưa cần làm gì bây giờ): nếu đến ~2026-08-25
+   mà `lag_edge_health.csv` VẪN dừng ở 05-11 trong khi `earnings_events_classified.csv` đã có sự kiện
+   Q2 đủ điều kiện hold-window — LÚC ĐÓ mới là bug thật, cần dispatch lại kiểm tra.
 
 ## Dự án "Q-sleeve" (rổ nhỏ chất lượng cao, cảm hứng AlphaLens) — ĐÓNG, NO-GO cả 2 trục (2026-07-12)
 User đề xuất thêm 1 sleeve buy-and-hold rổ nhỏ chất lượng cao (lấy cảm hứng AlphaLens) bổ sung cạnh
