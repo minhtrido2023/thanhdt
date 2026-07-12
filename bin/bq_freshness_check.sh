@@ -16,6 +16,8 @@
 #   tav2_bq.custom30v_8l              BLOCK content-age + WARN writer-alive — V2.4 PRODUCTION parking basket
 #   tav2_bq.custom30_8l               BLOCK content-age + WARN writer-alive — legacy blend (audit consumers)
 #   tav2_bq.risk_rating               WARN  — research-only, KHÔNG consumer production (orphan, stale từ 2025Q4)
+#   ticker_financial breadth-probe    WARN  — đếm cohort quý mới trong mùa BCTC (MAX(time) toàn bảng
+#                                             bị 1 mã early-filer reset đồng hồ — audit Winston_20260712_122313 F1)
 #
 # Usage: bin/bq_freshness_check.sh [--quiet]
 set -uo pipefail
@@ -210,6 +212,76 @@ else
   echo "WARN lag_edge_health.csv: FILE KHÔNG TỒN TẠI — non-blocking"
   "$ROOT/bin/notify_thread.sh" "$warn_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
   WARNED=$((WARNED + 1))
+fi
+
+# ticker_financial breadth-probe (Winston_20260712_124928, audit F1 Winston_20260712_122313) —
+# WARN-only, CHỈ đánh giá trong mùa BCTC. Gap được vá: _check ticker_financial ở trên đo
+# MAX(t.time) TOÀN BẢNG — 1 mã công bố sớm (MBS 2026-07-08) đã reset đồng hồ cho cả bảng,
+# vendor stall giữa mùa sẽ im lặng tới MAX_FIN_LAG=90d (fa_ratings gate chỉ silent-skip,
+# LAG refill lặng lẽ không xảy ra). Probe: đếm COUNT(DISTINCT ticker) của quý-vừa-kết-thúc,
+# so với lịch sử CSV — WARN nếu số này ĐỨNG YÊN >= FIN_BREADTH_STALL_DAYS calendar days,
+# TRỪ khi cohort đã ~đầy (>= FIN_BREADTH_SAT_PCT% quý trước — cuối mùa đứng yên là hành vi
+# đúng, không phải stall; tránh false-positive khi thực sự không còn gì mới để báo cáo).
+# "Trong mùa BCTC" = [quarter_end+10d, quarter_end+62d] (Q2/2026: 07-10 → 08-31; hạn nộp
+# BCTC quý VN = 20-30d sau quý, thực tế Q1/2026 hoàn tất ~05-04 = qend+34d ⇒ 62d phủ trọn
+# late-filer + đệm). Ngoài mùa: skip hẳn (không query, không WARN — cohort quý cũ đứng yên
+# ở ~full là bình thường). Mỗi lần chạy trong mùa append 1 dòng/ngày vào CSV lịch sử —
+# vừa là state cho stall-check, vừa là curve tham chiếu cho mùa BCTC sau.
+FIN_BREADTH_CSV="$WORKDIR/data/ticker_financial_breadth.csv"
+FIN_BREADTH_STALL_DAYS=5   # ~5-7d theo đề xuất audit; 5 = chặt nhất mà vẫn nuốt trọn 1 weekend
+                           # + 1 ngày lễ (cron T2-T6: Fri→Wed = 5 calendar days, không false-fire
+                           # chỉ vì cuối tuần không có filing mới)
+FIN_BREADTH_SAT_PCT=90     # cohort >= 90% số mã quý trước = mùa đã hoàn tất, đứng yên hợp lệ
+
+read -r EXPECTED_Q IN_SEASON <<< "$(python3 -c "
+import datetime as dt, calendar
+today = dt.date.today()
+q_end_month = ((today.month - 1) // 3) * 3   # 0,3,6,9 — tháng cuối của quý VỪA KẾT THÚC
+if q_end_month == 0:
+    q_end = dt.date(today.year - 1, 12, 31); q_num, q_year = 4, today.year - 1
+else:
+    q_end = dt.date(today.year, q_end_month, calendar.monthrange(today.year, q_end_month)[1])
+    q_num, q_year = q_end_month // 3, today.year
+in_season = 1 if q_end + dt.timedelta(days=10) <= today <= q_end + dt.timedelta(days=62) else 0
+print(f'{q_year}Q{q_num} {in_season}')
+" 2>/dev/null)"
+
+if [ "${IN_SEASON:-0}" = "1" ]; then
+  PREV_Q="$(python3 -c "q='$EXPECTED_Q'; y,n=int(q[:4]),int(q[-1]); print(f'{y-1}Q4' if n==1 else f'{y}Q{n-1}')")"
+  breadth_row=$(bq query --use_legacy_sql=false --project_id="$PROJECT" --format=csv --quiet "
+    SELECT
+      (SELECT COUNT(DISTINCT t.ticker) FROM \`${PROJECT}.tav2_bq.ticker_financial\` AS t WHERE t.quarter='${EXPECTED_Q}') AS n_cur,
+      (SELECT COUNT(DISTINCT t.ticker) FROM \`${PROJECT}.tav2_bq.ticker_financial\` AS t WHERE t.quarter='${PREV_Q}') AS n_prev" \
+    2>/dev/null | tail -1)
+  n_cur="${breadth_row%%,*}"; n_prev="${breadth_row##*,}"
+  if [ -n "$n_cur" ] && [ "$n_cur" -ge 0 ] 2>/dev/null && [ "$n_prev" -ge 1 ] 2>/dev/null; then
+    [ -f "$FIN_BREADTH_CSV" ] || echo "date,quarter,n_tickers,n_prev_quarter" > "$FIN_BREADTH_CSV"
+    # 1 dòng/ngày: chạy lại cùng ngày thì thay dòng cũ (giữ số đo mới nhất)
+    grep -v "^$TODAY," "$FIN_BREADTH_CSV" > "$FIN_BREADTH_CSV.tmp" 2>/dev/null && mv "$FIN_BREADTH_CSV.tmp" "$FIN_BREADTH_CSV"
+    echo "$TODAY,$EXPECTED_Q,$n_cur,$n_prev" >> "$FIN_BREADTH_CSV"
+    # dòng GẦN NHẤT cùng quý có tuổi >= STALL_DAYS (so sánh chuỗi YYYY-MM-DD = so sánh ngày);
+    # chưa đủ lịch sử (đầu mùa) → ref_n rỗng → PASS (grace period, đúng thiết kế)
+    BREADTH_CUTOFF="$(date -d "-${FIN_BREADTH_STALL_DAYS} days" +%Y-%m-%d)"
+    ref_n=$(awk -F, -v q="$EXPECTED_Q" -v cut="$BREADTH_CUTOFF" '$2==q && $1<=cut {n=$3} END {print n}' "$FIN_BREADTH_CSV")
+    sat_floor=$(( n_prev * FIN_BREADTH_SAT_PCT / 100 ))
+    if [ -n "$ref_n" ] && [ "$n_cur" -le "$ref_n" ] 2>/dev/null && [ "$n_cur" -lt "$sat_floor" ]; then
+      warn_msg="🟡 FIN BREADTH WARN ($TODAY $NOW_ICT): ticker_financial ${EXPECTED_Q} đứng yên ở ${n_cur} mã suốt >=${FIN_BREADTH_STALL_DAYS}d giữa mùa BCTC (quý trước ${PREV_Q}=${n_prev} mã). Vendor có thể đã stall — check MAX(time) ở trên KHÔNG bắt được case này (1 mã early-filer đã reset đồng hồ cả bảng). Không chặn pipeline; kiểm tra nguồn ticker_financial."
+      echo "WARN fin-breadth ${EXPECTED_Q}: n=${n_cur} đứng yên >=${FIN_BREADTH_STALL_DAYS}d (ref=${ref_n}, sat_floor=${sat_floor}) — non-blocking"
+      "$ROOT/bin/notify_thread.sh" "$warn_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+      WARNED=$((WARNED + 1))
+    else
+      [ -z "$QUIET" ] && echo "OK   fin-breadth ${EXPECTED_Q}: n=${n_cur}/${n_prev} mã (ref>=${FIN_BREADTH_STALL_DAYS}d: ${ref_n:-chưa đủ lịch sử})"
+    fi
+  else
+    # Query breadth fail trong khi _check ticker_financial phía trên vẫn chạy được = bất thường
+    # riêng của probe → WARN fail-safe (cùng triết lý age=999 của _check_lastmod), không chặn.
+    warn_msg="🟡 FIN BREADTH WARN ($TODAY $NOW_ICT): probe đếm cohort ${EXPECTED_Q} KHÔNG query được (kết quả: '${breadth_row:-rỗng}') — không đo được breadth hôm nay, kiểm tra bq/logs."
+    echo "WARN fin-breadth ${EXPECTED_Q}: query fail — non-blocking"
+    "$ROOT/bin/notify_thread.sh" "$warn_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+    WARNED=$((WARNED + 1))
+  fi
+else
+  [ -z "$QUIET" ] && echo "SKIP fin-breadth: ngoài mùa BCTC (quý roll-in ${EXPECTED_Q:-?}, cửa sổ = qend+10d..qend+62d)"
 fi
 
 [ "$WARNED" -gt 0 ] && echo "NOTE: $WARNED WARN non-blocking (đã post Discord Trading Daily) — pipeline vẫn chạy"
