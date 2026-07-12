@@ -186,3 +186,81 @@ chương trình nhiều-phase.** Lý do hai chiều:
 2. Duyệt family 3 rule + ngưỡng pre-registered (rating≥4, route {COMPOUNDER,POWER}, size 10/5/2.5%) — §4.
 3. Duyệt sổ N=5 đóng + gate CP-DVR1 (§5), chấp nhận trước NO-GO = đóng nhánh (b).
 4. Xác nhận scale: trial gọn maintenance (không mở chương trình nhiều phase) — §7.
+
+---
+
+## CP-DVR1 KẾT QUẢ — VERDICT: **NO-GO** (đóng nhánh (b), 2026-07-12, job Taylor_20260712_010527)
+
+> Backtest chạy trong job Taylor_20260711_235305 (4 run chính + sensitivity h=7.5% + PIT spot-check
+> hoàn tất trước khi job timeout ở bước DSR). Job này (Taylor_20260712_010527) KHÔNG chạy lại backtest
+> nào — chỉ đọc lại 5 CSV kết quả, tự recompute độc lập toàn bộ số (extract từ `combined_nav`),
+> tính bổ sung LOO ex-2020 (và LOO đủ 13 năm), và viết kết luận. **User quyết định: LOO ex-2021 ≈ 0
+> của R2 đã đủ bằng chứng NO-GO, không cần chạy DSR.**
+
+### Harness & tính toàn vẹn (verify lại từ artifact thật, không tin heartbeat)
+- 5 file `data/v23_golive_audit_..._exp_dvr8l{base,r1,r2,r3,r2h75}.csv` — đủ, không đè canonical.
+- Self-check **0 VND cả 5 run** (cash-flow identity + final NAV identity, log `data/dvr8l_exp/run_*_cache_20260712.log`).
+- **base tái lập ĐÚNG baseline R3 re-pinned**: 28.82% / Sharpe 1.90 / MaxDD −15.7% / Calmar 1.83,
+  final NAV 1.172,70B — khớp registry pin sau fix F3.
+- PIT spot-check (`data/dvr8l_exp/spotcheck_result_20260712.log`): Part A signal-level 20 rows **0 FAIL**,
+  Part B TX entry-level suffix 14 entries **0 FAIL**.
+- Mọi số dưới đây do job này tự recompute từ CSV (script tương đương `extract_peryear.py` + LOO
+  re-chain daily returns) — khớp 100% số engine log và heartbeat job trước.
+
+### Bảng kết quả 4 config + sensitivity (@50B, threads=1)
+
+| Config | FULL CAGR | IS 2014–19 | OOS 2020+ | OOS Calmar | MaxDD | Calmar Full | Sharpe | Δ Full vs base |
+|---|---|---|---|---|---|---|---|---|
+| **base (R3 re-pinned)** | **28.82%** | 25.86% | **31.59%** | 2.012 | −15.70% | 1.835 | 1.90 | — |
+| R1 route-tilt | 28.19% | 24.84% | 31.34% | 2.005 | −15.63% | 1.803 | 1.87 | **−0.63pp** |
+| R2 fragility-tilt | 29.72% | 25.69% | 33.56% | 2.136 | −15.71% | 1.892 | 1.95 | **+0.90pp** |
+| R3 combined-tilt | 27.97% | 25.70% | 30.08% | 1.915 | −15.71% | 1.781 | 1.86 | **−0.85pp** |
+| R2h75 (sens 5%→7.5%) | 29.74% | 25.63% | 33.66% | 2.143 | −15.71% | 1.894 | 1.95 | +0.92pp |
+
+### Gate check từng config
+
+**R1 (route-tilt) — FAIL rõ về câu chữ:** OOS 31.34 < base 31.59 (fail gate OOS); IS 24.84 = −1.02pp
+so base, vượt xa tolerance 0.3pp (fail gate IS); LOO delta ÂM ở CẢ 13 năm bỏ-ra (−0.07..−0.93pp).
+Trục route (V=0.259, mạnh nhất ở signal-level) KHÔNG dịch thành NAV edge — half-size COMPOUNDER cắt
+đúng cả các deal COMPOUNDER thắng lớn (win-rate 41% ≠ thua chắc; breadth bị phạt đau hơn phần né được).
+
+**R3 (combined) — FAIL rõ:** OOS 30.08 < 31.59 (fail); LOO âm mọi năm (−0.24..−1.16pp); 2025 mất
+−9.2pp riêng năm đó (45.60 vs 54.78). Nhân 2 tilt chồng lên nhau phạt kép quá tay.
+
+**R2 (fragility-tilt, rating≥4 → half-size) — đạt CÂU CHỮ 4/5 gate đo được, nhưng FAIL TINH THẦN:**
+
+| Gate | Số | Câu chữ | Tinh thần |
+|---|---|---|---|
+| OOS CAGR & Calmar ≥ base | 33.56 ≥ 31.59 ✓, 2.136 ≥ 2.012 ✓ | PASS | — |
+| IS không tệ hơn 0.3pp | 25.69 vs 25.86 = −0.17pp | PASS | — |
+| LOO không âm mọi năm, đặc biệt ex-2021/ex-2020 | ex-2020 **+1.337pp**; ex-2021 **+0.014pp** (min); 11 năm khác +0.79..+1.08pp | PASS (không âm) | **FAIL — ex-2021 ≈ 0** |
+| Tail MaxDD | −15.71% vs −15.70% (đồng nhất) | PASS | — |
+| DSR ≥ 0.95 | KHÔNG CHẠY (quyết định user — moot khi đã NO-GO) | — | — |
+
+**Vì sao ex-2021 ≈ 0 là án tử (per-year delta R2 vs base):**
+2018 **−1.16** · 2019 +0.04 · 2020 **−3.91** · **2021 +17.89** · 2022 −0.32 · 2023 −0.04 ·
+2024 +1.88 · 2025 +2.51 · 2026 +1.10 (2014–17: 0.00, DVR tilt chưa fire).
+Toàn bộ +0.90pp Full nằm gọn trong 1 năm 2021 (+17.89pp riêng năm đó); phần còn lại của lịch sử
+tự triệt tiêu (2020 −3.91 nuốt sạch 2024–26 cộng lại). Đây đúng chữ ký F12 ở dự án fa8l
+(2021 +20.95pp làm đẹp số full, LOO ex-2021 lộ chân tướng) — chuẩn đã dùng để bác F12 thì phải
+bác R2, và user đã xác nhận trực tiếp quyết định này. 2021 cũng chính là năm chiếm 48% mẫu DVR
+labeled (caveat §8.2 khai báo trước) — không phải edge lặp lại được, là regime-concentration.
+
+**Sensitivity R2h75 (5%→7.5%) đóng đinh thêm:** annual 2018 29.61 · 2019 13.14 · 2020 25.44 ·
+2021 **120.57** · 2022 −4.92 · 2023 23.45 · 2024 25.07 · 2025 57.11 · 2026 0.37 — cùng chữ ký
+dồn-2021 (Δ2021 +20.33pp); và LOO **ex-2021 = −0.077pp ÂM** → chỉ nhích tilt nhẹ là dấu ex-2021
+đổi chiều. Cái "+0.014pp không âm" của R2 là may mắn ranh giới, không phải robustness.
+
+### Kết luận
+
+- **CP-DVR1 = NO-GO cả 3 rule.** R1/R3 fail thẳng câu chữ; R2 pass câu chữ nhờ đúng 1 năm 2021
+  nhưng fail tinh thần gate (edge không lặp lại được qua năm), sensitivity flip dấu xác nhận.
+- **N-ledger DVR-8L-SIZING: 5/5 đã dùng, ĐÓNG SỔ.** Không mở thêm biến thể/ngưỡng nào — đúng cam
+  kết §7 "nếu NO-GO thì dừng hẳn, không thử thêm ngưỡng khác". DSR bỏ qua theo quyết định user.
+- **Toàn chuỗi dự án momentum-deals ĐÓNG**: Phase 1 CP1 NO-GO (0/13 feature) + nhánh (b) CP-DVR1
+  NO-GO. Khuyến nghị từ Phase 1 **giữ nguyên hiệu lực, không có gì thay đổi**: đóng/thu hẹp kênh
+  MOM_N/MOM_S, tái phân bổ về DVR/RE_BACKLOG (chờ user quyết). Insight "8L phân tách ở DVR" là
+  thật ở signal-level nhưng không chuyển thành NAV edge khai thác được bằng sizing-tilt — nhất
+  quán với bài học chung của hệ: signal-level separation ≠ NAV-level edge (proxy vs harness gap
+  đã thấy ở fa8l Phase 1→2).
+- Production V2.4/R3 **không đổi gì** — baseline 28.82%/1.90/−15.7%/1.83 nguyên trạng.
