@@ -423,8 +423,34 @@ không thể đảo ngược: bot tự đặt lệnh thật lần đầu, không
   sát diễn biến portfolio để đề xuất ngày review cụ thể khi đủ điều kiện** — không tự động, không
   phải 1 con số đã chốt sẵn.
 
-## Chờ user quyết định
-- V2.5 live-recommend integration: **2026-07-07** (trigger tự động)
+## V2.5 leverage — VERDICT: NO-GO, giữ DISABLED (2026-07-12, quant-skeptic CONFIRMED)
+User hỏi "V2.5 đã đủ tự tin chuyển production chưa" (mốc nhắc 2026-07-07 đã treo quá hạn) — Mike tự
+đọc lại toàn bộ lịch sử research, phát hiện edge +0.92pp trước đây có dấu hiệu thiếu vững (mẫu
+mỏng, OOS-only, mâu thuẫn nhãn "Spyros-approved" MGE 1.3 vs 1.5). User duyệt làm 1 vòng kiểm tra bổ
+sung: giải quyết mâu thuẫn approval + LOO theo episode + DSR/PBO riêng cho lever.
+
+**Kết quả:**
+1. **Mâu thuẫn MGE giải quyết**: nhãn "Spyros-approved" MGE 1.5 trong `trading_rules.json` là ĐÚNG
+   — Spyros REJECT 2.0/APPROVE 1.5 có điều kiện (06-27), điều kiện còn hiệu lực: "bất kỳ S4 fire nào
+   ở 1.5x trong 6 tháng đầu → dừng+review".
+2. **LOO + DSR (quant-skeptic tự tái hiện độc lập, kể cả bằng md5 checksum)**: edge +0.92pp FULL
+   thực ra là **IS-artifact** (IS +1.88pp, **OOS −0.05pp** — fail thẳng quy chuẩn "rớt OOS = loại").
+   Cơ chế tách khỏi baseline từ **2014** (6 năm trước lần lever đầu tiên) = path-divergence, không
+   phải alpha thật. LOO: 2 trong 3 episode (2022/2023) bị trần NAV 100B vô hiệu hoàn toàn (CSV
+   byte-identical, xác nhận bằng md5); chỉ COVID-2020 thực sự lever, đóng góp ròng **+0.04pp**. DSR
+   trên excess series = 0.18-0.56 (RED FLAG mọi N, ngưỡng an toàn ≥0.95). LEVnocap (proxy đúng cho
+   NAV live ~1B, trần không bind) → OOS **âm** (-0.19pp).
+3. **VERDICT: NO-GO, giữ V2.5 DISABLED.** quant-skeptic CONFIRMED độ tin cậy cao — không tìm được
+   lỗ hổng, đồng ý đây là kết luận thận trọng đúng đắn (n=1 episode hiệu dụng không đủ CHỨNG MINH
+   lever xấu, nhưng cũng không đủ để tin nó tốt — mặc định DISABLED là đúng cho hệ thống đang live).
+
+**Điều kiện tái xét sau này** (không tự động, cần user quyết lại khi đủ điều kiện):
+(a) tích lũy thêm episode capitulation qua theo dõi S2 trigger trên paper (không bật gì ở live);
+(b) nếu đo lại: đổi phương pháp sang episode-windowed sim (±60 ngày quanh từng episode, cùng path
+nền) thay vì diff 2 full-run — tránh lẫn path-divergence noise; gate = DSR excess ≥0.95 + OOS-dương.
+
+Chi tiết đầy đủ: `data/results_registry.md` mục "V2.5 LEVERAGE VERIFICATION" (2026-07-12), trace bus
+`Taylor_20260712_054553` → `Taylor_20260712_063143`.
 
 ## Reliability hardening (2026-07-02, theo yêu cầu user — 4 việc AgentOps)
 Đã triển khai đủ 4 mục theo thứ tự ưu tiên, chi tiết + self-check trong `kb/INCIDENTS.md` và
