@@ -48,6 +48,27 @@ cập nhật KB/CLAUDE.md. Đây là thay đổi production thật (chạm `goli
 trước khi coi là hoàn tất. Lưu ý: BAL/LAG book hiện đang rỗng (NEUTRAL parking từ ~04/2026) nên thay
 đổi này KHÔNG ép thoát vị thế nào đang mở, chỉ ảnh hưởng entry mới từ nay trở đi.
 
+## DỰ ÁN MOMENTUM-DEALS ĐÃ KHÉP KÍN HOÀN TOÀN — production LIVE (2026-07-12, commit 4fbd492 + 9df396d)
+
+Thực thi xong: **`MOMENTUM_N`/`MOMENTUM_S` đã bị bỏ khỏi `TIER_BAL`** ở 3 file production
+(`golive_recommend_v23.py` money-path, `pt_v22_dt5g.py`, `pt_v4_dt5g.py`) + harness
+`pt_v23_audit_2014.py` cùng commit — `signal_v11_sql.py` giữ nguyên (label MOM chỉ còn làm chẩn
+đoán, rollback = revert 1 dòng/file). Baseline R3 chính thức mới: **CAGR 27.84% / Sharpe 1.84 /
+MaxDD −18.2% / Calmar 1.53** (re-pin, byte-identical với bản đã quant-skeptic CONFIRMED trước đó).
+`kb/canonical.md` đã cập nhật số tham chiếu + ghi lại quyết định đóng kênh. quant-skeptic CONFIRMED
+(high confidence) cho CHÍNH việc sửa code — verify 4 file đúng ý, không side-effect, số liệu tái
+lập chính xác từ NAV thô.
+
+**Sự cố phụ bắt được + tự sửa trong lúc thực thi**: thiếu `BQ_LOCAL_CACHE` khiến 1 lần chạy rơi về
+đọc BQ sống thay vì cache pin — đã root-cause, sửa, ghi `BQ_LOCAL_CACHE=1` thành phần bắt buộc của
+lệnh pin từ nay. Phát hiện thêm: lần đo Scope C buổi sáng cùng ngày cũng dính lỗi tương tự (không
+ảnh hưởng kết luận chính Scope A) — đã chạy lại sạch, Scope A càng vững hơn ở các cửa sổ hậu-2021.
+
+**Hiệu lực thật**: BAL/LAG hiện đang rỗng (NEUTRAL parking từ ~04/2026) nên KHÔNG ép đóng vị thế nào
+đang mở — chỉ ảnh hưởng entry mới từ lần DollarBill lập plan tiếp theo trở đi.
+
+**Việc còn treo (không khẩn)**: dọn file tạm ở repo root (`pt_v23_scopeC_tmp_20260712.py`) khi tiện.
+
 ## Dự án momentum-deals — user duyệt plan, Phase 0 bắt đầu (2026-07-11)
 
 User duyệt `mike/agents/Taylor/plan_momentum_deals_20260711.md` nguyên trạng (label +10%/0%, 13
