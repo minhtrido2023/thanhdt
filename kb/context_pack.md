@@ -1,4 +1,4 @@
-# Mike fleet — context pack (v933)
+# Mike fleet — context pack (v934)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
@@ -52,6 +52,13 @@ Taylor cần scope/plan trước khi đo (đúng kỷ luật), không nhảy th�
 đã gửi, route qua Discord topic 1525112292159651940 (dự án này có topic riêng, tách khỏi vận hành
 chung — user tự nhận ra và yêu cầu tách, Mike xác nhận không tự chuyển phiên sống sang topic khác
 được, chỉ dispatch việc nền route đúng topic).
+
+**Plan DVR-8L sizing DUYỆT, backtest bắt đầu (2026-07-12)**: `plan_dvr_8l_sizing_20260712.md` —
+hướng size-tilt (không hard-gate), 3 rule pre-registered (R1 route-tilt, R2 fragility-tilt, R3
+combined), N=5 đóng sổ, gate CP-DVR1 chặt (OOS CAGR+Calmar ≥ baseline, LOO không âm mọi năm kể cả
+ex-2021/ex-2020, tail không xấu hơn, DSR≥0.95, quant-skeptic CONFIRMED bắt buộc). Kỳ vọng khai báo
+trước: +0.2-0.8pp CAGR — nếu ra +3-5pp phải nghi bug trước khi mừng. User duyệt nguyên trạng, Taylor
+tiến hành backtest (module tilt + 4 run + sensitivity/LOO).
 
 ## fa_ratings → fa_ratings_8l: user CHỐT hướng (c) — dự án re-tune SIGNAL_V11 bucket trên 8L (2026-07-11)
 
