@@ -9,7 +9,10 @@ Vận hành chiến lược **production V2.4**, **go-live 2026-07-01**, tài kh
 - = **V2.3A + custom30V parking (NEUTRAL) + gated-overflow (bear-washout) + HAG eq_flag fix**.
 - 2 book: **BAL** (momentum SIGNAL_V11, yieldcombo: 1/PE + 1/PCF) + **LAG** (PEAD/earnings drift).
 - Allocator w_LAG: {CRISIS 50 / BEAR 0 / NEUTRAL-BULL-EXBULL 65}, band ±10pp.
-- **R3 NEUTRAL-only @50B: CAGR 28.05% / Sharpe 1.87 / DD −18.8% / Calmar 1.50** (pin threads=1).
+- **R3 NEUTRAL-only @50B: CAGR 27.84% / Sharpe 1.84 / DD −18.2% / Calmar 1.53** (pin threads=1,
+  re-pin 2026-07-12 sau khi đóng kênh MOM_N/MOM_S trong TIER_BAL — commit `4fbd492`, quant-skeptic
+  CONFIRMED; xem `data/results_registry.md` + `plan_close_mom_20260712.md`). Số cũ 28.05%/28.82% đã
+  lỗi thời qua 2 lần re-pin (DT5G swap 07-11, rồi MOM closure 07-12).
 - Bootstrap 5th-pct: CAGR 18.6%, DD −28.6% (anchor DD ~−29%, KHÔNG phải −18%).
 - **NEUTRAL parking custom30V = phần tin cậy nhất: +7.4pp Full.** (30 mã, cap 0.10)
 - Bull parking: NAV ≥150B. **(30, 0.15) = OVERFIT**, walk-forward bác.
@@ -19,6 +22,14 @@ Vận hành chiến lược **production V2.4**, **go-live 2026-07-01**, tài kh
 custom30V permanent-exclude 7 tên (−1.0pp); LAG SUE-tilt 3 tầng (−0.66pp); hold-neutral exit (−47B);
 stability floor ROE_Min<0 (−0.45pp); liq-tilt custom30 (REFUTED); deep-discount sleeve (PARKED);
 pbcombo dual-vehicle (Calmar 1.48→1.37); gq_score growth gate (−IC); composite v3 as entry-selector (NO).
+
+### MOM_N/MOM_S ĐÃ ĐÓNG (2026-07-12) — không phải "thử bị loại", là thay đổi production chính thức
+Sau chuỗi R&D đầy đủ (momdeal Phase 1 CP1 NO-GO 0/13 feature → nhánh DVR-8L-sizing CP-DVR1 NO-GO →
+đo tác động Scope A/B → kiểm tra tách MOM_N-vs-MOM_S, tất cả quant-skeptic CONFIRMED), user duyệt
+đóng `MOMENTUM_N`+`MOMENTUM_S` khỏi `TIER_BAL` (giữ nguyên `MOMENTUM`/`MEGA` generic — Scope B đóng
+cả họ bị số đo bác, generic vẫn đóng góp thật). Lý do: thành công lịch sử của 2 tier này chủ yếu do
+dồn mẫu regime 2020-21, không phải pattern lặp lại được; hậu-2021 gần như hoà vốn. Chi tiết đầy đủ:
+`plan_close_mom_20260712.md`, `plan_dvr_8l_sizing_20260712.md`, `plan_momentum_deals_20260711.md`.
 
 ### DT5G — market regime gate
 - Production: `tav2_bq.vnindex_5state_dt5g_live` qua `get_gated_state()`.
