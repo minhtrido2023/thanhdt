@@ -16,6 +16,10 @@
 # (Discord Trading Daily + bus event) when anything failed.
 set -uo pipefail
 
+# Auth: CLOUDSDK_CONFIG = dtienthanh@gmail.com (read-WRITE) — without this, cron's default
+# gcloud config is bq-reader-8l (read-only) and every BQ write silently fails.
+source /home/trido/thanhdt/WorkingClaude/wc_env.sh
+
 ROOT="/home/trido/thanhdt/WorkingClaude"
 MIKE="$ROOT/mike"
 PROJECT="lithe-record-440915-m9"
