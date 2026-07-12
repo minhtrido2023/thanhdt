@@ -44,7 +44,7 @@ START_BR = (datetime.now() - timedelta(days=240)).strftime("%Y-%m-%d") # breadth
 START_VNI = (datetime.now() - timedelta(days=420)).strftime("%Y-%m-%d")# dd52w/rv10 window
 
 MAX_POS = 12; POS_PCT = 0.10; WEAK_PCT = 0.05
-TIER_BAL = ["MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","DEEP_VALUE_RECOVERY","RE_BACKLOG_BUY"]
+TIER_BAL = ["MEGA","MOMENTUM","DEEP_VALUE_RECOVERY","RE_BACKLOG_BUY"]  # MOM_N/MOM_S closed 2026-07-12 (CP1+CP-DVR1 NO-GO, user-approved Scope A — plan_close_mom_20260712.md)
 BUY_TIERS = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY","MOMENTUM_A",
              "MOMENTUM_S_N","COMPOUNDER_BUY","DEEP_VALUE_RECOVERY","S_PRO","RE_BACKLOG_BUY"}
 EXB_MOM = {"MEGA","MOMENTUM","MOMENTUM_S","MOMENTUM_QUALITY","MOMENTUM_A","S_PRO"}

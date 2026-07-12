@@ -479,8 +479,10 @@ _dvr8l_tag = ("" if not DVR8L_TILT else
 # MOM-channel closure measurement (job Taylor_20260712_012515) — env BAL_DROP_TIERS; unset = OFF,
 # byte-identical baseline, no tag. "none" = drop nothing but tagged output (contemporaneous control
 # that never touches the canonical R3 CSV, guidelines §8). Otherwise comma-separated play_types to
-# REMOVE from TIER_BAL (the BAL entry set), e.g. "MOMENTUM_N,MOMENTUM_S". Signals stay labeled in
+# REMOVE from TIER_BAL (the BAL entry set), e.g. "MOMENTUM". Signals stay labeled in
 # SIGNAL_V11; the dropped tiers just can never open BAL positions.
+# NOTE 2026-07-12: MOMENTUM_N/MOMENTUM_S removed from the DEFAULT TIER_BAL below (user-approved
+# Scope A closure, matching the 3 production consumers) — dropping them via this knob now asserts.
 BAL_DROP_TIERS = [t.strip() for t in os.environ.get("BAL_DROP_TIERS", "").split(",") if t.strip()]
 _droptag = ("" if not BAL_DROP_TIERS else
             "_exp_dropnone" if BAL_DROP_TIERS == ["none"] else
@@ -494,7 +496,7 @@ AUDIT_PATH  = os.path.join(WORKDIR, "data",
 BUY_TIERS_V11 = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
                  "MOMENTUM_A","MOMENTUM_S_N","COMPOUNDER_BUY","DEEP_VALUE_RECOVERY","S_PRO",
                  "RE_BACKLOG_BUY"}
-TIER_BAL = ["MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","DEEP_VALUE_RECOVERY","RE_BACKLOG_BUY"]
+TIER_BAL = ["MEGA","MOMENTUM","DEEP_VALUE_RECOVERY","RE_BACKLOG_BUY"]  # MOM_N/MOM_S closed 2026-07-12 (CP1+CP-DVR1 NO-GO, user-approved Scope A — plan_close_mom_20260712.md)
 if BAL_DROP_TIERS and BAL_DROP_TIERS != ["none"]:
     _unknown_drop = [t for t in BAL_DROP_TIERS if t not in TIER_BAL]
     assert not _unknown_drop, f"BAL_DROP_TIERS not in TIER_BAL: {_unknown_drop}"

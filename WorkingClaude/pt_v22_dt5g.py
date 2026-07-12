@@ -89,7 +89,7 @@ INTRADAY_PKL = os.path.join(WORKDIR, "data/intraday_full.pkl")
 BUY_TIERS_V11 = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
                  "MOMENTUM_A","MOMENTUM_S_N","COMPOUNDER_BUY","DEEP_VALUE_RECOVERY","S_PRO",
                  "RE_BACKLOG_BUY"}
-TIER_BAL = ["MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","DEEP_VALUE_RECOVERY","RE_BACKLOG_BUY"]
+TIER_BAL = ["MEGA","MOMENTUM","DEEP_VALUE_RECOVERY","RE_BACKLOG_BUY"]  # MOM_N/MOM_S closed 2026-07-12 (CP1+CP-DVR1 NO-GO, user-approved Scope A — plan_close_mom_20260712.md)
 MAX_POS_V11 = 12
 
 # === State-conditional LAG/BAL capital allocator (2026-06-11, deep-dive Finding #3) ===
