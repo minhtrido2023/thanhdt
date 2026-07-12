@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v961)
+# Mike fleet — context pack (v962)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-12T06:39:01] Taylor/finding — V2.5 LEVERAGE VERIFICATION XONG — VERDICT NO-GO (giữ DISABLED): edge lever +0.92pp là IS-artifact + path-noise, phần attributable cho cơ chế ≈ +0.04pp, OOS ≈ 0, DSR excess RED FLAG mọi mức N: {"job": "Taylor_20260712_063143", "trace_parent": "Taylor_20260712_054553", "status": "VERIFICATION_DONE_VERDICT_NO_GO", "registry": "data/results_registry.md m …
 - [2026-07-12T06:45:00] quant-skeptic/verification — ✅ CONFIRMED VERIFY: V2.5 LEVERAGE VERIFICATION XONG — VERDICT NO-GO (giữ DISABLED): edge lever +0.92pp là IS-artifact + path-noise, phần attributable cho cơ chế ≈ +0.04pp, OOS ≈ 0, DSR excess RED FLAG mọi mức N: {"finding_topic": "V2.5 LEVERAGE VERIFICATION — NO-GO (keep DISABLED): lever edge +0.92pp is IS-artifact + path-noise, attributable mechanism ≈ +0.04pp, OOS ≈ 0 …
 - [2026-07-12T07:10:10] Taylor/finding — SCOPE XONG — plan tăng w_LAG (chờ user duyệt, CHƯA backtest): tiền đề 'LAG bền hơn' đúng một nửa; allocator đã adaptive và đang nói 0.50; phát hiện phụ spec-drift golive_recommend thiếu edge-conditional gate: {"job": "Taylor_20260712_070206", "status": "SCOPE_DONE_AWAIT_USER_APPROVAL", "plan_doc": "mike/agents/Taylor/plan_lag_weight_20260712.md", "key_findings": {"pr …
 - [2026-07-12T07:30:04] Taylor/finding — FIX SPEC-DRIFT XONG: edge-conditional w_LAG gate vào golive_recommend_v23 (money-path), was hardcoded 65% — commit a776a9a, selfcheck 13/13, mirror khớp 0/3107 ngày vs pinned R3: {"job": "Taylor_20260712_072039", "trace_parent": "Taylor_20260712_070206", "status": "FIX_DONE_COMMITTED_AWAIT_SKEPTIC", "commit": "a776a9a (WorkingClaude; kèm …
@@ -11,11 +10,45 @@
 - [2026-07-12T07:40:25] quant-skeptic/verification — ✅ CONFIRMED VERIFY: FIX SPEC-DRIFT XONG: edge-conditional w_LAG gate vào golive_recommend_v23 (money-path), was hardcoded 65% — commit a776a9a, selfcheck 13/13, mirror khớp 0/3107 ngày vs pinned R3: {"finding_topic": "FIX SPEC-DRIFT: edge-conditional w_LAG gate into golive_recommend_v23 (money-path), was hardcoded 65% — commit a776a9a, selfcheck 13/13, mirr …
 - [2026-07-12T09:13:12] Taylor/finding — Q-SLEEVE BACKTEST XONG — VERDICT NO-GO CẢ 2 TRỤC (đóng nhánh): rổ nhỏ quality thay custom30V FAIL toàn diện (LOO âm mọi năm, OOS = 2021-carry, DSR excess 0.02-0.10), BULL-extension bị bác LẦN THỨ 5: {"job": "Taylor_20260712_090329", "trace_parent": "Taylor_20260712_080114", "status": "BACKTEST_DONE_VERDICT_NO_GO_BOTH_AXES", "plan_doc": "mike/agents/Taylor/p …
 - [2026-07-12T09:17:05] quant-skeptic/verification — ✅ CONFIRMED VERIFY: Q-SLEEVE BACKTEST XONG — VERDICT NO-GO CẢ 2 TRỤC (đóng nhánh): rổ nhỏ quality thay custom30V FAIL toàn diện (LOO âm mọi năm, OOS = 2021-carry, DSR excess 0.02-0.10), BULL-extension bị bác LẦN THỨ 5: {"finding_topic": "Q-SLEEVE BACKTEST — NO-GO both axes (small quality basket vs custom30V FAIL; BULL-extension rejected 5th time)", "verdict": "CONFIRMED", "con …
+- [2026-07-12T11:56:41] Winston/finding — lag_edge_health.csv KHÔNG stale — tiền đề dispatch sai: đã có cron daily (papertrade step 22), data dừng 05-11 là hành vi đúng (hết mùa BCTC Q1); gap thật duy nhất = silent-skip path, đề xuất 1 probe WARN vào bq_freshness_check.sh (chờ duyệt): {"job": "Winston_20260712_114800", "status": "AUDIT_DONE_NO_CRON_NEEDED_PROPOSAL_PENDING", "verdict": {"automation": "ĐÃ TỒN TẠI — edge_health_monitor.py --refr …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
 > Mike cập nhật thủ công khi có thay đổi trạng thái quan trọng. Đọc trước mọi thứ khác khi restart.
-> Cập nhật lần cuối: 2026-07-11
+> Cập nhật lần cuối: 2026-07-12
+
+## LAG-weight (tăng tỷ trọng PEAD trong allocator) — ĐÓNG, chấp nhận câu trả lời mô tả (2026-07-12)
+User chấp nhận kết luận mô tả của Taylor (`plan_lag_weight_20260712.md`) là đủ — KHÔNG chạy family
+backtest N=5. Tóm tắt: "LAG bền hơn MOM" đúng một nửa (bền hơn về bề rộng lịch sử, nhưng 2026 hiện
+là đáy sâu nhất mẫu); allocator adaptive sẵn có đang nói nên hạ về 50% chứ không phải tăng; capacity
+LAG book giới hạn bởi deal-flow (chỉ deploy ~42% vốn) nên tăng trần phần lớn không có tác dụng thật.
+Phần fix bug đi kèm (spec-drift w_LAG trong `golive_recommend_v23.py`) đã xong + quant-skeptic
+CONFIRMED riêng (commit `a776a9a`). Không mở N-budget mới cho hướng này trừ khi có dữ liệu mới.
+
+## Việc mới phát hiện khi rà soát — `lag_edge_health.csv` KHÔNG có lịch refresh tự động (2026-07-12)
+File này chính là input cho cơ chế w_LAG vừa fix (mean12 edge-health quyết định 50% vs 65%).
+`edge_health_monitor.py` (script sinh file) KHÔNG nằm trong crontab — phải chạy tay với cờ
+`--refresh`. Dữ liệu hiện dừng ở 2026-05-11 dù file mtime mới hơn (07-10, có người chạy lại nhưng
+không kéo dữ liệu mới — hoặc chạy thiếu cờ `--refresh`). Rủi ro: khi LAG refill cuối tháng 7, cơ chế
+w_LAG mới fix sẽ quyết định dựa trên dữ liệu 2+ tháng cũ. Đã dispatch Winston kiểm tra + wire cron
+theo đúng mẫu `fa_ratings_8l`/`fa_ratings` (wrapper + fail-safe check, không tự cài crontab).
+
+## Dự án "Q-sleeve" (rổ nhỏ chất lượng cao, cảm hứng AlphaLens) — ĐÓNG, NO-GO cả 2 trục (2026-07-12)
+User đề xuất thêm 1 sleeve buy-and-hold rổ nhỏ chất lượng cao (lấy cảm hứng AlphaLens) bổ sung cạnh
+BAL/LAG. Scope xong (`plan_quality_sleeve_20260712.md`), family N=5 pre-registered đã duyệt và
+chạy: Q8-NEU/Q12-NEU/QF8-NEU (rổ nhỏ thay custom30V) + Q12-BULLEXT (mở rộng giữ cả lúc BULL) + LOO.
+
+**VERDICT: NO-GO cả 2 trục, quant-skeptic CONFIRMED (không có phản bác).**
+- **Trục rổ nhỏ thay custom30V**: cả 3 cách chọn đều kém control 2.9-6.8pp IS, LOO âm mọi năm bỏ-ra,
+  phần "thắng" ở OOS chỉ là carry thuần từ năm 2021 (+20-24pp riêng năm đó) — đúng chữ ký lỗi đã bác
+  ở MOM/fa8l trước đây. Cơ chế: rổ 30 mã hiện tại thắng nhờ breadth/diversification, cô đặc còn 8-12
+  mã mất phần đó mà không có gì bù lại.
+- **Trục mở rộng BULL/EXBULL**: NO-GO lần thứ 5 liên tiếp (tiền lệ: bull-park, custom30B vehicle, R5,
+  DC-book CÂU 1, giờ thêm Q-sleeve) — chết đúng năm tiền lệ hay chết (2025 −19.5pp).
+- Diagnostic phụ: excess vốn-điều-chỉnh ÂM so custom30V, 1 mã chiếm 13.24% NAV vượt namecap 10%.
+
+Không đụng production/canonical/trading_rules. Registry đã ghi mục "2026-07-12 — Q-SLEEVE". N-ledger
+5/5 đóng sổ, không mở thêm trial.
 
 ## Dự án momentum-deals ĐÓNG, user duyệt đóng kênh MOM — production change đang scope (2026-07-11/12)
 
