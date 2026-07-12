@@ -189,7 +189,11 @@ def td_offset(ref, off):
     if tgt < len(trade_dates): return pd.Timestamp(trade_dates[tgt]), 0
     return None, tgt - (len(trade_dates) - 1)     # entry falls N sessions AFTER the latest session
 
-lag_up, lag_recent = [], []
+# lag_source_error: None = nguồn LAG đọc OK (n_lag_*=0 nghĩa là THẬT SỰ không có sự kiện);
+# string = except-path fired — máy đọc status.json phân biệt được "không có gì" vs "nguồn hỏng"
+# (audit M1 Spyros_20260712_131501: pkl lỗi giữa mùa BCTC trước đây chỉ in WARNING vào log cron,
+# n_lag_upcoming=0 lặng lẽ tái tạo đúng failure-mode gốc).
+lag_up, lag_recent, lag_source_error = [], [], None
 try:
     # Point-in-time candidate source (fix 2026-07-12, audit Taylor_20260712_121642 R1):
     # events must be visible here FROM their release date. The old source
@@ -217,6 +221,7 @@ try:
         elif entry is not None and entry >= LATEST - pd.Timedelta(days=5) and entry <= LATEST:
             item["entry"] = str(entry.date()); lag_recent.append(item)
 except Exception as e:
+    lag_source_error = f"{type(e).__name__}: {e}"
     print(f"  WARNING: LAG schedule unavailable ({e})")
 print(f"  LAG entries: {len(lag_up)} upcoming, {len(lag_recent)} entered in last sessions")
 
@@ -336,6 +341,7 @@ status = {
     "capit_size": round(capit_size, 2), "capit_grind": capit_grind,
     "dd52w": round(dd52_now, 1), "vn_cooling": vn_cool_now,
     "n_bal": int(len(bal)), "n_lag_upcoming": len(lag_up), "n_lag_recent": len(lag_recent),
+    "lag_source_error": lag_source_error,
     "n_capit_basket": len(basket),
     "n_park": len(_park_basket) if _park_basket is not None else 0,
     "park_rebal_date": _park_rebal_date,
