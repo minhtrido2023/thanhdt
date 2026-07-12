@@ -270,3 +270,25 @@ góp thật) nhưng số đo trả lời dứt khoát: MOM_S không phải gener
 **N-ledger cập nhật**: backtest trials 2→**3** (A, B, C — DSR tính lại với N=3, đều 1.0000);
 phân tích thêm **1 view** (Phase 1b regime-split, cùng 13 feature + gate CP1, không nới, không
 feature mới). Không mở thêm trial nào khác.
+
+---
+
+## 7. THỰC THI (job Taylor_20260712_025715, 2026-07-12) — user duyệt CUỐI Scope A, ĐÃ SỬA CODE + RE-PIN
+
+- **Code**: bỏ MOMENTUM_N/MOMENTUM_S khỏi `TIER_BAL` ở 3 file production (`golive_recommend_v23.py:47`,
+  `pt_v22_dt5g.py:92`, `pt_v4_dt5g.py:61`) + default harness `pt_v23_audit_2014.py:499` cùng commit.
+  `signal_v11_sql.py` KHÔNG sửa (đúng §2). Safety check trước khi sửa: BAL/LAG live rỗng, PSI MOM_N_W
+  trong sổ paper = case §2 (exit theo rule, không force-sell).
+- **Re-pin R3**: lệnh pin + `BQ_LOCAL_CACHE=1`, self-check 0 VND, **27.84/1.84/−18.2/1.53** khớp
+  CHÍNH XÁC §4; CSV canonical byte-identical `_exp_dropMOMN-MOMS.csv` (đã skeptic-verify); recompute
+  độc lập khớp (FULL 27.84/IS 23.15/OOS 32.30). Registry entry "2026-07-12 — RE-PIN BASELINE R3".
+- **Sự cố bắt được**: run re-pin đầu thiếu `BQ_LOCAL_CACHE` → 28.28/1.89/−17.9/1.58 lệch → DỪNG,
+  root-cause, re-run cache → khớp. `BQ_LOCAL_CACHE=1` từ nay là phần của lệnh pin.
+- **⚠️ ĐÍNH CHÍNH §6.2 (vintage Scope C)**: run Scope C sáng (job _022816) thực tế chạy **live-BQ**,
+  TRÁI khai báo "cùng cache vintage" §6.1 — số 27.50/1.85/−17.8/1.54 trong bảng §6.2 là vintage
+  live-BQ, KHÔNG so được thẳng với control/A/B (cache). Re-run Scope C sạch (cache-vintage, 0 VND):
+  **28.15/1.85/−18.1/1.56**; OOS 32.38 / ex-2021 21.30 / 2022+ 20.48 / 2024+ 30.34 — vs Scope A
+  32.30 / 21.92 / 21.30 / 30.87. **Kết luận §6.3 KHÔNG đổi và vững hơn**: C kém A ở cả 3 cửa sổ
+  hậu-2021 dưới vintage sạch (bản live-BQ từng cho C nhỉnh 2024+ +0.31pp — đảo lại thành −0.53pp);
+  FULL-advantage của C là 2021-carry (C +112.65 vs A +106.81 riêng 2021). Phần 2 regime-split độc
+  lập vintage. Tiêu chí pre-registered §6.1 fail rõ hơn → Scope A đứng.
