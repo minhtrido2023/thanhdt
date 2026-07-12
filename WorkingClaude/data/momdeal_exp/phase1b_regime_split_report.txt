@@ -1,0 +1,101 @@
+================================================================================================
+PHASE 1b — REGIME-SPLIT CONTRAST: MOM_N vs MOM_S (job Taylor_20260712_022816)
+Same dataset, same 13 tests, same gate as CP1 — only the pooling changes.
+================================================================================================
+[sanity] MOMENTUM_N: state5 observed = [3] (expected subset of [3]) OK
+[sanity] MOMENTUM_S: state5 observed = [4, 5] (expected subset of [4, 5]) OK
+
+================================================================================================
+[MOM_N (NEUTRAL-only)] episodes labeled = 125 | per-era: IS14-19 n=53 | OOS20+ n=72 | 2021 alone n=25
+
+  [MOM_N (NEUTRAL-only)] n labeled = 64 SUCCESS / 61 FAIL
+  id  feature                n_s   n_f     med_S     med_F   delta          p  FDR10%
+  F1  rating                  64    61     3.000     3.000  -0.134   1.69e-01       .
+  F3  ROIC_Trailing           62    58     0.259     0.259  +0.008   9.39e-01       .
+  F4  F4_cfoa_pos             64    61     1.000     1.000  +0.050   5.66e-01       .
+  F5  Revenue_YoY_P0          64    61     0.721     0.559  +0.117   2.59e-01       .
+  T1  ta                      64    61   158.000   158.000  -0.044   6.55e-01       .
+  T2  D_RSI                   64    61     0.717     0.704  -0.038   7.13e-01       .
+  T3  T3_vol_ratio            64    61     2.228     2.525  -0.182   7.91e-02       .
+  T4  C_L1M                   64    61     1.231     1.211  +0.124   2.33e-01       .
+  T5  T5_close_res            62    60     1.055     1.057  +0.012   9.08e-01       .
+  C1  C1_log_tv               62    60    10.083     9.881  +0.141   1.79e-01       .
+  C2  state5                  64    61         —         —       —          —       .
+  C3  days_since_release      64    61    15.000    28.000  -0.218   3.54e-02       .
+  F2  route                   64    61         —         —  +0.245   1.88e-01       .
+
+  Era stability [MOM_N (NEUTRAL-only)] — delta per era WITH per-cell n
+  F1  rating                         -0.134(n=64/61)           -0.084(n=25/28)           -0.172(n=39/33)           -0.197(n=43/57)
+  F3  ROIC_Trailing                  +0.008(n=62/58)           -0.090(n=24/26)           +0.035(n=38/32)           +0.009(n=41/54)
+  F4  F4_cfoa_pos                    +0.050(n=64/61)           +0.033(n=25/28)           +0.065(n=39/33)           +0.072(n=43/57)
+  F5  Revenue_YoY_P0                 +0.117(n=64/61)           -0.034(n=25/28)           +0.290(n=39/33)           +0.119(n=43/57)
+  T1  ta                             -0.044(n=64/61)           -0.037(n=25/28)           -0.055(n=39/33)           -0.083(n=43/57)
+  T2  D_RSI                          -0.038(n=64/61)           +0.114(n=25/28)           -0.136(n=39/33)           -0.020(n=43/57)
+  T3  T3_vol_ratio                   -0.182(n=64/61)           -0.169(n=25/28)           -0.178(n=39/33)           -0.180(n=43/57)
+  T4  C_L1M                          +0.124(n=64/61)           +0.003(n=25/28)           +0.172(n=39/33)           -0.029(n=43/57)
+  T5  T5_close_res                   +0.012(n=62/60)           +0.031(n=23/27)           +0.038(n=39/33)           +0.081(n=41/56)
+  C1  C1_log_tv                      +0.141(n=62/60)           +0.224(n=25/27)           +0.050(n=37/33)           +0.145(n=42/56)
+  C2  state5                         +0.000(n=64/61)           +0.000(n=25/28)           +0.000(n=39/33)           +0.000(n=43/57)
+  C3  days_since_release             -0.218(n=64/61)           -0.300(n=25/28)           -0.162(n=39/33)           -0.206(n=43/57)
+  F2  route                          +0.245(n=64/61)           +0.148(n=25/28)           +0.416(n=39/33)           +0.155(n=43/57)
+
+  Survivor gate [MOM_N (NEUTRAL-only)]: FDR10% PASS AND |delta FULL| >= 0.15 AND same sign IS/OOS/ex2021
+  SURVIVORS [MOM_N (NEUTRAL-only)]: NONE
+
+================================================================================================
+[MOM_S (BULL/EXB-only)] episodes labeled = 388 | per-era: IS14-19 n=31 | OOS20+ n=357 | 2021 alone n=185
+
+  [MOM_S (BULL/EXB-only)] n labeled = 205 SUCCESS / 183 FAIL
+  id  feature                n_s   n_f     med_S     med_F   delta          p  FDR10%
+  F1  rating                 205   183     3.000     3.000  +0.058   3.07e-01       .
+  F3  ROIC_Trailing          195   171     0.406     0.399  +0.083   1.69e-01       .
+  F4  F4_cfoa_pos            204   182     1.000     1.000  -0.041   4.12e-01       .
+  F5  Revenue_YoY_P0         205   183     0.377     0.228  +0.132   2.43e-02       .
+  T1  ta                     205   183   143.000   143.000  -0.062   2.85e-01       .
+  T2  D_RSI                  205   183     0.712     0.709  +0.028   6.30e-01       .
+  T3  T3_vol_ratio           205   183     2.294     2.256  -0.003   9.57e-01       .
+  T4  C_L1M                  205   183     1.213     1.243  -0.105   7.37e-02       .
+  T5  T5_close_res           202   181     1.076     1.092  -0.063   2.89e-01       .
+  C1  C1_log_tv              193   167    10.145    10.236  -0.067   2.73e-01       .
+  C2  state5                 205   183     4.000     4.000  -0.104   8.72e-03       .
+  C3  days_since_release     205   183    46.000    38.000  +0.078   1.84e-01       .
+  F2  route                  205   183         —         —  +0.158   1.41e-01       .
+
+  Era stability [MOM_S (BULL/EXB-only)] — delta per era WITH per-cell n
+  F1  rating                       +0.058(n=205/183)           +0.029(n=15/16)         +0.060(n=190/167)          -0.002(n=106/97)
+  F3  ROIC_Trailing                +0.083(n=195/171)           +0.253(n=13/14)         +0.068(n=182/157)           +0.063(n=99/90)
+  F4  F4_cfoa_pos                  -0.041(n=204/182)           +0.175(n=15/16)         -0.058(n=189/166)          -0.035(n=106/97)
+  F5  Revenue_YoY_P0               +0.132(n=205/183)           +0.258(n=15/16)         +0.129(n=190/167)          +0.134(n=106/97)
+  T1  ta                           -0.062(n=205/183)           -0.404(n=15/16)         -0.030(n=190/167)          -0.057(n=106/97)
+  T2  D_RSI                        +0.028(n=205/183)           +0.767(n=15/16)         -0.040(n=190/167)          +0.046(n=106/97)
+  T3  T3_vol_ratio                 -0.003(n=205/183)           +0.100(n=15/16)         -0.017(n=190/167)          -0.029(n=106/97)
+  T4  C_L1M                        -0.105(n=205/183)           -0.075(n=15/16)         -0.107(n=190/167)          -0.117(n=106/97)
+  T5  T5_close_res                 -0.063(n=202/181)           +0.259(n=14/16)         -0.086(n=188/165)          -0.064(n=105/96)
+  C1  C1_log_tv                    -0.067(n=193/167)           +0.058(n=15/15)         -0.087(n=178/152)           -0.069(n=99/85)
+  C2  state5                       -0.104(n=205/183)           +0.000(n=15/16)         -0.116(n=190/167)          -0.236(n=106/97)
+  C3  days_since_release           +0.078(n=205/183)           -0.083(n=15/16)         +0.095(n=190/167)          +0.081(n=106/97)
+  F2  route                        +0.158(n=205/183)           +0.377(n=15/16)         +0.184(n=190/167)          +0.169(n=106/97)
+
+  Survivor gate [MOM_S (BULL/EXB-only)]: FDR10% PASS AND |delta FULL| >= 0.15 AND same sign IS/OOS/ex2021
+  SURVIVORS [MOM_S (BULL/EXB-only)]: NONE
+
+================================================================================================
+[SUMMARY] side-by-side delta (FULL) — pooled CP1 vs MOM_N vs MOM_S
+  id  feature               pooled δ pooled FDR   MOM_N δ  N FDR   MOM_S δ  S FDR
+  F1  rating                  -0.019          .    -0.134      .    +0.058      .
+  F3  ROIC_Trailing           +0.116       PASS    +0.008      .    +0.083      .
+  F4  F4_cfoa_pos             -0.021          .    +0.050      .    -0.041      .
+  F5  Revenue_YoY_P0          +0.129       PASS    +0.117      .    +0.132      .
+  T1  ta                      +0.002          .    -0.044      .    -0.062      .
+  T2  D_RSI                   +0.020          .    -0.038      .    +0.028      .
+  T3  T3_vol_ratio            -0.065          .    -0.182      .    -0.003      .
+  T4  C_L1M                   -0.056          .    +0.124      .    -0.105      .
+  T5  T5_close_res            -0.004          .    +0.012      .    -0.063      .
+  C1  C1_log_tv               -0.004          .    +0.141      .    -0.067      .
+  C2  state5                  -0.042          .         —      .    -0.104      .
+  C3  days_since_release      +0.031          .    -0.218      .    +0.078      .
+  F2  route                   +0.137          .    +0.245      .    +0.158      .
+
+[VERDICT Phase 1b]
+  MOM_N survivors (CP1 gate, un-relaxed): NONE
+  MOM_S survivors (CP1 gate, un-relaxed): NONE

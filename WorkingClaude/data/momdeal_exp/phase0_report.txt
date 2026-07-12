@@ -1,0 +1,58 @@
+==========================================================================================
+PHASE 0 DATASET BUILD — momentum-deals (job Taylor_20260711_165407)
+==========================================================================================
+
+[A] Episode counts — survey reconciliation
+    play_type               survey(§2b)  base pkl 06-16  dt5g pkl 07-10
+    MOMENTUM_N                       87              87             153   OK(±10%)
+    MOMENTUM_S                      513             513             486   OK(±10%)
+    MOMENTUM                        129             129             136   OK(±10%)
+    MEGA                             10              10              14   OK(±10%)
+    DEEP_VALUE_RECOVERY            1077           1,077             912   OK(±10%)
+    MOMENTUM_S_N                      —             876           1,237   
+    (survey was measured on the frozen base-state pkl; base-pkl column is the like-for-like check.
+     dt5g column = dataset actually used downstream — shift is the F3 state-source change + 1 extra month.)
+
+[B] Deals (L1) — canonical R3 ledger round-trips
+    holdings total=2,819  closed=2,816  closed ex-parking=2,259  (survey: 2,258 closed — survey excluded parking sleeves)
+    play_type(+_W)             survey  measured   win%    avg%    med%
+    MOMENTUM_N                     77        77  55.8   +8.1   +0.5   OK(±10%)
+    MOMENTUM_S                     46        46  47.8   +6.1   -1.0   OK(±10%)
+    RE_BACKLOG_BUY                136       136  53.7   +6.7   +0.3   OK(±10%)
+    DEEP_VALUE_RECOVERY           247       247  54.3   +4.8   +0.7   OK(±10%)
+    L1 dataset rows (BAL family+controls, closed): 519
+
+[C] PIT joins (duckdb ASOF, threads=1)
+    episodes: tech row found 100.0% | tech row >5d older than feature date: 0.00%
+    deals: tech row found 100.0% | tech row >5d older than feature date: 0.19%
+
+[D] 8L coverage at entry (CP0 hard gate: >=80% episodes)
+    episodes MOM_FAMILY: overall coverage = 100.0%  (n=789)
+      2014-2019: 100.0%  (n=118)
+      2020-2026: 100.0%  (n=671)
+      per-year: 2014:100%  2015:100%  2016:100%  2017:100%  2018:100%  2019:100%  2020:100%  2021:100%  2022:100%  2023:100%  2024:100%  2025:100%  2026:100%
+    episodes ALL (family+DVR+diag): overall coverage = 98.1%  (n=2,938)
+      2014-2019: 92.4%  (n=723)
+      2020-2026: 100.0%  (n=2,215)
+      per-year: 2014:56%  2015:100%  2016:100%  2017:100%  2018:100%  2019:100%  2020:100%  2021:100%  2022:100%  2023:100%  2024:100%  2025:100%  2026:100%
+    deals L1: overall coverage = 100.0%  (n=519)
+      2014-2019: 100.0%  (n=121)
+      2020-2026: 100.0%  (n=398)
+      per-year: 2014:100%  2015:100%  2016:100%  2017:100%  2018:100%  2019:100%  2020:100%  2021:100%  2022:100%  2023:100%  2024:100%  2025:100%  2026:100%
+
+[E] Label availability
+    episodes with profit_2M label: 99.0%  (missing = tail entries after ~2026-05 without T+40 yet + data gaps)
+    MOM_FAMILY labeled episodes: 786 | L2 SUCCESS 343 / FAIL 293 / neutral-band 150
+
+[F] deal↔signal linkage (pkl play_type at T-1 == book play_type): DEEP_VALUE_RECOVERY:100%  MOMENTUM:100%  MOMENTUM_N:100%  MOMENTUM_S:100%  RE_BACKLOG_BUY:0%
+    (<100% expected: book applies extra gates/washout variants + dt5g-rebuilt pkl vs base-era book decisions)
+
+[write] data/momdeal_exp/momdeal_episodes_phase0.csv  (2,938 rows)
+[write] data/momdeal_exp/momdeal_deals_phase0.csv      (519 rows)
+
+[G] CP0 checklist snapshot
+    episode recon vs survey (base pkl, ±10%): PASS
+    deal recon vs survey (±10%):              PASS
+    8L coverage MOM_FAMILY episodes:          100.0%  (PASS >=80%)
+    8L coverage ALL episodes:                 98.1%
+    8L coverage deals:                        100.0%

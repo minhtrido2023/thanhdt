@@ -1,0 +1,138 @@
+================================================================================================
+PHASE 1 — PURE STATISTICAL CONTRAST (job Taylor_20260711_225135)
+================================================================================================
+
+[0] Independent episode-N recount on backup base pkl (skeptic addendum 2)
+    code path: plain per-(ticker,play_type) python loop — independent of phase0 groupby builder
+    MOMENTUM_N             survey=   87  independent recount=   87  EXACT
+    MOMENTUM_S             survey=  513  independent recount=  513  EXACT
+    MOMENTUM               survey=  129  independent recount=  129  EXACT
+    MEGA                   survey=   10  independent recount=   10  EXACT
+    DEEP_VALUE_RECOVERY    survey= 1077  independent recount= 1077  EXACT
+    verdict: N reconciliation CLOSED (exact, independent code path)
+
+[load] MOM_FAMILY labeled episodes: 636 (343 S / 293 F)
+       DVR_CONTROL labeled episodes: 724 (380 S / 344 F)
+       MOM per-era: IS14-19 n=97 | OOS20+ n=539 | 2021 alone n=257
+
+[A] Univariate contrast — MOM_FAMILY (L2: profit_2M >= +10% vs <= 0%) — FDR-BH 10% over 13 tests
+
+  [MOM_FAMILY] n labeled = 343 SUCCESS / 293 FAIL
+  id  feature                n_s   n_f     med_S     med_F   delta          p  FDR10%
+  F1  rating                 343   293     3.000     3.000  -0.019   6.66e-01       .
+  F3  ROIC_Trailing          331   274     0.393     0.319  +0.116   1.43e-02    PASS
+  F4  F4_cfoa_pos            342   292     1.000     1.000  -0.021   5.85e-01       .
+  F5  Revenue_YoY_P0         343   293     0.460     0.329  +0.129   5.04e-03    PASS
+  T1  ta                     343   293   148.000   148.000  +0.002   9.60e-01       .
+  T2  D_RSI                  343   293     0.718     0.711  +0.020   6.67e-01       .
+  T3  T3_vol_ratio           343   293     2.238     2.409  -0.065   1.59e-01       .
+  T4  C_L1M                  343   293     1.220     1.239  -0.056   2.22e-01       .
+  T5  T5_close_res           338   290     1.082     1.084  -0.004   9.30e-01       .
+  C1  C1_log_tv              323   272    10.145    10.119  -0.004   9.25e-01       .
+  C2  state5                 343   293     4.000     4.000  -0.042   2.73e-01       .
+  C3  days_since_release     343   293    35.000    35.000  +0.031   5.04e-01       .
+  F2  route                  343   293         —         —  +0.137   6.39e-02       .
+  (F2 route: delta column = Cramér's V, not Cliff's delta)
+
+[B] Era stability — Cliff's delta (or Cramér's V for F2) per era, WITH per-cell n (skeptic addendum 1)
+  id  feature                                   FULL                   IS14-19                    OOS20+                    ex2021
+  F1  rating                       -0.019(n=343/293)           -0.032(n=44/53)         -0.015(n=299/240)         -0.118(n=196/183)
+  F3  ROIC_Trailing                +0.116(n=331/274)           +0.045(n=41/49)         +0.108(n=290/225)         +0.104(n=187/170)
+  F4  F4_cfoa_pos                  -0.021(n=342/292)           +0.063(n=44/53)         -0.031(n=298/239)         -0.016(n=196/183)
+  F5  Revenue_YoY_P0               +0.129(n=343/293)           +0.056(n=44/53)         +0.164(n=299/240)         +0.119(n=196/183)
+  T1  ta                           +0.002(n=343/293)           -0.117(n=44/53)         +0.048(n=299/240)         -0.014(n=196/183)
+  T2  D_RSI                        +0.020(n=343/293)           +0.345(n=44/53)         -0.046(n=299/240)         +0.044(n=196/183)
+  T3  T3_vol_ratio                 -0.065(n=343/293)           +0.021(n=44/53)         -0.080(n=299/240)         -0.084(n=196/183)
+  T4  C_L1M                        -0.056(n=343/293)           +0.006(n=44/53)         -0.084(n=299/240)         -0.096(n=196/183)
+  T5  T5_close_res                 -0.004(n=338/290)           +0.151(n=41/52)         -0.029(n=297/238)         +0.031(n=193/181)
+  C1  C1_log_tv                    -0.004(n=323/272)           +0.108(n=44/51)         -0.039(n=279/221)         +0.005(n=187/168)
+  C2  state5                       -0.042(n=343/293)           -0.040(n=44/53)         -0.080(n=299/240)         -0.033(n=196/183)
+  C3  days_since_release           +0.031(n=343/293)           -0.157(n=44/53)         +0.062(n=299/240)         +0.036(n=196/183)
+  F2  route                        +0.137(n=343/293)           +0.179(n=44/53)         +0.172(n=299/240)         +0.106(n=196/183)
+
+  Survivor gate: FDR10% PASS  AND  |delta FULL| >= 0.15  AND  sign(delta) identical in IS14-19, OOS20+, ex2021
+  (F2 categorical: Cramér's V has no sign — sign-stability gate not applicable; treated as NOT survivor-eligible
+   for a directional rule, reported for information only.)
+  near-miss F3: FDR PASS but |delta|=0.116<0.15
+  near-miss F5: FDR PASS but |delta|=0.129<0.15
+  SURVIVORS (full CP1 gate): NONE
+
+[C] Multivariate check — logistic L2 (fixed: C=1.0, lbfgs, max_iter=1000, median-impute, z-score),
+    walk-forward by entry year (train = all years < y). NO hyperparameter tuning.
+    year  n_train  n_test  S/F test     AUC
+    2021      204     257   147/110   0.493
+    2024      467      60     36/24   0.542
+    2025      527     100     32/68   0.382
+  mean AUC = 0.472 | std = 0.067 | years>0.5: 1/3 | min 0.382 max 0.542
+
+[D] Control cohort — DVR_CONTROL, same 13 tests + own FDR-BH 10%
+
+  [DVR_CONTROL] n labeled = 380 SUCCESS / 344 FAIL
+  id  feature                n_s   n_f     med_S     med_F   delta          p  FDR10%
+  F1  rating                 380   344     3.000     3.000  -0.127   2.01e-03    PASS
+  F3  ROIC_Trailing          366   331     0.415     0.348  +0.056   2.01e-01       .
+  F4  F4_cfoa_pos            380   342     1.000     1.000  -0.024   5.07e-01       .
+  F5  Revenue_YoY_P0         380   344     0.298     0.234  +0.088   4.05e-02    PASS
+  T1  ta                     380   344   115.000   113.000  +0.093   3.06e-02    PASS
+  T2  D_RSI                  380   344     0.624     0.624  -0.014   7.45e-01       .
+  T3  T3_vol_ratio           380   344     1.751     1.886  -0.083   5.46e-02       .
+  T4  C_L1M                  380   344     1.150     1.147  +0.010   8.13e-01       .
+  T5  T5_close_res           373   338     0.999     1.000  -0.001   9.83e-01       .
+  C1  C1_log_tv              367   326    10.369    10.316  +0.024   5.78e-01       .
+  C2  state5                 380   344     4.000     4.000  -0.080   3.49e-03    PASS
+  C3  days_since_release     380   344    27.000    39.000  -0.112   9.16e-03    PASS
+  F2  route                  380   344         —         —  +0.259   8.82e-09    PASS
+  (F2 route: delta column = Cramér's V, not Cliff's delta)
+
+  MOM vs DVR separation pattern (structural info = separates in MOM only; common filter = both):
+  id    MOM delta  MOM FDR  DVR delta  DVR FDR  reading
+  F1       -0.019        .     -0.127     PASS  DVR-only
+  F3       +0.116     PASS     +0.056        .  MOM-only (structural)
+  F4       -0.021        .     -0.024        .  neither
+  F5       +0.129     PASS     +0.088     PASS  COMMON filter (golden-floor candidate)
+  T1       +0.002        .     +0.093     PASS  DVR-only
+  T2       +0.020        .     -0.014        .  neither
+  T3       -0.065        .     -0.083        .  neither
+  T4       -0.056        .     +0.010        .  neither
+  T5       -0.004        .     -0.001        .  neither
+  C1       -0.004        .     +0.024        .  neither
+  C2       -0.042        .     -0.080     PASS  DVR-only
+  C3       +0.031        .     -0.112     PASS  DVR-only
+  F2       +0.137        .     +0.259     PASS  DVR-only
+
+[E] L1 consistency check (book deals, net_ret >= +10% vs <= 0%) — sign check only, small N
+  MOM deals: n = 43 S / 61 F
+    F1  rating               delta=-0.005  p=0.963  (n=43/61)
+    F3  ROIC_Trailing        delta=+0.079  p=0.503  (n=41/59)
+    F4  F4_cfoa_pos          delta=+0.044  p=0.654  (n=42/61)
+    F5  Revenue_YoY_P0       delta=+0.043  p=0.712  (n=43/61)
+    T1  ta                   delta=-0.035  p=0.756  (n=43/61)
+    T2  D_RSI                delta=+0.117  p=0.313  (n=43/61)
+    T3  T3_vol_ratio         delta=-0.217  p=0.061  (n=43/61)
+    T4  C_L1M                delta=+0.104  p=0.371  (n=43/61)
+    T5  T5_close_res         delta=+0.287  p=0.016  (n=40/60)
+    C1  C1_log_tv            delta=+0.397  p=0.001  (n=43/58)
+    C2  state5               delta=+0.022  p=0.824  (n=43/61)
+    C3  days_since_release   delta=-0.150  p=0.195  (n=43/61)
+  RE_BACKLOG deals (2nd control): n = 33 S / 63 F
+    F1  rating               delta=+0.040  p=0.731  (n=33/63)
+    F3  ROIC_Trailing        delta=+0.002  p=0.994  (n=32/62)
+    F4  F4_cfoa_pos          delta=-0.075  p=0.476  (n=33/63)
+    F5  Revenue_YoY_P0       delta=-0.157  p=0.210  (n=33/63)
+    T1  ta                   delta=-0.062  p=0.623  (n=33/63)
+    T2  D_RSI                delta=+0.160  p=0.200  (n=33/63)
+    T3  T3_vol_ratio         delta=-0.024  p=0.853  (n=33/63)
+    T4  C_L1M                delta=+0.131  p=0.294  (n=33/63)
+    T5  T5_close_res         delta=+0.321  p=0.013  (n=30/61)
+    C1  C1_log_tv            delta=+0.331  p=0.008  (n=33/62)
+    C2  state5               delta=+0.085  p=0.280  (n=33/63)
+    C3  days_since_release   delta=+0.152  p=0.223  (n=33/63)
+
+[F] Label sensitivity — sign of delta under alternative labels (profit_3M; thresholds +7/+15)
+  F3  ROIC_Trailing        2M +7/0: +0.101 (p=2.9e-02) | 2M +15/0: +0.128 (p=1.0e-02) | 3M +10/0: +0.100 (p=3.1e-02)
+  F5  Revenue_YoY_P0       2M +7/0: +0.122 (p=6.5e-03) | 2M +15/0: +0.113 (p=2.0e-02) | 3M +10/0: +0.098 (p=3.2e-02)
+
+[G] CP1 verdict (gate pre-registered §6 — not relaxed)
+    condition: >=1 feature FDR10% PASS AND same sign IS/OOS/ex2021 AND |delta|>=0.15
+    survivors: NONE
+    CP1 = NO-GO
