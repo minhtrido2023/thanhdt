@@ -50,13 +50,16 @@ LAG book giới hạn bởi deal-flow (chỉ deploy ~42% vốn) nên tăng trầ
 Phần fix bug đi kèm (spec-drift w_LAG trong `golive_recommend_v23.py`) đã xong + quant-skeptic
 CONFIRMED riêng (commit `a776a9a`). Không mở N-budget mới cho hướng này trừ khi có dữ liệu mới.
 
-## Việc mới phát hiện khi rà soát — `lag_edge_health.csv` KHÔNG có lịch refresh tự động (2026-07-12)
-File này chính là input cho cơ chế w_LAG vừa fix (mean12 edge-health quyết định 50% vs 65%).
-`edge_health_monitor.py` (script sinh file) KHÔNG nằm trong crontab — phải chạy tay với cờ
-`--refresh`. Dữ liệu hiện dừng ở 2026-05-11 dù file mtime mới hơn (07-10, có người chạy lại nhưng
-không kéo dữ liệu mới — hoặc chạy thiếu cờ `--refresh`). Rủi ro: khi LAG refill cuối tháng 7, cơ chế
-w_LAG mới fix sẽ quyết định dựa trên dữ liệu 2+ tháng cũ. Đã dispatch Winston kiểm tra + wire cron
-theo đúng mẫu `fa_ratings_8l`/`fa_ratings` (wrapper + fail-safe check, không tự cài crontab).
+## `lag_edge_health.csv` staleness — ĐÃ GIẢI QUYẾT, tiền đề ban đầu SAI (2026-07-12, cập nhật)
+Ghi chú gốc (dòng này, trước sửa) nói "KHÔNG có lịch refresh tự động" — **SAI ở 2 điểm**, xác nhận
+qua 2 job Winston sau đó (`Winston_20260712_114800` rồi `Winston_20260712_121456`), và tái xác nhận
+độc lập lần 3 qua audit crontab hôm nay (`Winston_20260712_151206`, finding F2): `edge_health_monitor.py
+--refresh` **ĐÃ nằm trong lịch daily** (`papertrade_daily.sh` step [22], từ trước 2026-06-21) và chạy
+`[ok]` đều đặn — bug thật nằm TRONG SCRIPT (`--refresh` chỉ re-pull panel IC hàng tháng, không catch-up
+chuỗi LAG edge), không phải thiếu cron. Việc "wire cron" ban đầu là thừa — đã KHÔNG làm, thay vào đó
+thêm probe WARN-only mtime-check vào `bq_freshness_check.sh` (commit `f67e09a`, job `_121456`) để ít
+nhất cảnh báo khi file quá cũ so ngưỡng, trong lúc bug refresh-logic thật còn chờ fix riêng (chưa có
+job fix logic — cần dispatch nếu muốn giải quyết tận gốc trước khi LAG refill cuối tháng 7).
 
 ## Dự án "Q-sleeve" (rổ nhỏ chất lượng cao, cảm hứng AlphaLens) — ĐÓNG, NO-GO cả 2 trục (2026-07-12)
 User đề xuất thêm 1 sleeve buy-and-hold rổ nhỏ chất lượng cao (lấy cảm hứng AlphaLens) bổ sung cạnh
