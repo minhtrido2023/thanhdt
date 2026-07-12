@@ -12,6 +12,8 @@ tav2_bq.vnindex_5state_dt5g_live) and emits TODAY's actionable recommendations:
 
   • Market regime (gated state5) + ETF parking target {NEUTRAL: 70%} (both books)
   • Allocator: w_LAG target by state {CRISIS .50 / BEAR 0 / NEU·BULL·EXBULL .65},
+    EDGE-CONDITIONAL in states 3/4/5 (.65 only when LAG edge-health mean12 >= 4%,
+    else .50 — mirrors pinned R3 `edge` allocator, pt_v23_audit_2014.py:1738-1751);
     BAND-only rebalance trigger ±10pp vs current w_LAG (read from pt_v22 logs)
   • BAL book: ranked BA-core picks (SIGNAL_V11 + D1 + SV_TIGHT + overheat
     + AVOID_exbull + regime_size weak-half), max 12, 10%/pos of BAL book
@@ -51,6 +53,29 @@ EXB_MOM = {"MEGA","MOMENTUM","MOMENTUM_S","MOMENTUM_QUALITY","MOMENTUM_A","S_PRO
 PRIORITY = {t: i for i, t in enumerate(TIER_BAL)}
 ETF_PARK = {3: 0.7}                                  # both books in V2.3
 STATE_LAG_WEIGHT = {1: 0.50, 2: 0.00, 3: 0.65, 4: 0.65, 5: 0.65}
+EDGE_THR = 4.0   # %: LAG trailing-12M edge-health threshold (pinned R3 = argv "edge")
+
+def w_lag_target(state, asof):
+    """Edge-conditional w_LAG target — mirror of pt_v23_audit_2014.py:1738-1751 (pinned R3
+    allocator, argv `v23a none postbull 0 edge`): in good states (3/4/5) tilt to 0.65 ONLY
+    when LAG's own causal edge-health mean12 (trailing-12M mean LAG trade post-return, from
+    data/lag_edge_health.csv, ffill as-of the signal date) >= EDGE_THR%; else hold 0.50.
+    BEAR=0 / CRISIS=0.50 unchanged. Verified 0/3107 days mismatch vs the pinned R3 CSV
+    w_lag_tgt column (2014 -> 2026-06-19). CSV unreadable -> fail-safe 0.50 (gate-fail branch)."""
+    if int(state) in (3, 4, 5):
+        try:
+            eh = pd.read_csv(os.path.join(WORKDIR, "data", "lag_edge_health.csv"), parse_dates=["entry"])
+            eh = eh.drop_duplicates("entry").set_index("entry").sort_index()["mean12"]
+            m = eh.asof(pd.Timestamp(asof))
+            gate_ok = bool(pd.notna(m) and m >= EDGE_THR)
+            print(f"  [edge-alloc] mean12 as-of {pd.Timestamp(asof).date()} = "
+                  f"{(f'{m:.1f}%' if pd.notna(m) else 'n/a')} vs thr {EDGE_THR:.0f}% -> w_LAG {'0.65' if gate_ok else '0.50'}")
+            return 0.65 if gate_ok else 0.50
+        except Exception as e:
+            print(f"  WARNING: lag_edge_health.csv unavailable ({e}) -> fail-safe w_LAG=0.50")
+            return 0.50
+    return STATE_LAG_WEIGHT.get(int(state), 0.5)
+
 ALLOC_BAND = 0.10
 LAG_TW = {"LAG_HI": 0.10, "LAG_LO": 0.08}
 WASHOUT_GATE = 0.30; CAPIT_HOLD = 60
@@ -203,7 +228,7 @@ except Exception as e:
 print(f"  LAG entries: {len(lag_up)} upcoming, {len(lag_recent)} entered in last sessions")
 
 # ── 5. Allocator: w_LAG target vs current (band ±10pp) ──
-w_tgt = STATE_LAG_WEIGHT.get(state_today, 0.5)
+w_tgt = w_lag_target(state_today, LATEST)   # edge-conditional (was hardcoded 65% until 2026-07-12)
 w_cur, alloc_note = None, "pt_v22 logs unavailable"
 try:
     pl = pd.read_csv(os.path.join(WORKDIR, "data", "pt_v22_dt5g_logs.csv"), parse_dates=["ymd"]).sort_values("ymd")
