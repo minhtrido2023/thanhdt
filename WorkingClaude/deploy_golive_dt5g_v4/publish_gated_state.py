@@ -21,6 +21,15 @@ import pandas as pd
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
 os.chdir(WORKDIR); sys.path.insert(0, WORKDIR)
+
+# This publisher MUST read the base state from LIVE BigQuery, never the local DuckDB cache:
+# wc_env.sh exports BQ_LOCAL_CACHE globally, which silently routes simulate_holistic_nav.bq
+# through the 23:45-synced cache (always T-1 at the 18:30/19:00 publish slots) — so the
+# published dt5g_live series lagged the just-refreshed v34b_clean base by >=1 session and can
+# never pass bq_freshness_check's MAX_STATE_LAG=0 gate. Unset here (process-local; cache
+# consumers like papertrade/sims/backtests are unaffected). Audit: Winston_20260712_142100 C1.
+os.environ.pop("BQ_LOCAL_CACHE", None)
+
 from macro_state_live import get_gated_state
 
 PROJECT = "lithe-record-440915-m9"
