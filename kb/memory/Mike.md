@@ -63,3 +63,4 @@ yêu cầu cụ thể có góc mù, không thay được 1 lần rà toàn diệ
 
 ## Pattern A (job nền chết vì lifecycle) — ĐÃ ĐÓNG từ 07-09, không tái phát.
 
+- [2026-07-13T01:48:52Z] Dang cho job Winston_20260713_014816 (fix: send_plan_report second-chance re-check ~23:00 ICT, idempotent, chong tai dien incident 07-13 plan-khong-duoc-gui-lai-de-duyet). Plan ZaloPay 07-13 da duoc user duyet + ghi vao file (approved_by=user 08:45 ICT). Con no rieng: code-gate approval trong bot_execute.py (vung cam, can user sign-off rieng, KHONG lam hom nay).

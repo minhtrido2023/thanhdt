@@ -1,16 +1,16 @@
-# Mike fleet — context pack (v990)
+# Mike fleet — context pack (v991)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-12T15:59:17] quant-skeptic/verification — ✅ CONFIRMED VERIFY: ad-hoc claim: {"finding_topic": "ad-hoc claim — Fix H2 HIGH (mike 6459b6d): shares_outstanding_live freshness check BLOCK→WARN because cron runs --scan detection-only, no dai …
-- [2026-07-12T16:01:42] quant-skeptic/verification — ✅ CONFIRMED VERIFY: ad-hoc claim: {"finding_topic": "ad-hoc claim — H2 HIGH fix: shares_outstanding_live freshness check BLOCK→WARN (mike commit 6459b6d)", "verdict": "CONFIRMED", "confidence":  …
 - [2026-07-12T16:02:11] quant-skeptic/verification — ✅ CONFIRMED VERIFY: FIX H2 HIGH XONG: shares_outstanding_live freshness check BLOCK->WARN (commit 6459b6d repo mike) — verify sandbox PASS: WARN return 0, khong set FAILED, khong chan pipeline 19:00/DollarBill: {"finding_topic": "FIX H2 HIGH: shares_outstanding_live freshness check BLOCK->WARN (commit 6459b6d repo mike, bin/bq_freshness_check.sh) — sandbox verify WARN  …
 - [2026-07-12T16:04:02] quant-skeptic/verification — ✅ CONFIRMED VERIFY: REFUTED premise: lag_edge_health.csv KHONG co bug catch-up — series structurally current (VN earnings off-season), tu-advance ~08/2026; KHONG sua code: {"finding_topic": "REFUTED premise: lag_edge_health.csv has NO catch-up bug — series is structurally current (VN earnings off-season), self-advances ~08/2026; N …
 - [2026-07-12T17:42:06] Wags/finding — XAC MINH doc lap ban nhap RETRO 2026-07-12: GAPS FOUND (2 muc): {"job": "Wags_20260712_173644", "task": "verify retro_draft_20260712_for_review.md before Mike commits to kb/INCIDENTS.md", "verdict": "GAPS FOUND - 2 items, do …
 - [2026-07-12T17:49:07] Mike/finding — Daily retro 2026-07-12 hoan tat - 5 su co, Wags-verified, commit 112159b: {"job": "Mike_20260712_173001", "status": "DONE", "commit": "112159b (repo mike, kb/INCIDENTS.md)", "incidents_count": 5, "new_this_retro": 5, "recurring_patter …
 - [2026-07-13T01:26:12] Winston/finding — OPS-AUTOFIX 07-13 sáng: 2 WARN preflight = false-warn thứ Hai lặp lại (calendar-naive) — fix weekday-aware commit a92bf42; không có sự cố mới: {"job": "Winston_20260713_012013", "status": "DONE_COMMITTED_VERIFIED", "commit": "a92bf42 (repo mike, bin/preflight_check.sh)", "diagnosis": {"macro_health_64. …
 - [2026-07-13T01:29:43] Winston/finding — OPS-AUTOFIX ZaloPay 08:20: 1 CRITICAL escalated (plan 07-13 chua duyet + KHONG co code-gate approval, bot 09:05 se van chay) + 2 canh bao lanh tinh (weekend staleness): {"job": "Winston_20260713_012007", "status": "ESCALATED_CRITICAL+2_BENIGN_EXPLAINED", "critical": {"issue": "plan_ZaloPay_2026-07-13.json orders=2 (sell VIB 920 …
+- [2026-07-13T01:46:10] Mike/answer — zalopay-plan-0713-chua-duyet-bot-van-chay: {"decision": "option_A", "approved_by": "user", "approved_at": "2026-07-13T08:45:00+07:00", "note": "User da duyet truc tiep 2 lenh (ban VIB 9200cp + mua BID 90 …
+- [2026-07-13T01:55:54] Winston/finding — FIX incident 07-13 root-cause 1: send_plan_report second-chance 23:00 — plan sua sau 21:00 se duoc tu dong gui lai duyet (commit 4216295, cron DE XUAT cho Mike cai): {"job": "Winston_20260713_014816", "status": "DONE_COMMITTED_TESTED — can quant-skeptic verify + Mike cai cron", "commit": "4216295 (repo mike: bin/send_plan_re …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -705,6 +705,22 @@ env → cache branch bypass → live path), xác nhận process-local (mỗi ste
 bq_freshness_check chạy subprocess riêng, không leak sang sibling), không side-effect logic khác.
 1 ghi chú tùy chọn (pop thêm `LOCAL_SNAPSHOT_DIR`) — hiện vô hại vì biến chưa được export ở đâu.
 **Xong, không còn gì treo cho C1.** H2 (shares_outstanding_live false-BLOCK ~07-15) vẫn CHƯA quyết.
+
+## Plan ZaloPay 07-13 (transition day 5/5 FINAL) — user duyệt trực tiếp (2026-07-13, 08:45 ICT)
+User duyệt qua Mike sau khi được trình bày chi tiết: bán VIB 9.200cp (~146,7M) + mua BID 900cp
+(~36,9M, bù miss ngày 4). `approved_by=user`/`mafee_authorized=true` đã ghi vào
+`data/trade_plans/plan_ZaloPay_2026-07-13.json` lúc 08:45 ICT (~20' trước giờ chạy 09:05). Mirror
+vào DollarBill plan channel + trả lời bus question `zalopay-plan-0713-chua-duyet-bot-van-chay`
+(option A). Đây là ngày cuối transition 5 ngày (07-07→07-13), 4 ngày trước đã thực thi đúng.
+
+**User chỉ đạo quy trình quan trọng cùng lúc**: yêu cầu duyệt plan phải đến tay user TRƯỚC ngày
+giao dịch 1 ngày, không được để tái diễn tình huống sáng nay (plan sửa lỗi ngày lúc 22:17 tối
+07-10 không ai gửi lại cho duyệt, nằm im tới sáng 07-13 08:20 mới bị ops_health_check phát hiện
+CRITICAL — đã ghi đầy đủ `kb/INCIDENTS.md`). Dispatch Winston (fable) thiết kế + implement "second
+chance" re-check muộn hơn trong đêm (đề xuất 23:00 ICT, trước sync_bq_cache 23:45) — chạy lại
+`send_plan_report.sh` idempotent (không gửi trùng nếu 21:00 đã gửi thành công, có gửi nếu file
+plan được sửa/tạo lại sau 21:00): job `Winston_20260713_014816`. KHÔNG đụng bot_execute.py/executor
+(vùng cấm riêng, code-gate approval là quyết định khác, cần user sign-off riêng — chưa làm).
 
 ## Tri thức chung của đội (canonical — Mike biên tập; MỌI agent phải nắm)
 > Cập nhật 2026-07-01. Chi tiết: `kb/KNOWLEDGE.md`. Số liệu gốc: `data/results_registry.md`.
