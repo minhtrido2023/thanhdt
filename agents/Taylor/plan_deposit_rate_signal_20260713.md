@@ -1,6 +1,13 @@
 # PLAN — Tín hiệu lãi suất huy động Big-4 (Pillar A′) bổ sung macro gate DT5G
-> Taylor, 2026-07-13 · job Taylor_20260713_124803 · trạng thái: **PLAN PRE-REGISTERED — CHỜ USER DUYỆT, CHƯA CHẠY BACKTEST NÀO**
+> Taylor, 2026-07-13 · job Taylor_20260713_124803 · trạng thái: **PLAN PRE-REGISTERED — user ĐÃ DUYỆT 4 điểm §9; AMENDMENT 1 (D0 real-premium, job Taylor_20260713_131230) thêm TRƯỚC khi chạy bất kỳ backtest nào**
 > Trial MỚI, sổ N riêng. Kế thừa scope `Taylor_20260713_122053` (phần B) + premise-check `Taylor_20260713_114905`.
+
+> **AMENDMENT 1 (2026-07-13, job `Taylor_20260713_131230` — hợp lệ vì chưa tồn tại kết quả backtest nào):**
+> User yêu cầu xét thêm LỆCH PHA lạm phát vs lãi suất huy động — premium THỰC của việc gửi tiền
+> (`real_dep_premium = deposit_rate − CPI_yoy`) thay vì chỉ mức danh nghĩa. Family mở rộng
+> **N=5 → N=6** bằng variant **D0 real-premium** (§4), input premium thực (§3.1), episode table
+> premium thực đã enumerate MÔ TẢ (chưa backtest) ở §1.1. Mọi ngưỡng/fuse/debounce D0 mượn nguyên
+> D1 — không tune thêm trục nào.
 
 ## 0. Tóm tắt 1 đoạn (cho người duyệt nhanh)
 
@@ -51,6 +58,40 @@ rate = chi phí vốn thật của hệ ngân hàng, kênh truyền dẫn trực
   trước. Chuỗi step thô làm chg6m nhảy bậc quanh ngưỡng (flicker cấu trúc) — thêm lý do bắt buộc
   debounce + shadow trước.
 
+### 1.1. AMENDMENT 1 — enumerate MÔ TẢ premium thực (deposit − CPI), TRƯỚC khi backtest
+
+**Nguồn CPI có sẵn**: `cpi_vn.py` (repo root) — CPI YoY tháng, 2 tier: **Tier-1 THẬT** từ NSO/GSO
+chart-embed (2025-06→2026-06, 13 tháng — rolling window của NSO, không lùi xa hơn được); **Tier-2
+PROXY** anchor nội suy tuyến tính 2011-01→2025-05 (cùng phương pháp hindsight-anchor như
+`deposit_rate_vn.py`, calibrate 2026-07-06). Consumer hiện tại: chỉ `macro_confidence_regime.py`
+(research). **Chưa có trong `data_registry.md`** — gộp vào prerequisite §2. Alignment khai báo
+trước: CPI tháng M coi như usable từ đầu tháng M+1 (GSO công bố ~29 tháng M — publication shift,
+không phải tham số tune).
+
+**Kết quả enumerate (probe `probe_real_premium_20260713.py`, mô tả — KHÔNG phải backtest), cùng
+ngưỡng mượn {+0.5/+1.5/+3.0} pp/6m trên `real_prem_chg6m`:**
+
+| Tín hiệu | Episode MILD | Episode STRONG | Episode EXTREME |
+|---|---|---|---|
+| Danh nghĩa `dep_chg6m` (D1) | 3 (2017, 2022-23, 2026) | 2 (2022-12, 2026-06) | 0 |
+| Thực `real_prem_chg6m` (D0) | **12** | **6** (2012, **2017-05→08 peak +2.48**, 2019-01, **2020-08→2021-02 peak +2.89**, 2025-01, 2026-02) | 1 (2012, peak +9.2) |
+
+**Giả thuyết user đã kiểm tra thật — kết quả NGƯỢC với kỳ vọng**: false-positive 2017 KHÔNG biến
+mất mà **nặng thêm** — CPI 2017 đang RƠI (4.7→2.5) trong khi deposit +1.0 → premium thực mở rộng
++2.48pp/6m → D0 fire STRONG → cap BEAR(2) giữa bull +48%. Tương tự 2020-08→2021-02 (CPI sập
+6.4→0.2, premium thực +2.89 → cap BEAR xuyên mega-rally hậu-COVID) và 2012 (disinflation nhanh →
+EXTREME → cap CRISIS trong năm VNINDEX +18%). Ngược lại, đúng cửa sổ sập thật 2022-10→12, CPI tăng
+CÙNG NHỊP lãi suất → premium thực gần như đứng im (−0.19..+0.73) → D0 **im lặng đúng lúc cần fire
+nhất**. Cơ chế: CPI YoY biến động mạnh hơn chuỗi deposit step nhiều → `real_prem_chg6m` bị chi phối
+bởi CPI-momentum ngược dấu; trong mẫu VN 2011-2026, premium thực mở rộng chủ yếu do DISINFLATION —
+mà disinflation lịch sử ở VN đi kèm bull (nới lỏng kỳ vọng), không phải bear.
+
+**Kỳ vọng khai báo TRƯỚC khi chạy (chống tự lừa, đối xứng §4)**: D0 dự đoán **FAIL N2 nặng**
+(chi phí 2017 + 2020-21 + 2012 lớn, không có khoản bù 2022). Nếu backtest ra D0 ĐẸP → nghi ngờ bug
+/leak trước khi tin. Lý do vẫn chạy D0 thay vì bác trên giấy: (i) user yêu cầu kiểm tra thật;
+(ii) chi phí đo nhỏ, kết quả auditable thay vì suy luận; (iii) event-audit D0 cho ta bảng forward
+return của các cú fire — bằng chứng định lượng đóng hướng real-premium một lần cho dứt điểm.
+
 ## 2. Điều kiện tiên quyết về dữ liệu (KHÔNG phải trial — việc data-ops, làm trước/song song)
 
 Bằng chứng lịch sử yếu là vấn đề CỐ ĐỊNH không sửa được; nhưng dữ liệu FORWARD sạch thì rẻ và làm
@@ -61,6 +102,9 @@ Bằng chứng lịch sử yếu là vấn đề CỐ ĐỊNH không sửa đư�
 2. **Routine cập nhật tháng** (Winston): mỗi đầu tháng chốt Big-4 12M posted rate từ nguồn public
    (website VCB/BIDV/CTG/Agribank, bảng CafeF/Vietstock), append mốc mới **kèm ngày thu thập thật**
    (`collected_date`) — từ nay trở đi chuỗi là point-in-time thật, hết hindsight cho tương lai.
+2b. **(AMENDMENT 1) Registry entry + routine tháng cho `cpi_vn.py` luôn thể** — cùng gap, cùng
+   fix: NSO chart-embed fetch được bằng script (đã chứng minh 2026-07-06), Winston append mốc CPI
+   tháng mới kèm `collected_date` cùng nhịp với deposit-rate. Chi phí ~0 (cùng 1 routine).
 3. **KHÔNG tái dựng lịch sử top10 ngoài Big-4** (đã kết luận ở scope: khó, bẩn, không đáng) — top10
    chỉ thu forward nếu sau này cần, ngoài phạm vi plan này. Vì chỉ có 1 chuỗi Big-4 gộp (không có
    per-bank history), **trục "cách tính trọng số Big4" KHÔNG thể test được trên dữ liệu hiện có** —
@@ -90,15 +134,29 @@ dep_extreme = dep_chg6m ≥ +3.0   → đề xuất cap CRISIS(1)
 - **Ngưỡng {0.5/1.5/3.0} mượn nguyên Pillar A, KHÔNG tune**: biên độ 6m-change lịch sử của 2 chuỗi
   cùng cỡ (2022 cả hai +2.0pp) → mượn ngưỡng là defensible a priori và tiết kiệm toàn bộ N cho trục
   ngưỡng. Nếu ai muốn ngưỡng khác → trial mới, duyệt N mới.
+### 3.1. (AMENDMENT 1) Input D0 — premium thực
+
+```
+cpi_daily[t]        = CPI_yoy tháng M, usable từ đầu tháng M+1 (publication shift), ffill theo ngày
+real_dep_premium[t] = deposit_rate[t] − cpi_daily[t]
+rp_chg6m[t]         = (real_dep_premium[t] − real_dep_premium[t−126 phiên]).shift(lag=5 phiên)
+D0: rp_chg6m ≥ +0.5 → cap NEUTRAL · ≥ +1.5 → cap BEAR · ≥ +3.0 → cap CRISIS
+```
+Mọi thứ khác (OR-fuse cùng vòng, `_commit(7)`, không bypass bull, chỉ CAP) y hệt D1. KHÔNG tune
+ngưỡng riêng cho D0 — nếu ai muốn ngưỡng real-premium khác → trial mới, duyệt N mới.
+
 - **Tương tác với 2 consumer deposit-rate sẵn có** (khai báo chống nhầm lẫn): (i) deposit-lens
   hurdle trong `rating_8l.py` — tầng rating cổ phiếu, mức tuyệt đối, không liên quan; (ii)
   deposit-gate RECOVERY_PARK floor 7.5% — tầng parking vehicle, mức tuyệt đối, dormant. Pillar A′
   là tầng STATE CAP, xu hướng — 3 tầng đọc cùng 1 chuỗi nhưng không chồng logic. Không sửa 2 cái kia.
 
-## 4. Family pre-registered — sổ N-ledger "DEPOSIT-RATE-GATE": **N = 5, đóng tại đây**
+## 4. Family pre-registered — sổ N-ledger "DEPOSIT-RATE-GATE": **N = 6, đóng tại đây**
+> (AMENDMENT 1: N=5 → N=6, thêm D0 TRƯỚC khi chạy bất kỳ run nào — không phải mở thêm sau khi
+> thấy kết quả. Sau amendment này sổ ĐÓNG hẳn.)
 
 | ID | Variant | Khác D1 chỗ nào | Giả thuyết cần bác/xác nhận |
 |---|---|---|---|
+| **D0 real-premium** | = D1 nhưng input là `rp_chg6m` (premium thực, §3.1) thay vì `dep_chg6m` | Trục user: dòng tiền phụ thuộc phần thưởng THỰC của tiết kiệm | Kỳ vọng khai báo trước từ §1.1: **FAIL N2** (fire ngược dấu 2012/2017/2020-21, im trong 2022) — chạy để có bằng chứng đo được, không bác trên giấy |
 | **D1 mirror-full** | 3 ngưỡng {0.5/1.5/3.0} → cap {NEUTRAL/BEAR/CRISIS}, OR-fuse, lag 5, commit 7 | — (bản chuẩn) | Bản sao đối xứng Pillar A có do-no-harm không, hay chết vì 2017 |
 | **D2 strong-only** | CHỈ 1 ngưỡng ≥+1.5 → cap BEAR; bỏ tier mild và extreme | Bỏ hẳn tier mild → miễn nhiễm false-positive 2017 (peak 2017 = +1.0 < 1.5) | Insurance tối giản: chỉ phản ứng khi thắt chặt huy động THẬT SỰ mạnh |
 | **D3 blind-spot-only** | = D1 nhưng chỉ được fire khi Pillar A im (`refi_chg6m < 0.5`); refi đang tăng → nhường Pillar A | Trả lời thẳng rủi ro corr 0.92: tín hiệu CHỈ lấp đúng điểm mù, zero double-counting | Incremental value thuần — nếu D3 ≈ D1 thì phần trùng Pillar A vô nghĩa |
@@ -106,7 +164,8 @@ dep_extreme = dep_chg6m ≥ +3.0   → đề xuất cap CRISIS(1)
 | **A5 ablation** (winner only, read-only) | Per-year LOO + event-list đầy đủ (từng phiên cap binds, forward T+20/T+60) | Đọc, không đổi lựa chọn | Chuẩn DT5G event-audit |
 
 KHÔNG mở thêm biến thể/ngưỡng/trọng-số nào sau khi chạy. Trục trọng-số Big4 đã loại từ §2.3 (không
-có dữ liệu per-bank). Muốn thêm gì giữa chừng → dừng, xin user duyệt N mới.
+có dữ liệu per-bank). Muốn thêm gì giữa chừng → dừng, xin user duyệt N mới. S4/A5 áp cho winner
+của {D0..D3} như cũ.
 
 **Kỳ vọng độ lớn khai báo trước (chống tự lừa)**: cùng lớp với DT5G macro overlay — **Full CAGR
 delta trong khoảng −0.3..+0.5pp**, phần lớn lịch sử byte-identical với baseline (overlay dormant).
@@ -193,7 +252,13 @@ quá khứ hồi tố lần nữa.
 6. **Răng thật, cắn nhầm thì đau thật**: nếu wire D1/D2 lúc chg6m vượt 1.5 lần nữa, production tụt
    NEUTRAL→BEAR (70%→20% cổ phiếu) — một cú de-risk sai tốn hơn nhiều pp so mọi edge kỳ vọng. Đây
    là lý do thứ ba cho shadow-first.
-7. **Chu kỳ hiện tại có thể tự giải quyết**: deposit 6.8% đang tiến gần floor 7.5% của
+7. **(AMENDMENT 1) CPI proxy = hindsight-anchor KÉP + nội suy**: D0 trừ 2 chuỗi proxy cho nhau —
+   deposit (26 anchor hồi tố) − CPI (Tier-2 anchor nội suy tuyến tính, Tier-1 thật chỉ 13 tháng
+   cuối). Nội suy tuyến tính làm `rp_chg6m` giữa các anchor thành slope nhân tạo mượt; sai số mức
+   CPI ±vài phần mười pp là bình thường theo chính docstring nguồn. Mọi kết luận D0 vì thế yếu hơn
+   D1-D3 một bậc về provenance — nếu (ngoài kỳ vọng) D0 GO, bắt buộc re-verify trên CPI Tier-1
+   forward trước khi tin.
+8. **Chu kỳ hiện tại có thể tự giải quyết**: deposit 6.8% đang tiến gần floor 7.5% của
    RECOVERY_PARK deposit-gate sẵn có (dormant từ 2013) — nếu vượt, hệ ĐÃ có một phản ứng phòng thủ
    ở tầng parking mà không cần Pillar A′. Tránh double-build: event-audit phải kiểm tra 2 cơ chế có
    fire chồng lên nhau trong kịch bản rate > 7.5% không.
