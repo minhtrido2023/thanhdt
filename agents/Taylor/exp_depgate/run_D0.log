@@ -1,25 +1,25 @@
 [runner] BYPASS_VERIFIED: manifest verified=False — proceeding, control-vs-pin is the integrity gate
 [BQ_LOCAL_CACHE] ticker: casting VARCHAR→DATE for ['time'] (parquet has wrong dtype — re-run sync_bq_cache.py)
 [BQ_LOCAL_CACHE] ready — 13 tables from /home/trido/thanhdt/WorkingClaude/data/bq_cache
-[runner] control: published DT5G view untouched
+[runner] view vnindex_5state_dt5g_live -> /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/exp_depgate/state_D0.parquet  ([(3121, datetime.date(2014, 1, 2), datetime.date(2026, 7, 9))])
 ====================================================================================================
   V2.3A (allocator + CAPIT) + maturity:postbull + edge-cond-allocator(thr4%) — FULL AUDIT SIMULATION 2014-01-02 -> 2026-06-19
   NAV=50B (25B BAL + 25B LAG)   state=tav2_bq.vnindex_5state_dt5g_live
   PARK vehicle=custompitg  parking policy (cash_etf_states) {3: 0.7}
   combine=allocator ON {1: 0.5, 2: 0.0, 3: 0.65, 4: 0.65, 5: 0.65} band ±10pp   CAPIT=ON
-  fills=T+1 Open (BQ-auditable, no intraday)   -> v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_depgate_control.csv
+  fills=T+1 Open (BQ-auditable, no intraday)   -> v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_depgate_D0.csv
 ====================================================================================================
 
 [2] Loading v11 signals + Release_Date + 5-state + overheat + D1...
-[BQ_LOCAL_CACHE] query took 159.2s (703604 rows)
+[BQ_LOCAL_CACHE] query took 156.2s (703604 rows)
   signals: 703,604 rows
-[BQ_LOCAL_CACHE] query took 94.0s (161081 rows)
-  [EXBULL fix] suppressed 861 momentum signals in EX-BULL (state==5)
-  [regime_size] rating coverage 96.4%; weak buy-rows flagged (rating>=4): 2,369 -> halved to 5% ONLY in BEAR/CRISIS (state<=2), full 10% elsewhere
+[BQ_LOCAL_CACHE] query took 92.3s (161081 rows)
+  [EXBULL fix] suppressed 455 momentum signals in EX-BULL (state==5)
+  [regime_size] rating coverage 96.4%; weak buy-rows flagged (rating>=4): 1,751 -> halved to 5% ONLY in BEAR/CRISIS (state<=2), full 10% elsewhere
 
 [3] Loading prices/Open/sector/E1VFVN30...
   [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
-[BQ_LOCAL_CACHE] query took 66.4s (598494 rows)
+[BQ_LOCAL_CACHE] query took 65.0s (598494 rows)
   [ETF-LIQ custompitg] ex-VIC PIT basket (quality=none, rebal=q2m5, gate=3, weight=namecap): 48 rebals, 209 union names, avg 30/rebal
   [ETF-LIQ custompitg] cap=20% of ADV; median ADV 1716.2B/day -> ~343.2B/day parkable
 
@@ -46,7 +46,7 @@
   washout 2024-08-05: state=1 grind=True dd52=-8.7% cool=False -> size=0.50
   washout 2025-04-03: state=4 grind=False dd52=-8.0% cool=False -> size=0.50
   washout 2025-10-20: state=3 grind=False dd52=-7.4% cool=False -> size=0.75
-  washout 2026-03-09: state=3 grind=False dd52=-13.1% cool=False -> size=0.75
+  washout 2026-03-09: state=2 grind=False dd52=-13.1% cool=False -> size=0.50
 
 [4b] Fetching BQ prices for LAG universe (797 tickers)...
   chunk 1/4: 675,427 rows
@@ -56,42 +56,42 @@
   LAG signals in window: 5315  [fund_dnpr_reorder=False]
 
 [6] BOOK A — BAL 25B...
-  BAL events: 1731 stock + 660 ETF; final 521.8827B
+  BAL events: 1224 stock + 618 ETF; final 333.7195B
 
 [7] BOOK B — LAG 25B (always-on, parked)...
-  LAG events: 6722 stock + 1229 ETF; final 447.4932B
+  LAG events: 6594 stock + 1104 ETF; final 409.4583B
 
 [8] Combine books (allocator)...
   [edge-alloc] thr=4.0%; mean12 latest=0.5%, %time<thr=53%
-  39 band rebalances; final combined = 992.9952B
+  45 band rebalances; final combined = 598.6106B
 
 [9] Building TX table + self-checks...
   [selfcheck BAL] cash-flow identity max err = 0 VND; final NAV identity err = 0 VND
   [selfcheck LAG] cash-flow identity max err = 0 VND; final NAV identity err = 0 VND
-  [borrow-audit] total borrow cost = 0 VND (BAL 0 / LAG 0); max gross BAL 1.000 LAG 1.000 combined 1.000; borrow-days BAL 78 LAG 52
+  [borrow-audit] total borrow cost = 0 VND (BAL 0 / LAG 0); max gross BAL 1.000 LAG 1.000 combined 1.000; borrow-days BAL 59 LAG 34
 
 ====================================================================================================
  V2.3A (allocator + CAPIT) + maturity:postbull + edge-cond-allocator(thr4%) AUDIT — FULL 2014-01-02 -> 2026-06-19 (12.46y)
- Final NAV 993.00B  CAGR 27.11%  Sharpe(252) 1.81  MaxDD -18.3%  Calmar 1.48
+ Final NAV 598.61B  CAGR 22.05%  Sharpe(252) 1.57  MaxDD -18.4%  Calmar 1.20
  VNINDEX B&H: CAGR 10.87%  Sharpe 0.66  MaxDD -45.3%
 ====================================================================================================
 
 [11] Writing audit file...
-  -> /home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_depgate_control.csv  (18,169 rows)
+  -> /home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_depgate_D0.csv  (17,370 rows)
 
 ANNUAL (sys vs VNINDEX):
   2014: +36.62%   (vni=+0.0815)
   2015: +22.18%   (vni=+0.0635)
   2016: +13.02%   (vni=+0.1575)
-  2017: +32.95%   (vni=+0.4646)
-  2018: +24.56%   (vni=-0.1037)
-  2019: +12.85%   (vni=+0.0776)
-  2020: +22.78%   (vni=+0.1419)
-  2021: +103.25%   (vni=+0.3372)
-  2022: -3.47%   (vni=-0.3399)
-  2023: +23.59%   (vni=+0.0824)
-  2024: +23.65%   (vni=+0.1193)
-  2025: +52.47%   (vni=+0.4054)
-  2026: -1.16%   (vni=+0.0202)
+  2017: +15.55%   (vni=+0.4646)
+  2018: +25.94%   (vni=-0.1037)
+  2019: +6.07%   (vni=+0.0776)
+  2020: -1.20%   (vni=+0.1419)
+  2021: +85.00%   (vni=+0.3372)
+  2022: -0.36%   (vni=-0.3399)
+  2023: +23.94%   (vni=+0.0824)
+  2024: +24.08%   (vni=+0.1193)
+  2025: +40.87%   (vni=+0.4054)
+  2026: +1.99%   (vni=+0.0202)
 
 Done.

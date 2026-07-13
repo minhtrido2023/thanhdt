@@ -796,3 +796,20 @@ Audit xác nhận: **hôm nay dữ liệu 8L ĐẦY ĐỦ** — chỉ 1 mã (MBS
 User duyệt cả 3 đề xuất Winston: (1) sửa cache sync sang full-download cho 2 bảng rating; (2) tăng
 tần suất refresh 2x/tuần trong mùa BCTC cao điểm (~4-6 tuần, tới ~08-05); (3) cập nhật 3 chỗ tài
 liệu lỗi thời trong `data_registry.md`. Dispatch job `Winston_20260713_103213`.
+
+## User tự phát hiện BQ local cache stale — vấn đề LỚN HƠN dự kiến (2026-07-13)
+User hỏi lại "BQ local đang stale, trễ mấy ngày" sau khi tôi báo cáo đã fix xong 8L cache (chỉ
+verify fa_ratings/fa_ratings_8l, KHÔNG kiểm tra toàn bộ bq_cache). Tự kiểm tra phát hiện:
+`data/bq_cache/ticker_prune.parquet` (monolith) đứng yên từ **06-26** (17 ngày) trong khi thư mục
+chunked thay thế (`ticker_prune/<year>.parquet`) vẫn đồng bộ đúng — sync_bq_cache.py đã migrate
+sang chunked quanh 06-26 nhưng monolith cũ không ai xoá/cập nhật.
+
+**Blast radius LỚN**: grep xác nhận **27 file** vẫn đọc thẳng monolith cũ — không chỉ
+`trading_bot/executor.py:507` (đã biết từ audit M5 hôm qua), mà còn 17 sector-screener script +
+9 script backtest/research khác (gap_fairvalue_*, gq_score_gate, neutral_glide_backtest,
+converge_union_test, lag_dnpr_event_study, gap_adaptive_proxy, gap_ev_by_liquidity).
+
+Dispatch song song: `Winston_20260713_143546` (fix đường dẫn đọc cho cả 27 file, archive
+monolith cũ theo coding_guidelines §10) + `Taylor_20260713_143629` (đánh giá tác động — finding
+nào từ 06-26 tới nay đã dùng dữ liệu đông băng, ưu tiên cao nhất: chase-cap vol-scale review dự
+kiến MAI 07-14 có bị ảnh hưởng rvol_20d/prior_close không).

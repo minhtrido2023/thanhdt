@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v1028)
+# Mike fleet — context pack (v1029)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-13T10:18:29] Winston/finding — AUDIT 8L freshness 07-13: HÔM NAY dữ liệu 8L phản ánh ĐỦ thông tin hệ thống có (1/1 mã Q2 đã vào); cron thứ Bảy CHƯA từng chạy (lần đầu 07-18), bảng tươi nhờ refresh tay 07-12; 1 gap kỹ thuật sẽ nổ tối nay 23:45 (bq_cache delta không tương thích refresh re-rank) + 2 đề xuất mùa BCTC: {"job": "Winston_20260713_100733", "status": "DONE — audit-only, không sửa gì, toàn bộ số liệu từ BQ live + log thật hôm nay", "q1_fa_ratings_8l": {"lastModifie …
 - [2026-07-13T10:46:57] Winston/finding — 3 fix hau-audit 8L XONG: cache full_only (het count-mismatch gia thu Bay), cron tam T3 mua BCTC den 08-04 (tu het han), 3 row data_registry loi thoi da sua — cache da khop BQ live 0 drift: {"job": "Winston_20260713_103213", "status": "DONE_COMMITTED_TESTED", "viec1_cache_full_only": {"fix": "sync_bq_cache.py: fa_ratings + fa_ratings_8l them full_o …
 - [2026-07-13T11:57:31] Taylor/finding — Beta-cap custom30V (câu hỏi VIX): NO-GO cả 2 config kể cả bản có-điều-kiện macro-phòng-thủ; premise vĩ mô user ĐÚNG cả 3 (deposit 4.7→6.8%, CPI đỉnh 5.6%, thanh khoản −55%); rủi ro beta đã xử lý ở tầng sleeve DT5G + deposit-gate 7.5% sẵn có: {"job": "Taylor_20260713_114905", "status": "DONE — research-only, production/paper KHÔNG đụng, registry đã pin", "a_premise_vi_mo": {"verdict": "user ĐÚNG cả 3 …
 - [2026-07-13T11:11:18] Winston/finding — new-listings-daily: {"date": "2026-07-13", "lookback_days": 90, "total_new": 1, "needs_manual_rating": 0, "fresh_ipo": 0, "research_queue": [], "snapshot": "/home/trido/thanhdt/Wor …
@@ -11,6 +10,7 @@
 - [2026-07-13T12:27:40] Taylor/finding — World Cup effect + deposit-rate signal scope: A=mức NĂM khớp số nhưng KHÔNG có cơ chế (cửa sổ giải đấu 2/4 dương, N=4 không làm rule); B=dữ liệu ĐÃ CÓ SẴN (deposit_rate_vn.py Big-4 proxy) — Pillar A đang mù đúng chu kỳ 2025-26 deposit +2.0pp/refi bất động, corr 6m-change chỉ 0.63: {"job": "Taylor_20260713_122053", "status": "DONE — scope/descriptive only, KHÔNG sửa production, KHÔNG backtest đầy đủ (đúng đề bài)", "phan_A_worldcup": {"nga …
 - [2026-07-13T12:56:52] Taylor/finding — Plan pre-registered deposit-rate signal (Pillar A′) XONG — family N=5 đóng sổ, gate GO/NO-GO định nghĩa trước, khuyến nghị cứng shadow-first vì episode incremental STRONG chỉ N=1 (chính chu kỳ 2025-26 đang diễn ra, chuỗi lại hindsight-anchored): {"job": "Taylor_20260713_124803", "status": "DONE — plan only, KHÔNG backtest, KHÔNG sửa production (đúng đề bài)", "artifact": "mike/agents/Taylor/plan_deposit …
 - [2026-07-13T13:20:58] Winston/finding — deposit-rate-signal-data-prereq-xong: {"job": "Winston_20260713_131255", "status": "DONE — 3 viec plan §2 xong, KHONG sua production, KHONG tu cai cron", "viec1_registry": {"fix": "them 2 row muc Vi …
+- [2026-07-13T14:45:15] Winston/finding — ticker_prune monolith stale FIX XONG: 28 file doi sang chunked dir, monolith archived, executor stress PASS: {"job": "Winston_20260713_143546", "status": "DONE_COMMITTED_TESTED — het file nao doc du lieu chet 06-26", "scope": "28 file .py (dispatch noi 27, grep ra du 2 …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -811,6 +811,23 @@ Audit xác nhận: **hôm nay dữ liệu 8L ĐẦY ĐỦ** — chỉ 1 mã (MBS
 User duyệt cả 3 đề xuất Winston: (1) sửa cache sync sang full-download cho 2 bảng rating; (2) tăng
 tần suất refresh 2x/tuần trong mùa BCTC cao điểm (~4-6 tuần, tới ~08-05); (3) cập nhật 3 chỗ tài
 liệu lỗi thời trong `data_registry.md`. Dispatch job `Winston_20260713_103213`.
+
+## User tự phát hiện BQ local cache stale — vấn đề LỚN HƠN dự kiến (2026-07-13)
+User hỏi lại "BQ local đang stale, trễ mấy ngày" sau khi tôi báo cáo đã fix xong 8L cache (chỉ
+verify fa_ratings/fa_ratings_8l, KHÔNG kiểm tra toàn bộ bq_cache). Tự kiểm tra phát hiện:
+`data/bq_cache/ticker_prune.parquet` (monolith) đứng yên từ **06-26** (17 ngày) trong khi thư mục
+chunked thay thế (`ticker_prune/<year>.parquet`) vẫn đồng bộ đúng — sync_bq_cache.py đã migrate
+sang chunked quanh 06-26 nhưng monolith cũ không ai xoá/cập nhật.
+
+**Blast radius LỚN**: grep xác nhận **27 file** vẫn đọc thẳng monolith cũ — không chỉ
+`trading_bot/executor.py:507` (đã biết từ audit M5 hôm qua), mà còn 17 sector-screener script +
+9 script backtest/research khác (gap_fairvalue_*, gq_score_gate, neutral_glide_backtest,
+converge_union_test, lag_dnpr_event_study, gap_adaptive_proxy, gap_ev_by_liquidity).
+
+Dispatch song song: `Winston_20260713_143546` (fix đường dẫn đọc cho cả 27 file, archive
+monolith cũ theo coding_guidelines §10) + `Taylor_20260713_143629` (đánh giá tác động — finding
+nào từ 06-26 tới nay đã dùng dữ liệu đông băng, ưu tiên cao nhất: chase-cap vol-scale review dự
+kiến MAI 07-14 có bị ảnh hưởng rvol_20d/prior_close không).
 
 ## Tri thức chung của đội (canonical — Mike biên tập; MỌI agent phải nắm)
 > Cập nhật 2026-07-01. Chi tiết: `kb/KNOWLEDGE.md`. Số liệu gốc: `data/results_registry.md`.
