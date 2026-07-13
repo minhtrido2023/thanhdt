@@ -383,3 +383,114 @@ S4/A5 áp cho winner đó. N-ledger DEPOSIT-RATE-GATE: D0 đã tiêu 1/6, sổ v
 - Harness CSV: `data/v23_golive_audit_..._exp_depgate_{D0,control}.csv` (17.370/18.169 rows)
 - Code: `mike/agents/Taylor/exp_depgate_20260713.py` (build state), `run_depgate_variant.py`
   (view-swap runner) — không đụng `macro_state_live.py`/cache/production file nào.
+
+## 11. Kết quả backtest D1/D2/D3 — **NO-GO CẢ 3 → family 0/4 GO, ĐÓNG HƯỚNG B**
+> Job `Taylor_20260713_145605`, chạy 2026-07-13. Attempt 1 dispatch-layer timeout nhưng harness
+> nền chạy xong toàn bộ (đúng bài học D0); attempt 2 harvest + verify. **Kết luận: không biến thể
+> nào trong {D0,D1,D2,D3} qua gate §6 → hướng B (Pillar A′ deposit-rate) đóng hoàn toàn, KHÔNG
+> tiến tới shadow-monitor. S4/A5 (winner-only) không chạy vì không có winner. N-ledger
+> DEPOSIT-RATE-GATE: 4/6 tiêu, S4/A5 không dùng, sổ đóng.**
+
+### 11.1. Phát hiện phương pháp QUAN TRỌNG trước khi đọc số: tie-break nondeterminism trong harness
+Khi so run unsorted, NAV lệch **từ 2018-01-02** dù state của variant identical control tới tận
+2023 — root cause: sizing của harness tie-break theo THỨ TỰ DÒNG của query result; DuckDB đổi
+row-order theo NỘI DUNG parquet state được swap (hash-join layout) → 2 mã cùng score hoán đổi
+`buy_amount` (vd MWG/PLX 2018-01-02), NAV lệch hàng tỷ VND TRƯỚC phiên state-diff đầu tiên.
+- **Fix trong job**: patch stable-sort `(time,ticker)` lên `BQLocalCache.query` (chỉ result có
+  CẢ 2 cột — không đụng các ORDER BY chủ ý khác), runner `run_depgate_variant_sorted.py`.
+- **Determinism PROOF**: control chạy 2 lần (ctlSa/ctlSb) → **md5 byte-identical**
+  (`f4421a1755d2d2ef75e4be86280eba04`).
+- **Thang noise đo được**: unsorted control 27.11 vs sorted 27.65 = ~0.5pp thuần ordering; delta
+  unsorted D1/D2/D3 (+0.40/+0.19/+0.40) nhiễm noise → **số sorted là số chính thức của family**.
+  Hệ quả cho §10: caveat control-vs-pin −0.73pp trước đây thực ra TRỘN mutation-drift với ordering
+  noise; drift thật (sorted control vs pin) chỉ **−0.19pp** (27.65 vs 27.84). Verdict D0 KHÔNG đổi
+  (delta −5.06pp >> noise; N2/G2 của D0 dựa trên event-audit state-level, không nhiễm).
+  ⚠️ Bài học chung cho mọi experiment view-swap trên `pt_v23_audit_2014.py` từ nay: **bắt buộc
+  sort ổn định + determinism-pair control**, nếu không delta <±0.5pp không có nghĩa.
+
+### 11.2. Integrated ablation (sorted, same-vintage, self-check 0 VND cả BAL+LAG mọi run)
+| Run | FULL CAGR | Sharpe | MaxDD | Calmar | IS 2014-19 | OOS 2020+ | Delta FULL |
+|---|---|---|---|---|---|---|---|
+| control sorted (ctlSa≡ctlSb) | 27.65% | 1.83 | −18.3% | 1.51 | 23.37% | 31.70% | — |
+| **D1 mirror-full** | 27.82% | 1.86 | −18.3% | 1.52 | 23.37% | 32.02% | **+0.17pp** |
+| **D2 strong-only** | 27.84% | 1.85 | −18.3% | 1.52 | 23.37% | 32.06% | **+0.19pp** |
+| **D3 blind-spot-only** | 27.63% | 1.84 | −18.3% | 1.51 | 23.37% | 31.65% | **−0.02pp** |
+
+- **IS 2014-19 identical 23.37% cả 4 run** — overlay dormant in-sample, đúng dự đoán §5 (khớp
+  chữ ký DT5G "+0.00pp exactly IS").
+- **Benign-window identity PASS tuyệt đối**: D1/D2 NAV trùng control 2.267 phiên liên tục tới
+  ĐÚNG 2023-02-07 (phiên deviate đầu); D3 trùng 3.012 phiên tới ĐÚNG 2026-01-28.
+- Per-year delta ≠ 0 (D1): 2023 **+2.17pp** (23.54→25.71), 2024 −0.06, 2025 +0.16, 2026 −0.19 —
+  toàn bộ edge nằm trong 1 năm 2023; 2024-25 chỉ là path-carry sau divergence. D2 y hệt trừ 2026
+  (+0.01, không có mild tier). D3: identical mọi năm trừ 2026 (−0.21).
+- Recompute độc lập `extract_peryear.py` từ CSV khớp engine print cả 4 run.
+- DSR: **non-informative như khai báo trước §5.4** — deviate 70/58/30 phiên trên 3.107, excess
+  series không đủ power; không ép ra số.
+
+### 11.3. Event-audit (primary) — `exp_depgate/event_audit_D{1,2,3}{.csv,_episodes.csv}`
+| Variant | Ep | Cửa sổ | Phiên | Cap | Pillar A? | fwd T+60 | Sleeve |
+|---|---|---|---|---|---|---|---|
+| D1 | 0 | 2023-02-07→03-16 | 28 | BEAR | **active (0% im)** | −2.4% | **+0.89pp** |
+| D1 | 1 | 2023-04-04→04-19 | 12 | BEAR | **active (0% im)** | +3.9% | **+1.37pp** |
+| D1 | 2 | 2026-01-28→02-12 | 12 | NEUTRAL | im (100%) | +2.8% | −0.37pp |
+| D1 | 3 | 2026-06-16→07-09 | 18 | BEAR | im (100%) | +1.8%* | −0.92pp |
+| D2 | — | = D1 bỏ ep2 (mild) | 58 | | | | |
+| D3 | — | = chỉ ep2+ep3 (blind-spot) | 30 | | | | |
+
+\* fwd60 của ep 2026-06 **truncated tại cuối chuỗi** (fwd20=fwd60=+1.81 vì clamp) — episode đang
+diễn ra, chưa có kết cục.
+
+**Đọc thẳng:** toàn bộ phần DƯƠNG của D1/D2 (+2.26pp sleeve) nằm trong 2023-02→04 nơi **Pillar A
+đang active** (redundant 100%, đúng rủi ro corr-0.92 §7.2 — tín hiệu chỉ đào sâu thêm cú de-risk
+Pillar A đã ra lệnh, và cửa sổ này nằm TRONG vùng loại trừ N1 2022-10→2023-06). Phần incremental
+thuần (Pillar A im) = đúng 2 episode chu kỳ 2025-26 hindsight-anchored, cả 2 đều TỐN TIỀN
+(−1.29pp) với VNINDEX forward DƯƠNG sau de-risk → phần "mới" của tín hiệu tới nay chỉ sai (hoặc
+quá sớm — không phân biệt được cho tới khi chu kỳ hiện tại ngã ngũ).
+
+**2017 — dự đoán N2 pre-registered SAI, và lý do sai có giá trị**: tín hiệu mild CÓ fire 126 phiên
+(peak chg6m +1.0, dep_cap=NEUTRAL commit ~120 phiên) nhưng **không bind một phiên nào** — DT5G
+published đứng NEUTRAL(3) gần trọn 2017 (245/250 phiên; chỉ 4 phiên BULL). Cap-overlay chỉ có răng
+khi state Ở TRÊN mức cap; DT5G hiếm khi ở BULL/EXBULL (EX-BULL 59 ngày từ 2014) → **tier mild
+cap-NEUTRAL gần như vô hiệu lịch sử**, và nỗi sợ false-positive-2017 hóa ra được chính độ bảo thủ
+của DT5G base hóa giải. Chi phí 2017-18 = 0.00pp cho cả 3 variant.
+
+### 11.4. Gate §6 — phán quyết từng variant
+| Gate | D1 mirror-full | D2 strong-only | D3 blind-spot-only |
+|---|---|---|---|
+| **N1** (thắng chỉ nhờ 2022-23) | **NO-GO**: episode ngoài cửa sổ = 2026×2, sleeve **−1.29pp ≤ 0** | **NO-GO**: ngoài cửa sổ chỉ 2026-06, sleeve **−0.92pp ≤ 0** (per-year remainder +0.11 là path-carry của divergence 2023, không phải fire ngoài cửa sổ) | pass (không phụ thuộc 2022-23 — vì không thắng gì) |
+| N2 (chi phí 2017-18 >1pp) | pass (0.00pp — xem 11.3) | pass (0.00pp) | pass (0.00pp) |
+| N3 (leak quanh anchor) | pass (cụm dương duy nhất = 2023 redundant, N1 xử) | pass | pass (delta âm) |
+| G1 do-no-harm | pass (+0.17, DD same, identity 2.267 phiên) | pass (+0.19) | pass (−0.02 ≥ −0.30, identity 3.012 phiên) |
+| **G2** (incremental fwd60 không dương) | **FAIL** (+2.33% mean; ep cuối truncated) | **FAIL** (+1.81%*) | **FAIL** (+2.33% mean, sleeve −1.29pp) |
+| **G3** (≥50% phiên binds incremental) | **FAIL** (30/70 = 43%) | **FAIL** (18/58 = 31%) | pass (100% by design) |
+| G4 LOO | **FAIL** (100% edge = 1 năm 2023; LOO-2023 đổi dấu) | **FAIL** (như D1) | pass (moot, delta ≈ 0) |
+| G5 quant-skeptic | **pending — verify CẢ CỤM D0-D3 một lần** (đề xuất giữ nguyên từ job D0; mọi số đã recompute độc lập từ CSV + md5 determinism proof) | pending | pending |
+| **VERDICT** | **NO-GO** | **NO-GO** | **NO-GO** |
+
+### 11.5. Tổng kết family + quyết định
+- **0/4 variant GO (D0/D1/D2/D3 đều NO-GO)** → theo đúng quyết định pre-registered user đã duyệt
+  (§9.2: "NO-GO = đóng hướng B"): **hướng Pillar A′/deposit-rate gate ĐÓNG HOÀN TOÀN — không
+  shadow-monitor, không wire, không mở thêm biến thể.** Muốn mở lại → trial mới, duyệt N mới,
+  và điều kiện thực chất duy nhất đáng để mở lại là: chu kỳ 2025-26 kết thúc với bằng chứng
+  point-in-time thật (data prerequisite §2 của Winston vẫn NÊN chạy — chuỗi forward sạch có giá
+  trị độc lập cho 2 consumer khác + cho việc đánh giá hồi tố chu kỳ này khi nó ngã ngũ).
+- Diễn giải trung thực theo khung §0: backtest KHÔNG bác cơ chế kinh tế (chi phí vốn → thanh
+  khoản) — nó xác nhận đúng điều §1 nói trước: tín hiệu này không chứng minh được bằng lịch sử
+  (phần trùng Pillar A thì thừa, phần mới thì mới chỉ thấy tốn tiền), và lớp mild gần như vô hiệu
+  dưới kiến trúc cap-DT5G. Insurance không có bằng chứng do-no-harm DƯƠNG ở phần incremental
+  không đáng chiếm 1 lớp phức tạp trong `macro_state_live.py` production.
+- Số R3 pin 27.84/1.84/−18.2/1.53 KHÔNG đổi (mọi run experiment tag riêng, không đè canonical).
+- Còn treo duy nhất: **G5 — quant-skeptic verify cả cụm D0-D3** (artifact đầy đủ trong
+  `exp_depgate/`; điểm cần skeptic soi nhất: (i) patch sort không đổi semantics harness — bằng
+  chứng: control sorted vs pin chỉ lệch mutation-drift −0.19pp, xa dưới delta D0; (ii) đọc N1
+  bằng sleeve-attribution thay vì per-year remainder cho D2).
+
+### 11.6. Artifacts
+- Runs sorted (chính thức): `data/..._exp_depgate_{ctlSa,ctlSb,D1S,D2S,D3S}.csv`; log
+  `exp_depgate/run_{ctlSa,ctlSb,D1S,D2S,D3S}.log`. Unsorted (giữ làm bằng chứng noise):
+  `..._exp_depgate_{D1,D2,D3}.csv` + log tương ứng.
+- Event-audit: `exp_depgate/event_audit_D{1,2,3}{.csv,_episodes.csv}` (builder
+  `exp_depgate/build_event_audit.py`, tự verify khớp bản D0 gốc atol 0.011).
+- State series: `exp_depgate/state_D{1,2,3}{.parquet,_full.csv}`.
+- Runner sorted: `mike/agents/Taylor/run_depgate_variant_sorted.py` (header ghi đầy đủ cơ chế
+  nondeterminism); orchestration `exp_depgate/orchestrate_{d123,sorted}.sh`.

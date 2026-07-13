@@ -2,3 +2,5 @@
 [orch] 21:33:49 sync exited but verified=False — waiting 60s then proceeding anyway (data thru 06-19 needed only)
 [orch123] 2026-07-13 22:00:06 start D1/D2/D3 parallel
 [orch123] 2026-07-13 22:06:59 done D1=0 D2=0 D3=0
+[orchS] 2026-07-13 22:17:27 start ctlSa/ctlSb/D1S/D2S/D3S parallel
+[orchS] 2026-07-13 22:24:19 done ctlSa=0 ctlSb=0 D1S=0 D2S=0 D3S=0
