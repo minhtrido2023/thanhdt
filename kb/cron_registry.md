@@ -45,7 +45,8 @@
 | 19:00 (T2-T6) | `bq_freshness_check.sh --quiet` (pipeline BQ freshness + DT5G/recommend + dispatch Bill) | BQ live (không cache) cho freshness; pipeline-1 `publish_gated_state` (fix C1) | freshness log + golive recommend + bus | 21:00 send_plan, DollarBill | sau 18:30 (30') | `MAX(time)` từng bảng |
 | 19:00 (daily) | `kb_nightly.sh` | events_buffer | trim/archive | — | — | — |
 | 20:00 (daily) | *(giữ chỗ — không có job)* | | | | | |
-| 21:00 (T2-T6) | `send_plan_report.sh` (`for_each_live_account.sh`) | file plan `plan_<acct>_<T+1 date>.json` | Discord DollarBill plan channel | user (duyệt qua đêm) | sau 19:00 (2h) | verify `plan_date`=next_trading_day + field `orders` |
+| 21:00 (T2-T6) | `send_plan_report.sh` (`for_each_live_account.sh`) | file plan `plan_<acct>_<T+1 date>.json` | Discord DollarBill plan channel + marker `mike/state/plan_report_sent/<acct>_<date>.json` (md5 nội dung, loại field approval) | user (duyệt qua đêm) | sau 19:00 (2h) | verify `plan_date`=next_trading_day + field `orders` |
+| 23:00 (T2-T6) ⏳ĐỀ XUẤT chưa cài — chờ Mike review | `send_plan_report.sh --second-chance` (`for_each_live_account.sh`) | file plan (bản mới nhất trên đĩa lúc 23:00) + marker 21:00 | gửi lại plan cho user NẾU: 21:00 fail mà giờ file đúng, HOẶC plan đổi nội dung sau khi gửi; NO-OP nếu đã gửi + không đổi | user (duyệt qua đêm — sự cố 07-13: plan fix 22:17 không ai gửi lại) | sau khung re-dispatch tối (~22:1x đo thật), trước sync 23:45 (45') | idempotent qua marker md5; escalate lần 2 nếu vẫn thiếu/sai |
 | 23:45 (T2-T6) | `sync_bq_cache_daily.sh` | BQ live | `data/bq_cache/*` (DuckDB parquet) | mọi script source `wc_env.sh` + `BQ_LOCAL_CACHE` (papertrade, sims, backtest) | sau daily_refresh (~5h dư) | preflight_bq_cache.py 12 bảng (thiếu `custom30_8l` — L6b, chưa fix) |
 | 00:00 (daily) | `fleet_backup.sh` | git repo | GitHub `mike-fleet` branch | DR | sau sync 23:45 (~15') | — |
 | 00:30 (daily) | `daily_retro.sh` | events hôm qua trọn vẹn | retro report + Wags verify | user | sau backup (00:00) | — |
@@ -107,6 +108,13 @@ BQ_LOCAL_CACHE` nếu import chain có thể dính cache (bài học C1).
   encode đủ trong `vn_market.py`.
 
 ## Log thay đổi
+- 2026-07-13: thêm second-chance 23:00 cho `send_plan_report.sh` (sự cố kb/INCIDENTS.md 2026-07-13
+  root-cause 1: plan sửa/re-dispatch sau 21:00 không bao giờ được gửi lại duyệt). Script đã hỗ trợ
+  `--second-chance`/`--dry-run` + marker idempotent `state/plan_report_sent/` (Winston, job
+  `Winston_20260713_014816`). 4 câu hỏi §11: (1) đọc file plan local + marker, không BQ/cache;
+  (2) plan tươi sau pipeline 19:00, re-dispatch muộn đo thật 22:17 (07-13); (3) cần bản mới nhất
+  trên đĩa lúc chạy; (4) consumer = user duyệt qua đêm, deadline preflight 08:45. Dòng cron đề xuất
+  (CHƯA cài, chờ Mike): `0 16 * * 1-5 /home/trido/thanhdt/WorkingClaude/mike/bin/for_each_live_account.sh /home/trido/thanhdt/WorkingClaude/mike/bin/send_plan_report.sh --second-chance >> /home/trido/thanhdt/WorkingClaude/mike/logs/send_plan_report.log 2>&1   # 23:00 ICT — second-chance gui lai plan T+1 bi sua sau 21:00 (idempotent, su co 2026-07-13)`
 - 2026-07-12: seed v1 từ audit `Winston_20260712_142100` + `Winston_20260712_151206`. Xoá 1 dòng
   crontab dangling comment (`# V2.4 go-live flip`). Fix C1 (publish DT5G đọc live, commit `4995262`,
   quant-skeptic CONFIRMED). Fix H2 (shares_outstanding_live BLOCK→WARN, commit `6459b6d`). Điều tra

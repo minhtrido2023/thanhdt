@@ -1,19 +1,35 @@
 #!/usr/bin/env bash
 # send_plan_report.sh — đọc plan T+1 → gửi summary qua Telegram + Discord
-# Schedule: 19:30 ICT trading days (cron: 30 12 * * 1-5)
+# Schedule: 21:00 ICT trading days (cron: 0 14 * * 1-5) + second-chance 23:00 ICT
+# (cron: 0 16 * * 1-5, cờ --second-chance).
 #
 # Verify ARTIFACT thật (file plan có đúng ngày T+1, đúng schema) — KHÔNG tin vào job
 # status của dispatch.sh (job có thể báo "timeout" dù plan đã ghi xong, xem sự cố
 # 2026-07-01: DollarBill_20260701_103128 timeout nhưng plan_SpaceX_2026-07-02.json
 # hợp lệ). Nếu KHÔNG tìm thấy artifact hợp lệ → ESCALATE thật (bus question event,
 # Mike tự đọc ở phiên sau) thay vì chỉ gửi 1 tin Telegram rồi im lặng chờ người phát hiện.
+#
+# --second-chance (thêm 2026-07-13, sự cố kb/INCIDENTS.md 2026-07-13): plan bị sửa/
+# re-dispatch SAU giờ gửi 21:00 (vd DollarBill fix lỗi ngày rồi ghi lại 22:17) trước đây
+# KHÔNG bao giờ được gửi lại cho user duyệt — nằm im tới ops_health_check 08:20 sáng hôm
+# sau (CRITICAL, còn ~35' trước bot 09:05). Chạy lại lúc 23:00 với cờ này:
+#   - lần 21:00 đã gửi thành công VÀ plan không đổi         → NO-OP (không gửi trùng)
+#   - lần 21:00 đã gửi nhưng plan ĐÃ THAY ĐỔI nội dung      → gửi lại, ghi rõ "bản cập nhật"
+#   - lần 21:00 escalate/fail, giờ file đã có/đúng          → gửi (lần đầu user thấy plan)
+#   - vẫn thiếu/sai                                          → escalate lần nữa (final call trong đêm)
+# Idempotency: marker state/plan_report_sent/<account>_<T+1 date>.json ghi md5 NỘI DUNG
+# plan (đã loại các field approval — user duyệt làm plan file đổi là thay đổi lành tính,
+# không được kích re-send). Marker chỉ ghi khi đã gửi OK.
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WC_ROOT="$(cd "$ROOT/.." && pwd)"
 [ -f "$WC_ROOT/wc_env.sh" ] && source "$WC_ROOT/wc_env.sh" 2>/dev/null || true
 
-WORKDIR="${WORKDIR_8L:-/home/trido/thanhdt/WorkingClaude}"
+# SEND_PLAN_WORKDIR_OVERRIDE / SEND_PLAN_MARKER_DIR: chỉ dùng cho test/dry-run sandbox
+# (wc_env.sh export cứng WORKDIR_8L nên không override được bằng env thường).
+WORKDIR="${SEND_PLAN_WORKDIR_OVERRIDE:-${WORKDIR_8L:-/home/trido/thanhdt/WorkingClaude}}"
+MARKER_DIR="${SEND_PLAN_MARKER_DIR:-$ROOT/state/plan_report_sent}"
 TODAY="$(date +%Y-%m-%d)"
 NOW_ICT="$(TZ='Asia/Ho_Chi_Minh' date +'%H:%M ICT')"
 
@@ -21,9 +37,13 @@ NOW_ICT="$(TZ='Asia/Ho_Chi_Minh' date +'%H:%M ICT')"
 # thật gọi qua for_each_live_account.sh (lặp mọi account enabled=live/dnse) — xem
 # kb/account_onboarding_runbook.md.
 ACCOUNT="SpaceX"
+SECOND_CHANCE=0
+DRY_RUN=0
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --account) ACCOUNT="$2"; shift 2 ;;
+    --second-chance) SECOND_CHANCE=1; shift ;;
+    --dry-run) DRY_RUN=1; shift ;;
     *) echo "Unknown arg: $1" >&2; exit 1 ;;
   esac
 done
@@ -40,6 +60,37 @@ print(next_trading_day(dt.date.today()))
 
 # Plan file mới nhất theo mtime (Bill ghi vào data/trade_plans/plan_<account>_<date>.json)
 PLAN_FILE="$(ls -t "$WORKDIR"/data/trade_plans/plan_${ACCOUNT}_*.json 2>/dev/null | head -1)"
+
+# md5 NỘI DUNG plan, loại các field approval (approved_by/mafee_authorized/approv*/mafee_*/
+# requires_user_approval) — duyệt plan ghi thêm field vào file là thay đổi lành tính,
+# second-chance không được coi đó là "plan đổi" mà gửi lại lúc 23:00.
+plan_content_hash() {
+  local f="$1"
+  [ -n "$f" ] && [ -f "$f" ] || { echo ""; return; }
+  python3 - "$f" << 'PYHASH' 2>/dev/null || echo ""
+import sys, json, hashlib
+with open(sys.argv[1]) as fh:
+    plan = json.load(fh)
+if isinstance(plan, dict):
+    plan = {k: v for k, v in plan.items()
+            if not (k.startswith("approv") or k.startswith("mafee") or k == "requires_user_approval")}
+print(hashlib.md5(json.dumps(plan, sort_keys=True, ensure_ascii=False).encode()).hexdigest())
+PYHASH
+}
+
+MARKER_FILE=""
+[ -n "$EXPECTED_DATE" ] && MARKER_FILE="$MARKER_DIR/${ACCOUNT}_${EXPECTED_DATE}.json"
+CUR_HASH="$(plan_content_hash "$PLAN_FILE")"
+PLAN_CHANGED_AFTER_SEND=0
+
+if [ "$SECOND_CHANCE" = "1" ] && [ -n "$MARKER_FILE" ] && [ -f "$MARKER_FILE" ]; then
+  SENT_HASH="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get("content_md5",""))' "$MARKER_FILE" 2>/dev/null || echo "")"
+  if [ -n "$CUR_HASH" ] && [ "$CUR_HASH" = "$SENT_HASH" ]; then
+    echo "[send_plan_report] second-chance NO-OP — plan $ACCOUNT $EXPECTED_DATE đã gửi thành công trước đó và không đổi (md5 $CUR_HASH) — $NOW_ICT"
+    exit 0
+  fi
+  PLAN_CHANGED_AFTER_SEND=1
+fi
 
 RESULT=$(cd "$WORKDIR" && python3 - "$PLAN_FILE" "$EXPECTED_DATE" "$TODAY" "$NOW_ICT" "$ACCOUNT" << 'PY'
 import sys, json
@@ -147,18 +198,55 @@ STATUS="$(echo "$RESULT" | head -1)"
 if [ "$STATUS" = "ESCALATE" ]; then
   REASON="$(echo "$RESULT" | sed -n '2p')"
   DETAIL="$(echo "$RESULT" | tail -n +3)"
-  MSG="🔴 [$TODAY $NOW_ICT] Plan T+1 CHƯA SẴN SÀNG ($REASON) — $DETAIL Cần Mike hoặc user kiểm tra thủ công, KHÔNG tự phục hồi."
+  SC_TAG=""
+  [ "$SECOND_CHANCE" = "1" ] && SC_TAG=" [second-chance 23:00 — lần kiểm tra CUỐI trong đêm, sáng mai chỉ còn ops_health_check 08:20]"
+  MSG="🔴 [$TODAY $NOW_ICT] Plan T+1 CHƯA SẴN SÀNG ($REASON)$SC_TAG — $DETAIL Cần Mike hoặc user kiểm tra thủ công, KHÔNG tự phục hồi."
   echo "$MSG"
-  "$ROOT/bin/notify.sh" "$MSG" 2>/dev/null || true
-  "$ROOT/bin/notify_thread.sh" "$MSG" "$DISCORD_PLAN_CHANNEL" 2>/dev/null || true
-  "$ROOT/bin/append_event.sh" Mike question "plan-t1-not-ready-${ACCOUNT}" \
-    "{\"reason\":\"$REASON\",\"detail\":$(python3 -c 'import json,sys; print(json.dumps(sys.argv[1]))' "$DETAIL"),\"expected_date\":\"$EXPECTED_DATE\",\"account\":\"$ACCOUNT\",\"checked_at\":\"$TODAY $NOW_ICT\"}" \
-    2>/dev/null || true
+  if [ "$DRY_RUN" = "0" ]; then
+    "$ROOT/bin/notify.sh" "$MSG" 2>/dev/null || true
+    "$ROOT/bin/notify_thread.sh" "$MSG" "$DISCORD_PLAN_CHANNEL" 2>/dev/null || true
+    "$ROOT/bin/append_event.sh" Mike question "plan-t1-not-ready-${ACCOUNT}" \
+      "{\"reason\":\"$REASON\",\"detail\":$(python3 -c 'import json,sys; print(json.dumps(sys.argv[1]))' "$DETAIL"),\"expected_date\":\"$EXPECTED_DATE\",\"account\":\"$ACCOUNT\",\"second_chance\":$SECOND_CHANCE,\"checked_at\":\"$TODAY $NOW_ICT\"}" \
+      2>/dev/null || true
+  else
+    echo "[send_plan_report] DRY-RUN — không gửi notify/bus."
+  fi
   exit 0
 fi
 
 SUMMARY="$(echo "$RESULT" | tail -n +2)"
+
+# Ngữ cảnh second-chance: user cần biết đây là bản gửi lại/gửi muộn, không phải report 21:00 thường.
+if [ "$PLAN_CHANGED_AFTER_SEND" = "1" ]; then
+  SUMMARY="🔁 **PLAN ĐÃ THAY ĐỔI sau lần gửi 21:00** — bản dưới đây là bản MỚI trên đĩa, cần duyệt lại theo bản này (second-chance 23:00):
+$SUMMARY"
+elif [ "$SECOND_CHANCE" = "1" ]; then
+  SUMMARY="🔁 **GỬI MUỘN (second-chance 23:00)** — lần gửi 21:00 không thành công/plan chưa sẵn sàng lúc đó, đây là lần đầu plan này tới tay user:
+$SUMMARY"
+fi
+
 echo "$SUMMARY"
-"$ROOT/bin/notify.sh" "$SUMMARY" 2>/dev/null || true
-"$ROOT/bin/notify_thread.sh" "$SUMMARY" "$DISCORD_PLAN_CHANNEL" 2>/dev/null || true
+if [ "$DRY_RUN" = "0" ]; then
+  "$ROOT/bin/notify.sh" "$SUMMARY" 2>/dev/null || true
+  "$ROOT/bin/notify_thread.sh" "$SUMMARY" "$DISCORD_PLAN_CHANNEL" 2>/dev/null || true
+fi
+
+# Marker "đã gửi OK cho (account, ngày T+1)" — nguồn idempotency cho second-chance.
+# Dry-run KHÔNG ghi marker vào chỗ thật (sẽ làm 23:00 tưởng đã gửi rồi) — chỉ ghi khi
+# test tự override SEND_PLAN_MARKER_DIR sang sandbox.
+if [ -n "$MARKER_FILE" ] && { [ "$DRY_RUN" = "0" ] || [ -n "${SEND_PLAN_MARKER_DIR:-}" ]; }; then
+  mkdir -p "$MARKER_DIR"
+  SENT_MODE="normal"; [ "$SECOND_CHANCE" = "1" ] && SENT_MODE="second-chance"
+  python3 - "$MARKER_FILE" "$ACCOUNT" "$EXPECTED_DATE" "$PLAN_FILE" "$CUR_HASH" "$SENT_MODE" "$TODAY $NOW_ICT" << 'PYMARK' || true
+import sys, json, os, tempfile
+marker, acct, pdate, pfile, md5, mode, sent_at = sys.argv[1:8]
+rec = {"account": acct, "plan_date": pdate, "plan_file": pfile,
+       "content_md5": md5, "mode": mode, "sent_at": sent_at}
+fd, tmp = tempfile.mkstemp(dir=os.path.dirname(marker))
+with os.fdopen(fd, "w") as fh:
+    json.dump(rec, fh, ensure_ascii=False, indent=1)
+os.replace(tmp, marker)
+PYMARK
+  echo "[send_plan_report] marker: $MARKER_FILE (md5 $CUR_HASH)"
+fi
 echo "[send_plan_report] Done — $NOW_ICT"
