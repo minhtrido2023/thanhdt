@@ -751,3 +751,12 @@ check chứ không phải 16 như dự kiến, đính chính) + regression 6/6 P
    21:00 không được gửi lại duyệt" (commit `4216295`).
 3. Code-gate approval cứng trong `bot_execute.py` (commit `27e1282`) + hardening residual
    (commit `54d488c`) — có hiệu lực từ cron 09:05 sáng mai 07-14.
+
+## Báo cáo tuần 07-06→07-10 đã gửi + cơ chế chống tái diễn đã cài (2026-07-13)
+User phát hiện báo cáo tuần bị bỏ sót (không có cron tự động, phụ thuộc Mike tự nhớ). Đã xử lý:
+1. Soạn báo cáo tuần đầy đủ (Taylor, dùng đúng pipeline verify_account_snapshot.py/nav_history) —
+   Mike tự đối chiếu mọi số NAV/% với CSV thật trước khi gửi, khớp chính xác tuyệt đối. File:
+   `mike/reports/SpaceX_ZaloPay_weekly_report_2026-07-06_to_2026-07-10.md`. Đã gửi Trading report
+   topic (1522576692638388364), user duyệt trước khi gửi.
+2. Thêm check WARN vào `ops_health_check.sh` (commit `7147ac3`): tự cảnh báo khi báo cáo tuần
+   (thứ Hai, >7 ngày) hoặc tháng (từ ngày 5, chưa có báo cáo tháng trước) quá hạn — chống tái diễn.

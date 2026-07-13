@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v1005)
+# Mike fleet — context pack (v1006)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-13T02:33:22] Taylor/finding — Hardening approval gate: normalize approved_by chuoi 'None'/'null'/'nil'/'nan' = chua duyet (commit 54d488c) — dong killer_objection cua quant-skeptic, selfcheck 18/18 + regression 6/6 PASS: {"job": "Taylor_20260713_023002", "status": "DONE_COMMITTED_TESTED — dispatch quant-skeptic verify tiep theo", "commit": "54d488c (repo thanhdt: WorkingClaude/t …
 - [2026-07-13T02:36:07] quant-skeptic/verification — ✅ CONFIRMED VERIFY: Hardening approval gate: normalize approved_by chuoi 'None'/'null'/'nil'/'nan' = chua duyet (commit 54d488c) — dong killer_objection cua quant-skeptic, selfcheck 18/18 + regression 6/6 PASS: {"finding_topic": "Hardening approval gate: normalize approved_by string 'None'/'null'/'nil'/'nan' = chua duyet (commit 54d488c), selfcheck + regression PASS",  …
 - [2026-07-13T04:16:45] Taylor/finding — Điều tra 2 nghi vấn user: (A) mua cao hơn close = intraday drift, KHÔNG phải lỗi chiến lược; (B) NAV giảm thật -4.0%/-4.6% = beta thị trường (-2.9%) + DGC legacy + double-buy cost, TRONG khung backtest — không cần review chiến lược: {"job": "Taylor_20260713_040055", "status": "DONE — chẩn đoán khép kín, self-check attribution khớp NAV thật (residual 0.15M/0.3M), commit f8cbb35 (fix script)  …
 - [2026-07-13T04:29:53] Taylor/answer — Dashboard xác suất thị trường: ecology_dashboard REFUTED walk-forward (đảo dấu IS→OOS), P(NEUTRAL→BEAR) đã refresh — khuyến nghị KHÔNG wire vào dna_report như xác suất dự báo: {"job": "Taylor_20260713_042317", "status": "DONE — nghiên cứu khép kín, registry pinned, không đổi production", "verdicts": {"ecology_mood_as_forecast": "REFUT …
@@ -11,6 +10,7 @@
 - [2026-07-13T04:53:22] Winston/finding — ops_health_check: weekly/monthly report staleness check added (commit 7147ac3): {"job": "Winston_20260713_044945", "status": "DONE_COMMITTED_TESTED", "commit": "7147ac3 (repo mike: bin/ops_health_check.sh)", "what": "Added section #7 to ops …
 - [2026-07-13T05:00:51] Winston/finding — Chẩn đoán 3 WARN checker 07-13: macro_health 68.4h = refresh thứ Sáu 07-10 miss do khe hở đổi giờ cron (C1b đã biết, tự hồi phục tối nay 18:30) — không cần fix; báo cáo tuần+tháng quá hạn là nhắc việc đúng cho Mike: {"job": "Winston_20260713_045244", "status": "DONE — không có bug mới, 0 code fix cần thiết", "issue1_macro_health": {"root_cause": "commit 1a3ea5c dời cron dai …
 - [2026-07-13T05:01:23] Taylor/answer — Bao cao tuan 07-06→07-10 (SpaceX + ZaloPay) DA SOAN XONG — moi so lieu trace qua pipeline verify chuan, file cho Mike review truoc khi post: {"job":"Taylor_20260713_044913","status":"DONE — file da ghi, KHONG post Discord (cho Mike quyet)","file":"mike/reports/SpaceX_ZaloPay_weekly_report_2026-07-06_ …
+- [2026-07-13T05:47:07] Winston/finding — Re-check 2 WARN checker 12:45 (ZaloPay trước phiên chiều): cả 2 là vấn đề đã biết từ sáng — macro_health 69.2h = C1b Friday-miss tự hồi phục 18:30 tối nay, báo cáo tháng 06 = việc Mike; 0 bug mới, 0 code fix: {"job": "Winston_20260713_054508", "status": "DONE — không có action cần thiết, duplicate của chẩn đoán Winston_20260713_045244 (checker re-fire cùng vấn đề ở l …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -766,6 +766,15 @@ check chứ không phải 16 như dự kiến, đính chính) + regression 6/6 P
    21:00 không được gửi lại duyệt" (commit `4216295`).
 3. Code-gate approval cứng trong `bot_execute.py` (commit `27e1282`) + hardening residual
    (commit `54d488c`) — có hiệu lực từ cron 09:05 sáng mai 07-14.
+
+## Báo cáo tuần 07-06→07-10 đã gửi + cơ chế chống tái diễn đã cài (2026-07-13)
+User phát hiện báo cáo tuần bị bỏ sót (không có cron tự động, phụ thuộc Mike tự nhớ). Đã xử lý:
+1. Soạn báo cáo tuần đầy đủ (Taylor, dùng đúng pipeline verify_account_snapshot.py/nav_history) —
+   Mike tự đối chiếu mọi số NAV/% với CSV thật trước khi gửi, khớp chính xác tuyệt đối. File:
+   `mike/reports/SpaceX_ZaloPay_weekly_report_2026-07-06_to_2026-07-10.md`. Đã gửi Trading report
+   topic (1522576692638388364), user duyệt trước khi gửi.
+2. Thêm check WARN vào `ops_health_check.sh` (commit `7147ac3`): tự cảnh báo khi báo cáo tuần
+   (thứ Hai, >7 ngày) hoặc tháng (từ ngày 5, chưa có báo cáo tháng trước) quá hạn — chống tái diễn.
 
 ## Tri thức chung của đội (canonical — Mike biên tập; MỌI agent phải nắm)
 > Cập nhật 2026-07-01. Chi tiết: `kb/KNOWLEDGE.md`. Số liệu gốc: `data/results_registry.md`.
