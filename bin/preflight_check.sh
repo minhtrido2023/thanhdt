@@ -11,6 +11,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WORKDIR="${WORKDIR_8L:-/home/trido/thanhdt/WorkingClaude}"
 TODAY="$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)"
 NOW_ICT="$(TZ='Asia/Ho_Chi_Minh' date +'%H:%M ICT')"
+DOW_ICT="$(TZ='Asia/Ho_Chi_Minh' date +%u)"   # 1=thứ Hai … 7=CN
 # Trading Daily — mọi nội dung giao dịch hàng ngày gộp về 1 thread cố định (không phụ thuộc
 # session Mike gần nhất mở từ thread nào).
 DISCORD_TRADING_THREAD="1521470705563340910"
@@ -106,9 +107,14 @@ PY
   IFS='|' read -r _hstatus _hsev _hsrc _hage <<< "$HEALTH"
 
   # Chấp nhận HEALTHY hoặc DEGRADED (SEV2); từ chối FAILED (SEV1)
+  # Ngưỡng tuổi file theo thứ: daily_refresh chạy 18:30 ICT T2-T6 → sáng T3-T6 file ~14h,
+  # nhưng sáng thứ Hai bản mới nhất là 18:30 thứ Sáu (~62h) — ngưỡng 68h tránh false-warn
+  # lặp lại mỗi thứ Hai (miss thật tối thứ Sáu đã có gate 19:00 bq_freshness_check
+  # MAX_STATE_LAG=0 bắt ngay trong tối đó, không cần chờ preflight sáng thứ Hai).
+  _max_age_h=20; [ "$DOW_ICT" = "1" ] && _max_age_h=68
   if [ "$_hstatus" = "FAILED" ]; then
     _fail "macro_health=FAILED (SEV1) — DT5G chạy DT4_only. Kiểm tra data pipeline."
-  elif [ "$(echo "$_hage > 20" | bc -l 2>/dev/null)" = "1" ]; then
+  elif [ "$(echo "$_hage > $_max_age_h" | bc -l 2>/dev/null)" = "1" ]; then
     _warn "macro_health OK ($_hstatus) nhưng file cũ ${_hage}h — daily_refresh chưa chạy tối qua?"
     _ok  "State source: $_hsrc"
   else
@@ -139,7 +145,9 @@ BQ_LAG=$(bq query --use_legacy_sql=false --format=csv --quiet \
   "SELECT DATE_DIFF(CURRENT_DATE('Asia/Ho_Chi_Minh'), MAX(t.time), DAY) AS lag FROM \`lithe-record-440915-m9.tav2_bq.ticker_prune\` AS t" \
   2>/dev/null | tail -1 | tr -d '[:space:]' || echo "999")
 
-if [ "$BQ_LAG" -le 2 ] 2>/dev/null; then
+# Thứ Hai sáng: phiên gần nhất là thứ Sáu → lag=3 ngày lịch là bình thường (không phải stale).
+_max_prune_lag=2; [ "$DOW_ICT" = "1" ] && _max_prune_lag=3
+if [ "$BQ_LAG" -le "$_max_prune_lag" ] 2>/dev/null; then
   _ok "BQ ticker_prune: lag=${BQ_LAG}d ✓"
 else
   _warn "BQ ticker_prune: lag=${BQ_LAG}d — giá ref_price trong plan có thể cũ; kiểm tra trước khi đặt lệnh."
