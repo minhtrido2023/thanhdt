@@ -2,7 +2,7 @@
 Reads paper execution logs (data/execution_logs/exec_*_journal.csv + dnse_raw_*.jsonl) and reports the
 metrics that ARE decidable in a ~2-day window: WINDOW ADHERENCE (mechanics) + errors + directional fill
 sanity. The bps EDGE itself needs weeks of fills (daily noise std 100-220bps >> 5-17bps edge) -> tracked
-ongoing, NOT gated here. Usage: python3 execution_quality_review.py [--since YYYY-MM-DD]
+ongoing, NOT gated here. Usage: python3 execution_quality_review.py [--since YYYY-MM-DD] [--account LABEL]
 
 Decision rule (30-06): apply (flip fill_timing_live_gate=false) if MECHANICS clean — orders release in the
 right windows, no API rejects, fills not worse than open per side. Edge validates post-go-live."""
@@ -16,29 +16,57 @@ SELL_WIN = (time(9, 15), time(9, 45))      # mirror config.py sell_window
 since = "2026-06-26"
 if "--since" in sys.argv:
     since = sys.argv[sys.argv.index("--since") + 1]
+# --account LABEL: filter on the ORDER OBJECT's accountNo (present in every order record since
+# go-live) — the top-level account_no field only exists in files written after the 2026-07-06
+# cross-account log fix, so filtering on it would silently drop all 07-01/07-02 go-live data.
+ACCT = None
+if "--account" in sys.argv:
+    label = sys.argv[sys.argv.index("--account") + 1]
+    accs = json.load(open("secrets/trading_bot_accounts.json"))["accounts"]
+    ACCT = next((a.get("account_id") for a in accs if a.get("label") == label), None)
+    if not ACCT:
+        sys.exit(f"unknown account label or no account_id: {label}")
 
 def _in(t, win):
     return win[0] <= t <= win[1]
 
 # ---- 1. dnse_raw jsonl: actual fills ----
-fills = []
+# Fills live in the `orders` POLL records (payload.orders list) — a place_order resp always has
+# fillQuantity=0 at placement, so reading only payload.resp reports zero fills (bug found
+# 2026-07-13, job Taylor_20260713_040055). Ingest both, dedup to the LAST state per (date, order
+# id); fill timestamp = first poll where fillQuantity > 0.
+# Known limitation: an order that fills at ATC AFTER the bot's last poll of the day keeps its
+# stale pre-fill state here (e.g. ZaloPay VHC 600sh 2026-07-10, order 502431: last poll "New",
+# broker positions confirm it filled) — cross-check next-day positions for full-day accounting.
+order_state, first_fill_ts = {}, {}
+def _ingest(o, ts, d):
+    if not isinstance(o, dict) or not o.get("symbol") or o.get("id") is None: return
+    if ACCT and str(o.get("accountNo")) != str(ACCT): return
+    key = (d, o["id"])
+    side = o.get("side", "")               # NB=buy, NS=sell
+    fq = o.get("fillQuantity", 0) or 0
+    order_state[key] = {"ticker": o.get("symbol"),
+                        "side": "buy" if side == "NB" else ("sell" if side == "NS" else side),
+                        "status": o.get("orderStatus", ""), "fill_qty": fq,
+                        "avg_price": o.get("averagePrice", 0) or 0, "price": o.get("price", 0),
+                        "date": d, "ts": first_fill_ts.get(key, ts)}
+    if fq > 0 and key not in first_fill_ts:
+        first_fill_ts[key] = ts; order_state[key]["ts"] = ts
+
 for f in sorted(glob.glob(f"{EXEC}/dnse_raw_*.jsonl")):
     d = os.path.basename(f).replace("dnse_raw_", "").replace(".jsonl", "")
     if d < since: continue
     for line in open(f, encoding="utf-8"):
         try: rec = json.loads(line)
         except Exception: continue
-        p = rec.get("payload", {}); resp = p.get("resp", {}) if isinstance(p, dict) else {}
-        if not isinstance(resp, dict): continue
-        status = resp.get("orderStatus", "")
-        side = resp.get("side", "")            # NB=buy, NS=sell
-        fq = resp.get("fillQuantity", 0) or 0
-        avg = resp.get("averagePrice", 0) or 0
-        fills.append({"ts": rec.get("ts"), "kind": rec.get("kind"), "ticker": resp.get("symbol"),
-                      "side": "buy" if side == "NB" else ("sell" if side == "NS" else side),
-                      "status": status, "fill_qty": fq, "avg_price": avg, "price": resp.get("price", 0),
-                      "date": d})
-F = pd.DataFrame(fills)
+        p = rec.get("payload", {})
+        if not isinstance(p, dict): continue
+        ts = rec.get("ts")
+        resp = p.get("resp")
+        if isinstance(resp, dict): _ingest(resp, ts, d)
+        for o in (p.get("orders") or []):
+            _ingest(o, ts, d)
+F = pd.DataFrame(list(order_state.values()))
 
 # ---- 2. journal CSVs: ft: window notes + errors ----
 jrows = []
