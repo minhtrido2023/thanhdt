@@ -64,3 +64,4 @@ yêu cầu cụ thể có góc mù, không thay được 1 lần rà toàn diệ
 ## Pattern A (job nền chết vì lifecycle) — ĐÃ ĐÓNG từ 07-09, không tái phát.
 
 - [2026-07-13T01:48:52Z] Dang cho job Winston_20260713_014816 (fix: send_plan_report second-chance re-check ~23:00 ICT, idempotent, chong tai dien incident 07-13 plan-khong-duoc-gui-lai-de-duyet). Plan ZaloPay 07-13 da duoc user duyet + ghi vao file (approved_by=user 08:45 ICT). Con no rieng: code-gate approval trong bot_execute.py (vung cam, can user sign-off rieng, KHONG lam hom nay).
+- [2026-07-13T02:12:26Z] Da cai cron second-chance 23:00 (send_plan_report --second-chance, verify OK). Dang cho Taylor_20260713_021202 (thiet ke code-gate approval trong bot_execute.py) - CAN THAN vi co the phat hien rui ro chan ca giao dich thuong le SpaceX neu requires_user_approval=true la default cho moi plan. Neu Taylor bao cao rui ro nay thi PHAI dung lai hoi user cach xu ly, KHONG tu quyet.

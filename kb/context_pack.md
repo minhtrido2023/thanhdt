@@ -1,16 +1,16 @@
-# Mike fleet — context pack (v993)
+# Mike fleet — context pack (v994)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-12T16:04:02] quant-skeptic/verification — ✅ CONFIRMED VERIFY: REFUTED premise: lag_edge_health.csv KHONG co bug catch-up — series structurally current (VN earnings off-season), tu-advance ~08/2026; KHONG sua code: {"finding_topic": "REFUTED premise: lag_edge_health.csv has NO catch-up bug — series is structurally current (VN earnings off-season), self-advances ~08/2026; N …
-- [2026-07-12T17:42:06] Wags/finding — XAC MINH doc lap ban nhap RETRO 2026-07-12: GAPS FOUND (2 muc): {"job": "Wags_20260712_173644", "task": "verify retro_draft_20260712_for_review.md before Mike commits to kb/INCIDENTS.md", "verdict": "GAPS FOUND - 2 items, do …
 - [2026-07-12T17:49:07] Mike/finding — Daily retro 2026-07-12 hoan tat - 5 su co, Wags-verified, commit 112159b: {"job": "Mike_20260712_173001", "status": "DONE", "commit": "112159b (repo mike, kb/INCIDENTS.md)", "incidents_count": 5, "new_this_retro": 5, "recurring_patter …
 - [2026-07-13T01:26:12] Winston/finding — OPS-AUTOFIX 07-13 sáng: 2 WARN preflight = false-warn thứ Hai lặp lại (calendar-naive) — fix weekday-aware commit a92bf42; không có sự cố mới: {"job": "Winston_20260713_012013", "status": "DONE_COMMITTED_VERIFIED", "commit": "a92bf42 (repo mike, bin/preflight_check.sh)", "diagnosis": {"macro_health_64. …
 - [2026-07-13T01:29:43] Winston/finding — OPS-AUTOFIX ZaloPay 08:20: 1 CRITICAL escalated (plan 07-13 chua duyet + KHONG co code-gate approval, bot 09:05 se van chay) + 2 canh bao lanh tinh (weekend staleness): {"job": "Winston_20260713_012007", "status": "ESCALATED_CRITICAL+2_BENIGN_EXPLAINED", "critical": {"issue": "plan_ZaloPay_2026-07-13.json orders=2 (sell VIB 920 …
 - [2026-07-13T01:46:10] Mike/answer — zalopay-plan-0713-chua-duyet-bot-van-chay: {"decision": "option_A", "approved_by": "user", "approved_at": "2026-07-13T08:45:00+07:00", "note": "User da duyet truc tiep 2 lenh (ban VIB 9200cp + mua BID 90 …
 - [2026-07-13T01:55:54] Winston/finding — FIX incident 07-13 root-cause 1: send_plan_report second-chance 23:00 — plan sua sau 21:00 se duoc tu dong gui lai duyet (commit 4216295, cron DE XUAT cho Mike cai): {"job": "Winston_20260713_014816", "status": "DONE_COMMITTED_TESTED — can quant-skeptic verify + Mike cai cron", "commit": "4216295 (repo mike: bin/send_plan_re …
 - [2026-07-13T02:02:39] quant-skeptic/verification — ✅ CONFIRMED VERIFY: FIX incident 07-13 root-cause 1: send_plan_report second-chance 23:00 — plan sua sau 21:00 se duoc tu dong gui lai duyet (commit 4216295, cron DE XUAT cho Mike cai): {"finding_topic": "FIX incident 07-13 root-cause 1: send_plan_report second-chance 23:00 — plan sua sau 21:00 se duoc tu dong gui lai duyet (commit 4216295, cro …
+- [2026-07-13T02:23:17] Taylor/finding — Code-gate approval trong bot_execute.py XONG (commit 27e1282) — chan plan requires_user_approval=true chua duyet, 0 false-block tren flow hien hanh, selfcheck 16/16 + regression 6/6 + E2E 2 chieu PASS: {"job": "Taylor_20260713_021202", "status": "DONE_COMMITTED_TESTED — quant-skeptic verify dang chay --bg", "commit": "27e1282 (repo thanhdt: WorkingClaude/bot_e …
+- [2026-07-13T02:25:48] quant-skeptic/verification — ✅ CONFIRMED VERIFY: Code-gate approval trong bot_execute.py XONG (commit 27e1282) — chan plan requires_user_approval=true chua duyet, 0 false-block tren flow hien hanh, selfcheck 16/16 + regression 6/6 + E2E 2 chieu PASS: {"finding_topic": "Code-gate approval trong bot_execute.py (commit 27e1282) — chan plan requires_user_approval=true chua duyet, 0 false-block, selfcheck 16/16 + …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -721,6 +721,19 @@ chance" re-check muộn hơn trong đêm (đề xuất 23:00 ICT, trước sync_
 `send_plan_report.sh` idempotent (không gửi trùng nếu 21:00 đã gửi thành công, có gửi nếu file
 plan được sửa/tạo lại sau 21:00): job `Winston_20260713_014816`. KHÔNG đụng bot_execute.py/executor
 (vùng cấm riêng, code-gate approval là quyết định khác, cần user sign-off riêng — chưa làm).
+
+## Second-chance re-send cron ĐÃ CÀI + code-gate approval đang thiết kế (2026-07-13)
+User duyệt cron backup (`0 16 * * 1-5 ... send_plan_report.sh --second-chance`, 23:00 ICT) —
+đã cài + verify (crontab -l xác nhận, dry-run thật trên production path OK). quant-skeptic
+CONFIRMED (high) commit `4216295` trước khi cài.
+
+User đồng thời duyệt luôn root-cause 2 (code-gate cứng trong `bot_execute.py`, vùng cấm executor,
+cần sign-off riêng — đã có). Dispatch Taylor (fable) job `Taylor_20260713_021202`: BẮT BUỘC điều
+tra hành vi thực tế requires_user_approval/approved_by trên plan 2 tuần gần đây của cả SpaceX lẫn
+ZaloPay TRƯỚC khi viết code — rủi ro lớn nhất là nếu TOÀN BỘ plan hàng ngày đều đặt
+requires_user_approval=true theo triết lý canonical.md nhưng chưa ai set approved_by (vì trước
+giờ không gate nên không ai cần) → bật gate sẽ chặn oan giao dịch thường lệ SpaceX sáng mai. Đã
+dặn Taylor DỪNG báo cáo lại nếu phát hiện rủi ro này, không tự quyết cách xử lý.
 
 ## Tri thức chung của đội (canonical — Mike biên tập; MỌI agent phải nắm)
 > Cập nhật 2026-07-01. Chi tiết: `kb/KNOWLEDGE.md`. Số liệu gốc: `data/results_registry.md`.

@@ -706,3 +706,16 @@ chance" re-check muộn hơn trong đêm (đề xuất 23:00 ICT, trước sync_
 `send_plan_report.sh` idempotent (không gửi trùng nếu 21:00 đã gửi thành công, có gửi nếu file
 plan được sửa/tạo lại sau 21:00): job `Winston_20260713_014816`. KHÔNG đụng bot_execute.py/executor
 (vùng cấm riêng, code-gate approval là quyết định khác, cần user sign-off riêng — chưa làm).
+
+## Second-chance re-send cron ĐÃ CÀI + code-gate approval đang thiết kế (2026-07-13)
+User duyệt cron backup (`0 16 * * 1-5 ... send_plan_report.sh --second-chance`, 23:00 ICT) —
+đã cài + verify (crontab -l xác nhận, dry-run thật trên production path OK). quant-skeptic
+CONFIRMED (high) commit `4216295` trước khi cài.
+
+User đồng thời duyệt luôn root-cause 2 (code-gate cứng trong `bot_execute.py`, vùng cấm executor,
+cần sign-off riêng — đã có). Dispatch Taylor (fable) job `Taylor_20260713_021202`: BẮT BUỘC điều
+tra hành vi thực tế requires_user_approval/approved_by trên plan 2 tuần gần đây của cả SpaceX lẫn
+ZaloPay TRƯỚC khi viết code — rủi ro lớn nhất là nếu TOÀN BỘ plan hàng ngày đều đặt
+requires_user_approval=true theo triết lý canonical.md nhưng chưa ai set approved_by (vì trước
+giờ không gate nên không ai cần) → bật gate sẽ chặn oan giao dịch thường lệ SpaceX sáng mai. Đã
+dặn Taylor DỪNG báo cáo lại nếu phát hiện rủi ro này, không tự quyết cách xử lý.
