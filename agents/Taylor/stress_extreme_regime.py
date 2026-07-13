@@ -29,6 +29,14 @@ NOW = dt.datetime(2026, 7, 1, 10, 0, 0)          # mid-session ICT
 PLAN_DATE = "2026-07-01"
 FAILS = []
 
+# Stale-fixture cleanup (kb/coding_guidelines.md §7): Executor.__init__ eagerly resumes
+# from the default state path — a state file left by a PREVIOUS run of this suite would
+# silently corrupt this run's starting parents (KeyError on new order ids). Remove ours.
+import glob
+for _f in glob.glob("/home/trido/thanhdt/WorkingClaude/data/execution_logs/"
+                    "exec_STRESSTEST*_2026-07-01_state.json"):
+    os.remove(_f)
+
 
 def check(name, cond):
     tag = "PASS" if cond else "FAIL"
@@ -225,6 +233,105 @@ live_armed = any(exl._extreme_regime(lsell, ql, NOW + dt.timedelta(seconds=20 * 
                  for i in range(5))
 check("LIVE cfg (gate OFF): limit-down never arms", live_armed is False)
 check("LIVE cfg: slice_mult stays 1.0", exl._extreme_slice_mult(lsell, NOW) == 1.0)
+
+# ---- 6. POLL-1 LOOPHOLE — PNJ 2026-07-03 replay (job Taylor_20260713_075836) -
+print("\n== 6. POLL-1 LOOPHOLE (PNJ replay): first BUY slice at locked floor ==")
+# PNJ 2026-07-03: ref 63100, floor 58700 (-6.97%), khoá sàn từ ATO → quote đầu
+# tiên của MORNING đã last==floor. NAV ~1B → lệnh mua điển hình 800cp × 58700 =
+# 46.96M << max_child_value 200M → TOÀN BỘ lệnh gói trong 1 slice. Trước fix:
+# poll-1 của _extreme_regime trả False (n=1, 2-poll debounce) và slice đầu VẪN
+# được đặt → khớp hết tại sàn trước khi gate kịp arm. Fix = _floor_guard_buy
+# (stateless, quote-only): chặn slice MUA ngay poll-1 khi last cận sàn.
+buy_pnj = PlannedOrder(id="BUY-PNJ-01", ticker="PNJ", side="buy", qty=800,
+                       ref_price=63100, priority=1)
+qmap6 = {"PNJ": raw_quote("PNJ", last=58700, ref=63100, floor=58700, ceil=67500,
+                          bid=58700, ask=58700, vol=25_600_000)}
+brk6 = FakeBroker(qmap6)
+ex6 = Executor(make_plan([buy_pnj], account="STRESSTEST_P1PNJ"), brk6, dict(paper_cfg))
+jrows6 = []
+_orig_j6 = ex6._journal
+def _cap_j6(event, o=None, child_oid="", qty="", price="", note=""):
+    jrows6.append((event, getattr(o, "ticker", None)))
+    return _orig_j6(event, o, child_oid, qty, price, note)
+ex6._journal = _cap_j6
+ex6._place_slices(NOW, "CONT")                       # poll-1: lần đánh giá ĐẦU của session
+pnj_buys = [p for p in brk6.placed if p[0] == "PNJ" and p[2] == "buy"]
+check("PNJ poll-1: NO buy slice placed at locked floor", len(pnj_buys) == 0)
+check("PNJ poll-1: EXTREME_FLOOR_GUARD journaled",
+      any(r[0] == "EXTREME_FLOOR_GUARD" and r[1] == "PNJ" for r in jrows6))
+# poll-2 (+20s): state machine arms như thiết kế → EXTREME_PAUSE tiếp quản
+ex6._place_slices(NOW + dt.timedelta(seconds=20), "CONT")
+pnj_buys2 = [p for p in brk6.placed if p[0] == "PNJ" and p[2] == "buy"]
+check("PNJ poll-2: still no buy (gate armed → EXTREME_PAUSE)", len(pnj_buys2) == 0)
+check("PNJ poll-2: 2-poll machine armed normally (cooldown set)",
+      (ex6._extreme_state.get("PNJ") or {}).get("until") is not None)
+
+# 6b. Normal-path control: quote KHÔNG cận sàn → slice đầu đặt ngay (0 latency mới)
+print("\n== 6b. CONTROL: normal quote — first slice places immediately ==")
+buy_nrm = PlannedOrder(id="BUY-NRM2-01", ticker="NR2", side="buy", qty=800,
+                       ref_price=20000, priority=1)
+qn2 = {"NR2": raw_quote("NR2", last=20000, ref=20000, floor=18600, ceil=21400,
+                        bid=19950, ask=20000)}
+brk6b = FakeBroker(qn2)
+ex6b = Executor(make_plan([buy_nrm], account="STRESSTEST_P1NRM"), brk6b, dict(paper_cfg))
+ex6b._place_slices(NOW, "CONT")
+check("normal quote: first BUY slice placed on poll-1",
+      len([p for p in brk6b.placed if p[0] == "NR2"]) == 1)
+
+# 6c. LIVE control: cùng quote PNJ khoá sàn, cfg SpaceX (gate OFF) → hành vi live
+#     byte-identical (slice VẪN đặt — guard không được phép chạm live path)
+print("\n== 6c. CONTROL: LIVE cfg (gate OFF) — PNJ quote, slice still places ==")
+brk6c = FakeBroker(qmap6)
+ex6c = Executor(make_plan([buy_pnj], account="STRESSTEST_P1LIVE"), brk6c, dict(live_cfg))
+ex6c._place_slices(NOW, "CONT")
+check("LIVE cfg: buy slice at floor STILL places (no live behaviour change)",
+      len([p for p in brk6c.placed if p[0] == "PNJ"]) == 1)
+
+# 6d. Glitch false-positive cost: 1 quote lỗi cận sàn → chỉ trễ 1 chu kỳ, KHÔNG
+#     arm state machine, KHÔNG sell-to-floor; quote sau bình thường → đặt lại ngay
+print("\n== 6d. GLITCH: one bad near-floor quote costs exactly one cycle ==")
+buy_gl = PlannedOrder(id="BUY-GLT-01", ticker="GLT", side="buy", qty=800,
+                      ref_price=20000, priority=1)
+qmap6d = {"GLT": raw_quote("GLT", last=18700, ref=20000, floor=18600, ceil=21400,
+                           bid=18600, ask=18700)}
+brk6d = FakeBroker(qmap6d)
+ex6d = Executor(make_plan([buy_gl], account="STRESSTEST_P1GLT"), brk6d, dict(paper_cfg))
+ex6d._place_slices(NOW, "CONT")                      # glitch: guard chặn
+check("glitch poll-1: buy blocked", len(brk6d.placed) == 0)
+qmap6d["GLT"] = raw_quote("GLT", last=20000, ref=20000, floor=18600, ceil=21400,
+                          bid=19950, ask=20000)      # quote hồi bình thường
+ex6d._place_slices(NOW + dt.timedelta(seconds=20), "CONT")
+check("glitch recovered: buy places next cycle (cost = 1 cycle delay)",
+      len(brk6d.placed) == 1)
+check("glitch never armed the state machine",
+      (ex6d._extreme_state.get("GLT") or {}).get("until") is None)
+
+# 6e. Fail-safe: quote thiếu floor → guard không chặn (giống trigger (i) hiện có)
+print("\n== 6e. FAIL-SAFE: missing floor — guard inert, slice places ==")
+buy_nf = PlannedOrder(id="BUY-NFL-01", ticker="NFL", side="buy", qty=800,
+                      ref_price=20000, priority=1)
+qnf = {"NFL": raw_quote("NFL", last=19000, ref=20000, floor=0, ceil=21400,
+                        bid=18900, ask=19000)}
+brk6e = FakeBroker(qnf)
+ex6e = Executor(make_plan([buy_nf], account="STRESSTEST_P1NFL"), brk6e, dict(paper_cfg))
+ex6e._place_slices(NOW, "CONT")
+check("missing floor: buy slice places (fail-safe = old behaviour)",
+      len([p for p in brk6e.placed if p[0] == "NFL"]) == 1)
+
+# 6f. SELL poll-1 cận sàn: KHÔNG đổi hành vi (guard buy-only) — sell đặt bình
+#     thường tại chase-cap −3% (chưa sell-to-floor vì chưa arm)
+print("\n== 6f. SELL at near-floor poll-1: unchanged (guard is buy-only) ==")
+sell_pf = PlannedOrder(id="SELL-PF-01", ticker="SPF", side="sell", qty=800,
+                       ref_price=20000, priority=1)
+qspf = {"SPF": raw_quote("SPF", last=18700, ref=20000, floor=18600, ceil=21400,
+                         bid=18600, ask=18700)}
+brk6f = FakeBroker(qspf)
+ex6f = Executor(make_plan([sell_pf], account="STRESSTEST_P1SPF"), brk6f, dict(paper_cfg))
+ex6f._place_slices(NOW, "CONT")
+spf = [p for p in brk6f.placed if p[0] == "SPF"]
+check("sell poll-1: slice placed (not blocked)", len(spf) == 1)
+check("sell poll-1: price at -3% chase cap 19400 (not floor — not armed yet)",
+      bool(spf) and spf[0][3] == 19400)
 
 print("\n" + "=" * 60)
 if FAILS:
