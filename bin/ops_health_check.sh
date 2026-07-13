@@ -8,6 +8,12 @@
 #   3. Circuit breaker / job board bất thường
 #   4. Câu hỏi (event_type=question) đang chờ user chưa trả lời
 #   5. Kill-switch / macro freshness / BQ freshness (tái dùng preflight_check.sh)
+#   6. Corp-action backlog (sự kiện tồn đọng >7 ngày chưa resolve, thêm 2026-07-10)
+#   7. Báo cáo tuần/tháng quá hạn (WARN-only, thêm 2026-07-13 — bổ sung sau sự kiện tuan
+#      07-06→07-10 bi bo sot toi 07-13 moi phat hien, user tu hoi):
+#      - Thứ Hai: nếu file *_weekly_report_*.md mới nhất > 7 ngày → WARN
+#      - Ngày ≥5 trong tháng: nếu không có *_monthly_report_*<thang-truoc>*.md → WARN
+#      (Hiện chưa có file monthly nào, WARN ngay lần đầu chạy — đây là kỳ vọng, không phải bug)
 #
 # Đây là lớp CẢNH BÁO SỚM bổ sung, KHÔNG thay thế preflight_check.sh (08:45) hay
 # eod_trading_report.sh (15:00) — chạy TRƯỚC mỗi phiên để con người có thời gian phản ứng.
@@ -211,6 +217,56 @@ if os.path.exists(backlog_path):
             OK("Corp-action backlog: không có sự kiện nào tồn đọng >7 ngày.")
 else:
     lines.append("ℹ️ Chưa có data/corp_action_backlog.json — update_shares_live.py --scan (18:40 ICT) chưa chạy lần nào kể từ khi thêm check này.")
+
+# 7. Báo cáo tuần/tháng quá hạn (WARN-only, thêm 2026-07-13)
+import re
+from datetime import date as _date, timedelta as _timedelta
+
+def _dates_from_fname(fname):
+    """Trích tất cả YYYY-MM-DD trong tên file, trả về list date."""
+    return [_date.fromisoformat(m) for m in re.findall(r'\d{4}-\d{2}-\d{2}', fname)]
+
+reports_dir = os.path.join(wc_root, "mike", "reports")
+today_d = _date.fromisoformat(today)
+
+# --- 7a. Báo cáo tuần: chỉ kiểm tra vào thứ Hai ---
+if today_d.weekday() == 0:  # Monday = 0
+    weekly_files = glob.glob(os.path.join(reports_dir, "*_weekly_report_*.md"))
+    weekly_max_dates = []
+    for wf in weekly_files:
+        dates = _dates_from_fname(os.path.basename(wf))
+        if dates:
+            weekly_max_dates.append(max(dates))
+    most_recent_weekly = max(weekly_max_dates) if weekly_max_dates else None
+    # Tuần trước: thứ Hai = today - 7, thứ Sáu = today - 3
+    last_monday = today_d - _timedelta(days=7)
+    last_friday = today_d - _timedelta(days=3)
+    if most_recent_weekly is None or (today_d - most_recent_weekly).days > 7:
+        W(f"Báo cáo tuần quá hạn — tuần {last_monday}→{last_friday} chưa có báo cáo, "
+          f"Mike cần soạn (file mới nhất: {most_recent_weekly}).")
+    else:
+        OK(f"Báo cáo tuần: đã có (file mới nhất chứa ngày {most_recent_weekly}).")
+else:
+    day_name = ["Thứ Hai","Thứ Ba","Thứ Tư","Thứ Năm","Thứ Sáu","Thứ Bảy","Chủ Nhật"][today_d.weekday()]
+    lines.append(f"ℹ️ Kiểm tra báo cáo tuần: bỏ qua (chỉ chạy thứ Hai, hôm nay {day_name}).")
+
+# --- 7b. Báo cáo tháng: kiểm tra từ ngày 5 trong tháng ---
+if today_d.day >= 5:
+    monthly_files = glob.glob(os.path.join(reports_dir, "*_monthly_report_*.md"))
+    # Tháng trước
+    if today_d.month == 1:
+        last_month_year, last_month_num = today_d.year - 1, 12
+    else:
+        last_month_year, last_month_num = today_d.year, today_d.month - 1
+    last_month_str = f"{last_month_year}-{last_month_num:02d}"
+    has_last_month = any(last_month_str in os.path.basename(f) for f in monthly_files)
+    if not has_last_month:
+        W(f"Báo cáo tháng quá hạn — tháng {last_month_str} chưa có báo cáo "
+          f"(hôm nay ngày {today_d.day} >= 5), Mike cần soạn.")
+    else:
+        OK(f"Báo cáo tháng {last_month_str}: đã có.")
+else:
+    lines.append(f"ℹ️ Kiểm tra báo cáo tháng: bỏ qua (hôm nay ngày {today_d.day} < 5, chờ sau ngày 5).")
 
 print("\n".join(lines))
 print(f"__WARN_COUNT__={warn}")
