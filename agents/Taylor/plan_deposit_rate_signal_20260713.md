@@ -285,3 +285,101 @@ quá khứ hồi tố lần nữa.
 4. Xác nhận đã đọc §1 dòng cuối + §7.6: nếu về sau wire thật, tín hiệu này có thể kéo production
    NEUTRAL→BEAR khi deposit tăng tốc — đó là hành vi THIẾT KẾ, cần user hiểu và muốn nó trước khi
    bất kỳ ai gõ dòng code wire.
+
+## 10. Kết quả backtest D0 (real-premium) — **NO-GO, khớp chính xác kỳ vọng pre-registered §1.1**
+> Job `Taylor_20260713_141712` (tiếp `Taylor_20260713_131230`), chạy 2026-07-13. CHỈ D0 + control
+> trong job này (D1/D2/D3 thuộc job song song riêng). Verdict: **NO-GO tự động ở N2**, kèm fail
+> G1 + G2. Đây là kết quả ĐÚNG THIẾT KẾ: §1.1 đã dự đoán trước "D0 FAIL N2 nặng" — backtest xác
+> nhận bằng số đo được, đóng dứt điểm hướng real-premium như mục tiêu (iii) của Amendment 1.
+
+### 10.1. Thiết lập (đúng plan §3.1/§5, không tune gì thêm)
+- Input: `rp_chg6m = (deposit_rate − CPI_yoy_shifted_M+1)` 6m-change (126 phiên), lag 5 phiên —
+  y hệt `refi_chg6m`. Ngưỡng mượn nguyên {+0.5→NEUTRAL / +1.5→BEAR / +3.0→CRISIS}, debounce
+  `_commit(7)` mượn nguyên từ `macro_state_live.py` (import trực tiếp, không copy).
+- **Phương pháp overlay (khai báo, auditable)**: `state_D0[t] = min(published_DT5G[t],
+  commit(dep_cap[t]))` trên bảng published `vnindex_5state_dt5g_live` thay vì re-run cả fuse —
+  lý do: bản replica in-fuse drift 122/3107 phiên so bảng published NGAY CẢ KHI tắt dep-pillar
+  (v34b base full-recompute trên giá retro-adjusted + cap-timing 2020/2023) → dùng nó làm control
+  sẽ trộn lẫn base-drift với delta của dep layer. Overlay giữ control == published CHÍNH XÁC, mọi
+  deviation quy được 100% cho dep layer. Fidelity: trong cửa sổ Pillar-A-im (chính là phần
+  incremental cần đo) overlay == in-fuse exact; sai khác commit-timing chỉ khả dĩ bên trong
+  2022-23 nơi Pillar A đã cap sẵn (redundant by definition) — và D0 không fire ở đó (xem 10.3).
+- Harness: lệnh pin R3 nguyên văn (`pt_v23_audit_2014.py v23a none postbull 0 edge`, @50B,
+  `BQ_CACHE_THREADS=1`, `PARK_STATES="3:0.7"`, `AUDIT_END=2026-06-19`, `$DNA_PYEXE`), state view
+  swap in-process qua DuckDB view (zero touch cache thật). Output `EXP_TAG=depgate_D0/control` —
+  không đè canonical (§8). **Self-check 0 VND cả BAL+LAG, cả 2 run.**
+
+### 10.2. Kết quả integrated ablation
+| Run | FULL CAGR | Sharpe | MaxDD | Calmar | IS 2014-19 | OOS 2020+ |
+|---|---|---|---|---|---|---|
+| control (published DT5G, same-vintage) | 27.11% | 1.81 | −18.3% | 1.48 | 23.37% | 30.61% |
+| **D0 real-premium** | **22.05%** | 1.57 | −18.4% | 1.20 | 19.64% | 24.27% |
+| **Delta** | **−5.06pp** | −0.24 | −0.1pp | −0.28 | **−3.73pp** | **−6.34pp** |
+
+Per-year delta (chỉ năm có lệch): 2017 **−17.4pp** (32.95→15.55), 2019 −6.8pp, 2020 **−24.0pp**
+(+22.78→−1.20), 2021 −18.3pp (103→85), 2025 −11.6pp, 2026 +3.2pp. Không năm nào D0 thắng đáng kể.
+
+Kiểm chứng: (i) recompute độc lập `extract_peryear.py` từ CSV khớp chính xác engine print cả 2
+run; (ii) Sharpe/MaxDD recompute từ DAILY rows khớp; (iii) **benign-window identity PASS** — NAV
+byte-identical 839 phiên liên tục cho tới ĐÚNG phiên state-deviate đầu tiên (2017-05-24).
+
+**Caveat control-vs-pin (khai báo trung thực):** control same-vintage ra 27.11 ≠ pin R3 27.84
+(−0.73pp) dù đúng nguyên văn lệnh pin + AUDIT_END. Nguyên nhân thuộc lớp "mutation as-of" registry
+đã cảnh báo sẵn (quy tắc #3 đầu file registry): từ ngày pin 07-12 tới nay, `fa_ratings`/
+`fa_ratings_8l` re-rank 2 quý mở (07-12, +39/+16 rows), `custom30v_8l` republish daily, bảng DT5G
+re-publish sau EW-leg fix, cache chuyển full_only (07-13). Ablation này so **control vs D0 CÙNG
+vintage** nên delta sạch; verdict NO-GO bền với mọi level-shift ±0.73pp (delta −5.06pp).
+
+### 10.3. Event-audit (primary, chuẩn `audit_dt5g_events.md`) — 8 episode, 358 phiên deviate
+Artifact đầy đủ: `exp_depgate/event_audit_D0.csv` (từng phiên) + `_episodes.csv`. Tóm tắt:
+
+| Ep | Cửa sổ | Phiên | Cap sâu nhất | Peak rp_chg6m | Pillar A? | VNINDEX fwd T+60 sau de-risk | Chi phí sleeve |
+|---|---|---|---|---|---|---|---|
+| 0 | 2017-05→09 | 80 | BEAR | +2.85 | im | **+4.2%** | −4.18pp |
+| 1 | 2019-01→03 | 42 | BEAR | +2.02 | im | **+7.1%** | −3.74pp |
+| 2 | **2020-08→2021-04** | 169 | BEAR | +2.89 | im | **+12.0%** | **−30.19pp** |
+| 3 | 2025-01→02 | 17 | BEAR | +1.60 | im | −3.4% | −1.16pp |
+| 4 | 2025-03 | 11 | NEUTRAL | +0.71 | im | +1.2% | −0.10pp |
+| 5 | 2025-09→10 | 12 | NEUTRAL | +0.71 | im | +2.0% | −0.01pp |
+| 6 | 2026-01→02 | 12 | NEUTRAL | +1.86 | im | +2.8% | −0.37pp |
+| 7 | 2026-02→03 | 15 | BEAR | +1.86 | im | +0.5% | +4.22pp |
+
+- **100% incremental** (cả 358 phiên đều Pillar-A-im) — G3 pass về mặt kỹ thuật nhưng vô nghĩa:
+  phần "mới" của tín hiệu chính là phần SAI.
+- **Zero phiên deviate trong toàn bộ 2022** — D0 im lặng hoàn toàn đúng cửa sổ sập 2022-10→12 cần
+  fire nhất, y như §1.1 dự đoán (CPI tăng cùng nhịp lãi suất → premium thực đứng im).
+- Forward T+60 sau de-risk trung bình **+3.3%** (7/8 episode dương) → de-risk đúng lúc thị trường
+  ĐANG KHỎE — ngược hẳn tiêu chí insurance G2.
+- Cú đắt nhất đúng cơ chế §1.1: 2020-08→2021-04 CPI sập 6.4→0.2 → premium thực +2.89 → cap BEAR
+  xuyên 169 phiên mega-rally hậu-COVID, một mình tốn −30.2pp sleeve.
+- Episode dương duy nhất (ep7, +4.22pp, trúng cú chỉnh 02-03/2026) nằm TRONG chu kỳ hindsight-
+  anchored hiện tại — đúng loại "khoản bù" mà N2 loại trừ theo định nghĩa.
+
+### 10.4. Gate §6 — phán quyết từng mục
+| Gate | Định nghĩa | Kết quả | Verdict |
+|---|---|---|---|
+| **N2** | Chi phí 2017-18 >1.0pp không có bù ngoài cửa sổ hindsight | 2017 riêng −17.4pp năm / −4.18pp sleeve; bù duy nhất (+4.22pp) nằm trong cửa sổ hindsight 2026 | **NO-GO tự động** |
+| N1 | Thắng chỉ nhờ 2022-23 | Moot — D0 không thắng; 2022 zero deviation | — |
+| N3 | Delta dồn bất thường quanh anchor (leak) | Không có: tổng delta ÂM lớn, không có cụm lợi nhuận quanh anchor nào | pass (không leak DƯƠNG) |
+| G1 | Do-no-harm ≥ −0.30pp | **−5.06pp** | FAIL |
+| G2 | Incremental fwd T+60 không dương | **+3.3%** trung bình | FAIL |
+| G3 | ≥50% phiên binds incremental | 100% | pass (vô nghĩa khi G1/G2 fail) |
+| G4 | LOO | Moot (đã NO-GO) | — |
+| G5 | quant-skeptic | Chưa chạy trong job này (được phép để lại theo dispatch; mọi số đều recompute độc lập từ CSV) | pending |
+
+**VERDICT D0: NO-GO — đóng hướng real-premium.** Kết quả khớp chính xác kỳ vọng khai báo trước
+(§1.1: "FAIL N2 nặng, fire ngược dấu 2017/2020-21, im trong 2022") nên theo chính §1.1 đây là
+kết quả ĐÁNG TIN (không phải bất ngờ đẹp cần nghi bug). Cơ chế xác nhận định lượng: `rp_chg6m` bị
+CPI-momentum ngược dấu chi phối — trong mẫu VN 2014-2026, premium thực mở rộng chủ yếu do
+DISINFLATION, mà disinflation đi kèm bull. Trừ CPI khỏi deposit-rate làm tín hiệu TỆ ĐI so với
+danh nghĩa ở cả 2 đầu: thêm false-positive (2017/2019/2020-21/2025) VÀ xóa true-positive (2022).
+
+**Hàm ý cho family còn lại**: D0 out. Winner (nếu có) chọn trong {D1, D2, D3} ở job song song;
+S4/A5 áp cho winner đó. N-ledger DEPOSIT-RATE-GATE: D0 đã tiêu 1/6, sổ vẫn đóng.
+
+### 10.5. Artifacts
+- State series + audit: `mike/agents/Taylor/exp_depgate/state_D0{.parquet,_full.csv}`,
+  `event_audit_D0{.csv,_episodes.csv}`, log `run_D0.log`/`run_control.log`
+- Harness CSV: `data/v23_golive_audit_..._exp_depgate_{D0,control}.csv` (17.370/18.169 rows)
+- Code: `mike/agents/Taylor/exp_depgate_20260713.py` (build state), `run_depgate_variant.py`
+  (view-swap runner) — không đụng `macro_state_live.py`/cache/production file nào.
