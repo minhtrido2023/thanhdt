@@ -44,9 +44,10 @@
 | 18:40 (T2-T6) | `update_shares_live.sh --scan` | corp-action feed | detection-only alert (KHÔNG merge `updated_at` — chỉ MERGE khi xử lý tay) | Winston/Taylor | — | freshness check `shares_outstanding_live` hạ BLOCK→WARN (H2 fix, commit `6459b6d`, 2026-07-12) — cadence event-driven thật, không phải daily |
 | 19:00 (T2-T6) | `bq_freshness_check.sh --quiet` (pipeline BQ freshness + DT5G/recommend + dispatch Bill) | BQ live (không cache) cho freshness; pipeline-1 `publish_gated_state` (fix C1) | freshness log + golive recommend + bus | 21:00 send_plan, DollarBill | sau 18:30 (30') | `MAX(time)` từng bảng |
 | 19:00 (daily) | `kb_nightly.sh` | events_buffer | trim/archive | — | — | — |
-| 20:00 (daily) | *(giữ chỗ — không có job)* | | | | | |
+| 20:00 (T3, ⏳TẠM THỜI đến 2026-08-04) | `refresh_fa_ratings_8l.sh` (guard `date ≤ 20260804` trong dòng cron — tự no-op sau hết hạn) | `ticker_financial` BQ live (đọc-ghi, ingest same-day ~17:30 → bắt được filings tới hôm nay) | `tav2_bq.fa_ratings_8l` | như dòng Sat 08:30; mùa BCTC Q2 cần cadence 2x/tuần | sau ingest 17:30 + daily_refresh 18:30 + pipeline 19:00; trước sync cache 23:45 (cache full_only vớt ngay đêm đó) | `bq show` lastModified+numRows; wrapper alert nếu fail |
+| 20:45 (T3, ⏳TẠM THỜI đến 2026-08-04) | `refresh_fa_ratings.sh` (guard như trên) | `ticker_financial` BQ live (append-only) | `tav2_bq.fa_ratings` | như dòng Sat 09:15 | 45' sau fa_ratings_8l (giữ nguyên spacing mẫu thứ Bảy) | như dòng Sat 09:15 |
 | 21:00 (T2-T6) | `send_plan_report.sh` (`for_each_live_account.sh`) | file plan `plan_<acct>_<T+1 date>.json` | Discord DollarBill plan channel + marker `mike/state/plan_report_sent/<acct>_<date>.json` (md5 nội dung, loại field approval) | user (duyệt qua đêm) | sau 19:00 (2h) | verify `plan_date`=next_trading_day + field `orders` |
-| 23:00 (T2-T6) ⏳ĐỀ XUẤT chưa cài — chờ Mike review | `send_plan_report.sh --second-chance` (`for_each_live_account.sh`) | file plan (bản mới nhất trên đĩa lúc 23:00) + marker 21:00 | gửi lại plan cho user NẾU: 21:00 fail mà giờ file đúng, HOẶC plan đổi nội dung sau khi gửi; NO-OP nếu đã gửi + không đổi | user (duyệt qua đêm — sự cố 07-13: plan fix 22:17 không ai gửi lại) | sau khung re-dispatch tối (~22:1x đo thật), trước sync 23:45 (45') | idempotent qua marker md5; escalate lần 2 nếu vẫn thiếu/sai |
+| 23:00 (T2-T6) — ĐÃ CÀI 2026-07-13 (commit `4216295`, quant-skeptic CONFIRMED) | `send_plan_report.sh --second-chance` (`for_each_live_account.sh`) | file plan (bản mới nhất trên đĩa lúc 23:00) + marker 21:00 | gửi lại plan cho user NẾU: 21:00 fail mà giờ file đúng, HOẶC plan đổi nội dung sau khi gửi; NO-OP nếu đã gửi + không đổi | user (duyệt qua đêm — sự cố 07-13: plan fix 22:17 không ai gửi lại) | sau khung re-dispatch tối (~22:1x đo thật), trước sync 23:45 (45') | idempotent qua marker md5; escalate lần 2 nếu vẫn thiếu/sai |
 | 23:45 (T2-T6) | `sync_bq_cache_daily.sh` | BQ live | `data/bq_cache/*` (DuckDB parquet) | mọi script source `wc_env.sh` + `BQ_LOCAL_CACHE` (papertrade, sims, backtest) | sau daily_refresh (~5h dư) | preflight_bq_cache.py 12 bảng (thiếu `custom30_8l` — L6b, chưa fix) |
 | 00:00 (daily) | `fleet_backup.sh` | git repo | GitHub `mike-fleet` branch | DR | sau sync 23:45 (~15') | — |
 | 00:30 (daily) | `daily_retro.sh` | events hôm qua trọn vẹn | retro report + Wags verify | user | sau backup (00:00) | — |
@@ -108,6 +109,19 @@ BQ_LOCAL_CACHE` nếu import chain có thể dính cache (bài học C1).
   encode đủ trong `vn_market.py`.
 
 ## Log thay đổi
+- 2026-07-13 (Winston, job `Winston_20260713_103213`, user approved): thêm 2 dòng cron **TẠM THỜI
+  mùa BCTC Q2** — refresh `fa_ratings_8l` (T3 20:00 ICT) + `fa_ratings` (T3 20:45 ICT), guard
+  `[ $(date +%Y%m%d) -le 20260804 ]` ngay trong dòng cron → **tự no-op sau 2026-08-04**, xoá dòng
+  chết khi tiện. Lịch chạy: 07-14, 07-21, 07-28, 08-04 — lần cuối đúng tối trước rebalance quý
+  ~08-05 (đóng điểm nóng audit `Winston_20260713_100733` q6: mã công bố 08-02..08-04 sẽ kịp có Q2
+  rating tại rebalance). 4 câu hỏi: (1) đọc `ticker_financial` BQ live, ghi BQ qua wrapper đã
+  source `wc_env.sh` (identity fix `a9716f6`); (2) nguồn tươi same-day ~17:30 ICT → 20:00 bắt được
+  filings trong ngày (hơn hẳn 08:30 sáng); (3) cần T same-day trong mùa cao điểm; (4) consumer =
+  custom30 builder/DC-book/as-of joins, deadline rebalance ~08-05 15:30. Slot 20:00 trống (giữ chỗ
+  cũ), tránh hẳn khung giao dịch sáng, trước sync cache 23:45 → cache (giờ full_only, cùng commit)
+  vớt bản mới ngay đêm đó. Kèm cùng commit: `sync_bq_cache.py` chuyển `fa_ratings`/`fa_ratings_8l`
+  sang `full_only` (delta-append không tương thích refresh DELETE+INSERT/re-rank — hết alert
+  count-mismatch giả mỗi thứ Bảy).
 - 2026-07-13: thêm second-chance 23:00 cho `send_plan_report.sh` (sự cố kb/INCIDENTS.md 2026-07-13
   root-cause 1: plan sửa/re-dispatch sau 21:00 không bao giờ được gửi lại duyệt). Script đã hỗ trợ
   `--second-chance`/`--dry-run` + marker idempotent `state/plan_report_sent/` (Winston, job
