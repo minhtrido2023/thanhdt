@@ -310,6 +310,43 @@ def build_dt_gate_line(html=True):
             f"base giữ từ {c['start']}, committed {comm}){base}{thin}  {asof}")
 
 
+_NBASE_CACHE = {"t": 0.0, "val": None}
+
+
+def get_neutral_base_rate():
+    """Unconditional base-rate P(NEUTRAL touches BEAR/CRISIS within 20/40/60 sessions) +
+    current NEUTRAL streak, recomputed live from dt5g_live 2014+ each call (cached 15 min).
+    This is the HISTORICAL FREQUENCY of the DT5G series itself — NOT a validated forecast:
+    the conditional (streak-length, n=9 runs) and ecology-mood variants were REFUTED
+    walk-forward (job Taylor_20260713_042317), so ONLY this unconditional number may be
+    displayed, and always with the not-a-forecast label. Returns None on any failure or
+    when the current state is not NEUTRAL (caller drops the line)."""
+    if _NBASE_CACHE["val"] is not None and (time.time() - _NBASE_CACHE["t"]) < 900:
+        return _NBASE_CACHE["val"]
+    val = None
+    try:
+        d = _bq("SELECT t.time, t.state FROM tav2_bq.vnindex_5state_dt5g_live t "
+                "WHERE t.time>='2014-01-01' ORDER BY t.time", max_rows=8000)
+        if len(d) >= 500:
+            arr = d.sort_values("time")["state"].astype(int).values
+            if arr[-1] == 3:
+                bad = np.isin(arr, [1, 2]).astype(int)
+                idx = np.arange(len(arr))
+                p = {}
+                for N in (20, 40, 60):
+                    hit = np.array([bad[i+1:i+1+N].max() if i + 1 < len(arr) else 0 for i in idx])
+                    neu = (arr == 3) & (idx < len(arr) - N)   # full forward window only
+                    p[N] = float(hit[neu].mean() * 100)
+                streak = 1
+                while streak < len(arr) and arr[-1 - streak] == 3:
+                    streak += 1
+                val = {"streak": streak, "p20": p[20], "p40": p[40], "p60": p[60]}
+    except Exception:
+        val = None
+    _NBASE_CACHE.update(t=time.time(), val=val)
+    return val
+
+
 def build_market_alert():
     """Market-level capitulation message for the daily push. Returns None when DORMANT
     so the scheduler only pings on a real WATCH/STRONG signal."""
@@ -443,6 +480,11 @@ def build_report(tk):
         edge = "FA-edge mạnh" if reg["state"] <= 2 else ("FA-edge yếu" if reg["state"] >= 3 else "")
         stale_warn = " ⚠️ <b>STALE</b>" if reg.get("stale") else ""
         L.append(f"Regime : {reg['emoji']} <b>{reg['name']}</b> ({reg['weight']}) · {edge}  <i>[{reg['asof']}]</i>{stale_warn}")
+        if reg["state"] == 3:
+            nb = get_neutral_base_rate()
+            if nb:
+                L.append(f"  ↳ NEUTRAL {nb['streak']} phiên · tần suất lịch sử chạm BEAR/CRISIS trong 20/40/60 phiên: "
+                         f"{nb['p20']:.1f}% · {nb['p40']:.1f}% · {nb['p60']:.1f}% <i>(base-rate DT5G 2014+, không phải dự báo)</i>")
     dtline = build_dt_gate_line()
     if dtline:
         L.append(dtline)
