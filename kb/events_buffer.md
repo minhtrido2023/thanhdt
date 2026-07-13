@@ -2236,3 +2236,18 @@
 ## Consolidation 2026-07-13T06:00:05Z
 - [2026-07-13T06:00:04Z] Mafee/status — bot-start: {"account": "ZaloPay", "plan_date": "2026-07-13", "auto_otp": true}
 - [2026-07-13T06:00:05Z] Mafee/status — bot-done: {"account": "ZaloPay", "plan_date": "2026-07-13", "elapsed_s": 3, "rc": 0}
+
+## Consolidation 2026-07-13T08:07:01Z
+- [2026-07-13T08:00:11Z] Mafee/status — eod-trading-report: {"account": "ZaloPay", "plan_date": "2026-07-13", "delivered_via": "trading_report_thread"}
+- [2026-07-13T08:00:23Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-07-13", "delivered_via": "hold_day"}
+- [2026-07-13T07:58:56Z] Taylor/heartbeat — Taylor_20260713_075836: {"status": "in_progress", "note": "Bắt đầu: tra giá PNJ 2 tuần gần nhất từ BQ cache để xác định ngày sàn"}
+- [2026-07-13T07:59:37Z] Taylor/heartbeat — Taylor_20260713_075836: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260713_075836", "source": "watcher"}
+- [2026-07-13T08:00:02Z] Taylor/heartbeat — Taylor_20260713_075836: {"status": "in_progress", "note": "Ngày sàn xác định: 07-03/07-06/07-07 sàn cứng. PNJ KHÔNG trong custom30V hiện hành. Đang check BAL/LAG/DC book"}
+- [2026-07-13T08:00:37Z] Taylor/heartbeat — Taylor_20260713_075836: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260713_075836", "source": "watcher"}
+- [2026-07-13T08:01:38Z] Taylor/heartbeat — Taylor_20260713_075836: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260713_075836", "source": "watcher"}
+- [2026-07-13T08:02:27Z] Taylor/heartbeat — Taylor_20260713_075836: {"status": "in_progress", "note": "Xác nhận PNJ không là ứng viên ở cả 4 nguồn (ta~16-46, không PEAD event, không custom30V, không DC book). Bắt đầu replay EXTREME gate trên giá PNJ thật"}
+- [2026-07-13T08:02:38Z] Taylor/heartbeat — Taylor_20260713_075836: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260713_075836", "source": "watcher"}
+- [2026-07-13T08:03:38Z] Taylor/heartbeat — Taylor_20260713_075836: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260713_075836", "source": "watcher"}
+- [2026-07-13T08:04:38Z] Taylor/heartbeat — Taylor_20260713_075836: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260713_075836", "source": "watcher"}
+- [2026-07-13T08:05:38Z] Taylor/heartbeat — Taylor_20260713_075836: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260713_075836", "source": "watcher"}
+- [2026-07-13T08:06:39Z] Taylor/heartbeat — Taylor_20260713_075836: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260713_075836", "source": "watcher"}
