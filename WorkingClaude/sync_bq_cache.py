@@ -147,11 +147,18 @@ TABLES = {
             FROM `{project}.tav2_bq.vnindex_5state_dt_4gate` AS t
         """,
     },
+    # fa_ratings / fa_ratings_8l: weekly refresh (Sat cron) rewrites history in place —
+    # fa_ratings DELETE+INSERTs the 2 open quarters (re-rank), fa_ratings_8l republishes
+    # the full table. Delta-append by max_time can never pick up rewritten rows (and the
+    # re-rank can even move MAX(time) backwards), so delta leaves the cache permanently
+    # diverged and trips the 23:45 count-mismatch verify every week. full_only forces a
+    # full re-download even under --delta; both tables are ~MBs, cost is negligible.
     "fa_ratings": {
         "sql": """
             SELECT * FROM `{project}.tav2_bq.fa_ratings` AS t
         """,
         "partition_col": "time",
+        "full_only": True,
         "verify_sql": """
             SELECT COUNT(*) AS cnt, MAX(t.time) AS max_time
             FROM `{project}.tav2_bq.fa_ratings` AS t
@@ -162,6 +169,7 @@ TABLES = {
             SELECT * FROM `{project}.tav2_bq.fa_ratings_8l` AS t
         """,
         "partition_col": "time",
+        "full_only": True,
         "verify_sql": """
             SELECT COUNT(*) AS cnt, MAX(t.time) AS max_time
             FROM `{project}.tav2_bq.fa_ratings_8l` AS t
@@ -257,6 +265,8 @@ def save_manifest(manifest: dict):
 
 def download_table(name: str, config: dict, manifest: dict, delta: bool):
     """Download a table to parquet. Delta mode appends only new rows."""
+    if config.get("full_only"):
+        delta = False  # source table is rewritten in place — delta-append can't track it
     pq_path = os.path.join(CACHE_DIR, f"{name}.parquet")
     table_info = manifest["tables"].get(name, {})
 
