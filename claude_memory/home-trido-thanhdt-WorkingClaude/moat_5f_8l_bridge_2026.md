@@ -1,13 +1,13 @@
 ---
 name: moat_5f_8l_bridge_2026
-description: 5F (Porter) qualitative moat → 8L L4 bridge as a GATE (not ranker) + interactive Telegram 2-block DNA/NOW report
+description: 5F (Porter) qualitative moat → 8L L4 bridge as a GATE (not ranker) + [REDACTED] Telegram 2-block DNA/NOW report
 metadata: 
   node_type: memory
   type: project
   originSessionId: 8aee0eaa-e66c-43a2-9041-8e90dacf35eb
 ---
 
-**5F ↔ 8L moat bridge + interactive bot report (built [REDACTED]03).** Connects the qualitative
+**5F ↔ 8L moat bridge + [REDACTED] bot report (built [REDACTED]03).** Connects the qualitative
 **5F** persona (Porter 5-Forces, `5F.md`, a claude.ai project — assesses industry structure + firm
 moat) into the quantitative **8L** ranker. See [[fa_layer_ic_audit_2026]] (FA-as-ranker FAILS full-NAV).
 

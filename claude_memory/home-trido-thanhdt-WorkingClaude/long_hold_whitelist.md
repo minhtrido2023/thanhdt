@@ -110,7 +110,7 @@ These qualify on data but have specific risks requiring quarterly review.
 **Hold conditions** (continue holding while ALL true):
 - FA tier remains A or B
 - Political investigation hasn't resulted in operational disruption (production continues)
-- P4 spot prices trend up or stable (need external commodity data source)
+- P4 spot prices trend up or stable (need [REDACTED] commodity data source)
 - No major management exit
 
 **Re-entry / averaging-down triggers** (consider adding if existing position):

@@ -16,7 +16,7 @@ linger on) — visible in the Claude mobile app. 3 cron jobs added (consolidate 
 alongside the 6 existing trading jobs.
 
 Mike monitors **all account sessions except `tri`** via `bin/discover_sessions.py --exclude tri` (inventory →
-registry, kind=external) + `bin/session_brief.py <name>` (read transcript, observe). Sessions under
+registry, kind=[REDACTED]) + `bin/session_brief.py <name>` (read transcript, observe). Sessions under
 `mike/agents/<id>/` self-label as that child. Discovery is the liveness source (Stop-hook heartbeat only fires
 on a turn, so idle sessions would else look dead).
 **Retrofit applied** (user opted in): self-identifying hooks (`hooks/_resolve_id.sh` resolves session_id→label
@@ -24,7 +24,7 @@ from stdin, self-excludes `tri`) merged into `.claude/settings.local.json` of `/
 `/home/trido/thanhdt/WorkingClaude` (permissions preserved; `.bak-mike-*` backups exist). Takes effect on each
 session's NEXT start. NOTE: the session the user chats through is `WorkingClaude` (pid varies), NOT `tri`.
 Locked decisions ([REDACTED]21):
-- **Companion model**: children are interactive remote-control sessions the user drives; Mike routes +
+- **Companion model**: children are [REDACTED] remote-control sessions the user drives; Mike routes +
   aggregates; directives are advisory. Mike does NOT autonomously wake idle children (send_message [REDACTED]
   confirms — no unattended dispatch). Autonomous-worker / Hybrid = deferred Phase-3.
 - **Git-markdown KB first, no BigQuery** (deferred to Phase-2 only if needed).
@@ -35,7 +35,7 @@ Architecture: per-child JSONL bus (`bus/inbox/<id>.jsonl`, append-only, flock), 
 sees other children's results without repeating), `consolidate.sh` (cron :07/:37) merges via line-offset
 tracking (idempotent), rebuilds `context_pack.md`, dead-detects >30min, commits.
 
-Implementation note: server has NO `jq` (no sudo; external binary download blocked) → all JSON handled by
+Implementation note: server has NO `jq` (no sudo; [REDACTED] binary download blocked) → all JSON handled by
 `bin/mike_json.py` (python3, already on box). Zero deps beyond bash/python3/flock/git/systemd/claude.
 Server CLI = claude v2.1.185 (> 2.1.181 floor). Remaining manual steps in `mike/SETUP.md`: linger, OAuth,
 systemd install, cron. See plan: ~/.claude/plans/home-trido-claude-uploads-840a1a19-944e-floofy-island.md.

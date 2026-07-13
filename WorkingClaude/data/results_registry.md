@@ -2958,3 +2958,85 @@ GIỮ NGUYÊN chạy tới review — chính cửa sổ LAG-refill sắp tới s
 trên dữ liệu sống, đúng thứ mốc review event-anchored cần quan sát. KHÔNG wire gì bây giờ; DSR mechanism
 không đổi (0.775 sleeve / 0.111 full-NAV — insurance, không phải alpha).
 **Files:** `dc_trigger_gap_backtest.py`, `data/dc_trigger_gap_output.txt`. N-ledger job này: 2/2 đóng.
+
+## 2026-07-13 — BETA-CAP custom30V (câu hỏi VIX của user): NO-GO cả 2 config, kể cả bản CÓ ĐIỀU KIỆN macro-phòng-thủ (job Taylor_20260713_114905)
+
+**Câu hỏi user:** VIX (Chứng khoán VIX) nằm trong custom30V, beta cao/đầu cơ — khi vĩ mô nghiêng
+phòng thủ (lãi suất huy động tăng, CPI tăng, thanh khoản giảm, dù DT5G vẫn NEUTRAL) có nên hạn
+chế mã beta cao trong rổ không?
+
+**Premise vĩ mô — CẢ 3 dấu hiệu user nêu ĐỀU CÓ THẬT (verify dữ liệu, không phải cảm nhận):**
+- Deposit 12M Big-4 proxy (`deposit_rate_vn.DEPOSIT_EVENTS`): đáy 4.7% (04/2024) → 6.0% (01/2026)
+  → **6.8% (06/2026)** — tăng +2.1pp từ đáy, ĐANG TIẾN GẦN floor 7.5% của deposit-gate RECOVERY_PARK
+  (dormant từ 2013; nếu vượt 7.5% lần đầu tiên trong kỷ nguyên DT5G, gate tự vũ trang — đúng thiết kế).
+  ⚠️ proxy best-estimate, không phải series chính thức.
+- CPI YoY (NSO real, `cpi_vn.NSO_CPI_YOY_REAL`): 3.48% (12/2025) → đỉnh **5.60% (05/2026)** → 4.69%
+  (06/2026) — tăng thật, tháng 6 hạ nhiệt nhẹ.
+- Thanh khoản (ticker_prune, GTGD bình quân ngày): ~38-54T VND/ngày (07-08/2025) → **~16T (06-07/2026)**
+  — giảm ~55-70% từ đỉnh.
+- DT5G vẫn NEUTRAL(3) vì: Pillar A đọc REFI SBV (4.5% không đổi từ 06/2023 — SBV chưa nâng lãi điều
+  hành, chỉ lãi huy động NHTM tăng); re-risk/de-risk theo GIÁ qua DT base. Không phải hệ "mù" — là
+  thiết kế cap-only + price-based đã audit (DT5G = insurance).
+
+**VIX beta — xác nhận:** realized beta 2Y = **1.50, #2/30 trong rổ** (sau SHS 1.61; MBS 1.46, VND
+1.30 — cả 4 mã brokerage đều top-5 beta). `risk_rating` 2025Q4: Beta bin 5/5, Risk_Rating 4. VIX
+nằm trong danh sách known-bad-IntCov của brokerage sweep (registry ~L1000) — đúng, không đổi, nhưng
+đó là context screen brokerage (IntCov NULL-tolerant), không phải tiêu chí custom30V. Rổ mean beta
+1.05 / median 0.99. custom30V **beta-blind by design** (`custom_basket.py` yieldcombo: liquidity
+gate + rating≤3 + rank(1/PE)+rank(1/PCF), không có trục risk nào).
+
+**Probe pre-registered N=2 (`probe_beta_cap_c30v.py`), cùng harness/PIT với H1/H6a (47 quý,
+fwd profit_2M, top-30 yieldcombo từ pool top-60 liquid gate≤3, beta bin PRIOR-quarter causal):**
+| config | mean2M% | vs base | IS(14-19) | OOS(20+) | win%q | avg_drop |
+|---|---|---|---|---|---|---|
+| base | 3.80 | — | 1.56 | 5.78 | — | 0 |
+| EXCL-B5 vô điều kiện | 2.69 | **−1.11** | 0.92 | 4.26 | 28% | 15.1 |
+| EXCL-B5 chỉ quý phòng-thủ* | 3.68 | **−0.12** | 1.35 | 5.74 | 85%† | 3.1 |
+
+\* quý phòng-thủ = deposit 6m-momentum >+0.25pp (causal): 9/47 quý — 2017Q1-Q2, 2018Q1-Q2, 2022Q4,
+2023Q1, 2025Q3-2026Q1 (bao gồm đúng giai đoạn hiện tại). † 85% là tie-inflated (38/47 quý identical);
+trong 9 quý khác biệt: thua 6/9.
+**FAIL cả 2 theo gate khai báo trước (≥base ở CẢ IS lẫn OOS).** Per-year của bản có-điều-kiện:
+2017 −0.39 / 2018 −0.78 / **2022Q4 −0.67 (đúng bear lãi-tăng thật cũng THUA)** / 2023 +0.22 /
+2025 +0.28 / 2026 −0.20. Cơ chế thua 2022Q4: lúc macro đã xấu rõ thì mã beta-5 ĐÃ rẻ sẵn — loại
+chúng là bỏ lỡ rebound, đúng lời nguyền "de-risk theo macro chậm hơn giá". Cùng chữ ký fail với
+H1 (FSCORE-excl) và H6a (MAX5 lottery-excl + soft-penalty): pool cô đặc, exclusion co pool →
+substitute value kém hơn → dilute.
+
+**Trả lời 3 câu:** (a) premise vĩ mô user ĐÚNG cả 3 dấu hiệu; (b) VIX/beta cao trong custom30V
+KHÔNG phải vấn đề cần sửa ở tầng chọn mã — rủi ro beta đã được xử lý ở TẦNG SLEEVE: custom30V là
+NEUTRAL-parking vehicle, DT5G chuyển BEAR/CRISIS → exposure về 20%/0% (cả rổ unwind); brokerage
+sweep đã chứng minh DT5G gate chính là cơ chế đúng cho sector beta cao (17.74→27.74% CAGR); thêm
+deposit-gate floor 7.5% đã wire sẵn làm bảo hiểm trục lãi suất, hiện 6.8% chưa chạm; (c) KHÔNG đề
+xuất sửa gì — beta-cap cả vô điều kiện lẫn có điều kiện đều bị số đo bác. Đề xuất phụ DUY NHẤT
+(không phải code): theo dõi deposit proxy tiến về 7.5% — nếu vượt, deposit-gate tự vũ trang lần
+đầu kể từ 2013, và đó là tin ĐÁNG BÁO macro-view chứ không phải lý do override tay.
+
+**N-ledger job này: 2/2 đóng.** Files: `probe_beta_cap_c30v.py` (repo root). KHÔNG đụng
+production/paper. AUDIT date 2026-07-13, panel `value_panel_2014.csv` frozen, BQ_CACHE_THREADS=1,
+beta PIT prior-quarter, không dùng profit_* làm filter.
+
+---
+
+## 2026-07-13 — DEPOSIT-RATE-GATE variant D0 (real-premium): **NO-GO** (đúng kỳ vọng pre-registered)
+> Job `Taylor_20260713_141712` (tiếp `_131230`). Plan + kết quả đầy đủ: `mike/agents/Taylor/plan_deposit_rate_signal_20260713.md` §10 (family N=6 đóng sổ; D0 tiêu 1/6). quant-skeptic: PENDING (để bước sau theo dispatch).
+
+- **Lệnh**: lệnh pin R3 nguyên văn (`BQ_LOCAL_CACHE=data/bq_cache BQ_CACHE_THREADS=1 NAV_TOTAL_B=50 ETF_LIQ=custompitg BASKET_WT=namecap BASKET_SELECT=yieldcombo PARK_STATES="3:0.7" AUDIT_END=2026-06-19 $DNA_PYEXE pt_v23_audit_2014.py v23a none postbull 0 edge`) + state-view swap in-process (DuckDB) sang overlay `min(published_DT5G, commit(dep_cap,7))`, input `rp_chg6m = 6m-chg(deposit_Big4 − CPI_yoy shifted M+1)`, lag 5, ngưỡng mượn Pillar A {0.5/1.5/3.0}. `EXP_TAG=depgate_D0|control` — không đè canonical (§8).
+- **Số** (self-check 0 VND cả 2 run; recompute `extract_peryear.py` + DAILY-rows khớp chính xác):
+
+| Run | FULL | Sharpe | MaxDD | Calmar | IS | OOS |
+|---|---|---|---|---|---|---|
+| control same-vintage | 27.11% | 1.81 | −18.3% | 1.48 | 23.37% | 30.61% |
+| D0 real-premium | 22.05% | 1.57 | −18.4% | 1.20 | 19.64% | 24.27% |
+| **delta** | **−5.06pp** | −0.24 | −0.1 | −0.28 | −3.73pp | −6.34pp |
+
+- **Event-audit**: 8 episode / 358 phiên deviate, **100% Pillar-A-im (incremental = phần sai)**; fwd T+60 sau de-risk trung bình **+3.3%** (de-risk vào lúc thị trường khỏe); cú đắt nhất 2020-08→2021-04 cap BEAR 169 phiên xuyên mega-rally = −30.2pp sleeve; **zero deviation trong 2022** (im đúng cửa sổ cần fire). Gate: **N2 auto-NO-GO** + G1 fail (−5.06pp) + G2 fail. Benign-identity PASS (NAV byte-identical 839 phiên tới đúng phiên deviate đầu 2017-05-24).
+- **Caveat**: control ≠ pin R3 27.84 (−0.73pp) = mutation as-of (fa_ratings/fa_ratings_8l re-rank 07-12, custom30v_8l republish daily, DT5G re-publish sau EW-leg fix, cache full_only 07-13) — đúng lớp registry quy tắc #3; ablation same-vintage nên delta sạch, verdict bền.
+- **Kết luận cơ chế**: trừ CPI khỏi deposit làm tín hiệu TỆ ĐI cả 2 đầu (thêm false-positive disinflation-bull 2017/2019/2020-21/2025, xóa true-positive 2022 khi CPI tăng cùng nhịp rate). Đóng dứt điểm hướng real-premium. Winner nếu có chọn trong {D1,D2,D3} (job song song).
+
+## 2026-07-13 — DEPOSIT-RATE-GATE D1/D2/D3: **NO-GO CẢ 3 → family 0/4 GO, ĐÓNG HƯỚNG B (không shadow-monitor)**
+- **Job**: `Taylor_20260713_145605` (family pre-registered `plan_deposit_rate_signal_20260713.md` §4, kết quả đầy đủ §11). Control same-vintage, KHÔNG đè canonical, self-check 0 VND mọi run.
+- **⚠️ PHÁT HIỆN HARNESS (áp dụng mọi experiment view-swap `pt_v23_audit_2014.py` từ nay)**: sizing tie-break theo row-order query; DuckDB đổi row-order theo NỘI DUNG parquet swap → NAV lệch từ 2018 giữa 2 run state-identical-tới-2023 (~±0.5pp noise, MWG/PLX swap buy_amount). **Fix: stable-sort (time,ticker) trên BQLocalCache.query** (`run_depgate_variant_sorted.py`) + determinism-pair control (ctlSa≡ctlSb md5 `f4421a17...`). Delta <±0.5pp từ run view-swap KHÔNG sort = vô nghĩa. Pin canonical KHÔNG ảnh hưởng (không swap view); drift control-sorted vs pin chỉ −0.19pp (mutation as-of).
+- **Số (sorted, chính thức)**: control 27.65/1.83/−18.3/1.51 (IS 23.37/OOS 31.70); D1 +0.17pp FULL, D2 +0.19pp, D3 −0.02pp; IS identical 23.37 cả 4 (dormant). Benign identity: D1/D2 trùng NAV 2.267 phiên tới đúng 2023-02-07, D3 3.012 phiên tới đúng 2026-01-28.
+- **Verdict**: D1/D2 NO-GO ở **N1** (toàn bộ phần thắng = 2023-02→04 nơi Pillar A active/redundant 100%, nằm trong cửa sổ loại trừ; episode ngoài cửa sổ sleeve −1.29/−0.92pp) + G2/G3/G4 fail. D3 NO-GO ở **G2** (incremental thuần = 2 episode chu kỳ 2025-26, cả 2 tốn tiền −1.29pp, VNINDEX fwd60 DƯƠNG sau de-risk; ep 2026-06 truncated/đang diễn ra). **2017 false-positive KHÔNG bind** (fire 126 phiên nhưng DT5G published NEUTRAL cả năm → tier mild cap-NEUTRAL gần như vô hiệu lịch sử; dự đoán N2 pre-registered sai theo hướng informative). DSR non-informative (deviate 30-70 phiên) — khai báo trước, không ép số.
+- **Treo**: G5 quant-skeptic verify CẢ CỤM D0-D3 một lần (artifacts `mike/agents/Taylor/exp_depgate/`).

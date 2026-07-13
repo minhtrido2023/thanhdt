@@ -3867,3 +3867,90 @@ The `data/pt_v11_tq34b_logs.csv` now has 6 per-book columns:
 `BAL_cash`, `BAL_stocks`, `BAL_etf`, `VN30_cash`, `VN30_stocks`, `VN30_etf`.
 Each row: `BAL_cash + BAL_stocks + BAL_etf + VN30_cash + VN30_stocks + VN30_etf = NAV`.
 Cross-check at any date: when ETF is bought in BAL, BAL_cash decreases and BAL_etf increases (minus friction).
+
+## Cash-Flow Reconciliation (verifiable from transactions.csv)
+
+All numbers below derive ONLY from the transactions CSV. The MTM_UNREALIZED
+rows (flagged in `reason` column) are phantom mark-to-market entries used by
+analyze_portfolio.py to compute unrealized P&L on open positions — they are NOT
+real trades. Filter `reason != 'MTM_UNREALIZED'` to see only real broker activity.
+
+### Schema (per user 2026-05-18)
+
+- `buy_amount` = cost of shares (clean, no fee)
+- `sell_amount` = gross from sale (clean, no fee deducted)
+- `fee` = transaction cost (buy: 0.15% broker; sell: 0.15% broker + 0.1% PIT tax)
+- **Cash deducted on buy = buy_amount + fee**
+- **Cash received on sell = sell_amount - fee**
+- `deposit_annual=0` (no overnight interest)
+
+### Real activity (excludes MTM_UNREALIZED phantoms)
+
+| Category | Amount |
+|---|---|
+| Stock buys — share cost | +27.6393B |
+| Stock buys — fee | +0.0415B |
+| Stock sells — gross | +12.8809B |
+| Stock sells — fee+tax | +0.0322B |
+| **Net stock realized P&L** | **-14.8321B** |
+| ETF buys — share cost | +79.3765B |
+| ETF buys — friction | +0.1191B |
+| ETF sells — gross | +44.3907B |
+| ETF sells — friction | +0.0666B |
+| **Net ETF cash flow** | **-35.1714B** |
+
+### Open positions at end of period (unrealized)
+
+| Position | Cost basis | Current value | Unrealized P&L | Return |
+|---|---|---|---|---|
+| TVN (BAL) | +1.310B | +1.274B | -0.036B | -2.59% |
+| PVD (BAL) | +2.720B | +2.621B | -0.100B | -3.52% |
+| VCG (BAL) | +2.988B | +2.891B | -0.097B | -3.10% |
+| TPB (BAL) | +2.728B | +2.617B | -0.111B | -3.92% |
+| MBS (BAL) | +2.670B | +2.666B | -0.004B | +0.00% |
+| PVD (VN30) | +2.725B | +2.625B | -0.100B | -3.52% |
+| E1VFVN30 (BAL) | +0.359B | +0.360B | +0.001B | +0.23% |
+| E1VFVN30 (BAL) | +2.199B | +2.239B | +0.040B | +1.80% |
+| E1VFVN30 (BAL) | +0.389B | +0.396B | +0.007B | +1.80% |
+| E1VFVN30 (BAL) | +2.256B | +2.271B | +0.015B | +0.68% |
+| E1VFVN30 (BAL) | +0.359B | +0.356B | -0.003B | -0.78% |
+| E1VFVN30 (BAL) | +2.651B | +2.614B | -0.037B | -1.41% |
+| E1VFVN30 (BAL) | +5.796B | +5.767B | -0.029B | -0.50% |
+| E1VFVN30 (BAL) | +0.678B | +0.674B | -0.004B | -0.56% |
+| E1VFVN30 (VN30) | +19.998B | +21.608B | +1.610B | +8.05% |
+| E1VFVN30 (VN30) | +0.134B | +0.133B | -0.001B | -0.84% |
+| E1VFVN30 (VN30) | +2.755B | +2.741B | -0.014B | -0.50% |
+
+### Final reconciliation
+
+| Component | Value |
+|---|---|
+| Initial NAV | +50.000B |
+| + Realized P&L from stocks | -14.832B |
+| + ETF net cash flow + MTM | +3.987B |
+| + Stock unrealized MTM | +14.694B (cost 15.141B → realized would be -0.447B if sold today) |
+| Initial NAV | +50.0000B |
+| - Stock buys (buy_amount + fee out) | +27.6808B |
+| + Stock sells (sell_amount - fee in) | +12.8487B |
+| - ETF buys (buy_amount + fee out) | +79.4955B |
+| + ETF sells (sell_amount - fee in) | +44.3241B |
+| = Expected end cash (from transactions only) | -0.0035B |
+| Actual end cash (from logs) | -0.0041B |
+| **Diff (ETF appreciation rebalanced into cash)** | **-0.0006B** |
+| Actual end ETF balance (still in cash_etf) | +39.1585B |
+| Open stock positions mark value | +14.6942B |
+| = **Final NAV (cash + ETF + open stocks)** | **+53.8485B** |
+
+**Note on `Diff` line**: when ETF appreciates daily by VN30 return, cash_etf grows.
+The rebalance logic (target 70% of total cash+ETF in state=NEUTRAL) periodically moves
+a portion OUT of cash_etf and INTO cash. Those are logged as ETF 'sell' transactions,
+but the moved amount EXCEEDS the original cost basis (because ETF appreciated meanwhile).
+The diff line = appreciation that flowed to cash via rebalances. To FULLY reconcile,
+compute ETF return = (etf_sells + etf_etf_residual_mark) − etf_buys − etf_fees.
+
+### Per-book daily breakdown (in logs CSV)
+
+The `data/pt_v11_tq34b_logs.csv` now has 6 per-book columns:
+`BAL_cash`, `BAL_stocks`, `BAL_etf`, `VN30_cash`, `VN30_stocks`, `VN30_etf`.
+Each row: `BAL_cash + BAL_stocks + BAL_etf + VN30_cash + VN30_stocks + VN30_etf = NAV`.
+Cross-check at any date: when ETF is bought in BAL, BAL_cash decreases and BAL_etf increases (minus friction).
