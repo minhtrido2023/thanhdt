@@ -164,6 +164,10 @@ def approval_block_reason(plan):
     approved = plan.approved_by
     if isinstance(approved, str):
         approved = approved.strip()
+        # Plan LLM-authored có thể ghi null dạng CHUỖI ("None"/"null"/"nil"/"nan")
+        # — vẫn là chưa duyệt, không để chuỗi truthy lọt qua gate.
+        if approved.lower() in ("none", "null", "nil", "nan"):
+            approved = ""
     if approved:
         return None
     return (f"plan {plan.plan_date} [{plan.account}] có requires_user_approval=true nhưng "

@@ -109,6 +109,10 @@ try:
     check("E1 empty string blocked", approval_block_reason(p) is not None)
     p = write_and_load({"requires_user_approval": True, "approved_by": "   "})
     check("E2 whitespace-only blocked", approval_block_reason(p) is not None)
+    p = write_and_load({"requires_user_approval": True, "approved_by": "None"})
+    check("E3 literal 'None' string blocked", approval_block_reason(p) is not None)
+    p = write_and_load({"requires_user_approval": True, "approved_by": "null"})
+    check("E4 literal 'null' string blocked", approval_block_reason(p) is not None)
 
     print("F. approved_by_user alternate field name (preflight_check.sh accepts it)")
     p = write_and_load({"requires_user_approval": True, "approved_by_user": "user"})
