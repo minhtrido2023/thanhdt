@@ -2391,3 +2391,21 @@
 - [2026-07-13T12:05:40Z] DollarBill/heartbeat — DollarBill_20260713_120125: {"status": "in_progress", "note": "đọc xong basket 07-13 (CUSTOM30V_8L) - HPG OUT, cần lấy DNSE live prices"}
 - [2026-07-13T12:06:26Z] DollarBill/heartbeat — DollarBill_20260713_120124: {"status": "still_running", "elapsed_min": 5, "job_id": "DollarBill_20260713_120124", "source": "watcher"}
 - [2026-07-13T12:06:26Z] DollarBill/heartbeat — DollarBill_20260713_120125: {"status": "still_running", "elapsed_min": 5, "job_id": "DollarBill_20260713_120125", "source": "watcher"}
+
+## Consolidation 2026-07-13T12:13:30Z
+- [2026-07-13T12:07:26Z] DollarBill/heartbeat — DollarBill_20260713_120124: {"status": "still_running", "elapsed_min": 6, "job_id": "DollarBill_20260713_120124", "source": "watcher"}
+- [2026-07-13T12:07:26Z] DollarBill/heartbeat — DollarBill_20260713_120125: {"status": "still_running", "elapsed_min": 6, "job_id": "DollarBill_20260713_120125", "source": "watcher"}
+- [2026-07-13T12:07:55Z] DollarBill/heartbeat — DollarBill_20260713_120124: {"status": "in_progress", "note": "Đọc fills hôm nay xong — VIB 9200cp DONE, BID 900cp DONE. Đọc trading_rules và chuẩn bị plan VPB trim day 1"}
+- [2026-07-13T12:08:26Z] DollarBill/heartbeat — DollarBill_20260713_120124: {"status": "still_running", "elapsed_min": 7, "job_id": "DollarBill_20260713_120124", "source": "watcher"}
+- [2026-07-13T12:08:26Z] DollarBill/heartbeat — DollarBill_20260713_120125: {"status": "still_running", "elapsed_min": 7, "job_id": "DollarBill_20260713_120125", "source": "watcher"}
+- [2026-07-13T12:09:26Z] DollarBill/heartbeat — DollarBill_20260713_120124: {"status": "still_running", "elapsed_min": 8, "job_id": "DollarBill_20260713_120124", "source": "watcher"}
+- [2026-07-13T12:09:26Z] DollarBill/heartbeat — DollarBill_20260713_120125: {"status": "still_running", "elapsed_min": 8, "job_id": "DollarBill_20260713_120125", "source": "watcher"}
+- [2026-07-13T12:10:26Z] DollarBill/heartbeat — DollarBill_20260713_120124: {"status": "still_running", "elapsed_min": 9, "job_id": "DollarBill_20260713_120124", "source": "watcher"}
+- [2026-07-13T12:10:26Z] DollarBill/heartbeat — DollarBill_20260713_120125: {"status": "still_running", "elapsed_min": 9, "job_id": "DollarBill_20260713_120125", "source": "watcher"}
+- [2026-07-13T12:10:51Z] DollarBill/heartbeat — DollarBill_20260713_120125: {"status": "in_progress", "note": "DNSE live prices OK, basket drift xác nhận HPG OUT/LPB IN, đang viết plan JSON"}
+- [2026-07-13T12:11:25Z] DollarBill/status — DollarBill_20260713_120125: {"status": "deadline_extended", "hb_age_s": 34, "extension": 1, "max_ext": 3, "source": "watcher"}
+- [2026-07-13T12:11:27Z] DollarBill/heartbeat — DollarBill_20260713_120125: {"status": "still_running", "elapsed_min": 10, "job_id": "DollarBill_20260713_120125", "source": "watcher"}
+- [2026-07-13T12:12:27Z] DollarBill/heartbeat — DollarBill_20260713_120125: {"status": "still_running", "elapsed_min": 11, "job_id": "DollarBill_20260713_120125", "source": "watcher"}
+- [2026-07-13T12:12:41Z] DollarBill/decision — plan-2026-07-14: {"account": "SpaceX", "plan_date": "2026-07-14", "plan_file": "data/trade_plans/plan_SpaceX_2026-07-14.json", "state": "NEUTRAL(3)", "action": "BASKET_SWAP", "orders": [{"side": "SELL", "ticker": "HPG", "qty": 2200, "ref_price": 22400, "reason": "basket_drifter_out_of_CUSTOM30V_8L"}, {"side": "BUY", "ticker": "LPB", "qty": 900, "ref_price": 51600, "reason": "basket_swap_largest_missing_name_5.22pct"}], "nav_vnd": 957957216, "exposure_current_pct": 68.52, "exposure_post_trade_pct": 68.2, "requires_user_approval": true, "vix_risk_flag": "HIGH_WATCH -13.82% vs cost 17000, threshold -20% = 13600 VND"}
+- [2026-07-13T12:13:15Z] DollarBill/heartbeat — DollarBill_20260713_120125: {"status": "done", "note": "plan_SpaceX_2026-07-14.json ghi xong, decision lên bus, notify Discord plan channel OK"}
+- [2026-07-13T12:13:27Z] DollarBill/heartbeat — DollarBill_20260713_120125: {"status": "still_running", "elapsed_min": 12, "job_id": "DollarBill_20260713_120125", "source": "watcher"}
