@@ -450,12 +450,16 @@ STATUS_EMO = {"BUY": "🟢", "ARMED": "🔵", "WATCH": "👀",
 
 
 def _rating_tag(tk, status, ratings):
-    """'R2 ✓✓' when 8L golden/strong (rating<=2) AND sector-lens BUY; else 'R2' / 'R?'."""
+    """('R2 ✓✓', True) when 8L golden/strong (rating<=2) AND sector-lens BUY; else ('R2'/'R?', False).
+    Returns (tag, double) so the caller can annotate a STRONG line that LACKS the cross-sectional
+    confirm (job Taylor_20260713_092636: STRONG is self-referential-only — cheap vs the name's OWN
+    history; without 8L<=2 it is NOT confirmed cheap vs the whole market, and displaying it bare
+    reads as a market-wide 'deal hời' it never claimed to be)."""
     rt = ratings.get(tk)
     if rt is None:
-        return "R?"
+        return "R?", False
     double = (rt <= 2 and status == "BUY")
-    return f"R{rt} ✓✓" if double else f"R{rt}"
+    return (f"R{rt} ✓✓" if double else f"R{rt}"), double
 
 
 def build_telegram_message(df, transitions, prior, state, spread_yoy, feed_ok, feed_asof, ratings):
@@ -483,10 +487,16 @@ def build_telegram_message(df, transitions, prior, state, spread_yoy, feed_ok, f
     # (b)+(c) status table. df already sorted BUY->ARMED->WATCH->RICH_WAIT->EXCLUDED->STALE.
     def line(r):
         cur = r["status"] + (f"·{r['buy_mode']}" if r["buy_mode"] else "")
-        tag = _rating_tag(r["ticker"], r["status"], ratings)
+        tag, double = _rating_tag(r["ticker"], r["status"], ratings)
         emo = STATUS_EMO.get(r["status"], "•")
         bold = "<b>" + r["ticker"] + "</b>" if r["status"] in ("BUY", "ARMED") else r["ticker"]
-        return f"{emo} {bold} {r['sector']} <b>{cur}</b> {tag}"
+        s = f"{emo} {bold} {r['sector']} <b>{cur}</b> {tag}"
+        if r["buy_mode"] == "STRONG" and not double:
+            # backtest job Taylor_20260713_092636: BOTH-extreme (self + cross-sectional) OOS fwd
+            # +16.7%/3M hit 74% vs single-extreme +7.5..9.6% — a STRONG lacking the 8L confirm is
+            # the weaker single-extreme case and must SAY so, not read as a market-wide deal.
+            s += " ⚠️ <i>rẻ vs chính nó, CHƯA xác nhận rẻ vs thị trường (8L rating 3-5)</i>"
+        return s
 
     actionable = df[df["status"].isin(["BUY", "ARMED"])]
     rest = df[~df["status"].isin(["BUY", "ARMED"])]
@@ -510,7 +520,9 @@ def build_telegram_message(df, transitions, prior, state, spread_yoy, feed_ok, f
         L.append(f"\n<b>📋 Khác:</b> {summ}")
 
     L.append("\n<i>✓✓ DOUBLE-CONFIRM = 8L rating≤2 (golden/strong) VÀ sector-lens BUY — 2 hệ độc "
-             "lập cùng đồng thuận. R# = 8L rating (tham khảo). Đây là công cụ research/monitor: "
+             "lập cùng đồng thuận: rẻ vs chính nó VÀ rẻ vs toàn thị trường (backtest 2014-26: "
+             "cả-2-cực-đoan OOS +16.7%/3M hit 74% vs 1-trục +7.5–9.6%). STRONG không kèm ✓✓ = chỉ "
+             "rẻ vs lịch sử riêng mã. R# = 8L rating (tham khảo). Đây là công cụ research/monitor: "
              "BUY vẫn phải qua Taylor→DollarBill→user→Mafee.</i>")
     return "\n".join(L)
 
