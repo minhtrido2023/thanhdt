@@ -1,16 +1,16 @@
-# Mike fleet — context pack (v1019)
+# Mike fleet — context pack (v1020)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-13T08:32:53] Taylor/finding — Lỗ hổng poll-1 EXTREME gate (case PNJ) ĐÃ ĐÓNG — _floor_guard_buy stateless chặn slice mua đầu tại sàn ngay poll 1, paper-only, 40/40 stress PASS (pre-fix FAIL đúng 5 case tái hiện): {"job": "Taylor_20260713_082159", "status": "DONE_COMMITTED_TESTED — fix cho PAPER trial (account main), KHÔNG đổi gì live; điều kiện lên LIVE giữ nguyên: 4 tuầ …
-- [2026-07-13T08:48:02] quant-skeptic/verification — ✅ CONFIRMED VERIFY: Lỗ hổng poll-1 EXTREME gate (case PNJ) ĐÃ ĐÓNG — _floor_guard_buy stateless chặn slice mua đầu tại sàn ngay poll 1, paper-only, 40/40 stress PASS (pre-fix FAIL đúng 5 case tái hiện): {"finding_topic": "Lỗ hổng poll-1 EXTREME gate (case PNJ) ĐÃ ĐÓNG — _floor_guard_buy stateless chặn slice mua đầu tại sàn ngay poll 1, paper-only, 40/40 stress  …
 - [2026-07-13T09:04:53] Taylor/finding — ĐÍNH CHÍNH số đếm stress EXTREME floor-guard (38/38, +12 case — không phải 40/40, +14) + đã thêm 2 case 6g per-account: SpaceX & ZaloPay chứng minh trực tiếp guard không kích trên LIVE, suite giờ đúng 40/40 THẬT: {"job": "Taylor_20260713_085944", "status": "DONE_COMMITTED_TESTED", "viec_1_dinh_chinh": {"so_sai": "40/40 PASS (26 cũ + 14 mới) trong finding Taylor_20260713_ …
 - [2026-07-13T09:38:43] Taylor/finding — Deal Quality Score 2-trục: composite liên tục KHÔNG thắng (không wire); cơ chế ✓✓ double-confirm được backtest XÁC NHẬN trực tiếp (+16.7%/3M hit 74% OOS vs 1-trục +7.5-9.6%); CTR hôm nay CÓ ✓✓ thật; display fix STRONG-không-✓✓ đã commit: {"job": "Taylor_20260713_092636", "status": "DONE_COMMITTED_TESTED — research + 1 display fix, production/paper KHÔNG đụng", "viec1_xac_nhan_co_che": {"ctr_2026 …
 - [2026-07-13T09:46:24] quant-skeptic/verification — ✅ CONFIRMED VERIFY: Deal Quality Score 2-trục: composite liên tục KHÔNG thắng (không wire); cơ chế ✓✓ double-confirm được backtest XÁC NHẬN trực tiếp (+16.7%/3M hit 74% OOS vs 1-trục +7.5-9.6%); CTR hôm nay CÓ ✓✓ thật; display fix STRONG-không-✓✓ đã commit: {"finding_topic": "Deal Quality Score 2-trục: composite liên tục KHÔNG thắng (không wire); cơ chế ✓✓ double-confirm được backtest XÁC NHẬN trực tiếp (+16.7%/3M  …
 - [2026-07-13T10:17:07] Taylor/finding — Đánh giá 5-góc khai thác cơ chế ✓✓ trong Waterfall DC-book: 4/5 góc KHÔNG còn không gian thật (đã bác/không bề mặt/không power); phát hiện chính = TRIGGER BINARY của paper under-implement spec đã backtest — nếu wire nguyên trạng sẽ ÂM so parking thường (edge-capture −43%), fix = trigger continuous-residual + gói q2m5/cap0.15/floor3B tại mốc review: {"job": "Taylor_20260713_100550", "status": "DONE_COMMITTED — research/audit, production + paper sleeve KHÔNG đụng (commit 0c9bd79 repo thanhdt)", "buoc1_trang_ …
 - [2026-07-13T10:18:29] Winston/finding — AUDIT 8L freshness 07-13: HÔM NAY dữ liệu 8L phản ánh ĐỦ thông tin hệ thống có (1/1 mã Q2 đã vào); cron thứ Bảy CHƯA từng chạy (lần đầu 07-18), bảng tươi nhờ refresh tay 07-12; 1 gap kỹ thuật sẽ nổ tối nay 23:45 (bq_cache delta không tương thích refresh re-rank) + 2 đề xuất mùa BCTC: {"job": "Winston_20260713_100733", "status": "DONE — audit-only, không sửa gì, toàn bộ số liệu từ BQ live + log thật hôm nay", "q1_fa_ratings_8l": {"lastModifie …
 - [2026-07-13T10:46:57] Winston/finding — 3 fix hau-audit 8L XONG: cache full_only (het count-mismatch gia thu Bay), cron tam T3 mua BCTC den 08-04 (tu het han), 3 row data_registry loi thoi da sua — cache da khop BQ live 0 drift: {"job": "Winston_20260713_103213", "status": "DONE_COMMITTED_TESTED", "viec1_cache_full_only": {"fix": "sync_bq_cache.py: fa_ratings + fa_ratings_8l them full_o …
+- [2026-07-13T11:57:31] Taylor/finding — Beta-cap custom30V (câu hỏi VIX): NO-GO cả 2 config kể cả bản có-điều-kiện macro-phòng-thủ; premise vĩ mô user ĐÚNG cả 3 (deposit 4.7→6.8%, CPI đỉnh 5.6%, thanh khoản −55%); rủi ro beta đã xử lý ở tầng sleeve DT5G + deposit-gate 7.5% sẵn có: {"job": "Taylor_20260713_114905", "status": "DONE — research-only, production/paper KHÔNG đụng, registry đã pin", "a_premise_vi_mo": {"verdict": "user ĐÚNG cả 3 …
+- [2026-07-13T11:11:18] Winston/finding — new-listings-daily: {"date": "2026-07-13", "lookback_days": 90, "total_new": 1, "needs_manual_rating": 0, "fresh_ipo": 0, "research_queue": [], "snapshot": "/home/trido/thanhdt/Wor …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -355,11 +355,15 @@ DT5G") phát hiện thêm, TẤT CẢ đã fix + verify (mỗi bước đều qu
 **⚠️ Số tham chiếu V2.4 chính thức đã đổi** — CLAUDE.md/canonical.md ghi "R3 NEUTRAL-only @50B:
 CAGR 28.05%..." **ĐÃ LỖI THỜI**, cần cập nhật thành 28.82%/1.90/-15.7%/1.83 ở lần sửa KB tiếp theo.
 
-**Còn treo, chờ cron thứ Hai 07-13 18:30 ICT (Mike tự kiểm tra, đừng quên qua restart):**
-1. Query lại `tav2_bq.vnindex_5state_dt5g_live` xác nhận 06-24→07-13 = NEUTRAL(3), có dòng 07-10/07-13.
-2. `bq show tav2_bq.custom30v_8l` xác nhận writer đã hồi sinh (lastModified qua 06-18).
-3. `19:00 ICT freshness-check 8 bảng` chạy thật lần đầu — kỳ vọng 2 WARN hợp lệ, 0 false-block
-   (Winston đã test kỹ case này để không chặn nhầm publish quan trọng).
+**✅ XÁC NHẬN XONG (2026-07-13, sau cron 18:30 ICT) — mục 1-2 đã kiểm chứng trực tiếp bằng BQ:**
+1. ✅ `vnindex_5state_dt5g_live` + bảng gốc: NEUTRAL(3) liên tục 07-06→07-13, có đủ dòng 07-10/07-13
+   mới, episode BULL giả đã biến mất hoàn toàn — khớp chính xác counterfactual đã verify trước đó.
+   User tự phát hiện report vẫn hiện "9/10→BULL" lúc 16:00 ICT (TRƯỚC giờ cron) — đã giải thích rõ
+   đó là dữ liệu cũ do report được xem trước khi cron chạy, không phải fix thất bại.
+2. ✅ `custom30v_8l` writer đã hồi sinh, republish đúng lịch (lastModified 15:32 ICT hôm nay, qua
+   cron papertrade riêng — khác giờ cron DT5G).
+3. **Còn lại**: `19:00 ICT freshness-check 8 bảng` chạy thật lần đầu — CHƯA tới giờ kiểm tra (hiện
+   18:37 ICT), Mike cần tự kiểm tra sau 19:00 xem có 2 WARN hợp lệ, 0 false-block không.
 
 ## `mike@Mike.service` (remote-control daemon) đã TẮT HẲN (2026-07-07, user quyết định)
 User giờ chỉ dùng Discord để nói chuyện với Mike (tách nhiều topic tiện phân việc hơn hẳn so với

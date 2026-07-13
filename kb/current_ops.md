@@ -340,11 +340,15 @@ DT5G") phát hiện thêm, TẤT CẢ đã fix + verify (mỗi bước đều qu
 **⚠️ Số tham chiếu V2.4 chính thức đã đổi** — CLAUDE.md/canonical.md ghi "R3 NEUTRAL-only @50B:
 CAGR 28.05%..." **ĐÃ LỖI THỜI**, cần cập nhật thành 28.82%/1.90/-15.7%/1.83 ở lần sửa KB tiếp theo.
 
-**Còn treo, chờ cron thứ Hai 07-13 18:30 ICT (Mike tự kiểm tra, đừng quên qua restart):**
-1. Query lại `tav2_bq.vnindex_5state_dt5g_live` xác nhận 06-24→07-13 = NEUTRAL(3), có dòng 07-10/07-13.
-2. `bq show tav2_bq.custom30v_8l` xác nhận writer đã hồi sinh (lastModified qua 06-18).
-3. `19:00 ICT freshness-check 8 bảng` chạy thật lần đầu — kỳ vọng 2 WARN hợp lệ, 0 false-block
-   (Winston đã test kỹ case này để không chặn nhầm publish quan trọng).
+**✅ XÁC NHẬN XONG (2026-07-13, sau cron 18:30 ICT) — mục 1-2 đã kiểm chứng trực tiếp bằng BQ:**
+1. ✅ `vnindex_5state_dt5g_live` + bảng gốc: NEUTRAL(3) liên tục 07-06→07-13, có đủ dòng 07-10/07-13
+   mới, episode BULL giả đã biến mất hoàn toàn — khớp chính xác counterfactual đã verify trước đó.
+   User tự phát hiện report vẫn hiện "9/10→BULL" lúc 16:00 ICT (TRƯỚC giờ cron) — đã giải thích rõ
+   đó là dữ liệu cũ do report được xem trước khi cron chạy, không phải fix thất bại.
+2. ✅ `custom30v_8l` writer đã hồi sinh, republish đúng lịch (lastModified 15:32 ICT hôm nay, qua
+   cron papertrade riêng — khác giờ cron DT5G).
+3. **Còn lại**: `19:00 ICT freshness-check 8 bảng` chạy thật lần đầu — CHƯA tới giờ kiểm tra (hiện
+   18:37 ICT), Mike cần tự kiểm tra sau 19:00 xem có 2 WARN hợp lệ, 0 false-block không.
 
 ## `mike@Mike.service` (remote-control daemon) đã TẮT HẲN (2026-07-07, user quyết định)
 User giờ chỉ dùng Discord để nói chuyện với Mike (tách nhiều topic tiện phân việc hơn hẳn so với
