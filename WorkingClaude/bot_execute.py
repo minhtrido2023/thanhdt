@@ -23,6 +23,7 @@ import datetime as dt
 import fcntl
 import json
 import os
+import subprocess
 import sys
 import time
 
@@ -32,11 +33,47 @@ if hasattr(sys.stdout, "reconfigure"):  # console Windows cp1252 → utf-8
 
 from trading_bot.config import load_config, load_accounts, pick_accounts, EXEC_DIR
 from trading_bot.brokers import make_broker, get_quote_source, get_dnse_client
-from trading_bot.plan import load_plan, filter_excluded_tickers
-from trading_bot.executor import Executor, run_session
+from trading_bot.plan import load_plan, filter_excluded_tickers, approval_block_reason
+from trading_bot.executor import Executor, run_session, _publish_bot_event
 from trading_bot.vn_market import today_ict
 
 _LOCK_HANDLES = []  # giữ sống file descriptor để lock tồn tại suốt vòng đời process
+
+_WC_ROOT = os.path.dirname(os.path.abspath(__file__))
+_TRADING_DAILY_THREAD = "1521470705563340910"  # cùng thread run_bot.sh dùng
+
+
+def _alert_approval_block(label, plan_date, reason):
+    """Alert khi approval gate chặn plan: stdout + bus event + Discord + Telegram.
+
+    Mọi kênh fail-safe (không bao giờ raise) — alert hỏng không được làm hỏng phần
+    còn lại của phiên (account khác trong cùng process vẫn phải chạy bình thường).
+    """
+    msg = (f"⛔ APPROVAL GATE — account {label}: plan {plan_date} bị TỪ CHỐI thực thi.\n"
+           f"{reason}\n"
+           f"Xử lý: user duyệt plan, ghi approved_by vào "
+           f"data/trade_plans/plan_{label}_{plan_date}.json rồi chạy lại "
+           f"bin/run_bot.sh --account {label} --auto-otp.")
+    print(msg)
+    _publish_bot_event("error", "APPROVAL_GATE_BLOCK", {
+        "account": label, "plan_date": plan_date, "reason": reason,
+    })
+    notify_thread = os.path.join(_WC_ROOT, "mike", "bin", "notify_thread.sh")
+    if os.path.isfile(notify_thread):
+        try:
+            subprocess.Popen([notify_thread, msg, _TRADING_DAILY_THREAD],
+                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                             close_fds=True)
+        except Exception:
+            pass
+    try:
+        with open(os.path.join(_WC_ROOT, "secrets", "telegram_config.json"),
+                  encoding="utf-8") as f:
+            tg = json.load(f)
+        from telegram_recommend import send_telegram_text
+        send_telegram_text(tg["bot_token"], tg["chat_id"], msg, parse_mode="")
+    except Exception:
+        pass
 
 
 def _acquire_account_lock(label, plan_date):
@@ -171,6 +208,7 @@ def main():
     shared_fills = {}                            # sổ participation chung của fleet
 
     executors = []
+    approval_blocked = []                        # account bị approval gate từ chối
     for p in profiles:
         cfg = dict(p["cfg"])
         if args.mode:
@@ -192,6 +230,15 @@ def main():
         if not plan.orders:
             print(f"[{p['label']}] plan {plan_date} không có lệnh — bỏ qua")
             continue
+        # Code-gate approval (2026-07-13): plan yêu cầu duyệt mà chưa duyệt → TỪ CHỐI
+        # account này (account khác không liên quan vẫn chạy), exit code cuối ≠ 0 để
+        # run_bot.sh/heartbeat/ops_health_check bắt được. Xét SAU filter_excluded_tickers
+        # để "có lệnh" nghĩa là lệnh THẬT SỰ sắp được đặt.
+        gate_reason = approval_block_reason(plan)
+        if gate_reason:
+            _alert_approval_block(p["label"], plan_date, gate_reason)
+            approval_blocked.append(p["label"])
+            continue
         if not _acquire_account_lock(p["label"], plan_date):
             print(f"[{p['label']}] ⚠ đã có tiến trình bot_execute.py khác đang xử lý "
                   f"{plan_date} (lock đang giữ) — bỏ qua, KHÔNG chạy trùng.")
@@ -206,12 +253,20 @@ def main():
         executors.append(Executor(plan, broker, cfg, shared=shared_fills))
 
     if not executors:
+        if approval_blocked:
+            print(f"⛔ {len(approval_blocked)} account bị approval gate chặn "
+                  f"({', '.join(approval_blocked)}), không account nào chạy — exit 2.")
+            return 2
         print(f"ℹ️ không có account nào có plan/lệnh cho {plan_date} — không phải lỗi, "
               f"chỉ là ngày không giao dịch. Thoát bình thường.")
         return 0
 
     run_session(executors, once=args.once, max_cycles=args.max_cycles,
                 force_phase=args.force_phase)
+    if approval_blocked:
+        print(f"⛔ lưu ý: {len(approval_blocked)} account đã bị approval gate chặn đầu "
+              f"phiên ({', '.join(approval_blocked)}) — exit 2 để giám sát bắt được.")
+        return 2
     return 0
 
 

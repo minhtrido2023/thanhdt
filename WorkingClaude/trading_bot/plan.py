@@ -44,6 +44,13 @@ class TradePlan:
     account: str = "main"    # label account profile
     created_at: str = ""
     notes: list = dataclasses.field(default_factory=list)
+    # Approval gate (2026-07-13, sau sự cố plan ZaloPay 07-13 chưa duyệt suýt chạy —
+    # kb/INCIDENTS.md): plan generator (DollarBill) đặt requires_user_approval=true cho
+    # plan cần user duyệt; Mike ghi approved_by sau khi user duyệt thật. bot_execute.py
+    # enforce qua approval_block_reason() bên dưới. Default False = backward-compat:
+    # plan cũ/paper (account main) không có field này phải chạy như trước.
+    requires_user_approval: bool = False
+    approved_by: str = None
 
     def path(self):
         return os.path.join(PLAN_DIR, f"plan_{self.account}_{self.plan_date}.json")
@@ -107,6 +114,10 @@ def load_plan(plan_date, account="main"):
             filtered["ref_price"] = ref
         orders.append(PlannedOrder(**filtered))
     d["orders"] = orders
+    # preflight_check.sh chấp nhận cả tên field thay thế approved_by_user — gate phải
+    # nhất quán, không được để preflight báo GREEN mà bot lại chặn.
+    if not d.get("approved_by") and d.get("approved_by_user"):
+        d["approved_by"] = d["approved_by_user"]
     known_plan = {f.name for f in dataclasses.fields(TradePlan)}
     return TradePlan(**{k: v for k, v in d.items() if k in known_plan})
 
@@ -125,3 +136,36 @@ def filter_excluded_tickers(plan, excluded_tickers):
     blocked = [o for o in plan.orders if o.ticker in excluded]
     plan.orders = [o for o in plan.orders if o.ticker not in excluded]
     return plan, blocked
+
+
+def approval_block_reason(plan):
+    """Code-gate approval — lớp phòng thủ THỨ HAI, độc lập với việc gửi plan cho user
+    duyệt qua send_plan_report.sh (sự cố 2026-07-13: plan ZaloPay requires_user_approval=true
+    + approved_by=null suýt chạy lúc 09:05 vì không có gate nào ở tầng executor).
+
+    Trả None nếu được phép thực thi; ngược lại trả chuỗi lý do chặn (caller KHÔNG đặt
+    lệnh nào, alert + exit khác 0). Fail-safe pause, không đoán — cùng nguyên tắc
+    _ghost_tickers trong executor.py (coding_guidelines.md §5).
+
+    Điều kiện chặn: requires_user_approval truthy AND approved_by trống AND có lệnh.
+    - Thiếu field requires_user_approval (plan cũ / paper account main) → default False
+      → chạy như trước (backward-compat, KHÔNG chặn giao dịch thường lệ).
+    - orders=0 (HOLD) → không chặn dù chưa duyệt: không có gì để thực thi.
+    - Plan LLM-authored có thể ghi "true"/"false" dạng CHUỖI — normalize trước khi xét
+      ("false"/"no"/"0"/rỗng → không yêu cầu duyệt; chuỗi truthy khác → yêu cầu duyệt).
+    """
+    req = plan.requires_user_approval
+    if isinstance(req, str):
+        req = req.strip().lower() not in ("", "false", "no", "0", "none")
+    if not req:
+        return None
+    if not plan.orders:
+        return None
+    approved = plan.approved_by
+    if isinstance(approved, str):
+        approved = approved.strip()
+    if approved:
+        return None
+    return (f"plan {plan.plan_date} [{plan.account}] có requires_user_approval=true nhưng "
+            f"approved_by trống — {len(plan.orders)} lệnh chưa được user duyệt, "
+            f"bot TỪ CHỐI thực thi (không đoán, không tự bỏ qua).")
