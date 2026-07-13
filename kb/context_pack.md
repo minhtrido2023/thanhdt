@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v1018)
+# Mike fleet — context pack (v1019)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-13T08:07:15] Taylor/finding — PNJ case-study EXTREME gate: hệ thống không mua PNJ nhờ vòng chọn mã (cả 4 nguồn đều loại), KHÔNG phải nhờ gate; replay giả định lộ lỗ hổng poll-1 — slice đầu (thường = toàn bộ lệnh @NAV 1B) vẫn khớp tại sàn trước khi 2-poll confirm arm: {"job": "Taylor_20260713_075836", "status": "DONE — case-study khép kín, không đổi code/paper trial", "buoc1_ngay_that": {"san_cung_3_phien": ["2026-07-03 close …
 - [2026-07-13T08:32:53] Taylor/finding — Lỗ hổng poll-1 EXTREME gate (case PNJ) ĐÃ ĐÓNG — _floor_guard_buy stateless chặn slice mua đầu tại sàn ngay poll 1, paper-only, 40/40 stress PASS (pre-fix FAIL đúng 5 case tái hiện): {"job": "Taylor_20260713_082159", "status": "DONE_COMMITTED_TESTED — fix cho PAPER trial (account main), KHÔNG đổi gì live; điều kiện lên LIVE giữ nguyên: 4 tuầ …
 - [2026-07-13T08:48:02] quant-skeptic/verification — ✅ CONFIRMED VERIFY: Lỗ hổng poll-1 EXTREME gate (case PNJ) ĐÃ ĐÓNG — _floor_guard_buy stateless chặn slice mua đầu tại sàn ngay poll 1, paper-only, 40/40 stress PASS (pre-fix FAIL đúng 5 case tái hiện): {"finding_topic": "Lỗ hổng poll-1 EXTREME gate (case PNJ) ĐÃ ĐÓNG — _floor_guard_buy stateless chặn slice mua đầu tại sàn ngay poll 1, paper-only, 40/40 stress  …
 - [2026-07-13T09:04:53] Taylor/finding — ĐÍNH CHÍNH số đếm stress EXTREME floor-guard (38/38, +12 case — không phải 40/40, +14) + đã thêm 2 case 6g per-account: SpaceX & ZaloPay chứng minh trực tiếp guard không kích trên LIVE, suite giờ đúng 40/40 THẬT: {"job": "Taylor_20260713_085944", "status": "DONE_COMMITTED_TESTED", "viec_1_dinh_chinh": {"so_sai": "40/40 PASS (26 cũ + 14 mới) trong finding Taylor_20260713_ …
@@ -11,6 +10,7 @@
 - [2026-07-13T09:46:24] quant-skeptic/verification — ✅ CONFIRMED VERIFY: Deal Quality Score 2-trục: composite liên tục KHÔNG thắng (không wire); cơ chế ✓✓ double-confirm được backtest XÁC NHẬN trực tiếp (+16.7%/3M hit 74% OOS vs 1-trục +7.5-9.6%); CTR hôm nay CÓ ✓✓ thật; display fix STRONG-không-✓✓ đã commit: {"finding_topic": "Deal Quality Score 2-trục: composite liên tục KHÔNG thắng (không wire); cơ chế ✓✓ double-confirm được backtest XÁC NHẬN trực tiếp (+16.7%/3M  …
 - [2026-07-13T10:17:07] Taylor/finding — Đánh giá 5-góc khai thác cơ chế ✓✓ trong Waterfall DC-book: 4/5 góc KHÔNG còn không gian thật (đã bác/không bề mặt/không power); phát hiện chính = TRIGGER BINARY của paper under-implement spec đã backtest — nếu wire nguyên trạng sẽ ÂM so parking thường (edge-capture −43%), fix = trigger continuous-residual + gói q2m5/cap0.15/floor3B tại mốc review: {"job": "Taylor_20260713_100550", "status": "DONE_COMMITTED — research/audit, production + paper sleeve KHÔNG đụng (commit 0c9bd79 repo thanhdt)", "buoc1_trang_ …
 - [2026-07-13T10:18:29] Winston/finding — AUDIT 8L freshness 07-13: HÔM NAY dữ liệu 8L phản ánh ĐỦ thông tin hệ thống có (1/1 mã Q2 đã vào); cron thứ Bảy CHƯA từng chạy (lần đầu 07-18), bảng tươi nhờ refresh tay 07-12; 1 gap kỹ thuật sẽ nổ tối nay 23:45 (bq_cache delta không tương thích refresh re-rank) + 2 đề xuất mùa BCTC: {"job": "Winston_20260713_100733", "status": "DONE — audit-only, không sửa gì, toàn bộ số liệu từ BQ live + log thật hôm nay", "q1_fa_ratings_8l": {"lastModifie …
+- [2026-07-13T10:46:57] Winston/finding — 3 fix hau-audit 8L XONG: cache full_only (het count-mismatch gia thu Bay), cron tam T3 mua BCTC den 08-04 (tu het han), 3 row data_registry loi thoi da sua — cache da khop BQ live 0 drift: {"job": "Winston_20260713_103213", "status": "DONE_COMMITTED_TESTED", "viec1_cache_full_only": {"fix": "sync_bq_cache.py: fa_ratings + fa_ratings_8l them full_o …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -525,6 +525,23 @@ không thể đảo ngược: bot tự đặt lệnh thật lần đầu, không
   sát diễn biến portfolio để đề xuất ngày review cụ thể khi đủ điều kiện** — không tự động, không
   phải 1 con số đã chốt sẵn.
 
+  **⚠️ AGENDA SỬA tại mốc review (thêm 2026-07-13, job `Taylor_20260713_100550`, user xác nhận CHƯA
+  sửa ngay — để tự nhiên chạy sai thêm một thời gian nhằm quan sát whipsaw thật qua đúng đợt LAG
+  refill, rồi sửa gộp 1 lần tại mốc review).** Phát hiện quan trọng: **paper sleeve ĐANG CHẠY SAI so
+  với chính spec đã backtest/pin** — dùng trigger NHỊ PHÂN (BAL/LAG có deal → tắt hẳn DC book) thay vì
+  spec đúng là DC book chạy LIÊN TỤC trên phần tiền dư (residual). Hậu quả đo được: 57.8% ngày
+  NEUTRAL-có-✓✓ vẫn có deal BAL/LAG mới trong khi tiền park còn ~38% NAV → bản nhị phân đang chạy hiện
+  tại **TỆ HƠN CẢ baseline không có DC book** (CAGR 27.26% / DD −17.8% / Calmar 1.53 / turnover 20.7×,
+  so với spec đúng 27.56% / −15.5% / 1.77 / 3.18× và baseline R3 27.35% / −17.6% / 1.55). 4 việc cần
+  làm tại mốc review, theo đúng thứ tự ưu tiên:
+  1. **Đổi trigger sang continuous-residual** (quan trọng nhất — đây là bug thực chất, không phải tối ưu thêm).
+  2. Đồng bộ lịch rebalance DC book vào q2m5 (giống custom30V) — tự giảm whipsaw ~4 lần, đã backtest (job `Taylor_20260706_173317`).
+  3. Cap gộp 0.15/tên (chống trùng mã DC↔custom30V vượt trần name_cap 10% NAV khi sleeve lớn — job `Taylor_20260707_042827`).
+  4. Liquidity floor 3B thay hard-exclude DHG đơn thuần (job `Taylor_20260707_042827`).
+  Đã kiểm tra kỹ 4 góc còn lại (sizing/depth-weight, ✓✓ làm tiebreaker BAL/LAG, mở rộng CRISIS/BEAR,
+  sector-lens đứng riêng) — **không còn không gian cải thiện thật**, không cần backtest thêm cho các
+  góc đó khi tới review, chỉ cần làm đúng 4 việc trên.
+
 ## V2.5 leverage — VERDICT: NO-GO, giữ DISABLED (2026-07-12, quant-skeptic CONFIRMED)
 User hỏi "V2.5 đã đủ tự tin chuyển production chưa" (mốc nhắc 2026-07-07 đã treo quá hạn) — Mike tự
 đọc lại toàn bộ lịch sử research, phát hiện edge +0.92pp trước đây có dấu hiệu thiếu vững (mẫu
@@ -775,6 +792,21 @@ User phát hiện báo cáo tuần bị bỏ sót (không có cron tự động,
    topic (1522576692638388364), user duyệt trước khi gửi.
 2. Thêm check WARN vào `ops_health_check.sh` (commit `7147ac3`): tự cảnh báo khi báo cáo tuần
    (thứ Hai, >7 ngày) hoặc tháng (từ ngày 5, chưa có báo cáo tháng trước) quá hạn — chống tái diễn.
+
+## Audit dữ liệu 8L XONG (Winston_20260713_100733) — 3 fix đang dispatch (2026-07-13)
+User lo ngại dữ liệu 8L có phản ánh đầy đủ thông tin hệ thống hay không (mùa BCTC Q2 đang bắt đầu).
+Audit xác nhận: **hôm nay dữ liệu 8L ĐẦY ĐỦ** — chỉ 1 mã (MBS) đã công bố Q2, đã có mặt đúng ở cả
+3 lớp rating. Phát hiện 2 vấn đề kỹ thuật:
+- Cron `fa_ratings_8l` thứ Bảy 07-11 chưa từng chạy tự động (bảng tươi nhờ ghi tay 07-12); lần
+  scheduled đầu tiên = thứ Bảy 07-18, cần để mắt xác nhận.
+- Cache local (research/backtest, KHÔNG phải đường tiền thật) lệch do sync mode `--delta` không
+  tương thích cách refresh mới → tối nay 23:45 sẽ tự bắn 1 cảnh báo ĐÚNG NHƯNG không phải sự cố
+  thật (by design), sẽ lặp mỗi tuần nếu không sửa.
+- Điểm cần lưu ý: rebalance quý ~08-05, mã công bố 08-02..08-04 sẽ chưa kịp có rating Q2.
+
+User duyệt cả 3 đề xuất Winston: (1) sửa cache sync sang full-download cho 2 bảng rating; (2) tăng
+tần suất refresh 2x/tuần trong mùa BCTC cao điểm (~4-6 tuần, tới ~08-05); (3) cập nhật 3 chỗ tài
+liệu lỗi thời trong `data_registry.md`. Dispatch job `Winston_20260713_103213`.
 
 ## Tri thức chung của đội (canonical — Mike biên tập; MỌI agent phải nắm)
 > Cập nhật 2026-07-01. Chi tiết: `kb/KNOWLEDGE.md`. Số liệu gốc: `data/results_registry.md`.

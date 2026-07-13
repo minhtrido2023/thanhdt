@@ -510,6 +510,23 @@ không thể đảo ngược: bot tự đặt lệnh thật lần đầu, không
   sát diễn biến portfolio để đề xuất ngày review cụ thể khi đủ điều kiện** — không tự động, không
   phải 1 con số đã chốt sẵn.
 
+  **⚠️ AGENDA SỬA tại mốc review (thêm 2026-07-13, job `Taylor_20260713_100550`, user xác nhận CHƯA
+  sửa ngay — để tự nhiên chạy sai thêm một thời gian nhằm quan sát whipsaw thật qua đúng đợt LAG
+  refill, rồi sửa gộp 1 lần tại mốc review).** Phát hiện quan trọng: **paper sleeve ĐANG CHẠY SAI so
+  với chính spec đã backtest/pin** — dùng trigger NHỊ PHÂN (BAL/LAG có deal → tắt hẳn DC book) thay vì
+  spec đúng là DC book chạy LIÊN TỤC trên phần tiền dư (residual). Hậu quả đo được: 57.8% ngày
+  NEUTRAL-có-✓✓ vẫn có deal BAL/LAG mới trong khi tiền park còn ~38% NAV → bản nhị phân đang chạy hiện
+  tại **TỆ HƠN CẢ baseline không có DC book** (CAGR 27.26% / DD −17.8% / Calmar 1.53 / turnover 20.7×,
+  so với spec đúng 27.56% / −15.5% / 1.77 / 3.18× và baseline R3 27.35% / −17.6% / 1.55). 4 việc cần
+  làm tại mốc review, theo đúng thứ tự ưu tiên:
+  1. **Đổi trigger sang continuous-residual** (quan trọng nhất — đây là bug thực chất, không phải tối ưu thêm).
+  2. Đồng bộ lịch rebalance DC book vào q2m5 (giống custom30V) — tự giảm whipsaw ~4 lần, đã backtest (job `Taylor_20260706_173317`).
+  3. Cap gộp 0.15/tên (chống trùng mã DC↔custom30V vượt trần name_cap 10% NAV khi sleeve lớn — job `Taylor_20260707_042827`).
+  4. Liquidity floor 3B thay hard-exclude DHG đơn thuần (job `Taylor_20260707_042827`).
+  Đã kiểm tra kỹ 4 góc còn lại (sizing/depth-weight, ✓✓ làm tiebreaker BAL/LAG, mở rộng CRISIS/BEAR,
+  sector-lens đứng riêng) — **không còn không gian cải thiện thật**, không cần backtest thêm cho các
+  góc đó khi tới review, chỉ cần làm đúng 4 việc trên.
+
 ## V2.5 leverage — VERDICT: NO-GO, giữ DISABLED (2026-07-12, quant-skeptic CONFIRMED)
 User hỏi "V2.5 đã đủ tự tin chuyển production chưa" (mốc nhắc 2026-07-07 đã treo quá hạn) — Mike tự
 đọc lại toàn bộ lịch sử research, phát hiện edge +0.92pp trước đây có dấu hiệu thiếu vững (mẫu
@@ -760,3 +777,18 @@ User phát hiện báo cáo tuần bị bỏ sót (không có cron tự động,
    topic (1522576692638388364), user duyệt trước khi gửi.
 2. Thêm check WARN vào `ops_health_check.sh` (commit `7147ac3`): tự cảnh báo khi báo cáo tuần
    (thứ Hai, >7 ngày) hoặc tháng (từ ngày 5, chưa có báo cáo tháng trước) quá hạn — chống tái diễn.
+
+## Audit dữ liệu 8L XONG (Winston_20260713_100733) — 3 fix đang dispatch (2026-07-13)
+User lo ngại dữ liệu 8L có phản ánh đầy đủ thông tin hệ thống hay không (mùa BCTC Q2 đang bắt đầu).
+Audit xác nhận: **hôm nay dữ liệu 8L ĐẦY ĐỦ** — chỉ 1 mã (MBS) đã công bố Q2, đã có mặt đúng ở cả
+3 lớp rating. Phát hiện 2 vấn đề kỹ thuật:
+- Cron `fa_ratings_8l` thứ Bảy 07-11 chưa từng chạy tự động (bảng tươi nhờ ghi tay 07-12); lần
+  scheduled đầu tiên = thứ Bảy 07-18, cần để mắt xác nhận.
+- Cache local (research/backtest, KHÔNG phải đường tiền thật) lệch do sync mode `--delta` không
+  tương thích cách refresh mới → tối nay 23:45 sẽ tự bắn 1 cảnh báo ĐÚNG NHƯNG không phải sự cố
+  thật (by design), sẽ lặp mỗi tuần nếu không sửa.
+- Điểm cần lưu ý: rebalance quý ~08-05, mã công bố 08-02..08-04 sẽ chưa kịp có rating Q2.
+
+User duyệt cả 3 đề xuất Winston: (1) sửa cache sync sang full-download cho 2 bảng rating; (2) tăng
+tần suất refresh 2x/tuần trong mùa BCTC cao điểm (~4-6 tuần, tới ~08-05); (3) cập nhật 3 chỗ tài
+liệu lỗi thời trong `data_registry.md`. Dispatch job `Winston_20260713_103213`.
