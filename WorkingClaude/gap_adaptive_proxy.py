@@ -23,7 +23,7 @@ Universe = ticker_prune (liquid, quality-gated), 2014+, liquidity floor 5B/day, 
 """
 import duckdb, numpy as np, pandas as pd
 pd.set_option("display.width", 200); pd.set_option("display.max_columns", 30)
-PARQ = "data/bq_cache/ticker_prune.parquet"
+PARQ = "data/bq_cache/ticker_prune/*.parquet"
 LIQ_FLOOR = 5e9
 
 q = f"""

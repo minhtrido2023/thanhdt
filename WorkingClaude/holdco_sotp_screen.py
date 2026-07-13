@@ -49,7 +49,7 @@ conglomerate archetype, NOT a standalone book — tiny N + permanent-discount-tr
 """
 import duckdb, numpy as np, pandas as pd, json
 
-PRUNE = "data/bq_cache/ticker_prune.parquet"
+PRUNE = "data/bq_cache/ticker_prune/*.parquet"
 FIN   = "data/bq_cache/ticker_financial.parquet"
 DT5G  = "data/bq_cache/vnindex_5state_dt5g_live.parquet"
 START = "2016-01-01"

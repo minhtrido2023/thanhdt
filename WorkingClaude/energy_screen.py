@@ -35,7 +35,7 @@ BACKLOOK (ticker_financial cache, see framework doc):
 """
 import duckdb, numpy as np, pandas as pd, json
 
-PRUNE = "data/bq_cache/ticker_prune.parquet"
+PRUNE = "data/bq_cache/ticker_prune/*.parquet"
 FIN   = "data/bq_cache/ticker_financial.parquet"
 C30V  = "data/bq_cache/custom30v_8l.parquet"
 R8L   = "data/bq_cache/fa_ratings_8l.parquet"

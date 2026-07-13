@@ -3,7 +3,7 @@ Daily proxy on ticker_prune (same construction as gap_adaptive_proxy.py). Focus:
 edge + how OFTEN it fires (blast radius) + does it concentrate in stress years (when we deploy most)."""
 import duckdb, numpy as np, pandas as pd
 pd.set_option("display.width", 200)
-PARQ = "data/bq_cache/ticker_prune.parquet"
+PARQ = "data/bq_cache/ticker_prune/*.parquet"
 q = f"""
 WITH base AS (
   SELECT ticker, time, Open, Close, Close_T1, Trading_Value_1M_P50 AS liq, Close/Close_T1-1 AS ret, profit_1M

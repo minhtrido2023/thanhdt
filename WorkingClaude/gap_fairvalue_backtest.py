@@ -10,7 +10,7 @@ adjustment yet) — prove the core edge first, then layer adjustments only if th
 """
 import duckdb, numpy as np, pandas as pd
 pd.set_option("display.width", 220)
-PARQ = "data/bq_cache/ticker_prune.parquet"
+PARQ = "data/bq_cache/ticker_prune/*.parquet"
 q = f"""
 SELECT time, ticker, Price, PE, PB, EVEB, PE_MA5Y, PB_MA5Y, EVEB_MA5Y,
        ROE_Min3Y, FSCORE, ROIC5Y, Trading_Value_1M_P50 AS liq,

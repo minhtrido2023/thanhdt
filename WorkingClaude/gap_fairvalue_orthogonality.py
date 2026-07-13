@@ -10,7 +10,7 @@ d_pb_just = (ROIC5Y/r)/PB - 1, r=0.13 cost-of-equity placeholder. Quality-gated,
 CAVEAT: overlapping forward windows inflate t -> read t as directional, not precise.
 """
 import duckdb, numpy as np, pandas as pd
-PARQ = "data/bq_cache/ticker_prune.parquet"
+PARQ = "data/bq_cache/ticker_prune/*.parquet"
 cols = duckdb.connect().execute(f"DESCRIBE SELECT * FROM read_parquet('{PARQ}') LIMIT 1").df()["column_name"].tolist()
 has_ps = "PS" in cols
 print(f"PCF present: {'PCF' in cols} | PS present: {has_ps}")

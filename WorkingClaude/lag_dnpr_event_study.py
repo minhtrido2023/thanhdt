@@ -41,7 +41,7 @@ ev = ev.merge(fin[["ticker","quarter","Release_Date","d_NPR"]],
 
 # ---------- 3. faithful T+25 open-to-open from ticker_prune ----------
 px = duckdb.sql(f"""
-  SELECT time, ticker, Open FROM read_parquet('{BQC}/ticker_prune.parquet')
+  SELECT time, ticker, Open FROM read_parquet('{BQC}/ticker_prune/*.parquet')
   WHERE time >= DATE '2009-06-01'
 """).df()
 px["time"] = pd.to_datetime(px["time"])

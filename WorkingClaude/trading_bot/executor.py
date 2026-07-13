@@ -23,6 +23,7 @@ Trạng thái ghi liên tục → giết process giữa chừng chạy lại là
 
 import csv
 import datetime as dt
+import glob
 import json
 import os
 import subprocess
@@ -504,9 +505,12 @@ class Executor:
             "BQ_LOCAL_CACHE",
             os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                          "data", "bq_cache"))
-        parquet_path = os.path.join(cache_dir, "ticker_prune.parquet")
-        if not os.path.exists(parquet_path):
-            print(f"[exec:{self.label}] gap_adaptive: {parquet_path} not found — fail-safe")
+        # ticker_prune is chunked per-year since 2026-06-26 (the old monolith
+        # ticker_prune.parquet froze at that date — never read it again)
+        chunk_dir = os.path.join(cache_dir, "ticker_prune")
+        chunk_files = sorted(glob.glob(os.path.join(chunk_dir, "*.parquet")))
+        if not chunk_files:
+            print(f"[exec:{self.label}] gap_adaptive: no chunks in {chunk_dir} — fail-safe")
             return
         try:
             import pandas as pd
@@ -518,7 +522,7 @@ class Executor:
                 return
             today = pd.Timestamp(self.plan.plan_date)
             # ignore_metadata=True bypasses BQ dbdate pandas extension type annotation
-            table = _pq.read_table(parquet_path, columns=["time", "ticker", "Close"])
+            table = _pq.read_table(chunk_files, columns=["time", "ticker", "Close"])
             df = table.to_pandas(ignore_metadata=True)
             df["time"] = pd.to_datetime(df["time"])
             df = df[df["ticker"].isin(set(tickers))]

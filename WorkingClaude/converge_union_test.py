@@ -64,7 +64,7 @@ def build_buynow_panel(calendar):
         SELECT time, ticker, PB, PB_MA5Y, PB_SD5Y, ROE_Min3Y, Trading_Value_1M_P50
         FROM read_parquet('{CACHE}/ticker/*.parquet')
         WHERE time >= '{START}'
-          AND ticker IN (SELECT DISTINCT ticker FROM read_parquet('{CACHE}/ticker_prune.parquet')) """).df()
+          AND ticker IN (SELECT DISTINCT ticker FROM read_parquet('{CACHE}/ticker_prune/*.parquet')) """).df()
     c.close()
     df["time"] = pd.to_datetime(df["time"])
     df["pb_z"] = (df["PB"] - df["PB_MA5Y"]) / df["PB_SD5Y"].replace(0, np.nan)

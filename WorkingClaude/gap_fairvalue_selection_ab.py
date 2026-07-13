@@ -7,7 +7,7 @@ delta B-A, IS 2014-19 / OOS 2020+. The DELTA is what's valid (absolute level = p
 profit_* = forward LABEL only. ROIC/PB rank == the justified-discount signal (r washes out of the rank).
 """
 import duckdb, numpy as np, pandas as pd
-PARQ = "data/bq_cache/ticker_prune.parquet"
+PARQ = "data/bq_cache/ticker_prune/*.parquet"
 q = f"""SELECT time,ticker,PE,PCF,PB,ROIC5Y,profit_1M,profit_2M
 FROM read_parquet('{PARQ}')
 WHERE time>=DATE '2014-01-01' AND PE>0 AND PB>0 AND ROIC5Y IS NOT NULL

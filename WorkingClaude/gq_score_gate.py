@@ -23,7 +23,7 @@ def spearman(a,b):
     if len(a)<3: return np.nan
     return a.rank().corr(b.rank())
 
-PR = "data/bq_cache/ticker_prune.parquet"
+PR = "data/bq_cache/ticker_prune/*.parquet"
 FI = "data/bq_cache/ticker_financial.parquet"
 con = duckdb.connect()
 

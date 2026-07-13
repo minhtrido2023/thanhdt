@@ -67,7 +67,7 @@ def load_custom30v_parking_ret(calendar):
     c = con()
     bk = c.execute(f"SELECT rebal_date, ticker, weight FROM read_parquet('{CACHE}/custom30v_8l.parquet') ORDER BY rebal_date, ticker").df()
     tks = sorted(bk["ticker"].unique())
-    px = c.execute(f"""SELECT time, ticker, Close FROM read_parquet('{CACHE}/ticker_prune.parquet')
+    px = c.execute(f"""SELECT time, ticker, Close FROM read_parquet('{CACHE}/ticker_prune/*.parquet')
                        WHERE ticker IN ({','.join(chr(39)+t+chr(39) for t in tks)})
                        AND time >= DATE '2014-01-01' ORDER BY time""").df()
     c.close()

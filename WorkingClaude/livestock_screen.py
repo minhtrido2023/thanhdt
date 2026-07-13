@@ -45,7 +45,7 @@ import duckdb, numpy as np, pandas as pd, json
 FIN   = "data/bq_cache/ticker_financial.parquet"
 C30V  = "data/bq_cache/custom30v_8l.parquet"
 R8L   = "data/bq_cache/fa_ratings_8l.parquet"
-PRUNE = "data/bq_cache/ticker_prune.parquet"       # only for the 8L-top25 orthogonality liquidity universe
+PRUNE = "data/bq_cache/ticker_prune/*.parquet"       # only for the 8L-top25 orthogonality liquidity universe
 PXCSV = "data/livestock_prices.csv"                # full-ticker daily panel (BAF/HNG not in stale prune cache)
 IXCSV = "data/livestock_vnindex.csv"
 START = "2014-01-01"
