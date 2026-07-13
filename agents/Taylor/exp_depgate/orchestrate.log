@@ -1,2 +1,4 @@
 [orch] 2026-07-13 21:33:49 waiting for cache sync (verified=True + no sync procs)
 [orch] 21:33:49 sync exited but verified=False — waiting 60s then proceeding anyway (data thru 06-19 needed only)
+[orch123] 2026-07-13 22:00:06 start D1/D2/D3 parallel
+[orch123] 2026-07-13 22:06:59 done D1=0 D2=0 D3=0
