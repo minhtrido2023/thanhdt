@@ -38,7 +38,12 @@ for _f in glob.glob("/home/trido/thanhdt/WorkingClaude/data/execution_logs/"
     os.remove(_f)
 
 
+N_CHECKS = 0
+
+
 def check(name, cond):
+    global N_CHECKS
+    N_CHECKS += 1
     tag = "PASS" if cond else "FAIL"
     print(f"  [{tag}] {name}")
     if not cond:
@@ -333,9 +338,25 @@ check("sell poll-1: slice placed (not blocked)", len(spf) == 1)
 check("sell poll-1: price at -3% chase cap 19400 (not floor — not armed yet)",
       bool(spf) and spf[0][3] == 19400)
 
+# 6g. Per-account LIVE controls (đính chính họp team 07-13): 6c dùng live_cfg
+#     chụp sẵn ở section 0 — đây là bằng chứng TRỰC TIẾP per-account: resolve
+#     cfg hiệu dụng TƯƠI từ secrets thật cho TỪNG account live (SpaceX, ZaloPay),
+#     chạy đúng code path _place_slices với quote PNJ khoá sàn → khẳng định
+#     trong CÙNG một check: flag OFF ∧ slice mua VẪN đặt (guard không kích).
+print("\n== 6g. PER-ACCOUNT LIVE CONTROLS: SpaceX & ZaloPay untouched by guard ==")
+for _acct in ("SpaceX", "ZaloPay"):
+    _cfg = eff_cfg(_acct)                              # resolve tươi, không dùng bản chụp
+    _brk = FakeBroker(qmap6)
+    _ex = Executor(make_plan([buy_pnj], account=f"STRESSTEST_P1{_acct.upper()}"),
+                   _brk, dict(_cfg))
+    _ex._place_slices(NOW, "CONT")
+    check(f"{_acct}: extreme_regime_enabled False AND PNJ buy slice at floor still places",
+          _cfg["extreme_regime_enabled"] is False
+          and len([p for p in _brk.placed if p[0] == "PNJ" and p[2] == "buy"]) == 1)
+
 print("\n" + "=" * 60)
 if FAILS:
-    print(f"RESULT: {len(FAILS)} FAILED -> {FAILS}")
+    print(f"RESULT: {len(FAILS)}/{N_CHECKS} FAILED -> {FAILS}")
     sys.exit(1)
-print("RESULT: ALL PASS — extreme-regime gate fires on stress, silent when NORMAL,")
+print(f"RESULT: ALL {N_CHECKS}/{N_CHECKS} PASS — extreme-regime gate fires on stress, silent when NORMAL,")
 print("        and the LIVE account gate stays OFF.")
