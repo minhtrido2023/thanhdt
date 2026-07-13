@@ -2907,3 +2907,54 @@ chi phí CAGR ≈ 0 — nhất quán verdict DSR 0.775/0.111: sleeve là insuran
 - **Caveat khai báo:** (i) IS 2014-19 bucket BOTH chỉ n=8 (điều kiện both-extreme gần như không tồn tại pre-2020 trong pool này) → edge OOS-loaded, đúng character đã biết của sector-lens, chấp nhận được cho watchlist display (không phải sổ tự động); (ii) trục A dùng proxy percentile-3Y, không phải đúng từng công thức STRONG per-lens; (iii) fwd-return weekly vẫn overlap (1M ~4x) → hit-rate không phải i.i.d., đọc là descriptive; (iv) BOTH bucket nghiêng Banking (192/276) theo cấu trúc pool.
 **Việc 4 — VERDICT: KHÔNG wire composite liên tục** (thua B-alone trên IC giữa-phân-phối); **giữ ✓✓ nhị phân — giờ có backtest chứng minh trực tiếp** (trước đây ✓✓ chỉ là consensus 2 hệ chưa đo). Trả lời câu "deal hời nhất hôm nay xuyên sector": nhìn tầng ✓✓ trước (đã so-sánh-được xuyên sector vì rating 8L là rank toàn thị trường), trong tầng ✓✓ dùng 8L rating rồi mode STRONG làm tie-break — KHÔNG cần điểm số mới.
 **Self-check:** không có NAV sim (0-VND n/a — nghiên cứu IC/quintile thuần); toàn bộ IC/quintile/LOO recompute độc lập từ obs CSV persisted (`dqs_backtest_obs.csv`) khớp print. **Files:** `mike/agents/Taylor/deal_quality_score_backtest.py`, `mike/agents/Taylor/dqs_backtest_obs.csv`, display fix `sector_lens_monitor.py` (repo thanhdt). Chờ quant-skeptic phản biện (Mike dispatch) — display fix vô hại production (watchlist tham khảo, không phải money-path).
+
+## 2026-07-13 — ✓✓ DOUBLE-CONFIRM EXPLOITATION AUDIT (5 góc) + TRIGGER-GAP BACKTEST — job Taylor_20260713_100550 — RESEARCH-ONLY, production/paper KHÔNG đụng
+**Câu hỏi (user qua Mike):** Waterfall DC-book đang paper đã khai thác HIỆU QUẢ cơ chế ✓✓ (vừa được backtest
+xác nhận OOS fwd-3M +16.67%/hit 74%, job _092636) chưa? Còn không gian nào tận dụng tốt hơn?
+**Bước 1 — trạng thái paper vs các tinh chỉnh đã nghiên cứu:** paper sleeve (`dc_book_waterfall_paper.py`,
+chạy từ 2026-06-26) vẫn là BẢN GỐC: daily signal-driven, cap 0.20/tên, hard-exclude DHG, KHÔNG cap gộp 0.15,
+KHÔNG floor 3B, KHÔNG q2m5 — đúng ràng buộc "không đổi giữa trial"; 3 tinh chỉnh (q2m5 thống nhất / cap gộp
+0.15 / floor 3B, job _173317+_042827) vẫn là agenda-items cho mốc review event-anchored, chưa wire đâu cả.
+**Bước 2 — 5 góc (descriptive từ R3 audit `h3_baseline_R3.csv` + panel `dc_dbl_panel.csv`, single-cache):**
+1. **Sizing/depth-weight: KHÔNG còn không gian** — đã bị bác 2 lần độc lập (tilt STRONG 1.5× kém EW, job
+   _093329 §4; DQS composite liên tục FAIL vs binary, job _092636). Không test lần 3 cùng giả thuyết.
+2. **✓✓ làm tiebreaker/boost trong core BAL/LAG: KHÔNG có bề mặt** — đo thật: BAL 2047 entries chỉ 53 (2.6%)
+   thuộc universe lens 16 tên, chỉ **8 (0.39%)** có ✓✓ ON tại entry; LAG 5360 entries → 9 (0.17%). Ràng buộc
+   là COVERAGE lens (16 tên) chứ không phải priority; mở rộng lens = chương trình sector-sweep riêng (sweeps
+   #1-9 đã kết luận lens = tilt, không standalone).
+3. **CRISIS/BEAR coverage: có tín hiệu (618 ngày ✓✓, 16 block 2015-2024) nhưng KHÔNG test** — production cố ý
+   giữ cash ở đó (insurance mandate); bài học state-gate §8.3-8.4 (mean-reversion book trong washout); CAPIT
+   gated-overflow đã chiếm slot bear-washout mà chỉ có 18 event lịch sử → ✓✓-filter cho CAPIT không đủ power
+   cho wire-decision. Để lại như observation, không mở trial.
+4. **Sector-lens standalone cho core books: KHÔNG** — DQS đã trả lời: trục A (self-referential lens) IC 1M
+   chỉ 0.027 đứng riêng; sức mạnh nằm ở AND-tail với 8L. Không test thêm.
+5. **Chi phí cơ hội + TRIGGER GAP (phát hiện chính):** ✓✓ tồn tại 71.8% ngày NEUTRAL (1373/1912). Trigger
+   binary của paper (`bal_lag_has_deal` → sleeve FLAT toàn phần) khác HẲN spec overlay đã backtest & pin
+   (DC chạy liên tục trên phần tiền park): 57.8% ngày NEUTRAL-có-✓✓ có deal BAL/LAG mới (proxy TX-buy;
+   n_lag_upcoming thực còn fire sớm hơn → số thực CAO hơn), tiền park những ngày đó vẫn ~38% NAV → paper
+   bỏ **53.1% capital-days** so spec, kèm ~31 vòng whipsaw/năm.
+**Bước 3 — backtest trigger-gap (N khai báo = 2: binary+TC, binary-noTC; script `dc_trigger_gap_backtest.py`,
+output `data/dc_trigger_gap_output.txt`; self-check A identity 0 VND PASS, self-check C continuous tái lập
+CÂU 0 chính xác 27.56/1.77; deal-day proxy lạc quan cho binary; flat modeled = park về custom30V — nếu flat
+= cash thật như paper accounting thì binary còn tệ hơn):**
+| config (full-NAV overlay R3 @50B, single-cache 07-07) | FULL | IS | OOS | MaxDD | Calmar | turn sleeve |
+|---|---|---|---|---|---|---|
+| R3 baseline (custom30V parking) | 27.35% | 26.75% | 27.94% | −17.6% | 1.55 | ~0 |
+| **CONTINUOUS spec (đã pin, job _173317)** | **27.56%** | 26.55% | 28.54% | **−15.5%** | **1.77** | 3.18×/yr |
+| **BINARY trigger (paper wire) +whipsawTC** | **27.26%** | 26.61% | 27.89% | **−17.8%** | **1.53** | **20.72×/yr** |
+| BINARY noTC (diagnostic) | 28.00% | 26.93% | 29.03% | −17.5% | 1.60 | — |
+**Đọc:** binary-với-TC THUA CẢ BASELINE mọi metric (edge-capture = **−43%**); riêng whipsaw TC ăn 0.74pp/yr.
+Kể cả miễn phí giao dịch, binary vẫn mất sạch cải thiện DD/Calmar (−17.5/1.60 vs −15.5/1.77) — mà DD/Calmar
+chính là value proposition đã pin của waterfall (CAGR chỉ +0.19pp, DSR 0.111 insurance-grade). Per-year:
+continuous thắng binary 2023/2024/2025 (+1.5/+1.9/+3.2pp) — các năm deal-flow dày.
+**Bước 4 — VERDICT: paper sleeve hiện tại KHÔNG khai thác hiệu quả cơ chế ✓✓ — không phải vì thiếu ý tưởng
+tín hiệu mới, mà vì TRIGGER BINARY under-implement chính spec đã backtest.** Nếu wire live nguyên trạng
+trigger này = net-ÂM vs parking thường. 4 góc "ý tưởng mới" còn lại đều KHÔNG có không gian thật (đã bác/
+không bề mặt/không power). **Đề xuất cho mốc review event-anchored (~sau LAG refill + settle):** gói wire
+ĐÚNG SPEC gồm (1) **trigger continuous-residual** (DC nhận phần idle-cash còn lại sau BAL/LAG lấy phần của
+mình, không all-or-nothing) — đây là fix quan trọng nhất, (2) refresh q2m5 thống nhất (turnover 3.18→0.76×,
+tự giảm luôn whipsaw), (3) cap gộp 0.15 + floor 3B (risk-control đã đo job _042827). Paper trial hiện tại
+GIỮ NGUYÊN chạy tới review — chính cửa sổ LAG-refill sắp tới sẽ phô bày hành vi whipsaw của trigger binary
+trên dữ liệu sống, đúng thứ mốc review event-anchored cần quan sát. KHÔNG wire gì bây giờ; DSR mechanism
+không đổi (0.775 sleeve / 0.111 full-NAV — insurance, không phải alpha).
+**Files:** `dc_trigger_gap_backtest.py`, `data/dc_trigger_gap_output.txt`. N-ledger job này: 2/2 đóng.
