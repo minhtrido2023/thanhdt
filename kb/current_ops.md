@@ -738,3 +738,16 @@ approved_by giống requires_user_approval, thêm 2 selfcheck case, verify lại
 
 **Gate có hiệu lực từ cron 09:05 sáng 07-14** — từ nay plan `req=true` phải có `approved_by` thật
 trước giờ chạy, không thì bot tự chối + alert (đúng ý user yêu cầu, khớp cron second-chance 23:00).
+
+## Hardening approval gate: normalize approved_by string 'None'/'null'/'nil'/'nan' = chưa duyệt XONG (commit 54d488c, 2026-07-13)
+Vá lỗ hổng residual quant-skeptic tìm thấy — `approval_block_reason()` giờ coi các chuỗi
+lowercase `{none,null,nil,nan}` là approved_by trống → BLOCK. Selfcheck 19/19 PASS (file gốc 17
+check chứ không phải 16 như dự kiến, đính chính) + regression 6/6 PASS. quant-skeptic CONFIRMED
+(high) — tự tái lập false-negative pre-fix, xác nhận không false-block approver thật.
+
+**Chuỗi việc hôm nay đã khép kín hoàn toàn (đều quant-skeptic CONFIRMED):**
+1. Plan ZaloPay 07-13 duyệt + thực thi đúng giờ.
+2. Cron `send_plan_report.sh --second-chance` 23:00 ICT — đã cài, chống tái diễn "plan sửa sau
+   21:00 không được gửi lại duyệt" (commit `4216295`).
+3. Code-gate approval cứng trong `bot_execute.py` (commit `27e1282`) + hardening residual
+   (commit `54d488c`) — có hiệu lực từ cron 09:05 sáng mai 07-14.
