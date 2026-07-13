@@ -452,8 +452,8 @@ class Executor:
             if q is None or not q.ok():
                 return False
             extreme_down = self._extreme_regime(o, q, now)
-            if extreme_down and o.side == "buy":
-                return False  # sẽ chuyển EXTREME_PAUSE (không đặt gì) — khác hẳn, phải huỷ
+            if o.side == "buy" and (extreme_down or self._floor_guard_buy(o, q)):
+                return False  # sẽ EXTREME_PAUSE / EXTREME_FLOOR_GUARD (không đặt gì) — khác hẳn, phải huỷ
             cross, _ = self._decide_cross(o, now, q)
             if extreme_down:
                 cross = True
@@ -651,6 +651,29 @@ class Executor:
         except Exception:
             return False
 
+    def _floor_guard_buy(self, o, q):
+        """Poll-1 floor-proximity BUY guard — đóng lỗ hổng PNJ (job Taylor_20260713_075836):
+        2-poll confirm của `_extreme_regime` cố ý trễ 1 lần đánh giá, nhưng slice MUA đầu
+        tiên vẫn được đặt trong cửa sổ đó; với NAV nhỏ (lệnh ≤ max_child_value = 1 slice)
+        toàn bộ lệnh khớp tại sàn TRƯỚC khi gate arm — và vì đã có open child, gate không
+        bao giờ được đánh giá lại cho lệnh đó.
+
+        Guard này STATELESS (chỉ đọc quote hiện tại, không đếm, không cooldown, không đụng
+        `_extreme_state`) và CHỈ chặn chiều MUA: cận-sàn là fact cứng từ quote (floor là
+        ranh giới tuyệt đối), 1 quote lỗi chỉ làm trễ slice mua 1 chu kỳ (20s–8p) — không
+        đặt lệnh sai giá, không kích sell-to-floor. Trigger (ii) 3-sigma (nhiễu thật) vẫn
+        giữ nguyên 2-poll qua `_extreme_regime`. Fail-safe: thiếu floor/last → False.
+        Gated bởi extreme_regime_enabled (paper `main` only) — LIVE byte-identical."""
+        if not self.cfg.get("extreme_regime_enabled", False):
+            return False
+        try:
+            last = q.last or q.ref
+            floor = q.floor if (q.floor and q.floor > 0) else None
+            return bool(floor and last and last > 0
+                        and last <= floor * (1 + self.cfg.get("extreme_band", 0.03)))
+        except Exception:
+            return False
+
     def _extreme_slice_mult(self, o, now):
         """1.0 bình thường; extreme_slice_mult khi mã đang active EXTREME (rút ngắn nhịp
         cancel/reprice để đuổi kịp sổ lệnh tụt). Đọc state đã armed, KHÔNG gọi quote lại."""
@@ -688,6 +711,14 @@ class Executor:
             extreme_down = self._extreme_regime(o, q, now)
             if extreme_down and o.side == "buy":
                 self._journal("EXTREME_PAUSE", o, note="EXTREME_DOWN → tạm dừng mua, T+1 re-sync")
+                continue
+            if o.side == "buy" and not extreme_down and self._floor_guard_buy(o, q):
+                # đóng cửa sổ poll-1: chặn slice mua NGAY khi quote cận sàn, không chờ
+                # 2-poll confirm (xem _floor_guard_buy); _extreme_regime ở trên đã đếm
+                # poll này nên nếu cận-sàn là thật, gate sẽ arm bình thường ở poll kế.
+                self._journal("EXTREME_FLOOR_GUARD", o,
+                              note="quote cận sàn (fact cứng) → chặn slice mua từ poll 1, "
+                                   "thử lại chu kỳ sau")
                 continue
             cross, dip_note = self._decide_cross(o, now, q)
             if extreme_down:                 # o.side == "sell" (buy đã pause ở trên)
