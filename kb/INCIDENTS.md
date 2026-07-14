@@ -13,6 +13,36 @@ commit hash where one exists).
 
 ---
 
+## 2026-07-14 — ZaloPay mất plan ngày 07-14: dispatch DollarBill timeout ×2, attempt 2 chỉ được nửa thời gian
+
+**What happened.** `send_plan_report.sh` 21:00 + second-chance 23:00 (07-13) đều báo
+plan ZaloPay T+1 chưa sẵn sàng; `ops_health_check` 08:20 sáng 07-14 flag 2 question
+`plan-t1-not-ready-ZaloPay` chưa answer. Truy vết (job `Winston_20260714_012012`): dispatch
+`DollarBill_20260713_120124` (lập plan ZaloPay) **timeout cả 2 attempt** (exit 124), trong
+khi job SpaceX song song (`DollarBill_20260713_120125`) hoàn thành sau ~12 phút. Hệ quả:
+ZaloPay không có plan 07-14 — bot 09:05 tự bỏ qua an toàn (verified `bot_execute.py`:
+không có plan → skip, không đặt lệnh), nhưng account mất 1 phiên giao dịch.
+
+**Root cause.** Hai tầng: (1) phiên DollarBill treo từ đầu — log attempt-2 RỖNG 0 dòng,
+không output nào; pattern lặp lại từ 07-06 (dispatch ZaloPay từng treo 2 lần y hệt, chưa
+từng root-cause được vì log bị đè). (2) `dispatch.sh` dùng **deadline tuyệt đối chung**
+cho mọi attempt: job ZaloPay deadline = start + 1200s, attempt 1 ăn ~10 phút → attempt 2
+chỉ còn ~10 phút, trong khi job SpaceX cùng loại cần 12 phút — attempt 2 gần như không có
+cửa thành công kể cả khi không treo. Logfile dùng chung giữa các attempt nên dấu vết
+attempt 1 bị mất.
+
+**Fix.** Escalation chain hoạt động đúng thiết kế (21:00 → 23:00 → 08:20, đúng policy
+KHÔNG tự re-dispatch, human-in-the-loop). Winston nhắc user khẩn qua Telegram 08:25 +
+Trading Daily, post `answer` đóng 2 question với chẩn đoán + 2 option (re-dispatch hoặc
+bỏ qua phiên — transition đã xong 5/5 ngày 07-13 nên plan hôm nay khả năng chỉ HOLD/drift
+nhỏ). KHÔNG sửa code trong lượt (dispatch-infra thuộc Wags/Mike).
+
+**Lesson.** (1) Dispatch lập plan cho 2 account nên coi attempt 2 là retry ĐẦY ĐỦ thời
+gian, không phải phần thừa của deadline cũ; (2) logfile phải tách theo attempt để còn
+root-cause được treo-không-output; (3) DollarBill-ZaloPay treo đã tái diễn ≥2 lần
+(07-06, 07-13) — cần Wags điều tra một lần dứt điểm thay vì mỗi lần chỉ ghi nhận.
+Trace: bus `Winston_20260714_012012`, job record `DollarBill_20260713_120124.json`.
+
 ## 2026-07-13 — DT5G refresh thứ Sáu 07-10 KHÔNG chạy: dời giờ cron cùng ngày rơi đúng khe hở giữa slot cũ và slot mới
 
 **What happened.** Checker `ops_health_check` (11:52 ICT thứ Hai 07-13) cảnh báo
