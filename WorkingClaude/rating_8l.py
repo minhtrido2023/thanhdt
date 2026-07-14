@@ -94,7 +94,7 @@ SELECT t.ticker, t.ICB_Code,
   t.CF_OA_P0, t.CF_OA_P1, t.CF_OA_P2, t.CF_OA_P3,
   t.NP_P0, t.NP_P1, t.NP_P2, t.NP_P3,
   t.PB, t.PE, t.PCF, t.EVEB, ROUND(SAFE_DIVIDE(t.PB-t.PB_MA5Y, NULLIF(t.PB_SD5Y,0)),2) AS pb_z,
-  t.Close, t.Price, t.OShares,
+  t.Close, t.Price, t.OShares, t.Dividend_Min3Y,
   ROUND(t.Trading_Value_1M_P50/1e9,2) AS liq_bn,
   ROUND((SAFE_DIVIDE(t.Close,t.HI_3M_T1)-1)*100,1) AS drop_pct
 FROM tav2_bq.ticker_1m AS t, L
@@ -484,6 +484,16 @@ def main():
     out["ps"] = np.where((_ttm_rev > 0) & out["OShares"].notna() & out["Close"].notna(),
                          (out["Close"] * out["OShares"] / _ttm_rev), np.nan)
     out["sales_yield"] = np.where(out["ps"] > 0, (1.0 / out["ps"]).round(4), np.nan)
+    # DIVIDEND yield = Dividend_Min3Y (VND/sh, MINIMUM cash dividend over 3Y, event-based from VCI ex-dates)
+    # / unadjusted Price. Validated 2026-07-14 (job Taylor_20260714_033021, dividend_upgrade_test.py): the
+    # NEW event-based Dividend_Min3Y lifts usable-signal coverage from 26% (old sparse DY>0) to ~98% and is
+    # a genuinely ORTHOGONAL value lens — xsec rank-corr vs 1/PE only 0.18, residual IC +0.031 IS/+0.030 OOS
+    # (t2.4/1.7) vs profit_3M, and (unlike the old DY it replaces, which SIGN-FLIPPED IS -0.061/OOS +0.029)
+    # it is SIGN-STABLE positive both segments (+0.033 IS / +0.055 OOS). Non-payer -> Dividend_Min3Y=0 ->
+    # div_yield=0 (valid lowest-yield rank, NOT NaN); truly-missing -> NaN (coverage-aware abstain). Weighted
+    # ONLY under VALUE_VERSION=v3_div (weight 0 else) — value axis, does NOT touch the 8L quality rating (1-5).
+    out["div_yield"] = np.where((out["Price"] > 0) & out["Dividend_Min3Y"].notna(),
+                                (out["Dividend_Min3Y"] / out["Price"]).round(4), np.nan)
     # EVEB yield = 1/(EV/EBITDA) — value lens PRE-depreciation. For capital/D&A-heavy names heavy
     # depreciation depresses reported earnings so 1/PE understates cheapness; EBITDA (pre-D&A) is cleaner.
     # Computed for ALL names but weighted ONLY for D&A_HEAVY/POWER under VALUE_VERSION=v3_da (weight 0 else).
@@ -505,7 +515,7 @@ def main():
 
     cols = ["ticker","route","rating","core_score","stab","moat","note","redflag",
             "ROIC3Y","ROIC_Min3Y","ROE_Min3Y","ROE_Trailing","ROE3Y","ROIC_Trailing","neg_q","ROE_Min5Y","ROIC_Min5Y","STLTDebt_Eq_P0","Debt_Eq_P0","cfo_np","FSCORE","GPM_P0",
-            "PB","pb_z","PE","earn_yield","cfo_yield","cfo_normy","sales_yield","eveb_yield","cf_peak","proven5y","CF_OA_3Y","ROE5Y","drop_pct","liq_bn","ICB_Code"]
+            "PB","pb_z","PE","earn_yield","cfo_yield","cfo_normy","sales_yield","eveb_yield","div_yield","Dividend_Min3Y","cf_peak","proven5y","CF_OA_3Y","ROE5Y","drop_pct","liq_bn","ICB_Code"]
     out = out[cols].sort_values(["route","rating","core_score"], ascending=[True,True,False])
     os.makedirs(os.path.join(WORKDIR,"data"), exist_ok=True)
     path = os.path.join(WORKDIR,"data","rating_8l.csv")
@@ -648,8 +658,21 @@ def main():
     # re-weighted (15 D&A_HEAVY + 4 POWER); all production selectors (custom30V/BAL/LAG) read gate_rating<=3
     # off fa_ratings_8l.rating, NOT value_score/zone -> ZERO NAV impact. Old "v3" (pre-promotion, byte-
     # identical to v2 on the D&A_HEAVY/POWER routes) is retained for rollback: set VALUE_VERSION=v3.
+    # v3_div (opt-in, 2026-07-14) is a SUPERSET of v3_da: same routes/EVEB, PLUS a modest dividend-yield
+    # lens (div_yield). Default stays v3_da until user-approved. div lens weight ~0.15 was chosen from a
+    # walk-forward weight sweep (dividend_upgrade_test.py): adding div at 0.10-0.25 is a PARETO improvement
+    # of the ey+div composite IC (IS +0.0096->+0.016, OOS +0.1057->+0.110 — BOTH up, no OOS dilution below
+    # ~0.35). Coverage-aware, so a non-payer just gets the lowest div-rank and ey/cfy/ps carry.
+    # Deliberately a value-LENS, NOT a golden-floor gate: the gate test (dividend_upgrade_test.py) is
+    # NEGATIVE — golden & non-payer match golden & payer on mean fwd-3M (payer only mildly better win-rate
+    # + tail p10), so requiring a 3Y dividend track-record does NOT add to ROE_Min3Y>=0 & CF_OA_3Y>0. The
+    # signal's value is as a persistent (99% m/m) orthogonal (corr 0.18 vs 1/PE) cheapness lens, and its
+    # edge over the OLD DY it replaces is SIGN-STABILITY: old DY IC sign-flipped (IS -0.061 / OOS +0.029,
+    # why it was rejected), Dividend_Min3Y is +0.033 IS / +0.055 OOS. NB the event-based vs old financial-
+    # estimate _fin level diff is ~0 (median 0%); the gain is the dense min-3Y form + point-in-time ex-dates.
     VALUE_VERSION = os.environ.get("VALUE_VERSION", "v3_da").lower()
-    _DA = (VALUE_VERSION == "v3_da")
+    _DA = (VALUE_VERSION in ("v3_da", "v3_div"))   # v3_div inherits the D&A_HEAVY/POWER + EVEB machinery
+    _DIV = (VALUE_VERSION == "v3_div")
     def _route_pct_raw(col):
         rr = scr.groupby("route")[col].transform(
             lambda g: g.rank(pct=True) if g.notna().sum() >= 5 else pd.Series(np.nan, index=g.index))
@@ -668,6 +691,7 @@ def main():
     scr["cfy_pct"] = _route_pct_raw("cfy_input")
     scr["ps_pct"]  = _route_pct_raw("sales_yield")
     scr["eveb_pct"] = _route_pct_raw("eveb_yield")   # only weighted for D&A_HEAVY/POWER under v3_da (else w=0)
+    scr["dy_pct"]   = _route_pct_raw("div_yield")    # only weighted under v3_div (else column dropped, w=0)
     scr["golden_cell"] = (scr["pb_z"] <= -1).astype(float)
     def _is_consumer(c): return pd.notna(c) and ((3500 <= c < 3800) or (5300 <= c < 5400))
     # CYCLICAL ps=0 (audit 2026-06-20: PS in cyclical IC +0.053 t1.1 NOT sig, redundant ⟂ey,cfy (t0.2),
@@ -683,8 +707,17 @@ def main():
         if r["route"] == "COMPOUNDER" and _is_consumer(r["ICB_Code"]): return "RETAIL"
         return r["route"]
     scr["val_route"] = scr.apply(_val_route, axis=1)
-    P = scr[["ey_pct","cfy_pct","ps_pct","eveb_pct"]].to_numpy()      # N x 4 (eveb only weighted under v3_da)
-    Wm = np.array([VR_W.get(vr, VR_W["COMPOUNDER"]) for vr in scr["val_route"]])  # N x 4
+    _lens_cols = ["ey_pct","cfy_pct","ps_pct","eveb_pct"]
+    if _DIV:
+        # append dividend lens as a 5th column with a modest per-route weight. CYCLICAL keeps div=0 (cyclical
+        # cash/dividends are lumpiest and cfy already leads there); yield-relevant routes get 0.15. Coverage-
+        # aware add: effective ~0.15/(Σpresent) ≈ 13%, matching the Pareto-improving sweep band.
+        _DIV_W = {"COMPOUNDER": .15, "CYCLICAL": .00, "RETAIL": .15, "D&A_HEAVY": .15, "POWER": .15}
+        VR_W = {rt: w + (_DIV_W.get(rt, .00),) for rt, w in VR_W.items()}
+        _lens_cols = _lens_cols + ["dy_pct"]
+    P = scr[_lens_cols].to_numpy()                                    # N x 4 (or N x 5 under v3_div)
+    _defW = VR_W["COMPOUNDER"]
+    Wm = np.array([VR_W.get(vr, _defW) for vr in scr["val_route"]])   # matches P width
     present = ~np.isnan(P)
     num = np.nansum(np.where(present, P*Wm, 0.0), axis=1)
     den = np.nansum(np.where(present, Wm, 0.0), axis=1)
@@ -719,7 +752,7 @@ def main():
     # onto the composite (VALUE_VERSION read early above; go-live v3 2026-06-19, set v2 to fall back).
     _v3routes_list = ["COMPOUNDER","CYCLICAL","RETAIL"] + (["D&A_HEAVY","POWER"] if _DA else [])
     _v3routes = scr["val_route"].isin(_v3routes_list)
-    if VALUE_VERSION in ("v3","v3_da"):
+    if VALUE_VERSION in ("v3","v3_da","v3_div"):
         scr["value_score"] = scr["value_score_v2"].where(~_v3routes, scr["value_score_v3"]).round(3)
         print(f"  [VALUE_VERSION={VALUE_VERSION}] composite on {_v3routes.sum()} {'/'.join(_v3routes_list)} names; "
               f"{(~_v3routes).sum()} others keep v2")

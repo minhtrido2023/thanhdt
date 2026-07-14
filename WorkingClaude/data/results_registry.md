@@ -3040,3 +3040,34 @@ beta PIT prior-quarter, không dùng profit_* làm filter.
 - **Số (sorted, chính thức)**: control 27.65/1.83/−18.3/1.51 (IS 23.37/OOS 31.70); D1 +0.17pp FULL, D2 +0.19pp, D3 −0.02pp; IS identical 23.37 cả 4 (dormant). Benign identity: D1/D2 trùng NAV 2.267 phiên tới đúng 2023-02-07, D3 3.012 phiên tới đúng 2026-01-28.
 - **Verdict**: D1/D2 NO-GO ở **N1** (toàn bộ phần thắng = 2023-02→04 nơi Pillar A active/redundant 100%, nằm trong cửa sổ loại trừ; episode ngoài cửa sổ sleeve −1.29/−0.92pp) + G2/G3/G4 fail. D3 NO-GO ở **G2** (incremental thuần = 2 episode chu kỳ 2025-26, cả 2 tốn tiền −1.29pp, VNINDEX fwd60 DƯƠNG sau de-risk; ep 2026-06 truncated/đang diễn ra). **2017 false-positive KHÔNG bind** (fire 126 phiên nhưng DT5G published NEUTRAL cả năm → tier mild cap-NEUTRAL gần như vô hiệu lịch sử; dự đoán N2 pre-registered sai theo hướng informative). DSR non-informative (deviate 30-70 phiên) — khai báo trước, không ép số.
 - **Treo**: G5 quant-skeptic verify CẢ CỤM D0-D3 một lần (artifacts `mike/agents/Taylor/exp_depgate/`).
+
+## 2026-07-14 — DIVIDEND_MIN3Y (event-based, VCI ex-dates) → 8L value lens — job Taylor_20260714_033021 — GO opt-in (VALUE_VERSION=v3_div), DIAGNOSTIC-ONLY, production/paper KHÔNG đụng
+**Câu hỏi user:** BQ có field cổ tức mới (event-based Dividend_Min3Y, phủ +~45%) — có giúp 8L đánh giá từng cổ phiếu tốt hơn không?
+**Verdict: CÓ, tích hợp làm value-LENS opt-in (KHÔNG phải gate). Zero NAV impact (giống D&A_HEAVY).**
+
+Artifacts: `dividend_upgrade_test.py` (repo root), panel `mike/agents/Taylor/exp_dividend/panel_monthly.csv`
+(36,408 rows, ticker_prune 2014-01→2026-06, point-in-time monthly, Dividend_Min3Y as-of mỗi ngày), `ic_table.csv`.
+Interpreter: `/home/trido/thanhdt/wc_venv/bin/python`. Forward cols profit_1M/2M/3M = TRAINING/eval-only (đúng phép dùng cho IC).
+
+**1. Coverage (monthly panel):** DY_old>0 = **26.9%** → Dividend_Min3Y usable (payer+non-payer=0) = **98.2%** (div>0 60.9%, =0 36.7%, null 1.8%). Con số "+45%" của dispatch thực ra UNDERSTATE.
+  - ⚠️ Đính chính quan trọng: so với legacy financial-estimate `Dividend_Min3Y_fin` (BQ), event-based khác biệt LEVEL ~0 (median rel-diff 0%, mean 0.4%), và _fin còn phủ nhỉnh hơn (1283 vs 1190 tên latest-Q). Cú nhảy 27→98% là do đổi sang DẠNG min-3Y dày (thay field DY điểm sparse), + độ chính xác point-in-time ex-date cho backtest — KHÔNG phải coverage/level thắng lớn so _fin.
+
+**2. IC (cross-sectional Spearman, per-date avg, IS 2014-19 / OOS 2020-26):**
+| signal (vs profit_3M) | IS_IC (t) | OOS_IC (t) | sign-stable? |
+|---|---|---|---|
+| real_dy = Dividend_Min3Y/Price | +0.033 (2.6) | +0.055 (2.8) | ✅ dương cả 2 |
+| DY_old (field cũ, đã bị bác) | **−0.061 (−4.0)** | +0.029 (2.4) | ❌ SIGN-FLIP (lý do bị loại trước) |
+  → Data mới BIẾN 1 tín hiệu sign-unstable (đã reject) THÀNH sign-stable dương. Đây là câu trả lời trực tiếp "data mới có giúp không": CÓ.
+
+**3. Orthogonality vs 1/PE (earn_yield, factor value trội):** xsec rank-corr = **0.18** (gần orthogonal). Residual IC của real_dy sau khi neutralize earn_yield: **+0.031 IS (t2.4) / +0.030 OOS (t1.7)** vs profit_3M → thêm info thật, không redundant.
+
+**4. Weight sweep (composite ey+w·div, IC vs profit_3M):** PARETO improvement — IS +0.0096→+0.016, OOS +0.1057→+0.110 (CẢ 2 tăng, no OOS dilution tới ~w0.35; w0.50 mới bắt đầu loãng OOS). Chọn **w=0.15** (an toàn giữa dải).
+
+**5. Golden-floor GATE test = NEGATIVE (không nới rule 'DY chỉ bonus, không gate'):** golden & payer vs golden & NON-payer, mean fwd-3M gần bằng nhau (OOS 4.21 vs 4.35 — non-payer còn NHỈNH hơn); payer chỉ hơn nhẹ win-rate (53.4 vs 50.6%) + tail p10 (−18.0 vs −22.4). ⇒ đòi track-record cổ tức 3Y KHÔNG add cho ROE_Min3Y≥0 & CF_OA_3Y>0. Giữ là LENS, tuyệt đối KHÔNG làm hard gate.
+
+**6. Bản chất = QUALITY/STABILITY proxy, không phải timing:** div_payer persistence m/m **99.1%**, real_dy autocorr **0.963** — đặc trưng chậm/bền, đúng giả thuyết dispatch. SOE caveat (VEA/QTP/SJD/TVD/IDC top-yield, cổ tức theo chính sách nhà nước) có thật nhưng IC tổng vẫn dương sign-stable + chỉ là lens 0.15 trên value axis (bị pha loãng), không đủ để bác.
+
+**Implementation (rating_8l.py, opt-in):** `VALUE_VERSION=v3_div` = SUPERSET của v3_da (giữ nguyên D&A_HEAVY/POWER+EVEB) + lens div_yield (Dividend_Min3Y/Price, coverage-aware, non-payer→div_rank thấp nhất, truly-missing→NaN). Per-route weight 0.15 (CYCLICAL=0). Default GIỮ v3_da tới khi user duyệt.
+**🐛 BUG BẮT ĐƯỢC + FIX (nhờ verify, không tin comment):** phiên trước để sót — dòng gán value_score gate ở `VALUE_VERSION in ("v3","v3_da")` BỎ SÓT "v3_div" → v3_div âm thầm fallback về value_score_v2 (60/61 tên v3-route), lens cổ tức bị VỨT. Fixed (thêm "v3_div"). Sau fix: value_score==value_score_v3 cho 61/61.
+**Self-check (giống promotion D&A_HEAVY):** rating(1-5) v3_da vs v3_div **BYTE-IDENTICAL 0/107** → value-axis ONLY, production selectors (custom30V/BAL/LAG) đọc gate_rating≤3 off rating → **ZERO NAV impact**. Default v3_da vs backup trước-đổi: rating 0/785 khác. Div lens dịch value_score 46/107 (max|Δ|0.091), zone shift 22/107 — vừa phải, đúng lens 0.15.
+**Không backtest CAGR/Sharpe** vì (như D&A_HEAVY) selector không đọc value_score — đây là trục rating/diagnostic. Muốn wire vào selector là quyết định KHÁC, cần N-budget + backtest riêng.
