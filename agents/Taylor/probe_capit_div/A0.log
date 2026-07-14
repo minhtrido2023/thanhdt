@@ -1,0 +1,10 @@
+====================================================================================================
+  V2.3A (allocator + CAPIT) + maturity:postbull + edge-cond-allocator(thr4%) — FULL AUDIT SIMULATION 2014-01-02 -> 2026-06-19
+  NAV=50B (25B BAL + 25B LAG)   state=tav2_bq.vnindex_5state_dt5g_live
+  PARK vehicle=custompitg  parking policy (cash_etf_states) {3: 0.7}
+  combine=allocator ON {1: 0.5, 2: 0.0, 3: 0.65, 4: 0.65, 5: 0.65} band ±10pp   CAPIT=ON
+  fills=T+1 Open (BQ-auditable, no intraday)   -> v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_capdiv_a0.csv
+====================================================================================================
+
+[2] Loading v11 signals + Release_Date + 5-state + overheat + D1...
+[BQ_LOCAL_CACHE] init failed: BQ local cache not verified — run sync_bq_cache.py first — falling back to real BQ
