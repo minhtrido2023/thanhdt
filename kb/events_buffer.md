@@ -2569,3 +2569,6 @@
 - [2026-07-14T06:47:26Z] Mafee/heartbeat — Mafee_20260714_064324: {"status": "still_running", "elapsed_min": 4, "job_id": "Mafee_20260714_064324", "source": "watcher"}
 - [2026-07-14T06:48:27Z] Mafee/heartbeat — Mafee_20260714_064324: {"status": "still_running", "elapsed_min": 5, "job_id": "Mafee_20260714_064324", "source": "watcher"}
 - [2026-07-14T06:49:27Z] Mafee/heartbeat — Mafee_20260714_064324: {"status": "still_running", "elapsed_min": 6, "job_id": "Mafee_20260714_064324", "source": "watcher"}
+
+## Consolidation 2026-07-14T06:49:55Z
+- [2026-07-14T06:49:45Z] Mafee/finding — dcf-pha2-echo-executor: {"job": "Mafee_20260714_064324", "status": "DONE", "summary": "Pha 2 DCF echo vào execution audit trail", "changes": {"trading_bot/plan.py": "+ dcf_check: dict = None, dcf_override_reason: str trong PlannedOrder (auto-loaded qua known-field filter đã có)", "trading_bot/executor.py": "+ dcf_check vào state[parents][order_id]; + bus event finding/dcf-rich-fill trong _sync_fills khi BUY+RICH+robust=True"}, "selfcheck": "dcf_check_selfcheck.py 8/8 PASS", "backward_compat": "plan cũ không có dcf_check: dcf_check=None, không event, không lỗi", "constraint": "KHÔNG gate, KHÔNG chặn lệnh — chỉ echo+log audit trail"}
