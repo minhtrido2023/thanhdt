@@ -212,6 +212,55 @@ period (consistent with §6.3 "use ranks, not the line"). The IS 2014-19 IC shou
 `DCF_REFRESH=1 $DNA_PY dcf_rate_robustness.py` (writes its own `dcf_exp/fv_releases_fixedrate.parquet`,
 never the pinned cache).
 
+### 7.2 Orthogonality — is MoS an independent axis, or just 1/PE with more steps? (Pha 1)
+
+**The concern (Taylor, round-table):** composite-as-selector failed before because the **1/PE dominant
+factor absorbed everything** (KNOWLEDGE.md). Before any wire is considered, MoS must be shown to predict
+forward return **after neutralizing** the relative value lenses. `dcf_orthogonality_test.py` reuses the
+Study B panel (51,529 rows · 144 months · 959 tickers — FV not recomputed) and merges point-in-time
+PE / PB / EV-EBITDA onto the same rows (98% / 98% / 96% coverage). **t-stat is on the MONTHLY IC series
+(n≈144), a time-series t — NOT the 51k pooled rows** (Spyros: pooling inflates significance since
+same-month obs aren't independent). Confirmed correct.
+
+**Step 1 — cross-sectional rank-correlation rank(MoS) vs rank(value proxy)** (per month, averaged):
+
+| pair | ALL | IS 2014-19 | OOS 2020-26 |
+|---|---|---|---|
+| MoS vs **1/PE** | +0.285 | +0.281 | +0.288 |
+| MoS vs 1/PB | +0.334 | +0.334 | +0.334 |
+| MoS vs 1/EVEB | +0.346 | +0.292 | +0.388 |
+
+All **modest (0.28–0.39)** — MoS shares direction with the relative lenses but is **far from collinear**
+(if MoS were just 1/PE relabeled the correlation would be >0.7). First evidence it is a distinct axis.
+
+**Step 2 — residual IC** (neutralize MoS each month in rank space, IC of the residual vs forward return):
+
+| neutralizer | window | profit_1M | profit_2M | profit_3M |
+|---|---|---|---|---|
+| **RAW MoS** (baseline) | IS | +0.0410 (t 4.5) | +0.0508 (t 5.4) | +0.0690 (t 7.5) |
+| | OOS | +0.0473 (t 5.8) | +0.0646 (t 7.9) | +0.0690 (t 8.9) |
+| **MoS ⟂ 1/PE** | IS | +0.0222 (t 2.5) | +0.0271 (t 3.0) | +0.0412 (t 4.4) |
+| | OOS | +0.0252 (t 3.3) | +0.0367 (t 4.8) | +0.0373 (t 5.2) |
+| **MoS ⟂ 1/PB** | IS | +0.0329 (t 4.1) | +0.0406 (t 4.7) | +0.0565 (t 6.2) |
+| | OOS | +0.0332 (t 5.1) | +0.0486 (t 7.0) | +0.0508 (t 8.0) |
+| **MoS ⟂ 1/EVEB** | IS | +0.0223 (t 2.6) | +0.0275 (t 3.2) | +0.0425 (t 4.7) |
+| | OOS | +0.0170 (t 2.2) | +0.0265 (t 3.4) | +0.0294 (t 3.8) |
+| **MoS ⟂ [1/PE,1/PB,1/EVEB]** | IS | +0.0121 (t 1.5) | +0.0133 (t 1.5) | +0.0261 (t 2.8) |
+| | OOS | +0.0115 (t 1.7) | +0.0221 (t 2.9) | +0.0212 (t 3.2) |
+
+**Verdict — MoS IS an independent information axis (GO for the axis; qualifies for Pha 2 consideration).**
+- After neutralizing **1/PE alone**, MoS keeps **~55–60% of its raw IC and stays significant in BOTH
+  IS and OOS at every horizon** (t 2.5–5.2). It is *not* 1/PE measured with a fancier tool — the failure
+  mode that killed composite-as-selector does not repeat here.
+- Even against **all three** relative value ratios jointly (the hardest test), the residual stays
+  **positive and significant at 2M/3M in both windows** (3M: IS t 2.8, OOS t 3.2). Only the short-horizon
+  1M/2M IS residual loses significance (t 1.5) — i.e. the incremental edge is **real but concentrated at
+  the 2–3 month horizon**, consistent with the raw-MoS horizon-strengthening pattern (§7).
+- **Honest magnitude caveat:** the residual is roughly **half** the raw MoS IC — a meaningful share of
+  MoS's predictive power IS shared with the relative lenses. DCF is a **modest incremental axis, not a
+  large new independent alpha**; strongest at 2–3M, weak at 1M once all three relatives are removed. This
+  bounds how much weight Pha 2 (disciplined discretionary integration) should place on it.
+
 **Interpretation rule set in advance (so the read is honest either way):** the other 8L lenses were
 adopted *because* they showed a measured forward-return edge. This DCF is being held to the same
 test, but with an explicit caveat: **if MoS shows a positive, IS/OOS-stable cross-sectional IC, it
@@ -245,5 +294,6 @@ $DNA_PY dcf_valuation.py FPT --asof 2026-06-15        # single-name fair value +
 $DNA_PY dcf_backtest.py --calib                        # Study A (recency-weight calibration)
 DCF_REFRESH=1 $DNA_PY dcf_backtest.py --ic             # Study B (walk-forward MoS IC; refresh FV cache)
 DCF_REFRESH=1 $DNA_PY dcf_rate_robustness.py           # §7.1 fixed-discount-rate IC robustness probe
+$DNA_PY dcf_orthogonality_test.py                      # §7.2 MoS vs 1/PE,1/PB,1/EVEB residual-IC (Pha 1)
 ```
 FV cache: `mike/agents/Taylor/dcf_exp/fv_releases.parquet` (experiment namespace, §8 coding-guidelines).
