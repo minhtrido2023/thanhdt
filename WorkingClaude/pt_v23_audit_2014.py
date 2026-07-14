@@ -219,8 +219,12 @@ _liqsuf = "" if ETF_LIQ == "off" else f"_etfliq{ETF_LIQ}"
 # Basket WEIGHT SCHEME (env BASKET_WT, de-concentration review 2026-06-15): capwt(default, legacy)
 # | ew | namecap | sectorcap. Only affects custom* parking vehicles; capwt == current production.
 BASKET_WT = os.environ.get("BASKET_WT", "capwt").lower()
-assert BASKET_WT in ("capwt", "ew", "namecap", "sectorcap")
+assert BASKET_WT in ("capwt", "ew", "namecap", "sectorcap", "fincap")
 _wt_tag = "" if BASKET_WT == "capwt" else f"_wt{BASKET_WT}"
+# fincap's cap LEVEL is read from env by custom_basket -> it changes the numbers but would have no
+# filename suffix (coding_guidelines §8). Tag it so two cap levels can never collide on one CSV.
+if BASKET_WT == "fincap":
+    _wt_tag += str(int(round(float(os.environ.get("BASKET_FIN_CAP", "0.30")) * 100)))
 # Basket SIZE x CAP sweep (env BASKET_TOPN / BASKET_NAMECAP, C+D review 2026-06-16): top_n members and
 # single-name cap. Defaults = production (30 names, 10% name cap). Only affect custom* vehicles.
 BASKET_TOPN = int(os.environ.get("BASKET_TOPN", "30"))
