@@ -283,34 +283,41 @@ sự cố Taylor 2026-07-01).
 > Realtime risk monitor là **`risk_monitor.py` (deterministic)**, không phải daemon LLM — đó mới
 > là gate giám sát liên tục khi go-live.
 
-## Model routing — Sonnet 5 vs Fable 5 theo độ phức tạp task (thêm 2026-07-06, user yêu cầu)
+## Model routing — ladder 3 tầng theo độ phức tạp task (cập nhật 2026-07-14, user yêu cầu)
 
-`dispatch.sh` giờ nhận `--model NAME` (`sonnet|opus|haiku|fable`, validate ngay khi parse — sai giá
-trị thì exit 1 trước khi có side effect nào). Không truyền → giữ nguyên hành vi cũ (model mặc định
-của CLI). Áp dụng cho cả 2 nhánh (`--bg` và đồng bộ). Native subagent (`Agent(subagent_type=...)`)
-đã có sẵn tham số `model` — không cần sửa gì thêm ở đó.
+`dispatch.sh` nhận `--model NAME` (`sonnet|opus|haiku|fable`, validate ngay khi parse — sai giá trị
+thì exit 1 trước khi có side effect nào). Không truyền → giữ nguyên hành vi cũ (model mặc định của
+CLI). Áp dụng cho cả 2 nhánh (`--bg` và đồng bộ). Native subagent (`Agent(subagent_type=...)`) đã có
+sẵn tham số `model` — áp cùng nguyên tắc khi gọi tay.
 
 **Nguyên tắc: model chọn theo TASK, không phải theo AGENT cố định** — cùng một Taylor lúc thì chạy
-1 query BQ cơ học, lúc thì thiết kế backtest/giả thuyết mới; gắn cứng "Taylor = Fable" sẽ sai một
-nửa số lần. Người quyết định là **Mike, tại thời điểm dispatch**, bằng 3 câu hỏi:
+1 query BQ cơ học, lúc thì thiết kế backtest/giả thuyết mới; gắn cứng "Taylor = model X" sẽ sai một
+nửa số lần. Người quyết định là **Mike, tại thời điểm dispatch**.
+
+**Ladder ưu tiên (SỬA 2026-07-14): Sonnet → Opus → Fable. Ưu tiên Opus/Sonnet; Fable CHỈ cho task
+cực kỳ phức tạp.**
 
 | # | Câu hỏi | YES → |
 |---|---|---|
 | Q1 | Tra cứu/query/check cơ học, có 1 đáp án đúng rõ ràng? | **Sonnet 5** (mặc định, omit `--model`) |
-| Q2 | Cần cân nhắc trade-off, tổng hợp nhiều nguồn, sinh giả thuyết mới, hoặc phản biện/soi lỗi tinh vi? | **Fable 5** (`--model fable`) |
-| Q3 | Chạm production/live-trading thật, chưa có template sẵn để theo? | **Fable 5** bất kể Q1 |
+| Q2 | Phức tạp thường: cân nhắc trade-off, tổng hợp nhiều nguồn, sinh giả thuyết, phản biện/soi lỗi tinh vi, hoặc chạm production chưa có template? | **Opus** (`--model opus`) |
+| Q3 | **CỰC KỲ phức tạp**: thiết kế chiến lược/hệ thống mới từ đầu, backtest đa-giả-thuyết nhiều tầng, verify đối kháng khó nhất — vượt tầm Opus? | **Fable 5** (`--model fable`) — hiếm |
 
-Không chắc → mặc định Sonnet 5 (tiết kiệm, tránh dùng model đắt cho việc thường lệ).
+Không chắc → mặc định Sonnet 5. Việc phức tạp mà lưỡng lự Opus-hay-Fable → chọn **Opus** (Fable chỉ
+khi thực sự vượt tầm). Tránh dùng model đắt cho việc thường lệ.
 
 **Gợi ý xác suất ban đầu theo loại việc** (không phải rule cứng theo tên agent):
-- Sonnet 5: `bq-analyst`, `fleet-scout`, `corp-scanner`, `data-ops` (freshness/pipeline, rule-based),
+- **Sonnet 5**: `bq-analyst`, `fleet-scout`, `corp-scanner`, `data-ops` (freshness/pipeline, rule-based),
   `Mafee` (thực thi plan-bound, không phán đoán), `ops_health_check`/`preflight_check`-style.
-- Fable 5: `Taylor` khi làm R&D/backtest mới/sinh giả thuyết, `quant-skeptic` (bản chất việc là chủ
-  động săn lỗi tinh vi), `DollarBill` khi plan có trade-off không tầm thường, `risk-auditor`/
-  `legal-vn` khi câu hỏi mang tính diễn giải (khác lookup đơn giản).
+- **Opus** (tầng phức tạp mặc định): `Taylor` khi làm R&D/backtest/sinh giả thuyết, `quant-skeptic`
+  (săn lỗi tinh vi), `DollarBill` khi plan có trade-off không tầm thường, `risk-auditor`/`legal-vn`
+  khi câu hỏi mang tính diễn giải (khác lookup đơn giản).
+- **Fable 5**: chỉ khi task thực sự **cực kỳ phức tạp** (thiết kế chiến lược mới toàn diện, chuỗi
+  giả thuyết lớn nhiều tầng vượt tầm Opus) — dùng dè, không phải mặc định cho R&D thường.
 
-Ví dụ: `bin/dispatch.sh Taylor "Thiết kế backtest mới cho sector X, nhiều giả thuyết" --model fable`
-vs `bin/dispatch.sh Taylor "Query PE hiện tại của VNM" ` (omit `--model` → Sonnet 5 mặc định).
+Ví dụ: `bin/dispatch.sh Taylor "Thiết kế lại toàn bộ hệ thống chọn cổ phiếu từ đầu" --model fable --effort high`
+· `bin/dispatch.sh Taylor "Backtest thêm 1 sector cho family có sẵn" --model opus --effort high`
+· `bin/dispatch.sh Taylor "Query PE hiện tại của VNM"` (omit `--model` → Sonnet 5, medium).
 
 **Reasoning-effort per dispatch — `--effort LEVEL` (chính sách user 2026-07-14):** `dispatch.sh` giờ
 nhận `--effort low|medium|high|xhigh|max`, validate lúc parse, ghi vào job record (`effort=`), áp
@@ -321,8 +328,9 @@ cho cả `--bg` lẫn đồng bộ.
 - **Chặn cứng: model `fable` tối đa `high`.** Truyền `xhigh`/`max` cùng `--model fable` sẽ tự clamp
   về `high` + cảnh báo stderr (không bao giờ chạy fable ở xhigh/max). `xhigh`/`max` chỉ dành cho model
   khác (vd `opus`) khi thực sự cần — không phải fable.
-- Ghép với model: Fable+phức tạp → `--model fable --effort high`; Fable+thường → `--model fable`
-  (→ medium); lookup cơ học Sonnet → omit cả hai (→ Sonnet, medium).
+- Ghép với ladder model: lookup cơ học → omit cả hai (**Sonnet, medium**); phức tạp thường →
+  **`--model opus --effort high`**; cực kỳ phức tạp → **`--model fable --effort high`** (fable trần
+  high). `xhigh`/`max` chỉ cân nhắc cho `opus` khi thật sự cần, không cho fable.
 
 ## Tier phản biện — verify finding của Taylor (bắt buộc trước khi wire)
 Mọi finding R&D quan trọng (backtest, đổi config production, claim CAGR/Sharpe) phải qua một
