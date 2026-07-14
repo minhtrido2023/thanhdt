@@ -2440,3 +2440,57 @@
 - [2026-07-14T04:10:47Z] Taylor/heartbeat — Taylor_20260714_040245: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260714_040245", "source": "watcher"}
 - [2026-07-14T04:11:47Z] Taylor/heartbeat — Taylor_20260714_040245: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260714_040245", "source": "watcher"}
 - [2026-07-14T04:12:13Z] Taylor/finding — promote v3_div → DEFAULT trong rating_8l.py (+ fix golden-floor bug thứ 2): {"job": "Taylor_20260714_040245", "verdict": "DONE — promote VALUE_VERSION=v3_div thành DEFAULT (thay v3_da), user-approved. DIAGNOSTIC-ONLY, ZERO NAV impact (rating 1-5 byte-identical 0/785).", "commit": "f4e24b8", "changes": ["default v3_da->v3_div (rollback qua env var: VALUE_VERSION=v3_da)", "docstring cập nhật", "FIX bug thứ 2: golden-floor gate line-783 bỏ sót v3_div -> đã thêm"], "bug_thu_2": "golden-cell FLOOR ở if VALUE_VERSION in (v3,v3_da) BỎ SÓT v3_div (cùng lớp bug line-755 phiên trước). Dưới v3_div golden floor KHÔNG fire: BUY-NOW rơi 46->32, 14 dislocation (VCB/BID/SAB/ACV/VNM/FPT/CTR/VGC/REE/CMG/TV2/VSC/DGC/SZC) mất floor. Promote nguyên trạng = ship regression âm thầm. Fixed: thêm v3_div (superset của v3_da PHẢI kế thừa golden floor).", "dinh_chinh_so": "job 033021 báo zone shift 22/107 BỊ NHIỄM bởi golden-floor bug. Sau fix line-783, zone shift THẬT của div-lens = 7/107 (golden floor fire cả 2 phía).", "selfcheck": {"rating_1_5": "0/785 khác (v3_da-vs-v3_div, default-vs-v3_div, default-vs-ORIG) -> value-axis ONLY -> ZERO NAV impact", "flip_confirmed": "no-env in [VALUE_VERSION=v3_div]+golden floor 15; rollback v3_da in [v3_da]+floor 14; v3/v2 smoke exit 0", "div_lens_scope": "value_score 48/107 (max|d|0.091), zone 7/107 (CTI/VGT/MWG ease; SHS/DCM/VEA/OIL firm up)"}, "nav_impact": "ZERO — custom30V/BAL/LAG đọc gate_rating<=3 off tav2_bq.fa_ratings_8l.rating, không đọc value_score/zone", "registry": "data/results_registry.md mục 2026-07-14 PROMOTE v3_div", "production_paper": "KHÔNG đụng (rating_8l.py chỉ ghi CSV diagnostic local, không ghi BQ table)"}
+
+## Consolidation 2026-07-14T05:07:01Z
+- [2026-07-14T04:26:41Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "in_progress", "note": "bat dau: explore codebase (deposit/cpi/rating_8l + data access)"}
+- [2026-07-14T04:27:23Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T04:28:24Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T04:29:20Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "in_progress", "note": "confirmed CF_OA/CF_Invest/NP = absolute VND; designing FCFE=CFO-capex; checking rating table + ERP data"}
+- [2026-07-14T04:29:25Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T04:30:25Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T04:31:06Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "in_progress", "note": "ERP=7% (empirical VNINDEX TR-deposit ~6.5, Damodaran ~8); writing dcf_valuation.py core lib"}
+- [2026-07-14T04:31:25Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T04:32:25Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T04:33:25Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T04:34:23Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "in_progress", "note": "dcf_valuation.py works; MSH/PVT/HAH flagged neg-FCFE (capex>CFO, correct DCF limitation). Building calibration+IC backtest"}
+- [2026-07-14T04:34:25Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T04:35:25Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T04:36:25Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "in_progress", "note": "running STUDY A recency-weight calibration"}
+- [2026-07-14T04:36:25Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T04:37:26Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T04:38:26Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T04:38:47Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "in_progress", "note": "KEY FINDING A: trailing growth NEGATIVELY predicts next-yr growth (mean reversion, rankIC -0.10 IS/-0.20 OOS); recency-weighting WORSE than equal. Switching to equal-wt + shrink-to-terminal. Now Study B (MoS IC)"}
+- [2026-07-14T04:39:26Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T04:39:32Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "in_progress", "note": "running STUDY B MoS IC walk-forward (this is the decisive test, ~1090 tickers)"}
+- [2026-07-14T04:40:26Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T04:41:24Z] Taylor/status — Taylor_20260714_042622: {"status": "deadline_extended", "hb_age_s": 112, "extension": 1, "max_ext": 3, "source": "watcher"}
+- [2026-07-14T04:41:26Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T04:42:26Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T04:43:27Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T04:44:27Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T04:45:27Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T04:45:48Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "in_progress", "note": "Study B FV loop running (~40K point-in-time valuations), drafting framework doc in parallel"}
+- [2026-07-14T04:46:27Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T04:47:27Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T04:48:27Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T04:49:27Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 23, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T04:50:27Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T04:51:27Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 25, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T04:52:27Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 26, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T04:53:27Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 27, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T04:54:27Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 28, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T04:55:17Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "in_progress", "note": "starting DCF task: env + data discovery"}
+- [2026-07-14T04:55:28Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 29, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T04:56:28Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 30, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T04:57:28Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 31, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T04:58:28Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 32, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T04:59:28Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 33, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T05:00:29Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 34, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T05:00:47Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "in_progress", "note": "calibrated ERP=6.5%,CPI5Y=3.4%,growth mean-reverts(shrink). writing dcf_valuation.py"}
+- [2026-07-14T05:01:29Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 35, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T05:02:29Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 36, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T05:02:56Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "in_progress", "note": "module set ERP=6.5, regenerating FV cache + running walk-forward backtest (Study A+B)"}
+- [2026-07-14T05:03:29Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 37, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T05:04:29Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 38, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T05:05:29Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 39, "job_id": "Taylor_20260714_042622", "source": "watcher"}
+- [2026-07-14T05:06:29Z] Taylor/heartbeat — Taylor_20260714_042622: {"status": "still_running", "elapsed_min": 40, "job_id": "Taylor_20260714_042622", "source": "watcher"}
