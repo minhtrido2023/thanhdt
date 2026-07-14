@@ -3580,3 +3580,98 @@ neo hợp lệ. **Re-pin R3 vẫn TREO** — job này không tự re-pin.
 `fin_weight_{by_quarter,summary}.csv`, `finweight_definitions.csv`, `basket_20260505.md`.
 Code: `custom_basket.py` (nhánh mới `eyfin`/`eyonly`/`fincap`), `v4final_lib.py`,
 `v4final_selector_selfcheck.py`. Chi tiết đầy đủ: `mike/agents/Taylor/route_aware_selector_framework.md` §12.
+
+---
+
+## `v4final` A4 (DY tie-break) + quét cap theo ĐỈNH — **NO-GO CẢ HAI** (2026-07-14, job `Taylor_20260714_152605`)
+
+Nối tiếp job `Taylor_20260714_140127` (§12). Hai câu hỏi ĐỘC LẬP, mỗi arm lệch khỏi neo **A2**
+(`eyonly`) đúng 1 trục. Cùng vintage/config/session: `NAV_TOTAL_B=50 ETF_LIQ=custompitg
+PARK_STATES=3:0.7 AUDIT_END=2026-06-19`, threads=1, `$DNA_PYEXE`. **A2 chạy LẠI trong chính phiên
+này làm neo** (số job 140127 là khác phiên → không phải neo hợp lệ). `EXP_TAG` mọi arm ⇒ §8 an toàn
+(output `..._exp_v4f_*_exp_sel*.csv`, không đụng tên canonical). **self-check 0 VND (BAL+LAG) cả 6 arm.**
+
+| arm | cap | FULL | IS | OOS | Sharpe | MaxDD | Calmar | DD_IS | vs A2 |
+|---|---|---|---|---|---|---|---|---|---|
+| **A2** `eyonly` (neo, rerun) | — | 27.04 | 23.00 | 30.85 | 1.80 | −17.6 | 1.54 | −15.3 | — |
+| **A4** `eyonly`+DY 20:45 | — | **27.04** | 23.00 | 30.84 | 1.82 | **−18.6** | **1.45** | −15.2 | **−0.00** |
+| A3 (job 140127) | 0.30 | 26.40 | 22.45 | 30.12 | 1.75 | −17.6 | 1.50 | — | −0.64 |
+| **C45** | 0.45 | 26.20 | 22.63 | 29.54 | 1.75 | −17.5 | 1.49 | −16.0 | **−0.84** |
+| **C50** | 0.50 | 26.30 | 22.66 | 29.71 | 1.75 | −17.6 | 1.50 | −16.1 | −0.74 |
+| **C55** | 0.55 | 26.72 | 22.84 | 30.37 | 1.78 | −17.6 | 1.52 | −16.1 | −0.32 |
+| **C60** | 0.60 | 26.81 | 22.90 | 30.48 | 1.79 | −17.6 | 1.53 | −16.1 | −0.23 |
+
+**Việc 1 — A4 (DY tie-break dải biên ey 20-45) = NO-GO.** Cơ chế đã kiểm chứng TRƯỚC khi đo
+(`a4_dy_selfcheck.py` **17/17 PASS**): band-only (rank 1-19 bit-identical vs A2 trên 48 rebal),
+**fail-open đúng (140/140 tên không DY>0 giữ NGUYÊN rank)**, permutation-not-recut, OFF-path tái lập
+A2 chính xác, negative control **48/48 rebal ĐỔI thành phần** ⇒ luật không trơ. DY>0 coverage 66.0%
+(950/1440 name-rebal), khớp 70.4% §12.4. Kết quả: **FULL −0.00pp / IS ±0.00 / OOS −0.01** trong khi
+48/48 rebal đổi tên ⇒ **chữ ký reshuffle noise thuần tuý**. Và nó **XẤU ĐI ĐÚNG METRIC nó được mua để
+cải thiện**: MaxDD −17.6 → **−18.6** (toàn bộ ở OOS), Calmar 1.54 → 1.45.
+⇒ **§12.4 (DY-floor cấp TÊN, +2.34pp t=2.37 hit 68%) GIỮ NGUYÊN HIỆU LỰC.** Cái bị bác là **giả định
+ngầm rằng sàn cấp TÊN cộng dồn thành sàn cấp DANH MỤC** — nó không (rổ 30 tên, name_cap 0.10, rebal
+quý ⇒ DD bị **beta thị trường** chi phối). **Cùng cơ chế §12.3** đã tìm ra cho tập trung ngành (cắt
+financial 47%→26% mà DD không nhúc nhích): 2 job độc lập, 2 giả thuyết khác hẳn, **cùng 1 kết luận
+cấu trúc — DD không đến từ thứ nằm trong selector**. A4 đã là biến thể **bảo thủ nhất có thể**
+(tie-break / dải biên / fail-open / không cộng điểm) ⇒ hết đường tích hợp DY vào selector.
+
+**Việc 2 — cap theo ĐỈNH = NO-GO mọi mức 0.45-0.60.** ⚠️ **ĐÍNH CHÍNH THIẾT KẾ:** "cap chỉ kích hoạt
+khi vượt X" và "cap phẳng tại X" là **MỘT** — cap tại X theo định nghĩa không làm gì khi tỷ trọng đã
+dưới X (A3 cũng chưa từng "áp mọi ngày"). Khác biệt duy nhất vs A3 là **MỨC**, không phải cơ chế ⇒
+không code mới, chỉ quét `BASKET_FIN_CAP`. Trả lời 3 câu risk-auditor (đo trên vector tỷ trọng THẬT,
+`cap_peak_check.py`, tái dẫn xuất độc lập qua `v4final_lib`):
+- **(a) Chặn được đỉnh? CÓ về cơ học** — đỉnh uncapped nền A2 = **0.867 ngày / 0.774 quý (2026Q2)**;
+  mọi mức giữ đúng trần (sai số 0). **NHƯNG không mức nào "chỉ chạm đỉnh"**: uncapped mean **0.441**,
+  **median quý 0.466**, p95 0.696 ⇒ cap RÀNG BUỘC 0.45→**53.6%** ngày (26/48 quý) · 0.50→49.0% ·
+  0.55→46.4% · **0.60→34.7% ngày (19/48 quý = 40% mẫu)**. Phân bố nằm NGAY TRONG dải 45-60% được đề
+  xuất làm trần ⇒ **không phải rule đuôi, là ràng buộc thường ngày trên ~1/2 mẫu**. Muốn chạm CHỈ đỉnh
+  2026Q2 phải đặt trần ~0.75-0.80 (gần như không bao giờ ràng buộc ⇒ gần như vô nghĩa). **Điểm thiết kế
+  risk-auditor mô tả — "chặn đỉnh mà hầu như không đụng phần còn lại" — KHÔNG TỒN TẠI trong phân bố này.**
+- **(b) Chi phí 0.23-0.84pp/năm, KHÔNG ĐƠN ĐIỆU**: cap **0.45 đắt hơn (−0.84) cả cap 0.30 (−0.64)** dù
+  LỎNG HƠN hẳn ⇒ không phải đánh đổi risk-return, là **nhiễu đường đi**. **Đừng đọc bảng như đường cong
+  chi phí rồi chọn điểm tối ưu** — thứ tự giữa các mức không có ý nghĩa thống kê (đúng thứ Rule 5 chặn).
+- **(c) MaxDD ĐỨNG YÊN mọi mức** (−17.5/−17.6 vs A2 −17.6) **và DD_IS XẤU ĐI −15.3 → −16.0/−16.1 ở MỌI
+  mức**. Bảo hiểm làm TĂNG chính tổn thất nó được mua để chặn ⇒ không phải bảo hiểm đắt, là phí không
+  mua gì. §12.3 giữ nguyên và **mạnh hơn**: đúng trên **toàn dải 0.30-0.60**, không riêng mức 0.30.
+
+**Khuyến nghị risk-auditor/Spyros — điểm "hiệu quả nhất" KHÔNG tồn tại theo số đo.** Luận điểm còn
+đứng vững (backtest không nói được về sốc đuôi chưa từng xảy ra; **độ trễ cam kết CRISIS của DT5G
+enC=25 phiên** là khoảng trống thật) **không** tạo ra điểm cap tốt trong dữ liệu. Nếu user vẫn muốn
+mua bảo hiểm đuôi theo tuyên bố quản trị → **cap 0.60 rẻ nhất (−0.23pp, trong nhiễu)**, bound đỉnh
+86.7%→60% — nhưng mua **bằng khẩu vị rủi ro, KHÔNG bằng bằng chứng**: (i) ràng buộc 40% mẫu chứ không
+"chỉ đỉnh"; (ii) không cải thiện DD ở bất kỳ đâu + làm DD_IS xấu ~0.8pp; (iii) **đừng tinh chỉnh mức**
+(sẽ fit nhiễu). **Không được mua vì tin backtest cho thấy an toàn hơn — số đo nói NGƯỢC ở cả 5 mức.**
+
+⚠️ **ĐÍNH CHÍNH §12.1 (quan trọng, dễ đọc nhầm):** đỉnh 2026Q2 **82.7% là trên nền A0**; trên nền **A2
+là 77.4% quý / 86.7% ngày** ⇒ **`eyonly` KHÔNG làm giảm tập trung tài chính**. Đừng đọc §12 rồi tưởng
+bước 1+2 đã xử lý xong việc này.
+
+**Lỗi phụ (đo mới thấy, KHÔNG trọng yếu):** `wsum_err` 0.0096 trên MỌI mức cap (uncapped chính xác
+1e-16) ⇒ điều tra (`wsum_leak_diag.py`): **2/2965 ngày (2015-11-03/04)**, đúng ngày rổ chỉ có **1 tên
+tài chính** — `_cap_group_jointly` rescale name-cap theo ngân sách nhóm (0.10/0.30=0.333) rồi áp cho
+nhóm 1 tên buộc sum=1 ⇒ infeasible ⇒ Σw=0.990 (phần thiếu về tiền mặt ảo). ~1% NAV trong 2 phiên/12.5
+năm ⇒ không đổi kết luận nào (và **không** đủ giải thích tính không đơn điệu ở (b) — đó là nhiễu thật).
+`fincap` là code **audit-only**; **nếu sau này wire `fincap` vào production thì PHẢI vá trước**
+(`gcap_eff` phải floor theo cả năng lực nhóm IN, không chỉ nhóm OUT).
+
+**N-ledger (Rule 5):** họ `v4final` tới hết job này = **9 cấu hình** (A0 `yieldcombo` · A1 `eyfin` ·
+A2 `eyonly` · A3 cap0.30 · A4 DY20:45 · C45/C50/C55/C60). Cải thiện tốt nhất toàn họ vs production A0
+= **A2 −0.05pp FULL** (= không có cải thiện). **Không tính DSR/PBO** — không phải bỏ qua Rule 5, mà vì
+**không có ứng viên nào để wire**; với N=9 và biên độ tốt nhất ≈0.00pp, không gì sống sót nổi bất kỳ
+hiệu chỉnh multiple-testing nào.
+
+**VERDICT: KHÔNG WIRE GÌ. Production 0 chạm. Không đảo lệnh plan 07-14/07-15.** Không route
+quant-skeptic: skeptic dùng để **thử bác một kết quả SẠCH trước khi wire** — ở đây cả 2 arm **TỰ BÁC**,
+không có gì để bảo vệ. (Nếu Mike/user vẫn muốn soi, thứ đáng soi nhất là khẳng định **cơ chế**: "hiệu
+ứng cấp TÊN không cộng dồn thành hiệu ứng cấp DANH MỤC" — nó bác một giả thuyết của user.)
+Defaults xác minh OFF: `BASKET_DY_TIEBREAK=""` · `BASKET_SECCAP_MODE=""` ⇒ OFF-path byte-identical.
+
+**Treo (giữ nguyên từ §12.7, job này không đụng):** (a) chuyển bảng §14.2 (số tỷ trọng ĐÚNG) tới
+risk-auditor/Spyros; (b) **re-pin R3** (vintage hôm nay 27.09 vs pin 27.84 — treo từ §10.9); (c)
+sửa/chú thích §11.7 theo đính chính §12.1.
+
+**Artifacts** (`mike/agents/Taylor/v4final_exp/`): `run_arms_a4.sh` (viec1|viec2), `a4_dy_selfcheck.py`,
+`cap_peak_check.py`, `wsum_leak_diag.py` · `logs/v4f_{A2_eyonly_rerun,A4_dy2045,C45,C50,C55,C60}*.log`,
+`logs/{a4_selfcheck,cap_peak_check,wsum_leak_diag}.log` · `cap_peak_{summary,by_quarter}.csv`.
+Code: `custom_basket.py` (`BASKET_DY_TIEBREAK`, nhánh mới; nhánh cũ không đụng).
+Chi tiết đầy đủ: `mike/agents/Taylor/route_aware_selector_framework.md` §14 (roadmap dài hạn: §13).

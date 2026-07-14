@@ -667,6 +667,88 @@ GROUP BY t.time, sec""")
             print(f"  [fincap] cap BANK+INSURANCE+SECURITIES total weight at {FIN_CAP:.2f}, then name_cap "
                   f"{name_cap:.2f} ({len(route_hist)} tickers routed, PIT as-of selection quarter)")
 
+    # ---- AUDIT-ONLY DY marginal-band tie-break, arm A4 (job Taylor_20260714_152605) ----
+    # BASKET_DY_TIEBREAK: "" (default, OFF -> byte-identical) | "<lo>:<hi>" (1-indexed, inclusive)
+    #   e.g. "20:45" = the pre-registered marginal band (§12.4).
+    # Role, deliberately narrow: DY is a DOWNSIDE FLOOR, not a ranking axis (§12.4 measured a 6M
+    # downside effect of +2.34pp t=2.37 that SURVIVES de-confounding for cheapness, with NO return
+    # edge, t=0.17). A floor belongs where it can break a tie, not in a linear score — folding
+    # rank(DY) into `score` would make it a return-predictor by construction, which is the exact
+    # claim the data does NOT support. So: inside the band only, DY-bearing names permute among the
+    # slots THEY ALREADY OCCUPY; ranks outside the band are untouched.
+    # FAIL-OPEN (DY>0 covers only ~70.4% of obs): a name without a positive DY does not move AT ALL
+    # — it keeps its exact ey slot. Sorting the whole band by DY would push those names to the back,
+    # i.e. PENALISE absent data; that is a different (and unmeasured) rule.
+    # PIT: Dividend_Min3Y as-of Release_Date (never `time`, which is the quarter it describes, not
+    # the day it became public); denominator = UNADJUSTED Price at d, the price a real yield is
+    # quoted against. Identical definition to dy_floor_test.py, reused so the rule cannot drift from
+    # the evidence that justified it.
+    DY_BAND = os.environ.get("BASKET_DY_TIEBREAK", "")
+    dy_at = None
+    if DY_BAND:
+        if SELECT_MODE != "eyonly":
+            raise ValueError(f"BASKET_DY_TIEBREAK={DY_BAND} only defined for BASKET_SELECT=eyonly "
+                             f"(arm A4 is pre-registered on the A2 base; got {SELECT_MODE})")
+        try:
+            _dy_lo, _dy_hi = (int(x) for x in DY_BAND.split(":"))
+        except ValueError:
+            raise ValueError(f"BASKET_DY_TIEBREAK={DY_BAND} malformed (want '<lo>:<hi>', e.g. '20:45')")
+        if not (1 <= _dy_lo < _dy_hi):
+            raise ValueError(f"BASKET_DY_TIEBREAK={DY_BAND}: need 1 <= lo < hi")
+        _dv = bq(f"""SELECT f.ticker, f.time, f.Release_Date, f.Dividend_Min3Y
+FROM tav2_bq.ticker_financial f WHERE f.time <= DATE '{end_date}' AND f.Dividend_Min3Y IS NOT NULL""")
+        # Release_Date NULL -> time+45d: the same conservative public-availability fallback
+        # dy_floor_test.py used. It can only ever DELAY a fact, never leak one early.
+        _dv["eff"] = (pd.to_datetime(_dv["Release_Date"])
+                      .fillna(pd.to_datetime(_dv["time"]) + pd.Timedelta(days=45)))
+        _dv = _dv.sort_values("eff")
+        _dv_hist = {tk: (list(g["eff"]), list(g["Dividend_Min3Y"])) for tk, g in _dv.groupby("ticker")}
+        _dy_rebal_in = ",".join(f"DATE '{pd.Timestamp(x).date()}'" for x in rebal_dates)
+        _dy_px = bq(f"""SELECT t.ticker, t.time, t.Price FROM tav2_bq.ticker t
+WHERE t.time IN ({_dy_rebal_in}) AND t.Price IS NOT NULL""")
+        _dy_px["time"] = pd.to_datetime(_dy_px["time"])
+        _dy_px_map = {(r.ticker, r.time): float(r.Price) for r in _dy_px.itertuples()}
+        _dy_memo = {}
+        _dy_stat = {"have": 0, "absent": 0}
+
+        def dy_at(tk, d):
+            """-> float DY>0, or None when DY is absent/zero (caller must then NOT move the name)."""
+            key = (tk, pd.Timestamp(d))
+            if key in _dy_memo:
+                return _dy_memo[key]
+            out = None
+            e = _dv_hist.get(tk)
+            px = _dy_px_map.get(key)
+            if e and px and px > 0:
+                i = bisect.bisect_right(e[0], pd.Timestamp(d)) - 1
+                if i >= 0:
+                    _d3 = float(e[1][i])
+                    if _d3 > 0:
+                        out = _d3 / px
+            _dy_memo[key] = out
+            _dy_stat["have" if out is not None else "absent"] += 1
+            return out
+
+        print(f"  [DY tie-break] band = ey ranks {_dy_lo}-{_dy_hi} (1-indexed, inclusive); "
+              f"DY = Dividend_Min3Y(as-of Release_Date)/Price(d); fail-open: no DY -> name does not "
+              f"move; ranks outside the band untouched; NOT added to the score")
+
+    def _dy_reorder(gated, d, lo, hi):
+        """Permute the DY-bearing names inside gated[lo-1:hi] by DY desc, into the slots those names
+        already occupy. Names without a positive DY keep their exact ey slot (fail-open). Returns a
+        new list; ranks outside [lo-1:hi] are copied through untouched."""
+        band = gated[lo - 1:hi]
+        if len(band) < 2:
+            return gated
+        slots = [i for i, (tk, _) in enumerate(band) if dy_at(tk, d) is not None]
+        if len(slots) < 2:            # 0 or 1 DY-bearing name -> nothing to re-order
+            return gated
+        ranked = sorted((band[i] for i in slots), key=lambda tr: dy_at(tr[0], d), reverse=True)
+        out = list(band)
+        for _slot, _item in zip(slots, ranked):
+            out[_slot] = _item
+        return gated[:lo - 1] + out + gated[hi:]
+
     def route_asof(tk, q):
         """PIT route of `tk` as of selection quarter `q`; None when never routed."""
         r = route_by_tq.get((tk, pd.Timestamp(q)))
@@ -752,6 +834,11 @@ GROUP BY t.time, sec""")
                 # financial -> 2*ey (PCF leg dropped, range preserved); everyone else -> ey + cfy.
                 score = {t: (2.0 * pe_r[t] if is_fin(t, src_q) else pe_r[t] + pcf_r[t]) for t, _ in pool}
             gated = sorted(pool, key=lambda tr: score[tr[0]], reverse=True)
+            if dy_at is not None:
+                # arm A4: DY breaks ties ONLY in the marginal band, and only among names it can
+                # actually speak about. Applied AFTER the ey sort and BEFORE the top_n cut — the
+                # band straddles the cut line, which is the only place a tie-break changes a pick.
+                gated = _dy_reorder(gated, d, _dy_lo, _dy_hi)
         elif SELECT_MODE == "pbcombo" and gated:
             # bottom-deploy: 1/PB-heavy crisis-IC weights (0.67/0.23/0.10) within the liquid+gated pool.
             pool = gated[:CFO_POOL]
