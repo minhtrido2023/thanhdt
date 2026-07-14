@@ -100,9 +100,13 @@ for tk in ("HPG", "LPB"):
 qd = pd.Timestamp(d_r).to_period("Q").start_time
 prior = [q for q in sorted(PANEL.qstart.unique()) if q < qd]
 src_q = max(prior) if prior else qd
-pf = PANEL[(PANEL.qstart == src_q) & (PANEL.route.isin(FIN))]
+# PANEL is DAILY: dedupe to the one obs per (ticker, quarter) the selector actually reads
+# (custom_basket does `.groupby(["ticker","qstart"]).last()`), else "names" and "rows" get mixed
+# and the count comes out nonsense (the old line printed 85 names / 237 with-pb_z).
+pf = (PANEL[(PANEL.qstart == src_q) & (PANEL.route.isin(FIN))]
+      .sort_values("time").groupby("ticker").last())
 print(f"\n--- financial coverage at src_q {pd.Timestamp(src_q).date()} ---")
-print(f"  financial names in panel: {pf.ticker.nunique()}; with pb_z: {pf.pb_z.notna().sum()} "
+print(f"  financial names in panel: {len(pf)}; with pb_z: {int(pf.pb_z.notna().sum())} "
       f"({pf.pb_z.notna().mean():.0%}) -> the rest ABSTAIN (score -1) under v3route by rating_8l's own rule")
 
 # ---- vehicle-level (custom30V standalone) metrics: the mechanism, undiluted by the 2-book system ----

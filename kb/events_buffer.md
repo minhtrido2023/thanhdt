@@ -2811,3 +2811,64 @@
 ## Consolidation 2026-07-14T12:11:17Z
 - [2026-07-14T12:08:34Z] DollarBill/heartbeat — DollarBill_20260714_120226: {"status": "in_progress", "note": "Đã tính sizing: SELL VPB 800cp + BUY CTG 850cp, basket 68.5%->69.8%, đang viết plan JSON"}
 - [2026-07-14T12:10:42Z] DollarBill/decision — plan-ZaloPay-2026-07-15: {"account": "ZaloPay", "plan_date": "2026-07-15", "action": "REBALANCE_VPB_TRIM_DAY1", "orders": 2, "sell": "VPB 800cp @ 26,500 (21.2M gross)", "buy": "CTG 850cp @ 32,600 (27.7M)", "state": "NEUTRAL(3) DT5G_macro", "active_nav_vnd": 509865269, "basket_before_pct": 68.5, "basket_after_pct": 69.8, "vpb_overweight_note": "VPB 39%->34.8%, target 5.87%, ~7 phiên trim còn lại", "approved_by": null, "requires_user_approval": true, "file": "data/trade_plans/plan_ZaloPay_2026-07-15.json"}
+
+## Consolidation 2026-07-14T13:07:01Z
+- [2026-07-14T12:17:28Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "in_progress", "note": "bat dau: doc code v3route + framework doc"}
+- [2026-07-14T12:18:06Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "in_progress", "note": "da doc code+framework, xac dinh dung diem fix (line 427-444 custom_basket.py); bat dau implement v3route2 percentile-norm"}
+- [2026-07-14T12:18:18Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:19:18Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:20:19Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:21:10Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "in_progress", "note": "PHAT HIEN QUAN TRONG: naive percentile-norm (v3route2) OVER-corrects — fin P90 0.965 vs nonfin 0.866 (gap dao chieu -0.064). Ly do: v2-pct la 1 percentile don (uniform), diem nonfin la trung binh co trong so 3 percentile (bell). Them arm v3route3 = quantile-match vao phan phoi nonfin (moi la scale that su tuong thich). 3 arm se cho biet edge co don dieu theo trong so tai chinh khong = sector bet hay co che that."}
+- [2026-07-14T12:21:19Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:22:19Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:23:19Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:24:19Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:24:20Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "in_progress", "note": "Selfcheck ALL PASS 12/12 (them test [7] cross-route scale + bat duoc ca v3route mis-scale -0.107 LAN v3route2 over-correct +0.064). Bat dau backtest 3 arm vehicle-level: v3route/v3route2/v3route3 vs yieldcombo."}
+- [2026-07-14T12:25:19Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:26:20Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:27:20Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:28:20Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:29:20Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:30:20Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:30:47Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "in_progress", "note": "4-arm vehicle XONG: edge SONG SOT fix — v3route3 (quantile-matched) +6.17pp vs v3route +7.63pp => ~19% edge cu la scale artifact. NHUNG corr(fin weight, CAGR) = -0.986 => placebo test la quyet dinh. HPG: OUT duoi v3route3 (v3route bao IN — chinh la artifact). Dang build placebo count-matched 20 seed."}
+- [2026-07-14T12:31:20Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:32:21Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:33:21Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:34:21Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:35:21Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:36:21Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:37:21Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:38:21Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:39:21Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:40:21Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 23, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:41:21Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:42:21Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 25, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:43:21Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 26, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:43:52Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "in_progress", "note": "resume: doc code v3route2/v3route3 da co tu phien truoc"}
+- [2026-07-14T12:44:21Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 27, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:45:22Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 28, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:46:22Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 29, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:47:08Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "in_progress", "note": "scale-fix xong (selfcheck 7 nhom ALL PASS, v3route3 gap 0.001); placebo 20 seed + abstain/sens dang chay nen"}
+- [2026-07-14T12:47:22Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 30, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:48:22Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 31, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:49:15Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "in_progress", "note": "abstain: edge KHONG phai coverage-artifact (+6.63 khi impute > +6.17); placebo seed 0-3 AM het; dang cho v3latest attribution arm"}
+- [2026-07-14T12:49:22Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 32, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:50:22Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 33, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:51:22Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 34, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:52:22Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 35, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:53:23Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 36, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:54:23Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 37, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:55:23Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 38, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:56:23Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 39, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:57:23Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 40, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:58:23Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 41, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:59:23Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 42, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T13:00:23Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 43, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T13:01:23Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 44, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T13:02:23Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 45, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T13:03:23Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 46, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T13:04:23Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 47, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T13:05:23Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 48, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T13:06:24Z] Taylor/heartbeat — Taylor_20260714_121717: {"status": "still_running", "elapsed_min": 49, "job_id": "Taylor_20260714_121717", "source": "watcher"}
+- [2026-07-14T12:18:27Z] Winston/finding — new-listings-daily: {"date": "2026-07-14", "lookback_days": 90, "total_new": 1, "needs_manual_rating": 0, "fresh_ipo": 0, "research_queue": [], "snapshot": "/home/trido/thanhdt/WorkingClaude/data/new_listings.csv", "note": "0 mã mới < 20Q lịch sử → cần 8L manual rating. Taylor flag để đọc bản cáo bạch + tạo override documented reason+expiry."}
+- [2026-07-14T13:01:08Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 51250}
