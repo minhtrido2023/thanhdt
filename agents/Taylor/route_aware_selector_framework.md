@@ -905,3 +905,163 @@ Không có gì trong §13 được wire thẳng. Mọi ứng viên sinh ra từ 
 hành: **ablation neo liền kề** (mỗi arm khác neo đúng 1 trục, §12.2) → **self-check 0 VND** →
 **walk-forward IS/OOS** → **N-ledger + DSR** (Rule 5, multiple-testing discipline) → **quant-skeptic** →
 user duyệt. §13 chỉ nói **hướng nào đáng đào**, không cấp miễn trừ cho hướng nào.
+
+---
+
+# §14. ARM A4 (DY tie-break) + QUÉT CAP THEO ĐỈNH — job `Taylor_20260714_152605`
+
+Hai câu hỏi độc lập, mỗi câu 1 trục lệch khỏi neo A2 (`eyonly`), cùng vintage/config/session
+(`NAV_TOTAL_B=50 ETF_LIQ=custompitg PARK_STATES=3:0.7 AUDIT_END=2026-06-19`, threads=1, `EXP_TAG` mọi
+arm → §8 an toàn). **A2 được CHẠY LẠI trong chính phiên này** làm neo (số của job 140127 là số khác
+phiên — không phải neo hợp lệ). self-check 0 VND cả 6 arm. Mọi số dưới đây **recompute độc lập từ CSV**
+(`extract_peryear.py` + recompute MaxDD/Sharpe riêng), không đọc dòng print của script.
+
+## 14.0 VERDICT NGẮN
+
+| Việc | Kết quả | Verdict |
+|---|---|---|
+| **1. A4 — DY tie-break dải biên (ey 20-45)** | FULL **−0.00pp** (IS ±0.00 / OOS −0.01); **MaxDD −17.6 → −18.6 (XẤU ĐI 1.0pp)**; Calmar 1.54→1.45 | **NO-GO** |
+| **2. Cap theo đỉnh, quét X ∈ {45,50,55,60}%** | chi phí 0.23-0.84pp/năm, **KHÔNG ĐƠN ĐIỆU**; **MaxDD ĐỨNG YÊN −17.6 ở MỌI mức**; **DD_IS XẤU ĐI** −15.3→−16.1 | **NO-GO mọi mức** |
+
+**Không wire gì. Production 0 chạm.** Không có ứng viên nào cần quant-skeptic (không có kết quả sạch
+để verify — cả hai đều tự bác).
+
+## 14.1 Việc 1 — A4: DY tie-break là **NO-GO**, và nó thất bại ĐÚNG Ở CHỖ nó được kỳ vọng
+
+Cơ chế đã được kiểm chứng trước khi đo (`a4_dy_selfcheck.py` **17/17 PASS**): band-only (ranks 1-19
+bit-identical vs A2 trên cả 48 rebal), **fail-open đúng (140/140 tên không có DY>0 giữ NGUYÊN rank —
+không bị đánh tụt)**, permutation-not-recut (tên có DY chiếm đúng slot cũ), OFF-path tái lập A2 chính
+xác, và **negative control: 48/48 rebal ĐỔI thành phần** ⇒ luật KHÔNG hề trơ. DY>0 coverage trong rổ
+A4 = 66.0% (950/1440 name-rebal), khớp mức 70.4% đã đo ở §12.4.
+
+| arm | FULL | IS | OOS | Sharpe | MaxDD | Calmar | DD_IS | DD_OOS |
+|---|---|---|---|---|---|---|---|---|
+| **A2** `eyonly` (neo) | 27.04 | 23.00 | 30.85 | 1.80 | −17.6 | 1.54 | −15.3 | −17.6 |
+| **A4** `eyonly`+DY 20:45 | **27.04** | **23.00** | **30.84** | 1.82 | **−18.6** | **1.45** | −15.2 | **−18.6** |
+
+**Đọc kết quả — đây là một kết quả SẠCH và nó nói KHÔNG:**
+- **Return neutral tới mức gần như tuyệt đối**: FULL −0.00pp, IS ±0.00pp, OOS −0.01pp. Trong khi
+  **48/48 rebal đổi thành phần**. Một luật đảo tên ở MỌI kỳ mà tổng cộng lại đúng bằng 0 ⇒ **chữ ký
+  của reshuffle noise thuần tuý**, không phải của một trục thông tin.
+- **Và nó XẤU ĐI ĐÚNG Ở METRIC NÓ ĐƯỢC MUA VỀ ĐỂ CẢI THIỆN**: DY được đưa vào **chỉ vì** §12.4 đo được
+  hiệu ứng **downside nông hơn** (+2.34pp, t=2.37, hit 68%). Ở cấp danh mục, MaxDD **sâu THÊM 1.0pp**
+  (−17.6 → −18.6), toàn bộ nằm ở OOS (DD_OOS −17.6 → −18.6). Calmar 1.54 → 1.45.
+- Sharpe nhích 1.80→1.82 — không cứu được gì: đó là 1 đường NAV, và nó đi kèm DD sâu hơn 1pp.
+
+**Bài học cơ chế (quan trọng hơn con số, và nó KHÔNG bác §12.4):** hiệu ứng DY-floor ở §12.4 là **thật
+ở CẤP TÊN** — đo đúng, khử confound đúng, hit-rate theo ngày đứng vững. Cái sai là **giả định ngầm rằng
+một sàn ở cấp TÊN sẽ cộng dồn thành sàn ở cấp DANH MỤC**. Nó không. Rổ 30 tên, name_cap 0.10, rebal
+quý: drawdown của rổ bị **beta thị trường** chi phối, không phải bởi độ sâu của từng tên — **chính xác
+cùng một cơ chế §12.3 đã tìm ra cho tập trung ngành** (cắt financial 47%→26% mà DD không nhúc nhích).
+Hai job độc lập, hai giả thuyết khác hẳn nhau, **cùng một kết luận**: ở hệ này, **DD không đến từ thứ
+nằm trong selector**. Đây là bằng chứng thứ hai cho cùng một sự thật cấu trúc, không phải trùng hợp.
+
+⇒ **Giả thuyết DY-floor của user KHÔNG bị bác ở cấp tên** (§12.4 giữ nguyên). Cái bị bác là **đường
+tích hợp nó vào selector** — kể cả ở dạng bảo thủ nhất (tie-break, dải biên, fail-open, không cộng
+điểm) mà chính nó đã pre-register. Không còn biến thể "nhẹ tay hơn" nào để thử: A4 đã là bản nhẹ tay
+nhất có thể.
+
+## 14.2 Việc 2 — quét cap theo đỉnh: **NO-GO mọi mức**, và "cap theo đỉnh" ≡ "cap phẳng tại X"
+
+**⚠️ ĐÍNH CHÍNH THIẾT KẾ (phải nói trước, vì nó đổi bản chất đề xuất):** dispatch mô tả cap-theo-đỉnh
+như một cơ chế MỚI, khác cap phẳng ("thay vì cap phẳng áp mọi ngày… cap CHỈ kích hoạt khi vượt X").
+**Hai thứ đó là MỘT.** Một cap tại X **theo định nghĩa** không làm gì vào bất kỳ ngày nào tỷ trọng đã
+dưới X — A3 (cap 0.30) cũng chưa từng "áp mọi ngày". Thứ duy nhất tách đề xuất của risk-auditor khỏi
+A3 đã NO-GO là **MỨC** (0.30 → 0.45-0.60), **không phải cơ chế**. ⇒ không viết code mới, không có cơ chế
+mới phải tin: đây là **quét MỨC** trên đúng nhánh `fincap` đã có (`BASKET_FIN_CAP`).
+
+| arm | cap | FULL | IS | OOS | Sharpe | MaxDD | Calmar | **DD_IS** | chi phí vs A2 |
+|---|---|---|---|---|---|---|---|---|---|
+| **A2** | — | 27.04 | 23.00 | 30.85 | 1.80 | −17.6 | 1.54 | **−15.3** | — |
+| A3 (job 140127) | 0.30 | 26.40 | 22.45 | 30.12 | 1.75 | −17.6 | 1.50 | — | −0.64 |
+| **C45** | 0.45 | 26.20 | 22.63 | 29.54 | 1.75 | −17.5 | 1.49 | **−16.0** | **−0.84** |
+| **C50** | 0.50 | 26.30 | 22.66 | 29.71 | 1.75 | −17.6 | 1.50 | **−16.1** | −0.74 |
+| **C55** | 0.55 | 26.72 | 22.84 | 30.37 | 1.78 | −17.6 | 1.52 | **−16.1** | −0.32 |
+| **C60** | 0.60 | 26.81 | 22.90 | 30.48 | 1.79 | −17.6 | 1.53 | **−16.1** | −0.23 |
+
+**Trả lời đúng 3 câu risk-auditor hỏi:**
+
+**(a) Có chặn được đúng episode đỉnh không? CÓ — về cơ học.** (`cap_peak_check.py`, đo trên vector tỷ
+trọng THẬT, tái dẫn xuất độc lập qua `v4final_lib`, không tin nội bộ module.) Đỉnh uncapped trên nền
+A2 = **0.867 theo NGÀY / 0.774 theo quý (2026Q2)**; mọi mức cap đều giữ đúng trần (max = X, sai số 0).
+**Nhưng — và đây là điểm giết đề xuất — KHÔNG mức nào là "chỉ chạm đỉnh":**
+> uncapped: mean **0.441**, **median quý 0.466**, p95 0.696.
+> Số ngày cap thực sự RÀNG BUỘC: cap 0.45 → **53.6%** số ngày (26/48 quý) · 0.50 → **49.0%** (23/48) ·
+> 0.55 → **46.4%** (22/48) · **0.60 → 34.7% số ngày (19/48 quý = 40% mẫu)**.
+
+Phân bố tỷ trọng tài chính **nằm ngay trong dải 45-60%** được đề xuất làm trần ⇒ cap ở đó **không phải
+rule đuôi, nó là ràng buộc thường ngày** trên gần một nửa mẫu. Muốn chạm **chỉ** đỉnh 2026Q2 phải đặt
+trần ~0.75-0.80 — mức gần như không bao giờ ràng buộc (và do đó gần như vô nghĩa). **Điểm thiết kế mà
+risk-auditor mô tả — "chặn được đỉnh mà hầu như không đụng phần còn lại" — KHÔNG TỒN TẠI trong phân bố
+này.** (Ghi chú: §12.1 báo đỉnh 2026Q2 = 82.7% trên nền **A0**; trên nền **A2** là 77.4% quý / 86.7%
+ngày ⇒ **`eyonly` KHÔNG làm giảm tập trung** — đừng đọc §12 rồi tưởng bước 1+2 đã xử lý xong việc này.)
+
+**(b) Chi phí: 0.23-0.84pp/năm — và KHÔNG ĐƠN ĐIỆU theo mức.** cap **0.45 đắt hơn (−0.84pp) cả cap
+0.30 (−0.64pp)**, dù 0.45 là ràng buộc LỎNG HƠN hẳn. Một ràng buộc lỏng hơn mà tốn nhiều hơn thì **không
+phải một đánh đổi rủi ro-lợi nhuận** — nó là **nhiễu đường đi**. ⇒ không được đọc bảng này như "đường
+cong chi phí" rồi chọn điểm tối ưu: thứ tự giữa các mức **không có ý nghĩa thống kê**, và tối ưu hoá
+trên nó chính là fit vào nhiễu (đúng thứ Rule 5 tồn tại để chặn).
+
+**(c) MaxDD: ĐỨNG YÊN ở MỌI mức — và IS còn XẤU ĐI.** −17.5/−17.6 khắp bảng, so với A2 −17.6. Đo thêm
+**drawdown tách IS/OOS** (thứ dòng MaxDD gộp che mất): **DD_IS −15.3 → −16.0/−16.1 ở MỌI mức cap**.
+> Cap không chỉ **không trả tiền khi cháy** — trong nửa IS của mẫu nó làm **cháy sâu hơn**.
+Bảo hiểm mà làm tăng chính tổn thất nó được mua để chặn thì không phải bảo hiểm đắt; nó là một khoản
+phí không mua gì. Kết luận §12.3 **giữ nguyên và mạnh hơn**: nó không còn là tính chất của riêng mức
+0.30 — nó đúng **trên toàn dải 0.30-0.60**.
+
+## 14.3 Khuyến nghị cho risk-auditor / Spyros — điểm "hiệu quả nhất" KHÔNG tồn tại theo số đo
+
+Luận điểm còn đứng vững của risk-auditor (§12.3 đã ghi nhận, ở đây **không** bác): backtest chỉ nói
+"không có cú sốc riêng ngành tài chính trong 12.5 năm mẫu"; nó **không** trả lời được kịch bản đuôi
+chưa từng xảy ra, và **độ trễ cam kết CRISIS của DT5G (enC=25 phiên)** vẫn là một khoảng trống thật.
+**Điều đó vẫn không tạo ra một điểm cap tốt trong dữ liệu:**
+- Nếu user muốn cap **vì quản trị rủi ro đuôi có tuyên bố rõ ràng** → **cap 0.60 là rẻ nhất** (−0.23pp/
+  năm, nằm trong nhiễu) mà vẫn bound được đỉnh 86.7% → 60%. Đây là mức tôi đề xuất **NẾU** user quyết
+  mua bảo hiểm.
+- Nhưng phải mua nó **với con mắt mở**: (i) nó ràng buộc **40% mẫu**, không phải "chỉ đỉnh"; (ii) nó
+  **không** cải thiện DD ở bất kỳ đâu trong mẫu và làm DD_IS xấu đi ~0.8pp; (iii) thứ tự chi phí giữa
+  các mức là nhiễu ⇒ **đừng tinh chỉnh mức** để "tối ưu", sẽ chỉ fit vào nhiễu.
+- **Không được** mua nó vì tin backtest cho thấy nó an toàn hơn. Số đo nói **ngược**, ở cả 5 mức.
+
+## 14.4 Lỗi phụ tìm được (đo mới thấy, không suy diễn) — RÒ Σw, 2/2965 ngày, KHÔNG trọng yếu
+
+`cap_peak_check.py` báo `wsum_err` 0.0096 trên **mọi** mức cap trong khi nhánh uncapped chính xác tới
+1e-16 ⇒ điều tra thay vì bỏ qua (`wsum_leak_diag.py`). Kết quả: **2/2965 ngày (2015-11-03/04)**,
+đúng những ngày rổ chỉ có **1 tên tài chính**: `_cap_group_jointly` rescale name-cap theo ngân sách
+nhóm (`ncap/b_in` = 0.10/0.30 = 0.333) rồi áp cho một nhóm 1 tên buộc phải sum=1 ⇒ infeasible ⇒ Σw =
+0.990 thay vì 1 (phần thiếu rơi về tiền mặt ảo). Sai số **~1% NAV trong 2 phiên trên 12.5 năm** ⇒
+**không trọng yếu, không đổi bất kỳ kết luận nào** (và không đủ để giải thích tính không đơn điệu ở
+§14.2b — đó là nhiễu thật, không phải artifact). Ghi lại vì nhánh `fincap` là code audit-only; **nếu
+sau này có ai định wire `fincap` vào production thì phải vá trước** (đúng cách: `gcap_eff` phải floor
+theo cả năng lực nhóm IN, không chỉ nhóm OUT).
+
+## 14.5 N-ledger (Rule 5 — multiple-testing discipline)
+
+Họ `v4final` tới hết job này đã so **9 cấu hình selector**: A0 `yieldcombo` · A1 `eyfin` · A2 `eyonly`
+· A3 cap0.30 · **A4 DY 20:45** · **C45/C50/C55/C60**. Cải thiện tốt nhất trên toàn họ so với production
+A0 = **A2 −0.05pp FULL** (tức không có cải thiện nào). **Không tính DSR/PBO** — không phải vì bỏ qua
+Rule 5, mà vì **không có ứng viên nào để wire**: DSR chỉ có nghĩa khi có một cấu hình sắp deploy.
+Với N=9 và biên độ tốt nhất ≈ 0.00pp, không có gì sống sót nổi bất kỳ hiệu chỉnh multiple-testing nào.
+
+## 14.6 VERDICT + việc còn treo
+
+**Không wire gì. Production 0 chạm. Không đảo lệnh plan 07-14/07-15.** Không route sang quant-skeptic:
+skeptic dùng để **thử bác một kết quả sạch trước khi wire** — ở đây cả hai arm **tự bác**, không có gì
+để bảo vệ. (Nếu Mike/user vẫn muốn skeptic soi, thứ đáng soi nhất là §14.1: "hiệu ứng cấp tên không cộng
+dồn thành hiệu ứng cấp danh mục" — đó là một khẳng định cơ chế, và nó bác một giả thuyết của user.)
+
+- **Việc 1 (A4)**: **NO-GO** — return đúng bằng 0, DD xấu thêm 1.0pp. Đường tích hợp DY vào selector đã
+  hết biến thể bảo thủ để thử. §12.4 (DY-floor cấp tên) **giữ nguyên hiệu lực**.
+- **Việc 2 (cap đỉnh)**: **NO-GO mọi mức 0.45-0.60**, cùng lý do A3 và mạnh hơn (DD_IS xấu đi khắp dải).
+  Nếu user muốn bảo hiểm đuôi theo tuyên bố quản trị → cap 0.60 rẻ nhất (−0.23pp), mua bằng **khẩu vị
+  rủi ro**, không bằng bằng chứng.
+- **Việc 3 (roadmap)**: XONG — §13.
+- **Treo (giữ nguyên từ §12.7, job này không đụng):** (a) đưa số tỷ trọng ĐÚNG cho risk-auditor/Spyros
+  — **§14.2 chính là bản trả lời đó, cần chuyển tới họ**; (b) re-pin R3 (vintage hôm nay 27.09 vs pin
+  27.84, treo từ §10.9); (c) sửa/chú thích §11.7 theo đính chính §12.1.
+
+**Artifacts §14** (`v4final_exp/`): `run_arms_a4.sh` (viec1|viec2), `a4_dy_selfcheck.py`,
+`cap_peak_check.py`, `wsum_leak_diag.py` · `logs/v4f_{A2_eyonly_rerun,A4_dy2045,C45,C50,C55,C60}*.log`,
+`logs/a4_selfcheck.log`, `logs/cap_peak_check.log`, `logs/wsum_leak_diag.log` ·
+`cap_peak_summary.csv`, `cap_peak_by_quarter.csv`. Code: `custom_basket.py` (`BASKET_DY_TIEBREAK`,
+nhánh mới, OFF-path byte-identical — nhánh cũ không đụng).
