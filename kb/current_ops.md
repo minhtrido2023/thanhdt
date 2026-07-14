@@ -349,3 +349,15 @@ Dispatch khẩn: `Winston_20260714_174411` — xác nhận độc lập mâu thu
 (lastModifiedTime), truy vết script/job nào có thể đã ghi đè, đánh giá rủi ro cho cron mới
 (20:00 ICT tối nay 07-15, lần chạy thật đầu tiên của quy tắc quý mới) nếu bảng nguồn thật sự hỏng.
 KHÔNG tự sửa/rebuild — chờ xác định nguyên nhân trước.
+
+## Plan 07-15 đã duyệt (SpaceX + ZaloPay) — quyết định khôi phục ticker_financial ĐANG CHỜ user (2026-07-15)
+User: sẽ tự hỏi BQ admin (upstream tav2 pipeline) về sự cố ticker_financial rồi quyết định hướng
+xử lý sau — Mike KHÔNG tự khôi phục/tạm dừng cron cho tới khi có quyết định. Trong lúc chờ, user
+đã duyệt trực tiếp plan 07-15 cho cả 2 account (Mike verify trước: cả 2 plan 0 BAL/0 LAG, chỉ là
+basket-swap dựa trên custom30V_8l composition đã thiết lập từ trước rebalance quý gần nhất —
+không bị ảnh hưởng bởi corruption ticker_financial 07-14). approved_by=user đã ghi vào cả 2 file.
+
+**Còn treo, chờ user quay lại**: quyết định khôi phục ticker_financial/fa_ratings_8l từ backup
+Winston đã chụp (`ticker_financial_ttbackup_fresh_20260714`, `fa_ratings_8l_ttbackup_fresh_20260714`)
++ quyết định có tạm dừng cron mới 20:00 ICT (quy tắc quý mới, sẽ chạy lại tối nay 07-15) hay không
+nếu nguồn upstream chưa được xác nhận đã sửa.
