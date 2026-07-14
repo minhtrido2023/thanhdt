@@ -312,6 +312,18 @@ Không chắc → mặc định Sonnet 5 (tiết kiệm, tránh dùng model đ�
 Ví dụ: `bin/dispatch.sh Taylor "Thiết kế backtest mới cho sector X, nhiều giả thuyết" --model fable`
 vs `bin/dispatch.sh Taylor "Query PE hiện tại của VNM" ` (omit `--model` → Sonnet 5 mặc định).
 
+**Reasoning-effort per dispatch — `--effort LEVEL` (chính sách user 2026-07-14):** `dispatch.sh` giờ
+nhận `--effort low|medium|high|xhigh|max`, validate lúc parse, ghi vào job record (`effort=`), áp
+cho cả `--bg` lẫn đồng bộ.
+- **Mặc định (omit `--effort`) = `medium`** — mọi task thường lệ chỉ dùng `medium`.
+- **Task phức tạp → `--effort high`** (thiết kế backtest/giả thuyết mới, phản biện tinh vi, chạm
+  production chưa có template).
+- **Chặn cứng: model `fable` tối đa `high`.** Truyền `xhigh`/`max` cùng `--model fable` sẽ tự clamp
+  về `high` + cảnh báo stderr (không bao giờ chạy fable ở xhigh/max). `xhigh`/`max` chỉ dành cho model
+  khác (vd `opus`) khi thực sự cần — không phải fable.
+- Ghép với model: Fable+phức tạp → `--model fable --effort high`; Fable+thường → `--model fable`
+  (→ medium); lookup cơ học Sonnet → omit cả hai (→ Sonnet, medium).
+
 ## Tier phản biện — verify finding của Taylor (bắt buộc trước khi wire)
 Mọi finding R&D quan trọng (backtest, đổi config production, claim CAGR/Sharpe) phải qua một
 **reviewer độc lập có nhiệm vụ DUY NHẤT là bác bỏ nó** — săn look-ahead (`profit_*`), rớt OOS,

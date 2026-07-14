@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# dispatch.sh <agent_id> "prompt" [--bg] [--timeout SEC] [--retries N] [--model NAME]
+# dispatch.sh <agent_id> "prompt" [--bg] [--timeout SEC] [--retries N] [--model NAME] [--effort LEVEL]
 #
 # Run a HEADLESS Claude session as the specified agent. The session inherits the
 # agent's CLAUDE.md + hooks (KB context injection, bus writes, heartbeat).
@@ -36,11 +36,15 @@
 #                  mechanical lookups and deep R&D, so the CALLER judges complexity
 #                  per task and passes --model explicitly when it's warranted (see
 #                  MIKE.md §Model routing for the 3-question heuristic).
+#   --effort LEVEL reasoning effort (low|medium|high|xhigh|max). Omit → 'medium'
+#                  (task thường lệ). Task phức tạp → --effort high. CHÍNH SÁCH user
+#                  (2026-07-14): model 'fable' bị chặn tối đa 'high' — truyền xhigh/max
+#                  cho fable sẽ tự clamp về high + cảnh báo stderr. Xem MIKE.md §Model routing.
 #
 # Examples:
 #   bin/dispatch.sh Taylor "Phân tích kỹ thuật VNM"
 #   bin/dispatch.sh Winston "Kiểm tra corp-action hôm nay" --bg --timeout 1200
-#   bin/dispatch.sh Taylor "Thiết kế backtest mới, nhiều giả thuyết" --model fable
+#   bin/dispatch.sh Taylor "Thiết kế backtest mới, nhiều giả thuyết" --model fable --effort high
 #
 # Usage-limit-aware auto-resume (added 2026-07-03): a failure that looks like the ACCOUNT's
 # shared 5-hour usage window (bin/usage_watch.py) is exhausted — not a real task failure —
@@ -64,6 +68,7 @@ bg=""
 TIMEOUT=""
 RETRIES=1
 MODEL=""
+EFFORT=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --bg) bg="--bg" ;;
@@ -73,6 +78,8 @@ while [ $# -gt 0 ]; do
     --retries=*) RETRIES="${1#*=}" ;;
     --model) MODEL="${2:?--model needs a value}"; shift ;;
     --model=*) MODEL="${1#*=}" ;;
+    --effort) EFFORT="${2:?--effort needs a value}"; shift ;;
+    --effort=*) EFFORT="${1#*=}" ;;
     *) echo "ERROR: unknown argument '$1'" >&2; exit 1 ;;
   esac
   shift
@@ -97,6 +104,21 @@ case "$MODEL" in
 esac
 MODEL_FLAG=""
 [ -n "$MODEL" ] && MODEL_FLAG="--model $MODEL"
+
+# --- Effort policy (2026-07-14, user) ------------------------------------------
+# Reasoning-effort per dispatch. Mặc định 'medium' (task thường lệ). Task phức tạp:
+# truyền --effort high. Chính sách CỨNG của user: model 'fable' chỉ được tối đa 'high'
+# — xhigh/max bị clamp về high (Fable dùng high cho phức tạp, medium cho phần còn lại).
+case "$EFFORT" in
+  ""|low|medium|high|xhigh|max) ;;
+  *) echo "ERROR: --effort '$EFFORT' không hợp lệ — dùng low|medium|high|xhigh|max." >&2; exit 1 ;;
+esac
+[ -z "$EFFORT" ] && EFFORT="medium"
+if [ "$MODEL" = "fable" ] && { [ "$EFFORT" = "xhigh" ] || [ "$EFFORT" = "max" ]; }; then
+  echo "WARN: fable giới hạn effort tối đa 'high' (chính sách user) — hạ '$EFFORT'→'high'." >&2
+  EFFORT="high"
+fi
+EFFORT_FLAG="--effort $EFFORT"
 
 # Heartbeat-aware deadline knobs (see _hb_aware_timeout). MAX_EXT bounds the TOTAL
 # lifetime of one attempt at TIMEOUT×(MAX_EXT+1) — every worst-case computation below
@@ -463,7 +485,7 @@ _dtid0="${DISCORD_THREAD_ID:-$(_agent_thread_override "$id")}"
 JSET job_id="$job_id" from="$from" to="$id" status=running attempt=1 \
      max_attempts=$((RETRIES + 1)) started_at="$_start_ts" \
      deadline=$((_start_ts + TIMEOUT)) logfile="$logfile" discord_thread_id="$_dtid0" \
-     model="${MODEL:-default}" \
+     model="${MODEL:-default}" effort="$EFFORT" \
      prompt_summary="$(printf '%s' "$prompt" | head -c 160 | tr '\n\t' '  ')"
 
 if [ "$bg" = "--bg" ]; then
@@ -477,7 +499,7 @@ if [ "$bg" = "--bg" ]; then
       JSET status=running attempt="$attempt" started_at="$astart" deadline=$((astart + TIMEOUT))
       set +e
       _hb_aware_timeout "$CLAUDE" -p "$dispatch_prompt" \
-        --permission-mode auto --max-turns 50 $MODEL_FLAG > "$logfile" 2>&1
+        --permission-mode auto --max-turns 50 $MODEL_FLAG $EFFORT_FLAG > "$logfile" 2>&1
       rc=$?
       set -e
       if [ "$rc" -eq 0 ]; then
@@ -599,7 +621,7 @@ if [ "$bg" = "--bg" ]; then
             _maybe_schedule_usage_resume _looks_like_usage_limit _parse_reset_epoch \
             _current_resume_count _job_thread_id _hb_aware_timeout
   export ROOT JOBS_DIR job_id from id ts TIMEOUT RETRIES CLAUDE dispatch_prompt logfile prompt \
-         CIRCUIT_DIR CIRCUIT_THRESHOLD CIRCUIT_COOLDOWN MODEL_FLAG MAX_EXT HB_FRESH_S
+         CIRCUIT_DIR CIRCUIT_THRESHOLD CIRCUIT_COOLDOWN MODEL_FLAG EFFORT_FLAG MAX_EXT HB_FRESH_S
   # systemd-run --user needs the user manager socket; cron strips XDG_RUNTIME_DIR.
   export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
   _detach_ok=0
@@ -670,7 +692,7 @@ else
   trap _sync_killed_guard TERM INT HUP
   set +e
   _hb_aware_timeout "$CLAUDE" -p "$dispatch_prompt" \
-    --permission-mode auto --max-turns 50 $MODEL_FLAG \
+    --permission-mode auto --max-turns 50 $MODEL_FLAG $EFFORT_FLAG \
     2>"$logfile.err" | tee "$logfile"
   rc=${PIPESTATUS[0]}
   set -e
