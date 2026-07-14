@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v1040)
+# Mike fleet — context pack (v1041)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-13T15:34:36] Taylor/finding — Backtest D1/D2/D3 deposit-gate XONG: NO-GO CẢ 3 → family D0-D3 = 0/4 GO, ĐÓNG HOÀN TOÀN hướng B (Pillar A′), không shadow-monitor. Kèm phát hiện harness: tie-break nondeterminism ±0.5pp trong mọi run view-swap — đã fix stable-sort + chứng minh determinism md5: {"job": "Taylor_20260713_145605", "status": "DONE — production/paper không đụng, canonical không đè, N-ledger 4/6 tiêu (S4/A5 winner-only không dùng), sổ đóng", …
 - [2026-07-13T15:35:18] Winston/finding — corp-action-scan-2026w29: {"job": "Winston_20260713_152727", "week": "2026-07-13..2026-07-17", "scan_date": "2026-07-13", "verdict": "KHONG_CO_SU_KIEN", "sources_checked": ["shares_outst …
 - [2026-07-13T15:42:40] quant-skeptic/verification — ✅ CONFIRMED VERIFY: Backtest D1/D2/D3 deposit-gate XONG: NO-GO CẢ 3 → family D0-D3 = 0/4 GO, ĐÓNG HOÀN TOÀN hướng B (Pillar A′), không shadow-monitor. Kèm phát hiện harness: tie-break nondeterminism ±0.5pp trong mọi run view-swap — đã fix stable-sort + chứng minh determinism md5: {"finding_topic": "Deposit-gate D1/D2/D3 backtest → NO-GO all 3 → family D0-D3 = 0/4 GO, direction B (Pillar A′) fully closed; plus harness tie-break nondetermi …
 - [2026-07-13T16:19:14] Taylor/finding — HPG loại khỏi custom30V_8L — do RANK tương đối (hạng 31/30), KHÔNG do đắt lên, KHÔNG do gate: {"job": "Taylor_20260713_161329", "verdict": "HPG bị loại thuần do XẾP HẠNG value-yield tương đối trong pool, KHÔNG phải vì đắt lên, KHÔNG phải rating/liquidity …
@@ -11,6 +10,7 @@
 - [2026-07-14T01:26:21] Winston/finding — ops-autofix 07-14 sang: SpaceX NOT_APPROVED = gate dung thiet ke (da nhac user); ZaloPay mat plan do DollarBill timeout x2 (escalated, khong tu re-dispatch); bao cao thang 06 no Mike: {"job": "Winston_20260714_012012", "status": "DONE — 0 code fix (khong co bug trong pham vi Winston duoc sua), 3/3 diem checker da xu ly dung ranh gioi", "diem1 …
 - [2026-07-14T01:27:11] Winston/finding — ops-autofix ZaloPay 08:20: monthly-report false-positive FIXED (cd37d67), 2 question da duoc sibling job answer, ZaloPay khong plan hom nay = fail-safe: {"job": "Winston_20260714_012003", "status": "DONE", "item1_monthly_report": {"verdict": "FALSE_POSITIVE", "reason": "thang 2026-06 nam tron truoc go-live 2026- …
 - [2026-07-14T01:37:25] Wags/finding — wags-fix: coord-2026-07-14 — 2 question plan-t1-not-ready-ZaloPay: root cause DollarBill plan-job bị kill-while-alive ở 600s base (lần #4-5), fix per-agent timeout 1800s + bonus fix usage-limit phrase mới: {"job": "Wags_20260714_012002", "status": "DONE — fix committed + tested, question đã clear (Winston sibling answer), plan ZaloPay 07-14 vẫn thiếu = quyết định  …
+- [2026-07-14T01:42:59] arch-reviewer/verification — ✅ CONFIRMED ARCH-REVIEW: wags-fix: coord-2026-07-14 — 2 question plan-t1-not-ready-ZaloPay: root cause DollarBill plan-job bị kill-while-alive ở 600s base (lần #4-5), fix per-agent timeout 1800s + bonus fix usage-limit phrase mới: {"finding_topic": "wags-fix: coord-2026-07-14 — DollarBill plan-job kill-while-alive at 600s base → per-agent timeout 1800s + usage-limit phrase fix", "verdict" …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -872,6 +872,21 @@ Dispatch song song: `Winston_20260713_143546` (fix đường dẫn đọc cho c�
 monolith cũ theo coding_guidelines §10) + `Taylor_20260713_143629` (đánh giá tác động — finding
 nào từ 06-26 tới nay đã dùng dữ liệu đông băng, ưu tiên cao nhất: chase-cap vol-scale review dự
 kiến MAI 07-14 có bị ảnh hưởng rvol_20d/prior_close không).
+
+## 2026-07-14: HOLD chủ động — user quyết định không giao dịch hôm nay
+User yêu cầu 08:34 ICT (30' trước giờ mở cửa): "hôm nay không cần giao dịch". Đã xử lý:
+- **SpaceX**: plan gốc (DollarBill) có 2 lệnh basket-swap (bán HPG 2200cp do basket drift ra khỏi
+  custom30V_8L, mua LPB 900cp thay thế) — đã sửa `plan_SpaceX_2026-07-14.json` về orders=[],
+  summary.action=HOLD, giữ nguyên 2 lệnh gốc trong field `user_override_original_orders` để tham
+  khảo/xử lý lại sau nếu cần (basket drift HPG vẫn còn đó, chưa biến mất). Verify `load_plan()`
+  đọc đúng, 0 orders → bot sẽ tự skip sạch.
+- **ZaloPay**: không có file plan cho 07-14 (transition đã hoàn tất 07-13, không phát sinh gì
+  mới) — verify `load_plan()` return None khi thiếu file → bot tự skip, an toàn, không cần sửa gì.
+- Đã mirror vào kênh DollarBill plan channel.
+
+**Việc còn treo (không khẩn)**: HPG vẫn basket-drift ra khỏi custom30V_8L — nếu muốn xử lý basket
+swap này, cần lập lại plan cho ngày kế tiếp (không tự động quay lại, vì override hôm nay chỉ áp
+dụng cho 07-14, ngày mai DollarBill sẽ tự tính lại từ đầu dựa trên basket composition mới nhất).
 
 ## Tri thức chung của đội (canonical — Mike biên tập; MỌI agent phải nắm)
 > Cập nhật 2026-07-01. Chi tiết: `kb/KNOWLEDGE.md`. Số liệu gốc: `data/results_registry.md`.
