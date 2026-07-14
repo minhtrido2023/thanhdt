@@ -34,8 +34,15 @@ recent="$(python3 "$PY" recent "$KB/recent_delta.jsonl" 8 2>/dev/null || true)"
     cat "$KB/canonical.md"
     printf '\n'
   fi
+  # Closed-project INDEX (1 line/project). Full detail lives in kb/projects/<slug>.md —
+  # injected on demand (agent does `cat kb/projects/<slug>.md`), NOT in this pack. Keeps
+  # the always-injected context small; closed R&D narrative no longer rides every dispatch.
+  if [ -s "$KB/projects/INDEX.md" ]; then
+    cat "$KB/projects/INDEX.md"
+    printf '\n'
+  fi
   printf '## Nguồn chuẩn tắc đầy đủ\n'
-  printf 'Chi tiết: kb/KNOWLEDGE.md (§1-9). Events: kb/events_buffer.md. Fleet: kb/fleet_status.md.\n'
+  printf 'Chi tiết: kb/KNOWLEDGE.md (§1-9). Dự án đã đóng: kb/projects/ (index ở trên). Events: kb/events_buffer.md. Fleet: kb/fleet_status.md.\n'
 } > "$KB/context_pack.md"
 
 echo "published context_pack v$ver"
