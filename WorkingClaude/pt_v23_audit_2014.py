@@ -491,6 +491,16 @@ DVR8L_TILT = os.environ.get("DVR8L_TILT", "").lower()
 DVR8L_HALF = float(os.environ.get("DVR8L_HALF", "0.05"))
 _dvr8l_tag = ("" if not DVR8L_TILT else
               f"_exp_dvr8l{DVR8L_TILT}" + ("" if abs(DVR8L_HALF - 0.05) < 1e-9 else f"h{int(round(DVR8L_HALF*1000))}"))
+# DCF selector overlay tag (Pha 3, job Taylor_20260714_070221) — env BASKET_DCF_MODE in
+# {exclude_rich,tiebreak,placebo_random}; unset = OFF, byte-identical, no tag. Guidelines §8: this
+# axis changes the numbers, so it MUST change the filename or it would silently clobber the
+# canonical R3 CSV. placebo_random additionally folds the SEED into the tag — the seed is itself a
+# result-changing axis, so 20 seeds sharing one filename would clobber each other run-to-run.
+_DCFM = os.environ.get("BASKET_DCF_MODE", "").lower()
+_dcf_tag = ("" if not _DCFM else
+            "_exp_dcfexrich" if _DCFM == "exclude_rich" else
+            f"_exp_dcfplacebo{os.environ.get('BASKET_DCF_PLACEBO_SEED','0')}" if _DCFM == "placebo_random" else
+            f"_exp_dcftb{str(os.environ.get('BASKET_DCF_W','0.25')).replace('.','')}")
 # MOM-channel closure measurement (job Taylor_20260712_012515) — env BAL_DROP_TIERS; unset = OFF,
 # byte-identical baseline, no tag. "none" = drop nothing but tagged output (contemporaneous control
 # that never touches the canonical R3 CSV, guidelines §8). Otherwise comma-separated play_types to
@@ -506,7 +516,7 @@ AUDIT_PATH  = os.path.join(WORKDIR, "data",
                            {"v23a": "v23_golive_audit_2014_now.csv",
                             "v23c": "v23c_golive_audit_2014_now.csv",
                             "v22base": "v22base_audit_2014_now.csv",
-                            "singlebook": "singlebook_audit_2014_now.csv"}.get(MODE, MODE+"_audit.csv").replace(".csv", _capsuf + _matsuf + _liqsuf + _park_tag + _wt_tag + _sz_tag + _qs_tag + _qt_tag + _bullpark_tag + _c30b_tag + _recpark_tag + _vm_tag + _dnpr_tag + _dvr8l_tag + _droptag + _NAV_TAG + _START_TAG + ".csv"))
+                            "singlebook": "singlebook_audit_2014_now.csv"}.get(MODE, MODE+"_audit.csv").replace(".csv", _capsuf + _matsuf + _liqsuf + _park_tag + _wt_tag + _sz_tag + _qs_tag + _qt_tag + _bullpark_tag + _c30b_tag + _recpark_tag + _vm_tag + _dnpr_tag + _dvr8l_tag + _dcf_tag + _droptag + _NAV_TAG + _START_TAG + ".csv"))
 
 BUY_TIERS_V11 = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
                  "MOMENTUM_A","MOMENTUM_S_N","COMPOUNDER_BUY","DEEP_VALUE_RECOVERY","S_PRO",
