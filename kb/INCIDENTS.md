@@ -43,6 +43,28 @@ root-cause được treo-không-output; (3) DollarBill-ZaloPay treo đã tái di
 (07-06, 07-13) — cần Wags điều tra một lần dứt điểm thay vì mỗi lần chỉ ghi nhận.
 Trace: bus `Winston_20260714_012012`, job record `DollarBill_20260713_120124.json`.
 
+**Wags follow-up cùng sáng (job `Wags_20260714_012002`, commit `e4a5ea6`) — đính chính
+cơ chế + fix dứt điểm.** Hai điểm trong Root cause trên không khớp bằng chứng record:
+(1) KHÔNG có "deadline tuyệt đối chung" — `dispatch.sh` cấp mỗi attempt đủ TIMEOUT riêng
+(`deadline=$((astart + TIMEOUT))`); record attempt-2 cho thấy deadline = attempt-2-start
++600s. Số 1200s của job SpaceX không phải budget gốc mà là 600s base + 1 lần hb-extension
+(`hb_extensions=1` trong record `DollarBill_20260713_120125.json`, xong ở 725s). Hai cách
+đọc trùng số ở vụ này chỉ vì attempt 1 ăn trọn đúng 600s. (2) DollarBill KHÔNG treo —
+heartbeat bus attempt-2 có nội dung thực chất tới phút cuối (12:14 "đọc execution journal",
+12:19 "tính VPB trim + CTG entry plan"); log 0-byte vì `claude -p` chỉ flush output khi
+kết thúc, bị kill là mất sạch — log rỗng ≠ treo (đúng bài học LOG_AGE 2026-07-07).
+Root cause thật: base 600s quá ngắn cho plan-job 10-20+ phút, và cadence heartbeat thực
+chất của DollarBill (~5 phút) luôn > cửa sổ fresh `HB_FRESH_S=120s` tại deadline → không
+bao giờ được gia hạn → kill-while-alive (lần #4-5, cùng họ với Winston 900s 07-07 và
+Wags 1800s 07-09). Fix (`e4a5ea6`, sandbox test 6/6): per-agent base-timeout default
+trong dispatch.sh — DollarBill 1800s khi caller không truyền `--timeout` (mọi call-site
+hưởng, gồm cả dispatch ad-hoc từng treo 07-06); `--timeout` tường minh và env
+`DISPATCH_TIMEOUT_DOLLARBILL` vẫn thắng. Kèm fix thứ 2 phát hiện trong lúc truy vết:
+phrase CLI mới "You've hit your session limit · resets 12:50am" không khớp regex
+`_looks_like_usage_limit` → DAILY RETRO 00:30 ICT 07-14 (`Mike_20260713_173001`) thành
+`failed` thay vì `usage_limited`+auto-resume (fallback usage_watch pct≥95 cũng không cứu
+được — cần xem riêng vì sao, không chặn); đã thêm `session limit` vào regex.
+
 ## 2026-07-13 — DT5G refresh thứ Sáu 07-10 KHÔNG chạy: dời giờ cron cùng ngày rơi đúng khe hở giữa slot cũ và slot mới
 
 **What happened.** Checker `ops_health_check` (11:52 ICT thứ Hai 07-13) cảnh báo
