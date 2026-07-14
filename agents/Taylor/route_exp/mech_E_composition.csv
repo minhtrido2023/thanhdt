@@ -1,0 +1,4 @@
+arm,slots/q,fin/q,share_fin,ret_fin,ret_nonfin,ret_basket
+yieldcombo,30.0,9.09,0.3028,5.1,2.704,3.43
+v3latest,30.0,6.89,0.2298,5.015,3.065,3.513
+v3route3,30.0,6.43,0.2142,5.612,2.901,3.482

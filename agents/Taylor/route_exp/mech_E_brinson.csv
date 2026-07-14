@@ -1,0 +1,4 @@
+window,share_fin_base,share_fin_new,d_share_fin,ret_fin_base,ret_fin_new,ret_nonfin_base,ret_nonfin_new,R_base,R_new,dR,ALLOCATION,SELECTION,interaction
+FULL,0.2298,0.2142,-0.0156,5.015,5.612,3.065,2.901,3.513,3.482,-0.032,-0.03,0.011,-0.012
+IS 2014-19,0.147,0.1182,-0.0288,2.552,5.312,0.801,0.547,1.058,1.11,0.052,-0.05,0.189,-0.087
+OOS 2020+,0.3027,0.2987,-0.004,6.067,5.717,5.503,5.505,5.674,5.569,-0.105,-0.002,-0.104,0.001
