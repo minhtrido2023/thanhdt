@@ -2572,3 +2572,12 @@
 
 ## Consolidation 2026-07-14T06:49:55Z
 - [2026-07-14T06:49:45Z] Mafee/finding — dcf-pha2-echo-executor: {"job": "Mafee_20260714_064324", "status": "DONE", "summary": "Pha 2 DCF echo vào execution audit trail", "changes": {"trading_bot/plan.py": "+ dcf_check: dict = None, dcf_override_reason: str trong PlannedOrder (auto-loaded qua known-field filter đã có)", "trading_bot/executor.py": "+ dcf_check vào state[parents][order_id]; + bus event finding/dcf-rich-fill trong _sync_fills khi BUY+RICH+robust=True"}, "selfcheck": "dcf_check_selfcheck.py 8/8 PASS", "backward_compat": "plan cũ không có dcf_check: dcf_check=None, không event, không lỗi", "constraint": "KHÔNG gate, KHÔNG chặn lệnh — chỉ echo+log audit trail"}
+
+## Consolidation 2026-07-14T07:07:01Z
+- [2026-07-14T07:02:35Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "in_progress", "note": "Pha3 start: xac dinh harness + doc dcf_valuation API"}
+- [2026-07-14T07:03:09Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "in_progress", "note": "da xac dinh selector custom_basket.py SELECT_MODE=yieldcombo; dang doc dcf_valuation API"}
+- [2026-07-14T07:03:22Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260714_070221", "source": "watcher"}
+- [2026-07-14T07:04:23Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260714_070221", "source": "watcher"}
+- [2026-07-14T07:04:26Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "in_progress", "note": "Plan chot: overlay env-gated trong custom_basket.py yieldcombo branch + _dcf_tag filename (§8). Dang build FV+sens release cache."}
+- [2026-07-14T07:05:23Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260714_070221", "source": "watcher"}
+- [2026-07-14T07:06:24Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260714_070221", "source": "watcher"}
