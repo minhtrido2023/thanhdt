@@ -61,7 +61,7 @@ prompt="${2:?usage: dispatch.sh <agent_id> \"prompt\" [--bg] [--timeout SEC] [--
 shift 2
 
 bg=""
-TIMEOUT=600
+TIMEOUT=""
 RETRIES=1
 MODEL=""
 while [ $# -gt 0 ]; do
@@ -77,6 +77,20 @@ while [ $# -gt 0 ]; do
   esac
   shift
 done
+# Per-agent BASE-timeout default — applies only when the caller passed no --timeout.
+# DollarBill plan-T+1 jobs do 10-20+ min of real work and emit substantive heartbeats
+# only every ~5 min, so the generic 600s base + HB_FRESH_S=120s extension window kills
+# them mid-work (real HB is always >120s old at the 600s deadline → no extension).
+# Measured 2026-07-13: SpaceX plan needed 725s (survived on a lucky extension), ZaloPay
+# plan (job DollarBill_20260713_120124) was killed alive at 600s on BOTH attempts →
+# plan_ZaloPay_2026-07-14.json never written, bot had no plan on 07-14. Same mechanism
+# as the 07-06 "DollarBill treo" transition-plan timeouts.
+if [ -z "$TIMEOUT" ]; then
+  case "$id" in
+    DollarBill) TIMEOUT="${DISPATCH_TIMEOUT_DOLLARBILL:-1800}" ;;
+    *)          TIMEOUT=600 ;;
+  esac
+fi
 case "$MODEL" in
   ""|sonnet|opus|haiku|fable) ;;
   *) echo "ERROR: --model '$MODEL' không hợp lệ — dùng sonnet|opus|haiku|fable." >&2; exit 1 ;;
@@ -160,7 +174,7 @@ _looks_like_usage_limit() {  # <logfile> [<err_logfile>] -> 0 if the failure loo
   tail_text="$(tail -c 4000 "$lf" 2>/dev/null)"
   [ -n "$ef" ] && tail_text="$tail_text$(tail -c 4000 "$ef" 2>/dev/null)"
   if printf '%s' "$tail_text" | grep -qiE \
-      'usage limit|rate.?limit|resets at|quota exceeded|limit reached|rate_limit_error|"status":[[:space:]]*429'; then
+      'usage limit|session limit|rate.?limit|resets at|quota exceeded|limit reached|rate_limit_error|"status":[[:space:]]*429'; then
     return 0
   fi
   # Corroborate with the account-wide estimate — catches wording changes in future CLI
