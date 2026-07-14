@@ -412,6 +412,45 @@ WHERE t.time IN ({_rebal_in}) AND t.Price IS NOT NULL""")
         sc = np.where(d.PB.values < 0, 0.0, sc)
         sc = np.where(golden & bookok, np.maximum(np.nan_to_num(sc, nan=0.0), 1.0), sc)   # golden book-OK floor (=> selected first)
         return {t: (float(v) if pd.notna(v) else -1.0) for t, v in zip(toks, sc)}
+    # ---- AUDIT-ONLY dynamic sector cap (job Taylor_20260714_095953, sector-cap research) ----
+    # BASKET_SECCAP_MODE: "" (default, OFF -> byte-identical: sectorcap keeps the fixed `sector_cap`)
+    #   | "mktcap"   (variant B: cap sector_code at its PIT market-cap weight in ticker_prune)
+    #   | "mktx<f>"  (variant B': same x <f>, e.g. mktx1.5 = allow a 1.5x value tilt over market).
+    # Only meaningful with weight_scheme='sectorcap'. The cap is recomputed at EACH rebal date from
+    # ONLY that day's data (mcap = Close x as-of OShares, identical definition to the basket's own
+    # mcap, so basket weight and market weight are on one scale) -> no look-ahead.
+    SECCAP_MODE = os.environ.get("BASKET_SECCAP_MODE", "").lower()
+    seccap_by_date = {}
+    if SECCAP_MODE:
+        if weight_scheme != "sectorcap":
+            raise ValueError(f"BASKET_SECCAP_MODE={SECCAP_MODE} only defined for weight_scheme=sectorcap")
+        if SECCAP_MODE == "mktcap":
+            _mult = 1.0
+        elif SECCAP_MODE.startswith("mktx"):
+            _mult = float(SECCAP_MODE[4:])
+        else:
+            raise ValueError(f"BASKET_SECCAP_MODE={SECCAP_MODE} unknown (mktcap|mktx<f>)")
+        _rin = ",".join(f"DATE '{pd.Timestamp(x).date()}'" for x in rebal_dates)
+        _mk = bq(f"""WITH fin AS (
+  SELECT f.ticker, f.time AS ftime, f.OShares,
+    LEAD(f.time) OVER (PARTITION BY f.ticker ORDER BY f.time) AS nft
+  FROM tav2_bq.ticker_financial AS f WHERE f.OShares IS NOT NULL)
+SELECT t.time, CAST(FLOOR(t.ICB_Code/1000) AS INT64) AS sec, SUM(t.Close*fin.OShares) AS mcap
+FROM tav2_bq.ticker AS t
+JOIN fin ON fin.ticker=t.ticker AND t.time>=fin.ftime AND (fin.nft IS NULL OR t.time<fin.nft)
+WHERE t.time IN ({_rin}) AND t.ICB_Code IS NOT NULL AND t.Close IS NOT NULL
+  AND t.ticker IN (SELECT DISTINCT t2.ticker FROM tav2_bq.ticker_prune t2)
+GROUP BY t.time, sec""")
+        _mk["time"] = pd.to_datetime(_mk["time"])
+        for _d, _g in _mk.groupby("time"):
+            _tot = float(_g["mcap"].sum())
+            if _tot <= 0: continue
+            _w = float(_g.loc[_g["sec"] == sector_code, "mcap"].sum()) / _tot
+            seccap_by_date[pd.Timestamp(_d)] = min(1.0, _w * _mult)
+        if seccap_by_date:
+            _vv = pd.Series(seccap_by_date)
+            print(f"  [sector-cap dyn] mode={SECCAP_MODE} sec={sector_code}: PIT market weight x{_mult} "
+                  f"-> cap over {len(_vv)} rebals: min {_vv.min():.3f} / med {_vv.median():.3f} / max {_vv.max():.3f}")
     members = {}  # rebal_date -> list[(ticker, qmult)]
     mem_rows = []
     for d in rebal_dates:
@@ -577,7 +616,10 @@ WHERE t.ticker IN ({inlist})
                     W = base / base.sum() if base.sum() > 0 else base
                     if weight_scheme == "sectorcap":
                         sv = np.array([sec_map.get(t, -1) for t, ok in zip(tks, valid) if ok])
-                        W = _cap_sector(W, sv, sector_code, sector_cap)
+                        # dynamic cap (audit-only): the cap set at THIS day's active rebal date `aq`;
+                        # absent flag -> the fixed `sector_cap` (default path, byte-identical).
+                        _scap = seccap_by_date.get(aq, sector_cap) if seccap_by_date else sector_cap
+                        W = _cap_sector(W, sv, sector_code, _scap)
                         W = _cap_names(W, name_cap)
                     elif weight_scheme == "namecap":
                         W = _cap_names(W, name_cap)

@@ -3205,3 +3205,81 @@ production (`BASKET_DCF_MODE` default OFF → production byte-identical). Route 
 **Artifacts**: `data/*_exp_dcfplacebo<1..20>.csv` (§8: seed trong filename), `dcf_placebo_test.py`,
 `data/dcf_placebo_logs/` (runner.sh + 20 log + DONE_MARKS).
 Reproduce: `SEEDS="1 2 3" bash data/dcf_placebo_logs/runner.sh` → `$DNA_PYEXE dcf_placebo_test.py`
+
+---
+
+## Sector-cap cho custom30V (yieldcombo basket) — **NO-GO cả 3 biến thể** (2026-07-14, job `Taylor_20260714_095953`)
+
+**Câu hỏi:** basket custom30V dùng `BASKET_WT=namecap` (cap tên 10%, KHÔNG cap ngành). Tại rebal
+2026-05-05 sector-8 (ICB/1000=8 = ngân hàng 8355 + BĐS 8633 + CK/DVTC 8773/8777) = **95.5%** rổ.
+Cap ngành có cải thiện risk-adjusted không? (`weight_scheme="sectorcap"` có sẵn trong code từ
+2026-06-15 nhưng **chưa từng backtest**.)
+
+**Lệnh (§8: mỗi run 1 `EXP_TAG` riêng → CSV R3 pinned KHÔNG bị đụng; đã verify mtime R3 = Jul 12):**
+```bash
+# baseline / A / B / B×1.5 — chung: NAV_TOTAL_B=50 ETF_LIQ=custompitg BASKET_SELECT=yieldcombo
+# BQ_CACHE_THREADS=1 PARK_STATES="3:0.7" AUDIT_END=2026-06-19 $DNA_PYEXE pt_v23_audit_2014.py v23a none postbull 0 edge
+EXP_TAG=seccap_base   BASKET_WT=namecap
+EXP_TAG=seccap_Afix50 BASKET_WT=sectorcap                                 # A: fixed cap 0.50 (code có sẵn)
+EXP_TAG=seccap_Bmkt   BASKET_WT=sectorcap BASKET_SECCAP_MODE=mktcap       # B: cap = mkt-cap w8 PIT
+EXP_TAG=seccap_Bx15   BASKET_WT=sectorcap BASKET_SECCAP_MODE=mktx1.5      # B×1.5: value-tilt allowance
+```
+
+**Full harness (self-check 0 VND cả 4 run):**
+
+| Biến thể | CAGR | Sharpe | MaxDD | Calmar | IS 14-19 | OOS 20-26 |
+|---|---|---|---|---|---|---|
+| baseline (namecap = production) | 27.09% | 1.81 | −18.3% | 1.48 | 23.37 | 30.58 |
+| A fix50 | 26.88% | 1.81 | −18.1% | 1.48 | 23.30 | 30.23 |
+| B mktcap | 26.93% | 1.82 | −18.1% | 1.49 | 23.22 | 30.40 |
+| B×1.5 | 27.05% | 1.82 | −18.3% | 1.48 | 23.27 | 30.60 |
+
+Δ vs baseline: A −0.21pp (IS −0.07 / OOS −0.35) · B −0.16pp (IS −0.15 / OOS −0.18) → **chữ ký
+IS/OOS ÂM cả hai vế** = trượt chuẩn PASS. (baseline 27.09 ≠ 27.84 pinned = data-drift adj-price;
+đã tự chạy baseline cùng snapshot để so cùng thước — đúng META caveat.)
+
+**Vehicle thuần (custom30V level, không pha loãng bởi BAL/LAG) — số quyết định:**
+
+| Biến thể | CAGR | Sharpe | **MaxDD** | Calmar |
+|---|---|---|---|---|
+| baseline | 29.86% | 1.24 | **−41.0%** | 0.73 |
+| A fix50 | 28.71% | 1.22 | **−42.1%** | 0.68 |
+| B mktcap | 28.59% | 1.22 | **−42.1%** | 0.68 |
+
+→ **Cap ngành làm XẤU ĐI mọi chiều KỂ CẢ drawdown.** Trực giác "tập trung=rủi ro→cap sẽ giảm DD"
+**bị số liệu bác**: đuôi phi-tài-chính của rổ là small-cap beta cao, sập mạnh hơn bank large-cap.
+0.2pp DD "cải thiện" ở full harness = nhiễu pha loãng, không phải cơ chế. Turnover A/B 2.72×/năm
+vs baseline 2.43× (+0.09pp phí/năm @TC 0.3%) mà harness **không hề charge** (`build_pit`:
+`ret=Σ(W×r)`, không có phí nội bộ basket) → −0.21pp của A là **cận trên lạc quan**.
+
+**Task 1 — tập trung ngành là DRIFT dài hạn, không phải cực đoan nhất thời** (48 rebal q2m5,
+trọng số dựng lại khớp `custom30v_8l_publish.csv` tới 4 chữ số → LÀ số production):
+w8 2014 0.25 → 2016 0.14 → 2018 0.57 → 2020 0.57 → 2022 0.74 → 2024 0.77 → **2026-05-05 0.955**.
+**ĐÍNH CHÍNH tiền đề dispatch:** mkt-cap w8 thật của `ticker_prune` **KHÔNG** phải 25-35% —
+mean **47.0%**, hiện tại **63.7%**. Thị trường VN thật sự nặng tài chính; basket vượt thị trường
+36/48 rebal (tilt thật) nhưng phần lớn mức tập trung là **phản chiếu thị trường**.
+
+**⚠️ Cảnh báo phương pháp:** cap bind 25-26/26 rebal OOS nhưng chỉ 6/22 (A) IS → cơ chế **ngủ đông
+in-sample**, walk-forward IS/OOS **là công cụ SAI** ở đây (đúng bài học DT5G "IS = +0.00pp exactly").
+Verdict dựa trên vehicle-level + dấu nhất quán mọi chiều, không dựa chữ ký IS/OOS.
+
+**Verdict: NO-GO — không wire gì.** Không phải "edge nhỏ" mà **sai dấu mọi chiều đo**. Không cần
+DSR/PBO (chỉ có nghĩa khi có ứng viên dương). Lý do bản chất: tập trung sector-8 là **hệ quả cơ học
+của value axis** (1/PE+1/PCF; bank VN PE/PCF thấp cấu trúc) — đúng factor mạnh nhất của hệ (IC
++0.125, "Value dominates ALL regimes"). Cap ngành = cắt chính alpha đó, đổi lấy đuôi small-cap
+kém-value + rủi ro hơn. Rủi ro tập trung là THẬT & đáng theo dõi, nhưng **sector-cap không phải
+công cụ xử lý nó**.
+
+**Task 3 — lệnh HPG→LPB:** sector-cap là cơ chế TRỌNG SỐ, không phải cơ chế CHỌN TÊN → 30 tên
+**giống hệt** dưới mọi biến thể. LPB **là** thành viên dưới cả 3 (baseline 5.25% / A 2.75% /
+B 3.50%); HPG **không** là thành viên dưới bất kỳ biến thể nào. → swap vẫn đúng hướng; sector-cap
+không đưa ra tên khác thay LPB (chỉ đổi size ~½ + kéo theo rebalance rộng 13 tên đuôi).
+
+**Production KHÔNG đổi gì**: `BASKET_SECCAP_MODE` default OFF = byte-identical (guard
+`seccap_dyn_selfcheck.py` 9/9 PASS: OFF byte-identical · dyn bind thật · multiplier · raise khi
+sai weight_scheme · đại số `_cap_sector`). `custom_basket.py` default, `BASKET_WT` production,
+`trading_rules.json`, plan hiện tại: **không chạm**.
+
+**Artifacts**: `mike/agents/Taylor/sector_cap_framework.md` (phương pháp mcap ngành + cách cap),
+`sector_conc_audit.py` + `sector_conc_history.csv` (48 rebal), `seccap_vehicle_compare.py` + `.csv`,
+`seccap_dyn_selfcheck.py`, `data/*_exp_seccap_{base,Afix50,Bmkt,Bx15}.csv`, log `mike/agents/Taylor/seccap_logs/`.
