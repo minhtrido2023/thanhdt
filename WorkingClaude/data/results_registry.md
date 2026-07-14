@@ -3443,3 +3443,46 @@ là bước mạnh hơn (**thay 1/PCF bằng pb_z**). Và `v3latest` **cũng đ�
 `route_v3latest_arm.py` (arm quyết định), `route_fix_compare.py`, `route_abstain_sens.py`, `route_placebo.py`,
 `attribution_metrics.csv`, `abstain_sens_metrics.csv`, `placebo_v3route3.csv`, `vehicle_metrics_fix.csv`,
 `vehicle_level_*.csv`, `members_*.csv`, `logs/*.log` · `route_selector_selfcheck.py` (7 nhóm ALL PASS).
+
+## 🔬 CƠ CHẾ — vì sao thước đo "sai bản chất" (1/PCF cho bank) THẮNG thước đo "chuẩn hơn" (pb_z) + lời giải cho v3latest IS+1.40/OOS−0.78 (Taylor 2026-07-14, job `Taylor_20260714_132942`)
+**NGHIÊN CỨU CƠ CHẾ — KHÔNG có ứng viên wire, KHÔNG chạm production, KHÔNG arm backtest mới.** Trả lời câu hỏi user sau NO-GO `v3route` (job 121717). Doc đầy đủ: `mike/agents/Taylor/route_aware_selector_framework.md` **§11**. Scripts: `route_exp/{mech_bank_pbz,mech_attribution,mech_scale_drift}.py`. Dữ liệu: panel PIT đông băng `data/value_panel_2014.csv` + `members_*.csv` (job 112932).
+
+**TRẢ LỜI:** `1/PCF` **chưa bao giờ làm việc ĐỊNH GIÁ cho ngân hàng — nó làm việc PHÂN BỔ NGÀNH.** CFO ngân hàng = dòng huy động/cho vay (user đúng), nhưng sai **theo MỘT CHIỀU CÓ HỆ THỐNG** → `1/PCF` ngân hàng luôn cao → **bank ngồi percentile 0.711 TOÀN THỊ TRƯỜNG trên trục cfy vs 0.496 của phi-ngân-hàng** (coverage PCF>0: 0.742 vs 0.590). Phép cắt top-30 **CHÉO ngành** biến lệch đó thành **suất nhập rổ** ⇒ `yieldcombo` = **cỗ máy overweight bank đội lốt thước đo định giá**. Bank VN thắng **+1.29pp fwd2M** vs phần còn lại (IS +0.47 / OOS +1.39). ⇒ **thước đo sai đã MUA MỘT VỊ THẾ ĐÚNG; "sửa" phép đo = THANH LÝ vị thế.** Backtest chấm vị thế, không chấm phép đo. Hai mệnh đề cùng đúng, không mâu thuẫn: (1) `pb_z` đúng bản chất bank-vs-bank hơn; (2) thay `1/PCF`→`pb_z` làm hệ tệ (−2.38pp) — vì **leg `1/PCF` bị thay KHÔNG hề đang xếp hạng bank-vs-bank, nó đang giữ tỷ trọng ngành.**
+
+**Bằng chứng A — tiền đề "pb_z dự báo tốt hơn" KHÔNG được dữ liệu ủng hộ** (IC rank cross-section TRONG route BANK, target `profit_2M` T+40, gộp (ticker,quarter)=last, 27 tên/50 quý/TB 19.2 tên/quý):
+| lens | IC full | t | hit | IC IS | IC OOS |
+|---|---|---|---|---|---|
+| `pb_z` (cheap=high) | **+0.065** | **1.17** | 58% | +0.023 | +0.096 |
+| `cfy=1/PCF` (thước đo "SAI") | **+0.086** | 1.65 | 49% | +0.140 | +0.033 |
+| `ey=1/PE` | **+0.181** | **3.79** | 65% | +0.167 | +0.194 |
+⇒ `pb_z` **t=1.17 không phân biệt được với 0**; thước đo "sai" xếp hạng bank **NHỈNH HƠN**; cả hai bị `1/PE` áp đảo — mà **cả 2 arm đều đã có `1/PE`**.
+⚠️ **`+0.136` ở `rating_8l.py:649` KHÔNG TRUY VẾT ĐƯỢC** — grep toàn repo: chỉ tồn tại dưới dạng comment (`rating_8l.py:649`, `custom_basket.py:367`), **không artifact/script/dòng registry gốc**. Job 112932 trích nó như "đã validate" — **chưa từng validate ở đâu tìm được**. Đo lại: **+0.065**. → **số không truy vết được, không phải bằng chứng.** (Đề xuất dọn comment = task riêng có skeptic; KHÔNG sửa trong job research.)
+
+**Bằng chứng B — H3 XÁC NHẬN: `pb_z` là cờ ĐUÔI, không phải trục XẾP HẠNG.** `rating_8l.py:646` **tự ghi**: *"pb_z is **LINEAR-DEAD** (golden-cell flag only) + TRAP guard"* / *"RETAIN pb_z (0.35) for its **NON-linear** value the IC can't see"*. `value_score_v2` lại dùng nó qua leg **TUYẾN TÍNH** `0.35·(0.5−pb_z/2)` = **category error**. Bucket trong BANK: `pb_z≤−1` (golden cell) fwd2M **+9.30%** vs `>+1` **+2.06%** — hiệu ứng đuôi THẬT **nhưng chỉ nổ 3.9% bank-quarter** (và **0.0% trong 2017/2018/2021**). Phân phối `pb_z` bank **lệch phải nặng** (median **+0.71**, 30% >+1, chỉ 3.9% <−1) vì **bank VN re-rate LÊN từ nền thấp** → PB gần như luôn TRÊN MA5Y của chính nó ⇒ với bank, `pb_z` **không đo "rẻ"**, nó đo **drift định giá vs quá khứ gần**.
+
+**Bằng chứng C — H6 (mới) XÁC NHẬN: leg TUYỆT ĐỐI trong phép cắt CHÉO = cược thời điểm ngành ẩn.** Mọi leg khác (`ey/cfy/ps`, cả leg `ey` của v2) là **PERCENTILE chuẩn hoá lại mỗi quý**; leg `pb_z` là **TUYỆT ĐỐI**.
+| | mean | **sd QUA CÁC QUÝ** | range |
+|---|---|---|---|
+| leg TUYỆT ĐỐI `(0.5−pb_z/2)` (đang dùng) | 0.343 | **0.235** | 0.000…0.863 |
+| leg PERCENTILE của **cùng pb_z** (đối chứng) | 0.573 | **0.083** | 0.519…1.000 |
+**38.7% phương sai `pb_z` bank = CÚ DỊCH CHUNG của cả ngành**; mean `pb_z` ngành swing **−0.78…+3.05 = 3.83 z-unit** → leg tuyệt đối dịch cả ngành **1.92 điểm** trong khi **range của leg chỉ 0..1** ⇒ leg bị cú dịch chung lấn át. Hệ quả: PB toàn ngành nhích lên → **MỌI bank cùng bị hạ điểm** → **bị đẩy khỏi top-30 hàng loạt**, không liên quan bank nào hấp dẫn hơn. Percentile miễn nhiễm (median bank luôn ~0.5 → chỉ nói "bank NÀO", không bao giờ nói "BAO NHIÊU bank"). Xác nhận trên rổ thật: Spearman(Δslot do route fix, median `pb_z` ngành) = **−0.153**; 2017Q4–2019Q3 (median +0.9…+2.8) cắt đều −1..−2 slot, 2021Q4 (median +2.33) cắt **−3**. **Và KHÔNG có kỹ năng timing**: Spearman(Δslot bank, bank−nonbank fwd2M quý đó) = **+0.127** (n=47; IS +0.084/OOS +0.145) ≈ 0.
+
+**Bằng chứng D + LỜI GIẢI CHO v3latest IS+1.40/OOS−0.78 (registry L144-154, 2026-06-22).** Bank share THẬT của rổ 30 tên (48 quý, `members_*.csv`):
+| arm | bank share FULL | IS 2014-19 | **OOS 2020+** | bank/quý |
+|---|---|---|---|---|
+| **`yieldcombo` (production)** | **24.1%** | 10.3% | **35.8%** | **7.23** |
+| `v3latest` | 15.1% | 7.7% | 21.3% | 4.52 |
+| `v3route3` | 13.0% | 4.9% | 19.9% | 3.90 |
+Bank vs non-bank fwd2M: FULL **+4.06 vs +2.77 = +1.29pp** | IS **+2.10 vs +1.62 = +0.47pp** | **OOS +4.95 vs +3.56 = +1.39pp**. Ghép lại:
+| cửa sổ | Δ bank share (v3latest−yieldcombo) | × (bank−nonbank) | = drag/2M | **≈ drag/năm (×6)** |
+|---|---|---|---|---|
+| IS 2014-19 | **−2.6pp** | +0.47pp | −0.012pp | **−0.07pp/yr ≈ 0** |
+| **OOS 2020+** | **−14.5pp** | +1.39pp | −0.201pp | **−1.21pp/yr** |
+⇒ **`v3latest` KHÔNG "hết thiêng" OOS — nó vẫn chọn tên tốt như thường, nhưng nó ĐANG SHORT ngành đã thắng, và OOS ngành đó thắng đậm hơn ×3.** Alpha chọn-tên gần như không đổi giữa 2 cửa sổ; **chi phí underweight bank nhân ba** → dấu lật `+`→`−`. **Không phải "overfit IS" theo nghĩa cổ điển** (fit nhiễu quá khứ) — là một **vị thế ngành ẩn** bị đổi mà không ai khai báo.
+*⚠️ Giới hạn (ghi rõ):* ước lượng **equal-weight per-slot ×6**, KHÔNG phải NAV namecap theo ngày; fwd2M chồng lấn nên ×6 là thô. Khớp **CHIỀU + ĐỘ BẤT ĐỐI XỨNG IS/OOS** của số đã pin, **KHÔNG phải tái lập −0.78pp** — dùng làm bằng chứng cơ chế, **đừng quote như số hệ**. *Proxy THẤT BẠI đã ghi lại thay vì giấu:* Brinson equal-weight per-slot (`mech_attribution.py`) cho dR IS **+0.052 = SAI DẤU** vs cấp hệ (−2.56pp) → **không dùng để quy công** (đúng bài học §10.4: proxy equal-weight đảo dấu với đúng họ selector này).
+
+**Phán quyết giả thuyết dispatch:** **H1 XÁC NHẬN** (mạnh hơn dự đoán — không "tình cờ mang tin" mà là **lệch có hệ thống 1 chiều → overweight ngành cơ học**) · **H2 BÁC** (bank `pb_z` thấp nhất mỗi quý fwd2M **+5.08%** vs toàn bank +4.06% = **TỐT HƠN**, không phải bẫy rủi ro; điểm này của finding gốc đứng vững) · **H3 XÁC NHẬN 2 tầng** (linear-dead + số +0.136 không truy vết) · **H4 KHÔNG ủng hộ** (IC `pb_z` theo năm nhảy 2 chiều cả trước/sau 2020 = nhiễu, **không có breakpoint**; cái ĐỔI quanh 2020 là **mức thắng của NGÀNH** +0.47→+1.39pp và **bank share yieldcombo tự chất lên** 10.3%→35.8%) · **H5 BÁC** (vấn đề ĐÚNG ở trục bank) · **H6 mới XÁC NHẬN**.
+
+**⚠️ RỦI RO MỚI VỀ PRODUCTION — cần Mike/user quyết, Taylor KHÔNG tự đề xuất thay đổi:** custom30V production đang mang **vị thế OVERWEIGHT NGÂN HÀNG không ai chủ ý đặt và không ai quản** — **24.1% rổ toàn kỳ, 35.8% OOS 2020+, có quý 15/30 tên** (2025Q2-Q3). Nó **không đến từ quyết định** mà là **tác dụng phụ của lỗi đo lường** (`1/PCF` cho bank) — đúng thứ user chỉ ra. Hai mặt: (a) **đã trả tiền** (+1.29pp/2M, **LOO 13/13 năm dương**, min +0.755 khi bỏ 2017) ⇒ "sửa cho đúng lý thuyết" = phá giá trị thật (đã chứng minh 2 lần: −0.78pp, −2.38pp); (b) **bằng chứng thống kê MỎNG** — spread bank−nonbank theo quý **t=0.80, hit 46.9%** (IS t=0.25/OOS t=0.83) ⇒ **KHÔNG phải alpha đã validate**, là **cú đặt cược ngành dai dẳng sinh ra do tai nạn, đang thắng**. ⇒ **Không arm nào có alpha định giá đã validate ở tầng bank; cuộc so sánh được quyết bởi một cú cược ngành ngoài ý muốn, KHÔNG phải bởi độ chính xác thước đo.** Câu hỏi cho user/Mike: **24-36% rổ đỗ tiền nằm ở ngân hàng — có phải vị thế ta MUỐN giữ có chủ ý không?** CÓ → khai báo tường minh thành rule tỷ trọng ngành kiểm soát được, thay vì để phát sinh như tác dụng phụ của lỗi đã biết. KHÔNG → **cũng đừng "sửa" bằng đổi selector** (đã đo 2 lần, tệ hơn). Đây là câu hỏi **risk-concentration** — hợp lý hỏi thêm Spyros.
+
+**Hướng route-aware duy nhất còn logic (GHI NHẬN, KHÔNG theo đuổi — cần user/Mike quyết mở dự án riêng):** nếu vẫn muốn "chấm bank bằng thước đo của bank" mà **không phá tỷ trọng ngành** → dạng đúng là **percentile TRONG route** (ghim ~0.5, chỉ đổi "bank nào" không đổi "bao nhiêu bank"). **Prior THẤP**: `pb_z` trong bank IC +0.065 (t=1.17) — gần như không có gì để thu hoạch, `1/PE` đã làm hết việc. **Taylor KHÔNG mở.**
