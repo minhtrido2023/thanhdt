@@ -3283,3 +3283,78 @@ sai weight_scheme · đại số `_cap_sector`). `custom_basket.py` default, `BA
 **Artifacts**: `mike/agents/Taylor/sector_cap_framework.md` (phương pháp mcap ngành + cách cap),
 `sector_conc_audit.py` + `sector_conc_history.csv` (48 rebal), `seccap_vehicle_compare.py` + `.csv`,
 `seccap_dyn_selfcheck.py`, `data/*_exp_seccap_{base,Afix50,Bmkt,Bx15}.csv`, log `mike/agents/Taylor/seccap_logs/`.
+
+## Route-aware custom30V selector `BASKET_SELECT=v3route` — **CẦN VERIFY THÊM (lean GO, KHÔNG WIRE)** (2026-07-14, job `Taylor_20260714_112932`)
+
+**Tiền đề (user)**: `yieldcombo` (production) xếp hạng bằng `rank(1/PE)+rank(1/PCF)` cho MỌI tên →
+so ngân hàng với công ty sản xuất trên cùng thước `1/PCF`. PCF của bank = dòng tiền gửi/cho vay
+(bảng cân đối), KHÔNG phải tiền do lõi kinh doanh tạo ra → **không so ngang hàng được**.
+
+**v3route** = `v3latest` + đúng 1 đổi: BANK/INSURANCE/SECURITIES chấm bằng `rating_8l.value_score_v2`
+verbatim (`0.65*ey_pct_WITHIN_route + 0.35*(0.5-pb_z/2) + cfo_confirm(±0.05/-0.08) + track_bonus`;
+pb_z IC **+0.136** cho BANK, đã validate — không chế số mới). Mọi route khác **byte-identical
+v3latest** → ablation sạch 1 trục. REALESTATE/POWER **cố ý giữ** đường v3latest (ablation riêng).
+
+**Config**: NAV_TOTAL_B=50, PARK_STATES=3:0.7, DT5G, threads=1, AUDIT_END=2026-06-19, BASKET_WT=namecap.
+**Self-check 0 VND cả 2 arm** (BAL+LAG). Cả 2 arm chạy CÙNG hôm nay/cùng vintage → delta hợp lệ.
+
+| VEHICLE (custom30V standalone) | CAGR | Sharpe | MaxDD | Calmar | CAGR IS | CAGR OOS |
+|---|---|---|---|---|---|---|
+| yieldcombo | 29.83% | 1.24 | −40.98% | 0.73 | 23.53% | 35.89% |
+| **v3route** | **37.47%** | **1.51** | **−36.39%** | **1.03** | **29.68%** | **45.12%** |
+| Δ | **+7.63pp** | +0.27 | **+4.59pp tốt hơn** | +0.30 | **+6.15pp** | **+9.24pp** |
+
+| HỆ 2-book V2.4 đầy đủ | CAGR | Sharpe | MaxDD | Calmar |
+|---|---|---|---|---|
+| baseline yieldcombo | 27.09% | 1.81 | −18.3% | 1.48 |
+| **v3route** | **27.96%** | **1.88** | **−18.6%** | **1.50** |
+| Δ | **+0.87pp** | +0.07 | **−0.3pp xấu hơn** | +0.02 |
+
+**Multiple-testing (KB §5)**: N trials = 10 selector mode. **DSR = 1.0000 PASS** mọi N (10/25/50/138)
+— *nhưng tự hạ trọng số: DSR chấm NAV toàn hệ, Sharpe do V2.4 quyết định chứ không phải cú swap*.
+**Per-year LOO: edge CAGR dương 13/13** (min +0.36pp @drop 2017, max +1.48pp @drop 2024); **Calmar
+dương 12/13** (drop 2017 = −0.002 ≈ hoà) → **KHÔNG phải reshuffle-luck 1-2 năm** (khác DCF varA).
+Recompute độc lập từ CSV: **+0.88pp** vs harness **+0.87pp** (lệch do calendar-time vs 252d) → khớp.
+
+**⚠️ OBJECTION THẬT — 3 năm gần nhất ÂM ở cấp hệ**: 2024 **−5.57pp** / 2025 **−1.24pp** / 2026
+**−2.37pp**. Thắng 8/13 năm (mean +0.92 / median +1.08pp); edge tập trung 2016-18 + 2022-23. LOO cho
+thấy các năm gần đây **kéo edge xuống** (bỏ 2024 → edge tăng +1.48pp), không tạo ra nó. Edge vẫn
+dương 13/13 nên chưa bị lật, nhưng **câu hỏi mở: noise 3 năm hay cơ chế đang xói mòn?** → đây là
+killer objection phải giao quant-skeptic.
+
+**Basket rebal 2026-05-05 (overlap 21/30)**: **FINANCIAL 18/30 → 10/30; BANK 13/30 → 6/30.**
+OUT: BID·CTG·LPB·MBB·TCB·VCB[BANK], EVF[SEC], DCM[CYC]. IN: FPT·GAS·VNM·PNJ·DGW·GEE[COMPOUNDER],
+DIG·HDG[RE], HPG[CYC]. → bỏ thước 1/PCF sai thì **một nửa ngân hàng rơi ra** (chúng vào rổ nhờ chỉ
+số vô nghĩa với chúng). **HPG: yieldcombo OUT → v3route IN (liq_rank 29); LPB: IN → OUT** ⇒ **v3route
+đảo ngược đúng 180° cả 2 lệnh plan 07-14 (bán HPG / mua LPB)** — user HOLD hôm nay là may; chốt
+hướng selector TRƯỚC khi xử nốt basket-drift HPG.
+
+**Selfcheck** `route_selector_selfcheck.py` **6/6 PASS**: OFF byte-identical (default `blend`) ·
+bóp PCF của ACB → v3route **0.0000** vs v3latest 0.0353 (trục thật sự đổi) · bóp pb_z → 0.0431 ·
+1010 tên phi-tài-chính **0 khác biệt**, 79/79 tài chính ĐỀU đổi · rank WITHIN route (shock PE thị
+trường → 0 bank dịch) · thiếu pb_z → **abstain −1**, không bịa 0.5 · v2 tái lập rating_8l đúng 6 chữ
+số (ACB 0.538235 vs 0.538235).
+
+**⚠️ SỰ CỐ ĐÃ XỬ LÝ — canonical R3 CSV bị ghi đè**: baseline (`yieldcombo` → `_sel_tag` rỗng theo
+thiết kế) ghi đè đúng file pinned `..._wtnamecap.csv` lúc 18:42 (đúng mẫu §8 2026-07-06). **Đã khôi
+phục** từ `R3_pinned_backup_20260714.csv`, verify md5 `4d736d91…` khớp lại `_exp_dropMOMN-MOMS.csv`
+(= R3 pinned thật). Rerun hôm nay giữ ở `_exp_selbaseline20260714.csv`. Bài học: tag rỗng bảo vệ
+*tên file production*, KHÔNG bảo vệ *artifact pinned* khỏi một rerun hợp lệ.
+
+**⚠️ PHÁT HIỆN PHỤ — R3 pinned KHÔNG tái lập được trên vintage hôm nay**: baseline production chạy
+lại = **27.09%** vs registry pin **27.84%** (07-12) → **−0.75pp thuần data vintage** (fix cache 8L /
+ticker_prune chunked 07-13). Mọi run hôm nay nhất quán với nhau (md5 khớp `_exp_dcfctrl20260714`) nên
+A/B vẫn hợp lệ, **nhưng cần quyết định re-pin R3 riêng** — nền so sánh đang trôi.
+
+**Rủi ro tồn dư (pre-existing)**: `build_value_panel.py` khai báo route bằng **port copy-paste** của
+`rating_8l.route_of` (dòng 71), không import → 2 nguồn sự thật. Đối chiếu tay: **hiện khớp 100%**.
+Đề xuất (ngoài phạm vi job): panel import trực tiếp từ `rating_8l`.
+
+**Production KHÔNG đổi gì**: `BASKET_SELECT` default = `blend`; production set `yieldcombo` tường
+minh → không bao giờ vào nhánh v3route. `custom_basket.py` default / `BASKET_WT` / `trading_rules.json`
+/ plan hiện tại: **không chạm**. **BẮT BUỘC quant-skeptic CONFIRMED trước mọi cân nhắc wire.**
+
+**Artifacts**: `mike/agents/Taylor/route_aware_selector_framework.md`, `route_selector_selfcheck.py`,
+`mike/agents/Taylor/route_exp/` (logs/, vehicle_metrics.csv, members_{v3route,yieldcombo}.csv,
+basket_compare.py, route_robustness.py, R3_pinned_backup_20260714.csv),
+`data/*_exp_selv3route.csv` + `data/*_exp_selbaseline20260714.csv`.

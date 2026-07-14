@@ -512,11 +512,18 @@ BAL_DROP_TIERS = [t.strip() for t in os.environ.get("BAL_DROP_TIERS", "").split(
 _droptag = ("" if not BAL_DROP_TIERS else
             "_exp_dropnone" if BAL_DROP_TIERS == ["none"] else
             "_exp_drop" + "-".join(t.replace("MOMENTUM", "MOM").replace("_", "") for t in BAL_DROP_TIERS))
+# SELECTOR tag (coding_guidelines §8, added job Taylor_20260714_112932): BASKET_SELECT materially
+# changes the numbers but had NO filename suffix -> an experiment variant silently wrote onto the
+# registry-pinned R3 path (the 2026-07-06 overwrite incident, registry line ~74). Production
+# (yieldcombo, and the legacy default "blend") keep an EMPTY tag so the canonical filenames are
+# unchanged/byte-identical; every other selector gets an explicit _exp_sel<mode> path.
+_sel_tag = ("" if os.environ.get("BASKET_SELECT", "").lower() in ("", "blend", "yieldcombo")
+            else "_exp_sel" + os.environ["BASKET_SELECT"].lower())
 AUDIT_PATH  = os.path.join(WORKDIR, "data",
                            {"v23a": "v23_golive_audit_2014_now.csv",
                             "v23c": "v23c_golive_audit_2014_now.csv",
                             "v22base": "v22base_audit_2014_now.csv",
-                            "singlebook": "singlebook_audit_2014_now.csv"}.get(MODE, MODE+"_audit.csv").replace(".csv", _capsuf + _matsuf + _liqsuf + _park_tag + _wt_tag + _sz_tag + _qs_tag + _qt_tag + _bullpark_tag + _c30b_tag + _recpark_tag + _vm_tag + _dnpr_tag + _dvr8l_tag + _dcf_tag + _droptag + _NAV_TAG + _START_TAG + ".csv"))
+                            "singlebook": "singlebook_audit_2014_now.csv"}.get(MODE, MODE+"_audit.csv").replace(".csv", _capsuf + _matsuf + _liqsuf + _park_tag + _wt_tag + _sz_tag + _qs_tag + _qt_tag + _bullpark_tag + _c30b_tag + _recpark_tag + _vm_tag + _dnpr_tag + _dvr8l_tag + _dcf_tag + _droptag + _sel_tag + _NAV_TAG + _START_TAG + ".csv"))
 
 BUY_TIERS_V11 = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
                  "MOMENTUM_A","MOMENTUM_S_N","COMPOUNDER_BUY","DEEP_VALUE_RECOVERY","S_PRO",
