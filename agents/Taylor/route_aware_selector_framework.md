@@ -842,3 +842,66 @@ căn cứ đảo lệnh**: A1/A2 chưa qua skeptic, delta nằm trong nhiễu, v
 `dy_floor_panel.csv`, `dy_floor_results.csv`, `fin_weight_by_quarter.csv`, `fin_weight_summary.csv`,
 `finweight_definitions.csv`, `basket_20260505.md`. Code: `custom_basket.py` (`eyfin`/`eyonly`/`fincap`,
 nhánh mới, nhánh cũ không đụng), `v4final_lib.py`, `v4final_selector_selfcheck.py`.
+
+---
+
+# §13. ĐỊNH HƯỚNG DÀI HẠN CHO SELECTOR — chỉ đạo của user (chủ tài khoản), 2026-07-14
+
+Ghi lại nguyên văn ý chính sau khi user xem trọn kết quả ngày 2026-07-14 (chuỗi 112932 → 121717 →
+132942 → 140127). **Đây là GHI CHÉP ĐỊNH HƯỚNG cho các phiên nghiên cứu SAU, không phải kết quả đo,
+không phải yêu cầu backtest, và không mở rộng phạm vi bất kỳ job nào đang chạy.** Không diễn giải
+thêm ngoài 4 ý dưới; phần "ghi chú neo" chỉ trỏ tới thứ ĐÃ có trong hệ thống để phiên sau không phải
+đi tìm lại.
+
+## 13.1 `ey` (1/PE) = thước đo THỰC DỤNG cho GIAI ĐOẠN NÀY — không phải điểm đến cuối cùng
+
+> VN là thị trường mới nổi, trình độ nhà đầu tư trung bình chưa cao ⇒ một thước đo **đơn giản** phù
+> hợp với giai đoạn này.
+
+Ghi chú neo: khớp với số đo hiện có — 1/PE là factor mạnh nhất và route-neutral của hệ (KB: IC
++0.125, 94% hit; "Value dominates ALL regimes"; trong chính route BANK: IC +0.181 t=3.79, mạnh hơn cả
+`pb_z` lẫn 1/PCF). Chấp nhận `ey` ở đây là chấp nhận **có ý thức về giai đoạn**, không phải kết luận
+rằng `ey` là thước đo đúng nhất về bản chất.
+
+## 13.2 Dài hạn: chỉ tiêu DÒNG TIỀN vẫn là mục tiêu đúng — cần XÂY, không phải bỏ
+
+> Earnings (PE) có thể bị bóp méo bởi thủ thuật kế toán; dòng tiền hoạt động khó làm giả hơn. Nên một
+> chỉ tiêu cash-flow **được xây ĐÚNG** (khác 1/PCF hiện tại — đang lệch cho ngân hàng) sẽ tách bạch
+> doanh nghiệp tốt/xấu tốt hơn về lâu dài. **Đây là hướng cần XÂY DỰNG cho tương lai, không phải bỏ hẳn.**
+
+Ghi chú neo: phân biệt rõ hai việc — §11/§12 bác **1/PCF như đang dùng** (thước đo sai bản chất khi áp
+cho ngân hàng, xem §11.3), **KHÔNG** bác trục dòng tiền nói chung. `eyonly` (A2) là bước **lùi có chủ
+đích** khỏi một thước đo sai, không phải tuyên bố "dòng tiền vô dụng". Yêu cầu bất biến cho bản xây
+mới: phải **kháng thao túng** (manipulation-resistant) và phải **so sánh được chéo ngành** — chính lớp
+lỗi thang-đo cross-route đã giết `v3route`.
+
+## 13.3 Ngân hàng: trọng tâm là CHẤT LƯỢNG TÀI SẢN, không chỉ lợi nhuận ngắn hạn
+
+> Ngành ngân hàng cần chú trọng **chất lượng tài sản** (không chỉ lợi nhuận ngắn hạn). Tham chiếu lại
+> `banking_valuation_framework.md` / sector-lens **đã có sẵn** trong hệ thống thay vì tự phát minh lại
+> phán đoán ngân hàng trong `custom_basket.py`.
+
+Ghi chú neo: `mike/agents/Taylor/banking_valuation_framework.md` đã tồn tại. Chỉ đạo ở đây là **tái
+dùng**, không tái phát minh — cùng nguyên tắc đã áp cho route map (`value_panel_2014.csv` dùng chung
+với router của `rating_8l.py` để định nghĩa route không trôi giữa 2 engine).
+
+## 13.4 Xếp hạng chéo ngành nên THAM KHẢO sector lens, không chỉ 1 factor toàn cục
+
+> Ranking chéo ngành nên **tham khảo** Group-A 6-state sector lens (đã có trong `sector_lens_monitor.py`),
+> không chỉ dựa 1 factor toàn cục (`ey`) đơn thuần. **Đây là gợi ý cho thiết kế TƯƠNG LAI, không phải
+> yêu cầu backtest hôm nay.**
+
+Ghi chú neo (bắt buộc đọc trước khi phiên sau thiết kế): `sector_lens_monitor.py` (repo root, **không**
+nằm trong thư mục Taylor) tự ghi rõ lens Group-A là **NECESSARY-NOT-SUFFICIENT** — *"every Group-A lens
+failed OOS as a standalone book (Rule 3)"* — và công cụ này là **display/audit, KHÔNG phải selector tự
+động**. Khớp với KB sector sweep #1-9: *"tất cả = lens/tilt, không phải standalone book"*. Vì vậy chữ
+**"tham khảo"** trong ý user là đúng nghĩa đen và phải giữ đúng nghĩa đen: lens vào như **ngữ cảnh/
+tie-break/tilt**, **không** được nâng thành trục xếp hạng chính. Phiên sau đề xuất bất cứ dạng tích hợp
+nào cũng phải neo vào ràng buộc này, nếu không sẽ tái lập đúng thứ đã bị bác OOS.
+
+## 13.5 Ràng buộc thủ tục khi phiên sau mở hướng này
+
+Không có gì trong §13 được wire thẳng. Mọi ứng viên sinh ra từ 4 ý trên vẫn phải qua đủ chuỗi hiện
+hành: **ablation neo liền kề** (mỗi arm khác neo đúng 1 trục, §12.2) → **self-check 0 VND** →
+**walk-forward IS/OOS** → **N-ledger + DSR** (Rule 5, multiple-testing discipline) → **quant-skeptic** →
+user duyệt. §13 chỉ nói **hướng nào đáng đào**, không cấp miễn trừ cho hướng nào.
