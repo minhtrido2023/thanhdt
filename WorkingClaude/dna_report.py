@@ -291,7 +291,10 @@ def build_dt_gate_line(html=True):
     if not c:
         return None
     B = (lambda s: f"<b>{s}</b>") if html else (lambda s: s)
-    asof = f"[{c['asof']}]"
+    # c['asof'] = ngày cuối của chuỗi state (data vintage), KHÔNG phải ngày chạy report —
+    # report EOD 15:00 chạy TRƯỚC daily_refresh 18:30 nên vintage thường là T-1. Ghi rõ
+    # "dữ liệu tới" để không bị đọc nhầm thành report bị gắn nhãn ngày cũ (fix 2026-07-14).
+    asof = f"[dữ liệu tới {c['asof']}]"
     asof = f"<i>{asof}</i>" if html else asof
     if not c["active"]:
         cn = STATE_MAP.get(c["committed"], ("?",))[0]
@@ -345,6 +348,21 @@ def get_neutral_base_rate():
         val = None
     _NBASE_CACHE.update(t=time.time(), val=val)
     return val
+
+
+def build_neutral_base_line(html=True):
+    """One-line unconditional NEUTRAL→BEAR/CRISIS historical base-rate, shared by the
+    dna_report NOW block and eod_trading_report.sh. None when not NEUTRAL / data failure
+    (caller drops the line). The not-a-forecast label is part of the line by design —
+    conditional variants were REFUTED walk-forward (job Taylor_20260713_042317), only this
+    unconditional base-rate may be displayed."""
+    nb = get_neutral_base_rate()
+    if not nb:
+        return None
+    tail = "(base-rate DT5G 2014+, không phải dự báo)"
+    tail = f"<i>{tail}</i>" if html else tail
+    return (f"NEUTRAL {nb['streak']} phiên · tần suất lịch sử chạm BEAR/CRISIS trong 20/40/60 phiên: "
+            f"{nb['p20']:.1f}% · {nb['p40']:.1f}% · {nb['p60']:.1f}% {tail}")
 
 
 def build_market_alert():
@@ -481,10 +499,9 @@ def build_report(tk):
         stale_warn = " ⚠️ <b>STALE</b>" if reg.get("stale") else ""
         L.append(f"Regime : {reg['emoji']} <b>{reg['name']}</b> ({reg['weight']}) · {edge}  <i>[{reg['asof']}]</i>{stale_warn}")
         if reg["state"] == 3:
-            nb = get_neutral_base_rate()
-            if nb:
-                L.append(f"  ↳ NEUTRAL {nb['streak']} phiên · tần suất lịch sử chạm BEAR/CRISIS trong 20/40/60 phiên: "
-                         f"{nb['p20']:.1f}% · {nb['p40']:.1f}% · {nb['p60']:.1f}% <i>(base-rate DT5G 2014+, không phải dự báo)</i>")
+            nbline = build_neutral_base_line()
+            if nbline:
+                L.append("  ↳ " + nbline)
     dtline = build_dt_gate_line()
     if dtline:
         L.append(dtline)
