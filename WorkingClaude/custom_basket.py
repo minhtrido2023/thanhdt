@@ -70,6 +70,42 @@ def _cap_sector(w, sec, code, scap):
     return w
 
 
+def _cap_group_jointly(w, grp, gcap, ncap):
+    """Cap the `grp`-True group's TOTAL weight at `gcap` AND every name at `ncap`, jointly.
+
+    Why this is not just `_cap_sector` then `_cap_names` (the pre-existing `sectorcap` path):
+    `_cap_names` water-fills each over-cap name's excess pro-rata across ALL uncapped names —
+    the just-capped group included — so it silently re-inflates the group above `gcap`. MEASURED
+    on the real custom30V weight vector (v4final_selector_selfcheck [5], job Taylor_20260714_140127):
+    a nominal 0.30 financial cap actually delivered mean 0.427 / max 0.542, breaching on 1090/1090
+    days; a nominal 0.50 delivered mean 0.558. The cap never held at its stated level.
+
+    Here each group gets a fixed BUDGET first, and the name cap is water-filled WITHIN each group,
+    so neither cap can undo the other.
+
+    FEASIBILITY: the non-group side must be able to absorb `1-gcap` under `ncap`, i.e. it needs at
+    least `(1-gcap)/ncap` names. With 30 names @ ncap=0.10, holding a group at 0.30 needs >=7
+    non-group names. When there are fewer, `gcap` is MATHEMATICALLY unreachable — we then raise the
+    group budget to the tightest feasible value and return it, rather than silently returning a
+    vector that violates one of the two caps. -> (weights, effective_group_cap).
+    """
+    w = np.array(w, dtype=float)
+    s = w.sum()
+    if s <= 0: return w, gcap
+    w = w / s
+    g = np.asarray(grp, dtype=bool)
+    if not g.any() or not (~g).any(): return _cap_names(w, ncap), gcap
+    n_out = int((~g).sum())
+    gcap_eff = max(gcap, 1.0 - n_out * ncap)           # tightest budget the name cap permits
+    b_in = min(float(w[g].sum()), gcap_eff)            # only ever cap DOWN, never top a group up
+    out = np.zeros_like(w)
+    for m, b in ((g, b_in), (~g, 1.0 - b_in)):
+        if b <= 0 or w[m].sum() <= 0:
+            continue
+        out[m] = _cap_names(w[m], ncap / b) * b        # water-fill inside the group's own budget
+    return out, gcap_eff
+
+
 def select_members(bq):
     """Return the 30 most-liquid listed-company members (deterministic, STATIC/hindsight window).
     Universe = ticker_prune ∩ UNIVERSE_FILTER (real companies). No per-ticker exclusions."""
@@ -144,7 +180,12 @@ def build_pit(bq, start_date, end_date, top_n=N_MEMBERS, quality="none",
     #   'namecap'   = cap-weight then water-fill each name to <= name_cap (limits VHM/VCB single-name).
     #   'sectorcap' = cap the sector_code (default 8 = Financials+RealEstate) group to <= sector_cap,
     #                 then also apply name_cap. Keeps it market-like but bounds the bank/RE cluster.
-    assert weight_scheme in ("capwt", "ew", "namecap", "sectorcap")
+    #   'fincap'    = like sectorcap but the capped GROUP is the three FINANCIAL ROUTES
+    #                 (BANK/INSURANCE/SECURITIES, PIT route from value_panel_2014.csv) rather than
+    #                 1-digit ICB 8 — ICB-8 also sweeps in REALESTATE (8633) and brokers' parent
+    #                 sector, which is NOT the cluster under discussion (job Taylor_20260714_140127).
+    #                 Cap level = env BASKET_FIN_CAP (default 0.30), then name_cap as usual.
+    assert weight_scheme in ("capwt", "ew", "namecap", "sectorcap", "fincap")
     # EFFECTIVE start: always work back >=~1.5y before `end` even if the caller asks for a tiny window
     # (e.g. the LIVE forward script runs a 2-day window). This guarantees recent quarterly rebalances
     # AND a full 60-session ADV history exist, so the returned levels/ADV are valid over [start,end].
@@ -344,6 +385,25 @@ WHERE t.time IN ({_rebal_in}) AND t.Price IS NOT NULL""")
     if SELECT_MODE == "yieldcombo":
         # custom30V: liquidity is GATE only; rank PURELY by combined value-yield rank(1/PE)+rank(1/PCF)
         pe_piv = _yield_piv("PE"); pcf_piv = _yield_piv("PCF")
+    elif SELECT_MODE == "eyfin":
+        # STEP 1 of the v4final chain (job Taylor_20260714_140127): yieldcombo, except the three
+        # FINANCIAL routes drop the 1/PCF leg entirely — a bank's "cash flow" is deposit/loan
+        # balance-sheet flow, not a product of core operations, so 1/PCF is not the same economic
+        # quantity there (the user's premise, established 2026-07-14).
+        # SCALE, deliberately: a financial's score is 2*rank(1/PE), NOT a bare rank(1/PE). The cut is
+        # CROSS-route, so a 1-leg score on [0,1] against a 2-leg score on [0,2] would not "remove a
+        # wrong metric" — it would silently near-eliminate financials from the top-30, and the delta
+        # would measure a sector underweight, not the metric fix. That is EXACTLY the class of bug
+        # (absolute-vs-percentile scale mismatch across a cross-route cut) that killed v3route this
+        # morning; doubling the ey leg keeps the range identical and changes ONLY which metric is read.
+        pe_piv = _yield_piv("PE"); pcf_piv = _yield_piv("PCF")
+    elif SELECT_MODE == "eyonly":
+        # STEP 2 (v4final): ONE metric for every name, pool-wide — score = rank_pct(1/PE).
+        # Percentiles are normalised by construction, so there is no cross-group distribution to
+        # match and the whole scale-mismatch failure class cannot arise. 1/PE is the system's
+        # strongest, route-neutral factor (KB: IC +0.125, "Value dominates ALL regimes"; BANK route
+        # IC +0.181 t=3.79 — stronger than pb_z or 1/PCF inside the bank route itself).
+        pe_piv = _yield_piv("PE")
     elif SELECT_MODE == "pbcombo":
         # BOTTOM-DEPLOY vehicle (#18, Taylor 2026-06-27): 1/PB dominates at deep-cheap bottoms (crisis-IC
         # +0.222 vs −0.019 full-period) → weight 0.67*rank(1/PB)+0.23*rank(1/PCF)+0.10*rank(1/PE).
@@ -582,9 +642,48 @@ GROUP BY t.time, sec""")
             _vv = pd.Series(seccap_by_date)
             print(f"  [sector-cap dyn] mode={SECCAP_MODE} sec={sector_code}: PIT market weight x{_mult} "
                   f"-> cap over {len(_vv)} rebals: min {_vv.min():.3f} / med {_vv.median():.3f} / max {_vv.max():.3f}")
+    # ---- PIT route map for the v4final family (job Taylor_20260714_140127) ----
+    # Needed by SELECT_MODE='eyfin' (which routes get the PCF leg dropped) and weight_scheme='fincap'
+    # (which names count toward the financial cap). Source = data/value_panel_2014.csv `route`, the
+    # same column rating_8l's router produces — reused rather than re-derived so the route definition
+    # cannot drift between the rating engine and the basket.
+    # PIT: route is looked up at the SELECTION quarter (src_q), never "latest" — a name reclassified
+    # later must not retro-change an old rebal. Fallback = the name's LAST route at//before src_q,
+    # then its earliest known route; unknown -> non-financial (fail-open on the CAP = the cap can
+    # only ever bind on names we positively know are financial; a missing route never fabricates one).
+    FIN_CAP = float(os.environ.get("BASKET_FIN_CAP", "0.30"))
+    _FIN_ROUTES = {"BANK", "INSURANCE", "SECURITIES"}
+    route_by_tq, route_hist = {}, {}
+    if SELECT_MODE == "eyfin" or weight_scheme == "fincap":
+        _rp = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",
+                                       "value_panel_2014.csv"), parse_dates=["time"],
+                          usecols=["ticker", "time", "route"])
+        _rp["qstart"] = _rp["time"].dt.to_period("Q").dt.start_time
+        _rp = _rp.dropna(subset=["route"]).sort_values("time")
+        _rl = _rp.groupby(["ticker", "qstart"])["route"].last().reset_index()
+        route_by_tq = {(r.ticker, pd.Timestamp(r.qstart)): r.route for r in _rl.itertuples()}
+        route_hist = {tk: (list(g["qstart"]), list(g["route"])) for tk, g in _rl.groupby("ticker")}
+        if weight_scheme == "fincap":
+            print(f"  [fincap] cap BANK+INSURANCE+SECURITIES total weight at {FIN_CAP:.2f}, then name_cap "
+                  f"{name_cap:.2f} ({len(route_hist)} tickers routed, PIT as-of selection quarter)")
+
+    def route_asof(tk, q):
+        """PIT route of `tk` as of selection quarter `q`; None when never routed."""
+        r = route_by_tq.get((tk, pd.Timestamp(q)))
+        if r is not None: return r
+        e = route_hist.get(tk)
+        if not e: return None
+        i = bisect.bisect_right(e[0], pd.Timestamp(q)) - 1
+        return e[1][i] if i >= 0 else e[1][0]
+
+    def is_fin(tk, q):
+        return route_asof(tk, q) in _FIN_ROUTES
+
     members = {}  # rebal_date -> list[(ticker, qmult)]
     mem_rows = []
+    fin_src_q = {}   # rebal_date -> selection quarter, so the daily weighting can route names PIT
     for d in rebal_dates:
+        score = None   # selector score of the picked names, recorded into members_df for audit
         qd = pd.Timestamp(d).to_period("Q").start_time
         prior_qs = [qq for qq in liq_piv.index if qq < qd]
         src_q = max(prior_qs) if prior_qs else (qd if qd in liq_piv.index else None)  # 1st quarter: self-seed
@@ -639,6 +738,20 @@ GROUP BY t.time, sec""")
                 mos_r = pd.Series({t: dcf_at(t, d)[1] for t, _ in pool}).rank(pct=True).fillna(0.5)
                 for t, _ in pool: score[t] += DCF_W * mos_r[t]
             gated = sorted(pool, key=lambda tr: score[tr[0]], reverse=True)
+        elif SELECT_MODE in ("eyfin", "eyonly") and gated:
+            pool = gated[:CFO_POOL]
+            pe_s = pe_piv.loc[src_q] if (pe_piv is not None and src_q in pe_piv.index) else None
+            pe_r = pd.Series({t: (pe_s.get(t, np.nan) if pe_s is not None else np.nan)
+                              for t, _ in pool}).rank(pct=True).fillna(0.5)
+            if SELECT_MODE == "eyonly":
+                score = {t: pe_r[t] for t, _ in pool}
+            else:
+                pcf_s = pcf_piv.loc[src_q] if (pcf_piv is not None and src_q in pcf_piv.index) else None
+                pcf_r = pd.Series({t: (pcf_s.get(t, np.nan) if pcf_s is not None else np.nan)
+                                   for t, _ in pool}).rank(pct=True).fillna(0.5)
+                # financial -> 2*ey (PCF leg dropped, range preserved); everyone else -> ey + cfy.
+                score = {t: (2.0 * pe_r[t] if is_fin(t, src_q) else pe_r[t] + pcf_r[t]) for t, _ in pool}
+            gated = sorted(pool, key=lambda tr: score[tr[0]], reverse=True)
         elif SELECT_MODE == "pbcombo" and gated:
             # bottom-deploy: 1/PB-heavy crisis-IC weights (0.67/0.23/0.10) within the liquid+gated pool.
             pool = gated[:CFO_POOL]
@@ -687,9 +800,16 @@ GROUP BY t.time, sec""")
                      (QTILT_MISSING if quality == "tilt" else 1.0))
             picks.append((tk, qmult, rt))
         members[d] = [(tk, qm) for tk, qm, _ in picks]
+        fin_src_q[d] = src_q
         for rnk, (tk, qm, rt) in enumerate(picks):
             mem_rows.append({"quarter": qd.date(), "rebal_date": d.date(), "ticker": tk,
-                             "qmult": qm, "rating": rt, "liq_rank": rnk + 1})
+                             "qmult": qm, "rating": rt, "liq_rank": rnk + 1,
+                             # audit column (job Taylor_20260714_140127): the selector score this
+                             # name was picked on. Lets a guard assert WHICH INPUTS reach a score
+                             # (e.g. "no PCF for financials") directly, instead of inferring it from
+                             # membership — membership also moves through the shared rank denominator,
+                             # so it cannot isolate one leg. Levels/membership are unaffected.
+                             "score": (float(score[tk]) if (score is not None and tk in score) else np.nan)})
     members_df = pd.DataFrame(mem_rows)
     union = sorted(members_df["ticker"].unique())
     # (5) daily panel for the union of all members ever selected
@@ -725,6 +845,7 @@ WHERE t.ticker IN ({inlist})
         i = bisect.bisect_right(reb, d) - 1
         return reb[i] if i >= 0 else None
     ret = pd.Series(0.0, index=idx_dates); adv_tv = pd.Series(np.nan, index=idx_dates)
+    fincap_infeasible = []   # days where too few non-financial names exist to honour FIN_CAP
     prev = None
     for d in idx_dates:
         aq = active_q(d)
@@ -754,6 +875,13 @@ WHERE t.ticker IN ({inlist})
                         _scap = seccap_by_date.get(aq, sector_cap) if seccap_by_date else sector_cap
                         W = _cap_sector(W, sv, sector_code, _scap)
                         W = _cap_names(W, name_cap)
+                    elif weight_scheme == "fincap":
+                        # financial ROUTES capped as one group (routed PIT at this day's active
+                        # rebal's selection quarter) JOINTLY with the single-name cap.
+                        _sq = fin_src_q.get(aq)
+                        fv = np.array([is_fin(t, _sq) for t, ok in zip(tks, valid) if ok])
+                        W, _ce = _cap_group_jointly(W, fv, FIN_CAP, name_cap)
+                        if _ce > FIN_CAP + 1e-9: fincap_infeasible.append((d, _ce, int((~fv).sum())))
                     elif weight_scheme == "namecap":
                         W = _cap_names(W, name_cap)
                     r = today[valid] / yv - 1.0
@@ -767,6 +895,15 @@ WHERE t.ticker IN ({inlist})
         _pl.to_csv(f"data/dcf_exp_logs/placebo_drops_seed{DCF_PLACEBO_SEED}.csv", index=False)
         print(f"  [DCF placebo] seed={DCF_PLACEBO_SEED}: dropped {int(_pl['n_dropped'].sum())} names "
               f"over {len(_pl)} rebal dates (mean {_pl['n_dropped'].mean():.2f}/date)")
+    if weight_scheme == "fincap":
+        if fincap_infeasible:
+            _wc = pd.DataFrame(fincap_infeasible, columns=["date", "cap_eff", "n_nonfin"])
+            print(f"  [fincap] ⚠ cap {FIN_CAP:.2f} INFEASIBLE on {len(_wc)}/{len(idx_dates)} days "
+                  f"(too few non-financial names to absorb 1-cap under name_cap={name_cap:.2f}): "
+                  f"effective cap med {_wc.cap_eff.median():.3f} / max {_wc.cap_eff.max():.3f}, "
+                  f"n_nonfin med {int(_wc.n_nonfin.median())}")
+        else:
+            print(f"  [fincap] cap {FIN_CAP:.2f} feasible on all {len(idx_dates)} days")
     lvl = BASE_LEVEL * (1.0 + ret).cumprod()
     adv = adv_tv.rolling(60, min_periods=20).mean()
     level_dict = {t: float(v) for t, v in zip(lvl.index, lvl.values)}

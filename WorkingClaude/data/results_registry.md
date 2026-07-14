@@ -3486,3 +3486,97 @@ Bank vs non-bank fwd2M: FULL **+4.06 vs +2.77 = +1.29pp** | IS **+2.10 vs +1.62 
 **⚠️ RỦI RO MỚI VỀ PRODUCTION — cần Mike/user quyết, Taylor KHÔNG tự đề xuất thay đổi:** custom30V production đang mang **vị thế OVERWEIGHT NGÂN HÀNG không ai chủ ý đặt và không ai quản** — **24.1% rổ toàn kỳ, 35.8% OOS 2020+, có quý 15/30 tên** (2025Q2-Q3). Nó **không đến từ quyết định** mà là **tác dụng phụ của lỗi đo lường** (`1/PCF` cho bank) — đúng thứ user chỉ ra. Hai mặt: (a) **đã trả tiền** (+1.29pp/2M, **LOO 13/13 năm dương**, min +0.755 khi bỏ 2017) ⇒ "sửa cho đúng lý thuyết" = phá giá trị thật (đã chứng minh 2 lần: −0.78pp, −2.38pp); (b) **bằng chứng thống kê MỎNG** — spread bank−nonbank theo quý **t=0.80, hit 46.9%** (IS t=0.25/OOS t=0.83) ⇒ **KHÔNG phải alpha đã validate**, là **cú đặt cược ngành dai dẳng sinh ra do tai nạn, đang thắng**. ⇒ **Không arm nào có alpha định giá đã validate ở tầng bank; cuộc so sánh được quyết bởi một cú cược ngành ngoài ý muốn, KHÔNG phải bởi độ chính xác thước đo.** Câu hỏi cho user/Mike: **24-36% rổ đỗ tiền nằm ở ngân hàng — có phải vị thế ta MUỐN giữ có chủ ý không?** CÓ → khai báo tường minh thành rule tỷ trọng ngành kiểm soát được, thay vì để phát sinh như tác dụng phụ của lỗi đã biết. KHÔNG → **cũng đừng "sửa" bằng đổi selector** (đã đo 2 lần, tệ hơn). Đây là câu hỏi **risk-concentration** — hợp lý hỏi thêm Spyros.
 
 **Hướng route-aware duy nhất còn logic (GHI NHẬN, KHÔNG theo đuổi — cần user/Mike quyết mở dự án riêng):** nếu vẫn muốn "chấm bank bằng thước đo của bank" mà **không phá tỷ trọng ngành** → dạng đúng là **percentile TRONG route** (ghim ~0.5, chỉ đổi "bank nào" không đổi "bao nhiêu bank"). **Prior THẤP**: `pb_z` trong bank IC +0.065 (t=1.17) — gần như không có gì để thu hoạch, `1/PE` đã làm hết việc. **Taylor KHÔNG mở.**
+
+---
+
+## `v4final` — thiết kế tổng hợp selector custom30V (bỏ 1/PCF khỏi financial → 1 chỉ tiêu ey → cap 30%) + DY-floor — **KHÔNG WIRE** (2026-07-14, job `Taylor_20260714_140127`)
+
+**Việc:** thiết kế tổng hợp cuối theo 4 ý user sau chuỗi 112932 → 121717 → 132942. Nhánh MỚI trong
+`custom_basket.py` (`BASKET_SELECT=eyfin|eyonly`, `BASKET_WT=fincap` + `BASKET_FIN_CAP`), không sửa
+nhánh cũ. Harness `pt_v23_audit_2014.py`, `EXP_TAG` mọi arm kể cả baseline (§8), threads=1,
+`BQ_LOCAL_CACHE=data/bq_cache`, **self-check 0 VND (BAL+LAG) cả 4 arm**, borrow 0, max gross 1.000.
+
+**⚠️ ĐÍNH CHÍNH QUAN TRỌNG — "bank 24.1% / 35.8% OOS / đỉnh 50%" là ĐẾM TÊN, KHÔNG phải TỶ TRỌNG.**
+Đo trên vector tỷ trọng ngày thật của chính custom30V production (`reconcile_finweight.py`):
+BANK-only **count-share** full 0.239 / IS 0.102 / OOS 0.354 / đỉnh quý 0.500 → tái lập **chính xác cả
+3 con số** đã lưu hành cả ngày. **Weight-share thật gần GẤP ĐÔI: BANK-only 0.444 full / 0.603 OOS;
+BANK+INS+SEC 0.474 full / 0.644 OOS / 2026Q2 = 0.827.** ⇒ lời khuyên "cap 30% hợp lý" của risk-auditor
+được cho trên nền 24.1% (khi đó 30% = trần rộng, gần như không ràng buộc); trên tỷ trọng thật 47% nó là
+can thiệp **cắt ~½ exposure**, ràng buộc 100% ngày từ 2017Q1. **Cần đưa lại số đúng cho risk-auditor/
+Spyros trước khi coi "30%" là đã có tư vấn.**
+
+**Chuỗi ablation NEO LIỀN KỀ** (mỗi arm khác arm ngay trước ĐÚNG 1 trục — không so end-state với baseline gộp):
+
+| arm | thay đổi vs arm trước | FULL | IS | OOS | Sharpe | MaxDD | Calmar |
+|---|---|---|---|---|---|---|---|
+| **A0** `yieldcombo`+namecap (= LIVE) | — | 27.09 | 23.37 | 30.58 | 1.81 | −18.3 | 1.48 |
+| **A1** `eyfin` | financial bỏ chân 1/PCF (2×ey giữ range [0,2]) | 27.17 | 23.16 | 30.95 | 1.82 | −18.1 | 1.50 |
+| **A2** `eyonly` | mọi route chỉ `rank_pct(1/PE)` pool-wide | 27.04 | 23.00 | 30.85 | 1.81 | −17.6 | 1.54 |
+| **A3** `eyonly`+`fincap0.30` | cap BANK+INS+SEC 30% | **26.40** | 22.45 | 30.12 | **1.75** | −17.6 | 1.50 |
+
+- **A1−A0 = +0.08pp FULL (IS −0.21 / OOS +0.37)** — trái dấu IS/OOS, biên độ 0.1-0.4pp/12.5y ⇒ **nhiễu**.
+- **A2−A0 (bước 1+2) = −0.05pp FULL / −0.37 IS / +0.27 OOS**; DD −18.3→−17.6; Calmar 1.48→1.54 ⇒
+  **return-neutral, rủi ro nhích tốt nhẹ (1 đường NAV)**. **KHÔNG có bằng chứng alpha.**
+- **A3−A2 (cap 30%) = −0.64pp FULL / −0.55 IS / −0.73 OOS, Sharpe −0.06, DD ĐỨNG YÊN −17.6.**
+
+**Cap 30% = NO-GO (test lại từ đầu trên pool ĐÃ SẠCH bias PCF, đúng yêu cầu dispatch — không suy diễn
+từ sector-cap NO-GO sáng nay).** Cắt exposure tài chính 47%→26% mà **MaxDD không nhúc nhích** ⇒ tập
+trung tài chính **không phải nguồn drawdown** của hệ 2014-2026; cap chỉ đổi tên cầm, không đổi rủi ro
+đường giá. **Giới hạn phải nói rõ:** kết luận này chỉ phủ mẫu 12.5 năm, **không** bác rủi ro đuôi/kịch
+bản (sốc hệ thống ngân hàng VN chưa từng có trong mẫu); điểm risk-auditor nêu về **độ trễ cam kết CRISIS
+của DT5G (enC=25 phiên)** vẫn đứng và backtest **không trả lời được**. Muốn cap → cap vì quản trị rủi ro
+đuôi có tuyên bố rõ, chấp nhận trả **0.64pp/năm**, KHÔNG phải vì backtest cho thấy an toàn hơn (số nói ngược).
+
+**Ý 4 — DY làm NGƯỠNG CHẶN GIÁ, không phải return-predictor: CLAIM CỦA USER ĐƯỢC ỦNG HỘ (6M).**
+`dy_floor_test.py`: 2,878 obs / 262 mã / 48 ngày q2m5 2014-2026; DY = `Dividend_Min3Y`/`Price` (PIT
+as-of `Release_Date`); downside = `min(Close)/Close₀−1` trên Close **điều chỉnh** (cổ tức đã nằm trong
+đường giá ⇒ không ăn gian được). Gate: (a) downside nông hơn có ý nghĩa **VÀ** (b) return KHÔNG hơn.
+
+| cut | h | d_maxloss (HIGH−LOW) | t | hit/ngày | d_return | t | verdict |
+|---|---|---|---|---|---|---|---|
+| route×date | 6M | +2.07pp | 2.75 | 77% | +0.48pp | 0.31 | **FLOOR** |
+| route×date×**ey-tertile** (khử confound rẻ) | 6M | **+2.34pp** | 2.37 | 68% | +0.35pp | 0.17 | **FLOOR** |
+| marginal cohort (ey rank 20-45) | 6M | +2.40pp | 2.37 | 68% | +2.95pp | 1.39 | **FLOOR** |
+| (mọi cut) | 3M | +0.80…+1.53pp | 1.40-1.94 | 58-67% | — | — | **không ủng hộ** |
+
+Sống sót **double-sort trong ey-tertile** ⇒ không phải hiệu ứng "rẻ" mà selector đã chấm. **Giới hạn
+trung thực:** t lạc quan (cửa sổ 6M chồng lấn + tên tương quan) — số đáng tin hơn là hit-rate theo ngày
+68-77% trên 44-48 ngày (p≈0.01); cohort biên có d_return +2.95pp (t=1.39) **không có ý nghĩa nhưng
+không nhỏ** — nếu N lớn hơn làm nó significant thì DY tụt về return-predictor và thuộc trục xếp hạng,
+không phải rule chặn; DY>0 chỉ 70.4% obs ⇒ rule phải fail-open. **Đề xuất tích hợp (pre-registered,
+CHƯA CHẠY): tie-break CHỈ trong dải biên ey rank ~20-45, thiếu DY = no-op** — là arm A4 riêng, cần
+selfcheck + N-ledger + skeptic. **Job này KHÔNG chạy A4.**
+
+**Selfcheck `v4final_selector_selfcheck.py` 12/12 PASS** (đo trên vector tỷ trọng thật, không tin code):
+fincap@0.30 **max 0.3000 / mean 0.2995 / 1090 ngày / 0 vượt / 0 infeasible**, Σw=1 (err 4.4e-16); full
+panel 0.0% ngày >30%. `eyonly` không đọc PCF (đảo toàn bộ PCF → 0 tên đổi); `eyfin` không đọc PCF cho
+financial (255 pick, 0 khác) + **negative control**: cùng phép phá CÓ làm `yieldcombo` đổi 17/18 rebal;
+OFF-path byte-identical vs `git show HEAD:custom_basket.py`.
+**BUG THẬT bắt được nhờ đo:** `weight_scheme=sectorcap` **có sẵn KHÔNG giữ được cap** (`_cap_names`
+chạy SAU `_cap_sector`, water-fill phần dư vào mọi tên chưa chạm trần **kể cả financial**) → cap danh
+nghĩa 0.30 thực giao **mean 0.427 / max 0.542, vi phạm 1090/1090 ngày**. ⇒ dùng `_cap_group_jointly`
+(ngân sách nhóm trước, name-cap water-fill TRONG nhóm) thay vì tái dùng `sectorcap` như dispatch gợi ý;
+nếu tái dùng, A3 đã đo nhầm cap 0.43 rồi dán nhãn 0.30.
+
+**Rổ @ rebal 2026-05-05** (`basket_20260505.md`): A0 (LIVE) financial **18/30**; A1 17/30 (giữ 29/30,
+IN `HPG` / OUT `MBS`); A2 & A3 **cùng 16/30** (giữ 27/30, IN `HPG`,`PNJ`,`SAB` / OUT `MBS`,`VCB`,`VGC`).
+A3 chọn **cùng 30 tên như A2** — cap là rule tỷ trọng, không đổi thành phần: thành phần đổi rất ít
+(27/30) trong khi tỷ trọng đổi rất lớn (47%→26%). `HPG IN` trùng hướng plan 07-14/07-15 (bán HPG)
+**nhưng KHÔNG phải căn cứ đảo lệnh** (chưa skeptic, delta trong nhiễu, không đề xuất wire).
+
+**VERDICT: KHÔNG WIRE GÌ, production 0 chạm, không đảo lệnh plan.**
+- Bước 1+2 (`eyonly`) = ứng viên hợp lệ **về NGUYÊN LÝ** (bỏ thước đo sai bản chất cho bank; 2→1 chỉ
+  tiêu; triệt tiêu lớp lỗi thang-đo cross-route đã giết `v3route`) với bằng chứng **"không tốn gì"**
+  + rủi ro nhích tốt. **KHÔNG có bằng chứng alpha** — wire (nếu có) phải vì tính đúng đắn mô hình,
+  không vì kỳ vọng lãi hơn. **Bắt buộc quant-skeptic.**
+- Bước 3 (cap 30%) = **NO-GO**. Ý 4 (DY floor) = **ỦNG HỘ 6M**, chờ quyết mở arm A4.
+
+**Baseline note:** A0 = **27.09** khớp vintage hôm nay (registry mục `Taylor_20260714_121717` dòng
+"vintage hôm nay 27.09% vs pin 27.84% = data-drift, không phải bug") ⇒ control tái lập sạch, delta
+neo hợp lệ. **Re-pin R3 vẫn TREO** — job này không tự re-pin.
+
+**Artifacts** (`mike/agents/Taylor/v4final_exp/`): `run_arms.sh`, `dy_floor_test.py`,
+`basket_picture.py`, `reconcile_finweight.py`, `logs/*`, `dy_floor_{panel,results}.csv`,
+`fin_weight_{by_quarter,summary}.csv`, `finweight_definitions.csv`, `basket_20260505.md`.
+Code: `custom_basket.py` (nhánh mới `eyfin`/`eyonly`/`fincap`), `v4final_lib.py`,
+`v4final_selector_selfcheck.py`. Chi tiết đầy đủ: `mike/agents/Taylor/route_aware_selector_framework.md` §12.
