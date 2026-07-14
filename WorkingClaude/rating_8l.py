@@ -64,7 +64,7 @@ CEMENT_SET = {"CLH","HT1","HOM","BCC","HVX","SCJ","BTS","QNC","CCM"}
 # pre-D&A) is the cleaner value lens. Membership verified NAME-LEVEL (DA/Revenue>=5% TTM, job
 # Taylor_20260704_100727) — NOT by ICB: gas/oil-distribution (GAS/PLX/BSR) are D&A-LIGHT false candidates and
 # are excluded; all real-estate excluded (DA_margin proxy contaminated). This is a VALUE-AXIS route ONLY:
-# it re-weights value_score/zone in the screener under VALUE_VERSION=v3_da; it does NOT touch the 8L quality
+# it re-weights value_score/zone in the screener under VALUE_VERSION=v3_da/v3_div (v3_div = default); it does NOT touch the 8L quality
 # rating (1-5), and NOTHING downstream (custom30V/BAL/LAG or any trading selector) reads it. POWER
 # (GEG/POW/QTP/NT2) keeps its own rating+value route (handled separately below), not merged here.
 DA_HEAVY_SET = {
@@ -657,9 +657,17 @@ def main():
     # (1-5) BYTE-IDENTICAL v3 vs v3_da (0/108 differ) -> value-axis ONLY; exactly 19 in-scope names
     # re-weighted (15 D&A_HEAVY + 4 POWER); all production selectors (custom30V/BAL/LAG) read gate_rating<=3
     # off fa_ratings_8l.rating, NOT value_score/zone -> ZERO NAV impact. Old "v3" (pre-promotion, byte-
-    # identical to v2 on the D&A_HEAVY/POWER routes) is retained for rollback: set VALUE_VERSION=v3.
-    # v3_div (opt-in, 2026-07-14) is a SUPERSET of v3_da: same routes/EVEB, PLUS a modest dividend-yield
-    # lens (div_yield). Default stays v3_da until user-approved. div lens weight ~0.15 was chosen from a
+    # identical to v2 on the D&A_HEAVY/POWER routes) and "v3_da" are retained for rollback: set
+    # VALUE_VERSION=v3 or v3_da.
+    # v3_div is now the DEFAULT (promoted 2026-07-14, user-approved, job Taylor_20260714_040245). It is a
+    # SUPERSET of v3_da: same routes/EVEB + golden floor, PLUS a modest dividend-yield lens (div_yield,
+    # Dividend_Min3Y event-based). Chosen because the event-based Dividend_Min3Y (coverage 98.2% vs the old
+    # sparse DY 27%) turns a sign-UNSTABLE signal (old DY IC -0.061 IS / +0.029 OOS, which is why DY was
+    # rejected) into a sign-STABLE positive value lens (+0.033 IS / +0.055 OOS vs profit_3M), orthogonal to
+    # 1/PE (xsec corr 0.18, residual IC +0.031 IS / +0.030 OOS). Promotion self-check (job
+    # Taylor_20260714_040245): 8L rating (1-5) BYTE-IDENTICAL v3_da vs v3_div (0/107 differ) -> value-axis
+    # ONLY, ZERO NAV impact (same reasoning as the v3_da promotion above). Rollback: VALUE_VERSION=v3_da.
+    # div lens weight ~0.15 was chosen from a
     # walk-forward weight sweep (dividend_upgrade_test.py): adding div at 0.10-0.25 is a PARETO improvement
     # of the ey+div composite IC (IS +0.0096->+0.016, OOS +0.1057->+0.110 — BOTH up, no OOS dilution below
     # ~0.35). Coverage-aware, so a non-payer just gets the lowest div-rank and ey/cfy/ps carry.
@@ -670,7 +678,7 @@ def main():
     # edge over the OLD DY it replaces is SIGN-STABILITY: old DY IC sign-flipped (IS -0.061 / OOS +0.029,
     # why it was rejected), Dividend_Min3Y is +0.033 IS / +0.055 OOS. NB the event-based vs old financial-
     # estimate _fin level diff is ~0 (median 0%); the gain is the dense min-3Y form + point-in-time ex-dates.
-    VALUE_VERSION = os.environ.get("VALUE_VERSION", "v3_da").lower()
+    VALUE_VERSION = os.environ.get("VALUE_VERSION", "v3_div").lower()
     _DA = (VALUE_VERSION in ("v3_da", "v3_div"))   # v3_div inherits the D&A_HEAVY/POWER + EVEB machinery
     _DIV = (VALUE_VERSION == "v3_div")
     def _route_pct_raw(col):
@@ -780,7 +788,11 @@ def main():
     # earns +2.6%/+5.0% fwd-2M/3M (54% win) and SURVIVES weak cashflow (golden&cfy-low still +1.9%/+4.2%),
     # robust 8/12yr. The pooled IC can't see it (golden ~5% of names) so it's free on IC but strong on event
     # return -> floor it to BUY-NOW (restores the v2 'DISLOCATED' rule the cross-sectional composite buried).
-    if VALUE_VERSION in ("v3","v3_da"):
+    # NB v3_div MUST be included here (it is a SUPERSET of v3_da) — omitting it silently disabled the golden
+    # floor under v3_div (dropped BUY-NOW 46->32, 14 dislocations lost the floor); same bug class as the
+    # line-~755 value_score omission fixed in job Taylor_20260714_033021, caught here when v3_div was promoted
+    # to default (job Taylor_20260714_040245).
+    if VALUE_VERSION in ("v3","v3_da","v3_div"):
         # golden floor gate (2026-06-20, CTF catch): pb_z<=-1 + book-OK is NOT enough — a name cheap-on-book
         # but BURNING CASH through-cycle (CF_OA_3Y<0, e.g. CTF: CFO_3Y −0.83T, IntCov 1.1, op-margin ~0,
         # ROE 0.9% razor-thin) is a value-trap, not a quality dislocation. REQUIRE CF_OA_3Y>0 (genuinely
