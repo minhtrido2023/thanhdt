@@ -368,29 +368,64 @@ WHERE t.time IN ({_rebal_in}) AND t.Price IS NOT NULL""")
     #   financials the COMPOUNDER composite (cfy=1/PCF weighted .30) -> ranked within-route, but on the
     #   wrong metric. v3route reuses the v2 formula verbatim for those routes; every other route is
     #   BYTE-IDENTICAL to v3latest, so this is a clean single-axis ablation.
+    # v3route2 / v3route3 (job Taylor_20260714_121717) = v3route + the SCALE fix quant-skeptic's
+    #   REFUTED verdict demanded. v3route's flaw: value_score_v2 mixes an ABSOLUTE pb_z term
+    #   (0.35*(0.5-pb_z/2), which only reaches 1.0 at pb_z<=-1) into a score that is then cut against
+    #   non-financial scores built from PURE WITHIN-ROUTE PERCENTILES (where some name always reaches
+    #   1.0). rating_8l only ever compares v2 scores bank-vs-bank, so the absolute scale never
+    #   mattered there; a cross-route top-30 cut makes it decisive.
+    #   v3route2 = rank-percentile v2 WITHIN each financial route before the cross-route cut. This is
+    #     the fix as specified, but MEASURED (selfcheck [7]) it over-corrects the other way: a single
+    #     percentile is UNIFORM (P90 ~ .96) while the non-financial score is a weighted mean of three
+    #     percentiles and therefore BELL-shaped (P90 ~ .87). Financials go from -0.107 too low to
+    #     +0.064 too high. Same class of bug, opposite sign.
+    #   v3route3 = quantile-MATCH: map each financial's within-route percentile through the
+    #     non-financial score distribution of the same quarter, so a financial at within-route rank q
+    #     scores exactly what a non-financial at rank q scores. This is the only one of the three that
+    #     is actually scale-comparable, and it is the reference arm.
+    #   All three share identical financial ORDERING (monotone transforms of one v2 score) and leave
+    #   non-financials byte-identical to v3latest -> the 3-arm spread isolates PURELY how much
+    #   financial weight the cut grants, which is exactly the thing under suspicion.
+    _V3_MODES    = ("v3comp", "ps3", "v3gated", "v3latest", "v3route", "v3route2", "v3route3")
+    _V3L_MODES   = ("v3latest", "v3route", "v3route2", "v3route3")   # "latest rating_8l v3" cfo/golden
+    _ROUTE_MODES = ("v3route", "v3route2", "v3route3")               # financial routes -> value_score_v2
     _v3q = None
-    if SELECT_MODE in ("v3comp", "ps3", "v3gated", "v3latest", "v3route"):
+    if SELECT_MODE in _V3_MODES:
         _p = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "value_panel_2014.csv"),
                          parse_dates=["time"])
         _p["qstart"] = _p["time"].dt.to_period("Q").dt.start_time
         _p = _p.sort_values("time").groupby(["ticker", "qstart"]).last().reset_index()   # last obs per quarter
         _cols=["qstart","ticker","PE","PCF","PS","pb_z","PB","route","ICB_Code","ROE_Min3Y",
                "CF_OA_P0","CF_OA_P1","CF_OA_P2","CF_OA_P3","CF_OA_3Y",
-               "ROE_Min5Y","CF_OA_5Y"]   # v3route only: v2 track-record bonus inputs (proven5y, ROE floor)
+               "ROE_Min5Y","CF_OA_5Y"]   # v3route* only: v2 track-record bonus inputs (proven5y, ROE floor)
         _v3q = _p[[c for c in _cols if c in _p.columns]]
     # v3comp = PS broad; v3gated = PS retail-only; v3latest = THIS-MORNING rating_8l v3 (CYCLICAL ps->0,
     # cfy=cfo_normy for non-cyclical, golden floor gated by CF_OA_3Y>0).
     VR_W_FULL   = {"COMPOUNDER": (.45,.30,.25), "CYCLICAL": (.35,.50,.15), "RETAIL": (.35,.20,.45)}
     VR_W_GATED  = {"RETAIL": (.35,.20,.45), "CYCLICAL": (.50,.50,.00), "_default": (.55,.45,.00)}
     VR_W_LATEST = {"COMPOUNDER": (.45,.30,.25), "CYCLICAL": (.40,.60,.00), "RETAIL": (.35,.20,.45)}
-    VR_W = {"v3gated":VR_W_GATED,"v3latest":VR_W_LATEST,"v3route":VR_W_LATEST}.get(SELECT_MODE, VR_W_FULL)
+    VR_W = {"v3gated":VR_W_GATED,"v3latest":VR_W_LATEST,"v3route":VR_W_LATEST,
+            "v3route2":VR_W_LATEST,"v3route3":VR_W_LATEST}.get(SELECT_MODE, VR_W_FULL)
     _VRDEF = VR_W.get("_default", VR_W.get("COMPOUNDER"))
     # routes rating_8l KEEPS on value_score_v2 (never the ey/cfy/ps composite). rating_8l's rule is
     # "financials/RE/POWER KEEP v2"; v3route deliberately moves ONLY the three FINANCIAL routes, so the
     # v3latest->v3route delta isolates exactly the metric the user challenged (bank ranked on 1/PCF).
     # REALESTATE/POWER stay on the v3latest path (unchanged) -> separate ablation if ever wanted.
     _V2_ROUTES = {"BANK", "INSURANCE", "SECURITIES"}
-    W_ABS_V2 = 0.65   # rating_8l value_score_v2: abs (ey-within-route) weight; 0.35 -> pb_z relative
+    # rating_8l value_score_v2 knobs. Defaults ARE rating_8l's live values -> unset env == verbatim.
+    # AUDIT-ONLY overrides (job Taylor_20260714_121717) exist because these were tuned inside
+    # rating_8l's WITHIN-route problem; nothing says they survive a CROSS-route cut. Sweep = §5
+    # sensitivity-plateau evidence, not a tuning opportunity.
+    W_ABS_V2  = float(os.environ.get("V3R_W_ABS", 0.65))   # abs (ey-within-route) weight; 1-w -> pb_z
+    CFO_UP    = float(os.environ.get("V3R_CFO_UP", 0.05))  # cfo-confirm nudge (pool pct >= .5)
+    CFO_DN    = float(os.environ.get("V3R_CFO_DN", -0.08)) # cfo-contradict nudge (pool pct < .2)
+    TRK_CF    = float(os.environ.get("V3R_TRK_CF", 0.03))  # track bonus: CF_OA_5Y > 0
+    TRK_ROE   = float(os.environ.get("V3R_TRK_ROE", 0.03)) # track bonus: ROE_Min5Y > 0.10
+    # ABSTAIN isolation: v3route* drops a financial with NO pb_z entirely (rating_8l's own rule).
+    # In 2014-19 that is ~20% of financial exclusions -> a DATA-COVERAGE effect masquerading as a
+    # valuation judgement. =1 imputes the route-median pb_z instead, so the name stays and is judged
+    # on its real ey. The v3route3-vs-this delta IS the abstain contribution.
+    ABST_IMP  = os.environ.get("V3R_ABSTAIN_IMPUTE", "") == "1"
     def _score_v3(pool, src_q):
         toks = [t for t,_ in pool]
         d = _v3q[(_v3q.qstart == src_q) & (_v3q.ticker.isin(toks))].set_index("ticker")
@@ -398,7 +433,7 @@ WHERE t.time IN ({_rebal_in}) AND t.Price IS NOT NULL""")
         ey  = np.where(d.PE  > 0, 1.0/d.PE,  np.nan)
         cfy = np.where(d.PCF > 0, 1.0/d.PCF, np.nan)
         ps  = np.where(d.PS  > 0, 1.0/d.PS,  np.nan)
-        if SELECT_MODE in ("v3latest", "v3route") and "CF_OA_3Y" in d.columns:   # cfo_normy non-cyclical, raw cyclical
+        if SELECT_MODE in _V3L_MODES and "CF_OA_3Y" in d.columns:   # cfo_normy non-cyclical, raw cyclical
             _ttm = d[["CF_OA_P0","CF_OA_P1","CF_OA_P2","CF_OA_P3"]].sum(axis=1, min_count=1)
             _n3 = d["CF_OA_3Y"]/3.0
             _cfynorm = np.where((d.PCF>0)&(_ttm>0)&(_n3>0), (1.0/d.PCF)*np.clip(_n3/_ttm,0.3,3.0), np.nan)
@@ -422,30 +457,92 @@ WHERE t.time IN ({_rebal_in}) AND t.Price IS NOT NULL""")
         pres = ~np.isnan(P); num = np.nansum(np.where(pres,P*Wm,0),1); den = np.nansum(np.where(pres,Wm,0),1)
         sc = np.where(den>0, num/den, np.nan)
         golden = (d.pb_z.values <= -1); bookok = ~(d.ROE_Min3Y.values < 0)
-        if SELECT_MODE in ("v3latest", "v3route") and "CF_OA_3Y" in d.columns:   # golden floor also needs CF_OA_3Y>0
+        if SELECT_MODE in _V3L_MODES and "CF_OA_3Y" in d.columns:   # golden floor also needs CF_OA_3Y>0
             bookok = bookok & (d.CF_OA_3Y.values > 0)
-        if SELECT_MODE == "v3route":
+        if SELECT_MODE in _ROUTE_MODES:
             # FINANCIAL routes -> rating_8l value_score_v2, verbatim (rating_8l.py "value_score_v2"):
             #   0.65*ey-percentile-WITHIN-route + 0.35*(0.5 - pb_z/2) + cfo confirm/contradict + track bonus.
             # NO cfy/PCF main lens: 1/PCF enters only as the same small ±0.05/-0.08 confirm nudge rating_8l
             # applies, ranked POOL-WIDE (not per-route) exactly as rating_8l does it.
             _fin = vr.isin(_V2_ROUTES).values
             if _fin.any():
-                _rel = np.clip(0.5 - d.pb_z.values / 2.0, 0, 1)                    # pb_z=-1 -> 1, 0 -> .5, +1 -> 0
+                _pbz = d.pb_z.values
+                if ABST_IMP:      # impute route-median pb_z so a no-pb_z financial competes, not abstains
+                    _pbs = pd.Series(np.where(_fin, _pbz, np.nan), index=toks)
+                    _med = _pbs.groupby(vr).transform("median")
+                    _pbz = np.where(np.isnan(_pbz) & _fin & _med.notna().values, _med.values, _pbz)
+                _rel = np.clip(0.5 - _pbz / 2.0, 0, 1)                             # pb_z=-1 -> 1, 0 -> .5, +1 -> 0
                 _cfo_pct = pd.Series(cfy, index=toks).rank(pct=True)               # pool-wide, as rating_8l
-                _adj = np.where(_cfo_pct.notna() & (_cfo_pct >= 0.5), 0.05,
-                        np.where(_cfo_pct.notna() & (_cfo_pct < 0.2), -0.08, 0.0))
-                _track = (np.where(pd.Series(d.get("CF_OA_5Y", np.nan), index=toks).fillna(-9).values > 0, 0.03, 0.0)
-                          + np.where(pd.Series(d.get("ROE_Min5Y", np.nan), index=toks).fillna(-9).values > 0.10, 0.03, 0.0))
+                _adj = np.where(_cfo_pct.notna() & (_cfo_pct >= 0.5), CFO_UP,
+                        np.where(_cfo_pct.notna() & (_cfo_pct < 0.2), CFO_DN, 0.0))
+                _track = (np.where(pd.Series(d.get("CF_OA_5Y", np.nan), index=toks).fillna(-9).values > 0, TRK_CF, 0.0)
+                          + np.where(pd.Series(d.get("ROE_Min5Y", np.nan), index=toks).fillna(-9).values > 0.10, TRK_ROE, 0.0))
                 _ey_route = pct["ey"].values                                       # already within-route (v2's design)
                 _v2 = np.clip((1 - W_ABS_V2) * _rel + W_ABS_V2 * np.nan_to_num(_ey_route, nan=0.5)
                               + _adj + _track, 0, 1)
-                _v2 = np.where(np.isnan(d.pb_z.values), np.nan, _v2)               # no pb_z -> abstain, not a fake 0.5
+                _v2 = np.where(np.isnan(_pbz), np.nan, _v2)                        # no pb_z -> abstain, not a fake 0.5
+                if SELECT_MODE in ("v3route2", "v3route3"):
+                    # SCALE FIX step 1 (both arms): v2 -> within-route percentile, so financials are
+                    # ranked on the same *kind* of quantity the non-financial score is built from.
+                    # Same convention as the ey/cfy/ps pct block above: rank WITHIN route when the
+                    # route has >=5 scored names, else fall back to the whole financial pool.
+                    _s2 = pd.Series(np.where(_fin, _v2, np.nan), index=toks)
+                    _rk = _s2.groupby(vr).transform(
+                        lambda g: g.rank(pct=True) if g.notna().sum() >= 5 else pd.Series(np.nan, index=g.index))
+                    _pool_rk = _s2.rank(pct=True)                                   # financial-pool-wide fallback
+                    _m = _rk.isna() & _s2.notna(); _rk = _rk.copy(); _rk[_m] = _pool_rk[_m]
+                    _v2 = _rk.values                                                # NaN (abstain) stays NaN
+                if SELECT_MODE == "v3route3":
+                    # step 2 (v3route3 only): a bare percentile is UNIFORM; the non-financial score is
+                    # a weighted mean of three percentiles and is BELL-shaped. Equal percentiles are
+                    # therefore still NOT equal scores. Push each financial's percentile through the
+                    # quarter's own non-financial score distribution -> a financial at within-route
+                    # rank q gets exactly the score a non-financial at rank q has. Order-preserving.
+                    _nf_sc = sc[(~_fin) & ~np.isnan(sc)]
+                    if _nf_sc.size >= 5:
+                        _v2 = np.where(np.isnan(_v2), np.nan,
+                                       np.quantile(_nf_sc, np.clip(np.nan_to_num(_v2, nan=0.5), 0, 1)))
                 sc = np.where(_fin, _v2, sc)
         sc = sc + 0.10*np.where(golden & pd.notna(d.pb_z.values), 1.0, 0.0)
         sc = np.where(d.PB.values < 0, 0.0, sc)
         sc = np.where(golden & bookok, np.maximum(np.nan_to_num(sc, nan=0.0), 1.0), sc)   # golden book-OK floor (=> selected first)
         return {t: (float(v) if pd.notna(v) else -1.0) for t, v in zip(toks, sc)}
+    # ---- AUDIT-ONLY count-matched PLACEBO (job Taylor_20260714_121717) ----
+    # BASKET_PLACEBO_FIN = "<seed>:<counts_csv>" (default "" = OFF, byte-identical).
+    # The v3route* family's only measurable effect on the cut is that it holds FEWER financial names
+    # (9.27/30 -> ~5-6.5/30). This asks the obvious question: does WHICH financials it keeps matter at
+    # all, or would ANY equally-sized financial underweight score the same? Keeps the baseline
+    # selector's ranking, but forces exactly the SAME NUMBER of financial names the real arm chose
+    # that quarter, picking WHICH ones at RANDOM from the eligible pool; non-financial slots are
+    # filled by the baseline's own top names. Same pattern as the DCF Pha-4 placebo.
+    PLACEBO = os.environ.get("BASKET_PLACEBO_FIN", "")
+    _pl_n, _pl_route, _pl_seed = {}, {}, 0
+    if PLACEBO:
+        _pl_seed_s, _pl_csv = PLACEBO.split(":", 1)
+        _pl_seed = int(_pl_seed_s)
+        _pc = pd.read_csv(_pl_csv, parse_dates=["rebal_date"])
+        _pl_n = {pd.Timestamp(r.rebal_date): int(r.n_fin) for r in _pc.itertuples()}
+        _pp = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",
+                                       "value_panel_2014.csv"), parse_dates=["time"])
+        _pp["qstart"] = _pp["time"].dt.to_period("Q").dt.start_time
+        _pp = _pp.sort_values("time").groupby(["ticker", "qstart"]).last().reset_index()
+        _pl_route = {(r.ticker, pd.Timestamp(r.qstart)): r.route for r in _pp.itertuples()}   # PIT route
+        print(f"  [placebo] seed={_pl_seed}, count-matched to {len(_pl_n)} rebals from {os.path.basename(_pl_csv)}")
+    _PL_FIN = {"BANK", "INSURANCE", "SECURITIES"}
+
+    def _placebo_reorder(gated, d, src_q, top_n):
+        """Force exactly n_fin(d) financial names into the top-n, chosen at RANDOM."""
+        tgt = _pl_n.get(pd.Timestamp(d))
+        if tgt is None: return gated
+        fin = [x for x in gated if _pl_route.get((x[0], pd.Timestamp(src_q))) in _PL_FIN]
+        non = [x for x in gated if _pl_route.get((x[0], pd.Timestamp(src_q))) not in _PL_FIN]
+        k = min(tgt, len(fin))
+        rng = np.random.default_rng(abs(hash((_pl_seed, pd.Timestamp(d).value))) % (2**32))
+        keep = [fin[i] for i in sorted(rng.choice(len(fin), size=k, replace=False))] if k > 0 else []
+        head = keep + non[: max(0, top_n - len(keep))]
+        rest = [x for x in gated if x not in head]
+        return head + rest
+
     # ---- AUDIT-ONLY dynamic sector cap (job Taylor_20260714_095953, sector-cap research) ----
     # BASKET_SECCAP_MODE: "" (default, OFF -> byte-identical: sectorcap keeps the fixed `sector_cap`)
     #   | "mktcap"   (variant B: cap sector_code at its PIT market-cap weight in ticker_prune)
@@ -569,7 +666,7 @@ GROUP BY t.time, sec""")
                 rsi_r = pd.Series({t:(rsi_s.get(t,np.nan) if rsi_s is not None else np.nan) for t,_ in pool}).rank(pct=True).fillna(0.5)
                 for t,_ in pool: score[t] += RSI_W*rsi_r[t]
             gated = sorted(pool, key=lambda tr: score[tr[0]], reverse=True)
-        elif SELECT_MODE in ("v3comp", "ps3", "v3gated", "v3latest", "v3route") and gated:
+        elif SELECT_MODE in _V3_MODES and gated:
             pool = gated[:CFO_POOL]
             score = _score_v3(pool, src_q)
             gated = sorted(pool, key=lambda tr: score[tr[0]], reverse=True)
@@ -582,6 +679,8 @@ GROUP BY t.time, sec""")
                                for t, _ in pool}).rank(pct=True).fillna(0.5)
             score = {t: liq_r[t] + CFO_BLEND * cfo_r[t] for t, _ in pool}
             gated = sorted(pool, key=lambda tr: score[tr[0]], reverse=True)
+        if PLACEBO and gated:
+            gated = _placebo_reorder(gated, d, src_q, top_n)
         picks = []
         for tk, rt in gated[:top_n]:
             qmult = (QT.get(int(rt), QTILT_MISSING) if (quality == "tilt" and pd.notna(rt)) else

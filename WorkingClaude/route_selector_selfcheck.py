@@ -15,6 +15,12 @@ Checks the things that can silently invalidate the backtest:
   [5] Coverage-aware / missing-data behavior: no pb_z -> abstain (NaN), never a fabricated 0.5;
       golden floor + PB<0 handling unchanged.
   [6] The v2 score reproduces rating_8l's value_score_v2 arithmetic exactly on real panel rows.
+  [7] CROSS-ROUTE SCALE COMPARABILITY (added job Taylor_20260714_121717, after quant-skeptic REFUTED
+      v3route): checks 1-6 are all WITHIN-route or byte-identity tests, so none of them can see the
+      bug that actually mattered — v2's ABSOLUTE pb_z term puts financial scores on a different
+      scale than the non-financials' pure within-route percentiles, and the top-30 cut is CROSS
+      route. v3route must FAIL this check (that is the bug); v3route2 (percentile-normalized) must
+      PASS it. A test that only ever compares banks to banks reproduces rating_8l's own blind spot.
 
 Run: $DNA_PYEXE route_selector_selfcheck.py
 """
@@ -58,7 +64,7 @@ W_ABS_V2 = 0.65
 
 
 def score(pool_tokens, src_q, mode, panel=None):
-    """Reimplementation of custom_basket._score_v3 for mode in {v3latest, v3route}.
+    """Reimplementation of custom_basket._score_v3 for mode in {v3latest, v3route, v3route2}.
 
     This is a MIRROR used to test semantics; check [6] pins it against rating_8l's own arithmetic
     and check [3]/[2] pin the v3route-vs-v3latest delta. The real harness path is exercised by the
@@ -90,7 +96,7 @@ def score(pool_tokens, src_q, mode, panel=None):
     sc = np.where(den > 0, num / den, np.nan)
     golden = (d.pb_z.values <= -1); bookok = ~(d.ROE_Min3Y.values < 0)
     bookok = bookok & (d.CF_OA_3Y.values > 0)
-    if mode == "v3route":
+    if mode in ("v3route", "v3route2", "v3route3"):
         _fin = vr.isin(_V2_ROUTES).values
         if _fin.any():
             _rel = np.clip(0.5 - d.pb_z.values / 2.0, 0, 1)
@@ -101,6 +107,18 @@ def score(pool_tokens, src_q, mode, panel=None):
                       + np.where(pd.Series(d.get("ROE_Min5Y", np.nan), index=toks).fillna(-9).values > 0.10, 0.03, 0.0))
             _v2 = np.clip((1 - W_ABS_V2) * _rel + W_ABS_V2 * np.nan_to_num(pct["ey"].values, nan=0.5) + _adj + _track, 0, 1)
             _v2 = np.where(np.isnan(d.pb_z.values), np.nan, _v2)
+            if mode in ("v3route2", "v3route3"):       # scale fix: v2 -> within-financial-route pct
+                _s2 = pd.Series(np.where(_fin, _v2, np.nan), index=toks)
+                _rk = _s2.groupby(vr).transform(
+                    lambda g: g.rank(pct=True) if g.notna().sum() >= 5 else pd.Series(np.nan, index=g.index))
+                _pr = _s2.rank(pct=True)
+                _mk = _rk.isna() & _s2.notna(); _rk = _rk.copy(); _rk[_mk] = _pr[_mk]
+                _v2 = _rk.values
+            if mode == "v3route3":                     # + quantile-match onto the non-financial dist
+                _nf = sc[(~_fin) & ~np.isnan(sc)]
+                if _nf.size >= 5:
+                    _v2 = np.where(np.isnan(_v2), np.nan,
+                                   np.quantile(_nf, np.clip(np.nan_to_num(_v2, nan=0.5), 0, 1)))
             sc = np.where(_fin, _v2, sc)
     sc = sc + 0.10 * np.where(golden & pd.notna(d.pb_z.values), 1.0, 0.0)
     sc = np.where(d.PB.values < 0, 0.0, sc)
@@ -126,8 +144,8 @@ _src = open(os.path.join(WORKDIR, "custom_basket.py")).read()
 check(os.environ.get("BASKET_SELECT") is None, "no BASKET_SELECT in a clean env")
 check('SELECT_MODE = os.environ.get("BASKET_SELECT", "blend")' in _src,
       "default SELECT_MODE is 'blend' (production yieldcombo is set explicitly, never v3route)")
-check(_src.count('"v3route"') > 0 and 'if SELECT_MODE == "v3route"' in _src,
-      "v3route branch is env-gated inside _score_v3, not a default")
+check('_ROUTE_MODES = ("v3route", "v3route2", "v3route3")' in _src and "if SELECT_MODE in _ROUTE_MODES" in _src,
+      "v3route* branches are env-gated inside _score_v3, not a default")
 if _prev is not None: os.environ["BASKET_SELECT"] = _prev
 
 print("\n[2] BANK is scored on the v2 axis (pb_z + within-route ey), NOT on cfy/PCF")
@@ -217,6 +235,86 @@ _got = base[_bank]
 _golden_adj = 0.10 if (_d.pb_z.values[_i] <= -1) else 0.0
 print(f"      {_bank}: independent v2 recompute {_expect+_golden_adj:.6f} vs selector {_got:.6f}")
 check(abs((_expect + _golden_adj) - _got) < 1e-6, "selector v2 branch == independent rating_8l arithmetic")
+
+print("\n[7] CROSS-ROUTE SCALE COMPARABILITY — financial vs non-financial score distributions")
+# The top-30 cut is cross-route, so financial and non-financial scores must live on the SAME scale.
+# Measure it the way the cut sees it: per quarter, the P90 of each group's scored names (the region
+# a 30-name cut out of a ~200-name pool actually samples), plus the spread. v3route mixes an
+# ABSOLUTE pb_z term into the financial score while non-financials are pure percentiles -> the
+# financial P90 sits structurally below 1.0 and the gap swings with pb_z coverage. v3route2 ranks
+# v2 within route first -> both groups reach ~1.0 and the gap collapses to noise.
+_QS = [pd.Timestamp(f"{y}-01-01") for y in range(2015, 2027)]
+
+
+def scale_gap(mode):
+    rows = []
+    for q in _QS:
+        pool_q = list(PQ[(PQ.qstart == q) & PQ.PE.notna()].ticker)
+        if len(pool_q) < 40: continue
+        s = score(pool_q, q, mode)
+        rt = PQ[(PQ.qstart == q) & PQ.ticker.isin(pool_q)].set_index("ticker").route.reindex(pool_q)
+        fin = pd.Series({t: s[t] for t in pool_q if rt.get(t) in _V2_ROUTES})
+        non = pd.Series({t: s[t] for t in pool_q if rt.get(t) not in _V2_ROUTES})
+        fin, non = fin[fin > -1], non[non > -1]        # drop abstains: a scale test, not a coverage test
+        if len(fin) < 5 or len(non) < 5: continue
+        rows.append(dict(q=q.date(), n_fin=len(fin), fin_p90=fin.quantile(.9), non_p90=non.quantile(.9),
+                         gap=non.quantile(.9) - fin.quantile(.9), fin_sd=fin.std(), non_sd=non.std()))
+    return pd.DataFrame(rows)
+
+
+G = {}
+for _m in ("v3route", "v3route2", "v3route3"):
+    G[_m] = g = scale_gap(_m)
+    print(f"      {_m:9s}: fin P90 med {g.fin_p90.median():.3f} | nonfin P90 med {g.non_p90.median():.3f} "
+          f"| gap med {g.gap.median():+.3f} (worst |gap| {g.gap.abs().max():.3f}) "
+          f"| sd ratio {(g.fin_sd/g.non_sd).median():.2f}")
+# The bug, stated as a test: v3route's financial P90 is materially BELOW the non-financial P90.
+check(G["v3route"].gap.median() > 0.05,
+      f"v3route IS mis-scaled — financial P90 sits {G['v3route'].gap.median():.3f} BELOW non-financial "
+      f"(this is the REFUTED bug; the test must SEE it, not excuse it)")
+# ...and the naive percentile fix over-shoots: a lone percentile is uniform, the non-financial score
+# is a mean of three percentiles and is bell-shaped. Documented as a test so nobody "fixes" it back.
+check(G["v3route2"].gap.median() < -0.02,
+      f"v3route2 OVER-corrects — financial P90 now {abs(G['v3route2'].gap.median()):.3f} ABOVE "
+      f"non-financial (uniform-vs-bell; same bug class, opposite sign)")
+# v3route3 is asserted on the median across quarters, and on the worst quarter with a financial pool
+# big enough for a P90 to mean anything (n>=50, i.e. 2020+). MEASURED LIMIT, stated rather than hidden:
+# in 2015-2018 the financial pool is only 18-45 names of which 15-17% sit ON the golden floor (score
+# forced to 1.0 at pb_z<=-1), so financial P90 pins at 1.000 and no scale transform can move it. That
+# residual is the golden floor — a rule BOTH groups share by design, verified separately — not the v2
+# scale. Asserting <0.05 on those quarters would be asserting the golden floor away.
+_g3 = G["v3route3"]; _g3_big = _g3[_g3.n_fin >= 50]
+check(abs(_g3.gap.median()) < 0.02 and _g3_big.gap.abs().max() < 0.09,
+      f"v3route3 (quantile-matched) IS comparable — gap med {_g3.gap.median():+.4f}, "
+      f"worst {_g3_big.gap.abs().max():.4f} over n_fin>=50 quarters "
+      f"(early small-n quarters pinned by the golden floor, excluded by design)")
+_g1_big = G["v3route"][G["v3route"].n_fin >= 50]
+check(_g3_big.gap.abs().max() < _g1_big.gap.abs().max(),
+      f"v3route3 worst-quarter gap {_g3_big.gap.abs().max():.3f} < v3route's {_g1_big.gap.abs().max():.3f} "
+      f"(same n_fin>=50 quarters) — strictly better scaled, not merely different")
+# ORDERING within EACH financial route must be untouched — all three arms are monotone transforms of
+# the same v2 score, so they may move the CUT but never the bank-vs-bank preference. (Ordering is
+# compared per route, not across the pooled financials: ranking WITHIN route is the intended design,
+# so BANK#1 and INSURANCE#1 both reaching 1.0 is correct, not a violation.)
+_qz = pd.Timestamp("2023-01-01")
+_S = {m: score(POOL, _qz, m) for m in ("v3route", "v3route2", "v3route3", "v3latest")}
+_rt = PQ[(PQ.qstart == _qz) & PQ.ticker.isin(POOL)].set_index("ticker").route.reindex(POOL)
+_fin_tk = [t for t in POOL if _rt.get(t) in _V2_ROUTES]
+for _m in ("v3route2", "v3route3"):
+    _taus = []
+    for _r in _V2_ROUTES:
+        _tk = [t for t in _fin_tk if _rt.get(t) == _r
+               and -1 < _S["v3route"][t] < 1.0 and _S[_m][t] < 1.0]   # exclude abstains + golden ties
+        if len(_tk) < 5: continue
+        _taus.append(pd.Series({t: _S["v3route"][t] for t in _tk}).corr(
+                     pd.Series({t: _S[_m][t] for t in _tk}), method="spearman"))
+    print(f"      within-route ordering v3route vs {_m}: spearman min {min(_taus):.4f} over {len(_taus)} routes")
+    check(min(_taus) > 0.999, f"{_m} preserves bank-vs-bank ordering (monotone; only the cut moves)")
+# and non-financials must STILL be byte-identical to v3latest in both new arms
+_nf = [t for t in POOL if t not in _fin_tk]
+for _m in ("v3route2", "v3route3"):
+    check(all(abs(_S[_m][t] - _S["v3latest"][t]) < 1e-12 for t in _nf),
+          f"{_m} leaves all {len(_nf)} non-financial scores byte-identical to v3latest")
 
 print("\n" + ("=" * 70))
 print(f"RESULT: {'ALL PASS' if not FAILS else f'{len(FAILS)} FAIL'}")

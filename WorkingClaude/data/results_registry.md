@@ -3284,7 +3284,11 @@ sai weight_scheme · đại số `_cap_sector`). `custom_basket.py` default, `BA
 `sector_conc_audit.py` + `sector_conc_history.csv` (48 rebal), `seccap_vehicle_compare.py` + `.csv`,
 `seccap_dyn_selfcheck.py`, `data/*_exp_seccap_{base,Afix50,Bmkt,Bx15}.csv`, log `mike/agents/Taylor/seccap_logs/`.
 
-## Route-aware custom30V selector `BASKET_SELECT=v3route` — **CẦN VERIFY THÊM (lean GO, KHÔNG WIRE)** (2026-07-14, job `Taylor_20260714_112932`)
+## Route-aware custom30V selector `BASKET_SELECT=v3route` — ~~CẦN VERIFY THÊM (lean GO)~~ → **NO-GO, KHÔNG WIRE** (2026-07-14, job `Taylor_20260714_112932` → fix quyết định `Taylor_20260714_121717`)
+
+> ⚠️ **MỤC NÀY ĐÃ BỊ LẬT.** Số `+7.63pp` dưới đây **quy sai công** (so với `yieldcombo` = gộp 2 trục).
+> Đóng góp THẬT của fix route = **−2.38pp** (âm cả IS lẫn OOS). Xem mục **`v3route` FIX QUYẾT ĐỊNH**
+> ở cuối file. Giữ nguyên phần dưới làm dấu vết audit.
 
 **Tiền đề (user)**: `yieldcombo` (production) xếp hạng bằng `rank(1/PE)+rank(1/PCF)` cho MỌI tên →
 so ngân hàng với công ty sản xuất trên cùng thước `1/PCF`. PCF của bank = dòng tiền gửi/cho vay
@@ -3358,3 +3362,84 @@ minh → không bao giờ vào nhánh v3route. `custom_basket.py` default / `BAS
 `mike/agents/Taylor/route_exp/` (logs/, vehicle_metrics.csv, members_{v3route,yieldcombo}.csv,
 basket_compare.py, route_robustness.py, R3_pinned_backup_20260714.csv),
 `data/*_exp_selv3route.csv` + `data/*_exp_selbaseline20260714.csv`.
+
+---
+
+## `v3route` FIX QUYẾT ĐỊNH — **NO-GO, edge KHÔNG TỒN TẠI khi tách bạch** (2026-07-14, job `Taylor_20260714_121717`)
+
+Chạy theo đúng khuyến nghị quant-skeptic (REFUTED, verify 12:07:14) cho finding `Taylor_20260714_112932`.
+**Fix đã làm đúng và đủ — edge không sống sót.** REFUTED **giữ nguyên**. Research-only, production **0 chạm**.
+
+### Lỗi lớn hơn cả bug skeptic bắt: arm `v3latest` CHƯA TỪNG ĐƯỢC ĐO
+Mọi số cũ quote vs `yieldcombo`, nhưng `v3route3` khác `yieldcombo` ở **2 chiều**: **(a)** trục định giá
+→ composite 8L `v3latest` (áp cho MỌI route, **không liên quan route-aware**), **(b)** fix route tài chính
+(**premise của user**). Không đo `v3latest` ⇒ (a)+(b) gộp làm một, toàn bộ công ghi cho (b).
+
+### Cấp vehicle — 5 arm, cùng vintage/config (`route_v3latest_arm.py`, `route_fix_compare.py`)
+| arm | CAGR | Sharpe | MaxDD | Calmar | IS | OOS | fin/30 |
+|---|---|---|---|---|---|---|---|
+| yieldcombo (production) | 29.83% | 1.24 | −40.98% | 0.73 | 23.53% | 35.89% | 9.27 |
+| **`v3latest`** (trục (a) đơn thuần) | **38.38%** | **1.51** | **−34.96%** | **1.10** | **32.07%** | **44.51%** | 6.98 |
+| `v3route` (REFUTED, lệch thang) | 37.47% | 1.51 | −36.39% | 1.03 | 29.68% | 45.12% | 5.08 |
+| `v3route2` (pct-norm, quá đà) | 36.22% | 1.47 | −36.29% | 1.00 | 29.49% | 42.76% | 6.19 |
+| **`v3route3`** (quantile-match, tham chiếu) | 36.01% | 1.46 | −36.41% | 0.99 | 29.52% | 42.30% | 6.54 |
+
+`v3latest` **thắng mọi arm route ở mọi chiều** → thêm fix route lên trên chỉ làm xấu đi.
+
+### Phân rã sạch của `+7.63pp` (cộng khớp chính xác)
+```
+ +8.55pp  (a) trục composite 8L    v3latest − yieldcombo   <- KHÔNG liên quan route
+ −2.38pp  (b) fix route THẬT       v3route3 − v3latest     <- premise user, đã tách bạch
+ +1.46pp  (c) artifact thang đo    v3route  − v3route3     <- đúng bug skeptic bắt
+ ───────
+ +7.63pp  = headline job 112932    ✓ (8.55 − 2.38 + 1.46 = 7.63)
+```
+**(b) ÂM CẢ HAI CỬA SỔ** (không phải hiện tượng 1 cửa sổ): IS **−2.56pp** · OOS **−2.20pp**.
+*(so sánh: (a) IS +8.54 / OOS +8.62)*
+
+### Đòn kết liễu 2: `v3latest` ĐÃ BỊ BÁC 2026-06-22 — và **cấp vehicle ĐẢO DẤU OOS**
+Registry THREAD (b) (dòng ~145-154, drift-controlled, self-check 0 VND) đã đo `v3latest` **ở cấp hệ**:
+IS **+1.40pp** / **OOS −0.78pp** → *IS-overfit, GIỮ yieldcombo, KHÔNG nhận v3 composite làm selector*.
+Nhưng **cấp vehicle hôm nay nói OOS +8.62pp**. ⇒ **Proxy vehicle không chỉ suy giảm — nó ĐẢO DẤU**
+(custom30V chỉ là sleeve park khi NEUTRAL; CAGR vehicle tính cả những đoạn sleeve không được dùng).
+**Không bao giờ tuyên GO cho selector custom30V từ số cấp vehicle.**
+
+### Các test phụ
+- **§3 ABSTAIN — giả thuyết coverage-artifact BỊ BÁC** (sòng phẳng: điểm finding gốc đứng vững).
+  `V3R_ABSTAIN_IMPUTE=1` (gán pb_z trung vị route thay vì loại): CAGR **36.46%** (+6.63pp, fin 7.46/30)
+  **> `v3route3` 36.01%** ⇒ ABSTAIN **làm mất −0.45pp**, không tạo edge.
+- **§4 SENSITIVITY — plateau THẬT nhưng quanh đóng góp ÂM.** 7 cell (`W_ABS` .55/.65/.75 × cfo off/×2 ×
+  track off/×2): edge **+5.72 … +6.65pp**, sd 0.33, default không phải spike. Nhưng mọi cell mang sẵn
+  +8.55pp của (a) ⇒ thực chất **−1.9 … −2.8pp so `v3latest`**: robust ở chỗ **hơi có hại**.
+- **§2 PLACEBO — CONFOUND, verdict tự in của script SAI, KHÔNG ĐƯỢC TRÍCH.** 20 seed count-matched:
+  placebo mean −2.13pp, real +6.18pp, z=+5.12; script in *"WHICH names are dropped carries real
+  information"* — **sai**: placebo dựng trên ranking `yieldcombo` còn `v3route3` lấy phi-tài-chính từ
+  `v3latest` ⇒ z đang đo **trục (a)**. Placebo đúng (nền `v3latest`) **không chạy**: thứ nó cần giải
+  thích (edge dương của (b)) **không tồn tại** (b = −2.38pp).
+- **§5 selfcheck `route_selector_selfcheck.py` — 7 nhóm ALL PASS.** Thêm **[7] cross-route scale**:
+  gap fin−nonfin P90 mỗi quý → `v3route` **+0.107** (bug REFUTED, test PHẢI thấy) · `v3route2` **−0.064**
+  (quá đà, cùng lớp lỗi ngược dấu) · `v3route3` **−0.001** ✅. Spearman trong-route 0.9993/0.9995
+  (thứ tự bank-vs-bank không đổi, chỉ phép cắt dịch); 1010 tên phi-tài-chính byte-identical cả 3 arm.
+  `basket_compare.py`: vá dòng chẩn đoán "85 names/237 with pb_z" (PANEL daily → lẫn rows-vs-names).
+
+### Verdict + sòng phẳng với premise của user
+**NO-GO. Không wire gì.** Kết quả **không** chứng minh "PCF bank = PCF nhà máy"; nó bác một điều hẹp hơn:
+**cách hiện thực hoá này** (chấm bank bằng `pb_z` qua `value_score_v2` **trong phép cắt top-30 chéo ngành**)
+**không tạo return edge** — mất 2.38pp. Sắc thái: `v3latest` (arm thắng vehicle) **cũng đã** xếp hạng
+**TRONG route** ⇒ nguyên tắc "đừng so bank với nhà máy trên cùng thang" **hệ đã làm sẵn ở đó**; thứ gãy
+là bước mạnh hơn (**thay 1/PCF bằng pb_z**). Và `v3latest` **cũng đã bị bác ở cấp hệ** ⇒ **không có gì để wire**.
+**KHÔNG đảo ngược 2 lệnh HPG/LPB hoãn trong plan 07-14** (quyết định của user; nếu có thì kết quả này càng củng cố không hành động theo v3route).
+
+### Bài học phương pháp (giá trị lâu dài nhất)
+1. **Ablation phải neo vào arm LIỀN KỀ, không phải baseline production** — bug này có **trước** bug thang đo và **lớn hơn** (8.55 vs 1.46).
+2. **Cấp vehicle custom30V là proxy ĐẢO DẤU cho cấp hệ.**
+3. **Verdict tự in của script có thể sai khi thí nghiệm bị confound** — đọc thiết kế, đừng copy dòng kết luận.
+
+### Việc riêng (không thuộc verdict này)
+- **Re-pin R3**: vintage hôm nay **27.09%** vs pin **27.84%** = −0.75pp **data-drift, không phải bug** → **chờ Mike/user quyết**, job này KHÔNG tự re-pin.
+- **`build_value_panel.py` import `rating_8l.route_of`: KHÔNG LÀM** — `route_of` là **hàm lồng** (`rating_8l.py:443`, closure trên `bank_set`/`power_set`) → cần **refactor production 8L**, sai phạm vi cho job research (guidelines §3). **Đã verify port TƯƠNG ĐƯƠNG hôm nay** (COMMODITY_MAP/SUGAR/CEMENT khớp từng ký tự, cùng lens CSV, cùng thứ tự nhánh) ⇒ **finding không bị nhiễm**; rủi ro trôi tương lai vẫn còn → task refactor riêng nếu muốn.
+
+**Artifacts**: `mike/agents/Taylor/route_aware_selector_framework.md` §10 · `route_exp/`:
+`route_v3latest_arm.py` (arm quyết định), `route_fix_compare.py`, `route_abstain_sens.py`, `route_placebo.py`,
+`attribution_metrics.csv`, `abstain_sens_metrics.csv`, `placebo_v3route3.csv`, `vehicle_metrics_fix.csv`,
+`vehicle_level_*.csv`, `members_*.csv`, `logs/*.log` · `route_selector_selfcheck.py` (7 nhóm ALL PASS).
