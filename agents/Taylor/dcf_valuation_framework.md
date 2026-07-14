@@ -51,11 +51,22 @@ honest "can't value this with FCFE".
 
 Requirement was: test recency-weight schemes {equal, 50/30/20, 60/25/15, exp-decay} for predicting
 **next-year** actual earnings growth vs an equal-weight 3Y baseline. Panel = one obs per
-(ticker, year), non-financial, trailing 3 annual TTM-NP growths → realized next-year TTM-NP growth
-(n≈30k obs 2012-2026).
+(ticker, calendar-year last release), non-financial, trailing 3 annual TTM-NP growths → realized
+next-year TTM-NP growth. **n = 6,332 firm-years, 2009–2024, 892 tickers** (growths winsorized to [−90%, +200%]).
+
+| window | scheme | rankIC | MAE | corr |
+|---|---|---|---|---|
+| IS ≤2019 (n=3283) | **equal 1/3** | **−0.104** | **0.623** | −0.137 |
+| | 60/25/15 | −0.118 | 0.642 | −0.162 |
+| OOS ≥2020 (n=3049) | **equal 1/3** | **−0.199** | **0.662** | −0.204 |
+| | 60/25/15 | −0.221 | 0.700 | −0.226 |
+| ALL (n=6332) | **equal 1/3** | **−0.151** | **0.641** | −0.171 |
+| | 60/25/15 | −0.170 | 0.670 | −0.195 |
+
+Reference (ALL): `g1_only` rankIC −0.134 / MAE 0.776; `mean(g1,g2,g3)` rankIC −0.151 / MAE 0.641.
 
 **Finding: trailing earnings growth *mean-reverts hard*.** A company's own past growth has
-**negative** rank correlation (~−0.13) with its next-year growth. Consequences measured:
+**negative** rank correlation (−0.10 IS / −0.20 OOS / −0.15 ALL) with its next-year growth. Consequences measured:
 - **Recency weighting does NOT help** — 50/30/20, 60/25/15, exp-decay and equal are within noise
   of each other; recency-tilt is marginally *worse* on MAE than a simple 3Y mean.
 - **Multi-year averaging DOES help** — any 3-year average beats recent-quarter-only on MAE
@@ -89,37 +100,48 @@ Tier-2 proxy before). Trailing-5Y average as-of 2026-06 ≈ **3.37%** (annual av
 
 ## 5. Sensitivity (know the tool's limits)
 
-DCF is famously sensitive to r and terminal value. Measured on real names (fair value % change):
-- **r ±1%** → fair value ≈ **∓9–12%** (e.g. FPT: r−1% +12%, r+1% −10%).
-- **g_stage1 ±2%** → fair value ≈ **±8%**.
+DCF is famously sensitive to r and terminal value. Measured on the demo names (as-of 2026-07-13):
 
-So a 1-percentage-point view on the discount rate moves intrinsic value ~10% — the margin-of-safety
-should be read with a **wide band**, not to the decimal. `dcf_valuation.py` prints the sensitivity
-grid on every single-name run.
+| perturbation | CTR: FV (Δ%) → MoS | DHG: FV (Δ%) → MoS |
+|---|---|---|
+| base | 52,564 → −40.4% | 51,614 → −79.2% |
+| r **−1%** | 58,591 (+11.5%) → −26.0% | 57,307 (+11.0%) → −61.4% |
+| r **+1%** | 47,645 (−9.4%) → −54.9% | 46,962 (−9.0%) → −97.0% |
+| g_stage1 **−2%** | 48,511 (−7.7%) → −52.1% | 47,510 (−8.0%) → −94.7% |
+| g_stage1 **+2%** | 56,904 (+8.3%) → −29.7% | 56,023 (+8.5%) → −65.1% |
 
-## 6. Demo (as-of 2026-06-15, watchlist non-financials)
+So a 1-percentage-point view on the discount rate moves intrinsic value ~±10%, ±2% growth ~±8% — the
+margin-of-safety should be read with a **wide band**, not to the decimal. **But note the verdict is
+robust to the whole ±1%r / ±2%g box: even at the most favorable corner (r−1%) both CTR and DHG stay
+RICH** (−26% / −61%). Rule of thumb: distrust any MoS that *flips sign* inside that box — it is noise,
+not signal. `dcf_valuation.py` prints the sensitivity grid on every single-name run.
 
-| Ticker | FCFE0 (B/yr) | g_stage1 | Fair value | Price | Margin of safety | Read |
-|---|---|---|---|---|---|---|
-| FPT | 6,335 | +11.7% | 53,909 | 73,600 | **−36.5%** | RICH |
-| CTR | 505 | +6.6% | 52,475 | 86,900 | **−65.6%** | RICH |
-| DHG | 722 | +0.7% | 51,530 | 94,000 | **−82.4%** | RICH |
-| MSH | — | — | — | — | — | **no positive FCFE** (capex > CFO) |
-| PVT | — | — | — | — | — | **no positive FCFE** (fleet build-out) |
-| HAH | — | — | — | — | — | **no positive FCFE** (fleet build-out) |
+## 6. Demo — 5 Group-A watchlist names (as-of 2026-07-13, r=13.30%, g_term=3.40%)
 
-**Two important, honest takeaways from the demo:**
-1. **Nearly everything with a quality bid reads "RICH."** A conservative FCFE-DCF (all-investing
-   netted out of cash flow, growth shrunk toward CPI, ~13% VN discount rate) sits *below* the price
-   the market pays for durable compounders. The DCF's absolute level is therefore **conservative by
-   construction** — its value is in **cross-sectional ranking** (which name is *least* rich, is the
-   market premium unusually large right now), not as an absolute buy/sell line. This is consistent
-   with sector_lens calling these names "expensive on relative metrics too" — the DCF agrees on
-   *direction* but is harsher on *level*.
-2. **Capital-intensive names (shipping/tankers/towers-in-buildout) are refused by the FCFE gate.**
-   PVT, HAH, MSH have investing outflows exceeding operating cash — free cash flow to equity is
-   negative during expansion, so a per-share DCF is not meaningful and the tool says so rather than
-   manufacturing a number. For those, relative/asset-based lenses remain the right tool.
+| Ticker | Sector | FCFE0 (B/yr) | g_stage1 | Fair value | Price | Margin of safety | DCF read | sector_lens (RELATIVE) |
+|---|---|---|---|---|---|---|---|---|
+| **MSH** | Textile | — | — | — | 31,750 | — | **no positive FCFE** (capex > CFO) | BUY/ACCUM · PE 5.70 cheap |
+| **PVT** | Logistics (tanker) | — | — | — | 18,950 | — | **no positive FCFE** (fleet build-out) | BUY/ACCUM · PB 0.83 trough |
+| **HAH** | Logistics (container) | — | — | — | 50,800 | — | **no positive FCFE** (ship build-out) | BUY/ACCUM · EVEB 4.21 cheap |
+| **CTR** | Viettel-infra | 505 | +6.6% | 52,564 | 73,800 | **−40.4%** | **RICH** | BUY/ACCUM · EVEB 9.74 (<11 accum) |
+| **DHG** | Pharma | 722 | +0.7% | 51,614 | 92,500 | **−79.2%** | **RICH** | BUY/ACCUM · PE 13.4 < MA5Y 15.05 |
+
+**The DCF disagrees with the relative lens on all 5 — and that disagreement is exactly the point of an absolute lens:**
+1. **3 of 5 (MSH / PVT / HAH) fall in the DCF blind spot** — capex-heavy expanders whose FCFE is currently
+   negative (investing outflow > operating cash during build-out). The DCF correctly **abstains** rather than
+   fabricate a value; the *right* tool for these is precisely what sector_lens uses (asset-based PB / EV-based
+   EVEB, which handle reinvestment). This is a **coverage boundary, not a contradiction** — the two lenses cover
+   different name types.
+2. **CTR & DHG compute and both read RICH** despite being "cheap" on the relative lens — the **value-trap warning**:
+   - **DHG is the archetype**: cheap vs its **own 5Y PE history** (13.4 vs 15.05) but ~80% above intrinsic on
+     discounted cash flows, driven by **declining trailing earnings** (g2 −10.2%, g3 −16.6%) against a rich 92,500
+     price. Relative-cheap, absolute-expensive — precisely what this lens is built to flag.
+   - **CTR** is milder: EVEB 9.74 sits in sector_lens's *accumulate* band but *not* the `<9` *strong* band, and the
+     DCF's −40% MoS agrees it is no longer a bargain in absolute terms after the run to 73,800.
+3. **Level bias, use ranks not the line.** A conservative FCFE-DCF (all-investing netted out, growth shrunk toward
+   CPI, ~13% VN discount rate) sits *below* the price the market pays for durable compounders — so a RICH reading is
+   normal for quality names and the DCF's value is in **cross-sectional ranking / value-trap flags**, not an absolute
+   buy/sell line. (Consistent with §5: the ranking is what Study B's +IC actually rewards.)
 
 ## 7. Walk-forward IC validation (does margin-of-safety predict forward return?)
 
@@ -127,7 +149,25 @@ grid on every single-name run.
 a monthly price panel, filtered to the **non-financial rating≤3** universe, cross-sectional Spearman
 IC of MoS vs `profit_1M/2M/3M` per month, averaged, walk-forward IS(2014-19)/OOS(2020-26).
 
-> **[IC RESULTS — filled from `dcf_exp/backtest_run.log` after the run completes]**
+Panel: **51,529 rows · 144 months · 959 tickers.** FV releases older than ~15 months dropped as stale;
+MoS distribution: mean −3.02, median +0.12, %cheap(MoS>0) 55%.
+
+| window | profit_1M | profit_2M | profit_3M |
+|---|---|---|---|
+| **ALL 2014–2026** | +0.0444 (t=7.3, hit 72%) | +0.0584 (t=9.4, hit 79%) | +0.0690 (t=11.6, hit 86%) |
+| **IS 2014–2019** | +0.0410 (t=4.5) | +0.0508 (t=5.4) | +0.0690 (t=7.5) |
+| **OOS 2020–2026** | +0.0473 (t=5.8) | +0.0646 (t=7.9) | +0.0690 (t=8.9) |
+
+Quintile monotonicity (profit_2M, 0=richest → 4=cheapest): **1.70 → 2.24 → 2.68 → 3.24 → 4.94** — clean monotone.
+
+**Verdict: MoS carries a positive, monotone, IS/OOS-stable cross-sectional signal**, strengthening with horizon
+(IC 0.044 → 0.069 from 1M → 3M) and — unusually — **OOS ≥ IS** (no overfit decay). The magnitude (~0.05–0.07) is
+*modest*, consistent with a value lens: a real edge signal, **not** a stand-alone alpha. It corroborates the 8L thesis
+that cheapness predicts — here from an *absolute* (cash-flow) angle, orthogonal to the relative lenses.
+
+> **Run vintages:** `backtest_run.log` (the cache-build run) is authoritative (quintile 3 = 3.24). An earlier
+> `/tmp/dcf_ic.log` shows quintile 3 = `inf` — a one-off `qcut` edge artifact; the IC/t figures match to ±0.001
+> across both runs. Use `backtest_run.log`.
 
 **Interpretation rule set in advance (so the read is honest either way):** the other 8L lenses were
 adopted *because* they showed a measured forward-return edge. This DCF is being held to the same

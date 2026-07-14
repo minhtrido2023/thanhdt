@@ -1,0 +1,55 @@
+
+==============================================================================
+STUDY A — recency-weight calibration (predict next-year earnings growth)
+==============================================================================
+panel n=6332  years 2009-2024  tickers=892
+
+  IS (<=2019)  n=3283
+    scheme           rankIC      MAE     corr
+    equal_1/3        -0.104    0.623   -0.137
+    50/30/20         -0.117    0.630   -0.160
+    60/25/15         -0.118    0.642   -0.162
+    expdecay_.6      -0.117    0.649   -0.160
+
+  OOS (>=2020)  n=3049
+    scheme           rankIC      MAE     corr
+    equal_1/3        -0.199    0.662   -0.204
+    50/30/20         -0.225    0.682   -0.233
+    60/25/15         -0.221    0.700   -0.226
+    expdecay_.6      -0.223    0.710   -0.226
+
+  ALL  n=6332
+    scheme           rankIC      MAE     corr
+    equal_1/3        -0.151    0.641   -0.171
+    50/30/20         -0.170    0.655   -0.197
+    60/25/15         -0.170    0.670   -0.195
+    expdecay_.6      -0.170    0.679   -0.194
+
+  reference predictors (ALL):
+    g1_only        rankIC=-0.134 MAE=0.776
+    mean(g1,g2,g3) rankIC=-0.151 MAE=0.641
+
+==============================================================================
+STUDY B — margin-of-safety forward-return IC (non-financial, rating<=3)
+==============================================================================
+FV computed for 1018 tickers, 25726 release-points (cached)
+panel rows=51529  months=144  tickers=959
+  MoS distribution: mean=-3.02 median=+0.12 %cheap(MoS>0)=55%
+
+  ALL 2014-2026: (cross-sectional Spearman IC of MoS vs forward return, monthly, then averaged)
+    profit_1M: meanIC=+0.0444  t=+7.30  hit%=72  (n_months=144)
+    profit_2M: meanIC=+0.0584  t=+9.43  hit%=79  (n_months=143)
+    profit_3M: meanIC=+0.0690  t=+11.63  hit%=86  (n_months=142)
+
+  IS 2014-2019: (cross-sectional Spearman IC of MoS vs forward return, monthly, then averaged)
+    profit_1M: meanIC=+0.0410  t=+4.50  hit%=71  (n_months=65)
+    profit_2M: meanIC=+0.0508  t=+5.42  hit%=78  (n_months=65)
+    profit_3M: meanIC=+0.0690  t=+7.51  hit%=82  (n_months=65)
+
+  OOS 2020-2026: (cross-sectional Spearman IC of MoS vs forward return, monthly, then averaged)
+    profit_1M: meanIC=+0.0473  t=+5.75  hit%=72  (n_months=79)
+    profit_2M: meanIC=+0.0646  t=+7.88  hit%=79  (n_months=78)
+    profit_3M: meanIC=+0.0690  t=+8.89  hit%=90  (n_months=77)
+
+  profit_2M by MoS quintile (0=most rich .. 4=cheapest):
+    {0: 1.7, 1: 2.24, 2: 2.68, 3: 3.24, 4: 4.94}
