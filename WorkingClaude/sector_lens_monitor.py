@@ -496,6 +496,14 @@ def build_telegram_message(df, transitions, prior, state, spread_yoy, feed_ok, f
             # +16.7%/3M hit 74% vs single-extreme +7.5..9.6% — a STRONG lacking the 8L confirm is
             # the weaker single-extreme case and must SAY so, not read as a market-wide deal.
             s += " ⚠️ <i>rẻ vs chính nó, CHƯA xác nhận rẻ vs thị trường (8L rating 3-5)</i>"
+        if double:
+            # Golden/Strong (8L rating<=2 AND sector-lens BUY) — add DCF (informational only,
+            # job Taylor_20260714_095943; reuses dcf_valuation.py, never gates this list).
+            try:
+                from dcf_valuation import dcf_line
+                s += f" · {dcf_line(r['ticker'], r.get('price_asof') or str(TODAY))}"
+            except Exception as e:
+                s += f" · DCF: N/A (dcf_error: {str(e)[:40]})"
         return s
 
     actionable = df[df["status"].isin(["BUY", "ARMED"])]

@@ -132,6 +132,15 @@ def generate_section(as_of_date: str = None) -> str:
             sign = "+" if pct >= 0 else ""
             line = f"- **{ticker}**: {current:,.0f}đ ({sign}{pct:.1f}%)"
 
+            # DCF check (informational only — never gates this report). ACB/MBB/HDB are
+            # financials -> dcf_line() auto-degrades to N/A via the same gate as Pha 2 production.
+            try:
+                from dcf_valuation import dcf_line
+                dcf_str = dcf_line(ticker, as_of_date or data_date, price=current)
+            except Exception as e:
+                dcf_str = f"DCF: N/A (dcf_error: {str(e)[:40]})"
+            line += f" | {dcf_str}"
+
             # Valuation annotation
             if ticker == "FPT":
                 pe_ma1y = pe_ma1y_map.get("FPT")

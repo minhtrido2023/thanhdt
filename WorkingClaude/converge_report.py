@@ -124,7 +124,25 @@ def generate_section(as_of_date=None, live_set=None):
         adds = [f"{t}·{m}" for t, m in sorted(live.items()) if t not in seed_tk]
         drops = [t for t in sorted(seed_tk) if t not in live]
         lines.append("")
-        lines.append(f"**Live double-confirm ({len(live)}):** " + ", ".join(sorted(live)))
+        lines.append(f"**Live double-confirm ({len(live)}):**")
+
+        # DCF check per name (informational only, never gates). Reuse price already fetched
+        # above when the ticker is in the seed set; else dcf_line() fetches its own via BQ cache.
+        try:
+            from dcf_valuation import dcf_line
+        except Exception:
+            dcf_line = None
+        dcf_asof = as_of_date or data_date
+        for tk, mode in sorted(live.items()):
+            if dcf_line is not None:
+                try:
+                    dcf_str = dcf_line(tk, dcf_asof, price=price.get(tk))
+                except Exception as e:
+                    dcf_str = f"DCF: N/A (dcf_error: {str(e)[:40]})"
+            else:
+                dcf_str = "DCF: N/A"
+            lines.append(f"- **{tk}**·{mode} — {dcf_str}")
+
         if adds:
             lines.append(f"🟢 ENTER (mới double-confirm, chưa trong seed): {', '.join(adds)}")
         if drops:
