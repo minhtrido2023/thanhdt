@@ -33,19 +33,25 @@ _dt_gate_line() {
 import sys
 sys.path.insert(0, '$WC_ROOT')
 try:
-    from dna_report import build_dt_gate_line
+    from dna_report import build_dt_gate_line, build_neutral_base_line
     line = build_dt_gate_line(html=False)
     if line:
-        print(line)
+        print('🛰️ ' + line)
+        # Tần suất lịch sử NEUTRAL→BEAR/CRISIS (base-rate DT5G, KHÔNG phải dự báo —
+        # nhãn nằm sẵn trong hàm). Tự None khi state không phải NEUTRAL → bỏ dòng.
+        nb = build_neutral_base_line(html=False)
+        if nb:
+            print('  ↳ ' + nb)
 except Exception:
     pass
 " 2>/dev/null || true
 }
 # Trả về block (có newline dẫn đầu) khi có dữ liệu, "" khi lỗi/không có. Gọi LAZY — chỉ
 # ở case HOLD-day + full-render, tránh chạy BQ trong nhánh cảnh báo lỗi (case 1/3).
+# Có thể nhiều dòng (gate + base-rate) — prefix đã gắn sẵn từng dòng trong python.
 _dt_gate_block() {
-  local line; line="$(_dt_gate_line)"
-  [ -n "$line" ] && printf '\n🛰️ %s' "$line"
+  local out; out="$(_dt_gate_line)"
+  [ -n "$out" ] && printf '\n%s' "$out"
 }
 
 # Mọi ngày PHẢI có 1 dòng báo cho account này — "im lặng" không phân biệt được với hệ
@@ -59,8 +65,12 @@ if [ -f "$PLAN_FILE" ]; then
 fi
 
 if [ ! -f "$PLAN_FILE" ]; then
-  # Case 1: KHÔNG CÓ plan — vấn đề thật (DollarBill chưa chạy/lỗi), không phải "ngày nghỉ".
-  MSG="🔴 **EOD $ACCOUNT ($PLAN_DATE)** — KHÔNG TÌM THẤY plan hôm nay. DollarBill có thể đã lỗi lúc 17:30/19:30 hôm qua — kiểm tra ngay, đây KHÔNG phải ngày nghỉ giao dịch bình thường."
+  # Case 1: KHÔNG TÌM THẤY file plan — script này KHÔNG phân biệt tự động được giữa
+  # (i) lỗi thật (DollarBill fail 17:30/19:30) và (ii) quyết định CHỦ ĐỘNG không lập plan
+  # (vd ZaloPay 2026-07-14: transition xong 07-13, không phát sinh lệnh — bản cũ khẳng
+  # định chắc "KHÔNG phải ngày nghỉ bình thường" là kết luận sai, fix 2026-07-14).
+  # Không có bằng chứng → nêu cả 2 khả năng, để người đọc xác nhận, không buộc kết luận.
+  MSG="🟡 **EOD $ACCOUNT ($PLAN_DATE)** — KHÔNG TÌM THẤY file plan hôm nay. 2 khả năng: (i) CHỦ ĐỘNG không lập plan cho account này (quyết định HOLD có chủ đích — bình thường), hoặc (ii) DollarBill lỗi lúc 17:30/19:30 hôm qua. Kiểm tra plan channel / bus để xác nhận là chủ động hay lỗi — báo cáo này không đủ bằng chứng tự kết luận."
   echo "$MSG"
   "$ROOT/bin/notify_thread.sh" "$MSG" "$TRADING_THREAD" 2>/dev/null || true
   "$ROOT/bin/append_event.sh" Mafee status "eod-trading-report" \
