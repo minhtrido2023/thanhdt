@@ -251,6 +251,10 @@ else:
     lines.append(f"ℹ️ Kiểm tra báo cáo tuần: bỏ qua (chỉ chạy thứ Hai, hôm nay {day_name}).")
 
 # --- 7b. Báo cáo tháng: kiểm tra từ ngày 5 trong tháng ---
+# Sàn go-live: live trading bắt đầu 2026-07-01 (SpaceX) — tháng nằm TRỌN trước đó
+# không có dữ liệu tài khoản live nào để báo cáo, đòi báo cáo là false-positive
+# (fix 2026-07-14, ops-autofix Winston: checker đòi báo cáo tháng 2026-06).
+GO_LIVE_MONTH = (2026, 7)
 if today_d.day >= 5:
     monthly_files = glob.glob(os.path.join(reports_dir, "*_monthly_report_*.md"))
     # Tháng trước
@@ -260,7 +264,10 @@ if today_d.day >= 5:
         last_month_year, last_month_num = today_d.year, today_d.month - 1
     last_month_str = f"{last_month_year}-{last_month_num:02d}"
     has_last_month = any(last_month_str in os.path.basename(f) for f in monthly_files)
-    if not has_last_month:
+    if (last_month_year, last_month_num) < GO_LIVE_MONTH:
+        lines.append(f"ℹ️ Kiểm tra báo cáo tháng: bỏ qua — tháng {last_month_str} "
+                     f"trước go-live 2026-07, không có dữ liệu live để báo cáo.")
+    elif not has_last_month:
         W(f"Báo cáo tháng quá hạn — tháng {last_month_str} chưa có báo cáo "
           f"(hôm nay ngày {today_d.day} >= 5), Mike cần soạn.")
     else:
