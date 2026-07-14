@@ -107,7 +107,8 @@ class Executor:
                 "exchange_override": {},  # ticker -> "HOSE"|"HNX" học được sau 1 lần bị từ chối
                                           # tick-size (xem _is_invalid_tick_lot + _place_slices)
                 "parents": {o.id: {"filled": 0, "done": False, "atc_sent": False,
-                                   "children": [], "last_slice_ts": None}
+                                   "children": [], "last_slice_ts": None,
+                                   "dcf_check": o.dcf_check}  # audit trail Pha 2 DCF
                             for o in self.plan.orders}}
 
     def seed_shared(self):
@@ -396,6 +397,17 @@ class Executor:
                             self.shared[o.ticker] = self.shared.get(o.ticker, 0) + delta
                         self._journal("FILL", o, c["oid"], c["filled"],
                                       u.avg_price or c["price"])
+                        # Audit-trail bus event khi mua mã DCF đang RICH+robust (Pha 2 DCF).
+                        # Chỉ log — không chặn, không thay đổi execution logic.
+                        _dcf = o.dcf_check
+                        if (o.side == "buy" and _dcf and
+                                _dcf.get("status") == "RICH" and _dcf.get("robust") is True):
+                            _publish_bot_event("finding", "dcf-rich-fill", {
+                                "ticker": o.ticker, "order_id": o.id,
+                                "filled_delta": delta, "child_oid": c["oid"],
+                                "dcf_check": _dcf,
+                                "dcf_override_reason": o.dcf_override_reason or None,
+                            })
                     if c["status"] == "open" and u.is_dead:
                         c["status"] = "closed"
                         self._release_child(o.ticker, c)

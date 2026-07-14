@@ -15,12 +15,80 @@ import datetime as dt
 import json
 import os
 import re
+import logging
 
 import pandas as pd
 
 from .config import WORKDIR, DATA_DIR
 from .plan import TradePlan, PlannedOrder
 from .vn_market import next_trading_day, round_lot, LOT
+
+_log = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------- DCF check (Pha 2, 2026-07-14)
+
+_DCF_SENS_KEYS = ["r-1%", "r+1%", "g-2%", "g+2%"]
+
+
+def _dcf_check_for_order(ticker, price, asof):
+    """Tính dcf_check dict cho 1 BUY order (non-financial, informational only).
+
+    Đọc từ data/bq_cache/ticker_financial.parquet (local parquet, không gọi BQ live).
+    Fail-safe: mọi lỗi đều trả NOT_COMPUTED với reason="dcf_error:...", KHÔNG raise.
+
+    robust = True khi MoS KHÔNG đổi dấu qua toàn bộ sensitivity box
+             (±1pp discount rate, ±2pp growth) — ngưỡng thống nhất theo Spyros/họp round-table.
+    """
+    try:
+        import sys as _sys
+        if WORKDIR not in _sys.path:
+            _sys.path.insert(0, WORKDIR)
+        import dcf_valuation as _dcf
+
+        res = _dcf.fair_value(ticker, asof, price=price)
+
+        if not res["ok"]:
+            reason = res.get("reason", "unknown")
+            if "financial-sector" in reason:
+                nc_reason = "financial_sector_excluded"
+            elif "positive FCFE" in reason or "FCFE <= 0" in reason:
+                nc_reason = "fcfe_negative_buildout"
+            elif "insufficient financial" in reason:
+                nc_reason = "insufficient_history"
+            else:
+                nc_reason = reason[:80]
+            return {"status": "NOT_COMPUTED", "margin_of_safety": None,
+                    "robust": False, "reason": nc_reason, "as_of": str(asof)[:10]}
+
+        mos = res.get("margin_of_safety")
+        status = "CHEAP" if (mos is not None and mos > 0) else "RICH"
+
+        # robust: kiểm tra MoS không đổi dấu qua sensitivity box
+        sens = res.get("sensitivity", {})
+        robust = False
+        if mos is not None and price and price > 0:
+            mos_positive = mos > 0
+            sens_signs = []
+            for k in _DCF_SENS_KEYS:
+                s = sens.get(k, {})
+                fv_s = s.get("fv")
+                if fv_s and fv_s > 0:
+                    mos_s = (fv_s - price) / fv_s
+                    sens_signs.append(mos_s > 0)
+            robust = bool(sens_signs) and all(sg == mos_positive for sg in sens_signs)
+
+        return {
+            "status": status,
+            "margin_of_safety": round(float(mos), 4) if mos is not None else None,
+            "robust": robust,
+            "as_of": str(asof)[:10],
+        }
+
+    except Exception as exc:
+        _log.warning("DCF check lỗi cho %s: %s", ticker, exc)
+        return {"status": "NOT_COMPUTED", "margin_of_safety": None,
+                "robust": False, "reason": f"dcf_error: {str(exc)[:80]}",
+                "as_of": str(asof)[:10]}
 
 GOLIVE_OUT = os.path.join(WORKDIR, "deploy_golive_dt5g_v4", "out")
 STATUS_FILE = os.path.join(DATA_DIR, "golive_v23_status.json")
@@ -205,9 +273,18 @@ class V23Strategy(StrategyBase):
             if diff > 0:
                 qty = round_lot(diff)
                 if qty >= LOT:
+                    dcf = _dcf_check_for_order(t, px, str(signal_date)[:10])
+                    dcf_warn = (
+                        dcf.get("status") == "RICH" and dcf.get("robust")
+                    )
+                    if dcf_warn:
+                        notes.append(
+                            f"⚠ DCF: {t} RICH & robust (MoS={dcf.get('margin_of_safety',0):.1%}) "
+                            f"— ghi dcf_override_reason nếu vẫn mua"
+                        )
                     orders.append(PlannedOrder(
                         id="", ticker=t, side="buy", qty=qty, ref_price=px,
-                        book=book, play_type=play))
+                        book=book, play_type=play, dcf_check=dcf))
             else:
                 qty = min(round_lot(-diff), sellable)
                 if qty >= LOT:

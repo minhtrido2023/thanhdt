@@ -25,6 +25,11 @@ class PlannedOrder:
     priority: int = 5        # nhỏ = làm trước (sell=1, buy theo weight)
     urgency: str = "normal"  # "normal" | "high" (high: cross spread ngay)
     note: str = ""
+    # Pha 2 DCF (2026-07-14): informational, KHÔNG block lệnh.
+    # {"status":"RICH"|"CHEAP"|"NOT_COMPUTED","margin_of_safety":<float|null>,"robust":<bool>,"as_of":"YYYY-MM-DD"}
+    dcf_check: dict = dataclasses.field(default=None)
+    # BẮT BUỘC ghi khi dcf_check.status=RICH AND robust=true AND side=buy; nếu trống → WARN.
+    dcf_override_reason: str = ""
 
     @property
     def value(self):
