@@ -268,6 +268,74 @@ is a genuine edge signal; if it does not, the DCF remains a useful interpretive 
 (an absolute sanity check on how much premium you are paying) but must NOT be sold as a measured
 alpha source** — a distinction that matters for how much weight discretionary decisions give it.
 
+## 7.3 Pha 4 — PLACEBO test of the DCF-as-gate (job Taylor_20260714_080414, 2026-07-14)
+
+**Why**: quant-skeptic REFUTED Pha 3 on ONE decisive, blocking objection
+(`mike/logs/verify_20260714_073843.log`): variant A (`BASKET_DCF_MODE=exclude_rich`) mechanically
+swaps only ~3 names in a 30-name PARKING basket, and nobody had shown that a *random* same-sized
+swap wouldn't produce the same spread. If random does the same, the DCF is doing no work.
+
+**The control** (`BASKET_DCF_MODE=placebo_random`, `BASKET_DCF_PLACEBO_SEED=<int>`): at each rebal
+date d, drop **exactly as many names as exclude_rich actually dropped at that same date d** (n_d
+measured off the same `dcf_at` calls, not estimated), but pick the victims at RANDOM. Same count,
+same pool, same pipeline stage, same empty-pool fail-safe. The ONLY difference vs variant A is
+*which* names go. RNG seeded per `(SEED, date.toordinal())` → each date draws independently, the
+whole 48-date path replays exactly. 20 independent seeds = the null distribution.
+
+**Fairness + integrity audit** (all verified, not assumed):
+- Every seed dropped **740 names over 48 rebal dates (mean 15.42/date)** — identical to
+  exclude_rich by construction. (Note: 15.4/date is dropped from the *pool*; only ~3 of those
+  reach the final 30-name basket — the "~3 names" in the skeptic's objection.)
+- **20/20 runs `self-check 0 VND`** on both books (BAL + LAG cash-flow + final-NAV identity).
+- **Regression guard PASS**: re-running the OFF/control config under the patched code reproduces
+  Pha 3's control NAV series **identically** (`_exp_dcfctrlrerun20260714.csv`) — proof the placebo
+  branch did not perturb the shared selection path, so every delta below measures the placebo, not
+  my own edit.
+
+**Result — the objection does NOT survive. varA is a clear outlier vs the random null:**
+
+| window | metric | null mean ± SD | null range | varA | z | #≥varA |
+|---|---|---|---|---|---|---|
+| FULL | ΔCAGR | −0.09 ± 0.43 | −1.02 … +0.76 | **+0.99** | +2.51 | **0/20** |
+| FULL | ΔSharpe | +0.012 ± 0.021 | −0.030 … +0.052 | **+0.059** | +2.26 | **0/20** |
+| OOS 2020+ | ΔCAGR | −0.14 ± 0.57 | −1.49 … +0.66 | **+1.50** | +2.85 | **0/20** |
+| OOS 2020+ | ΔSharpe | −0.012 ± 0.030 | −0.083 … +0.024 | **+0.063** | +2.53 | **0/20** |
+| IS 2014-19 | ΔCAGR | −0.03 ± 0.78 | −1.45 … +1.82 | +0.49 | +0.68 | 5/20 |
+| IS 2014-19 | ΔSharpe | +0.036 ± 0.043 | −0.043 … +0.131 | +0.052 | +0.37 | 6/20 |
+
+t-as-draw (varA as one draw from the 20-seed null, descriptive — with n=20 the SD is itself noisy):
+FULL CAGR t=+2.51 p=0.021, FULL Sharpe t=+2.26 p=0.036, OOS CAGR t=+2.85 p=0.010.
+
+**Read**: a random same-sized swap is worth **≈ nothing on average** (null mean ~0) with modest
+dispersion (±0.43pp CAGR). The DCF gate's +0.99pp sits ~2.5 SD outside it, and **0/20** random
+swaps did as well or better. The skeptic's killer objection is empirically wrong: perturbation
+dispersion alone does not manufacture variant A's spread. Notably the effect is *strongest OOS*
+(z=2.85), the opposite of the usual overfit signature.
+
+**What this does NOT establish — why this is NOT a GO** (stated plainly, per the pre-registered
+interpretation rule; only quant-skeptic can lift the REFUTED verdict):
+1. **The 2017/2021 concentration objection SURVIVES INTACT.** Per-year ΔCAGR: 2017 **+7.52pp**,
+   2021 **+8.71pp**, sum of all 13 years ≈ +16.2pp → those two years are still **~100% of the
+   total edge**. The placebo does show those years aren't mere dispersion (2021: 0/20 random swaps
+   matched it; 2020 1/20, 2024 0/20), but "not random" ≠ "repeatable".
+2. **A random null is not a multiple-testing null.** This answers "is DCF better than *random*
+   selection of the same size?" (yes). It does not answer "was exclude_rich picked from N variants?"
+   — the DSR / N-trials question is separate and unaddressed here.
+3. **DCF-beats-random ≠ DCF-specifically.** The placebo's victims are random; a *simpler systematic*
+   rule (e.g. drop the highest-PE names in the pool) might capture the same spread at a fraction of
+   the complexity. **This is the natural next objection and I did not run it** — a value-proxy
+   placebo (not a random one) is the test that would isolate whether the DCF machinery itself earns
+   its keep. Recommended as the thing quant-skeptic should demand before any GO.
+4. The Pha 3 daily-return t=1.02 / p=0.31 is **unchanged** — the raw effect remains small relative
+   to daily noise regardless of how unusual it looks against random swaps.
+
+**Status: REFUTED-verdict CHALLENGED on its stated killer objection, NOT overturned.** Research-only;
+nothing wired (`BASKET_DCF_MODE` defaults OFF → production byte-identical). Routed to quant-skeptic.
+
+Reproduce: `SEEDS="1 2 3" bash data/dcf_placebo_logs/runner.sh` then
+`$DNA_PYEXE dcf_placebo_test.py`. Daily CSVs for all 20 seeds retained under the `_exp_dcfplacebo<seed>`
+tag (§8: seed folded into the filename — the canonical R3 CSV is never a possible target).
+
 ## 8. Limitations (read before trusting a number)
 
 - **FCFE proxy is coarse.** `CF_OA + CF_Invest` nets *all* investing (incl. securities buys/sells),
