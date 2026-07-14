@@ -3675,3 +3675,48 @@ sửa/chú thích §11.7 theo đính chính §12.1.
 `logs/{a4_selfcheck,cap_peak_check,wsum_leak_diag}.log` · `cap_peak_{summary,by_quarter}.csv`.
 Code: `custom_basket.py` (`BASKET_DY_TIEBREAK`, nhánh mới; nhánh cũ không đụng).
 Chi tiết đầy đủ: `mike/agents/Taylor/route_aware_selector_framework.md` §14 (roadmap dài hạn: §13).
+
+### CAPIT dividend gate (`CAPIT_DIV_GATE`) — NO-GO cả 2 arm (Taylor 2026-07-14, job `Taylor_20260714_173435`)
+- **Đề xuất user:** thêm tiêu chí "cổ tức ổn định 3 năm" (`Dividend_Min3Y`) vào universe golden của CAPIT.
+- **Lệnh** (self-check **0 VND** cả 3 arm; `AUDIT_END=2026-06-19`; `BQ_CACHE_THREADS=1`):
+  ```bash
+  NAV_TOTAL_B=50 ETF_LIQ=custompitg BASKET_WT=namecap BASKET_SELECT=yieldcombo PARK_STATES="3:0.7" \
+  AUDIT_END=2026-06-19 BQ_CACHE_THREADS=1 AUDIT_EXP_TAG=capdiv_a0 \
+    $DNA_PYEXE pt_v23_audit_2014.py v23a none postbull 0 edge        # A0 (gate off)
+  # A1: + CAPIT_DIV_GATE=pos   AUDIT_EXP_TAG=capdiv_a1
+  # A2: + CAPIT_DIV_GATE=tilt  AUDIT_EXP_TAG=capdiv_a2
+  ```
+- **CSV:** `data/v23_golive_audit_2014_now_matpostbull_shrink0_edge{,_capdivpos3,_capdivtilt3}_etfliqcustompitg_wtnamecap_exp_capdiv_a{0,1,2}.csv`
+
+| Arm | FULL | Δ vs A0 | IS 2014-19 | OOS 2020-26 | Sharpe | MaxDD | Calmar |
+|---|---|---|---|---|---|---|---|
+| **A0** golden (gate off) | 26.88% | — | 23.09% | 30.44% | 1.80 | −17.9 | 1.50 |
+| **A1** `pos` (Dividend_Min3Y>0) | 26.56% | **−0.32pp** | 23.09% (**+0.00**) | 29.80% (−0.64) | 1.79 | **−17.9 (y hệt)** | 1.49 |
+| **A2** `tilt` (dy3 ≥ trung vị rổ) | 26.31% | **−0.57pp** | 22.88% (−0.21) | 29.51% (−0.93) | 1.79 | −17.6 | 1.49 |
+
+- **VERDICT: NO-GO. Không wire. Production `CAPIT_DIV_GATE=off` byte-identical.**
+- **Cấp tên tín hiệu CÓ THẬT** (khác claim custom30V sáng nay đã chết sau sửa overlap): dy3 cao → DD
+  nông hơn **+2.15pp/3M** (block-bootstrap 8 episode độc lập, **p=0.002**, 7/8; khử confound pb_z:
+  +2.84pp t=3.24), return không xấu đi. **Nhưng KHÔNG thu hoạch được.**
+- ⚠️ **Δ vs A0 KHÔNG phải ước lượng chi phí đáng tin — verdict KHÔNG đứng trên các số này.** Gate
+  `pos` **không cắt gì trong toàn bộ IS** ⇒ **A1 IS = A0 IS chính xác (23.09%)**; toàn bộ −0.32pp =
+  hệ quả của **4 lần bỏ tên ở đúng 2 sự kiện OOS** (2020-07-27 bỏ DPG/KSB/MWG, 2024-08-05 bỏ TLG) =
+  nhiễu path-dependent 1-2 sự kiện, KHÔNG phải bằng chứng gate có hại hệ thống. NO-GO đứng trên **lý
+  do cấu trúc** (dưới). Bằng chứng có ý nghĩa hơn là **A2**: khi gate THẬT SỰ bấm (9/18 sự kiện,
+  thường 6→3/8→4) nó **ép tập trung** rổ vốn đã nhỏ → xấu đi đều ở mọi cửa sổ.
+- **MaxDD KHÔNG cải thiện (A1 −17.9 y hệt A0)** — đúng metric mà tiêu chí dividend được đề xuất để
+  cải thiện. Tín hiệu DD cấp tên KHÔNG chuyển thành DD cấp hệ; cùng kết cục custom30V A4 sáng nay
+  nhưng **qua cơ chế khác** (custom30V: beta thị trường át; CAPIT: gate gần như không bao giờ bấm).
+- **N thật = 8 episode** (18 sự kiện gom block <180d vì cửa sổ forward chồng lấn), KHÔNG phải 18 sự
+  kiện / 84 name-event. p=0.002 chủ yếu do **nhất quán dấu 7/8**, không phải hiệu ứng đo chính xác.
+- **Lý do cấu trúc:** golden **không có độ dư lựa chọn** — pool 2–22 tên, rổ chọn 2–8, `nsmallest(15)`
+  **chưa bao giờ ràng buộc** ⇒ dividend chỉ CẮT được, không CHỌN được. Thêm nữa **79/84 name-event
+  (94%) đã trả cổ tức >0 liên tục 3 năm** (quality-gate ROE_Min5Y≥0.12 ∧ ROIC5Y≥0.10 ∧ FSCORE≥6 đã
+  hàm ý) ⇒ gate cứng = **NO-OP** (chỉ loại 5/84). Coverage `Dividend_Min3Y` = **84/84, không null**
+  ở mọi giai đoạn kể cả 2014-16 (không có vấn đề độ phủ).
+- ⚠️ **A0 26.88% ≠ R3 pinned 27.84%**: A0 chạy fallback **real-BQ** (local cache FAIL verification
+  2026-07-14, `ticker` sync timeout) + data-drift AUDIT_END. Ablation anchor A0-relative nên **kết
+  luận không phụ thuộc mức tuyệt đối**; KHÔNG dùng 26.88% để re-pin R3.
+- **Hạ tầng mới `AUDIT_EXP_TAG`** (coding_guidelines §8): arm A0 có config TRÙNG R3 pinned ⇒ tự resolve
+  về đúng tên file canonical và **sẽ ghi đè CSV pinned** (đúng lỗi 2026-07-06). Tag ép arm thí nghiệm
+  sang path `_exp_*`; rỗng = production. Chi tiết: `capit_dividend_gate_framework.md`.

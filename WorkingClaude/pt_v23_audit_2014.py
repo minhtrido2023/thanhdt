@@ -260,6 +260,17 @@ _capsuf = "" if CAPIT_EVENT_CAP is None else f"_cap{int(round(CAPIT_EVENT_CAP*10
 _matsuf = "" if MATURITY is None else (f"_mat{MATURITY}" + (f"_shrink{int(round(EW2D_SHRINK*100))}" if MATURITY in ("ew2d", "postbull") and abs(EW2D_SHRINK - 0.30) > 1e-9 else ""))
 _matsuf += "_edge" if USE_EDGE_ALLOC else ""
 _matsuf += "_holdneutral" if CAPIT_HOLD_NEUTRAL else ""
+# CAPIT dividend gate (Taylor 2026-07-14, user proposal) — env-gated, default off = production
+# byte-identical. Applied AFTER the pb_z cheap-gate selection inside capit_basket():
+#   "off"  (default) : no dividend criterion (production golden).
+#   "pos"  : require Dividend_Min3Y > 0 (paid a dividend every one of the last 3 years).
+#   "tilt" : keep only names with dy3 (=Dividend_Min3Y/Price) above the basket's own median.
+# Names surviving the gate must number >= CAPIT_DIV_MINN, else the gate is skipped for that event
+# (fail-safe: never let the gate empty a basket the sleeve was sized to deploy into).
+CAPIT_DIV_GATE = os.environ.get("CAPIT_DIV_GATE", "off").lower()
+CAPIT_DIV_MINN = int(os.environ.get("CAPIT_DIV_MINN", "3"))
+_div_tag = "" if CAPIT_DIV_GATE == "off" else f"_capdiv{CAPIT_DIV_GATE}{CAPIT_DIV_MINN}"
+_matsuf += _div_tag
 LABEL = {"v23a": "V2.3A (allocator + CAPIT)",
          "v23c": "V2.3C (static 50/50 + CAPIT)",
          "v22base": "V2.2-base (static 50/50, NO CAPIT)",
@@ -523,11 +534,15 @@ _droptag = ("" if not BAL_DROP_TIERS else
 # unchanged/byte-identical; every other selector gets an explicit _exp_sel<mode> path.
 _sel_tag = ("" if os.environ.get("BASKET_SELECT", "").lower() in ("", "blend", "yieldcombo")
             else "_exp_sel" + os.environ["BASKET_SELECT"].lower())
+# Explicit experiment-output override (coding_guidelines §8): an ablation arm whose config happens to
+# equal a registry-pinned baseline still resolves to that baseline's canonical filename and would
+# silently clobber it. AUDIT_EXP_TAG forces such runs onto a non-canonical path. Empty = production.
+_EXP_TAG = ("" if not os.environ.get("AUDIT_EXP_TAG") else "_exp_" + os.environ["AUDIT_EXP_TAG"].lower())
 AUDIT_PATH  = os.path.join(WORKDIR, "data",
                            {"v23a": "v23_golive_audit_2014_now.csv",
                             "v23c": "v23c_golive_audit_2014_now.csv",
                             "v22base": "v22base_audit_2014_now.csv",
-                            "singlebook": "singlebook_audit_2014_now.csv"}.get(MODE, MODE+"_audit.csv").replace(".csv", _capsuf + _matsuf + _liqsuf + _park_tag + _wt_tag + _sz_tag + _qs_tag + _qt_tag + _bullpark_tag + _c30b_tag + _recpark_tag + _vm_tag + _dnpr_tag + _dvr8l_tag + _dcf_tag + _droptag + _sel_tag + _NAV_TAG + _START_TAG + ".csv"))
+                            "singlebook": "singlebook_audit_2014_now.csv"}.get(MODE, MODE+"_audit.csv").replace(".csv", _capsuf + _matsuf + _liqsuf + _park_tag + _wt_tag + _sz_tag + _qs_tag + _qt_tag + _bullpark_tag + _c30b_tag + _recpark_tag + _vm_tag + _dnpr_tag + _dvr8l_tag + _dcf_tag + _droptag + _sel_tag + _NAV_TAG + _START_TAG + _EXP_TAG + ".csv"))
 
 BUY_TIERS_V11 = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
                  "MOMENTUM_A","MOMENTUM_S_N","COMPOUNDER_BUY","DEEP_VALUE_RECOVERY","S_PRO",
@@ -1025,7 +1040,8 @@ FROM tav2_bq.ticker_prune p WHERE p.time = DATE '{d.date()}' AND p.ticker IN ({i
         pick = e[e["pbz"] < CAPIT_PBZ]                       # 'cheap enough' within the liquid custom30 set
         pick = pick.nsmallest(20, "pbz") if len(pick) > 20 else pick
         _basket_cache[d] = list(pick["ticker"]); return _basket_cache[d]
-    e = bq(f"""SELECT p.ticker, SAFE_DIVIDE(p.PB-p.PB_MA5Y,p.PB_SD5Y) pbz
+    e = bq(f"""SELECT p.ticker, SAFE_DIVIDE(p.PB-p.PB_MA5Y,p.PB_SD5Y) pbz,
+  p.Dividend_Min3Y, COALESCE(p.Price,p.Close) px_div
 FROM tav2_bq.ticker_prune p
 WHERE p.time = DATE '{d.date()}' AND p.ROE_Min5Y>=0.12 AND p.ROIC5Y>=0.10 AND p.FSCORE>=6
   AND COALESCE(p.Price,p.Close)*p.Volume/1e9 >= 2""")
@@ -1035,6 +1051,24 @@ WHERE p.time = DATE '{d.date()}' AND p.ROE_Min5Y>=0.12 AND p.ROIC5Y>=0.10 AND p.
     g = e[e["pbz"] < -1]; c = e[e["pbz"] < 0]
     pick = g if len(g) >= 3 else (c if len(c) >= 3 else e)
     pick = pick.nsmallest(15, "pbz") if len(pick) > 15 else pick
+    # dividend gate (env; default off -> untouched production selection)
+    if CAPIT_DIV_GATE != "off" and len(pick):
+        _dv = pick["Dividend_Min3Y"].fillna(0)
+        if CAPIT_DIV_GATE == "pos":
+            kept = pick[_dv > 0]
+        elif CAPIT_DIV_GATE == "tilt":
+            _dy3 = _dv / pick["px_div"]
+            kept = pick[(_dv > 0) & (_dy3 >= _dy3.median())]
+        else:
+            raise SystemExit(f"CAPIT_DIV_GATE={CAPIT_DIV_GATE!r} not in (off,pos,tilt)")
+        if len(kept) >= CAPIT_DIV_MINN:
+            if len(kept) < len(pick):
+                print(f"    [capdiv:{CAPIT_DIV_GATE}] {d.date()} basket {len(pick)} -> {len(kept)} "
+                      f"(dropped: {','.join(sorted(set(pick['ticker']) - set(kept['ticker'])))})")
+            pick = kept
+        else:
+            print(f"    [capdiv:{CAPIT_DIV_GATE}] {d.date()} SKIP gate — only {len(kept)} names "
+                  f"survive (< min {CAPIT_DIV_MINN}), keeping ungated basket of {len(pick)}")
     golden = list(pick["ticker"])
     _final_pbz = pick.set_index("ticker")["pbz"]            # pb_z of selected names (for depth-sizing)
     # C v2 — UNIFIED pb_z scale (user 2026-06-17): in a SAFE bear (state 2, NOT postbull) where golden is
