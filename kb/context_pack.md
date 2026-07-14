@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v1080)
+# Mike fleet — context pack (v1081)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-14T12:18:27] Winston/finding — new-listings-daily: {"date": "2026-07-14", "lookback_days": 90, "total_new": 1, "needs_manual_rating": 0, "fresh_ipo": 0, "research_queue": [], "snapshot": "/home/trido/thanhdt/Wor …
 - [2026-07-14T13:16:09] Taylor/finding — v3route FIX QUYET DINH: NO-GO — edge route-aware KHONG TON TAI. Arm v3latest chua tung duoc do da gop 2 truc va ghi sai cong: +7.63pp = +8.55 (truc composite 8L, khong lien quan route) − 2.38 (fix route THAT, AM ca IS lan OOS) + 1.46 (artifact thang do skeptic bat). v3latest lai DA BI BAC 2026-06-22 o cap he (OOS -0.78pp) => cap vehicle DAO DAU OOS. ABSTAIN bi bac (giu ten thieu pb_z lam edge TOT LEN). REFUTED giu nguyen, khong wire gi, khong dung plan 07-14: {"job": "Taylor_20260714_121717", "verdict": "NO-GO — REFUTED GIU NGUYEN. Fix da lam dung va du; edge KHONG song sot. Khong wire gi. Production 0 cham.", "cau_t …
 - [2026-07-14T13:45:02] Taylor/finding — TRA LOI cau hoi user: 1/PCF chua bao gio DINH GIA ngan hang — no PHAN BO NGANH. Thuoc do sai da MUA MOT VI THE DUNG (bank overweight 24-36% ro); v3route/v3latest sua phep do va THANH LY mat vi the. Day cung la loi giai v3latest IS+1.40/OOS-0.78: no khong het thieng OOS, no dang SHORT nganh da thang, va OOS nganh thang dam hon x3: {"job": "Taylor_20260714_132942", "loai": "NGHIEN CUU CO CHE — khong co ung vien wire, khong cham production, khong arm backtest moi", "cau_tra_loi_cho_user": " …
 - [2026-07-14T14:25:50] Taylor/finding — v4final selfcheck 12/12 PASS — VA PHAT HIEN BUG trong nhanh sectorcap CO SAN (anh huong ket luan sector-cap NO-GO sang nay): {"job":"Taylor_20260714_140127","status":"interim — chua co ket qua backtest","bug":"_cap_names chay SAU _cap_sector va water-fill phan thua pro-rata vao MOI te …
@@ -11,6 +10,7 @@
 - [2026-07-14T15:29:43] quant-skeptic/verification — ✅ CONFIRMED VERIFY: v4final selector tong hop: KHONG WIRE — sua thuoc do (bo 1/PCF khoi bank -> 1 chi tieu ey) MIEN PHI nhung KHONG co alpha (A2-A0 -0.05pp, trong nhieu); cap tai chinh 30% NO-GO (-0.64pp/nam, DD KHONG doi -17.6); DY-floor claim cua user DUOC UNG HO tai 6M (+2.34pp t=2.37 sau khi khu confound re, return khong hon). DINH CHINH LON: so 24.1%/35.8%/dinh-50% ca ngay nay = DEM TEN bank, KHONG phai ty trong — ty trong that gap doi (47% full / 82.7% 2026Q2): {"finding_topic": "v4final selector tong hop: KHONG WIRE — sua thuoc do (bo 1/PCF khoi bank) MIEN PHI nhung KHONG co alpha; cap tai chinh 30% NO-GO; DY-floor cl …
 - [2026-07-14T16:13:11] Winston/finding — quy-tac-vinh-vien-re-rate-8L-mua-BCTC: DA CAI + TEST XONG truoc cua so 07-15: {"job": "Winston_20260714_160739", "status": "DONE", "rule": "tu ngay 15 thang dau moi quy (1/4/7/10) den het thang: chay refresh_fa_ratings_8l.sh 20:00 ICT + r …
 - [2026-07-14T16:15:54] Taylor/finding — A4 (DY tie-break) + cap-theo-dinh: NO-GO CA HAI. A4 return dung bang 0 (-0.00pp) trong khi 48/48 rebal doi ten = chu ky reshuffle noise, VA xau di DUNG metric no duoc mua de cai thien (MaxDD -17.6 -> -18.6). Cap-theo-dinh ≡ cap phang tai X (cung co che, chi khac MUC): moi muc 0.45-0.60 deu KHONG chi-cham-dinh (rang buoc 35-54% so ngay), chi phi KHONG DON DIEU (0.45 dat hon ca 0.30!), MaxDD DUNG YEN + DD_IS XAU DI khap dai. DINH CHINH: dinh 82.7% la nen A0; nen A2 la 77.4% quy/86.7% ngay => eyonly KHONG giam tap trung: {"job": "Taylor_20260714_152605", "verdict": "KHONG WIRE GI. Production 0 cham. Khong dao lenh plan 07-14/07-15. Khong route quant-skeptic — ca 2 arm TU BAC, kh …
+- [2026-07-14T17:58:26] Winston/finding — ticker_financial bi ghi de stale — XAC NHAN LOI THAT, nguon = UPSTREAM tav2 pipeline (khong phai fleet), fa_ratings_8l DA BI LAY, backup recovery da chup xong: {"job": "Winston_20260714_174411", "verdict": "LOI THAT 100%, KHONG phai Mike doc nham. Bang nguon tav2_bq.ticker_financial bi ghi de bang snapshot cu ~2026-05- …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -343,6 +343,27 @@ User yêu cầu 08:34 ICT (30' trước giờ mở cửa): "hôm nay không cầ
 **Việc còn treo (không khẩn)**: HPG vẫn basket-drift ra khỏi custom30V_8L — nếu muốn xử lý basket
 swap này, cần lập lại plan cho ngày kế tiếp (không tự động quay lại, vì override hôm nay chỉ áp
 dụng cho 07-14, ngày mai DollarBill sẽ tự tính lại từ đầu dựa trên basket composition mới nhất).
+
+## User tự phát hiện BQ local cache stale — vấn đề LỚN HƠN dự kiến (2026-07-14→15)
+User hỏi "BQ local lại stale à, sao không ai fix" sau khi thấy alert. Điều tra: KHÔNG phải cùng
+loại lỗi hôm qua (cache/monolith). Phát hiện thật: bus event error thật (Taylor, 20:45 ICT 07-14)
+— Taylor chạy TAY `refresh_fa_ratings.sh` (không qua cron, cron cũ đã xoá/cron mới chưa tới hạn)
+làm 1 phần việc R&D khác, script tự ABORT đúng thiết kế vì fresh build chỉ ra 1 dòng cho 2026Q1
+thay vì 337 dòng đã publish — bảo vệ thành công, KHÔNG ghi đè bảng `fa_ratings` (Mike tự verify
+BQ live: vẫn đủ 337 dòng 2026Q1, an toàn).
+
+**Phát hiện NGHIÊM TRỌNG HƠN trong lúc điều tra root cause của abort này**: bảng NGUỒN
+`tav2_bq.ticker_financial` hiện tại (query BQ live, Mike tự làm 3 lần, unset cache, fully-qualified
+table) báo **MAX(time)=2026-05-04, MAX(Release_Date)=2026-04-20, 65,178 dòng** — trong khi CHÍNH
+audit hôm qua (`Winston_20260713_100733`) đã xác nhận qua BQ live: MAX(time)=MAX(Release_Date)
+=**2026-07-08** (có MBS Q2). Dữ liệu không thể tự lùi 2 tháng cho 1 bảng append-only — nghi ngờ có
+ghi đè/CREATE OR REPLACE làm hỏng bảng nguồn giữa 13/07 và giờ, có thể liên quan tới job Taylor
+chạy refresh thủ công hoặc job R&D khác chạm bảng này.
+
+Dispatch khẩn: `Winston_20260714_174411` — xác nhận độc lập mâu thuẫn, kiểm tra BQ table metadata
+(lastModifiedTime), truy vết script/job nào có thể đã ghi đè, đánh giá rủi ro cho cron mới
+(20:00 ICT tối nay 07-15, lần chạy thật đầu tiên của quy tắc quý mới) nếu bảng nguồn thật sự hỏng.
+KHÔNG tự sửa/rebuild — chờ xác định nguyên nhân trước.
 
 ## Tri thức chung của đội (canonical — Mike biên tập; MỌI agent phải nắm)
 > Cập nhật 2026-07-01. Chi tiết: `kb/KNOWLEDGE.md`. Số liệu gốc: `data/results_registry.md`.

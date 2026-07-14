@@ -328,3 +328,24 @@ User yêu cầu 08:34 ICT (30' trước giờ mở cửa): "hôm nay không cầ
 **Việc còn treo (không khẩn)**: HPG vẫn basket-drift ra khỏi custom30V_8L — nếu muốn xử lý basket
 swap này, cần lập lại plan cho ngày kế tiếp (không tự động quay lại, vì override hôm nay chỉ áp
 dụng cho 07-14, ngày mai DollarBill sẽ tự tính lại từ đầu dựa trên basket composition mới nhất).
+
+## User tự phát hiện BQ local cache stale — vấn đề LỚN HƠN dự kiến (2026-07-14→15)
+User hỏi "BQ local lại stale à, sao không ai fix" sau khi thấy alert. Điều tra: KHÔNG phải cùng
+loại lỗi hôm qua (cache/monolith). Phát hiện thật: bus event error thật (Taylor, 20:45 ICT 07-14)
+— Taylor chạy TAY `refresh_fa_ratings.sh` (không qua cron, cron cũ đã xoá/cron mới chưa tới hạn)
+làm 1 phần việc R&D khác, script tự ABORT đúng thiết kế vì fresh build chỉ ra 1 dòng cho 2026Q1
+thay vì 337 dòng đã publish — bảo vệ thành công, KHÔNG ghi đè bảng `fa_ratings` (Mike tự verify
+BQ live: vẫn đủ 337 dòng 2026Q1, an toàn).
+
+**Phát hiện NGHIÊM TRỌNG HƠN trong lúc điều tra root cause của abort này**: bảng NGUỒN
+`tav2_bq.ticker_financial` hiện tại (query BQ live, Mike tự làm 3 lần, unset cache, fully-qualified
+table) báo **MAX(time)=2026-05-04, MAX(Release_Date)=2026-04-20, 65,178 dòng** — trong khi CHÍNH
+audit hôm qua (`Winston_20260713_100733`) đã xác nhận qua BQ live: MAX(time)=MAX(Release_Date)
+=**2026-07-08** (có MBS Q2). Dữ liệu không thể tự lùi 2 tháng cho 1 bảng append-only — nghi ngờ có
+ghi đè/CREATE OR REPLACE làm hỏng bảng nguồn giữa 13/07 và giờ, có thể liên quan tới job Taylor
+chạy refresh thủ công hoặc job R&D khác chạm bảng này.
+
+Dispatch khẩn: `Winston_20260714_174411` — xác nhận độc lập mâu thuẫn, kiểm tra BQ table metadata
+(lastModifiedTime), truy vết script/job nào có thể đã ghi đè, đánh giá rủi ro cho cron mới
+(20:00 ICT tối nay 07-15, lần chạy thật đầu tiên của quy tắc quý mới) nếu bảng nguồn thật sự hỏng.
+KHÔNG tự sửa/rebuild — chờ xác định nguyên nhân trước.
