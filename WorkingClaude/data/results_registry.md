@@ -3086,3 +3086,122 @@ Interpreter: `/home/trido/thanhdt/wc_venv/bin/python`. Forward cols profit_1M/2M
 - **flip xác nhận:** chạy no-env in `[VALUE_VERSION=v3_div]` + golden floor 15 (== explicit v3_div). rollback `VALUE_VERSION=v3_da` in `[VALUE_VERSION=v3_da]` + golden floor 14 (khớp trước-đổi). v3 (floor 14) / v2 (no floor) smoke exit 0.
 - **phạm vi div-lens:** value_score re-weight 48/107 tên (max|Δ|0.091) — khớp ~46/107 job trước (chênh 2 = live-snapshot jitter, value_score là composite không do golden floor); zone shift **7/107** (đã sửa, sạch): CTI/VGT/MWG hạ (yield thấp), SHS/DCM/VEA/OIL firm-up (payer) — hợp lý, đúng lens 0.15 coverage-aware.
 **Rollback:** `VALUE_VERSION=v3_da python rating_8l.py` (== hành vi cũ trước promote). **Không backtest CAGR/Sharpe** — selector không đọc value_score (trục rating/diagnostic), wire vào selector là quyết định KHÁC cần N-budget riêng.
+
+## 2026-07-14 — DCF ABSOLUTE-VALUATION LENS (2-stage FCFE, VN non-financial) — jobs Taylor_20260714_042622 (build) → _051643 (finish) — RESEARCH TOOL, NOT wired to production
+**What:** new absolute intrinsic-value lens complementing the 8L *relative* lenses (PE-vs-history, PB-vs-Gordon, EVEB). Files: `dcf_valuation.py` (model+CLI), `dcf_backtest.py` (2 studies), FV cache `mike/agents/Taylor/dcf_exp/fv_releases.parquet`, run log `dcf_exp/backtest_run.log`, framework `mike/agents/Taylor/dcf_valuation_framework.md`. **No production/trading_rules/allocator/rating_8l touched.**
+**Model:** FCFE proxy = CF_OA+CF_Invest (base = norm 3y-avg (CF_OA_3Y+CF_Invest_3Y)/3). r = Big-4 12M deposit (deposit_rate_vn) + ERP 6.5% = 13.30% today. g_term = 5y-avg CPI (cpi_vn) = 3.40%. g_explicit = g_term + 0.50·(g_trailing−g_term), clamp [−2%,+20%]. Gates: exclude financials, CF_OA_3Y>0, norm-FCFE>0, OShares>0.
+
+**STUDY A — recency-weight calibration (REJECTED full extrapolation).** Panel n=6,332 firm-years, 2009-2024, 892 non-fin tickers; predict next-year TTM-earnings growth. rankIC of trailing→next growth is NEGATIVE every window (mean-reversion): equal-1/3 = **−0.104 IS / −0.199 OOS / −0.151 ALL**; recency-tilt (60/25/15) strictly WORSE (−0.118/−0.221/−0.170). MAE: equal 0.641 ALL best. ⇒ use EQUAL weights + shrink-0.50 toward terminal (full extrapolation empirically unjustified). Growth direction is unforecastable; shrink just bounds the assumption.
+
+**STUDY B — margin-of-safety forward-return IC (POSITIVE, stable).** Panel 51,529 rows · 144 months · 959 tickers, non-fin rating≤3, point-in-time FV as-of merged to monthly price panel, stale FV (>15mo) dropped. Cross-sectional Spearman IC of MoS vs forward return, monthly-averaged:
+| window | 1M | 2M | 3M |
+|---|---|---|---|
+| ALL 2014-26 | +0.0444 (t7.3) | +0.0584 (t9.4) | +0.0690 (t11.6) |
+| IS 2014-19 | +0.0410 (t4.5) | +0.0508 (t5.4) | +0.0690 (t7.5) |
+| OOS 2020-26 | +0.0473 (t5.8) | +0.0646 (t7.9) | +0.0690 (t8.9) |
+Quintile monotone (profit_2M, richest→cheapest): 1.70→2.24→2.68→3.24→4.94. **Positive, monotone, IS/OOS-stable, OOS≥IS (no overfit), strengthens with horizon.** Modest magnitude (~0.05-0.07) = real value signal, NOT stand-alone alpha. (authoritative run = `dcf_exp/backtest_run.log`; `/tmp/dcf_ic.log` shows a qcut `inf` edge-artifact in quintile 3, IC/t identical to ±0.001.)
+
+**DEMO — 5 Group-A watchlist names (as-of 2026-07-13, r13.30/g_term3.40):**
+| tk | DCF | FV/sh | price | MoS | sector_lens (relative) |
+|---|---|---|---|---|---|
+| MSH | no FCFE (capex>CFO) | — | 31,750 | — | BUY PE 5.70 cheap |
+| PVT | no FCFE (tanker buildout) | — | 18,950 | — | BUY PB 0.83 trough |
+| HAH | no FCFE (ship buildout) | — | 50,800 | — | BUY EVEB 4.21 cheap |
+| CTR | RICH | 52,564 | 73,800 | −40.4% | BUY EVEB 9.74 accum |
+| DHG | RICH | 51,614 | 92,500 | −79.2% | BUY PE 13.4<MA5Y 15.05 |
+DCF disagrees with relative lens on all 5 — the point of an absolute lens: (1) 3/5 in DCF blind spot (capex-heavy, FCFE<0 → tool abstains; relative asset/EV lens is right tool = coverage boundary, not contradiction); (2) CTR/DHG compute RICH despite relative-cheap = value-trap flag (DHG archetype: cheap vs own 5Y PE but ~80% above intrinsic, driven by declining earnings g2 −10.2/g3 −16.6); (3) conservative level bias → use ranks/value-trap flags not an absolute buy line.
+
+**SENSITIVITY (CTR/DHG):** ±1% r → FV ~±10%; ±2% g → ~±8%. Verdict ROBUST — even at most-favorable corner (r−1%) both stay RICH (CTR −26%, DHG −61%). Rule: distrust any MoS that flips sign inside the ±1%r/±2%g box.
+**LIMITATIONS:** coverage (FCFE-positive gate excludes capex-heavy + all financials); growth unforecastable (Study A); parameter fragility (§sens); net-borrow≈0 simplification; modest IC = interpretive aid not a book; research BQ-cache prices (never for live sizing). **Status: interpretive/reference tool. Wiring into any selector = a separate decision needing its own N-budget + backtest.**
+
+**ROBUSTNESS ADD-ON (job Taylor_20260714_055038, `dcf_rate_robustness.py`):** Spyros flagged that `deposit_rate_vn.py`'s 26 anchors are all calibrated on ONE date (2026-06-19) → discount-rate hindsight, esp. IS 2014-19. Deposit series DOES vary (annual means 6.65→4.78→6.13, spread 2.8pp/std 0.78). **Test: re-run Study B IC with a CONSTANT r=12.47% (window-mean deposit 5.97% + ERP 6.5%) applied to all dates** (removes all date-level rate info incl. hindsight). Result vs pinned: ALL Δ={1M −0.0003, 2M −0.0009, 3M −0.0010}; IS Δ≤−0.0025; OOS Δ≤+0.0003 (panel 51,367 rows/144 mo/952 tk; 4,525 pre-2014 degenerate g_term≥r releases skipped, all outside eval window). **VERDICT: IC NOT sensitive to deposit hindsight** — rate is date-only (same across tickers within a month), so within-month cross-sectional MoS rank differences out the common level. Same argument covers CPI-proxy (terminal g = 100% proxy pre-2025). Residual caveat: robust to rate LEVEL being wrong, does NOT make historical MoS *level* point-in-time-clean → use ranks not the line (§6.3). Also patched `dcf_valuation.py terminal_growth()` to return `frac_real` + CLI prints `terminal g = X% (Y% REAL NSO / Z% PROXY)` with soft WARN when frac_real<15% (Winston: 13/60=21.7% real at 2026-06). FV math unchanged (verified). Framework §7.1 + §8.
+
+**ORTHOGONALITY / RESIDUAL-IC (Pha 1, job Taylor_20260714_061144, `dcf_orthogonality_test.py`) — the gate before ANY wire:** is MoS an independent axis or just 1/PE with more steps (the failure mode that killed composite-as-selector: 1/PE dominant factor absorbed everything)? Reuse Study B panel (51,529 rows/144 mo/959 tk, FV not recomputed) + point-in-time PE/PB/EVEB merged on same rows (98/98/96% cov). **t-stat on MONTHLY IC series n≈144 (time-series t), NOT 51k pooled rows — Spyros' method question, confirmed correct.** (1) Cross-sectional rank-corr rank(MoS) vs rank(1/PE)=**+0.285** ALL / 0.281 IS / 0.288 OOS; vs 1/PB=0.334; vs 1/EVEB=0.346 — all **modest 0.28–0.39, far from collinear** (>0.7 if same thing). (2) Residual IC (neutralize MoS in rank space, IC of residual vs fwd ret): **MoS⟂1/PE** keeps ~55–60% of raw IC, sig BOTH windows all horizons (3M: IS +0.0412 t4.4 / OOS +0.0373 t5.2); MoS⟂1/PB even higher (3M IS 0.0565/OOS 0.0508); MoS⟂1/EVEB sig both (3M IS 0.0425 t4.7 / OOS 0.0294 t3.8); **MoS⟂[1/PE,1/PB,1/EVEB] joint** (hardest) still +sig at 2M/3M both windows (3M IS +0.0261 t2.8 / OOS +0.0212 t3.2), only 1M/2M-IS lose sig (t1.5). **VERDICT: MoS IS an independent information axis → GO qualifies for Pha 2 consideration.** Not 1/PE relabeled; composite-selector failure does NOT repeat. **Honest caveat: residual ≈ half raw IC (meaningful share shared w/ relative lenses); modest incremental axis NOT large new alpha; edge concentrated at 2–3M horizon, weak at 1M once all 3 relatives removed** — bounds Pha 2 weighting. Framework §7.2. Research-only, 0 production touch.
+
+## Pha 2 — DCF check tích hợp vào plan generation (DollarBill, 2026-07-14)
+
+**File thay đổi:** `trading_bot/plan.py` (field mới) + `trading_bot/strategies.py` (hàm `_dcf_check_for_order` + call trong build_plan).
+
+**Tích hợp:** mỗi BUY order trong plan JSON giờ có field `dcf_check` theo schema:
+```json
+{"status":"RICH"|"CHEAP"|"NOT_COMPUTED","margin_of_safety":<float|null>,"robust":<bool>,"as_of":"YYYY-MM-DD"}
+```
++ field `dcf_override_reason` (bắt buộc ghi khi RICH+robust+BUY, nếu trống → WARN note trong plan).
+
+**Nguồn dữ liệu:** `dcf_valuation.fair_value()` đọc từ `data/bq_cache/ticker_financial.parquet` (local, không gọi BQ live). Fail-safe: mọi lỗi → `NOT_COMPUTED` với reason=`dcf_error:...`, plan vẫn build bình thường.
+
+**robust = True** khi MoS không đổi dấu qua sensitivity box (±1pp discount rate, ±2pp growth) — đúng ngưỡng thống nhất Spyros/họp round-table.
+
+**Verified (2026-07-14):**
+- CTR @73,800: RICH, MoS=−40.4%, robust=True ✓
+- DHG @92,500: RICH, MoS=−79.2%, robust=True ✓
+- E1VFVN30 (ETF): NOT_COMPUTED reason=insufficient_history ✓
+- VIC: NOT_COMPUTED reason=fcfe_negative_buildout ✓
+- Backward compat: old plans load với dcf_check=None ✓
+- Save→load round-trip: JSON schema đúng ✓
+- bot_prepare_plan.py --dry: KHÔNG crash, plan build bình thường ✓
+
+**Giới hạn:** discretionary/informational only — KHÔNG block/tự động loại lệnh. Quyết định cuối = user khi duyệt plan.
+
+## Pha 2 — DCF echo vào execution audit trail (Mafee, 2026-07-14)
+
+**File thay đổi:** `trading_bot/plan.py` (+ `dcf_check: dict`, `dcf_override_reason: str` vào `PlannedOrder`) + `trading_bot/executor.py` (state parents + bus event trong `_sync_fills`).
+
+**Logic:**
+- `load_plan()` tự-preserve `dcf_check`/`dcf_override_reason` từ JSON (field đã trong known set, không cần thay đổi filter).
+- `Executor._load_state()` ghi `dcf_check` vào `state["parents"][order_id]` → field tồn tại trong `exec_*_state.json` cho audit.
+- `Executor._sync_fills()` khi delta fill > 0 cho BUY với `dcf_check.status=RICH AND robust=True`: publish bus event `finding/dcf-rich-fill` (chứa ticker, order_id, filled_delta, dcf_check, dcf_override_reason). KHÔNG chặn lệnh, KHÔNG thay đổi execution path.
+- Backward-compat: plan không có `dcf_check` → `dcf_check=None`, không bus event, không lỗi.
+
+**Selfcheck `dcf_check_selfcheck.py` — 8/8 PASS:**
+1. PlannedOrder giữ dcf_check + dcf_override_reason ✓
+2. Backward-compat (dcf_check=None) ✓
+3. load_plan() giữ dcf_check từ JSON ✓
+4. Executor state giữ dcf_check trong parents ✓
+5. Executor state dcf_check=None khi order không có ✓
+6. _sync_fills publish bus event cho RICH+robust BUY ✓
+7. KHÔNG publish khi CHEAP/NOT_COMPUTED/None ✓
+8. KHÔNG publish khi SELL side dù RICH ✓
+
+## Pha 4 — DCF-as-gate PLACEBO test (Taylor, 2026-07-14, job Taylor_20260714_080414)
+
+**Mục đích**: trả lời killer objection duy nhất mà quant-skeptic dùng để REFUTED Pha 3
+(`mike/logs/verify_20260714_073843.log`): "~3 tên bị hoán đổi trong rổ PARKING 30 tên, chưa ai chứng
+minh 1 hoán đổi NGẪU NHIÊN cùng cỡ không tạo ra spread tương đương".
+
+**Control**: `BASKET_DCF_MODE=placebo_random` + `BASKET_DCF_PLACEBO_SEED` (custom_basket.py, mặc định
+OFF). Mỗi ngày rebal d loại ĐÚNG n_d tên mà exclude_rich thật sự loại ở chính ngày d (đo từ cùng
+`dcf_at`, không ước lượng) nhưng chọn NGẪU NHIÊN. Cùng số lượng / cùng pool / cùng bước / cùng
+fail-safe → khác biệt DUY NHẤT vs biến thể A là CHỌN AI. RNG seed theo `(SEED, date.toordinal())`
+→ mỗi ngày độc lập, cả path tái lập chính xác. 20 seed = phân phối null.
+
+**Audit** (verified, không giả định): 20/20 run `self-check 0 VND` (cả BAL+LAG); mọi seed loại đúng
+740 tên / 48 ngày (mean 15.42/ngày) = y hệt exclude_rich; **regression guard PASS** — chạy lại config
+OFF dưới code đã vá cho ra NAV series **identical** với ctrl Pha 3 (`_exp_dcfctrlrerun20260714.csv`)
+→ nhánh placebo KHÔNG động vào path selection dùng chung.
+
+**KẾT QUẢ — objection KHÔNG đứng vững. varA là outlier rõ rệt vs null:**
+| window | metric | null mean±SD | varA | z | #≥varA |
+|---|---|---|---|---|---|
+| FULL | ΔCAGR | −0.09 ± 0.43 | **+0.99** | +2.51 | **0/20** |
+| FULL | ΔSharpe | +0.012 ± 0.021 | **+0.059** | +2.26 | **0/20** |
+| OOS 2020+ | ΔCAGR | −0.14 ± 0.57 | **+1.50** | +2.85 | **0/20** |
+| OOS 2020+ | ΔSharpe | −0.012 ± 0.030 | **+0.063** | +2.53 | **0/20** |
+| IS 2014-19 | ΔCAGR | −0.03 ± 0.78 | +0.49 | +0.68 | 5/20 |
+
+Hoán đổi ngẫu nhiên cùng cỡ đáng giá ≈ 0 trung bình (±0.43pp CAGR). varA nằm ~2.5 SD ngoài null,
+0/20 seed random bằng hoặc hơn. Mạnh nhất Ở OOS (z=2.85) — ngược với dấu hiệu overfit thường gặp.
+
+**KHÔNG PHẢI GO** (4 điều placebo KHÔNG chứng minh): (1) **objection 2017/2021 SỐNG NGUYÊN** — per-year
+ΔCAGR 2017 +7.52pp / 2021 +8.71pp = ~100% tổng edge (+16.2pp); "không phải random" ≠ "lặp lại được".
+(2) null random ≠ null multiple-testing — câu hỏi DSR/N-trials chưa đụng tới. (3) **DCF-hơn-random ≠
+DCF-cụ-thể** — 1 rule hệ thống ĐƠN GIẢN hơn (vd loại các tên PE cao nhất) có thể bắt cùng spread;
+**placebo theo value-proxy (thay vì random) là test tiếp theo cần làm, tôi CHƯA chạy** — đề xuất
+quant-skeptic đòi test này trước mọi GO. (4) daily-return t=1.02/p=0.31 Pha 3 KHÔNG đổi.
+
+**Trạng thái: REFUTED bị THÁCH THỨC đúng ở killer objection, CHƯA bị lật.** Research-only, 0 chạm
+production (`BASKET_DCF_MODE` default OFF → production byte-identical). Route quant-skeptic.
+
+**Artifacts**: `data/*_exp_dcfplacebo<1..20>.csv` (§8: seed trong filename), `dcf_placebo_test.py`,
+`data/dcf_placebo_logs/` (runner.sh + 20 log + DONE_MARKS).
+Reproduce: `SEEDS="1 2 3" bash data/dcf_placebo_logs/runner.sh` → `$DNA_PYEXE dcf_placebo_test.py`

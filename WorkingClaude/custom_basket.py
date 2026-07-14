@@ -264,6 +264,82 @@ FROM tav2_bq.ticker t WHERE t.D_RSI IS NOT NULL AND t.time BETWEEN DATE '{eff_st
 GROUP BY t.ticker, q""")
         _r["q"] = pd.to_datetime(_r["q"])
         return _r.pivot_table(index="q", columns="ticker", values="r")
+    # ---- AUDIT-ONLY DCF overlay on the custom30V (yieldcombo) selector (Pha 3, Taylor 2026-07-14) ----
+    # BASKET_DCF_MODE: "" (default, OFF -> byte-identical) | "exclude_rich" (variant A: drop
+    #   status==RICH AND robust==True from the pool BEFORE ranking) | "tiebreak" (variant B: add
+    #   BASKET_DCF_W * rank_pct(MoS) to the yieldcombo score, no hard exclude).
+    # NOT_COMPUTED is a NEUTRAL pass-through in BOTH variants: never dropped (A), and given the
+    # same 0.5 mid-rank the production selector already uses for a missing yield (B) — i.e. neither
+    # auto-cheap nor auto-rich. Verified explicitly by dcf_selector_selfcheck.py.
+    # status/robust replicate trading_bot/strategies.py::_dcf_check_for_order exactly (Pha 2 rule):
+    #   status = CHEAP iff MoS>0 else RICH; robust = MoS keeps its sign across the whole ±1pp-r /
+    #   ±2pp-g sensitivity box. PIT: fair_value(asof=d) itself picks the last release <= d; price =
+    #   Price at d (the backtest analogue of production's live order ref price).
+    # We call fair_value(asof=d) LIVE (memoised per (ticker, rebal date)) rather than reading a
+    # per-release FV cache: fair_value resolves the discount rate and terminal g AT `asof`, so a
+    # cache keyed by release date prices them at rel_time instead of d and does NOT reproduce
+    # production (measured: 14/40 samples off, incl. a CHEAP/RICH flip on a knife-edge MoS≈0 name).
+    # Both are look-ahead-free, but only asof=d matches the gate we are actually testing. Cost is
+    # ~5ms/call * ~pool*rebal_dates ≈ 30s per run — not worth an approximation on a level call.
+    # "placebo_random" (Pha 4, job Taylor_20260714_080414): the null-distribution control for variant
+    # A. At each rebal date it drops the SAME NUMBER of names exclude_rich would have dropped that
+    # day, but picks the victims at RANDOM instead of by DCF. Same count, same pool, same stage,
+    # same fail-safe -> the ONLY difference vs variant A is *which* names go. If A's edge survives
+    # only because "3 names got swapped in a 30-name basket", the placebo reproduces it.
+    DCF_MODE = os.environ.get("BASKET_DCF_MODE", "").lower()
+    DCF_W    = float(os.environ.get("BASKET_DCF_W", "0.25"))
+    DCF_PLACEBO_SEED = int(os.environ.get("BASKET_DCF_PLACEBO_SEED", "0"))
+    dcf_at = None
+    if DCF_MODE:
+        if SELECT_MODE != "yieldcombo":
+            raise ValueError(f"BASKET_DCF_MODE={DCF_MODE} only defined for BASKET_SELECT=yieldcombo")
+        if DCF_MODE not in ("exclude_rich", "tiebreak", "placebo_random"):
+            raise ValueError(f"BASKET_DCF_MODE={DCF_MODE} unknown (exclude_rich|tiebreak|placebo_random)")
+        import dcf_valuation as _dcfv
+        _fin = _dcfv._load_financials()
+        _rebal_in = ",".join(f"DATE '{pd.Timestamp(x).date()}'" for x in rebal_dates)
+        _px = bq(f"""SELECT t.ticker, t.time, t.Price FROM tav2_bq.ticker t
+WHERE t.time IN ({_rebal_in}) AND t.Price IS NOT NULL""")
+        _px["time"] = pd.to_datetime(_px["time"])
+        _px_map = {(r.ticker, r.time): float(r.Price) for r in _px.itertuples()}
+        _dcf_memo = {}
+        _dcf_stat = {"CHEAP": 0, "RICH": 0, "NOT_COMPUTED": 0}
+        _placebo_log = []   # placebo_random: per-date (n_pool, n_dropped) — audit trail proving the
+                            # placebo dropped exactly as many names as exclude_rich would have.
+        def dcf_at(tk, d):
+            """-> (status, mos, robust). status='NOT_COMPUTED' when FV or price unavailable.
+            Mirrors trading_bot/strategies.py::_dcf_check_for_order, incl. its fail-safe: any
+            error -> NOT_COMPUTED (neutral), never raise."""
+            key = (tk, pd.Timestamp(d))
+            if key in _dcf_memo:
+                return _dcf_memo[key]
+            px = _px_map.get(key)
+            out = ("NOT_COMPUTED", np.nan, False)
+            if px and px > 0:
+                try:
+                    res = _dcfv.fair_value(tk, pd.Timestamp(d), price=px, fin=_fin)
+                    if res.get("ok"):
+                        mos = res.get("margin_of_safety")
+                        if mos is not None and pd.notna(mos):
+                            # the 4 box keys ONLY — `sensitivity` also carries a bare `base_fv_ps`
+                            # float; folding it in would add a 5th point production never counts.
+                            _sens = res.get("sensitivity") or {}
+                            signs = []
+                            for _k in ("r-1%", "r+1%", "g-2%", "g+2%"):
+                                _f = (_sens.get(_k) or {}).get("fv")
+                                if _f and _f > 0:
+                                    signs.append(((_f - px) / _f) > 0)
+                            robust = bool(signs) and all(s == (mos > 0) for s in signs)
+                            out = (("CHEAP" if mos > 0 else "RICH"), float(mos), robust)
+                except Exception:
+                    out = ("NOT_COMPUTED", np.nan, False)
+            _dcf_memo[key] = out
+            _dcf_stat[out[0]] += 1
+            return out
+        print(f"  [DCF overlay] mode={DCF_MODE}"
+              + (f" w={DCF_W}" if DCF_MODE == "tiebreak" else "")
+              + (f" seed={DCF_PLACEBO_SEED}" if DCF_MODE == "placebo_random" else "")
+              + "; fair_value(asof=rebal date) live; NOT_COMPUTED = neutral pass-through")
     cfo_piv = None; pe_piv = None; pcf_piv = None; mom_piv = None; rsi_piv = None; pb_piv = None
     if SELECT_MODE == "yieldcombo":
         # custom30V: liquidity is GATE only; rank PURELY by combined value-yield rank(1/PE)+rank(1/PCF)
@@ -359,11 +435,39 @@ GROUP BY t.ticker, q""")
             # custom30V: liquidity = GATE only (top-POOL tradability floor); rank PURELY by combined
             # value-yield = rank(1/PE)+rank(1/PCF). For BULL parking funded mainly by LAG idle cash.
             pool = gated[:CFO_POOL]
+            if dcf_at is not None and DCF_MODE in ("exclude_rich", "placebo_random"):
+                # variant A: drop only names the DCF calls RICH *and* robust (sign survives the
+                # whole sensitivity box). CHEAP / non-robust-RICH / NOT_COMPUTED all stay.
+                _keep = [(t, rt) for t, rt in pool
+                         if not (lambda s: s[0] == "RICH" and s[2])(dcf_at(t, d))]
+                if DCF_MODE == "exclude_rich":
+                    if _keep: pool = _keep  # never empty the pool (fail-safe -> no-op that quarter)
+                else:
+                    # placebo: n_d = what exclude_rich ACTUALLY dropped at THIS date d (measured off
+                    # the same dcf_at calls, not estimated). `_keep` empty means variant A no-ops via
+                    # the fail-safe above -> effective drop 0 -> the placebo must also drop 0, else
+                    # it would be a strictly harsher gate than the thing it is a control for.
+                    _n_d = len(pool) - len(_keep)
+                    if _keep and _n_d > 0:
+                        # seed = (SEED, date) so each rebal date draws INDEPENDENTLY, yet the whole
+                        # 48-date path replays exactly from the same SEED. A single global RNG would
+                        # make the draws path-dependent on rebal ordering and unreplayable per-date.
+                        _rng = np.random.default_rng([DCF_PLACEBO_SEED, pd.Timestamp(d).toordinal()])
+                        _drop = set(_rng.choice(len(pool), size=_n_d, replace=False).tolist())
+                        pool = [p for _i, p in enumerate(pool) if _i not in _drop]
+                        _placebo_log.append({"date": pd.Timestamp(d), "n_pool": len(pool) + _n_d,
+                                             "n_dropped": _n_d})
             pe_s  = pe_piv.loc[src_q]  if (pe_piv  is not None and src_q in pe_piv.index)  else None
             pcf_s = pcf_piv.loc[src_q] if (pcf_piv is not None and src_q in pcf_piv.index) else None
             pe_r  = pd.Series({t:(pe_s.get(t,np.nan)  if pe_s  is not None else np.nan) for t,_ in pool}).rank(pct=True).fillna(0.5)
             pcf_r = pd.Series({t:(pcf_s.get(t,np.nan) if pcf_s is not None else np.nan) for t,_ in pool}).rank(pct=True).fillna(0.5)
             score = {t: pe_r[t] + pcf_r[t] for t,_ in pool}
+            if dcf_at is not None and DCF_MODE == "tiebreak":
+                # variant B: soft blend. rank_pct over the names that HAVE a MoS; NOT_COMPUTED gets
+                # 0.5 (same neutral mid-rank convention as a missing 1/PE above) -> never favoured
+                # nor penalised, it just keeps its yieldcombo standing.
+                mos_r = pd.Series({t: dcf_at(t, d)[1] for t, _ in pool}).rank(pct=True).fillna(0.5)
+                for t, _ in pool: score[t] += DCF_W * mos_r[t]
             gated = sorted(pool, key=lambda tr: score[tr[0]], reverse=True)
         elif SELECT_MODE == "pbcombo" and gated:
             # bottom-deploy: 1/PB-heavy crisis-IC weights (0.67/0.23/0.10) within the liquid+gated pool.
@@ -481,6 +585,13 @@ WHERE t.ticker IN ({inlist})
                     ret.loc[d] = float(np.nansum(W * r))
             adv_tv.loc[d] = np.nansum(tvv.loc[d, tks].values.astype(float))
         prev = d
+    if dcf_at is not None and DCF_MODE == "placebo_random" and _placebo_log:
+        # audit trail: lets a reviewer verify the placebo dropped exactly n_d names per date, i.e.
+        # that this really is a same-count control and not a differently-sized gate.
+        _pl = pd.DataFrame(_placebo_log)
+        _pl.to_csv(f"data/dcf_exp_logs/placebo_drops_seed{DCF_PLACEBO_SEED}.csv", index=False)
+        print(f"  [DCF placebo] seed={DCF_PLACEBO_SEED}: dropped {int(_pl['n_dropped'].sum())} names "
+              f"over {len(_pl)} rebal dates (mean {_pl['n_dropped'].mean():.2f}/date)")
     lvl = BASE_LEVEL * (1.0 + ret).cumprod()
     adv = adv_tv.rolling(60, min_periods=20).mean()
     level_dict = {t: float(v) for t, v in zip(lvl.index, lvl.values)}
