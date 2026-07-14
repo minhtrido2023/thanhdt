@@ -2918,3 +2918,113 @@
 - [2026-07-14T14:04:29Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260714_140127", "source": "watcher"}
 - [2026-07-14T14:05:29Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260714_140127", "source": "watcher"}
 - [2026-07-14T14:06:29Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+
+## Consolidation 2026-07-14T15:03:41Z
+- [2026-07-14T14:07:29Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:08:29Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:09:29Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:10:30Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:11:30Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:12:31Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:13:31Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:14:31Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:15:31Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:16:31Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:17:31Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:18:31Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:19:31Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:20:31Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:21:31Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:22:31Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:23:31Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:24:31Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 23, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:25:31Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:25:50Z] Taylor/finding — v4final selfcheck 12/12 PASS — VA PHAT HIEN BUG trong nhanh sectorcap CO SAN (anh huong ket luan sector-cap NO-GO sang nay): {"job":"Taylor_20260714_140127","status":"interim — chua co ket qua backtest","bug":"_cap_names chay SAU _cap_sector va water-fill phan thua pro-rata vao MOI ten chua bi cap — KE CA ten trong nhom vua bi cap. Ket qua: cap nganh KHONG BAO GIO giu dung muc danh nghia.","do_that_tren_weight_vector_that":{"cap_danh_nghia_0.30":"thuc te mean 0.427 / max 0.542, breach 1090/1090 ngay","cap_danh_nghia_0.50":"thuc te mean 0.558 / max 0.659, breach 898/1090 ngay"},"ham_y_cho_job_095953_sector_cap_NO_GO":"Nhanh sectorcap co san dung DUNG thu tu loi nay (_cap_sector roi _cap_names, custom_basket.py). => 3 bien the A fix50/B mktcap/B x1.5 da test sang nay THUC TE khong cap o muc bao cao. Ket luan NO-GO co the VAN dung (huong da xau ro rang) nhung con so -0.21pp/-1.15pp la cua mot co che khac voi mo ta. KHONG tu dong dao nguoc ket luan do — chi bao de Mike/user biet artifact nay ton tai.","fix":"_cap_group_jointly() — moi nhom nhan BUDGET co dinh truoc, name_cap water-fill TRONG tung nhom => 2 cap khong the pha nhau. Kem xu ly FEASIBILITY tuong minh: giu nhom o 0.30 voi name_cap 0.10 doi hoi >=7 ten ngoai nhom; thieu thi cap la BAT KHA THI ve so hoc -> module nang cap len muc kha thi chat nhat va IN CANH BAO, khong am tham tra ve vector vi pham. Verify lai: max 0.3000 / mean 0.2995, 0 ngay infeasible.","selfcheck":"v4final_selector_selfcheck.py 12/12 PASS — OFF byte-identical vs module PRE-EDIT (git show HEAD, khong phai CSV luu san); eyonly bo qua PCF hoan toan (+neg control); eyfin: 255/255 diem financial bit-identical khi dao PCF financial; fincap giu dung cap moi ngay do tren weight vector THAT (recompute doc lap, v4final_lib.py).","design_note_trung_thuc":"eyfin: financial KHONG dung PCF cho diem cua chinh no, NHUNG gia tri PCF cua financial VAN set mau so rank pool-wide ma chan cfy cua NON-financial duoc cham tren do. La dac tinh thiet ke, da ghi ro, khong giau."
+- [2026-07-14T14:26:32Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 25, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:27:32Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 26, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:28:08Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "in_progress", "note": "bat dau: doc custom_basket.py + framework doc"}
+- [2026-07-14T14:28:32Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 27, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:29:32Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 28, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:30:32Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 29, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:31:32Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 30, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:32:33Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 31, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:33:28Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "in_progress", "note": "selfcheck 12/12 PASS (fincap giu 0.30 chinh xac tren 1090 ngay); A0 base=27.09 khop vintage hom nay (khong phai bug); A1/A2/A3 dang chay; PHAT HIEN: eyonly uncapped = 63.6% financial trung binh"}
+- [2026-07-14T14:33:33Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 32, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:34:33Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 33, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:35:33Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 34, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:36:33Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 35, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:37:33Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 36, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:38:33Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 37, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:39:33Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 38, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:40:33Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 39, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:40:43Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "in_progress", "note": "DY floor test XONG (claim ung ho tai 6M, khong ung ho 3M); arms A1 dang chay; basket_picture.py dang chay do fin-weight full panel + basket 2026-05-05"}
+- [2026-07-14T14:41:33Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 40, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:42:33Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 41, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:43:33Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 42, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:44:33Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 43, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:45:34Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 44, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:46:34Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 45, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:47:34Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 46, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:48:34Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 47, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:49:34Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 48, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:50:34Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 49, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:51:21Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "in_progress", "note": "PHAT HIEN LON: so 24.1%/35.8%/peak50% ca ngay nay = COUNT-share ten BANK trong 30, KHONG phai weight. Weight that = 44.4% full / 60.3% OOS / 2026Q2 82.7% (3 route). Cap 30% khong phai bound nhe ma la can thiep giam ~1/2 exposure. A1 eyfin 27.17 (+0.08), A2 eyonly 27.04 (-0.05, DD -17.6 Calmar 1.54); A3 fincap dang chay"}
+- [2026-07-14T14:51:34Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 50, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:52:34Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 51, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:53:34Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 52, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:54:34Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 53, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:55:34Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 54, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:56:34Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 55, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:57:34Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 56, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:58:35Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 57, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T14:59:35Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 58, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T15:00:35Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 59, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T15:01:35Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 60, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T15:02:35Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 61, "job_id": "Taylor_20260714_140127", "source": "watcher"}
+- [2026-07-14T15:03:00Z] Taylor/finding — v4final selector tong hop: KHONG WIRE — sua thuoc do (bo 1/PCF khoi bank -> 1 chi tieu ey) MIEN PHI nhung KHONG co alpha (A2-A0 -0.05pp, trong nhieu); cap tai chinh 30% NO-GO (-0.64pp/nam, DD KHONG doi -17.6); DY-floor claim cua user DUOC UNG HO tai 6M (+2.34pp t=2.37 sau khi khu confound re, return khong hon). DINH CHINH LON: so 24.1%/35.8%/dinh-50% ca ngay nay = DEM TEN bank, KHONG phai ty trong — ty trong that gap doi (47% full / 82.7% 2026Q2): {
+  "job": "Taylor_20260714_140127",
+  "verdict": "KHONG WIRE GI. Production 0 cham. Khong dao lenh plan 07-14/07-15. Buoc 1+2 = ung vien hop le VE NGUYEN LY (khong phai ve alpha) -> BAT BUOC quant-skeptic. Buoc 3 = NO-GO. Y 4 (DY) = UNG HO, cho quyet mo arm A4.",
+  "dinh_chinh_premise_quan_trong_nhat": {
+    "phat_hien": "So 24.1% ca ky / 35.8% OOS / dinh ~50% ma CA NGAY hom nay (dispatch, framework §11.4/§11.7, tu van risk-auditor) neo vao = COUNT-SHARE ten route BANK trong ro 30, KHONG phai ty trong von.",
+    "bang_chung": "reconcile_finweight.py do tren vector ty trong ngay THAT cua chinh custom30V production: BANK-only count-share full 0.239 / IS 0.102 / OOS 0.354 / dinh quy 0.500 -> tai lap CHINH XAC CA 3 con so da luu hanh.",
+    "ty_trong_that": "BANK-only weight 0.444 full / 0.603 OOS; BANK+INS+SEC 0.474 full / 0.644 OOS / 2026Q2 = 0.827. Ro do tien custom30V hom nay hon 4/5 la tai chinh theo VON.",
+    "he_qua_1": "§11.7 dung ban chat nhung NHE TAY mot nua — vi the nganh ngoai chu y con lon hon da bao.",
+    "he_qua_2": "Tu van cap 30% cua risk-auditor duoc cho tren nen 24.1% => khi do 30% nghe nhu TRAN RONG gan nhu khong rang buoc. Tren ty trong that 47% no la CAN THIEP CAT ~1/2 exposure, rang buoc 100% so ngay tu 2017Q1. Hai chinh sach khac han nhau doi chung 1 ten. CAN dua lai so dung cho risk-auditor/Spyros truoc khi coi 30% la da co tu van.",
+    "he_qua_3": "Dung lop loi ca ngay nay dang truy (so 2 dai luong khong cung thu nguyen) — lan nay khong nam trong code, nam trong CACH CHUNG TA TRICH DAN SO CHO NHAU."
+  },
+  "ablation_neo_lien_ke": {
+    "ky_luat": "moi arm khac arm NGAY TRUOC dung 1 truc; EXP_TAG moi arm ke ca baseline (§8); threads=1; BQ_LOCAL_CACHE=data/bq_cache; self-check 0 VND (BAL+LAG) ca 4 arm; borrow 0; max gross 1.000",
+    "A0_yieldcombo_LIVE": "FULL 27.09 | IS 23.37 | OOS 30.58 | Sh 1.81 | DD -18.3 | Calmar 1.48",
+    "A1_eyfin": "FULL 27.17 | IS 23.16 | OOS 30.95 | Sh 1.82 | DD -18.1 | Calmar 1.50  (A1-A0 = +0.08pp FULL, IS -0.21 / OOS +0.37 TRAI DAU -> NHIEU)",
+    "A2_eyonly": "FULL 27.04 | IS 23.00 | OOS 30.85 | Sh 1.81 | DD -17.6 | Calmar 1.54  (A2-A0 = -0.05pp FULL / -0.37 IS / +0.27 OOS; DD +0.7pp; Calmar +0.06)",
+    "A3_eyonly_fincap30": "FULL 26.40 | IS 22.45 | OOS 30.12 | Sh 1.75 | DD -17.6 | Calmar 1.50  (A3-A2 = -0.64pp FULL / -0.55 IS / -0.73 OOS, Sh -0.06, DD DUNG YEN)",
+    "doc_dung": "Sua thuoc do = RETURN-NEUTRAL, rui ro nhich tot nhe (1 duong NAV). KHONG co bang chung alpha. Ai muon wire phai wire vi TINH DUNG DAN CUA MO HINH, khong phai vi ky vong lai hon."
+  },
+  "cap_30pct_NO_GO": {
+    "test_lai_tu_dau": "Dung yeu cau dispatch — sang nay sector-cap NO-GO tren pool DA NHIEM bias PCF; lan nay pool DA SACH bias (A2) truoc khi cap. Ket luan VAN NO-GO va MANH HON.",
+    "so_do": "Cap lay 0.64pp CAGR/nam deu ca IS lan OOS, doi lai KHONG duoc gi do duoc: MaxDD -17.6 -> -17.6 (KHONG DOI), Sharpe XAU DI 1.81->1.75, Calmar 1.54->1.50.",
+    "co_che": "Cat exposure tai chinh 47%->26% ma drawdown khong nhuc nhich => tap trung tai chinh KHONG phai nguon gay drawdown cua he 2014-2026. DD den tu beta thi truong chung; bank trong pool nay khong sut sau hon thu thay the no. Cap chi doi TEN CAM, khong doi RUI RO DUONG GIA.",
+    "gioi_han_trung_thuc": "Chi phu mau 12.5 nam. KHONG bac rui ro duoi/kich ban (soc he thong ngan hang VN chua tung co trong mau). Diem risk-auditor neu ve DO TRE CAM KET CRISIS cua DT5G (enC=25 phien) VAN DUNG va backtest KHONG tra loi duoc. Muon cap -> cap vi quan tri rui ro duoi CO TUYEN BO RO, chap nhan tra 0.64pp/nam; DUNG cap vi tin backtest cho thay an toan hon (so noi nguoc)."
+  },
+  "y4_DY_floor_UNG_HO": {
+    "phuong_phap": "Test DUNG claim bat doi xung cua user, KHONG test IC(DY,return). Panel 2878 obs / 262 ma / 48 ngay q2m5 2014-2026. DY = Dividend_Min3Y/Price (PIT as-of Release_Date). Downside = min(Close)/Close0-1 tren Close DIEU CHINH (co tuc da nam trong duong gia -> ma DY cao khong the an gian bang chinh viec tra co tuc). Gate: (a) downside nong hon co y nghia VA (b) return KHONG hon.",
+    "ket_qua_6M": "route×date +2.07pp (t=2.75, hit 77%) | route×date×ey-tertile (KHU CONFOUND RE) +2.34pp (t=2.37, hit 68%) | marginal cohort ey rank 20-45 +2.40pp (t=2.37, hit 68%). d_return KHONG co y nghia moi cut (t=0.17-1.39).",
+    "ket_qua_3M": "KHONG duoc ung ho (t=1.40-1.94) -> nguong chan DAI HAN, khong phai dem phien-toi-phien.",
+    "vi_sao_dang_tin": "Song sot DOUBLE-SORT trong ey-tertile => khong phai hieu ung re ma selector da cham roi. Day la confound nguy hiem nhat va da bi kiem soat tuong minh.",
+    "gioi_han_khong_tu_cuu_gia_thuyet": "t LAC QUAN (cua so 6M chong lan + ten tuong quan cung ngay); so dang tin hon = hit-rate theo NGAY 68-77% tren 44-48 ngay (nhi thuc p~0.01). Cohort bien co d_return +2.95pp (t=1.39) KHONG co y nghia NHUNG KHONG NHO — neu N lon hon lam no significant thi DY tut ve return-predictor va cho cua no la TRUC XEP HANG chu khong phai rule chan. Chua ket luan duoc voi N hien co. DY>0 chi 70.4% obs -> rule phai fail-open.",
+    "de_xuat_tich_hop_pre_registered_CHUA_CHAY": "DY chi duoc quyen TIE-BREAK trong DAI BIEN (ey rank ~20-45 — dung cohort da do co hieu ung, va la cho duy nhat tie-break doi duoc quyet dinh): trong dai bien uu tien DY cao khi lap du 30 slot; ngoai dai bien khong dung; thieu DY -> giu nguyen thu tu ey (fail-open). KHONG ep vao cong thuc cong diem tuyen tinh. = arm A4 rieng, can selfcheck + N-ledger + skeptic. JOB NAY KHONG CHAY A4 (chay them 1 bien the o cuoi phien dung bang cach sinh ra thu ca ngay nay vua mat cong bac)."
+  },
+  "selfcheck_12_12_PASS": {
+    "cap_giu_dung_thuc_te": "fincap@0.30 do tren vector ty trong THAT: max 0.3000 / mean 0.2995 tren 1090 ngay, 0 ngay vuot, 0 ngay infeasible, sum(w)=1 (err 4.4e-16). Full panel 2014-2026: 0.0% so ngay >30%.",
+    "BUG_THAT_bat_duoc_nho_DO_thay_vi_TIN": "weight_scheme=sectorcap CO SAN (dispatch goi y tai dung) KHONG GIU DUOC CAP — _cap_names chay SAU _cap_sector va water-fill phan du vao MOI ten chua cham tran KE CA FINANCIAL => cap danh nghia 0.30 thuc giao mean 0.427 / max 0.542, VI PHAM 1090/1090 ngay. Da dung _cap_group_jointly (cap ngan sach nhom truoc, name-cap water-fill TRONG tung nhom). NEU DA TAI DUNG sectorcap nhu dispatch goi y, arm A3 se do nham mot cap 0.43 roi dan nhan 0.30.",
+    "khac": "eyonly KHONG doc PCF (dao dau toan bo PCF -> 0 ten doi); eyfin khong doc PCF cho financial (255 pick, 0 khac) + NEGATIVE CONTROL: cung phep pha do CO lam yieldcombo doi 17/18 rebal (=> phep thu khong phai no-op); OFF-path byte-identical vs git show HEAD:custom_basket.py."
+  },
+  "ro_2026_05_05": {
+    "A0_LIVE": "financial 18/30",
+    "A1_eyfin": "17/30 — giu 29/30, IN HPG / OUT MBS",
+    "A2_eyonly_va_A3": "CUNG 16/30 — giu 27/30, IN HPG,PNJ,SAB / OUT MBS,VCB,VGC",
+    "luu_y": "A3 chon CUNG 30 TEN nhu A2 — cap la rule TY TRONG khong doi thanh phan: thanh phan doi rat it (27/30) trong khi ty trong doi rat lon (47%->26%). Them 1 minh hoa cho dinh chinh: DEM TEN va TY TRONG la 2 dai luong khac nhau.",
+    "HPG": "HPG IN trung huong lenh basket-swap plan 07-14/07-15 (ban HPG) NHUNG KHONG phai can cu dao lenh: A1/A2 chua qua skeptic, delta trong nhieu, job nay khong de xuat wire."
+  },
+  "baseline_note": "A0 = 27.09 KHOP vintage hom nay (registry job Taylor_20260714_121717: vintage
+- [2026-07-14T15:03:35Z] Taylor/heartbeat — Taylor_20260714_140127: {"status": "still_running", "elapsed_min": 62, "job_id": "Taylor_20260714_140127", "source": "watcher"}
