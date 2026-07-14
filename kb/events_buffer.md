@@ -2581,3 +2581,34 @@
 - [2026-07-14T07:04:26Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "in_progress", "note": "Plan chot: overlay env-gated trong custom_basket.py yieldcombo branch + _dcf_tag filename (§8). Dang build FV+sens release cache."}
 - [2026-07-14T07:05:23Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260714_070221", "source": "watcher"}
 - [2026-07-14T07:06:24Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260714_070221", "source": "watcher"}
+
+## Consolidation 2026-07-14T07:32:26Z
+- [2026-07-14T07:07:24Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260714_070221", "source": "watcher"}
+- [2026-07-14T07:08:24Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260714_070221", "source": "watcher"}
+- [2026-07-14T07:09:24Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260714_070221", "source": "watcher"}
+- [2026-07-14T07:10:24Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260714_070221", "source": "watcher"}
+- [2026-07-14T07:11:24Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260714_070221", "source": "watcher"}
+- [2026-07-14T07:12:24Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260714_070221", "source": "watcher"}
+- [2026-07-14T07:13:10Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "in_progress", "note": "selfcheck bat 2 bug that (stale-FV leak mask NOT_COMPUTED + truncated fin history). Da fix, dang rebuild cache."}
+- [2026-07-14T07:13:25Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260714_070221", "source": "watcher"}
+- [2026-07-14T07:14:25Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260714_070221", "source": "watcher"}
+- [2026-07-14T07:15:25Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260714_070221", "source": "watcher"}
+- [2026-07-14T07:16:25Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260714_070221", "source": "watcher"}
+- [2026-07-14T07:17:25Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20260714_070221", "source": "watcher"}
+- [2026-07-14T07:17:57Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "in_progress", "note": "resume: overlay custom_basket+pt_v23 da co tu phien truoc, dang verify selfcheck + tim run logs"}
+- [2026-07-14T07:18:25Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20260714_070221", "source": "watcher"}
+- [2026-07-14T07:19:25Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20260714_070221", "source": "watcher"}
+- [2026-07-14T07:20:25Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20260714_070221", "source": "watcher"}
+- [2026-07-14T07:21:08Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "in_progress", "note": "selfcheck 16/16 PASS (40/40 parity prod) sau khi fix 2 bug: cache rate-at-rel_time thay vi asof=d, va base_fv_ps lot vao robust. Tiep: chay baseline+A+B"}
+- [2026-07-14T07:21:25Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20260714_070221", "source": "watcher"}
+- [2026-07-14T07:22:25Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20260714_070221", "source": "watcher"}
+- [2026-07-14T07:23:25Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20260714_070221", "source": "watcher"}
+- [2026-07-14T07:24:25Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20260714_070221", "source": "watcher"}
+- [2026-07-14T07:25:25Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "still_running", "elapsed_min": 23, "job_id": "Taylor_20260714_070221", "source": "watcher"}
+- [2026-07-14T07:26:15Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "in_progress", "note": "3 run full-harness dang chay nen (ctrl/A/B), da chuan bi compare_dcf.py; cho ket qua"}
+- [2026-07-14T07:26:26Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20260714_070221", "source": "watcher"}
+- [2026-07-14T07:27:26Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "still_running", "elapsed_min": 25, "job_id": "Taylor_20260714_070221", "source": "watcher"}
+- [2026-07-14T07:28:26Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "still_running", "elapsed_min": 26, "job_id": "Taylor_20260714_070221", "source": "watcher"}
+- [2026-07-14T07:29:26Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "still_running", "elapsed_min": 27, "job_id": "Taylor_20260714_070221", "source": "watcher"}
+- [2026-07-14T07:30:26Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "still_running", "elapsed_min": 28, "job_id": "Taylor_20260714_070221", "source": "watcher"}
+- [2026-07-14T07:31:26Z] Taylor/heartbeat — Taylor_20260714_070221: {"status": "still_running", "elapsed_min": 29, "job_id": "Taylor_20260714_070221", "source": "watcher"}
