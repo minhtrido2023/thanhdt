@@ -1,16 +1,16 @@
-# Mike fleet — context pack (v1085)
+# Mike fleet — context pack (v1086)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-14T15:03:00] Taylor/finding — v4final selector tong hop: KHONG WIRE — sua thuoc do (bo 1/PCF khoi bank -> 1 chi tieu ey) MIEN PHI nhung KHONG co alpha (A2-A0 -0.05pp, trong nhieu); cap tai chinh 30% NO-GO (-0.64pp/nam, DD KHONG doi -17.6); DY-floor claim cua user DUOC UNG HO tai 6M (+2.34pp t=2.37 sau khi khu confound re, return khong hon). DINH CHINH LON: so 24.1%/35.8%/dinh-50% ca ngay nay = DEM TEN bank, KHONG phai ty trong — ty trong that gap doi (47% full / 82.7% 2026Q2): { "job": "Taylor_20260714_140127", "verdict": "KHONG WIRE GI. Production 0 cham. Khong dao lenh plan 07-14/07-15. Buoc 1+2 = ung vien hop le VE NGUYEN LY (khong …
-- [2026-07-14T15:29:43] quant-skeptic/verification — ✅ CONFIRMED VERIFY: v4final selector tong hop: KHONG WIRE — sua thuoc do (bo 1/PCF khoi bank -> 1 chi tieu ey) MIEN PHI nhung KHONG co alpha (A2-A0 -0.05pp, trong nhieu); cap tai chinh 30% NO-GO (-0.64pp/nam, DD KHONG doi -17.6); DY-floor claim cua user DUOC UNG HO tai 6M (+2.34pp t=2.37 sau khi khu confound re, return khong hon). DINH CHINH LON: so 24.1%/35.8%/dinh-50% ca ngay nay = DEM TEN bank, KHONG phai ty trong — ty trong that gap doi (47% full / 82.7% 2026Q2): {"finding_topic": "v4final selector tong hop: KHONG WIRE — sua thuoc do (bo 1/PCF khoi bank) MIEN PHI nhung KHONG co alpha; cap tai chinh 30% NO-GO; DY-floor cl …
 - [2026-07-14T16:13:11] Winston/finding — quy-tac-vinh-vien-re-rate-8L-mua-BCTC: DA CAI + TEST XONG truoc cua so 07-15: {"job": "Winston_20260714_160739", "status": "DONE", "rule": "tu ngay 15 thang dau moi quy (1/4/7/10) den het thang: chay refresh_fa_ratings_8l.sh 20:00 ICT + r …
 - [2026-07-14T16:15:54] Taylor/finding — A4 (DY tie-break) + cap-theo-dinh: NO-GO CA HAI. A4 return dung bang 0 (-0.00pp) trong khi 48/48 rebal doi ten = chu ky reshuffle noise, VA xau di DUNG metric no duoc mua de cai thien (MaxDD -17.6 -> -18.6). Cap-theo-dinh ≡ cap phang tai X (cung co che, chi khac MUC): moi muc 0.45-0.60 deu KHONG chi-cham-dinh (rang buoc 35-54% so ngay), chi phi KHONG DON DIEU (0.45 dat hon ca 0.30!), MaxDD DUNG YEN + DD_IS XAU DI khap dai. DINH CHINH: dinh 82.7% la nen A0; nen A2 la 77.4% quy/86.7% ngay => eyonly KHONG giam tap trung: {"job": "Taylor_20260714_152605", "verdict": "KHONG WIRE GI. Production 0 cham. Khong dao lenh plan 07-14/07-15. Khong route quant-skeptic — ca 2 arm TU BAC, kh …
 - [2026-07-14T17:58:26] Winston/finding — ticker_financial bi ghi de stale — XAC NHAN LOI THAT, nguon = UPSTREAM tav2 pipeline (khong phai fleet), fa_ratings_8l DA BI LAY, backup recovery da chup xong: {"job": "Winston_20260714_174411", "verdict": "LOI THAT 100%, KHONG phai Mike doc nham. Bang nguon tav2_bq.ticker_financial bi ghi de bang snapshot cu ~2026-05- …
 - [2026-07-14T18:08:06] Taylor/finding — CAPIT dividend gate: NO-GO ca 2 arm — tin hieu cap TEN co that (dy3 cao -> DD nong hon +2.15pp/3M, 7/8 episode, song sot khu confound re) nhung KHONG thu hoach duoc: golden KHONG co do du lua chon (ro 2-8 ten, nsmallest(15) chua bao gio rang buoc => dividend chi CAT duoc, khong CHON duoc) VA 79/84 name-event DA tra co tuc >0 3 nam lien vi quality-gate ROE_Min5Y/ROIC5Y/FSCORE DA HAM Y => gate cung = NO-OP. MaxDD KHONG cai thien (-17.9 y het) = dung metric duoc de xuat de cai thien: {"job": "Taylor_20260714_173435", "verdict": "NO-GO ca 2 arm. KHONG wire gi. Production CAPIT_DIV_GATE=off byte-identical. BAT BUOC quant-skeptic truoc khi Mike …
 - [2026-07-14T18:13:54] quant-skeptic/verification — ✅ CONFIRMED VERIFY: CAPIT dividend gate: NO-GO ca 2 arm — tin hieu cap TEN co that (dy3 cao -> DD nong hon +2.15pp/3M, 7/8 episode, song sot khu confound re) nhung KHONG thu hoach duoc: golden KHONG co do du lua chon (ro 2-8 ten, nsmallest(15) chua bao gio rang buoc => dividend chi CAT duoc, khong CHON duoc) VA 79/84 name-event DA tra co tuc >0 3 nam lien vi quality-gate ROE_Min5Y/ROIC5Y/FSCORE DA HAM Y => gate cung = NO-OP. MaxDD KHONG cai thien (-17.9 y het) = dung metric duoc de xuat de cai thien: {"finding_topic": "CAPIT dividend gate: NO-GO ca 2 arm — tin hieu cap TEN co that (dy3 cao -> DD nong hon +2.15pp/3M, 7/8 episode, song sot khu confound re) nhu …
 - [2026-07-14T18:18:26] quant-skeptic/verification — ✅ CONFIRMED VERIFY: CAPIT dividend gate: NO-GO ca 2 arm — tin hieu cap TEN co that (dy3 cao -> DD nong hon +2.15pp/3M, 7/8 episode, song sot khu confound re) nhung KHONG thu hoach duoc: golden KHONG co do du lua chon (ro 2-8 ten, nsmallest(15) chua bao gio rang buoc => dividend chi CAT duoc, khong CHON duoc) VA 79/84 name-event DA tra co tuc >0 3 nam lien vi quality-gate ROE_Min5Y/ROIC5Y/FSCORE DA HAM Y => gate cung = NO-OP. MaxDD KHONG cai thien (-17.9 y het) = dung metric duoc de xuat de cai thien: {"finding_topic": "CAPIT dividend gate: NO-GO ca 2 arm — tin hieu cap TEN co that (dy3 cao -> DD nong hon +2.15pp/3M, 7/8 episode, song sot khu confound re) nhu …
+- [2026-07-15T01:26:05] Winston/finding — ops-autofix 07-15: MAFEE_NOT_AUTH = RED giả (bug checker đã biết từ 07-06) — đã fix preflight, plan 07-15 cả 2 account duyệt thật + gate RUN OK: {"job": "Winston_20260715_012007", "status": "DONE", "diagnosis": "Plan ZaloPay 2026-07-15 (VPB trim 800cp + CTG buy 850cp) ĐÃ được user duyệt thật (approved_by …
+- [2026-07-15T01:26:28] Winston/finding — MAFEE_NOT_AUTH plan 07-15: false-RED, khong chan giao dich — thieu stamp mafee_authorized (Mike duyet khuya quen stamp), escalated cho Mike: {"job": "Winston_20260715_012013", "verdict": "FALSE-RED / khong co execution risk. Plan SpaceX 07-15 (SELL HPG 2200 + BUY LPB 900) va ZaloPay 07-15 (SELL VPB 8 …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -364,6 +364,18 @@ Dispatch khẩn: `Winston_20260714_174411` — xác nhận độc lập mâu thu
 (lastModifiedTime), truy vết script/job nào có thể đã ghi đè, đánh giá rủi ro cho cron mới
 (20:00 ICT tối nay 07-15, lần chạy thật đầu tiên của quy tắc quý mới) nếu bảng nguồn thật sự hỏng.
 KHÔNG tự sửa/rebuild — chờ xác định nguyên nhân trước.
+
+## Plan 07-15 đã duyệt (SpaceX + ZaloPay) — quyết định khôi phục ticker_financial ĐANG CHỜ user (2026-07-15)
+User: sẽ tự hỏi BQ admin (upstream tav2 pipeline) về sự cố ticker_financial rồi quyết định hướng
+xử lý sau — Mike KHÔNG tự khôi phục/tạm dừng cron cho tới khi có quyết định. Trong lúc chờ, user
+đã duyệt trực tiếp plan 07-15 cho cả 2 account (Mike verify trước: cả 2 plan 0 BAL/0 LAG, chỉ là
+basket-swap dựa trên custom30V_8l composition đã thiết lập từ trước rebalance quý gần nhất —
+không bị ảnh hưởng bởi corruption ticker_financial 07-14). approved_by=user đã ghi vào cả 2 file.
+
+**Còn treo, chờ user quay lại**: quyết định khôi phục ticker_financial/fa_ratings_8l từ backup
+Winston đã chụp (`ticker_financial_ttbackup_fresh_20260714`, `fa_ratings_8l_ttbackup_fresh_20260714`)
++ quyết định có tạm dừng cron mới 20:00 ICT (quy tắc quý mới, sẽ chạy lại tối nay 07-15) hay không
+nếu nguồn upstream chưa được xác nhận đã sửa.
 
 ## Tri thức chung của đội (canonical — Mike biên tập; MỌI agent phải nắm)
 > Cập nhật 2026-07-01. Chi tiết: `kb/KNOWLEDGE.md`. Số liệu gốc: `data/results_registry.md`.
