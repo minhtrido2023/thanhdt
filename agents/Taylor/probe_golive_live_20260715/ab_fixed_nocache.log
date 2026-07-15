@@ -1,0 +1,14 @@
+==========================================================================================
+  V2.3 + DT5G — DAILY RECOMMENDATIONS  (2026-07-15)
+==========================================================================================
+  state source: DT5G_macro | as_of 2026-07-14 | state 3 (NEUTRAL)
+  latest signal date: 2026-07-15 | 23,707 signal rows in window
+  [lag-live] 1092 events in window, 138 qualify, release max 2026-07-14
+  LAG entries: 0 upcoming, 0 entered in last sessions
+  [edge-alloc] mean12 as-of 2026-07-15 = 0.5% vs thr 4% -> w_LAG 0.50
+
+  state=3(NEUTRAL)  w_LAG tgt=50% cur=50%  parking=70%  breadth=18.2%
+  BAL picks: 0 | LAG upcoming: 0 | CAPIT fired: False
+  -> /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/probe_golive_live_20260715/ab_out_fixed/golive_v23_recommendations_2026-07-15.md
+  -> /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/probe_golive_live_20260715/ab_out_fixed/golive_v23_recommendations_2026-07-15.csv
+DONE.
