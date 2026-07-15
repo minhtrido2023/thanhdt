@@ -3309,3 +3309,19 @@
 
 ## Consolidation 2026-07-15T14:07:01Z
 - [2026-07-15T13:45:49Z] Taylor/status — fa_ratings-refresh-ok: {"rows": 12406}
+
+## Consolidation 2026-07-15T17:38:16Z
+- [2026-07-15T17:31:01Z] Mike/heartbeat — Mike_20260715_173001: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20260715_173001", "source": "watcher"}
+- [2026-07-15T17:32:02Z] Mike/heartbeat — Mike_20260715_173001: {"status": "still_running", "elapsed_min": 2, "job_id": "Mike_20260715_173001", "source": "watcher"}
+- [2026-07-15T17:33:02Z] Mike/heartbeat — Mike_20260715_173001: {"status": "still_running", "elapsed_min": 3, "job_id": "Mike_20260715_173001", "source": "watcher"}
+- [2026-07-15T17:34:02Z] Mike/heartbeat — Mike_20260715_173001: {"status": "still_running", "elapsed_min": 4, "job_id": "Mike_20260715_173001", "source": "watcher"}
+- [2026-07-15T17:35:02Z] Mike/heartbeat — Mike_20260715_173001: {"status": "still_running", "elapsed_min": 5, "job_id": "Mike_20260715_173001", "source": "watcher"}
+- [2026-07-15T17:35:07Z] Mike/heartbeat — Mike_20260715_173001: {"status": "in_progress", "note": "da viet ban nhap RETRO 07-15 (3 su co, 1 gap moi bo sung), dang dispatch Wags xac minh doc lap truoc khi commit"}
+- [2026-07-15T17:36:03Z] Mike/heartbeat — Mike_20260715_173001: {"status": "still_running", "elapsed_min": 6, "job_id": "Mike_20260715_173001", "source": "watcher"}
+- [2026-07-15T17:37:03Z] Mike/heartbeat — Mike_20260715_173001: {"status": "still_running", "elapsed_min": 7, "job_id": "Mike_20260715_173001", "source": "watcher"}
+- [2026-07-15T17:37:48Z] Mike/heartbeat — Mike_20260715_173001: {"status": "in_progress", "note": "da dispatch Wags xac minh RETRO draft (chay nen), dang cho ket qua"}
+- [2026-07-15T17:38:03Z] Mike/heartbeat — Mike_20260715_173001: {"status": "still_running", "elapsed_min": 8, "job_id": "Mike_20260715_173001", "source": "watcher"}
+- [2026-07-15T17:36:18Z] Wags/heartbeat — Wags_20260715_173533: {"status": "in_progress", "note": "(1) grep bus xong — phat hien GAP: Taylor_20260715_104449 attempt-1 TIMEOUT exit 124, mau thuan claim job-lifecycle-timeout KHONG tai dien. Dang check job records + commits."}
+- [2026-07-15T17:36:33Z] Wags/heartbeat — Wags_20260715_173533: {"status": "still_running", "elapsed_min": 1, "job_id": "Wags_20260715_173533", "source": "watcher"}
+- [2026-07-15T17:37:16Z] Wags/heartbeat — Wags_20260715_173533: {"status": "in_progress", "note": "(2) commits+job_ids verified het (1b66428/ef23190 nam o repo mike, khong phai WorkingClaude). Dang check candidate missed incidents + dispatch.sh timeout claim."}
+- [2026-07-15T17:37:34Z] Wags/heartbeat — Wags_20260715_173533: {"status": "still_running", "elapsed_min": 2, "job_id": "Wags_20260715_173533", "source": "watcher"}

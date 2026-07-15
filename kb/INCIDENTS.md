@@ -2452,3 +2452,113 @@ chứng đã đủ rõ để không cần thêm 1 chu kỳ RETRO nữa mới h�
 
 **Đã dọn working memory cuối ngày** (`kb/memory/Mike.md`) + chạy `bin/consolidate.sh` để
 `context_pack.md` tươi cho phiên ngày mai — xem cập nhật ngay sau entry này.
+
+## RETRO — 2026-07-15: 3 sự cố (1 GAP báo cáo — chưa ai ghi trước retro, retro tự bổ sung),
+## 1 pattern xuyên suốt (data-registry-accuracy) ĐẠT điều kiện escalate đã đặt ra từ RETRO
+## 07-12 — ngày thứ 5 liên tiếp (07-11→07-15) nhóm này là nguồn sự cố chính
+
+**Bối cảnh ngày:** ngày R&D nặng (chuỗi DCF Pha 5 kết thúc NO-GO, cross-sector ey NO-GO,
+fa_ratings/fa_ratings_8l refresh xong) xen giữa 3 sự cố vận hành/dữ liệu — 2 đã có entry đầy
+đủ ngay trong ngày (Winston), 1 chưa (Taylor tự phát hiện+fix+verify nhưng không ghi
+INCIDENTS.md, dù đã ghi bus finding đầy đủ).
+
+| # | Sự cố | Phân loại | Nguồn gốc (bước/quy trình, không quy tội cá nhân) | Người ghi chép |
+|---|---|---|---|---|
+| 1 | `ticker_prune` corruption upstream — mở rộng trực tiếp sự cố `ticker_financial` 07-14 (rows 07-08→07-14 bị xóa/ghi đè, `daily_refresh` 07-14 ABORT, DT5G 07-14 = ffill trên base stale) | data-registry-accuracy | Freshness gate hiện tại chỉ kiểm `MAX(time)` tồn tại, không đếm số dòng/tên — "ngày tồn tại nhưng thin" (7-10 tên thay vì ~225) lọt qua hoàn toàn; `publish_gated_state` ffill-on-stale-base publish row mới chỉ WARN chứ không fail-hard, làm gate `MAX_STATE_LAG=0` downstream mất tác dụng | Winston (`Winston_20260715_054514` + `Winston_20260715_054508`) — đã ghi đầy đủ trong ngày kèm 3 mitigation (backup time-travel, restore cache, depth-check commit `1b66428`) — **KHÔNG phải gap** |
+| 2 | Preflight RED giả `MAFEE_NOT_AUTH` trên plan ZaloPay+SpaceX 07-15 đã duyệt thật — tái diễn lần 2 cùng bug 07-06 | khác (checker-field-không-writer) | `preflight_check.sh` fail cứng trên field `mafee_authorized` — field này không có code path nào từng ghi (khác `approved_by`, field gate thực thi thật `trading_bot/plan.py approval_block_reason` đọc) — lần 07-06 chỉ vá dữ liệu (stamp 1 plan) chứ không sửa checker nên tái diễn đúng như Lesson entry 07-06 đã cảnh báo | Winston (`Winston_20260715_012007`) — đã ghi đầy đủ trong ngày kèm fix ở tầng checker (commit `ef23190`) — **KHÔNG phải gap** |
+| 3 | `golive_recommend_v23.py` (money-path, sinh plan tiền thật) đọc qua `BQ_LOCAL_CACHE` coin-flip theo đêm-trước-sync-verify-pass hay không — production plan phụ thuộc ngẫu nhiên nguồn live/cache, đo được lệch thành viên rổ parking custom30V (sleeve tin cậy nhất, +7.4pp Full) giữa 2 nguồn | data-registry-accuracy | **Tái lập nguyên văn shape của bug C1 (07-12, `publish_gated_state.py`)** ở một script money-path KHÁC — `wc_env.sh` export `BQ_LOCAL_CACHE` toàn cục, script kế thừa vô điều kiện; cache còn fail-open khi verify=false (âm thầm rơi về live) nên nguồn tự lật ngẫu nhiên theo trạng thái sync đêm trước, không phải lựa chọn thiết kế. RETRO 07-12 đã đề xuất 1 sweep tĩnh 1-lần rà toàn bộ script money-path/publish để tìm hết case còn lại — **sweep đó CHƯA từng chạy**; bug này tự lộ ra nhờ Taylor tình cờ điều tra việc khác (`Taylor_20260715_103016`), không phải nhờ sweep chủ động | **Chưa ai ghi vào INCIDENTS.md trước retro này** — có đầy đủ bus finding (điều tra 10:40, fix 10:49, đóng+quant-skeptic CONFIRMED 10:58, commit `41a338c`) nhưng không entry — retro tự bổ sung |
+
+**Sự cố 1 — 3 câu hỏi bắt buộc:**
+a. **TÁI DIỄN** — mở rộng trực tiếp entry 07-14 (`ticker_financial` corruption), cùng cửa sổ
+   thời gian 07-13 18:30 → 07-14 18:30. Thuộc họ "nguồn dữ liệu tưởng đúng/tươi nhưng thực ra
+   sai/thin/ghi đè" đã xuất hiện liên tục 07-11→07-14.
+b. **CÒN HỞ** — root cause thật (upstream `tav2` pipeline) chưa sửa, đang chờ user hỏi BQ
+   admin (context_pack 07-15). Mitigations hôm nay đóng đúng lỗ hổng Lesson (1) mà chính
+   entry 07-14 đã tự nêu (freshness theo `MAX(time)` không bắt "ngày tồn tại nhưng thin") —
+   verify: depth-check mới (`1b66428`) test standalone trên bảng hỏng thật bắt đúng
+   lag=0/names=8. Residual risk rõ ràng: sync 23:45 tối 07-15 sẽ re-mirror bảng hỏng nếu
+   upstream chưa sửa; DT5G tự rơi về DT4-only từ 07-16 khi base chạm ngưỡng stale 3 ngày
+   (đúng thiết kế fail-safe, không phải lỗi mới).
+c. **PATTERN** — ngày thứ 5 liên tiếp (07-11→07-15) nhóm data-registry-accuracy là nguồn sự
+   cố; xem tổng hợp cuối entry.
+
+**Sự cố 2 — 3 câu hỏi bắt buộc:**
+a. **TÁI DIỄN lần 2** — cùng field (`mafee_authorized`), cùng triệu chứng (RED giả trên plan
+   đã duyệt thật) với entry 07-06.
+b. **HOÀN CHỈNH lần này** — khác 07-06 (chỉ stamp dữ liệu 1 plan, không sửa checker → tái
+   diễn), lần này sửa ở tầng checker (bỏ hẳn fail-flag, giữ hiển thị informational) — verify:
+   commit `ef23190`, preflight re-run 2 account → GREEN, `approval_block_reason` trên 2 plan
+   thật → RUN OK. Đóng đúng đường tái phát, không phải vá triệu chứng.
+c. **Đơn lẻ về sự kiện**, nhưng thuộc mô-típ rộng "checker fail cứng trên field không ai từng
+   ghi" — khác nhóm data-registry-accuracy (đây là lỗi báo cáo/gate nội bộ, không phải đọc
+   sai nguồn BQ) nên xếp riêng "khác".
+
+**Sự cố 3 — 3 câu hỏi bắt buộc:**
+a. **TÁI DIỄN** — chính finding gốc tự thừa nhận "tái lập bug C1" (`2_loi_cau_truc_bat_duoc`
+   trong payload). Cùng shape: script money-path/publish kế thừa `BQ_LOCAL_CACHE` toàn cục
+   thay vì pop process-local trước query.
+b. **HOÀN CHỈNH cho ĐÚNG 1 script này** — verify: quant-skeptic CONFIRMED/high (đọc raw log,
+   độc lập tái lập 2 con số từ BQ live khớp), 3 selfcheck độc lập PASS
+   (`edge_wlag_gate_selfcheck`, `money_path_freshness_selfcheck`, `lag_live_schedule_selfcheck`),
+   `ab_fixed.log` vs `ab_fixed_nocache.log` byte-identical, không side-effect lên cache thật
+   (manifest verified=false giữ nguyên). **NHƯNG còn hở ở phạm vi rộng hơn**: sweep tĩnh
+   1-lần toàn bộ script money-path/publish mà RETRO 07-12 đã đề xuất cụ thể **vẫn chưa từng
+   chạy** — không có gì đảm bảo đây là script cuối cùng còn dính đúng lỗi này; bug hôm nay tự
+   lộ ra nhờ tình cờ, không nhờ quét chủ động.
+c. **PATTERN, và đây chính là "lần audit/phát hiện tiếp theo" mà RETRO 07-12 đặt làm điều
+   kiện escalate** ("nếu audit TIẾP THEO — bất kỳ góc nào — vẫn tìm thêm 1 case
+   data-registry-accuracy mới, RETRO ngày đó nên escalate thật"). Điều kiện đã đạt hôm nay.
+
+**Pattern xuyên suốt QUAN TRỌNG NHẤT — data-registry-accuracy, 5 ngày liên tiếp, điều kiện
+escalate của RETRO 07-12 nay đã khớp:** 07-11 (SIGNAL_V11 đọc nhầm `vnindex_5state` base
+thay vì `vnindex_5state_dt5g_live`) → 07-12 (C1 CRITICAL: `publish_gated_state.py` qua
+`BQ_LOCAL_CACHE`) → 07-13 (`ticker_prune` monolith stale 17 ngày, 27 file đọc nhầm) → 07-14
+(`ticker_financial` bị ghi đè upstream) → 07-15 (**2/3 sự cố hôm nay riêng thuộc nhóm này**:
+mở rộng `ticker_prune` corruption + tái lập bug C1 nguyên văn ở `golive_recommend_v23.py`).
+RETRO 07-12 đã tự đặt điều kiện rõ ràng cho lần escalate tiếp theo và hôm nay đúng là lần đó
+— không phải diễn giải mới, mà là điều kiện đã viết sẵn từ 3 ngày trước nay khớp thật.
+
+**Prevention MẠNH HƠN được đề xuất (không lặp lại "cần quét thêm" suông — đây CHÍNH LÀ việc
+RETRO 07-12 đã đề xuất cụ thể mà chưa ai làm):**
+- Dispatch NGAY sweep tĩnh 1-lần (không phải cron định kỳ) rà toàn bộ `deploy_golive_dt5g_v4/`
+  + `mike/bin/` + mọi script đọc `tav2_bq.*`: với mỗi script publish/production-money-path,
+  xác nhận có `os.environ.pop('BQ_LOCAL_CACHE', ...)` process-local trước query đầu tiên hay
+  không — đúng nguyên văn đề xuất RETRO 07-12, effort cao (Taylor hoặc Winston, `--model
+  fable --effort high` theo MIKE.md §Model routing vì đây là việc quét sâu nhiều file, không
+  phải lookup đơn giản).
+- Đồng thời cân nhắc sửa `bq_local_cache.py` bỏ hành vi **fail-open khi verify=false** (âm
+  thầm rơi về live) cho các script KHÔNG phải money-path — hành vi này là nguồn gốc "coin-flip
+  ngẫu nhiên" thay vì lỗi cố định dễ phát hiện; nếu giữ fail-open thì ít nhất mọi lần fail-open
+  nên tự log rõ ràng để không ai phải tình cờ mới phát hiện (đề xuất phụ trong chính finding
+  Taylor, mục 3 "đề xuất trình user").
+- Kết quả sweep ghi vào `mike/kb/data_registry.md` + `mike/kb/cron_registry.md` theo đúng §9/
+  §11 coding_guidelines — đóng dứt điểm thay vì chờ audit tình cờ tiếp theo tìm case thứ 3.
+
+**Escalation (bước 10) — ĐỦ điều kiện, ghi bus question:** điều kiện RETRO 07-12 tự đặt ("audit
+tiếp theo tìm thêm 1 case data-registry-accuracy mới → escalate thật") đã khớp đúng nghĩa đen
+hôm nay. Ghi bus event `question`
+(`retro-pattern-recurring-data-registry-accuracy-5days`) đề xuất user chốt: (a) có duyệt
+dispatch sweep tĩnh 1-lần ngay (Taylor/Winston, fable+high) hay không, (b) có nên bỏ fail-open
+của `bq_local_cache.py` cho script không phải money-path hay không.
+
+**Ghi nhận riêng — pattern job-lifecycle-timeout (escalated RETRO 07-14) KHÔNG tái diễn hôm
+nay** — không có job nào timeout/kill-while-alive trong 3 sự cố hôm nay. Nhưng câu hỏi
+`retro-pattern-recurring-joblifecycle-timeout-3` (07-14) **vẫn CHƯA có answer trên bus** và
+`dispatch.sh` dòng 97-98 xác nhận vẫn giữ trục per-agent (`DollarBill` riêng 1800s, mọi agent
+khác mặc định 600s) — đề xuất "timeout theo khối-lượng-việc (model/effort)" của RETRO 07-14
+CHƯA được áp dụng. Không escalate lại (chưa tái diễn), nhưng nêu để không quên — đã treo 1
+ngày.
+
+**Ghi nhận tích cực đáng nêu:** sự cố 2 (preflight MAFEE_NOT_AUTH) là ví dụ tốt về sửa ĐÚNG
+tầng checker thay vì vá dữ liệu — khác hẳn cách vá 07-06 đã bị chính Lesson entry đó cảnh báo
+sẽ tái diễn nếu không sửa gốc. Sự cố 3 cũng là ví dụ tốt về self-audit (Taylor tự thừa nhận
+tình cờ tái lập bug C1, tự đề xuất 3 phương án thay vì tự ý áp dụng, chờ Mike/user duyệt) và
+verify độc lập nghiêm túc trước khi đóng (3 selfcheck + quant-skeptic + byte-identical diff).
+
+**Việc còn treo sang ngày mai:**
+- Quyết định user cho câu hỏi `retro-pattern-recurring-data-registry-accuracy-5days` (sweep
+  tĩnh 1-lần + fail-open policy).
+- Quyết định user cho câu hỏi `retro-pattern-recurring-joblifecycle-timeout-3` (07-14, vẫn mở).
+- Quyết định user về khôi phục `ticker_financial`/`ticker_prune` từ backup Winston đã chụp
+  (`*_ttbackup_fresh_20260714`/`_20260713`) sau khi hỏi BQ admin — chưa quyết tính tới lúc
+  retro này chạy (xác nhận: chưa có bus event/commit nào áp dụng khôi phục).
