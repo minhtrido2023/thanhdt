@@ -1,0 +1,56 @@
+[
+ {
+  "i": 1,
+  "secs": 4.48,
+  "rows": 23707,
+  "sql": "\nWITH fa_dated AS (\n  SELECT f.ticker, f.time AS f_time, f.tier AS fa_tier,\n    LEAD(f.time) OVER (PARTITION BY f.ticker ORDER BY f.time) AS next_f_time\n  FROM tav2_bq.fa_ratings AS f\n),\nfin_dated AS (\n  SELECT f.ticker, f.time AS fin_time, f.Revenue_YoY_P0,\n    LEAD(f.time) OVER (PARTITION BY f.ticker ORDER BY f.time) AS next_fin_time\n  FROM tav2_bq.ticker_financial AS f\n),\nlatest_vni_max3m AS (\n  -- NOTE: VNINDEX is NOT in ticker_1m (it carries only individual tickers), so this\n  -- index-level RSI feature cannot be de-lagged via ticker_1m. The 1-day lag here is\n  -- immaterial: rsi_max3m below is a 60-session rolling max (one stale day \u2248 no change).\n  SELECT t.D_RSI AS rsi_latest\n  FROM tav2_bq.ticker AS t WHERE t.ticker = 'VNINDEX' AND t.D_RSI IS NOT NULL\n  ORDER BY t.time DESC LIMIT 1\n),\nvni_history AS (\n  SELECT t.time, t.D_RSI\n  FROM tav2_bq.ticker AS t\n  WHERE t.ticker = 'VNINDEX' AND t.D_RSI IS NOT NULL\n),\nvni_max3m AS (\n  SELECT time,\n    MAX(D_RSI) OVER (ORDER BY time ROWS BETWEEN 59 PRECEDING AND CURRENT ROW) AS rsi_max3m\n  FROM vni_history\n),\nticker_data AS (\n  -- ticker canonical\n  SELECT t.ticker, t.time, t.Close, t.Price, t.Volume, t.D_RSI, t.D_MACDdiff,\n         t.MA20, t.MA50, t.MA200, t.MA50_T1, t.Close_T1,\n         t.HI_3M_T1, t.ID_HI_3Y, t.D_RSI_Max1W,\n         t.PE, t.PE_MA5Y, t.PE_SD5Y, t.FSCORE,\n         t.NP_P0, t.NP_P1, t.NP_P4, t.ICB_Code, t.Volume_3M_P50\n  FROM tav2_bq.ticker AS t\n  WHERE t.time BETWEEN DATE '2026-03-17' AND DATE '2026-07-15'\n    AND t.ticker IN (SELECT DISTINCT t2.ticker FROM tav2_bq.ticker_prune AS t2)\n    AND t.D_RSI IS NOT NULL\n\n  UNION ALL\n\n  -- ticker_1m fallback for dates where ticker has no D_RSI\n  SELECT t.ticker, t.time, t.Close, t.Price, t.Volume, t.D_RSI, t.D_MACDdiff,\n         t.MA20, t.MA50, t.MA200, t.MA50_T1, t.Close_T1,\n         t.HI_3M_T1, t.ID_HI_3Y, t.D_RSI_Max1W,\n         t.PE, t.PE_MA5Y, t.PE_SD5Y, t.FSCORE,\n         t.NP_P0, t.NP_P1, t.NP_P4, t.ICB_Code, t.Volume_3M_P50\n  FROM tav2_bq.ticker_1m AS t\n  WHERE t.time BETWEEN DATE '2026-03-17' AND DATE '2026-07-15'\n    AND t.ticker IN (SELECT DISTINCT t2.ticker FROM tav2_bq.ticker_prune AS t2)\n    AND t.D_RSI IS NOT NULL\n    AND NOT EXISTS (\n      SELECT 1 FROM tav2_bq.ticker AS t2\n      WHERE t2.time = t.time AND t2.ticker = t.ticker AND t2.D_RSI IS NOT NULL\n    )\n),\nclassified AS (\n  SELECT t.ticker, t.time, t.Close,\n    (CASE WHEN t.D_RSI > 0.50 THEN 25 ELSE 0 END\n    + CASE WHEN t.Close > t.MA50 AND t.MA50 > t.MA200 THEN 25 ELSE 0 END\n    + CASE WHEN t.Volume >= t.Volume_3M_P50 * 1.3 AND t.Close > t.Close_T1 THEN 20 ELSE 0 END\n    + CASE WHEN t.D_MACDdiff > 0 THEN 15 ELSE 0 END\n    + CASE WHEN t.Close > t.MA20 THEN 15 ELSE 0 END\n    + CASE WHEN t.D_RSI > 0.75 THEN 5 ELSE 0 END\n    + CASE WHEN t.D_RSI < 0.30 THEN -10 ELSE 0 END\n    + CASE WHEN t.PE > 0 AND t.PE_MA5Y > 0 AND t.PE < t.PE_MA5Y - 0.5*t.PE_SD5Y THEN 15 ELSE 0 END\n    + CASE WHEN t.PE > 0 AND t.PE_MA5Y > 0 AND t.PE > t.PE_MA5Y + 1.0*t.PE_SD5Y THEN -15 ELSE 0 END\n    + CASE WHEN vmax.rsi_max3m > 0.65 THEN 10 ELSE 0 END\n    + CASE WHEN t.ID_HI_3Y <= 5 THEN 8 ELSE 0 END\n    + CASE WHEN t.D_RSI_Max1W > 0.65 THEN 5 ELSE 0 END\n    + CASE WHEN t.FSCORE >= 8 THEN 10 ELSE 0 END\n    + CASE WHEN t.NP_P0 > t.NP_P4 * 1.5 AND t.NP_P4 > 0 THEN 8 ELSE 0 END\n    + CASE WHEN t.NP_P0 < t.NP_P4 * 0.7 AND t.NP_P4 > 0 THEN -8 ELSE 0 END\n    + CASE WHEN t.ICB_Code IS NOT NULL AND CAST(FLOOR(t.ICB_Code/1000) AS INT64) IN (8,9) THEN 5 ELSE 0 END\n    + CASE WHEN t.ICB_Code IS NOT NULL AND CAST(FLOOR(t.ICB_Code/1000) AS INT64) IN (4,7) THEN -5 ELSE 0 END\n    + CASE WHEN t.MA50_T1 > 0 AND t.MA50 > t.MA50_T1 THEN 5 ELSE 0 END\n    + CASE WHEN t.MA50_T1 > 0 AND t.MA50 > t.MA50_T1 * 1.005 THEN 5 ELSE 0 END\n    + CASE WHEN t.MA50_T1 > 0 AND t.MA50 < t.MA50_T1 THEN -5 ELSE 0 END\n    + CASE WHEN t.HI_3M_T1 > 0 AND t.Close / t.HI_3M_T1 < 0.85 THEN -10 ELSE 0 END\n    + CASE WHEN t.NP_P0 > t.NP_P1 * 1.2 AND t.NP_P1 > 0 THEN 8 ELSE 0 END\n    + CASE WHEN CAST(FLOOR(t.ICB_Code/1000) AS INT64)=8 AND fa.fa_tier='D' THEN 10 ELSE 0 END\n    + CASE WHEN CAST(FLOOR(t.ICB_Code/1000) AS INT64)=8 AND fa.fa_tier='A' THEN -10 ELSE 0 END) AS ta,\n    s5_ff.state AS state5, fa.fa_tier,\n    SAFE_DIVIDE(t.NP_P0, t.NP_P4) - 1 AS np_yoy,\n    fin.Revenue_YoY_P0 AS rev_yoy,\n    (t.PE - t.PE_MA5Y) / NULLIF(t.PE_SD5Y, 0) AS pe_z,\n    (t.D_RSI > 0.90 OR (t.MA20 > 0 AND t.Close / t.MA20 > 1.25)) AS warn_ext,\n    t.Volume_3M_P50 * COALESCE(t.Price, t.Close) AS liq,   -- real (unadjusted) traded notional, not back-adjusted Close\n    CAST(FLOOR(t.ICB_Code/1000) AS INT64) AS sec,\n    rel.days_since_release\n  FROM ticker_data AS t\n  LEFT JOIN fa_dated AS fa\n    ON fa.ticker = t.ticker AND t.time >= fa.f_time\n   AND (fa.next_f_time IS NULL OR t.time < fa.next_f_time)\n  LEFT JOIN fin_dated AS fin\n    ON fin.ticker = t.ticker AND t.time >= fin.fin_time\n   AND (fin.next_fin_time IS NULL OR t.time < fin.next_fin_time)\n  LEFT JOIN vni_max3m AS vmax ON vmax.time = t.time\n  LEFT JOIN (\n    SELECT t2.time, ARRAY_AGG(s.state ORDER BY s.time DESC LIMIT 1)[OFFSET(0)] AS state\n    FROM (SELECT DISTINCT time FROM ticker_data) AS t2\n    LEFT JOIN tav2_bq.vnindex_5state_dt5g_live AS s ON s.time <= t2.time\n    GROUP BY t2.time\n  ) AS s5_ff ON s5_ff.time = t.time\n  LEFT JOIN (\n    SELECT t2.ticker, t2.time,\n      DATE_DIFF(t2.time, MAX(tf.Release_Date), DAY) AS days_since_release\n    FROM (SELECT DISTINCT ticker, time FROM ticker_data) AS t2\n    LEFT JOIN tav2_bq.ticker_financial AS tf\n      ON tf.ticker = t2.ticker AND tf.Release_Date <= t2.time\n    GROUP BY t2.ticker, t2.time\n  ) AS rel ON rel.ticker = t.ticker AND rel.time = t.time\n)\nSELECT ticker, time, Close,\n  CASE\n    WHEN state5 IN (1, 2) THEN 'AVOID_bear'\n    WHEN fa_tier = 'E' THEN 'AVOID_faE'\n    -- V11 SV_TIGHT Fresh-Q: state 4-5 (BULL) no filter; state 3 (NEUTRAL) \u226460d\n    -- State 1 (CRISIS) \u226430d but blocked anyway via AVOID_bear\n    WHEN ta >= 170 AND state5 IN (4,5) AND fa_tier IN ('C','D') THEN 'MEGA'\n    WHEN ta >= 170 AND state5 IN (4,5) THEN 'S_PRO'\n    WHEN ta >= 155 AND state5 IN (4,5) AND fa_tier IN ('C','D') THEN 'MOMENTUM'\n    WHEN ta >= 155 AND state5 IN (4,5) AND fa_tier IN ('A','B') THEN 'MOMENTUM_QUALITY'\n    WHEN ta >= 155 AND state5 = 3 AND fa_tier IN ('C','D')\n         AND days_since_release IS NOT NULL AND days_since_release <= 60 THEN 'MOMENTUM_N'\n    WHEN fa_tier IN ('A','B') AND pe_z < -0.5 AND ta >= 95 AND state5 IN (3,4,5) AND NOT warn_ext THEN 'COMPOUNDER_BUY'\n    WHEN fa_tier = 'C' AND ta >= 100 AND state5 IN (4,5) AND ((np_yoy > 0.20) OR (rev_yoy > 0.20)) THEN 'DEEP_VALUE_RECOVERY'\n    WHEN ta >= 140 AND state5 IN (4,5) THEN 'MOMENTUM_S'\n    WHEN ta >= 125 AND state5 IN (4,5) THEN 'MOMENTUM_A'\n    WHEN ta >= 140 AND state5 = 3 THEN 'MOMENTUM_S_N'\n    WHEN fa_tier IN ('A','B') AND ta >= 70 AND ta < 130 THEN 'COMPOUNDER_HOLD'\n    WHEN fa_tier IN ('A','B') THEN 'WAIT'\n    ELSE 'PASS'\n  END AS play_type,\n  ta, liq, sec, days_since_release, state5\nFROM classified WHERE liq >= 1e9\n"
+ },
+ {
+  "i": 2,
+  "secs": 2.55,
+  "rows": 5161,
+  "sql": "WITH adv_dated AS (SELECT f.ticker,f.time AS f_time,SAFE_DIVIDE(f.AdvCust_P0,NULLIF(f.AdvCust_P4,0))-1 AS adv_yoy,\n  LEAD(f.time) OVER (PARTITION BY f.ticker ORDER BY f.time) AS next_f_time FROM tav2_bq.ticker_financial AS f),\nfa_dated AS (SELECT f.ticker,f.time AS f_time,f.tier AS fa_tier,LEAD(f.time) OVER (PARTITION BY f.ticker ORDER BY f.time) AS next_f_time FROM tav2_bq.fa_ratings AS f),\nfin_dated AS (SELECT f.ticker,f.time AS fin_time,f.Revenue_YoY_P0,LEAD(f.time) OVER (PARTITION BY f.ticker ORDER BY f.time) AS next_fin_time FROM tav2_bq.ticker_financial AS f),\ntkd AS (\n  -- ICB-8633 panel: canonical ticker + ticker_1m fallback for the freshest session not yet in `ticker`\n  SELECT t.ticker,t.time,t.NP_P0,t.NP_P4 FROM tav2_bq.ticker AS t\n  WHERE t.ICB_Code=8633 AND t.time BETWEEN DATE '2026-03-17' AND DATE '2026-07-15' AND t.ticker IN (SELECT DISTINCT t2.ticker FROM tav2_bq.ticker_prune AS t2)\n  UNION ALL\n  SELECT t.ticker,t.time,t.NP_P0,t.NP_P4 FROM tav2_bq.ticker_1m AS t\n  WHERE t.ICB_Code=8633 AND t.time BETWEEN DATE '2026-03-17' AND DATE '2026-07-15' AND t.ticker IN (SELECT DISTINCT t2.ticker FROM tav2_bq.ticker_prune AS t2)\n    AND NOT EXISTS (SELECT 1 FROM tav2_bq.ticker AS x WHERE x.ticker=t.ticker AND x.time=t.time AND x.ICB_Code IS NOT NULL))\nSELECT t.ticker,t.time,fa.fa_tier,SAFE_DIVIDE(t.NP_P0,t.NP_P4)-1 AS np_yoy,fin.Revenue_YoY_P0 AS rev_yoy,adv.adv_yoy,s5.state AS state5\nFROM tkd AS t LEFT JOIN tav2_bq.vnindex_5state_dt5g_live AS s5 ON s5.time=t.time\nLEFT JOIN fa_dated AS fa ON fa.ticker=t.ticker AND t.time>=fa.f_time AND (fa.next_f_time IS NULL OR t.time<fa.next_f_time)\nLEFT JOIN fin_dated AS fin ON fin.ticker=t.ticker AND t.time>=fin.fin_time AND (fin.next_fin_time IS NULL OR t.time<fin.next_fin_time)\nLEFT JOIN adv_dated AS adv ON adv.ticker=t.ticker AND t.time>=adv.f_time AND (adv.next_f_time IS NULL OR t.time<adv.next_f_time)"
+ },
+ {
+  "i": 3,
+  "secs": 2.24,
+  "rows": 84,
+  "sql": "SELECT t.time,t.Close,t.MA200,t.D_RSI FROM tav2_bq.ticker AS t WHERE t.ticker='VNINDEX' AND t.time BETWEEN DATE '2026-03-17' AND DATE '2026-07-15' ORDER BY t.time"
+ },
+ {
+  "i": 4,
+  "secs": 2.02,
+  "rows": 84,
+  "sql": "SELECT s.time,s.state FROM tav2_bq.vnindex_5state_dt5g_live AS s WHERE s.time BETWEEN DATE '2026-03-17' AND DATE '2026-07-15'"
+ },
+ {
+  "i": 5,
+  "secs": 2.09,
+  "rows": 1284,
+  "sql": "SELECT f.ticker, f.rating FROM tav2_bq.fa_ratings_8l AS f\nQUALIFY ROW_NUMBER() OVER (PARTITION BY f.ticker ORDER BY f.time DESC) = 1"
+ },
+ {
+  "i": 6,
+  "secs": 2.02,
+  "rows": 1287,
+  "sql": "SELECT DISTINCT t.ticker,CAST(FLOOR(t.ICB_Code/1000) AS INT64) AS s FROM tav2_bq.ticker AS t WHERE t.ICB_Code IS NOT NULL"
+ },
+ {
+  "i": 7,
+  "secs": 2.17,
+  "rows": 163,
+  "sql": "SELECT p.time, AVG(CASE WHEN p.D_RSI<0.3 THEN 1.0 ELSE 0 END) oversold\nFROM tav2_bq.ticker_prune p\nWHERE p.time BETWEEN DATE '2025-11-17' AND DATE '2026-07-15' AND p.Close_T1>0\nGROUP BY p.time ORDER BY p.time"
+ },
+ {
+  "i": 8,
+  "secs": 2.05,
+  "rows": 289,
+  "sql": "SELECT t.time, t.Close FROM tav2_bq.ticker AS t\nWHERE t.ticker='VNINDEX' AND t.time BETWEEN DATE '2025-05-21' AND DATE '2026-07-15' ORDER BY t.time"
+ },
+ {
+  "i": 9,
+  "secs": 2.18,
+  "rows": 30,
+  "sql": "SELECT t.ticker, t.weight, t.rating_8l, t.liq_rank, t.rebal_date\nFROM tav2_bq.custom30v_8l AS t\nWHERE t.rebal_date = (SELECT MAX(s.rebal_date) FROM tav2_bq.custom30v_8l AS s WHERE s.rebal_date <= CURRENT_DATE())\nORDER BY t.weight DESC"
+ }
+]
