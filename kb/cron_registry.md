@@ -32,12 +32,12 @@
 | 13:05 (T2-T6) | `bot_execute.py --account main` (afternoon) | — | paper fill log | fill-timing/EXTREME/chase-cap evidence | — | (a) trial mở |
 | 13:35 (T2-T6) | `paper_main_early_check.sh afternoon` | — | early-fail alert | user | 30' sau 13:05 | — |
 | 14:50 (T2-T6) | `session_announce.sh close` | — | Discord thông báo | user | — | — |
-| 15:00 (T2-T6) | `eod_trading_report.sh` (`for_each_live_account.sh`) | `state.json` fill giá thật + `daily_nav_snapshot.py` | Discord Trading report | user | sau ATC ~14:50 | `verify_account_snapshot.py` cross-check |
+| 19:10 (T2-T6) | `eod_trading_report.sh` (`for_each_live_account.sh`) | `state.json` fill giá thật + `daily_nav_snapshot.py` + `dna_report.build_dt_gate_line()` đọc `dt5g_live` BQ live | Discord Trading report | user | sau publish DT5G ~19:01 (9' buffer); sau ATC ~14:50 (fill đã có từ ~14:50, chỉ cần chờ regime T) | `verify_account_snapshot.py` cross-check |
 | 15:05 (T2-T6) | `dc_book_waterfall_paper.py --update` | live BQ/DNSE | DC-book paper NAV | Paper Programs report 15:20 | trước 15:20 | idempotent theo data_date |
 | 15:20 (T2-T6) | `paper_programs_daily_report.sh --post` | `papertrade_compare5.csv` + registry | Discord Trading report | user | sau 15:05/15:30(hôm trước) | render registry |
 | 15:30 (T2-T6) | `papertrade_daily.sh` (23 step, xem chi tiết §papertrade) | cache T-1 (đa số step) + BQ live (vài step) | nhiều CSV/BQ table sim | 15:20 report hôm sau, dashboards | — | continue-on-error + FAIL alert cuối chain |
-| 17:45 (T2-T6) | `pt_8l_daily.sh` (9 step 8L production) | `dt5g_live` — **⚠️ trước refresh 18:30 → luôn đọc regime HÔM QUA** (M3, optional reorder) | rating/screener/dna/alerts | user Telegram | — | — |
-| 18:00 (T2-T6) | `telegram_run_daily.sh` | `dt5g_live` — cùng vấn đề M3 | Telegram BA-system report | user | — | — |
+| 19:20 (T2-T6) | `pt_8l_daily.sh` (9 step 8L production) | `rating_8l.py`+`cheap_pb_floor.py` đọc `dt5g_live` BQ live; step [9] `sector_lens_monitor.py` đọc **BQ_LOCAL_CACHE** (T-1, known limitation chấp nhận được — chỉ ảnh hưởng monitor nội bộ, không chạm trading production) | rating/screener/dna/alerts | user Telegram | sau publish DT5G ~19:01; sau eod_trading_report 10' | — |
+| 19:35 (T2-T6) | `telegram_run_daily.sh` | `dt5g_live` BQ live; đọc sau `pt_8l_daily` để `rating_8l.csv` tươi cho cột R | Telegram BA-system report | user | sau pt_8l_daily 15' | — |
 | 18:10 (T2-T6) | `fetch_new_listings_daily.sh` | web listings | queue nghiên cứu 8L | Winston | — | — |
 | 18:30 (T2-T6) | `daily_refresh_v34b_linux.sh` (13 step) | ticker_prune BQ live (ingest xong ~17:30) | `vnindex_5state` (base) + `_v34b_clean` + `dt5g_live` (fix C1 07-12: publish đọc LIVE, không qua cache) | pt_8l/telegram hôm sau, bq_freshness 19:00, mọi consumer regime | ~90' worst-case + retry | step [13] mtime-assert |
 | 18:35 (T2-T6) | `rubber_weekly.sh` | web feed | rubber alert | Winston | lệch 5' so 18:30 (tránh trùng CPU) | — |
@@ -108,6 +108,7 @@ BQ_LOCAL_CACHE` nếu import chain có thể dính cache (bài học C1).
   encode đủ trong `vn_market.py`.
 
 ## Log thay đổi
+- 2026-07-15 (Winston, job `Winston_20260715_061920`, user duyệt dispatch): đổi giờ 3 cron đọc `dt5g_live` để luôn đọc regime HÔM NAY thay vì hôm qua (fix M3 audit `Winston_20260712_142100`): (1) `eod_trading_report.sh` 15:00→19:10 ICT (`0 8` → `10 12` UTC); (2) `pt_8l_daily.sh` 17:45→19:20 ICT (`45 10` → `20 12` UTC); (3) `telegram_run_daily.sh` 18:00→19:35 ICT (`0 11` → `35 12` UTC). Buffer sau publish DT5G ~19:01: eod 9', pt_8l 19', telegram 34'. Không trùng phút với nhau hoặc với bq_freshness 19:00. sector_lens_monitor.py step [9] vẫn đọc cache T-1 — user xác nhận KHÔNG CẦN SỬA, known limitation, chỉ ảnh hưởng công cụ nghiên cứu nội bộ, không chạm trading production.
 - 2026-07-14 (Winston, job `Winston_20260714_160739`, **user directive trực tiếp — quy tắc vĩnh
   viễn mỗi quý**): thay 2 dòng T3 tạm thời (hết hạn 08-04) bằng **1 dòng cron DAILY 20:00 ICT**
   gọi `mike/bin/fa_ratings_earnings_window_daily.sh` — wrapper tự gate: chỉ chạy thật khi
