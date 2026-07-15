@@ -129,9 +129,12 @@ orders_by_id = {o.id: {'ticker': o.ticker, 'side': o.side, 'qty': o.qty, 'ref_pr
 # + as-of plan_date (khớp đúng số report duyệt plan tối hôm trước, KHÔNG dùng giá EOD).
 # Fail-safe: lỗi import/tính → không có dòng DCF, report vẫn nguyên vẹn.
 try:
-    from trading_bot.strategies import _dcf_check_for_order, format_dcf_check
+    from trading_bot.strategies import (_dcf_check_for_order, format_dcf_check,
+                                        log_dcf_history)
+    from dcf_valuation import DCF_DISCLAIMER
 except Exception:
-    _dcf_check_for_order = format_dcf_check = None
+    _dcf_check_for_order = format_dcf_check = log_dcf_history = None
+    DCF_DISCLAIMER = ''
 
 def _dcf_str(o):
     if not format_dcf_check:
@@ -143,7 +146,10 @@ def _dcf_str(o):
             dcf = _dcf_check_for_order(o.get('ticker'), o.get('ref_price'), plan_date)
         except Exception:
             dcf = None
-    return format_dcf_check(dcf, o.get('side') or 'buy')
+    s = format_dcf_check(dcf, o.get('side') or 'buy')
+    if s and log_dcf_history:
+        log_dcf_history(o.get('ticker'), dcf, 'eod_trading_report', asof=plan_date)
+    return s
 plan = {'orders': list(orders_by_id.values())}
 parents = state.get('parents', {})
 
@@ -278,6 +284,10 @@ for r in rows:
         lines.append(f"• ⚠️ {side_disp} {r['ticker']}: 0/{r['qty_plan']:,} — KHÔNG khớp")
     if r.get('dcf'):
         lines.append(f"   ↳ {r['dcf']}")
+
+if any(r.get('dcf') for r in rows) and DCF_DISCLAIMER:
+    lines.append("")
+    lines.append(f"ℹ️ _{DCF_DISCLAIMER}_")
 
 lines.append("")
 fill_rate = 100 * tot_value_filled / tot_value_planned if tot_value_planned else 0

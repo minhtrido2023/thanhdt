@@ -159,9 +159,13 @@ if orders:
     # (plan DollarBill hiện không populate) → tự tính fallback từ cache local (KHÔNG BQ live).
     # Fail-safe toàn phần: import/tính lỗi → bỏ dòng DCF, KHÔNG chặn report duyệt plan.
     try:
-        from trading_bot.strategies import _dcf_check_for_order, format_dcf_check
+        from trading_bot.strategies import (_dcf_check_for_order, format_dcf_check,
+                                            log_dcf_history)
+        from dcf_valuation import DCF_DISCLAIMER
     except Exception:
-        _dcf_check_for_order = format_dcf_check = None
+        _dcf_check_for_order = format_dcf_check = log_dcf_history = None
+        DCF_DISCLAIMER = ""
+    dcf_shown = False
     buys  = [o for o in orders if str(o.get("side","")).lower() in ("buy","mua","b")]
     sells = [o for o in orders if str(o.get("side","")).lower() in ("sell","ban","s")]
     lines.append(f"🎯 Hành động: **{len(orders)} lệnh** ({len(sells)} bán, {len(buys)} mua):")
@@ -188,8 +192,13 @@ if orders:
                                      has_override=bool(o.get("dcf_override_reason")))
             if dcf_s:
                 lines.append(f"      ↳ {dcf_s}")
+                dcf_shown = True
+                if log_dcf_history:
+                    log_dcf_history(ticker, dcf, "send_plan_report", asof=date)
             if is_buy and o.get("dcf_override_reason"):
                 lines.append(f"      ↳ lý do override DCF: {str(o['dcf_override_reason'])[:120]}")
+    if dcf_shown and DCF_DISCLAIMER:
+        lines.append(f"ℹ️ _{DCF_DISCLAIMER}_")
 else:
     lines.append(f"🎯 Hành động: **GIỮ NGUYÊN (HOLD)** — không có lệnh nào ngày mai.")
 
