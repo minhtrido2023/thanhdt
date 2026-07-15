@@ -13,6 +13,44 @@ commit hash where one exists).
 
 ---
 
+## 2026-07-15 — ticker_prune cũng bị corruption upstream (mở rộng sự cố ticker_financial 07-14): rows 07-08→07-14 bị xóa/ghi đè, daily_refresh 07-14 ABORT, DT5G 07-14 là ffill trên base stale
+
+**What happened.** Ops-health-check 12:45 flag `macro_health.json` cũ 21.2h (job
+`Winston_20260715_054514`). Truy vết: daily_refresh_v34b 18:30 tối 07-14 **ABORT ở precheck**
+(đúng thiết kế) — `ticker_prune` chỉ có 10 tickers cho 2026-07-14 sau 6 lần retry (~1.5h, tới
+19:45) → không chạy tới bước 14 (macro_healthcheck) → macro_health đóng băng ở bản 15:30 07-14.
+Điều tra tiếp lộ blast radius: **ticker_prune hiện chỉ còn 7-10 tickers/ngày cho MỌI ngày từ
+2026-07-08** (07-08=7, 07-13=7, 07-14=10; đầy đủ ~225/ngày tới 07-07) — trong khi chính precheck
+07-13 18:30 đã đếm được **265 tickers cho 07-13**. Tức là rows bị XÓA/ghi đè retroactive trong
+cửa sổ 07-13 18:30 → 07-14 18:30 — **trùng đúng cửa sổ regression của `ticker_financial`**
+(MAX lùi 07-08→2026-05-04, phát hiện 07-14, job `Winston_20260714_174411`). Giả thuyết cơ chế
+(cho BQ admin): ticker_prune là subset lọc chất lượng cần fundamentals — nếu upstream regenerate
+rolling window hàng ngày trên ticker_financial đã hỏng → gần như mọi tên rớt filter → chỉ còn
+7-10 tên/ngày. Bảng vẫn đang được ghi tiếp (lastModified 12:48 07-15).
+
+**Hệ quả dây chuyền đã xảy ra.** 19:00 07-14 `bq_freshness_check` báo ALL FRESH (lúc đó VNINDEX
+07-14 chưa ingest → gap=0) → pipeline chạy → `publish_gated_state` xuất row DT5G **2026-07-14 =
+ffill trên base stale 07-13** (có WARNING trong log nhưng không fail) → gate MAX_STATE_LAG=0
+downstream bị vô hiệu vì row ffill tồn tại. Plan 07-15 không bị ảnh hưởng thực chất (0 BAL/0 LAG,
+basket-swap từ composition cũ, user đã duyệt biết bối cảnh; 2 phiên 07-15 thực thi bình thường).
+
+**Fix (trong thẩm quyền).** Chạy lại `macro_healthcheck.py` standalone 12:50 → HEALTHY /
+DT5G_macro, `macro_health.json` tươi lại (base age 2td < ngưỡng 3). KHÔNG rebuild bảng nguồn,
+KHÔNG đổi cron/gate — user đang chờ BQ admin xác nhận upstream rồi mới quyết (context pack 07-15).
+
+**Dự đoán tối 07-15 (để không ai bất ngờ).** 18:30 refresh sẽ ABORT tiếp (prune 07-15 = 7 tên);
+19:00 gate sẽ FAIL/block DollarBill NẾU VNINDEX 07-15 ingest kịp trước 19:00 (bảo vệ đúng); nếu
+VNINDEX cũng trễ → lại ALL FRESH giả + ffill tiếp. 20:00 fa_ratings wrapper sẽ tự ABORT (bảo vệ
+đã chứng minh 07-14). Từ thứ Năm 07-16, base DT4 chạm ngưỡng 3 trading-day → macro_health tự
+DEGRADED → `get_gated_state` fail-safe về DT4-only (đúng thiết kế).
+
+**Lesson.** (1) Freshness gate theo MAX(time) không bắt được "ngày tồn tại nhưng thin" — precheck
+đếm-số-tên của daily_refresh là lớp bắt được, gate BQ thì không; cân nhắc thêm row-count check khi
+sửa gate sau sự cố. (2) `publish_gated_state` ffill-on-stale-base publish row mới làm gate
+MAX_STATE_LAG=0 mất tác dụng — cần quyết (sau khi upstream ổn) có nên fail-hard thay vì WARN.
+(3) Corruption upstream lan theo dependency: financial hỏng → prune hỏng theo — khi 1 bảng nguồn
+regress, phải quét ngay các bảng derived cùng pipeline.
+
 ## 2026-07-15 — Preflight RED giả MAFEE_NOT_AUTH trên plan đã duyệt thật (tái diễn bug 07-06) — fix vĩnh viễn ở checker
 
 **What happened.** ops_health_check 08:20 flag `Plan ZaloPay 2026-07-15: MAFEE_NOT_AUTH —
