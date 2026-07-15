@@ -35,6 +35,19 @@ import numpy as np, pandas as pd
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
 os.chdir(WORKDIR); sys.path.insert(0, WORKDIR)
+
+# This recommender MUST read LIVE BigQuery, never the local DuckDB cache: wc_env.sh exports
+# BQ_LOCAL_CACHE globally, which silently routes simulate_holistic_nav.bq through the
+# 23:45-synced cache (always T-1 at the 19:00 slot). Worse, the cache fails OPEN when its
+# nightly verify fails — so the data source was flipping live/cache per day depending on the
+# previous night's sync, making the plan non-deterministic (probe 2026-07-15: cache vs live
+# disagreed on signal_date, breadth_oversold, and custom30V parking membership PVS/VGC).
+# Reading live also makes the 17:30->19:00 reschedule (2026-07-10) actually take effect and
+# lets bq_freshness_check's gate (live) and this consumer (live) finally see the same data.
+# Unset here (process-local; cache consumers like papertrade/sims/backtests are unaffected).
+# Same pattern as publish_gated_state.py (audit Winston_20260712_142100 C1, commit 4995262).
+os.environ.pop("BQ_LOCAL_CACHE", None)
+
 from simulate_holistic_nav import bq
 from signal_v11_sql import SIGNAL_V11
 
