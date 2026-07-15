@@ -3720,3 +3720,79 @@ Chi tiết đầy đủ: `mike/agents/Taylor/route_aware_selector_framework.md` 
 - **Hạ tầng mới `AUDIT_EXP_TAG`** (coding_guidelines §8): arm A0 có config TRÙNG R3 pinned ⇒ tự resolve
   về đúng tên file canonical và **sẽ ghi đè CSV pinned** (đúng lỗi 2026-07-06). Tag ép arm thí nghiệm
   sang path `_exp_*`; rỗng = production. Chi tiết: `capit_dividend_gate_framework.md`.
+
+---
+
+## `eyrisk` — risk-adjusted earnings yield (vùng giữa sector-neutral ↔ raw 1/PE) — **NO-GO CẢ 2 SCOPE** (2026-07-15, job `Taylor_20260715_025346`)
+
+**Câu hỏi user (qua Mike):** ey (1/PE) xếp hạng cross-sectional thô thiên lệch ngân hàng (PE thấp CƠ CẤU
+vì rủi ro nợ xấu tương lai chưa nằm trong E) — có "thang đo công bằng hơn mà vẫn hiệu quả" không?
+
+**(a) Hiện trạng sector-neutral — XÁC NHẬN ĐỌC THẲNG CODE (không suy từ text cũ):**
+- `rating_8l.py` (8L SCREENER/diagnostic): value axis rank **WITHIN route** (sector-neutral) — v2
+  L617-620 `groupby("route")` + v3 route-specific weights. Đây là tầng PHÂN LOẠI chất lượng/hiển thị.
+- `custom_basket.py` custom30V production (`yieldcombo`, L785+): rank **POOL-WIDE THÔ**
+  `rank(1/PE)+rank(1/PCF)`, KHÔNG có groupby route nào. Sector-neutrality chỉ chạm production qua
+  gate nhị phân `gate_rating<=3` (8L rating sector-aware), KHÔNG qua điểm xếp hạng.
+- Composite v2 (full sector-neutral) làm ENTRY SELECTOR = REFUTED 2026-07-01 (−7..−15pp, dòng ~1040).
+
+**(b) 3 ứng viên dispatch → 2 đã đóng bằng chuỗi 07-14, 1 arm mới chạy hôm nay:**
+- **Ứng viên 2 (blend within-route)**: chuỗi `v3route`→`v3route3` (jobs 112932/121717) đã đo endpoint
+  sạch: fix within-route cho financials = **−2.38pp** (âm cả IS lẫn OOS). Full neutral = −7..−15pp.
+  Mọi blend tuyến tính giữa 2 đầu (raw ↔ neutral) nội suy giữa 0 và −2.38pp ⇒ không mở arm mới.
+- **Ứng viên 3 (cap sector)**: `fincap` 0.30 (A3) + sweep 0.45-0.60 (job 152605) = NO-GO toàn dải,
+  chi phí 0.23-0.84pp/năm, **MaxDD đứng yên, DD_IS xấu đi** ⇒ đã đóng, không chạy lại. (Nhắc user:
+  `trading_rules.json` "sector_cap: DELIBERATELY NONE" — user 2026-06-22, lý do performance; lần này
+  lý do "công bằng đo lường" KHÁC về động cơ nhưng số đo trả lời Y HỆT: cap không mua được gì.)
+- **Ứng viên 1 (risk-adjusted ey liên tục) = ARM MỚI DUY NHẤT** — `BASKET_SELECT=eyrisk`:
+  `ey_adj = (1/PE) × clip(0.5 + 5·ROE_Min5Y, 0.5, 1.0)` (ROE_Min5Y PIT từ value_panel, thiếu → 1.0
+  fail-open; knobs (0.5, 0.10) CỐ ĐỊNH pre-registered, KHÔNG sweep). Biến gate nhị phân ROE_Min
+  thành discount liên tục vào chính ey — "rẻ vì rủi ro chưa lộ" bị trừ điểm, KHÔNG neutral hoá sector.
+  Scope `all` (mọi tên) và `fin` (chỉ BANK/INS/SEC — đúng luận đề NPL). **N=2 arm khai báo trước.**
+
+**Selfcheck `eyrisk_selector_selfcheck.py` 12/12 PASS**: OFF-path byte-identical vs `git show HEAD`
+(eyonly + yieldcombo), fail-open identity (panel ROE all-NaN → trùng eyonly 100%), wiring thật
+(penalty đổi thành phần 16/18 rebal cửa sổ 2022-26), negative control non-uniform, scope fin không
+đọc floor của non-fin, unit multiplier. Kỹ thuật doctored-panel qua module exec với `__file__` trỏ
+tmpdir (không monkeypatch nguồn thật).
+
+**Harness `pt_v23_audit_2014.py` v23a, NAV 50B, threads=1, AUDIT_END=2026-06-19, EXP_TAG mọi arm
+(§8-safe), self-check 0 VND (BAL+LAG) cả 3 arm.** ⚠️ Vintage: BQ local cache UNVERIFIED sáng nay
+(hệ quả sự cố ticker_financial 07-14) → cả 3 arm fallback real BQ — cùng nguồn, delta hợp lệ;
+anchor rerun cùng phiên (A2 27.03 vs 27.04 hôm qua = trùng khớp).
+
+| arm | FULL | IS 14-19 | OOS 20+ | Sharpe | MaxDD | Calmar | vs A2 |
+|---|---|---|---|---|---|---|---|
+| **A2** `eyonly` (neo, rerun) | 27.03 | 22.38 | 31.49 | 1.82 | −17.1 | 1.58 | — |
+| **R1** `eyrisk` all | 26.75 | 22.91 | 30.42 | 1.79 | **−17.8** | 1.50 | **−0.28** |
+| **R2** `eyrisk` fin | 26.64 | 21.90 | 31.19 | 1.80 | −17.0 | 1.56 | **−0.39** |
+
+- **R1 (penalty toàn pool): NO-GO** — thua mọi metric; IS/OOS trái dấu (+0.53/−1.07) = nhiễu về
+  return nhưng DD/Sharpe/Calmar đồng loạt XẤU đi. Penalty đẩy tên rẻ-thật ra khỏi rổ.
+- **R2 (penalty chỉ financial — đúng luận đề user): NO-GO** — **−0.39pp FULL, âm CẢ IS (−0.48) lẫn
+  OOS (−0.30)**, còn MaxDD −17.0 vs −17.1 = KHÔNG mua được giảm rủi ro nào. Trả return thật, nhận về 0.
+- **Cùng kết luận cấu trúc lần thứ 3 liên tiếp** (fincap 12.3, A4 DY 152605, nay eyrisk): **DD của hệ
+  KHÔNG đến từ thứ nằm trong selector** (beta thị trường + regime gate chi phối); mọi "bảo hiểm" cài
+  vào selector đều trả phí return mà không dịch chuyển DD.
+
+**(c) TẠI SAO raw cross-sectional 1/PE "không công bằng" lại đúng thực nghiệm — nói thẳng:** trực giác
+công bằng và hiệu quả thực nghiệm MÂU THUẪN thật ở đây, và dữ liệu đứng về phía "không công bằng".
+Low-PE-sector tilt (nghiêng vào bank khi bank rẻ) chính là NGUỒN return của selector (đã đo 3 lần độc
+lập: neutral-hoá mất 7-15pp, route-fix mất 2.38pp, risk-discount mất 0.3-0.4pp). Trong mẫu 12.5 năm
+VN, "rủi ro nợ xấu chưa lộ" của bank KHÔNG vật chất hoá thành drawdown danh mục (mọi cách cắt/phạt
+bank đều không cải thiện MaxDD dù chỉ 0.1pp) — trong khi cái giá của việc "sửa cho công bằng" là chắc
+chắn và trả ngay. Rủi ro thật còn lại là **rủi ro đuôi ngoài mẫu** (khủng hoảng hệ thống ngân hàng VN
+chưa từng có trong mẫu + độ trễ CRISIS enC=25 của DT5G) — backtest KHÔNG trả lời được; nếu muốn phòng
+nó thì đó là quyết định quản trị có tuyên bố rõ (trả ~0.23pp/năm cap 0.60 là rẻ nhất), KHÔNG phải kết
+luận thực nghiệm. Layer đúng cho "công bằng đo lường" là tầng GATE/SCREENER (8L đã sector-aware) —
+không phải tầng RANK.
+
+**VERDICT: KHÔNG WIRE GÌ. Production 0 chạm (`eyrisk` = audit-only mode, default OFF, OFF-path
+byte-identical đã chứng minh). Không route quant-skeptic — cả 2 arm TỰ BÁC.** Không còn arm hợp lý
+nào chưa thử trong "vùng giữa": neutral-hoá (thua), blend (nội suy giữa 2 điểm thua), cap (thua),
+risk-discount liên tục pool-wide lẫn fin-only (thua). Câu hỏi này ĐÓNG trừ khi có instrument rủi ro
+nợ xấu MỚI (vd NPL ratio thật per-bank, không phải proxy ROE_Min).
+
+**Artifacts** (`mike/agents/Taylor/eyrisk_exp/`): `run_arms.sh`, `logs/{selfcheck,driver,eyr_*}.log`.
+Code: `custom_basket.py` (nhánh `eyrisk` + `roemin_asof`/`eyrisk_mult`), `eyrisk_selector_selfcheck.py`.
+CSV: `data/v23_golive_audit_2014_now..._exp_eyr_{A2_anchor,R1_all,R2_fin}_exp_sel*.csv`.

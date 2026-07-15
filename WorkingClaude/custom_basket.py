@@ -404,6 +404,21 @@ WHERE t.time IN ({_rebal_in}) AND t.Price IS NOT NULL""")
         # strongest, route-neutral factor (KB: IC +0.125, "Value dominates ALL regimes"; BANK route
         # IC +0.181 t=3.79 — stronger than pb_z or 1/PCF inside the bank route itself).
         pe_piv = _yield_piv("PE")
+    elif SELECT_MODE == "eyrisk":
+        # RISK-ADJUSTED earnings yield (job Taylor_20260715_025346): the "middle ground" the user
+        # asked for between raw pool-wide 1/PE (structurally favours banks whose PE is low because
+        # future NPL risk is not yet in E) and full sector-neutral ranking (REFUTED: strips the
+        # low-PE-sector tilt that earns return — composite-v2 selector −7..−15pp, v3route3 −2.38pp).
+        # Instead of neutralising the SECTOR, discount the EARNINGS by a continuous quality floor:
+        #   ey_adj = (1/PE) × m,  m = clip(0.5 + 5·ROE_Min5Y, 0.5, 1.0)
+        # i.e. a name whose worst-5Y ROE is ≤0 gets HALF credit for its earnings, full credit from
+        # ROE_Min5Y ≥ 0.10, linear between. Missing ROE_Min5Y → m = 1.0 (fail-open: absence of a
+        # track record is not evidence of risk; penalising absence is a different, unmeasured rule).
+        # PRE-REGISTERED, NO GRID: the (0.5, 0.10) knobs are fixed a priori and will NOT be swept —
+        # if neither scope shows an effect outside noise vs the A2 anchor, the verdict is NO-GO.
+        # BASKET_RISK_SCOPE: "all" (default) = penalty on every name; "fin" = penalty only on
+        # BANK/INSURANCE/SECURITIES (the user's NPL thesis is financial-specific).
+        pe_piv = _yield_piv("PE")
     elif SELECT_MODE == "pbcombo":
         # BOTTOM-DEPLOY vehicle (#18, Taylor 2026-06-27): 1/PB dominates at deep-cheap bottoms (crisis-IC
         # +0.222 vs −0.019 full-period) → weight 0.67*rank(1/PB)+0.23*rank(1/PCF)+0.10*rank(1/PE).
@@ -654,12 +669,27 @@ GROUP BY t.time, sec""")
     FIN_CAP = float(os.environ.get("BASKET_FIN_CAP", "0.30"))
     _FIN_ROUTES = {"BANK", "INSURANCE", "SECURITIES"}
     route_by_tq, route_hist = {}, {}
-    if SELECT_MODE == "eyfin" or weight_scheme == "fincap":
-        _rp = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",
-                                       "value_panel_2014.csv"), parse_dates=["time"],
-                          usecols=["ticker", "time", "route"])
-        _rp["qstart"] = _rp["time"].dt.to_period("Q").dt.start_time
-        _rp = _rp.dropna(subset=["route"]).sort_values("time")
+    roe_by_tq, roe_hist = {}, {}
+    RISK_SCOPE = os.environ.get("BASKET_RISK_SCOPE", "all").lower()   # eyrisk only: "all" | "fin"
+    if SELECT_MODE in ("eyfin", "eyrisk") or weight_scheme == "fincap":
+        _rp0 = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",
+                                        "value_panel_2014.csv"), parse_dates=["time"],
+                           usecols=["ticker", "time", "route", "ROE_Min5Y"])
+        _rp0["qstart"] = _rp0["time"].dt.to_period("Q").dt.start_time
+        if SELECT_MODE == "eyrisk":
+            if RISK_SCOPE not in ("all", "fin"):
+                raise ValueError(f"BASKET_RISK_SCOPE={RISK_SCOPE} invalid (want 'all' or 'fin')")
+            # PIT ROE_Min5Y map, same (ticker, qstart)->last convention as the route map below so
+            # the two lookups cannot drift. Unlike route_asof there is NO earliest-known fallback:
+            # a floor first published AFTER the selection quarter must not leak backward — absent
+            # history at src_q simply means m=1.0 (fail-open).
+            _rr = _rp0.dropna(subset=["ROE_Min5Y"]).sort_values("time")
+            _rr = _rr.groupby(["ticker", "qstart"])["ROE_Min5Y"].last().reset_index()
+            roe_by_tq = {(r.ticker, pd.Timestamp(r.qstart)): float(r.ROE_Min5Y) for r in _rr.itertuples()}
+            roe_hist = {tk: (list(g["qstart"]), list(g["ROE_Min5Y"])) for tk, g in _rr.groupby("ticker")}
+            print(f"  [eyrisk] scope={RISK_SCOPE}: ey × clip(0.5 + 5·ROE_Min5Y, 0.5, 1.0), "
+                  f"missing→1.0 ({len(roe_hist)} tickers with a PIT ROE_Min5Y history)")
+        _rp = _rp0.dropna(subset=["route"]).sort_values("time")
         _rl = _rp.groupby(["ticker", "qstart"])["route"].last().reset_index()
         route_by_tq = {(r.ticker, pd.Timestamp(r.qstart)): r.route for r in _rl.itertuples()}
         route_hist = {tk: (list(g["qstart"]), list(g["route"])) for tk, g in _rl.groupby("ticker")}
@@ -761,6 +791,21 @@ WHERE t.time IN ({_dy_rebal_in}) AND t.Price IS NOT NULL""")
     def is_fin(tk, q):
         return route_asof(tk, q) in _FIN_ROUTES
 
+    def roemin_asof(tk, q):
+        """PIT ROE_Min5Y of `tk` as of selection quarter `q`; None when no history at//before q."""
+        r = roe_by_tq.get((tk, pd.Timestamp(q)))
+        if r is not None: return r
+        e = roe_hist.get(tk)
+        if not e: return None
+        i = bisect.bisect_right(e[0], pd.Timestamp(q)) - 1
+        return e[1][i] if i >= 0 else None   # deliberately NO earliest-known fallback (look-ahead)
+
+    def eyrisk_mult(tk, q):
+        if RISK_SCOPE == "fin" and not is_fin(tk, q):
+            return 1.0
+        r = roemin_asof(tk, q)
+        return 1.0 if r is None else float(np.clip(0.5 + 5.0 * r, 0.5, 1.0))
+
     members = {}  # rebal_date -> list[(ticker, qmult)]
     mem_rows = []
     fin_src_q = {}   # rebal_date -> selection quarter, so the daily weighting can route names PIT
@@ -839,6 +884,17 @@ WHERE t.time IN ({_dy_rebal_in}) AND t.Price IS NOT NULL""")
                 # actually speak about. Applied AFTER the ey sort and BEFORE the top_n cut — the
                 # band straddles the cut line, which is the only place a tie-break changes a pick.
                 gated = _dy_reorder(gated, d, _dy_lo, _dy_hi)
+        elif SELECT_MODE == "eyrisk" and gated:
+            # risk-adjusted ey: multiply the RAW yield by the continuous quality-floor multiplier
+            # BEFORE the pool rank — the penalty reorders names only where the floor actually
+            # differs, so the rank stays pool-wide (no sector neutralisation anywhere).
+            pool = gated[:CFO_POOL]
+            pe_s = pe_piv.loc[src_q] if (pe_piv is not None and src_q in pe_piv.index) else None
+            ey_adj = pd.Series({t: (pe_s.get(t, np.nan) if pe_s is not None else np.nan)
+                                * eyrisk_mult(t, src_q) for t, _ in pool})
+            pe_r = ey_adj.rank(pct=True).fillna(0.5)   # NaN ey stays NaN (×m keeps NaN) -> same 0.5 convention as eyonly
+            score = {t: pe_r[t] for t, _ in pool}
+            gated = sorted(pool, key=lambda tr: score[tr[0]], reverse=True)
         elif SELECT_MODE == "pbcombo" and gated:
             # bottom-deploy: 1/PB-heavy crisis-IC weights (0.67/0.23/0.10) within the liquid+gated pool.
             pool = gated[:CFO_POOL]
