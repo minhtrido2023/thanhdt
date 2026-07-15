@@ -476,6 +476,36 @@ def _append_nav_csv(row):
 # REPORT SECTION (importable by bin/eod_trading_report.sh)
 # ======================================================================================
 
+def _dcf_echo_line(dc_names, last_close, asof):
+    """DCF check echo (Pha 2, informational — user directive 2026-07-15: kể cả paper) cho
+    các mã double-confirm đang active. CHỈ hiển thị — không tham gia chọn mã/sizing của
+    waterfall. Đọc cache local qua trading_bot.strategies._dcf_check_for_order (fail-safe
+    NOT_COMPUTED, không BQ live). Trả "" khi lỗi/không có tên → caller bỏ dòng."""
+    try:
+        if not dc_names:
+            return ""
+        if WORKDIR not in sys.path:
+            sys.path.insert(0, WORKDIR)
+        from trading_bot.strategies import _dcf_check_for_order, format_dcf_check
+        parts = []
+        for t in dc_names:
+            px = last_close.get(t)
+            if not isinstance(px, (int, float)) or px <= 0:
+                parts.append(f"{t} NOT_COMPUTED (thiếu giá close trong state)")
+                continue
+            d = _dcf_check_for_order(t, px, asof)
+            # side="paper": không kích đuôi "cần dcf_override_reason" (chỉ áp cho BUY order thật)
+            s = format_dcf_check(d, side="paper")
+            if s.startswith("DCF: NOT_COMPUTED"):
+                s = s.replace("DCF: ", "", 1)          # gọn cho dòng gộp nhiều mã
+            else:
+                s = s.replace(" DCF: ", " ", 1)
+            parts.append(f"{t} {s}")
+        return "- DCF check (informational, không tham gia chọn mã): " + " · ".join(parts)
+    except Exception:
+        return ""
+
+
 def generate_section(account=ACCOUNT_DEFAULT, do_advance=True):
     """Markdown section for the EOD report. Advances the sleeve first (idempotent) unless
     do_advance=False. Never raises — degrades to a single ⚠️ line (the caller must not abort)."""
@@ -514,6 +544,9 @@ def generate_section(account=ACCOUNT_DEFAULT, do_advance=True):
                      f"@ {last.get('dc_weight_each',0)*100:.1f}%/tên "
                      f"| custom30V {last.get('c30v_weight',0)*100:.1f}% "
                      f"| cash {last.get('cash_weight',0)*100:.1f}%")
+            dcf_line = _dcf_echo_line(dc, st.get("last_close") or {}, last.get("date"))
+            if dcf_line:
+                L.append(dcf_line)
         else:
             L.append("- Sleeve đang FLAT (0% deploy — không có tiền rảnh do sleeve này quản)")
         if last.get("reverse_unwind"):

@@ -90,6 +90,25 @@ def _dcf_check_for_order(ticker, price, asof):
                 "robust": False, "reason": f"dcf_error: {str(exc)[:80]}",
                 "as_of": str(asof)[:10]}
 
+def format_dcf_check(dcf, side="buy", has_override=False):
+    """1 dòng hiển thị chuẩn cho dcf_check dict (Pha 2) — dùng chung mọi report echo
+    (send_plan_report / eod_trading_report / paper sleeve). Informational only.
+    Trả "" khi dcf rỗng/None — caller bỏ dòng, không hiện gì."""
+    if not dcf or not isinstance(dcf, dict):
+        return ""
+    status = dcf.get("status")
+    if status == "NOT_COMPUTED":
+        return f"DCF: NOT_COMPUTED ({dcf.get('reason', '?')})"
+    mos = dcf.get("margin_of_safety")
+    mos_s = f"{mos * 100:+.1f}%" if isinstance(mos, (int, float)) else "n/a"
+    robust_s = "robust" if dcf.get("robust") else "không robust"
+    icon = "🟢" if status == "CHEAP" else "🔴"
+    out = f"{icon} DCF: {status} (MoS {mos_s}, {robust_s})"
+    if status == "RICH" and dcf.get("robust") and str(side).lower() == "buy":
+        out += " ⚠" if has_override else " ⚠ cần dcf_override_reason"
+    return out
+
+
 GOLIVE_OUT = os.path.join(WORKDIR, "deploy_golive_dt5g_v4", "out")
 STATUS_FILE = os.path.join(DATA_DIR, "golive_v23_status.json")
 PT_LOGS = os.path.join(DATA_DIR, "pt_v22_dt5g_logs.csv")
