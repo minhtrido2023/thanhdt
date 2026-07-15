@@ -154,11 +154,20 @@ if tday:
     lines.append(f"🔄 Lộ trình chuyển đổi danh mục: ngày {tday.get('day')}/{len(tsched)} theo kế hoạch Option A đã duyệt")
 
 if orders:
+    # DCF check (Pha 2, informational — user directive 2026-07-15: PHẢI hiển thị trong text
+    # duyệt plan, không chỉ nằm trong JSON). Echo field dcf_check nếu plan có; BUY thiếu field
+    # (plan DollarBill hiện không populate) → tự tính fallback từ cache local (KHÔNG BQ live).
+    # Fail-safe toàn phần: import/tính lỗi → bỏ dòng DCF, KHÔNG chặn report duyệt plan.
+    try:
+        from trading_bot.strategies import _dcf_check_for_order, format_dcf_check
+    except Exception:
+        _dcf_check_for_order = format_dcf_check = None
     buys  = [o for o in orders if str(o.get("side","")).lower() in ("buy","mua","b")]
     sells = [o for o in orders if str(o.get("side","")).lower() in ("sell","ban","s")]
     lines.append(f"🎯 Hành động: **{len(orders)} lệnh** ({len(sells)} bán, {len(buys)} mua):")
     for o in orders:
         side_vn = "BÁN" if str(o.get("side","")).lower() in ("sell","ban","s") else "MUA"
+        is_buy = side_vn == "MUA"
         ticker = o.get("ticker","?")
         qty    = o.get("quantity", o.get("qty","?"))
         price  = o.get("ref_price", o.get("mtm_price_ref", o.get("price")))
@@ -168,6 +177,19 @@ if orders:
         note = o.get("note", "")
         note_s = f" — {note[:90]}" if note else ""
         lines.append(f"  • {side_vn} {ticker} {qty}cp @ {px}{val_s}{note_s}")
+        if format_dcf_check:
+            dcf = o.get("dcf_check")
+            if not dcf and is_buy and _dcf_check_for_order and isinstance(price, (int, float)):
+                try:
+                    dcf = _dcf_check_for_order(ticker, price, date)
+                except Exception:
+                    dcf = None
+            dcf_s = format_dcf_check(dcf, "buy" if is_buy else "sell",
+                                     has_override=bool(o.get("dcf_override_reason")))
+            if dcf_s:
+                lines.append(f"      ↳ {dcf_s}")
+            if is_buy and o.get("dcf_override_reason"):
+                lines.append(f"      ↳ lý do override DCF: {str(o['dcf_override_reason'])[:120]}")
 else:
     lines.append(f"🎯 Hành động: **GIỮ NGUYÊN (HOLD)** — không có lệnh nào ngày mai.")
 

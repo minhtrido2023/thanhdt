@@ -120,8 +120,30 @@ plan_obj = _load_plan(plan_date, account=account)
 with open(state_file, encoding='utf-8') as f:
     state = json.load(f)
 
-orders_by_id = {o.id: {'ticker': o.ticker, 'side': o.side, 'qty': o.qty, 'ref_price': o.ref_price}
+orders_by_id = {o.id: {'ticker': o.ticker, 'side': o.side, 'qty': o.qty, 'ref_price': o.ref_price,
+                       'dcf_check': getattr(o, 'dcf_check', None)}
                 for o in plan_obj.orders}
+
+# DCF check echo (Pha 2, informational — user directive 2026-07-15: hiện trong MỌI report
+# mua/bán). Echo field từ plan; BUY thiếu field → tính fallback từ cache local với ref_price
+# + as-of plan_date (khớp đúng số report duyệt plan tối hôm trước, KHÔNG dùng giá EOD).
+# Fail-safe: lỗi import/tính → không có dòng DCF, report vẫn nguyên vẹn.
+try:
+    from trading_bot.strategies import _dcf_check_for_order, format_dcf_check
+except Exception:
+    _dcf_check_for_order = format_dcf_check = None
+
+def _dcf_str(o):
+    if not format_dcf_check:
+        return ''
+    dcf = o.get('dcf_check')
+    if not dcf and o.get('side') == 'buy' and _dcf_check_for_order \
+            and isinstance(o.get('ref_price'), (int, float)) and o.get('ref_price'):
+        try:
+            dcf = _dcf_check_for_order(o.get('ticker'), o.get('ref_price'), plan_date)
+        except Exception:
+            dcf = None
+    return format_dcf_check(dcf, o.get('side') or 'buy')
 plan = {'orders': list(orders_by_id.values())}
 parents = state.get('parents', {})
 
@@ -219,7 +241,7 @@ for oid, p in parents.items():
 
     rows.append({
         'ticker': ticker, 'side': side, 'qty_plan': qty_plan, 'filled': filled,
-        'pct': pct, 'avg_price': avg_price, 'value': value_filled
+        'pct': pct, 'avg_price': avg_price, 'value': value_filled, 'dcf': _dcf_str(o)
     })
 
 rows.sort(key=lambda r: -r['value'])
@@ -254,6 +276,8 @@ for r in rows:
     else:
         side_disp = 'mua' if r['side'] == 'buy' else 'bán'
         lines.append(f"• ⚠️ {side_disp} {r['ticker']}: 0/{r['qty_plan']:,} — KHÔNG khớp")
+    if r.get('dcf'):
+        lines.append(f"   ↳ {r['dcf']}")
 
 lines.append("")
 fill_rate = 100 * tot_value_filled / tot_value_planned if tot_value_planned else 0
