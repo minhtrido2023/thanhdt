@@ -515,6 +515,7 @@ _DCFM = os.environ.get("BASKET_DCF_MODE", "").lower()
 _dcf_tag = ("" if not _DCFM else
             "_exp_dcfexrich" if _DCFM == "exclude_rich" else
             f"_exp_dcfplacebo{os.environ.get('BASKET_DCF_PLACEBO_SEED','0')}" if _DCFM == "placebo_random" else
+            "_exp_dcfplacebope" if _DCFM == "placebo_pe" else
             f"_exp_dcftb{str(os.environ.get('BASKET_DCF_W','0.25')).replace('.','')}")
 # MOM-channel closure measurement (job Taylor_20260712_012515) — env BAL_DROP_TIERS; unset = OFF,
 # byte-identical baseline, no tag. "none" = drop nothing but tagged output (contemporaneous control

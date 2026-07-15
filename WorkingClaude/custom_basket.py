@@ -327,6 +327,13 @@ GROUP BY t.ticker, q""")
     # day, but picks the victims at RANDOM instead of by DCF. Same count, same pool, same stage,
     # same fail-safe -> the ONLY difference vs variant A is *which* names go. If A's edge survives
     # only because "3 names got swapped in a 30-name basket", the placebo reproduces it.
+    # "placebo_pe" (Pha 5, job Taylor_20260715_041608): the value-proxy control for variant A —
+    # the SECOND killer objection ("is DCF just 1/PE in disguise?"). Same frame as placebo_random
+    # (same n_d per date measured off the same dcf_at calls, same pool, same stage, same fail-safe),
+    # but the victims are the n_d names with the HIGHEST PE (lowest 1/PE from the selector's own
+    # pe_piv at src_q — the simplest available value proxy) instead of random/DCF. Names with no PE
+    # are a neutral pass-through (never dropped), mirroring exclude_rich's NOT_COMPUTED convention.
+    # If variant A's edge is reproduced here, DCF adds nothing over a trivial PE rule.
     DCF_MODE = os.environ.get("BASKET_DCF_MODE", "").lower()
     DCF_W    = float(os.environ.get("BASKET_DCF_W", "0.25"))
     DCF_PLACEBO_SEED = int(os.environ.get("BASKET_DCF_PLACEBO_SEED", "0"))
@@ -334,8 +341,9 @@ GROUP BY t.ticker, q""")
     if DCF_MODE:
         if SELECT_MODE != "yieldcombo":
             raise ValueError(f"BASKET_DCF_MODE={DCF_MODE} only defined for BASKET_SELECT=yieldcombo")
-        if DCF_MODE not in ("exclude_rich", "tiebreak", "placebo_random"):
-            raise ValueError(f"BASKET_DCF_MODE={DCF_MODE} unknown (exclude_rich|tiebreak|placebo_random)")
+        if DCF_MODE not in ("exclude_rich", "tiebreak", "placebo_random", "placebo_pe"):
+            raise ValueError(f"BASKET_DCF_MODE={DCF_MODE} unknown "
+                             "(exclude_rich|tiebreak|placebo_random|placebo_pe)")
         import dcf_valuation as _dcfv
         _fin = _dcfv._load_financials()
         _rebal_in = ",".join(f"DATE '{pd.Timestamp(x).date()}'" for x in rebal_dates)
@@ -831,7 +839,7 @@ WHERE t.time IN ({_dy_rebal_in}) AND t.Price IS NOT NULL""")
             # custom30V: liquidity = GATE only (top-POOL tradability floor); rank PURELY by combined
             # value-yield = rank(1/PE)+rank(1/PCF). For BULL parking funded mainly by LAG idle cash.
             pool = gated[:CFO_POOL]
-            if dcf_at is not None and DCF_MODE in ("exclude_rich", "placebo_random"):
+            if dcf_at is not None and DCF_MODE in ("exclude_rich", "placebo_random", "placebo_pe"):
                 # variant A: drop only names the DCF calls RICH *and* robust (sign survives the
                 # whole sensitivity box). CHEAP / non-robust-RICH / NOT_COMPUTED all stay.
                 _keep = [(t, rt) for t, rt in pool
@@ -845,14 +853,38 @@ WHERE t.time IN ({_dy_rebal_in}) AND t.Price IS NOT NULL""")
                     # it would be a strictly harsher gate than the thing it is a control for.
                     _n_d = len(pool) - len(_keep)
                     if _keep and _n_d > 0:
-                        # seed = (SEED, date) so each rebal date draws INDEPENDENTLY, yet the whole
-                        # 48-date path replays exactly from the same SEED. A single global RNG would
-                        # make the draws path-dependent on rebal ordering and unreplayable per-date.
-                        _rng = np.random.default_rng([DCF_PLACEBO_SEED, pd.Timestamp(d).toordinal()])
-                        _drop = set(_rng.choice(len(pool), size=_n_d, replace=False).tolist())
-                        pool = [p for _i, p in enumerate(pool) if _i not in _drop]
-                        _placebo_log.append({"date": pd.Timestamp(d), "n_pool": len(pool) + _n_d,
-                                             "n_dropped": _n_d})
+                        if DCF_MODE == "placebo_random":
+                            # seed = (SEED, date) so each rebal date draws INDEPENDENTLY, yet the
+                            # whole 48-date path replays exactly from the same SEED. A single global
+                            # RNG would make the draws path-dependent on rebal ordering and
+                            # unreplayable per-date.
+                            _rng = np.random.default_rng([DCF_PLACEBO_SEED,
+                                                          pd.Timestamp(d).toordinal()])
+                            _drop = set(_rng.choice(len(pool), size=_n_d, replace=False).tolist())
+                            pool = [p for _i, p in enumerate(pool) if _i not in _drop]
+                            _placebo_log.append({"date": pd.Timestamp(d), "n_pool": len(pool) + _n_d,
+                                                 "n_dropped": _n_d})
+                        else:  # placebo_pe — drop the n_d HIGHEST-PE names (lowest 1/PE at src_q,
+                            # the very series the selector ranks on 20 lines below). NaN 1/PE =
+                            # neutral pass-through, mirroring exclude_rich's NOT_COMPUTED rule; ties
+                            # break on ticker so the whole path is deterministic (no seed needed).
+                            _pe_row = (pe_piv.loc[src_q]
+                                       if (pe_piv is not None and src_q in pe_piv.index) else None)
+                            _cand = sorted(
+                                [(t, float(_pe_row[t])) for t, _rt in pool
+                                 if _pe_row is not None and pd.notna(_pe_row.get(t, np.nan))],
+                                key=lambda ty: (ty[1], ty[0]))
+                            _dropset = {t for t, _y in _cand[:_n_d]}
+                            _keepset = {t for t, _rt in _keep}
+                            _placebo_log.append({
+                                "date": pd.Timestamp(d), "n_pool": len(pool),
+                                "n_target": _n_d, "n_dropped": len(_dropset),
+                                # audit trail for the overlap question this test exists to answer:
+                                # who does DCF drop vs who does the naive PE rule drop, same date.
+                                "dcf_drops": "|".join(sorted(t for t, _rt in pool
+                                                             if t not in _keepset)),
+                                "pe_drops": "|".join(sorted(_dropset))})
+                            pool = [p for p in pool if p[0] not in _dropset]
             pe_s  = pe_piv.loc[src_q]  if (pe_piv  is not None and src_q in pe_piv.index)  else None
             pcf_s = pcf_piv.loc[src_q] if (pcf_piv is not None and src_q in pcf_piv.index) else None
             pe_r  = pd.Series({t:(pe_s.get(t,np.nan)  if pe_s  is not None else np.nan) for t,_ in pool}).rank(pct=True).fillna(0.5)
@@ -1031,13 +1063,16 @@ WHERE t.ticker IN ({inlist})
                     ret.loc[d] = float(np.nansum(W * r))
             adv_tv.loc[d] = np.nansum(tvv.loc[d, tks].values.astype(float))
         prev = d
-    if dcf_at is not None and DCF_MODE == "placebo_random" and _placebo_log:
+    if dcf_at is not None and DCF_MODE in ("placebo_random", "placebo_pe") and _placebo_log:
         # audit trail: lets a reviewer verify the placebo dropped exactly n_d names per date, i.e.
         # that this really is a same-count control and not a differently-sized gate.
         _pl = pd.DataFrame(_placebo_log)
-        _pl.to_csv(f"data/dcf_exp_logs/placebo_drops_seed{DCF_PLACEBO_SEED}.csv", index=False)
-        print(f"  [DCF placebo] seed={DCF_PLACEBO_SEED}: dropped {int(_pl['n_dropped'].sum())} names "
-              f"over {len(_pl)} rebal dates (mean {_pl['n_dropped'].mean():.2f}/date)")
+        _plname = (f"placebo_drops_seed{DCF_PLACEBO_SEED}.csv" if DCF_MODE == "placebo_random"
+                   else "placebo_pe_drops.csv")
+        _pl.to_csv(f"data/dcf_exp_logs/{_plname}", index=False)
+        print(f"  [DCF placebo] {DCF_MODE}: dropped {int(_pl['n_dropped'].sum())} names "
+              f"over {len(_pl)} rebal dates (mean {_pl['n_dropped'].mean():.2f}/date)"
+              + (f" [target {int(_pl['n_target'].sum())}]" if "n_target" in _pl else ""))
     if weight_scheme == "fincap":
         if fincap_infeasible:
             _wc = pd.DataFrame(fincap_infeasible, columns=["date", "cap_eff", "n_nonfin"])

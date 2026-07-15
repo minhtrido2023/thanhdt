@@ -3796,3 +3796,61 @@ nợ xấu MỚI (vd NPL ratio thật per-bank, không phải proxy ROE_Min).
 **Artifacts** (`mike/agents/Taylor/eyrisk_exp/`): `run_arms.sh`, `logs/{selfcheck,driver,eyr_*}.log`.
 Code: `custom_basket.py` (nhánh `eyrisk` + `roemin_asof`/`eyrisk_mult`), `eyrisk_selector_selfcheck.py`.
 CSV: `data/v23_golive_audit_2014_now..._exp_eyr_{A2_anchor,R1_all,R2_fin}_exp_sel*.csv`.
+
+---
+
+## Pha 5 — DCF-as-gate PLACEBO-PE (value-proxy) test → **NO-GO DỨT ĐIỂM** (Taylor, 2026-07-15, job `Taylor_20260715_041608`)
+
+**Mục đích**: killer objection #2 từ Pha 4 (mục (3) entry trên): DCF-exclude có khác gì rule đơn giản
+"loại n_d tên PE CAO NHẤT" không? Nếu ≈ nhau → DCF chỉ là 1/PE núp bóng, không thêm gì so với yieldcombo.
+
+**Control**: `BASKET_DCF_MODE=placebo_pe` (custom_basket.py, default OFF). Mỗi ngày rebal d loại ĐÚNG
+n_d tên (đo từ cùng `dcf_at` như exclude_rich — cùng pool/bước/fail-safe/NaN-pass-through) nhưng chọn
+n_d tên có PE cao nhất (1/PE thấp nhất từ chính `pe_piv` selector dùng). Deterministic, không seed.
+Droplog ghi kèm `dcf_drops` vs `pe_drops` từng ngày để đo victim overlap.
+
+**Audit**: self-check 0 VND (BAL+LAG, cả 3 run mới); count-match EXACT 48/48 ngày, 737/737 tên;
+diff code 100% nằm trong nhánh `if DCF_MODE` (OFF-path không đụng — mọi counter chẩn đoán ctrl y hệt).
+
+**⚠️ SỰ CỐ VINTAGE phát hiện giữa chừng (quan trọng hơn cả test):** sync bq_cache 23:45 đêm 07-14
+(giữa Pha 4 và Pha 5) đổi input (~1.839/703.604 dòng signal = 0,26%; nghi risk_rating/fa_ratings/
+dt5g_live parquet — ticker chunks 2013-2025 + ticker_financial local KHÔNG đổi). Hệ quả: ctrl VÀ varA
+rerun đều lệch khỏi bản 07-14 từ 2018-01-03. **Ctrl gần như bất động** (CAGR 27,09→27,02, mọi counter
+y hệt) **nhưng edge varA BAY SẠCH**: ΔCAGR FULL +0,99pp→+0,07pp (z vs null 20-seed: 2,51→0,37), OOS
++1,50→+0,17 (z 2,85→0,54); per-year 2021 flip +8,71pp→−6,31pp. So sánh 3 nhánh dùng intra-vintage
+07-15 (cùng code + cùng cache pin `mike/agents/Taylor/dcf_exp/bq_cache_pin20260715`).
+
+**KẾT QUẢ 3-WAY (intra-vintage 07-15, ctrl / varA(DCF) / placeboPE):**
+| window | ctrl CAGR/Sharpe/DD/Calmar | varA | placeboPE | A−PE (ΔCAGR) |
+|---|---|---|---|---|
+| FULL | 27,02 / 1,719 / −18,33 / 1,474 | 27,09 / 1,734 / −18,94 / 1,430 | 27,47 / 1,745 / −18,22 / 1,508 | **−0,38pp** |
+| IS 2014-19 | 23,30 / 1,533 / −18,09 | 23,27 / 1,549 / −18,78 | 23,44 / 1,539 / −18,22 | −0,16pp |
+| OOS 2020+ | 30,51 / 1,882 / −18,33 | 30,68 / 1,894 / −18,94 | 31,27 / 1,926 / −18,13 | **−0,59pp** |
+
+varA KHÔNG thắng placebo PE ở bất kỳ cửa sổ nào (A−PE âm FULL/OOS); paired daily t varA-vs-placeboPE
+= −0,42 (p=0,68), varA-vs-ctrl t=+0,09 (p=0,93). Victim overlap DCF-vs-PE chỉ 37,9% (Jaccard mean
+0,206) — DCF CHỌN nạn nhân khác PE thật, nhưng sự khác biệt đó KHÔNG tạo giá trị.
+
+**VERDICT CUỐI CÙNG cho DCF-as-selector/gate: NO-GO, đóng dự án.** 3 căn cứ độc lập:
+1. Test 2 (câu hỏi dispatch (a)/(b)): varA ≈ placeboPE ≈ ctrl trên dữ liệu hiện tại — DCF không có
+   giá trị gia tăng so với rule 1 dòng "loại PE cao nhất", và cả 2 đều ≈ 0.
+2. Edge Pha 3/4 (z 2,5-2,85, 0/20 seed) KHÔNG SỐNG SÓT qua 1 nhiễu input 0,26% khi baseline đứng
+   yên — độ nhạy này tự nó disqualify (path-dependency artifact của ~3 swap/rebal trong rổ 30 tên,
+   không phải alpha). Dù vintage 07-15 sau này có bị chứng minh contaminated (sự cố upstream
+   ticker_financial đang mở), kết luận không đổi: edge thật không được phép chết vì nhiễu cỡ này.
+3. 2 cờ cũ chưa từng gỡ: concentration (Pha 3: 2017+2021 = ~100% edge; giờ chính các năm carry cũng
+   đổi chỗ theo vintage — đúng chữ ký reshuffle-luck của bài học Wave1/H8a); DSR/N-trials chưa qua
+   (nay moot vì edge ≈ 0). N-budget lũy kế họ DCF-gate: 2 treatment (exclude_rich, tiebreak 0,25)
+   + 21 control (20 random + 1 PE) + 3 rerun guard.
+
+DCF echo Pha 1-2 (display-only trong report) KHÔNG bị ảnh hưởng — chưa bao giờ là logic chọn mã.
+Production 0 chạm (`BASKET_DCF_MODE` default OFF, byte-identical).
+
+**Flag cho Winston (data-ops, độc lập với verdict):** sim R3-family trên cache sau sync 23:45 07-14
+lệch path từ 2018-01-03 (ctrl max |Δ|NAV 4,8%, final −0,7%) → bảng nào đổi lịch sử? (nghi
+risk_rating / fa_ratings / dt5g_live). Số R3 pinned có thể xê dịch nhẹ khi re-pin trên cache mới.
+
+**Artifacts**: `data/*_exp_dcf{exrichrerun,ctrlrerun,placebope}20260715.csv`, `dcf_placebo_pe_test.py`,
+`data/dcf_placebo_logs/{runner_pe.sh,varA_rerun_pe_guard,placebo_pe,ctrl_rerun_pe}.log`,
+`data/dcf_exp_logs/placebo_pe_drops.csv` (dcf_drops|pe_drops từng ngày).
+Reproduce: `bash data/dcf_placebo_logs/runner_pe.sh` → `$DNA_PYEXE dcf_placebo_pe_test.py`
