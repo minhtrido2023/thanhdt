@@ -69,10 +69,13 @@ rc        = d.get("risk_checks", {})
 rc_ok     = all("PASS" in str(v) or "CLEAR" in str(v) or "HEALTHY" in str(v) or "VALID" in str(v) or "N/A" in str(v)
                 for v in rc.values()) if rc else None
 flags = []
-# Plan HOLD (0 lệnh) không có gì cho Mafee thực thi — approval/mafee-auth chỉ bắt buộc khi có lệnh thật.
+# Plan HOLD (0 lệnh) không có gì để thực thi — approval chỉ bắt buộc khi có lệnh thật.
+# mafee_authorized KHÔNG còn là fail-flag: không có code path nào ghi field này (INCIDENTS
+# 2026-07-06), gate thực thi thật (trading_bot/plan.py approval_block_reason) chỉ đọc
+# approved_by — flag cứng ở đây tạo RED giả lặp lại cho plan đã duyệt thật (07-06, 07-15).
+# Vẫn hiển thị giá trị mafee ở dòng kết quả để đối chiếu khi field có mặt.
 if n_orders > 0:
     if not approved:   flags.append("NOT_APPROVED")
-    if not mafee_ok:   flags.append("MAFEE_NOT_AUTH")
 if mode != "live": flags.append(f"mode={mode}")
 if rc_ok is False: flags.append("RISK_CHECK_FAIL")
 print(f"{approved}|{mafee_ok}|{mode}|{n_orders}|{est_val:.3f}|{state_nm}|{src}|{'|'.join(flags) if flags else 'OK'}")
@@ -82,7 +85,7 @@ PY
   IFS='|' read -r _approved _mafee _mode _n_orders _est _state_nm _src _flags <<< "$PLAN_INFO"
 
   if [ "$_flags" = "OK" ]; then
-    _ok "Plan $ACCOUNT $TODAY: $_n_orders lệnh, ~${_est}B VND, state=$_state_nm ($_src), approved=$_approved"
+    _ok "Plan $ACCOUNT $TODAY: $_n_orders lệnh, ~${_est}B VND, state=$_state_nm ($_src), approved=$_approved mafee=$_mafee"
   else
     _fail "Plan $ACCOUNT $TODAY: $_flags — orders=$_n_orders approved=$_approved mafee=$_mafee"
   fi
