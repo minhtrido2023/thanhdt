@@ -263,9 +263,60 @@ class TestDcfCheckEcho(unittest.TestCase):
         print("  [8] KHÔNG publish khi SELL side dù RICH: OK")
 
 
+class TestDcfFairValueDisplay(unittest.TestCase):
+    """fair_value_ps hiển thị (user directive 2026-07-15) — THUẦN HIỂN THỊ."""
+
+    def test_9_format_shows_fair_value_and_price(self):
+        from trading_bot.strategies import format_dcf_check
+        dcf = dict(DCF_CHEAP, fair_value_ps=85400.0, price=74200.0)
+        s = format_dcf_check(dcf)
+        self.assertIn("giá trị hợp lý ~85,400đ", s)
+        self.assertIn("vs giá 74,200đ", s)
+        self.assertIn("MoS +35.0%", s)
+        print(f"  [9] format hiện giá trị hợp lý + giá: OK → {s}")
+
+    def test_10_format_backward_compat_no_fair_value(self):
+        """dcf cũ (plan trước 2026-07-15) không có field → dòng cũ nguyên vẹn, không crash."""
+        from trading_bot.strategies import format_dcf_check
+        self.assertEqual(format_dcf_check(DCF_CHEAP),
+                         "🟢 DCF: CHEAP (MoS +35.0%, robust)")
+        # fair_value_ps=None (NOT_COMPUTED-shaped) cũng không được hiện "None"
+        self.assertNotIn("None", format_dcf_check(dict(DCF_RICH, fair_value_ps=None, price=None)))
+        self.assertEqual(format_dcf_check(DCF_NOT_COMPUTED),
+                         "DCF: NOT_COMPUTED (fcfe_negative_buildout)")
+        print("  [10] backward-compat khi thiếu/None fair_value_ps: OK")
+
+    def test_11_real_compute_has_fair_value_ps(self):
+        """_dcf_check_for_order thật: CHEAP/RICH → fair_value_ps là số khớp MoS;
+        NOT_COMPUTED → None (không crash)."""
+        from trading_bot.strategies import _dcf_check_for_order, format_dcf_check
+        d = _dcf_check_for_order("FPT", 120000.0, "2026-06-30")
+        self.assertIn("fair_value_ps", d)
+        self.assertEqual(d.get("price"), 120000.0)
+        if d["status"] in ("CHEAP", "RICH"):
+            fv = d["fair_value_ps"]
+            self.assertIsInstance(fv, float)
+            self.assertGreater(fv, 0)
+            # MoS phải tái lập được từ fair_value_ps + price (cùng một nguồn số)
+            self.assertAlmostEqual((fv - 120000.0) / fv, d["margin_of_safety"], places=2)
+            self.assertIn("giá trị hợp lý", format_dcf_check(d))
+        else:
+            self.assertIsNone(d["fair_value_ps"])
+        print(f"  [11] compute thật FPT → {format_dcf_check(d)}")
+
+    def test_12_dict_still_has_all_legacy_fields(self):
+        """Chỉ THÊM field — không sửa/xoá field cũ nào (backward-compat schema)."""
+        from trading_bot.strategies import _dcf_check_for_order
+        d = _dcf_check_for_order("FPT", 120000.0, "2026-06-30")
+        for k in ("status", "margin_of_safety", "robust", "as_of"):
+            self.assertIn(k, d)
+        print("  [12] field cũ còn nguyên (status/margin_of_safety/robust/as_of): OK")
+
+
 if __name__ == "__main__":
     print("=== dcf_check_selfcheck.py ===")
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDcfCheckEcho)
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestDcfFairValueDisplay))
     runner = unittest.TextTestRunner(verbosity=0)
     result = runner.run(suite)
     sys.exit(0 if result.wasSuccessful() else 1)

@@ -77,10 +77,17 @@ def _dcf_check_for_order(ticker, price, asof):
                     sens_signs.append(mos_s > 0)
             robust = bool(sens_signs) and all(sg == mos_positive for sg in sens_signs)
 
+        # fair_value_ps + price: HIỂN THỊ ONLY (user directive 2026-07-15) — neo số tuyệt đối
+        # cho quyết định mua/bán + cho phép so giá dự báo vs giá thị trường sau này. KHÔNG
+        # tham gia logic status/robust/gate nào. price = đúng giá MoS được tính trên đó, nên
+        # dòng hiển thị luôn tự nhất quán mà không cần caller truyền lại giá.
+        fv_ps = res.get("fair_value_ps")
         return {
             "status": status,
             "margin_of_safety": round(float(mos), 4) if mos is not None else None,
             "robust": robust,
+            "fair_value_ps": round(float(fv_ps), 0) if fv_ps is not None else None,
+            "price": round(float(price), 0) if price is not None else None,
             "as_of": str(asof)[:10],
         }
 
@@ -103,7 +110,15 @@ def format_dcf_check(dcf, side="buy", has_override=False):
     mos_s = f"{mos * 100:+.1f}%" if isinstance(mos, (int, float)) else "n/a"
     robust_s = "robust" if dcf.get("robust") else "không robust"
     icon = "🟢" if status == "CHEAP" else "🔴"
-    out = f"{icon} DCF: {status} (MoS {mos_s}, {robust_s})"
+    # giá trị hợp lý tuyệt đối — bỏ qua khi dcf cũ (plan trước 2026-07-15) không có field
+    fv, px = dcf.get("fair_value_ps"), dcf.get("price")
+    fv_s = ""
+    if isinstance(fv, (int, float)):
+        fv_s = f"giá trị hợp lý ~{fv:,.0f}đ"
+        if isinstance(px, (int, float)):
+            fv_s += f" vs giá {px:,.0f}đ"
+        fv_s += ", "
+    out = f"{icon} DCF: {status} ({fv_s}MoS {mos_s}, {robust_s})"
     if status == "RICH" and dcf.get("robust") and str(side).lower() == "buy":
         out += " ⚠" if has_override else " ⚠ cần dcf_override_reason"
     return out
