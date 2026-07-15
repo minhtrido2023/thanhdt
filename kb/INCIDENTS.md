@@ -51,6 +51,20 @@ MAX_STATE_LAG=0 mất tác dụng — cần quyết (sau khi upstream ổn) có 
 (3) Corruption upstream lan theo dependency: financial hỏng → prune hỏng theo — khi 1 bảng nguồn
 regress, phải quét ngay các bảng derived cùng pipeline.
 
+**Addendum (job song song `Winston_20260715_054508`, cùng buổi chiều — mitigations bổ sung).**
+(a) **Backup time-travel** trước khi bằng chứng hết hạn (BQ time-travel chỉ giữ 7 ngày):
+`tav2_bq.ticker_prune_ttbackup_fresh_20260713` = CLONE `FOR SYSTEM_TIME AS OF 2026-07-13 12:00 UTC`,
+verified 912.209 dòng / 265 mã ngày 07-13 / đủ 264-267 mã cho 07-08..07-13 — nguồn khôi phục sẵn
+sàng khi user quyết (cùng bộ với `ticker_financial_ttbackup_fresh_20260714`). (b) **Restore cache
+local** `data/bq_cache/ticker_prune/2026.parquet` từ clone này (sync 23:45 đêm 07-14 đã mirror bảng
+hỏng → cache mất sạch 07-08..07-13; live không ảnh hưởng — gap_ref chỉ bật ở paper `main` — nhưng
+paper evidence + DC-book + screener đọc sai). Lưu ý: sync 23:45 tối 07-15 sẽ re-mirror bảng hỏng
+nếu upstream chưa sửa. (c) **Đóng lỗ hổng Lesson (1) ngay**: thêm depth-check (COUNT DISTINCT
+ticker của ngày mới nhất, ngưỡng 200 — cùng ngưỡng precheck daily_refresh) vào
+`bin/bq_freshness_check.sh` (FAIL → block DollarBill, kể cả kịch bản "VNINDEX trễ → ALL FRESH giả"
+trong Dự đoán ở trên) và `bin/preflight_check.sh` §5 (WARN rõ ràng thay vì `lag=0d ✓` giả) —
+commit `1b66428`, test standalone trên bảng hỏng thật: lag=0/names=8 → bắt đúng.
+
 ## 2026-07-15 — Preflight RED giả MAFEE_NOT_AUTH trên plan đã duyệt thật (tái diễn bug 07-06) — fix vĩnh viễn ở checker
 
 **What happened.** ops_health_check 08:20 flag `Plan ZaloPay 2026-07-15: MAFEE_NOT_AUTH —
