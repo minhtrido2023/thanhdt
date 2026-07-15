@@ -313,10 +313,118 @@ class TestDcfFairValueDisplay(unittest.TestCase):
         print("  [12] field cũ còn nguyên (status/margin_of_safety/robust/as_of): OK")
 
 
+class TestConglomerateWarning(unittest.TestCase):
+    """Cảnh báo đa ngành/holding (user directive 2026-07-15) — THUẦN HIỂN THỊ."""
+
+    def test_13_is_conglomerate_flags_known_names(self):
+        import dcf_valuation as dcf
+        self.assertTrue(dcf.is_conglomerate("VGC"))     # ví dụ user nêu: VLXD + KCN
+        self.assertTrue(dcf.is_conglomerate("vgc"))     # không phân biệt hoa/thường
+        self.assertFalse(dcf.is_conglomerate("FPT"))
+        self.assertNotEqual(dcf.conglomerate_reason("VGC"), "")
+        self.assertEqual(dcf.conglomerate_reason("FPT"), "")
+        print("  [13] is_conglomerate nhận diện VGC, không đụng FPT: OK")
+
+    def test_14_format_shows_conglomerate_warning_on_the_number_line(self):
+        from trading_bot.strategies import format_dcf_check
+        s = format_dcf_check(dict(DCF_CHEAP, fair_value_ps=50000.0, price=40000.0,
+                                  conglomerate=True))
+        self.assertIn("đa ngành", s)
+        self.assertIn("MoS +35.0%", s)               # cảnh báo THÊM, không thay số cũ
+        self.assertNotIn("đa ngành", format_dcf_check(DCF_CHEAP))   # dcf cũ → không cờ
+        print(f"  [14] cảnh báo đa ngành nằm ngay dòng có số: OK → {s}")
+
+    def test_15_real_compute_sets_conglomerate_flag(self):
+        """Compute thật: cờ đúng cho cả tên đa ngành lẫn tên thường; status KHÔNG đổi vì cờ."""
+        from trading_bot.strategies import _dcf_check_for_order
+        d_cong = _dcf_check_for_order("VGC", 45000.0, "2026-06-30")
+        d_norm = _dcf_check_for_order("FPT", 120000.0, "2026-06-30")
+        self.assertTrue(d_cong["conglomerate"])
+        self.assertFalse(d_norm["conglomerate"])
+        # cờ chỉ hiển thị: VGC vẫn được tính DCF bình thường (KHÔNG bị exclude như tài chính)
+        self.assertIn(d_cong["status"], ("CHEAP", "RICH", "NOT_COMPUTED"))
+        if d_cong["status"] != "NOT_COMPUTED":
+            self.assertIsNotNone(d_cong["margin_of_safety"])
+        print(f"  [15] compute thật VGC conglomerate=True (status={d_cong['status']}), "
+              f"FPT=False: OK")
+
+    def test_16_disclaimer_exists_and_mentions_both_caveats(self):
+        from dcf_valuation import DCF_DISCLAIMER
+        for kw in ("ĐA NGÀNH", "THAM KHẢO", "tài chính"):
+            self.assertIn(kw, DCF_DISCLAIMER)
+        print("  [16] DCF_DISCLAIMER nêu đủ: tham khảo + đa ngành + loại tài chính: OK")
+
+
+class TestDcfHistoryLog(unittest.TestCase):
+    """Ghi lịch sử DCF (user directive 2026-07-15) — append-only, fail-safe."""
+
+    def _patch_csv(self, path):
+        import trading_bot.strategies as s
+        self._orig = s.DCF_HISTORY_CSV
+        s.DCF_HISTORY_CSV = path
+        self.addCleanup(lambda: setattr(s, "DCF_HISTORY_CSV", self._orig))
+
+    def test_17_append_writes_header_once_and_keeps_rows(self):
+        import csv as _csv
+        from trading_bot.strategies import log_dcf_history
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "dcf_lens_history.csv")
+            self._patch_csv(path)
+            d = dict(DCF_CHEAP, fair_value_ps=85400.0, price=74200.0, conglomerate=False)
+            log_dcf_history("FPT", d, "send_plan_report")
+            log_dcf_history("VGC", dict(d, conglomerate=True), "eod_trading_report")
+            with open(path, encoding="utf-8") as f:
+                rows = list(_csv.DictReader(f))
+        self.assertEqual(len(rows), 2)                       # append, không ghi đè
+        self.assertEqual(rows[0]["ticker"], "FPT")
+        self.assertEqual(rows[0]["fair_value_ps"], "85400.0")
+        self.assertEqual(rows[0]["price"], "74200.0")
+        self.assertEqual(rows[0]["source"], "send_plan_report")
+        self.assertEqual(rows[0]["as_of"], "2026-07-14")
+        self.assertEqual(rows[1]["conglomerate"], "True")
+        self.assertTrue(rows[0]["logged_at"])
+        print("  [17] append-only + header 1 lần + đủ field: OK")
+
+    def test_18_not_computed_and_empty_are_safe(self):
+        import csv as _csv
+        from trading_bot.strategies import log_dcf_history
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "h.csv")
+            self._patch_csv(path)
+            log_dcf_history("XYZ", DCF_NOT_COMPUTED, "eod_trading_report")
+            log_dcf_history("XYZ", None, "eod_trading_report")     # không ghi gì, không lỗi
+            log_dcf_history("XYZ", "rác", "eod_trading_report")    # không ghi gì, không lỗi
+            with open(path, encoding="utf-8") as f:
+                rows = list(_csv.DictReader(f))
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["status"], "NOT_COMPUTED")
+        self.assertEqual(rows[0]["fair_value_ps"], "")
+        print("  [18] NOT_COMPUTED ghi được; dcf rỗng/rác bỏ qua im lặng: OK")
+
+    def test_19_never_raises_when_path_unwritable(self):
+        """Đường ghi hỏng → report KHÔNG BAO GIỜ vì dòng log này mà chết."""
+        from trading_bot.strategies import log_dcf_history
+        self._patch_csv("/proc/definitely-not-writable/h.csv")
+        log_dcf_history("FPT", DCF_CHEAP, "send_plan_report")     # không raise = pass
+        print("  [19] path không ghi được → nuốt lỗi, không raise: OK")
+
+    def test_20_v23strategy_path_does_not_log(self):
+        """Chỉ đường REPORT ghi lịch sử — _dcf_check_for_order (V23Strategy dùng) KHÔNG tự ghi."""
+        from trading_bot.strategies import _dcf_check_for_order
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "h.csv")
+            self._patch_csv(path)
+            _dcf_check_for_order("FPT", 120000.0, "2026-06-30")
+            self.assertFalse(os.path.exists(path))
+        print("  [20] _dcf_check_for_order KHÔNG tự ghi lịch sử (chỉ report gọi): OK")
+
+
 if __name__ == "__main__":
     print("=== dcf_check_selfcheck.py ===")
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDcfCheckEcho)
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestDcfFairValueDisplay))
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestConglomerateWarning))
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestDcfHistoryLog))
     runner = unittest.TextTestRunner(verbosity=0)
     result = runner.run(suite)
     sys.exit(0 if result.wasSuccessful() else 1)

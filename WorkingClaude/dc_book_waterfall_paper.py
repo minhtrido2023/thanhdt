@@ -486,7 +486,9 @@ def _dcf_echo_line(dc_names, last_close, asof):
             return ""
         if WORKDIR not in sys.path:
             sys.path.insert(0, WORKDIR)
-        from trading_bot.strategies import _dcf_check_for_order, format_dcf_check
+        from trading_bot.strategies import (_dcf_check_for_order, format_dcf_check,
+                                            log_dcf_history)
+        from dcf_valuation import DCF_DISCLAIMER
         parts = []
         for t in dc_names:
             px = last_close.get(t)
@@ -494,6 +496,7 @@ def _dcf_echo_line(dc_names, last_close, asof):
                 parts.append(f"{t} NOT_COMPUTED (thiếu giá close trong state)")
                 continue
             d = _dcf_check_for_order(t, px, asof)
+            log_dcf_history(t, d, "dc_book_waterfall_paper", asof=asof)
             # side="paper": không kích đuôi "cần dcf_override_reason" (chỉ áp cho BUY order thật)
             s = format_dcf_check(d, side="paper")
             if s.startswith("DCF: NOT_COMPUTED"):
@@ -501,7 +504,8 @@ def _dcf_echo_line(dc_names, last_close, asof):
             else:
                 s = s.replace(" DCF: ", " ", 1)
             parts.append(f"{t} {s}")
-        return "- DCF check (informational, không tham gia chọn mã): " + " · ".join(parts)
+        return ("- DCF check (informational, không tham gia chọn mã): " + " · ".join(parts)
+                + f"\n  ℹ️ _{DCF_DISCLAIMER}_")
     except Exception:
         return ""
 

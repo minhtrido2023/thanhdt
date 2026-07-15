@@ -31,6 +31,15 @@ LIMITATIONS: DCF is notoriously sensitive to the discount rate and terminal valu
   sensitivity block. This is an INTERPRETIVE / reference tool; whether margin-of-safety has a
   measurable forward-return edge is tested honestly in dcf_backtest.py (walk-forward IC).
 
+  CONGLOMERATE / HOLDING CAVEAT (user directive 2026-07-15): unlike financials, multi-segment
+  groups are NOT excluded — they still get a number — but that number models the group as ONE
+  cash-flow stream with ONE growth rate and ONE discount rate. A holding whose segments have
+  different economics/risk (e.g. VGC: building materials + industrial-park leasing) is properly
+  valued sum-of-the-parts; a single-stream FCFE-DCF on it can be meaningless even when it looks
+  precise. is_conglomerate() flags the known names so every report echoes the warning inline
+  (see format_dcf_check in trading_bot/strategies.py), and DCF_DISCLAIMER carries the general
+  version for readers — the list is hand-maintained and can never be exhaustive.
+
 Author: Taylor (quant). Job Taylor_20260714_042622. NOT wired into production trading.
 """
 import os
@@ -71,6 +80,45 @@ def is_financial_icb(icb):
     return icb == 8355 or (8530 <= icb <= 8579) or (8770 <= icb <= 8779)
 
 FIN_ROUTES = {"BANK", "INSURANCE", "SECURITIES"}
+
+# Đa ngành / holding — VẪN tính DCF (khác nhóm tài chính bị exclude hẳn), nhưng kết quả có thể
+# vô nghĩa: mô hình gộp cả tập đoàn thành 1 dòng tiền / 1 g / 1 r, trong khi các mảng có kinh tế
+# và rủi ro khác nhau (định giá đúng phải là sum-of-the-parts).
+# Danh sách DUY TRÌ TAY: ICB/route không nhận diện được cấu trúc đa ngành — ICB chỉ gán 1 ngành
+# chính (VGC=2353 vật liệu XD, MSN=3577 thực phẩm, VIC=8633 BĐS — đúng cái bẫy này), 8L route
+# cũng không có nhóm HOLDING. Vì vậy danh sách KHÔNG BAO GIỜ đầy đủ → DCF_DISCLAIMER (cảnh báo
+# chung) luôn hiện trong report, không chỉ dựa vào cờ theo tên.
+CONGLOMERATE_TICKERS = {
+    "VIC": "Vingroup: BĐS + ô tô (VinFast) + bán lẻ/y tế/giáo dục",
+    "MSN": "Masan Group: hàng tiêu dùng + bán lẻ + khoáng sản + cổ phần ngân hàng",
+    "GEX": "Gelex: thiết bị điện + năng lượng/nước + vật liệu XD + KCN",
+    "VGC": "Viglacera: vật liệu xây dựng + cho thuê KCN",
+    "REE": "REE: cơ điện lạnh (M&E) + điện + nước + BĐS văn phòng",
+    "GVR": "GVR: cao su thiên nhiên + KCN + gỗ",
+    "HAG": "HAGL: nông nghiệp (chuối/heo) + các mảng còn lại",
+    "CII": "CII: hạ tầng BOT + BĐS + nước",
+    "TCH": "TC Hoàng Huy: xe tải/ô tô + BĐS",
+}
+
+DCF_DISCLAIMER = (
+    "DCF là lăng kính THAM KHẢO (không tham gia quyết định mua/bán): mô hình gộp doanh nghiệp "
+    "thành 1 dòng tiền FCFE với 1 mức tăng trưởng + 1 lãi suất chiết khấu, rất nhạy với 2 tham số "
+    "này. Với doanh nghiệp ĐA NGÀNH/HOLDING (mảng khác nhau, kinh tế + rủi ro khác nhau — cần "
+    "định giá sum-of-the-parts) kết quả có thể KHÔNG CÓ Ý NGHĨA dù trông chính xác; các tên đã "
+    "biết được đánh dấu '⚠ đa ngành', nhưng danh sách duy trì tay nên không đầy đủ. Nhóm tài "
+    "chính (ngân hàng/bảo hiểm/chứng khoán) bị loại hẳn → NOT_COMPUTED."
+)
+
+
+def is_conglomerate(ticker):
+    """True nếu ticker nằm trong danh sách đa ngành/holding đã biết (chỉ để CẢNH BÁO hiển thị —
+    không loại khỏi DCF, không tham gia logic nào)."""
+    return str(ticker).upper() in CONGLOMERATE_TICKERS
+
+
+def conglomerate_reason(ticker):
+    """Mô tả ngắn vì sao ticker được đánh dấu đa ngành; "" nếu không có trong danh sách."""
+    return CONGLOMERATE_TICKERS.get(str(ticker).upper(), "")
 
 _FIN_CACHE = None
 _RATE_CACHE = {}
@@ -389,7 +437,8 @@ def dcf_check(ticker, asof, price=None):
 
         return {"status": status,
                 "margin_of_safety": round(float(mos), 4) if mos is not None else None,
-                "robust": robust, "as_of": str(asof)[:10]}
+                "robust": robust, "conglomerate": is_conglomerate(ticker),
+                "as_of": str(asof)[:10]}
     except Exception as exc:
         return {"status": "NOT_COMPUTED", "margin_of_safety": None, "robust": False,
                 "reason": f"dcf_error: {str(exc)[:80]}", "as_of": str(asof)[:10]}
@@ -412,7 +461,8 @@ def dcf_line(ticker, asof, price=None):
         return f"DCF: N/A ({label})"
     mos = d["margin_of_safety"]
     tag = ", robust" if d["robust"] else ""
-    return f"DCF: {d['status']} (MoS {mos*100:+.1f}%{tag})"
+    cong = " ⚠ đa ngành" if d.get("conglomerate") else ""
+    return f"DCF: {d['status']} (MoS {mos*100:+.1f}%{tag}){cong}"
 
 
 # ---------------------------------------------------------------- price lookup (research)

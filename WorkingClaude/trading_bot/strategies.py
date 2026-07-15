@@ -11,6 +11,7 @@ target − danh mục thật. Exit của paper ngày T+1 sẽ được sync ở 
 (trễ 1 phiên — chấp nhận ở v1, vì exit V2.3 là hold-expiry/stop không gấp).
 """
 
+import csv
 import datetime as dt
 import json
 import os
@@ -28,6 +29,22 @@ _log = logging.getLogger(__name__)
 # ---------------------------------------------------------------- DCF check (Pha 2, 2026-07-14)
 
 _DCF_SENS_KEYS = ["r-1%", "r+1%", "g-2%", "g+2%"]
+
+DCF_HISTORY_CSV = os.path.join(WORKDIR, "data", "dcf_lens_history.csv")
+_DCF_HISTORY_COLS = ["logged_at", "as_of", "ticker", "source", "status",
+                     "fair_value_ps", "price", "margin_of_safety", "robust", "conglomerate"]
+
+
+def _dcf_is_conglomerate(ticker):
+    """Cờ đa ngành/holding (chỉ để cảnh báo hiển thị). Fail-safe: import lỗi → False."""
+    try:
+        import sys as _sys
+        if WORKDIR not in _sys.path:
+            _sys.path.insert(0, WORKDIR)
+        import dcf_valuation as _dcf
+        return _dcf.is_conglomerate(ticker)
+    except Exception:
+        return False
 
 
 def _dcf_check_for_order(ticker, price, asof):
@@ -58,7 +75,8 @@ def _dcf_check_for_order(ticker, price, asof):
             else:
                 nc_reason = reason[:80]
             return {"status": "NOT_COMPUTED", "margin_of_safety": None,
-                    "robust": False, "reason": nc_reason, "as_of": str(asof)[:10]}
+                    "robust": False, "reason": nc_reason,
+                    "conglomerate": _dcf.is_conglomerate(ticker), "as_of": str(asof)[:10]}
 
         mos = res.get("margin_of_safety")
         status = "CHEAP" if (mos is not None and mos > 0) else "RICH"
@@ -88,6 +106,10 @@ def _dcf_check_for_order(ticker, price, asof):
             "robust": robust,
             "fair_value_ps": round(float(fv_ps), 0) if fv_ps is not None else None,
             "price": round(float(price), 0) if price is not None else None,
+            # đa ngành/holding: CẢNH BÁO hiển thị (user directive 2026-07-15) — DCF 1-dòng-tiền
+            # có thể vô nghĩa với cấu trúc nhiều mảng. KHÔNG loại khỏi DCF, không đụng
+            # status/robust/gate — y hệt fair_value_ps, thuần hiển thị.
+            "conglomerate": _dcf.is_conglomerate(ticker),
             "as_of": str(asof)[:10],
         }
 
@@ -95,7 +117,7 @@ def _dcf_check_for_order(ticker, price, asof):
         _log.warning("DCF check lỗi cho %s: %s", ticker, exc)
         return {"status": "NOT_COMPUTED", "margin_of_safety": None,
                 "robust": False, "reason": f"dcf_error: {str(exc)[:80]}",
-                "as_of": str(asof)[:10]}
+                "conglomerate": _dcf_is_conglomerate(ticker), "as_of": str(asof)[:10]}
 
 def format_dcf_check(dcf, side="buy", has_override=False):
     """1 dòng hiển thị chuẩn cho dcf_check dict (Pha 2) — dùng chung mọi report echo
@@ -104,6 +126,9 @@ def format_dcf_check(dcf, side="buy", has_override=False):
     if not dcf or not isinstance(dcf, dict):
         return ""
     status = dcf.get("status")
+    # đa ngành/holding: cảnh báo NGAY trên dòng có con số, không giấu trong footnote
+    cong_s = " ⚠ đa ngành — DCF gộp 1 dòng tiền, có thể không phản ánh đúng" \
+        if dcf.get("conglomerate") else ""
     if status == "NOT_COMPUTED":
         return f"DCF: NOT_COMPUTED ({dcf.get('reason', '?')})"
     mos = dcf.get("margin_of_safety")
@@ -121,7 +146,44 @@ def format_dcf_check(dcf, side="buy", has_override=False):
     out = f"{icon} DCF: {status} ({fv_s}MoS {mos_s}, {robust_s})"
     if status == "RICH" and dcf.get("robust") and str(side).lower() == "buy":
         out += " ⚠" if has_override else " ⚠ cần dcf_override_reason"
-    return out
+    return out + cong_s
+
+
+def log_dcf_history(ticker, dcf, source, asof=None):
+    """Ghi 1 dòng vào data/dcf_lens_history.csv (append-only) mỗi lần một report tính dcf_check.
+
+    Mục đích (user directive 2026-07-15): tích luỹ fair_value_ps đã dự báo + giá thị trường lúc
+    tính, để SAU NÀY đối chiếu với giá thật tại T+1M/3M/6M và đánh giá lăng kính DCF có hữu ích
+    không. Đây thuần là BƯỚC GHI DỮ LIỆU — không phân tích, không quyết định gì.
+
+    Chỉ gọi từ đường REPORT (send_plan_report / eod_trading_report / dc_book_waterfall_paper),
+    KHÔNG từ V23Strategy: plan đã duyệt không được ghi ngược (rủi ro, theo dispatch).
+    Fail-safe: mọi lỗi → bỏ qua im lặng (log warning), report không bao giờ vì dòng này mà hỏng.
+    """
+    try:
+        if not dcf or not isinstance(dcf, dict):
+            return
+        row = {
+            "logged_at": dt.datetime.now().isoformat(timespec="seconds"),
+            "as_of": dcf.get("as_of") or (str(asof)[:10] if asof else ""),
+            "ticker": ticker,
+            "source": source,
+            "status": dcf.get("status"),
+            "fair_value_ps": dcf.get("fair_value_ps"),
+            "price": dcf.get("price"),
+            "margin_of_safety": dcf.get("margin_of_safety"),
+            "robust": dcf.get("robust"),
+            "conglomerate": dcf.get("conglomerate"),
+        }
+        os.makedirs(os.path.dirname(DCF_HISTORY_CSV), exist_ok=True)
+        write_header = not os.path.exists(DCF_HISTORY_CSV)
+        with open(DCF_HISTORY_CSV, "a", encoding="utf-8", newline="") as f:
+            w = csv.DictWriter(f, fieldnames=_DCF_HISTORY_COLS)
+            if write_header:
+                w.writeheader()
+            w.writerow(row)
+    except Exception as exc:
+        _log.warning("log_dcf_history lỗi cho %s: %s", ticker, exc)
 
 
 GOLIVE_OUT = os.path.join(WORKDIR, "deploy_golive_dt5g_v4", "out")
