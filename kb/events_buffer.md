@@ -2927,3 +2927,21 @@
 
 ## Consolidation 2026-07-15T02:48:08Z
 - [2026-07-15T02:48:08Z] Mafee/status — bot-done: {"account": "SpaceX", "plan_date": "2026-07-15", "elapsed_s": 2586, "rc": 0}
+
+## Consolidation 2026-07-15T03:07:01Z
+- [2026-07-15T02:54:02Z] Taylor/heartbeat — Taylor_20260715_025346: {"status": "in_progress", "note": "bắt đầu: đọc rating_8l.py + custom30 builder + registry để xác nhận hiện trạng sector-neutral"}
+- [2026-07-15T02:54:46Z] Taylor/heartbeat — Taylor_20260715_025346: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260715_025346", "source": "watcher"}
+- [2026-07-15T02:55:43Z] Taylor/heartbeat — Taylor_20260715_025346: {"status": "in_progress", "note": "đã xác nhận hiện trạng sector-neutral (rating_8l screener CÓ, custom30V selector KHÔNG); candidate 2+3 đã NO-GO hôm qua (v3route chain, fincap 0.30-0.60); thiết kế arm mới duy nhất: risk-adjusted ey (eyrisk) neo A2"}
+- [2026-07-15T02:55:47Z] Taylor/heartbeat — Taylor_20260715_025346: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260715_025346", "source": "watcher"}
+- [2026-07-15T02:56:48Z] Taylor/heartbeat — Taylor_20260715_025346: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260715_025346", "source": "watcher"}
+- [2026-07-15T02:57:48Z] Taylor/heartbeat — Taylor_20260715_025346: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260715_025346", "source": "watcher"}
+- [2026-07-15T02:58:01Z] Taylor/heartbeat — Taylor_20260715_025346: {"status": "in_progress", "note": "implement BASKET_SELECT=eyrisk (ey × penalty ROE_Min5Y liên tục, scope all|fin), pre-register 2 arm + selfcheck trước khi chạy harness"}
+- [2026-07-15T02:58:48Z] Taylor/heartbeat — Taylor_20260715_025346: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260715_025346", "source": "watcher"}
+- [2026-07-15T02:59:48Z] Taylor/heartbeat — Taylor_20260715_025346: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260715_025346", "source": "watcher"}
+- [2026-07-15T03:00:48Z] Taylor/heartbeat — Taylor_20260715_025346: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260715_025346", "source": "watcher"}
+- [2026-07-15T03:01:48Z] Taylor/heartbeat — Taylor_20260715_025346: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260715_025346", "source": "watcher"}
+- [2026-07-15T03:02:48Z] Taylor/heartbeat — Taylor_20260715_025346: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260715_025346", "source": "watcher"}
+- [2026-07-15T03:03:48Z] Taylor/heartbeat — Taylor_20260715_025346: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260715_025346", "source": "watcher"}
+- [2026-07-15T03:04:49Z] Taylor/heartbeat — Taylor_20260715_025346: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260715_025346", "source": "watcher"}
+- [2026-07-15T03:05:49Z] Taylor/heartbeat — Taylor_20260715_025346: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260715_025346", "source": "watcher"}
+- [2026-07-15T03:06:49Z] Taylor/heartbeat — Taylor_20260715_025346: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260715_025346", "source": "watcher"}
