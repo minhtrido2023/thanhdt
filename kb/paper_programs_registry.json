@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updated": "2026-07-07",
+  "updated": "2026-07-15",
   "description": "Registry các chương trình PAPER-TRADING đang active — nguồn duy nhất cho paper_programs_daily_report.py. Thêm sleeve mới = thêm 1 entry (không sửa code render). Probe types: command | journal_scan | alphalens.",
   "programs": [
     {
@@ -208,33 +208,6 @@
         "data/pt_v22_dt5g_*.csv (V2.3-book = production signal), data/pt_v4_dt5g_logs.csv, data/pt_v11_tq34b_logs.csv, data/pt_v12_macro_logs.csv"
       ],
       "notes": "pt_v22_dt5g KHÔNG PHẢI paper thí nghiệm — là sổ tín hiệu production, KHÔNG BAO GIỜ retire khi V2.4 còn live. V11/V12/V4 giữ chạy làm control arms (chi phí ~0, không gửi kênh nào). Inception khác nhau (V11/V12 cũ hơn, V4 06-01, V23 06-11) — probe tự rebase về cửa sổ chung."
-    },
-    {
-      "id": "ab_cross",
-      "name": "A/B cross-mode (ab_cross vs ab_dip)",
-      "owner": "Taylor",
-      "status": "paused",
-      "pause_reason": "PAUSED — chưa từng bắt đầu (0 phiên), và câu hỏi đã được trả lời bằng đường khác: cross_mode 'adaptive' được chọn làm production default từ 2026-06-26 (user+Taylor, backtest: always-TWAP hơn dip 3.5bps fill-rate nhưng variance 2×; adaptive beat cả hai). Giữ entry để mở lại nếu cần re-test ở NAV lớn.",
-      "objective": "So sánh 2 chế độ đặt lệnh (cross ngay vs chờ dip) trên cùng plan — chế độ nào cho fill price tốt hơn NET?",
-      "start": null,
-      "end": null,
-      "end_or_trigger": "PAUSED 2026-07-07 (quyết định trong job Taylor_20260707_071130) — không wire cron cho ab_cross/ab_dip.",
-      "gate_criteria": [
-        {"text": "Cả 2 account A/B có phiên chạy song song đủ mẫu", "status": "pending"},
-        {"text": "Khác biệt fill price có ý nghĩa thống kê trước khi kết luận", "status": "pending"}
-      ],
-      "probe": {
-        "type": "command",
-        "cmd": ["python3", "bot_ab_report.py", "--days", "10"],
-        "timeout": 120,
-        "max_chars": 1200
-      },
-      "data_sources": [
-        "bot_ab_report.py",
-        "data/bot_paper_ab_cross.json",
-        "data/bot_paper_ab_dip.json"
-      ],
-      "notes": "Tính đến 2026-07-07 account ab_cross chưa chạy phiên nào — report sẽ nói thẳng điều đó."
     }
   ]
 }
