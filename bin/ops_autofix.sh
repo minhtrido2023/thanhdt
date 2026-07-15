@@ -48,7 +48,27 @@ if [ -f "$STAMP_FILE" ]; then
     exit 0
   fi
 fi
+# Global episode guard (2026-07-15, Wags coord-2026-07-15): checker sweep per-account
+# (for_each_live_account) gọi ops_autofix vài giây liên tiếp với LABEL KHÁC NHAU cho cùng
+# 1 issue fleet-wide → cooldown per-label không dedupe được (sự cố 07-15: ops-health-ZaloPay
+# 01:20:06Z + ops-health-SpaceX 01:20:12Z → 2 Winston fable song song, kết luận NGƯỢC nhau
+# trên cùng preflight_check.sh). Trong AUTOFIX_GLOBAL_GUARD giây (mặc định 600) sau BẤT KỲ
+# dispatch autofix nào: lần gọi sau chỉ notify gộp-episode, KHÔNG dispatch song song, và
+# KHÔNG stamp cooldown per-label (issue thật sự riêng sẽ được checker kỳ sau re-flag và
+# dispatch bình thường). Escape hatch: AUTOFIX_GLOBAL_GUARD=0 tắt guard.
+AUTOFIX_GLOBAL_GUARD="${AUTOFIX_GLOBAL_GUARD:-600}"
+GLOBAL_STAMP="$STATE_DIR/_global.last"
+if [ "$AUTOFIX_GLOBAL_GUARD" -gt 0 ] && [ -f "$GLOBAL_STAMP" ]; then
+  GLAST=$(cat "$GLOBAL_STAMP" 2>/dev/null || echo 0)
+  GAGE=$((NOW - GLAST))
+  if [ "$GAGE" -lt "$AUTOFIX_GLOBAL_GUARD" ]; then
+    echo "[ops_autofix] global guard: autofix khác vừa dispatch ${GAGE}s trước — gộp episode, không dispatch song song cho '$LABEL'."
+    "$ROOT/bin/notify_thread.sh" "⏸️ [ops-autofix] '$LABEL' phát hiện ${GAGE}s sau 1 autofix khác đang chạy — gộp chung episode, không dispatch song song (nếu là issue riêng biệt, checker kỳ sau sẽ tự re-flag): $DETAILS" "$TRADING_DAILY_THREAD" 2>/dev/null || true
+    exit 0
+  fi
+fi
 echo "$NOW" > "$STAMP_FILE"
+echo "$NOW" > "$GLOBAL_STAMP"
 
 "$ROOT/bin/notify_thread.sh" "🔧 [ops-autofix] Phát hiện vấn đề '$LABEL' — đã tự động cử agent chẩn đoán + sửa (Winston/fable). Sẽ báo kết quả vào đây khi xong." "$TRADING_DAILY_THREAD" 2>/dev/null || true
 
