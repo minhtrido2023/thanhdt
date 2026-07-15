@@ -142,16 +142,25 @@ print('yes' if d.get('refresh_token') else 'no')
   fi
 fi
 
-# ── 5. BQ freshness (nhanh — chỉ check ticker_prune lag) ─────────────────────
-BQ_LAG=$(bq query --use_legacy_sql=false --format=csv --quiet \
+# ── 5. BQ freshness (nhanh — check ticker_prune lag + depth) ─────────────────
+# Depth (số mã ngày mới nhất) thêm 2026-07-15: sự cố upstream ghi đè ticker_prune còn
+# 7-10 mã/ngày trong khi MAX(time) vẫn advance → lag-check một mình bị mù hoàn toàn.
+BQ_ROW=$(bq query --use_legacy_sql=false --format=csv --quiet \
   --project_id=lithe-record-440915-m9 \
-  "SELECT DATE_DIFF(CURRENT_DATE('Asia/Ho_Chi_Minh'), MAX(t.time), DAY) AS lag FROM \`lithe-record-440915-m9.tav2_bq.ticker_prune\` AS t" \
-  2>/dev/null | tail -1 | tr -d '[:space:]' || echo "999")
+  "SELECT DATE_DIFF(CURRENT_DATE('Asia/Ho_Chi_Minh'), MAX(t.time), DAY) AS lag,
+          COUNT(DISTINCT IF(t.time = (SELECT MAX(x.time) FROM \`lithe-record-440915-m9.tav2_bq.ticker_prune\` AS x), t.ticker, NULL)) AS names
+   FROM \`lithe-record-440915-m9.tav2_bq.ticker_prune\` AS t
+   WHERE t.time >= DATE_SUB(CURRENT_DATE('Asia/Ho_Chi_Minh'), INTERVAL 14 DAY)" \
+  2>/dev/null | tail -1 | tr -d '[:space:]' || echo "999,0")
+BQ_LAG="${BQ_ROW%%,*}"; BQ_NAMES="${BQ_ROW##*,}"
 
 # Thứ Hai sáng: phiên gần nhất là thứ Sáu → lag=3 ngày lịch là bình thường (không phải stale).
 _max_prune_lag=2; [ "$DOW_ICT" = "1" ] && _max_prune_lag=3
-if [ "$BQ_LAG" -le "$_max_prune_lag" ] 2>/dev/null; then
-  _ok "BQ ticker_prune: lag=${BQ_LAG}d ✓"
+_min_prune_names=200   # bình thường ~225-265 mã/ngày; <200 = bảng bị ghi thiếu
+if [ "$BQ_LAG" -le "$_max_prune_lag" ] 2>/dev/null && [ "$BQ_NAMES" -ge "$_min_prune_names" ] 2>/dev/null; then
+  _ok "BQ ticker_prune: lag=${BQ_LAG}d, ${BQ_NAMES} mã ✓"
+elif [ "$BQ_NAMES" -lt "$_min_prune_names" ] 2>/dev/null; then
+  _warn "BQ ticker_prune: ngày mới nhất chỉ có ${BQ_NAMES} mã (<${_min_prune_names}, bình thường ~225-265) — bảng bị ghi thiếu/moi ruột dù lag=${BQ_LAG}d; ref_price/screening không tin được."
 else
   _warn "BQ ticker_prune: lag=${BQ_LAG}d — giá ref_price trong plan có thể cũ; kiểm tra trước khi đặt lệnh."
 fi

@@ -185,6 +185,25 @@ _run_pipeline() {
 echo "=== BQ Freshness Check — $TODAY $NOW_ICT ==="
 
 _check "ticker_prune (EOD price)"         "tav2_bq.ticker_prune"              "t.time"  $MAX_PRICE_LAG  "trading"  || true
+# --- ticker_prune DEPTH check (2026-07-15, sự cố upstream ghi đè bảng): MAX(time) vẫn
+# advance khi bảng bị moi ruột (7-10 mã/ngày từ 07-08 thay vì ~225-265) → lag-check một
+# mình mù hoàn toàn, suýt cho DollarBill lập plan trên universe 7 mã. Đếm số mã của
+# NGÀY MỚI NHẤT: < MIN_PRUNE_NAMES ⇒ FAIL như stale (block pipeline/DollarBill).
+MIN_PRUNE_NAMES=200   # daily_refresh_v34b precheck dùng cùng ngưỡng (bình thường ~225-265)
+prune_names=$(bq query --use_legacy_sql=false --project_id="$PROJECT" --format=csv --quiet \
+  "SELECT COUNT(DISTINCT t.ticker) FROM \`${PROJECT}.tav2_bq.ticker_prune\` AS t
+   WHERE t.time = (SELECT MAX(x.time) FROM \`${PROJECT}.tav2_bq.ticker_prune\` AS x)" \
+  2>/dev/null | tail -1 | tr -d '[:space:]')
+prune_names="${prune_names:-0}"
+if [ "$prune_names" -ge "$MIN_PRUNE_NAMES" ] 2>/dev/null; then
+  [ -z "$QUIET" ] && echo "OK   ticker_prune depth: ${prune_names} mã ngày mới nhất (≥${MIN_PRUNE_NAMES})"
+else
+  depth_msg="⚠️ BQ DEPTH ($TODAY $NOW_ICT): ticker_prune ngày mới nhất chỉ có ${prune_names} mã (<${MIN_PRUNE_NAMES}, bình thường ~225-265) — bảng bị ghi thiếu/moi ruột dù MAX(time) vẫn advance. Chặn pipeline/DollarBill."
+  echo "FAIL ticker_prune depth: ${prune_names} mã (<${MIN_PRUNE_NAMES}) — bảng bị ghi thiếu"
+  "$ROOT/bin/notify.sh" "$depth_msg" 2>/dev/null || true
+  "$ROOT/bin/notify_thread.sh" "$depth_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+  FAILED=1
+fi
 _check "vnindex_5state_dt5g_live (DT5G)"  "tav2_bq.vnindex_5state_dt5g_live"  "t.time"  $MAX_STATE_LAG  "trading"  || true
 _check "ticker_financial (fundamentals)"  "tav2_bq.ticker_financial"          "t.time"  $MAX_FIN_LAG    "calendar" || true
 # --- mở rộng 2026-07-11 (audit Winston_20260711_031745 #3) ---
