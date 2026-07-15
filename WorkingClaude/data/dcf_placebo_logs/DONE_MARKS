@@ -19,3 +19,5 @@ placebo_seed18 exit=0
 placebo_seed17 exit=0
 placebo_seed19 exit=0
 placebo_seed20 exit=0
+placebo_pe exit=0
+varA_rerun_pe_guard exit=0
