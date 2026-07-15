@@ -1,0 +1,82 @@
+{
+ "tables": {
+  "custom30v_8l": {
+   "file": "custom30v_8l.parquet",
+   "rows": 1440,
+   "size_mb": 0.0
+  },
+  "risk_rating": {
+   "file": "risk_rating.parquet",
+   "rows": 116389,
+   "size_mb": 0.2
+  },
+  "vnindex_5state": {
+   "file": "vnindex_5state.parquet",
+   "rows": 6320,
+   "size_mb": 0.0,
+   "max_time": "2026-07-13"
+  },
+  "vnindex_5state_dt5g_live": {
+   "file": "vnindex_5state_dt5g_live.parquet",
+   "rows": 3124,
+   "size_mb": 0.0,
+   "max_time": "2026-07-14"
+  },
+  "vnindex_5state_tam_quan_v34b_clean": {
+   "file": "vnindex_5state_tam_quan_v34b_clean.parquet",
+   "rows": 6320,
+   "size_mb": 0.0,
+   "max_time": "2026-07-13"
+  },
+  "vnindex_5state_dt_4gate": {
+   "file": "vnindex_5state_dt_4gate.parquet",
+   "rows": 6291,
+   "size_mb": 0.0,
+   "max_time": "2026-06-02"
+  },
+  "fa_ratings": {
+   "file": "fa_ratings.parquet",
+   "rows": 12406,
+   "size_mb": 2.3,
+   "max_time": "2026-05-04"
+  },
+  "fa_ratings_8l": {
+   "file": "fa_ratings_8l.parquet",
+   "rows": 51250,
+   "size_mb": 0.1,
+   "max_time": "2026-06-20"
+  },
+  "ticker_financial": {
+   "file": "ticker_financial.parquet",
+   "rows": 66387,
+   "size_mb": 70.8,
+   "max_time": "2026-07-08"
+  },
+  "ticker_1m": {
+   "file": "ticker_1m.parquet",
+   "rows": 20868,
+   "size_mb": 9.3
+  },
+  "ticker_prune": {
+   "file": "ticker_prune/",
+   "rows": 753570,
+   "size_mb": 433.9,
+   "max_time": "2026-07-14"
+  },
+  "ticker": {
+   "file": "ticker/",
+   "rows": 3480386,
+   "size_mb": 1469.7,
+   "max_time": "2026-07-13"
+  },
+  "custom30_8l": {
+   "file": "custom30_8l.parquet",
+   "rows": 1440,
+   "size_mb": 0.0
+  }
+ },
+ "verified": true,
+ "verified_at": "2026-07-14T16:53:05Z",
+ "verified_at_epoch": 1784047985.713893,
+ "_pin_note": "Pha-5 placebo_pe (job Taylor_20260715_041608): experiment-local pin of the shared cache via symlinks. verified flipped true HERE ONLY because the shared manifest was marked unverified by the 07-14 upstream ticker_financial incident; this experiment deliberately wants the frozen local snapshot (ticker_financial = GOOD pre-corruption), and the varA byte-identical regression guard adjudicates comparability with the 07-14 baseline runs."
+}
