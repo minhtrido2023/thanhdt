@@ -2719,3 +2719,7 @@
 - [2026-07-16T12:10:16Z] Mafee/status — eod-trading-report: {"account": "ZaloPay", "plan_date": "2026-07-16", "delivered_via": "trading_report_thread"}
 - [2026-07-16T12:10:29Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-07-16", "delivered_via": "hold_day"}
 - [2026-07-16T13:01:09Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 52454}
+
+## Consolidation 2026-07-16T14:07:01Z
+- [2026-07-16T14:03:02Z] Mike/decision — plan-2026-07-17-approved: {"date": "2026-07-17", "approved_by": "user", "accounts": {"SpaceX": {"action": "HOLD", "orders": 0}, "ZaloPay": {"action": "REBALANCE", "orders": 2, "summary": "sell VPB 800cp (trim legacy overweight ngày 3, 5900→5100cp), buy TCB 600cp"}}, "note": "Mafee authorized để thực thi sáng 2026-07-17."}
+- [2026-07-16T13:45:51Z] Taylor/status — fa_ratings-refresh-ok: {"rows": 12406}
