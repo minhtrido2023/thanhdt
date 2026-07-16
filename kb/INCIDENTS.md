@@ -2562,3 +2562,74 @@ verify độc lập nghiêm túc trước khi đóng (3 selfcheck + quant-skepti
 - Quyết định user về khôi phục `ticker_financial`/`ticker_prune` từ backup Winston đã chụp
   (`*_ttbackup_fresh_20260714`/`_20260713`) sau khi hỏi BQ admin — chưa quyết tính tới lúc
   retro này chạy (xác nhận: chưa có bus event/commit nào áp dụng khôi phục).
+
+## RETRO — 2026-07-16: 0 sự cố, 0 pattern mới (ngày sạch — chuỗi 5 ngày liên tiếp
+## data-registry-accuracy 07-11→07-15 KHÔNG kéo dài sang hôm nay)
+
+**Bối cảnh ngày:** ngày vận hành nhẹ (SpaceX HOLD/0 lệnh, ZaloPay REBALANCE 2 lệnh theo plan
+đã duyệt trước — cả 2 job DollarBill lập plan T+2 chạy sạch exit 0), cộng 1 việc điều tra
+không liên quan trading (user hỏi Mafee về khoản "trứng vàng" — sản phẩm tiền gửi money-market
+DNSE nằm ngoài API OpenAPI, 2 job Mafee đều DONE exit 0, kết luận rõ ràng không phải bug).
+
+**Bằng chứng đã kiểm tra (không suy đoán):**
+- `grep '^## 2026-07-16' kb/INCIDENTS.md` → 0 kết quả (chưa ai ghi entry nào cho ngày này).
+- Toàn bộ event bus 2026-07-16 (cả UTC lịch và ICT lịch 07-15T17:00Z→07-16T17:00Z để không
+  lệch múi giờ): `event_type` chỉ gồm heartbeat(39)/status(23)/decision(3)/finding(2)/answer(1).
+  **0 event `error`, 0 event `question`.**
+- Job board (`bus/jobs/*.json`, lọc `started_at` unix-ts thuộc 2026-07-16): 4 job hoàn tất
+  (`Mafee_20260716_164743`, `Mafee_20260716_170856`, `DollarBill_20260716_120132/120133`) —
+  **cả 4 đều `status:done exit_code:0 attempt:1`**, không job nào fail/timeout/retry.
+- `git log` cả 2 repo (WorkingClaude + mike) trong ngày: chỉ commit routine
+  (`consolidate`/`fleet backup`) — **0 commit hotfix**, khác hẳn 07-11→07-15 (mỗi ngày đều có
+  commit sửa lỗi thật).
+- Tự verify độc lập bằng BQ live (không tin lại context cũ): `tav2_bq.ticker_financial`
+  MAX(time)=MAX(Release_Date)=**2026-07-16**, 66.394 dòng (so với bản hỏng 07-14
+  MAX(time)=2026-05-04, 65.178 dòng) — corruption entry 07-14 xuất hiện đã **TỰ LÀNH ở nguồn
+  upstream** tính tới hôm nay, độc lập với quyết định khôi phục-từ-backup mà user vẫn đang
+  chờ hỏi BQ admin (context_pack 07-15 — user nói sẽ tự hỏi, Mike không tự khôi phục). Tương tự
+  `tav2_bq.ticker_prune` MAX(time)=2026-07-16, 262 ticker (khoẻ, so bản hỏng 07-13 chỉ 7-10
+  tên). Cache local `data/bq_cache/ticker_financial.parquet` cũng đã sync lại tối nay
+  (23:45 ICT) phản ánh đúng nguồn đã lành — **không còn đang mirror dữ liệu hỏng**.
+- Đối chiếu bus kể từ RETRO 07-15: **cả 2 câu hỏi escalate của ngày hôm qua
+  (`retro-pattern-recurring-data-registry-accuracy-5days`,
+  `retro-pattern-recurring-joblifecycle-timeout-3`) vẫn CHƯA có event `answer`/`decision`
+  khớp topic trên bus** — sweep tĩnh 1-lần rà toàn bộ script money-path/`BQ_LOCAL_CACHE` mà
+  RETRO 07-12 và 07-15 đều đề xuất **vẫn CHƯA được dispatch**.
+
+**3 câu hỏi bắt buộc — áp dụng ở mức ngày (không có sự cố cụ thể để trả lời từng cái):**
+a. Không có sự cố mới — không đánh giá MỚI/TÁI DIỄN được. Điều đáng ghi nhận: chuỗi
+   data-registry-accuracy 5 ngày liên tiếp (07-11→07-15) **KHÔNG kéo dài thành 6** — nhưng đây
+   là quan sát **thụ động** (do upstream tự lành, không phải do sweep phòng ngừa đã đề xuất
+   được thực thi), nên không thể tính là "pattern đã bị chặn đứng bởi biện pháp phòng ngừa".
+b. Không có gì cần đóng hôm nay ở tầng sự cố. Nhưng 2 mục HỞ từ 07-15 (sweep tĩnh 1-lần,
+   quyết định fail-open policy của `bq_local_cache.py`) **vẫn treo nguyên**, cộng thêm 1 ngày
+   nữa không có hành động — residual risk không đổi: bất kỳ script money-path/publish nào
+   khác ngoài 2 case đã vá (`publish_gated_state.py` 07-12, `golive_recommend_v23.py` 07-15)
+   có thể vẫn đang kế thừa `BQ_LOCAL_CACHE` toàn cục mà chưa ai biết, tới khi tự lộ ra tình cờ.
+c. Không phải pattern mới, nhưng **thiếu-hành-động trên câu hỏi escalate đã đặt** tự nó là
+   1 dấu hiệu quy trình: escalate ghi bus `question` không có cơ chế nhắc lại/theo dõi tuổi —
+   nếu 07-15 và 07-16 đều không có ai trả lời, tới RETRO nào đó các câu hỏi này sẽ "cũ" tới
+   mức bị bỏ quên thay vì được quyết định. Đây là dấu hiệu CẦN THEO DÕI, chưa đủ ngưỡng để
+   escalate thêm lần nữa (mới 1 ngày trôi qua kể từ khi đặt, chưa lặp đủ 2 lần liên tiếp để
+   kích hoạt điều kiện bước 10 lại).
+
+| # | Hạng mục | Phân loại | Nguồn gốc | Người ghi chép |
+|---|---|---|---|---|
+| — | (không có sự cố nào phát sinh trong ngày) | — | — | — |
+
+**Ghi nhận tích cực:** đây là ngày đầu tiên kể từ RETRO 07-11 (6 ngày liên tiếp có RETRO trước
+đó: 07-11/12/14/15 đều ≥2 sự cố) mà retro ghi được **0 sự cố** — cả 2 luồng dữ liệu bị hỏng
+(`ticker_financial`, `ticker_prune`) tính tới hôm nay đều đã có bằng chứng BQ live cho thấy đã
+lành, và không có job/dispatch nào fail. Không nên đọc thành "hệ thống đã hết vấn đề" — 2 mục
+hở từ pattern data-registry-accuracy (sweep tĩnh 1-lần, fail-open policy) vẫn hoàn toàn chưa xử
+lý, chỉ là hôm nay không có sự kiện MỚI nào phơi bày chúng thêm.
+
+**Việc còn treo sang ngày mai (kế thừa nguyên từ RETRO 07-15, +1 ngày chưa xử lý):**
+- Quyết định user cho câu hỏi `retro-pattern-recurring-data-registry-accuracy-5days` (sweep
+  tĩnh 1-lần rà `BQ_LOCAL_CACHE` + chính sách fail-open) — nay đã 1 ngày không phản hồi.
+- Quyết định user cho câu hỏi `retro-pattern-recurring-joblifecycle-timeout-3` (07-14).
+- `ticker_financial`/`ticker_prune` tự lành ở nguồn (xác nhận BQ live 07-16) — có thể coi
+  hạng mục "khôi phục từ backup" đã HẾT CẦN THIẾT (upstream đã đúng), nhưng quyết định chính
+  thức đóng hạng mục này vẫn nên do user xác nhận (đã tự hỏi BQ admin xong hay chỉ trùng hợp
+  tự phục hồi) — Mike không tự đóng thay.
+
