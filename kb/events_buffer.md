@@ -2661,3 +2661,14 @@
 - [2026-07-15T17:36:33Z] Wags/heartbeat — Wags_20260715_173533: {"status": "still_running", "elapsed_min": 1, "job_id": "Wags_20260715_173533", "source": "watcher"}
 - [2026-07-15T17:37:16Z] Wags/heartbeat — Wags_20260715_173533: {"status": "in_progress", "note": "(2) commits+job_ids verified het (1b66428/ef23190 nam o repo mike, khong phai WorkingClaude). Dang check candidate missed incidents + dispatch.sh timeout claim."}
 - [2026-07-15T17:37:34Z] Wags/heartbeat — Wags_20260715_173533: {"status": "still_running", "elapsed_min": 2, "job_id": "Wags_20260715_173533", "source": "watcher"}
+
+## Consolidation 2026-07-16T02:05:13Z
+- [2026-07-16T02:05:02Z] Mafee/status — bot-start: {"account": "SpaceX", "plan_date": "2026-07-16", "auto_otp": true}
+- [2026-07-16T02:05:02Z] Mafee/status — bot-start: {"account": "ZaloPay", "plan_date": "2026-07-16", "auto_otp": true}
+- [2026-07-16T02:05:13Z] Mafee/status — bot-done: {"account": "SpaceX", "plan_date": "2026-07-16", "elapsed_s": 11, "rc": 0}
+- [2026-07-16T01:20:07Z] Mike/status — preflight-ZaloPay-2026-07-16: {"result": "GREEN", "checks": ["✅ BOT_STOP: CLEAR", "✅ Plan ZaloPay 2026-07-16: 2 lệnh, ~0.027B VND, state=NEUTRAL (DT5G_macro), approved=user mafee=True", "✅ macro_health: HEALTHY (DT5G_macro, file 13.7h tuổi)", "✅ Gmail OAuth: có refresh_token (tự refresh khi cần)", "✅ BQ ticker_prune: lag=1d, 264 mã ✓"]}
+- [2026-07-16T01:20:07Z] Mike/status — ops-health-check-ZaloPay-2026-07-16: {"account": "ZaloPay", "label": "Trước phiên sáng", "warn_count": 0}
+- [2026-07-16T01:20:12Z] Mike/status — preflight-SpaceX-2026-07-16: {"result": "GREEN", "checks": ["✅ BOT_STOP: CLEAR", "✅ Plan SpaceX 2026-07-16: 0 lệnh, ~0.000B VND, state=NEUTRAL (DT5G_macro), approved=user mafee=True", "✅ macro_health: HEALTHY (DT5G_macro, file 13.7h tuổi)", "✅ Gmail OAuth: có refresh_token (tự refresh khi cần)", "✅ BQ ticker_prune: lag=1d, 264 mã ✓"]}
+- [2026-07-16T01:20:12Z] Mike/status — ops-health-check-SpaceX-2026-07-16: {"account": "SpaceX", "label": "Trước phiên sáng", "warn_count": 0}
+- [2026-07-16T01:45:06Z] Mike/status — preflight-ZaloPay-2026-07-16: {"result": "GREEN", "checks": ["✅ BOT_STOP: CLEAR", "✅ Plan ZaloPay 2026-07-16: 2 lệnh, ~0.027B VND, state=NEUTRAL (DT5G_macro), approved=user mafee=True", "✅ macro_health: HEALTHY (DT5G_macro, file 14.1h tuổi)", "✅ Gmail OAuth: có refresh_token (tự refresh khi cần)", "✅ BQ ticker_prune: lag=1d, 264 mã ✓"]}
+- [2026-07-16T01:45:12Z] Mike/status — preflight-SpaceX-2026-07-16: {"result": "GREEN", "checks": ["✅ BOT_STOP: CLEAR", "✅ Plan SpaceX 2026-07-16: 0 lệnh, ~0.000B VND, state=NEUTRAL (DT5G_macro), approved=user mafee=True", "✅ macro_health: HEALTHY (DT5G_macro, file 14.1h tuổi)", "✅ Gmail OAuth: có refresh_token (tự refresh khi cần)", "✅ BQ ticker_prune: lag=1d, 264 mã ✓"]}
