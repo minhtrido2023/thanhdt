@@ -2252,3 +2252,28 @@
 - [2026-07-17T12:05:39Z] DollarBill/heartbeat — DollarBill_20260717_120138: {"status": "still_running", "elapsed_min": 4, "job_id": "DollarBill_20260717_120138", "source": "watcher"}
 - [2026-07-17T12:06:39Z] DollarBill/heartbeat — DollarBill_20260717_120137: {"status": "still_running", "elapsed_min": 5, "job_id": "DollarBill_20260717_120137", "source": "watcher"}
 - [2026-07-17T12:06:39Z] DollarBill/heartbeat — DollarBill_20260717_120138: {"status": "still_running", "elapsed_min": 5, "job_id": "DollarBill_20260717_120138", "source": "watcher"}
+
+## Consolidation 2026-07-17T12:14:53Z
+- [2026-07-17T12:07:32Z] DollarBill/heartbeat — DollarBill_20260717_120138: {"status": "in_progress", "note": "anomaly: cash 07-17 = 3.16M vs 305.39M hôm qua — đang điều tra; positions 15 mã stable, live prices lấy xong"}
+- [2026-07-17T12:07:39Z] DollarBill/heartbeat — DollarBill_20260717_120137: {"status": "still_running", "elapsed_min": 6, "job_id": "DollarBill_20260717_120137", "source": "watcher"}
+- [2026-07-17T12:07:39Z] DollarBill/heartbeat — DollarBill_20260717_120138: {"status": "still_running", "elapsed_min": 6, "job_id": "DollarBill_20260717_120138", "source": "watcher"}
+- [2026-07-17T12:08:39Z] DollarBill/heartbeat — DollarBill_20260717_120137: {"status": "still_running", "elapsed_min": 7, "job_id": "DollarBill_20260717_120137", "source": "watcher"}
+- [2026-07-17T12:08:40Z] DollarBill/heartbeat — DollarBill_20260717_120138: {"status": "still_running", "elapsed_min": 7, "job_id": "DollarBill_20260717_120138", "source": "watcher"}
+- [2026-07-17T12:09:39Z] DollarBill/heartbeat — DollarBill_20260717_120137: {"status": "still_running", "elapsed_min": 8, "job_id": "DollarBill_20260717_120137", "source": "watcher"}
+- [2026-07-17T12:09:40Z] DollarBill/heartbeat — DollarBill_20260717_120138: {"status": "still_running", "elapsed_min": 8, "job_id": "DollarBill_20260717_120138", "source": "watcher"}
+- [2026-07-17T12:10:39Z] DollarBill/heartbeat — DollarBill_20260717_120137: {"status": "still_running", "elapsed_min": 9, "job_id": "DollarBill_20260717_120137", "source": "watcher"}
+- [2026-07-17T12:10:40Z] DollarBill/heartbeat — DollarBill_20260717_120138: {"status": "still_running", "elapsed_min": 9, "job_id": "DollarBill_20260717_120138", "source": "watcher"}
+- [2026-07-17T12:11:29Z] DollarBill/heartbeat — DollarBill_20260717_120138: {"status": "in_progress", "note": "basket ổn định 07-16→07-17, VIX -19.12% EXTREME (150VND trên stop), cash anomaly 3.16M vs 305.39M, đang viết plan_SpaceX_2026-07-20.json HOLD"}
+- [2026-07-17T12:11:39Z] DollarBill/heartbeat — DollarBill_20260717_120137: {"status": "still_running", "elapsed_min": 10, "job_id": "DollarBill_20260717_120137", "source": "watcher"}
+- [2026-07-17T12:11:40Z] DollarBill/heartbeat — DollarBill_20260717_120138: {"status": "still_running", "elapsed_min": 10, "job_id": "DollarBill_20260717_120138", "source": "watcher"}
+- [2026-07-17T12:12:18Z] DollarBill/heartbeat — DollarBill_20260717_120137: {"status": "in_progress", "note": "Active NAV anomaly: availableCash=1.4M vs totalCash=22.5M vs prior plan 147M. Đang phân tích và viết plan 07-20. Roadmap: sell VPB 800cp + buy TCB 351cp (complete) + MBB 92cp (complete)."}
+- [2026-07-17T12:12:40Z] DollarBill/heartbeat — DollarBill_20260717_120137: {"status": "still_running", "elapsed_min": 11, "job_id": "DollarBill_20260717_120137", "source": "watcher"}
+- [2026-07-17T12:12:41Z] DollarBill/heartbeat — DollarBill_20260717_120138: {"status": "still_running", "elapsed_min": 11, "job_id": "DollarBill_20260717_120138", "source": "watcher"}
+- [2026-07-17T12:13:40Z] DollarBill/heartbeat — DollarBill_20260717_120137: {"status": "still_running", "elapsed_min": 12, "job_id": "DollarBill_20260717_120137", "source": "watcher"}
+- [2026-07-17T12:13:41Z] DollarBill/heartbeat — DollarBill_20260717_120138: {"status": "still_running", "elapsed_min": 12, "job_id": "DollarBill_20260717_120138", "source": "watcher"}
+- [2026-07-17T12:13:54Z] DollarBill/decision — plan-2026-07-20: {"account": "SpaceX", "plan_date": "2026-07-20", "action": "HOLD", "orders": 0, "state": "NEUTRAL(3)", "nav_estimate_vnd": 951570463, "stock_mtm_vnd": 646180000, "cash_anomaly": "CRITICAL: DNSE API 3.16M vs verified 305.39M 07-16, no trades 07-17, cause unknown", "vix_risk": "EXTREME_WATCH: -19.12% from cost 17000, live 13750, stop_threshold 13600, gap 150 VND", "file": "data/trade_plans/plan_SpaceX_2026-07-20.json", "requires_user_approval": true}
+- [2026-07-17T12:14:39Z] DollarBill/answer — plan-SpaceX-07-20-complete: {"job": "DollarBill_20260717_120138", "status": "done", "file": "data/trade_plans/plan_SpaceX_2026-07-20.json", "action": "HOLD", "orders": 0, "sent_to_discord": "plan_thread", "awaiting_user_approval": true, "critical_flags": ["VIX_EXTREME_WATCH_13750_stop_13600", "CASH_ANOMALY_3M_vs_305M"]}
+- [2026-07-17T12:14:40Z] DollarBill/heartbeat — DollarBill_20260717_120137: {"status": "still_running", "elapsed_min": 13, "job_id": "DollarBill_20260717_120137", "source": "watcher"}
+- [2026-07-17T12:14:41Z] DollarBill/heartbeat — DollarBill_20260717_120138: {"status": "still_running", "elapsed_min": 13, "job_id": "DollarBill_20260717_120138", "source": "watcher"}
+- [2026-07-17T12:10:17Z] Mafee/status — eod-trading-report: {"account": "ZaloPay", "plan_date": "2026-07-17", "delivered_via": "trading_report_thread"}
+- [2026-07-17T12:10:33Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-07-17", "delivered_via": "hold_day"}
