@@ -89,6 +89,36 @@ Agent(prompt="query BQ freshness ticker"), Agent(prompt="query BQ freshness tick
 
 **Rule**: N việc độc lập → dispatch/Agent song song. Việc phụ thuộc nhau → tuần tự.
 
+## Gộp chuỗi nghiên cứu nhiều bước ĐÃ BIẾT TRƯỚC thành 1 dispatch (cost-opt #3, 2026-07-17)
+
+Khác với "N việc độc lập" ở trên (chạy song song) — đây là **N bước ĐÃ LIỆT KÊ SẴN, không
+cần Mike phán đoán/tổng hợp giữa từng bước** (vd sector sweep: nghiên cứu lần lượt 5 ngành
+mới). Nếu Mike dispatch N lần riêng (`dispatch.sh Taylor "sector A" --bg`, rồi đợi, rồi
+`dispatch.sh Taylor "sector B" --bg`, ...), MỖI lần trả phí cố định riêng: 12K token context
+(hoặc 4K nếu đã dùng context-mini) + heartbeat/watcher/notification overhead — nhân lên N lần
+cho cùng 1 chuỗi việc mà Taylor có thể tự làm liên tục trong 1 phiên.
+
+**Quy tắc mới**: khi chuỗi bước đã biết đủ trước khi dispatch (không cần Mike đọc kết quả
+bước 1 mới quyết được bước 2 là gì) → gộp thành **1 dispatch duy nhất**, yêu cầu agent tự
+lặp nội bộ và ghi finding riêng từng bước lên bus:
+
+```bash
+bin/dispatch.sh Taylor "Nghiên cứu lần lượt 5 sector sau, MỖI sector ghi 1 bus finding
+riêng ngay khi xong (đừng đợi hết cả 5 mới ghi — để Mike thấy tiến độ qua bus như bình
+thường): (1) ngân hàng, (2) bất động sản KCN, (3) logistics, (4) bán lẻ, (5) hoá chất.
+Với mỗi sector: <tiêu chí nghiên cứu cụ thể>." --bg --timeout 3600
+```
+
+`--timeout` phải đủ rộng cho CẢ chuỗi (không phải 1 bước) — ước lượng theo số bước ×
+thời gian/bước thường thấy, cộng đệm. Heartbeat của agent (bắt buộc mỗi 4-5 tool call)
+vẫn hoạt động bình thường suốt cả chuỗi nên `_hb_aware_timeout` không kill giữa chừng
+kể cả job chạy hàng chục phút.
+
+**KHÔNG áp dụng khi**: bước sau phụ thuộc PHÁN ĐOÁN của Mike về kết quả bước trước (vd
+"tuỳ vào finding sector A có đáng chú ý không mới quyết có làm sector B hay đổi hướng") —
+lúc đó vẫn dispatch riêng từng bước như cũ, vì gộp sẽ ép agent tự quyết thay Mike đúng chỗ
+cần con người/Mike cân nhắc.
+
 ## Agent routing — 2 tiers (Mike = daemon duy nhất, cập nhật 2026-07-01)
 
 **Mike là companion daemon DUY NHẤT còn lại.** Mọi agent khác (Taylor, DollarBill, Mafee,
