@@ -2072,3 +2072,8 @@
 - [2026-07-17T05:49:11Z] Winston/heartbeat — Winston_20260717_054509: {"status": "still_running", "elapsed_min": 4, "job_id": "Winston_20260717_054509", "source": "watcher"}
 - [2026-07-17T05:50:11Z] Winston/heartbeat — Winston_20260717_054509: {"status": "still_running", "elapsed_min": 5, "job_id": "Winston_20260717_054509", "source": "watcher"}
 - [2026-07-17T05:50:34Z] Winston/finding — preflight-false-alarm-ticker_prune-intraday-partial: {"verdict": "FALSE_ALARM — không có corruption", "root_cause": "upstream ETL ghi dở partition 2026-07-17 intraday (1→2→7 mã lớn dần); ngày hoàn chỉnh 07-16 khoẻ 262 mã, 07-08→07-15 = 264-267 mã", "fix": "preflight_check.sh đo lag+depth trên ngày hoàn chỉnh gần nhất (time < CURRENT_DATE ICT); bq_freshness_check.sh 19:00 cố ý giữ nguyên MAX(time) vì cần ngày T đầy đủ", "commit": "a89593f", "verify": "re-run preflight ZaloPay → lag=1d, 262 mã, GREEN toàn bộ", "note": "hành vi upstream MỚI: ghi intraday từng dòng thay vì chỉ sau đóng cửa — gate 19:00 + daily_refresh precheck ≥200 vẫn chặn nếu tối nay ngày T chưa đầy"}
+
+## Consolidation 2026-07-17T06:00:03Z
+- [2026-07-17T06:00:02Z] Mafee/status — bot-start: {"account": "SpaceX", "plan_date": "2026-07-17", "auto_otp": true}
+- [2026-07-17T06:00:02Z] Mafee/status — bot-start: {"account": "ZaloPay", "plan_date": "2026-07-17", "auto_otp": true}
+- [2026-07-17T06:00:03Z] Mafee/status — bot-done: {"account": "SpaceX", "plan_date": "2026-07-17", "elapsed_s": 0, "rc": 0}
