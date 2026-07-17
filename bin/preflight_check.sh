@@ -145,12 +145,18 @@ fi
 # ── 5. BQ freshness (nhanh — check ticker_prune lag + depth) ─────────────────
 # Depth (số mã ngày mới nhất) thêm 2026-07-15: sự cố upstream ghi đè ticker_prune còn
 # 7-10 mã/ngày trong khi MAX(time) vẫn advance → lag-check một mình bị mù hoàn toàn.
+# 2026-07-17: đo trên NGÀY HOÀN CHỈNH gần nhất (time < hôm nay ICT) — upstream ETL có thể
+# ghi dở dang partition hôm nay trong phiên (quan sát thật 12:45 ICT: 1-2 mã, lớn dần),
+# preflight chạy sáng/trưa nên ref_price/screening dựa trên EOD hôm qua; đo MAX(time) tuyệt
+# đối sẽ báo động giả "bảng moi ruột" trên partition đang ghi. bq_freshness_check.sh (19:00,
+# cần dữ liệu ngày T đầy đủ) giữ nguyên ngữ nghĩa MAX(time) — đừng đồng bộ hoá 2 chỗ này.
 BQ_ROW=$(bq query --use_legacy_sql=false --format=csv --quiet \
   --project_id=lithe-record-440915-m9 \
   "SELECT DATE_DIFF(CURRENT_DATE('Asia/Ho_Chi_Minh'), MAX(t.time), DAY) AS lag,
-          COUNT(DISTINCT IF(t.time = (SELECT MAX(x.time) FROM \`lithe-record-440915-m9.tav2_bq.ticker_prune\` AS x), t.ticker, NULL)) AS names
+          COUNT(DISTINCT IF(t.time = (SELECT MAX(x.time) FROM \`lithe-record-440915-m9.tav2_bq.ticker_prune\` AS x WHERE x.time < CURRENT_DATE('Asia/Ho_Chi_Minh')), t.ticker, NULL)) AS names
    FROM \`lithe-record-440915-m9.tav2_bq.ticker_prune\` AS t
-   WHERE t.time >= DATE_SUB(CURRENT_DATE('Asia/Ho_Chi_Minh'), INTERVAL 14 DAY)" \
+   WHERE t.time >= DATE_SUB(CURRENT_DATE('Asia/Ho_Chi_Minh'), INTERVAL 14 DAY)
+     AND t.time < CURRENT_DATE('Asia/Ho_Chi_Minh')" \
   2>/dev/null | tail -1 | tr -d '[:space:]' || echo "999,0")
 BQ_LAG="${BQ_ROW%%,*}"; BQ_NAMES="${BQ_ROW##*,}"
 
