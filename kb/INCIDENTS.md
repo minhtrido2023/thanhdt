@@ -2701,3 +2701,96 @@ lý, chỉ là hôm nay không có sự kiện MỚI nào phơi bày chúng thê
   thức đóng hạng mục này vẫn nên do user xác nhận (đã tự hỏi BQ admin xong hay chỉ trùng hợp
   tự phục hồi) — Mike không tự đóng thay.
 
+
+## RETRO — 2026-07-17: 2 sự cố (cả 2 đã có entry đầy đủ trước retro, 0 gap báo cáo), 2 pattern
+## liên quan — 1 MỚI (cost-governance) tự bắt bởi user chứ không phải audit chủ động, 1 hậu-duệ
+## trực tiếp của pattern data-registry-accuracy (fix 07-15 tự sinh false-positive mới)
+
+**Bối cảnh ngày:** ngày R&D nặng (DCF earning-power upgrade triển khai xong 3 việc, anomaly-scan
+DGC/PNJ thiết kế+implement+wire xong, sector/pattern research special-sit), vận hành sống nhẹ.
+2 sự cố hôm nay không đến từ trading thật mà từ (1) user tự hỏi về chi phí vận hành, và (2) checker
+tự phát hiện báo động giả do chính fix hôm qua sinh ra.
+
+**Bằng chứng đã kiểm tra (không suy đoán):**
+- `grep '^## 2026-07-17' kb/INCIDENTS.md` → đúng 2 entry, cả 2 đã ghi ĐẦY ĐỦ (root cause/fix/
+  lesson) trước khi retro này chạy — không phải gap.
+- Toàn bộ bus event `ts` bắt đầu `2026-07-17` (219 event): 0 `error`, 0 `question`; mọi
+  `finding` đối chiếu xong đều là R&D/ops-routine hợp lệ (DCF, anomaly-scan, sbv-check,
+  new-listings, pattern research) — không sự cố nào bị bỏ sót khỏi 2 entry đã ghi.
+- Commit thật xác nhận cả 2 fix: `37b0e5f` (model-tier drift + context bloat — sửa
+  `bin/ops_autofix.sh`, `bin/wags_autofix.sh`, `~/.claude/agents/arch-reviewer.md`,
+  `bin/dispatch.sh`, `bin/spend_report.py`) và `a89593f` (preflight depth-check, sửa
+  `bin/preflight_check.sh` +10/-2 dòng).
+- Verify trực tiếp trên đĩa: `bin/dispatch.sh` dòng 116-123 có stderr nudge khi `--model fable`;
+  `bin/spend_report.py` dòng 181-184 in cảnh báo khi `fable_pct>=30`; `~/.claude/agents/
+  arch-reviewer.md` dòng 5 = `model: opus` (đã hạ, không còn fable); `bin/ops_autofix.sh` dòng
+  91 = `--model opus` (đã hạ từ fable); `bin/preflight_check.sh` dòng 155-159 dùng
+  `t.time < CURRENT_DATE(...)` cho MAX(time)/depth (đúng như fix mô tả, không còn đo tuyệt đối).
+- Kích thước file xác nhận đã trim: `kb/context_pack.md` 34.8KB (so đỉnh 48.9KB entry mô tả),
+  `kb/current_ops.md` 22.0KB (so đỉnh 36KB) — khớp hướng fix dù chưa chắc đã về mức 3-tuần-trước.
+
+**3 câu hỏi bắt buộc — từng sự cố:**
+
+1. **Model-tier drift (fable 0%→58%, compute +150% dù job count −76%)**
+   a. **MỚI dạng cụ thể** (chưa từng có entry "model-tier drift"/"fable misuse" trước đây —
+      grep xác nhận). Nhưng CÙNG HỌ với pattern đã biết: "chính sách viết đúng nhưng không có
+      cơ chế ép buộc" — giống hệt root cause của `retro-pattern-recurring-dataprovenance`
+      (07-09, đóng 07-10 bằng bright-line rule) và `dataprovenance-2` (07-10, tổng quát hoá
+      freshness-check). Ở đây là 1 biến thể khác của cùng luận điểm: ladder model routing đã
+      viết rõ trong MIKE.md từ 07-14 nhưng không ai kiểm tra tuân thủ suốt 3 tuần.
+   b. Fix **HOÀN CHỈNH ở 2/3 lớp** đã verify trên đĩa (autofix default hạ + arch-reviewer hạ +
+      dispatch.sh nudge + spend_report cảnh báo ngưỡng). **CÒN HỞ**: cả 2 lớp phòng thủ (nudge
+      + spend_report) đều là *cảnh báo*, không *chặn* — Mike (hoặc bất kỳ agent nào dispatch)
+      vẫn CÓ THỂ tiếp tục chọn `--model fable` cho việc tầm Opus nếu bỏ qua nudge; residual risk
+      = drift tái diễn chậm hơn (vì có cảnh báo sớm hơn ở %fable≥30 thay vì phải đợi user tự
+      hỏi sau 3 tuần), không phải = không thể tái diễn.
+   c. Đây là **PATTERN họ với dataprovenance** (chính sách viết-nhưng-không-ép-buộc) NHƯNG khác
+      trục hoàn toàn: dataprovenance là về NGUỒN DỮ LIỆU, đây là về NGUỒN LỰC/CHI PHÍ. Đáng chú
+      ý: phát hiện đến từ **user chủ động hỏi**, không phải từ audit định kỳ nào — `spend_report.py`
+      bản cũ (job-count/log-bytes) đã tồn tại nhưng đo SAI chỉ số nên không tự bắt được; đây là
+      lỗ hổng process ("có công cụ giám sát nhưng đo nhầm đại lượng") đáng xếp cùng nhóm với các
+      lần retro trước từng phát hiện "checker chạy nhưng đo/gate sai điều kiện" (vd RETRO 07-12
+      H2 freshness miscalibrated, entry preflight hôm nay).
+
+2. **Preflight false-alarm "ticker_prune moi ruột"**
+   a. **TÁI DIỄN CÓ QUAN HỆ TRỰC TIẾP với 07-14/07-15** (corruption thật) nhưng dạng cụ thể
+      MỚI: 07-14/15 là corruption UPSTREAM THẬT (rows bị xoá/ghi đè); hôm nay là **false alarm
+      từ chính depth-check được THÊM VÀO ngày 07-15** để bắt corruption đó — bug nằm trong cơ
+      chế phòng thủ mới, không phải trong dữ liệu.
+   b. Fix **HOÀN CHỈNH, đã verify artifact** (code đọc `t.time < CURRENT_DATE(...)`, re-run
+      preflight ZaloPay → lag=1d/262 mã GREEN). Residual risk nêu rõ trong entry gốc: bất kỳ
+      checker nào khác cùng dùng logic "MAX(time) tuyệt đối" chưa được rà — chỉ mới sửa đúng 1
+      điểm (`preflight_check.sh`), `bq_freshness_check.sh` CỐ Ý giữ nguyên MAX(time) vì đúng
+      ngữ nghĩa khác (gate EOD cần ngày T đầy đủ) — đây là quyết định thiết kế đúng, không phải
+      lỗ hổng.
+   c. **Trực tiếp thuộc pattern data-registry-accuracy đã escalate từ RETRO 07-15** (5 ngày liên
+      tiếp 07-11→07-15), dù RETRO 07-16 ghi nhận chuỗi đó "không kéo dài sang ngày 6" — hôm nay
+      cho thấy dư chấn của chuỗi đó vẫn tiếp tục 2 ngày sau dưới dạng MỚI (bug trong chính fix
+      đã triển khai để đối phó corruption, không phải corruption tái phát). Đúng tinh thần cảnh
+      báo residual risk mà RETRO 07-15/07-16 đã nêu: "checker mới thêm gấp trong sự cố có thể
+      chưa tính hết edge-case" — nay xác nhận bằng bằng chứng cụ thể.
+
+| # | Hạng mục | Phân loại | Nguồn gốc | Người ghi chép |
+|---|---|---|---|---|
+| 1 | Model-tier drift: fable 0%→58%/3 tuần, compute +150% dù job -76% | cost-governance (MỚI — thêm nhóm, chưa nhóm nào khớp) | Quy trình tự-audit chi phí đo SAI chỉ số (job-count/log-bytes thay vì compute-hours/model-mix) suốt 3 tuần + 2 pipeline autofix mới (07-06/07-07) hardcode `--model fable` mặc định mà không rà lại theo ladder đã có; phát hiện qua user hỏi, không qua audit chủ động | Mike (phiên sống, trả lời câu hỏi user trực tiếp) — commit `37b0e5f`, không qua bus dispatch/agent finding |
+| 2 | Preflight depth-check false-alarm "moi ruột" do chính fix 07-15 chưa tính upstream ghi intraday | data-registry-accuracy (tái dùng nhóm đã có, hậu duệ trực tiếp entry 07-15) | Fix thêm ngày 07-15 (depth-check trên `MAX(time)` tuyệt đối) không lường trước hành vi upstream MỚI (ghi từng dòng intraday cho ngày T thay vì chỉ sau đóng cửa) — bước thiết kế checker thiếu đặc tả rõ "vintage nào" (ngày hoàn chỉnh gần nhất vs ngày T tuyệt đối) | Winston (`Winston_20260717_054509`, dispatch từ ops_health_check 12:45 ICT) — commit `a89593f` |
+
+**Điểm quan trọng nhất hôm nay:** cả 2 sự cố đều KHÔNG do audit chủ động bắt trước — #1 do user
+tự hỏi, #2 do checker tự trigger trong vận hành thật. Cả 2 đều đã fix+verify trong ngày, không
+gây hại thật (không mất tiền, không sai lệch quyết định trading). Không đủ điều kiện escalate
+thêm (pattern cost-governance mới xuất hiện lần đầu; pattern data-registry-accuracy tuy tái hiện
+nhưng RETRO 07-16 đã ngắt chuỗi "liên tiếp", nên chưa tính là 2 RETRO liên tiếp không đổi
+prevention — điều kiện escalate ở bước 10 chưa đạt cho cả hai).
+
+**Việc còn treo sang ngày mai (kế thừa từ RETRO 07-15/07-16, không đổi):**
+- Quyết định user cho câu hỏi `retro-pattern-recurring-data-registry-accuracy-5days` (sweep
+  tĩnh 1-lần rà `BQ_LOCAL_CACHE` + chính sách fail-open) — nay đã 2 ngày không phản hồi.
+- Quyết định user cho câu hỏi `retro-pattern-recurring-joblifecycle-timeout-3` (07-14).
+- Quyết định user đóng chính thức hạng mục "khôi phục ticker_financial/ticker_prune từ backup"
+  (đã tự lành ở nguồn, xác nhận BQ live 07-16) — Mike không tự đóng thay.
+- M5 nợ cũ: `executor.py`/paper trials đọc `ticker_prune.parquet` monolith chết từ 06-26 — chưa
+  dispatch Taylor, không khẩn (chỉ ảnh hưởng paper).
+- Theo dõi %fable qua `bin/spend_report.py` ở Friday KB review kế tiếp — xác nhận nudge/cảnh
+  báo mới cài hôm nay có thực sự giữ %fable dưới ngưỡng hay không (chưa có dữ liệu sau-fix).
+
+Verified by: Wags — pending.

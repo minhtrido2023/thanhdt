@@ -134,3 +134,58 @@ có phân bổ vốn trung thực không" — mà cổ tức 15% thực trả s�
 - Nếu đội muốn theo đuổi: dựng **watchlist "state-backstop special-sit"** — quét các DN NN-chi-phối có
   lãnh đạo bị khởi tố, chạy bộ lọc §2, xếp theo (PB, CF_OA/NP, mức backstop). TV1 là case sống đầu tiên.
 - Theo dõi 2 catalyst TV1 (kiểm toán 10/08 · ngày trả cổ tức 15%) như tín hiệu falsify/confirm luận điểm.
+
+---
+
+## 6. Case #2 — DGC (Hoá chất Đức Giang), thêm 2026-07-17 (Mike, dispatch từ user)
+
+**KHÔNG phải NN chi phối** (tư nhân, họ Đào Hữu Huyền kiểm soát) — khác TV1/VEA, giống PNJ (cũng tư
+nhân). Xác nhận qua case này: tiêu chí "NN>50%" trong §2 KHÔNG phải điều kiện bắt buộc cứng — PNJ đã
+hồi phục +148%/12m dù không có NN backstop. Discriminator thật sự quan trọng hơn là **tài sản/hoạt
+động lõi có tách biệt khỏi hành vi bị điều tra hay không** (§2 tiêu chí #1+#3), không phải cơ cấu sở
+hữu.
+
+**Bối cảnh**: 17/03/2026 khởi tố Chủ tịch Đào Hữu Huyền + con trai + nhiều lãnh đạo (14 bị can) về
+3 nhóm hành vi: (a) vi phạm kế toán, (b) khai thác Apatit trái phép, (c) xả thải ô nhiễm tại KCN Tằng
+Loỏng. Thiệt hại thuế cho NN được nêu ~"hàng chục tỷ" — NHỎ hơn nhiều so với **331,3 tỷ đã tự nguyện
+khắc phục** (dấu hiệu thiện chí/dư dả tài chính, không phải vá lỗ hổng lớn). DGC là DN đầu ngành thật
+(chi phối ~1/3 xuất khẩu phốt pho vàng toàn cầu, công nghệ độc quyền) — khác về CHẤT so với case
+"lõi giả tưởng" (OGC/FLC).
+
+**⚠️ PHÁT HIỆN QUAN TRỌNG — DGC KHÔNG qua được bài test CF_OA≥NP mà chính §2 đề ra:**
+
+| | 2026Q1 (quý xảy ra scandal) | 5 quý trước |
+|---|---|---|
+| Revenue YoY | **-24,4%** | +1,3% đến +17,8% |
+| NP YoY | **-49,5%** | dương ổn định |
+| GPM | 28,66% (thấp nhất) | 31-36% |
+| **CF_OA** | **-1.093 tỷ** (âm mạnh) | +281 đến +786 tỷ (luôn dương) |
+| FSCORE | 2/9 (thấp nhất) | 2-7 |
+
+→ Khác hẳn TV1 (CF_OA≥NP mọi quý suốt vụ án — lõi sạch xác nhận bằng dữ liệu), ở DGC quý xảy ra
+scandal có **CF_OA âm sâu trong khi NP vẫn dương** — đúng loại tín hiệu "accrual/lõi có vấn đề" mà
+chính tiêu chí #3 của khung này được thiết kế để bắt. Chưa rõ đây là (a) tác động thật từ scandal
+(khách hàng/đối tác thận trọng, gián đoạn giao dịch), (b) chu kỳ ngành hóa chất/phốt pho đang yếu
+riêng biệt, hay (c) chi phí một lần (khắc phục 331 tỷ + phí pháp lý) — **Q1 chỉ có ~2 tuần sau ngày
+khởi tố (17/03) nên không thể quy hết cho scandal.**
+
+**Giá**: đỉnh trước scandal 95.810 → đáy 44.850 → hiện tại (17/07) 44.800 — **CHƯA có tín hiệu tạo đáy
+ổn định** (dưới MA50/MA200, RSI yếu, CMF âm), khác PNJ đã bật +50%/6m ngay từ đầu.
+
+**Kết luận: DGC = case AMBIGUOUS (giống TIS/OCH), CHƯA đủ điều kiện QUALIFY §2 để vào T1/T2** — mặc dù
+định giá hấp dẫn (PB 1,07x gần book, PE 6,48x vs PE_MA5Y 10,89x) và câu chuyện thiệt hại-nhỏ-hơn-khắc-
+phục ủng hộ luận điểm giá trị, phát hiện CF_OA<<NP là lý do đủ mạnh để **CHỜ KQKD Q2/2026** (dự kiến
+công bố cuối tháng 7 theo lịch sử — Q2/2025 công bố 22/07) làm cổng xác nhận:
+- CF_OA dương trở lại + doanh thu hồi phục → nâng cấp QUALIFY, vào T1
+- CF_OA tiếp tục âm/doanh thu tiếp tục giảm → chuyển sang nhóm NON, không vào
+
+**Ước tính lợi nhuận kỳ vọng 12 tháng tại giá 44.800** (dùng làm ví dụ minh hoạ cách lượng hoá case
+AMBIGUOUS, không phải khuyến nghị vào ngay):
+- Bull (giống PNJ, Q2 xác nhận Q1 chỉ là sốc 1 quý): PE về PE_MA5Y 10,89x → ~75.250 (**+68%**)
+- Base (tái định giá một phần, PE→8,5-9x): ~59.000-63.400 (**+32-41%**)
+- Bear (Q2 xác nhận suy giảm thật, không chỉ do scandal): 40.000-45.000 (**-11% đến 0%**)
+- Kỳ vọng trung tâm nếu phải chọn 1 số: **~+25-35%/12m** — thấp hơn nhiều PNJ (+148%) đúng vì thiếu
+  xác nhận "lõi sạch" mà PNJ/TV1 có tại thời điểm entry.
+
+**Việc cần làm tiếp**: theo dõi ngày công bố BCTC Q2/2026 DGC (ước cuối tháng 7/đầu tháng 8 theo lịch
+sử công bố các năm trước), đọc lại đúng 2 chỉ số CF_OA và Revenue YoY làm cổng quyết định.
