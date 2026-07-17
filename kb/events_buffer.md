@@ -2277,3 +2277,8 @@
 - [2026-07-17T12:14:41Z] DollarBill/heartbeat — DollarBill_20260717_120138: {"status": "still_running", "elapsed_min": 13, "job_id": "DollarBill_20260717_120138", "source": "watcher"}
 - [2026-07-17T12:10:17Z] Mafee/status — eod-trading-report: {"account": "ZaloPay", "plan_date": "2026-07-17", "delivered_via": "trading_report_thread"}
 - [2026-07-17T12:10:33Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-07-17", "delivered_via": "hold_day"}
+
+## Consolidation 2026-07-17T12:15:43Z
+- [2026-07-17T12:14:55Z] DollarBill/decision — plan-ZaloPay-2026-07-20: {"plan_date": "2026-07-20", "account": "ZaloPay", "state": "NEUTRAL(3)", "orders": [{"side": "sell", "ticker": "VPB", "qty": 800, "ref_px": 25850, "net_proceeds": 20664490}, {"side": "buy", "ticker": "TCB", "qty": 351, "ref_px": 31450, "cost": 11047229}, {"side": "buy", "ticker": "MBB", "qty": 92, "ref_px": 23750, "cost": 2186639}], "milestones": "TCB=COMPLETE(951cp) + MBB=COMPLETE(1092cp) sau plan", "vpb_after": 4300, "cash_anomaly": "availableCash=1.4M vs totalCash=22.5M vs prior 147.4M — pending investigation", "requires_user_approval": true}
+- [2026-07-17T12:15:26Z] DollarBill/answer — plan-ZaloPay-07-20-complete: {"status": "done", "plan_file": "data/trade_plans/plan_ZaloPay_2026-07-20.json", "plan_date": "2026-07-20", "orders": 3, "requires_user_approval": true, "discord_sent": true, "cash_anomaly_flagged": true, "anomaly_summary": "availableCash=1.4M vs totalCash=22.5M vs prior 147.4M — pending Winston/Spyros review"}
+- [2026-07-17T12:15:40Z] DollarBill/heartbeat — DollarBill_20260717_120137: {"status": "still_running", "elapsed_min": 14, "job_id": "DollarBill_20260717_120137", "source": "watcher"}
