@@ -1,4 +1,4 @@
-# Mike fleet — context pack (v1150)
+# Mike fleet — context pack (v1151)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
@@ -74,6 +74,25 @@ không thể đảo ngược: bot tự đặt lệnh thật lần đầu, không
   custom30V) đã XONG — `kb/projects/zalopay-transition-0713.md`. Known gap: `daily_nav_snapshot.py`
   chưa tính đúng P&L cho vị thế legacy (NAV/active_nav đã đúng, chỉ breakdown P&L báo cáo còn thiếu).
 - **AlphaLens Paper**: FPT/ACB/MBB/HDB, tracking vs VNINDEX đến 2026-09-30. DollarBill phụ trách.
+
+### Trứng vàng DNSE (idle-cash off-book) — cả 2 account (thêm 2026-07-17)
+User chuyển tiền rảnh sang sản phẩm tiền gửi "Trứng vàng" DNSE — **hoàn toàn ngoài phạm vi
+OpenAPI** (cạn 19 endpoint pattern + SDK chính thức, xác nhận Mafee_20260716_170856). Số dư
+hiện biết (user tự báo, **CẦN CẬP NHẬT LẠI mỗi lần nạp/rút**): SpaceX 302.108.211đ, ZaloPay
+147.473.247đ (asof 2026-07-16) — lưu ở `manual_offbook_assets_vnd/_asof/_note` trong
+`secrets/trading_bot_accounts.json` (default field mới ở `trading_bot/config.py`
+ACCOUNT_DEFAULTS). Đã wire vào `daily_nav_snapshot.py` (NAV += offbook, KHÔNG cộng vào cash)
+và `compute_active_nav.py` (active_nav += offbook, cơ sở sizing cho DollarBill) — quant-skeptic
+CONFIRMED 2026-07-17. `bq_freshness_check.sh`'s DollarBill dispatch tự thêm note khi
+`manual_offbook_assets_vnd≠0`.
+⚠️ **QUY TẮC BẮT BUỘC — không tự động**: khi user báo đã RÚT tiền từ Trứng vàng ra (vd để
+DollarBill lên plan mua), Mike PHẢI cập nhật/giảm `manual_offbook_assets_vnd` NGAY trong cùng
+lượt — nếu quên, NAV/active_nav sẽ bị đếm trùng (cash tăng lại + offbook vẫn giữ số cũ). Không
+rủi ro tiền thật (executor chỉ check cash/ppse live khi đặt lệnh — quant-skeptic xác nhận
+fail-safe), nhưng sẽ làm sai NAV báo cáo + sizing plan. Staleness WARN tự in khi asof >21 ngày
+chưa cập nhật (cả 2 script trên) — không tự block, chỉ nhắc.
+⚠️ Chưa xác minh: SpaceX có dấu hiệu ppse/pp0Buy báo sức mua cao dù availableCash≈0 sau khi
+chuyển Trứng vàng (Mafee_20260716_164743) — CHƯA rõ DNSE có tự tính gộp không, đừng giả định.
 
 ## Đang R&D
 - **Taylor · EXTREME-regime gate PAPER-TRADING** (bắt đầu 2026-07-01, user duyệt trực tiếp): `extreme_regime_enabled=True` CHỈ trên account paper `main` (override trong `trading_bot_accounts.json`); global default + SpaceX/live GIỮ `False`. Week-1 stress-injection PASS 24/24 (`stress_extreme_regime.py`: arm 2-poll · sell-to-floor · buy-pause · cadence ×0.25 + negative controls). **Target kết thúc ~2026-07-28 (~20 phiên).** 3 điều kiện còn lại trước LIVE: (a) ZERO false-trigger qua ~4 tuần benign, (b) không can thiệp NORMAL-path, (c) user sign-off. **KHÔNG bật gì ở live.**
