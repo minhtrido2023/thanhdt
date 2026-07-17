@@ -129,11 +129,18 @@ def main():
 
     account_id = args.account_id or profile.get("account_id")
     excluded = set(profile.get("excluded_tickers") or [])
+    # Tài sản off-book (vd "Trứng vàng" DNSE — không lộ qua OpenAPI, user tự báo, xem
+    # trading_bot/config.py ACCOUNT_DEFAULTS): cộng vào total_nav để KHÔNG hụt cơ sở tính
+    # tỷ trọng mục tiêu của chiến lược khi user tạm chuyển tiền rảnh ra ngoài tài khoản giao
+    # dịch — số THỰC SỰ đặt lệnh được vẫn phải kiểm qua `cash`/ppse live, KHÔNG phải số này.
+    offbook = float(profile.get("manual_offbook_assets_vnd") or 0)
 
     cash, positions = live_balance_and_positions(account_id, args.account)
     tickers = list(positions.keys())
     if not tickers:
-        print(f"⚠️ Account {args.account} không có vị thế nào — active_nav = cash = {cash:,.0f}")
+        print(f"⚠️ Account {args.account} không có vị thế nào — "
+              f"active_nav = cash + offbook = {cash + offbook:,.0f} "
+              f"(cash {cash:,.0f} + offbook {offbook:,.0f})")
         return
 
     prices, price_source, err = resolve_prices(tickers, args.asof)
@@ -158,7 +165,7 @@ def main():
             excluded_mv += mv
         rows.append((tk, qty, px, mv, is_excluded))
 
-    total_nav = cash + total_mv
+    total_nav = cash + total_mv + offbook
     active_nav = total_nav - excluded_mv
 
     print(f"== Active NAV — {args.account} (account_id={account_id}) ==")
@@ -170,12 +177,19 @@ def main():
     print(f"Tiền mặt:                 {cash:>16,.0f}")
     print(f"Tổng giá trị cổ phiếu:    {total_mv:>16,.0f}")
     print(f"  trong đó excluded:      {excluded_mv:>16,.0f}  ({', '.join(sorted(excluded)) or '(none)'})")
+    if offbook:
+        print(f"Off-book (vd Trứng vàng, user tự báo, KHÔNG phải sức mua ngay): {offbook:>16,.0f}")
     print(f"= TỔNG NAV:               {total_nav:>16,.0f}")
     print(f"= ACTIVE NAV (cho chiến lược V2.4, loại trừ excluded_tickers): {active_nav:>16,.0f}")
+    if offbook:
+        print(f"⚠️ ACTIVE NAV đã cộng {offbook:,.0f} off-book làm cơ sở TÍNH TỶ TRỌNG mục tiêu — "
+              f"nhưng sức mua THỰC THI NGAY vẫn phải kiểm tra `cash`/ppse live (DNSE), vì số "
+              f"off-book cần user rút tay trước khi bot đặt lệnh được.")
 
     result = {
         "account": args.account, "account_id": account_id,
         "cash": cash, "total_stock_value": total_mv, "excluded_value": excluded_mv,
+        "offbook_assets": offbook,
         "excluded_tickers": sorted(excluded), "total_nav": total_nav, "active_nav": active_nav,
         "positions": [{"ticker": tk, "qty": qty, "price": px, "value": mv, "excluded": is_excl,
                         "price_source": price_source.get(tk, "?")}

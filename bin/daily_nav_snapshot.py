@@ -166,12 +166,21 @@ def main():
     # theo label — tránh phải nhớ truyền tay mỗi lần gọi (và là điều kiện BẮT BUỘC để lọc
     # đúng account trong dnse_raw_{date}.jsonl dùng chung, xem latest_balance()).
     account_no = args.account_no
+    sys.path.insert(0, WC_ROOT)
+    from trading_bot.config import load_config, load_accounts
+    _profiles = load_accounts(load_config())
+    _match = next((p for p in _profiles if p["label"] == args.account), None)
     if not account_no:
-        sys.path.insert(0, WC_ROOT)
-        from trading_bot.config import load_config, load_accounts
-        _profiles = load_accounts(load_config())
-        _match = next((p for p in _profiles if p["label"] == args.account), None)
         account_no = _match.get("account_id") if _match else None
+    # Tài sản off-book (vd "Trứng vàng" DNSE — không lộ qua OpenAPI, xem
+    # trading_bot/config.py ACCOUNT_DEFAULTS): user tự báo, Mike cập nhật config khi thay
+    # đổi. Cộng vào NAV THẬT (không cộng vào 'cash' — cash vẫn phải là sức mua thực sự khả
+    # dụng ở tài khoản môi giới), tránh NAV báo THẤP hơn thực tế sau khi user chuyển tiền
+    # sang sản phẩm này, và tránh sanity-guard bên dưới chặn oan 1 ngày biến động lớn do
+    # chuyển tiền thật (không phải lỗi dữ liệu).
+    offbook = float((_match or {}).get("manual_offbook_assets_vnd") or 0)
+    offbook_note = (_match or {}).get("manual_offbook_assets_note") or ""
+    offbook_asof = (_match or {}).get("manual_offbook_assets_asof") or ""
 
     dates = trading_dates_with_fills(args.account, args.date)
     if not dates:
@@ -258,7 +267,9 @@ def main():
     # Lần đọc sau (cuối ngày) mới đúng, khớp ảnh chụp thật. => KHÔNG tự suy luận/mô hình hoá
     # thêm gì — chỉ cần đảm bảo balance record dùng để tính NAV là bản MỚI NHẤT trong ngày
     # (đã tự động nhờ latest_balance() lấy dòng cuối), và cảnh báo rõ nếu có dấu hiệu stale.
-    nav = mtm_stock + cash - debt
+    # + offbook: tài sản off-book user tự báo (vd Trứng vàng, xem ACCOUNT_DEFAULTS) — cộng
+    # thẳng vào NAV thật, KHÔNG lẫn vào 'cash' (cash vẫn = sức mua thật ở tài khoản môi giới).
+    nav = mtm_stock + cash - debt + offbook
 
     sell_today = today_sell_value(args.account, args.date)
     stale_warning = None
@@ -295,9 +306,9 @@ def main():
     hist_rows = [row for row in hist_rows if row["date"] != args.date]
     hist_rows.append({"date": args.date, "nav": f"{nav:.0f}", "mtm_stock": f"{mtm_stock:.0f}",
                        "cash": f"{cash:.0f}", "margin_debt": f"{debt:.0f}",
-                       "balance_ts": bal["ts"]})
+                       "offbook_assets": f"{offbook:.0f}", "balance_ts": bal["ts"]})
     hist_rows.sort(key=lambda r: r["date"])
-    fieldnames = ["date", "nav", "mtm_stock", "cash", "margin_debt", "balance_ts"]
+    fieldnames = ["date", "nav", "mtm_stock", "cash", "margin_debt", "offbook_assets", "balance_ts"]
     _write_nav_history(hist_path, hist_rows, fieldnames)
 
     since_inception = nav - args.starting_capital
@@ -305,9 +316,14 @@ def main():
 
     lines = [
         f"💰 **NAV {args.date}: {nav:,.0f} VND** ({day_change:+,.0f} VND, {day_change_pct:+.2f}% so với hôm trước)",
-        f"   Cổ phiếu {mtm_stock:,.0f} · Tiền mặt {cash:,.0f} · Nợ margin {debt:,.0f}",
+        f"   Cổ phiếu {mtm_stock:,.0f} · Tiền mặt {cash:,.0f} · Nợ margin {debt:,.0f}"
+        + (f" · Off-book {offbook:,.0f}" if offbook else ""),
         f"   Từ go-live: {since_inception:+,.0f} VND ({since_inception_pct:+.2f}%)",
     ]
+    if offbook:
+        lines.append(f"   ℹ️ Off-book {offbook:,.0f} VND ({offbook_note or 'không có ghi chú'}, "
+                      f"user tự báo asof {offbook_asof or '?'}) — KHÔNG lộ qua API broker, đã "
+                      f"cộng vào NAV nhưng KHÔNG tính là tiền mặt khả dụng để đặt lệnh ngay.")
     if debt > 1_000_000:
         lines.append(f"   ⚠️ Đang có nợ margin thật {debt:,.0f} VND — theo dõi lãi vay tích lũy.")
     if stale_warning:
@@ -318,12 +334,16 @@ def main():
 
     out = {"account": args.account, "date": args.date, "nav": nav,
            "mtm_stock": mtm_stock, "cash": cash, "margin_debt": debt,
+           "offbook_assets": offbook, "offbook_assets_note": offbook_note,
+           "offbook_assets_asof": offbook_asof,
            "stale_warning": stale_warning, "prev_nav": prev_nav, "day_change": day_change,
            "day_change_pct": day_change_pct, "since_inception": since_inception,
            "since_inception_pct": since_inception_pct, "balance_ts": bal["ts"],
            "source": "verify_account_snapshot.py (fills) + dnse_raw balances (real broker API, "
                      "chọn bản GHI CUỐI CÙNG trong ngày — balance có thể cần thời gian đối soát "
-                     "cuối phiên mới phản ánh đúng, xem cảnh báo staleness nếu có)"}
+                     "cuối phiên mới phản ánh đúng, xem cảnh báo staleness nếu có) + "
+                     "manual_offbook_assets_vnd (trading_bot_accounts.json, user tự báo, KHÔNG "
+                     "có API — xem note/asof)"}
     with open(os.path.join(EXEC_DIR, f"nav_snapshot_{args.account}_{args.date}.json"), "w",
               encoding="utf-8") as f:
         json.dump(out, f, indent=2, ensure_ascii=False)

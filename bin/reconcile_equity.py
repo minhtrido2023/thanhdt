@@ -59,6 +59,11 @@ def main():
                           "CHƯA xác minh với DNSE, chỉ dùng để DIỄN GIẢI residual)")
     ap.add_argument("--tolerance-pct", type=float, default=0.05,
                      help="ngưỡng dung sai %% NAV cho residual chưa giải thích được")
+    ap.add_argument("--offbook-assets", type=float, default=0.0,
+                     help="tài sản off-book user tự báo (vd Trứng vàng DNSE, không lộ qua API) "
+                          "asof ngày --balance-raw — cộng vào vế phải để KHÔNG báo residual giả "
+                          "khi user đã chuyển tiền rảnh ra ngoài tài khoản giao dịch. Lấy số này "
+                          "từ manual_offbook_assets_vnd trong secrets/trading_bot_accounts.json.")
     args = ap.parse_args()
 
     snap = json.load(open(args.snapshot, encoding="utf-8"))
@@ -82,8 +87,9 @@ def main():
 
     # Vế trái: đường P&L — CHỈ dùng số THẬT (fee-rate xác nhận + depositFeeAmount thật từ API)
     lhs = args.starting_capital + unrealized_pnl - fees - accrued_fee
-    # Vế phải: đường bảng cân đối (số dư THẬT từ broker)
-    rhs = mtm_stock + cash - debt
+    # Vế phải: đường bảng cân đối (số dư THẬT từ broker) + offbook (user tự báo, vd Trứng vàng —
+    # tiền vẫn của user, chỉ ngoài phạm vi balances() API, xem --offbook-assets ở trên)
+    rhs = mtm_stock + cash - debt + args.offbook_assets
 
     residual = lhs - rhs
     tolerance_vnd = rhs * args.tolerance_pct / 100.0
@@ -107,6 +113,8 @@ def main():
     print(f"  Giá trị cổ phiếu (MTM):{mtm_stock:>16,.0f}")
     print(f"  + Tiền mặt:            {cash:>16,.0f}")
     print(f"  - Nợ vay margin:       {-debt:>16,.0f}")
+    if args.offbook_assets:
+        print(f"  + Off-book (tự báo):   {args.offbook_assets:>16,.0f}")
     print(f"  = VẾ PHẢI:             {rhs:>16,.0f}")
     print()
     print(f"CHÊNH LỆCH (trái - phải, TOÀN BỘ SỐ THẬT): {residual:>+16,.0f}  ({residual/rhs*100:+.4f}% của vế phải)")
@@ -125,6 +133,7 @@ def main():
         "fee_rate_pct_used": args.fee_rate_pct, "trading_fees_used": fees,
         "accrued_margin_fee_real": accrued_fee,
         "lhs_pnl_path": lhs, "mtm_stock": mtm_stock, "cash": cash, "margin_debt": debt,
+        "offbook_assets_used": args.offbook_assets,
         "rhs_balance_sheet_path": rhs, "residual": residual,
         "residual_pct_of_rhs": residual / rhs * 100, "within_tolerance": within_tolerance,
         "margin_rate_annual_estimate": args.margin_rate_annual,
