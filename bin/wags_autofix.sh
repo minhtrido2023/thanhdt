@@ -14,6 +14,15 @@
 # Verdict NEEDS_CHANGES/REFUTED → báo ⚠ vào topic architecture + bus question (không tự
 # ép Wags sửa vòng 2 vô hạn — con người quyết ở vòng 2, chống ping-pong).
 # Chống bão: cooldown 1h/label (chung cơ chế state/autofix của ops_autofix).
+#
+# Xác minh theo mức rủi ro (cost-opt #2, 2026-07-17): arch-reviewer (model fable, ~1500s
+# timeout) chạy MẶC ĐỊNH cho MỌI fix trước đây — đúng cho fix chạm dispatch.sh/hooks (dùng
+# chung toàn team), nhưng lãng phí cho fix cosmetic (sửa chữ thông báo, doc). Giờ
+# bin/wags_risk_tier.py phân loại DỰA TRÊN files_changed Wags tự báo (không tin Wags tự
+# chấm rủi ro): mọi file khớp allowlist ngắn, cố tình bảo thủ (kb/*.md, MIKE.md, notify.sh,
+# chính wags_autofix.sh/ops_autofix.sh/jobs.sh) → "low" → bỏ qua arch-reviewer, chỉ ghi vào
+# state/autofix/sample_queue.jsonl để audit lấy mẫu sau; BẤT KỲ gì khác (mặc định fail-safe
+# "high" khi thiếu field/không phân loại được) → vẫn bắt buộc như cũ.
 set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WC_ROOT="$(cd "$ROOT/.." && pwd)"
@@ -129,13 +138,31 @@ setsid bash -c '
   ARCH_TOPIC="'"$ARCH_TOPIC"'"
   _notify_arch() { "$ROOT/bin/notify_thread.sh" "$1" "$ARCH_TOPIC" >/dev/null 2>&1 || true; }
 
-  # 1) Wags fix (đồng bộ trong pipeline nền; timeout rộng vì job chẩn đoán sâu)
+  # 1) Wags fix (đồng bộ trong pipeline nền; timeout rộng vì job chẩn đoán sâu). Chạy
+  #    --context mini (Wags mặc định đã mini per dispatch.sh, xem cost-opt #1) và BẮT
+  #    BUỘC báo files_changed (mảng đường dẫn tương đối) trong payload finding — đây là
+  #    input DUY NHẤT cho phân loại rủi ro ở bước 2 (không dựa vào Wags tự chấm "rủi ro
+  #    thấp", tránh Wags tự miễn review cho chính nó — verify ARTIFACT, không tin
+  #    self-report, cùng nguyên tắc đã áp dụng ở idempotency guard/ghost-order).
   out="$("$ROOT/bin/dispatch.sh" Wags "NHIỆM VỤ WAGS-AUTOFIX (issue điều phối giữa agent, mandate 2026-07-07): '"'"'$LABEL'"'"'
 CHI TIẾT: $DETAILS
-Quy trình: (1) chẩn đoán từ artifact thật (jobs.sh list cột HB_AGE, trace.sh, bus, log) — đọc kb/ops_runbook.md + working memory của bạn trước; (2) SỬA trong ranh giới: được sửa tooling điều phối (dispatch.sh/jobs.sh/mike_json.py/ops_autofix/wags_autofix/checker) sau khi test, TUYỆT ĐỐI không đụng trading (plan/executor/cron thực thi/trading_rules); (3) verify artifact sau sửa (chạy lại lệnh lỗi, xác nhận hết); (4) ghi bus finding topic bắt đầu bằng '"'"'wags-fix: $LABEL'"'"' kèm root_cause/fix/verify/commit — arch-reviewer sẽ audit finding này, viết đủ bằng chứng." --timeout 1500 --retries 0 --model fable 2>&1)" || true
+Quy trình: (1) chẩn đoán từ artifact thật (jobs.sh list cột HB_AGE, trace.sh, bus, log) — đọc kb/ops_runbook.md + working memory của bạn trước; (2) SỬA trong ranh giới: được sửa tooling điều phối (dispatch.sh/jobs.sh/mike_json.py/ops_autofix/wags_autofix/checker) sau khi test, TUYỆT ĐỐI không đụng trading (plan/executor/cron thực thi/trading_rules); (3) verify artifact sau sửa (chạy lại lệnh lỗi, xác nhận hết); (4) ghi bus finding topic bắt đầu bằng '"'"'wags-fix: $LABEL'"'"' kèm root_cause/fix/verify/commit + field \"files_changed\": [danh sách ĐẦY ĐỦ đường dẫn tương đối bạn đã sửa, vd [\"bin/dispatch.sh\",\"MIKE.md\"]] — field này quyết định fix có cần arch-reviewer audit đầy đủ hay không, KHÔNG được bỏ trống hay báo thiếu file." --timeout 1500 --retries 0 --model fable 2>&1)" || true
   echo "$out" >> "'"$PIPELOG"'"
 
-  # 2) arch-review finding vừa tạo — KHÔNG tail -1 mù: chọn dòng JSON cuối có key
+  # 2) Phân loại rủi ro (cost-opt #2, 2026-07-17): fix chỉ đụng path an toàn tuyệt đối
+  #    (kb/docs, notify.sh, chính wags_autofix.sh/ops_autofix.sh/jobs.sh) -> bỏ qua
+  #    arch-reviewer đắt tiền, chỉ log vào hàng đợi audit lấy mẫu. Bất kỳ gì khác
+  #    (đặc biệt dispatch.sh/hooks — plumbing DÙNG CHUNG toàn team) -> vẫn bắt buộc như
+  #    cũ. Fail-safe mặc định "high" nếu không phân loại được (xem wags_risk_tier.py).
+  tier="$("$ROOT/bin/wags_risk_tier.py" "'"$ROOT"'/bus/inbox/Wags.jsonl" "wags-fix: $LABEL" 2>>"'"$PIPELOG"'" || echo high)"
+
+  if [ "$tier" = "low" ]; then
+    mkdir -p "'"$ROOT"'/state/autofix"
+    printf "%s\n" "{\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"label\":\"$LABEL\",\"topic\":\"wags-fix: $LABEL\"}" \
+      >> "'"$ROOT"'/state/autofix/sample_queue.jsonl"
+    _notify_arch "✅ **[wags-autofix] HOÀN TẤT issue '"'"'$LABEL'"'"'** (LOW-RISK — chỉ đụng docs/tooling tự chứa, bỏ qua arch-reviewer đầy đủ, đưa vào hàng đợi audit lấy mẫu). Wags đã tự verify. Chi tiết: bus finding '"'"'wags-fix: $LABEL'"'"'; log pipeline: '"$PIPELOG"'"
+  else
+  # arch-review finding vừa tạo — KHÔNG tail -1 mù: chọn dòng JSON cuối có key
   # "verdict" (chống output lạ chen vào stdout, vd {"status":"sent"} của notify)
   v="$("$ROOT/bin/wags_autofix.sh" --review-topic "wags-fix: $LABEL" 2>>"'"$PIPELOG"'" | python3 -c "import json,sys
 last={}
@@ -160,6 +187,7 @@ except Exception: print(\"\")")"
     _notify_arch "⚠️ **[wags-autofix] Issue '"'"'$LABEL'"'"' CẦN NGƯỜI XEM** — arch-reviewer verdict: **$verdict** ($summary). Fix của Wags KHÔNG được tự coi là xong; xem bus verification + log '"$PIPELOG"'."
     "$ROOT/bin/append_event.sh" Wags question "wags-fix-not-confirmed: $LABEL" \
       "{\"verdict\":\"$verdict\",\"pipelog\":\"'"$PIPELOG"'\"}" >/dev/null 2>&1 || true
+  fi
   fi
 ' >> "$PIPELOG" 2>&1 < /dev/null &
 
