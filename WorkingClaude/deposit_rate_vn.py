@@ -14,6 +14,7 @@ Source / calibration (2026-06-19):
   - Pre-2014 (out of the value panel, kept for context): 2011 SBV cap ~14%; 2012 12->9; 2013 8->7.
 ⚠️ PROXY — levels are best-estimate (esp. 2022-H2 spike). Refine if a clean Big-4 series surfaces.
 """
+import os
 import numpy as np, pandas as pd
 
 # (effective_date, big4_12m_deposit_pct_pa) — step series, forward-filled between anchors
@@ -47,9 +48,31 @@ DEPOSIT_EVENTS = [
 ]
 
 
+# append-only live extension: future point-in-time anchors go here, NEVER edit the 26 frozen
+# historical anchors above (see proposal_deposit_rate_monthly_refresh_20260713.md §1). Written only
+# by append_deposit_rate.py after a human confirms the number. No CSV / no newer rows -> behaviour
+# is byte-identical to the frozen-anchors-only series (100% backward-compatible).
+_EVENTS_CSV = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "deposit_rate_vn_events.csv")
+
+
 def deposit_events_df():
     ev = pd.DataFrame(DEPOSIT_EVENTS, columns=["time", "deposit_rate"])
     ev["time"] = pd.to_datetime(ev["time"])
+    if os.path.exists(_EVENTS_CSV):
+        try:
+            extra = pd.read_csv(_EVENTS_CSV, usecols=["effective_date", "deposit_rate"])
+        except (pd.errors.EmptyDataError, ValueError):
+            extra = None  # empty file or missing columns -> keep frozen anchors only
+        if extra is not None and len(extra):
+            extra = extra.rename(columns={"effective_date": "time"})
+            extra["time"] = pd.to_datetime(extra["time"], errors="coerce")
+            extra["deposit_rate"] = pd.to_numeric(extra["deposit_rate"], errors="coerce")
+            extra = extra.dropna(subset=["time", "deposit_rate"])
+            # only append anchors strictly newer than the last frozen one (append-only, no re-write
+            # of history); if two CSV rows share the newest date, sort keeps the last-written one.
+            extra = extra[extra["time"] > ev["time"].max()]
+            if len(extra):
+                ev = pd.concat([ev, extra[["time", "deposit_rate"]]], ignore_index=True)
     return ev.sort_values("time").reset_index(drop=True)
 
 

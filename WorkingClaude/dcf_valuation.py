@@ -11,7 +11,11 @@ WHAT IT DOES (point-in-time, no look-ahead):
 MODEL (2-stage FCFE):
   Stage 1 (explicit, 5y): base FCFE grows at g_explicit = recency-weighted average of the
     last 3 annual growth rates (weights calibrated in dcf_backtest.py, default 60/25/15).
-  Stage 2 (terminal, Gordon): growth fades to g_terminal = 5y-average CPI (cpi_vn.py).
+  Stage 2 (terminal, Gordon): growth fades to g_terminal. DEFAULT MODE = "cap_rf" (Damodaran
+    risk-free cap: g_terminal = min(5y-avg CPI + long-run real GDP, nominal risk-free)); this is a
+    DISPLAY-realism level fix (not an alpha change) — see terminal_growth_mode() and DEFAULT_TERM_MODE.
+    Override per-run via the DCF_TERMINAL_MODE env var or fair_value(..., term_mode=). Mode "cpi"
+    (the prior default = 5y-avg CPI only, cpi_vn.py) is still available.
   Discount rate (cost of equity) r = Big-4 12M deposit rate (deposit_rate_vn.py) + ERP,
     ERP = 6.5% (empirical: VNINDEX total-return premium over Big-4 deposit, 2013-2026).
   FCFE (free cash flow to equity) proxy = CFO - capex = CF_OA + CF_Invest (both absolute
@@ -71,6 +75,25 @@ GROWTH_SHRINK = 0.50           # g_used = g_terminal + SHRINK*(g_trailing - g_te
 G_EXPLICIT_FLOOR = -0.02       # clamp stage-1 growth (avoid explosive / runaway DCF)
 G_EXPLICIT_CAP = 0.20          # high-growth caveat: DCF caps the extrapolated growth
 CPI_TERMINAL_YEARS = 5
+
+# ---------------------------------------------------------------- terminal-growth DISPLAY mode
+# Default terminal-growth mode (job Taylor_20260717_074106, user-approved 2026-07-17). The prior
+# implicit default was "cpi" (5y-avg CPI only → implied REAL growth = 0 forever → the FCFE DCF
+# reads almost everything RICH, universe %cheap ~57). Default is now "cap_rf": the Damodaran
+# risk-free cap g_terminal = min(cpi + long-run real GDP, nominal risk-free). This is a
+# DISPLAY-REALISM LEVEL fix, NOT an alpha change — the cross-sectional margin-of-safety IC is FLAT
+# across every terminal-g mode (terminal g is identical for all tickers on a date, so it rescales
+# each name's FV ~equally and differences out of the within-month rank; study
+# mike/agents/Taylor/dcf_earning_power_upgrade.md Việc 3, quant-skeptic CONFIRMED high-confidence).
+# cap_rf also never trips the Gordon guard (g_term ≤ risk-free < r) — 0% clamp, unlike the naive
+# full-GDP mode. Universe %cheap becomes a sensible ~66. FCFE remains the margin-of-safety BASIS
+# (Việc 1 = NO-GO on earning-power); only the terminal-growth DISPLAY level changed here.
+# The mode formulas mirror the research module dcf_earning_power.terminal_growth_mode() — kept as a
+# small local copy so production owns its own default and does not import that RESEARCH-only module
+# (which imports this one). Override per run via DCF_TERMINAL_MODE env or fair_value(term_mode=).
+TERM_MODES = ("cpi", "cpi_gdp_full", "cpi_gdp_half", "cap_rf")
+GDP_FADE = 0.5                                          # convergence haircut for cpi_gdp_half
+DEFAULT_TERM_MODE = os.environ.get("DCF_TERMINAL_MODE", "cap_rf")
 
 # financial-sector ICB codes (excluded — own Gordon-P/B frameworks)
 def is_financial_icb(icb):
@@ -226,6 +249,37 @@ def terminal_growth(asof, years=CPI_TERMINAL_YEARS, with_frac=False):
     return (val, frac) if with_frac else val
 
 
+def terminal_growth_mode(asof, mode=None, erp=ERP, with_frac=False):
+    """Terminal NOMINAL growth (decimal) under `mode` (default DEFAULT_TERM_MODE = "cap_rf").
+
+      cpi          : 5y-avg CPI only              (prior default; implied real growth = 0)
+      cpi_gdp_full : cpi + long-run(15y) real GDP (naive; ~9.6% — fragile, can trip Gordon guard)
+      cpi_gdp_half : cpi + GDP_FADE * real GDP    (convergence-faded; ~6.5%)
+      cap_rf       : min(cpi + real GDP, r_f)     (DEFAULT; Damodaran hard cap g_term ≤ risk-free)
+
+    The nominal risk-free proxy r_f = Big-4 deposit rate = discount_rate(asof) - ERP. Reuses
+    terminal_growth() for the CPI component (and passes through its frac_real proxy diagnostic when
+    with_frac=True, so the fair_value() report/⚠ line is unchanged). Formula mirrors the research
+    module dcf_earning_power.terminal_growth_mode (see DEFAULT_TERM_MODE note)."""
+    mode = DEFAULT_TERM_MODE if mode is None else mode
+    cpi, frac = terminal_growth(asof, with_frac=True)
+    if mode == "cpi":
+        g = cpi
+    else:
+        import gdp_growth_vn as _gdp
+        gdp = _gdp.longrun_real_gdp(asof)                  # decimal, 15y-avg real GDP
+        if mode == "cpi_gdp_full":
+            g = cpi + gdp
+        elif mode == "cpi_gdp_half":
+            g = cpi + GDP_FADE * gdp
+        elif mode == "cap_rf":
+            rf = discount_rate(asof, erp) - erp / 100.0    # deposit rate (nominal risk-free proxy)
+            g = min(cpi + gdp, rf)
+        else:
+            raise ValueError(f"unknown term_mode {mode!r} (expected one of {TERM_MODES})")
+    return (g, frac) if with_frac else g
+
+
 # ---------------------------------------------------------------- growth assembly
 def _annual_series(rows, value_cols):
     """From point-in-time quarterly rows (asc), build an annual TTM series by sampling the
@@ -273,7 +327,7 @@ def recency_weighted_growth(annual_np, weights=DEFAULT_WEIGHTS):
 
 # ---------------------------------------------------------------- core valuation
 def fair_value(ticker, asof, price=None, oshares=None, erp=ERP,
-               weights=DEFAULT_WEIGHTS, fin=None, verbose=False):
+               weights=DEFAULT_WEIGHTS, fin=None, verbose=False, term_mode=None):
     """Compute intrinsic fair-value-per-share + margin-of-safety, point-in-time as-of `asof`.
 
     Returns a dict (always) with `ok` flag and `reason` when not computable.
@@ -311,7 +365,7 @@ def fair_value(ticker, asof, price=None, oshares=None, erp=ERP,
     # growth from recency-weighted annual TTM net-profit
     annual_np = _annual_series(rows, ["NP_P0", "NP_P1", "NP_P2", "NP_P3"])
     g_raw, gpts = recency_weighted_growth(annual_np, weights)
-    g_T, g_T_frac_real = terminal_growth(a, with_frac=True)
+    g_T, g_T_frac_real = terminal_growth_mode(a, term_mode, erp, with_frac=True)
     if np.isnan(g_raw):
         g_raw = g_T                             # no usable growth -> assume terminal
     g_clamp = float(np.clip(g_raw, G_EXPLICIT_FLOOR, G_EXPLICIT_CAP))
@@ -332,6 +386,7 @@ def fair_value(ticker, asof, price=None, oshares=None, erp=ERP,
         "ok": True, "fair_value_ps": fv_ps, "price": price,
         "discount_rate": r, "g_explicit": g_exp, "g_explicit_raw": g_raw,
         "g_terminal": g_T, "g_terminal_frac_real": g_T_frac_real,
+        "term_mode": (DEFAULT_TERM_MODE if term_mode is None else term_mode),
         "growth_points": gpts, "oshares": oshares,
         "annual_np": annual_np, "quarter": last.quarter,
     })
@@ -377,7 +432,8 @@ def _print_report(res):
     print(f"  annual growth pts g1,g2,g3: {gp}   -> g_trailing {res['g_explicit_raw']:+.1%}, g_explicit(shrunk→terminal) = {res['g_explicit']:+.1%}")
     fr = res.get("g_terminal_frac_real", 0.0)
     print(f"  discount rate r          : {res['discount_rate']:.2%}   "
-          f"terminal g = {res['g_terminal']:.2%} ({fr:.0%} REAL NSO / {1-fr:.0%} PROXY)")
+          f"terminal g = {res['g_terminal']:.2%} [{res.get('term_mode','cpi')}] "
+          f"(CPI window {fr:.0%} REAL NSO / {1-fr:.0%} PROXY)")
     if fr < 0.15:
         print("  ⚠️ CPI window mostly proxy — refetch NSO if this becomes a recurring valuation")
     print(f"  OShares                  : {res['oshares']/1e6:,.1f} M")
@@ -493,8 +549,10 @@ if __name__ == "__main__":
     ap.add_argument("--asof", default=None, help="YYYY-MM-DD (default: latest)")
     ap.add_argument("--price", type=float, default=None, help="market price VND (default: BQ cache)")
     ap.add_argument("--erp", type=float, default=ERP)
+    ap.add_argument("--term", default=None, choices=list(TERM_MODES),
+                    help=f"terminal-growth mode (default {DEFAULT_TERM_MODE})")
     args = ap.parse_args()
     px = args.price if args.price is not None else latest_price(args.ticker, args.asof)
     res = fair_value(args.ticker, args.asof or pd.Timestamp.today().normalize(),
-                     price=px, erp=args.erp)
+                     price=px, erp=args.erp, term_mode=args.term)
     _print_report(res)
