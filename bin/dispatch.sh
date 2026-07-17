@@ -113,6 +113,17 @@ case "$MODEL" in
 esac
 MODEL_FLAG=""
 [ -n "$MODEL" ] && MODEL_FLAG="--model $MODEL"
+# Soft nudge (2026-07-17, model-drift incident — see kb/INCIDENTS.md): fable should be
+# rare per MIKE.md §Model routing ("dùng dè, không phải mặc định"), but measured
+# 2026-07-17 showed 82/94 fable dispatches to Taylor/Winston in one week were Mike
+# manually choosing it for routine audit/fix work that the ladder's own tie-break rule
+# says belongs at Opus. This is a stderr reminder, not a block — fable is still valid
+# when genuinely warranted; the point is to make the ladder's own question visible at
+# the moment of choosing, not to prevent the choice.
+if [ "$MODEL" = "fable" ]; then
+  echo "NOTE: --model fable cho '$id' — xác nhận task này THẬT SỰ cực kỳ phức tạp (vượt tầm" >&2
+  echo "  Opus), không phải audit/fix routine. Không chắc → dùng opus (MIKE.md §Model routing)." >&2
+fi
 
 # --- Effort policy (2026-07-14, user) ------------------------------------------
 # Reasoning-effort per dispatch. Mặc định 'medium' (task thường lệ). Task phức tạp:

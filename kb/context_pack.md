@@ -1,4 +1,4 @@
-# Mike fleet — context pack (v1142)
+# Mike fleet — context pack (v1143)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
@@ -15,48 +15,29 @@
 
 # Current Operations — Mike fleet
 > Mike cập nhật thủ công khi có thay đổi trạng thái quan trọng. Đọc trước mọi thứ khác khi restart.
-> Cập nhật lần cuối: 2026-07-14
+> Cập nhật lần cuối: 2026-07-17
 > ⚠️ File này inject vào MỌI phiên/dispatch — giữ NHỎ. Chỉ để mục LIVE/đang-mở. Dự án ĐÓNG (NO-GO/
 > KHÉP KÍN/XONG) → chuyển thành 1 file `kb/projects/<slug>.md` + thêm 1 dòng vào `kb/projects/INDEX.md`
 > (INDEX được inject, chi tiết chỉ `cat` khi cần). Đừng để nhật ký dự án đã đóng tích lại ở đây.
+> ⚠️ Sự cố ĐÃ GIẢI QUYẾT (fix xong + verify) → rút về **1-2 câu + pointer `kb/INCIDENTS.md`**
+> ngay khi đóng, KHÔNG giữ nguyên play-by-play ở đây "cho chắc" (bài học sự cố model-drift/
+> context-bloat 2026-07-17 — file này phình 0→36KB trong 3 tuần chủ yếu vì narrative sự cố đã
+> đóng không được rút gọn, đè phí token lên MỌI dispatch qua `context_pack.md`).
 
-## `mike@Mike.service` (remote-control daemon) đã TẮT HẲN (2026-07-07, user quyết định)
-User giờ chỉ dùng Discord để nói chuyện với Mike (tách nhiều topic tiện phân việc hơn hẳn so với
-ClaudeCode desktop app), gần như không dùng desktop app trực tiếp nữa (chỉ dự phòng lúc bất
-thường, vd lỗi version model không xử lý được qua Discord). Đã xác nhận qua điều tra process/
-systemd: **`mike@Mike.service`** ("Claude agent Mike, remote-control") và **`ccdb-mike.service`**
-(bridge Discord thật, nhận tin nhắn + spawn `claude -p --resume <thread-uuid>` cho MỖI topic) là
-**2 service độc lập hoàn toàn** — `ccdb-mike.service` KHÔNG phụ thuộc `mike@Mike.service` (xác
-nhận `systemctl --user show ccdb-mike.service` không có Requires/After/PartOf/BindsTo nào trỏ tới
-service kia). Đã `systemctl --user disable --now mike@Mike.service` — verify: service này
-`inactive (dead)`, còn `ccdb-mike.service` vẫn `active (running)` bình thường, Discord không hề
-gián đoạn. **Không cần sửa `bin/watchdog.sh`/`bin/fleet_health.sh`** — cả 2 script tự động iterate
-qua unit đang `enabled` (không hardcode tên `mike@Mike.service`), nên tự động bỏ qua unit đã tắt,
-không báo cảnh báo giả "DOWN"/"PERSISTENT DOWN" nữa.
-
-**Nếu cần bật lại** (vd muốn dùng lại tính năng remote-control của desktop app):
-`systemctl --user enable --now mike@Mike.service`.
-
-## Model mặc định của chính Mike — SỬA LẠI về Sonnet 5 (2026-07-07, user yêu cầu, đảo ngược quyết
-định 2026-07-06 đổi sang Fable 5)
-Đã đồng bộ **3 nơi** (phát hiện có 2 tầng cấu hình song song trong bridge, không chỉ 1 chỗ — xem
-[[reference-ccdb-model-config-layers]]):
-1. `agents/Mike/.claude/settings.json` → `"model": "claude-sonnet-5"`.
-2. `/workspace/ccdb-mike/.env` → `CCDB_MODEL=claude-sonnet-5` (đây là fallback thấp nhất, KHÔNG
-   phải nguồn quyết định thật nếu DB đã có row).
-3. **`/workspace/ccdb-mike/data/sessions.db` bảng `settings`** — đây mới là nguồn ưu tiên CAO NHẤT
-   (thread override > global > `.env`). Phát hiện 4 dòng rác sai format từ các lần `/model` trước
-   đó (`"Sonnet 5"`, `"sonnet 5"` có dấu cách — CLI từ chối, đây chính là lỗi user gặp ở 1 topic
-   khác). Đã dọn: xóa hết override riêng theo thread, chỉ giữ 1 giá trị global
-   `model.global.claude = "claude-sonnet-5"` (+ đồng bộ key legacy `claude_model` cho nhất quán
-   hiển thị). Không cần restart `ccdb-mike.service` — bridge tự đọc lại nguồn này mỗi lần spawn
-   session mới.
+## Vận hành/kiến trúc daemon — trạng thái ổn định (không đổi gần đây)
+Remote-control daemon `mike@Mike.service` tắt hẳn từ 07-07 (user chỉ dùng Discord qua
+`ccdb-mike.service`, 2 service độc lập; bật lại: `systemctl --user enable --now mike@Mike.service`).
+Model mặc định Mike = Sonnet 5, đồng bộ ở 3 tầng config (`.claude/settings.json` +
+`ccdb-mike/.env` + `sessions.db` bảng `settings` — DB là nguồn ưu tiên cao nhất; sự cố malformed
+model-string qua `/model` command đã fix ở tầng validation, xem [[reference-ccdb-model-config-layers]]
++ [[project-discord-only-workflow-remote-control-disabled]] trong memory Mike).
 
 ## Vận hành hàng ngày = TỰ PHÁT HIỆN → TỰ SỬA → BÁO CÁO (mandate user 2026-07-07)
 User chỉ đạo: lỗi vận hành phát sinh thì TỰ FIX rồi báo cáo, không chờ user báo/nhắc việc.
 Tài liệu chuẩn tắc: **`kb/ops_runbook.md`** (timeline ngày, mỗi bước check gì, ranh giới tự
-sửa). Cơ chế: `bin/ops_autofix.sh` — checker phát hiện lỗi → dispatch Winston (fable) chẩn
-đoán + sửa + verify + báo Trading Daily; đã wire vào `ops_health_check.sh` (08:20/12:45) và
+sửa). Cơ chế: `bin/ops_autofix.sh` — checker phát hiện lỗi → dispatch Winston (opus, hạ từ
+fable 2026-07-17 — xem `kb/INCIDENTS.md` "Model-tier drift") chẩn đoán + sửa + verify + báo
+Trading Daily; đã wire vào `ops_health_check.sh` (08:20/12:45) và
 `sync_bq_cache_daily.sh` (23:45). Cooldown 1h/vấn đề chống bão dispatch. **Ranh giới cứng
 (không bao giờ tự sửa, escalate question + Telegram):** trade plan, trading_rules.json,
 logic đặt lệnh, crontab dòng thực thi, xoá dữ liệu, BOT_STOP. Mike trong phiên sống thấy
@@ -73,88 +54,25 @@ account mới `enabled:true/mode:live/broker:dnse` trong `trading_bot_accounts.j
 không thể đảo ngược: bot tự đặt lệnh thật lần đầu, không người duyệt giữa chừng).
 
 ## Đang trading (LIVE)
-- **SpaceX** (DNSE 0002023347): V2.4 LIVE từ 2026-07-01. **Trim 07-06 ĐÃ HOÀN TẤT** (23/23 lệnh bán,
-  710,5tr/710,1tr kế hoạch = 100%, không lệch đối soát broker) — exposure 141,4%→~70% NEUTRAL target
-  như kế hoạch, 8 mã basket-drift đã thoát hết (LPB/MSB/VHC/HAH/VIB/VGC/DCM/MBS). **Nợ margin thật
-  VẪN CÒN 409,86tr VND** (chưa trả — lần đọc API giữa chiều báo debt=0 là do balance CHƯA cập nhật
-  xong, không phải nợ đã được trả; xác nhận bằng ảnh chụp app DNSE thật của user + đọc lại API lúc
-  16:12 ICT, xem `kb/INCIDENTS.md` 2026-07-06 "CORRECTION"). **NAV xác nhận đúng: 983.002.349 VND**
-  (khớp chính xác ảnh chụp app: Tiền 709.276.086 + Cổ phiếu 683.590.000 − Nợ 409.863.737). Nợ margin
-  sẽ giảm khi tiền bán thật sự settle T+2 (08/07). 15 vị thế còn lại. run_bot.sh 09:05 ICT mỗi T2-T6.
-  **Cập nhật cùng ngày:** `verify_account_snapshot.py` từng dùng BQ Close (sync đêm 23:45) cho MTM
-  cùng ngày → NAV đã post lúc 15:00 dùng nhầm giá 07-03 (688,38tr thay vì 683,59tr thật). Đã vá: dùng
-  `close_price()`/`latest_trade()` DNSE boardId=G1 khi `--asof`=hôm nay (verified khớp app tới đồng),
-  BQ vẫn dùng cho ngày quá khứ. `nav_history_SpaceX.csv` dòng 07-06 đã sửa lại đúng. Chi tiết:
-  `kb/INCIDENTS.md` 2026-07-06 "Two wrong end-of-day market price sources".
-  **Đã duyệt (2026-07-03, event Mike/decision `plan-07-06-v2-trim-70pct`): trim GỘP về đúng 70% NEUTRAL
-  target** (không chỉ khôi phục 1x như plan v1 cũ) — `data/trade_plans/plan_SpaceX_2026-07-06_v2.json`,
-  bán tổng ~710M VND (71.8% NAV) trong 1 phiên 07-06 09:00-10:30, Mafee đã authorized, không cần duyệt
-  lại. Sau thực thi kỳ vọng: exposure 141.4%→69.6%, dọn sạch 8 mã basket drift (LPB/MSB/VHC/HAH/VIB/
-  VGC/DCM/MBS), margin debt→0 sau T+2 settle 07-08. **Lý do 70% (không phải 93.8-94.7% go-live gốc):**
-  DollarBill từng tự đặt target_equity_pct=93.8% lúc go-live KHÔNG qua backtest — user chất vấn trực
-  tiếp, Taylor backtest full 2-book NAV thật xác nhận 70% thắng tuyệt đối mọi metric risk-adjusted
-  (Sharpe 1.78 vs 1.66, Calmar 1.63 vs 1.49, DD -16.5% vs -18.8%, job `Taylor_20260703_130720`, quant-
-  skeptic CONFIRMED). Đã chính thức hoá thành `trading_rules.json` v2.1 section `neutral_parking`
-  (default 0.70 của phần idle cash khi BAL/LAG rỗng, KHÔNG phải trần tổng cổ phiếu — khi 2 book có deal
-  thật tổng cổ phiếu có thể vượt xa 70%, đúng thiết kế) + cơ chế `risk_dial_override` (muốn park≠0.70
-  bắt buộc field `risk_dial_confirmed_by_user`+`risk_dial_warning_acknowledged`, thiếu 1 trong 2 →
-  Mafee tự block plan).
-  **Cập nhật 2026-07-06 08:5x ICT (trước giờ mở cửa):** phát hiện `plan_SpaceX_2026-07-06.json`
-  (tên file executor thật sự đọc) vẫn là bản v1 cũ (11 lệnh, 94.7%) — v2 (23 lệnh, 70%, bản đã
-  duyệt) nằm ở tên file `_v2` mà `trading_bot/plan.py` KHÔNG hề nhận diện. Nếu không phát hiện,
-  09:05 sẽ chạy nhầm v1. Đã sửa (user duyệt): đổi tên v1→`..._v1_superseded_11name.json` (giữ audit),
-  copy v2 đè vào tên file chính thức — xác nhận qua preflight 08:58 ICT: "23 lệnh, ~0.710B VND,
-  approved=user" đúng như kỳ vọng. Tiện thể vá 2 lỗi hiển thị trong `preflight_check.sh` (field
-  `approved_by`/`mafee_authorized` thiếu ở plan gốc gây báo NOT_APPROVED giả; field `est_value_vnd`
-  vs `est_value` sai tên gây hiển thị `0.000B` giả). Chi tiết đầy đủ: `kb/INCIDENTS.md` 2026-07-06.
-  **Cập nhật 2026-07-06 giữa phiên sáng:** phát hiện bot lặp ~2000 lần `HTTP 400: Trade quantity
-  not enough` từ 09:12 ICT trên đúng 11 mã mua 02/07 (chưa qua T+2 — DNSE chỉ nhả sellable từ
-  **phiên chiều** của ngày T+2, không phải từ đầu phiên sáng). Đã vá `trading_bot/executor.py`
-  (commit `2cee603`): `step()` gọi `get_positions()` 1 lần/chu kỳ, cap qty bán theo `sellable`
-  thật hoặc bỏ qua (`WAIT_T2_SETTLEMENT`) thay vì để broker tự từ chối. Fix này CHỈ có hiệu lực
-  từ lần restart tự nhiên tiếp theo (nghỉ trưa 11:30 → resume 13:00), không restart tay giữa
-  chừng. Cũng commit luôn fix `trading_bot/plan.py` (id/ref_price normalize cho schema v2, commit
-  `7a2a145`) đã hotfix trên đĩa từ sáng nhưng chưa commit. Chi tiết: `kb/INCIDENTS.md` 2026-07-06
-  (entry thứ 2 cùng ngày).
-- **ZaloPay** (DNSE 0001743768, tên cũ `dnse_main`, đổi tên 2026-07-06): V2.4 LIVE từ 2026-07-06
-  (user quyết định). **CASH-ONLY** (không margin, package "ZaloPay" id=1258 type N) — cơ hội so
-  sánh V2.4 có-margin (SpaceX) vs không-margin. Tài khoản có 7 vị thế CŨ (giữ từ trước khi bot
-  quản lý, không có lịch sử FILL trong journal nội bộ): DGC/MSH/TCM/TLG/VHC/VIB/VPB. **DGC (47,2%
-  NAV) EXCLUDED khỏi rebalancing** qua field mới `excluded_tickers` trong
-  `secrets/trading_bot_accounts.json` (enforce cứng ở `bot_execute.py` qua
-  `trading_bot.plan.filter_excluded_tickers()`, không phụ thuộc plan generator nhớ đúng) — lý do:
-  đang bị HOSE hạn chế giao dịch (QĐ 448, chỉ khớp định kỳ, cắt margin) + cảnh báo (QĐ 544, kiểm
-  toán ngoại trừ) do lãnh đạo bị khởi tố hình sự 17/03/2026, ước gỡ hạn chế ~11-12/2026 (xem
-  legal-vn/Wendy research 2026-06-21/26/29 — Điều 42 QĐ 22 cần đủ 2 điều kiện: khắc phục nguyên
-  nhân + 6 tháng sạch CBTT liên tục). Taylor giữ DGC vì lý do đầu tư (target 70-75k/12-18 tháng,
-  +37% EV, 65% xác suất, briefing 2026-06-29), KHÔNG phải vì kẹt thanh khoản.
-  NAV thật go-live (xác nhận API 2026-07-06T07:42): **tổng NAV 1.011.470.378đ, active NAV (loại
-  DGC, dùng làm cơ sở target V2.4) 534.470.378đ** — dùng `bin/compute_active_nav.py --account
-  ZaloPay` để tính lại khi cần (không phụ thuộc lịch sử journal, đọc trực tiếp balance/positions
-  thật + giá BQ). **Known gap:** `daily_nav_snapshot.py` chưa tính đúng P&L cho vị thế legacy này
-  (cần lịch sử FILL nội bộ mà account không có) — NAV/active_nav đã đúng, phần P&L breakdown cho
-  báo cáo cần việc riêng sau. Cơ chế `excluded_tickers` viết TỔNG QUÁT (không riêng ZaloPay) để
-  dùng cho account tương lai có vị thế legacy tương tự — xem `kb/coding_guidelines.md` §7. Chi
-  tiết đầy đủ + 10 selfcheck: `kb/INCIDENTS.md` không có entry riêng (không phải sự cố, là setup
-  bình thường) — xem commit `87392be` (WorkingClaude repo).
-  **Cập nhật 2026-07-06 tối (user xác nhận 2 lần):** đã thêm 4 dòng cron thực thi thật
-  (`run_bot.sh --account ZaloPay` sáng/chiều, `bot_heartbeat.sh ZaloPay`, lunch-pkill) —
-  ZaloPay giờ tự động y hệt SpaceX. **Plan 07-07 hiện tại vẫn là HOLD/0 lệnh** (bản nháp
-  transition Option A — bán dần VIB/VHC/TCM/TLG/MSH, mua custom30V thay thế, user đã chọn
-  hướng A — dispatch DollarBill 2 lần đều timeout/treo, KHÔNG ghi được file cập nhật, cần
-  dispatch lại + điều tra nguyên nhân treo) → phiên chạy tự động ĐẦU TIÊN sáng mai
-  (2026-07-07) sẽ không làm gì (an toàn). `approved_by` vẫn null → preflight 08:45 mai sẽ
-  báo RED cho ZaloPay (NOT_APPROVED) — ĐÃ BIẾT TRƯỚC, vô hại vì 0 lệnh. **Bug nghiêm trọng
-  phát hiện + đã vá cùng tối:** `dnse_raw_{date}.jsonl` dùng chung cho MỌI account theo
-  ngày, bản ghi "balances" không gắn account → NAV SpaceX báo sai 688,5tr (lẫn balance
-  ZaloPay) khi tính lại báo cáo EOD hôm nay. Đã vá tận gốc (`trading_bot/brokers.py` gắn
-  account_no/label mọi bản ghi log, `daily_nav_snapshot.py` lọc đúng account) + verify lại
-  đúng 982.867.365đ + gửi đính chính (Telegram — Discord "Trading report" lỗi HTTP 500,
-  không phải do nội dung). Chi tiết: `kb/INCIDENTS.md` 2026-07-06. **Topic Trading report đã
-  THÔNG lại ~23:45 cùng tối**: root cause = private thread, bot rớt membership khi archive —
-  unarchive KHÔNG đủ, user phải @mention bot trong topic để thêm lại. Report EOD chính thức
-  đã gửi vào topic. eod_trading_report.sh giờ có fallback Telegram+Trading Daily khi post fail
-  (không bao giờ rơi im lặng nữa).
+- **SpaceX** (DNSE 0002023347): V2.4 LIVE từ 2026-07-01, có margin. NEUTRAL parking target
+  **70%** của phần idle cash khi BAL/LAG rỗng (`trading_rules.json` v2.1 `neutral_parking`,
+  đổi ≠0.70 cần `risk_dial_override` xác nhận, không thì Mafee tự block plan) — chọn 70% thay
+  vì 93.8% go-live gốc vì backtest risk-adjusted thắng rõ (Sharpe 1.78 vs 1.66, job
+  `Taylor_20260703_130720`, quant-skeptic CONFIRMED). run_bot.sh 09:05 ICT mỗi T2-T6. NAV/vị
+  thế hiện tại: đọc `nav_history_SpaceX.csv` hoặc EOD report mới nhất (Trading report topic),
+  đừng dùng số hardcode cũ ở đây. Chuỗi sự cố go-live tuần đầu (trim 07-06, bug tên file plan
+  `_v2`, T+2 sellable-chiều, giá EOD sai nguồn) đều đã fix+verify — chi tiết: `kb/INCIDENTS.md`
+  (tìm "2026-07-06").
+- **ZaloPay** (DNSE 0001743768, tên cũ `dnse_main`): V2.4 LIVE từ 2026-07-06, **CASH-ONLY**
+  (không margin) — cơ hội so sánh V2.4 có/không margin. **DGC (vị thế legacy) EXCLUDED khỏi
+  rebalancing** qua `excluded_tickers` (`secrets/trading_bot_accounts.json`, enforce cứng ở
+  `bot_execute.py`) — lý do: HOSE hạn chế giao dịch (lãnh đạo bị khởi tố 17/03/2026, ước gỡ
+  hạn chế ~11-12/2026); Taylor giữ vì lý do đầu tư riêng, không phải kẹt thanh khoản. Sizing
+  V2.4 dùng `active_nav` (`bin/compute_active_nav.py --account ZaloPay`), không dùng NAV tổng.
+  Cơ chế `excluded_tickers` viết tổng quát cho account tương lai có vị thế legacy tương tự —
+  `kb/coding_guidelines.md` §7. Transition 5 ngày (07-07→07-13, bán dần vị thế cũ sang
+  custom30V) đã XONG — `kb/projects/zalopay-transition-0713.md`. Known gap: `daily_nav_snapshot.py`
+  chưa tính đúng P&L cho vị thế legacy (NAV/active_nav đã đúng, chỉ breakdown P&L báo cáo còn thiếu).
 - **AlphaLens Paper**: FPT/ACB/MBB/HDB, tracking vs VNINDEX đến 2026-09-30. DollarBill phụ trách.
 
 ## Đang R&D
@@ -278,104 +196,21 @@ của toàn hệ thống).
 - `state/NOTIFY_OFF`: tắt Telegram push tạm thời
 - V2.5: `trading_rules.json v1.7` → v25_leverage STATUS=DISABLED
 
-## Audit cron toàn hệ thống XONG (Winston_20260712_142100) — 2 fix đang dispatch (2026-07-12)
-User yêu cầu review thứ tự cron. Kết quả: **thứ tự ĐÚNG**, nhưng lộ 2 bug nội dung khẩn:
-- **C1 CRITICAL** (tự verify độc lập bằng code+BQ live, xác nhận đúng 100%): `publish_gated_state.py`
-  đọc DT5G qua `BQ_LOCAL_CACHE` (T-1) thay vì live — với `MAX_STATE_LAG=0` (siết 07-11), thứ Hai
-  07-13 19:00 sẽ FAIL, không dispatch DollarBill. Dispatch Taylor (fable) fix ngay hôm nay: job
-  `Taylor_20260712_151135`.
-- **H2 HIGH**: check `shares_outstanding_live` calibrate sai giả định → false-BLOCK ~thứ Tư 07-15.
-  Đề xuất hạ BLOCK→WARN — CHƯA dispatch, chờ quyết sau khi C1 xong.
-- Phụ: M5 (executor.py đọc ticker_prune.parquet monolith chết từ 06-26, ảnh hưởng 2 paper trial
-  evidence), M4 (sync_bq_cache thiếu `|| true`), M3 (optional reorder pt_8l/telegram sau 19:00).
-- Bản thảo quy tắc "thêm cron mới đặt giờ nào" ở Phần 5 `mike/agents/Winston/audit_cron_order_20260712.md`
-  — CHƯA chính thức hoá thành `kb/cron_registry.md`/coding_guidelines, còn nợ.
+## Sự cố đã đóng, chỉ còn 2 mục thật sự CÒN TREO (rút gọn 2026-07-17, chi tiết đầy đủ `kb/INCIDENTS.md`)
+Audit cron 07-12 (C1 DT5G-cache-bug + H2 freshness-false-block) — cả 2 **FIXED+VERIFIED**
+(commit `4995262`, `6459b6d`, quant-skeptic CONFIRMED). BQ cache monolith 07-13 (27 file đọc
+nhầm `ticker_prune.parquet` chết) — **FIXED** (Winston_20260713_143546, archived). 2026-07-14
+HOLD — 1 ngày đã qua, không còn ảnh hưởng vận hành (DollarBill tự tính lại plan mỗi ngày).
 
-User đồng thời yêu cầu dọn crontab paper-trading lạc hậu (dựa production hiện tại V2.4 + version
-numbering + research đã đóng: V2.5 lever NO-GO, Q-sleeve NO-GO, DVR-8L NO-GO, momentum-deals NO-GO
-đã production-thực-thi-rồi, fa8l CP2 NO-GO). Dispatch Winston (fable) research + đề xuất diff (KHÔNG
-tự sửa crontab thật): job `Winston_20260712_151206`. Việc còn đang chạy: EXTREME (~07-28), chase-cap
-(~07-14), fill-timing (~cuối tháng 7), DC-book (event-anchored) — KHÔNG được đụng.
-
-**Còn nợ sau khi 2 job trên xong**: verify C1 fix (quant-skeptic), quyết H2, formalize cron_registry.md,
-áp dụng diff dọn crontab (sau khi tôi review), dispatch Taylor xem lại M5 (2 paper trial evidence).
-
-## C1 CRITICAL (publish DT5G qua BQ_LOCAL_CACHE) — FIX + COMMIT + VERIFY XONG (2026-07-12)
-Fix: `deploy_golive_dt5g_v4/publish_gated_state.py` — `os.environ.pop('BQ_LOCAL_CACHE', None)` process-
-local trước import `macro_state_live` (commit `4995262`, repo WorkingClaude). Cả 2 attempt dispatch
-Taylor đều timeout (tự mở rộng phạm vi sang backfill C1b không cần thiết — Monday's daily_refresh tự
-recompute full window nên không cần backfill riêng); Mike tự verify code + tự commit + dispatch
-quant-skeptic bằng `--claim` (không có finding event chính thức từ Taylor do timeout).
-**quant-skeptic CONFIRMED (high confidence)**: độc lập tái lập cơ chế bằng Python replica thật (pop
-env → cache branch bypass → live path), xác nhận process-local (mỗi step trong daily_refresh/
-bq_freshness_check chạy subprocess riêng, không leak sang sibling), không side-effect logic khác.
-1 ghi chú tùy chọn (pop thêm `LOCAL_SNAPSHOT_DIR`) — hiện vô hại vì biến chưa được export ở đâu.
-**Xong, không còn gì treo cho C1.** H2 (shares_outstanding_live false-BLOCK ~07-15) vẫn CHƯA quyết.
-
-## User tự phát hiện BQ local cache stale — vấn đề LỚN HƠN dự kiến (2026-07-13)
-User hỏi lại "BQ local đang stale, trễ mấy ngày" sau khi tôi báo cáo đã fix xong 8L cache (chỉ
-verify fa_ratings/fa_ratings_8l, KHÔNG kiểm tra toàn bộ bq_cache). Tự kiểm tra phát hiện:
-`data/bq_cache/ticker_prune.parquet` (monolith) đứng yên từ **06-26** (17 ngày) trong khi thư mục
-chunked thay thế (`ticker_prune/<year>.parquet`) vẫn đồng bộ đúng — sync_bq_cache.py đã migrate
-sang chunked quanh 06-26 nhưng monolith cũ không ai xoá/cập nhật.
-
-**Blast radius LỚN**: grep xác nhận **27 file** vẫn đọc thẳng monolith cũ — không chỉ
-`trading_bot/executor.py:507` (đã biết từ audit M5 hôm qua), mà còn 17 sector-screener script +
-9 script backtest/research khác (gap_fairvalue_*, gq_score_gate, neutral_glide_backtest,
-converge_union_test, lag_dnpr_event_study, gap_adaptive_proxy, gap_ev_by_liquidity).
-
-Dispatch song song: `Winston_20260713_143546` (fix đường dẫn đọc cho cả 27 file, archive
-monolith cũ theo coding_guidelines §10) + `Taylor_20260713_143629` (đánh giá tác động — finding
-nào từ 06-26 tới nay đã dùng dữ liệu đông băng, ưu tiên cao nhất: chase-cap vol-scale review dự
-kiến MAI 07-14 có bị ảnh hưởng rvol_20d/prior_close không).
-
-## 2026-07-14: HOLD chủ động — user quyết định không giao dịch hôm nay
-User yêu cầu 08:34 ICT (30' trước giờ mở cửa): "hôm nay không cần giao dịch". Đã xử lý:
-- **SpaceX**: plan gốc (DollarBill) có 2 lệnh basket-swap (bán HPG 2200cp do basket drift ra khỏi
-  custom30V_8L, mua LPB 900cp thay thế) — đã sửa `plan_SpaceX_2026-07-14.json` về orders=[],
-  summary.action=HOLD, giữ nguyên 2 lệnh gốc trong field `user_override_original_orders` để tham
-  khảo/xử lý lại sau nếu cần (basket drift HPG vẫn còn đó, chưa biến mất). Verify `load_plan()`
-  đọc đúng, 0 orders → bot sẽ tự skip sạch.
-- **ZaloPay**: không có file plan cho 07-14 (transition đã hoàn tất 07-13, không phát sinh gì
-  mới) — verify `load_plan()` return None khi thiếu file → bot tự skip, an toàn, không cần sửa gì.
-- Đã mirror vào kênh DollarBill plan channel.
-
-**Việc còn treo (không khẩn)**: HPG vẫn basket-drift ra khỏi custom30V_8L — nếu muốn xử lý basket
-swap này, cần lập lại plan cho ngày kế tiếp (không tự động quay lại, vì override hôm nay chỉ áp
-dụng cho 07-14, ngày mai DollarBill sẽ tự tính lại từ đầu dựa trên basket composition mới nhất).
-
-## User tự phát hiện BQ local cache stale — vấn đề LỚN HƠN dự kiến (2026-07-14→15)
-User hỏi "BQ local lại stale à, sao không ai fix" sau khi thấy alert. Điều tra: KHÔNG phải cùng
-loại lỗi hôm qua (cache/monolith). Phát hiện thật: bus event error thật (Taylor, 20:45 ICT 07-14)
-— Taylor chạy TAY `refresh_fa_ratings.sh` (không qua cron, cron cũ đã xoá/cron mới chưa tới hạn)
-làm 1 phần việc R&D khác, script tự ABORT đúng thiết kế vì fresh build chỉ ra 1 dòng cho 2026Q1
-thay vì 337 dòng đã publish — bảo vệ thành công, KHÔNG ghi đè bảng `fa_ratings` (Mike tự verify
-BQ live: vẫn đủ 337 dòng 2026Q1, an toàn).
-
-**Phát hiện NGHIÊM TRỌNG HƠN trong lúc điều tra root cause của abort này**: bảng NGUỒN
-`tav2_bq.ticker_financial` hiện tại (query BQ live, Mike tự làm 3 lần, unset cache, fully-qualified
-table) báo **MAX(time)=2026-05-04, MAX(Release_Date)=2026-04-20, 65,178 dòng** — trong khi CHÍNH
-audit hôm qua (`Winston_20260713_100733`) đã xác nhận qua BQ live: MAX(time)=MAX(Release_Date)
-=**2026-07-08** (có MBS Q2). Dữ liệu không thể tự lùi 2 tháng cho 1 bảng append-only — nghi ngờ có
-ghi đè/CREATE OR REPLACE làm hỏng bảng nguồn giữa 13/07 và giờ, có thể liên quan tới job Taylor
-chạy refresh thủ công hoặc job R&D khác chạm bảng này.
-
-Dispatch khẩn: `Winston_20260714_174411` — xác nhận độc lập mâu thuẫn, kiểm tra BQ table metadata
-(lastModifiedTime), truy vết script/job nào có thể đã ghi đè, đánh giá rủi ro cho cron mới
-(20:00 ICT tối nay 07-15, lần chạy thật đầu tiên của quy tắc quý mới) nếu bảng nguồn thật sự hỏng.
-KHÔNG tự sửa/rebuild — chờ xác định nguyên nhân trước.
-
-## Plan 07-15 đã duyệt (SpaceX + ZaloPay) — quyết định khôi phục ticker_financial ĐANG CHỜ user (2026-07-15)
-User: sẽ tự hỏi BQ admin (upstream tav2 pipeline) về sự cố ticker_financial rồi quyết định hướng
-xử lý sau — Mike KHÔNG tự khôi phục/tạm dừng cron cho tới khi có quyết định. Trong lúc chờ, user
-đã duyệt trực tiếp plan 07-15 cho cả 2 account (Mike verify trước: cả 2 plan 0 BAL/0 LAG, chỉ là
-basket-swap dựa trên custom30V_8l composition đã thiết lập từ trước rebalance quý gần nhất —
-không bị ảnh hưởng bởi corruption ticker_financial 07-14). approved_by=user đã ghi vào cả 2 file.
-
-**Còn treo, chờ user quay lại**: quyết định khôi phục ticker_financial/fa_ratings_8l từ backup
-Winston đã chụp (`ticker_financial_ttbackup_fresh_20260714`, `fa_ratings_8l_ttbackup_fresh_20260714`)
-+ quyết định có tạm dừng cron mới 20:00 ICT (quy tắc quý mới, sẽ chạy lại tối nay 07-15) hay không
-nếu nguồn upstream chưa được xác nhận đã sửa.
+**Còn treo thật** (2 mục):
+1. Dọn crontab paper-trading lạc hậu — diff đã có (`Winston_20260712_151206`), **chưa áp dụng**
+   (chờ Mike review). Ưu tiên thấp, không khẩn.
+2. **`ticker_financial`/`ticker_prune` corruption 07-14/15** (rows 07-08→07-14 bị xóa/ghi đè
+   upstream) — mitigations đã xong (depth-check gate commit `1b66428`, backup time-travel
+   `*_ttbackup_fresh_20260714`), nhưng **quyết định khôi phục dữ liệu từ backup vẫn CHỜ USER**
+   (đang hỏi BQ admin upstream). Mike KHÔNG tự khôi phục/tạm dừng cron cho tới khi có quyết
+   định. Kiểm tra nhanh còn treo hay đã xong: `kb/INCIDENTS.md` (tìm "ticker_prune cũng bị
+   corruption") + hỏi lại user nếu > vài ngày chưa thấy cập nhật ở đây.
 
 ## Tri thức chung của đội (canonical — Mike biên tập; MỌI agent phải nắm)
 > Cập nhật 2026-07-01. Chi tiết: `kb/KNOWLEDGE.md`. Số liệu gốc: `data/results_registry.md`.

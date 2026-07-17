@@ -2,25 +2,29 @@
 """spend_report.py [--days N] [--csv-append PATH]
 
 Cost-optimization #5 (2026-07-17) — repeatable ops-vs-research spend measurement.
-The 4 changes made earlier today (context tiering, risk-tiered arch-review, batched
-research dispatch, model-config smoke-test) were justified by a one-off manual count
-(dispatch job counts by agent, commit-type breakdown) done by hand in this session.
-This script turns that same measurement into something that can be re-run any time
-to check whether the optimizations are actually holding, instead of trusting memory.
 
-Measures two things over the trailing N days (default 7):
-  1. Headless dispatch jobs (bus/jobs/*.json) grouped into research / production /
-     ops-coordination / other, with total dispatch-log bytes per bucket as a rough
-     proxy for token spend (no real per-job token count is logged anywhere).
-  2. Git commits in the same window, bucketed by conventional-commit prefix
-     (feat/fix/docs/chore/refactor/other) — a proxy for how much work was new
-     capability vs. maintenance/fixes.
+REVISED same day (model-drift incident): the original version only counted JOBS and
+dispatch-log bytes per agent-category — and that metric actively hid the real problem.
+Real measurement 2026-07-17: job count fell 688 -> 168 (-76%) over 3 weeks while total
+wall-clock compute ROSE 12.2h -> 30.4h (+150%), because the fraction of dispatches using
+the most expensive model (fable) went from 0% (no --model flag existed 3 weeks ago) to
+~58% this week — mostly from Mike manually choosing fable for routine audit/fix work
+that the team's own model ladder (MIKE.md §Model routing) says belongs at Opus at most.
+A job-count trend alone would have shown this as "ops spend is DOWN" — completely
+missing the actual cost driver. Model-mix % and total duration are now the primary
+signals; job count and log-bytes are kept as secondary context.
+
+Measures three things over the trailing N days (default 7), from bus/jobs/*.json:
+  1. Job count + total duration (ended_at - started_at) per agent-category (research /
+     production / ops-coordination / other) — duration is the better spend proxy;
+     log-bytes is kept too but is weaker (doesn't reflect model price tier).
+  2. Model mix (sonnet/opus/fable/default) per category, as a percentage — the metric
+     that actually caught the 2026-07-17 incident.
+  3. Git commits in the same window, bucketed by conventional-commit prefix.
 
 Known gap: native subagent calls (Agent(subagent_type=...) for data-ops, risk-auditor,
 legal-vn, fleet-scout, quant-skeptic, bq-analyst) are NOT tracked here — they don't
-create bus/jobs records, only headless dispatch.sh calls do. This undercounts total
-spend but the headless dispatch path is where the 4 fixes today actually applied, so
-it's the right thing to trend.
+create bus/jobs records, only headless dispatch.sh calls do.
 
   spend_report.py                              -> human report, trailing 7 days
   spend_report.py --days 14                    -> trailing 14 days
@@ -65,8 +69,11 @@ def _parse_args(argv):
     return days, csv_path
 
 
+MODELS = ["sonnet", "opus", "fable", "default"]
+
+
 def _scan_jobs(since_ts):
-    buckets = {}  # category -> {"jobs": int, "log_bytes": int, "agents": {}}
+    buckets = {}  # category -> {"jobs", "log_bytes", "duration_s", "agents": {}, "models": {}}
     for path in glob.glob(os.path.join(ROOT, "bus", "jobs", "*.json")):
         try:
             with open(path, encoding="utf-8") as f:
@@ -82,12 +89,25 @@ def _scan_jobs(since_ts):
             continue
         agent = rec.get("to", "?")
         cat = AGENT_CATEGORY.get(agent, "other")
-        b = buckets.setdefault(cat, {"jobs": 0, "log_bytes": 0, "agents": {}})
+        b = buckets.setdefault(
+            cat, {"jobs": 0, "log_bytes": 0, "duration_s": 0, "agents": {}, "models": {}}
+        )
         b["jobs"] += 1
         b["agents"][agent] = b["agents"].get(agent, 0) + 1
+        model = rec.get("model") or "default"
+        if model not in MODELS:
+            model = "default"
+        b["models"][model] = b["models"].get(model, 0) + 1
         logfile = rec.get("logfile")
         if logfile and os.path.isfile(logfile):
             b["log_bytes"] += os.path.getsize(logfile)
+        ended = rec.get("ended_at")
+        try:
+            dur = int(ended) - started
+        except (TypeError, ValueError):
+            dur = 0
+        if dur > 0:
+            b["duration_s"] += dur
     return buckets
 
 
@@ -123,18 +143,48 @@ def main():
     job_buckets = _scan_jobs(since_ts)
     commit_counts, commit_total = _scan_commits(days)
 
+    empty = {"jobs": 0, "log_bytes": 0, "duration_s": 0, "agents": {}, "models": {}}
+
     print(f"Spend report — trailing {days} days")
     print()
     print("Headless dispatch jobs by category (bus/jobs/, native Agent() calls NOT counted):")
     total_jobs = 0
     total_bytes = 0
+    total_dur = 0
+    total_models = {m: 0 for m in MODELS}
     for cat in ["research", "production", "ops-coordination", "other"]:
-        b = job_buckets.get(cat, {"jobs": 0, "log_bytes": 0, "agents": {}})
+        b = job_buckets.get(cat, empty)
         total_jobs += b["jobs"]
         total_bytes += b["log_bytes"]
+        total_dur += b["duration_s"]
         agents_str = ", ".join(f"{a}={n}" for a, n in sorted(b["agents"].items()))
-        print(f"  {cat:18s} jobs={b['jobs']:4d}  log_kb={b['log_bytes']//1024:6d}  ({agents_str})")
-    print(f"  {'TOTAL':18s} jobs={total_jobs:4d}  log_kb={total_bytes//1024:6d}")
+        print(
+            f"  {cat:18s} jobs={b['jobs']:4d}  compute_h={b['duration_s']/3600:5.1f}  "
+            f"log_kb={b['log_bytes']//1024:6d}  ({agents_str})"
+        )
+        model_str = ", ".join(
+            f"{m}={100*n/b['jobs']:.0f}%" for m, n in sorted(b["models"].items()) if b["jobs"]
+        )
+        if model_str:
+            print(f"    model mix: {model_str}")
+        for m, n in b["models"].items():
+            total_models[m] = total_models.get(m, 0) + n
+    print(
+        f"  {'TOTAL':18s} jobs={total_jobs:4d}  compute_h={total_dur/3600:5.1f}  "
+        f"log_kb={total_bytes//1024:6d}"
+    )
+    if total_jobs:
+        overall_mix = ", ".join(
+            f"{m}={100*n/total_jobs:.0f}%" for m, n in sorted(total_models.items()) if n
+        )
+        print(f"    overall model mix: {overall_mix}")
+        fable_pct = 100 * total_models.get("fable", 0) / total_jobs
+        if fable_pct >= 30:
+            print(
+                f"    ⚠ fable = {fable_pct:.0f}% of all dispatches — ladder policy "
+                f"(MIKE.md §Model routing) says fable should be rare, reserved for "
+                f"genuinely exceptional complexity, not routine audit/fix work."
+            )
     print()
     print(f"Commits by type ({commit_total} total):")
     for p in COMMIT_PREFIXES + ["other"]:
@@ -143,22 +193,26 @@ def main():
     if csv_path:
         csv_path = os.path.join(ROOT, csv_path) if not os.path.isabs(csv_path) else csv_path
         is_new = not os.path.isfile(csv_path)
-        research = job_buckets.get("research", {"jobs": 0, "log_bytes": 0})
-        production = job_buckets.get("production", {"jobs": 0, "log_bytes": 0})
-        ops = job_buckets.get("ops-coordination", {"jobs": 0, "log_bytes": 0})
-        other = job_buckets.get("other", {"jobs": 0, "log_bytes": 0})
+        research = job_buckets.get("research", empty)
+        production = job_buckets.get("production", empty)
+        ops = job_buckets.get("ops-coordination", empty)
+        other = job_buckets.get("other", empty)
         with open(csv_path, "a", encoding="utf-8") as f:
             if is_new:
                 f.write(
-                    "date,days,research_jobs,research_kb,production_jobs,production_kb,"
-                    "ops_jobs,ops_kb,other_jobs,other_kb,feat,fix,docs,chore,refactor,test,other_commits\n"
+                    "date,days,research_jobs,research_kb,research_h,production_jobs,production_kb,"
+                    "production_h,ops_jobs,ops_kb,ops_h,other_jobs,other_kb,other_h,"
+                    "sonnet_jobs,opus_jobs,fable_jobs,default_jobs,"
+                    "feat,fix,docs,chore,refactor,test,other_commits\n"
                 )
             f.write(
                 f"{time.strftime('%Y-%m-%d', time.gmtime())},{days},"
-                f"{research['jobs']},{research['log_bytes']//1024},"
-                f"{production['jobs']},{production['log_bytes']//1024},"
-                f"{ops['jobs']},{ops['log_bytes']//1024},"
-                f"{other['jobs']},{other['log_bytes']//1024},"
+                f"{research['jobs']},{research['log_bytes']//1024},{research['duration_s']/3600:.1f},"
+                f"{production['jobs']},{production['log_bytes']//1024},{production['duration_s']/3600:.1f},"
+                f"{ops['jobs']},{ops['log_bytes']//1024},{ops['duration_s']/3600:.1f},"
+                f"{other['jobs']},{other['log_bytes']//1024},{other['duration_s']/3600:.1f},"
+                f"{total_models.get('sonnet',0)},{total_models.get('opus',0)},"
+                f"{total_models.get('fable',0)},{total_models.get('default',0)},"
                 f"{commit_counts.get('feat',0)},{commit_counts.get('fix',0)},"
                 f"{commit_counts.get('docs',0)},{commit_counts.get('chore',0)},"
                 f"{commit_counts.get('refactor',0)},{commit_counts.get('test',0)},"

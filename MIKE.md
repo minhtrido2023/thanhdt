@@ -317,6 +317,20 @@ cực kỳ phức tạp.**
 Không chắc → mặc định Sonnet 5. Việc phức tạp mà lưỡng lự Opus-hay-Fable → chọn **Opus** (Fable chỉ
 khi thực sự vượt tầm). Tránh dùng model đắt cho việc thường lệ.
 
+**⚠️ Sự cố model-drift đã đo được (2026-07-17)** — bằng chứng cụ thể để KHÔNG lặp lại: user hỏi tại
+sao token vận hành tăng dù không có research nặng nào 3 tuần qua. Đo `bus/jobs/` thật: job count
+giảm 76% (688→168) nhưng tổng compute wall-clock TĂNG 150% (12.2h→30.4h), vì tỷ lệ dispatch dùng
+fable đi từ 0% (3 tuần trước, `--model` còn chưa tồn tại) lên **58%** tuần đó. Trong 94 dispatch
+fable tới Taylor/Winston tuần đó, chỉ 12 đến từ pipeline tự động (`ops_autofix.sh`, đã hạ về opus
+cùng ngày) — **82 là chính Mike tự chọn `--model fable`** cho việc đọc mẫu ra là audit cron order,
+dọn crontab lạc hậu, fix bug dữ liệu, soạn báo cáo bị bỏ sót — tất cả là "phức tạp thường" (Q2,
+tầng Opus) theo đúng bảng trên, KHÔNG phải Q3. Bài học: chính sách viết đúng KHÔNG tự động được
+tuân thủ — `dispatch.sh` giờ in 1 dòng nhắc ra stderr mỗi lần `--model fable` được dùng (không
+chặn, chỉ nhắc lại câu hỏi Q3), và `bin/spend_report.py` tự cảnh báo khi %fable tổng ≥30% (đọc mỗi
+Friday editorial review, §Việc định kỳ mục 5b). Cả 2 chỉ là lưới an toàn — quyết định thật vẫn ở
+Mike tại thời điểm dispatch, tự hỏi đúng câu hỏi Q1-Q3 thay vì phản xạ chọn tier cao khi việc "nghe
+có vẻ quan trọng" (audit/incident không tự động = phức tạp).
+
 **Gợi ý xác suất ban đầu theo loại việc** (không phải rule cứng theo tên agent):
 - **Sonnet 5**: `bq-analyst`, `fleet-scout`, `corp-scanner`, `data-ops` (freshness/pipeline, rule-based),
   `Mafee` (thực thi plan-bound, không phán đoán), `ops_health_check`/`preflight_check`-style.

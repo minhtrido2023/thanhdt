@@ -5,8 +5,12 @@
 # tự động fix bug, không thụ động chờ báo lỗi... tự fix rồi báo cáo lại").
 #
 # Được gọi bởi các checker định kỳ (ops_health_check.sh, sync_bq_cache_daily.sh, ...) khi
-# phát hiện vấn đề — dispatch 1 headless agent (Winston, model fable) để CHẨN ĐOÁN + SỬA
-# trong giới hạn an toàn (guardrails bên dưới) + báo cáo vào Trading Daily.
+# phát hiện vấn đề — dispatch 1 headless agent (Winston, model opus) để CHẨN ĐOÁN + SỬA
+# trong giới hạn an toàn (guardrails bên dưới) + báo cáo vào Trading Daily. Model hạ từ
+# fable xuống opus (cost-opt model-drift fix, 2026-07-17) — mọi issue checker này gọi tới
+# là "phức tạp thường" (chẩn đoán+fix 1 script) theo đúng ladder ở MIKE.md §Model routing,
+# không phải "cực kỳ phức tạp" cần fable. Cần fable thật (issue khó bất thường) → dispatch
+# tay lại với --model fable, đừng mặc định.
 #
 # GUARDRAILS (nhúng thẳng vào prompt — fixer KHÔNG được vượt):
 #   ĐƯỢC tự sửa : bug code trong script report/check/pipeline/cache, resync cache, resend
@@ -84,6 +88,6 @@ QUY TRÌNH BẮT BUỘC:
 3. CẤM TUYỆT ĐỐI (dù thấy 'cần thiết'): sửa trade plan, trading_rules.json, logic đặt lệnh executor/brokers, crontab dòng thực thi (run_bot/heartbeat/pkill), xoá dữ liệu, tạo/xoá BOT_STOP. Nếu root cause nằm ở đó → append_event.sh Winston question '<topic>' với mô tả + đề xuất, notify Telegram, rồi DỪNG.
 4. VERIFY artifact sau khi sửa (chạy lại checker/script bị lỗi, xác nhận hết lỗi thật) — không tin self-report.
 5. BÁO CÁO: notify_thread.sh vào thread $TRADING_DAILY_THREAD — ngắn gọn: hỏng gì, nguyên nhân, đã sửa gì, verify thế nào. Nếu ảnh hưởng workflow sống → thêm entry kb/INCIDENTS.md. Ghi bus event finding như thường lệ." \
-  --bg --timeout "$AUTOFIX_TIMEOUT" --model fable 2>&1 | tail -3
+  --bg --timeout "$AUTOFIX_TIMEOUT" --model opus 2>&1 | tail -3
 
 echo "[ops_autofix] dispatched fixer for '$LABEL'"

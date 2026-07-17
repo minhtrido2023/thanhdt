@@ -4,8 +4,9 @@
 #
 # CƠ CHẾ TỰ ĐỘNG cho lỗi VẬN HÀNH/TƯƠNG TÁC GIỮA CÁC AGENT team Mike (user mandate
 # 2026-07-07): Wags (Fleet Ops Coordinator) tìm lỗi + tự sửa → arch-reviewer (chuyên gia
-# kiến trúc tổ chức/điều phối agent, ~/.claude/agents/arch-reviewer.md, model fable, sinh
-# ra để BÁC BỎ) audit lại → báo cáo hoàn tất vào TOPIC ARCHITECTURE (1521475726329516122).
+# kiến trúc tổ chức/điều phối agent, ~/.claude/agents/arch-reviewer.md, model opus — hạ từ
+# fable 2026-07-17, xem note dưới, sinh ra để BÁC BỎ) audit lại → báo cáo hoàn tất vào TOPIC
+# ARCHITECTURE (1521475726329516122).
 #
 # Phân định domain với ops_autofix.sh (Winston): Winston = lỗi vận hành TRADING/data/
 # pipeline/report; Wags = lỗi ĐIỀU PHỐI giữa agent (dispatch treo/timeout, circuit breaker,
@@ -15,14 +16,20 @@
 # ép Wags sửa vòng 2 vô hạn — con người quyết ở vòng 2, chống ping-pong).
 # Chống bão: cooldown 1h/label (chung cơ chế state/autofix của ops_autofix).
 #
-# Xác minh theo mức rủi ro (cost-opt #2, 2026-07-17): arch-reviewer (model fable, ~1500s
-# timeout) chạy MẶC ĐỊNH cho MỌI fix trước đây — đúng cho fix chạm dispatch.sh/hooks (dùng
-# chung toàn team), nhưng lãng phí cho fix cosmetic (sửa chữ thông báo, doc). Giờ
-# bin/wags_risk_tier.py phân loại DỰA TRÊN files_changed Wags tự báo (không tin Wags tự
-# chấm rủi ro): mọi file khớp allowlist ngắn, cố tình bảo thủ (kb/*.md, MIKE.md, notify.sh,
-# chính wags_autofix.sh/ops_autofix.sh/jobs.sh) → "low" → bỏ qua arch-reviewer, chỉ ghi vào
+# Xác minh theo mức rủi ro (cost-opt #2, 2026-07-17): arch-reviewer (~1500s timeout) chạy
+# MẶC ĐỊNH cho MỌI fix trước đây — đúng cho fix chạm dispatch.sh/hooks (dùng chung toàn
+# team), nhưng lãng phí cho fix cosmetic (sửa chữ thông báo, doc). Giờ bin/wags_risk_tier.py
+# phân loại DỰA TRÊN files_changed Wags tự báo (không tin Wags tự chấm rủi ro): mọi file
+# khớp allowlist ngắn, cố tình bảo thủ (kb/*.md, MIKE.md, notify.sh, chính wags_autofix.sh/
+# ops_autofix.sh/jobs.sh) → "low" → bỏ qua arch-reviewer, chỉ ghi vào
 # state/autofix/sample_queue.jsonl để audit lấy mẫu sau; BẤT KỲ gì khác (mặc định fail-safe
 # "high" khi thiếu field/không phân loại được) → vẫn bắt buộc như cũ.
+#
+# Model-drift fix (2026-07-17, cùng đợt sửa với ops_autofix.sh): cả Wags-fix step lẫn
+# arch-reviewer đã hạ từ fable→opus. Đo được thật: tuần 07-10→07-17, 82/94 dispatch fable
+# tới Taylor/Winston là Mike TỰ dispatch tay (không phải từ pipeline tự động này), nhưng
+# 2 call-site fable cứng trong file này vẫn là 1 phần cấu thành — fable chỉ nên dùng khi
+# Opus thật sự không đủ (escalate tay lại, không mặc định).
 set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WC_ROOT="$(cd "$ROOT/.." && pwd)"
@@ -75,7 +82,7 @@ $finding
 Codebase: $WC_ROOT (fleet tooling ở $ROOT). Mở artifact thật finding trích dẫn (file/commit/
 log/bus event), chạy đủ 7 hướng tấn công, rồi in ĐÚNG khối VERDICT_JSON." \
       --permission-mode auto --allowedTools "Bash Read Grep Glob" \
-      --model fable --max-turns 40 > "$log" 2>"$log.err" ) || true
+      --model opus --max-turns 40 > "$log" 2>"$log.err" ) || true
 
   verdict_json="$(python3 - "$log" "$topic" <<'PY'
 import json, re, sys
@@ -147,7 +154,7 @@ setsid bash -c '
   #    self-report, cùng nguyên tắc đã áp dụng ở idempotency guard/ghost-order).
   out="$("$ROOT/bin/dispatch.sh" Wags "NHIỆM VỤ WAGS-AUTOFIX (issue điều phối giữa agent, mandate 2026-07-07): '"'"'$LABEL'"'"'
 CHI TIẾT: $DETAILS
-Quy trình: (1) chẩn đoán từ artifact thật (jobs.sh list cột HB_AGE, trace.sh, bus, log) — đọc kb/ops_runbook.md + working memory của bạn trước; (2) SỬA trong ranh giới: được sửa tooling điều phối (dispatch.sh/jobs.sh/mike_json.py/ops_autofix/wags_autofix/checker) sau khi test, TUYỆT ĐỐI không đụng trading (plan/executor/cron thực thi/trading_rules); (3) verify artifact sau sửa (chạy lại lệnh lỗi, xác nhận hết); (4) ghi bus finding topic bắt đầu bằng '"'"'wags-fix: $LABEL'"'"' kèm root_cause/fix/verify/commit + field \"files_changed\": [danh sách ĐẦY ĐỦ đường dẫn tương đối bạn đã sửa, vd [\"bin/dispatch.sh\",\"MIKE.md\"]] — field này quyết định fix có cần arch-reviewer audit đầy đủ hay không, KHÔNG được bỏ trống hay báo thiếu file." --timeout 1500 --retries 0 --model fable 2>&1)" || true
+Quy trình: (1) chẩn đoán từ artifact thật (jobs.sh list cột HB_AGE, trace.sh, bus, log) — đọc kb/ops_runbook.md + working memory của bạn trước; (2) SỬA trong ranh giới: được sửa tooling điều phối (dispatch.sh/jobs.sh/mike_json.py/ops_autofix/wags_autofix/checker) sau khi test, TUYỆT ĐỐI không đụng trading (plan/executor/cron thực thi/trading_rules); (3) verify artifact sau sửa (chạy lại lệnh lỗi, xác nhận hết); (4) ghi bus finding topic bắt đầu bằng '"'"'wags-fix: $LABEL'"'"' kèm root_cause/fix/verify/commit + field \"files_changed\": [danh sách ĐẦY ĐỦ đường dẫn tương đối bạn đã sửa, vd [\"bin/dispatch.sh\",\"MIKE.md\"]] — field này quyết định fix có cần arch-reviewer audit đầy đủ hay không, KHÔNG được bỏ trống hay báo thiếu file." --timeout 1500 --retries 0 --model opus 2>&1)" || true
   echo "$out" >> "'"$PIPELOG"'"
 
   # 2) Phân loại rủi ro (cost-opt #2, 2026-07-17): fix chỉ đụng path an toàn tuyệt đối

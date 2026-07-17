@@ -151,11 +151,19 @@ Bạn đang ở headless mode. Nhiệm vụ:
 2. Chạy '$ROOT/bin/data_registry_audit.sh --bus' (audit correctness+freshness của kb/data_registry.md — user directive 2026-07-11, sau sự cố SIGNAL_V11 base-leak). Đọc output: FAIL = có regression thật (nguồn TRAP/DEAD bị đọc nhầm lại, hoặc writer chết) — PHẢI điều tra + escalate Winston/dispatch fix, KHÔNG bỏ qua. WARN = cần xem xét, ghi chú vào kb/data_registry.md 'Lịch sử' nếu là false-positive đã biết. Cập nhật dòng 'Last full audit: <date>' ở đầu file data_registry.md dù kết quả clean/warn/fail.
 3. Rà bất kỳ nguồn nào trong data_registry.md đã đánh dấu Status=DEPRECATED nhưng KHÔNG có dòng ⚠️ SUPERSEDED BY <nguồn mới> ON <date> — nếu thiếu, đó là vi phạm quy trình obsolete (xem 'Nguyên tắc bắt buộc' mục 5 trong file), cần bổ sung hoặc hỏi Winston.
 4. Section D của audit script (stale-duplicate scan, coding_guidelines.md §10) liệt kê file variant đã confirm bị thay thế nhưng CHƯA archive — nếu WARN mới xuất hiện (khác danh sách đã biết), dispatch Winston verify + git mv vào archive/ theo đúng quy trình (không tự archive khi đang ở headless review, chỉ dispatch việc đó).
-5. Đọc '$ROOT/state/spend_history.csv' (cost-opt #5, mỗi dòng = 1 tuần, ops_jobs/ops_kb =
-Wags+Winston+Spyros+Wendy, research_jobs/research_kb = Taylor). Nếu ops_kb có xu hướng tăng
-liên tục qua ≥3 tuần gần nhất so với research_kb (tỉ lệ ops/research xấu đi rõ rệt, không
-phải 1 tuần bất thường do sự cố đơn lẻ) — ghi nhận vào KNOWLEDGE.md + cân nhắc đề xuất thêm
-biện pháp tối ưu (không tự làm gì thêm, chỉ ghi nhận + đề xuất cho user quyết).
+5. Đọc '$ROOT/state/spend_history.csv' (cost-opt #5, mỗi dòng = 1 tuần; cột *_h = giờ
+compute thật — chỉ báo spend TỐT HƠN *_jobs, xem bài học sự cố model-drift 2026-07-17 dưới).
+Nếu ops_h có xu hướng tăng liên tục qua ≥3 tuần gần nhất so với research_h (không phải 1 tuần
+bất thường do sự cố đơn lẻ) — ghi nhận vào KNOWLEDGE.md + cân nhắc đề xuất thêm biện pháp tối
+ưu (không tự làm gì thêm, chỉ ghi nhận + đề xuất cho user quyết).
+5b. **Model-mix drift check (bài học sự cố 2026-07-17)**: cùng file, cột fable_jobs/(sonnet_
+jobs+opus_jobs+fable_jobs+default_jobs). Sự cố thật: job count giảm 76% trong 3 tuần nhưng
+compute TĂNG 150% vì %fable đi từ 0%→58% — chỉ đếm job/KB log đã KHÔNG bắt được, chỉ
+'$ROOT/bin/spend_report.py' bản có model-mix mới bắt được. Nếu %fable tổng (mọi category)
+≥30% ở tuần mới nhất → đọc lại các dispatch fable thật (bus/jobs, field prompt_summary) xem
+có phải phần lớn là audit/fix routine (đáng lẽ Opus) hay thật sự "cực kỳ phức tạp" theo đúng
+ladder MIKE.md §Model routing — ghi nhận vào KNOWLEDGE.md nếu lệch, không tự sửa thói quen
+dispatch của Mike (đây là hành vi con người, không phải 1 lỗi code có thể fix 1 lần).
 6. Role-scoped context drift check (MIKE.md §Context theo vai trò, 2026-07-17): đọc
 '$ROOT/kb/context_safety_core.md', 'context_execution_mini.md', 'context_planning_mini.md',
 'context_dataops_mini.md' — đối chiếu với KNOWLEDGE.md/current_ops.md mới nhất. Fact nào đã
@@ -163,7 +171,15 @@ biện pháp tối ưu (không tự làm gì thêm, chỉ ghi nhận + đề xu�
 mới ảnh hưởng thực thi/lập plan/data-ops) nhưng CHƯA lan sang (các) file role-scoped liên quan
 → sửa ngay, đúng file theo bảng trong MIKE.md (đừng sửa nhầm — fact riêng Mafee không thuộc
 context_planning_mini.md và ngược lại).
-KHÔNG xóa archive. Không cần hỏi user cho việc 1-5 — đây là routine maintenance đã được user uỷ quyền. Sau khi xong: ghi sự thay đổi lên bus (append_event.sh Mike decision 'kb-weekly-editorial') và notify Telegram." \
+7. **`kb/current_ops.md` bloat check (bài học sự cố context-bloat 2026-07-17 — file này phình
+0→36KB trong 3 tuần, đè phí token lên MỌI dispatch qua context_pack.md)**: đọc kích thước file
+('wc -c $ROOT/kb/current_ops.md'). Nếu >20KB HOẶC có mục nào mô tả 1 sự cố đã ghi rõ 'FIXED'/
+'XONG'/'ĐÃ VÁ' + có pointer 'kb/INCIDENTS.md' nhưng VẪN giữ nguyên narrative đầy đủ (thay vì
+rút về 1-2 câu như quy ước ở đầu file current_ops.md) → rút gọn ngay theo đúng mẫu đã làm hôm
+07-17 (giữ current-state + pointer INCIDENTS.md, xoá play-by-play đã có nơi khác lưu). CHỈ rút
+gọn mục đã XÁC NHẬN đóng — mục còn 'CHỜ USER'/'chưa quyết' GIỮ NGUYÊN, không rút gọn nhầm việc
+đang mở thành trông như đã xong.
+KHÔNG xóa archive. Không cần hỏi user cho việc 1-6 — đây là routine maintenance đã được user uỷ quyền. Sau khi xong: ghi sự thay đổi lên bus (append_event.sh Mike decision 'kb-weekly-editorial') và notify Telegram." \
         --timeout 900 >> "$LOG" 2>&1 &
     log "Editorial dispatch launched (background)."
 fi
