@@ -182,3 +182,17 @@ while read -r skey sage smax sflag; do
     rm -f "$smark" 2>/dev/null || true
   fi
 done <<<"$(python3 "$ROOT/bin/staleness_watch.py" --oneline 2>/dev/null)"
+
+# --- ccdb-mike model config watch (cost-opt #4, 2026-07-17) — second defense layer for
+# the exact class of bug seen twice this week: a malformed model id (e.g. "Sonnet 5" with
+# a space) at any of the 3 resolution layers silently breaks session spawns. Write-side
+# validation (2026-07-17) should prevent new bad values; this is the cheap read-side
+# check catching anything that got in some other way. Debounced via state/modelwarn.
+MODELWARN="$ROOT/state/modelwarn"
+read -r _mstatus _mdetail <<<"$(python3 "$ROOT/bin/model_config_watch.py" --oneline 2>/dev/null)"
+if [ "${_mstatus:-}" = "bad" ]; then
+  [ -f "$MODELWARN" ] || notify "MODEL CONFIG BAD: ${_mdetail:-unknown} — ccdb-mike sessions may fail to spawn. Kiểm tra: python3 $ROOT/bin/model_config_watch.py"
+  touch "$MODELWARN"
+else
+  rm -f "$MODELWARN" 2>/dev/null || true
+fi

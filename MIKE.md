@@ -285,6 +285,17 @@ sự cố Taylor 2026-07-01).
 
 ## Model routing — ladder 3 tầng theo độ phức tạp task (cập nhật 2026-07-14, user yêu cầu)
 
+**Checklist thủ công SAU MỖI LẦN đổi model của chính Mike** (cost-opt #4, 2026-07-17 — bài
+học từ sự cố schema-drift `run_in_background` biến mất khỏi Agent tool sau lần đổi Fable-5
+2026-07-06, không ai phát hiện tới khi có sự cố thật): trước khi tin tưởng các cơ chế phối
+hợp lõi (fast-wake wrapper §8, dispatch reminder snippet) vẫn hoạt động đúng, kiểm tra nhanh
+1 lần — KHÔNG xây cron tự động cho việc này (chi phí duy trì > lợi ích, đổi model không xảy
+ra thường xuyên): hỏi thử "liệt kê các tham số của Agent tool hiện có" và so với danh sách
+đã ghi trong §8, nếu khác → cập nhật §8 + snippet dispatch.sh NGAY, đừng để phát hiện qua sự
+cố thật lần nữa. `bin/model_config_watch.py` (chạy tự động qua watchdog.sh mỗi 10') là lớp
+phòng thủ RIÊNG cho model CONFIG (không phải tool schema) — 2 việc khác nhau, không thay
+được cho nhau.
+
 `dispatch.sh` nhận `--model NAME` (`sonnet|opus|haiku|fable`, validate ngay khi parse — sai giá trị
 thì exit 1 trước khi có side effect nào). Không truyền → giữ nguyên hành vi cũ (model mặc định của
 CLI). Áp dụng cho cả 2 nhánh (`--bg` và đồng bộ). Native subagent (`Agent(subagent_type=...)`) đã có
