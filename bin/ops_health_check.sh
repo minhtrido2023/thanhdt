@@ -275,6 +275,45 @@ if today_d.day >= 5:
 else:
     lines.append(f"ℹ️ Kiểm tra báo cáo tháng: bỏ qua (hôm nay ngày {today_d.day} < 5, chờ sau ngày 5).")
 
+# 8. Lãi suất tiết kiệm (deposit_rate_vn) freshness — WARN-only, thêm 2026-07-17 (proposal §4).
+#    Input LIVE cho rating_8l NEUTRAL tilt. Mốc cuối = collected_date mới nhất trong
+#    data/deposit_rate_vn_events.csv, hoặc anchor cứng cuối cùng trong deposit_rate_vn.py nếu CSV
+#    chưa có dòng nào. >45 ngày -> WARN (KHÔNG BLOCK — đây là tilt nhỏ ±0.03, không money-path).
+#    Không import pandas ở đây (system python3 có thể thiếu) — đọc CSV bằng csv, anchor bằng regex.
+dep_csv = os.path.join(wc_root, "data", "deposit_rate_vn_events.csv")
+dep_last, dep_kind = None, None
+if os.path.exists(dep_csv):
+    try:
+        with open(dep_csv, newline="") as f:
+            drows = [r for r in csv.DictReader(f) if r.get("effective_date")]
+        cds = [(r.get("collected_date") or r.get("effective_date")) for r in drows]
+        cds = [c for c in cds if c]
+        if cds:
+            dep_last = max(_date.fromisoformat(c) for c in cds)
+            dep_kind = "CSV live"
+    except Exception:
+        pass
+if dep_last is None:  # CSV rỗng/không đọc được -> mốc cuối = anchor cứng cuối trong module
+    try:
+        with open(os.path.join(wc_root, "deposit_rate_vn.py")) as f:
+            src = f.read()
+        anchor_dates = re.findall(r'\("(\d{4}-\d{2}-\d{2})"\s*,', src)
+        if anchor_dates:
+            dep_last = max(_date.fromisoformat(d) for d in anchor_dates)
+            dep_kind = "anchor cứng (CSV rỗng)"
+    except Exception:
+        pass
+if dep_last is not None:
+    dep_age = (today_d - dep_last).days
+    if dep_age > 45:
+        W(f"Lãi suất tiết kiệm (deposit_rate_vn) đã {dep_age} ngày chưa refresh "
+          f"(mốc cuối {dep_last}, {dep_kind}) — input rating_8l NEUTRAL tilt sống. "
+          f"Chạy refresh_deposit_rate_vn.sh (nhắc) rồi append_deposit_rate.py để cập nhật.")
+    else:
+        OK(f"Lãi suất tiết kiệm (deposit_rate_vn): mốc cuối {dep_last} ({dep_age} ngày, {dep_kind}).")
+else:
+    lines.append("ℹ️ deposit_rate_vn freshness: không đọc được mốc cuối (bỏ qua).")
+
 print("\n".join(lines))
 print(f"__WARN_COUNT__={warn}")
 PYEOF

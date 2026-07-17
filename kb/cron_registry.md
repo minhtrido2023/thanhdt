@@ -12,6 +12,7 @@
 |---|---|---|---|---|---|---|
 | 06:00 (T2-T6) | `newdeals_daily_report.py` | BQ live | Telegram/Discord watchlist | AlphaLens paper monitor (đến 09-30) | độc lập | — |
 | 08:00 (ngày 5, 10) | `auto_update_commodity_wb.sh` | World Bank CMO (idempotent, 2 attempts) | `iron_ore/urea/dap_monthly.csv` | feed archive, chưa có consumer sống | độc lập | — |
+| 08:10 (ngày 3) | `refresh_deposit_rate_vn.sh` | best-effort web (CafeF/VCB, timeout 15s, hay fail — **KHÔNG BQ**) + `current_deposit_rate()` | **KHÔNG tự ghi** — chỉ nhắc Discord + status bus; con người chạy `append_deposit_rate.py` ghi `data/deposit_rate_vn_events.csv` | `rating_8l.py` NEUTRAL tilt (LIVE) + `dcf_refresh_gate.py` (ngày 11) | trước DCF refresh-gate ngày 11 | `data/refresh_deposit_rate_vn_YYYY-MM.log` |
 | 08:15 (T2-T6) | `vcb_fx_feed.py` | VCB web | `vcb_fx_rate.csv` | feed archive | độc lập | — |
 | 08:20 (T2-T6) | `ops_health_check.sh` "Trước phiên sáng" | trạng thái vận hành (plan conflict, journal error, circuit breaker, câu hỏi 48h) | Discord Trading Daily | user | trước preflight 08:45 | post message |
 | 08:30 (Sat) | `refresh_fa_ratings_8l.sh` | `ticker_financial` BQ live (đọc-ghi) | `tav2_bq.fa_ratings_8l` | custom30 builder, golive sizing, DC-book, SIGNAL_V11 8L re-tune | trước 09:15 (45') | `bq show` lastModified+numRows |
@@ -108,6 +109,18 @@ BQ_LOCAL_CACHE` nếu import chain có thể dính cache (bài học C1).
   encode đủ trong `vn_market.py`.
 
 ## Log thay đổi
+- 2026-07-17 (Winston, job `Winston_20260717_072420`, **user approved trực tiếp**): thêm 1 dòng cron
+  `10 1 3 * *` (08:10 ICT ngày 3 hàng tháng) gọi `refresh_deposit_rate_vn.sh` — Layer A của
+  `proposal_deposit_rate_monthly_refresh_20260713.md`. Script chỉ NHẮC (best-effort fetch CafeF/VCB
+  timeout 15s hay fail, KHÔNG tự ghi) + post Discord + status bus; con người xác nhận số rồi chạy
+  `append_deposit_rate.py` append vào `data/deposit_rate_vn_events.csv` (append-only, chỉ mốc
+  effective_date > 2026-06-01 mới có hiệu lực). 4 câu hỏi §11: (1) đọc web external best-effort
+  (CafeF/VCB, có thể fail) + `current_deposit_rate()` — **KHÔNG BQ/cache**; (2) nguồn Big-4 posted
+  rate đổi bất thường, thường đầu tháng → chạy ngày 3 hợp lý, không cần T thật trong ngày; (3)
+  KHÔNG cần T chính xác (tilt tần suất tháng, sai vài ngày vô hại); (4) consumer = `rating_8l.py`
+  NEUTRAL tilt LIVE (đọc bất kỳ lúc nào có, không deadline cứng) + `dcf_refresh_gate.py` (dùng
+  quanh ngày 11 → ngày 3 nằm trước). Không trùng phút với cron nào (08:00 commodity ngày 5/10 khác
+  phút+ngày; 08:15 vcb_fx T2-T6). Freshness WARN >45 ngày ở `ops_health_check.sh` §8.
 - 2026-07-15 (Winston, job `Winston_20260715_061920`, user duyệt dispatch): đổi giờ 3 cron đọc `dt5g_live` để luôn đọc regime HÔM NAY thay vì hôm qua (fix M3 audit `Winston_20260712_142100`): (1) `eod_trading_report.sh` 15:00→19:10 ICT (`0 8` → `10 12` UTC); (2) `pt_8l_daily.sh` 17:45→19:20 ICT (`45 10` → `20 12` UTC); (3) `telegram_run_daily.sh` 18:00→19:35 ICT (`0 11` → `35 12` UTC). Buffer sau publish DT5G ~19:01: eod 9', pt_8l 19', telegram 34'. Không trùng phút với nhau hoặc với bq_freshness 19:00. sector_lens_monitor.py step [9] vẫn đọc cache T-1 — user xác nhận KHÔNG CẦN SỬA, known limitation, chỉ ảnh hưởng công cụ nghiên cứu nội bộ, không chạm trading production.
 - 2026-07-14 (Winston, job `Winston_20260714_160739`, **user directive trực tiếp — quy tắc vĩnh
   viễn mỗi quý**): thay 2 dòng T3 tạm thời (hết hạn 08-04) bằng **1 dòng cron DAILY 20:00 ICT**
