@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# dispatch.sh <agent_id> "prompt" [--bg] [--timeout SEC] [--retries N] [--model NAME] [--effort LEVEL]
+# dispatch.sh <agent_id> "prompt" [--bg] [--timeout SEC] [--retries N] [--model NAME] [--effort LEVEL] [--context mini|full]
 #
 # Run a HEADLESS Claude session as the specified agent. The session inherits the
 # agent's CLAUDE.md + hooks (KB context injection, bus writes, heartbeat).
@@ -40,11 +40,18 @@
 #                  (task thường lệ). Task phức tạp → --effort high. CHÍNH SÁCH user
 #                  (2026-07-14): model 'fable' bị chặn tối đa 'high' — truyền xhigh/max
 #                  cho fable sẽ tự clamp về high + cảnh báo stderr. Xem MIKE.md §Model routing.
+#   --context mini|full  context injection tier (2026-07-17, cost optimization). 'mini' =
+#                  kb/context_ops_mini.md (~4KB, fleet-ops mechanics only, no trading domain)
+#                  instead of kb/context_pack.md (~48KB). Default by AGENT ROLE: Wags always
+#                  mini (its job is fleet coordination, never trading research), everyone else
+#                  full. Override per-dispatch when a Wags task genuinely needs trading context,
+#                  or when routing a non-Wags agent to a pure tooling task.
 #
 # Examples:
 #   bin/dispatch.sh Taylor "Phân tích kỹ thuật VNM"
 #   bin/dispatch.sh Winston "Kiểm tra corp-action hôm nay" --bg --timeout 1200
 #   bin/dispatch.sh Taylor "Thiết kế backtest mới, nhiều giả thuyết" --model fable --effort high
+#   bin/dispatch.sh Wags "Chẩn đoán lỗi thông báo Discord sai topic" --context mini
 #
 # Usage-limit-aware auto-resume (added 2026-07-03): a failure that looks like the ACCOUNT's
 # shared 5-hour usage window (bin/usage_watch.py) is exhausted — not a real task failure —
@@ -69,6 +76,7 @@ TIMEOUT=""
 RETRIES=1
 MODEL=""
 EFFORT=""
+CONTEXT=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --bg) bg="--bg" ;;
@@ -80,10 +88,28 @@ while [ $# -gt 0 ]; do
     --model=*) MODEL="${1#*=}" ;;
     --effort) EFFORT="${2:?--effort needs a value}"; shift ;;
     --effort=*) EFFORT="${1#*=}" ;;
+    --context) CONTEXT="${2:?--context needs a value}"; shift ;;
+    --context=*) CONTEXT="${1#*=}" ;;
     *) echo "ERROR: unknown argument '$1'" >&2; exit 1 ;;
   esac
   shift
 done
+
+# --- Context tiering (2026-07-17, cost optimization) ---------------------------
+# kb/context_pack.md is ~48KB (~12K tokens) injected into EVERY headless dispatch
+# regardless of task size — a fleet-ops tooling fix (Wags) pays the exact same fixed
+# tax as a real trading-domain research task, even though it needs none of the
+# trading context. kb/context_ops_mini.md (~4KB) covers dispatch/bus/jobs mechanics
+# + coding guidelines without the domain payload. Default by AGENT ROLE (Wags is
+# ALWAYS fleet-ops, never trading research) — override per-dispatch with --context.
+case "$CONTEXT" in
+  "") case "$id" in
+        Wags) CONTEXT="mini" ;;
+        *)    CONTEXT="full" ;;
+      esac ;;
+  mini|full) ;;
+  *) echo "ERROR: --context '$CONTEXT' không hợp lệ — dùng mini|full." >&2; exit 1 ;;
+esac
 # Per-agent BASE-timeout default — applies only when the caller passed no --timeout.
 # DollarBill plan-T+1 jobs do 10-20+ min of real work and emit substantive heartbeats
 # only every ~5 min, so the generic 600s base + HB_FRESH_S=120s extension window kills
@@ -259,6 +285,7 @@ logfile="$ROOT/logs/dispatch_${id}_${ts}.log"
 job_id="${id}_${ts}"
 JOBS_DIR="$ROOT/bus/jobs"
 export JOB_ID="$job_id"  # picked up by append_event.sh as the default trace_id (see there)
+export MIKE_CONTEXT_TIER="$CONTEXT"  # "mini"|"full" — read by hooks/session_start.sh
 
 from="${DISPATCH_FROM:-Mike}"
 

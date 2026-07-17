@@ -21,7 +21,17 @@ if [ "$id" = "Mike" ] && [ -n "${DISCORD_THREAD_ID:-}" ]; then
   printf '%s' "$DISCORD_THREAD_ID" > "$ROOT/agents/Mike/state/ccdb_thread_id"
 fi
 
-if [ -s "$KB/context_pack.md" ]; then
+# Context tiering (2026-07-17, cost optimization): a fleet-ops/tooling dispatch (Wags
+# by default, or any dispatch.sh call with --context mini) doesn't need the ~48KB
+# trading-domain context_pack.md — kb/context_ops_mini.md (~4KB) covers the fleet
+# mechanics it actually needs. MIKE_CONTEXT_TIER is set by dispatch.sh; absent for
+# Mike's own interactive session (ccdb-mike bridge doesn't set it) -> defaults to full.
+tier="${MIKE_CONTEXT_TIER:-full}"
+if [ "$tier" = "mini" ] && [ -s "$KB/context_ops_mini.md" ]; then
+  echo "[Mike KB v$cur — CONTEXT MINI, fleet-ops only] Không có domain trading — nếu việc"
+  echo "cần domain (V2.4/8L/DT5G/BQ), báo lại thay vì đoán:"
+  cat "$KB/context_ops_mini.md"
+elif [ -s "$KB/context_pack.md" ]; then
   echo "[Mike KB v$cur] Bối cảnh chung của fleet (đọc trước khi làm, không hỏi lại điều đã ghi ở đây):"
   cat "$KB/context_pack.md"
 fi
