@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v1140)
+# Mike fleet — context pack (v1141)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-17T05:50:34] Winston/finding — preflight-false-alarm-ticker_prune-intraday-partial: {"verdict": "FALSE_ALARM — không có corruption", "root_cause": "upstream ETL ghi dở partition 2026-07-17 intraday (1→2→7 mã lớn dần); ngày hoàn chỉnh 07-16 khoẻ …
 - [2026-07-17T06:45:52] Winston/finding — PE/PB/PCF self-computed: KHÔNG hồi tố, backtest an toàn: {"verdict": "NO_INTEGRITY_PROBLEM — severity LOW, không cần escalate", "context": "bq_admin đổi PE/PB/PCF từ nguồn bên-thứ-3 sang tự-tính từ tài chính thô (~202 …
 - [2026-07-17T07:08:59] quant-skeptic/verification — ✅ CONFIRMED VERIFY: ad-hoc claim: {"finding_topic": "ad-hoc claim — DCF upgrade study (earning-power basis NO-GO + GDP terminal-g level-not-alpha)", "verdict": "CONFIRMED", "confidence": "high", …
 - [2026-07-17T07:12:02] Taylor/finding — DCF Việc1 earning-power vs FCFE — NO-GO (replacement): {"verdict": "NO-GO_as_replacement", "quant_skeptic": "CONFIRMED_high (verify_20260717_070358)", "dir_chosen": "option_b (2-stage, change base input only); rejec …
@@ -11,6 +10,7 @@
 - [2026-07-17T07:12:02] Taylor/finding — DCF Việc2 conditional refresh gate (1pp band) — DONE: {"verdict": "DONE selfcheck 24/24 PASS", "mechanism": "recompute DCF only when Big-4 12M deposit rate moved >=1.0pp from last-used; else keep numbers", "state": …
 - [2026-07-17T07:20:04] Winston/finding — FA quality-gate (ROE/ROIC/FSCORE/CF_OA): KHÔNG hồi tố, golden-floor ổn định, backtest an toàn: {"verdict": "NO_INTEGRITY_PROBLEM — severity LOW, KHÔNG cần escalate. Golden-floor + mọi chỉ số quality PIN AN TOÀN.", "scope": "Mở rộng job PE/PB/PCF (063633)  …
 - [2026-07-17T07:35:35] Winston/finding — deposit-rate Layer-A refresh routine DONE (implemented+installed): {"job": "Winston_20260717_072420", "status": "DONE", "approved_by": "user (direct)", "spec": "proposal_deposit_rate_monthly_refresh_20260713.md §1-§5", "changes …
+- [2026-07-17T07:53:18] Taylor/finding — DCF earning-power upgrade — cả 3 việc TRIỂN KHAI XONG (cap_rf default + refresh-gate cron + docs): {"verdict": "DONE — all 3 items implemented + verified, user approved cả 3", "trace_link": "nối job nghiên cứu Taylor_20260717_063638 (dcf_earning_power_upgrade …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -467,6 +467,7 @@ dồn mẫu regime 2020-21, không phải pattern lặp lại được; hậu-20
 `~/thanhdt/backup.sh` → GitHub `minhtrido2023/thanhdt` (private). Daily 00:00 ICT.
 
 ## Dự án đã đóng — chi tiết theo yêu cầu (đọc khi cần: `cat kb/projects/<file>.md`)
+- 2026-07-17 **DCF upgrade (earning-power · GDP terminal-g · refresh-gate)** → `kb/projects/dcf-earning-power-upgrade.md` — TRIỂN KHAI XONG — Việc1 earning-power NO-GO (giữ FCFE); Việc3 `cap_rf` = default hiển thị `dcf_valuation.py` (level fix, không alpha, DCF non-decisional); Việc2 refresh-gate cron LIVE ngày 11. quant-skeptic CONFIRMED.
 - 2026-07-13 **World Cup + rổ lãi suất huy động (Pillar A′)** → `kb/projects/wc-deposit-rate-gate.md` — ĐÓNG cả 2 hướng — N quá mỏng / 0-4 GO, không wire production.
 - 2026-07-13 **Plan-approval gate (second-chance cron + code-gate)** → `kb/projects/plan-approval-gate.md` — XONG — second-chance re-send 23:00 + code-gate bot_execute.py, hiệu lực 09:05 07-14 (commits 4216295/27e1282/54d488c).
 - 2026-07-13 **Plan ZaloPay transition day 5/5 (FINAL)** → `kb/projects/zalopay-transition-0713.md` — XONG — bán VIB + mua BID, ngày cuối chuỗi transition 07-07→07-13.

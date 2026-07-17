@@ -141,3 +141,41 @@ recomputes only if `refresh=True`); no downstream deadline (reference tool, not 
 - `gdp_growth_vn.py` added to `mike/kb/data_registry.md` (CANONICAL-single-tier, WB API, annual refresh).
 - Caches in experiment namespace `dcf_exp/fv_releases_epvariants.parquet` (§8 — never the pinned cache).
 - Reproduce: `DCF_REFRESH=1 $DNA_PYEXE dcf_earning_power_test.py`.
+
+---
+
+## Trạng thái triển khai (job `Taylor_20260717_074106`, user DUYỆT cả 3 việc — 2026-07-17)
+
+Sau khi user duyệt trực tiếp cả 3 kết luận, đã TRIỂN KHAI THẬT (không nghiên cứu thêm):
+
+**Việc A — `cap_rf` = default terminal-growth DISPLAY của `dcf_valuation.py`.** User đồng ý phương án
+`cap_rf` làm mặc định hiển thị report/dashboard (KHÔNG wire alpha). Đổi trong `dcf_valuation.py`:
+- Thêm `TERM_MODES`, `GDP_FADE=0.5`, `DEFAULT_TERM_MODE = os.environ.get("DCF_TERMINAL_MODE","cap_rf")`.
+- Thêm `terminal_growth_mode(asof, mode, erp, with_frac)` (bản local, mirror công thức của
+  `dcf_earning_power.terminal_growth_mode` — production tự sở hữu default, KHÔNG import module
+  RESEARCH-only đó vì nó import ngược `dcf_valuation`). `terminal_growth()` (raw CPI) GIỮ NGUYÊN — các
+  caller khác (`dcf_rate_robustness.py`) không bị ảnh hưởng.
+- `fair_value(..., term_mode=None)` → dùng `terminal_growth_mode`; ghi `term_mode` vào result dict;
+  `_print_report` in `[mode]`; CLI thêm `--term`. Override: env `DCF_TERMINAL_MODE` hoặc `term_mode=`.
+- **An toàn production**: DCF non-decisional — `trading_bot/strategies.py::_dcf_check_for_order` chỉ ECHO
+  cảnh báo (RICH&robust → thêm 1 dòng warn, KHÔNG chặn/drop lệnh); `custom_basket.py` DCF overlay OFF
+  mặc định (`BASKET_DCF_MODE=""`). Nên đổi default = chỉ đổi LEVEL hiển thị RICH/CHEAP, không đổi lệnh.
+- **Regression (asof 2026-06-15, cpi→cap_rf):** terminal g 3.38%→6.80% (khớp doc). FV tăng mọi tên,
+  MoS dịch lên: VNM −52.6%→−3.6%, FPT −36.5%→+8.0% (**flip RICH→CHEAP**), CTR −65.6%→−12.3%,
+  DHG −82.4%→−24.9%. Universe rating≤3 non-fin: **%cheap 55.3%→68.6%** (khớp hướng+độ lớn báo cáo
+  57→66); NC 513/513 KHÔNG đổi → 0 NaN/Gordon-explosion mới. Override env `DCF_TERMINAL_MODE=cpi` khôi
+  phục số cũ (verified). `dcf_line()`/`dcf_check()` (echo production) tự nhận cap_rf.
+
+**Việc B — cron `dcf_refresh_gate.py` LIVE.** User duyệt trực tiếp. Cài `10 1 11 * *` (08:10 ICT ngày 11
+hàng tháng, UTC-cron vì `/etc/timezone=Etc/UTC`) — SAU cron deposit-rate ngày 3 (`10 1 3`, Winston job
+`Winston_20260717_072420`). Boundary =1.0pp **INCLUSIVE — CHỐT** (không đổi flag, không còn "chờ user").
+Verified `crontab -l` (dòng 87, ngay sau deposit dòng 86). Backup crontab: `/tmp/ct_before_dcf.bak`.
+
+**Việc C — tài liệu.** `kb/cron_registry.md` (bảng chính + Log thay đổi, 4 câu hỏi §11);
+`kb/projects/dcf-earning-power-upgrade.md` + 1 dòng `kb/projects/INDEX.md` (đóng dự án — current_ops.md
+không có mục mở nào để đóng, theo quy ước closed→kb/projects); `data_registry.md` đã có `gdp_growth_vn.py`.
+
+**Quyết định user cho từng điểm treo trước đây:** (1) Việc-3 default `cap_rf` — user APPROVED làm default
+hiển thị. (2) Việc-2 boundary 1.0pp — user APPROVED giữ INCLUSIVE. (3) Việc-1 earning-power — giữ
+NO-GO as replacement (FCFE vẫn là basis margin-of-safety chính; earning-power chỉ coverage-extension
+tùy chọn, chưa wire).

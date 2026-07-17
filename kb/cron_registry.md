@@ -13,6 +13,7 @@
 | 06:00 (T2-T6) | `newdeals_daily_report.py` | BQ live | Telegram/Discord watchlist | AlphaLens paper monitor (đến 09-30) | độc lập | — |
 | 08:00 (ngày 5, 10) | `auto_update_commodity_wb.sh` | World Bank CMO (idempotent, 2 attempts) | `iron_ore/urea/dap_monthly.csv` | feed archive, chưa có consumer sống | độc lập | — |
 | 08:10 (ngày 3) | `refresh_deposit_rate_vn.sh` | best-effort web (CafeF/VCB, timeout 15s, hay fail — **KHÔNG BQ**) + `current_deposit_rate()` | **KHÔNG tự ghi** — chỉ nhắc Discord + status bus; con người chạy `append_deposit_rate.py` ghi `data/deposit_rate_vn_events.csv` | `rating_8l.py` NEUTRAL tilt (LIVE) + `dcf_refresh_gate.py` (ngày 11) | trước DCF refresh-gate ngày 11 | `data/refresh_deposit_rate_vn_YYYY-MM.log` |
+| 08:10 (ngày 11) | `dcf_refresh_gate.py` | `deposit_rate_vn.current_deposit_rate()` (as-of, step series — **KHÔNG BQ/cache**) + prior `data/dcf_refresh_state.json` | `data/dcf_refresh_state.json` (atomic) + `data/dcf_refresh_gate.log` (append) | ai tái tạo số DCF cho report/dashboard: gọi `run_gate()`, chỉ recompute fair value khi `refresh=True` | SAU deposit-rate ngày 3 | `data/dcf_refresh_gate.log` |
 | 08:15 (T2-T6) | `vcb_fx_feed.py` | VCB web | `vcb_fx_rate.csv` | feed archive | độc lập | — |
 | 08:20 (T2-T6) | `ops_health_check.sh` "Trước phiên sáng" | trạng thái vận hành (plan conflict, journal error, circuit breaker, câu hỏi 48h) | Discord Trading Daily | user | trước preflight 08:45 | post message |
 | 08:30 (Sat) | `refresh_fa_ratings_8l.sh` | `ticker_financial` BQ live (đọc-ghi) | `tav2_bq.fa_ratings_8l` | custom30 builder, golive sizing, DC-book, SIGNAL_V11 8L re-tune | trước 09:15 (45') | `bq show` lastModified+numRows |
@@ -109,6 +110,21 @@ BQ_LOCAL_CACHE` nếu import chain có thể dính cache (bài học C1).
   encode đủ trong `vn_market.py`.
 
 ## Log thay đổi
+- 2026-07-17 (Taylor, job `Taylor_20260717_074106`, **user approved trực tiếp**): thêm 1 dòng cron
+  `10 1 11 * *` (08:10 ICT ngày 11 hàng tháng) gọi `dcf_refresh_gate.py` — cổng refresh có điều kiện:
+  recompute DCF **chỉ khi** lãi suất Big-4 12M dịch ≥1.0pp so lần dùng trước (boundary =1.0pp
+  **INCLUSIVE** — CHỐT, flag `THRESHOLD_INCLUSIVE=True`, không còn "chờ user"); else giữ số cũ (SKIP).
+  Gate chỉ QUYẾT ĐỊNH + PERSIST, không tự chạy recompute. 4 câu hỏi §11: (1) đọc
+  `deposit_rate_vn.current_deposit_rate()` (as-of, step series) + prior state JSON — **KHÔNG BQ/cache**,
+  granularity tháng nên không vintage-sensitive; (2) nguồn tươi phụ thuộc deposit-rate ngày 3 đã cập
+  nhật (con người xác nhận số) → chạy ngày 11 để nằm SAU ngày 3; (3) KHÔNG cần T chính xác
+  (`_now_ict_date` dùng UTC date, monthly-granularity vô hại); (4) consumer = whoever tái tạo số DCF
+  cho report/dashboard, gọi `run_gate()` trước rồi chỉ recompute fair value khi `refresh=True` —
+  reference tool, KHÔNG deadline pipeline hàng ngày. **Fail-safe:** mọi lỗi → `refresh=True` (recompute
+  thay vì phục vụ stale trên gate hỏng). Ngày 11 > ngày 3 deposit; cùng phút 08:10 nhưng khác ngày →
+  không trùng thực thi. First-run/no-state → REFRESH init. Selfcheck `dcf_refresh_gate_selfcheck.py`
+  24/24 PASS. Đi kèm Việc A cùng job: default terminal-growth DISPLAY của `dcf_valuation.py` đổi
+  CPI→`cap_rf` (level fix, không alpha — DCF non-decisional trong prod).
 - 2026-07-17 (Winston, job `Winston_20260717_072420`, **user approved trực tiếp**): thêm 1 dòng cron
   `10 1 3 * *` (08:10 ICT ngày 3 hàng tháng) gọi `refresh_deposit_rate_vn.sh` — Layer A của
   `proposal_deposit_rate_monthly_refresh_20260713.md`. Script chỉ NHẮC (best-effort fetch CafeF/VCB
