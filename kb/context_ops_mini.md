@@ -1,14 +1,15 @@
 # Mike fleet — context ops-mini (fleet-ops/tooling tasks only)
-> Dành cho agent làm việc THUẦN hạ tầng điều phối (Wags và mọi dispatch gắn cờ
-> `--context mini`) — KHÔNG có domain trading (V2.4/8L/DT5G/BQ). Nếu việc đang làm
-> cần hiểu chiến lược/dữ liệu trading, đây KHÔNG đủ — báo lại cho Mike thay vì đoán.
-> Full context: `kb/context_pack.md` (nặng hơn nhiều, chỉ dùng khi thật sự cần).
+> Đây là context MẶC ĐỊNH của Wags (`agents/Wags/CLAUDE.md` tự import file này thay vì
+> `context_pack.md` — cost-opt #1b, 2026-07-17) — KHÔNG có domain trading (V2.4/8L/
+> DT5G/BQ). Việc đang làm cần hiểu chiến lược/dữ liệu trading? **Tự đọc thẳng
+> `kb/context_pack.md` bằng Read tool** (chỉ tốn token khi thật sự cần, không phải
+> mỗi lần dispatch) — hoặc báo lại cho Mike nếu không chắc tự đọc có đủ.
 
 ## ROOT
 `/home/trido/thanhdt/WorkingClaude/mike` — mọi đường dẫn dưới đây tương đối gốc này.
 
 ## Cơ chế dispatch (bạn đang chạy TRONG 1 lần dispatch)
-- Dispatched qua `bin/dispatch.sh <id> "prompt" [--bg] [--model] [--effort] [--context]`.
+- Dispatched qua `bin/dispatch.sh <id> "prompt" [--bg] [--model] [--effort]`.
 - Job record: `bus/jobs/<job_id>.json` — tra bằng `bin/jobs.sh status <job_id>` (exit
   0=done 2=running 3=overdue 1=failed/timeout 4=not-found).
 - Ghi kết quả lên bus: `bin/append_event.sh <agent_id> finding "<chủ đề>" '<payload_json>' '<trace_id=job_id>'`
@@ -49,10 +50,11 @@
   root cause/fix/verify. Repo `WorkingClaude` (trading code) — commit sau khi user xác
   nhận nếu chạm surface tiền thật.
 
-## Khi nào KHÔNG đủ (báo lại thay vì tự đoán)
+## Khi nào KHÔNG đủ (tự đọc context_pack.md, hoặc báo lại — đừng đoán)
 - Cần hiểu chiến lược trading (V2.4, allocator, custom30V, DT5G, 8L rating).
 - Cần schema/tên bảng BigQuery cụ thể.
 - Cần lịch sử quyết định nghiệp vụ (vd tại sao 1 mã bị BANNED, tại sao chọn tham số X).
 
-Những việc trên → escalate về Mike (event `question`) hoặc yêu cầu dispatch lại với
-context đầy đủ, đừng suy đoán từ context-mini này.
+Những việc trên → `Read kb/context_pack.md` (~48KB, đủ mọi domain) nếu bạn tự tin đọc
+đúng chỗ cần; nếu không chắc chắn tự đọc có đủ hoặc câu hỏi cần quyết định của user →
+escalate về Mike (event `question`), đừng suy đoán từ context-mini này.

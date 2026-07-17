@@ -21,20 +21,16 @@ if [ "$id" = "Mike" ] && [ -n "${DISCORD_THREAD_ID:-}" ]; then
   printf '%s' "$DISCORD_THREAD_ID" > "$ROOT/agents/Mike/state/ccdb_thread_id"
 fi
 
-# Context tiering (2026-07-17, cost optimization): a fleet-ops/tooling dispatch (Wags
-# by default, or any dispatch.sh call with --context mini) doesn't need the ~48KB
-# trading-domain context_pack.md — kb/context_ops_mini.md (~4KB) covers the fleet
-# mechanics it actually needs. MIKE_CONTEXT_TIER is set by dispatch.sh; absent for
-# Mike's own interactive session (ccdb-mike bridge doesn't set it) -> defaults to full.
-tier="${MIKE_CONTEXT_TIER:-full}"
-if [ "$tier" = "mini" ] && [ -s "$KB/context_ops_mini.md" ]; then
-  echo "[Mike KB v$cur — CONTEXT MINI, fleet-ops only] Không có domain trading — nếu việc"
-  echo "cần domain (V2.4/8L/DT5G/BQ), báo lại thay vì đoán:"
-  cat "$KB/context_ops_mini.md"
-elif [ -s "$KB/context_pack.md" ]; then
-  echo "[Mike KB v$cur] Bối cảnh chung của fleet (đọc trước khi làm, không hỏi lại điều đã ghi ở đây):"
-  cat "$KB/context_pack.md"
-fi
+# NOTE (cost-opt #1b, 2026-07-17): this hook used to `cat` context_pack.md /
+# context_ops_mini.md here too — found to be a pure duplicate of what
+# agents/<id>/CLAUDE.md's own `@kb/context_*.md` import already delivers on every
+# fresh session (every headless dispatch is a fresh `claude -p` process, so CLAUDE.md
+# is read fresh off disk every time; no staleness risk from removing this). Removed:
+# it was literally injecting the same ~48KB (or ~4KB for Wags's mini tier, which
+# CLAUDE.md's own import wasn't even matching until this same fix) a second time,
+# every single dispatch. CLAUDE.md is now the SOLE source of the shared context pack,
+# which also keeps it framed as authoritative "project instructions" rather than
+# lower-priority hook stdout.
 
 # Personal working memory (curated by the agent via remember.sh) — durable across restarts,
 # higher-signal than the raw recap below. The agent's own priorities / open threads / next steps.

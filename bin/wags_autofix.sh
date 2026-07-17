@@ -138,9 +138,10 @@ setsid bash -c '
   ARCH_TOPIC="'"$ARCH_TOPIC"'"
   _notify_arch() { "$ROOT/bin/notify_thread.sh" "$1" "$ARCH_TOPIC" >/dev/null 2>&1 || true; }
 
-  # 1) Wags fix (đồng bộ trong pipeline nền; timeout rộng vì job chẩn đoán sâu). Chạy
-  #    --context mini (Wags mặc định đã mini per dispatch.sh, xem cost-opt #1) và BẮT
-  #    BUỘC báo files_changed (mảng đường dẫn tương đối) trong payload finding — đây là
+  # 1) Wags fix (đồng bộ trong pipeline nền; timeout rộng vì job chẩn đoán sâu). Wags
+  #    tự nhận context ops-mini qua chính agents/Wags/CLAUDE.md (cost-opt #1b,
+  #    2026-07-17) — không cần cờ gì ở đây. BẮT BUỘC báo files_changed (mảng đường dẫn
+  #    tương đối) trong payload finding — đây là
   #    input DUY NHẤT cho phân loại rủi ro ở bước 2 (không dựa vào Wags tự chấm "rủi ro
   #    thấp", tránh Wags tự miễn review cho chính nó — verify ARTIFACT, không tin
   #    self-report, cùng nguyên tắc đã áp dụng ở idempotency guard/ghost-order).
