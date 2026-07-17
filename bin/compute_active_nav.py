@@ -134,6 +134,20 @@ def main():
     # tỷ trọng mục tiêu của chiến lược khi user tạm chuyển tiền rảnh ra ngoài tài khoản giao
     # dịch — số THỰC SỰ đặt lệnh được vẫn phải kiểm qua `cash`/ppse live, KHÔNG phải số này.
     offbook = float(profile.get("manual_offbook_assets_vnd") or 0)
+    offbook_asof = profile.get("manual_offbook_assets_asof") or ""
+    offbook_stale_warning = None
+    if offbook and offbook_asof:
+        import datetime as _dt_stale
+        asof_ref = args.asof or _dt_stale.date.today().isoformat()
+        try:
+            age_days = (_dt_stale.date.fromisoformat(asof_ref)
+                        - _dt_stale.date.fromisoformat(offbook_asof)).days
+            if age_days > 21:
+                offbook_stale_warning = (
+                    f"manual_offbook_assets_asof ({offbook_asof}) đã {age_days} ngày — xác nhận "
+                    f"lại số dư off-book với user trước khi dùng làm cơ sở sizing.")
+        except ValueError:
+            pass
 
     cash, positions = live_balance_and_positions(account_id, args.account)
     tickers = list(positions.keys())
@@ -185,11 +199,14 @@ def main():
         print(f"⚠️ ACTIVE NAV đã cộng {offbook:,.0f} off-book làm cơ sở TÍNH TỶ TRỌNG mục tiêu — "
               f"nhưng sức mua THỰC THI NGAY vẫn phải kiểm tra `cash`/ppse live (DNSE), vì số "
               f"off-book cần user rút tay trước khi bot đặt lệnh được.")
+    if offbook_stale_warning:
+        print(f"⚠️ {offbook_stale_warning}")
 
     result = {
         "account": args.account, "account_id": account_id,
         "cash": cash, "total_stock_value": total_mv, "excluded_value": excluded_mv,
-        "offbook_assets": offbook,
+        "offbook_assets": offbook, "offbook_assets_asof": offbook_asof,
+        "offbook_stale_warning": offbook_stale_warning,
         "excluded_tickers": sorted(excluded), "total_nav": total_nav, "active_nav": active_nav,
         "positions": [{"ticker": tk, "qty": qty, "price": px, "value": mv, "excluded": is_excl,
                         "price_source": price_source.get(tk, "?")}

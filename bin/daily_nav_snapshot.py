@@ -181,6 +181,21 @@ def main():
     offbook = float((_match or {}).get("manual_offbook_assets_vnd") or 0)
     offbook_note = (_match or {}).get("manual_offbook_assets_note") or ""
     offbook_asof = (_match or {}).get("manual_offbook_assets_asof") or ""
+    # Staleness WARN (quant-skeptic review 2026-07-17): số off-book là user tự báo, KHÔNG có
+    # API xác nhận lại — nếu asof quá cũ, cảnh báo thay vì âm thầm tin mãi 1 con số có thể đã
+    # đổi (user rút bớt/rút hết mà quên báo, hoặc Mike quên cập nhật config).
+    offbook_stale_warning = None
+    if offbook and offbook_asof:
+        import datetime as _dt_stale
+        try:
+            age_days = (_dt_stale.date.fromisoformat(args.date)
+                        - _dt_stale.date.fromisoformat(offbook_asof)).days
+            if age_days > 21:
+                offbook_stale_warning = (
+                    f"manual_offbook_assets_asof ({offbook_asof}) đã {age_days} ngày — xác nhận "
+                    f"lại số dư Trứng vàng/off-book với user trước khi tin tưởng hoàn toàn.")
+        except ValueError:
+            pass
 
     dates = trading_dates_with_fills(args.account, args.date)
     if not dates:
@@ -324,6 +339,8 @@ def main():
         lines.append(f"   ℹ️ Off-book {offbook:,.0f} VND ({offbook_note or 'không có ghi chú'}, "
                       f"user tự báo asof {offbook_asof or '?'}) — KHÔNG lộ qua API broker, đã "
                       f"cộng vào NAV nhưng KHÔNG tính là tiền mặt khả dụng để đặt lệnh ngay.")
+    if offbook_stale_warning:
+        lines.append(f"   ⚠️ {offbook_stale_warning}")
     if debt > 1_000_000:
         lines.append(f"   ⚠️ Đang có nợ margin thật {debt:,.0f} VND — theo dõi lãi vay tích lũy.")
     if stale_warning:
@@ -335,7 +352,7 @@ def main():
     out = {"account": args.account, "date": args.date, "nav": nav,
            "mtm_stock": mtm_stock, "cash": cash, "margin_debt": debt,
            "offbook_assets": offbook, "offbook_assets_note": offbook_note,
-           "offbook_assets_asof": offbook_asof,
+           "offbook_assets_asof": offbook_asof, "offbook_stale_warning": offbook_stale_warning,
            "stale_warning": stale_warning, "prev_nav": prev_nav, "day_change": day_change,
            "day_change_pct": day_change_pct, "since_inception": since_inception,
            "since_inception_pct": since_inception_pct, "balance_ts": bal["ts"],
