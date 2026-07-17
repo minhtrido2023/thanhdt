@@ -125,6 +125,13 @@ MSG="🌙 KB nightly done ($(date -u +%Y-%m-%d))"
 _tid="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
 [ -n "${_tid:-}" ] && "$ROOT/bin/notify_thread.sh" "$MSG" "$_tid" 2>/dev/null || true
 
+# ── Phase 4.5: weekly ops-vs-research spend trend (cost-opt #5, 2026-07-17) ──
+# Deterministic, no LLM needed — just appends one row/week to state/spend_history.csv
+# so the 4 optimizations made 2026-07-17 (context tiering, risk-tiered arch-review,
+# batched research dispatch, model-config smoke-test) can be checked against real
+# trend data instead of relying on a one-off manual count staying accurate forever.
+python3 "$ROOT/bin/spend_report.py" --days 7 --csv-append "$ROOT/state/spend_history.csv" >> "$LOG" 2>&1 || true
+
 # ── Phase 5: Friday = LLM editorial review ──────────────────────────────────
 DOW=$(date -u +%u)  # 1=Mon … 7=Sun; 5=Fri
 if [ "$DOW" -eq 5 ]; then
@@ -144,7 +151,12 @@ Bạn đang ở headless mode. Nhiệm vụ:
 2. Chạy '$ROOT/bin/data_registry_audit.sh --bus' (audit correctness+freshness của kb/data_registry.md — user directive 2026-07-11, sau sự cố SIGNAL_V11 base-leak). Đọc output: FAIL = có regression thật (nguồn TRAP/DEAD bị đọc nhầm lại, hoặc writer chết) — PHẢI điều tra + escalate Winston/dispatch fix, KHÔNG bỏ qua. WARN = cần xem xét, ghi chú vào kb/data_registry.md 'Lịch sử' nếu là false-positive đã biết. Cập nhật dòng 'Last full audit: <date>' ở đầu file data_registry.md dù kết quả clean/warn/fail.
 3. Rà bất kỳ nguồn nào trong data_registry.md đã đánh dấu Status=DEPRECATED nhưng KHÔNG có dòng ⚠️ SUPERSEDED BY <nguồn mới> ON <date> — nếu thiếu, đó là vi phạm quy trình obsolete (xem 'Nguyên tắc bắt buộc' mục 5 trong file), cần bổ sung hoặc hỏi Winston.
 4. Section D của audit script (stale-duplicate scan, coding_guidelines.md §10) liệt kê file variant đã confirm bị thay thế nhưng CHƯA archive — nếu WARN mới xuất hiện (khác danh sách đã biết), dispatch Winston verify + git mv vào archive/ theo đúng quy trình (không tự archive khi đang ở headless review, chỉ dispatch việc đó).
-KHÔNG xóa archive. Không cần hỏi user cho việc 1-3 — đây là routine maintenance đã được user uỷ quyền. Sau khi xong: ghi sự thay đổi lên bus (append_event.sh Mike decision 'kb-weekly-editorial') và notify Telegram." \
+5. Đọc '$ROOT/state/spend_history.csv' (cost-opt #5, mỗi dòng = 1 tuần, ops_jobs/ops_kb =
+Wags+Winston+Spyros+Wendy, research_jobs/research_kb = Taylor). Nếu ops_kb có xu hướng tăng
+liên tục qua ≥3 tuần gần nhất so với research_kb (tỉ lệ ops/research xấu đi rõ rệt, không
+phải 1 tuần bất thường do sự cố đơn lẻ) — ghi nhận vào KNOWLEDGE.md + cân nhắc đề xuất thêm
+biện pháp tối ưu (không tự làm gì thêm, chỉ ghi nhận + đề xuất cho user quyết).
+KHÔNG xóa archive. Không cần hỏi user cho việc 1-4 — đây là routine maintenance đã được user uỷ quyền. Sau khi xong: ghi sự thay đổi lên bus (append_event.sh Mike decision 'kb-weekly-editorial') và notify Telegram." \
         --timeout 900 >> "$LOG" 2>&1 &
     log "Editorial dispatch launched (background)."
 fi
