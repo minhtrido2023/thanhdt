@@ -332,6 +332,39 @@ if [ -f "$WC_ROOT/data/trade_plans/plan_${ACCOUNT}_${TODAY}.json" ]; then
 fi
 WARN_COUNT=$(( ${WARN_COUNT:-0} + ${PREFLIGHT_WARN:-0} ))
 
+# 9. Anomaly scan (thêm 2026-07-17, job Taylor_20260717_113024) — PHÂN VAI:
+#    PRIMARY = tín hiệu GIÁ/KHỐI LƯỢNG tier-H (bắt DGC ĐÚNG ngày sự việc 2026-03-17;
+#    trạng thái RES/diện-kiểm-soát mãi 2026-05-13 mới có → TRỄ 57 ngày lịch/~38 phiên).
+#    Scan giá/volume (BQ cache, nhanh) LUÔN chạy; --status-check (DNSE, chậm/không ổn định)
+#    best-effort có timeout, non-fatal. Tier-H trip MỚI → anomaly_escalate.py tự post
+#    Trading Daily + dispatch Wendy(pháp lý)+Spyros(rủi ro) KHỞI ĐỘNG due-diligence —
+#    KHÔNG tự mua/bán (quyết định cuối chờ user/Mike). Idempotent qua ledger
+#    data/anomaly_escalations.json → 08:20 + 12:45 không escalate trùng cùng 1 trip.
+#    Chỉ chạy trên lượt ACCOUNT đầu (universe fleet-wide, không per-account — tránh loop
+#    for_each_live_account gọi trùng; SpaceX là account mặc định/đầu tiên).
+ANOMALY_SUMMARY=""
+ANOMALY_WARN=0
+ANOMALY_SCAN="$WC_ROOT/mike/agents/Taylor/anomaly_scan.py"
+if [ "$ACCOUNT" = "SpaceX" ] && [ -f "$ANOMALY_SCAN" ]; then
+  EMIT="/tmp/anomaly_emit_${TODAY}.json"
+  timeout 200 python3 "$ANOMALY_SCAN" --status-check --emit-json "$EMIT" >/dev/null 2>&1 \
+    || timeout 90 python3 "$ANOMALY_SCAN" --emit-json "$EMIT" >/dev/null 2>&1 || true
+  if [ -f "$EMIT" ]; then
+    ESC_OUT="$(python3 "$WC_ROOT/mike/bin/anomaly_escalate.py" --emit-json "$EMIT" 2>&1 || true)"
+    if echo "$ESC_OUT" | grep -q "tier-H MỚI"; then
+      ANOMALY_WARN=1
+      ANOMALY_SUMMARY="🚨 Anomaly (giá/khối lượng): $(echo "$ESC_OUT" | grep 'tier-H MỚI') — ĐÃ khởi động due-diligence (Wendy+Spyros), chi tiết ở alert riêng phía trên. KHÔNG tự mua/bán, chờ user/Mike duyệt."
+    elif echo "$ESC_OUT" | grep -q "trạng thái sàn"; then
+      ANOMALY_SUMMARY="📋 Anomaly: $(echo "$ESC_OUT" | grep 'trạng thái sàn') — nhãn theo dõi thực thi (không phải cảnh báo sớm)."
+    else
+      ANOMALY_SUMMARY="✅ Anomaly scan (giá/khối lượng + trạng thái sàn): không có tín hiệu tier-H mới."
+    fi
+  else
+    ANOMALY_SUMMARY="ℹ️ Anomaly scan: không tạo được emit (BQ cache/DNSE tạm lỗi) — bỏ qua lượt này, tự chạy lại sau."
+  fi
+fi
+WARN_COUNT=$(( ${WARN_COUNT:-0} + ${ANOMALY_WARN:-0} ))
+
 MSG="🩺 **${ACCOUNT} — ${LABEL} — kiểm tra vận hành ${NOW_ICT}**
 ${REPORT_BODY}"
 if [ -n "$PREFLIGHT_TAIL" ]; then
@@ -339,6 +372,12 @@ if [ -n "$PREFLIGHT_TAIL" ]; then
 
 Đối chiếu preflight (macro/BQ/approval):
 ${PREFLIGHT_TAIL}"
+fi
+if [ -n "$ANOMALY_SUMMARY" ]; then
+  MSG="${MSG}
+
+Quét bất thường (anomaly scan — cảnh báo sớm giá/khối lượng + theo dõi trạng thái sàn):
+${ANOMALY_SUMMARY}"
 fi
 if [ "${WARN_COUNT:-0}" -eq 0 ]; then
   MSG="${MSG}

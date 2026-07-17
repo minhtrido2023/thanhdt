@@ -193,6 +193,8 @@ def main():
     ap.add_argument("--status-check", action="store_true")
     ap.add_argument("--selftest", action="store_true")
     ap.add_argument("--no-flags", action="store_true", help="không ghi anomaly_flags.json")
+    ap.add_argument("--emit-json", help="ghi tóm tắt phiên (tier_h/tier_w_count/status_changes) ra PATH "
+                    "cho hệ escalation đọc — máy-đọc, không parse text")
     args = ap.parse_args()
     if args.selftest:
         sys.exit(selftest())
@@ -209,6 +211,16 @@ def main():
     last = pd.to_datetime(df["time"]).max()
     al = compute_signals(df, hold)
     al = al[al["time"] == last]
+    emit = {"asof": str(last.date()), "tier_h": [], "tier_w_count": 0, "status_changes": []}
+    for _, r in al.iterrows():
+        rec = {"ticker": r["ticker"], "reasons": r["reasons"], "ret": round(float(r["ret"]), 2),
+               "vni_ret": round(float(r["vni_ret"]), 2), "idio": round(float(r["idio"]), 2),
+               "vol_x": round(float(r["vol_x"]), 2), "val_bn": round(float(r["val_bn"]), 2),
+               "close": round(float(r["Close"]), 0)}
+        if r["tier"] == "H":
+            emit["tier_h"].append(rec)
+        else:
+            emit["tier_w_count"] += 1
     print(f"# Anomaly scan — phiên {last.date()} | universe {len(uni)} mã (H:{len(hold)} / W:{len(wl)})")
     if al.empty:
         print("Không có tín hiệu giá/khối lượng bất thường.")
@@ -222,12 +234,18 @@ def main():
             print(f"→ đã ghi cờ vào {FLAGS_PATH}")
     if args.status_check:
         ch = status_check(uni)
+        emit["status_changes"] = ch
         if ch:
             print("## Thay đổi trạng thái sàn/margin (DNSE secdef):")
             for c in ch:
                 print(" ", json.dumps(c, ensure_ascii=False))
         else:
             print("Trạng thái sàn: không thay đổi so với snapshot trước.")
+
+    if args.emit_json:
+        tmp = args.emit_json + ".tmp"
+        json.dump(emit, open(tmp, "w"), ensure_ascii=False, indent=1)
+        os.replace(tmp, args.emit_json)
 
 
 if __name__ == "__main__":
