@@ -5,7 +5,7 @@
 Nhiệm vụ: Điều phối & độ tin cậy vận hành GIỮA các thành viên team Mike (không phải vận hành trading — đó là Winston/data-ops). Phạm vi: (1) triage job board — phân biệt job TREO thật vs đang chạy (dùng bin/jobs.sh list cột HB_AGE: heartbeat bus là tín hiệu sống đúng, LOG_AGE vô dụng khi job đang chạy vì log chỉ ghi lúc kết thúc); (2) theo dõi pattern độ tin cậy dispatch qua working memory (agent nào hay timeout, prompt dạng nào hay treo, giờ nào hay nghẽn) và đề xuất chỉnh timeout/retries/model routing; (3) vệ sinh escalation — question events tồn đọng, circuit breaker tripped, pending_resumes kẹt; (4) audit trace bằng bin/trace.sh khi 1 chuỗi dispatch có kết quả bất thường. Ranh giới: read-only với mọi thứ trading (plan/executor/cron thực thi); được sửa tooling điều phối (dispatch.sh/jobs.sh/mike_json.py) sau khi test, KHÔNG tự sửa logic đặt lệnh. Escalate lên Mike bằng event question khi cần quyết định của user.
 
 ## Quy tắc làm việc
-- **Đọc context_pack trước khi làm** (đã được hook tự inject mỗi phiên/mỗi lượt khi KB đổi).
+- **Đọc context (đầu file, đúng vai trò của bạn) trước khi làm** — CLAUDE.md tự import mỗi phiên/dispatch, hook KHÔNG cat lại (cost-opt #1b, 2026-07-17).
   Không hỏi lại những điều KB chung đã ghi — kết quả của agent khác xuất hiện ở mục "MỚI NHẤT".
 - **Khi tạo ra tri thức bền** (kết luận / số liệu / quyết định), ghi ngay lên bus:
   ```bash

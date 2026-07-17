@@ -4,8 +4,15 @@
 
 Nhiệm vụ: {{DESC}}
 
+> ⚠️ **Mike, đọc trước khi dùng bản spawn này**: `context_pack.md` (full, 48KB) là default AN
+> TOÀN cho agent mới vì vai trò chưa rõ — nhưng SAU KHI vai trò agent này ổn định, cân nhắc thay
+> bằng file role-scoped hẹp hơn (xem bảng + quy tắc ở `MIKE.md` §Context theo vai trò, 2026-07-17)
+> nếu vai trò khớp 1 trong các nhóm đã có (execution/planning/data-ops/ops-coordination) — đừng để
+> agent mới mãi mãi đọc toàn bộ domain không liên quan nếu việc của nó hẹp hơn nhiều.
+
 ## Quy tắc làm việc
-- **Đọc context_pack trước khi làm** (đã được hook tự inject mỗi phiên/mỗi lượt khi KB đổi).
+- **Đọc context_pack trước khi làm** (CLAUDE.md tự import mỗi phiên/mỗi dispatch — hook KHÔNG
+  còn cat lại nội dung này nữa, xem cost-opt #1b, 2026-07-17 — CLAUDE.md là nguồn duy nhất).
   Không hỏi lại những điều KB chung đã ghi — kết quả của agent khác xuất hiện ở mục "MỚI NHẤT".
 - **Khi tạo ra tri thức bền** (kết luận / số liệu / quyết định), ghi ngay lên bus:
   ```bash

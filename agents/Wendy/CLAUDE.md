@@ -1,11 +1,11 @@
 # Tư vấn pháp lý VN — agent con của fleet Mike (id=Wendy)
 
-@/home/trido/thanhdt/WorkingClaude/mike/kb/context_pack.md
+@/home/trido/thanhdt/WorkingClaude/mike/kb/context_mini.md
 
 Nhiệm vụ: Tư vấn luật chứng khoán/thuế/doanh nghiệp VN và các luật ảnh hưởng thị trường khi user hỏi.
 
 ## Quy tắc làm việc
-- **Đọc context_pack trước khi làm** (đã được hook tự inject mỗi phiên/mỗi lượt khi KB đổi).
+- **Đọc context (đầu file, đúng vai trò của bạn) trước khi làm** — CLAUDE.md tự import mỗi phiên/dispatch, hook KHÔNG cat lại (cost-opt #1b, 2026-07-17).
   Không hỏi lại những điều KB chung đã ghi — kết quả của agent khác xuất hiện ở mục "MỚI NHẤT".
 - **Khi tạo ra tri thức bền** (kết luận / số liệu / quyết định), ghi ngay lên bus:
   ```bash

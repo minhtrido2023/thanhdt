@@ -463,3 +463,50 @@ conversation sống — đó là ghi trùng 2 lần (bus + KB) và làm loãng t
 
 Lý do: các file trên Mike đã cập nhật NGAY LÚC quyết định (không cần đợi consolidator), và Mike
 đọc lại chính các file này ở SessionStart — bus event thêm vào chỉ là công đoạn thừa cần dọn sau.
+
+## Context theo vai trò (role-scoped) — quy tắc ghi chép & bảo trì (thêm 2026-07-17)
+
+**Vấn đề đã sửa:** trước đây MỌI agent (Taylor/DollarBill/Mafee/Wags/Winston/Spyros/Wendy) đều
+import y hệt `kb/context_pack.md` (48KB, toàn bộ domain) qua `CLAUDE.md`, bất kể việc đang làm có
+liên quan hay không — Mafee đặt lệnh phải đọc cả lịch sử R&D của Taylor, Wendy tư vấn luật phải
+đọc cả chi tiết thực thi lệnh. Tốn token vô ích + agent phải tự lọc ra phần liên quan mỗi lần.
+
+**Kiến trúc mới — mỗi agent chỉ import ĐÚNG phần việc của mình:**
+
+| Agent | File(s) import (qua CLAUDE.md, KHÔNG qua hook nữa — xem cost-opt #1b) | Vì sao |
+|---|---|---|
+| Taylor | `kb/context_pack.md` (full, không đổi) | R&D tổng hợp xuyên domain, cắt sẽ mất thông tin cần |
+| DollarBill | `context_safety_core.md` + `context_planning_mini.md` | Lập plan T+1: cần V2.4/DT5G/8L tóm tắt + rule giá/file, KHÔNG cần phương pháp backtest |
+| Mafee | `context_safety_core.md` + `context_execution_mini.md` | Thực thi plan-bound: cần T+2/idempotency/excluded_tickers, KHÔNG cần chiến lược/backtest |
+| Winston | `context_safety_core.md` + `context_dataops_mini.md` | Data-ops: cần bảng BQ/registry/DT5G-trap, KHÔNG cần chi tiết trading strategy |
+| Spyros | `context_safety_core.md` + `context_mini.md` | Risk-audit tần suất thấp: cần kill-switch + BQ cơ bản, không cần bespoke file |
+| Wendy | `context_mini.md` | Legal-vn: gần như tự chứa, không chạm execution |
+| Wags | `context_ops_mini.md` (không đổi từ cost-opt #1) | Fleet-ops thuần, 0 domain trading |
+| Mike | `context_pack.md` (full, không đổi) | Coordinator — cần nhìn toàn cảnh để định tuyến đúng |
+
+`kb/context_safety_core.md` là file NHỎ dùng chung cho mọi agent chạm surface tiền thật (kill-
+switch, banned tickers, human-in-the-loop, danh tính 2 account LIVE) — tách riêng để 1 fact an
+toàn chỉ cần sửa ĐÚNG 1 chỗ, không lệch giữa nhiều bản sao.
+
+**Quy tắc ghi chép — mở rộng nguyên tắc "ghi 1 lần đúng chỗ" ở trên:** khi tạo tri thức bền mới
+(quyết định/kết luận/quy tắc), trước khi ghi vào `context_pack.md`/`canonical.md` như cũ, tự hỏi
+**"role nào thực sự cần fact này khi làm việc?"** rồi ghi bổ sung/sửa đúng (các) file role-scoped
+tương ứng CÙNG LÚC:
+- Fact chạm tiền thật/an toàn (kill-switch, banned ticker, account LIVE mới) → `context_safety_core.md`.
+- Fact riêng thực thi lệnh (broker quirk, settlement, executor bug) → `context_execution_mini.md`.
+- Fact riêng lập plan (allocator, regime-gate, pricing rule, plan-file convention) → `context_planning_mini.md`.
+- Fact riêng data-ops (bảng BQ mới, cron, cache) → `context_dataops_mini.md`.
+- Fact chỉ Taylor cần (backtest method, R&D history) → giữ nguyên ở `context_pack.md`/`KNOWLEDGE.md`, KHÔNG cần lan sang các file role-scoped khác.
+Nếu 1 fact liên quan ≥2 role — ghi vào MỖI file liên quan (chấp nhận trùng nhỏ, ưu tiên đúng hơn
+DRY tuyệt đối cho nội dung an toàn-quan trọng), HOẶC nếu fact đủ nhỏ/nền tảng, cân nhắc đưa vào
+`context_safety_core.md` thay vì lặp ở nhiều file.
+
+**Audit định kỳ — gộp vào Friday KB editorial review có sẵn** (không tạo cron mới, theo đúng
+pattern đã dùng ở `coding_guidelines.md` §9/§10/§11): mục 5 trong dispatch Friday của
+`bin/kb_nightly.sh` yêu cầu Mike đọc lại các file role-scoped, đối chiếu với `KNOWLEDGE.md`/
+`current_ops.md` mới nhất — fact nào đã đổi ở nguồn canonical nhưng chưa lan sang file role-scoped
+liên quan (vd đổi target NEUTRAL parking, thêm account LIVE mới, đổi tên bảng DT5G) thì sửa ngay.
+
+**Khi thêm agent mới hoặc đổi vai trò 1 agent:** quyết định file role-scoped nào nó cần dựa trên
+BẢNG trên (không mặc định full `context_pack.md` trừ khi vai trò thực sự cần tổng hợp xuyên
+domain như Taylor/Mike) — cập nhật cả bảng này khi quyết định.

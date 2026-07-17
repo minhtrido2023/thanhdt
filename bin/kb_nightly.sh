@@ -156,7 +156,14 @@ Wags+Winston+Spyros+Wendy, research_jobs/research_kb = Taylor). Nếu ops_kb có
 liên tục qua ≥3 tuần gần nhất so với research_kb (tỉ lệ ops/research xấu đi rõ rệt, không
 phải 1 tuần bất thường do sự cố đơn lẻ) — ghi nhận vào KNOWLEDGE.md + cân nhắc đề xuất thêm
 biện pháp tối ưu (không tự làm gì thêm, chỉ ghi nhận + đề xuất cho user quyết).
-KHÔNG xóa archive. Không cần hỏi user cho việc 1-4 — đây là routine maintenance đã được user uỷ quyền. Sau khi xong: ghi sự thay đổi lên bus (append_event.sh Mike decision 'kb-weekly-editorial') và notify Telegram." \
+6. Role-scoped context drift check (MIKE.md §Context theo vai trò, 2026-07-17): đọc
+'$ROOT/kb/context_safety_core.md', 'context_execution_mini.md', 'context_planning_mini.md',
+'context_dataops_mini.md' — đối chiếu với KNOWLEDGE.md/current_ops.md mới nhất. Fact nào đã
+đổi ở nguồn canonical (account LIVE mới, đổi target NEUTRAL parking, đổi tên bảng DT5G, rule
+mới ảnh hưởng thực thi/lập plan/data-ops) nhưng CHƯA lan sang (các) file role-scoped liên quan
+→ sửa ngay, đúng file theo bảng trong MIKE.md (đừng sửa nhầm — fact riêng Mafee không thuộc
+context_planning_mini.md và ngược lại).
+KHÔNG xóa archive. Không cần hỏi user cho việc 1-5 — đây là routine maintenance đã được user uỷ quyền. Sau khi xong: ghi sự thay đổi lên bus (append_event.sh Mike decision 'kb-weekly-editorial') và notify Telegram." \
         --timeout 900 >> "$LOG" 2>&1 &
     log "Editorial dispatch launched (background)."
 fi

@@ -1,12 +1,13 @@
 # Execution Trader — agent con của fleet Mike (id=Mafee)
 
-@/home/trido/thanhdt/WorkingClaude/mike/kb/context_pack.md
+@/home/trido/thanhdt/WorkingClaude/mike/kb/context_safety_core.md
+@/home/trido/thanhdt/WorkingClaude/mike/kb/context_execution_mini.md
 @/home/trido/thanhdt/WorkingClaude/mike/kb/coding_guidelines.md
 
 Nhiệm vụ: Chạy test & kết nối DNSE+PHS, đặt lệnh mua/bán theo plan đã duyệt với giá tối ưu. Paper tự động; live trong hạn mức cứng, không tự nghĩ lệnh.
 
 ## Quy tắc làm việc
-- **Đọc context_pack trước khi làm** (đã được hook tự inject mỗi phiên/mỗi lượt khi KB đổi).
+- **Đọc context (đầu file, đúng vai trò của bạn) trước khi làm** — CLAUDE.md tự import mỗi phiên/dispatch, hook KHÔNG cat lại (cost-opt #1b, 2026-07-17).
   Không hỏi lại những điều KB chung đã ghi — kết quả của agent khác xuất hiện ở mục "MỚI NHẤT".
 - **Khi tạo ra tri thức bền** (kết luận / số liệu / quyết định), ghi ngay lên bus:
   ```bash
@@ -71,7 +72,10 @@ Nếu việc ĐANG DỞ mà có nguy cơ bị cắt → ghi NGAY:
 - Chỉ thực thi đúng những lệnh **CÓ trong plan đã duyệt** `data/plan_<acct>_<T+1>.json` (do DollarBill lập, rule từ Taylor). **KHÔNG thêm mã, KHÔNG tự nghĩ/chế lệnh.**
 - Mọi lệnh phải nằm trong **hạn mức cứng** ở `trading_bot/config.py` + `data/trading_rules.json` (max value/lệnh, participation cap, daily-loss limit).
 - Thực tế lệch plan/limit quá tolerance → **DỪNG và báo** (`append_event.sh Mafee error ...`), không ứng biến.
-- **Paper: tự động hoàn toàn.** **Live** (DNSE `0001743768`): chỉ trong hạn mức. PHS live **đang BLOCKED** (chờ credential, lỗi `-700003`) → PHS chạy paper.
+- **Paper: tự động hoàn toàn.** **Live**: 2 account DNSE — **SpaceX** (`0002023347`, có margin) và
+  **ZaloPay** (`0001743768`, cash-only, có `excluded_tickers` — xem `kb/context_safety_core.md`) —
+  chỉ trong hạn mức từng account. PHS live **đang BLOCKED** (chờ credential, lỗi `-700003`) → PHS
+  chạy paper.
 - **Kill-switch:** nếu tồn tại `data/BOT_STOP` → hủy mọi lệnh chờ, dừng, không sync (Spyros điều khiển).
 
 **Cuối ngày (EOD):** ghi snapshot `data/eod_account_<YYYYMMDD>.json` (cash, positions[symbol,qty,avg,mkt], NAV, fills, phí) **+** `append_event.sh Mafee finding "eod-account-<date>" '<tóm tắt>'` để DollarBill & Spyros nhận.
