@@ -208,8 +208,25 @@ kim cương xuyên quốc gia (141 lô, ~28.000 viên từ 2024) — dùng chuy�
 **cấp chứng chỉ P-Lab giả**. Công bố 02/07/2026. Giá sàn 3 phiên liên tiếp (03–07/07): 63.100→50.800
 (**−19,5% trong 3 phiên**). Khuếch đại bởi **FPTS cắt margin PNJ 50%→30% hiệu lực 08/07** (bán cưỡng
 bức — volume 08/07 nhảy vọt 25,6 triệu cp). PNJ tuyên bố cáo buộc liên quan cá nhân cựu GĐ, không có
-kim cương lậu vào hệ thống bán lẻ, đang hợp tác điều tra + công bố kế hoạch **mua cổ phiếu quỹ** (số
-lượng/giá trần chưa verify — cần Winston/nguồn corp-action).
+kim cương lậu vào hệ thống bán lẻ, đang hợp tác điều tra + công bố **ý định** mua cổ phiếu quỹ (08/07).
+
+**Cập nhật 18/07/2026 (Winston, job `Winston_20260718_051002`, verified qua Tuổi Trẻ/VnExpress/
+Vietstock/CafeF/Dân Trí/Người Quan Sát):**
+- **16/07**: NQ HĐQT (CT Cao Thị Ngọc Dung ký) — CHỦ TRƯƠNG thuê 3 tổ chức quốc tế độc lập: (a) kiểm
+  định chất lượng sản phẩm, (b) kiểm toán TOÀN BỘ chuỗi nhập khẩu→sản xuất→bán kim cương (kèm kiểm
+  toán thuế 2025), (c) tư vấn đánh giá hệ thống quản trị rủi ro. TGĐ Phan Quốc Công được giao tìm/
+  đàm phán/ký HĐ, Ủy ban Kiểm toán giám sát. **CHƯA có tên đơn vị cụ thể, CHƯA có timeline, CHƯA cam
+  kết công bố công khai kết quả** — về nguyên tắc đây là catalyst T2/T3 mạnh (đúng khung §3), nhưng
+  còn quá non để coi là cổng xác nhận (xem khuyến nghị timing cuối §7.5).
+- **Cổ phiếu quỹ — ĐÍNH CHÍNH quan trọng**: con số "169.559 cp, giá ≥50.000đ" lan truyền là bước
+  **BÁN** cổ phiếu quỹ CŨ đang có (bắt buộc theo NĐ 245/2025 trước khi mua lại đợt mới) — **KHÔNG
+  phải quy mô đợt MUA LẠI**. Quy mô/giá trần đợt mua lại thật **CHƯA công bố**; mới ở giai đoạn lấy ý
+  kiến cổ đông bằng văn bản, ĐKCC 17/08/2026.
+- **Vụ án mở rộng (Chuyên án 268V)**: tới 12–14/07 đã 31 bị can (thêm 4 chủ tiệm vàng TP.HCM + **1
+  nhân viên P-Lab khởi tố 14/07, được truyền thông nêu là EM TRAI một thành viên HĐQT PNJ**), tổng
+  giá trị buôn lậu >1.500 tỷ, thu lợi bất chính >300 tỷ. Governance-link này thu hẹp nhẹ khoảng cách
+  "cá nhân bên ngoài" nhưng **cáo buộc vẫn nhắm cá nhân**, CHƯA khởi tố pháp nhân PNJ, chưa kê biên
+  → chưa chạm HARD ABANDON §3.
 
 ### Tiêu chí #1 (scandal cá nhân vs chạm lõi) — ĐIỂM QUYẾT ĐỊNH, và là điểm KHÁC 2015
 
@@ -348,3 +365,18 @@ rõ-ràng-ngoài-lõi; lần này phải chờ chứng minh lõi không bị lâ
 
 **Việc cần làm tiếp**: (a) nhờ Winston verify số lượng/giá trần cổ phiếu quỹ + theo dõi phản ứng GIA
 (corp-action + tin quốc tế); (b) đặt reminder đọc BCTC Q3/2026 PNJ (~cuối 10/2026) — cổng quyết định.
+
+### 7.5 Khuyến nghị timing — audit độc lập có nên đẩy cổng xác nhận sớm hơn Q3 không? (18/07/2026)
+**KHÔNG, giữ nguyên cổng = BCTC Q3/2026.** Việc thuê 3 tổ chức quốc tế đúng là loại catalyst T2/T3
+(§3) và VỀ NGUYÊN TẮC có thể ra kết quả trước Q3 (kiểm định sản phẩm thường nhanh hơn 1 quý tài
+chính) — nhưng hiện quá non để nâng cổng: chưa chọn đơn vị (uy tín = ẩn số), không timeline, không
+cam kết công bố công khai (có thể chỉ nội bộ → thị trường không quan sát được, không phải cổng xác
+nhận thật). **Chỉ nâng audit thành cổng-sớm khi đủ CẢ 3 điều kiện**: (1) tên đơn vị uy tín quốc tế
+thật (kiểu GIA/Bureau Veritas/SGS, không phải đơn vị vô danh), (2) timeline ra kết quả trước cuối
+Q3/2026, (3) cam kết công bố công khai. Tới lúc đó có thể coi là T2 xác nhận sớm hơn BCTC Q3.
+
+**Rủi ro timing cho người muốn vào**: nếu đợi tới đúng lúc BCTC Q3 công bố mới vào, có thể đã bỏ lỡ
+phần lớn mức tái định giá — thị trường thường phản ứng trước với tin tức trung gian (chọn được đơn
+vị kiểm định uy tín, audit sơ bộ rò rỉ tích cực) hơn là chờ đúng ngày báo cáo tài chính chính thức.
+Đây là lý do §3 thiết kế 3 tranche thay vì 1 cổng duy nhất — case PNJ-2015 cho thấy phần lớn mức
+tăng (+50%/6m) đến RẤT SỚM, trước khi có xác nhận đầy đủ.
