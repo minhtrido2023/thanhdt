@@ -2714,13 +2714,17 @@ tự phát hiện báo động giả do chính fix hôm qua sinh ra.
 **Bằng chứng đã kiểm tra (không suy đoán):**
 - `grep '^## 2026-07-17' kb/INCIDENTS.md` → đúng 2 entry, cả 2 đã ghi ĐẦY ĐỦ (root cause/fix/
   lesson) trước khi retro này chạy — không phải gap.
-- Toàn bộ bus event `ts` bắt đầu `2026-07-17` (219 event): 0 `error`, 0 `question`; mọi
-  `finding` đối chiếu xong đều là R&D/ops-routine hợp lệ (DCF, anomaly-scan, sbv-check,
-  new-listings, pattern research) — không sự cố nào bị bỏ sót khỏi 2 entry đã ghi.
-- Commit thật xác nhận cả 2 fix: `37b0e5f` (model-tier drift + context bloat — sửa
+- Toàn bộ bus event `ts` bắt đầu `2026-07-17`: 0 `error`, 0 `question` trong mọi cửa sổ thời
+  gian đã thử (UTC-day/ICT-day) — con số tuyệt đối lệch theo biên cửa sổ tính (không tái lập
+  được chính xác 1 con số, xem Wags gap #2 07-18), nhưng kết luận định tính (0 error/question)
+  đúng và ổn định qua mọi cách tính; mọi `finding` đối chiếu xong đều là R&D/ops-routine hợp lệ
+  (DCF, anomaly-scan, sbv-check, new-listings, pattern research) — không sự cố nào bị bỏ sót
+  khỏi 2 entry đã ghi.
+- Commit thật xác nhận cả 2 fix: `37b0e5f` (model-tier drift + context bloat — 10 file, gồm
   `bin/ops_autofix.sh`, `bin/wags_autofix.sh`, `~/.claude/agents/arch-reviewer.md`,
-  `bin/dispatch.sh`, `bin/spend_report.py`) và `a89593f` (preflight depth-check, sửa
-  `bin/preflight_check.sh` +10/-2 dòng).
+  `bin/dispatch.sh`, `bin/spend_report.py`, `MIKE.md` (+14, ladder policy), `bin/kb_nightly.sh`
+  (+28, chống context-bloat) — danh sách gốc chỉ liệt 5/10 file, bổ sung sau Wags verify 07-18)
+  và `a89593f` (preflight depth-check, sửa `bin/preflight_check.sh` +10/-2 dòng).
 - Verify trực tiếp trên đĩa: `bin/dispatch.sh` dòng 116-123 có stderr nudge khi `--model fable`;
   `bin/spend_report.py` dòng 181-184 in cảnh báo khi `fable_pct>=30`; `~/.claude/agents/
   arch-reviewer.md` dòng 5 = `model: opus` (đã hạ, không còn fable); `bin/ops_autofix.sh` dòng
@@ -2732,12 +2736,16 @@ tự phát hiện báo động giả do chính fix hôm qua sinh ra.
 **3 câu hỏi bắt buộc — từng sự cố:**
 
 1. **Model-tier drift (fable 0%→58%, compute +150% dù job count −76%)**
-   a. **MỚI dạng cụ thể** (chưa từng có entry "model-tier drift"/"fable misuse" trước đây —
-      grep xác nhận). Nhưng CÙNG HỌ với pattern đã biết: "chính sách viết đúng nhưng không có
-      cơ chế ép buộc" — giống hệt root cause của `retro-pattern-recurring-dataprovenance`
-      (07-09, đóng 07-10 bằng bright-line rule) và `dataprovenance-2` (07-10, tổng quát hoá
-      freshness-check). Ở đây là 1 biến thể khác của cùng luận điểm: ladder model routing đã
-      viết rõ trong MIKE.md từ 07-14 nhưng không ai kiểm tra tuân thủ suốt 3 tuần.
+   a. **MỚI dạng cụ thể — nhưng có TÍN HIỆU SỚM đã bị đọc sai (sửa sau Wags verify 07-18):**
+      chưa từng có entry "model-tier drift"/"fable misuse" trước đây (grep xác nhận), và CÙNG
+      HỌ với pattern đã biết "chính sách viết đúng nhưng không có cơ chế ép buộc" (giống hệt
+      root cause của `retro-pattern-recurring-dataprovenance` 07-09/07-10). Nhưng RETRO 07-11
+      đã ghi hẳn 1 mục "4 lần dispatch hard-timeout Fable-model" + câu hỏi còn treo
+      `retro-pattern-recurring-joblifecycle-fable-timeout` đề xuất "nâng TIMEOUT riêng cho
+      `--model fable`" — nghĩa là việc dùng fable tràn lan đã CÓ TÍN HIỆU từ 07-11, chỉ bị đóng
+      khung nhầm thành bài toán tinh-chỉnh-timeout thay vì vi-phạm-routing-ladder. Framing "chi
+      phí" là mới; tín hiệu nền thì không — 6 ngày (07-11→07-17) đã trôi qua trước khi được đọc
+      đúng bản chất.
    b. Fix **HOÀN CHỈNH ở 2/3 lớp** đã verify trên đĩa (autofix default hạ + arch-reviewer hạ +
       dispatch.sh nudge + spend_report cảnh báo ngưỡng). **CÒN HỞ**: cả 2 lớp phòng thủ (nudge
       + spend_report) đều là *cảnh báo*, không *chặn* — Mike (hoặc bất kỳ agent nào dispatch)
@@ -2793,4 +2801,120 @@ prevention — điều kiện escalate ở bước 10 chưa đạt cho cả hai)
 - Theo dõi %fable qua `bin/spend_report.py` ở Friday KB review kế tiếp — xác nhận nudge/cảnh
   báo mới cài hôm nay có thực sự giữ %fable dưới ngưỡng hay không (chưa có dữ liệu sau-fix).
 
-Verified by: Wags — pending.
+Verified by: Wags — **gaps found and fixed retroactively 2026-07-18** (original verification
+never ran — see RETRO 07-18 sự cố #1 for why; job `Wags_20260718_173444`, opus/high). 4 gaps:
+1 material (job-lifecycle bug itself — now its own entry in RETRO 07-18, not repeated here),
+3 minor (bus-event count softened, 5 missing commit files added to `37b0e5f` list, early-signal
+caveat added to model-drift 3a) — all fixed in this entry above. Substantive content (commit
+hashes, job_ids, file sizes, code line references) was NOT contradicted — all confirmed real.
+
+
+## RETRO — 2026-07-18: 1 sự cố (phát hiện bởi chính retro hôm nay, chưa từng ghi trước —
+## gap báo cáo), 1 pattern TÁI DIỄN dưới dạng MỚI của agent-wrapper-monitor-gap (07-07)
+
+**Bối cảnh ngày:** Thứ Bảy, không phải ngày giao dịch (cron `ops_health_check.sh`/`preflight`
+chỉ chạy T2-T6, đúng thiết kế — KHÔNG phải lỗi bỏ sót). Hoạt động trong ngày chỉ gồm: 2 job
+refresh dữ liệu định kỳ (`fa_ratings`/`fa_ratings_8l` — Taylor + Winston, cả 2 status "ok"),
+1 finding R&D (Taylor thêm case #3 PNJ vào playbook state-backstop) + 1 finding theo dõi
+(Winston PNJ §7), và các commit routine (`consolidate` ×4, `fleet backup`). Không có lệnh đặt
+ra, không có tiền di chuyển.
+
+**Bằng chứng đã kiểm tra (không suy đoán):**
+- `grep '^## 2026-07-18' kb/INCIDENTS.md` → 0 kết quả trước khi retro này chạy.
+- Toàn bộ bus event `ts` bắt đầu `2026-07-18` (tất cả agent inbox): **0 event `error`, 0 event
+  `question`**; chỉ có heartbeat/status/finding, toàn bộ đã đối chiếu khớp 2 job refresh + 2
+  finding R&D nêu trên — không sự cố trading/vận hành nào bị bỏ sót ở lớp bus.
+- `git log` ngày 2026-07-18: chỉ 4 commit `consolidate` + không có `fleet backup` riêng (đã gộp
+  vào chu kỳ trước) — **0 commit hotfix** trong ngày.
+- `bus/jobs/*.json` lọc `created_at` 2026-07-18: **0 job** (2 việc refresh chạy qua cron trực
+  tiếp, không qua `dispatch.sh`, nên không có job record — đúng thiết kế, không phải job biến
+  mất).
+- `logs/ops_health.log`, `logs/backup.log`, `logs/consolidator.log`: không dòng nào chứa lỗi/
+  warn cho 2026-07-18; `ops_health.log` không có entry ngày 07-18 vì cron `1-5` (T2-T6) đúng —
+  xác nhận bằng `crontab -l` (`20 1 * * 1-5` / `45 5 * * 1-5`), không phải bug bỏ sót.
+
+**Sự cố duy nhất — phát hiện KHI ĐI KIỂM TRA lịch sử để trả lời câu hỏi chuẩn tắc "RETRO hôm
+qua đã đóng đúng chưa" (không nằm trong ngày 07-18 theo lịch, nhưng chỉ lộ ra qua bằng chứng
+đọc được HÔM NAY — theo đúng tinh thần bước 2 'đối chiếu gap báo cáo'):**
+
+**1. Daily-retro job 07-17 (`Mike_20260717_173001`) tự kết thúc sớm giữa chừng bước 4b, để lại
+entry đã commit với dòng "Verified by: Wags — pending" chưa từng được verify thật**
+
+`result_summary` trong `bus/jobs/Mike_20260717_173001.json`: *"I'll wait for the background
+Wags verification to finish (the harness will notify me automatically) before proceeding to
+commit and the remaining steps."* — nhưng job này LÀ một `dispatch.sh` headless one-shot
+(`claude -p`), không phải phiên tương tác sống: một khi tiến trình dừng sinh thêm tool-call,
+KHÔNG CÓ turn sau nào để "được đánh thức" — không giống phiên tương tác của Mike (nơi task-
+notification của Agent/Bash nền thật sự quay lại được cùng session). `dispatch.sh` ghi nhận
+`status:done exit_code:0` (đúng — tiến trình `claude -p` thoát sạch, không phải bị kill/
+timeout) vì bản thân tiến trình TỰ CHỌN dừng, không phải bị buộc dừng. Job Wags đi kèm
+(`Wags_20260717_173335`) bị KILL giữa chừng (`exit_code:143`, `result_summary`: "KILLED:
+dispatch.sh sync bị kill giữa chừng (caller chết/Bash-tool timeout?)") — tức Mike đã dispatch
+Wags nhưng KHÔNG chờ đồng bộ đúng cách (có khả năng dùng cơ chế nền/Agent thay vì Bash chờ
+`dispatch.sh` chạy foreground như job hôm nay đang làm), rồi bản thân Mike cũng dừng theo.
+Kết quả: entry RETRO 07-17 vẫn được ghi vào `kb/INCIDENTS.md` VÀ COMMIT (`30d9616 consolidate
+2026-07-17T17:35:57Z`) — nhưng KHÔNG PHẢI do Mike tự commit sau khi hoàn tất bước 6 như quy
+trình yêu cầu, mà do cron `consolidate.sh` (một tiến trình HOÀN TOÀN KHÔNG LIÊN QUAN, chạy
+độc lập theo lịch riêng) tình cờ quét thấy file `kb/INCIDENTS.md` đã sửa (uncommitted) trong
+working tree và gộp nó vào commit "consolidate" định kỳ của chính nó — cách 9 giây sau
+heartbeat cuối cùng của job Mike (17:35:48 → commit 17:35:57). Verification bắt buộc trước
+khi commit (bước 4b) đã bị BỎ QUA HOÀN TOÀN trong thực tế, dù dòng "Verified by: Wags —
+pending" tạo cảm giác đã có một bước xác minh nào đó đang chạy.
+
+**Đã sửa TRONG PHIÊN retro hôm nay** (không phải hôm qua): dispatch Wags lại (đồng bộ, qua
+Bash tool chờ trực tiếp `dispatch.sh` foreground, KHÔNG dùng cơ chế nền nào) để verify
+retroactive entry RETRO 07-17 — xem dòng "Verified by" đã cập nhật trong chính entry đó.
+
+   a. **TÁI DIỄN, dạng MỚI của pattern đã ghi 2026-07-07 ("agent-wrapper-monitor-gap")** —
+      cùng họ lỗi gốc ("giả định có cơ chế đánh thức/quay-lại-turn trong khi ngữ cảnh thực thi
+      không có cơ chế đó") nhưng lần 07-07 là phiên TƯƠNG TÁC sống của Mike chọn nhầm tham số
+      Agent tool (`isolation:worktree` tưởng là nền); lần này là một JOB HEADLESS ONE-SHOT (bản
+      thân là kết quả của `dispatch.sh Mike ...`) tưởng nhầm nó cũng có "turn sau" như phiên
+      sống — nhầm lẫn xảy ra ở TẦNG THỰC THI KHÁC (headless job vs interactive session), không
+      phải cùng 1 lỗi lặp y hệt, nhưng cùng 1 LOẠI giả định sai.
+   b. **CÒN HỞ tới trước phiên retro hôm nay** — bây giờ đã sửa (Wags verify retroactive, xem
+      dòng cập nhật ở entry 07-17). Residual risk còn lại: `daily_retro.sh` (cron trigger của
+      chính pipeline retro) không có cơ chế tự phát hiện "job Mike đã `done` nhưng entry vẫn
+      còn dòng 'pending'/chưa có commit message đúng dạng retro" — nếu lần sau lặp lại, sẽ lại
+      cần một retro SAU đó tình cờ phát hiện qua đọc kỹ, không có gate tự động nào chặn.
+   c. **Thuộc PATTERN xuyên suốt "giả định sai về cơ chế đánh thức/tiếp tục turn"** — đã xuất
+      hiện dưới ít nhất 3 hình thái riêng biệt tính đến nay: 07-07 sáng (LOG_AGE nhìn như treo
+      dù job sống — ngộ nhận NGƯỢC, tưởng đã chết), 07-07 chiều (Agent isolation:worktree tưởng
+      là nền), và hôm nay (headless one-shot job tưởng có turn sau). Điểm chung: bất cứ khi nào
+      một tiến trình/agent tạm dừng để "chờ báo lại", PHẢI tự hỏi rõ ràng "cơ chế báo lại này có
+      THẬT tồn tại trong ngữ cảnh thực thi cụ thể của TÔI không" trước khi dừng — không suy ra
+      từ kinh nghiệm ở một ngữ cảnh thực thi khác (phiên sống ≠ headless dispatch ≠ cron script).
+
+| # | Hạng mục | Phân loại | Nguồn gốc | Người ghi chép |
+|---|---|---|---|---|
+| 1 | RETRO 07-17 commit với verification bị bỏ dở ("Verified by: Wags — pending" chưa từng verify thật) — job Mike headless tự dừng giữa bước 4b tưởng có turn sau | job-monitoring/lifecycle (hậu duệ agent-wrapper-monitor-gap 07-07) | `daily_retro.sh` dispatch Mike headless một lần (`claude -p`, không có turn sau); bước 4b của prompt yêu cầu dispatch Wags "đồng bộ" nhưng không đặc tả CƠ CHẾ CHỜ cụ thể (Bash blocking vs Agent/nền) → Mike (phiên headless hôm đó) tự chọn nhầm cách chờ giống cách chờ của phiên tương tác sống, rồi tự dừng process khi tưởng đã "giao việc xong, sẽ được báo lại" | Chưa ai ghi trước retro này — retro 07-18 tự phát hiện qua đọc `bus/jobs/Mike_20260717_173001.json` + `Wags_20260717_173335.json` (không có trong bus event error/finding nào, chỉ lộ ra qua job record) |
+
+**Điểm quan trọng nhất hôm nay:** ngày 07-18 tự nó SẠCH (0 sự cố vận hành/trading thật), nhưng
+việc đi xác minh "RETRO hôm qua đã đóng đúng chưa" (đúng tinh thần bước 2b của chính quy trình
+retro) lộ ra RETRO hôm qua **chưa từng thực sự hoàn tất** — chỉ trông như đã hoàn tất nhờ một
+cron KHÔNG LIÊN QUAN vô tình commit hộ. Đây là lời nhắc: **bản thân cơ chế retro cũng cần được
+retro** — không nên mặc định "entry đã có trong `kb/INCIDENTS.md` với dòng Verified by" nghĩa là
+verification đã thật sự chạy; luôn cross-check job record (`bus/jobs/<job_id>.json`) của chính
+lần dispatch retro đó khi job_id còn tồn tại, giống cách làm hôm nay.
+
+**Prevention MẠNH HƠN đề xuất** (vì đây là lần 3 của cùng 1 loại giả định sai, sau 07-07 ×2):
+mỗi lần `daily_retro.sh` dispatch Mike, sau khi `dispatch.sh` trả về (dù `exit_code` gì), tự
+thêm 1 bước kiểm tra CƠ KHÍ (không phụ thuộc LLM tự giác) ngay trong `daily_retro.sh`: đọc lại
+`kb/INCIDENTS.md` xem entry mới nhất có khớp `## RETRO — $TODAY` VÀ không còn chứa chuỗi
+"— pending" ở dòng "Verified by" hay không; nếu sai → tự escalate `append_event.sh` error thay
+vì im lặng để lộ ra ở retro NGÀY SAU (rút ngắn thời gian phát hiện từ "1 ngày" xuống "ngay sau
+khi job kết thúc").
+
+**Việc còn treo sang ngày mai (kế thừa từ RETRO 07-17, không đổi — vẫn chưa có phản hồi user):**
+- Quyết định user cho câu hỏi `retro-pattern-recurring-data-registry-accuracy-5days` (07-15,
+  nay đã 3 ngày không phản hồi).
+- Quyết định user cho câu hỏi `retro-pattern-recurring-joblifecycle-timeout-3` (07-14, nay đã
+  4 ngày không phản hồi).
+- M5 nợ cũ: `executor.py`/paper trials đọc `ticker_prune.parquet` monolith chết từ 06-26 — chưa
+  dispatch Taylor, không khẩn (chỉ ảnh hưởng paper).
+- Theo dõi %fable qua `bin/spend_report.py` ở Friday KB review kế tiếp (2026-07-24) — xác nhận
+  nudge/cảnh báo cài 07-17 có giữ %fable dưới ngưỡng hay không.
+- **MỚI**: cân nhắc thêm gate cơ khí vào `daily_retro.sh` (xem Prevention ở trên) — chưa làm,
+  chỉ mới đề xuất trong entry này; nên làm trong tuần tới nếu pattern "giả định sai cơ chế đánh
+  thức" tái diễn lần thứ 4.
+
