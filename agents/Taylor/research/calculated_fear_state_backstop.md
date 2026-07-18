@@ -189,3 +189,162 @@ AMBIGUOUS, không phải khuyến nghị vào ngay):
 
 **Việc cần làm tiếp**: theo dõi ngày công bố BCTC Q2/2026 DGC (ước cuối tháng 7/đầu tháng 8 theo lịch
 sử công bố các năm trước), đọc lại đúng 2 chỉ số CF_OA và Revenue YoY làm cổng quyết định.
+
+---
+
+## 7. Case #3 — PNJ (P-Lab 2026), thêm 2026-07-18 (Taylor, dispatch từ Mike, job `Taylor_20260718_044400`)
+
+**KHÔNG phải NN chi phối** (tư nhân, gia đình sáng lập Cao Thị Ngọc Dung) — giống DGC. Theo kết luận
+đã chốt ở §6, tiêu chí "NN>50%" KHÔNG phải điều kiện cứng → không tự động loại (tiêu chí #2 pass mềm).
+
+**⚠️ ĐÂY LÀ CASE KHÓ NHẤT của khung cho tới nay** vì nó rơi ĐÚNG vào cái bẫy mà framework được thiết
+kế để tránh: **PNJ đã có 1 case QUALIFY textbook trong chính §1 (2015, DD−27%→+148%/12m)** — nhưng bản
+chất scandal lần này KHÁC HẲN, và mặc định "PNJ từng qua 2015 thì lần này cũng qua" chính xác là loại
+sai lầm "nhầm case cũ với case mới" mà §0/§2 cảnh báo.
+
+### Bối cảnh (đã verify qua tin tức thật — Mike tra, không query lại)
+Cựu giám đốc **P-Lab** (công ty con giám định kim cương của PNJ) bị bắt liên quan đường dây buôn lậu
+kim cương xuyên quốc gia (141 lô, ~28.000 viên từ 2024) — dùng chuyên môn **xóa mã laser GIA gốc** và
+**cấp chứng chỉ P-Lab giả**. Công bố 02/07/2026. Giá sàn 3 phiên liên tiếp (03–07/07): 63.100→50.800
+(**−19,5% trong 3 phiên**). Khuếch đại bởi **FPTS cắt margin PNJ 50%→30% hiệu lực 08/07** (bán cưỡng
+bức — volume 08/07 nhảy vọt 25,6 triệu cp). PNJ tuyên bố cáo buộc liên quan cá nhân cựu GĐ, không có
+kim cương lậu vào hệ thống bán lẻ, đang hợp tác điều tra + công bố kế hoạch **mua cổ phiếu quỹ** (số
+lượng/giá trần chưa verify — cần Winston/nguồn corp-action).
+
+### Tiêu chí #1 (scandal cá nhân vs chạm lõi) — ĐIỂM QUYẾT ĐỊNH, và là điểm KHÁC 2015
+
+| | PNJ 2015 (QUALIFY textbook) | PNJ 2026 (case này) |
+|---|---|---|
+| Vị trí scandal | Ngân hàng của **CHỒNG** chủ tịch (DongABank) — **ngoài ngành, ngoài công ty** | **Công ty con của chính PNJ** (P-Lab) |
+| Sản phẩm bị làm giả | Không có — thuần contagion cá nhân/liên quan | **Chứng chỉ giám định kim cương** — một mắt xích trong chuỗi giá trị kim cương PNJ bán trực tiếp cho khách |
+| Khoảng cách tới lõi | Rất xa (0 chạm lõi bán lẻ) | **Gần lõi hơn nhiều** — nội bộ + chạm product-integrity |
+
+→ **Phép loại suy 2015 YẾU hơn vẻ ngoài.** 2015 = pure external contagion; 2026 = scandal nội bộ về
+tính toàn vẹn sản phẩm. KHÔNG được coi 2015 là bằng chứng "PNJ luôn hồi phục". Đánh giá độc lập 3 lớp:
+
+- **(a) Quy mô P-Lab trong PNJ**: BQ chỉ có số hợp nhất, **không có segment breakdown** cho P-Lab
+  (giới hạn dữ liệu — nêu rõ). Nhưng cơ cấu doanh thu PNJ bị **bán lẻ vàng/trang sức truyền thống chi
+  phối áp đảo** (riêng Q1/2026 doanh thu hợp nhất 17,37 nghìn tỷ). P-Lab là **mảng giám định/chứng
+  nhận** (dịch vụ), không phải trung tâm doanh thu bán lẻ → gần như chắc chắn là **tỷ trọng nhỏ** trong
+  doanh thu/LN hợp nhất. Điểm này **kéo về phía criterion #1** (ngoại vi, lõi bán lẻ vàng không bị chạm).
+- **(b) Rủi ro lan uy tín (đây là phần "gần lõi" thật)**: khách hàng có thể nghi ngờ **TẤT CẢ chứng
+  chỉ P-Lab đã cấp trước đây** (không chỉ 28.000 viên bị điều tra) → tổn hại thương hiệu **rộng hơn phạm
+  vi vụ án hình sự**, chạm vào mảng kim cương/kim hoàn cao cấp (biên cao, đang tăng trưởng). Đây là rủi
+  ro reputational, không phải rủi ro pháp nhân trực tiếp — nhưng THẬT.
+- **(c) Quan hệ GIA (tổ chức quốc tế) — "chiếc đèn báo lõi" quan trọng nhất**: scandal DÍNH TRỰC TIẾP
+  GIA (xóa mã laser GIA gốc). Nếu **GIA rút công nhận/hợp tác với P-Lab** → đây là **tổn hại LÕI thật**
+  (không còn là tin đồn), vì năng lực chứng nhận quốc tế là tài sản cạnh tranh của mảng kim cương. **Chưa
+  có tin GIA phản ứng** — đây là watch-item hạng nhất, không phải điều đã biết.
+
+**Kết luận tiêu chí #1: AMBIGUOUS.** Gần lõi hơn 2015 (nội bộ + product-integrity), nhưng lõi lớn nhất
+(bán lẻ vàng) không bị chạm và P-Lab là mảng nhỏ. KHÔNG phải "lõi giả tưởng" kiểu OGC/FLC (loại NON),
+cũng KHÔNG phải contagion cá nhân sạch kiểu 2015 (QUALIFY). Nằm CHÍNH GIỮA.
+
+### Tiêu chí #3 (CF_OA≥NP, lõi tách biệt) — mùa vụ ĐÃ VERIFY + khoảng trống dữ liệu DÀI
+
+**Xác nhận giả thuyết mùa vụ (query BQ 5 năm, adjusted):** CF_OA PNJ theo quý (nghìn tỷ VND):
+
+| Quý | Q1 | Q2 | Q3 | Q4 |
+|---|---|---|---|---|
+| 2022 | +1,71 | +0,20 | −0,64 | **−1,18** |
+| 2023 | +1,40 | −0,31 | +0,65 | **−0,24** |
+| 2024 | +1,89 | +0,23 | −0,46 | **−1,57** |
+| 2025 | −0,24 | +0,13 | +1,82 | **−1,70** |
+| 2026 | **+3,56** | *(chưa CB)* | — | — |
+
+→ **Q4 âm ĐỀU ĐẶN 5/5 năm** (tích trữ vàng trước Tết → dòng tiền vận hành âm Q4 là BÌNH THƯỜNG, không
+phải dấu hiệu xấu). **Hệ quả methodology quan trọng:** với PNJ, tiêu chí #3 **KHÔNG áp được kiểu "1 quý
+âm = xấu"** như đã làm với DGC ở §6 — phải so **YoY cùng quý**, không so quý liền kề. Đây là tinh chỉnh
+khung mà case DGC không cần (DGC không có mùa vụ CF_OA rõ như PNJ).
+
+**Trên dữ liệu MỚI NHẤT có sẵn (2026Q1, công bố 29/04/2026, hoàn toàn TRƯỚC khủng hoảng): tiêu chí #3
+PASS mạnh** — CF_OA_P0 **+3,558 nghìn tỷ >> NP_P0 +1,467 nghìn tỷ**; Revenue YoY **+77,9%**; FSCORE
+**7/9**; ROE_Trailing **27,1%**; NPM 8,5%. Lõi bán lẻ vàng đang tạo tiền tốt.
+
+**⚠️ NHƯNG dữ liệu đó ENTIRELY PRE-CRISIS.** Scandal nổ 02/07/2026 = **đầu Q3/2026**. Các cổng:
+- **BCTC Q2/2026** (Apr–Jun, ước công bố ~cuối tháng 7 — lịch sử Q2/2025 công bố 29/07) → **hoàn toàn
+  trước khủng hoảng, KHÔNG phản ánh tác động thật**. Chỉ có giá trị ở phần thuyết minh/guidance ban lãnh
+  đạo về P-Lab (nếu có).
+- **BCTC Q3/2026** (Jul–Sep, ước công bố **~cuối tháng 10** — lịch sử Q3/2025 công bố 28/10/2025) =
+  **cổng xác nhận tiêu chí #3 THẬT SỰ** — quý đầu tiên bao trọn khủng hoảng. Đọc **CF_OA (so YoY vs
+  Q3/2025 +1,82T, KHÔNG so Q2)** + Revenue YoY + thuyết minh mảng kim cương.
+
+→ **Khoảng trống dữ liệu DÀI ~3,5 tháng** — xa hơn NHIỀU so với DGC (DGC đã có Q1 ~2 tuần sau khởi tố +
+Q2 cận kề lúc đánh giá). **Không thể kết luận QUALIFY/NON ngay bây giờ** — đây là lý do cấu trúc, không
+phải do thiếu phân tích.
+
+### Tiêu chí #4 (bảng cân đối) — PASS
+Debt_Eq_P0 = **0,367** (Q1/2026, thấp/solvent; dải lịch sử 0,21–0,77, lành mạnh). Bán lẻ vàng cần vốn
+tồn kho nhưng đòn bẩy thấp. ✓
+
+### Tiêu chí #5 (sàn định giá) — PASS trên trục "chiết khấu vs lịch sử của chính nó"
+Tại giá **43.000 (17/07)**: **PE 6,08x vs PE_MA5Y 16,09x (SD5Y 3,91 → 2,56 SD DƯỚI trung bình)**; **PB
+1,53x vs PB_MA5Y 3,05x (SD5Y 0,56 → 2,70 SD DƯỚI trung bình)**. Lưu ý: PB 1,53 **KHÔNG** ≲1,2 (không ở
+book hữu hình) — nhưng khác TV1 (thủy điện nặng tài sản, PB~1 hợp lý), PNJ là **bán lẻ thương hiệu
+asset-light, ROE 27%** → book value *hiểu thấp* giá trị; sàn định giá đúng của PNJ là **bội số so lịch
+sử chính nó** (ở đó nó rẻ 2,6 SD), không phải book hữu hình. ✓ trên leg này.
+
+### Tín hiệu kỹ thuật + catalyst (§3 T2)
+- **Giá**: đỉnh trước scandal 63.100 (02/07) → đáy tạm **40.900 (16/07)** = **−35% peak-to-trough** (từ
+  đỉnh 120d ~64.100 ≈ −36%). Bật **+5,1% lên 43.000 (17/07)**. Close 43.000 **<< MA50 61.724 << MA200
+  66.017** (rất sâu dưới cả 2 đường).
+- **Volume cạn kiệt (đang hình thành)**: panic 25,6 triệu (08/07, ngày FPTS cắt margin) → 14,7 triệu
+  (16/07) → **7,5 triệu (17/07)**, tiệm cận Volume_1M 4,7 triệu. Áp lực bán cưỡng bức đang giảm.
+- **RSI hồi từ đáy**: D_RSI 0,148 (13/07) → **0,261 (17/07)** (thoát vùng quá bán sâu). **CMF −0,098
+  (16/07) → −0,008 (17/07)** (áp lực bán ròng dịu về gần trung tính, chưa dương).
+- **Đọc §3**: mới **1 phiên bật**, đáy 40.900 chưa được test lại → **higher-low CHƯA xác lập**. Ổn định
+  giá đang CHỚM (volume dry-up + RSI/CMF hồi), **chưa đủ chuẩn "ổn định + higher-low + volume cạn kiệt"
+  để chắc chắn T2**. Catalyst dương đầu tiên = **kế hoạch mua cổ phiếu quỹ** (đúng khung §3) — cần verify
+  số lượng/giá trần (Winston/corp-action, không có trong BQ).
+
+### Ước tính lợi nhuận kỳ vọng 12 tháng tại giá 43.000 (minh hoạ lượng hoá case AMBIGUOUS, KHÔNG phải khuyến nghị vào ngay)
+Neo vào PE hiện tại 6,08x, giả định lõi bán lẻ vàng (phần lớn LN) không bị chạm:
+- **Bull** (khủng hoảng chỉ là sốc uy tín 1–2 quý, Q3 xác nhận lõi intact, P-Lab được ring-fence, GIA
+  không rút): re-rate 1 phần về PE ~12x (dưới TB 16x — thị trường giữ 1 phần discount rủi ro vĩnh viễn)
+  → **~84.900 (+97%)**. Re-rate đầy đủ về 16x = +164% (dội lại 2015 +148%) nhưng để **thận trọng hơn**
+  vì tính "gần lõi" lần này → dùng cận Bull ~+90–100%.
+- **Base** (re-rate 1 phần về PE ~9–10x, thị trường áp discount uy tín có kéo dài nhưng hữu hạn):
+  ~63.700–71.000 → **+48–65%**, trung tâm ~**+55%**.
+- **Bear** (Q3/2026 lộ tổn hại lõi thật — tẩy chay mảng kim cương / GIA rút công nhận / biên co lại):
+  PE giữ 6–7x hoặc EPS giảm → 38.000–45.000 → **−12% đến +5%**.
+- **Kỳ vọng trung tâm nếu phải chọn 1 số: ~+40%/12m** — **cao hơn DGC (+25–35%)** vì fundamentals mới
+  nhất của PNJ *chứng minh được* là mạnh (CF_OA>>NP, rev +78%, FSCORE 7) trong khi DGC quý gần nhất đã
+  lộ CF_OA<<NP; nhưng **thấp hơn nhiều 2015 (+148%)** vì (a) scandal lần này GẦN LÕI hơn, (b) khoảng
+  trống dữ liệu tới Q3/2026 dài, chưa có xác nhận post-crisis "lõi sạch" như PNJ/TV1 có tại điểm entry.
+
+### Kết luận: PNJ = **AMBIGUOUS** (nghiêng constructive, mạnh hơn DGC nhưng bị chặn bởi wait dài)
+
+| Tiêu chí | Phán quyết | Ghi chú |
+|---|---|---|
+| #1 cá nhân vs lõi | ⚠️ AMBIGUOUS | Gần lõi hơn 2015 (nội bộ + product-integrity), nhưng lõi vàng bán lẻ không chạm, P-Lab nhỏ. GIA + lan uy tín = ẩn số. |
+| #2 NN backstop | pass mềm | Tư nhân — không phải điều kiện cứng (§6). |
+| #3 CF_OA≥NP | ⚠️ PASS nhưng PRE-CRISIS | Q1/2026 CF_OA +3,56T >> NP +1,47T, nhưng trước khủng hoảng. Cổng thật = **Q3/2026 (~cuối 10/2026)**, so YoY. |
+| #4 solvent | ✓ PASS | Debt_Eq 0,367. |
+| #5 sàn định giá | ✓ PASS | 2,56 SD (PE) / 2,70 SD (PB) dưới lịch sử. |
+| Kỹ thuật (T2) | chớm, chưa xác nhận | Volume cạn dần + RSI/CMF hồi + bounce +5%, nhưng higher-low chưa lập. |
+
+**Lý do AMBIGUOUS (không QUALIFY, không NON):** không phải "lõi giả tưởng" (nên không NON), nhưng
+**thiếu xác nhận post-crisis "lõi sạch"** mà PNJ-2015/TV1 có tại điểm entry — và cổng xác nhận đó (Q3/2026)
+**xa ~3,5 tháng**. Định giá + fundamentals-pre-crisis ủng hộ luận điểm giá trị mạnh hơn DGC, nhưng
+tiêu chí #1 gần lõi + khoảng trống dữ liệu dài = không đủ để nâng thẳng QUALIFY→T1/T2 full.
+
+**Hàm ý sizing (§3):** nếu đội muốn mở vị thế special-sit, **T1 nhỏ (cận dưới cap 2–4% NAV)** có thể
+biện minh (chiết khấu sâu 2,6 SD + fundamentals pre-crisis mạnh + volume cạn dần + catalyst buyback),
+nhưng **KHÔNG T2/T3 full** cho tới khi qua cổng. Điểm khác PNJ-2015: đó là vào-được-ngay vì scandal
+rõ-ràng-ngoài-lõi; lần này phải chờ chứng minh lõi không bị lây.
+
+### Cổng xác nhận + catalyst trung gian đáng theo dõi (thứ tự thời gian)
+1. **BCTC Q2/2026** (~cuối 07/2026) — KHÔNG phản ánh khủng hoảng (Apr–Jun), nhưng đọc **thuyết minh/
+   guidance ban lãnh đạo về P-Lab** nếu có.
+2. **Phản ứng GIA** (bất kỳ lúc nào) — nếu GIA rút công nhận/hợp tác P-Lab → tín hiệu tổn hại LÕI thật
+   (nghiêng về NON). Watch-item hạng nhất.
+3. **Tiến độ vụ án hình sự** — nếu mở rộng từ cá nhân cựu GĐ → pháp nhân PNJ / kê biên tài sản → HARD
+   ABANDON (§3).
+4. **Kết quả mua cổ phiếu quỹ** — thực thi = catalyst dương + đỡ giá (verify số lượng/giá trần: Winston).
+5. **★ BCTC Q3/2026 (~cuối 10/2026) = CỔNG QUYẾT ĐỊNH** — quý đầu bao trọn khủng hoảng. **CF_OA so YoY
+   vs Q3/2025 (+1,82T)** + Revenue YoY + thuyết minh mảng kim cương:
+   - CF_OA giữ dương ~mức YoY + doanh thu lõi vàng không sụt → **nâng QUALIFY**.
+   - CF_OA sụt bất thường so YoY / doanh thu kim cương bốc hơi / GIA đã rút → **chuyển NON**.
+
+**Việc cần làm tiếp**: (a) nhờ Winston verify số lượng/giá trần cổ phiếu quỹ + theo dõi phản ứng GIA
+(corp-action + tin quốc tế); (b) đặt reminder đọc BCTC Q3/2026 PNJ (~cuối 10/2026) — cổng quyết định.
