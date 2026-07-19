@@ -29,22 +29,40 @@ import json
 import sys
 
 
-def latest_balance(raw_path):
+def latest_balance(raw_path, account_no=None):
+    """Bản ghi 'balances' MỚI NHẤT cho ĐÚNG account_no (file dùng CHUNG cho mọi account cùng
+    ngày, xem daily_nav_snapshot.py — cùng bug, cùng fix: nếu account_no được truyền vào mà
+    KHÔNG có bản ghi nào khớp, RAISE thay vì âm thầm dùng bản ghi có thể sai account. Phát
+    hiện 2026-07-19: bản gốc không lọc account_no ⇒ ZaloPay reconcile từng lấy nhầm cash của
+    SpaceX (3.160.463 thay vì 22.465.980 thật), job Taylor_20260719_055139."""
     latest = None
+    seen_other_account = False
     with open(raw_path, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:
                 continue
             rec = json.loads(line)
-            if rec.get("kind") == "balances":
-                latest = rec
+            if rec.get("kind") != "balances":
+                continue
+            if account_no is not None and rec.get("account_no") not in (None, account_no):
+                seen_other_account = True
+                continue
+            latest = rec
+    if latest is None and seen_other_account:
+        raise RuntimeError(
+            f"{raw_path} có bản ghi balances nhưng KHÔNG bản nào khớp account_no="
+            f"{account_no!r} — file này dùng chung cho nhiều account, tránh dùng nhầm.")
     return latest
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--account", required=True)
+    ap.add_argument("--account-no", default=None,
+                     help="account_id thật (vd 0002023347) — BẮT BUỘC truyền hoặc để script tự "
+                          "tra secrets/trading_bot_accounts.json theo --account, vì "
+                          "--balance-raw dùng CHUNG cho mọi account cùng ngày.")
     ap.add_argument("--starting-capital", type=float, required=True)
     ap.add_argument("--snapshot", required=True,
                      help="output file of verify_account_snapshot.py")
@@ -66,8 +84,21 @@ def main():
                           "từ manual_offbook_assets_vnd trong secrets/trading_bot_accounts.json.")
     args = ap.parse_args()
 
+    account_no = args.account_no
+    if not account_no:
+        import os
+        WC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        sys.path.insert(0, WC_ROOT)
+        from trading_bot.config import load_config, load_accounts
+        _match = next((p for p in load_accounts(load_config()) if p["label"] == args.account), None)
+        account_no = _match.get("account_id") if _match else None
+
     snap = json.load(open(args.snapshot, encoding="utf-8"))
-    bal_rec = latest_balance(args.balance_raw)
+    try:
+        bal_rec = latest_balance(args.balance_raw, account_no=account_no)
+    except RuntimeError as e:
+        print(f"❌ {e}", file=sys.stderr)
+        sys.exit(2)
     if bal_rec is None:
         print(f"❌ Không tìm thấy record kind=balances trong {args.balance_raw} — "
               f"KHÔNG thể đối chiếu.", file=sys.stderr)
