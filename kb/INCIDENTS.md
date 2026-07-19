@@ -2918,3 +2918,116 @@ khi job kết thúc").
   chỉ mới đề xuất trong entry này; nên làm trong tuần tới nếu pattern "giả định sai cơ chế đánh
   thức" tái diễn lần thứ 4.
 
+
+---
+
+## RETRO — 2026-07-19: 1 sự cố (đã fix+verify trong ngày, chưa có entry đầy đủ trước retro —
+## gap báo cáo tự bổ sung), 1 pattern TÁI DIỄN từ follow-up bỏ ngỏ của sự cố 2026-07-06
+
+**Bằng chứng đã kiểm tra (không suy đoán):**
+- `grep '^## 2026-07-19' kb/INCIDENTS.md` → 0 kết quả trước khi retro này chạy.
+- Toàn bộ bus event `ts` bắt đầu `2026-07-19` (mọi agent inbox): chỉ **14 heartbeat + 1
+  finding** (Taylor, job `Taylor_20260719_055139` — báo cáo tuần SpaceX+ZaloPay đã gửi). **0
+  event `error`, 0 event `question`.**
+- `bus/jobs/*.json` lọc `created_at` bắt đầu `2026-07-19` → **0 job** khác ngoài
+  `Taylor_20260719_055139` (`status:done exit_code:0`).
+- `git log` (repo `mike/`) ngày 2026-07-19: 4 commit — `64b2f15` (consolidate), `993cf98` (fix
+  reconcile_equity.py), `f77b061` (fix verify_account_snapshot.py), `5aa113c` (kb log). **2
+  commit hotfix thật trong ngày** — đây là sự cố duy nhất của ngày, phát hiện qua git log chứ
+  KHÔNG qua bus (đúng theo nguyên tắc `coding_guidelines.md` — quyết định Mike ghi thẳng vào
+  `kb/current_ops.md` một lần, không lặp qua bus).
+
+**Sự cố duy nhất — cross-account contamination trong `reconcile_equity.py` /
+`verify_account_snapshot.py`, phát hiện khi Taylor soạn báo cáo tuần**
+
+Taylor (job `Taylor_20260719_055139`, soạn báo cáo tuần 07-13→07-17 cho 2 tài khoản) phát
+hiện `reconcile_equity.py`'s `latest_balance()` đọc nhầm cash của SpaceX (3.160.463đ) khi
+đối soát ZaloPay (đúng phải là 22.465.980đ) — cùng file `dnse_raw_{date}.jsonl` dùng CHUNG cho
+mọi account trong ngày, hàm lấy bản ghi `balances` CUỐI CÙNG trong file mà không lọc theo
+`account_no`. Kiểm tra tiếp thấy `verify_account_snapshot.py` có lỗ hổng tương tự: `--account-no`
+là optional không auto-resolve, khi bỏ trống thì `if account_no and ...` short-circuit trên
+`None` → không lọc fill theo account nào cả.
+
+**Fix (commit `993cf98` + `f77b061`, cùng ngày):** cả 2 file giờ auto-resolve `account_no` từ
+`trading_bot_accounts.json` theo `--account` (mirror đúng cơ chế `daily_nav_snapshot.py` đã có
+từ 07-06/07), và **raise/exit lỗi** thay vì âm thầm dùng bản ghi/fill có thể sai account. Verify
+trực tiếp trên dữ liệu thật của cả 2 account cùng file raw 2026-07-17. Kèm 1 lỗi latent không
+liên quan tìm thấy khi test (`bq_close_prices()` crash trên ngày 0-fill, `sorted(tickers)[0]`
+trên list rỗng) — đã fix cùng commit. Backfill 1 dòng NAV ZaloPay 07-14 thiếu (no-plan day) từ
+vị thế broker thật + giá đóng cửa BQ — verify khớp `nav_history_ZaloPay.csv` dòng 07-14
+(963.451.542đ, `balance_ts` đã stamp).
+
+**3 câu hỏi bắt buộc:**
+
+a. **TÁI DIỄN — cùng bug class với sự cố `2026-07-06 — Cross-account balance contamination`**
+   (dòng ~1028 file này), chỉ khác Ở FILE: 07-06 là `daily_nav_snapshot.py`, hôm nay là 2 file
+   "anh em" (`reconcile_equity.py`, `verify_account_snapshot.py`) đọc CÙNG một shared-by-date
+   file (`dnse_raw_{date}.jsonl`) theo cùng pattern sai (lấy bản ghi cuối, không lọc account).
+   Đáng chú ý: entry 07-06 đã tự ghi rõ trong mục "Lesson" của chính nó — *"worth an explicit
+   grep for `_{date}.jsonl`-style shared-file patterns across the codebase as a follow-up, not
+   just this one call site"* — follow-up đó **chưa từng được làm** trong 13 ngày (07-06→07-19)
+   cho tới khi retro hôm nay tự chạy grep này (xem dưới) để trả lời câu hỏi này.
+b. **Fix HOÀN CHỈNH cho 2 điểm phát hiện hôm nay** (verify trên dữ liệu thật, cả 2 account,
+   cùng file raw) — nhưng **2 điểm còn HỞ, cả 2 kế thừa nguyên trạng từ chính entry 07-06**:
+   (1) **vẫn KHÔNG có automated regression test/selfcheck** cho bất kỳ file nào trong 3 file
+   (`daily_nav_snapshot.py`, `reconcile_equity.py`, `verify_account_snapshot.py`) — entry 07-06
+   tự ghi "Not yet done" cho selfcheck kiểu `ghost_order_selfcheck.py` (2 account giả lập
+   interleaved, assert mỗi account chỉ thấy dữ liệu của mình), 13 ngày sau vẫn chưa làm, giờ áp
+   dụng cho CẢ 3 file chứ không chỉ 1; (2) follow-up "grep toàn repo" từ 07-06 **retro hôm nay
+   mới thực sự làm lần đầu** (`grep -rl "dnse_raw_" --include=*.py`) — kết quả: 6 file đọc
+   `dnse_raw_*`, trong đó `execution_quality_review.py` và `trading_bot/executor.py` đã kiểm tra
+   riêng và AN TOÀN by construction (đọc field `accountNo` gắn sẵn TRÊN TỪNG order record của
+   DNSE API, không phải bản ghi `balances` tổng hợp cuối-file như 3 file kia) — nghĩa là grep
+   này giờ ĐÃ ĐƯỢC LÀM và không tìm thêm điểm hở nào ngoài 3 file đã biết/đã fix, nhưng bản thân
+   việc grep chỉ mới chạy HÔM NAY (bởi retro, không phải một hành động chủ động trước đó).
+c. **PATTERN, không phải lỗi đơn lẻ** — đây là recurrence trực tiếp của pattern "shared-by-date
+   (không phải shared-by-account) resource dùng chung nhiều tenant, không có bộ lọc" đã ghi
+   07-06. Sự khác biệt so với các pattern "chính sách viết-nhưng-không-ép-buộc" (model-drift,
+   dataprovenance) đã ghi các RETRO trước: ở đây KHÔNG PHẢI thiếu chính sách hay thiếu cảnh báo
+   — chính entry gốc đã tự đề xuất đúng hành động phòng ngừa (grep toàn repo) nhưng **không ai
+   thực thi nó** cho tới khi một sự cố THỨ HAI buộc phải làm. Đây là dạng cụ thể của pattern lớn
+   hơn đã thấy nhiều lần trong các RETRO trước: "Prevention được ĐỀ XUẤT đúng nhưng không có cơ
+   chế nào đảm bảo nó thực sự được THỰC THI" (cùng họ với model-tier-drift 07-17: nudge/cảnh báo
+   viết đúng nhưng không chặn).
+
+| # | Hạng mục | Phân loại | Nguồn gốc | Người ghi chép |
+|---|---|---|---|---|
+| 1 | Cross-account contamination tái diễn ở 2 file "anh em" (`reconcile_equity.py`, `verify_account_snapshot.py`) — cùng bug class với `daily_nav_snapshot.py` 07-06, follow-up "grep toàn repo" từ 07-06 chưa từng thực thi tới khi retro hôm nay tự làm | report-data-provenance (đúng scope `coding_guidelines.md` §6 — 2 file này LÀ pipeline chuẩn tắc P&L/cost-basis cho báo cáo) | Fix 07-06 chỉ sửa ĐÚNG 1 call site (`daily_nav_snapshot.py`) dù bug là thuộc tính của DẠNG FILE (`dnse_raw_{date}.jsonl` shared-by-date) chứ không phải của 1 script cụ thể; bản thân entry 07-06 đã tự đề xuất "grep toàn repo cho pattern này" làm follow-up nhưng không có cơ chế nào (task/reminder/gate) buộc follow-up đó phải chạy trước khi sự cố kế tiếp | Taylor phát hiện lỗi thật (job `Taylor_20260719_055139`, khi soạn báo cáo tuần) → Mike ghi/fix trực tiếp trong phiên sống, thẳng vào `kb/current_ops.md` + 2 commit code (`993cf98`, `f77b061`) — KHÔNG qua bus finding/error event nào (đúng quy ước ghi-1-lần của `coding_guidelines.md`, nhưng cũng là lý do retro phải tự phát hiện qua git log thay vì grep bus) |
+
+**Điểm quan trọng nhất hôm nay:** ngày 07-19 tự nó gần như sạch (1 sự cố, fix xong trong <2 giờ,
+không có tiền/lệnh bị ảnh hưởng — đây là bug ở tầng BÁO CÁO/đối soát, không phải đường tiền thật).
+Nhưng phát hiện đáng chú ý nhất KHÔNG phải bug hôm nay tự nó, mà là: **1 follow-up phòng ngừa đã
+được chính đội tự đề xuất từ 13 ngày trước, đúng hướng, đơn giản (1 lệnh grep), nhưng bị bỏ ngỏ
+cho tới khi 1 sự cố thứ hai xảy ra mới có động lực thực thi.** Đây không phải escalate theo bước
+10 (chưa có RETRO nào trước từng nêu pattern cross-account-contamination — đây là lần callout
+RETRO đầu tiên của pattern này, dù bản thân bug đã xảy ra lần 2 ở tầng incident), nhưng đáng ghi
+nhận là dạng CÙNG HỌ với pattern "prevention đề xuất nhưng không cơ chế thực thi" đã thấy ở
+model-tier-drift (07-17). Đề xuất prevention MẠNH HƠN một dòng "grep toàn repo" thuần prose:
+- **Thêm 1 dòng vào `kb/coding_guidelines.md` §5/§6** (đã có 2 rule liên quan: idempotency +
+  report-data-provenance) chỉ rõ: bất kỳ file mới đọc `dnse_raw_{date}.jsonl` (hoặc bất kỳ file
+  `_{date}.` shared-by-date tương tự) PHẢI lọc theo `account_no`/`accountNo` native của record,
+  không được lấy "bản ghi cuối cùng trong file" làm mặc định — quy tắc đã tồn tại rải rác trong
+  3 commit message nhưng chưa có 1 chỗ canonical nào nêu thành rule chung áp dụng TRƯỚC khi viết
+  file mới (giống cách §9 "check data_registry.md trước khi wire nguồn mới" đã làm cho bug khác).
+- Việc viết selfcheck 2-account-interleaved (residual risk (1) ở trên) nên làm SỚM — không phải
+  "nice to have" nữa vì đây đã là lần THỨ HAI cùng 1 shape lỗi xảy ra ở tầng số liệu báo cáo cho
+  client thật.
+
+**Việc còn treo sang ngày mai (kế thừa từ RETRO 07-17/07-18, verify lại — vẫn CHƯA có answer
+trên bus, đã kiểm tra trực tiếp không suy đoán):**
+- Quyết định user cho câu hỏi `retro-pattern-recurring-data-registry-accuracy-5days` (07-15,
+  nay đã 4 ngày không phản hồi — verify: `grep -l` trong `bus/inbox/*.jsonl` không tìm thấy).
+- Quyết định user cho câu hỏi `retro-pattern-recurring-joblifecycle-timeout-3` (07-14, nay đã
+  5 ngày không phản hồi — verify tương tự, không tìm thấy).
+- Dọn crontab paper-trading lạc hậu (diff `Winston_20260712_151206`) — verify: `crontab -l` hôm
+  nay vẫn còn nguyên các dòng paper-main cũ, **chưa áp dụng** (không đổi so với RETRO trước).
+- M5 nợ cũ: `executor.py`/paper trials đọc `ticker_prune.parquet` monolith chết từ 06-26 — chưa
+  dispatch Taylor, không khẩn (chỉ ảnh hưởng paper).
+- **MỚI**: viết selfcheck 2-account-interleaved cho `daily_nav_snapshot.py` +
+  `reconcile_equity.py` + `verify_account_snapshot.py` (xem Prevention ở trên) — chưa làm, nên
+  ưu tiên cao hơn các mục cũ vì đây là lần 2 của cùng 1 lỗi ở tầng số liệu báo cáo client.
+- Theo dõi %fable qua `bin/spend_report.py` ở Friday KB review kế tiếp (2026-07-24).
+
+Verified by: Wags — PENDING (bước 4b sẽ chạy trước commit; xem dòng cập nhật ngay dưới nếu còn
+"PENDING" nghĩa là bước xác minh chưa hoàn tất — theo đúng bài học RETRO 07-18, KHÔNG được coi
+entry này là đã đóng nếu dòng này chưa đổi thành CONFIRMED/gaps-found-and-fixed).
