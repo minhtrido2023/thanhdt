@@ -205,6 +205,12 @@ Audit cron 07-12 (C1 DT5G-cache-bug + H2 freshness-false-block) — cả 2 **FIX
 (commit `4995262`, `6459b6d`, quant-skeptic CONFIRMED). BQ cache monolith 07-13 (27 file đọc
 nhầm `ticker_prune.parquet` chết) — **FIXED** (Winston_20260713_143546, archived). 2026-07-14
 HOLD — 1 ngày đã qua, không còn ảnh hưởng vận hành (DollarBill tự tính lại plan mỗi ngày).
+Cross-account contamination trong `reconcile_equity.py`/`verify_account_snapshot.py` (phát
+hiện 2026-07-19 khi Taylor soạn báo cáo tuần 07-13→07-17, job `Taylor_20260719_055139`) —
+**FIXED** cả 2 file (mirror đúng fix `daily_nav_snapshot.py` 07-06/07: filter theo account_no
+tự tra config, raise nếu không lọc được thay vì âm thầm dùng nhầm account); thiếu 1 dòng NAV
+ZaloPay 07-14 (no-plan day, không có journal) — backfill bằng vị thế THẬT từ `dnse_raw`
+`kind=positions` + giá đóng cửa BQ 07-14 (963.451.542đ), verify khớp broker positions record.
 
 **Còn treo thật** (2 mục):
 1. Dọn crontab paper-trading lạc hậu — diff đã có (`Winston_20260712_151206`), **chưa áp dụng**
