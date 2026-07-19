@@ -205,7 +205,11 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--account", required=True)
     ap.add_argument("--account-no", default=None,
-                     help="broker account number to filter dnse_raw orders (recommended)")
+                     help="broker account number to filter dnse_raw orders — nếu bỏ trống, "
+                          "tự tra secrets/trading_bot_accounts.json theo --account (BẮT BUỘC "
+                          "phải lọc: dnse_raw_{date}.jsonl dùng CHUNG cho mọi account cùng "
+                          "ngày, xem incident 2026-07-19 job Taylor_20260719_055139 — chạy tay "
+                          "thiếu account-no từng trộn fill 2 account).")
     ap.add_argument("--dates", required=True,
                      help="comma-separated trading dates with fills, e.g. 2026-07-01,2026-07-02")
     ap.add_argument("--asof", required=True, help="mark-to-market date (BQ close price)")
@@ -215,6 +219,18 @@ def main():
     ap.add_argument("--tolerance-pct", type=float, default=0.5,
                      help="max %% diff allowed between dnse_raw and journal cost basis before warning")
     args = ap.parse_args()
+
+    if not args.account_no:
+        sys.path.insert(0, WC_ROOT)
+        from trading_bot.config import load_config, load_accounts
+        _match = next((p for p in load_accounts(load_config()) if p["label"] == args.account), None)
+        args.account_no = _match.get("account_id") if _match else None
+        if not args.account_no:
+            print(f"XÁC MINH THẤT BẠI — không tự tra được account_id cho '{args.account}' trong "
+                  f"trading_bot_accounts.json và --account-no cũng không được truyền. dnse_raw "
+                  f"dùng chung cho mọi account cùng ngày — KHÔNG được chạy thiếu bộ lọc account "
+                  f"(nguy cơ trộn fill account khác).", file=sys.stderr)
+            sys.exit(4)
 
     dates = [d.strip() for d in args.dates.split(",") if d.strip()]
     warnings = []
@@ -274,13 +290,15 @@ def main():
                     f"WARN qty vs broker-snapshot {tk}: dnse_raw={rq:.0f} snapshot={q:.0f}")
 
     tickers = sorted(raw_agg.keys())
-    prices, perr = bq_close_prices(tickers, args.asof)
-    if prices is None:
-        print(f"XÁC MINH THẤT BẠI — không lấy được giá BQ: {perr}", file=sys.stderr)
-        sys.exit(3)
-
-    price_source = {tk: "bq_close" for tk in prices}
-    if args.asof == _dt.date.today().isoformat():
+    if not tickers:
+        prices, price_source = {}, {}
+    else:
+        prices, perr = bq_close_prices(tickers, args.asof)
+        if prices is None:
+            print(f"XÁC MINH THẤT BẠI — không lấy được giá BQ: {perr}", file=sys.stderr)
+            sys.exit(3)
+        price_source = {tk: "bq_close" for tk in prices}
+    if tickers and args.asof == _dt.date.today().isoformat():
         dnse_prices = dnse_close_prices(tickers)
         for tk, px in dnse_prices.items():
             prices[tk] = px
