@@ -3854,3 +3854,26 @@ risk_rating / fa_ratings / dt5g_live). Số R3 pinned có thể xê dịch nhẹ
 `data/dcf_placebo_logs/{runner_pe.sh,varA_rerun_pe_guard,placebo_pe,ctrl_rerun_pe}.log`,
 `data/dcf_exp_logs/placebo_pe_drops.csv` (dcf_drops|pe_drops từng ngày).
 Reproduce: `bash data/dcf_placebo_logs/runner_pe.sh` → `$DNA_PYEXE dcf_placebo_pe_test.py`
+
+## 2026-07-20 — Pillar C (thanh khoản thị trường) làm input macro overlay: **NO-GO** (job Taylor_20260720_091806)
+Script: `mike/agents/Taylor/pillarC_liquidity_probe.py` (research-only, không ghi production).
+N-budget khai báo trước: 2 định nghĩa (liq_ratio=MA20/MA250 turnover; liq_z=z-score log turnover 250d)
+× 3 ngưỡng = **6 trials**; báo cáo cả 6. Universe = `ticker_prune` (turnover = Σ Volume×Price, causal),
+target = forward 60-phiên max-drawdown + return của VNINDEX. IS 2014–19 / OOS 2020+.
+
+| Kiểm tra | IS (2014–19) | OOS (2020+) | Kết luận |
+|---|---|---|---|
+| Spearman(liq_ratio, fwd_dd60) | **−0.018** (≈0) | +0.20 | không có quan hệ IS |
+| Spearman(liq_ratio, fwd_ret60) | **−0.002** (≈0) | +0.33 | ĐỔI DẤU / chỉ có ở OOS |
+| liq_ratio<0.70, fwd_dd60 | −4.20% vs base −5.24% (**TỐT HƠN**) | −9.65% vs −6.57% | sign-flip |
+| liq_ratio<0.70, fwd_ret60 | +4.41% vs +2.02% (**TỐT HƠN**) | −2.24% vs +3.50% | sign-flip |
+
+Cả 6/6 trials cùng mẫu: IS gần như zero-quan-hệ (thậm chí thanh khoản thấp = forward TỐT hơn),
+toàn bộ "edge" nằm ở OOS. Per-episode (liq_ratio<0.60): 2015Q4 +0.3% · 2018Q4 **+6.3%** · 2019Q1 **+6.0%**
+· 2022Q3 **−12.9%** · 2022Q4 **+5.8%** (đáy) · 2023Q1 −4.4% → **toàn bộ edge = 1 episode 2022Q3**; các
+đợt còn lại thanh khoản cạn xuất hiện gần ĐÁY/capitulation, không phải trước khi rơi. Đúng mẫu
+reshuffle-luck mà per-year LOO đã bác ở Wave1/H8a → **KHÔNG wire**, không cần DSR/PBO (fail trước gate IS/OOS).
+
+Trạng thái hôm nay (2026-07-17): liq_ratio = **0.543** = **percentile 2.3%** của lịch sử 2013+; thấp hơn
+cả ngưỡng thấp nhất từng test (0.70) → kể cả nếu tín hiệu đúng cũng KHÔNG có mẫu lịch sử để hiệu chỉnh
+ở mức này (out-of-sample thật sự). Đây là lý do thứ hai để không wire.
