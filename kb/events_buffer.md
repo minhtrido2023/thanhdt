@@ -722,3 +722,13 @@
 - [2026-07-20T07:44:33Z] Winston/heartbeat — Winston_20260720_074356: {"status": "in_progress", "note": "Đã tìm được kết quả ban đầu: Big-4 12th online ~6.80%. Đang fetch chi tiết từ nguồn độc lập để xác minh kỳ hạn/kênh cụ thể."}
 - [2026-07-20T07:44:56Z] Winston/heartbeat — Winston_20260720_074356: {"status": "still_running", "elapsed_min": 1, "job_id": "Winston_20260720_074356", "source": "watcher"}
 - [2026-07-20T07:45:57Z] Winston/heartbeat — Winston_20260720_074356: {"status": "still_running", "elapsed_min": 2, "job_id": "Winston_20260720_074356", "source": "watcher"}
+
+## Consolidation 2026-07-20T07:51:22Z
+- [2026-07-20T07:46:57Z] Winston/heartbeat — Winston_20260720_074356: {"status": "still_running", "elapsed_min": 3, "job_id": "Winston_20260720_074356", "source": "watcher"}
+- [2026-07-20T07:47:02Z] Winston/heartbeat — Winston_20260720_074356: {"status": "in_progress", "note": "Phát hiện mâu thuẫn: VCB 5.9% vs Big-4 6.8% trong cafef July 13. Đang fetch nguồn chính thức VCB + thuonggiaonline để xác minh."}
+- [2026-07-20T07:47:58Z] Winston/heartbeat — Winston_20260720_074356: {"status": "still_running", "elapsed_min": 4, "job_id": "Winston_20260720_074356", "source": "watcher"}
+- [2026-07-20T07:48:58Z] Winston/heartbeat — Winston_20260720_074356: {"status": "still_running", "elapsed_min": 5, "job_id": "Winston_20260720_074356", "source": "watcher"}
+- [2026-07-20T07:49:58Z] Winston/heartbeat — Winston_20260720_074356: {"status": "still_running", "elapsed_min": 6, "job_id": "Winston_20260720_074356", "source": "watcher"}
+- [2026-07-20T07:50:03Z] Winston/status — deposit-rate-refresh-done: {"rate": 6.8, "changed": false, "note": "SKIP idempotent - 2026-07-20 da co manual_verify ghi 6.8%/nam. WebSearch crosscheck xac nhan: BIDV 6.8% (24hmoney), cafef 13/7 bao tat ca Big-4 giu 6.8% 12T online. Rate khong doi."}
+- [2026-07-20T07:50:58Z] Winston/heartbeat — Winston_20260720_074356: {"status": "still_running", "elapsed_min": 7, "job_id": "Winston_20260720_074356", "source": "watcher"}
+- [2026-07-20T07:51:07Z] Winston/finding — deposit-rate-july2026-confirmed: {"rate": 6.8, "changed": false, "effective_date": "2026-07-20", "sources": ["cafef.vn 2026-07-13: Big-4 tat ca 6.8%/nam 12T", "24hmoney.vn 2026-07-07: BIDV/Agribank/VietinBank 6.8% online 12T"], "skip_reason": "idempotent - manual_verify da ghi cung ngay", "note": "WebSearch crosscheck xac nhan 6.8% khong doi. Nguon 5.9% la bieu quay hoac ky han khac, khong phai 12M-online Big-4."}
