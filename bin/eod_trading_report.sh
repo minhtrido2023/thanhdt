@@ -146,7 +146,7 @@ def _dcf_str(o):
             dcf = _dcf_check_for_order(o.get('ticker'), o.get('ref_price'), plan_date)
         except Exception:
             dcf = None
-    s = format_dcf_check(dcf, o.get('side') or 'buy')
+    s = format_dcf_check(dcf, o.get('side') or 'buy', ticker=o.get('ticker'))
     if s and log_dcf_history:
         log_dcf_history(o.get('ticker'), dcf, 'eod_trading_report', asof=plan_date)
     return s

@@ -189,7 +189,8 @@ if orders:
                 except Exception:
                     dcf = None
             dcf_s = format_dcf_check(dcf, "buy" if is_buy else "sell",
-                                     has_override=bool(o.get("dcf_override_reason")))
+                                     has_override=bool(o.get("dcf_override_reason")),
+                                     ticker=ticker)
             if dcf_s:
                 lines.append(f"      ↳ {dcf_s}")
                 dcf_shown = True
