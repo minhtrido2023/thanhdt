@@ -491,3 +491,7 @@
 
 ## Consolidation 2026-07-20T02:05:16Z
 - [2026-07-20T02:05:14Z] Mafee/error — bot-fail: {"account": "ZaloPay", "plan_date": "2026-07-20", "elapsed_s": 13, "rc": 2, "log": "/home/trido/thanhdt/WorkingClaude/mike/logs/run_bot_ZaloPay_2026-07-20.log"}
+
+## Consolidation 2026-07-20T02:07:01Z
+- [2026-07-20T02:05:40Z] Winston/heartbeat — Winston_20260720_020516: {"status": "in_progress", "note": "đọc log xong: rc=2 = approval gate ZaloPay plan 07-20 (approved_by=null), đang kiểm tra plan đã gửi duyệt chưa + lệnh kẹt"}
+- [2026-07-20T02:06:16Z] Winston/heartbeat — Winston_20260720_020516: {"status": "still_running", "elapsed_min": 1, "job_id": "Winston_20260720_020516", "source": "watcher"}
