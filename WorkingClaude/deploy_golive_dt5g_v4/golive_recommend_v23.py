@@ -238,10 +238,13 @@ def capit_account_shares():
       · chia đều chỉ hơn ở chỗ không cần dữ liệu NAV → giữ đúng vai trò FALLBACK bên dưới.
     N=1: cả hai công thức đều ra share=1.0 → về đúng công thức gốc, không có case đặc biệt.
 
-    BẤT BIẾN (điều kiện an toàn thật sự, đúng ở MỌI nhánh kể cả fallback):
-        Σ_account share = 1.0  ⇒  Σ_account cap = X·ADV20·D
-    Thiếu NAV KHÔNG BAO GIỜ được phép nới tổng trần — nên fallback là chia đều, không phải
-    "cho mỗi account full trần" (chính là bug mà thay đổi này sửa).
+    BẤT BIẾN (điều kiện an toàn thật sự):
+        Σ_account share ≤ 1.0  ⇒  Σ_account cap ≤ X·ADV20·D
+    Đúng "=" ở nhánh pro-rata và nhánh fallback chia đều; nhánh KHÔNG có account live nào
+    trả {} (Σ=0) — không biết chia cho ai thì không phát trần cho ai, executor fail-closed
+    chặn sạch. Chiều duy nhất bị cấm là NỚI: thiếu dữ liệu KHÔNG BAO GIỜ được phép làm tổng
+    trần vượt X·ADV20·D — nên fallback là chia đều, không phải "cho mỗi account full trần"
+    (chính là bug mà thay đổi này sửa).
     """
     from trading_bot.config import live_dnse_labels
     labels = sorted(live_dnse_labels())
