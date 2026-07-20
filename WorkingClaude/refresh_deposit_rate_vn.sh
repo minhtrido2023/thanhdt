@@ -91,10 +91,15 @@ BẮT BUỘC HÀNH ĐỘNG CUỐI CÙNG (để Mike xác minh được job này 
   - Nếu append_deposit_rate.py chạy thành công (kể cả SKIP idempotent): gọi 'mike/bin/append_event.sh Winston status deposit-rate-refresh-done \"<JSON: rate, changed true/false, note ngắn>\"'.
   - Nếu escalate (mục 4, hoặc script từ chối vì a/b/c ở trên): gọi 'mike/bin/append_event.sh Winston question deposit-rate-refresh-question \"<JSON tóm tắt>\"' (chỉ 1 trong 2, không gọi cả hai).
 
-BÁO CÁO NGAY TRONG NGÀY, LUÔN LUÔN (user chỉ đạo 2026-07-20 — KHÔNG áp dụng quiet-heartbeat cho mục này nữa, khác với các cron khác của team): dù rate ĐỔI hay KHÔNG ĐỔI, bạn PHẢI tự gọi notify.sh để báo Trading Daily NGAY hôm nay, mở đầu tin nhắn bằng dòng highlight rõ ràng đây là dữ liệu MỚI vừa xác nhận hôm nay, không phải số cũ còn hiệu lực — dùng đúng mẫu:
-  - Nếu KHÔNG đổi: '🆕 XÁC NHẬN LÃI SUẤT ${MONTH} (mới cập nhật hôm nay ${TODAY}): Big-4 12 tháng online VẪN GIỮ ${CUR}%/năm — đã kiểm chứng qua N nguồn độc lập.' + liệt kê ngắn gọn nguồn.
-  - Nếu ĐÃ GHI một số MỚI: '🆕 LÃI SUẤT THAY ĐỔI (mới cập nhật hôm nay ${TODAY}): ${CUR}%→X%/năm.' + lý do/nguồn ngắn gọn.
-  - Nếu escalate (mục 4): tin nhắn 'question' đã tự đủ rõ, không cần thêm dòng highlight riêng.
+BÁO CÁO NGAY TRONG NGÀY, LUÔN LUÔN (user chỉ đạo 2026-07-20 — KHÔNG áp dụng quiet-heartbeat cho mục này nữa, khác với các cron khác của team): dù rate ĐỔI hay KHÔNG ĐỔI, bạn PHẢI tự gọi notify.sh để báo Trading Daily NGAY hôm nay, mở đầu tin nhắn bằng dòng highlight rõ ràng đây là dữ liệu MỚI vừa xác nhận hôm nay, không phải số cũ còn hiệu lực.
+
+BẮT BUỘC GHI RÕ NGÀY, KHÔNG CHỈ CON SỐ (user chỉ đạo bổ sung — mỗi con số lãi suất trong tin nhắn PHẢI đi kèm ngày, để người đọc biết dữ liệu từ ngày nào, không phải chỉ đọc thấy % trần trụi): phân biệt RÕ 2 loại ngày, đừng gộp làm một —
+  (a) 'Ngày hiệu lực/xác nhận' = ${TODAY} (ngày bạn chạy check này, cũng là --effective bạn ghi vào CSV),
+  (b) 'Ngày nguồn công bố' = ngày THẬT của từng bài báo/trang bạn trích dẫn (field 'date' trong --sources, thường sớm hơn ${TODAY} vài ngày đến vài tuần — ĐỪNG lẫn với (a)).
+Dùng đúng mẫu (điền cả 2 loại ngày, không rút gọn):
+  - Nếu KHÔNG đổi: '🆕 XÁC NHẬN LÃI SUẤT ${MONTH} — ngày xác nhận ${TODAY}: Big-4 12 tháng online VẪN GIỮ ${CUR}%/năm. Nguồn: <tên nguồn 1> (ngày <date nguồn 1>), <tên nguồn 2> (ngày <date nguồn 2>).'
+  - Nếu ĐÃ GHI một số MỚI: '🆕 LÃI SUẤT THAY ĐỔI — ngày xác nhận ${TODAY}, hiệu lực từ ${TODAY}: ${CUR}%→X%/năm. Nguồn: <tên nguồn 1> (ngày <date nguồn 1>), <tên nguồn 2> (ngày <date nguồn 2>).'
+  - Nếu escalate (mục 4): tin nhắn 'question' vẫn phải nêu ngày của từng nguồn mâu thuẫn (để người đọc biết số nào mới hơn), không chỉ liệt kê số suông.
 
 Gợi ý tham khảo (KHÔNG tin tưởng, chỉ là điểm khởi đầu — nguồn CafeF JS-render nên fetch trực tiếp thường fail): direct fetch hint = '${HINT:-không có}'."
 
