@@ -12,7 +12,7 @@
 |---|---|---|---|---|---|---|
 | 06:00 (T2-T6) | `newdeals_daily_report.py` | BQ live | Telegram/Discord watchlist | AlphaLens paper monitor (đến 09-30) | độc lập | — |
 | 08:00 (ngày 5, 10) | `auto_update_commodity_wb.sh` | World Bank CMO (idempotent, 2 attempts) | `iron_ore/urea/dap_monthly.csv` | feed archive, chưa có consumer sống | độc lập | — |
-| 08:10 (ngày 3) | `refresh_deposit_rate_vn.sh` | best-effort web (CafeF/VCB, timeout 15s, hay fail — **KHÔNG BQ**) + `current_deposit_rate()` | **KHÔNG tự ghi** — chỉ nhắc Discord + status bus; con người chạy `append_deposit_rate.py` ghi `data/deposit_rate_vn_events.csv` | `rating_8l.py` NEUTRAL tilt (LIVE) + `dcf_refresh_gate.py` (ngày 11) | trước DCF refresh-gate ngày 11 | `data/refresh_deposit_rate_vn_YYYY-MM.log` |
+| 08:10 (ngày 3) | `refresh_deposit_rate_vn.sh` | best-effort direct fetch (CafeF, timeout 15s, hay fail — **KHÔNG BQ**) rồi **dispatch Winston** WebSearch-crosscheck ≥2 nguồn độc lập | Nếu đủ bằng chứng: `append_deposit_rate.py --source web_crosscheck_auto` ghi `data/deposit_rate_vn_events.csv`; nếu mâu thuẫn/thiếu bằng chứng: KHÔNG ghi, escalate bus `question` + notify (như cũ); nếu dispatch tự lỗi: fallback nhắc thủ công | `rating_8l.py` NEUTRAL tilt (LIVE) + `dcf_refresh_gate.py` (ngày 11) | trước DCF refresh-gate ngày 11 | `data/refresh_deposit_rate_vn_YYYY-MM.log` |
 | 08:10 (ngày 11) | `dcf_refresh_gate.py` | `deposit_rate_vn.current_deposit_rate()` (as-of, step series — **KHÔNG BQ/cache**) + prior `data/dcf_refresh_state.json` | `data/dcf_refresh_state.json` (atomic) + `data/dcf_refresh_gate.log` (append) | ai tái tạo số DCF cho report/dashboard: gọi `run_gate()`, chỉ recompute fair value khi `refresh=True` | SAU deposit-rate ngày 3 | `data/dcf_refresh_gate.log` |
 | 08:15 (T2-T6) | `vcb_fx_feed.py` | VCB web | `vcb_fx_rate.csv` | feed archive | độc lập | — |
 | 08:20 (T2-T6) | `ops_health_check.sh` "Trước phiên sáng" | trạng thái vận hành (plan conflict, journal error, circuit breaker, câu hỏi 48h) | Discord Trading Daily | user | trước preflight 08:45 | post message |
@@ -110,6 +110,21 @@ BQ_LOCAL_CACHE` nếu import chain có thể dính cache (bài học C1).
   encode đủ trong `vn_market.py`.
 
 ## Log thay đổi
+- 2026-07-20 (Mike, user approved trực tiếp — "để bạn tự động cập nhật thông tin mà không phụ
+  thuộc tôi"): nâng cấp `refresh_deposit_rate_vn.sh` từ CHỈ-NHẮC sang tự-xác-nhận-và-ghi. Không
+  còn dừng ở "nhắc con người chạy `append_deposit_rate.py`" — giờ tự dispatch Winston mỗi tháng để
+  WebSearch-crosscheck lãi suất Big-4 12M kênh online qua ≥2 nguồn độc lập (hoặc 1 bài báo liệt kê
+  đủ 4 ngân hàng cùng ngày, tự nó là đối chiếu chéo), CHỈ ghi khi đủ bằng chứng — nếu mâu thuẫn/thiếu
+  bằng chứng thì escalate y hệt luồng cũ, không tự đoán. Thêm `--source web_crosscheck_auto` vào
+  `append_deposit_rate.py` (bắt buộc `--note` non-empty, tách biệt khỏi `manual_verify` để giữ đúng
+  provenance — không phải người trực tiếp xác nhận). Test end-to-end thật ngay trong phiên (không
+  đợi cron ngày 3): Winston tìm được 3 nguồn (CafeF 18/7, Kenh14 16/7, CafeF 13/7) đều xác nhận
+  6.8% — khớp record đã có sẵn cùng ngày (do Mike tự tay append trước đó) nên tự SKIP đúng
+  (idempotent), không ghi trùng. 4 câu hỏi §11 không đổi so với entry gốc bên dưới (vẫn đọc
+  `current_deposit_rate()` KHÔNG BQ/cache, vẫn chạy ngày 3 trước DCF gate ngày 11, vẫn KHÔNG cần T
+  chính xác, vẫn consumer = `rating_8l.py` NEUTRAL tilt + `dcf_refresh_gate.py`) — chỉ đổi CƠ CHẾ
+  ghi (agent-driven crosscheck thay vì chờ người), không đổi lịch/nguồn/consumer. Chi tiết đầy đủ +
+  review đối kháng: `kb/projects/deposit-rate-autocheck.md`.
 - 2026-07-17 (Taylor, job `Taylor_20260717_074106`, **user approved trực tiếp**): thêm 1 dòng cron
   `10 1 11 * *` (08:10 ICT ngày 11 hàng tháng) gọi `dcf_refresh_gate.py` — cổng refresh có điều kiện:
   recompute DCF **chỉ khi** lãi suất Big-4 12M dịch ≥1.0pp so lần dùng trước (boundary =1.0pp
