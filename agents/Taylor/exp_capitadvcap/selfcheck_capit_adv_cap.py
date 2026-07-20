@@ -59,13 +59,22 @@ B = pd.DataFrame(rows)
 adv = con.execute(f"""SELECT ticker, time, COALESCE(Price,Close)*Volume/1e9 AS turn_b
                       FROM {PRUNE} WHERE time >= DATE '2013-06-01'""").df()
 adv["time"] = pd.to_datetime(adv["time"])
-cal = np.array(sorted(adv["time"].unique()))
 
 def adv20_pre(ticker, ds):
-    """median giá trị GD 20 phiên NGAY TRƯỚC ds (ds không tính vào cửa sổ)."""
-    i = np.searchsorted(cal, np.datetime64(pd.Timestamp(ds)), side="left")
-    lo = cal[max(0, i - 20)]
-    s = adv[(adv["ticker"] == ticker) & (adv["time"] >= lo) & (adv["time"] < pd.Timestamp(ds))]
+    """median giá trị GD của 20 DÒNG DỮ LIỆU cuối của CHÍNH mã đó trước ds.
+
+    Phải khớp ĐÚNG định nghĩa của SQL production (golive_recommend_v23.capit_adv_caps):
+    `WHERE ticker=… AND time < asof AND time >= asof-90d`, `ROW_NUMBER() OVER (PARTITION
+    BY ticker ORDER BY time DESC)`, `rn <= 20`. Bản trước dùng cửa sổ 20 phiên theo LỊCH
+    CHUNG toàn thị trường — khác nhau ngay khi một mã bị KHUYẾT phiên: NCT thủng
+    2016-06-05→06-24 nên cửa sổ-lịch chỉ bắt được 18 dòng và ra ADV20 2,338 tỷ, trong khi
+    production (rn<=20, với trần 90 ngày) với tay xa hơn và ra 2,178 tỷ — lệch 7,3%.
+    Một selfcheck dùng công thức tự viết lại thì không kiểm được công thức thật sự chạy
+    (quant-skeptic killer objection, log verify_20260720_181645).
+    """
+    t0 = pd.Timestamp(ds)
+    s = adv[(adv["ticker"] == ticker) & (adv["time"] < t0)
+            & (adv["time"] >= t0 - pd.Timedelta(days=90))].nlargest(20, "time")
     return float(s["turn_b"].median()) if len(s) else np.nan
 
 B["adv20_pre"] = [adv20_pre(r.ticker, r.event) for r in B.itertuples()]
@@ -266,13 +275,25 @@ _account_nav_basis, capit_account_shares = _ns["_account_nav_basis"], _ns["capit
 CAP_TOTAL = 480_000_000.0     # trần tổng giả định cho 1 mã (X·ADV20·D)
 
 def shares_for(navs):
-    """Tái hiện đúng logic capit_account_shares() với bộ NAV cho trước (không đụng file)."""
-    labels = sorted(navs)
-    ok = {l: v for l, v in navs.items() if v}
-    if labels and len(ok) == len(labels):
-        tot = sum(ok.values())
-        return {l: ok[l] / tot for l in labels}, "pro-rata-nav"
-    return ({l: 1.0 / len(labels) for l in labels} if labels else {}), "equal-split-fallback"
+    """Chạy CHÍNH capit_account_shares() của production với bộ NAV giả lập.
+
+    KHÔNG viết lại logic ở đây: một bản mirror thì dù có PASS cũng chỉ chứng minh bản
+    mirror đúng, không chứng minh hàm thật đúng (quant-skeptic caveat, log
+    verify_20260720_181645 — cùng loại lỗi với adv20_pre ở mục A).
+    Chặn 2 phụ thuộc I/O: danh sách account (trading_bot.config.live_dnse_labels, hàm
+    thật import nó lúc GỌI nên phải vá ở module) và NAV mỗi account (_account_nav_basis
+    là global trong namespace đã exec).
+    """
+    import trading_bot.config as _tbc
+    _lbl, _nav = _tbc.live_dnse_labels, _ns["_account_nav_basis"]
+    try:
+        _tbc.live_dnse_labels = lambda *a, **k: sorted(navs)
+        _ns["_account_nav_basis"] = lambda l: (
+            (navs[l], "giả lập") if navs.get(l) else (None, "giả lập thiếu NAV"))
+        s, mode, _det = capit_account_shares()
+        return s, mode
+    finally:
+        _tbc.live_dnse_labels, _ns["_account_nav_basis"] = _lbl, _nav
 
 dcases = []
 # D1 — N=1: cap = ĐÚNG công thức gốc 100%, không bị chia nhỏ
@@ -341,6 +362,15 @@ try:
 finally:
     for _f in (_ap, _np_):
         os.path.exists(_f) and os.remove(_f)
+
+# D8 — KHÔNG có account live nào: Σ share = 0 (KHÔNG phải 1.0) → không phát cap cho ai →
+# executor fail-closed chặn sạch CAPIT. Đây là NGOẠI LỆ có chủ đích của bất biến Σ=1: khi
+# không biết chia cho ai thì không phát trần, chứ không phát trần cho một account nào đó.
+s0, m0 = shares_for({})
+print(f"\n  không có account live: shares={s0}, mode={m0} -> Σ = {sum(s0.values()):.1f} "
+      f"(executor sẽ CHẶN mọi lệnh CAPIT — fail-closed, KHÔNG phải Σ=1)")
+dcases.append(("D8 không có account -> {} (Σ=0), fail-closed chứ không nới trần",
+               s0 == {} and m0 == "no-account"))
 
 for name, ok in dcases:
     print(f"  {'PASS' if ok else 'FAIL'}  {name}")
