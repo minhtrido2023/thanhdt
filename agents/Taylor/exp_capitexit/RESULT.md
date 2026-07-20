@@ -142,8 +142,21 @@ X = 10% (thông lệ chống market impact), D = 2 phiên (thoát trong 2 ngày)
 ADV20 = median 20 phiên TRƯỚC ngày vào, KHÔNG dùng ADV ngày washout (§3a)
 ```
 Tính chất: **thuần phòng thủ** — không tạo capacity, không hứa alpha, chỉ chặn việc ôm một vị thế
-không thoát nổi. Ở quy mô sleeve hiện tại nó **không kích hoạt** (14/14 event đủ capacity ở
-0,38 tỷ) → wire bây giờ = zero thay đổi hành vi live, nhưng có sẵn khi NAV lớn lên.
+không thoát nổi.
+
+> ⚠️ **ĐÍNH CHÍNH (job Taylor_20260720_170223, xác nhận lại Taylor_20260720_172614).** Câu gốc ở
+> đây ghi "ở quy mô sleeve hiện tại nó KHÔNG kích hoạt (14/14 event đủ capacity ở 0,38 tỷ) → wire
+> bây giờ = zero thay đổi" — **SAI**. Bảng capacity §3b phía trên tính bằng ADV20 **SAU** khi vào
+> (`axis3_liquidity.py`, k∈[1,20]), trong khi công thức chốt dùng ADV20 **TRƯỚC** ngày washout
+> (cửa sổ nhân quả duy nhất live dùng được). Chạy đúng cửa sổ PRE: **cap kích hoạt 1/14 event** —
+> **NNC ngày 2016-01-18** (ADV20_pre 0,335 tỷ → cap 0,067 tỷ/tên, equal-weight đòi 0,076 tỷ),
+> lệch **8.975.500đ** ở 1 vị thế. 13/14 event còn lại không kích hoạt. Bảng §3b giữ nguyên vì nó
+> mô tả đúng biến thể POST, chỉ **không phải** biến thể được wire.
+> Tác động **live hiện tại vẫn = 0**: rổ 2026-07-20 (NCT/PVT/SAB/VNM) không chạm cap tới tận
+> sleeve 0,75 tỷ. Bằng chứng: `exp_capitadvcap/selfcheck_capit_adv_cap.py`.
+
+→ wire bây giờ = zero thay đổi hành vi live **hiện tại** (không phải zero thay đổi lịch sử), và
+có sẵn khi NAV lớn lên.
 Điểm quan trọng: dùng ADV20 **trước** washout thay vì ADV ngày washout đã tự sửa lỗi phóng đại
 ở §3a — đây mới là phần có giá trị nhất, độc lập với việc có cap hay không.
 
@@ -166,10 +179,11 @@ Dispatch nêu giả thuyết exit-mechanism dễ paper hơn selection (áp dụn
 paper, vì cả 6 đều kém baseline.
 
 Thứ đáng đưa lên là **cap %ADV (trục 3)**, và nó *không cần* paper-trading: ở quy mô sleeve hiện
-tại cap không bao giờ kích hoạt (14/14 event đủ capacity), nên paper sẽ quan sát được đúng **0 sự
-kiện** — paper ở đây là nghi thức rỗng, không phải bằng chứng. Đường đi đúng: **selfcheck xác minh
-công thức + quant-skeptic + user sign-off**, wire như safeguard ngủ.
-**Chưa wire gì. Chờ chỉ đạo.**
+tại cap không kích hoạt trên rổ live (xem ĐÍNH CHÍNH §3c — lịch sử có 1/14 event kích hoạt, nhưng
+rổ hôm nay còn cách cap khá xa), nên paper sẽ quan sát được đúng **0 sự kiện** — paper ở đây là
+nghi thức rỗng, không phải bằng chứng. Đường đi đúng: **selfcheck xác minh công thức +
+quant-skeptic + user sign-off**.
+**Đã wire (phương án B, job Taylor_20260720_172614) — nhánh `capit-adv-cap-20260721`, chưa merge.**
 
 ## 6. Kết luận rộng hơn — 4 job liên tiếp đang chỉ về cùng một chỗ
 `pb_z rank` (NO-GO) → `DCF filter/tiebreaker` (NO-GO) → `DCF rank chính` (NO-GO) → `nới quality
