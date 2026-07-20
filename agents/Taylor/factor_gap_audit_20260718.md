@@ -208,3 +208,99 @@ nhưng điều đó **KHÔNG có nghĩa chúng hỏng**. Chúng chưa bao giờ 
 tiếp theo cho breadth — dư địa "mở rộng bộ breadth" đã được đo và rỗng. Nhóm A còn lại đáng làm:
 **#4 low-beta as factor** (nhưng đọc trước finding `Taylor_20260720_111429`: `risk_rating.Beta`
 là BIN 1–5, phải tự tính beta liên tục trước).
+
+---
+
+## §6 — KẾT QUẢ candidate #4 (Low-beta / BAB) + #15 (Idio-vol) — **NO-GO cả hai**
+
+**Job** `Taylor_20260720_121019` · **N trials khai báo trước = 2** (#4 candidate chính; #15 rider
+đã pre-register trong §2 dòng 109 "gộp cùng vòng nghiên cứu với #4"). Không sweep cửa sổ, không
+sweep tham số Blume, không thử biến thể daily/monthly rồi chọn cái đẹp. Vòng thăm dò — **không
+wire gì**.
+
+### Cách tính (chốt trước, không phải lựa chọn post-hoc)
+Beta **liên tục tự tính**: return **tuần**, rolling **260 tuần** vs VNINDEX, **Blume-adjust
+0,67b+0,33**. Khung weekly-5Y đã được chốt bởi job `Taylor_20260720_111429` (thắng 8/8 quý khi
+reverse-engineer `risk_rating.Beta`) — **không** dùng field bin 1–5 làm input. Idio-vol = độ lệch
+chuẩn phần dư của **cùng** hồi quy đó (chi phí ~0, đúng lý do §2 xếp #15 chung vòng).
+Script: `ic_panel_lowbeta_q3.py` + `ic_panel_lowbeta_diag.py`.
+
+### Self-check bắt buộc (làm TRƯỚC khi kết luận)
+| Kiểm tra | Kết quả |
+|---|---|
+| Beta tính lại bằng đường code khác hẳn (pandas thuần, từng ticker) @2025Q1 | Khớp: VNM 0,690/0,696 · HPG 1,212/1,241 · FPT 0,907/0,918 · MBB 1,181/1,186 · VIC 0,785/0,763 · SAB 0,807/0,786 |
+| Beta vs field bin `risk_rating.Beta` | Spearman **+0,742** (n=12.680) — khớp kỳ vọng ~+0,8 |
+| Mức beta hợp lý? | top-30 med **1,12** · top-60 **1,08** · 61-150 **0,90** · 151-400 **0,60** · 401+ **0,23** |
+
+⚠️ **Giới hạn phạm vi phải nêu**: cache giá chỉ có từ 2013-01 ⇒ 8 quý đầu panel (2014Q1–2015Q4)
+**không đủ 260 tuần và bị loại**. IS thực tế = **2016–2019** (16 quý), không phải 2014–2019.
+OOS 2020+ (25 quý) không bị ảnh hưởng.
+
+### Kết quả — #4 low-beta (`neg_beta`, kỳ vọng IC dương)
+| Tầng | ALL | IS (2016-19) | OOS (2020+) |
+|---|---|---|---|
+| L0 raw | +0,0012 (t=0,04) | **+0,0330** | **−0,0192** (t=−0,41) |
+| L1 vs value | +0,0072 | +0,0410 | −0,0144 |
+| L2 vs value+rating | +0,0081 | **+0,0449** | **−0,0155** (t=−0,38) |
+
+**Lật dấu IS→OOS ở cả 3 tầng.** Ngũ phân vị không đơn điệu (Q1 3,18 · Q3 2,84 · Q5 3,07). LOO:
+không năm nào gánh edge — IC dương/âm đảo liên tục theo năm (2020 −0,213 vs 2022 +0,103).
+
+**Trong pool thanh khoản thật — còn tệ hơn:** L2 OOS IC = **−0,082** (top-60) / **−0,037**
+(top-100). Nghĩa là ở đúng universe ta giao dịch, low-beta **sai dấu**, không phải chỉ vô dụng.
+
+### Chẩn đoán — TẠI SAO BAB không dịch được sang VN
+Đây là phần có giá trị nhất của vòng này. Beta đo được **giảm đơn điệu theo độ thanh khoản**
+(1,12 ở top-30 → 0,23 ở nhóm 401+). Đó là **thiên lệch non-synchronous trading**
+(Scholes-Williams): cổ phiếu ít khớp lệnh + biên độ ±7% HOSE ⇒ giá phản ứng trễ với thị trường ⇒
+beta đo thấp giả tạo. Hệ quả: **"low beta" trong universe đầy đủ chủ yếu là proxy của ILLIQUIDITY,
+không phải tính phòng thủ thật.** Một rổ BAB long-low-beta ở VN sẽ tự động mua đuôi kém thanh
+khoản — không giao dịch được ở quy mô của ta, và OOS âm ở top-60/100 xác nhận phần "beta thấp
+thật" (không do illiquidity) không mang edge.
+
+### Kết quả — #15 idio-vol (`neg_idiovol`) — sống sót L2 nhưng vẫn NO-GO
+| Tầng | ALL | IS | OOS |
+|---|---|---|---|
+| L0 raw | +0,0481 (t=3,70) | +0,0408 | +0,0528 (t=3,23) |
+| L2 vs value+rating | +0,0329 (t=2,04) | +0,0354 | +0,0314 (t=2,48) |
+
+Thoạt nhìn đây là ứng viên duy nhất qua được gate L2 với OOS ổn định và LOO sạch (không năm nào
+gánh edge). **Ba lý do vẫn NO-GO:**
+
+1. **Trùng lặp gần như hoàn toàn với `risk_rating.Dev` — ta đã có nó rồi.**
+   corr(idio-vol, Dev bin) = **+0,854**. Thêm `neg_dev` vào bộ control: OOS IC **0,0314 → 0,0182**,
+   t **2,48 → 1,32** (mất ý nghĩa). Thêm hết dev+liq+beta: OOS t = 1,34. Đây đúng mẫu hình
+   accruals-bị-1/PCF-nuốt của vòng trước, chỉ đổi thủ phạm: **Dev**.
+2. **Không sống trong pool thanh khoản thật.** L2 OOS: top-60 t=+1,26 · top-100 t=+1,34 ·
+   top-200 t=+1,41 — không mức nào có ý nghĩa. Edge L0 lớn (+0,14 top-60) tan khi trung hòa
+   value+rating. corr(idio-vol, liq_rank)=+0,386 ⇒ một phần là size/thanh khoản đội lốt.
+3. **Là lăng kính RỦI RO, không phải return-factor** (giống hệt gross profitability vòng trước).
+   Ngũ phân vị trong-từng-quý (Q5 = idio-vol thấp nhất):
+
+   | Q | idiovol med | fwd_mean | fwd_med | crash% | moon% (>30) |
+   |---|---|---|---|---|---|
+   | 1 | 0,0959 | 3,59 | 0,00 | **10,46** | 9,20 |
+   | 3 | 0,0562 | 2,88 | 0,00 | 5,54 | 6,28 |
+   | 5 | 0,0341 | 2,52 | 0,56 | **1,98** | 3,13 |
+
+   crash% giảm đơn điệu 10,5→2,0 **và** moon% cũng giảm đơn điệu 9,2→3,1, trong khi `fwd_mean`
+   **không** tăng (Q5 2,52 < Q1 3,59). Đây là **nén phương sai hai đuôi**, không phải alpha. IC
+   rank dương chỉ phản ánh trung vị cao hơn (0,56 vs 0,00). Một tilt long-only equal-weight theo
+   idio-vol thấp sẽ **KHÔNG** thu được IC này thành lợi nhuận.
+
+### Kết luận §6
+**NO-GO cả #4 và #15.** Không wire gì. Cụ thể cho vòng sau:
+- **Dừng theo đuổi low-beta ở VN** — rào cản là cấu trúc vi mô thị trường (biên độ + thanh khoản
+  mỏng làm hỏng phép đo beta), không phải chọn sai khung/tham số. Không có cách đặc tả lại nào
+  cứu được; đừng đề xuất lại với cửa sổ khác.
+- **Idio-vol: đã có sẵn dưới tên `risk_rating.Dev`.** Nếu vòng sau muốn dùng, phải dùng đúng vai
+  trò **lăng kính rủi ro / gate giảm crash** (không phải return-tilt), test riêng với tiêu chí
+  riêng, và **không** tái sử dụng IC ở đây làm bằng chứng.
+- Mẫu hình lặp lại 3 vòng liên tiếp (accruals→1/PCF, gross-prof→lăng kính rủi ro + nhiễm nhóm tài
+  chính, idio-vol→Dev): **khối quality/risk của ta đã bị 8L + value block phủ kín**. Dư địa factor
+  mới không nằm ở đó nữa.
+
+**Artifacts**: `ic_panel_lowbeta_q3.py` · `ic_panel_lowbeta_diag.py` ·
+`data/ic_panel_lowbeta_q3.csv` · `data/beta_panel_continuous.csv` ·
+`data/ic_panel_lowbeta_diag.csv` · `data/ic_panel_lowbeta_loo_F3_low_beta.csv` ·
+`data/ic_panel_lowbeta_loo_F4_neg_idiovol.csv`
