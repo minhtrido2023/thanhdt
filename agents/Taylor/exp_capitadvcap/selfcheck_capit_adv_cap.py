@@ -120,13 +120,18 @@ live["adv20_pre"] = [adv20_pre(t, LIVE_DATE) for t in LIVE_BASKET]
 live["cap_bn"] = X * live["adv20_pre"] * D
 print(live.assign(**{"cap (tỷ)": live["cap_bn"].round(3)})[["ticker","adv20_pre","cap (tỷ)"]]
       .to_string(index=False))
+# Trần mỗi account = phần CHIA của nó, KHÔNG phải trần tổng (job Taylor_20260720_180351).
+# So với trần tổng ở đây sẽ đánh giá THẤP mức ràng buộc thật -> phải nhân share.
+LIVE_SHARE = {a: LIVE_NAV[a] / sum(LIVE_NAV.values()) for a in LIVE_NAV}
 ok_b = True
 for acct, nav in LIVE_NAV.items():
     s = nav / 1e9 * LIVE_SIZE
     per = s / len(LIVE_BASKET)
-    binds = per > live["cap_bn"] + 1e-12
+    cap_acct = live["cap_bn"] * LIVE_SHARE[acct]
+    binds = per > cap_acct + 1e-12
     print(f"  {acct}: NAV {nav/1e9:.3f} tỷ x size {LIVE_SIZE} = sleeve {s:.3f} tỷ "
-          f"(n={len(LIVE_BASKET)} -> {per:.3f} tỷ/tên): "
+          f"(n={len(LIVE_BASKET)} -> {per:.3f} tỷ/tên) vs trần đã chia "
+          f"(share {LIVE_SHARE[acct]:.1%}, thấp nhất {cap_acct.min():.3f} tỷ): "
           f"{'KHÔNG kích hoạt' if not binds.any() else 'KÍCH HOẠT ' + str(live[binds]['ticker'].tolist())}")
     ok_b &= not binds.any()
 print(f"  -> {'PASS' if ok_b else 'FAIL'}: tác động live = 0 (cap có/không đều cho kết quả như nhau)")
@@ -155,10 +160,19 @@ def mkplan(orders, signal_date="2026-07-20"):
                      strategy_version="2.4", state=3, state_name="NEUTRAL",
                      nav_basis={}, orders=orders, account="selfcheck_advcap")
 
-def mkstatus(caps, signal_date="2026-07-20"):
+ACCT = "SpaceX"          # account dùng cho unit test tầng enforce
+
+def mkstatus(caps, signal_date="2026-07-20", account=ACCT, raw=False):
+    """caps = {ticker: vnd} của MỘT account (bọc lại thành schema {label:{ticker:vnd}}),
+    hoặc raw=True để ghi thẳng cấu trúc truyền vào (test schema cũ/schema lạ)."""
     fd, p = tempfile.mkstemp(suffix=".json"); os.close(fd)
-    json.dump({"signal_date": signal_date, "capit_adv_caps": caps}, open(p, "w"))
+    json.dump({"signal_date": signal_date,
+               "capit_adv_caps": caps if raw else {account: caps}}, open(p, "w"))
     return p
+
+def cap_capit_orders_A(plan, status_path, account=ACCT):
+    """Wrapper cố định account cho các case C — chữ ký thật là (plan, account, status)."""
+    return cap_capit_orders(plan, account, status_path)
 
 def order(tk, qty, px=100_000, book="CAPIT", side="buy"):
     return PlannedOrder(id=f"{side}-{tk}", ticker=tk, side=side, qty=qty,
@@ -167,52 +181,171 @@ def order(tk, qty, px=100_000, book="CAPIT", side="buy"):
 cases = []
 # C1 — dưới trần: không đụng
 st = mkstatus({"NCT": 480_000_000})
-pl, adj = cap_capit_orders(mkplan([order("NCT", 1000)]), st)
+pl, adj = cap_capit_orders_A(mkplan([order("NCT", 1000)]), st)
 cases.append(("C1 dưới trần -> giữ nguyên", pl.orders[0].qty == 1000 and not adj))
 # C2 — trên trần: cắt xuống bội số lô chẵn (480tr/100k = 4800cp)
-pl, adj = cap_capit_orders(mkplan([order("NCT", 9000)]), st)
+pl, adj = cap_capit_orders_A(mkplan([order("NCT", 9000)]), st)
 cases.append(("C2 trên trần -> trim 9000->4800 lô chẵn",
               pl.orders[0].qty == 4800 and adj and adj[0]["action"] == "TRIMMED"))
 # C2b — trim phải làm TRÒN XUỐNG lô, không vượt trần
-pl, _ = cap_capit_orders(mkplan([order("NCT", 9000, px=99_999)]), st)
+pl, _ = cap_capit_orders_A(mkplan([order("NCT", 9000, px=99_999)]), st)
 cases.append(("C2b trim làm tròn xuống lô, giá trị <= trần",
               pl.orders[0].qty % 100 == 0 and pl.orders[0].qty * 99_999 <= 480_000_000))
 # C3 — thiếu cap cho mã -> FAIL-CLOSED (chặn)
-pl, adj = cap_capit_orders(mkplan([order("XYZ", 1000)]), st)
+pl, adj = cap_capit_orders_A(mkplan([order("XYZ", 1000)]), st)
 cases.append(("C3 thiếu cap -> BLOCKED (fail-closed)",
               not pl.orders and adj and adj[0]["action"] == "BLOCKED"))
 # C4 — artifact của signal_date KHÁC -> chặn hết
-pl, adj = cap_capit_orders(mkplan([order("NCT", 1000)]), mkstatus({"NCT": 480_000_000}, "2026-07-10"))
+pl, adj = cap_capit_orders_A(mkplan([order("NCT", 1000)]), mkstatus({"NCT": 480_000_000}, "2026-07-10"))
 cases.append(("C4 artifact cũ (signal_date lệch) -> BLOCKED",
               not pl.orders and adj and adj[0]["action"] == "BLOCKED"))
 # C5 — artifact không tồn tại -> chặn
-pl, adj = cap_capit_orders(mkplan([order("NCT", 1000)]), "/tmp/khong_ton_tai_advcap.json")
+pl, adj = cap_capit_orders_A(mkplan([order("NCT", 1000)]), "/tmp/khong_ton_tai_advcap.json")
 cases.append(("C5 artifact thiếu -> BLOCKED", not pl.orders and adj[0]["action"] == "BLOCKED"))
 # C6 — book khác / lệnh bán: KHÔNG đụng tới
-pl, adj = cap_capit_orders(mkplan([order("NCT", 99_999, book="BAL"),
+pl, adj = cap_capit_orders_A(mkplan([order("NCT", 99_999, book="BAL"),
                                    order("NCT", 99_999, side="sell")]), st)
 cases.append(("C6 không phải CAPIT-buy -> không đụng",
               len(pl.orders) == 2 and all(o.qty == 99_999 for o in pl.orders) and not adj))
 # C7 — plan không có CAPIT: no-op kể cả khi artifact hỏng
-pl, adj = cap_capit_orders(mkplan([order("FPT", 500, book="BAL")]), "/tmp/khong_ton_tai.json")
+pl, adj = cap_capit_orders_A(mkplan([order("FPT", 500, book="BAL")]), "/tmp/khong_ton_tai.json")
 cases.append(("C7 plan không có CAPIT -> no-op", len(pl.orders) == 1 and not adj))
 # C8 — trần < 1 lô -> chặn (không đặt lệnh lẻ)
-pl, adj = cap_capit_orders(mkplan([order("NCT", 1000, px=100_000)]), mkstatus({"NCT": 5_000_000}))
+pl, adj = cap_capit_orders_A(mkplan([order("NCT", 1000, px=100_000)]), mkstatus({"NCT": 5_000_000}))
 cases.append(("C8 trần < 1 lô -> BLOCKED", not pl.orders and adj[0]["action"] == "BLOCKED"))
 # C9 — ref_price xấu -> chặn, không chia cho 0
-pl, adj = cap_capit_orders(mkplan([order("NCT", 1000, px=0)]), st)
+pl, adj = cap_capit_orders_A(mkplan([order("NCT", 1000, px=0)]), st)
 cases.append(("C9 ref_price=0 -> BLOCKED (không chia 0)",
               not pl.orders and adj[0]["action"] == "BLOCKED"))
 # C10 — phần dư KHÔNG dồn sang tên khác
-pl, adj = cap_capit_orders(mkplan([order("NCT", 9000), order("VNM", 1000)]),
+pl, adj = cap_capit_orders_A(mkplan([order("NCT", 9000), order("VNM", 1000)]),
                            mkstatus({"NCT": 480_000_000, "VNM": 27_760_000_000}))
 cases.append(("C10 phần dư không dồn sang tên khác",
               pl.orders[0].qty == 4800 and pl.orders[1].qty == 1000))
+
+# C11 — SCHEMA CŨ (phẳng {ticker: vnd}, chưa chia account) -> phải CHẶN, không được diễn
+# giải như trần riêng của account này (làm vậy = tái lập đúng bug N x 10% ADV).
+pl, adj = cap_capit_orders_A(mkplan([order("NCT", 1000)]),
+                             mkstatus({"NCT": 480_000_000}, raw=True))
+cases.append(("C11 schema cũ (phẳng) -> BLOCKED, không tái lập bug N×ADV",
+              not pl.orders and adj and adj[0]["action"] == "BLOCKED"))
+# C12 — account không có phần chia trong artifact -> chặn (không mượn trần account khác)
+pl, adj = cap_capit_orders_A(mkplan([order("NCT", 1000)]),
+                             mkstatus({"NCT": 480_000_000}, account="ZaloPay"), account="SpaceX")
+cases.append(("C12 account không có phần chia -> BLOCKED",
+              not pl.orders and adj and adj[0]["action"] == "BLOCKED"))
+# C13 — mỗi account CHỈ thấy trần của mình (cùng artifact, 2 account, 2 kết quả khác nhau)
+_st2 = mkstatus({"SpaceX": {"NCT": 480_000_000}, "ZaloPay": {"NCT": 240_000_000}}, raw=True)
+_a, _ = cap_capit_orders(mkplan([order("NCT", 9000)]), "SpaceX", _st2)
+_b, _ = cap_capit_orders(mkplan([order("NCT", 9000)]), "ZaloPay", _st2)
+cases.append(("C13 mỗi account chỉ thấy phần trần của mình (4800 vs 2400)",
+              _a.orders[0].qty == 4800 and _b.orders[0].qty == 2400))
 
 for name, ok in cases:
     print(f"  {'PASS' if ok else 'FAIL'}  {name}")
     if not ok:
         fails.append(f"C: {name}")
+
+# ── D. CHIA TRẦN DÙNG CHUNG cho N account (job Taylor_20260720_180351) ────────────────
+# Trần %ADV là nguồn lực THỊ TRƯỜNG của một mã, không phải trần riêng từng account. Bất
+# biến phải đúng ở MỌI nhánh: Σ_account cap = X·ADV20·D, và N=1 -> đúng công thức gốc.
+print("\n" + "=" * 78)
+print("D. CHIA TRẦN DÙNG CHUNG — N account đọc ĐỘNG từ trading_bot_accounts.json")
+print("=" * 78)
+import importlib.util as _ilu
+_spec = _ilu.spec_from_file_location(
+    "_golive_sc", f"{WORKDIR}/deploy_golive_dt5g_v4/golive_recommend_v23.py")
+# module chạy full pipeline khi import -> chỉ trích 2 hàm thuần bằng exec có kiểm soát
+_src = open(_spec.origin, encoding="utf-8").read()
+_ns = {"os": os, "json": json, "pd": pd, "WORKDIR": WORKDIR, "ACTIVE_NAV_MAX_AGE_D": 5,
+       "print": print}
+_start = _src.index("def _account_nav_basis(")
+exec(_src[_start:_src.index("def capit_base(")], _ns)
+_account_nav_basis, capit_account_shares = _ns["_account_nav_basis"], _ns["capit_account_shares"]
+
+CAP_TOTAL = 480_000_000.0     # trần tổng giả định cho 1 mã (X·ADV20·D)
+
+def shares_for(navs):
+    """Tái hiện đúng logic capit_account_shares() với bộ NAV cho trước (không đụng file)."""
+    labels = sorted(navs)
+    ok = {l: v for l, v in navs.items() if v}
+    if labels and len(ok) == len(labels):
+        tot = sum(ok.values())
+        return {l: ok[l] / tot for l in labels}, "pro-rata-nav"
+    return ({l: 1.0 / len(labels) for l in labels} if labels else {}), "equal-split-fallback"
+
+dcases = []
+# D1 — N=1: cap = ĐÚNG công thức gốc 100%, không bị chia nhỏ
+s1, m1 = shares_for({"SpaceX": 928_971_136.0})
+c1 = {a: CAP_TOTAL * v for a, v in s1.items()}
+print(f"  N=1 ({m1}): {s1} -> cap SpaceX = {c1['SpaceX']:,.0f}đ (trần gốc {CAP_TOTAL:,.0f}đ)")
+dcases.append(("D1 N=1 -> cap = 100% công thức gốc", abs(c1["SpaceX"] - CAP_TOTAL) < 1e-6))
+# D2 — N=2 hiện trạng: tổng ĐÚNG 10% ADV (không phải 20% như bug)
+NAV2 = {"SpaceX": 928_971_136.0, "ZaloPay": 469_326_169.0}   # active_nav thật 2026-07-20
+s2, m2 = shares_for(NAV2)
+c2 = {a: CAP_TOTAL * v for a, v in s2.items()}
+for a in sorted(c2):
+    print(f"  N=2 ({m2}): {a} share {s2[a]:.4f} (active_nav {NAV2[a]:,.0f}đ) "
+          f"-> cap {c2[a]:,.0f}đ")
+print(f"       Σ = {sum(c2.values()):,.0f}đ vs trần tổng {CAP_TOTAL:,.0f}đ "
+      f"(bug cũ sẽ cho {2*CAP_TOTAL:,.0f}đ)")
+dcases.append(("D2 N=2 -> Σ cap = ĐÚNG trần tổng (không phải 2×)",
+               abs(sum(c2.values()) - CAP_TOTAL) < 1e-6))
+dcases.append(("D2b N=2 -> share tỉ lệ ĐÚNG theo NAV",
+               abs(s2["SpaceX"] / s2["ZaloPay"] - NAV2["SpaceX"] / NAV2["ZaloPay"]) < 1e-9))
+# D3 — N=3 giả lập: vẫn ĐÚNG tổng, mỗi account nhận đúng tỉ lệ NAV
+NAV3 = dict(NAV2, Sim3=250_000_000.0)
+s3, m3 = shares_for(NAV3)
+c3 = {a: CAP_TOTAL * v for a, v in s3.items()}
+for a in sorted(c3):
+    print(f"  N=3 ({m3}): {a} share {s3[a]:.4f} (NAV {NAV3[a]:,.0f}đ) -> cap {c3[a]:,.0f}đ")
+print(f"       Σ = {sum(c3.values()):,.0f}đ vs trần tổng {CAP_TOTAL:,.0f}đ")
+dcases.append(("D3 N=3 -> Σ cap = ĐÚNG trần tổng", abs(sum(c3.values()) - CAP_TOTAL) < 1e-6))
+dcases.append(("D3b N=3 -> mỗi account đúng tỉ lệ NAV",
+               all(abs(s3[a] - NAV3[a] / sum(NAV3.values())) < 1e-12 for a in NAV3)))
+# D4 — thiếu NAV 1 account -> chia đều, tổng VẪN không đổi (fail-safe không nới trần)
+s4, m4 = shares_for({"SpaceX": 928_971_136.0, "ZaloPay": None})
+c4 = {a: CAP_TOTAL * v for a, v in s4.items()}
+print(f"  thiếu NAV ({m4}): {s4} -> Σ = {sum(c4.values()):,.0f}đ")
+dcases.append(("D4 thiếu NAV -> chia đều, Σ cap KHÔNG đổi",
+               m4 == "equal-split-fallback" and abs(sum(c4.values()) - CAP_TOTAL) < 1e-6))
+# D5 — N=1 cho ra CÙNG kết quả ở cả 2 chế độ (không có case đặc biệt cần xử lý riêng)
+dcases.append(("D5 N=1: pro-rata ≡ chia đều (không cần case đặc biệt)",
+               abs(shares_for({"A": 1.0})[0]["A"] - 1.0) < 1e-12
+               and abs(shares_for({"A": None})[0]["A"] - 1.0) < 1e-12))
+# D6 — danh sách account đọc ĐỘNG từ config THẬT, không hardcode
+s_live, m_live, det_live = capit_account_shares()
+print(f"\n  đọc ĐỘNG từ trading_bot_accounts.json: {sorted(s_live)} (mode={m_live})")
+for a in sorted(det_live):
+    print(f"    {a}: NAV {det_live[a]['nav'] or 0:,.0f}đ — nguồn: {det_live[a]['source']}")
+dcases.append(("D6 account đọc động = live_dnse_labels() và Σ share = 1",
+               bool(s_live) and abs(sum(s_live.values()) - 1.0) < 1e-9))
+
+# D7 — nguồn NAV: active_nav (đã trừ excluded_tickers) khi computed_at còn hạn; quá hạn ->
+# lùi nav_history. Kiểm theo NỘI DUNG file, KHÔNG theo mtime (bẫy lag_edge_health).
+import datetime as _dt
+_LBL = "_sc_navbasis"
+_ap = f"{WORKDIR}/data/execution_logs/active_nav_{_LBL}.json"
+_np_ = f"{WORKDIR}/data/execution_logs/nav_history_{_LBL}.csv"
+try:
+    open(_np_, "w").write("date,nav\n2026-07-20,777000000\n")
+    for tag, days, want_src, want_nav in [("tươi", 0, "active_nav", 111_000_000.0),
+                                          ("quá hạn", 30, "nav_history", 777_000_000.0)]:
+        json.dump({"active_nav": 111_000_000.0,
+                   "computed_at": str(_dt.date.today() - _dt.timedelta(days=days))},
+                  open(_ap, "w"))
+        nav, src = _account_nav_basis(_LBL)
+        print(f"  active_nav {tag} -> nguồn={src.split(' @')[0]}, NAV={nav:,.0f}đ")
+        dcases.append((f"D7 active_nav {tag} -> dùng {want_src}",
+                       src.startswith(want_src) and abs(nav - want_nav) < 1e-6))
+finally:
+    for _f in (_ap, _np_):
+        os.path.exists(_f) and os.remove(_f)
+
+for name, ok in dcases:
+    print(f"  {'PASS' if ok else 'FAIL'}  {name}")
+    if not ok:
+        fails.append(f"D: {name}")
 
 # ── kết luận + self-check 0 VND ───────────────────────────────────────────────────────
 print("\n" + "=" * 78)

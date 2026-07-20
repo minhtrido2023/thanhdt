@@ -204,6 +204,11 @@ def main():
 
     result = {
         "account": args.account, "account_id": account_id,
+        # Ngày tính, ghi vào NỘI DUNG file: file này ghi ad-hoc (không cron) nên consumer
+        # phải tự kiểm tra nó còn tươi không — và phải kiểm theo nội dung, không theo mtime
+        # (mtime tươi/nội dung cũ là bẫy đã gặp thật, sự cố lag_edge_health 2026-07-12).
+        # Consumer: golive_recommend_v23._account_nav_basis() (chia trần %ADV cho CAPIT).
+        "computed_at": __import__("datetime").date.today().isoformat(),
         "cash": cash, "total_stock_value": total_mv, "excluded_value": excluded_mv,
         "offbook_assets": offbook, "offbook_assets_asof": offbook_asof,
         "offbook_stale_warning": offbook_stale_warning,
