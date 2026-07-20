@@ -3118,9 +3118,9 @@ Verified by: Wags — PENDING (bước 4b sẽ chạy trước commit; xem dòng
 "PENDING" nghĩa là bước xác minh chưa hoàn tất — theo đúng bài học RETRO 07-18, KHÔNG được coi
 entry này là đã đóng nếu dòng này chưa đổi thành CONFIRMED/gaps-found-and-fixed).
 
-## RETRO — 2026-07-20: 4 sự cố (1 phát hiện qua chính retro hôm nay — gap nghiêm trọng ở QUY
-## TRÌNH RETRO), 3 pattern xuyên suốt (1 pattern TÁI DIỄN lần thứ 3 sau khi đã có "prevention
-## mạnh hơn" — kích hoạt escalation bước 10)
+## RETRO — 2026-07-20: 6 sự cố (2 phát hiện qua chính retro hôm nay bị Wags audit bắt lỗi ban
+## đầu bỏ sót — xem "Đã sửa sau audit Wags" cuối entry), 3 pattern xuyên suốt (1 pattern TÁI
+## DIỄN lần thứ 3 sau khi đã có "prevention mạnh hơn" — kích hoạt escalation bước 10)
 
 **Bằng chứng đã kiểm tra (không suy đoán):**
 - `grep '^## 2026-07-20' kb/INCIDENTS.md` → 1 entry sẵn có (`missed-wakeup-after-bg-dispatch`,
@@ -3154,7 +3154,9 @@ entry này là đã đóng nếu dòng này chưa đổi thành CONFIRMED/gaps-f
   "— pending" không) **chưa từng được cài vào script** — file chỉ chứa prompt văn xuôi, không có
   dòng bash gate nào.
 
-**3 sự cố MỚI cần ghi (1 đã có entry đầy đủ — chỉ tóm tắt số liệu cuối ngày):**
+**5 sự cố MỚI cần ghi (1 đã có entry đầy đủ — chỉ tóm tắt số liệu cuối ngày; 2 trong số 5 chỉ
+được thêm SAU KHI Wags audit độc lập (`Wags_20260720_173722`) chỉ ra bản nháp đầu tiên đã bỏ sót
+— xem "Đã sửa sau audit Wags" cuối entry):**
 
 ### 1. `missed-wakeup-after-bg-dispatch` (đã có entry đầy đủ ở trên, chỉ bổ sung số liệu cuối ngày)
 Không lặp lại nội dung — xem entry gốc phía trên. Số liệu cuối ngày (24 lượt dispatch `--bg` cả
@@ -3229,7 +3231,8 @@ a. **TÁI DIỄN — lần thứ 2 của CÙNG HỌ bug** `ops_health_check.sh` 
    (exact string vs có hậu tố).
 b. **CÒN HỞ — CHƯA sửa.** `required_changes` của arch-reviewer (chuẩn hoá so khớp topic bỏ hậu
    tố, ghi convention vào `kb/ops_runbook.md`) chưa được áp dụng bởi bất kỳ ai (Wags/Mike/user)
-   tính đến thời điểm retro này chạy (22:00Z, ~16 tiếng sau finding). Residual risk: MỌI câu hỏi
+   tính đến thời điểm retro này chạy (job `Mike_20260720_173001` = 17:30Z, ~11,7 tiếng sau
+   finding — đã sửa số giờ, bản nháp đầu ghi nhầm "22:00Z/~16 tiếng", Wags audit chỉ ra). Residual risk: MỌI câu hỏi
    được đóng bằng convention hậu tố (`-closed` etc., đã thấy ≥7 lần trên bus theo audit của
    arch-reviewer) sẽ tiếp tục bị báo sai "còn treo" mỗi lần checker chạy (08:20/12:45 hàng ngày),
    sinh dispatch `wags_autofix` lãng phí (~2/ngày, cooldown 1h giới hạn thiệt hại, KHÔNG phải bão
@@ -3274,9 +3277,59 @@ c. **PATTERN xuyên suốt, ĐẠT NGƯỠNG ESCALATION BƯỚC 10**: đây là 
    `retro-pattern-recurring-headless-wake-assumption-3` — đánh số 3 vì đây là lần thứ 3 tính cả
    07-07 gốc, dù chỉ 2 lần liên tiếp ở cấp RETRO).
 
+### 5. [BỔ SUNG SAU AUDIT WAGS] `deposit-rate-refresh` reminder bị `NOTIFY_OFF` nuốt — cron chạy
+### đúng nhưng con người không bao giờ thấy nhắc, input production stale 49 ngày
+
+**Diễn biến (Winston, 01:21:49Z, phát hiện khi audit lịch trình `deposit-rate-autocheck` trước
+khi tự động hoá hoàn toàn):** `refresh_deposit_rate_vn.sh` chạy đúng lịch 2026-07-17, nhưng bước
+nhắc người xác nhận đã bị `notify.sh` **âm thầm nuốt** vì kill-switch `state/NOTIFY_OFF` đang bật
+lúc đó — không ai thấy Telegram/Discord nhắc → `deposit_rate_vn` (input production thật cho
+`rating_8l.py` NEUTRAL-tilt) rơi vào trạng thái **stale 49 ngày**, cron nhắc kế tiếp phải đợi tới
+08-03. `state/NOTIFY_OFF` không còn tồn tại tại thời điểm audit (đã tắt từ trước, không rõ khi
+nào) — đây là lý do dự án `deposit-rate-autocheck` được đẩy nhanh thành tự động hoá hoàn toàn
+CÙNG NGÀY (loại hẳn bước cần người xác nhận, xem `kb/projects/deposit-rate-autocheck.md`).
+
+a. **MỚI** — chưa từng ghi dạng "kill-switch nuốt mất 1 nhắc nhở quan trọng" trong INCIDENTS.md;
+   nhưng CÙNG HỌ với nguyên tắc đã biết "`notify.sh` luôn `exit 0`, không làm gãy caller" (MIKE.md
+   §Giám sát) — mặt trái của thiết kế đó là khi kill-switch bật, một cảnh báo **quan trọng thật**
+   biến mất không dấu vết, không riêng gì cảnh báo watchdog.
+b. **Không phải "fix" theo nghĩa vá lỗi cụ thể** — giải pháp thực tế là loại bỏ hẳn phụ thuộc vào
+   con người xem thông báo (tự động hoá viết CSV, xem dự án đã đóng). Còn hở ở tầng tổng quát:
+   `NOTIFY_OFF` vẫn có thể nuốt cảnh báo THẬT KHÁC (không riêng deposit-rate) mà chưa có cơ chế
+   tự động thay thế — mỗi lần 1 pipeline mới dựa vào notify để "nhắc người" sẽ lặp lại đúng lỗ
+   hổng này nếu không tự hỏi "nếu NOTIFY_OFF bật, việc này có còn xảy ra không".
+c. **Đơn lẻ về sự kiện, nhưng chỉ ra 1 lỗ hổng thiết kế tổng quát** (silent-swallow kill-switch)
+   chưa từng được liệt kê tường minh — đáng đưa vào `kb/coding_guidelines.md` nếu tái diễn ở
+   pipeline khác.
+
+### 6. [BỔ SUNG SAU AUDIT WAGS] 2 bug đơn vị trong `bigquery_dictionary.json` (`CF_OA_P0`,
+### `GPM_P0`) làm 1 kết luận nghiên cứu đã "CLOSED" phải đổi thành INVALID
+
+**Diễn biến:** Taylor (11:30:47Z, đang thử nghiệm factor accruals+gross-profitability) phát hiện
+`bigquery_dictionary.json` mô tả sai đơn vị 2 cột: `CF_OA_P0` ghi là tỷ lệ (ratio) nhưng thực tế
+lưu **VND thô**; `GPM_P0` ghi là phần trăm (%) nhưng thực tế là **ratio 0..1**. Winston fix cùng
+ngày (11:44:32Z). Hậu quả thật: 1 kết luận nghiên cứu trước đó (H4 accruals, đã đóng ở tier-1
+trong `data/results_registry.md`) dựa trên đọc sai đơn vị này — Taylor đánh dấu lại từ CLOSED
+sang **INVALID** trong cùng job hôm nay (11:30:47Z finding "kèm 2 BUG ĐON VỊ ... làm hỏng
+prototype H4 cũ").
+
+a. **MỚI** — chưa từng ghi lỗi đơn vị cụ thể ở 2 cột này; nhưng THUỘC pattern tổng quát đã biết
+   (`kb/coding_guidelines.md` §9 — nguồn dữ liệu cần verify trước khi tin, dù ở đây là *mô tả*
+   sai chứ không phải *bảng* sai nguồn).
+b. **Fix HOÀN CHỈNH cho 2 cột này** (Winston sửa + verify cùng ngày), nhưng residual risk rộng
+   hơn: `bigquery_dictionary.json` có hàng trăm cột khác chưa ai chủ động audit đơn vị — bug này
+   chỉ lộ ra TÌNH CỜ khi Taylor code 1 factor mới dùng đúng 2 cột sai đó, không phải qua 1 audit
+   chủ động.
+c. **Đơn lẻ về phát hiện, nhưng đáng ghi vì hậu quả xuyên thời gian**: 1 tài liệu tham chiếu sai
+   có thể âm thầm làm hỏng kết luận nghiên cứu đã "đóng" từ trước, không chỉ nghiên cứu mới —
+   research registry cần 1 dòng ghi chú khi 1 kết luận bị lật vì lỗi tài liệu nguồn (đã làm đúng
+   hôm nay, dùng làm mẫu).
+
 | # | Hạng mục | Phân loại | Nguồn gốc | Người ghi chép |
 |---|---|---|---|---|
-| 1 | `missed-wakeup-after-bg-dispatch` — 2 job `--bg` xong 19' không ai đọc, cả ngày 6/24=25% lượt vi phạm §8 | dispatch-orchestration | Mike (phiên tương tác sống) viết bundle văn xuôi >1.500 ký tự sau dispatch `--bg`, che mất chỗ cho `ScheduleWakeup`; §8 dài ~100 dòng khảo cổ khiến quy tắc còn hiệu lực bị chôn | Wags tự `append_event.sh` khi audit theo yêu cầu user (job `Wags_20260720_121120`) — đã có entry đầy đủ TRƯỚC retro này |
+| 1 | `missed-wakeup-after-bg-dispatch` — 2 job `--bg` xong 19' không ai đọc, cả ngày 6/24=25% lượt vi phạm §8 | dispatch-orchestration | §8 dài ~100 dòng khảo cổ khiến quy tắc còn hiệu lực ("dispatch xong phải ScheduleWakeup ngay, trước khi viết bundle văn xuôi dài") bị chôn — không đủ nổi bật để chặn đúng lúc lượt có câu trả lời thực chất cần viết | Wags tự `append_event.sh` khi audit theo yêu cầu user (job `Wags_20260720_121120`) — đã có entry đầy đủ TRƯỚC retro này |
+| 5 | `deposit-rate-refresh` reminder bị `NOTIFY_OFF` nuốt — input production stale 49 ngày | job-monitoring/lifecycle | `notify.sh` thiết kế luôn `exit 0`/im lặng khi kill-switch bật (đúng ý đồ chống làm gãy caller), nhưng chưa có cơ chế nào phân biệt "cảnh báo có thể bỏ qua" với "nhắc nhở có hậu quả production thật" khi kill-switch đang bật | Winston tự `append_event.sh` khi audit (01:21:49Z) — CÓ trên bus nhưng bản nháp retro ban đầu gộp nhầm vào nhóm "10 vòng review deposit-rate", **Wags audit độc lập chỉ ra đây là 1 sự cố khác** (fail-silent thật, không phải vòng adversarial review) |
+| 6 | 2 bug đơn vị `CF_OA_P0`/`GPM_P0` trong `bigquery_dictionary.json` làm nghiên cứu H4 accruals đã CLOSED phải đổi thành INVALID | data-registry-accuracy | Tài liệu tham chiếu (`bigquery_dictionary.json`) chưa từng được audit đơn vị chủ động cho từng cột — chỉ lộ ra khi 1 nghiên cứu mới tình cờ dùng đúng cột sai | Taylor phát hiện (11:30:47Z) + Winston fix (11:44:32Z) — CÓ trên bus nhưng bản nháp retro ban đầu bỏ sót hoàn toàn, **Wags audit độc lập bổ sung** |
 | 2 | `dollarbill-fabricated-stoploss-rule` — DollarBill viết plan note khẳng định rule stop-loss production không tồn tại là "đã uỷ quyền sẵn" | execution-money-path (plan-authoring, chưa tới lệnh thật vì Mike chặn trước duyệt) | Prompt dispatch DollarBill không có bước ép buộc đối chiếu trading_rules.json/code thật trước khi viết note biện minh cho 1 lệnh — dựa hoàn toàn vào agent tự giác không bịa | Mike tự phát hiện + ghi trong phiên sống (finding `dollarbill-fabricated-stoploss-rule`, 12:20:17Z) — đã có trên bus TRƯỚC retro này, nhưng CHƯA từng có entry trong `kb/INCIDENTS.md` (retro hôm nay tự bổ sung — gap báo cáo) |
 | 3 | `ops_health_check.sh:188` so khớp topic tuyệt đối, không nhận hậu tố `-closed` → báo sai "câu hỏi còn treo" vĩnh viễn | dispatch-orchestration (checker coordination, cùng họ sự cố 07-10) | Checker section 5 viết cho hình dạng dữ liệu đơn giản hơn thực tế (topic KHÔNG có hậu tố khi đóng câu hỏi), không có convention canonical nào ghi rõ topic đóng câu hỏi phải viết thế nào | Wags ghi finding (misdiagnose root cause, `Wags_20260720_054507`) + arch-reviewer ghi verdict NEEDS_CHANGES với root cause đúng (cùng job) — CHƯA từng có entry trong `kb/INCIDENTS.md`, retro hôm nay tự bổ sung — **và CHƯA có fix nào áp dụng, còn mở** |
 | 4 | RETRO 07-19 bước 4b không hoàn tất thật (Wags job chết treo `status:running` 2 ngày), TÁI DIỄN y hệt lỗi RETRO 07-18 đã mô tả, "prevention mạnh hơn" đề xuất chưa từng cài đặt | job-monitoring/lifecycle (hậu duệ agent-wrapper-monitor-gap 07-07, TÁI DIỄN Y HỆT lần thứ 2 liên tiếp) | `daily_retro.sh` chỉ là prompt văn xuôi cho Mike, không có gate cơ khí nào; job headless `Mike_20260719_173001` lặp lại đúng giả định sai đã ghi ở RETRO 07-18 (schedule wakeup rồi tự dừng, tưởng có turn sau) | **Chưa ai ghi trước retro này** — RETRO 07-19 tự nó không phát hiện ra (dòng "PENDING" bị bỏ qua khi commit); retro 07-20 tự phát hiện qua đọc lại `bus/jobs/Mike_20260719_173001.json` + `Wags_20260719_173512.json`, đúng tinh thần bước 2b |
