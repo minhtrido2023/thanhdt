@@ -1,0 +1,37 @@
+# V2.3 + DT5G — Daily Recommendations — 2026-07-20
+
+*Generated 2026-07-20 19:01. System: V2.3 = BAL | LAG (static, always-on) + allocator + parking + CAPIT v2, gated DT5G state (fail-safe DT4).*
+
+## Regime, allocator & parking
+
+- **Market state (gated):** 3 = **NEUTRAL**  (source: DT5G_macro)
+- **Allocator w_LAG:** target **50%** | current 50% (as of 2026-07-17) → trong band ±10pp, không rebalance
+- **Parking (cả 2 book):** park **70%** cash nhàn rỗi vào **rổ custom30V** (`tav2_bq.custom30v_8l`, yieldcombo, cap-weight namecap≤10%, 30 mã) (NEUTRAL)
+    - top: VCB 10% · CTG 10% · BID 10% · VHM 10% · TCB 9% · VPB 8% · MBB 8% · LPB 5% …
+
+## BAL book (50% NAV target) — 0 picks
+
+_No new BAL entries today_ — không có signal đạt chuẩn trong các tier BAL (MEGA/MOMENTUM*/DVR/RE_BACKLOG) sau SV_TIGHT/overheat/AVOID_exbull. **Action: giữ vị thế hiện có (45d) + park cash theo target ở trên.** Đây là hành vi thận trọng bình thường, không phải lỗi.
+
+## LAG book (50% NAV target, always-on PEAD)
+
+Entry T+5 sau báo cáo quý mạnh (NP_R≥15, prior_n_good≥4, pa_HL3≥5), hold 25td, NO stop. LAG_HI (surprise>0.5) 10%/slot, LAG_LO 8%/slot.
+
+**Vào lệnh phiên tới:**
+- **IVS** (LAG_HI) — entry T+4 phiên tới (release 2026-07-17, NP_R 30%, pa_HL3 9.6)
+- **TMG** (LAG_HI) — entry T+4 phiên tới (release 2026-07-17, NP_R 142%, pa_HL3 5.1)
+- **TRC** (LAG_LO) — entry T+4 phiên tới (release 2026-07-17, NP_R 21%, pa_HL3 7.0)
+
+## CAPIT v2 monitor
+
+- Oversold breadth (D_RSI<0.3, ticker_prune): **42.9%** vs gate 30%
+- 🚨 **WASHOUT GATE FIRED** — state routing size = **0.75** (grind=False, dd52w=-9.6%, vn_cooling=False)
+- Committed VND = size × free cash mỗi book, hold 60td, stop-exempt, slot-exempt.
+- Basket quality-golden (5 mã): NCT, PVT, SAB, SIP, VNM
+
+## Notes
+- Sizing: %/slot tính trên VỐN CỦA BOOK (BAL book = 50% NAV, LAG book = 50% NAV theo allocator).
+- BAL: max 12 pos, hold 45d, stop -20%, Fin/RE (sector 8) cap 4 (RE_BACKLOG exempt); mã 8L rating≥4 half-size CHỈ trong BEAR/CRISIS.
+- LAG: KHÔNG ensemble switch (always-on), KHÔNG stop — quản trị bằng allocator (BEAR=0).
+- State là chuỗi gated fail-safe; nếu macro feed lỗi, source = 'DT4_only'.
+- CSV: `out/golive_v23_recommendations_2026-07-20.csv` | status: `data/golive_v23_status.json`
