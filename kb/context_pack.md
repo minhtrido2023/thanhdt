@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v1201)
+# Mike fleet — context pack (v1202)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-20T07:51:07] Winston/finding — deposit-rate-july2026-confirmed: {"rate": 6.8, "changed": false, "effective_date": "2026-07-20", "sources": ["cafef.vn 2026-07-13: Big-4 tat ca 6.8%/nam 12T", "24hmoney.vn 2026-07-07: BIDV/Agri …
 - [2026-07-20T08:02:12] Winston/finding — deposit-rate-vn-july2026-crosscheck: {"result": "CONFIRMED_NO_CHANGE", "rate_stored": 6.8, "rate_verified": 6.8, "effective_date": "2026-07-20", "sources": [{"publisher": "dnse.com.vn", "url": "htt …
 - [2026-07-20T08:14:10] Winston/answer — deposit-rate-refresh: {"job": "Winston_20260720_080854", "result": "CONFIRMED_UNCHANGED", "rate": 6.8, "mode_basis": "3/4 banks at 6.80% (Agribank/BIDV/VietinBank). VCB outlier at 5. …
 - [2026-07-20T08:26:07] Taylor/finding — CAPIT due-diligence gate — PNJ se bi mua full-size neu khong chan, da wire + verify: {"job": "Taylor_20260720_081359", "viec": "1/2 (Viec 1 XONG)", "commit_wc": "981e05e", "commit_mike": "c6b6fd5", "van_de": "CAPIT chon ro thuan co hoc (ROE_Min5 …
@@ -11,6 +10,7 @@
 - [2026-07-20T08:28:56] quant-skeptic/verification — ⚠️ INCONCLUSIVE VERIFY: CAPIT due-diligence gate — PNJ se bi mua full-size neu khong chan, da wire + verify: {"finding_topic": "CAPIT due-diligence gate — PNJ se bi mua full-size neu khong chan, da wire + verify", "verdict": "INCONCLUSIVE", "confidence": "low", "summar …
 - [2026-07-20T08:31:29] quant-skeptic/verification — ✅ CONFIRMED VERIFY: CAPIT due-diligence gate — loai ticker co co bat thuong khoi ro ung vien (Viec1 XONG): {"finding_topic": "CAPIT due-diligence gate — loai ticker co co bat thuong khoi ro ung vien (Viec1 XONG)", "verdict": "CONFIRMED", "confidence": "high", "checks …
 - [2026-07-20T08:33:20] Taylor/answer — Viec1+Viec2 XONG, quant-skeptic CONFIRMED — CAPIT co gate due-diligence truoc 19:00: {"job": "Taylor_20260720_081359", "ket_luan": "CA 2 VIEC XONG va VERIFIED truoc han 19:00 ICT", "viec1": {"trang_thai": "XONG + quant-skeptic CONFIRMED (confide …
+- [2026-07-20T09:21:13] Taylor/finding — macro-view 07-20: deposit-gate cach 70bps, Pillar C thanh khoan NO-GO, khong doi gi: {"job": "Taylor_20260720_091806", "muc1_deposit_gate": {"deposit_rate_now": 6.8, "since": "2026-06-01", "threshold": 7.5, "khoang_cach_bps": 70, "trajectory": " …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -27,9 +27,23 @@ Trứng vàng trong ngày khi CAPIT kích hoạt, để có tiền sẵn sàng s
 sẽ tự thấy hướng dẫn khi lập plan T+1 lúc CAPIT fire, không cần Mike can thiệp tay mỗi lần.
 2 điểm cần biết nếu fire: (a) sát biên "grind" (91 vs cửa sổ 20-90 phiên — lệch 1 phiên khiến size
 full 0,75 thay vì 0,375 nếu tính grind); (b) dd52w hiện tại (~-7%) sẽ là mức nông nhất từng fire
-trong lịch sử 2014-2026 (kỷ lục cũ -7,4%) — ngoài rìa mẫu dữ liệu đã biết. Basket dự kiến nếu fire
-(data 07-17): PNJ, NCT, VNM, SAB, PVT — không mã cấm, NCT thanh khoản mỏng nên cần chia lệnh. Kiểm
-tra lại `data/golive_v23_status.json` (`capit_fired`) sau cron 19:00 mỗi tối để biết đã fire chưa.
+trong lịch sử 2014-2026 (kỷ lục cũ -7,4%) — ngoài rìa mẫu dữ liệu đã biết. Kiểm tra lại
+`data/golive_v23_status.json` (`capit_fired`) sau cron 19:00 mỗi tối để biết đã fire chưa.
+
+**PNJ EXCLUDED khỏi rổ CAPIT — due-diligence gate đã wire + verify (2026-07-20, job
+`Taylor_20260720_081359`).** PNJ đang khủng hoảng thật (P-Lab bị bắt vì buôn lậu kim cương, scandal
+02/07, giá sập ~-32%, team đã kết luận AMBIGUOUS trong `agents/Taylor/research/
+calculated_fear_state_backstop.md` §7, cổng xác nhận thật là BCTC Q3/2026 ~cuối tháng 10 — KHÔNG
+phải case sạch như PNJ-2015). quant-skeptic CONFIRMED (cao): PNJ pbz=-2,699, xếp HẠNG 1 trong pool
+CAPIT ngày 07-17 — nếu không có gate, CAPIT sẽ mua PNJ full size đúng lúc khủng hoảng. Cơ chế:
+`anomaly_scan.py` (build từ ground-truth DGC+PNJ) ghi `data/anomaly_flags.json` (cờ 30 ngày, TTL
+verify không rò rỉ), CAPIT basket-selection lọc bỏ mọi ticker có cờ active TRƯỚC bước chọn pbz —
+gate CHUNG, không hardcode tên, tự áp dụng cho case tương lai. Đã wire vào `ops_health_check.sh`
+08:20+12:45 (tier-H alert Trading Daily, tier-W ghi cờ im lặng). Rổ hiện tại (nếu fire hôm nay):
+NCT, PVT, SAB, VNM (PNJ đã loại). **Giới hạn thật cần nhớ**: gate KHÔNG backtest được (n=1, không
+có lịch sử point-in-time), coi là bảo hiểm chi phí chưa đo được, đừng trích dẫn như alpha đã kiểm
+chứng; sau khi loại PNJ (mã thanh khoản nhất), rổ neo vào NCT (ADV 2,18 tỷ/ngày, sát sàn 2 tỷ) —
+vấn đề sizing NCT có sẵn từ trước, gate làm nặng thêm chút, cần theo dõi nếu fire thật.
 > ⚠️ File này inject vào MỌI phiên/dispatch — giữ NHỎ. Chỉ để mục LIVE/đang-mở. Dự án ĐÓNG (NO-GO/
 > KHÉP KÍN/XONG) → chuyển thành 1 file `kb/projects/<slug>.md` + thêm 1 dòng vào `kb/projects/INDEX.md`
 > (INDEX được inject, chi tiết chỉ `cat` khi cần). Đừng để nhật ký dự án đã đóng tích lại ở đây.

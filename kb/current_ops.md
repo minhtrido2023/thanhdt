@@ -12,9 +12,23 @@ Trứng vàng trong ngày khi CAPIT kích hoạt, để có tiền sẵn sàng s
 sẽ tự thấy hướng dẫn khi lập plan T+1 lúc CAPIT fire, không cần Mike can thiệp tay mỗi lần.
 2 điểm cần biết nếu fire: (a) sát biên "grind" (91 vs cửa sổ 20-90 phiên — lệch 1 phiên khiến size
 full 0,75 thay vì 0,375 nếu tính grind); (b) dd52w hiện tại (~-7%) sẽ là mức nông nhất từng fire
-trong lịch sử 2014-2026 (kỷ lục cũ -7,4%) — ngoài rìa mẫu dữ liệu đã biết. Basket dự kiến nếu fire
-(data 07-17): PNJ, NCT, VNM, SAB, PVT — không mã cấm, NCT thanh khoản mỏng nên cần chia lệnh. Kiểm
-tra lại `data/golive_v23_status.json` (`capit_fired`) sau cron 19:00 mỗi tối để biết đã fire chưa.
+trong lịch sử 2014-2026 (kỷ lục cũ -7,4%) — ngoài rìa mẫu dữ liệu đã biết. Kiểm tra lại
+`data/golive_v23_status.json` (`capit_fired`) sau cron 19:00 mỗi tối để biết đã fire chưa.
+
+**PNJ EXCLUDED khỏi rổ CAPIT — due-diligence gate đã wire + verify (2026-07-20, job
+`Taylor_20260720_081359`).** PNJ đang khủng hoảng thật (P-Lab bị bắt vì buôn lậu kim cương, scandal
+02/07, giá sập ~-32%, team đã kết luận AMBIGUOUS trong `agents/Taylor/research/
+calculated_fear_state_backstop.md` §7, cổng xác nhận thật là BCTC Q3/2026 ~cuối tháng 10 — KHÔNG
+phải case sạch như PNJ-2015). quant-skeptic CONFIRMED (cao): PNJ pbz=-2,699, xếp HẠNG 1 trong pool
+CAPIT ngày 07-17 — nếu không có gate, CAPIT sẽ mua PNJ full size đúng lúc khủng hoảng. Cơ chế:
+`anomaly_scan.py` (build từ ground-truth DGC+PNJ) ghi `data/anomaly_flags.json` (cờ 30 ngày, TTL
+verify không rò rỉ), CAPIT basket-selection lọc bỏ mọi ticker có cờ active TRƯỚC bước chọn pbz —
+gate CHUNG, không hardcode tên, tự áp dụng cho case tương lai. Đã wire vào `ops_health_check.sh`
+08:20+12:45 (tier-H alert Trading Daily, tier-W ghi cờ im lặng). Rổ hiện tại (nếu fire hôm nay):
+NCT, PVT, SAB, VNM (PNJ đã loại). **Giới hạn thật cần nhớ**: gate KHÔNG backtest được (n=1, không
+có lịch sử point-in-time), coi là bảo hiểm chi phí chưa đo được, đừng trích dẫn như alpha đã kiểm
+chứng; sau khi loại PNJ (mã thanh khoản nhất), rổ neo vào NCT (ADV 2,18 tỷ/ngày, sát sàn 2 tỷ) —
+vấn đề sizing NCT có sẵn từ trước, gate làm nặng thêm chút, cần theo dõi nếu fire thật.
 > ⚠️ File này inject vào MỌI phiên/dispatch — giữ NHỎ. Chỉ để mục LIVE/đang-mở. Dự án ĐÓNG (NO-GO/
 > KHÉP KÍN/XONG) → chuyển thành 1 file `kb/projects/<slug>.md` + thêm 1 dòng vào `kb/projects/INDEX.md`
 > (INDEX được inject, chi tiết chỉ `cat` khi cần). Đừng để nhật ký dự án đã đóng tích lại ở đây.
