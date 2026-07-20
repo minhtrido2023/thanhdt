@@ -125,3 +125,63 @@ Hai hệ quả:
 - ❌ Không sửa `pt_v23_audit_2014.py` / plan / executor logic ngoài điểm gọi.
 - ❌ Không chỉnh X/D để khớp kỳ vọng.
 - ✅ Selfcheck + regression + sửa tài liệu + route quant-skeptic.
+
+---
+## 7. Quant-skeptic — **CONFIRMED (high)** · log `mike/logs/verify_20260720_174011.log`
+
+Reviewer tự tái tính độc lập: 1/14 event · NNC 2016-01-18 · adv20_pre 0,335122 → cap 0,067025
+vs uncapped 0,076 → **8.975.500đ** khớp đến từng chữ số; 11/11 unit test PASS từ worktree nhánh
+và **ImportError trên main** (chứng minh thật sự chưa merge); 2 regression suite exit 0; ADV
+window strictly TRƯỚC ngày washout, không cột forward nào.
+
+### Killer objection — CÓ THẬT, chưa xử lý
+Cap enforce **per-account** bằng VND tuyệt đối, mà **cả hai account live nhận cùng rổ CAPIT** →
+tổng tham gia có thể đạt **~20% ADV** thay vì 10% như ý đồ. Lập luận "VND tuyệt đối ⇒ đúng cho
+mọi account theo cấu tạo" (§1) đúng *trên từng account* nhưng **âm thầm bỏ mất trần gộp**.
+
+Tôi lượng hoá độc lập — **hôm nay không binding**:
+
+| ticker | combined (tỷ) | ADV20 (tỷ) | %ADV gộp | trần/account (tỷ) |
+|---|---|---|---|---|
+| NCT | 0,082 | 2,338 | **3,52%** | 0,468 |
+| SIP | 0,087 | 3,054 | 2,84% | 0,611 |
+| SAB | 0,087 | 23,29 | 0,37% | 4,658 |
+| PVT | 0,086 | 48,50 | 0,18% | 9,700 |
+| VNM | 0,088 | 138,78 | 0,06% | 27,756 |
+
+→ Lỗ hổng thiết kế thật, **không khẩn**. Cần **quyết định chính sách** (Mike/user), không phải
+tôi tự chọn: chia cap cho N account live, HAY chấp nhận N×X×ADV và ghi rõ %ADV hiệu dụng.
+
+### Caveat 2 — thứ tự merge BẮT BUỘC
+CAPIT đang FIRED nhưng artifact **chưa có** `capit_adv_caps`. Merge trước khi chạy lại golive →
+fail-closed **chặn sạch sleeve**. Thứ tự: chạy `golive_recommend_v23.py` → xác nhận artifact có
+`capit_adv_caps` đủ 5 tên → **mới** merge.
+
+### Caveat 3 — bằng chứng gitignored
+`mike/` bị gitignore (`.gitignore:102`) → selfcheck script + RESULT.md **không** nằm trong commit
+`5d273e8` (chỉ 3 file code). Đã xác nhận.
+
+### ref_price units — kiểm tra, không hiện hữu hôm nay
+Skeptic cảnh báo cap có thể **fail OPEN** nếu ref_price về đơn vị nghìn. Plan hôm nay cả 2 account
+resolve ra VND chuẩn (NCT 94200 · PVT 17000 · SAB 47300 · SIP 46950 · VNM 58500) → không hiện hữu,
+nhưng guard nên thêm (hiện chỉ có guard `ref_price<=0`).
+
+---
+## 8. ⚠️ HAI SỰ CỐ VẬN HÀNH PHÁT HIỆN KHI VÀO PHIÊN (07-21 00:36)
+
+**(1) Live tree đang checkout nhánh CHƯA merge — ĐÃ XỬ LÝ.** Repo production
+`/home/trido/thanhdt/WorkingClaude` đang ở nhánh `capit-adv-cap-20260721` với 3 file production
+sửa dở (staged). Cron 09:05 chạy thẳng từ tree này → `cap_capit_orders()` fail-closed sẽ **chặn
+sạch 11 lệnh CAPIT cả 2 account** đúng ngày CAPIT fire full-size. Đã commit nhánh (`5d273e8`) rồi
+`git checkout main`; verify `cap_capit_orders` **không tồn tại** trên tree hiện tại.
+
+**(2) `plan_SpaceX_2026-07-21.json` KHÔNG LOAD ĐƯỢC — CHƯA xử lý, đã escalate.**
+`load_plan()` raise `TypeError: PlannedOrder.__init__() missing 1 required positional argument:
+'side'` — plan dùng schema `action`/`qty` (DollarBill v2), loader chỉ normalize `ref_price`, không
+map `action→side`. ZaloPay load bình thường (6 lệnh).
+**PRE-EXISTING** — verify bằng cách exec bản `plan.py` tại commit HEAD (không có
+`cap_capit_orders`): SpaceX FAIL y hệt, ZaloPay OK. **Không** do thay đổi của tôi.
+Hậu quả: 5 lệnh CAPIT SpaceX (~236 triệu) không được đặt lúc 09:05, đúng ngày CAPIT fire FULL size.
+**Tôi không tự sửa** (plan + logic đặt lệnh = ranh giới cứng). Đã escalate: bus event `question` +
+Telegram + Trading Daily. Khuyến nghị: DollarBill re-gen plan SpaceX đúng schema, sạch hơn là vá
+loader gấp trước giờ mở cửa.
