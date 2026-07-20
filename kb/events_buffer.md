@@ -576,3 +576,11 @@
 - [2026-07-20T05:04:15Z] Winston/heartbeat — Winston_20260720_045913: {"status": "still_running", "elapsed_min": 5, "job_id": "Winston_20260720_045913", "source": "watcher"}
 - [2026-07-20T05:05:15Z] Winston/heartbeat — Winston_20260720_045913: {"status": "still_running", "elapsed_min": 6, "job_id": "Winston_20260720_045913", "source": "watcher"}
 - [2026-07-20T05:06:30Z] Winston/status — deposit-rate-refresh-dispatch: {"month": "2026-07", "current": "6.80", "direct_fetch_hint": "none"}
+
+## Consolidation 2026-07-20T05:10:21Z
+- [2026-07-20T05:07:08Z] Winston/heartbeat — in_progress: {"status": "in_progress", "note": "Searching Big4 12M online deposit rates Jul 2026, initial results show 6.80% still holds"}
+- [2026-07-20T05:07:31Z] Winston/heartbeat — Winston_20260720_050630: {"status": "still_running", "elapsed_min": 1, "job_id": "Winston_20260720_050630", "source": "watcher"}
+- [2026-07-20T05:08:31Z] Winston/heartbeat — Winston_20260720_050630: {"status": "still_running", "elapsed_min": 2, "job_id": "Winston_20260720_050630", "source": "watcher"}
+- [2026-07-20T05:09:32Z] Winston/heartbeat — Winston_20260720_050630: {"status": "still_running", "elapsed_min": 3, "job_id": "Winston_20260720_050630", "source": "watcher"}
+- [2026-07-20T05:09:59Z] Winston/status — deposit-rate-refresh-done: {"rate": 6.8, "changed": false, "note": "SKIP idempotent: 2026-07-20 already recorded. Cross-check confirms 6.80% unchanged — kenh14 16/7 all Big4 online 12M = 6.8%, 24hmoney 7/7 Agri/BIDV/CTG 6.8% online."}
+- [2026-07-20T05:10:08Z] Winston/finding — deposit-rate-Jul2026: {"rate": 6.8, "status": "CONFIRMED_UNCHANGED", "sources": ["kenh14.vn 16/7 all Big4 online 12M 6.8%", "24hmoney.vn 7/7 Agri/BIDV/CTG 6.8% online"], "note": "VCB appears at 5.9% on 24hmoney 7/7 but 6.8% on kenh14 16/7 — likely raised between 7-16 Jul. Consensus 6.80% confirmed.", "append_result": "SKIP_idempotent"}
