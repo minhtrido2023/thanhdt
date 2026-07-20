@@ -3877,3 +3877,64 @@ reshuffle-luck mà per-year LOO đã bác ở Wave1/H8a → **KHÔNG wire**, kh�
 Trạng thái hôm nay (2026-07-17): liq_ratio = **0.543** = **percentile 2.3%** của lịch sử 2013+; thấp hơn
 cả ngưỡng thấp nhất từng test (0.70) → kể cả nếu tín hiệu đúng cũng KHÔNG có mẫu lịch sử để hiệu chỉnh
 ở mức này (out-of-sample thật sự). Đây là lý do thứ hai để không wire.
+
+---
+
+## DC-book waterfall sleeve — 2 câu cấu trúc: DC-share floor & phạm vi cap 0.15 (job Taylor_20260720_095235)
+
+RESEARCH ONLY — paper sleeve KHÔNG đổi (vừa reset ở job _091731). Tái sử dụng harness có sẵn:
+`dc_waterfall_deepdive.py` (job _173317) cho câu 1, `dc_overlap_cap_backtest.py` (job _042827) +
+`mike/agents/Taylor/dc_overlap_cap_narrow_exp.py` (mới, experiment-named theo §8) cho câu 2.
+Panel cache `data/dc_dbl_panel.csv` / `dc_stock_ret.csv` / `dc_park_ret.csv` (07-07) dùng lại, không build lại.
+**N-budget khai báo trước = 7 trials** (4 câu 1 + 3 câu 2), không sweep thêm.
+
+### CÂU 1 — DC book có nên được phép chiếm 100% sleeve, hay cần SÀN cho custom30V?
+Mức độ liên quan (grounding): trên 2.397/2.985 phiên có ≥1 mã DC, **44,3% số phiên DC ăn TRỌN sleeve**
+(n≥5 → w=min(0.20,1/n) làm park_frac=0); park_frac trung bình 37,0%. Đây là hiện tượng thật, không hiếm.
+
+| Config | FULL CAGR | Sharpe | MaxDD | Calmar | OOS Calmar |
+|---|---|---|---|---|---|
+| **A. DC-first không trần tổng (pinned)** | **27,68%** | **1,85** | **−15,5%** | **1,79** | **1,83** |
+| B. trần tổng DC 70% | 27,46% | 1,83 | −15,5% | 1,77 | 1,83 |
+| B. trần tổng DC 50% | 27,44% | 1,83 | −16,0% | 1,72 | 1,76 |
+| B. trần tổng DC 30% | 27,44% | 1,82 | −16,7% | 1,65 | 1,69 |
+
+**A thắng mọi metric, mọi cửa sổ (FULL/IS/OOS).** Quan hệ **đơn điệu theo liều**: càng ép nhiều tiền
+xuống custom30V, MaxDD càng xấu (−15,5 → −16,0 → −16,7) và Calmar càng giảm (1,79 → 1,65). Đơn điệu
+liều-đáp ứng là dấu hiệu cơ chế thật, không phải nhiễu chọn mẫu. Diễn giải: lớp DC (double-confirm =
+sector-lens BUY ∧ 8L≤2) trong NEUTRAL là tập con phòng thủ/chất lượng; pha loãng nó về rổ 30 mã rộng
+làm TĂNG beta của sleeve chứ không giảm rủi ro. **→ KHÔNG thêm sàn custom30V. Giữ nguyên A.**
+
+### CÂU 2 — trần 0,15/mã: BROAD (mọi mã, đang wired) vs NARROW (chỉ mã trùng DC∩custom30V)
+
+| Config | FULL CAGR | Sharpe | MaxDD | Calmar | max name-w | extraTC |
+|---|---|---|---|---|---|---|
+| control — không cap (tham chiếu) | 27,68% | 1,84 | −16,1% | 1,72 | 29,7% | 0 |
+| **A. BROAD 0,15 mọi mã (đang wired)** | 27,53% | 1,83 | **−15,6%** | **1,77** | 15,0% | 0,174pp/yr |
+| B. NARROW 0,15 chỉ mã trùng | 27,58% | 1,83 | −16,0% | 1,72 | 20,0% | 0,079pp/yr |
+
+**A (BROAD) thắng risk-adjusted**, nhất quán IS lẫn OOS (OOS Calmar 1,83 vs 1,79). Trả giá 0,05pp CAGR
+để đổi lấy MaxDD chặt hơn 0,4pp và trần tên 15% thay vì 20%.
+
+**Phát hiện then chốt — ý đồ gốc "chống trùng mã" là CHẨN ĐOÁN SAI vị trí rủi ro:** đếm name-days mà
+control vượt 0,15 → **DC-only 4.299 / mã TRÙNG 1.120 / c30V-only 0**. Tức **79% lực chặn của trần rơi
+vào mã DC-only, không phải mã trùng.** Nguồn tập trung thật là w_dc=min(0,20;1/n) khi n nhỏ (n≤6), chứ
+không phải chồng lấn 2 leg. Vì vậy NARROW gần như trùng khít control (Calmar 1,72 = 1,72; MaxDD −16,0
+vs −16,1) — nó chặn đúng chỗ ÍT quan trọng. **→ Giữ BROAD như code hiện tại.**
+
+### Giới hạn & self-check (đọc trước khi trích dẫn)
+- **SELF-CHECK A = 2,78e-17** (phân rã per-name Σ Wp·ret == park_ret) — đây là identity "0 VND" thật sự
+  quan trọng: cả 3 biến thể câu 2 dựng trên cùng phân rã chính xác này, nên chênh lệch giữa chúng là
+  cơ chế thuần, không phải sai số tái dựng. SELF-CHECK D (NARROW ≤15,000% trên mã trùng) và E
+  (Σw ≤ 1,0) PASS đúng biên.
+- ⚠️ **SELF-CHECK B (control vs file NAV `converge_portfolio_backtest_nav.csv`) = 2,82e-02, KHÔNG phải 0.**
+  Đây là artifact ĐÃ BIẾT và đã ghi trong chính harness _042827 (file NAV build trước sync 23:45 → lệch
+  227 ngày); `overlay()` vì thế rebuild `park_ret` từ cache thay vì đọc file. Không phải lỗi mới phát
+  sinh, nhưng **không được nói "self-check 0 VND" cho nhánh này** — chỉ nhánh A đạt machine-zero.
+- **Độ tin cậy: THẤP về mặt thống kê.** DSR của toàn bộ excess DC-book (N=10 trials) = **0,111** ≪ 0,95.
+  Cả 2 câu ở đây là lựa chọn bậc-2 BÊN TRONG một sleeve vốn đã dưới ngưỡng DSR. Biên độ 0,05–0,24pp CAGR
+  nằm trong nhiễu. Lý do vẫn kết luận được: cả 2 câu đều **giữ nguyên hiện trạng**, và lập luận dựa vào
+  (a) đơn điệu liều-đáp ứng (câu 1) và (b) cơ chế a-priori "chặn tập trung → giảm DD" cộng chẩn đoán
+  name-days (câu 2) — chứ không dựa vào chữ số CAGR.
+- **KHÔNG đổi gì ở paper sleeve.** Kết luận của cả 2 câu = giữ nguyên code hiện tại, nên không có hành
+  động wire nào cần user duyệt.
