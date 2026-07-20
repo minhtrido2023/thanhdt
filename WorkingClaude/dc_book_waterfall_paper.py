@@ -635,7 +635,7 @@ def _dcf_echo_line(dc_names, last_close, asof):
             d = _dcf_check_for_order(t, px, asof)
             log_dcf_history(t, d, "dc_book_waterfall_paper", asof=asof)
             # side="paper": không kích đuôi "cần dcf_override_reason" (chỉ áp cho BUY order thật)
-            s = format_dcf_check(d, side="paper")
+            s = format_dcf_check(d, side="paper", ticker=t)
             if s.startswith("DCF: NOT_COMPUTED"):
                 s = s.replace("DCF: ", "", 1)          # gọn cho dòng gộp nhiều mã
             else:

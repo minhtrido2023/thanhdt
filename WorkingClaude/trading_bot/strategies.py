@@ -119,10 +119,28 @@ def _dcf_check_for_order(ticker, price, asof):
                 "robust": False, "reason": f"dcf_error: {str(exc)[:80]}",
                 "conglomerate": _dcf_is_conglomerate(ticker), "as_of": str(asof)[:10]}
 
-def format_dcf_check(dcf, side="buy", has_override=False):
+def _format_alt_lens(ticker):
+    """Lăng kính định giá thay thế khi DCF NOT_COMPUTED. Fail-safe: import/lỗi → ""."""
+    if not ticker:
+        return ""
+    try:
+        import sys as _sys
+        if WORKDIR not in _sys.path:
+            _sys.path.insert(0, WORKDIR)
+        from alt_valuation_lens import format_alt_lens
+        return format_alt_lens(ticker)
+    except Exception as exc:
+        _log.warning("alt lens lỗi cho %s: %s", ticker, exc)
+        return ""
+
+
+def format_dcf_check(dcf, side="buy", has_override=False, ticker=None):
     """1 dòng hiển thị chuẩn cho dcf_check dict (Pha 2) — dùng chung mọi report echo
     (send_plan_report / eod_trading_report / paper sleeve). Informational only.
-    Trả "" khi dcf rỗng/None — caller bỏ dòng, không hiện gì."""
+    Trả "" khi dcf rỗng/None — caller bỏ dòng, không hiện gì.
+
+    ticker: khi có, NOT_COMPUTED được nối thêm LĂNG KÍNH ĐỊNH GIÁ THAY THẾ theo ngành
+    (job Taylor_20260720_101638) thay vì để trống. Bỏ trống ticker → dòng cũ nguyên vẹn."""
     if not dcf or not isinstance(dcf, dict):
         return ""
     status = dcf.get("status")
@@ -130,7 +148,8 @@ def format_dcf_check(dcf, side="buy", has_override=False):
     cong_s = " ⚠ đa ngành — DCF gộp 1 dòng tiền, có thể không phản ánh đúng" \
         if dcf.get("conglomerate") else ""
     if status == "NOT_COMPUTED":
-        return f"DCF: NOT_COMPUTED ({dcf.get('reason', '?')})"
+        return (f"DCF: NOT_COMPUTED ({dcf.get('reason', '?')})"
+                + _format_alt_lens(ticker or dcf.get("ticker")))
     mos = dcf.get("margin_of_safety")
     mos_s = f"{mos * 100:+.1f}%" if isinstance(mos, (int, float)) else "n/a"
     robust_s = "robust" if dcf.get("robust") else "không robust"

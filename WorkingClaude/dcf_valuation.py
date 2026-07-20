@@ -129,7 +129,10 @@ DCF_DISCLAIMER = (
     "này. Với doanh nghiệp ĐA NGÀNH/HOLDING (mảng khác nhau, kinh tế + rủi ro khác nhau — cần "
     "định giá sum-of-the-parts) kết quả có thể KHÔNG CÓ Ý NGHĨA dù trông chính xác; các tên đã "
     "biết được đánh dấu '⚠ đa ngành', nhưng danh sách duy trì tay nên không đầy đủ. Nhóm tài "
-    "chính (ngân hàng/bảo hiểm/chứng khoán) bị loại hẳn → NOT_COMPUTED."
+    "chính (ngân hàng/bảo hiểm/chứng khoán) bị loại hẳn → NOT_COMPUTED. Khi NOT_COMPUTED, "
+    "report nối thêm LĂNG KÍNH THAY THẾ theo ngành (Gordon P/B ngân hàng, P/B chứng khoán, "
+    "EV/EBITDA cảng-viễn thông, P/B trough vận tải biển, 8L fallback) — độ tin cậy ghi rõ "
+    "trong ngoặc vuông, cũng THUẦN THAM KHẢO."
 )
 
 
