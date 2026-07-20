@@ -1,6 +1,13 @@
 # Deposit-rate auto-crosscheck automation (2026-07-20)
 
-**Status: DONE — quant-skeptic CONFIRMED after 10 rounds of adversarial review.**
+**Status: LIVE — quant-skeptic CONFIRMED after 10 rounds of adversarial review.**
+
+**Timeline note**: briefly reverted to notify-only same day (commit `91886bf`) by a parallel
+session watching the review churn mid-process ("cost > benefit after 6 rounds"), then
+RE-ENABLED same day (commit `49481e7`) once the user reviewed the final CONFIRMED design +
+the real `current_deposit_rate()` bug the process caught, plus a new requirement: Winston
+now ALWAYS posts a same-day highlighted Discord notification after each monthly check
+(changed or not), instead of staying silent on no-change.
 
 ## What changed
 

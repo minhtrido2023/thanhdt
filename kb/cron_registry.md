@@ -110,6 +110,14 @@ BQ_LOCAL_CACHE` nếu import chain có thể dính cache (bài học C1).
   encode đủ trong `vn_market.py`.
 
 ## Log thay đổi
+- 2026-07-20 (Mike, user approved trực tiếp): sau entry gốc bên dưới, cơ chế trải qua thêm 7 vòng
+  quant-skeptic REFUTED→fix (tổng 10 vòng, chi tiết `kb/projects/deposit-rate-autocheck.md`) — luật
+  "1 bài liệt kê đủ 4 ngân hàng = đối chiếu chéo" ở entry gốc đã bị loại bỏ (lỗ hổng N=1), thay bằng
+  kiểm tra domain cơ học (`--sources` JSON, ≥2 nhóm sở hữu độc lập). Giữa chừng bị 1 phiên song song
+  revert về chỉ-nhắc (lo ngại chi phí review), rồi user xem lại thiết kế CONFIRMED cuối + bug thật
+  tìm được (`current_deposit_rate()` ghim sai khi có ngày tương lai/gõ nhầm) → quyết định bật lại
+  (commit `49481e7`), kèm yêu cầu MỚI: Winston giờ LUÔN báo Trading Daily cùng ngày có kết quả (đổi
+  hay không đổi), có dòng 🆕 highlight rõ đây là số mới — không còn quiet-heartbeat cho mục này.
 - 2026-07-20 (Mike, user approved trực tiếp — "để bạn tự động cập nhật thông tin mà không phụ
   thuộc tôi"): nâng cấp `refresh_deposit_rate_vn.sh` từ CHỈ-NHẮC sang tự-xác-nhận-và-ghi. Không
   còn dừng ở "nhắc con người chạy `append_deposit_rate.py`" — giờ tự dispatch Winston mỗi tháng để
