@@ -13,6 +13,12 @@ Source / calibration (2026-06-19):
       2021/2022H1 ~5.5; 2020 6.0->5.7 (COVID cuts); 2015-17 ~5.5-6.5; 2014 ~7.0.
   - Pre-2014 (out of the value panel, kept for context): 2011 SBV cap ~14%; 2012 12->9; 2013 8->7.
 ⚠️ PROXY — levels are best-estimate (esp. 2022-H2 spike). Refine if a clean Big-4 series surfaces.
+
+Methodology — resolving Big-4 disagreement (decided 2026-07-20):
+  Representative rate = MODE (most common value across all 4 banks), NOT average.
+  If 3/4 banks agree on a value, that value wins regardless of the outlier.
+  Rationale: the rate that the majority of the dominant state-banks offer is the true market anchor;
+  averaging in a contradictory outlier (often from a different channel/term) distorts the hurdle.
 """
 import os
 import numpy as np, pandas as pd
@@ -86,10 +92,14 @@ def merge_deposit(df, time_col="time"):
 
 
 def current_deposit_rate(asof=None):
+    """asof=None means TODAY, not "the last row in the series" — a future-dated or typo'd
+    effective_date (e.g. a year typo) must never pin/pre-empt the live value. Found 2026-07-20
+    via adversarial review of append_deposit_rate.py (mike/kb/projects/deposit-rate-autocheck.md,
+    round 7->8): the old `if asof is None: return ev.deposit_rate.iloc[-1]` returned whatever row
+    sorted last by time, with no bound against the real clock — rating_8l.py calls this with no
+    asof (the live NEUTRAL-tilt path), so this was a real, reachable production gap."""
     ev = deposit_events_df()
-    if asof is None:
-        return float(ev.deposit_rate.iloc[-1])
-    asof = pd.to_datetime(asof)
+    asof = pd.Timestamp.today().normalize() if asof is None else pd.to_datetime(asof)
     return float(ev[ev.time <= asof].deposit_rate.iloc[-1])
 
 
