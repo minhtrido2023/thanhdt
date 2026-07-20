@@ -161,3 +161,50 @@ Factor học thuật (kiến thức chuẩn ngành, không cần trích web): Sl
 Novy-Marx (2013) gross profitability · Fama-French (2015) 5-factor CMA · Frazzini-Pedersen (2014)
 BAB · Asness-Frazzini-Pedersen (2019) QMJ · Altman (1968) Z-score · Beneish (1999) M-score ·
 George-Hwang (2004) 52-week high · Piotroski (2000) F-score.
+
+---
+
+## §5 — KẾT QUẢ candidate #3 (Breadth sâu hơn) — **NO-GO cả 3 metric**
+
+**Job:** `Taylor_20260720_114042` · **Ngày:** 2026-07-20 · **N trials khai báo trước = 3**
+(B1 A/D line · B2 new-high/new-low 3M · B3 %>MA20 + %>MA50). Không sweep tham số; cửa sổ
+divergence cố định 60 phiên chọn trước. Artifact: `exp_breadth/{build_breadth_panel,analyze_breadth,
+fairness_check}.py`, `exp_breadth/{breadth_panel,ic_divergence}.csv`.
+
+**Điều chỉnh khung test so với §2 dòng #3** (đúng như dispatch yêu cầu): test ở tầng
+**market-timing**, KHÔNG ép breadth thành factor xếp hạng từng mã (category error — breadth
+không có giá trị per-ticker). Biến mục tiêu = forward VNINDEX return T+5/20/60.
+
+**Sanity check nguồn:** `b_rsi_os` tính được ngày 07-17 = **0,2176**, khớp CHÍNH XÁC
+`breadth_oversold` production đang theo dõi cho CAPIT → panel dựng đúng.
+
+### Kết quả
+
+| Bằng chứng | Kết luận |
+|---|---|
+| **Sign-stability IS→OOS** | **5/18** cặp (metric × horizon) giữ đúng dấu — **thấp hơn cả coin-flip 9/18** |
+| IC divergence h=20 | B3_ma50: IS **+0,074** (p=0,005) → OOS **−0,050** (p=0,047) — lật dấu, cả 2 đều "có ý nghĩa" |
+| | B1_ad_line h=60: IS **−0,138** → OOS **+0,121** — lật dấu mạnh nhất |
+| | B2_nhnl: IS ≈ 0,00 (không tín hiệu) → OOS +0,065 — chỉ có ở OOS, không phải edge bền |
+| Tercile H−L (h=20) | Lật dấu ở **6/6** metric giữa IS và OOS |
+| Đuôi cực đoan (D1 vs D10) | Không metric nào giữ được thứ tự đơn điệu ở cả IS lẫn OOS |
+| Per-year IC | Không metric nào giữ dấu ổn định; IC dương tập trung ở **2025-2026** ở CẢ 6 metric (kể cả 2 PROD) ⇒ artifact chế độ thị trường, không phải tín hiệu |
+| Fairness check (dùng LEVEL thay divergence) | **Tệ hơn** — B1 level OOS −0,153/−0,246 (lật dấu từ IS ≈0) ⇒ kết luận không phải do spec divergence làm oan |
+
+### Trùng lặp (mục 3 của dispatch)
+Ở mức divergence, 3 metric mới **trùng nhau nặng** (B3_ma20↔B3_ma50 = **0,79**; B2↔B3_ma20 =
+**0,75**) và trùng vừa phải với PROD %>MA200 (0,41–0,60; B1↔%>MA200 = **0,60**). Nghĩa là phần
+"thông tin mới" vốn đã nhỏ — và phần nhỏ đó không dự báo được gì.
+
+### ⚠️ Điều KHÔNG được suy ra từ kết quả này
+2 breadth PROD hiện tại **cũng** trượt cùng bài test (P_ma200 1/3, P_rsi_os 2/3 sign-stable) —
+nhưng điều đó **KHÔNG có nghĩa chúng hỏng**. Chúng chưa bao giờ được wire làm **bộ dự báo return**:
+%>MA200 là **guard chặn cap fail-safe** (suppress cap US khi VN-US phân kỳ), %RSI<0,3 là
+**trigger trạng thái** cho washout CAPIT. Đó là việc khác. Kết quả này thực ra **ủng hộ** quyết
+định thiết kế cũ: breadth ở VN dùng làm *cổng điều kiện* thì được, làm *dự báo hướng* thì không.
+
+### Kết luận
+**NO-GO cả 3.** Không wire gì vào DT5G/production (đúng phạm vi thăm dò). Không đề xuất vòng
+tiếp theo cho breadth — dư địa "mở rộng bộ breadth" đã được đo và rỗng. Nhóm A còn lại đáng làm:
+**#4 low-beta as factor** (nhưng đọc trước finding `Taylor_20260720_111429`: `risk_rating.Beta`
+là BIN 1–5, phải tự tính beta liên tục trước).
