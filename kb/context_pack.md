@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v1192)
+# Mike fleet — context pack (v1193)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-20T05:47:38] Wags/finding — wags-fix: coord-2026-07-20 — question tồn đọng là ESCALATION THẬT, không phải lỗi checker; nhưng routing question→wags_autofix là category error: {"root_cause": "HAI phần. (1) Alert KHÔNG phải false positive: Winston/deposit-rate-refresh-question (2026-07-20T05:24:05Z, job Winston_20260720_051840) là esca …
 - [2026-07-20T05:48:04] Winston/answer — deposit-rate-refresh-question-closed: {"job_closed": "Winston_20260720_051840", "result": "rate=6.80%", "methodology": "mode_of_big4_not_average", "rationale": "3/4 Big-4 (Agribank/BIDV/VietinBank)  …
 - [2026-07-20T05:48:10] Winston/finding — deposit-rate-methodology-documented: {"summary": "Big-4 deposit rate representative methodology now documented in deposit_rate_vn.py docstring", "rule": "MODE (most common across 4 banks), NOT aver …
 - [2026-07-20T05:55:16] Winston/finding — deposit-rate-July2026: {"rate_confirmed": 6.8, "effective": "2026-07-20", "big4_breakdown": {"Agribank": "6.8%", "BIDV": "6.8%", "VCB": "6.8%", "VietinBank": "6.8%"}, "sources": [{"pu …
@@ -11,6 +10,7 @@
 - [2026-07-20T05:58:45] quant-skeptic/verification — ✅ CONFIRMED VERIFY: ad-hoc claim: {"finding_topic": "ad-hoc claim", "verdict": "CONFIRMED", "confidence": "high", "checks": {"look_ahead_leak": "pass — the fix IS an anti-look-ahead/point-in-tim …
 - [2026-07-20T06:05:32] Winston/finding — deposit-rate-july2026-confirmed: {"rate_current": 6.8, "rate_confirmed": 6.8, "changed": false, "sources": [{"publisher": "DNSE Senses", "url": "https://www.dnse.com.vn/senses/tin-tuc/lai-suat- …
 - [2026-07-20T06:10:21] quant-skeptic/verification — ✅ CONFIRMED VERIFY: ad-hoc claim: {"finding_topic": "ad-hoc claim", "verdict": "CONFIRMED", "confidence": "high", "checks": {"look_ahead_leak": "na — no backtest/model claim; this is a writer-si …
+- [2026-07-20T06:19:27] Winston/decision — deposit-rate-autowrite-removed: {"action": "revert_to_notify_only", "reason": "6 adversarial review rounds each found new attack surface; user decision 2026-07-20 to remove surface entirely",  …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -327,6 +327,7 @@ dồn mẫu regime 2020-21, không phải pattern lặp lại được; hậu-20
 `~/thanhdt/backup.sh` → GitHub `minhtrido2023/thanhdt` (private). Daily 00:00 ICT.
 
 ## Dự án đã đóng — chi tiết theo yêu cầu (đọc khi cần: `cat kb/projects/<file>.md`)
+- 2026-07-20 **Deposit-rate auto-crosscheck automation** → `kb/projects/deposit-rate-autocheck.md` — DONE — refresh_deposit_rate_vn.sh tự dispatch Winston xác nhận + ghi (không cần người), 10 vòng quant-skeptic REFUTED→fix→re-review (mỗi vòng 1 lỗi thật, khác nhau) rồi CONFIRMED — kể cả 1 bug thật trong `deposit_rate_vn.current_deposit_rate()` (consumer, không phải chỉ writer).
 - 2026-07-17 **DCF upgrade (earning-power · GDP terminal-g · refresh-gate)** → `kb/projects/dcf-earning-power-upgrade.md` — TRIỂN KHAI XONG — Việc1 earning-power NO-GO (giữ FCFE); Việc3 `cap_rf` = default hiển thị `dcf_valuation.py` (level fix, không alpha, DCF non-decisional); Việc2 refresh-gate cron LIVE ngày 11. quant-skeptic CONFIRMED.
 - 2026-07-13 **World Cup + rổ lãi suất huy động (Pillar A′)** → `kb/projects/wc-deposit-rate-gate.md` — ĐÓNG cả 2 hướng — N quá mỏng / 0-4 GO, không wire production.
 - 2026-07-13 **Plan-approval gate (second-chance cron + code-gate)** → `kb/projects/plan-approval-gate.md` — XONG — second-chance re-send 23:00 + code-gate bot_execute.py, hiệu lực 09:05 07-14 (commits 4216295/27e1282/54d488c).
