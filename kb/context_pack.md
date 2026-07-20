@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v1196)
+# Mike fleet — context pack (v1197)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-20T05:50:33] arch-reviewer/verification — ARCH-REVIEW: wags-fix: coord-2026-07-20 — question tồn đọng là ESCALATION THẬT, không phải lỗi checker; nhưng routing question→wags_autofix là category error: {"finding_topic": "wags-fix: coord-2026-07-20 — question tồn đọng là ESCALATION THẬT, không phải lỗi checker; nhưng routing question→wags_autofix là category er …
 - [2026-07-20T05:58:45] quant-skeptic/verification — ✅ CONFIRMED VERIFY: ad-hoc claim: {"finding_topic": "ad-hoc claim", "verdict": "CONFIRMED", "confidence": "high", "checks": {"look_ahead_leak": "pass — the fix IS an anti-look-ahead/point-in-tim …
 - [2026-07-20T06:05:32] Winston/finding — deposit-rate-july2026-confirmed: {"rate_current": 6.8, "rate_confirmed": 6.8, "changed": false, "sources": [{"publisher": "DNSE Senses", "url": "https://www.dnse.com.vn/senses/tin-tuc/lai-suat- …
 - [2026-07-20T06:10:21] quant-skeptic/verification — ✅ CONFIRMED VERIFY: ad-hoc claim: {"finding_topic": "ad-hoc claim", "verdict": "CONFIRMED", "confidence": "high", "checks": {"look_ahead_leak": "na — no backtest/model claim; this is a writer-si …
@@ -11,11 +10,26 @@
 - [2026-07-20T07:21:22] Taylor/finding — VIX SpaceX — lo -24.4% nhung DUNG SPEC, khuyen nghi HOLD: {"ticker": "VIX", "account": "SpaceX 0002023347", "live_px_vnd": 12850, "live_px_time": "2026-07-20T14:19:31 ICT", "source": "DNSE latest_trade (KHONG dung BQ)" …
 - [2026-07-20T07:45:32] Taylor/finding — CAPIT readiness audit — cơ chế OK nhưng có 3 gap vận hành chặn deploy thật: {"job": "Taylor_20260720_074025", "scope": "audit readiness, KHONG sua code", "NOTE_NGAY": "dispatch ghi hom nay=2026-07-17 nhung thuc te dang la 2026-07-20 (T2 …
 - [2026-07-20T07:51:07] Winston/finding — deposit-rate-july2026-confirmed: {"rate": 6.8, "changed": false, "effective_date": "2026-07-20", "sources": ["cafef.vn 2026-07-13: Big-4 tat ca 6.8%/nam 12T", "24hmoney.vn 2026-07-07: BIDV/Agri …
+- [2026-07-20T08:02:12] Winston/finding — deposit-rate-vn-july2026-crosscheck: {"result": "CONFIRMED_NO_CHANGE", "rate_stored": 6.8, "rate_verified": 6.8, "effective_date": "2026-07-20", "sources": [{"publisher": "dnse.com.vn", "url": "htt …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
 > Mike cập nhật thủ công khi có thay đổi trạng thái quan trọng. Đọc trước mọi thứ khác khi restart.
-> Cập nhật lần cuối: 2026-07-17
+> Cập nhật lần cuối: 2026-07-20
+
+## CAPIT (bear-washout) — nguồn vốn CHỐT, đang theo dõi khả năng fire (2026-07-20)
+Breadth_oversold đang tăng dần (0,166 07-13 → 0,2176 07-17), tiến gần ngưỡng washout_gate=0,3 —
+Taylor audit readiness (`Taylor_20260720_074025`) tìm thấy mâu thuẫn công thức vốn (MD "size × free
+cash" vs code paper "NAV_LAG × capit_size", chênh ~100x) vì free-cash luôn ≈0 ở NEUTRAL parking.
+**User CHỐT (2026-07-20): công thức `NAV_book_LAG × capit_size` ĐÚNG ý đồ.** Nguồn vốn: user tự RÚT
+Trứng vàng trong ngày khi CAPIT kích hoạt, để có tiền sẵn sàng sáng hôm sau. Đã wire note này vào
+`bin/bq_freshness_check.sh` (chỉ chèn khi `capit_fired=true`, tránh nhiễu ngày thường) — DollarBill
+sẽ tự thấy hướng dẫn khi lập plan T+1 lúc CAPIT fire, không cần Mike can thiệp tay mỗi lần.
+2 điểm cần biết nếu fire: (a) sát biên "grind" (91 vs cửa sổ 20-90 phiên — lệch 1 phiên khiến size
+full 0,75 thay vì 0,375 nếu tính grind); (b) dd52w hiện tại (~-7%) sẽ là mức nông nhất từng fire
+trong lịch sử 2014-2026 (kỷ lục cũ -7,4%) — ngoài rìa mẫu dữ liệu đã biết. Basket dự kiến nếu fire
+(data 07-17): PNJ, NCT, VNM, SAB, PVT — không mã cấm, NCT thanh khoản mỏng nên cần chia lệnh. Kiểm
+tra lại `data/golive_v23_status.json` (`capit_fired`) sau cron 19:00 mỗi tối để biết đã fire chưa.
 > ⚠️ File này inject vào MỌI phiên/dispatch — giữ NHỎ. Chỉ để mục LIVE/đang-mở. Dự án ĐÓNG (NO-GO/
 > KHÉP KÍN/XONG) → chuyển thành 1 file `kb/projects/<slug>.md` + thêm 1 dòng vào `kb/projects/INDEX.md`
 > (INDEX được inject, chi tiết chỉ `cat` khi cần). Đừng để nhật ký dự án đã đóng tích lại ở đây.
