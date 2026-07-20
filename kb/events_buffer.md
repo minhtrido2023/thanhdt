@@ -675,3 +675,14 @@
 
 ## Consolidation 2026-07-20T06:00:04Z
 - [2026-07-20T06:00:04Z] Mafee/status — bot-done: {"account": "SpaceX", "plan_date": "2026-07-20", "elapsed_s": 1, "rc": 0}
+
+## Consolidation 2026-07-20T06:05:40Z
+- [2026-07-20T06:00:45Z] Winston/heartbeat — Winston_20260720_055945: {"status": "still_running", "elapsed_min": 1, "job_id": "Winston_20260720_055945", "source": "watcher"}
+- [2026-07-20T06:00:50Z] Winston/heartbeat — Winston_20260720_055945: {"status": "in_progress", "note": "Đang cross-check lãi suất Big-4 từ nhiều nguồn - thấy mâu thuẫn giữa 24hmoney (6.8%) và vnsignal/topi (~5.9%)"}
+- [2026-07-20T06:01:47Z] Winston/heartbeat — Winston_20260720_055945: {"status": "still_running", "elapsed_min": 2, "job_id": "Winston_20260720_055945", "source": "watcher"}
+- [2026-07-20T06:02:48Z] Winston/heartbeat — Winston_20260720_055945: {"status": "still_running", "elapsed_min": 3, "job_id": "Winston_20260720_055945", "source": "watcher"}
+- [2026-07-20T06:03:48Z] Winston/heartbeat — Winston_20260720_055945: {"status": "still_running", "elapsed_min": 4, "job_id": "Winston_20260720_055945", "source": "watcher"}
+- [2026-07-20T06:04:10Z] Winston/heartbeat — Winston_20260720_055945: {"status": "in_progress", "note": "Fetch vietnam.vn blocked 403. Đang kiểm tra official bank sites và nguồn độc lập khác cho 12-month online rate"}
+- [2026-07-20T06:04:48Z] Winston/heartbeat — Winston_20260720_055945: {"status": "still_running", "elapsed_min": 5, "job_id": "Winston_20260720_055945", "source": "watcher"}
+- [2026-07-20T06:05:25Z] Winston/status — deposit-rate-refresh-done: {"rate": 6.8, "changed": false, "note": "SKIP idempotent — 2026-07-20 đã ghi. Xác nhận: Big-4 online 12M vẫn 6.8%/năm, ổn định toàn tháng 7. Nguồn DNSE 7/7 + CafeF 15/7 đều confirm."}
+- [2026-07-20T06:05:32Z] Winston/finding — deposit-rate-july2026-confirmed: {"rate_current": 6.8, "rate_confirmed": 6.8, "changed": false, "sources": [{"publisher": "DNSE Senses", "url": "https://www.dnse.com.vn/senses/tin-tuc/lai-suat-ngan-hang-77-tai-agribank-vietcombank-bidv-vietinbank-mb-sacombank-hdbank-35244202", "date": "2026-07-07"}, {"publisher": "CafeF", "url": "https://cafef.vn/lai-suat-ngan-hang-15-7-tai-agribank-vietcombank-bidv-vietinbank-mb-sacombank-hdbank-188260715202748776.chn", "date": "2026-07-15"}], "note": "Big-4 (Agribank/BIDV/VCB/VietinBank) online 12M đồng loạt 6.8%/năm, stable từ đầu tháng 7. Idempotent SKIP vì đã ghi."}
