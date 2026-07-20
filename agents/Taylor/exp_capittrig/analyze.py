@@ -9,29 +9,29 @@ d = pd.read_parquet(P).dropna(subset=["fwd60_ew"])
 rng = np.random.default_rng(20260720)
 H = 60
 
+def _blk(N, block):
+    """Block length must stay well under N or the wrapped resample is just a ROTATION of the
+    whole array -> every replicate has an identical mean -> CI collapses to a point. (Bug hit
+    on the first run: every n<=60 series reported CI90=[mean,mean].) Cap at N//4."""
+    return max(1, min(block, N // 4))
+
+def _resample(x, block):
+    N = len(x); b = _blk(N, block); nb = int(np.ceil(N / b))
+    s = rng.integers(0, N, nb)
+    return x[np.concatenate([np.arange(k, k + b) % N for k in s])[:N]]
+
 def block_boot_mean(x, n=4000, block=H):
     """Stationary block bootstrap of the mean; returns (lo90, hi90)."""
     x = np.asarray(x, float); N = len(x)
-    if N < 2: return (np.nan, np.nan)
-    nb = int(np.ceil(N / block))
-    means = np.empty(n)
-    for i in range(n):
-        starts = rng.integers(0, N, nb)
-        idx = np.concatenate([np.arange(s, s + block) % N for s in starts])[:N]
-        means[i] = x[idx].mean()
+    if N < 4: return (np.nan, np.nan)
+    means = np.array([_resample(x, block).mean() for _ in range(n)])
     return tuple(np.percentile(means, [5, 95]))
 
 def boot_diff(xa, xb, n=4000, block=H):
     """CI of mean(xa)-mean(xb) resampling each independently (different fire sets)."""
     xa, xb = np.asarray(xa, float), np.asarray(xb, float)
-    if len(xa) < 2 or len(xb) < 2: return (np.nan, np.nan)
-    out = np.empty(n)
-    for i in range(n):
-        for j, x in enumerate((xa, xb)):
-            N = len(x); nb = int(np.ceil(N / block))
-            s = rng.integers(0, N, nb)
-            idx = np.concatenate([np.arange(k, k + block) % N for k in s])[:N]
-            out[i] = x[idx].mean() if j == 0 else out[i] - x[idx].mean()
+    if len(xa) < 4 or len(xb) < 4: return (np.nan, np.nan)
+    out = np.array([_resample(xa, block).mean() - _resample(xb, block).mean() for _ in range(n)])
     return tuple(np.percentile(out, [5, 95]))
 
 def events(mask, gap=30):
@@ -57,6 +57,14 @@ for _ in range(2000):
     sub = d.iloc[idx]
     rs.append(sub["bd_rsi30"].corr(sub["fwd60_ew"], method="spearman"))
 print(f"  block-bootstrap CI90 of rho = [{np.percentile(rs,5):+.4f}, {np.percentile(rs,95):+.4f}]")
+
+print("\n  [EXPLORATORY ADDENDUM — not part of the pre-registered GO test]")
+print("  Quintiles are too coarse in the tail (Q5 spans 0.06-0.84). Finer tail bins:")
+for lo_, hi_ in [(0.0,0.02),(0.02,0.05),(0.05,0.10),(0.10,0.20),(0.20,0.30),(0.30,1.01)]:
+    g = d[(d["bd_rsi30"] >= lo_) & (d["bd_rsi30"] < hi_)]
+    if len(g) < 4: continue
+    l, h = block_boot_mean(g["fwd60_ew"])
+    print(f"    breadth [{lo_:.2f},{hi_:.2f})  n={len(g):4d}  mean_fwd60={g['fwd60_ew'].mean():+.2%}  CI90=[{l:+.2%},{h:+.2%}]")
 
 print("\n" + "=" * 88); print("Q1b — THRESHOLD SWEEP (event-level, production clustering)"); print("=" * 88)
 base_all = d["fwd60_ew"].mean()
