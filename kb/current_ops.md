@@ -1,6 +1,20 @@
 # Current Operations — Mike fleet
 > Mike cập nhật thủ công khi có thay đổi trạng thái quan trọng. Đọc trước mọi thứ khác khi restart.
-> Cập nhật lần cuối: 2026-07-17
+> Cập nhật lần cuối: 2026-07-20
+
+## CAPIT (bear-washout) — nguồn vốn CHỐT, đang theo dõi khả năng fire (2026-07-20)
+Breadth_oversold đang tăng dần (0,166 07-13 → 0,2176 07-17), tiến gần ngưỡng washout_gate=0,3 —
+Taylor audit readiness (`Taylor_20260720_074025`) tìm thấy mâu thuẫn công thức vốn (MD "size × free
+cash" vs code paper "NAV_LAG × capit_size", chênh ~100x) vì free-cash luôn ≈0 ở NEUTRAL parking.
+**User CHỐT (2026-07-20): công thức `NAV_book_LAG × capit_size` ĐÚNG ý đồ.** Nguồn vốn: user tự RÚT
+Trứng vàng trong ngày khi CAPIT kích hoạt, để có tiền sẵn sàng sáng hôm sau. Đã wire note này vào
+`bin/bq_freshness_check.sh` (chỉ chèn khi `capit_fired=true`, tránh nhiễu ngày thường) — DollarBill
+sẽ tự thấy hướng dẫn khi lập plan T+1 lúc CAPIT fire, không cần Mike can thiệp tay mỗi lần.
+2 điểm cần biết nếu fire: (a) sát biên "grind" (91 vs cửa sổ 20-90 phiên — lệch 1 phiên khiến size
+full 0,75 thay vì 0,375 nếu tính grind); (b) dd52w hiện tại (~-7%) sẽ là mức nông nhất từng fire
+trong lịch sử 2014-2026 (kỷ lục cũ -7,4%) — ngoài rìa mẫu dữ liệu đã biết. Basket dự kiến nếu fire
+(data 07-17): PNJ, NCT, VNM, SAB, PVT — không mã cấm, NCT thanh khoản mỏng nên cần chia lệnh. Kiểm
+tra lại `data/golive_v23_status.json` (`capit_fired`) sau cron 19:00 mỗi tối để biết đã fire chưa.
 > ⚠️ File này inject vào MỌI phiên/dispatch — giữ NHỎ. Chỉ để mục LIVE/đang-mở. Dự án ĐÓNG (NO-GO/
 > KHÉP KÍN/XONG) → chuyển thành 1 file `kb/projects/<slug>.md` + thêm 1 dòng vào `kb/projects/INDEX.md`
 > (INDEX được inject, chi tiết chỉ `cat` khi cần). Đừng để nhật ký dự án đã đóng tích lại ở đây.
