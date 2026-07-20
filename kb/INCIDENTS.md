@@ -3114,9 +3114,12 @@ trên bus, đã kiểm tra trực tiếp không suy đoán):**
   ưu tiên cao hơn các mục cũ vì đây là lần 2 của cùng 1 lỗi ở tầng số liệu báo cáo client.
 - Theo dõi %fable qua `bin/spend_report.py` ở Friday KB review kế tiếp (2026-07-24).
 
-Verified by: Wags — PENDING (bước 4b sẽ chạy trước commit; xem dòng cập nhật ngay dưới nếu còn
-"PENDING" nghĩa là bước xác minh chưa hoàn tất — theo đúng bài học RETRO 07-18, KHÔNG được coi
-entry này là đã đóng nếu dòng này chưa đổi thành CONFIRMED/gaps-found-and-fixed).
+Verified by: Wags — **CONFIRMED (retroactive, job `Wags_20260720_173722`, 2026-07-20T17:37Z)**.
+Job gốc `Wags_20260719_173512` bị treo `status:running` không bao giờ hoàn tất (xem RETRO 07-20
+sự cố #4) — Wags làm lại đúng việc verification lẽ ra phải chạy 07-19: đối chiếu bus 07-19 (27
+event = 26 heartbeat + 1 finding, 0 error/question/decision, khớp mô tả entry), xác nhận 2 commit
+`993cf98`/`f77b061` có thật và nội dung khớp (+35/−4 và +26/−8), cột Nguồn gốc PASS blameless.
+2 sai số nhỏ không ảnh hưởng nội dung (đếm heartbeat "14"→thực 26, tính riêng Taylor).
 
 ## RETRO — 2026-07-20: 6 sự cố (2 phát hiện qua chính retro hôm nay bị Wags audit bắt lỗi ban
 ## đầu bỏ sót — xem "Đã sửa sau audit Wags" cuối entry), 3 pattern xuyên suốt (1 pattern TÁI
@@ -3273,9 +3276,12 @@ c. **PATTERN xuyên suốt, ĐẠT NGƯỠNG ESCALATION BƯỚC 10**: đây là 
    tiếp** (07-18 phát hiện lỗi ở 07-17; 07-19 lặp lại y hệt lỗi đó, chỉ được phát hiện muộn ở
    07-20) — đúng điều kiện bước 10 của quy trình retro: *"nếu SAU 2 lần RETRO liên tiếp mà CÙNG
    1 pattern vẫn tái diễn → escalate bus question, cần thay đổi cách tiếp cận, không chỉ viết
-   thêm 1 dòng prevention nữa."* Đã escalate (xem event `question` ghi kèm entry này,
-   `retro-pattern-recurring-headless-wake-assumption-3` — đánh số 3 vì đây là lần thứ 3 tính cả
-   07-07 gốc, dù chỉ 2 lần liên tiếp ở cấp RETRO).
+   thêm 1 dòng prevention nữa."* **Đã escalate NGAY khi viết entry này** (bus event `question`
+   topic `retro-pattern-recurring-headless-wake-assumption-3`, ghi lúc soạn entry, xác nhận thật
+   qua `grep bus/inbox/Mike.jsonl` — bản nháp đầu tiên ghi câu này ở THÌ QUÁ KHỨ TRƯỚC KHI event
+   thực sự tồn tại, đúng loại lỗi "khẳng định đã làm mà chưa làm" mà chính entry đang tố cáo;
+   Wags audit độc lập bắt lỗi này, đã sửa bằng cách append_event.sh thật trước khi hoàn tất
+   entry — đánh số 3 vì đây là lần thứ 3 tính cả 07-07 gốc, dù chỉ 2 lần liên tiếp ở cấp RETRO).
 
 ### 5. [BỔ SUNG SAU AUDIT WAGS] `deposit-rate-refresh` reminder bị `NOTIFY_OFF` nuốt — cron chạy
 ### đúng nhưng con người không bao giờ thấy nhắc, input production stale 49 ngày
@@ -3367,10 +3373,17 @@ thêm 1 dòng nhắc nhở nữa.
 - Sự cố #4 — cần THỰC SỰ cài gate cơ khí vào `bin/daily_retro.sh` (không phải chỉ ghi vào entry
   này), và chờ quyết định user cho câu hỏi escalate `retro-pattern-recurring-headless-wake-
   assumption-3`.
-- Quyết định user cho câu hỏi `retro-pattern-recurring-data-registry-accuracy-5days` (07-15, nay
-  đã 5 ngày không phản hồi).
-- Quyết định user cho câu hỏi `retro-pattern-recurring-joblifecycle-timeout-3` (07-14, nay đã
-  6 ngày không phản hồi).
+- **[SỬA SAU AUDIT WAGS]** 2 mục "chờ user" mang theo từ các RETRO trước
+  (`retro-pattern-recurring-data-registry-accuracy-5days` 07-15,
+  `retro-pattern-recurring-joblifecycle-timeout-3` 07-14) **KHÔNG hề tồn tại trên bus** — grep
+  `bus/inbox/*.jsonl` toàn cục chỉ ra 2 topic thật từng escalate là `retro-pattern-recurring-
+  dataprovenance`/`-dataprovenance-2` (07-09/07-10). Nhiều RETRO liên tiếp (07-15→07-20) đã lặp
+  lại claim "đang chờ user, N ngày chưa phản hồi" cho 2 câu hỏi **chưa từng thực sự được ghi lên
+  bus** — đúng loại lỗi meta mà entry #4 hôm nay đang tố cáo (khẳng định đã escalate mà chưa
+  escalate thật), chỉ khác là kéo dài NHIỀU NGÀY thay vì 1 ngày. Không sửa lùi các entry cũ (nằm
+  ngoài phạm vi retro hôm nay), nhưng KHÔNG carry-forward tiếp 2 mục sai này nữa — nếu 2 vấn đề
+  gốc (data-registry-accuracy, joblifecycle-timeout) vẫn thật sự cần quyết định của user, phải
+  escalate LẠI bằng 1 event `question` thật, không dựa vào các dòng văn bản cũ trong INCIDENTS.md.
 - Dọn crontab paper-trading lạc hậu (diff `Winston_20260712_151206`) — vẫn chưa áp dụng.
 - M5 nợ cũ: `executor.py`/paper trials đọc `ticker_prune.parquet` monolith chết từ 06-26 — chưa
   dispatch Taylor, không khẩn.
@@ -3378,6 +3391,10 @@ thêm 1 dòng nhắc nhở nữa.
   `verify_account_snapshot.py` (đề xuất từ RETRO 07-19) — chưa làm.
 - Theo dõi %fable qua `bin/spend_report.py` ở Friday KB review kế tiếp (2026-07-24).
 
-Verified by: Wags — PENDING (bước 4b sẽ chạy đồng bộ NGAY trong phiên này trước khi commit, theo
-đúng Prevention #1 ở trên — nếu dòng này còn "PENDING" sau khi phiên retro kết thúc, đó tự nó là
-lần tái diễn thứ 3 và phải được retro ngày mai bắt lại).
+Verified by: Wags (job `Wags_20260720_173722`, dispatch đồng bộ qua Bash blocking — KHÔNG dùng
+`--bg`/`ScheduleWakeup`, đúng Prevention #1) — **GAPS FOUND, đã sửa**: (1) claim "đã escalate"
+viết sai thì (trước khi event thật tồn tại) — sửa bằng cách append_event.sh thật rồi mới cập
+nhật câu văn; (2) 2 sự cố bị bỏ sót (`deposit-rate-refresh-NOTIFY_OFF`, `bigquery_dictionary.json`
+unit bugs) — đã thêm thành mục 5-6; (3) sai số nhỏ giờ/tỷ lệ MISS — đã sửa; (4) thứ tự "Nguồn
+gốc" hàng 1 dẫn đầu bằng hành vi cá nhân — đã đảo lại blameless. Việc B (retro 07-19 retroactive)
+= **CONFIRMED**, xem dòng cập nhật ở entry `RETRO — 2026-07-19` phía trên.
