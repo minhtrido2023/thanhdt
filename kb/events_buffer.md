@@ -488,3 +488,6 @@
 - [2026-07-20T02:05:12Z] Mafee/status — bot-done: {"account": "SpaceX", "plan_date": "2026-07-20", "elapsed_s": 11, "rc": 0}
 - [2026-07-20T01:45:06Z] Mike/status — preflight-ZaloPay-2026-07-20: {"result": "RED", "checks": ["✅ BOT_STOP: CLEAR", "❌ Plan ZaloPay 2026-07-20: NOT_APPROVED — orders=3 approved=None mafee=False", "✅ macro_health: HEALTHY (DT5G_macro, file 62.1h tuổi)", "✅ Gmail OAuth: có refresh_token (tự refresh khi cần)", "✅ BQ ticker_prune: lag=3d, 262 mã ✓"]}
 - [2026-07-20T01:45:09Z] Mike/status — preflight-SpaceX-2026-07-20: {"result": "GREEN", "checks": ["✅ BOT_STOP: CLEAR", "✅ Plan SpaceX 2026-07-20: 0 lệnh, ~0.000B VND, state=NEUTRAL (DT5G_macro), approved=None mafee=True", "✅ macro_health: HEALTHY (DT5G_macro, file 62.1h tuổi)", "✅ Gmail OAuth: có refresh_token (tự refresh khi cần)", "✅ BQ ticker_prune: lag=3d, 262 mã ✓"]}
+
+## Consolidation 2026-07-20T02:05:16Z
+- [2026-07-20T02:05:14Z] Mafee/error — bot-fail: {"account": "ZaloPay", "plan_date": "2026-07-20", "elapsed_s": 13, "rc": 2, "log": "/home/trido/thanhdt/WorkingClaude/mike/logs/run_bot_ZaloPay_2026-07-20.log"}
