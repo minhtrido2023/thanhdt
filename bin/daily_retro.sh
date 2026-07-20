@@ -37,6 +37,14 @@ QUY TRÌNH BẮT BUỘC (đọc bằng chứng thật, không suy đoán):
 2. Liệt kê MỌI bus event event_type=error/finding trong bus/inbox/*.jsonl có ts bắt đầu
    bằng '$TODAY' — đối chiếu xem có sự cố nào CHƯA được ghi vào INCIDENTS.md không (nếu
    có, đây là gap báo cáo cần ghi luôn bổ sung, không bỏ sót).
+2c. CHẠY bin/wakeup_audit.py --since \$TODAY (script chỉ hỗ trợ --since, không có --until —
+   chấp nhận nó quét luôn phần đầu hôm nay khi retro chạy, đọc kỹ output để CHỈ tính các
+   lượt có timestamp thuộc \$TODAY, đừng gộp nhầm). Thêm 2026-07-20 sau sự cố missed-wakeup-
+   after-bg-dispatch, job Wags_20260720_121120 — đo tuân thủ MIKE.md §8: mọi lượt dispatch
+   --bg có ScheduleWakeup theo sau không. Nếu có lượt vi phạm trong \$TODAY, đưa vào danh
+   sách sự cố ở bước 3 (category=dispatch-orchestration), trích số lượt vi phạm/tổng lượt
+   --bg trong ngày.
+
 2b. VERIFY ARTIFACT THẬT trước khi báo bất kỳ vấn đề nào là 'chưa xử lý'/'còn treo' — đây
    là quy tắc BẮT BUỘC (bài học 2026-07-10: chính retro lần đầu đã sai — báo 1 câu hỏi
    'crontab paper-main chưa cài' là còn mở CHỈ vì bus event question chưa có answer, trong

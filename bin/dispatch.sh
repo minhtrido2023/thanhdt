@@ -289,6 +289,11 @@ from="${DISPATCH_FROM:-Mike}"
 _agent_thread_override() {
   case "$1" in
     DollarBill) echo "1521183164364754974" ;;  # DollarBill trading-plan channel
+    Wags) echo "1521475726329516122" ;;  # Architecture topic — Wags = fleet-ops/coordination
+          # role, output luôn thuộc Architecture bất kể Mike dispatch từ topic nào (thêm
+          # 2026-07-20 sau feedback user: dispatch Wags cho incident missed-wakeup mà không
+          # set DISCORD_THREAD_ID đã khiến notify rơi vào topic Mike đang nói chuyện thay vì
+          # Architecture — đúng lỗi §8 vừa sửa: chỉ nhắc trong prose không đủ, cần cơ chế)
   esac
 }
 

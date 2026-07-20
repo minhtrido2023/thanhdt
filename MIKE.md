@@ -102,117 +102,50 @@ trong phiên), KHÔNG phải giải pháp chắc chắn 100% như headless — M
 "chắc chắn sẽ tự resume", mà phải nói rõ "đã đặt cron trong phiên, xác suất cao sẽ tự chạy
 tiếp, nhưng nếu phiên tôi bị restart giữa chừng thì cron này mất, anh vẫn cần quay lại nhắc."
 
-**8. Fast wake-on-completion sau `dispatch.sh ... --bg` (thêm 2026-07-03, theo yêu cầu user —
-nghiên cứu bằng 3 Explore agent + 1 Plan agent, đọc thẳng code, không suy đoán).** Vấn đề: Mike
-dispatch `--bg` rồi `ScheduleWakeup` 1 khoảng cố định (vd 1200s) để quay lại — nhưng Taylor xong
-sớm hơn nhiều, Discord đã báo GẦN NHƯ TỨC THÌ (`_bg_wrapper` gọi `notify_thread.sh` ngay khi
-`claude -p` exit thành công, 0s delay), mà phiên sống của Mike vẫn ngủ tới đúng chu kỳ mới xử lý.
-Đã xác nhận 2 hướng KHÔNG dùng được: (a) Discord không đánh thức được phiên sống —
-`discord_bot/bot.py`'s `on_message` chủ động bỏ qua mọi message do bot/script đăng
-(`if msg.author.bot: return`); phiên remote-control của Mike hoàn toàn thụ động, chỉ xử lý turn
-mới khi người thật gõ hoặc `ScheduleWakeup` tự bắn. (b) Auto-callback có sẵn trong `dispatch.sh`
-(khi job xong, tự dispatch lại `from` với prompt `[AUTO-CALLBACK...]`, không bao giờ tự lặp —
-fix cho vòng lặp Taylor↔Winston 2026-06-27) không dùng được cho Mike: dù gỡ guard chặn
-target=Mike, `dispatch.sh Mike "..."` spawn **1 tiến trình Mike lạnh hoàn toàn mới**, không phải
-đánh thức phiên đang nói chuyện với user.
+**8. Fast wake-on-completion sau `dispatch.sh ... --bg`**
 
-**Phát hiện mấu chốt**: nút thắt không phải "phát hiện chậm" (Discord đã 0s) mà là "tín hiệu đã
-có, không có kênh đưa vào lại turn sống". `bin/jobs.sh wait <job_id> [--timeout SEC]` đã có sẵn
-(poll mỗi 15s vào job board bền vững `bus/jobs/*.json`, không cần cơ chế phát hiện mới). **Giải
-pháp**: dùng `Agent(run_in_background: true)` bọc `jobs.sh wait` làm kênh dẫn tín hiệu vào lại
-turn sống — tận dụng cơ chế `<task-notification>` gốc của harness (đã kiểm chứng hoạt động ổn
-định nhiều lần ngay trong phiên nghiên cứu ra rule này).
+> **§8 rút gọn — 3 dòng phải nhớ (thêm 2026-07-20, sau sự cố `missed-wakeup-after-bg-dispatch`,
+> xem `kb/INCIDENTS.md` + job `Wags_20260720_121120`):**
+> 1. `dispatch.sh --bg` xong thì `ScheduleWakeup` 240-270s là tool call CUỐI CÙNG của lượt,
+>    không ngoại lệ.
+> 2. **Nếu trong cùng lượt bạn còn định viết một câu trả lời thực chất cho user — đó chính là lúc
+>    nguy hiểm nhất** (đo được từ 147 lượt: lượt QUÊN wakeup viết trung vị 1.755 ký tự văn xuôi
+>    sau dispatch, lượt NHỚ chỉ 343 ký tự — rủi ro gấp ~25 lần). Đặt `ScheduleWakeup` NGAY sau
+>    dispatch, TRƯỚC KHI viết đoạn trả lời cho câu hỏi khác.
+> 3. Mọi phát ngôn về trạng thái job phải kèm `jobs.sh status` chạy trong CÙNG lượt — kể cả câu
+>    "job vừa mới xong" (sự cố 07-20: `ended_at` cách đó 19 phút vẫn bị thuật thành "vừa xong",
+>    chỉ vì không chạy lại status trước khi nói).
+>
+> Đo tuân thủ hồi cứu: `bin/wakeup_audit.py --since <ngày>` (gắn vào `daily_retro.sh`).
 
-**Khi nào dùng — SỬA 2026-07-06 (phản hồi user, xem incident dưới)**: mặc định LUÔN dùng, kể cả
-chuỗi research fan-out dài tự trị (sector sweep #1-20, v.v.) — KHÔNG còn ngoại lệ "fire-and-forget
-research". Lý do đảo ngược: 1 sweep nhiều bước mà mỗi bước lãng phí 15-25' chờ timer dài (xem
-incident) cộng dồn thành hàng giờ lãng phí thật trong 1 ngày — dù không ai "chờ theo giờ cụ thể",
-tổng thời gian trôi qua vẫn là chi phí thật. Ngoại lệ DUY NHẤT còn lại: 1 job đứng riêng, không có
-bước kế tiếp phụ thuộc vào nó (rất hiếm — hầu hết dispatch của Mike đều có bước sau).
+**Cơ chế hiện hành**: sau dispatch `--bg`, đặt `ScheduleWakeup` ngắn (**240-270s** — dưới ngưỡng
+cache-miss 300s của chính tool). Mỗi lần tỉnh: `bin/jobs.sh status <job_id>`; chưa `done` → đặt
+lại wakeup ngắn (không editorialize, không retry job); `done` → xử lý kết quả + dispatch bước kế
+tiếp ngay. Đây là mẫu "actively polling external state" ScheduleWakeup tự khuyến nghị — nhiều lần
+check ngắn thay vì 1 lần chờ dài, vẫn phủ đúng worst-case nhưng nhanh hơn nhiều ở trường hợp phổ
+biến (job xong sớm, 5-15').
 
-**⚠️ SỬA 2026-07-07 (incident `agent-wrapper-monitor-gap`, chẩn đoán Wags job
-`Wags_20260707_142752`): template Agent(run_in_background) dưới đây KHÔNG còn chạy được
-nguyên văn.** Harness sau lần restart Mike sang Fable 5 (2026-07-06) đã BỎ tham số
-`run_in_background` khỏi Agent tool — schema hiện tại chỉ có
-`description/prompt/subagent_type/model/isolation` (xác nhận trực tiếp từ tool schema phiên
-Wags 2026-07-07). Ba quy tắc thay thế, theo thứ tự:
-1. **Cơ chế CHÍNH = ScheduleWakeup poll ngắn 240-270s** (mô tả chi tiết ở đoạn "ScheduleWakeup
-   fallback" dưới — nay thăng cấp từ fallback thành chính, vì nó không phụ thuộc schema Agent
-   tool): mỗi lần tỉnh chạy `bin/jobs.sh status <job_id>`, chưa done → đặt lại wakeup ngắn,
-   done → xử lý ngay.
-2. **`isolation: "worktree"` KHÔNG phải background** — nó chỉ tạo git worktree cách ly; agent
-   vẫn chạy ĐỒNG BỘ và tin nhắn cuối của nó là kênh trả kết quả DUY NHẤT. Một wrapper trả lời
-   "đã bắt đầu theo dõi, sẽ báo lại" là bất khả thi cơ học — nó không bao giờ báo lại được.
-   Sự cố thật 2026-07-07 chiều: Mike bọc job `Taylor_20260707_132048` bằng
-   Agent(isolation:worktree), wrapper trả lời sớm rồi thoát; job thật xong sạch ~13:32
-   (status:done, exit_code:0) mà Mike không hề biết, user phải tự hỏi "job die rồi hay bạn
-   không bao giờ biết" mới đi kiểm tra tay. Wrapper Agent nền CHỈ dùng lại nếu schema tool
-   phiên hiện tại THẬT SỰ có tham số nền (kiểm tra schema trước khi gọi, không đoán); khi đó
-   dùng template cũ: `Agent(prompt="Run: bin/jobs.sh wait <job_id> --timeout <wrapper_timeout>;
-   nếu status != done, chạy bin/trace.sh <job_id>; CHỈ báo lại field status + result literal,
-   KHÔNG tự ý retry/quyết định/đánh giá thành-bại", run_in_background: true, model: "haiku")`.
-3. **Self-check bắt buộc trước mọi phát ngôn về job nền**: đã nói với user bất kỳ điều gì về
-   trạng thái 1 job (đang chạy/đang chờ/chết/xong) thì trong CÙNG turn phải có 1 lần
-   `bin/jobs.sh status <job_id>` làm bằng chứng — không nói từ trí nhớ/suy đoán. (Lần THỨ HAI
-   trong ngày 2026-07-07 lỗi giám sát job nền: lần 1 = LOG_AGE nhìn như treo trong khi job sống
-   → sinh cột HB_AGE; lần 2 = wrapper sai cơ chế → mất tín hiệu hoàn tất. Cả hai đều là "khẳng
-   định trạng thái job không kèm bằng chứng jobs.sh".)
-`dispatch.sh --bg` đã in sẵn 3 bước này ra stderr sau dòng "Theo dõi:" — làm theo đúng bản in,
-không soạn lại từ trí nhớ.
+**Fan-out song song → 1 lượt poll cho cả batch**, không phải 1 lượt/job: check trạng thái CẢ
+batch trong 1 lần tỉnh, chưa xong hết thì đặt lại wakeup ngắn tiếp, rồi tổng hợp khi tất cả done.
 
-Scope wrapper (khi dùng được) cố tình hẹp: wrapper KHÔNG được gọi `dispatch.sh`, KHÔNG tự retry,
-KHÔNG editorialize — quyền quyết định bước tiếp theo luôn ở Mike khi tỉnh dậy, không phải ở wrapper.
+**Luôn dùng, không có ngoại lệ "fire-and-forget"** — kể cả chuỗi research fan-out dài tự trị (vd
+sector sweep nhiều bước): mỗi bước lãng phí 15-25' chờ timer dài nếu bỏ wakeup cộng dồn thành
+hàng giờ lãng phí thật trong ngày (incident 2026-07-06 — chuỗi Taylor sector-sweep #17-20 mỗi job
+xong thật trong 5-15' nhưng dùng ScheduleWakeup dài theo quy tắc cũ). Ngoại lệ DUY NHẤT: 1 job
+đứng riêng, không có bước kế tiếp phụ thuộc vào nó (hiếm — hầu hết dispatch của Mike đều có bước
+sau).
 
-**Công thức timeout cho wrapper** (bám retry thật của dispatch.sh, KHÔNG dùng `--timeout` gốc
-trực tiếp vì job có thể đang ở lần thử thứ 2) — không đổi, vẫn dùng cho `jobs.sh wait --timeout`
-BÊN TRONG wrapper:
-```
-wrapper_wait_timeout = TIMEOUT × (RETRIES + 1) + 60
-```
-`dispatch.sh` in sẵn số này ra stderr ngay sau dòng "Theo dõi:" để khỏi soạn lại từ trí nhớ.
+**Self-check bắt buộc trước mọi phát ngôn về job nền**: đã nói với user bất kỳ điều gì về trạng
+thái 1 job (đang chạy/đang chờ/chết/xong) thì trong CÙNG turn phải có 1 lần `bin/jobs.sh status
+<job_id>` làm bằng chứng — không nói từ trí nhớ/suy đoán, kể cả khi "chắc chắn nó xong rồi".
 
-**ScheduleWakeup fallback — SỬA 2026-07-06: poll ngắn lặp lại, KHÔNG phải 1 lần chờ dài theo
-worst-case.** Trước đây dùng `wrapper_wait_timeout + 300` (~26' cho timeout/retries mặc định) làm
-1 lần chờ DUY NHẤT — đúng an toàn nhưng sai hiệu quả: hầu hết job (xem sector sweep hôm nay) xong
-trong 5-15', nghĩa là tới 15-20' mỗi lần bị lãng phí chờ không cần thiết nếu wrapper's task-
-notification không sống sót qua 1 lần Mike restart (xem giới hạn chưa xác minh dưới). Thay bằng:
-đặt `ScheduleWakeup` ngắn (**240-270s** — dưới ngưỡng cache-miss 300s của chính tool, xem mô tả
-ScheduleWakeup) chỉ để check `bin/jobs.sh status <job_id>`; nếu chưa `done` → đặt lại 1 lần
-ScheduleWakeup ngắn nữa (không editorialize, không retry job); nếu `done` → xử lý kết quả + dispatch
-bước kế tiếp ngay. Đây chính là mẫu "actively polling external state" mà ScheduleWakeup tự khuyến
-nghị dùng khoảng ngắn, không phải khoảng dài đoán trước. Worst-case (job thật sự cần hết
-`wrapper_wait_timeout`) vẫn được phủ — chỉ là qua NHIỀU lần check ngắn thay vì 1 lần chờ dài, nên
-không mất an toàn, chỉ nhanh hơn nhiều ở trường hợp phổ biến (job xong sớm).
+`dispatch.sh --bg` in sẵn các bước theo dõi ra stderr sau dòng "Theo dõi:" — làm theo đúng bản in.
 
-**Fan-out song song → 1 wrapper cho cả batch**, không phải 1 wrapper/job: prompt wrapper lặp
-tuần tự `jobs.sh wait job1 && jobs.sh wait job2 && ...` rồi tổng hợp. ScheduleWakeup ngắn ở trên
-áp dụng y hệt — check trạng thái CẢ batch, chưa xong hết thì đặt lại ngắn tiếp.
-
-**Vẫn giữ `ScheduleWakeup` làm fallback** (giờ là poll ngắn lặp lại, không phải 1 lần dài) — đây
-là lớp XẾP CHỒNG lên task-notification của wrapper, không thay thế. Xấu nhất (Mike restart giữa
-lúc chờ, task-notification mất) = vẫn tự phục hồi ở lần ScheduleWakeup ngắn kế tiếp (≤270s sau),
-KHÔNG rơi về khoảng chờ dài cũ — đây chính là điểm sửa so với thiết kế cũ.
-
-**Incident 2026-07-06 (feedback user, thêm mục #8 cần sửa)**: chuỗi Taylor sector-sweep #17-20
-(hog/feed leadlag, construction, SOE, holdco) chạy suốt 2026-07-05→06, mỗi job Mike->Taylor xong
-trong 5-15' thật nhưng dùng ScheduleWakeup dài theo quy tắc "fire-and-forget research" CŨ — user
-quan sát thấy lãng phí thời gian chờ rõ rệt cộng dồn qua nhiều bước, đúng bằng lý do đảo ngược quy
-tắc ở trên. Không phải bug code — quy tắc VIẾT SAI (che khuất bởi lo ngại "đừng phiền vì job dài
-không ai chờ", trong khi thực tế TỔNG thời gian trôi qua vẫn tính).
-
-⚠️ **Giới hạn chưa xác minh** *(MOOT từ 2026-07-07 — tham số `run_in_background` không còn
-trong schema Agent tool của harness hiện tại, xem SỬA 2026-07-07 ở trên; giữ đoạn này làm sử
-liệu, chỉ áp dụng lại nếu harness tương lai khôi phục tham số)*: độ bền của
-`Agent(run_in_background)` task-notification qua CHÍNH việc Mike restart chưa ai kiểm chứng
-thực tế (không tài liệu nào trong codebase khẳng định hay phủ định). Cần quan sát lần dùng
-thật và ghi kết quả (verified/không) vào đây hoặc `kb/INCIDENTS.md` theo khuôn
-"verified 2026-0X-XX" đã dùng ở nơi khác trong file này.
-
-**Verified 2026-07-03 (happy-path, KHÔNG restart)**: dispatch thật Winston `--bg` (job chạy 14s) +
-wrapper Agent(haiku, nền) theo đúng template trên → task-notification đánh thức turn Mike NGAY khi
-job xong (~vài giây), thay vì chờ hết fallback 600s. Cơ chế chính hoạt động đúng. **Vẫn CHƯA
-verified**: trường hợp Mike restart giữa lúc wrapper đang chờ (notification có sống sót không) —
-chỉ quan sát được khi tình cờ xảy ra; khi đó ghi kết quả vào đây.
+Cơ chế `Agent(run_in_background)` wrapper (thử 2026-07-03, đã MOOT từ 2026-07-07 khi harness bỏ
+tham số nền khỏi Agent tool) — lịch sử đầy đủ + template cũ đã chuyển sang
+[`kb/archive/wake_on_completion_wrapper_history_20260707.md`](kb/archive/wake_on_completion_wrapper_history_20260707.md),
+chỉ khôi phục nếu harness tương lai thêm lại tham số nền cho Agent tool (kiểm tra schema thật
+trước khi dùng, không đoán).
 
 ## Việc định kỳ
 - Cron 30' chạy `bin/consolidate.sh` (cơ khí): gộp event mới từ bus → `KNOWLEDGE.md`, bump version,
