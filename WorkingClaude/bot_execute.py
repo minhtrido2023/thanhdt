@@ -33,7 +33,8 @@ if hasattr(sys.stdout, "reconfigure"):  # console Windows cp1252 → utf-8
 
 from trading_bot.config import load_config, load_accounts, pick_accounts, EXEC_DIR
 from trading_bot.brokers import make_broker, get_quote_source, get_dnse_client
-from trading_bot.plan import load_plan, filter_excluded_tickers, approval_block_reason
+from trading_bot.plan import (load_plan, filter_excluded_tickers, cap_capit_orders,
+                              approval_block_reason)
 from trading_bot.executor import Executor, run_session, _publish_bot_event
 from trading_bot.vn_market import today_ict
 
@@ -227,6 +228,13 @@ def main():
                   f"excluded_tickers={sorted({o.ticker for o in blocked})}: "
                   f"{[o.ticker for o in blocked]} — không bao giờ tự động giao dịch "
                   f"các mã này (xem trading_bot_accounts.json).")
+        # Trần %ADV cho book CAPIT (X·ADV20·D, đọc từ data/golive_v23_status.json) — enforce
+        # ở ĐÂY, không dựa vào plan generator nhớ áp, giống filter_excluded_tickers ngay trên.
+        # Fail-closed khi thiếu cap/artifact cũ: chặn lệnh chứ không mua không giới hạn.
+        plan, capped = cap_capit_orders(plan)
+        for a in capped:
+            print(f"[{p['label']}] ⚠ CAPIT trần %ADV {a['action']} {a['ticker']}: "
+                  f"{a['qty_before']:,} → {a['qty_after']:,} cp — {a['reason']}")
         if not plan.orders:
             print(f"[{p['label']}] plan {plan_date} không có lệnh — bỏ qua")
             continue

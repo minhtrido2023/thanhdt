@@ -143,6 +143,88 @@ def filter_excluded_tickers(plan, excluded_tickers):
     return plan, blocked
 
 
+def cap_capit_orders(plan, status_path=None):
+    """Áp trần %ADV cho lệnh MUA book CAPIT — enforce cứng, độc lập plan generator.
+
+    Trần đọc từ `data/golive_v23_status.json` (`capit_adv_caps`: {ticker: VND tuyệt đối},
+    do golive_recommend_v23.py::capit_adv_caps() ghi = X·ADV20·D, X=10%, D=2 phiên,
+    ADV20 = median 20 phiên TRƯỚC ngày washout). Cắt qty xuống bội số lô chẵn lớn nhất
+    thỏa `qty*ref_price <= cap`; phần dư KHÔNG dồn sang tên khác — sleeve under-deploy
+    có chủ đích, tiền để cash.
+
+    VÌ SAO đọc artifact chứ không đọc field trong order: cùng lý do filter_excluded_tickers
+    tồn tại (coding_guidelines §7) — plan do DollarBill (LLM) sinh ra, một cap nằm trong
+    plan chỉ có tác dụng khi generator NHỚ copy nó vào. Đọc thẳng artifact của golive thì
+    generator quên cũng không mất cap.
+
+    FAIL-CLOSED: có lệnh mua CAPIT mà artifact thiếu/hỏng/không có cap cho mã đó, hoặc
+    signal_date của artifact ≠ signal_date của plan (artifact cũ) → CHẶN lệnh đó, không
+    thả không giới hạn. CAPIT là sự kiện sizing lớn và hiếm; thà không mua còn hơn mua
+    quá tay vào đúng ngày thanh khoản cạn (coding_guidelines §5: không đoán, fail-safe).
+
+    Tác động lịch sử đo được (mike/agents/Taylor/exp_capitadvcap/selfcheck_capit_adv_cap.py,
+    14 event washout 2014→2026, sleeve tham chiếu 0,38 tỷ): trần kích hoạt ở ĐÚNG 1/14
+    event — NNC ngày 2016-01-18, lệch ~9 triệu VND ở 1 vị thế. KHÔNG phải "0/14 dormant".
+
+    Trả (plan đã sửa, list dict mô tả từng điều chỉnh) — KHÔNG log, để caller tự báo.
+    """
+    from .config import WORKDIR
+    from .vn_market import round_lot, LOT
+
+    def _is_capit_buy(o):
+        return (o.book or "").upper() == "CAPIT" and (o.side or "").lower() == "buy"
+
+    if not any(_is_capit_buy(o) for o in plan.orders):
+        return plan, []
+
+    caps, err = {}, None
+    path = status_path or os.path.join(WORKDIR, "data", "golive_v23_status.json")
+    try:
+        with open(path, encoding="utf-8") as f:
+            st = json.load(f)
+        caps = st.get("capit_adv_caps") or {}
+        if st.get("signal_date") and plan.signal_date and st["signal_date"] != plan.signal_date:
+            caps, err = {}, (f"golive_v23_status.json là của signal_date "
+                             f"{st['signal_date']} ≠ plan {plan.signal_date} (artifact cũ)")
+    except Exception as ex:
+        err = f"không đọc được {path}: {ex}"
+
+    adj, keep = [], []
+    for o in plan.orders:
+        # so sánh theo _is_capit_buy chứ không phải `o in capit`: PlannedOrder là dataclass
+        # có __eq__ theo giá trị, hai lệnh trùng hệt nhau sẽ so bằng nhau và lọc nhầm.
+        if not _is_capit_buy(o):
+            keep.append(o)
+            continue
+        cap = caps.get(o.ticker)
+        if cap is None:
+            adj.append({"ticker": o.ticker, "action": "BLOCKED", "qty_before": o.qty,
+                        "qty_after": 0, "cap_vnd": None,
+                        "reason": err or f"không có cap %ADV cho {o.ticker} trong artifact"})
+            continue
+        if o.ref_price <= 0:
+            adj.append({"ticker": o.ticker, "action": "BLOCKED", "qty_before": o.qty,
+                        "qty_after": 0, "cap_vnd": cap,
+                        "reason": f"ref_price={o.ref_price} không hợp lệ, không kiểm tra được trần"})
+            continue
+        max_qty = round_lot(float(cap) / o.ref_price)
+        if o.qty <= max_qty:
+            keep.append(o)
+            continue
+        if max_qty < LOT:
+            adj.append({"ticker": o.ticker, "action": "BLOCKED", "qty_before": o.qty,
+                        "qty_after": 0, "cap_vnd": cap,
+                        "reason": f"trần {cap:,.0f}đ < 1 lô @ {o.ref_price:,.0f}đ"})
+            continue
+        adj.append({"ticker": o.ticker, "action": "TRIMMED", "qty_before": o.qty,
+                    "qty_after": max_qty, "cap_vnd": cap,
+                    "reason": f"trần %ADV {cap:,.0f}đ (phần dư để cash, không dồn tên khác)"})
+        o.qty = max_qty
+        keep.append(o)
+    plan.orders = keep
+    return plan, adj
+
+
 def approval_block_reason(plan):
     """Code-gate approval — lớp phòng thủ THỨ HAI, độc lập với việc gửi plan cho user
     duyệt qua send_plan_report.sh (sự cố 2026-07-13: plan ZaloPay requires_user_approval=true

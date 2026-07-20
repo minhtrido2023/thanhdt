@@ -92,6 +92,7 @@ def w_lag_target(state, asof):
 ALLOC_BAND = 0.10
 LAG_TW = {"LAG_HI": 0.10, "LAG_LO": 0.08}
 WASHOUT_GATE = 0.30; CAPIT_HOLD = 60
+ADV_X, ADV_D = 0.10, 2.0   # trần %ADV/tên cho CAPIT — xem capit_adv_caps() (quy ước, KHÔNG backtest)
 ANOMALY_TTL_DAYS = 30   # cờ due-diligence còn hiệu lực bao lâu kể từ phiên alert cuối
 SNAME = {1: "CRISIS", 2: "BEAR", 3: "NEUTRAL", 4: "BULL", 5: "EX-BULL"}
 
@@ -122,6 +123,62 @@ def anomaly_excluded(asof):
     except Exception as ex:
         print(f"  WARNING: due-diligence flags không đọc được ({ex}) — CAPIT chạy KHÔNG có gate")
         return set()
+
+
+def capit_adv_caps(basket, asof):
+    """Trần VND TUYỆT ĐỐI cho mỗi tên trong rổ CAPIT — chống market-impact khi sleeve lớn.
+
+        cap_vnd_i = ADV_X * ADV20_i * ADV_D
+
+    ADV20_i = median giá trị giao dịch (VND) của 20 phiên NGAY TRƯỚC `asof` (ngày washout
+    KHÔNG tính vào). Ngày washout theo định nghĩa là ngày volume spike, lấy nó làm mốc sẽ
+    thổi phồng thanh khoản khả dụng (đo được: median ADV20-sau / ADV-ngày-vào = 0,54;
+    p10 = 0,32 — mike/agents/Taylor/exp_capitexit/RESULT.md §3a). Cửa sổ TRƯỚC cũng là cửa
+    sổ duy nhất NHÂN QUẢ (live không biết ADV tương lai).
+
+    ADV_X=10% / ADV_D=2 là QUY ƯỚC NGÀNH, KHÔNG phải tham số đã backtest — không có dữ liệu
+    market-impact thật để hiệu chỉnh. Đừng trích dẫn như đã kiểm chứng thực nghiệm, và đừng
+    chỉnh chúng để khớp một kỳ vọng biết trước (phương án C job Taylor_20260720_170223 đã
+    bị bác chính vì lý do này).
+
+    Trả cap dạng VND TUYỆT ĐỐI (không phải %) — có chủ đích: script này advisory, chạy MỘT
+    lần/ngày và phục vụ MỌI account (SpaceX có margin, ZaloPay cash-only, NAV khác nhau).
+    Một trần theo % NAV tính từ NAV của một account sẽ SAI cho account còn lại; X·ADV20·D
+    độc lập account nên đúng cho mọi account theo cấu tạo. Enforce cứng ở bot_execute.py
+    (trading_bot/plan.py::cap_capit_orders) — xem ghi chú kiến trúc ở đó.
+
+    Tác động lịch sử ĐO ĐƯỢC (selfcheck_capit_adv_cap.py, 14 event washout 2014→2026 ở mức
+    sleeve tham chiếu 0,38 tỷ): cap kích hoạt ở ĐÚNG 1/14 event — NNC ngày 2016-01-18,
+    ADV20_pre 0,335 tỷ → cap 0,067 tỷ/tên trong khi equal-weight đòi 0,076 tỷ, lệch ~9
+    triệu VND ở 1 vị thế. KHÔNG phải "dormant 0/14" như ước tính ban đầu (ước tính đó dùng
+    ADV20 SAU khi vào — biến thể không nhân quả). 13/14 event còn lại: không kích hoạt.
+
+    FAIL-SAFE: query lỗi → trả {} + WARNING. Rỗng KHÔNG có nghĩa "không giới hạn":
+    cap_capit_orders() fail-closed (chặn lệnh CAPIT khi thiếu cap), nên mất dữ liệu ADV
+    dẫn tới KHÔNG mua, chứ không phải mua không giới hạn.
+    """
+    if not basket:
+        return {}
+    try:
+        tl = ",".join(f"'{t}'" for t in basket)
+        a = bq(f"""WITH px AS (
+  SELECT p.ticker, p.time, COALESCE(p.Price,p.Close)*p.Volume AS turn,
+         ROW_NUMBER() OVER (PARTITION BY p.ticker ORDER BY p.time DESC) rn
+  FROM tav2_bq.ticker_prune p
+  WHERE p.ticker IN ({tl}) AND p.time < DATE '{pd.Timestamp(asof).date()}'
+    AND p.time >= DATE_SUB(DATE '{pd.Timestamp(asof).date()}', INTERVAL 90 DAY))
+SELECT ticker, APPROX_QUANTILES(turn, 2)[OFFSET(1)] AS adv20
+FROM px WHERE rn <= 20 GROUP BY ticker""")
+        caps = {r.ticker: float(ADV_X * r.adv20 * ADV_D)
+                for r in a.itertuples() if pd.notna(r.adv20) and r.adv20 > 0}
+        missing = sorted(set(basket) - set(caps))
+        if missing:
+            print(f"  WARNING: thiếu ADV20 cho {missing} — bot_execute sẽ CHẶN các mã này "
+                  f"(fail-closed), không mua không giới hạn")
+        return caps
+    except Exception as ex:
+        print(f"  WARNING: không tính được cap %ADV ({ex}) — CAPIT sẽ bị chặn ở executor")
+        return {}
 
 
 def capit_base(state, dd52w, vn_cooling):
@@ -299,7 +356,7 @@ vnh["vn_cooling"] = vnh["rv10"] <= vnh["rv10"].rolling(30).max() * 0.85
 dd52_now = float(vnh["dd52"].iloc[-1]) if len(vnh) else -99.0
 vn_cool_now = bool(vnh["vn_cooling"].iloc[-1]) if len(vnh) and pd.notna(vnh["vn_cooling"].iloc[-1]) else False
 
-capit_size, capit_grind, basket, capit_dd_excluded = 0.0, False, [], []
+capit_size, capit_grind, basket, capit_dd_excluded, capit_caps = 0.0, False, [], [], {}
 if capit_fired:
     wdays = br[br["oversold"] >= WASHOUT_GATE]["time"].tolist()
     bdates = br["time"].tolist(); i0 = len(bdates) - 1
@@ -326,6 +383,7 @@ WHERE p.time = DATE '{bd.date()}' AND p.ROE_Min5Y>=0.12 AND p.ROIC5Y>=0.10 AND p
             pick = g if len(g) >= 3 else (c if len(c) >= 3 else e)
             pick = pick.nsmallest(15, "pbz") if len(pick) > 15 else pick
             basket = sorted(pick["ticker"].tolist())
+            capit_caps = capit_adv_caps(basket, bd)
 
 # ── 7. emit recommendations (CSV + MD + status JSON) ──
 etf_frac = ETF_PARK.get(state_today, 0.0)
@@ -366,7 +424,8 @@ for it in lag_recent:
 for tk in basket:
     recs.append({"book": "CAPIT", "ticker": tk, "play_type": "CAPIT_GOLDEN",
                  "ta": None, "close_bq_stale_DO_NOT_USE_AS_REFPRICE": None, "sector": sec_map.get(tk),
-                 "weight_pct": round(capit_size / max(len(basket), 1) * 100, 2), "status": "WASHOUT"})
+                 "weight_pct": round(capit_size / max(len(basket), 1) * 100, 2), "status": "WASHOUT",
+                 "capit_cap_vnd": round(capit_caps[tk]) if tk in capit_caps else None})
 # parking basket — advisory rows (book=PARK, weight_pct = within-basket cap-weight %)
 if _park_basket is not None:
     for pr in _park_basket.itertuples():
@@ -375,7 +434,7 @@ if _park_basket is not None:
                      "close_bq_stale_DO_NOT_USE_AS_REFPRICE": None, "sector": None,
                      "weight_pct": round(float(pr.weight) * 100, 4),
                      "status": "PARK_ADVISORY"})
-rec_df = pd.DataFrame(recs, columns=["book","ticker","play_type","ta","close_bq_stale_DO_NOT_USE_AS_REFPRICE","sector","weight_pct","status"])
+rec_df = pd.DataFrame(recs, columns=["book","ticker","play_type","ta","close_bq_stale_DO_NOT_USE_AS_REFPRICE","sector","weight_pct","status","capit_cap_vnd"])
 csv_path = os.path.join(OUTDIR, f"golive_v23_recommendations_{END}.csv")
 rec_df.to_csv(csv_path, index=False)
 
@@ -389,6 +448,11 @@ status = {
     "washout_gate": WASHOUT_GATE, "capit_fired": capit_fired,
     "capit_size": round(capit_size, 2), "capit_grind": capit_grind,
     "capit_dd_excluded": capit_dd_excluded,
+    # Trần VND tuyệt đối/tên (X·ADV20·D) — NGUỒN CHUẨN TẮC mà bot_execute.py enforce.
+    # Cố tình KHÔNG dựa vào DollarBill copy field này vào plan: executor đọc thẳng artifact
+    # ở đây, nên plan generator quên áp cap cũng không làm mất cap. Xem capit_adv_caps().
+    "capit_adv_caps": {t: round(v) for t, v in sorted(capit_caps.items())},
+    "capit_adv_x": ADV_X, "capit_adv_d": ADV_D,
     "dd52w": round(dd52_now, 1), "vn_cooling": vn_cool_now,
     "n_bal": int(len(bal)), "n_lag_upcoming": len(lag_up), "n_lag_recent": len(lag_recent),
     "lag_source_error": lag_source_error,
@@ -465,6 +529,10 @@ if capit_fired:
     L.append(f"- Committed VND = size × free cash mỗi book, hold {CAPIT_HOLD}td, stop-exempt, slot-exempt.")
     if basket:
         L.append(f"- Basket quality-golden ({len(basket)} mã): " + ", ".join(basket))
+        L.append(f"- Trần %ADV/tên ({ADV_X:.0%}·ADV20·{ADV_D:.0f} phiên, VND tuyệt đối — "
+                 f"executor enforce cứng, phần dư để CASH không dồn sang tên khác): "
+                 + ", ".join(f"{t} {capit_caps[t]/1e6:,.0f}tr" if t in capit_caps
+                             else f"{t} ⚠KHÔNG CÓ ADV → sẽ bị CHẶN" for t in basket))
     else:
         L.append("- Basket: <3 mã quality đạt chuẩn — sleeve không kích hoạt.")
 else:
