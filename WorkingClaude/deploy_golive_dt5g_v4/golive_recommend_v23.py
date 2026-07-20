@@ -92,7 +92,37 @@ def w_lag_target(state, asof):
 ALLOC_BAND = 0.10
 LAG_TW = {"LAG_HI": 0.10, "LAG_LO": 0.08}
 WASHOUT_GATE = 0.30; CAPIT_HOLD = 60
+ANOMALY_TTL_DAYS = 30   # cờ due-diligence còn hiệu lực bao lâu kể từ phiên alert cuối
 SNAME = {1: "CRISIS", 2: "BEAR", 3: "NEUTRAL", 4: "BULL", 5: "EX-BULL"}
+
+def anomaly_excluded(asof):
+    """Due-diligence gate cho rổ CAPIT: set ticker có cờ bất thường còn hiệu lực tại `asof`.
+
+    CAPIT chọn rổ thuần CƠ HỌC (ROE/ROIC/FSCORE + PB z-score cực âm) nên nó KHÔNG biết
+    một cú sập giá là "rẻ đi" hay là khủng hoảng doanh nghiệp đang diễn ra — đúng cú sập
+    khủng hoảng lại làm pbz âm nhất, tức là đưa mã đó lên ĐẦU danh sách mua (case PNJ
+    07/2026: lãnh đạo bị bắt, giá -32% từ đỉnh). Cờ do anomaly_scan.py ghi
+    (data/anomaly_flags.json, hiệu lực ANOMALY_TTL_DAYS ngày kể từ phiên alert cuối).
+
+    FAIL-SAFE: file thiếu/hỏng → trả set rỗng + log warning, KHÔNG chặn pipeline —
+    một file thiếu không được phép làm treo cả đường lập plan tiền thật.
+    """
+    p = os.path.join(WORKDIR, "data", "anomaly_flags.json")
+    try:
+        flags = json.load(open(p, encoding="utf-8"))
+        # chuẩn hoá asof (date / Timestamp / str đều nhận) — sai kiểu ở caller mà rơi vào
+        # except sẽ TẮT ÂM THẦM cả cái gate an toàn này, nên không để nó có cửa xảy ra.
+        d = pd.Timestamp(asof).date()
+        # CỬA SỔ HAI ĐẦU: cutoff <= last_alert <= asof. Chặn trên là chống look-ahead — nếu
+        # chỉ so >= cutoff thì chạy lại cho một ngày quá khứ sẽ áp cả cờ của TƯƠNG LAI
+        # (vd rerun 2025-12: cờ PNJ 07/2026 vẫn "active"). Live thì asof≈hôm nay nên vô hại,
+        # nhưng để vậy là mời gọi kết quả backtest sai lệch về sau.
+        lo, hi = str(d - timedelta(days=ANOMALY_TTL_DAYS)), str(d)
+        return {t for t, f in flags.items() if lo <= str(f.get("last_alert", "")) <= hi}
+    except Exception as ex:
+        print(f"  WARNING: due-diligence flags không đọc được ({ex}) — CAPIT chạy KHÔNG có gate")
+        return set()
+
 
 def capit_base(state, dd52w, vn_cooling):
     if state == 1: return 1.0
@@ -269,7 +299,7 @@ vnh["vn_cooling"] = vnh["rv10"] <= vnh["rv10"].rolling(30).max() * 0.85
 dd52_now = float(vnh["dd52"].iloc[-1]) if len(vnh) else -99.0
 vn_cool_now = bool(vnh["vn_cooling"].iloc[-1]) if len(vnh) and pd.notna(vnh["vn_cooling"].iloc[-1]) else False
 
-capit_size, capit_grind, basket = 0.0, False, []
+capit_size, capit_grind, basket, capit_dd_excluded = 0.0, False, [], []
 if capit_fired:
     wdays = br[br["oversold"] >= WASHOUT_GATE]["time"].tolist()
     bdates = br["time"].tolist(); i0 = len(bdates) - 1
@@ -285,6 +315,12 @@ if capit_fired:
 FROM tav2_bq.ticker_prune p
 WHERE p.time = DATE '{bd.date()}' AND p.ROE_Min5Y>=0.12 AND p.ROIC5Y>=0.10 AND p.FSCORE>=6
   AND COALESCE(p.Price,p.Close)*p.Volume/1e9 >= 2""")
+        excl = anomaly_excluded(bd.date())
+        hit = sorted(set(e["ticker"]) & excl) if not e.empty else []
+        if hit:
+            capit_dd_excluded = hit
+            print(f"  CAPIT due-diligence: loại {hit} khỏi pool (cờ bất thường <{ANOMALY_TTL_DAYS}d)")
+            e = e[~e["ticker"].isin(excl)]
         if not e.empty:
             g = e[e["pbz"] < -1]; c = e[e["pbz"] < 0]
             pick = g if len(g) >= 3 else (c if len(c) >= 3 else e)
@@ -352,6 +388,7 @@ status = {
     "breadth_oversold": (round(breadth_today, 4) if pd.notna(breadth_today) else None),
     "washout_gate": WASHOUT_GATE, "capit_fired": capit_fired,
     "capit_size": round(capit_size, 2), "capit_grind": capit_grind,
+    "capit_dd_excluded": capit_dd_excluded,
     "dd52w": round(dd52_now, 1), "vn_cooling": vn_cool_now,
     "n_bal": int(len(bal)), "n_lag_upcoming": len(lag_up), "n_lag_recent": len(lag_recent),
     "lag_source_error": lag_source_error,
