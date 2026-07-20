@@ -193,6 +193,9 @@ def main():
     ap.add_argument("--status-check", action="store_true")
     ap.add_argument("--selftest", action="store_true")
     ap.add_argument("--no-flags", action="store_true", help="không ghi anomaly_flags.json")
+    ap.add_argument("--backfill-days", type=int, default=0,
+                    help="ghi cờ cho MỌI phiên trong N ngày gần nhất thay vì chỉ phiên cuối "
+                         "(seed lần đầu / bù những ngày chưa chạy scan)")
     ap.add_argument("--emit-json", help="ghi tóm tắt phiên (tier_h/tier_w_count/status_changes) ra PATH "
                     "cho hệ escalation đọc — máy-đọc, không parse text")
     args = ap.parse_args()
@@ -203,14 +206,17 @@ def main():
     hold, wl = load_universe()
     uni = hold | wl
     end = datetime.date.fromisoformat(args.asof) if args.asof else datetime.date.today()
-    start = end - datetime.timedelta(days=70)  # đủ cho Volume_1M + 2 phiên streak
+    start = end - datetime.timedelta(days=70 + args.backfill_days)  # đủ cho Volume_1M + 2 phiên streak
     df = load_prices(uni, start, end)
     if df.empty:
         print("Không có dữ liệu trong cache cho khoảng này.")
         sys.exit(1)
     last = pd.to_datetime(df["time"]).max()
     al = compute_signals(df, hold)
-    al = al[al["time"] == last]
+    if args.backfill_days:
+        al = al[al["time"] >= last - pd.Timedelta(days=args.backfill_days)]
+    else:
+        al = al[al["time"] == last]
     emit = {"asof": str(last.date()), "tier_h": [], "tier_w_count": 0, "status_changes": []}
     for _, r in al.iterrows():
         rec = {"ticker": r["ticker"], "reasons": r["reasons"], "ret": round(float(r["ret"]), 2),
@@ -225,8 +231,8 @@ def main():
     if al.empty:
         print("Không có tín hiệu giá/khối lượng bất thường.")
     else:
-        for _, r in al.sort_values(["tier", "ticker"]).iterrows():
-            print(f"  [{r['tier']}] {r['ticker']}: {r['reasons']} | ret {r['ret']:+.1f}% "
+        for _, r in al.sort_values(["tier", "ticker", "time"]).iterrows():
+            print(f"  [{r['tier']}] {r['time'].date()} {r['ticker']}: {r['reasons']} | ret {r['ret']:+.1f}% "
                   f"(VNI {r['vni_ret']:+.1f}%, idio {r['idio']:+.1f}%) vol {r['vol_x']:.1f}x "
                   f"val {r['val_bn']:.1f}B close {r['Close']:,.0f}")
         if not args.no_flags:
