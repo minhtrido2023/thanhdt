@@ -231,7 +231,7 @@ def main():
         # Trần %ADV cho book CAPIT (X·ADV20·D, đọc từ data/golive_v23_status.json) — enforce
         # ở ĐÂY, không dựa vào plan generator nhớ áp, giống filter_excluded_tickers ngay trên.
         # Fail-closed khi thiếu cap/artifact cũ: chặn lệnh chứ không mua không giới hạn.
-        plan, capped = cap_capit_orders(plan)
+        plan, capped = cap_capit_orders(plan, p["label"])
         for a in capped:
             print(f"[{p['label']}] ⚠ CAPIT trần %ADV {a['action']} {a['ticker']}: "
                   f"{a['qty_before']:,} → {a['qty_after']:,} cp — {a['reason']}")

@@ -143,24 +143,33 @@ def filter_excluded_tickers(plan, excluded_tickers):
     return plan, blocked
 
 
-def cap_capit_orders(plan, status_path=None):
+def cap_capit_orders(plan, account_label, status_path=None):
     """Áp trần %ADV cho lệnh MUA book CAPIT — enforce cứng, độc lập plan generator.
 
-    Trần đọc từ `data/golive_v23_status.json` (`capit_adv_caps`: {ticker: VND tuyệt đối},
-    do golive_recommend_v23.py::capit_adv_caps() ghi = X·ADV20·D, X=10%, D=2 phiên,
-    ADV20 = median 20 phiên TRƯỚC ngày washout). Cắt qty xuống bội số lô chẵn lớn nhất
-    thỏa `qty*ref_price <= cap`; phần dư KHÔNG dồn sang tên khác — sleeve under-deploy
-    có chủ đích, tiền để cash.
+    Trần đọc từ `data/golive_v23_status.json` (`capit_adv_caps`: {account: {ticker: VND
+    tuyệt đối}}, do golive_recommend_v23.py ghi). Trần TỔNG mỗi mã = X·ADV20·D (X=10%,
+    D=2 phiên, ADV20 = median 20 phiên TRƯỚC ngày washout) và đã được CHIA cho các account
+    live (pro-rata NAV) TRƯỚC khi ghi — hàm này chỉ đọc đúng phần của `account_label`.
+    Cắt qty xuống bội số lô chẵn lớn nhất thỏa `qty*ref_price <= cap`; phần dư KHÔNG dồn
+    sang tên khác — sleeve under-deploy có chủ đích, tiền để cash.
+
+    VÌ SAO phải chia (bug đã sửa): trần %ADV là nguồn lực THỊ TRƯỜNG dùng chung cho một mã.
+    Bản trước phát 1 trần phẳng {ticker: vnd} và MỖI account enforce full trần đó, nên N
+    account cùng rổ CAPIT thì tổng tác động = N × 10% ADV (2 account → ~20%). Phải đọc
+    `capit_adv_caps[account_label]`, KHÔNG BAO GIỜ đọc trần tổng ở đây.
 
     VÌ SAO đọc artifact chứ không đọc field trong order: cùng lý do filter_excluded_tickers
     tồn tại (coding_guidelines §7) — plan do DollarBill (LLM) sinh ra, một cap nằm trong
     plan chỉ có tác dụng khi generator NHỚ copy nó vào. Đọc thẳng artifact của golive thì
     generator quên cũng không mất cap.
 
-    FAIL-CLOSED: có lệnh mua CAPIT mà artifact thiếu/hỏng/không có cap cho mã đó, hoặc
+    FAIL-CLOSED: có lệnh mua CAPIT mà artifact thiếu/hỏng/không có cap cho mã đó, artifact
+    không có phần chia cho account này, artifact còn ở SCHEMA CŨ phẳng {ticker: vnd}, hoặc
     signal_date của artifact ≠ signal_date của plan (artifact cũ) → CHẶN lệnh đó, không
     thả không giới hạn. CAPIT là sự kiện sizing lớn và hiếm; thà không mua còn hơn mua
     quá tay vào đúng ngày thanh khoản cạn (coding_guidelines §5: không đoán, fail-safe).
+    Riêng schema cũ: đọc nó như trần của riêng account này chính là tái lập bug N×10% ADV,
+    nên nó phải CHẶN chứ không được "thử hiểu cho qua".
 
     Tác động lịch sử đo được (mike/agents/Taylor/exp_capitadvcap/selfcheck_capit_adv_cap.py,
     14 event washout 2014→2026, sleeve tham chiếu 0,38 tỷ): trần kích hoạt ở ĐÚNG 1/14
@@ -182,7 +191,16 @@ def cap_capit_orders(plan, status_path=None):
     try:
         with open(path, encoding="utf-8") as f:
             st = json.load(f)
-        caps = st.get("capit_adv_caps") or {}
+        all_caps = st.get("capit_adv_caps") or {}
+        if any(not isinstance(v, dict) for v in all_caps.values()):
+            err = ("capit_adv_caps ở SCHEMA CŨ (phẳng {ticker: vnd}, chưa chia theo "
+                   "account) — chạy lại golive_recommend_v23.py trước khi giao dịch CAPIT")
+        elif account_label not in all_caps:
+            err = (f"artifact không có phần trần %ADV cho account '{account_label}' "
+                   f"(có: {sorted(all_caps)}) — account này không nằm trong danh sách "
+                   f"live lúc golive chạy")
+        else:
+            caps = all_caps[account_label]
         if st.get("signal_date") and plan.signal_date and st["signal_date"] != plan.signal_date:
             caps, err = {}, (f"golive_v23_status.json là của signal_date "
                              f"{st['signal_date']} ≠ plan {plan.signal_date} (artifact cũ)")

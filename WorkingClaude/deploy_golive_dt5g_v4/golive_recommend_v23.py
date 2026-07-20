@@ -93,6 +93,7 @@ ALLOC_BAND = 0.10
 LAG_TW = {"LAG_HI": 0.10, "LAG_LO": 0.08}
 WASHOUT_GATE = 0.30; CAPIT_HOLD = 60
 ADV_X, ADV_D = 0.10, 2.0   # trần %ADV/tên cho CAPIT — xem capit_adv_caps() (quy ước, KHÔNG backtest)
+ACTIVE_NAV_MAX_AGE_D = 5   # active_nav_<label>.json ghi ad-hoc (không cron) — quá hạn thì lùi nav_history
 ANOMALY_TTL_DAYS = 30   # cờ due-diligence còn hiệu lực bao lâu kể từ phiên alert cuối
 SNAME = {1: "CRISIS", 2: "BEAR", 3: "NEUTRAL", 4: "BULL", 5: "EX-BULL"}
 
@@ -147,6 +148,12 @@ def capit_adv_caps(basket, asof):
     độc lập account nên đúng cho mọi account theo cấu tạo. Enforce cứng ở bot_execute.py
     (trading_bot/plan.py::cap_capit_orders) — xem ghi chú kiến trúc ở đó.
 
+    ⚠️ Đây là trần TỔNG của cả FLEET cho một mã, KHÔNG phải trần của một account. Thanh
+    khoản của một mã là nguồn lực THỊ TRƯỜNG dùng chung: N account cùng mua một mã trong
+    cùng một ngày thì tác động giá cộng dồn. Trần này phải được CHIA cho các account đang
+    deploy CAPIT — xem capit_account_shares(); caller ghi ra `capit_adv_caps` đã chia
+    theo account, executor mỗi account chỉ thấy phần của mình.
+
     Tác động lịch sử ĐO ĐƯỢC (selfcheck_capit_adv_cap.py, 14 event washout 2014→2026 ở mức
     sleeve tham chiếu 0,38 tỷ): cap kích hoạt ở ĐÚNG 1/14 event — NNC ngày 2016-01-18,
     ADV20_pre 0,335 tỷ → cap 0,067 tỷ/tên trong khi equal-weight đòi 0,076 tỷ, lệch ~9
@@ -179,6 +186,77 @@ FROM px WHERE rn <= 20 GROUP BY ticker""")
     except Exception as ex:
         print(f"  WARNING: không tính được cap %ADV ({ex}) — CAPIT sẽ bị chặn ở executor")
         return {}
+
+
+def _account_nav_basis(label):
+    """Cơ sở NAV để chia trần %ADV cho một account. Trả (VND, nguồn) hoặc (None, lý do).
+
+    Ưu tiên `active_nav` (data/execution_logs/active_nav_<label>.json) — ĐÚNG cơ sở, vì nó
+    đã trừ excluded_tickers (vị thế legacy ngoài rebalancing, vd DGC chiếm ~47% NAV
+    ZaloPay) và đây cũng chính là con số DollarBill dùng để sizing. Dùng tổng NAV thay thế
+    sẽ cho ZaloPay ~50% phần chia trong khi vốn thực sự triển khai được chỉ ~34% — account
+    lớn hơn bị cắt trần oan.
+
+    Freshness kiểm theo NỘI DUNG (`computed_at` trong chính file), KHÔNG theo mtime — mtime
+    tươi/nội dung cũ là bẫy đã gặp thật (sự cố lag_edge_health 2026-07-12). File này ghi
+    ad-hoc (không có cron), nên hết hạn là chuyện bình thường, không phải lỗi.
+
+    Fallback: nav_history_<label>.csv (do daily_nav_snapshot.py ghi mỗi phiên, có cột
+    `date` nên cũng dated theo nội dung) — TỔNG NAV, chưa trừ excluded_tickers.
+    """
+    p = os.path.join(WORKDIR, "data", "execution_logs", f"active_nav_{label}.json")
+    try:
+        d = json.load(open(p, encoding="utf-8"))
+        age = (pd.Timestamp.now().normalize() - pd.Timestamp(d["computed_at"])).days
+        if 0 <= age <= ACTIVE_NAV_MAX_AGE_D and float(d["active_nav"]) > 0:
+            return float(d["active_nav"]), f"active_nav @{d['computed_at']}"
+    except Exception:
+        pass
+    p = os.path.join(WORKDIR, "data", "execution_logs", f"nav_history_{label}.csv")
+    try:
+        r = pd.read_csv(p).iloc[-1]
+        if float(r["nav"]) > 0:
+            return float(r["nav"]), f"nav_history @{r['date']} (TỔNG NAV, chưa trừ excluded)"
+    except Exception:
+        pass
+    return None, "không có active_nav/nav_history dùng được"
+
+
+def capit_account_shares():
+    """Phần chia trần %ADV cho từng account đang deploy CAPIT. Trả (shares, mode, chi tiết).
+
+    Danh sách account đọc ĐỘNG qua config.live_dnse_labels() (enabled ∧ mode=live ∧
+    broker=dnse) — cùng nguồn mà mọi cron dùng-chung đã dùng. Thêm account thứ 3/4 vào
+    trading_bot_accounts.json là tự áp dụng, KHÔNG sửa code ở đây.
+
+    PRO-RATA theo NAV (chọn) vs CHIA ĐỀU (bác):
+      · pro-rata cho mỗi account phần trần tỉ lệ với vốn thực sự triển khai được, nên trần
+        bind ở cùng một MỨC TƯƠNG ĐỐI với mọi account — nhất quán với sizing hiện tại (mọi
+        book đều size theo NAV account). Chia đều thì account nhỏ nhận phần trần lớn hơn
+        khả năng dùng (trần không bao giờ bind, phần dư chết) trong khi account lớn bị cắt
+        oan — cùng một cỡ lệnh lại bị đối xử khác nhau chỉ vì đứng cạnh một account nhỏ.
+      · chia đều chỉ hơn ở chỗ không cần dữ liệu NAV → giữ đúng vai trò FALLBACK bên dưới.
+    N=1: cả hai công thức đều ra share=1.0 → về đúng công thức gốc, không có case đặc biệt.
+
+    BẤT BIẾN (điều kiện an toàn thật sự, đúng ở MỌI nhánh kể cả fallback):
+        Σ_account share = 1.0  ⇒  Σ_account cap = X·ADV20·D
+    Thiếu NAV KHÔNG BAO GIỜ được phép nới tổng trần — nên fallback là chia đều, không phải
+    "cho mỗi account full trần" (chính là bug mà thay đổi này sửa).
+    """
+    from trading_bot.config import live_dnse_labels
+    labels = sorted(live_dnse_labels())
+    if not labels:
+        print("  WARNING: không có account live nào — CAPIT sẽ bị chặn ở executor")
+        return {}, "no-account", {}
+    detail = {l: dict(zip(("nav", "source"), _account_nav_basis(l))) for l in labels}
+    navs = {l: d["nav"] for l, d in detail.items() if d["nav"]}
+    if len(navs) == len(labels):
+        tot = sum(navs.values())
+        return {l: navs[l] / tot for l in labels}, "pro-rata-nav", detail
+    missing = sorted(set(labels) - set(navs))
+    print(f"  WARNING: thiếu NAV cho {missing} → chia ĐỀU trần %ADV cho {len(labels)} "
+          f"account (tổng trần KHÔNG đổi, chỉ kém tối ưu về phân bổ)")
+    return {l: 1.0 / len(labels) for l in labels}, "equal-split-fallback", detail
 
 
 def capit_base(state, dd52w, vn_cooling):
@@ -356,7 +434,8 @@ vnh["vn_cooling"] = vnh["rv10"] <= vnh["rv10"].rolling(30).max() * 0.85
 dd52_now = float(vnh["dd52"].iloc[-1]) if len(vnh) else -99.0
 vn_cool_now = bool(vnh["vn_cooling"].iloc[-1]) if len(vnh) and pd.notna(vnh["vn_cooling"].iloc[-1]) else False
 
-capit_size, capit_grind, basket, capit_dd_excluded, capit_caps = 0.0, False, [], [], {}
+capit_size, capit_grind, basket, capit_dd_excluded = 0.0, False, [], []
+capit_caps_total, capit_caps, capit_shares, capit_share_mode, capit_share_detail = {}, {}, {}, "n/a", {}
 if capit_fired:
     wdays = br[br["oversold"] >= WASHOUT_GATE]["time"].tolist()
     bdates = br["time"].tolist(); i0 = len(bdates) - 1
@@ -383,7 +462,11 @@ WHERE p.time = DATE '{bd.date()}' AND p.ROE_Min5Y>=0.12 AND p.ROIC5Y>=0.10 AND p
             pick = g if len(g) >= 3 else (c if len(c) >= 3 else e)
             pick = pick.nsmallest(15, "pbz") if len(pick) > 15 else pick
             basket = sorted(pick["ticker"].tolist())
-            capit_caps = capit_adv_caps(basket, bd)
+            # trần TỔNG fleet cho mỗi mã → chia cho từng account đang deploy CAPIT.
+            capit_caps_total = capit_adv_caps(basket, bd)
+            capit_shares, capit_share_mode, capit_share_detail = capit_account_shares()
+            capit_caps = {a: {t: v * s for t, v in capit_caps_total.items()}
+                          for a, s in capit_shares.items()}
 
 # ── 7. emit recommendations (CSV + MD + status JSON) ──
 etf_frac = ETF_PARK.get(state_today, 0.0)
@@ -425,7 +508,9 @@ for tk in basket:
     recs.append({"book": "CAPIT", "ticker": tk, "play_type": "CAPIT_GOLDEN",
                  "ta": None, "close_bq_stale_DO_NOT_USE_AS_REFPRICE": None, "sector": sec_map.get(tk),
                  "weight_pct": round(capit_size / max(len(basket), 1) * 100, 2), "status": "WASHOUT",
-                 "capit_cap_vnd": round(capit_caps[tk]) if tk in capit_caps else None})
+                 # TỔNG cả fleet — CSV này account-agnostic. Trần của TỪNG account (đã chia)
+                 # nằm ở status["capit_adv_caps"][<label>] và đó mới là cái executor enforce.
+                 "capit_cap_total_vnd": round(capit_caps_total[tk]) if tk in capit_caps_total else None})
 # parking basket — advisory rows (book=PARK, weight_pct = within-basket cap-weight %)
 if _park_basket is not None:
     for pr in _park_basket.itertuples():
@@ -434,7 +519,7 @@ if _park_basket is not None:
                      "close_bq_stale_DO_NOT_USE_AS_REFPRICE": None, "sector": None,
                      "weight_pct": round(float(pr.weight) * 100, 4),
                      "status": "PARK_ADVISORY"})
-rec_df = pd.DataFrame(recs, columns=["book","ticker","play_type","ta","close_bq_stale_DO_NOT_USE_AS_REFPRICE","sector","weight_pct","status","capit_cap_vnd"])
+rec_df = pd.DataFrame(recs, columns=["book","ticker","play_type","ta","close_bq_stale_DO_NOT_USE_AS_REFPRICE","sector","weight_pct","status","capit_cap_total_vnd"])
 csv_path = os.path.join(OUTDIR, f"golive_v23_recommendations_{END}.csv")
 rec_df.to_csv(csv_path, index=False)
 
@@ -448,10 +533,17 @@ status = {
     "washout_gate": WASHOUT_GATE, "capit_fired": capit_fired,
     "capit_size": round(capit_size, 2), "capit_grind": capit_grind,
     "capit_dd_excluded": capit_dd_excluded,
-    # Trần VND tuyệt đối/tên (X·ADV20·D) — NGUỒN CHUẨN TẮC mà bot_execute.py enforce.
-    # Cố tình KHÔNG dựa vào DollarBill copy field này vào plan: executor đọc thẳng artifact
-    # ở đây, nên plan generator quên áp cap cũng không làm mất cap. Xem capit_adv_caps().
-    "capit_adv_caps": {t: round(v) for t, v in sorted(capit_caps.items())},
+    # Trần VND tuyệt đối/tên ĐÃ CHIA THEO ACCOUNT — NGUỒN CHUẨN TẮC mà bot_execute.py
+    # enforce. Cố tình KHÔNG dựa vào DollarBill copy field này vào plan: executor đọc thẳng
+    # artifact ở đây, nên plan generator quên áp cap cũng không làm mất cap.
+    # Cấu trúc {label: {ticker: vnd}} — mỗi account CHỈ thấy phần của mình; Σ theo account
+    # = capit_adv_caps_total (bất biến an toàn). Xem capit_adv_caps()/capit_account_shares().
+    "capit_adv_caps": {a: {t: round(v) for t, v in sorted(c.items())}
+                       for a, c in sorted(capit_caps.items())},
+    "capit_adv_caps_total": {t: round(v) for t, v in sorted(capit_caps_total.items())},
+    "capit_adv_shares": {a: round(s, 6) for a, s in sorted(capit_shares.items())},
+    "capit_adv_share_mode": capit_share_mode,
+    "capit_adv_share_nav": {a: d for a, d in sorted(capit_share_detail.items())},
     "capit_adv_x": ADV_X, "capit_adv_d": ADV_D,
     "dd52w": round(dd52_now, 1), "vn_cooling": vn_cool_now,
     "n_bal": int(len(bal)), "n_lag_upcoming": len(lag_up), "n_lag_recent": len(lag_recent),
@@ -529,10 +621,19 @@ if capit_fired:
     L.append(f"- Committed VND = size × free cash mỗi book, hold {CAPIT_HOLD}td, stop-exempt, slot-exempt.")
     if basket:
         L.append(f"- Basket quality-golden ({len(basket)} mã): " + ", ".join(basket))
-        L.append(f"- Trần %ADV/tên ({ADV_X:.0%}·ADV20·{ADV_D:.0f} phiên, VND tuyệt đối — "
-                 f"executor enforce cứng, phần dư để CASH không dồn sang tên khác): "
-                 + ", ".join(f"{t} {capit_caps[t]/1e6:,.0f}tr" if t in capit_caps
+        L.append(f"- Trần %ADV/tên — TỔNG cả fleet ({ADV_X:.0%}·ADV20·{ADV_D:.0f} phiên, VND "
+                 f"tuyệt đối; phần dư để CASH, không dồn sang tên khác): "
+                 + ", ".join(f"{t} {capit_caps_total[t]/1e6:,.0f}tr" if t in capit_caps_total
                              else f"{t} ⚠KHÔNG CÓ ADV → sẽ bị CHẶN" for t in basket))
+        L.append(f"  Thanh khoản một mã là nguồn lực THỊ TRƯỜNG dùng chung — trần TỔNG này "
+                 f"được CHIA cho {len(capit_shares)} account live ({capit_share_mode}), "
+                 f"executor mỗi account enforce cứng phần của mình:")
+        for a in sorted(capit_shares):
+            nav = capit_share_detail.get(a, {})
+            L.append(f"    · {a} — {capit_shares[a]:.1%} "
+                     f"(NAV {nav.get('nav') or 0:,.0f}đ, {nav.get('source')}): "
+                     + ", ".join(f"{t} {capit_caps[a][t]/1e6:,.0f}tr"
+                                 for t in basket if t in capit_caps.get(a, {})))
     else:
         L.append("- Basket: <3 mã quality đạt chuẩn — sleeve không kích hoạt.")
 else:
