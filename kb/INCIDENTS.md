@@ -3398,3 +3398,37 @@ nhật câu văn; (2) 2 sự cố bị bỏ sót (`deposit-rate-refresh-NOTIFY_O
 unit bugs) — đã thêm thành mục 5-6; (3) sai số nhỏ giờ/tỷ lệ MISS — đã sửa; (4) thứ tự "Nguồn
 gốc" hàng 1 dẫn đầu bằng hành vi cá nhân — đã đảo lại blameless. Việc B (retro 07-19 retroactive)
 = **CONFIRMED**, xem dòng cập nhật ở entry `RETRO — 2026-07-19` phía trên.
+
+---
+
+## 2026-07-21 — ZaloPay run_bot rc=1: 5 lệnh MUA CAPIT mất + executor seed_shared crash
+**Job**: `Winston_20260721_024320` (ops-autofix dispatch). **Vốn: AN TOÀN** (không lệnh treo).
+
+**Triệu chứng**: `run_bot.sh --account ZaloPay` (plan 2026-07-21) exit rc=1 sau 0'.
+`executor.py:122 seed_shared` → `KeyError: 'BUY-NCT-02'`.
+
+**Chuỗi sự việc (từ log/journal/artifact thật)**:
+- 09:15 exec: chỉ `SELL-VPB-01` PLACE→FILL→DONE 800@24.800 (khớp đủ, 20M/99%). 5 lệnh MUA CAPIT
+  (NCT/PVT/SAB/SIP/VNM) bị `%ADV BLOCKED …→0cp` vì `data/golive_v23_status.json` khi đó là **bản
+  cũ tối qua với `capit_adv_caps={}` rỗng** (`plan.py:199` báo "có: []").
+- 09:29 artifact được regen **ĐÚNG** (có ZaloPay+SpaceX) — **SAU** khi bot chạy.
+- Resume sau đó: `_load_state` khôi phục state cũ (parents chỉ `SELL-VPB-01`, vì 5 buy qty=0 bị drop
+  lúc seed), nhưng `seed_shared` lặp `self.plan.orders` vẫn còn `BUY-NCT-02` → `state[parents][BUY-NCT-02]`
+  KeyError → rc=1. **Mọi resume (kể cả 13:00 chiều) sẽ crash.**
+
+**Bằng chứng regression**: `%ADV BLOCKED` chỉ có ở log 07-21 (10 dòng); 0 dòng suốt 07-10..07-20.
+
+**2 root cause — CẢ 2 ở vùng CẤM Winston, KHÔNG tự sửa**:
+1. **Plan↔golive timing**: `run_bot` 09:05 chạy TRƯỚC khi `golive_v23_status.json` regen 09:29 → đọc
+   caps rỗng → chặn buys. (crontab/generation — Taylor/DollarBill).
+2. **executor.py `seed_shared` KeyError** khi `plan.orders` chứa order KHÔNG có trong `state[parents]`
+   (do %ADV-drop). Cần tolerate mismatch. (executor code — Wags/Taylor).
+
+**Impact**: ZaloPay MẤT 5 lệnh mua CAPIT hôm nay; resume chiều không tự bù được (crash).
+
+**Đã làm (Winston, trong ranh giới)**: chẩn đoán từ log/journal/state/artifact; xác nhận vốn an toàn;
+escalate bus `finding` + `question` (`escalate-ZaloPay-CAPIT-buys-missed-2026-07-21`) + Telegram
+Trading Daily. **KHÔNG** patch executor/plan/golive, **KHÔNG** xóa state (đúng mandate).
+
+**Chờ quyết định trước 13:00 ICT**: (A) patch executor seed_shared; (B) đảm bảo artifact tươi trước
+run_bot; (C) có re-seed state để mua bù 5 lệnh chiều nay (chạm executor/xóa state → cần user duyệt).
