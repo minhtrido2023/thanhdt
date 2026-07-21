@@ -451,3 +451,34 @@ c.execute("""select ticker, Price*OShares/1e9 mcap_ty, Trading_Value_1M_P50/1e9 
 
 Chạy lại: `source ./wc_env.sh && $DNA_PYEXE mike/agents/Taylor/<script>.py` (từ thư mục
 `/home/trido/thanhdt/WorkingClaude`).
+
+---
+
+## 8. Điều chỉnh bear-case DCF theo beta bất đối xứng (đã duyệt 2026-07-21)
+
+Nguồn: `research/asymmetric_beta_regime.md` (job `Taylor_20260721_112050`), user duyệt dùng ở tầng
+**định giá/giám sát rủi ro** — KHÔNG áp dụng cho chọn cổ phiếu/sizing/DT5G/V2.4.
+
+**Phát hiện**: beta đo khi thị trường giảm cao hơn rõ rệt và ổn định so với beta đo khi thị trường
+tăng (asym +0,23 IS / +0,34 OOS, sống qua kiểm soát thanh khoản) — tương quan giữa các cổ phiếu tăng
+mạnh ở đuôi xấu của thị trường (mọi mã rơi cùng nhau khi khủng hoảng/downtrend), không tăng tương ứng
+ở đuôi tốt (mã nào có câu chuyện riêng mới bứt phá). **Hiệu ứng này KHÔNG tập trung riêng ở nhóm "đầu
+cơ"** (turnover, biến động riêng lẻ không có tương quan) — đây là hiện tượng thị trường rộng, không
+phải cách phân loại cổ phiếu.
+
+**Quy tắc áp dụng — kịch bản Bear của mọi DCF từ nay**:
+- Dùng **beta chuẩn (§1.1b) + 0,25** làm beta cho kịch bản Bear (thay vì cùng 1 beta cho cả 3 kịch bản
+  Bear/Base/Bull như trước đây).
+- Base và Bull vẫn dùng beta chuẩn — bất đối xứng chỉ có bằng chứng vững ở đuôi xấu, KHÔNG có bằng
+  chứng tương ứng ở đuôi tốt (đừng tự suy ra "Bull nên trừ beta" — chưa đo được).
+- Ví dụ: FPT beta chuẩn 0,71 → Bear dùng 0,96 thay vì 0,71 (chi phí vốn cổ phần Bear tăng thêm
+  ~0,25×6,5%≈1,6pp so với cách cũ).
+
+**Ghi chú gửi risk-auditor (song song, không thay thế quy tắc trên)**: mọi ước tính drawdown danh mục
+hiện tại dùng beta vô điều kiện đang **lạc quan quá mức ~0,15 đến 0,34 beta** trong giai đoạn
+CRISIS/BEAR thực tế — đây là ghi chú hiệu chỉnh cho việc đọc số, không phải đề xuất đổi cơ chế risk
+gate/DT5G.
+
+**Giới hạn** (đọc trước khi dùng): đây vẫn là phát hiện THĂM DÒ, chưa qua quant-skeptic; +0,25 là ước
+lượng điểm giữa (asym đo được 0,23-0,34 tuỳ IS/OOS), không phải hằng số chính xác — coi là mức điều
+chỉnh thận trọng hợp lý, không phải con số đã tối ưu.
