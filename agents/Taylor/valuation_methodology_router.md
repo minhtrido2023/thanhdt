@@ -56,7 +56,44 @@ framework weekly-5y nhất, mean spearman 0.835):
 | 5 | 80 | **1.51** | đầu cơ / đòn bẩy cao |
 
 Dùng bảng này khi cần beta nhanh mà không muốn chạy hồi quy. Khi con số quan trọng (report chính
-thức) → chạy hồi quy thật, lệnh ở §7.
+thức) → **tra bảng beta thật ở §1.1b** (đã tính sẵn cho toàn bộ mã), không cần chạy tay.
+
+**Sai số nếu dùng bin làm proxy** (đo trên 402 mã, quý 2026Q3) — biết trước để không dùng bừa:
+
+| bin | MAE | p90 | % mã lệch > 0.30 beta |
+|---|---|---|---|
+| 1 | 0.141 | 0.335 | 14% |
+| **2** | **0.200** | **0.449** | **21%** ← lệch nhiều nhất, đừng dùng |
+| 3 | 0.170 | 0.382 | 18% |
+| 4 | 0.128 | 0.301 | 11% ← chặt nhất |
+| 5 | 0.175 | 0.349 | 16% |
+
+⇒ **Bin 2 là bin tệ nhất để thay thế tạm** (IQR rộng nhất, 1/5 số mã lệch >0.30). Bin 1 và 4 tạm
+chấp nhận được. Nhưng khi đã có §1.1b thì không có lý do gì dùng bin nữa.
+
+### 1.1b Bảng beta thật toàn bộ mã — `data_beta_universe.csv` (dùng cái này)
+
+Script `mike/agents/Taylor/beta_universe.py` → **`mike/agents/Taylor/data_beta_universe.csv`**
+(1.288 mã, chạy lại bất cứ lúc nào, ~1 phút). Tra thẳng file, không tính tay từng case.
+
+| Cột | Ý nghĩa |
+|---|---|
+| `beta_5y` / `r2_5y` / `t_5y` | **beta chính** — hồi quy tuần, 260 tuần, vs VNINDEX + độ tin cậy |
+| `beta_3y` | cửa sổ 156 tuần — so với `beta_5y` để xem beta có ổn định không |
+| `status` | `OK` / `LOW_CONFIDENCE_ILLIQUID` / `INSUFFICIENT_HISTORY` |
+| `adv_vnd`, `mcap_vnd`, `in_prune`, `bin` | thanh khoản, vốn hoá, có trong `ticker_prune` không, bin cũ |
+
+**Quy tắc đọc:**
+- `status=OK` (ADV ≥ 2 tỷ **và** R² ≥ 0.10) → dùng `beta_5y` thẳng. 253/1.288 mã.
+- `status=LOW_CONFIDENCE_ILLIQUID` → **bỏ beta đo**, xem §1.2. Toàn thị trường có 846/1.288 mã
+  R² < 0.10 — với nhóm này beta gần như vô nghĩa.
+- `status=INSUFFICIENT_HISTORY` (< 104 tuần ≈ 2 năm, thường là mã mới niêm yết) → dùng **beta trung
+  vị của ngành (`icb`) hoặc của tier**, **không** dùng bin `risk_rating` (bin cũng cần lịch sử).
+- Beta không ổn định ở đuôi: `|beta_3y − beta_5y|` trung vị 0.185, **p90 0.523**. Khi con số quan
+  trọng, xem cả 2 cột; lệch nhiều ⇒ nói rõ độ bất định trong report thay vì đưa 1 số.
+
+**Đã kiểm chứng**: script tái tạo đúng cả 14 case tính tay ở §1.3 (median |sai lệch| 0.011,
+max 0.061). Gotcha: cột `time` trong `bq_cache/ticker/*.parquet` là VARCHAR → phải `CAST(time AS DATE)`.
 
 ### 1.2 Tier theo vốn hoá & thanh khoản
 
@@ -78,6 +115,42 @@ adjust cổ tức/chia tách nên nhân với số cổ phiếu hiện tại s�
 | 1 | 0.9–1.1 (đo thật) | **0** | **10,5–13%** | thanh khoản cao, track record dài, không cộng thêm phí quy mô |
 | 2 | 0.8–1.2 (đo thật) | +1,0–1,5pp | **12,5–15%** | |
 | 3 | **đừng tin beta đo** | **+2–3pp** | **15–18%** | xem cảnh báo dưới |
+
+> ### ⚠️ 1.2b ĐÍNH CHÍNH QUAN TRỌNG (2026-07-21): premium neo vào **THANH KHOẢN**, không phải vốn hoá
+>
+> Đã đo trực tiếp bằng dữ liệu VN (`size_premium_vn.py`, 31.345 quan sát tháng, 2015-02→2026-07,
+> alpha = phần dư CAPM sau khi **kiểm soát beta**, universe point-in-time, walk-forward IS/OOS):
+>
+> - **KHÔNG có size premium ở VN.** Alpha theo ngũ phân vị vốn hoá phẳng và không đơn điệu
+>   (+3,17 / +3,51 / −0,21 / +3,37 / +1,82 pp/năm). L/S nhỏ-trừ-lớn: FULL +1,35pp (t=0,23),
+>   IS −0,35, OOS +2,62 — **vô nghĩa ở mọi cách chia** (tercile/quintile/decile). DSR 0,26–0,33.
+> - **Cái tồn tại thật là ILLIQUIDITY premium**: trung hoà size, L/S (ADV thấp − ADV cao) =
+>   **+6,55pp/năm, t=2,84, p=0,005; IS +7,95 / OOS +5,50; DSR 0,978** — thứ duy nhất vượt ngưỡng
+>   DSR 0,95 của đội.
+> - Bằng chứng dứt điểm: trong nửa **thanh khoản cao**, L/S nhỏ-trừ-lớn là **ÂM** nhất quán
+>   (FULL −4,04 / IS −5,31 / OOS −3,10). Giữa các mã thanh khoản tốt, mã nhỏ không hề thắng mã lớn.
+>
+> **⇒ Thay trục premium từ vốn hoá sang ADV** (`Trading_Value_1M_P50`):
+>
+> | ADV (GTGD trung vị 1M) | premium cộng vào CoE |
+> |---|---|
+> | ≥ 50 tỷ/ngày | **0** |
+> | 10–50 tỷ | **+1pp** |
+> | 2–10 tỷ | **+2–3pp** |
+> | < 2 tỷ | **+4–6pp** (neo vào +6,55pp đo được, làm tròn xuống cho thận trọng) |
+>
+> Bảng tier ở trên vẫn dùng được vì tier tương quan mạnh với thanh khoản — nhưng khi tier và ADV
+> **mâu thuẫn** (mã vốn hoá lớn nhưng GTGD mỏng, hoặc small-cap giao dịch sôi động) thì **theo ADV**.
+>
+> Đây là input **định giá** (mức đền bù rủi ro đòi hỏi), **không phải tín hiệu giao dịch** — theo
+> đúng định nghĩa nó nằm ở các mã ta không thể vào lệnh với size.
+>
+> 🐞 **Bẫy đã sập một lần, đừng lặp lại:** lần đo đầu tiên dùng `mcap = Close × OShares` cho ra
+> "size premium +9,3pp/năm" — **giả hoàn toàn**. `Close` đã điều chỉnh cổ tức nên vốn hoá **quá khứ**
+> bị chiết lùi (median mcap 2014: 324 tỷ theo `Close` vs 947 tỷ theo `Price` — thấp 2,9 lần, thu hẹp
+> dần về 1,0 lần ở 2026), khiến nhóm "nhỏ nhất" thực chất bị nhồi bởi các mã **trả cổ tức cao/lâu
+> năm** — một tilt value trá hình. **Luôn dùng `Price × OShares` cho vốn hoá; `Close` chỉ dùng để
+> tính return.**
 
 > ⚠️ **Beta small-cap THẤP là ảo giác thanh khoản, không phải an toàn.** Tier 3 có beta trung vị
 > 0.56 — thấp hơn cả blue-chip. Nguyên nhân là giá giao dịch thưa/đứng im (stale pricing) làm hiệp
@@ -366,3 +439,15 @@ c.execute("""select ticker, Price*OShares/1e9 mcap_ty, Trading_Value_1M_P50/1e9 
 **Liên quan:** `dcf_valuation_framework.md` (mô hình 2-stage FCFE chi tiết + hiệu chuẩn thực nghiệm),
 `beta_reverse_engineer_results.csv` (bằng chứng `risk_rating` ranks giống weekly-5y),
 `soe_governance_framework.md` (nhóm c), `mike/kb/data_registry.md` (nguồn dữ liệu canonical).
+
+**Script & dữ liệu của chính router này** (job `Taylor_20260721_112050`):
+
+| File | Dùng để |
+|---|---|
+| `beta_universe.py` → `data_beta_universe.csv` | beta thật toàn bộ mã (§1.1b) — **tra file, đừng tính tay** |
+| `beta_universe.py` → `data_beta_bin_map.csv` | bảng quy đổi bin → beta thật (§1.1) |
+| `size_premium_vn.py` → `data_size_premium.csv` | đo premium theo vốn hoá/thanh khoản (§1.2b) |
+| `research/asymmetric_beta_regime.md` | beta bất đối xứng theo regime — **THĂM DÒ**, chưa dùng được |
+
+Chạy lại: `source ./wc_env.sh && $DNA_PYEXE mike/agents/Taylor/<script>.py` (từ thư mục
+`/home/trido/thanhdt/WorkingClaude`).
