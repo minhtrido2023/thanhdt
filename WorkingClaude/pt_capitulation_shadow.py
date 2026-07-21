@@ -48,6 +48,13 @@ hist=bq("""WITH daily AS (
  SELECT d.time, s.state, d.oversold FROM daily d
  JOIN tav2_bq.vnindex_5state_dt5g_live s USING(time)
  ORDER BY d.time DESC LIMIT 120""").sort_values("time").reset_index(drop=True)
+# CAPIT_FORCE_DATE=YYYY-MM-DD: ép ngày xử lý (backfill/replay point-in-time). Cắt lịch sử
+# tới đúng ngày đó nên breadth/state/grind đều tính bằng dữ liệu có thật lúc ấy, không hindsight.
+_force=os.environ.get("CAPIT_FORCE_DATE","").strip()
+if _force:
+    hist=hist[hist["time"].astype(str)<=_force].reset_index(drop=True)
+    if not len(hist) or str(hist.iloc[-1]["time"])!=_force:
+        raise SystemExit(f"CAPIT_FORCE_DATE={_force}: không có dữ liệu breadth/state cho ngày này")
 today=str(hist.iloc[-1]["time"]); state=int(hist.iloc[-1]["state"]); oversold=float(hist.iloc[-1]["oversold"])
 prior=hist.iloc[:-1]; pw=prior[prior["oversold"]>=WASHOUT]
 grind=False
@@ -143,6 +150,7 @@ else:
 
 # ---- 5. log + persist -------------------------------------------------------
 stt["last_date"]=today
+if _force: note=f"BACKFILL/REPLAY (CAPIT_FORCE_DATE={_force}) | "+note
 row={"date":today,"dt5g_state":state,"regime":STATE_NAME.get(state),"oversold_pct":round(oversold*100,1),
      "fired":fired,"grind":grind,"size":size if fired else 0.0,"mode":stt["mode"],
      "nav":round(stt["nav"]),"nav_x":round(stt["nav"]/SEED,4),"n_holdings":len(stt["basket"]),"note":note}
