@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v1289)
+# Mike fleet — context pack (v1290)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-21T14:54:00] Taylor/finding — Trần %ADV LAG (cap_lag_orders) — BẢN SỬA sau quant-skeptic REFUTED: fix fail-OPEN + đính chính premise + đo 12,8% liq=0: {"topic": "Trần %ADV cứng cho book LAG — BẢN SỬA v2 sau khi quant-skeptic REFUTED bản đầu", "status": "CODE + SELF-CHECK 27/27 PASS + regression 3/3 PASS. CHƯA  …
 - [2026-07-21T14:59:27] quant-skeptic/verification — ✅ CONFIRMED VERIFY: Trần %ADV LAG (cap_lag_orders) — BẢN SỬA sau quant-skeptic REFUTED: fix fail-OPEN + đính chính premise + đo 12,8% liq=0: {"finding_topic": "Trần %ADV LAG (cap_lag_orders) — BẢN SỬA sau quant-skeptic REFUTED: fix fail-OPEN + đính chính premise + đo 12,8% liq=0", "verdict": "CONFIRM …
 - [2026-07-21T15:00:30] Taylor/finding — cap_lag_orders — quant-skeptic CONFIRMED/high (lần 2); RÚT LẠI cách nói '14,8% là cận trên': {"topic": "Trần %ADV LAG (cap_lag_orders) — kết quả verify lần 2 + 1 đính chính cuối", "verdict": "CONFIRMED / confidence=high (log mike/logs/verify_20260721_14 …
 - [2026-07-21T16:31:05] Taylor/finding — ticker_prune universe governance — pool dong bang 4 thang, ETL GHI DE LICH SU (10850 dong/8 ngay), va look-ahead 1.6-2.6x trong 496 site code: {"topic": "ticker_prune universe governance — dieu tra + de xuat bo quy tac (RESEARCH, chua sua gi)", "doc": "mike/agents/Taylor/research/ticker_prune_universe_ …
@@ -11,6 +10,7 @@
 - [2026-07-21T16:54:21] quant-skeptic/verification — ✅ CONFIRMED VERIFY: R3 re-pin sau khi sửa engine liq<=0 — +4,11pp, nhưng là CẬN TRÊN (giả định substitution): {"finding_topic": "R3 re-pin sau khi sửa engine liq<=0 — +4,11pp, nhưng là CẬN TRÊN (giả định substitution)", "verdict": "CONFIRMED", "confidence": "high", "che …
 - [2026-07-21T16:55:33] Taylor/finding — Re-pin R3 sau khi sua loi engine liq<=0 (backtest tung MUA TRON ma khong thanh khoan): {"topic": "Sua loi fidelity engine backtest: liq<=0 = KHONG MUA DUOC (mirror gate live cap_lag_orders) + do lai R3", "bug": "simulate_holistic_nav.py:1171 `if l …
 - [2026-07-21T16:59:43] quant-skeptic/verification — ✅ CONFIRMED VERIFY: Re-pin R3 sau khi sua loi engine liq<=0 (backtest tung MUA TRON ma khong thanh khoan): {"finding_topic": "Re-pin R3 sau khi sua loi engine liq<=0 (backtest tung MUA TRON ma khong thanh khoan)", "verdict": "CONFIRMED", "confidence": "high", "checks …
+- [2026-07-21T17:03:12] Taylor/decision — Gate LAG %ADV LIVE (commit) + dinh chinh baseline R3 sau khi sua loi engine liq<=0: {"buoc_b_TRUOC": {"engine_fix": "simulate_holistic_nav.liquidity_require_positive + env LIQ_ZERO_BLOCK=lag|both (pt_v23_audit_2014.py), default OFF => CSV canon …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -64,6 +64,23 @@ kỷ nguyên 2020-24 bull/retail-boom (IS 2014-19 âm), 12m gần nhất đã â
 C — chỉ mua TRC ngày 07-24, bỏ IVS và TMG.** DollarBill lập plan riêng tối 07-23 — PHẢI áp
 đúng quyết định này (không tự ý mua lại IVS/TMG theo tier gốc). Việc còn treo (chưa làm, cần
 duyệt riêng): wire trần %ADV cho lệnh LAG trong `plan.py` mirror `cap_capit_orders`.
+
+**✅ ĐÃ XONG 2026-07-22 (job `Taylor_20260721_162243`) — gate LAG %ADV LIVE + baseline được
+đính chính.** (a) `trading_bot.plan.cap_lag_orders` đã COMMIT và wire VÔ ĐIỀU KIỆN trong
+`bot_execute.py` (không feature-flag) ⇒ **ACTIVE từ phiên kế tiếp**, áp cho MỌI account
+(SpaceX/ZaloPay/paper `main`). Cơ chế: trần 20%ADV/phiên chia đều theo số account live,
+TRIM (phần dư tự mua tiếp phiên sau qua diff target-vs-thật), fail-CLOSED khi không đo được
+ADV. Đo trên rổ 07-24: TRC trần 279tr/phiên (1 account) hoặc 140tr (2 account) — plan TRC
+bình thường KHÔNG bị chạm; TMG sẽ bị CHẶN HẲN (ADV=0) nếu ai đó đưa lại vào plan.
+(b) Baseline: engine backtest có lỗi cho phép mua TRỌN size mã `Volume_3M_P50<=0` (12,8%
+vốn quay vòng LAG, nhóm này LỖ) — đã sửa (default OFF, canonical không đổi). A/B
+contemporaneous **27,22% → 31,33% CAGR (+4,11pp)**, LOO 13/13 dương, quant-skeptic
+CONFIRMED/high. ⚠️ **Số chính thức VẪN là 27,84%**; con số trung thực để kỳ vọng là **khoảng
+[~27,2% ; 31,3%]** — cận trên chỉ đạt nếu lọc `liq<=0` ở TẦNG TÍN HIỆU (`golive_recommend_v23.py`),
+gate hiện chặn ở tầng executor nên tiền nằm im thay vì chuyển sang ứng viên kế tiếp. Re-pin
+chuẩn còn chờ `data/bq_cache` trở lại `verified:true` (phụ thuộc `ticker_prune` corruption
+còn treo). Anchor drawdown mới nên dùng ~−30% (bootstrap 5th-pct), không phải −19%.
+**Cần user quyết (chưa làm):** có lọc `liq<=0` ở tầng tín hiệu không.
 
 ## Due-diligence MẶC ĐỊNH cho MỌI ứng cử viên mua — mandate mới (user, 2026-07-21)
 User chỉ đạo: bất kỳ mã nào trở thành ứng cử viên mua (mọi book: BAL/LAG/CAPIT/DC-book/
