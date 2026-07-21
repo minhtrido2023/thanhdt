@@ -150,6 +150,25 @@ def _dcf_str(o):
     if s and log_dcf_history:
         log_dcf_history(o.get('ticker'), dcf, 'eod_trading_report', asof=plan_date)
     return s
+
+# Due-diligence tổng hợp cho lệnh MUA (mandate user 2026-07-21) — informational, không gate.
+# skip_dcf=True: dòng DCF đã echo riêng ngay trên (_dcf_str).
+try:
+    from trading_bot.due_diligence import run_due_diligence, DD_DISCLAIMER
+except Exception:
+    run_due_diligence = None
+    DD_DISCLAIMER = ''
+
+def _dd_str(o):
+    if not run_due_diligence or o.get('side') != 'buy':
+        return ''
+    ctx = {'asof': plan_date, 'skip_dcf': True}
+    px = o.get('ref_price')
+    if isinstance(px, (int, float)) and px:
+        ctx['price'] = px
+        if isinstance(o.get('qty'), (int, float)):
+            ctx['est_value_vnd'] = px * o['qty']
+    return run_due_diligence(o.get('ticker'), o.get('book'), ctx) or ''
 plan = {'orders': list(orders_by_id.values())}
 parents = state.get('parents', {})
 
@@ -266,7 +285,8 @@ for oid, p in parents.items():
 
     rows.append({
         'ticker': ticker, 'side': side, 'qty_plan': qty_plan, 'filled': filled,
-        'pct': pct, 'avg_price': avg_price, 'value': value_filled, 'dcf': _dcf_str(o)
+        'pct': pct, 'avg_price': avg_price, 'value': value_filled, 'dcf': _dcf_str(o),
+        'dd': _dd_str(o)
     })
 
 rows.sort(key=lambda r: -r['value'])
@@ -303,10 +323,15 @@ for r in rows:
         lines.append(f"• ⚠️ {side_disp} {r['ticker']}: 0/{r['qty_plan']:,} — KHÔNG khớp")
     if r.get('dcf'):
         lines.append(f"   ↳ {r['dcf']}")
+    if r.get('dd'):
+        for _dl in str(r['dd']).splitlines():
+            lines.append(f"   ↳ {_dl.strip()}")
 
 if any(r.get('dcf') for r in rows) and DCF_DISCLAIMER:
     lines.append("")
     lines.append(f"ℹ️ _{DCF_DISCLAIMER}_")
+if any(r.get('dd') for r in rows) and DD_DISCLAIMER:
+    lines.append(f"ℹ️ _{DD_DISCLAIMER}_")
 
 lines.append("")
 fill_rate = 100 * tot_value_filled / tot_value_planned if tot_value_planned else 0

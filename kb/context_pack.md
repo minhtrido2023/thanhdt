@@ -1,4 +1,4 @@
-# Mike fleet — context pack (v1280)
+# Mike fleet — context pack (v1281)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
@@ -51,6 +51,30 @@ vấn đề sizing NCT có sẵn từ trước, gate làm nặng thêm chút, c�
 > ngay khi đóng, KHÔNG giữ nguyên play-by-play ở đây "cho chắc" (bài học sự cố model-drift/
 > context-bloat 2026-07-17 — file này phình 0→36KB trong 3 tuần chủ yếu vì narrative sự cố đã
 > đóng không được rút gọn, đè phí token lên MỌI dispatch qua `context_pack.md`).
+
+## LAG 07-24 (IVS/TMG/TRC) — user chốt phương án C, chỉ mua TRC (2026-07-21)
+Chuỗi điều tra hôm nay (job `Taylor_20260721_130404` + `_133858`) phát hiện: (a) đường live
+LAG **thiếu trần %ADV** mà chính backtest R3 pinned đang giả định (≤20%ADV/phiên, ≤5 phiên,
+huỷ nếu <30% filled) — lỗ hổng thật, chưa fix; (b) **TMG** `Volume_3M_P50=0` (ngoài
+`ticker_prune`, ~20tr VND/ngày) → đóng góp ĐÚNG 0 vào backtest, mua live = ngoài mô hình; (c)
+**IVS** (ICB 8777, CTCK) surprise +136,7% phồng cơ học do nền 2025Q4 lỗ, ROE_Trailing chỉ
+1,89%, ADV 39% lệnh fleet, ngoài `ticker_prune`; PEAD nhóm CTCK edge trung bình cao hơn sản
+xuất NHƯNG không dự báo được (IC=+0,051 p=0,35 vs manuf +0,136 p<1e-4) và chỉ là hiện tượng
+kỷ nguyên 2020-24 bull/retail-boom (IS 2014-19 âm), 12m gần nhất đã âm. **User CHỐT: phương án
+C — chỉ mua TRC ngày 07-24, bỏ IVS và TMG.** DollarBill lập plan riêng tối 07-23 — PHẢI áp
+đúng quyết định này (không tự ý mua lại IVS/TMG theo tier gốc). Việc còn treo (chưa làm, cần
+duyệt riêng): wire trần %ADV cho lệnh LAG trong `plan.py` mirror `cap_capit_orders`.
+
+## Due-diligence MẶC ĐỊNH cho MỌI ứng cử viên mua — mandate mới (user, 2026-07-21)
+User chỉ đạo: bất kỳ mã nào trở thành ứng cử viên mua (mọi book: BAL/LAG/CAPIT/DC-book/
+custom30V rotation) phải qua bước due-diligence — không chỉ để bảo vệ giao dịch đó, mà còn
+để LỘ RA điểm hệ thống cần cải thiện (như lỗ hổng %ADV cho LAG vừa phát hiện ở trên). **Mặc
+định trong quy trình cho CẢ production lẫn paper-trading**, không phải opt-in/chỉ khi có cờ
+đặc biệt. Đây là mở rộng của due-diligence trigger hiện có (forensic_flags, >7% NAV,
+first-time-buy, DCF=RICH+robust override, anomaly Tier-H — vẫn giữ nguyên làm HARD gate) sang
+diện rộng hơn: MỌI candidate, không chỉ các case có cờ. Đã dispatch Taylor thiết kế + triển
+khai (xem bus finding sau 2026-07-21 13:xx) — theo dõi kết quả trước khi coi mandate này đã
+xong.
 
 ## Vận hành/kiến trúc daemon — trạng thái ổn định (không đổi gần đây)
 Remote-control daemon `mike@Mike.service` tắt hẳn từ 07-07 (user chỉ dùng Discord qua

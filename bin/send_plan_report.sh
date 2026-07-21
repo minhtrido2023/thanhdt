@@ -165,7 +165,15 @@ if orders:
     except Exception:
         _dcf_check_for_order = format_dcf_check = log_dcf_history = None
         DCF_DISCLAIMER = ""
+    # Due-diligence tổng hợp cho MỌI lệnh MUA (mandate user 2026-07-21) — thanh khoản/universe/
+    # cơ học tín hiệu/cờ bất thường/FA thô. skip_dcf=True vì dòng DCF đã echo riêng ngay trên.
+    try:
+        from trading_bot.due_diligence import run_due_diligence, DD_DISCLAIMER
+    except Exception:
+        run_due_diligence = None
+        DD_DISCLAIMER = ""
     dcf_shown = False
+    dd_shown = False
     buys  = [o for o in orders if str(o.get("side","")).lower() in ("buy","mua","b")]
     sells = [o for o in orders if str(o.get("side","")).lower() in ("sell","ban","s")]
     lines.append(f"🎯 Hành động: **{len(orders)} lệnh** ({len(sells)} bán, {len(buys)} mua):")
@@ -198,8 +206,21 @@ if orders:
                     log_dcf_history(ticker, dcf, "send_plan_report", asof=date)
             if is_buy and o.get("dcf_override_reason"):
                 lines.append(f"      ↳ lý do override DCF: {str(o['dcf_override_reason'])[:120]}")
+        if is_buy and run_due_diligence:
+            dd_ctx = {"asof": date, "skip_dcf": True}
+            if isinstance(price, (int, float)):
+                dd_ctx["price"] = price
+            if isinstance(val, (int, float)):
+                dd_ctx["est_value_vnd"] = val
+            dd_s = run_due_diligence(ticker, o.get("book") or o.get("play_type"), dd_ctx)
+            if dd_s:
+                for dl in str(dd_s).splitlines():
+                    lines.append(f"      ↳ {dl.strip()}")
+                dd_shown = True
     if dcf_shown and DCF_DISCLAIMER:
         lines.append(f"ℹ️ _{DCF_DISCLAIMER}_")
+    if dd_shown and DD_DISCLAIMER:
+        lines.append(f"ℹ️ _{DD_DISCLAIMER}_")
 else:
     lines.append(f"🎯 Hành động: **GIỮ NGUYÊN (HOLD)** — không có lệnh nào ngày mai.")
 
