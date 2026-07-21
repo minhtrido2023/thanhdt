@@ -170,9 +170,13 @@ try:
     _secrets_file = os.path.join(wc_root, 'secrets', 'trading_bot_accounts.json')
     with open(_secrets_file, encoding='utf-8') as _sf:
         _s = json.load(_sf)
-    _a = _s.get('accounts', {})
-    if isinstance(_a, dict):
-        _acct = _a.get(account) or {}
+    _accts_list = _s.get('accounts', [])
+    if isinstance(_accts_list, list):
+        _acct = next((a for a in _accts_list if a.get('label') == account), None)
+        if _acct:
+            _target_account_no = _acct.get('account_id') or _acct.get('account_no')
+    elif isinstance(_accts_list, dict):
+        _acct = _accts_list.get(account) or {}
         _target_account_no = _acct.get('account_id') or _acct.get('account_no')
 except Exception:
     pass
