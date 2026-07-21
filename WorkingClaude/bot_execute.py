@@ -34,7 +34,7 @@ if hasattr(sys.stdout, "reconfigure"):  # console Windows cp1252 → utf-8
 from trading_bot.config import load_config, load_accounts, pick_accounts, EXEC_DIR
 from trading_bot.brokers import make_broker, get_quote_source, get_dnse_client
 from trading_bot.plan import (load_plan, filter_excluded_tickers, cap_capit_orders,
-                              approval_block_reason)
+                              cap_lag_orders, approval_block_reason)
 from trading_bot.executor import Executor, run_session, _publish_bot_event
 from trading_bot.vn_market import today_ict
 
@@ -234,6 +234,14 @@ def main():
         plan, capped = cap_capit_orders(plan, p["label"])
         for a in capped:
             print(f"[{p['label']}] ⚠ CAPIT trần %ADV {a['action']} {a['ticker']}: "
+                  f"{a['qty_before']:,} → {a['qty_after']:,} cp — {a['reason']}")
+        # Trần %ADV cho book LAG (20% ADV/phiên = liquidity_volume_pct của LIQ_LAG trong
+        # backtest pinned R3) — đóng lỗ hổng live-vs-backtest 2026-07-21. Cùng luồng, cùng
+        # nguyên tắc fail-closed như CAPIT ngay trên; phần bị cắt tự mua tiếp phiên sau qua
+        # diff target-vs-thật của plan hôm sau.
+        plan, lag_capped = cap_lag_orders(plan, p["label"], account_mode=cfg["mode"])
+        for a in lag_capped:
+            print(f"[{p['label']}] ⚠ LAG trần %ADV {a['action']} {a['ticker']}: "
                   f"{a['qty_before']:,} → {a['qty_after']:,} cp — {a['reason']}")
         if not plan.orders:
             print(f"[{p['label']}] plan {plan_date} không có lệnh — bỏ qua")

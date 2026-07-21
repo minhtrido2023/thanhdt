@@ -353,6 +353,7 @@ def simulate(signals_df, prices, vni_dates, *,
              max_fill_days=1,                # how many days to attempt completion of order
              min_fill_pct=0.30,              # if <30% filled after max_fill_days → abandon
              liquidity_lookup=None,          # dict: (ticker, time) -> volume_3m_p50 * price (real unadjusted notional, VND)
+             liquidity_require_positive=False,  # True: liq missing/<=0 → CANNOT buy that day (mirror live gate). False = legacy (no cap → full size)
              exit_slippage_tiered=False,     # True: add extra slip on exit if position large vs ADV
              sector_limit_per_sector=None,   # dict {sector_id: max_pos} for per-sector caps
              sector_cap_exempt_tiers=None,   # set/list of play_types exempt from sector caps (D1)
@@ -1170,6 +1171,11 @@ def simulate(signals_df, prices, vni_dates, *,
                 liq = liquidity_lookup.get((tk, today))
                 if liq and liq > 0:
                     daily_max = liq * liquidity_volume_pct
+                elif liquidity_require_positive:
+                    # ADV không đo được (key thiếu) hoặc <=0 (Volume_3M_P50<=0, kiểu TMG).
+                    # Legacy: bỏ qua trần ⇒ mua TRỌN size trong 1 phiên (không mô tả được
+                    # đường live). Bật cờ này = mirror gate live `cap_lag_orders`: chặn hẳn.
+                    daily_max = 0.0
             _mg_ok2 = (max_gross_exposure is not None
                        and (margin_tiers is None or play_type in margin_tiers))
             _bp = cash + ((max_gross_exposure - 1.0) *

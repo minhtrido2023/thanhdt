@@ -114,15 +114,24 @@ try:  # fail-safe: file thiếu / hỏng → set rỗng, không ném lỗi
 finally:
     anomaly_gate.WORKDIR = _real
 
-print("== D. bản dùng chung khớp bản inline production ==")
-src = open(os.path.join(W, "deploy_golive_dt5g_v4", "golive_recommend_v23.py"), encoding="utf-8").read()
+print("== D. bản dùng chung khớp bản inline production (PRE-PATCH, ghim git rev) ==")
+# golive_recommend_v23.py từ 2026-07-21 (job Taylor_20260721_092529 + Mike áp patch) đã
+# delegate sang anomaly_gate.py — không còn bản inline độc lập để so (exec thân hàm hiện
+# tại sẽ NameError vì _anomaly_excluded_shared không có trong ns). Ghim về commit NGAY
+# TRƯỚC lần refactor đó (569bdca) để bài test vẫn chạy được và còn giá trị regression.
+PINNED_REV = "569bdca742b55a13314df4c83108b059ec14e543"
+_o = subprocess.run(["git", "show", f"{PINNED_REV}:WorkingClaude/deploy_golive_dt5g_v4/golive_recommend_v23.py"],
+                     cwd=W, capture_output=True, text=True)
+if _o.returncode != 0:
+    raise RuntimeError(f"không đọc được rev ghim {PINNED_REV}: {_o.stderr}")
+src = _o.stdout
 ns = {"os": os, "json": json, "pd": pd, "WORKDIR": W, "ANOMALY_TTL_DAYS": 30}
 exec("from datetime import timedelta\n" + src[src.index("def anomaly_excluded"):
                                               src.index("def capit_adv_caps")], ns)
 prod = ns["anomaly_excluded"]
 same = all(prod(d) == anomaly_excluded(d) for d in
            [SIG_DATE, "2025-12-01", "2026-07-01", "2026-06-24", "2026-08-30"])
-chk("D1 2 bản trả kết quả giống nhau trên 5 ngày mẫu", same)
+chk("D1 2 bản trả kết quả giống nhau trên 5 ngày mẫu (pre-patch pinned vs shared)", same)
 
 print(f"\n{ok} PASS / {fail} FAIL")
 sys.exit(1 if fail else 0)

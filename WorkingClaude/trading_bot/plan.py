@@ -243,6 +243,156 @@ def cap_capit_orders(plan, account_label, status_path=None):
     return plan, adj
 
 
+LAG_ADV_PCT = 0.20           # = liquidity_volume_pct của LIQ_LAG (pt_v23_audit_2014.py:1135)
+LAG_ADV_MAX_STALE_DAYS = 30  # dòng ADV mới nhất cũ hơn ngần này ⇒ coi như không có dữ liệu
+
+
+def cap_lag_orders(plan, account_label, asof=None, live_labels=None, account_mode="live"):
+    """Áp trần %ADV cho lệnh MUA book LAG — enforce cứng, độc lập plan generator.
+
+    VÌ SAO (lỗ hổng live-vs-backtest, phát hiện 2026-07-21, job Taylor_20260721_130404):
+    baseline pinned R3 (CAGR 27,84%) mô phỏng book LAG với `LIQ_LAG = {liquidity_volume_pct:
+    0.20, max_fill_days: 5}` (pt_v23_audit_2014.py:1135) + `min_fill_pct=0.30` là DEFAULT của
+    engine (simulate_holistic_nav.py:354) — tức backtest KHÔNG BAO GIỜ mua quá 20% ADV một
+    phiên. Đường live không có ràng buộc này (chỉ CAPIT có, `cap_capit_orders` ngay trên),
+    nên một lệnh LAG trên mã mỏng (IVS ADV 0,18 tỷ/phiên) đặt được ở live với size mà
+    backtest không bao giờ cho phép = giao dịch NGOÀI mô hình.
+
+    Trần = LAG_ADV_PCT × ADV × share, ADV = Volume_3M_P50 × Close đúng công thức backtest
+    (`due_diligence.adv_vnd`, đọc `data/bq_cache/ticker/` — trễ tối đa 1 phiên, chấp nhận
+    được vì đây là trung vị 3 tháng; TUYỆT ĐỐI không dùng số này làm giá, §6 bright-line).
+
+    ⚠️ CHẶT HƠN BACKTEST, CÓ CHỦ Ý — đọc kỹ trước khi so số với R3 (sửa sau khi quant-skeptic
+    REFUTED bản đầu, 2026-07-21): engine mô phỏng viết `if liq and liq > 0` khi tra trần
+    (simulate_holistic_nav.py:1169-1172), nên `liq == 0` HOẶC key thiếu ⇒ daily_max giữ
+    nguyên = mua FULL size KHÔNG trần. Nói cách khác backtest KHÔNG chặn mã liq=0 như TMG —
+    nó mua trọn. Gate này CHẶN chúng ⇒ đây là một sai lệch MỚI (theo hướng an toàn), KHÔNG
+    phải "vá lại một lỗ hổng fidelity". Đo được trên chính rổ ứng viên LAG 2014+ (5.319 event,
+    tái dựng từ earnings_events_classified.csv + gate NP_R≥15/prior_n_good≥4/pa_HL3≥5 +
+    forensic): 14,8% số event có ADV KHÔNG đo được ở ngày vào lệnh — trong đó 12,8% là
+    Volume_3M_P50 ≤ 0 ĐÚNG kiểu TMG. ⚠️ ĐỪNG coi đây là cận trên: 14,8% là tỷ lệ theo EVENT,
+    còn tỷ lệ theo DEAL ĐƯỢC CẤP VỐN có thể CAO HƠN — trong engine, tên liq≤0 không bị trần
+    nên fill trọn target NGAY trong 1 phiên rồi rời hàng đợi, còn tên đo được ADV bị bóp
+    20%/phiên và giữ vốn tới 5 phiên ⇒ tên liq≤0 bị chọn vào nhóm được cấp vốn NHIỀU hơn tỷ
+    lệ tự nhiên (quant-skeptic 2026-07-21 lần 2). Con số theo deal chưa đo. Nghĩa là:
+    baseline 27,84% CAGR không còn mô tả
+    đúng đường live sau khi bật gate này, muốn con số chuẩn phải re-pin bằng một lần chạy
+    pt_v23 với engine coi liq≤0 là CHẶN. Quyết định giữ CHẶN (không nới theo backtest) là
+    quyết định RỦI RO có chủ ý, cần user duyệt — không phải kết luận từ backtest.
+
+    `share` = 1/N với N = số account LIVE (enabled + mode=live, MỌI broker — cố ý không dùng
+    `live_dnse_labels()` vì nó lọc broker=='dnse' và sẽ đếm thiếu một account live sàn khác,
+    làm tổng vượt 20%). LÝ DO chia: %ADV là nguồn lực THỊ TRƯỜNG dùng chung cho một mã, mỗi
+    account enforce full 20% thì 2 account = 40% — đúng bug `cap_capit_orders` đã phải sửa.
+    Chia ĐỀU (không pro-rata NAV như CAPIT) vì không có artifact fleet-level tính sẵn phần
+    chia; tổng vẫn đúng 20%. Account paper dùng CÙNG share (không phải 1.0) để paper không
+    lệch khỏi live — paper là bàn thử của live, khác share là tự tạo tracking error.
+
+    Cắt (TRIM) chứ không chặn khi vượt trần: phần dư tự động được mua tiếp các phiên sau,
+    KHÔNG cần cơ chế carry-over mới — plan sinh lại mỗi ngày theo diff target-vs-thật
+    (`strategies.py`: `target[t]` từ paper book mirror, orders = target − real_pos), nên
+    phần chưa khớp hôm nay tự xuất hiện lại trong plan hôm sau. Executor cũng đã
+    `cancel_all_open("EOD")` cuối phiên nên không có lệnh treo qua đêm.
+
+    FAIL-CLOSED (mirror cap_capit_orders): không đọc được cache / không có mã trong cache /
+    thiếu Volume_3M_P50|Close / dữ liệu ADV cũ hơn LAG_ADV_MAX_STALE_DAYS / ADV ≤ 0 /
+    ref_price ≤ 0 / trần < 1 lô / KHÔNG dựng được danh sách account live / account đang chạy
+    mode=live mà KHÔNG có trong danh sách đó (config lệch ⇒ không biết chia bao nhiêu) →
+    CHẶN lệnh đó. Không mua một mã còn hơn mua một mã mà ta không đo được thanh khoản HOẶC
+    không biết mình được phép chiếm bao nhiêu %ADV (coding_guidelines §5).
+
+    KHÔNG mô phỏng `max_fill_days=5` / `min_fill_pct=0.30`: đó là luật HỦY của simulation
+    (bỏ deal nếu 5 phiên chưa fill ≥30%), live không có state đếm ngày-đang-fill. Đây là
+    khác biệt fidelity CÒN LẠI, đã ghi nhận, không tự chế cơ chế mới ở đây.
+
+    Trả (plan đã sửa, list dict mô tả từng điều chỉnh) — KHÔNG log, để caller tự báo.
+    """
+    from .vn_market import round_lot, LOT
+
+    def _is_lag_buy(o):
+        return (o.book or "").upper() == "LAG" and (o.side or "").lower() == "buy"
+
+    if not any(_is_lag_buy(o) for o in plan.orders):
+        return plan, []
+
+    asof = str(asof or plan.plan_date)[:10]
+
+    share, share_err = 1.0, None
+    try:
+        if live_labels is None:
+            from .config import load_config, load_accounts
+            live_labels = [p["label"] for p in load_accounts(load_config())
+                           if p["enabled"] and p["cfg"]["mode"] == "live"]
+        live_labels = list(live_labels or [])
+        is_live = str(account_mode or "live").lower() == "live"
+        if is_live and account_label not in live_labels:
+            share_err = (f"account '{account_label}' chạy mode=live nhưng KHÔNG có trong danh "
+                         f"sách account live ({sorted(live_labels) or 'RỖNG'}) — không xác "
+                         f"định được phần %ADV được phép chiếm, config lệch")
+        else:
+            share = 1.0 / max(1, len(live_labels))
+    except Exception as ex:
+        share_err = f"không xác định được danh sách account live: {ex}"
+
+    adj, keep = [], []
+    for o in plan.orders:
+        if not _is_lag_buy(o):
+            keep.append(o)
+            continue
+
+        def _block(reason, cap=None):
+            adj.append({"ticker": o.ticker, "action": "BLOCKED", "qty_before": o.qty,
+                        "qty_after": 0, "cap_vnd": cap, "reason": reason})
+
+        if share_err:
+            _block(share_err)
+            continue
+        if o.ref_price <= 0:
+            _block(f"ref_price={o.ref_price} không hợp lệ, không kiểm tra được trần")
+            continue
+        adv, data_date, err = _adv_for_gate(o.ticker, asof)
+        if err:
+            _block(f"không đo được ADV: {err}")
+            continue
+        if data_date:
+            try:
+                lag_days = (dt.date.fromisoformat(asof) - dt.date.fromisoformat(data_date)).days
+            except Exception:
+                lag_days = None
+            if lag_days is not None and lag_days > LAG_ADV_MAX_STALE_DAYS:
+                _block(f"dữ liệu ADV mới nhất {data_date} cũ {lag_days} ngày so với {asof} "
+                       f"(> {LAG_ADV_MAX_STALE_DAYS}) — mã có thể ngừng giao dịch/huỷ niêm yết")
+                continue
+        if adv <= 0:
+            _block(f"ADV = 0 (Volume_3M_P50×Close, data {data_date}) — mã không có thanh "
+                   f"khoản thật, đóng góp 0 vào backtest")
+            continue
+
+        cap = LAG_ADV_PCT * adv * share
+        max_qty = round_lot(cap / o.ref_price)
+        if o.qty <= max_qty:
+            keep.append(o)
+            continue
+        if max_qty < LOT:
+            _block(f"trần {cap:,.0f}đ ({LAG_ADV_PCT:.0%} ADV × {share:.2f}) < 1 lô "
+                   f"@ {o.ref_price:,.0f}đ", cap)
+            continue
+        adj.append({"ticker": o.ticker, "action": "TRIMMED", "qty_before": o.qty,
+                    "qty_after": max_qty, "cap_vnd": cap,
+                    "reason": f"trần {LAG_ADV_PCT:.0%} ADV × {share:.2f} = {cap:,.0f}đ "
+                              f"(ADV {adv:,.0f}đ, data {data_date}); phần dư mua tiếp phiên sau"})
+        o.qty = max_qty
+        keep.append(o)
+    plan.orders = keep
+    return plan, adj
+
+
+def _adv_for_gate(ticker, asof):
+    """Tách riêng để self-check monkeypatch được nguồn ADV mà không cần bq_cache thật."""
+    from .due_diligence import adv_vnd
+    return adv_vnd(ticker, asof)
+
+
 def approval_block_reason(plan):
     """Code-gate approval — lớp phòng thủ THỨ HAI, độc lập với việc gửi plan cho user
     duyệt qua send_plan_report.sh (sự cố 2026-07-13: plan ZaloPay requires_user_approval=true

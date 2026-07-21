@@ -243,6 +243,14 @@ if _gate_raw:
     _qs_tag += f"_gate{_gate_raw}"
 if os.environ.get("BASKET_QFLOOR", "") == "1": _qs_tag += "_qfloor"
 if os.environ.get("BASKET_LIQ_FLOOR_B", "").strip(): _qs_tag += f"_liqf{os.environ['BASKET_LIQ_FLOOR_B'].strip()}B"
+# LIQ_ZERO_BLOCK (2026-07-21, job Taylor_20260721_162243): coi ADV không đo được / <=0 là
+# KHÔNG MUA ĐƯỢC, thay vì "bỏ qua trần ⇒ mua trọn size" của engine gốc — mirror gate live
+# `trading_bot.plan.cap_lag_orders`. "lag"|"1" = chỉ book LAG (đúng phạm vi gate live);
+# "both" = cả BAL (chỉ để đo, live KHÔNG có gate cho BAL). Unset = hành vi cũ, byte-identical.
+LIQ_ZERO_BLOCK = os.environ.get("LIQ_ZERO_BLOCK", "").strip().lower()
+if LIQ_ZERO_BLOCK in ("1", "lag"): _qs_tag += "_liqzblag"
+elif LIQ_ZERO_BLOCK == "both": _qs_tag += "_liqzbboth"
+elif LIQ_ZERO_BLOCK: raise SystemExit(f"LIQ_ZERO_BLOCK không hợp lệ: {LIQ_ZERO_BLOCK!r} (lag|both)")
 EXP_TAG = os.environ.get("EXP_TAG", "").strip()
 if EXP_TAG: _qs_tag += f"_exp_{EXP_TAG}"
 # Quality-TILT strength sweep (env BASKET_QTILT, dir B 2026-06-16). Only affects custompitgq
@@ -839,7 +847,8 @@ for d in vni_dates:
     state_ff[d] = last_s
 
 LIQ_FULL = {"liquidity_volume_pct": 0.20, "max_fill_days": 5,
-            "liquidity_lookup": liq_map, "exit_slippage_tiered": True}
+            "liquidity_lookup": liq_map, "exit_slippage_tiered": True,
+            "liquidity_require_positive": (LIQ_ZERO_BLOCK == "both")}
 
 # ============================================================================
 # 4. LAGGED PEAD schedule (signal layer from earnings files; prices from BQ)
@@ -1133,7 +1142,8 @@ for tk, g in lagpx.groupby("ticker"):
     for d, adv, px in zip(gl["time"], gl["Volume_3M_P50"].astype(float), gl["Close"].astype(float)):
         liq_lag[(tk, d)] = adv * px
 LIQ_LAG = {"liquidity_volume_pct": 0.20, "max_fill_days": 5,
-           "liquidity_lookup": liq_lag, "exit_slippage_tiered": True}
+           "liquidity_lookup": liq_lag, "exit_slippage_tiered": True,
+           "liquidity_require_positive": (LIQ_ZERO_BLOCK in ("1", "lag", "both"))}
 
 # LAG SUE-TILT (#23, Taylor 2026-06-27): finer 3-tier weight by surprise tercile vs the binary HI/LO@0.5.
 # REJECTED (backtest @50B): 3-tier LOSES -0.66pp CAGR (27.44->26.78), worse BOTH halves (IS -0.7 / OOS -0.2),

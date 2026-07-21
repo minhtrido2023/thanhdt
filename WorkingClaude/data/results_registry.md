@@ -34,6 +34,7 @@ Họ config = **V2.3A (argv `v23a none postbull 0 edge`) + custom30V parking (ET
 
 ### 🔁 RE-PIN 2026-06-25 — threads=1 DETERMINISTIC (thay số threads=4 1-sample ở trên)
 > ⚠️ **SUPERSEDED cho R3 (2026-07-11, rồi 2026-07-12):** baseline R3 đã RE-PIN 2 lần — (a) 2026-07-11 sau DT5G swap trong SIGNAL_V11 (28.82/1.90/−15.7/1.83); (b) **2026-07-12 sau khi ĐÓNG KÊNH MOM_N/MOM_S (Scope A, user sign-off) — số chính thức hiện hành: CAGR 27.84% / Sharpe 1.84 / MaxDD −18.2% / Calmar 1.53**, xem section "2026-07-12 — RE-PIN BASELINE R3 (đóng kênh MOM)" cuối file. R1/R2 (bull-park, nghiên cứu) CHƯA re-run với dt5g swap lẫn MOM-closure.
+> ⚠️ **THÊM 2026-07-21 (job Taylor_20260721_162243):** engine backtest có lỗi fidelity — mã `Volume_3M_P50<=0`/không đo được ADV được **mua trọn size** thay vì bị chặn (12,8% vốn quay vòng LAG). Sau khi sửa (mirror gate live `cap_lag_orders`): A/B contemporaneous **27,22% → 31,33%** (+4,11pp), LOO 13/13 dương. **27,84% vẫn là số CHÍNH THỨC cho tới khi chạy lại được với cache verified** — con số kỳ vọng trung thực nên đọc là **khoảng [~27,2% ; 31,3%]** (cận trên chỉ đạt nếu lọc `liq<=0` ở TẦNG TÍN HIỆU, chưa làm). Chi tiết + điều kiện: section "2026-07-21 — RE-PIN R3 (SỬA ENGINE `liq<=0`)" cuối file.
 > Chạy lại R1/R2/R3 với `BQ_CACHE_THREADS=1`, CÙNG `AUDIT_END=2026-06-19`, lệnh y hệt. Số dưới là **tái lập được** (R3a==R3b bit-for-bit). Chênh so số cũ = threads-determinism + data-drift 6 ngày gộp; KHÔNG tách được. **Số cũ (threads=4) coi là ước lượng; số này là chuẩn mới.**
 
 | Config | Lệnh (thêm `BQ_CACHE_THREADS=1` vào đầu) | CAGR cũ→mới | Sharpe | MaxDD | Calmar | self-check |
@@ -3939,3 +3940,85 @@ vs −16,1) — nó chặn đúng chỗ ÍT quan trọng. **→ Giữ BROAD như
   name-days (câu 2) — chứ không dựa vào chữ số CAGR.
 - **KHÔNG đổi gì ở paper sleeve.** Kết luận của cả 2 câu = giữ nguyên code hiện tại, nên không có hành
   động wire nào cần user duyệt.
+
+## CAPIT fill-timing study (OPEN vs 11:15 vs ATC on the fill day) — 2026-07-21 (job Taylor_20260721_022952)
+Script: `agents/Taylor/capit_fill_timing_study.py`. Question: keep the 11:15 ICT CAPIT fill or move
+earlier per gap-adaptive down-gap logic? **N-budget: 3 fixed fill times compared on 19 historical
+washout episodes — descriptive execution study, NOT a parameter search, nothing wired → no DSR gate.**
+- **Fire universe**: production metric `breadth_oversold = mean(D_RSI<0.30)` over ticker_prune, gate 0.30,
+  30-day de-cluster → **19 episodes 2014→2026-07-20** (incl. today's 07-20 fire, filling 07-21).
+- **CRITICAL framing fix**: CAPIT fires on washout CLOSE (day D); basket FILLS on **D+1** (plan gen EOD,
+  exec next session). Timing question is about D+1's intraday path, not D's. (Day-D itself grinds down
+  hard: o2c −299bps / day_ret −4.3% — but that's not the execution day.)
+- **TRACK A (daily OHLC, D+1, deepest-pbz basket proxy, 18 episodes)**: o2c(Close/Open−1) = **+29.4 bps
+  (t=1.8, 49% open<close)** — ATC is on avg ~29bps ABOVE open, i.e. OPEN marginally cheaper than ATC but
+  a near coin-flip. Per-episode HIGHLY heterogeneous: 11/18 positive (bounce D+1, open cheap), 7 negative
+  (continuation-flush D+1, ATC cheap); range −316 to +544 bps. D+1 day-low sits ~−218bps below D+1 open
+  (recovers +252bps into close) — real intraday dispersion but not reliably timeable.
+- **TRACK B (1-min bars, D+1, 16 liquid names, 6 dates w/ minute coverage = market-shape proxy)**:
+  OPEN→11:15 = **−31.5 bps** (11:15 marginally BELOW open = slightly better entry than open);
+  11:15 vs day-LOW = **+211 bps** (11:15 does NOT catch the low); day-low in MORNING (<11:30) on **71%**
+  of name-days, mode low-time **09:15** (gap-down-open-then-recover shape).
+- **Ranking by avg entry price (lower=better)**: 11:15 (≈−31 vs open) ≲ OPEN (0) < ATC (+29) — spread
+  <60bps, ALL within execution noise (110–220bps) and none robust (t<2).
+- **VERDICT: KEEP 11:15 (no change).** (1) Gap-adaptive "buy-at-open on down-gap" does NOT transfer:
+  a single-name abnormal down-GAP recovers, but a broad breadth-WASHOUT D+1 is a ~50/50 mix of
+  continuation-flush vs bounce → OPEN-vs-ATC is a wash. (2) 11:15 is empirically the cheapest of the 3
+  fixed times on the (thin) evidence AND avoids open-auction spread/volatility on a panic session.
+  (3) The morning-low bias (71%) mildly hints earlier, but 09:15 auction slippage on panic days >> the
+  <60bps edge, and n=19 episodes / 6 with intraday is far too small + dispersed to justify a live change.
+  RESEARCH ONLY — did not touch today's live 07-21 fills.
+
+### ⚠️ CORRECTION (2026-07-21, job Taylor_20260721_083405) — the "11:15" PREMISE of the study above is FALSE for LIVE; verdict is moot
+User/Mike suspicion CONFIRMED: **live CAPIT does NOT fill "at 11:15".** The 10:45–11:15 BUY window
+(`_fill_timing_mult`) is **paper-only** and never applies to the live SpaceX/ZaloPay books.
+- **Code proof** (`trading_bot/executor.py:672`): `if fill_timing_live_gate(True) and mode!="paper": return 1.0`.
+  Default `fill_timing_live_gate=True` (`config.py:66`); SpaceX/ZaloPay (`mode=live`, dnse) carry **no
+  override** in `secrets/trading_bot_accounts.json` → the window multiplier is 1.0 on every live order,
+  i.e. the 10:45–11:15 concentration is inert on live. (Already documented elsewhere in THIS registry:
+  lines ~1202, ~2704, ~2881 — the study above contradicted established knowledge.)
+- **What actually governs live fill timing**: continuous slicing in `_place_slices` — one child slice per
+  parent every `slice_interval_min=8` min, each capped at `max_participation=10%` of the day's *cumulative*
+  traded volume (+ CAPIT hybrid ADV20 floor / 30% realized ceiling, commit 57675a0). Orders pace out from
+  market open to close as cumulative volume builds; there is no "wait until 11:15" gate.
+- **Empirical proof, today's real fills** (`dnse_raw_2026-07-21.jsonl`, deduped by order id):
+  SpaceX first buys PLACED **09:30:02** (PVT/SAB/VNM), PVT+VNM filled by **09:30:22**, SAB sliced 09:30→10:35,
+  SIP 09:51→13:00, NCT 13:00→14:20. ZaloPay VNM/SAB/SIP first slices **10:11**, PVT 10:34→13:00, NCT 13:00→14:29.
+  ZaloPay VPB **sell** placed 09:15:15 / filled 09:15:35 (at open). **Nothing clustered at 11:15** — 11:15
+  timestamps in the place log are merely two of ~40 slice ticks that happened to land there.
+- **Consequence for the study above**: TRACK A/B are legitimate *descriptive* market-shape stats, but the
+  framing question ("keep the 11:15 CAPIT fill vs move earlier") is **built on a fill time that live never
+  uses**. The verdict "KEEP 11:15" is therefore MOOT for live — there is nothing at 11:15 to keep. The one
+  thing the finding got right (and which stands): **RESEARCH ONLY, do not change live execution.** No live
+  behavior was or should be altered on the basis of it.
+- **Correct question, if we ever ask it**: whether to change the live **slicing schedule** (8-min cadence /
+  10% participation / start-at-open) — NOT a fixed "11:15" fill. Flipping `fill_timing_live_gate` is a
+  separate, still-open item (paper-accrual + skeptic + user sign-off; see registry ~line 1202/1212).
+Original finding block RETAINED above for audit trail (not deleted).
+
+## 2026-07-21 — RE-PIN R3 (SỬA ENGINE: `liq<=0` = KHÔNG MUA ĐƯỢC) — job Taylor_20260721_162243 — ⚠️ PIN TẠM (điều kiện dưới)
+**Bối cảnh:** gate live mới `trading_bot.plan.cap_lag_orders` (trần 20%ADV/phiên cho lệnh LAG, job `Taylor_20260721_143341`, quant-skeptic CONFIRMED) CHẶN mã không đo được ADV / `Volume_3M_P50<=0`. Engine backtest viết `if liq and liq > 0` (`simulate_holistic_nav.py:1171`) ⇒ đúng những mã đó **KHÔNG bị trần** và được **mua TRỌN size trong 1 phiên**. Nghĩa là pin 27,84% mô tả một đường mà live không đi được (fill ảo trên mã không có thanh khoản).
+**Sửa (surgical, default OFF ⇒ canonical byte-identical khi không set env):** thêm kwarg `liquidity_require_positive` vào `simulate()` — khi True, `liq` thiếu hoặc `<=0` ⇒ `daily_max=0` (không mua được phiên đó). `pt_v23_audit_2014.py`: env `LIQ_ZERO_BLOCK=lag|both` (lag = đúng phạm vi gate live; both = chỉ để đo, live KHÔNG gate BAL), có tag filename `_liqzblag`/`_liqzbboth` theo §8. **KHÔNG đụng CSV canonical** (ctrl chạy với `EXP_TAG=liqzbctrl`).
+**Lệnh (⚠️ đính chính lệnh pin cũ):** lệnh pin 07-12 ghi `BQ_LOCAL_CACHE=1` — SAI, biến này là ĐƯỜNG DẪN; `=1` ⇒ "no manifest at .../1/manifest.json" ⇒ **âm thầm rơi về live BQ** (đúng sự cố 07-12 mà chính dòng đó định phòng). Đúng phải là `BQ_LOCAL_CACHE=data/bq_cache`. **Nhưng hôm nay cache đang `verified:false`** (`ticker_prune` local 756.091 vs BQ 760.296 — hệ quả corruption upstream còn treo), nên cache KHÔNG dùng được ⇒ **cả 2 chân chạy live BQ, contemporaneous** (so sánh A/B hợp lệ; mức tuyệt đối lệch vintage).
+```bash
+BQ_LOCAL_CACHE=data/bq_cache BQ_CACHE_THREADS=1 NAV_TOTAL_B=50 ETF_LIQ=custompitg BASKET_WT=namecap \
+BASKET_SELECT=yieldcombo PARK_STATES="3:0.7" AUDIT_END=2026-06-19 LIQ_ZERO_BLOCK=lag \
+$DNA_PYEXE pt_v23_audit_2014.py v23a none postbull 0 edge
+```
+
+| R3 @50B NEUTRAL-only | CAGR | Sharpe | MaxDD | Calmar | IS 14–19 | OOS 20+ | LAG stock events |
+|---|---|---|---|---|---|---|---|
+| Pin 2026-07-12 (cache vintage 07-12, engine cũ) | 27.84% | 1.84 | −18.2% | 1.53 | 23.15% | 32.30% | — |
+| **ctrl** hôm nay (engine cũ, live-BQ vintage 07-21) | 27.22% | 1.82 | −17.8% | 1.53 | 23.34% | 30.87% | 6.825 |
+| **treat = ENGINE ĐÃ SỬA** (`LIQ_ZERO_BLOCK=lag`) | **31.33%** | **1.89** | −18.8% | **1.67** | 24.44% | 38.01% | 11.712 |
+
+**Δ đúng nghĩa (contemporaneous ctrl→treat): +4,11pp CAGR / +0,07 Sharpe / −1,0pp MaxDD (xấu hơn) / +0,14 Calmar.** IS +1,10pp và OOS +7,14pp — cùng dấu, walk-forward không gãy. Self-check **0 VND** cả BAL+LAG ở CẢ 2 run, borrow 0 VND, max gross 1.000, threads=1. Recompute độc lập `extract_peryear.py` khớp chính xác engine print (27.22 / 31.33). DSR trên NAV daily: 1.0000 cả 2 (z=6.11 / 6.30). **PBO n/a và DSR không phải câu hỏi ở đây** — đây là 1 sửa lỗi fidelity, N=1, KHÔNG chọn từ họ config nào (không có multiple-testing để deflate).
+**Cơ chế (đo từ chính CSV, không suy đoán):** 58 mã chỉ xuất hiện ở ctrl = đúng nhóm microcap không thanh khoản (LAW 142B, TMG 133B, ATS 101B, HHC, BDB, SSH, DAN, HJC…). Chúng nuốt **1.634B / 12.759B = 12,8% tổng vốn quay vòng LAG** (trùng khớp con số 12,8% event đo hôm trước) và **LỖ**: gross −1,11%/vòng (net −28,5B), trong khi phần còn lại +4,82%/vòng. Chặn chúng ⇒ vốn quay lại nhóm mua được ⇒ turnover LAG 12,76T → 19,25T, số lệnh mua 5.460 → 9.806. Vậy +4,11pp = (a) bỏ một sleeve THUA + (b) tái phân bổ vốn sang sleeve +4,95%/vòng.
+**⚠️ 2 ĐIỀU KIỆN — VÌ SAO ĐÂY LÀ PIN TẠM, CHƯA THAY 27,84% LÀM SỐ CHÍNH THỨC:**
+1. **Vintage**: chạy trên live BQ (cache hỏng). Phải chạy lại đúng 2 chân với `BQ_LOCAL_CACHE=data/bq_cache` sau khi cache `verified:true` trở lại (phụ thuộc việc `ticker_prune` corruption còn treo) trước khi con số tuyệt đối được coi là pin chuẩn.
+2. **Giả định THAY THẾ (substitution) — quan trọng hơn**: trong engine, mã bị chặn không giữ vốn ⇒ vốn chảy NGAY sang ứng viên kế tiếp cùng phiên. Trên đường LIVE, gate `cap_lag_orders` chặn ở tầng EXECUTOR, còn sổ mục tiêu (paper book mirror) VẪN chứa mã đó ⇒ tiền **nằm im**, không tự thay bằng ứng viên khác. Nên **31,33% là CẬN TRÊN** (có thay thế); cận dưới ≈ ctrl bỏ sleeve thua mà không tái đầu tư (~27,2% +chút). Kỳ vọng thật nằm trong khoảng **[~27,2% ; 31,3%]**, vị trí trong khoảng phụ thuộc điều 3 dưới.
+3. **Việc cần quyết (đề xuất, CHƯA làm)**: muốn thực sự hưởng phần trên của khoảng, phải loại mã `Volume_3M_P50<=0`/không đo được ADV ở **TẦNG TÍN HIỆU** (`golive_recommend_v23.py` / sổ LAG) chứ không chỉ chặn ở executor — khi đó sổ tự chọn ứng viên kế tiếp, đúng như engine mô phỏng. Đây là thay đổi production cần user duyệt riêng.
+**Đọc nghiệp vụ:** sửa lỗi này KHÔNG làm chiến lược xấu đi — nhóm bị chặn vốn là nhóm LỖ, nên gate LAG %ADV vừa bật **không đánh đổi return để lấy an toàn** (khác với lo ngại ban đầu). Cái mất là *fill ảo*, không phải alpha thật. Cảnh báo phân bố: phần hơn tập trung 2017/2020/2021 (2021 +136,4% vs +108,8%) — cùng dạng regime-carry đã bắt được ở dự án MOM, đừng ngoại suy +4pp cho mọi năm.
+**Per-year LOO trên Δ (bổ sung, cùng job — kiểm tra đúng bài học MOM/Wave1):** bỏ LẦN LƯỢT từng năm rồi tính lại CAGR cả 2 chân — Δ **DƯƠNG ở CẢ 13/13 phép**, biên độ +2,44pp (bỏ 2020) → +4,87pp (bỏ 2015); bỏ 2021 vẫn +2,65pp. ⇒ lợi ích **KHÔNG do 1-2 năm carry**, khác chữ ký reshuffle-luck từng loại ở H8a. (Phần *mức tuyệt đối* thì vẫn phụ thuộc 2021 nặng ở CẢ hai chân — đó là đặc tính sẵn có của R3, không phải của bản sửa này.)
+**Annex robustness trên chân treat (`data/liqzb_20260721/annex_liqzb.py`, wrapper §8 trỏ `dsr_pbo_annex` sang CSV treat, KHÔNG đụng canonical):** DSR **1,0000** ở mọi N (163 CSV/120/200), ann-SR (convention annex) 1,812; PBO family-level **0,3713** (family đã phình lên 163 CSV so với 120 lúc đo 0,209 — chỉ số này nói về CẢ họ tìm kiếm, KHÔNG phải về bản sửa fidelity N=1 này); bootstrap circular-block L=21: CAGR 5th-pct **21,1%** (med 31,7%), MaxDD 5th-pct **−30,5%**, **P(DD<−30%) = 5,9%** (pin 07-11 là 1,5%) — **đuôi rủi ro DÀY HƠN**, khớp MaxDD −18,8% vs −17,8%: sổ LAG chạy nhiều vốn hơn trong nhóm mua được thì cũng ăn drawdown thật hơn. Anchor DD dùng cho kỳ vọng: **~−30%**, không phải −19%.
+**Files:** ctrl `data/..._wtnamecap_exp_liqzbctrl.csv`, treat `data/..._wtnamecap_liqzblag.csv`, log `data/liqzb_20260721/{ctrl,treat}.log`, annex wrapper `data/liqzb_20260721/annex_liqzb.py`. Canonical `..._wtnamecap.csv` KHÔNG bị đụng.

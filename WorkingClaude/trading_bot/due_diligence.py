@@ -102,6 +102,33 @@ def _in_prune(ticker, asof):
     return bool((pd.Timestamp(asof) - last).days <= 30), str(last)[:10]
 
 
+def adv_vnd(ticker, asof):
+    """ADV notional (VND/phiên) theo ĐÚNG công thức backtest LAG dùng: Volume_3M_P50 × Close
+    (pt_v23_audit_2014.py:1132-1135 — chỉ nhận dòng có CẢ HAI cột notna).
+
+    Trả (adv, data_date, err): adv=None khi không tính được, err = lý do (chuỗi) để caller
+    tự quyết fail-closed. KHÔNG raise — nhưng KHÁC run_due_diligence ở chỗ lỗi được trả về
+    tường minh thay vì nuốt thành text, vì caller (trading_bot.plan.cap_lag_orders) là một
+    hard-gate chặn lệnh thật và phải phân biệt được "ADV mỏng" với "không đọc được dữ liệu".
+
+    Lưu ý đơn vị: Close là giá ĐÃ điều chỉnh (≤ giá thật khi mã đã chia cổ tức), nên ADV tính
+    ra có xu hướng THẤP hơn notional thật → trần chặt hơn, lệch về phía an toàn. Giữ đúng
+    công thức backtest thay vì "sửa cho đúng thực tế" để trần live == trần đã mô phỏng.
+    """
+    import pandas as pd
+    try:
+        row = _latest_row(ticker, asof)
+    except Exception as exc:
+        return None, None, f"không đọc được bq_cache/ticker: {str(exc)[:120]}"
+    if row is None:
+        return None, None, "không có dòng nào trong bq_cache/ticker"
+    data_date = str(row.get("time"))[:10]
+    v50, close = row.get("Volume_3M_P50"), row.get("Close")
+    if pd.isna(v50) or pd.isna(close):
+        return None, data_date, "thiếu Volume_3M_P50 hoặc Close"
+    return float(v50) * float(close), data_date, None
+
+
 def _anomaly_note(ticker, asof):
     """Echo cờ anomaly_scan hiện có. KHÔNG scan lại, KHÔNG đổi gate CAPIT."""
     try:

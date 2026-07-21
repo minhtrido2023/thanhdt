@@ -23,8 +23,17 @@ PROJECT = "lithe-record-440915-m9"
 
 from anomaly_gate import anomaly_excluded as shared
 
-# --- bản inline production, exec nguyên văn từ file (không copy tay) ---
-src = open(os.path.join(W, "deploy_golive_dt5g_v4", "golive_recommend_v23.py"), encoding="utf-8").read()
+# --- bản inline production PRE-PATCH, ghim vào 1 git rev bất biến (commit 569bdca, ngay
+# trước khi golive_recommend_v23.py được sửa thành delegate sang anomaly_gate.py) — KHÔNG
+# đọc file production hiện tại: từ 2026-07-21 nó chỉ còn 1 dòng gọi module chung, exec
+# nguyên văn sẽ NameError (_anomaly_excluded_shared không có trong ns). Ghim git rev để bài
+# test không rot theo lần refactor production tiếp theo.
+PINNED_REV = "569bdca742b55a13314df4c83108b059ec14e543"
+_o = subprocess.run(["git", "show", f"{PINNED_REV}:WorkingClaude/deploy_golive_dt5g_v4/golive_recommend_v23.py"],
+                     cwd=W, capture_output=True, text=True)
+if _o.returncode != 0:
+    raise RuntimeError(f"không đọc được rev ghim {PINNED_REV}: {_o.stderr}")
+src = _o.stdout
 body = src[src.index("def anomaly_excluded"):src.index("def capit_adv_caps")]
 ns = {"os": os, "json": json, "pd": pd, "WORKDIR": W, "ANOMALY_TTL_DAYS": 30}
 exec("from datetime import timedelta\n" + body, ns)

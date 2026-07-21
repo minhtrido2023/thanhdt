@@ -5,14 +5,13 @@ Chỉ đạo user: MỌI cổ phiếu ứng viên mua — kể cả paper-tradin
 gate (loại các mã đang có cờ bất thường/khủng hoảng thật, vd case PNJ 07/2026 lãnh đạo
 bị bắt, giá -32% từ đỉnh).
 
-Logic ở đây là bản CHÍNH THỨC, sao đúng nguyên từ `deploy_golive_dt5g_v4/
-golive_recommend_v23.py::anomaly_excluded` (wired 2026-07-20, job Taylor_20260720_081359).
-Consumers hiện tại: pt_capitulation_shadow.py, pt_v22_dt5g.py, dc_book_waterfall_paper.py.
-
-⚠️ golive_recommend_v23.py (PRODUCTION) vẫn giữ bản inline riêng — job này bị cấm sửa
-production. Khi nào có dịp chạm production hợp lệ, đổi nó thành `from anomaly_gate import
-anomaly_excluded` để còn đúng 1 nguồn sự thật. Đến lúc đó: sửa logic ở đây thì PHẢI sửa
-cả bản inline kia (test: anomaly_gate_selfcheck.py so khớp 2 bản trên cùng bộ input).
+Đây LÀ nguồn sự thật duy nhất cho gate này. Từ 2026-07-21 (job Taylor_20260721_092529 +
+Mike áp patch, user duyệt trực tiếp), `deploy_golive_dt5g_v4/golive_recommend_v23.py::
+anomaly_excluded` (PRODUCTION) delegate thẳng vào đây (`from anomaly_gate import
+anomaly_excluded as _anomaly_excluded_shared`) — không còn bản inline riêng. Consumers:
+production (golive_recommend_v23.py) + 3 paper book (pt_capitulation_shadow.py,
+pt_v22_dt5g.py, dc_book_waterfall_paper.py). Sửa logic ở đây là sửa cho TẤT CẢ cùng lúc —
+đúng như thiết kế 1 nguồn sự thật, không còn nguy cơ 2 bản lệch nhau.
 """
 import json
 import os
