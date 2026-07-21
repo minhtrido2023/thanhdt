@@ -44,3 +44,4 @@ trọng nhất: quy trình retro TỰ NÓ lỗi 2 lần liên tiếp (07-18→07
 - CAPIT washout: chuỗi R&D DCF/quality-gate/exit/liquidity/trigger hôm nay đều NO-GO — trigger
   hiện tại được minh oan, không sửa gì. Basket hiện tại (nếu fire): NCT/PVT/SAB/SIP/VNM.
 
+- [2026-07-21T01:20:03Z] TREO — merge cap %ADV N-account cho CAPIT: nhánh capit-adv-cap-20260721, quant-skeptic đã CONFIRMED (high) cả 2 vòng (per-account job Taylor_20260720_172614 + N-account pro-rata job Taylor_20260720_180351). CHỈ CÒN 1 bước kỹ thuật: chạy lại golive_recommend_v23.py để có artifact capit_adv_caps schema mới, RỒI mới merge (merge trước sẽ fail-closed chặn sạch sleeve CAPIT đang fired). User CHỈ ĐẠO 2026-07-21 08:19 ICT: đợi SAU phiên giao dịch sáng nay mới làm (không đụng vào lúc CAPIT SpaceX đang thực thi 5 lệnh ~236M @11:15). Trigger: sau ~11:30 ICT hôm nay (07-21), dispatch Taylor regenerate golive_recommend_v23.py + merge nhánh trên.
