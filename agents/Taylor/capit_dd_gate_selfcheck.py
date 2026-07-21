@@ -22,13 +22,19 @@ SRC = os.path.join(WORKDIR, "deploy_golive_dt5g_v4", "golive_recommend_v23.py")
 FLAGS = os.path.join(WORKDIR, "data", "anomaly_flags.json")
 
 # ── trích hàm thật + hằng số TTL từ source production ──
+# Từ 2026-07-21 (job Taylor_20260721_092529 + Mike áp patch), thân hàm production chỉ còn
+# 1 dòng delegate sang anomaly_gate.anomaly_excluded (_anomaly_excluded_shared) — bơm đúng
+# tên đó vào ns để AST-extract vẫn chạy được, và nhờ vậy test này giờ CÀNG sát code thật
+# đang chạy (gọi thẳng qua module dùng chung, không còn 2 bản logic tách biệt để lệch).
 tree = ast.parse(open(SRC, encoding="utf-8").read())
 fn = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "anomaly_excluded")
 ttl = next(n.value.value for n in tree.body
            if isinstance(n, ast.Assign) and getattr(n.targets[0], "id", "") == "ANOMALY_TTL_DAYS")
 import pandas as pd
+from anomaly_gate import anomaly_excluded as _anomaly_excluded_shared
 ns = {"os": os, "json": json, "timedelta": timedelta, "pd": pd,
-      "WORKDIR": WORKDIR, "ANOMALY_TTL_DAYS": ttl}
+      "WORKDIR": WORKDIR, "ANOMALY_TTL_DAYS": ttl,
+      "_anomaly_excluded_shared": _anomaly_excluded_shared}
 exec(compile(ast.Module([fn], []), SRC, "exec"), ns)
 anomaly_excluded = ns["anomaly_excluded"]
 print(f"# trích anomaly_excluded() từ {os.path.basename(SRC)} | TTL={ttl}d")
