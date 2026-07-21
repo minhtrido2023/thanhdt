@@ -164,6 +164,18 @@ plan_tickers = {o.get('ticker') for o in plan.get('orders', [])}
 dnse_raw_file = os.path.join(wc_root, 'data', 'execution_logs', f'dnse_raw_{plan_date}.jsonl')
 real_filled_by_ticker = {}
 reconciled = False
+# Lấy account_no cho account này để filter dnse_raw (file chung cả SpaceX+ZaloPay)
+_target_account_no = None
+try:
+    _secrets_file = os.path.join(wc_root, 'secrets', 'trading_bot_accounts.json')
+    with open(_secrets_file, encoding='utf-8') as _sf:
+        _s = json.load(_sf)
+    _a = _s.get('accounts', {})
+    if isinstance(_a, dict):
+        _acct = _a.get(account) or {}
+        _target_account_no = _acct.get('account_id') or _acct.get('account_no')
+except Exception:
+    pass
 if os.path.exists(dnse_raw_file):
     reconciled = True
     latest_by_oid = {}
@@ -172,6 +184,9 @@ if os.path.exists(dnse_raw_file):
             try:
                 rec = json.loads(line)
             except json.JSONDecodeError:
+                continue
+            # Bỏ qua records của account khác (fix: dnse_raw chứa cả SpaceX+ZaloPay)
+            if _target_account_no and rec.get('account_no') and rec.get('account_no') != _target_account_no:
                 continue
             kind = rec.get('kind')
             seen = []
