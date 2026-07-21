@@ -65,6 +65,31 @@ def _live_double_confirm():
         return {}
 
 
+def _production_nav_return():
+    """Return (pct, first_date, last_date, None) for the REAL V2.4 production book (SpaceX),
+    read straight from the verified NAV series `nav_history_SpaceX.csv` (col `nav` — already the
+    total incl. off-book Trứng vàng; per coding_guidelines §6 this file IS the authoritative
+    provenance, do not recompute NAV from anywhere else). Window = first available row (SpaceX
+    go-live, ≠ the DC-book entry date) → latest row. Returns (None, None, None, err) on any
+    failure; the caller degrades to a warning line instead of aborting the report."""
+    try:
+        import csv
+        path = WORKDIR / "data" / "execution_logs" / "nav_history_SpaceX.csv"
+        rows = []
+        with open(path) as f:
+            for r in csv.DictReader(f):
+                nav = float(r["nav"])
+                if nav > 0:
+                    rows.append((r["date"], nav))
+        if len(rows) < 2:
+            return None, None, None, "chưa đủ 2 dòng NAV"
+        rows.sort(key=lambda x: x[0])
+        pct = (rows[-1][1] / rows[0][1] - 1) * 100
+        return pct, rows[0][0], rows[-1][0], None
+    except Exception as e:
+        return None, None, None, str(e)
+
+
 def generate_section(as_of_date=None, live_set=None):
     """Return the ConvergePort markdown section. live_set (optional) = precomputed
     {ticker: buy_mode} to avoid recomputing the sector-lens; falls back to _live_double_confirm()."""
@@ -116,6 +141,19 @@ def generate_section(as_of_date=None, live_set=None):
                              f"**VNINDEX**: {vs}{vpnl:.2f}% | **Alpha**: {as_}{a:.2f}pp")
             else:
                 lines.append(f"**Portfolio (seed, weighted)**: {ps}{port:.2f}% (VNINDEX N/A)")
+
+            # ---- vs V2.4 PRODUCTION thật (SpaceX NAV), KHÁC khung ngày → ghi rõ, không so mù ----
+            prod, p_first, p_last, p_err = _production_nav_return()
+            if p_err:
+                lines.append(f"⚠️ V2.4 production: không đọc được nav_history_SpaceX.csv ({p_err})")
+            else:
+                pr = "+" if prod >= 0 else ""
+                ap_ = port - prod; aps = "+" if ap_ >= 0 else ""
+                lines.append(
+                    f"**V2.4 production (từ {p_first[5:]}, NAV thật)**: {pr}{prod:.2f}% "
+                    f"(→{p_last[5:]}) | **Alpha vs production**: {aps}{ap_:.2f}pp "
+                    f"*(xấp xỉ — KHÔNG cùng khung ngày: DC book tính từ "
+                    f"{meta.get('entry_price_asof','?')}, production chỉ có NAV thật từ {p_first})*")
 
     # ---- live double-confirm diff (dynamic entry/exit signals) ----
     live = live_set if live_set is not None else _live_double_confirm()
