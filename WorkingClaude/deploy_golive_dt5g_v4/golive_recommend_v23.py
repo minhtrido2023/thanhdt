@@ -51,6 +51,7 @@ os.environ.pop("BQ_LOCAL_CACHE", None)
 from simulate_holistic_nav import bq
 from signal_v11_sql import SIGNAL_V11
 from anomaly_gate import anomaly_excluded as _anomaly_excluded_shared
+from lag_liquidity_filter import lag_filter_illiquid
 
 OUTDIR = os.path.join(WORKDIR, "deploy_golive_dt5g_v4", "out"); os.makedirs(OUTDIR, exist_ok=True)
 DT_TABLE = "vnindex_5state_dt5g_live"
@@ -367,6 +368,7 @@ def td_offset(ref, off):
 # (audit M1 Spyros_20260712_131501: pkl lỗi giữa mùa BCTC trước đây chỉ in WARNING vào log cron,
 # n_lag_upcoming=0 lặng lẽ tái tạo đúng failure-mode gốc).
 lag_up, lag_recent, lag_source_error = [], [], None
+lag_liq_dropped, lag_liq_error = [], None
 try:
     # Point-in-time candidate source (fix 2026-07-12, audit Taylor_20260712_121642 R1):
     # events must be visible here FROM their release date. The old source
@@ -382,6 +384,13 @@ try:
     print(f"  [lag-live] {len(cand)} events in window, {int(cand['qualify'].sum())} qualify"
           + (f", release max {cand['Release_Date'].max().date()}" if len(cand) else ""))
     cand = cand[cand["qualify"]]
+    # Lọc thanh khoản Ở TẦNG TÍN HIỆU (user quyết 2026-07-21) — xem lag_filter_illiquid():
+    # mã ADV≤0/không đo được KHÔNG thành mục tiêu, nên vốn tự chảy sang event LAG kế tiếp
+    # thay vì nằm im chờ một lệnh mà executor sẽ chặn.
+    cand, lag_liq_dropped, lag_liq_error = lag_filter_illiquid(bq, cand, LATEST)
+    if lag_liq_dropped:
+        print(f"  [lag-liq] loại {len(lag_liq_dropped)} ứng viên không đo được thanh khoản: "
+              + ", ".join(f"{d['ticker']} ({d['reason']})" for d in lag_liq_dropped))
     for _, row in cand.iterrows():
         entry, ahead = td_offset(row["Release_Date"], 5)
         tier = row["tier"]
@@ -562,6 +571,12 @@ status = {
     "dd52w": round(dd52_now, 1), "vn_cooling": vn_cool_now,
     "n_bal": int(len(bal)), "n_lag_upcoming": len(lag_up), "n_lag_recent": len(lag_recent),
     "lag_source_error": lag_source_error,
+    # Ứng viên LAG bị loại ở TẦNG TÍN HIỆU vì không đo được thanh khoản (ADV ≤ 0/thiếu/cũ).
+    # `lag_liq_filter_error` != None ⇒ tầng này KHÔNG chạy được (fail-open) — phân biệt được
+    # "không có mã nào bị loại" với "không lọc được"; executor vẫn fail-closed.
+    "lag_liq_excluded": lag_liq_dropped,
+    "n_lag_liq_excluded": len(lag_liq_dropped),
+    "lag_liq_filter_error": lag_liq_error,
     "n_capit_basket": len(basket),
     "n_park": len(_park_basket) if _park_basket is not None else 0,
     "park_rebal_date": _park_rebal_date,
@@ -626,6 +641,14 @@ if lag_recent:
     # chiếu vị thế thực, không mặc định vị thế đã tồn tại.
     L.append("\n_Cửa sổ entry đã qua trong các phiên gần nhất — đối chiếu vị thế thực, KHÔNG mặc định đã vào lệnh:_ "
              + ", ".join(f"{it['ticker']}({it['entry']})" for it in lag_recent))
+if lag_liq_error:
+    L.append(f"\n⚠️ Bộ lọc thanh khoản LAG KHÔNG chạy được ({lag_liq_error}) — danh sách trên CHƯA "
+             "lọc mã ADV≤0; executor (`cap_lag_orders`) vẫn fail-closed nên không mã nào lọt thành "
+             "lệnh, nhưng vốn có thể nằm im. Xem log.")
+elif lag_liq_dropped:
+    _lq = ", ".join(d["ticker"] for d in lag_liq_dropped[:12]) + (" …" if len(lag_liq_dropped) > 12 else "")
+    L.append(f"\n_Đã loại ở tầng tín hiệu (ADV≤0/thiếu/cũ — không mua được; vốn dồn sang ứng viên "
+             f"kế tiếp thay vì nằm im): {len(lag_liq_dropped)} mã — {_lq}_")
 if state_today == 2:
     L.append("\n⚠️ BEAR: allocator w_LAG=0 — KHÔNG cấp vốn entry LAG mới cho tới khi thoát BEAR.")
 L.append(f"\n## CAPIT v2 monitor\n")
