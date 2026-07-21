@@ -304,3 +304,155 @@ gánh edge). **Ba lý do vẫn NO-GO:**
 `data/ic_panel_lowbeta_q3.csv` · `data/beta_panel_continuous.csv` ·
 `data/ic_panel_lowbeta_diag.csv` · `data/ic_panel_lowbeta_loo_F3_low_beta.csv` ·
 `data/ic_panel_lowbeta_loo_F4_neg_idiovol.csv`
+
+---
+
+## §7 — Giải mã hệ thống LEGACY (buy-signal / sell-signal, tiền-V2.4) của user
+
+**Job:** `Taylor_20260721_043256` · **Ngày:** 2026-07-21 · **Loại:** KHẢO SÁT/KIỂM KÊ, KHÔNG backtest.
+**Nguồn:** `agents/Taylor/inbox/legacy_v1_filter_20260721.csv` — bộ filter.json của 1 hệ thống user
+tự xây trước V2.4, kiến trúc **mua-khi-có-tín-hiệu-mua / bán-khi-có-tín-hiệu-bán** (14 pattern MUA
+`_X`, 13 pattern BÁN `~X`, bảng map `$X` gán mỗi pattern mua với 4–9 pattern bán tương ứng). Khác
+hẳn kiến trúc BAL/LAG hiện tại (2 book + allocator + time/stop exit).
+
+> **Kết luận đầu tiên, quan trọng nhất:** trên phía MUA, hệ thống legacy **trùng lặp nặng** với cái
+> ta đã có (value + quality-floor + growth QoQ/YoY + sàn thanh khoản + Risk_Rating gate). Novelty
+> thật nằm gần như HOÀN TOÀN ở **tầng EXIT** — 13 tín hiệu bán kỹ thuật/cơ bản chi tiết. Đây đúng
+> khoảng trống §1c đã xác nhận ("Exit kỹ thuật: KHÔNG CÓ — exit prod = thời gian + stop cố định").
+> Vì vậy §7 dồn trọng tâm vào exit (Bước 3), không xới lại phần buy đã phủ.
+
+### §7.0 — Ba phát hiện cấu trúc phải nêu trước (không phải suy đoán — đã verify bằng BQ)
+
+1. **`Init` bị đóng băng `time ∈ [2014-01-01, 2025-01-01]`.** Đây là 1 snapshot NGHIÊN CỨU/backtest
+   tĩnh, **không phải bộ filter live** (cửa sổ kết thúc 2025-01-01, không tự trượt). Coi như tài
+   liệu thiết kế, không phải hệ đang chạy.
+2. **`ICB_Code` THỰC TẾ là mã số ICB 4 chữ số** (2353.0, 8633.0…), **KHÔNG** phải chuỗi CT/NH/BH/CK
+   như `bigquery_dictionary.json` mô tả — verify bằng `SELECT DISTINCT ICB_Code` trên `tav2_bq.ticker`.
+   ⇒ điều kiện `ICB_Code != 2353` / `!= 8633` trong legacy **hợp lệ** với bảng hiện tại (không phải
+   lỗi). *(Việc phụ cho Winston: sửa mô tả `ICB_Code` trong dictionary — đang sai/lỗi thời.)*
+   - **ICB 2353 = Building Materials & Fixtures** (xi măng/gạch/nhựa: BCC, BTS, CLH, BMP, CVT, DHA…),
+     n≈97 mã. `_BuySupport` loại ngành này.
+   - **ICB 8633 = Real Estate Holding & Development** (BĐS: DIG, DXG, AGG, CEO, HDC, BCM…), n≈105 mã.
+     `~SellBV` loại ngành này.
+   - **Lý do loại trừ KHÔNG ghi trong file — cần user xác nhận nếu muốn dùng lại.** Lý do CƠ HỌC hợp
+     lý (không phải ý đồ user): `~SellBV` bán khi `Close>1.85·BVPS` — BĐS phát triển dự án hợp pháp
+     giao dịch trên BVPS sổ sách (quỹ đất định giá thấp trên sổ) ⇒ tín hiệu P/BV misfire với BĐS,
+     nên loại. `_BuySupport` mua bật từ hỗ trợ, loại vật liệu xây dựng — có thể vì tính chu kỳ mạnh
+     tạo "hỗ trợ giả"/bẫy giá trị. **Đây là suy luận cơ học, KHÔNG phải ý đồ user đã nêu** — ghi rõ
+     để không ai trích dẫn như lý do chính thức.
+3. **`_TradingValueMax` chứa điều kiện CHẾT `D_RSI < 83.0`.** Verify: `D_RSI ∈ [0,1]` (min 0, max 1,
+   median 0.49) trên BQ ⇒ `D_RSI < 83.0` **luôn đúng** = no-op. Đây là **lỗi port thang đo** từ hệ
+   cũ (RSI 0–100) sang cột `D_RSI` 0–1: trần chống-quá-mua dự kiến (~RSI<83) đã bị **vô hiệu âm thầm**
+   ⇒ pattern này KHÔNG có trần RSI, có thể kích hoạt ở vùng quá mua cực đoan. Các pattern khác trong
+   CÙNG file lại dùng đúng thang 0–1 (`D_RSI<0.27`, `<0.78`…) ⇒ đây là lỗi cục bộ 1 dòng, không phải
+   file khác thang. **Nếu tái sử dụng pattern này phải sửa ngưỡng về 0–1 hoặc bỏ.**
+
+### §7.1 — Giải mã 14 pattern MUA (Bước 1)
+
+Khung chung MỌI pattern mua: `{Init}` + **sàn thanh khoản** `Volume_3M_P50·Price/Inflation_7 > X`
+(X = trading-value 3M-median quy về VND thực; X ∈ [0.4B, 3.6B] tùy pattern — **cùng khái niệm** với
+sàn `Volume_3M_P50·Price` PROD của SIGNAL_V11, chỉ khác mức) + **`Risk_Rating ≤ 4/5/6`** (bin
+Beta+Dev làm cổng eligibility — hiện PROD **KHÔNG** dùng, xem §7.2/#24).
+
+| Pattern | Logic kinh tế/kỹ thuật (1 dòng) | Ngưỡng cốt lõi (ngoài liq/risk) |
+|---|---|---|
+| `_BKMA200` | Phục hồi sau downtrend dài: đáy 3Y đến rất sau đỉnh 3Y + giá về gần MA200 từ dưới, MA50 cong lên + earnings turn | `(ID_LO_3Y−ID_HI_3Y)>265`; `MA50/MA200>0.92`; `MA10/MA200<1.24`; `NP_P0>1.28·NP_P1`; PE 4–20; ROE_Min3Y>0.02 |
+| `_BullDvg` | **Phân kỳ RSI tăng tường minh** (giá đáy sau ≈ đáy trước nhưng RSI đáy sau CAO hơn) | `D_RSI 0.46–0.78`; `D_RSI_Min3M<0.34`; `D_RSI_Min1W/D_RSI_Min3M>1.26`; `D_RSI_Min1W_Close/D_RSI_Min3M_Close<1.85`; FSCORE>4; PE 5.6–13; NP_P0/NP_P4≥1.15 |
+| `_BuySupport` | Bật từ hỗ trợ 1Y sau cú đâm thủng ngắn rồi thu hồi | `Close>1.08·Sup_1Y`; `LO_3M_T1<0.99·Sup_1Y`; `Close<1.49·LO_3M_T1`; PE 2–18.5; PB 0.34–1.35; **`ICB_Code≠2353`** |
+| `_CashCowStock` | **FCF/EV yield** (CFO+CFI 4Q)/(mktcap+LtDebt) cao + đệm tài sản ròng + cú nổ volume | `(ΣCF_OA_P0..3+ΣCF_Invest_P0..3)/(OShares·Price+LtDebt_P0)>0.055`; `(Cash+LtInvest+AR+Inv−StLiab−LtDebt)/mktcap>0.13`; `Trading_Value/Trading_Value_1M_P50>1.85`; DY>0.022 |
+| `_Conservative` | Cùng họ FCF/EV nhưng floor kép: 5Y-avg FCF/EV **và** 4Q FCF/EV; sàn liq thấp nhất (0.4B) | `((CF_OA_5Y+CF_Invest_5Y)/5)/(mktcap+LtDebt)>0.03`; `4Q FCF/EV>0.24`; NP_P0/NP_P1>1.12; PE 3.4–33 |
+| `_DividendYield` | Cổ tức bền: **Dividend_Min3Y/Price** (cổ tức năm TỆ nhất 3Y) >2%, khác DY trailing | `abs(Dividend_Min3Y)/Price>0.02`; PCF 2–16; PE 0–14; NP_P0/NP_P1>1.14; Risk≤4 (chặt nhất) |
+| `_RSILow30` | Quá bán sâu + rẻ tuyệt đối + **PB dưới dải lịch-sử-của-chính-nó** | `D_RSI<0.27`; PE 1.2–7.4; **`PB < 1.1·PB_MA5Y − 0.3·PB_SD5Y`**; ROE_Min3Y>0.04 |
+| `_SuperGrowth` | GARP + **vào NGAY SAU báo cáo tốt** (event-timed entry) | `PE/(YoY%·100)<0.64` (PEG cực thấp); FSCORE≥4; **`ID_Current−ID_Release≤14`**; ROE_Min5Y>0.07 |
+| `_SurpriseEarning` | Bất ngờ lợi nhuận YoY **và** QoQ (không neo ngày công bố) | `(NP_P0−NP_P4)/abs(NP_P4)>0.12`; `NP_P0/NP_P1>1.25`; PE 5–18.5; PB 0.47–1.8 |
+| `_TL3M` | Nổ volume từ nền tích lũy chặt | `HI_3M_T1/LO_3M_T1<1.5` (nền chặt); `Volume>1.28·Volume_3M_P90`; NP_P0>1.28·NP_P1; PE 2.8–13 |
+| `_TradingValueMax` | Đột biến **trading-value tuần chạm max 6M** + volume gần max 1Y (climax mua) | `Trading_Value_Total_1W≥0.93·..._Max6M`; `Volume≥0.96·Volume_Max1Y`; `Close<1.05·Close_2Y_P90`; ⚠️`D_RSI<83.0` CHẾT |
+| `_TrendingGrowth` | **Breakout vượt vùng giá tại đỉnh-volume 5Y** (phá cung lịch sử lớn nhất) + earnings tăng tốc | `Close>1.13·Volume_Max5Y_High`; PE≤11.2; NP_P0>1.2·NP_P1; NP_P1>NP_P2 |
+| `_UnderBV` | Dưới book (PB<1.14) + tăng trưởng YoY mạnh | PB 0.1–1.14; `NP_P0/NP_P4>1.40`; `(ΣNP 4Q)/OShares>1200`; PE 3.2–15 |
+| `_VolMax1Y` | Breakout vượt vùng giá tại **đỉnh-volume 1Y** (mới, T-1W còn dưới) | `Close>1.12·Volume_Max1Y_High`; `Close_T1W<1.07·..High`; `ID_Current−Volume_Max1Y_ID≤205`; FSCORE>3 |
+
+### §7.2 — Kiểm kê THẬT: khái niệm MỚI vs đã có (Bước 2, chỉ khái niệm mới/cách-dùng-mới)
+
+Dùng 3 mức PROD/RESEARCH/COLUMN-ONLY như §1. **Bỏ qua** PE/PB/PCF/PS/ROE/ROIC/FSCORE/CF_OA/
+Debt_Eq/RSI-thô/MACD/MA — §1 đã xác định trạng thái. Chỉ liệt kê điểm dispatch đánh dấu:
+
+| Khái niệm legacy | Trạng thái hiện tại | Ghi chú khác biệt |
+|---|---|---|
+| **Sup_1Y / Res_1Y làm ngưỡng entry/exit** | **COLUMN-ONLY** (§1c liệt "Res_1Y-Sup_1Y" COLUMN-ONLY) | Legacy dùng làm tín hiệu tường minh ở ≥3 pattern (BuySupport bật từ Sup_1Y; SellResistance/1Y bị từ chối tại Res_1Y). Hiện KHÔNG ai đọc 2 cột này làm signal. **Cách dùng mới.** |
+| **VAP1W/1M/3M (volume-at-price) làm ngưỡng exit** | **COLUMN-ONLY** | Legacy dùng VAP làm **tham chiếu exit cốt lõi** trong 7/13 pattern bán (giá phá xuống dưới VAP = mất vùng chi phí đám đông). **Ứng viên exit-signal CHÍNH.** |
+| **Volume_Max1Y/5Y_High + ID (breakout vượt đỉnh-volume lịch sử)** | **COLUMN-ONLY, chưa ai dùng** | Hoàn toàn MỚI. Ý tưởng: vùng giá nơi volume đạt đỉnh 1Y/5Y = vùng cung/phân phối lớn nhất; phá lên = clear overhead supply. 3 pattern dùng (TrendingGrowth 5Y, VolMax1Y 1Y, SellVolMax top5-2Y). |
+| **Phân kỳ RSI STOCK-level tường minh (BullDvg/BearDvg2)** | Cột `D_RSI_Max/Min_1W/3M(+_Close/_MACD)` **PROD-tồn-tại**; divergence-logic chỉ có ở **MARKET-level** (DT5G base v3.4b có BearDvg gate trên VNINDEX) — **CHƯA có ở stock-selection** | SIGNAL_V11 chỉ dùng RSI **thô 3 bậc**. Legacy so RSI hiện tại vs RSI-đỉnh/đáy 1W & 3M + so `_Close`/`_MACD` tại các đỉnh đó ⇒ phát hiện phân kỳ giá-momentum. **Tinh vi hơn hẳn cách dùng RSI hiện tại.** |
+| **FCF/EV yield = (CFO+CFI)/(mktcap+LtDebt)** | **KHÔNG có** — 1/PCF chỉ là CFO/giá (bỏ capex + bỏ nợ) | **Công thức MỚI, khác 1/PCF VÀ khác shareholder-yield** (đã đánh THẤP §2#8 vì thiếu buyback). Đây là EV-cash-yield: trừ capex (gồm CF_Invest) + chuẩn hóa theo mktcap+LtDebt. Dữ liệu = **A** (đủ cột). Đáng xét độc lập. |
+| **Dividend_Min3Y/Price làm sàn cứng** | DY PROD (đơn); Dividend_Min3Y **COLUMN-ONLY** | Khác DY: Min3Y = cổ tức năm TỆ NHẤT trong 3Y ⇒ lọc payer BỀN, miễn nhiễm cổ tức đặc biệt 1 lần thổi phồng DY. Cải tiến nhỏ nhưng hợp lý. |
+| **Giao dịch quanh ngày công bố BCTC** (entry SuperGrowth ≤14d sau; exit SellLowGrowth ≤10d sau) | Entry event-timed **CÓ (PROD qua LAG:** vào release+5, giữ 25) ; **Exit-on-disappointment KHÔNG có** (LAG chỉ time-stop 25d, không exit theo BCTC xấu) | Entry side ≈ đã trùng LAG (SuperGrowth thêm lăng kính low-PEG khác selection nhưng cơ chế event-timed đã có). **Exit side MỚI** — xem #21. |
+| **PB vs dải-lịch-sử-của-chính-nó có SD** (RSILow30/SellBV2/SellResistance1Y) | **PE-vs-own-history = PROD** (SIGNAL_V11); **PB-vs-own-history = KHÔNG PROD** (PB_MA5Y/SD5Y cột có). 8L `pb_z` là **cross-sectional sector-relative**, KHÁC time-series | Verify dispatch: PE có (PROD), **PB CHƯA** ở dạng time-series vs chính nó. Legacy dùng `PB < 1.1·PB_MA5Y−0.3·PB_SD5Y` (mua) và `PB>1.23·PB_MA5Y+0.84/0.93·PB_SD5Y` (bán). |
+| **Loại trừ ngành theo ICB_Code** | 8L **sector-neutralize** (chuẩn hóa trong ngành); custom30V thuần thanh khoản (không lọc ngành) | Legacy **hard-exclude** ngành cụ thể/pattern (2353, 8633). Cơ chế khác (neutralize ≠ exclude). Lý do loại chưa rõ — §7.0#2. |
+| **Risk_Rating ≤ N làm cổng eligibility** | **KHÔNG PROD** (Beta/Dev chưa từng là factor hay gate — §1b/#4; low-beta as *factor* đã NO-GO §6) | Legacy dùng Risk≤4/5/6 làm **gate cứng** mọi pattern. Câu hỏi "Risk-bin làm GATE" **khác** "low-beta làm FACTOR" (đã bác) — chưa test riêng. Xem #24. |
+
+### §7.3 — Cơ hội EXIT-SIGNAL: phân loại 13 pattern BÁN + đề xuất vòng đầu (Bước 3, ưu tiên cao nhất)
+
+Khoảng trống đã XÁC NHẬN (§1c) — không cần chứng minh tồn tại, chỉ đánh giá KHẢ THI. Phân loại theo
+dữ liệu cần: **T** = thuần kỹ thuật (dùng ngay) · **T+F** = cần thêm cơ bản (PE/PB/NP — đã có sẵn PROD).
+
+| Pattern bán | Loại | #ĐK | Logic exit (1 dòng) | Cột "lạ" cần validate |
+|---|---|---|---|---|
+| `~SellResistance` | **T** | **4** | Ngày phân phối: down-day volume cực lớn, bị từ chối dưới Res_1Y, sau cú chạy dài từ đáy 3M | Res_1Y (col-only, đơn giản) |
+| `~SellLowGrowth` | **F** | **2** | Thoát NGAY sau BCTC yếu (YoY<20% & ≤10 phiên từ release) | — (NP + release, đều PROD) |
+| `~MA41` | T+F | 5 | Quá căng trên MA200 (>1.55×) + earnings quay đầu + volume + phá VAP1M | VAP1M |
+| `~S13` | T | 4 | Quá mua ngắn hạn (C_L1W≥1.15, >1.15·MA10) + đỉnh CMB tuần | CMB/D_CMB_XFast (col-only) |
+| `~MA21` | T | 6 | Mất động lượng: MA20/MA50 gãy + RSI tuần giảm + dưới VAP1M + MACD<signal | VAP1M |
+| `~SellResistance1M` | T | 4 | Phá xuống VAP1M + timing crossdown VAP | VAP1M, ID_XVAP (col-only) |
+| `~SellVolMax` | T | 7 | Gãy khỏi vùng phân phối volume-đỉnh top5-2Y gần đây | Volume_MaxTop5_2Y, VAP1W (col-only) |
+| `~MA31` | T+F | 8 | Trend gãy (MA10 về dưới MA200) + phá VAP3M + earnings chậm | VAP3M |
+| `~BearDvg2` | **T** | **9** | **Phân kỳ RSI/MACD giảm** (giá đỉnh cao hơn, RSI+MACD đỉnh thấp hơn) | — (cột RSI-peak PROD) |
+| `~SellPE` | T+F | 5 | PE vượt dải-lịch-sử-của-mình (+1.23SD) + earnings đứng + phá VAP3M | VAP3M, PE_MA5Y/SD5Y (PROD) |
+| `~SellBV` | T+F | 6 | Giá>1.85·BVPS + earnings giảm + phá VAP1M; loại BĐS (8633) | VAP1M |
+| `~SellBV2` | T+F | 6 | PB vượt dải-lịch-sử (+0.84SD) + earnings sập (QoQ<0.62) + phá VAP1M | VAP1M, PB_MA5Y/SD5Y (PROD) |
+| `~SellResistance1Y` | T+F | 6 | PB căng lịch-sử + earnings giảm + bị từ chối dưới Res_1Y | VAP1M, Res_1Y, PB hist |
+
+**Nhận xét chốt:** 10/13 pattern bán **phụ thuộc VAP** (COLUMN-ONLY) làm tham chiếu "giá phá xuống
+vùng chi phí đám đông" — nên bước 0 của BẤT KỲ nghiên cứu exit nào là **validate VAP** (dựng lại
+đúng định nghĩa "close in the largest trading area", kiểm point-in-time). VAP là trục exit-signal
+trung tâm của cả hệ legacy.
+
+**Đề xuất 3 ứng viên vòng đầu (đơn giản nhất, ít tham số nhất, dễ backtest nhất) — để 1 nghiên cứu
+"exit theo chỉ báo" RIÊNG sau này (KHÔNG backtest trong job này):**
+
+1. **`~SellResistance` (T, 4 ĐK)** — ứng viên #1. Thuần kỹ thuật, cột chuẩn (Open/Close/Res_1Y/
+   LO_3M_T1/Volume_3M_P50), KHÔNG đụng VAP. Ngữ nghĩa sạch: "ngày phân phối volume-lớn từ chối tại
+   kháng cự sau cú chạy dài" = exit chốt-lãi động lượng. Chỉ cần validate Res_1Y.
+2. **`~SellLowGrowth` (F, 2 ĐK)** — ứng viên #2 (đơn giản TUYỆT ĐỐI). Thuần cơ bản, mọi cột PROD
+   (NP_P0/NP_P4, ID_Current−ID_Release). Ngữ nghĩa: "thoát ngay khi BCTC làm thất vọng" — **bổ khuyết
+   TRỰC TIẾP** cho LAG book (LAG hiện chỉ time-stop 25d, không có exit theo BCTC xấu). Đây là mảnh
+   ghép thiếu tự nhiên nhất của khung PEAD đang chạy.
+3. **`~BearDvg2` (T, 9 ĐK)** — ứng viên #3 cho exit ĐẢO-CHIỀU-động-lượng "tinh vi". Thuần kỹ thuật,
+   dùng cột RSI-peak/MACD-peak đã PROD-tồn-tại, KHÔNG đụng VAP. Nhiều tham số hơn (9) nhưng là **gương
+   đối xứng của BullDvg** và của BearDvg gate market-level đã hiểu rõ. *Nếu muốn ít tham số hơn cho
+   vòng đầu, thay bằng `~MA41` (5 ĐK) — nhưng MA41 kéo theo VAP1M nên phải validate VAP trước.*
+
+> Kỷ luật khi chuyển sang backtest exit (nhắc lại §Quy chuẩn 5): exit-signal khó đo hơn entry —
+> phải so với **baseline exit hiện tại** (time-stop 45d/25d + hard-stop) trên **cùng tập entry**, đo
+> Δ trên NAV path (không phải IC), khai N trials + DSR, và cực kỳ cẩn thận look-ahead ở VAP/Res_1Y
+> (2 cột này phải là giá trị point-in-time T-1, không được nhìn tương lai).
+
+### §7.4 — GHÉP vào bảng ưu tiên tổng hợp (candidate #16–#24, nối tiếp #1–#15)
+
+Cùng quy ước dữ liệu **A/B/C** và caveat "Ưu tiên = tiền đề/khả thi, KHÔNG = edge" như §2/§3.
+
+| # | Candidate (từ legacy) | Cơ chế (1 dòng) | Hệ thống đã có? | Dữ liệu VN | Phù hợp VN | **Ưu tiên** |
+|---|---|---|---|---|---|---|
+| 16 | **Exit theo VAP (volume-at-price)** | Thoát khi giá phá xuống dưới vùng chi phí đám đông (VAP1W/1M/3M) | **KHÔNG** (exit prod = time/stop); VAP COLUMN-ONLY | **A** (cột có) nhưng phải validate point-in-time | Cao — VAP nắm "giá vốn đám đông", hợp thị trường retail-nặng VN | **CAO** (đây là trục exit-signal trung tâm — lấp gap §1c) |
+| 17 | **Support/Resistance làm signal (Sup_1Y/Res_1Y)** | Mua bật từ Sup_1Y / bán bị từ chối tại Res_1Y | **KHÔNG** (COLUMN-ONLY) | **A** | Trung-Cao | **CAO** cho exit (`~SellResistance` là ứng viên #1), TRUNG cho entry (trùng nhiều với breakout hiện có) |
+| 18 | **Breakout vượt đỉnh-volume lịch sử (Volume_Max1Y/5Y_High + ID)** | Phá lên vùng giá nơi volume đạt đỉnh 1Y/5Y = clear overhead supply | **KHÔNG** (COLUMN-ONLY) | **A** | Trung — khái niệm hợp lý nhưng rủi ro trùng momentum (đã đóng MOM_N/S) | **TRUNG** |
+| 19 | **Phân kỳ RSI/MACD stock-level (BullDvg entry / BearDvg2 exit)** | Giá đỉnh/đáy mới nhưng momentum đỉnh/đáy ngược chiều = báo đảo | Chỉ RSI thô (SIGNAL_V11); divergence có ở market-level, **chưa stock-level** | **A** (cột RSI-peak/MACD-peak PROD) | Cao — tinh vi hơn RSI thô, 0 nguồn mới | **CAO** cho exit (`~BearDvg2`), TRUNG cho entry (BullDvg trùng 1 phần đáy-RSI) |
+| 20 | **FCF/EV cash yield = (CFO+CFI)/(mktcap+LtDebt)** | Hiệu suất tiền mặt tự do trên giá-trị-doanh-nghiệp; khác 1/PCF (bỏ capex+nợ) và khác shareholder-yield | **KHÔNG** (1/PCF chỉ CFO/giá) | **A** | Cao — trừ capex + tính nợ ⇒ khắt khe hơn 1/PCF, khó bị bóp méo | **TRUNG-CAO** (candidate value MỚI thật, không trùng #8/#12 đã loại) |
+| 21 | **Exit-on-earnings-disappointment (SellLowGrowth)** | Thoát ≤10 phiên sau BCTC nếu YoY<20% | Entry event-timed có (LAG); **exit-on-BCTC-xấu KHÔNG** | **A** | Cao — bổ khuyết trực tiếp LAG (đang chỉ time-stop) | **CAO** (đơn giản nhất, gắn thẳng book PEAD đang chạy) |
+| 22 | **PB vs dải-lịch-sử-của-chính-nó (time-series z)** | PB thấp/cao so với MA±SD 5Y của CHÍNH nó (khác pb_z cross-sectional của 8L) | PE-hist **PROD**; **PB-hist KHÔNG** (cột có) | **A** | Trung — bổ sung PE-hist đã có; giá trị gia tăng cần đo | **TRUNG** |
+| 23 | **Dividend_Min3Y/Price (sàn cổ tức bền)** | Cổ tức năm TỆ nhất 3Y/giá > ngưỡng ⇒ payer bền, miễn nhiễm special-div | DY đơn PROD; Min3Y COLUMN-ONLY | **A** | Trung — cải tiến nhỏ trên DY | **THẤP-TRUNG** |
+| 24 | **Risk_Rating (Beta+Dev bin) làm GATE eligibility** | Loại mã Beta/Dev cao trước khi chọn (khác dùng làm return-factor) | **KHÔNG PROD**; low-beta as *factor* đã **NO-GO §6** | **A** (nhớ DISTINCT bảng risk_rating) | Trung — như GATE (không phải factor) chưa test; nhưng §6 cho thấy beta VN nhiễu bởi thanh khoản | **THẤP-TRUNG** (câu hỏi khác §6 nhưng cùng rào cản đo-beta) |
+
+**Tóm tắt ưu tiên §7:** cụm **exit-signal (#16 VAP, #17 Res/Sup, #19 BearDvg2, #21 SellLowGrowth)**
+là phần đáng giá nhất — lấp đúng gap §1c đã xác nhận, và 3 ứng viên vòng đầu (`~SellResistance`,
+`~SellLowGrowth`, `~BearDvg2`) đều A-data, 0 nguồn mới. **#20 FCF/EV** là candidate ENTRY/value MỚI
+thật duy nhất từ hệ legacy không trùng cái đã loại. Phần buy còn lại trùng nặng cái đã có ⇒ không đề
+xuất theo đuổi riêng. **Không backtest gì trong job này** (đúng phạm vi khảo sát).

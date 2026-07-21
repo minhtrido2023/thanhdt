@@ -1,0 +1,44 @@
+﻿filter,value
+#timestop,"time_stop('1M', 0)"
+$BKMA200,"MA31, MA41, SellBV, SellBV2, SellResistance1Y, SellVolMax"
+$BullDvg,"MA31, S13, SellBV, SellBV2, SellPE, SellResistance, SellResistance1M, SellResistance1Y"
+$BuySupport,"SellBV2, SellResistance, SellResistance1M, BearDvg2"
+$CashCowStock,"MA31, SellBV, SellPE, SellResistance1M, SellResistance1Y, SellVolMax"
+$Conservative,"MA21, MA31, MA41, S13, SellBV, SellResistance, SellResistance1Y, BearDvg2, SellVolMax"
+$DividendYield,"MA21, MA31, MA41, S13, SellBV2, SellResistance, SellResistance1M, SellResistance1Y, SellVolMax"
+$RSILow30,"MA21, MA41, S13"
+$SuperGrowth,"MA21, SellResistance1M, BearDvg2"
+$SurpriseEarning,"MA41, SellBV2, SellPE, SellResistance1M, SellVolMax"
+$TL3M,"MA31, S13, SellBV, SellBV2, SellPE, SellResistance, SellResistance1M, SellResistance1Y, BearDvg2"
+$TradingValueMax,"S13, SellBV, SellPE, SellResistance, SellResistance1Y"
+$TrendingGrowth,"MA21, MA41, SellBV2, SellPE, SellResistance, SellResistance1M, BearDvg2, SellVolMax"
+$UnderBV,"MA31, MA41, SellBV, SellResistance1Y, BearDvg2"
+$VolMax1Y,"MA21, S13, SellPE, SellResistance1Y, BearDvg2"
+Init,(time>='2014-01-01') & (time<='2025-01-01') 
+_BKMA200,{Init} &  ((Volume_3M_P50*Price/Inflation_7)>1000000000.0) & (Risk_Rating <= 6) & ((ID_LO_3Y-ID_HI_3Y)>265.0) & (MA50/MA200>0.92) & (MA10/MA200<1.24) & (ROE5Y >0.05) & (PE <20.0) & (PE >4.0)& (NP_P0 > 1.28*NP_P1) & (NP_P1 > 0) & (HI_3M_T1/LO_3M_T1<2.0) & (ROE_Min3Y >0.02)
+_BullDvg,{Init} & ((Volume_3M_P50*Price/Inflation_7)>1400000000.0) & (Risk_Rating <= 5) & (D_RSI / D_RSI_T1 > 0.68) & (D_RSI > 0.46) & (D_RSI < 0.78) & (D_RSI_Min3M < 0.34) & (D_RSI_Min1W > 0.11) & (D_RSI_Min1W/D_RSI_Min3M > 1.26) & (D_RSI_Min1W_Close/D_RSI_Min3M_Close < 1.85) & (FSCORE > 4.0)& (PE< 13.0) & (PE>5.6) & (PB < 3.1) & (PB > 0.5) & (ROE_Min5Y > 0.045) & (PCF <34.0) & (PCF>3.5) & ((Cash_P0/ (LtDebt_P0+1) > 0.038)|(abs(IntCov_P0) > 6.0)) & ((CF_OA_5Y/OShares)> 10000.0) & (NP_P0/NP_P4 >=1.15)
+_BuySupport,{Init} & ((Volume_3M_P50*Price/Inflation_7)>1800000000.0) & (Risk_Rating <= 5) & (Close >1.08* Sup_1Y) & (LO_3M_T1 < 0.99*Sup_1Y) &( Close < 1.49*LO_3M_T1)  & (PE < 18.5) & (PE>2.0) & (PB <1.35) & (PB>0.34) & (PCF <27.4) & (PCF >0.2)  &  ((Cash_P0/ (LtDebt_P0+1) > 0.005)|abs(IntCov_P0 > 8.8)) & ((CF_OA_5Y/OShares)> 4800.0) & (ROE_Min5Y > 0.035) & (ICB_Code != 2353)
+_CashCowStock,{Init} & ((Volume_3M_P50*Price/Inflation_7)>3600000000.0) & (Risk_Rating <= 5) & ((CF_OA_P0+CF_OA_P1+CF_OA_P2+CF_OA_P3 + CF_Invest_P0 + CF_Invest_P1+ CF_Invest_P2+CF_Invest_P3)/(OShares*Price + LtDebt_P0) > 0.055) & ((Cash_P0  + LtInvest_P0 + AR_P0 + Inventory_P0 - StLiab_P0  -  LtDebt_P0 )/(OShares*Price) > 0.13) & (abs(IntCov_P0) > 1.0) & (NP_P0 > 0) & (NP_P1 > 0) & (PE > 4.8) & (PE < 19.5) & (Trading_Value /Trading_Value_1M_P50 > 1.85) & (DY > 0.022)
+_Conservative,{Init} & ((Volume_3M_P50*Price/Inflation_7)>400000000.0) & (Risk_Rating <= 6) &(((CF_OA_5Y + CF_Invest_5Y )/5)/(OShares*Price + LtDebt_P0) > 0.03) & ((CF_OA_P0+CF_OA_P1+CF_OA_P2+CF_OA_P3 + CF_Invest_P0 + CF_Invest_P1+ CF_Invest_P2+CF_Invest_P3)/(OShares*Price + LtDebt_P0)>0.24) & ((Cash_P0/ (LtDebt_P0+1) > 0.098)|(abs(IntCov_P0) > 8.4))  & (NP_P0 /NP_P1> 1.12) & (NP_P1>0) & (PE >3.4) & (PE < 33.0) & (ROE_Min3Y > 0.015) & (NP_P0/NP_P4 > 1.05)
+_DividendYield,{Init} & ((Volume_3M_P50*Price/Inflation_7)>2800000000.0) & (Risk_Rating <= 4) & (PCF>2.0) & (PCF < 16.0) & (NP_P0 > 0) & (NP_P0/NP_P1>1.14) & (PE>0.0) & (PE < 14.0) & ((CF_OA_5Y/OShares)> 7000.0) & (abs(Dividend_Min3Y)/Price >0.02)
+_RSILow30,{Init} & ((Volume_3M_P50*Price/Inflation_7)>1000000000.0) & (Risk_Rating <= 6) & (D_RSI < 0.27)  & (PE < 7.4)  & (PE>1.2) & (ROE_Min3Y > 0.04) & (PB < 1.1*PB_MA5Y - 0.3*PB_SD5Y) & (PCF > 1.0) & (PCF <38.0) & ((Cash_P0/ (LtDebt_P0+1) > 0.095)|(abs(IntCov_P0) > 2.6)) & (NP_P0 > 0)
+_SuperGrowth,{Init} & ((Volume_3M_P50*Price/Inflation_7)>3400000000.0) & (Risk_Rating <= 6) & (PE/((NP_P0/NP_P4 -1)*100) < 0.64) & (ROE_Min5Y > 0.07) &  ((FSCORE>=4)) & (NP_P0/NP_P4 > 1.04)  & (NP_P4 >= 0)  & (PCF > 0.1) & (PCF < 11.0) & (CF_OA_5Y/OShares > 3000.0) & (ID_Current -  ID_Release <= 14.0)
+_SurpriseEarning,{Init} & ((Volume_3M_P50*Price/Inflation_7)>1400000000.0) & (Risk_Rating <= 5) & (PE < 18.5) & (PE > 5.0) & (PB < 1.8) & (PB > 0.47) & (ROE_Min5Y > 0.04) & ((NP_P0 - NP_P4)/abs(NP_P4) > 0.12) & (NP_P0/NP_P1> 1.25) & (NP_P1 > 0) & (PCF > 2.0) & (PCF < 19.0) & (CF_OA_5Y/OShares > 5500.0) & ((Cash_P0/ (LtDebt_P0+1) >0.035)|(abs(IntCov_P0) > 4.5))
+_TL3M,{Init} & ((Volume_3M_P50*Price/Inflation_7)>1800000000.0) & (Risk_Rating <= 6) & (HI_3M_T1/LO_3M_T1<1.5) & (Volume > 1.28*Volume_3M_P90)& (ROE5Y>0.045) & (PE<13.0)  & (PE >2.8)& (PB < 1.65) & (PB >0.25)& (FSCORE > 4.0) & (NP_P0 > 1.28*NP_P1) & (NP_P1 > 0)& (PCF>1.40) & (PCF<23.0)
+_TradingValueMax,{Init} & ((Volume_3M_P50*Price/Inflation_7)>2200000000.0) & (Risk_Rating <= 6) & (Trading_Value_Total_1W >= 0.93 * Trading_Value_Total_1W_Max6M) & (Volume >= 0.96 * Volume_Max1Y) & (PE > 2.0) & (PE < 19.0) & (PB < 2.75) & (PB > 0.1) & (Close < 1.05 * Close_2Y_P90) & (D_RSI < 83.0) & (FSCORE > 4.0)
+_TrendingGrowth,{Init} & ((Volume_3M_P50*Price/Inflation_7)>800000000.0) & (Risk_Rating <= 6) & (Close> 1.13*Volume_Max5Y_High) & (ROE_Min5Y > 0.03)& (PE<=11.2) & (PE >0.0) & (NP_P0 > 1.2*NP_P1) & (NP_P1 > NP_P2)& (HI_3M_T1/LO_3M_T1<2.2)
+_UnderBV,{Init} & ((Volume_3M_P50*Price/Inflation_7)>1000000000.0) & (Risk_Rating <= 5) & (PB < 1.14) & (PB > 0.1) & (FSCORE >= 2.0) & (NP_P0 > 0.96*NP_P1)  & (PCF>0.8) & (PCF<16.0)& (PE >3.2) & (PE<15.0) & ((NP_P0+NP_P1+NP_P2+NP_P3)/OShares > 1200.0) & (NP_P0/NP_P4 > 1.40)
+_VolMax1Y,{Init} & ((Volume_3M_P50*Price/Inflation_7)>1000000000.0) & (Risk_Rating <= 6) & (Close > 1.12*Volume_Max1Y_High) & (Close_T1W < 1.07*Volume_Max1Y_High) & (Volume > 0.95*Volume_3M_P50) & (PE >1.6) & (PE < 19.0) & (PB<3.1) & (PB > 0.4) & (((NP_P0 > 1.0*NP_P1)& (PCF < 19.8) & (ROE_Min3Y > 0.03)) | ((((NP_P0 - NP_P4)/abs(NP_P4) > 0.70)) & (PCF < 15.8))) & (PCF > 2.4000000000000004) & (ID_Current-Volume_Max1Y_ID<=205.0)  & (Volume_Max1Y_High/LO_3M_T1 < 1.4500000000000002) & (FSCORE > 3.0)
+~BearDvg2,(D_RSI_Max1W/D_RSI > 0.88) & (D_RSI_T1/D_RSI > 1.11) & (D_RSI_Max3M > 0.66) & (D_RSI_Max1W < 0.76) & (D_RSI_Max1W >0.57) & (D_RSI_Max1W_Close/D_RSI_Max3M_Close > 1.12) & (D_RSI_Max3M_MACD/D_RSI_Max1W_MACD > 1.29) & (Volume > 1.11*Volume_1M)& (D_RSI_Max3M/D_RSI_Max1W > 1.21)
+~MA21,(MA20/MA50<1.3) & (MA20_T1/MA50_T1>1.23) & (D_RSI/D_RSI_T1W < 0.9) & (Close < 1.25*VAP1M) & (D_MACDdiff< -1) & (Close/Close_T1W < 1.09)
+~MA31,(MA10/MA200<1.05) & (MA10_T1/MA200_T1>1.05) & (Close < 1.12*VAP3M) & (Close/Close_T1W < 1.03)& (D_RSI/D_RSI_T1W < 0.9) & (D_RSI < 0.62) & (D_MACDdiff< -1.0)& (NP_P0/NP_P1 < 1.08) & (Volume>0.99*Volume_3M_P50)
+~MA41,(Close > 1.55*MA200) & (NP_P0/NP_P1 < 0.92) & (Volume>1.17*Volume_3M_P50) & (Close/Close_T1W < 1.0) & (Close < 1.05*VAP1M)
+~S13,(C_L1W>=1.15) & (D_CMB_Peak_T1>0.85*D_CMB) & (Close>1.15*MA10) & (D_CMB_XFast<2.0)
+~SellBV,(Close > 1.85*BVPS) & (NP_P0 /NP_P1 < 0.91) &(Close < 0.97*VAP1M) & (Close_T1W > 0.92*VAP1M) & (Volume > 0.95* Volume_3M_P50) & (ICB_Code != 8633)
+~SellBV2,(PB > 1.23*PB_MA5Y + 0.84*PB_SD5Y) & (NP_P0 /NP_P1 < 0.62)  & (Close < 0.99*VAP1M) & (Close_T1W > 0.8*VAP1M)  & (D_RSI > 0.28) & (Volume > 1.01*Volume_3M_P50)
+~SellLowGrowth,(NP_P0/NP_P4 < 1.2) & (ID_Current -  ID_Release <= 10)
+~SellPE,(PE >= 1.25*PE_MA5Y  + 1.23*PE_SD5Y) & (NP_P0 /NP_P1 < 1.01) & (Close < 0.98*VAP3M) & (Close_T1W > 0.89*VAP3M) & (Close/Close_T1W < 1.29) & (Volume > 1.24*Volume_3M_P50)
+~SellResistance, (Open/Close< 0.95) & (Close  <  0.8*Res_1Y) & (Close/LO_3M_T1 > 1.58) & (Volume > 2.47*Volume_3M_P50)
+~SellResistance1M,(ID_XVAP3M_Down_P0 - ID_XVAP1M_Down_P2 <= 25.0) & (Close < 0.94*VAP1M) & (Close_T1 >  0.96*VAP1M) & (Volume > 1.04* Volume_3M_P50) & (D_RSI > 0.4)
+~SellResistance1Y, (PB > 1.23*PB_MA5Y + 0.93*PB_SD5Y) & (NP_P0 /NP_P1 < 0.8)  &  (Close < 0.94*Res_1Y)  & (Volume  > 1.25*Volume_3M_P50)  & (Close_T1W > 0.86*VAP1M)  & (D_RSI > 0.43)
+~SellVolMax,(Close/Volume_MaxTop5_2Y_Close < 0.84) & (ID_Current - Volume_MaxTop5_2Y_ID <=128.0) & (Close < 1.17*VAP1W) & (D_RSI < 0.55) & (Close/Close_T1 < 1.1) & (D_RSI/D_RSI_T1W < 1.03) & (Close_T1/LO_3M_T1 > 1.59)
