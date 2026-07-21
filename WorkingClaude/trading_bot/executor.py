@@ -99,6 +99,17 @@ class Executor:
             if st.get("plan_created_at") == self.plan.created_at:
                 print(f"[exec:{self.label}] resume từ {self.state_file}")
                 st.setdefault("exchange_override", {})  # state cũ (trước fix) chưa có key này
+                # Reconcile: plan.orders có thể ĐÔNG hơn state cũ nếu 1 fail-safe (vd
+                # cap_capit_orders) đã loại tạm vài order khi state được tạo lần đầu rồi sau
+                # đó plan đầy đủ trở lại mà created_at KHÔNG đổi (incident ZaloPay 2026-07-21).
+                # Backfill parent MỚI đúng format fresh-state cho order còn thiếu — KHÔNG động
+                # vào parent đã tồn tại (giữ nguyên filled/done/children đã ghi nhận).
+                st.setdefault("parents", {})
+                for o in self.plan.orders:
+                    st["parents"].setdefault(o.id, {"filled": 0, "done": False,
+                                                    "atc_sent": False, "children": [],
+                                                    "last_slice_ts": None,
+                                                    "dcf_check": o.dcf_check})
                 return st
             print(f"[exec:{self.label}] ⚠ plan đã đổi so với state cũ — state mới")
         return {"plan_date": self.plan.plan_date,
