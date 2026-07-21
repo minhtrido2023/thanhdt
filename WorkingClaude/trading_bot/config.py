@@ -29,6 +29,14 @@ DEFAULTS = {
     # --- slicing / execution ---
     "max_child_value": 200_000_000,   # VND tối đa mỗi lệnh con
     "max_participation": 0.10,        # mua/bán ≤ 10% KL khớp lũy kế trong ngày của mã
+    "capit_realized_participation_ceiling": 0.30,  # CHỈ áp cho lệnh CAPIT (hybrid ADV20-basis,
+                                      #   job Taylor_20260721_053659): sau khi đổi cơ sở pacing
+                                      #   sang ADV20 causal, trần phụ này chặn fleet vượt 30% KL
+                                      #   khớp lũy kế THẬT của phiên → không bao giờ thành đa số
+                                      #   một phiên mỏng. Chọn cận trên dải 25-30% mà market-impact
+                                      #   test (Taylor_20260721_050720) khuyến nghị: đủ lỏng để KHÔNG
+                                      #   tái lập zero-block NCT 2026-07-21 (cần <10% realized mới
+                                      #   sập) nhưng vẫn bắt đuôi >30% tape. Non-CAPIT KHÔNG dùng.
     "slice_interval_min": 8,          # phút giữa 2 lệnh con cùng một parent
     "poll_interval_sec": 20,          # chu kỳ poll sổ lệnh + quote
     "chase_ticks": 1,                 # mua: đặt bid + n tick (passive); 0 = đặt ngay bid

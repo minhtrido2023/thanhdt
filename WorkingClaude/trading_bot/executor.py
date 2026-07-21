@@ -87,8 +87,54 @@ class Executor:
                                        # cycle where BOTH _cancel_stale (via _would_be_unchanged)
                                        # AND _place_slices ask only mutates the 2-poll counter once
         self._load_gap_ref_data()
+        # ticker -> ADV20 causal (giá trị giao dịch VND, TỔNG cả fleet) cho lệnh CAPIT.
+        # Rỗng {} = không phải phiên CAPIT, hoặc artifact thiếu/stale → _child_qty tự
+        # fail-safe về guard realtime cũ. Xem _load_capit_adv20_basis().
+        self._capit_adv20_vnd = self._load_capit_adv20_basis()
         self.state = self._load_state()
         self._step_fail_count = 0   # consecutive STEP_FAIL counter for escalation
+
+    @staticmethod
+    def _is_capit_buy(o):
+        return (o.book or "").upper() == "CAPIT" and (o.side or "").lower() == "buy"
+
+    def _load_capit_adv20_basis(self, status_path=None):
+        """ticker -> ADV20 causal (giá trị giao dịch VND, TỔNG cả fleet) cho lệnh CAPIT.
+
+        Đọc cùng artifact mà plan.cap_capit_orders() dùng (data/golive_v23_status.json).
+        ADV20_vnd = capit_adv_caps_total[t] / (capit_adv_x · capit_adv_d) — đảo ngược đúng
+        công thức golive_recommend_v23.py:132 (cap_vnd = X·ADV20·D), KHÔNG tính lại khác đi.
+        Dùng caps_TOTAL (không chia account) vì self.shared = KL fleet đã khớp trên MỌI
+        account, khớp đúng ngữ nghĩa guard fleet-level trong _child_qty.
+
+        FAIL-SAFE (trả {} → _child_qty tự lùi về guard realtime cũ, KHÔNG mua vô hạn):
+        không có lệnh CAPIT buy / thiếu file / signal_date artifact ≠ plan (artifact cũ) /
+        thiếu capit_adv_caps_total / thiếu-sai capit_adv_x·d. Đây là lớp phòng thủ THỨ HAI:
+        cap_capit_orders() đã CHẶN lệnh CAPIT ở tầng plan khi artifact hỏng trước khi tới đây.
+        """
+        if not any(self._is_capit_buy(o) for o in self.plan.orders):
+            return {}
+        from .config import WORKDIR
+        path = status_path or os.path.join(WORKDIR, "data", "golive_v23_status.json")
+        try:
+            with open(path, encoding="utf-8") as f:
+                st = json.load(f)
+            if (st.get("signal_date") and self.plan.signal_date
+                    and st["signal_date"] != self.plan.signal_date):
+                return {}
+            caps_total = st.get("capit_adv_caps_total") or {}
+            x = st.get("capit_adv_x")
+            d = st.get("capit_adv_d")
+            if not (isinstance(x, (int, float)) and isinstance(d, (int, float))
+                    and x > 0 and d > 0):
+                return {}
+            out = {}
+            for t, v in caps_total.items():
+                if isinstance(v, (int, float)) and v > 0:
+                    out[t] = float(v) / (x * d)     # = ADV20_vnd
+            return out
+        except Exception:
+            return {}
 
     # ------------------------------------------------------------ state/journal
 
@@ -372,7 +418,30 @@ class Executor:
             return remaining
         by_value = int(self.cfg["max_child_value"] / px) if px else remaining
         qty = min(remaining, by_value)
-        if q.day_volume:   # quota fleet: tổng đã khớp MỌI account ≤ p% KL ngày của mã
+        adv20_vnd = self._capit_adv20_vnd.get(o.ticker) if self._is_capit_buy(o) else None
+        if adv20_vnd and px:
+            # LỆNH CAPIT — hybrid ADV20-floor + realized-ceiling (job Taylor_20260721_053659,
+            # market-impact test Taylor_20260721_050720). CƠ SỞ pacing đổi từ q.day_volume
+            # real-time sang ADV20 causal (median 20 phiên TRƯỚC washout): một phiên mỏng bất
+            # thường của tên THỰC CHẤT thanh khoản không còn bị WAIT_QUOTA oan (bug NCT
+            # 2026-07-21). TRẦN PHỤ = capit_realized_participation_ceiling × KL khớp lũy kế
+            # THẬT: fleet không bao giờ thành đa số một phiên mỏng. allowance = min(hai guard)
+            # → bị chặn bởi CẢ thanh khoản 20 phiên LẪN tape thật hôm nay (fleet-level).
+            fleet_filled = self.shared.get(o.ticker, 0)
+            floor_allow = int(self.cfg["max_participation"] * adv20_vnd / px) - fleet_filled
+            if q.day_volume:
+                ceil_allow = int(self.cfg["capit_realized_participation_ceiling"]
+                                 * q.day_volume) - fleet_filled
+                allowance = min(floor_allow, ceil_allow)
+            else:
+                # halt / chưa có tape (Volume=0): chỉ còn ADV20-floor; khan người bán tự
+                # giới hạn fill thực (không ai bán → lệnh treo, không đẩy giá — memo Result 2).
+                allowance = floor_allow
+            if allowance < LOT:
+                return 0
+            qty = min(qty, allowance)
+        elif q.day_volume:   # non-CAPIT (hoặc CAPIT thiếu ADV20 → fail-safe guard cũ):
+                             # tổng đã khớp MỌI account ≤ p% KL ngày của mã. GIỮ NGUYÊN.
             fleet_filled = self.shared.get(o.ticker, 0)
             allowance = int(self.cfg["max_participation"] * q.day_volume) - fleet_filled
             if allowance < LOT:
