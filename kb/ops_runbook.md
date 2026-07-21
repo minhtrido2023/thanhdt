@@ -46,6 +46,14 @@ chưa ăn → notify "cần người xem", không dispatch lặp vô hạn.
 - **DollarBill plan channel** (1521183164364754974): plan T+1 + mọi record duyệt plan.
 - Bus `question` events = việc CHỜ USER — Mike phải chủ động trình user, không để tồn >48h
   (ops_health_check tự bắt).
+- **QUY ƯỚC ĐÓNG question** (bắt buộc, fix Wags 2026-07-21): để `ops_health_check.sh` gỡ 1
+  question khỏi backlog, event đóng (`answer` HOẶC `decision`) PHẢI mang topic **chứa nguyên
+  topic của question** — hoặc y hệt, hoặc thêm hậu-tố trạng thái (`…-closed` / `…-confirmed`
+  / `… [RESOLVED]`). Checker khớp 1 chiều: `resolver ⊇ topic-hỏi`. Đóng bằng topic KHÁC HẲN
+  (vd question `deposit-rate-refresh-question` đóng bằng answer `deposit-rate-refresh` cụt
+  đuôi, hoặc bằng decision chủ đề rời) → checker KHÔNG thấy → question "tồn đọng" vĩnh viễn
+  → spawn Wags vô nghĩa. Trước 2026-07-21 checker so topic BẰNG NHAU TUYỆT ĐỐI nên cả hậu-tố
+  `-closed` cũng trượt (7 answer trên bus dính lỗi này).
 
 ## Macro health — phân biệt 3 tầng khi FAILED (bài học 2026-07-06, 3 bug chồng nhau)
 
