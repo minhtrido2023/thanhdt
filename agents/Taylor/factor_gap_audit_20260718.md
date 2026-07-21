@@ -458,3 +458,46 @@ là phần đáng giá nhất — lấp đúng gap §1c đã xác nhận, và 3 
 `~SellLowGrowth`, `~BearDvg2`) đều A-data, 0 nguồn mới. **#20 FCF/EV** là candidate ENTRY/value MỚI
 thật duy nhất từ hệ legacy không trùng cái đã loại. Phần buy còn lại trùng nặng cái đã có ⇒ không đề
 xuất theo đuổi riêng. **Không backtest gì trong job này** (đúng phạm vi khảo sát).
+
+### §7.5 — KẾT QUẢ backtest 3 ứng viên exit (job `Taylor_20260721_045810`, user duyệt) — **cả 3 NO-GO / underpowered**
+
+**Phương pháp (deal-level isolation, auditable).** Lấy CHÍNH tập entry production từ R3 audit CSV
+(`data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap.csv`): **423 deal
+BAL** (SIGNAL_V11, 2015-2026) + **1629 deal LAG** (PEAD, 2014-2026), loại CAPIT. Chạy simulator deal-level
+riêng (tự kiểm soát mọi bước, không nhiễu ramp/partial-fill/allocator): mỗi deal vào tại Close ngày fill,
+thoát theo baseline **verify trong code** (`pt_v23_audit_2014.py:1704` BAL hold=45d stop=−20% min_hold=2;
+`:1756` LAG hold=25d no-stop). Biến thể candidate = baseline HOẶC thoát SỚM hơn nếu exit-signal fire (exec
+**T+1 Open**, chống look-ahead). Đo Δ trên **CÙNG entry set**. NAV = **fixed-slot honest** (sau early exit,
+slot giữ **cash 0** tới đúng ngày baseline-exit — KHÔNG redeploy) để tránh artifact tái-đầu-tư-ngầm. **N=3
+trials khai báo trước, KHÔNG sweep tham số.**
+
+**Look-ahead audit (bắt buộc, §Quy chuẩn 5):** `Res_1Y` **98.5% backward-only** (corr 0.82–0.99 với trailing-
+incl 252d-High-max; residual 1.5% = artifact adj/raw price trên mã nhiều corp-action, KHÔNG phải future-leak);
+`D_RSI_Max1W/3M` **100% ≥ D_RSI hiện tại** (trailing max thật); `sess_since_rel` tự tính causal (đếm phiên kể
+từ khi `ID_Release` đổi bậc — vì `ID_Current/ID_Release` là **counter per-ticker, ID_Current RESET cho ~412/603
+mã** ⇒ hiệu số thô KHÔNG dùng được, đây là 1 bug cột nữa cùng họ §7.0; median khoảng-cách release 91 ngày ✓).
+
+| Ứng viên | Entry set | Fire | Δ per-deal | NAV honest (Δ CAGR / Sharpe / MaxDD) | fwd-after-exit | Verdict |
+|---|---|---|---|---|---|---|
+| `~SellResistance` | BAL 423 | **2 (0.5%)** | +0.10pp | **+0.82pp** / +0.030 / 0 | **2/2 dodged DD** (−13.7%) | **UNDERPOWERED** — đúng hướng nhưng N=2 |
+| `~BearDvg2` | BAL 423 | 9 (2.1%) | −0.03pp | −0.03pp / +0.003 / 0 | +1.41% (cắt winner ≈ dodge) | **NO-GO** (flat/âm) |
+| `~SellLowGrowth` | LAG 1629 | 97 (6.0%) | −0.12pp | **−0.42pp** / +0.003 / **+2.31pp** | +1.19% med (cắt winner), 42% dodge | **NO-GO** như return play |
+
+**Diễn giải:**
+1. **`~SellResistance`** — signal chính xác & bảo vệ THẬT (HPX 2023-08-03 né −23% pump-crash; IDI 2021-10-27
+   né −4.2%), honest NAV +0.82pp, MaxDD giữ nguyên. NHƯNG **gần như không bao giờ fire trên BAL** (cần down-day
+   >5% + volume >2.47× median + dưới kháng cự sau cú chạy dài — BAL hold ngắn hiếm khi tới trạng thái đó). N=2
+   ⇒ **không kết luận edge**. Để dành: test entry set rộng hơn (all-buys / custom30V / market-wide distribution-day)
+   để tích N. **KHÔNG WIRE.**
+2. **`~BearDvg2`** — phân kỳ 9-ĐK không thêm giá trị làm exit trên momentum entries: thoát winner ≈ ngang dodge
+   loss (BMI 2021 cắt winner +29.6→+3.5%, fwd +25%!), net ~0/hơi âm, Sharpe phẳng. **KHÔNG WIRE.**
+3. **`~SellLowGrowth`** — **đánh đổi return lấy DD** (−0.42pp CAGR đổi −2.31pp MaxDD), Sharpe phẳng. Cốt lõi:
+   LAG = book **DRIFT sau BCTC**; thoát khi YoY<20% (vẫn dương) là **QUÁ SỚM**, đánh vào chính edge của book — đặc
+   biệt OOS 2020+ (fwd +4.32%, n=45, cắt winner mạnh). ⚠️ Bẫy đo: NAV renormalized-active ban đầu báo **+0.83pp**
+   nhưng đó là **redeploy artifact**; honest fixed-slot = **−0.42pp**. DD-benefit nhỏ, có thể có rẻ hơn qua hard-stop.
+   **KHÔNG WIRE.**
+
+**Kết luận §7.5:** 3/3 candidate exit vòng đầu **không đủ tư cách wire**. `~SellResistance` là mảnh duy nhất
+đáng theo tiếp (đúng hướng, cần larger-N entry set). Không có candidate nào cần quant-skeptic ở vòng này (chưa
+có gì để wire). Scripts: `mike/agents/Taylor/research/exit_signal_backtest_20260721/` (deal-level harness,
+đọc R3 audit CSV + BQ-cache panel). **KHÔNG chạm production V2.4.**
