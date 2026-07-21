@@ -171,11 +171,26 @@ if os.path.isdir(inbox_dir):
                     yield json.loads(line)
                 except Exception:
                     continue
-    answers = set()
+    # Resolver = answer HOẶC decision — 1 quyết định thường đóng câu hỏi mà không lặp lại
+    # y hệt topic (vd decision "deposit-rate-autowrite-removed"), và người trả lời hay
+    # thêm hậu-tố trạng thái vào topic gốc (…-question-closed / …-confirmed / … [RESOLVED]).
+    # Khớp exact-topic như bản cũ bỏ sót cả 2 dạng → false-positive backlog, Wags bị
+    # dispatch lặp cho câu hỏi ĐÃ giải quyết (sự cố Wags 2026-07-21: 2/5 "pending" thực ra
+    # đã đóng — Winston deposit-rate + Taylor plan-SpaceX).
+    resolvers = []
     for p in files:
         for rec in iter_events(p):
-            if rec.get("event_type") == "answer":
-                answers.add(rec.get("topic"))
+            if rec.get("event_type") in ("answer", "decision"):
+                t = rec.get("topic")
+                if t:
+                    resolvers.append(t)
+    def _resolved(q_topic):
+        # Exact-match, HOẶC resolver CHỨA nguyên topic câu hỏi (quy ước hậu-tố trạng thái).
+        # Chỉ 1 chiều (resolver ⊇ topic-hỏi) để 1 decision topic-ngắn KHÔNG vô tình khớp
+        # câu hỏi dài khác chủ đề.
+        if not q_topic:
+            return False
+        return any(r == q_topic or q_topic in r for r in resolvers)
     for p in files:
         agent = os.path.basename(p).replace(".jsonl", "")
         for rec in iter_events(p):
@@ -185,7 +200,7 @@ if os.path.isdir(inbox_dir):
                 ts_dt = dt.datetime.fromisoformat(rec.get("ts", "").replace("Z", "+00:00"))
             except Exception:
                 continue
-            if ts_dt >= cutoff and rec.get("topic") not in answers:
+            if ts_dt >= cutoff and not _resolved(rec.get("topic")):
                 pending_q.append(f"{agent}/{rec.get('topic')}")
 if pending_q:
     W(f"Có {len(pending_q)} câu hỏi (question) trong 48h qua CHƯA thấy answer tương ứng: {pending_q}")
@@ -400,7 +415,13 @@ echo "$MSG"
 # (circuit breaker, question tồn đọng) → Wags (wags_autofix, có arch-reviewer audit);
 # lỗi vận hành trading/pipeline còn lại → Winston (ops_autofix). Cả 2 tự chống lặp 1h.
 if [ "${WARN_COUNT:-0}" -gt 0 ]; then
-  COORD_WARN="$(echo "$MSG" | grep -E '⚠️|❌' | grep -E "Circuit breaker|câu hỏi \(question\)" || true)"
+  # Circuit breaker = lỗi CƠ HỌC Wags sửa được → wags_autofix. "câu hỏi (question) tồn đọng"
+  # KHÔNG còn tự dispatch Wags: câu hỏi tồn đọng là QUYẾT ĐỊNH của user/Mike (chọn A/B,
+  # duyệt plan, xác nhận số liệu) — Wags không có quyền trả lời, mỗi lần checker chạy chỉ đẻ
+  # 1 job Wags vô nghĩa rồi tự-triage lại (loop 2026-07-21). Vẫn được surface trong $MSG →
+  # notify Trading Daily + status event để Mike/user thấy. False-positive (câu hỏi đã đóng
+  # bằng answer/decision) nay được _resolved() ở check #5 dọn tự động, không cần Wags.
+  COORD_WARN="$(echo "$MSG" | grep -E '⚠️|❌' | grep -E "Circuit breaker" || true)"
   OTHER_WARN="$(echo "$MSG" | grep -E '⚠️|❌' | grep -vE "NOT_APPROVED|KHÔNG TÌM THẤY|Circuit breaker|câu hỏi \(question\)" || true)"
   if [ -n "$COORD_WARN" ]; then
     # Label KHÔNG kèm ACCOUNT: circuit breaker + question tồn đọng là trạng thái FLEET-WIDE
