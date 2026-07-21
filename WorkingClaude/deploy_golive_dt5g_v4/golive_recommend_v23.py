@@ -50,6 +50,7 @@ os.environ.pop("BQ_LOCAL_CACHE", None)
 
 from simulate_holistic_nav import bq
 from signal_v11_sql import SIGNAL_V11
+from anomaly_gate import anomaly_excluded as _anomaly_excluded_shared
 
 OUTDIR = os.path.join(WORKDIR, "deploy_golive_dt5g_v4", "out"); os.makedirs(OUTDIR, exist_ok=True)
 DT_TABLE = "vnindex_5state_dt5g_live"
@@ -108,22 +109,13 @@ def anomaly_excluded(asof):
 
     FAIL-SAFE: file thiếu/hỏng → trả set rỗng + log warning, KHÔNG chặn pipeline —
     một file thiếu không được phép làm treo cả đường lập plan tiền thật.
+
+    Delegates to anomaly_gate.py — nguồn dùng chung với các paper-trading book
+    (pt_capitulation_shadow.py, pt_v22_dt5g.py, dc_book_waterfall_paper.py). Đổi
+    2026-07-21 (job Taylor_20260721_092529 + Mike áp patch) từ bản inline sang import;
+    hành vi giữ nguyên 100% (zero-diff verify 60 phiên, xem anomaly_gate_prod_parity_selfcheck.py).
     """
-    p = os.path.join(WORKDIR, "data", "anomaly_flags.json")
-    try:
-        flags = json.load(open(p, encoding="utf-8"))
-        # chuẩn hoá asof (date / Timestamp / str đều nhận) — sai kiểu ở caller mà rơi vào
-        # except sẽ TẮT ÂM THẦM cả cái gate an toàn này, nên không để nó có cửa xảy ra.
-        d = pd.Timestamp(asof).date()
-        # CỬA SỔ HAI ĐẦU: cutoff <= last_alert <= asof. Chặn trên là chống look-ahead — nếu
-        # chỉ so >= cutoff thì chạy lại cho một ngày quá khứ sẽ áp cả cờ của TƯƠNG LAI
-        # (vd rerun 2025-12: cờ PNJ 07/2026 vẫn "active"). Live thì asof≈hôm nay nên vô hại,
-        # nhưng để vậy là mời gọi kết quả backtest sai lệch về sau.
-        lo, hi = str(d - timedelta(days=ANOMALY_TTL_DAYS)), str(d)
-        return {t for t, f in flags.items() if lo <= str(f.get("last_alert", "")) <= hi}
-    except Exception as ex:
-        print(f"  WARNING: due-diligence flags không đọc được ({ex}) — CAPIT chạy KHÔNG có gate")
-        return set()
+    return _anomaly_excluded_shared(asof, ttl_days=ANOMALY_TTL_DAYS)
 
 
 def capit_adv_caps(basket, asof):
@@ -522,7 +514,26 @@ if _park_basket is not None:
                      "close_bq_stale_DO_NOT_USE_AS_REFPRICE": None, "sector": None,
                      "weight_pct": round(float(pr.weight) * 100, 4),
                      "status": "PARK_ADVISORY"})
-rec_df = pd.DataFrame(recs, columns=["book","ticker","play_type","ta","close_bq_stale_DO_NOT_USE_AS_REFPRICE","sector","weight_pct","status","capit_cap_total_vnd"])
+# ── Due-diligence tổng hợp cho MỌI ứng cử viên (mandate user 2026-07-21) ──
+# Đây là CHOKE-POINT SỚM NHẤT: mọi mã ở đây mới chỉ là ứng cử viên, chưa thành lệnh. Lớp này
+# THUẦN THÔNG TIN (thanh khoản/universe/cơ học surprise/cờ bất thường/FA/định giá) — KHÔNG loại
+# mã, KHÔNG đổi weight, KHÔNG thêm gate. Bối cảnh: rà tay LAG 07-24 (IVS/TMG/TRC) phát hiện
+# TMG thanh khoản=0 + ngoài ticker_prune, IVS 39% ADV — không cơ chế tự động nào bắt được.
+# Đọc bq_cache local (T-1) qua module riêng, KHÔNG động vào đường BQ live ở trên.
+dd_map = {}
+try:
+    from trading_bot.due_diligence import run_due_diligence as _run_dd
+    for _r in recs:
+        _t, _b = _r["ticker"], _r["book"]
+        if (_t, _b) not in dd_map:
+            dd_map[(_t, _b)] = _run_dd(_t, _b, {"asof": str(LATEST.date())})
+except Exception as _e:
+    print(f"  WARNING: due-diligence layer lỗi: {_e}")
+for _r in recs:
+    _s = dd_map.get((_r["ticker"], _r["book"]), "")
+    _r["due_diligence"] = " | ".join(x.strip() for x in str(_s).splitlines()) if _s else ""
+
+rec_df = pd.DataFrame(recs, columns=["book","ticker","play_type","ta","close_bq_stale_DO_NOT_USE_AS_REFPRICE","sector","weight_pct","status","capit_cap_total_vnd","due_diligence"])
 csv_path = os.path.join(OUTDIR, f"golive_v23_recommendations_{END}.csv")
 rec_df.to_csv(csv_path, index=False)
 
@@ -641,6 +652,29 @@ if capit_fired:
         L.append("- Basket: <3 mã quality đạt chuẩn — sleeve không kích hoạt.")
 else:
     L.append("- Gate chưa kích hoạt — sleeve dormant.")
+if dd_map:
+    try:
+        from trading_bot.due_diligence import DD_DISCLAIMER as _DDD
+    except Exception:
+        _DDD = ""
+    L.append("\n## Due-diligence ứng cử viên (informational — KHÔNG loại mã, KHÔNG đổi weight)\n")
+    # In ĐẦY ĐỦ mã có cờ; mã sạch gộp 1 dòng theo book (CSV vẫn giữ đủ DD cho MỌI dòng —
+    # đó mới là artifact tra cứu, MD chỉ để người đọc nhanh).
+    _clean = {}
+    for (_t, _b), _s in sorted(dd_map.items()):
+        if not _s:
+            continue
+        _ls = str(_s).splitlines()
+        if any(("⚠" in x or "🔴" in x) for x in _ls):
+            L.append(f"- {_ls[0]}")
+            for _x in _ls[1:]:
+                L.append(f"  {_x.strip()}")
+        else:
+            _clean.setdefault(_b, []).append(_t)
+    for _b in sorted(_clean):
+        L.append(f"- ✅ {_b} không cờ ({len(_clean[_b])}): {', '.join(sorted(_clean[_b]))}")
+    if _DDD:
+        L.append(f"\n_{_DDD}_")
 L.append(f"\n## Notes\n- Sizing: %/slot tính trên VỐN CỦA BOOK (BAL book = {(1-w_tgt)*100:.0f}% NAV, LAG book = {w_tgt*100:.0f}% NAV theo allocator).")
 L.append(f"- BAL: max {MAX_POS} pos, hold 45d, stop -20%, Fin/RE (sector 8) cap 4 (RE_BACKLOG exempt); mã 8L rating≥4 half-size CHỈ trong BEAR/CRISIS.")
 L.append(f"- LAG: KHÔNG ensemble switch (always-on), KHÔNG stop — quản trị bằng allocator (BEAR=0).")

@@ -663,6 +663,35 @@ def _dcf_echo_line(dc_names, last_close, asof):
         return ""
 
 
+def _dd_echo_lines(dc_names, asof):
+    """Due-diligence tổng hợp (mandate user 2026-07-21) cho các mã DC book đang active.
+    Informational y hệt _dcf_echo_line — KHÔNG tham gia chọn mã/sizing. skip_dcf=True vì
+    dòng DCF đã echo ngay trên. Fail-safe: lỗi → [] (bỏ hẳn phần này, report vẫn nguyên)."""
+    try:
+        if not dc_names:
+            return []
+        if WORKDIR not in sys.path:
+            sys.path.insert(0, WORKDIR)
+        from trading_bot.due_diligence import run_due_diligence, DD_DISCLAIMER
+        out = ["- Due-diligence (informational, không tham gia chọn mã):"]
+        clean = []
+        for t in dc_names:
+            s = str(run_due_diligence(t, "DC", {"asof": asof, "skip_dcf": True}))
+            # chỉ in ĐẦY ĐỦ mã có cờ — mã sạch gộp 1 dòng (quy ước báo cáo "quiet heartbeat":
+            # im lặng hoàn toàn không phân biệt được với pipeline chết, nên vẫn liệt kê tên)
+            if "⚠" in s or "🔴" in s:
+                for dl in s.splitlines():
+                    out.append(f"  {dl.strip()}")
+            else:
+                clean.append(t)
+        if clean:
+            out.append(f"  ✅ không cờ ({len(clean)}): {', '.join(clean)}")
+        out.append(f"  ℹ️ _{DD_DISCLAIMER}_")
+        return out
+    except Exception:
+        return []
+
+
 def generate_section(account=ACCOUNT_DEFAULT, do_advance=True):
     """Markdown section for the EOD report. Advances the sleeve first (idempotent) unless
     do_advance=False. Never raises — degrades to a single ⚠️ line (the caller must not abort)."""
@@ -722,6 +751,9 @@ def generate_section(account=ACCOUNT_DEFAULT, do_advance=True):
             dcf_line = _dcf_echo_line(dc, st.get("last_close") or {}, last.get("date"))
             if dcf_line:
                 L.append(dcf_line)
+            dd_lines = _dd_echo_lines(dc, last.get("date"))
+            if dd_lines:
+                L.extend(dd_lines)
         else:
             L.append("- Sleeve đang FLAT (0% deploy — không có tiền rảnh do sleeve này quản)")
         if last.get("reverse_unwind"):
