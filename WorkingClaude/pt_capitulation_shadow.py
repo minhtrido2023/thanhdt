@@ -25,6 +25,8 @@ except Exception: pass
 import numpy as np, pandas as pd
 
 W=r"/home/trido/thanhdt/WorkingClaude"; PROJECT="lithe-record-440915-m9"
+sys.path.insert(0, W)
+from anomaly_gate import anomaly_excluded   # due-diligence gate dùng chung (xem anomaly_gate.py)
 SDK_BIN=r"C:\Users\hotro\AppData\Local\Google\Cloud SDK\google-cloud-sdk\bin"
 SEED=50_000_000_000.0; HOLD_TD=60; COST=0.003; WASHOUT=0.30   # gate v2 (2026-06-10): cliff ~30%, see playbook §0b; HOLD stays 60td (NEUTRAL move back-loaded, 40d = worst exit point)
 STATE_NAME={1:"CRISIS",2:"BEAR",3:"NEUTRAL",4:"BULL",5:"EX-BULL"}
@@ -100,14 +102,25 @@ if stt["mode"]=="DEPLOYED":
 
 # ---- 4. if CASH and washout fires: deploy point-in-time --------------------
 elif fired:
-    snap=bq("""WITH latest AS (SELECT MAX(time) mt FROM tav2_bq.ticker_prune)
-      SELECT p.ticker, p.Close, SAFE_DIVIDE(p.PB-p.PB_MA5Y,p.PB_SD5Y) pb_z,
+    # BUG FIX 2026-07-21: bước này TỪNG tự query MAX(time) riêng thay vì tái dùng `today`.
+    # `today` = ngày mà CẢ ticker_prune LẪN dt5g_live đều có (INNER JOIN ở bước 1), nên khi
+    # DT5G publish trễ, script chạy vào hôm SAU ngày tín hiệu → MAX(time) đã trôi sang ngày
+    # hiện tại (dữ liệu intraday partial, vài chục mã) → filter lọc trên tập gần rỗng →
+    # LUÔN ra "<3 eligible names". Rổ PHẢI khoá vào đúng ngày tín hiệu đã fired = `today`
+    # (giống production golive_recommend_v23.py: `bd = br["time"].iloc[-1]`).
+    snap=bq(f"""SELECT p.ticker, p.Close, SAFE_DIVIDE(p.PB-p.PB_MA5Y,p.PB_SD5Y) pb_z,
              p.ROE_Min5Y, p.ROIC5Y, p.FSCORE,
              COALESCE(p.Price,p.Close)*p.Volume/1e9 liq_bn
-      FROM tav2_bq.ticker_prune p, latest WHERE p.time=latest.mt""")
+      FROM tav2_bq.ticker_prune p WHERE p.time=DATE '{today}'""")
     snap["q"]=(snap.ROE_Min5Y>=0.12)&(snap.ROIC5Y>=0.10)&(snap.FSCORE>=6)
     snap=snap[(snap.liq_bn>=2)&snap.Close.gt(0)]
     q=snap[snap.q]
+    # due-diligence gate (chỉ đạo user): loại mã đang có cờ bất thường TRƯỚC khi xếp hạng pb_z
+    excl=anomaly_excluded(today)
+    hit=sorted(set(q.ticker)&excl)
+    if hit:
+        print(f"  due-diligence: loại {hit} khỏi pool CAPIT (cờ bất thường <30d)")
+        q=q[~q.ticker.isin(excl)]
     g=q[q.pb_z<-1]; c=q[q.pb_z<0]
     pick = g if len(g)>=3 else (c if len(c)>=3 else q)
     pick=pick.sort_values("pb_z").head(15)

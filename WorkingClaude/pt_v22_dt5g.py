@@ -57,6 +57,7 @@ import simulate_holistic_nav as shn
 from simulate_holistic_nav import simulate, bq, VNI_QUERY
 from signal_v11_sql import SIGNAL_V11
 from pt_dates import detect_end_date
+from anomaly_gate import anomaly_excluded   # due-diligence gate dùng chung (xem anomaly_gate.py)
 
 START_DATE = "2026-06-11"     # pure forward (track created 2026-06-10)
 STATE_TABLE = "tav2_bq.vnindex_5state_dt5g_live"
@@ -603,6 +604,15 @@ FROM tav2_bq.ticker_prune p
 WHERE p.time = DATE '{d.date()}' AND p.ROE_Min5Y>=0.12 AND p.ROIC5Y>=0.10 AND p.FSCORE>=6
   AND COALESCE(p.Price,p.Close)*p.Volume/1e9 >= 2""")
     if e.empty: return []
+    # due-diligence gate (chỉ đạo user, wired 2026-07-21): loại mã có cờ bất thường còn hiệu
+    # lực tại ngày tín hiệu d, TRƯỚC khi xếp hạng pbz. Cửa sổ hai đầu trong anomaly_excluded
+    # chống look-ahead nên khi replay event lịch sử, cờ của tương lai không rò vào rổ cũ.
+    _excl = anomaly_excluded(d)
+    _hit = sorted(set(e["ticker"]) & _excl)
+    if _hit:
+        print(f"  [due-diligence] {d.date()}: loại {_hit} khỏi pool CAPIT (cờ bất thường <30d)")
+        e = e[~e["ticker"].isin(_excl)]
+        if e.empty: return []
     g = e[e["pbz"] < -1]; c = e[e["pbz"] < 0]
     pick = g if len(g) >= 3 else (c if len(c) >= 3 else e)
     pick = pick.nsmallest(15, "pbz") if len(pick) > 15 else pick
@@ -620,6 +630,7 @@ WHERE p.time = DATE '{d.date()}' AND p.ROE_Min5Y>=0.12 AND p.ROIC5Y>=0.10 AND p.
                 ev = bq(f"""SELECT p.ticker, SAFE_DIVIDE(p.PB-p.PB_MA5Y,p.PB_SD5Y) pbz
 FROM tav2_bq.ticker_prune p WHERE p.time = DATE '{d.date()}' AND p.ticker IN ({in_v})""")
                 ev = ev[ev["pbz"] < 0]                                   # liquid join only if genuinely cheap
+                ev = ev[~ev["ticker"].isin(_excl)]                       # cùng due-diligence gate với nhánh golden
                 merged = pd.concat([pick[["ticker", "pbz"]], ev[["ticker", "pbz"]]]).drop_duplicates("ticker")
                 merged = merged.nsmallest(CAPIT_OVERFLOW_N, "pbz")       # one unified pb_z scale
                 golden = list(merged["ticker"])

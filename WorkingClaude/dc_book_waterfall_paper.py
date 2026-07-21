@@ -66,6 +66,10 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 WORKDIR = os.path.dirname(os.path.abspath(__file__))
+if WORKDIR not in sys.path:
+    sys.path.insert(0, WORKDIR)
+from anomaly_gate import anomaly_excluded   # due-diligence gate dùng chung (xem anomaly_gate.py)
+
 DATA_DIR = os.path.join(WORKDIR, "data")
 BQ_CACHE = os.path.join(DATA_DIR, "bq_cache")
 STATE_FILE = os.path.join(DATA_DIR, "dc_book_waterfall_paper_state.json")
@@ -479,6 +483,18 @@ def advance(account=ACCOUNT_DEFAULT):
     # idempotent: already advanced for this close
     if st.get("clock_date") == data_date and st.get("history"):
         return "unchanged", st
+
+    # due-diligence gate (chỉ đạo user, wired 2026-07-21): loại khỏi DC set mọi mã đang có cờ
+    # bất thường còn hiệu lực tại data_date. Đặt SAU khi có data_date để asof đúng ngày dữ liệu,
+    # và giữ nguyên `None` (fail-safe hold) — gate không được biến None thành set rỗng.
+    # Chỉ áp cho DC set (nhánh chọn mã của sleeve này); custom30V basket là rổ pinned của
+    # production, không sửa ở đây.
+    if dc_set is not None:
+        _excl = anomaly_excluded(data_date)
+        _hit = sorted(set(dc_set) & _excl)
+        if _hit:
+            print(f"  due-diligence: loại {_hit} khỏi DC book (cờ bất thường <30d)")
+            dc_set = {t: m for t, m in dc_set.items() if t not in _excl}
 
     prev_w = dict(st.get("weights", {}))
     prev_close = dict(st.get("last_close", {}))
