@@ -501,3 +501,58 @@ mã** ⇒ hiệu số thô KHÔNG dùng được, đây là 1 bug cột nữa c�
 đáng theo tiếp (đúng hướng, cần larger-N entry set). Không có candidate nào cần quant-skeptic ở vòng này (chưa
 có gì để wire). Scripts: `mike/agents/Taylor/research/exit_signal_backtest_20260721/` (deal-level harness,
 đọc R3 audit CSV + BQ-cache panel). **KHÔNG chạm production V2.4.**
+
+### §7.6 — `~SellResistance` mở rộng sang custom30V (job `Taylor_20260721_053305`, user duyệt) — **VẪN UNDERPOWERED / NO-GO**
+
+**Bối cảnh phải nêu rõ (theo yêu cầu dispatch):** custom30V hiện theo đúng thiết kế **KHÔNG stop-loss** —
+sizing (cap 0.10/tên) + tái cân bằng quý LÀ cơ chế rủi ro duy nhất (quyết định user chốt gần đây, case
+VIX −24%, từ chối thêm cảnh báo/stop-loss). `~SellResistance` KHÔNG phải stop-loss giá đơn thuần (nó là
+tín hiệu kỹ thuật cụ thể: phiên phân phối volume-lớn `>2.47×` bị từ chối dưới `0.8×Res_1Y` sau chuỗi
+tăng dài từ đáy 3M — `Close/LO_3M_T1>1.58`), nhưng **về bản chất vẫn là "thoát sớm hơn lịch tái cân bằng
+dựa trên tín hiệu giá"** — nên kết quả này neo trực tiếp vào quyết định no-stop-loss đó, không tách rời.
+
+**Cấu trúc deal (point-in-time, KHÔNG dùng snapshot hiện tại).** Đọc lịch sử thành phần rổ thật từ BQ-cache
+`data/bq_cache/custom30v_8l.parquet` (= published `tav2_bq.custom30v_8l`, 48 rebal q2m5 2014-08→2026-05,
+30 tên/rebal, có `effective_from/effective_to`). Mỗi (rebal_date × ticker) giữa 2 lần tái cân bằng liên
+tiếp = 1 "deal": entry = Close ngày vào rổ, baseline exit = Close ngày tái cân bằng kế tiếp (**không
+stop-loss**, đúng thiết kế). Rebal cuối (window đang mở) bị loại → **1410 deal / 209 tên**, phân bố đều
+120 deal/năm 2015-2025 (không dồn regime). Candidate = baseline HOẶC thoát sớm nếu `~SellResistance` fire
+trong window (exec **T+1 Open**, chống look-ahead). NAV = **honest fixed-slot** (cash 0 sau early exit tới
+đúng baseline-exit, KHÔNG redeploy — cùng bài học "bẫy NAV renormalized" §7.5). **N=1 trial**, không sweep.
+
+**Look-ahead audit (universe khác BAL nên verify lại).** `Res_1Y` vs trailing-252d-max Close: **corr 0.993**,
+backward-consistent (PASS — khớp 98.5% audit §7.5). Fire-rate toàn panel **0.047%** (284/603.320 phiên).
+
+| Metric | Baseline (no-stop) | Candidate (SellResistance overlay) | Δ |
+|---|---|---|---|
+| Deal fire early | — | **15 / 1410 (1.06%)** | — |
+| Per-deal return (mean) | +4.65% | +4.68% | **+0.029pp** (t=0.26, 95%CI [−0.23,+0.21] **spans 0**) |
+| Honest NAV CAGR | +15.74% | +15.98% | +0.238pp |
+| Honest NAV MaxDD | −56.9% | −56.1% | +0.84pp |
+| Honest NAV Sharpe | 0.74 | 0.75 | +0.016 |
+| IS 2014-19 per-deal Δ | — | — | **−0.174pp** (fire=2) |
+| OOS 2020+ per-deal Δ | — | — | +0.207pp (fire=13) |
+
+**Diễn giải:**
+1. **Vẫn UNDERPOWERED — 15 fire trên tập RỘNG NHẤT hợp lý.** Dù custom30V hold ~62 ngày (dài gấp ~1.4×
+   BAL 45d) và tập entry lớn gấp ~3× (1410 vs 423), signal chỉ fire 15 lần (so N=2 ở BAL §7.5). Signal
+   cực hiếm **do cấu trúc** (cần 4 điều kiện đồng thời rất chặt) — mở rộng entry set không cứu được.
+2. **Đúng hướng bảo vệ nhưng KHÔNG có ý nghĩa thống kê.** 10/15 fire né được sụt giảm (fwd<0, median
+   −6.18%): HSG 2022-08 né −44.8%, HPX 2023-08 né −23.1%, MBG né −20%. NHƯNG per-deal Δ t=0.26, CI qua 0.
+3. **Rủi ro bất đối xứng winner-cut là lý do thật.** 10 dodge cộng −160.6pp / 5 winner-cut cộng +136.1pp
+   → **gần như triệt tiêu nhau**. Riêng **LDG 2017 cắt mất +110pp** (thoát ở +23% trong khi deal chạy tiếp
+   lên +158%) ~ một mình xoá sạch mọi dodge. Trên sleeve KHÔNG tái vào lệnh, một winner-cut nuốt trọn
+   nhiều dodge nhỏ — đúng cơ chế vì sao exit kỹ thuật nguy hiểm trên parking basket.
+4. **IS âm / OOS dương = split-luck**, không phải edge bền (IS Δ −0.174pp fire=2; toàn bộ Δ dương đến từ
+   OOS 13 fire — cùng dấu hiệu underpowered §Quy chuẩn 5 per-year LOO).
+
+⚠️ **Caveat harness:** NAV MaxDD −56.9% là sleeve equal-weight LUÔN đầu tư (mọi tên, không cap, không
+cash-park, gồm bear 2018/2022) — **KHÔNG phải DD production custom30V** (cap-weight 0.10, nằm trong book
+lớn có allocator + NEUTRAL-only). Đây chỉ là harness cô lập Δ-signal, không đại diện rủi ro thật của sleeve.
+
+**Kết luận §7.6 (neo vào quyết định no-stop-loss):** kết quả **NO-GO/underpowered** → đây là **bằng chứng
+CỦNG CỐ quyết định no-stop-loss** của custom30V, không đảo ngược. Thêm 1 điểm dữ liệu (sau BAL §7.5) cho
+thấy exit sớm theo tín hiệu kỹ thuật **không tạo giá trị ròng có ý nghĩa** ở đây (Δ CAGR +0.24pp nằm trong
+nhiễu, per-deal Δ CI qua 0), và mang rủi ro winner-cut bất đối xứng thật (LDG). **KHÔNG cần quant-skeptic**
+(dispatch chỉ route skeptic nếu N đủ lớn ∧ dương có ý nghĩa — cả hai đều KHÔNG đạt). **KHÔNG wire, KHÔNG
+chạm production V2.4/custom30V.** Scripts: `exit_c30v.py`, `dealset_c30v.csv`, `result_c30v.csv` cùng thư mục.
