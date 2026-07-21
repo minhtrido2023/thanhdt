@@ -415,13 +415,14 @@ echo "$MSG"
 # (circuit breaker, question tồn đọng) → Wags (wags_autofix, có arch-reviewer audit);
 # lỗi vận hành trading/pipeline còn lại → Winston (ops_autofix). Cả 2 tự chống lặp 1h.
 if [ "${WARN_COUNT:-0}" -gt 0 ]; then
-  # Circuit breaker = lỗi CƠ HỌC Wags sửa được → wags_autofix. "câu hỏi (question) tồn đọng"
-  # KHÔNG còn tự dispatch Wags: câu hỏi tồn đọng là QUYẾT ĐỊNH của user/Mike (chọn A/B,
-  # duyệt plan, xác nhận số liệu) — Wags không có quyền trả lời, mỗi lần checker chạy chỉ đẻ
-  # 1 job Wags vô nghĩa rồi tự-triage lại (loop 2026-07-21). Vẫn được surface trong $MSG →
-  # notify Trading Daily + status event để Mike/user thấy. False-positive (câu hỏi đã đóng
-  # bằng answer/decision) nay được _resolved() ở check #5 dọn tự động, không cần Wags.
-  COORD_WARN="$(echo "$MSG" | grep -E '⚠️|❌' | grep -E "Circuit breaker" || true)"
+  # Circuit breaker + question tồn đọng = lỗi ĐIỀU PHỐI → wags_autofix (Wags triage + re-escalate
+  # lên Mike). GIỮ nhánh dispatch question ở đây có chủ đích: đây là kênh escalate CHỦ ĐỘNG duy
+  # nhất cho question fleet-wide — bỏ nó thì question chết im sau cutoff 48h, không owner
+  # (arch-reviewer NEEDS_CHANGES coord-2026-07-20: blast_radius/long_term_ops fail). Loop chỉ
+  # ~2 job/ngày (bounded, không phải bão). Harm THẬT đã sửa ở tầng matching (_resolved() check
+  # #5): false-positive — question ĐÃ đóng bằng answer/decision hậu-tố '-closed'/'-confirmed'
+  # trước đây báo pending vĩnh viễn nên spawn Wags vô nghĩa — nay tự dọn, không cần chạm dispatch.
+  COORD_WARN="$(echo "$MSG" | grep -E '⚠️|❌' | grep -E "Circuit breaker|câu hỏi \(question\)" || true)"
   OTHER_WARN="$(echo "$MSG" | grep -E '⚠️|❌' | grep -vE "NOT_APPROVED|KHÔNG TÌM THẤY|Circuit breaker|câu hỏi \(question\)" || true)"
   if [ -n "$COORD_WARN" ]; then
     # Label KHÔNG kèm ACCOUNT: circuit breaker + question tồn đọng là trạng thái FLEET-WIDE
