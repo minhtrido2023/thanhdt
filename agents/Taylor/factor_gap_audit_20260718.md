@@ -334,12 +334,14 @@ hẳn kiến trúc BAL/LAG hiện tại (2 book + allocator + time/stop exit).
      n≈97 mã. `_BuySupport` loại ngành này.
    - **ICB 8633 = Real Estate Holding & Development** (BĐS: DIG, DXG, AGG, CEO, HDC, BCM…), n≈105 mã.
      `~SellBV` loại ngành này.
-   - **Lý do loại trừ KHÔNG ghi trong file — cần user xác nhận nếu muốn dùng lại.** Lý do CƠ HỌC hợp
-     lý (không phải ý đồ user): `~SellBV` bán khi `Close>1.85·BVPS` — BĐS phát triển dự án hợp pháp
-     giao dịch trên BVPS sổ sách (quỹ đất định giá thấp trên sổ) ⇒ tín hiệu P/BV misfire với BĐS,
-     nên loại. `_BuySupport` mua bật từ hỗ trợ, loại vật liệu xây dựng — có thể vì tính chu kỳ mạnh
-     tạo "hỗ trợ giả"/bẫy giá trị. **Đây là suy luận cơ học, KHÔNG phải ý đồ user đã nêu** — ghi rõ
-     để không ai trích dẫn như lý do chính thức.
+   - **Lý do loại trừ — user xác nhận 2026-07-21**: *"Tôi loại trừ nhóm tài chính và bất động sản
+     khu công nghiệp để tránh nhìn sai PB"* — đúng khớp suy luận cơ học ban đầu cho `~SellBV`/8633
+     (tài sản BĐS/tài chính hạch toán khác doanh nghiệp sản xuất thường ⇒ PB không so sánh trực
+     tiếp được, cùng bài học "domain-correctness trước khi cross-sectional" đã rút ra ở case PCF-
+     ngân hàng trong custom30V, xem [[feedback-finance-domain-grounding-not-pure-statistics]]).
+     **`_BuySupport`/2353 (vật liệu xây dựng) — user xác nhận KHÔNG chủ ý loại trừ** (2026-07-21:
+     "không chủ ý loại vật liệu xây dựng, không cần quan tâm") — có thể là artifact còn sót lại
+     từ quá trình tinh chỉnh cũ, không mang ý nghĩa thiết kế. Không cần điều tra thêm.
 3. **`_TradingValueMax` chứa điều kiện CHẾT `D_RSI < 83.0`.** Verify: `D_RSI ∈ [0,1]` (min 0, max 1,
    median 0.49) trên BQ ⇒ `D_RSI < 83.0` **luôn đúng** = no-op. Đây là **lỗi port thang đo** từ hệ
    cũ (RSI 0–100) sang cột `D_RSI` 0–1: trần chống-quá-mua dự kiến (~RSI<83) đã bị **vô hiệu âm thầm**
