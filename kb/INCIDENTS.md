@@ -3432,3 +3432,153 @@ Trading Daily. **KHÔNG** patch executor/plan/golive, **KHÔNG** xóa state (đ�
 
 **Chờ quyết định trước 13:00 ICT**: (A) patch executor seed_shared; (B) đảm bảo artifact tươi trước
 run_bot; (C) có re-seed state để mua bù 5 lệnh chiều nay (chạm executor/xóa state → cần user duyệt).
+
+**Resolution (cùng ngày, trước 13:00 ICT — job `Mafee_20260721_030327`, verify: `trading_bot/
+executor.py:143-152` đọc trực tiếp, code hiện tại KHỚP mô tả fix):** `Executor._load_state()`
+nhánh resume giờ `st.setdefault("parents", {})` rồi lặp `self.plan.orders` để backfill parent
+fresh-state (`filled=0, done=False, ...`) cho MỌI order thiếu trong state cũ — không động parent
+đã tồn tại (giữ nguyên `filled`/`done`/`children`). Verify trước khi áp dụng: `reconcile_parents_
+selfcheck.py` PASS, `dryrun_zalopay_0721.py` PASS trên pipeline thật (0 lệnh đặt), self-check 0
+VND (thay đổi thuần additive). Resume 13:00 ICT đặt bù đủ 5 lệnh CAPIT (xác nhận qua Spyros audit
+`EOD-mismatch-ZaloPay-07-21-audit-complete`: state cuối ngày `done=true` cả 6 parent, fill khớp
+plan). Bus question `escalate-ZaloPay-CAPIT-buys-missed-2026-07-21` đóng `[RESOLVED-BY-ACTION]`
+05:49:51Z (Wags). **Fix ĐÃ COMMIT** (qua auto-consolidate, không phải uncommitted như trạng thái
+lúc phát hiện). Root cause #1 (plan↔golive timing race, `run_bot` 09:05 chạy trước artifact regen
+09:29) — CHƯA có fix riêng, nhưng residual risk giờ THẤP vì fix #2 (backfill parent) làm resume an
+toàn ngay cả khi race này tái diễn (order thiếu ở state cũ tự backfill thay vì crash).
+
+---
+
+## 2026-07-21 — `eod_trading_report.sh` cross-account contamination: báo SAI mismatch cho CẢ
+## SpaceX lẫn ZaloPay (lần 3 của cùng 1 bug class, KHÔNG được ghi bởi ai trước retro này)
+
+**Vốn: AN TOÀN** (bug ở tầng BÁO CÁO/đối soát, không phải đường đặt lệnh — 0 lệnh sai, 0 tiền
+ảnh hưởng). **Chưa từng có bus event `error`/entry INCIDENTS.md nào cho việc này trước khi retro
+hôm nay tự phát hiện qua rà bus finding/answer** (Mafee `eod-mismatch-fix-confirmed-2026-07-21`
+12:19:06Z, `eod-report-account-filter-fix` 12:20:56Z; Spyros `eod-mismatch-ZaloPay-07-21-FALSE-
+POSITIVE` 12:14:52Z, `eod-mismatch-SpaceX-07-21-FALSE-POSITIVE` 12:17:11Z).
+
+**Triệu chứng**: `eod_trading_report.sh` (báo cáo EOD 15:00 ICT) báo mismatch broker_filled >
+state_filled cho 5 mã CAPIT (NCT/PVT/SAB/SIP/VNM) ở CẢ HAI account cùng lúc — trông giống double-
+buy nhưng không phải.
+
+**Root cause (xác nhận bằng số khớp 100%)**: `eod_trading_report.sh` tính `real_filled_by_ticker`
+bằng cách gộp TẤT CẢ record trong `dnse_raw_{plan_date}.jsonl` — file này CHUNG cho mọi account
+trong ngày (SpaceX + ZaloPay), không lọc theo `account_no`. Hôm nay CẢ 2 account đều mua đúng 5 mã
+CAPIT giống nhau → fill của account A bị cộng nhầm vào broker_filled của account B. Spyros verify:
+`373(ZaloPay)+500(SpaceX)=873` khớp 100% số mismatch báo cho NCT; tương tự cho 4 mã còn lại.
+
+**Fix (Mafee, cùng ngày, đã commit qua auto-consolidate 12:21:15Z, verify: `bin/eod_trading_
+report.sh` dòng ~180-193 hiện tại có block `_target_account_no` resolve từ `secrets/trading_bot_
+accounts.json` theo `label`, filter record `account_no != _target_account_no` trước khi tính
+`real_filled_by_ticker`)**: 643 record SpaceX bị skip đúng khi chạy cho ZaloPay; mismatch 5 mã
+biến mất; còn lại đúng 1 lệch thật (PVT +1 cổ phiếu, không liên quan cross-account). Spyros audit
+độc lập CONFIRMED FALSE POSITIVE cho cả 2 account.
+
+**3 câu hỏi bắt buộc:**
+
+a. **TÁI DIỄN — LẦN THỨ 3 của CÙNG 1 bug class** "đọc file `dnse_raw_{date}.jsonl` (shared-by-
+   date, không phải shared-by-account) mà không lọc `account_no`":
+   - Lần 1: `2026-07-06 — Cross-account balance contamination` (dòng ~1114), file `daily_nav_
+     snapshot.py`.
+   - Lần 2: `RETRO — 2026-07-19` (dòng ~3026), file `reconcile_equity.py` + `verify_account_
+     snapshot.py` — RETRO 07-19 đã tự gọi tên đây là "PATTERN, không phải lỗi đơn lẻ" và đề xuất
+     "grep toàn repo cho mọi file đọc `dnse_raw_` " làm prevention.
+   - Lần 3: hôm nay, file thứ 4 (`eod_trading_report.sh`) — **CHÍNH FILE NÀY đã được liệt kê
+     trong kết quả grep của RETRO 07-19** ("6 file đọc `dnse_raw_*`") nhưng RETRO 07-19 KẾT LUẬN
+     SAI rằng nó "an toàn by construction" cùng nhóm với `execution_quality_review.py`/
+     `executor.py` — thực ra KHÔNG đúng: `execution_quality_review.py`/`executor.py` an toàn vì
+     đọc field `accountNo` GẮN SẴN trên từng order record; `eod_trading_report.sh` lại tổng hợp
+     qua 1 dict `real_filled_by_ticker` KHÔNG giữ `account_no` — khác cách xử lý, cùng file gốc.
+     Grep đã chạy đúng, nhưng KHÔNG đủ sâu để phân biệt 2 cách dùng khác nhau của cùng 1 nguồn dữ
+     liệu — chỉ liệt danh sách file đọc `dnse_raw_`, không audit TỪNG file có thực sự filter hay
+     không.
+b. **Fix HOÀN CHỈNH cho lần này** (verify bằng số khớp 100% + Spyros audit độc lập cả 2 account),
+   nhưng **CÒN HỞ ở tầng cơ chế — giống hệt residual đã ghi 07-19, vẫn CHƯA làm**: (1) không có
+   automated regression test/selfcheck 2-account-interleaved cho BẤT KỲ file nào trong 4 file đã
+   biết đọc `dnse_raw_*` theo kiểu tổng hợp (không phải per-record accountNo); (2) `kb/coding_
+   guidelines.md` §5/§6 (đề xuất từ RETRO 07-19: "thêm 1 dòng rule chung — file mới đọc `dnse_
+   raw_{date}.jsonl` phải lọc theo account_no, không lấy bản ghi cuối cùng") **VẪN CHƯA ĐƯỢC
+   VIẾT** — verify: `grep -n "dnse_raw_{date}\|shared-by-date" kb/coding_guidelines.md` → 0 kết
+   quả. Đây CHÍNH LÀ prevention đã đề xuất 2 ngày trước, vẫn treo.
+c. **PATTERN — đây là RETRO CALLOUT THỨ 2 của đúng pattern này** (lần 1 = RETRO 07-19). Theo
+   bước 5/10 của quy trình retro: khi 1 pattern đã bị gọi tên ở 1 RETRO trước và VẪN tái diễn ở
+   RETRO sau (dù có 1 ngày sạch — 07-20 — xen giữa), đây là tín hiệu prevention hiện tại CHƯA ĐỦ
+   MẠNH, cần escalate thay vì lặp lại đúng câu khuyên cũ. Xem escalate bên dưới.
+
+| # | Hạng mục | Phân loại | Nguồn gốc | Người ghi chép |
+|---|---|---|---|---|
+| 1 | `eod_trading_report.sh` cross-account contamination — file THỨ 4 cùng bug class, đã từng bị grep tới ở RETRO 07-19 nhưng đánh giá sai là "an toàn" | report-data-provenance | RETRO 07-19's grep-sweep chỉ kiểm tra "có đọc `dnse_raw_*` không", không kiểm tra "có giữ/lọc `account_no` qua bước tổng hợp không" — quy trình audit nông hơn cần thiết, không phải lỗi cá nhân | Mafee (fix + finding `eod-report-account-filter-fix`, 12:20:56Z) + Spyros (audit độc lập, `eod-mismatch-*-FALSE-POSITIVE`, 12:14-12:17Z); KHÔNG ai ghi vào `kb/INCIDENTS.md` trước retro hôm nay — retro tự bổ sung qua bus sweep |
+
+**Prevention MẠNH HƠN — 2 đề xuất cũ (grep toàn repo, selfcheck 2-account) đã KHÔNG ĐỦ vì lần
+này bug sống sót đúng NGAY SAU KHI grep đã chạy**, cần thêm 1 lớp không dựa vào con người tự nhớ
+đọc kỹ:
+1. **Viết rule vào `kb/coding_guidelines.md` NGAY** (không phải "nên làm" nữa — đã trễ 2 ngày kể
+   từ khi đề xuất) — nội dung tối thiểu: "bất kỳ script đọc `dnse_raw_{date}.jsonl` để TỔNG HỢP
+   (sum/count qua nhiều record) phải filter `account_no`/`accountNo` TRƯỚC khi gộp; nếu chỉ đọc
+   field có sẵn trên từng record (không tổng hợp chéo) thì an toàn by construction — 2 trường hợp
+   khác nhau, phải tự hỏi mình đang ở trường hợp nào".
+2. **1 selfcheck DÙNG CHUNG cho cả 4 file** (`daily_nav_snapshot.py`, `reconcile_equity.py`,
+   `verify_account_snapshot.py`, `eod_trading_report.sh`) — dựng 1 file `dnse_raw_test.jsonl` giả
+   lập 2 account trộn lẫn, assert mỗi file chỉ tính đúng account được yêu cầu. Không cần 4
+   selfcheck riêng — 1 file test data dùng chung, 4 lần gọi.
+3. **Escalate bus question** (đúng bước 10) — xem bên dưới, vì đây là lần callout RETRO thứ 2 của
+   đúng pattern, dù đã có prevention đề xuất từ lần 1.
+
+---
+
+## RETRO — 2026-07-21: 2 sự cố, 1 pattern tái diễn (RETRO callout lần 2 — escalate), 1 lượt
+## thiếu ScheduleWakeup (4,3%, tự phục hồi, không cần entry riêng)
+
+**Bằng chứng đã kiểm tra (không suy đoán):**
+- `grep '^## 2026-07-21' kb/INCIDENTS.md` → 1 entry sẵn có trước retro (`ZaloPay run_bot rc=1`),
+  còn thiếu resolution — đã bổ sung ở trên (Mafee fix, đã commit, verify trực tiếp code).
+- Toàn bộ bus event `ts` bắt đầu `2026-07-21` (mọi agent inbox, `event_type` ∈ {error, finding}):
+  ~55 event. Phần lớn là finding R&D bình thường (Taylor: CAPIT hybrid cap, DC-book report, beta/
+  size-premium, LAG %ADV gate, R3 re-pin, ticker_prune governance — tất cả là NGHIÊN CỨU có
+  verdict rõ ràng qua quant-skeptic, không phải sự cố vận hành). 2 event/luồng thật là sự cố vận
+  hành: (1) `Mafee error bot-fail` ZaloPay 02:43:20Z → khớp entry `ZaloPay run_bot rc=1` đã có;
+  (2) chuỗi `eod-mismatch-*` (Mafee/Spyros) → **GAP mới, đã thêm entry ở trên**.
+- `bin/wakeup_audit.py --since 2026-07-21`: **1/23 lượt dispatch `--bg` (4,3%) thiếu
+  ScheduleWakeup**, 0/1 dạng bundle (không phải trường hợp nguy hiểm nhất theo MIKE.md §8 — lượt
+  MISS này chỉ đi trước 1 câu hỏi ngắn "Job đã xong, đọc kết quả đầy đủ", không phải văn xuôi
+  dài). Kiểm tra transcript trực tiếp (`cc23ea89...jsonl`, 08:34:02Z): dispatch --bg xảy ra ngay
+  trước khi session bị compact ("continued from a previous conversation"); user hỏi lại cùng câu
+  ~5 phút sau (08:39:02Z), Mike tự `jobs.sh status` (không phải ScheduleWakeup) và thấy job đã
+  xong, đọc kết quả ngay. **Tự phục hồi hoàn toàn trong <5 phút, không có tác động thật** — tỷ lệ
+  4,3% thấp hơn nhiều so với 07-20 (25,0%) và 07-19 (không đo). Không đủ nghiêm trọng để tạo entry
+  riêng theo tinh thần "artifact thật, không phải điểm số tuân thủ" — nhưng ghi nhận ở đây để
+  không mất dấu xu hướng (3 ngày gần nhất: 07-19 không đo, 07-20 25,0%, 07-21 4,3% — CẢI THIỆN,
+  không phải xấu đi, có thể do compaction ngẫu nhiên hơn là process lỗi lặp lại).
+
+**2 sự cố** (bảng tổng hợp, phân loại + nguồn gốc — xem chi tiết đầy đủ ở 2 entry phía trên,
+không lặp lại nội dung):
+
+| # | Hạng mục | Mới/Tái diễn | Fix | Phân loại | Nguồn gốc |
+|---|---|---|---|---|---|
+| 1 | ZaloPay run_bot rc=1 — 5 lệnh CAPIT mất, executor `seed_shared` KeyError | Tái diễn (dạng) — cùng họ "state/plan desync khi 1 fail-safe loại tạm order rồi plan đầy đủ trở lại mà `created_at` không đổi" | HOÀN CHỈNH cho lần này (backfill parent, verify 2 lớp, đã commit); root cause #1 (race plan↔golive) còn hở nhưng risk đã hạ nhờ fix #2 | job-monitoring/lifecycle (resume logic) + scheduling-timing (race điều kiện) | Winston chẩn đoán (`Winston_20260721_024320`) → Mafee fix (`Mafee_20260721_030327`, đã ghi bus) → **Mike/retro là người đầu tiên ghi resolution vào INCIDENTS.md** (gap báo cáo nhỏ, không phải gap phát hiện) |
+| 2 | `eod_trading_report.sh` cross-account contamination (lần 3 cùng bug class) | **TÁI DIỄN — lần thứ 3, RETRO callout lần thứ 2** | HOÀN CHỈNH cho lần này; prevention từ lần 2 (grep + selfcheck + rule) vẫn CHƯA làm | report-data-provenance | Mafee + Spyros ghi bus đầy đủ (12:14-12:21Z) nhưng **KHÔNG ai ghi vào `kb/INCIDENTS.md`** trước retro hôm nay — retro tự phát hiện qua bus sweep bước 2 |
+
+**Điểm quan trọng nhất hôm nay — ĐÃ ĐẠT NGƯỠNG ESCALATION BƯỚC 10 cho pattern cross-account-
+contamination**: RETRO 07-19 là lần callout đầu tiên (đề xuất 3 prevention: rule trong coding_
+guidelines.md, selfcheck 2-account, grep toàn repo). Grep ĐÃ chạy (07-19) nhưng nông — bỏ sót
+đúng cách `eod_trading_report.sh` dùng dữ liệu. Rule + selfcheck ĐỀU CHƯA làm. Hôm nay (RETRO thứ
+2 gọi tên pattern này) bug tái diễn ở CHÍNH file đã bị grep quét qua mà không phát hiện ra. Đây
+đúng là điều kiện bước 10 mô tả: "pattern đã xuất hiện ở RETRO ngày trước đó VẪN tái diễn hôm nay
+dù đã có Prevention — prevention cũ chưa đủ mạnh". Escalate bus question ngay dưới đây (bước 10).
+
+**Việc còn treo sang ngày mai (kế thừa, verify lại — không suy đoán):**
+- Bus question `retro-pattern-recurring-headless-wake-assumption-3` (07-20) — **vẫn PENDING**,
+  verify: `grep -l` trong `bus/inbox/Mike.jsonl` chỉ thấy `question`, không có `answer` khớp
+  topic. Chưa hết hạn để escalate thêm (mới 1 ngày).
+- `ops_health_check.sh:188` bug so khớp topic tuyệt đối (07-20) — verify: dòng `rec.get("topic")
+  not in answers` **vẫn y nguyên**, `git log` file dừng ở 07-17. CÒN MỞ, không khẩn (chỉ noise
+  dispatch ~2/ngày, cooldown 1h giới hạn thiệt hại).
+- Dọn crontab paper-trading lạc hậu (diff `Winston_20260712_151206`) — verify: `crontab -l` vẫn
+  còn dòng paper-main cũ, chưa áp dụng. Không đổi so với các retro trước.
+- **MỚI — ưu tiên cao**: viết rule `kb/coding_guidelines.md` (dnse_raw_ shared-by-date filter) +
+  1 selfcheck dùng chung 4 file — xem Prevention ở entry #2 phía trên. Đây là follow-up đã trễ 2
+  ngày, không nên trễ thêm lần 3.
+- Quyết định user cho 2 câu hỏi cũ `retro-pattern-recurring-data-registry-accuracy-5days` (07-15)
+  và `retro-pattern-recurring-joblifecycle-timeout-3` (07-14) — verify lại: vẫn không tìm thấy
+  answer trên bus, đã >6 ngày không phản hồi.
