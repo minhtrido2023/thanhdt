@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v1294)
+# Mike fleet — context pack (v1295)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-21T16:59:43] quant-skeptic/verification — ✅ CONFIRMED VERIFY: Re-pin R3 sau khi sua loi engine liq<=0 (backtest tung MUA TRON ma khong thanh khoan): {"finding_topic": "Re-pin R3 sau khi sua loi engine liq<=0 (backtest tung MUA TRON ma khong thanh khoan)", "verdict": "CONFIRMED", "confidence": "high", "checks …
 - [2026-07-21T17:03:12] Taylor/decision — Gate LAG %ADV LIVE (commit) + dinh chinh baseline R3 sau khi sua loi engine liq<=0: {"buoc_b_TRUOC": {"engine_fix": "simulate_holistic_nav.liquidity_require_positive + env LIQ_ZERO_BLOCK=lag|both (pt_v23_audit_2014.py), default OFF => CSV canon …
 - [2026-07-21T17:33:00] Taylor/finding — Loc thanh khoan LAG o TANG TIN HIEU (golive_recommend_v23) — TMG bi loai, vốn khong nam im: {"topic": "Signal-layer liquidity filter cho book LAG (user quyet 2026-07-21): loai ung vien Volume_3M_P50<=0/khong do duoc ADV NGAY o tang chon ma, khong chi c …
 - [2026-07-21T17:39:08] quant-skeptic/verification — ⚠️ INCONCLUSIVE VERIFY: Loc thanh khoan LAG o TANG TIN HIEU (golive_recommend_v23) — TMG bi loai, vốn khong nam im: {"finding_topic": "Loc thanh khoan LAG o TANG TIN HIEU (golive_recommend_v23) — TMG bi loai, vốn khong nam im", "verdict": "INCONCLUSIVE", "confidence": "low",  …
@@ -11,6 +10,7 @@
 - [2026-07-21T17:49:27] quant-skeptic/verification — ❌ REFUTED VERIFY: DINH CHINH sau quant-skeptic REFUTED: co che thay the LAG la SLOT+VON tuc thi, va khe ho live thieu tran vi the LAG: {"finding_topic": "DINH CHINH sau quant-skeptic REFUTED: co che thay the LAG la SLOT+VON tuc thi, va khe ho live thieu tran vi the LAG", "verdict": "REFUTED", " …
 - [2026-07-21T17:53:39] Taylor/finding — Loc thanh khoan LAG tang tin hieu — ban dinh chinh #2 (co che THAT su la VON, tran slot 12 la cong RO): {"topic": "Lan sua THU HAI cua PHAN DIEN GIAI (code chuc nang KHONG doi mot dong tu ban da PASS 6/7 check). Wire: golive_recommend_v23.py goi lag_filter_illiqui …
 - [2026-07-21T17:59:57] quant-skeptic/verification — ✅ CONFIRMED VERIFY: Loc thanh khoan LAG tang tin hieu — ban dinh chinh #2 (co che THAT su la VON, tran slot 12 la cong RO): {"finding_topic": "Loc thanh khoan LAG tang tin hieu — ban dinh chinh #2 (co che THAT su la VON, tran slot 12 la cong RO)", "verdict": "CONFIRMED", "confidence" …
+- [2026-07-21T18:02:23] Taylor/decision — Loc thanh khoan LAG TANG TIN HIEU — COMMIT 4b7aaa1, quant-skeptic CONFIRMED/high: {"trang_thai": "XONG + COMMIT (4b7aaa1). quant-skeptic CONFIRMED/high, log mike/logs/verify_20260721_175346.log. Day la attempt 2 cua job — attempt 1 da viet co …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -76,11 +76,30 @@ bình thường KHÔNG bị chạm; TMG sẽ bị CHẶN HẲN (ADV=0) nếu ai 
 vốn quay vòng LAG, nhóm này LỖ) — đã sửa (default OFF, canonical không đổi). A/B
 contemporaneous **27,22% → 31,33% CAGR (+4,11pp)**, LOO 13/13 dương, quant-skeptic
 CONFIRMED/high. ⚠️ **Số chính thức VẪN là 27,84%**; con số trung thực để kỳ vọng là **khoảng
-[~27,2% ; 31,3%]** — cận trên chỉ đạt nếu lọc `liq<=0` ở TẦNG TÍN HIỆU (`golive_recommend_v23.py`),
-gate hiện chặn ở tầng executor nên tiền nằm im thay vì chuyển sang ứng viên kế tiếp. Re-pin
-chuẩn còn chờ `data/bq_cache` trở lại `verified:true` (phụ thuộc `ticker_prune` corruption
-còn treo). Anchor drawdown mới nên dùng ~−30% (bootstrap 5th-pct), không phải −19%.
-**Cần user quyết (chưa làm):** có lọc `liq<=0` ở tầng tín hiệu không.
+[~27,2% ; 31,3%]**. Re-pin chuẩn còn chờ `data/bq_cache` trở lại `verified:true` (phụ thuộc
+`ticker_prune` corruption còn treo). Anchor drawdown mới nên dùng ~−30% (bootstrap 5th-pct),
+không phải −19%.
+
+**✅ ĐÃ XONG 2026-07-22 (job `Taylor_20260721_172103`) — lọc thanh khoản LAG ở TẦNG TÍN HIỆU
+(user quyết 2026-07-21), commit `4b7aaa1`.** `golive_recommend_v23.py` gọi `lag_filter_illiquid()`
+(module mới `lag_liquidity_filter.py`) NGAY TRƯỚC bước chọn/xếp hạng ứng viên LAG ⇒ mã ADV≤0/
+thiếu/cũ >30 ngày không còn thành mục tiêu, vốn tự chảy sang event LAG kế tiếp thay vì nằm im.
+Phạm vi = **CHỈ book LAG** (đo thật: BAL đã có `liq>=1e9` cứng; CAPIT pool 0/26.277 dòng ADV≤0
++ `capit_adv_caps` fail-closed; PARK custom30V min ADV 13,1 tỷ). Self-check 13/13 offline +
+19/19 live (TMG loại, TRC giữ); quant-skeptic **CONFIRMED/high** (`logs/verify_20260721_175346.log`,
+sau 2 vòng REFUTED — cả 2 chỉ refute phần DIỄN GIẢI, code không đổi).
+
+⚠️ **CON SỐ CAGR KỲ VỌNG: GIỮ NGUYÊN KHOẢNG [~27,2%; ~31,3%], KHÔNG chốt về 31,33%.** Lý do (quan
+trọng, đừng bỏ qua): quant-skeptic đo được TREAT vào lệnh **+30,1%** nhưng vị thế HOÀN TẤT lại
+**−16,3%**, tỷ lệ ABANDONED_REFUND **59,2% → 73,8%**. "Vốn chảy sang event kế tiếp" và "book không
+fill nổi mã LAG ở quy mô 25B" để lại **cùng dấu vết CSV** — chưa tách được. Nếu vế sau đúng thì
++4,11pp là hiện vật mô hình fill, không phải edge. Bộ lọc vẫn đúng logic (không mua được thì đừng
+đặt mục tiêu) nhưng **đừng dùng +4,11pp làm cơ sở kỳ vọng**. Số chính thức VẪN **27,84%**.
+
+**Còn treo (cần user duyệt, Taylor KHÔNG tự sửa):** đường LIVE không có trần vị thế nào cho book
+LAG (`MAX_POS=12` chỉ áp cho BAL). Backtest có trần nhưng là **cổng RÒ** (chỉ check tại first-fill
+trên vị thế đã hoàn tất) ⇒ concurrency thực 16-17, không phải 12. Nếu mirror sang live phải neo
+vào ~16-17, **không copy hằng số 12**.
 
 ## Due-diligence MẶC ĐỊNH cho MỌI ứng cử viên mua — mandate mới (user, 2026-07-21)
 User chỉ đạo: bất kỳ mã nào trở thành ứng cử viên mua (mọi book: BAL/LAG/CAPIT/DC-book/
