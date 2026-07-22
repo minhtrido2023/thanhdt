@@ -2,8 +2,11 @@
 
 Job `Taylor_20260722_033547` · 2026-07-22 · Taylor (Quant, lead)
 Tiền thân: `ticker_prune_universe_governance.md` (job `Taylor_20260721_162005`) + phản hồi bq_admin.
-**Trạng thái: ĐỀ XUẤT QUYẾT ĐỊNH. Chưa implement dòng code nào. Chờ Winston (khả thi vận hành) +
-quant-skeptic review → user duyệt.**
+~~**Trạng thái: ĐỀ XUẤT QUYẾT ĐỊNH. Chưa implement dòng code nào.**~~
+✅ **TRẠNG THÁI CUỐI (2026-07-22): DỰ ÁN ĐÃ ĐÓNG.** Q1-Q9 duyệt · G1/G2/G2b xong · P1-P4 cutover
+xong · G6 re-pin xong (pit 27,16% vs prune 27,95% cùng vintage, Δ −0,79pp). **Đọc §9 trước** để lấy
+trạng thái cuối + danh sách hạng mục còn mở (quyết định pin production, G7/G8/G9, P5/P6); §5.4 cho
+kết quả re-pin. Phần còn lại của tài liệu giữ nguyên làm dấu vết quá trình.
 
 ---
 
@@ -904,6 +907,47 @@ kiểm chứng trong 2-3 tuần tới.
 - Ứng viên thứ hai: mọi kết luận về mã **ngoài** `ticker_prune` (TMG `Volume_3M_P50=0`, IVS) — chính
   là các mã mà universe mới định nghĩa lại tư cách.
 
+### 5.4 ✅ KẾT QUẢ RE-PIN CUỐI CÙNG (G6 — XONG 2026-07-22)
+
+Jobs: `Taylor_20260722_151919` (chạy) + `Taylor_20260722_154334` (ghi nhận). Điều kiện đo: **cache
+`data/bq_cache` ĐÓNG CỨNG**, manifest `verified: true`, **14/14 bảng**, `verified_at
+2026-07-22T14:22:24Z`. 3 chân khác nhau đúng 2 biến `UNIVERSE_SRC`/`EXP_TAG`; driver
+`data/g6_repin/chain_after_resync_v2.sh`; logs `data/g6_repin/cache_v2_{control,control2,pit}.log`.
+
+| Chân | Universe | Vintage | Final NAV | CAGR | Sharpe | MaxDD | Calmar |
+|---|---|---|---|---|---|---|---|
+| **control_v2c** | `ticker_prune` | cache 07-22 | 1.077,68B | **27,95%** | 1,85 | −18,4% | 1,52 |
+| **control_v2c2** (chạy lại) | `ticker_prune` | cache 07-22 | 1.077,68B | **27,95%** | 1,85 | −18,4% | 1,52 |
+| **pit_v2c** | **`universe_pit`** | cache 07-22 | 998,09B | **27,16%** | 1,81 | −18,1% | 1,50 |
+| *(tham chiếu)* pin 2026-07-12 | `ticker_prune` | cache 07-12 (**khác vintage**) | — | 27,84% | 1,84 | −18,2% | 1,53 |
+
+Self-check **0 VND** (BAL+LAG, cash-flow identity + final-NAV identity) ở cả 3 chân.
+
+**H1 vs H2 — đã tách xong.** Hai chân control khớp **tuyệt đối** ⇒ **H1 LOẠI** ("engine không tất
+định" — sai); **H2 XÁC NHẬN**: chênh 0,37pp giữa 2 lần chạy control trên **live BQ** sáng cùng ngày
+(job `Taylor_20260722_112850`) là do **dữ liệu BQ trôi giữa các lần chạy khác giờ**. Engine ĐÃ được
+xác nhận tất định trên cache đóng cứng. Hệ quả: delta pit đo lần này là tín hiệu thật, không còn bị
+nhiễu-vintage che (lần đo live-BQ trước: delta 0,49pp < nhiễu 0,37pp ⇒ không kết luận được).
+
+**⚠️ SO SÁNH CÔNG BẰNG = `pit_v2c` vs `control_v2c` (CÙNG VINTAGE), KHÔNG phải vs pin cũ 27,84%**
+(khác vintage ⇒ trộn hiệu ứng universe với hiệu ứng dữ liệu trôi).
+**Δ (pit − prune, cùng vintage): CAGR −0,79pp · Sharpe −0,04 · MaxDD tốt hơn nhẹ (−18,1 vs −18,4) ·
+Calmar −0,02.**
+
+**Kết luận pit-vs-prune:** R3 trên `universe_pit` **THẤP HƠN** `ticker_prune` cùng vintage 0,79pp —
+**đúng hướng đã pre-register ở §8.5** (*"nhiều khả năng THẤP HƠN; nếu CAO HƠN mới là dấu hiệu nghi
+ngờ"*). **KHÔNG điều tra thêm.** Phần chênh đọc là *bias vòng tròn/look-ahead của `ticker_prune` bị
+khử*, không phải `universe_pit` chọn kém hơn (MaxDD còn tốt hơn nhẹ).
+
+**❗Quyết định production CHƯA có:** có cutover **baseline R3 chính thức** sang `universe_pit`
+(27,84% → 27,16%) hay không **KHÔNG thuộc phạm vi G6** — cần **escalate user riêng**. Cho tới lúc đó
+**số chính thức vẫn là 27,84%**, trích dẫn kèm ghi chú đo-lại-cùng-vintage 27,16% và khoảng
+[~27,2%; ~31,3%] (vụ LAG %ADV). Đã ghi đầy đủ vào `data/results_registry.md`.
+
+*(Về nhãn `PROVISIONAL` đề xuất ở §5.2/§6-G0/§9-Q3: **chưa từng được ghi vào `results_registry.md`**
+— grep xác nhận 0 hit. Không có nhãn nào sót lại cần gỡ; §5.4 này thay thế toàn bộ cảnh báo tạm đó
+bằng số đo thật.)*
+
 ---
 
 ## 6. TIMELINE & EFFORT
@@ -1021,7 +1065,37 @@ khoảng trống này**, và là lý do tôi từ chối viết builder không c
 
 ---
 
-## 9. CẦN USER DUYỆT GÌ TRƯỚC KHI IMPLEMENT
+## 9. ✅ DỰ ÁN ĐÃ ĐÓNG (2026-07-22) — trạng thái cuối + phần duyệt (lưu trữ)
+
+> **DỰ ÁN `ticker_prune` → `universe_pit` ĐÓNG HOÀN TOÀN ngày 2026-07-22** (job cuối
+> `Taylor_20260722_154334`). Bảng dưới là trạng thái cuối cùng; phần "cần user duyệt" ban đầu giữ
+> nguyên bên dưới làm dấu vết lịch sử (đã duyệt xong toàn bộ Q1-Q9 ngày 2026-07-22).
+
+| Hạng mục | Trạng thái cuối | Bằng chứng |
+|---|---|---|
+| **Q1-Q9** — phê duyệt phương án | ✅ **USER DUYỆT TOÀN BỘ 2026-07-22** (Q9 theo khuyến nghị **Q-A + Q-C, KHÔNG Q-B**) | §9 bảng dưới |
+| **G1** — builder + backfill | ✅ XONG — `mike/bin/build_universe_pit.py`, selfcheck **15/15**, bảng `tav2_mike.universe_pit` 4.089.541 dòng / 6.339 phiên, 0 trùng | §10.1 |
+| **G2 / G2b** — kiểm định recall + lớp chất lượng | ✅ XONG — recall median-60 tự tính **KHÔNG tụt** (98,6-99,1%), không hiệu chuẩn lại B3; G2b → user chốt **A′ + Q-C**, Q-C đã implement (`universe_pit_quality`) ⇒ **cổng cứng Q9 MỞ** | §10.2, §3.2c |
+| **P1** — `due_diligence.py` | ✅ **CUTOVER XONG** — commit `b2d0502`, selfcheck 20/20 | §4.2 |
+| **P2** — `custom_basket.py` (custom30V, CHẠM TIỀN THẬT) | ✅ **CUTOVER XONG** — commit `ce7d457`, user duyệt, selfcheck 13/13, rổ LIVE **byte-identical**, rollback 1 chữ `UNIVERSE_SOURCE` | §4.3b |
+| **P3** — `golive_recommend_v23.py` panel D1 | ✅ **CUTOVER XONG** — commit `0bfbdfe`, user duyệt, selfcheck 14/14, VHM-look-ahead đã fix, A/B trọn script byte-identical ⇒ **0 tác động LIVE** | §10.3 |
+| **P4** — CAPIT breadth (C-conserv) | ✅ **CUTOVER XONG** — commit `dcee252`, **quant-skeptic CONFIRMED**, `CAPIT_BREADTH_SOURCE="pit"` top-250 gate 0,31, selfcheck 26/26, A/B live 07-22 **không đổi 1 đồng**. ⚠️ **`CAPIT_POOL_SOURCE` + ADV cap CỐ Ý còn ghim `ticker_prune`** (pool `pit` sẽ thêm HVT vào rổ đang giải ngân — là ĐỔI CHIẾN LƯỢC, không gộp vào migration) | §4.4-P4 |
+| **G6** — re-pin R3 | ✅ **XONG** — control 27,95% vs **pit 27,16%** cùng vintage (Δ **−0,79pp**), 2 chân control khớp tuyệt đối ⇒ H1 loại / H2 xác nhận; đúng hướng pre-register §8.5 | **§5.4** |
+| Nhãn `PROVISIONAL` (Q3/G0) | ✅ **KHÔNG CÒN SÓT** — grep `results_registry.md` = 0 hit (nhãn này thực tế chưa từng được ghi vào registry); §5.4 thay thế bằng số đo thật | §5.4 |
+
+**Còn mở SAU khi dự án migration đóng (hạng mục RIÊNG, không chặn việc đóng dự án — CHƯA làm trong job này):**
+
+| # | Việc | Trạng thái |
+|---|---|---|
+| **Quyết định production** | Có cutover **baseline R3 chính thức** sang `universe_pit` (27,84% → 27,16%) hay không | 🔴 **CHƯA QUYẾT — cần escalate user riêng.** Taylor KHÔNG tự quyết. Số chính thức vẫn **27,84%** |
+| **G7** | Rà soát N-trial tuần qua (§5.3) — phân loại giữ/chạy-lại; ứng viên rõ nhất: **lọc thanh khoản LAG** (`lag_filter_illiquid`, commit `4b7aaa1`) chồng lớp với B3/B4 | 🔶 **CÒN TREO** — chưa làm |
+| **G8** | P6 gate + `data_registry.md` (prune→TRAP, pit→CANONICAL) + `cron_registry.md` + `coding_guidelines.md` + `universe_ruleset.md` v1 | 🔶 **LÀM MỘT PHẦN** — `universe_pit`/`universe_pit_quality` ĐÃ có entry **CANONICAL** trong `data_registry.md`; **nhưng** entry `ticker_prune` vẫn ghi *"ĐANG XEM XÉT, CHƯA CHỐT"* và §"Quy tắc chọn universe" vẫn trỏ backtest→`ticker_prune`. Còn phải cập nhật |
+| **G9** | quant-skeptic full review toàn bộ dự án | 🔶 **CÒN TREO** — từng phần chạm tiền thật (P2/P3/P4) đã qua skeptic riêng; review tổng chưa chạy |
+| **P5/P6** | `CAPIT_POOL_SOURCE` cutover + gate vận hành cấm đọc `ticker_prune` | 🔶 **CÒN TREO** — chặn bởi (a) `capit_fired=false` và (b) user duyệt riêng sàn thanh khoản pool |
+
+---
+
+### 9.1 (lưu trữ) Bảng phê duyệt ban đầu — ĐÃ DUYỆT TOÀN BỘ 2026-07-22
 
 | # | Quyết định | Khuyến nghị Taylor |
 |---|---|---|
