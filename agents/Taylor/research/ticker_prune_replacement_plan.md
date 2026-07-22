@@ -523,8 +523,15 @@ KHÔNG còn liên quan — verify giả định này."*
 **Kết quả verify: giả định SAI. Đã có xác nhận trực tiếp từ bq_admin.**
 
 > **CẬP NHẬT 2026-07-22 04:12 ICT — trả lời Q8 của bq_admin** (Discord, kênh technical analysis),
-> nguyên văn: *"Nó chỉ là config của bigquery và được apply ở toàn bộ các bảng. Logic ở đây chỉ là
-> một script update lại toàn bộ dữ liệu mới và chỉ được chạy một lần để initial."*
+> nguyên văn (**bản đầy đủ**, do Mike gửi lại 2026-07-22 — không đổi kết luận, chỉ rõ hơn bản tóm
+> tắt trước): *"Nó chỉ là config của bigquery và được apply ở toàn bộ các bảng. Logic ở đây chỉ là
+> một script update xóa và update lại toàn bộ dữ liệu và chỉ được chạy một lần với mục đích là
+> INITIAL table và dữ liệu."*
+>
+> Bản đầy đủ làm rõ thêm một chi tiết **củng cố** kết luận 2 bên dưới: script không chỉ "update lại"
+> mà **XÓA rồi update lại** toàn bộ dữ liệu. Đó đúng là ngữ nghĩa `WRITE_TRUNCATE` — mọi dòng lịch
+> sử biến mất trước khi được ghi lại, nên một lần chạy lại ngoài ý muốn là mất dữ liệu toàn bảng,
+> không phải sửa lệch vài dòng.
 >
 > Hai điều được chốt:
 > 1. **`max_bad_records=10` áp cho MỌI bảng, gồm cả `tav2_bq.ticker`.** Không còn là "có thể có" —
@@ -624,11 +631,83 @@ khoảng trống này**, và là lý do tôi từ chối viết builder không c
 | ~~1~~ | ~~Lấy lại văn bản gốc Q&A bq_admin~~ | **XONG** — file có sẵn, đã đọc, §7 cập nhật (§0) |
 | ~~2~~ | ~~Winston đánh giá khả thi vận hành~~ | **XONG** — khả thi, chi phí ~0; cảnh báo `ticker` cũng bị ghi đè lịch sử (§8.6) |
 | ~~3~~ | ~~quant-skeptic review, soi riêng §2.2~~ | **XONG — REFUTED (cao) đúng §2.2.** Đã sửa: §2.2 (tautology), §2.4 (test thay thế), §2.2c (2,74×), §7 (Q8 có trả lời), §8.3 (n=3) |
+| ~~4~~ | ~~User duyệt Q1-Q9~~ | **XONG 2026-07-22** — duyệt toàn bộ; Q9 theo khuyến nghị **Q-A + Q-C, KHÔNG Q-B** |
+| ~~5~~ | ~~**G1** — viết builder + selfcheck + backfill~~ | **XONG 2026-07-22** (job `Taylor_20260722_044614`) — xem dưới |
+| ~~6~~ | ~~**G2** — kiểm định recall bằng median-60 TỰ TÍNH~~ | **XONG — KHÔNG tụt.** Không phải hiệu chuẩn lại B3 |
 
-**Còn lại trước G1:**
-1. Trình user quyết **Q1-Q7 + Q9** (Q8 đã đóng). **Q9 là mục mới và quan trọng nhất** — cổng cứng
-   lớp chất lượng ex-ante (§3.2b), sinh ra từ §2.4.
-2. Chạy **G2b** (đo độ rò qua golden floor) — có thể chạy độc lập, không chặn bởi G1.
-3. **Không cần dispatch quant-skeptic vòng 2** cho các sửa đổi ở trên (chúng chỉ **hạ** mức tự tin
-   và **siết** thêm cổng, không nới lỏng gì). **Cần** skeptic lại nếu G2b dẫn tới đề xuất thêm tham
-   số chất lượng vào tầng universe (Q-B) — đó là thay đổi hành vi thật.
+### 10.1 G1 — ĐÃ XONG (2026-07-22)
+
+**Artifact:**
+- Builder: `mike/bin/build_universe_pit.py` (ruleset_version = 1)
+- Selfcheck: `mike/bin/build_universe_pit_selfcheck.py` — **15 PASS / 0 FAIL**
+- Bảng: **`lithe-record-440915-m9.tav2_mike.universe_pit`** — dataset **`tav2_mike`** (RIÊNG của đội,
+  KHÔNG phải `tav2_bq`). Lý do đặt ngoài `tav2_bq`: bản đầy đủ câu trả lời Q8 (§7) xác nhận script
+  của bq_admin **XÓA rồi ghi lại toàn bảng**; bảng bất biến của ta không được nằm trong tầm với của
+  một lệnh TRUNCATE ta không kiểm soát.
+
+**Kết quả backfill (2000-07-28 → 2026-07-21):** 4.089.541 dòng · 6.339 phiên · 1.463.992 dòng
+`in_universe=TRUE` · **0 cặp (time,ticker) trùng lặp** (đã verify bằng query độc lập).
+
+**Đã kiểm chứng:**
+| Kiểm tra | Kết quả |
+|---|---|
+| B8 trip đúng 3 case (lệch >±15%, dòng thô <90%, double-run) | PASS (A2/A2b/A3/A4/A5) + PASS biên (A2c 15,0% và A3b 90,0% KHÔNG chặn nhầm) |
+| Idempotent LIVE (chạy lại ngày đã có) | **PASS** — `--date 2026-07-21` → `REFUSED / B8_DUPLICATE`, không ghi thêm dòng nào |
+| Atomic write (kill trước `os.replace`) | PASS — file đích còn nguyên bản cũ, không có file dở dang |
+| Đọc LIVE không qua cache | `BQ_LOCAL_CACHE` pop process-local ngay đầu file (guidelines §11) |
+
+⚠️ **Một sự cố THẬT trong chính G1, đã sửa và đáng ghi lại:** lần backfill đầu bị kill lúc timeout,
+nhưng job `INSERT` phía BigQuery **vẫn chạy tiếp và commit SAU** khi lần chạy lại đã đọc `MAX(time)`
+⇒ dữ liệu 2022 bị ghi **hai lần**. Kiểm tra `MAX(time)` là kiểm tra nguồn-sự-thật-bên-ngoài, nhưng
+nó **không thấy được job đang bay**. Đã sửa bằng **`job_id` tiền định** (`_run_dml`): BigQuery từ
+chối tạo job trùng id, ta bắt `Conflict` rồi bám vào chính job cũ thay vì chạy lệnh thứ hai. Bảng
+hiện tại đã dựng lại sạch (0 trùng). Đây đúng là ca mà `coding_guidelines.md` §5 mô tả — và cho thấy
+"kiểm tra state bên ngoài" một mình **không đủ** khi side-effect là bất đồng bộ.
+
+### 10.2 G2 — kiểm định median-60 TỰ TÍNH: recall KHÔNG tụt
+
+Bước bắt buộc ở §3.2b (chạy lại bảng §2.2 nhưng dùng **median 60 phiên tự tính từ `Price × Volume`
+thô**, thay vì cột dựng sẵn `Volume_3M_P50` của ETL ngoài). Đo trên chính `universe_pit` đã build:
+
+| Ngày | `n_prune` PIT | Giao | **Recall (median-60 tự tính)** | Recall §2.2 (`Volume_3M_P50`) | Δ |
+|---|---|---|---|---|---|
+| 2014-06-30 | 140 | 138 | **98,6%** | 97,1% | +1,5pp |
+| 2016-06-30 | 167 | 165 | **98,8%** | 97,6% | +1,2pp |
+| 2018-06-29 | 180 | 178 | **98,9%** | 98,3% | +0,6pp |
+| 2020-06-30 | 226 | 224 | **99,1%** | 98,7% | +0,4pp |
+| 2022-06-30 | 321 | 318 | **99,1%** | 99,1% | 0,0pp |
+| 2024-06-28 | 310 | 306 | **98,7%** | 99,0% | −0,3pp |
+| 2026-06-15 | 233 | 230 | **98,7%** | 98,7% | 0,0pp |
+
+⇒ **KHÔNG tụt** (thực tế nhỉnh hơn ở các mốc sớm). **Không hiệu chuẩn lại B3** — đúng §8.4, tránh
+bẫy tự-tune. *(Nhắc lại đính chính §2.2: con số recall này chỉ đo **độ lệch công thức** giữa spec và
+row-filter production; nó KHÔNG phải bằng chứng về chất lượng curation — câu đó thuộc §2.4/G2b.)*
+
+**Kiểm tra chéo tách được 2 hiệu ứng — quan trọng cho việc đọc số:** tổng `in_universe` của
+`universe_pit` **lớn hơn đáng kể** `n_rule` tĩnh ở §2.2 (vd 2026-06-15: 396 vs 273). Tách theo
+`reason` cho thấy đây **không phải** lệch công thức mà là **B4 hysteresis đúng như thiết kế**:
+
+| Ngày | `ENTER` (đủ điều kiện vào) | §2.2 `n_rule` tĩnh | `CARRY_IN` (giữ bởi hysteresis) |
+|---|---|---|---|
+| 2014-06-30 | 169 | 165 | 58 (26% rổ) |
+| 2022-06-30 | 421 | 402 | 130 (24% rổ) |
+| 2026-06-15 | 271 | 273 | 125 (32% rổ) |
+
+Chân `ENTER` khớp §2.2 trong khoảng ~±5% ⇒ **công thức median-60 tự tính tái lập đúng row-filter
+production**. Toàn bộ phần rộng thêm là `CARRY_IN`. Lưu ý đọc đúng B4: điều kiện ra là *"dưới 0,5 tỷ
+trong 20 phiên **liên tiếp**"*, implement bằng `MAX(tv, 20 phiên) < 0,5e9` — đúng nghĩa đen của
+"liên tiếp", nhưng **rất dính**: một phiên duy nhất vượt 0,5 tỷ là reset đồng hồ. Đó là lý do
+`CARRY_IN` chiếm 24-32%. **Không sửa** (spec là spec, và bất đối xứng vào-chặt/ra-lỏng cùng triết lý
+DT5G 4-gate), nhưng đây là số cần nhớ khi re-pin R3 và khi hiệu chuẩn lại mẫu số CAPIT breadth
+(§4.4) — rổ `universe_pit` rộng hơn ~45% so với rule tĩnh, và **rộng hơn `ticker_prune` PIT ~1,7×**.
+
+### 10.3 Còn lại
+
+1. **G2b** (đo độ rò chất lượng qua golden floor — cổng cứng Q9/§3.2b) — chạy độc lập được, **chặn
+   cutover P2/P4**. Chưa làm.
+2. **G3** (cutover consumer) · **G4** (CAPIT breadth, §4.4) — chưa làm, phụ thuộc G2b.
+3. Re-pin R3 (§5.1) — chưa làm.
+4. **Không cần dispatch quant-skeptic vòng 2** cho các sửa đổi tài liệu (chúng chỉ **hạ** mức tự tin
+   và **siết** thêm cổng, không nới lỏng gì). **Cần** skeptic khi: (a) G2b dẫn tới đề xuất thêm tham
+   số chất lượng vào tầng universe (Q-B), hoặc (b) trước cutover bất kỳ consumer chạm tiền thật.
+   G1 tự nó **không đổi hành vi production nào** — chỉ thêm một bảng mới chưa ai đọc.

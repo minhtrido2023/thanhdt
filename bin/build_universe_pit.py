@@ -64,6 +64,8 @@ DATASET = os.environ.get("UNIVERSE_PIT_DATASET", "tav2_mike")
 TABLE = os.environ.get("UNIVERSE_PIT_TABLE", "universe_pit")
 LOCATION = "asia-southeast1"
 RULESET_VERSION = 1
+# hậu tố job_id — đổi khi CỐ Ý dựng lại bảng từ đầu (job_id tiền định sẽ trùng nếu không đổi)
+JOB_SUFFIX = os.environ.get("UNIVERSE_PIT_JOB_SUFFIX", "")
 ARTIFACT_DIR = os.path.join(WORKDIR, "data", "universe_pit")
 
 # tham số bộ tiêu chí (hằng số production — KHÔNG tune, xem Q2/§8.4)
@@ -79,6 +81,7 @@ MAX_ABSENT_SESSIONS = 10         # B6
 B8_COUNT_DEV = 0.15              # lệch số mã in_universe so trung vị 20 ngày
 B8_RAW_DEPTH = 0.90              # số dòng thô `ticker` so trung vị 20 ngày
 B8_LOOKBACK = 20
+BACKFILL_CHUNK_DAYS = 3500      # < gioi han 4000 partition/DML cua BigQuery
 
 os.environ.setdefault("GOOGLE_APPLICATION_CREDENTIALS", ADC_PATH)
 
@@ -178,6 +181,26 @@ SELECT {select_cols} FROM final WHERE {day_filter}
 def _q(client, sql, params=None):
     cfg = bigquery.QueryJobConfig(query_parameters=params or [])
     return list(client.query(sql, job_config=cfg, location=LOCATION).result())
+
+
+def _run_dml(client, sql, params, job_id):
+    """Chạy INSERT với job_id TIỀN ĐỊNH — đây là cơ chế idempotency thật (guidelines §5).
+
+    Sự cố có thật trong chính job G1 này: client bị kill lúc 10' timeout, nhưng job INSERT
+    năm 2022 vẫn chạy tiếp phía BigQuery và commit SAU khi lần chạy lại đã đọc MAX(time) —
+    kết quả 2022 bị ghi 2 lần. Kiểm tra `MAX(time)` là kiểm tra nguồn-sự-thật-bên-ngoài,
+    nhưng nó KHÔNG thấy được job đang bay. job_id tiền định thì thấy: BigQuery từ chối tạo
+    job trùng id, ta bắt Conflict rồi bám vào chính job cũ thay vì chạy lệnh thứ hai.
+    """
+    from google.api_core.exceptions import Conflict
+    cfg = bigquery.QueryJobConfig(query_parameters=params)
+    try:
+        job = client.query(sql, job_config=cfg, location=LOCATION, job_id=job_id)
+    except Conflict:
+        print(f"  [idempotent] job {job_id} da ton tai — bam vao job cu, KHONG chay lai")
+        job = client.get_job(job_id, location=LOCATION)
+    job.result()
+    return job
 
 
 # ── B8 integrity gate (§3.3) — hàm THUẦN để selfcheck được ────────────────────
@@ -312,9 +335,7 @@ INSERT INTO `{target_ref}` (time, ticker, in_universe, reason, ruleset_version, 
 {membership_sql(f"time, ticker, in_universe, reason, {RULESET_VERSION} AS ruleset_version, "
                 f"FALSE AS backfilled, CURRENT_TIMESTAMP() AS computed_at", "time = @day")}
 """
-    job = client.query(ins, job_config=bigquery.QueryJobConfig(query_parameters=p_asof),
-                       location=LOCATION)
-    job.result()
+    job = _run_dml(client, ins, p_asof, f"upit_day_v{RULESET_VERSION}{JOB_SUFFIX}_{day}")
     art["status"] = "APPENDED"
     art["inserted_rows"] = job.num_dml_affected_rows
     atomic_write_json(os.path.join(ARTIFACT_DIR, f"build_{day}.json"), art)
@@ -338,11 +359,18 @@ def build_backfill(client, target_ref, asof, dry_run=False):
               f"tong in_universe {sum(r['n_in'] for r in rows)}")
         return {"status": "DRY_RUN", "n_days": len(rows)}
 
+    # Chia lô theo SỐ PARTITION (1 DML của BQ chỉ chạm được <=4000 partition), không theo năm:
+    # 27 lô-năm × 1 lần quét toàn lịch sử mỗi lô = quá đắt (đo thật: có lô mất 13').
+    days = [r["d"] for r in _q(client,
+            f"SELECT DISTINCT time AS d FROM `{SRC_TABLE}` WHERE time <= @asof ORDER BY d",
+            [bigquery.ScalarQueryParameter("asof", "DATE", asof)])]
+    chunks = [(days[i], days[min(i + BACKFILL_CHUNK_DAYS, len(days)) - 1])
+              for i in range(0, len(days), BACKFILL_CHUNK_DAYS)]
+    print(f"  {len(days)} phien -> {len(chunks)} lo (toi da {BACKFILL_CHUNK_DAYS} partition/lo)")
+
     total = 0
-    for year in range(2000, asof.year + 1):
+    for ci, (lo, hi) in enumerate(chunks):
         done = _q(client, f"SELECT MAX(time) AS d FROM `{target_ref}`")[0]["d"]
-        lo = dt.date(year, 1, 1)
-        hi = min(dt.date(year, 12, 31), asof)
         if done is not None and done >= hi:
             continue
         if done is not None and done >= lo:
@@ -353,13 +381,13 @@ INSERT INTO `{target_ref}` (time, ticker, in_universe, reason, ruleset_version, 
                 f"TRUE AS backfilled, CURRENT_TIMESTAMP() AS computed_at",
                 "time BETWEEN @lo AND @hi")}
 """
-        job = client.query(ins, job_config=bigquery.QueryJobConfig(query_parameters=[
+        job = _run_dml(client, ins, [
             bigquery.ScalarQueryParameter("asof", "DATE", asof),
             bigquery.ScalarQueryParameter("lo", "DATE", lo),
-            bigquery.ScalarQueryParameter("hi", "DATE", hi)]), location=LOCATION)
-        job.result()
+            bigquery.ScalarQueryParameter("hi", "DATE", hi)],
+            f"upit_bf_v{RULESET_VERSION}{JOB_SUFFIX}_c{ci}_{asof}")
         total += job.num_dml_affected_rows or 0
-        print(f"  [{year}] {lo}..{hi}  +{job.num_dml_affected_rows} dong (cong don {total})")
+        print(f"  [lo {ci}] {lo}..{hi}  +{job.num_dml_affected_rows} dong (cong don {total})", flush=True)
 
     n = total
     art = {"status": "BACKFILLED", "asof": str(asof), "inserted_rows": n,
