@@ -358,6 +358,10 @@ def simulate(signals_df, prices, vni_dates, *,
              sector_limit_per_sector=None,   # dict {sector_id: max_pos} for per-sector caps
              sector_cap_exempt_tiers=None,   # set/list of play_types exempt from sector caps (D1)
              tier_position_limit=None,       # dict {play_type: max_concurrent} for per-tier cap (E3)
+             count_inflight_slots=False,     # True: an order that has STARTED filling occupies a slot for max_positions/tier_position_limit
+                                             #       (mirrors reality: capital is committed the moment the first lot is bought).
+                                             #       False = legacy leaky gate — counts only COMPLETED positions, so up to max_fill_days
+                                             #       worth of half-filled orders are invisible to the cap. Default False = byte-identical.
              tier_weights=None,              # dict {play_type: fraction_of_NAV} for tier-sized positions; None → equal-weight 1/max_positions
              tier_weights_by_state=None,     # OPTIONAL dict {state_int: {play_type: fraction}} — state-conditional tier weights; falls back to tier_weights if state not in map
              regime_suppress_dates=None,     # OPTIONAL set of pd.Timestamp: on these dates skip the tier_weights_by_state override (use base tier_weights). Used to SUPPRESS regime_size weak-halving during capitulation windows (validated: RS-off-in-capitulation). Default None = no suppression.
@@ -1011,6 +1015,11 @@ def simulate(signals_df, prices, vni_dates, *,
             if is_first_fill and tier_position_limit and play_type in tier_position_limit:
                 same_tier = sum(1 for p in positions.values()
                                 if p.get("play_type") == play_type)
+                if count_inflight_slots:
+                    same_tier += sum(1 for p in active
+                                     if p is not entry and p["filled_shares"] > 0
+                                     and p["ticker"] not in positions
+                                     and p["play_type"] == play_type)
                 if same_tier >= tier_position_limit[play_type]:
                     continue
             if is_first_fill and ticker_sector_map and not _exempt:
@@ -1034,6 +1043,12 @@ def simulate(signals_df, prices, vni_dates, *,
                                if p.get("play_type") not in slot_exempt_tiers)
             else:
                 _n_slots = len(positions)
+            if count_inflight_slots:
+                _n_slots += sum(1 for p in active
+                                if p is not entry and p["filled_shares"] > 0
+                                and p["ticker"] not in positions
+                                and not (slot_exempt_tiers is not None
+                                         and p["play_type"] in slot_exempt_tiers))
             if is_first_fill and not _slot_exempt and _n_slots >= max_positions:
                 if not eviction:
                     continue

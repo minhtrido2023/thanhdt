@@ -251,6 +251,13 @@ LIQ_ZERO_BLOCK = os.environ.get("LIQ_ZERO_BLOCK", "").strip().lower()
 if LIQ_ZERO_BLOCK in ("1", "lag"): _qs_tag += "_liqzblag"
 elif LIQ_ZERO_BLOCK == "both": _qs_tag += "_liqzbboth"
 elif LIQ_ZERO_BLOCK: raise SystemExit(f"LIQ_ZERO_BLOCK không hợp lệ: {LIQ_ZERO_BLOCK!r} (lag|both)")
+# LAG_SLOT_INFLIGHT (2026-07-22, job Taylor_20260722_030015): vá "cổng rò" trần vị thế LAG.
+# Engine gốc chỉ đếm vị thế ĐÃ HOÀN TẤT khi kiểm max_positions/tier_position_limit, nên tối đa
+# max_fill_days=5 phiên lệnh đang khớp dở là VÔ HÌNH với trần ⇒ concurrency thực vượt 12
+# (đo trên R3: max 18 vị thế hoàn tất, 37 lệnh đang cam kết vốn). "1" = đếm cả lệnh đang khớp
+# (đúng ý đồ trần 12). Unset = hành vi cũ, byte-identical.
+LAG_SLOT_INFLIGHT = os.environ.get("LAG_SLOT_INFLIGHT", "").strip() == "1"
+if LAG_SLOT_INFLIGHT: _qs_tag += "_lagslotif"
 EXP_TAG = os.environ.get("EXP_TAG", "").strip()
 if EXP_TAG: _qs_tag += f"_exp_{EXP_TAG}"
 # Quality-TILT strength sweep (env BASKET_QTILT, dir B 2026-06-16). Only affects custompitgq
@@ -1767,6 +1774,7 @@ LAG_KW = dict(allowed_tiers=list(_LAG_BASE_TIERS), max_positions=12,
               stop_exempt_tiers=set(_LAG_BASE_TIERS),
               hold_days_by_tier={t: 25 for t in _LAG_BASE_TIERS},
               tier_position_limit={t: 12 for t in _LAG_BASE_TIERS},
+              count_inflight_slots=LAG_SLOT_INFLIGHT,
               deposit_annual=0.0, borrow_annual=BORROW_ANNUAL, state_by_date=state_ff,
               cash_etf_states=PARK_STATES_DICT, cash_etf_states_by_date=PARK_BY_DATE, vn30_underlying=vn30_underlying,
               etf_mgmt_fee_annual=0.0, etf_tracking_drag_annual=0.0, etf_rebalance_friction=0.0015,
