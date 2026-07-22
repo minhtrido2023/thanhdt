@@ -594,7 +594,7 @@ Hai điều đọc được, ngược chiều nhau:
 bỏ ước lượng đó. *Giới hạn phép đo:* chỉ đối chiếu nhánh `tav2_bq.ticker` của UNION; nhánh fallback
 `ticker_1m` (chỉ bổ sung phiên tươi nhất) không đo — không ảnh hưởng kết luận ở các mốc lịch sử.
 
-#### P2 — `custom_basket.py` · **ĐÃ CUTOVER 2026-07-22** (job `Taylor_20260722_070547`, user duyệt)
+#### P2 — `custom_basket.py` · **DONE — ĐÃ CUTOVER 2026-07-22**, commit `ce7d457` (job `Taylor_20260722_070547`, user duyệt)
 
 **CHẠM PRODUCTION THẬT** — custom30V là parking book NEUTRAL đang sống của SpaceX/ZaloPay.
 3 chỗ đọc `ticker_prune` (`select_members`, `build_pit`, nhánh sector-cap `mktcap`) → `universe_pred()`
@@ -610,7 +610,9 @@ Selfcheck `universe_pit_p2_selfcheck.py` **13/13 PASS**: 7/7 mốc rebal trong 6
 Selfcheck cũ: `route_selector` PASS; `dcf_selector` FAIL **1 test có sẵn từ trước** (đo lại với
 `UNIVERSE_SOURCE="prune"` cho ra đúng FAIL đó ⇒ không do cutover); `eyrisk_selector`/`v4final_selector`
 FAIL các test dạng "identical to **pre-edit** (`git show HEAD:custom_basket.py`)" — fail **do bản
-cutover chưa commit**, sau khi commit HEAD đã chứa thay đổi thì cả hai trở lại PASS (đã verify).
+cutover chưa commit**, sau khi commit HEAD đã chứa thay đổi thì cả hai trở lại PASS (đã verify:
+`eyrisk_selector` **12/12 PASS**; `v4final_selector` **12/12 PASS / FAIL 0** — chạy lại sau commit
+`ce7d457` trong job `Taylor_20260722_082001`, bao gồm cả các guard fincap/route/namecap trên 1114 ngày).
 
 #### P1 — `trading_bot/due_diligence.py` · **ĐÃ CUTOVER** (rủi ro thấp nhất, §4.2)
 
@@ -726,7 +728,7 @@ kiểm chứng trong 2-3 tuần tới.
 | **G1** | `bin/build_universe_pit.py` + selfcheck (idempotent, atomic, B8) | 1-1,5 phiên | Cao | — |
 | **G2** | Backfill 2000→nay (compute rẻ: 215MB) + **kiểm định**: chạy lại bảng §2.2 với median-60-phiên tự tính, ~30 mốc | **1 phiên** (compute ~phút, kiểm định chiếm hết) | Cao | G1 |
 | **G2b** | ✅ **XONG + ĐÃ ĐÓNG 2026-07-22.** Đo xong (§3.2b-G2b) → escalate → **user chốt A′ + Q-C, không Q-B** → **Q-C đã implement (§3.2c), selfcheck PASS**. **Cổng cứng §3.2b/Q9 MỞ** (cổng CAPIT §4.4 vẫn đóng riêng) | 0,5-1 phiên | Trung bình | G2 |
-| **G3** | 🔶 **ĐANG DỞ 2026-07-22**: **P1 XONG** (`due_diligence.py`, selfcheck 20/20) · **P2 XONG** (`custom_basket.py` → `universe_pit_q`, user duyệt, selfcheck 13/13, rổ LIVE byte-identical) · **P3 vẫn CHỜ NGƯỜI DUYỆT** (diff lớn, §4.3b) | 1 phiên | Trung bình | G2 |
+| **G3** | 🔶 **ĐANG DỞ 2026-07-22**: **P1 XONG** (`due_diligence.py`, selfcheck 20/20) · **P2 XONG** (`custom_basket.py` → `universe_pit_q`, user duyệt, commit `ce7d457`, selfcheck 13/13, rổ LIVE byte-identical, v4final/eyrisk selector 12/12 PASS sau commit) · **P3 vẫn CHỜ NGƯỜI DUYỆT** (diff lớn, §4.3b) | 1 phiên | Trung bình | G2 |
 | **G4** | **Re-hiệu chuẩn breadth CAPIT (§4.4)** — chuỗi 2014→nay, tìm `WASHOUT_GATE'` bảo toàn tập ngày fire | 1 phiên | **Thấp** — có thể không tồn tại ngưỡng bảo toàn ⇒ escalate | G2 |
 | **G5** | Shadow P4/P5 ≥10 phiên (chi phí *thời gian lịch*, gần như không tốn effort) | ~2 tuần lịch, 0,5 phiên | Cao | G4 |
 | **G6** | Re-pin R3: 2 lần chạy (control + pit) theo **đúng lệnh pin + `$DNA_PYEXE`** (`coding_guidelines.md` §8) | 1-2 phiên + runtime | **Thấp** — chưa đo runtime thật của lệnh pin trong job này | G2 |
