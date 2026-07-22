@@ -40,14 +40,28 @@ DATE_COLS = {"time", "Release_Date", "rebal_date", "effective_from", "effective_
 
 
 def _apply_date_dtypes(df: pd.DataFrame) -> pd.DataFrame:
-    """Cast known date columns from string → datetime.date so parquet stores date32."""
+    """Cast known date columns from string → datetime.date so parquet stores date32.
+
+    Kiểm tra `dtype == object` là KHÔNG đủ: pandas 3.x đọc CSV ra dtype `str`
+    (StringDtype) chứ không còn `object`, nên điều kiện cũ bỏ qua cast âm thầm →
+    parquet ghi cột time thành `large_string` → verify báo DTYPE_MISMATCH
+    (universe_pit_q + ticker_prune, 2026-07-22). Nhận cả object lẫn string dtype.
+    """
     for col in DATE_COLS:
-        if col in df.columns and df[col].dtype == object:
+        if col not in df.columns:
+            continue
+        dt = df[col].dtype
+        if dt == object or pd.api.types.is_string_dtype(dt):
             df[col] = pd.to_datetime(df[col], errors="coerce").dt.date
     return df
 CACHE_DIR = os.path.join(WORKDIR, "data", "bq_cache")
 PROJECT = "lithe-record-440915-m9"
 MANIFEST_PATH = os.path.join(CACHE_DIR, "manifest.json")
+
+# Timeout mặc định cho 1 lệnh `bq query` (giây). Bảng lớn khai báo riêng qua
+# key "query_timeout" trong TABLES — 300s cứng cho MỌI bảng là quá ngắn cho chunk
+# năm của `ticker` (~15,2M dòng, chunk 2013 timeout ở resync 2026-07-22).
+DEFAULT_QUERY_TIMEOUT = 300
 
 # Use bq CLI (gcloud auth login creds) — no ADC/Application-Default required
 BQ_BIN = os.environ.get("BQ_BIN", "/home/trido/google-cloud-sdk/bin/bq")
@@ -67,6 +81,9 @@ TABLES = {
         """,
         "partition_col": "time",
         "chunk_years": list(range(2013, 2028)),
+        # Bảng lớn nhất hệ thống (~15,2M dòng, ~1M dòng/chunk năm) — 300s mặc định
+        # không đủ cho 1 chunk (fail thật ở resync 2026-07-22).
+        "query_timeout": 3600,
         "verify_sql": """
             SELECT COUNT(*) AS cnt, MAX(t.time) AS max_time
             FROM `{project}.tav2_bq.ticker` AS t
@@ -101,17 +118,24 @@ TABLES = {
         """,
         "partition_col": "time",
         "chunk_years": list(range(2013, 2028)),
+        # chunk năm nặng nhất đo được ~190s ở resync 2026-07-22 — biên an toàn 900s.
+        "query_timeout": 900,
         "verify_sql": """
             SELECT COUNT(*) AS cnt, MAX(t.time) AS max_time
             FROM `{project}.tav2_bq.ticker_prune` AS t
             WHERE t.time >= '2013-01-01'
         """,
     },
+    # ticker_financial: upstream backfill/đính chính ghi vào các quý CŨ (time ≤ max đã cache),
+    # nên delta-append theo max_time không bao giờ thấy chúng — cache lệch vĩnh viễn (đo thật
+    # 2026-07-22: local 66.520 vs BQ 66.600, 80 dòng nằm ở ngày ≤ 2026-07-21, delta chỉ thêm +7).
+    # Cùng lớp lỗi với fa_ratings/fa_ratings_8l ở trên; bảng ~54MB nên full mỗi lần là không đáng kể.
     "ticker_financial": {
         "sql": """
             SELECT * FROM `{project}.tav2_bq.ticker_financial` AS t
         """,
         "partition_col": "time",
+        "full_only": True,
         "verify_sql": """
             SELECT COUNT(*) AS cnt, MAX(t.time) AS max_time
             FROM `{project}.tav2_bq.ticker_financial` AS t
@@ -242,7 +266,11 @@ def log(msg: str):
     print(f"{ts} {msg}", flush=True)
 
 
-def bq_query_to_df(sql: str, max_rows: int = 10_000_000) -> pd.DataFrame:
+def bq_query_to_df(
+    sql: str,
+    max_rows: int = 10_000_000,
+    timeout: int = DEFAULT_QUERY_TIMEOUT,
+) -> pd.DataFrame:
     """Run a BQ query via bq CLI subprocess, return DataFrame.
 
     Uses gcloud auth login credentials (no ADC/Application-Default required).
@@ -259,7 +287,7 @@ def bq_query_to_df(sql: str, max_rows: int = 10_000_000) -> pd.DataFrame:
         input=sql,
         capture_output=True,
         text=True,
-        timeout=300,
+        timeout=timeout,
         env=_SUBPROCESS_ENV,
     )
     if result.returncode != 0:
@@ -289,6 +317,7 @@ def download_table(name: str, config: dict, manifest: dict, delta: bool):
         delta = False  # source table is rewritten in place — delta-append can't track it
     pq_path = os.path.join(CACHE_DIR, f"{name}.parquet")
     table_info = manifest["tables"].get(name, {})
+    qtimeout = config.get("query_timeout", DEFAULT_QUERY_TIMEOUT)
 
     chunk_years = config.get("chunk_years")
 
@@ -314,7 +343,7 @@ def download_table(name: str, config: dict, manifest: dict, delta: bool):
                     config["sql"]
                     + f" AND t.{col} >= '{yr}-01-01' AND t.{col} < '{yr + 1}-01-01'"
                 )
-                yr_df = bq_query_to_df(yr_sql)
+                yr_df = bq_query_to_df(yr_sql, timeout=qtimeout)
                 if not yr_df.empty:
                     yr_df.to_parquet(yr_path, index=False)
                     total_rows += len(yr_df)
@@ -341,7 +370,7 @@ def download_table(name: str, config: dict, manifest: dict, delta: bool):
             # vnindex_5state* kẹt vĩnh viễn ở ngày full-download gần nhất.
             joiner = "AND" if "WHERE" in config["sql"].upper() else "WHERE"
             delta_sql = config["sql"] + f" {joiner} t.{col} > '{max_cached}'"
-            new_df = bq_query_to_df(delta_sql)
+            new_df = bq_query_to_df(delta_sql, timeout=qtimeout)
             if new_df.empty:
                 log(f"  {name}: no new rows")
                 return
@@ -371,7 +400,7 @@ def download_table(name: str, config: dict, manifest: dict, delta: bool):
                 config["sql"]
                 + f" AND t.{col} >= '{yr}-01-01' AND t.{col} < '{yr + 1}-01-01'"
             )
-            yr_df = bq_query_to_df(yr_sql)
+            yr_df = bq_query_to_df(yr_sql, timeout=qtimeout)
             if not yr_df.empty:
                 yr_path = os.path.join(chunk_dir, f"{yr}.parquet")
                 yr_df.to_parquet(yr_path, index=False)
@@ -399,7 +428,7 @@ def download_table(name: str, config: dict, manifest: dict, delta: bool):
         return
 
     log(f"  {name}: full download...")
-    df = bq_query_to_df(config["sql"])
+    df = bq_query_to_df(config["sql"], timeout=qtimeout)
 
     if df.empty:
         log(f"  {name}: 0 rows (empty)")
