@@ -785,11 +785,57 @@ sự là "top-N" từ 2014-10 (trước đó universe < 250 ⇒ br250 ≡ br_new
 universe co còn 128 mã (hậu crash 08/2015, thanh khoản 3M co lại) — hành vi đúng của rule, không
 phải lỗi.
 
-**Trạng thái: 3 vị trí P4 trong `golive_recommend_v23.py` (`:229` ADV cap, `:492`/`:522`
+**Trạng thái (lúc escalate): 3 vị trí P4 trong `golive_recommend_v23.py` (`:229` ADV cap, `:492`/`:522`
 breadth+pool) VẪN đọc `ticker_prune` có chủ ý — không đổi dòng code nào.** Cổng "không cutover khi
 `capit_fired=true`" cũng đang CHẶN độc lập (fired từ 07-20). Chờ user chọn: A (pin vĩnh viễn) /
 B (0,3070, mất 7 ngày) / C-conserv (`br250@0,31`, mất 7 ngày tương đương B + bất biến mẫu số về
 sau) — C-mixed KHÔNG khuyến nghị (fire giả + knife-edge).
+
+#### 4.4-P4 — **IMPLEMENT C-conserv (user chốt 2026-07-22)**: breadth CUTOVER, pool + ADV **CÒN GHIM**
+*(job `Taylor_20260722_100814`)*
+
+**User chốt C-conserv** ⇒ đã wire vào `deploy_golive_dt5g_v4/golive_recommend_v23.py`. Điểm quan
+trọng nhất của lô này: **P4 tách làm HAI switch độc lập, không phải một**, vì đo thật cho thấy hai
+nửa có hồ sơ rủi ro khác hẳn nhau:
+
+| Switch | Giá trị hôm nay | Phạm vi | Tác động ngày LIVE 07-22 |
+|---|---|---|---|
+| `CAPIT_BREADTH_SOURCE` | **`"pit"`** (CUTOVER) + `CAPIT_TOPN=250`, `WASHOUT_GATE=0,31` | trigger `capit_fired` + `capit_grind` (⇒ size) | **0 đồng** — A/B trên cùng dữ liệu: fired/size/grind/rổ/ADV cap **giống hệt** |
+| `CAPIT_POOL_SOURCE` | **`"prune"`** (CÒN GHIM) | pool chọn rổ (pbz) + nguồn ADV cap | — (chưa cutover) |
+
+`WASHOUT_GATE` được **buộc vào mẫu số** (`0,31 if pit else 0,30`) để không tồn tại trạng thái
+"mẫu số mới + ngưỡng cũ" — đó là dạng hỏng nguy hiểm nhất của lô này. Rollback = sửa đúng 1 dòng.
+
+**Vì sao pool KHÔNG cutover cùng breadth (phát hiện MỚI, chưa có trong §4.4-C):** đo ngày 07-22
+(`universe_pit_p4_selfcheck.py` T6c2) — pool `pit` **thêm HVT** (pbz −1,362) ⇒ rổ đổi từ 4 mã
+`[PVT, SAB, SIP, VNM]` thành 5 mã `[HVT, PVT, SAB, SIP, VNM]`: vừa **thêm một lệnh mua thật**, vừa
+pha loãng equal-weight 25% → 20% cho 4 mã **đang khớp dở**. HVT không phải nhiễu: chất lượng thật
+(ROE_Min5Y 16,1% · ROIC5Y 24,0% · FSCORE 7) nhưng **ADV thật chỉ 0,196 tỷ/phiên** — nó lọt sàn
+"2 tỷ" của pool vì sàn đó đo **turnover MỘT NGÀY** (07-22: 2,063 tỷ, sát mép) chứ không đo ADV.
+`ticker_prune` vô tình che lỗ hổng sàn-thanh-khoản này bấy lâu; bỏ prune ra là lộ. **Sửa sàn đó là
+ĐỔI CHIẾN LƯỢC** (cần R&D + backtest riêng), không được làm lẫn vào migration. ⇒ Ghim `pool` tới khi
+(a) `capit_fired` về `false`, VÀ (b) user duyệt riêng khoản sàn thanh khoản pool. Cổng Q5 ("không
+cutover P4 khi `capit_fired=true`") đang chặn **đúng chỗ nó sinh ra để chặn**. ADV cap đi THEO
+`CAPIT_POOL_SOURCE` (không theo breadth): ADV đo trên chính những cái tên pool đã chọn.
+
+**Bảo hiểm mới đi kèm — fail-CLOSED độ tươi (`capit_breadth_is_stale`)**: `universe_pit` do một job
+RIÊNG build; nếu job đó chưa chạy cho phiên mới nhất thì câu breadth vẫn trả kết quả, chỉ thiếu ngày
+cuối ⇒ `breadth` lặng lẽ thành của HÔM QUA (đúng mẫu sự cố C1 07-12, nhưng lần này điều khiển một
+lệnh mua thật). Xử lý: **không raise** (sẽ hạ cả recommender, BAL/LAG vô can) mà chặn riêng CAPIT
+không fire lệnh mới trên dữ liệu cũ + nói to trong status JSON (`capit_breadth_stale`,
+`capit_breadth_src_max`) và MD.
+
+**Bằng chứng (đều chạy thật, không suy luận):**
+- `universe_pit_p4_selfcheck.py`: **26/26 PASS**. Trong đó T4b MẤT **đúng 7 ngày đã công bố**
+  (2015-05-18, 2018-07-05, 2020-02-04, 2020-03-11, 2020-03-25, 2020-04-01, 2022-06-15), T4a **THÊM
+  0** ngày (0 fire giả), T5 grind lật **đúng 1 cặp** 2015-08-24/25, T7 fail-closed đủ 4 nhánh.
+- A/B **end-to-end trên cùng dữ liệu 07-22** (chạy production 2 lần, lật đúng 1 dòng): khác nhau
+  **chỉ** ở `breadth_oversold` 0,5096 → 0,4960 + 3 field metadata + `washout_gate`;
+  `capit_fired=True`, `capit_size=0,75`, `capit_grind=False`, `n_capit_basket=4`, **`capit_adv_caps`
+  bằng nhau từng đồng**. ⇒ đợt giải ngân CAPIT đang dở KHÔNG bị đụng.
+- Số tổng 82→75 của §4.4-C là **đo tới 07-21**; hôm nay 07-22 fire ở CẢ HAI nhánh nên thành 83→76.
+  Bất biến thật là **hiệu = 7** và tập fire mới là **tập con** — selfcheck assert theo bất biến đó,
+  cố ý KHÔNG pin số tuyệt đối (pin tổng sẽ tự hỏng sau mỗi lần CAPIT fire).
 
 ### 4.5 D3 — gate vận hành (P6) sau khi prod không còn đọc `ticker_prune`
 
@@ -871,7 +917,7 @@ kiểm chứng trong 2-3 tuần tới.
 | **G2** | Backfill 2000→nay (compute rẻ: 215MB) + **kiểm định**: chạy lại bảng §2.2 với median-60-phiên tự tính, ~30 mốc | **1 phiên** (compute ~phút, kiểm định chiếm hết) | Cao | G1 |
 | **G2b** | ✅ **XONG + ĐÃ ĐÓNG 2026-07-22.** Đo xong (§3.2b-G2b) → escalate → **user chốt A′ + Q-C, không Q-B** → **Q-C đã implement (§3.2c), selfcheck PASS**. **Cổng cứng §3.2b/Q9 MỞ** (cổng CAPIT §4.4 vẫn đóng riêng) | 0,5-1 phiên | Trung bình | G2 |
 | **G3** | 🔶 **ĐANG DỞ 2026-07-22**: **P1 XONG** (`due_diligence.py`, selfcheck 20/20) · **P2 XONG** (`custom_basket.py` → `universe_pit_q`, user duyệt, commit `ce7d457`, selfcheck 13/13, rổ LIVE byte-identical, v4final/eyrisk selector 12/12 PASS sau commit) · **P3 XONG** (`golive_recommend_v23.py` panel D1 ICB-8633, user duyệt, commit `0bfbdfe`, selfcheck 14/14, VHM-look-ahead fix có bằng chứng, A/B trọn script byte-identical) ⇒ **P1-P3 ĐỦ, G3 XONG** (P4/P5/P6 là hạng mục riêng) | 1 phiên | Trung bình | G2 |
-| **G4** | ✅ **ĐO XONG 2 VÒNG, ESCALATED 2026-07-22.** Vòng 1 (§4.4-KQ): không tồn tại gate bảo toàn trên mẫu số mới. Vòng 2 hướng C (§4.4-C): top-N thanh khoản N∈{100..300} vẫn không tách sạch — thất bại CẤU TRÚC (đuôi illiquid của prune); ứng viên tốt nhất C-conserv `br250@0,31` = ngang B. **Chờ user chọn A/B/C-conserv; P4 vẫn đọc `ticker_prune` có chủ ý** | 1 phiên | **Thấp** — có thể không tồn tại ngưỡng bảo toàn ⇒ escalate (đã xảy ra đúng vậy, cả 2 vòng) | G2 |
+| **G4** | ✅ **ĐO XONG 2 VÒNG, ESCALATED 2026-07-22.** Vòng 1 (§4.4-KQ): không tồn tại gate bảo toàn trên mẫu số mới. Vòng 2 hướng C (§4.4-C): top-N thanh khoản N∈{100..300} vẫn không tách sạch — thất bại CẤU TRÚC (đuôi illiquid của prune); ứng viên tốt nhất C-conserv `br250@0,31` = ngang B. **User chốt C-conserv ⇒ ĐÃ IMPLEMENT nửa breadth (§4.4-P4, selfcheck 26/26, A/B live 0 đồng); pool + ADV còn ghim `ticker_prune` (pool `pit` thêm HVT vào rổ đang giải ngân)** | 1 phiên | **Thấp** — có thể không tồn tại ngưỡng bảo toàn ⇒ escalate (đã xảy ra đúng vậy, cả 2 vòng) | G2 |
 | **G5** | Shadow P4/P5 ≥10 phiên (chi phí *thời gian lịch*, gần như không tốn effort) | ~2 tuần lịch, 0,5 phiên | Cao | G4 |
 | **G6** | Re-pin R3: 2 lần chạy (control + pit) theo **đúng lệnh pin + `$DNA_PYEXE`** (`coding_guidelines.md` §8) | 1-2 phiên + runtime | **Thấp** — chưa đo runtime thật của lệnh pin trong job này | G2 |
 | **G7** | Rà soát N-trial (§5.3) — phân loại giữ/chạy-lại, chạy lại LAG-liquidity | 1-2 phiên | Thấp | G6 |
@@ -1082,11 +1128,12 @@ DT5G 4-gate), nhưng đây là số cần nhớ khi re-pin R3 và khi hiệu chu
    `UNIVERSE_SOURCE`) · **P3 đã cutover 2026-07-22** (`golive_recommend_v23.py` panel D1, user duyệt,
    commit `0bfbdfe`, selfcheck 14/14, VHM-look-ahead xác nhận đã fix, A/B trọn script byte-identical
    ⇒ 0 tác động LIVE hôm nay). **G3 coi như XONG** cho phần P1-P3; P4/P5/P6 vẫn mở.
-3. **G4** (CAPIT breadth, §4.4) — đã đo XONG cả 2 vòng: §4.4-KQ (re-hiệu-chuẩn mẫu số mới —
-   không tồn tại gate bảo toàn) + §4.4-C (hướng C top-N thanh khoản, user chốt 2026-07-22 — vẫn
-   không tách sạch, C-conserv `br250@0,31` chỉ NGANG B chứ không hơn về tái tạo lịch sử; giá trị
-   thêm là bất biến mẫu số về sau). **ESCALATE lần 2, cổng CAPIT vẫn ĐÓNG**, chờ user chọn
-   A / B / C-conserv (menu ở cuối §4.4-C).
+3. ✅🔶 **G4/P4 — user chốt C-conserv, ĐÃ IMPLEMENT MỘT NỬA** (2026-07-22, §4.4-P4):
+   **breadth CUTOVER** (`CAPIT_BREADTH_SOURCE="pit"`, top-250, gate 0,31 — selfcheck 26/26, A/B
+   live 07-22 không đổi 1 đồng), **pool + ADV cap CÒN GHIM `ticker_prune`** vì đo được pool `pit`
+   sẽ thêm **HVT** vào rổ CAPIT **đang giải ngân dở** (lộ lỗ hổng sàn thanh khoản pool đo turnover
+   1 ngày thay vì ADV — là ĐỔI CHIẾN LƯỢC, không làm lẫn vào migration). **Còn mở**: cutover
+   `CAPIT_POOL_SOURCE` sau khi (a) `capit_fired=false` và (b) user duyệt riêng sàn thanh khoản pool.
 4. Re-pin R3 (§5.1) — **chưa làm, và P2 vừa làm nó cần thiết hơn**: rổ custom30V đổi ở 4 mốc rebal
    2021-06 → 2022-05 (§4.3b đính chính) ⇒ chuỗi NAV backtest 2021-2022 sẽ khác bản đang pin 27,84%.
 4. **Không cần dispatch quant-skeptic vòng 2** cho các sửa đổi tài liệu (chúng chỉ **hạ** mức tự tin

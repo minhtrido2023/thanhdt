@@ -2150,3 +2150,26 @@
 - [2026-07-22T10:30:18Z] Taylor/heartbeat — Taylor_20260722_100814: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20260722_100814", "source": "watcher"}
 - [2026-07-22T10:30:48Z] Taylor/heartbeat — Taylor_20260722_093140: {"status": "still_running", "elapsed_min": 59, "job_id": "Taylor_20260722_093140", "source": "watcher"}
 - [2026-07-22T10:31:18Z] Taylor/heartbeat — Taylor_20260722_100814: {"status": "still_running", "elapsed_min": 23, "job_id": "Taylor_20260722_100814", "source": "watcher"}
+
+## Consolidation 2026-07-22T10:48:58Z
+- [2026-07-22T10:32:18Z] Taylor/heartbeat — Taylor_20260722_100814: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20260722_100814", "source": "watcher"}
+- [2026-07-22T10:32:24Z] Taylor/heartbeat — Taylor_20260722_100814: {"status": "in_progress", "note": "PHAT HIEN: breadth C-conserv khop chinh xac so da bao (mat dung 7 ngay, 0 fire gia, grind flip dung 2015-08-24/25) NHUNG phan POOL doi ro CAPIT LIVE hom nay: them HVT (pbz -1.36, rank 3) => ro 4 -> 5 ma trong luc dang giai ngan dor. Dang do ky HVT truoc khi quyet"}
+- [2026-07-22T10:33:18Z] Taylor/heartbeat — Taylor_20260722_100814: {"status": "still_running", "elapsed_min": 25, "job_id": "Taylor_20260722_100814", "source": "watcher"}
+- [2026-07-22T10:33:28Z] Taylor/heartbeat — Taylor_20260722_100814: {"status": "in_progress", "note": "doc lai artifact job escalate, chuan bi implement C-conserv br250@0.31"}
+- [2026-07-22T10:34:18Z] Taylor/heartbeat — Taylor_20260722_100814: {"status": "still_running", "elapsed_min": 26, "job_id": "Taylor_20260722_100814", "source": "watcher"}
+- [2026-07-22T10:35:18Z] Taylor/heartbeat — Taylor_20260722_100814: {"status": "still_running", "elapsed_min": 27, "job_id": "Taylor_20260722_100814", "source": "watcher"}
+- [2026-07-22T10:36:19Z] Taylor/heartbeat — Taylor_20260722_100814: {"status": "still_running", "elapsed_min": 28, "job_id": "Taylor_20260722_100814", "source": "watcher"}
+- [2026-07-22T10:36:58Z] Taylor/heartbeat — Taylor_20260722_100814: {"status": "in_progress", "note": "attempt1 de lai refactor do dang: CAPIT_POOL_SOURCE la dead code (pool se tu cutover len pit -> them HVT vao ro LIVE dang giai ngan). Da sua pool+ADV key theo CAPIT_POOL_SOURCE; dang sua selfcheck"}
+- [2026-07-22T10:37:19Z] Taylor/heartbeat — Taylor_20260722_100814: {"status": "still_running", "elapsed_min": 29, "job_id": "Taylor_20260722_100814", "source": "watcher"}
+- [2026-07-22T10:38:19Z] Taylor/heartbeat — Taylor_20260722_100814: {"status": "still_running", "elapsed_min": 30, "job_id": "Taylor_20260722_100814", "source": "watcher"}
+- [2026-07-22T10:39:19Z] Taylor/heartbeat — Taylor_20260722_100814: {"status": "still_running", "elapsed_min": 31, "job_id": "Taylor_20260722_100814", "source": "watcher"}
+- [2026-07-22T10:40:19Z] Taylor/heartbeat — Taylor_20260722_100814: {"status": "still_running", "elapsed_min": 32, "job_id": "Taylor_20260722_100814", "source": "watcher"}
+- [2026-07-22T10:41:19Z] Taylor/heartbeat — Taylor_20260722_100814: {"status": "still_running", "elapsed_min": 33, "job_id": "Taylor_20260722_100814", "source": "watcher"}
+- [2026-07-22T10:42:20Z] Taylor/heartbeat — Taylor_20260722_100814: {"status": "still_running", "elapsed_min": 34, "job_id": "Taylor_20260722_100814", "source": "watcher"}
+- [2026-07-22T10:43:20Z] Taylor/heartbeat — Taylor_20260722_100814: {"status": "still_running", "elapsed_min": 35, "job_id": "Taylor_20260722_100814", "source": "watcher"}
+- [2026-07-22T10:44:20Z] Taylor/heartbeat — Taylor_20260722_100814: {"status": "still_running", "elapsed_min": 36, "job_id": "Taylor_20260722_100814", "source": "watcher"}
+- [2026-07-22T10:45:20Z] Taylor/heartbeat — Taylor_20260722_100814: {"status": "still_running", "elapsed_min": 37, "job_id": "Taylor_20260722_100814", "source": "watcher"}
+- [2026-07-22T10:46:20Z] Taylor/heartbeat — Taylor_20260722_100814: {"status": "still_running", "elapsed_min": 38, "job_id": "Taylor_20260722_100814", "source": "watcher"}
+- [2026-07-22T10:47:20Z] Taylor/heartbeat — Taylor_20260722_100814: {"status": "still_running", "elapsed_min": 39, "job_id": "Taylor_20260722_100814", "source": "watcher"}
+- [2026-07-22T10:47:35Z] Taylor/heartbeat — Taylor_20260722_100814: {"status": "in_progress", "note": "selfcheck 26/26 PASS; A/B live tren cung du lieu 07-22: fired/size/grind/basket/ADV caps GIONG HET (chi breadth 0.5096->0.4960 + metadata). Dang update plan doc roi goi quant-skeptic"}
+- [2026-07-22T10:48:20Z] Taylor/heartbeat — Taylor_20260722_100814: {"status": "still_running", "elapsed_min": 40, "job_id": "Taylor_20260722_100814", "source": "watcher"}
