@@ -59,8 +59,21 @@ def fire(fp, rec):
         "lại từ đầu, KHÔNG lặp lại việc đã xong. Prompt gốc: %s"
     ) % (count, orig_job, agent, agent, prompt)
     env = dict(os.environ, DISPATCH_FROM=frm)
+    # Ghim lại ĐÚNG topic Discord của job gốc (fix 2026-07-22). Cron không có
+    # DISCORD_THREAD_ID nên nếu không truyền --thread, job resume rơi về con trỏ global
+    # "topic Mike mở phiên gần nhất" = topic user đang đọc. Job record của job gốc đã lưu
+    # discord_thread_id từ lúc dispatch → đọc thẳng từ đó, không cần thêm field mới.
+    argv = [DISPATCH, agent, resume_prompt, "--bg"]
     try:
-        r = subprocess.run([DISPATCH, agent, resume_prompt, "--bg"], env=env,
+        with open(os.path.join(ROOT, "bus", "jobs", "%s.json" % orig_job),
+                  encoding="utf-8") as f:
+            tid = str(json.load(f).get("discord_thread_id") or "")
+        if tid:
+            argv += ["--thread", tid]
+    except Exception:
+        pass  # job record cũ/mất → giữ hành vi cũ (ambient/global), không chặn resume
+    try:
+        r = subprocess.run(argv, env=env,
                            capture_output=True, text=True, timeout=30)
         log("RESUMED %s (orig_job=%s, attempt #%d) -> %s"
             % (agent, orig_job, count, r.stdout.strip()[:200] or r.stderr.strip()[:200]))

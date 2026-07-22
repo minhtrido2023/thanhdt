@@ -122,8 +122,11 @@ fi
 MSG="🌙 KB nightly done ($(date -u +%Y-%m-%d))"
 [ -n "${OVERSIZE:-}" ] && MSG="$MSG — ⚠️ oversized memories:$OVERSIZE"
 "$ROOT/bin/notify.sh" "$MSG" 2>/dev/null || true
-_tid="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
-[ -n "${_tid:-}" ] && "$ROOT/bin/notify_thread.sh" "$MSG" "$_tid" 2>/dev/null || true
+# Topic CỐ ĐỊNH (Architecture) — trước 2026-07-22 đọc con trỏ global
+# state/ccdb_thread_id = "topic Mike mở phiên gần nhất", nên tin bảo trì KB đêm nào cũng
+# rơi vào topic user vừa đọc, bất kể topic đó về việc gì.
+_tid="1521475726329516122"
+"$ROOT/bin/notify_thread.sh" "$MSG" "$_tid" 2>/dev/null || true
 
 # ── Phase 4.5: weekly ops-vs-research spend trend (cost-opt #5, 2026-07-17) ──
 # Deterministic, no LLM needed — just appends one row/week to state/spend_history.csv

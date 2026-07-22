@@ -1980,3 +1980,41 @@
 - [2026-07-22T09:35:25Z] Wags/heartbeat — Wags_20260722_091421: {"status": "still_running", "elapsed_min": 21, "job_id": "Wags_20260722_091421", "source": "watcher"}
 - [2026-07-22T09:36:25Z] Wags/heartbeat — Wags_20260722_091421: {"status": "still_running", "elapsed_min": 22, "job_id": "Wags_20260722_091421", "source": "watcher"}
 - [2026-07-22T09:36:33Z] Wags/heartbeat — Wags_20260722_091421: {"status": "in_progress", "note": "ROOT CAUSE tìm thấy: dispatch.sh tính _dtid0 (topic ghim của job) nhưng KHÔNG export DISCORD_THREAD_ID cho tiến trình claude con -> agent tự notify rơi vào topic ambient/global = topic user đang đọc"}
+
+## Consolidation 2026-07-22T09:49:50Z
+- [2026-07-22T09:37:42Z] Taylor/heartbeat — Taylor_20260722_093140: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260722_093140", "source": "watcher"}
+- [2026-07-22T09:38:42Z] Taylor/heartbeat — Taylor_20260722_093140: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260722_093140", "source": "watcher"}
+- [2026-07-22T09:39:42Z] Taylor/heartbeat — Taylor_20260722_093140: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260722_093140", "source": "watcher"}
+- [2026-07-22T09:40:42Z] Taylor/heartbeat — Taylor_20260722_093140: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260722_093140", "source": "watcher"}
+- [2026-07-22T09:41:37Z] Taylor/heartbeat — Taylor_20260722_093140: {"status": "in_progress", "note": "3 leg dang chay: control(prune) / pit / pit+LIQ_ZERO_BLOCK=lag (§5.3). Phat hien som: universe_pit_q co cot in_universe — da wire dung (~350 ten/ngay vs prune ~257-300)"}
+- [2026-07-22T09:41:42Z] Taylor/heartbeat — Taylor_20260722_093140: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260722_093140", "source": "watcher"}
+- [2026-07-22T09:42:43Z] Taylor/heartbeat — Taylor_20260722_093140: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260722_093140", "source": "watcher"}
+- [2026-07-22T09:43:43Z] Taylor/heartbeat — Taylor_20260722_093140: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260722_093140", "source": "watcher"}
+- [2026-07-22T09:44:43Z] Taylor/heartbeat — Taylor_20260722_093140: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260722_093140", "source": "watcher"}
+- [2026-07-22T09:45:43Z] Taylor/heartbeat — Taylor_20260722_093140: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260722_093140", "source": "watcher"}
+- [2026-07-22T09:45:46Z] Taylor/heartbeat — Taylor_20260722_094530: {"status": "in_progress", "note": "bat dau: doc lai artifact exp_capit_breadth + plan 4.4 + finding job truoc"}
+- [2026-07-22T09:46:30Z] Taylor/heartbeat — Taylor_20260722_094530: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260722_094530", "source": "watcher"}
+- [2026-07-22T09:46:43Z] Taylor/heartbeat — Taylor_20260722_093140: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20260722_093140", "source": "watcher"}
+- [2026-07-22T09:47:05Z] Taylor/heartbeat — Taylor_20260722_093140: {"status": "in_progress", "note": "G6 re-pin R3: doc plan §5, dang tim lenh pin nguyen van trong results_registry"}
+- [2026-07-22T09:47:30Z] Taylor/heartbeat — Taylor_20260722_094530: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260722_094530", "source": "watcher"}
+- [2026-07-22T09:47:37Z] Taylor/status — G4-C khai bao N-trial truoc khi do: {"job": "Taylor_20260722_094530", "design": "breadth top-N thanh khoan co dinh tren universe_pit_q", "trials": "N in {100,150,200,250,300} (5 trials), rank=Volume_3M_P50*COALESCE(Price,Close) per day", "tieu_chi_chon": "tach sach tap fire cu (min br_topN tren 82 ngay fire > max tren 3047 ngay non-fire); nhieu N dat -> chon margin tuong doi lon nhat; gate moi = trung diem khoang tach, KHONG tune", "grind": "neu tap fire tai tao 100% thi grind identical tu dong (ham thuan cua tap fire)"}
+- [2026-07-22T09:47:44Z] Taylor/heartbeat — Taylor_20260722_093140: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20260722_093140", "source": "watcher"}
+- [2026-07-22T09:48:32Z] Taylor/heartbeat — Taylor_20260722_094530: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260722_094530", "source": "watcher"}
+- [2026-07-22T09:48:44Z] Taylor/heartbeat — Taylor_20260722_093140: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20260722_093140", "source": "watcher"}
+- [2026-07-22T09:49:32Z] Taylor/heartbeat — Taylor_20260722_094530: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260722_094530", "source": "watcher"}
+- [2026-07-22T09:49:44Z] Taylor/heartbeat — Taylor_20260722_093140: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20260722_093140", "source": "watcher"}
+- [2026-07-22T09:37:25Z] Wags/heartbeat — Wags_20260722_091421: {"status": "still_running", "elapsed_min": 23, "job_id": "Wags_20260722_091421", "source": "watcher"}
+- [2026-07-22T09:38:25Z] Wags/heartbeat — Wags_20260722_091421: {"status": "still_running", "elapsed_min": 24, "job_id": "Wags_20260722_091421", "source": "watcher"}
+- [2026-07-22T09:39:13Z] Wags/heartbeat — Wags_20260722_091421: {"status": "in_progress", "note": "fix xong + repro pre/post-fix trong sandbox /tmp/wags_tid2, chuẩn bị commit + arch-reviewer"}
+- [2026-07-22T09:39:25Z] Wags/heartbeat — Wags_20260722_091421: {"status": "still_running", "elapsed_min": 25, "job_id": "Wags_20260722_091421", "source": "watcher"}
+- [2026-07-22T09:40:25Z] Wags/heartbeat — Wags_20260722_091421: {"status": "still_running", "elapsed_min": 26, "job_id": "Wags_20260722_091421", "source": "watcher"}
+- [2026-07-22T09:41:25Z] Wags/heartbeat — Wags_20260722_091421: {"status": "still_running", "elapsed_min": 27, "job_id": "Wags_20260722_091421", "source": "watcher"}
+- [2026-07-22T09:42:25Z] Wags/heartbeat — Wags_20260722_091421: {"status": "still_running", "elapsed_min": 28, "job_id": "Wags_20260722_091421", "source": "watcher"}
+- [2026-07-22T09:43:25Z] Wags/heartbeat — Wags_20260722_091421: {"status": "still_running", "elapsed_min": 29, "job_id": "Wags_20260722_091421", "source": "watcher"}
+- [2026-07-22T09:44:26Z] Wags/heartbeat — Wags_20260722_091421: {"status": "still_running", "elapsed_min": 30, "job_id": "Wags_20260722_091421", "source": "watcher"}
+- [2026-07-22T09:45:26Z] Wags/heartbeat — Wags_20260722_091421: {"status": "still_running", "elapsed_min": 31, "job_id": "Wags_20260722_091421", "source": "watcher"}
+- [2026-07-22T09:46:26Z] Wags/heartbeat — Wags_20260722_091421: {"status": "still_running", "elapsed_min": 32, "job_id": "Wags_20260722_091421", "source": "watcher"}
+- [2026-07-22T09:47:26Z] Wags/heartbeat — Wags_20260722_091421: {"status": "still_running", "elapsed_min": 33, "job_id": "Wags_20260722_091421", "source": "watcher"}
+- [2026-07-22T09:47:42Z] Wags/heartbeat — Wags_20260722_091421: {"status": "in_progress", "note": "arch-reviewer NEEDS_CHANGES — killer objection thật (export bật nhánh Mike-only của session_start cho phiên Mike chạy từ cron). Đang vá round 2."}
+- [2026-07-22T09:48:26Z] Wags/heartbeat — Wags_20260722_091421: {"status": "still_running", "elapsed_min": 34, "job_id": "Wags_20260722_091421", "source": "watcher"}
+- [2026-07-22T09:49:27Z] Wags/heartbeat — Wags_20260722_091421: {"status": "still_running", "elapsed_min": 35, "job_id": "Wags_20260722_091421", "source": "watcher"}

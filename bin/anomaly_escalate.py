@@ -65,7 +65,11 @@ def _dispatch_bg(target, prompt, dry):
         print(f"[dry-run] dispatch {target} --bg:\n  {prompt[:160]}...\n")
         return "DRY"
     env = dict(os.environ, DISPATCH_FROM="Taylor")
-    r = subprocess.run([DISPATCH, target, prompt, "--bg", "--timeout", "900"],
+    # --thread: script chạy từ cron (không có DISCORD_THREAD_ID) → không ghim thì thông báo
+    # của job rơi về con trỏ global = topic user mở gần nhất. Anomaly luôn thuộc Trading Daily,
+    # cùng nơi _notify() ở trên gửi (fix 2026-07-22).
+    r = subprocess.run([DISPATCH, target, prompt, "--bg", "--thread", TRADING_DAILY,
+                        "--timeout", "900"],
                        capture_output=True, text=True, env=env)
     if r.returncode != 0:
         print(f"  ⚠️ dispatch {target} FAIL rc={r.returncode}: {r.stderr.strip()[:200]}")
