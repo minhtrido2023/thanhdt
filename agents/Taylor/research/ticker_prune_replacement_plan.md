@@ -7,7 +7,17 @@ quant-skeptic review → user duyệt.**
 
 ---
 
-## ⚠️ 0. Cảnh báo về nguồn: file Q&A của bq_admin KHÔNG có trên đĩa
+## ⚠️ 0. Cảnh báo về nguồn — **ĐÃ GIẢI QUYẾT, giữ lại làm dấu vết**
+
+> **CẬP NHẬT 2026-07-22:** file **CÓ tồn tại** —
+> `agents/Taylor/research/ticker_prune_universe_QA_bq_admin_20260722.md` (21 KB, ghi lúc 03:45,
+> đúng bằng thời điểm tôi ghi finding 03:45:34Z ⇒ **race giữa hai tiến trình, không phải file thiếu**).
+> Cảnh báo bên dưới đã lỗi thời. Đọc lại văn bản gốc: bản tóm tắt của Mike **khớp** ở các điểm 1-3
+> và 5 (không phải sửa gì trong §3-§6), **và §7 vẫn đứng vững** — Phần 4 mục 5 của văn bản gốc nêu
+> `max_bad_records=10` mà **không giới hạn cho bảng nào**, nên câu hỏi Q8 là cần thiết. Q8 nay **đã
+> có trả lời** (bq_admin, 04:12 ICT) — xem §7.
+
+<details><summary>Cảnh báo gốc (đã lỗi thời, giữ để truy vết)</summary>
 
 Dispatch chỉ tới `agents/Taylor/research/ticker_prune_universe_QA_bq_admin_20260722.md`. File này
 **không tồn tại** — đã tìm toàn repo, `/tmp`, `$HOME`, bus events, và mọi file `.md` tạo sau
@@ -26,6 +36,8 @@ văn bản gốc. Hệ quả cụ thể:
 **Việc cần làm trước khi user duyệt phương án này: lấy lại văn bản gốc của bq_admin và lưu đúng
 đường dẫn trên.** Nếu văn bản gốc mâu thuẫn với tóm tắt ở bất kỳ điểm nào, §7 và §3.3 phải xem lại.
 
+</details>
+
 ---
 
 ## 1. TL;DR — 5 câu
@@ -34,9 +46,16 @@ văn bản gốc. Hệ quả cụ thể:
    (bias là hệ quả) — mà là **`ticker_prune` không tái lập được (non-reproducible)**. Một baseline
    thay đổi sau lưng thì không phải baseline, bất kể nó đúng hay sai.
 2. **Nỗi lo lớn nhất trong doc gốc (§5: "rule thanh khoản thuần của ta có thể THUA curation của
-   bq_admin") — đã ĐO và bác bỏ được.** Bộ tiêu chí B1-B5 tôi đề xuất, dùng **0 thông tin từ
-   backtest**, tái tạo universe PIT của `ticker_prune` với **recall 97-99% tại cả 7 mốc lịch sử
-   2014→2026** (§2.2). Curation của họ gần như không mang thông tin gì mà rule không có.
+   bq_admin") — ⚠️ ĐÃ ĐO LẠI ĐÚNG CÁCH, và câu trả lời NGƯỢC với bản trước: nỗi lo đó CÓ CƠ SỞ.**
+   Bản trước dùng recall 97-99% để bác bỏ §5 — quant-skeptic REFUTED (cao): phép đo đó là
+   **tautology** (`Inflation_7` là deflator neo 2026 ⇒ rule tôi viết trùng khớp đại số với chính
+   row-filter production tạo ra prune ⇒ "prune ⊆ rule" đúng bất kể curation có nghĩa hay không; dùng
+   đúng công thức gốc thì recall = **100,0%**). Phép test thay thế **có sức mạnh** (§2.4): 43 mã
+   "rule-only" có `ROE_Min3Y` **âm trung bình** (−5,8% vs +4,9%), `ROE5Y` chỉ **1/3** nhóm được giữ,
+   nhất quán ở **cả 4 mốc** và **không phải hiệu ứng quy mô**. ⇒ **Rule thanh khoản thuần KHÔNG đủ**;
+   cần một lớp chất lượng ex-ante trước khi chạm tiền thật (§3.2b). Tin tốt: thông tin đó **không bí
+   mật** — nằm trong cột ta đã có; và curation cũng **bỏ sót** mã tốt mới lên sàn (FOX ROE5Y 31%,
+   VPL, VGI) nên nó không phải chuẩn vàng để bắt chước.
 3. **Migration khả thi hơn tôi tưởng: `tav2_bq.ticker` là superset THẬT của `ticker_prune` cả dòng
    lẫn cột** — 0/738.201 dòng prune (2014+) mồ côi, và 174 cột của `ticker` chứa đủ mọi cột mở rộng
    (`Trading_Value`, `O1W`, `Pattern_*`, `PC_*`) mà tôi từng lo là prune-only (§2.1). Thay thế =
@@ -72,7 +91,32 @@ Về cột: `ticker` có **174 cột**, và các cột tôi tưởng là prune-o
 → **Mọi câu `FROM tav2_bq.ticker_prune p` đều thay được bằng `FROM tav2_bq.ticker t JOIN universe_pit
 u USING(ticker, time)` mà không mất một cột nào.** Đây là điều làm cho phương án này rẻ.
 
-### 2.2 Bộ tiêu chí B1-B5 tái tạo được curation của bq_admin — recall 97-99%
+### 2.2 Recall của rule so với `ticker_prune` — ⚠️ ĐÃ SỬA sau review quant-skeptic (REFUTED, cao)
+
+> **ĐÍNH CHÍNH (2026-07-22, job `Taylor_20260722_041743`).** Bản trước của mục này dùng con số
+> recall 97-99% để tuyên bố "curation là TRỪ không phải CỘNG ⇒ nỗi lo §5 doc gốc KHÔNG được dữ liệu
+> ủng hộ". **Tuyên bố đó VOID.** quant-skeptic (`mike/logs/verify_20260722_040031.log`) chỉ ra:
+> `Inflation_7` là **hệ số khử lạm phát neo 2026** (đo được: 2026 = 1,0; 2014 = 0,4186-0,4501;
+> `1/1,07¹² = 0,444`), nên B3 tôi viết (`Volume_3M_P50 × Price ≥ 1e9 × Inflation_7`) **đại số trùng
+> khớp** với chính row-filter production tạo ra `ticker_prune`, nằm sẵn ở `filter.json:18`
+> (`(Volume_3M_P50*Price/Inflation_7)>1000000000.0`). Đó KHÔNG phải một tái tạo độc lập — đó là hằng
+> số của chính repo này.
+>
+> Vì `ticker_prune = hit_ticker_list ∩ liquidity_filter`, mệnh đề "prune ⊆ rule" là **đồng nhất thức
+> cấu trúc**: nó đúng bất kể `hit_ticker_list` mang thông tin thật hay được bốc ngẫu nhiên. Chạy
+> ĐÚNG công thức gốc cho recall **chính xác 100,0%** tại cả 3 mốc kiểm tra lại (140/140, 180/180,
+> 233/233). Phần thiếu 1-3% trong bảng dưới **không phải tín hiệu về curation** — nó là **độ lệch
+> công thức** giữa row-filter production và spec median-60-phiên tôi đề xuất (`COALESCE(Price,Close)`,
+> `ICB_Code IS NOT NULL`).
+>
+> Hệ quả logic: phép test này có **sức mạnh thống kê bằng 0** đối với §5 doc gốc — vì §5 lo đúng về
+> **phép TRỪ** (curation loại mã diện cảnh báo/kiểm soát/BCTC ngoại trừ), mà một phép đo chỉ có thể
+> quan sát được phép trừ thì không thể bác bỏ giả thuyết phép trừ. Cả hai giả thuyết ("curation vô
+> nghĩa" và "curation lọc đúng mã xấu thật") cho **cùng một kết quả**. Câu hỏi §5 vì vậy vẫn **MỞ**
+> ở thời điểm đó — và được trả lời riêng ở **§2.4** bằng một phép test có sức mạnh thật.
+>
+> Giữ bảng dưới lại vì nó vẫn hữu ích cho đúng mục đích ban đầu: **đo độ lệch giữa spec đề xuất và
+> row-filter production**. Không được trích dẫn nó như bằng chứng về chất lượng curation.
 
 Rule đo: `ICB_Code IS NOT NULL` ∧ `Close ≥ 1.000đ` ∧ `Volume_3M_P50 × COALESCE(Price,Close) ≥ ngưỡng
 thực`, ngưỡng thực = **1,0 tỷ VND neo 2026, khử lạm phát 7%/năm** (`1e9 / 1,07^(2026−năm)`).
@@ -90,29 +134,130 @@ thực`, ngưỡng thực = **1,0 tỷ VND neo 2026, khử lạm phát 7%/năm**
 (Cột `n_union` lấy từ doc gốc §2.2 = dạng `IN (SELECT DISTINCT ticker FROM ticker_prune)` không có
 điều kiện thời gian — dạng đang chạy trong pin R3 và custom30V.)
 
-Ba kết luận rút ra, đều quan trọng:
+Ba kết luận rút ra:
 
-**(a) Mục tiêu hiệu chuẩn trong doc gốc đã đạt và vượt xa.** Doc gốc §3.2 đặt "overlap ≥85% thì rule
-mới coi là đủ tốt". Thực đo 97-99% tại **mọi** mốc, không phải mốc gần đây. Và ngưỡng 1,0 tỷ là con
-số tôi bốc ra hôm qua **trước khi** đo — không phải kết quả tuning. (Sweep kiểm chứng tại 2026-06-15:
-2e8→421 mã, 5e8→336, **1e9→273**, 2e9→220 (recall tụt còn 83%), 5e9→171. Ngưỡng 1e9 nằm ở chỗ recall
-còn ~99% mà universe chưa phồng — đây là **cao nguyên**, không phải đỉnh nhọn.)
+**(a) Ngưỡng 1e9 là cao nguyên, không phải đỉnh nhọn — nay có n=3 mốc, không còn n=1.** Sweep gốc
+tại 2026-06-15: 2e8→421 mã, 5e8→336, **1e9→273**, 2e9→220 (recall 82,8%), 5e9→171. quant-skeptic mở
+rộng sang 2018-06-29 và 2022-06-30: recall tại **1e9 = 98,9% / 99,1%**, tại **2e9 = 80,6% / 87,2%**.
+Cao nguyên giữ nguyên hình dạng ở cả 3 mốc ⇒ **rủi ro tự-flag #3 (§8.3) được giải quyết theo hướng
+có lợi**.
+⚠️ Nhưng phải nói lại cho đúng: khung "ngưỡng này tôi bốc ra TRƯỚC khi đo, không phải tuning" là
+**diễn giải sai**. 1e9 không phải một phỏng đoán độc lập tình cờ trúng — nó là **hằng số đã hardcode
+sẵn trong chính hệ đang được đo** (`filter.json:18`, `deeplearning/bigquery.py:261-265`). Điều này
+không làm nó tệ đi (dùng lại hằng số production là đúng tinh thần "bảo toàn hành vi"), nhưng nó
+KHÔNG phải bằng chứng chống overfit.
 
-**(b) Curation của bq_admin là TRỪ, không phải CỘNG.** Prune gần như là tập con của rule (chỉ 3 mã
-prune-only tại 2026-06-15). Nghĩa là họ **không** biết thêm điều gì mà ta không biết — họ chỉ bỏ bớt.
-Nỗi lo §5 doc gốc ("có thể họ lọc mã diện cảnh báo/kiểm soát, BCTC ngoại trừ — thay thế mù sẽ làm
-xấu universe") **không được dữ liệu ủng hộ**: nếu curation mang tín hiệu chất lượng thật, ta sẽ thấy
-prune chứa mã mà rule bỏ sót, chứ không phải ngược lại. ⚠️ *Giới hạn của lập luận này:* nó chứng minh
-curation không thêm **phạm vi**, chưa chứng minh 43 mã "rule-only" là **tốt**. Đó là việc của gate
-chất lượng ở tầng chiến lược (ROE/FSCORE/8L), không phải tầng universe — và §4.4 xử lý rủi ro sizing
-của 43 mã này.
+**(b) ⚠️ MỤC NÀY ĐÃ BỊ XÓA — tuyên bố cũ VOID.** Bản trước viết: *"Curation của bq_admin là TRỪ
+không phải CỘNG ⇒ họ không biết thêm điều gì mà ta không biết ⇒ nỗi lo §5 doc gốc không được dữ liệu
+ủng hộ."* Như hộp đính chính đầu §2.2 giải thích, phép đo dùng để chống lưng cho câu này là một
+**tautology** — nó đúng 100% bất kể curation có thông tin hay không, nên **không kết luận được gì**
+theo cả hai hướng. Câu hỏi §5 được trả lời riêng ở **§2.4**, bằng dữ liệu mà rule thanh khoản không
+nhìn thấy. Kết quả ở §2.4 đi **ngược** với tuyên bố cũ: curation **CÓ** mang thông tin thật.
 
-**(c) Look-ahead đo được rõ: 1,4×–2,3×.** So `n_rule` (PIT) với `n_union`: 2018 là **198 vs 459 =
-2,3×**. Universe backtest hiện tại đang cho phép mua gấp đôi số mã lẽ ra được phép tại thời điểm đó.
-Kết hợp với việc `hit_ticker_list.csv` được suy từ chính backtest cũ ⇒ **phần phồng thêm không phải
-mã ngẫu nhiên, mà thiên vị về phía mã từng sinh deal** — đây đúng định nghĩa circular selection bias.
+**(c) Look-ahead lớn hơn số cũ: 2,7× tại 2018 (không phải 2,3×).** Số cũ so `n_rule` PIT với `n_union`
+lấy từ doc gốc (459 tại 2018). Sai mẫu số. Dạng gọi mà code **thực sự đang chạy** là
+`IN (SELECT DISTINCT ticker FROM ticker_prune)` — `pt_v23_audit_2014.py:670/736/765/848` và ~20 file
+khác — **không có bất kỳ điều kiện thời gian nào**. Mẫu số thật vì vậy là **543 mã từng có mặt bất kỳ
+lúc nào trong lịch sử prune**, đo lại hôm nay:
 
-### 2.3 Chi phí backfill: không đáng kể
+```sql
+SELECT COUNT(DISTINCT ticker) FROM tav2_bq.ticker_prune                          → 543   (mẫu số code thật dùng)
+SELECT COUNT(DISTINCT ticker) FROM tav2_bq.ticker_prune WHERE time<=DATE"2018-06-29" → 381
+```
+
+⇒ **543 vs `n_rule` PIT 198 tại 2018 = 2,74×.** Backtest hiện tại cho phép mua gần **gấp ba** số mã
+lẽ ra được phép tại thời điểm đó. Kết hợp với `hit_ticker_list.csv` suy từ chính kết quả backtest cũ
+⇒ phần phồng thêm **thiên vị về phía mã từng sinh deal** = circular selection bias đúng định nghĩa.
+
+📌 **Ghi chú riêng, tự nó là bằng chứng:** con số 459 (ever-đến-2018) trong doc gốc **không tái lập
+được hôm nay — nay là 381**. Không ai sửa gì; bảng nguồn tự đổi dưới chân. Đây là minh chứng sống,
+đo được, cho chính vấn đề non-reproducibility mà `universe_pit` sinh ra để giải quyết — và là lý do
+mọi con số trích từ doc cũ phải đo lại chứ không chép.
+
+### 2.4 ⚠️ Phép test CÓ sức mạnh: 43 mã "rule-only" có chất lượng KÉM RÕ RỆT — §5 doc gốc ĐƯỢC XÁC NHẬN
+
+Đây là phép test thay thế cho §2.2 (theo `recommended_reruns` của quant-skeptic). Nguyên tắc: so 43
+mã **rule-only** (qua rule thanh khoản nhưng KHÔNG có trong `ticker_prune`) với nhóm **BOTH** bằng
+dữ liệu chất lượng mà **rule thanh khoản không nhìn thấy**.
+
+**Kết quả A — chất lượng ex-ante (đo tại chính ngày đó, không look-ahead):**
+
+| Ngày | Nhóm | n | ROE_Min3Y TB | % ROE_Min3Y<0 | ROE5Y TB | FSCORE TB |
+|---|---|---|---|---|---|---|
+| 2026-06-15 | BOTH | 230 | **+4,90%** | 6,5% | **11,85%** | 4,40 |
+| 2026-06-15 | **RULE_ONLY** | **43** | **−5,83%** | **30,2%** | **3,56%** | 4,74 |
+| 2014-06-30 | BOTH | 138 | +2,93% | 22,5% | 12,47% | 4,56 |
+| 2014-06-30 | **RULE_ONLY** | **30** | **−14,12%** | **60,0%** | **1,92%** | 5,03 |
+| 2018-06-29 | BOTH | 178 | +9,23% | 5,6% | 14,37% | 4,22 |
+| 2018-06-29 | **RULE_ONLY** | **21** | **−6,78%** | **23,8%** | **6,94%** | 4,55 |
+| 2022-06-30 | BOTH | 318 | +6,75% | 8,5% | 13,72% | 4,38 |
+| 2022-06-30 | **RULE_ONLY** | **84** | **−5,51%** | **29,8%** | **5,26%** | 4,46 |
+
+Dấu **nhất quán ở cả 4 mốc**, không phải một lần may. **FSCORE KHÔNG phân biệt được** (rule-only đôi
+khi còn cao hơn) — nên đừng dùng FSCORE làm gate universe; ROE_Min3Y và ROE5Y mới là trục phân biệt.
+
+**Không phải hiệu ứng quy mô.** Chia theo dải thanh khoản tại 2026-06-15, chênh lệch vẫn giữ nguyên
+dấu trong từng dải (trừ dải C, n=7 quá nhỏ):
+
+| Dải ADV | BOTH: ROE_Min3Y / %âm | RULE_ONLY: ROE_Min3Y / %âm |
+|---|---|---|
+| <2 tỷ | +4,4% / 14% (n=37) | −5,9% / **31%** (n=16) |
+| 2-5 tỷ | −2,2% / 13% (n=39) | −13,6% / **50%** (n=10) |
+| 5-15 tỷ | +0,4% / 7% (n=45) | +3,9% / 0% (n=7) |
+| >15 tỷ | +9,5% / 2% (n=109) | −4,8% / **30%** (n=10) |
+
+**Kết quả B — lợi suất 1 năm sau (ex-post):**
+
+| Ngày | BOTH: TB / trung vị | RULE_ONLY: TB / trung vị |
+|---|---|---|
+| 2014-06-30 | +17,9% / +11,0% | **+3,4% / −16,2%** |
+| 2018-06-29 | +6,3% / −1,4% | **−8,3% / −4,8%** |
+| 2022-06-30 | −0,9% / −5,6% | **−19,9% / −19,2%** |
+
+⚠️ **Kết quả B KHÔNG được dùng làm bằng chứng "curation khôn ngoan".** Nó bị nhiễm đúng thứ mà cả
+tài liệu này đang tố cáo: `hit_ticker_list` suy từ deal backtest ⇒ mã trong prune **theo cấu trúc**
+là mã đã tăng giá. Cả hai giả thuyết (curation-khôn-ngoan và circular-bias) đều dự đoán chênh lệch
+này. Ghi lại để minh bạch, không để suy luận. **Kết quả A mới là phần có sức mạnh** — nó đo bằng dữ
+liệu quá khứ tại chính ngày đó, và ta **có sẵn** các cột đó.
+
+**Golden floor giải thích được phần lớn, nhưng KHÔNG hết.** Áp golden floor hiện hành của
+`rating_8l` (`ROE_Min3Y ≥ 0 ∧ CF_OA > 0`) lên nhóm rule-only: loại **24/30 (2014), 16/21 (2018),
+63/84 (2022), 32/43 (2026)** ≈ **70-76%**. Nhưng nhóm rule-only **qua được** golden floor vẫn thua
+BOTH-qua-floor ở cả 3 mốc (−8,8% vs +21,7% · −11,3% vs +10,4% · −15,4% vs −1,7%) — n nhỏ (6/5/21) và
+lại dính đúng confound circular ở trên, nên coi là **tín hiệu cảnh báo, không phải kết luận**.
+
+**Đọc danh sách thật thì bức tranh có hai nửa** (43 mã tại 2026-06-15, xếp theo ADV — đây cũng là
+danh sách §8.1 yêu cầu công bố trước P2/P4):
+
+- **Nửa "curation ĐÚNG"** — mã lẽ ra không nên vào rổ: **HNG** (ROE_Min3Y −73,7%), **PIV** (−99,3%),
+  **NVB** (−91,7%), **SBS** (−22,6%), **TTF** (−13,4%), **MSR** (−12,8%), **TIN** (−17,3%),
+  **NRC** (−12,7%), và **VJC** — đã nằm trong danh sách **BANNED vĩnh viễn** của chính đội ta.
+- **Nửa "curation SAI vì danh sách cũ"** — mã lớn, chất lượng tốt, **niêm yết/lên sàn gần đây** nên
+  chưa kịp sinh deal trong backtest cũ: **FOX** (ADV 15 tỷ, ROE5Y **31,0%**), **VPL** (67 tỷ,
+  FSCORE 8), **VGI** (52 tỷ, CF_OA dương lớn), **VIW**, **TDP**. Loại nhóm này là **MẤT**, không phải
+  được — và đó chính là non-reproducibility/staleness của `hit_ticker_list`, không phải trí tuệ.
+
+Còn lại là các mã nhỏ 1-8 tỷ ADV, chất lượng trung bình (`C69 DSE KOS CTF AAS AAV PPT L40 CDC STH
+PSI PCH TLD TSA BIG SCG SGR THD AAH SBG FIR ASP MML RYG TAL DXS ORS BAF DSE VCK`).
+
+**KẾT LUẬN §2.4 — trả lời dứt điểm §5 doc gốc:**
+1. **Curation CÓ mang thông tin thật** (ngược tuyên bố cũ ở §2.2b). Rule thanh khoản thuần **KHÔNG
+   đủ** để thay `ticker_prune` mà bảo toàn chất lượng universe.
+2. **Nhưng thông tin đó KHÔNG bí mật** — nó nằm trong các cột ta đã có (`ROE_Min3Y`, `ROE5Y`,
+   `CF_OA`). Không có bằng chứng bq_admin dùng nguồn ngoài (danh sách cảnh báo HOSE/HNX, BCTC ngoại
+   trừ) mà ta không tra được. ⚠️ *Cũng không có bằng chứng ngược lại* — không tra được các nguồn đó
+   trong BQ, nên đây là **chưa loại trừ**, không phải **đã loại trừ**.
+3. **Curation cũng SAI theo hướng bỏ sót** (FOX/VPL/VGI) — nên nó không phải chuẩn vàng để bắt chước.
+4. ⇒ **Hàm ý thiết kế bắt buộc**: trước khi `universe_pit` chạm P2/P4 (đường tiền thật), phải có
+   **một lớp chất lượng ex-ante** — hoặc trong chính `universe_pit`, hoặc chứng minh được tầng chiến
+   lược đã chặn đủ. Xem **§3.2b (mới)**.
+
+📌 **Proxy hủy niêm yết: đo rồi, KHÔNG có sức mạnh — đừng dùng lại.** Đếm số mã không còn dòng nào
+trong `ticker` ở cửa sổ T+12→T+15 tháng: **0/0 tại cả 3 mốc, cả hai nhóm.** `tav2_bq.ticker` giữ dòng
+cho mọi mã bất kể tình trạng niêm yết ⇒ proxy này luôn cho 0, không phân biệt được gì. Muốn kiểm
+delist/diện cảnh báo thật thì cần nguồn ngoài BQ (Winston) — chưa có, và §2.4 **không** dựa vào nó.
+
+### 2.5 Chi phí backfill: không đáng kể
 
 Dry-run quét toàn bộ lịch sử `ticker` cho các cột cần thiết: **215.458.030 bytes ≈ 215 MB** (~0,001
 USD). Không phải rào cản. Rào cản là **kiểm định**, không phải compute.
@@ -143,16 +288,38 @@ sách hôm nay **là** look-ahead — đó là cái `ticker_prune` đang làm.
 |---|---|---|---|---|
 | B1 | `ICB_Code IS NOT NULL` | ✔ | **giữ nguyên** | loại pseudo-ticker chỉ số |
 | B2 | Tuổi ≥ 60 phiên từ dòng đầu trong `ticker` | ✔ | **giữ nguyên** | khớp chế độ tự động ~85 ngày hiện có |
-| B3 | VÀO: median trading value 60 phiên ≥ ngưỡng thực | 1,0 tỷ (*chưa hiệu chuẩn*) | **1,0 tỷ — ĐÃ HIỆU CHUẨN** (§2.2) | recall 97-99%, cao nguyên rộng |
+| B3 | VÀO: median trading value 60 phiên ≥ ngưỡng thực | 1,0 tỷ (*chưa hiệu chuẩn*) | **1,0 tỷ — giữ, có cơ sở** (§2.2a) | = hằng số production `filter.json:18`; cao nguyên n=3 mốc. **KHÔNG** còn viện dẫn "recall 97-99%" làm lý do (§2.2 đính chính) |
 | B4 | RA: < 0,5 tỷ trong 20 phiên liên tiếp | ✔ | **giữ nguyên** | hysteresis bất đối xứng, cùng triết lý DT5G 4-gate |
 | B5 | `Close ≥ 1.000 VND` | ✔ | **giữ nguyên** | |
 | B6 | Loại cứng: vắng ≥10 phiên liên tiếp trong `ticker` | ✔ | **giữ nguyên** | delist/đình chỉ |
 | B7 | Loại rồi phải đủ điều kiện lại từ đầu | ✔ | **giữ nguyên** | chống nhấp nháy |
 | **B8** | — | *(không có)* | **MỚI: integrity gate** | xem §3.3 |
 
-**Chỉ 2 thay đổi thực chất:** B3 chuyển từ "đề xuất khởi điểm chưa hiệu chuẩn" → **đã hiệu chuẩn có
-số**; và thêm **B8**. Bộ tiêu chí còn lại đứng vững trước phản hồi bq_admin — vì nó vốn đã được thiết
-kế để không phụ thuộc `ticker_prune`.
+**Thay đổi thực chất:** thêm **B8** (§3.3), và thêm **hạng mục mở B-Q** (§3.2b) — hạng mục này SINH
+RA từ kết quả §2.4 và **chưa có lời giải chốt**. Bộ tiêu chí còn lại đứng vững trước phản hồi
+bq_admin — vì nó vốn đã được thiết kế để không phụ thuộc `ticker_prune`.
+
+### 3.2b B-Q — lớp chất lượng ex-ante: HẠNG MỤC BẮT BUỘC, CHƯA CHỐT (mới, từ §2.4)
+
+§2.4 đo được: rule thanh khoản thuần cho vào rổ ~43 mã (2026) / 84 mã (2022) có `ROE_Min3Y` **âm
+trung bình** và `ROE5Y` chỉ bằng **1/3** nhóm được prune giữ. Vì vậy **B1-B8 thuần thanh khoản KHÔNG
+đủ** cho P2/P4. Ba phương án, chưa chọn:
+
+| PA | Nội dung | Ưu | Nhược |
+|---|---|---|---|
+| **Q-A** | **Không đụng `universe_pit`** — chứng minh tầng chiến lược đã chặn đủ (golden floor `rating_8l` loại 70-76% nhóm rule-only; VJC đã BANNED) | Giữ universe thuần "có giao dịch được không", đúng phân tầng trách nhiệm; **không thêm tham số mới nào** | Còn rò 24-30% qua floor; phải **đo thật** tỷ lệ rò tới tầng đặt lệnh, chưa đo |
+| **Q-B** | Thêm B-Q vào `universe_pit`: loại khi `ROE_Min3Y < 0` ∧ `CF_OA ≤ 0` (2 điều kiện cùng lúc) | Chặn tận gốc, một chỗ | Trộn "chất lượng" vào tầng "thanh khoản" — sai phân tầng; **thêm 1 tham số có thể tune** ⇒ đúng cái bẫy §8.4 |
+| **Q-C** | Giữ universe thuần, nhưng **xuất cờ** `quality_flag` trong `universe_pit` để tầng chiến lược/due-diligence đọc | Không đổi hành vi, minh bạch, khớp mandate due-diligence 2026-07-21 | Cần consumer chịu đọc cờ |
+
+**Khuyến nghị Taylor: Q-A trước, Q-C kèm theo; KHÔNG làm Q-B.** Lý do: đúng nguyên tắc §8.4 (mọi
+tham số universe phải chốt theo **bảo toàn hành vi**, không theo CAGR) — thêm ngưỡng ROE vào tầng
+universe là mở đúng cánh cửa tự-tune mà tài liệu này cảnh báo. Nhưng Q-A **phải được đo, không được
+giả định**: việc G2b (§6) = chạy `rating_8l` + `BANNED` + golden floor lên đúng 43/84 mã rule-only,
+đếm còn bao nhiêu mã lọt tới tầng đặt lệnh. Nếu số rò đó **≠ ~0** ⇒ quay lại bàn Q-C/Q-B với user,
+KHÔNG tự chọn.
+
+**Cổng cứng:** cấm cutover P2/P4 khi hạng mục này chưa đóng. Đây là bổ sung thứ hai cho danh sách
+cổng cứng, ngang hàng với cổng CAPIT §4.4.
 
 **Điểm cần user biết rõ:** ⚠️ B3/B4 dùng `Volume_3M_P50 × Price` trong đo lường §2.2 (cột dựng sẵn,
 cửa sổ 3 tháng), còn đặc tả ghi "median 60 phiên". Hai thứ **gần nhau chứ không bằng nhau**. Builder
@@ -277,9 +444,9 @@ có mang thông tin thật không, và chưa biết độ lớn look-ahead"*. **
 
 | Ẩn số hôm qua | Hôm nay |
 |---|---|
-| Curation của bq_admin có mang thông tin ta không có? | **Không** — prune ⊂ rule, recall 97-99% (§2.2b) |
+| Curation của bq_admin có mang thông tin ta không có? | **CÓ thông tin thật, nhưng KHÔNG bí mật** — nhóm rule-only kém rõ rệt (ROE_Min3Y âm, ROE5Y ~1/3), song đo được bằng cột ta đã có (§2.4). ⚠️ *Đây là bản sửa: câu trả lời cũ "Không — recall 97-99%" là tautology, đã VOID (§2.2)* |
 | Nguồn của membership là gì? | **`hit_ticker_list.csv` suy từ chính kết quả backtest cũ** (bq_admin xác nhận) |
-| Độ lớn look-ahead? | **1,4×–2,3× số mã** (§2.2c) |
+| Độ lớn look-ahead? | **2,74× số mã tại 2018** (543-ever vs 198 PIT) — §2.2c |
 | Universe có tái lập được không? | **Không** — IVS 0 → 1.622 dòng trong 8 ngày |
 
 Điểm quyết định không phải "27,84% cao hay thấp hơn thực tế bao nhiêu" — mà là: **một con số tính
@@ -330,6 +497,7 @@ kiểm chứng trong 2-3 tuần tới.
 | **G0** | Lấy lại văn bản gốc Q&A bq_admin (§0); đánh dấu R3 `PROVISIONAL` (§5.2) | <0,5 phiên | Cao | User |
 | **G1** | `bin/build_universe_pit.py` + selfcheck (idempotent, atomic, B8) | 1-1,5 phiên | Cao | — |
 | **G2** | Backfill 2000→nay (compute rẻ: 215MB) + **kiểm định**: chạy lại bảng §2.2 với median-60-phiên tự tính, ~30 mốc | **1 phiên** (compute ~phút, kiểm định chiếm hết) | Cao | G1 |
+| **G2b** | **(MỚI, từ §2.4/§3.2b)** Đo độ rò chất lượng: chạy `BANNED` + golden floor `rating_8l` lên đúng nhóm rule-only tại nhiều mốc, đếm số mã lọt tới tầng đặt lệnh. Ra ~0 ⇒ chốt Q-A; ra ≠0 ⇒ trình user chọn Q-C/Q-B | 0,5-1 phiên | Trung bình | G2 |
 | **G3** | P1-P3 cutover + A/B tĩnh rổ custom30V | 1 phiên | Trung bình (phụ thuộc diff rổ lớn hay nhỏ) | G2 |
 | **G4** | **Re-hiệu chuẩn breadth CAPIT (§4.4)** — chuỗi 2014→nay, tìm `WASHOUT_GATE'` bảo toàn tập ngày fire | 1 phiên | **Thấp** — có thể không tồn tại ngưỡng bảo toàn ⇒ escalate | G2 |
 | **G5** | Shadow P4/P5 ≥10 phiên (chi phí *thời gian lịch*, gần như không tốn effort) | ~2 tuần lịch, 0,5 phiên | Cao | G4 |
@@ -347,20 +515,35 @@ escalate) và **G6** (chưa đo runtime lệnh pin R3 trong job này — nên h�
 
 ---
 
-## 7. 5 VẤN ĐỀ ETL PHỤ CỦA bq_admin — **KHÔNG xác nhận được giả định "không liên quan"**
+## 7. 5 VẤN ĐỀ ETL PHỤ CỦA bq_admin — **giả định "không liên quan" ĐÃ BỊ BÁC BỎ (bq_admin xác nhận)**
 
 Dispatch nêu giả định: *"lớp mới đọc thẳng `ticker` không qua `ticker_prune`, nên các bug này có lẽ
 KHÔNG còn liên quan — verify giả định này."*
 
-**Kết quả verify: giả định này chỉ đúng nếu các bug nằm riêng ở load job của `ticker_prune`. Tôi
-không xác minh được điều đó, và có lý do thực chất để nghi ngờ nó SAI.**
+**Kết quả verify: giả định SAI. Đã có xác nhận trực tiếp từ bq_admin.**
+
+> **CẬP NHẬT 2026-07-22 04:12 ICT — trả lời Q8 của bq_admin** (Discord, kênh technical analysis),
+> nguyên văn: *"Nó chỉ là config của bigquery và được apply ở toàn bộ các bảng. Logic ở đây chỉ là
+> một script update lại toàn bộ dữ liệu mới và chỉ được chạy một lần để initial."*
+>
+> Hai điều được chốt:
+> 1. **`max_bad_records=10` áp cho MỌI bảng, gồm cả `tav2_bq.ticker`.** Không còn là "có thể có" —
+>    **ĐÃ XÁC NHẬN CÓ**. `universe_pit` đọc `ticker` ⇒ thừa hưởng nguyên vẹn khả năng âm thầm mất tới
+>    10 dòng mỗi lần nạp, **không có cảnh báo nào**.
+> 2. Cơ chế `WRITE_TRUNCATE` (rebuild toàn bộ) là script **"chỉ chạy 1 lần để initial"**, không phải
+>    job định kỳ. Nhưng nó **vẫn kích hoạt lại thủ công được** — và thực tế **đã xảy ra ngày 07-12**
+>    (sự cố corruption `ticker_financial` + `ticker_prune`). "Chỉ chạy 1 lần theo thiết kế" ≠ "không
+>    thể chạy lại"; kiểm soát nằm ở phía bq_admin, không ở phía ta.
+>
+> ⇒ **B8 (§3.3) không còn là bảo hiểm phòng hờ — nó là bắt buộc, chống một rủi ro ĐÃ XÁC NHẬN TỒN
+> TẠI.** Tôi từ chối viết builder không có B8.
 
 | Vấn đề | Liên quan tới `universe_pit`? | Lập luận |
 |---|---|---|
-| `max_bad_records=10` im lặng | **CÓ THỂ CÓ** | Đây là tham số của **load job**, không phải của bảng đích. Nếu `ticker` được nạp bằng load job có cùng cấu hình (rất hợp lý — cùng pipeline), thì `ticker` cũng âm thầm mất tới 10 dòng/lần nạp. `universe_pit` đọc `ticker` ⇒ **thừa hưởng nguyên vẹn**. |
-| GCS cleanup bị comment | **CÓ THỂ CÓ** | File cũ tồn đọng trong bucket ⇒ rủi ro nạp lại/nạp trùng. Ảnh hưởng **mọi** bảng nạp từ đường GCS đó, không riêng prune. |
+| `max_bad_records=10` im lặng | **CÓ — ĐÃ XÁC NHẬN** | bq_admin: *"config của bigquery và được apply ở toàn bộ các bảng"*. `ticker` mất tới 10 dòng/lần nạp, im lặng. `universe_pit` đọc `ticker` ⇒ thừa hưởng. |
+| GCS cleanup bị comment | **CÓ THỂ CÓ** | File cũ tồn đọng trong bucket ⇒ rủi ro nạp lại/nạp trùng. Ảnh hưởng **mọi** bảng nạp từ đường GCS đó, không riêng prune. Chưa hỏi riêng. |
 | `is_skip` không nhất quán | **Chưa xác định** | Không biết cờ này lọc ở tầng nào (nguồn hay riêng bước prune). |
-| (2 vấn đề còn lại) | **Không biết** | Bản tóm tắt không nêu tên. |
+| (2 vấn đề còn lại) | **Không biết** | Chưa đối chiếu chi tiết với văn bản gốc. |
 
 **Bằng chứng ủng hộ phía "có liên quan"**: sự cố 07-14/15 làm hỏng **cả `ticker_financial` LẪN
 `ticker_prune`** (rows 07-08→07-14 bị xoá/ghi đè) — nghĩa là chế độ hỏng của pipeline này **không**
@@ -380,15 +563,24 @@ khoảng trống này**, và là lý do tôi từ chối viết builder không c
 
 ## 8. RỦI RO CỦA CHÍNH PHƯƠNG ÁN NÀY (nói thẳng)
 
-1. **43 mã "rule-only" chưa được đánh giá chất lượng.** §2.2b chứng minh curation không thêm phạm
-   vi, **không** chứng minh phần rule thêm ra là tốt. Universe rộng hơn 17% ⇒ nhiều ứng viên mua hơn
-   ⇒ tương tác với mandate due-diligence toàn-diện (user 2026-07-21) và với trần vị thế LAG đang treo
-   (concurrency thực 16-17, không phải 12). **Cần liệt kê 43 mã đó cho người đọc trước khi cutover
-   P2/P4** — rẻ, và là đúng tinh thần mandate due-diligence.
-2. **§2.2 đo bằng `Volume_3M_P50` dựng sẵn, không phải median-60-phiên tự tính** (§3.2). Recall
-   97-99% có thể xê dịch. Chưa phải kết quả cuối.
-3. **`n=1` mốc cho sweep ngưỡng** (chỉ 2026-06-15). Cao nguyên 5e8-1e9 nên kiểm ở vài mốc lịch sử
-   nữa trong G2 trước khi khoá B3.
+1. **43 mã "rule-only" — ĐÃ ĐÁNH GIÁ (§2.4), và kết quả XẤU hơn tôi tưởng.** Không còn là "chưa
+   biết": nhóm này có `ROE_Min3Y` âm trung bình, `ROE5Y` bằng ~1/3 nhóm được prune giữ, nhất quán ở
+   4 mốc và không phải hiệu ứng quy mô. Danh sách đầy đủ đã công bố ở §2.4 (đáp ứng yêu cầu "liệt kê
+   trước cutover"). Rủi ro còn lại **chuyển dạng**: từ "chưa đo" → "**đã đo, cần lớp chất lượng
+   ex-ante, chưa chốt dùng lớp nào**" (§3.2b, cổng cứng trước P2/P4). Vẫn tương tác với mandate
+   due-diligence toàn-diện (user 2026-07-21) và trần vị thế LAG.
+2. **§2.2 đo bằng `Volume_3M_P50` dựng sẵn, không phải median-60-phiên tự tính** (§3.2). Recall sẽ
+   xê dịch khi chuyển sang spec tự tính. ⚠️ **Khi nó xê dịch, KHÔNG được tune B3 về lại cho recall
+   đẹp** — recall so với prune giờ đã biết là **thước đo không có sức mạnh** (§2.2), nên "kéo recall
+   lên" chính là tuning mù. Xem #4.
+3. ~~**`n=1` mốc cho sweep ngưỡng**~~ — **ĐÃ ĐÓNG, có lợi.** quant-skeptic mở rộng sang 2018 và
+   2022: recall tại 1e9 = 98,9% / 99,1%; tại 2e9 = 80,6% / 87,2%. Cao nguyên giữ ở **n=3 mốc**
+   (§2.2a). Không cần kiểm thêm trong G2.
+3b. **RỦI RO MỚI thay chỗ #3: sai lầm suy luận, không phải sai số đo.** Bản trước của tài liệu này
+   đã đưa một tautology lên thành kết luận nền tảng ("curation vô nghĩa") và suýt để nó đông cứng
+   thành đồng thuận của fleet. Bài học vận hành: **một phép đo khớp 97-99% với hệ thống đang đo là
+   dấu hiệu nghi ngờ, không phải dấu hiệu thành công** — phải hỏi "phép đo này có thể ra kết quả
+   khác được không?" trước khi ăn mừng. Nếu câu trả lời là không, nó không phải bằng chứng.
 4. **Rủi ro con người, không phải kỹ thuật: đây là lúc rất dễ tune.** Ta đang tự viết lại universe
    cho một hệ đã biết kết quả lịch sử. Mọi tham số universe (ngưỡng B3, `WASHOUT_GATE'`) phải chốt
    theo tiêu chí **tái tạo/bảo toàn hành vi**, không theo CAGR. Nếu ai đó (kể cả tôi) đề xuất đổi B3
@@ -397,8 +589,10 @@ khoảng trống này**, và là lý do tôi từ chối viết builder không c
 5. **Kỳ vọng cần đặt lại ngay từ bây giờ: R3 mới nhiều khả năng THẤP HƠN 27,84%** (universe co lại,
    bỏ bớt mã thiên vị-về-phía-sinh-deal). Nếu con số mới **cao hơn**, đó là **dấu hiệu nghi ngờ**,
    phải điều tra chứ không phải ăn mừng.
-6. Chưa có ý kiến Winston (khả thi vận hành, chạy song song) — phương án này chưa hoàn chỉnh nếu
-   thiếu.
+6. ~~Chưa có ý kiến Winston~~ — **ĐÃ CÓ** (bus 2026-07-22 03:48, `Winston_20260722_034...`): khả thi
+   vận hành, chi phí ~0. Winston bổ sung một điểm quan trọng: **`ticker` CŨNG bị ghi đè lịch sử** —
+   nghĩa là `universe_pit` phải **tự lưu snapshot bất biến** (append-only, đúng như §3.1 thiết kế),
+   không được coi `ticker` là nguồn ổn định để tính lại bất cứ lúc nào. Củng cố thêm B8.
 
 ---
 
@@ -406,14 +600,15 @@ khoảng trống này**, và là lý do tôi từ chối viết builder không c
 
 | # | Quyết định | Khuyến nghị Taylor |
 |---|---|---|
-| Q1 | Chấp nhận hướng `universe_pit` tự xây (không mirror `ticker_prune`) | **CÓ** — bq_admin + số đo §2.2 đồng thuận |
-| Q2 | Chốt B3 = 1,0 tỷ VND/ngày (thực, neo 2026, khử lạm phát 7%) làm v1, hiệu chuẩn theo **recall**, không theo CAGR | **CÓ** |
+| Q1 | Chấp nhận hướng `universe_pit` tự xây (không mirror `ticker_prune`) | **CÓ** — căn cứ **không** phải §2.2 (đã void) mà là: circular bias (bq_admin xác nhận `hit_ticker_list` ← deal backtest), non-reproducibility (IVS 0→1.622 dòng; 459→381), look-ahead 2,74× (§2.2c) |
+| Q2 | Chốt B3 = 1,0 tỷ VND/ngày (thực, neo 2026, khử lạm phát 7%) làm v1 — **giữ vì nó là hằng số production sẵn có** (`filter.json:18`), **KHÔNG** hiệu chuẩn theo recall (thước đo vô hiệu, §2.2), **KHÔNG** theo CAGR | **CÓ** |
+| **Q9** | **(MỚI)** Chấp nhận **cổng cứng §3.2b**: cấm cutover P2/P4 tới khi đóng hạng mục lớp-chất-lượng-ex-ante; hướng khuyến nghị **Q-A (đo độ rò qua golden floor) + Q-C (xuất cờ)**, **không** thêm ngưỡng ROE vào tầng universe | **CÓ** — đây là hệ quả trực tiếp của §2.4, chạm tiền thật |
 | Q3 | Đánh dấu R3 27,84% là `PROVISIONAL` trong `results_registry.md` **ngay**, trước khi implement | **CÓ** — rẻ, ngăn trích dẫn sai trong 2-3 tuần tới |
 | Q4 | Chấp nhận re-pin R3 (2 lần chạy) + rà soát N-trial tuần qua | **CÓ**, ưu tiên cao-không-khẩn |
 | Q5 | **CAPIT: cho phép giữ breadth ở `ticker_prune` CÓ CHỦ Ý cho tới khi re-hiệu-chuẩn xong**, và cấm cutover P4 khi `capit_fired=true` | **CÓ** — đây là khoản chạm tiền thật, xin duyệt riêng |
 | Q6 | Nếu G4 không tìm được `WASHOUT_GATE'` bảo toàn tập ngày fire → dừng và hỏi user, không tự chọn ngưỡng | **CÓ** |
 | Q7 | Cho phép sửa `data_registry.md` / `coding_guidelines.md` / `cron_registry.md` kèm theo | **CÓ** |
-| Q8 | Gửi bq_admin 1 câu hỏi bổ sung (§7: `max_bad_records`/GCS có áp cho `ticker` không) | **CÓ** |
+| ~~Q8~~ | ~~Gửi bq_admin 1 câu hỏi bổ sung~~ — **ĐÃ XONG, đã có trả lời 04:12 ICT** | **ĐÓNG** — xác nhận `max_bad_records=10` áp cho MỌI bảng gồm `ticker` ⇒ B8 bắt buộc (§7) |
 
 **Không xin duyệt trong tài liệu này** (chưa đủ dữ liệu): sửa trần vị thế LAG (12 vs 16-17 thực),
 đổi bất kỳ tham số chiến lược nào, đụng vào 43 mã rule-only ở tầng sizing.
@@ -422,8 +617,18 @@ khoảng trống này**, và là lý do tôi từ chối viết builder không c
 
 ## 10. VIỆC KẾ TIẾP (nếu duyệt)
 
-1. Lấy lại văn bản gốc Q&A bq_admin → lưu đúng đường dẫn → đọc lại §7 (G0).
-2. Winston: đánh giá khả thi vận hành (cron slot cho builder, tương tác `sync_bq_cache_daily.sh`
-   23:45, `bq_cache` có cần thêm `universe_pit` không).
-3. quant-skeptic: review phương án này, soi riêng §2.2 (recall có bị tôi vô tình tune không) và §8.4.
-4. Sau khi đủ 2 review → trình user quyết Q1-Q8 → bắt đầu G1.
+**Đã đóng kể từ bản đầu:**
+
+| # | Việc | Trạng thái |
+|---|---|---|
+| ~~1~~ | ~~Lấy lại văn bản gốc Q&A bq_admin~~ | **XONG** — file có sẵn, đã đọc, §7 cập nhật (§0) |
+| ~~2~~ | ~~Winston đánh giá khả thi vận hành~~ | **XONG** — khả thi, chi phí ~0; cảnh báo `ticker` cũng bị ghi đè lịch sử (§8.6) |
+| ~~3~~ | ~~quant-skeptic review, soi riêng §2.2~~ | **XONG — REFUTED (cao) đúng §2.2.** Đã sửa: §2.2 (tautology), §2.4 (test thay thế), §2.2c (2,74×), §7 (Q8 có trả lời), §8.3 (n=3) |
+
+**Còn lại trước G1:**
+1. Trình user quyết **Q1-Q7 + Q9** (Q8 đã đóng). **Q9 là mục mới và quan trọng nhất** — cổng cứng
+   lớp chất lượng ex-ante (§3.2b), sinh ra từ §2.4.
+2. Chạy **G2b** (đo độ rò qua golden floor) — có thể chạy độc lập, không chặn bởi G1.
+3. **Không cần dispatch quant-skeptic vòng 2** cho các sửa đổi ở trên (chúng chỉ **hạ** mức tự tin
+   và **siết** thêm cổng, không nới lỏng gì). **Cần** skeptic lại nếu G2b dẫn tới đề xuất thêm tham
+   số chất lượng vào tầng universe (Q-B) — đó là thay đổi hành vi thật.
