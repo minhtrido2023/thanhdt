@@ -2284,3 +2284,18 @@
 - [2026-07-22T12:11:56Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 43, "job_id": "Taylor_20260722_112850", "source": "watcher"}
 - [2026-07-22T12:12:56Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 44, "job_id": "Taylor_20260722_112850", "source": "watcher"}
 - [2026-07-22T12:13:56Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 45, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+
+## Consolidation 2026-07-22T12:20:12Z
+- [2026-07-22T12:15:13Z] DollarBill/heartbeat — DollarBill_20260722_120311: {"status": "still_running", "elapsed_min": 12, "job_id": "DollarBill_20260722_120311", "source": "watcher"}
+- [2026-07-22T12:16:13Z] DollarBill/heartbeat — DollarBill_20260722_120311: {"status": "still_running", "elapsed_min": 13, "job_id": "DollarBill_20260722_120311", "source": "watcher"}
+- [2026-07-22T12:16:29Z] DollarBill/heartbeat — DollarBill_20260722_120311: {"status": "in_progress", "note": "Đang viết plan JSON. CAPIT fired 07-22, basket 4 mã. Trứng vàng uncertain. LAG IVS+TRC entry 07-24."}
+- [2026-07-22T12:17:13Z] DollarBill/heartbeat — DollarBill_20260722_120311: {"status": "still_running", "elapsed_min": 14, "job_id": "DollarBill_20260722_120311", "source": "watcher"}
+- [2026-07-22T12:18:14Z] DollarBill/heartbeat — DollarBill_20260722_120311: {"status": "still_running", "elapsed_min": 15, "job_id": "DollarBill_20260722_120311", "source": "watcher"}
+- [2026-07-22T12:19:14Z] DollarBill/heartbeat — DollarBill_20260722_120311: {"status": "still_running", "elapsed_min": 16, "job_id": "DollarBill_20260722_120311", "source": "watcher"}
+- [2026-07-22T12:19:43Z] DollarBill/decision — plan-2026-07-23: {"account": "SpaceX", "plan_date": "2026-07-23", "state": "NEUTRAL(3)", "action": "CAPIT_TOPUP_CONDITIONAL", "orders": 4, "conditional_on": "Trứng vàng = 302M xác nhận", "capit_basket": ["PVT", "SAB", "SIP", "VNM"], "capit_top_up_cost_vnd": 243200000, "cash_needed_from_truong_vang": 195000000, "scenario_b": "HOLD nếu Trứng vàng=0", "lag_upcoming_07_24": ["IVS", "TRC"], "lag_upcoming_07_25": 18, "nav_active": 1211383374, "cash": 49125163, "file": "data/trade_plans/plan_SpaceX_2026-07-23.json"}
+- [2026-07-22T12:14:56Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 46, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:15:56Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 47, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:16:57Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 48, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:17:57Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 49, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:18:57Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 50, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:19:57Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 51, "job_id": "Taylor_20260722_112850", "source": "watcher"}
