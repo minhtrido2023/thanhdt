@@ -70,6 +70,68 @@ ETF_PARK = {3: 0.7}                                  # both books in V2.3
 STATE_LAG_WEIGHT = {1: 0.50, 2: 0.00, 3: 0.65, 4: 0.65, 5: 0.65}
 EDGE_THR = 4.0   # %: LAG trailing-12M edge-health threshold (pinned R3 = argv "edge")
 
+# ── UNIVERSE SOURCE — P3 cutover 2026-07-22 (§4.2/§4.3/§4.3b ticker_prune_replacement_plan.md) ──
+# Scope of THIS constant = the D1 RE_BACKLOG sector-lens panel ONLY (ICB_Code=8633, real estate).
+# The other three `ticker_prune` reads in this file (ADV caps :167, CAPIT breadth/pool :425/:455)
+# are P4 and stay on `ticker_prune` DELIBERATELY until the breadth gate is recalibrated (§4.4).
+# "pit"   = `tav2_mike.universe_pit_q`, membership PER DAY. This also FIXES a live look-ahead bug:
+#           the old `IN (SELECT DISTINCT ticker FROM ticker_prune)` predicate has no time condition,
+#           so it admitted a name to every historical panel date — VHM (listed 2018) was sitting in
+#           the 2014 panel today (§4.3b). Diff is NOT zero and is not meant to be: ±10-17 names per
+#           date (~20% of the panel), the removals being exactly the un-listed-yet names.
+# "prune" = legacy DISTINCT-ever predicate. Kept as the ONE-WORD ROLLBACK.
+# Module-level constant on purpose, NOT an env var (env inherited through a process is the very
+# mechanism behind incident C1 07-12 — coding_guidelines §11).
+UNIVERSE_SOURCE = "pit"
+UNIVERSE_PIT_TABLE = "lithe-record-440915-m9.tav2_mike.universe_pit_q"
+
+
+def universe_pred(alias="t"):
+    """SQL predicate restricting `alias` (a tav2_bq.ticker / ticker_1m row) to the universe.
+
+    Fail-safe (§4.3): there is deliberately NO branch that silently falls back to `ticker_prune` —
+    a silent fallback would re-import the very drift this migration exists to escape."""
+    if UNIVERSE_SOURCE == "prune":
+        return f"{alias}.ticker IN (SELECT DISTINCT t2.ticker FROM tav2_bq.ticker_prune AS t2)"
+    if UNIVERSE_SOURCE != "pit":
+        raise ValueError(f"UNIVERSE_SOURCE={UNIVERSE_SOURCE!r} unknown (pit|prune)")
+    return (f"EXISTS(SELECT 1 FROM `{UNIVERSE_PIT_TABLE}` u2 "
+            f"WHERE u2.ticker={alias}.ticker AND u2.time={alias}.time AND u2.in_universe)")
+
+
+def assert_universe_covers(start_date, end_date, icb=8633):
+    """Fail-safe (§4.3): STOP WITH AN ERROR if `universe_pit` misses any session on which the D1
+    panel actually HAS rows. Without this a missing day silently looks like "no name was in the
+    universe that day" — a quietly empty panel instead of a loud failure.
+
+    Scoped to the panel's own rows (ICB=`icb`, `ticker` UNION `ticker_1m`) rather than to every
+    session in `tav2_bq.ticker`, and that scoping is deliberate, not laxity: upstream regularly
+    leaves a 1-row stub for the current date (e.g. 2026-07-22 had exactly one row, DRL) which
+    `build_universe_pit.py`'s B8 integrity gate correctly REFUSES to build a universe day from.
+    Erroring on such a stub would take the live recommender down for a day that contributes
+    nothing. If the stub ever does contain an ICB-8633 name, this still fails loudly."""
+    if UNIVERSE_SOURCE != "pit":
+        return
+    df = bq(f"""WITH src AS (
+  SELECT DISTINCT t.time FROM tav2_bq.ticker AS t
+    WHERE t.ICB_Code={icb} AND t.time BETWEEN DATE '{start_date}' AND DATE '{end_date}'
+  UNION DISTINCT
+  SELECT DISTINCT t.time FROM tav2_bq.ticker_1m AS t
+    WHERE t.ICB_Code={icb} AND t.time BETWEEN DATE '{start_date}' AND DATE '{end_date}')
+SELECT (SELECT COUNT(*) FROM src) AS n_src,
+       (SELECT COUNT(*) FROM src WHERE src.time NOT IN (
+          SELECT u.time FROM `{UNIVERSE_PIT_TABLE}` AS u
+            WHERE u.time BETWEEN DATE '{start_date}' AND DATE '{end_date}'
+            GROUP BY u.time)) AS n_missing,
+       (SELECT MAX(u.time) FROM `{UNIVERSE_PIT_TABLE}` AS u) AS uni_max""")
+    n_src, n_missing = int(df["n_src"].iloc[0]), int(df["n_missing"].iloc[0])
+    if n_missing:
+        raise RuntimeError(
+            f"universe_pit thieu {n_missing}/{n_src} phien co du lieu panel ICB-{icb} trong "
+            f"[{start_date},{end_date}] (universe_pit max={df['uni_max'].iloc[0]}). DUNG — khong tu "
+            f"fallback ve ticker_prune (§4.3). Chay mike/bin/build_universe_pit.py "
+            f"(+ build_universe_pit_quality.py) cho khoang thieu.")
+
 def w_lag_target(state, asof):
     """Edge-conditional w_LAG target — mirror of pt_v23_audit_2014.py:1738-1751 (pinned R3
     allocator, argv `v23a none postbull 0 edge`): in good states (3/4/5) tilt to 0.65 ONLY
@@ -280,17 +342,22 @@ state_today = int(sig.loc[sig["time"] == LATEST, "state5"].dropna().iloc[0]) if 
 print(f"  latest signal date: {LATEST.date()} | {len(sig):,} signal rows in window")
 
 # ── 2. D1 RE_BACKLOG (gated state) + SV_TIGHT + overheat (same layering as pt_v22_dt5g) ──
+assert_universe_covers(START, END)          # §4.3 fail-safe, BEFORE the first universe-gated query
+UNI_PRED = universe_pred("t")
+print(f"  D1 panel universe source: {UNIVERSE_SOURCE}")
 d1 = bq(f"""WITH adv_dated AS (SELECT f.ticker,f.time AS f_time,SAFE_DIVIDE(f.AdvCust_P0,NULLIF(f.AdvCust_P4,0))-1 AS adv_yoy,
   LEAD(f.time) OVER (PARTITION BY f.ticker ORDER BY f.time) AS next_f_time FROM tav2_bq.ticker_financial AS f),
 fa_dated AS (SELECT f.ticker,f.time AS f_time,f.tier AS fa_tier,LEAD(f.time) OVER (PARTITION BY f.ticker ORDER BY f.time) AS next_f_time FROM tav2_bq.fa_ratings AS f),
 fin_dated AS (SELECT f.ticker,f.time AS fin_time,f.Revenue_YoY_P0,LEAD(f.time) OVER (PARTITION BY f.ticker ORDER BY f.time) AS next_fin_time FROM tav2_bq.ticker_financial AS f),
 tkd AS (
   -- ICB-8633 panel: canonical ticker + ticker_1m fallback for the freshest session not yet in `ticker`
+  -- Universe membership is PER DAY via {UNIVERSE_SOURCE} (see universe_pred) — the old DISTINCT-ever
+  -- form had no time condition and leaked not-yet-listed names into historical dates (VHM in 2014).
   SELECT t.ticker,t.time,t.NP_P0,t.NP_P4 FROM tav2_bq.ticker AS t
-  WHERE t.ICB_Code=8633 AND t.time BETWEEN DATE '{START}' AND DATE '{END}' AND t.ticker IN (SELECT DISTINCT t2.ticker FROM tav2_bq.ticker_prune AS t2)
+  WHERE t.ICB_Code=8633 AND t.time BETWEEN DATE '{START}' AND DATE '{END}' AND {UNI_PRED}
   UNION ALL
   SELECT t.ticker,t.time,t.NP_P0,t.NP_P4 FROM tav2_bq.ticker_1m AS t
-  WHERE t.ICB_Code=8633 AND t.time BETWEEN DATE '{START}' AND DATE '{END}' AND t.ticker IN (SELECT DISTINCT t2.ticker FROM tav2_bq.ticker_prune AS t2)
+  WHERE t.ICB_Code=8633 AND t.time BETWEEN DATE '{START}' AND DATE '{END}' AND {UNI_PRED}
     AND NOT EXISTS (SELECT 1 FROM tav2_bq.ticker AS x WHERE x.ticker=t.ticker AND x.time=t.time AND x.ICB_Code IS NOT NULL))
 SELECT t.ticker,t.time,fa.fa_tier,SAFE_DIVIDE(t.NP_P0,t.NP_P4)-1 AS np_yoy,fin.Revenue_YoY_P0 AS rev_yoy,adv.adv_yoy,s5.state AS state5
 FROM tkd AS t LEFT JOIN tav2_bq.{DT_TABLE} AS s5 ON s5.time=t.time
