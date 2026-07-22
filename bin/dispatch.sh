@@ -36,6 +36,10 @@
 #                  mechanical lookups and deep R&D, so the CALLER judges complexity
 #                  per task and passes --model explicitly when it's warranted (see
 #                  MIKE.md §Model routing for the 3-question heuristic).
+#   --thread ID    pin this job's Discord topic explicitly (highest precedence). Omit and
+#                  the topic is resolved by _ambient_thread: per-agent override → ambient
+#                  session topic → global last-active pointer. Use when a job legitimately
+#                  belongs to a topic other than the dispatching one.
 #   --effort LEVEL reasoning effort (low|medium|high|xhigh|max). Omit → 'medium'
 #                  (task thường lệ). Task phức tạp → --effort high. CHÍNH SÁCH user
 #                  (2026-07-14): model 'fable' bị chặn tối đa 'high' — truyền xhigh/max
@@ -77,9 +81,16 @@ TIMEOUT=""
 RETRIES=1
 MODEL=""
 EFFORT=""
+FORCE_TID=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --bg) bg="--bg" ;;
+    # --thread: pin this job's Discord topic EXPLICITLY — beats both the per-agent
+    # override and the ambient session topic. This is the escape hatch that makes it
+    # safe for _agent_thread_override to outrank ambient DISCORD_THREAD_ID
+    # (fix 2026-07-22, see the _ambient_thread comment).
+    --thread) FORCE_TID="${2:?--thread needs a value}"; shift ;;
+    --thread=*) FORCE_TID="${1#*=}" ;;
     --timeout) TIMEOUT="${2:?--timeout needs a value}"; shift ;;
     --timeout=*) TIMEOUT="${1#*=}" ;;
     --retries) RETRIES="${2:?--retries needs a value}"; shift ;;
@@ -183,8 +194,7 @@ _circuit_record() {
   if [ "$2" = "fail" ] && [ "$_cr_rc" -eq 1 ]; then
     "$ROOT/bin/notify.sh" "[circuit-breaker] $1 TRIPPED ($_cr_out) — dispatch tạm dừng ${CIRCUIT_COOLDOWN}s." 2>/dev/null || true
     local _cbtid; _cbtid="$(_job_thread_id "$job_id")"
-    [ -n "$_cbtid" ] || _cbtid="${DISCORD_THREAD_ID:-$(_agent_thread_override "$1")}"
-    [ -n "$_cbtid" ] || _cbtid="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
+    [ -n "$_cbtid" ] || _cbtid="$(_ambient_thread "$1")"
     if [ -n "$_cbtid" ]; then
       "$ROOT/bin/notify_thread.sh" "🔴 **Circuit breaker OPEN** cho **$1** ($_cr_out) — $CIRCUIT_THRESHOLD+ lỗi liên tiếp, tạm dừng dispatch ${CIRCUIT_COOLDOWN}s. Ép chạy: \`DISPATCH_FORCE=1\`." "$_cbtid" 2>/dev/null || true
     fi
@@ -265,8 +275,7 @@ _maybe_schedule_usage_resume() {
   local resume_ict; resume_ict="$(TZ=Asia/Ho_Chi_Minh date -d "@$resume_at" '+%H:%M %d/%m' 2>/dev/null || echo '?')"
   "$ROOT/bin/notify.sh" "[dispatch] $id: tài khoản hết usage limit (job $job_id) — KHÔNG PHẢI lỗi task. Tự động resume lúc ~${resume_ict} ICT (lần thử #$((n + 1))/$cap)." 2>/dev/null || true
   local _tid; _tid="$(_job_thread_id "$job_id")"
-  [ -n "$_tid" ] || _tid="${DISCORD_THREAD_ID:-$(_agent_thread_override "$id")}"
-  [ -n "$_tid" ] || _tid="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
+  [ -n "$_tid" ] || _tid="$(_ambient_thread "$id")"
   if [ -n "$_tid" ]; then
     "$ROOT/bin/notify_thread.sh" "⏳ **$id** hết usage limit tài khoản (job \`$job_id\`) — không phải lỗi task. TỰ ĐỘNG resume lúc ~${resume_ict} ICT. Không cần làm gì." "$_tid" 2>/dev/null || true
   fi
@@ -311,6 +320,28 @@ _job_thread_id() {
   python3 "$ROOT/bin/mike_json.py" job-field "$JOBS_DIR" "$1" discord_thread_id 2>/dev/null
 }
 
+# _ambient_thread <agent> — fallback topic when the job record carries no discord_thread_id
+# (old in-flight jobs, cron dispatches). Precedence, HIGHEST first:
+#   1. _agent_thread_override  — agent whose output ALWAYS belongs to one fixed topic
+#   2. $DISCORD_THREAD_ID      — ambient topic of the session that happens to be dispatching
+#   3. state/ccdb_thread_id    — global "last topic Mike was active in" (last resort)
+#
+# The override MUST outrank the ambient env (fixed 2026-07-22). Before this, the chain was
+# `${DISCORD_THREAD_ID:-$(_agent_thread_override ...)}` — env FIRST — which made the override
+# dead code in practice, because Mike's live session ALWAYS has DISCORD_THREAD_ID set to
+# whatever topic the user is currently chatting in. Measured evidence on the job board:
+# Wags jobs were pinned across 6 different topics (only 9/27 to Architecture) and DollarBill
+# across 5, despite both being declared single-topic agents. Net effect for the user: work
+# discussed in topic A got reported into topic B simply because Mike happened to be dispatching
+# from B. Explicit `--thread <id>` still beats the override when a caller really means it.
+_ambient_thread() {
+  local _t
+  _t="$(_agent_thread_override "$1")"
+  [ -n "$_t" ] || _t="${DISCORD_THREAD_ID:-}"
+  [ -n "$_t" ] || _t="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
+  printf '%s' "$_t"
+}
+
 # _job_watcher: runs in background alongside a dispatch job.
 # Two distinct alert tracks:
 #   ANOMALY track (fires immediately, no cap): empty log after 60s, stale log >120s with no update.
@@ -323,8 +354,7 @@ _job_watcher() {
   local log_stale_alerted=0 log_empty_alerted=0
   local discord_thread_id
   discord_thread_id="$(_job_thread_id "$jid")"
-  [ -n "$discord_thread_id" ] || discord_thread_id="${DISCORD_THREAD_ID:-$(_agent_thread_override "$target")}"
-  [ -n "$discord_thread_id" ] || discord_thread_id="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
+  [ -n "$discord_thread_id" ] || discord_thread_id="$(_ambient_thread "$target")"
   local milestones="600 1800"  # 10 min, 30 min; max 2 Discord progress messages total
 
   _discord() {
@@ -505,8 +535,7 @@ echo "JOB $job_id (from=$from, timeout=${TIMEOUT}s) → $ROOT/bin/jobs.sh status
 # notification for this job reads it back via _job_thread_id instead of re-deriving a
 # "current" topic later (see _job_thread_id comment for why that was the actual bug).
 _start_ts="$(date +%s)"
-_dtid0="${DISCORD_THREAD_ID:-$(_agent_thread_override "$id")}"
-[ -n "$_dtid0" ] || _dtid0="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
+_dtid0="${FORCE_TID:-$(_ambient_thread "$id")}"
 JSET job_id="$job_id" from="$from" to="$id" status=running attempt=1 \
      max_attempts=$((RETRIES + 1)) started_at="$_start_ts" \
      deadline=$((_start_ts + TIMEOUT)) logfile="$logfile" discord_thread_id="$_dtid0" \
@@ -537,8 +566,7 @@ if [ "$bg" = "--bg" ]; then
         # topic Mike happens to be active in right now (see _job_thread_id comment).
         # tail -c 500: last bytes of log = agent's conclusion, not context-loading preamble.
         local _tid; _tid="$(_job_thread_id "$job_id")"
-        [ -n "$_tid" ] || _tid="${DISCORD_THREAD_ID:-$(_agent_thread_override "$id")}"
-        [ -n "$_tid" ] || _tid="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
+        [ -n "$_tid" ] || _tid="$(_ambient_thread "$id")"
         if [ -n "$_tid" ]; then
           # DollarBill's plan-generation jobs route straight into the user-facing plan
           # channel (_agent_thread_override) — a raw tail-c-500 preview strips newlines
@@ -596,8 +624,7 @@ if [ "$bg" = "--bg" ]; then
     "$ROOT/bin/consolidate.sh" >> "$ROOT/logs/consolidator.log" 2>&1 || true
     "$ROOT/bin/notify.sh" "[dispatch] $id $why sau $max_attempts lần (job $job_id) — xem $logfile" 2>/dev/null || true
     local _tid; _tid="$(_job_thread_id "$job_id")"
-    [ -n "$_tid" ] || _tid="${DISCORD_THREAD_ID:-$(_agent_thread_override "$id")}"
-    [ -n "$_tid" ] || _tid="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
+    [ -n "$_tid" ] || _tid="$(_ambient_thread "$id")"
     if [ -n "$_tid" ]; then
       "$ROOT/bin/notify_thread.sh" "❌ **$id** $why (job \`${job_id}\`). Xem log: $logfile" "$_tid" 2>/dev/null || true
     fi
@@ -642,7 +669,7 @@ if [ "$bg" = "--bg" ]; then
   # function and everything it closes over (JSET, SUMMARY, and the vars they use)
   # must be exported and re-entered via `bash -c`. Verified empirically: a plain
   # `setsid _bg_wrapper &` silently fails to find "_bg_wrapper" as a command.
-  export -f _bg_wrapper _job_watcher JSET SUMMARY _agent_thread_override _circuit_record \
+  export -f _bg_wrapper _job_watcher JSET SUMMARY _agent_thread_override _ambient_thread _circuit_record \
             _maybe_schedule_usage_resume _looks_like_usage_limit _parse_reset_epoch \
             _current_resume_count _job_thread_id _hb_aware_timeout
   export ROOT JOBS_DIR job_id from id ts TIMEOUT RETRIES CLAUDE dispatch_prompt logfile prompt \
@@ -691,8 +718,7 @@ if [ "$bg" = "--bg" ]; then
   echo "$pid" > "$ROOT/logs/.dispatch_${id}_${ts}.pid"
   # Immediate Discord notify so user sees task is in flight (don't wait for watcher heartbeat)
   { _dtid="$(_job_thread_id "$job_id")"
-    [ -n "$_dtid" ] || _dtid="${DISCORD_THREAD_ID:-$(_agent_thread_override "$id")}"
-    [ -n "$_dtid" ] || _dtid="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
+    [ -n "$_dtid" ] || _dtid="$(_ambient_thread "$id")"
     if [ -n "${_dtid:-}" ]; then
       _dp="$(printf '%s' "$prompt" | head -c 120 | tr '\n\t' '  ')"
       "$ROOT/bin/notify_thread.sh" "🚀 **$id** nhận việc (job \`$job_id\`): $_dp… Sẽ notify khi xong." "$_dtid" 2>/dev/null || true

@@ -185,6 +185,23 @@ Khi thấy event_type `question` trong KB delta, Mike phải:
 5. **⚠️ Directive/inbox — ĐÃ DEPRECATED cho task dispatch** (cập nhật 2026-06-24):
    `bus/directives/X.jsonl` chỉ còn dùng cho **mandate dài hạn** (setup ban đầu, quy tắc vĩnh viễn không cần reply ngay). Với mọi task cần kết quả → **dùng `dispatch.sh`**, không dùng directive/inbox.
 
+## Kỷ luật topic Discord — CẤM tự ý trả lời sang topic khác (user yêu cầu 2026-07-22)
+Mỗi topic Discord = một mạch việc riêng. Mỗi phiên Mike gắn với ĐÚNG một topic (`$DISCORD_THREAD_ID`).
+Quy tắc CỨNG:
+1. **Trả lời ở đúng nơi được hỏi.** Việc được giao ở topic A → mọi phản hồi/báo cáo/tiến độ của việc đó
+   thuộc topic A, kể cả khi user đang đọc/chat ở topic B. Chỉ đổi topic khi **user tự yêu cầu**.
+2. **Không tiện tay kể việc của topic khác.** Hook bơm KB delta + job board là thông tin NỀN fleet-wide
+   (từ mọi topic). Chỉ nêu ra ở topic hiện tại nếu liên quan trực tiếp điều user vừa hỏi TẠI ĐÂY.
+   Việc thuộc topic khác cần báo → gửi vào đúng topic đó:
+   ```bash
+   bin/notify_thread.sh "<msg>" "$(python3 bin/mike_json.py job-field bus/jobs <job_id> discord_thread_id)"
+   ```
+3. **Dispatch việc thuộc topic khác → luôn ghim topic đó**, đừng để nó thừa hưởng topic Mike đang ngồi:
+   `bin/dispatch.sh <agent> "<prompt>" --thread <thread_id>`. Không có `--thread` thì thứ tự tự động là:
+   per-agent override (Wags→Architecture, DollarBill→plan) → topic phiên hiện tại → con trỏ global.
+4. Agent một-topic-cố-định (Wags, DollarBill) LUÔN về topic của mình, bất kể dispatch từ đâu — muốn khác
+   phải truyền `--thread` tường minh.
+
 ## Chọn agent nào cho việc gì
 **1 lớp duy nhất (cập nhật 2026-07-01):** *companion daemon* (persistent, systemd) chỉ còn **Mike** —
 đầu mối duy nhất user tương tác trực tiếp (Discord/desktop/mobile). **Mọi agent khác đều

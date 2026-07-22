@@ -20,7 +20,14 @@ if [ "$cur" != "$seen" ]; then
   # TRUE delta: only events with ingest-version > what this agent last saw (capped 15).
   delta="$(python3 "$ROOT/bin/mike_json.py" delta-since "$KB/recent_delta.jsonl" "${seen:-0}" 15 2>/dev/null || true)"
   if [ -n "${delta//[[:space:]]/}" ]; then
-    echo "[Mike KB → v$cur] Kết quả MỚI từ agent khác kể từ lượt trước (dùng luôn, không hỏi lại; chi tiết đầy đủ ở kb/KNOWLEDGE.md):"
+    # KỶ LUẬT TOPIC (2026-07-22): the delta is fleet-wide — it carries results of work that
+    # belongs to OTHER Discord topics. Injecting it bare made Mike narrate topic A's results
+    # inside whatever topic the user was currently reading. It stays background knowledge
+    # unless it's relevant to what the user asked HERE.
+    echo "[Mike KB → v$cur] Kết quả MỚI từ agent khác kể từ lượt trước (dùng luôn, không hỏi lại; chi tiết đầy đủ ở kb/KNOWLEDGE.md)."
+    echo "KỶ LUẬT TOPIC: đây là thông tin NỀN fleet-wide, KHÔNG phải nội dung của topic hiện tại. Chỉ nêu ở đây nếu"
+    echo "liên quan trực tiếp điều user đang hỏi TẠI topic này; việc thuộc topic khác → báo vào ĐÚNG topic đó"
+    echo "(bin/notify_thread.sh \"<msg>\" <thread_id>), không tiện tay kể ở topic user đang đọc:"
     printf '%s\n' "$delta"
   fi
 fi

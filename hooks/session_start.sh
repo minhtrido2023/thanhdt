@@ -46,27 +46,44 @@ if [ -n "${MIKE_CWD:-}" ]; then
 fi
 
 # Job board audit: surface any OVERDUE jobs immediately on restart (Mike only — coordinator owns the board).
+# TOPIC-SCOPED (2026-07-22): jobs are split by the topic they were dispatched from. Detail only
+# for jobs belonging to THIS session's topic; jobs of other topics collapse to a count + routing
+# rule. Root cause this fixes: the block used to dump EVERY overdue job into whatever topic Mike
+# happened to start a session in, telling him to "xử lý trước khi nhận việc mới" — so Mike would
+# narrate topic A's work inside topic B just because that's where the user was reading.
 if [ "$id" = "Mike" ] && [ -d "$ROOT/bus/jobs" ]; then
   NOW="$(date +%s)"
+  MY_TID="${DISCORD_THREAD_ID:-}"
   overdue_out=""
+  other_n=0
   for _jf in "$ROOT/bus/jobs"/*.json; do
     [ -f "$_jf" ] || continue
-    read -r _jst _jdl _jto _jprompt < <(python3 -c "
+    read -r _jst _jdl _jto _jtid _jprompt < <(python3 -c "
 import json,sys
 d=json.load(open(sys.argv[1]))
-print(d.get('status','?'), d.get('deadline',0), d.get('to','?'), repr(d.get('prompt_summary','')[:80]))
+print(d.get('status','?'), d.get('deadline',0), d.get('to','?'),
+      d.get('discord_thread_id') or '-', repr(d.get('prompt_summary','')[:80]))
 " "$_jf" 2>/dev/null) || continue
     [ "$_jst" = "running" ] || continue
     [ "$_jdl" -gt 0 ] && [ "$NOW" -gt "$_jdl" ] || continue
+    # Belongs to a DIFFERENT topic → count only, no detail (nothing to narrate here).
+    if [ -n "$MY_TID" ] && [ "$_jtid" != "-" ] && [ "$_jtid" != "$MY_TID" ]; then
+      other_n=$((other_n + 1)); continue
+    fi
     _jid="$(basename "$_jf" .json)"
     _jmin="$(( (NOW - _jdl) / 60 ))"
     overdue_out="${overdue_out}  ⚠️ OVERDUE $_jid (→$_jto, ${_jmin}min quá hạn): $_jprompt\n"
   done
   if [ -n "$overdue_out" ]; then
     echo ""
-    echo "[CẢNH BÁO — JOB BOARD CÓ TÁC VỤ QUÁ HẠN — xử lý trước khi nhận việc mới:]"
+    echo "[CẢNH BÁO — JOB BOARD CÓ TÁC VỤ QUÁ HẠN (thuộc ĐÚNG topic này) — xử lý trước khi nhận việc mới:]"
     printf '%b' "$overdue_out"
     echo "Kiểm tra: bin/jobs.sh list | Đánh xong: python3 bin/mike_json.py job-set bus/jobs <id> status=done"
+  fi
+  if [ "$other_n" -gt 0 ]; then
+    echo ""
+    echo "[$other_n job quá hạn thuộc TOPIC KHÁC — KHÔNG kể/báo cáo ở topic này. Cần xử lý thì gửi vào"
+    echo " ĐÚNG topic của job: bin/notify_thread.sh \"<msg>\" \"\$(python3 bin/mike_json.py job-field bus/jobs <job_id> discord_thread_id)\"]"
   fi
 fi
 

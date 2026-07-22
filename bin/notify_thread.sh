@@ -15,6 +15,14 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 msg="${1:?usage: notify_thread.sh \"<message>\" [thread_id]}"
 thread_id="${2:-}"
 
+# Default target, in order: the CALLER's own session/job topic ($DISCORD_THREAD_ID, injected
+# per-session by the bridge and inherited by dispatched agents), then the global
+# state/ccdb_thread_id pointer. The global is "the last topic Mike started a session in" —
+# using it while a caller has its own topic in env posted the message into whatever topic the
+# user happened to be reading (fixed 2026-07-22, same cross-topic leak family as dispatch.sh).
+if [ -z "$thread_id" ]; then
+  thread_id="${DISCORD_THREAD_ID:-}"
+fi
 if [ -z "$thread_id" ]; then
   state_file="$ROOT/agents/Mike/state/ccdb_thread_id"
   [ -f "$state_file" ] || { echo "notify_thread: no thread_id and state file missing" >&2; exit 1; }
