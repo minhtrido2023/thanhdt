@@ -140,6 +140,15 @@ class BQLocalCache:
         # 1. Strip dataset prefix
         sql = sql.replace("tav2_bq.", "")
 
+        # 1b. Team-owned `tav2_mike` tables are referenced fully-qualified and backticked
+        # (e.g. `lithe-record-440915-m9.tav2_mike.universe_pit_q`) — DuckDB knows them by the
+        # bare table name registered from the manifest. Added with the P2 universe_pit cutover.
+        sql = re.sub(
+            r"`?(?:[A-Za-z0-9_-]+\.)?tav2_mike\.([A-Za-z0-9_]+)`?",
+            r"\1",
+            sql,
+        )
+
         # 2. Type names
         sql = re.sub(r"\bINT64\b", "BIGINT", sql)
         sql = re.sub(r"\bFLOAT64\b", "DOUBLE", sql)

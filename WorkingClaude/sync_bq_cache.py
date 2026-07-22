@@ -73,6 +73,26 @@ TABLES = {
             WHERE t.time >= '2013-01-01'
         """,
     },
+    # universe_pit_q = the team-owned point-in-time universe (view = universe_pit + quality_flag).
+    # Cached because custom_basket.py (custom30V parking basket) reads it per day since the P2
+    # cutover 2026-07-22 — without it every cache-routed basket build would fail hard (by design:
+    # no silent fallback to ticker_prune, §4.3 of ticker_prune_replacement_plan.md).
+    # Full fidelity (in_universe TRUE *and* FALSE rows) so a cache-routed query can never disagree
+    # with the same query run against BigQuery.
+    "universe_pit_q": {
+        "sql": """
+            SELECT *
+            FROM `{project}.tav2_mike.universe_pit_q` AS t
+            WHERE t.time >= '2013-01-01'
+        """,
+        "partition_col": "time",
+        "chunk_years": list(range(2013, 2028)),
+        "verify_sql": """
+            SELECT COUNT(*) AS cnt, MAX(t.time) AS max_time
+            FROM `{project}.tav2_mike.universe_pit_q` AS t
+            WHERE t.time >= '2013-01-01'
+        """,
+    },
     "ticker_prune": {
         "sql": """
             SELECT *
@@ -527,7 +547,7 @@ def main():
             "vnindex_5state_tam_quan_v34b_clean": 2,
             "vnindex_5state_dt_4gate": 2,
             "fa_ratings": 3, "fa_ratings_8l": 3,
-            "ticker_financial": 4, "ticker_1m": 5,
+            "ticker_financial": 4, "ticker_1m": 5, "universe_pit_q": 5,
             "ticker_prune": 6, "ticker": 7,
         }
         target_tables.sort(key=lambda t: size_order.get(t, 99))

@@ -9,7 +9,7 @@ The basket is a pure deterministic function of raw tav2_bq data, so an independe
 rebuild it from scratch and verify every parking-row price. Shared by pt_v23_audit_2014.py /
 pt_v22_dt5g.py (simulation) and data/v23_audit_spotcheck.py (verification): identical series.
 
-UNIVERSE = RULES, NOT EXCEPTIONS: members come from ticker_prune ∩ ICB_Code IS NOT NULL (real
+UNIVERSE = RULES, NOT EXCEPTIONS: members come from UNIVERSE_SOURCE ∩ ICB_Code IS NOT NULL (real
 listed companies; indices/ETFs have NULL ICB -> auto-excluded). NO ticker is hardcoded out. VIC
 competes like any name; it is admitted iff it passes the 8L quality gate (see build_pit gate_rating)
 -> in practice gated out ~24/25 quarters because its 8L rating is 4-5, admitted when it earns <=3.
@@ -32,7 +32,7 @@ BASE_LEVEL = 1000.0
 QTILT = {1: 1.50, 2: 1.25, 3: 1.00, 4: 0.70, 5: 0.40}
 QTILT_MISSING = 1.00
 # UNIVERSE RULE (no per-name exceptions): the basket universe = real listed companies in
-# ticker_prune, i.e. ICB_Code IS NOT NULL. That single rule auto-excludes index pseudo-tickers
+# UNIVERSE_SOURCE (see below), i.e. ICB_Code IS NOT NULL. That single rule auto-excludes index pseudo-tickers
 # (VN30/VNINDEX) AND ETFs (E1VFVN30) — all of which carry a NULL ICB_Code — without hardcoding any
 # ticker. VIC is NOT special-cased: it competes on liquidity like any name and is admitted iff it
 # passes the 8L quality gate (rating<=gate). Empirically VIC is rated 4-5 in ~24/25 quarters so the
@@ -40,6 +40,52 @@ QTILT_MISSING = 1.00
 UNIVERSE_FILTER = "t.ICB_Code IS NOT NULL"
 SEL_START, SEL_END = "2020-01-01", "2025-01-01"
 N_MEMBERS = 30
+
+# ── UNIVERSE SOURCE — P2 cutover 2026-07-22 (§4.2/§4.3 ticker_prune_replacement_plan.md) ────────
+# "pit"   = `tav2_mike.universe_pit_q`, membership PER DAY (branch B of the §4.3b A/B) — the team-
+#           owned, append-only, point-in-time universe. Per-day EXISTS also removes the look-ahead
+#           the old predicate carried (`DISTINCT ticker`-ever admits a name years before it listed).
+# "prune" = legacy `tav2_bq.ticker_prune` DISTINCT-ever. Kept as the ONE-WORD ROLLBACK.
+# Module-level constant on purpose, NOT an env var (env inherited through a process is exactly the
+# mechanism behind incident C1 07-12 — coding_guidelines §11).
+# Measured before flipping (§4.3b, job Taylor_20260722_062405): the 30-name basket is IDENTICAL at
+# the LIVE rebal 2026-05-05 and at every rebal since 2018-08; diffs exist only in 2014-2015 where
+# `ticker_prune` was thin.
+UNIVERSE_SOURCE = "pit"
+UNIVERSE_PIT_TABLE = "lithe-record-440915-m9.tav2_mike.universe_pit_q"
+
+
+def universe_pred(alias="t"):
+    """SQL predicate restricting `alias` (a tav2_bq.ticker row) to the universe.
+
+    Fail-safe (§4.3): there is deliberately NO branch that silently falls back to `ticker_prune` —
+    a silent fallback would re-import the very drift this migration exists to escape.
+    """
+    if UNIVERSE_SOURCE == "prune":
+        return f"{alias}.ticker IN (SELECT DISTINCT t2.ticker FROM tav2_bq.ticker_prune t2)"
+    if UNIVERSE_SOURCE != "pit":
+        raise ValueError(f"UNIVERSE_SOURCE={UNIVERSE_SOURCE!r} unknown (pit|prune)")
+    return (f"EXISTS(SELECT 1 FROM `{UNIVERSE_PIT_TABLE}` u2 "
+            f"WHERE u2.ticker={alias}.ticker AND u2.time={alias}.time AND u2.in_universe)")
+
+
+def assert_universe_covers(bq, start_date, end_date):
+    """Fail-safe (§4.3): STOP WITH AN ERROR if `universe_pit` does not cover every trading day in
+    [start_date, end_date]. Without this the missing days would silently look like "no name was in
+    the universe that day" — an empty basket instead of a loud failure."""
+    if UNIVERSE_SOURCE != "pit":
+        return
+    df = bq(f"""SELECT
+  (SELECT COUNT(DISTINCT t.time) FROM tav2_bq.ticker t
+     WHERE t.time BETWEEN DATE '{start_date}' AND DATE '{end_date}') AS n_ticker,
+  (SELECT COUNT(DISTINCT u.time) FROM `{UNIVERSE_PIT_TABLE}` u
+     WHERE u.time BETWEEN DATE '{start_date}' AND DATE '{end_date}') AS n_universe""")
+    n_tk, n_un = int(df["n_ticker"].iloc[0]), int(df["n_universe"].iloc[0])
+    if n_un < n_tk:
+        raise RuntimeError(
+            f"universe_pit thieu ngay trong [{start_date},{end_date}]: co {n_un} phien / "
+            f"tav2_bq.ticker co {n_tk} phien. DUNG — khong tu fallback ve ticker_prune (§4.3). "
+            f"Chay lai mike/bin/build_universe_pit.py cho khoang thieu.")
 
 
 def _cap_names(w, cap):
@@ -108,10 +154,11 @@ def _cap_group_jointly(w, grp, gcap, ncap):
 
 def select_members(bq):
     """Return the 30 most-liquid listed-company members (deterministic, STATIC/hindsight window).
-    Universe = ticker_prune ∩ UNIVERSE_FILTER (real companies). No per-ticker exclusions."""
+    Universe = UNIVERSE_SOURCE ∩ UNIVERSE_FILTER (real companies). No per-ticker exclusions."""
+    assert_universe_covers(bq, SEL_START, SEL_END)
     df = bq(f"""SELECT t.ticker FROM tav2_bq.ticker t
 WHERE t.time BETWEEN DATE '{SEL_START}' AND DATE '{SEL_END}'
-  AND t.ticker IN (SELECT DISTINCT t2.ticker FROM tav2_bq.ticker_prune t2)
+  AND {universe_pred()}
   AND {UNIVERSE_FILTER}
 GROUP BY t.ticker ORDER BY AVG(t.Volume_3M_P50*t.Close) DESC LIMIT {N_MEMBERS}""")
     return list(df["ticker"])
@@ -196,10 +243,12 @@ def build_pit(bq, start_date, end_date, top_n=N_MEMBERS, quality="none",
     # (UNIVERSE_FILTER); NO per-ticker exclusions — VIC/indices/ETFs handled BY RULE (see header):
     # indices+ETFs have NULL ICB_Code so the filter drops them; VIC competes and is removed only
     # when it fails the 8L gate below.
+    assert_universe_covers(bq, (pd.Timestamp(eff_start) - pd.Timedelta(days=380)).strftime("%Y-%m-%d"),
+                           str(end_date))
     qliq = bq(f"""SELECT t.ticker, DATE_TRUNC(t.time, QUARTER) AS q,
   AVG(t.Volume_3M_P50*t.Close) AS liq, COUNT(*) AS nd
 FROM tav2_bq.ticker t
-WHERE t.ticker IN (SELECT DISTINCT t2.ticker FROM tav2_bq.ticker_prune t2)
+WHERE {universe_pred()}
   AND {UNIVERSE_FILTER}
   AND t.time >= DATE_SUB(DATE '{eff_start}', INTERVAL 380 DAY) AND t.time <= DATE '{end_date}'
 GROUP BY t.ticker, q HAVING nd >= 20""")
@@ -653,7 +702,7 @@ SELECT t.time, CAST(FLOOR(t.ICB_Code/1000) AS INT64) AS sec, SUM(t.Close*fin.OSh
 FROM tav2_bq.ticker AS t
 JOIN fin ON fin.ticker=t.ticker AND t.time>=fin.ftime AND (fin.nft IS NULL OR t.time<fin.nft)
 WHERE t.time IN ({_rin}) AND t.ICB_Code IS NOT NULL AND t.Close IS NOT NULL
-  AND t.ticker IN (SELECT DISTINCT t2.ticker FROM tav2_bq.ticker_prune t2)
+  AND {universe_pred()}
 GROUP BY t.time, sec""")
         _mk["time"] = pd.to_datetime(_mk["time"])
         for _d, _g in _mk.groupby("time"):
