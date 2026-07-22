@@ -153,6 +153,24 @@ if tripped:
 else:
     OK("Circuit breaker: tất cả agent bình thường (0 tripped).")
 
+# 4b. Job board: bản ghi kẹt status=running vì tiến trình dispatch chết giữa chừng
+# (sự cố 2026-07-19: Wags_20260719_173512 kẹt 'running' 2 ngày, không ai phát hiện vì
+# job board đã đầy zombie cũ). Chỉ ĐỌC ở đây (--dry-run) — dọn thật bằng `bin/jobs.sh reap`.
+try:
+    _reap_out = subprocess.run(
+        ["python3", os.path.join(wc_root, "mike", "bin", "mike_json.py"),
+         "job-reap", os.path.join(wc_root, "mike", "bus", "jobs"), "3600", "--dry-run"],
+        capture_output=True, text=True, timeout=60).stdout.splitlines()
+except Exception:
+    _reap_out = []
+orphan_ids = [l.split()[1] for l in _reap_out if l.startswith("orphaned ")]
+if orphan_ids:
+    W(f"{len(orphan_ids)} job kẹt status=running dù tiến trình đã chết (mới nhất: "
+      f"{orphan_ids[0]}) — chạy `bin/jobs.sh reap` để đóng. Job MỚI xuất hiện ở đây nghĩa là "
+      f"caller chết trước khi ghi kết quả → dùng bin/trace.sh xem việc có thực sự xong không.")
+else:
+    OK("Job board: không có bản ghi nào kẹt status=running quá hạn.")
+
 # 5. Câu hỏi (event_type=question) chưa được trả lời trong 48h gần nhất
 # 2 pass: answers gom TOÀN CỤC trước (append_event.sh ghi event vào file của TÁC GIẢ —
 # bus/inbox/<agent_id>.jsonl — nên answer của agent KHÁC người hỏi nằm ở file khác;

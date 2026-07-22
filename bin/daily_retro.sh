@@ -102,6 +102,13 @@ QUY TRÌNH BẮT BUỘC (đọc bằng chứng thật, không suy đoán):
    đúng tinh thần blameless (mô tả bước/quy trình, không quy tội cá nhân/agent cụ thể).
    Yêu cầu Wags trả lời CONFIRMED (không tìm ra sai sót) hoặc GAPS FOUND kèm danh sách cụ
    thể — Wags KHÔNG tự sửa file, chỉ báo cáo lại.
+   ⛔ CẤM ở bước này: ScheduleWakeup, 'chờ lượt sau', 'sẽ kiểm tra lại khi Wags xong', hay
+   bất kỳ cách nào giả định có TURN TIẾP THEO. Phiên này là `claude -p` MỘT LẦN — thoát là
+   hết, không ai đánh thức bạn, và job Wags kẹt status=running không ai đọc (sự cố 07-17,
+   TÁI DIỄN Y HỆT 07-19: Wags_20260719_173512 kẹt 2 ngày). Chỉ 2 lựa chọn hợp lệ:
+   (a) dispatch ĐỒNG BỘ, đọc kết quả ngay trong lượt này (mặc định); hoặc (b) nếu không
+   gọi được Wags → vẫn commit, kèm dòng 'Verified by: CHƯA — verification không chạy được
+   vì <lý do>' VÀ ghi 1 event `question` để lượt sau có người nhặt. KHÔNG im lặng bỏ dở.
    Đọc kết quả Wags trả về, rồi:
    - CONFIRMED → thêm dòng 'Verified by: Wags — CONFIRMED' vào cuối entry, commit luôn.
    - GAPS FOUND → SỬA bản nháp theo đúng gaps Wags chỉ ra trước, rồi mới thêm dòng

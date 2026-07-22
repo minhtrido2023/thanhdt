@@ -336,3 +336,36 @@ current-day source of truth) must read its inputs live, never through a process-
 env** — if the import chain can reach `BQ_LOCAL_CACHE`/`bq_local_cache`, unset it explicitly
 (`os.environ.pop(...)`) before the first query, process-locally (never edit `wc_env.sh` itself,
 which would break every OTHER script that legitimately wants the cache).
+
+## 12. Shared Multi-Account Data Files: Filter by `account_no` at Every Read
+
+**Pattern "cross-account contamination" — 3 lần trong 15 ngày** (2026-07-06
+`daily_nav_snapshot.py`, 2026-07-19 `reconcile_equity.py` + `verify_account_snapshot.py`,
+2026-07-21 `eod_trading_report.sh`). Cùng 1 root cause mỗi lần: `data/execution_logs/dnse_raw_{date}.jsonl`
+là file DÙNG CHUNG cho MỌI account (SpaceX + ZaloPay ghi lẫn vào 1 file, phân biệt bằng field
+`accountNo`/`account_no` bên trong record). Code đọc file theo NGÀY rồi tính NAV/fill/P&L mà quên
+lọc account → số của account này lẫn số của account kia.
+
+**Quy tắc bắt buộc:** mọi lần đọc 1 file dữ liệu dùng chung giữa các account (hiện tại:
+`dnse_raw_{date}.jsonl`, và bất kỳ file nào sau này gộp nhiều account vào 1 path), dòng ĐẦU TIÊN
+xử lý record phải là bộ lọc account, không phải phép tính:
+
+```python
+if str(rec.get("accountNo")) != str(account_no):
+    continue
+```
+
+Không có account_no trong scope → đó là dấu hiệu hàm đang thiếu tham số, KHÔNG phải lý do bỏ lọc.
+Nếu chủ đích là gộp toàn bộ account (báo cáo fleet-wide), phải viết rõ trong docstring rằng đây là
+tổng-mọi-account có chủ đích.
+
+**Self-check trước khi commit** bất kỳ script nào đọc file dùng chung: chạy nó cho CẢ 2 account
+(`SpaceX` và `ZaloPay`) trong cùng 1 ngày có giao dịch, và xác nhận 2 kết quả KHÁC nhau. Hai output
+giống hệt nhau = gần như chắc chắn đang đọc chung không lọc — đây là dấu hiệu rẻ nhất, bắt được cả
+3 sự cố trên nếu có ai chạy.
+
+**Grep sweep không đủ nếu chỉ tìm tên file.** Lần sweep 2026-07-19 grep `dnse_raw` vẫn bỏ sót
+`eod_trading_report.sh` vì file CÓ nhắc tên nhưng lọc thiếu ở 1 nhánh. Sweep đúng = với MỖI hit,
+đọc xem record có bị lọc account trước khi vào phép tính hay không (audit 2026-07-22: 4/4 script
+kế toán đã lọc đúng; `execution_quality_review.py` chỉ lọc KHI truyền `--account`, mặc định gộp cả
+2 account — chấp nhận được cho công cụ review ad-hoc, KHÔNG được dùng làm nguồn số báo cáo).

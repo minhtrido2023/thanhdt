@@ -10,6 +10,9 @@
 #   jobs.sh wait <job_id> [--timeout SEC]   poll every 15s until the job leaves
 #                                     'running' or SEC elapse (default 900); exits
 #                                     with the job's status code (124 on wait-timeout)
+#   jobs.sh reap [grace_sec] [--dry-run]   close records stuck at status=running whose
+#                                     dispatcher died (deadline + grace passed AND pid
+#                                     dead/absent) -> status=orphaned. Default grace 3600s.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -20,6 +23,10 @@ cmd="${1:-list}"
 case "$cmd" in
   list)
     MJ job-list "$JOBS_DIR" "${2:-20}"
+    ;;
+  reap)
+    # Close records left status=running by a dispatcher that died (see job-reap docstring).
+    MJ job-reap "$JOBS_DIR" "${2:-3600}" ${3:-}
     ;;
   status)
     job_id="${2:?usage: jobs.sh status <job_id>}"
@@ -49,7 +56,7 @@ case "$cmd" in
     done
     ;;
   *)
-    echo "usage: jobs.sh {list [limit] | status <job_id> | wait <job_id> [--timeout SEC]}" >&2
+    echo "usage: jobs.sh {list [limit] | status <job_id> | wait <job_id> [--timeout SEC] | reap [grace_sec] [--dry-run]}" >&2
     exit 2
     ;;
 esac

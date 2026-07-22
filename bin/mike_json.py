@@ -342,6 +342,71 @@ def _load_jobs(jobs_dir):
     return rows
 
 
+def _pid_alive(pid):
+    """True if the pid is still a live process, False if provably dead, None if unknown
+    (no pid recorded — old records predating the pid field)."""
+    if not pid:
+        return None
+    try:
+        os.kill(int(pid), 0)
+        return True
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True          # exists, owned by someone else
+    except Exception:
+        return None
+
+
+def cmd_job_reap(a):
+    """job-reap <jobs_dir> [grace_sec] [--dry-run] — close ORPHANED job records.
+
+    A job record stays status=running forever when its dispatcher dies between the
+    fork and the completion write (headless `claude -p` caller exits, host restart,
+    kill -9). Nobody ever writes the terminal status, so `jobs.sh list` accumulates
+    zombies and a genuinely stuck job is invisible in the noise (incident 2026-07-19:
+    Wags_20260719_173512 sat 'running' for 2 days unnoticed).
+
+    Reaped only when BOTH hold, so a live-but-slow job is never touched:
+      - deadline passed by more than grace_sec (default 3600), AND
+      - the recorded pid is provably dead (or no pid was ever recorded).
+    Sets status=orphaned + ended_at + result_summary; idempotent. Prints one line per
+    reaped job; exit 0 always (report tool)."""
+    jobs_dir = a[0]
+    rest = [x for x in a[1:] if x != "--dry-run"]
+    dry = "--dry-run" in a[1:]
+    grace = _as_int(rest[0], 3600) if rest else 3600
+    n = now_epoch()
+    reaped = 0
+    for o in _load_jobs(jobs_dir):
+        if o.get("status") != "running":
+            continue
+        dl = _as_int(o.get("deadline"), 0)
+        if not dl or n <= dl + grace:
+            continue
+        if _pid_alive(o.get("pid")) is True:
+            continue
+        # Only --bg dispatches record a pid; a sync dispatch has none, so fall back to the
+        # agent's own heartbeat — a job still writing bus events is alive, never reap it.
+        if not o.get("pid"):
+            hb = _hb_age(o, n, agent_only=True)
+            if hb != "-" and _as_int(hb, 10 ** 9) < grace:
+                continue
+        job_id = o.get("job_id")
+        if not job_id:
+            continue      # no id -> can't address the record safely; leave it alone
+        over_h = (n - dl) / 3600.0
+        print("orphaned %-26s %s->%s  %.1fh past deadline" % (
+            job_id, o.get("from", "?"), o.get("to", "?"), over_h))
+        reaped += 1
+        if not dry:
+            cmd_job_set([jobs_dir, job_id, "status=orphaned", "ended_at=%d" % n,
+                         "result_summary=reaped by jobs.sh reap: dispatcher died without "
+                         "writing a terminal status (%.1fh past deadline, pid dead/absent)"
+                         % over_h])
+    print("%d orphaned job record(s)%s" % (reaped, " (dry-run, not written)" if dry else " closed"))
+
+
 def cmd_job_list(a):
     """job-list <jobs_dir> [limit] — recent jobs, newest first, with computed ages."""
     jobs_dir = a[0]
@@ -607,6 +672,7 @@ CMDS = {"event": cmd_event, "heartbeat": cmd_heartbeat, "recent": cmd_recent,
         "delta-append": cmd_delta_append, "delta-since": cmd_delta_since,
         "format-events": cmd_format_events, "fleet-status": cmd_fleet_status,
         "job-set": cmd_job_set, "job-list": cmd_job_list, "job-get": cmd_job_get,
+        "job-reap": cmd_job_reap,
         "job-field": cmd_job_field, "job-hb-age": cmd_job_hb_age,
         "circuit-check": cmd_circuit_check, "circuit-record": cmd_circuit_record,
         "pending-resume-set": cmd_pending_resume_set,
