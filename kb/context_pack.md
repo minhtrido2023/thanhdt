@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v1300)
+# Mike fleet — context pack (v1301)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-21T17:53:39] Taylor/finding — Loc thanh khoan LAG tang tin hieu — ban dinh chinh #2 (co che THAT su la VON, tran slot 12 la cong RO): {"topic": "Lan sua THU HAI cua PHAN DIEN GIAI (code chuc nang KHONG doi mot dong tu ban da PASS 6/7 check). Wire: golive_recommend_v23.py goi lag_filter_illiqui …
 - [2026-07-21T17:59:57] quant-skeptic/verification — ✅ CONFIRMED VERIFY: Loc thanh khoan LAG tang tin hieu — ban dinh chinh #2 (co che THAT su la VON, tran slot 12 la cong RO): {"finding_topic": "Loc thanh khoan LAG tang tin hieu — ban dinh chinh #2 (co che THAT su la VON, tran slot 12 la cong RO)", "verdict": "CONFIRMED", "confidence" …
 - [2026-07-21T18:02:23] Taylor/decision — Loc thanh khoan LAG TANG TIN HIEU — COMMIT 4b7aaa1, quant-skeptic CONFIRMED/high: {"trang_thai": "XONG + COMMIT (4b7aaa1). quant-skeptic CONFIRMED/high, log mike/logs/verify_20260721_175346.log. Day la attempt 2 cua job — attempt 1 da viet co …
 - [2026-07-22T01:27:49] Wags/answer — retro-pattern-recurring-headless-wake-assumption-3: {"answered_by": "Wags (fleet-ops, in-mandate: coordination tooling)", "status": "CLOSED-BY-FIX", "finding": "watchdog.sh DID already alert once for Wags_2026071 …
@@ -11,6 +10,7 @@
 - [2026-07-22T01:28:21] Wags/finding — wags-fix: coord-2026-07-22 — 2 question tồn đọng đóng bằng fix thật (job-reap + rule §12), 25 zombie job record dọn sạch: {"job": "Wags_20260722_012010", "dispatch_from": "Mike", "status": "DONE", "triage": "2 question flagged, cả 2 GENUINE (không phải checker false-positive lần nà …
 - [2026-07-22T01:33:32] arch-reviewer/verification — ARCH-REVIEW: wags-fix: coord-2026-07-22 — 2 question tồn đọng đóng bằng fix thật (job-reap + rule §12), 25 zombie job record dọn sạch: {"finding_topic": "wags-fix coord-2026-07-22: job-reap + ops_health check 4b + coding_guidelines §12", "verdict": "NEEDS_CHANGES", "confidence": "high", "summar …
 - [2026-07-22T03:28:14] Taylor/answer — Tran vi the LAG = 12 (he qua so hoc cua tier weight, khong phai tham so rui ro doc lap): {"cau_tra_loi_ngan": "12 vi the dong thoi. Nhung 12 KHONG phai 1 tham so rui ro doc lap — no la nghich dao so hoc cua tier weight LAG (LAG_HI 10% / LAG_LO 8% cu …
+- [2026-07-22T03:45:34] Taylor/finding — Phuong an thay the ticker_prune — universe_pit: rule tai tao curation recall 97-99%, CAN re-pin R3: {"doc": "mike/agents/Taylor/research/ticker_prune_replacement_plan.md", "canh_bao_nguon": "File QA bq_admin (agents/Taylor/research/ticker_prune_universe_QA_bq_ …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -96,10 +96,22 @@ fill nổi mã LAG ở quy mô 25B" để lại **cùng dấu vết CSV** — ch
 +4,11pp là hiện vật mô hình fill, không phải edge. Bộ lọc vẫn đúng logic (không mua được thì đừng
 đặt mục tiêu) nhưng **đừng dùng +4,11pp làm cơ sở kỳ vọng**. Số chính thức VẪN **27,84%**.
 
-**Còn treo (cần user duyệt, Taylor KHÔNG tự sửa):** đường LIVE không có trần vị thế nào cho book
-LAG (`MAX_POS=12` chỉ áp cho BAL). Backtest có trần nhưng là **cổng RÒ** (chỉ check tại first-fill
-trên vị thế đã hoàn tất) ⇒ concurrency thực 16-17, không phải 12. Nếu mirror sang live phải neo
-vào ~16-17, **không copy hằng số 12**.
+**✅ ĐÃ TRẢ LỜI 2026-07-22 (job `Taylor_20260722_030015`) — trần vị thế LAG.** Số đúng theo logic
+production = **12**, nhưng KHÔNG phải tham số rủi ro độc lập — là nghịch đảo số học của tier
+weight (LAG_HI 10%/LAG_LO 8% NAV book LAG ⇒ 1/0,09≈11,1⇒12 = "book đầy"). Cơ chế enforce THẬT là
+TIỀN (`target_value = NAV_book × tier_weight`), không phải bộ đếm — trần đếm-tên và trần tiền là
+dual của nhau. Con số "16-17" đo trước đó là ảo giác từ cổng rò (chỉ đếm vị thế ĐÃ hoàn tất, bỏ
+sót lệnh đang khớp dở); đếm đúng theo size thật (≥4% book) ra **max 13 / p95 11** — khớp hằng số
+12. **Kết luận: LIVE KHÔNG CẦN thêm trần cứng nào** — trần kinh tế đã bị ép bởi tiền, thêm
+`MAX_POS_LAG=12` sẽ là code chết (không bao giờ bind trước ràng buộc tiền), chỉ tạo ảo giác an
+toàn. Backtest đã vá cổng rò (`count_inflight_slots`, commit `f974459`, default OFF = byte-
+identical, không cần quant-skeptic vì không đổi hành vi live).
+
+⚠️ **Rủi ro mới phát hiện, CHƯA XÁC MINH** — `golive_recommend_v23.py:506-510` emit
+`weight_pct=10/8` cho LAG không kèm field BASE (chỉ có trong header MD, không có trong CSV). Nếu
+downstream hiểu nhầm base = tổng NAV thay vì NAV book LAG (0,50×NAV hiện tại), size sẽ lớn ~1,5x
+ý đồ. Cần kiểm tra 1 plan LAG thật (07-24 TRC) + cân nhắc thêm field `weight_base="LAG_BOOK"` rõ
+ràng. Không khẩn cho 07-24 (chỉ 1 tên, cách trần 12 rất xa).
 
 ## Due-diligence MẶC ĐỊNH cho MỌI ứng cử viên mua — mandate mới (user, 2026-07-21)
 User chỉ đạo: bất kỳ mã nào trở thành ứng cử viên mua (mọi book: BAL/LAG/CAPIT/DC-book/

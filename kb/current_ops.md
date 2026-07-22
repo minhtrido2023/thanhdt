@@ -81,10 +81,22 @@ fill nổi mã LAG ở quy mô 25B" để lại **cùng dấu vết CSV** — ch
 +4,11pp là hiện vật mô hình fill, không phải edge. Bộ lọc vẫn đúng logic (không mua được thì đừng
 đặt mục tiêu) nhưng **đừng dùng +4,11pp làm cơ sở kỳ vọng**. Số chính thức VẪN **27,84%**.
 
-**Còn treo (cần user duyệt, Taylor KHÔNG tự sửa):** đường LIVE không có trần vị thế nào cho book
-LAG (`MAX_POS=12` chỉ áp cho BAL). Backtest có trần nhưng là **cổng RÒ** (chỉ check tại first-fill
-trên vị thế đã hoàn tất) ⇒ concurrency thực 16-17, không phải 12. Nếu mirror sang live phải neo
-vào ~16-17, **không copy hằng số 12**.
+**✅ ĐÃ TRẢ LỜI 2026-07-22 (job `Taylor_20260722_030015`) — trần vị thế LAG.** Số đúng theo logic
+production = **12**, nhưng KHÔNG phải tham số rủi ro độc lập — là nghịch đảo số học của tier
+weight (LAG_HI 10%/LAG_LO 8% NAV book LAG ⇒ 1/0,09≈11,1⇒12 = "book đầy"). Cơ chế enforce THẬT là
+TIỀN (`target_value = NAV_book × tier_weight`), không phải bộ đếm — trần đếm-tên và trần tiền là
+dual của nhau. Con số "16-17" đo trước đó là ảo giác từ cổng rò (chỉ đếm vị thế ĐÃ hoàn tất, bỏ
+sót lệnh đang khớp dở); đếm đúng theo size thật (≥4% book) ra **max 13 / p95 11** — khớp hằng số
+12. **Kết luận: LIVE KHÔNG CẦN thêm trần cứng nào** — trần kinh tế đã bị ép bởi tiền, thêm
+`MAX_POS_LAG=12` sẽ là code chết (không bao giờ bind trước ràng buộc tiền), chỉ tạo ảo giác an
+toàn. Backtest đã vá cổng rò (`count_inflight_slots`, commit `f974459`, default OFF = byte-
+identical, không cần quant-skeptic vì không đổi hành vi live).
+
+⚠️ **Rủi ro mới phát hiện, CHƯA XÁC MINH** — `golive_recommend_v23.py:506-510` emit
+`weight_pct=10/8` cho LAG không kèm field BASE (chỉ có trong header MD, không có trong CSV). Nếu
+downstream hiểu nhầm base = tổng NAV thay vì NAV book LAG (0,50×NAV hiện tại), size sẽ lớn ~1,5x
+ý đồ. Cần kiểm tra 1 plan LAG thật (07-24 TRC) + cân nhắc thêm field `weight_base="LAG_BOOK"` rõ
+ràng. Không khẩn cho 07-24 (chỉ 1 tên, cách trần 12 rất xa).
 
 ## Due-diligence MẶC ĐỊNH cho MỌI ứng cử viên mua — mandate mới (user, 2026-07-21)
 User chỉ đạo: bất kỳ mã nào trở thành ứng cử viên mua (mọi book: BAL/LAG/CAPIT/DC-book/
