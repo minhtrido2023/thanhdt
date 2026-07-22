@@ -2253,3 +2253,34 @@
 - [2026-07-22T12:06:56Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 38, "job_id": "Taylor_20260722_112850", "source": "watcher"}
 - [2026-07-22T11:11:17Z] Winston/finding — new-listings-daily: {"date": "2026-07-22", "lookback_days": 90, "total_new": 1, "needs_manual_rating": 0, "fresh_ipo": 0, "research_queue": [], "snapshot": "/home/trido/thanhdt/WorkingClaude/data/new_listings.csv", "note": "0 mã mới < 20Q lịch sử → cần 8L manual rating. Taylor flag để đọc bản cáo bạch + tạo override documented reason+expiry."}
 - [2026-07-22T11:40:07Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}
+
+## Consolidation 2026-07-22T12:14:56Z
+- [2026-07-22T12:07:12Z] DollarBill/heartbeat — DollarBill_20260722_120310: {"status": "still_running", "elapsed_min": 4, "job_id": "DollarBill_20260722_120310", "source": "watcher"}
+- [2026-07-22T12:07:12Z] DollarBill/heartbeat — DollarBill_20260722_120311: {"status": "still_running", "elapsed_min": 4, "job_id": "DollarBill_20260722_120311", "source": "watcher"}
+- [2026-07-22T12:08:11Z] DollarBill/heartbeat — DollarBill_20260722_120311: {"status": "in_progress", "note": "Đã có live NAV 1,211M. Cash 49.1M. 20 vị thế. Đang tính plan LAG entries 07-24 + 07-25 và CAPIT status."}
+- [2026-07-22T12:08:12Z] DollarBill/heartbeat — DollarBill_20260722_120310: {"status": "still_running", "elapsed_min": 5, "job_id": "DollarBill_20260722_120310", "source": "watcher"}
+- [2026-07-22T12:08:12Z] DollarBill/heartbeat — DollarBill_20260722_120311: {"status": "still_running", "elapsed_min": 5, "job_id": "DollarBill_20260722_120311", "source": "watcher"}
+- [2026-07-22T12:09:12Z] DollarBill/heartbeat — DollarBill_20260722_120310: {"status": "still_running", "elapsed_min": 6, "job_id": "DollarBill_20260722_120310", "source": "watcher"}
+- [2026-07-22T12:09:12Z] DollarBill/heartbeat — DollarBill_20260722_120311: {"status": "still_running", "elapsed_min": 6, "job_id": "DollarBill_20260722_120311", "source": "watcher"}
+- [2026-07-22T12:10:12Z] DollarBill/heartbeat — DollarBill_20260722_120310: {"status": "still_running", "elapsed_min": 7, "job_id": "DollarBill_20260722_120310", "source": "watcher"}
+- [2026-07-22T12:10:12Z] DollarBill/heartbeat — DollarBill_20260722_120311: {"status": "still_running", "elapsed_min": 7, "job_id": "DollarBill_20260722_120311", "source": "watcher"}
+- [2026-07-22T12:11:12Z] DollarBill/heartbeat — DollarBill_20260722_120310: {"status": "still_running", "elapsed_min": 8, "job_id": "DollarBill_20260722_120310", "source": "watcher"}
+- [2026-07-22T12:11:13Z] DollarBill/heartbeat — DollarBill_20260722_120311: {"status": "still_running", "elapsed_min": 8, "job_id": "DollarBill_20260722_120311", "source": "watcher"}
+- [2026-07-22T12:12:00Z] DollarBill/heartbeat — DollarBill_20260722_120310: {"status": "in_progress", "note": "Đã có DNSE prices + custom30V basket. Đang tính cash flow và viết plan_ZaloPay_2026-07-23.json."}
+- [2026-07-22T12:12:12Z] DollarBill/heartbeat — DollarBill_20260722_120310: {"status": "still_running", "elapsed_min": 9, "job_id": "DollarBill_20260722_120310", "source": "watcher"}
+- [2026-07-22T12:12:13Z] DollarBill/heartbeat — DollarBill_20260722_120311: {"status": "still_running", "elapsed_min": 9, "job_id": "DollarBill_20260722_120311", "source": "watcher"}
+- [2026-07-22T12:13:12Z] DollarBill/heartbeat — DollarBill_20260722_120310: {"status": "still_running", "elapsed_min": 10, "job_id": "DollarBill_20260722_120310", "source": "watcher"}
+- [2026-07-22T12:13:13Z] DollarBill/heartbeat — DollarBill_20260722_120311: {"status": "still_running", "elapsed_min": 10, "job_id": "DollarBill_20260722_120311", "source": "watcher"}
+- [2026-07-22T12:13:57Z] DollarBill/decision — plan-ZaloPay-2026-07-23: {"account": "ZaloPay", "plan_date": "2026-07-23", "state": "NEUTRAL(3)", "orders": [{"side": "sell", "ticker": "VPB", "qty": 800, "net_vnd": 19985000, "note": "trim day7/9"}, {"side": "buy", "ticker": "HDB", "qty": 659, "cost_vnd": 17014952, "note": "park entry first tranche"}], "cash_buffer_vnd": 3111797, "buffer_pct": 15.5, "capit": "NCT/PVT/SAB/SIP/VNM hold 60td entry 07-21", "lag_next": "IVS 07-24(ADV-capped 18M), TRC 07-25", "requires_approval": true}
+- [2026-07-22T12:14:13Z] DollarBill/heartbeat — DollarBill_20260722_120310: {"status": "still_running", "elapsed_min": 11, "job_id": "DollarBill_20260722_120310", "source": "watcher"}
+- [2026-07-22T12:14:13Z] DollarBill/heartbeat — DollarBill_20260722_120311: {"status": "still_running", "elapsed_min": 11, "job_id": "DollarBill_20260722_120311", "source": "watcher"}
+- [2026-07-22T12:14:38Z] DollarBill/answer — plan-ZaloPay-2026-07-23-sent: {"job": "DollarBill_20260722_120310", "status": "done", "plan_file": "data/trade_plans/plan_ZaloPay_2026-07-23.json", "discord_thread": "1521183164364754974", "summary": "Plan ZaloPay 07-23 hoàn thành: SELL VPB 800cp + BUY HDB 659cp. Active NAV 459.6M, buffer 15.5%. Đã gửi Discord plan channel. Chờ user duyệt trước 08:45 07-23."}
+- [2026-07-22T12:10:29Z] Mafee/status — eod-trading-report: {"account": "ZaloPay", "plan_date": "2026-07-22", "delivered_via": "trading_report_thread"}
+- [2026-07-22T12:10:42Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-07-22", "delivered_via": "hold_day"}
+- [2026-07-22T12:07:56Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 39, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:08:56Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 40, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:09:56Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 41, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:10:56Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 42, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:11:56Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 43, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:12:56Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 44, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:13:56Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 45, "job_id": "Taylor_20260722_112850", "source": "watcher"}
