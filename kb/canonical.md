@@ -14,8 +14,11 @@ Vận hành chiến lược **production V2.4**, **go-live 2026-07-01**, tài kh
   `UNIVERSE_SRC` default = `pit` trong `pt_v23_audit_2014.py`). threads=1, self-check 0 VND.
   **Số lịch sử (KHÔNG dùng để trích dẫn mới)**: 27.84%/1.84/−18.2%/1.53 (pin 07-12, `ticker_prune`);
   cùng vintage cache 07-22 `ticker_prune` cho 27.95%/1.85/−18.4%/1.52 ⇒ Δ universe = **−0,79pp CAGR**,
-  đúng hướng pre-register (khử curation/look-ahead bias của `ticker_prune`). Chi tiết:
-  `data/results_registry.md` (mục 2026-07-22 RE-PIN + CUTOVER).
+  đúng hướng pre-register (khử curation/look-ahead bias của `ticker_prune`). quant-skeptic **CONFIRMED
+  (high)**. ⚠️ Nhãn đúng khi trích dẫn: **MIXED-universe** — `universe_pit` cho *cổng quyết định*,
+  `ticker_prune` vẫn cho *CAPIT pool / breadth / maturity* (~10 vị trí, cutover riêng). Lỗi fidelity
+  `liq<=0` vẫn MỞ ⇒ khoảng kỳ vọng trung thực vẫn **[~27,2%; ~31,3%]**, anchor DD **~−30%**. Chi tiết:
+  `data/results_registry.md` (mục 2026-07-22 CUTOVER R3 CHÍNH THỨC).
 - Bootstrap 5th-pct: CAGR 18.6%, DD −28.6% (anchor DD ~−29%, KHÔNG phải −18%).
 - **NEUTRAL parking custom30V = phần tin cậy nhất: +7.4pp Full.** (30 mã, cap 0.10)
 - Bull parking: NAV ≥150B. **(30, 0.15) = OVERFIT**, walk-forward bác.
