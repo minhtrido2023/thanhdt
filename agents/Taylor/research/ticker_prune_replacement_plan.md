@@ -391,8 +391,51 @@ của user**, không phải của tôi.
   tham số tune được), và số đo hôm nay **không ủng hộ** Q-B: nhóm leak có chất lượng dương.
 
 **Khuyến nghị Taylor: A′ + Q-C** (chốt Q-A với điều kiện ghi rõ, đồng thời làm Q-C vì nó gần như miễn
-phí và phục vụ mandate due-diligence). Chờ user quyết. **Cổng cứng P2/P4 vẫn ĐÓNG tới khi có quyết
-định** — G3 không được chạy.
+phí và phục vụ mandate due-diligence).
+
+> ### ✅ USER ĐÃ CHỐT (2026-07-22, job `Taylor_20260722_062405`): **A′ + Q-C. KHÔNG Q-B.**
+>
+> - **A′** — sàn thanh khoản riêng của từng consumer (**custom30V ≥13,1 tỷ/ngày**, **CAPIT ≥2
+>   tỷ/ngày**) được tính là **lớp chặn chất lượng hợp lệ**, bổ sung cho golden floor + BANNED.
+>   **KHÔNG sửa tiêu chí B1-B8** của `universe_pit`. Rủi ro còn lại (0-4 mã biên kiểu ITA/APH-2022)
+>   được **CHẤP NHẬN có ghi nhận** — đây là quyết định của user, không phải kết luận đo đạc.
+> - **Q-C** — làm (§3.2c). **Q-B — không làm** (không thêm ngưỡng ROE cứng vào tầng universe).
+> - **Cổng cứng §3.2b/Q9 ⇒ MỞ.** G3 được phép chạy. Cổng CAPIT §4.4 **vẫn ĐÓNG độc lập** (P4 chưa
+>   được cutover cho tới khi re-hiệu chuẩn breadth xong — hai cổng khác nhau, đừng nhầm).
+
+#### 3.2c Q-C — CỜ CHẤT LƯỢNG: **ĐÃ IMPLEMENT** (job `Taylor_20260722_062405`, 2026-07-22)
+
+**Bảng companion, KHÔNG thêm cột vào `universe_pit`.** `universe_pit` là bảng bất biến append-only —
+thêm cột rồi `UPDATE` 6.339 partition đã ghi chính là thứ ta đang bỏ chạy (lịch sử bị viết lại). Vì
+vậy: bảng riêng `tav2_mike.universe_pit_quality` + view `tav2_mike.universe_pit_q`
+(`universe_pit LEFT JOIN quality`) để consumer đọc "như một cột". Lợi thêm: `quality_ruleset_version`
+**riêng** — sau này đổi định nghĩa chất lượng không kéo theo re-version membership.
+
+- **Phạm vi**: chỉ dòng `in_universe = TRUE` → **1.463.992 dòng** (khớp chính xác `COUNT(*) WHERE
+  in_universe` của `universe_pit`). Cờ chất lượng của mã ngoài universe là vô nghĩa với mọi consumer.
+- **Nguồn: ĐÚNG 3 nguồn đã dùng ở G2b, không thêm nguồn mới** — `ticker.ROE_Min3Y` (cùng ngày),
+  `ticker_financial.CF_OA_3Y` (as-of quý, hiệu lực ≤400 ngày), `fa_ratings_8l` (panel as-of,
+  CANONICAL) + hằng số BANNED.
+- **`quality_flag`** (loại trừ nhau, theo thứ tự ưu tiên): `BANNED` → `UNKNOWN_FLOOR` (thiếu dữ liệu)
+  → `FLOOR_FAIL` → `UNKNOWN_RATING` (chưa có panel 8L) → `RATING_FAIL` (rating >3) → `QUALITY_OK`.
+  Kèm các cột thô `roe_min3y / cf_oa_3y / rating_8l / rating_asof` để người đọc tự kiểm.
+- ⚠️ **Cờ này KHÔNG chặn gì.** Không đổi `in_universe`, không đổi rổ, không đổi lệnh. Thuần thông tin.
+- **Selfcheck `universe_pit_quality_selfcheck.py` — PASS**, tái lập đúng số G2b trên nhóm rule-only:
+
+  | Ngày | rule-only | `QUALITY_OK` (= "leak" G2b) | G2b ghi |
+  |---|---|---|---|
+  | 2014-06-30 | 89 | **0** (35 `UNKNOWN_RATING`) | không đo được ✔ |
+  | 2018-06-29 | 124 | **45** | 45 ✔ |
+  | 2022-06-30 | 233 | **77** | 77 ✔ |
+  | 2026-06-15 | 166 | **60** | 61 — lệch 1, **giải thích được** |
+
+  Lệch 1 mã ở 2026: G2b đọc snapshot local `data/fa_ratings_8l_hist.csv` (mtime 06-16), cờ này đọc
+  bảng **CANONICAL** `tav2_bq.fa_ratings_8l` đã refresh — **TLD** bị re-rank 3→5 tại cùng eff-date
+  2026-05-04 (refresh weekly re-rank 2 quý mở, `data_registry.md` dòng 117). Mọi mã khác trùng khít.
+  Đây là **dữ liệu tươi hơn, không phải sai số tính toán**. Mốc 2014 ra `UNKNOWN_RATING` đúng như
+  cảnh báo §3.2b-G2b — thiếu dữ liệu **không** được đọc thành "0 leak sạch".
+- **Files**: `mike/bin/build_universe_pit_quality.py` (`--backfill` / `--date` / `--dry-run`,
+  append-only, `SKIP_EXISTING` chống ghi đè), `mike/bin/universe_pit_quality_selfcheck.py`.
 
 *Tái lập:* `/tmp/g2b_detail.sql` (SQL rule-only + floor) và bước join panel rating; artifact đầy đủ
 `mike/agents/Taylor/research/g2b_leak_20260722.csv` (612 dòng, mọi mã rule-only 4 mốc kèm
@@ -447,7 +490,7 @@ Sắp theo **rủi ro tăng dần**, cố ý: làm cái an toàn trước để 
 |---|---|---|---|---|
 | P1 | `trading_bot/due_diligence.py` (6 chỗ) | D1 (đọc `bq_cache/ticker_prune/*.parquet`) | **Không** — chỉ hiện cờ cho người đọc | Làm đầu tiên. Sai cũng chỉ sai 1 dòng nhãn. |
 | P2 | `custom_basket.py` (114, 202, 656) | D1 × 3 | custom30V — parking NEUTRAL | Universe rộng hơn ~17% ⇒ rổ 30 mã có thể đổi thành phần. Cần A/B rổ trước-sau, **không cutover mù**. |
-| P3 | `deploy_golive_dt5g_v4/golive_recommend_v23.py` 290/293 | D1 (banking sector-lens) | Thấp | |
+| P3 | `deploy_golive_dt5g_v4/golive_recommend_v23.py` 290/293 | D1 (**BẤT ĐỘNG SẢN** ICB-8633 — lens D1 RE_BACKLOG) | ~~Thấp~~ **TRUNG BÌNH** (§4.3b) | ⚠️ **ĐÍNH CHÍNH 2026-07-22**: bản trước ghi "banking sector-lens" — **SAI**. `ICB_Code=8633` là **Real Estate Holding & Development**, không phải ngân hàng. Nhãn sai này đã lan sang cả prompt dispatch. Diff §4.3b **không nhỏ** ⇒ hạ ước lượng "Thấp". |
 | P4 | `golive_recommend_v23.py` 167/425/455 | D2 (ADV cap, breadth, pool pbz CAPIT) | **CAO — xem §4.4** | Không làm cùng lô với P1-P3. |
 | P5 | `macro_state_live.py` (breadth Pillar B guard, %>MA200, cần ≥100 mã) | D2 | **CAO** — chạm DT5G | Đổi mẫu số breadth ⇒ có thể đổi state. Bắt buộc chạy song song đối chiếu chuỗi state 2014→nay, yêu cầu **0 phiên lệch** trước khi cutover. |
 | P6 | `mike/bin/preflight_check.sh`, `bq_freshness_check.sh` | D3 | Gate vận hành | §4.5 |
@@ -471,6 +514,71 @@ Chạy shadow toàn bộ là lãng phí; chạy shadow cho P4/P5 là bắt buộ
   `coding_guidelines.md` §11). Rollback = đổi 1 hằng số + rerun. **Fail-safe: nếu `universe_pit`
   thiếu ngày cần dùng → DỪNG CÓ LỖI, tuyệt đối không tự fallback về `ticker_prune`** — fallback im
   lặng sẽ tái nhập đúng cái drift ta đang bỏ chạy.
+
+### 4.3b KẾT QUẢ A/B TĨNH P1-P3 (job `Taylor_20260722_062405`, 2026-07-22)
+
+Script: `mike/agents/Taylor/research/universe_pit_ab_p2p3.py` — **không sửa một dòng nào** của
+`custom_basket.py` / `golive_recommend_v23.py`: `build_pit` nhận `bq` làm tham số, nên ta bọc `bq`
+bằng wrapper viết lại đúng mệnh đề universe trong SQL. Chạy **đúng code production**, universe khác.
+Artifact: `universe_pit_ab_p2p3_2026-07-22.csv`. Cấu hình P2 = production (`BASKET_SELECT=yieldcombo`,
+`gate_rating=3`, `rebal=q2m5`, `namecap`).
+
+**3 nhánh, cố ý tách 2 hiệu ứng** (gộp lại thì không đọc được diff đến từ đâu):
+`A` = production hôm nay (`ticker_prune` DISTINCT-ever, **đang có look-ahead** §2.2) ·
+`B0` = `universe_pit` DISTINCT-ever (**chỉ** hiệu ứng đổi universe) ·
+`B` = `universe_pit` per-day `EXISTS` (**đúng đặc tả D1 §4.1**: đổi universe **+ bỏ look-ahead**).
+
+#### P2 — rổ custom30V (30 mã) · **DIFF NHỎ, và = 0 ở kỷ nguyên hiện đại**
+
+| Mốc rebal | B0 đổi | B đổi | VÀO (nhánh B) | RA (nhánh B) |
+|---|---|---|---|---|
+| 2014-08-05 | 6/30 | **6/30** | FDC,KMR,LAF,NTL,SMA,VHG | CTD,DPR,DQC,HLD,SVC,VSH |
+| 2015-11-05 | 6/30 | **6/30** | APC,API,CSM,MCG,TIG,TMT | CMG,CMS,DHA,FMC,SD6,SVC |
+| 2017-02-06 | 1/30 | **2/30** | TSC,WSB | CSV,TLH |
+| 2018-08-06 | 0 | **0** | — | — |
+| 2019-11-05 | 1/30 | **1/30** | SSI | NTL |
+| 2021-02-05 | 2/30 | **2/30** | SZC,TAR | CRE,TTF |
+| 2022-05-05 | 1/30 | **1/30** | VGC | PVT |
+| 2023-11-06 | 0 | **0** | — | — |
+| 2025-02-05 | 0 | **0** | — | — |
+| **2026-05-05 (rổ ĐANG LIVE)** | **0** | **0** | — | — |
+
+Đọc: universe rộng hơn ~1,7× **nhưng rổ 30 mã gần như không đổi** — vì `gate_rating≤3` + xếp hạng
+theo value-yield đã tự lọc, mã mới vào universe chủ yếu là mã nhỏ/kém, không lọt top-30. **Rổ đang
+LIVE (rebal 2026-05-05) GIỐNG HỆT** ⇒ cutover P2 hôm nay là **no-op với rổ hiện tại**. Diff 6/30 chỉ
+ở 2014-2015 (`ticker_prune` mỏng thời kỳ đầu). ⚠️ **Vẫn KHÔNG tự cutover** — đây là parking NEUTRAL
+production, và diff 2014-2015 sẽ đổi chuỗi NAV backtest (liên quan re-pin R3 §5), cần người duyệt.
+
+#### P3 — lens D1 RE_BACKLOG (ICB-8633, **bất động sản**, không phải ngân hàng) · **DIFF LỚN**
+
+| Mốc | A (n) | B0 (n) | **B (n)** | B: VÀO / RA |
+|---|---|---|---|---|
+| 2014-08-05 | 36 | 52 | **34** | +8 / −10 (bỏ VHM, PDR, D2D, HDC…) |
+| 2018-08-06 | 55 | 77 | **45** | +4 / −14 (bỏ BCM, VEF, HPX…) |
+| 2022-05-05 | 66 | 91 | **78** | +17 / −5 |
+| 2026-05-05 | 67 | 92 | **60** | +5 (API,HAR,LGL,LSG,PV2) / −12 (C21,EFI,IDV,PVR,SZB,SZL,TEG,TID,TIX,VPH,VRC,VRG) |
+
+Hai điều đọc được, ngược chiều nhau:
+1. **B0 chỉ CỘNG, không bao giờ TRỪ** ở mọi mốc ⇒ xác nhận lại `universe_pit ⊇ ticker_prune` ở mức
+   tập-ever (khớp §2.1).
+2. **Phần TRỪ của B toàn bộ đến từ việc bỏ look-ahead** — và nó **đúng**: VHM bị loại khỏi panel
+   2014/2015 vì **VHM niêm yết 2018**. Đây chính là look-ahead §2.2 đang nằm trong production hôm
+   nay. Nhưng độ lớn (±10-17 mã/mốc, ~20% panel) là **thay đổi hành vi thật**, không phải cosmetic.
+
+⇒ **P3 CHỜ NGƯỜI DUYỆT.** Không cutover trong job này dù §4.2 từng xếp nó "rủi ro thấp" — số đo bác
+bỏ ước lượng đó. *Giới hạn phép đo:* chỉ đối chiếu nhánh `tav2_bq.ticker` của UNION; nhánh fallback
+`ticker_1m` (chỉ bổ sung phiên tươi nhất) không đo — không ảnh hưởng kết luận ở các mốc lịch sử.
+
+#### P1 — `trading_bot/due_diligence.py` · **ĐÃ CUTOVER** (rủi ro thấp nhất, §4.2)
+
+Đọc `tav2_mike.universe_pit_q` (membership **+ `quality_flag`** — Q-C vào việc luôn) thay cho
+`bq_cache/ticker_prune/*.parquet`. Hằng số module-level `UNIVERSE_SOURCE = "pit"`, nhánh cũ `_in_prune`
+giữ nguyên để rollback bằng 1 chữ. **Fail-safe theo §4.3**: đọc lỗi/thiếu ngày → nhãn `n/a`, **không**
+tự fallback về `ticker_prune`, và **không** được kết luận "NGOÀI universe". Selfcheck **20/20 PASS**
+(thêm 3 test mới: `n/a` khi lỗi · hiện cờ chất lượng · TRC ở TRONG universe nhưng `RATING_FAIL`).
+Kiểm chứng trên case thật 07-24: **TMG/IVS = NGOÀI `universe_pit`** (khớp kết luận thủ công),
+**TRC = TRONG universe + cờ `RATING_FAIL`** (rating 8L = 4 — thông tin MỚI mà nhánh `ticker_prune`
+cũ không có).
 
 ### 4.4 ⚠️ Hạng mục nguy hiểm nhất: CAPIT breadth + `WASHOUT_GATE=0.30`
 
@@ -574,8 +682,8 @@ kiểm chứng trong 2-3 tuần tới.
 | **G0** | Lấy lại văn bản gốc Q&A bq_admin (§0); đánh dấu R3 `PROVISIONAL` (§5.2) | <0,5 phiên | Cao | User |
 | **G1** | `bin/build_universe_pit.py` + selfcheck (idempotent, atomic, B8) | 1-1,5 phiên | Cao | — |
 | **G2** | Backfill 2000→nay (compute rẻ: 215MB) + **kiểm định**: chạy lại bảng §2.2 với median-60-phiên tự tính, ~30 mốc | **1 phiên** (compute ~phút, kiểm định chiếm hết) | Cao | G1 |
-| **G2b** | ✅ **ĐO XONG 2026-07-22 — Q-A KHÔNG chốt được, ESCALATE user (§3.2b-G2b); cổng cứng P2/P4 vẫn ĐÓNG.** (MỚI, từ §2.4/§3.2b) Đo độ rò chất lượng: chạy `BANNED` + golden floor `rating_8l` lên đúng nhóm rule-only tại nhiều mốc, đếm số mã lọt tới tầng đặt lệnh. Ra ~0 ⇒ chốt Q-A; ra ≠0 ⇒ trình user chọn Q-C/Q-B | 0,5-1 phiên | Trung bình | G2 |
-| **G3** | P1-P3 cutover + A/B tĩnh rổ custom30V | 1 phiên | Trung bình (phụ thuộc diff rổ lớn hay nhỏ) | G2 |
+| **G2b** | ✅ **XONG + ĐÃ ĐÓNG 2026-07-22.** Đo xong (§3.2b-G2b) → escalate → **user chốt A′ + Q-C, không Q-B** → **Q-C đã implement (§3.2c), selfcheck PASS**. **Cổng cứng §3.2b/Q9 MỞ** (cổng CAPIT §4.4 vẫn đóng riêng) | 0,5-1 phiên | Trung bình | G2 |
+| **G3** | 🔶 **ĐANG DỞ 2026-07-22**: **P1 cutover XONG** (`due_diligence.py` → `universe_pit_q`, selfcheck 20/20). **P2/P3 mới chỉ XUẤT A/B DIFF — CHỜ NGƯỜI DUYỆT, chưa cutover** (§4.3: diff phải được đọc trước) | 1 phiên | Trung bình (phụ thuộc diff rổ lớn hay nhỏ) | G2 |
 | **G4** | **Re-hiệu chuẩn breadth CAPIT (§4.4)** — chuỗi 2014→nay, tìm `WASHOUT_GATE'` bảo toàn tập ngày fire | 1 phiên | **Thấp** — có thể không tồn tại ngưỡng bảo toàn ⇒ escalate | G2 |
 | **G5** | Shadow P4/P5 ≥10 phiên (chi phí *thời gian lịch*, gần như không tốn effort) | ~2 tuần lịch, 0,5 phiên | Cao | G4 |
 | **G6** | Re-pin R3: 2 lần chạy (control + pit) theo **đúng lệnh pin + `$DNA_PYEXE`** (`coding_guidelines.md` §8) | 1-2 phiên + runtime | **Thấp** — chưa đo runtime thật của lệnh pin trong job này | G2 |
@@ -780,10 +888,13 @@ DT5G 4-gate), nhưng đây là số cần nhớ khi re-pin R3 và khi hiệu chu
 
 ### 10.3 Còn lại
 
-1. **G2b** (đo độ rò chất lượng qua golden floor — cổng cứng Q9/§3.2b) — chạy độc lập được, **chặn
-   cutover P2/P4**. Chưa làm.
-2. **G3** (cutover consumer) · **G4** (CAPIT breadth, §4.4) — chưa làm, phụ thuộc G2b.
-3. Re-pin R3 (§5.1) — chưa làm.
+1. ✅ **G2b XONG + ĐÓNG** (2026-07-22): đo → escalate → user chốt **A′ + Q-C** → Q-C implement
+   (§3.2c). **Cổng cứng §3.2b/Q9 đã MỞ.**
+2. 🔶 **G3 đang dở**: **P1 đã cutover** (`due_diligence.py`, §4.2). **P2/P3 CHỜ NGƯỜI DUYỆT DIFF** —
+   diff đã xuất (§4.3b), **tuyệt đối không tự cutover** dù diff nhỏ (P2 = parking NEUTRAL production,
+   P3 = sector-lens của CAPIT).
+3. **G4** (CAPIT breadth, §4.4) — chưa làm, **phụ thuộc P2 cutover xong**. Cổng CAPIT vẫn ĐÓNG.
+4. Re-pin R3 (§5.1) — chưa làm.
 4. **Không cần dispatch quant-skeptic vòng 2** cho các sửa đổi tài liệu (chúng chỉ **hạ** mức tự tin
    và **siết** thêm cổng, không nới lỏng gì). **Cần** skeptic khi: (a) G2b dẫn tới đề xuất thêm tham
    số chất lượng vào tầng universe (Q-B), hoặc (b) trước cutover bất kỳ consumer chạm tiền thật.
