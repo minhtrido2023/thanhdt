@@ -393,6 +393,43 @@ cd "$WORKDIR"
 PIPELINE_START_EPOCH="$(date +%s)"
 
 _run_pipeline "[pipeline-1] publish_gated_state"      deploy_golive_dt5g_v4/publish_gated_state.py
+
+# [pipeline-1b] build universe_pit — BLOCK on real fail.
+# build_universe_pit.py exit 1 cả khi: (a) fail thật, (b) B8_DUPLICATE (data đã có = idempotent).
+# Phân biệt bằng BQ count: n>0 sau exit≠0 → idempotent OK; n=0 → fail thật → BLOCK.
+# Thứ tự bắt buộc: ticker FRESH (đã BLOCK ở trên) → build universe_pit → build quality → golive_recommend_v23.
+# (Taylor_20260722_100814: golive_recommend_v23 crash vì assert_universe_covers() raise RuntimeError khi thiếu 1 phiên)
+echo; echo "--- [pipeline-1b] build_universe_pit ($TODAY) ---"
+if $PY mike/bin/build_universe_pit.py --date "$TODAY"; then
+  echo "  [ok] [pipeline-1b] build_universe_pit"
+else
+  _pit_n=$(bq query --use_legacy_sql=false --project_id="$PROJECT" --format=csv --quiet \
+    "SELECT COUNT(*) FROM \`${PROJECT}.tav2_mike.universe_pit\` WHERE time='$TODAY'" \
+    2>/dev/null | tail -1 | tr -d '[:space:]')
+  if [ "${_pit_n:-0}" -gt 0 ] 2>/dev/null; then
+    echo "  [ok-skip] [pipeline-1b] build_universe_pit — data đã có từ trước (${_pit_n} rows, idempotent)"
+  else
+    _pit_err="⛔ BUILD FAIL $TODAY $NOW_ICT — build_universe_pit.py exit≠0 + universe_pit[$TODAY] rỗng → golive_recommend_v23 sẽ crash (assert_universe_covers). DollarBill bị BLOCK. Check mike/logs/bq_freshness.log"
+    "$ROOT/bin/notify.sh" "$_pit_err" 2>/dev/null || true
+    "$ROOT/bin/notify_thread.sh" "$_pit_err" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+    echo "=== FAILED (build_universe_pit — universe_pit[$TODAY] rỗng) — DollarBill KHÔNG được dispatch ==="
+    exit 1
+  fi
+fi
+
+# [pipeline-1c] build universe_pit_quality — BLOCK on fail.
+# Phụ thuộc: universe_pit[$TODAY] đã có (bước trên). SKIP_EXISTING → exit 0 (idempotent đúng).
+echo; echo "--- [pipeline-1c] build_universe_pit_quality ($TODAY) ---"
+if $PY mike/bin/build_universe_pit_quality.py --date "$TODAY"; then
+  echo "  [ok] [pipeline-1c] build_universe_pit_quality"
+else
+  _pq_err="⛔ BUILD FAIL $TODAY $NOW_ICT — build_universe_pit_quality.py exit≠0 → universe_pit_quality[$TODAY] thiếu → golive_recommend_v23/custom30V bị ảnh hưởng. DollarBill bị BLOCK. Check mike/logs/bq_freshness.log"
+  "$ROOT/bin/notify.sh" "$_pq_err" 2>/dev/null || true
+  "$ROOT/bin/notify_thread.sh" "$_pq_err" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+  echo "=== FAILED (build_universe_pit_quality) — DollarBill KHÔNG được dispatch ==="
+  exit 1
+fi
+
 _run_pipeline "[pipeline-2] golive_recommend_v23"     deploy_golive_dt5g_v4/golive_recommend_v23.py
 _run_pipeline "[pipeline-3] push_recommend_v23_to_bq" mike/agents/Mafee/push_recommend_v23_to_bq.py
 
