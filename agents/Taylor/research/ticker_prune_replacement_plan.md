@@ -1087,7 +1087,7 @@ khoảng trống này**, và là lý do tôi từ chối viết builder không c
 
 | # | Việc | Trạng thái |
 |---|---|---|
-| **Quyết định production** | Có cutover **baseline R3 chính thức** sang `universe_pit` (27,84% → 27,16%) hay không | 🔴 **CHƯA QUYẾT — cần escalate user riêng.** Taylor KHÔNG tự quyết. Số chính thức vẫn **27,84%** |
+| **Quyết định production** | Cutover **baseline R3 chính thức** sang `universe_pit` (27,84% → 27,16%) | ✅ **ĐÃ QUYẾT (user, 2026-07-22) + ĐÃ THỰC HIỆN** — job `Taylor_20260722_155549`. `pt_v23_audit_2014.py` default `UNIVERSE_SRC` = `"pit"`; chạy lại KHÔNG set env ra **đúng 27,16%/1,81/−18,1%/1,50**, self-check 0 VND (BAL+LAG), CSV **identical** với `pit_v2c`. **Số CHÍNH THỨC nay là 27,16%/1,81/−18,1%/1,50**; số `ticker_prune` giữ làm lịch sử. Đã đồng bộ `data/results_registry.md` + `mike/kb/canonical.md`. Phạm vi KHÔNG gồm P4 (`CAPIT_POOL_SOURCE`/ADV vẫn ghim prune) |
 | **G7** | Rà soát N-trial tuần qua (§5.3) — phân loại giữ/chạy-lại; ứng viên rõ nhất: **lọc thanh khoản LAG** (`lag_filter_illiquid`, commit `4b7aaa1`) chồng lớp với B3/B4 | 🔶 **CÒN TREO** — chưa làm |
 | **G8** | P6 gate + `data_registry.md` (prune→TRAP, pit→CANONICAL) + `cron_registry.md` + `coding_guidelines.md` + `universe_ruleset.md` v1 | 🔶 **LÀM MỘT PHẦN** — `universe_pit`/`universe_pit_quality` ĐÃ có entry **CANONICAL** trong `data_registry.md`; **nhưng** entry `ticker_prune` vẫn ghi *"ĐANG XEM XÉT, CHƯA CHỐT"* và §"Quy tắc chọn universe" vẫn trỏ backtest→`ticker_prune`. Còn phải cập nhật |
 | **G9** | quant-skeptic full review toàn bộ dự án | 🔶 **CÒN TREO** — từng phần chạm tiền thật (P2/P3/P4) đã qua skeptic riêng; review tổng chưa chạy |
