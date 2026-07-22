@@ -689,6 +689,59 @@ Gợi ý an toàn nhất: **để CAPIT breadth ở lại `ticker_prune` một c
 cho tới khi hoàn tất bước 1-2 ở trên. Một pin "cố tình dùng nguồn cũ, có lý do, có ngày hết hạn" an
 toàn hơn nhiều so với một lần đổi mẫu số vô tình.
 
+#### 4.4-KQ — **G4/P4 = ESCALATED, KHÔNG CUTOVER** (job `Taylor_20260722_093055`, 2026-07-22)
+
+Đã chạy đúng bước 1-2. Kết quả: **CẢ HAI cổng ở trên đều CHẶN.** Không đổi một dòng code nào trong
+`golive_recommend_v23.py` — 3 vị trí P4 (`:167` ADV cap, `:492`/`:522` CAPIT breadth+pool) **vẫn đọc
+`ticker_prune` có chủ ý**. Bằng chứng: `agents/Taylor/exp_capit_breadth/breadth_both.csv`
+(3.129 phiên 2014-01-02 → 2026-07-21, cả 2 mẫu số cạnh nhau, chạy lại được bằng SQL trong finding bus).
+
+**Cổng 1 (mục 4) — `capit_fired` ĐANG `true`.** `data/golive_v23_status.json` (date 2026-07-22,
+signal_date 2026-07-21): `capit_fired=true`, `breadth_oversold=0,4621` vs `washout_gate=0,30`.
+⚠️ Điểm cần hiểu đúng, đừng chờ nhầm: `capit_fired` **KHÔNG phải cờ "còn vị thế mở"** — nó là hàm
+thuần của breadth HÔM NAY (`golive_recommend_v23.py:497`). Vậy nên "user đã giải ngân xong" **không**
+làm nó về `false`; nó chỉ tắt khi breadth thị trường tự hồi xuống <0,30. Cổng này sẽ tự mở khi thị
+trường hồi, không cần ai làm gì — nhưng tới lúc đó vẫn còn cổng 2.
+
+**Cổng 2 (mục 3) — KHÔNG TỒN TẠI ngưỡng nào bảo toàn tập ngày fire.** Hai tập không tách được
+tuyến tính trên mẫu số mới:
+
+| Đại lượng | Giá trị |
+|---|---|
+| min `br_new` trên 82 ngày fire cũ | **0,2425** (2018-07-05) |
+| max `br_new` trên 3.047 ngày không-fire cũ | **0,3067** (2022-11-17) |
+
+max(không-fire) **>** min(fire) ⇒ mọi ngưỡng đều sai ít nhất vài ngày. Hai ứng viên tốt nhất:
+
+- `WASHOUT_GATE'=0,3070` (sai ít nhất): **7 ngày lệch**, đều là fire cũ bị MẤT (0 fire giả) —
+  2015-05-18, 2018-07-05, 2020-02-04, 2020-03-11, 2020-04-01, 2022-10-05, 2023-10-30.
+- Giữ nguyên `0,30` (cutover ngây thơ): **8 ngày lệch** (4 mất / 4 thêm). Đúng tổng số ngày fire
+  (82) nhưng ở mức **episode** thì: MẤT hẳn 2 đợt 1 ngày (2015-05-18, 2018-07-05) và THÊM 1 đợt
+  mới **2021-07-12** — tức mua rổ washout giữa năm bull 2021, một hành vi chưa từng có trong bản gốc.
+
+**Tác động TIỀN thật không chỉ ở fire/không-fire mà ở SIZE.** `capit_grind` (lookback 20-90 phiên
+tìm ngày washout trước đó) đọc chính chuỗi breadth này, và nó nhân đôi/chia đôi size (0,75 ↔ 0,375).
+Đếm số sự kiện lịch sử đổi kết cục size: **10 sự kiện** ở gate 0,30 / **9 sự kiện** ở gate 0,3070.
+Nặng nhất: **2015-08-24 và 2015-08-25 lật `grind` True→False ⇒ size GẤP ĐÔI** trên một lần fire thật.
+
+**Hôm nay (2026-07-21) thì cả 3 cấu hình cho kết quả GIỐNG HỆT** — fired=True, grind=False,
+size=0,75, và pool CAPIT **trùng khít 11 mã** (PNJ/NCT/SIP/PVT/VNM/SAB/DHC/HAH/VHM/BFC/MCH) trên cả
+2 mẫu số, vì bộ lọc `ROE_Min5Y≥0,12 ∧ ROIC5Y≥0,10 ∧ FSCORE≥6 ∧ ADV≥2 tỷ` đã siết chặt hơn nhiều so
+với ranh giới universe. ⇒ **Rủi ro không nằm ở hôm nay; nằm ở lần fire kế tiếp và ở việc baseline
+lịch sử của CAPIT bị đổi ngầm.**
+
+**Đề xuất (chờ user quyết, KHÔNG tự chọn — đúng Q6/§8.4):**
+- **A (mặc định của tôi)**: **pin `ticker_prune` vĩnh viễn cho riêng breadth+pool CAPIT**, ghi rõ lý
+  do trong code như hiện tại. CAPIT là 1 trigger duy nhất, đã hiệu chuẩn, chạm tiền thật; universe
+  mới không mang lại lợi ích gì cho nó (pool trùng khít) mà chỉ mang rủi ro đổi hành vi. Đánh đổi:
+  production vẫn còn 1 dây phụ thuộc `ticker_prune` ⇒ §4.5 phải GIỮ gate depth/lag `ticker_prune` ở
+  mức BLOCK chứ không hạ xuống WARN rồi gỡ.
+- **B**: chấp nhận `0,3070` + 7 ngày lệch (toàn bộ theo hướng THẬN TRỌNG hơn — mất fire, không thêm
+  fire giả), đổi lại cắt hẳn phụ thuộc `ticker_prune`. Cần user duyệt tường minh vì đây là đổi hành
+  vi một tham số điều khiển tiền thật.
+- **C**: viết lại breadth cho bất biến với mẫu số (vd đếm trên rổ cố định top-N thanh khoản). Đây là
+  thiết kế lại chỉ báo, không phải migration — cần R&D + backtest riêng, không làm trong lần này.
+
 ### 4.5 D3 — gate vận hành (P6) sau khi prod không còn đọc `ticker_prune`
 
 Hiện `preflight_check.sh` + `bq_freshness_check.sh` gác **lag + depth của `ticker_prune`**
