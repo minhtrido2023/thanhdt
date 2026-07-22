@@ -2299,3 +2299,56 @@
 - [2026-07-22T12:17:57Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 49, "job_id": "Taylor_20260722_112850", "source": "watcher"}
 - [2026-07-22T12:18:57Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 50, "job_id": "Taylor_20260722_112850", "source": "watcher"}
 - [2026-07-22T12:19:57Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 51, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+
+## Consolidation 2026-07-22T13:07:01Z
+- [2026-07-22T12:24:51Z] Mike/decision — trung-vang-fully-withdrawn-capit-complete: {"note": "User bao Trung vang da rut het tren CA 2 tai khoan (SpaceX + ZaloPay), CAPIT da mua het.", "verified": "Journal that xac nhan ca 5 lenh CAPIT (PVT/SAB/SIP/NCT/VNM) DONE o ca SpaceX va ZaloPay ngay 2026-07-21.", "action": "manual_offbook_assets_vnd SpaceX: 302108211 -> 0 (ZaloPay da ve 0 tu 07-20). Ca 2 account gio offbook = 0.", "impact": "NAV/active_nav tu day tro di khong con cong them offbook cho ca 2 tai khoan - phan anh dung von da chuyen het vao co phieu."}
+- [2026-07-22T12:20:57Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 52, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:21:57Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 53, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:22:57Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 54, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:23:57Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 55, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:24:57Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 56, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:25:57Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 57, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:26:57Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 58, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:27:57Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 59, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:28:58Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 60, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:29:58Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 61, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:30:58Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 62, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:31:58Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 63, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:32:58Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 64, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:33:58Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 65, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:34:58Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 66, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:35:31Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "in_progress", "note": "Bug1 XAC NHAN FIX: chunk ticker/2013 mat 318s (>300s cu => truoc day chet dung o day), gio chay tron. ticker dang tai 2016/2027, ETA ~13:30 UTC roi verify."}
+- [2026-07-22T12:35:58Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 67, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:36:58Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 68, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:37:58Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 69, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:38:58Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 70, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:39:58Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 71, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:40:58Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 72, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:41:59Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 73, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:42:59Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 74, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:43:59Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 75, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:44:59Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 76, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:45:59Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 77, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:46:59Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 78, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:47:59Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 79, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:48:59Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 80, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:49:59Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 81, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:50:59Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 82, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:51:59Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 83, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:52:59Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 84, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:54:00Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 85, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:55:00Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 86, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:56:00Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 87, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:57:00Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 88, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:58:00Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 89, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:59:00Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 90, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T12:59:36Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "in_progress", "note": "Fix 2 bug sync_bq_cache da apply (phien truoc); resync THAT dang chay pid 2916570, ticker chunk 2020/2027, ETA ~21:00 ICT. Trong luc cho: dieu tra 2 bug G6 (opens_df max_rows, universe_pit thieu 2 phien)"}
+- [2026-07-22T13:00:00Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 91, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T13:01:00Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 92, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T13:02:00Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 93, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T13:03:00Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 94, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T13:04:00Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 95, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T13:04:30Z] Taylor/finding — G6 A/B live-BQ KHONG ket luan duoc: 2 chan control giong het nhau lech 0,37pp > delta pit 0,49pp: {"job": "Taylor_20260722_112850", "phat_hien": "Hai lan chay CONTROL (UNIVERSE_SRC=prune) hom nay tren LIVE BQ, CUNG config CUNG lenh pin, cho ket qua KHAC NHAU: 27,26%/Sharpe1,83/Calmar1,56 (16:59) vs 27,63%/1,85/1,58 (17:15). Log giong het nhau den dong 51 (cung 713.818 dong signal, cung washout events, cung LAG book 6825 events/460,1452B) roi tach ra DUNG tai book BAL: 1852 stock+684 ETF vs 1898 stock+665 ETF.", "tai_sao_quan_trong": "Chan pit ra 27,75% = +0,49pp so control A, nhung KHOANG CACH GIUA HAI CHAN CONTROL la 0,37pp. Delta pit KHONG lon hon nhieu (noise). => KHONG duoc ket luan universe_pit tot hon/te hon prune tu bo so nay.", "2_gia_thuyet_chua_tach": ["H1 engine BAL khong tat dinh (tie-break theo thu tu dong / iteration set; khong co PYTHONHASHSEED o dau trong repo)", "H2 BQ upstream ghi de bang GIUA 2 lan chay = live BQ la muc tieu di dong (hom nay ticker that su doi: 3.485.636 -> 3.490.494 dong trong luc chay)"], "cach_tach": "Chay lai A/B tren CACHE DONG BANG + THEM 1 chan control trung lap (control_c vs control_c2). Bang nhau => H2. Khac nhau => H1.", "bai_hoc_chung": "KHONG A/B tren live BQ khi upstream con dang ghi trong ngay - moi so deu contemporaneous mot cach gia tao.", "trang_thai": "chain script dang chay nen: cho resync -> delta bang con lai -> verify toan bo -> 3 chan A/B"}
+- [2026-07-22T13:05:00Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 96, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T13:06:01Z] Taylor/heartbeat — Taylor_20260722_112850: {"status": "still_running", "elapsed_min": 97, "job_id": "Taylor_20260722_112850", "source": "watcher"}
+- [2026-07-22T13:01:03Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 52660}
