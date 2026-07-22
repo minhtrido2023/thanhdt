@@ -14,11 +14,25 @@ cache="${XDG_CACHE_HOME:-$HOME/.cache}/mike_kbver_$id"
 mkdir -p "$(dirname "$cache")"
 printf '%s' "$cur" > "$cache"
 
+# INTERACTIVE_TID — "this session IS the user's live Discord session, in that topic".
+# Since 2026-07-22b, DISCORD_THREAD_ID carries TWO different meanings:
+#   1. injected by the CCDB bridge  → the user's live session, topic = where they are chatting;
+#   2. exported by bin/dispatch.sh  → merely "the topic this JOB's output belongs to", on a
+#      headless `claude -p` run that no human is watching.
+# The Mike-only branches below (global ccdb pointer write, job-board topic filter, "🟢 Đã
+# resume xong" notice) are only ever correct for meaning 1 — arming them for meaning 2 makes a
+# cron-dispatched Mike (daily_retro.sh, kb_nightly.sh) clobber the pointer, spray a resume
+# notice into whatever topic the user last opened, and lose the deliberate fail-open of the
+# job-board audit. Distinguish by JOB_ID, which bin/dispatch.sh exports for every dispatched
+# run and nothing else sets.
+INTERACTIVE_TID=""
+if [ -z "${JOB_ID:-}" ]; then INTERACTIVE_TID="${DISCORD_THREAD_ID:-}"; fi
+
 # Persist the active Discord thread so _bg_wrapper can post to it even after this session ends.
 # DISCORD_THREAD_ID is injected by the CCDB bot when it launches Mike's session.
-if [ "$id" = "Mike" ] && [ -n "${DISCORD_THREAD_ID:-}" ]; then
+if [ "$id" = "Mike" ] && [ -n "$INTERACTIVE_TID" ]; then
   mkdir -p "$ROOT/agents/Mike/state"
-  printf '%s' "$DISCORD_THREAD_ID" > "$ROOT/agents/Mike/state/ccdb_thread_id"
+  printf '%s' "$INTERACTIVE_TID" > "$ROOT/agents/Mike/state/ccdb_thread_id"
 fi
 
 # NOTE (cost-opt #1b, 2026-07-17): this hook used to `cat` context_pack.md /
@@ -53,7 +67,7 @@ fi
 # narrate topic A's work inside topic B just because that's where the user was reading.
 if [ "$id" = "Mike" ] && [ -d "$ROOT/bus/jobs" ]; then
   NOW="$(date +%s)"
-  MY_TID="${DISCORD_THREAD_ID:-}"
+  MY_TID="$INTERACTIVE_TID"   # empty on a dispatched/cron session → fail-open, show every job
   overdue_out=""
   other_n=0
   for _jf in "$ROOT/bus/jobs"/*.json; do
@@ -99,8 +113,10 @@ source "$ROOT/hooks/_directives.sh"
 # Discord is unreachable. Fires on every SessionStart (fresh start, compact-resume, or a
 # watchdog-triggered restart) — all of those are cases where the user benefits from knowing
 # Mike just became ready again.
-if [ "$id" = "Mike" ] && [ -n "${DISCORD_THREAD_ID:-}" ]; then
-  "$ROOT/bin/notify_thread.sh" "🟢 Đã resume xong — sẵn sàng nhận việc tiếp." "$DISCORD_THREAD_ID" \
+# INTERACTIVE_TID (not DISCORD_THREAD_ID): a headless dispatched session has no human waiting
+# on a "ready" signal — announcing there is pure noise in the user's topic.
+if [ "$id" = "Mike" ] && [ -n "$INTERACTIVE_TID" ]; then
+  "$ROOT/bin/notify_thread.sh" "🟢 Đã resume xong — sẵn sàng nhận việc tiếp." "$INTERACTIVE_TID" \
     >/dev/null 2>&1 || true
 fi
 

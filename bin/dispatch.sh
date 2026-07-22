@@ -547,15 +547,17 @@ _dtid0="${FORCE_TID:-$(_ambient_thread "$id")}"
 # by construction for Wags/DollarBill and for every `--thread` dispatch.
 # Exporting here also makes any peer dispatch the agent issues inherit the job's topic
 # (via _ambient_thread) instead of the caller's ambient one.
-# EXCEPTION id=Mike (arch-reviewer 1d9dcc6, round 2): `dispatch.sh Mike` from cron
-# (daily_retro.sh, kb_nightly.sh) starts a HEADLESS Mike session. hooks/session_start.sh has
-# three Mike-only branches keyed on DISCORD_THREAD_ID being set — it writes the global
-# ccdb_thread_id pointer, posts "🟢 Đã resume xong", and narrows the job-board audit to that
-# topic (whose fail-open for topic-less cron sessions b3e9fe8 deliberately kept). Exporting
-# here would arm all three for a cron job, spraying a meaningless resume notice into whatever
-# topic the user last opened — the very symptom this fix exists to remove. Headless Mike keeps
-# the old behaviour: no ambient topic, fail-open.
-if [ -n "$_dtid0" ] && [ "$id" != "Mike" ]; then export DISCORD_THREAD_ID="$_dtid0"; fi
+# ROUND 2 (arch-reviewer objection): this export ALSO armed three Mike-only branches in
+# hooks/session_start.sh that used "DISCORD_THREAD_ID is set" as their proxy for "this is the
+# user's LIVE Discord session". `dispatch.sh Mike` from cron (daily_retro.sh, kb_nightly.sh)
+# would then clobber the global ccdb pointer, post "🟢 Đã resume xong" into whatever topic the
+# user last opened, and lose the job-board fail-open that b3e9fe8 kept on purpose.
+# Fixed at the CONSUMER — session_start.sh now derives INTERACTIVE_TID, gating those branches
+# on the absence of $JOB_ID (exported above for dispatched runs only) — not by exempting
+# id=Mike here: the stale proxy was the root cause, and an id-keyed exemption would leave the
+# job record and the agent's env disagreeing for Mike alone, which is the exact class of bug
+# this commit chain exists to remove.
+if [ -n "$_dtid0" ]; then export DISCORD_THREAD_ID="$_dtid0"; fi
 JSET job_id="$job_id" from="$from" to="$id" status=running attempt=1 \
      max_attempts=$((RETRIES + 1)) started_at="$_start_ts" \
      deadline=$((_start_ts + TIMEOUT)) logfile="$logfile" discord_thread_id="$_dtid0" \
