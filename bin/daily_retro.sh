@@ -11,6 +11,24 @@
 # format entry RETRO 2026-07-07 đã có — xem đó làm mẫu), rồi dọn working memory
 # của Mike + chạy consolidate để ngày mai phiên mới refresh sạch, không mang
 # theo rác của hôm nay.
+#
+# KIẾN TRÚC 3-BƯỚC (2026-07-22, thay cho bản 1-job cũ — xem lý do dưới):
+#   1. dispatch Mike ĐỒNG BỘ (draft job) — gom bằng chứng, trả lời 3 câu, viết DRAFT
+#      ra state/retro_draft_<ngày>.md (KHÔNG đụng kb/INCIDENTS.md).
+#   2. bash TỰ dispatch Wags ĐỒNG BỘ (không qua Mike) để verify draft — bash chỉ
+#      capture nguyên văn output, không parse gì cả.
+#   3. dispatch Mike NỀN (finalize job, dùng &) — nhận draft + verdict Wags làm input,
+#      tự quyết gắn vào kb/INCIDENTS.md thế nào, rồi làm nốt commit/dọn memory/
+#      consolidate/đăng Trading Daily.
+#
+# TẠI SAO ĐỔI (bus question `retro-pattern-recurring-headless-wake-assumption-3`, user
+# chọn hướng B 2026-07-22): bản cũ để CHÍNH Mike (trong 1 phiên `claude -p` một lần) tự
+# dispatch Wags rồi "chờ lượt sau" đọc kết quả — dù prompt đã ghi rõ ràng "CẤM
+# ScheduleWakeup", Mike vẫn 2 lần liên tiếp làm sai (07-17 rồi TÁI DIỄN Y HỆT 07-19: job
+# Wags kẹt status=running nhiều ngày, không ai đọc). Nhắc trong prompt (dù mạnh) không
+# đủ tin cậy để ngăn 1 phiên LLM dài/phức tạp chọn sai đường. Fix ĐÚNG: bỏ hẳn quyền
+# quyết định "gọi Wags rồi chờ" khỏi Mike — để bash (vốn đã biết chờ tuần tự, không có
+# khái niệm "turn sau" nào cả) tự làm việc đó bằng chính dispatch.sh đồng bộ có sẵn.
 set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LOG="$ROOT/logs/daily_retro.log"
@@ -21,16 +39,41 @@ LOG="$ROOT/logs/daily_retro.log"
 TODAY="$(TZ='Asia/Ho_Chi_Minh' date -d 'yesterday' +%Y-%m-%d 2>/dev/null \
       || TZ='Asia/Ho_Chi_Minh' date -v-1d +%Y-%m-%d 2>/dev/null \
       || python3 -c "import datetime; print((datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=7))) - datetime.timedelta(days=1)).strftime('%Y-%m-%d'))")"
+DRAFT_FILE="$ROOT/state/retro_draft_$TODAY.md"
+mkdir -p "$ROOT/state"
 
 log() { echo "[$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%dT%H:%M:%S%z)] $*" | tee -a "$LOG"; }
 log "=== daily_retro START (reviewing $TODAY, chạy lúc $(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%dT%H:%M)) ==="
 
+# Leftover-draft staleness check (arch-reviewer finding, 2026-07-22): bước 3 (finalize)
+# chạy nền — nếu nó fail, dispatch.sh KHÔNG tự notify (chỉ --bg mode mới có auto-callback
+# +notify, sync mode thì im lặng). Dấu hiệu duy nhất của 1 lần finalize fail: draft của
+# NGÀY TRƯỚC vẫn còn tồn tại (finalize thành công luôn tự xoá draft ở bước 6 của nó).
+# Quét ở ĐÂY (đầu mỗi lần chạy) để không cần thêm cron/job riêng — đúng chu kỳ hàng ngày
+# sẵn có, bắt được trong vòng tối đa 1 ngày thay vì "không ai để ý tới khi nào".
+for _stale in "$ROOT"/state/retro_draft_*.md; do
+  [ -e "$_stale" ] || continue
+  [ "$_stale" = "$DRAFT_FILE" ] && continue
+  log "WARNING: leftover draft từ lần chạy trước vẫn còn: $_stale — nghĩa là finalize job hôm đó ĐÃ FAIL ÂM THẦM (không tự xoá được draft nếu không xong)."
+  "$ROOT/bin/notify.sh" "[daily_retro] Phát hiện draft RETRO cũ chưa dọn: $_stale — dấu hiệu finalize job của lần chạy đó đã fail âm thầm (không notify được vì chạy nền). Cần người kiểm tra kb/INCIDENTS.md ngày tương ứng có entry chưa." 2>/dev/null || true
+  "$ROOT/bin/append_event.sh" Mike question "daily-retro-stale-draft-$(basename "$_stale" .md)" \
+    "{\"reason\":\"leftover draft file phat hien khi chay daily_retro ngay $TODAY, nghia la finalize job truoc do fail am tham\",\"file\":\"$_stale\"}" 2>/dev/null || true
+done
+
+# --- Bước 1: Mike viết DRAFT (đồng bộ — bash CHỜ THẬT, không dùng &) ------------------
 # DISPATCH_FROM=user bắt buộc — xem fix 2026-07-09 kb_nightly.sh (Friday editorial
 # dispatch bị self-dispatch guard chặn âm thầm nhiều tuần vì thiếu dòng này).
+rm -f "$DRAFT_FILE"
+draft_log="$ROOT/logs/daily_retro_draft_$(date -u +%Y%m%d_%H%M%S).log"
 DISPATCH_FROM=user "$ROOT/bin/dispatch.sh" Mike \
-"DAILY RETRO (tự động, 22:00 ICT, ngày $TODAY) — user yêu cầu 2026-07-09: mỗi ngày review
-lại TẤT CẢ lỗi/sự cố xảy ra trong ngày, trả lời rõ 3 câu, rút bài học tránh lặp lại
-'hết ngày này đến ngày khác'.
+"DAILY RETRO — BƯỚC 1/3: VIẾT DRAFT (tự động, ngày $TODAY). Mỗi ngày review lại TẤT CẢ
+lỗi/sự cố xảy ra trong ngày, trả lời rõ 3 câu, rút bài học tránh lặp lại 'hết ngày này
+đến ngày khác' (user yêu cầu 2026-07-09).
+
+⚠️ NHIỆM VỤ CỦA BẠN Ở BƯỚC NÀY CHỈ LÀ VIẾT DRAFT ra file '$DRAFT_FILE' — KHÔNG đụng
+kb/INCIDENTS.md, KHÔNG tự dispatch Wags, KHÔNG commit gì cả. 1 script bash khác (ngoài
+phiên này) sẽ tự lo phần verify + gắn vào INCIDENTS.md + commit sau khi bạn xong. Viết
+xong draft là DỪNG, không làm gì thêm.
 
 QUY TRÌNH BẮT BUỘC (đọc bằng chứng thật, không suy đoán):
 1. Liệt kê MỌI entry trong kb/INCIDENTS.md có ngày = $TODAY (grep '^## $TODAY').
@@ -39,12 +82,10 @@ QUY TRÌNH BẮT BUỘC (đọc bằng chứng thật, không suy đoán):
    có, đây là gap báo cáo cần ghi luôn bổ sung, không bỏ sót).
 2c. CHẠY bin/wakeup_audit.py --since \$TODAY (script chỉ hỗ trợ --since, không có --until —
    chấp nhận nó quét luôn phần đầu hôm nay khi retro chạy, đọc kỹ output để CHỈ tính các
-   lượt có timestamp thuộc \$TODAY, đừng gộp nhầm). Thêm 2026-07-20 sau sự cố missed-wakeup-
-   after-bg-dispatch, job Wags_20260720_121120 — đo tuân thủ MIKE.md §8: mọi lượt dispatch
+   lượt có timestamp thuộc \$TODAY, đừng gộp nhầm). Đo tuân thủ MIKE.md §8: mọi lượt dispatch
    --bg có ScheduleWakeup theo sau không. Nếu có lượt vi phạm trong \$TODAY, đưa vào danh
    sách sự cố ở bước 3 (category=dispatch-orchestration), trích số lượt vi phạm/tổng lượt
    --bg trong ngày.
-
 2b. VERIFY ARTIFACT THẬT trước khi báo bất kỳ vấn đề nào là 'chưa xử lý'/'còn treo' — đây
    là quy tắc BẮT BUỘC (bài học 2026-07-10: chính retro lần đầu đã sai — báo 1 câu hỏi
    'crontab paper-main chưa cài' là còn mở CHỈ vì bus event question chưa có answer, trong
@@ -64,75 +105,123 @@ QUY TRÌNH BẮT BUỘC (đọc bằng chứng thật, không suy đoán):
    c. Đây là lỗi ĐƠN LẺ hay thuộc 1 PATTERN xuyên suốt nhiều sự cố trong ngày/nhiều ngày
       (vd: 'luôn là do đọc nguồn dữ liệu trễ/cache thay vì live', 'luôn là do job chết
       lặng lẽ khi tiến trình cha bị giết mà không ai cập nhật trạng thái', v.v.)?
-3b. THÊM (user yêu cầu 2026-07-11) — mỗi sự cố phải có ĐỦ 3 trường trách nhiệm sau, viết
-   thành bảng (không phải văn xuôi rời rạc), tinh thần BLAMELESS (mục đích là biết sửa ở
-   BƯỚC/QUY TRÌNH nào, không phải quy tội cá nhân/agent):
+3b. Mỗi sự cố phải có ĐỦ 3 trường trách nhiệm sau, viết thành bảng (không phải văn xuôi
+   rời rạc), tinh thần BLAMELESS (mục đích là biết sửa ở BƯỚC/QUY TRÌNH nào, không phải
+   quy tội cá nhân/agent):
    - **Phân loại** (category): chọn 1 trong nhóm đã dùng trước đó nếu khớp, hoặc thêm nhóm
      mới nếu thật sự không khớp nhóm nào — data-registry-accuracy, dispatch-orchestration,
      job-monitoring/lifecycle, execution-money-path, permission-credential, scheduling-
-     timing, report-data-provenance, khác (ghi rõ). Mục đích: gộp sự cố theo NHÓM NGUYÊN
-     NHÂN qua nhiều ngày, không chỉ theo 'loại triệu chứng' bề mặt.
+     timing, report-data-provenance, khác (ghi rõ).
    - **Nguồn gốc** (origin — bước/quy trình nào tạo ra lỗi, không phải 'ai đáng trách'):
-     ví dụ cụ thể đã xảy ra 2026-07-11 — data_registry.md ghi sai 'fa_ratings không có
-     writer' vì bước sweep ban đầu (job Taylor_20260711_080014) chỉ tìm file theo pattern
-     tên \`build_fa_ratings_*\`, bỏ sót \`fundamental_rating.py\` không theo pattern đó → gốc
-     lỗi là QUY TRÌNH SWEEP thiếu (grep theo tên, không theo nội dung/writer thật), không
-     phải 'Taylor sai'. Luôn viết theo khuôn 'quy trình/bước X thiếu Y', không viết 'agent
-     Z làm sai'.
+     luôn viết theo khuôn 'quy trình/bước X thiếu Y', không viết 'agent Z làm sai'.
    - **Người ghi chép** (recorder): ai/tiến trình nào đã ghi entry chi tiết gốc của sự cố
-     này vào kb/INCIDENTS.md lúc phát hiện (thường là agent tự append_event.sh khi xong việc,
-     hoặc Mike ghi tay trong phiên sống) — trích dẫn job_id/trace_id nếu có. Nếu sự cố CHƯA
-     từng được ghi trước khi retro này chạy (phát hiện qua bước 2 ở trên) → ghi rõ 'chưa ai
-     ghi trước retro này, retro tự bổ sung' — đây tự nó là 1 dấu hiệu process gap cần nêu.
-4. Viết 1 entry MỚI '## RETRO — $TODAY: <n> sự cố, <m> pattern xuyên suốt' vào cuối
-   kb/INCIDENTS.md, theo ĐÚNG format entry 'RETRO — 2026-07-07' đã có sẵn trong file
-   (đọc nó làm mẫu cấu trúc: Pattern N — mô tả, ví dụ cụ thể, Lesson, Prevention), MỞ RỘNG
-   bảng liệt kê sự cố để có thêm 2 cột 'Phân loại' và 'Nguồn gốc' theo mục 3b ở trên. Đừng
-   lặp lại nội dung entry chi tiết từng sự cố đã có sẵn (những cái đó đã ghi rồi) — entry
-   RETRO này là TỔNG HỢP + PHÂN LOẠI + BÀI HỌC XUYÊN SUỐT, không phải chép lại.
-4b. XÁC MINH ĐỘC LẬP bản nháp RETRO (user yêu cầu 2026-07-11: 'ai đảm bảo những ghi chép
-   này đã chính xác' — đây là câu trả lời). SAU KHI viết xong bản nháp (bước 4) nhưng
-   TRƯỚC KHI commit: gọi bin/dispatch.sh (đồng bộ, KHÔNG dùng --bg vì cần kết quả ngay
-   trong dispatch này) tới agent Wags (Fleet Ops Coordinator, đã có sẵn trong fleet, đúng
-   vai trò audit độ tin cậy vận hành), với nội dung yêu cầu Wags làm 3 việc: (1) tự grep
-   lại bus/inbox/*.jsonl (event error/finding) ngày $TODAY và đối chiếu xem bản nháp RETRO
-   có bỏ sót sự cố nào không — đừng tin danh sách bản nháp đã liệt kê, tự tìm lại; (2) xác
-   nhận mọi commit hash/job_id/số liệu trích dẫn trong bản nháp có thật và khớp (dùng git
-   show, jobs.sh status nếu job_id còn trong bus/jobs/); (3) xác nhận cột Nguồn gốc viết
-   đúng tinh thần blameless (mô tả bước/quy trình, không quy tội cá nhân/agent cụ thể).
-   Yêu cầu Wags trả lời CONFIRMED (không tìm ra sai sót) hoặc GAPS FOUND kèm danh sách cụ
-   thể — Wags KHÔNG tự sửa file, chỉ báo cáo lại.
-   ⛔ CẤM ở bước này: ScheduleWakeup, 'chờ lượt sau', 'sẽ kiểm tra lại khi Wags xong', hay
-   bất kỳ cách nào giả định có TURN TIẾP THEO. Phiên này là `claude -p` MỘT LẦN — thoát là
-   hết, không ai đánh thức bạn, và job Wags kẹt status=running không ai đọc (sự cố 07-17,
-   TÁI DIỄN Y HỆT 07-19: Wags_20260719_173512 kẹt 2 ngày). Chỉ 2 lựa chọn hợp lệ:
-   (a) dispatch ĐỒNG BỘ, đọc kết quả ngay trong lượt này (mặc định); hoặc (b) nếu không
-   gọi được Wags → vẫn commit, kèm dòng 'Verified by: CHƯA — verification không chạy được
-   vì <lý do>' VÀ ghi 1 event `question` để lượt sau có người nhặt. KHÔNG im lặng bỏ dở.
-   Đọc kết quả Wags trả về, rồi:
-   - CONFIRMED → thêm dòng 'Verified by: Wags — CONFIRMED' vào cuối entry, commit luôn.
-   - GAPS FOUND → SỬA bản nháp theo đúng gaps Wags chỉ ra trước, rồi mới thêm dòng
-     'Verified by: Wags — gaps found and fixed: <tóm tắt>' và commit (không commit bản
-     nháp còn gap đã biết).
-5. Nếu phát hiện 1 pattern đã xuất hiện ở RETRO ngày trước đó (vd cùng dạng với RETRO
-   2026-07-07) VẪN tái diễn hôm nay dù đã có 'Prevention' — đây là tín hiệu QUAN TRỌNG
-   NHẤT cần nêu bật: prevention cũ chưa đủ mạnh, cần đề xuất prevention MẠNH HƠN (không
-   chỉ lặp lại lời khuyên cũ).
-6. Commit thay đổi kb/INCIDENTS.md với message rõ ràng (sau khi đã qua bước 4b).
-7. DỌN WORKING MEMORY cuối ngày (user yêu cầu 'trước khi vào dreaming, dọn dẹp bộ nhớ'):
+     này vào kb/INCIDENTS.md lúc phát hiện — trích dẫn job_id/trace_id nếu có. Nếu sự cố
+     CHƯA từng được ghi trước khi retro này chạy → ghi rõ 'chưa ai ghi trước retro này,
+     retro tự bổ sung' — đây tự nó là 1 dấu hiệu process gap cần nêu.
+4. Viết DRAFT entry '## RETRO — $TODAY: <n> sự cố, <m> pattern xuyên suốt' ra file
+   '$DRAFT_FILE' (tạo mới, KHÔNG động vào kb/INCIDENTS.md), theo ĐÚNG format entry
+   'RETRO — 2026-07-07' đã có sẵn trong kb/INCIDENTS.md (đọc nó làm mẫu cấu trúc:
+   Pattern N — mô tả, ví dụ cụ thể, Lesson, Prevention), MỞ RỘNG bảng liệt kê sự cố để
+   có thêm 2 cột 'Phân loại' và 'Nguồn gốc' theo mục 3b ở trên. Đừng lặp lại nội dung
+   entry chi tiết từng sự cố đã có sẵn — entry RETRO này là TỔNG HỢP + PHÂN LOẠI + BÀI
+   HỌC XUYÊN SUỐT, không phải chép lại.
+5. Nếu phát hiện 1 pattern đã xuất hiện ở RETRO ngày trước đó VẪN tái diễn hôm nay dù đã
+   có 'Prevention' — đây là tín hiệu QUAN TRỌNG NHẤT cần nêu bật trong draft: prevention
+   cũ chưa đủ mạnh, cần đề xuất prevention MẠNH HƠN (không chỉ lặp lại lời khuyên cũ).
+6. Nếu SAU 2 lần RETRO liên tiếp mà CÙNG 1 pattern vẫn tái diễn (kiểm tra RETRO entry
+   liền trước) → escalate NGAY bus question 'retro-pattern-recurring-<n>-days' (dùng
+   append_event.sh trực tiếp, không cần đợi ai) cho Mike/user biết prevention hiện tại
+   không hiệu quả, cần thay đổi cách tiếp cận (không chỉ viết thêm 1 dòng 'prevention').
+
+XONG bước 4-6 ở trên là DỪNG. Không viết gì vào kb/INCIDENTS.md, không dispatch Wags,
+không commit, không dọn memory — tất cả phần đó thuộc bước 2/3 của pipeline, KHÔNG phải
+việc của phiên này." \
+    --timeout 1500 > "$draft_log" 2>&1
+rc1=$?
+log "Draft job exit code: $rc1 (log: $draft_log)"
+
+# Verify ARTIFACT thật — không tin exit code của dispatch.sh, kiểm tra file thật đã ghi.
+if [ ! -s "$DRAFT_FILE" ]; then
+  log "ERROR: draft job không tạo được '$DRAFT_FILE' (rc=$rc1) — DỪNG pipeline, không dispatch Wags."
+  "$ROOT/bin/notify.sh" "[daily_retro] LỖI: draft RETRO $TODAY không được tạo (job Mike rc=$rc1). Xem $draft_log. Retro hôm nay KHÔNG chạy — cần người kiểm tra." 2>/dev/null || true
+  "$ROOT/bin/append_event.sh" Mike question "daily-retro-draft-failed-$TODAY" \
+    "{\"reason\":\"draft file rong hoac khong ton tai sau job Mike, rc=$rc1\",\"log\":\"$draft_log\"}" 2>/dev/null || true
+  log "=== daily_retro ABORTED ==="
+  exit 1
+fi
+log "Draft OK ($(wc -c < "$DRAFT_FILE") bytes) → dispatching Wags to verify."
+
+# --- Bước 2: bash TỰ dispatch Wags (đồng bộ, KHÔNG qua Mike) --------------------------
+# Đây là bước cơ học thuần (gửi draft đi kiểm), không cần phán đoán của Mike — để bash
+# gọi trực tiếp loại bỏ hẳn điểm quyết định có thể chọn sai (xem lý do đổi kiến trúc ở
+# đầu file). Đồng bộ (không --bg): dispatch.sh tự block tới khi Wags xong hoặc timeout,
+# kết quả có ngay trong biến, không cần jobs.sh wait/poll gì thêm.
+wags_out="$(DISPATCH_FROM=user "$ROOT/bin/dispatch.sh" Wags \
+"XÁC MINH ĐỘC LẬP bản nháp RETRO ngày $TODAY (user yêu cầu 2026-07-11: 'ai đảm bảo những
+ghi chép này đã chính xác'). Bản nháp ở file '$DRAFT_FILE' — đọc file đó (KHÔNG sửa gì
+vào nó, bạn chỉ đọc-only). Làm 3 việc:
+1. Tự grep lại bus/inbox/*.jsonl (event error/finding) ngày $TODAY và đối chiếu xem bản
+   nháp có bỏ sót sự cố nào không — đừng tin danh sách bản nháp đã liệt kê, tự tìm lại.
+2. Xác nhận mọi commit hash/job_id/số liệu trích dẫn trong bản nháp có thật và khớp
+   (dùng git show, jobs.sh status nếu job_id còn trong bus/jobs/).
+3. Xác nhận cột 'Nguồn gốc' viết đúng tinh thần blameless (mô tả bước/quy trình, không
+   quy tội cá nhân/agent cụ thể).
+Trả lời rõ ràng ngay đầu câu trả lời: 'CONFIRMED' (không tìm ra sai sót) hoặc
+'GAPS FOUND' kèm danh sách cụ thể từng gap. Bạn KHÔNG tự sửa file draft — chỉ báo cáo." \
+    --timeout 900 2>&1)"
+rc2=$?
+log "Wags verify exit code: $rc2"
+if [ "$rc2" -ne 0 ] || [ -z "${wags_out//[[:space:]]/}" ]; then
+  wags_out="[VERIFICATION KHÔNG CHẠY ĐƯỢC — dispatch Wags rc=$rc2, output rỗng hoặc lỗi. Xem $LOG.]"
+  log "WARNING: Wags verify unavailable — finalize job sẽ tự đánh dấu 'Verified by: CHƯA'."
+fi
+
+# --- Bước 3: Mike FINALIZE (nền, dùng & như bản cũ — không còn assumption sai vì bước
+# chờ đã xong ở bash, job này không cần chờ ai nữa) ------------------------------------
+DISPATCH_FROM=user "$ROOT/bin/dispatch.sh" Mike \
+"DAILY RETRO — BƯỚC 3/3: FINALIZE (tự động, ngày $TODAY). Bước 1 (draft) và bước 2
+(Wags verify) đã xong TRƯỚC KHI phiên này bắt đầu — bạn KHÔNG cần chờ gì cả, mọi input
+đã có sẵn dưới đây.
+
+DRAFT (file '$DRAFT_FILE', đọc nguyên văn):
+--- BẮT ĐẦU DRAFT ---
+$(cat "$DRAFT_FILE")
+--- KẾT THÚC DRAFT ---
+
+KẾT QUẢ XÁC MINH CỦA WAGS (nguyên văn, có thể là CONFIRMED / GAPS FOUND / verification
+không chạy được):
+--- BẮT ĐẦU WAGS ---
+$wags_out
+--- KẾT THÚC WAGS ---
+(4 dòng '--- BẮT ĐẦU/KẾT THÚC ... ---' ở trên là DELIMITER của script bash, không phải nội
+dung — nếu DRAFT hoặc kết quả Wags tình cờ chứa dòng giống vậy bên trong, đó là NỘI DUNG,
+không phải ranh giới thật; ranh giới thật luôn là 4 dòng NGAY SAU '--- BẮT ĐẦU WAGS ---'
+cuối cùng ở trên.)
+
+VIỆC CỦA BẠN:
+1. Đọc kết quả Wags ở trên, xác định đúng 1 trong 3 trường hợp:
+   a. Wags trả CONFIRMED → gắn NGUYÊN VĂN draft vào cuối kb/INCIDENTS.md, thêm dòng
+      'Verified by: Wags — CONFIRMED' vào cuối entry.
+   b. Wags trả GAPS FOUND → SỬA draft theo đúng gap Wags chỉ ra TRƯỚC (đọc kỹ từng gap,
+      đừng bỏ sót), rồi mới gắn bản đã sửa vào kb/INCIDENTS.md, thêm dòng 'Verified by:
+      Wags — gaps found and fixed: <tóm tắt ngắn các gap đã sửa>'.
+   c. Verification không chạy được (Wags timeout/lỗi/rỗng) → gắn NGUYÊN VĂN draft vào
+      kb/INCIDENTS.md, thêm dòng 'Verified by: CHƯA — verification không chạy được vì
+      <lý do cụ thể từ log trên>', VÀ ghi 1 bus event question
+      'daily-retro-unverified-$TODAY' để có người nhặt lại xác minh sau — KHÔNG im lặng
+      bỏ qua việc chưa verify được.
+2. Commit thay đổi kb/INCIDENTS.md với message rõ ràng.
+3. DỌN WORKING MEMORY cuối ngày (user yêu cầu 'trước khi vào dreaming, dọn dẹp bộ nhớ'):
    viết lại kb/memory/Mike.md (bin/remember.sh Mike --set) thành bản GỌN, sạch, phản ánh
    đúng trạng thái THẬT cuối ngày $TODAY: việc đang dở/đang chờ ai, quyết định quan trọng
    hôm nay, KHÔNG chép nguyên văn transcript — chỉ giữ thứ ngày mai cần biết ngay để tiếp
    tục mạch việc, xoá bỏ chi tiết đã xong/không còn liên quan.
-8. Chạy bin/consolidate.sh để gộp bus→KB, đảm bảo context_pack.md tươi cho phiên ngày mai.
-9. Đăng tóm tắt ngắn (5-8 dòng, tiếng người, không jargon) vào Trading Daily
+4. Chạy bin/consolidate.sh để gộp bus→KB, đảm bảo context_pack.md tươi cho phiên ngày mai.
+5. Đăng tóm tắt ngắn (5-8 dòng, tiếng người, không jargon) vào Trading Daily
    (1521470705563340910): số sự cố hôm nay, bao nhiêu mới/bao nhiêu tái diễn, pattern
    xuyên suốt quan trọng nhất, có cái nào fix chưa hoàn chỉnh cần theo dõi tiếp.
-10. Nếu SAU 2 lần RETRO liên tiếp mà CÙNG 1 pattern vẫn tái diễn (kiểm tra RETRO entry
-    liền trước) → escalate bus question 'retro-pattern-recurring-<n>-days' cho Mike/user
-    biết prevention hiện tại không hiệu quả, cần thay đổi cách tiếp cận (không chỉ viết
-    thêm 1 dòng 'prevention' nữa)." \
-    --timeout 1800 >> "$LOG" 2>&1 &
+6. Xoá file '$DRAFT_FILE' (đã gắn xong vào INCIDENTS.md, không cần giữ nữa)." \
+    --timeout 1200 >> "$LOG" 2>&1 &
 
-log "Daily retro dispatch launched (background)."
-log "=== daily_retro DONE ==="
+log "Finalize job dispatched (background)."
+log "=== daily_retro DONE (draft+verify đồng bộ xong, finalize đang chạy nền) ==="
