@@ -260,6 +260,54 @@ LAG_SLOT_INFLIGHT = os.environ.get("LAG_SLOT_INFLIGHT", "").strip() == "1"
 if LAG_SLOT_INFLIGHT: _qs_tag += "_lagslotif"
 EXP_TAG = os.environ.get("EXP_TAG", "").strip()
 if EXP_TAG: _qs_tag += f"_exp_{EXP_TAG}"
+# ── UNIVERSE SOURCE (G6 re-pin A/B, ticker_prune_replacement_plan.md §5) ────────────────────
+# "pit" (DEFAULT tu 2026-07-22, user quyet dinh cutover) = team-owned `tav2_mike.universe_pit_q`,
+#                   membership PER TRADING DAY (no DISTINCT-ever look-ahead) -> baseline R3 CHINH THUC.
+# "prune" = legacy `tav2_bq.ticker_prune` DISTINCT-ever, GIU LAI de so sanh lich su (curation suy
+#           vong tron tu chinh deal backtest cu; delta pit-vs-prune cung vintage = -0,79pp CAGR).
+# Decision gates (BAL signal rows, D1 RE_BACKLOG panel) use PER-DAY membership; price/sector panels
+# use UNION-over-the-audit-window membership so a name that leaves the universe mid-hold still has a
+# price to mark against (the engine carries the last price otherwise -> silent stale MTM).
+UNIVERSE_SRC = os.environ.get("UNIVERSE_SRC", "pit").strip().lower()
+if UNIVERSE_SRC not in ("prune", "pit"): raise SystemExit(f"UNIVERSE_SRC={UNIVERSE_SRC!r} not in (prune,pit)")
+UNIVERSE_PIT_TABLE = "lithe-record-440915-m9.tav2_mike.universe_pit_q"
+if UNIVERSE_SRC == "pit": _qs_tag += "_univpit"
+
+def univ_window_pred(alias="t"):
+    """Membership over the AUDIT WINDOW — for PRICE/SECTOR panels, not a decision gate."""
+    if UNIVERSE_SRC == "prune":
+        return f"{alias}.ticker IN (SELECT DISTINCT t2.ticker FROM tav2_bq.ticker_prune AS t2)"
+    return (f"{alias}.ticker IN (SELECT DISTINCT u2.ticker FROM `{UNIVERSE_PIT_TABLE}` u2 "
+            f"WHERE u2.time BETWEEN DATE '{START_DATE}' AND DATE '{END_DATE}' AND u2.in_universe)")
+
+def univ_day_pred(alias="t"):
+    """Membership ON THE ROW'S OWN DAY — the decision gate (no DISTINCT-ever look-ahead)."""
+    if UNIVERSE_SRC == "prune":
+        return f"{alias}.ticker IN (SELECT DISTINCT t2.ticker FROM tav2_bq.ticker_prune AS t2)"
+    return (f"EXISTS(SELECT 1 FROM `{UNIVERSE_PIT_TABLE}` u2 "
+            f"WHERE u2.ticker = {alias}.ticker AND u2.time = {alias}.time AND u2.in_universe)")
+
+_UNIV_MIN_DEPTH = 50   # rows/day in `ticker` below which the day is an upstream stub, not a session
+
+def assert_universe_covers():
+    """Fail-safe (plan §4.3): STOP if universe_pit misses trading days in the audit window.
+    NEVER silently fall back to ticker_prune — a gap would look like 'no candidates', not an error."""
+    if UNIVERSE_SRC != "pit": return
+    r = bq(f"""SELECT
+  (SELECT COUNT(DISTINCT u.time) FROM `{UNIVERSE_PIT_TABLE}` u
+     WHERE u.time BETWEEN DATE '{START_DATE}' AND DATE '{END_DATE}' AND u.in_universe) AS n_univ,
+  (SELECT COUNT(*) FROM (SELECT t.time FROM tav2_bq.ticker t
+     WHERE t.time BETWEEN DATE '{START_DATE}' AND DATE '{END_DATE}'
+     GROUP BY t.time HAVING COUNT(*) >= {_UNIV_MIN_DEPTH})) AS n_tk""")
+    n_un, n_tk = int(r["n_univ"][0]), int(r["n_tk"][0])
+    # Scope = REAL trading days only. Upstream regularly leaves a 1-row stub for a non-trading date
+    # (2025-05-04 / 2025-05-11 are Sundays with exactly 1 row in `ticker`); build_universe_pit's own
+    # B8 depth gate refuses to build a universe from those, so counting them would fail every run.
+    if n_un < n_tk:
+        raise SystemExit(f"universe_pit thieu ngay trong [{START_DATE},{END_DATE}]: {n_un} phien / "
+                         f"tav2_bq.ticker co {n_tk} phien (depth>={_UNIV_MIN_DEPTH}). "
+                         f"DUNG — khong tu fallback ve ticker_prune.")
+    print(f"  [universe_pit] coverage OK: {n_un} phien >= ticker {n_tk} phien (depth>={_UNIV_MIN_DEPTH})")
 # Quality-TILT strength sweep (env BASKET_QTILT, dir B 2026-06-16). Only affects custompitgq
 # (quality=tilt). Presets or explicit "1:1.5,2:1.25,..."; "default" = module QTILT (None passthrough).
 _QTILT_PRESETS = {"default": None, "off": {1: 1.0, 2: 1.0, 3: 1.0, 4: 1.0, 5: 1.0},
@@ -613,7 +661,10 @@ print("=" * 100)
 print("\n[2] Loading v11 signals + Release_Date + 5-state + overheat + D1...")
 # state5/play_type must come from the gated DT5G series, not the v3.4b base the raw
 # SIGNAL_V11 SQL hardcodes (mirror of golive_recommend_v23.py:77 — fix 2026-07-11)
+assert_universe_covers()          # plan §4.3 fail-safe; no-op when UNIVERSE_SRC=prune
+_PRUNE_PRED_T = "t.ticker IN (SELECT DISTINCT t2.ticker FROM tav2_bq.ticker_prune AS t2)"
 sig = bq(SIGNAL_V11.replace("tav2_bq.vnindex_5state AS s", STATE_TABLE + " AS s")
+                   .replace(_PRUNE_PRED_T, univ_day_pred("t"))
                    .format(start=START_DATE, end=END_DATE))
 sig["time"] = pd.to_datetime(sig["time"])
 print(f"  signals: {len(sig):,} rows")
@@ -667,7 +718,7 @@ LEFT JOIN fa_dated AS fa ON fa.ticker=t.ticker AND t.time>=fa.f_time AND (fa.nex
 LEFT JOIN fin_dated AS fin ON fin.ticker=t.ticker AND t.time>=fin.fin_time AND (fin.next_fin_time IS NULL OR t.time<fin.next_fin_time)
 LEFT JOIN adv_dated AS adv ON adv.ticker=t.ticker AND t.time>=adv.f_time AND (adv.next_f_time IS NULL OR t.time<adv.next_f_time)
 WHERE t.ICB_Code=8633 AND t.time BETWEEN DATE '{START_DATE}' AND DATE '{END_DATE}'
-  AND t.ticker IN (SELECT DISTINCT t2.ticker FROM tav2_bq.ticker_prune AS t2)""")
+  AND {univ_day_pred("t")}""")
 d1["time"] = pd.to_datetime(d1["time"])
 d1_mask = (d1["adv_yoy"].notna() & (d1["adv_yoy"] > 0.5) & d1["fa_tier"].isin(["C","D"])
            & d1["state5"].isin([3,4,5])
@@ -731,12 +782,22 @@ if BAL_CFO_BLEND > 0:
 # 3. Common data (BAL prices/opens/liquidity, VNI calendar, ETF, sectors)
 # ============================================================================
 print("\n[3] Loading prices/Open/sector/E1VFVN30...")
-opens_df = bq(f"""SELECT t.ticker, t.time, t.Open AS open_price FROM tav2_bq.ticker AS t
-WHERE t.time BETWEEN DATE '{START_DATE}' AND DATE '{END_DATE}'
-  AND t.ticker IN (SELECT DISTINCT t2.ticker FROM tav2_bq.ticker_prune AS t2)
+# Fetched YEAR BY YEAR: the union membership of `universe_pit_q` (766 names) is wider than
+# ticker_prune's DISTINCT-ever (543), and one flat query hits bq()'s ~2M max_rows cap
+# (1,991,498 rows measured 2026-07-22) -> silent truncation. (ticker, time) is UNIQUE in
+# `tav2_bq.ticker` (verified 3,313,058 rows == 3,313,058 distinct pairs over the audit window),
+# so chunking is row-identical to the flat query and open_prices below is order-insensitive.
+_opens_parts = []
+for _yr in range(int(START_DATE[:4]), int(END_DATE[:4]) + 1):
+    _p = bq(f"""SELECT t.ticker, t.time, t.Open AS open_price FROM tav2_bq.ticker AS t
+WHERE t.time BETWEEN DATE '{max(START_DATE, f"{_yr}-01-01")}' AND DATE '{min(END_DATE, f"{_yr}-12-31")}'
+  AND {univ_window_pred("t")}
   AND t.Open IS NOT NULL""")
+    assert len(_p) < 1_990_000, f"bq() max_rows cap risk (opens {_yr})"
+    _opens_parts.append(_p)
+opens_df = pd.concat(_opens_parts, ignore_index=True)
 opens_df["time"] = pd.to_datetime(opens_df["time"])
-assert len(opens_df) < 1_990_000, "bq() max_rows cap risk (opens)"
+print(f"  opens: {len(opens_df):,} rows ({len(_opens_parts)} year chunks)")
 open_prices = {tk: dict(zip(g["time"], g["open_price"])) for tk, g in opens_df.groupby("ticker")}
 prices = {tk: dict(zip(g["time"], g["Close"])) for tk, g in sig_f.groupby("ticker")}
 liq_map = dict(zip(zip(sig_f["ticker"], sig_f["time"]), sig_f["liq"]))
@@ -770,6 +831,11 @@ WHERE t.ticker IN ({",".join(f"'{x}'" for x in _top30)})
 GROUP BY t.time ORDER BY t.time""")
     else:  # custom*: build the ex-VIC basket as the parking VEHICLE itself
         import custom_basket as cb
+        # The parking basket is part of the universe under test: keep it on the SAME source as the
+        # rest of the run. custom_basket ships UNIVERSE_SOURCE="pit" (P2 cutover 2026-07-22), so the
+        # `prune` control leg has to pin it back explicitly or the A/B would be mixed-universe.
+        cb.UNIVERSE_SOURCE = UNIVERSE_SRC
+        print(f"  [universe] pt_v23={UNIVERSE_SRC} custom_basket={cb.UNIVERSE_SOURCE}")
         if ETF_LIQ == "custom":   # static hindsight membership (fixed 2020-2025 liquidity selection)
             _cust = cb.select_members(bq)
             print(f"  [ETF-LIQ custom] ex-VIC cap-weighted basket (STATIC), {len(_cust)} names: {', '.join(_cust)}")
@@ -843,9 +909,9 @@ PARK_TICKER = {"custom": "CUSTOM_VN30EXVIC", "custompit": "CUSTOM_VN30EXVIC_PIT"
                "custompitq": "CUSTOM_VN30EXVIC_PITQ", "custompitg": "CUSTOM_VN30EXVIC_PITG",
                "custompitgq": "CUSTOM_VN30EXVIC_PITGQ"}.get(ETF_LIQ, "E1VFVN30")
 
-sec_map = bq("""SELECT DISTINCT t.ticker, CAST(FLOOR(t.ICB_Code/1000) AS INT64) AS s
+sec_map = bq(f"""SELECT DISTINCT t.ticker, CAST(FLOOR(t.ICB_Code/1000) AS INT64) AS s
 FROM tav2_bq.ticker AS t WHERE t.ICB_Code IS NOT NULL
-  AND t.ticker IN (SELECT DISTINCT t2.ticker FROM tav2_bq.ticker_prune AS t2)""").set_index("ticker")["s"].to_dict()
+  AND {univ_window_pred("t")}""").set_index("ticker")["s"].to_dict()
 
 state_ff = {}; last_s = None
 for d in vni_dates:

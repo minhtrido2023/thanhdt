@@ -33,8 +33,13 @@ Họ config = **V2.3A (argv `v23a none postbull 0 edge`) + custom30V parking (ET
 - Capacity: nhỏ NAV cao hơn (R1 @20B 31.69 > R2 @50B 29.24), decay theo vốn.
 
 ### 🔁 RE-PIN 2026-06-25 — threads=1 DETERMINISTIC (thay số threads=4 1-sample ở trên)
-> ⚠️ **SUPERSEDED cho R3 (2026-07-11, rồi 2026-07-12):** baseline R3 đã RE-PIN 2 lần — (a) 2026-07-11 sau DT5G swap trong SIGNAL_V11 (28.82/1.90/−15.7/1.83); (b) **2026-07-12 sau khi ĐÓNG KÊNH MOM_N/MOM_S (Scope A, user sign-off) — số chính thức hiện hành: CAGR 27.84% / Sharpe 1.84 / MaxDD −18.2% / Calmar 1.53**, xem section "2026-07-12 — RE-PIN BASELINE R3 (đóng kênh MOM)" cuối file. R1/R2 (bull-park, nghiên cứu) CHƯA re-run với dt5g swap lẫn MOM-closure.
-> ⚠️ **THÊM 2026-07-21 (job Taylor_20260721_162243):** engine backtest có lỗi fidelity — mã `Volume_3M_P50<=0`/không đo được ADV được **mua trọn size** thay vì bị chặn (12,8% vốn quay vòng LAG). Sau khi sửa (mirror gate live `cap_lag_orders`): A/B contemporaneous **27,22% → 31,33%** (+4,11pp), LOO 13/13 dương. **27,84% vẫn là số CHÍNH THỨC cho tới khi chạy lại được với cache verified** — con số kỳ vọng trung thực nên đọc là **khoảng [~27,2% ; 31,3%]** (cận trên chỉ đạt nếu lọc `liq<=0` ở TẦNG TÍN HIỆU, chưa làm). Chi tiết + điều kiện: section "2026-07-21 — RE-PIN R3 (SỬA ENGINE `liq<=0`)" cuối file.
+> ⭐ **SỐ R3 CHÍNH THỨC HIỆN HÀNH (từ 2026-07-22, CUTOVER `universe_pit`): CAGR 27,16% / Sharpe 1,81 /
+> MaxDD −18,1% / Calmar 1,50.** Mọi trích dẫn MỚI dùng số này. Các số `ticker_prune` bên dưới
+> (27,84% / 27,95% / 28,82% / 28,05%…) **giữ làm lịch sử, KHÔNG dùng cho việc mới**. Xem section
+> "2026-07-22 — ⭐ CUTOVER R3 CHÍNH THỨC SANG `universe_pit`" cuối file.
+>
+> ⚠️ **SUPERSEDED cho R3 (2026-07-11, rồi 2026-07-12, rồi 2026-07-22):** baseline R3 đã RE-PIN 2 lần — (a) 2026-07-11 sau DT5G swap trong SIGNAL_V11 (28.82/1.90/−15.7/1.83); (b) **2026-07-12 sau khi ĐÓNG KÊNH MOM_N/MOM_S (Scope A, user sign-off) — số chính thức hiện hành: CAGR 27.84% / Sharpe 1.84 / MaxDD −18.2% / Calmar 1.53**, xem section "2026-07-12 — RE-PIN BASELINE R3 (đóng kênh MOM)" cuối file. R1/R2 (bull-park, nghiên cứu) CHƯA re-run với dt5g swap lẫn MOM-closure.
+> ⚠️ **THÊM 2026-07-21 (job Taylor_20260721_162243):** engine backtest có lỗi fidelity — mã `Volume_3M_P50<=0`/không đo được ADV được **mua trọn size** thay vì bị chặn (12,8% vốn quay vòng LAG). Sau khi sửa (mirror gate live `cap_lag_orders`): A/B contemporaneous **27,22% → 31,33%** (+4,11pp), LOO 13/13 dương. ~~**27,84% vẫn là số CHÍNH THỨC cho tới khi chạy lại được với cache verified**~~ → **HẾT HIỆU LỰC 2026-07-22: số CHÍNH THỨC nay là 27,16% (`universe_pit`)**; lỗi fidelity `liq<=0` **VẪN CÒN MỞ** trong pin mới (pin 27,16% là chân fill-lạc-quan) — con số kỳ vọng trung thực vẫn đọc là **khoảng [~27,2% ; 31,3%]** (cận trên chỉ đạt nếu lọc `liq<=0` ở TẦNG TÍN HIỆU, chưa làm). Chi tiết + điều kiện: section "2026-07-21 — RE-PIN R3 (SỬA ENGINE `liq<=0`)" cuối file.
 > Chạy lại R1/R2/R3 với `BQ_CACHE_THREADS=1`, CÙNG `AUDIT_END=2026-06-19`, lệnh y hệt. Số dưới là **tái lập được** (R3a==R3b bit-for-bit). Chênh so số cũ = threads-determinism + data-drift 6 ngày gộp; KHÔNG tách được. **Số cũ (threads=4) coi là ước lượng; số này là chuẩn mới.**
 
 | Config | Lệnh (thêm `BQ_CACHE_THREADS=1` vào đầu) | CAGR cũ→mới | Sharpe | MaxDD | Calmar | self-check |
@@ -4074,14 +4079,98 @@ thiên vị vòng tròn có lợi cho backtest; nếu CAO HƠN mới là dấu h
 ⇒ **KHÔNG cần điều tra thêm.** Đọc nghiệp vụ: phần chênh chính là *look-ahead/curation bias* của
 `ticker_prune` bị khử, không phải `universe_pit` chọn universe kém hơn — MaxDD còn tốt hơn nhẹ.
 
-**❗ QUYẾT ĐỊNH PRODUCTION — CHƯA QUYẾT, CẦN ESCALATE USER RIÊNG:** *có cutover baseline R3 chính
-thức sang `universe_pit` hay không* (tức số pin công bố đổi 27,84% → 27,16%) **KHÔNG** nằm trong
-phạm vi job này và Taylor **không tự quyết**. Cho tới khi user quyết:
-- **Số CHÍNH THỨC vẫn là 27,84%** (pin 2026-07-12, `ticker_prune`).
-- Khi trích dẫn cho việc mới, nói kèm: đo lại trên universe không-bias cùng vintage ra **27,16%**,
-  và khoảng kỳ vọng trung thực từ vụ LAG %ADV vẫn là **[~27,2%; ~31,3%]** (xem section 2026-07-21).
-- Anchor drawdown dùng cho kỳ vọng: **~−30%** (bootstrap 5th-pct), không phải −18%.
+**~~❗ QUYẾT ĐỊNH PRODUCTION — CHƯA QUYẾT~~ → ĐÃ QUYẾT & THỰC HIỆN 2026-07-22 (user):** cutover
+baseline R3 chính thức sang `universe_pit`. **Số pin công bố đổi 27,84% → 27,16%.** Chi tiết + verify:
+xem section kế tiếp *"2026-07-22 — CUTOVER R3 CHÍNH THỨC"*. (Khoảng kỳ vọng trung thực từ vụ LAG %ADV
+**[~27,2%; ~31,3%]** và anchor drawdown **~−30%** (bootstrap 5th-pct) vẫn giữ nguyên, không đổi.)
 
 **Files:** control `data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_repinR3control_v2c.csv`
 (18.400 dòng) · pit `data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_repinR3pit_v2c_univpit.csv`
 (18.421 dòng) · logs `data/g6_repin/cache_v2_*.log`. Canonical `..._wtnamecap.csv` **KHÔNG bị đụng** (§8 guidelines).
+
+---
+
+## 2026-07-22 — ⭐ CUTOVER R3 CHÍNH THỨC SANG `universe_pit` (user quyết định) — job `Taylor_20260722_155549`
+
+**Quyết định (user, 2026-07-22):** cutover con số R3 **CHÍNH THỨC** trong production sang
+`universe_pit` — bước cuối của dự án `ticker_prune`→`universe_pit`, sau khi G6 (section ngay trên)
+đo được delta cùng vintage **−0,79pp** đúng hướng đã pre-register.
+
+### ⭐ SỐ PIN CHÍNH THỨC V2.4 / R3 TỪ 2026-07-22
+
+| | CAGR | Sharpe | MaxDD | Calmar | Final NAV | Universe |
+|---|---|---|---|---|---|---|
+| **R3 NEUTRAL-only @50B (CHÍNH THỨC)** | **27,16%** | **1,81** | **−18,1%** | **1,50** | 998,09B | **`universe_pit`** |
+| *(lịch sử, GIỮ tham chiếu)* pin 2026-07-12 | 27,84% | 1,84 | −18,2% | 1,53 | — | `ticker_prune` |
+| *(lịch sử)* control cùng vintage 07-22 | 27,95% | 1,85 | −18,4% | 1,52 | 1.077,68B | `ticker_prune` |
+
+**Các số `ticker_prune` KHÔNG bị xoá** — giữ làm lịch sử/tham chiếu. Nhưng **mọi trích dẫn MỚI phải
+dùng 27,16%/1,81/−18,1%/1,50**. Δ −0,79pp = khử curation/look-ahead bias của `ticker_prune`
+(bq_admin xác nhận `hit_ticker_list` suy từ chính deal backtest cũ), KHÔNG phải `universe_pit` chọn
+universe kém hơn — MaxDD còn tốt hơn nhẹ (−18,1% vs −18,4%).
+
+### Thay đổi code
+
+`pt_v23_audit_2014.py` — **default `UNIVERSE_SRC` đổi `"prune"` → `"pit"`** (1 dòng + comment).
+Lệnh PIN GỐC (không set `UNIVERSE_SRC`) từ nay chạy trên `universe_pit`. Nhánh `prune` **GIỮ NGUYÊN**,
+override `UNIVERSE_SRC=prune` vẫn tái lập được số lịch sử.
+
+**Lệnh pin (cập nhật) — chú ý: KHÔNG còn set `UNIVERSE_SRC`:**
+```bash
+cd /home/trido/thanhdt/WorkingClaude && source ./wc_env.sh
+BQ_LOCAL_CACHE=data/bq_cache BQ_CACHE_THREADS=1 NAV_TOTAL_B=50 ETF_LIQ=custompitg BASKET_WT=namecap \
+BASKET_SELECT=yieldcombo PARK_STATES="3:0.7" AUDIT_END=2026-06-19 \
+$DNA_PYEXE pt_v23_audit_2014.py v23a none postbull 0 edge
+```
+(Chạy verify dùng thêm `EXP_TAG=cutoverdefault` để **không đè** canonical CSV — §8 guidelines.)
+
+### Verify bắt buộc (đã chạy, ĐẠT)
+
+Chạy KHÔNG set `UNIVERSE_SRC` (= dùng default mới), cache `data/bq_cache` **đóng cứng**
+(`verified:true`, 14/14 bảng, `verified_at 2026-07-22T14:22:24Z`) — cùng vintage với G6:
+1. `[universe_pit] coverage OK: 3107 phien >= ticker 3107 phien` — fail-safe coverage gate qua.
+2. `[selfcheck BAL] cash-flow identity max err = 0 VND; final NAV identity err = 0 VND`
+3. `[selfcheck LAG] cash-flow identity max err = 0 VND; final NAV identity err = 0 VND`
+4. `Final NAV 998.09B  CAGR 27.16%  Sharpe(252) 1.81  MaxDD -18.1%  Calmar 1.50` — **khớp CHÍNH XÁC**
+   `pit_v2c` của G6.
+5. Đối chứng độc lập từ CSV: khối ANNUAL **identical** (diff rỗng) và DataFrame
+   `..._exp_cutoverdefault_univpit.csv` (18.421×31) **identical** với `..._exp_repinR3pit_v2c_univpit.csv`
+   ⇒ default mới tái lập đúng chân `pit` đã đo, không phải số mới chưa kiểm.
+
+**Log:** `data/g6_repin/cutover_default.log`. **CSV:**
+`data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_cutoverdefault_univpit.csv`.
+Canonical `..._wtnamecap.csv` (chân prune cũ) **KHÔNG bị đụng**.
+
+### Phạm vi — CÁI GÌ KHÔNG ĐỔI
+
+- **KHÔNG** đóng lại quyết định P4: `CAPIT_POOL_SOURCE` + ADV cap **cố ý còn ghim `ticker_prune`**
+  (2 điều kiện treo ở commit `dcee252`) — cutover R3 này không đụng vào.
+- **KHÔNG** quét/đổi ~496 vị trí `ticker_prune` còn lại trong codebase (việc riêng, G8).
+- Khoảng kỳ vọng LAG %ADV **[~27,2%; ~31,3%]** và anchor DD **~−30%** giữ nguyên.
+
+**KB đã đồng bộ:** `mike/kb/canonical.md` (dòng "R3 NEUTRAL-only @50B") sửa sang 27,16%/1,81/−18,1%/1,50
++ ghi chú `universe_pit` + giữ số lịch sử. `ticker_prune_replacement_plan.md` §9 đánh dấu quyết định
+production ĐÃ QUYẾT + ĐÃ THỰC HIỆN.
+
+### quant-skeptic — **CONFIRMED (high)**, `mike/logs/verify_20260722_161010.log`
+
+Reviewer tái lập độc lập 27,16%/1,81/−18,1%/1,50 **từ CSV** (không đọc log), xác nhận 2 CSV
+**md5 trùng khớp**, xác nhận delta −0,79pp là tín hiệu thật (2 chân control trên cache đóng cứng
+bit-for-bit bằng nhau ⇒ khác hẳn nhiễu 0,37pp của A/B live-BQ sáng cùng ngày), self-check 0 VND cả
+2 sổ, coverage gate fail-loud, **không cron/production path nào gọi `pt_v23_audit_2014.py`** ⇒ flip
+default chỉ đổi các harness R&D, tất cả đều tự gắn hậu tố `_univpit` vào tên file.
+
+**⚠️ Caveat reviewer nêu — GHI RÕ, KHÔNG được bỏ qua khi trích dẫn 27,16%:**
+1. **Pin là MIXED-UNIVERSE, không phải point-in-time toàn phần.** `UNIVERSE_SRC=pit` áp cho **cổng
+   quyết định** (BAL signal rows, D1) + panel giá/sector; **CAPIT pool, breadth ew2d và maturity vẫn
+   đọc `ticker_prune`** (~10 vị trí hardcode). Nhãn đúng khi trích dẫn:
+   *"`universe_pit` (decision gates) + `ticker_prune` (CAPIT/breadth/maturity)"*.
+2. **Lỗi fidelity `liq<=0` vẫn MỞ** — 27,16% là chân fill-lạc-quan; khoảng trung thực
+   **[~27,2%; ~31,3%]** (section 2026-07-21) giữ nguyên hiệu lực.
+
+**Việc treo do reviewer đề xuất (CHƯA làm, ngoài phạm vi job này):** (a) chạy lại pin với
+`LIQ_ZERO_BLOCK=lag` trên cùng cache đóng cứng rồi công bố cả 2 chân; (b) cutover nốt ~10 vị trí
+residual `ticker_prune` rồi re-pin (trùng G8/P5-P6 trong plan); (c) thêm banner 1 dòng vào các
+harness R&D gọi `pt_v23` không pin env (`sweep_basket_size_cap.py`, `run_parkstate_rest.sh`,
+`run_depgate_variant*.py`, `eyrisk_exp/run_arms.sh`) — hậu tố `_univpit` chống ĐÈ file nhưng không
+chống việc so mắt-thường với CSV trước 07-22 (khác universe).
