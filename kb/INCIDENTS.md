@@ -3582,3 +3582,192 @@ dù đã có Prevention — prevention cũ chưa đủ mạnh". Escalate bus que
 - Quyết định user cho 2 câu hỏi cũ `retro-pattern-recurring-data-registry-accuracy-5days` (07-15)
   và `retro-pattern-recurring-joblifecycle-timeout-3` (07-14) — verify lại: vẫn không tìm thấy
   answer trên bus, đã >6 ngày không phản hồi.
+
+## RETRO — 2026-07-22: 4 sự cố, 1 escalation ĐÓNG (cross-account-contamination), 1 pattern MỚI cần theo dõi (git-commit-blocked-by-classifier, đã 2 ngày liên tiếp)
+
+**Nguồn bằng chứng**: `kb/INCIDENTS.md` ngày 2026-07-22 = **0 entry** (chưa ai ghi trước retro
+này). Bus sweep `bus/inbox/*.jsonl` ts=`2026-07-22`, event_type ∈ {error, finding}: ~26 event
+(phần lớn Taylor/Winston — R&D dự án `ticker_prune→universe_pit`, đã có verdict quant-skeptic rõ
+ràng, không phải sự cố vận hành). 4 luồng thật là sự cố/near-miss vận hành (mục #4 bổ sung sau
+vòng verify độc lập của Wags — bản nháp đầu bỏ sót), cả 4 đều **CHƯA được ghi vào
+`kb/INCIDENTS.md` trước retro hôm nay** — retro tự bổ sung.
+
+### 1. Near-miss P0: cutover P3 sang `universe_pit_q` gần như làm `golive_recommend_v23.py`
+### CRASH lúc 19:00 — bảng mới không có cron build hàng ngày
+
+**Diễn biến**: 10:11:44Z Taylor tự phát hiện (đang làm P4) — commit P3 (`0bfbdfe`, cùng buổi sáng)
+đổi panel D1 sang đọc `universe_pit_q`, nhưng **không script/cron nào build bảng này hàng ngày**
+(`grep bin/*.sh` = 0 hit, `crontab -l` = 0 hit — bảng chỉ tồn tại vì Taylor build tay ở bước G1).
+19:00 ICT `bq_freshness_check.sh` sẽ gọi `golive_recommend_v23.py` → bảng thiếu ngày 2026-07-22 →
+`RuntimeError` → DollarBill không có plan T+1 cho 07-23. 10:19:53Z Winston tự sửa: chèn
+pipeline-1b/1c (`build_universe_pit` + `build_universe_pit_quality`) vào `bq_freshness_check.sh`
+NGAY TRƯỚC bước gọi `golive_recommend_v23.py` (commit `072dfbd`), cập nhật cả `cron_registry.md`
++ `data_registry.md`, verify idempotent — **xong lúc 10:19, cách hạn chót 19:00 gần 9 tiếng, 0
+tác động thật**.
+
+- a. **TÁI DIỄN (dạng)** — cùng họ lỗi "cutover consumer sang bảng/nguồn mới mà không kiểm tra có
+  pipeline/cron nào giữ bảng đó tươi" như SIGNAL_V11 base-leak (07-11, §9) và C1 DT5G-cache-bug
+  (07-12, §11) — 2 lần trước đều đã sinh ra quy tắc bắt buộc ("check `data_registry.md`/
+  `cron_registry.md` trước khi wire nguồn mới"), nhưng quy tắc đó nói về đọc-nguồn, chưa từng nói
+  rõ "khi TỰ TẠO một bảng mới, phải tự hỏi ai/cái gì giữ nó tươi trước khi cho consumer production
+  đọc nó" — góc nhìn ngược của cùng vấn đề.
+- b. **HOÀN CHỈNH** cho lần này — fix xong trước hạn chót thật, verify idempotent, cả 2 registry
+  đã cập nhật đúng theo §9/§11.
+- c. **PATTERN** — đây là lần thứ 3 (07-11, 07-12, 07-22) cùng một họ lỗi "wiring nguồn dữ liệu
+  mới thiếu bước xác nhận pipeline nuôi nó", chỉ khác chiều (đọc sai bảng cũ / đọc qua cache sai
+  vintage / tạo bảng mới không có cron) — đủ 3 lần để coi là 1 root-pattern rộng hơn từng quy tắc
+  con, không chỉ 3 sự cố rời rạc.
+
+| Phân loại | Nguồn gốc | Người ghi chép |
+|---|---|---|
+| data-registry-accuracy + scheduling-timing | Quy trình migration P1-P4 (`ticker_prune_replacement_plan.md`) thiếu bước bắt buộc "trước khi cutover consumer production sang bảng mới, xác nhận cron build bảng đó đã tồn tại" | Taylor (`Taylor_20260722_100814`, error event 10:11:44Z) + Winston (`Winston_20260722_101303`, finding 10:19:53Z) ghi đủ trên bus; **chưa ai ghi vào `kb/INCIDENTS.md`** — retro là người đầu tiên |
+
+### 2. `sync_bq_cache.py`: live-BQ pin KHÔNG tái lập được (2 lần chạy CÙNG config CONTROL ra
+### 27,26% vs 27,63%, lệch 0,37pp — LỚN HƠN chính delta đang đo 0,49pp) — 2/3 bug đã fix, 1 còn hở
+
+**Diễn biến**: G6 A/B test (pit vs prune) chạy trên BQ sống (không qua cache verified) — Taylor
+phát hiện chính khâu đo lường không đáng tin: chạy lại CONTROL 2 lần, cùng config, ra 2 kết quả
+khác nhau 0,37pp (13:04:30Z). Điều tra root cause tìm ra **2 bug hạ tầng thật** trong
+`sync_bq_cache.py` (timeout query bảng lớn + ép kiểu ngày sai cho pandas 3) — **đã FIX + VERIFY
+THẬT** (11:35:45Z fix, 14:23:02Z verify lại xác nhận), nhưng trong lúc verify phát hiện thêm
+**bug thứ 3: `ticker_financial` bị lệch vĩnh viễn** — nguyên nhân gốc: sync hàng ngày chỉ đồng
+bộ **delta từ 2026 trở đi**, nên nếu dữ liệu LỊCH SỬ (trước 2026) bị nguồn ghi đè/sửa (đúng kiểu
+sự cố `ticker_prune corruption` 07-14/15 vẫn đang treo — xem `kb/current_ops.md`), cache local sẽ
+**không bao giờ tự bắt kịp** — bug này KHÔNG được fix hôm nay, chỉ được phát hiện và ghi nhận.
+Sau khi vá 2 bug đầu + full re-sync, G6 re-pin lại XONG cùng cache đã verify (15:23:47Z→15:48:29Z),
+kết quả pit=27,16% CONFIRMED (quant-skeptic high, 16:14:56Z), **cutover chính thức 16:18:21Z**.
+
+- a. **MỚI** ở dạng cụ thể (chưa từng đo "live BQ tự nó không tái lập được giữa 2 lần chạy CÙNG
+  config" trước đây), nhưng **thuộc pattern rộng hơn "cache/pipeline sync có lỗi âm thầm"** đã
+  từng xảy ra: BQ cache monolith đọc nhầm `ticker_prune.parquet` chết (07-13), C1 DT5G cache-vintage
+  bug (07-12).
+- b. **HỞ MỘT PHẦN** — 2/3 bug fix+verify (không phải residual risk, đã đóng thật), nhưng bug thứ
+  3 (`ticker_financial` delta-only sync bỏ sót sửa-đổi lịch sử) **CHƯA có fix**, chỉ mới phát
+  hiện+ghi nhận. Điều kiện tái diễn: bất kỳ lần nào BQ nguồn sửa/ghi đè dữ liệu quá khứ (đã xảy ra
+  thật với `ticker_prune`/`ticker_financial` 07-14/15) → cache local drift vĩnh viễn không tự
+  phục hồi cho tới khi có full re-sync tay như hôm nay.
+- c. **CÁ BIỆT nhưng chạm đúng khe hở đã biết** — không phải 1 pattern mới độc lập, mà là hệ quả
+  trực tiếp của sự cố `ticker_prune corruption` (07-14/15) vẫn đang CHỜ QUYẾT ĐỊNH khôi phục từ
+  backup — bug thứ 3 hôm nay là bằng chứng cụ thể cho thấy thiết kế sync hiện tại (delta-only từ
+  2026+) không đủ để tự phục hồi khỏi loại sự cố đó, làm tăng thêm lý do nên xử lý dứt điểm sự cố
+  gốc thay vì để treo.
+
+| Phân loại | Nguồn gốc | Người ghi chép |
+|---|---|---|
+| data-registry-accuracy | `sync_bq_cache.py` — thiết kế delta-sync chỉ đồng bộ dữ liệu từ 2026 trở đi, không có cơ chế phát hiện/re-sync khi dữ liệu LỊCH SỬ ở nguồn bị sửa | Taylor (`Taylor_20260722_093140`/`_155549`, 2 finding events) ghi đủ trên bus; **chưa ai ghi vào `kb/INCIDENTS.md`** — retro bổ sung |
+
+### 3. Git commit của headless Taylor session bị permission classifier chặn — LẦN THỨ 2 LIÊN
+### TIẾP (07-21, 07-22) — mỗi lần phải escalate cho Mike tự chạy `git commit` hộ
+
+**Diễn biến**: 11:06:30Z Taylor hỏi (`P4-commit-bi-classifier-chan-can-Mike-commit-ho`) — code
+P4 CAPIT breadth cutover đã quant-skeptic CONFIRMED/high, đã `git add` xong, nhưng `git commit`
+(cả `-F file` lẫn `-m` ngắn) bị permission classifier của harness chặn 3 lần trong phiên headless.
+Taylor tự đánh giá đúng: cron 19:00 đọc FILE trên đĩa (đã là bản verified) nên KHÔNG rủi ro tiền
+thật, chỉ thiếu bản ghi lịch sử git — nhưng vẫn cần người có quyền commit hộ. Commit thực tế xuất
+hiện sau đó cùng ngày (`dcee252 "P4: CAPIT breadth cutover..."`) — **không có event `answer` nào
+trên bus xác nhận ai/khi nào đã chạy hộ**, chỉ xác minh được qua `git log` (đúng kiểu "artifact
+thật, không phải self-report" mà quy trình này đang cố áp dụng cho việc khác). Đây là lần THỨ HAI
+liên tiếp: 09:33:02Z ngày 07-21 Taylor đã ghi finding "CAPIT backfill 07-20 XONG; refactor
+production BỊ CHẶN bởi classifier" — cùng root cause, cùng cách xử lý tạm (escalate cho người
+commit hộ), **và lần đó cũng CHƯA từng được ghi vào `kb/INCIDENTS.md`**.
+
+- a. **TÁI DIỄN — lần 2 liên tiếp** (07-21 → 07-22), cùng root cause chính xác: harness permission
+  classifier không cho phép `git commit` chạy trong phiên headless `-p` (không có người tương tác
+  để duyệt), bất kể nội dung đã verify CONFIRMED và an toàn tới đâu.
+- b. **HỞ HOÀN TOÀN** — chưa có prevention hệ thống nào, mỗi lần chỉ vá tạm bằng cách Taylor tự
+  dừng lại hỏi rồi chờ Mike/user chạy lệnh hộ (tốn 1 vòng escalate mỗi lần, và bus không tự ghi
+  lại việc commit-hộ đã xảy ra — phải soi git log mới biết).
+- c. **PATTERN nhánh của permission-classifier rộng hơn đã biết** — classifier trước đây từng
+  đúng đắn chặn `rename`/`xoá` file, `BOT_STOP` tự phát, sửa file thao tác — nhưng những case đó
+  là chặn ĐÚNG (hành động thật sự rủi ro). Case này khác: `git commit` cho code ĐÃ verify
+  CONFIRMED và ĐÃ `git add` xong không mang rủi ro tương đương — chặn ở đây là ma sát vận hành
+  thuần túy (operational friction), không phải bảo vệ đúng chỗ.
+
+| Phân loại | Nguồn gốc | Người ghi chép |
+|---|---|---|
+| permission-credential | Headless dispatch pipeline (`dispatch.sh`/harness) không có cơ chế "tự commit sau khi bước verify quant-skeptic đã CONFIRMED", và permission classifier áp dụng đồng nhất `git commit` giữa phiên tương tác (có người duyệt) và phiên headless (không ai duyệt) | **Chưa ai ghi trước retro này CẢ 2 LẦN** (07-21 lẫn 07-22) — retro là người đầu tiên ghi nhận đây là 1 pattern, không phải 2 sự kiện rời rạc |
+
+**⚠️ Chưa đủ điều kiện escalate bus theo đúng luật (mục 6: cần pattern xuất hiện ở RETRO ngày
+TRƯỚC rồi tái diễn ở RETRO hôm nay)** — vì đây là lần ĐẦU TIÊN một RETRO gọi tên pattern này (dù
+bản thân sự cố đã xảy ra 2 ngày liên tiếp trong dữ liệu thô). Ghi rõ ở đây để nếu pattern này xuất
+hiện lần thứ 3 (bất kỳ ngày nào tới, không cần đúng RETRO liền kề) → escalate ngay lập tức, không
+chờ thêm. Đề xuất prevention cụ thể cho vòng theo dõi tiếp theo: (a) thêm permission rule riêng
+cho `git commit` trong repo `WorkingClaude` khi chạy dưới `dispatch.sh` (đã có tiền lệ tương tự ở
+`fewer-permission-prompts` skill), HOẶC (b) `dispatch.sh` tự động chạy `git commit` thay agent
+NGAY SAU khi verify CONFIRMED trả về (thay vì để agent tự thử và bị chặn) — phương án (b) còn giải
+quyết luôn việc "không ai ghi bus khi commit-hộ xảy ra".
+
+### 4. Discord topic-routing hỏng: `dispatch.sh` không export `DISCORD_THREAD_ID` cho tiến trình
+### con — việc giao ở topic A, phản hồi rơi vào topic B (09:15–10:19Z, Wags tự sửa)
+
+**Diễn biến** (bổ sung sau xác minh Wags, GAP 2 — bị bỏ sót ở bản nháp đầu): 09:15:21Z–09:56:56Z
+Wags phát hiện + chẩn đoán (`Wags_20260722_091421`/`_095656`) — root cause: `dispatch.sh` không
+truyền `DISCORD_THREAD_ID` xuống môi trường tiến trình headless con, nên mọi callback/notify tự
+rơi về topic mặc định/topic Mike đang hoạt động thay vì topic đã giao việc ban đầu. Fix: 3 commit
+(`b3e9fe8` + `1d9dcc6` + `f0eb2b2`), **arch-reviewer CONFIRMED** (finding bus 10:19:22Z).
+
+- a. **MỚI** — lần đầu ghi nhận đúng dạng lỗi này (thiếu export env var cho tiến trình con), khác
+  với các lần "per-job thread routing" trước đây (07-06, `_agent_thread_override`/`discord_thread_id`
+  ghi vào job record) — đây là lỗi ở tầng truyền biến môi trường, không phải thiếu field job record.
+- b. **HOÀN CHỈNH** — 3 commit + arch-reviewer CONFIRMED trước khi coi là đóng, đúng quy trình
+  Wags+arch-reviewer đã thiết lập (`kb/memory` "Wags + arch-reviewer mechanism").
+- c. **CÁ BIỆT** — không có bằng chứng đây là 1 pattern rộng hơn (chỉ 1 lần, đã fix nhanh trong
+  ~1 giờ, có review độc lập xác nhận).
+
+| Phân loại | Nguồn gốc | Người ghi chép |
+|---|---|---|
+| coordination/topic-routing | `dispatch.sh` thiếu bước export `DISCORD_THREAD_ID` vào môi trường tiến trình con khi spawn headless session | Wags (chẩn đoán + fix, `Wags_20260722_091421`/`_095656`) + arch-reviewer (audit CONFIRMED, 10:19:22Z) ghi đủ trên bus; **chưa ai ghi vào `kb/INCIDENTS.md`** — retro bổ sung (phát hiện qua vòng verify của Wags, không phải bản nháp đầu) |
+
+### ✅ Đóng escalation — cross-account-contamination (pattern đã escalate ở RETRO 07-19, callout
+### lần 2 ở RETRO 07-21) — HÔM NAY hoàn tất ĐỦ 3 prevention còn thiếu
+
+RETRO 07-21 (§ closing "Việc còn treo") ghi rõ: rule `coding_guidelines.md` + selfcheck 2-account
+CHƯA làm, dù đã bug tái diễn LẦN THỨ 3 cùng họ. Hôm nay (07-22, xác nhận qua `git log`, KHÔNG suy
+đoán):
+- `kb/coding_guidelines.md` §12 "Shared Multi-Account Data Files: Filter by `account_no` at Every
+  Read" — **THÊM MỚI hôm nay** (commit `388f56f`, cùng lúc Wags đóng round1 coordination fix).
+- `bin/nav_scripts_2account_selfcheck.py` — **MỚI hôm nay** (commit `8d07529`), test cả 3 script
+  (`daily_nav_snapshot.py`/`verify_account_snapshot.py`/`reconcile_equity.py`) đọc file dùng
+  chung `dnse_raw_{date}.jsonl`, PASS trên dữ liệu thật 07-20/07-21/07-22, backup/restore verify
+  md5sum.
+- Audit sweep xác nhận (ghi trong chính §12 vừa thêm): 4/4 script kế toán đã lọc đúng account_no;
+  `execution_quality_review.py` chấp nhận được (chỉ dùng cho review ad-hoc, không phải nguồn báo
+  cáo chính thức).
+
+**→ Pattern cross-account-contamination coi như ĐÓNG với đủ 3 lớp phòng thủ** (rule + selfcheck +
+audit xác nhận), sau 2 lần RETRO callout (07-19, 07-21) không hành động kịp. Đây là ví dụ tích
+cực đối lập với sự cố #3 ở trên — cùng cơ chế "RETRO gọi tên pattern → prevention thật được viết"
+nhưng lần này ĐÃ hoạt động đúng, dù chậm.
+
+### Wakeup compliance (MIKE.md §8) — `bin/wakeup_audit.py --since 2026-07-22`
+
+24 lượt dispatch `--bg`, **1 lượt thiếu ScheduleWakeup (4,2%)**, 0 lượt dạng nguy hiểm nhất (văn
+xuôi >1500 ký tự sau dispatch — lượt MISS duy nhất chỉ có 1399 ký tự). So 3 ngày gần nhất: 07-20
+25,0% → 07-21 4,3% → 07-22 4,2% — **ổn định ở mức thấp**, không có dấu hiệu xấu đi, không đủ
+nghiêm trọng để tạo entry riêng (theo đúng tinh thần "artifact thật" chứ không phải điểm số tuân
+thủ đơn thuần).
+
+### Tổng hợp bảng phân loại
+
+| # | Hạng mục | Mới/Tái diễn | Fix | Phân loại | Nguồn gốc | Người ghi chép |
+|---|---|---|---|---|---|---|
+| 1 | Near-miss P0: `universe_pit_q` cutover thiếu cron, suýt crash `golive_recommend_v23` 19:00 | Tái diễn (dạng, lần 3 cùng họ: 07-11, 07-12, 07-22) | HOÀN CHỈNH, tự phát hiện tự sửa trong 8 phút, verify idempotent | data-registry-accuracy + scheduling-timing | Quy trình migration P1-P4 thiếu bước "xác nhận cron build tồn tại trước khi cutover consumer" | Taylor+Winston ghi bus đủ; retro ghi INCIDENTS.md lần đầu |
+| 2 | `sync_bq_cache.py`: live-BQ pin không tái lập được, 3 bug (2 fixed, 1 hở) | Mới (cụ thể) / thuộc pattern cache-sync rộng hơn | HỞ MỘT PHẦN — bug#3 (`ticker_financial` delta-only) chưa fix | data-registry-accuracy | `sync_bq_cache.py` delta-sync chỉ đồng bộ từ 2026+, không phát hiện sửa-đổi dữ liệu lịch sử | Taylor ghi bus đủ; retro ghi INCIDENTS.md lần đầu |
+| 3 | Git commit headless Taylor bị classifier chặn — lần 2 liên tiếp | **TÁI DIỄN — lần 2 liên tiếp (07-21→07-22)** | HỞ HOÀN TOÀN — không có prevention hệ thống | permission-credential | Harness classifier không phân biệt phiên headless-đã-verify với phiên cần duyệt thật; dispatch.sh thiếu bước auto-commit-sau-verify | **Chưa ai ghi CẢ 2 LẦN** — retro là người đầu tiên gọi tên pattern |
+| 4 | Discord topic-routing hỏng: `dispatch.sh` không export `DISCORD_THREAD_ID` cho tiến trình con | Mới | HOÀN CHỈNH — 3 commit, arch-reviewer CONFIRMED | coordination/topic-routing | `dispatch.sh` thiếu export env var cho headless session con | Wags+arch-reviewer ghi bus đủ; retro ghi INCIDENTS.md lần đầu (bổ sung qua vòng verify Wags) |
+
+**Việc còn treo sang ngày mai (kế thừa từ retro trước, cần verify lại khi retro tiếp theo chạy —
+không suy đoán từ văn bản này):**
+- Pattern git-commit-blocked-by-classifier (mục 3) — theo dõi: nếu tái diễn lần 3 (bất kỳ lúc
+  nào) → escalate ngay, không chờ đúng nhịp RETRO liền kề.
+- `sync_bq_cache.py` bug#3 (`ticker_financial` delta lệch vĩnh viễn) — chưa có ai nhận việc fix.
+- `ticker_prune`/`ticker_financial` corruption 07-14/15 — vẫn đang chờ quyết định khôi phục từ
+  backup (không đổi từ các retro trước; bug#3 hôm nay là bằng chứng thêm cho thấy càng để lâu
+  càng khó tự phục hồi qua sync thường).
+- Bus question `retro-pattern-recurring-headless-wake-assumption-3` (07-20) — vẫn PENDING theo
+  ghi nhận RETRO 07-21, chưa kiểm tra lại hôm nay (ngoài phạm vi 3 sự cố chính được audit).
+- 2 câu hỏi cũ `retro-pattern-recurring-data-registry-accuracy-5days` (07-15) và
+  `retro-pattern-recurring-joblifecycle-timeout-3` (07-14) — RETRO 07-21 ghi nhận vẫn chưa có
+  answer, >6 ngày — không re-verify lại hôm nay (ngoài phạm vi audit chính của retro này).
+
+**Verified by: Wags — gaps found and fixed: (1) job id typo `Taylor_20260722_155919` → correct `Taylor_20260722_155549`; (2) added omitted incident #4 (Discord topic-routing / `DISCORD_THREAD_ID` not exported to child process, Wags+arch-reviewer, commits b3e9fe8+1d9dcc6+f0eb2b2, CONFIRMED) and updated the summary table + incident count.**
