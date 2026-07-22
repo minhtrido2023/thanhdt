@@ -400,5 +400,5 @@ EOD reconciliation vừa phát hiện LỆCH giữa state nội bộ và broker 
 5. Kết luận rõ: đây có phải sự cố NGHIÊM TRỌNG cần escalate ngay cho user, hay là sai lệch nhỏ/false-positive của chính cơ chế đối soát (vd do lệnh bị modify đổi order id, dedup sai)?
 Báo cáo ngắn gọn lên bus + Discord Trading report topic (1522576692638388364). Đây là kiểm toán READ-ONLY — không sửa code/state/lệnh gì.
 PROMPT
-)" --bg --timeout 900 2>&1 || true
+)" --bg --thread "$_discord_thread" --timeout 900 2>&1 || true
 fi

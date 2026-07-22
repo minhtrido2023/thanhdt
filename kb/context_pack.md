@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v1318)
+# Mike fleet — context pack (v1319)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-22T05:50:07] Wags/answer — wags-fix-not-confirmed: coord-2026-07-22: {"resolution": "CLOSED by round-2 fix commit 678e81d — 5/7 required_changes done+verified; #6 escalated to Mike (accounting domain), #7 la dinh chinh self-repor …
 - [2026-07-22T05:58:09] Taylor/finding — G2b do do ro chat luong: Q-A KHONG chot duoc (leak 45/77/61) nhung chat luong leak DUONG va o tang tien that chi 0-3 ma — escalate user chon A'/Q-C: {"job": "Taylor_20260722_054947", "commit": "d0fde7c", "ket_luan": "G2b DO XONG — Q-A KHONG CHOT DUOC theo tieu chi §3.2b (leak != ~0). KHONG tu chon Q-B/Q-C. C …
 - [2026-07-22T05:55:05] arch-reviewer/verification — ⚠️ INCONCLUSIVE ARCH-REVIEW: wags-fix: coord-2026-07-22 round2 — dong verdict NEEDS_CHANGES (fail-open detector, routing sai domain, reap race, reap khong co lich): {"finding_topic": "wags-fix: coord-2026-07-22 round2 — dong verdict NEEDS_CHANGES (fail-open detector, routing sai domain, reap race, reap khong co lich)", "ver …
 - [2026-07-22T06:46:50] Mike/answer — retro-pattern-recurring-headless-wake-assumption-3-closed: {"resolution": "User chon huong B. Implement xong: daily_retro.sh tach 3 buoc, bash tu dispatch Wags dong bo (khong qua Mike), Mike khong con tu quyet dinh goi  …
@@ -11,6 +10,7 @@
 - [2026-07-22T07:05:17] Mike/finding — 3-viec-daily-cleanup-status: {"task1_ops_health_check_188": "DA XONG TU 07-21 (khong phai con mo nhu working memory ghi) - fix _resolved() commit a268476/a59cd85, arch-reviewer CONFIRMED. W …
 - [2026-07-22T08:27:17] Taylor/finding — P2 cutover custom_basket.py -> universe_pit_q DONE (commit ce7d457) - cham production that, moi selector family da xac nhan: {"job": "Taylor_20260722_082001", "truoc_do": "job Taylor_20260722_070547 TIMEOUT o dispatch layer nhung viec chinh da xong that; job nay chi hoan tat phan dang …
 - [2026-07-22T09:15:18] Taylor/finding — P3 DONE — golive_recommend_v23 panel D1 (ICB-8633) -> universe_pit_q, SUA BUG LOOK-AHEAD THAT, tac dong LIVE hom nay = 0: {"job": "Taylor_20260722_084953 (attempt 2 — attempt 1 exit=1 SAU KHI code+doc da commit xong, chi thieu buoc ghi bus; attempt 2 KHONG lam lai code, chi VERIFY  …
+- [2026-07-22T09:36:08] Taylor/finding — G4/P4 CAPIT breadth = ESCALATED, KHONG cutover — khong ton tai nguong bao toan tap ngay fire + capit_fired van true: {"job": "Taylor_20260722_093055", "commit": "mike ce0fef4", "ket_luan": "G4/P4 ESCALATED. KHONG doi 1 dong code nao trong golive_recommend_v23.py — 3 vi tri P4  …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -40,18 +40,15 @@ Timeline ước tính ~2,5-3 tuần lịch (8-11 phiên + 2 tuần shadow). Tài
 `mike/agents/Taylor/research/ticker_prune_universe_QA_bq_admin_20260722.md` (Q&A gốc bq_admin).
 Đang triển khai G1 (`bin/build_universe_pit.py`) — theo dõi tiến độ qua bus finding Taylor.
 
-## CAPIT (bear-washout) — nguồn vốn CHỐT, đang theo dõi khả năng fire (2026-07-20)
-Breadth_oversold đang tăng dần (0,166 07-13 → 0,2176 07-17), tiến gần ngưỡng washout_gate=0,3 —
-Taylor audit readiness (`Taylor_20260720_074025`) tìm thấy mâu thuẫn công thức vốn (MD "size × free
-cash" vs code paper "NAV_LAG × capit_size", chênh ~100x) vì free-cash luôn ≈0 ở NEUTRAL parking.
-**User CHỐT (2026-07-20): công thức `NAV_book_LAG × capit_size` ĐÚNG ý đồ.** Nguồn vốn: user tự RÚT
-Trứng vàng trong ngày khi CAPIT kích hoạt, để có tiền sẵn sàng sáng hôm sau. Đã wire note này vào
-`bin/bq_freshness_check.sh` (chỉ chèn khi `capit_fired=true`, tránh nhiễu ngày thường) — DollarBill
-sẽ tự thấy hướng dẫn khi lập plan T+1 lúc CAPIT fire, không cần Mike can thiệp tay mỗi lần.
-2 điểm cần biết nếu fire: (a) sát biên "grind" (91 vs cửa sổ 20-90 phiên — lệch 1 phiên khiến size
-full 0,75 thay vì 0,375 nếu tính grind); (b) dd52w hiện tại (~-7%) sẽ là mức nông nhất từng fire
-trong lịch sử 2014-2026 (kỷ lục cũ -7,4%) — ngoài rìa mẫu dữ liệu đã biết. Kiểm tra lại
-`data/golive_v23_status.json` (`capit_fired`) sau cron 19:00 mỗi tối để biết đã fire chưa.
+## CAPIT (bear-washout) — ĐÃ FIRE từ 07-20/07-21, đang giải ngân dở (cập nhật 2026-07-22)
+**Trạng thái thật** (`data/golive_v23_status.json`, xác nhận qua job `Taylor_20260722_084953`):
+`capit_fired=true` từ ít nhất 07-20 (breadth_oversold 07-20: 42,9%, 07-21/22: 46,2% — vượt xa
+washout_gate=0,3). SAB/SIP/VNM đã khớp; PVT/NCT còn vướng (chờ trần giá/quota). Nguồn vốn: công
+thức `NAV_book_LAG × capit_size` (user chốt 07-20), user tự rút Trứng vàng khi fire — note đã wire
+vào `bin/bq_freshness_check.sh`, DollarBill tự thấy khi lập plan.
+2 điểm cần biết: (a) sát biên "grind" (91 vs cửa sổ 20-90 phiên — lệch 1 phiên khiến size full 0,75
+thay vì 0,375); (b) dd52w lúc fire (~-7%) là mức nông nhất từng fire trong lịch sử 2014-2026 (kỷ
+lục cũ -7,4%) — ngoài rìa mẫu dữ liệu đã biết. Theo dõi tiếp PVT/NCT khớp nốt qua EOD report.
 
 **PNJ EXCLUDED khỏi rổ CAPIT — due-diligence gate đã wire + verify (2026-07-20, job
 `Taylor_20260720_081359`).** PNJ đang khủng hoảng thật (P-Lab bị bắt vì buôn lậu kim cương, scandal

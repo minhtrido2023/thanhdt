@@ -25,18 +25,15 @@ Timeline ước tính ~2,5-3 tuần lịch (8-11 phiên + 2 tuần shadow). Tài
 `mike/agents/Taylor/research/ticker_prune_universe_QA_bq_admin_20260722.md` (Q&A gốc bq_admin).
 Đang triển khai G1 (`bin/build_universe_pit.py`) — theo dõi tiến độ qua bus finding Taylor.
 
-## CAPIT (bear-washout) — nguồn vốn CHỐT, đang theo dõi khả năng fire (2026-07-20)
-Breadth_oversold đang tăng dần (0,166 07-13 → 0,2176 07-17), tiến gần ngưỡng washout_gate=0,3 —
-Taylor audit readiness (`Taylor_20260720_074025`) tìm thấy mâu thuẫn công thức vốn (MD "size × free
-cash" vs code paper "NAV_LAG × capit_size", chênh ~100x) vì free-cash luôn ≈0 ở NEUTRAL parking.
-**User CHỐT (2026-07-20): công thức `NAV_book_LAG × capit_size` ĐÚNG ý đồ.** Nguồn vốn: user tự RÚT
-Trứng vàng trong ngày khi CAPIT kích hoạt, để có tiền sẵn sàng sáng hôm sau. Đã wire note này vào
-`bin/bq_freshness_check.sh` (chỉ chèn khi `capit_fired=true`, tránh nhiễu ngày thường) — DollarBill
-sẽ tự thấy hướng dẫn khi lập plan T+1 lúc CAPIT fire, không cần Mike can thiệp tay mỗi lần.
-2 điểm cần biết nếu fire: (a) sát biên "grind" (91 vs cửa sổ 20-90 phiên — lệch 1 phiên khiến size
-full 0,75 thay vì 0,375 nếu tính grind); (b) dd52w hiện tại (~-7%) sẽ là mức nông nhất từng fire
-trong lịch sử 2014-2026 (kỷ lục cũ -7,4%) — ngoài rìa mẫu dữ liệu đã biết. Kiểm tra lại
-`data/golive_v23_status.json` (`capit_fired`) sau cron 19:00 mỗi tối để biết đã fire chưa.
+## CAPIT (bear-washout) — ĐÃ FIRE từ 07-20/07-21, đang giải ngân dở (cập nhật 2026-07-22)
+**Trạng thái thật** (`data/golive_v23_status.json`, xác nhận qua job `Taylor_20260722_084953`):
+`capit_fired=true` từ ít nhất 07-20 (breadth_oversold 07-20: 42,9%, 07-21/22: 46,2% — vượt xa
+washout_gate=0,3). SAB/SIP/VNM đã khớp; PVT/NCT còn vướng (chờ trần giá/quota). Nguồn vốn: công
+thức `NAV_book_LAG × capit_size` (user chốt 07-20), user tự rút Trứng vàng khi fire — note đã wire
+vào `bin/bq_freshness_check.sh`, DollarBill tự thấy khi lập plan.
+2 điểm cần biết: (a) sát biên "grind" (91 vs cửa sổ 20-90 phiên — lệch 1 phiên khiến size full 0,75
+thay vì 0,375); (b) dd52w lúc fire (~-7%) là mức nông nhất từng fire trong lịch sử 2014-2026 (kỷ
+lục cũ -7,4%) — ngoài rìa mẫu dữ liệu đã biết. Theo dõi tiếp PVT/NCT khớp nốt qua EOD report.
 
 **PNJ EXCLUDED khỏi rổ CAPIT — due-diligence gate đã wire + verify (2026-07-20, job
 `Taylor_20260720_081359`).** PNJ đang khủng hoảng thật (P-Lab bị bắt vì buôn lậu kim cương, scandal

@@ -88,6 +88,6 @@ QUY TRÌNH BẮT BUỘC:
 3. CẤM TUYỆT ĐỐI (dù thấy 'cần thiết'): sửa trade plan, trading_rules.json, logic đặt lệnh executor/brokers, crontab dòng thực thi (run_bot/heartbeat/pkill), xoá dữ liệu, tạo/xoá BOT_STOP. Nếu root cause nằm ở đó → append_event.sh Winston question '<topic>' với mô tả + đề xuất, notify Telegram, rồi DỪNG.
 4. VERIFY artifact sau khi sửa (chạy lại checker/script bị lỗi, xác nhận hết lỗi thật) — không tin self-report.
 5. BÁO CÁO: notify_thread.sh vào thread $TRADING_DAILY_THREAD — ngắn gọn: hỏng gì, nguyên nhân, đã sửa gì, verify thế nào. Nếu ảnh hưởng workflow sống → thêm entry kb/INCIDENTS.md. Ghi bus event finding như thường lệ." \
-  --bg --timeout "$AUTOFIX_TIMEOUT" --model opus 2>&1 | tail -3
+  --bg --thread "$TRADING_DAILY_THREAD" --timeout "$AUTOFIX_TIMEOUT" --model opus 2>&1 | tail -3
 
 echo "[ops_autofix] dispatched fixer for '$LABEL'"

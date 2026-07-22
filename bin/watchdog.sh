@@ -141,7 +141,12 @@ print(d.get('status','?'), d.get('deadline',0), d.get('from','?'), d.get('to','?
     _jmin="$(( (_now - _jdl) / 60 ))"
     notify "JOB OVERDUE: $_jid ($_jfrom→$_jto, ${_jmin}min past deadline). Prompt: $_jprompt. Fix: bin/jobs.sh status $_jid"
     touch "$_omark"
-    _tid="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
+    # Topic của CHÍNH job này (ghim lúc dispatch) — con trỏ global "topic Mike mở phiên gần
+    # nhất" chỉ là chốt cuối. Trước 2026-07-22 chỉ đọc global → cảnh báo job của topic A rơi
+    # vào topic user đang đọc (đúng khiếu nại user; arch-reviewer bắt được sau commit b3e9fe8:
+    # session_start đã lọc theo topic nhưng watchdog thì chưa → nguồn đúng câm, nguồn sai còn).
+    _tid="$(python3 "$ROOT/bin/mike_json.py" job-field "$JOBS_DIR" "$_jid" discord_thread_id 2>/dev/null || true)"
+    [ -n "${_tid:-}" ] || _tid="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
     if [ -n "${_tid:-}" ]; then
       "$ROOT/bin/notify_thread.sh" "⚠️ **Job OVERDUE** \`$_jid\` ($_jfrom→$_jto, ${_jmin}min quá hạn). Kiểm tra: \`bin/jobs.sh status $_jid\`" "$_tid" 2>/dev/null || true
     fi
