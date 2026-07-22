@@ -321,6 +321,83 @@ KHÔNG tự chọn.
 **Cổng cứng:** cấm cutover P2/P4 khi hạng mục này chưa đóng. Đây là bổ sung thứ hai cho danh sách
 cổng cứng, ngang hàng với cổng CAPIT §4.4.
 
+#### 3.2b-G2b — KẾT QUẢ ĐO (job `Taylor_20260722_054947`, 2026-07-22): **Q-A KHÔNG CHỐT ĐƯỢC — ESCALATE**
+
+Đã chạy đúng việc G2b (§6): `golden floor rating_8l` (`ROE_Min3Y ≥ 0` ∧ `CF_OA_3Y > 0`, point-in-time)
++ `BANNED` + **rating 8L thật ≤3** (panel lịch sử `data/fa_ratings_8l_hist.csv`, as-of ≤ ngày đo) lên
+nhóm rule-only. **Cổng cứng GIỮ NGUYÊN (đóng).**
+
+⚠️ **Đính chính quan trọng trước khi đọc số: nhóm rule-only THẬT lớn gấp ~2-4 lần con số §2.4.**
+§2.4 đo trên rule thanh khoản thuần (`Volume_3M_P50×Price ≥ 1e9×Inflation_7`). `universe_pit` đã build
+(G1/G2) có thêm **hysteresis B4** (chỉ loại khi <0,5 tỷ suốt 20 phiên liên tiếp) nên giữ lại nhiều mã
+thanh khoản mỏng hơn. Đo trực tiếp trên bảng thật `tav2_mike.universe_pit`:
+
+| Ngày | universe_pit | BOTH (∩ prune) | **rule-only THẬT** | (§2.4 từng ghi) |
+|---|---|---|---|---|
+| 2014-06-30 | 227 | 138 | **89** | 30 |
+| 2018-06-29 | 302 | 178 | **124** | 21 |
+| 2022-06-30 | 551 | 318 | **233** | 84 |
+| 2026-06-15 | 396 | 230 | **166** | 43 |
+
+Cột BOTH khớp §2.4 chính xác (138/178/318/230) ⇒ chênh lệch nằm hoàn toàn ở B4, không phải lỗi đo.
+
+**Kết quả 2 lớp chặn:**
+
+| Ngày | rule-only | qua golden floor | BANNED | rating ≤3 | **LỌT CẢ HAI (leak)** |
+|---|---|---|---|---|---|
+| 2014-06-30 | 89 | 37 | 3 | *(n/a)* | **không đo được** |
+| 2018-06-29 | 124 | 72 | 4 | 59 | **45** |
+| 2022-06-30 | 233 | 121 | 3 | 104 | **77** |
+| 2026-06-15 | 166 | 82 | 2 | 84 | **61** |
+
+- **2014-06-30 KHÔNG đo được**: panel `fa_ratings_8l_hist.csv` bắt đầu **2014-07-09**, sau ngày đo ⇒
+  100% mã thiếu rating. Không được đọc "0 leak" ở mốc này là kết quả tốt — đó là thiếu dữ liệu.
+- **Leak ≠ ~0 ở cả 3 mốc đo được** ⇒ theo đúng cam kết §3.2b: **KHÔNG tự chọn Q-C/Q-B, trình user.**
+
+**Nhưng số thô này gây hiểu lầm nếu đọc một mình — 2 điều chỉnh hướng NGƯỢC nhau, phải đọc cùng:**
+
+1. **Chất lượng nhóm leak là TỐT, không xấu.** Trung bình nhóm lọt qua cả 2 lớp: `ROE_Min3Y`
+   **+14,6% / +11,7% / +12,1%**, `ROE5Y` **+18,5% / +16,1% / +17,7%** (2018/2022/2026) — tức là **cao
+   hơn cả nhóm BOTH** trong §2.4 (+9,2% / +6,8% / +4,9%). Rủi ro §2.4 nêu (nhóm rule-only có
+   `ROE_Min3Y` **âm** trung bình) **đã bị 2 lớp chặn hấp thụ đúng như Q-A giả định**. Leak lớn về SỐ
+   LƯỢNG nhưng không mang theo chất lượng xấu.
+2. **Ở tầng chạm tiền thật (P2/P4) leak nhỏ hơn nhiều bậc.** Lọc thêm bằng sàn thanh khoản của chính
+   consumer (custom30V min ADV ~13,1 tỷ; CAPIT sàn ~2 tỷ):
+
+   | Ngày | leak ADV ≥ 13,1 tỷ (P2 custom30V) | leak ADV ≥ 2 tỷ (P4 CAPIT) |
+   |---|---|---|
+   | 2018-06-29 | **0** | **0** |
+   | 2022-06-30 | **3**: ITA(r3, ROE_Min3Y +1,4%), BAF(r3, +13,4%), APH(r3, +1,8%) | **9** (+FIR, DVG, ODE, ADG, HAR, GMH) |
+   | 2026-06-15 | **3**: VPL(r3, +3,2%), VGI(r3, +1,8%), FOX(r2, ROE5Y **31,0%**) | **4** (+VIW) |
+
+   3 mã lọt ở mốc 2026 chính là **nhóm "curation SAI vì danh sách cũ"** §2.4 đã chỉ tên (FOX/VPL/VGI —
+   mã lớn, chất lượng tốt, mới lên sàn). Ở tầng tiền thật, leak = **đúng phần curation cũ làm SAI**,
+   không phải phần curation làm ĐÚNG. Mốc 2022 mờ hơn: BAF chất lượng thật, ITA/APH `ROE_Min3Y` dương
+   nhưng mỏng (+1,4%/+1,8%) — đây là 2 tên cần user nhìn tận mắt.
+
+**Vì sao vẫn KHÔNG tự chốt Q-A dù bức tranh có lợi:** tiêu chí §3.2b viết là "**≈0 hoặc rất nhỏ, giải
+thích được từng trường hợp**". 45/77/61 không phải "rất nhỏ", và việc rào nó xuống 0-3 phải **mượn sàn
+thanh khoản của consumer** — tức là đổi tiêu chí giữa chừng, đúng kiểu tự-hợp-lý-hóa mà §8.4 cảnh báo.
+Việc quyết định "sàn thanh khoản consumer có được tính là lớp chặn hợp lệ hay không" là **quyết định
+của user**, không phải của tôi.
+
+**3 lựa chọn trình user (không tự chọn):**
+- **A′ (Q-A có điều kiện)** — chấp nhận sàn thanh khoản consumer là lớp chặn thứ 3; chốt Q-A với ghi
+  nhận rõ: leak thật ở tầng tiền = 0-3 mã/mốc, chất lượng dương, phần lớn là mã curation cũ bỏ sót.
+  Rẻ nhất, không thêm tham số. Rủi ro còn lại: ITA/APH-2022 kiểu (rating 3 + ROE mỏng).
+- **Q-C** — giữ universe thuần + xuất cờ `quality_flag` trong `universe_pit` (khuyến nghị gốc §3.2b),
+  cho tầng due-diligence đọc. Không đổi hành vi, minh bạch, khớp mandate due-diligence 2026-07-21.
+- **Q-B** — thêm ngưỡng chất lượng vào universe. **Tôi vẫn KHÔNG khuyến nghị** (§8.4: trộn tầng + thêm
+  tham số tune được), và số đo hôm nay **không ủng hộ** Q-B: nhóm leak có chất lượng dương.
+
+**Khuyến nghị Taylor: A′ + Q-C** (chốt Q-A với điều kiện ghi rõ, đồng thời làm Q-C vì nó gần như miễn
+phí và phục vụ mandate due-diligence). Chờ user quyết. **Cổng cứng P2/P4 vẫn ĐÓNG tới khi có quyết
+định** — G3 không được chạy.
+
+*Tái lập:* `/tmp/g2b_detail.sql` (SQL rule-only + floor) và bước join panel rating; artifact đầy đủ
+`mike/agents/Taylor/research/g2b_leak_20260722.csv` (612 dòng, mọi mã rule-only 4 mốc kèm
+`roe_min3y/cf_oa_3y/roe5y/FSCORE/adv_bn/pass_floor/banned/rating/leak`).
+
 **Điểm cần user biết rõ:** ⚠️ B3/B4 dùng `Volume_3M_P50 × Price` trong đo lường §2.2 (cột dựng sẵn,
 cửa sổ 3 tháng), còn đặc tả ghi "median 60 phiên". Hai thứ **gần nhau chứ không bằng nhau**. Builder
 phải tự tính median 60 phiên từ `Price × Volume` thô (tự chủ, không phụ thuộc cột dẫn xuất của ETL
@@ -497,7 +574,7 @@ kiểm chứng trong 2-3 tuần tới.
 | **G0** | Lấy lại văn bản gốc Q&A bq_admin (§0); đánh dấu R3 `PROVISIONAL` (§5.2) | <0,5 phiên | Cao | User |
 | **G1** | `bin/build_universe_pit.py` + selfcheck (idempotent, atomic, B8) | 1-1,5 phiên | Cao | — |
 | **G2** | Backfill 2000→nay (compute rẻ: 215MB) + **kiểm định**: chạy lại bảng §2.2 với median-60-phiên tự tính, ~30 mốc | **1 phiên** (compute ~phút, kiểm định chiếm hết) | Cao | G1 |
-| **G2b** | **(MỚI, từ §2.4/§3.2b)** Đo độ rò chất lượng: chạy `BANNED` + golden floor `rating_8l` lên đúng nhóm rule-only tại nhiều mốc, đếm số mã lọt tới tầng đặt lệnh. Ra ~0 ⇒ chốt Q-A; ra ≠0 ⇒ trình user chọn Q-C/Q-B | 0,5-1 phiên | Trung bình | G2 |
+| **G2b** | ✅ **ĐO XONG 2026-07-22 — Q-A KHÔNG chốt được, ESCALATE user (§3.2b-G2b); cổng cứng P2/P4 vẫn ĐÓNG.** (MỚI, từ §2.4/§3.2b) Đo độ rò chất lượng: chạy `BANNED` + golden floor `rating_8l` lên đúng nhóm rule-only tại nhiều mốc, đếm số mã lọt tới tầng đặt lệnh. Ra ~0 ⇒ chốt Q-A; ra ≠0 ⇒ trình user chọn Q-C/Q-B | 0,5-1 phiên | Trung bình | G2 |
 | **G3** | P1-P3 cutover + A/B tĩnh rổ custom30V | 1 phiên | Trung bình (phụ thuộc diff rổ lớn hay nhỏ) | G2 |
 | **G4** | **Re-hiệu chuẩn breadth CAPIT (§4.4)** — chuỗi 2014→nay, tìm `WASHOUT_GATE'` bảo toàn tập ngày fire | 1 phiên | **Thấp** — có thể không tồn tại ngưỡng bảo toàn ⇒ escalate | G2 |
 | **G5** | Shadow P4/P5 ≥10 phiên (chi phí *thời gian lịch*, gần như không tốn effort) | ~2 tuần lịch, 0,5 phiên | Cao | G4 |
