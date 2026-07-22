@@ -72,8 +72,8 @@ EDGE_THR = 4.0   # %: LAG trailing-12M edge-health threshold (pinned R3 = argv "
 
 # ── UNIVERSE SOURCE — P3 cutover 2026-07-22 (§4.2/§4.3/§4.3b ticker_prune_replacement_plan.md) ──
 # Scope of THIS constant = the D1 RE_BACKLOG sector-lens panel ONLY (ICB_Code=8633, real estate).
-# The other three `ticker_prune` reads in this file (ADV caps :167, CAPIT breadth/pool :425/:455)
-# are P4 and stay on `ticker_prune` DELIBERATELY until the breadth gate is recalibrated (§4.4).
+# The CAPIT reads (ADV cap, breadth, pool) have their OWN switch — see "CAPIT UNIVERSE" (P4) below;
+# they are deliberately NOT coupled to this one, so either can roll back without the other.
 # "pit"   = `tav2_mike.universe_pit_q`, membership PER DAY. This also FIXES a live look-ahead bug:
 #           the old `IN (SELECT DISTINCT ticker FROM ticker_prune)` predicate has no time condition,
 #           so it admitted a name to every historical panel date — VHM (listed 2018) was sitting in
@@ -132,6 +132,122 @@ SELECT (SELECT COUNT(*) FROM src) AS n_src,
             f"fallback ve ticker_prune (§4.3). Chay mike/bin/build_universe_pit.py "
             f"(+ build_universe_pit_quality.py) cho khoang thieu.")
 
+
+# ── CAPIT UNIVERSE — P4 cutover 2026-07-22 (§4.4-C-conserv ticker_prune_replacement_plan.md) ──
+# Scope = CAPIT chỉ: breadth (trigger), pool (chọn rổ), ADV cap. Switch RIÊNG với UNIVERSE_SOURCE
+# ở trên, vì đây là đường CHẠM TIỀN THẬT và phải rollback được độc lập bằng đúng 1 dòng.
+#
+# TẠI SAO KHÔNG PHẢI "đổi mẫu số, giữ nguyên ngưỡng":
+#   `WASHOUT_GATE=0,30` được hiệu chuẩn trên mẫu số `ticker_prune`. Đổi mẫu số mà giữ ngưỡng =
+#   âm thầm đổi cả xác suất kích hoạt LẪN size của một lệnh mua thật. Đo trên 3.129 phiên
+#   (§4.4-KQ): KHÔNG TỒN TẠI ngưỡng nào bảo toàn đúng tập 82 ngày fire cũ trên mẫu số mới —
+#   max(non-fire)=0,3067 > min(fire)=0,2425, hai tập không tách được tuyến tính.
+#
+# THIẾT KẾ ĐÃ CHỌN (user chốt 2026-07-22 sau 2 vòng escalate) = C-conserv:
+#   breadth = tỷ lệ `D_RSI<0,3` trên rổ TOP-250 THANH KHOẢN NHẤT của `universe_pit_q`
+#   (rank mỗi ngày theo `Volume_3M_P50 × COALESCE(Price, Close)`), gate 0,31.
+#   Lý do chọn top-N thay vì "cả universe": mẫu số universe đã swing 128 → 589 → 365 mã trong
+#   2014-2026; một tỷ lệ trên mẫu số co giãn thì thang đo trôi theo. Top-N cố định thì không.
+#   Gate 0,31 = TRUNG ĐIỂM khoảng tách (0,3080 ; 0,3120) — quy ước, KHÔNG dò lưới (chống tune:
+#   đây là tham số điều khiển tiền thật; N-trial đã khai báo TRƯỚC = 5 giá trị N).
+#
+# GIÁ PHẢI TRẢ, ĐÃ ĐO VÀ ĐÃ CHẤP NHẬN (đừng phát hiện lại rồi tưởng là bug):
+#   - MẤT 7 ngày fire lịch sử, THÊM 0 (toàn bộ lệch theo hướng THẬN TRỌNG, không có fire giả):
+#     2015-05-18, 2018-07-05, 2020-02-04, 2020-03-11, 2020-03-25, 2020-04-01, 2022-06-15.
+#     Mất HẲN 2 episode 1-ngày: 2015-05-18 và 2018-07-05 (2018-07-05 fire cũ do ĐUÔI ILLIQUID
+#     của `ticker_prune` oversold, phần lõi thanh khoản thì không — đúng thứ ta muốn bỏ).
+#   - 1 cặp lật `capit_grind` True→False: 2015-08-24/25 ⇒ size 0,375 → 0,75 (GẤP ĐÔI) trên một
+#     lần fire thật. Đây là thay đổi nặng nhất về tiền của cả P4.
+#   - Ngày LIVE cutover (2026-07-22): fired/grind/size giống hệt nhánh cũ ⇒ 0 tác động lên đợt
+#     giải ngân CAPIT đang dở (đo bằng universe_pit_p4_selfcheck.py, không giả định). Pool + ADV
+#     cap thì KHÔNG cutover hôm nay — xem khối ngay dưới, đó mới là chỗ có tác động thật.
+#   - N=250 chỉ thực sự là "top-N" từ 2014-10-17; trước đó universe < 250 nên br250 ≡ breadth
+#     toàn universe. Hành vi đúng của rule, không phải lỗi.
+CAPIT_BREADTH_SOURCE = "pit"        # "pit" | "prune"  ← ROLLBACK ĐÚNG 1 DÒNG
+CAPIT_TOPN = 250            # chỉ dùng khi CAPIT_BREADTH_SOURCE="pit"
+# Ngưỡng ĐI KÈM mẫu số, không tách rời: đặt cạnh nhau để không ai đổi cái này mà quên cái kia.
+WASHOUT_GATE = 0.31 if CAPIT_BREADTH_SOURCE == "pit" else 0.30
+
+# ── POOL + ADV: VẪN GHIM `ticker_prune` CÓ CHỦ Ý (2026-07-22) — KHÔNG phải quên ────────────
+# Switch RIÊNG với breadth ở trên vì hai thứ này hỏng theo hai kiểu khác nhau: breadth sai thì
+# sai NGÀY kích hoạt, pool sai thì sai TÊN MÃ được mua. Cutover trigger đã đo là 0 tác động
+# ngày LIVE; cutover pool thì KHÔNG:
+#   Đo ngày 2026-07-22 (universe_pit_p4_selfcheck.py T6c/T6d, trong lúc `capit_fired=true` và
+#   đợt giải ngân CAPIT đang DỞ): pool "pit" thêm **HVT** (pbz −1,362 ⇒ đứng HẠNG 3) ⇒ rổ đổi
+#   từ 4 mã [PVT, SAB, SIP, VNM] thành 5 mã [HVT, PVT, SAB, SIP, VNM] — vừa thêm một lệnh mua
+#   thật, vừa pha loãng equal-weight 25% → 20% cho 4 mã đang khớp dở.
+#   HVT là ca đáng chú ý, KHÔNG phải nhiễu: chất lượng thật (ROE_Min5Y 16,1% · ROIC5Y 24,0% ·
+#   FSCORE 7) nhưng THANH KHOẢN THẬT chỉ 0,196 tỷ/phiên; nó lọt sàn "2 tỷ" chỉ vì sàn đó đo
+#   turnover MỘT NGÀY (hôm nay 2,063 tỷ — sát mép) chứ không đo ADV. `ticker_prune` vô tình che
+#   lỗ hổng này bao lâu nay; bỏ prune ra là lộ. Sửa sàn thanh khoản của pool (ADV thay vì
+#   turnover-1-ngày) là ĐỔI CHIẾN LƯỢC — cần R&D + backtest riêng, KHÔNG làm lẫn vào migration.
+# ⇒ Ghim tại đây tới khi (a) `capit_fired` về false, VÀ (b) user duyệt riêng khoản sàn thanh
+#   khoản pool. Cổng "không cutover P4 khi capit_fired=true" (§4.4 mục 4, user duyệt Q5) đang
+#   CHẶN đúng chỗ nó sinh ra để chặn.
+CAPIT_POOL_SOURCE = "prune"         # "pit" | "prune"  ← cutover 1 dòng khi 2 điều kiện trên đủ
+
+
+def capit_breadth_sql(start, end):
+    """Chuỗi breadth oversold — nguồn của trigger `capit_fired` VÀ của `capit_grind` (size)."""
+    if CAPIT_BREADTH_SOURCE == "prune":
+        return f"""SELECT p.time, AVG(CASE WHEN p.D_RSI<0.3 THEN 1.0 ELSE 0 END) oversold
+FROM tav2_bq.ticker_prune p
+WHERE p.time BETWEEN DATE '{start}' AND DATE '{end}' AND p.Close_T1>0
+GROUP BY p.time ORDER BY p.time"""
+    if CAPIT_BREADTH_SOURCE != "pit":
+        raise ValueError(f"CAPIT_BREADTH_SOURCE={CAPIT_BREADTH_SOURCE!r} unknown (pit|prune)")
+    # tie-break `, ticker` là CỐ Ý: hai mã cùng `liq` mà đổi thứ tự giữa 2 lần chạy sẽ làm ranh
+    # giới rn=250 nhấp nháy ⇒ breadth không tái lập được. Giữ nguyên đúng bản đã đo (§4.4-C).
+    return f"""WITH base AS (
+  SELECT t.time, t.ticker, t.D_RSI, t.Volume_3M_P50 * COALESCE(t.Price, t.Close) AS liq
+  FROM tav2_bq.ticker t
+  JOIN `{UNIVERSE_PIT_TABLE}` u ON u.ticker = t.ticker AND u.time = t.time AND u.in_universe
+  WHERE t.time BETWEEN DATE '{start}' AND DATE '{end}' AND t.Close_T1 > 0),
+r AS (SELECT *, ROW_NUMBER() OVER (PARTITION BY time ORDER BY liq DESC, ticker) rn FROM base)
+SELECT time, AVG(CASE WHEN D_RSI < 0.3 THEN 1.0 ELSE 0 END) oversold
+FROM r WHERE rn <= {CAPIT_TOPN} GROUP BY time ORDER BY time"""
+
+
+def capit_pool_sql(bd):
+    """Pool ứng viên rổ CAPIT tại ngày washout `bd` (golden floor + sàn thanh khoản 2 tỷ)."""
+    if CAPIT_POOL_SOURCE == "prune":
+        return f"""SELECT p.ticker, SAFE_DIVIDE(p.PB-p.PB_MA5Y,p.PB_SD5Y) pbz
+FROM tav2_bq.ticker_prune p
+WHERE p.time = DATE '{bd}' AND p.ROE_Min5Y>=0.12 AND p.ROIC5Y>=0.10 AND p.FSCORE>=6
+  AND COALESCE(p.Price,p.Close)*p.Volume/1e9 >= 2"""
+    if CAPIT_POOL_SOURCE != "pit":
+        raise ValueError(f"CAPIT_POOL_SOURCE={CAPIT_POOL_SOURCE!r} unknown (pit|prune)")
+    return f"""SELECT t.ticker, SAFE_DIVIDE(t.PB-t.PB_MA5Y,t.PB_SD5Y) pbz
+FROM tav2_bq.ticker t
+JOIN `{UNIVERSE_PIT_TABLE}` u ON u.ticker = t.ticker AND u.time = t.time AND u.in_universe
+WHERE t.time = DATE '{bd}' AND t.ROE_Min5Y>=0.12 AND t.ROIC5Y>=0.10 AND t.FSCORE>=6
+  AND COALESCE(t.Price,t.Close)*t.Volume/1e9 >= 2"""
+
+
+def capit_breadth_is_stale(br_max, end):
+    """FAIL-CLOSED riêng cho CAPIT khi `universe_pit` chậm hơn dữ liệu giá. Trả (stale, src_max).
+
+    Vì sao cần: `universe_pit` do một job RIÊNG build (`mike/bin/build_universe_pit.py`). Nếu job
+    đó chưa chạy cho phiên mới nhất, câu breadth vẫn trả kết quả — chỉ thiếu ngày cuối — và
+    `br["oversold"].iloc[-1]` lặng lẽ thành breadth của HÔM QUA. Đúng mẫu sự cố C1 07-12 (đọc
+    vintage T-1 mà tưởng T), nhưng lần này nó điều khiển một lệnh mua thật.
+
+    KHÔNG raise (sẽ hạ cả recommender, BAL/LAG vô can) mà fail-CLOSED riêng CAPIT: không fire
+    lệnh mới trên dữ liệu cũ, và nói to trong status JSON + MD."""
+    if CAPIT_BREADTH_SOURCE != "pit":
+        return False, None
+    try:
+        m = bq(f"SELECT MAX(t.time) AS m FROM tav2_bq.ticker AS t "
+               f"WHERE t.time <= DATE '{end}' AND t.Close_T1 > 0")
+        src_max = pd.Timestamp(m["m"].iloc[0])
+    except Exception as ex:
+        print(f"  WARNING: không kiểm được độ tươi breadth ({ex}) — CAPIT fail-closed")
+        return True, None
+    if pd.isna(src_max):
+        return True, None
+    return bool(pd.isna(br_max) or pd.Timestamp(br_max) < src_max), str(src_max.date())
+
+
 def w_lag_target(state, asof):
     """Edge-conditional w_LAG target — mirror of pt_v23_audit_2014.py:1738-1751 (pinned R3
     allocator, argv `v23a none postbull 0 edge`): in good states (3/4/5) tilt to 0.65 ONLY
@@ -155,7 +271,7 @@ def w_lag_target(state, asof):
 
 ALLOC_BAND = 0.10
 LAG_TW = {"LAG_HI": 0.10, "LAG_LO": 0.08}
-WASHOUT_GATE = 0.30; CAPIT_HOLD = 60
+CAPIT_HOLD = 60   # WASHOUT_GATE: xem khối "CAPIT UNIVERSE" bên dưới (gate ĐI KÈM mẫu số, P4)
 ADV_X, ADV_D = 0.10, 2.0   # trần %ADV/tên cho CAPIT — xem capit_adv_caps() (quy ước, KHÔNG backtest)
 ACTIVE_NAV_MAX_AGE_D = 5   # active_nav_<label>.json ghi ad-hoc (không cron) — quá hạn thì lùi nav_history
 ANOMALY_TTL_DAYS = 30   # cờ due-diligence còn hiệu lực bao lâu kể từ phiên alert cuối
@@ -192,6 +308,15 @@ def capit_adv_caps(basket, asof):
     p10 = 0,32 — mike/agents/Taylor/exp_capitexit/RESULT.md §3a). Cửa sổ TRƯỚC cũng là cửa
     sổ duy nhất NHÂN QUẢ (live không biết ADV tương lai).
 
+    NGUỒN GIÁ/KL (P4, 2026-07-22): đi THEO `CAPIT_POOL_SOURCE`, không theo breadth — ADV đo trên
+    đúng những cái TÊN mà pool đã chọn, nên hai thứ phải cùng một nguồn hoặc cap có thể rơi vào
+    tên mà nguồn kia không có dòng. Hôm nay pool còn ghim "prune" ⇒ ADV cũng đọc `ticker_prune`
+    = y hệt hành vi trước P4 (đã đo: cap rổ LIVE 07-22 không đổi 1 đồng).
+    Khi pool cutover sang "pit", ADV chuyển sang `tav2_bq.ticker` — CỐ Ý không join `universe_pit`
+    ở đây: ADV là SỰ KIỆN THỊ TRƯỜNG THÔ (giá × khối lượng), không phải phán quyết universe; join
+    lần nữa chỉ thêm một đường làm MẤT cap, mà mất cap là mất tiền theo hướng xấu
+    (cap_capit_orders() fail-closed ⇒ thiếu ADV = CHẶN MUA). Đọc siêu tập `ticker` an toàn hơn.
+
     ADV_X=10% / ADV_D=2 là QUY ƯỚC NGÀNH, KHÔNG phải tham số đã backtest — không có dữ liệu
     market-impact thật để hiệu chỉnh. Đừng trích dẫn như đã kiểm chứng thực nghiệm, và đừng
     chỉnh chúng để khớp một kỳ vọng biết trước (phương án C job Taylor_20260720_170223 đã
@@ -226,7 +351,7 @@ def capit_adv_caps(basket, asof):
         a = bq(f"""WITH px AS (
   SELECT p.ticker, p.time, COALESCE(p.Price,p.Close)*p.Volume AS turn,
          ROW_NUMBER() OVER (PARTITION BY p.ticker ORDER BY p.time DESC) rn
-  FROM tav2_bq.ticker_prune p
+  FROM tav2_bq.{'ticker_prune' if CAPIT_POOL_SOURCE == 'prune' else 'ticker'} p
   WHERE p.ticker IN ({tl}) AND p.time < DATE '{pd.Timestamp(asof).date()}'
     AND p.time >= DATE_SUB(DATE '{pd.Timestamp(asof).date()}', INTERVAL 90 DAY))
 SELECT ticker, APPROX_QUANTILES(turn, 2)[OFFSET(1)] AS adv20
@@ -488,13 +613,15 @@ except Exception as e:
 band_breach = (w_cur is not None) and (abs(w_cur - w_tgt) > ALLOC_BAND)
 
 # ── 6. CAPIT v2 monitor (gate 30% + state routing + grind + BEAR guard) ──
-br = bq(f"""SELECT p.time, AVG(CASE WHEN p.D_RSI<0.3 THEN 1.0 ELSE 0 END) oversold
-FROM tav2_bq.ticker_prune p
-WHERE p.time BETWEEN DATE '{START_BR}' AND DATE '{END}' AND p.Close_T1>0
-GROUP BY p.time ORDER BY p.time""")
+br = bq(capit_breadth_sql(START_BR, END))
 br["time"] = pd.to_datetime(br["time"])
 breadth_today = float(br["oversold"].iloc[-1]) if len(br) else np.nan
-capit_fired = bool(pd.notna(breadth_today) and breadth_today >= WASHOUT_GATE)
+breadth_stale, breadth_src_max = capit_breadth_is_stale(br["time"].max() if len(br) else pd.NaT, END)
+if breadth_stale:
+    print(f"  WARNING: breadth CAPIT CŨ — chuỗi tới {br['time'].max() if len(br) else 'rỗng'} "
+          f"nhưng dữ liệu giá đã có tới {breadth_src_max}. CAPIT FAIL-CLOSED (không fire lệnh "
+          f"mới trên dữ liệu cũ). Chạy mike/bin/build_universe_pit.py + _quality.py cho ngày thiếu.")
+capit_fired = bool(pd.notna(breadth_today) and breadth_today >= WASHOUT_GATE and not breadth_stale)
 vnh = bq(f"""SELECT t.time, t.Close FROM tav2_bq.ticker AS t
 WHERE t.ticker='VNINDEX' AND t.time BETWEEN DATE '{START_VNI}' AND DATE '{END}' ORDER BY t.time""")
 vnh["time"] = pd.to_datetime(vnh["time"]); vnh = vnh.set_index("time")
@@ -518,10 +645,7 @@ if capit_fired:
     capit_size = base * (0.5 if capit_grind else 1.0)
     if capit_size > 0.005:
         bd = br["time"].iloc[-1]
-        e = bq(f"""SELECT p.ticker, SAFE_DIVIDE(p.PB-p.PB_MA5Y,p.PB_SD5Y) pbz
-FROM tav2_bq.ticker_prune p
-WHERE p.time = DATE '{bd.date()}' AND p.ROE_Min5Y>=0.12 AND p.ROIC5Y>=0.10 AND p.FSCORE>=6
-  AND COALESCE(p.Price,p.Close)*p.Volume/1e9 >= 2""")
+        e = bq(capit_pool_sql(bd.date()))
         excl = anomaly_excluded(bd.date())
         hit = sorted(set(e["ticker"]) & excl) if not e.empty else []
         if hit:
@@ -621,6 +745,11 @@ status = {
     "etf_park_frac": etf_frac,
     "breadth_oversold": (round(breadth_today, 4) if pd.notna(breadth_today) else None),
     "washout_gate": WASHOUT_GATE, "capit_fired": capit_fired,
+    # P4 (§4.4-C-conserv): mẫu số breadth + ngưỡng ĐI KÈM NHAU — ghi cả hai vào artifact để một
+    # bản ghi lịch sử luôn tự nói được nó sinh ra trên thang đo nào.
+    "capit_universe_source": CAPIT_BREADTH_SOURCE,
+    "capit_breadth_topn": (CAPIT_TOPN if CAPIT_BREADTH_SOURCE == "pit" else None),
+    "capit_breadth_stale": breadth_stale, "capit_breadth_src_max": breadth_src_max,
     "capit_size": round(capit_size, 2), "capit_grind": capit_grind,
     "capit_dd_excluded": capit_dd_excluded,
     # Trần VND tuyệt đối/tên ĐÃ CHIA THEO ACCOUNT — NGUỒN CHUẨN TẮC mà bot_execute.py
@@ -719,7 +848,13 @@ elif lag_liq_dropped:
 if state_today == 2:
     L.append("\n⚠️ BEAR: allocator w_LAG=0 — KHÔNG cấp vốn entry LAG mới cho tới khi thoát BEAR.")
 L.append(f"\n## CAPIT v2 monitor\n")
-L.append(f"- Oversold breadth (D_RSI<0.3, ticker_prune): **{breadth_today*100:.1f}%** vs gate {WASHOUT_GATE*100:.0f}%")
+_brsrc = f"top-{CAPIT_TOPN} thanh khoản universe_pit" if CAPIT_BREADTH_SOURCE == "pit" else "ticker_prune"
+L.append(f"- Oversold breadth (D_RSI<0.3, {_brsrc}): **{breadth_today*100:.1f}%** vs gate {WASHOUT_GATE*100:.0f}%")
+if breadth_stale:
+    L.append(f"- ⛔ **BREADTH CŨ — CAPIT FAIL-CLOSED**: chuỗi breadth mới tới "
+             f"{br['time'].max().date() if len(br) else 'rỗng'} trong khi dữ liệu giá đã có tới "
+             f"{breadth_src_max}. KHÔNG fire lệnh CAPIT mới trên dữ liệu cũ. Khắc phục: chạy "
+             f"`mike/bin/build_universe_pit.py --date <ngày>` + `build_universe_pit_quality.py`.")
 if capit_fired:
     L.append(f"- 🚨 **WASHOUT GATE FIRED** — state routing size = **{capit_size:.2f}** (grind={capit_grind}, dd52w={dd52_now:.1f}%, vn_cooling={vn_cool_now})")
     L.append(f"- Committed VND = size × free cash mỗi book, hold {CAPIT_HOLD}td, stop-exempt, slot-exempt.")
