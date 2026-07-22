@@ -742,6 +742,55 @@ lịch sử của CAPIT bị đổi ngầm.**
 - **C**: viết lại breadth cho bất biến với mẫu số (vd đếm trên rổ cố định top-N thanh khoản). Đây là
   thiết kế lại chỉ báo, không phải migration — cần R&D + backtest riêng, không làm trong lần này.
 
+#### 4.4-C — KẾT QUẢ R&D HƯỚNG C (user chốt C; job `Taylor_20260722_094530`, 2026-07-22): **VẪN KHÔNG TÁCH SẠCH — ESCALATE LẦN 2, KHÔNG CUTOVER**
+
+Thiết kế đã đo (N-trial khai báo TRƯỚC trên bus, không tune): breadth = tỷ lệ `D_RSI<0.3` trên rổ
+top-N thanh khoản (`Volume_3M_P50 × COALESCE(Price,Close)`, rank mỗi ngày trong `universe_pit_q`),
+N ∈ {100, 150, 200, 250, 300} — 5 trials. Gate quy ước = trung điểm khoảng tách, KHÔNG dò lưới.
+Artifacts: `exp_capit_breadth/{breadth_topn.sql,breadth_topn.csv,sweep_topn.py,detail_topn.py,conservative_topn.py,grind_union.py,gate_placement.py}`.
+
+**Kết quả 1 — không N nào tách được tập fire cũ** (gap = min_fire − max_nonfire, ÂM cả 5):
+
+| N | min br trên 82 ngày fire | max br trên 3.047 ngày non-fire | gap |
+|---|---|---|---|
+| 100 | 0,1900 | 0,3300 | −0,1400 |
+| 150 | 0,2467 | 0,3333 | −0,0867 |
+| 200 | 0,2850 | 0,3250 | −0,0400 |
+| 250 | 0,2680 | 0,3080 | −0,0400 |
+| 300 | 0,2433 | 0,3133 | −0,0700 |
+
+**Kết quả 2 — thất bại là CẤU TRÚC, không phải nhiễu ngưỡng.** Các ngày vi phạm KHÔNG phải
+knife-edge của chuỗi cũ: 2018-07-05 br_old=0,3143 (fire thoải mái) nhưng MỌI mẫu số mới chỉ ra
+0,24–0,29 — fire hôm đó do ĐUÔI ILLIQUID của `ticker_prune` oversold, phần lõi thanh khoản thì
+không; ngược lại 2022-09-19 br_old=0,2876 (không fire) nhưng top-200/250/300 ra 0,308–0,315 (lõi
+thanh khoản oversold HƠN trung bình prune). Corr(br_old, br250)=0,9908 nhưng đúng các ngày biên thì
+lệch theo thành phần rổ ⇒ **không tồn tại chuỗi bất-biến-mẫu-số nào tái tạo đúng 100% tập fire cũ**
+— tập fire cũ mã hoá thành phần cụ thể (kể cả đuôi illiquid) của `ticker_prune`.
+
+**Kết quả 3 — menu tốt nhất trong họ C** (so với B = `br_new@0,3070` của §4.4-KQ):
+
+| Config | lệch | MẤT/THÊM | episode Δ | grind flip thật | ghi chú |
+|---|---|---|---|---|---|
+| B (`br_new@0,3070`) | 7 | 7/0 | mất 2 ep 1-ngày (2015-05-18, 2018-07-05) | 2015-08-24/25 size GẤP ĐÔI | khoảng trống gate 0,0027 |
+| C-mixed (`br250@0,288`) | 5 | 2/3 | mất 1 ep (2018-07-05), THÊM 1 ep mới giữa bear 2022 (2022-09-19) | 0 | ⚠️ 3 fire GIẢ (sai hướng tiêu chí); giữ được 2015-05-18 chỉ nhờ margin 0,0013 — knife-edge, không robust |
+| **C-conserv (`br250@0,31`)** | 7 | 7/0 | mất đúng 2 ep 1-ngày NHƯ B | y hệt B (2015-08-24/25) | khoảng trống 0,0040 (rộng hơn B); 7 ngày mất hơi khác B trong-episode nhưng tương đương kinh tế |
+
+**Kết luận trung thực (đúng tiêu chí đã khai báo, không ép số):** C KHÔNG giải quyết "dứt điểm"
+việc tái tạo lịch sử — ứng viên duy nhất đạt chuẩn "sai số nhỏ + toàn thận trọng" (`br250@0,31`)
+có profile đổi-hành-vi **y hệt B về số lượng và độ nặng** (7 ngày mất, cùng 2 episode mất, cùng 1
+cặp grind-flip). Giá trị THẬT của C nằm ở tương lai, không phải quá khứ: mẫu số universe đã swing
+128 → 589 → 365 mã trong 2014–2026; top-N cố định miễn nhiễm với swing đó, còn B sẽ lại lệch thang
+đo khi universe phình/co lần tới. Đánh đổi: thêm 1 bước ranking (phức tạp hơn), và N=250 chỉ thực
+sự là "top-N" từ 2014-10 (trước đó universe < 250 ⇒ br250 ≡ br_new). Lưu ý dữ liệu: 2015-09-28
+universe co còn 128 mã (hậu crash 08/2015, thanh khoản 3M co lại) — hành vi đúng của rule, không
+phải lỗi.
+
+**Trạng thái: 3 vị trí P4 trong `golive_recommend_v23.py` (`:229` ADV cap, `:492`/`:522`
+breadth+pool) VẪN đọc `ticker_prune` có chủ ý — không đổi dòng code nào.** Cổng "không cutover khi
+`capit_fired=true`" cũng đang CHẶN độc lập (fired từ 07-20). Chờ user chọn: A (pin vĩnh viễn) /
+B (0,3070, mất 7 ngày) / C-conserv (`br250@0,31`, mất 7 ngày tương đương B + bất biến mẫu số về
+sau) — C-mixed KHÔNG khuyến nghị (fire giả + knife-edge).
+
 ### 4.5 D3 — gate vận hành (P6) sau khi prod không còn đọc `ticker_prune`
 
 Hiện `preflight_check.sh` + `bq_freshness_check.sh` gác **lag + depth của `ticker_prune`**
@@ -822,7 +871,7 @@ kiểm chứng trong 2-3 tuần tới.
 | **G2** | Backfill 2000→nay (compute rẻ: 215MB) + **kiểm định**: chạy lại bảng §2.2 với median-60-phiên tự tính, ~30 mốc | **1 phiên** (compute ~phút, kiểm định chiếm hết) | Cao | G1 |
 | **G2b** | ✅ **XONG + ĐÃ ĐÓNG 2026-07-22.** Đo xong (§3.2b-G2b) → escalate → **user chốt A′ + Q-C, không Q-B** → **Q-C đã implement (§3.2c), selfcheck PASS**. **Cổng cứng §3.2b/Q9 MỞ** (cổng CAPIT §4.4 vẫn đóng riêng) | 0,5-1 phiên | Trung bình | G2 |
 | **G3** | 🔶 **ĐANG DỞ 2026-07-22**: **P1 XONG** (`due_diligence.py`, selfcheck 20/20) · **P2 XONG** (`custom_basket.py` → `universe_pit_q`, user duyệt, commit `ce7d457`, selfcheck 13/13, rổ LIVE byte-identical, v4final/eyrisk selector 12/12 PASS sau commit) · **P3 XONG** (`golive_recommend_v23.py` panel D1 ICB-8633, user duyệt, commit `0bfbdfe`, selfcheck 14/14, VHM-look-ahead fix có bằng chứng, A/B trọn script byte-identical) ⇒ **P1-P3 ĐỦ, G3 XONG** (P4/P5/P6 là hạng mục riêng) | 1 phiên | Trung bình | G2 |
-| **G4** | **Re-hiệu chuẩn breadth CAPIT (§4.4)** — chuỗi 2014→nay, tìm `WASHOUT_GATE'` bảo toàn tập ngày fire | 1 phiên | **Thấp** — có thể không tồn tại ngưỡng bảo toàn ⇒ escalate | G2 |
+| **G4** | ✅ **ĐO XONG 2 VÒNG, ESCALATED 2026-07-22.** Vòng 1 (§4.4-KQ): không tồn tại gate bảo toàn trên mẫu số mới. Vòng 2 hướng C (§4.4-C): top-N thanh khoản N∈{100..300} vẫn không tách sạch — thất bại CẤU TRÚC (đuôi illiquid của prune); ứng viên tốt nhất C-conserv `br250@0,31` = ngang B. **Chờ user chọn A/B/C-conserv; P4 vẫn đọc `ticker_prune` có chủ ý** | 1 phiên | **Thấp** — có thể không tồn tại ngưỡng bảo toàn ⇒ escalate (đã xảy ra đúng vậy, cả 2 vòng) | G2 |
 | **G5** | Shadow P4/P5 ≥10 phiên (chi phí *thời gian lịch*, gần như không tốn effort) | ~2 tuần lịch, 0,5 phiên | Cao | G4 |
 | **G6** | Re-pin R3: 2 lần chạy (control + pit) theo **đúng lệnh pin + `$DNA_PYEXE`** (`coding_guidelines.md` §8) | 1-2 phiên + runtime | **Thấp** — chưa đo runtime thật của lệnh pin trong job này | G2 |
 | **G7** | Rà soát N-trial (§5.3) — phân loại giữ/chạy-lại, chạy lại LAG-liquidity | 1-2 phiên | Thấp | G6 |
@@ -1033,8 +1082,11 @@ DT5G 4-gate), nhưng đây là số cần nhớ khi re-pin R3 và khi hiệu chu
    `UNIVERSE_SOURCE`) · **P3 đã cutover 2026-07-22** (`golive_recommend_v23.py` panel D1, user duyệt,
    commit `0bfbdfe`, selfcheck 14/14, VHM-look-ahead xác nhận đã fix, A/B trọn script byte-identical
    ⇒ 0 tác động LIVE hôm nay). **G3 coi như XONG** cho phần P1-P3; P4/P5/P6 vẫn mở.
-3. **G4** (CAPIT breadth, §4.4) — chưa làm; ràng buộc "phụ thuộc P2" nay đã gỡ, nhưng **cổng CAPIT
-   vẫn ĐÓNG** cho tới khi có quyết định riêng.
+3. **G4** (CAPIT breadth, §4.4) — đã đo XONG cả 2 vòng: §4.4-KQ (re-hiệu-chuẩn mẫu số mới —
+   không tồn tại gate bảo toàn) + §4.4-C (hướng C top-N thanh khoản, user chốt 2026-07-22 — vẫn
+   không tách sạch, C-conserv `br250@0,31` chỉ NGANG B chứ không hơn về tái tạo lịch sử; giá trị
+   thêm là bất biến mẫu số về sau). **ESCALATE lần 2, cổng CAPIT vẫn ĐÓNG**, chờ user chọn
+   A / B / C-conserv (menu ở cuối §4.4-C).
 4. Re-pin R3 (§5.1) — **chưa làm, và P2 vừa làm nó cần thiết hơn**: rổ custom30V đổi ở 4 mốc rebal
    2021-06 → 2022-05 (§4.3b đính chính) ⇒ chuỗi NAV backtest 2021-2022 sẽ khác bản đang pin 27,84%.
 4. **Không cần dispatch quant-skeptic vòng 2** cho các sửa đổi tài liệu (chúng chỉ **hạ** mức tự tin
