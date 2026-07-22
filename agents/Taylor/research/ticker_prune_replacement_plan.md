@@ -545,9 +545,34 @@ Artifact: `universe_pit_ab_p2p3_2026-07-22.csv`. Cấu hình P2 = production (`B
 
 Đọc: universe rộng hơn ~1,7× **nhưng rổ 30 mã gần như không đổi** — vì `gate_rating≤3` + xếp hạng
 theo value-yield đã tự lọc, mã mới vào universe chủ yếu là mã nhỏ/kém, không lọt top-30. **Rổ đang
-LIVE (rebal 2026-05-05) GIỐNG HỆT** ⇒ cutover P2 hôm nay là **no-op với rổ hiện tại**. Diff 6/30 chỉ
-ở 2014-2015 (`ticker_prune` mỏng thời kỳ đầu). ⚠️ **Vẫn KHÔNG tự cutover** — đây là parking NEUTRAL
-production, và diff 2014-2015 sẽ đổi chuỗi NAV backtest (liên quan re-pin R3 §5), cần người duyệt.
+LIVE (rebal 2026-05-05) GIỐNG HỆT** ⇒ cutover P2 hôm nay là **no-op với rổ hiện tại**. ⚠️ **Vẫn
+KHÔNG tự cutover** — đây là parking NEUTRAL production, và diff lịch sử sẽ đổi chuỗi NAV backtest
+(liên quan re-pin R3 §5), cần người duyệt.
+
+##### ⚠️ ĐÍNH CHÍNH PHẠM VI DIFF (job `Taylor_20260722_070547`) — diff KHÔNG chỉ ở 2014-15
+
+Bảng trên chỉ lấy mẫu 10 mốc rời rạc, dễ bị đọc thành "diff chỉ ở 2014-2015" (prompt dispatch của
+job cutover đã tóm tắt sai đúng theo hướng đó). Quét **LIÊN TỤC MỌI mốc rebal 2021-06 → 2026-07**
+(`UNIVERSE_SOURCE` prune vs pit, cấu hình production q2m5/gate3/namecap):
+
+| Mốc rebal | Khác? | VÀO | RA |
+|---|---|---|---|
+| 2021-06-01 | 1/30 | ITA | PLX |
+| 2021-08-05 | 1/30 | ITA | KDH |
+| 2022-02-07 | 1/30 | ITA | FPT |
+| 2022-05-05 | 2/30 | APH, ITA | MSB, VGT |
+| **2022-08-05 → 2026-05-05 (16 mốc liên tiếp)** | **0** | — | — |
+
+⇒ **Mốc diff CUỐI CÙNG là 2022-05-05.** Từ 2022-08-05 tới nay (16 mốc liên tiếp, gồm rổ ĐANG LIVE)
+rổ giống hệt từng mã. Hàm ý: (a) cutover an toàn với tiền thật hôm nay — đúng cơ sở user đã duyệt;
+(b) nhưng chuỗi NAV backtest 2021-2022 **sẽ đổi** ⇒ re-pin R3 (§5) vẫn là việc còn nợ, không được
+coi là đã đóng.
+
+*Quan sát cần người đọc:* mã VÀO ở 3/4 mốc là **ITA** — đúng loại "mã rule-only" mà `ticker_prune`
+curation loại và quant-skeptic từng cảnh báo là curation CÓ mang thông tin thật. `universe_pit_q`
+gắn ITA cờ **`QUALITY_OK`** ở cả 2021-06-01 lẫn 2022-05-05 ⇒ golden floor hiện có **không** bắt
+được ca này. Không tự xử lý trong job cutover (đúng Q9: không thêm ngưỡng chất lượng vào tầng
+universe); ghi lại để tầng chiến lược/§3.2b cân nhắc.
 
 #### P3 — lens D1 RE_BACKLOG (ICB-8633, **bất động sản**, không phải ngân hàng) · **DIFF LỚN**
 
@@ -568,6 +593,24 @@ Hai điều đọc được, ngược chiều nhau:
 ⇒ **P3 CHỜ NGƯỜI DUYỆT.** Không cutover trong job này dù §4.2 từng xếp nó "rủi ro thấp" — số đo bác
 bỏ ước lượng đó. *Giới hạn phép đo:* chỉ đối chiếu nhánh `tav2_bq.ticker` của UNION; nhánh fallback
 `ticker_1m` (chỉ bổ sung phiên tươi nhất) không đo — không ảnh hưởng kết luận ở các mốc lịch sử.
+
+#### P2 — `custom_basket.py` · **ĐÃ CUTOVER 2026-07-22** (job `Taylor_20260722_070547`, user duyệt)
+
+**CHẠM PRODUCTION THẬT** — custom30V là parking book NEUTRAL đang sống của SpaceX/ZaloPay.
+3 chỗ đọc `ticker_prune` (`select_members`, `build_pit`, nhánh sector-cap `mktcap`) → `universe_pred()`
+đọc `tav2_mike.universe_pit_q` **theo NGÀY** (bỏ luôn look-ahead `DISTINCT ticker`-ever của nhánh cũ).
+Hằng số module-level `UNIVERSE_SOURCE = "pit"` — rollback bằng 1 chữ, nhánh `prune` giữ nguyên.
+**Fail-safe §4.3**: `assert_universe_covers()` chạy TRƯỚC truy vấn đầu tiên, thiếu ngày → `RuntimeError`,
+**tuyệt đối không** tự fallback `ticker_prune` (thiếu ngày mà im lặng sẽ ra "rổ rỗng" thay vì lỗi to).
+Kèm theo: `sync_bq_cache.py` cache `universe_pit_q` + `bq_local_cache.py` dịch tham chiếu `tav2_mike.*`
+— nếu không, mọi lần build qua cache sẽ fail cứng (đúng thiết kế, nhưng làm hỏng đường chạy 23:45).
+
+Selfcheck `universe_pit_p2_selfcheck.py` **13/13 PASS**: 7/7 mốc rebal trong 600 ngày byte-identical
+(gồm mốc LIVE 2026-05-05) · thiếu ngày → dừng có lỗi · không có đường fallback · nhánh cache == BigQuery.
+Selfcheck cũ: `route_selector` PASS; `dcf_selector` FAIL **1 test có sẵn từ trước** (đo lại với
+`UNIVERSE_SOURCE="prune"` cho ra đúng FAIL đó ⇒ không do cutover); `eyrisk_selector`/`v4final_selector`
+FAIL các test dạng "identical to **pre-edit** (`git show HEAD:custom_basket.py`)" — fail **do bản
+cutover chưa commit**, sau khi commit HEAD đã chứa thay đổi thì cả hai trở lại PASS (đã verify).
 
 #### P1 — `trading_bot/due_diligence.py` · **ĐÃ CUTOVER** (rủi ro thấp nhất, §4.2)
 
@@ -683,7 +726,7 @@ kiểm chứng trong 2-3 tuần tới.
 | **G1** | `bin/build_universe_pit.py` + selfcheck (idempotent, atomic, B8) | 1-1,5 phiên | Cao | — |
 | **G2** | Backfill 2000→nay (compute rẻ: 215MB) + **kiểm định**: chạy lại bảng §2.2 với median-60-phiên tự tính, ~30 mốc | **1 phiên** (compute ~phút, kiểm định chiếm hết) | Cao | G1 |
 | **G2b** | ✅ **XONG + ĐÃ ĐÓNG 2026-07-22.** Đo xong (§3.2b-G2b) → escalate → **user chốt A′ + Q-C, không Q-B** → **Q-C đã implement (§3.2c), selfcheck PASS**. **Cổng cứng §3.2b/Q9 MỞ** (cổng CAPIT §4.4 vẫn đóng riêng) | 0,5-1 phiên | Trung bình | G2 |
-| **G3** | 🔶 **ĐANG DỞ 2026-07-22**: **P1 cutover XONG** (`due_diligence.py` → `universe_pit_q`, selfcheck 20/20). **P2/P3 mới chỉ XUẤT A/B DIFF — CHỜ NGƯỜI DUYỆT, chưa cutover** (§4.3: diff phải được đọc trước) | 1 phiên | Trung bình (phụ thuộc diff rổ lớn hay nhỏ) | G2 |
+| **G3** | 🔶 **ĐANG DỞ 2026-07-22**: **P1 XONG** (`due_diligence.py`, selfcheck 20/20) · **P2 XONG** (`custom_basket.py` → `universe_pit_q`, user duyệt, selfcheck 13/13, rổ LIVE byte-identical) · **P3 vẫn CHỜ NGƯỜI DUYỆT** (diff lớn, §4.3b) | 1 phiên | Trung bình | G2 |
 | **G4** | **Re-hiệu chuẩn breadth CAPIT (§4.4)** — chuỗi 2014→nay, tìm `WASHOUT_GATE'` bảo toàn tập ngày fire | 1 phiên | **Thấp** — có thể không tồn tại ngưỡng bảo toàn ⇒ escalate | G2 |
 | **G5** | Shadow P4/P5 ≥10 phiên (chi phí *thời gian lịch*, gần như không tốn effort) | ~2 tuần lịch, 0,5 phiên | Cao | G4 |
 | **G6** | Re-pin R3: 2 lần chạy (control + pit) theo **đúng lệnh pin + `$DNA_PYEXE`** (`coding_guidelines.md` §8) | 1-2 phiên + runtime | **Thấp** — chưa đo runtime thật của lệnh pin trong job này | G2 |
@@ -890,11 +933,14 @@ DT5G 4-gate), nhưng đây là số cần nhớ khi re-pin R3 và khi hiệu chu
 
 1. ✅ **G2b XONG + ĐÓNG** (2026-07-22): đo → escalate → user chốt **A′ + Q-C** → Q-C implement
    (§3.2c). **Cổng cứng §3.2b/Q9 đã MỞ.**
-2. 🔶 **G3 đang dở**: **P1 đã cutover** (`due_diligence.py`, §4.2). **P2/P3 CHỜ NGƯỜI DUYỆT DIFF** —
-   diff đã xuất (§4.3b), **tuyệt đối không tự cutover** dù diff nhỏ (P2 = parking NEUTRAL production,
-   P3 = sector-lens của CAPIT).
-3. **G4** (CAPIT breadth, §4.4) — chưa làm, **phụ thuộc P2 cutover xong**. Cổng CAPIT vẫn ĐÓNG.
-4. Re-pin R3 (§5.1) — chưa làm.
+2. 🔶 **G3 đang dở**: **P1 đã cutover** (`due_diligence.py`, §4.2) · **P2 đã cutover 2026-07-22**
+   (`custom_basket.py`, user duyệt — CHẠM TIỀN THẬT, rổ LIVE byte-identical, rollback 1 chữ
+   `UNIVERSE_SOURCE`). **P3 vẫn CHỜ NGƯỜI DUYỆT DIFF** — diff lớn (§4.3b, ±10-17 mã/mốc),
+   **tuyệt đối không tự cutover**.
+3. **G4** (CAPIT breadth, §4.4) — chưa làm; ràng buộc "phụ thuộc P2" nay đã gỡ, nhưng **cổng CAPIT
+   vẫn ĐÓNG** cho tới khi có quyết định riêng.
+4. Re-pin R3 (§5.1) — **chưa làm, và P2 vừa làm nó cần thiết hơn**: rổ custom30V đổi ở 4 mốc rebal
+   2021-06 → 2022-05 (§4.3b đính chính) ⇒ chuỗi NAV backtest 2021-2022 sẽ khác bản đang pin 27,84%.
 4. **Không cần dispatch quant-skeptic vòng 2** cho các sửa đổi tài liệu (chúng chỉ **hạ** mức tự tin
    và **siết** thêm cổng, không nới lỏng gì). **Cần** skeptic khi: (a) G2b dẫn tới đề xuất thêm tham
    số chất lượng vào tầng universe (Q-B), hoặc (b) trước cutover bất kỳ consumer chạm tiền thật.

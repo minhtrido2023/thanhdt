@@ -1814,3 +1814,69 @@
 ## Consolidation 2026-07-22T07:07:01Z
 - [2026-07-22T07:05:17Z] Mike/finding — 3-viec-daily-cleanup-status: {"task1_ops_health_check_188": "DA XONG TU 07-21 (khong phai con mo nhu working memory ghi) - fix _resolved() commit a268476/a59cd85, arch-reviewer CONFIRMED. Working memory bi carry-forward stale claim, da sua.", "task2_nav_2account_selfcheck": "MOI - bin/nav_scripts_2account_selfcheck.py, commit 8d07529, test that voi du lieu that 07-20/07-21/07-22, PASS - khong co dau hieu lan account.", "task3_crontab_cleanup": "DA XONG TU TRUOC 07-22 (dong comment lac hau da bi xoa khoi crontab that, khong ro ai/khi nao - khong tim thay commit/log ghi lai). Khong con viec gi de ap dung.", "new_finding_orthogonal": "Tai tinh daily_nav_snapshot.py/verify_account_snapshot.py cho 1 ngay QUA KHU sau khi co giao dich MOI se SAI (cuon theo vi the HIEN TAI) - SpaceX bi tu chan boi NAV_SANITY_MAX_PCT khi tai tinh 07-20/07-21 sau CAPIT 07-21. KHONG phai loi lan account, la gioi han rieng cua co che tai tinh-ngay-cu. Chua fix, ghi nhan de biet."}
 - [2026-07-22T07:06:47Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+
+## Consolidation 2026-07-22T08:07:01Z
+- [2026-07-22T07:07:48Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:08:49Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:09:19Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "in_progress", "note": "P2: da trace 3 cho + phat hien phu thuoc BQ_LOCAL_CACHE (universe_pit_q chua co trong cache) — dang thiet ke cutover + ho tro cache"}
+- [2026-07-22T07:09:49Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:10:49Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:11:49Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:12:49Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:13:49Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:14:49Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:15:49Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:16:50Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:17:50Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:18:50Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:19:50Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:20:23Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "in_progress", "note": "P2 cutover code xong, selfcheck PASS (7/7 moc rebal byte-identical + fail-safe + cache). Dang chay custom30_history that (ghi bang scratch) de xac nhan buoc production"}
+- [2026-07-22T07:20:50Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:21:50Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:22:50Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:23:51Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:24:51Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:25:51Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:26:51Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:27:51Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:28:51Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 23, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:29:51Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:30:51Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 25, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:31:51Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 26, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:32:51Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 27, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:33:51Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 28, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:34:51Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 29, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:35:52Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 30, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:36:52Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 31, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:37:04Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "in_progress", "note": "P2: phien truoc da de lai cutover uncommitted (custom_basket + selfcheck + cache sync universe_pit_q). Dang chay selfcheck de xac minh, khong tin san."}
+- [2026-07-22T07:37:52Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 32, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:38:52Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 33, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:39:53Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 34, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:40:53Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 35, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:41:53Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 36, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:42:53Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 37, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:43:53Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 38, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:44:53Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 39, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:45:53Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 40, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:46:53Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 41, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:47:53Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 42, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:48:18Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "in_progress", "note": "P2 selfcheck rieng PASS 13/13 (7/7 ro byte-identical gom LIVE 05-05). Nhung dcf_selector + eyrisk selfcheck co FAIL — dang do baseline prune de biet co phai do cutover khong. KHONG tu sua."}
+- [2026-07-22T07:48:53Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 43, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:49:53Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 44, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:50:53Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 45, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:51:54Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 46, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:52:54Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 47, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:53:54Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 48, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:54:54Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 49, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:55:54Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 50, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:56:54Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 51, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:57:54Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 52, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:58:54Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 53, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T07:59:54Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 54, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T08:00:54Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 55, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T08:01:54Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 56, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T08:02:54Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 57, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T08:03:55Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 58, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T08:04:55Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 59, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T08:05:55Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 60, "job_id": "Taylor_20260722_070547", "source": "watcher"}
+- [2026-07-22T08:06:55Z] Taylor/heartbeat — Taylor_20260722_070547: {"status": "still_running", "elapsed_min": 61, "job_id": "Taylor_20260722_070547", "source": "watcher"}
