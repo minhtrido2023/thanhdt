@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v1303)
+# Mike fleet — context pack (v1304)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-22T01:27:49] Wags/answer — retro-pattern-recurring-headless-wake-assumption-3: {"answered_by": "Wags (fleet-ops, in-mandate: coordination tooling)", "status": "CLOSED-BY-FIX", "finding": "watchdog.sh DID already alert once for Wags_2026071 …
 - [2026-07-22T01:27:49] Wags/answer — retro-pattern-recurring-cross-account-contamination-2: {"answered_by": "Wags (fleet-ops; rule+audit half only)", "status": "PARTIALLY-CLOSED", "done": ["kb/coding_guidelines.md §12 written: filter by account_no as t …
 - [2026-07-22T01:28:21] Wags/finding — wags-fix: coord-2026-07-22 — 2 question tồn đọng đóng bằng fix thật (job-reap + rule §12), 25 zombie job record dọn sạch: {"job": "Wags_20260722_012010", "dispatch_from": "Mike", "status": "DONE", "triage": "2 question flagged, cả 2 GENUINE (không phải checker false-positive lần nà …
 - [2026-07-22T01:33:32] arch-reviewer/verification — ARCH-REVIEW: wags-fix: coord-2026-07-22 — 2 question tồn đọng đóng bằng fix thật (job-reap + rule §12), 25 zombie job record dọn sạch: {"finding_topic": "wags-fix coord-2026-07-22: job-reap + ops_health check 4b + coding_guidelines §12", "verdict": "NEEDS_CHANGES", "confidence": "high", "summar …
@@ -11,6 +10,7 @@
 - [2026-07-22T03:45:34] Taylor/finding — Phuong an thay the ticker_prune — universe_pit: rule tai tao curation recall 97-99%, CAN re-pin R3: {"doc": "mike/agents/Taylor/research/ticker_prune_replacement_plan.md", "canh_bao_nguon": "File QA bq_admin (agents/Taylor/research/ticker_prune_universe_QA_bq_ …
 - [2026-07-22T03:47:23] Taylor/answer — weight_base LAG — XAC MINH XONG, DONG van de, KHONG sua gi: {"ket_luan": "KHONG co rui ro that. Dong van de, khong them field weight_base, khong sua code/prompt.", "trace_full": [{"emit": "deploy_golive_dt5g_v4/golive_re …
 - [2026-07-22T03:48:39] Winston/finding — universe_pit KHA THI VAN HANH — chi phi ~0, curation cua bq_admin KHONG mang thong tin (prune la tap con thuc su), nhung ticker CUNG bi ghi de lich su: {"topic": "Kha thi VAN HANH cho universe_pit (bo ticker_prune) — data-ops lens, job pair voi Taylor_20260722_033547", "doc": "mike/agents/Winston/universe_pit_o …
+- [2026-07-22T04:05:27] quant-skeptic/verification — ❌ REFUTED VERIFY: Phuong an thay the ticker_prune — universe_pit: rule tai tao curation recall 97-99%, CAN re-pin R3: {"finding_topic": "Phuong an thay the ticker_prune — universe_pit: rule tai tao curation recall 97-99%, CAN re-pin R3", "verdict": "REFUTED", "confidence": "hig …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -107,11 +107,12 @@ sót lệnh đang khớp dở); đếm đúng theo size thật (≥4% book) ra *
 toàn. Backtest đã vá cổng rò (`count_inflight_slots`, commit `f974459`, default OFF = byte-
 identical, không cần quant-skeptic vì không đổi hành vi live).
 
-⚠️ **Rủi ro mới phát hiện, CHƯA XÁC MINH** — `golive_recommend_v23.py:506-510` emit
-`weight_pct=10/8` cho LAG không kèm field BASE (chỉ có trong header MD, không có trong CSV). Nếu
-downstream hiểu nhầm base = tổng NAV thay vì NAV book LAG (0,50×NAV hiện tại), size sẽ lớn ~1,5x
-ý đồ. Cần kiểm tra 1 plan LAG thật (07-24 TRC) + cân nhắc thêm field `weight_base="LAG_BOOK"` rõ
-ràng. Không khẩn cho 07-24 (chỉ 1 tên, cách trần 12 rất xa).
+**✅ ĐÃ XÁC MINH 2026-07-22 (job `Taylor_20260722_034554`) — `weight_base` KHÔNG có rủi ro thật,
+ĐÓNG, không sửa gì.** Trace đủ 3 kênh tiêu thụ `weight_pct` LAG: hiển thị/telegram (đúng, có ghi
+chú base), archive-BQ (trung tính, không nhân NAV), DollarBill (đúng — MD tự ghi rõ base 2 chỗ).
+Bằng chứng thật: plan `SpaceX_2026-07-22.json` tính đúng LAG book ~463M = active_nav × w_lag_target,
+không phải NAV tổng. Không có code nào khác đọc thẳng CSV rồi nhân NAV — thêm field sẽ chỉ gây
+rối không cần thiết.
 
 ## Due-diligence MẶC ĐỊNH cho MỌI ứng cử viên mua — mandate mới (user, 2026-07-21)
 User chỉ đạo: bất kỳ mã nào trở thành ứng cử viên mua (mọi book: BAL/LAG/CAPIT/DC-book/

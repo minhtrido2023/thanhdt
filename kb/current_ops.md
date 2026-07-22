@@ -92,11 +92,12 @@ sót lệnh đang khớp dở); đếm đúng theo size thật (≥4% book) ra *
 toàn. Backtest đã vá cổng rò (`count_inflight_slots`, commit `f974459`, default OFF = byte-
 identical, không cần quant-skeptic vì không đổi hành vi live).
 
-⚠️ **Rủi ro mới phát hiện, CHƯA XÁC MINH** — `golive_recommend_v23.py:506-510` emit
-`weight_pct=10/8` cho LAG không kèm field BASE (chỉ có trong header MD, không có trong CSV). Nếu
-downstream hiểu nhầm base = tổng NAV thay vì NAV book LAG (0,50×NAV hiện tại), size sẽ lớn ~1,5x
-ý đồ. Cần kiểm tra 1 plan LAG thật (07-24 TRC) + cân nhắc thêm field `weight_base="LAG_BOOK"` rõ
-ràng. Không khẩn cho 07-24 (chỉ 1 tên, cách trần 12 rất xa).
+**✅ ĐÃ XÁC MINH 2026-07-22 (job `Taylor_20260722_034554`) — `weight_base` KHÔNG có rủi ro thật,
+ĐÓNG, không sửa gì.** Trace đủ 3 kênh tiêu thụ `weight_pct` LAG: hiển thị/telegram (đúng, có ghi
+chú base), archive-BQ (trung tính, không nhân NAV), DollarBill (đúng — MD tự ghi rõ base 2 chỗ).
+Bằng chứng thật: plan `SpaceX_2026-07-22.json` tính đúng LAG book ~463M = active_nav × w_lag_target,
+không phải NAV tổng. Không có code nào khác đọc thẳng CSV rồi nhân NAV — thêm field sẽ chỉ gây
+rối không cần thiết.
 
 ## Due-diligence MẶC ĐỊNH cho MỌI ứng cử viên mua — mandate mới (user, 2026-07-21)
 User chỉ đạo: bất kỳ mã nào trở thành ứng cử viên mua (mọi book: BAL/LAG/CAPIT/DC-book/
