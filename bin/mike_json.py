@@ -396,6 +396,15 @@ def cmd_job_reap(a):
         if not job_id:
             continue      # no id -> can't address the record safely; leave it alone
         over_h = (n - dl) / 3600.0
+        if not dry:
+            # compare-and-set: the snapshot above may be stale by seconds — if the wrapper
+            # wrote a terminal status in the meantime, do NOT stamp 'orphaned' over it.
+            try:
+                with open(_job_path(jobs_dir, job_id), encoding="utf-8") as f:
+                    if json.load(f).get("status") != "running":
+                        continue
+            except Exception:
+                continue
         print("orphaned %-26s %s->%s  %.1fh past deadline" % (
             job_id, o.get("from", "?"), o.get("to", "?"), over_h))
         reaped += 1
@@ -404,6 +413,12 @@ def cmd_job_reap(a):
                          "result_summary=reaped by jobs.sh reap: dispatcher died without "
                          "writing a terminal status (%.1fh past deadline, pid dead/absent)"
                          % over_h])
+            # watchdog's per-job debounce marker is dead weight once the record is closed
+            om = os.path.join(os.path.dirname(jobs_dir.rstrip("/")), "..", "state", "overdue", job_id)
+            try:
+                os.remove(os.path.normpath(om))
+            except Exception:
+                pass
     print("%d orphaned job record(s)%s" % (reaped, " (dry-run, not written)" if dry else " closed"))
 
 

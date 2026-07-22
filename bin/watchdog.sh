@@ -146,6 +146,12 @@ print(d.get('status','?'), d.get('deadline',0), d.get('from','?'), d.get('to','?
       "$ROOT/bin/notify_thread.sh" "⚠️ **Job OVERDUE** \`$_jid\` ($_jfrom→$_jto, ${_jmin}min quá hạn). Kiểm tra: \`bin/jobs.sh status $_jid\`" "$_tid" 2>/dev/null || true
     fi
   done
+
+  # Dọn THẬT (không chỉ alert): bản ghi quá hạn >1h mà pid đã chết và không còn heartbeat
+  # → status=orphaned. Trước 2026-07-22 reap chỉ chạy khi có người gõ tay nên board tích
+  # zombie (25 bản ghi) làm job kẹt MỚI vô hình giữa đống cũ. Compare-and-set trong
+  # mike_json.py bảo đảm không đè lên status terminal do wrapper vừa kịp ghi.
+  python3 "$ROOT/bin/mike_json.py" job-reap "$JOBS_DIR" 3600 >> "$LOG" 2>&1 || true
 fi
 
 # --- Account-wide 5-hour usage watch (shared ceiling for the whole fleet). Log once on the

@@ -156,20 +156,33 @@ else:
 # 4b. Job board: bản ghi kẹt status=running vì tiến trình dispatch chết giữa chừng
 # (sự cố 2026-07-19: Wags_20260719_173512 kẹt 'running' 2 ngày, không ai phát hiện vì
 # job board đã đầy zombie cũ). Chỉ ĐỌC ở đây (--dry-run) — dọn thật bằng `bin/jobs.sh reap`.
+# KHÔNG fail-OPEN: detector hỏng (sai path/python lỗi/timeout) phải KÊU, không được nuốt
+# exception rồi in ✅ — đúng failure mode mà check này sinh ra để chặn (arch-reviewer
+# NEEDS_CHANGES coord-2026-07-22).
+_reap_out, _reap_err = [], ""
 try:
-    _reap_out = subprocess.run(
+    _p = subprocess.run(
         ["python3", os.path.join(wc_root, "mike", "bin", "mike_json.py"),
          "job-reap", os.path.join(wc_root, "mike", "bus", "jobs"), "3600", "--dry-run"],
-        capture_output=True, text=True, timeout=60).stdout.splitlines()
-except Exception:
-    _reap_out = []
-orphan_ids = [l.split()[1] for l in _reap_out if l.startswith("orphaned ")]
-if orphan_ids:
-    W(f"{len(orphan_ids)} job kẹt status=running dù tiến trình đã chết (mới nhất: "
-      f"{orphan_ids[0]}) — chạy `bin/jobs.sh reap` để đóng. Job MỚI xuất hiện ở đây nghĩa là "
-      f"caller chết trước khi ghi kết quả → dùng bin/trace.sh xem việc có thực sự xong không.")
+        capture_output=True, text=True, timeout=60)
+    if _p.returncode != 0 or _p.stderr.strip():
+        _reap_err = (_p.stderr.strip() or f"exit={_p.returncode}")[:200]
+    else:
+        _reap_out = _p.stdout.splitlines()
+except Exception as e:
+    _reap_err = f"{type(e).__name__}: {e}"[:200]
+
+if _reap_err:
+    W(f"Job board: KHÔNG kiểm tra được (job-reap --dry-run lỗi: {_reap_err}) — không kết "
+      f"luận được board sạch; chạy tay `bin/jobs.sh reap --dry-run` để xem.")
 else:
-    OK("Job board: không có bản ghi nào kẹt status=running quá hạn.")
+    orphan_ids = [l.split()[1] for l in _reap_out if l.startswith("orphaned ")]
+    if orphan_ids:
+        W(f"Job board: {len(orphan_ids)} job kẹt status=running dù tiến trình đã chết (mới nhất: "
+          f"{orphan_ids[0]}) — chạy `bin/jobs.sh reap` để đóng. Job MỚI xuất hiện ở đây nghĩa là "
+          f"caller chết trước khi ghi kết quả → dùng bin/trace.sh xem việc có thực sự xong không.")
+    else:
+        OK("Job board: không có bản ghi nào kẹt status=running quá hạn.")
 
 # 5. Câu hỏi (event_type=question) chưa được trả lời trong 48h gần nhất
 # 2 pass: answers gom TOÀN CỤC trước (append_event.sh ghi event vào file của TÁC GIẢ —
@@ -440,8 +453,11 @@ if [ "${WARN_COUNT:-0}" -gt 0 ]; then
   # ~2 job/ngày (bounded, không phải bão). Harm THẬT đã sửa ở tầng matching (_resolved() check
   # #5): false-positive — question ĐÃ đóng bằng answer/decision hậu-tố '-closed'/'-confirmed'
   # trước đây báo pending vĩnh viễn nên spawn Wags vô nghĩa — nay tự dọn, không cần chạm dispatch.
-  COORD_WARN="$(echo "$MSG" | grep -E '⚠️|❌' | grep -E "Circuit breaker|câu hỏi \(question\)" || true)"
-  OTHER_WARN="$(echo "$MSG" | grep -E '⚠️|❌' | grep -vE "NOT_APPROVED|KHÔNG TÌM THẤY|Circuit breaker|câu hỏi \(question\)" || true)"
+  # "Job board:" cũng là FLEET-WIDE (đọc bus/jobs toàn cục) → phải nằm ở COORD_WARN, nếu
+  # không nó rơi vào OTHER_WARN → ops_autofix label per-account, chạy lặp theo số account
+  # cho một tình trạng toàn cục (arch-reviewer NEEDS_CHANGES coord-2026-07-22).
+  COORD_WARN="$(echo "$MSG" | grep -E '⚠️|❌' | grep -E "Circuit breaker|câu hỏi \(question\)|Job board:" || true)"
+  OTHER_WARN="$(echo "$MSG" | grep -E '⚠️|❌' | grep -vE "NOT_APPROVED|KHÔNG TÌM THẤY|Circuit breaker|câu hỏi \(question\)|Job board:" || true)"
   if [ -n "$COORD_WARN" ]; then
     # Label KHÔNG kèm ACCOUNT: circuit breaker + question tồn đọng là trạng thái FLEET-WIDE
     # (đọc state/circuit/* + bus/inbox/* toàn cục, nội dung y hệt cho mọi account) — label
