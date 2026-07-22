@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v1340)
+# Mike fleet — context pack (v1341)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-22T12:14:38] DollarBill/answer — plan-ZaloPay-2026-07-23-sent: {"job": "DollarBill_20260722_120310", "status": "done", "plan_file": "data/trade_plans/plan_ZaloPay_2026-07-23.json", "discord_thread": "1521183164364754974", " …
 - [2026-07-22T12:19:43] DollarBill/decision — plan-2026-07-23: {"account": "SpaceX", "plan_date": "2026-07-23", "state": "NEUTRAL(3)", "action": "CAPIT_TOPUP_CONDITIONAL", "orders": 4, "conditional_on": "Trứng vàng = 302M x …
 - [2026-07-22T12:24:51] Mike/decision — trung-vang-fully-withdrawn-capit-complete: {"note": "User bao Trung vang da rut het tren CA 2 tai khoan (SpaceX + ZaloPay), CAPIT da mua het.", "verified": "Journal that xac nhan ca 5 lenh CAPIT (PVT/SAB …
 - [2026-07-22T13:04:30] Taylor/finding — G6 A/B live-BQ KHONG ket luan duoc: 2 chan control giong het nhau lech 0,37pp > delta pit 0,49pp: {"job": "Taylor_20260722_112850", "phat_hien": "Hai lan chay CONTROL (UNIVERSE_SRC=prune) hom nay tren LIVE BQ, CUNG config CUNG lenh pin, cho ket qua KHAC NHAU …
@@ -11,6 +10,7 @@
 - [2026-07-22T15:23:47] Taylor/finding — G6: sua loi tai lieu lenh pin BQ_LOCAL_CACHE + khoi dong lai A/B DUNG tren cache dong cung: {"job": "Taylor_20260722_151919", "viec1_registry_fix": {"commit": "c592a74", "file": "data/results_registry.md", "sua": "BQ_LOCAL_CACHE=1 -> BQ_LOCAL_CACHE=dat …
 - [2026-07-22T15:48:29] Taylor/finding — DONG du an ticker_prune->universe_pit: G6 re-pin xong (pit 27,16% vs prune 27,95% cung vintage, -0,79pp), P1-P4 cutover xong, so chinh thuc VAN 27,84%: {"job": "Taylor_20260722_154334", "trang_thai": "DU AN ticker_prune -> universe_pit DA DONG HOAN TOAN (2026-07-22)", "commits": {"WorkingClaude": "c48f9a7 (data …
 - [2026-07-22T16:14:56] quant-skeptic/verification — ✅ CONFIRMED VERIFY: ad-hoc claim: {"finding_topic": "CUTOVER R3 CHINH THUC sang universe_pit (2026-07-22, job Taylor_20260722_155549) — pin 27.16%/1.81/-18.1%/1.50", "verdict": "CONFIRMED", "con …
+- [2026-07-22T16:18:21] Taylor/decision — CUTOVER R3 CHINH THUC sang universe_pit: pin moi 27,16%/1,81/-18,1%/1,50 (quant-skeptic CONFIRMED high): {"job": "Taylor_20260722_155549", "quyet_dinh": "User quyet dinh cutover baseline R3 chinh thuc sang universe_pit (2026-07-22) — buoc cuoi du an ticker_prune->u …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -374,8 +374,11 @@ Vận hành chiến lược **production V2.4**, **go-live 2026-07-01**, tài kh
   `UNIVERSE_SRC` default = `pit` trong `pt_v23_audit_2014.py`). threads=1, self-check 0 VND.
   **Số lịch sử (KHÔNG dùng để trích dẫn mới)**: 27.84%/1.84/−18.2%/1.53 (pin 07-12, `ticker_prune`);
   cùng vintage cache 07-22 `ticker_prune` cho 27.95%/1.85/−18.4%/1.52 ⇒ Δ universe = **−0,79pp CAGR**,
-  đúng hướng pre-register (khử curation/look-ahead bias của `ticker_prune`). Chi tiết:
-  `data/results_registry.md` (mục 2026-07-22 RE-PIN + CUTOVER).
+  đúng hướng pre-register (khử curation/look-ahead bias của `ticker_prune`). quant-skeptic **CONFIRMED
+  (high)**. ⚠️ Nhãn đúng khi trích dẫn: **MIXED-universe** — `universe_pit` cho *cổng quyết định*,
+  `ticker_prune` vẫn cho *CAPIT pool / breadth / maturity* (~10 vị trí, cutover riêng). Lỗi fidelity
+  `liq<=0` vẫn MỞ ⇒ khoảng kỳ vọng trung thực vẫn **[~27,2%; ~31,3%]**, anchor DD **~−30%**. Chi tiết:
+  `data/results_registry.md` (mục 2026-07-22 CUTOVER R3 CHÍNH THỨC).
 - Bootstrap 5th-pct: CAGR 18.6%, DD −28.6% (anchor DD ~−29%, KHÔNG phải −18%).
 - **NEUTRAL parking custom30V = phần tin cậy nhất: +7.4pp Full.** (30 mã, cap 0.10)
 - Bull parking: NAV ≥150B. **(30, 0.15) = OVERFIT**, walk-forward bác.
