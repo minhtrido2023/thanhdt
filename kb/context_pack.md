@@ -1,4 +1,4 @@
-# Mike fleet — context pack (v1338)
+# Mike fleet — context pack (v1339)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
@@ -369,10 +369,13 @@ Vận hành chiến lược **production V2.4**, **go-live 2026-07-01**, tài kh
 - = **V2.3A + custom30V parking (NEUTRAL) + gated-overflow (bear-washout) + HAG eq_flag fix**.
 - 2 book: **BAL** (momentum SIGNAL_V11, yieldcombo: 1/PE + 1/PCF) + **LAG** (PEAD/earnings drift).
 - Allocator w_LAG: {CRISIS 50 / BEAR 0 / NEUTRAL-BULL-EXBULL 65}, band ±10pp.
-- **R3 NEUTRAL-only @50B: CAGR 27.84% / Sharpe 1.84 / DD −18.2% / Calmar 1.53** (pin threads=1,
-  re-pin 2026-07-12 sau khi đóng kênh MOM_N/MOM_S trong TIER_BAL — commit `4fbd492`, quant-skeptic
-  CONFIRMED; xem `data/results_registry.md` + `plan_close_mom_20260712.md`). Số cũ 28.05%/28.82% đã
-  lỗi thời qua 2 lần re-pin (DT5G swap 07-11, rồi MOM closure 07-12).
+- **R3 NEUTRAL-only @50B: CAGR 27.16% / Sharpe 1.81 / DD −18.1% / Calmar 1.50** — pin CHÍNH THỨC từ
+  **2026-07-22**, đo trên **`universe_pit`** (bảng đội tự sở hữu, point-in-time, không look-ahead;
+  `UNIVERSE_SRC` default = `pit` trong `pt_v23_audit_2014.py`). threads=1, self-check 0 VND.
+  **Số lịch sử (KHÔNG dùng để trích dẫn mới)**: 27.84%/1.84/−18.2%/1.53 (pin 07-12, `ticker_prune`);
+  cùng vintage cache 07-22 `ticker_prune` cho 27.95%/1.85/−18.4%/1.52 ⇒ Δ universe = **−0,79pp CAGR**,
+  đúng hướng pre-register (khử curation/look-ahead bias của `ticker_prune`). Chi tiết:
+  `data/results_registry.md` (mục 2026-07-22 RE-PIN + CUTOVER).
 - Bootstrap 5th-pct: CAGR 18.6%, DD −28.6% (anchor DD ~−29%, KHÔNG phải −18%).
 - **NEUTRAL parking custom30V = phần tin cậy nhất: +7.4pp Full.** (30 mã, cap 0.10)
 - Bull parking: NAV ≥150B. **(30, 0.15) = OVERFIT**, walk-forward bác.
