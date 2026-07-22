@@ -23,12 +23,12 @@ def _row(**kw):
 
 class Unit(unittest.TestCase):
     def setUp(self):
-        self._lr, self._ip, self._an = dd._latest_row, dd._in_prune, dd._anomaly_note
-        dd._in_prune = lambda t, a: (True, "2026-07-20")
+        self._lr, self._ip, self._an = dd._latest_row, dd._in_universe, dd._anomaly_note
+        dd._in_universe = lambda t, a: (True, "2026-07-20", "QUALITY_OK")
         dd._anomaly_note = lambda t, a: ""
 
     def tearDown(self):
-        dd._latest_row, dd._in_prune, dd._anomaly_note = self._lr, self._ip, self._an
+        dd._latest_row, dd._in_universe, dd._anomaly_note = self._lr, self._ip, self._an
 
     def _dd(self, row, book="BAL", ctx=None):
         dd._latest_row = lambda t, a: row
@@ -55,9 +55,20 @@ class Unit(unittest.TestCase):
         self.assertIn("40% ADV", s)
         self.assertIn("🔴", s)
 
-    def test_05_outside_prune(self):
-        dd._in_prune = lambda t, a: (False, "2025-12-31")
-        self.assertIn("NGOÀI ticker_prune", self._dd(_row()))
+    def test_05_outside_universe(self):
+        dd._in_universe = lambda t, a: (False, "2025-12-31", None)
+        self.assertIn("NGOÀI universe_pit", self._dd(_row()))
+
+    def test_05b_universe_unknown_no_fallback(self):
+        # đọc lỗi -> "n/a", KHÔNG được kết luận NGOÀI, KHÔNG được fallback ticker_prune (§4.3)
+        dd._in_universe = lambda t, a: (None, None, None)
+        s = self._dd(_row())
+        self.assertIn("universe_pit: n/a", s)
+        self.assertNotIn("NGOÀI", s)
+
+    def test_05c_quality_flag_shown(self):
+        dd._in_universe = lambda t, a: (True, "2026-07-20", "RATING_FAIL")
+        self.assertIn("cờ chất lượng RATING_FAIL", self._dd(_row()))
 
     def test_06_pead_negative_base(self):
         s = self._dd(_row(NP_P4=-3e9), book="LAG")
@@ -97,7 +108,7 @@ class Unit(unittest.TestCase):
         d = dd.run_due_diligence("XXX", "LAG", {"asof": "2026-07-21", "skip_dcf": True},
                                  as_dict=True)
         self.assertEqual(d["ticker"], "XXX")
-        for k in ("liquidity", "fundamentals", "signal_mechanics", "in_prune"):
+        for k in ("liquidity", "fundamentals", "signal_mechanics", "in_universe", "quality_flag"):
             self.assertIn(k, d)
 
     def test_14_missing_fields(self):
@@ -115,18 +126,20 @@ class Integration(unittest.TestCase):
     def test_20_TMG_dead_liquidity(self):
         s = dd.run_due_diligence("TMG", "LAG", {"asof": self.ASOF})
         self.assertIn("thanh khoản ~0", s)
-        self.assertIn("NGOÀI ticker_prune", s)
+        self.assertIn("NGOÀI universe_pit", s)
 
     def test_21_IVS_thin_and_inflated_surprise(self):
         s = dd.run_due_diligence("IVS", "LAG", {"asof": self.ASOF, "est_value_vnd": 70e6})
         self.assertIn("thanh khoản mỏng", s)
-        self.assertIn("NGOÀI ticker_prune", s)
+        self.assertIn("NGOÀI universe_pit", s)
         self.assertIn("quý LỖ trong nền", s)
 
-    def test_22_TRC_thin_but_in_prune(self):
+    def test_22_TRC_thin_but_in_universe(self):
         s = dd.run_due_diligence("TRC", "LAG", {"asof": self.ASOF})
         self.assertIn("thanh khoản mỏng", s)
-        self.assertNotIn("NGOÀI ticker_prune", s)
+        self.assertNotIn("NGOÀI universe_pit", s)
+        # TRC ở TRONG universe nhưng rating 8L = 4 -> cờ chất lượng phải hiện (Q-C)
+        self.assertIn("cờ chất lượng RATING_FAIL", s)
 
     def test_23_clean_names_no_false_alarm(self):
         for t in ("FPT", "MBB", "VNM"):

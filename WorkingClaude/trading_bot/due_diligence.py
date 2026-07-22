@@ -18,7 +18,10 @@ Nguồn dữ liệu (đã tra mike/kb/data_registry.md — coding_guidelines §9
     Cache sync 23:45 ICT ⇒ trễ tới 1 phiên. CHẤP NHẬN ĐƯỢC ở đây: mọi số dùng là trung vị
     3 tháng / chỉ số quý, 1 phiên lệch không đổi kết luận. TUYỆT ĐỐI không dùng cho ref_price
     (bright-line rule §6: giá trong ngày phải lấy DNSE).
-  - `data/bq_cache/ticker_prune/<year>.parquet` → cờ "có nằm trong universe backtest không".
+  - `tav2_mike.universe_pit_q` (BQ live) → cờ "có nằm trong universe không" + `quality_flag`
+    (Q-C, user chốt 2026-07-22). Cutover P1 §4.2 của `ticker_prune_replacement_plan.md`.
+    Rollback = đặt `UNIVERSE_SOURCE = "prune"` (nhánh cũ `bq_cache/ticker_prune/` giữ nguyên).
+    Đọc lỗi/thiếu ngày → nhãn "n/a", KHÔNG tự fallback về `ticker_prune` (§4.3).
   - `data/anomaly_flags.json` qua anomaly_gate (echo lại, KHÔNG scan lại).
   - DCF/sector-lens qua trading_bot.strategies.format_dcf_check (gọi lại, KHÔNG viết lại).
 
@@ -90,16 +93,69 @@ def _latest_row(ticker, asof):
 
 
 def _in_prune(ticker, asof):
-    """Ticker có nằm trong universe chất lượng ticker_prune (universe mọi backtest pin) không."""
+    """Nhánh CŨ (rollback): membership theo `ticker_prune` từ bq_cache."""
     import pandas as pd
     year = int(str(asof)[:4])
     df = _read_year("ticker_prune", year, ["ticker", "time"])
     d = df[df["ticker"] == ticker]
     if d.empty:
-        return False, None
+        return False, None, None
     last = pd.to_datetime(d["time"]).max()
     # còn "sống" trong prune nếu xuất hiện trong vòng 30 ngày trước asof
-    return bool((pd.Timestamp(asof) - last).days <= 30), str(last)[:10]
+    return bool((pd.Timestamp(asof) - last).days <= 30), str(last)[:10], None
+
+
+def _in_universe_pit(ticker, asof):
+    """Nhánh MỚI (P1, §4.2): membership + cờ chất lượng từ `tav2_mike.universe_pit_q`.
+
+    Trả (in_universe, last_date, quality_flag). in_universe=None nghĩa là KHÔNG BIẾT (bảng
+    thiếu ngày / lỗi đọc) — **tuyệt đối không tự fallback về `ticker_prune`** (§4.3): fallback
+    im lặng tái nhập đúng cái drift ta đang bỏ chạy. Nhãn sẽ hiện "n/a", không hiện "NGOÀI".
+    """
+    from google.cloud import bigquery
+    client = _CACHE.get("_bqclient")
+    if client is None:
+        client = bigquery.Client(project="lithe-record-440915-m9", location="asia-southeast1")
+        _CACHE["_bqclient"] = client
+    # `latest` = trạng thái mới nhất <= asof; `last_in` = lần cuối THỰC SỰ ở trong universe
+    # (hai thứ khác nhau khi mã vừa bị loại — nhãn cần nói đúng cái sau).
+    sql = """
+SELECT ARRAY_AGG(STRUCT(in_universe, quality_flag) ORDER BY time DESC LIMIT 1)[OFFSET(0)] AS latest,
+       MAX(IF(in_universe, time, NULL)) AS last_in
+FROM `lithe-record-440915-m9.tav2_mike.universe_pit_q`
+WHERE ticker = @tk AND time <= @asof AND time >= DATE_SUB(@asof, INTERVAL 30 DAY)"""
+    cfg = bigquery.QueryJobConfig(query_parameters=[
+        bigquery.ScalarQueryParameter("tk", "STRING", ticker),
+        bigquery.ScalarQueryParameter("asof", "DATE", str(asof)[:10])])
+    rows = list(client.query(sql, job_config=cfg, location="asia-southeast1").result())
+    if not rows or rows[0]["latest"] is None:
+        # không có dòng nào trong 30 ngày: mã chưa từng có trong `ticker`, HOẶC bảng chưa
+        # build tới ngày này. Hai thứ khác nhau — phân biệt bằng chính ngày mới nhất của bảng.
+        mx = list(client.query(
+            "SELECT MAX(time) AS d FROM `lithe-record-440915-m9.tav2_mike.universe_pit`",
+            location="asia-southeast1").result())[0]["d"]
+        if mx is None or str(mx) < str(asof)[:10]:
+            raise RuntimeError(f"universe_pit chi co toi {mx} < asof {str(asof)[:10]}")
+        return False, None, None
+    r = rows[0]
+    last_in = str(r["last_in"])[:10] if r["last_in"] is not None else None
+    return bool(r["latest"]["in_universe"]), last_in, r["latest"]["quality_flag"]
+
+
+# Nguồn universe cho nhãn DD. Hằng số module-level (KHÔNG env var — env thừa hưởng qua process
+# là đúng cơ chế đã gây sự cố C1 07-12, coding_guidelines §11). Rollback = đổi về "prune".
+UNIVERSE_SOURCE = "pit"
+
+
+def _in_universe(ticker, asof):
+    """(in_universe|None, last_date, quality_flag) — None = không kết luận được, KHÔNG fallback."""
+    try:
+        if UNIVERSE_SOURCE == "prune":
+            return _in_prune(ticker, asof)
+        return _in_universe_pit(ticker, asof)
+    except Exception as exc:
+        _log.warning("universe (%s) doc loi (%s): %s", UNIVERSE_SOURCE, ticker, exc)
+        return None, None, None
 
 
 def adv_vnd(ticker, asof):
@@ -153,7 +209,7 @@ def _fmt_vnd(x):
     return f"{x / 1e6:,.0f} tr"
 
 
-def _liquidity_part(row, in_prune, prune_last, est_value_vnd):
+def _liquidity_part(row, in_universe, universe_last, est_value_vnd, quality_flag=None):
     import pandas as pd
     v50 = row.get("Volume_3M_P50")
     px = row.get("Price") if pd.notna(row.get("Price")) else row.get("Close")
@@ -169,8 +225,14 @@ def _liquidity_part(row, in_prune, prune_last, est_value_vnd):
         bits.append(f"⚠ thanh khoản mỏng (ADV3T {_fmt_vnd(adv)}/phiên < sàn {ADV_THIN_VND/1e9:.0f} tỷ)")
     else:
         bits.append(f"thanh khoản OK (ADV3T {_fmt_vnd(adv)}/phiên)")
-    if not in_prune:
-        bits.append("🔴 NGOÀI ticker_prune" + (f" (lần cuối {prune_last})" if prune_last else ""))
+    src = "ticker_prune" if UNIVERSE_SOURCE == "prune" else "universe_pit"
+    if in_universe is None:
+        bits.append(f"⚠ {src}: n/a (không đọc được)")
+    elif not in_universe:
+        bits.append(f"🔴 NGOÀI {src}" + (f" (lần cuối {universe_last})" if universe_last else ""))
+    elif quality_flag and quality_flag != "QUALITY_OK":
+        # Q-C: cờ THUẦN THÔNG TIN cho due-diligence, KHÔNG chặn gì (§3.2b, user chốt 2026-07-22)
+        bits.append(f"⚠ cờ chất lượng {quality_flag}")
     if est_value_vnd and adv:
         pct = est_value_vnd / adv
         mark = "🔴" if pct > ORDER_ADV_HARD else ("⚠" if pct > ORDER_ADV_WARN else "")
@@ -230,12 +292,14 @@ def run_due_diligence(ticker, book=None, context=None, as_dict=False):
                    "error": "không có dữ liệu trong bq_cache/ticker"}
             return out if as_dict else f"{prefix}: ⚠ DD n/a — không thấy mã trong bq_cache/ticker"
 
-        in_prune, prune_last = _in_prune(ticker, asof)
+        in_universe, universe_last, quality_flag = _in_universe(ticker, asof)
         est_val = ctx.get("est_value_vnd")
         parts = {
             "data_date": str(row.get("time"))[:10],
-            "liquidity": _liquidity_part(row, in_prune, prune_last, est_val),
-            "in_prune": in_prune,
+            "liquidity": _liquidity_part(row, in_universe, universe_last, est_val, quality_flag),
+            "in_universe": in_universe,
+            "universe_source": UNIVERSE_SOURCE,
+            "quality_flag": quality_flag,
             "fundamentals": _fa_part(row),
             "anomaly": _anomaly_note(ticker, asof),
         }
