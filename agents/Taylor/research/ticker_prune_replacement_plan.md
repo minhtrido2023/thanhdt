@@ -490,7 +490,7 @@ Sắp theo **rủi ro tăng dần**, cố ý: làm cái an toàn trước để 
 |---|---|---|---|---|
 | P1 | `trading_bot/due_diligence.py` (6 chỗ) | D1 (đọc `bq_cache/ticker_prune/*.parquet`) | **Không** — chỉ hiện cờ cho người đọc | Làm đầu tiên. Sai cũng chỉ sai 1 dòng nhãn. |
 | P2 | `custom_basket.py` (114, 202, 656) | D1 × 3 | custom30V — parking NEUTRAL | Universe rộng hơn ~17% ⇒ rổ 30 mã có thể đổi thành phần. Cần A/B rổ trước-sau, **không cutover mù**. |
-| P3 | `deploy_golive_dt5g_v4/golive_recommend_v23.py` 290/293 | D1 (**BẤT ĐỘNG SẢN** ICB-8633 — lens D1 RE_BACKLOG) | ~~Thấp~~ **TRUNG BÌNH** (§4.3b) | ⚠️ **ĐÍNH CHÍNH 2026-07-22**: bản trước ghi "banking sector-lens" — **SAI**. `ICB_Code=8633` là **Real Estate Holding & Development**, không phải ngân hàng. Nhãn sai này đã lan sang cả prompt dispatch. Diff §4.3b **không nhỏ** ⇒ hạ ước lượng "Thấp". |
+| P3 | `deploy_golive_dt5g_v4/golive_recommend_v23.py` 290/293 | D1 (**BẤT ĐỘNG SẢN** ICB-8633 — lens D1 RE_BACKLOG) | ✅ **DONE 2026-07-22** (commit `0bfbdfe`) — tác động LIVE hôm nay = **ZERO** (A/B trọn script byte-identical) | ⚠️ **ĐÍNH CHÍNH 2026-07-22**: bản trước ghi "banking sector-lens" — **SAI**. `ICB_Code=8633` là **Real Estate Holding & Development**, không phải ngân hàng. Nhãn sai này đã lan sang cả prompt dispatch. Diff §4.3b **không nhỏ** ⇒ hạ ước lượng "Thấp". |
 | P4 | `golive_recommend_v23.py` 167/425/455 | D2 (ADV cap, breadth, pool pbz CAPIT) | **CAO — xem §4.4** | Không làm cùng lô với P1-P3. |
 | P5 | `macro_state_live.py` (breadth Pillar B guard, %>MA200, cần ≥100 mã) | D2 | **CAO** — chạm DT5G | Đổi mẫu số breadth ⇒ có thể đổi state. Bắt buộc chạy song song đối chiếu chuỗi state 2014→nay, yêu cầu **0 phiên lệch** trước khi cutover. |
 | P6 | `mike/bin/preflight_check.sh`, `bq_freshness_check.sh` | D3 | Gate vận hành | §4.5 |
@@ -590,9 +590,49 @@ Hai điều đọc được, ngược chiều nhau:
    2014/2015 vì **VHM niêm yết 2018**. Đây chính là look-ahead §2.2 đang nằm trong production hôm
    nay. Nhưng độ lớn (±10-17 mã/mốc, ~20% panel) là **thay đổi hành vi thật**, không phải cosmetic.
 
-⇒ **P3 CHỜ NGƯỜI DUYỆT.** Không cutover trong job này dù §4.2 từng xếp nó "rủi ro thấp" — số đo bác
-bỏ ước lượng đó. *Giới hạn phép đo:* chỉ đối chiếu nhánh `tav2_bq.ticker` của UNION; nhánh fallback
-`ticker_1m` (chỉ bổ sung phiên tươi nhất) không đo — không ảnh hưởng kết luận ở các mốc lịch sử.
+⇒ ~~**P3 CHỜ NGƯỜI DUYỆT.**~~ *Giới hạn phép đo:* chỉ đối chiếu nhánh `tav2_bq.ticker` của UNION;
+nhánh fallback `ticker_1m` (chỉ bổ sung phiên tươi nhất) không đo — không ảnh hưởng kết luận ở các
+mốc lịch sử.
+
+#### P3 — **DONE, ĐÃ CUTOVER 2026-07-22**, commit `0bfbdfe` (job `Taylor_20260722_084953`, user duyệt)
+
+2 vị trí panel D1 (nhánh `ticker` + nhánh fallback `ticker_1m`) → `universe_pred()` đọc
+`tav2_mike.universe_pit_q` **theo NGÀY**. Hằng số module-level `UNIVERSE_SOURCE = "pit"` (KHÔNG env
+var, `coding_guidelines.md` §11) — rollback bằng 1 chữ. **3 chỗ đọc `ticker_prune` còn lại trong
+cùng file (`:167` ADV cap, `:425`/`:455` CAPIT breadth + pool) là P4, GIỮ NGUYÊN có chủ đích** cho
+tới khi hiệu chuẩn lại §4.4.
+
+**Fail-safe §4.3** — `assert_universe_covers()` chạy TRƯỚC truy vấn panel; thiếu ngày → `RuntimeError`,
+**tuyệt đối không** tự fallback `ticker_prune`. Phạm vi kiểm tra = các phiên **có dữ liệu panel
+ICB-8633**, không phải mọi phiên trong `ticker`: upstream thường xuyên để lại **1 dòng stub** cho
+ngày hiện tại (07-22 đúng 1 dòng, DRL) mà gate B8 của `build_universe_pit.py` **TỪ CHỐI** dựng
+universe từ đó (`B8_RAW_DEPTH: 1 dòng = 0,1% trung vị 816`) — bắt lỗi ở đó sẽ hạ recommender vì một
+ngày không đóng góp gì. Nếu stub có mã 8633 thì vẫn fail to.
+
+**Selfcheck `universe_pit_p3_selfcheck.py` 14/14 PASS** (khác P2: **không** assert diff = 0, vì đây
+là sửa bug — đổi hành vi là có chủ đích):
+- **T4 = bằng chứng bug đã fix**: VHM **CÓ** trong panel 2014 nhánh `prune`, **KHÔNG còn** ở nhánh
+  `pit`. Panel 2014: 38 → 39 mã (bỏ 9: C21, D2D, HDC, IDV, LHG, PVR, TIX, **VHM**, VRG; thêm 10).
+- **T5 đo diff LIVE thật**: panel `[2026-03-24..07-22]` **67 → 60 mã** (RA 12 / VÀO 5); tập tín hiệu
+  RE_BACKLOG (mask `d1m`) **778 → 649 cặp**; ngày tín hiệu gần nhất 07-21 mất **HLD, TEG**.
+  T5.3 xác nhận **100% thay đổi giải thích được bằng membership theo ngày** (bỏ-sai 0 / thêm-sai 0).
+- **Bẫy đo lường tìm ra trong lúc làm**: chạy câu panel 2 lần cách nhau vài phút bị `fa_ratings`
+  re-rank **đúng eff-date** làm nhiễu (QCG `fa_tier` D→E ⇒ 6 diff giả). Selfcheck đã sửa sang lấy
+  **MỘT panel hợp `(pit OR prune)`** rồi tách 2 nhánh bằng membership đọc riêng — A/B nguyên tử.
+  *(Cùng họ với ghi chú TLD dòng ~433. Mọi A/B tương lai chạm `fa_ratings` phải làm kiểu này.)*
+
+**Tác động LIVE hôm nay = ZERO — đã đo, không phải suy luận.** Chạy trọn `golive_recommend_v23.py`
+2 lần **cùng vintage** (`pit` rồi `prune`, 15:59-16:0x 07-22) → `out/golive_v23_recommendations_
+2026-07-22.md`/`.csv` và `data/golive_v23_status.json` **byte-identical**. Lý do cơ chế: hôm nay
+**BAL picks = 0**, mà `RE_BACKLOG_BUY` chỉ là một nhãn `play_type` trong `TIER_BAL` ⇒ thay đổi lens
+không tới được đầu ra. Artifact production đã khôi phục về bản `pit`.
+⚠️ Hệ quả: **zero-impact hôm nay là điều kiện thị trường, không phải tính chất của thay đổi.** Ngày
+nào BAL có pick, HLD/TEG-loại-kiểu-này sẽ đổi đầu ra thật.
+
+Selfcheck sẵn có đã chạy lại: `lag_live_schedule` · `edge_wlag_gate` · `money_path_freshness` ·
+`anomaly_gate_prod_parity` · `lag_liq_signal_filter` — **PASS**. `anomaly_gate_selfcheck` 15 PASS /
+**2 FAIL** (A4, B1 — cờ PNJ đã hết hạn 30 ngày): xác minh **CÓ SẴN TỪ TRƯỚC**, chạy lại với file đã
+`git stash` cho kết quả y hệt.
 
 #### P2 — `custom_basket.py` · **DONE — ĐÃ CUTOVER 2026-07-22**, commit `ce7d457` (job `Taylor_20260722_070547`, user duyệt)
 
@@ -728,7 +768,7 @@ kiểm chứng trong 2-3 tuần tới.
 | **G1** | `bin/build_universe_pit.py` + selfcheck (idempotent, atomic, B8) | 1-1,5 phiên | Cao | — |
 | **G2** | Backfill 2000→nay (compute rẻ: 215MB) + **kiểm định**: chạy lại bảng §2.2 với median-60-phiên tự tính, ~30 mốc | **1 phiên** (compute ~phút, kiểm định chiếm hết) | Cao | G1 |
 | **G2b** | ✅ **XONG + ĐÃ ĐÓNG 2026-07-22.** Đo xong (§3.2b-G2b) → escalate → **user chốt A′ + Q-C, không Q-B** → **Q-C đã implement (§3.2c), selfcheck PASS**. **Cổng cứng §3.2b/Q9 MỞ** (cổng CAPIT §4.4 vẫn đóng riêng) | 0,5-1 phiên | Trung bình | G2 |
-| **G3** | 🔶 **ĐANG DỞ 2026-07-22**: **P1 XONG** (`due_diligence.py`, selfcheck 20/20) · **P2 XONG** (`custom_basket.py` → `universe_pit_q`, user duyệt, commit `ce7d457`, selfcheck 13/13, rổ LIVE byte-identical, v4final/eyrisk selector 12/12 PASS sau commit) · **P3 vẫn CHỜ NGƯỜI DUYỆT** (diff lớn, §4.3b) | 1 phiên | Trung bình | G2 |
+| **G3** | 🔶 **ĐANG DỞ 2026-07-22**: **P1 XONG** (`due_diligence.py`, selfcheck 20/20) · **P2 XONG** (`custom_basket.py` → `universe_pit_q`, user duyệt, commit `ce7d457`, selfcheck 13/13, rổ LIVE byte-identical, v4final/eyrisk selector 12/12 PASS sau commit) · **P3 XONG** (`golive_recommend_v23.py` panel D1 ICB-8633, user duyệt, commit `0bfbdfe`, selfcheck 14/14, VHM-look-ahead fix có bằng chứng, A/B trọn script byte-identical) ⇒ **P1-P3 ĐỦ, G3 XONG** (P4/P5/P6 là hạng mục riêng) | 1 phiên | Trung bình | G2 |
 | **G4** | **Re-hiệu chuẩn breadth CAPIT (§4.4)** — chuỗi 2014→nay, tìm `WASHOUT_GATE'` bảo toàn tập ngày fire | 1 phiên | **Thấp** — có thể không tồn tại ngưỡng bảo toàn ⇒ escalate | G2 |
 | **G5** | Shadow P4/P5 ≥10 phiên (chi phí *thời gian lịch*, gần như không tốn effort) | ~2 tuần lịch, 0,5 phiên | Cao | G4 |
 | **G6** | Re-pin R3: 2 lần chạy (control + pit) theo **đúng lệnh pin + `$DNA_PYEXE`** (`coding_guidelines.md` §8) | 1-2 phiên + runtime | **Thấp** — chưa đo runtime thật của lệnh pin trong job này | G2 |
@@ -937,8 +977,9 @@ DT5G 4-gate), nhưng đây là số cần nhớ khi re-pin R3 và khi hiệu chu
    (§3.2c). **Cổng cứng §3.2b/Q9 đã MỞ.**
 2. 🔶 **G3 đang dở**: **P1 đã cutover** (`due_diligence.py`, §4.2) · **P2 đã cutover 2026-07-22**
    (`custom_basket.py`, user duyệt — CHẠM TIỀN THẬT, rổ LIVE byte-identical, rollback 1 chữ
-   `UNIVERSE_SOURCE`). **P3 vẫn CHỜ NGƯỜI DUYỆT DIFF** — diff lớn (§4.3b, ±10-17 mã/mốc),
-   **tuyệt đối không tự cutover**.
+   `UNIVERSE_SOURCE`) · **P3 đã cutover 2026-07-22** (`golive_recommend_v23.py` panel D1, user duyệt,
+   commit `0bfbdfe`, selfcheck 14/14, VHM-look-ahead xác nhận đã fix, A/B trọn script byte-identical
+   ⇒ 0 tác động LIVE hôm nay). **G3 coi như XONG** cho phần P1-P3; P4/P5/P6 vẫn mở.
 3. **G4** (CAPIT breadth, §4.4) — chưa làm; ràng buộc "phụ thuộc P2" nay đã gỡ, nhưng **cổng CAPIT
    vẫn ĐÓNG** cho tới khi có quyết định riêng.
 4. Re-pin R3 (§5.1) — **chưa làm, và P2 vừa làm nó cần thiết hơn**: rổ custom30V đổi ở 4 mốc rebal
