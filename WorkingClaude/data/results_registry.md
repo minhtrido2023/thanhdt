@@ -4022,3 +4022,66 @@ $DNA_PYEXE pt_v23_audit_2014.py v23a none postbull 0 edge
 **Per-year LOO trên Δ (bổ sung, cùng job — kiểm tra đúng bài học MOM/Wave1):** bỏ LẦN LƯỢT từng năm rồi tính lại CAGR cả 2 chân — Δ **DƯƠNG ở CẢ 13/13 phép**, biên độ +2,44pp (bỏ 2020) → +4,87pp (bỏ 2015); bỏ 2021 vẫn +2,65pp. ⇒ lợi ích **KHÔNG do 1-2 năm carry**, khác chữ ký reshuffle-luck từng loại ở H8a. (Phần *mức tuyệt đối* thì vẫn phụ thuộc 2021 nặng ở CẢ hai chân — đó là đặc tính sẵn có của R3, không phải của bản sửa này.)
 **Annex robustness trên chân treat (`data/liqzb_20260721/annex_liqzb.py`, wrapper §8 trỏ `dsr_pbo_annex` sang CSV treat, KHÔNG đụng canonical):** DSR **1,0000** ở mọi N (163 CSV/120/200), ann-SR (convention annex) 1,812; PBO family-level **0,3713** (family đã phình lên 163 CSV so với 120 lúc đo 0,209 — chỉ số này nói về CẢ họ tìm kiếm, KHÔNG phải về bản sửa fidelity N=1 này); bootstrap circular-block L=21: CAGR 5th-pct **21,1%** (med 31,7%), MaxDD 5th-pct **−30,5%**, **P(DD<−30%) = 5,9%** (pin 07-11 là 1,5%) — **đuôi rủi ro DÀY HƠN**, khớp MaxDD −18,8% vs −17,8%: sổ LAG chạy nhiều vốn hơn trong nhóm mua được thì cũng ăn drawdown thật hơn. Anchor DD dùng cho kỳ vọng: **~−30%**, không phải −19%.
 **Files:** ctrl `data/..._wtnamecap_exp_liqzbctrl.csv`, treat `data/..._wtnamecap_liqzblag.csv`, log `data/liqzb_20260721/{ctrl,treat}.log`, annex wrapper `data/liqzb_20260721/annex_liqzb.py`. Canonical `..._wtnamecap.csv` KHÔNG bị đụng.
+
+---
+
+## 2026-07-22 — RE-PIN R3 TRÊN `universe_pit` (G6, ĐÓNG dự án `ticker_prune`→`universe_pit`) — job `Taylor_20260722_151919` + `Taylor_20260722_154334`
+
+**Bối cảnh:** dự án thay `ticker_prune` (universe không tái lập được, curation suy vòng tròn từ chính
+deal backtest cũ — bq_admin xác nhận) bằng `universe_pit` (bảng đội tự sở hữu, append-only, point-in-
+time, `lithe-record-440915-m9.tav2_mike.universe_pit`). G6 = bước re-pin R3 trên universe mới.
+Kế hoạch đầy đủ: `mike/agents/Taylor/research/ticker_prune_replacement_plan.md`.
+
+**Điều kiện đo — CACHE ĐÓNG CỨNG (khác các lần chạy trước trong ngày):** `data/bq_cache` manifest
+`verified: true`, **14/14 bảng**, `verified_at = 2026-07-22T14:22:24Z`. Chạy trên cache đã verify là
+điều kiện CẦN — 3 chân chạy 21:23–21:51 (giờ máy) cùng ngày đã hỏng vì `BQ_LOCAL_CACHE=1` (biến này
+là ĐƯỜNG DẪN, `=1` ⇒ không có manifest tại `./1/manifest.json` ⇒ **âm thầm rơi về live BQ**). Lệnh
+pin trong registry đã được sửa (`BQ_LOCAL_CACHE=data/bq_cache`, commit `c592a74`).
+
+**Lệnh (3 chân, khác nhau ĐÚNG 2 biến `UNIVERSE_SRC`/`EXP_TAG`):**
+```bash
+cd /home/trido/thanhdt/WorkingClaude && source ./wc_env.sh
+BQ_LOCAL_CACHE=data/bq_cache BQ_CACHE_THREADS=1 NAV_TOTAL_B=50 ETF_LIQ=custompitg BASKET_WT=namecap \
+BASKET_SELECT=yieldcombo PARK_STATES="3:0.7" AUDIT_END=2026-06-19 \
+UNIVERSE_SRC=<prune|pit> EXP_TAG=<repinR3control_v2c|repinR3control_v2c2|repinR3pit_v2c> \
+$DNA_PYEXE pt_v23_audit_2014.py v23a none postbull 0 edge
+```
+Driver: `data/g6_repin/chain_after_resync_v2.sh`. Logs: `data/g6_repin/cache_v2_{control,control2,pit}.log`.
+
+| Chân | Universe | Vintage | Final NAV | CAGR | Sharpe | MaxDD | Calmar | self-check |
+|---|---|---|---|---|---|---|---|---|
+| **control_v2c** | `ticker_prune` | cache 07-22 (đóng cứng) | 1.077,68B | **27,95%** | 1,85 | −18,4% | 1,52 | 0 VND (BAL+LAG) |
+| **control_v2c2** (chạy lại) | `ticker_prune` | cache 07-22 (đóng cứng) | 1.077,68B | **27,95%** | 1,85 | −18,4% | 1,52 | 0 VND (BAL+LAG) |
+| **pit_v2c** | **`universe_pit`** | cache 07-22 (đóng cứng) | 998,09B | **27,16%** | 1,81 | −18,1% | 1,50 | 0 VND (BAL+LAG) |
+| *(tham chiếu)* Pin 2026-07-12 | `ticker_prune` | cache 07-12 (**vintage KHÁC**) | — | 27,84% | 1,84 | −18,2% | 1,53 | 0 VND |
+
+**⚠️ SO SÁNH CÔNG BẰNG = `pit_v2c` (27,16%) vs `control_v2c` (27,95%) — CÙNG VINTAGE.**
+**KHÔNG** so `pit_v2c` với pin cũ 27,84% (khác vintage cache ⇒ trộn lẫn hiệu ứng universe với hiệu
+ứng dữ liệu trôi ⇒ sai lệch kết luận).
+**Δ (pit − prune, cùng vintage): CAGR −0,79pp · Sharpe −0,04 · MaxDD −18,1% vs −18,4% (TỐT hơn nhẹ)
+· Calmar −0,02.**
+
+**H1 vs H2 — hai chân control khớp TUYỆT ĐỐI (1.077,68B / 27,95% / 1,85 / −18,4% / 1,52 giống hệt):**
+- ⇒ **H1 LOẠI** (giả thuyết "engine không tất định"). **Engine ĐÃ XÁC NHẬN tất định** trên cache đóng cứng.
+- ⇒ **H2 XÁC NHẬN**: chênh lệch 0,37pp giữa 2 lần chạy control trên **live BQ** sáng cùng ngày (job
+  `Taylor_20260722_112850`) là do **dữ liệu BQ trôi giữa các lần chạy khác giờ**, không phải engine.
+- Hệ quả: delta pit −0,79pp đo trên cache đóng cứng là **tín hiệu thật**, không còn bị nhiễu-vintage
+  che (khác lần đo live-BQ hôm trước, khi delta 0,49pp < nhiễu 0,37pp ⇒ không kết luận được).
+
+**KẾT LUẬN:** R3 trên `universe_pit` **THẤP HƠN** `ticker_prune` cùng vintage **0,79pp CAGR** — **đúng
+như đã pre-register TRƯỚC khi chạy** (plan §8.5: *"nhiều khả năng THẤP HƠN, vì `ticker_prune` mang
+thiên vị vòng tròn có lợi cho backtest; nếu CAO HƠN mới là dấu hiệu nghi ngờ"*). Khớp hướng dự kiến
+⇒ **KHÔNG cần điều tra thêm.** Đọc nghiệp vụ: phần chênh chính là *look-ahead/curation bias* của
+`ticker_prune` bị khử, không phải `universe_pit` chọn universe kém hơn — MaxDD còn tốt hơn nhẹ.
+
+**❗ QUYẾT ĐỊNH PRODUCTION — CHƯA QUYẾT, CẦN ESCALATE USER RIÊNG:** *có cutover baseline R3 chính
+thức sang `universe_pit` hay không* (tức số pin công bố đổi 27,84% → 27,16%) **KHÔNG** nằm trong
+phạm vi job này và Taylor **không tự quyết**. Cho tới khi user quyết:
+- **Số CHÍNH THỨC vẫn là 27,84%** (pin 2026-07-12, `ticker_prune`).
+- Khi trích dẫn cho việc mới, nói kèm: đo lại trên universe không-bias cùng vintage ra **27,16%**,
+  và khoảng kỳ vọng trung thực từ vụ LAG %ADV vẫn là **[~27,2%; ~31,3%]** (xem section 2026-07-21).
+- Anchor drawdown dùng cho kỳ vọng: **~−30%** (bootstrap 5th-pct), không phải −18%.
+
+**Files:** control `data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_repinR3control_v2c.csv`
+(18.400 dòng) · pit `data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_repinR3pit_v2c_univpit.csv`
+(18.421 dòng) · logs `data/g6_repin/cache_v2_*.log`. Canonical `..._wtnamecap.csv` **KHÔNG bị đụng** (§8 guidelines).
