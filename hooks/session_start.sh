@@ -25,8 +25,18 @@ printf '%s' "$cur" > "$cache"
 # notice into whatever topic the user last opened, and lose the deliberate fail-open of the
 # job-board audit. Distinguish by JOB_ID, which bin/dispatch.sh exports for every dispatched
 # run and nothing else sets.
+# Self-heal (arch-reviewer round 2): a gate that keys on the ABSENCE of a variable fails
+# SILENTLY if JOB_ID ever leaks into a long-lived process — the ccdb bridge copies its whole
+# environment into every Mike session it spawns (runner.py `dict(os.environ)`), so a bridge
+# restarted by hand from inside a dispatched shell would carry a dead JOB_ID forever and mute
+# all three branches with no error. So the marker only counts while it still maps to a job
+# record that is actually RUNNING; a stale/leaked one decays back to "interactive". A
+# set-but-empty JOB_ID can never map to a running record, so it decays the same way.
 INTERACTIVE_TID=""
-if [ -z "${JOB_ID:-}" ]; then INTERACTIVE_TID="${DISCORD_THREAD_ID:-}"; fi
+_job_rec="$ROOT/bus/jobs/${JOB_ID:-}.json"
+if [ -z "${JOB_ID+x}" ] || ! grep -qs '"status": *"running"' "$_job_rec"; then
+  INTERACTIVE_TID="${DISCORD_THREAD_ID:-}"
+fi
 
 # Persist the active Discord thread so _bg_wrapper can post to it even after this session ends.
 # DISCORD_THREAD_ID is injected by the CCDB bot when it launches Mike's session.
