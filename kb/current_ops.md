@@ -1,6 +1,29 @@
 # Current Operations — Mike fleet
 > Mike cập nhật thủ công khi có thay đổi trạng thái quan trọng. Đọc trước mọi thứ khác khi restart.
-> Cập nhật lần cuối: 2026-07-20
+> Cập nhật lần cuối: 2026-07-22
+
+## Dự án thay thế `ticker_prune` → `universe_pit` — ĐÃ DUYỆT Q1-Q9, đang triển khai G1 (2026-07-22)
+bq_admin xác nhận `ticker_prune` không có hệ thống quản trị (3 đường ghi độc lập chồng lấn, curation
+`hit_ticker_list` suy từ chính kết quả backtest cũ = circular bias, membership không tái lập được).
+Team (Taylor kiến trúc + Winston vận hành) đề xuất xây `universe_pit` — bảng team tự sở hữu, append-
+only, tính point-in-time trực tiếp từ `tav2_bq.ticker`. quant-skeptic REFUTED 1 luận điểm phụ (test
+recall 97-99% là tautology, đại số trùng công thức gốc) → Taylor sửa lại + chạy test thay thế: **43
+mã "rule-only" (lọt rule thanh khoản nhưng bị `ticker_prune` loại) có chất lượng KÉM RÕ RỆT** (ROE_
+Min3Y âm TB, nhất quán 4/4 mốc lịch sử) — **curation CÓ mang thông tin thật**, nhưng cũng SAI theo
+hướng bỏ sót mã tốt mới niêm yết (FOX/VPL/VGI). User đã DUYỆT toàn bộ Q1-Q9 (2026-07-22):
+- Q1-Q2: xây `universe_pit` độc lập, ngưỡng B3=1,0 tỷ VND/ngày (hằng số production có sẵn).
+- **Q9 (mới, cổng cứng)**: cấm cutover các bước chạm tiền thật (P2 custom30V, P4 CAPIT) tới khi đo
+  xong độ rò chất lượng qua golden floor hiện có (G2b) + xuất cờ chất lượng cho tầng chiến lược đọc
+  — **KHÔNG** thêm ngưỡng ROE cứng vào tầng universe (tránh bẫy tự-tune). User tin hệ thống rating
+  8L/golden floor hiện có đã đủ lọc chất lượng độc lập với `ticker_prune`.
+- Q3-Q8: đánh dấu R3 27,84% PROVISIONAL, chấp nhận re-pin, CAPIT breadth giữ đọc `ticker_prune` có
+  chủ ý tới khi hiệu chuẩn lại (cấm cutover khi `capit_fired=true`), B8 integrity gate bắt buộc
+  (bq_admin xác nhận `max_bad_records=10` áp cho MỌI bảng gồm `ticker`).
+Timeline ước tính ~2,5-3 tuần lịch (8-11 phiên + 2 tuần shadow). Tài liệu đầy đủ:
+`mike/agents/Taylor/research/ticker_prune_replacement_plan.md` (kiến trúc/migration) +
+`mike/agents/Winston/universe_pit_ops_feasibility_20260722.md` (vận hành) +
+`mike/agents/Taylor/research/ticker_prune_universe_QA_bq_admin_20260722.md` (Q&A gốc bq_admin).
+Đang triển khai G1 (`bin/build_universe_pit.py`) — theo dõi tiến độ qua bus finding Taylor.
 
 ## CAPIT (bear-washout) — nguồn vốn CHỐT, đang theo dõi khả năng fire (2026-07-20)
 Breadth_oversold đang tăng dần (0,166 07-13 → 0,2176 07-17), tiến gần ngưỡng washout_gate=0,3 —
