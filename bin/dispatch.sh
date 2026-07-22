@@ -536,6 +536,18 @@ echo "JOB $job_id (from=$from, timeout=${TIMEOUT}s) → $ROOT/bin/jobs.sh status
 # "current" topic later (see _job_thread_id comment for why that was the actual bug).
 _start_ts="$(date +%s)"
 _dtid0="${FORCE_TID:-$(_ambient_thread "$id")}"
+# …and hand that SAME pinned topic to the agent process itself (fix 2026-07-22b).
+# Without this the child `claude` merely inherited the DISPATCHING session's ambient
+# DISCORD_THREAD_ID, so the job record said topic A while the agent's own
+# `notify_thread.sh` (no explicit thread arg) resolved topic B = whatever topic the user
+# was chatting/reading in. That is the user-visible complaint ("phản hồi rơi vào topic
+# đang đọc"): the parent's ✅/❌ notice landed correctly, the agent's own report did not.
+# The gap WIDENED after commit b3e9fe8, which made _agent_thread_override and --thread
+# outrank the ambient env for the job record only — record and agent env then disagreed
+# by construction for Wags/DollarBill and for every `--thread` dispatch.
+# Exporting here also makes any peer dispatch the agent issues inherit the job's topic
+# (via _ambient_thread) instead of the caller's ambient one.
+if [ -n "$_dtid0" ]; then export DISCORD_THREAD_ID="$_dtid0"; fi
 JSET job_id="$job_id" from="$from" to="$id" status=running attempt=1 \
      max_attempts=$((RETRIES + 1)) started_at="$_start_ts" \
      deadline=$((_start_ts + TIMEOUT)) logfile="$logfile" discord_thread_id="$_dtid0" \
