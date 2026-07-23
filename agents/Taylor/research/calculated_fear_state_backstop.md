@@ -7,15 +7,56 @@
 ---
 
 ## 0. Luận điểm một câu
-Khi **scandal CÁ NHÂN lãnh đạo** (không phải scandal chạm vào chính tài sản lõi) đánh sập giá một
-doanh nghiệp **có cổ đông nhà nước/chiến lược chi phối (>50%)** đang sở hữu **tài sản sinh tiền đã
-hết/gần hết nợ**, thị trường bán tháo *pháp nhân* vì sợ *con người* — tạo khoảng lệch giá có thể khai
-thác. Điều KIỆN QUYẾT không phải "mua sau khi bắt", mà là **bộ tiêu chí phân biệt** (§2): pattern
-thắng đúng khi tài sản lõi tách biệt khỏi người bị điều tra và vẫn tạo tiền.
+
+> **⚠️ ĐÍNH CHÍNH PHẠM VI 2026-07-23 (user, job `Taylor_20260723_121602`) — ĐỌC TRƯỚC TIÊN.**
+> Khung này TRƯỚC ĐÂY bị scope HẸP SAI vào **scandal pháp lý cá nhân lãnh đạo** (mọi case §1/§6/§7 đều
+> vậy). User đính chính nguyên văn: *"Chú ý vấn đề không phải là bị pháp lý. Vấn đề là bị đánh giá quá
+> thấp so với giá trị thực. Nên pool sẽ có rất nhiều đặc biệt trong giai đoạn khủng hoảng. Ví dụ HPG
+> 2022 tháng 11, giá về bằng book value. 1 năm sau tăng 90%. Kiểu như vậy bạn sẽ có nhiều case hơn hẳn
+> thay vì bám vào pháp lý để tìm."* → **Scandal pháp lý chỉ là MỘT trong nhiều loại TRIGGER**, không
+> phải điều kiện. Tiêu chí THẬT SỰ = §0.5 dưới đây. Đừng loại nhầm case như HPG chỉ vì "không có scandal".
+
+**Tiêu chí cốt lõi (một câu):** khi một **giai đoạn khủng hoảng** (bất kể nguồn cơn) đẩy giá một doanh
+nghiệp xuống **THẤP HƠN NHIỀU giá trị thực** của nó — trong khi khủng hoảng đó **sẽ QUA** (mang tính
+chu kỳ/tạm thời/tâm lý) chứ không **PHÁ HỦY CẤU TRÚC** giá trị lõi — thì khoảng lệch giá đó có thể khai
+thác. Điều KIỆN QUYẾT không phải "đã giảm sâu bao nhiêu" mà là **bộ tiêu chí phân biệt "khủng hoảng sẽ
+qua" vs "giá trị đã hỏng vĩnh viễn"** (§0.5 + §2). Trường hợp scandal cá nhân (§2) là một *đặc tả* của
+tiêu chí này cho nhóm trigger (a); các nhóm (b)/(c)/(d) có đặc tả tương đương ở §2.5.
+
+---
+
+## 0.5. Taxonomy trigger — 4 loại khủng hoảng có thể tạo case (mở rộng 2026-07-23)
+
+Cùng MỘT tiêu chí cốt lõi ("giá << giá trị thực, khủng hoảng sẽ qua"), nhưng **nguồn cơn khủng hoảng**
+đa dạng. Mỗi nhóm có một **câu hỏi phân biệt trung tâm khác nhau** (bản chất giống nhau: khủng hoảng
+này là CHU KỲ/TẠM THỜI hay CẤU TRÚC/VĨNH VIỄN):
+
+| Nhóm | Trigger | Câu hỏi phân biệt trung tâm | Case đã có |
+|---|---|---|---|
+| **(a)** | **Scandal/pháp lý cá nhân lãnh đạo** | Tài sản/hoạt động lõi có **TÁCH BIỆT** khỏi người bị điều tra & vẫn tạo tiền? (test CF_OA≥NP — §2) | PNJ✅ · VEA✅ · TV1✅ · DGC⚠️ · OGC❌ · FLC❌ |
+| **(b)** | **Khủng hoảng ngành / chu kỳ hàng hoá** (giá đầu ra sập, tồn kho ứ, cầu đóng băng tạm thời) | Chu kỳ **SẼ QUAY LẠI** (cầu tạm giảm, không mất vĩnh viễn)? DN có **sống sót qua đáy** không (bảng cân đối) + có phải **DN dẫn đầu chi phí thấp**? (§2.5) | **HPG 2022** ✅ (case mới) |
+| **(c)** | **Khủng hoảng vĩ mô / thị trường chung** kéo cả nhóm ngành xuống dưới giá trị (bán tháo hệ thống, margin call, thanh khoản) | Giá sập vì **KỸ THUẬT/tâm lý** (deleveraging, panic) hay vì **lõi kinh doanh xấu đi thật**? DN có bị **buộc bán tài sản/pha loãng** ở đáy không? | *(chưa có case verify)* |
+| **(d)** | **Gián đoạn vận hành TẠM THỜI** không liên quan pháp lý (đứt gãy chuỗi cung, sự cố nhà máy, mất 1 hợp đồng lớn, thiên tai) | Gián đoạn có **thời hạn/khắc phục được** hay là **mất cấu trúc** (mất khách hàng vĩnh viễn, tài sản hỏng không sửa)? | *(chưa có case verify)* |
+
+**Điểm chung tất cả 4 nhóm — cùng 1 discriminator gốc:** *"Cái gì đang bị định giá — nỗi sợ tạm thời,
+hay sự phá hủy giá trị thật?"* Nhóm (a) hỏi qua lăng kính "scandal chạm lõi chưa"; nhóm (b)/(c)/(d) hỏi
+qua lăng kính "chu kỳ vs cấu trúc". **Đây là cùng một câu hỏi mặc hai bộ áo khác nhau** — không phải hai
+khung khác nhau.
+
+**Hệ quả quan trọng cho việc TÌM case (user nhấn mạnh):** bám vào "scandal pháp lý" để tìm case là
+scope quá hẹp → bỏ lỡ phần lớn cơ hội. Pool THẬT SỰ rộng hơn nhiều — mọi điểm cực trị định giá (giá ≈
+book / PE nén sâu vs lịch sử) trùng với một khủng hoảng-sẽ-qua đều là ứng viên. **Cách tìm nhóm
+(b)/(c)/(d): user tự phát hiện + đưa case tới** (xem §4-note: KHÔNG mở rộng scanner tự động — phạm vi
+quá rộng, trùng public value screen). Nhiệm vụ của khung = **due-diligence ĐÚNG khi case tới**, không
+phải quét tự động.
 
 ---
 
 ## 1. Bằng chứng lịch sử (đo trên BQ cache `ticker`, adjusted Close, trough→forward return)
+
+> **Ghi chú phạm vi (2026-07-23):** bảng dưới toàn nhóm trigger **(a) scandal cá nhân** — vì khung ban
+> đầu bị scope hẹp vào đó. Nhóm **(b) chu kỳ ngành** có case chuẩn **HPG 2022** với số liệu đầy đủ ở
+> **§8** (tách riêng vì discriminator khác — chu kỳ vs cấu trúc, không phải scandal-chạm-lõi).
 
 | Ticker | Sự kiện | Loại | DD đáy | +6m | +12m | +18m | Kết luận |
 |---|---|---|---|---|---|---|---|
@@ -53,7 +94,9 @@ thắng đúng khi tài sản lõi tách biệt khỏi người bị điều tra
 
 ---
 
-## 2. Bộ tiêu chí sàng lọc — QUALIFY vs KHÔNG
+## 2. Bộ tiêu chí sàng lọc — nhóm (a) SCANDAL CÁ NHÂN — QUALIFY vs KHÔNG
+
+> Đây là đặc tả cho **nhóm trigger (a)** (scandal/pháp lý cá nhân lãnh đạo). Nhóm (b)/(c)/(d) dùng **§2.5**.
 
 ### ✅ ĐỦ ĐIỀU KIỆN (tất cả phải đúng)
 1. **Scandal là CÁ NHÂN**: khởi tố lãnh đạo vì hành vi cá nhân (tham ô/vi phạm kế toán/quản lý tài sản)
@@ -78,6 +121,49 @@ thắng đúng khi tài sản lõi tách biệt khỏi người bị điều tra
   thiếu BCTC kiểm toán → **bị hạn chế/đình chỉ giao dịch**. Đây là tail-risk kiểu-OGC/PVX/FLC (về gần 0
   / huỷ niêm yết). Không tự động loại TV1, nhưng **hạ sizing** và biến việc *chọn được kiểm toán* thành
   **cổng nhị phân** (xem §4). Đây là lý do TV1 xứng đáng size NHỎ HƠN PNJ/VEA ngày đó.
+
+---
+
+## 2.5. Bộ tiêu chí sàng lọc — nhóm (b) CHU KỲ NGÀNH / (c) VĨ MÔ / (d) GIÁN ĐOẠN TẠM THỜI (thêm 2026-07-23)
+
+Cho các trigger KHÔNG có scandal cá nhân. Test cốt lõi đổi từ *"scandal có tách khỏi lõi không"* sang
+**"khủng hoảng này CHU KỲ (sẽ qua) hay CẤU TRÚC (không qua)"** — tương đương về mặt logic, khác về công cụ đo.
+
+### ✅ ĐỦ ĐIỀU KIỆN (tất cả phải đúng)
+1. **Khủng hoảng có tính CHU KỲ/TẠM THỜI, không CẤU TRÚC**: cầu *tạm* giảm (chu kỳ hàng hoá, siết tín
+   dụng, panic vĩ mô, gián đoạn có thời hạn) — KHÔNG phải mất cầu vĩnh viễn / công nghệ lỗi thời / sản
+   phẩm bị thay thế / mất giấy phép hoạt động. **Bằng chứng chu kỳ**: ngành từng có nhiều chu kỳ lên-
+   xuống trong lịch sử và đã hồi phục; động lực cầu dài hạn còn nguyên (HPG: thép ↔ đầu tư công/BĐS,
+   chu kỳ kinh điển; giá thép/HRC có đáy chu kỳ rõ).
+2. **Sống sót qua đáy — bảng cân đối chịu được** (thay trụ "NN backstop" của nhóm a): net debt **quản
+   lý được**, không bị **buộc bán tài sản / pha loãng cổ phiếu ở đáy** để tồn tại. Đây là điều kiện
+   sinh-tử: chu kỳ sẽ qua CHỈ CÓ Ý NGHĨA nếu DN còn sống tới lúc đó. (HPG: nợ vay cao lúc đỉnh nhưng
+   không mất khả năng thanh toán, không pha loãng — vượt qua đáy 2022 nguyên vẹn.)
+3. **DN DẪN ĐẦU chi phí thấp trong ngành** (đòn bẩy vận hành đúng chiều khi chu kỳ quay lại): kẻ sống
+   sót trong đợt thanh lọc, giành thị phần từ đối thủ yếu chết đi, và **bật mạnh nhất** khi biên hồi.
+   (HPG: nhà sản xuất thép chi phí thấp nhất VN, lò cao tích hợp — khác hẳn tôn/thép thương mại biên mỏng.)
+4. **Sàn định giá bằng TÀI SẢN THỰC (không phải lợi nhuận)**: đây là điểm mấu chốt khác nhóm (a). Ở đáy
+   chu kỳ, **lợi nhuận SẬP/âm là BÌNH THƯỜNG** (đó chính là lý do giá rẻ) → **PE ở đáy chu kỳ vô dụng/
+   gây hiểu lầm** (xem HPG §8: PE 3,9x lúc đáy rồi vọt lên 190x khi EPS sập — cùng lúc giá TĂNG gấp đôi).
+   Sàn đúng = **PB ≲ 1 trên tài sản HỮU HÌNH thật** (nhà máy/thiết bị, không phải goodwill). Mua dưới
+   giá trị thanh lý của tài sản vật chất mà chu kỳ không phá huỷ được. (HPG đáy: **PB 0,72** — dưới book 28%.)
+
+### ❌ KHÔNG ĐỦ (bất kỳ điều nào → loại)
+- **Khủng hoảng CẤU TRÚC, không phải chu kỳ**: cầu mất vĩnh viễn (công nghệ thay thế, đổi hành vi tiêu
+  dùng không đảo ngược), sản phẩm/mô hình lỗi thời. Chu kỳ sẽ KHÔNG quay lại → không phải case này.
+- **Bảng cân đối KHÔNG sống nổi qua đáy**: đòn bẩy quá cao, phải pha loãng/bán tài sản lõi để trả nợ ở
+  đáy → dù chu kỳ hồi thì cổ đông cũ đã bị nghiền (equity wipeout / dilution). Book value "rẻ" trên
+  giấy nhưng sẽ bị nợ ăn hết trước khi chu kỳ quay lại.
+- **DN chi phí cao / biên mỏng / theo sau**: chết trong đợt thanh lọc hoặc không bật được khi chu kỳ hồi.
+- **"Rẻ" chỉ vì tài sản ảo/goodwill/định giá lại đất chưa thực**: PB<1 trên tài sản không có giá trị
+  thanh lý thật = bẫy giá trị, không phải sàn.
+- **Đáy chu kỳ CHƯA tới / không xác định được** — bắt dao rơi giữa chu kỳ đi xuống mà chưa có dấu hiệu
+  tạo đáy giá/đáy hàng hoá → rủi ro timing lớn. Ưu tiên bằng chứng đáy (§3: higher-low + volume cạn +
+  giá đầu vào/đầu ra ngành chạm đáy) hơn là "đã rẻ so book".
+
+**Ghi chú áp dụng chéo**: một case có thể thuộc NHIỀU nhóm cùng lúc (vd DGC — §6 — vừa có (a) scandal
+cá nhân, vừa có yếu tố (b) đáy chu kỳ hoá chất/phốt pho + (d) gián đoạn mỏ 25). Khi đó chạy **cả** bộ
+tiêu chí liên quan; case QUALIFY khi vượt discriminator của TỪNG nhóm mà nó thuộc về.
 
 ---
 
@@ -460,3 +546,93 @@ phần lớn mức tái định giá — thị trường thường phản ứng 
 vị kiểm định uy tín, audit sơ bộ rò rỉ tích cực) hơn là chờ đúng ngày báo cáo tài chính chính thức.
 Đây là lý do §3 thiết kế 3 tranche thay vì 1 cổng duy nhất — case PNJ-2015 cho thấy phần lớn mức
 tăng (+50%/6m) đến RẤT SỚM, trước khi có xác nhận đầy đủ.
+
+---
+
+## 8. Case #4 — HPG 2022 (nhóm trigger (b) CHU KỲ NGÀNH), thêm 2026-07-23 (Taylor, job `Taylor_20260723_121602`)
+
+**Case CHUẨN đầu tiên của nhóm (b)** — do user đưa ra để đính chính scope của khung (§0). KHÔNG có
+scandal/pháp lý gì cả: đây thuần là **đáy chu kỳ thép + BĐS đóng băng 2022** đẩy nhà sản xuất thép đầu
+ngành xuống DƯỚI giá trị sổ sách. Chứng minh discriminator "chu kỳ vs cấu trúc" (§2.5) hoạt động y hệt
+discriminator "scandal-chạm-lõi" (§2).
+
+### Bằng chứng số (BQ `ticker`, adjusted Close, verify job này)
+
+| Mốc | Ngày | Close (adj) | PB | PE | Ghi chú |
+|---|---|---|---|---|---|
+| Đỉnh 2022H1 | 2022-03-07 | 26.120 | 2,52 | 6,63 | Đỉnh chu kỳ, PE thấp trên EPS đỉnh |
+| **ĐÁY** | **2022-11-10** | **8.180** | **0,72** | 3,93 | **PB 0,72 = dưới book 28%**; BVPS 16.867 |
+| +6m | 2023-05-10 | 14.660 | 1,31 | **190** | **+79%** từ đáy — EPS đã SẬP (PE vọt 190x) |
+| +12m | 2023-11-10 | 17.900 | 1,54 | 82 | **+118,8%** từ đáy |
+| +18m | 2024-05-10 | 20.570 | 1,68 | 19 | **+151,5%** từ đáy — EPS hồi (PE về 19x) |
+
+- **DD đỉnh→đáy = −68,7%** (26.120 → 8.180).
+- **Đính chính lời user (số thật TỐT HƠN trí nhớ):** user nhớ *"giá về bằng book value, 1 năm sau tăng
+  90%"*. Thực tế: (a) giá về **DƯỚI book 28%** (PB 0,72), *rẻ hơn* "bằng book"; (b) +12m = **+118,8%**,
+  *cao hơn* "+90%" user nhớ. Trí nhớ user conservative ở cả 2 chiều — luận điểm càng đứng vững hơn.
+
+### ★ Bài học methodology QUAN TRỌNG NHẤT từ case này — tại sao PE vô dụng ở đáy chu kỳ
+
+Nhìn cột PE: **đáy PB 0,72 / PE 3,93 → +6m giá +79% nhưng PE VỌT lên 190x**. Nghịch lý biểu kiến: giá
+tăng gấp đôi trong khi PE tăng 48 lần. Giải thích: **EPS SẬP về gần 0** ở giữa chu kỳ (thép lỗ/hoà vốn
+Q4/22–Q1/23) → mẫu số PE bốc hơi. Nếu ai dùng "PE thấp = rẻ" làm tín hiệu, họ sẽ **BÁN đúng đáy** (khi
+PE nhảy lên 190x trông "đắt") — sai hoàn toàn.
+
+→ **Xác nhận §2.5 tiêu chí #4:** ở nhóm (b), **sàn định giá phải neo vào TÀI SẢN (PB trên tài sản hữu
+hình), KHÔNG neo vào lợi nhuận (PE)**. Lợi nhuận sập ở đáy chu kỳ LÀ lý do giá rẻ — không phải cảnh báo.
+Recovery đến từ 2 nguồn cộng hưởng: (1) **PB normalize** 0,72→1,68 (thị trường trả lại giá trị tài sản
+thực khi hết panic), (2) **EPS hồi** khi chu kỳ quay lại (PE 190→19). Đây là khác biệt CƠ CHẾ nền tảng
+so với nhóm (a): case scandal có **PE thấp trên lợi nhuận THẬT còn nguyên** (lõi tạo tiền), recovery =
+de-rate phần bù sợ hãi; case chu kỳ có **lợi nhuận đã sập**, recovery = tài sản + chu kỳ.
+
+### Đọc HPG qua bộ tiêu chí §2.5 — QUALIFY sạch (hồi tố)
+
+| Tiêu chí §2.5 | Phán quyết | Bằng chứng |
+|---|---|---|
+| #1 chu kỳ (không cấu trúc) | ✅ | Thép ↔ đầu tư công/BĐS, chu kỳ kinh điển; 2022 = giá HRC sập + BĐS đóng băng *tạm thời* (chính sách siết trái phiếu), cầu thép dài hạn nguyên |
+| #2 sống sót qua đáy | ✅ | Nợ vay cao lúc đỉnh nhưng KHÔNG mất thanh khoản, KHÔNG pha loãng; qua đáy 2022 nguyên vẹn |
+| #3 dẫn đầu chi phí thấp | ✅ | Nhà SX thép chi phí thấp nhất VN (lò cao tích hợp Dung Quất) — khác tôn/thép thương mại biên mỏng (HSG/NKG đã BANNED) |
+| #4 sàn tài sản thực | ✅ | PB 0,72 trên nhà máy/thiết bị thật (không goodwill) — mua dưới giá trị thanh lý tài sản vật chất |
+
+**Cảnh báo tự nhất quán:** HSG/NKG (tôn/thép thương mại) đang nằm trong **BANNED list** của đội (KB
+"Cổ phiếu — quy tắc nhanh") — đúng logic §2.5 #3: chúng là DN biên mỏng/theo sau, KHÔNG phải kẻ dẫn đầu
+chi phí thấp, nên **cùng đáy chu kỳ 2022 nhưng KHÔNG qualify** (chết/bật yếu hơn nhiều trong đợt thanh
+lọc). HPG qualify không phải vì "thép rẻ" mà vì "kẻ DẪN ĐẦU chi phí thấp mua dưới book giữa đáy chu kỳ".
+Đây là bằng chứng discriminator §2.5 phân biệt được trong CÙNG một ngành cùng một đáy.
+
+### Hàm ý cho khung
+- Case (b) **KHÔNG cần** test CF_OA≥NP kiểu (a) — ở đáy chu kỳ CF_OA/NP âm là bình thường. Thay bằng
+  **survivability (bảng cân đối) + leader (chi phí thấp) + PB tài sản thực**.
+- Recovery của (b) thường **CHẬM hơn cú nảy đầu của (a)** nhưng **BỀN và lớn** (+79/+119/+152% qua
+  6/12/18m — leo đều theo chu kỳ, khác cú nảy giật của scandal). → Exit §3 nên **giữ runner lâu hơn**
+  cho (b) (chốt theo PB normalize về ~1,5–2,0x + dấu hiệu đỉnh chu kỳ hàng hoá), không chốt sớm ở +30–40%.
+- **N vẫn nhỏ** (1 case (b) verify đầy đủ) → vẫn là playbook, không phải edge thống kê. Giá trị = bộ lọc §2.5.
+
+---
+
+## 9. Ranh giới với BAL book / custom30V (value tilt hệ thống) — tránh trùng lặp vô nghĩa
+
+Câu hỏi user (§3 của dispatch): sleeve "mua khi sợ hãi" khác gì cơ chế value đã có sẵn trong V2.4?
+
+**Trả lời: khác về CONCENTRATION + TIMING + tính DISCRETIONARY, KHÔNG khác về triết lý.** Cả hai đều
+là "mua rẻ so giá trị" — nhưng ở hai chế độ vận hành khác nhau, KHÔNG chồng lấn:
+
+| Chiều | BAL / custom30V (value tilt hệ thống, LIVE V2.4) | Sleeve "mua khi sợ hãi có tính toán" (playbook này) |
+|---|---|---|
+| **Cơ chế** | Quy tắc CỨNG, tự động: rank 1/PE+1/PCF (BAL) / ey (custom30V), rebalance định kỳ | DISCRETIONARY, thủ công: due-diligence từng case §2/§2.5, user duyệt từng tên |
+| **Diện** | Rải rộng, LIÊN TỤC trên toàn universe (30 tên custom30V, cap 0,10) | CHỌN LỌC, thưa, chỉ tại **điểm cực trị định giá + khủng hoảng cụ thể** |
+| **Sizing** | Tỷ trọng nhỏ đều tay (~3,3%/tên custom30V, theo rank) | **Tập trung lớn hơn CÓ CHỦ ĐÍCH: 2–4%/tên** (cap cứng §3), vào 3 tranche |
+| **Timing** | Luôn-bật (always-on), không định thời khủng hoảng | **Định thời**: chỉ khi DD sâu + tạo đáy + qua cổng discriminator |
+| **Universe** | Chỉ mã LỌT rating gate ≤3 + golden floor (ROE_Min3Y≥0, CF_OA_3Y>0) | **CÓ THỂ gồm mã golden-floor loại tạm** (đáy chu kỳ EPS/CF âm → HPG/DGC sẽ RỚT custom30V) — đây chính là lý do cần sleeve riêng |
+
+**Điểm mấu chốt — tại sao KHÔNG trùng lặp:** cơ chế value hệ thống (custom30V/BAL) **theo định nghĩa sẽ
+LOẠI** đúng các case này ở đáy khủng hoảng — vì golden floor (CF_OA_3Y>0, ROE_Min3Y≥0) và rank ey/PE
+đều bị bóp méo khi lợi nhuận/dòng tiền sập tạm thời (HPG đáy 2022: EPS gần 0, CF_OA âm → rớt mọi filter
+hệ thống). Sleeve "mua khi sợ hãi" **bắt đúng cái mà hệ thống buộc phải bỏ**: mã tốt-về-tài-sản-lõi
+nhưng xấu-tạm-thời-về-số-hiện-tại. → Bổ sung, không chồng lấn: hệ thống bắt "rẻ + số đẹp bền", sleeve
+bắt "rẻ + số xấu TẠM THỜI có lý do sẽ qua". Đây là lý do sleeve phải **NGOÀI book V2.4, discretionary,
+cap riêng** (như TV1/DGC đã làm) — nhét vào custom30V sẽ vừa vi phạm golden floor vừa mất tính chọn-lọc.
+
+**Kết luận ranh giới:** giữ 2 cơ chế TÁCH BIỆT. custom30V = value-tilt always-on trong book. Sleeve fear-
+buy = special-situation discretionary ngoài book, kích hoạt tại giao điểm (định-giá-cực-trị × khủng-hoảng-
+sẽ-qua), user duyệt từng tên. Không systematize sleeve vào V2.4 (N nhỏ + discretionary theo bản chất).
