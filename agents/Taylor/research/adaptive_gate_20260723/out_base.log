@@ -1,0 +1,15 @@
+====================================================================================================
+  5-SYSTEM PROD-SPEC BACKTEST 2014-01-01 -> 2026-05-15  (50B per system)  TAG=201401_202605
+====================================================================================================
+
+[1] Loading signals + prices + VNI + Open prices...
+  [variant] PKL=data/ba_v11_unified_12y_sig.pkl  FA_TABLE=tav2_bq.fa_ratings
+[BQ_LOCAL_CACHE] ready — 14 tables from /home/trido/thanhdt/WorkingClaude/data/bq_cache
+  ETF underlying: REAL E1VFVN30 from 2016-01-07 (pre-2016 = rescaled VNINDEX proxy)
+  Open: 1,362,900 rows / 522 tk
+
+[2] Loading states (TQ34b + LIVE)...
+  [STATE_OVERRIDE=dt5g] TQ34b state replaced by macro_state_live.state (3082 rows, 49 macro-diff days)
+
+[3] D1 RE_BACKLOG_BUY reclassification...
+[BQ_LOCAL_CACHE] query took 91.6s (167348 rows)
