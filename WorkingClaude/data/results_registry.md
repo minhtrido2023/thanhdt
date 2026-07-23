@@ -4174,3 +4174,119 @@ residual `ticker_prune` rồi re-pin (trùng G8/P5-P6 trong plan); (c) thêm ban
 harness R&D gọi `pt_v23` không pin env (`sweep_basket_size_cap.py`, `run_parkstate_rest.sh`,
 `run_depgate_variant*.py`, `eyrisk_exp/run_arms.sh`) — hậu tố `_univpit` chống ĐÈ file nhưng không
 chống việc so mắt-thường với CSV trước 07-22 (khác universe).
+
+## Adaptive persistence gate (DT 4-gate) — NO-GO (2026-07-23, Taylor, job Taylor_20260723_054325)
+**Q (user):** thay dwell CỐ ĐỊNH (`default=10` NEUTRAL→BEAR) bằng "độ mạnh bằng chứng" — VNINDEX
+giảm liên tiếp ~3 phiên → commit de-risk sớm thay vì đợi đủ 10. **Discipline:** PRE-REGISTERED
+N_trials=10 (F1 K1∈{3,5}×K2∈{2,3,4,5}=8 + F2 enC-shortcut K1c∈{10,15}=2; primary K1=3/K2=3;
+baseline=prod fixed dwell) — decision ghi bus TRƯỚC khi chạy. **Harness:** `run_5systems_prodspec`
+STATE_OVERRIDE=dt5g (chính engine đã validate DT5G; macro cap base-independent nên
+`adaptiveDT5G=min(adaptiveDT4,cap)` faithful), full 2014-01→2026-05, 50B/hệ.
+**VERDICT = NO-GO trên MỌI tiêu chí, KHÔNG wire, DT5G production KHÔNG sửa:**
+1. **0 crash-lead**: 4 real ≥15% DD (2014-03/2018-04/2022-01/2026-01) — adaptive chạm defensive state
+   CÙNG PHIÊN default=10 (lead=+0). VN crash đi NEUTRAL→raw-CRISIS (enC=25), KHÔNG →raw-BEAR (đường
+   user nhắm); enC-shortcut cũng 0 lead vì crash rơi choppy (2018 all CRISIS 2018-05-09; 2022 all 2022-01-04).
+2. **Proxy REDUNDANT**: base v3.4b price-derived + nhiễu (raw-CRISIS 713/3130=22.8% ngày, 77% onset
+   FALSE=17/22). Fixed dwell = noise-filter hiệu chỉnh đúng mức nhiễu; "giá giảm 3 ngày" là echo trễ
+   của chính price đã làm base bearish → 0 info thêm, chỉ cho nhiều 77%-false commit sớm. = lý do THẬT
+   `default=10` là robust plateau.
+3. **Churn + DD tệ hơn**: +7(primary)..+17(K2=2) transitions, false-panic 2→3, MaxDD V1 −19.8→−22.5%.
+4. **Perf âm đều**: V5(Kelly) ΔCAGR primary −0.98pp / aggressive −1.29pp / F2 −0.95pp; V4 −1.09..−1.24pp;
+   excess daily t=−0.85..−0.99. V3 LIVE-control unchanged (override isolated đúng).
+5. **Bị chính đợt motivating bác**: per-year V5 drag = 2018 −3.32pp, 2024 −1.63pp, **2026 YTD −7.33pp**
+   (đợt đang rơi = nơi adaptive HẠI NHẤT). Năm giúp duy nhất 2025 +3.29pp = reshuffle-luck (LOO). 4win/4lose net âm.
+6. **DSR/PBO không đạt** — best-of-family excess Sharpe<0, không có gì deflate; không route quant-skeptic.
+**Caveat trung thực:** intuition user (bằng chứng ĐỘC LẬP mạnh → commit nhanh) đúng tổng quát; thất bại
+Ở ĐÂY vì VNINDEX down-close KHÔNG độc lập với base. Tương lai cần stress signal orthogonal + nhanh hơn giá
+(breadth collapse / credit-liquidity stress / intraday volume-spike LEAD price) = chương trình R&D riêng.
+**Artifacts:** `mike/agents/Taylor/research/adaptive_persistence_gate_20260723.md` +
+`research/adaptive_gate_20260723/` (state_analysis.py, enc_analysis.py, run_ab.py, final_summary.py,
+nav_*.csv, out_*.log) — mọi số tái lập từ NAV CSV + base_state.csv.
+
+---
+## 2026-07-23 — Signal-search vs DT5G (rate + breadth-momentum + liquidity) = NO-GO (job Taylor_20260723_064214)
+Câu hỏi: tìm bộ tín hiệu tốt hơn DT5G (phản ứng qua giá, ~50 phiên) cho tình huống hiện tại
+(VNI −13.45% từ đỉnh, lending >10%, spread tín dụng-huy động hẹp ~2pp). **Kết quả: KHÔNG tìm được
+gì thắng DT5G trên CẢ 2 tiêu chí (bớt false-alarm VÀ bắt sớm hơn). NO-GO toàn bộ, DT5G không đổi.**
+- **Rate signal (Bước 2, `test_rates_regime_signal.py`)**: MOMENTUM>LEVEL đúng, nhưng tín hiệu rate
+  mạnh nhất = SBV refi momentum (IC −0.18/−0.19) = ĐÃ là Pillar-A production. Lending momentum
+  −0.15 (stale 2023, không live được); deposit-live IC~0 (step-series quá thô). Rate lead 2/10
+  crisis → headwind, không phải crisis-timing.
+- **Breadth-momentum + liquidity (Bước 3, `agents/Taylor/breadth_liq_momentum_study.py`)**: pre-reg
+  16-trial grid. breadth-MOMENTUM SAI DẤU (contrarian/oversold: b_mom40<−0.10 → fwd60 +3.46% ON vs
+  +2.54% OFF); lag DT5G 36-53d trên bear thật (2018/2022); false-fire cả 2 benign dip (2014-09,
+  2026-01). NAV market-timing overlay proxy 2014-26: Confluence 5.94%/Calmar0.17 < B&H 9.23%/0.20 <<
+  **DT5G ref 12.81%/Sharpe0.92/DD−22.0%/Calmar0.58**. Thêm liquidity(S2) vào DT5G làm tệ đi (0.58→0.38).
+- **S2 liquidity turn_ratio** = thành phần DUY NHẤT đúng dấu (sep −1.60%) nhưng tự thân yếu (Calmar
+  0.14) — đáng chú ý cho R&D tương lai RIÊNG, chưa wire được.
+- **Hướng duy nhất còn merit (có điều kiện)**: spread tín dụng-huy động hẹp + market-rate tăng khi
+  SBV policy FROZEN = trực giao với mọi thứ production (Pillar-A dormant từ 2023-06). Nhưng không có
+  chuỗi LIVE sạch để test → cần user cung cấp feed lending/spread 2024-26 (không tự bịa). Tiền đề,
+  chưa phải kết quả.
+- **KHÔNG sửa DT5G production dưới bất kỳ hình thức nào trong job này.**
+
+## 2026-07-23 — VN30F futures basis via vnstock: DATA OK (full history) but basis is NOT a leading signal (job Taylor_20260723_073030)
+**Data discovery (BUOC1):** vnstock/VCI DOES serve VN30 futures. `Quote(symbol="VN30F1M"/"VN30F2M", source="VCI").history()` → daily OHLCV+volume, **full depth back to 2017-08-10** (VN30 futures launch — 2220 sessions, NOT n=1). VN30 spot ("VN30") from 2016-07-28. Basis computable over the entire 9-yr history. Specific contract codes (VN30F2508) fail; use continuous VN30F1M/VN30F2M. **Open Interest NOT available** (history=OHLCV only; `Trading.price_board` has no OI column — has realtime foreign_buy/sell_volume on futures, not pursued). Script/data: `mike/agents/Taylor/vn30f_basis.csv`.
+**Basis stats:** basis_pct=(F−S)/S×100, mean −0.20%, std 0.77%, structural slight discount.
+**Signal test (BUOC2) — NEGATIVE:**
+- Forward IC (full 2017-2026): spearman(basis, fwd VN30 spot ret) = −0.03/+0.006/+0.037 (h=5/10/20); bp5 = −0.006/+0.030/+0.046. **~0, none significant after multiple-testing.** Basis has NO reliable forward-predictive power.
+- Coincident only: 30 worst spot days → basis −0.72% (futures+spot fall together, not leading).
+- Episode pre-peak bp5 (10 sess before peak, avg−0.11): 2018 −0.35 / COVID2020 −0.25 / 2022bear −0.60(min−1.04) / 2024 −0.40 → weak discount-before-drop tendency historically, BUT inconsistent (→ zero IC).
+- **2026 current episode = OPPOSITE:** bp5 = **+0.02 (contango)** before 05-18 peak; on worst down days futures traded at **PREMIUM** (07-22: +0.59% on the −10.7% spot day). Selloff is **cash/foreign-led, NOT futures-led** → basis gave ZERO warning.
+**Verdict:** VN30F basis is NOT a leading indicator for the current decline; no proven historical edge (near-zero IC + fails on the very episode asked about). Data source works w/ full depth → future study possible, but naive basis is a dead end. **NOT wired anywhere; DT5G/production unchanged.**
+
+## 2026-07-23 — LAG (PEAD) weakness: regime-vs-quality decomposition + gate (job Taylor_20260723_131958)
+R&D only, wires nothing. LAG-only standalone ledger (5389 signals / 550 trades, 2014-2026), PIT attribution.
+Scripts: research/lag_regime_gate/{lag_common,stage1_decomp_ic,stage2_gates,stage3_loo_dsr}.py. Full writeup: research/lag_regime_gate/FINDINGS.md.
+- LAG-only baseline: CAGR 16.03% / Sharpe 1.16 / MaxDD -18.3% / Calmar 0.88 (≠ blended V2.4 27%).
+- Q2 CORE: surprise IC does NOT die in bad markets — STRONGEST in BEAR (0.125,t4.16) / mild-DD -20..-10 (0.173,t5.95) / falling-6m (0.154,t4.58); WEAKEST in BULL (0.034). What collapses is the LEVEL (BEAR avg +1.96% vs BULL +6.78%), not the ranking. Only DEEP crisis dd<=-20 kills IC (-0.026 n.s.).
+- Q4: 2026 decline (avg -0.82% vs +4.6% hist) ≈ 78% REGIME (level compression; DT5G still labeled NEUTRAL/BULL while market fell) + 22% QUALITY (rating>3 tail -2.69%; rating-fail% NOT elevated 39% vs 36-41%).
+- Q3 WINNER c4/c5 = half-size LAG in DT5G BEAR/low-neutral: CAGR-neutral (-0.17pp), Sharpe 1.16->1.30, DD -18.3->-15.1%, Calmar 0.88->1.05, improves BOTH IS(0.95->1.08) and OOS, DSR 0.999 (N=10), LOO-robust, 0-VND clean. Rejected: rating<=3 gate IS-NEGATIVE (Sharpe 0.95->0.80); price-trend cut robustly costs ~1.5pp CAGR/yr; combo overfit (worst IS).
+- CAVEAT: c4/c5 would NOT have stopped 2026 loss (DT5G slow, entries were state 3/4). Fresh-drawdown protection needs faster price gate that costs return. Current regime 2026-07-23: dd -11.9%, below MA200, RSI 0.30, DT5G NEUTRAL(3) = strongest-IC-but-compressed-level bucket → LAG selection still valid, size down.
+- Next: route c4/c5 to quant-skeptic + re-run inside blended V2.4 before any wiring. TRC stays HOLD.
+
+## 2026-07-23 — LAG deep-dive #2: rating-by-regime + continuous-vs-discrete gate (job Taylor_20260723_135623)
+Continues Taylor_20260723_131958. Same LAG-only engine, 5,389 PIT events. R&D, wires nothing.
+Scripts: research/lag_regime_gate/stage4_rating_by_regime.py, stage5_build_cont_features.py,
+stage6_cont_univariate.py, stage7_cont_vs_disc.py. Writeup: FINDINGS2_rating_continuous.md. Pre-reg: PREREGISTER_stage7.md.
+- **Q1 (rating gap by regime) — user hypothesis REFUTED**: rating≤3 vs ≥4 return gap is point-estimate
+  LARGEST in BULL (+1.53pp) / near-zero in BEAR (−0.03) / FLATTEST in NEUTRAL; NO per-regime gap significant
+  (all p>0.10 except early-drawdown dd−10..−5 +2.44pp p=0.022). Rating = binary quality gate, not a
+  regime-conditional return tilt → no basis for a NEUTRAL-only rating gate.
+- **Q2 (continuous vs discrete) — continuous does NOT beat DT5G c4**: breadth best predicts LAG drift LEVEL
+  (IC +0.143) but IS/OOS sign FLIP (−0.049→+0.212) = OOS-only. Within-NEUTRAL breadth split real (+2.19,
+  t3.54) but also OOS-only (IS −0.72/OOS +5.33). NAV: disc_c4 CAGR16.63/Sharpe1.33/IS_S1.03↑ beats every
+  continuous variant; breadth/combo/smooth FAIL IS (IS_Sharpe<baseline), cont_liq −2.05pp. Only IS-stable
+  continuous = roc20<−8 fast-decline (−0.51pp, IS_S0.96) — cheaper fresh-drawdown gate than MA200/6m (−1.5pp)
+  but Sharpe gain < c4. Standing candidate UNCHANGED = disc_c4/c5.
+- **Q3 (current state 2026-07-23)**: dd −11.9% (19th pctile, not crisis), roc5/10/20 −5.8/−7.7/−8.8% (bottom
+  3-5% = very fast decline), liq 0.87× LT-avg (thin), breadth 30.5% >MA200 (Q1, 12th pctile), RSI 0.30. LAG
+  drift LEVEL compressed to +0.24% (breadth-Q1)/+0.70% analog (WR46%) but surprise-IC still +0.128 (p0.014,
+  ranking intact). roc20=−8.79<−8 → fast-decline gate fires now (DT5G still NEUTRAL(3), doesn't). User right
+  about LEVEL (LAG return-thin vs defensive blue-chip here), wrong that signal is dead → size down + keep
+  selecting on surprise. TRC also rating-fails → small/cautious. Self-check 0 VND all variants (minNAV +49.6-49.9B).
+
+---
+## 2026-07-23 — disc_c4/c5 (LAG half-size in low DT5G) in BLENDED V2.4 → DILUTED, NO-GO wire (job Taylor_20260723_162813)
+Follow-up to LAG-only study (Taylor_20260723_131958, skeptic CONFIRMED). Re-ran disc_c4/c5 inside
+full V2.4 (BAL+LAG+CAPIT+parking+allocator) via new OFF-default knob `LAG_DISC_STATE` in
+`pt_v23_audit_2014.py` (halves LAG_* tier weights in DT5G states {1,2}=c4 / {1}=c5, both LAG passes).
+Frozen cache verified:true 14/14, threads=1, self-check 0 VND ×3, §8-compliant EXP_TAG.
+**Lệnh:** pin R3 command + `LAG_DISC_STATE={c4|c5}` + `EXP_TAG=discC4|discC5|discC4_control`.
+
+| variant | CAGR | Sharpe | MaxDD | Calmar | IS CAGR/Shrp | OOS CAGR/Shrp/DD/Calm |
+|---|---|---|---|---|---|---|
+| control(=pin R3) | 27.16% | 1.81 | −18.1% | 1.50 | 23.17/1.59 | 30.91/1.99/−18.1/1.71 |
+| c4 | 26.98% | 1.82 | −17.2% | 1.57 | 23.79/1.64 | 29.96/1.95/−16.7/1.79 |
+| c5 | 26.84% | 1.81 | −17.2% | 1.56 | 23.64/1.63 | 29.82/1.95/−16.9/1.76 |
+
+**Control reproduces pinned R3 exactly.** Dilution vs LAG-only: Sharpe Δ +0.14→**+0.01** (raw +0.002,
+gone); MaxDD Δ +3.2pp→**+0.9pp**; Calmar Δ +0.17→**+0.07**; CAGR Δ −0.17→−0.18pp. **Root cause = allocator
+already sets w_LAG=0 in BEAR(2)** (redundant with disc_c4 BEAR-half) + LAG is ½ book + parking/CAPIT
+de-risk independently; effective bite ≈ CRISIS-only (16.6% days) on LAG half. Walk-forward asymmetric
+(IS CAGR +0.62pp / OOS −0.95pp; DD/Calmar improve both). NAV-level LOO: CAGR edge −0.18pp, small-negative
+12/13 drops (not 1-yr driven), i.e. flat-slightly-negative CAGR trade for a small DD shave. DSR of the
+*difference* not significant (Δann-SR +0.002, ΔDD within bootstrap band). **Verdict: NO-GO wire** — the
+LAG-only win does not survive to portfolio level (allocator already prices the protection). No 2nd
+quant-skeptic pass (was conditional on a wire-worthy result). c4≥c5 if ever chosen (pure DD-insurance).
+Doc: `mike/agents/Taylor/research/lag_disc_blended/FINDINGS.md`.

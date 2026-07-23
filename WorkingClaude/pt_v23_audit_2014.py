@@ -258,6 +258,20 @@ elif LIQ_ZERO_BLOCK: raise SystemExit(f"LIQ_ZERO_BLOCK không hợp lệ: {LIQ_Z
 # (đúng ý đồ trần 12). Unset = hành vi cũ, byte-identical.
 LAG_SLOT_INFLIGHT = os.environ.get("LAG_SLOT_INFLIGHT", "").strip() == "1"
 if LAG_SLOT_INFLIGHT: _qs_tag += "_lagslotif"
+# LAG_DISC_STATE (2026-07-23, job Taylor_20260723_162813): disc_c4/c5 — half-size LAG *entries*
+# when DT5G state is low. Risk-sizing insurance from LAG-only study (Taylor_20260723_131958):
+# the earnings-drift LEVEL compresses in fear (BEAR +1.96% vs BULL +6.78%) while surprise still
+# ranks names → size down where the premium is thin, full where it pays.
+#   "c4" = halve LAG_* tier weights in states {1,2} (CRISIS+BEAR)   ← LAG-only winner
+#   "c5" = halve LAG_* tier weights in state  {1}   (CRISIS only)
+# BLENDED INTERACTION (the whole point of this re-run): the allocator already sets w_LAG=0 in
+# BEAR(2) (STATE_LAG_WEIGHT), so the BEAR half is largely moot at book level; the live bite is
+# CRISIS(1) where w_LAG=0.50. Freed LAG cash stays in the LAG book and is visible to the CAPIT
+# arm (sizes on book free-cash) in BOTH passes → faithful full-system test. "" = OFF/byte-identical.
+LAG_DISC_STATE = os.environ.get("LAG_DISC_STATE", "").strip().lower()
+if LAG_DISC_STATE and LAG_DISC_STATE not in ("c4", "c5"):
+    raise SystemExit(f"LAG_DISC_STATE={LAG_DISC_STATE!r} not in (c4,c5,'')")
+if LAG_DISC_STATE: _qs_tag += f"_lagdisc{LAG_DISC_STATE}"
 EXP_TAG = os.environ.get("EXP_TAG", "").strip()
 if EXP_TAG: _qs_tag += f"_exp_{EXP_TAG}"
 # ── UNIVERSE SOURCE (G6 re-pin A/B, ticker_prune_replacement_plan.md §5) ────────────────────
@@ -1846,8 +1860,15 @@ LAG_KW = dict(allowed_tiers=list(_LAG_BASE_TIERS), max_positions=12,
               etf_mgmt_fee_annual=0.0, etf_tracking_drag_annual=0.0, etf_rebalance_friction=0.0015,
               fund_tiebreak_col=("_fund_tb" if _LAG_FUND_DNPR else None),   # Wave1/H8a within-tier reorder (OFF-default None = byte-identical)
               open_prices=opens_lag, t1_open_exec=True, force_close_eod=False, **ETF_LIQ_KW)
+def _lag_disc_twbs(tw):
+    """disc_c4/c5 state-conditional LAG sizing: halve LAG_* tier weights in low states, leave
+    CAPIT_* tiers untouched. Returns None (byte-identical) when LAG_DISC_STATE off."""
+    if not LAG_DISC_STATE: return None
+    _states = (1, 2) if LAG_DISC_STATE == "c4" else (1,)
+    return {st: {t: (w * 0.5 if t.startswith("LAG_") else w) for t, w in tw.items()} for st in _states}
 if capit_events:
     nav_lag0, _ = simulate(sig_lag, prices_lag, vni_dates, tier_weights=LAG_TW,
+                           tier_weights_by_state=_lag_disc_twbs(LAG_TW),
                            name="v23audit_LAG_base", **LAG_KW, **LIQ_LAG)
     nav_lag0["time"] = pd.to_datetime(nav_lag0["time"])
     sig_lagC, tw_lagC, ex_lagC = add_capit_arm(sig_lag, nav_lag0, LAG_TW, "L", prices_lag)
@@ -1871,6 +1892,7 @@ if _mge:                                                    # mirror BAL: open t
     if LEVER_STRESS_DATES:
         _ss = {pd.Timestamp(x.strip()): RECOVERY_LEVER_FRAC for x in LEVER_STRESS_DATES.split(",") if x.strip()}
         kwB["etf_lever_by_date"] = {**kwB.get("etf_lever_by_date", {}), **_ss}
+kwB["tier_weights_by_state"] = _lag_disc_twbs(tw_lagC)
 nav_lag, _ = simulate(sig_lagC, prices_lag, vni_dates, tier_weights=tw_lagC,
                       event_log=events_lag, etf_log=etf_lag,
                       name="v23audit_LAG", **merge_extra(kwB, ex_lagC), **LIQ_LAG)
