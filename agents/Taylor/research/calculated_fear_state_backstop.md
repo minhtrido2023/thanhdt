@@ -824,3 +824,28 @@ lại khi thị trường crash sâu, FEARBUY v1 thu hẹp vũ trụ, rồi §10
 - Caveat trung thực: (a) chỉ 63/276 episode đã có r24 24 tháng (còn lại quá mới) → so sánh realized mỏng;
   (b) 8L rating PIT ở đây là bản **rút gọn** (thiếu moat notch / bank-AQ lens / eq_flag structural / forensic)
   — bản đầy đủ `rating_8l.py` có thể lệch chút nhưng lõi phân biệt (ROIC/FSCORE/route) giữ nguyên.
+
+---
+
+## §11. Blend systematic fear-buy vào V2.4 — nghiên cứu blend (job `Taylor_20260723_163630`, 2026-07-23)
+
+Chi tiết đầy đủ: **`fearbuy_blend_v24_20260723.md`**. Tóm tắt cho backstop:
+
+**User mandate:** blend fear-buy vào V2.4 ưu tiên cao, blue-chip, giữ ≥18m, ngưỡng mua ADAPTIVE theo
+market drawdown (càng xấu càng phải rẻ). Đã thiết kế đủ + backtest blend đầy đủ trên NAV ngày.
+
+**Kết quả:**
+- **Adaptive threshold** `PB_max(s)=clip(1.0−2.0·(s−0.20),0.40,1.0)`, s=−mkt_dd — CHẠY ĐÚNG ý thiết
+  kế; + **blue-chip ADV≥20B → win-rate 77%, median ex24 +41%, sign-test 5/5 crisis p=0.031**. Screen tốt.
+- ⚠️ "blue-chip" theo ADV = **cyclical/financial/BĐS high-beta** (SHB/KBC/HSG/HHV/STB…), KHÔNG phải
+  compounder phòng thủ — quality defensive hiếm khi về PB<0.7.
+- **Blend vào V2.4 KHÔNG "hiệu quả hẳn lên":** swap-model dCAGR **+0.05-0.08pp** (MaxDD xấu đi);
+  cash-aware cận-trên **+1.7pp @w10%** nhưng **+2.96pp toàn bộ từ OOS 2020+**, IS chỉ +0.39pp; w≥15%
+  MaxDD sập. **Root cause: V2.4 ĐÃ bắt hồi-phục-khủng-hoảng (CAPIT+LAG re-risk+parking); trong cửa sổ
+  sleeve active, sleeve +26.9% < V2.4 +29.9% ann → trùng lặp (redundant).**
+- **Verdict: KHÔNG blend ưu tiên cao / KHÔNG reserve NAV riêng.** Chỉ overlay cơ hội ≤5-10% NAV rót từ
+  tiền-mặt-đáy khi DT5G∈{CRISIS,BEAR}; kỳ vọng trung thực +0.5-1.5pp (kịch bản thuận), Calmar neutral.
+- **Phân biệt quan trọng:** market-wide fear (adaptive theo VNINDEX) = trùng V2.4. **Idiosyncratic-
+  scandal fear (TV1/DGC/PNJ — thị trường ổn, 1 tên sập) = chỗ V2.4 KHÔNG với tới = giá trị fear-buy
+  thật**, giữ nguyên khung discretionary §1-§10 (≤1% NAV/tên, due-diligence, user duyệt).
+- Cần `verify_finding.sh` (quant-skeptic) TRƯỚC nếu user chọn overlay nhỏ — chưa làm trong job này.
