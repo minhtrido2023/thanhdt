@@ -671,3 +671,101 @@ trúng chu kỳ, KHÔNG đếm ex-ante**). → entry PB 0.73 đủ đảm bảo 
 §2/§2.5 vẫn là HARD GATE thủ công + user duyệt từng tên. Sleeve special-situation ≤0.5–1.0% NAV/tên,
 NGOÀI book V2.4. Đề xuất nâng cấp `fearbuy_weekly_scan.sh` chạy FEARBUY v1 định lượng (gate −30% tự
 bật/tắt: 2026 hiện chưa −30% → screen "ngủ", crash sâu tự kích hoạt) — **chờ user duyệt, chưa wire.**
+
+---
+
+## 10. Checklist phân tích SÂU cho case KHÔNG có gate thị trường — khi không có −30% VNINDEX làm bộ lọc thô, phân tích phải GÁNH HẾT việc phân biệt hàng tốt vs hàng lởm
+> Thêm 2026-07-23 (job `Taylor_20260723_130951`, user chỉ đạo). Trích xuất TRỰC TIẾP từ due-diligence
+> đã làm rất kỹ với TV1 (SOTP) và DGC (CF one-time vs cấu trúc). Đây là **công cụ ĐỊNH TÍNH, SÂU,
+> per-case** — khác hẳn FEARBUY v1 (định lượng, auto-weekly). Ranh giới 2 công cụ ở §10.9.
+
+**Bối cảnh kích hoạt:** nhóm trigger **(a) scandal cá nhân** và **(d) gián đoạn tạm thời** — TV1/DGC/PNJ
+đều rẻ (PB≈book, PE nén) NHƯNG **VNINDEX KHÔNG sập −30%** đi kèm. FEARBUY v1 (gate thị trường −30%)
+CHỦ ĐÍCH không bắt nhóm này → khi user/Mike tự đưa 1 case loại "rẻ mà thị trường không sập", chạy
+checklist dưới. **Mỗi bước BẮT BUỘC, ghi rõ PASS/FAIL/AMBIGUOUS + số liệu**, không mô tả chung chung.
+
+### 10.1. Phân tầng rủi ro: PHÁP NHÂN vs CÁ NHÂN (bước phân biệt #1, quyết định nhất)
+- Người/sự kiện bị điều tra có **tách rời khỏi tài sản tạo tiền** không? Hỏi cụ thể: hợp đồng/giấy
+  phép/nhà máy có **tiếp tục vận hành** trong lúc điều tra không (đo bằng sản lượng/doanh thu mảng lõi
+  theo quý, KHÔNG bằng lời trấn an)?
+- **TEST PHÂN BIỆT THẬT (bài học TV1 vs DGC):** vụ án dính vào **hoạt động ngoại vi/cá nhân** (TV1: tư
+  vấn đấu thầu EVNNPT — thuỷ điện Sông Bung 5 **chưa 1 ngày dừng phát điện**) = QUALIFY-được; vụ án dính
+  **chính tài sản lõi vật lý** (DGC: mỏ apatit 25 bị dừng — nguồn nguyên liệu lõi) = gần NON. Viết ra
+  1 câu: "tài sản tạo ≥X% lợi nhuận có bị chạm trực tiếp không?"
+- FAIL ngay nếu: lõi kinh doanh CHÍNH là cái bị điều tra (OGC/FLC — "lõi giả tưởng").
+
+### 10.2. SOTP — tách & định giá ĐỘC LẬP tài sản lõi (bài học TV1, bước bỏ sót ở DD lần 1)
+- **Liệt kê tài sản theo mảng**, định giá TỪNG mảng độc lập, gán **tư vấn/mảng-dính-án = 0** (thận
+  trọng): TV1 = hydro Sông Bung 5 (57MW) đáy-DCF + tư vấn=0 → equity ~883 tỷ = 33.100đ/cp (+66%).
+- **Kiểm tra NỢ của tài sản lõi** (đừng định giá gộp): SB5 nợ dự án đã trả gần hết (257 tỷ→0,4 tỷ) →
+  equity value ≈ enterprise value. Bỏ sót nợ = sai to theo cả 2 chiều.
+- **NEO bằng comp M&A THẬT, không bằng multiple sách vở**: thuỷ điện Nậm Nơn 32 tỷ/MW → SB5 ~1.824 tỷ;
+  đấu giá SB5 2018 1.390–1.688 tỷ (gồm nợ, nay hết nợ). Comp giao dịch thật > multiple lý thuyết.
+
+### 10.3. Chất lượng lợi nhuận: CF_OA vs NP — one-time hay CẤU TRÚC (bài học DGC)
+- CF_OA quý-scandal âm trong khi NP dương = **cờ đỏ accrual/lõi**. NHƯNG **phân tách one-time vs cấu
+  trúc TRƯỚC khi kết luận**: DGC Q1 CF_OA −1.093 tỷ **phần lớn one-time** (331 tỷ khắc phục + timing vốn
+  lưu động) → Q2 bật dương +1.083 tỷ. 1 quý CF âm ≠ mất khả năng tạo tiền.
+- **Đọc TTM/nhiều-năm, KHÔNG 1 điểm** (bài học PVX §10.10): dùng cumulative 3Y CF_OA/NP + đếm % quý
+  CF_OA>0, so **base-rate NGÀNH** (đừng so 50% chung — Q1 mùa vụ ~49% DN CF_OA âm là bình thường).
+- **Ngoại lệ cần biết (nếu KHÔNG sẽ false-negative):** equity-method (VEA: LN là cổ tức JV, CF_OA cấu
+  trúc < NP — tiền ở dòng đầu tư) và ôm-tồn-kho (PNJ: vốn kẹt tồn kho vàng) → CF_OA<NP KHÔNG phải red-
+  flag. → nhóm (a) cash-cow/holding: đọc thêm **cổ tức nhận + CF gồm đầu tư**, đừng chỉ CF_OA.
+
+### 10.4. Bất thường bảng cân đối theo MẢNG: AR/DSO, tồn kho, phải-thu-dở-dang
+- **DSO/khoản phải thu tăng đột biến** so lịch sử & so peer = LN đang được "ghi nhận" chứ chưa thu tiền
+  (đặc biệt POC/xây lắp — WIP receivable phình). Đo DSO_P0 vs DSO_P4 và vs trung vị ngành.
+- Tồn kho/dở dang phình nhanh hơn doanh thu = ứ đọng/ghi nhận sớm. Chia theo mảng nếu DN đa ngành.
+- Nợ vay ngắn hạn tăng để đắp vốn lưu động (không phải đầu tư) = dấu hiệu căng thanh khoản.
+
+### 10.5. Solvency — SỐNG SÓT qua khủng hoảng (điều kiện tiên quyết, không có = vô nghĩa mọi định giá)
+- **Debt_Eq và XU HƯỚNG** (không chỉ mức): tăng dần = đi tới vỡ nợ (PVX 3,7→9,1). Sàn cứng đề xuất
+  cho sleeve: **Debt_Eq_P0 ≤ 2,5** (xem §10.10). CR/QuickR, lịch đáo hạn nợ vs tiền mặt.
+- Câu hỏi sinh tử: "DN có bị BUỘC bán tài sản / pha loãng cổ đông ở đáy không?" Nếu có → không phải
+  value opportunity, là bẫy giá trị.
+
+### 10.6. Sàn định giá & downside (không chỉ upside)
+- PB neo **tài sản THỰC** (đất/nhà máy/thuỷ điện định giá lại), không neo PE (EPS đáy vô nghĩa).
+- **Cổ tức làm sàn carry** (bài học DGC/VEA): DGC yield tổng ~21% (30% tiền mặt 2026 + 50% treo 2025),
+  VEA ~50%+/năm → trả tiền để CHỜ re-rating, hạ downside. Kiểm tra lịch sử chi trả (Dividend_Min3Y).
+- Book value vs giá: PB<1 dưới sổ = biên an toàn; nhưng phải qua §10.4 (book có thật không, AR ảo?).
+
+### 10.7. Catalyst & timing — có LỘ TRÌNH đóng gap không (đừng mua dead-money vô hạn)
+- Liệt kê catalyst THẬT có thời hạn: kết quả điều tra, kiểm toán ra BCTC, mở lại tài sản dừng, bán tài
+  sản. Phân biệt catalyst **còn giá trị** vs **đã vô hiệu** (TV1 lần 1: cổ tức 15% + bỏ phiếu kiểm toán
+  đều mất giá trị thực khi Big4 từ chối FY2026).
+- **Không lộ trình rõ = dead-money vài quý → size NHỎ hơn + chân trời DÀI hơn** (DGC mỏ 25 chưa có
+  lộ trình mở lại → ≤0,5–1,0% NAV, 1–2 năm).
+
+### 10.8. Đính chính chéo — đừng đánh đồng 2 việc khác nhau (bài học TV1 lần 1)
+- FY đã kiểm toán vs FY tương lai: TV1 lần 1 SAI khi đánh đồng "A&C kiểm toán sạch FY2025" với "Big4
+  từ chối FY2026" — 2 việc khác nhau. Luôn ghi rõ **năm tài chính** của mỗi rủi ro.
+- User overstate/understate số (DGC: cash thật ~10.922 tỷ không phải 13.000; EV ~3.472 tỷ không phải
+  ~1.400) — **verify từng con số bằng BQ**, giữ luận điểm nếu vẫn đứng vững sau khi sửa số.
+
+### 10.9. ⚠️ RANH GIỚI: FEARBUY v1 (định lượng, auto) vs Checklist §10 (định tính, sâu) — 2 CÔNG CỤ KHÁC NHAU
+| | **FEARBUY v1** (§9 Case#5 + `fearbuy_systematic_screen`) | **Checklist §10** (mục này) |
+|---|---|---|
+| **Loại** | Định lượng, quét TỰ ĐỘNG | Định tính, due-diligence per-case |
+| **Kích hoạt** | Auto weekly (`fearbuy_weekly_scan.sh`), **gate thị trường −30%** | Khi user/Mike tự đưa 1 case cụ thể |
+| **Tình huống** | Thị trường **SẬP SÂU** (crash diện rộng) → dò rộng ứng viên PB<0.7 | **"Rẻ nhưng thị trường KHÔNG sập"** (scandal cá nhân/gián đoạn — TV1/DGC/PNJ) |
+| **Đầu ra** | Danh sách ứng viên (candidate generator) | Kết luận QUALIFY/AMBIGUOUS/NON + size + entry/exit |
+| **Quan hệ** | Screen ra → mọi tên vẫn PHẢI qua §2/§2.5 + §10 + user duyệt | Là HARD GATE thủ công cho từng tên |
+
+**KHÔNG thay thế nhau.** FEARBUY v1 gate −30% cố tình "ngủ" khi thị trường chưa sập → nhóm (a)/(d)
+"rẻ-mà-thị-trường-không-sập" lọt lưới screen tự động là ĐÚNG THIẾT KẾ; §10 gánh đúng nhóm đó. Ngược
+lại khi thị trường crash sâu, FEARBUY v1 thu hẹp vũ trụ, rồi §10 (+§2/§2.5) chạy trên từng tên lọt ra.
+
+### 10.10. Red-flag PVX — POC/xây lắp biên mỏng + CF_OA âm đa-kỳ + đòn bẩy tăng = LN sổ sách hư cấu
+> Verify job `Taylor_20260723_130951`, chi tiết `research/pvx_2011_ruleverify_20260723.md`.
+- **PVX (Xây lắp Dầu khí, ICB 2357)**: NPM 3,1%, kế toán **percentage-of-completion** → TTM CF_OA/NP
+  **không bao giờ ≥1** khi NP dương (3Y cumulative −0,31), Debt_Eq 3,7→9,1 → **insolvency**. Lọt FEARBUY
+  v1 chỉ vì `CF_OA_P0>0` **1 quý** lumpy (2011Q3) ngay trước sập. r24 −57%→−70%.
+- **Red-flag bắt buộc kiểm khi case thuộc ngành POC/xây lắp/EPC (ICB 23xx)**: (biên NPM mỏng <5%) ∧
+  (CF_OA âm/lag NP **nhiều năm** — §10.3 TTM) ∧ (Debt_Eq tăng dần) → **LN sổ sách là hư cấu kế toán, DN
+  đang đi tới vỡ nợ, LOẠI** dù PB<1. (TV1 ICB **2791** consulting, KHÔNG thuộc 23xx → red-flag này không
+  áp; TV1 chết/sống theo §10.1–10.2, không theo red-flag ngành.)
+- **Fix rule tự động (chờ user duyệt, chưa wire):** thêm `Debt_Eq_P0 ≤ 2,5` vào FEARBUY v1 — loại PVX +
+  xoá thảm hoạ 2012, median ex24 +1,8pp, nhưng là **tail-insurance KHÔNG free-lunch** (cũng loại một số
+  V-recovery đòn-bẩy-cao 2020). CF_OA≥NP đa-kỳ **KHÔNG dùng** (false-negative PNJ/VEA). Sector-exclude
+  quá thô. → đòn bẩy là lever tự động sạch nhất; phần còn lại giao §10 thủ công.

@@ -151,3 +151,25 @@ hàng hoá.** Salience bias: user nhớ commodity 10-bagger, nhưng screen cho t
 - **Sizing**: đây là sleeve special-situation ≤0.5–1.0% NAV/tên như TV1/DGC discretionary, NGOÀI book
   V2.4. Vào chậm ở đáy, giữ 12–24 tháng, chốt theo PB normalize ~1.5–2.0×.
 - Mỗi tên vẫn PHẢI qua due-diligence §2/§2.5 + user duyệt. Screen chỉ thu hẹp vũ trụ tìm kiếm.
+
+---
+
+## 7. PVX 2011 rule-fix (job `Taylor_20260723_130951`, user phản hồi) — thêm leverage ceiling
+
+User: "xây lắp biên mỏng, dòng tiền không thực → PVX không thể là case". **Verify ĐÚNG** (chi tiết
+`pvx_2011_ruleverify_20260723.md`): PVX ICB 2357, NPM 3,1%, TTM CF_OA/NP không bao giờ ≥1 (POC
+accounting), Debt_Eq 3,7→9,1 vào insolvency. Lọt v1 vì `CF_OA_P0>0` **1 quý** (2011Q3 lumpy).
+
+**Đã test 3 hướng fix trên panel 273 episode:**
+1. **CF_OA≥NP đa-kỳ (user đề xuất #1) → BỎ**: false-negative PNJ 2015 (3Y −0,46) + VEA 2019 (−0,28),
+   cả 2 là WINNER. Cash-conversion không tách được PVX khỏi PNJ (tồn kho vàng)/VEA (equity-method).
+2. **Sector filter (user #2) → một phần đúng nhưng thô**: 2357 an toàn cho TV1 (2791) nhưng nhóm này
+   hỗn hợp (HBC-2020 +282%, SCI-2020 +723% cũng trong đó).
+3. **✅ Leverage ceiling `Debt_Eq_P0 ≤ 2,5`**: loại PVX + xoá thảm hoạ 2012, median ex24 +13,2→+15,0%,
+   sign-test 6/8→6/7 (p 0,14→0,06), tail giữ. **CAVEAT: KHÔNG free-lunch** — cũng loại V-recovery
+   đòn-bẩy-cao 2020 (LPB +297%, HDG +566%); dropped-set median vẫn +43%. Là **tail-insurance**, +1,8pp
+   median, đừng bán như alpha. Cân nhắc loại hẳn bank/financial (khung riêng).
+
+**Rule đề xuất (chờ user duyệt, KHÔNG tự wire)**: FEARBUY v1 + `Debt_Eq_P0 ≤ 2,5`. Ngưỡng do user
+chọn (2,5 vs 3,0). **Nhưng fix thật theo triết lý = red-flag PVX vào checklist DD thủ công** (§10
+backstop.md) — POC/xây lắp 23xx + biên mỏng + CF_OA âm đa-kỳ + đòn bẩy tăng = LN hư cấu, đi tới vỡ nợ.
