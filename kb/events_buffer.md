@@ -2977,3 +2977,16 @@
 - [2026-07-23T13:57:23Z] Taylor/heartbeat — Taylor_20260723_135623: {"status": "in_progress", "note": "Reusing prev-job LAG event engine (5389 signals PIT-attributed). Starting Q1: rating gap by regime."}
 - [2026-07-23T13:57:24Z] Taylor/heartbeat — Taylor_20260723_135623: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260723_135623", "source": "watcher"}
 - [2026-07-23T13:57:54Z] Taylor/heartbeat — Taylor_20260723_134350: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260723_134350", "source": "watcher"}
+
+## Consolidation 2026-07-23T14:07:01Z
+- [2026-07-23T13:58:24Z] Taylor/heartbeat — Taylor_20260723_135623: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260723_135623", "source": "watcher"}
+- [2026-07-23T13:59:25Z] Taylor/heartbeat — Taylor_20260723_135623: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260723_135623", "source": "watcher"}
+- [2026-07-23T14:00:17Z] Taylor/heartbeat — Taylor_20260723_135623: {"status": "in_progress", "note": "Q1 done (rating gap NOT concentrated in neutral - refutes hypothesis). Built 8-dim continuous panel PIT to 07-23. Starting Q2 univariate edge-vs-feature."}
+- [2026-07-23T14:00:25Z] Taylor/heartbeat — Taylor_20260723_135623: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260723_135623", "source": "watcher"}
+- [2026-07-23T14:01:25Z] Taylor/heartbeat — Taylor_20260723_135623: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260723_135623", "source": "watcher"}
+- [2026-07-23T14:02:25Z] Taylor/heartbeat — Taylor_20260723_135623: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260723_135623", "source": "watcher"}
+- [2026-07-23T14:03:25Z] Taylor/heartbeat — Taylor_20260723_135623: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260723_135623", "source": "watcher"}
+- [2026-07-23T14:04:06Z] Taylor/heartbeat — Taylor_20260723_135623: {"status": "in_progress", "note": "Q2 done: no continuous gate beats discrete DT5G c4 on robustness (breadth/liq are OOS-only, IS sign flips). Within-NEUTRAL breadth split real but OOS-only. Now Q3 current-state read."}
+- [2026-07-23T14:04:25Z] Taylor/heartbeat — Taylor_20260723_135623: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260723_135623", "source": "watcher"}
+- [2026-07-23T14:05:26Z] Taylor/heartbeat — Taylor_20260723_135623: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260723_135623", "source": "watcher"}
+- [2026-07-23T14:06:26Z] Taylor/heartbeat — Taylor_20260723_135623: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260723_135623", "source": "watcher"}
