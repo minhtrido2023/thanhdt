@@ -46,6 +46,23 @@ không thấy bản mới, chạy nhầm bản cũ — sự cố thật 2026-07-
 sẵn sàng trước deadline → **escalate thật** (Telegram + Discord + bus event `question`
 `plan-t1-not-ready`), KHÔNG tự retry/re-dispatch — quyết định bước tiếp theo là của người.
 
+## TV1 discretionary (SpaceX) — PHẢI trừ cash trước khi tính plan V2.4 hàng ngày (thêm 2026-07-23)
+SpaceX có 1 chương trình gom TV1/PECC1 riêng (`data/trade_plans/discretionary/plan_TV1_SpaceX_discretionary_20260723.json`, book=DISCRETIONARY_SPECIAL, ngoài V2.4, đã user duyệt) — tranche
+07-24 (200cp≈3,98M) + 07-27 (200cp≈3,98M). File này KHÔNG tự động trừ vào `cash_vnd` khi lập
+plan V2.4 hàng ngày vì nó tách file cố ý (không bị EOD clobber). TRƯỚC khi tính size lệnh V2.4
+cho SpaceX ngày nào trùng lịch tranche TV1, PHẢI trừ trước số tiền tranche đó khỏi cash khả dụng
+— nếu không, tổng nhu cầu 2 nguồn có thể vượt cash thực (sự cố thật 07-24: V2.4 45,9M + TV1
+3,98M = 49,9M > cash 49,1M, thiếu ~0,78M). Luôn check file discretionary trước khi chốt size.
+
+## LAG entry — KHÔNG tự override RATING_FAIL bằng DCF (thêm 2026-07-23)
+8L rating ≤3 là golden gate nhị phân cho custom30V/CAPIT. LAG book (PEAD, `LAG_KW`) về mặt công
+thức backtest KHÔNG gate theo 8L rating (chỉ theo NP_R/prior_n_good/pa_HL3) — nhưng due-diligence
+mặc định (mandate 2026-07-21, áp cho MỌI book) vẫn phải chạy cho từng ứng viên LAG. Nếu 1 mã LAG
+có rating≥4 (RATING_FAIL), KHÔNG được tự ý đưa vào plan chỉ vì DCF cheap — đó là quyết định
+chính sách (có chấp nhận DCF override rating-fail hay không) cần escalate hỏi Mike/user, không tự
+quyết. Sự cố thật 2026-07-23: TRC rating=4/tier=D, DollarBill tự ghi "RATING_FAIL" trong note rồi
+vẫn đưa vào plan vì "DCF CHEAP MoS+40%" — không escalate trước.
+
 ## 2 tài khoản LIVE hiện tại — xem safety core (SpaceX margin, ZaloPay cash-only+excluded DGC).
 
 ## LAG entry EXCLUDE list — kiểm tra TRƯỚC khi đưa mã LAG mới vào plan (cập nhật 2026-07-23)
