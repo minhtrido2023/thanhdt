@@ -3771,3 +3771,105 @@ không suy đoán từ văn bản này):**
   answer, >6 ngày — không re-verify lại hôm nay (ngoài phạm vi audit chính của retro này).
 
 **Verified by: Wags — gaps found and fixed: (1) job id typo `Taylor_20260722_155919` → correct `Taylor_20260722_155549`; (2) added omitted incident #4 (Discord topic-routing / `DISCORD_THREAD_ID` not exported to child process, Wags+arch-reviewer, commits b3e9fe8+1d9dcc6+f0eb2b2, CONFIRMED) and updated the summary table + incident count.**
+
+## RETRO — 2026-07-23: 0 sự cố mới, 0 pattern mới (ngày sạch — 1 near-incident đã tự xác định NOT-A-BUG cùng ngày, khớp tiền lệ 07-20)
+
+**Bằng chứng đã kiểm tra (không suy đoán):**
+- `grep '^## 2026-07-23' kb/INCIDENTS.md` → **0 entry** (chưa ai ghi gì cho ngày này — nhất
+  quán với việc không có sự cố thật, không phải gap báo cáo).
+- Bus sweep `bus/inbox/*.jsonl`, `ts` bắt đầu `2026-07-23`, mọi agent: khối lượng lớn
+  (Taylor 365, DollarBill 85, Mafee 15, Winston 20, Wags 14, Mike 13, arch-reviewer 2,
+  quant-skeptic 1) — gần như toàn bộ là finding R&D (fear-buy sleeve TV1/DGC/PVX, LAG
+  regime deep-dive #1/#2, universe_pit G-phases) đã có verdict quant-skeptic/user rõ ràng,
+  KHÔNG phải sự cố vận hành.
+- `event_type=error` trong ngày: **7 event, đúng 1 luồng** — Mafee `APPROVAL_GATE_BLOCK` ×5
+  (SpaceX ×2 + ZaloPay ×3, 02:05Z-02:15Z — sửa theo Wags: draft gốc ghi nhầm ×4) + `bot-fail`
+  ×2 (rc=2, cùng nguyên nhân). Winston tự phát hiện CÙNG LÚC và ghi **2 event song song** trên
+  bus (`event_type=question` 02:07:21Z **và** `event_type=finding` chứa verdict `NOT_A_FAULT`,
+  trace `Winston_20260723_020515`): *"Không phải lỗi hệ thống... Winston không tự sửa
+  plan/approval (ranh giới cứng §3)"* — plan `requires_user_approval=true` nhưng `approved_by`
+  trống lúc chạy 02:05 (giờ UTC = 09:05 ICT), bot từ chối đúng thiết kế, không đoán không tự bỏ
+  qua. Verify tiếp: sau khi user duyệt, lượt chạy lại 06:00Z (=13:00 ICT, phiên chiều) **cả 2
+  account `bot-done rc=0`** — khớp hoàn toàn.
+- **Đối chiếu tiền lệ**: RETRO 07-20 đã gặp ĐÚNG hình dạng lỗi này (Mafee `APPROVAL_GATE_BLOCK`
+  + `bot-fail`, ZaloPay) và Winston đã tự audit + kết luận `NOT-A-BUG` (approval gate hoạt
+  động đúng thiết kế) ngay hôm đó — retro 07-20 không đưa vào bảng sự cố. Hôm nay lặp lại
+  đúng cơ chế, đúng kết luận, tự phát hiện + tự đóng trong ngày (không cần retro can thiệp) →
+  **không tính là sự cố**, chỉ ghi nhận là hoạt động đúng thiết kế (gate an toàn, không phải
+  gap).
+- `bin/wakeup_audit.py --since 2026-07-23`: **26 lượt dispatch `--bg`, 0 thiếu ScheduleWakeup
+  (0,0%)** — tuân thủ MIKE.md §8 hoàn toàn sạch, khác hẳn 07-20 (6/24=25,0%).
+- Pattern `git-commit-blocked-by-classifier` (RETRO 07-22 gọi tên lần đầu, 2 ngày liên tiếp
+  07-21→07-22, cảnh báo "lần 3 bất kỳ lúc nào → escalate ngay"): sweep `bus/inbox/Taylor.jsonl`
+  ts=`2026-07-23` cho từ khoá classifier/commit-block/permission → **0 hit**. Pattern KHÔNG
+  tái diễn hôm nay — chưa đủ điều kiện escalate (cần lần 3 xảy ra thật), nhưng vẫn CHƯA có
+  prevention hệ thống nào được triển khai (2 đề xuất từ RETRO 07-22 — permission rule riêng
+  cho `git commit` dưới `dispatch.sh`, hoặc `dispatch.sh` tự commit sau verify CONFIRMED — đều
+  chưa làm). Tiếp tục theo dõi, không đóng mục này.
+- Commit `734cbac` (topic-routing fix, mục 4 của RETRO 07-22) — **sửa theo Wags: draft gốc ghi
+  sai "arch-reviewer CONFIRMED"**. Thực tế trên bus: arch-reviewer trả `NEEDS_CHANGES` (07-22
+  01:33Z) rồi `INCONCLUSIVE` (07-22 05:55Z) — **KHÔNG có event CONFIRMED nào cho commit
+  `734cbac`** trên bus. Commit tồn tại thật (verify qua `git log`), nhưng trạng thái review của
+  nó là INCONCLUSIVE, không phải đã đóng-xác-nhận như RETRO 07-22/working-memory từng ghi. Đây
+  chính là dạng lỗi mà retro process đang cố bắt (khẳng định verdict mà không đối chiếu event
+  thật) — **cần theo dõi lại: commit 734cbac có cần re-review arch-reviewer không, hay đã có
+  quyết định khác đóng nó (vd user tự chấp nhận INCONCLUSIVE)?** Chưa rõ, carry sang việc treo.
+- Câu hỏi escalate cũ đã kiểm tra lại (verify artifact thật, không suy đoán):
+  - `retro-pattern-recurring-dataprovenance` — đã có `answer` (07-10, CLOSED, bright-line rule
+    DNSE-vs-BQ đã ghi vào `coding_guidelines.md` §6).
+  - `retro-pattern-recurring-headless-wake-assumption-3` — ghi nhận CLOSED-BY-FIX (Wags
+    07-22T01:27:49Z, commit `388f56f`); tình trạng đóng-chính-thức tương tự cần đối chiếu lại
+    do phát hiện G2 ở trên (không tự động tin verdict CONFIRMED nếu chưa thấy event thật).
+  - `retro-pattern-recurring-cross-account-contamination-2` — PARTIALLY-CLOSED (Wags
+    07-22T01:27:49Z): rule §12 + audit 4/4 script sạch, 1 residual đã ghi rõ
+    (`execution_quality_review.py` mặc định gộp 2 account, chấp nhận được vì chỉ dùng ad-hoc).
+  - `retro-pattern-recurring-data-registry-accuracy-5days` (07-15) và
+    `retro-pattern-recurring-joblifecycle-timeout-3` (07-14) — **vẫn KHÔNG tìm thấy event
+    `answer`/`decision` khớp topic trên bus**, đã >8 ngày. Carry-over, không phải sự cố mới
+    hôm nay nhưng đáng chú ý là 2 câu hỏi cũ nhất chưa từng được trả lời.
+  - Dọn crontab paper-trading lạc hậu (diff `Winston_20260712_151206`) — verify `crontab -l`
+    hôm nay: **vẫn còn nguyên 4 dòng paper-main cũ** (09:10 T2/T4/T6, 10:46 T3/T5, lunch-pkill
+    11:32, 13:05 chiều) — chưa áp dụng, không đổi so với các RETRO trước.
+
+**3 câu hỏi bắt buộc — áp dụng ở mức ngày (không có sự cố cụ thể mới để trả lời từng cái):**
+a. Không có sự cố mới phát sinh hôm nay để phân loại MỚI/TÁI DIỄN.
+b. Không có gì cần đóng ở tầng sự cố. Các mục HỞ đã biết (bug#3 `sync_bq_cache.py`
+   ticker_financial delta-only-sync, `ticker_prune`/`ticker_financial` corruption chờ quyết
+   định khôi phục, crontab paper-main lạc hậu, prevention cho git-commit-blocked-by-classifier,
+   và MỚI hôm nay: xác nhận lại trạng thái review thật của commit `734cbac`) đều **carry-over
+   nguyên trạng, +1 ngày chưa xử lý** — không có hành động mới nào trong ngày đối với các mục
+   này.
+c. Không có pattern MỚI. Điều đáng ghi nhận: 2 pattern đang bị theo dõi từ trước
+   (git-commit-blocked-by-classifier — chờ lần 3; APPROVAL_GATE_BLOCK — đã tự xác định
+   NOT-A-BUG 2 lần liên tiếp 07-20 và 07-23, đủ để coi là hành vi thiết kế ổn định, không cần
+   theo dõi thêm) đều KHÔNG xấu đi hôm nay.
+
+| # | Hạng mục | Phân loại | Nguồn gốc | Người ghi chép |
+|---|---|---|---|---|
+| — | (không có sự cố nào phát sinh trong ngày; 1 near-incident tự xác định NOT-A-BUG, xem trên) | — | — | Winston (`Winston_20260723_020515`, question + finding 02:07:21Z) — Mafee ghi error events gốc |
+
+**Ghi nhận tích cực:** ngày sạch thứ 2 kể từ chuỗi RETRO có sự cố liên tục 07-17→07-22 (mỗi
+ngày ≥1-4 sự cố) — không tính từ 07-16 (ngày sạch trước đó, cách 07 ngày). Wakeup-compliance
+0,0% vi phạm là mức tốt nhất đo được kể từ khi `wakeup_audit.py` bắt đầu chạy trong retro
+(07-20 25,0%). Không nên đọc thành "hệ thống đã ổn định hẳn" — các mục HỞ carry-over vẫn
+nguyên, chỉ là hôm nay không có sự kiện MỚI nào phơi bày thêm.
+
+**Việc còn treo sang ngày mai (kế thừa, +1 ngày chưa xử lý):**
+- `sync_bq_cache.py` bug#3 (`ticker_financial` delta-only sync không bắt kịp sửa-đổi lịch sử,
+  RETRO 07-22) — chưa dispatch ai fix.
+- Pattern `git-commit-blocked-by-classifier` — 0/2 prevention đề xuất từ RETRO 07-22 đã triển
+  khai; theo dõi lần 3.
+- `ticker_prune`/`ticker_financial` corruption 07-14/15 — vẫn chờ quyết định khôi phục backup
+  từ user (đang hỏi BQ admin upstream).
+- Dọn crontab paper-trading lạc hậu (diff `Winston_20260712_151206`) — chưa áp dụng.
+- **MỚI hôm nay**: xác nhận lại trạng thái review thật của commit `734cbac` (topic-routing
+  fix) — bus chỉ có NEEDS_CHANGES/INCONCLUSIVE từ arch-reviewer, không có CONFIRMED; RETRO
+  07-22/working-memory từng khẳng định "CONFIRMED" sai. Cần kiểm tra có quyết định đóng nào
+  khác hay commit này cần re-review.
+- 2 câu hỏi escalate cũ nhất chưa có answer trên bus:
+  `retro-pattern-recurring-data-registry-accuracy-5days` (07-15, >8 ngày),
+  `retro-pattern-recurring-joblifecycle-timeout-3` (07-14, >9 ngày).
+- M5 nợ cũ: `executor.py`/paper trials đọc `ticker_prune.parquet` monolith chết từ 06-26 —
+  chưa dispatch, không khẩn (chỉ ảnh hưởng paper).
+
+**Verified by: Wags — gaps found and fixed: (G1) sửa APPROVAL_GATE_BLOCK ×4→×5 (SpaceX×2+ZaloPay×3), tổng 7 error không đổi; (G2, mức vừa) gỡ claim sai "commit 734cbac, arch-reviewer CONFIRMED" — bus thực tế chỉ có NEEDS_CHANGES (01:33Z) + INCONCLUSIVE (05:55Z), không có CONFIRMED, đã thêm vào việc treo để xác minh lại; (G3) bổ sung Winston ghi 2 event song song (question + finding NOT_A_FAULT), không chỉ 1 event question như draft gốc.**
