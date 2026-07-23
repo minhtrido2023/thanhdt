@@ -814,7 +814,7 @@ lại khi thị trường crash sâu, FEARBUY v1 thu hẹp vũ trụ, rồi §10
    comparable. Panel realized-only (n=63): kept-set của **8L≤3 median r24 +22,5%** > no-gate +16,4% > sàn
    chung +17,1%; 8L≤3 loại 8 thảm hoạ (<−30%) vs sàn chung chỉ 2.
 
-**Cách dùng cho FEARBUY v1 (đề xuất, KHÔNG tự wire — chờ user):**
+**Cách dùng cho FEARBUY v1 (User CHỐT 2026-07-23 — đồng ý đề xuất, dùng chính thức từ đây):**
 - **BỎ mọi sàn Debt_Eq chung.** Thay vào: gắn **8L rating point-in-time** (qua máy `custom_basket.rating_asof`
   đã có) vào mỗi ứng viên screen. **rating≥4 = cờ CHẤT-LƯỢNG-CẢNH-BÁO** đẩy vào due-diligence §10 thủ công.
 - KHÔNG nên biến 8L≤3 thành cổng auto CỨNG cho sleeve này: fear-buy **cố tình** muốn một số survivor bị
