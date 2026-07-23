@@ -2521,3 +2521,6 @@
 ## Consolidation 2026-07-23T03:07:01Z
 - [2026-07-23T02:15:01Z] Mafee/error — APPROVAL_GATE_BLOCK: {"account": "ZaloPay", "plan_date": "2026-07-23", "reason": "plan 2026-07-23 [ZaloPay] có requires_user_approval=true nhưng approved_by trống — 2 lệnh chưa được user duyệt, bot TỪ CHỐI thực thi (không đoán, không tự bỏ qua)."}
 - [2026-07-23T02:18:32Z] Mike/decision — plan-2026-07-23-approved: {"date": "2026-07-23", "approved_by": "user", "accounts": {"SpaceX": {"action": "HOLD", "orders": 0, "note": "offbook=0 confirmed, active_nav 909.28M, gross 94.6%"}, "ZaloPay": {"action": "REBALANCE", "orders": 2, "summary": "sell VPB 800cp, buy HDB 659cp"}}, "note": "Mafee authorized thuc thi sang mai."}
+
+## Consolidation 2026-07-23T05:07:02Z
+- [2026-07-23T04:51:10Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 52660}
