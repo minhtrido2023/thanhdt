@@ -849,3 +849,115 @@ market drawdown (càng xấu càng phải rẻ). Đã thiết kế đủ + backt
   scandal fear (TV1/DGC/PNJ — thị trường ổn, 1 tên sập) = chỗ V2.4 KHÔNG với tới = giá trị fear-buy
   thật**, giữ nguyên khung discretionary §1-§10 (≤1% NAV/tên, due-diligence, user duyệt).
 - Cần `verify_finding.sh` (quant-skeptic) TRƯỚC nếu user chọn overlay nhỏ — chưa làm trong job này.
+
+---
+
+## §12. Holding-period + Sizing RULE cho sleeve idiosyncratic (job `Taylor_20260723_170729`, 2026-07-24)
+
+> Trả lời 2 câu user: **"giữ bao lâu"** + **"đầu tư bao nhiêu"** — thay heuristic tròn số cũ (18m,
+> 2-4%/tên) bằng quy tắc CÓ CĂN CỨ DỮ LIỆU. Panel MỚI = **idiosyncratic** (1 mã sập ≥40% từ đỉnh-1-năm
+> của CHÍNH NÓ **trong khi VNINDEX vẫn ≥−15% đỉnh** = thị trường ổn), quality-floor (NP_P0>0 ∧
+> CF_OA_P0>0 ∧ ROE_Min3Y≥0), in `universe_pit` PIT. **N=1209 episode, 2007–2026.** KHÔNG dùng lại panel
+> market-wide (đã chứng minh trùng V2.4 ở §11). Artefacts: `fearbuy_idio/screen_idio.sql` +
+> `analyze_*.py` (tái lập). **RESEARCH-ONLY — tài liệu tham khảo khi user duyệt case, KHÔNG wire.**
+
+### ⚠️ Phát hiện #1 (quan trọng nhất, phản trực giác) — screen CƠ HỌC idiosyncratic KHÔNG có edge
+Khác hẳn market-wide crash (bán tháo bừa → quality bị vứt rẻ → mua quality thắng, §systematic screen
+median ex12 **+38%**), một mã sập 40% **khi thị trường vẫn ổn** thì trung bình là **thị trường định giá
+ĐÚNG một vấn đề riêng của doanh nghiệp** → phần lớn là **value-trap**:
+
+| Mốc giữ | N | median return | median **excess** vs VNINDEX | win-rate |
+|---|---|---|---|---|
+| 3m | 1154 | +2.7% | +2.6% | 55% |
+| 6m | 1119 | −3.5% | −4.8% | 44% |
+| 12m | 1094 | −1.5% | **−7.2%** | 43% |
+| 18m | 1037 | −5.8% | **−11.8%** | 41% |
+| 24m | 991 | −3.3% | **−14.4%** | 43% |
+| 36m | 934 | +7.3% | −8.9% | 45% |
+
+**Median excess ÂM ở mọi mốc 6–36m, win-rate <50%.** Mean dương (+16–18% ex24m) nhưng chỉ vì **đuôi
+phải béo** (vài siêu-winner DGC-2019 +721%, FIT-2019 +192% — trúng chu kỳ về sau). **Bộ lọc CƠ HỌC
+(rẻ PB / đòn bẩy thấp / biên cao / thanh khoản) KHÔNG cứu được** — thậm chí combo "QUALIFY-ish"
+(PB<1 ∧ DE≤2.5 ∧ NPM≥5% ∧ ADV≥5B) làm median ex24 **TỆ hơn −28%, win 30%**. → **Xác nhận tuyệt đối
+luận điểm §10: sleeve idiosyncratic là trò DUE-DILIGENCE ĐỊNH TÍNH, không có screen cơ học thay được.**
+(PNJ-2015 & VEA-2019 — 2 winner sạch — thậm chí KHÔNG lọt screen −40% cơ học: cú sập của chúng nông
+hơn/UPCoM. Winner sạch không nằm ở đuôi drawdown sâu nhất.)
+
+### ⚡ Phát hiện #2 — Câu trả lời "giữ bao lâu" = CATALYST-CONFIRM, KHÔNG phải lịch cố định
+Đây là kết quả mạnh nhất & khả thi vận hành nhất. Test proxy catalyst: **sau khi vào, vị thế có hồi
+(r6m>0 hoặc r9m>0) không** = thị trường bắt đầu re-rate khi lõi chứng minh còn nguyên:
+
+| Nhánh | N | median r24 | median **ex24** | **win-rate 24m** | mean r24 |
+|---|---|---|---|---|---|
+| TẤT CẢ (giữ mù theo lịch) | 991 | −3% | −14% | 43% | +33% |
+| **Xác nhận trong 6m (r6m>0) → GIỮ** | 426 | +36% | **+19%** | **62%** | +84% |
+| KHÔNG xác nhận 6m → **BỎ** | 565 | −27% | −29% | 28% | −6% |
+| Xác nhận trong 9m (r9m>0) | 425 | +45% | **+24%** | **65%** | +94% |
+
+**Tách biệt KHỔNG LỒ (62% vs 28% win-rate) & BỀN: confirmed-6m thắng not-confirmed ở 13/14 năm**
+(chỉ 2020 hoà vì mọi thứ hồi, 2024 chưa đủ 24m forward). → **Giữ MÙ theo lịch 18/24m thua trên
+median** (nhánh không-xác-nhận là bẫy −29%). **Quy tắc đúng: vào thăm dò → ĐÒI xác nhận trong 6–9m
+(giá ổn/hồi + BCTC sau khủng hoảng chứng minh lõi tạo tiền lại) → nếu XÁC NHẬN thì giữ DÀI, nếu
+KHÔNG thì THOÁT.** Không phải "giữ đủ 18 tháng rồi xét".
+> Caveat trung thực: r6m>0 có phần là **momentum/survivorship** ("thứ đã lên hay lên tiếp"), không phải
+> 100% catalyst cơ bản — nhưng nó CAUSAL (chỉ dùng thông tin tới mốc 6m), khả thi, trùng khớp thời điểm
+> BCTC-xác-nhận (~2 quý), và tách biệt lớn+bền → bài học vận hành thật: **sleeve phải được QUẢN LÝ có
+> cổng tái-đánh-giá 6–9m, không mua-rồi-quên.**
+
+**Một khi ĐÃ xác nhận → giữ bao lâu:** winner nhả lời CHẬM & MUỘN (median winner r = 8%/32%/45%/68%/73%
+tại 6/9... 12/18/24/36m). Risk-adjusted (r/|maxDD-trong-kỳ|) chỉ **dương ở 36m** (âm ở 12/24m); maxDD
+từ điểm vào **sâu: median −28% @12m, −39% @24m** (bạn SẼ ngồi qua thêm một cú giảm). → **Sau xác nhận,
+chân trời tối ưu 24–36m**, chấp nhận dao động sâu; đừng chốt non ở 12m.
+
+### 💰 Phát hiện #3 — "Đầu tư bao nhiêu": Kelly ⇒ size THEO ĐỘ BẢO VỆ DOWNSIDE, không phải số phẳng
+1. **Kelly trên panel cơ học = ảo giác đuôi-béo.** f*≈0.44 nhưng do vài siêu-winner kéo mean; N_eff nhỏ
+   (số crisis/tên độc lập, không phải 991), median bet LỖ → **loại, Kelly không robust với đuôi phải +
+   sai số ước lượng mean.** KHÔNG dùng.
+2. **Kelly có-điều-kiện-DD là lưỡi dao quanh break-even.** Với loser NON blended **−70%**:
+   break-even p* = 70/(W+70). Winner khiêm tốn VEA-like +22% → cần p>76% (gần như hoàn hảo); blended
+   +80% → p>47%; PNJ-tail +249% → chỉ cần p>22%. **Base-rate cơ học win ~43–48% ⇒ bet NGÂY THƠ
+   (không DD) ≈ hoà tới âm.** Chỉ DD đẩy p qua break-even mới có EV — mà p **không chứng minh được**
+   (N=2 winner sạch).
+3. **Point-estimate quarter-Kelly** (p=0.50, W=+100%, L=−70%) ≈ **5% NAV/tên** — NHƯNG sập về **0** ở
+   kịch bản bi quan (p=0.45, W=+80%). Vì p bất khả chứng + tồn tại đuôi **−100% (FLC)**, phải hạ **sâu
+   dưới** point-Kelly (~1/10-Kelly) → về đúng vùng "**phí bảo hiểm chịu được**".
+4. **★ UPGRADE THẬT (thay "2-4%" cũ): size do LOSER-payoff = độ bảo vệ downside chi phối — đúng thứ DD
+   đo được:**
+
+   | Loại case | Downside thật (loser) | Kelly cho phép | **SIZE đề xuất/tên** |
+   |---|---|---|---|
+   | **Fear thuần / cược re-rating** (không sàn tài sản, đuôi −70/−100%) | −70% | ~0 trừ khi p≥0.55–0.65 | **0.5% NAV** |
+   | **Asset-backed / SOTP** (sàn tài sản vật lý, downside −20/−30%) | −25% | ≥1.0 dễ dàng | **1.0–1.5% NAV** (ràng buộc = **thanh khoản**, không phải Kelly) |
+
+   → "2-4%/tên" cũ **quá cao** (không phân biệt độ bảo vệ, vượt cả quarter-Kelly cho fear thuần).
+   "0.5-1.0%" cũ ĐÚNG cho fear thuần, nới tới **1.5%** CHỈ khi tài sản vật lý chặn đáy (giảm loser
+   payoff → Kelly bung ra).
+
+### 🧢 Phát hiện #4 — Trần TỔNG sleeve
+- **Tần suất cơ hội THẬT hiếm:** panel cơ học ~64 case/năm nhưng phần lớn là trap/cyclical (median LỖ).
+  Case **QUALIFY-grade thật** (scandal tách-lõi, lõi còn tạo tiền — PNJ'15/VEA'19/DGC'20/TV1'26…) ≈
+  **0.7–1.5/năm, thường 0**, dồn cụm khi có sóng khởi tố (2026: TV1+DGC+PNJ+JVC cùng lúc).
+- **Tương quan giữa case idiosyncratic THẤP** (mỗi case 1 công ty/lý do riêng; độ phân tán ex24 trong
+  cùng năm rất lớn, std 50–240%) → giữ **3 tên đồng thời = đa dạng hoá THẬT** (không giả vờ).
+- **Worst-case chịu được:** 3 tên × 1% = **3% NAV gross**; toàn bộ hoá NON −70% = **−2.1pp NAV**; thảm
+  hoạ toàn bộ FLC −100% = **−3.0pp**. Chấp nhận như phí bảo hiểm đã biết.
+- **→ Trần: tổng sleeve ≤ 3% NAV, tối đa 3 tên đồng thời** (khớp con số cũ nhưng nay NEO vào tần suất
+  + worst-case, không phải tròn số). Sóng crackdown lớn có thể nới 4 tên NHỎ (0.5–0.75%) vẫn ≤3% tổng.
+
+### ✅ Phát hiện #5 — Áp lên TV1 (đang có)
+TV1 nằm trong panel (stock_dd **−49.5%**, mkt_dd **−13.5%** = đúng idiosyncratic, PB 0.98). Size đã
+duyệt **0.5–1.0% NAV (do THANH KHOẢN ADV~1 tỷ/ngày)** — vì TV1 là **asset-backed SOTP** (Sông Bung 5
+chặn đáy, loser ~−25%), Kelly cho phép **≥1.0–1.5%** → **thanh khoản binding TRƯỚC Kelly, KHÔNG mâu
+thuẫn.** Nếu bỏ ràng buộc thanh khoản, "đúng ra" TV1 ~1.0–1.5%; trần 1.0% hiện tại là **hợp lý & thận
+trọng**. Cổng catalyst-confirm §12#2 áp cho TV1: theo dõi xác nhận giá/SOTP-catalyst trong 6–9m, không
+giữ mù chờ đủ 2 năm.
+
+### 📌 Tóm tắt quy tắc (thay heuristic cũ)
+1. **Holding = catalyst-conditional, KHÔNG lịch:** vào thăm dò → đòi xác nhận (giá hồi + BCTC lõi tạo
+   tiền lại) trong **6–9m** → xác nhận thì giữ **24–36m** (winner nhả lời muộn), không thì **THOÁT**
+   (nhánh không-xác-nhận là bẫy −29%). Giữ mù 18/24m thua trên median.
+2. **Sizing theo độ-bảo-vệ-downside:** fear thuần **0.5%**/tên; asset-backed/SOTP **1.0–1.5%**/tên.
+   "2-4%" cũ quá cao; số neo vào Kelly có-điều-kiện + đuôi −100% + p bất khả chứng.
+3. **Trần sleeve ≤3% NAV, ≤3 tên** đồng thời (tần suất ~1/năm, tương quan thấp, worst-case −2 tới −3pp).
+4. **Vẫn CHỈ mua case qua due-diligence §2/§10 + user duyệt.** Screen cơ học idiosyncratic **KHÔNG** có
+   edge (median LỖ) → tuyệt đối không auto-buy; DD định tính gánh 100% việc phân biệt.
