@@ -9,20 +9,20 @@
   Open: 1,362,900 rows / 522 tk
 
 [2] Loading states (TQ34b + LIVE)...
-[ADAPTIVE gate K1=3 K2=2 encAdapt=False K1c=10] 249 DT5G days differ from production base-gate (3082 rows)
-  [STATE_OVERRIDE=dt5g] TQ34b state replaced by macro_state_live.state (3082 rows, 45 macro-diff days)
+[ADAPTIVE gate K1=3 K2=3 encAdapt=True K1c=10] 220 DT5G days differ from production base-gate (3082 rows)
+  [STATE_OVERRIDE=dt5g] TQ34b state replaced by macro_state_live.state (3082 rows, 32 macro-diff days)
 
 [3] D1 RE_BACKLOG_BUY reclassification...
-[BQ_LOCAL_CACHE] query took 90.2s (167348 rows)
+[BQ_LOCAL_CACHE] query took 92.6s (167348 rows)
   RE_BACKLOG_BUY reclassified: 1,615
   After SV_TIGHT: 697,499 rows
 
 [8] Running legs (prod spec)...
-  BAL_TQ_base final: 252.401B
+  BAL_TQ_base final: 258.269B
   BAL_LIVE_base final: 257.971B
-  BAL_TQ_kelly final: 298.929B
-  VN30_TQ_base final: 199.089B
-  VN30_TQ_kelly final: 230.517B
+  BAL_TQ_kelly final: 312.658B
+  VN30_TQ_base final: 208.618B
+  VN30_TQ_kelly final: 245.169B
 
 [9] LAGGED schedule + books...
   LAG v12 : 307.103B
@@ -39,11 +39,11 @@
   HEADLINE  (2014-01-01 -> 2026-05-15)  init=50B
 ====================================================================================================
   System                     CAGR   Sharpe    MaxDD  Calmar   Wealth   TotRet
-  V1 V11+TQ34b            +19.49%    +1.30  -22.27%   +0.88    +9.04 +803.93%
-  V2 V12+TQ34b            +21.58%    +1.62  -13.76%   +1.57   +11.20+1019.59%
+  V1 V11+TQ34b            +19.81%    +1.31  -22.68%   +0.87    +9.35 +834.76%
+  V2 V12+TQ34b            +21.68%    +1.62  -14.54%   +1.49   +11.31+1031.34%
   V3 V12+LIVE             +21.67%    +1.63  -12.79%   +1.69   +11.31+1030.74%
-  V4 V121_ENS+TQ34b       +22.52%    +1.53  -15.96%   +1.41   +12.31+1131.39%
-  V5 V4+KellyQ2           +24.15%    +1.50  -18.36%   +1.32   +14.51+1350.73%
+  V4 V121_ENS+TQ34b       +22.73%    +1.54  -16.64%   +1.37   +12.58+1157.78%
+  V5 V4+KellyQ2           +24.48%    +1.50  -18.87%   +1.30   +15.00+1399.62%
   VNI B&H                 +11.42%    +0.68  -45.26%   +0.25    +3.81 +280.88%
 DONE.
 ADP_DONE

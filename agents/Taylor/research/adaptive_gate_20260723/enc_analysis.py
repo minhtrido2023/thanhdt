@@ -4,7 +4,7 @@ Family-2 (enC shortcut) focused analysis + noise quantification.
 The ONLY path that can buy lead in real crashes is shortening enC (into-CRISIS),
 because real crashes go NEUTRAL->raw-CRISIS, not NEUTRAL->raw-BEAR.
 Question: does shortening enC on '3 consecutive down closes' buy lead WITHOUT
-exploding false-panic commits? The raw base fires CRISIS 763/3130 days (24%).
+exploding false-panic commits? The raw base sits in CRISIS 713/3130 days (22.8%).
 """
 import numpy as np, pandas as pd, sys
 sys.path.insert(0,'/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/adaptive_gate_20260723')
