@@ -53,6 +53,7 @@
 | 00:00 (daily) | `fleet_backup.sh` | git repo | GitHub `mike-fleet` branch | DR | sau sync 23:45 (~15') | — |
 | 00:30 (daily) | `daily_retro.sh` | events hôm qua trọn vẹn | retro report + Wags verify | user | sau backup (00:00) | — |
 | 02:00 (daily) | `kb_nightly.sh` | events_buffer | trim/archive KB | — | — | — |
+| Friday 08:10 (thêm 2026-07-23) | `fearbuy_weekly_scan.sh` | `anomaly_scan.py` (BQ cache T-1) + WebSearch tin khởi tố/bắt lãnh đạo DN niêm yết 7-14 ngày | dispatch Taylor → bus finding + `calculated_fear_state_backstop.md` (nếu case mới) → Discord Taylor thread `1521735922066919515` | user (recon, không tự mua) | trước `ops_health_check.sh` 08:20 (10') | bus finding phải luôn có (kể cả "0 case mới" — quy tắc quiet-heartbeat, không im lặng) |
 | Friday 15:00 | `check_sbv_weekly.sh` | SBV web | `sbv_macro_overlay` | DT5G Pillar A | — | — |
 | Mon 09:00 | `hog_price_feed.py` | web | feed archive | chưa consumer sống | — | — |
 | Sat 09:15 | `refresh_fa_ratings.sh` | `ticker_financial` BQ live (append-only) | `tav2_bq.fa_ratings` | custom30 builder cũ, audit | sau fa_ratings_8l (45') | `bq show` lastModified+numRows, invariant quý đóng băng |

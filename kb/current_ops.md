@@ -2,6 +2,16 @@
 > Mike cập nhật thủ công khi có thay đổi trạng thái quan trọng. Đọc trước mọi thứ khác khi restart.
 > Cập nhật lần cuối: 2026-07-23
 
+## Sleeve "mua khi sợ hãi có tính toán" — quét chủ động HÀNG TUẦN (mandate user 2026-07-23)
+Sau chuỗi case TV1 + DGC (cả 2 lần đầu bị đánh giá quá thận trọng, user tự phát hiện + sửa —
+xem 2 mục trên/bên dưới) — user chỉ đạo: đừng chỉ chờ user tình cờ để ý, chủ động dò tìm THÊM
+case hàng tuần. Đã cài `bin/fearbuy_weekly_scan.sh` (cron Friday 08:10 ICT, dispatch Taylor,
+đăng ký `kb/cron_registry.md`) — kết hợp refresh `anomaly_scan.py` + WebSearch tin khởi tố/bắt
+lãnh đạo DN niêm yết 7-14 ngày qua, áp bộ lọc QUALIFY/NON/AMBIGUOUS trong
+`calculated_fear_state_backstop.md`. Luôn báo cáo (kể cả 0 case mới — quy tắc quiet-heartbeat).
+Đây là recon, KHÔNG tự mua — mọi case đáng chú ý vẫn cần due-diligence sâu + user duyệt riêng
+như TV1/DGC.
+
 ## DGC re-do: DAO NGUOC downgrade -> QUALIFIED YES (asset-backed deep value, downside bao ve manh); user dung phan lon
 **Job `Taylor_20260723_112707`** — user phản biện downgrade "gần-NON" (§6, 17/07) bằng data thật,
 Taylor verify từng claim, đảo ngược kết luận. Phát hiện quyết định: **Q2/2026 CF_OA đã dương lại
