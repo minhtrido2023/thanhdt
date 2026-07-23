@@ -2784,3 +2784,37 @@
 - [2026-07-23T12:05:35Z] DollarBill/heartbeat — DollarBill_20260723_120333: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20260723_120333", "source": "watcher"}
 - [2026-07-23T12:06:35Z] DollarBill/heartbeat — DollarBill_20260723_120333: {"status": "still_running", "elapsed_min": 3, "job_id": "DollarBill_20260723_120333", "source": "watcher"}
 - [2026-07-23T12:06:35Z] DollarBill/heartbeat — DollarBill_20260723_120333: {"status": "still_running", "elapsed_min": 3, "job_id": "DollarBill_20260723_120333", "source": "watcher"}
+
+## Consolidation 2026-07-23T12:17:59Z
+- [2026-07-23T12:07:35Z] DollarBill/heartbeat — DollarBill_20260723_120333: {"status": "still_running", "elapsed_min": 4, "job_id": "DollarBill_20260723_120333", "source": "watcher"}
+- [2026-07-23T12:07:35Z] DollarBill/heartbeat — DollarBill_20260723_120333: {"status": "still_running", "elapsed_min": 4, "job_id": "DollarBill_20260723_120333", "source": "watcher"}
+- [2026-07-23T12:08:35Z] DollarBill/heartbeat — DollarBill_20260723_120333: {"status": "still_running", "elapsed_min": 5, "job_id": "DollarBill_20260723_120333", "source": "watcher"}
+- [2026-07-23T12:08:35Z] DollarBill/heartbeat — DollarBill_20260723_120333: {"status": "still_running", "elapsed_min": 5, "job_id": "DollarBill_20260723_120333", "source": "watcher"}
+- [2026-07-23T12:09:35Z] DollarBill/heartbeat — DollarBill_20260723_120333: {"status": "still_running", "elapsed_min": 6, "job_id": "DollarBill_20260723_120333", "source": "watcher"}
+- [2026-07-23T12:09:35Z] DollarBill/heartbeat — DollarBill_20260723_120333: {"status": "still_running", "elapsed_min": 6, "job_id": "DollarBill_20260723_120333", "source": "watcher"}
+- [2026-07-23T12:10:00Z] DollarBill/heartbeat — DollarBill_20260723_120333: {"status": "in_progress", "note": "đã có giá DNSE live. Đang đọc DNSE balance/positions live + tính CAPIT top-up sizing"}
+- [2026-07-23T12:10:35Z] DollarBill/heartbeat — DollarBill_20260723_120333: {"status": "still_running", "elapsed_min": 7, "job_id": "DollarBill_20260723_120333", "source": "watcher"}
+- [2026-07-23T12:10:35Z] DollarBill/heartbeat — DollarBill_20260723_120333: {"status": "still_running", "elapsed_min": 7, "job_id": "DollarBill_20260723_120333", "source": "watcher"}
+- [2026-07-23T12:11:35Z] DollarBill/heartbeat — DollarBill_20260723_120333: {"status": "still_running", "elapsed_min": 8, "job_id": "DollarBill_20260723_120333", "source": "watcher"}
+- [2026-07-23T12:11:36Z] DollarBill/heartbeat — DollarBill_20260723_120333: {"status": "still_running", "elapsed_min": 8, "job_id": "DollarBill_20260723_120333", "source": "watcher"}
+- [2026-07-23T12:12:35Z] DollarBill/heartbeat — DollarBill_20260723_120333: {"status": "still_running", "elapsed_min": 9, "job_id": "DollarBill_20260723_120333", "source": "watcher"}
+- [2026-07-23T12:12:36Z] DollarBill/heartbeat — DollarBill_20260723_120333: {"status": "still_running", "elapsed_min": 9, "job_id": "DollarBill_20260723_120333", "source": "watcher"}
+- [2026-07-23T12:13:35Z] DollarBill/heartbeat — DollarBill_20260723_120333: {"status": "still_running", "elapsed_min": 10, "job_id": "DollarBill_20260723_120333", "source": "watcher"}
+- [2026-07-23T12:13:36Z] DollarBill/heartbeat — DollarBill_20260723_120333: {"status": "still_running", "elapsed_min": 10, "job_id": "DollarBill_20260723_120333", "source": "watcher"}
+- [2026-07-23T12:14:23Z] DollarBill/heartbeat — DollarBill_20260723_120333: {"status": "in_progress", "note": "đã tính xong sizing. CAPIT top-up 128.4M (PVT+SAB+SIP+VNM), LAG IVS 11.3M + TRC 37.5M = tổng 177.2M. Cash gap 128.2M. Đang viết plan JSON."}
+- [2026-07-23T12:14:36Z] DollarBill/heartbeat — DollarBill_20260723_120333: {"status": "still_running", "elapsed_min": 11, "job_id": "DollarBill_20260723_120333", "source": "watcher"}
+- [2026-07-23T12:14:36Z] DollarBill/heartbeat — DollarBill_20260723_120333: {"status": "still_running", "elapsed_min": 11, "job_id": "DollarBill_20260723_120333", "source": "watcher"}
+- [2026-07-23T12:14:59Z] DollarBill/heartbeat — DollarBill_20260723_120333: {"status": "in_progress", "note": "Đã lấy DNSE live prices: IVS=6300, TRC=74900, VPB=25000. Cash carry=3.32M. Orders: SELL VPB 800cp + BUY IVS 2750cp (ADV-capped 17.5M). Đang viết plan file."}
+- [2026-07-23T12:15:36Z] DollarBill/heartbeat — DollarBill_20260723_120333: {"status": "still_running", "elapsed_min": 12, "job_id": "DollarBill_20260723_120333", "source": "watcher"}
+- [2026-07-23T12:15:36Z] DollarBill/heartbeat — DollarBill_20260723_120333: {"status": "still_running", "elapsed_min": 12, "job_id": "DollarBill_20260723_120333", "source": "watcher"}
+- [2026-07-23T12:16:36Z] DollarBill/heartbeat — DollarBill_20260723_120333: {"status": "still_running", "elapsed_min": 13, "job_id": "DollarBill_20260723_120333", "source": "watcher"}
+- [2026-07-23T12:16:36Z] DollarBill/heartbeat — DollarBill_20260723_120333: {"status": "still_running", "elapsed_min": 13, "job_id": "DollarBill_20260723_120333", "source": "watcher"}
+- [2026-07-23T12:17:04Z] DollarBill/decision — plan-2026-07-24-ZaloPay: {"account": "ZaloPay", "plan_date": "2026-07-24", "state": "NEUTRAL(3)", "active_nav_vnd": 459158217, "orders": [{"side": "sell", "ticker": "VPB", "qty": 800, "net_vnd": 19985000, "timing": "9:00-9:30"}, {"side": "buy", "ticker": "IVS", "qty": 2750, "cost_vnd": 17337994, "timing": "11:15", "adv_capped": true}], "capit_hold": ["NCT", "PVT", "SAB", "SIP", "VNM"], "trc_defer": "07-25", "cash_after_vnd": 5963973, "file": "data/trade_plans/plan_ZaloPay_2026-07-24.json", "requires_approval": true}
+- [2026-07-23T12:17:36Z] DollarBill/answer — plan-ZaloPay-07-24-sent: {"status": "done", "plan_file": "data/trade_plans/plan_ZaloPay_2026-07-24.json", "discord_thread": "1521183164364754974", "orders": ["SELL VPB 800cp 9:00-9:30", "BUY IVS 2750cp 11:15 (LAG_HI ADV-cap)"], "trc_defer": "07-25", "capit_hold": 5, "requires_user_approval": true}
+- [2026-07-23T12:17:36Z] DollarBill/heartbeat — DollarBill_20260723_120333: {"status": "still_running", "elapsed_min": 14, "job_id": "DollarBill_20260723_120333", "source": "watcher"}
+- [2026-07-23T12:17:36Z] DollarBill/heartbeat — DollarBill_20260723_120333: {"status": "still_running", "elapsed_min": 14, "job_id": "DollarBill_20260723_120333", "source": "watcher"}
+- [2026-07-23T12:17:51Z] DollarBill/decision — plan-2026-07-24: {"account": "SpaceX", "plan_date": "2026-07-24", "state": "NEUTRAL(3)", "action": "BUY x6", "capit_topup": {"n": 4, "tickers": ["PVT", "SAB", "SIP", "VNM"], "cost_vnd": 128425000}, "lag_entry": {"n": 2, "tickers": ["IVS", "TRC"], "cost_vnd": 48790000}, "total_cost_vnd": 177347911, "cash_gap_vnd": 128222748, "trung_vang_withdrawal_recommend": 134000000, "nav_basis": 909195163, "file": "data/trade_plans/plan_SpaceX_2026-07-24.json", "status": "awaiting_user_approval"}
+- [2026-07-23T12:10:31Z] Mafee/status — eod-trading-report: {"account": "ZaloPay", "plan_date": "2026-07-23", "delivered_via": "trading_report_thread"}
+- [2026-07-23T12:10:46Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-07-23", "delivered_via": "hold_day"}
+- [2026-07-23T12:16:35Z] Taylor/heartbeat — Taylor_20260723_121602: {"status": "in_progress", "note": "Da doc backstop.md + verify HPG day 11/2022 (PB 0.72, PE 3.93). Dang lay recovery 12m + peak."}
+- [2026-07-23T12:17:03Z] Taylor/heartbeat — Taylor_20260723_121602: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260723_121602", "source": "watcher"}
