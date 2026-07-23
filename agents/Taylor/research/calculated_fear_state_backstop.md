@@ -719,8 +719,12 @@ checklist dưới. **Mỗi bước BẮT BUỘC, ghi rõ PASS/FAIL/AMBIGUOUS + s
 - Nợ vay ngắn hạn tăng để đắp vốn lưu động (không phải đầu tư) = dấu hiệu căng thanh khoản.
 
 ### 10.5. Solvency — SỐNG SÓT qua khủng hoảng (điều kiện tiên quyết, không có = vô nghĩa mọi định giá)
-- **Debt_Eq và XU HƯỚNG** (không chỉ mức): tăng dần = đi tới vỡ nợ (PVX 3,7→9,1). Sàn cứng đề xuất
-  cho sleeve: **Debt_Eq_P0 ≤ 2,5** (xem §10.10). CR/QuickR, lịch đáo hạn nợ vs tiền mặt.
+- **Đòn bẩy phải đọc THEO NGÀNH bằng khung 8L, KHÔNG dùng sàn Debt_Eq chung** (sửa 2026-07-23, job
+  `Taylor_20260723_134350` — xem §10.11). `Debt_Eq_P0` là **tổng-nợ-phải-trả/vốn** (gồm tiền khách trả
+  trước, phải trả người bán, tiền gửi ngân hàng) → phồng giả cho ngân hàng/BĐS/xây lắp. Dùng **`real_lev`
+  = STLTDebt_Eq_P0 (nợ VAY có lãi/vốn)** và ngưỡng theo route: NH/CK/BH bỏ qua (đòn bẩy = vận hành); BĐS
+  nới (real_lev≤2,5); hàng hoá/xi măng chu kỳ chặt (≤1,5); xây lắp/CN thường (COMPOUNDER, ≤3). Xu hướng
+  vẫn quan trọng (PVX tổng-nợ 3,7→9,1 = đi tới vỡ nợ). CR/QuickR, lịch đáo hạn nợ vs tiền mặt.
 - Câu hỏi sinh tử: "DN có bị BUỘC bán tài sản / pha loãng cổ đông ở đáy không?" Nếu có → không phải
   value opportunity, là bẫy giá trị.
 
@@ -765,7 +769,58 @@ lại khi thị trường crash sâu, FEARBUY v1 thu hẹp vũ trụ, rồi §10
   (CF_OA âm/lag NP **nhiều năm** — §10.3 TTM) ∧ (Debt_Eq tăng dần) → **LN sổ sách là hư cấu kế toán, DN
   đang đi tới vỡ nợ, LOẠI** dù PB<1. (TV1 ICB **2791** consulting, KHÔNG thuộc 23xx → red-flag này không
   áp; TV1 chết/sống theo §10.1–10.2, không theo red-flag ngành.)
-- **Fix rule tự động (chờ user duyệt, chưa wire):** thêm `Debt_Eq_P0 ≤ 2,5` vào FEARBUY v1 — loại PVX +
-  xoá thảm hoạ 2012, median ex24 +1,8pp, nhưng là **tail-insurance KHÔNG free-lunch** (cũng loại một số
-  V-recovery đòn-bẩy-cao 2020). CF_OA≥NP đa-kỳ **KHÔNG dùng** (false-negative PNJ/VEA). Sector-exclude
-  quá thô. → đòn bẩy là lever tự động sạch nhất; phần còn lại giao §10 thủ công.
+- **⚠️ ĐÃ HỦY đề xuất `Debt_Eq_P0 ≤ 2,5`** (job `Taylor_20260723_134350`, user chỉ đạo): sàn chung dùng
+  tổng-nợ-phải-trả, KHÔNG so sánh được giữa ngành → công cụ đúng là **8L rating (route-aware) đã có sẵn**.
+  Xem §10.11 để biết vì sao và dùng thế nào.
+
+### 10.11. Đòn bẩy đọc THEO NGÀNH bằng 8L — KHÔNG dựng sàn Debt_Eq chung (verify job `Taylor_20260723_134350`)
+> User chỉ đạo (2026-07-23): "vấn đề đòn bẩy đã dùng lens từng nhóm ngành để xử lý, không thể dùng
+> chung. Cập nhật lại kiến thức 8L từ đó dễ phân biệt case tốt/xấu hơn thay vì chọn tràn lan."
+> Artifact: `research/fearbuy_screen/analyze_8l_rating.py` (+ `analyze_8l_lev.py`).
+
+**8L ĐÃ xử lý đòn bẩy theo ngành ở 2 tầng (đọc code `rating_8l.py`):**
+1. **Metric đúng — `real_lev()` = STLTDebt_Eq_P0 (nợ VAY có lãi/vốn), KHÔNG phải Debt_Eq_P0.** Debt_Eq_P0
+   là tổng-nợ-phải-trả/vốn → đếm cả tiền khách trả trước + phải trả người bán + tiền gửi (với NH) là "nợ",
+   thổi phồng đòn bẩy cho BĐS/khu-CN/NH.
+2. **Ngưỡng theo route** (router BANK/POWER/CYCLICAL/COMPOUNDER + INSURANCE/SECURITIES/REALESTATE):
+   NH(8355)/BH(853x-857x)/CK(877x) **bỏ qua đòn bẩy** (là vốn vận hành); BĐS(8633) **nới** (real_lev≤0,5→+2,
+   ≤1,5→+1); hàng hoá/đường/xi măng **chặt** (real_lev>1,5 → rating 5 "trough-fragile"); xây lắp/CN thường
+   (COMPOUNDER) real_lev>3 → red-flag rating 5.
+
+**Bài test user (PVX xấu vs LPB/HDG/SCI tốt), 8L rating point-in-time (universe_pit), tính từ BQ:**
+
+| Mã | Ngày | Route | Debt_Eq (tổng-nợ) | real_lev (nợ vay) | 8L rating | Sàn chung ≤2,5 | 8L ≤3 | Kết cục r24 |
+|---|---|---|---|---|---|---|---|---|
+| **PVX** | 2011-12 | COMPOUNDER | **3,7** | **1,52** | **4** | ❌ loại | ❌ **LOẠI** ✓ | −57% |
+| SCI | 2020-03 | COMPOUNDER | 4,18 | 2,11 | 3 | ❌ loại (SAI) | ✓ giữ | +723% |
+| HDG | 2020-03 | REALESTATE | 3,23 | 1,77 | 3 | ❌ loại (SAI) | ✓ giữ | +566% |
+| LPB | 2020-03 | BANK | 15,06 | 0,0 | 2 | ❌ loại (SAI) | ✓ giữ | +297% |
+
+**3 kết luận (thay hẳn "đòn bẩy là lever sạch nhất" ở §10.10 cũ):**
+
+1. **Sàn chung `Debt_Eq_P0≤2,5` loại CẢ 4** (PVX + 3 winner). Nó "bắt" được PVX chỉ do **tổng-nợ tình cờ
+   đã cao** (3,7) tại đáy, nhưng bắn nhầm luôn NH (LPB 15x = tiền gửi), BĐS (HDG = tiền khách trả trước),
+   xây lắp (SCI = phải trả người bán). Đây đúng là "chọn tràn lan" user nói.
+
+2. **Đòn bẩy — làm ĐÚNG (real_lev route-aware) — gần như VÔ DỤNG làm cổng.** Quét toàn panel 276 episode:
+   cổng real_lev route-aware chỉ loại **4/276** (không mã nào có r24). Vì đa số mã tổng-nợ cao lại có nợ
+   VAY vừa phải. **PVX real_lev 1,52 còn THẤP HƠN SCI 2,11 và HDG 1,77** → không có ngưỡng đòn bẩy nào tách
+   được PVX khỏi winner. ⇒ "edge" của sàn chung cũ chỉ là **ảo giác từ dùng sai metric** (tổng-nợ). Đòn
+   bẩy KHÔNG phải discriminator.
+
+3. **Công cụ đúng = 8L QUALITY rating (đã có sẵn, route-aware).** Nó loại PVX (rating 4) nhờ **CHẤT LƯỢNG**
+   — ROIC3Y 0,051 (yếu, 0 điểm) + FSCORE 3 + chuyển đổi tiền mặt gãy (POC accounting) — KHÔNG phải đòn bẩy;
+   và giữ SCI(ROIC 0,113)/HDG(ROIC 0,152, ROE mạnh)/LPB(NH, chấm theo ROE). Đây chính là trục sector-
+   comparable. Panel realized-only (n=63): kept-set của **8L≤3 median r24 +22,5%** > no-gate +16,4% > sàn
+   chung +17,1%; 8L≤3 loại 8 thảm hoạ (<−30%) vs sàn chung chỉ 2.
+
+**Cách dùng cho FEARBUY v1 (đề xuất, KHÔNG tự wire — chờ user):**
+- **BỎ mọi sàn Debt_Eq chung.** Thay vào: gắn **8L rating point-in-time** (qua máy `custom_basket.rating_asof`
+  đã có) vào mỗi ứng viên screen. **rating≥4 = cờ CHẤT-LƯỢNG-CẢNH-BÁO** đẩy vào due-diligence §10 thủ công.
+- KHÔNG nên biến 8L≤3 thành cổng auto CỨNG cho sleeve này: fear-buy **cố tình** muốn một số survivor bị
+  đánh sập (có thể rating 3-4) — 8L≤3 loại 46% ứng viên (128/276) là bộ lọc chất lượng thật, hợp cho
+  BAL/custom30V hơn là cho sleeve deep-value discretionary. Đúng vai: 8L rating là **INPUT sector-aware
+  cho §10**, không phải bộ lọc im lặng.
+- Caveat trung thực: (a) chỉ 63/276 episode đã có r24 24 tháng (còn lại quá mới) → so sánh realized mỏng;
+  (b) 8L rating PIT ở đây là bản **rút gọn** (thiếu moat notch / bank-AQ lens / eq_flag structural / forensic)
+  — bản đầy đủ `rating_8l.py` có thể lệch chút nhưng lõi phân biệt (ROIC/FSCORE/route) giữ nguyên.
