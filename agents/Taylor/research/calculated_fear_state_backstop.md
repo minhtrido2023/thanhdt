@@ -190,6 +190,39 @@ AMBIGUOUS, không phải khuyến nghị vào ngay):
 **Việc cần làm tiếp**: theo dõi ngày công bố BCTC Q2/2026 DGC (ước cuối tháng 7/đầu tháng 8 theo lịch
 sử công bố các năm trước), đọc lại đúng 2 chỉ số CF_OA và Revenue YoY làm cổng quyết định.
 
+### ⚠️ CẬP NHẬT 2026-07-23 (Mike) — Q2/2026 đã công bố (22/07), CỔNG XÁC NHẬN CHO KẾT QUẢ XẤU: DOWNGRADE khỏi AMBIGUOUS, gần nhóm NON
+
+BQ (`ticker_financial`) tại 23/07 vẫn chỉ có tới 2026Q1 (chưa sync), nhưng DGC đã công bố công khai
+KQKD Q2/2026 ngày 22/07 (báo chí, chưa xác nhận qua BQ):
+
+| | Q2/2026 | So Q2/2025 |
+|---|---|---|
+| Doanh thu | 2.416,2 tỷ | **−16,55% YoY** |
+| LN sau thuế | 440,77 tỷ | **−50,52% YoY** |
+| GPM | 18,9% | Sụt từ 33,9% (gần một nửa) |
+
+**Nguyên nhân công ty tự công bố — đây là bằng chứng quyết định**: **Mỏ 25 tạm ngừng khai thác để
+phục vụ công tác điều tra** (đúng vụ án "khai thác Apatit trái phép" đang bị điều tra) → công ty phải
+dùng hoàn toàn quặng nhập khẩu/mua ngoài, chi phí sản xuất phốt pho vàng tăng vọt. Cộng thêm giá đầu
+vào (lưu huỳnh, điện, than cốc, amoniac) tăng.
+
+**Áp đúng cổng đã đặt ra ở trên**: "CF_OA tiếp tục âm/doanh thu tiếp tục giảm → chuyển sang nhóm NON"
+— **2 quý liên tiếp doanh thu giảm YoY** (Q1 −24,4%, Q2 −16,55%), không phải cú sốc 1 quý rồi qua như
+kịch bản Bull kỳ vọng.
+
+**Khác biệt về CHẤT so với đánh giá 17/07**: đây không còn là "thị trường sợ hãi trong khi hoạt động
+vẫn bình thường" (điều kiện cốt lõi của QUALIFY §2 tiêu chí #3) — **chính tài sản lõi vật lý (mỏ khai
+thác) bị dừng hoạt động vì phục vụ điều tra**, tức vụ án đang **trực tiếp phá vỡ vận hành sản xuất**,
+không chỉ ảnh hưởng tâm lý/định giá. Đây là khác biệt nền tảng với TV1 (thủy điện Sông Bung 5 chưa một
+ngày ngừng phát điện suốt vụ án) — DGC giờ gần với case NON (lõi bị chạm trực tiếp) hơn là QUALIFY.
+
+**Kết luận cập nhật: hạ mức ưu tiên DGC trong watchlist "mua khi sợ hãi có tính toán".** Không loại
+hẳn (biên lợi nhuận có thể phục hồi khi mỏ hoạt động trở lại + điều tra kết thúc), nhưng KHÔNG còn là
+ứng viên tốt cho pattern này ở thời điểm hiện tại — cần chờ: (a) mỏ 25 hoạt động trở lại, (b) biên lợi
+nhuận GPM hồi phục về vùng 30%+, (c) CF_OA chính thức qua BQ xác nhận xu hướng. Kịch bản Bull (+68%,
+PE về PE_MA5Y) trong ước tính 17/07 coi như đã bị bác bỏ bởi dữ liệu thật; kịch bản Bear (đi ngang/
+giảm thêm) đang là kịch bản có xác suất cao hơn.
+
 ---
 
 ## 7. Case #3 — PNJ (P-Lab 2026), thêm 2026-07-18 (Taylor, dispatch từ Mike, job `Taylor_20260718_044400`)
