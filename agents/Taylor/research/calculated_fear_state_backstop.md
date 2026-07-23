@@ -636,3 +636,38 @@ cap riêng** (như TV1/DGC đã làm) — nhét vào custom30V sẽ vừa vi ph�
 **Kết luận ranh giới:** giữ 2 cơ chế TÁCH BIỆT. custom30V = value-tilt always-on trong book. Sleeve fear-
 buy = special-situation discretionary ngoài book, kích hoạt tại giao điểm (định-giá-cực-trị × khủng-hoảng-
 sẽ-qua), user duyệt từng tên. Không systematize sleeve vào V2.4 (N nhỏ + discretionary theo bản chất).
+
+---
+
+## 9. Case #5 — DGC 3/2020 (nhóm (b) chu kỳ, COVID) + SYSTEMATIC SCREEN N-lớn (Taylor, job `Taylor_20260723_123927`, 2026-07-23)
+
+**Bước ngoặt phương pháp:** thay vì thêm 1 case tay nữa (bẫy chọn-case-đã-biết-kết-quả), quét CÓ HỆ
+THỐNG toàn lịch sử VN 2008–2026 → N=237 episode độc lập thay N=2. Chi tiết đầy đủ + script tái lập:
+**`fearbuy_systematic_screen_20260723.md`**. Tóm tắt:
+
+**DGC 3/2020 verify:** đáy 2020-03-31 PB **0.73** (dưới book 27%), PE 4.4, LN quý +168 tỷ, CF_OA +197
+tỷ (lõi tạo tiền nguyên). 24m sau = **+16,3× adjusted** (user nhớ "10×" là conservative). ★ Tách cơ chế:
+16,3× = PE 3,7× (**de-rate = value thật, lặp lại được**) × EPS 4,4× (**siêu chu kỳ photpho 2021-22 =
+trúng chu kỳ, KHÔNG đếm ex-ante**). → entry PB 0.73 đủ đảm bảo de-rate 3–5×; đuôi 16× là may super-cycle.
+
+**FEARBUY v1 — bộ tiêu chí định lượng rút ra:** (mkt_dd VNINDEX<−30% so đỉnh 1y) ∧ (PB<0.7) ∧ (NP_P0>0
+∧ CF_OA_P0>0) ∧ (ROE_Min3Y≥0), trong `universe_pit` point-in-time.
+- **Median excess 12m vs VNINDEX = +37.8%, winrate 77%; excess 24m +45.3%.** Tail sạch: 0.8% mất >50%/24m.
+- **8/8 năm-khủng-hoảng median DƯƠNG, sign-test p=0.0039** (N_eff thật = 8 regime, KHÔNG phải 237 —
+  độ tin nằm ở "dương mọi crisis", không ở con số điểm).
+
+**3 phát hiện đính chính trực giác:**
+1. **Value-trap ở TẦNG THỊ TRƯỜNG (2010):** gate −20% dd bắn suốt bear cấu-trúc 2010–12 → mua rẻ nhưng
+   giá tiếp tục rơi (median −27%, wr 15%). Fix = yêu cầu panic **SÂU −30%** (phân biệt crash cấp tính
+   mean-revert vs grind cấu trúc) → xoá sạch bẫy 2010. **Discriminator "khủng hoảng sẽ qua" cần cả
+   chiều THỊ TRƯỜNG, không chỉ chiều doanh nghiệp.**
+2. **Golden floor ROE_Min3Y≥0 KHÔNG tăng mean, nhưng cắt blow-up từ 6.5% → 1%** — đúng vai trò tail-guard.
+3. **Commodity KHÔNG phải động lực:** non-commodity median +47.5% > commodity +12.5%. DGC/HPG là đuôi nổi
+   bật nhưng subset median-thấp + phụ thuộc chu kỳ. **Edge lõi = deep-value-trong-panic DIỆN RỘNG, không
+   cần siêu chu kỳ hàng hoá** (salience bias: user nhớ commodity 10-bagger, screen cho thấy value phi-HH
+   đáng tin hơn).
+
+**Ranh giới không đổi:** screen = CANDIDATE GENERATOR; PVX 2011 qua rule vẫn mất 57% → discriminator
+§2/§2.5 vẫn là HARD GATE thủ công + user duyệt từng tên. Sleeve special-situation ≤0.5–1.0% NAV/tên,
+NGOÀI book V2.4. Đề xuất nâng cấp `fearbuy_weekly_scan.sh` chạy FEARBUY v1 định lượng (gate −30% tự
+bật/tắt: 2026 hiện chưa −30% → screen "ngủ", crash sâu tự kích hoạt) — **chờ user duyệt, chưa wire.**
