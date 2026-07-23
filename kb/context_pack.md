@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v1367)
+# Mike fleet — context pack (v1368)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-23T06:51:52] Taylor/finding — KET LUAN CUOI (3 buoc): KHONG tim duoc bo tin hieu nao thang DT5G tren CA 2 tieu chi (bot false-alarm VA bat som hon). NO-GO toan bo, DT5G production KHONG doi: {"job": "Taylor_20260723_064214", "cau_hoi": "Tim bo tin hieu TOT HON DT5G (phan ung qua gia, cham ~50 phien) cho tinh huong hien tai (VNI -13.45% tu dinh, lai  …
 - [2026-07-23T07:35:48] Taylor/finding — VN30F basis via vnstock: DATA OK (full 2017+ history) nhung basis KHONG phai tin hieu dan truoc — IC~0, dot 2026 la contango truoc dinh (cash-led selloff): {"job": "Taylor_20260723_073030", "buoc1_data": "vnstock/VCI CO du lieu VN30F. Quote(symbol=VN30F1M/VN30F2M,source=VCI).history() = daily OHLCV+volume, DO SAU D …
 - [2026-07-23T07:55:25] Taylor/finding — foreign/prop flow data qua vnstock = NO-GO (data blocker): foreign_trade/prop_trade NotImplementedError, chi co snapshot phien hien tai, 0 lich su => khong test IC duoc: {"job": "Taylor_20260723_074919", "buoc1_data": {"foreign_trade": "NotImplementedError ca VCI+KBS (stub, khong provider nao cai dat)", "prop_trade": "NotImpleme …
 - [2026-07-23T08:12:33] Winston/finding — Nguon foreign flow lich su — VNDirect finfo la nguon thay the kha thi: {"question": "Nguon du lieu LICH SU khoi ngoai (foreign net) co so + phai sinh, thay the vnstock (khong co)", "tested_real": true, "date": "2026-07-23", "winner …
@@ -11,11 +10,32 @@
 - [2026-07-23T09:06:03] Taylor/finding — fear-buy sleeve 07-23: NO QUALIFY candidate — moi co IDIOCRASH moi la market-wide beta, khong phai scandal ca nhan: {"job": "Taylor_20260723_090248", "asof": "2026-07-23", "scan_freshness": "BQ cache T-1, phien moi nhat 2026-07-22; chay lai anomaly_scan.py => 0 tin hieu MOI t …
 - [2026-07-23T09:19:36] Taylor/finding — TV1 due-diligence sau: KHONG mua (CHUA) - fail QUALIFY tren truc dinh nghia, khong phai scandal ca nhan: {"ket_luan": "NO / CHUA MUA cho fear-buy sleeve. TV1 (PECC1) KHONG dung khung calculated-fear PNJ/VEA - da lech sang nhom rui ro governance/audit/legal cap PHAP …
 - [2026-07-23T09:43:00] Taylor/finding — TV1 SOTP re-do: DAO NGUOC lan 1 -> QUALIFIED YES (special-situation nho, asset-backed deep value): {"job": "Taylor_20260723_093559", "ket_luan": "User DUNG phan lon. Lan 1 sai vi chi soi governance/audit, bo qua dinh gia tai san loi. Dao nguoc NO -> QUALIFIED …
+- [2026-07-23T10:06:36] DollarBill/decision — plan-discretionary-TV1: {"ticker": "TV1", "company": "PECC1", "book": "DISCRETIONARY_SPECIAL", "outside_v24": true, "account": "SpaceX", "account_no": "0002023347", "payment": "cash_no …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
 > Mike cập nhật thủ công khi có thay đổi trạng thái quan trọng. Đọc trước mọi thứ khác khi restart.
-> Cập nhật lần cuối: 2026-07-22
+> Cập nhật lần cuối: 2026-07-23
+
+## TV1 (PECC1) — due-diligence lần 1 (KHÔNG mua) → lần 2 SOTP ĐẢO NGƯỢC (QUALIFIED YES)
+Lần 1 (job `Taylor_20260723_091219`) kết luận NO cho fear-buy sleeve: TV1 lệch khỏi khung
+calculated-fear PNJ/VEA — vụ án EVNNPT dính đấu thầu tư vấn điện = lõi kinh doanh (không phải
+scandal cá nhân tách rời tài sản), Big4 từ chối kiểm toán FY2026, 2 catalyst đang theo dõi (cổ
+tức 15%/2025, bỏ phiếu chọn kiểm toán 10/08) đều không còn giá trị thực.
+
+**⚠️ TV1 SOTP re-do (2026-07-23, job `Taylor_20260723_093559`) — ĐẢO NGƯỢC "NO" ở trên →
+QUALIFIED YES (deep-value, asset-backed).** User chỉ ra due-diligence lần 1 bỏ sót tài sản lõi:
+TV1/PECC1 sở hữu 100% thủy điện **Sông Bung 5 (57MW)**, nợ dự án đã trả gần hết (257 tỷ→0,4
+tỷ), NP TTM 151,9 tỷ trên vốn hoá chỉ 531 tỷ (PE 3,5/PB 0,98). Verify bằng comp M&A thật (Nậm
+Nơn 32 tỷ/MW → SB5 ~1.824 tỷ) + đấu giá SB5 2018 (1.390-1.688 tỷ gồm nợ, nay đã hết nợ) → SOTP
+bảo thủ (hydro đáy DCF, tư vấn=0): equity ~883 tỷ = 33.100đ/cp (+66% từ giá 19.900đ). **Đính
+chính quan trọng lần 1 sai:** BCTC FY2025 đã kiểm toán bởi A&C (sạch); Big4 từ chối là cho FY2026
+(tương lai) — lần 1 đánh đồng 2 việc khác nhau. Vẫn giữ 2 ràng buộc thật (không phải lệnh sạch):
+thanh khoản ADV chỉ ~1 tỷ/ngày (fail sàn custom30V, sát biên LAG), overhang pháp lý FY2026 audit
+chưa xong (tiền lệ DGC hạn chế giao dịch). Đề xuất: **ngoài book V2.4, discretionary special-
+situation** ≤0,5-1,0% NAV, gom chậm ≤15-20%ADV, giữ 2-3 năm chờ SOTP đóng/catalyst bán tài sản.
+Chi tiết: `agents/Taylor/research/tv1_pecc1_sotp_20260723.md`. **Cần user quyết định cuối** có
+mua discretionary hay không — Mike/Taylor không tự đặt lệnh ngoài V2.4.
 
 ## Dự án thay thế `ticker_prune` → `universe_pit` — ĐÃ DUYỆT Q1-Q9, đang triển khai G1 (2026-07-22)
 bq_admin xác nhận `ticker_prune` không có hệ thống quản trị (3 đường ghi độc lập chồng lấn, curation
