@@ -35,3 +35,4 @@ SpaceX/ZaloPay LIVE, V2.4. CAPIT fired 07-20/21 (SAB/SIP/VNM khớp, PVT/NCT cò
 `context_pack.md` "MỚI NHẤT" cho tin mới nhất thay vì tin nguyên văn phần này nếu đã qua nhiều
 ngày.
 
+- [2026-07-23T12:26:06Z] SỰ CỐ 07-23: DollarBill mua lại IVS (đã loại 07-21) + đòi rút thêm Trứng vàng (đã cạn) trong plan 07-24 — do context_planning_mini.md không cập nhật từ 07-17. Root cause = Mike không đẩy quyết định sang file role-scoped đúng lúc. Đã fix file + dispatch DollarBill sửa 2 plan (job DollarBill_20260723_122510). CẦN LÀM: audit các file role-scoped khác (execution_mini/dataops_mini) xem có stale tương tự không — đưa vào Friday KB editorial review.
