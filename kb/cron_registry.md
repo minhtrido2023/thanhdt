@@ -162,17 +162,23 @@ BQ_LOCAL_CACHE` nếu import chain có thể dính cache (bài học C1).
   phút+ngày; 08:15 vcb_fx T2-T6). Freshness WARN >45 ngày ở `ops_health_check.sh` §8.
 - 2026-07-15 (Winston, job `Winston_20260715_061920`, user duyệt dispatch): đổi giờ 3 cron đọc `dt5g_live` để luôn đọc regime HÔM NAY thay vì hôm qua (fix M3 audit `Winston_20260712_142100`): (1) `eod_trading_report.sh` 15:00→19:10 ICT (`0 8` → `10 12` UTC); (2) `pt_8l_daily.sh` 17:45→19:20 ICT (`45 10` → `20 12` UTC); (3) `telegram_run_daily.sh` 18:00→19:35 ICT (`0 11` → `35 12` UTC). Buffer sau publish DT5G ~19:01: eod 9', pt_8l 19', telegram 34'. Không trùng phút với nhau hoặc với bq_freshness 19:00. sector_lens_monitor.py step [9] vẫn đọc cache T-1 — user xác nhận KHÔNG CẦN SỬA, known limitation, chỉ ảnh hưởng công cụ nghiên cứu nội bộ, không chạm trading production.
 - 2026-07-14 (Winston, job `Winston_20260714_160739`, **user directive trực tiếp — quy tắc vĩnh
-  viễn mỗi quý**): thay 2 dòng T3 tạm thời (hết hạn 08-04) bằng **1 dòng cron DAILY 20:00 ICT**
-  gọi `mike/bin/fa_ratings_earnings_window_daily.sh` — wrapper tự gate: chỉ chạy thật khi
-  **tháng ∈ {1,4,7,10} ∧ ngày ≥ 15 ∧ T2-T6 ∧ không lễ VN** (công thức: cửa sổ = từ 15 của tháng
-  đầu quý đến hết tháng đó; điều kiện "ngày ≥ 15" là đủ vì date hợp lệ không vượt số ngày thật
-  của tháng — không cần bảng số-ngày-từng-tháng/năm nhuận; lễ VN = `vn_market.is_holiday`
-  fixed-list, lễ biến động Tết ÂL chưa encode → best-effort, ngày Tết chạy thừa vô hại).
-  Trong cửa sổ: `refresh_fa_ratings_8l.sh` 20:00 → `refresh_fa_ratings.sh` 20:45 (spacing 45'
-  giữ nguyên mẫu Sat/T3-tạm). Ngoài cửa sổ: no-op im lặng (log skip-reason). Dòng Sat 08:30/09:15
-  GIỮ NGUYÊN (baseline quanh năm, gate loại weekend nên không trùng). Cửa sổ đầu tiên:
-  **2026-07-15 → 2026-07-31**. Gate test 18 ca mô phỏng PASS (07-14 F/07-15 T/07-31 T/08-01 F/
-  08-03 F/04-30 lễ F/05-15 F/10-15 T/10-31 Sat F/01-15 T/…) qua `--check YYYY-MM-DD`.
+  viễn mỗi quý**; **SỬA 2026-07-23, user directive trực tiếp**): thay 2 dòng T3 tạm thời (hết hạn
+  08-04) bằng **1 dòng cron DAILY 20:00 ICT** gọi `mike/bin/fa_ratings_earnings_window_daily.sh`
+  — wrapper tự gate: chỉ chạy thật khi **tháng ∈ {1,4,7,10} ∧ ngày ≥ 15 ∧ không lễ VN** (đã BỎ
+  điều kiện T2-T6 ngày 2026-07-23 — user xác nhận qua bq_admin rằng `ticker_financial` vẫn được
+  cập nhật kể cả Thứ Bảy/Chủ Nhật trong mùa BCTC, nên loại cuối tuần chỉ làm cohort chậm oan; công
+  thức cửa sổ = từ 15 của tháng đầu quý đến hết tháng đó; điều kiện "ngày ≥ 15" là đủ vì date hợp
+  lệ không vượt số ngày thật của tháng — không cần bảng số-ngày-từng-tháng/năm nhuận; lễ VN =
+  `vn_market.is_holiday` fixed-list, lễ biến động Tết ÂL chưa encode → best-effort, ngày Tết chạy
+  thừa vô hại). Trong cửa sổ: `refresh_fa_ratings_8l.sh` 20:00 → `refresh_fa_ratings.sh` 20:45
+  (spacing 45' giữ nguyên mẫu Sat/T3-tạm). Ngoài cửa sổ: no-op im lặng (log skip-reason). Dòng Sat
+  08:30/09:15 GIỮ NGUYÊN (baseline quanh năm) — **từ 2026-07-23, trong cửa sổ mùa BCTC, Thứ Bảy
+  sẽ chạy CẢ 2 lần trong ngày (08:30/09:15 baseline + 20:00/20:45 window-run)**, vô hại (idempotent
+  DELETE+INSERT/re-rank, khác giờ nên không trùng phút) chỉ tốn thêm 1 lượt BQ query/tuần trong
+  cửa sổ; Chủ Nhật chỉ có window-run (20:00/20:45), không có baseline. Cửa sổ đầu tiên áp dụng đủ
+  cuối tuần: **2026-07-23 → 2026-07-31** (07-15→07-22 đã chạy dưới gate cũ, bỏ lỡ 2 cuối tuần
+  07-18/19). Gate test lại 2026-07-23 qua `--check YYYY-MM-DD`: 07-18/07-19/07-25/07-26 (cuối
+  tuần trong cửa sổ) = RUN đúng; 07-14 (<15)/08-01 (ngoài quý)/04-30 (lễ VN) = SKIP đúng.
   4 câu hỏi §11: (1) đọc `ticker_financial` BQ live qua 2 wrapper con đã source `wc_env.sh`
   (identity fix `a9716f6`), ghi BQ `fa_ratings_8l`+`fa_ratings`; (2) nguồn tươi same-day ~17:30
   ICT → 20:00 bắt được filings trong ngày; (3) cần T same-day trong mùa cao điểm BCTC; (4)

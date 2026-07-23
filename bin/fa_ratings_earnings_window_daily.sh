@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 # fa_ratings_earnings_window_daily.sh — QUY TẮC VĨNH VIỄN mỗi quý (user chỉ đạo 2026-07-14,
-# job Winston_20260714_160739): trong mùa BCTC — từ ngày 15 của THÁNG ĐẦU mỗi quý (1/4/7/10)
-# đến HẾT tháng đó — re-rate 8L MỖI NGÀY LÀM VIỆC (T2-T6, trừ lễ VN), vì báo cáo tài chính
-# công bố dồn dập trong cửa sổ này và cohort ngày đầu thường chưa đầy đủ.
+# job Winston_20260714_160739; SỬA 2026-07-23 — user xác nhận với bq_admin rằng
+# ticker_financial vẫn được cập nhật kể cả cuối tuần, nên bỏ điều kiện T2-T6): trong mùa BCTC —
+# từ ngày 15 của THÁNG ĐẦU mỗi quý (1/4/7/10) đến HẾT tháng đó — re-rate 8L MỖI NGÀY TRONG CỬA
+# SỔ, KỂ CẢ CUỐI TUẦN (chỉ trừ lễ VN), vì báo cáo tài chính công bố dồn dập trong cửa sổ này và
+# cohort ngày đầu thường chưa đầy đủ.
 #
 # Thay thế 2 dòng cron TẠM THỜI thứ Ba (Winston_20260713_103213, guard ≤20260804) — đã xoá
 # cùng commit. Dòng thứ Bảy hàng tuần (08:30/09:15) GIỮ NGUYÊN làm baseline quanh năm.
@@ -16,7 +18,9 @@
 #   (b) ngày ≥ 15 — không cần check "≤ ngày cuối tháng" vì một date hợp lệ không bao giờ
 #       vượt quá số ngày thật của tháng đó (kể cả năm nhuận); cửa sổ tự đóng khi sang tháng
 #       sau vì (a) fail.
-#   (c) ngày làm việc: weekday T2-T6 VÀ không phải lễ VN theo vn_market.is_holiday().
+#   (c) không phải lễ VN theo vn_market.is_holiday() — KHÔNG còn loại cuối tuần (sửa
+#       2026-07-23: user xác nhận qua bq_admin rằng ticker_financial vẫn được cập nhật cả
+#       Thứ Bảy/Chủ Nhật trong mùa BCTC, nên bỏ lỡ cuối tuần chỉ làm cohort chậm 1-2 ngày vô ích).
 #       ⚠️ HẠN CHẾ ĐÃ BIẾT: vn_market chỉ encode lễ CỐ ĐỊNH (01/01, 30/04, 01/05, 02/09);
 #       lễ biến động (Tết ÂL — có thể rơi vào cửa sổ tháng 1 — Giỗ Tổ, nghỉ bù) chưa khai
 #       báo (_VARIABLE_HOLIDAYS rỗng). Best-effort: ngày Tết script vẫn chạy — vô hại
@@ -53,9 +57,7 @@ if d.month not in (1, 4, 7, 10):
     reasons.append(f"month={d.month} khong phai thang dau quy")
 if d.day < 15:
     reasons.append(f"day={d.day} < 15")
-if d.weekday() >= 5:
-    reasons.append(f"weekend (weekday={d.weekday()})")
-elif is_holiday(d):
+if is_holiday(d):
     reasons.append("le VN (fixed-list; le bien dong nhu Tet CHUA encode — best-effort)")
 print("RUN" if not reasons else "SKIP: " + "; ".join(reasons))
 PY
@@ -73,7 +75,7 @@ if [ "$GATE" != "RUN" ]; then
   exit 0
 fi
 
-echo "[$TODAY_ICT] RUN — trong cua so mua BCTC (15..het thang dau quy, ngay lam viec)"
+echo "[$TODAY_ICT] RUN — trong cua so mua BCTC (15..het thang dau quy, moi ngay ke ca cuoi tuan, tru le VN)"
 START_EPOCH="$(date +%s)"
 
 "$MIKE/bin/refresh_fa_ratings_8l.sh" >> "$LOG_8L" 2>&1
