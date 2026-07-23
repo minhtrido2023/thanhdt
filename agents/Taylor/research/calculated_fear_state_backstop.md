@@ -223,6 +223,53 @@ nhuận GPM hồi phục về vùng 30%+, (c) CF_OA chính thức qua BQ xác nh
 PE về PE_MA5Y) trong ước tính 17/07 coi như đã bị bác bỏ bởi dữ liệu thật; kịch bản Bear (đi ngang/
 giảm thêm) đang là kịch bản có xác suất cao hơn.
 
+### ⚠️⚠️ RE-DO 2026-07-23 (job `Taylor_20260723_112707`) — user phản biện MẠNH → ĐẢO NGƯỢC downgrade: DGC **KHÔNG phải gần-NON**, đúng hơn là **AMBIGUOUS-nghiêng-constructive** (asset-backed deep value, downside được bảo vệ mạnh)
+
+User phản biện: *"DGC book value 4x, LN kế hoạch 1.600 tỷ, giá 37,9k vốn hoá 14.400 tỷ gần bằng tiền
+mặt 13.000 tỷ. LN giảm 50% nhưng chưa lỗ bao giờ, năm nào dòng tiền cũng > lợi nhuận, 2026 chia 3k
+cổ tức. Giá đó hơn gửi tiết kiệm rồi. Sao phải sợ."* — verify TỪNG claim bằng dữ liệu thật:
+
+| Claim user | Verdict | Số thật (nguồn) |
+|---|---|---|
+| "book value 4x" | ✅ ĐÚNG (nghĩa: BVPS ~4× mệnh giá) | BVPS 41.696đ ≈ 4,17× par 10.000đ; **PB = 0,91x → giá DƯỚI sổ sách** |
+| LN kế hoạch 2026 = 1.600 tỷ | ✅ CHÍNH XÁC | ĐHĐCĐ 22/07: DT 10.100 tỷ / **LNST 1.600 tỷ** (−10%/−50% vs 2025). ĐHCĐ 13/8 |
+| Giá 37,9k, vốn hoá 14.400 tỷ | ✅ số học khớp (379,78M×37.900=14.394 tỷ) | ⚠️ **close 22/07 = 40.500** (sau KQKD) → ~15.380 tỷ; xác nhận giá LIVE khi thực thi |
+| "gần bằng tiền mặt 13.000 tỷ" | ⚠️ MỘT PHẦN | Cash+tiền gửi 30/6 = **~10.922 tỷ** (−17% YTD; **đầu năm ~13.000 tỷ**, đã rút trả cổ tức). **EV thật = 14.394−10.922 = ~3.472 tỷ**, KHÔNG phải ~1.400 tỷ như user gộp — user overstate ~2.000 tỷ |
+| "LN giảm 50% nhưng chưa lỗ bao giờ" | ✅ XÁC NHẬN | 48 quý (2014Q2→2026Q1), **min NP quý = +10,6 tỷ, ZERO quý lỗ**. −50% là kế hoạch/thực tế, vẫn lãi đậm |
+| "năm nào dòng tiền cũng > lợi nhuận" | ⚠️ ĐA SỐ ĐÚNG (không tuyệt đối) | CF_OA>NP **9/12 năm đủ**; NGƯỢC ở 2017/2023/2025. CF_OA 3Y=7.939 tỷ, 5Y=16.496 tỷ (vẫn lớn) |
+| "2026 chia 3k cổ tức" | ✅ + CÒN HƠN | 2026 plan cổ tức 30% = **3.000đ/cp (yield 7,9%)**; CỘNG **50% còn treo từ 2025 = 5.000đ/cp (yield 13,2%)** |
+| "hơn gửi tiết kiệm, sao phải sợ" | ✅ ĐÚNG VỀ DOWNSIDE | Lãi tiền gửi ~707 tỷ/năm (6,5%×10.884 tỷ) ~44% LN kế hoạch; cash = **76% vốn hoá**; div yield >> gửi TK |
+
+**★ PHÁT HIỆN MỚI QUYẾT ĐỊNH (§6 downgrade 17/07 KHÔNG có dữ liệu này): CF_OA quý 2/2026 ĐÃ BẬT
+DƯƠNG lại ~+1.083 tỷ.** H1/2026 CF_OA = **−10 tỷ** (báo cáo), Q1 = **−1.093 tỷ** (BQ) ⇒ Q2 = −10−(−1.093)
+= **+1.083 tỷ dương**. Tức cú CF_OA −1.093 tỷ ở Q1 (từng là lý do #1 hạ DGC gần-NON) phần LỚN là **một
+lần** (331 tỷ khắc phục + timing vốn lưu động), KHÔNG phải lõi mất khả năng tạo tiền cấu trúc. Red-flag
+lớn nhất của §6 **giảm mạnh** — dù mỏ dừng + LN nửa, lõi vẫn tạo được +1.083 tỷ tiền mặt trong Q2.
+
+**§6 downgrade "gần NON" QUÁ NẶNG — 2 lỗi lập luận:**
+1. **Chỉ có Q1 CF_OA khi viết** → coi −1.093 tỷ là dấu hiệu cấu trúc. Q2 dương lại bác điều đó.
+2. **Lẫn "cú sốc BIÊN LỢI NHUẬN" với "lõi vô giá trị".** Mỏ 25 dừng = phải mua quặng nhập → GPM
+   34%→19% = **vấn đề CHI PHÍ**, KHÔNG phải phá sản/gian lận-là-lõi (OGC/FLC/PVX → lỗ/huỷ niêm yết).
+   DGC vẫn SẢN XUẤT, vẫn LÃI, vẫn tạo tiền. Khác CHẤT với nhóm NON.
+
+**Thận trọng CÒN giá trị (không phải lệnh sạch):**
+- Mỏ 25 **không có lộ trình mở lại** (mở/đóng theo tiến độ điều tra — vô định); GPM có thể kẹt ~19%
+  nhiều quý. 2 quý liên tiếp doanh thu giảm YoY (Q1 −24%, Q2 −16,6%).
+- Vụ án THẬT dính đúng tài sản lõi (khai thác Apatit trái phép) — khác TV1 (thuỷ điện chưa 1 ngày dừng).
+- Tư nhân, không NN backstop (nhưng PNJ chứng minh không bắt buộc).
+- "Rẻ" một phần ảo: ~44% LN kế hoạch chỉ là lãi tiền gửi, mảng hoá chất đang đáy thật.
+- Cổ tức rút từ két (cash −17% YTD) → không giả định 10.900 tỷ đứng yên nếu tiếp tục chia ~3.000 tỷ/năm.
+
+**KẾT LUẬN ĐẢO NGƯỢC (trung thực, không giữ lập trường cũ):** user **ĐÚNG phần lớn** trên trục
+*bảo toàn vốn / margin-of-safety*. DGC nâng từ "hạ ưu tiên/gần-NON" → **AMBIGUOUS-nghiêng-constructive,
+QUALIFIED YES cho vị thế NHỎ, kiên nhẫn, kiểu carry cổ tức + deep-value tài sản** (giống khung TV1
+discretionary special-situation, ngoài book V2.4). Luận điểm = *"được trả ~8-13% cổ tức + downside kê
+bởi ~10.900 tỷ tiền mặt (76% vốn hoá) + chưa lỗ 12 năm, trong khi optionality mỏ-mở-lại/biên-hồi-phục
+là miễn phí"*. **KHÔNG** underwrite kịch bản re-rating +100% kiểu PNJ làm base (mỏ vô định lịch) — có
+thể "dead money" vài quý. Size ≤0,5-1,0% NAV, chân trời 1-2 năm. **Cần user quyết định cuối** (Taylor/
+Mike không tự đặt lệnh ngoài V2.4). Nguồn số: BQ cache `ticker_financial` (48 quý) + Vietstock/CafeF/
+DNSE/TinNhanhCK KQKD Q2 & tài liệu ĐHĐCĐ 22/07/2026.
+
 ---
 
 ## 7. Case #3 — PNJ (P-Lab 2026), thêm 2026-07-18 (Taylor, dispatch từ Mike, job `Taylor_20260718_044400`)
