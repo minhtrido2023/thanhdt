@@ -2,6 +2,21 @@
 > Mike cập nhật thủ công khi có thay đổi trạng thái quan trọng. Đọc trước mọi thứ khác khi restart.
 > Cập nhật lần cuối: 2026-07-23
 
+## DGC re-do: DAO NGUOC downgrade -> QUALIFIED YES (asset-backed deep value, downside bao ve manh); user dung phan lon
+**Job `Taylor_20260723_112707`** — user phản biện downgrade "gần-NON" (§6, 17/07) bằng data thật,
+Taylor verify từng claim, đảo ngược kết luận. Phát hiện quyết định: **Q2/2026 CF_OA đã dương lại
+~+1.083 tỷ** (Q1 âm -1.093 tỷ chủ yếu là ONE-TIME — 331 tỷ khắc phục + timing vốn lưu động, không
+phải lõi mất khả năng tạo tiền). Verify claims: LN kế hoạch 1.600 tỷ ✅ đúng, "chưa lỗ bao giờ" ✅
+48 quý 0 quý lỗ, cổ tức 2026 ✅ 30%=3.000đ + 50% treo 2025=5.000đ (yield tổng ~21%), "book value
+4x" ✅ PB 0,91x (dưới sổ sách), "gần bằng tiền mặt" ⚠️ MỘT PHẦN đúng — cash thật ~10.922 tỷ (không
+phải 13.000 như user nói, đã giảm 17% YTD), EV thật ~3.472 tỷ (không phải ~1.400 như suy ra từ số
+user) — user overstate ~2.000 tỷ nhưng luận điểm vẫn đứng vững. Thận trọng còn giá trị: mỏ 25
+KHÔNG có lộ trình mở lại rõ ràng (có thể dead-money vài quý), 2 quý liên tiếp DT giảm YoY, vụ án
+dính đúng tài sản lõi (khác TV1 — thuỷ điện chưa 1 ngày dừng). **Khuyến nghị: QUALIFIED YES vị thế
+NHỎ ≤0,5-1,0% NAV**, chân trời 1-2 năm, khung carry-cổ-tức + deep-value (giống TV1 discretionary,
+ngoài book V2.4) — KHÔNG đặt cược re-rating +100% kiểu PNJ làm base case. `calculated_fear_state_
+backstop.md` §6 đã RE-DO. **Cần user quyết định cuối** có mua discretionary hay không.
+
 ## TV1 (PECC1) — due-diligence lần 1 (KHÔNG mua) → lần 2 SOTP ĐẢO NGƯỢC (QUALIFIED YES)
 Lần 1 (job `Taylor_20260723_091219`) kết luận NO cho fear-buy sleeve: TV1 lệch khỏi khung
 calculated-fear PNJ/VEA — vụ án EVNNPT dính đấu thầu tư vấn điện = lõi kinh doanh (không phải

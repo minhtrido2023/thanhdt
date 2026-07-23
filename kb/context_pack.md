@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v1371)
+# Mike fleet — context pack (v1372)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-23T09:06:03] Taylor/finding — fear-buy sleeve 07-23: NO QUALIFY candidate — moi co IDIOCRASH moi la market-wide beta, khong phai scandal ca nhan: {"job": "Taylor_20260723_090248", "asof": "2026-07-23", "scan_freshness": "BQ cache T-1, phien moi nhat 2026-07-22; chay lai anomaly_scan.py => 0 tin hieu MOI t …
 - [2026-07-23T09:19:36] Taylor/finding — TV1 due-diligence sau: KHONG mua (CHUA) - fail QUALIFY tren truc dinh nghia, khong phai scandal ca nhan: {"ket_luan": "NO / CHUA MUA cho fear-buy sleeve. TV1 (PECC1) KHONG dung khung calculated-fear PNJ/VEA - da lech sang nhom rui ro governance/audit/legal cap PHAP …
 - [2026-07-23T09:43:00] Taylor/finding — TV1 SOTP re-do: DAO NGUOC lan 1 -> QUALIFIED YES (special-situation nho, asset-backed deep value): {"job": "Taylor_20260723_093559", "ket_luan": "User DUNG phan lon. Lan 1 sai vi chi soi governance/audit, bo qua dinh gia tai san loi. Dao nguoc NO -> QUALIFIED …
 - [2026-07-23T10:06:36] DollarBill/decision — plan-discretionary-TV1: {"ticker": "TV1", "company": "PECC1", "book": "DISCRETIONARY_SPECIAL", "outside_v24": true, "account": "SpaceX", "account_no": "0002023347", "payment": "cash_no …
@@ -11,11 +10,27 @@
 - [2026-07-23T10:40:41] Taylor/finding — fear-buy sleeve sizing rule (scenario analysis, N=2 QUALIFY): {"job": "Taylor_20260723_103411", "loai": "SCENARIO ANALYSIS, KHONG phai backtest — N=2 QUALIFY sach (PNJ15/VEA19), khong tinh duoc DSR/PBO", "case_library_veri …
 - [2026-07-23T11:34:20] Taylor/finding — DGC re-do: DAO NGUOC downgrade -> QUALIFIED YES (asset-backed deep value, downside bao ve manh); user dung phan lon: {"job": "Taylor_20260723_112707", "ket_luan": "NANG DGC tu (ha uu tien / gan-NON, ghi §6 17/07) -> AMBIGUOUS-nghieng-constructive = QUALIFIED YES cho vi the NHO …
 - [2026-07-23T11:11:19] Winston/finding — new-listings-daily: {"date": "2026-07-23", "lookback_days": 90, "total_new": 1, "needs_manual_rating": 0, "fresh_ipo": 0, "research_queue": [], "snapshot": "/home/trido/thanhdt/Wor …
+- [2026-07-23T11:53:13] Taylor/finding — DGC Nghi Son GD1 profit estimate (comp CSV): {"job": "Taylor_20260723_114905", "loai": "research, khong phai quyet dinh mua (user da so huu DGC)", "du_an": "To hop hoa chat Duc Giang Nghi Son (Thanh Hoa),  …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
 > Mike cập nhật thủ công khi có thay đổi trạng thái quan trọng. Đọc trước mọi thứ khác khi restart.
 > Cập nhật lần cuối: 2026-07-23
+
+## DGC re-do: DAO NGUOC downgrade -> QUALIFIED YES (asset-backed deep value, downside bao ve manh); user dung phan lon
+**Job `Taylor_20260723_112707`** — user phản biện downgrade "gần-NON" (§6, 17/07) bằng data thật,
+Taylor verify từng claim, đảo ngược kết luận. Phát hiện quyết định: **Q2/2026 CF_OA đã dương lại
+~+1.083 tỷ** (Q1 âm -1.093 tỷ chủ yếu là ONE-TIME — 331 tỷ khắc phục + timing vốn lưu động, không
+phải lõi mất khả năng tạo tiền). Verify claims: LN kế hoạch 1.600 tỷ ✅ đúng, "chưa lỗ bao giờ" ✅
+48 quý 0 quý lỗ, cổ tức 2026 ✅ 30%=3.000đ + 50% treo 2025=5.000đ (yield tổng ~21%), "book value
+4x" ✅ PB 0,91x (dưới sổ sách), "gần bằng tiền mặt" ⚠️ MỘT PHẦN đúng — cash thật ~10.922 tỷ (không
+phải 13.000 như user nói, đã giảm 17% YTD), EV thật ~3.472 tỷ (không phải ~1.400 như suy ra từ số
+user) — user overstate ~2.000 tỷ nhưng luận điểm vẫn đứng vững. Thận trọng còn giá trị: mỏ 25
+KHÔNG có lộ trình mở lại rõ ràng (có thể dead-money vài quý), 2 quý liên tiếp DT giảm YoY, vụ án
+dính đúng tài sản lõi (khác TV1 — thuỷ điện chưa 1 ngày dừng). **Khuyến nghị: QUALIFIED YES vị thế
+NHỎ ≤0,5-1,0% NAV**, chân trời 1-2 năm, khung carry-cổ-tức + deep-value (giống TV1 discretionary,
+ngoài book V2.4) — KHÔNG đặt cược re-rating +100% kiểu PNJ làm base case. `calculated_fear_state_
+backstop.md` §6 đã RE-DO. **Cần user quyết định cuối** có mua discretionary hay không.
 
 ## TV1 (PECC1) — due-diligence lần 1 (KHÔNG mua) → lần 2 SOTP ĐẢO NGƯỢC (QUALIFIED YES)
 Lần 1 (job `Taylor_20260723_091219`) kết luận NO cho fear-buy sleeve: TV1 lệch khỏi khung
