@@ -3192,3 +3192,8 @@
 ## Consolidation 2026-07-24T12:03:56Z
 - [2026-07-24T11:11:21Z] Winston/finding — new-listings-daily: {"date": "2026-07-24", "lookback_days": 90, "total_new": 1, "needs_manual_rating": 0, "fresh_ipo": 0, "research_queue": [], "snapshot": "/home/trido/thanhdt/WorkingClaude/data/new_listings.csv", "note": "0 mã mới < 20Q lịch sử → cần 8L manual rating. Taylor flag để đọc bản cáo bạch + tạo override documented reason+expiry."}
 - [2026-07-24T11:40:06Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}
+
+## Consolidation 2026-07-24T13:07:01Z
+- [2026-07-24T12:10:17Z] Mafee/status — eod-trading-report: {"account": "ZaloPay", "plan_date": "2026-07-24", "delivered_via": "hold_day"}
+- [2026-07-24T12:10:57Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-07-24", "delivered_via": "trading_report_thread"}
+- [2026-07-24T13:01:10Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 52790}
