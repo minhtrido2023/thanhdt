@@ -4290,3 +4290,29 @@ de-risk independently; effective bite ≈ CRISIS-only (16.6% days) on LAG half. 
 LAG-only win does not survive to portfolio level (allocator already prices the protection). No 2nd
 quant-skeptic pass (was conditional on a wire-worthy result). c4≥c5 if ever chosen (pure DD-insurance).
 Doc: `mike/agents/Taylor/research/lag_disc_blended/FINDINGS.md`.
+
+---
+## 2026-07-24 — Low-Liquidity Discretionary Accumulation playbook (execution mechanism, KHÔNG phải alpha) — job Taylor_20260724_024201
+User duyệt (§5 memo `lowliq_execution_playbook_20260724.md`): (a) đổi TV1 tranche 2 (fix 07-27) →
+cơ chế **lệnh chờ dai dẳng (resting-bid)**, (b) tổng quát hoá thành playbook + WIRE auto-chèn lệnh
+vào plan hằng ngày. **Đây là điều chỉnh THỰC THI (giảm chi phí GD), KHÔNG có edge backtest-able** →
+không có bảng metric CAGR/Sharpe; gate là kỷ luật thực thi + audit fill-giá-vs-ceiling + selfcheck.
+
+**Code (thật, không đề xuất):** `trading_bot/discretionary_accumulation.py` (engine thuần) +
+`mike/bin/discretionary_accumulation_inject.py` (driver: broker positions LIVE = filled thật + DNSE
+quote LIVE = giá/KL phiên gần nhất, KHÔNG BQ §6; chèn `book=DISCRETIONARY_SPECIAL` vào plan atomic) +
+`mike/bin/inject_discretionary_orders.sh` (wrapper cron) + `data/trade_plans/discretionary/state_TV1_SpaceX.json`.
+
+**Logic size/phiên:** qty = min(target−filled_broker, floor_lot(cap_pct×adv_ref/limit × opp_boost)).
+No-chase: limit ≤ ceiling (bất biến, validate_state raise nếu vi phạm). Opportunistic: turnover phiên
+gần nhất ≥ k×adv_ref (k=2) ∧ giá ≤ ceiling → cap ×m (m=2). Dừng khi filled≥target (không mua quá).
+
+**Selfcheck `discretionary_accumulation_selfcheck.py`: 33/33 PASS** — (a) opp trigger đúng điều kiện
+(turnover ∧ giá≤ceiling); (b) idempotent 3 lớp (order-id + ticker/book + ledger plan_date), filled
+luôn từ broker không cộng dồn ledger; (c) fail-safe thiếu broker/giá/KL → no-op; (d) order V2.4
+(CAPIT/BAL/LAG) GIỮ NGUYÊN không bị đụng; (e) đủ target → completed, không chèn.
+
+**Wiring:** DollarBill dispatch là `--bg` async ⇒ chèn ở **bước cron RIÊNG 20:30 ICT** (sau plan ghi,
+trước send_plan_report 21:00). **CHƯA CÀI cron** — chờ quant-skeptic verify + user duyệt (chạm lệnh
+thật SpaceX). Cron line + đăng ký ở `mike/kb/cron_registry.md`. **hard_expiry (kiểm toán FY2026/đình
+chỉ GD) = MANUAL, không auto** (tin pháp lý tương lai) — người set `halted=true`, engine tự dừng.
