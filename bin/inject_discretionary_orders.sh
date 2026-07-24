@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 # inject_discretionary_orders.sh — chèn tự động lệnh gom DISCRETIONARY_SPECIAL vào plan T+1
 # của MỌI account live, chạy SAU khi DollarBill ghi plan (~19:0x) và TRƯỚC send_plan_report
-# 21:00 (đề xuất cron 20:30 ICT). Lặp account qua live_dnse_labels() — thêm account mới tự có.
+# 21:00 (cron 20:30 ICT). Lặp account qua live_dnse_labels() — thêm account mới tự có.
 #
-# ⚠️ CHƯA KÍCH HOẠT LIVE tới khi quant-skeptic verify + user duyệt (chèn tay lệnh vào plan =
-# chạm lệnh thật SpaceX; plan vẫn requires_user_approval nên có human gate, nhưng cơ chế mới
-# phải qua verify trước — Taylor job Taylor_20260724_024201). Để kích hoạt: thêm 1 dòng cron
-# (xem mike/kb/cron_registry.md mục discretionary-accumulation-inject).
+# KÍCH HOẠT LIVE 2026-07-24 (quant-skeptic CONFIRMED job Taylor_20260724_024201 + 2 việc hardening
+# job Taylor_20260724_030732 [dry-run đường DNSE thật phát hiện+fix bug account_id, session guard
+# chặn giữa phiên] + user duyệt trực tiếp). Cron: xem mike/kb/cron_registry.md mục
+# discretionary-accumulation-inject. Plan vẫn requires_user_approval → human gate giữ nguyên; chỉ
+# CHÈN lệnh vào plan, không tự đặt lệnh thật.
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
