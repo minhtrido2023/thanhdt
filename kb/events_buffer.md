@@ -3206,3 +3206,6 @@
 ## Consolidation 2026-07-24T16:07:01Z
 - [2026-07-24T16:00:04Z] Mike/question — plan-t1-not-ready-ZaloPay: {"reason": "plan_date_stale", "detail": "File mới nhất (/home/trido/thanhdt/WorkingClaude/data/trade_plans/plan_ZaloPay_2026-07-24.json) có plan_date='2026-07-24', kỳ vọng '2026-07-27' (T+1 từ hôm nay 2026-07-24). DollarBill có thể chưa chạy hoặc bị lỗi chiều nay.", "expected_date": "2026-07-27", "account": "ZaloPay", "second_chance": 1, "checked_at": "2026-07-24 23:00 ICT"}
 - [2026-07-24T16:00:05Z] Mike/question — plan-t1-not-ready-SpaceX: {"reason": "plan_date_stale", "detail": "File mới nhất (/home/trido/thanhdt/WorkingClaude/data/trade_plans/plan_SpaceX_2026-07-24.json) có plan_date='2026-07-24', kỳ vọng '2026-07-27' (T+1 từ hôm nay 2026-07-24). DollarBill có thể chưa chạy hoặc bị lỗi chiều nay.", "expected_date": "2026-07-27", "account": "SpaceX", "second_chance": 1, "checked_at": "2026-07-24 23:00 ICT"}
+
+## Consolidation 2026-07-24T18:07:01Z
+- [2026-07-24T17:30:22Z] Mike/question — daily-retro-draft-failed-2026-07-24: {"reason": "draft file rong hoac khong ton tai sau job Mike, rc=1", "log": "/home/trido/thanhdt/WorkingClaude/mike/logs/daily_retro_draft_20260724_173001.log"}
