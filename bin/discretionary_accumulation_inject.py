@@ -32,6 +32,14 @@ WC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file
 sys.path.insert(0, WC_ROOT)
 
 from trading_bot.discretionary_accumulation import compute_session_order, validate_state, BOOK
+from trading_bot.vn_market import session_phase, now_ict
+
+# Phiên đang giao dịch (09:00–14:45 T2-T6) → day_volume của DNSE là KL DỞ DANG. Cơ chế
+# opportunistic (compute_session_order) giả định day_volume là KHỐI LƯỢNG CẢ PHIÊN đã chốt để
+# đo "người bán có xuất hiện không"; đọc giữa phiên = KL chưa đủ → quyết định opportunistic sai.
+# → injector LIVE TỪ CHỐI chạy trong các phiên này (cron thật chạy 20:30 ICT = CLOSED). PRE
+# (trước 09:00) và CLOSED (sau 14:45 / cuối tuần / lễ) đều an toàn: DNSE report phiên hoàn tất.
+_SESSION_OPEN_PHASES = {"ATO", "MORNING", "LUNCH", "AFTERNOON", "ATC"}
 
 DISC_DIR = os.path.join(WC_ROOT, "data", "trade_plans", "discretionary")
 PLAN_DIR = os.path.join(WC_ROOT, "data", "trade_plans")
@@ -122,7 +130,7 @@ def process_account(account, plan_date, dry_run):
     if not profile:
         print(f"[ERR] không tìm thấy account {account} trong trading_bot_accounts.json")
         return 1
-    account_id = profile.get("account_no")
+    account_id = profile.get("account_id")  # key CHUẨN trong secrets (KHÔNG phải account_no)
 
     states = load_active_states(account)
     if not states:
@@ -220,12 +228,35 @@ def process_account(account, plan_date, dry_run):
     return 0
 
 
+def session_guard_ok(dry_run):
+    """Cổng phiên: LIVE inject chỉ được chạy khi phiên đã ĐÓNG (day_volume đã chốt).
+    - Phiên đang mở (ATO/MORNING/LUNCH/AFTERNOON/ATC) + LIVE → TỪ CHỐI (return False).
+    - Phiên đang mở + dry-run → CHO chạy nhưng in WARN (dry-run không ghi gì; số chỉ minh hoạ).
+    - PRE/CLOSED/cuối tuần/lễ → CHO chạy.
+    Đặt ở main() (điểm vào lệnh thật), KHÔNG ở process_account() — để selfcheck gọi thẳng
+    process_account() bất kể giờ nào vẫn chạy được (FakeBroker, không đọc DNSE thật)."""
+    phase, _ = session_phase()
+    now_str = now_ict().strftime("%F %H:%M ICT")
+    if phase not in _SESSION_OPEN_PHASES:
+        return True
+    if dry_run:
+        print(f"  [WARN] {now_str} phiên {phase} ĐANG MỞ — dry-run vẫn chạy, nhưng day_volume "
+              "là KL DỞ DANG → cờ opportunistic chỉ MINH HOẠ, KHÔNG dùng làm quyết định thật.")
+        return True
+    print(f"[GUARD] {now_str} phiên {phase} đang giao dịch (09:00–14:45 T2-T6) — injector LIVE "
+          "TỪ CHỐI chạy giữa phiên: day_volume chưa chốt → opportunistic sai. Chỉ chạy SAU đóng "
+          "cửa (cron 20:30 ICT) hoặc dùng --dry-run để test.")
+    return False
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--account", required=True)
     ap.add_argument("--plan-date", default=None, help="YYYY-MM-DD; bỏ trống → next_trading_day()")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
+    if not session_guard_ok(args.dry_run):
+        return 2   # phân biệt guard-block với lỗi thật (rc=1) và thành công (rc=0)
     plan_date = args.plan_date or next_trading_day_str()
     return process_account(args.account, plan_date, args.dry_run)
 
