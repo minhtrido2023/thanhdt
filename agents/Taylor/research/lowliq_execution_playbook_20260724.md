@@ -163,3 +163,53 @@ Mike/user quyết + có thể cần DollarBill/Mafee phối hợp. **KHÔNG tự
 3. **Thêm rule opportunistic**: phiên nào KL > ~1,4 tr VND turnover (≈2×adv_ref) và giá ≤19.900 → cho
    phép gom tới hết phần còn thiếu trong phiên đó (vẫn ≤400 tổng, vẫn no-chase).
 4. **CẦN USER/MIKE QUYẾT** có tổng quát hoá thành playbook §4 + wire cơ chế re-chèn tự động hay không.
+
+---
+
+## 6. TRIỂN KHAI (job Taylor_20260724_024201 — user duyệt 2 việc ở §5)
+
+Đã code THẬT (không chỉ đề xuất) + selfcheck 33/33 PASS. **CHƯA kích hoạt cron live** — chờ
+quant-skeptic verify + user duyệt trước tranche 2 (thứ Hai 07-27), theo đúng chỉ đạo dispatch.
+
+### Files
+| File | Vai trò |
+|---|---|
+| `trading_bot/discretionary_accumulation.py` | Engine THUẦN (no I/O): `compute_session_order(state, filled_qty, prev_turnover_vnd, prev_price_vnd, plan_date, now_iso)` → (order|None, decision). `validate_state()` bảo vệ bất biến no-chase. |
+| `mike/bin/discretionary_accumulation_inject.py` | Driver I/O: đọc broker positions LIVE (filled thật) + DNSE quote LIVE (giá/KL phiên gần nhất, KHÔNG BQ §6) → chèn order `book=DISCRETIONARY_SPECIAL` vào `plan_<acct>_<date>.json` (atomic tmp+os.replace) + cập nhật ledger. Idempotent + fail-safe. |
+| `mike/bin/inject_discretionary_orders.sh` | Wrapper cron: lặp `live_dnse_labels()`, gọi injector từng account. |
+| `data/trade_plans/discretionary/state_TV1_SpaceX.json` | State TV1: target 400 / min 200 / resting_limit 19.900 / ceiling 20.000 / cap 10%ADV / opp k=2,m=2 / soft 20 phiên / hard_expiry = 2 catalyst phi-giá (MANUAL). |
+| `discretionary_accumulation_selfcheck.py` | 33 test (engine + injector). |
+
+### Schema state per-position (formalize — task item 1)
+`target_qty · min_acceptable_qty · baseline_qty_before_program · lot_size · price_band{resting_limit,
+no_chase_ceiling, floor} · adv_ref_vnd · per_session_cap_pct_adv · opportunistic{k,m} ·
+soft_window_sessions/start_date · hard_expiry{manual_only, halted, halted_reason, conditions[]} ·
+no_chase · accept_underfill · ledger[] · status(active|completed|halted)`.
+
+### Idempotency (3 lớp)
+1. dedup order-id `BUY-<T>-DISC-<plan_date>` đã có trong plan → skip.
+2. dedup ticker+book=DISCRETIONARY_SPECIAL đã có trong plan → skip (bắt cả tranche chèn tay).
+3. dedup ledger đã có bản ghi `plan_date` → skip.
+`filled_qty` LUÔN tính lại từ **broker positions** (chân lý), KHÔNG cộng dồn ledger → chạy lại
+không đếm 2 lần (selfcheck b′ chứng minh: mất ledger vẫn ra remaining đúng từ broker).
+
+### Wiring (task item 4) — điểm chèn
+DollarBill dispatch trong `bq_freshness_check.sh` là **`--bg` (async)** ⇒ plan file được ghi SAU
+đó vài phút bởi headless session khác. KHÔNG thể chèn ngay trong vòng lặp dispatch (plan chưa tồn
+tại). ⇒ chọn **1 bước cron RIÊNG lúc 20:30 ICT** (sau DollarBill ghi plan ~19:0x, trước
+send_plan_report 21:00) để user duyệt plan đã có sẵn lệnh gom. Plan vẫn `requires_user_approval`
+⇒ Mafee chỉ execute sau khi user duyệt (human gate GIỮ NGUYÊN).
+
+**Crontab line để KÍCH HOẠT (sau verify + user duyệt):**
+```
+30 13 * * 1-5 /home/trido/thanhdt/WorkingClaude/mike/bin/inject_discretionary_orders.sh >> /home/trido/thanhdt/WorkingClaude/mike/logs/inject_discretionary.log 2>&1   # 20:30 ICT - auto-chen lenh gom DISCRETIONARY_SPECIAL
+```
+(20:30 ICT = 13:30 UTC. Đã đăng ký `mike/kb/cron_registry.md`, đánh dấu CHƯA CÀI.)
+
+### Còn cần NGƯỜI (task item 6)
+- **hard_expiry (catalyst kiểm toán FY2026 / đình chỉ giao dịch): KHÔNG tự động hoá được.** Cả 2 là
+  tin pháp lý/kiểm toán tương lai, không có feed đọc-máy đáng tin. Cơ chế: NGƯỜI (Winston theo dõi
+  corp-action/tin → escalate) set `hard_expiry.halted=true` + `halted_reason` trong state file; engine
+  tự dừng gom ngay phiên kế (selfcheck xác nhận). Đây là điểm human-in-the-loop CÒN LẠI của cơ chế.
+- **Kích hoạt cron**: cần user duyệt (chạm lệnh thật) + quant-skeptic PASS.
+- Mọi bước KHÁC (tính qty/giá, chèn plan, dừng khi đủ target, fail-safe) đã tự động + auditable.
