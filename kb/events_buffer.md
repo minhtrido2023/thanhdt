@@ -3197,3 +3197,8 @@
 - [2026-07-24T12:10:17Z] Mafee/status — eod-trading-report: {"account": "ZaloPay", "plan_date": "2026-07-24", "delivered_via": "hold_day"}
 - [2026-07-24T12:10:57Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-07-24", "delivered_via": "trading_report_thread"}
 - [2026-07-24T13:01:10Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 52790}
+
+## Consolidation 2026-07-24T14:07:01Z
+- [2026-07-24T14:00:04Z] Mike/question — plan-t1-not-ready-ZaloPay: {"reason": "plan_date_stale", "detail": "File mới nhất (/home/trido/thanhdt/WorkingClaude/data/trade_plans/plan_ZaloPay_2026-07-24.json) có plan_date='2026-07-24', kỳ vọng '2026-07-27' (T+1 từ hôm nay 2026-07-24). DollarBill có thể chưa chạy hoặc bị lỗi chiều nay.", "expected_date": "2026-07-27", "account": "ZaloPay", "second_chance": 0, "checked_at": "2026-07-24 21:00 ICT"}
+- [2026-07-24T14:00:05Z] Mike/question — plan-t1-not-ready-SpaceX: {"reason": "plan_date_stale", "detail": "File mới nhất (/home/trido/thanhdt/WorkingClaude/data/trade_plans/plan_SpaceX_2026-07-24.json) có plan_date='2026-07-24', kỳ vọng '2026-07-27' (T+1 từ hôm nay 2026-07-24). DollarBill có thể chưa chạy hoặc bị lỗi chiều nay.", "expected_date": "2026-07-27", "account": "SpaceX", "second_chance": 0, "checked_at": "2026-07-24 21:00 ICT"}
+- [2026-07-24T13:45:58Z] Taylor/status — fa_ratings-refresh-ok: {"rows": 12495}
