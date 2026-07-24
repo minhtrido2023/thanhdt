@@ -356,6 +356,30 @@ thể "dead money" vài quý. Size ≤0,5-1,0% NAV, chân trời 1-2 năm. **C�
 Mike không tự đặt lệnh ngoài V2.4). Nguồn số: BQ cache `ticker_financial` (48 quý) + Vietstock/CafeF/
 DNSE/TinNhanhCK KQKD Q2 & tài liệu ĐHĐCĐ 22/07/2026.
 
+### ⚠️ CẬP NHẬT 2026-07-23 (quét tuần `Taylor_20260724_011001`) — VỤ ÁN MỞ RỘNG SANG BAN ĐIỀU HÀNH ĐANG TẠI CHỨC → DGC giảm SÀN, giảm nhẹ conviction của RE-DO
+
+Ngày 22-23/07, Bộ Công an khởi tố THÊM **3 lãnh đạo DGC**: **TGĐ (CEO) Lưu Bách Đạt** + Thành viên
+HĐQT **Nguyễn Quốc Trung** + Phó TGĐ **Phùng Trọng Tú** (cấm đi khỏi nơi cư trú). Cổ phiếu **giảm
+SÀN 07-23** (−6,9%, close 37.700-37.950, thủng đáy 5 năm; vốn hoá ~14.300 tỷ, mất ~2/3 giá trị/1 năm).
+anomaly_scan bắt DGC tier-H (VOLSPIKE+IDIOCRASH, idio −8,1% khi VNINDEX +1,8%). Nguồn: Vietstock/
+VietnamBiz/CafeBiz/Dân Trí 22-23/07.
+
+**Khác biệt về CHẤT so với vụ 17/03 (chỉ dính họ Đào Hữu Huyền — nhà sáng lập):** lần này chạm **ban
+điều hành ĐANG TẠI CHỨC** (CEO + Phó TGĐ) ngay trước ĐHĐCĐ (13/08) → rủi ro **gián đoạn quản trị/vận
+hành** + khoảng-trống-lãnh-đạo, đúng loại "vụ án di cư từ cá nhân sáng lập → pháp nhân/ban điều hành"
+mà §3 liệt là tín hiệu cần theo dõi sát (chưa tới HARD ABANDON: chưa khởi tố pháp nhân, chưa kê biên).
+Cộng dồn với mỏ 25 vẫn dừng (Q2 GPM 19%) → **2 trong 4 rủi ro-thật của RE-DO (mỏ vô định + vụ án chạm
+lõi) đang NẶNG THÊM, không nhẹ đi.**
+
+**Điều KHÔNG đổi:** luận điểm asset-backed deep-value của RE-DO (cash ~10.900 tỷ = 76% vốn hoá, chưa
+lỗ 12 năm, CF_OA Q2 bật dương +1.083 tỷ, div yield ~8-13%) VẪN đứng — downside vẫn được kê bởi tiền
+mặt + tài sản, và giá càng giảm sàn thì margin-of-safety trên trục carry-cổ-tức càng dày. **Điều đổi:**
+optionality "re-rating khi vụ án kết thúc" bị đẩy XA hơn và bất định hơn (giờ phải chờ cả ổn định lại
+ban điều hành, không chỉ mỏ mở lại). **Ròng: giữ nguyên khung QUALIFIED-YES vị thế NHỎ ≤0,5-1,0% NAV
+kiểu carry+deep-value, nhưng KHÔNG vội bắt đáy sàn 07-23** — thêm 1 tín hiệu bất định lớn, ưu tiên chờ
+ổn định giá (§3 T2: higher-low + volume cạn) + tín hiệu quản trị được kiện toàn trước khi cân nhắc T1.
+**Vẫn cần user quyết định cuối.**
+
 ---
 
 ## 7. Case #3 — PNJ (P-Lab 2026), thêm 2026-07-18 (Taylor, dispatch từ Mike, job `Taylor_20260718_044400`)
