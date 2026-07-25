@@ -2490,3 +2490,6 @@
 
 ## Consolidation 2026-07-25T14:07:01Z
 - [2026-07-25T13:45:56Z] Taylor/status — fa_ratings-refresh-ok: {"rows": 12495}
+
+## Consolidation 2026-07-25T18:07:02Z
+- [2026-07-25T17:30:22Z] Mike/question — daily-retro-draft-failed-2026-07-25: {"reason": "draft file rong hoac khong ton tai sau job Mike, rc=1", "log": "/home/trido/thanhdt/WorkingClaude/mike/logs/daily_retro_draft_20260725_173001.log"}
