@@ -2478,3 +2478,6 @@
 
 ## Consolidation 2026-07-24T18:07:01Z
 - [2026-07-24T17:30:22Z] Mike/question — daily-retro-draft-failed-2026-07-24: {"reason": "draft file rong hoac khong ton tai sau job Mike, rc=1", "log": "/home/trido/thanhdt/WorkingClaude/mike/logs/daily_retro_draft_20260724_173001.log"}
+
+## Consolidation 2026-07-25T02:07:01Z
+- [2026-07-25T01:30:57Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 52790}
