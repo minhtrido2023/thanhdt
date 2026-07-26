@@ -101,6 +101,15 @@ max 0.061). Gotcha: cột `time` trong `bq_cache/ticker/*.parquet` là VARCHAR �
 adjust cổ tức/chia tách nên nhân với số cổ phiếu hiện tại sẽ ra vốn hoá sai). Thanh khoản dùng
 `Trading_Value_1M_P50`. Snapshot 2026-07-20, 771 mã:
 
+**⚠️ Bẫy dữ liệu thêm (phát hiện 2026-07-26, case PVT)**: `OShares` trong `ticker_financial` (BCTC
+theo quý) chỉ cập nhật khi có báo cáo mới — nếu DN chia cổ tức bằng cổ phiếu/phát hành thêm GIỮA 2 kỳ
+báo cáo, field này **lỗi thời** cho tới báo cáo quý kế tiếp. Ví dụ PVT: BCTC Q1/2026 (release 04/05)
+ghi `OShares=469.931.235`, nhưng công ty phát hành cổ tức 10% bằng CP hoàn tất 08/06/2026 →
+`OShares` thật = 516.918.938 từ 05/06/2026 trở đi. Bảng `ticker` (và `ticker_1m`, cùng schema) **cập
+nhật hàng ngày**, đã bắt kịp đúng ngày 05/06 — dùng `ticker.OShares` cho vốn hoá/EPS/số cổ phiếu hiện
+tại, **KHÔNG dùng `ticker_financial.OShares`** cho mục đích này (chỉ dùng field đó khi cần đúng số
+cổ phiếu TẠI THỜI ĐIỂM báo cáo, ví dụ tính lại EPS lịch sử của quý đó).
+
 | Tier | Định nghĩa | n | mcap trung vị | GTGD trung vị | **beta thật p25 / trung vị / p75** |
 |---|---|---|---|---|---|
 | **1 — mega-cap blue-chip** | mcap ≥ 30.000 tỷ **và** GTGD ≥ 50 tỷ/ngày | 36 | 115.500 tỷ | 188 tỷ | 0.92 / **1.06** / 1.21 |
