@@ -1797,3 +1797,15 @@
 - [2026-07-26T12:57:59Z] Taylor/heartbeat — Taylor_20260726_125456: {"status": "in_progress", "note": "Da hieu co che CAPIT (capit_base + event detection + lump entry@fire). Dang viet event-study script: replicate washout events + golden basket + forward prices, so sanh lump vs tranche-by-confirmation"}
 - [2026-07-26T12:58:57Z] Taylor/heartbeat — Taylor_20260726_125456: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260726_125456", "source": "watcher"}
 - [2026-07-26T12:59:57Z] Taylor/heartbeat — Taylor_20260726_125456: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260726_125456", "source": "watcher"}
+
+## Consolidation 2026-07-26T13:07:01Z
+- [2026-07-26T13:00:41Z] Taylor/heartbeat — Taylor_20260726_125456: {"status": "in_progress", "note": "Step1 xong: 19 washout fires 2014-2026 (gom ca live 2026-07-20). Dang code analysis: lump vs tranche (33/33/34 + 50/30/20), T2=breadth roll-over, T3=oversold<0.20 or state-up, do cost-basis/DD/terminal ret"}
+- [2026-07-26T13:00:57Z] Taylor/heartbeat — Taylor_20260726_125456: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260726_125456", "source": "watcher"}
+- [2026-07-26T13:01:57Z] Taylor/heartbeat — Taylor_20260726_125456: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260726_125456", "source": "watcher"}
+- [2026-07-26T13:02:34Z] Taylor/heartbeat — Taylor_20260726_125456: {"status": "in_progress", "note": "Ket qua chinh: tranche LOSES -1.1..-1.7pp ret60, cost-basis WORSE (~+1%), chi giam DD nhe (~1.5pp) tap trung o 3 crash da-tang (COVID 2020-03, 2025-04, 2022-04). Dang chay IS/OOS + sensitivity de xac nhan robust"}
+- [2026-07-26T13:02:57Z] Taylor/heartbeat — Taylor_20260726_125456: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260726_125456", "source": "watcher"}
+- [2026-07-26T13:03:58Z] Taylor/heartbeat — Taylor_20260726_125456: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260726_125456", "source": "watcher"}
+- [2026-07-26T13:04:58Z] Taylor/heartbeat — Taylor_20260726_125456: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260726_125456", "source": "watcher"}
+- [2026-07-26T13:05:58Z] Taylor/heartbeat — Taylor_20260726_125456: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260726_125456", "source": "watcher"}
+- [2026-07-26T13:06:58Z] Taylor/heartbeat — Taylor_20260726_125456: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260726_125456", "source": "watcher"}
+- [2026-07-26T13:01:05Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 52790}
