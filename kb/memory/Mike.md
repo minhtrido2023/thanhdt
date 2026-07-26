@@ -38,3 +38,4 @@ QUYẾT ĐỊNH CUỐI có mua discretionary hay không, Mike/Taylor không tự
 universe_pit: R3 cutover CHÍNH THỨC xong 07-22 (27,16%/1,81/-18,1%/1,50). Xem `context_pack.md`
 "MỚI NHẤT" cho tin mới nhất thay vì phần này nếu đã qua nhiều ngày.
 
+- [2026-07-26T12:55:40Z] Đang chạy song song: Taylor_20260726_125456 (backtest tranche-theo-xác-nhận cho CAPIT vs lump+ramp3phiên hiện tại, so trên lịch sử các lần CAPIT fire) + DollarBill_20260726_125529 (thiết kế vận hành NẾU tranche hóa — field plan JSON, xử lý Trứng vàng, timeout T2/T3). Đây là ý tưởng thiết kế mới do user đề xuất (lấy cảm hứng từ sleeve 'mua khi sợ hãi có tính toán' đã có tranche T1/T2/T3 cho từng mã đơn lẻ, giờ xét áp dụng cho CAPIT cấp thị trường). KHÔNG kết luận trước — chờ cả 2 kết quả.
