@@ -1159,3 +1159,26 @@
 - [2026-07-27T12:05:42Z] DollarBill/heartbeat — DollarBill_20260727_120341: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20260727_120341", "source": "watcher"}
 - [2026-07-27T12:06:42Z] DollarBill/heartbeat — DollarBill_20260727_120341: {"status": "still_running", "elapsed_min": 3, "job_id": "DollarBill_20260727_120341", "source": "watcher"}
 - [2026-07-27T12:06:42Z] DollarBill/heartbeat — DollarBill_20260727_120341: {"status": "still_running", "elapsed_min": 3, "job_id": "DollarBill_20260727_120341", "source": "watcher"}
+
+## Consolidation 2026-07-27T12:14:56Z
+- [2026-07-27T12:07:42Z] DollarBill/heartbeat — DollarBill_20260727_120341: {"status": "still_running", "elapsed_min": 4, "job_id": "DollarBill_20260727_120341", "source": "watcher"}
+- [2026-07-27T12:07:43Z] DollarBill/heartbeat — DollarBill_20260727_120341: {"status": "still_running", "elapsed_min": 4, "job_id": "DollarBill_20260727_120341", "source": "watcher"}
+- [2026-07-27T12:08:42Z] DollarBill/heartbeat — DollarBill_20260727_120341: {"status": "still_running", "elapsed_min": 5, "job_id": "DollarBill_20260727_120341", "source": "watcher"}
+- [2026-07-27T12:08:43Z] DollarBill/heartbeat — DollarBill_20260727_120341: {"status": "still_running", "elapsed_min": 5, "job_id": "DollarBill_20260727_120341", "source": "watcher"}
+- [2026-07-27T12:09:42Z] DollarBill/heartbeat — DollarBill_20260727_120341: {"status": "still_running", "elapsed_min": 6, "job_id": "DollarBill_20260727_120341", "source": "watcher"}
+- [2026-07-27T12:09:43Z] DollarBill/heartbeat — DollarBill_20260727_120341: {"status": "still_running", "elapsed_min": 6, "job_id": "DollarBill_20260727_120341", "source": "watcher"}
+- [2026-07-27T12:10:42Z] DollarBill/heartbeat — DollarBill_20260727_120341: {"status": "still_running", "elapsed_min": 7, "job_id": "DollarBill_20260727_120341", "source": "watcher"}
+- [2026-07-27T12:10:43Z] DollarBill/heartbeat — DollarBill_20260727_120341: {"status": "still_running", "elapsed_min": 7, "job_id": "DollarBill_20260727_120341", "source": "watcher"}
+- [2026-07-27T12:11:43Z] DollarBill/heartbeat — DollarBill_20260727_120341: {"status": "still_running", "elapsed_min": 8, "job_id": "DollarBill_20260727_120341", "source": "watcher"}
+- [2026-07-27T12:11:43Z] DollarBill/heartbeat — DollarBill_20260727_120341: {"status": "still_running", "elapsed_min": 8, "job_id": "DollarBill_20260727_120341", "source": "watcher"}
+- [2026-07-27T12:12:18Z] DollarBill/heartbeat — DollarBill_20260727_120341: {"status": "in_progress", "note": "Đã xác nhận ppse=25.5M, CSV close=21500, active_nav=444M. Đang tính sizing và viết plan ZaloPay 07-28."}
+- [2026-07-27T12:12:43Z] DollarBill/heartbeat — DollarBill_20260727_120341: {"status": "still_running", "elapsed_min": 9, "job_id": "DollarBill_20260727_120341", "source": "watcher"}
+- [2026-07-27T12:12:43Z] DollarBill/heartbeat — DollarBill_20260727_120341: {"status": "still_running", "elapsed_min": 9, "job_id": "DollarBill_20260727_120341", "source": "watcher"}
+- [2026-07-27T12:13:43Z] DollarBill/heartbeat — DollarBill_20260727_120341: {"status": "still_running", "elapsed_min": 10, "job_id": "DollarBill_20260727_120341", "source": "watcher"}
+- [2026-07-27T12:13:43Z] DollarBill/heartbeat — DollarBill_20260727_120341: {"status": "still_running", "elapsed_min": 10, "job_id": "DollarBill_20260727_120341", "source": "watcher"}
+- [2026-07-27T12:14:09Z] DollarBill/decision — plan-ZaloPay-2026-07-28: {"account": "ZaloPay", "plan_date": "2026-07-28", "orders": 1, "action": "BUY CSV 1000cp LAG_HI @11:15", "ref_price": 21500, "cost_vnd": 21516125, "ppse_before": 25542531, "slot_pct": 96.8, "capit_gap_vnd": 61236400, "hold_actions": "VPB_PARK/LAG + CAPIT + PARK — HOLD tất cả", "approved_by": null, "file": "data/trade_plans/plan_ZaloPay_2026-07-28.json"}
+- [2026-07-27T12:14:43Z] DollarBill/answer — plan-ZaloPay-2026-07-28-done: {"job": "DollarBill_20260727_120341", "status": "DONE", "plan_file": "data/trade_plans/plan_ZaloPay_2026-07-28.json", "orders": 1, "summary": "BUY CSV 1000cp LAG_HI @11:15 (21.5M, ppse=25.5M). CAPIT gap 61.2M defer. CHỜ user duyệt.", "discord_sent": true}
+- [2026-07-27T12:14:43Z] DollarBill/heartbeat — DollarBill_20260727_120341: {"status": "still_running", "elapsed_min": 11, "job_id": "DollarBill_20260727_120341", "source": "watcher"}
+- [2026-07-27T12:14:44Z] DollarBill/heartbeat — DollarBill_20260727_120341: {"status": "still_running", "elapsed_min": 11, "job_id": "DollarBill_20260727_120341", "source": "watcher"}
+- [2026-07-27T12:10:29Z] Mafee/status — eod-trading-report: {"account": "ZaloPay", "plan_date": "2026-07-27", "delivered_via": "trading_report_thread"}
+- [2026-07-27T12:11:08Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-07-27", "delivered_via": "trading_report_thread"}
