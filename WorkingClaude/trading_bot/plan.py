@@ -143,6 +143,111 @@ def filter_excluded_tickers(plan, excluded_tickers):
     return plan, blocked
 
 
+def net_offsetting_orders(plan):
+    """Gộp các lệnh NGƯỢC CHIỀU cùng mã trong CÙNG 1 plan thành 1 lệnh NET gửi broker.
+
+    VÌ SAO (case thật plan ZaloPay 2026-07-27): SELL VPB 800 (book custom30V_parking, trim)
+    + BUY VPB 700 (book LAG, entry mới) trong cùng 1 plan/ngày/account. "Book" là SỔ SÁCH
+    NỘI BỘ, KHÔNG phải sub-account của broker — DNSE chỉ thấy TỔNG số cp một mã trong một
+    tài khoản. Gửi cả 2 lệnh ra broker tốn phí+spread 2 lượt, trong khi 700cp chỉ là chuyển
+    nội bộ custom30V→LAG ở cùng giá thị trường (0 phí/spread thật). Đo trên case: phí bán
+    14.940 + phí mua 13.073 = 28.013đ; netting còn 1 lệnh SELL 100cp = 1.868đ → tiết kiệm
+    26.145đ + 1 lượt đi qua spread bid-ask. Đây là GIẢM CHI PHÍ THỰC THI, KHÔNG phải alpha.
+
+    NGUYÊN TẮC:
+    - Gộp CHỈ ở tầng đặt lệnh ra broker. Sổ sách từng book (entry_price/hold_period/exit của
+      LAG, target của park…) do TẦNG TRÊN giữ (paper-book mirror của V23Strategy, hoặc record
+      riêng của DollarBill) — KHÔNG suy ngược từ lệnh đã gửi, nên netting ở đây không đụng tới
+      kế toán/báo cáo từng book. Ở live, executor.py book-agnostic (journal FILL không ghi
+      book) → gộp tại đây an toàn cho ledger từng book. V23Strategy tự net sẵn (mỗi mã 1
+      target[t] rồi diff, không bao giờ sinh 2 chiều) — case cần gộp chỉ đến từ plan
+      LLM-authored của DollarBill, nên hàm này là lưới an toàn tầng chuẩn hoá plan.
+    - net = Σqty_buy − Σqty_sell (cùng mã). net=0 → KHÔNG gửi lệnh nào ra broker (100%
+      chuyển nội bộ; cả 2 book vẫn coi như đã giao dịch ở giá TT vì ledger nằm ở tầng trên).
+      net≠0 → ĐÚNG 1 lệnh theo chiều bên LỚN hơn, qty=|net|, book = book của bên lớn (phần
+      dư của bên lớn sau khi đã "cấp vốn/hàng" nội bộ cho bên nhỏ).
+    - CHỈ net khi 1 mã có CẢ buy VÀ sell trong plan. Một chiều (dù nhiều lệnh cùng chiều) →
+      GIỮ NGUYÊN, không đổi hành vi (không gộp cùng chiều — ngoài phạm vi yêu cầu).
+
+    THỨ TỰ trong pipeline (bot_execute.py): filter_excluded → NET → cap_capit → cap_lag →
+    approval. Net TRƯỚC các trần %ADV là CÓ CHỦ ĐÍCH: trần %ADV đo TÁC ĐỘNG THỊ TRƯỜNG, mà
+    chỉ phần NET mới thật sự chạm thị trường (phần chuyển nội bộ không tiêu thụ thanh khoản
+    nào). Nếu bên MUA lớn hơn, lệnh net vẫn là BUY (book bên mua) → cap_capit/cap_lag vẫn áp
+    trần lên phần dư đó bình thường. Nếu bên BÁN lớn hơn (case VPB) → net là SELL, các trần
+    %ADV (chỉ áp buy) không đụng tới — đúng, vì tác động thị trường thật chỉ là bán |net|cp.
+
+    Trả (plan đã sửa, list dict mô tả từng lần netting) — KHÔNG log, caller tự báo. Mỗi dict
+    ghi đủ leg gốc từng book (buy_legs/sell_legs) để audit/báo cáo không mất thông tin book.
+    """
+    from collections import defaultdict
+
+    by_ticker = defaultdict(list)
+    for o in plan.orders:
+        by_ticker[o.ticker].append(o)
+
+    new_orders, adj, handled = [], [], set()
+    for o in plan.orders:
+        if id(o) in handled:
+            continue
+        group = by_ticker[o.ticker]
+        buys = [g for g in group if (g.side or "").lower() == "buy"]
+        sells = [g for g in group if (g.side or "").lower() == "sell"]
+        if not (buys and sells):
+            # một chiều (hoặc side lạ) → giữ nguyên toàn bộ group, đúng thứ tự xuất hiện
+            for g in group:
+                handled.add(id(g))
+                new_orders.append(g)
+            continue
+
+        for g in group:
+            handled.add(id(g))
+        tb = sum(g.qty for g in buys)
+        ts = sum(g.qty for g in sells)
+        net = tb - ts
+        internal = min(tb, ts)
+        legs_desc = "; ".join(f"{g.side.upper()} {g.qty:,} {g.book or '?'}" for g in group)
+        rec = {
+            "ticker": o.ticker, "internal_qty": internal, "total_buy": tb,
+            "total_sell": ts, "net_qty": net,
+            "buy_legs": [{"book": g.book, "qty": g.qty, "note": g.note} for g in buys],
+            "sell_legs": [{"book": g.book, "qty": g.qty, "note": g.note} for g in sells],
+        }
+        if net == 0:
+            rec["action"] = "INTERNAL_ONLY"
+            rec["net_side"] = None
+            rec["reason"] = (f"mua {tb:,} = bán {ts:,} → 0 lệnh ra broker, 100% chuyển nội "
+                             f"bộ {internal:,}cp giữa book ở giá thị trường [{legs_desc}]")
+            adj.append(rec)
+            continue  # net=0 → không thêm lệnh nào
+
+        dom = buys if net > 0 else sells
+        side = "buy" if net > 0 else "sell"
+        lead = max(dom, key=lambda g: g.qty)  # leg lớn nhất bên dominant quyết định meta
+        qty = abs(net)
+        note = (f"NET {side.upper()} {qty:,}cp (dư của book {lead.book or '?'}) ← gộp các lệnh "
+                f"ngược chiều cùng mã trong plan: [{legs_desc}]. Chuyển nội bộ {internal:,}cp "
+                f"giữa book @giá thị trường (0 phí/spread); chỉ {qty:,}cp chạm broker.")
+        net_order = PlannedOrder(
+            id=f"NET-{o.ticker}-{side.upper()}",
+            ticker=o.ticker, side=side, qty=qty, ref_price=lead.ref_price,
+            book=lead.book, play_type=lead.play_type,
+            priority=min(g.priority for g in dom),
+            urgency=("high" if any((g.urgency or "") == "high" for g in dom) else lead.urgency),
+            note=note,
+            dcf_check=(lead.dcf_check if side == "buy" else None),
+            dcf_override_reason=(lead.dcf_override_reason if side == "buy" else ""),
+        )
+        new_orders.append(net_order)
+        rec["action"] = "NETTED"
+        rec["net_side"] = side
+        rec["net_book"] = lead.book
+        rec["reason"] = note
+        adj.append(rec)
+
+    plan.orders = new_orders
+    return plan, adj
+
+
 def cap_capit_orders(plan, account_label, status_path=None):
     """Áp trần %ADV cho lệnh MUA book CAPIT — enforce cứng, độc lập plan generator.
 

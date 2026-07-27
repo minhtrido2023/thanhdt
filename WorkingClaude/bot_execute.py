@@ -33,8 +33,10 @@ if hasattr(sys.stdout, "reconfigure"):  # console Windows cp1252 → utf-8
 
 from trading_bot.config import load_config, load_accounts, pick_accounts, EXEC_DIR
 from trading_bot.brokers import make_broker, get_quote_source, get_dnse_client
-from trading_bot.plan import (load_plan, filter_excluded_tickers, cap_capit_orders,
-                              cap_lag_orders, approval_block_reason)
+from trading_bot.plan import (load_plan, filter_excluded_tickers, net_offsetting_orders,
+                              cap_capit_orders, cap_lag_orders, approval_block_reason)
+from trading_bot.netting_recon import (reconcile_netted_fills, get_net_fill_from_journal,
+                                       write_recon_log)
 from trading_bot.executor import Executor, run_session, _publish_bot_event
 from trading_bot.vn_market import today_ict
 
@@ -75,6 +77,74 @@ def _alert_approval_block(label, plan_date, reason):
         send_telegram_text(tg["bot_token"], tg["chat_id"], msg, parse_mode="")
     except Exception:
         pass
+
+
+def _notify_trading_daily(msg):
+    """Post msg → Trading Daily Discord + Telegram — fail-safe (không bao giờ raise)."""
+    notify_thread = os.path.join(_WC_ROOT, "mike", "bin", "notify_thread.sh")
+    if os.path.isfile(notify_thread):
+        try:
+            subprocess.Popen([notify_thread, msg, _TRADING_DAILY_THREAD],
+                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                             close_fds=True)
+        except Exception:
+            pass
+    try:
+        with open(os.path.join(_WC_ROOT, "secrets", "telegram_config.json"),
+                  encoding="utf-8") as f:
+            tg = json.load(f)
+        from telegram_recommend import send_telegram_text
+        send_telegram_text(tg["bot_token"], tg["chat_id"], msg, parse_mode="")
+    except Exception:
+        pass
+
+
+def _alert_recon_failure(label, plan_date, failures):
+    """Netting reconciliation post-fill phát hiện bất nhất → BÁO LOUD, KHÔNG tự gộp.
+
+    Fail-loud theo coding_guidelines §5/§6: bus error + Discord + Telegram. Không raise
+    (để account khác vẫn được audit + report), nhưng caller đặt exit ≠ 0 để giám sát bắt.
+    """
+    lines = "\n".join(f"  • {f['ticker']}: {f['reason']}" for f in failures)
+    msg = (f"⚠️ NETTING RECON FAIL — account {label} ({plan_date}): đối soát post-fill lệnh "
+           f"đã netted phát hiện {len(failures)} bất nhất, CẦN NGƯỜI KIỂM TRA (không tự gộp):\n"
+           f"{lines}")
+    print(msg)
+    _publish_bot_event("error", "NETTING_RECON_FAIL", {
+        "account": label, "plan_date": plan_date, "failures": failures,
+    })
+    _notify_trading_daily(msg)
+
+
+def _reconcile_net_fills(executors, net_adjustments, pre_net_refs, plan_date):
+    """Đối soát post-fill cho các lệnh đã netted — chạy SAU khi phiên đóng (fills đã chốt).
+
+    Với mỗi account có netting (net_adjustments[label] non-empty): đọc GIÁ KHỚP THẬT của lệnh
+    net (parent `NET-<ticker>-<SIDE>`) từ journal FILL của executor (avg_price broker qua
+    `get_net_fill_from_journal`, KHÔNG phải giá đặt lệnh — §6), chạy `reconcile_netted_fills`:
+      • records → ghi audit-trail JSONL (2 leg từng book @ cùng giá thật);
+      • failures → BÁO LOUD (bus error + Discord + Telegram), KHÔNG tự gộp.
+    Đây là AUDIT read-only + ghi log atomic — process chết trước khi chạy chỉ mất audit, không
+    ảnh hưởng lệnh (side-effect đã xảy ra trong phiên). ref_price_of dùng ref trước-net để định
+    giá chuyển nội bộ khi NET=0 / net order khớp 0cp (không có giá khớp thật để dùng).
+    Trả list label có failures (caller đặt exit ≠ 0)."""
+    failed = []
+    for e in executors:
+        adj = net_adjustments.get(e.label)
+        if not adj:
+            continue
+        refs = pre_net_refs.get(e.label, {})
+        get_net_fill = (lambda tk, side, _j=e.journal_file:
+                        get_net_fill_from_journal(_j, tk, side))
+        ref_price_of = lambda tk, _r=refs: _r.get(tk)
+        records, failures = reconcile_netted_fills(adj, get_net_fill, ref_price_of)
+        if records:
+            path = write_recon_log(records, e.label, plan_date, EXEC_DIR)
+            print(f"[{e.label}] ✅ netting reconcile: {len(records)} mã audited → {path}")
+        if failures:
+            failed.append(e.label)
+            _alert_recon_failure(e.label, plan_date, failures)
+    return failed
 
 
 def _acquire_account_lock(label, plan_date):
@@ -207,6 +277,8 @@ def main():
     plan_date = args.date or today_ict().strftime("%Y-%m-%d")
 
     shared_fills = {}                            # sổ participation chung của fleet
+    net_adjustments = {}                         # label -> adj của net_offsetting_orders
+    pre_net_refs = {}                            # label -> {ticker: ref_price} TRƯỚC khi net
 
     executors = []
     approval_blocked = []                        # account bị approval gate từ chối
@@ -228,6 +300,17 @@ def main():
                   f"excluded_tickers={sorted({o.ticker for o in blocked})}: "
                   f"{[o.ticker for o in blocked]} — không bao giờ tự động giao dịch "
                   f"các mã này (xem trading_bot_accounts.json).")
+        # Netting lệnh NGƯỢC CHIỀU cùng mã trong cùng plan (vd SELL park + BUY LAG cùng VPB)
+        # → 1 lệnh NET ra broker; phần bù trừ là chuyển nội bộ giữa book (0 phí/spread). ĐẶT
+        # SAU filter_excluded, TRƯỚC các trần %ADV — CHỦ ĐÍCH: trần đo tác động THỊ TRƯỜNG, mà
+        # chỉ phần NET mới thật chạm thị trường (xem docstring net_offsetting_orders). Lưới an
+        # toàn tầng chuẩn hoá plan: V23Strategy tự net sẵn, case cần gộp đến từ plan LLM-authored
+        # của DollarBill. ref_price trước-net + adj giữ lại để reconcile post-fill (netting_recon).
+        pre_net_refs[p["label"]] = {o.ticker: o.ref_price for o in plan.orders}
+        plan, net_adj = net_offsetting_orders(plan)
+        net_adjustments[p["label"]] = net_adj
+        for a in net_adj:
+            print(f"[{p['label']}] ⟲ NET {a['ticker']} ({a['action']}): {a['reason']}")
         # Trần %ADV cho book CAPIT (X·ADV20·D, đọc từ data/golive_v23_status.json) — enforce
         # ở ĐÂY, không dựa vào plan generator nhớ áp, giống filter_excluded_tickers ngay trên.
         # Fail-closed khi thiếu cap/artifact cũ: chặn lệnh chứ không mua không giới hạn.
@@ -279,6 +362,14 @@ def main():
 
     run_session(executors, once=args.once, max_cycles=args.max_cycles,
                 force_phase=args.force_phase)
+    # Đối soát post-fill cho lệnh đã netted (fills đã chốt sau run_session). Audit + fail-loud.
+    # Fail-loud = bus error NETTING_RECON_FAIL + Discord + Telegram (trong _alert_recon_failure);
+    # ops_health_check bắt event error này. Không đổi exit-code (side-effect lệnh đã xảy ra;
+    # đây là AUDIT post-hoc, không nên đổi trạng thái thoát của tầng đặt lệnh live).
+    recon_failed = _reconcile_net_fills(executors, net_adjustments, pre_net_refs, plan_date)
+    if recon_failed:
+        print(f"⚠️ netting reconciliation FAIL: {len(recon_failed)} account "
+              f"({', '.join(recon_failed)}) — đã BÁO LOUD (bus/Discord/Telegram), cần người kiểm tra.")
     if approval_blocked:
         print(f"⛔ lưu ý: {len(approval_blocked)} account đã bị approval gate chặn đầu "
               f"phiên ({', '.join(approval_blocked)}) — exit 2 để giám sát bắt được.")
