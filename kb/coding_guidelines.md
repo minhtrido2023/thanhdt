@@ -64,13 +64,10 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 **Any script that can be killed mid-run and re-run must not repeat an external action.**
 
-Root cause of the 2026-07-02 double-buy incident: a headless process crashed after
-`broker.place_order()` succeeded but before it persisted that fact locally. The next run,
-holding the lock correctly, had no way to know the order already existed and placed a
-duplicate. A lock (flock/circuit-breaker) only stops two runs from overlapping — it does
-nothing for one run dying mid-write. Fixed in `trading_bot/executor.py` (`_ghost_tickers` +
-atomic `_save_state`, commit `e1d9b7c`); apply the same reasoning to every new script, not
-just that one.
+Root cause (2026-07-02 double-buy, `kb/INCIDENTS.md`): a lock only stops two runs from
+overlapping — it does nothing for one run dying mid-write between the external action and
+persisting that fact locally. Fixed in `trading_bot/executor.py` (`_ghost_tickers` + atomic
+`_save_state`); apply the same reasoning to every new script.
 
 Before writing any script that calls an external system with a side effect (place an order,
 send a message, write a shared file, call an API that isn't naturally idempotent):
@@ -91,12 +88,10 @@ send a message, write a shared file, call an API that isn't naturally idempotent
 
 ## 6. Verify Report Data Provenance (client-facing numbers)
 
-**A field's name and a plausible-looking value are not verification.** Root cause of the
-2026-07-03 weekly-report incident: a P&L calc read `avg_cost_vnd` out of a snapshot file whose
-own metadata labeled that field `"source": "ref_px_approx"` (an approximate reference price,
-captured for an unrelated audit purpose) and reported it as real cost basis — flipping VHM's
-week from a gain to a fabricated −6.4% loss. The number looked like a real VND price, so it went
-unchecked into a document meant for clients.
+**A field's name and a plausible-looking value are not verification.** Root cause (2026-07-03
+weekly-report incident, `kb/INCIDENTS.md`): a P&L calc read a snapshot field labeled
+`"source": "ref_px_approx"` (an approximate price for an unrelated purpose) and reported it as
+real cost basis, unchecked, into a client-facing document.
 
 Before any number reaches a report (daily/weekly/monthly, or any client-facing artifact):
 - Trace it back to the system that is *authoritative* for that fact — for trade prices/fills,
@@ -132,12 +127,10 @@ Before any number reaches a report (daily/weekly/monthly, or any client-facing a
 
 **Bright-line rule — same-day data: DNSE API, never BigQuery (user directive, 2026-07-09).**
 BQ (`tav2_bq.ticker`/`ticker_1m`) only syncs overnight (`sync_bq_cache_daily.sh`, 23:45 ICT) —
-any script that runs *before* that sync completes and reads BQ for "today's" price/volume is
-reading **yesterday's** close, structurally, every single time (not an occasional staleness —
-BQ physically cannot have today's data yet). Concrete incident: 2026-07-09, DollarBill's T+1
-plan generator (`bq_freshness_check.sh`, dispatches ~17:30 ICT) priced 2 of 4 orders off BQ
-close (one day stale, off by up to +5.7%) while the other 2 happened to use a live DNSE quote
-correctly — the inconsistency itself is what let it go unnoticed. Rule going forward:
+any script reading BQ for "today's" price/volume before that sync is reading **yesterday's**
+close, structurally, every time (BQ physically cannot have today's data yet). Incident
+2026-07-09 (`kb/INCIDENTS.md`): a plan generator priced 2/4 orders off stale BQ close (+5.7%
+off) while 2 others happened to use live DNSE — the inconsistency is what let it go unnoticed.
 - Any same-day/live calculation (order sizing, ref prices for a T+1 plan, live NAV/exposure
   checks, anything a report will call "today's" number) MUST read DNSE (`dnse_api.py`
   secdef/latest_trade/positions/balances) — never BQ — regardless of what hour the script runs.
@@ -165,10 +158,9 @@ correctly — the inconsistency itself is what let it go unnoticed. Rule going f
 ## 7. Onboarding a New Account With Legacy/Excluded Holdings
 
 **When an account brought under management already holds positions the bot didn't buy** (e.g.
-ZaloPay/0001743768, onboarded 2026-07-06 with a pre-existing 47%-NAV DGC position kept for its
-own investment thesis while under an active HOSE trading restriction), don't hand-roll a one-off
-workaround — use the general mechanism, since more accounts of this shape are expected
-(user, 2026-07-06: "xử lý case này để về sau quản lý nhiều loại tài khoản hơn mà không gặp vấn đề"):
+ZaloPay's pre-existing DGC position, kept for its own thesis under a trading restriction — see
+`kb/INCIDENTS.md`), don't hand-roll a one-off workaround — use the general mechanism, since more
+accounts of this shape are expected:
 
 1. **Declare it in config, not code**: set `"excluded_tickers": [...]` on the account's profile
    in `secrets/trading_bot_accounts.json` (field added to `ACCOUNT_DEFAULTS` in
@@ -197,29 +189,20 @@ workaround — use the general mechanism, since more accounts of this shape are 
    matching (a lowercase config typo must not silently fail to exclude). Extend this file rather
    than writing a parallel one when the mechanism itself changes.
 
-**A test-infrastructure lesson from the same work session:** re-running the full selfcheck suite
-after this change (per user's "backtest cẩn thận" instruction) surfaced a real, pre-existing bug
-across several *other* selfcheck files: `Executor.__init__` eagerly loads `state.json` from the
-DEFAULT `(account, plan_date)` path *before* any test code gets a chance to redirect it to a
-tmpdir — so a stale file left by an earlier run (this file's own, or another selfcheck reusing
-the literal account tag `"selfcheck"`) silently corrupts the next run's starting state. Every
-selfcheck driving `Executor` needs BOTH a unique account tag (not shared across files) AND a
-module-load-time cleanup of any stale fixture at the default path — see
-`ghost_order_selfcheck.py`'s `TAG` comment for the full pattern. A selfcheck suite that only
-passes on a clean checkout and silently flakes on repeated runs is not verifying what it claims
-to.
+**Test-infrastructure lesson (same root cause, different files):** `Executor.__init__` eagerly
+loads `state.json` from the DEFAULT `(account, plan_date)` path *before* test code can redirect
+it to a tmpdir — a stale file from an earlier run (or another selfcheck reusing the same account
+tag) silently corrupts the next run's starting state. Every selfcheck driving `Executor` needs
+BOTH a unique account tag AND a module-load-time cleanup of any stale fixture at the default path
+— see `ghost_order_selfcheck.py`'s `TAG` comment for the pattern.
 
 ## 8. Never Write Experiment Output to a Canonical / Registry-Pinned Filename
 
-**Root cause of the 2026-07-06 R3-CSV overwrite:** `pt_v23_audit_2014.py` builds its output
-filename ONLY from a subset of env knobs (`_capsuf _matsuf _liqsuf _park_tag _wt_tag …`).
-Two config axes that materially change the result — **`BASKET_SELECT`** and the
-**combination mode** (allocator vs V2.3C static 50/50) — have **no filename suffix**. So an
-experiment run with a different `BASKET_SELECT`/combination silently wrote to the exact
-canonical R3 path `..._etfliqcustompitg_wtnamecap.csv` (producing CAGR 17.5%, w_lag_tgt blank),
-clobbering the registry-pinned production baseline. Same failure mode as the earlier `v3latest`
-episode (registry line ~142). A lock wouldn't help — both runs were legitimate, just colliding
-on an output name.
+**Root cause (2026-07-06 R3-CSV overwrite, `data/results_registry.md` line ~142):** an output
+filename built from only a SUBSET of env knobs (e.g. `BASKET_SELECT` / combination-mode had no
+suffix) — a config axis that materially changes the result but has no filename suffix lets an
+experiment run silently clobber the registry-pinned production baseline. A lock wouldn't help —
+both runs were legitimate, just colliding on an output name.
 
 Rules when a script's output feeds `data/results_registry.md` or any pinned baseline:
 
@@ -242,15 +225,10 @@ Rules when a script's output feeds `data/results_registry.md` or any pinned base
 
 ## 9. Check `mike/kb/data_registry.md` Before Wiring a New Data Source
 
-**Root cause of the 2026-07-11 SIGNAL_V11 base-leak:** four production/canonical consumers
-(`golive_recommend_v23.py`, `pt_v4_dt5g.py`, `pt_v22_dt5g.py`, `pt_v23_audit_2014.py`) were all
-silently reading `tav2_bq.vnindex_5state` (the v3.4b BASE — no DT-gate, no macro-cap, ~153
-transitions) instead of `tav2_bq.vnindex_5state_dt5g_live` (the actual production regime, 49
-transitions) — a trap already written up in `CLAUDE.md` ("many research scripts read bare
-`vnindex_5state` assuming it is DT5G"). The documentation existed; nothing forced a check
-against it before each new script picked a table name that *sounded* right. Concrete damage:
-the live paper-trading book `pt_v22_dt5g` entered 6 tickers on a fake BULL(4) signal that a
-correctly-sourced read would have shown as NEUTRAL(3).
+**Root cause (2026-07-11 SIGNAL_V11 base-leak, `kb/INCIDENTS.md`):** four production consumers
+silently read a trap table (documented as a trap in `CLAUDE.md`, but nothing forced a check
+against it before each new script picked a table name that *sounded* right) instead of the real
+production regime table — causing a live paper-trading book to enter 6 tickers on a fake signal.
 
 **Mandatory rule, user directive 2026-07-11:** before reading ANY data source (BQ table, local
 CSV/pickle/JSON, published state file) in new research or production code — check
@@ -277,16 +255,10 @@ sounds closest to what it needs in the moment; naming the specific registry file
 
 ## 10. When a File Becomes Canonical, Archive Its Superseded Variants in the Same Pass
 
-**Why this matters (user directive 2026-07-11):** the fa_ratings incident had two separate root
-causes on the same day — SIGNAL_V11 read the wrong *table* (§9, a data-source trap), and
-`data_registry.md` claimed `fundamental_rating.py`'s builder "had no writer in the codebase" when
-the builder was sitting at repo root the whole time, just under a name that didn't match the
-`build_fa_ratings_*` pattern this registry was seeded from. Confirming which file is canonical is
-only half the fix — the *other* half is that near-identical variant files (`build_fa_ratings_v9.py`,
-`build_fa_ratings_pre2014.py`, `fundamental_rating_v5.py`, `fundamental_rating_v8c.py` — all sitting
-in the same repo root, all producing a same-shaped rating output under a slightly different name)
-are exactly the kind of landmine that caused this confusion in the first place. Leaving them in
-place "for reference" is how the next agent (or human) doing a quick grep picks the wrong one.
+**Why this matters (2026-07-11 fa_ratings incident, `kb/INCIDENTS.md`):** confirming which file is
+canonical is only half the fix — near-identical variant files left in the repo root under
+slightly different names are exactly the landmine that causes the next agent (or human) doing a
+quick grep to pick the wrong one.
 
 **Rule: when a script/file is confirmed canonical for a purpose** (a builder is identified as *the*
 one that produces a pinned table, a cron is installed pointing at a specific script, a migration
@@ -311,14 +283,11 @@ repo-root files with a name similar to an already-CANONICAL registry entry that 
 
 ## 11. Check `mike/kb/cron_registry.md` Before Adding or Changing a Cron Schedule
 
-**Root cause of the 2026-07-12 C1 CRITICAL incident:** `publish_gated_state.py` had been silently
-reading the DT5G base state through `BQ_LOCAL_CACHE` (always T-1) instead of live BigQuery for
-~2.5 weeks, because `wc_env.sh` exports that env var globally and the script's own comment ("SOURCE
-OF TRUTH = BigQuery... NOT a local CSV") stated an intent the code didn't actually enforce. Nobody
-had asked "what vintage does this publish step actually read, and does that survive a stricter
-freshness gate?" before the gate (`MAX_STATE_LAG`) was tightened to 0 on 2026-07-11 — at which point
-the mismatch became a structural, always-fails contradiction (Winston audit `Winston_20260712_142100`,
-fixed same day, commit `4995262`, quant-skeptic CONFIRMED).
+**Root cause (2026-07-12 C1 CRITICAL, `kb/INCIDENTS.md`):** a publish script silently read a
+process-inherited T-1 cache env var for ~2.5 weeks despite its own comment stating live BQ as the
+source of truth — the code didn't actually enforce the intent the comment stated. Nobody had
+asked "what vintage does this publish step actually read?" before a downstream gate tightened and
+turned the mismatch into a structural, always-fails contradiction.
 
 **Mandatory rule**: before adding a new cron entry or changing an existing one's schedule, read
 `mike/kb/cron_registry.md` first — it answers, per job, what it reads (source + vintage T/T-1),
@@ -339,12 +308,10 @@ which would break every OTHER script that legitimately wants the cache).
 
 ## 12. Shared Multi-Account Data Files: Filter by `account_no` at Every Read
 
-**Pattern "cross-account contamination" — 3 lần trong 15 ngày** (2026-07-06
-`daily_nav_snapshot.py`, 2026-07-19 `reconcile_equity.py` + `verify_account_snapshot.py`,
-2026-07-21 `eod_trading_report.sh`). Cùng 1 root cause mỗi lần: `data/execution_logs/dnse_raw_{date}.jsonl`
-là file DÙNG CHUNG cho MỌI account (SpaceX + ZaloPay ghi lẫn vào 1 file, phân biệt bằng field
-`accountNo`/`account_no` bên trong record). Code đọc file theo NGÀY rồi tính NAV/fill/P&L mà quên
-lọc account → số của account này lẫn số của account kia.
+**Pattern "cross-account contamination" — 3 lần trong 15 ngày** (chi tiết `kb/INCIDENTS.md`). Cùng
+1 root cause mỗi lần: `data/execution_logs/dnse_raw_{date}.jsonl` là file DÙNG CHUNG cho MỌI
+account (phân biệt bằng field `accountNo`/`account_no` bên trong record). Code đọc file theo NGÀY
+rồi tính NAV/fill/P&L mà quên lọc account → số của account này lẫn số của account kia.
 
 **Quy tắc bắt buộc:** mọi lần đọc 1 file dữ liệu dùng chung giữa các account (hiện tại:
 `dnse_raw_{date}.jsonl`, và bất kỳ file nào sau này gộp nhiều account vào 1 path), dòng ĐẦU TIÊN
