@@ -129,7 +129,9 @@ def main():
             print("   - " + e.splitlines()[0][:110])
         return 0
 
+    orig_mode = os.stat(args.memfile).st_mode & 0o777   # preserve the file's permissions
     os.makedirs(arch_dir, exist_ok=True)
+    new_archive = not os.path.exists(arch_path)
     stamp = today.strftime('%Y-%m-%d')
     with open(arch_path, 'a', encoding='utf-8') as f:
         if f.tell() == 0:
@@ -140,11 +142,14 @@ def main():
                 f"require_done={args.require_done})\n")
         for e in archived:
             f.write(e if e.endswith('\n') else e + '\n')
+    if new_archive:
+        os.chmod(arch_path, orig_mode)      # archive inherits the source file's permissions
 
     new_text = head + ''.join(kept)
     tmp = args.memfile + '.tmp'
     with open(tmp, 'w', encoding='utf-8') as f:
         f.write(new_text)
+    os.chmod(tmp, orig_mode)                 # os.replace would otherwise drop mode → 0664
     os.replace(tmp, args.memfile)
     print(f"   wrote {len(new_text)} bytes hot / appended {arch_lines} lines to archive")
     return 0
