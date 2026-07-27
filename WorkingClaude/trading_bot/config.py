@@ -29,8 +29,9 @@ DEFAULTS = {
     # --- slicing / execution ---
     "max_child_value": 200_000_000,   # VND tối đa mỗi lệnh con
     "max_participation": 0.10,        # mua/bán ≤ 10% KL khớp lũy kế trong ngày của mã
-    "capit_realized_participation_ceiling": 0.30,  # CHỈ áp cho lệnh CAPIT (hybrid ADV20-basis,
-                                      #   job Taylor_20260721_053659): sau khi đổi cơ sở pacing
+    "capit_realized_participation_ceiling": 0.30,  # áp cho lệnh ADV20-paced (CAPIT +
+                                      #   DISCRETIONARY_SPECIAL, mở rộng job Taylor_20260727_072910;
+                                      #   job gốc Taylor_20260721_053659): sau khi đổi cơ sở pacing
                                       #   sang ADV20 causal, trần phụ này chặn fleet vượt 30% KL
                                       #   khớp lũy kế THẬT của phiên → không bao giờ thành đa số
                                       #   một phiên mỏng. Chọn cận trên dải 25-30% mà market-impact

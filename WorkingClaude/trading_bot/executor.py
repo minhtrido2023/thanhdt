@@ -91,6 +91,10 @@ class Executor:
         # Rỗng {} = không phải phiên CAPIT, hoặc artifact thiếu/stale → _child_qty tự
         # fail-safe về guard realtime cũ. Xem _load_capit_adv20_basis().
         self._capit_adv20_vnd = self._load_capit_adv20_basis()
+        # ticker -> ADV20 (adv_ref_vnd) cho lệnh DISCRETIONARY_SPECIAL — nguồn KHÁC CAPIT:
+        # đọc từ state file riêng của từng case (state_<TICKER>_<account>.json). Rỗng/thiếu
+        # → cùng fail-safe về guard realtime cũ. Xem _load_discretionary_adv20_basis().
+        self._disc_adv20_vnd = self._load_discretionary_adv20_basis()
         self.state = self._load_state()
         self._step_fail_count = 0   # consecutive STEP_FAIL counter for escalation
 
@@ -135,6 +139,59 @@ class Executor:
             return out
         except Exception:
             return {}
+
+    @staticmethod
+    def _is_discretionary_special_buy(o):
+        return (o.book or "").upper() == "DISCRETIONARY_SPECIAL" and (o.side or "").lower() == "buy"
+
+    def _load_discretionary_adv20_basis(self, base_dir=None):
+        """ticker -> ADV20 (adv_ref_vnd, VND) cho lệnh DISCRETIONARY_SPECIAL buy.
+
+        Đọc adv_ref_vnd từ state file RIÊNG của từng case theo quy ước playbook
+        lowliq_execution_playbook_20260724.md: data/trade_plans/discretionary/
+        state_<TICKER>_<account>.json. TỔNG QUÁT — không hardcode TV1; case sau (DGC/…)
+        đăng ký state cùng convention là tự được nhận diện.
+
+        Nguồn ADV20 KHÁC CAPIT: CAPIT lấy từ golive_v23_status.json (fleet-level, chia đảo
+        ngược từ cap_vnd), còn DISCRETIONARY_SPECIAL lấy adv_ref_vnd đã đo sẵn trong state.
+        adv_ref_vnd là turnover 1 phiên (median 20 phiên), dùng CHUNG ngữ nghĩa với ADV20
+        CAPIT trong _child_qty (floor = max_participation × ADV20 / px).
+
+        FAIL-SAFE (bỏ qua ticker → _child_qty tự lùi về guard %KL-ngày cũ, KHÔNG mua vô hạn):
+        không có lệnh DISCRETIONARY_SPECIAL buy / thiếu file state / thiếu-sai adv_ref_vnd /
+        state không có (order phát sinh thủ công không đăng ký playbook) → ticker vắng khỏi
+        dict → nhánh elif q.day_volume cũ áp dụng như trước (không crash).
+        """
+        disc_orders = [o for o in self.plan.orders if self._is_discretionary_special_buy(o)]
+        if not disc_orders:
+            return {}
+        from .config import WORKDIR
+        base = base_dir or os.path.join(WORKDIR, "data", "trade_plans", "discretionary")
+        out = {}
+        for o in disc_orders:
+            path = os.path.join(base, f"state_{o.ticker}_{self.label}.json")
+            try:
+                with open(path, encoding="utf-8") as f:
+                    st = json.load(f)
+                v = st.get("adv_ref_vnd")
+                if isinstance(v, (int, float)) and v > 0:
+                    out[o.ticker] = float(v)
+            except Exception:
+                continue
+        return out
+
+    def _adv20_basis_for(self, o):
+        """ADV20 (turnover VND) cho lệnh cần pacing theo ADV20 thay vì %KL-ngày, hoặc None.
+
+        None → KHÔNG phải lệnh cần ADV20-pacing (CAPIT/DISCRETIONARY_SPECIAL buy), HOẶC
+        thiếu nguồn ADV20 → _child_qty fail-safe về guard %KL-ngày thật (KHÔNG mua vô hạn).
+        Route theo book để 2 nguồn ADV20 (CAPIT vs DISCRETIONARY_SPECIAL) không lẫn nhau.
+        """
+        if self._is_capit_buy(o):
+            return self._capit_adv20_vnd.get(o.ticker)
+        if self._is_discretionary_special_buy(o):
+            return self._disc_adv20_vnd.get(o.ticker)
+        return None
 
     # ------------------------------------------------------------ state/journal
 
@@ -418,15 +475,17 @@ class Executor:
             return remaining
         by_value = int(self.cfg["max_child_value"] / px) if px else remaining
         qty = min(remaining, by_value)
-        adv20_vnd = self._capit_adv20_vnd.get(o.ticker) if self._is_capit_buy(o) else None
+        adv20_vnd = self._adv20_basis_for(o)
         if adv20_vnd and px:
-            # LỆNH CAPIT — hybrid ADV20-floor + realized-ceiling (job Taylor_20260721_053659,
-            # market-impact test Taylor_20260721_050720). CƠ SỞ pacing đổi từ q.day_volume
-            # real-time sang ADV20 causal (median 20 phiên TRƯỚC washout): một phiên mỏng bất
-            # thường của tên THỰC CHẤT thanh khoản không còn bị WAIT_QUOTA oan (bug NCT
-            # 2026-07-21). TRẦN PHỤ = capit_realized_participation_ceiling × KL khớp lũy kế
-            # THẬT: fleet không bao giờ thành đa số một phiên mỏng. allowance = min(hai guard)
-            # → bị chặn bởi CẢ thanh khoản 20 phiên LẪN tape thật hôm nay (fleet-level).
+            # LỆNH ADV20-PACED (CAPIT hoặc DISCRETIONARY_SPECIAL) — hybrid ADV20-floor +
+            # realized-ceiling (job Taylor_20260721_053659 cho CAPIT; mở rộng sang
+            # DISCRETIONARY_SPECIAL job Taylor_20260727_072910 — cùng lỗi WAIT_QUOTA oan như
+            # NCT/TV1). CƠ SỞ pacing đổi từ q.day_volume real-time sang ADV20 causal (median
+            # 20 phiên): một phiên mỏng bất thường của tên THỰC CHẤT thanh khoản không còn bị
+            # WAIT_QUOTA oan. TRẦN PHỤ = capit_realized_participation_ceiling × KL khớp lũy kế
+            # THẬT (dùng chung cho cả 2 book — cùng ngữ nghĩa "không thành đa số một phiên
+            # mỏng", không có lý do tách): fleet không bao giờ thành đa số. allowance =
+            # min(hai guard) → bị chặn bởi CẢ thanh khoản 20 phiên LẪN tape thật (fleet-level).
             fleet_filled = self.shared.get(o.ticker, 0)
             floor_allow = int(self.cfg["max_participation"] * adv20_vnd / px) - fleet_filled
             if q.day_volume:
