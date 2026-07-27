@@ -69,6 +69,8 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# Shared usage-limit phrase list (single source of truth, also used by daily_retro.sh).
+source "$ROOT/bin/usage_limit_phrases.sh"
 # Override only for tests; production always uses the real CLI.
 CLAUDE="${DISPATCH_CLAUDE_BIN:-/home/trido/.local/bin/claude}"
 
@@ -225,12 +227,14 @@ _looks_like_usage_limit() {  # <logfile> [<err_logfile>] -> 0 if the failure loo
   local lf="$1" ef="${2:-}" tail_text
   tail_text="$(tail -c 4000 "$lf" 2>/dev/null)"
   [ -n "$ef" ] && tail_text="$tail_text$(tail -c 4000 "$ef" 2>/dev/null)"
-  if printf '%s' "$tail_text" | grep -qiE \
-      'usage limit|session limit|rate.?limit|resets at|quota exceeded|limit reached|rate_limit_error|"status":[[:space:]]*429'; then
+  if printf '%s' "$tail_text" | grep -qiE "$USAGE_LIMIT_PHRASE_RE"; then
     return 0
   fi
   # Corroborate with the account-wide estimate — catches wording changes in future CLI
-  # versions that the phrase list above doesn't know about yet.
+  # versions that the phrase list above doesn't know about yet. NOTE: this only estimates
+  # the rolling 5-HOUR window; it CANNOT catch a WEEKLY-cap exhaustion (different ceiling,
+  # 5h pct reads low while weekly is blocked) — that case is caught by the phrase list
+  # above ("weekly limit"), which is why the shared list is the primary signal.
   local pct
   pct="$(python3 "$ROOT/bin/usage_watch.py" --oneline 2>/dev/null | awk '{print $1}')"
   [ -n "$pct" ] && [ "${pct%%.*}" -ge "${DISPATCH_USAGE_LIMIT_PCT:-95}" ] 2>/dev/null

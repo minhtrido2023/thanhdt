@@ -31,6 +31,8 @@
 # khái niệm "turn sau" nào cả) tự làm việc đó bằng chính dispatch.sh đồng bộ có sẵn.
 set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# Shared usage-limit phrase list (single source of truth, also used by dispatch.sh).
+source "$ROOT/bin/usage_limit_phrases.sh"
 LOG="$ROOT/logs/daily_retro.log"
 # Chạy 00:30 ICT = đã sang ngày lịch MỚI — review NGÀY VỪA KẾT THÚC (hôm qua theo giờ chạy),
 # không phải "hôm nay" theo đồng hồ lúc script chạy. Bug tiềm ẩn nếu dùng `date` trực tiếp:
@@ -149,8 +151,7 @@ if [ ! -s "$DRAFT_FILE" ]; then
   #     CLI "weekly limit · resets 5pm" evade _looks_like_usage_limit của dispatch.sh).
   #   - lỗi thật (Mike trả sai/treo/exit0-nhưng-không-viết-draft, đúng ca 2026-07-26): giữ
   #     nguyên event `question` để người/Mike xem — đây là bất thường thật.
-  if tail -c 4000 "$draft_log" 2>/dev/null | grep -qiE \
-       'weekly limit|usage limit|session limit|rate.?limit|resets? ([0-9]|at)|quota exceeded|limit reached|rate_limit_error|"status":[[:space:]]*429'; then
+  if tail -c 4000 "$draft_log" 2>/dev/null | grep -qiE "$USAGE_LIMIT_PHRASE_RE"; then
     log "SKIP: draft RETRO $TODAY không chạy vì tài khoản Mike hết usage-limit (rc=$rc1) — transient, không cần user quyết."
     "$ROOT/bin/notify.sh" "[daily_retro] RETRO $TODAY bỏ qua: tài khoản Mike hết usage-limit lúc chạy (00:30 ICT). Transient — sẽ tự chạy lại kỳ sau. Không cần làm gì trừ khi lặp nhiều ngày liên tiếp." 2>/dev/null || true
     "$ROOT/bin/append_event.sh" Mike status "daily-retro-skipped-usagelimit-$TODAY" \
