@@ -88,6 +88,52 @@ knowledge_path.write_text(''.join(canonical + to_keep), encoding='utf-8')
 print(f"ARCHIVED: {archived_count} events → {archive_path.name}")
 PYEOF
 
+# ── Phase 1b: prune stale heartbeats from bus inbox ───────────────────────────
+# Heartbeats are liveness pings — useless once a job ends. They dominate bus/inbox
+# (measured 2026-07-27: ~7.2K/8.7K lines fleet-wide, Taylor.jsonl 3MB with 88%
+# heartbeat) and inflate every bus read. Drop event_type=="heartbeat" older than
+# HB_KEEP_DAYS; keep EVERY other event_type (finding/question/answer/verification/
+# decision/error/status/directive) and any unparseable/blank line untouched. Atomic
+# per-file write (tmp + os.replace, coding_guidelines §5) so a mid-run kill leaves the
+# original intact. Guarded so a prune failure can't abort the nightly commit/backup.
+HB_KEEP_DAYS="${KB_HB_KEEP_DAYS:-3}"
+HB_CUTOFF=$(python3 -c "import datetime; print((datetime.datetime.utcnow()-datetime.timedelta(days=$HB_KEEP_DAYS)).strftime('%Y-%m-%dT%H:%M:%SZ'))")
+log "Pruning heartbeats older than $HB_CUTOFF (keep_days=$HB_KEEP_DAYS) from bus/inbox/*.jsonl..."
+python3 - "$HB_CUTOFF" "$ROOT/bus/inbox" <<'PYEOF' 2>&1 | tee -a "$LOG" || log "heartbeat-prune: python error (non-fatal, bus untouched)"
+import sys, json, os, glob
+cutoff_iso = sys.argv[1]   # ISO-8601 Zulu; ts field is same format → lexicographic compare is valid
+inbox_dir = sys.argv[2]
+total_removed = 0
+for path in sorted(glob.glob(os.path.join(inbox_dir, "*.jsonl"))):
+    removed = 0
+    kept = []
+    with open(path, encoding="utf-8") as fh:
+        for line in fh:
+            s = line.strip()
+            if not s:
+                kept.append(line)          # keep blank lines untouched
+                continue
+            try:
+                ev = json.loads(s)
+            except Exception:
+                kept.append(line)          # never drop an unparseable line
+                continue
+            if ev.get("event_type") == "heartbeat":
+                ts = ev.get("ts", "")
+                if ts and ts < cutoff_iso:  # only drop OLD heartbeats
+                    removed += 1
+                    continue
+            kept.append(line)
+    if removed:
+        tmp = path + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as out:
+            out.writelines(kept)
+        os.replace(tmp, path)              # atomic
+        total_removed += removed
+        print(f"  {os.path.basename(path)}: pruned {removed} stale heartbeat(s)")
+print(f"HEARTBEAT-PRUNE: removed {total_removed} stale heartbeat(s) total")
+PYEOF
+
 # ── Phase 2: alert on oversized working memories ──────────────────────────────
 log "Checking agent working memories..."
 OVERSIZE=""
@@ -139,6 +185,29 @@ python3 "$ROOT/bin/spend_report.py" --days 7 --csv-append "$ROOT/state/spend_his
 DOW=$(date -u +%u)  # 1=Mon … 7=Sun; 5=Fri
 if [ "$DOW" -eq 5 ]; then
     log "Friday → dispatching Mike for LLM editorial review of KNOWLEDGE.md..."
+    # ── Context-file hard-threshold check (VIỆC 3, 2026-07-27) ────────────────
+    # Deterministic size gate for the two files that load into EVERY Mike turn AND
+    # EVERY dispatch. Over threshold → surface a clear warning in the review output
+    # (logged + injected into the editorial prompt as an extra item). Do NOT auto-trim
+    # — human/Mike decides what to archive. NOTE: MIKE.md is already >40KB as of
+    # 2026-07-27, so this flags on the very first run BY DESIGN (wanted, not a bug).
+    CTX_BLOAT_WARN=""
+    ctx_check() {
+        local f="$1" limit_kb="$2" label="$3"
+        [ -f "$f" ] || return 0
+        local kb=$(( $(wc -c < "$f") / 1024 ))
+        if [ "$kb" -gt "$limit_kb" ]; then
+            log "CONTEXT-BLOAT WARNING: $label = ${kb}KB > ${limit_kb}KB hard threshold"
+            CTX_BLOAT_WARN="${CTX_BLOAT_WARN}
+- ⚠️ $label = ${kb}KB (ngưỡng cứng ${limit_kb}KB) — VƯỢT ngưỡng, cần archive bớt."
+        fi
+    }
+    ctx_check "$ROOT/kb/context_pack.md" 20 "kb/context_pack.md"
+    ctx_check "$ROOT/MIKE.md" 40 "MIKE.md"
+    if [ -n "$CTX_BLOAT_WARN" ]; then
+        CTX_BLOAT_WARN="
+8. **Context-bloat hard-threshold cảnh báo (VIỆC 3, 2026-07-27)** — các file dưới đây VƯỢT ngưỡng cứng và load vào MỌI turn Mike + MỌI dispatch. Đưa cảnh báo này RÕ RÀNG vào output review; **KHÔNG tự cắt nội dung** — để user/Mike quyết định phần nào archive:${CTX_BLOAT_WARN}"
+    fi
     # DISPATCH_FROM=user required: dispatch.sh blocks any non-user caller from targeting
     # Mike (agents must escalate via a question event instead) AND blocks self-dispatch
     # (from==id). This cron job's default $from is "Mike" (dispatch.sh's own default),
@@ -182,7 +251,7 @@ rút về 1-2 câu như quy ước ở đầu file current_ops.md) → rút gọ
 07-17 (giữ current-state + pointer INCIDENTS.md, xoá play-by-play đã có nơi khác lưu). CHỈ rút
 gọn mục đã XÁC NHẬN đóng — mục còn 'CHỜ USER'/'chưa quyết' GIỮ NGUYÊN, không rút gọn nhầm việc
 đang mở thành trông như đã xong.
-KHÔNG xóa archive. Không cần hỏi user cho việc 1-6 — đây là routine maintenance đã được user uỷ quyền. Sau khi xong: ghi sự thay đổi lên bus (append_event.sh Mike decision 'kb-weekly-editorial') và notify Telegram." \
+KHÔNG xóa archive. Không cần hỏi user cho việc 1-6 — đây là routine maintenance đã được user uỷ quyền. Sau khi xong: ghi sự thay đổi lên bus (append_event.sh Mike decision 'kb-weekly-editorial') và notify Telegram.${CTX_BLOAT_WARN}" \
         --timeout 900 >> "$LOG" 2>&1 &
     log "Editorial dispatch launched (background)."
 fi

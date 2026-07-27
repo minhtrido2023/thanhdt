@@ -106,8 +106,10 @@ tiếp, nhưng nếu phiên tôi bị restart giữa chừng thì cron này mấ
 
 > **§8 rút gọn — 3 dòng phải nhớ (thêm 2026-07-20, sau sự cố `missed-wakeup-after-bg-dispatch`,
 > xem `kb/INCIDENTS.md` + job `Wags_20260720_121120`):**
-> 1. `dispatch.sh --bg` xong thì `ScheduleWakeup` 240-270s là tool call CUỐI CÙNG của lượt,
->    không ngoại lệ.
+> 1. `dispatch.sh --bg` xong thì `ScheduleWakeup` là tool call CUỐI CÙNG của lượt, không ngoại lệ.
+>    3 lần tỉnh ĐẦU dùng 240-270s (bắt job xong sớm); từ lần tỉnh thứ 4 trở đi mà job vẫn running
+>    thì TĂNG DẦN khoảng cách (240→480→900→trần 1200s), không quay lại ngắn trừ khi có job MỚI
+>    phát sinh trong batch.
 > 2. **Nếu trong cùng lượt bạn còn định viết một câu trả lời thực chất cho user — đó chính là lúc
 >    nguy hiểm nhất** (đo được từ 147 lượt: lượt QUÊN wakeup viết trung vị 1.755 ký tự văn xuôi
 >    sau dispatch, lượt NHỚ chỉ 343 ký tự — rủi ro gấp ~25 lần). Đặt `ScheduleWakeup` NGAY sau
@@ -118,12 +120,20 @@ tiếp, nhưng nếu phiên tôi bị restart giữa chừng thì cron này mấ
 >
 > Đo tuân thủ hồi cứu: `bin/wakeup_audit.py --since <ngày>` (gắn vào `daily_retro.sh`).
 
-**Cơ chế hiện hành**: sau dispatch `--bg`, đặt `ScheduleWakeup` ngắn (**240-270s** — dưới ngưỡng
-cache-miss 300s của chính tool). Mỗi lần tỉnh: `bin/jobs.sh status <job_id>`; chưa `done` → đặt
-lại wakeup ngắn (không editorialize, không retry job); `done` → xử lý kết quả + dispatch bước kế
-tiếp ngay. Đây là mẫu "actively polling external state" ScheduleWakeup tự khuyến nghị — nhiều lần
-check ngắn thay vì 1 lần chờ dài, vẫn phủ đúng worst-case nhưng nhanh hơn nhiều ở trường hợp phổ
-biến (job xong sớm, 5-15').
+**Cơ chế hiện hành (wakeup thích ứng — backoff sau lần tỉnh thứ 3, sửa 2026-07-27)**: sau dispatch
+`--bg`, đặt `ScheduleWakeup`. **3 lần tỉnh ĐẦU** dùng khoảng NGẮN **240-270s** (dưới ngưỡng cache-miss
+300s của chính tool) — bắt job xong sớm, phủ đa số trường hợp (5-15'). **Từ lần tỉnh thứ 4 trở đi mà
+job VẪN running**: TĂNG DẦN khoảng cách theo cấp số nhân (240→480→900→trần **1200s**), KHÔNG bao giờ
+quay lại khoảng ngắn TRỪ KHI có job MỚI phát sinh trong cùng batch (job mới → reset về 240-270s cho cả
+batch). Lý do: một job dài (vd 46') tỉnh cố định 240s phải nạp lại toàn bộ context ~11 lần; backoff
+cắt mạnh số lần nạp lại mà không làm chậm đáng kể việc phát hiện job xong (job dài không xong trong
+vài giây, nên khoảng cách dài hơn về cuối không bỏ lỡ gì). Mỗi lần tỉnh: `bin/jobs.sh status
+<job_id>`; chưa `done` → đặt lại wakeup theo bậc thang trên (không editorialize, không retry job);
+`done` → xử lý kết quả + dispatch bước kế tiếp ngay. Đây vẫn là mẫu "actively polling external state"
+ScheduleWakeup tự khuyến nghị — thay đổi này CHỈ đổi khoảng cách giữa các lần tỉnh, **KHÔNG đổi cơ
+chế**: vẫn không bao giờ dùng Bash/Monitor giữ-live để theo dõi job nền, vẫn verify artifact chứ
+không tin self-report, vẫn self-check bắt buộc trong CÙNG turn trước khi phát ngôn về job, vẫn batch
+nhiều job song song vào 1 lượt poll.
 
 **Fan-out song song → 1 lượt poll cho cả batch**, không phải 1 lượt/job: check trạng thái CẢ
 batch trong 1 lần tỉnh, chưa xong hết thì đặt lại wakeup ngắn tiếp, rồi tổng hợp khi tất cả done.
