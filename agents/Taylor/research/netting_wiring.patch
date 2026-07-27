@@ -1,0 +1,23 @@
+# WIRING DIFF cho bot_execute.py — APPLY SAU KHI quant-skeptic CONFIRMED.
+# Đặt netting SAU filter_excluded_tickers, TRƯỚC cap_capit_orders.
+
+# 1) Sửa import (dòng ~36-37):
+-from trading_bot.plan import (load_plan, filter_excluded_tickers, cap_capit_orders,
+-                              cap_lag_orders, approval_block_reason)
++from trading_bot.plan import (load_plan, filter_excluded_tickers, net_offsetting_orders,
++                              cap_capit_orders, cap_lag_orders, approval_block_reason)
+
+# 2) Chèn NGAY TRƯỚC dòng "plan, capped = cap_capit_orders(plan, p["label"])":
++        # Netting lệnh ngược chiều cùng mã (case ZaloPay 2026-07-27: SELL+BUY VPB cùng plan).
++        # "Book" là sổ nội bộ, broker chỉ thấy tổng cp/mã → chỉ gửi 1 lệnh NET (chênh lệch),
++        # phần trùng là chuyển nội bộ giữa book @giá TT (0 phí/spread). Đặt TRƯỚC các trần
++        # %ADV: trần đo tác động thị trường, chỉ phần net mới chạm thị trường thật.
++        plan, netted = net_offsetting_orders(plan)
++        for a in netted:
++            if a["action"] == "INTERNAL_ONLY":
++                print(f"[{p['label']}] ⇄ NET {a['ticker']}: mua {a['total_buy']:,} = bán "
++                      f"{a['total_sell']:,} → 0 lệnh ra broker (100% nội bộ {a['internal_qty']:,}cp)")
++            else:
++                print(f"[{p['label']}] ⇄ NET {a['ticker']}: mua {a['total_buy']:,} / bán "
++                      f"{a['total_sell']:,} → 1 lệnh {a['net_side'].upper()} {abs(a['net_qty']):,}cp "
++                      f"(nội bộ {a['internal_qty']:,}cp, tiết kiệm phí/spread)")
