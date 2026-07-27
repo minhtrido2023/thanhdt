@@ -52,6 +52,7 @@ from simulate_holistic_nav import bq
 from signal_v11_sql import SIGNAL_V11
 from anomaly_gate import anomaly_excluded as _anomaly_excluded_shared
 from lag_liquidity_filter import lag_filter_illiquid
+from lag_rating_filter import lag_filter_low_rating
 
 OUTDIR = os.path.join(WORKDIR, "deploy_golive_dt5g_v4", "out"); os.makedirs(OUTDIR, exist_ok=True)
 DT_TABLE = "vnindex_5state_dt5g_live"
@@ -561,6 +562,7 @@ def td_offset(ref, off):
 # n_lag_upcoming=0 lặng lẽ tái tạo đúng failure-mode gốc).
 lag_up, lag_recent, lag_source_error = [], [], None
 lag_liq_dropped, lag_liq_error = [], None
+lag_rating_dropped, lag_rating_error = [], None
 try:
     # Point-in-time candidate source (fix 2026-07-12, audit Taylor_20260712_121642 R1):
     # events must be visible here FROM their release date. The old source
@@ -583,6 +585,13 @@ try:
     if lag_liq_dropped:
         print(f"  [lag-liq] loại {len(lag_liq_dropped)} ứng viên không đo được thanh khoản: "
               + ", ".join(f"{d['ticker']} ({d['reason']})" for d in lag_liq_dropped))
+    # GATE CỨNG chất lượng 8L (user chốt 2026-07-27) — xem lag_filter_low_rating():
+    # ứng viên LAG rating≥4 (RATING_FAIL) bị LOẠI THẬT khỏi danh sách, không escalate từng ca.
+    # CHỈ book LAG; BAL/CAPIT/custom30V có gate rating riêng, không đụng.
+    cand, lag_rating_dropped, lag_rating_error = lag_filter_low_rating(bq, cand, LATEST)
+    if lag_rating_dropped:
+        print(f"  [lag-rating] loại {len(lag_rating_dropped)} ứng viên RATING_FAIL (8L≥4): "
+              + ", ".join(f"{d['ticker']} (8L={d['rating']})" for d in lag_rating_dropped))
     for _, row in cand.iterrows():
         entry, ahead = td_offset(row["Release_Date"], 5)
         tier = row["tier"]
@@ -773,6 +782,11 @@ status = {
     "lag_liq_excluded": lag_liq_dropped,
     "n_lag_liq_excluded": len(lag_liq_dropped),
     "lag_liq_filter_error": lag_liq_error,
+    # Ứng viên LAG bị loại vì GATE CỨNG 8L rating≥4 (RATING_FAIL, user policy 2026-07-27).
+    # `lag_rating_filter_error` != None ⇒ gate KHÔNG chạy được (fail-open, KHÔNG có lưới executor).
+    "lag_rating_excluded": lag_rating_dropped,
+    "n_lag_rating_excluded": len(lag_rating_dropped),
+    "lag_rating_filter_error": lag_rating_error,
     "n_capit_basket": len(basket),
     "n_park": len(_park_basket) if _park_basket is not None else 0,
     "park_rebal_date": _park_rebal_date,
