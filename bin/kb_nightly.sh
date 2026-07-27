@@ -208,6 +208,47 @@ for path in sorted(glob.glob(os.path.join(inbox_dir, "*.jsonl"))):
 print(f"EVENT-ARCHIVE: moved {total_archived} old event(s) total")
 PYEOF
 
+# ── Phase 1b3: archive old terminal job records ───────────────────────────────
+# The dispatch job board (bus/jobs/<job_id>.json) accretes one record per dispatch (1178 as
+# of 2026-07-27). Once a job is long finished the record is dead weight that slows every
+# job-list/job-reap scan. Move records that are TERMINAL (done/failed/timeout — NOT running/
+# orphaned/usage_limited, which may still need a reap or a pending-resume) AND older than
+# JOB_KEEP_DAYS into bus/jobs/archive/ (plain .json, greppable/trace-able). jobs.sh list/reap
+# glob bus/jobs/*.json non-recursively so the archive/ subdir is invisible to them — active
+# jobs are unaffected (verified: mike_json cmd_job_list/reap use "*.json", not os.walk). Age
+# uses ended_at (epoch) falling back to started_at. Move = os.rename (atomic, no content
+# change; nothing deleted). 0 records qualify today (board starts ~2026-06-27) — this is the
+# mechanism for when they age. Guarded non-fatal.
+JOB_KEEP_DAYS="${KB_JOB_KEEP_DAYS:-30}"
+log "Archiving terminal job records older than ${JOB_KEEP_DAYS}d → bus/jobs/archive/..."
+python3 - "$JOB_KEEP_DAYS" "$ROOT/bus/jobs" <<'PYEOF' 2>&1 | tee -a "$LOG" || log "job-archive: python error (non-fatal, board untouched)"
+import sys, os, json, glob, datetime
+keep_days = int(sys.argv[1]); jobs_dir = sys.argv[2]
+cutoff = datetime.datetime.utcnow().timestamp() - keep_days * 86400
+arch_dir = os.path.join(jobs_dir, "archive")
+TERMINAL = {"done", "failed", "timeout"}
+moved = 0
+for fp in glob.glob(os.path.join(jobs_dir, "*.json")):   # non-recursive; archive/ not matched
+    try:
+        j = json.load(open(fp, encoding="utf-8"))
+    except Exception:
+        continue                                          # unparseable → leave in place
+    if j.get("status") not in TERMINAL:
+        continue
+    ts = j.get("ended_at") or j.get("started_at") or ""
+    try:
+        age_ok = float(ts) < cutoff
+    except (TypeError, ValueError):
+        continue                                          # no usable timestamp → keep (safe)
+    if not age_ok:
+        continue
+    os.makedirs(arch_dir, exist_ok=True)
+    dest = os.path.join(arch_dir, os.path.basename(fp))
+    os.replace(fp, dest)                                  # atomic move, same filesystem
+    moved += 1
+print(f"JOB-ARCHIVE: moved {moved} terminal job record(s) older than {keep_days}d")
+PYEOF
+
 # ── Phase 1c: archive closed/old working-memory entries ───────────────────────
 # Working memories (kb/memory/<id>.md) are reloaded on EVERY session/dispatch of that
 # agent. Left alone they grow into full time-ordered job diaries (measured 2026-07-27:
