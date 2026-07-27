@@ -199,7 +199,7 @@
       ],
       "probe": {
         "type": "command",
-        "cmd": ["python3", "-c", "import pandas as pd; d=pd.read_csv('data/papertrade_compare5.csv',parse_dates=['ymd']).set_index('ymd'); r=d.loc[d.index>=d.dropna().index.min()]; b,l=r.iloc[0],r.iloc[-1]; print(f'Cửa sổ so sánh CHUNG {r.index[0].date()} → {r.index[-1].date()} ({len(r)} phiên):'); [print(f'  {c:8s} {(l[c]/b[c]-1)*100:+6.2f}%  (NAV {l[c]/1e9:.2f}B)') for c in d.columns]"],
+        "cmd": ["python3", "-c", "import pandas as pd; d=pd.read_csv('data/papertrade_compare5.csv',parse_dates=['ymd']).set_index('ymd'); r=d.loc[d.index>=d.dropna().index.min()]; b,l=r.iloc[0],r.iloc[-1]; BASE=50e9; print(f'Cửa sổ so sánh CHUNG {r.index[0].date()} → {r.index[-1].date()} ({len(r)} phiên), NAV rebase {BASE/1e9:.0f}B tại đầu cửa sổ (không phải NAV thô từ inception gốc):'); [print(f'  {c:8s} {(l[c]/b[c]-1)*100:+6.2f}%  (NAV {BASE*l[c]/b[c]/1e9:.2f}B)') for c in d.columns]"],
         "timeout": 60,
         "max_chars": 900
       },
