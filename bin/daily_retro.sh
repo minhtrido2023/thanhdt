@@ -142,6 +142,22 @@ log "Draft job exit code: $rc1 (log: $draft_log)"
 
 # Verify ARTIFACT thật — không tin exit code của dispatch.sh, kiểm tra file thật đã ghi.
 if [ ! -s "$DRAFT_FILE" ]; then
+  # Phân loại LÝ DO draft rỗng trước khi báo động (Wags coord-2026-07-27):
+  #   - usage-limit: tài khoản Mike hết quota lúc chạy (00:30 ICT) — TRANSIENT, không cần
+  #     user quyết. Chỉ báo calm status, KHÔNG đẻ event `question` (question chưa trả lời sẽ
+  #     chất đống → ops_health_check §5 spawn job Wags vô ích; đúng ca 2026-07-25 khi phrase
+  #     CLI "weekly limit · resets 5pm" evade _looks_like_usage_limit của dispatch.sh).
+  #   - lỗi thật (Mike trả sai/treo/exit0-nhưng-không-viết-draft, đúng ca 2026-07-26): giữ
+  #     nguyên event `question` để người/Mike xem — đây là bất thường thật.
+  if tail -c 4000 "$draft_log" 2>/dev/null | grep -qiE \
+       'weekly limit|usage limit|session limit|rate.?limit|resets? ([0-9]|at)|quota exceeded|limit reached|rate_limit_error|"status":[[:space:]]*429'; then
+    log "SKIP: draft RETRO $TODAY không chạy vì tài khoản Mike hết usage-limit (rc=$rc1) — transient, không cần user quyết."
+    "$ROOT/bin/notify.sh" "[daily_retro] RETRO $TODAY bỏ qua: tài khoản Mike hết usage-limit lúc chạy (00:30 ICT). Transient — sẽ tự chạy lại kỳ sau. Không cần làm gì trừ khi lặp nhiều ngày liên tiếp." 2>/dev/null || true
+    "$ROOT/bin/append_event.sh" Mike status "daily-retro-skipped-usagelimit-$TODAY" \
+      "{\"reason\":\"tai khoan Mike het usage-limit luc chay retro (00:30 ICT), draft khong tao duoc — transient khong can user quyet\",\"rc\":$rc1,\"log\":\"$draft_log\"}" 2>/dev/null || true
+    log "=== daily_retro SKIPPED (usage-limit, transient) ==="
+    exit 0
+  fi
   log "ERROR: draft job không tạo được '$DRAFT_FILE' (rc=$rc1) — DỪNG pipeline, không dispatch Wags."
   "$ROOT/bin/notify.sh" "[daily_retro] LỖI: draft RETRO $TODAY không được tạo (job Mike rc=$rc1). Xem $draft_log. Retro hôm nay KHÔNG chạy — cần người kiểm tra." 2>/dev/null || true
   "$ROOT/bin/append_event.sh" Mike question "daily-retro-draft-failed-$TODAY" \
