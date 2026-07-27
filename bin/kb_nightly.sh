@@ -134,6 +134,80 @@ for path in sorted(glob.glob(os.path.join(inbox_dir, "*.jsonl"))):
 print(f"HEARTBEAT-PRUNE: removed {total_removed} stale heartbeat(s) total")
 PYEOF
 
+# ── Phase 1b2: archive ALL old bus events (not just heartbeats) ───────────────
+# Phase 1b only DROPS stale heartbeats. Everything else (finding/question/answer/decision/
+# error/status/verification) accumulates forever in bus/inbox/*.jsonl (measured 2026-07-27:
+# Taylor 5781 events / 3MB even after heartbeat prune). Move every event older than
+# EVENT_KEEP_DAYS to a compressed, by-month-of-origin archive bus/inbox/archive/<id>_<YYYY-MM>
+# .jsonl.gz — gzip members concatenate, so `gzip -dc` reads the whole history back. The hot
+# file keeps only the recent window. Loss-safe: per file we assert (kept_events + archived ==
+# original_events) and re-read the gz to confirm it decompresses BEFORE atomically replacing
+# the hot file; on any mismatch/error that file is left untouched. Guarded so a failure can't
+# abort the nightly commit.
+EVENT_KEEP_DAYS="${KB_EVENT_KEEP_DAYS:-30}"
+EVENT_CUTOFF=$(python3 -c "import datetime; print((datetime.datetime.utcnow()-datetime.timedelta(days=$EVENT_KEEP_DAYS)).strftime('%Y-%m-%dT%H:%M:%SZ'))")
+log "Archiving bus events older than $EVENT_CUTOFF (keep_days=$EVENT_KEEP_DAYS) → bus/inbox/archive/*.jsonl.gz..."
+python3 - "$EVENT_CUTOFF" "$ROOT/bus/inbox" <<'PYEOF' 2>&1 | tee -a "$LOG" || log "event-archive: python error (non-fatal, bus untouched)"
+import sys, json, os, glob, gzip
+cutoff_iso = sys.argv[1]          # ISO-8601 Zulu; ts is same format → lexicographic compare valid
+inbox_dir = sys.argv[2]
+arch_dir = os.path.join(inbox_dir, "archive")
+
+def is_event(line):
+    s = line.strip()
+    if not s:
+        return False
+    try:
+        json.loads(s); return True
+    except Exception:
+        return False
+
+total_archived = 0
+for path in sorted(glob.glob(os.path.join(inbox_dir, "*.jsonl"))):
+    base = os.path.basename(path)[:-6]        # strip ".jsonl"
+    kept, buckets = [], {}                     # buckets: 'YYYY-MM' -> [raw lines]
+    orig_events = 0
+    with open(path, encoding="utf-8") as fh:
+        for line in fh:
+            if not is_event(line):
+                kept.append(line); continue    # blank/unparseable → keep untouched
+            orig_events += 1
+            ev = json.loads(line)
+            ts = ev.get("ts", "")
+            if ts and ts < cutoff_iso:
+                buckets.setdefault(ts[:7], []).append(line if line.endswith("\n") else line + "\n")
+            else:
+                kept.append(line)
+    if not buckets:
+        continue
+    n_arch = sum(len(v) for v in buckets.values())
+    kept_events = sum(1 for l in kept if is_event(l))
+    if kept_events + n_arch != orig_events:    # conservation guard — never lose
+        print(f"  {base}: SKIP conservation FAIL (orig={orig_events} kept={kept_events} arch={n_arch})")
+        continue
+    os.makedirs(arch_dir, exist_ok=True)
+    ok = True
+    for ym, lines in sorted(buckets.items()):
+        apath = os.path.join(arch_dir, f"{base}_{ym}.jsonl.gz")
+        try:
+            with gzip.open(apath, "at", encoding="utf-8") as gz:   # append as a new gzip member
+                gz.writelines(lines)
+            with gzip.open(apath, "rt", encoding="utf-8") as gz:   # verify it decompresses
+                sum(1 for _ in gz)
+        except Exception as e:
+            print(f"  {base}: archive WRITE/VERIFY error on {ym} ({e}) — hot file left intact")
+            ok = False; break
+    if not ok:
+        continue
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as out:
+        out.writelines(kept)
+    os.replace(tmp, path)                       # atomic hot-file swap
+    total_archived += n_arch
+    print(f"  {base}: archived {n_arch} event(s) across {len(buckets)} month(s), {kept_events} kept hot")
+print(f"EVENT-ARCHIVE: moved {total_archived} old event(s) total")
+PYEOF
+
 # ── Phase 1c: archive closed/old working-memory entries ───────────────────────
 # Working memories (kb/memory/<id>.md) are reloaded on EVERY session/dispatch of that
 # agent. Left alone they grow into full time-ordered job diaries (measured 2026-07-27:
