@@ -888,3 +888,42 @@
 ## Consolidation 2026-07-27T02:08:01Z
 - [2026-07-27T02:07:23Z] Wags/heartbeat — Wags_20260727_015420: {"status": "still_running", "elapsed_min": 13, "job_id": "Wags_20260727_015420", "source": "watcher"}
 - [2026-07-27T02:07:38Z] Wags/heartbeat — Wags_20260727_015420: {"status": "done", "note": "coord-2026-07-27 round2 CLOSED — arch CONFIRMED, finding+Architecture-topic posted, 3 questions closed"}
+
+## Consolidation 2026-07-27T02:38:19Z
+- [2026-07-27T02:24:59Z] DollarBill/heartbeat — DollarBill_20260727_022358: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260727_022358", "source": "watcher"}
+- [2026-07-27T02:24:59Z] DollarBill/heartbeat — DollarBill_20260727_022358: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260727_022358", "source": "watcher"}
+- [2026-07-27T02:24:59Z] DollarBill/heartbeat — DollarBill_20260727_022358: {"status": "in_progress", "note": "Đọc recommend output 07-24, chuẩn bị lập plan SpaceX 07-27"}
+- [2026-07-27T02:25:59Z] DollarBill/heartbeat — DollarBill_20260727_022358: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20260727_022358", "source": "watcher"}
+- [2026-07-27T02:25:59Z] DollarBill/heartbeat — DollarBill_20260727_022358: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20260727_022358", "source": "watcher"}
+- [2026-07-27T02:26:26Z] DollarBill/heartbeat — DollarBill_20260727_022358: {"status": "in_progress", "note": "đang đọc recommend output 2026-07-24"}
+- [2026-07-27T02:26:45Z] DollarBill/heartbeat — DollarBill_20260727_022358: {"status": "in_progress", "note": "Đọc DNSE live positions SpaceX, check TV1 fill, chuẩn bị lập plan 07-27"}
+- [2026-07-27T02:27:00Z] DollarBill/heartbeat — DollarBill_20260727_022358: {"status": "still_running", "elapsed_min": 3, "job_id": "DollarBill_20260727_022358", "source": "watcher"}
+- [2026-07-27T02:27:00Z] DollarBill/heartbeat — DollarBill_20260727_022358: {"status": "still_running", "elapsed_min": 3, "job_id": "DollarBill_20260727_022358", "source": "watcher"}
+- [2026-07-27T02:28:00Z] DollarBill/heartbeat — DollarBill_20260727_022358: {"status": "still_running", "elapsed_min": 4, "job_id": "DollarBill_20260727_022358", "source": "watcher"}
+- [2026-07-27T02:28:00Z] DollarBill/heartbeat — DollarBill_20260727_022358: {"status": "still_running", "elapsed_min": 4, "job_id": "DollarBill_20260727_022358", "source": "watcher"}
+- [2026-07-27T02:29:00Z] DollarBill/heartbeat — DollarBill_20260727_022358: {"status": "still_running", "elapsed_min": 5, "job_id": "DollarBill_20260727_022358", "source": "watcher"}
+- [2026-07-27T02:29:00Z] DollarBill/heartbeat — DollarBill_20260727_022358: {"status": "still_running", "elapsed_min": 5, "job_id": "DollarBill_20260727_022358", "source": "watcher"}
+- [2026-07-27T02:30:00Z] DollarBill/heartbeat — DollarBill_20260727_022358: {"status": "still_running", "elapsed_min": 6, "job_id": "DollarBill_20260727_022358", "source": "watcher"}
+- [2026-07-27T02:30:00Z] DollarBill/heartbeat — DollarBill_20260727_022358: {"status": "still_running", "elapsed_min": 6, "job_id": "DollarBill_20260727_022358", "source": "watcher"}
+- [2026-07-27T02:31:00Z] DollarBill/heartbeat — DollarBill_20260727_022358: {"status": "still_running", "elapsed_min": 7, "job_id": "DollarBill_20260727_022358", "source": "watcher"}
+- [2026-07-27T02:31:00Z] DollarBill/heartbeat — DollarBill_20260727_022358: {"status": "still_running", "elapsed_min": 7, "job_id": "DollarBill_20260727_022358", "source": "watcher"}
+- [2026-07-27T02:32:00Z] DollarBill/heartbeat — DollarBill_20260727_022358: {"status": "still_running", "elapsed_min": 8, "job_id": "DollarBill_20260727_022358", "source": "watcher"}
+- [2026-07-27T02:32:00Z] DollarBill/heartbeat — DollarBill_20260727_022358: {"status": "still_running", "elapsed_min": 8, "job_id": "DollarBill_20260727_022358", "source": "watcher"}
+- [2026-07-27T02:32:52Z] DollarBill/heartbeat — DollarBill_20260727_022358: {"status": "in_progress", "note": "Đã lấy positions/prices. Đang tổng hợp logic plan: CAPIT topup SIP 600cp + TV1 400cp. Viết plan JSON."}
+- [2026-07-27T02:33:00Z] DollarBill/heartbeat — DollarBill_20260727_022358: {"status": "still_running", "elapsed_min": 9, "job_id": "DollarBill_20260727_022358", "source": "watcher"}
+- [2026-07-27T02:33:00Z] DollarBill/heartbeat — DollarBill_20260727_022358: {"status": "still_running", "elapsed_min": 9, "job_id": "DollarBill_20260727_022358", "source": "watcher"}
+- [2026-07-27T02:33:16Z] DollarBill/heartbeat — DollarBill_20260727_022358: {"status": "in_progress", "note": "đã có giá DNSE live, đang tính toán NAV và chọn LAG entry"}
+- [2026-07-27T02:33:59Z] DollarBill/status — DollarBill_20260727_022358: {"status": "deadline_extended", "hb_age_s": 43, "extension": 1, "max_ext": 3, "source": "watcher"}
+- [2026-07-27T02:33:59Z] DollarBill/status — DollarBill_20260727_022358: {"status": "deadline_extended", "hb_age_s": 43, "extension": 1, "max_ext": 3, "source": "watcher"}
+- [2026-07-27T02:34:00Z] DollarBill/heartbeat — DollarBill_20260727_022358: {"status": "still_running", "elapsed_min": 10, "job_id": "DollarBill_20260727_022358", "source": "watcher"}
+- [2026-07-27T02:34:01Z] DollarBill/heartbeat — DollarBill_20260727_022358: {"status": "still_running", "elapsed_min": 10, "job_id": "DollarBill_20260727_022358", "source": "watcher"}
+- [2026-07-27T02:35:01Z] DollarBill/heartbeat — DollarBill_20260727_022358: {"status": "still_running", "elapsed_min": 11, "job_id": "DollarBill_20260727_022358", "source": "watcher"}
+- [2026-07-27T02:35:01Z] DollarBill/heartbeat — DollarBill_20260727_022358: {"status": "still_running", "elapsed_min": 11, "job_id": "DollarBill_20260727_022358", "source": "watcher"}
+- [2026-07-27T02:36:01Z] DollarBill/heartbeat — DollarBill_20260727_022358: {"status": "still_running", "elapsed_min": 12, "job_id": "DollarBill_20260727_022358", "source": "watcher"}
+- [2026-07-27T02:36:01Z] DollarBill/heartbeat — DollarBill_20260727_022358: {"status": "still_running", "elapsed_min": 12, "job_id": "DollarBill_20260727_022358", "source": "watcher"}
+- [2026-07-27T02:37:01Z] DollarBill/heartbeat — DollarBill_20260727_022358: {"status": "still_running", "elapsed_min": 13, "job_id": "DollarBill_20260727_022358", "source": "watcher"}
+- [2026-07-27T02:37:01Z] DollarBill/heartbeat — DollarBill_20260727_022358: {"status": "still_running", "elapsed_min": 13, "job_id": "DollarBill_20260727_022358", "source": "watcher"}
+- [2026-07-27T02:37:16Z] DollarBill/decision — plan-2026-07-27-SpaceX: {"plan_date": "2026-07-27", "account": "SpaceX", "account_no": "0002023347", "state": "NEUTRAL(3)", "state_source": "DT5G_macro", "nav_approx_m": 907, "cash_available_m": 40.6, "orders": [{"id": "BUY-SIP-00", "ticker": "SIP", "qty": 600, "ref_price": 47200, "book": "CAPIT", "cost_m": 28.32}, {"id": "BUY-TV1-DISC-02", "ticker": "TV1", "qty": 400, "limit_price": 19900, "book": "DISCRETIONARY_SPECIAL", "cost_m": 7.96}], "total_buy_m": 36.28, "cash_remaining_est_m": 4.26, "lag_t1_missed": 16, "lag_t1_miss_reason": "window closed T+7>T+5, catch-up delay", "capit_gap_m": 176, "capit_topup_today_m": 28.32, "tv1_remaining_qty": 400, "plan_file": "data/trade_plans/plan_SpaceX_2026-07-27.json", "requires_user_approval": true}
+- [2026-07-27T02:38:01Z] DollarBill/heartbeat — DollarBill_20260727_022358: {"status": "still_running", "elapsed_min": 14, "job_id": "DollarBill_20260727_022358", "source": "watcher"}
+- [2026-07-27T02:38:01Z] DollarBill/heartbeat — DollarBill_20260727_022358: {"status": "still_running", "elapsed_min": 14, "job_id": "DollarBill_20260727_022358", "source": "watcher"}
+- [2026-07-27T02:38:05Z] DollarBill/answer — plan-SpaceX-07-27-complete: {"job": "DollarBill_20260727_022358", "status": "done", "plan_file": "data/trade_plans/plan_SpaceX_2026-07-27.json", "plan_date": "2026-07-27", "account": "SpaceX", "orders": 2, "summary": "2 lệnh: SIP CAPIT 600cp@47200 (28.32M) + TV1 DISC 400cp LO≤19900 (7.96M). Total 36.31M ≤ availableCash 40.6M. Buffer 4.26M. CAPIT gap 176M defer (cash-constrained). LAG T+1 16 mã bỏ lỡ (window closed T+7). T+2 entries 07-28 → plan ngày mai. Gửi Discord plan thread 1521183164364754974. Chờ user duyệt."}
