@@ -50,4 +50,55 @@ Demo trên plan ZaloPay thật (read-only): 2 lệnh → 1 lệnh SELL 100cp, ph
 Hàm nằm sẵn trong `plan.py` (INERT — chưa ai gọi ở live). **Chưa wire vào `bot_execute.py`**
 (giữ live path nguyên vẹn tới khi verify) — đúng norm "verify trước, wire+commit sau" như
 `cap_lag_orders` đã làm. Diff wiring 6 dòng để Mike áp SAU khi quant-skeptic CONFIRMED:
-`research/netting_wiring.patch`. **KHÔNG đụng plan hôm nay** (đã duyệt/thực thi).
+`mike/agents/Taylor/research/netting_wiring.patch` (đường dẫn đầy đủ từ WORKDIR — bản trước
+ghi tắt `research/...` gây nhầm; đính chính 2026-07-27 job Taylor_20260727_040719). **KHÔNG
+đụng plan hôm nay** (đã duyệt/thực thi).
+
+## Reconciliation post-fill — trả lời killer objection quant-skeptic (2026-07-27, job Taylor_20260727_040719)
+
+**Objection**: netting gộp SELL 800 park + BUY 700 LAG → broker chỉ thấy −100; ai ghi phần
+chuyển nội bộ (park −700 / LAG +700) vào sổ từng book? Nếu wire mà không có bước này, sổ từng
+book lệch khỏi broker theo thời gian.
+
+**Kết quả điều tra (chứng cứ trên code hiện có — KHÔNG bịa kiến trúc):** ở LIVE **không tồn
+tại sổ vị thế từng book tích-luỹ-từ-fill** để mà "lệch":
+- Journal FILL (`executor._journal`) book-agnostic (cột: ts/event/parent_id/ticker/side/
+  child_oid/qty/price/filled_total/note — không có `book`).
+- Tầng kế toán/NAV (`daily_nav_snapshot.py`/`compute_active_nav.py`/`reconcile_equity.py`)
+  book-agnostic: NAV = mtm_stock(TỔNG broker) + cash − debt + offbook. Mọi chữ "book" ở đó là
+  "off-book" (Trứng vàng), không phải per-book.
+- Vị thế "từng book" chỉ tồn tại: (a) paper-mirror `pt_v22_dt5g_open_positions.csv` — do engine
+  mô phỏng ghi, tái dựng + scale NAV MỖI ngày rồi diff vs vị thế TỔNG broker (không đọc fill);
+  (b) field `book` trên PlannedOrder — chỉ routing tier/khoá trần %ADV/hiển thị, vòng đời 1 plan.
+- DollarBill lập plan T+1 tái dựng từ recommend CSV + vị thế TỔNG thật + active_nav — không đọc
+  sổ per-book bền nào.
+- **Bất biến bảo toàn** (đã test, case E netting selfcheck): net = Σbuy − Σsell = TỔNG Δ per-book
+  dự kiến ⇒ vị thế TỔNG broker luôn = tổng-các-book dự kiến; target ngày mai tái dựng từ
+  (paper-mirror) − (TỔNG broker) tự hấp thụ cả khớp một phần. Netting **trong suốt** với bước này.
+- Khớp MỘT PHẦN khiến "chẻ fill về từng book" không định nghĩa được → thêm lý do vì sao sổ
+  per-book-từ-fill vừa không có vừa không nên bịa.
+
+⇒ Dựng một "sổ vị thế per-book" sẽ là **bịa kiến trúc không tồn tại, không có consumer, và
+false-fire trên khớp một phần** — đúng thứ dispatch cấm. Thay vào đó, dựng phần lõi HỢP LỆ &
+ĐỊNH NGHĨA ĐƯỢC của objection:
+
+**`trading_bot/netting_recon.py` — `reconcile_netted_fills(adj, get_net_fill, ref_price_of,
+broker_net_delta=None)`** (INERT, chưa wire, giống `net_offsetting_orders` khi mới viết). Chạy
+SAU khi có FILL THẬT:
+1. Audit-trail: mỗi mã netted ghi 2 leg gốc (book+qty) định giá CÙNG MỘT giá — NET≠0 dùng giá
+   khớp THẬT của lệnh net (từ xác nhận khớp broker/journal FILL, §6 — KHÔNG phải giá đặt lệnh);
+   NET=0 (không có lệnh net) dùng ref_price plan (2 leg bù trừ, P&L gộp=0 dù giá nào). Objection #1/#2/#3.
+2. Conservation guard FAIL-LOUD: phần THẬT chạm broker (khớp có dấu) = Σ Δ book chạm-thị-trường;
+   nếu caller cấp `broker_net_delta` (đọc positions API sau−trước) phải khớp — lệch ⇒ raise +
+   để caller báo Mike/user, KHÔNG tự gộp (§5/§6). Objection #4 dạng mạnh.
+3. `write_recon_log()` ghi JSONL atomic (tmp+os.replace) `netting_recon_<acct>_<date>.jsonl`.
+
+**Điểm wiring đề xuất** (bot_execute.py, cuối `run()` sau phiên đóng & fills chốt): đọc
+(filled_qty, avg_price) của parent `NET-<ticker>-<SIDE>` từ xác nhận khớp broker; tuỳ chọn đọc
+positions API để cấp `broker_net_delta` (cross-check mạnh nhất). failures non-empty → bus event
++ notify Mike/user, KHÔNG tự thực thi tiếp.
+
+**Selfcheck `netting_recon_selfcheck.py` — 44/44 PASS**: NET≠0 khớp đủ @ giá thật · NET=0 @ ref
+bù trừ · FAIL LOUD khi thiếu giá khớp · FAIL LOUD khi Σ(book)≠broker · khớp một phần không
+false-fail · FAIL LOUD NET=0 thiếu ref · FAIL LOUD NET=0 ghost broker-delta · NET BUY dấu dương ·
+lệnh net 0-filled @ref · adj hỏng · write_recon_log atomic/append/rỗng→None. net_offsetting_orders_selfcheck 35/35 giữ nguyên.

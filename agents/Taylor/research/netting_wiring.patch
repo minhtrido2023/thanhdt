@@ -21,3 +21,34 @@
 +                print(f"[{p['label']}] ⇄ NET {a['ticker']}: mua {a['total_buy']:,} / bán "
 +                      f"{a['total_sell']:,} → 1 lệnh {a['net_side'].upper()} {abs(a['net_qty']):,}cp "
 +                      f"(nội bộ {a['internal_qty']:,}cp, tiết kiệm phí/spread)")
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 3) RECONCILIATION POST-FILL (prereq của objection quant-skeptic 2026-07-27,
+#    job Taylor_20260727_040719) — module trading_bot/netting_recon.py.
+#    KHÔNG phải "sổ vị thế per-book" (ở live không tồn tại sổ đó — xem
+#    netting_offsetting_orders_20260727.md §Reconciliation). Là audit-trail 2 leg
+#    @ giá khớp THẬT + conservation guard FAIL-LOUD Σ(book)==broker.
+#
+#    Vị trí gọi: CUỐI Executor.run() (bot_execute.py hoặc executor.py), SAU phiên
+#    đóng & lần _sync_fills cuối cùng (fills đã chốt). KHÔNG gọi lúc sinh plan.
+#    Phải giữ `netted` (adj) từ bước (2) để truyền vào đây.
+#
+#    Khung gọi (điền get_net_fill từ xác nhận khớp broker/journal FILL — §6, KHÔNG
+#    dùng giá đặt lệnh c["price"]; broker_net_delta tuỳ chọn từ positions API):
+#
+#      from trading_bot.netting_recon import reconcile_netted_fills, write_recon_log
+#      from trading_bot.config import EXEC_DIR
+#      def _net_fill(ticker, net_side):
+#          ps = executor.state["parents"].get(f"NET-{ticker}-{net_side.upper()}")
+#          if not ps: return (0, None)
+#          # avg_price THẬT: đọc từ FILL rows của journal / xác nhận khớp broker
+#          return (ps["filled"], _avg_fill_price_from_broker(ticker, ps))
+#      recs, fails = reconcile_netted_fills(
+#          netted, get_net_fill=_net_fill,
+#          ref_price_of=lambda t: _plan_ref_price(t),
+#          broker_net_delta=_owned_qty_delta_from_positions())   # tuỳ chọn
+#      write_recon_log(recs, p["label"], plan.plan_date, EXEC_DIR)
+#      if fails:
+#          # FAIL-LOUD: bus event + notify Mike/user, KHÔNG tự gộp/thực thi tiếp
+#          _publish_bot_event("error", "netting-recon-fail", {"fails": fails})
+#          notify(...)
