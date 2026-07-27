@@ -134,6 +134,28 @@ for path in sorted(glob.glob(os.path.join(inbox_dir, "*.jsonl"))):
 print(f"HEARTBEAT-PRUNE: removed {total_removed} stale heartbeat(s) total")
 PYEOF
 
+# ── Phase 1c: archive closed/old working-memory entries ───────────────────────
+# Working memories (kb/memory/<id>.md) are reloaded on EVERY session/dispatch of that
+# agent. Left alone they grow into full time-ordered job diaries (measured 2026-07-27:
+# Wags 22KB/26 entries, Taylor 24KB) — 95% closed jobs already consolidated to bus/
+# INCIDENTS/commits. Move settled episodic entries out to kb/memory/archive/<id>_history.md
+# (append-only, NOT auto-loaded); nothing deleted. CONSERVATIVE mode (--require-done): an
+# entry is archived ONLY if it is older than MEM_ARCHIVE_DAYS, is NOT among the last
+# MEM_ARCHIVE_KEEP, carries a done marker (XONG/DONE/…), AND does NOT match the still-open /
+# durable-rule regex baked into archive_memory.py. So only provably-closed old job-logs move;
+# open work + standing rules stay hot. This also rescues entries from remember.sh's silent
+# 40-bullet cap (which DROPS overflow) by relocating them before the cap is reached. Guarded
+# so a failure can't abort the nightly commit/backup.
+MEM_ARCHIVE_DAYS="${KB_MEM_ARCHIVE_DAYS:-14}"
+MEM_ARCHIVE_KEEP="${KB_MEM_ARCHIVE_KEEP:-6}"
+log "Archiving closed working-memory entries (>${MEM_ARCHIVE_DAYS}d, done-marked, keep last ${MEM_ARCHIVE_KEEP})..."
+for f in "$ROOT/kb/memory/"*.md; do
+    [ -f "$f" ] || continue
+    python3 "$ROOT/bin/archive_memory.py" "$f" \
+        --keep "$MEM_ARCHIVE_KEEP" --days "$MEM_ARCHIVE_DAYS" --require-done --apply \
+        2>&1 | tee -a "$LOG" || log "mem-archive: error on $(basename "$f") (non-fatal, file untouched)"
+done
+
 # ── Phase 2: alert on oversized working memories ──────────────────────────────
 log "Checking agent working memories..."
 OVERSIZE=""

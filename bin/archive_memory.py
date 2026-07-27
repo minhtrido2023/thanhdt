@@ -32,10 +32,15 @@ DONE_RE = re.compile(r'\bXONG\b|\bDONE\b|HOÀN TẤT|HOAN TAT|HOÀN THÀNH|HOAN 
 # is the only real failure mode; over-keeping just costs a few KB, and it is recoverable
 # from the archive regardless). Callers pass a stricter set for the aggressive one-time pass.
 DEFAULT_OPEN = (
+    # (1) still-open work
     r'ĐANG DỞ|DANG DO|ĐANG CHỜ|DANG CHO|CÒN MỞ|CON MO|CÒN TREO|CON TREO|CÒN NỢ|CON NO|'
     r'CHỜ VERIFY|CHO VERIFY|CHỜ USER|CHO USER|CHỜ user|CẦN USER|CAN USER|VIỆC MỞ|VIEC MO|'
     r'Việc mở|Viec mo|CHỜ DUYỆT|CHO DUYET|CHỜ Mike|CHO Mike|CHỜ APPROVE|user approve|'
-    r'user duyệt|PENDING|TREO cho user|OPEN:|MỞ:'
+    r'user duyệt|PENDING|TREO cho user|OPEN:|MỞ:|'
+    # (2) durable standing rules/directives — "used every session", must stay hot even if the
+    # entry also carries a done marker (e.g. "SCHEMA FIX XONG ... LƯU Ý CHO PLAN SAU")
+    r'QUY TẮC|QUY TAC|User chỉ đạo|User chi dao|chỉ đạo|chi dao|LƯU Ý CHO|LUU Y CHO|'
+    r'GỘP THREAD|TÁCH LẠI|ACCOUNT ROLES|Directive|directive'
 )
 
 
