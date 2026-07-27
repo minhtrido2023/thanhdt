@@ -1200,3 +1200,6 @@
 
 ## Consolidation 2026-07-27T13:07:01Z
 - [2026-07-27T13:01:06Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 52835}
+
+## Consolidation 2026-07-27T14:07:01Z
+- [2026-07-27T13:45:49Z] Taylor/status — fa_ratings-refresh-ok: {"rows": 12499}
