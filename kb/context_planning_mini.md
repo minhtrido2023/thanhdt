@@ -54,14 +54,20 @@ cho SpaceX ngày nào trùng lịch tranche TV1, PHẢI trừ trước số ti�
 — nếu không, tổng nhu cầu 2 nguồn có thể vượt cash thực (sự cố thật 07-24: V2.4 45,9M + TV1
 3,98M = 49,9M > cash 49,1M, thiếu ~0,78M). Luôn check file discretionary trước khi chốt size.
 
-## LAG entry — KHÔNG tự override RATING_FAIL bằng DCF (thêm 2026-07-23)
-8L rating ≤3 là golden gate nhị phân cho custom30V/CAPIT. LAG book (PEAD, `LAG_KW`) về mặt công
-thức backtest KHÔNG gate theo 8L rating (chỉ theo NP_R/prior_n_good/pa_HL3) — nhưng due-diligence
-mặc định (mandate 2026-07-21, áp cho MỌI book) vẫn phải chạy cho từng ứng viên LAG. Nếu 1 mã LAG
-có rating≥4 (RATING_FAIL), KHÔNG được tự ý đưa vào plan chỉ vì DCF cheap — đó là quyết định
-chính sách (có chấp nhận DCF override rating-fail hay không) cần escalate hỏi Mike/user, không tự
-quyết. Sự cố thật 2026-07-23: TRC rating=4/tier=D, DollarBill tự ghi "RATING_FAIL" trong note rồi
-vẫn đưa vào plan vì "DCF CHEAP MoS+40%" — không escalate trước.
+## LAG entry — GATE CỨNG rating≤3, TỰ ĐỘNG LOẠI rating≥4, KHÔNG escalate nữa (CHỐT 2026-07-27)
+User đã CHỐT LUẬT (2026-07-27, sau 2 case liên tiếp TRC rồi MST cùng rating≥4): mọi ứng viên LAG
+PHẢI có 8L rating ≤3 mới được đưa vào orders[]. Rating≥4 (RATING_FAIL) → TỰ ĐỘNG loại khỏi plan,
+KHÔNG cần escalate Mike/user từng lần nữa (khác quy tắc cũ trước 07-27). Ghi vào `deferred_orders[]`
+hoặc mục riêng với lý do "RATING_FAIL — auto-excluded per user policy 2026-07-27", không phải
+orders[] và không phải trạng thái "chờ quyết định".
+⚠️ **Đánh đổi đã biết, user đã được thông báo trước khi chốt**: backtest cùng ngày (job
+Taylor_20260723_131958) test đúng biến thể "gate rating≤3 chặn cứng cho LAG" và kết quả NO-GO ở
+cấp trung bình lịch sử (IS-negative, Sharpe 0,95→0,80) — nghĩa là luật này đánh đổi hiệu suất đo
+được trong backtest để lấy bảo vệ khỏi rủi ro cá biệt (mã cụ thể chất lượng rất kém dù tín hiệu
+PEAD kích hoạt, kiểu TRC rating=4/D và MST rating=4/E — PE 39x, ROE_Trailing 2,55%). Đây là quyết
+định rủi ro/risk-tolerance của user, không phải sai số kỹ thuật — không tự ý đảo ngược nếu thấy
+"backtest nói ngược lại", vì user đã biết và chấp nhận đánh đổi này.
+Case cũ TRC (07-23) và MST (07-27) áp dụng hồi tố theo luật mới: cả 2 giữ nguyên KHÔNG mua.
 
 ## CẤM field `funding_required: true` — plan phải tự SHRINK theo cash thực, không list-rồi-đợi-tiền (thêm 2026-07-27)
 Đây là TÁI PHẠM đúng lỗi Trứng vàng 07-23 (context "Trứng vàng DNSE" ở trên) — lần này núp dưới field
