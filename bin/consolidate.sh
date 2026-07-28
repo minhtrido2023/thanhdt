@@ -99,8 +99,24 @@ if [ -s "$NEW" ]; then
   "$ROOT/bin/publish_context.sh"
 
   if [ ! -d "$ROOT/.git" ]; then git -C "$ROOT" init -q; fi
-  git -C "$ROOT" add -A 2>/dev/null || true
-  git -C "$ROOT" commit -q -m "consolidate $(date -u +%FT%TZ) (KB v$(cat "$KB/version.txt"))" 2>/dev/null || true
+  # Scoped to kb/ (matches kb_nightly.sh's existing `git add kb/`, line ~484) — NOT `-A`.
+  # `-A` stages the whole repo (everything `.gitignore` doesn't exclude: bin/, agents/, root
+  # docs — bus/state/logs/locks are gitignored, so those were never actually at risk), which
+  # means any in-progress edit to a script sitting uncommitted gets silently swept into this
+  # hourly/post-dispatch auto-commit under a generic "consolidate KB vNNNN" message — it
+  # happened for real 2026-07-28 (twice, mid-session) to a careful safety-critical fix whose
+  # detailed rationale got replaced by this one-line message. consolidate.sh only ever WRITES
+  # inside kb/ (context_pack.md, events_buffer.md, version.txt, recent_delta.jsonl,
+  # fleet_status.md via publish_context.sh + the fleet-status step below) — nothing it does
+  # legitimately touches bin/ or the repo root.
+  git -C "$ROOT" add kb/ 2>/dev/null || true
+  # `-- kb/` on commit too (arch-review round 2, 2026-07-28): `git add kb/` only controls what
+  # gets STAGED here — `git commit` with no pathspec commits the WHOLE INDEX. If some other
+  # in-flight session had already run `git add bin/foo.sh` (or staged one hunk of it) a moment
+  # before this runs, that staged-but-uncommitted file still rides along into "consolidate KB
+  # vNNNN" without the pathspec. Reproduced in review; verified this pathspec leaves any such
+  # staged file exactly as staged (not committed, not unstaged) afterward.
+  git -C "$ROOT" commit -q -m "consolidate $(date -u +%FT%TZ) (KB v$(cat "$KB/version.txt"))" -- kb/ 2>/dev/null || true
   echo "$(date -u +%FT%TZ) consolidated new events → KB v$(cat "$KB/version.txt")"
 
   # --- 2b. push new events to Discord #mike channel ---

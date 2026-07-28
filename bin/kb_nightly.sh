@@ -40,6 +40,20 @@ if ! python3 "$ROOT/bin/cursor_advance_selfcheck.py" >> "$LOG" 2>&1; then
       >/dev/null 2>&1 || true
 fi
 
+# consolidate.sh's git-commit SCOPE (separate concern from the cursor logic above — does NOT
+# gate Phase 1b/1b2, which only depend on cursor/offset correctness, not commit scope): a
+# repo-wide `git add -A` there twice swept an in-progress code edit into an auto-generated
+# "consolidate KB vNNNN" commit message on 2026-07-28 (see kb/INCIDENTS.md), fixed by scoping
+# to `-- kb/` on both add and commit. Alert-only (not a gate) — a bad commit message is an
+# audit-trail annoyance, not a data-loss risk, so it doesn't warrant pausing tonight's prune.
+if ! python3 "$ROOT/bin/consolidate_git_scope_selfcheck.py" >> "$LOG" 2>&1; then
+    log "FAIL: consolidate_git_scope_selfcheck.py — consolidate.sh may be sweeping unrelated files into its commits again, see $LOG"
+    "$ROOT/bin/notify.sh" "🟡 kb_nightly: consolidate_git_scope_selfcheck.py FAILED — consolidate.sh có thể lại cuốn file không liên quan vào commit KB tự động: $LOG" >/dev/null 2>&1 || true
+    "$ROOT/bin/append_event.sh" Mike error "consolidate-git-scope-selfcheck-failed" \
+      "{\"note\": \"kb_nightly Phase 0 selfcheck FAIL — consolidate.sh git-commit scope co the da regressed\", \"log\": \"$LOG\"}" \
+      >/dev/null 2>&1 || true
+fi
+
 # ── Lock: Phase 1a/1 (events_buffer.md) + 1b/1b2 (bus/inbox + offsets) ───────
 # consolidate.sh holds locks/consolidator.lock while it appends to the same file, and it
 # runs after EVERY dispatch (dispatch.sh, run_bot.sh, verify_finding.sh, fleet_backup.sh)
@@ -482,8 +496,13 @@ fi
 CHANGED=$(git -C "$ROOT" status --porcelain kb/ | wc -l)
 if [ "$CHANGED" -gt 0 ]; then
     git -C "$ROOT" add kb/
+    # `-- kb/` on commit too, for consistency with consolidate.sh's same fix (2026-07-28):
+    # `add kb/` only controls what's staged HERE — commit with no pathspec commits the whole
+    # index, so a file staged (or partially staged) by another in-flight session at the wrong
+    # moment would still ride along. Lower-risk here (02:00 ICT, not hourly/post-dispatch),
+    # but kept consistent so this isn't miscited as the safe pattern to copy elsewhere.
     git -C "$ROOT" commit -m "kb: nightly cleanup $(date -u +%Y-%m-%d) — archive+trim" \
-        --author="Mike <mike@fleet>" || true
+        --author="Mike <mike@fleet>" -- kb/ || true
     log "Git committed."
 else
     log "No KB changes to commit."
