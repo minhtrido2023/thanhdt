@@ -30,12 +30,13 @@ class PlannedOrder:
     dcf_check: dict = dataclasses.field(default=None)
     # BẮT BUỘC ghi khi dcf_check.status=RICH AND robust=true AND side=buy; nếu trống → WARN.
     dcf_override_reason: str = ""
-    # cash_only=True → đặt lệnh KHÔNG gắn gói vay nào (lệnh tiền mặt thuần), bất kể
-    # account có loan_package_id default hay không. Cần cho book DISCRETIONARY_SPECIAL
-    # trên mã (vd TV1/UPCOM) không đủ điều kiện dưới gói margin/GD-tiền-mặt 1841 của
-    # SpaceX → DNSE reject nếu ép gắn (bug TV1 07-28). Default False = mọi order
-    # BAL/LAG/CAPIT giữ nguyên hành vi (dùng gói default account). Nằm trong
-    # dataclasses.fields nên load_plan() KHÔNG lọc mất field này.
+    # cash_only=True → executor chọn gói vay HỢP LỆ RIÊNG cho mã (query loan-packages
+    # theo symbol) thay vì gói default account. Cần cho book DISCRETIONARY_SPECIAL trên
+    # mã (vd TV1/UPCOM) mà gói 1841 mainboard của SpaceX KHÔNG hợp lệ → DNSE reject
+    # "loanPackageId is required" (bug TV1 07-28; fix cũ "bỏ trường" cũng sai vì DNSE
+    # bắt buộc trường này). Xem DNSEBroker._resolve_loan_package_id. Default False = mọi
+    # order BAL/LAG/CAPIT giữ nguyên hành vi (gói default account, KHÔNG query thêm).
+    # Nằm trong dataclasses.fields nên load_plan() KHÔNG lọc mất field này.
     cash_only: bool = False
 
     @property

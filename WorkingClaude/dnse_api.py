@@ -129,32 +129,26 @@ class DNSEClient:
 
     def place_order(self, account_id, symbol, qty, side, order_type="LO",
                     price=None, market_type="STOCK", order_category="NORMAL",
-                    loan_package_id=None, no_loan_package=False):
+                    loan_package_id=None):
         """Đặt lệnh — POST /accounts/orders?marketType=&orderCategory=.
 
         side: "buy"/"sell" (tự đổi sang NB/NS) hoặc truyền thẳng "NB"/"NS".
         order_type: LO, ATO, ATC, MTL (HOSE); LO/MTL/MOK/MAK/ATC/PLO (HNX).
 
-        loanPackageId — 3 trường hợp RÕ RÀNG (bug TV1 07-28, kb/INCIDENTS.md):
-          (a) không truyền gì (loan_package_id=None, no_loan_package=False) → dùng
-              default của account (self.loan_package_id) — HÀNH VI CŨ, không đổi.
-          (b) truyền loan_package_id cụ thể → dùng đúng số đó.
-          (c) no_loan_package=True → KHÔNG gắn key loanPackageId nào lên body (lệnh
-              tiền mặt thuần, giống hệt cách account KHÔNG có loan_package_id config
-              chạy tự nhiên). Cần cho mã như TV1/UPCOM không đủ điều kiện dưới gói
-              1841 của SpaceX → DNSE reject nếu ép gắn.
-        Dùng cờ bool riêng, KHÔNG dùng 0 làm sentinel "không gói": 0 là falsy →
-        `loan_package_id or self.loan_package_id` sẽ rơi ngược về default = tái diễn bug.
+        loanPackageId LUÔN được gắn khi account có gói default (self.loan_package_id) —
+        DNSE bắt buộc trường này (reject "loanPackageId is required" nếu thiếu, bug TV1
+        07-28, kb/INCIDENTS.md). Truyền `loan_package_id` cụ thể để override default cho
+        1 mã (vd TV1/UPCOM cần gói 1122 thay vì 1841 mainboard) — việc CHỌN đúng ID theo
+        mã do DNSEBroker._resolve_loan_package_id() lo, KHÔNG bỏ trường ở tầng này.
         """
         body = {"accountNo": account_id, "symbol": symbol,
                 "side": _side(side), "orderType": order_type,
                 "quantity": int(qty)}
         if price is not None:
             body["price"] = price
-        if not no_loan_package:
-            lp = loan_package_id or self.loan_package_id
-            if lp is not None:
-                body["loanPackageId"] = lp
+        lp = loan_package_id or self.loan_package_id
+        if lp is not None:
+            body["loanPackageId"] = lp
         return self._request("POST", "/accounts/orders",
                              query={"marketType": market_type,
                                     "orderCategory": order_category},

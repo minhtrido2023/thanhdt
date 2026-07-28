@@ -454,7 +454,7 @@ class Executor:
             return None
         try:
             oid = self.broker.place_order(o.ticker, qty, o.side, price=px_alt,
-                                          no_loan_package=getattr(o, "cash_only", False))
+                                          cash_only=getattr(o, "cash_only", False))
         except Exception:
             overrides.pop(o.ticker, None)     # vẫn lỗi ở exchange thay thế → không phải do tick, bỏ học
             return None
@@ -929,7 +929,7 @@ class Executor:
                         continue
             try:
                 oid = self.broker.place_order(o.ticker, qty, o.side, price=px,
-                                              no_loan_package=getattr(o, "cash_only", False))
+                                              cash_only=getattr(o, "cash_only", False))
             except Exception as e:
                 retry = self._retry_tick_mismatch(o, q, cross, extreme_down, px, qty, e)
                 if retry is None:
@@ -1002,7 +1002,7 @@ class Executor:
             try:
                 oid = self.broker.place_order(o.ticker, remaining, o.side,
                                               price=None, order_type="ATC",
-                                              no_loan_package=getattr(o, "cash_only", False))
+                                              cash_only=getattr(o, "cash_only", False))
                 ps["children"].append({"oid": oid, "qty": remaining, "price": None,
                                        "filled": 0, "status": "open",
                                        "ts": now_ict().isoformat(timespec="seconds")})

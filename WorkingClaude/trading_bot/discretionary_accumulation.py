@@ -161,9 +161,9 @@ def compute_session_order(state, filled_qty, prev_turnover_vnd, prev_price_vnd,
         "estimated_cost_vnd": int(session_qty * limit_price),
         "book": BOOK,
         # Lệnh gom discretionary special = thanh toán TIỀN MẶT theo thiết kế (master
-        # plan: "CASH — KHÔNG dùng margin"). cash_only=True → executor đặt lệnh KHÔNG
-        # gắn gói vay account (bug TV1 07-28: gói 1841 SpaceX gắn tự động → DNSE reject
-        # mã UPCOM không đủ điều kiện). Đọc từ state, default True cho cả họ discretionary.
+        # plan: "CASH — KHÔNG dùng margin"). cash_only=True → executor chọn gói vay hợp
+        # lệ RIÊNG cho mã (bug TV1 07-28: gói 1841 mainboard SpaceX gắn tự động → DNSE
+        # reject mã UPCOM; đúng gói cho TV1 = 1122). Đọc từ state, default True cho cả họ.
         "cash_only": bool(state.get("cash_only", True)),
         "play_type": "DISCRETIONARY_SPECIAL_SITUATION",
         "priority": int(state.get("priority", 5)),

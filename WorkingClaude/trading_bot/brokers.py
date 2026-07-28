@@ -197,9 +197,11 @@ class BrokerBase:
         return cash + mv
 
     def place_order(self, symbol, qty, side, price=None, order_type="LO",
-                    no_loan_package=False):
-        """→ order_id (str). no_loan_package=True: đặt lệnh KHÔNG gắn gói vay nào
-        (lệnh tiền mặt thuần) — broker không hỗ trợ gói vay có thể bỏ qua cờ này."""
+                    cash_only=False):
+        """→ order_id (str). cash_only=True: lệnh tiền mặt thuần — chọn gói vay HỢP LỆ
+        RIÊNG cho mã này (vd TV1/UPCOM cần 1122 thay vì gói mainboard 1841) thay vì gói
+        default account; xem DNSEBroker._resolve_loan_package_id. Broker không dùng gói
+        vay DNSE có thể bỏ qua cờ này."""
         raise NotImplementedError
 
     def cancel_order(self, order_id):
@@ -286,9 +288,9 @@ class PHSBroker(BrokerBase):
         return q
 
     def place_order(self, symbol, qty, side, price=None, order_type="LO",
-                    no_loan_package=False):
-        # PHS không dùng gói vay DNSE → cờ no_loan_package không áp dụng, chấp nhận
-        # để interface đồng nhất với DNSEBroker (executor gọi chung 1 chữ ký).
+                    cash_only=False):
+        # PHS không dùng gói vay DNSE → cờ cash_only không áp dụng, chấp nhận để
+        # interface đồng nhất với DNSEBroker (executor gọi chung 1 chữ ký).
         r = self.client.place_order(self.account_id, symbol, qty=int(qty), side=side,
                                     order_type=order_type, price=price)
         self._log_raw("place_order", {"req": [symbol, qty, side, price, order_type],
@@ -346,6 +348,7 @@ class DNSEBroker(BrokerBase):
         self.client = None
         self._quote_cache = {}      # symbol -> (ts, Quote)
         self._secdef_cache = {}     # symbol -> dict (trần/sàn/ref — tĩnh trong ngày)
+        self._loan_pkg_cache = {}   # symbol -> loanPackageId đã giải (cash_only, theo phiên)
         self._quote_ttl = 3.0
         self._raw_log = os.path.join(
             EXEC_DIR, f"dnse_raw_{today_ict():%Y-%m-%d}.jsonl")
@@ -491,13 +494,70 @@ class DNSEBroker(BrokerBase):
         self._quote_cache[symbol] = (_t.time(), q)
         return q
 
+    @staticmethod
+    def _extract_loan_pkgs(payload):
+        """Chuẩn hoá payload loan-packages → list[dict]. DNSE có thể trả list thẳng
+        hoặc {loanPackages|loanPackageList|data|items: [...]}."""
+        if isinstance(payload, dict):
+            for k in ("loanPackages", "loanPackageList", "data", "items"):
+                if isinstance(payload.get(k), list):
+                    return [r for r in payload[k] if isinstance(r, dict)]
+            return []
+        if isinstance(payload, list):
+            return [r for r in payload if isinstance(r, dict)]
+        return []
+
+    def _resolve_loan_package_id(self, symbol):
+        """loanPackageId HỢP LỆ cho `symbol` — chỉ gọi cho lệnh cash_only (book
+        DISCRETIONARY_SPECIAL). Bug TV1 07-28 (kb/INCIDENTS.md): gói default 1841 của
+        SpaceX chỉ hợp lệ CP mainboard (HOSE/HNX), KHÔNG hợp lệ UPCOM (TV1) → DNSE
+        reject. Fix cũ ("bỏ trường") cũng sai: DNSE bắt buộc loanPackageId → HTTP 400.
+
+        Chọn ID (query GET /accounts/{acc}/loan-packages?symbol=X):
+          - default account (self.client.loan_package_id) CÓ trong danh sách gói hợp lệ
+            của symbol → dùng default (BAL/LAG/CAPIT mainboard KHÔNG đổi hành vi).
+          - default KHÔNG có (như TV1) → ưu tiên gói type='N' (thuần tiền mặt) trước
+            type='M' (margin), rồi tới gói đầu tiên trong danh sách.
+        Fail-safe: query lỗi/timeout/rỗng → trả về default account (KHÔNG bỏ trường —
+        thiếu loanPackageId = HTTP 400; well-formed request bị business-reject vẫn an
+        toàn hơn request thiếu trường bắt buộc). Cache theo symbol trong phiên (bot
+        restart mỗi phiên sáng/chiều → cache tự làm mới)."""
+        if symbol in self._loan_pkg_cache:
+            return self._loan_pkg_cache[symbol]
+        default = getattr(self.client, "loan_package_id", None)
+        resolved = default
+        try:
+            raw = self.client.loan_packages(self.account_id, symbol=symbol)
+            pkgs = self._extract_loan_pkgs(raw)
+            ids = [qget(p, "id", "loanpackageid", "loanproductid") for p in pkgs]
+            ids = [i for i in ids if i is not None]
+            ids_norm = {str(i) for i in ids}
+            if default is not None and str(default) in ids_norm:
+                resolved = default                      # gói default hợp lệ → giữ nguyên
+            elif ids:
+                cash_pkgs = [p for p in pkgs
+                             if str(qget(p, "type", default="")).upper() == "N"]
+                pick = (cash_pkgs or pkgs)[0]
+                resolved = qget(pick, "id", "loanpackageid", "loanproductid")
+            # else: danh sách rỗng → giữ default (fail-safe)
+            self._log_raw("loan_packages_resolve",
+                          {"symbol": symbol, "default": default,
+                           "valid_ids": ids, "resolved": resolved})
+        except Exception as e:
+            print(f"[dnse] ⚠ loan_packages {symbol} lỗi ({e}) → gói default {default}")
+            resolved = default
+        self._loan_pkg_cache[symbol] = resolved
+        return resolved
+
     def place_order(self, symbol, qty, side, price=None, order_type="LO",
-                    no_loan_package=False):
+                    cash_only=False):
+        lp = self._resolve_loan_package_id(symbol) if cash_only else None
         r = self.client.place_order(self.account_id, symbol, qty=int(qty),
                                     side=side, order_type=order_type, price=price,
-                                    no_loan_package=no_loan_package)
+                                    loan_package_id=lp)
         self._log_raw("place_order", {"req": [symbol, qty, side, price, order_type],
-                                      "no_loan_package": no_loan_package, "resp": r})
+                                      "cash_only": cash_only, "loan_package_id": lp,
+                                      "resp": r})
         oid = qget(r, "id", "orderid", "orderId")
         if oid is None:
             raise RuntimeError(f"place_order không trả id: {r}")
