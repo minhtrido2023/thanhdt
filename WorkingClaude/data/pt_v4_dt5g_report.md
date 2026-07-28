@@ -1,8 +1,8 @@
 # pt_v4_dt5g — V4 12.1 (V121_ENS + BASE) on DT5G
 
-*Period*: 2026-06-01 → 2026-07-24 (0.145y, 40 trading days)
+*Period*: 2026-06-01 → 2026-07-27 (0.153y, 41 trading days)
 
-*Init NAV*: 50B  |  *Final NAV*: 47.1152B  |  *Total ret*: -5.77%  |  *CAGR*: -33.60%  |  *MaxDD*: -6.06%
+*Init NAV*: 50B  |  *Final NAV*: 46.8271B  |  *Total ret*: -6.35%  |  *CAGR*: -34.79%  |  *MaxDD*: -6.64%
 
 *Switch flips*: 0  |  *Switch cost*: 0.50%/flip  |  *Active leg today*: VN30
 

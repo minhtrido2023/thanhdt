@@ -237,10 +237,12 @@ def bus(event_type, topic, payload):
 def telegram(text):
     try:
         with open(TG_CONFIG) as f: cfg = json.load(f)
-        data = urllib.parse.urlencode({"chat_id": cfg["chat_id"], "text": text,
-                                       "parse_mode": "HTML", "disable_web_page_preview": "true"}).encode()
+        chat_ids = cfg["chat_id"] if isinstance(cfg["chat_id"], (list, tuple)) else [cfg["chat_id"]]
         url = f"https://api.telegram.org/bot{cfg['bot_token']}/sendMessage"
-        urllib.request.urlopen(urllib.request.Request(url, data=data), timeout=30).read()
+        for cid in chat_ids:
+            data = urllib.parse.urlencode({"chat_id": cid, "text": text,
+                                           "parse_mode": "HTML", "disable_web_page_preview": "true"}).encode()
+            urllib.request.urlopen(urllib.request.Request(url, data=data), timeout=30).read()
         return True
     except Exception as e:
         print(f"  [warn] telegram send failed: {e}")

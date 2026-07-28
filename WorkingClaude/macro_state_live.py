@@ -223,8 +223,10 @@ def _alert(msg):
     try:
         import json, requests
         cfg = json.load(open(os.path.join(WORKDIR, "secrets/telegram_config.json"), encoding="utf-8"))
-        requests.post(f"https://api.telegram.org/bot{cfg['bot_token']}/sendMessage",
-                      data={"chat_id": cfg["chat_id"], "text": msg}, timeout=8)
+        chat_ids = cfg["chat_id"] if isinstance(cfg["chat_id"], (list, tuple)) else [cfg["chat_id"]]
+        for cid in chat_ids:
+            requests.post(f"https://api.telegram.org/bot{cfg['bot_token']}/sendMessage",
+                          data={"chat_id": cid, "text": msg}, timeout=8)
         return
     except Exception:
         pass

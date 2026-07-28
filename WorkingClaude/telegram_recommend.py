@@ -43,32 +43,46 @@ def load_config() -> dict:
         return json.load(f)
 
 
-def send_telegram_text(bot_token: str, chat_id: str, text: str,
+def send_telegram_text(bot_token: str, chat_id, text: str,
                         parse_mode: str = "HTML") -> dict:
-    """Send a text message (≤ 4096 chars) to Telegram."""
+    """Send a text message (≤ 4096 chars) to Telegram. chat_id may be a single
+    id or a list/tuple of ids (broadcast to all, never raises on one failing)."""
     import requests
     url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
-    r = requests.post(url, data={
-        "chat_id": chat_id,
-        "text": text,
-        "parse_mode": parse_mode,
-        "disable_web_page_preview": True,
-    }, timeout=30)
-    return r.json()
+    chat_ids = chat_id if isinstance(chat_id, (list, tuple)) else [chat_id]
+    last = {}
+    for cid in chat_ids:
+        r = requests.post(url, data={
+            "chat_id": cid,
+            "text": text,
+            "parse_mode": parse_mode,
+            "disable_web_page_preview": True,
+        }, timeout=30)
+        last = r.json()
+        if not last.get("ok"):
+            print(f"  WARNING: telegram send to {cid} failed: {last}")
+    return last
 
 
-def send_telegram_document(bot_token: str, chat_id: str,
+def send_telegram_document(bot_token: str, chat_id,
                             file_path: str, caption: str = "") -> dict:
-    """Upload a file as document attachment."""
+    """Upload a file as document attachment. chat_id may be a single id or a
+    list/tuple of ids (broadcast to all, never raises on one failing)."""
     import requests
     url = f"https://api.telegram.org/bot{bot_token}/sendDocument"
-    with open(file_path, "rb") as f:
-        r = requests.post(url, data={
-            "chat_id": chat_id,
-            "caption": caption,
-            "parse_mode": "HTML",
-        }, files={"document": f}, timeout=60)
-    return r.json()
+    chat_ids = chat_id if isinstance(chat_id, (list, tuple)) else [chat_id]
+    last = {}
+    for cid in chat_ids:
+        with open(file_path, "rb") as f:
+            r = requests.post(url, data={
+                "chat_id": cid,
+                "caption": caption,
+                "parse_mode": "HTML",
+            }, files={"document": f}, timeout=60)
+        last = r.json()
+        if not last.get("ok"):
+            print(f"  WARNING: telegram document send to {cid} failed: {last}")
+    return last
 
 
 def split_message(text: str, max_len: int = TG_MAX_MSG) -> list:
