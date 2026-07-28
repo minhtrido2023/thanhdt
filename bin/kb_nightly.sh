@@ -22,6 +22,28 @@ log() { echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] $*" | tee -a "$LOG"; }
 
 log "=== kb_nightly START ==="
 
+# ── Lock: Phase 1a + Phase 1 both read-modify-write kb/events_buffer.md ──────
+# consolidate.sh holds locks/consolidator.lock while it appends to the same file, and it
+# runs after EVERY dispatch (dispatch.sh, run_bot.sh, verify_finding.sh, fleet_backup.sh)
+# — not just the :07 cron. Without this lock an append landing between our read and our
+# os.replace is erased whole (reproduced by arch-reviewer 2026-07-28, ~23 ms window).
+# Required by kb/cron_registry/_adding-cron-policy.md §"File đọc-sửa-ghi → flock cùng lock".
+# Phase 1 had this hole before Phase 1a existed; one lock closes both. Wait, don't skip
+# (nightly must run); if the lock can't be had, skip ONLY the buffer phases — a night of
+# unpruned buffer is cheap, a lost finding is not. Released right after Phase 1; no later
+# phase mutates the buffer.
+mkdir -p "$ROOT/locks"
+exec 8>"$ROOT/locks/consolidator.lock"
+BUFFER_LOCK=0
+if flock -w 120 8; then
+    BUFFER_LOCK=1
+else
+    log "WARN: không lấy được locks/consolidator.lock sau 120s → BỎ QUA Phase 1a+1 đêm nay (tránh lost-update với consolidate.sh)"
+    PRUNE_WARN="buffer phases SKIPPED (lock busy)"
+fi
+
+if [ "$BUFFER_LOCK" = 1 ]; then
+
 # ── Phase 1a: strip heartbeats from events_buffer.md (BEFORE Phase 1 archives it) ──
 # Same leak Phase 1b fixed for bus/inbox/*.jsonl, one layer up: consolidate.sh copies
 # EVERY new bus event into kb/events_buffer.md every 30 min with no filter, so the hot
@@ -32,13 +54,21 @@ log "=== kb_nightly START ==="
 # trace.sh read it for job triage — NOTHING reads heartbeats out of events_buffer.md
 # (liveness comes from bus/inbox + bus/registry), so they are worthless here at ANY age:
 # drop them all. Every other event_type and every unrecognised/blank line is kept
-# byte-for-byte. Also drops "## Consolidation" headers left with no event, else an
-# all-heartbeat block sinks into Phase 1's canonical bucket and never leaves the buffer.
-# Atomic write (tmp + os.replace, coding_guidelines §3) + conservation guard: refuses to
-# write unless every surviving non-heartbeat line is identical and in order. Guarded so a
-# failure can't abort the nightly. Existing kb/archive/*.md = historical record, NOT rewritten.
+# byte-for-byte. Also drops "## Consolidation" headers left with no event (only blocks
+# that are ENTIRELY heartbeat produce one — measured 3 over a 24-day buffer, not one per
+# block), else such a header sinks into Phase 1's canonical bucket and never leaves.
+# Atomic write (tmp + os.replace, coding_guidelines §3) + conservation guard. NOTE the
+# guard's exact scope: it re-uses HB_RE, so it validates the header-drop loop only — it
+# canNOT certify HB_RE itself. KNOWN LIMITATION of HB_RE: fmt_event (mike_json.py:91-92)
+# emits a STRING payload verbatim, so a payload containing a real newline renders as
+# several physical lines; a heartbeat line QUOTED inside such a payload would be dropped
+# mid-payload. Measured 2026-07-28: 3/1981 bus events have multi-line string payloads,
+# 0 of them quote an event line → no live exposure, but keep it in mind when an ops agent
+# pastes heartbeat lines into an incident report.
+# Guarded so a failure can't abort the nightly. Existing kb/archive/*.md = historical
+# record, NOT rewritten.
 log "Pruning heartbeat lines from kb/events_buffer.md (all ages; nothing reads them here)..."
-python3 - "$EVENTS_BUFFER" <<'PYEOF' 2>&1 | tee -a "$LOG" || log "events-buffer-prune: python error (non-fatal, buffer untouched)"
+PRUNE_OUT="$(python3 - "$EVENTS_BUFFER" 2>&1 <<'PYEOF'
 import sys, re, os, pathlib
 
 path = pathlib.Path(sys.argv[1])
@@ -89,6 +119,15 @@ with open(tmp, "w", encoding="utf-8") as fh:
 os.replace(tmp, path)
 print(f"EVENTS-BUFFER-PRUNE: removed {removed} heartbeat line(s), {dropped_hdr} empty block header(s)")
 PYEOF
+)" || PRUNE_OUT="events-buffer-prune: python error (non-fatal, buffer untouched)"
+echo "$PRUNE_OUT" | tee -a "$LOG"
+# Surface only the ABNORMAL outcomes to Phase 4's notification — a prune that quietly
+# stops working (conservation FAIL / python error) would otherwise be discoverable only
+# by re-measuring the buffer months later, i.e. exactly how this leak was found.
+case "$PRUNE_OUT" in
+    *"EVENTS-BUFFER-PRUNE:"*|*"SKIP: no heartbeat"*|*"SKIP: no events_buffer"*) ;;
+    *) PRUNE_WARN="events_buffer prune: ${PRUNE_OUT%%$'\n'*}" ;;
+esac
 
 # ── Phase 1: archive stale raw events ─────────────────────────────────────────
 CUTOFF=$(date -u -d "-${KEEP_DAYS} days" +%Y-%m-%d 2>/dev/null \
@@ -155,6 +194,9 @@ with archive_path.open('a', encoding='utf-8') as f:
 knowledge_path.write_text(''.join(canonical + to_keep), encoding='utf-8')
 print(f"ARCHIVED: {archived_count} events → {archive_path.name}")
 PYEOF
+
+exec 8>&-    # release consolidator lock — no phase below mutates events_buffer.md
+fi           # end BUFFER_LOCK guard
 
 # ── Phase 1b: prune stale heartbeats from bus inbox ───────────────────────────
 # Heartbeats are liveness pings — useless once a job ends. They dominate bus/inbox
@@ -372,6 +414,7 @@ fi
 # ── Phase 4: notify ──────────────────────────────────────────────────────────
 MSG="🌙 KB nightly done ($(date -u +%Y-%m-%d))"
 [ -n "${OVERSIZE:-}" ] && MSG="$MSG — ⚠️ oversized memories:$OVERSIZE"
+[ -n "${PRUNE_WARN:-}" ] && MSG="$MSG — ⚠️ $PRUNE_WARN"
 "$ROOT/bin/notify.sh" "$MSG" 2>/dev/null || true
 # Topic CỐ ĐỊNH (Architecture) — trước 2026-07-22 đọc con trỏ global
 # state/ccdb_thread_id = "topic Mike mở phiên gần nhất", nên tin bảo trì KB đêm nào cũng
