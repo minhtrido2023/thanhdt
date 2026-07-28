@@ -886,3 +886,6 @@
 - [2026-07-28T12:49:57Z] Wags/heartbeat — Wags_20260728_121552: {"status": "still_running", "elapsed_min": 34, "job_id": "Wags_20260728_121552", "source": "watcher"}
 - [2026-07-28T12:50:57Z] Wags/heartbeat — Wags_20260728_121552: {"status": "still_running", "elapsed_min": 35, "job_id": "Wags_20260728_121552", "source": "watcher"}
 - [2026-07-28T12:51:57Z] Wags/heartbeat — Wags_20260728_121552: {"status": "still_running", "elapsed_min": 36, "job_id": "Wags_20260728_121552", "source": "watcher"}
+
+## Consolidation 2026-07-28T13:07:02Z
+- [2026-07-28T13:01:07Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 52926}
