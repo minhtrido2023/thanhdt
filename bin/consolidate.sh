@@ -46,8 +46,15 @@ if [ -s "$REPAIRS" ]; then
     echo "$(date -u +%FT%TZ) $r"
     wbase="$(echo "$r" | awk '{print $2}' | tr -c 'A-Za-z0-9._-' '_')"; wmark="$WARN_DIR/${wbase:-unknown}"
     echo "${wbase:-unknown}" >> "$SEEN"
-    if [ "$(cat "$wmark" 2>/dev/null || true)" = "$r" ]; then continue; fi   # unchanged → already reported
-    printf '%s' "$r" > "$wmark"
+    # Debounce key = repair KIND (field 3: resync-ts/resync-id/clamp-legacy/CURSOR-ERROR), not
+    # the whole line — the line also carries prev=/total=/recovered=, which change on every run
+    # of a file that's still actively being appended to, so comparing the full line never
+    # matched twice and the debounce silently never fired on a busy file (the exact case that
+    # matters most: a repair recurring on a hot inbox). Full `$r` still goes to notify.sh below
+    # so a human sees the real numbers; only the dedup KEY is now stable.
+    wkind="$(echo "$r" | awk '{print $3}')"
+    if [ "$(cat "$wmark" 2>/dev/null || true)" = "$wkind" ]; then continue; fi   # same kind already reported
+    printf '%s' "$wkind" > "$wmark"
     "$ROOT/bin/notify.sh" "⚠️ consolidate.sh CURSOR REPAIR — KB ingestion đã lệch, kiểm tra event có bị bỏ sót:
 \`$r\`" >/dev/null 2>&1 || true
     "$ROOT/bin/append_event.sh" Mike error "consolidate-cursor-repair" \

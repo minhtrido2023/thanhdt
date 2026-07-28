@@ -56,7 +56,8 @@ if [ "$BUFFER_LOCK" = 1 ]; then
 
 # ── Phase 1a: strip heartbeats from events_buffer.md (BEFORE Phase 1 archives it) ──
 # Same leak Phase 1b fixed for bus/inbox/*.jsonl, one layer up: consolidate.sh copies
-# EVERY new bus event into kb/events_buffer.md every 30 min with no filter, so the hot
+# EVERY new bus event into kb/events_buffer.md hourly (cron :07) and after every dispatch
+# with no filter, so the hot
 # buffer is ~57% heartbeat noise (measured 2026-07-28: 355/623 lines, 200KB) and Phase 1
 # below archives that noise VERBATIM into kb/archive/<date>-nightly.md, making it
 # permanent (largest archive seen: 660KB).
