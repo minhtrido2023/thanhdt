@@ -66,8 +66,13 @@ done
 # DISPATCH_FROM=user bắt buộc — xem fix 2026-07-09 kb_nightly.sh (Friday editorial
 # dispatch bị self-dispatch guard chặn âm thầm nhiều tuần vì thiếu dòng này).
 rm -f "$DRAFT_FILE"
-draft_log="$ROOT/logs/daily_retro_draft_$(date -u +%Y%m%d_%H%M%S).log"
-DISPATCH_FROM=user "$ROOT/bin/dispatch.sh" Mike \
+# Prompt viết DRAFT — đặt vào biến để có thể RETRY 1 lần mà không lặp lại text.
+# Mitigation (Wags coord-2026-07-28): phiên Mike `claude -p` thỉnh thoảng trả lời NHẦM
+# task cũ còn trong context thay vì viết draft (07-26 trả tóm tắt research "đi đêm lãi
+# suất", 07-27 trả status job Taylor) → draft rỗng dù rc=0 → đẻ question vô ích 2 ngày
+# liên tiếp. Lần trượt này mang tính nhất thời; 1 lần retry với prompt sạch thường bắt
+# được. KHÔNG retry khi draft rỗng do usage-limit (transient quota — retry chỉ phí quota).
+draft_prompt=\
 "DAILY RETRO — BƯỚC 1/3: VIẾT DRAFT (tự động, ngày $TODAY). Mỗi ngày review lại TẤT CẢ
 lỗi/sự cố xảy ra trong ngày, trả lời rõ 3 câu, rút bài học tránh lặp lại 'hết ngày này
 đến ngày khác' (user yêu cầu 2026-07-09).
@@ -137,10 +142,26 @@ QUY TRÌNH BẮT BUỘC (đọc bằng chứng thật, không suy đoán):
 
 XONG bước 4-6 ở trên là DỪNG. Không viết gì vào kb/INCIDENTS.md, không dispatch Wags,
 không commit, không dọn memory — tất cả phần đó thuộc bước 2/3 của pipeline, KHÔNG phải
-việc của phiên này." \
-    --timeout 1500 > "$draft_log" 2>&1
-rc1=$?
-log "Draft job exit code: $rc1 (log: $draft_log)"
+việc của phiên này."
+
+rc1=0
+for _attempt in 1 2; do
+  draft_log="$ROOT/logs/daily_retro_draft_$(date -u +%Y%m%d_%H%M%S)_a${_attempt}.log"
+  DISPATCH_FROM=user "$ROOT/bin/dispatch.sh" Mike "$draft_prompt" \
+      --timeout 1500 > "$draft_log" 2>&1
+  rc1=$?
+  log "Draft attempt $_attempt exit code: $rc1 (log: $draft_log)"
+  [ -s "$DRAFT_FILE" ] && break
+  # Draft rỗng: nếu do usage-limit thì DỪNG (transient quota, retry vô nghĩa) — để block
+  # phân loại phía dưới xử lý calm-skip. Nếu KHÔNG phải usage-limit (nghi model trả nhầm
+  # task cũ trong context) thì retry 1 lần cuối với prompt sạch.
+  if tail -c 4000 "$draft_log" 2>/dev/null | grep -qiE "$USAGE_LIMIT_PHRASE_RE"; then
+    log "Draft rỗng vì usage-limit — không retry."
+    break
+  fi
+  [ "$_attempt" -lt 2 ] && log "Draft rỗng (không phải usage-limit) — nghi Mike trả nhầm task cũ; retry lần cuối với prompt sạch."
+done
+log "Draft dispatch xong sau $_attempt lần thử (exit $rc1, log: $draft_log)"
 
 # Verify ARTIFACT thật — không tin exit code của dispatch.sh, kiểm tra file thật đã ghi.
 if [ ! -s "$DRAFT_FILE" ]; then
