@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# data_registry_audit.sh — periodic correctness + freshness audit for kb/data_registry.md
+# data_registry_audit.sh — periodic correctness + freshness audit for kb/data_registry/ (OKF tree; kb/data_registry.md is a stub redirect since 2026-07-28)
 #
 # Built 2026-07-11 (user directive, after SIGNAL_V11 base-leak incident): a written registry
 # with a Status column is not self-enforcing — nothing had ever re-checked that the exact
@@ -102,7 +102,7 @@ check_bq_fresh "fa_ratings"               9  "legacy tier A-E, SIGNAL_V11 fa_tie
 # ── C. Reference-count drift on known DEPRECATED/DEAD sources ──────────────────────────────
 # Not a pass/fail gate (some counts are expected to stay >0 forever, e.g. archived research
 # scripts) — just surfaces the current count so a jump vs. the documented baseline in
-# kb/data_registry.md is easy to eyeball during the Friday review.
+# kb/data_registry/ (index.md frontmatter/group index.md) is easy to eyeball during the Friday review.
 log "--- C. Reference-count snapshot (deprecated/dead/trap sources) ---"
 count_refs() {
   grep -rlE "$1" "$ROOT" --include='*.py' --include='*.sql' 2>/dev/null \
