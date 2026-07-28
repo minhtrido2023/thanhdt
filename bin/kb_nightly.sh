@@ -30,11 +30,13 @@ log "=== kb_nightly START ==="
 # tonight: it's offline, isolated (own sandbox dirs), ~1s, and its whole purpose ("so this
 # never has to happen again for this pipeline") is not delivered by a test nobody runs — an
 # earlier round of this exact fix chain wrote a test, then left it wired to nothing.
+SELFCHECK_OK=1
 if ! python3 "$ROOT/bin/cursor_advance_selfcheck.py" >> "$LOG" 2>&1; then
+    SELFCHECK_OK=0
     log "FAIL: cursor_advance_selfcheck.py — cursor/consolidate pipeline regressed, see $LOG"
-    "$ROOT/bin/notify.sh" "🔴 kb_nightly: cursor_advance_selfcheck.py FAILED — KB ingestion pipeline có thể đang mất event âm thầm. KHÔNG tự sửa, cần người kiểm ngay: $LOG" >/dev/null 2>&1 || true
+    "$ROOT/bin/notify.sh" "🔴 kb_nightly: cursor_advance_selfcheck.py FAILED — KB ingestion pipeline có thể đang mất event âm thầm. Phase 1b/1b2 (prune bus/inbox) SKIPPED đêm nay, KHÔNG tự sửa, cần người kiểm ngay: $LOG" >/dev/null 2>&1 || true
     "$ROOT/bin/append_event.sh" Mike error "cursor-selfcheck-failed" \
-      "{\"note\": \"kb_nightly Phase 0 selfcheck FAIL truoc khi chay cac phase archive dem nay\", \"log\": \"$LOG\"}" \
+      "{\"note\": \"kb_nightly Phase 0 selfcheck FAIL — Phase 1b/1b2 SKIPPED dem nay (fail-safe pause, khong tiep tuc prune bang logic da biet loi)\", \"log\": \"$LOG\"}" \
       >/dev/null 2>&1 || true
 fi
 
@@ -222,6 +224,14 @@ knowledge_path.write_text(''.join(canonical + to_keep), encoding='utf-8')
 print(f"ARCHIVED: {archived_count} events → {archive_path.name}")
 PYEOF
 
+# Phase 1b/1b2 rewrite bus/inbox/*.jsonl AND move consolidate.sh's cursors via cursor_shift —
+# exactly the logic Phase 0 just tested. Detecting a regression and pruning with it anyway is
+# alert-and-proceed, not fail-safe pause (arch-review round 5, 2026-07-28): a night of
+# unpruned bus is cheap, a cursor moved by broken arithmetic is not easily undone.
+if [ "${SELFCHECK_OK:-1}" != 1 ]; then
+    log "SKIPPED Phase 1b/1b2 (cursor selfcheck failed above) — bus/inbox left untouched tonight"
+else
+
 # ── Phase 1b: prune stale heartbeats from bus inbox ───────────────────────────
 # Heartbeats are liveness pings — useless once a job ends. They dominate bus/inbox
 # (measured 2026-07-27: ~7.2K/8.7K lines fleet-wide, Taylor.jsonl 3MB with 88%
@@ -383,6 +393,8 @@ for path in sorted(glob.glob(os.path.join(inbox_dir, "*.jsonl"))):
     shift_offset(os.path.basename(path), archived_idx)
 print(f"EVENT-ARCHIVE: moved {total_archived} old event(s) total")
 PYEOF
+
+fi           # end SELFCHECK_OK guard (Phase 1b + 1b2)
 
 exec 8>&-    # release consolidator lock — no phase below touches events_buffer.md or bus/inbox
 fi           # end BUFFER_LOCK guard (Phase 1a + 1 + 1b + 1b2)

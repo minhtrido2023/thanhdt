@@ -306,9 +306,22 @@ def cmd_cursor_advance(a):
     inbox, state = a[0], a[1]
     try:
         with open(inbox, encoding="utf-8") as f:
-            lines = f.read().splitlines()
+            raw = f.read()
     except Exception:
         return
+    lines = raw.splitlines()
+    if raw and lines and not raw.endswith("\n"):
+        # The last line has no trailing newline: it is not a complete event, it's a write
+        # caught mid-flight. append_event.sh's `printf '%s\n' "$line" >&9` is NOT one atomic
+        # write() for a large line — strace shows a >4KB event split across two write()
+        # syscalls (12288 + remainder) — and cursor-advance takes no lock against that write.
+        # 149/2111 live events exceed 4KB; a live race test measured 19 torn reads in 153,676.
+        # Drop it rather than anchor the cursor on it (arch-review round 5, 2026-07-28): an
+        # anchor with last_ts=None is exactly what makes the resync-ts bound below fall back
+        # to trusting `prev`, which is the failure mode this whole file exists to close.
+        # Dropping it here means this run simply doesn't see it yet; once the writer finishes
+        # (adds the trailing \n) a later run picks it up as a normal new line, no loss.
+        lines = lines[:-1]
     total = len(lines)
     prev, last_id, last_ts = _cursor_read(state)
     repair = ""

@@ -60,7 +60,7 @@ def run_cursor_advance(inbox, state):
     """Invoke the real CLI entry point (exact code path consolidate.sh uses), not the raw
     function, so this test exercises the same stdout/stderr wiring as production."""
     r = subprocess.run([PYEXE, os.path.join(ROOT, "mike_json.py"), "cursor-advance", inbox, state],
-                        capture_output=True, text=True)
+                        capture_output=True, text=True, timeout=10)
     new_lines = [l for l in r.stdout.split("\n") if l]
     return new_lines, r.stderr, r.returncode
 
@@ -69,8 +69,13 @@ def read_cursor(state):
     return mike_json._cursor_read(state)
 
 
+_tmpdirs = []  # cleaned up at exit (this ran nightly via kb_nightly.sh Phase 0 and used to
+                # leak one dir per test — 17/run, ~6200/year uncleaned on a nightly cron)
+
+
 def tmpfiles():
     d = tempfile.mkdtemp(prefix="cursor_sc_")
+    _tmpdirs.append(d)
     return os.path.join(d, "inbox.jsonl"), os.path.join(d, "state.json")
 
 
@@ -296,7 +301,7 @@ def run_consolidate_sandbox(sandbox, inbox_lines):
     before_n = os.path.getsize(notify_log) if os.path.exists(notify_log) else 0
     before_a = os.path.getsize(append_log) if os.path.exists(append_log) else 0
     subprocess.run(["bash", os.path.join(sandbox, "bin", "consolidate.sh")],
-                    cwd=sandbox, capture_output=True, text=True)
+                    cwd=sandbox, capture_output=True, text=True, timeout=30)
     after_n = os.path.getsize(notify_log) if os.path.exists(notify_log) else 0
     after_a = os.path.getsize(append_log) if os.path.exists(append_log) else 0
     warn_dir = os.path.join(sandbox, "state", "cursorwarn")
@@ -309,6 +314,7 @@ def run_consolidate_sandbox(sandbox, inbox_lines):
 
 import shutil  # noqa: E402
 sandbox = tempfile.mkdtemp(prefix="consolidate_sc_")
+_tmpdirs.append(sandbox)
 for d in ["bin", "kb", "bus/inbox", "bus/registry", "bus/directives", "state/offsets", "locks", "logs"]:
     os.makedirs(os.path.join(sandbox, d), exist_ok=True)
 shutil.copy(os.path.join(ROOT, "consolidate.sh"), os.path.join(sandbox, "bin", "consolidate.sh"))
@@ -345,7 +351,55 @@ notified4, _, _ = run_consolidate_sandbox(sandbox, [ev(i) for i in range(5)])
 check("O3 same repair kind but recovered ESCALATES -> re-alerts (not silenced mid-streak)",
       notified4)
 
+# ── P. Unterminated final line (the actual production trigger, round-5 review): a large
+#      (>4KB) event written via append_event.sh's `printf` can land as 2+ non-atomic write()
+#      syscalls, so cursor-advance can read the file mid-write with the last line incomplete
+#      and no trailing \n. It must be DROPPED, not anchored on — anchoring on it is exactly
+#      what produces a last_ts=None cursor and reopens the whole resync-ts bound question.
+inbox, state = tmpfiles()
+with open(inbox, "w", encoding="utf-8") as f:
+    f.write(ev(0) + "\n" + ev(1) + "\n")
+    f.write('{"event_id": "e2", "ts": "2026-07-28T01:02:00Z", "event_type": "finding", "agent')
+    # deliberately NO trailing newline — simulates a write() caught mid-syscall
+new_p1, _, _ = run_cursor_advance(inbox, state)
+check("P1 unterminated final line is not ingested as a fragment",
+      new_p1 == [ev(0), ev(1)], str(new_p1))
+n_p, last_id_p, last_ts_p = read_cursor(state)
+check("P2 cursor does NOT anchor on the incomplete line (stays at the last COMPLETE one)",
+      n_p == 2 and last_ts_p == "2026-07-28T01:01:00Z", f"n={n_p} last_ts={last_ts_p}")
+# Now the writer "finishes": the event reappears complete (proper JSON, trailing \n).
+write_inbox(inbox, [ev(0), ev(1), ev(2)])
+new_p2, _, _ = run_cursor_advance(inbox, state)
+check("P3 once the writer completes the line, a later run ingests it normally (no loss)",
+      ev(2) in new_p2, str(new_p2))
+
+# ── C''. The exact residual round-5 flagged: mark truly gone + last_ts=None (torn mark, not
+#      just a torn CURRENT read) + prune WITHOUT cursor_shift + regrowth past prev. This is
+#      the one case the P1/P2 unterminated-line fix does not by itself rule out: the cursor
+#      was written in the PAST with last_ts=None (e.g. from a run that hit exactly the P1/P2
+#      case last time), and *now* a completely unrelated large-scale prune+regrowth happens.
+#      Bound still applies here (no ts info to do better with) — assert it stays small AND
+#      that a directly-following normal run still finds everything from there on.
+inbox, state = tmpfiles()
+write_inbox(inbox, [ev(i) for i in range(10)])
+run_cursor_advance(inbox, state)
+mike_json._cursor_write(state, 10, "gone-id-2", None)   # simulates a past P1/P2-shaped cursor
+write_inbox(inbox, [ev(i) for i in range(5)] + [ev(i) for i in range(10, 25)])  # 20 lines, prev=10 stale
+new_cpp, err_cpp, _ = run_cursor_advance(inbox, state)
+# The bound caps the replay at (total - prev) = 15, never the full 20-line file — that's the
+# property being tested, not a specific small number (this scenario genuinely has 15 lines
+# past `prev`, unlike M's single-line-regrowth case).
+check("C''1 last_ts=None + prune-without-shift bound caps at total-prev, not a full 20-line replay",
+      len(new_cpp) <= 15, f"replayed {len(new_cpp)} lines (file has 20)")
+# Whatever this run missed (it has no ts info to avoid missing SOMETHING when the mark is
+# truly gone), the very next run — now with the freshly-written last_ts — must not miss more.
+new_cpp2, _, _ = run_cursor_advance(inbox, state)
+check("C''2 immediate next run (now with fresh ts info) ingests nothing further (no residual)",
+      new_cpp2 == [], str(new_cpp2))
+
 print()
+for d in _tmpdirs:
+    shutil.rmtree(d, ignore_errors=True)
 if fails:
     print(f"FAIL: {len(fails)}/{total} — {fails}")
     sys.exit(1)
