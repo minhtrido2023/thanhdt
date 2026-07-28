@@ -223,7 +223,7 @@ Rules when a script's output feeds `data/results_registry.md` or any pinned base
   and an independent recompute from the CSV (`extract_peryear.py <CSV>`) matching the print — then
   note the regeneration in the registry so the overwrite episode is auditable.
 
-## 9. Check `mike/kb/data_registry.md` Before Wiring a New Data Source
+## 9. Check `mike/kb/data_registry/` Before Wiring a New Data Source
 
 **Root cause (2026-07-11 SIGNAL_V11 base-leak, `kb/INCIDENTS.md`):** four production consumers
 silently read a trap table (documented as a trap in `CLAUDE.md`, but nothing forced a check
@@ -232,9 +232,10 @@ production regime table — causing a live paper-trading book to enter 6 tickers
 
 **Mandatory rule, user directive 2026-07-11:** before reading ANY data source (BQ table, local
 CSV/pickle/JSON, published state file) in new research or production code — check
-`mike/kb/data_registry.md` first.
+`mike/kb/data_registry/` first (start at `index.md`; it is now an OKF tree, 1 source = 1 file —
+`kb/data_registry.md` is a stub redirect). Grep still works: `grep -rn "<source>" mike/kb/data_registry/`.
 - If the source is listed as `CANONICAL` — use it directly.
-- If listed as `TRAP` — read the "Bẫy" column before touching it; there is almost always a
+- If listed as `TRAP` — read the "Bẫy" section before touching it; there is almost always a
   correctly-named sibling table/file to use instead.
 - If listed as `DEPRECATED/DEAD` — don't wire it into anything new; it may still exist for
   historical reference only.
@@ -248,7 +249,7 @@ codebase for sources still missing) is folded into the existing Friday KB editor
 (`kb_nightly.sh`'s headless Mike dispatch) rather than a separate new cron job.
 
 **When dispatching Taylor (or anyone) for new R&D**: the dispatch prompt should explicitly say
-"tra `mike/kb/data_registry.md` trước khi chọn nguồn dữ liệu, đặc biệt bảng market-state/regime"
+"tra `mike/kb/data_registry/` (index.md) trước khi chọn nguồn dữ liệu, đặc biệt bảng market-state/regime"
 — matching the same pattern already used for DollarBill's DNSE-vs-BQ rule (§6). A general
 "verify your data" reminder does not reliably stop an LLM from reaching for whichever table name
 sounds closest to what it needs in the moment; naming the specific registry file does.
@@ -269,7 +270,7 @@ decision names a specific file as the production source) — in the **same commi
 2. **`git mv` them into an `archive/` subdirectory** (preserving git history, not `rm`) — this is
    reversible and auditable, unlike deletion, but it removes the file from the root namespace where
    a casual `ls`/glob would surface it as a live candidate.
-3. **Update `mike/kb/data_registry.md`** to reflect the new archive path and mark the entry
+3. **Update the source's file in `mike/kb/data_registry/`** to reflect the new archive path and mark the entry
    `DEPRECATED` with a pointer to the confirmed canonical replacement (per §5's obsolete-marking
    rule if this is a data-source migration, or a plain note if it's just script hygiene).
 4. **Do NOT apply this to genuine audit-trail artifacts** — rejected-hypothesis backtest CSVs, dry-run

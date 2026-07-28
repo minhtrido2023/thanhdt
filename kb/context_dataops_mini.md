@@ -21,9 +21,10 @@ T-1 khiến freshness gate `MAX_STATE_LAG=0` fail cứng; fix = `os.environ.pop(
 process-local trước import, KHÔNG sửa `wc_env.sh` (sẽ hỏng mọi script khác cần cache).
 
 ## Trước khi wire nguồn dữ liệu mới hoặc sửa cron — TRA REGISTRY TRƯỚC
-- `mike/kb/data_registry.md` — mọi bảng/file có status CANONICAL/TRAP/DEPRECATED. Bẫy đã biết:
-  đọc nhầm bảng regime base thay vì DT5G (trên); nguồn không có trong registry → xác minh trước
-  khi coi là an toàn, đừng suy đoán từ tên bảng "nghe hợp lý".
+- `mike/kb/data_registry/` (bắt đầu ở `index.md`) — mọi bảng/file có status CANONICAL/TRAP/DEPRECATED,
+  1 nguồn = 1 file (cấu trúc OKF, migrate 2026-07-28). Bẫy đã biết: đọc nhầm bảng regime base thay vì
+  DT5G (trên); nguồn không có trong registry → xác minh trước khi coi là an toàn, đừng suy đoán từ tên
+  bảng "nghe hợp lý". (`kb/data_registry.md` giờ là stub redirect.)
 - `mike/kb/cron_registry.md` — trước khi thêm/sửa lịch cron, trả lời 4 câu hỏi bắt buộc (đọc gì+
   vintage, nguồn tươi lúc nào — ĐO THẬT không tin comment, cần T hay T-1, ai tiêu thụ+deadline).
 
@@ -35,8 +36,8 @@ không phải append-only). Đừng "tối ưu" 3 bảng này thành delta mà k
 
 ## Khi archive 1 file thành canonical (coding_guidelines §10)
 Khi xác nhận 1 script là bản canonical cho 1 mục đích, CÙNG lúc: grep toàn repo xác nhận không
-còn caller nào dùng bản cũ, `git mv` bản cũ vào `archive/` (không `rm`), cập nhật
-`data_registry.md` đánh dấu DEPRECATED + trỏ tới bản thay thế.
+còn caller nào dùng bản cũ, `git mv` bản cũ vào `archive/` (không `rm`), cập nhật file nguồn tương ứng
+trong `data_registry/` đánh dấu DEPRECATED + trỏ tới bản thay thế.
 
 ## Same-day pricing — DNSE API, KHÔNG BigQuery
 BQ chỉ sync qua đêm 23:45 ICT — bất kỳ check freshness/giá "hôm nay" chạy TRƯỚC giờ đó đọc BQ sẽ
