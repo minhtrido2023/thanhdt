@@ -1,4 +1,4 @@
-# Mike fleet — context pack (v1468)
+# Mike fleet — context pack (v1469)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
@@ -27,53 +27,32 @@ lãnh đạo DN niêm yết 7-14 ngày qua, áp bộ lọc QUALIFY/NON/AMBIGUOUS
 Đây là recon, KHÔNG tự mua — mọi case đáng chú ý vẫn cần due-diligence sâu + user duyệt riêng
 như TV1/DGC.
 
-## Dự án thay thế `ticker_prune` → `universe_pit` — ĐÃ DUYỆT Q1-Q9, đang triển khai G1 (2026-07-22)
-bq_admin xác nhận `ticker_prune` không có hệ thống quản trị (3 đường ghi độc lập chồng lấn, curation
-`hit_ticker_list` suy từ chính kết quả backtest cũ = circular bias, membership không tái lập được).
-Team (Taylor kiến trúc + Winston vận hành) đề xuất xây `universe_pit` — bảng team tự sở hữu, append-
-only, tính point-in-time trực tiếp từ `tav2_bq.ticker`. quant-skeptic REFUTED 1 luận điểm phụ (test
-recall 97-99% là tautology, đại số trùng công thức gốc) → Taylor sửa lại + chạy test thay thế: **43
-mã "rule-only" (lọt rule thanh khoản nhưng bị `ticker_prune` loại) có chất lượng KÉM RÕ RỆT** (ROE_
-Min3Y âm TB, nhất quán 4/4 mốc lịch sử) — **curation CÓ mang thông tin thật**, nhưng cũng SAI theo
-hướng bỏ sót mã tốt mới niêm yết (FOX/VPL/VGI). User đã DUYỆT toàn bộ Q1-Q9 (2026-07-22):
-- Q1-Q2: xây `universe_pit` độc lập, ngưỡng B3=1,0 tỷ VND/ngày (hằng số production có sẵn).
-- **Q9 (mới, cổng cứng)**: cấm cutover các bước chạm tiền thật (P2 custom30V, P4 CAPIT) tới khi đo
-  xong độ rò chất lượng qua golden floor hiện có (G2b) + xuất cờ chất lượng cho tầng chiến lược đọc
-  — **KHÔNG** thêm ngưỡng ROE cứng vào tầng universe (tránh bẫy tự-tune). User tin hệ thống rating
-  8L/golden floor hiện có đã đủ lọc chất lượng độc lập với `ticker_prune`.
-- Q3-Q8: đánh dấu R3 27,84% PROVISIONAL, chấp nhận re-pin, CAPIT breadth giữ đọc `ticker_prune` có
-  chủ ý tới khi hiệu chuẩn lại (cấm cutover khi `capit_fired=true`), B8 integrity gate bắt buộc
-  (bq_admin xác nhận `max_bad_records=10` áp cho MỌI bảng gồm `ticker`).
-Timeline ước tính ~2,5-3 tuần lịch (8-11 phiên + 2 tuần shadow). Tài liệu đầy đủ:
-`mike/agents/Taylor/research/ticker_prune_replacement_plan.md` (kiến trúc/migration) +
-`mike/agents/Winston/universe_pit_ops_feasibility_20260722.md` (vận hành) +
-`mike/agents/Taylor/research/ticker_prune_universe_QA_bq_admin_20260722.md` (Q&A gốc bq_admin).
-Đang triển khai G1 (`bin/build_universe_pit.py`) — theo dõi tiến độ qua bus finding Taylor.
+## Dự án thay thế `ticker_prune` → `universe_pit` — ĐÃ CUTOVER R3 CHÍNH THỨC 2026-07-22, đang G1 tiếp
+`ticker_prune` không có quản trị (curation circular-bias, không tái lập được) → team tự xây
+`universe_pit` (point-in-time từ `tav2_bq.ticker`, B3=1,0 tỷ VND/ngày). User đã duyệt Q1-Q9
+(2026-07-22) — cổng cứng còn hiệu lực: **Q9** cấm cutover bước chạm tiền thật (P2 custom30V, P4
+CAPIT) tới khi đo xong độ rò chất lượng qua golden floor (G2b); **CAPIT breadth vẫn đọc
+`ticker_prune` có chủ ý** tới khi hiệu chuẩn lại (cấm cutover khi `capit_fired=true`). R3 (allocator
+gate) đã cutover chính thức — xem số liệu ở "Tri thức chung của đội" bên dưới. Đang triển khai G1
+(`bin/build_universe_pit.py`). Tài liệu đầy đủ (kiến trúc/vận hành/Q&A gốc): xem
+`mike/agents/Taylor/research/ticker_prune_replacement_plan.md` + `mike/agents/Winston/
+universe_pit_ops_feasibility_20260722.md` + `.../ticker_prune_universe_QA_bq_admin_20260722.md`.
 
 ## CAPIT (bear-washout) — ĐÃ FIRE từ 07-20/07-21, đang giải ngân dở (cập nhật 2026-07-22)
-**Trạng thái thật** (`data/golive_v23_status.json`, xác nhận qua job `Taylor_20260722_084953`):
-`capit_fired=true` từ ít nhất 07-20 (breadth_oversold 07-20: 42,9%, 07-21/22: 46,2% — vượt xa
-washout_gate=0,3). SAB/SIP/VNM đã khớp; PVT/NCT còn vướng (chờ trần giá/quota). Nguồn vốn: công
-thức `NAV_book_LAG × capit_size` (user chốt 07-20), user tự rút Trứng vàng khi fire — note đã wire
-vào `bin/bq_freshness_check.sh`, DollarBill tự thấy khi lập plan.
-2 điểm cần biết: (a) sát biên "grind" (91 vs cửa sổ 20-90 phiên — lệch 1 phiên khiến size full 0,75
-thay vì 0,375); (b) dd52w lúc fire (~-7%) là mức nông nhất từng fire trong lịch sử 2014-2026 (kỷ
-lục cũ -7,4%) — ngoài rìa mẫu dữ liệu đã biết. Theo dõi tiếp PVT/NCT khớp nốt qua EOD report.
+`capit_fired=true` từ 07-20 (`data/golive_v23_status.json`, breadth_oversold vượt xa
+washout_gate=0,3). SAB/SIP/VNM đã khớp; PVT/NCT còn vướng (chờ trần giá/quota) — theo dõi qua EOD
+report. Nguồn vốn: `NAV_book_LAG × capit_size` (user chốt 07-20). 2 điểm cần nhớ: (a) sát biên
+"grind" (91 vs cửa sổ 20-90 phiên — lệch 1 phiên đổi size full 0,75 vs 0,375); (b) dd52w lúc fire
+(~-7%) nông nhất lịch sử 2014-2026 (kỷ lục cũ -7,4%) — ngoài rìa mẫu dữ liệu đã biết.
 
-**PNJ EXCLUDED khỏi rổ CAPIT — due-diligence gate đã wire + verify (2026-07-20, job
-`Taylor_20260720_081359`).** PNJ đang khủng hoảng thật (P-Lab bị bắt vì buôn lậu kim cương, scandal
-02/07, giá sập ~-32%, team đã kết luận AMBIGUOUS trong `agents/Taylor/research/
-calculated_fear_state_backstop.md` §7, cổng xác nhận thật là BCTC Q3/2026 ~cuối tháng 10 — KHÔNG
-phải case sạch như PNJ-2015). quant-skeptic CONFIRMED (cao): PNJ pbz=-2,699, xếp HẠNG 1 trong pool
-CAPIT ngày 07-17 — nếu không có gate, CAPIT sẽ mua PNJ full size đúng lúc khủng hoảng. Cơ chế:
-`anomaly_scan.py` (build từ ground-truth DGC+PNJ) ghi `data/anomaly_flags.json` (cờ 30 ngày, TTL
-verify không rò rỉ), CAPIT basket-selection lọc bỏ mọi ticker có cờ active TRƯỚC bước chọn pbz —
-gate CHUNG, không hardcode tên, tự áp dụng cho case tương lai. Đã wire vào `ops_health_check.sh`
-08:20+12:45 (tier-H alert Trading Daily, tier-W ghi cờ im lặng). Rổ hiện tại (nếu fire hôm nay):
-NCT, PVT, SAB, VNM (PNJ đã loại). **Giới hạn thật cần nhớ**: gate KHÔNG backtest được (n=1, không
-có lịch sử point-in-time), coi là bảo hiểm chi phí chưa đo được, đừng trích dẫn như alpha đã kiểm
-chứng; sau khi loại PNJ (mã thanh khoản nhất), rổ neo vào NCT (ADV 2,18 tỷ/ngày, sát sàn 2 tỷ) —
-vấn đề sizing NCT có sẵn từ trước, gate làm nặng thêm chút, cần theo dõi nếu fire thật.
+**PNJ EXCLUDED khỏi rổ CAPIT** (due-diligence gate, 2026-07-20, quant-skeptic CONFIRMED cao — PNJ
+xếp HẠNG 1 pool CAPIT 07-17 nếu không gate). PNJ khủng hoảng thật (lãnh đạo bị bắt buôn lậu kim
+cương, giá sập ~-32%, kết luận AMBIGUOUS trong `calculated_fear_state_backstop.md` §7, cổng xác
+nhận = BCTC Q3/2026 ~cuối tháng 10). Cơ chế `anomaly_scan.py` → `data/anomaly_flags.json` (gate
+CHUNG theo cờ, không hardcode tên) — wire vào `ops_health_check.sh` 08:20+12:45. Rổ hiện tại (nếu
+fire hôm nay): NCT, PVT, SAB, VNM (PNJ đã loại). Giới hạn: gate KHÔNG backtest được (n=1) — coi là
+bảo hiểm chi phí chưa đo được, không phải alpha đã kiểm chứng; rổ neo vào NCT (ADV 2,18 tỷ/ngày,
+sát sàn 2 tỷ) sau khi loại PNJ — vấn đề sizing NCT có sẵn từ trước, cần theo dõi nếu fire thật.
 > ⚠️ File này inject vào MỌI phiên/dispatch — giữ NHỎ. Chỉ để mục LIVE/đang-mở. Dự án ĐÓNG (NO-GO/
 > KHÉP KÍN/XONG) → chuyển thành 1 file `kb/projects/<slug>.md` + thêm 1 dòng vào `kb/projects/INDEX.md`
 > (INDEX được inject, chi tiết chỉ `cat` khi cần). Đừng để nhật ký dự án đã đóng tích lại ở đây.
@@ -144,24 +123,15 @@ không thể đảo ngược: bot tự đặt lệnh thật lần đầu, không
   chưa tính đúng P&L cho vị thế legacy (NAV/active_nav đã đúng, chỉ breakdown P&L báo cáo còn thiếu).
 - **AlphaLens Paper**: FPT/ACB/MBB/HDB, tracking vs VNINDEX đến 2026-09-30. DollarBill phụ trách.
 
-### Trứng vàng DNSE (idle-cash off-book) — cả 2 account (thêm 2026-07-17)
-User chuyển tiền rảnh sang sản phẩm tiền gửi "Trứng vàng" DNSE — **hoàn toàn ngoài phạm vi
-OpenAPI** (cạn 19 endpoint pattern + SDK chính thức, xác nhận Mafee_20260716_170856). Số dư
-hiện biết (user tự báo, **CẦN CẬP NHẬT LẠI mỗi lần nạp/rút**): SpaceX 302.108.211đ, ZaloPay
-147.473.247đ (asof 2026-07-16) — lưu ở `manual_offbook_assets_vnd/_asof/_note` trong
-`secrets/trading_bot_accounts.json` (default field mới ở `trading_bot/config.py`
-ACCOUNT_DEFAULTS). Đã wire vào `daily_nav_snapshot.py` (NAV += offbook, KHÔNG cộng vào cash)
-và `compute_active_nav.py` (active_nav += offbook, cơ sở sizing cho DollarBill) — quant-skeptic
-CONFIRMED 2026-07-17. `bq_freshness_check.sh`'s DollarBill dispatch tự thêm note khi
-`manual_offbook_assets_vnd≠0`.
-⚠️ **QUY TẮC BẮT BUỘC — không tự động**: khi user báo đã RÚT tiền từ Trứng vàng ra (vd để
-DollarBill lên plan mua), Mike PHẢI cập nhật/giảm `manual_offbook_assets_vnd` NGAY trong cùng
-lượt — nếu quên, NAV/active_nav sẽ bị đếm trùng (cash tăng lại + offbook vẫn giữ số cũ). Không
-rủi ro tiền thật (executor chỉ check cash/ppse live khi đặt lệnh — quant-skeptic xác nhận
-fail-safe), nhưng sẽ làm sai NAV báo cáo + sizing plan. Staleness WARN tự in khi asof >21 ngày
-chưa cập nhật (cả 2 script trên) — không tự block, chỉ nhắc.
-⚠️ Chưa xác minh: SpaceX có dấu hiệu ppse/pp0Buy báo sức mua cao dù availableCash≈0 sau khi
-chuyển Trứng vàng (Mafee_20260716_164743) — CHƯA rõ DNSE có tự tính gộp không, đừng giả định.
+### Trứng vàng DNSE (idle-cash off-book) — ĐÃ ĐÓNG HẲN, cả 2 account (cập nhật 2026-07-23)
+SpaceX + ZaloPay đều `manual_offbook_assets_vnd=0` — rút hết vĩnh viễn, KHÔNG phải "tạm hết".
+KHÔNG giả định/đề xuất "user rút thêm Trứng vàng" để bù cash gap khi lập plan — nguồn này không
+còn tồn tại, không phải ATM nạp lại theo nhu cầu. Thiếu cash → tự SHRINK/loại bớt lệnh, không
+yêu cầu user nạp thêm. Cơ chế field (`manual_offbook_assets_vnd/_asof/_note` trong
+`secrets/trading_bot_accounts.json`, wire vào `daily_nav_snapshot.py`/`compute_active_nav.py`)
+vẫn còn đó cho account tương lai có off-book asset tương tự — nếu 1 account MỚI thật sự dùng
+Trứng vàng, cập nhật lại field NGAY khi nạp/rút (nếu quên → NAV/active_nav đếm trùng, không rủi
+ro tiền thật vì executor check cash/ppse live). Chi tiết đầy đủ: [[project-dnse-trung-vang-offbook-assets]] (memory Mike) + `kb/context_planning_mini.md`.
 
 ## Đang R&D
 - **Taylor · EXTREME-regime gate PAPER-TRADING** (bắt đầu 2026-07-01, user duyệt trực tiếp): `extreme_regime_enabled=True` CHỈ trên account paper `main` (override trong `trading_bot_accounts.json`); global default + SpaceX/live GIỮ `False`. Week-1 stress-injection PASS 24/24 (`stress_extreme_regime.py`: arm 2-poll · sell-to-floor · buy-pause · cadence ×0.25 + negative controls). **Target kết thúc ~2026-07-28 (~20 phiên).** 3 điều kiện còn lại trước LIVE: (a) ZERO false-trigger qua ~4 tuần benign, (b) không can thiệp NORMAL-path, (c) user sign-off. **KHÔNG bật gì ở live.**
@@ -207,32 +177,10 @@ chuyển Trứng vàng (Mafee_20260716_164743) — CHƯA rõ DNSE có tự tính
   sector-lens đứng riêng) — **không còn không gian cải thiện thật**, không cần backtest thêm cho các
   góc đó khi tới review, chỉ cần làm đúng 4 việc trên.
 
-## Workflow ngày trading (SpaceX, T2-T6, giờ ICT)
-1. **17:30** — `bq_freshness_check.sh`: BQ fresh → dispatch DollarBill lập plan T+1
-2. **19:30** — `send_plan_report.sh`: gửi plan T+1 vào Trading Daily thread (duyệt trước 08:45 sáng mai)
-3. **08:20** — `ops_health_check.sh --label "Trước phiên sáng"` (thêm 2026-07-06, theo yêu cầu user) —
-   kiểm tra vận hành tự động TRƯỚC preflight: xung đột file plan (bài học sự cố 07-06), lỗi lặp lại
-   bất thường trong journal (loại trừ WAIT_T2_SETTLEMENT/mẫu T+2 đã biết), circuit breaker, câu hỏi
-   (question) chưa trả lời trong 48h — post tóm tắt vào **Trading Daily** (vận hành sống, không phải
-   Trading report). Script: `bin/ops_health_check.sh`.
-4. **08:45** — `preflight_check.sh`: kiểm tra sẵn sàng trước giờ mở cửa (GREEN/RED)
-5. **09:05** — `run_bot.sh --auto-otp`: thực thi plan (phiên sáng)
-6. **09:00-14:55** — `bot_heartbeat.sh` mỗi 5': giám sát liveness + digest fill mới
-7. **11:30** — dừng bot giờ nghỉ trưa (`pkill -f "[b]ot_execute.py --account SpaceX"`, sửa 2026-07-06
-   tối — pattern cũ tự khớp luôn dòng lệnh gọi chính nó qua `sh -c`, xem `kb/INCIDENTS.md`; vô hại
-   vì `session_phase()` đã tự idle đúng qua trưa dù pkill không hiệu quả, nhưng vẫn cần fix cho đúng)
-8. **12:45** — `ops_health_check.sh --label "Trước phiên chiều"` (thêm 2026-07-06) — kiểm tra lại toàn
-   bộ khâu vận hành sau phiên sáng, trước khi resume phiên chiều — cùng nội dung kiểm tra như bước 3,
-   chạy lại để bắt vấn đề phát sinh trong phiên sáng trước khi vào phiên chiều.
-9. **13:00** — `run_bot.sh --auto-otp`: resume phiên chiều
-10. **~14:50** — phiên đóng (ATC), bot tự cancel lệnh treo, ghi `exec_*_report.md`
-11. **15:00** — `eod_trading_report.sh`: **báo cáo tổng kết EOD** (thêm 2026-07-01) — đọc `state.json`
-   (giá khớp thực từng lệnh), tính tổng lệnh/mua-bán/khớp đủ-một phần-chưa khớp/tổng giá trị VND,
-   post vào **Trading report topic** (đổi từ Trading Daily 2026-07-03, xem dưới). **Thêm 2026-07-03**:
-   gọi `bin/daily_nav_snapshot.py` để in kèm NAV thật cuối ngày + biến động so hôm trước (MTM cổ phiếu
-   từ BQ, cash/nợ margin từ balances API thật) — ghi vào `data/execution_logs/nav_history_SpaceX.csv`,
-   nguồn duy nhất mọi báo cáo ngày/tuần/tháng dùng chung. Xem `kb/coding_guidelines.md` §6 "Standing
-   pipeline" cho quy trình xác minh bắt buộc + phân biệt độ sâu nội dung theo từng loại báo cáo.
+## Workflow ngày trading (SpaceX/ZaloPay, T2-T6, giờ ICT)
+Timeline đầy đủ (giờ từng bước, checker gì, ranh giới tự sửa) đã chuẩn tắc hoá ở
+**`kb/ops_runbook.md`** — đọc đó, đừng lặp lại ở đây (từng trùng ~25 dòng, dọn 2026-07-28).
+Phần dưới đây là quy tắc **Discord topic routing** — KHÔNG có trong ops_runbook.md, chỉ ở đây.
 
 **3 Discord topic tách biệt (cập nhật 2026-07-03 — thêm Trading report):**
 - **Trading Daily (1521470705563340910)** — nội dung VẬN HÀNH SỐNG trong ngày: preflight, run_bot,
