@@ -29,10 +29,19 @@ log "=== kb_nightly START ==="
 # os.replace is erased whole (reproduced by arch-reviewer 2026-07-28, ~23 ms window).
 # Required by kb/cron_registry/_adding-cron-policy.md §"File đọc-sửa-ghi → flock cùng lock".
 # Phase 1 had this hole before Phase 1a existed; one lock closes both. Phase 1b/1b2 are inside
-# the same region too: they rewrite bus/inbox/*.jsonl AND move consolidate.sh's line cursors
+# the same region too: they rewrite bus/inbox/*.jsonl AND move consolidate.sh's cursors
 # (state/offsets), which must not shift under a consolidate run mid-flight.
 # Wait, don't skip (nightly must run); if the lock can't be had, skip ONLY these buffer/bus
 # phases — a night of unpruned buffer is cheap, a lost finding is not. Released after Phase 1b2.
+#
+# ⚠️ SCOPE: this lock only excludes consolidate.sh (the other holder of the same lock). It does
+# NOT block append_event.sh, which flocks its own per-agent inbox file and can append while we
+# hold this. A line appended between our read and our os.replace is therefore still dropped —
+# a pre-existing, known residual race, not something Phase 1b/1b2 introduced. It is survivable
+# because the appended line is NEW (above the cursor), so the write-back loses it from
+# bus/inbox but consolidate has not yet ingested it either. Closing it properly means
+# append_event.sh taking this same lock; deliberately not done here (it would serialise every
+# agent's writes fleet-wide behind the nightly).
 mkdir -p "$ROOT/locks"
 exec 8>"$ROOT/locks/consolidator.lock"
 BUFFER_LOCK=0
@@ -205,46 +214,43 @@ PYEOF
 # per-file write (tmp + os.replace, coding_guidelines §5) so a mid-run kill leaves the
 # original intact. Guarded so a prune failure can't abort the nightly commit/backup.
 #
-# ⚠️ MUST decrement state/offsets/<file> by the number of lines removed. consolidate.sh
-# tracks each inbox by LINE OFFSET and only ingests when total > prev (consolidate.sh:24-29);
-# shrinking a file without fixing the cursor leaves prev > total FOREVER, so that agent is
-# never consolidated again. That is exactly what this phase caused fleet-wide on 2026-07-27
-# (incident found 2026-07-28: 9/11 offsets stranded, KB ingestion dead since 07:05Z).
-# Pruned lines are always inside the already-ingested prefix (heartbeats older than
-# HB_KEEP_DAYS=3 days, while consolidate runs every 30 min), so prev-removed is exact.
+# ⚠️ MUST lower state/offsets/<file> by the lines removed BELOW the cursor. consolidate.sh
+# reads each inbox from a saved cursor (see its "gather new events" loop); shrinking a file
+# without fixing the cursor leaves it past EOF FOREVER, so that agent is never consolidated
+# again — exactly what this phase caused fleet-wide on 2026-07-27 (incident found 2026-07-28:
+# 9/11 offsets stranded, KB ingestion dead since 07:05Z).
+# Do NOT assume every pruned line is inside the already-ingested prefix. It normally is
+# (heartbeats older than HB_KEEP_DAYS=3d, consolidate runs hourly at :07 plus after every
+# dispatch), but if consolidate has been down longer than HB_KEEP_DAYS the prune reaches
+# lines the cursor never read, and subtracting those re-ingests real events as duplicates.
+# mike_json.cursor_shift takes the line NUMBERS and counts only those at/below the cursor.
 HB_KEEP_DAYS="${KB_HB_KEEP_DAYS:-3}"
 HB_CUTOFF=$(python3 -c "import datetime; print((datetime.datetime.utcnow()-datetime.timedelta(days=$HB_KEEP_DAYS)).strftime('%Y-%m-%dT%H:%M:%SZ'))")
 log "Pruning heartbeats older than $HB_CUTOFF (keep_days=$HB_KEEP_DAYS) from bus/inbox/*.jsonl..."
-python3 - "$HB_CUTOFF" "$ROOT/bus/inbox" "$ROOT/state/offsets" <<'PYEOF' 2>&1 | tee -a "$LOG" || log "heartbeat-prune: python error (non-fatal, bus untouched)"
+python3 - "$HB_CUTOFF" "$ROOT/bus/inbox" "$ROOT/state/offsets" "$ROOT/bin" <<'PYEOF' 2>&1 | tee -a "$LOG" || log "heartbeat-prune: python error (non-fatal, bus untouched)"
 import sys, json, os, glob
 cutoff_iso = sys.argv[1]   # ISO-8601 Zulu; ts field is same format → lexicographic compare is valid
 inbox_dir = sys.argv[2]
 offsets_dir = sys.argv[3]
+sys.path.insert(0, sys.argv[4])
+import mike_json            # the cursor format has exactly ONE owner — see cursor_shift()
 
 
-def shift_offset(base, removed):
-    """Move consolidate.sh's line cursor down by the lines we just deleted, else
-    prev > total forever and that agent is never ingested again."""
-    fp = os.path.join(offsets_dir, base)
-    try:
-        with open(fp, encoding="utf-8") as fh:
-            prev = int("".join(c for c in fh.read() if c.isdigit()) or 0)
-    except Exception:
-        return
-    new = max(0, prev - removed)
-    tmp = fp + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as fh:
-        fh.write(str(new))
-    os.replace(tmp, fp)
-    print(f"    offset {base}: {prev} → {new}")
+def shift_offset(base, removed_idx):
+    """Lower consolidate.sh's cursor by the lines deleted BELOW it. Passing the line
+    NUMBERS rather than a bare count is what stops a prune that reaches past the cursor
+    from over-subtracting and re-ingesting real events as duplicates."""
+    moved = mike_json.cursor_shift(os.path.join(offsets_dir, base), removed_idx)
+    if moved:
+        print(f"    offset {base}: {moved[0]} → {moved[1]} ({len(removed_idx)} line(s) removed)")
 
 
 total_removed = 0
 for path in sorted(glob.glob(os.path.join(inbox_dir, "*.jsonl"))):
-    removed = 0
+    removed_idx = []                       # 1-based line numbers in the PRE-prune file
     kept = []
     with open(path, encoding="utf-8") as fh:
-        for line in fh:
+        for idx, line in enumerate(fh, 1):
             s = line.strip()
             if not s:
                 kept.append(line)          # keep blank lines untouched
@@ -257,17 +263,17 @@ for path in sorted(glob.glob(os.path.join(inbox_dir, "*.jsonl"))):
             if ev.get("event_type") == "heartbeat":
                 ts = ev.get("ts", "")
                 if ts and ts < cutoff_iso:  # only drop OLD heartbeats
-                    removed += 1
+                    removed_idx.append(idx)
                     continue
             kept.append(line)
-    if removed:
+    if removed_idx:
         tmp = path + ".tmp"
         with open(tmp, "w", encoding="utf-8") as out:
             out.writelines(kept)
         os.replace(tmp, path)              # atomic
-        total_removed += removed
-        print(f"  {os.path.basename(path)}: pruned {removed} stale heartbeat(s)")
-        shift_offset(os.path.basename(path), removed)
+        total_removed += len(removed_idx)
+        print(f"  {os.path.basename(path)}: pruned {len(removed_idx)} stale heartbeat(s)")
+        shift_offset(os.path.basename(path), removed_idx)
 print(f"HEARTBEAT-PRUNE: removed {total_removed} stale heartbeat(s) total")
 PYEOF
 
@@ -286,28 +292,22 @@ PYEOF
 EVENT_KEEP_DAYS="${KB_EVENT_KEEP_DAYS:-30}"
 EVENT_CUTOFF=$(python3 -c "import datetime; print((datetime.datetime.utcnow()-datetime.timedelta(days=$EVENT_KEEP_DAYS)).strftime('%Y-%m-%dT%H:%M:%SZ'))")
 log "Archiving bus events older than $EVENT_CUTOFF (keep_days=$EVENT_KEEP_DAYS) → bus/inbox/archive/*.jsonl.gz..."
-python3 - "$EVENT_CUTOFF" "$ROOT/bus/inbox" "$ROOT/state/offsets" <<'PYEOF' 2>&1 | tee -a "$LOG" || log "event-archive: python error (non-fatal, bus untouched)"
+python3 - "$EVENT_CUTOFF" "$ROOT/bus/inbox" "$ROOT/state/offsets" "$ROOT/bin" <<'PYEOF' 2>&1 | tee -a "$LOG" || log "event-archive: python error (non-fatal, bus untouched)"
 import sys, json, os, glob, gzip
 cutoff_iso = sys.argv[1]          # ISO-8601 Zulu; ts is same format → lexicographic compare valid
 inbox_dir = sys.argv[2]
 offsets_dir = sys.argv[3]
+sys.path.insert(0, sys.argv[4])
+import mike_json                  # single owner of the cursor format (see Phase 1b)
 arch_dir = os.path.join(inbox_dir, "archive")
 
 
-def shift_offset(base, removed):
-    """Keep consolidate.sh's line cursor in step with the shrunken file (see Phase 1b)."""
-    fp = os.path.join(offsets_dir, base)
-    try:
-        with open(fp, encoding="utf-8") as fh:
-            prev = int("".join(c for c in fh.read() if c.isdigit()) or 0)
-    except Exception:
-        return
-    new = max(0, prev - removed)
-    tmp = fp + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as fh:
-        fh.write(str(new))
-    os.replace(tmp, fp)
-    print(f"    offset {base}: {prev} → {new}")
+def shift_offset(base, removed_idx):
+    """Keep consolidate.sh's cursor in step with the shrunken file (see Phase 1b). Same
+    at-or-below-the-cursor rule: archiving lines the cursor never reached must not lower it."""
+    moved = mike_json.cursor_shift(os.path.join(offsets_dir, base), removed_idx)
+    if moved:
+        print(f"    offset {base}: {moved[0]} → {moved[1]} ({len(removed_idx)} line(s) removed)")
 
 def is_event(line):
     s = line.strip()
@@ -323,8 +323,9 @@ for path in sorted(glob.glob(os.path.join(inbox_dir, "*.jsonl"))):
     base = os.path.basename(path)[:-6]        # strip ".jsonl"
     kept, buckets = [], {}                     # buckets: 'YYYY-MM' -> [raw lines]
     orig_events = 0
+    archived_idx = []                          # 1-based line numbers in the PRE-archive file
     with open(path, encoding="utf-8") as fh:
-        for line in fh:
+        for idx, line in enumerate(fh, 1):
             if not is_event(line):
                 kept.append(line); continue    # blank/unparseable → keep untouched
             orig_events += 1
@@ -332,6 +333,7 @@ for path in sorted(glob.glob(os.path.join(inbox_dir, "*.jsonl"))):
             ts = ev.get("ts", "")
             if ts and ts < cutoff_iso:
                 buckets.setdefault(ts[:7], []).append(line if line.endswith("\n") else line + "\n")
+                archived_idx.append(idx)
             else:
                 kept.append(line)
     if not buckets:
@@ -361,7 +363,7 @@ for path in sorted(glob.glob(os.path.join(inbox_dir, "*.jsonl"))):
     os.replace(tmp, path)                       # atomic hot-file swap
     total_archived += n_arch
     print(f"  {base}: archived {n_arch} event(s) across {len(buckets)} month(s), {kept_events} kept hot")
-    shift_offset(os.path.basename(path), n_arch)
+    shift_offset(os.path.basename(path), archived_idx)
 print(f"EVENT-ARCHIVE: moved {total_archived} old event(s) total")
 PYEOF
 

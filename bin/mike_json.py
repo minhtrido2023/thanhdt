@@ -12,6 +12,10 @@ Centralizes all JSON building/reading so the shell scripts depend only on python
       -> markdown bullets of the latest finding/answer/decision events (newest first)
   format-events <jsonl_file>
       -> markdown bullets for every event in the file (for the KNOWLEDGE.md log)
+  cursor-advance <inbox_jsonl> <state_file>
+      -> print the not-yet-ingested lines and advance consolidate.sh's cursor. The cursor
+         stores the last-read event_id+ts, not just a line count, so a head-prune that
+         shifts the file is repaired by content instead of silently skipping events
   fleet-status <registry_dir>
       -> markdown fleet table; status shown as "dead" when last_heartbeat > 30 min old
   settings <hooks_dir> <agent_id>
@@ -180,6 +184,135 @@ def cmd_delta_since(a):
 def cmd_format_events(a):
     for e in load_jsonl([a[0]]):
         print(fmt_event(e))
+
+
+# ── consolidate.sh ingestion cursor ──────────────────────────────────────────
+# A bare line-NUMBER cursor is only valid while the file it indexes never shifts.
+# bus/inbox/*.jsonl DO shift: kb_nightly.sh Phase 1b/1b2 delete lines off the head.
+# Two ways that loses events, both seen live:
+#   (a) cursor left ABOVE the shrunken file -> `total > prev` false forever -> that agent
+#       is never ingested again (fleet-wide 2026-07-27, 9/11 offsets stranded);
+#   (b) the file REGROWS past the stale cursor before the next consolidate run -> the
+#       comparison looks healthy and `tail -n +prev+1` silently LEAPFROGS every event
+#       sitting between the new EOF and the stale cursor. That is how the quant-skeptic
+#       verification at 2026-07-28T03:46:18Z vanished: prune 100->99 lines with the cursor
+#       left at 100, file regrew to 101, so line 100 was never emitted.
+# Case (b) is invisible to any pure-number check, so the cursor stores WHAT it last read
+# (event_id + ts of that line), not just how many. If the marked event is no longer at the
+# recorded line, we relocate it by content instead of trusting the number.
+def _line_mark(raw):
+    """(event_id, ts) of a raw JSONL line — (None, None) if it isn't parseable JSON."""
+    try:
+        e = json.loads(raw)
+        return e.get("event_id"), e.get("ts")
+    except Exception:
+        return None, None
+
+
+def _cursor_read(path):
+    """-> (n, last_id, last_ts). Accepts the legacy bare-integer file (last_id=None), so an
+    existing state/offsets/* keeps working and self-upgrades on its next write."""
+    try:
+        with open(path, encoding="utf-8") as f:
+            raw = f.read().strip()
+    except Exception:
+        return 0, None, None
+    if not raw:
+        return 0, None, None
+    if raw.startswith("{"):
+        try:
+            d = json.loads(raw)
+            return _as_int(d.get("n"), 0), d.get("last_id"), d.get("last_ts")
+        except Exception:
+            return 0, None, None
+    return _as_int("".join(c for c in raw if c.isdigit()), 0), None, None
+
+
+def _cursor_write(path, n, last_id, last_ts):
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump({"n": n, "last_id": last_id, "last_ts": last_ts}, f, ensure_ascii=False)
+    os.replace(tmp, path)          # atomic — a kill mid-write can't truncate the cursor
+
+
+def cursor_shift(state_path, removed_indices):
+    """Lower a cursor after lines were DELETED from the file it indexes (kb_nightly.sh
+    Phase 1b/1b2 import this — one owner of the cursor format, so a prune can never write
+    a shape cursor-advance can't read).
+
+    `removed_indices` are 1-based line numbers IN THE PRE-PRUNE FILE. Only lines the cursor
+    had already passed may lower it: subtracting a deletion from BEYOND the cursor charges it
+    for an event it never ingested, and the next run re-emits real events as DUPLICATES
+    (reproduced 2026-07-28 — happens whenever consolidate has been down longer than
+    HB_KEEP_DAYS, so the prune reaches lines the cursor hasn't reached yet).
+
+    The content mark is deliberately left alone: it still names the same event, and if this
+    arithmetic is ever wrong anyway, cursor-advance relocates it by id and reports a repair.
+    Returns (old_n, new_n) if it moved, else None."""
+    n, last_id, last_ts = _cursor_read(state_path)
+    if n <= 0:
+        return None
+    passed = sum(1 for i in removed_indices if i <= n)
+    if not passed:
+        return None
+    _cursor_write(state_path, max(0, n - passed), last_id, last_ts)
+    return n, max(0, n - passed)
+
+
+def cmd_cursor_advance(a):
+    """cursor-advance <inbox_jsonl> <state_file>
+    Print every line not yet ingested, then advance the cursor to EOF.
+
+    stdout = the new raw JSONL lines (consolidate.sh appends them straight to its batch).
+    stderr = one CURSOR-REPAIR line IFF the cursor had to be repaired — consolidate.sh
+             turns that into a Discord notify + a bus error event, because the old code
+             only echoed a WARN into a log file nobody reads.
+    Resolution order, most trustworthy first:
+      1. mark still sits at line n           -> fast path, no repair
+      2. mark found at another line j        -> resume from j (exact, no loss, no dup)
+      3. mark gone (its line was pruned)     -> resume by ts, RE-EMITTING ts ties: a
+         duplicate KB line is noise, a lost finding is unrecoverable
+      4. no mark at all (legacy int cursor)  -> trust the number, clamp it to EOF
+    """
+    inbox, state = a[0], a[1]
+    try:
+        with open(inbox, encoding="utf-8") as f:
+            lines = f.read().splitlines()
+    except Exception:
+        return
+    total = len(lines)
+    prev, last_id, last_ts = _cursor_read(state)
+    repair = ""
+
+    if prev <= 0:
+        start = 0                                       # fresh file: ingest everything
+    elif last_id is None:
+        start = min(prev, total)                        # legacy cursor: number is all we have
+        if prev > total:
+            repair = "clamp-legacy"
+    elif prev <= total and _line_mark(lines[prev - 1])[0] == last_id:
+        start = prev                                    # fast path — cursor still true
+    else:
+        start = None
+        for j, raw in enumerate(lines, 1):              # (2) relocate the marked event
+            if _line_mark(raw)[0] == last_id:
+                start = j
+                repair = "resync-id"
+                break
+        if start is None:                               # (3) mark itself was pruned away
+            start = sum(1 for raw in lines if (_line_mark(raw)[1] or "") < (last_ts or ""))
+            repair = "resync-ts"
+
+    for raw in lines[start:]:
+        print(raw)
+
+    if repair:
+        sys.stderr.write(
+            "CURSOR-REPAIR %s %s prev=%s total=%s resume_from=%s recovered=%s\n"
+            % (os.path.basename(inbox), repair, prev, total, start, max(0, prev - start)))
+    if total != prev or repair or last_id is None:
+        nid, nts = _line_mark(lines[-1]) if total else (None, None)
+        _cursor_write(state, total, nid, nts)
 
 
 def cmd_fleet_status(a):
@@ -686,6 +819,7 @@ def cmd_settings(a):
 CMDS = {"event": cmd_event, "heartbeat": cmd_heartbeat, "recent": cmd_recent,
         "delta-append": cmd_delta_append, "delta-since": cmd_delta_since,
         "format-events": cmd_format_events, "fleet-status": cmd_fleet_status,
+        "cursor-advance": cmd_cursor_advance,
         "job-set": cmd_job_set, "job-list": cmd_job_list, "job-get": cmd_job_get,
         "job-reap": cmd_job_reap,
         "job-field": cmd_job_field, "job-hb-age": cmd_job_hb_age,

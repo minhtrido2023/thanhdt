@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # consolidate.sh — mechanical Phase-1 consolidator (no LLM, no BigQuery).
-# Runs from cron every 30 min. Single-writer (flock). Steps:
-#   1. Gather NEW events from each child's inbox (line-offset tracking → no re-ingestion).
+# Runs hourly from cron (:07) AND after every dispatch. Single-writer (flock). Steps:
+#   1. Gather NEW events from each child's inbox (content-anchored cursor → no re-ingestion,
+#      and no silent skip when kb_nightly.sh prunes lines off the head of a file).
 #   2. If any new: append them to events_buffer.md (episodic), bump version, rebuild context_pack, commit.
 #      NOTE: KNOWLEDGE.md is canonical-only (Mike-edited). Raw events go to events_buffer.md.
 #   3. Always refresh kb/fleet_status.md (derived dead-detection; never mutates child files).
@@ -17,26 +18,33 @@ shopt -s nullglob
 exec 8>"$ROOT/locks/consolidator.lock"
 flock -n 8 || { echo "$(date -u +%FT%TZ) another consolidator running, skip"; exit 0; }
 
-# --- 1. gather new events via per-file line offsets ---
-NEW="$(mktemp)"; trap 'rm -f "$NEW"' EXIT
+# --- 1. gather new events via per-file CONTENT-anchored cursors ---
+# Each cursor remembers the event_id+ts of the last line it read, not just a line count, so a
+# head-prune by kb_nightly.sh is repaired by relocating that event instead of trusting a number
+# the prune invalidated. See mike_json.py:cmd_cursor_advance for the two loss modes this closes
+# (stranded cursor AND the silent leapfrog that ate an event on 2026-07-28).
+NEW="$(mktemp)"; REPAIRS="$(mktemp)"; trap 'rm -f "$NEW" "$REPAIRS"' EXIT
 for f in "$BUS"/inbox/*.jsonl; do
   base="$(basename "$f")"
-  total="$(wc -l < "$f" 2>/dev/null | tr -dc '0-9')"; total="${total:-0}"
-  prev="$(cat "$STATE/$base" 2>/dev/null | tr -dc '0-9' || true)"; prev="${prev:-0}"
-  # Self-heal a cursor left past the end of a SHRUNKEN file (a prune/archive that forgot to
-  # move it down). Without this, `total > prev` stays false forever and that agent is never
-  # ingested again — silent KB death, 21h undetected on 2026-07-28. Skip forward to $total
-  # instead of restarting at 0: losing the shrink-window tail beats re-ingesting the whole
-  # file as duplicates. kb_nightly.sh now decrements properly, so this is insurance only.
-  if [ "$prev" -gt "$total" ]; then
-    echo "$(date -u +%FT%TZ) WARN offset past EOF for $base ($prev > $total lines) — clamping to $total"
-    printf '%s' "$total" > "$STATE/$base"; prev="$total"
-  fi
-  if [ "$total" -gt "$prev" ]; then
-    tail -n +"$((prev + 1))" "$f" >> "$NEW"
-    printf '%s' "$total" > "$STATE/$base"
-  fi
+  python3 "$PY" cursor-advance "$f" "$STATE/$base" >> "$NEW" 2>>"$REPAIRS" \
+    || echo "CURSOR-ERROR $base cursor-advance failed (cursor left untouched)" >> "$REPAIRS"
 done
+
+# A repaired cursor means events were at risk of being dropped — that MUST reach a human.
+# Previously this was an echo into logs/consolidator.log, which nobody reads: the 2026-07-28
+# loss ran 9h unnoticed. notify.sh is dedup'd and always exits 0, so this can't break the run.
+if [ -s "$REPAIRS" ]; then
+  cat "$REPAIRS"                       # anything unexpected (a traceback) still reaches the log
+  while IFS= read -r r; do
+    case "$r" in CURSOR-*) ;; *) continue ;; esac   # only our own structured lines alert
+    echo "$(date -u +%FT%TZ) $r"
+    "$ROOT/bin/notify.sh" "⚠️ consolidate.sh CURSOR REPAIR — KB ingestion đã lệch, kiểm tra event có bị bỏ sót:
+\`$r\`" >/dev/null 2>&1 || true
+    "$ROOT/bin/append_event.sh" Mike error "consolidate-cursor-repair" \
+      "$(python3 -c 'import json,sys; print(json.dumps({"detail": sys.argv[1], "note": "cursor state/offsets lech so voi bus/inbox — da tu chua; prev cu nam trong detail de doi chieu neu can khoi phuc tay"}))' "$r")" \
+      >/dev/null 2>&1 || true
+  done < "$REPAIRS"
+fi
 
 # --- 2. if new knowledge: log + bump + republish + commit ---
 if [ -s "$NEW" ]; then
