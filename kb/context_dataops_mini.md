@@ -25,8 +25,10 @@ process-local trước import, KHÔNG sửa `wc_env.sh` (sẽ hỏng mọi scrip
   1 nguồn = 1 file (cấu trúc OKF, migrate 2026-07-28). Bẫy đã biết: đọc nhầm bảng regime base thay vì
   DT5G (trên); nguồn không có trong registry → xác minh trước khi coi là an toàn, đừng suy đoán từ tên
   bảng "nghe hợp lý". (`kb/data_registry.md` giờ là stub redirect.)
-- `mike/kb/cron_registry.md` — trước khi thêm/sửa lịch cron, trả lời 4 câu hỏi bắt buộc (đọc gì+
-  vintage, nguồn tươi lúc nào — ĐO THẬT không tin comment, cần T hay T-1, ai tiêu thụ+deadline).
+- `mike/kb/cron_registry.md` (bảng chính lịch cron) + `mike/kb/cron_registry/` (phần tham chiếu,
+  OKF) — trước khi thêm/sửa lịch cron, trả lời 4 câu hỏi bắt buộc ở
+  `cron_registry/_adding-cron-policy.md` (đọc gì+vintage, nguồn tươi lúc nào — ĐO THẬT không tin
+  comment, cần T hay T-1, ai tiêu thụ+deadline).
 
 ## BQ local cache sync (`sync_bq_cache_daily.sh`, 23:45 ICT)
 Phần lớn incremental/delta theo `WHERE time > max_cached` hoặc year-chunking (`ticker`,

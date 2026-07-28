@@ -291,10 +291,11 @@ asked "what vintage does this publish step actually read?" before a downstream g
 turned the mismatch into a structural, always-fails contradiction.
 
 **Mandatory rule**: before adding a new cron entry or changing an existing one's schedule, read
-`mike/kb/cron_registry.md` first — it answers, per job, what it reads (source + vintage T/T-1),
-what it writes, who consumes the output, and what buffer/verify-artifact exists downstream. Answer
-its "4 câu hỏi bắt buộc" (đọc gì+vintage / nguồn tươi lúc nào — đo thật, không tin comment / cần T
-hay T-1 / ai tiêu thụ + deadline) before picking a time slot.
+`mike/kb/cron_registry.md` first (the bảng chính) — it answers, per job, what it reads (source +
+vintage T/T-1), what it writes, who consumes the output, and what buffer/verify-artifact exists
+downstream. Answer its "4 câu hỏi bắt buộc" (đọc gì+vintage / nguồn tươi lúc nào — đo thật, không
+tin comment / cần T hay T-1 / ai tiêu thụ + deadline), now documented in
+`mike/kb/cron_registry/_adding-cron-policy.md`, before picking a time slot.
 
 **Update the registry in the SAME commit** as any crontab change (add/remove/reschedule a line) —
 same discipline as §9's data registry and §10's archive-on-canonicalize rule. A crontab change
