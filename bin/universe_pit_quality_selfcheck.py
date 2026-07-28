@@ -11,7 +11,7 @@ Kiểm 4 điều:
      ⚠️ 2026 kỳ vọng **60**, KHÔNG phải 61 như G2b ghi: G2b đọc panel snapshot local
      `data/fa_ratings_8l_hist.csv` (mtime 06-16), còn cờ này đọc bảng CANONICAL
      `tav2_bq.fa_ratings_8l` đã refresh — TLD bị re-rank 3→5 tại cùng eff-date 2026-05-04
-     (refresh weekly re-rank 2 quý mở, data_registry.md dòng 117). Đây là dữ liệu tươi hơn,
+     (refresh weekly re-rank 2 quý mở, kb/data_registry/rating-8l/fa_ratings_8l.md). Đây là dữ liệu tươi hơn,
      không phải sai lệch tính toán. Mọi mã khác trùng khít.
   4. 2014-06-30 phải ra UNKNOWN_RATING (panel 8L bắt đầu 2014-07-09), KHÔNG được ra "0 leak" —
      đúng cảnh báo §3.2b-G2b: thiếu dữ liệu không được đọc thành kết quả tốt.

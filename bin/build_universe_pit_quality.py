@@ -22,7 +22,7 @@ PHẠM VI DÒNG
 NGUỒN (đúng 3 nguồn đã dùng ở G2b — KHÔNG thêm nguồn mới)
     1. `tav2_bq.ticker.ROE_Min3Y`        — dòng cùng ngày (point-in-time theo cấu trúc)
     2. `tav2_bq.ticker_financial.CF_OA_3Y` — as-of quý gần nhất <= ngày, hiệu lực tối đa 400 ngày
-    3. `tav2_bq.fa_ratings_8l`           — panel 8L as-of (CANONICAL, data_registry.md dòng 117)
+    3. `tav2_bq.fa_ratings_8l`           — panel 8L as-of (CANONICAL, kb/data_registry/rating-8l/fa_ratings_8l.md)
     + BANNED list (hằng số dưới, = danh sách trong `context_pack.md`)
 
 CỜ (`quality_flag`) — thứ tự ưu tiên, loại trừ nhau:
