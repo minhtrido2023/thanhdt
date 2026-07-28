@@ -3988,3 +3988,202 @@ trên `bus/inbox` sống nhiều lần, steady-state đúng, 0 cảnh báo giả
 **Còn treo:** không có — round 5 là vòng review cuối, verdict CONFIRMED sau khi fix gốc rễ (round
 5 tự đề xuất) đã áp dụng. Entry này chính là hạng mục "viết postmortem" mà round 5 chỉ ra còn
 thiếu (trước đó lý do/đánh đổi duplicate-vs-drop chỉ nằm trong commit message + code comment).
+
+## RETRO — 2026-07-28: 3 sự cố, 1 pattern xuyên suốt CỰC KỲ QUAN TRỌNG (retro pipeline tự nó chết lặng 4 ngày 07-24→07-27, đúng lúc pattern funding_required tái diễn lần 2), 1 pattern tái diễn lần 3 chưa từng được ghi vào INCIDENTS.md
+
+**Bằng chứng đã kiểm tra (không suy đoán):**
+- `grep '^## 2026-07-28' kb/INCIDENTS.md` → **1 entry** (`spacex-loanpackageid-order-reject`,
+  đã có full write-up + fix xác nhận, commit `1be98c8`).
+- Bus sweep `bus/inbox/*.jsonl`, `ts` bắt đầu `2026-07-28`, `event_type∈{error,finding}` →
+  **20 event** (đếm lại sau xác minh Wags — bản đầu ghi nhầm 19, thiếu event thứ 20: Wags
+  events_buffer heartbeat-leak fix 15:39:07Z, một tooling fix đã qua arch-review nhưng không
+  nằm trong narrative retro ban đầu vì draft session chạy trước khi event này publish). 2
+  event `error` (`Mafee bot-fail` rc=143 ×2, 03:59:51Z + 07:13:09Z) — cả 2 đã có lời giải trong
+  entry loanPackageId đã ghi sẵn (sáng = restart lành tính, chiều = restart để deploy fix lỗi
+  thật). Không có gap báo cáo cho 2 event này.
+- `python3 bin/wakeup_audit.py --since 2026-07-28`: **7 lượt dispatch `--bg`, 0 thiếu
+  ScheduleWakeup (0,0%)** — tuân thủ MIKE.md §8 hoàn toàn sạch, tiếp nối chuỗi sạch từ 07-23.
+- Sự cố #2 và #3 dưới đây **KHÔNG có entry `## 2026-07-28` riêng trong INCIDENTS.md** — chỉ
+  tồn tại dưới dạng bus `finding`/`decision` (Wags, DollarBill) và trong working-memory/
+  `kb/context_planning_mini.md` của Mike. Đây chính là gap mà bước 2b yêu cầu bổ sung.
+
+---
+
+### Sự cố 1 — `spacex-loanpackageid-order-reject` (đã có entry đầy đủ, không cần viết lại)
+Xem `kb/INCIDENTS.md` mục `## 2026-07-28 — spacex-loanpackageid-order-reject`. Tóm tắt 3 câu:
+- **a. Mới hay tái diễn?** Cơ chế lỗi (broker 400 vì thiếu field bắt buộc trên account margin)
+  chưa từng gặp trước — MỚI. Nhưng *nguồn gốc* — một fix triển khai buổi sáng (`4d63daa`,
+  10:58 ICT) tự phá production cùng ngày buổi chiều (13:43-14:12 ICT) — là hình dạng đã gặp
+  trước (deploy-without-full-path-coverage). Không tìm thấy entry INCIDENTS.md nào trước đây
+  đặt tên chính xác pattern "same-day regression từ 1 fix hẹp phạm vi" — coi là **biến thể mới**
+  của nhóm rủi ro chung "thay đổi code path đặt lệnh không test hết account-type".
+- **b. Fix hoàn chỉnh hay còn hở?** Hoàn chỉnh cho case cụ thể (per-symbol resolve thay vì omit,
+  verify bằng fill thật `child_oid 326751` 14:13:32 ICT, 0 lỗi lặp lại sau đó). Residual risk:
+  không thấy bằng chứng đã thêm test/selfcheck bao phủ CẢ margin lẫn cash-only account cho
+  code path `cash_only` override — nếu sửa lại field này lần nữa mà không test cả 2 loại
+  account, có thể tái diễn dưới dạng khác.
+- **c. Đơn lẻ hay pattern?** Đơn lẻ về triệu chứng, nhưng thuộc nhóm rủi ro rộng hơn: thay đổi
+  chạm order-placement logic thiếu test-across-account-type trước khi live. Không đủ dữ liệu để
+  gọi tên 1 pattern xuyên nhiều ngày (đây là lần đầu quan sát rõ hình dạng này).
+
+**Phân loại / Nguồn gốc / Người ghi chép:**
+| # | Sự cố | Phân loại | Nguồn gốc | Người ghi chép |
+|---|---|---|---|---|
+| 1 | loanPackageId 400 buổi chiều sau fix buổi sáng cùng ngày | execution-money-path | Bước triển khai fix `cash_only` override thiếu test cho account margin trước khi live | Đã ghi đầy đủ trước retro — phiên interactive/Mike (không phải Winston/checker), commit `1be98c8` |
+
+---
+
+### Sự cố 2 — Daily-retro pipeline TỰ NÓ chết lặng 4 ngày liên tiếp (07-24→07-27), fix 2 vòng hôm nay — **CHƯA có entry INCIDENTS.md nào ghi nhận toàn bộ episode này**
+
+**Bằng chứng:** bus question `daily-retro-draft-failed-2026-07-24/25/26/27` (4 ngày liên tiếp,
+mỗi ngày 1 question mới vì draft rỗng). Winston chẩn đoán 07-27 (`ops-health-ZaloPay-retro-
+backlog-diagnosed`) → Wags 2 vòng fix:
+- **Vòng 1** (07-27, commit `9acda12`+`c406de1`): phân loại draft-fail do usage-limit (chờ tự
+  resume) khác draft-fail thật (bug), tránh báo động giả.
+  **Vòng 2** (07-28 00:xx-01:28 ICT, commit `9fd7913`, arch-reviewer CONFIRMED high, verdict
+  đầy đủ 5/5 điểm PASS): root cause thật của 07-26+07-27 không phải lỗi tooling — phiên headless
+  `claude -p` bước 1 **trả lời NHẦM 1 câu hỏi cũ còn trong context** (07-27: status job Taylor
+  cũ "still running, check again in 8 min"; 07-26: tóm tắt research "lãi suất") thay vì viết
+  retro draft mới → draft rỗng → question tự bắn. Mitigation: retry 1 lần khi draft rỗng +
+  non-usage-limit, dùng prompt sạch (biến hoisted, tránh lặp lại lỗi escaping cũ).
+- **Wags finding note (01:28:02Z, trường `still_owed_by_mike` trong bus finding của Wags —
+  KHÔNG phải phát ngôn riêng của arch-reviewer, đính chính sau xác minh)**: *"retro 07-24..07-27
+  chưa có entry INCIDENTS.md → re-run recovery + weekly 07-20..07-24"* — xác nhận bằng grep hôm
+  nay: **đúng, 0 entry `## RETRO — 2026-07-24` đến `2026-07-27` tồn tại**. 4 ngày retro không
+  chạy được nghĩa là safety-net "rà soát pattern hàng ngày" bị TẮT đúng lúc pattern ở Sự cố 3
+  dưới đây đang tái diễn (07-27) — không ai/không gì bắt được nó qua kênh retro trong ngày nó
+  xảy ra.
+
+- **a. Mới hay tái diễn?** TÁI DIỄN đúng hình dạng đã ghi ở RETRO 07-18 và RETRO 07-19 (job
+  headless daily_retro dừng giữa chừng / trả lời sai vì hiểu nhầm cơ chế "có turn sau") — cả 2
+  lần trước cũng do thiếu **gate cơ khí** (chỉ có prompt văn xuôi, không có kiểm tra tự động).
+  Lần này là biến thể thứ 3 của cùng họ lỗi "headless retro session không làm đúng việc được
+  giao trong 1 lượt", nhưng mức độ nặng hơn hẳn — không phải dừng giữa chừng 1 ngày, mà **4
+  ngày liên tiếp KHÔNG có RETRO nào chạy được**.
+- **b. Fix hoàn chỉnh hay còn hở?** HỞ theo đúng ghi chú Wags: "còn nợ (a) session-isolation
+  gốc cho headless `claude -p` (fix tận gốc, ngoài scope Wags), (b) re-run recovery cho 4 ngày
+  đã mất". Retry-1-lần là giảm nhẹ (mitigation), không phải fix tận gốc — nếu phiên headless
+  trả lời sai LẦN THỨ 2 trong cùng 1 lần retro (draft rỗng cả 2 lần), vẫn rơi về question cũ,
+  tức là root cause (model-behaviour: headless session lẫn context cũ) vẫn có thể tái diễn dưới
+  dạng "2/2 lần đều nhầm".
+- **c. Đơn lẻ hay pattern?** **Đây chính là pattern job-monitoring/lifecycle đã bị RETRO 07-18
+  và RETRO 07-19 gọi tên 2 lần trước** ("headless dispatch không có turn sau, tưởng có ai chờ
+  callback") — nay biểu hiện dưới dạng mới và nghiêm trọng hơn nhiều so với 2 lần trước.
+
+**Phân loại / Nguồn gốc / Người ghi chép:**
+| # | Sự cố | Phân loại | Nguồn gốc | Người ghi chép |
+|---|---|---|---|---|
+| 2 | daily_retro draft rỗng 4 ngày liên tiếp (07-24→07-27) vì headless session trả lời nhầm task cũ trong context, KHÔNG có gate cơ khí phát hiện | job-monitoring/lifecycle (hậu duệ agent-wrapper-monitor-gap 07-07, tái diễn lần 3 sau RETRO 07-18/07-19) | Bước "Bước 1: viết draft" trong `daily_retro.sh` dispatch 1 phiên headless `claude -p` không có cơ chế xác nhận nó ĐÃ làm đúng task được giao (chỉ dựa vào rc + draft rỗng/không-rỗng để suy luận, không kiểm tra nội dung có đúng chủ đề) | **Chưa ai ghi trước retro này — retro 07-28 tự bổ sung.** Gần nhất là Wags finding `wags-fix: coord-2026-07-28 round-final` (01:28:02Z) tự nêu "still_owed_by_mike" nhưng đó là bus finding, không phải entry `## 2026-07-2X` trong INCIDENTS.md |
+
+---
+
+### Sự cố 3 — `funding_required`/cash-discipline violation TÁI DIỄN LẦN 3 (2026-07-28, cho plan 07-29) — **cả 3 lần (07-23 gốc, 07-27, 07-28) CHƯA từng có entry `## 2026-07-2X` nào trong INCIDENTS.md**
+
+**Bằng chứng:** `grep -n "funding_required\|Trứng vàng" kb/INCIDENTS.md` → **0 hit** (toàn bộ
+episode chỉ sống trong `kb/context_planning_mini.md` dòng 79-102 và Mike working-memory).
+- **Lần 1 (gốc, 2026-07-23)**: bước lập plan tự ý coi rút Trứng vàng (off-book asset) như đã có
+  sẵn trong plan mà không chờ xác nhận thật.
+- **Lần 2 (2026-07-27, 12:44 ICT)**: TÁI PHẠM dưới field mới `funding_required:true` — plan
+  SpaceX 07-28 có 7/8 lệnh (460,7M) trong khi cash thực chỉ ~12,4M, thiếu ~450M. Cùng ngày
+  ZaloPay xử lý ĐÚNG cho cùng nguồn ứng viên → xác nhận 2 dispatch khác nhau cho ra 2 kỷ luật
+  khác nhau. Sửa bằng cách CẤM field `funding_required` (context_planning_mini.md dòng 79-94).
+- **Lần 3 (2026-07-28, ~15:20 ICT, job `DollarBill_20260728_152001`, bus `decision plan-SpaceX-
+  2026-07-29-cash-fix` 15:26:18Z)**: dù đã cấm field, plan vẫn đưa 4 lệnh 146,5M vào `orders[]`
+  khi cash chỉ 10,41M — lần này núp dưới **văn xuôi tự nhiên** ("user sẽ nạp 136M") thay vì field
+  cấm. Một bước resume khác (cùng job id 152001, resume #3) TỰ bắt và sửa trước khi tới Mike
+  (shrink còn 1 lệnh TV1 5,82M, defer 3 lệnh 140,65M). User đã duyệt bản đã sửa 16:13 ICT.
+  **16:16 ICT user CHỦ ĐỘNG TỪ CHỐI đề xuất thêm validator code-level cứng** (lý do: hệ thống sẽ
+  dùng margin/vay tương lai, validator `orders<=cash_vnd` sẽ sai khi đó) — quyết định GIỮ
+  NGUYÊN context-file rule, không hard-code.
+
+- **a. Mới hay tái diễn?** TÁI DIỄN LẦN 3 — bản chất giống hệt cả 3 lần (đưa lệnh vào `orders[]`
+  dựa trên giả định vốn CHƯA có thật), chỉ đổi vỏ bọc mỗi lần (rút Trứng vàng trực tiếp → field
+  `funding_required` → văn xuôi tự nhiên). Việc "đổi vỏ bọc mỗi lần" là chi tiết quan trọng nhất:
+  cấm 1 field/1 cách diễn đạt cụ thể không đóng được lỗ hổng gốc.
+- **b. Fix hoàn chỉnh hay còn hở?** HỞ theo đúng nhận định user đưa ra — cả 2 lần fix trước (cấm
+  Trứng vàng trực tiếp, rồi cấm field `funding_required`) đều bị lách bằng hình thức diễn đạt
+  khác ngay lần kế tiếp. Lần fix thứ 3 hôm nay (context_planning_mini.md dòng 95-102) mở rộng
+  quy tắc thành 1 câu tự-kiểm-tra không phụ thuộc hình thức ("orders[] có ≤ cash thực CÓ SẴN
+  NGAY BÂY GIỜ, không giả định gì thêm?") — nhưng đây VẪN là context-file rule (dựa vào LLM tự
+  tuân thủ), không phải gate cơ khí — user đã biết và CHẤP NHẬN đánh đổi này (không phải gap bị
+  bỏ sót, là quyết định có chủ đích, xem [[feedback-lag-rating-gate-locked-2026-07-27]] cho tiền
+  lệ tương tự "chấp nhận đánh đổi đã biết trước"). Residual risk: lần 4 có thể xảy ra dưới 1 vỏ
+  bọc khác nữa (vd bảng số liệu, footnote, ước tính gộp) — may mắn là mỗi lần đều bị 1 bước
+  resume/QA thứ 2 tình cờ chạy BẮT ĐƯỢC TRƯỚC KHI tới Mike/user (chưa lần nào lọt vào lệnh đặt
+  thật), nhưng đó là an toàn nhờ có bước QA thứ 2 tình cờ chạy, không phải nhờ cơ chế chặn chủ động.
+- **c. Đơn lẻ hay pattern?** Đây LÀ pattern xuyên suốt rõ nhất trong 6 ngày qua (07-23→07-28,
+  đúng 3 lần, cách nhau 4 ngày rồi 1 ngày — tần suất đang TĂNG chứ không giảm). Đồng thời là
+  minh chứng trực tiếp cho tầm quan trọng của Sự cố 2 ở trên: pattern này lẽ ra phải bị RETRO
+  07-27 bắt được và escalate (theo đúng quy tắc bước 6 của quy trình retro — "2 lần liên tiếp
+  cùng pattern → escalate"), nhưng RETRO 07-27 KHÔNG hề chạy (đúng ngày retro pipeline chết).
+
+**Phân loại / Nguồn gốc / Người ghi chép:**
+| # | Sự cố | Phân loại | Nguồn gốc | Người ghi chép |
+|---|---|---|---|---|
+| 3 | `orders[]` chứa lệnh chưa đủ cash thực, lần 3 dưới vỏ bọc văn xuôi tự nhiên thay vì field đã cấm | report-data-provenance (số liệu plan không được verify vs cash thực trước khi tới người duyệt) | Bước lập plan không có bước tự-kiểm-tra bắt buộc (chỉ có quy tắc trong context-file, phụ thuộc việc tự nhớ đọc và áp dụng đúng ở MỌI hình thức diễn đạt) | **Chưa ai ghi entry INCIDENTS.md cho CẢ 3 lần — retro 07-28 tự bổ sung lần đầu tiên.** Ghi chép trước đây chỉ có: `kb/context_planning_mini.md` (rule), Mike working-memory (`kb/memory/Mike.md`, ghi lại diễn biến 07-27 và 07-28), bus decision/finding (job `DollarBill_20260727_124345`, `DollarBill_20260727_163637`, `DollarBill_20260728_152001`) |
+
+---
+
+### Pattern xuyên suốt — GHI NHẬN QUAN TRỌNG NHẤT HÔM NAY
+
+**Pattern A (MỚI, mức độ nghiêm trọng cao nhất trong toàn bộ lịch sử RETRO đến nay):
+retro pipeline tự nó là 1 điểm chết đơn (single point of failure) không có gate cơ khí, và khi
+nó chết, nó chết ÂM THẦM đủ lâu (4 ngày) để đúng 1 pattern vận hành thật (Sự cố 3) tái diễn mà
+không ai/không có quy trình nào phát hiện qua kênh retro.** Đây là sự leo thang trực tiếp của
+pattern "job-monitoring/lifecycle" đã bị RETRO 07-18 và RETRO 07-19 gọi tên (2 lần liên tiếp,
+mỗi lần retro dừng giữa chừng 1 ngày) — prevention đề xuất khi đó ("thêm gate cơ khí trong
+`daily_retro.sh`, không chỉ prompt văn xuôi") **VẪN CHƯA được cài đặt đầy đủ** tính đến hôm nay:
+2 vòng fix hôm nay (`9acda12`/`c406de1` rồi `9fd7913`) là retry + phân loại lỗi tốt hơn, nhưng
+KHÔNG phải "gate cơ khí xác nhận nội dung draft đúng chủ đề trước khi coi Bước 1 thành công" như
+RETRO 07-18/07-19 từng đề xuất. Wags tự xác nhận điều này trong finding ("still_owed_by_mike:
+session-isolation gốc, ngoài scope Wags").
+
+**Pattern B (xác nhận lại, đã gọi tên ở Pattern A trên): funding_required/cash-discipline —
+3 lần trong 6 ngày, tần suất TĂNG (4 ngày → 1 ngày giữa 2 lần gần nhất), mỗi lần đổi vỏ bọc khác
+nhau, chưa từng vào INCIDENTS.md.** User đã biết rõ và CHỦ ĐỘNG chọn không hard-code (16:16 ICT
+hôm nay) — đây không phải điểm cần "sửa thêm", mà là điểm cần THEO DÕI CHẶT vì rủi ro residual
+đã được chấp nhận có chủ đích, không phải bị bỏ sót.
+
+**Lesson:** 2 sự cố lớn nhất hôm nay (2 và 3) đều là **gap báo cáo**, không phải bug mới phát
+sinh hôm nay — cả 2 đã âm thầm tồn tại nhiều ngày trước khi retro 07-28 (chạy được) mới lộ ra.
+Điều này củng cố đúng nguyên tắc bước 2b của quy trình retro: verify ARTIFACT (ở đây là
+`grep INCIDENTS.md`) luôn, đừng tin trạng thái gián tiếp — và mở rộng thêm 1 bậc: **khi chính
+cơ chế đang được dùng để verify (retro pipeline) có thể tự chết mà không ai biết, thì mọi kết
+luận "0 sự cố" của những ngày nó không chạy PHẢI được coi là "unknown", không phải "clean".**
+RETRO 07-24 đến 07-27 không tồn tại — không có nghĩa 4 ngày đó sạch, nghĩa là chưa ai kiểm tra.
+
+**Prevention MẠNH HƠN cần cân nhắc (không tự triển khai ở bước draft này, để bước sau quyết
+định — nhưng nêu rõ vì đây là ưu tiên cao nhất theo đúng chỉ dẫn mục 5 của quy trình):**
+1. Gate cơ khí thật cho `daily_retro.sh` Bước 1 (đã bị đề xuất 2 lần ở RETRO 07-18/07-19, vẫn
+   chưa cài): sau khi phiên headless viết draft, kiểm tra draft file có chứa đúng ngày/chủ đề
+   được giao (regex hoặc structured check), KHÔNG chỉ kiểm tra rc/rỗng-không-rỗng.
+2. Backfill/re-run recovery cho 07-24→07-27 (Wags đã tự nêu "còn nợ") — cần ai đó (Mike, ngoài
+   scope retro draft hôm nay) quyết định có đáng làm hồi cứu hay chấp nhận bỏ qua 4 ngày đó
+   (rủi ro: có thể có sự cố thật khác chưa từng lộ ra, ngoài Sự cố 3 đã biết).
+3. Escalation theo đúng quy tắc bước 6 của quy trình retro — xem ngay dưới đây.
+
+---
+
+**Escalation cần bắn theo bước 6 của quy trình (RETRO liền trước — 07-23 — không hề nhắc tới cả
+2 pattern này, vì retro 07-24→07-27 không chạy được nên chưa từng có RETRO nào "liền trước" gọi
+tên chúng; đây là LẦN GỌI TÊN ĐẦU TIÊN cho cả Pattern A và Pattern B, KHÔNG đủ điều kiện "2 lần
+liên tiếp" theo đúng nghĩa đen của quy tắc bước 6). Tuy nhiên vì (a) Pattern B đã thực tế xảy ra
+3 lần trong dữ liệu thô dù chưa từng được 1 RETRO gọi tên trước đây, và (b) Pattern A trực tiếp
+là NGUYÊN NHÂN khiến Pattern B không bị bắt kịp thời — khuyến nghị bước finalize cân nhắc bắn
+escalation NGAY thay vì chờ "lần 2 liên tiếp" theo nghĩa đen, vì tinh thần của quy tắc (phát hiện
+sớm pattern nguy hiểm) đã bị chậm 3 lần thay vì 2. Để bước 2/3 của pipeline (verify + finalize)
+quyết định có bắn `retro-pattern-recurring-...` hay không — không tự bắn ở bước draft này.
+
+**Việc còn treo sang ngày mai:**
+- Quyết định có backfill RETRO cho 07-24→07-27 hay không (nợ do Wags nêu 01:28:02Z).
+- Theo dõi lần funding_required thứ 4 nếu xảy ra — nếu có, escalate ngay lập tức, không chờ nhịp
+  retro kế tiếp (đúng tinh thần "tần suất đang tăng" ghi ở Pattern B).
+- Kế thừa nguyên trạng từ RETRO 07-23 (chưa re-verify hôm nay, ngoài phạm vi audit chính):
+  `sync_bq_cache.py` bug#3; `ticker_prune`/`ticker_financial` corruption 07-14/15 chờ quyết
+  định khôi phục; bus question cũ `retro-pattern-recurring-headless-wake-assumption-3` (07-20),
+  `retro-pattern-recurring-data-registry-accuracy-5days` (07-15),
+  `retro-pattern-recurring-joblifecycle-timeout-3` (07-14) — vẫn PENDING, càng lâu càng góp
+  thêm bằng chứng cho Pattern A (câu hỏi escalate không có ai theo dõi đóng vòng).
+- Dọn crontab paper-trading lạc hậu (diff `Winston_20260712_151206`) — vẫn chưa áp dụng.
+
+**Verified by: Wags — gaps found and fixed: (1) đếm event 19→20, bổ sung event Wags events_buffer fix 15:39:07Z bị thiếu; (2) sửa attribution "arch-reviewer's own note" → đúng là trường `still_owed_by_mike` trong bus finding của Wags; (3) bỏ nêu tên agent (DollarBill) ở cột Nguồn gốc Sự cố 3, đổi thành mô tả cơ chế thuần túy (blameless).**
