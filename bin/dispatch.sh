@@ -44,10 +44,15 @@
 #                  (task thường lệ). Task phức tạp → --effort high. CHÍNH SÁCH user
 #                  (2026-07-14): model 'fable' bị chặn tối đa 'high' — truyền xhigh/max
 #                  cho fable sẽ tự clamp về high + cảnh báo stderr. Xem MIKE.md §Model routing.
-# Context injection tier is now fixed per AGENT IDENTITY, not per dispatch: each
-# agent's own agents/<id>/CLAUDE.md statically imports the right default (Wags ->
-# kb/context_ops_mini.md, ~4KB, fleet-ops mechanics only; everyone else ->
-# kb/context_pack.md, ~48KB, full trading domain) — see cost-opt #1b, 2026-07-17.
+# Context injection tier is fixed per AGENT IDENTITY, not per dispatch: each agent's
+# own agents/<id>/CLAUDE.md statically imports its role-scoped default — see MIKE.md
+# §"Context theo vai trò (role-scoped)" for the full table (Mike/Taylor -> full
+# kb/context_pack.md ~35-45KB; DollarBill/Mafee -> context_safety_core + their planning/
+# execution mini file + coding_guidelines.md (both own production code); Winston/Spyros
+# -> context_safety_core + their mini file; Wendy -> context_mini.md only; Wags ->
+# context_ops_mini.md only, ~5KB). This replaced an earlier binary split (cost-opt #1b,
+# 2026-07-17: Wags=mini / everyone else=full) the same day it was introduced — the
+# table above is the current source of truth, don't infer routing from this comment.
 # A dispatch that genuinely needs MORE than an agent's default (e.g. a rare Wags task
 # touching trading domain) doesn't need a flag here: every agent has Read tool access,
 # so the prompt can just say "đọc kb/context_pack.md nếu cần" and the agent self-serves

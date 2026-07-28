@@ -371,18 +371,29 @@ sự cố gốc):
 
 | Agent | File(s) import (qua CLAUDE.md, KHÔNG qua hook nữa — xem cost-opt #1b) | Vì sao |
 |---|---|---|
-| Taylor | `kb/context_pack.md` (full, không đổi) | R&D tổng hợp xuyên domain, cắt sẽ mất thông tin cần |
-| DollarBill | `context_safety_core.md` + `context_planning_mini.md` | Lập plan T+1: cần V2.4/DT5G/8L tóm tắt + rule giá/file, KHÔNG cần phương pháp backtest |
-| Mafee | `context_safety_core.md` + `context_execution_mini.md` | Thực thi plan-bound: cần T+2/idempotency/excluded_tickers, KHÔNG cần chiến lược/backtest |
+| Taylor | `kb/context_pack.md` (full) + `coding_guidelines.md` | R&D tổng hợp xuyên domain, cắt sẽ mất thông tin cần; viết backtest/script thường xuyên |
+| DollarBill | `context_safety_core.md` + `context_planning_mini.md` + `coding_guidelines.md` | Lập plan T+1 (KHÔNG cần phương pháp backtest); NHƯNG sở hữu `bot_prepare_plan.py`/`golive_recommend_v23.py` — vẫn cần guideline khi sửa |
+| Mafee | `context_safety_core.md` + `context_execution_mini.md` + `coding_guidelines.md` | Thực thi plan-bound (KHÔNG cần chiến lược/backtest); NHƯNG sở hữu `trading_bot/{executor,brokers,...}.py` — §5 Idempotent Side Effects trích dẫn TRỰC TIẾP `executor.py` của Mafee làm ví dụ chuẩn |
 | Winston | `context_safety_core.md` + `context_dataops_mini.md` | Data-ops: cần bảng BQ/registry/DT5G-trap, KHÔNG cần chi tiết trading strategy |
 | Spyros | `context_safety_core.md` + `context_mini.md` | Risk-audit tần suất thấp: cần kill-switch + BQ cơ bản, không cần bespoke file |
 | Wendy | `context_mini.md` | Legal-vn: gần như tự chứa, không chạm execution |
 | Wags | `context_ops_mini.md` (không đổi từ cost-opt #1) | Fleet-ops thuần, 0 domain trading |
-| Mike | `context_pack.md` (full, không đổi) | Coordinator — cần nhìn toàn cảnh để định tuyến đúng |
+| Mike | `context_pack.md` (full) + `coding_guidelines.md` | Coordinator — cần nhìn toàn cảnh để định tuyến đúng; sửa fleet tooling thường xuyên |
 
 `kb/context_safety_core.md` là file NHỎ dùng chung cho mọi agent chạm surface tiền thật (kill-
 switch, banned tickers, human-in-the-loop, danh tính 2 account LIVE) — tách riêng để 1 fact an
 toàn chỉ cần sửa ĐÚNG 1 chỗ, không lệch giữa nhiều bản sao.
+
+**`kb/coding_guidelines.md` (23KB) — quyết định TƯỜNG MINH, không phải mặc định** (audit
+2026-07-28, token-cost review): file tự nhận "áp dụng cho toàn fleet" nhưng chỉ 4/8 agent import
+(Mike/Taylor/DollarBill/Mafee) — đây là chủ ý, KHÔNG phải thiếu sót: cả 4 đều thật sự sở hữu/sửa
+code sản xuất thường xuyên (xem cột "Vì sao"). Winston và Wags CŨNG sửa code qua cơ chế autofix
+(`ops_autofix.sh`/`wags_autofix.sh`) nhưng KHÔNG import file này — cân nhắc có thật nhưng chưa
+thêm vì sẽ tăng chi phí mỗi dispatch (Wags ~22 job/tuần × 23KB ≈ +500KB/tuần) ngược với mục tiêu
+giảm token; nếu autofix của 2 agent này bắt đầu tái phạm đúng loại lỗi guideline này nhắm tới
+(surgical changes, idempotent side effects, canonical-filename...) thì đó là tín hiệu nên thêm.
+Đừng tự ý bớt file này khỏi Mafee/DollarBill để "tiết kiệm token" mà không kiểm tra lại bảng "File
+sở hữu" trong CLAUDE.md của agent đó trước — cả 2 sở hữu code chạm tiền thật.
 
 **Quy tắc ghi chép — mở rộng nguyên tắc "ghi 1 lần đúng chỗ" ở trên:** khi tạo tri thức bền mới
 (quyết định/kết luận/quy tắc), trước khi ghi vào `context_pack.md`/`canonical.md` như cũ, tự hỏi

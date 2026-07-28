@@ -15,7 +15,7 @@
 
 # Current Operations — Mike fleet
 > Mike cập nhật thủ công khi có thay đổi trạng thái quan trọng. Đọc trước mọi thứ khác khi restart.
-> Cập nhật lần cuối: 2026-07-23
+> Cập nhật lần cuối: 2026-07-28 (token-cost trim: Trứng vàng staleness fix, workflow/CAPIT/universe_pit/R&D compression, ~9KB saved)
 
 ## Sleeve "mua khi sợ hãi có tính toán" — quét chủ động HÀNG TUẦN (mandate user 2026-07-23)
 Sau chuỗi case TV1 + DGC (cả 2 lần đầu bị đánh giá quá thận trọng, user tự phát hiện + sửa —
