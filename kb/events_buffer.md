@@ -933,3 +933,46 @@
 - [2026-07-28T15:04:06Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 29, "job_id": "Wags_20260728_143501", "source": "watcher"}
 - [2026-07-28T15:05:06Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 30, "job_id": "Wags_20260728_143501", "source": "watcher"}
 - [2026-07-28T15:06:07Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 31, "job_id": "Wags_20260728_143501", "source": "watcher"}
+
+## Consolidation 2026-07-28T15:27:22Z
+- [2026-07-28T15:21:01Z] DollarBill/heartbeat — DollarBill_20260728_152001: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260728_152001", "source": "watcher"}
+- [2026-07-28T15:22:02Z] DollarBill/heartbeat — DollarBill_20260728_152001: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20260728_152001", "source": "watcher"}
+- [2026-07-28T15:23:03Z] DollarBill/heartbeat — DollarBill_20260728_152001: {"status": "still_running", "elapsed_min": 3, "job_id": "DollarBill_20260728_152001", "source": "watcher"}
+- [2026-07-28T15:23:59Z] DollarBill/heartbeat — DollarBill_20260728_152001: {"status": "in_progress", "note": "Plan 07-28 fix verified OK (approved by user). Plan 07-29 SpaceX vi phạm cash discipline: 4 orders 146.37M vs cash 10.41M. Đang đọc + sửa."}
+- [2026-07-28T15:24:03Z] DollarBill/heartbeat — DollarBill_20260728_152001: {"status": "still_running", "elapsed_min": 4, "job_id": "DollarBill_20260728_152001", "source": "watcher"}
+- [2026-07-28T15:25:03Z] DollarBill/heartbeat — DollarBill_20260728_152001: {"status": "still_running", "elapsed_min": 5, "job_id": "DollarBill_20260728_152001", "source": "watcher"}
+- [2026-07-28T15:26:03Z] DollarBill/heartbeat — DollarBill_20260728_152001: {"status": "still_running", "elapsed_min": 6, "job_id": "DollarBill_20260728_152001", "source": "watcher"}
+- [2026-07-28T15:26:18Z] DollarBill/decision — plan-SpaceX-2026-07-29-cash-fix: {"job": "DollarBill_20260728_152001", "plan_date": "2026-07-29", "account": "SpaceX", "before": {"orders": 4, "total_orders_vnd": 146477276, "available_cash_vnd": 10412823, "orders_within_cash": false, "had_funding_needed_vnd": 136064453, "error": "4 lenh 146.5M trong orders[] vs cash 10.41M — viên lý user se nap 136M (vi pham cash discipline)"}, "after": {"orders": 1, "orders_value_with_fee_vnd": 5824365, "available_cash_vnd": 10412823, "orders_within_cash": true, "deferred": 3, "deferred_value_with_fee_vnd": 140652911, "no_funding_needed_field": true, "approved_by": null}, "action": "SHRINK orders[] ve TV1 disc (5.82M <= cash 10.41M); PVT/SIP/VNM CAPIT -> deferred_orders[]", "next": "CHO user duyet plan 07-29. Neu user nap von moi -> re-dispatch de kích hoat deferred."}
+- [2026-07-28T15:27:00Z] DollarBill/finding — job-DollarBill_20260728_152001-complete: {"job": "DollarBill_20260728_152001", "status": "DONE", "summary": "Resume #3 — phát hiện và sửa 1 lỗi mới ngoài scope ban đầu (07-29 SpaceX cash discipline). Plan 07-28 đã OK từ trước (fixed by job 163637, approved by user). Plan 07-29 SpaceX v1 vi phạm tương tự funding_required: 4 lệnh 146.5M trong orders[] vs cash 10.41M. Đã SHRINK: orders[]=TV1 5.82M, deferred=PVT/SIP/VNM 140.65M. Plan 07-29 ZaloPay OK (HOLD 0 lệnh).", "plans_status": {"plan_SpaceX_2026-07-28": "FIXED (07-27 job 163637) + approved_by=user", "plan_ZaloPay_2026-07-28": "FIXED (07-27 job 163637) + approved_by=user", "plan_SpaceX_2026-07-29": "FIXED NOW (job 152001) — approved_by=null, CHO USER DUYET truoc 08:45", "plan_ZaloPay_2026-07-29": "OK (HOLD 0 lenh, deferred PVT/SIP/VNM 69.6M thieu cash)"}, "next": "User duyet plan 07-29 SpaceX. Neu user nap von moi vao SpaceX -> re-dispatch kích hoat deferred PVT/SIP/VNM 140.65M."}
+- [2026-07-28T15:27:03Z] DollarBill/heartbeat — DollarBill_20260728_152001: {"status": "still_running", "elapsed_min": 7, "job_id": "DollarBill_20260728_152001", "source": "watcher"}
+- [2026-07-28T15:07:07Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 32, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T15:08:07Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 33, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T15:08:32Z] Wags/heartbeat — Wags_20260728_143501: {"status": "in_progress", "note": "arch-reviewer NEEDS_CHANGES: 3 lo hong that (resync-ts dem sai, last_id=null tai mo leapfrog, kb_ingest_lag lech don vi) — dang va"}
+- [2026-07-28T15:09:07Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 34, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T15:10:07Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 35, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T15:11:07Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 36, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T15:11:59Z] Wags/heartbeat — Wags_20260728_143501: {"status": "in_progress", "note": "3 lo hong da va, 17 assertion PASS; dang test debounce e2e"}
+- [2026-07-28T15:12:07Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 37, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T15:13:07Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 38, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T15:14:07Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 39, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T15:15:07Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 40, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T15:16:08Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 41, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T15:17:08Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 42, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T15:18:08Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 43, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T15:19:08Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 44, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T15:20:08Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 45, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T15:21:02Z] Wags/heartbeat — Wags_20260728_152002: {"status": "still_running", "elapsed_min": 1, "job_id": "Wags_20260728_152002", "source": "watcher"}
+- [2026-07-28T15:21:08Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 46, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T15:22:03Z] Wags/heartbeat — Wags_20260728_152002: {"status": "still_running", "elapsed_min": 2, "job_id": "Wags_20260728_152002", "source": "watcher"}
+- [2026-07-28T15:22:08Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 47, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T15:23:03Z] Wags/heartbeat — Wags_20260728_152002: {"status": "still_running", "elapsed_min": 3, "job_id": "Wags_20260728_152002", "source": "watcher"}
+- [2026-07-28T15:23:08Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 48, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T15:24:03Z] Wags/heartbeat — Wags_20260728_152002: {"status": "still_running", "elapsed_min": 4, "job_id": "Wags_20260728_152002", "source": "watcher"}
+- [2026-07-28T15:24:08Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 49, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T15:24:51Z] Wags/heartbeat — Wags_20260728_152002: {"status": "in_progress", "note": "tracing state: job 143501 still alive (HB_AGE 55s), checking kb_nightly Phase 1a events_buffer prune state"}
+- [2026-07-28T15:25:03Z] Wags/heartbeat — Wags_20260728_152002: {"status": "still_running", "elapsed_min": 5, "job_id": "Wags_20260728_152002", "source": "watcher"}
+- [2026-07-28T15:25:08Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 50, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T15:26:03Z] Wags/heartbeat — Wags_20260728_152002: {"status": "still_running", "elapsed_min": 6, "job_id": "Wags_20260728_152002", "source": "watcher"}
+- [2026-07-28T15:26:08Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 51, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T15:27:04Z] Wags/heartbeat — Wags_20260728_152002: {"status": "still_running", "elapsed_min": 7, "job_id": "Wags_20260728_152002", "source": "watcher"}
+- [2026-07-28T15:27:08Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 52, "job_id": "Wags_20260728_143501", "source": "watcher"}
