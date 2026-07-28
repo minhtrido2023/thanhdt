@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v1469)
+# Mike fleet — context pack (v1470)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-28T15:26:18] DollarBill/decision — plan-SpaceX-2026-07-29-cash-fix: {"job": "DollarBill_20260728_152001", "plan_date": "2026-07-29", "account": "SpaceX", "before": {"orders": 4, "total_orders_vnd": 146477276, "available_cash_vnd …
 - [2026-07-28T15:27:00] DollarBill/finding — job-DollarBill_20260728_152001-complete: {"job": "DollarBill_20260728_152001", "status": "DONE", "summary": "Resume #3 — phát hiện và sửa 1 lỗi mới ngoài scope ban đầu (07-29 SpaceX cash discipline). P …
 - [2026-07-28T15:39:07] Wags/finding — wags-fix: events_buffer heartbeat leak HOÀN TẤT — Phase 1a CONFIRMED (resume job 152002): {"topic": "events_buffer-heartbeat-prune", "status": "CLOSED — arch-reviewer CONFIRMED (round 3 trên fd76e61)", "root_cause": "consolidate.sh copy MỌI bus event …
 - [2026-07-28T15:39:30] Wags/answer — Architecture: events_buffer-heartbeat-prune DONE+CONFIRMED: {"topic_id": "1521475726329516122", "summary": "events_buffer.md heartbeat leak fix HOÀN TẤT. Phase 1a (prune heartbeat từ events_buffer.md mỗi đêm trước archiv …
@@ -11,6 +10,7 @@
 - [2026-07-28T16:13:14] Mike/decision — plan-2026-07-29-approved: {"date": "2026-07-29", "approved_by": "user", "accounts": {"SpaceX": {"orders": 1, "summary": "BUY TV1 (discretionary, 5.82M <= cash 10.41M). CAPIT PVT/SIP/VNM  …
 - [2026-07-28T17:35:07] Mike/finding — daily-retro-draft-2026-07-28: {"status": "DRAFT_WRITTEN", "file": "state/retro_draft_2026-07-28.md", "incidents_found": 3, "patterns": 2, "summary": "Su co 1 (loanPackageId, da co entry day  …
 - [2026-07-28T17:42:04] Wags/finding — retro-verify-2026-07-28: {"verdict": "GAPS_FOUND", "gaps": 3, "gap_1": {"severity": "minor", "description": "Event count in draft says 19, actual grep = 20. Extra event: Wags finding ev …
+- [2026-07-28T17:45:32] Mike/finding — daily-retro-2026-07-28-finalized: {"status": "DONE", "incidents_logged": 2, "incidents_new": ["daily-retro-pipeline-4-day-silent-death", "funding_required-cash-discipline-3rd-recurrence"], "inci …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -133,49 +133,33 @@ vẫn còn đó cho account tương lai có off-book asset tương tự — nế
 Trứng vàng, cập nhật lại field NGAY khi nạp/rút (nếu quên → NAV/active_nav đếm trùng, không rủi
 ro tiền thật vì executor check cash/ppse live). Chi tiết đầy đủ: [[project-dnse-trung-vang-offbook-assets]] (memory Mike) + `kb/context_planning_mini.md`.
 
-## Đang R&D
-- **Taylor · EXTREME-regime gate PAPER-TRADING** (bắt đầu 2026-07-01, user duyệt trực tiếp): `extreme_regime_enabled=True` CHỈ trên account paper `main` (override trong `trading_bot_accounts.json`); global default + SpaceX/live GIỮ `False`. Week-1 stress-injection PASS 24/24 (`stress_extreme_regime.py`: arm 2-poll · sell-to-floor · buy-pause · cadence ×0.25 + negative controls). **Target kết thúc ~2026-07-28 (~20 phiên).** 3 điều kiện còn lại trước LIVE: (a) ZERO false-trigger qua ~4 tuần benign, (b) không can thiệp NORMAL-path, (c) user sign-off. **KHÔNG bật gì ở live.**
-- **Taylor · vol-scale buy chase-cap (patch#3) PAPER-TRADING** (bắt đầu 2026-07-01, user duyệt trực tiếp): `chase_cap_vol_scale_enabled=True` CHỈ trên account paper `main` (override trong `trading_bot_accounts.json`, k=2.0/ceil=0.04); global default + SpaceX/live GIỮ `False`. Executor-path stress PASS 15/15 (`stress_vol_scale_chase_cap.py`: wiring · WIDEN clamp-to-ceil · MONOTONE · fail-safe rvol absent/0/<0 · paper limit > static + NEG-control live→static). **Target kết thúc ~2026-07-14 (~10 phiên — ngắn hơn EXTREME vì fire trên gap-up thường, tích event nhanh).** Điều kiện trước LIVE: (a) paper sạch (wiring đúng trên quote thật + fail-safe khi thiếu rvol cache), (b) không can thiệp NORMAL-path ngày non-gap, (c) skeptic rerun REAL-fill vs `min(open,L)` proxy trên correlated gap-up @NAV target, (d) user sign-off. **KHÔNG bật gì ở live.**
-- **Taylor**: sector sweep #10+ (chờ Mike dispatch)
-- **Taylor · fill-timing khung giờ (BUY 10:45-11:15 / SELL 09:15-09:45)**: ĐÃ xử lý xong 2026-07-02 (job Taylor_20260702_031608, note cũ ở dòng này lỗi thời). Edge THẬT & IS/OOS-stable (BUY tại 11:15 rẻ hơn open +17.6bps/lệnh, t=12.0; SELL tại open đúng, +11.8bps vs ATC) nhưng **KHÔNG flip `fill_timing_live_gate` ngay** — cần paper tích lũy ~3-4 tuần fill (từ go-live 2026-07-01, mới ~3-4 phiên) để `execution_quality_review.py` xác nhận NET-of-noise capture (noise 110-220bps >> edge 17bps) → quant-skeptic → user sign-off mới flip. Checkpoint tự nhiên: ~cuối tháng 7.
-- **V2.5**: R&D-complete, DISABLED. Reminder: 2026-07-07 Mike hỏi user go-ahead integration.
-- **Taylor · DC-book (ConvergePort) NEUTRAL idle-cash waterfall PAPER-TRADING** (bắt đầu 2026-07-06,
-  user duyệt trực tiếp, job `Taylor_20260706_125540` + `Taylor_20260706_131247`): khi NEUTRAL và
-  BAL/LAG rỗng (đúng tình trạng SpaceX từ ~04/2026), thứ tự ưu tiên giải ngân phần tiền rảnh:
-  **BAL/LAG (full trước, không đổi) → DC book/ConvergePort (double-confirm sector-lens BUY ∧ 8L
-  rating≤2, capacity ~10-15B ex-DHG) → custom30V (phần còn lại)**. Khi BAL/LAG có deal trở lại → rút
-  ưu tiên ngược lại, bán custom30V trước rồi mới đến DC book (reverse-unwind). Backtest xác nhận: DC
-  làm top-priority (thay BAL/LAG) = REFUTE mạnh (12.05% CAGR/DD-38.4% vs R3 28.05%/DD-18.8%); DC làm
-  lớp giữa (đúng thứ tự trên) = +5.0pp trên sleeve parking, ước tính +3.5pp/năm cho SpaceX-now. **Caveat
-  quan trọng: DSR phần excess này chỉ 0.775 (<0.95 ngưỡng an toàn) — bảo hiểm hợp lý, CHƯA phải alpha
-  tin cậy cao** → lý do bắt buộc phải paper trước, không wire live ngay. Chạy CHỈ trên account paper
-  `main` (override trong `trading_bot_accounts.json`), global default + SpaceX/live GIỮ nguyên (không
-  đổi gì). **Đã thêm vào EOD daily report** (theo yêu cầu user 2026-07-06) — xem section paper sleeve
-  trong `eod_trading_report.sh` output.
-  **Review = EVENT-ANCHORED, KHÔNG PHẢI ngày cố định** (user quyết định 2026-07-06, sau khi Taylor tự
-  đính chính lý do "3 tháng" không phải vì DSR mà vì chu-kỳ cơ chế): mốc review = khi chu kỳ
-  reverse-unwind ĐẦU TIÊN (LAG dự kiến refill cuối 07, job `Taylor_20260704_033932`) hoàn tất + settle
-  4-6 tuần sau đó. Sàn ~2 tháng (đủ thấy trọn unwind+settle), trần ~2026-10-06 (tránh mùa BCTC Q3).
-  Nếu LAG refill trượt lịch → mốc review trượt theo, KHÔNG giữ cứng 10-06. **Mike + Taylor cùng theo
-  sát diễn biến portfolio để đề xuất ngày review cụ thể khi đủ điều kiện** — không tự động, không
-  phải 1 con số đã chốt sẵn.
-
-  **⚠️ AGENDA SỬA tại mốc review (thêm 2026-07-13, job `Taylor_20260713_100550`, user xác nhận CHƯA
-  sửa ngay — để tự nhiên chạy sai thêm một thời gian nhằm quan sát whipsaw thật qua đúng đợt LAG
-  refill, rồi sửa gộp 1 lần tại mốc review).** Phát hiện quan trọng: **paper sleeve ĐANG CHẠY SAI so
-  với chính spec đã backtest/pin** — dùng trigger NHỊ PHÂN (BAL/LAG có deal → tắt hẳn DC book) thay vì
-  spec đúng là DC book chạy LIÊN TỤC trên phần tiền dư (residual). Hậu quả đo được: 57.8% ngày
-  NEUTRAL-có-✓✓ vẫn có deal BAL/LAG mới trong khi tiền park còn ~38% NAV → bản nhị phân đang chạy hiện
-  tại **TỆ HƠN CẢ baseline không có DC book** (CAGR 27.26% / DD −17.8% / Calmar 1.53 / turnover 20.7×,
-  so với spec đúng 27.56% / −15.5% / 1.77 / 3.18× và baseline R3 27.35% / −17.6% / 1.55). 4 việc cần
-  làm tại mốc review, theo đúng thứ tự ưu tiên:
-  1. **Đổi trigger sang continuous-residual** (quan trọng nhất — đây là bug thực chất, không phải tối ưu thêm).
-  2. Đồng bộ lịch rebalance DC book vào q2m5 (giống custom30V) — tự giảm whipsaw ~4 lần, đã backtest (job `Taylor_20260706_173317`).
-  3. Cap gộp 0.15/tên (chống trùng mã DC↔custom30V vượt trần name_cap 10% NAV khi sleeve lớn — job `Taylor_20260707_042827`).
-  4. Liquidity floor 3B thay hard-exclude DHG đơn thuần (job `Taylor_20260707_042827`).
-  Đã kiểm tra kỹ 4 góc còn lại (sizing/depth-weight, ✓✓ làm tiebreaker BAL/LAG, mở rộng CRISIS/BEAR,
-  sector-lens đứng riêng) — **không còn không gian cải thiện thật**, không cần backtest thêm cho các
-  góc đó khi tới review, chỉ cần làm đúng 4 việc trên.
+## Đang R&D (mọi mục PAPER-ONLY trừ khi ghi rõ LIVE — chi tiết đầy đủ: job ID trích dẫn + `kb/INCIDENTS.md`)
+- **EXTREME-regime gate** (paper `main` only, từ 07-01): stress PASS 24/24. Target kết thúc
+  ~2026-07-28 (~20 phiên). Trước LIVE cần: 0 false-trigger ~4 tuần, không đụng NORMAL-path,
+  user sign-off. KHÔNG bật ở live.
+- **Vol-scale buy chase-cap patch#3** (paper `main` only, từ 07-01, k=2.0/ceil=0.04): stress PASS
+  15/15. Target kết thúc ~2026-07-14. Trước LIVE cần: paper sạch, không đụng NORMAL-path ngày
+  non-gap, skeptic rerun REAL-fill, user sign-off. KHÔNG bật ở live.
+- **Sector sweep #10+**: chờ Mike dispatch.
+- **Fill-timing khung giờ** (BUY 11:15 / SELL open): edge thật đo được (+17.6bps BUY t=12.0,
+  +11.8bps SELL) nhưng KHÔNG flip `fill_timing_live_gate` — cần ~3-4 tuần paper fill để
+  `execution_quality_review.py` xác nhận NET-of-noise (noise 110-220bps >> edge 17bps). Checkpoint
+  tự nhiên ~cuối tháng 7.
+- **V2.5**: R&D-complete, DISABLED. Reminder 2026-07-07: Mike hỏi user go-ahead integration.
+- **DC-book (ConvergePort) NEUTRAL idle-cash waterfall** (paper `main` only, từ 07-06): thứ tự ưu
+  tiên giải ngân **BAL/LAG (full trước) → DC book (double-confirm sector-lens BUY ∧ 8L rating≤2,
+  capacity ~10-15B ex-DHG) → custom30V**; reverse-unwind khi BAL/LAG có deal lại. Backtest: +5.0pp
+  sleeve parking (~+3.5pp/năm SpaceX-now), nhưng DSR phần excess chỉ 0.775 (<0.95 ngưỡng an toàn) —
+  bảo hiểm hợp lý, CHƯA phải alpha tin cậy cao → lý do bắt buộc paper trước. Trong EOD daily report.
+  Review = EVENT-ANCHORED (khi chu kỳ reverse-unwind đầu tiên hoàn tất + settle 4-6 tuần), sàn
+  ~2 tháng, trần ~2026-10-06 (trượt theo nếu LAG refill trượt lịch).
+  ⚠️ **Bug đã biết, sửa TẠI mốc review (không sửa sớm — user chốt 07-13, muốn quan sát whipsaw thật
+  trước)**: paper sleeve dùng trigger NHỊ PHÂN thay vì spec đúng (DC book chạy liên tục trên residual)
+  → hiện TỆ HƠN baseline không-DC (CAGR 27.26%/DD−17.8%/Calmar 1.53/turnover 20.7× vs spec đúng
+  27.56%/−15.5%/1.77/3.18×). 4 việc khi tới review, theo thứ tự: (1) đổi sang continuous-residual
+  trigger — bug thực chất, ưu tiên nhất; (2) đồng bộ rebalance vào q2m5 (giảm whipsaw ~4 lần);
+  (3) cap gộp 0.15/tên (chống trùng DC↔custom30V); (4) liquidity floor 3B thay hard-exclude DHG.
+  4 góc khác đã kiểm tra kỹ, không còn dư địa cải thiện — không cần backtest thêm cho chúng.
 
 ## Workflow ngày trading (SpaceX/ZaloPay, T2-T6, giờ ICT)
 Timeline đầy đủ (giờ từng bước, checker gì, ranh giới tự sửa) đã chuẩn tắc hoá ở
