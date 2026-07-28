@@ -52,7 +52,11 @@ WATCH = [
 def kb_ingest_lag_hours():
     """Hours between the newest event on the bus and the newest event that reached the KB.
     Both sides are UTC Zulu (bus "ts" fields; the "- [<ts>]" lines consolidate.sh writes), so
-    unlike the ICT artifacts above this needs no timezone handling."""
+    unlike the ICT artifacts above this needs no timezone handling.
+
+    Heartbeats are excluded from the BUS side because kb_nightly.sh Phase 1a strips them from
+    the KB side — counting them here but not there lets the gap grow on its own through any
+    heartbeat-only stretch and raises a STALE that ingestion never caused."""
     newest_bus = ""
     for fp in glob.glob(os.path.join(MIKE, "bus/inbox/*.jsonl")):
         try:
@@ -62,9 +66,12 @@ def kb_ingest_lag_hours():
                     if not line:
                         continue
                     try:
-                        ts = json.loads(line).get("ts", "")
+                        ev = json.loads(line)
                     except Exception:
                         continue          # unparseable line can't date the bus
+                    if ev.get("event_type") == "heartbeat":
+                        continue          # compare like with like (see docstring)
+                    ts = ev.get("ts", "")
                     if ts > newest_bus:
                         newest_bus = ts
         except Exception:
@@ -75,8 +82,10 @@ def kb_ingest_lag_hours():
     try:
         with open(os.path.join(MIKE, "kb/events_buffer.md"), encoding="utf-8") as f:
             for line in f:
-                m = re.match(r"^- \[(\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ)\]", line)
-                if m and m.group(1) > newest_kb:
+                # "/heartbeat" is skipped on this side too, so the comparison is symmetric
+                # both before and after Phase 1a first strips them from the buffer.
+                m = re.match(r"^- \[(\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ)\] \S+?/(\S+)", line)
+                if m and m.group(2) != "heartbeat" and m.group(1) > newest_kb:
                     newest_kb = m.group(1)
     except Exception:
         return -1.0                       # buffer unreadable -> UNKNOWN, louder than STALE

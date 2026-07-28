@@ -33,7 +33,7 @@ Centralizes all JSON building/reading so the shell scripts depend only on python
       -> seconds since the job's last AGENT-written bus event ('-' if none); excludes
          _job_watcher liveness pings — input to dispatch.sh heartbeat-aware deadline
 """
-import sys, os, json, uuid, glob, datetime
+import sys, os, json, uuid, glob, datetime, hashlib
 
 TS_FMT = "%Y-%m-%dT%H:%M:%SZ"
 
@@ -201,12 +201,20 @@ def cmd_format_events(a):
 # (event_id + ts of that line), not just how many. If the marked event is no longer at the
 # recorded line, we relocate it by content instead of trusting the number.
 def _line_mark(raw):
-    """(event_id, ts) of a raw JSONL line — (None, None) if it isn't parseable JSON."""
+    """(anchor, ts) of a raw JSONL line. ts is None when the line isn't parseable JSON.
+
+    The anchor is the event_id when the line has one, else a hash of the raw line. It is
+    NEVER None: a cursor anchored on None degrades straight back to a bare number on its
+    next read, which is exactly the leapfrog this module exists to close (a handful of old
+    bus events carry no event_id, and a torn line has none either)."""
     try:
         e = json.loads(raw)
-        return e.get("event_id"), e.get("ts")
+        eid, ts = e.get("event_id"), e.get("ts")
     except Exception:
-        return None, None
+        eid, ts = None, None
+    if not eid:
+        eid = "raw:" + hashlib.sha1(raw.encode("utf-8", "replace")).hexdigest()[:16]
+    return eid, ts
 
 
 def _cursor_read(path):
@@ -230,9 +238,16 @@ def _cursor_read(path):
 
 def _cursor_write(path, n, last_id, last_ts):
     tmp = path + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as f:
-        json.dump({"n": n, "last_id": last_id, "last_ts": last_ts}, f, ensure_ascii=False)
-    os.replace(tmp, path)          # atomic — a kill mid-write can't truncate the cursor
+    try:
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump({"n": n, "last_id": last_id, "last_ts": last_ts}, f, ensure_ascii=False)
+        os.replace(tmp, path)      # atomic — a kill mid-write can't truncate the cursor
+    except Exception:
+        try:
+            os.remove(tmp)         # don't leave a half-written cursor lying in state/offsets
+        except OSError:
+            pass
+        raise
 
 
 def cursor_shift(state_path, removed_indices):
@@ -270,9 +285,10 @@ def cmd_cursor_advance(a):
     Resolution order, most trustworthy first:
       1. mark still sits at line n           -> fast path, no repair
       2. mark found at another line j        -> resume from j (exact, no loss, no dup)
-      3. mark gone (its line was pruned)     -> resume by ts, RE-EMITTING ts ties: a
-         duplicate KB line is noise, a lost finding is unrecoverable
-      4. no mark at all (legacy int cursor)  -> trust the number, clamp it to EOF
+      3. mark gone (its line was pruned)     -> resume at the first line that is NOT
+         provably older than the mark, RE-EMITTING ts ties: a duplicate KB line is noise,
+         a lost finding is unrecoverable
+      4. legacy bare-int cursor (no mark)    -> trust the number, clamp it to EOF
     """
     inbox, state = a[0], a[1]
     try:
@@ -286,21 +302,34 @@ def cmd_cursor_advance(a):
 
     if prev <= 0:
         start = 0                                       # fresh file: ingest everything
-    elif last_id is None:
-        start = min(prev, total)                        # legacy cursor: number is all we have
-        if prev > total:
+    elif last_id is None and last_ts is None:
+        start = min(prev, total)                        # legacy bare-int cursor: the number
+        if prev > total:                                # is genuinely all we have
             repair = "clamp-legacy"
-    elif prev <= total and _line_mark(lines[prev - 1])[0] == last_id:
+    elif last_id is not None and prev <= total and _line_mark(lines[prev - 1])[0] == last_id:
         start = prev                                    # fast path — cursor still true
     else:
+        # A cursor with a ts but no id is one an older build wrote before anchors were
+        # mandatory; it must NOT fall back to the bare number (that silently reopens the
+        # leapfrog), so it resolves by content here like any other stale cursor.
         start = None
-        for j, raw in enumerate(lines, 1):              # (2) relocate the marked event
-            if _line_mark(raw)[0] == last_id:
+        for j, raw in enumerate(lines, 1):              # (2) relocate the marked line
+            if last_id is not None and _line_mark(raw)[0] == last_id:
                 start = j
                 repair = "resync-id"
                 break
         if start is None:                               # (3) mark itself was pruned away
-            start = sum(1 for raw in lines if (_line_mark(raw)[1] or "") < (last_ts or ""))
+            # POSITIONAL scan, not a count: counting "lines older than the mark" treats an
+            # unparseable/blank line ANYWHERE as already-read and shifts the resume point
+            # past a real unread event (reproduced by arch-reviewer). Stop at the first line
+            # that is not provably older — including a torn one, which is re-emitted rather
+            # than skipped.
+            start = total
+            for j, raw in enumerate(lines):
+                ts = _line_mark(raw)[1]
+                if ts is None or not last_ts or ts >= last_ts:
+                    start = j
+                    break
             repair = "resync-ts"
 
     for raw in lines[start:]:

@@ -33,11 +33,21 @@ done
 # A repaired cursor means events were at risk of being dropped — that MUST reach a human.
 # Previously this was an echo into logs/consolidator.log, which nobody reads: the 2026-07-28
 # loss ran 9h unnoticed. notify.sh is dedup'd and always exits 0, so this can't break the run.
+# Debounced per file (state/cursorwarn/<base>, same shape watchdog.sh uses for stale pipelines):
+# a repair that can't self-clear would otherwise alert AND append a bus error on every hourly
+# and post-dispatch run — each of those bumps the KB, commits, and posts to Discord, so the
+# alarm itself would become the event storm. A CHANGED repair line still alerts immediately.
+WARN_DIR="$ROOT/state/cursorwarn"; mkdir -p "$WARN_DIR"
+SEEN="$(mktemp)"; trap 'rm -f "$NEW" "$REPAIRS" "$SEEN"' EXIT
 if [ -s "$REPAIRS" ]; then
   cat "$REPAIRS"                       # anything unexpected (a traceback) still reaches the log
   while IFS= read -r r; do
     case "$r" in CURSOR-*) ;; *) continue ;; esac   # only our own structured lines alert
     echo "$(date -u +%FT%TZ) $r"
+    wbase="$(echo "$r" | awk '{print $2}' | tr -c 'A-Za-z0-9._-' '_')"; wmark="$WARN_DIR/${wbase:-unknown}"
+    echo "${wbase:-unknown}" >> "$SEEN"
+    if [ "$(cat "$wmark" 2>/dev/null || true)" = "$r" ]; then continue; fi   # unchanged → already reported
+    printf '%s' "$r" > "$wmark"
     "$ROOT/bin/notify.sh" "⚠️ consolidate.sh CURSOR REPAIR — KB ingestion đã lệch, kiểm tra event có bị bỏ sót:
 \`$r\`" >/dev/null 2>&1 || true
     "$ROOT/bin/append_event.sh" Mike error "consolidate-cursor-repair" \
@@ -45,6 +55,12 @@ if [ -s "$REPAIRS" ]; then
       >/dev/null 2>&1 || true
   done < "$REPAIRS"
 fi
+# Clear the marker for every file that repaired cleanly this run, so the NEXT occurrence of
+# the same repair is reported again instead of being swallowed as "already seen".
+for wmark in "$WARN_DIR"/*; do
+  [ -e "$wmark" ] || continue
+  grep -qxF "$(basename "$wmark")" "$SEEN" 2>/dev/null || rm -f "$wmark"
+done
 
 # --- 2. if new knowledge: log + bump + republish + commit ---
 if [ -s "$NEW" ]; then
