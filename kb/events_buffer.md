@@ -878,3 +878,11 @@
 - [2026-07-28T12:02:03Z] Winston/heartbeat — Winston_20260728_120001: {"status": "still_running", "elapsed_min": 2, "job_id": "Winston_20260728_120001", "source": "watcher"}
 - [2026-07-28T12:02:39Z] Winston/finding — cron_registry OKF PILOT done — resume xác nhận + Architecture notified: {"job_goc": "Winston_20260728_114643", "resume_job": "Winston_20260728_120001", "status": "DONE_CONFIRMED", "note": "Cả 2 OKF PILOT (data_registry 104434 + cron_registry 114643) đã xong trước usage-limit. Resume này chỉ verify + gửi Architecture notification còn thiếu (topic 1521475726329516122). Không có việc thiếu sót.", "commits": ["abe5a32", "5d053fe", "7388da5"], "arch_reviewer": "CONFIRMED cả 2"}
 - [2026-07-28T12:02:46Z] Winston/heartbeat — Winston_20260728_114643: {"status": "still_running", "elapsed_min": 16, "job_id": "Winston_20260728_114643", "source": "watcher"}
+
+## Consolidation 2026-07-28T12:52:51Z
+- [2026-07-28T12:47:57Z] Wags/heartbeat — Wags_20260728_121552: {"status": "still_running", "elapsed_min": 32, "job_id": "Wags_20260728_121552", "source": "watcher"}
+- [2026-07-28T12:48:13Z] Wags/heartbeat — Wags_20260728_121552: {"status": "in_progress", "note": "offsets repaired + consolidate resumed (623->880 lines, KB v1458); commit 51b20f6; chuan bi arch-review"}
+- [2026-07-28T12:48:57Z] Wags/heartbeat — Wags_20260728_121552: {"status": "still_running", "elapsed_min": 33, "job_id": "Wags_20260728_121552", "source": "watcher"}
+- [2026-07-28T12:49:57Z] Wags/heartbeat — Wags_20260728_121552: {"status": "still_running", "elapsed_min": 34, "job_id": "Wags_20260728_121552", "source": "watcher"}
+- [2026-07-28T12:50:57Z] Wags/heartbeat — Wags_20260728_121552: {"status": "still_running", "elapsed_min": 35, "job_id": "Wags_20260728_121552", "source": "watcher"}
+- [2026-07-28T12:51:57Z] Wags/heartbeat — Wags_20260728_121552: {"status": "still_running", "elapsed_min": 36, "job_id": "Wags_20260728_121552", "source": "watcher"}
