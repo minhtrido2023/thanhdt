@@ -349,7 +349,7 @@ if [ "$DOW" -eq 5 ]; then
     # SONG SONG với ctx_check (ngưỡng cứng theo size) nhưng chiều KHÁC: phát hiện
     # TỪNG mục '## ...' đã im lặng quá lâu, thứ mục 7 (size+narrative chung) không
     # bắt được. Mục 7 GIỮ NGUYÊN — đây là bổ sung, không thay thế.
-    # Cơ chế: với mỗi section, lấy NGÀY (2026-MM-DD) MỚI NHẤT xuất hiện trong nội
+    # Cơ chế: với mỗi section, lấy NGÀY (YYYY-MM-DD) MỚI NHẤT xuất hiện trong nội
     # dung làm 'lần chạm cuối'. CHỈ tính ngày <= hôm nay: ngày tương lai trong nội
     # dung là DEADLINE/target (vd "tracking đến 2026-09-30", "trần ~2026-10-06"),
     # KHÔNG phải dấu thời gian chạm file — nếu lấy max() thô sẽ ra tuổi âm và che
@@ -372,7 +372,7 @@ if [ "$DOW" -eq 5 ]; then
         done < <(awk -v today="$TODAY_ISO" '
             function scan(line,   s, d) {
                 s = line
-                while (match(s, /2026-[0-9][0-9]-[0-9][0-9]/)) {
+                while (match(s, /[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/)) {
                     d = substr(s, RSTART, RLENGTH)
                     s = substr(s, RSTART + RLENGTH)
                     if (d <= today && (latest == "" || d > latest)) latest = d
