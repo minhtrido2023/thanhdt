@@ -345,6 +345,51 @@ if [ "$DOW" -eq 5 ]; then
         CTX_BLOAT_WARN="
 8. **Context-bloat hard-threshold cảnh báo (VIỆC 3, 2026-07-27)** — các file dưới đây VƯỢT ngưỡng cứng và load vào MỌI turn Mike + MỌI dispatch. Đưa cảnh báo này RÕ RÀNG vào output review; **KHÔNG tự cắt nội dung** — để user/Mike quyết định phần nào archive:${CTX_BLOAT_WARN}"
     fi
+    # ── Per-section STALE-by-AGE flag cho kb/current_ops.md (Wags 2026-07-28) ────
+    # SONG SONG với ctx_check (ngưỡng cứng theo size) nhưng chiều KHÁC: phát hiện
+    # TỪNG mục '## ...' đã im lặng quá lâu, thứ mục 7 (size+narrative chung) không
+    # bắt được. Mục 7 GIỮ NGUYÊN — đây là bổ sung, không thay thế.
+    # Cơ chế: với mỗi section, lấy NGÀY (2026-MM-DD) MỚI NHẤT xuất hiện trong nội
+    # dung làm 'lần chạm cuối'. CHỈ tính ngày <= hôm nay: ngày tương lai trong nội
+    # dung là DEADLINE/target (vd "tracking đến 2026-09-30", "trần ~2026-10-06"),
+    # KHÔNG phải dấu thời gian chạm file — nếu lấy max() thô sẽ ra tuổi âm và che
+    # mất mục thật sự cũ. Section KHÔNG có ngày cụ thể nào (Kill-switches, Cron,
+    # daemon evergreen) → BỎ QUA, không flag (không phải quyết-định-theo-thời-điểm).
+    # CHỈ phát hiện + liệt kê; KHÔNG tự archive — quyết định là judgment của Mike.
+    STALE_SECTIONS_WARN=""
+    if [ -f "$ROOT/kb/current_ops.md" ]; then
+        TODAY_ISO=$(date -u +%Y-%m-%d)
+        TODAY_EPOCH=$(date -u -d "$TODAY_ISO" +%s)
+        while IFS=$'\t' read -r ldate title; do
+            [ -n "$ldate" ] || continue
+            d_epoch=$(date -u -d "$ldate" +%s 2>/dev/null) || continue
+            age=$(( (TODAY_EPOCH - d_epoch) / 86400 ))
+            if [ "$age" -gt 14 ]; then
+                log "STALE-SECTION WARNING: current_ops.md '$title' im lặng ${age}d (ngày gần nhất=$ldate)"
+                STALE_SECTIONS_WARN="${STALE_SECTIONS_WARN}
+- ⚠️ **${title}** — ${age} ngày không chạm (ngày gần nhất trong mục: ${ldate})"
+            fi
+        done < <(awk -v today="$TODAY_ISO" '
+            function scan(line,   s, d) {
+                s = line
+                while (match(s, /2026-[0-9][0-9]-[0-9][0-9]/)) {
+                    d = substr(s, RSTART, RLENGTH)
+                    s = substr(s, RSTART + RLENGTH)
+                    if (d <= today && (latest == "" || d > latest)) latest = d
+                }
+            }
+            /^## / {
+                if (title != "" && latest != "") print latest "\t" title
+                title = substr($0, 4); latest = ""; scan($0); next
+            }
+            { scan($0) }
+            END { if (title != "" && latest != "") print latest "\t" title }
+        ' "$ROOT/kb/current_ops.md")
+    fi
+    if [ -n "$STALE_SECTIONS_WARN" ]; then
+        STALE_SECTIONS_WARN="
+9. **\`kb/current_ops.md\` — cờ mục IM LẶNG >14 ngày (phát hiện theo TUỔI, Wags 2026-07-28)** — các mục dưới đây có NGÀY GẦN NHẤT trong nội dung cách hôm nay hơn 14 ngày. Đây là danh sách CỜ tự động (chỉ phát hiện, KHÔNG tự archive — bổ sung cho mục 7 theo size). Với TỪNG mục, trả lời TƯỜNG MINH ngay trong review này — **không bỏ trống mục nào** (đoán sai = giấu mất quyết định thật đang treo, tệ hơn phình file): hoặc **'ĐÃ ĐÓNG → archive theo đúng mẫu \`kb/projects/<slug>.md\` + cập nhật \`kb/projects/INDEX.md\`, xoá section khỏi current_ops.md'**, hoặc **'VẪN MỞ → giữ nguyên, không đổi gì'** (mục evergreen/tham chiếu vận hành thường xuyên như workflow/onboarding thường thuộc loại này):${STALE_SECTIONS_WARN}"
+    fi
     # DISPATCH_FROM=user required: dispatch.sh blocks any non-user caller from targeting
     # Mike (agents must escalate via a question event instead) AND blocks self-dispatch
     # (from==id). This cron job's default $from is "Mike" (dispatch.sh's own default),
@@ -388,7 +433,7 @@ rút về 1-2 câu như quy ước ở đầu file current_ops.md) → rút gọ
 07-17 (giữ current-state + pointer INCIDENTS.md, xoá play-by-play đã có nơi khác lưu). CHỈ rút
 gọn mục đã XÁC NHẬN đóng — mục còn 'CHỜ USER'/'chưa quyết' GIỮ NGUYÊN, không rút gọn nhầm việc
 đang mở thành trông như đã xong.
-KHÔNG xóa archive. Không cần hỏi user cho việc 1-6 — đây là routine maintenance đã được user uỷ quyền. Sau khi xong: ghi sự thay đổi lên bus (append_event.sh Mike decision 'kb-weekly-editorial') và notify Telegram.${CTX_BLOAT_WARN}" \
+KHÔNG xóa archive. Không cần hỏi user cho việc 1-6 — đây là routine maintenance đã được user uỷ quyền. Sau khi xong: ghi sự thay đổi lên bus (append_event.sh Mike decision 'kb-weekly-editorial') và notify Telegram.${CTX_BLOAT_WARN}${STALE_SECTIONS_WARN}" \
         --timeout 900 >> "$LOG" 2>&1 &
     log "Editorial dispatch launched (background)."
 fi
