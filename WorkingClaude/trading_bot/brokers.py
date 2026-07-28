@@ -196,8 +196,10 @@ class BrokerBase:
             mv += p["total"] * (px or 0)
         return cash + mv
 
-    def place_order(self, symbol, qty, side, price=None, order_type="LO"):
-        """→ order_id (str)."""
+    def place_order(self, symbol, qty, side, price=None, order_type="LO",
+                    no_loan_package=False):
+        """→ order_id (str). no_loan_package=True: đặt lệnh KHÔNG gắn gói vay nào
+        (lệnh tiền mặt thuần) — broker không hỗ trợ gói vay có thể bỏ qua cờ này."""
         raise NotImplementedError
 
     def cancel_order(self, order_id):
@@ -283,7 +285,10 @@ class PHSBroker(BrokerBase):
         self._quote_cache[symbol] = (_t.time(), q)
         return q
 
-    def place_order(self, symbol, qty, side, price=None, order_type="LO"):
+    def place_order(self, symbol, qty, side, price=None, order_type="LO",
+                    no_loan_package=False):
+        # PHS không dùng gói vay DNSE → cờ no_loan_package không áp dụng, chấp nhận
+        # để interface đồng nhất với DNSEBroker (executor gọi chung 1 chữ ký).
         r = self.client.place_order(self.account_id, symbol, qty=int(qty), side=side,
                                     order_type=order_type, price=price)
         self._log_raw("place_order", {"req": [symbol, qty, side, price, order_type],
@@ -486,11 +491,13 @@ class DNSEBroker(BrokerBase):
         self._quote_cache[symbol] = (_t.time(), q)
         return q
 
-    def place_order(self, symbol, qty, side, price=None, order_type="LO"):
+    def place_order(self, symbol, qty, side, price=None, order_type="LO",
+                    no_loan_package=False):
         r = self.client.place_order(self.account_id, symbol, qty=int(qty),
-                                    side=side, order_type=order_type, price=price)
+                                    side=side, order_type=order_type, price=price,
+                                    no_loan_package=no_loan_package)
         self._log_raw("place_order", {"req": [symbol, qty, side, price, order_type],
-                                      "resp": r})
+                                      "no_loan_package": no_loan_package, "resp": r})
         oid = qget(r, "id", "orderid", "orderId")
         if oid is None:
             raise RuntimeError(f"place_order không trả id: {r}")
