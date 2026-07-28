@@ -893,3 +893,43 @@
 
 ## Consolidation 2026-07-28T14:07:01Z
 - [2026-07-28T13:45:48Z] Taylor/status — fa_ratings-refresh-ok: {"rows": 12505}
+
+## Consolidation 2026-07-28T15:07:01Z
+- [2026-07-28T14:35:27Z] Wags/heartbeat — Wags_20260728_143501: {"status": "in_progress", "note": "bat dau task1 khoi phuc event mat"}
+- [2026-07-28T14:36:02Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 1, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T14:37:02Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 2, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T14:38:03Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 3, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T14:38:16Z] Wags/heartbeat — Wags_20260728_143501: {"status": "in_progress", "note": "task1: da chen lai event mat vao events_buffer dong 623, dang quet lai toan bo 643 event"}
+- [2026-07-28T14:39:03Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 4, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T14:40:03Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 5, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T14:40:44Z] Wags/heartbeat — Wags_20260728_143501: {"status": "in_progress", "note": "task1 XONG (0 event thieu, commit 589f1b2). Root cause xac nhan tu log. Sang task2 content-based cursor"}
+- [2026-07-28T14:41:03Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 6, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T14:42:03Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 7, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T14:43:03Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 8, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T14:44:04Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 9, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T14:45:04Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 10, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T14:45:45Z] Wags/heartbeat — Wags_20260728_143501: {"status": "in_progress", "note": "task2+3 XONG (content cursor + notify, 9 nhom test A-I PASS). Sang task5 tru du + task6 comment"}
+- [2026-07-28T14:46:05Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 11, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T14:47:05Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 12, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T14:48:05Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 13, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T14:49:05Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 14, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T14:49:39Z] Wags/heartbeat — Wags_20260728_143501: {"status": "in_progress", "note": "resume sau context-compact: kiem tra trang thai 5 viec"}
+- [2026-07-28T14:50:05Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 15, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T14:51:05Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 16, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T14:51:26Z] Wags/heartbeat — Wags_20260728_143501: {"status": "in_progress", "note": "viec1 verified 0 missing; dang chay test suite cursor content-based"}
+- [2026-07-28T14:52:05Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 17, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T14:53:05Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 18, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T14:54:05Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 19, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T14:54:31Z] Wags/heartbeat — Wags_20260728_143501: {"status": "in_progress", "note": "18 test cursor + 7 test lag + e2e sandbox PASS; dang commit"}
+- [2026-07-28T14:55:05Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 20, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T14:56:05Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 21, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T14:57:06Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 22, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T14:58:06Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 23, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T14:59:06Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 24, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T15:00:06Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 25, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T15:01:06Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 26, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T15:02:06Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 27, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T15:03:06Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 28, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T15:04:06Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 29, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T15:05:06Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 30, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T15:06:07Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 31, "job_id": "Wags_20260728_143501", "source": "watcher"}
