@@ -55,9 +55,11 @@ dồn mẫu regime 2020-21, không phải pattern lặp lại được; hậu-20
 - BQ Local Cache (DuckDB, threads=1): `data/bq_cache/`, ~100ms vs 5-15s BQ. Sync 23:45 ICT.
 - Auto-OTP Gmail: `gmail_otp_reader.py` dùng `internalDate` filter (KHÔNG `newer_than`).
 - PHS: **BLOCKED** (lỗi -700003, chờ credential) → paper only.
-- **Workflow ngày trading đầy đủ** (T2-T6): BQ freshness(17:30) → plan T+1(19:30) → preflight(08:45)
-  → execute sáng(09:05) → resume chiều(13:00) → **EOD report(15:00, `eod_trading_report.sh`, thêm
-  2026-07-01)**. Toàn bộ post vào 1 Discord thread — Trading Daily (1521470705563340910).
+- **Workflow ngày trading đầy đủ** (T2-T6, giờ chuẩn tắc ở `kb/ops_runbook.md`): BQ
+  freshness(19:00) → plan T+1(21:00) → preflight(08:45) → execute sáng(09:05) →
+  resume chiều(13:00) → **EOD report(19:10, `eod_trading_report.sh`)**. Alert vận hành sống
+  post vào Trading Daily (1521470705563340910); EOD/tuần/tháng vào Trading report
+  (1522576692638388364) — xem chi tiết routing ở `kb/current_ops.md`.
 
 ### Kiến trúc fleet
 - Companion daemon: **CHỈ Mike**. Mọi agent khác (Taylor, Bill, Mafee, v.v.) headless/native on-demand.

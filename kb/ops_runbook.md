@@ -22,10 +22,12 @@ chưa ăn → notify "cần người xem", không dispatch lặp vô hạn.
 
 | Giờ | Bước (cron) | Kiểm tra | Khi lỗi |
 |---|---|---|---|
-| 23:15 (đêm trước) | `daily_refresh_v34b_linux.sh` | v3.4b base + DT5G publish tới BQ, macro_health.json HEALTHY | Log `!!! ABORT` → autofix; macro_health FAILED kéo dài → xem mục "Macro health" dưới |
+| 18:30 (chiều trước) | `daily_refresh_v34b_linux.sh` | v3.4b base + DT5G publish tới BQ, macro_health.json HEALTHY | Log `!!! ABORT` → autofix; macro_health FAILED kéo dài → xem mục "Macro health" dưới |
+| 19:00 (tối trước) | `bq_freshness_check.sh` | BQ fresh → pipeline EOD → dispatch DollarBill lập plan T+1 **cho MỌI account live** | STALE → block DollarBill + alert (có sẵn); dispatch fail → check `bus/jobs`, circuit breaker |
+| 20:30 (tối trước) | `inject_discretionary_orders.sh` | Chèn lệnh gom DISCRETIONARY_SPECIAL (vd TV1 tranche) vào plan T+1 sau khi DollarBill ghi, trước gửi plan | — |
+| 21:00 (tối trước) | `send_plan_report.sh` (per account) | Plan T+1 TỒN TẠI THẬT, đúng ngày, đúng schema (verify artifact, không tin job status) | Escalate bus `question` + Telegram (có sẵn) — plan cần user duyệt, KHÔNG tự tạo |
+| 23:00 (tối trước) | `send_plan_report.sh --second-chance` (per account) | Re-send idempotent nếu plan sửa sau 21:00 chưa được gửi lại | Như 21:00 |
 | 23:45 (đêm trước) | `sync_bq_cache_daily.sh` | **Cache verified OK toàn bộ bảng** (không chỉ preflight) | Verify FAILED → **autofix tự động** (đã wire 2026-07-07) — bài học: cache thối âm thầm 10 ngày gây false-SEV1 |
-| 17:30 (chiều trước) | `bq_freshness_check.sh` | BQ fresh → pipeline EOD → dispatch DollarBill lập plan T+1 **cho MỌI account live** | STALE → block DollarBill + alert (có sẵn); dispatch fail → check `bus/jobs`, circuit breaker |
-| 19:30 (tối trước) | `send_plan_report.sh` (per account) | Plan T+1 TỒN TẠI THẬT, đúng ngày, đúng schema (verify artifact, không tin job status) | Escalate bus `question` + Telegram (có sẵn) — plan cần user duyệt, KHÔNG tự tạo |
 | 08:20 | `ops_health_check.sh` (per account) | BOT_STOP, xung đột file plan, lỗi lặp journal, circuit breaker, question tồn, đối chiếu preflight | WARN > 0 → **autofix tự động** (wire 2026-07-07) + vẫn post cảnh báo như cũ |
 | 08:45 | `preflight_check.sh` (per account) | Plan hôm nay tồn tại + approved + macro_health + Gmail OTP + BQ lag | RED vì plan thiếu/chưa duyệt → USER phải xử lý (không autofix); RED vì hạ tầng → autofix |
 | 09:05 | `run_bot.sh` (per account) | Bot chạy, đặt lệnh theo plan | — (thực thi thật, autofix KHÔNG đụng) |
@@ -34,8 +36,8 @@ chưa ăn → notify "cần người xem", không dispatch lặp vô hạn.
 | 12:45 | `ops_health_check.sh` lần 2 | Như 08:20 + bắt vấn đề phát sinh phiên sáng | Như 08:20 |
 | 13:00 | `run_bot.sh` resume (per account) | Resume state, chạy phiên chiều | Như 09:05 |
 | ~14:50 | phiên đóng (ATC) | Bot tự cancel lệnh treo, ghi `exec_*_report.md` | — (thực thi thật, autofix KHÔNG đụng) |
-| 15:00 | `eod_trading_report.sh` (per account) | Report khớp lệnh + NAV verify-pipeline + đối soát broker≠state | Crash → autofix; kênh Discord hỏng → ĐÃ CÓ fallback Telegram+Trading Daily tự động |
 | 15:05 | `dc_book_waterfall_paper.py --update` | Paper sleeve DC-book cập nhật | Lỗi → autofix (paper, không chạm tiền thật) |
+| 19:10 | `eod_trading_report.sh` (per account) | Report khớp lệnh + NAV verify-pipeline + đối soát broker≠state | Crash → autofix; kênh Discord hỏng → ĐÃ CÓ fallback Telegram+Trading Daily tự động |
 | Mỗi 10' | `watchdog.sh` | Session Mike sống, macro_health staleness (`staleness_watch.py`) | Tự restart/clear-bridge (có sẵn) |
 
 ## Nơi kết quả đổ về (đọc mỗi sáng, KHÔNG cần user nhắc)

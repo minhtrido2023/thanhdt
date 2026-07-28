@@ -32,19 +32,24 @@ như TV1/DGC.
 `universe_pit` (point-in-time từ `tav2_bq.ticker`, B3=1,0 tỷ VND/ngày). **Cổng cứng §3.2b/Q9 ĐÃ
 MỞ từ 2026-07-22** (user chốt A′+Q-C, không Q-B, sau khi G2b đo xong độ rò chất lượng) — P1-P3 đã
 cutover production (due_diligence.py, custom30V→`universe_pit_q` commit `ce7d457`, golive_recommend_v23
-commit `0bfbdfe`, cả 2 user duyệt + selfcheck pass). **Cổng CAPIT §4.4 vẫn ĐÓNG riêng** — breadth/pool
-CAPIT vẫn đọc `ticker_prune` có chủ ý tới khi hiệu chuẩn lại (2 vòng đo đều thất bại cấu trúc tìm
-ngưỡng bảo toàn; cấm cutover khi `capit_fired=true`). R3 (allocator gate) đã cutover chính thức — xem
-số liệu ở "Tri thức chung của đội" bên dưới. Còn lại: G5 shadow ≥10 phiên, G6 re-pin R3, G7 N-trial
-review, G8 data/cron-registry gate, G9 quant-skeptic full review. Tài liệu đầy đủ (kiến trúc/vận
+commit `0bfbdfe`, cả 2 user duyệt + selfcheck pass). **Cổng CAPIT §4.4 = NỬA XONG (G4)**: breadth ĐÃ
+cutover sang `universe_pit` (`CAPIT_BREADTH_SOURCE=pit`, top-250, washout_gate 0,31, commit `dcee252`,
+selfcheck 26/26, quant-skeptic CONFIRMED, A/B live 0 đồng); **pool pbz + ADV cap CỐ Ý còn ghim
+`ticker_prune`** (pool `pit` đổi rổ đang giải ngân — tách khỏi migration, 2 vòng đo đều thất bại cấu
+trúc tìm ngưỡng bảo toàn cho pool) — cấm cutover pool khi `capit_fired=true`. R3 (allocator gate) đã
+cutover chính thức — xem số liệu ở "Tri thức chung của đội" bên dưới. Còn lại: G5 shadow ≥10 phiên,
+G6 re-pin R3, G7 N-trial review, G8 data/cron-registry gate, G9 quant-skeptic full review. Tài liệu
+đầy đủ (kiến trúc/vận
 hành/Q&A gốc, bảng G0-G9): `mike/agents/Taylor/research/ticker_prune_replacement_plan.md` +
 `mike/agents/Winston/universe_pit_ops_feasibility_20260722.md` +
 `.../ticker_prune_universe_QA_bq_admin_20260722.md`.
 
 ## CAPIT (bear-washout) — ĐÃ FIRE từ 07-20/07-21, đang giải ngân dở (cập nhật 2026-07-22)
 `capit_fired=true` từ 07-20 (`data/golive_v23_status.json`, breadth_oversold vượt xa
-washout_gate=0,3). SAB/SIP/VNM đã khớp; PVT/NCT còn vướng (chờ trần giá/quota) — theo dõi qua EOD
-report. Nguồn vốn: `NAV_book_LAG × capit_size` (user chốt 07-20). 2 điểm cần nhớ: (a) sát biên
+washout_gate=0,3). Rổ hiện tại luôn đọc `data/golive_v23_status.json` (`n_capit_basket`,
+`capit_adv_caps`, `capit_dd_excluded`) — ĐỪNG chép cứng danh sách mã vào đây, rổ đổi theo phiên (đã
+từng sai lệch: bản trước ghi cứng NCT/SAB dù rổ đã đổi). Nguồn vốn: `NAV_book_LAG × capit_size`
+(user chốt 07-20). 2 điểm cần nhớ: (a) sát biên
 "grind" (91 vs cửa sổ 20-90 phiên — lệch 1 phiên đổi size full 0,75 vs 0,375); (b) dd52w lúc fire
 (~-7%) nông nhất lịch sử 2014-2026 (kỷ lục cũ -7,4%) — ngoài rìa mẫu dữ liệu đã biết.
 
@@ -54,10 +59,11 @@ cương, giá sập ~-32%, kết luận AMBIGUOUS trong `calculated_fear_state_b
 nhận = BCTC Q3/2026 ~cuối tháng 10). Cơ chế `anomaly_scan.py` → `data/anomaly_flags.json` (gate
 CHUNG theo cờ, không hardcode tên, **TTL 30 ngày** — cờ PNJ tự hết hạn ~08-23 nếu không có
 alert mới trước cổng xác nhận thật tháng 10, cần theo dõi không để hở gate) — wire vào
-`ops_health_check.sh` 08:20+12:45. Rổ hiện tại (nếu
-fire hôm nay): NCT, PVT, SAB, VNM (PNJ đã loại). Giới hạn: gate KHÔNG backtest được (n=1) — coi là
-bảo hiểm chi phí chưa đo được, không phải alpha đã kiểm chứng; rổ neo vào NCT (ADV 2,18 tỷ/ngày,
-sát sàn 2 tỷ) sau khi loại PNJ — vấn đề sizing NCT có sẵn từ trước, cần theo dõi nếu fire thật.
+`ops_health_check.sh` 08:20+12:45. `capit_dd_excluded` hiện tại đọc `data/golive_v23_status.json`
+(PNJ + CSV loại tính đến giờ — danh sách có thể mở rộng, đừng chép cứng). Giới hạn: gate KHÔNG
+backtest được (n=1) — coi là bảo hiểm chi phí chưa đo được, không phải alpha đã kiểm chứng; loại
+1 mã thanh khoản khỏi rổ có thể làm nặng thêm vấn đề sizing của mã còn lại trong rổ — theo dõi ADV
+cap thật (`capit_adv_caps`) khi fire.
 > ⚠️ File này inject vào MỌI phiên/dispatch — giữ NHỎ. Chỉ để mục LIVE/đang-mở. Dự án ĐÓNG (NO-GO/
 > KHÉP KÍN/XONG) → chuyển thành 1 file `kb/projects/<slug>.md` + thêm 1 dòng vào `kb/projects/INDEX.md`
 > (INDEX được inject, chi tiết chỉ `cat` khi cần). Đừng để nhật ký dự án đã đóng tích lại ở đây.
@@ -201,7 +207,7 @@ plan channel), Mike vẫn xử lý ngay tại chỗ (không ép user đổi topi
 
 **Escalation khi plan T+1 không sẵn sàng (thêm 2026-07-01, sau sự cố DollarBill "timeout" nhưng
 plan thực ra đã ghi xong — dispatch.sh job status không đáng tin 100%):** `send_plan_report.sh`
-19:30 ICT giờ verify ARTIFACT thật (file `plan_<account>_<T+1 date>.json` đúng ngày kỳ vọng qua
+21:00 ICT (+ second-chance 23:00) giờ verify ARTIFACT thật (file `plan_<account>_<T+1 date>.json` đúng ngày kỳ vọng qua
 `next_trading_day()`, có field `orders`) — KHÔNG tin job status. Nếu thiếu/sai ngày/hỏng schema →
 **ESCALATE thật**: Telegram + Discord (như cũ) VÀ ghi bus event `question` (`plan-t1-not-ready`) để
 Mike tự đọc được ở phiên sau, không chỉ trông chờ user thấy Telegram rồi tới hỏi. KHÔNG tự động
@@ -300,9 +306,11 @@ dồn mẫu regime 2020-21, không phải pattern lặp lại được; hậu-20
 - BQ Local Cache (DuckDB, threads=1): `data/bq_cache/`, ~100ms vs 5-15s BQ. Sync 23:45 ICT.
 - Auto-OTP Gmail: `gmail_otp_reader.py` dùng `internalDate` filter (KHÔNG `newer_than`).
 - PHS: **BLOCKED** (lỗi -700003, chờ credential) → paper only.
-- **Workflow ngày trading đầy đủ** (T2-T6): BQ freshness(17:30) → plan T+1(19:30) → preflight(08:45)
-  → execute sáng(09:05) → resume chiều(13:00) → **EOD report(15:00, `eod_trading_report.sh`, thêm
-  2026-07-01)**. Toàn bộ post vào 1 Discord thread — Trading Daily (1521470705563340910).
+- **Workflow ngày trading đầy đủ** (T2-T6, giờ chuẩn tắc ở `kb/ops_runbook.md`): BQ
+  freshness(19:00) → plan T+1(21:00) → preflight(08:45) → execute sáng(09:05) →
+  resume chiều(13:00) → **EOD report(19:10, `eod_trading_report.sh`)**. Alert vận hành sống
+  post vào Trading Daily (1521470705563340910); EOD/tuần/tháng vào Trading report
+  (1522576692638388364) — xem chi tiết routing ở `kb/current_ops.md`.
 
 ### Kiến trúc fleet
 - Companion daemon: **CHỈ Mike**. Mọi agent khác (Taylor, Bill, Mafee, v.v.) headless/native on-demand.
