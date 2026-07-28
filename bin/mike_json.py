@@ -306,8 +306,12 @@ def cmd_cursor_advance(a):
         start = min(prev, total)                        # legacy bare-int cursor: the number
         if prev > total:                                # is genuinely all we have
             repair = "clamp-legacy"
-    elif last_id is not None and prev <= total and _line_mark(lines[prev - 1])[0] == last_id:
-        start = prev                                    # fast path — cursor still true
+    elif last_id is not None and prev <= total and _line_mark(lines[prev - 1]) == (last_id, last_ts):
+        # Fast path — cursor still true. Matching the ts as well as the anchor matters for
+        # anchor-less lines: their anchor is a hash of the raw line, so two byte-identical
+        # lines share one anchor and a bare-anchor test would accept the WRONG line and skip
+        # everything between them, silently.
+        start = prev
     else:
         # A cursor with a ts but no id is one an older build wrote before anchors were
         # mandatory; it must NOT fall back to the bare number (that silently reopens the
@@ -327,7 +331,7 @@ def cmd_cursor_advance(a):
             start = total
             for j, raw in enumerate(lines):
                 ts = _line_mark(raw)[1]
-                if ts is None or not last_ts or ts >= last_ts:
+                if not ts or not last_ts or ts >= last_ts:   # ts="" is not evidence of age
                     start = j
                     break
             repair = "resync-ts"
