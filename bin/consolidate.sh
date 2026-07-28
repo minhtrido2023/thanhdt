@@ -23,6 +23,15 @@ for f in "$BUS"/inbox/*.jsonl; do
   base="$(basename "$f")"
   total="$(wc -l < "$f" 2>/dev/null | tr -dc '0-9')"; total="${total:-0}"
   prev="$(cat "$STATE/$base" 2>/dev/null | tr -dc '0-9' || true)"; prev="${prev:-0}"
+  # Self-heal a cursor left past the end of a SHRUNKEN file (a prune/archive that forgot to
+  # move it down). Without this, `total > prev` stays false forever and that agent is never
+  # ingested again — silent KB death, 21h undetected on 2026-07-28. Skip forward to $total
+  # instead of restarting at 0: losing the shrink-window tail beats re-ingesting the whole
+  # file as duplicates. kb_nightly.sh now decrements properly, so this is insurance only.
+  if [ "$prev" -gt "$total" ]; then
+    echo "$(date -u +%FT%TZ) WARN offset past EOF for $base ($prev > $total lines) — clamping to $total"
+    printf '%s' "$total" > "$STATE/$base"; prev="$total"
+  fi
   if [ "$total" -gt "$prev" ]; then
     tail -n +"$((prev + 1))" "$f" >> "$NEW"
     printf '%s' "$total" > "$STATE/$base"

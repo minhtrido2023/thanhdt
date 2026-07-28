@@ -22,16 +22,17 @@ log() { echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] $*" | tee -a "$LOG"; }
 
 log "=== kb_nightly START ==="
 
-# ── Lock: Phase 1a + Phase 1 both read-modify-write kb/events_buffer.md ──────
+# ── Lock: Phase 1a/1 (events_buffer.md) + 1b/1b2 (bus/inbox + offsets) ───────
 # consolidate.sh holds locks/consolidator.lock while it appends to the same file, and it
 # runs after EVERY dispatch (dispatch.sh, run_bot.sh, verify_finding.sh, fleet_backup.sh)
 # — not just the :07 cron. Without this lock an append landing between our read and our
 # os.replace is erased whole (reproduced by arch-reviewer 2026-07-28, ~23 ms window).
 # Required by kb/cron_registry/_adding-cron-policy.md §"File đọc-sửa-ghi → flock cùng lock".
-# Phase 1 had this hole before Phase 1a existed; one lock closes both. Wait, don't skip
-# (nightly must run); if the lock can't be had, skip ONLY the buffer phases — a night of
-# unpruned buffer is cheap, a lost finding is not. Released right after Phase 1; no later
-# phase mutates the buffer.
+# Phase 1 had this hole before Phase 1a existed; one lock closes both. Phase 1b/1b2 are inside
+# the same region too: they rewrite bus/inbox/*.jsonl AND move consolidate.sh's line cursors
+# (state/offsets), which must not shift under a consolidate run mid-flight.
+# Wait, don't skip (nightly must run); if the lock can't be had, skip ONLY these buffer/bus
+# phases — a night of unpruned buffer is cheap, a lost finding is not. Released after Phase 1b2.
 mkdir -p "$ROOT/locks"
 exec 8>"$ROOT/locks/consolidator.lock"
 BUFFER_LOCK=0
@@ -119,7 +120,7 @@ with open(tmp, "w", encoding="utf-8") as fh:
 os.replace(tmp, path)
 print(f"EVENTS-BUFFER-PRUNE: removed {removed} heartbeat line(s), {dropped_hdr} empty block header(s)")
 PYEOF
-)" || PRUNE_OUT="events-buffer-prune: python error (non-fatal, buffer untouched)"
+)" || PRUNE_OUT="events-buffer-prune: python error (non-fatal, buffer untouched) :: $PRUNE_OUT"
 echo "$PRUNE_OUT" | tee -a "$LOG"
 # Surface only the ABNORMAL outcomes to Phase 4's notification — a prune that quietly
 # stops working (conservation FAIL / python error) would otherwise be discoverable only
@@ -195,9 +196,6 @@ knowledge_path.write_text(''.join(canonical + to_keep), encoding='utf-8')
 print(f"ARCHIVED: {archived_count} events → {archive_path.name}")
 PYEOF
 
-exec 8>&-    # release consolidator lock — no phase below mutates events_buffer.md
-fi           # end BUFFER_LOCK guard
-
 # ── Phase 1b: prune stale heartbeats from bus inbox ───────────────────────────
 # Heartbeats are liveness pings — useless once a job ends. They dominate bus/inbox
 # (measured 2026-07-27: ~7.2K/8.7K lines fleet-wide, Taylor.jsonl 3MB with 88%
@@ -206,13 +204,41 @@ fi           # end BUFFER_LOCK guard
 # decision/error/status/directive) and any unparseable/blank line untouched. Atomic
 # per-file write (tmp + os.replace, coding_guidelines §5) so a mid-run kill leaves the
 # original intact. Guarded so a prune failure can't abort the nightly commit/backup.
+#
+# ⚠️ MUST decrement state/offsets/<file> by the number of lines removed. consolidate.sh
+# tracks each inbox by LINE OFFSET and only ingests when total > prev (consolidate.sh:24-29);
+# shrinking a file without fixing the cursor leaves prev > total FOREVER, so that agent is
+# never consolidated again. That is exactly what this phase caused fleet-wide on 2026-07-27
+# (incident found 2026-07-28: 9/11 offsets stranded, KB ingestion dead since 07:05Z).
+# Pruned lines are always inside the already-ingested prefix (heartbeats older than
+# HB_KEEP_DAYS=3 days, while consolidate runs every 30 min), so prev-removed is exact.
 HB_KEEP_DAYS="${KB_HB_KEEP_DAYS:-3}"
 HB_CUTOFF=$(python3 -c "import datetime; print((datetime.datetime.utcnow()-datetime.timedelta(days=$HB_KEEP_DAYS)).strftime('%Y-%m-%dT%H:%M:%SZ'))")
 log "Pruning heartbeats older than $HB_CUTOFF (keep_days=$HB_KEEP_DAYS) from bus/inbox/*.jsonl..."
-python3 - "$HB_CUTOFF" "$ROOT/bus/inbox" <<'PYEOF' 2>&1 | tee -a "$LOG" || log "heartbeat-prune: python error (non-fatal, bus untouched)"
+python3 - "$HB_CUTOFF" "$ROOT/bus/inbox" "$ROOT/state/offsets" <<'PYEOF' 2>&1 | tee -a "$LOG" || log "heartbeat-prune: python error (non-fatal, bus untouched)"
 import sys, json, os, glob
 cutoff_iso = sys.argv[1]   # ISO-8601 Zulu; ts field is same format → lexicographic compare is valid
 inbox_dir = sys.argv[2]
+offsets_dir = sys.argv[3]
+
+
+def shift_offset(base, removed):
+    """Move consolidate.sh's line cursor down by the lines we just deleted, else
+    prev > total forever and that agent is never ingested again."""
+    fp = os.path.join(offsets_dir, base)
+    try:
+        with open(fp, encoding="utf-8") as fh:
+            prev = int("".join(c for c in fh.read() if c.isdigit()) or 0)
+    except Exception:
+        return
+    new = max(0, prev - removed)
+    tmp = fp + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as fh:
+        fh.write(str(new))
+    os.replace(tmp, fp)
+    print(f"    offset {base}: {prev} → {new}")
+
+
 total_removed = 0
 for path in sorted(glob.glob(os.path.join(inbox_dir, "*.jsonl"))):
     removed = 0
@@ -241,6 +267,7 @@ for path in sorted(glob.glob(os.path.join(inbox_dir, "*.jsonl"))):
         os.replace(tmp, path)              # atomic
         total_removed += removed
         print(f"  {os.path.basename(path)}: pruned {removed} stale heartbeat(s)")
+        shift_offset(os.path.basename(path), removed)
 print(f"HEARTBEAT-PRUNE: removed {total_removed} stale heartbeat(s) total")
 PYEOF
 
@@ -250,18 +277,37 @@ PYEOF
 # Taylor 5781 events / 3MB even after heartbeat prune). Move every event older than
 # EVENT_KEEP_DAYS to a compressed, by-month-of-origin archive bus/inbox/archive/<id>_<YYYY-MM>
 # .jsonl.gz — gzip members concatenate, so `gzip -dc` reads the whole history back. The hot
-# file keeps only the recent window. Loss-safe: per file we assert (kept_events + archived ==
+# file keeps only the recent window. Same offset rule as Phase 1b: this shrinks the hot file, so
+# state/offsets/<file> must come down by the archived count too, else consolidate.sh stops ingesting
+# that agent forever (incident 2026-07-28). Loss-safe: per file we assert (kept_events + archived ==
 # original_events) and re-read the gz to confirm it decompresses BEFORE atomically replacing
 # the hot file; on any mismatch/error that file is left untouched. Guarded so a failure can't
 # abort the nightly commit.
 EVENT_KEEP_DAYS="${KB_EVENT_KEEP_DAYS:-30}"
 EVENT_CUTOFF=$(python3 -c "import datetime; print((datetime.datetime.utcnow()-datetime.timedelta(days=$EVENT_KEEP_DAYS)).strftime('%Y-%m-%dT%H:%M:%SZ'))")
 log "Archiving bus events older than $EVENT_CUTOFF (keep_days=$EVENT_KEEP_DAYS) → bus/inbox/archive/*.jsonl.gz..."
-python3 - "$EVENT_CUTOFF" "$ROOT/bus/inbox" <<'PYEOF' 2>&1 | tee -a "$LOG" || log "event-archive: python error (non-fatal, bus untouched)"
+python3 - "$EVENT_CUTOFF" "$ROOT/bus/inbox" "$ROOT/state/offsets" <<'PYEOF' 2>&1 | tee -a "$LOG" || log "event-archive: python error (non-fatal, bus untouched)"
 import sys, json, os, glob, gzip
 cutoff_iso = sys.argv[1]          # ISO-8601 Zulu; ts is same format → lexicographic compare valid
 inbox_dir = sys.argv[2]
+offsets_dir = sys.argv[3]
 arch_dir = os.path.join(inbox_dir, "archive")
+
+
+def shift_offset(base, removed):
+    """Keep consolidate.sh's line cursor in step with the shrunken file (see Phase 1b)."""
+    fp = os.path.join(offsets_dir, base)
+    try:
+        with open(fp, encoding="utf-8") as fh:
+            prev = int("".join(c for c in fh.read() if c.isdigit()) or 0)
+    except Exception:
+        return
+    new = max(0, prev - removed)
+    tmp = fp + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as fh:
+        fh.write(str(new))
+    os.replace(tmp, fp)
+    print(f"    offset {base}: {prev} → {new}")
 
 def is_event(line):
     s = line.strip()
@@ -315,8 +361,12 @@ for path in sorted(glob.glob(os.path.join(inbox_dir, "*.jsonl"))):
     os.replace(tmp, path)                       # atomic hot-file swap
     total_archived += n_arch
     print(f"  {base}: archived {n_arch} event(s) across {len(buckets)} month(s), {kept_events} kept hot")
+    shift_offset(os.path.basename(path), n_arch)
 print(f"EVENT-ARCHIVE: moved {total_archived} old event(s) total")
 PYEOF
+
+exec 8>&-    # release consolidator lock — no phase below touches events_buffer.md or bus/inbox
+fi           # end BUFFER_LOCK guard (Phase 1a + 1 + 1b + 1b2)
 
 # ── Phase 1b3: archive old terminal job records ───────────────────────────────
 # The dispatch job board (bus/jobs/<job_id>.json) accretes one record per dispatch (1178 as
