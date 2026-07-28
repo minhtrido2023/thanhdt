@@ -22,6 +22,74 @@ log() { echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] $*" | tee -a "$LOG"; }
 
 log "=== kb_nightly START ==="
 
+# ── Phase 1a: strip heartbeats from events_buffer.md (BEFORE Phase 1 archives it) ──
+# Same leak Phase 1b fixed for bus/inbox/*.jsonl, one layer up: consolidate.sh copies
+# EVERY new bus event into kb/events_buffer.md every 30 min with no filter, so the hot
+# buffer is ~57% heartbeat noise (measured 2026-07-28: 355/623 lines, 200KB) and Phase 1
+# below archives that noise VERBATIM into kb/archive/<date>-nightly.md, making it
+# permanent (largest archive seen: 660KB).
+# Unlike bus/inbox — where Phase 1b keeps the recent HB_KEEP_DAYS window because jobs.sh/
+# trace.sh read it for job triage — NOTHING reads heartbeats out of events_buffer.md
+# (liveness comes from bus/inbox + bus/registry), so they are worthless here at ANY age:
+# drop them all. Every other event_type and every unrecognised/blank line is kept
+# byte-for-byte. Also drops "## Consolidation" headers left with no event, else an
+# all-heartbeat block sinks into Phase 1's canonical bucket and never leaves the buffer.
+# Atomic write (tmp + os.replace, coding_guidelines §3) + conservation guard: refuses to
+# write unless every surviving non-heartbeat line is identical and in order. Guarded so a
+# failure can't abort the nightly. Existing kb/archive/*.md = historical record, NOT rewritten.
+log "Pruning heartbeat lines from kb/events_buffer.md (all ages; nothing reads them here)..."
+python3 - "$EVENTS_BUFFER" <<'PYEOF' 2>&1 | tee -a "$LOG" || log "events-buffer-prune: python error (non-fatal, buffer untouched)"
+import sys, re, os, pathlib
+
+path = pathlib.Path(sys.argv[1])
+if not path.exists():
+    print("SKIP: no events_buffer.md")
+    sys.exit(0)
+
+lines = path.read_text(encoding="utf-8").splitlines(keepends=True)
+
+# A rendered bus event line (mike_json.fmt_event): "- [<ts>] <agent>/<event_type> — <topic>: <payload>"
+HB_RE    = re.compile(r'^- \[\d{4}-\d{2}-\d{2}[^\]]*\] [^/\s]+/heartbeat — ')
+EVENT_RE = re.compile(r'^- \[\d{4}-\d{2}-\d{2}')
+HDR_RE   = re.compile(r'^## Consolidation ')
+
+survivors = [l for l in lines if not HB_RE.match(l)]
+removed = len(lines) - len(survivors)
+
+out, i, dropped_hdr = [], 0, 0
+while i < len(survivors):
+    if HDR_RE.match(survivors[i]):
+        j = i + 1
+        while j < len(survivors) and not HDR_RE.match(survivors[j]):
+            j += 1
+        body = survivors[i + 1:j]
+        if any(EVENT_RE.match(b) for b in body):
+            out.extend(survivors[i:j])
+        else:
+            out.extend(b for b in body if b.strip())   # keep any stray non-blank text
+            dropped_hdr += 1
+        i = j
+    else:
+        out.append(survivors[i])
+        i += 1
+
+if removed == 0 and dropped_hdr == 0:
+    print("SKIP: no heartbeat lines in events_buffer.md")
+    sys.exit(0)
+
+want = [l for l in lines if not HB_RE.match(l) and not HDR_RE.match(l) and l.strip()]
+got  = [l for l in out   if not HDR_RE.match(l) and l.strip()]
+if want != got:
+    print(f"SKIP: conservation FAIL (want={len(want)} got={len(got)}) — events_buffer.md untouched")
+    sys.exit(0)
+
+tmp = str(path) + ".tmp"
+with open(tmp, "w", encoding="utf-8") as fh:
+    fh.writelines(out)
+os.replace(tmp, path)
+print(f"EVENTS-BUFFER-PRUNE: removed {removed} heartbeat line(s), {dropped_hdr} empty block header(s)")
+PYEOF
+
 # ── Phase 1: archive stale raw events ─────────────────────────────────────────
 CUTOFF=$(date -u -d "-${KEEP_DAYS} days" +%Y-%m-%d 2>/dev/null \
       || date -u -v-${KEEP_DAYS}d +%Y-%m-%d 2>/dev/null \
