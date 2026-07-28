@@ -217,6 +217,19 @@ def _line_mark(raw):
     return eid, ts
 
 
+def _ambiguous_mark(anchor, lines):
+    """True when a hash anchor names more than one line, i.e. the mark cannot identify WHICH
+    line the cursor read. Two byte-identical anchor-less lines share their ts as well as their
+    anchor, so no equality test can separate them: matching on the pair does NOT close this.
+    The caller must refuse the fast path here and fall through to the resync scan, which
+    resumes at the FIRST match and raises a repair — duplicates a human can see beat a silent
+    skip of everything between the twins. Real event_ids are uuid4, so this only ever scans
+    for a `raw:` anchor (a line the bus wrote without an event_id, or a torn one)."""
+    if not str(anchor).startswith("raw:"):
+        return False
+    return sum(1 for raw in lines if _line_mark(raw)[0] == anchor) > 1
+
+
 def _cursor_read(path):
     """-> (n, last_id, last_ts). Accepts the legacy bare-integer file (last_id=None), so an
     existing state/offsets/* keeps working and self-upgrades on its next write."""
@@ -306,12 +319,10 @@ def cmd_cursor_advance(a):
         start = min(prev, total)                        # legacy bare-int cursor: the number
         if prev > total:                                # is genuinely all we have
             repair = "clamp-legacy"
-    elif last_id is not None and prev <= total and _line_mark(lines[prev - 1]) == (last_id, last_ts):
-        # Fast path — cursor still true. Matching the ts as well as the anchor matters for
-        # anchor-less lines: their anchor is a hash of the raw line, so two byte-identical
-        # lines share one anchor and a bare-anchor test would accept the WRONG line and skip
-        # everything between them, silently.
-        start = prev
+    elif (last_id is not None and prev <= total
+          and _line_mark(lines[prev - 1]) == (last_id, last_ts)
+          and not _ambiguous_mark(last_id, lines)):
+        start = prev                                    # fast path — cursor still true
     else:
         # A cursor with a ts but no id is one an older build wrote before anchors were
         # mandatory; it must NOT fall back to the bare number (that silently reopens the

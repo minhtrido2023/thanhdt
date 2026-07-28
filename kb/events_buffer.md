@@ -976,3 +976,16 @@
 - [2026-07-28T15:26:08Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 51, "job_id": "Wags_20260728_143501", "source": "watcher"}
 - [2026-07-28T15:27:04Z] Wags/heartbeat — Wags_20260728_152002: {"status": "still_running", "elapsed_min": 7, "job_id": "Wags_20260728_152002", "source": "watcher"}
 - [2026-07-28T15:27:08Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 52, "job_id": "Wags_20260728_143501", "source": "watcher"}
+
+## Consolidation 2026-07-28T15:34:15Z
+- [2026-07-28T15:27:27Z] Wags/heartbeat — Wags_20260728_152002: {"status": "in_progress", "note": "dispatching arch-reviewer for fd76e61 (cursor-advance+kb_ingest_lag NEEDS_CHANGES round2) — 143501 still alive but no bus result yet"}
+- [2026-07-28T15:28:04Z] Wags/heartbeat — Wags_20260728_152002: {"status": "still_running", "elapsed_min": 8, "job_id": "Wags_20260728_152002", "source": "watcher"}
+- [2026-07-28T15:28:09Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 53, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T15:29:04Z] Wags/heartbeat — Wags_20260728_152002: {"status": "still_running", "elapsed_min": 9, "job_id": "Wags_20260728_152002", "source": "watcher"}
+- [2026-07-28T15:29:09Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 54, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T15:30:09Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 55, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T15:31:09Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 56, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T15:32:09Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 57, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T15:32:42Z] Wags/heartbeat — Wags_20260728_152002: {"status": "in_progress", "note": "triaging: Phase 1a committed (24468b4+6adce43+51b20f6), events_buffer=0 heartbeat confirmed. Checking arch-reviewer status for 6adce43 + job 143501 final state"}
+- [2026-07-28T15:33:09Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 58, "job_id": "Wags_20260728_143501", "source": "watcher"}
+- [2026-07-28T15:34:09Z] Wags/heartbeat — Wags_20260728_143501: {"status": "still_running", "elapsed_min": 59, "job_id": "Wags_20260728_143501", "source": "watcher"}
