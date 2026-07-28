@@ -95,20 +95,41 @@ check("B1 stranded legacy cursor doesn't crash", rc_b == 0)
 check("B2 stranded cursor emits nothing new (clamped, not negative-replayed)", new_b == [])
 check("B3 stranded cursor reports a repair", "clamp-legacy" in err_b, err_b)
 
-# ── C. Mode (b) leapfrog: content mark pruned + file regrows before next read ───────────────
+# ── C. Mode (b) leapfrog, mark SURVIVES relocation: content mark pruned from its old line
+#      number + file regrows before next read, but the marked event itself is still somewhere
+#      in the file -> resolves via resync-id (exact, no ts arithmetic involved) ────────────────
 inbox, state = tmpfiles()
 write_inbox(inbox, [ev(i) for i in range(10)])
 run_cursor_advance(inbox, state)  # cursor now anchored on e9
-# Simulate kb_nightly pruning lines 0-4 (e0..e4) WITHOUT calling cursor_shift (the exact
-# defect class this whole redesign exists to survive), then the file grows past where the
-# mark used to be before the next consolidate run.
-write_inbox(inbox, [ev(i) for i in range(5, 10)] + [ev(10)])
+write_inbox(inbox, [ev(i) for i in range(5, 10)] + [ev(10)])  # e9 still present, shifted
 new_c, err_c, _ = run_cursor_advance(inbox, state)
-check("C1 leapfrog does not lose the new event", ev(10) in new_c, str(new_c))
-check("C2 leapfrog reports a repair (mark relocated or resynced)",
-      "CURSOR-REPAIR" in err_c, err_c)
+check("C1 leapfrog (mark relocatable) does not lose the new event", ev(10) in new_c, str(new_c))
+check("C2 leapfrog (mark relocatable) resolves via resync-id, not resync-ts",
+      "resync-id" in err_c, err_c)
 
-# ── D. Torn line in the UNREAD region must not be silently skipped ──────────────────────────
+# ── C'. Mode (b) leapfrog, mark is TRULY GONE + last_ts is PRESENT (not torn) — this is the
+#      case a first version of the R1 bounded-replay fix got wrong: it trusted `prev` as a
+#      floor even here, reproduced losing 100/150 real events with the repair line reporting
+#      recovered=0 (the loss invisible even to a human reading it). The file is pruned WITHOUT
+#      calling cursor_shift (the exact defect class this whole redesign exists to survive —
+#      it is how the 2026-07-27 stranded-offset incident happened) and regrows PAST `prev`, so
+#      a naive `min(prev, total)` bound lands in the middle of genuinely new content. Must lose
+#      ZERO events: the resync-ts scan must stay unbounded whenever last_ts is available. ─────
+inbox, state = tmpfiles()
+write_inbox(inbox, [ev(i) for i in range(10)])
+run_cursor_advance(inbox, state)  # cursor anchored on e9, prev=10, last_ts=e9's ts
+# Prune away e5..e9 (the marked line e9 included) WITHOUT cursor_shift, then regrow past `prev`
+# with events that are NEWER than the marked ts (this is what a real hourly gap looks like:
+# several dispatches' worth of new findings land while nobody prunes/shifts).
+write_inbox(inbox, [ev(i) for i in range(5)] + [ev(i) for i in range(10, 21)])  # 16 lines, prev=10 stale
+new_cp, err_cp, _ = run_cursor_advance(inbox, state)
+expected_cp = {ev(i) for i in range(10, 21)}  # every genuinely-new event, e10..e20
+missing_cp = expected_cp - set(new_cp)
+check("C'1 leapfrog (mark gone, last_ts present) loses ZERO of the 11 new events",
+      not missing_cp, f"missing={len(missing_cp)}/11")
+check("C'2 resolves via resync-ts (mark truly unresolvable by id)", "resync-ts" in err_cp, err_cp)
+
+# ── D. Torn line in the UNREAD region must not be silently skipped (last_ts present case) ───
 inbox, state = tmpfiles()
 write_inbox(inbox, [ev(i) for i in range(5)])
 run_cursor_advance(inbox, state)
@@ -119,20 +140,32 @@ new_d, err_d, _ = run_cursor_advance(inbox, state)
 check("D1 torn line in unread region does not eat the event after it",
       ev(12) in new_d, str(new_d))
 
-# ── E. Degenerate case: prev >= total when the resync-ts scan starts (should not happen via
-#      the real cursor_shift path, but must not silently emit nothing if it ever does) — the
-#      bounded-replay fix (R1/M below) must fall back to a full scan rather than an empty one.
-#      Also covers "blank line in the unread region must not be silently skipped".
+# ── E. Blank line in the UNREAD region must not be silently skipped: the anchor is gone AND
+#      last_ts is None (the actual R1-bound path), so the scan must still land ON the blank
+#      line (treating it as "not provably older") rather than jump past it to whatever comes
+#      next. Distinct from D: this exercises the narrowed R1 bound itself, not the unbounded
+#      last_ts-present path. ──────────────────────────────────────────────────────────────────
+inbox, state = tmpfiles()
+write_inbox(inbox, [ev(i) for i in range(5)])
+run_cursor_advance(inbox, state)  # prev=5, last_ts=e4's real ts
+write_inbox(inbox, [ev(i) for i in range(5, 8)] + ["", ev(9)])  # total=8 now (prev=5 < total)
+mike_json._cursor_write(state, mike_json._cursor_read(state)[0], "some-other-id", None)  # torn mark
+new_e, _, _ = run_cursor_advance(inbox, state)
+check("E1 R1-bounded scan (last_ts=None) still finds the blank line, not just skips to EOF",
+      new_e != [], str(new_e))
+check("E2 ...and the event after the blank line is not eaten", ev(9) in new_e, str(new_e))
+
+# ── E'. Degenerate case: prev >= total AND last_ts is None (the actual R1-bound gate) — must
+#      fall back to a full scan rather than silently emit nothing. ──────────────────────────
 inbox, state = tmpfiles()
 write_inbox(inbox, [ev(i) for i in range(5)])
 run_cursor_advance(inbox, state)  # prev=5
-write_inbox(inbox, [ev(i) for i in range(5, 8)] + ["", ev(9)])  # total=5 again, content unrelated
-mike_json._cursor_write(state, mike_json._cursor_read(state)[0], "some-other-id", "2026-07-28T01:07:00Z")
-new_e, _, _ = run_cursor_advance(inbox, state)
-check("E1 prev==total degenerate case falls back to full scan, does not emit nothing",
-      new_e != [], str(new_e))
-check("E2 blank line in the (fallback) scan does not eat the event after it",
-      ev(9) in new_e, str(new_e))
+write_inbox(inbox, [ev(i) for i in range(5, 8)] + ["", ev(9)])  # total=5 again, unrelated content
+mike_json._cursor_write(state, mike_json._cursor_read(state)[0], "some-other-id", None)
+new_ep, _, _ = run_cursor_advance(inbox, state)
+check("E'1 prev>=total AND last_ts=None falls back to full scan, not empty",
+      new_ep != [], str(new_ep))
+check("E'2 ...still finds the event past the blank line", ev(9) in new_ep, str(new_ep))
 
 # ── F. ts="" is not evidence of age (must not be treated as "older, skip") ──────────────────
 n, last_id, last_ts = 3, "e2", "2026-07-28T01:02:00Z"
@@ -180,6 +213,23 @@ mike_json.cursor_shift(state, [2, 3, 7])  # 1-based indices
 n_after, _, _ = read_cursor(state)
 check("I1 cursor_shift only subtracts the 2 indices at/below the pre-shift cursor",
       n_after == n_before - 2, f"before={n_before} after={n_after}")
+
+# ── I'. Pin the i==n boundary exactly (n=6): index 6 counts ("at" the cursor), index 7 does
+#      not ("above" it) — I1 above tests this implicitly via the delta; this pins it directly.
+inbox2, state2 = tmpfiles()
+write_inbox(inbox2, [ev(i) for i in range(6)])
+run_cursor_advance(inbox2, state2)  # n=6
+mike_json.cursor_shift(state2, [6])   # exactly AT the cursor -> must count
+n_at, _, _ = read_cursor(state2)
+check("I'1 index == n counts (subtracts)", n_at == 5, f"n_at={n_at}")
+
+inbox3, state3 = tmpfiles()
+write_inbox(inbox3, [ev(i) for i in range(6)])
+run_cursor_advance(inbox3, state3)  # n=6
+mike_json.cursor_shift(state3, [7])   # strictly ABOVE the cursor -> must NOT count
+n_above, _, _ = read_cursor(state3)
+check("I'2 index == n+1 does not count (no-op, returns None)",
+      n_above == 6, f"n_above={n_above}")
 
 # ── J. Legacy bare-int cursor still works and self-upgrades to the JSON+anchor form ─────────
 inbox, state = tmpfiles()
@@ -233,17 +283,67 @@ check("N1 stdout.flush() exists in cmd_cursor_advance", i_flush != -1)
 check("N2 print-loop -> flush -> cursor_write, in that order",
       -1 < i_print < i_flush < i_write, f"print={i_print} flush={i_flush} write={i_write}")
 
-# ── O. consolidate.sh debounce key must be the repair KIND, not the whole line (whole-line
-#      compare never matches twice on a file whose total= line count changes every run) ────
-consolidate_src = open(os.path.join(ROOT, "consolidate.sh"), encoding="utf-8").read()
-check("O1 debounce compares repair kind (awk field 3), not the full repaired line",
-      "awk '{print $3}'" in consolidate_src and 'wkind' in consolidate_src)
-line1 = "CURSOR-REPAIR Taylor.jsonl resync-ts prev=10 total=12 resume_from=10 recovered=0"
-line2 = "CURSOR-REPAIR Taylor.jsonl resync-ts prev=12 total=15 resume_from=12 recovered=0"
-kind1 = line1.split()[2]
-kind2 = line2.split()[2]
-check("O2 same repair kind on a growing file now compares equal (would debounce)",
-      kind1 == kind2 and line1 != line2, f"{kind1} vs {kind2}")
+# ── O. consolidate.sh debounce: run the REAL script end-to-end in an isolated sandbox ROOT
+#      (not a re-implementation of its logic, which could silently drift from the real file) —
+#      same kind + not-worse = suppressed; same kind + recovered ESCALATES = re-alerts even
+#      mid-streak; a run with no new repair clears the marker for the next occurrence. ─────────
+def run_consolidate_sandbox(sandbox, inbox_lines):
+    """One consolidate.sh pass against a fresh single-line-count inbox state; returns
+    (notify_call_count_delta, append_call_count_delta, warn_dir_contents)."""
+    write_inbox(os.path.join(sandbox, "bus", "inbox", "Test.jsonl"), inbox_lines)
+    notify_log = os.path.join(sandbox, "notify_calls.log")
+    append_log = os.path.join(sandbox, "append_calls.log")
+    before_n = os.path.getsize(notify_log) if os.path.exists(notify_log) else 0
+    before_a = os.path.getsize(append_log) if os.path.exists(append_log) else 0
+    subprocess.run(["bash", os.path.join(sandbox, "bin", "consolidate.sh")],
+                    cwd=sandbox, capture_output=True, text=True)
+    after_n = os.path.getsize(notify_log) if os.path.exists(notify_log) else 0
+    after_a = os.path.getsize(append_log) if os.path.exists(append_log) else 0
+    warn_dir = os.path.join(sandbox, "state", "cursorwarn")
+    contents = {}
+    if os.path.isdir(warn_dir):
+        for fn in os.listdir(warn_dir):
+            contents[fn] = open(os.path.join(warn_dir, fn)).read()
+    return (after_n > before_n), (after_a > before_a), contents
+
+
+import shutil  # noqa: E402
+sandbox = tempfile.mkdtemp(prefix="consolidate_sc_")
+for d in ["bin", "kb", "bus/inbox", "bus/registry", "bus/directives", "state/offsets", "locks", "logs"]:
+    os.makedirs(os.path.join(sandbox, d), exist_ok=True)
+shutil.copy(os.path.join(ROOT, "consolidate.sh"), os.path.join(sandbox, "bin", "consolidate.sh"))
+shutil.copy(os.path.join(ROOT, "mike_json.py"), os.path.join(sandbox, "bin", "mike_json.py"))
+# Stub the 2 side-effecting calls consolidate.sh makes on a repair, so this test can count
+# invocations instead of actually hitting Telegram/the bus.
+with open(os.path.join(sandbox, "bin", "notify.sh"), "w") as f:
+    f.write('#!/usr/bin/env bash\necho "$@" >> "$(dirname "$0")/../notify_calls.log"\n')
+with open(os.path.join(sandbox, "bin", "append_event.sh"), "w") as f:
+    f.write('#!/usr/bin/env bash\necho "$@" >> "$(dirname "$0")/../append_calls.log"\n')
+os.chmod(os.path.join(sandbox, "bin", "notify.sh"), 0o755)
+os.chmod(os.path.join(sandbox, "bin", "append_event.sh"), 0o755)
+
+# Pass 1: cold state, no repair possible (fresh file) — establishes prev, no alert expected.
+run_consolidate_sandbox(sandbox, [ev(i) for i in range(10)])
+# Pass 2: force a torn-last-line resync-ts repair with a small recovered count.
+mike_json._cursor_write(os.path.join(sandbox, "state", "offsets", "Test.jsonl"), 10, "gone-id", None)
+notified2, _, warn2 = run_consolidate_sandbox(sandbox, [ev(i) for i in range(10)] + [ev(10, torn=True)])
+check("O1 first repair occurrence alerts", notified2)
+
+# Pass 3: SAME repair magnitude again (steady state) — must be debounced.
+mike_json._cursor_write(os.path.join(sandbox, "state", "offsets", "Test.jsonl"), 10, "gone-id", None)
+notified3, _, _ = run_consolidate_sandbox(sandbox, [ev(i) for i in range(10)] + [ev(10, torn=True)])
+check("O2 identical repair kind+magnitude on the next run is debounced (no 2nd alert)",
+      not notified3)
+
+# Pass 4: same KIND but the loss ESCALATES (recovered grows) — must re-alert despite the
+# still-active marker from pass 2/3. Passes 2/3 both landed on recovered=0 (the bounded scan
+# always resumes exactly at `prev` when there's only one trailing torn line). To get a genuinely
+# bigger `recovered`, force the prev>=total fallback (E'-shaped): prev far exceeds the tiny
+# file, so the scan falls back to position 0 and `recovered = prev - 0` is large.
+mike_json._cursor_write(os.path.join(sandbox, "state", "offsets", "Test.jsonl"), 100, "gone-id", None)
+notified4, _, _ = run_consolidate_sandbox(sandbox, [ev(i) for i in range(5)])
+check("O3 same repair kind but recovered ESCALATES -> re-alerts (not silenced mid-streak)",
+      notified4)
 
 print()
 if fails:

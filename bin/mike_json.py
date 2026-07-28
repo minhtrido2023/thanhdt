@@ -338,25 +338,22 @@ def cmd_cursor_advance(a):
             # unparseable/blank line ANYWHERE as already-read and shifts the resume point
             # past a real unread event (reproduced by arch-reviewer). Stop at the first line
             # that is not provably older — including a torn one, which is re-emitted rather
-            # than skipped.
+            # than skipped. This branch exists BECAUSE `prev` can no longer be trusted (the
+            # mark it was meant to protect got pruned) — do not reintroduce that trust here.
             #
-            # Bound the scan at min(prev, total) rather than starting from 0: `prev` is the
-            # cursor's line count AFTER cursor_shift already lowered it for every known
-            # deletion, so anything before it is either already ingested or was pruned and
-            # accounted for — replaying from there is still the safe direction (duplicate,
-            # not drop) without re-emitting the WHOLE file just because the mark's own line
-            # (e.g. one torn write) lost its ts. Without this bound, a torn last line at
-            # cursor-write time (last_ts=None) makes `not last_ts` true on line 0 and resends
-            # everything already read (reproduced by arch-reviewer, 2026-07-28: recovered=30
-            # for a single torn line). scan_from can exceed total only if the file shrank
-            # without a matching cursor_shift; total still caps it.
-            # `prev <= total` holds after any legitimate cursor_shift-mediated prune (it always
-            # lowers `prev` by exactly the removed count, never past the file's new length), so
-            # bounding at `prev` is safe in the normal case. If prev somehow reaches/exceeds
-            # total anyway (a state cursor_shift should never produce, but "should never happen"
-            # is exactly how the 2026-07-28 loss started) — don't get clever: fall back to the
-            # full scan, which is wasteful but can never silently emit nothing.
-            scan_from = min(prev, total) if prev < total else 0
+            # The ONLY situation worth bounding is "no age information at all" (last_ts is
+            # None — e.g. a torn last line at cursor-write time), where the scan below would
+            # otherwise start comparing from line 0 and replay the entire file (reproduced,
+            # 2026-07-28: recovered=30 for a single torn line). Whenever last_ts IS present we
+            # keep the full unbounded scan: an earlier version of this fix bounded that case
+            # too (`prev` as a floor) and was proven wrong by a second independent review —
+            # a prune that runs WITHOUT calling cursor_shift (the exact defect class this
+            # whole redesign exists to survive; it is how the 2026-07-27 stranded-offset
+            # incident happened) leaves `prev` overstating the true ingested prefix, and
+            # trusting it as a lower bound silently skipped 100/150 real events in that repro
+            # — with the repair line reporting recovered=0, making the loss invisible even to
+            # a human reading it.
+            scan_from = (min(prev, total) if prev < total else 0) if not last_ts else 0
             start = scan_from
             for j in range(scan_from, total):
                 ts = _line_mark(lines[j])[1]

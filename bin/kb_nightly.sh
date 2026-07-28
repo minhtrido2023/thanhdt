@@ -22,6 +22,22 @@ log() { echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] $*" | tee -a "$LOG"; }
 
 log "=== kb_nightly START ==="
 
+# ── Phase 0: cursor/consolidate regression selfcheck ───────────────────────────
+# Every phase below (1a/1/1b/1b2/1b3) depends on the content-anchored cursor logic in
+# mike_json.py + the flush-order/debounce logic in consolidate.sh being correct — that logic
+# has already had 3 rounds of real bugs found by independent review on 2026-07-28 (a same-day
+# regression chain, see kb/INCIDENTS.md). Run its regression suite BEFORE touching anything
+# tonight: it's offline, isolated (own sandbox dirs), ~1s, and its whole purpose ("so this
+# never has to happen again for this pipeline") is not delivered by a test nobody runs — an
+# earlier round of this exact fix chain wrote a test, then left it wired to nothing.
+if ! python3 "$ROOT/bin/cursor_advance_selfcheck.py" >> "$LOG" 2>&1; then
+    log "FAIL: cursor_advance_selfcheck.py — cursor/consolidate pipeline regressed, see $LOG"
+    "$ROOT/bin/notify.sh" "🔴 kb_nightly: cursor_advance_selfcheck.py FAILED — KB ingestion pipeline có thể đang mất event âm thầm. KHÔNG tự sửa, cần người kiểm ngay: $LOG" >/dev/null 2>&1 || true
+    "$ROOT/bin/append_event.sh" Mike error "cursor-selfcheck-failed" \
+      "{\"note\": \"kb_nightly Phase 0 selfcheck FAIL truoc khi chay cac phase archive dem nay\", \"log\": \"$LOG\"}" \
+      >/dev/null 2>&1 || true
+fi
+
 # ── Lock: Phase 1a/1 (events_buffer.md) + 1b/1b2 (bus/inbox + offsets) ───────
 # consolidate.sh holds locks/consolidator.lock while it appends to the same file, and it
 # runs after EVERY dispatch (dispatch.sh, run_bot.sh, verify_finding.sh, fleet_backup.sh)

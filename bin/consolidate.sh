@@ -28,6 +28,7 @@ for f in "$BUS"/inbox/*.jsonl; do
   base="$(basename "$f")"
   python3 "$PY" cursor-advance "$f" "$STATE/$base" >> "$NEW" 2>>"$REPAIRS" \
     || echo "CURSOR-ERROR $base cursor-advance failed (cursor left untouched)" >> "$REPAIRS"
+    # field 1=CURSOR-ERROR, field 2=$base, field 3=cursor-advance (the failing subcommand name)
 done
 
 # A repaired cursor means events were at risk of being dropped — that MUST reach a human.
@@ -46,15 +47,25 @@ if [ -s "$REPAIRS" ]; then
     echo "$(date -u +%FT%TZ) $r"
     wbase="$(echo "$r" | awk '{print $2}' | tr -c 'A-Za-z0-9._-' '_')"; wmark="$WARN_DIR/${wbase:-unknown}"
     echo "${wbase:-unknown}" >> "$SEEN"
-    # Debounce key = repair KIND (field 3: resync-ts/resync-id/clamp-legacy/CURSOR-ERROR), not
-    # the whole line — the line also carries prev=/total=/recovered=, which change on every run
-    # of a file that's still actively being appended to, so comparing the full line never
+    # Debounce key = repair KIND (field 3, e.g. resync-ts/resync-id/clamp-legacy; for a
+    # CURSOR-ERROR line field 3 is the failing subcommand name, "cursor-advance") PLUS the
+    # `recovered=` count, not the whole line — the line also carries prev=/total=, which
+    # change on every run of a file still being appended to, so comparing the full line never
     # matched twice and the debounce silently never fired on a busy file (the exact case that
     # matters most: a repair recurring on a hot inbox). Full `$r` still goes to notify.sh below
-    # so a human sees the real numbers; only the dedup KEY is now stable.
+    # so a human sees the real numbers; only the dedup KEY is stable — same kind AND recovered
+    # not growing = suppressed; recovered ESCALATING re-alerts even mid-streak, so a repair
+    # that's getting worse can't hide behind the debounce meant for a steady-state one.
     wkind="$(echo "$r" | awk '{print $3}')"
-    if [ "$(cat "$wmark" 2>/dev/null || true)" = "$wkind" ]; then continue; fi   # same kind already reported
-    printf '%s' "$wkind" > "$wmark"
+    [ -n "$wkind" ] || wkind="$r"   # malformed/short line (no field 3) -> key is never empty
+    wrecovered="$(echo "$r" | sed -n 's/.*recovered=\([0-9]*\).*/\1/p')"; wrecovered="${wrecovered:-0}"
+    wold="$(cat "$wmark" 2>/dev/null || true)"
+    wold_kind="${wold% recovered=*}"; wold_recovered="${wold##*recovered=}"
+    case "$wold_recovered" in ''|*[!0-9]*) wold_recovered=0 ;; esac
+    if [ "$wold_kind" = "$wkind" ] && [ "$wrecovered" -le "$wold_recovered" ]; then
+      continue   # same kind, not worse than last reported -> already seen, suppressed
+    fi
+    printf '%s recovered=%s' "$wkind" "$wrecovered" > "$wmark"
     "$ROOT/bin/notify.sh" "⚠️ consolidate.sh CURSOR REPAIR — KB ingestion đã lệch, kiểm tra event có bị bỏ sót:
 \`$r\`" >/dev/null 2>&1 || true
     "$ROOT/bin/append_event.sh" Mike error "consolidate-cursor-repair" \
