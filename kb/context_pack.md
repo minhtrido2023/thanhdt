@@ -27,16 +27,19 @@ lãnh đạo DN niêm yết 7-14 ngày qua, áp bộ lọc QUALIFY/NON/AMBIGUOUS
 Đây là recon, KHÔNG tự mua — mọi case đáng chú ý vẫn cần due-diligence sâu + user duyệt riêng
 như TV1/DGC.
 
-## Dự án thay thế `ticker_prune` → `universe_pit` — ĐÃ CUTOVER R3 CHÍNH THỨC 2026-07-22, đang G1 tiếp
+## Dự án thay thế `ticker_prune` → `universe_pit` — G0-G3 XONG, R3 đã cutover chính thức (2026-07-22)
 `ticker_prune` không có quản trị (curation circular-bias, không tái lập được) → team tự xây
-`universe_pit` (point-in-time từ `tav2_bq.ticker`, B3=1,0 tỷ VND/ngày). User đã duyệt Q1-Q9
-(2026-07-22) — cổng cứng còn hiệu lực: **Q9** cấm cutover bước chạm tiền thật (P2 custom30V, P4
-CAPIT) tới khi đo xong độ rò chất lượng qua golden floor (G2b); **CAPIT breadth vẫn đọc
-`ticker_prune` có chủ ý** tới khi hiệu chuẩn lại (cấm cutover khi `capit_fired=true`). R3 (allocator
-gate) đã cutover chính thức — xem số liệu ở "Tri thức chung của đội" bên dưới. Đang triển khai G1
-(`bin/build_universe_pit.py`). Tài liệu đầy đủ (kiến trúc/vận hành/Q&A gốc): xem
-`mike/agents/Taylor/research/ticker_prune_replacement_plan.md` + `mike/agents/Winston/
-universe_pit_ops_feasibility_20260722.md` + `.../ticker_prune_universe_QA_bq_admin_20260722.md`.
+`universe_pit` (point-in-time từ `tav2_bq.ticker`, B3=1,0 tỷ VND/ngày). **Cổng cứng §3.2b/Q9 ĐÃ
+MỞ từ 2026-07-22** (user chốt A′+Q-C, không Q-B, sau khi G2b đo xong độ rò chất lượng) — P1-P3 đã
+cutover production (due_diligence.py, custom30V→`universe_pit_q` commit `ce7d457`, golive_recommend_v23
+commit `0bfbdfe`, cả 2 user duyệt + selfcheck pass). **Cổng CAPIT §4.4 vẫn ĐÓNG riêng** — breadth/pool
+CAPIT vẫn đọc `ticker_prune` có chủ ý tới khi hiệu chuẩn lại (2 vòng đo đều thất bại cấu trúc tìm
+ngưỡng bảo toàn; cấm cutover khi `capit_fired=true`). R3 (allocator gate) đã cutover chính thức — xem
+số liệu ở "Tri thức chung của đội" bên dưới. Còn lại: G5 shadow ≥10 phiên, G6 re-pin R3, G7 N-trial
+review, G8 data/cron-registry gate, G9 quant-skeptic full review. Tài liệu đầy đủ (kiến trúc/vận
+hành/Q&A gốc, bảng G0-G9): `mike/agents/Taylor/research/ticker_prune_replacement_plan.md` +
+`mike/agents/Winston/universe_pit_ops_feasibility_20260722.md` +
+`.../ticker_prune_universe_QA_bq_admin_20260722.md`.
 
 ## CAPIT (bear-washout) — ĐÃ FIRE từ 07-20/07-21, đang giải ngân dở (cập nhật 2026-07-22)
 `capit_fired=true` từ 07-20 (`data/golive_v23_status.json`, breadth_oversold vượt xa
@@ -49,7 +52,9 @@ report. Nguồn vốn: `NAV_book_LAG × capit_size` (user chốt 07-20). 2 đi�
 xếp HẠNG 1 pool CAPIT 07-17 nếu không gate). PNJ khủng hoảng thật (lãnh đạo bị bắt buôn lậu kim
 cương, giá sập ~-32%, kết luận AMBIGUOUS trong `calculated_fear_state_backstop.md` §7, cổng xác
 nhận = BCTC Q3/2026 ~cuối tháng 10). Cơ chế `anomaly_scan.py` → `data/anomaly_flags.json` (gate
-CHUNG theo cờ, không hardcode tên) — wire vào `ops_health_check.sh` 08:20+12:45. Rổ hiện tại (nếu
+CHUNG theo cờ, không hardcode tên, **TTL 30 ngày** — cờ PNJ tự hết hạn ~08-23 nếu không có
+alert mới trước cổng xác nhận thật tháng 10, cần theo dõi không để hở gate) — wire vào
+`ops_health_check.sh` 08:20+12:45. Rổ hiện tại (nếu
 fire hôm nay): NCT, PVT, SAB, VNM (PNJ đã loại). Giới hạn: gate KHÔNG backtest được (n=1) — coi là
 bảo hiểm chi phí chưa đo được, không phải alpha đã kiểm chứng; rổ neo vào NCT (ADV 2,18 tỷ/ngày,
 sát sàn 2 tỷ) sau khi loại PNJ — vấn đề sizing NCT có sẵn từ trước, cần theo dõi nếu fire thật.
@@ -133,7 +138,7 @@ vẫn còn đó cho account tương lai có off-book asset tương tự — nế
 Trứng vàng, cập nhật lại field NGAY khi nạp/rút (nếu quên → NAV/active_nav đếm trùng, không rủi
 ro tiền thật vì executor check cash/ppse live). Chi tiết đầy đủ: [[project-dnse-trung-vang-offbook-assets]] (memory Mike) + `kb/context_planning_mini.md`.
 
-## Đang R&D (mọi mục PAPER-ONLY trừ khi ghi rõ LIVE — chi tiết đầy đủ: job ID trích dẫn + `kb/INCIDENTS.md`)
+## Đang R&D (mọi mục PAPER-ONLY trừ khi ghi rõ LIVE — chi tiết đầy đủ: bus finding của Taylor + `kb/INCIDENTS.md`)
 - **EXTREME-regime gate** (paper `main` only, từ 07-01): stress PASS 24/24. Target kết thúc
   ~2026-07-28 (~20 phiên). Trước LIVE cần: 0 false-trigger ~4 tuần, không đụng NORMAL-path,
   user sign-off. KHÔNG bật ở live.
