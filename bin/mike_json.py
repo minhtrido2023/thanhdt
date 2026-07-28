@@ -356,6 +356,14 @@ def cmd_cursor_advance(a):
             % (os.path.basename(inbox), repair, prev, total, start, max(0, prev - start)))
     if total != prev or repair or last_id is None:
         nid, nts = _line_mark(lines[-1]) if total else (None, None)
+        # Payload MUST hit disk before the cursor advances (arch-review 2026-07-28) — stdout
+        # here is redirected into consolidate.sh's $NEW file, block-buffered. Without this
+        # flush, a SIGTERM between the print() above and the cursor write leaves the cursor
+        # already advanced while $NEW is still empty: the events are gone, silently, with a
+        # perfectly self-consistent cursor (no repair, no alert, no recovery). Flushing first
+        # restores the old fail-safe direction: killed mid-write re-emits (duplicate, safe),
+        # never drops.
+        sys.stdout.flush()
         _cursor_write(state, total, nid, nts)
 
 
