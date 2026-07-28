@@ -1457,6 +1457,25 @@ sáng theo thiết kế human-in-the-loop. Phiên chiều 13:00 bot restart vớ
 sell 10cp — fail-safe đúng); lệnh tay khớp/hủy xong thì guard tự nhả, bot tự bán nốt
 10cp lẻ bằng code mới nếu còn.
 
+**Cập nhật 2026-07-28 (lần đầu nhánh fail rc=143-ngoài-trưa bắn thật — BENIGN):**
+run_bot SpaceX plan 2026-07-28 "thoát rc=143 sau 114 phút" (09:05→10:59) → tự dispatch
+ops_autofix (job `Winston_20260728_035952`). Điều tra: rc=143 KHÔNG phải crash — một
+**phiên Claude interactive** (`ppid 1192926`, shell-snapshot) chạy tay `kill 3125444`
+(chính là run_bot cron 09:05) rồi `nohup run_bot.sh --account SpaceX restart` lúc
+10:59:52. Vì 10:59 NGOÀI cửa sổ trưa 11:25–12:59 → fail-branch coi là bất thường và
+dispatch ops_autofix — **đúng thiết kế** (entry 2026-07-09 cố ý giữ nhánh này cho
+"kill tay/BOT_STOP bất thường"). Bot hồi phục sạch: state file idempotent, resume
+WAIT_QUOTA liền mạch (10:59:54, 11:00:14…), KHÔNG đặt trùng (vẫn đúng 2 child
+35091/57151 status=closed filled=0 released=True, parent done=False). **0 fill, 0 rủi
+ro vốn, không BOT_STOP.** WAIT_QUOTA của TV1 là throttle thanh khoản THẬT (ratio
+38.46%≥1%ADV, cap tham gia 10% KLGD — TV1 mỏng, chưa đủ volume để 1 slice khớp trong
+cap), KHÔNG phải bug round_lot (qty 300 = lô chẵn; bug đó đã fix `f7f9f52`).
+**Bài học triage:** rc=143 + có run_bot mới sống lại trong vài giây + parent `ppid` là
+claude shell-snapshot = restart tay lành, không cần điều tra sâu. Cost-note: mỗi lần
+restart tay run_bot ngoài giờ trưa vẫn nuốt trọn 1 phiên ops_autofix (Opus) —
+cân nhắc mở rộng nhánh benign của run_bot.sh nếu tái diễn (chưa sửa: rủi ro che mất
+kill bất thường thật; giữ nguyên hành vi hiện tại).
+
 ## RETRO — 2026-07-09: 7 sự cố, 2 pattern xuyên suốt tái diễn từ trước, prevention cũ chưa đủ
 
 User yêu cầu trực tiếp cuối ngày: review toàn bộ lỗi hôm nay, phân loại MỚI/TÁI DIỄN,
