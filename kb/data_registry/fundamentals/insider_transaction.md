@@ -58,6 +58,19 @@ Cùng 1 `id` chuyển trạng thái `Đăng ký` → `Đã thực hiện xong` v
 "lợi thế công bố-trước" của VN từ bảng này; muốn có phải **tự snapshot bảng theo ngày từ giờ trở đi**
 (hoặc lấy nguồn khác). Ước lượng ngày đăng ký ≈ `start_date − 3` là IMPUTE, không phải sự thật.
 
+**XÁC NHẬN bởi bq_admin (2026-07-29, đọc source ETL, không còn là suy luận từ dữ liệu):**
+1. `publicDate` là field VCI tự maintain trong DB nguồn của họ — **không gắn với ý nghĩa "ngày công
+   bố sự kiện"**; khi event lật Registration→Done, chính VCI dời `publicDate` sang ngày công bố kết
+   quả (verified qua comment source dòng 337 & 532-533, cơ chế feed re-surface flip).
+2. Pipeline ingest có bước `_merge_prefer_done` (dòng 213-238): Done luôn thắng not-Done khi merge
+   → `public_date` trong store bị ghi đè thành ngày kết quả, **kể cả khi lần sync trước đã bắt được
+   dòng lúc còn Đăng ký** (không có cơ chế giữ bản snapshot cũ).
+3. Không có cột nào khác lưu ngày công bố đăng ký gốc; `start_date`/`end_date` là cửa sổ ĐƯỢC PHÉP
+   giao dịch, không phải ngày công bố.
+⇒ Kết luận "ngày đăng ký gốc đã mất vĩnh viễn cho event Done" nay là **sự thật đã xác nhận ở tầng
+nguồn**, không phải suy luận thống kê — đề xuất §5.4 (tự snapshot hàng ngày từ giờ trở đi) là con
+đường DUY NHẤT để lấy lại cửa sổ pre-trade, không có cách nào phục hồi lịch sử.
+
 **(2) `Không thực hiện được` gần như không được dùng (2 dòng/11 năm) — tỷ lệ không-thực-hiện THẬT nằm
 ở `share_acquire`:** trong 31.505 dòng Done có `share_register>0`: **14,7% khớp 0 cổ phiếu**
 (4.646), **27,2% khớp một phần** (8.567), **58,1% khớp đủ** (18.292); trung vị fill = 1,0, p25 ≈ 0,38–0,44.
