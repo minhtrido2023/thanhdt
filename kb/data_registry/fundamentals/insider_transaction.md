@@ -3,7 +3,7 @@ kind: bigquery-table
 status: CANONICAL
 source: tav2_bq.insider_transaction
 group: fundamentals
-writer: bq_admin — backfill 1 lần 2026-07-27 14:35–14:36 UTC (ingested_at); CADENCE REFRESH CHƯA XÁC NHẬN
+writer: bq_admin — backfill 1 lần 2026-07-27 14:35–14:36 UTC (ingested_at); CADENCE REFRESH = hàng ngày theo kế hoạch (bq_admin xác nhận 2026-07-29, đang fix 1 bug trước khi cron chạy đều — chưa quan sát được refresh thật lần nào tính đến giờ)
 first_profiled: 2026-07-29 (Taylor, job Taylor_20260729_015830)
 usage_note: SNAPSHOT trạng thái hiện tại, KHÔNG phải event-log append-only — public_date bị ghi đè khi Đăng ký→Đã thực hiện xong
 ---
@@ -44,8 +44,10 @@ cũng tách được `DDIND` vs `DDRP`, thứ mà person_id không tách đượ
 
 ## Ai ghi / cadence
 bq_admin. `ingested_at` chỉ có **72 giá trị phân biệt trong 81 giây ngày 2026-07-27** ⇒ tới nay mới
-**đúng 1 lần backfill**, CHƯA có bằng chứng cron refresh. **Phải xác nhận cadence với bq_admin/Winston
-trước khi bất kỳ thứ gì live đọc bảng này** — nếu không refresh, mọi tín hiệu sẽ đứng im từ 07-24.
+**đúng 1 lần backfill**. **bq_admin xác nhận 2026-07-29: cadence dự kiến hàng ngày, nhưng đang có bug
+đang fix** — chưa quan sát được lần refresh cron thật nào. **Trước khi bất kỳ thứ gì LIVE đọc bảng
+này (vd `insider_flags.py` §5.3 trong research file), phải kiểm tra lại `MAX(public_date)` để xác
+nhận cron đã chạy đều, không tin lời hứa cadence khi chưa thấy dữ liệu tự cập nhật thật.**
 
 ## Bẫy
 **(1) BẢNG LÀ SNAPSHOT TRẠNG THÁI, KHÔNG PHẢI EVENT-LOG — `public_date` bị GHI ĐÈ.**
