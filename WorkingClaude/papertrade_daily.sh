@@ -76,8 +76,16 @@ run "[17] orb_pt"               orb_pt.py
 # [18] RETIRED 2026-07-07 (Taylor_20260707_132048) — câu hỏi A/B "foundation nào go-live"
 # đã QUYẾT 2026-05-29 (DT5G live từ 06-02); không còn quyết định nào đọc report này.
 #run "[18] pt_dt4_vs_tq34b_ab"   pt_dt4_vs_tq34b_ab.py
-run "[19] crisis_alert_push"    crisis_alert_push.py
+# [19] crisis_alert_push CHUYỂN sang mike/bin/paper_late_feeds.sh (20:05 ICT) — 2026-07-29,
+# job Winston_20260729_103816. Nó tự query BQ LIVE (ticker_prune JOIN dt5g_live), không đọc
+# artifact của step nào khác → ở 15:30 asof luôn = T-1 (ingest tav2 xong ~17:2x, publish DT5G
+# 19:0x); chạy 20:05 thì asof = T. Không step nào trong chain này đọc output của nó (nó chỉ
+# push Telegram) → gỡ ra không phá thứ tự.
+#run "[19] crisis_alert_push"    crisis_alert_push.py
 run "[20] pt_capitulation_shadow" pt_capitulation_shadow.py
+# [21] GIỮ ở đây (dù đọc web live) vì script chỉ lấy ngày MỚI NHẤT trên trang: bỏ 1 phiên =
+# mất ngày đó vĩnh viễn. paper_late_feeds.sh 20:05 chạy LẠI cùng script để bắt được ngày T khi
+# Baltic đã công bố (~19:00-20:00 ICT); dedup theo date nên 2 lần/ngày là idempotent.
 run "[21] fetch_bdi_daily"      fetch_bdi_daily.py
 run "[22] edge_health_monitor"  edge_health_monitor.py --refresh
 # [23][24][25] RETIRED 2026-07-07 (Taylor_20260707_132048) — arc V6 "Tứ Trụ"/AMH không
