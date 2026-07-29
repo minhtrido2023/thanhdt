@@ -129,12 +129,23 @@ echo "local v3.4b CSV max date = $LOCAL_MAX"
 [ -n "$LOCAL_MAX" ] || die "v3.4b CSV empty"
 
 # --- 2. backup (dated, keep last 5) ---
-step "[9] backup vnindex_5state + _v34b_clean (dated)"
+step "[9] backup vnindex_5state + dt5g_live (dated)"
 TS="$(date +%Y%m%d_%H%M%S)"
 bq query --use_legacy_sql=false --project_id="$PJ" \
   "CREATE TABLE \`$PJ.tav2_bq.vnindex_5state_archive_predeploy_$TS\` AS SELECT * FROM \`$PJ.tav2_bq.vnindex_5state\`" || die "backup bare"
 # prune: keep newest 5 predeploy backups of the bare table
 for old in $(bq ls --max_results=1000 tav2_bq 2>/dev/null | grep -oE 'vnindex_5state_archive_predeploy_[0-9_]+' | sort | head -n -5); do
+  echo "  prune old backup $old"; bq rm -f -t "$PJ:tav2_bq.$old"
+done
+# dt5g_live cũng cần bản predeploy: step [12] publish đè thẳng bảng production mà trước đây
+# KHÔNG có snapshot dated nào (RCA 2026-07-29 mục 6 ưu tiên 2) ⇒ không có gì để so khi lịch
+# sử bị viết lại, và BQ time-travel thì đã chết vì upstream DROP+CREATE mỗi sáng. Chụp ở
+# ĐÂY (trước publish) để step [12b] diff được bản-ngay-trước-khi-ghi-đè. Non-fatal: thiếu
+# backup chỉ làm mất guard, không được chặn publish production.
+bq query --use_legacy_sql=false --project_id="$PJ" \
+  "CREATE TABLE \`$PJ.tav2_bq.vnindex_5state_dt5g_live_archive_predeploy_$TS\` AS SELECT * FROM \`$PJ.tav2_bq.vnindex_5state_dt5g_live\`" \
+  || echo "  WARN: backup dt5g_live predeploy FAILED (step [12b] restate guard sẽ skip)"
+for old in $(bq ls --max_results=1000 tav2_bq 2>/dev/null | grep -oE 'vnindex_5state_dt5g_live_archive_predeploy_[0-9_]+' | sort | head -n -5); do
   echo "  prune old backup $old"; bq rm -f -t "$PJ:tav2_bq.$old"
 done
 
@@ -148,9 +159,28 @@ step "[11] sync _v34b_clean <- vnindex_5state"
 bq query --use_legacy_sql=false --project_id="$PJ" \
   'CREATE OR REPLACE TABLE tav2_bq.vnindex_5state_tam_quan_v34b_clean AS SELECT * FROM tav2_bq.vnindex_5state' || die "sync _v34b_clean"
 
+# --- 3b. restate guard: lịch sử đã đóng có bị viết lại không? ---
+# RCA dt5g_history_restate_rca_20260729.md: chain này rebuild TOÀN BỘ lịch sử mỗi đêm từ
+# upstream có thể restate (PE backfill, corp-action re-adjust, ticker_prune membership) qua
+# expanding-window, rồi bq load --replace đè bảng — nên state của phiên đã đóng nhiều năm
+# trước vẫn đổi được. 2026-07-29: 134 phiên base + 101 phiên dt5g_live bị viết lại và
+# KHÔNG có gì cảnh báo. Guard chạy SAU deploy (alert-only, không chặn) và cố ý là advisory:
+# guard hỏng thì chain vẫn phải chạy tiếp.
+step "[11b] restate guard: vnindex_5state vs archive_predeploy_$TS"
+./restate_guard.sh "$PJ.tav2_bq.vnindex_5state" \
+                   "$PJ.tav2_bq.vnindex_5state_archive_predeploy_$TS" \
+                   "vnindex_5state (base v3.4b)"
+case $? in 0) : ;; 2) echo "  restate ALERT đã gửi (base)" ;; *) echo "  WARN: restate guard (base) không chạy được" ;; esac
+
 # --- 4. republish DT5G live ---
 step "[12] publish_gated_state.py -> dt5g_live"
 $PY deploy_golive_dt5g_v4/publish_gated_state.py || die "publish_gated_state"
+
+step "[12b] restate guard: dt5g_live vs archive_predeploy_$TS"
+./restate_guard.sh "$PJ.tav2_bq.vnindex_5state_dt5g_live" \
+                   "$PJ.tav2_bq.vnindex_5state_dt5g_live_archive_predeploy_$TS" \
+                   "vnindex_5state_dt5g_live (PRODUCTION)"
+case $? in 0) : ;; 2) echo "  restate ALERT đã gửi (dt5g_live)" ;; *) echo "  WARN: restate guard (dt5g_live) không chạy được" ;; esac
 
 # --- 5. verify ---
 step "[13] verify freshness (base should match local CSV max=$LOCAL_MAX)"
