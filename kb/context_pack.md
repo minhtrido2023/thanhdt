@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v1476)
+# Mike fleet — context pack (v1477)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-29T02:01:07] Taylor/finding — ontology-constraint-layer-design: {"job": "Taylor_20260729_015312", "status": "DONE", "deliverable": "mike/agents/Taylor/research/ontology_constraint_layer_design_20260729.md", "scope": "RESEARC …
 - [2026-07-29T02:06:52] Taylor/finding — insider_transaction data-profiling + data_registry: {"job": "Taylor_20260729_015830", "step": "(1) profiling XONG + đã đăng ký data_registry", "table": "tav2_bq.insider_transaction", "registry": "mike/kb/data_reg …
 - [2026-07-29T02:14:30] Taylor/finding — insider factor track — IC yếu sau trung tính 1/PE, KHÔNG đề xuất: {"job": "Taylor_20260729_015830", "step": "(2)+(3) hướng FACTOR", "verdict": "NO-GO — không đề xuất đi tiếp thành factor xếp hạng, không cần backtest production …
 - [2026-07-29T02:14:30] Taylor/finding — insider gate track — cờ rủi ro đuôi trái CÓ nội dung thật, đề xuất theo đuổi (WATCH-only): {"job": "Taylor_20260729_015830", "step": "(2)+(4) hướng GATE due-diligence", "verdict": "GO để nghiên cứu tiếp — NHƯNG chặn bởi 2 điều kiện trước khi wire (cad …
@@ -11,11 +10,32 @@
 - [2026-07-29T02:35:32] Taylor/answer — P1 LAG_RATING_MAX (ACTIVE) + P0 PLAN_BUYING_POWER (WARN_ONLY) — code+test XONG, chua commit, cho user duyet: {"job": "Taylor_20260729_022049", "trang_thai": "CODE + TEST XONG — CHUA COMMIT, CHUA COI LA LIVE. Can Mike doc diff + xin user xac nhan truoc phien 09:05 ke ti …
 - [2026-07-29T02:40:54] Taylor/finding — P1 LAG rating gate tang order (ACTIVE) + P0 buying-power shadow (WARN_ONLY) — code+test XONG, CHUA commit, cho user duyet: {"job": "Taylor_20260729_022049", "trang_thai": "CODE + TEST XONG — UNSTAGED o working tree, CHUA COMMIT, CHUA LIVE. Cho Mike doc diff + xin user duyet truoc ph …
 - [2026-07-29T02:57:54] Taylor/finding — market-regime-probability — PE re, PB trung binh, P(bear 12M) ~20% khong khac base rate: {"job": "Taylor_20260729_024754", "loai": "RESEARCH tra loi cau hoi — KHONG wire production, khong can quant-skeptic", "deliverable": "mike/agents/Taylor/resear …
+- [2026-07-29T03:36:20] Taylor/finding — insider-sell flag — overlap voi anomaly/forensic THAP (21,7%), GO cho §5.3 WATCH-only shadow: {"job": "Taylor_20260729_032713", "buoc": "§5.2 — do phan GIA TANG so voi anomaly_scan/forensic_flags", "verdict": "GO cho §5.3 (dung insider_flags.py WATCH-onl …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
 > Mike cập nhật thủ công khi có thay đổi trạng thái quan trọng. Đọc trước mọi thứ khác khi restart.
 > Cập nhật lần cuối: 2026-07-28 (token-cost trim: Trứng vàng staleness fix, workflow/CAPIT/universe_pit/R&D compression, ~9KB saved)
+
+## Domain-constraint layer — P1 LIVE, P0 shadow đang chạy (2026-07-29, commit `d64717f`)
+Theo sau talk "Why Agentic Systems Need Ontologies" — thiết kế đầy đủ + kiểm kê 12 guardrail cơ
+khí có sẵn: `mike/agents/Taylor/research/ontology_constraint_layer_design_20260729.md`. User chốt:
+làm P1+P0 dạng patch tối thiểu, KHÔNG xây `trading_bot/constraints.py`/registry (chỉ đáng làm khi
+có ≥3 rule cùng lúc, có thể là lúc V2.5 cần nhiều rule tường minh hơn).
+- **P1 (ACTIVE, LIVE từ phiên 07-30)**: `filter_lag_rating_orders()` — lưới an toàn tầng ORDER cho
+  gate 8L rating≤3 của LAG (chốt 07-27), vá lỗ hổng gate cũ chỉ sống ở tầng sinh tín hiệu. Gọi ở
+  `bot_execute.py` ngay sau `cap_lag_orders`. Verify: 14/14 + 22/22 selfcheck (Mike tự chạy lại độc
+  lập, không chỉ tin báo cáo Taylor), replay đúng case TRC/MST bị chặn, 0 lệnh khác đổi trên 21
+  plan thật 07-20→07-28.
+- **P0 (WARN_ONLY, chỉ log)**: `data/plan_buying_power_shadow_log.csv` — Σ lệnh mua vs sức mua
+  broker sống (`ppse.pp0Buy`), KHÔNG chặn gì. Nhắm đúng pattern funding_required tái diễn 3 lần
+  (07-23/07-27/07-28) mà KHÔNG đảo ngược quyết định user 16:16 07-28 (từ chối luật `orders≤cash`
+  cứng vì margin tương lai) — vế phải là sức mua đo được (đã bao gồm hạn mức vay), không phải cash
+  tĩnh. ⚠️ **Giới hạn đã biết**: SpaceX (account margin) chưa từng có bản ghi `pp0Buy` thật trong
+  lịch sử (code chỉ gọi API đó khi thiếu cash mặt, SpaceX có margin nên chưa rơi nhánh đó) — số
+  liệu replay 3/3 sự cố cũ dùng PROXY (`availableCash`), là cận dưới, không phải bằng chứng rule
+  sẽ bắn đúng với `pp0Buy` thật. **Việc còn treo**: theo dõi log ≥10 phiên thật rồi Mike/user mới
+  xét P0 → ACTIVE (không tự động promote).
 
 ## Sleeve "mua khi sợ hãi có tính toán" — quét chủ động HÀNG TUẦN (mandate user 2026-07-23)
 Sau chuỗi case TV1 + DGC (cả 2 lần đầu bị đánh giá quá thận trọng, user tự phát hiện + sửa —
