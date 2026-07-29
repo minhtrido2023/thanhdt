@@ -1,16 +1,16 @@
-# Mike fleet — context pack (v1497)
+# Mike fleet — context pack (v1498)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-29T11:56:27] Winston/finding — kaffa_v2 DT5G writer: KHONG co LLM, 2 engine bit-identical cung vintage: {"job": "Winston_20260729_114625", "report": "mike/agents/Winston/kaffa_dt5g_writer_taskspec_20260729.md", "dinh_chinh_3_gia_dinh": {"ton_token_claude": "SAI -  …
-- [2026-07-29T11:57:01] Winston/answer — Task-spec de xuat cho hainguyen/bq_admin ve writer thu hai dt5g_live: {"job": "Winston_20260729_114625", "report_day_du": "mike/agents/Winston/kaffa_dt5g_writer_taskspec_20260729.md", "message_gui_thang_cho_ho": "co san o muc 6 cu …
 - [2026-07-29T12:07:36] DollarBill/decision — plan-2026-07-30-SpaceX: {"account": "SpaceX", "plan_date": "2026-07-30", "action": "HOLD_ALL", "orders": 0, "nav_vnd": 900082648, "cash_vnd": 4527648, "state": "NEUTRAL(3)", "lag_new": …
 - [2026-07-29T12:12:21] DollarBill/decision — plan-ZaloPay-2026-07-30: {"plan_date": "2026-07-30", "account": "ZaloPay", "orders_count": 0, "action": "HOLD", "state": "NEUTRAL", "active_nav_vnd": 474684855, "cash_vnd": 5782155, "ca …
 - [2026-07-29T12:43:35] Winston/finding — DT5G lich su bi viet lai — RCA: VNINDEX_PE backfill + corp-action restate (CA HAI loai tru cua Mike deu SAI): {"verdict": "RESTATE CONFIRMED", "report": "mike/agents/Winston/research/dt5g_history_restate_rca_20260729.md", "time_travel": "BAT KHA THI: tav2_bq.ticker crea …
 - [2026-07-29T12:44:01] Winston/answer — Winston_20260729_123049 — ket luan + viec can quyet: {"context": "Dispatch tu Mike: dieu tra nguyen nhan DT5G lich su bi viet lai (71 phien 2014+).", "answer": "Restate XAC NHAN. Nguyen nhan chinh = VNINDEX_PE bac …
 - [2026-07-29T13:38:16] Taylor/finding — PE 2006-2008 co lam meo chuoi dinh gia khong — CO o tang percentile tho, KHONG o DT5G, KHONG anh huong state hom nay: {"job": "Taylor_20260729_132056", "report": "mike/agents/Taylor/research/pe_history_floor_2006_2008_20260729.md", "cau_hoi_user": "giai doan 2006-2008 thi truon …
 - [2026-07-29T13:37:43] Winston/finding — ticker_prune còn là rủi ro ẩn — 4 consumer LIVE ngoài registry + 58 mã biến mất khỏi toàn lịch sử; KHÔNG phải nguyên nhân vụ DT5G 71 phiên: {"job": "Winston_20260729_132257", "report": "mike/agents/Winston/research/ticker_prune_hidden_risk_audit_20260729.md", "q1_upstream_bq_admin": "SẠCH — không bả …
+- [2026-07-29T15:30:01] Taylor/finding — DT5G breadth guard migrate ticker_prune -> universe_pit: 0/3135 phien doi state, patch san sang chua merge: {"job": "Taylor_20260729_152031", "report": "mike/agents/Taylor/research/dt5g_breadth_guard_universe_pit_20260729.md", "patch": "mike/agents/Taylor/exp_dt5g_bre …
+- [2026-07-29T15:34:35] quant-skeptic/verification — ✅ CONFIRMED VERIFY: DT5G breadth guard migrate ticker_prune -> universe_pit: 0/3135 phien doi state, patch san sang chua merge: {"finding_topic": "DT5G breadth guard migrate ticker_prune -> universe_pit: 0/3135 phien doi state, patch san sang chua merge", "verdict": "CONFIRMED", "confide …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -273,15 +273,34 @@ tự tra config, raise nếu không lọc được thay vì âm thầm dùng nh�
 ZaloPay 07-14 (no-plan day, không có journal) — backfill bằng vị thế THẬT từ `dnse_raw`
 `kind=positions` + giá đóng cửa BQ 07-14 (963.451.542đ), verify khớp broker positions record.
 
-**Còn treo thật** (2 mục):
+**Còn treo thật** (1 mục):
 1. Dọn crontab paper-trading lạc hậu — diff đã có (`Winston_20260712_151206`), **chưa áp dụng**
    (chờ Mike review). Ưu tiên thấp, không khẩn.
-2. **`ticker_financial`/`ticker_prune` corruption 07-14/15** (rows 07-08→07-14 bị xóa/ghi đè
-   upstream) — mitigations đã xong (depth-check gate commit `1b66428`, backup time-travel
-   `*_ttbackup_fresh_20260714`), nhưng **quyết định khôi phục dữ liệu từ backup vẫn CHỜ USER**
-   (đang hỏi BQ admin upstream). Mike KHÔNG tự khôi phục/tạm dừng cron cho tới khi có quyết
-   định. Kiểm tra nhanh còn treo hay đã xong: `kb/INCIDENTS.md` (tìm "ticker_prune cũng bị
-   corruption") + hỏi lại user nếu > vài ngày chưa thấy cập nhật ở đây.
+
+`ticker_financial`/`ticker_prune` corruption 07-14/15 — **ĐÓNG 2026-07-29, user chốt KHÔNG khôi
+phục từ backup.** Lý do (audit `Winston_20260729_132257`,
+`mike/agents/Winston/research/ticker_prune_hidden_risk_audit_20260729.md`): `ticker_prune` vừa bị
+bq_admin TRUNCATE+rebuild lại (07-29 07:27, `--mode prune`) — 58 mã biến mất khỏi TOÀN BỘ lịch sử
+(513→455 mã, membership 265→220/ngày, **-17%**), đúng cơ chế "mọi mã vào bằng daily-append bị xoá
+ở lần rebuild toàn bộ tiếp theo" mà QA doc bq_admin đã cảnh báo trước — khôi phục từ backup
+`ticker_prune_ttbackup_fresh_20260713` sẽ chỉ bị xoá lại ở lần rebuild kế. Giữ snapshot đó làm mỏ
+neo nghiên cứu, không restore vào bảng live.
+
+## ticker_prune — 3 việc theo sau audit 07-29 (Winston_20260729_132257 + Taylor_20260729_132056)
+User đã quyết cả 3, đang triển khai (2026-07-29 13:5x):
+1. **WASHOUT_GATE**: đã verify trực tiếp code — **KHÔNG cần rà lại**. `CAPIT_BREADTH_SOURCE="pit"`
+   ⇒ `WASHOUT_GATE=0.31` (không phải 0.30) đã hiệu chuẩn trên `universe_pit`, KHÔNG đọc
+   `ticker_prune` — nhánh Winston nêu (dòng 215/354, `CAPIT_POOL_SOURCE="prune"` — pool
+   golden-floor + ADV cap) là 1 cơ chế KHÁC, nhỏ hơn, vẫn cố ý ghim `ticker_prune` per
+   §4.4 CAPIT migration (pool đổi rổ đang giải ngân, 2 vòng đo trước đều fail tìm ngưỡng bảo
+   toàn) — không phải washout gate.
+2. **Migrate breadth-decoupling guard** (`macro_state_live.py:158`, đọc `ticker_prune` không
+   điều kiện `time` — look-ahead + điểm mù registry) sang `universe_pit` — dispatch Taylor, đang
+   chạy (đổi input DT5G production, cần self-check + quant-skeptic trước khi wire).
+3. **Pin/snapshot BQ hàng tháng** cho các bảng dễ bị restate âm thầm (`ticker`, `ticker_financial`,
+   `ticker_prune`, `universe_pit`, VNINDEX_PE) — dispatch Winston, đang chạy. Mục đích: phát hiện
+   bất thường dữ liệu sớm + backtest/kết quả pinned tái lập được (Taylor 07-29 nêu: corp-action
+   restate ~2-3%/tuần, BQ time-travel xoá mỗi sáng ⇒ vintage hiện tại không lặp lại được).
 
 ## Tri thức chung của đội (canonical — Mike biên tập; MỌI agent phải nắm)
 > Cập nhật 2026-07-01. Chi tiết: `kb/KNOWLEDGE.md`. Số liệu gốc: `data/results_registry.md`.

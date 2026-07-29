@@ -18,4 +18,5 @@ Không ai ghi.
 
 ## Bẫy
 Breadth-decoupling guard PRODUCTION **không** đọc file này — `macro_state_live.py` query thẳng
-`ticker_prune` (causal T-1). Đừng "fix freshness" file này cho production.
+`ticker_prune` (causal T-1); patch migrate sang `universe_pit` per-day đang chờ merge
+(job `Taylor_20260729_152031`). Đừng "fix freshness" file này cho production.

@@ -55,7 +55,7 @@ migration**, không ai cố ý giữ:
 
 | File | Dùng làm gì | Mức |
 |---|---|---|
-| **`macro_state_live.py:158`** | **breadth-decoupling guard của DT5G** (`daily_refresh_v34b_linux.sh` 18:30) — đúng pattern look-ahead `IN (SELECT DISTINCT ticker …)` **không** điều kiện `time` | 🔴 đường regime PRODUCTION |
+| **`macro_state_live.py:158`** | **breadth-decoupling guard của DT5G** (`daily_refresh_v34b_linux.sh` 18:30) — đúng pattern look-ahead `IN (SELECT DISTINCT ticker …)` **không** điều kiện `time`. → **PATCH SẴN SÀNG, CHỜ MERGE** (job `Taylor_20260729_152031`, xem mục dưới) | 🔴 đường regime PRODUCTION |
 | `dna_report.py:91,129` | 2 trục breadth trong report Telegram + `eod_trading_report.sh` | 🟠 báo cáo |
 | `update_shares_live.py:49` | `SCAN_UNIVERSE` quét ex-date corp-action (cron 18:40) — mã rớt prune ⇒ ngưng phát hiện corp-action mã đó | 🟠 |
 | `ta_score_daily.py:142` | universe chấm điểm TA, pattern look-ahead y hệt | 🟡 |
@@ -69,6 +69,17 @@ guard là coin-flip quanh đúng ngưỡng `b200 = 0,50` (đa số lệch ±0,5p
 cửa sổ US panic sẽ lật nó **im lặng trên chuỗi live**. Đối chứng: `vnindex_5state_ew_v1.py`
 **KHÔNG** dùng prune (breadth của nó tự tính từ `ticker`: ≥252 phiên + ADV60 ≥ 0,5 tỷ) ⇒ kênh
 expanding-rank sạch với prune.
+
+## 2026-07-29 — chỗ 🔴 (`macro_state_live.py` breadth guard): PATCH SẴN SÀNG, **CHƯA MERGE**
+Job `Taylor_20260729_152031` (user chốt migrate). Patch đổi guard sang `universe_pit` per-day
+(`BREADTH_SOURCE = "pit"`, rollback đúng 1 dòng), **giữ nguyên** ngưỡng `breadth_th=0,50` /
+`breadth_min_univ=100`. Đo A/B 3.135 phiên 2014→2026-07-29: breadth lệch 3.132 phiên (mean |Δ|
+2,4pp), guard lật 229 phiên (161 lệch về phía THẬN TRỌNG), macro cap đổi 13 phiên (chỉ 1 episode
+01-02/2016, không binding vì base đã NEUTRAL), **DT5G state đổi 0 phiên**, hôm nay không đổi
+(NEUTRAL(3)). Self-check 4/4 PASS gồm parity `prune`-rollback == production byte-for-byte.
+Patch + report: `mike/agents/Taylor/exp_dt5g_breadth_pit/dt5g_breadth_pit.patch`,
+`mike/agents/Taylor/research/dt5g_breadth_guard_universe_pit_20260729.md`.
+**Khi merge**: cập nhật dòng bảng ở trên + `CLAUDE.md` §DT5G mục 4 + entry `universe_pit.md`.
 
 ## ⚠️ 2026-07-29 — bảng bị TRUNCATE+rebuild: **58 mã biến mất khỏi TOÀN BỘ lịch sử**
 `creation_time = 2026-07-29 07:27:05` ⇒ rebuild `--mode prune` (DROP+CREATE) đã chạy. So với

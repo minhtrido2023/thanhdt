@@ -258,12 +258,31 @@ tự tra config, raise nếu không lọc được thay vì âm thầm dùng nh�
 ZaloPay 07-14 (no-plan day, không có journal) — backfill bằng vị thế THẬT từ `dnse_raw`
 `kind=positions` + giá đóng cửa BQ 07-14 (963.451.542đ), verify khớp broker positions record.
 
-**Còn treo thật** (2 mục):
+**Còn treo thật** (1 mục):
 1. Dọn crontab paper-trading lạc hậu — diff đã có (`Winston_20260712_151206`), **chưa áp dụng**
    (chờ Mike review). Ưu tiên thấp, không khẩn.
-2. **`ticker_financial`/`ticker_prune` corruption 07-14/15** (rows 07-08→07-14 bị xóa/ghi đè
-   upstream) — mitigations đã xong (depth-check gate commit `1b66428`, backup time-travel
-   `*_ttbackup_fresh_20260714`), nhưng **quyết định khôi phục dữ liệu từ backup vẫn CHỜ USER**
-   (đang hỏi BQ admin upstream). Mike KHÔNG tự khôi phục/tạm dừng cron cho tới khi có quyết
-   định. Kiểm tra nhanh còn treo hay đã xong: `kb/INCIDENTS.md` (tìm "ticker_prune cũng bị
-   corruption") + hỏi lại user nếu > vài ngày chưa thấy cập nhật ở đây.
+
+`ticker_financial`/`ticker_prune` corruption 07-14/15 — **ĐÓNG 2026-07-29, user chốt KHÔNG khôi
+phục từ backup.** Lý do (audit `Winston_20260729_132257`,
+`mike/agents/Winston/research/ticker_prune_hidden_risk_audit_20260729.md`): `ticker_prune` vừa bị
+bq_admin TRUNCATE+rebuild lại (07-29 07:27, `--mode prune`) — 58 mã biến mất khỏi TOÀN BỘ lịch sử
+(513→455 mã, membership 265→220/ngày, **-17%**), đúng cơ chế "mọi mã vào bằng daily-append bị xoá
+ở lần rebuild toàn bộ tiếp theo" mà QA doc bq_admin đã cảnh báo trước — khôi phục từ backup
+`ticker_prune_ttbackup_fresh_20260713` sẽ chỉ bị xoá lại ở lần rebuild kế. Giữ snapshot đó làm mỏ
+neo nghiên cứu, không restore vào bảng live.
+
+## ticker_prune — 3 việc theo sau audit 07-29 (Winston_20260729_132257 + Taylor_20260729_132056)
+User đã quyết cả 3, đang triển khai (2026-07-29 13:5x):
+1. **WASHOUT_GATE**: đã verify trực tiếp code — **KHÔNG cần rà lại**. `CAPIT_BREADTH_SOURCE="pit"`
+   ⇒ `WASHOUT_GATE=0.31` (không phải 0.30) đã hiệu chuẩn trên `universe_pit`, KHÔNG đọc
+   `ticker_prune` — nhánh Winston nêu (dòng 215/354, `CAPIT_POOL_SOURCE="prune"` — pool
+   golden-floor + ADV cap) là 1 cơ chế KHÁC, nhỏ hơn, vẫn cố ý ghim `ticker_prune` per
+   §4.4 CAPIT migration (pool đổi rổ đang giải ngân, 2 vòng đo trước đều fail tìm ngưỡng bảo
+   toàn) — không phải washout gate.
+2. **Migrate breadth-decoupling guard** (`macro_state_live.py:158`, đọc `ticker_prune` không
+   điều kiện `time` — look-ahead + điểm mù registry) sang `universe_pit` — dispatch Taylor, đang
+   chạy (đổi input DT5G production, cần self-check + quant-skeptic trước khi wire).
+3. **Pin/snapshot BQ hàng tháng** cho các bảng dễ bị restate âm thầm (`ticker`, `ticker_financial`,
+   `ticker_prune`, `universe_pit`, VNINDEX_PE) — dispatch Winston, đang chạy. Mục đích: phát hiện
+   bất thường dữ liệu sớm + backtest/kết quả pinned tái lập được (Taylor 07-29 nêu: corp-action
+   restate ~2-3%/tuần, BQ time-travel xoá mỗi sáng ⇒ vintage hiện tại không lặp lại được).
