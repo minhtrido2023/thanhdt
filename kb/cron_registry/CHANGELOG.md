@@ -21,6 +21,36 @@ preserve_verbatim: >
 
 # Log thay đổi Cron Registry
 
+- 2026-07-29 (Winston, job `Winston_20260729_103816` — user yêu cầu "dời TẤT CẢ paper report/pipeline
+  sang 19:00 để có dữ liệu cuối ngày"): **CÀI MỚI `mike/bin/paper_late_feeds.sh` 20:05 ICT** (`5 13 * * 1-5`),
+  tách `[19] crisis_alert_push` ra khỏi `papertrade_daily.sh` 15:30 và chạy LẠI `[21] fetch_bdi_daily`.
+  **KHÔNG dời chuỗi 15:30** — yêu cầu gốc đã kiểm chứng và bác bỏ một phần: đo thật cho thấy 11/15 step
+  active đọc `BQ_LOCAL_CACHE` (`data/bq_cache/*.parquet`, chỉ sync 23:45) nên thấy T-1 dù chạy 15:30 hay
+  19:00 — dời chỉ làm báo cáo muộn hơn mà không tươi hơn. Bảng phân loại A/B/C từng step + sơ đồ thứ tự:
+  [papertrade_daily_steps.md](papertrade_daily_steps.md).
+  4 câu hỏi §11 cho dòng mới:
+  (1) *Đọc gì + vintage*: `[19]` query BQ **LIVE** (`ticker_prune` JOIN `dt5g_live` qua `dna_report._bq`
+  subprocess, KHÔNG qua cache) → asof = min(2 bảng); `[21]` scrape handybulk.com, lấy ngày mới nhất trên trang.
+  (2) *Nguồn tươi lúc nào — ĐO THẬT 2026-07-29*: ingest tav2 ghi xong `ticker` 17:23 / `ticker_prune` 17:17 /
+  `ticker_financial` 17:21 / `ticker_1m` 16:02 ICT; `dt5g_live` có phiên T sau `publish_gated_state`
+  19:00-19:03 (log: `EOD PIPELINE DONE — 19:03 ICT`). Baltic công bố ~13:00 London ≈ 19-20:00 ICT — kiểm
+  chứng: chạy thử lúc 17:47 ICT vẫn chỉ lấy được 07-28.
+  (3) *Cần T hay T-1*: cần **T** — `[19]` là cảnh báo capitulation cho người đọc; cảnh báo theo regime hôm qua
+  là vô nghĩa đúng vào ngày cần nó nhất.
+  (4) *Ai tiêu thụ + deadline*: `[19]` → user qua Telegram, cần trước `send_plan_report` 21:00 (thấy cảnh báo
+  trước khi duyệt plan); `[21]` → `freight_map.py` ad-hoc, không deadline. Chọn 20:05 = sau publish 19:03
+  (buffer 1h), sau `telegram_run_daily` 19:35, trước 20:30 inject + 21:00 send_plan.
+  **Giữ `[21]` ở CẢ 15:30 lẫn 20:05** (không phải dư thừa): script chỉ lấy ngày MỚI NHẤT trên trang → nếu chỉ
+  chạy 1 lần muộn mà hôm đó trang chưa cập nhật thì ngày đó mất vĩnh viễn; 2 lần/ngày + dedup theo `date`
+  (`drop_duplicates keep=last`) = idempotent, không bao giờ thủng chuỗi.
+  **KHÔNG đổi** (có lý do, đừng "tối ưu" lại): `[20] pt_capitulation_shadow` giữ ở 15:30 vì `bq_freshness_check`
+  19:00 đọc `pt_capitulation_state.json` cho note CAPIT_FIRED của dispatch DollarBill (đường plan tiền thật) —
+  đề xuất chuyển `[20]` vào chính chuỗi 19:00 (sau pipeline-1, trước pipeline-2) đang **chờ user duyệt**;
+  `[17] orb_pt` đã asof T sẵn (vnstock live, VN đóng cửa 14:45); `[22]` panel theo THÁNG + bị 19:00 check tuổi
+  file `lag_edge_health.csv`; `[1] pull_us_market` phiên US chưa mở ở mọi giờ ICT trong ngày; `[26]` dữ liệu
+  theo quý. Test: chạy thật `paper_late_feeds.sh` 17:47 → rc=0, cả 2 step `[ok]`, không side-effect (DORMANT
+  → không push, BDI dedup no-op). Backup crontab `/tmp/cron_bak_20260729.txt`, diff xác nhận chỉ THÊM 1 dòng.
+
 - 2026-07-29 (Winston, job `Winston_20260729_084600` — user phát hiện report hiển thị dữ liệu cũ):
   **ĐỔI GIỜ `paper_programs_daily_report.sh --post` 15:20 → 16:00 ICT** (`20 8` → `0 9`, T2-T6).
   *Triệu chứng:* report ngày 07-29 hiển thị mục (7) Capitulation + (8) Engine-room asof **07-27**
