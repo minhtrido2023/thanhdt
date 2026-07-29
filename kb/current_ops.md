@@ -150,6 +150,20 @@ Trứng vàng, cập nhật lại field NGAY khi nạp/rút (nếu quên → NAV
 ro tiền thật vì executor check cash/ppse live). Chi tiết đầy đủ: [[project-dnse-trung-vang-offbook-assets]] (memory Mike) + `kb/context_planning_mini.md`.
 
 ## Đang R&D (mọi mục PAPER-ONLY trừ khi ghi rõ LIVE — chi tiết đầy đủ: bus finding của Taylor + `kb/INCIDENTS.md`)
+- **Insider-sell WATCH shadow (`insider_flags.py`)** (WATCH-only, chưa wire due-diligence, từ
+  2026-07-29): cờ bán ròng nội bộ ≥1% CP lưu hành/90 ngày (chỉ `event_code IN ('DDIND','DDRP')`,
+  TTL 90d). Scoping (job Taylor_20260729_015830 + Phụ lục A `_032713`) kết luận GO: overlap thấp
+  với `anomaly_scan`/`forensic_flags` (7,1-21,7%), lift phần riêng 2,08× (z=5,74), ổn định IS/OOS;
+  hai cờ bắn ở hai thời điểm khác nhau (insider sớm hơn ~2 tháng so với anomaly). Đang dựng
+  writer/reader (job Taylor_20260729_104614). **Sàn review ~2026-08-29 (≥1 tháng shadow), trần
+  ~2026-09-15.** Điều kiện TIẾP TỤC (wire vào due-diligence report như dòng bằng chứng): cadence
+  refresh bảng nguồn xác nhận chạy đều (bq_admin đang fix bug tính đến 07-29) + shadow log sạch
+  (không false-trigger bất thường) + qua quant-skeptic trước khi vào due-diligence chính thức.
+  Điều kiện NGỪNG: bq_admin không fix xong cadence (bảng đứng im, cờ đóng băng) hoặc shadow log
+  noise quá tải (~>5 mã/tháng cần review tay, vượt xa ước tính ~3/tháng). **Tuyệt đối không hard-
+  exclude ở bất kỳ giai đoạn nào** — 85% mã bị cờ không sập (§3.5 research file), chỉ là dòng bằng
+  chứng WATCH cho người duyệt plan cân nhắc. Research đầy đủ:
+  `mike/agents/Taylor/research/insider_transaction_scoping_20260729.md`.
 - **EXTREME-regime gate** (paper `main` only, từ 07-01): stress PASS 24/24. Target kết thúc
   ~2026-07-28 (~20 phiên). Trước LIVE cần: 0 false-trigger ~4 tuần, không đụng NORMAL-path,
   user sign-off. KHÔNG bật ở live.
