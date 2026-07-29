@@ -655,3 +655,14 @@
 - [2026-07-29T12:07:12Z] DollarBill/heartbeat — DollarBill_20260729_120310: {"status": "still_running", "elapsed_min": 4, "job_id": "DollarBill_20260729_120310", "source": "watcher"}
 - [2026-07-29T12:07:12Z] DollarBill/heartbeat — DollarBill_20260729_120311: {"status": "still_running", "elapsed_min": 4, "job_id": "DollarBill_20260729_120311", "source": "watcher"}
 - [2026-07-29T12:07:36Z] DollarBill/decision — plan-2026-07-30-SpaceX: {"account": "SpaceX", "plan_date": "2026-07-30", "action": "HOLD_ALL", "orders": 0, "nav_vnd": 900082648, "cash_vnd": 4527648, "state": "NEUTRAL(3)", "lag_new": 0, "capit_fired": false, "bal": 0, "tv1": "DONE 400/400cp", "deferred_count": 3, "deferred_vnd": 140652911, "file": "data/trade_plans/plan_SpaceX_2026-07-30.json", "note": "Không có signal LAG/CAPIT/BAL mới. Cash 4.53M không đủ lệnh nào. TV1 disc hoàn tất."}
+
+## Consolidation 2026-07-29T12:12:46Z
+- [2026-07-29T12:08:12Z] DollarBill/heartbeat — DollarBill_20260729_120310: {"status": "still_running", "elapsed_min": 5, "job_id": "DollarBill_20260729_120310", "source": "watcher"}
+- [2026-07-29T12:09:12Z] DollarBill/heartbeat — DollarBill_20260729_120310: {"status": "still_running", "elapsed_min": 6, "job_id": "DollarBill_20260729_120310", "source": "watcher"}
+- [2026-07-29T12:10:12Z] DollarBill/heartbeat — DollarBill_20260729_120310: {"status": "still_running", "elapsed_min": 7, "job_id": "DollarBill_20260729_120310", "source": "watcher"}
+- [2026-07-29T12:10:29Z] DollarBill/heartbeat — DollarBill_20260729_120310: {"status": "in_progress", "note": "đọc xong recommend 07-29 + template plan cũ. LAG T+1: PCT/VVS/XPH đều bị loại (VVS=BANNED, PCT/XPH ADV~0). CAPIT turned off (breadth 29.2%<31%). orders=[]. Đang viết plan JSON."}
+- [2026-07-29T12:11:12Z] DollarBill/heartbeat — DollarBill_20260729_120310: {"status": "still_running", "elapsed_min": 8, "job_id": "DollarBill_20260729_120310", "source": "watcher"}
+- [2026-07-29T12:12:12Z] DollarBill/heartbeat — DollarBill_20260729_120310: {"status": "still_running", "elapsed_min": 9, "job_id": "DollarBill_20260729_120310", "source": "watcher"}
+- [2026-07-29T12:12:21Z] DollarBill/decision — plan-ZaloPay-2026-07-30: {"plan_date": "2026-07-30", "account": "ZaloPay", "orders_count": 0, "action": "HOLD", "state": "NEUTRAL", "active_nav_vnd": 474684855, "cash_vnd": 5782155, "capit_signal": "OFF_breadth_29.2pct", "lag_t1_excluded": {"PCT": "ADV~0", "VVS": "BANNED", "XPH": "ADV~0"}, "deferred_topup": "DROPPED_capit_off", "file": "data/trade_plans/plan_ZaloPay_2026-07-30.json", "requires_user_approval": true}
+- [2026-07-29T12:10:15Z] Mafee/status — eod-trading-report: {"account": "ZaloPay", "plan_date": "2026-07-29", "delivered_via": "hold_day"}
+- [2026-07-29T12:10:43Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-07-29", "delivered_via": "trading_report_thread"}
