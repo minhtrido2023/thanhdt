@@ -111,3 +111,9 @@ bản `_20260714` là của `ticker_financial`)*:
 - 🔧 Gap monitoring: depth-check hiện có (`bq_freshness_check.sh`/`preflight_check.sh`) bắt "moi
   ruột" nhưng **KHÔNG bắt "thay universe"** (depth 220 vẫn > ngưỡng 200 → xanh). Đề xuất thêm
   alert khi `COUNT(DISTINCT ticker)` toàn bảng đổi > ngưỡng giữa 2 ngày (hôm nay sẽ bắn ở −58).
+  → **ĐÃ LÀM một phần, ở nhịp THÁNG** (2026-07-29, job `Winston_20260729_152037`): cron
+  `bq_monthly_pin.sh` 22:00 ngày 1 hàng tháng pin bảng này thành `tav2_pin.ticker_prune_pin_YYYYMM`
+  và bắn CRITICAL khi >5% mã biến mất khỏi lịch sử — đúng dạng sự cố hôm nay. Xem
+  [`../config-meta/bq_pin_snapshots.md`](../config-meta/bq_pin_snapshots.md). **Vẫn hở nhịp NGÀY**:
+  một lần TRUNCATE+rebuild rồi sửa lại trong cùng tháng sẽ lọt qua pin — muốn bắt trong ngày thì
+  vẫn cần thêm alert `COUNT(DISTINCT ticker)` vào `bq_freshness_check.sh` 19:00.
