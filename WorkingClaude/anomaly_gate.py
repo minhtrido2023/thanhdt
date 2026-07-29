@@ -21,6 +21,7 @@ import pandas as pd
 
 WORKDIR = os.path.dirname(os.path.abspath(__file__))
 ANOMALY_TTL_DAYS = 30   # cờ due-diligence còn hiệu lực bao lâu kể từ phiên alert cuối
+INSIDER_TTL_DAYS = 90   # cờ nội bộ bán: khớp cửa sổ tín hiệu 90d (KHÁC anomaly, cố ý)
 
 
 def anomaly_excluded(asof, ttl_days=ANOMALY_TTL_DAYS, quiet=False):
@@ -47,3 +48,34 @@ def anomaly_excluded(asof, ttl_days=ANOMALY_TTL_DAYS, quiet=False):
         if not quiet:
             print(f"  WARNING: due-diligence flags không đọc được ({ex}) — chạy KHÔNG có gate")
         return set()
+
+
+def insider_sell_flagged(asof, ttl_days=INSIDER_TTL_DAYS, quiet=False):
+    """Mã có cờ "nội bộ bán ≥1% CP lưu hành/90 ngày" còn hiệu lực tại `asof` — **WATCH-only**.
+
+    CỐ Ý LÀ HÀM RIÊNG, KHÔNG merge vào `anomaly_excluded` (§4 research file
+    mike/agents/Taylor/research/insider_transaction_scoping_20260729.md): `anomaly_excluded`
+    là HARD EXCLUDE đang chi phối 4 sổ (1 production + 3 paper); bằng chứng của cờ này —
+    ~80% mã bị bắt KHÔNG sập (§3.5) — không đủ mạnh để loại mã tự động. Nhập chung sẽ âm
+    thầm đổi hành vi chọn mã của production. Dùng làm MỘT DÒNG BẰNG CHỨNG trong báo cáo
+    due-diligence để người duyệt plan cân nhắc, không phải bộ lọc.
+
+    Trả về dict {ticker: {last_alert, tier, reasons, sell_pct_osh, n_sellers, window_end}}
+    — khác `anomaly_excluded` (trả set) vì tiêu thụ là hiển thị bằng chứng, cần cả số liệu.
+    Vẫn iterate ra tên mã như set nếu chỉ cần danh sách.
+
+    Cửa sổ HAI ĐẦU giống `anomaly_excluded`: `asof-ttl <= last_alert <= asof` — chặn trên là
+    chống look-ahead khi replay một ngày quá khứ.
+    FAIL-SAFE: file thiếu/hỏng → trả {} + log warning, KHÔNG chặn pipeline.
+    """
+    p = os.path.join(WORKDIR, "data", "insider_flags.json")
+    try:
+        flags = json.load(open(p, encoding="utf-8"))
+        d = pd.Timestamp(asof).date()
+        lo, hi = str(d - timedelta(days=ttl_days)), str(d)
+        return {t: f for t, f in flags.items()
+                if lo <= str(f.get("last_alert", "")) <= hi}
+    except Exception as ex:
+        if not quiet:
+            print(f"  WARNING: insider flags không đọc được ({ex}) — không có dòng bằng chứng nội bộ")
+        return {}
