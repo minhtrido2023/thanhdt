@@ -2,6 +2,26 @@
 > Mike cập nhật thủ công khi có thay đổi trạng thái quan trọng. Đọc trước mọi thứ khác khi restart.
 > Cập nhật lần cuối: 2026-07-28 (token-cost trim: Trứng vàng staleness fix, workflow/CAPIT/universe_pit/R&D compression, ~9KB saved)
 
+## Domain-constraint layer — P1 LIVE, P0 shadow đang chạy (2026-07-29, commit `d64717f`)
+Theo sau talk "Why Agentic Systems Need Ontologies" — thiết kế đầy đủ + kiểm kê 12 guardrail cơ
+khí có sẵn: `mike/agents/Taylor/research/ontology_constraint_layer_design_20260729.md`. User chốt:
+làm P1+P0 dạng patch tối thiểu, KHÔNG xây `trading_bot/constraints.py`/registry (chỉ đáng làm khi
+có ≥3 rule cùng lúc, có thể là lúc V2.5 cần nhiều rule tường minh hơn).
+- **P1 (ACTIVE, LIVE từ phiên 07-30)**: `filter_lag_rating_orders()` — lưới an toàn tầng ORDER cho
+  gate 8L rating≤3 của LAG (chốt 07-27), vá lỗ hổng gate cũ chỉ sống ở tầng sinh tín hiệu. Gọi ở
+  `bot_execute.py` ngay sau `cap_lag_orders`. Verify: 14/14 + 22/22 selfcheck (Mike tự chạy lại độc
+  lập, không chỉ tin báo cáo Taylor), replay đúng case TRC/MST bị chặn, 0 lệnh khác đổi trên 21
+  plan thật 07-20→07-28.
+- **P0 (WARN_ONLY, chỉ log)**: `data/plan_buying_power_shadow_log.csv` — Σ lệnh mua vs sức mua
+  broker sống (`ppse.pp0Buy`), KHÔNG chặn gì. Nhắm đúng pattern funding_required tái diễn 3 lần
+  (07-23/07-27/07-28) mà KHÔNG đảo ngược quyết định user 16:16 07-28 (từ chối luật `orders≤cash`
+  cứng vì margin tương lai) — vế phải là sức mua đo được (đã bao gồm hạn mức vay), không phải cash
+  tĩnh. ⚠️ **Giới hạn đã biết**: SpaceX (account margin) chưa từng có bản ghi `pp0Buy` thật trong
+  lịch sử (code chỉ gọi API đó khi thiếu cash mặt, SpaceX có margin nên chưa rơi nhánh đó) — số
+  liệu replay 3/3 sự cố cũ dùng PROXY (`availableCash`), là cận dưới, không phải bằng chứng rule
+  sẽ bắn đúng với `pp0Buy` thật. **Việc còn treo**: theo dõi log ≥10 phiên thật rồi Mike/user mới
+  xét P0 → ACTIVE (không tự động promote).
+
 ## Sleeve "mua khi sợ hãi có tính toán" — quét chủ động HÀNG TUẦN (mandate user 2026-07-23)
 Sau chuỗi case TV1 + DGC (cả 2 lần đầu bị đánh giá quá thận trọng, user tự phát hiện + sửa —
 xem 2 mục trên/bên dưới) — user chỉ đạo: đừng chỉ chờ user tình cờ để ý, chủ động dò tìm THÊM
