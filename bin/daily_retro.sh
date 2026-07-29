@@ -144,6 +144,18 @@ XONG bước 4-6 ở trên là DỪNG. Không viết gì vào kb/INCIDENTS.md, k
 không commit, không dọn memory — tất cả phần đó thuộc bước 2/3 của pipeline, KHÔNG phải
 việc của phiên này."
 
+# Content-shape gate (thêm 2026-07-29, sau khi bắt được job Mike_20260729_173001 trả rc=0
+# nhưng nội dung là chuyện lạc đề — session_start.sh đã vá root cause session-collision ở
+# trên, nhưng vẫn cần lớp phòng thủ THỨ HAI độc lập ở đây: non-empty KHÔNG đủ để coi là
+# draft thật, vì bất kỳ output lạc đề nào cũng có thể non-empty. Gate cơ khí rẻ: draft phải
+# có đúng dòng header mà chính prompt trên đã ra lệnh viết — 1 câu trả lời lạc đề gần như
+# chắc chắn không tình cờ khớp định dạng này.
+_draft_valid() {
+  local f="$1"
+  [ -s "$f" ] || return 1
+  grep -q "^## RETRO — $TODAY" "$f"
+}
+
 rc1=0
 for _attempt in 1 2; do
   draft_log="$ROOT/logs/daily_retro_draft_$(date -u +%Y%m%d_%H%M%S)_a${_attempt}.log"
@@ -151,20 +163,26 @@ for _attempt in 1 2; do
       --timeout 1500 > "$draft_log" 2>&1
   rc1=$?
   log "Draft attempt $_attempt exit code: $rc1 (log: $draft_log)"
-  [ -s "$DRAFT_FILE" ] && break
-  # Draft rỗng: nếu do usage-limit thì DỪNG (transient quota, retry vô nghĩa) — để block
-  # phân loại phía dưới xử lý calm-skip. Nếu KHÔNG phải usage-limit (nghi model trả nhầm
-  # task cũ trong context) thì retry 1 lần cuối với prompt sạch.
+  _draft_valid "$DRAFT_FILE" && break
+  if [ -s "$DRAFT_FILE" ]; then
+    _bad="$ROOT/state/retro_rejected_${TODAY}_a${_attempt}.md"
+    mv "$DRAFT_FILE" "$_bad"
+    log "WARNING: draft attempt $_attempt viết ra file nhưng SAI ĐỊNH DẠNG (thiếu header '## RETRO — $TODAY' — nghi lạc đề/trả nhầm task cũ). Giữ lại để chẩn đoán: $_bad (đầu file: $(head -c 200 "$_bad" | tr '\n' ' '))"
+  fi
+  # Draft rỗng/sai định dạng: nếu do usage-limit thì DỪNG (transient quota, retry vô nghĩa) —
+  # để block phân loại phía dưới xử lý calm-skip. Nếu KHÔNG phải usage-limit thì retry 1 lần
+  # cuối với prompt sạch.
   if tail -c 4000 "$draft_log" 2>/dev/null | grep -qiE "$USAGE_LIMIT_PHRASE_RE"; then
-    log "Draft rỗng vì usage-limit — không retry."
+    log "Draft rỗng/sai định dạng vì usage-limit — không retry."
     break
   fi
-  [ "$_attempt" -lt 2 ] && log "Draft rỗng (không phải usage-limit) — nghi Mike trả nhầm task cũ; retry lần cuối với prompt sạch."
+  [ "$_attempt" -lt 2 ] && log "Draft rỗng/sai định dạng (không phải usage-limit) — nghi Mike trả nhầm task cũ; retry lần cuối với prompt sạch."
 done
 log "Draft dispatch xong sau $_attempt lần thử (exit $rc1, log: $draft_log)"
 
-# Verify ARTIFACT thật — không tin exit code của dispatch.sh, kiểm tra file thật đã ghi.
-if [ ! -s "$DRAFT_FILE" ]; then
+# Verify ARTIFACT thật — không tin exit code của dispatch.sh, kiểm tra NỘI DUNG file thật
+# đã ghi đúng định dạng draft (không chỉ non-empty).
+if ! _draft_valid "$DRAFT_FILE"; then
   # Phân loại LÝ DO draft rỗng trước khi báo động (Wags coord-2026-07-27):
   #   - usage-limit: tài khoản Mike hết quota lúc chạy (00:30 ICT) — TRANSIENT, không cần
   #     user quyết. Chỉ báo calm status, KHÔNG đẻ event `question` (question chưa trả lời sẽ
@@ -180,10 +198,10 @@ if [ ! -s "$DRAFT_FILE" ]; then
     log "=== daily_retro SKIPPED (usage-limit, transient) ==="
     exit 0
   fi
-  log "ERROR: draft job không tạo được '$DRAFT_FILE' (rc=$rc1) — DỪNG pipeline, không dispatch Wags."
-  "$ROOT/bin/notify.sh" "[daily_retro] LỖI: draft RETRO $TODAY không được tạo (job Mike rc=$rc1). Xem $draft_log. Retro hôm nay KHÔNG chạy — cần người kiểm tra." 2>/dev/null || true
+  log "ERROR: draft job không tạo được '$DRAFT_FILE' hợp lệ sau 2 lần thử (rc=$rc1) — DỪNG pipeline, không dispatch Wags. Xem state/retro_rejected_${TODAY}_a*.md nếu có (draft lạc đề đã bị gate chặn)."
+  "$ROOT/bin/notify.sh" "[daily_retro] LỖI: draft RETRO $TODAY không hợp lệ sau 2 lần thử (job Mike rc=$rc1). Xem $draft_log và state/retro_rejected_${TODAY}_a*.md. Retro hôm nay KHÔNG chạy — cần người kiểm tra." 2>/dev/null || true
   "$ROOT/bin/append_event.sh" Mike question "daily-retro-draft-failed-$TODAY" \
-    "{\"reason\":\"draft file rong hoac khong ton tai sau job Mike, rc=$rc1\",\"log\":\"$draft_log\"}" 2>/dev/null || true
+    "{\"reason\":\"draft file rong hoac sai dinh dang (thieu header RETRO) sau 2 lan thu, rc=$rc1\",\"log\":\"$draft_log\",\"rejected_glob\":\"state/retro_rejected_${TODAY}_a*.md\"}" 2>/dev/null || true
   log "=== daily_retro ABORTED ==="
   exit 1
 fi

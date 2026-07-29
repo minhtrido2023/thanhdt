@@ -65,7 +65,23 @@ fi
 
 # Continuity: recap this agent's OWN previous session so a restart continues the thread
 # (the durable KB above is fleet-wide facts; this is the in-flight conversation/work).
-if [ -n "${MIKE_CWD:-}" ]; then
+# Mike-only carve-out (2026-07-29, root cause of the recurring "trả lời nhầm task cũ" bug —
+# RETRO 07-17/07-19/07-26/07-27, caught live again today as job Mike_20260729_173001):
+# recap_prev.py's docstring assumes "project dir maps 1:1 to one logical agent" — true for
+# every other agent (their cwd only ever holds sequential one-shot headless dispatches), but
+# FALSE for Mike, who uniquely also has a long-lived live companion session sharing the same
+# project dir. A headless dispatch (daily_retro.sh, kb_nightly.sh) started while the live
+# companion is mid-conversation picks up the LIVE session's last turns as "your own previous
+# session, continue this thread" instead of a genuine prior headless run — that's what made
+# the retro draft job answer with Taylor-job-monitoring chatter instead of writing a draft.
+# Headless Mike dispatches are fully self-contained one-shot prompts by design (see
+# daily_retro.sh's own "viết xong draft là DỪNG" instruction) and were never meant to inherit
+# prior-turn context, so skip recap for them entirely — only recap on a genuine live-companion
+# restart (arch-reviewer note: this guard keys on the literal id "Mike" — the actual precondition
+# is "a live daemon shares this cwd with headless dispatches", so if any other agent is ever
+# re-enabled as a daemon via `systemctl --user enable --now mike@<id>`, revisit this guard for it too)
+# restart (INTERACTIVE_TID non-empty, same signal the job-board/notice blocks above already use).
+if [ -n "${MIKE_CWD:-}" ] && { [ "$id" != "Mike" ] || [ -n "$INTERACTIVE_TID" ]; }; then
   python3 "$ROOT/bin/recap_prev.py" "$MIKE_CWD" "${MIKE_SID:-}" 6 2>/dev/null || true
 fi
 
