@@ -25,6 +25,14 @@
 # exit 1 = bản thân check không chạy được (thiếu tham số / bq lỗi) -> caller ghi WARN,
 #          KHÔNG die (guard là advisory, không được làm hỏng chuỗi refresh production)
 #
+# NGƯỠNG 5 — biên hẹp hơn tưởng (quant-skeptic 2026-07-29, verdict CONFIRMED/medium):
+# churn NỀN đo thật trên 4 cặp archive predeploy liên tiếp (cùng metric hợp state-HOẶC-raw,
+# cùng cửa sổ time < T-30) = 1 · 0 · 0 · **4**. Tức đã có 1 ngày thường chạm 4, chỉ dưới ngưỡng
+# 1 đơn vị ⇒ alert dương-tính-giả trên churn corp-action bình thường là chuyện SẼ xảy ra, không
+# phải chuyện hiếm. Giữ 5 vì đây là alert-only (giá của 1 tin thừa << giá của 1 lần restate lọt
+# im lặng — chính là sự cố 2026-07-29). Nếu nhiễu: chỉnh RESTATE_ALERT_THRESHOLD (env, không cần
+# sửa code); nên dựa trên phân bố `data/restate_guard_history.jsonl` tích luỹ được, đừng đoán.
+#
 # Env override: RESTATE_ALERT_THRESHOLD (5) · RESTATE_LOOKBACK_DAYS (30) ·
 #               RESTATE_ARCH_TOPIC (1521475726329516122) · RESTATE_GUARD_DRYRUN=1 (không gửi)
 # Test: restate_guard_selfcheck.sh (mô phỏng lại đúng sự kiện 2026-07-29).
