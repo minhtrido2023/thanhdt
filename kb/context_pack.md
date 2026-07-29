@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v1484)
+# Mike fleet — context pack (v1485)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-29T03:36:20] Taylor/finding — insider-sell flag — overlap voi anomaly/forensic THAP (21,7%), GO cho §5.3 WATCH-only shadow: {"job": "Taylor_20260729_032713", "buoc": "§5.2 — do phan GIA TANG so voi anomaly_scan/forensic_flags", "verdict": "GO cho §5.3 (dung insider_flags.py WATCH-onl …
 - [2026-07-29T04:31:37] Taylor/finding — ROE thi truong: 14,61% gop / 8,41% trung vi ma — NO-GO wire lam chi bao bo sung (ROE = PB/PE dong nhat thuc): {"job": "Taylor_20260729_041421", "loai": "RESEARCH tra loi cau hoi — KHONG wire production, khong can quant-skeptic", "deliverable": "mike/agents/Taylor/resear …
 - [2026-07-29T04:32:17] Taylor/answer — Cau hoi ROE thi truong — XONG: so lieu + thong ke mo ta + histogram + verdict NO-GO: {"job": "Taylor_20260729_041421", "dispatch_tu": "Mike (thread 1525112292159651940)", "trang_thai": "HOAN TAT — research/tra loi cau hoi, KHONG wire production, …
 - [2026-07-29T05:22:49] Taylor/finding — DINH CHINH PB thi truong: 'PB dat, phan vi 65,6/3Y' LA AO GIAC DO VIC — do ben voi outlier cho phan vi 0,4-27,0 (RE). Xac suat bear ~20% KHONG doi.: {"job": "Taylor_20260729_050632", "loai": "RESEARCH / DINH CHINH bao cao — KHONG wire production, khong can quant-skeptic", "deliverable": "mike/agents/Taylor/r …
@@ -11,6 +10,7 @@
 - [2026-07-29T08:48:47] Taylor/finding — Lang kinh co ban bo sung DT5G — CAPE la bien doi cua PB (NO-GO), composite thua PB don le (NO-GO); dinh gia luc CAPIT fire CO tin hieu that va TRUC GIAO voi dd52w nhung 0/56 qua BH -> de xuat SHADOW-LOG, khong tilt: {"job": "Taylor_20260729_082452", "loai": "RESEARCH tra loi cau hoi chien luoc — KHONG wire production, khong can quant-skeptic", "deliverable": "mike/agents/Ta …
 - [2026-07-29T08:49:13] Taylor/answer — Khung dinh gia co ban cho DT5G — XONG 3/3 viec: Viec1 NO-GO (CAPE=bien doi PB, composite thua PB), Viec2 co tin hieu that nhung khong qua gate da phep thu -> de xuat shadow-log WARN_ONLY: {"job": "Taylor_20260729_082452", "dispatch_tu": "Mike (thread 1525112292159651940)", "trang_thai": "HOAN TAT — 3/3 viec, RESEARCH thuan, KHONG code/wire gi, kh …
 - [2026-07-29T09:04:14] Winston/finding — paper-report-tre-2-phien: root cause + fix cron 15:20->16:00: {"trieu_chung": "Report 2026-07-29 hien muc (7) Capitulation + (8) Engine-room asof 2026-07-27 (tre 2 phien), muc (6) ORB asof 2026-07-28 (tre 1 phien) — cung n …
+- [2026-07-29T10:53:13] Winston/finding — paper-pipeline 19:00 — phan loai A/B/C + doi gio dung cho: {"job": "Winston_20260729_103816", "yeu_cau_goc": "doi TAT CA paper report/pipeline sang 19:00 de co du lieu cuoi ngay", "ket_luan": "BAC BO MOT PHAN — chi 2/15 …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -165,6 +165,20 @@ Trứng vàng, cập nhật lại field NGAY khi nạp/rút (nếu quên → NAV
 ro tiền thật vì executor check cash/ppse live). Chi tiết đầy đủ: [[project-dnse-trung-vang-offbook-assets]] (memory Mike) + `kb/context_planning_mini.md`.
 
 ## Đang R&D (mọi mục PAPER-ONLY trừ khi ghi rõ LIVE — chi tiết đầy đủ: bus finding của Taylor + `kb/INCIDENTS.md`)
+- **Insider-sell WATCH shadow (`insider_flags.py`)** (WATCH-only, chưa wire due-diligence, từ
+  2026-07-29): cờ bán ròng nội bộ ≥1% CP lưu hành/90 ngày (chỉ `event_code IN ('DDIND','DDRP')`,
+  TTL 90d). Scoping (job Taylor_20260729_015830 + Phụ lục A `_032713`) kết luận GO: overlap thấp
+  với `anomaly_scan`/`forensic_flags` (7,1-21,7%), lift phần riêng 2,08× (z=5,74), ổn định IS/OOS;
+  hai cờ bắn ở hai thời điểm khác nhau (insider sớm hơn ~2 tháng so với anomaly). Đang dựng
+  writer/reader (job Taylor_20260729_104614). **Sàn review ~2026-08-29 (≥1 tháng shadow), trần
+  ~2026-09-15.** Điều kiện TIẾP TỤC (wire vào due-diligence report như dòng bằng chứng): cadence
+  refresh bảng nguồn xác nhận chạy đều (bq_admin đang fix bug tính đến 07-29) + shadow log sạch
+  (không false-trigger bất thường) + qua quant-skeptic trước khi vào due-diligence chính thức.
+  Điều kiện NGỪNG: bq_admin không fix xong cadence (bảng đứng im, cờ đóng băng) hoặc shadow log
+  noise quá tải (~>5 mã/tháng cần review tay, vượt xa ước tính ~3/tháng). **Tuyệt đối không hard-
+  exclude ở bất kỳ giai đoạn nào** — 85% mã bị cờ không sập (§3.5 research file), chỉ là dòng bằng
+  chứng WATCH cho người duyệt plan cân nhắc. Research đầy đủ:
+  `mike/agents/Taylor/research/insider_transaction_scoping_20260729.md`.
 - **EXTREME-regime gate** (paper `main` only, từ 07-01): stress PASS 24/24. Target kết thúc
   ~2026-07-28 (~20 phiên). Trước LIVE cần: 0 false-trigger ~4 tuần, không đụng NORMAL-path,
   user sign-off. KHÔNG bật ở live.
