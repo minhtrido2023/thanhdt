@@ -10,6 +10,7 @@ title: Market state / regime (nhóm rủi ro cao nhất — đã có sự cố t
 |---|---|
 | [`anomaly_escalations.md`](anomaly_escalations.md) — data/anomaly_escalations.json | DERIVED |
 | [`anomaly_flags.md`](anomaly_flags.md) — data/anomaly_flags.json | CANONICAL |
+| [`insider_flags.md`](insider_flags.md) — data/insider_flags.json | CANONICAL (WATCH-only, chưa consumer) |
 | [`golive_state_today.md`](golive_state_today.md) — deploy_golive_dt5g_v4/golive_state_today.json | DERIVED |
 | [`golive_v23_recommendations.md`](golive_v23_recommendations.md) — golive_v23_recommendations_<date>.csv | DERIVED |
 | [`pt_v12_live_logs.md`](pt_v12_live_logs.md) — data/pt_v12_live_logs.csv | DEAD |

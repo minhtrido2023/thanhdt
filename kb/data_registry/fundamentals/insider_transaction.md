@@ -49,6 +49,13 @@ bq_admin. `ingested_at` chỉ có **72 giá trị phân biệt trong 81 giây ng
 này (vd `insider_flags.py` §5.3 trong research file), phải kiểm tra lại `MAX(public_date)` để xác
 nhận cron đã chạy đều, không tin lời hứa cadence khi chưa thấy dữ liệu tự cập nhật thật.**
 
+**Đo lại 2026-07-29 (job `Taylor_20260729_104614`)**: `ingested_at` vẫn **đúng 1 ngày phân biệt
+(2026-07-27 14:35:45→14:36:56 UTC), 52.155 dòng, `MAX(public_date)=2026-07-24`** ⇒ **chưa quan sát
+được lần refresh nào**. Consumer đầu tiên đã tồn tại — `mike/agents/Taylor/insider_flags.py`
+(WATCH-only shadow, xem `market-state/insider_flags.md`) — và nó **tự có cổng freshness**: bảng cũ
+hơn 10 phiên → WARN + `exit 3`, không bắn cờ. Nếu bug chưa được fix, cổng này sẽ bắt đầu chặn từ
+khoảng **2026-08-07**.
+
 ## Bẫy
 **(1) BẢNG LÀ SNAPSHOT TRẠNG THÁI, KHÔNG PHẢI EVENT-LOG — `public_date` bị GHI ĐÈ.**
 Cùng 1 `id` chuyển trạng thái `Đăng ký` → `Đã thực hiện xong` và `public_date` đổi theo:
