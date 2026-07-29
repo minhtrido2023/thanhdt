@@ -51,6 +51,41 @@ P = dict(vix_crisis=35, vix_bear=25, vix_mild=20,
          breadth_th=0.50,       # US cap suppressed if VN breadth_MA200 >= this (decoupling guard)
          breadth_min_univ=100)  # ...and only if the breadth universe is this large (else feed/nascent -> no suppress)
 
+# ── BREADTH UNIVERSE (guard on Pillar B) — migrate to universe_pit, 2026-07-29 ────────────────
+# "pit"   = `tav2_mike.universe_pit`, membership PER DAY (point-in-time, owned by the team).
+# "prune" = legacy `IN (SELECT DISTINCT ticker FROM ticker_prune)` — no time condition, so a name
+#           admitted to ticker_prune TODAY was counted in EVERY historical breadth date, and any
+#           rebuild/TRUNCATE of ticker_prune silently rewrote breadth across all of history (the
+#           2026-07-29 rebuild dropped 58 names from the whole series — Winston_20260729_132257
+#           §2/§4). Kept as the ONE-WORD ROLLBACK only.
+# Thresholds (breadth_th / breadth_min_univ) are DELIBERATELY UNCHANGED: this is a data-source
+# migration, not a re-tune — mixing the two would make a future regression untraceable.
+# Measured A/B 2014-01-02 -> 2026-07-29 (3135 sessions, mike/agents/Taylor/exp_dt5g_breadth_pit):
+#   breadth series differs on 3132 days (mean |Δ| 2,4pp), guard flips on 229 (7,3%), macro cap
+#   differs on 13 (2016-01-26 -> 2016-02-18, all pit-side MORE conservative), FINAL DT5G state
+#   differs on **0**, DT4 base 0, today (2026-07-29) unchanged: NEUTRAL(3).
+# Module-level constant on purpose, NOT an env var (env inherited through a process is the very
+# mechanism behind incident C1 07-12 — coding_guidelines §11).
+BREADTH_SOURCE = "pit"          # "pit" | "prune"  ← ROLLBACK ĐÚNG 1 DÒNG
+UNIVERSE_PIT_TABLE = "lithe-record-440915-m9.tav2_mike.universe_pit"
+
+
+def _breadth_sql(qstart, end):
+    """% of the breadth universe trading above its MA200, per session."""
+    if BREADTH_SOURCE == "prune":
+        return f"""SELECT t.time, AVG(IF(t.Close>t.MA200,1.0,0.0)) AS b200, COUNT(*) AS univ
+FROM tav2_bq.ticker AS t
+WHERE t.ticker IN (SELECT DISTINCT t2.ticker FROM tav2_bq.ticker_prune AS t2)
+  AND t.MA200 IS NOT NULL AND t.time BETWEEN DATE '{qstart}' AND DATE '{end}'
+GROUP BY t.time ORDER BY t.time"""
+    if BREADTH_SOURCE != "pit":
+        raise ValueError(f"BREADTH_SOURCE={BREADTH_SOURCE!r} unknown (pit|prune)")
+    return f"""SELECT t.time, AVG(IF(t.Close>t.MA200,1.0,0.0)) AS b200, COUNT(*) AS univ
+FROM tav2_bq.ticker AS t
+JOIN `{UNIVERSE_PIT_TABLE}` u ON u.ticker = t.ticker AND u.time = t.time AND u.in_universe
+WHERE t.MA200 IS NOT NULL AND t.time BETWEEN DATE '{qstart}' AND DATE '{end}'
+GROUP BY t.time ORDER BY t.time"""
+
 
 def _commit(arr, K):
     """Causal dwell: a new cap level must persist K sessions before it commits
@@ -150,14 +185,13 @@ WHERE t.ticker='VNINDEX' AND t.time BETWEEN DATE '{qstart}' AND DATE '{end}' ORD
     # Suppress the US-panic cap ONLY when VN breadth is broadly HEALTHY while the US panics
     # (genuine US-VN decoupling, e.g. 2025 VIC-led). FAIL-SAFE: weak / missing / small-universe
     # breadth => NO suppression => US cap fires as usual (never skip crisis protection on a data
-    # gap). Breadth = % of ticker_prune above MA200 (the production breadth universe). Causal (T-1).
+    # gap). Breadth = % of the BREADTH_SOURCE universe above MA200. Causal (T-1).
+    # A session missing from `universe_pit` (its build job runs separately, 19:00 ICT) yields a
+    # NaN breadth row => guard False => US cap fires as usual. That is the SAFE direction here
+    # (unlike CAPIT, where stale breadth would authorise a real buy), so no fail-closed abort.
     df["us_decoupled"] = False
     try:
-        bd = bq(f"""SELECT t.time, AVG(IF(t.Close>t.MA200,1.0,0.0)) AS b200, COUNT(*) AS univ
-FROM tav2_bq.ticker AS t
-WHERE t.ticker IN (SELECT DISTINCT t2.ticker FROM tav2_bq.ticker_prune AS t2)
-  AND t.MA200 IS NOT NULL AND t.time BETWEEN DATE '{qstart}' AND DATE '{end}'
-GROUP BY t.time ORDER BY t.time""")
+        bd = bq(_breadth_sql(qstart, end))
         bd["time"] = pd.to_datetime(bd["time"])
         df = df.merge(bd, on="time", how="left")
         decoup = ((df["univ"].fillna(0) >= P["breadth_min_univ"]) & (df["b200"] >= P["breadth_th"])).shift(1).fillna(False)
