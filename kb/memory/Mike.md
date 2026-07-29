@@ -42,3 +42,4 @@ chính thức 07-22; CAPIT breadth cutover 07-22 (pool vẫn ghim ticker_prune, 
 layer P1 LIVE (LAG rating gate order-level), P0 shadow-log (buying-power) đang theo dõi.
 Xem `context_pack.md` "MỚI NHẤT" cho tin mới hơn nếu đã qua nhiều ngày.
 
+- [2026-07-29T17:49:43Z] Daily_retro gate SHIPPED (commit 01a7f99, arch-reviewer CONFIRMED sau 1 gap fix): session_start.sh giờ skip recap_prev.py cho headless Mike dispatch (root cause thật của Pattern A, không phải model flakiness) + daily_retro.sh có content-shape gate _draft_valid(). Đóng Prevention#1 nợ từ RETRO 07-18/07-19/07-28. Follow-up CHƯA làm (arch-reviewer nêu, ưu tiên cao): chiều NGƯỢC LẠI vẫn hở — phiên live Mike cũng tự resume/recap transcript của headless dispatch (245 lần quan sát được), cùng họ bug, lớn hơn.
