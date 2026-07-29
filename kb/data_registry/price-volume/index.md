@@ -16,5 +16,6 @@ title: Giá / khối lượng cổ phiếu
 | [`universe_pit.md`](universe_pit.md) — lithe-record-440915-m9.tav2_mike.universe_pit | CANONICAL |
 | [`universe_pit_quality.md`](universe_pit_quality.md) — lithe-record-440915-m9.tav2_mike.universe_pit_quality | CANONICAL |
 | [`vnindex_mirror_col.md`](vnindex_mirror_col.md) — cột mirror t.VNINDEX trên hàng CỔ PHIẾU (trong tav2_bq.ticker VÀ ticker_prune) | TRAP |
+| [`vnindex_pe_mirror_col.md`](vnindex_pe_mirror_col.md) — cột mirror t.VNINDEX_PE trên hàng CỔ PHIẾU (trong tav2_bq.ticker VÀ ticker_prune) | TRAP (pending fix) |
 
 ↩ [Về index tổng](../index.md)
