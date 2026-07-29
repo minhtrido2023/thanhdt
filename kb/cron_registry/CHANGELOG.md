@@ -21,6 +21,36 @@ preserve_verbatim: >
 
 # Log thay đổi Cron Registry
 
+- 2026-07-29 (Winston, job `Winston_20260729_084600` — user phát hiện report hiển thị dữ liệu cũ):
+  **ĐỔI GIỜ `paper_programs_daily_report.sh --post` 15:20 → 16:00 ICT** (`20 8` → `0 9`, T2-T6).
+  *Triệu chứng:* report ngày 07-29 hiển thị mục (7) Capitulation + (8) Engine-room asof **07-27**
+  (trễ 2 phiên) trong khi mục (6) ORB asof 07-28 (trễ 1 phiên) — cùng nguồn `papertrade_daily.sh`.
+  *Root cause = HAI lag ĐỘC LẬP cộng dồn, không phải một:* **(A)** report chạy 15:20 = **TRƯỚC**
+  chain 15:30 cùng ngày → luôn đọc artifact do chain **hôm trước** ghi (+1 phiên, áp dụng cho MỌI
+  mục — đây là phần đã sửa); **(B)** riêng mục 7/8, bản thân artifact được gắn nhãn T-1 vì
+  `pt_capitulation_shadow.py` query BQ LIVE (`ticker_prune`/`dt5g_live`) và các sim sinh
+  `papertrade_compare5.csv` chạy trên giá tới T-1 — BQ chưa có close phiên T lúc 15:30 (ingest
+  ~17:30 / sync 23:45) → **sàn cấu trúc**, không sửa được nếu giữ report trong khung 15-16h. Mục 6
+  KHÔNG dính (B) vì `orb_pt.py` kéo bar 1m VN30F **LIVE từ vnstock**, phiên đã đóng 14:30 → nhãn T.
+  Vậy 2+1 = đúng chênh lệch quan sát được. *Sau fix:* ORB asof **T**, Capitulation/Engine-room asof
+  **T-1** (sàn). Ghi chú cũ ở dòng 15:30 ("consumer = 15:20 report **hôm sau**") mô tả đúng hậu quả
+  nhưng KHÔNG phải thiết kế có chủ đích — chain idempotent, không có lý do data-integrity nào bắt
+  phải đọc artifact hôm trước; đã sửa thành "report 16:00 CÙNG NGÀY".
+  **4 câu hỏi §11:** (1) *Đọc gì/vintage?* file artifact local do chain 15:30 ghi — `orb_pt_status.json`
+  (T), `pt_capitulation_state.json` + `papertrade_compare5.csv` (T-1); không đọc BQ/cache trực tiếp.
+  (2) *Nguồn tươi lúc nào?* đo thật 10 log `papertrade_run_*.log`: chain START 15:30 → DONE **15:38-15:42**
+  (worst 15:42, 12'). (3) *Cần T hay T-1?* report EOD paper — cần bản MỚI NHẤT chain vừa sinh; asof=T
+  chỉ khả thi cho ORB, mục BQ chấp nhận T-1 (muốn T phải dời sang sau 23:45 = đổi bản chất báo cáo).
+  (4) *Ai tiêu thụ/deadline?* user đọc Discord "Trading report", không có job downstream → không
+  deadline cứng. **Buffer** 15:30+12'+18' = 16:00 (policy đòi runtime + ≥10'). **Xung đột:** không có
+  cron nào trong khe 15:35-16:15 ICT. **Degrade an toàn:** chain chậm bất thường → report đọc artifact
+  hôm trước = đúng hành vi cũ, không tạo failure mode mới; mỗi mục tự in `asof` nên đọc ra ngay.
+  Kèm theo (cùng commit): nhãn header report đổi `Data as-of: <giờ chạy>` → `Render lúc: … — vintage
+  dữ liệu xem asof từng mục` (nhãn cũ dễ khiến người đọc tưởng mọi số là của hôm nay); thêm trường
+  `notes` VINTAGE vào registry entry `capitulation_shadow` + `engine_room_oos` giải thích sàn T-1.
+  Cron đổi giữa ngày lúc 15:49 ICT → 16:00 hôm nay VẪN nổ (không nhảy khe), report 07-29 chạy 2 lần
+  (15:20 bản cũ trễ + 16:00 bản đúng) — cố ý, để xác minh fix ngay trong ngày.
+
 - 2026-07-20 (Mike, user approved trực tiếp): sau entry gốc bên dưới, cơ chế trải qua thêm 7 vòng
   quant-skeptic REFUTED→fix (tổng 10 vòng, chi tiết `kb/projects/deposit-rate-autocheck.md`) — luật
   "1 bài liệt kê đủ 4 ngân hàng = đối chiếu chéo" ở entry gốc đã bị loại bỏ (lỗ hổng N=1), thay bằng

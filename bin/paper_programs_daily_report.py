@@ -244,8 +244,12 @@ def main():
     now = dt.datetime.now()
     today = dt.date.fromisoformat(args.date) if args.date else now.date()
 
+    # "Render lúc" ≠ vintage dữ liệu — nhãn cũ "Data as-of: <giờ chạy>" khiến người đọc tưởng
+    # mọi số là của HÔM NAY, trong khi mục đọc BQ chỉ có tới T-1 (BQ chưa có close same-day lúc
+    # 15:30-16:00; sync 23:45). Vintage thật của từng mục nằm ở dòng `asof`/cửa sổ trong mục đó.
     out = [f"📋 **Paper Programs Daily Report — {today}**",
-           f"Data as-of: {now.strftime('%Y-%m-%d %H:%M')} ICT | registry: `mike/kb/paper_programs_registry.json`"]
+           f"Render lúc: {now.strftime('%Y-%m-%d %H:%M')} ICT — *vintage dữ liệu xem `asof` "
+           f"từng mục* | registry: `mike/kb/paper_programs_registry.json`"]
     try:
         with open(args.registry, encoding="utf-8") as f:
             reg = json.load(f)
