@@ -1,0 +1,4 @@
+Wrote /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/exp_pe2006/wd/data/vnindex_5state_dt_4gate.csv  (6332 rows, 2000-07-28 -> 2026-07-29)
+Params: {'default': 10, 'enter_crisis': 25, 'exit_crisis': 10, 'enter_exbull': 25, 'exit_exbull': 10}
+Transitions (full): 92   |   State dist %: {1: 16.7, 2: 14.2, 3: 59.6, 4: 8.4, 5: 1.1}
+Latest state: 2026-07-29 = 3

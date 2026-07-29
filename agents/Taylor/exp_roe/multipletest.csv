@@ -1,0 +1,13 @@
+signal,target,N,rho,p,p_bonferroni,rank,BH_thresh,pass_BH_05
+roe_agg_pex,fwd_12M,15,-0.621,0.0134,0.161,1,0.0042,False
+roe_agg_pex,minfwd_12M,15,-0.479,0.0711,0.853,2,0.0083,False
+roe_agg_p3y,fwd_12M,13,-0.505,0.078,0.936,3,0.0125,False
+pe_agg_pex,minfwd_12M,15,0.357,0.1913,1.0,4,0.0167,False
+pb_agg_pex,fwd_12M,15,-0.275,0.3212,1.0,5,0.0208,False
+roe_agg_p3y,minfwd_12M,13,-0.253,0.4048,1.0,6,0.025,False
+pe_agg_p3y,minfwd_12M,13,0.236,0.4371,1.0,7,0.0292,False
+pb_agg_p3y,fwd_12M,13,-0.236,0.4371,1.0,8,0.0333,False
+pb_agg_pex,minfwd_12M,15,0.071,0.8003,1.0,9,0.0375,False
+pe_agg_p3y,fwd_12M,13,0.077,0.8028,1.0,10,0.0417,False
+pb_agg_p3y,minfwd_12M,13,0.038,0.9007,1.0,11,0.0458,False
+pe_agg_pex,fwd_12M,15,-0.011,0.9698,1.0,12,0.05,False

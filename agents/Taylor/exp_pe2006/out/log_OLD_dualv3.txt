@@ -1,0 +1,54 @@
+======================================================================
+v3 — Dual + Tinh Tế pipeline
+======================================================================
+
+[1] Load cached data
+[2] Compute raw VNI factors
+[3] Rank 8 factors on raw VNI (with PE-comp)
+  Rank P3M ...
+  Rank P1M ...
+  Rank MA200 ...
+  Rank RSI ...
+  Rank MACD ...
+  Rank CMF ...
+  Rank Breadth ...
+  Rank PE ...
+[4] Merge EW r_score + concentration
+[5] EMA → classify → risk overrides
+[6] BearDvg / BullDvg / E2 / S2_bull
+  BearDvg: 49 | BullDvg: 156 | E2: 116 | S2_bull: 493
+[7] v2g gate (min_dur=30, exit=BullDvg|E2|S2_bull)
+  Gate events: 11 open / 11 close
+[8] s3 smoothing
+
+======================================================================
+SUMMARY
+======================================================================
+
+State distribution (post-2014):
+  CRISIS      22.0%
+  BEAR         8.2%
+  NEUTRAL     53.7%
+  BULL        11.7%
+  EX-BULL      4.5%
+
+Transitions post-2014: 157
+
+Last 15 sessions:
+  2026-07-09  c=0.63  α=0.75  raw=3  state=NEUTRAL
+  2026-07-10  c=0.63  α=0.74  raw=3  state=NEUTRAL
+  2026-07-13  c=0.61  α=0.77  raw=3  state=NEUTRAL
+  2026-07-14  c=0.59  α=0.82  raw=3  state=NEUTRAL
+  2026-07-15  c=0.63  α=0.75  raw=2  state=NEUTRAL
+  2026-07-16  c=0.61  α=0.77  raw=2  state=BEAR
+  2026-07-17  c=0.62  α=0.77  raw=2  state=BEAR
+  2026-07-20  c=0.59  α=0.82  raw=2  state=BEAR
+  2026-07-21  c=0.55  α=0.89  raw=1  state=BEAR
+  2026-07-22  c=0.53  α=0.94  raw=1  state=CRISIS
+  2026-07-23  c=0.51  α=0.98  raw=1  state=CRISIS
+  2026-07-24  c=0.53  α=0.93  raw=1  state=CRISIS
+  2026-07-27  c=0.51  α=0.98  raw=1  state=CRISIS
+  2026-07-28  c=0.51  α=0.99  raw=1  state=CRISIS
+  2026-07-29  c=0.55  α=0.90  raw=1  state=CRISIS
+
+→ vnindex_5state_dual_v3_staging.csv

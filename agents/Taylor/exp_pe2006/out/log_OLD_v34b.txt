@@ -1,0 +1,20 @@
+Building v3.4 variants ...
+  v3.4a (BTC_RP_loose): bypassed 206 US-override days where BTC=True
+    transitions: 259 | elevated days vs v3.1: 360
+    ✓ Saved vnindex_5state_tam_quan_v3_4a_full_history.csv
+
+  v3.4b (BTC_R6M): bypassed 187 US-override days where BTC=True
+    transitions: 262 | elevated days vs v3.1: 361
+    ✓ Saved vnindex_5state_tam_quan_v3_4b_full_history.csv
+
+  v3.4c (BTC_RP): bypassed 91 US-override days where BTC=True
+    transitions: 259 | elevated days vs v3.1: 283
+    ✓ Saved vnindex_5state_tam_quan_v3_4c_full_history.csv
+
+
+State         v3.1   v3.3b   v3.4a   v3.4b   v3.4c
+  CRISIS     27.7%   27.8%   27.0%   26.2%   27.9%
+  BEAR       14.6%   13.5%   13.2%   13.5%   13.3%
+  NEUTRAL    48.5%   48.7%   50.1%   50.3%   49.6%
+  BULL        7.0%    6.1%    5.8%    6.1%    5.5%
+  EX-BULL     2.1%    4.0%    3.9%    3.9%    3.8%

@@ -1,0 +1,120 @@
+Panel: 49059 obs, 134 thang, 2015-06-30 -> 2026-07-24
+Co fwd60: 47886 obs | ro ung vien mua (rating<=3 & ey top-tercile): 10410 obs
+Ty le bat: INS=0.0541 | anom_w=0.1666 | anom_h=0.2704 | anom_w_down=0.1210
+SELF-CHECK vs §3.4 pin: INS bat 5.4% (pin 5,4%) | P(sap|INS)=19.65% (pin 19,68%) | nen=11.26% (pin 11,28%) | lift=1.746x (pin 1,745x)
+
+==============================================================================
+### TOAN UNIVERSE ###
+
+--- 2x2: INS (insider-sell >=1% CP luu hanh/90d) x anomaly tier-W (thuc te cho ung vien mua) | mau TOAN UNIVERSE ---
+                       anom_w=T        anom_w=F
+  INS=T                    761         1829      (tong INS   2590)
+  INS=F                   7216        38080      (tong  45296)
+  => TRONG SO MA BI INS: 29.4% DA co anom_w (trung lap) | 70.6% KHONG co anom_w (tin hieu MOI)
+  => chieu nguoc: trong so ma bi anom_w, 9.5% cung bi INS
+  odds-ratio=2.20  phi=0.0817  (phi~0 => hai co gan nhu DOC LAP)
+
+  P(fwd60 < -20%) theo tung o (anom_w):
+  NEN: khong co ca 2 co                  n=38080  P=0.0955
+  INS & anom_w (trung ca 2)              n=  761  P(fwd60<-20%)=0.3009  lift=3.152x  z=18.75
+  INS RIENG (khong co anom_w)            n= 1829  P(fwd60<-20%)=0.1531  lift=1.603x  z=8.09
+  anom_w RIENG (khong co INS)            n= 7216  P(fwd60<-20%)=0.2027  lift=2.123x  z=26.43
+  Recall: anom_w bat 1692/5608 ca sap (30.2%) | INS THEM 280 ca (5.0pp) voi chi phi 1829 co moi
+
+--- 2x2: INS (insider-sell >=1% CP luu hanh/90d) x anomaly tier-H (nguong LONG = bien tren do phu) | mau TOAN UNIVERSE ---
+                       anom_h=T        anom_h=F
+  INS=T                   1102         1488      (tong INS   2590)
+  INS=F                  11848        33448      (tong  45296)
+  => TRONG SO MA BI INS: 42.5% DA co anom_h (trung lap) | 57.5% KHONG co anom_h (tin hieu MOI)
+  => chieu nguoc: trong so ma bi anom_h, 8.5% cung bi INS
+  odds-ratio=2.09  phi=0.0835  (phi~0 => hai co gan nhu DOC LAP)
+
+  P(fwd60 < -20%) theo tung o (anom_h):
+  NEN: khong co ca 2 co                  n=33448  P=0.0897
+  INS & anom_h (trung ca 2)              n= 1102  P(fwd60<-20%)=0.2722  lift=3.036x  z=20.29
+  INS RIENG (khong co anom_h)            n= 1488  P(fwd60<-20%)=0.1405  lift=1.567x  z=6.64
+  anom_h RIENG (khong co INS)            n=11848  P(fwd60<-20%)=0.1772  lift=1.977x  z=25.92
+  Recall: anom_h bat 2400/5608 ca sap (42.8%) | INS THEM 209 ca (3.7pp) voi chi phi 1488 co moi
+
+==============================================================================
+### RO UNG VIEN MUA ###
+
+--- 2x2: INS (insider-sell >=1% CP luu hanh/90d) x anomaly tier-W (thuc te cho ung vien mua) | mau RO UNG VIEN MUA ---
+                       anom_w=T        anom_w=F
+  INS=T                    107          385      (tong INS    492)
+  INS=F                   1124         8794      (tong   9918)
+  => TRONG SO MA BI INS: 21.7% DA co anom_w (trung lap) | 78.3% KHONG co anom_w (tin hieu MOI)
+  => chieu nguoc: trong so ma bi anom_w, 8.7% cung bi INS
+  odds-ratio=2.17  phi=0.0684  (phi~0 => hai co gan nhu DOC LAP)
+
+  P(fwd60 < -20%) theo tung o (anom_w):
+  NEN: khong co ca 2 co                  n= 8794  P=0.0736
+  INS & anom_w (trung ca 2)              n=  107  P(fwd60<-20%)=0.2430  lift=3.303x  z=6.59
+  INS RIENG (khong co anom_w)            n=  385  P(fwd60<-20%)=0.1532  lift=2.083x  z=5.74
+  anom_w RIENG (khong co INS)            n= 1124  P(fwd60<-20%)=0.1842  lift=2.503x  z=12.45
+  Recall: anom_w bat  233/939 ca sap (24.8%) | INS THEM  59 ca (6.3pp) voi chi phi 385 co moi
+
+--- 2x2: INS (insider-sell >=1% CP luu hanh/90d) x anomaly tier-H (nguong LONG = bien tren do phu) | mau RO UNG VIEN MUA ---
+                       anom_h=T        anom_h=F
+  INS=T                    180          312      (tong INS    492)
+  INS=F                   2023         7895      (tong   9918)
+  => TRONG SO MA BI INS: 36.6% DA co anom_h (trung lap) | 63.4% KHONG co anom_h (tin hieu MOI)
+  => chieu nguoc: trong so ma bi anom_h, 8.2% cung bi INS
+  odds-ratio=2.25  phi=0.0841  (phi~0 => hai co gan nhu DOC LAP)
+
+  P(fwd60 < -20%) theo tung o (anom_h):
+  NEN: khong co ca 2 co                  n= 7895  P=0.0695
+  INS & anom_h (trung ca 2)              n=  180  P(fwd60<-20%)=0.2222  lift=3.196x  z=7.79
+  INS RIENG (khong co anom_h)            n=  312  P(fwd60<-20%)=0.1442  lift=2.074x  z=4.99
+  anom_h RIENG (khong co INS)            n= 2023  P(fwd60<-20%)=0.1508  lift=2.168x  z=11.62
+  Recall: anom_h bat  345/939 ca sap (36.7%) | INS THEM  45 ca (4.8pp) voi chi phi 312 co moi
+
+==============================================================================
+### ON DINH IS/OOS cua phan INS-RIENG (khong co anomaly tier-W) ###
+  toan universe  IS 2015-19 : n_INS_rieng=  689 P=0.1263 vs nen 0.0900 lift=1.403x z=3.21
+  toan universe  OOS 2020+  : n_INS_rieng= 1140 P=0.1693 vs nen 0.0984 lift=1.720x z=7.75
+  ro ung vien    IS 2015-19 : n_INS_rieng=  144 P=0.1458 vs nen 0.0782 lift=1.866x z=2.89
+  ro ung vien    OOS 2020+  : n_INS_rieng=  241 P=0.1577 vs nen 0.0716 lift=2.201x z=4.98
+
+==============================================================================
+### FORENSIC_FLAGS — do phu point-in-time ###
+ticker            flag_type severity       date
+   KSF        related_party  exclude 2026-06-20
+   CTF    distress_cashburn    watch 2026-06-20
+   VVS         pump_no_moat  exclude 2026-06-20
+   PC1      fraud_confirmed  exclude 2026-06-20
+   HHS        related_party  exclude 2026-06-20
+   L40 non_operating_profit  exclude 2026-06-20
+   KLB        related_party  exclude 2026-06-20
+   DIG non_operating_profit  exclude 2026-06-20
+   BFC         pump_no_moat  exclude 2026-06-20
+   IJC        related_party    watch 2026-06-20
+   VRE non_operating_profit    watch 2026-06-20
+
+Tat ca 11 co deu co date = [datetime.date(2026, 6, 20)]
+PIT: so quan sat co forensic flag hieu luc trong panel 2015-06..2026-06 = 0 (0.0000% panel)
+  -> nam o cac thang: []
+  trong so do, bao nhieu cung bi INS: 0/0
+  trong ro ung vien mua (rating<=3): 267 quan sat (forensic cap rating->5 tu ngay flag => cau truc KHONG the nam trong ro sau 2026-06-20)
+
+Kiem tra TINH (KHONG point-in-time, chi tham khao): 11 ma forensic co tung bi INS bat khong?
+  KSF:  56 quan sat trong universe, INS bat   0 lan (KHONG trung)
+  CTF:  89 quan sat trong universe, INS bat  13 lan (CO trung)
+  VVS:  10 quan sat trong universe, INS bat   0 lan (KHONG trung)
+  PC1: 114 quan sat trong universe, INS bat   3 lan (CO trung)
+  HHS: 134 quan sat trong universe, INS bat  11 lan (CO trung)
+  L40:  15 quan sat trong universe, INS bat  10 lan (CO trung)
+  KLB:  42 quan sat trong universe, INS bat   0 lan (KHONG trung)
+  DIG: 134 quan sat trong universe, INS bat  10 lan (CO trung)
+  BFC: 128 quan sat trong universe, INS bat   0 lan (KHONG trung)
+  IJC: 130 quan sat trong universe, INS bat   0 lan (KHONG trung)
+  VRE: 103 quan sat trong universe, INS bat   0 lan (KHONG trung)
+
+==============================================================================
+### BIEN THE THUC TE: anomaly_scan chi QUET hold ∪ watchlist(rating<=2) ###
+(replay o tren ap quy tac gia cho TOAN universe => da UU AI anomaly toi da.
+ Thuc te ma rating 3 khong nam trong universe quet => anomaly KHONG BAO GIO bat duoc.)
+  toan universe   : overlap chi 2.5% | INS-rieng n= 2526 P=0.1940 vs nen 0.1114 lift=1.741x z=12.60
+  ro ung vien mua : overlap chi 7.1% | INS-rieng n=  457 P=0.1597 vs nen 0.0805 lift=1.984x z=5.96
+
+  Ty trong ro ung vien mua co rating 3 (ngoai tam quet anomaly): 43.5%

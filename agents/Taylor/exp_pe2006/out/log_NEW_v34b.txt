@@ -1,0 +1,35 @@
+Building v3.4 variants ...
+  v3.4a (BTC_RP_loose): bypassed 220 US-override days where BTC=True
+    transitions: 278 | elevated days vs v3.1: 359
+    ✓ Saved vnindex_5state_tam_quan_v3_4a_full_history.csv
+
+  v3.4b (BTC_R6M): bypassed 195 US-override days where BTC=True
+    transitions: 281 | elevated days vs v3.1: 362
+    ✓ Saved vnindex_5state_tam_quan_v3_4b_full_history.csv
+
+  v3.4c (BTC_RP): bypassed 101 US-override days where BTC=True
+    transitions: 278 | elevated days vs v3.1: 284
+    ✓ Saved vnindex_5state_tam_quan_v3_4c_full_history.csv
+
+
+State         v3.1   v3.3b   v3.4a   v3.4b   v3.4c
+Traceback (most recent call last):
+  File "/home/trido/thanhdt/WorkingClaude/deploy_v3_4b_package/build_v3_4_bull_aware.py", line 173, in <module>
+    v34b = pd.read_csv(os.path.join(WORKDIR, "data/vnindex_5state_tam_quan_v3_4b_full_history.csv"))["state"].values
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/pandas/io/parsers/readers.py", line 873, in read_csv
+    return _read(filepath_or_buffer, kwds)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/pandas/io/parsers/readers.py", line 300, in _read
+    parser = TextFileReader(filepath_or_buffer, **kwds)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/pandas/io/parsers/readers.py", line 1645, in __init__
+    self._engine = self._make_engine(f, self.engine)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/pandas/io/parsers/readers.py", line 1904, in _make_engine
+    self.handles = get_handle(
+                   ^^^^^^^^^^^
+  File "/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/pandas/io/common.py", line 926, in get_handle
+    handle = open(
+             ^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/exp_pe2006/wd/data/vnindex_5state_tam_quan_v3_4b_full_history.csv'
