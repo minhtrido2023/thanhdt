@@ -644,7 +644,16 @@ rút về 1-2 câu như quy ước ở đầu file current_ops.md) → rút gọ
 07-17 (giữ current-state + pointer INCIDENTS.md, xoá play-by-play đã có nơi khác lưu). CHỈ rút
 gọn mục đã XÁC NHẬN đóng — mục còn 'CHỜ USER'/'chưa quyết' GIỮ NGUYÊN, không rút gọn nhầm việc
 đang mở thành trông như đã xong.
-KHÔNG xóa archive. Không cần hỏi user cho việc 1-6 — đây là routine maintenance đã được user uỷ quyền. Sau khi xong: ghi sự thay đổi lên bus (append_event.sh Mike decision 'kb-weekly-editorial') và notify Telegram.${CTX_BLOAT_WARN}${STALE_SECTIONS_WARN}" \
+10. **Token-saver skill audit** (thêm 2026-07-29, user yêu cầu): invoke Skill \`token-saver\`
+(args: \`audit\`) — chạy đủ 6 mục checklist của nó (size-gate/hardcoded-drift/schedule-drift/
+duplicate-content/ownership-scoped-import/fixed-per-call-overhead) trên toàn bộ
+agents/*/CLAUDE.md + kb/*.md + bin/kb_nightly.sh + bin/dispatch.sh. Đây LÀ việc 1-9 ở trên
+nhìn qua 1 lăng kính khác (không thay thế, bổ sung phát hiện các mục kia có thể bỏ sót — vd
+schedule-drift từng lọt qua nhiều tuần vì không mục nào ở trên đối chiếu docs với \`crontab -l\`
+thật). Finding có rủi ro cao (chạm 'ranh giới cứng' của skill — có thể làm sai lệch 1 fact
+đang backing quyết định thật) → CHỈ báo cáo, KHÔNG tự sửa trong review này, để user/Mike xem lại
+riêng; finding rủi ro thấp (đúng dedup/pointer thuần tuý) → sửa luôn như việc 1-6.
+KHÔNG xóa archive. Không cần hỏi user cho việc 1-6, 10 — đây là routine maintenance đã được user uỷ quyền. Sau khi xong: ghi sự thay đổi lên bus (append_event.sh Mike decision 'kb-weekly-editorial') và notify Telegram.${CTX_BLOAT_WARN}${STALE_SECTIONS_WARN}" \
         --timeout 900 >> "$LOG" 2>&1 &
     log "Editorial dispatch launched (background)."
 fi
