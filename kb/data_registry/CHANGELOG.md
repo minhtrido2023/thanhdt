@@ -10,6 +10,7 @@ note: >
 
 # Lịch sử biên tập Data Registry
 
+- 2026-07-29 (Taylor, job Taylor_20260729_015830): thêm nguồn MỚI `tav2_bq.insider_transaction` (giao dịch nội bộ TT96/2020, bq_admin backfill 2026-07-27) → `fundamentals/insider_transaction.md`, status CANONICAL kèm 4 bẫy point-in-time đo được: (1) bảng là SNAPSHOT trạng thái, `public_date` bị GHI ĐÈ khi Đăng ký→Done ⇒ ngày công bố Ý ĐỊNH của 50.934 sự kiện đã hoàn tất ĐÃ MẤT (không backtest được lợi thế công bố-trước của VN nếu không tự snapshot từ nay); (2) `Không thực hiện được` gần như không dùng (2 dòng/11 năm) — non-completion thật đọc ở `share_acquire` (14,7% khớp 0 CP); (3) `share_before/after` không tin được ở dòng Đăng ký; (4) cụm ≥5 người cùng mua 1 ngày = ESOP (15,7% dòng Mua) làm nhiễu tín hiệu "insider mua". Ghi thêm: `role_name` KHÔNG phải chức danh (chứa tên người) — bảng KHÔNG có field chức vụ; `event_code` tách sạch DDIND/DDRP (người) vs DDINS (tổ chức = flow, không phải inside info). CADENCE REFRESH CHƯA XÁC NHẬN (mới 1 lần ingest) — phải hỏi bq_admin trước khi live đọc.
 - 2026-07-28 (Winston, job Winston_20260728_104434): migrate `kb/data_registry.md` (single-file, 265 dòng,
   18 mục bảng markdown) → cấu trúc OKF `kb/data_registry/` (1 nguồn = 1 file .md + frontmatter tối thiểu,
   13 thư mục nhóm + index.md điều hướng). File cũ giữ làm STUB REDIRECT. Cảnh báo an toàn (cột "Bẫy")
