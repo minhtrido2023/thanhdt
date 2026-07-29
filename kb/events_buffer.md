@@ -742,3 +742,6 @@
 - [2026-07-29T13:38:59Z] Taylor/heartbeat — Taylor_20260729_132056: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20260729_132056", "source": "watcher"}
 - [2026-07-29T13:39:35Z] Taylor/status — job-da-hoan-thanh-tu-truoc-da-re-verify: {"job": "Taylor_20260729_132056", "note": "Phien nay la lan goi lai cua job DA XONG (finding goc 13:38:16Z). KHONG chay lai harness. Da tu verify doc lap tu artifact exp_pe2006/out/dt5g_states_all.csv (n=3135, 2014-01-02..2026-07-29): OLD-vs-NEW 28 phien, NEW-vs-M2008 19, NEW-vs-M2007 0, OLD-vs-M2008 9; nam 2026 (n=140) 0 diff moi variant; 2026-07-29 = NEUTRAL(3) o ca 4 phien ban. Khop chinh xac bao cao goc.", "deliverables_verified": ["mike/agents/Taylor/research/pe_history_floor_2006_2008_20260729.md (344 dong, day du toi §9 Gioi han)", "mike/kb/data_registry/price-volume/vnindex_pe_mirror_col.md (TRAP->CANONICAL + quy uoc san 2008 + bang audit consumer)", "mike/agents/Taylor/exp_pe2006/out/ (37 file: state 4 variant x 4 tang, nav_by_variant.csv, live_dt5g.csv, log tung phien ban)"]}
 - [2026-07-29T13:39:59Z] Taylor/heartbeat — Taylor_20260729_132056: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20260729_132056", "source": "watcher"}
+
+## Consolidation 2026-07-29T14:07:02Z
+- [2026-07-29T13:45:47Z] Taylor/status — fa_ratings-refresh-ok: {"rows": 12523}
