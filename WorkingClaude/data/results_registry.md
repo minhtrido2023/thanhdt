@@ -33,10 +33,17 @@ Họ config = **V2.3A (argv `v23a none postbull 0 edge`) + custom30V parking (ET
 - Capacity: nhỏ NAV cao hơn (R1 @20B 31.69 > R2 @50B 29.24), decay theo vốn.
 
 ### 🔁 RE-PIN 2026-06-25 — threads=1 DETERMINISTIC (thay số threads=4 1-sample ở trên)
-> ⭐ **SỐ R3 CHÍNH THỨC HIỆN HÀNH (từ 2026-07-22, CUTOVER `universe_pit`): CAGR 27,16% / Sharpe 1,81 /
-> MaxDD −18,1% / Calmar 1,50.** Mọi trích dẫn MỚI dùng số này. Các số `ticker_prune` bên dưới
-> (27,84% / 27,95% / 28,82% / 28,05%…) **giữ làm lịch sử, KHÔNG dùng cho việc mới**. Xem section
-> "2026-07-22 — ⭐ CUTOVER R3 CHÍNH THỨC SANG `universe_pit`" cuối file.
+> ⭐ **SỐ R3 CHÍNH THỨC HIỆN HÀNH (từ 2026-07-29, RE-PIN sau restate DT5G): CAGR 27,60% / Sharpe 1,84 /
+> MaxDD −17,5% / Calmar 1,58** (Final NAV 1.041,95B, universe = MIXED `universe_pit` + `ticker_prune`).
+> Mọi trích dẫn MỚI dùng số này. Xem section **"2026-07-29 — ⭐ RE-PIN R3 SAU RESTATE DT5G"** cuối file.
+>
+> ~~⭐ **SỐ R3 CHÍNH THỨC (từ 2026-07-22, CUTOVER `universe_pit`): CAGR 27,16% / Sharpe 1,81 /
+> MaxDD −18,1% / Calmar 1,50.**~~ → **SUPERSEDED 2026-07-29.** Lý do: KHÔNG phải đổi mô hình —
+> **vintage dữ liệu đã đổi** (restate `vnindex_5state_dt5g_live` 101/3.134 phiên + trôi corp-action
+> 7 ngày + `ticker_prune` TRUNCATE+rebuild mất 58 mã). Vintage cache 07-22 **đã bị ghi đè, không
+> còn tồn tại** ⇒ 27,16% **KHÔNG TÁI LẬP ĐƯỢC** ở bất kỳ đâu — giữ làm lịch sử, không dùng cho
+> việc mới, không so trực tiếp với số vintage khác. Các số `ticker_prune` bên dưới
+> (27,84% / 27,95% / 28,82% / 28,05%…) cũng **chỉ là lịch sử**.
 >
 > ⚠️ **SUPERSEDED cho R3 (2026-07-11, rồi 2026-07-12, rồi 2026-07-22):** baseline R3 đã RE-PIN 2 lần — (a) 2026-07-11 sau DT5G swap trong SIGNAL_V11 (28.82/1.90/−15.7/1.83); (b) **2026-07-12 sau khi ĐÓNG KÊNH MOM_N/MOM_S (Scope A, user sign-off) — số chính thức hiện hành: CAGR 27.84% / Sharpe 1.84 / MaxDD −18.2% / Calmar 1.53**, xem section "2026-07-12 — RE-PIN BASELINE R3 (đóng kênh MOM)" cuối file. R1/R2 (bull-park, nghiên cứu) CHƯA re-run với dt5g swap lẫn MOM-closure.
 > ⚠️ **THÊM 2026-07-21 (job Taylor_20260721_162243):** engine backtest có lỗi fidelity — mã `Volume_3M_P50<=0`/không đo được ADV được **mua trọn size** thay vì bị chặn (12,8% vốn quay vòng LAG). Sau khi sửa (mirror gate live `cap_lag_orders`): A/B contemporaneous **27,22% → 31,33%** (+4,11pp), LOO 13/13 dương. ~~**27,84% vẫn là số CHÍNH THỨC cho tới khi chạy lại được với cache verified**~~ → **HẾT HIỆU LỰC 2026-07-22: số CHÍNH THỨC nay là 27,16% (`universe_pit`)**; lỗi fidelity `liq<=0` **VẪN CÒN MỞ** trong pin mới (pin 27,16% là chân fill-lạc-quan) — con số kỳ vọng trung thực vẫn đọc là **khoảng [~27,2% ; 31,3%]** (cận trên chỉ đạt nếu lọc `liq<=0` ở TẦNG TÍN HIỆU, chưa làm). Chi tiết + điều kiện: section "2026-07-21 — RE-PIN R3 (SỬA ENGINE `liq<=0`)" cuối file.
@@ -4092,6 +4099,13 @@ xem section kế tiếp *"2026-07-22 — CUTOVER R3 CHÍNH THỨC"*. (Khoảng k
 
 ## 2026-07-22 — ⭐ CUTOVER R3 CHÍNH THỨC SANG `universe_pit` (user quyết định) — job `Taylor_20260722_155549`
 
+> ⚠️ **SUPERSEDED 2026-07-29 — con số 27,16% trong section này KHÔNG còn là số pin chính thức.**
+> Số hiện hành: **27,60% / 1,84 / −17,5% / 1,58** (section *"2026-07-29 — ⭐ RE-PIN R3 SAU RESTATE
+> DT5G"* cuối file). **Quyết định cutover `universe_pit` của section này VẪN CÒN HIỆU LỰC** — chỉ
+> con số bị thay do đổi vintage dữ liệu, KHÔNG có thay đổi mô hình/tham số nào. 27,16% đo trên
+> cache vintage 07-22 nay **đã bị ghi đè ⇒ không tái lập được**; mọi so sánh với nó là so khác
+> vintage (không hợp lệ theo quy tắc #3).
+
 **Quyết định (user, 2026-07-22):** cutover con số R3 **CHÍNH THỨC** trong production sang
 `universe_pit` — bước cuối của dự án `ticker_prune`→`universe_pit`, sau khi G6 (section ngay trên)
 đo được delta cùng vintage **−0,79pp** đúng hướng đã pre-register.
@@ -4316,3 +4330,118 @@ luôn từ broker không cộng dồn ledger; (c) fail-safe thiếu broker/giá/
 trước send_plan_report 21:00). **CHƯA CÀI cron** — chờ quant-skeptic verify + user duyệt (chạm lệnh
 thật SpaceX). Cron line + đăng ký ở `mike/kb/cron_registry.md`. **hard_expiry (kiểm toán FY2026/đình
 chỉ GD) = MANUAL, không auto** (tin pháp lý tương lai) — người set `halted=true`, engine tự dừng.
+
+---
+
+## 2026-07-29 — ⭐ RE-PIN R3 SAU RESTATE DT5G (số pin CHÍNH THỨC hiện hành) — job `Taylor_20260729_155142` + `Taylor_20260729_173621`
+
+**Bối cảnh:** `vnindex_5state_dt5g_live` bị **viết lại lịch sử** (backfill `VNINDEX_PE` 2006+ lan
+qua expanding-window — RCA: `mike/agents/Winston/research/dt5g_history_restate_rca_20260729.md`).
+101/3.134 phiên (3,22%) đổi nhãn state, lệch tối đa 3 tier. Cùng ngày `ticker_prune` bị
+TRUNCATE+rebuild làm **mất 58 mã khỏi toàn bộ lịch sử**. ⇒ Số pin 27,16% (07-22) lỗi thời trong
+im lặng, phải re-pin.
+
+### ⭐ SỐ PIN CHÍNH THỨC V2.4 / R3 TỪ 2026-07-29
+
+| | CAGR | Sharpe | MaxDD | Calmar | Final NAV | Universe |
+|---|---|---|---|---|---|---|
+| **R3 NEUTRAL-only @50B (CHÍNH THỨC)** | **27,60%** | **1,84** | **−17,5%** | **1,58** | **1.041,95B** | MIXED: `universe_pit` (cổng quyết định) + `ticker_prune` (CAPIT pool/maturity) |
+| *(SUPERSEDED)* pin 2026-07-22 | 27,16% | 1,81 | −18,1% | 1,50 | 998,09B | như trên, vintage 07-22 (**đã mất**) |
+
+**Δ = +0,44pp CAGR. ĐÂY KHÔNG PHẢI THAY ĐỔI MÔ HÌNH** — lệnh pin **nguyên văn**, không đổi một
+tham số nào. Toàn bộ delta là **vintage dữ liệu**.
+
+### Phân rã 3 chân (thiết kế tách được nguyên nhân)
+
+| bước | ΔCAGR | nguyên nhân | cô lập sạch? |
+|---|---|---|---|
+| 27,16 → 27,63 (chân A) | **+0,47pp** | trôi dữ liệu thường 07-22→07-28 (6 ngày, **chưa** restate) | — (2 vintage khác nhau) |
+| 27,63 → 27,99 (chân C) | **+0,36pp** | **restate DT5G thuần** — chân C = bản sao chân A, tráo **đúng 1 file** `vnindex_5state_dt5g_live.parquet` | ✅ **SẠCH** |
+| 27,99 → **27,60** (chân B) | **−0,39pp** | trôi 07-28→07-29 **+** `ticker_prune` −58 mã | ❌ **GỘP 2 CÚ SỐC, không tách được** |
+| **tổng 27,16 → 27,60** | **+0,44pp** | | |
+
+⚠️ **Hai cảnh báo bắt buộc khi trích dẫn:**
+1. **KHÔNG viết "−0,39pp = trôi dữ liệu"** — chân C→B gộp 2 nguyên nhân, job này không tách được
+   (quant-skeptic nêu đúng đây là điểm yếu duy nhất). Chỉ chân A→C (+0,36pp) là cô lập sạch.
+2. **Tổng +0,44pp là tổng của 3 hiệu ứng LỚN HƠN NÓ và ngược dấu nhau** (+0,47 / +0,36 / −0,39).
+   Nếu chỉ chạy 1 chân "cũ vs mới" sẽ kết luận nhầm "gần như không đổi". Không có gì bảo đảm lần
+   sau 3 hiệu ứng cũng bù nhau.
+
+**Hiệu ứng single-path (quan trọng cho mọi rerun sau này):** Δ per-year lớn gấp **~21 lần** Δ
+headline và rơi vào năm **KHÔNG** bị restate (2021: A→C **+3,46pp**, C→B **−8,34pp**, cả 2 đều
+0 phiên restate) — vốn mang sang từ 2020 rồi gộp lãi. ⇒ **Không thể khoanh vùng "chỉ rerun mấy
+năm bị ảnh hưởng"**; restate làm bẩn toàn bộ đường NAV từ điểm chạm trở đi.
+
+### Lệnh pin (KHÔNG ĐỔI so với 07-22)
+
+```bash
+cd /home/trido/thanhdt/WorkingClaude && source ./wc_env.sh
+BQ_LOCAL_CACHE=data/bq_cache BQ_CACHE_THREADS=1 NAV_TOTAL_B=50 ETF_LIQ=custompitg BASKET_WT=namecap \
+BASKET_SELECT=yieldcombo PARK_STATES="3:0.7" AUDIT_END=2026-06-19 \
+$DNA_PYEXE pt_v23_audit_2014.py v23a none postbull 0 edge
+```
+(`UNIVERSE_SRC` để mặc định = `pit`. Chạy verify thêm `EXP_TAG=<tag>` để **không đè** canonical CSV — §8.)
+
+### AS-OF DATA VINTAGE
+
+- `run_date`: 2026-07-29T19:28Z→19:35Z (backtest); full re-sync `ticker` 17:37Z→19:27Z
+- `cache_dir`: `data/bq_cache` — full re-sync toàn bộ 14 bảng cùng ngày 2026-07-29
+- `manifest.verified`: **true** · `verified_at`: **2026-07-29T19:27:45Z** · **14/14 bảng OK**
+- `snapshot`: **`data/bq_cache_asof20260729_postrestate/`** (ĐÓNG CỨNG, bản sao THẬT 2,0GB —
+  **không** hardlink: `sync_bq_cache.py` ghi `to_parquet` đè inode nên hardlink sẽ hỏng lặng lẽ)
+- `reproducible`: **CHỈ TỪ SNAPSHOT** — BQ time-travel đã tắt, `ticker`/`ticker_prune` bị
+  TRUNCATE+rebuild mỗi ngày ⇒ chạy lại trên live BQ ngày khác **KHÔNG** tái lập được con số này.
+
+| bảng | rows | max_time | md5 (16 ký tự đầu) |
+|---|---|---|---|
+| `vnindex_5state_dt5g_live` | 3.136 | 2026-07-29 | `371b79941d685954` |
+| `vnindex_5state_tam_quan_v34b_clean` | 6.333 | 2026-07-29 | `2646553d23b441f4` |
+| `ticker` | 3.493.441 | 2026-07-29 | `2de5ec9412f5e3dd` |
+| `ticker_prune` | 755.751 | 2026-07-29 | `6849d5557218f475` |
+| `universe_pit_q` | 3.494.415 | 2026-07-29 | `edc917d05fce0538` |
+| `ticker_financial` | 66.906 | 2026-07-29 | `5d836b11948bbf62` |
+| `fa_ratings_8l` | 52.966 | 2026-07-29 | `2ad86b94411e1359` |
+
+### Verify (đã chạy, ĐẠT)
+
+1. `[selfcheck BAL] cash-flow identity max err = 0 VND; final NAV identity err = 0 VND` — LAG y hệt.
+2. `[universe_pit] coverage OK: 3107 phiên >= ticker 3107 phiên` — fail-safe coverage gate qua.
+3. Recompute độc lập từ CSV (`extract_peryear.py`): **FULL 27,60% / IS 23,45% / OOS 31,51%** — khớp
+   chính xác bản in. OOS > IS.
+4. Cache `verified:true` 14/14 bảng trước khi chạy (không phải override thủ công).
+
+**Log:** `data/g7_restate_repin/legB_new0729.log` · resync `.../full_resync_ticker_0730.log`.
+**CSV:** `data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_g7_legB_new0729_univpit.csv`
+(18.496 dòng). Canonical `..._wtnamecap.csv` **KHÔNG bị đụng**.
+**Báo cáo đầy đủ:** `mike/agents/Taylor/research/r3_repin_post_restate_20260729.md`.
+
+### CÁI GÌ KHÔNG ĐỔI
+
+- **Lỗi fidelity `liq<=0` vẫn MỞ** ⇒ 27,60% là chân **fill-lạc-quan**; khoảng kỳ vọng trung thực
+  **[~27,6%; ~31,3%]**, anchor DD **~−30%** (bootstrap 5th-pct), **KHÔNG phải −17,5%**.
+- Nhãn **MIXED-universe** giữ nguyên (`CAPIT_POOL_SOURCE` + ADV cap vẫn cố ý ghim `ticker_prune`).
+  Riêng breadth-decoupling guard của DT5G đã cutover sang `universe_pit` 07-29 (commit `8f95895`,
+  ảnh hưởng **0 phiên** lên state cuối).
+- Kết luận định tính DT5G không đổi: **51 transitions trước và sau restate** — gate bảo hiểm,
+  không phải return-enhancer.
+- Verdict các ablation cùng vintage (c4/c5 LAG, depgate, Q-sleeve, momentum-deals…) **không cần
+  rerun** — chúng là delta-based, so cùng vintage vẫn hợp lệ (quy tắc #3).
+
+### quant-skeptic — **CONFIRMED (high)**, `mike/logs/verify_20260729_193906.log`
+
+Reviewer **tái lập độc lập cả 3 chân từ CSV** (A 27,63/23,22/31,80 · B 27,60/23,45/31,51 ·
+C 27,99/23,48/32,27 — khớp đến 2 chữ số thập phân), **và** tái lập độc lập phân bố state + số
+transitions thẳng từ `vnindex_5state_dt5g_live.parquet` trong snapshot đóng cứng (489/241/1924/422/60,
+51 transitions — khớp chính xác). Xác nhận lệnh trong `leg.sh` **byte-identical** với lệnh pin
+registry (không có knob nào đổi ngầm), md5 snapshot khớp, không có look-ahead (`STATE_TABLE` =
+`vnindex_5state_dt5g_live`, zero hit `profit_*`/`O1W..O2Y`/`Pattern_*_3Y`/`_center_`).
+
+**Killer objection (ĐÃ ghi vào cảnh báo #1 ở trên):** chân C→B gộp 2 cú sốc không tách được ⇒
+trích dẫn "−0,39pp = trôi dữ liệu" là overclaim. Không làm mất hiệu lực số pin (headline,
+self-check, phân bố state đều đã verify độc lập) — reviewer khuyến nghị **duyệt** ghi SUPERSEDED.
+
+**Việc treo reviewer đề xuất (CHƯA làm):** (a) khi `ticker_prune` ổn định, chạy chân tách sạch
+drift-vs-co-rổ (giữ `ticker_prune` cố định, chỉ đẩy cửa sổ ngày); (b) **`flock` + `tmp`+`os.replace`
+cho `sync_bq_cache.py`** — lần này tránh được va chạm với cron 23:45 ICT là do **may** (thứ tự ghi
+manifest), không phải do thiết kế (vi phạm `coding_guidelines` §5); (c) rerun base-rate
+P(NEUTRAL→BEAR/CRISIS) trên chuỗi DT5G đã restate (101 ngày đổi tier).
