@@ -283,3 +283,11 @@
 - [2026-07-29T02:01:13Z] Taylor/heartbeat — Taylor_20260729_015830: {"status": "in_progress", "note": "profiling: event_code tách sạch DDIND/DDRP (person) vs DDINS (tổ chức); phát hiện bảng là SNAPSHOT 1 lần 07-27, public_date bị GHI ĐÈ khi Đăng ký->Done"}
 - [2026-07-29T02:01:14Z] Taylor/heartbeat — Taylor_20260729_015312: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260729_015312", "source": "watcher"}
 - [2026-07-29T02:01:32Z] Taylor/heartbeat — Taylor_20260729_015830: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260729_015830", "source": "watcher"}
+
+## Consolidation 2026-07-29T02:05:13Z
+- [2026-07-29T02:05:02Z] Mafee/status — bot-start: {"account": "ZaloPay", "plan_date": "2026-07-29", "auto_otp": true}
+- [2026-07-29T02:05:02Z] Mafee/status — bot-start: {"account": "SpaceX", "plan_date": "2026-07-29", "auto_otp": true}
+- [2026-07-29T02:05:13Z] Mafee/status — bot-done: {"account": "ZaloPay", "plan_date": "2026-07-29", "elapsed_s": 11, "rc": 0}
+- [2026-07-29T02:02:32Z] Taylor/heartbeat — Taylor_20260729_015830: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260729_015830", "source": "watcher"}
+- [2026-07-29T02:03:32Z] Taylor/heartbeat — Taylor_20260729_015830: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260729_015830", "source": "watcher"}
+- [2026-07-29T02:04:33Z] Taylor/heartbeat — Taylor_20260729_015830: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260729_015830", "source": "watcher"}
