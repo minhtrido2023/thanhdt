@@ -650,3 +650,8 @@
 - [2026-07-29T12:06:12Z] DollarBill/heartbeat — DollarBill_20260729_120310: {"status": "still_running", "elapsed_min": 3, "job_id": "DollarBill_20260729_120310", "source": "watcher"}
 - [2026-07-29T12:06:12Z] DollarBill/heartbeat — DollarBill_20260729_120311: {"status": "in_progress", "note": "Đã có đủ dữ liệu: NAV 900M, cash 4.5M, LAG T+1 không có candidate hợp lệ, CAPIT không fired 07-29, TV1 hoàn thành 400cp. Đang viết plan HOLD."}
 - [2026-07-29T12:06:12Z] DollarBill/heartbeat — DollarBill_20260729_120311: {"status": "still_running", "elapsed_min": 3, "job_id": "DollarBill_20260729_120311", "source": "watcher"}
+
+## Consolidation 2026-07-29T12:08:06Z
+- [2026-07-29T12:07:12Z] DollarBill/heartbeat — DollarBill_20260729_120310: {"status": "still_running", "elapsed_min": 4, "job_id": "DollarBill_20260729_120310", "source": "watcher"}
+- [2026-07-29T12:07:12Z] DollarBill/heartbeat — DollarBill_20260729_120311: {"status": "still_running", "elapsed_min": 4, "job_id": "DollarBill_20260729_120311", "source": "watcher"}
+- [2026-07-29T12:07:36Z] DollarBill/decision — plan-2026-07-30-SpaceX: {"account": "SpaceX", "plan_date": "2026-07-30", "action": "HOLD_ALL", "orders": 0, "nav_vnd": 900082648, "cash_vnd": 4527648, "state": "NEUTRAL(3)", "lag_new": 0, "capit_fired": false, "bal": 0, "tv1": "DONE 400/400cp", "deferred_count": 3, "deferred_vnd": 140652911, "file": "data/trade_plans/plan_SpaceX_2026-07-30.json", "note": "Không có signal LAG/CAPIT/BAL mới. Cash 4.53M không đủ lệnh nào. TV1 disc hoàn tất."}
