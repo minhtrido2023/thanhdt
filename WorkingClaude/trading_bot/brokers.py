@@ -178,6 +178,14 @@ class BrokerBase:
         get_cash() cũ (fail-safe, không nới lỏng khi không chắc)."""
         return None
 
+    def get_buying_power(self, symbol, price):
+        """Sức mua CÒN LẠI tính bằng VND theo chính broker, hoặc None nếu broker không hỗ
+        trợ/lỗi. Anh em với get_max_buy_qty() (cùng nguồn ppse) nhưng trả TIỀN chứ không
+        phải số CP — cần cho các kiểm tra ở cấp PLAN (Σ giá trị lệnh mua vs sức mua), nơi
+        không có một mã/giá duy nhất để quy ra số CP. None = không đo được (caller KHÔNG
+        được đoán thay)."""
+        return None
+
     def get_positions(self):
         """→ {symbol: {"total": n, "sellable": n}}."""
         raise NotImplementedError
@@ -416,6 +424,19 @@ class DNSEBroker(BrokerBase):
             self._log_raw("ppse", {"symbol": symbol, "price": price, "resp": r})
             v = _fnum(qget(r, "qmaxBuy", "qmaxbuy"))
             return int(v) if v is not None and v >= 0 else None
+        except Exception:
+            return None
+
+    def get_buying_power(self, symbol, price):
+        """Sức mua VND = `pp0Buy` của GET /accounts/{acc}/ppse (cùng response với qmaxBuy).
+        pp0Buy là số của CHÍNH broker: đã gồm tiền bán chờ về T+0 và hạn mức vay của gói
+        loanPackageId đang dùng (đo được 2026-07-28 ZaloPay cash-only: pp0Buy 25,54M trong
+        khi availableCash chỉ 5,68M). Mọi lỗi → None, KHÔNG suy ra từ get_cash()."""
+        try:
+            r = self.client.ppse(self.account_id, symbol, int(price))
+            self._log_raw("ppse", {"symbol": symbol, "price": price, "resp": r})
+            v = _fnum(qget(r, "pp0Buy", "pp0buy"))
+            return float(v) if v is not None and v >= 0 else None
         except Exception:
             return None
 

@@ -34,7 +34,8 @@ if hasattr(sys.stdout, "reconfigure"):  # console Windows cp1252 → utf-8
 from trading_bot.config import load_config, load_accounts, pick_accounts, EXEC_DIR
 from trading_bot.brokers import make_broker, get_quote_source, get_dnse_client
 from trading_bot.plan import (load_plan, filter_excluded_tickers, net_offsetting_orders,
-                              cap_capit_orders, cap_lag_orders, approval_block_reason)
+                              cap_capit_orders, cap_lag_orders, filter_lag_rating_orders,
+                              approval_block_reason)
 from trading_bot.netting_recon import (reconcile_netted_fills, get_net_fill_from_journal,
                                        write_recon_log)
 from trading_bot.executor import Executor, run_session, _publish_bot_event
@@ -145,6 +146,67 @@ def _reconcile_net_fills(executors, net_adjustments, pre_net_refs, plan_date):
             failed.append(e.label)
             _alert_recon_failure(e.label, plan_date, failures)
     return failed
+
+
+_BP_SHADOW_LOG = os.path.join(_WC_ROOT, "data", "plan_buying_power_shadow_log.csv")
+_BP_SHADOW_COLS = ("date", "account", "orders_buy_value_vnd", "buying_power_vnd",
+                   "buying_power_source", "would_block")
+
+
+def _log_plan_buying_power_shadow(label, plan, broker, mode):
+    """SHADOW (WARN_ONLY) — ghi log so Σ giá trị lệnh MUA vs SỨC MUA THẬT của broker.
+
+    ⚠️ CHỈ GHI LOG. KHÔNG chặn, KHÔNG sửa plan/orders, KHÔNG raise — không đổi hành vi phiên
+    theo bất kỳ cách nào. Mục đích duy nhất: tích luỹ dữ liệu để Mike/user quyết có nên nâng
+    thành gate thật hay không (thiết kế §3.6 ontology_constraint_layer_design_20260729.md,
+    yêu cầu ≥10 phiên trước khi bàn ACTIVE).
+
+    VÌ SAO: pattern "orders[] chứa lệnh dựa trên vốn CHƯA tồn tại" tái diễn 3 lần trong 6 ngày
+    (07-23 rút Trứng vàng ảo → 07-27 field `funding_required` → 07-28 văn xuôi "user sẽ nạp
+    136M"), tần suất TĂNG; cả 3 lần chỉ thoát nhờ một bước QA thứ hai TÌNH CỜ chạy
+    (kb/INCIDENTS.md 07-28 "Sự cố 3"). Cấm từng hình thức diễn đạt không đóng được lỗ hổng —
+    Σ giá trị orders[] thì độc lập hoàn toàn với tên field/văn xuôi.
+
+    VẾ PHẢI = SỨC MUA ĐO ĐƯỢC (`ppse.pp0Buy` của chính broker), KHÔNG phải cash tĩnh, KHÔNG
+    phải giả định — tôn trọng nguyên vẹn quyết định user 16:16 ICT 07-28 (từ chối luật cứng
+    `orders ≤ cash_vnd` vì hệ sẽ dùng margin): pp0Buy tự bao gồm hạn mức vay của gói đang dùng
+    và tiền bán chờ về T+0, nên chỉ bắt "vốn CHƯA TỒN TẠI", không cấm đòn bẩy. Đọc DNSE sống
+    (coding_guidelines §6 bright-line: sức mua same-day PHẢI từ broker, tuyệt đối không từ BQ).
+
+    Phạm vi: account mode=live, plan có ≥1 lệnh MUA. Chỉ tính `orders[]`; `deferred_orders[]`
+    KHÔNG tính (đó là cơ chế ĐÚNG đã được dạy — và load_plan() vốn không nạp field đó).
+    Không đo được sức mua → ghi would_block="unknown" + lý do trong buying_power_source, KHÔNG
+    đoán (bản ACTIVE sau này mới phải quyết chặn hay không trong tình huống đó).
+    """
+    try:
+        if str(mode or "").lower() != "live":
+            return
+        buys = [o for o in plan.orders if (o.side or "").lower() == "buy"]
+        if not buys:
+            return
+        buy_value = sum(o.value for o in buys)
+        biggest = max(buys, key=lambda o: o.value)
+        bp = src = None
+        try:
+            bp = broker.get_buying_power(biggest.ticker, int(biggest.ref_price))
+            src = f"dnse:ppse.pp0Buy@{biggest.ticker}" if bp is not None else "unavailable:ppse"
+        except Exception as ex:
+            src = f"unavailable:{type(ex).__name__}"
+        would_block = "unknown" if bp is None else str(buy_value > bp).lower()
+        row = (plan.plan_date, label, f"{buy_value:.0f}",
+               "" if bp is None else f"{bp:.0f}", src, would_block)
+        new = not os.path.exists(_BP_SHADOW_LOG)
+        os.makedirs(os.path.dirname(_BP_SHADOW_LOG), exist_ok=True)
+        with open(_BP_SHADOW_LOG, "a", encoding="utf-8") as f:
+            if new:
+                f.write(",".join(_BP_SHADOW_COLS) + "\n")
+            f.write(",".join(row) + "\n")
+        print(f"[{label}] ℹ️ shadow PLAN_BUYING_POWER (chỉ log, không chặn): "
+              f"Σ mua {buy_value:,.0f}đ vs sức mua "
+              f"{'n/a' if bp is None else format(bp, ',.0f') + 'đ'} ({src}) "
+              f"→ would_block={would_block}")
+    except Exception as ex:                      # shadow log KHÔNG được làm hỏng phiên
+        print(f"[{label}] ⚠ shadow PLAN_BUYING_POWER bỏ qua (lỗi ghi log, vô hại): {ex}")
 
 
 def _acquire_account_lock(label, plan_date):
@@ -326,6 +388,17 @@ def main():
         for a in lag_capped:
             print(f"[{p['label']}] ⚠ LAG trần %ADV {a['action']} {a['ticker']}: "
                   f"{a['qty_before']:,} → {a['qty_after']:,} cp — {a['reason']}")
+        # GATE CỨNG 8L rating ≤3 cho lệnh MUA book LAG (chính sách user chốt 2026-07-27) —
+        # LƯỚI AN TOÀN tầng order cho gate vốn chỉ sống ở tầng sinh ứng viên
+        # (lag_rating_filter.py:33-34 tự thừa nhận thiếu lưới executor). Cùng nhóm LAG nên
+        # đặt ngay sau trần %ADV. Fail-closed từng mã, fail-OPEN khi cả nguồn rating hỏng.
+        plan, rating_blocked = filter_lag_rating_orders(plan)
+        for a in rating_blocked:
+            if a["action"] == "FAIL_OPEN":
+                print(f"[{p['label']}] ⚠⚠ LAG gate rating KHÔNG CHẠY ĐƯỢC — {a['reason']}")
+            else:
+                print(f"[{p['label']}] ⛔ LAG BỎ lệnh {a['ticker']} ({a['qty_before']:,} cp, "
+                      f"8L rating={a['rating']}) — {a['reason']}")
         if not plan.orders:
             print(f"[{p['label']}] plan {plan_date} không có lệnh — bỏ qua")
             continue
@@ -349,6 +422,10 @@ def main():
         broker = make_broker(cfg, otp=otp, profile=p).connect()
         if cfg["mode"] == "paper" and hasattr(broker, "set_fallback_refs"):
             broker.set_fallback_refs({o.ticker: o.ref_price for o in plan.orders})
+        # SHADOW (chỉ log, không chặn) — plan đã qua TOÀN BỘ cascade + approval gate ở trên,
+        # và chưa lệnh nào được đặt (run_session chạy sau). Đặt sau connect() vì sức mua phải
+        # đọc từ broker SỐNG (§6), không suy từ cash tĩnh/BQ.
+        _log_plan_buying_power_shadow(p["label"], plan, broker, cfg["mode"])
         executors.append(Executor(plan, broker, cfg, shared=shared_fills))
 
     if not executors:

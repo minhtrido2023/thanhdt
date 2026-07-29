@@ -30,8 +30,10 @@ FAIL-SAFE:
     status.json phân biệt "không có mã nào rating≥4" vs "gate không chạy được". Chặn sạch book LAG
     vì một lỗi mạng thiệt hại lớn hơn; và recommender đã nạp thành công `fa_ratings_8l` ở bước BAL
     (regime_size) TRƯỚC khi tới đây, nên một lỗi truy vấn thứ hai trên cùng bảng là hiếm/thoáng
-    qua. LƯU Ý (khác lag_liquidity_filter): gate này KHÔNG có lưới an toàn ở executor — nên
-    lag_rating_filter_error != None phải được người đọc status/plan để ý.
+    qua. LƯU Ý: từ 2026-07-29 gate NÀY có lưới an toàn ở executor
+    (`trading_bot.plan.filter_lag_rating_orders`, gọi trong cascade bot_execute.py) áp CÙNG hàm
+    này lên từng order LAG-buy của plan — nhưng lưới đó fail-OPEN theo đúng nguyên tắc trên, nên
+    lag_rating_filter_error != None VẪN phải được người đọc status/plan để ý.
 
 Consumer: deploy_golive_dt5g_v4/golive_recommend_v23.py.
 Self-check: lag_rating_filter_selfcheck.py
@@ -60,8 +62,8 @@ WHERE f.ticker IN ({tl}) AND f.time <= DATE '{asof_d}'
 QUALIFY ROW_NUMBER() OVER (PARTITION BY f.ticker ORDER BY f.time DESC) = 1""")
     except Exception as ex:
         print(f"  WARNING: không đọc được 8L rating cho ứng viên LAG ({ex}) — GIỮ nguyên danh "
-              f"sách (fail-open). LƯU Ý: gate rating KHÔNG có lưới executor, xem "
-              f"lag_rating_filter_error trong status.json")
+              f"sách (fail-open). LƯU Ý: lưới executor (filter_lag_rating_orders) cũng fail-open "
+              f"khi nguồn hỏng, xem lag_rating_filter_error trong status.json")
         return cand, [], f"{type(ex).__name__}: {ex}"
     rmap = {r.ticker: r.rating for r in a.itertuples()} if len(a) else {}
     dropped = []

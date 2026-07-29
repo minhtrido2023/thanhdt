@@ -506,6 +506,96 @@ def _adv_for_gate(ticker, asof):
     return adv_vnd(ticker, asof)
 
 
+def _rating_gate_deps():
+    """Nguồn cho gate rating LAG. Tách riêng để self-check monkeypatch được (như _adv_for_gate).
+
+    Trả (bq, lag_filter_low_rating) — DÙNG LẠI nguyên hàm gate của tầng tín hiệu, không
+    viết lại logic point-in-time.
+    """
+    import sys
+    from .config import WORKDIR
+    if WORKDIR not in sys.path:
+        sys.path.insert(0, WORKDIR)
+    from simulate_holistic_nav import bq
+    from lag_rating_filter import lag_filter_low_rating
+    return bq, lag_filter_low_rating
+
+
+def filter_lag_rating_orders(plan, asof=None):
+    """GATE CỨNG 8L rating ≤3 cho lệnh MUA book LAG — LƯỚI AN TOÀN Ở TẦNG ORDER.
+
+    VÌ SAO: chính sách "ứng viên LAG phải có 8L rating ≤3, rating ≥4 auto-exclude" (user chốt
+    2026-07-27 sau 2 case TRC rating=4/D rồi MST rating=4/E) tới nay CHỈ được enforce ở tầng
+    SINH ứng viên (`lag_rating_filter.lag_filter_low_rating` gọi trong golive_recommend_v23.py).
+    Docstring của chính gate đó ghi thẳng lỗ hổng: *"gate này KHÔNG có lưới an toàn ở executor"*
+    (lag_rating_filter.py:33-34). Plan là JSON do LLM viết (DollarBill) hoặc người sửa tay — một
+    lệnh `{"ticker":"MST","book":"LAG","side":"buy"}` viết thẳng vào plan đi qua được toàn bộ
+    cascade hiện có (filter_excluded không biết mã, cap_lag_orders chỉ kiểm ADV) và ra tới broker
+    dù rating=4. Hàm này đóng lỗ hổng đó — cùng nguyên tắc "enforce cứng, không phụ thuộc plan
+    generator có nhớ hay không" của filter_excluded_tickers/cap_capit_orders/cap_lag_orders.
+
+    KHÔNG phải chính sách mới: ngưỡng, phạm vi (chỉ book LAG), nguồn (`tav2_bq.fa_ratings_8l`,
+    point-in-time `time ≤ asof`) đều dùng lại NGUYÊN hàm `lag_filter_low_rating` — thay đổi duy
+    nhất là nơi gọi. Đánh đổi backtest đã biết + đã được user duyệt: xem docstring
+    lag_rating_filter.py.
+
+    FAIL-MODE — đồng bộ ĐÚNG hành vi gate S1 tầng tín hiệu (đọc lag_rating_filter.py §FAIL-SAFE):
+      · TỪNG MÃ rating ≥4  → LOẠI lệnh đó (fail-closed).
+      · TỪNG MÃ không có rating nào ≤ asof → LOẠI lệnh đó (fail-closed: "phải CÓ rating≤3 mới
+        được vào" ⇒ không xác nhận được thì không mua).
+      · CẢ NGUỒN hỏng (BQ lỗi / không import được) → GIỮ NGUYÊN plan (fail-OPEN) + 1 bản ghi
+        action="FAIL_OPEN" để caller báo LOUD. Chặn sạch book LAG vì một lỗi mạng thiệt hại lớn
+        hơn — cùng lý lẽ đã chốt ở tầng tín hiệu, KHÔNG tự sáng tác hành vi khác ở đây.
+
+    Vị trí trong cascade (bot_execute.py): filter_excluded → net → cap_capit → cap_lag → **rating**
+    → approval. Đặt sau cap_lag (cùng nhóm LAG); thứ tự với cap_lag không đổi kết quả vì cap_lag
+    chỉ đổi qty còn gate này loại cả lệnh, nhưng đặt sau thì log cắt-trần không in cho lệnh rốt
+    cuộc bị loại.
+
+    Trả (plan đã lọc, list dict mô tả từng lệnh bị loại / cảnh báo) — KHÔNG log, caller tự báo.
+    Mỗi dict: {"ticker", "order_id", "rating" (int|None), "action", "qty_before", "reason"}.
+    """
+    def _is_lag_buy(o):
+        return (o.book or "").upper() == "LAG" and (o.side or "").lower() == "buy"
+
+    lag_buys = [o for o in plan.orders if _is_lag_buy(o)]
+    if not lag_buys:
+        return plan, []
+
+    asof = str(asof or plan.plan_date)[:10]
+    tickers = sorted({o.ticker for o in lag_buys})
+    try:
+        import pandas as pd
+        bq, lag_filter_low_rating = _rating_gate_deps()
+        cand = pd.DataFrame({"ticker": tickers})
+        _, dropped, src_err = lag_filter_low_rating(bq, cand, asof)
+    except Exception as ex:
+        dropped, src_err = [], f"{type(ex).__name__}: {ex}"
+
+    if src_err:
+        # Nguồn rating hỏng TOÀN BỘ → fail-open (giữ nguyên plan), nhưng phải BÁO ĐỘNG:
+        # đây đúng là kịch bản mà lag_rating_filter.py yêu cầu "người đọc status/plan để ý".
+        return plan, [{"ticker": None, "order_id": None, "rating": None,
+                       "action": "FAIL_OPEN", "qty_before": None,
+                       "reason": f"KHÔNG kiểm tra được 8L rating cho {tickers} ({src_err}) — "
+                                 f"GIỮ NGUYÊN lệnh (fail-open, đồng bộ gate tầng tín hiệu). "
+                                 f"CẦN NGƯỜI KIỂM TRA rating trước khi tin phiên này."}]
+
+    bad = {d["ticker"]: d for d in dropped}
+    if not bad:
+        return plan, []
+    blocked, keep = [], []
+    for o in plan.orders:
+        d = bad.get(o.ticker) if _is_lag_buy(o) else None
+        if d is None:
+            keep.append(o)
+            continue
+        blocked.append({"ticker": o.ticker, "order_id": o.id, "rating": d.get("rating"),
+                        "action": "BLOCKED", "qty_before": o.qty, "reason": d.get("reason")})
+    plan.orders = keep
+    return plan, blocked
+
+
 def approval_block_reason(plan):
     """Code-gate approval — lớp phòng thủ THỨ HAI, độc lập với việc gửi plan cho user
     duyệt qua send_plan_report.sh (sự cố 2026-07-13: plan ZaloPay requires_user_approval=true
