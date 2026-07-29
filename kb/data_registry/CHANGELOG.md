@@ -57,3 +57,19 @@ note: >
   custom30-mislabel, freshness re-check 3 nguồn rủi ro cao nhất, reference-count snapshot cho
   nguồn deprecated/dead) — wire vào Friday KB editorial review (`kb_nightly.sh` Phase 5). Chạy
   thật lần đầu: FAIL=0/WARN=0, xác nhận cả regression-guard lẫn freshness đều đúng thực tế.
+- 2026-07-29 (Winston, job `Winston_20260729_132257`, audit sâu theo dispatch Mike): **sửa
+  `price-volume/ticker_prune.md` — entry cũ ĐẾM THIẾU consumer LIVE.** Câu "2 consumer LIVE còn
+  lại có chủ đích" là SAI: rà cron thật ra thêm **4 chỗ không chủ đích**, sót lại từ trước
+  migration — `macro_state_live.py:158` (**breadth-decoupling guard của DT5G, đường regime
+  PRODUCTION**), `dna_report.py:91,129`, `update_shares_live.py:49`, `ta_score_daily.py:142`.
+  Thêm mục ⚠️ 2026-07-29 ghi sự kiện **TRUNCATE+rebuild `--mode prune` (creation_time 07:27)**:
+  distinct ticker **513 → 455** (58 mã biến mất khỏi TOÀN BỘ lịch sử, thêm mới 0), lịch sử viết
+  lại ở **20/27 năm cả hai chiều**, hố corruption 07-08→07-14 lành về độ sâu nhưng membership
+  07-13 rơi **265 → 220** và là tập con nghiêm ngặt. Cơ chế = đúng Câu 8 QA doc bq_admin
+  (`hit_ticker_list.csv` không đổi từ 04-14) ⇒ **sẽ lặp lại mọi rebuild sau**. Blast radius đo
+  được vào DT5G: guard lật 79/3135 phiên nhưng chỉ 2 trùng Pillar B, cả 2 singleton →
+  `cap_commit=7` nuốt → **0 phiên state đổi** (KHÔNG phải nguyên nhân thứ 3 của vụ restate 71
+  phiên). Xác minh **upstream sạch** (`ticker_1m`/`risk_rating` KHÔNG bị prune-lọc; prune là đầu
+  ra chứ không phải đầu vào của bq_admin) — có ghi giới hạn: `INFORMATION_SCHEMA.JOBS` Access
+  Denied nên không đọc được SQL họ. Phụ: cột `Pattern_*` của `ticker_1m` NULL 100% = cột chết.
+  Báo cáo: `mike/agents/Winston/research/ticker_prune_hidden_risk_audit_20260729.md`.
