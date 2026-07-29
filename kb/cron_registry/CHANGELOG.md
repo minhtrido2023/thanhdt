@@ -21,6 +21,36 @@ preserve_verbatim: >
 
 # Log thay đổi Cron Registry
 
+- 2026-07-29 (Winston, job `Winston_20260729_152037` — user CHỐT sau khi 2 job cùng ngày
+  (`Winston_20260729_132257` + `Taylor_20260729_132056`) phát hiện production BQ bị restate ÂM THẦM
+  ba lần: `ticker_prune` TRUNCATE+rebuild 07:27 xoá 58 mã khỏi TOÀN BỘ lịch sử, `VNINDEX_PE` backfill
+  ngược tới 2006, corp-action restate ~2-3%/tuần trên `ticker`/`ticker_financial` — cả ba đều phát hiện
+  do TÌNH CỜ, và BQ time-travel bị xoá mỗi sáng nên KHÔNG tái tạo được vintage cũ):
+  **CÀI MỚI `mike/bin/bq_monthly_pin.sh` 22:00 ICT ngày 1 hàng tháng** (`0 15 1 * *`, máy chạy giờ UTC).
+  Chụp BQ table SNAPSHOT 11 bảng dễ bị restate vào dataset RIÊNG `tav2_pin` (`<table>_pin_YYYYMM`),
+  rồi diff pin-mới vs pin-tháng-trước theo từng `ticker` và cảnh báo khi vượt ngưỡng.
+  Chọn **BQ snapshot thay vì export CSV**: metadata-only (bảng `ticker` 4,8 GB pin xong trong ~10 s),
+  chỉ tính phí phần BYTE LỆCH so bảng gốc, read-only nên bất biến, và vẫn là bảng BQ hạng nhất nên
+  `SELECT ... FROM tav2_pin.ticker_pin_202608` chạy được ngay — CSV mất kiểu dữ liệu và khó diff.
+  4 câu hỏi §11:
+  (1) *Đọc gì + vintage*: BQ **LIVE** qua `bq cp --snapshot` + `bq query` CLI thuần — không import
+  python nào của repo nên không có đường dính `BQ_LOCAL_CACHE` (bài học C1);
+  (2) *Nguồn tươi lúc nào*: mọi bảng đích ổn định sau chuỗi ghi trong ngày — ingest tav2 ~17:2x,
+  `daily_refresh` 18:30 (state), pipeline 19:00 (`universe_pit`/`universe_pit_quality`),
+  `fa_ratings*` 20:00 mùa BCTC, `inject` 20:30. Thêm một mốc MỚI đo được hôm nay: bq_admin có
+  cửa sổ rebuild **buổi sáng ~07:27** — snapshot là atomic nhưng pin rơi vào giữa TRUNCATE...INSERT
+  sẽ chụp bảng RỖNG và bắn CRITICAL giả, nên **cố ý không đặt job này buổi sáng**;
+  (3) *Cần T hay T-1*: cần một trạng thái **ỔN ĐỊNH**, không cần same-day — nên chạy cuối ngày 1
+  thay vì đầu ngày; ngày 1 rơi vào cuối tuần vẫn hợp lệ (bảng đứng yên, không có gì để chờ);
+  (4) *Ai tiêu thụ + deadline*: **không có consumer tự động nào** — đích là người (tra lại vintage khi
+  cần audit) + cảnh báo Discord Trading Daily `1521470705563340910`. Không job nào chặn sau nó, nên
+  giờ chạy chỉ cần tránh xung đột: 22:00 trống (21:00 send_plan, 23:00 second-chance, 23:45 sync),
+  đệm 105' trước sync 23:45 với `timeout 4500` (runtime baseline đo thật ~7').
+  **Retention = GIỮ TẤT CẢ** (11 pin = 6,27 GB logical ≈ $0,16/tháng nếu không dedup — thực tế rẻ hơn;
+  xoá 1 pin = huỷ bản sao DUY NHẤT của một vintage để tiết kiệm vài cent). Xem lại chỉ khi
+  `--cost` báo dataset vượt ~100 GB. Baseline `*_pin_202607` đã tạo ngay trong job này để tháng 8
+  có cái mà so. Test: `--selftest` 6/6 + diff thật trên `fa_ratings_8l` (dựng pin giả tháng trước
+  bằng cách xoá VNM/FPT + đổi rating AAA → diff bắt đúng cả 3 loại thay đổi).
 - 2026-07-29 (Winston, job `Winston_20260729_103816` — user yêu cầu "dời TẤT CẢ paper report/pipeline
   sang 19:00 để có dữ liệu cuối ngày"): **CÀI MỚI `mike/bin/paper_late_feeds.sh` 20:05 ICT** (`5 13 * * 1-5`),
   tách `[19] crisis_alert_push` ra khỏi `papertrade_daily.sh` 15:30 và chạy LẠI `[21] fetch_bdi_daily`.
