@@ -150,14 +150,27 @@ for old in $(bq ls --max_results=1000 tav2_bq 2>/dev/null | grep -oE 'vnindex_5s
 done
 
 # --- 3. deploy: load bare, sync _v34b_clean ---
-step "[10] bq load --replace vnindex_5state"
-bq load --replace --source_format=CSV --skip_leading_rows=1 --location=asia-southeast1 \
-  --schema=time:DATE,state:INT64,state_raw:INT64 \
-  "$PJ:tav2_bq.vnindex_5state" "$WORKDIR_8L/$CSV" || die "bq load bare"
+# ── BẢNG CÔNG BỐ BẤT BIẾN (2026-07-30, job Taylor_20260730_013951) ──────────────────────
+# TRƯỚC: `bq load --replace` đè TOÀN BỘ bảng mỗi đêm ⇒ mọi restate upstream (PE backfill,
+# corp-action re-adjust, ticker_prune membership) lan qua cửa sổ EXPANDING và VIẾT LẠI state
+# của phiên đã đóng nhiều năm trước, im lặng (2026-07-29: 134 phiên ở bảng này).
+# GIỜ: append phiên mới + recompute đuôi 25 phiên chưa chốt; phần đã chốt bất khả xâm phạm.
+# CÔNG THỨC KHÔNG ĐỔI một dòng nào — chỉ đổi CÁCH GHI. Cơ sở N=25 + thiết kế: docstring
+# state_publish_immutable.py. Abort => die (bảng giữ bản hôm qua, gate freshness chặn hạ nguồn).
+step "[10] publish BẤT BIẾN -> vnindex_5state (append + recompute đuôi 25 phiên)"
+$PY state_publish_immutable.py --csv "$WORKDIR_8L/$CSV" \
+    --table tav2_bq.vnindex_5state \
+    --label "vnindex_5state (base v3.4b)" || die "immutable publish bare"
 
 step "[11] sync _v34b_clean <- vnindex_5state"
+# Cột PHẢI liệt kê TƯỜNG MINH, KHÔNG `SELECT *` (sửa 2026-07-30, quant-skeptic bắt được):
+# publisher bất biến thêm cột audit `asof_date` vào `vnindex_5state`. `SELECT *` sẽ âm thầm
+# nhân bản cột đó sang `_v34b_clean` — bảng có ~50 consumer chưa ai audit về giả định số cột.
+# `asof_date` là metadata CỦA HÀNH ĐỘNG CÔNG BỐ, không thuộc đặc tả chuỗi state, nên nó không
+# có việc gì ở bảng hạ nguồn. Ghim 3 cột giữ đúng hợp đồng "_v34b_clean == vnindex_5state"
+# (CLAUDE.md) cho mọi consumer, và mọi cột audit thêm sau này cũng tự động không lan xuống.
 bq query --use_legacy_sql=false --project_id="$PJ" \
-  'CREATE OR REPLACE TABLE tav2_bq.vnindex_5state_tam_quan_v34b_clean AS SELECT * FROM tav2_bq.vnindex_5state' || die "sync _v34b_clean"
+  'CREATE OR REPLACE TABLE tav2_bq.vnindex_5state_tam_quan_v34b_clean AS SELECT time, state, state_raw FROM tav2_bq.vnindex_5state' || die "sync _v34b_clean"
 
 # --- 3b. restate guard: lịch sử đã đóng có bị viết lại không? ---
 # RCA dt5g_history_restate_rca_20260729.md: chain này rebuild TOÀN BỘ lịch sử mỗi đêm từ
@@ -166,17 +179,45 @@ bq query --use_legacy_sql=false --project_id="$PJ" \
 # trước vẫn đổi được. 2026-07-29: 134 phiên base + 101 phiên dt5g_live bị viết lại và
 # KHÔNG có gì cảnh báo. Guard chạy SAU deploy (alert-only, không chặn) và cố ý là advisory:
 # guard hỏng thì chain vẫn phải chạy tiếp.
+# Hai env override dưới đây là BẮT BUỘC sau khi bật publish bất biến, và phải giống nhau ở CẢ
+# HAI lần gọi guard ([11b] base + [12b] dt5g_live) — cả hai bảng giờ đều publish bất biến:
+#
+# RESTATE_LOOKBACK_DAYS=45 (mặc định 30): cửa sổ chốt của publisher là 25 phiên GIAO DỊCH
+#   (~35 ngày lịch, hơn nữa nếu rơi vào Tết), còn guard cắt theo NGÀY LỊCH. Để mặc định 30 ngày
+#   lịch (~21 phiên) thì guard soi cả dải 21-25 phiên vốn CHƯA CHỐT và được phép tính lại hợp lệ
+#   mỗi đêm ⇒ alert dương-tính-giả đều đặn. 45 ngày lịch (>=26 phiên kể cả tuần Tết) nằm trọn
+#   trong vùng đã chốt.
+# RESTATE_ALERT_THRESHOLD=0 (mặc định 5): ngưỡng 5 được đặt cho THỜI `bq load --replace`, khi
+#   churn nền 0-4 phiên/đêm là chuyện thường ngày. Với publish bất biến, kỳ vọng ở vùng đã chốt
+#   là ĐÚNG 0 — để nguyên 5 thì một bug tương lai ghi đè 1-5 phiên đã chốt sẽ bị guard LÀM NGƠ,
+#   tức lưới an toàn có lỗ rộng 5 phiên đúng ở chỗ nó phải bắt. Guard so `n_total <= THRESH` nên
+#   0 = alert khi có BẤT KỲ phiên đã chốt nào đổi/thêm/mất.
+# ⇒ Guard trở lại đúng vai trò: dây bẫy chỉ kêu khi có BUG ghi đè phần đã chốt.
 step "[11b] restate guard: vnindex_5state vs archive_predeploy_$TS"
+RESTATE_LOOKBACK_DAYS=45 RESTATE_ALERT_THRESHOLD=0 \
 ./restate_guard.sh "$PJ.tav2_bq.vnindex_5state" \
                    "$PJ.tav2_bq.vnindex_5state_archive_predeploy_$TS" \
                    "vnindex_5state (base v3.4b)"
 case $? in 0) : ;; 2) echo "  restate ALERT đã gửi (base)" ;; *) echo "  WARN: restate guard (base) không chạy được" ;; esac
 
 # --- 4. republish DT5G live ---
-step "[12] publish_gated_state.py -> dt5g_live"
-$PY deploy_golive_dt5g_v4/publish_gated_state.py || die "publish_gated_state"
+# publish_gated_state.py giờ exit!=0 khi publish BQ hỏng (trước đây chỉ in WARNING rồi exit 0
+# ⇒ thất bại lặng lẽ). KHÔNG `die`: cần step [14] macro_healthcheck vẫn chạy — health report
+# đứng im sẽ khiến get_gated_state fail-closed về DT4, tức BỎ macro cap (kém phòng thủ hơn).
+# Bảng giữ nguyên bản hôm qua ⇒ bq_freshness_check chặn hạ nguồn đúng như thiết kế.
+step "[12] publish_gated_state.py -> dt5g_live (bất biến)"
+if ! $PY deploy_golive_dt5g_v4/publish_gated_state.py; then
+  PMSG="🛑 daily_refresh_v34b $(TZ='Asia/Ho_Chi_Minh' date '+%Y-%m-%d %H:%M ICT'): publish_gated_state THẤT BẠI — vnindex_5state_dt5g_live GIỮ NGUYÊN bản hôm qua. Hạ nguồn sẽ bị bq_freshness_check chặn. Xem $LOG."
+  echo "  !!! publish_gated_state FAILED (chain vẫn tiếp tục để macro_healthcheck chạy)"
+  /home/trido/thanhdt/WorkingClaude/mike/bin/notify.sh "$PMSG" 2>/dev/null || true
+  /home/trido/thanhdt/WorkingClaude/mike/bin/notify_thread.sh "$PMSG" "1521470705563340910" 2>/dev/null || true
+fi
 
 step "[12b] restate guard: dt5g_live vs archive_predeploy_$TS"
+# Cùng override như [11b] — dt5g_live cũng publish bất biến (seal_n=25 phiên giao dịch), nên để
+# mặc định 30 ngày/ngưỡng 5 sẽ vừa báo dương-tính-giả ở đuôi chưa chốt, vừa bỏ qua bug ghi đè
+# <=5 phiên đã chốt. Xem giải thích đầy đủ ở [11b].
+RESTATE_LOOKBACK_DAYS=45 RESTATE_ALERT_THRESHOLD=0 \
 ./restate_guard.sh "$PJ.tav2_bq.vnindex_5state_dt5g_live" \
                    "$PJ.tav2_bq.vnindex_5state_dt5g_live_archive_predeploy_$TS" \
                    "vnindex_5state_dt5g_live (PRODUCTION)"
