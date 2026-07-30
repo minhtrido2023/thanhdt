@@ -78,6 +78,7 @@ enforced_by: kb/coding_guidelines.md §11
 | Friday 15:00 | `check_sbv_weekly.sh` | SBV web | `sbv_macro_overlay` | DT5G Pillar A | — | — |
 | Mon 09:00 | `hog_price_feed.py` | web | feed archive | chưa consumer sống | — | — |
 | Sat 09:15 | `refresh_fa_ratings.sh` | `ticker_financial` BQ live (append-only) | `tav2_bq.fa_ratings` | custom30 builder cũ, audit | sau fa_ratings_8l (45') | `bq show` lastModified+numRows, invariant quý đóng băng |
+| Sun 22:00 (thêm 2026-07-30) | `fleet_housekeeping.sh --apply` | `mike/logs/` + `bus/registry/` (mtime/size/nội dung, KHÔNG chạm `bus/jobs`/`bus/events`/`execution_logs`) | archive-first: `logs/archive/YYYY-MM/*.gz`, `bus/registry/archive/YYYY-MM/*.gz`; DELETE chỉ 5 category đã kiểm chứng nội dung (pid mồ côi/log rỗng/err-noise/jobtmp mồ côi/`__pycache__`) | không ai downstream (dọn dẹp thuần, mục tiêu là TOKEN khi agent `ls`/glob thư mục, không phải disk) | độc lập, quiet-hour cuối tuần | `logs/fleet_housekeeping.log` (append) + bus event `status` mỗi lần chạy; dry-run mặc định nếu gọi tay không `--apply` |
 | mỗi giờ :07 | `consolidate.sh` | bus | KB | — | — | — |
 | mỗi 10' | `watchdog.sh`, `discover_sessions.py`, `resume_pending.py` | — | — | — | — | — |
 | @reboot + mỗi 5' | `discord_bot/start.sh` | — | supervisor | — | — | — |

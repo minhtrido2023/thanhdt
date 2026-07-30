@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
-# ⚠️ NHÁP — CHƯA DUYỆT, CHƯA EXECUTABLE, CHƯA ĐĂNG KÝ CRON.
-# Hậu tố .draft có chủ đích (coding_guidelines §10): một file tên `bin/fleet_housekeeping.sh` nằm
-# sẵn trong bin/ là đúng cái bẫy khiến agent/người sau tưởng nó đã live và gọi thật.
-# Đổi tên bỏ `.draft` + chmod +x CHỈ sau khi: (1) arch-reviewer CONFIRMED, (2) user duyệt,
-# (3) đăng ký kb/cron_registry.md trong CÙNG commit theo §11.
+# LIVE từ 2026-07-30 — arch-reviewer NEEDS_CHANGES(high)→11/12 áp dụng→user duyệt, cron hàng tuần
+# đăng ký ở kb/cron_registry.md. Lần --apply đầu tay chạy: DELETE 1409 mục/0,86MB, ARCHIVE 720
+# mục/0,52MB — verify: mike/logs top-level 1930→978 file.
 #
 # Audit + thiết kế: agents/Wags/research/fleet_housekeeping_audit_20260730.md (job Wags_20260730_112912)
 #
