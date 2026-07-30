@@ -223,6 +223,26 @@ Rules when a script's output feeds `data/results_registry.md` or any pinned base
   and an independent recompute from the CSV (`extract_peryear.py <CSV>`) matching the print — then
   note the regeneration in the registry so the overwrite episode is auditable.
 
+**§8b. `data/bq_cache_asof*` snapshot retention (policy chốt 2026-07-30, user directive, sau audit
+`fleet_housekeeping` job Wags_20260730_112912).** Mỗi snapshot ~2,0GB, không tái tạo được (BQ
+time-travel tắt, `ticker`/`ticker_prune` TRUNCATE+rebuild mỗi ngày) — xoá sai = mất vĩnh viễn bằng
+chứng cho 1 kết quả pinned.
+
+- **Giữ tối đa 1 bản/tháng.** Nhiều snapshot cùng tháng dương lịch (vd nhiều lần re-pin do restate
+  trong cùng tháng) → chỉ giữ bản MỚI NHẤT của tháng đó là bản "hiện hành" cho AS-OF vintage.
+- **>3 tháng tuổi → xoá được, NẾU không có vấn đề** — "không có vấn đề" nghĩa là: (a) KHÔNG phải
+  bản snapshot pin CHÍNH THỨC hiện hành cho 1 kết quả sống trong `current_ops.md`/
+  `results_registry.md` (grep xác nhận trước khi xoá, đúng kỷ luật §10 — không đoán theo tuổi/tên);
+  (b) KHÔNG được đánh dấu **"mốc lịch sử đặc biệt — giữ riêng"** (vd `bq_cache_asof20260728` =
+  mốc TRƯỚC restate DT5G 07-29, bằng chứng duy nhất cho attribution +0,47pp CAGR do trôi dữ liệu —
+  **KHÔNG BAO GIỜ xoá theo tuổi**, chỉ xoá nếu người quyết định tường minh việc này không còn giá
+  trị bằng chứng).
+- **Xoá snapshot cũ CHỈ SAU KHI số pin mới đã qua quant-skeptic** — không xoá bản đang dùng để
+  chờ verify xong bản thay thế (tránh mất cả 2 nếu bản mới bị REFUTED).
+- **Không tạo cadence re-pin riêng** — gắn vào nhịp snapshot BQ hàng tháng Winston đã dựng
+  (`bin/bq_monthly_pin.py`, cron ngày 1 hàng tháng) thay vì đặt lịch mới.
+- Nguồn đề xuất gốc: Taylor job `Taylor_20260729_155142`, `agents/Taylor/research/asof_vintage_label_20260729.md`.
+
 ## 9. Check `mike/kb/data_registry/` Before Wiring a New Data Source
 
 **Root cause (2026-07-11 SIGNAL_V11 base-leak, `kb/INCIDENTS.md`):** four production consumers
