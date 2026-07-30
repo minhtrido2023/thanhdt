@@ -5,3 +5,38 @@ logs/
 locks/
 state/
 __pycache__/
+
+# --- Taylor experiment raw panels (housekeeping 2026-07-30, job Taylor_20260730_125303) ---
+# Chính sách: thư mục agents/Taylor/exp_*/ và probe_*/ giữ SCRIPT (.py) + REPORT (.md) +
+# bảng kết quả nhỏ trong git; PANEL THÔ lớn (>=512KB) và mọi .parquet/.pkl thì KHÔNG track —
+# file vẫn NẰM NGUYÊN TRÊN ĐĨA (archive-first, không xoá), chỉ gỡ khỏi git tracking để
+# repo không phình thêm. Panel thô KHÔNG tái tạo được (BQ time-travel tắt, ticker/
+# ticker_prune rebuild mỗi ngày — coding_guidelines §8b) ⇒ tuyệt đối không xoá khỏi đĩa.
+agents/Taylor/exp_*/**/*.parquet
+agents/Taylor/exp_*/**/*.pkl
+agents/Taylor/probe_*/**/*.parquet
+agents/Taylor/probe_*/**/*.pkl
+agents/Taylor/exp_breadth/breadth_panel.csv
+agents/Taylor/exp_capitexit/panel.csv
+agents/Taylor/exp_capitgate/panel.csv
+agents/Taylor/exp_dividend/panel_monthly.csv
+agents/Taylor/exp_insider/anom_replay.csv
+agents/Taylor/exp_insider/panel.csv
+agents/Taylor/exp_insider/panel2.csv
+agents/Taylor/exp_market_prob/agg_pepb.csv
+agents/Taylor/exp_market_prob/daily_panel.csv
+agents/Taylor/exp_market_prob/panel_fwd.csv
+agents/Taylor/exp_pb_exvic/agg_all.csv
+agents/Taylor/exp_pb_exvic/pb_variants.csv
+agents/Taylor/exp_pb_exvic/pb_variants_final.csv
+agents/Taylor/exp_pb_exvic/t100_panel.csv
+agents/Taylor/exp_pb_exvic/t100_panel2.csv
+agents/Taylor/exp_roe/fin_quarterly.csv
+agents/Taylor/exp_roe/panel_roe_fwd.csv
+agents/Taylor/exp_roe/panel_roe_fwd2.csv
+agents/Taylor/exp_roe/roe_daily_enriched.csv
+agents/Taylor/exp_roe/roe_market_daily.csv
+agents/Taylor/exp_valframe/metrics_daily.csv
+agents/Taylor/exp_valframe/metrics_full.csv
+agents/Taylor/probe_fa_rebuild/fundamental_rating_all_probe.csv
+agents/Taylor/probe_fa_rebuild/fundamental_rating_probe.csv
