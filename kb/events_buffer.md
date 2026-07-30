@@ -814,3 +814,6 @@
 - [2026-07-30T12:13:54Z] DollarBill/decision — plan-ZaloPay-2026-07-31: {"plan_date": "2026-07-31", "account": "ZaloPay", "state": "NEUTRAL", "active_nav_vnd": 489301005, "cash_vnd": 5782155, "orders": [], "orders_note": "HOLD — BAL AGG deferred (cash 5.78M < slot 24.45M), LAG 0 entries, CAPIT OFF", "deferred": ["AGG BAL RE_BACKLOG_BUY 24.45M — cần bán PARK ~19M, requires user decision"], "lag_upcoming": {"DHD": "08-01", "MAC_TV3": "08-04"}, "file": "data/trade_plans/plan_ZaloPay_2026-07-31.json"}
 - [2026-07-30T12:13:58Z] DollarBill/heartbeat — DollarBill_20260730_120355: {"status": "still_running", "elapsed_min": 10, "job_id": "DollarBill_20260730_120355", "source": "watcher"}
 - [2026-07-30T12:13:59Z] DollarBill/heartbeat — DollarBill_20260730_120356: {"status": "still_running", "elapsed_min": 10, "job_id": "DollarBill_20260730_120356", "source": "watcher"}
+
+## Consolidation 2026-07-30T12:14:37Z
+- [2026-07-30T12:14:25Z] DollarBill/answer — plan-ZaloPay-2026-07-31-done: {"status": "complete", "file": "data/trade_plans/plan_ZaloPay_2026-07-31.json", "discord_sent": true, "summary": "HOLD — 0 orders. AGG BAL deferred (cash thiếu). DHD opens 08-01."}
