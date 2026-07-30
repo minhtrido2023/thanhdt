@@ -12,7 +12,7 @@ vào DollarBill plan channel + trả lời bus question `zalopay-plan-0713-chua-
 **User chỉ đạo quy trình quan trọng cùng lúc**: yêu cầu duyệt plan phải đến tay user TRƯỚC ngày
 giao dịch 1 ngày, không được để tái diễn tình huống sáng nay (plan sửa lỗi ngày lúc 22:17 tối
 07-10 không ai gửi lại cho duyệt, nằm im tới sáng 07-13 08:20 mới bị ops_health_check phát hiện
-CRITICAL — đã ghi đầy đủ `kb/INCIDENTS.md`). Dispatch Winston (fable) thiết kế + implement "second
+CRITICAL — đã ghi đầy đủ `kb/incidents/2026-07/`, các file `2026-07-13-*`). Dispatch Winston (fable) thiết kế + implement "second
 chance" re-check muộn hơn trong đêm (đề xuất 23:00 ICT, trước sync_bq_cache 23:45) — chạy lại
 `send_plan_report.sh` idempotent (không gửi trùng nếu 21:00 đã gửi thành công, có gửi nếu file
 plan được sửa/tạo lại sau 21:00): job `Winston_20260713_014816`. KHÔNG đụng bot_execute.py/executor

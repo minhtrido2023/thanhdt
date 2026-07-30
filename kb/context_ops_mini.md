@@ -19,13 +19,13 @@
   Discord tự động đi đúng topic đã gọi việc, không cần bạn tự lo Discord routing.
 
 ## Vòng đời sự cố điều phối (Wags) — pipeline `bin/wags_autofix.sh`
-1. Chẩn đoán + sửa trực tiếp file trong `bin/`, `MIKE.md`, `hooks/`, `kb/INCIDENTS.md`.
+1. Chẩn đoán + sửa trực tiếp file trong `bin/`, `MIKE.md`, `hooks/`, `kb/incidents/`.
 2. Ghi finding lên bus (`wags-fix: <topic>`) kèm root_cause/fix/verify/commit.
 3. Pipeline tự dispatch `arch-reviewer` (đọc-only) audit lại — **bắt buộc nếu fix chạm
    `bin/dispatch.sh`/`bin/run_bot.sh`/`bot_execute.py`/`trading_bot/`/`trading_rules.json`/
    plan JSON**; các fix KHÁC (docs, notification text, log format, tooling không đụng
    surface tiền thật) chỉ cần self-check kỹ + có thể được audit lấy mẫu sau, không bắt
-   buộc chờ arch-reviewer mỗi lần (chính sách 2026-07-17, xem `kb/INCIDENTS.md`).
+   buộc chờ arch-reviewer mỗi lần (chính sách 2026-07-17, xem `kb/incidents/2026-07/2026-07-17-model-tier-drift-fable.md`).
 4. **KHÔNG BAO GIỜ** tự sửa: trade plan, `trading_rules.json`, logic đặt lệnh, dòng cron
    THỰC THI, xoá dữ liệu, `BOT_STOP` — luôn escalate (event `question`) cho việc này.
 

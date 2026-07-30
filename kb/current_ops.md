@@ -34,7 +34,7 @@ lãnh đạo DN niêm yết 7-14 ngày qua, áp bộ lọc QUALIFY/NON/AMBIGUOUS
 Đây là recon, KHÔNG tự mua — mọi case đáng chú ý vẫn cần due-diligence sâu + user duyệt riêng
 như TV1/DGC.
 
-## Dự án thay thế `ticker_prune` → `universe_pit` (gộp 3 mục rải rác 2026-07-30, xem lịch sử ở `kb/INCIDENTS.md`/git log nếu cần)
+## Dự án thay thế `ticker_prune` → `universe_pit` (gộp 3 mục rải rác 2026-07-30, xem lịch sử ở `kb/incidents/`/git log nếu cần)
 `ticker_prune` không có quản trị (curation circular-bias, không tái lập được, và **07-29 bị
 bq_admin TRUNCATE+rebuild mất 58 mã khỏi toàn lịch sử** — 513→455 mã, -17%, đúng cơ chế "mã vào
 bằng daily-append bị xoá ở lần rebuild toàn bộ kế tiếp" — user chốt 07-29 KHÔNG khôi phục từ
@@ -83,7 +83,7 @@ cap thật (`capit_adv_caps`) khi fire.
 > cắt fact quyết định; file này riêng có ngưỡng phụ 28KB — kiểm tra SAME-DAY qua `kb_nightly.sh`,
 > không chỉ Thứ Sáu, xem §Cron) — giữ NHỎ, chỉ mục LIVE/đang-mở. Dự án ĐÓNG → 1 file
 > `kb/projects/<slug>.md` + 1 dòng `kb/projects/INDEX.md`. Sự cố ĐÃ GIẢI QUYẾT → **1-2 câu + pointer
-> `kb/INCIDENTS.md`** ngay khi đóng, không giữ play-by-play (bài học phình 0→36KB trong 3 tuần,
+> `kb/incidents/`** ngay khi đóng, không giữ play-by-play (bài học phình 0→36KB trong 3 tuần,
 > 2026-07-17).
 
 ## Due-diligence MẶC ĐỊNH cho MỌI ứng cử viên mua — ĐÃ TRIỂN KHAI (mandate 2026-07-21, XONG cùng ngày)
@@ -107,7 +107,7 @@ model-string qua `/model` command đã fix ở tầng validation, xem [[referenc
 User chỉ đạo: lỗi vận hành phát sinh thì TỰ FIX rồi báo cáo, không chờ user báo/nhắc việc.
 Tài liệu chuẩn tắc: **`kb/ops_runbook.md`** (timeline ngày, mỗi bước check gì, ranh giới tự
 sửa). Cơ chế: `bin/ops_autofix.sh` — checker phát hiện lỗi → dispatch Winston (opus, hạ từ
-fable 2026-07-17 — xem `kb/INCIDENTS.md` "Model-tier drift") chẩn đoán + sửa + verify + báo
+fable 2026-07-17 — xem `kb/incidents/2026-07/2026-07-17-model-tier-drift-fable.md`) chẩn đoán + sửa + verify + báo
 Trading Daily; đã wire vào `ops_health_check.sh` (08:20/12:45) và
 `sync_bq_cache_daily.sh` (23:45). Cooldown 1h/vấn đề chống bão dispatch. **Ranh giới cứng
 (không bao giờ tự sửa, escalate question + Telegram):** trade plan, trading_rules.json,
@@ -132,7 +132,7 @@ không thể đảo ngược: bot tự đặt lệnh thật lần đầu, không
   `Taylor_20260703_130720`, quant-skeptic CONFIRMED). run_bot.sh 09:05 ICT mỗi T2-T6. NAV/vị
   thế hiện tại: đọc `nav_history_SpaceX.csv` hoặc EOD report mới nhất (Trading report topic),
   đừng dùng số hardcode cũ ở đây. Chuỗi sự cố go-live tuần đầu (trim 07-06, bug tên file plan
-  `_v2`, T+2 sellable-chiều, giá EOD sai nguồn) đều đã fix+verify — chi tiết: `kb/INCIDENTS.md`
+  `_v2`, T+2 sellable-chiều, giá EOD sai nguồn) đều đã fix+verify — chi tiết: `kb/incidents/index.md`
   (tìm "2026-07-06").
 - **ZaloPay** (DNSE 0001743768, tên cũ `dnse_main`): V2.4 LIVE từ 2026-07-06, **CASH-ONLY**
   (không margin) — cơ hội so sánh V2.4 có/không margin. **DGC (vị thế legacy) EXCLUDED khỏi
@@ -151,7 +151,7 @@ không thể đảo ngược: bot tự đặt lệnh thật lần đầu, không
 gap khi lập plan; thiếu cash → tự SHRINK lệnh. Cơ chế field vẫn giữ cho account tương lai có
 off-book asset tương tự. Chi tiết: [[project-dnse-trung-vang-offbook-assets]] (memory Mike).
 
-## Đang R&D (mọi mục PAPER-ONLY trừ khi ghi rõ LIVE — chi tiết đầy đủ: bus finding của Taylor + `kb/INCIDENTS.md`)
+## Đang R&D (mọi mục PAPER-ONLY trừ khi ghi rõ LIVE — chi tiết đầy đủ: bus finding của Taylor + `kb/incidents/index.md`)
 - **Insider-sell WATCH shadow (`insider_flags.py`)** (WATCH-only, chưa wire due-diligence, từ
   2026-07-29): cờ bán ròng nội bộ ≥1% CP lưu hành/90 ngày (chỉ `event_code IN ('DDIND','DDRP')`,
   TTL 90d). Scoping (job Taylor_20260729_015830 + Phụ lục A `_032713`) kết luận GO: overlap thấp
@@ -170,7 +170,7 @@ off-book asset tương tự. Chi tiết: [[project-dnse-trung-vang-offbook-asset
   ~2026-07-28 **ĐÃ QUA, CHƯA XÁC NHẬN trạng thái** (không tìm thấy sign-off/close nào — cần dispatch
   Taylor kiểm tra lại, không tự đoán). Điều kiện LIVE (chưa đổi): 0 false-trigger ~4 tuần benign +
   không can thiệp NORMAL-path + user sign-off. ⚠️ audit `Winston_20260712_142100` (M5, xem
-  `kb/INCIDENTS.md`) từng nêu `executor.py` đọc `ticker_prune.parquet` monolith đông cứng từ 06-26
+  `kb/incidents/index.md`) từng nêu `executor.py` đọc `ticker_prune.parquet` monolith đông cứng từ 06-26
   khiến rvol/prior_close trial này tính trên giá cũ 2+ tuần — bug monolith đã **FIXED 07-13**
   (Winston_20260713_143546), câu hỏi mở CHỈ còn là evidence giai đoạn 06-26→07-13 có giá trị
   không, cần Taylor xác nhận cùng lúc. KHÔNG bật ở live cho tới khi có xác nhận.
@@ -221,7 +221,7 @@ Phần dưới đây là quy tắc **Discord topic routing** — KHÔNG có tron
   thành từng job phải về ĐÚNG topic đã yêu cầu job đó, không phải topic Mike đang hoạt động lúc
   job xong. Fix: `dispatch.sh` giờ ghi `discord_thread_id` NGAY vào job record lúc dispatch (chụp
   1 lần, không đổi), mọi thông báo (nhận việc/xong/fail/circuit-breaker/usage-limit) đọc lại field
-  này qua `_job_thread_id <job_id>` thay vì suy ra "topic hiện tại". Xem `kb/INCIDENTS.md`.
+  này qua `_job_thread_id <job_id>` thay vì suy ra "topic hiện tại". Xem `kb/incidents/index.md`.
 - **Trading report (1522576692638388364, thêm 2026-07-03, user chỉ đạo)** — kênh DUY NHẤT cho
   **báo cáo tổng hợp** trading ngày/tuần/tháng (khác với alert vận hành sống ở Trading Daily). Đã
   chuyển đích `eod_trading_report.sh` (báo cáo EOD + cảnh báo đối soát mismatch) sang topic này.
@@ -257,7 +257,7 @@ của toàn hệ thống).
 - `state/NOTIFY_OFF`: tắt Telegram push tạm thời
 - V2.5: `trading_rules.json v1.7` → v25_leverage STATUS=DISABLED
 
-## Sự cố đã đóng (cập nhật 2026-07-30) — rút gọn, chi tiết đầy đủ `kb/INCIDENTS.md`
+## Sự cố đã đóng (cập nhật 2026-07-30) — rút gọn, chi tiết đầy đủ `kb/incidents/index.md`
 Audit cron C1/H2 (2026-07-12), BQ cache monolith (2026-07-13), cross-account contamination
 `reconcile_equity.py`/`verify_account_snapshot.py` (2026-07-19) — tất cả FIXED+VERIFIED. **Còn
 treo thật** (1 mục, ưu tiên thấp): dọn crontab paper-trading lạc hậu — diff có sẵn

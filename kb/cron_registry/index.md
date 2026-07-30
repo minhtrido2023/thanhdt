@@ -24,7 +24,7 @@ migrated_from: kb/cron_registry.md (single-file → tách phần tham chiếu 20
 |---|---|
 | [`_adding-cron-policy.md`](_adding-cron-policy.md) | RULE khi THÊM/SỬA 1 dòng cron: 4 câu hỏi bắt buộc + chống xung đột tài nguyên + nguyên tắc buffer+verify + ghi lại ở đâu. Enforce bởi `coding_guidelines.md §11`. |
 | [`papertrade_daily_steps.md`](papertrade_daily_steps.md) | Chi tiết 23 step nội bộ của cron `papertrade_daily.sh` (15:30) — không cần đọc khi tra lịch tổng. |
-| [`CHANGELOG.md`](CHANGELOG.md) | Log thay đổi lịch cron (thêm/xoá/đổi giờ, ai, job, audit-trail §11). Provenance, KHÔNG phải narrative sự cố (đó là `kb/INCIDENTS.md`). |
+| [`CHANGELOG.md`](CHANGELOG.md) | Log thay đổi lịch cron (thêm/xoá/đổi giờ, ai, job, audit-trail §11). Provenance, KHÔNG phải narrative sự cố (đó là `kb/incidents/`). |
 
 **Grep vẫn hoạt động:** `grep -rn "<script/giờ>" mike/kb/cron_registry.md mike/kb/cron_registry/`.
 

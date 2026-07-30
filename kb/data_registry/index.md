@@ -11,7 +11,7 @@ migrated_from: kb/data_registry.md (single-file, migrate → OKF 2026-07-28 job 
 
 > Lập theo yêu cầu user 2026-07-11, sau sự cố SIGNAL_V11 đọc nhầm bảng `vnindex_5state`
 > (base, KHÔNG phải DT5G) khiến sổ production `pt_v22_dt5g` vào lệnh theo trạng thái BULL
-> GIẢ (xem `kb/INCIDENTS.md`). Đây là danh sách CHÍNH THỨC mọi nguồn dữ liệu (bảng BQ, file
+> GIẢ (xem `kb/incidents/index.md`). Đây là danh sách CHÍNH THỨC mọi nguồn dữ liệu (bảng BQ, file
 > local, file trạng thái publish) đang được paper-trading/production/nghiên cứu dùng.
 
 > **Last full audit: 2026-07-11** (seed + Taylor codebase sweep + `bin/data_registry_audit.sh` xây

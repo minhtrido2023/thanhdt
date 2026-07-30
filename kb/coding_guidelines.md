@@ -64,7 +64,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 **Any script that can be killed mid-run and re-run must not repeat an external action.**
 
-Root cause (2026-07-02 double-buy, `kb/INCIDENTS.md`): a lock only stops two runs from
+Root cause (2026-07-02 double-buy, `kb/incidents/2026-07/2026-07-02-double-buy-concurrent-bot-execute.md`): a lock only stops two runs from
 overlapping — it does nothing for one run dying mid-write between the external action and
 persisting that fact locally. Fixed in `trading_bot/executor.py` (`_ghost_tickers` + atomic
 `_save_state`); apply the same reasoning to every new script.
@@ -89,7 +89,7 @@ send a message, write a shared file, call an API that isn't naturally idempotent
 ## 6. Verify Report Data Provenance (client-facing numbers)
 
 **A field's name and a plausible-looking value are not verification.** Root cause (2026-07-03
-weekly-report incident, `kb/INCIDENTS.md`): a P&L calc read a snapshot field labeled
+weekly-report incident, `kb/incidents/2026-07/2026-07-03-weekly-report-estimated-cost-basis.md`): a P&L calc read a snapshot field labeled
 `"source": "ref_px_approx"` (an approximate price for an unrelated purpose) and reported it as
 real cost basis, unchecked, into a client-facing document.
 
@@ -276,7 +276,7 @@ sounds closest to what it needs in the moment; naming the specific registry file
 
 ## 10. When a File Becomes Canonical, Archive Its Superseded Variants in the Same Pass
 
-**Why this matters (2026-07-11 fa_ratings incident, `kb/INCIDENTS.md`):** confirming which file is
+**Why this matters (2026-07-11 fa_ratings incident, `kb/incidents/2026-07/2026-07-11-fa-ratings-8l-silent-write-failure.md`):** confirming which file is
 canonical is only half the fix — near-identical variant files left in the repo root under
 slightly different names are exactly the landmine that causes the next agent (or human) doing a
 quick grep to pick the wrong one.
@@ -304,7 +304,7 @@ repo-root files with a name similar to an already-CANONICAL registry entry that 
 
 ## 11. Check `mike/kb/cron_registry.md` Before Adding or Changing a Cron Schedule
 
-**Root cause (2026-07-12 C1 CRITICAL, `kb/INCIDENTS.md`):** a publish script silently read a
+**Root cause (2026-07-12 C1 CRITICAL, `kb/incidents/2026-07/2026-07-12-audit-cron-order-publish-cache-t1.md`):** a publish script silently read a
 process-inherited T-1 cache env var for ~2.5 weeks despite its own comment stating live BQ as the
 source of truth — the code didn't actually enforce the intent the comment stated. Nobody had
 asked "what vintage does this publish step actually read?" before a downstream gate tightened and
@@ -330,7 +330,7 @@ which would break every OTHER script that legitimately wants the cache).
 
 ## 12. Shared Multi-Account Data Files: Filter by `account_no` at Every Read
 
-**Pattern "cross-account contamination" — 3 lần trong 15 ngày** (chi tiết `kb/INCIDENTS.md`). Cùng
+**Pattern "cross-account contamination" — 3 lần trong 15 ngày** (chi tiết `kb/incidents/index.md`). Cùng
 1 root cause mỗi lần: `data/execution_logs/dnse_raw_{date}.jsonl` là file DÙNG CHUNG cho MỌI
 account (phân biệt bằng field `accountNo`/`account_no` bên trong record). Code đọc file theo NGÀY
 rồi tính NAV/fill/P&L mà quên lọc account → số của account này lẫn số của account kia.

@@ -5,7 +5,7 @@ title: Log thay đổi Cron Registry
 note: >
   Đây là changelog BIÊN TẬP của lịch cron (dòng nào thêm/xoá/đổi giờ, ai làm, job nào, 4 câu hỏi
   §11 đã trả lời) — provenance + audit trail §11, KHÔNG phải narrative sự cố. Sự cố live-workflow
-  ghi ở kb/INCIDENTS.md (C1 vintage-mismatch 2026-07-12; send_plan re-dispatch 2026-07-13). Mục cũ
+  ghi ở kb/incidents/ (C1 vintage-mismatch 2026-07-12; send_plan re-dispatch 2026-07-13). Mục cũ
   nhất ở dưới cùng.
 authority_note: >
   CURRENT-STATE của mỗi cron = BẢNG CHÍNH (../cron_registry.md), KHÔNG phải changelog này. Đặc biệt
@@ -16,7 +16,7 @@ authority_note: >
 preserve_verbatim: >
   Cố ý KHÔNG nén-semantic các mục dưới (theo tiền lệ data_registry/CHANGELOG.md + guardrail "đừng
   cắt cảnh báo an toàn nào"): mỗi mục chứa audit-trail §11 (4 câu hỏi/job) + buffer đo thật + gate
-  formula — load-bearing, không phải fluff. Chỉ thêm pointer INCIDENTS.md, giữ nguyên nội dung.
+  formula — load-bearing, không phải fluff. Chỉ thêm pointer kb/incidents/, giữ nguyên nội dung.
 ---
 
 # Log thay đổi Cron Registry
@@ -226,7 +226,7 @@ preserve_verbatim: >
   (CHƯA cài, chờ Mike): `0 16 * * 1-5 /home/trido/thanhdt/WorkingClaude/mike/bin/for_each_live_account.sh /home/trido/thanhdt/WorkingClaude/mike/bin/send_plan_report.sh --second-chance >> /home/trido/thanhdt/WorkingClaude/mike/logs/send_plan_report.log 2>&1   # 23:00 ICT — second-chance gui lai plan T+1 bi sua sau 21:00 (idempotent, su co 2026-07-13)`
 - 2026-07-12: seed v1 từ audit `Winston_20260712_142100` + `Winston_20260712_151206`. Xoá 1 dòng
   crontab dangling comment (`# V2.4 go-live flip`). Fix C1 (publish DT5G đọc live, commit `4995262`,
-  quant-skeptic CONFIRMED — chi tiết sự cố: kb/INCIDENTS.md 2026-07-12 C1). Fix H2 (shares_outstanding_live BLOCK→WARN, commit `6459b6d`). Điều tra
+  quant-skeptic CONFIRMED — chi tiết sự cố: kb/incidents/2026-07/2026-07-12-audit-cron-order-publish-cache-t1.md). Fix H2 (shares_outstanding_live BLOCK→WARN, commit `6459b6d`). Điều tra
   `lag_edge_health.csv` "staleness" → kết luận KHÔNG phải bug (job `Taylor_20260712_155038`, xem
   `kb/current_ops.md`).
 

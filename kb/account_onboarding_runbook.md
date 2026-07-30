@@ -119,4 +119,4 @@ Sau khi user xác nhận, thêm 4 dòng cron (mẫu SpaceX, đổi `--account Sp
 
 **Lược sử:** viết 2026-07-06 sau khi tổng quát hoá automation từ ca ZaloPay (account thứ 2,
 trước đó mọi script hardcode "SpaceX"). Helper: `trading_bot.config.live_dnse_labels()`,
-`bin/for_each_live_account.sh`. Xem `kb/INCIDENTS.md` 2026-07-06 cho bối cảnh đầy đủ.
+`bin/for_each_live_account.sh`. Xem `kb/incidents/2026-07/` (các file `2026-07-06-*`) cho bối cảnh đầy đủ.

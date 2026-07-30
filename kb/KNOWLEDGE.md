@@ -63,7 +63,7 @@
 **Production state:** bảng `tav2_bq.vnindex_5state_dt5g_live`, đọc qua `get_gated_state()`.
 **KHÔNG đọc** `vnindex_5state` — đó là v3.4b BASE (153 transitions), KHÔNG phải DT5G (49 transitions).
 
-**✅ INCIDENT LỚN 2026-07-10 — BULL commit giả do bug stale EW-leg — ĐÃ ĐÓNG 2026-07-13** (đường đi B/zero-touch: Taylor backfill EW-leg thủ công tối CN 07-12 + cron `daily_refresh` 18:30 ICT thứ Hai 07-13 recompute toàn cửa sổ và publish → `dt5g_live` có đủ cả 07-10 lẫn 07-13, `macro_health.json` tươi lại; trong lúc stale `get_gated_state()` fail-closed về DT4-only đúng thiết kế, DT4==DT5G==NEUTRAL nên không lệch hành vi. Chi tiết: `kb/INCIDENTS.md` mục 2026-07-13). *Ghi chép root-cause dưới đây giữ nguyên làm bài học:*
+**✅ INCIDENT LỚN 2026-07-10 — BULL commit giả do bug stale EW-leg — ĐÃ ĐÓNG 2026-07-13** (đường đi B/zero-touch: Taylor backfill EW-leg thủ công tối CN 07-12 + cron `daily_refresh` 18:30 ICT thứ Hai 07-13 recompute toàn cửa sổ và publish → `dt5g_live` có đủ cả 07-10 lẫn 07-13, `macro_health.json` tươi lại; trong lúc stale `get_gated_state()` fail-closed về DT4-only đúng thiết kế, DT4==DT5G==NEUTRAL nên không lệch hành vi. Chi tiết: `kb/incidents/2026-07/2026-07-13-dt5g-refresh-missed-cron-time-change.md`). *Ghi chép root-cause dưới đây giữ nguyên làm bài học:*
 - **Root cause:** repo reorg 2026-06-21 (commit `10ae395`) đổi path reader sang `data/` nhưng writer trong `vnindex_5state_ew_v1.py` (dòng 519) vẫn ghi ra WORKDIR root → `data/vnindex_5state_ew_full.csv` đóng băng ở 06-19 từ 06-22. Base v3.4b mất 30-42% trọng số EW-leg + factor breadth (NaN) đúng lúc concentration cao → mọi cơ chế chống rally hẹp bất hoạt từ TRƯỚC khi episode BULL bắt đầu (06-24).
 - **Phát hiện (Taylor, job `Taylor_20260710_163939`):** candidate BULL (streak 9/10, sắp commit tối 07-10) có breadth/thanh khoản TỆ NHẤT so với cả 8 lần BULL-commit thật lịch sử 2014-2026 (breadth 0.32 vs min lịch sử 0.52; thanh khoản 0.60 vs min 1.06) — dấu hiệu rõ ràng đây là artifact, không phải regime thật.
 - **Fix + verify (job `Taylor_20260710_170527`, commit `498c3a6`):** sửa 1 dòng (ew_v1.py ghi ra `data/`), rerun toàn chain local. Counterfactual KHỚP: base giữ NEUTRAL(3) LIÊN TỤC 06-22→07-10, episode BULL giả 06-24→07-06 biến mất hoàn toàn.
@@ -93,7 +93,7 @@ Mọi agent khác (Taylor, DollarBill, Mafee, Wags, ...) headless/native on-dema
 1. **Circuit breaker** per-agent (`state/circuit/<id>.json`) — 3 lỗi liên tiếp → TRIPPED, cooldown 1800s.
 2. **Idempotency ghost-order guard** (`Executor._ghost_tickers`, `trading_bot/executor.py`) — lớp phòng thủ thứ 2 độc lập với `fcntl.flock`, đóng gap process bị kill ngay sau `place_order()` thành công nhưng trước `_save_state()`. quant-skeptic CONFIRMED. Review vòng 2 (bên thứ 3, cùng ngày) tìm thêm: `_save_state()` không atomic (fix: tmp+`os.replace`), `PaperBroker.poll_orders()` guard no-op (fix: trả `raw` giống broker thật để paper diễn tập được), không có quy trình unpause chính thức (chấp nhận theo thiết kế — thủ công). Đã commit `e1d9b7c` (gộp cả 2 vòng review).
 3. **trace_id** trong bus event, fallback `$JOB_ID`.
-4. `kb/INCIDENTS.md` — nhật ký sự cố đầy đủ, backfill từ đầu.
+4. `kb/incidents/` (index: `kb/incidents/index.md`) — nhật ký sự cố đầy đủ, backfill từ đầu.
 
 **Usage-limit auto-resume (2026-07-03):** `dispatch.sh` phát hiện fail vì hết usage limit 5h tài khoản (không phải task lỗi thật) → ghi `bus/pending_resumes/`, KHÔNG trip circuit breaker. `bin/resume_pending.py` (cron 10') tự dispatch lại "tiếp tục từ working memory". Trần 3 lần lặp (`DISPATCH_MAX_USAGE_RESUMES`) rồi rơi về xử lý fail thật. **Chỉ cứu headless dispatch, KHÔNG cứu phiên tương tác sống của Mike** — khi Mike thấy usage cao giữa task dài, phải chủ động báo trước + đề xuất `CronCreate` one-shot (session-only, mất nếu Mike restart giữa chừng — phải nói rõ giới hạn này mỗi lần).
 
@@ -209,7 +209,7 @@ Mọi agent khác (Taylor, DollarBill, Mafee, Wags, ...) headless/native on-dema
 
 ## 8. Incidents & Lessons Learned
 
-> Bảng tóm tắt — chi tiết đầy đủ + self-check trong `kb/INCIDENTS.md`.
+> Bảng tóm tắt — chi tiết đầy đủ + self-check trong `kb/incidents/` (index: `kb/incidents/index.md`).
 
 | Ngày | Incident | Root Cause | Fix | Bài học |
 |---|---|---|---|---|
@@ -254,7 +254,7 @@ Mọi agent khác (Taylor, DollarBill, Mafee, Wags, ...) headless/native on-dema
 - `data/results_registry.md` — pin mọi backtest result có audit trail (bao gồm DSR/PBO annex).
 - `data/trade_plans/plan_<Account>_YYYY-MM-DD.json` — plan hàng ngày, per account (SpaceX/ZaloPay). Luôn overwrite tên file chính thức khi duyệt lại — không dùng suffix `_v2`.
 - `data/execution_logs/nav_history_<Account>.csv` — nguồn NAV duy nhất mọi báo cáo ngày/tuần/tháng dùng chung.
-- `kb/INCIDENTS.md` — nhật ký sự cố đầy đủ. `kb/ops_runbook.md` — quy trình tự phát hiện/tự sửa vận hành hàng ngày.
+- `kb/incidents/` (index: `kb/incidents/index.md`) — nhật ký sự cố đầy đủ. `kb/ops_runbook.md` — quy trình tự phát hiện/tự sửa vận hành hàng ngày.
 - `kb/paper_programs_registry.json` — 9 chương trình paper-trading chính thức (bao gồm `pt_v22_dt5g` = production signal book, KHÔNG phải paper mirror).
 - `kb/archive/` — raw consolidation blocks cũ (không cần đọc thường xuyên).
 
@@ -272,4 +272,4 @@ Mọi agent khác (Taylor, DollarBill, Mafee, Wags, ...) headless/native on-dema
 ---
 
 ## Nguồn chuẩn tắc đầy đủ
-Chi tiết: kb/KNOWLEDGE.md (§1-9, file này). Events: kb/events_buffer.md. Fleet: kb/fleet_status.md. Incidents: kb/INCIDENTS.md.
+Chi tiết: kb/KNOWLEDGE.md (§1-9, file này). Events: kb/events_buffer.md. Fleet: kb/fleet_status.md. Incidents: kb/incidents/index.md.

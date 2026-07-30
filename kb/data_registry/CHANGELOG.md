@@ -4,7 +4,7 @@ group: _rules
 title: Lịch sử biên tập Data Registry
 note: >
   Đây là changelog BIÊN TẬP của chính registry (nguồn nào thêm/sửa/đánh dấu obsolete, ai làm,
-  job nào) — provenance, KHÔNG phải narrative sự cố. Sự cố live-workflow ghi ở kb/INCIDENTS.md.
+  job nào) — provenance, KHÔNG phải narrative sự cố. Sự cố live-workflow ghi ở kb/incidents/.
   Vì không trùng INCIDENTS nên giữ nguyên (không nén-thành-pointer). Mục cũ nhất ở dưới cùng.
 ---
 

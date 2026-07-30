@@ -100,7 +100,8 @@ chưa ăn → notify "cần người xem", không dispatch lặp vô hạn.
 
 ## Nhật ký & kinh nghiệm
 
-- Mọi sự cố ảnh hưởng workflow sống → `kb/INCIDENTS.md` (blameless, có commit hash).
+- Mọi sự cố ảnh hưởng workflow sống → **1 file mới** trong `kb/incidents/<YYYY-MM>/` (blameless,
+  có commit hash) + 1 dòng trong `kb/incidents/index.md`. KHÔNG append vào `kb/INCIDENTS.md` (STUB).
 - Fix xong PHẢI verify artifact thật (chạy lại checker, đối chiếu số thật) — không tin
   self-report của agent/job status (MIKE.md §Quy chuẩn #2).
 - Số đã gửi cho user mà phát hiện sai → đính chính NGAY trên kênh đã gửi, không âm thầm sửa.
