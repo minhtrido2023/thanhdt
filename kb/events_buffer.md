@@ -832,3 +832,6 @@
 - [2026-07-30T13:01:06Z] Taylor/heartbeat — Taylor_20260730_125303: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260730_125303", "source": "watcher"}
 - [2026-07-30T12:36:58Z] Wags/status — fleet-housekeeping chạy thật: {"deleted_items": 1409, "deleted_bytes": 896847, "archived_items": 720, "archived_bytes": 546808, "only": "default", "log": "/home/trido/thanhdt/WorkingClaude/mike/logs/fleet_housekeeping.log"}
 - [2026-07-30T13:01:07Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 53039}
+
+## Consolidation 2026-07-30T14:07:02Z
+- [2026-07-30T13:45:49Z] Taylor/status — fa_ratings-refresh-ok: {"rows": 12552}
