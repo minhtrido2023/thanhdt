@@ -15,7 +15,9 @@
 
 # Current Operations — Mike fleet
 > Mike cập nhật thủ công khi có thay đổi trạng thái quan trọng. Đọc trước mọi thứ khác khi restart.
-> Cập nhật lần cuối: 2026-07-28 (token-cost trim: Trứng vàng staleness fix, workflow/CAPIT/universe_pit/R&D compression, ~9KB saved)
+> Cập nhật lần cuối: 2026-07-30 (token-cost trim #2: gộp 3 mục ticker_prune rải rác, sửa stale
+> due-diligence-mandate/G6-repin, nén sự cố-đã-đóng + Trứng vàng theo đúng kỷ luật đã có, gắn cờ
+> 2 checkpoint R&D quá hạn chưa xác nhận thay vì giả định — KHÔNG tự đoán trạng thái)
 
 ## Domain-constraint layer — P1 LIVE, P0 shadow đang chạy (2026-07-29, commit `d64717f`)
 Theo sau talk "Why Agentic Systems Need Ontologies" — thiết kế đầy đủ + kiểm kê 12 guardrail cơ
@@ -47,22 +49,29 @@ lãnh đạo DN niêm yết 7-14 ngày qua, áp bộ lọc QUALIFY/NON/AMBIGUOUS
 Đây là recon, KHÔNG tự mua — mọi case đáng chú ý vẫn cần due-diligence sâu + user duyệt riêng
 như TV1/DGC.
 
-## Dự án thay thế `ticker_prune` → `universe_pit` — G0-G3 XONG, R3 đã cutover chính thức (2026-07-22)
-`ticker_prune` không có quản trị (curation circular-bias, không tái lập được) → team tự xây
+## Dự án thay thế `ticker_prune` → `universe_pit` (gộp 3 mục rải rác 2026-07-30, xem lịch sử ở `kb/INCIDENTS.md`/git log nếu cần)
+`ticker_prune` không có quản trị (curation circular-bias, không tái lập được, và **07-29 bị
+bq_admin TRUNCATE+rebuild mất 58 mã khỏi toàn lịch sử** — 513→455 mã, -17%, đúng cơ chế "mã vào
+bằng daily-append bị xoá ở lần rebuild toàn bộ kế tiếp" — user chốt 07-29 KHÔNG khôi phục từ
+backup, giữ `ticker_prune_ttbackup_fresh_20260713` chỉ làm mỏ neo nghiên cứu) → team tự xây
 `universe_pit` (point-in-time từ `tav2_bq.ticker`, B3=1,0 tỷ VND/ngày). **Cổng cứng §3.2b/Q9 ĐÃ
-MỞ từ 2026-07-22** (user chốt A′+Q-C, không Q-B, sau khi G2b đo xong độ rò chất lượng) — P1-P3 đã
-cutover production (due_diligence.py, custom30V→`universe_pit_q` commit `ce7d457`, golive_recommend_v23
-commit `0bfbdfe`, cả 2 user duyệt + selfcheck pass). **Cổng CAPIT §4.4 = NỬA XONG (G4)**: breadth ĐÃ
-cutover sang `universe_pit` (`CAPIT_BREADTH_SOURCE=pit`, top-250, washout_gate 0,31, commit `dcee252`,
-selfcheck 26/26, quant-skeptic CONFIRMED, A/B live 0 đồng); **pool pbz + ADV cap CỐ Ý còn ghim
-`ticker_prune`** (pool `pit` đổi rổ đang giải ngân — tách khỏi migration, 2 vòng đo đều thất bại cấu
-trúc tìm ngưỡng bảo toàn cho pool) — cấm cutover pool khi `capit_fired=true`. R3 (allocator gate) đã
-cutover chính thức — xem số liệu ở "Tri thức chung của đội" bên dưới. Còn lại: G5 shadow ≥10 phiên,
-G6 re-pin R3, G7 N-trial review, G8 data/cron-registry gate, G9 quant-skeptic full review. Tài liệu
-đầy đủ (kiến trúc/vận
-hành/Q&A gốc, bảng G0-G9): `mike/agents/Taylor/research/ticker_prune_replacement_plan.md` +
+MỞ từ 2026-07-22** (user chốt A′+Q-C, không Q-B) — P1-P3 cutover production (custom30V→
+`universe_pit_q` commit `ce7d457`, golive_recommend_v23 commit `0bfbdfe`). **CAPIT §4.4 = NỬA XONG
+(G4)**: breadth cutover `universe_pit` (`CAPIT_BREADTH_SOURCE=pit`, top-250, washout_gate 0,31,
+commit `dcee252`); **pool pbz + ADV cap CỐ Ý còn ghim `ticker_prune`** (đổi rổ đang giải ngân, 2
+vòng đo thất bại tìm ngưỡng bảo toàn) — cấm cutover pool khi `capit_fired=true`. **G6 re-pin R3
+XONG 2026-07-22** (`results_registry.md:4040`); số bị **re-pin LẠI 07-29 do đổi vintage restate
+DT5G, không đổi mô hình** (số liệu ở "Tri thức chung của đội" bên dưới). Còn lại thật: G5 shadow
+≥10 phiên, G7 N-trial review, G8 data/cron-registry gate, G9 quant-skeptic full review — cộng 3
+việc mới phát sinh từ audit 07-29 (Winston_20260729_132257): (1) migrate breadth-decoupling guard
+`macro_state_live.py:158` sang `universe_pit` (đang chạy, cần self-check+quant-skeptic trước khi
+wire — input DT5G production); (2) pin/snapshot BQ hàng tháng cho bảng dễ restate (`ticker`/
+`ticker_financial`/`ticker_prune`/`universe_pit`/VNINDEX_PE, dispatch Winston đang chạy); (3)
+WASHOUT_GATE đã tự verify KHÔNG cần rà lại (0,31 hiệu chuẩn đúng trên `universe_pit`, không phải
+bug). Tài liệu đầy đủ:
+`mike/agents/Taylor/research/ticker_prune_replacement_plan.md` +
 `mike/agents/Winston/universe_pit_ops_feasibility_20260722.md` +
-`.../ticker_prune_universe_QA_bq_admin_20260722.md`.
+`mike/agents/Winston/research/ticker_prune_hidden_risk_audit_20260729.md`.
 
 ## CAPIT (bear-washout) — ĐÃ FIRE từ 07-20/07-21, đang giải ngân dở (cập nhật 2026-07-22)
 `capit_fired=true` từ 07-20 (`data/golive_v23_status.json`, breadth_oversold vượt xa
@@ -84,24 +93,20 @@ alert mới trước cổng xác nhận thật tháng 10, cần theo dõi không
 backtest được (n=1) — coi là bảo hiểm chi phí chưa đo được, không phải alpha đã kiểm chứng; loại
 1 mã thanh khoản khỏi rổ có thể làm nặng thêm vấn đề sizing của mã còn lại trong rổ — theo dõi ADV
 cap thật (`capit_adv_caps`) khi fire.
-> ⚠️ File này inject vào MỌI phiên/dispatch — giữ NHỎ. Chỉ để mục LIVE/đang-mở. Dự án ĐÓNG (NO-GO/
-> KHÉP KÍN/XONG) → chuyển thành 1 file `kb/projects/<slug>.md` + thêm 1 dòng vào `kb/projects/INDEX.md`
-> (INDEX được inject, chi tiết chỉ `cat` khi cần). Đừng để nhật ký dự án đã đóng tích lại ở đây.
-> ⚠️ Sự cố ĐÃ GIẢI QUYẾT (fix xong + verify) → rút về **1-2 câu + pointer `kb/INCIDENTS.md`**
-> ngay khi đóng, KHÔNG giữ nguyên play-by-play ở đây "cho chắc" (bài học sự cố model-drift/
-> context-bloat 2026-07-17 — file này phình 0→36KB trong 3 tuần chủ yếu vì narrative sự cố đã
-> đóng không được rút gọn, đè phí token lên MỌI dispatch qua `context_pack.md`).
+> ⚠️ File này inject vào MỌI phiên/dispatch qua `context_pack.md` (ngưỡng cứng 20KB, kiểm tra
+> SAME-DAY qua `kb_nightly.sh` — xem §Cron) — giữ NHỎ, chỉ mục LIVE/đang-mở. Dự án ĐÓNG → 1 file
+> `kb/projects/<slug>.md` + 1 dòng `kb/projects/INDEX.md`. Sự cố ĐÃ GIẢI QUYẾT → **1-2 câu + pointer
+> `kb/INCIDENTS.md`** ngay khi đóng, không giữ play-by-play (bài học phình 0→36KB trong 3 tuần,
+> 2026-07-17).
 
-## Due-diligence MẶC ĐỊNH cho MỌI ứng cử viên mua — mandate mới (user, 2026-07-21)
-User chỉ đạo: bất kỳ mã nào trở thành ứng cử viên mua (mọi book: BAL/LAG/CAPIT/DC-book/
-custom30V rotation) phải qua bước due-diligence — không chỉ để bảo vệ giao dịch đó, mà còn
-để LỘ RA điểm hệ thống cần cải thiện (như lỗ hổng %ADV cho LAG vừa phát hiện ở trên). **Mặc
-định trong quy trình cho CẢ production lẫn paper-trading**, không phải opt-in/chỉ khi có cờ
-đặc biệt. Đây là mở rộng của due-diligence trigger hiện có (forensic_flags, >7% NAV,
-first-time-buy, DCF=RICH+robust override, anomaly Tier-H — vẫn giữ nguyên làm HARD gate) sang
-diện rộng hơn: MỌI candidate, không chỉ các case có cờ. Đã dispatch Taylor thiết kế + triển
-khai (xem bus finding sau 2026-07-21 13:xx) — theo dõi kết quả trước khi coi mandate này đã
-xong.
+## Due-diligence MẶC ĐỊNH cho MỌI ứng cử viên mua — ĐÃ TRIỂN KHAI (mandate 2026-07-21, XONG cùng ngày)
+`trading_bot/due_diligence.py` — thuần thông tin (không chặn/đổi sizing), 5 trục (thanh khoản/
+valuation/PEAD-surprise cơ học/anomaly/FA thô), wire ở 4 choke-point: `golive_recommend_v23.py`
+(mọi rec), `send_plan_report.sh` (mọi lệnh buy plan T+1), `eod_trading_report.sh`,
+`dc_book_waterfall_paper.py`. Self-check 18/18 PASS + reproduce đúng 3 case tay (TMG/IVS/TRC).
+KHÔNG wire `paper_main_probe_plan.py` (basket hardcode 6 mã, không có bước chọn mã). Ghi chú:
+trần %ADV LAG = gate CỨNG live riêng (`cap_lag_orders`, `bot_execute.py:387`, fail-closed, từ
+2026-07-22) — KHÁC với P1 domain-constraint layer phía trên (đó là gate rating≤3).
 
 ## Vận hành/kiến trúc daemon — trạng thái ổn định (không đổi gần đây)
 Remote-control daemon `mike@Mike.service` tắt hẳn từ 07-07 (user chỉ dùng Discord qua
@@ -154,15 +159,10 @@ không thể đảo ngược: bot tự đặt lệnh thật lần đầu, không
   chưa tính đúng P&L cho vị thế legacy (NAV/active_nav đã đúng, chỉ breakdown P&L báo cáo còn thiếu).
 - **AlphaLens Paper**: FPT/ACB/MBB/HDB, tracking vs VNINDEX đến 2026-09-30. DollarBill phụ trách.
 
-### Trứng vàng DNSE (idle-cash off-book) — ĐÃ ĐÓNG HẲN, cả 2 account (cập nhật 2026-07-23)
-SpaceX + ZaloPay đều `manual_offbook_assets_vnd=0` — rút hết vĩnh viễn, KHÔNG phải "tạm hết".
-KHÔNG giả định/đề xuất "user rút thêm Trứng vàng" để bù cash gap khi lập plan — nguồn này không
-còn tồn tại, không phải ATM nạp lại theo nhu cầu. Thiếu cash → tự SHRINK/loại bớt lệnh, không
-yêu cầu user nạp thêm. Cơ chế field (`manual_offbook_assets_vnd/_asof/_note` trong
-`secrets/trading_bot_accounts.json`, wire vào `daily_nav_snapshot.py`/`compute_active_nav.py`)
-vẫn còn đó cho account tương lai có off-book asset tương tự — nếu 1 account MỚI thật sự dùng
-Trứng vàng, cập nhật lại field NGAY khi nạp/rút (nếu quên → NAV/active_nav đếm trùng, không rủi
-ro tiền thật vì executor check cash/ppse live). Chi tiết đầy đủ: [[project-dnse-trung-vang-offbook-assets]] (memory Mike) + `kb/context_planning_mini.md`.
+### Trứng vàng DNSE (idle-cash off-book) — ĐÃ ĐÓNG HẲN cả 2 account (2026-07-23)
+`manual_offbook_assets_vnd=0` vĩnh viễn cả 2 account — KHÔNG đề xuất "rút thêm Trứng vàng" bù cash
+gap khi lập plan; thiếu cash → tự SHRINK lệnh. Cơ chế field vẫn giữ cho account tương lai có
+off-book asset tương tự. Chi tiết: [[project-dnse-trung-vang-offbook-assets]] (memory Mike).
 
 ## Đang R&D (mọi mục PAPER-ONLY trừ khi ghi rõ LIVE — chi tiết đầy đủ: bus finding của Taylor + `kb/INCIDENTS.md`)
 - **Insider-sell WATCH shadow (`insider_flags.py`)** (WATCH-only, chưa wire due-diligence, từ
@@ -179,17 +179,26 @@ ro tiền thật vì executor check cash/ppse live). Chi tiết đầy đủ: [[
   exclude ở bất kỳ giai đoạn nào** — 85% mã bị cờ không sập (§3.5 research file), chỉ là dòng bằng
   chứng WATCH cho người duyệt plan cân nhắc. Research đầy đủ:
   `mike/agents/Taylor/research/insider_transaction_scoping_20260729.md`.
-- **EXTREME-regime gate** (paper `main` only, từ 07-01): stress PASS 24/24. Target kết thúc
-  ~2026-07-28 (~20 phiên). Trước LIVE cần: 0 false-trigger ~4 tuần, không đụng NORMAL-path,
-  user sign-off. KHÔNG bật ở live.
+- **EXTREME-regime gate** (paper `main` only, từ 07-01): stress PASS 24/24, target checkpoint
+  ~2026-07-28 **ĐÃ QUA, CHƯA XÁC NHẬN trạng thái** (không tìm thấy sign-off/close nào — cần dispatch
+  Taylor kiểm tra lại, không tự đoán). Điều kiện LIVE (chưa đổi): 0 false-trigger ~4 tuần benign +
+  không can thiệp NORMAL-path + user sign-off. ⚠️ audit `Winston_20260712_142100` (M5, xem
+  `kb/INCIDENTS.md`) từng nêu `executor.py` đọc `ticker_prune.parquet` monolith đông cứng từ 06-26
+  khiến rvol/prior_close trial này tính trên giá cũ 2+ tuần — bug monolith đã **FIXED 07-13**
+  (Winston_20260713_143546), câu hỏi mở CHỈ còn là evidence giai đoạn 06-26→07-13 có giá trị
+  không, cần Taylor xác nhận cùng lúc. KHÔNG bật ở live cho tới khi có xác nhận.
 - **Vol-scale buy chase-cap patch#3** (paper `main` only, từ 07-01, k=2.0/ceil=0.04): stress PASS
-  15/15. Target kết thúc ~2026-07-14. Trước LIVE cần: paper sạch, không đụng NORMAL-path ngày
-  non-gap, skeptic rerun REAL-fill, user sign-off. KHÔNG bật ở live.
+  15/15, target checkpoint ~2026-07-14 **ĐÃ QUA HƠN 2 TUẦN, CHƯA XÁC NHẬN**. Điều kiện LIVE (chưa
+  đổi): paper sạch, không đụng NORMAL-path ngày non-gap, skeptic rerun REAL-fill, user sign-off.
+  Cùng câu hỏi M5 (evidence 06-26→07-13) áp dụng. KHÔNG bật ở live cho tới khi có xác nhận.
 - **Sector sweep #10+**: chờ Mike dispatch.
 - **Fill-timing khung giờ** (BUY 11:15 / SELL open): edge thật đo được (+17.6bps BUY t=12.0,
-  +11.8bps SELL) nhưng KHÔNG flip `fill_timing_live_gate` — cần ~3-4 tuần paper fill để
-  `execution_quality_review.py` xác nhận NET-of-noise (noise 110-220bps >> edge 17bps). Checkpoint
-  tự nhiên ~cuối tháng 7.
+  +11.8bps SELL), KHÔNG flip `fill_timing_live_gate` — cần ≥5 phiên paper có BUY fill trong cửa sổ
+  + 0 reject + không lệnh treo → quant-skeptic → user sign-off (điều kiện chốt sau audit fill thật
+  `Taylor_20260709_101602`, phát hiện `execution_quality_review.py` từng đếm nhầm lệnh LIVE làm
+  "98% adherence" giả — evidence-rate thật ≈0 khi đó). Checkpoint tự nhiên ~cuối 07 **ĐÃ TỚI, CHƯA
+  XÁC NHẬN đủ điều kiện chưa** — cần Taylor kiểm tra số phiên đã đạt. Option: pilot ZaloPay trước
+  SpaceX — chưa quyết.
 - **V2.5**: R&D-complete, DISABLED. Reminder 2026-07-07: Mike hỏi user go-ahead integration.
 - **DC-book (ConvergePort) NEUTRAL idle-cash waterfall** (paper `main` only, từ 07-06): thứ tự ưu
   tiên giải ngân **BAL/LAG (full trước) → DC book (double-confirm sector-lens BUY ∧ 8L rating≤2,
@@ -252,8 +261,8 @@ của toàn hệ thống).
 | Giờ | Lịch | Việc |
 |---|---|---|
 | 23:45 | T2-T6 | sync_bq_cache_daily.sh |
-| 02:00 | Daily | kb_nightly.sh — archive events, trim memory |
-| 02:00 | Thứ 6 | kb_nightly.sh → dispatch Mike editorial KB review |
+| 02:00 | Daily | kb_nightly.sh — archive events, trim memory, **check context_pack.md/MIKE.md ngưỡng cứng MỖI đêm** (thêm 2026-07-30 — trước chỉ check Thứ Sáu; breach ngày thường → escalate question + Telegram cùng đêm, KHÔNG chờ tuần) |
+| 02:00 | Thứ 6 | kb_nightly.sh → dispatch Mike editorial KB review (đầy đủ) |
 | 00:00 | Daily | backup.sh → GitHub |
 
 ## Kill-switches
@@ -261,46 +270,11 @@ của toàn hệ thống).
 - `state/NOTIFY_OFF`: tắt Telegram push tạm thời
 - V2.5: `trading_rules.json v1.7` → v25_leverage STATUS=DISABLED
 
-## Sự cố đã đóng, chỉ còn 2 mục thật sự CÒN TREO (rút gọn 2026-07-17, chi tiết đầy đủ `kb/INCIDENTS.md`)
-Audit cron 07-12 (C1 DT5G-cache-bug + H2 freshness-false-block) — cả 2 **FIXED+VERIFIED**
-(commit `4995262`, `6459b6d`, quant-skeptic CONFIRMED). BQ cache monolith 07-13 (27 file đọc
-nhầm `ticker_prune.parquet` chết) — **FIXED** (Winston_20260713_143546, archived). 2026-07-14
-HOLD — 1 ngày đã qua, không còn ảnh hưởng vận hành (DollarBill tự tính lại plan mỗi ngày).
-Cross-account contamination trong `reconcile_equity.py`/`verify_account_snapshot.py` (phát
-hiện 2026-07-19 khi Taylor soạn báo cáo tuần 07-13→07-17, job `Taylor_20260719_055139`) —
-**FIXED** cả 2 file (mirror đúng fix `daily_nav_snapshot.py` 07-06/07: filter theo account_no
-tự tra config, raise nếu không lọc được thay vì âm thầm dùng nhầm account); thiếu 1 dòng NAV
-ZaloPay 07-14 (no-plan day, không có journal) — backfill bằng vị thế THẬT từ `dnse_raw`
-`kind=positions` + giá đóng cửa BQ 07-14 (963.451.542đ), verify khớp broker positions record.
-
-**Còn treo thật** (1 mục):
-1. Dọn crontab paper-trading lạc hậu — diff đã có (`Winston_20260712_151206`), **chưa áp dụng**
-   (chờ Mike review). Ưu tiên thấp, không khẩn.
-
-`ticker_financial`/`ticker_prune` corruption 07-14/15 — **ĐÓNG 2026-07-29, user chốt KHÔNG khôi
-phục từ backup.** Lý do (audit `Winston_20260729_132257`,
-`mike/agents/Winston/research/ticker_prune_hidden_risk_audit_20260729.md`): `ticker_prune` vừa bị
-bq_admin TRUNCATE+rebuild lại (07-29 07:27, `--mode prune`) — 58 mã biến mất khỏi TOÀN BỘ lịch sử
-(513→455 mã, membership 265→220/ngày, **-17%**), đúng cơ chế "mọi mã vào bằng daily-append bị xoá
-ở lần rebuild toàn bộ tiếp theo" mà QA doc bq_admin đã cảnh báo trước — khôi phục từ backup
-`ticker_prune_ttbackup_fresh_20260713` sẽ chỉ bị xoá lại ở lần rebuild kế. Giữ snapshot đó làm mỏ
-neo nghiên cứu, không restore vào bảng live.
-
-## ticker_prune — 3 việc theo sau audit 07-29 (Winston_20260729_132257 + Taylor_20260729_132056)
-User đã quyết cả 3, đang triển khai (2026-07-29 13:5x):
-1. **WASHOUT_GATE**: đã verify trực tiếp code — **KHÔNG cần rà lại**. `CAPIT_BREADTH_SOURCE="pit"`
-   ⇒ `WASHOUT_GATE=0.31` (không phải 0.30) đã hiệu chuẩn trên `universe_pit`, KHÔNG đọc
-   `ticker_prune` — nhánh Winston nêu (dòng 215/354, `CAPIT_POOL_SOURCE="prune"` — pool
-   golden-floor + ADV cap) là 1 cơ chế KHÁC, nhỏ hơn, vẫn cố ý ghim `ticker_prune` per
-   §4.4 CAPIT migration (pool đổi rổ đang giải ngân, 2 vòng đo trước đều fail tìm ngưỡng bảo
-   toàn) — không phải washout gate.
-2. **Migrate breadth-decoupling guard** (`macro_state_live.py:158`, đọc `ticker_prune` không
-   điều kiện `time` — look-ahead + điểm mù registry) sang `universe_pit` — dispatch Taylor, đang
-   chạy (đổi input DT5G production, cần self-check + quant-skeptic trước khi wire).
-3. **Pin/snapshot BQ hàng tháng** cho các bảng dễ bị restate âm thầm (`ticker`, `ticker_financial`,
-   `ticker_prune`, `universe_pit`, VNINDEX_PE) — dispatch Winston, đang chạy. Mục đích: phát hiện
-   bất thường dữ liệu sớm + backtest/kết quả pinned tái lập được (Taylor 07-29 nêu: corp-action
-   restate ~2-3%/tuần, BQ time-travel xoá mỗi sáng ⇒ vintage hiện tại không lặp lại được).
+## Sự cố đã đóng (cập nhật 2026-07-30) — rút gọn, chi tiết đầy đủ `kb/INCIDENTS.md`
+Audit cron C1/H2 (2026-07-12), BQ cache monolith (2026-07-13), cross-account contamination
+`reconcile_equity.py`/`verify_account_snapshot.py` (2026-07-19) — tất cả FIXED+VERIFIED. **Còn
+treo thật** (1 mục, ưu tiên thấp): dọn crontab paper-trading lạc hậu — diff có sẵn
+(`Winston_20260712_151206`), chưa áp dụng.
 
 ## Tri thức chung của đội (canonical — Mike biên tập; MỌI agent phải nắm)
 > Cập nhật 2026-07-01. Chi tiết: `kb/KNOWLEDGE.md`. Số liệu gốc: `data/results_registry.md`.
@@ -314,26 +288,15 @@ Vận hành chiến lược **production V2.4**, **go-live 2026-07-01**, tài kh
 - 2 book: **BAL** (momentum SIGNAL_V11, yieldcombo: 1/PE + 1/PCF) + **LAG** (PEAD/earnings drift).
 - Allocator w_LAG: {CRISIS 50 / BEAR 0 / NEUTRAL-BULL-EXBULL 65}, band ±10pp.
 - **R3 NEUTRAL-only @50B: CAGR 27.60% / Sharpe 1.84 / DD −17.5% / Calmar 1.58** — pin CHÍNH THỨC từ
-  **2026-07-29** (Final NAV 1.041,95B), đo trên **`universe_pit`** (bảng đội tự sở hữu, point-in-time,
-  không look-ahead; `UNIVERSE_SRC` default = `pit` trong `pt_v23_audit_2014.py`). threads=1,
-  self-check 0 VND, cache `verified:true` 14/14 bảng. quant-skeptic **CONFIRMED (high)** — reviewer
-  tái lập độc lập cả 3 chân từ CSV + phân bố state từ snapshot.
-  **Re-pin do VINTAGE DỮ LIỆU, KHÔNG đổi mô hình** (lệnh pin nguyên văn): restate
-  `vnindex_5state_dt5g_live` (101/3.134 phiên đổi tier) + trôi corp-action 7 ngày +
-  `ticker_prune` TRUNCATE+rebuild mất 58 mã. Phân rã: 27,16 →(+0,47 trôi 6 ngày)→ 27,63
-  →(+0,36 **restate thuần**, chân cô lập sạch)→ 27,99 →(−0,39 **gộp** trôi 1 ngày + co rổ prune,
-  KHÔNG tách được)→ **27,60**. ⚠️ Tổng +0,44pp là tổng 3 hiệu ứng lớn hơn nó và ngược dấu — đừng
-  đọc thành "gần như không đổi". **AS-OF vintage**: snapshot đóng cứng
-  `data/bq_cache_asof20260729_postrestate/`, `verified_at 2026-07-29T19:27:45Z` — **chỉ tái lập
-  được TỪ SNAPSHOT** (BQ time-travel tắt, `ticker`/`ticker_prune` rebuild mỗi ngày).
-  **Số lịch sử (KHÔNG dùng để trích dẫn mới, KHÔNG so trực tiếp — khác vintage)**:
-  27.16%/1.81/−18.1%/1.50 (pin 07-22, vintage **đã mất, không tái lập được**);
-  27.84%/1.84/−18.2%/1.53 (pin 07-12, `ticker_prune`).
-  ⚠️ Nhãn đúng khi trích dẫn: **MIXED-universe** — `universe_pit` cho *cổng quyết định*,
-  `ticker_prune` vẫn cho *CAPIT pool / maturity* (breadth đã cutover sang `universe_pit` 07-29,
-  commit `8f95895`, 0 phiên đổi state). Lỗi fidelity `liq<=0` vẫn MỞ ⇒ khoảng kỳ vọng trung thực
-  **[~27,6%; ~31,3%]**, anchor DD **~−30%** (KHÔNG phải −17,5%). Chi tiết:
-  `data/results_registry.md` (mục **2026-07-29 RE-PIN R3 SAU RESTATE DT5G**).
+  **2026-07-29**, đo trên **`universe_pit`** (point-in-time, không look-ahead). quant-skeptic
+  **CONFIRMED (high)**. Re-pin do **VINTAGE DỮ LIỆU, KHÔNG đổi mô hình** (restate DT5G + trôi
+  corp-action + `ticker_prune` mất 58 mã) — phân rã đủ 3 hiệu ứng + AS-OF snapshot pin ở
+  `data/results_registry.md` (mục **2026-07-29 RE-PIN R3 SAU RESTATE DT5G**), KHÔNG lặp lại ở đây.
+  **Số lịch sử KHÁC VINTAGE, không so trực tiếp**: 27.16%/1.81/−18.1%/1.50 (pin 07-22, đã mất, không
+  tái lập được); 27.84%/1.84/−18.2%/1.53 (pin 07-12, `ticker_prune`).
+  ⚠️ **MIXED-universe khi trích dẫn**: `universe_pit` cho cổng quyết định, `ticker_prune` vẫn cho
+  CAPIT pool/maturity. Lỗi fidelity `liq<=0` vẫn MỞ ⇒ khoảng kỳ vọng trung thực **[~27,6%; ~31,3%]**,
+  **anchor DD ~−30%** (KHÔNG phải −17,5%).
 - Bootstrap 5th-pct: CAGR 18.6%, DD −28.6% (anchor DD ~−29%, KHÔNG phải −18%).
 - **NEUTRAL parking custom30V = phần tin cậy nhất: +7.4pp Full.** (30 mã, cap 0.10)
 - Bull parking: NAV ≥150B. **(30, 0.15) = OVERFIT**, walk-forward bác.
@@ -344,13 +307,10 @@ custom30V permanent-exclude 7 tên (−1.0pp); LAG SUE-tilt 3 tầng (−0.66pp)
 stability floor ROE_Min<0 (−0.45pp); liq-tilt custom30 (REFUTED); deep-discount sleeve (PARKED);
 pbcombo dual-vehicle (Calmar 1.48→1.37); gq_score growth gate (−IC); composite v3 as entry-selector (NO).
 
-### MOM_N/MOM_S ĐÃ ĐÓNG (2026-07-12) — không phải "thử bị loại", là thay đổi production chính thức
-Sau chuỗi R&D đầy đủ (momdeal Phase 1 CP1 NO-GO 0/13 feature → nhánh DVR-8L-sizing CP-DVR1 NO-GO →
-đo tác động Scope A/B → kiểm tra tách MOM_N-vs-MOM_S, tất cả quant-skeptic CONFIRMED), user duyệt
-đóng `MOMENTUM_N`+`MOMENTUM_S` khỏi `TIER_BAL` (giữ nguyên `MOMENTUM`/`MEGA` generic — Scope B đóng
-cả họ bị số đo bác, generic vẫn đóng góp thật). Lý do: thành công lịch sử của 2 tier này chủ yếu do
-dồn mẫu regime 2020-21, không phải pattern lặp lại được; hậu-2021 gần như hoà vốn. Chi tiết đầy đủ:
-`plan_close_mom_20260712.md`, `plan_dvr_8l_sizing_20260712.md`, `plan_momentum_deals_20260711.md`.
+### MOM_N/MOM_S ĐÃ ĐÓNG (2026-07-12) — thay đổi production chính thức, không phải "thử bị loại"
+`MOMENTUM_N`+`MOMENTUM_S` đóng khỏi `TIER_BAL` (giữ `MOMENTUM`/`MEGA` generic — vẫn đóng góp thật):
+thành công lịch sử 2 tier này chủ yếu do dồn mẫu regime 2020-21, hậu-2021 gần hoà vốn, quant-skeptic
+CONFIRMED cả chuỗi R&D. Chi tiết: `plan_close_mom_20260712.md`.
 
 ### DT5G — market regime gate
 - Production: `tav2_bq.vnindex_5state_dt5g_live` qua `get_gated_state()`.

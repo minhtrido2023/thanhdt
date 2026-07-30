@@ -10,26 +10,15 @@ Vận hành chiến lược **production V2.4**, **go-live 2026-07-01**, tài kh
 - 2 book: **BAL** (momentum SIGNAL_V11, yieldcombo: 1/PE + 1/PCF) + **LAG** (PEAD/earnings drift).
 - Allocator w_LAG: {CRISIS 50 / BEAR 0 / NEUTRAL-BULL-EXBULL 65}, band ±10pp.
 - **R3 NEUTRAL-only @50B: CAGR 27.60% / Sharpe 1.84 / DD −17.5% / Calmar 1.58** — pin CHÍNH THỨC từ
-  **2026-07-29** (Final NAV 1.041,95B), đo trên **`universe_pit`** (bảng đội tự sở hữu, point-in-time,
-  không look-ahead; `UNIVERSE_SRC` default = `pit` trong `pt_v23_audit_2014.py`). threads=1,
-  self-check 0 VND, cache `verified:true` 14/14 bảng. quant-skeptic **CONFIRMED (high)** — reviewer
-  tái lập độc lập cả 3 chân từ CSV + phân bố state từ snapshot.
-  **Re-pin do VINTAGE DỮ LIỆU, KHÔNG đổi mô hình** (lệnh pin nguyên văn): restate
-  `vnindex_5state_dt5g_live` (101/3.134 phiên đổi tier) + trôi corp-action 7 ngày +
-  `ticker_prune` TRUNCATE+rebuild mất 58 mã. Phân rã: 27,16 →(+0,47 trôi 6 ngày)→ 27,63
-  →(+0,36 **restate thuần**, chân cô lập sạch)→ 27,99 →(−0,39 **gộp** trôi 1 ngày + co rổ prune,
-  KHÔNG tách được)→ **27,60**. ⚠️ Tổng +0,44pp là tổng 3 hiệu ứng lớn hơn nó và ngược dấu — đừng
-  đọc thành "gần như không đổi". **AS-OF vintage**: snapshot đóng cứng
-  `data/bq_cache_asof20260729_postrestate/`, `verified_at 2026-07-29T19:27:45Z` — **chỉ tái lập
-  được TỪ SNAPSHOT** (BQ time-travel tắt, `ticker`/`ticker_prune` rebuild mỗi ngày).
-  **Số lịch sử (KHÔNG dùng để trích dẫn mới, KHÔNG so trực tiếp — khác vintage)**:
-  27.16%/1.81/−18.1%/1.50 (pin 07-22, vintage **đã mất, không tái lập được**);
-  27.84%/1.84/−18.2%/1.53 (pin 07-12, `ticker_prune`).
-  ⚠️ Nhãn đúng khi trích dẫn: **MIXED-universe** — `universe_pit` cho *cổng quyết định*,
-  `ticker_prune` vẫn cho *CAPIT pool / maturity* (breadth đã cutover sang `universe_pit` 07-29,
-  commit `8f95895`, 0 phiên đổi state). Lỗi fidelity `liq<=0` vẫn MỞ ⇒ khoảng kỳ vọng trung thực
-  **[~27,6%; ~31,3%]**, anchor DD **~−30%** (KHÔNG phải −17,5%). Chi tiết:
-  `data/results_registry.md` (mục **2026-07-29 RE-PIN R3 SAU RESTATE DT5G**).
+  **2026-07-29**, đo trên **`universe_pit`** (point-in-time, không look-ahead). quant-skeptic
+  **CONFIRMED (high)**. Re-pin do **VINTAGE DỮ LIỆU, KHÔNG đổi mô hình** (restate DT5G + trôi
+  corp-action + `ticker_prune` mất 58 mã) — phân rã đủ 3 hiệu ứng + AS-OF snapshot pin ở
+  `data/results_registry.md` (mục **2026-07-29 RE-PIN R3 SAU RESTATE DT5G**), KHÔNG lặp lại ở đây.
+  **Số lịch sử KHÁC VINTAGE, không so trực tiếp**: 27.16%/1.81/−18.1%/1.50 (pin 07-22, đã mất, không
+  tái lập được); 27.84%/1.84/−18.2%/1.53 (pin 07-12, `ticker_prune`).
+  ⚠️ **MIXED-universe khi trích dẫn**: `universe_pit` cho cổng quyết định, `ticker_prune` vẫn cho
+  CAPIT pool/maturity. Lỗi fidelity `liq<=0` vẫn MỞ ⇒ khoảng kỳ vọng trung thực **[~27,6%; ~31,3%]**,
+  **anchor DD ~−30%** (KHÔNG phải −17,5%).
 - Bootstrap 5th-pct: CAGR 18.6%, DD −28.6% (anchor DD ~−29%, KHÔNG phải −18%).
 - **NEUTRAL parking custom30V = phần tin cậy nhất: +7.4pp Full.** (30 mã, cap 0.10)
 - Bull parking: NAV ≥150B. **(30, 0.15) = OVERFIT**, walk-forward bác.
@@ -40,13 +29,10 @@ custom30V permanent-exclude 7 tên (−1.0pp); LAG SUE-tilt 3 tầng (−0.66pp)
 stability floor ROE_Min<0 (−0.45pp); liq-tilt custom30 (REFUTED); deep-discount sleeve (PARKED);
 pbcombo dual-vehicle (Calmar 1.48→1.37); gq_score growth gate (−IC); composite v3 as entry-selector (NO).
 
-### MOM_N/MOM_S ĐÃ ĐÓNG (2026-07-12) — không phải "thử bị loại", là thay đổi production chính thức
-Sau chuỗi R&D đầy đủ (momdeal Phase 1 CP1 NO-GO 0/13 feature → nhánh DVR-8L-sizing CP-DVR1 NO-GO →
-đo tác động Scope A/B → kiểm tra tách MOM_N-vs-MOM_S, tất cả quant-skeptic CONFIRMED), user duyệt
-đóng `MOMENTUM_N`+`MOMENTUM_S` khỏi `TIER_BAL` (giữ nguyên `MOMENTUM`/`MEGA` generic — Scope B đóng
-cả họ bị số đo bác, generic vẫn đóng góp thật). Lý do: thành công lịch sử của 2 tier này chủ yếu do
-dồn mẫu regime 2020-21, không phải pattern lặp lại được; hậu-2021 gần như hoà vốn. Chi tiết đầy đủ:
-`plan_close_mom_20260712.md`, `plan_dvr_8l_sizing_20260712.md`, `plan_momentum_deals_20260711.md`.
+### MOM_N/MOM_S ĐÃ ĐÓNG (2026-07-12) — thay đổi production chính thức, không phải "thử bị loại"
+`MOMENTUM_N`+`MOMENTUM_S` đóng khỏi `TIER_BAL` (giữ `MOMENTUM`/`MEGA` generic — vẫn đóng góp thật):
+thành công lịch sử 2 tier này chủ yếu do dồn mẫu regime 2020-21, hậu-2021 gần hoà vốn, quant-skeptic
+CONFIRMED cả chuỗi R&D. Chi tiết: `plan_close_mom_20260712.md`.
 
 ### DT5G — market regime gate
 - Production: `tav2_bq.vnindex_5state_dt5g_live` qua `get_gated_state()`.

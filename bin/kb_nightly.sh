@@ -585,6 +585,72 @@ _tid="1521475726329516122"
 # trend data instead of relying on a one-off manual count staying accurate forever.
 python3 "$ROOT/bin/spend_report.py" --days 7 --csv-append "$ROOT/state/spend_history.csv" >> "$LOG" 2>&1 || true
 
+# ── Phase 4.6: SAME-DAY context-bloat check (2026-07-30, user directive) ──────────────────────
+# Root cause fixed: the hard-threshold check (context_pack.md 20KB / MIKE.md 40KB) only ran
+# inside the Friday block below, so a breach on any other day sat unaddressed up to 6 days.
+# Runs EVERY night now. SIMPLIFIED after arch-review NEEDS_CHANGES on the first draft: that
+# version auto-dispatched a headless Mike EVERY breached non-Friday night with no post-condition
+# check / rc=5(usage-limit) handling / cooldown — and the breach that same night was STRUCTURAL
+# (context_pack.md ~38KB vs 20KB even after a careful trim pass, because canonical.md/
+# projects/INDEX.md are evergreen must-know content, not compressible narrative) => would have
+# treadmilled a real Mike session every non-Friday night indefinitely. This version only
+# DETECTS + ESCALATES same-day (Telegram + Architecture topic + 1 bus `question`), debounced to
+# one alert per open episode (stamp file, cleared once the breach shape changes or resolves) —
+# a human/Mike-in-a-live-session does the actual edit, keeping a reviewer in the loop for the
+# single most-injected file in the fleet (this exact file class already produced 2 real fact
+# errors in past trims — see kb/INCIDENTS.md).
+_ctx_kb_or_missing() {  # "MISSING" beats silently reporting 0KB as healthy when the file is gone
+    # -s (not -f): publish_context.sh:46 truncates-in-place (no tmp+rename), so a kill mid-write
+    # leaves an EMPTY or TRUNCATED file, not a missing one — -f alone would silently treat that
+    # as "0KB, healthy" (arch-review catch, 2026-07-30).
+    [ -s "$1" ] || { echo "MISSING"; return; }
+    echo $(( $(wc -c < "$1") / 1024 ))
+}
+_CP_KB=$(_ctx_kb_or_missing "$ROOT/kb/context_pack.md")
+_MIKE_KB=$(_ctx_kb_or_missing "$ROOT/MIKE.md")
+SAME_DAY_BREACH=""       # human-readable, WITH numbers — for the alert text/payload only
+_BREACH_KEY=""           # stable membership key, NO numbers — debounce compares THIS
+if [ "$_CP_KB" = "MISSING" ]; then
+    SAME_DAY_BREACH="${SAME_DAY_BREACH}kb/context_pack.md MẤT/rỗng (publish_context.sh có thể đã chết); "
+    _BREACH_KEY="${_BREACH_KEY}CP:MISSING|"
+elif [ "$_CP_KB" -gt 20 ]; then
+    SAME_DAY_BREACH="${SAME_DAY_BREACH}kb/context_pack.md=${_CP_KB}KB(ngưỡng 20KB); "
+    _BREACH_KEY="${_BREACH_KEY}CP:OVER|"
+fi
+if [ "$_MIKE_KB" = "MISSING" ]; then
+    SAME_DAY_BREACH="${SAME_DAY_BREACH}MIKE.md MẤT/rỗng; "
+    _BREACH_KEY="${_BREACH_KEY}MIKE:MISSING|"
+elif [ "$_MIKE_KB" -gt 40 ]; then
+    SAME_DAY_BREACH="${SAME_DAY_BREACH}MIKE.md=${_MIKE_KB}KB(ngưỡng 40KB); "
+    _BREACH_KEY="${_BREACH_KEY}MIKE:OVER|"
+fi
+mkdir -p "$ROOT/state"
+_CTXBLOAT_STAMP="$ROOT/state/ctxbloat_episode.txt"
+if [ -n "$SAME_DAY_BREACH" ]; then
+    log "SAME-DAY CONTEXT-BLOAT: $SAME_DAY_BREACH"
+    _prev="$(cat "$_CTXBLOAT_STAMP" 2>/dev/null || true)"
+    if [ "$_prev" != "$_BREACH_KEY" ]; then
+        # Debounce on WHICH FILE(S) breach, not the exact KB number — context_pack.md is
+        # rewritten hourly by consolidate.sh and its size drifts a few KB within the same day,
+        # so keying on the number would mint a "new" question every run and none would ever
+        # resolve each other (ops_health_check.sh's stale-question matcher requires the
+        # answer's topic to contain the question's topic verbatim) — arch-review catch.
+        printf '%s' "$_BREACH_KEY" > "$_CTXBLOAT_STAMP"
+        MSG="⚠️ [kb_nightly] SAME-DAY context-bloat: ${SAME_DAY_BREACH}Cần Mike/user xử lý HÔM NAY (không chờ Thứ Sáu) — xem kb/current_ops.md §Cron quan trọng khác."
+        "$ROOT/bin/notify.sh" "$MSG" >/dev/null 2>&1 || true
+        "$ROOT/bin/notify_thread.sh" "$MSG" "1521475726329516122" >/dev/null 2>&1 || true
+        "$ROOT/bin/append_event.sh" Mike question "context-bloat-same-day" \
+"Vượt ngưỡng cứng: ${SAME_DAY_BREACH}Phát hiện NGOÀI Thứ Sáu (kb_nightly.sh Phase 4.6, $(date -u +%Y-%m-%dT%H:%M:%SZ)). Xử lý SAME-DAY: nén thêm (chỉ cắt narrative, KHÔNG cắt fact quyết định — xem kb/coding_guidelines.md, bài học 2 lỗi fact đã lọt qua các lần trim trước). Nếu không xuống được ngưỡng mà không mất fact (đã từng đúng vậy 2026-07-30) — không tự nâng ngưỡng, hỏi user quyết nâng ngưỡng hay OKF-hoá sâu hơn kb/canonical.md." \
+            2>/dev/null || true
+        log "Escalated (new/changed episode)."
+    else
+        log "Same breach as last check -- đã escalate 1 lần cho đợt này, giữ im lặng tới khi đổi."
+    fi
+elif [ -f "$_CTXBLOAT_STAMP" ]; then
+    rm -f "$_CTXBLOAT_STAMP"
+    log "Context-bloat episode cleared."
+fi
+
 # ── Phase 5: Friday = LLM editorial review ──────────────────────────────────
 DOW=$(date -u +%u)  # 1=Mon … 7=Sun; 5=Fri
 if [ "$DOW" -eq 5 ]; then
