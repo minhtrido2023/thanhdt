@@ -581,3 +581,7 @@
 - [2026-07-30T02:03:16Z] Taylor/heartbeat — Taylor_20260730_013951: {"status": "in_progress", "note": "state_publish_immutable.py XONG + selfcheck 19/19 PASS tren sandbox clone bang that (A: 6307/3110 phien da chot 0 diff; C: backfill gia 101 phien bi CHAN va dem dung; G/H fail-closed). Bat duoc 2 bug thuc: bq query --format=csv chi in 100 dong, va SUM(FARM_FINGERPRINT) tran INT64. Dang wire vao publish_gated_state.py + daily_refresh_v34b_linux.sh."}
 - [2026-07-30T02:03:55Z] Taylor/heartbeat — Taylor_20260730_013951: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20260730_013951", "source": "watcher"}
 - [2026-07-30T02:04:55Z] Taylor/heartbeat — Taylor_20260730_013951: {"status": "still_running", "elapsed_min": 25, "job_id": "Taylor_20260730_013951", "source": "watcher"}
+
+## Consolidation 2026-07-30T02:07:01Z
+- [2026-07-30T02:05:55Z] Taylor/heartbeat — Taylor_20260730_013951: {"status": "still_running", "elapsed_min": 26, "job_id": "Taylor_20260730_013951", "source": "watcher"}
+- [2026-07-30T02:06:56Z] Taylor/heartbeat — Taylor_20260730_013951: {"status": "still_running", "elapsed_min": 27, "job_id": "Taylor_20260730_013951", "source": "watcher"}
