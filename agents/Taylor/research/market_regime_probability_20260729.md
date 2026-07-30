@@ -1446,3 +1446,334 @@ Interpreter: `/home/trido/thanhdt/wc_venv/bin/python` (= `$DNA_PYEXE`). Nguồn 
 (CANONICAL, `data_registry/fundamentals/valuation_pe_pb_pcf_ps.md`), `tav2_bq.vnindex_5state_dt5g_live`
 (CANONICAL, KHÔNG dùng `vnindex_5state` — bẫy đã biết), `deposit_rate_vn.py` (CANONICAL-PROXY).
 Chuỗi forward returns tái dùng `exp_market_prob/panel_fwd.csv` (đã kiểm parity ở C.1.1).
+
+---
+---
+
+# PHỤ LỤC D — Value Radar (rolling-10Y) **tại 26 đợt CAPIT-washout**: có tăng độ tin cậy quyết định mua không?
+
+**Ngày dữ liệu: 2026-07-30** · job `Taylor_20260730_171814` · Taylor (Quant)
+**Loại: RESEARCH / trả lời câu hỏi — KHÔNG wire, KHÔNG đề xuất đổi tham số production nào.**
+
+> **ĐỌC ĐOẠN NÀY TRƯỚC MỌI SỐ LIỆU BÊN DƯỚI — cảnh báo garden-of-forking-paths.**
+> Đây là **lần thứ 5** trong CÙNG một mạch nghiên cứu (2026-07-29 → 07-30) hỏi cùng một câu hỏi
+> kinh tế: *"định giá có giúp chọn thời điểm mua ở washout không?"* — trên **cùng một khoảng lịch
+> sử VN hữu hạn** (~26 đợt CAPIT-washout độc lập kể từ 2009):
+>
+> | # | Lần thử | Cách cắt | Kết luận đã ra |
+> |---|---|---|---|
+> | 1 | Phụ lục A | ROE-cycle-level | **NO-GO** (0/12 qua Bonferroni/BH) |
+> | 2 | Phụ lục B | P/B ex-VIC, 9 cách đo | lật kết luận cũ; không wire |
+> | 3 | `fundamental_valuation_framework_20260729.md` §2 | CAPE / EV-EBITDA / ERP / composite, **CAPIT-conditional N=26** | **0/56 qua BH** |
+> | 4 | Phụ lục C (Việc 4-5) | Value Radar **expanding-2008**, base rate theo nhãn | hiệu RẺ−ĐẮT p=0,049 **thô**; 0/17 lăng kính qua BH; đầu RẺ không đơn điệu |
+> | **5** | **Phụ lục D (bài này)** | **Radar rolling-10Y × đúng 26 sự kiện CAPIT** | **xem §D.6** |
+>
+> Mỗi lần đổi một chiều tự do (chỉ số / cửa sổ phân vị / cách gộp / ngưỡng) trên cùng ~26 quan sát
+> **chính là** garden-of-forking-paths cổ điển: càng thử nhiều cách, xác suất tình cờ tìm ra một cách
+> "đẹp" càng cao. Vì vậy §D.6 tính hiệu chỉnh đa kiểm định trên **TOÀN BỘ N_trials tích luỹ của cả
+> mạch (=110)**, không tính riêng lẻ cho bài này như 4 báo cáo trước đã làm.
+
+---
+
+## D.0 Trả lời ngắn
+
+| Câu hỏi user | Trả lời |
+|---|---|
+| Dùng radar rolling-10Y đọc tại đúng ngày CAPIT fire, nhóm RẺ có kết cục tốt hơn nhóm TRUNG TÍNH/ĐẮT không? | **Có chênh lệch đúng chiều ở 6M/12M (+3,8pp / +14,7pp trung vị), nhưng KHÔNG có phép thử nào tiến gần ý nghĩa thống kê**: p thấp nhất = **0,133**, CI90 của mọi hiệu đều phủ 0 rộng, và **r3M đảo dấu** (−0,9pp). |
+| **Kết hợp radar + DT5G/CAPIT có tăng độ tin cậy quyết định mua so với chỉ dùng CAPIT một mình không?** | **KHÔNG ĐỦ BẰNG CHỨNG.** Xem §D.6 — 3 lý do độc lập, mỗi lý do đủ để bác một mình. |
+| Vì sao lần này còn yếu hơn Phụ lục C? | Vì cửa sổ rolling-10Y **mất gần hết khả năng phân biệt tại chính washout**: 16/25 sự kiện (64%) bị dán nhãn RẺ, nhóm ĐẮT chỉ còn **N=2** (cả hai đều là 2018). §D.3. |
+| Sự kiện LIVE 2026-07-20 đọc gì? | **27,8 → RẺ**, nhưng xếp **thứ 15/25 từ rẻ nhất** trong chính phân phối các đợt washout lịch sử ⇒ **trung bình so với táo-với-táo**, không phải "rẻ hiếm có". §D.5. |
+| Có đề xuất đổi gì không? | **KHÔNG.** Không đụng `capit_size`, `WASHOUT_GATE`, sizing, không wire radar vào bất kỳ code quyết định nào. Ranh giới display-only của `value_radar.py` giữ nguyên. |
+
+---
+
+## D.1 Phương pháp — tái dùng nguyên xi, không thêm bậc tự do nào
+
+Chủ đích của bài này là **không** tạo thêm bậc tự do. Cả hai đầu vào đều lấy nguyên trạng:
+
+| Thành phần | Nguồn tái dùng | Ghi chú |
+|---|---|---|
+| **26 sự kiện washout** | `exp_valframe/capit_events_gate0.3.csv` — định nghĩa ở [`fundamental_valuation_framework_20260729.md` §2.1](fundamental_valuation_framework_20260729.md) (breadth_oversold ≥ WASHOUT_GATE 0,30, cụm cách ≥30 ngày, 2009-05→2026-07) | **KHÔNG định nghĩa lại washout.** Đây đúng cơ chế CAPIT sống dùng để mua thật |
+| **Điểm Value Radar** | cột `radar3_roll` của `exp_value_radar/radar.csv` — **đúng công thức §C.4.1**, cửa sổ rolling 2500 phiên / min 500 (= `score` của module `value_radar.py`, parity 0/4.134 nhãn lệch) | **KHÔNG đổi công thức, KHÔNG đổi ngưỡng** RẺ<33 / 33–67 / ĐẮT>67 |
+| **Cửa sổ kết cục** | y hệt bảng §2.2 gốc: `r3M`, `r6M`, `r12M`, `mdd12M` (+ `mdd3M` cho câu hỏi "rơi sâu thêm") | Sự kiện **chưa đủ cửa sổ** bị loại khỏi đúng metric đó, không dùng số cắt ngắn |
+
+**Self-check tái lập (bắt buộc, chạy trước mọi thống kê):**
+- 26/26 sự kiện khớp file gốc; 3 dòng đối chiếu tay với bảng markdown §2.2 (2011-11-14 / 2018-05-28 / 2026-07-20: `pb_cap10`, `%ile P/B`, `pe_cap10`) — **MATCH tuyệt đối**.
+- `radar3_roll` ngày 2026-07-30 = **25,9**, khớp đúng số đã công bố ở C.4.5 và module `value_radar.py` — **MATCH**.
+- **26/26 ngày fire đều là phiên có trong chuỗi radar** (không phải nội suy) — trừ 2009-12-10 rơi vào **burn-in** của cửa sổ rolling (chuỗi radar rolling chỉ có từ 2010-01-04) ⇒ **N dùng được = 25**.
+- Floor dữ liệu 2008-01-01 giữ nguyên theo quy ước bắt buộc.
+
+---
+
+## D.2 Bảng 26 sự kiện CAPIT-washout + radar rolling-10Y tại đúng ngày fire
+
+`radar_roll` = điểm rolling-10Y (bản user chọn, LIVE trong báo cáo); `radar_exp` = bản expanding-2008 đã báo cáo ở Phụ lục C, để đối chiếu.
+
+| Sự kiện | ovs% | **radar_roll** | **Nhãn** | radar_exp | r3M | r6M | r12M | mdd12M |
+|---|---|---|---|---|---|---|---|---|
+| 2009-12-10 | 40,7 | *(burn-in)* | — | — | +11,4 | +11,4 | +6,8 | −7,6 |
+| 2010-08-09 | 41,1 | 40,0 | TRUNG TÍNH | 40,0 | −3,3 | +8,8 | −18,7 | −18,8 |
+| 2010-10-20 | 38,2 | 31,8 | **RẺ** | 31,8 | +12,5 | +6,1 | −7,4 | −13,2 |
+| 2011-02-21 | 41,9 | 22,3 | **RẺ** | 22,3 | −20,1 | −16,1 | −12,4 | **−30,4** |
+| 2011-04-21 | 31,9 | 17,1 | **RẺ** | 17,1 | −10,3 | −12,9 | +1,1 | **−26,8** |
+| 2011-11-14 | 35,9 | 3,6 | **RẺ** | 3,6 | +3,0 | +14,4 | −1,0 | −14,0 |
+| 2012-08-23 | 42,9 | 26,7 | **RẺ** | 26,7 | −2,3 | +18,6 | +20,5 | −4,5 |
+| 2014-05-08 | 52,5 | 36,6 | TRUNG TÍNH | 36,6 | +15,3 | +13,5 | +2,0 | −2,5 |
+| 2015-05-18 | 31,1 | 27,2 | **RẺ** | 27,2 | +12,3 | +14,1 | +17,7 | −1,3 |
+| 2015-08-24 | 44,7 | 21,3 | **RẺ** | 21,3 | +14,7 | +6,8 | +25,4 | −1,0 |
+| 2016-01-18 | 44,4 | 19,5 | **RẺ** | 19,5 | +12,6 | +23,5 | +29,8 | −0,9 |
+| 2018-05-28 | 41,5 | **88,3** | **ĐẮT** | 87,4 | +6,0 | −1,0 | +3,0 | −5,7 |
+| 2018-07-05 | 31,2 | **84,0** | **ĐẮT** | 82,9 | +13,5 | −0,9 | +8,3 | −2,4 |
+| 2020-02-03 | 35,2 | 52,8 | TRUNG TÍNH | 52,1 | −17,7 | −14,0 | +18,2 | **−29,0** |
+| 2020-03-11 | 32,8 | 37,1 | TRUNG TÍNH | 36,4 | +6,9 | +9,6 | **+45,6** | −18,8 |
+| 2020-07-27 | 39,2 | 27,4 | **RẺ** | 27,6 | +22,4 | **+48,3** | **+62,6** | 0,0 |
+| 2022-04-19 | 38,3 | 54,9 | TRUNG TÍNH | 58,0 | −16,2 | **−24,4** | **−25,4** | **−35,2** |
+| 2022-06-15 | 30,3 | 27,1 | **RẺ** | 33,6 | +2,2 | −15,0 | −8,9 | **−24,9** |
+| 2022-09-28 | 35,5 | 16,6 | **RẺ** | 23,7 | −13,9 | −6,9 | +1,0 | **−20,3** |
+| 2023-10-30 | 31,5 | 3,2 | **RẺ** | 12,9 | +12,8 | +19,8 | +20,4 | −1,4 |
+| 2024-04-17 | 30,1 | 22,9 | **RẺ** | 31,5 | +6,0 | +7,7 | +1,5 | −8,3 |
+| 2024-08-05 | 35,6 | 18,1 | **RẺ** | 27,6 | +4,8 | +7,3 | +33,4 | −7,9 |
+| 2025-04-03 | 52,5 | 9,1 | **RẺ** | 18,8 | +14,0 | +37,9 | +41,2 | −11,0 |
+| 2025-10-20 | 33,3 | 47,1 | TRUNG TÍNH | 55,4 | +15,9 | +14,3 | *đang chạy* | −3,4 |
+| 2026-03-09 | 43,8 | 34,3 | TRUNG TÍNH | 45,2 | +8,5 | *đang chạy* | — | −3,7 |
+| **2026-07-20 (LIVE)** | 45,9 | **27,8** | **RẺ** | 38,4 | *đang chạy* | — | — | −4,3 |
+
+**Phân bố nhãn: RẺ 16 · TRUNG TÍNH 7 · ĐẮT 2 · burn-in 1.**
+
+---
+
+## D.3 Phát hiện cấu trúc quan trọng nhất — **rolling-10Y gần như mất khả năng phân biệt tại washout**
+
+| | Toàn chuỗi (4.134 phiên, 2010+) | **Tại 25 sự kiện washout** |
+|---|---|---|
+| % nhãn RẺ, **rolling-10Y** | 31,4% | **64,0%** |
+| % nhãn RẺ, expanding-2008 | 25,5% | 56,0% |
+| Trung vị điểm radar rolling | 45,1 | **27,2** |
+
+Điều này **đúng về mặt cơ học và không phải bug**: một cửa sổ rolling 10 năm đo "rẻ so với chính 10
+năm gần nhất". Washout theo định nghĩa xảy ra sau khi giá đã rơi ⇒ tại thời điểm đó thị trường gần
+như luôn rẻ **so với quá khứ gần**. Hệ quả trực tiếp cho câu hỏi của user:
+
+1. Nhóm đối chứng bị bóp còn **ĐẮT = 2 sự kiện** (2018-05-28 và 2018-07-05 — **cùng một chu kỳ, cách
+   nhau 5 tuần**, tức thực chất là **1 quan sát độc lập**). Mọi so sánh "RẺ vs ĐẮT" ở đây là so với
+   một mẫu cỡ 1.
+2. Đây chính là điểm mà rolling **kém hơn** expanding cho câu hỏi này — trớ trêu vì rolling là bản
+   user chọn để hiển thị. Hai mục đích khác nhau: rolling tốt cho **mô tả bối cảnh gần**, expanding
+   giữ được **độ tương phản lịch sử** cần cho phân loại sự kiện.
+
+---
+
+## D.4 Kết quả — không nhóm nào tách khỏi nhóm nào
+
+**(a) Kết cục forward theo nhãn** (chỉ sự kiện đủ cửa sổ; CI90 bootstrap 8.000 lần **theo sự kiện**, không theo ngày):
+
+| Metric | Nhóm | N | Trung vị | CI90 | Trung bình | % dương |
+|---|---|---|---|---|---|---|
+| **r3M** | RẺ | 15 | **+6,0** | [+2,2; +12,6] | +4,7 | 73,3% |
+| | TRUNG TÍNH | 7 | +6,9 | [−16,2; +15,3] | +1,3 | 57,1% |
+| | ĐẮT | 2 | +9,7 | [+6,0; +13,5] | +9,7 | 100% |
+| | *vô điều kiện* | 25 | +6,9 | [+3,0; +12,5] | +4,4 | 72,0% |
+| **r6M** | RẺ | 15 | **+7,8** | [+6,1; +18,6] | +10,2 | 73,3% |
+| | TRUNG TÍNH | 6 | +9,2 | [−14,0; +13,5] | +1,3 | 66,7% |
+| | ĐẮT | 2 | −0,9 | [−1,0; −0,9] | −0,9 | 0% |
+| | *vô điều kiện* | 24 | +8,3 | [+2,6; +13,5] | +7,1 | 66,7% |
+| **r12M** | RẺ | 15 | **+17,7** | [+1,0; +25,4] | +15,0 | 73,3% |
+| | TRUNG TÍNH | 5 | +2,0 | [−25,4; +45,6] | +4,3 | 60,0% |
+| | ĐẮT | 2 | +5,6 | [+3,0; +8,3] | +5,6 | 100% |
+| | *vô điều kiện* | 23 | +6,8 | [+1,1; +20,4] | +11,5 | 73,9% |
+| **mdd12M** | RẺ | 15 | −8,3 | [−14,0; −1,4] | −11,1 | — |
+| | TRUNG TÍNH | 5 | −18,8 | [−35,2; −2,5] | −20,8 | — |
+| | ĐẮT | 2 | −4,1 | [−5,7; −2,4] | −4,1 | — |
+| | *vô điều kiện* | 23 | −8,3 | [−18,8; −4,5] | −12,4 | — |
+
+**(b) Hiệu RẺ − (TRUNG TÍNH+ĐẮT) và kiểm định** (bootstrap 8.000 + permutation 20.000, hai phía):
+
+| Kết cục | N_RẺ / N_khác | Hiệu trung vị | CI90 | p_bootstrap | p_permutation |
+|---|---|---|---|---|---|
+| r3M | 15 / 9 | **−0,9pp** *(đảo dấu)* | [−9,3; +15,8] | 0,961 | 1,000 |
+| r6M | 15 / 8 | +3,8pp | [−4,3; +21,3] | 0,465 | 0,511 |
+| r12M | 15 / 7 | **+14,7pp** | [−9,3; +36,4] | 0,762 | 0,657 |
+| mdd12M | 15 / 7 | +10,5pp *(đỡ sâu hơn)* | [−8,3; +21,1] | 0,611 | 0,278 |
+| P(mdd 3M ≤ −10%) | 15 / 9 | −11,1pp | [−44,4; +22,2] | 0,646 | — |
+| P(mdd 12M ≤ −20%) | 15 / 7 | −1,9pp | [−37,1; +32,4] | 0,891 | — |
+
+Số gốc: `exp_value_radar/washout_radar_tests.csv`.
+
+**(c) Tương quan liên tục** (Spearman, không phụ thuộc ngưỡng — đây là kiểm định **sạch nhất** vì
+không dùng cắt tercile):
+
+| | N | ρ (rolling-10Y) | p | ρ (expanding, đối chiếu) | p |
+|---|---|---|---|---|---|
+| r3M | 24 | +0,019 | 0,929 | −0,015 | 0,945 |
+| r6M | 23 | −0,323 | **0,133** | −0,389 | 0,066 |
+| r12M | 22 | −0,172 | 0,443 | −0,212 | 0,344 |
+| mdd12M | 22 | −0,094 | 0,676 | −0,180 | 0,423 |
+
+**p nhỏ nhất của toàn bộ 10 phép thử mới = 0,133** (r6M). Chưa cần hiệu chỉnh đa kiểm định gì cả —
+nó đã **không qua nổi ngưỡng 0,05 thô**.
+
+**(d) Xác suất "rơi sâu thêm" — điều user thực sự quan tâm khi mua ở washout:**
+
+| Nhóm | N | P(mdd 3M ≤ −10%) | P(mdd 12M ≤ −20%) |
+|---|---|---|---|
+| RẺ | 15 | 33,3% [13,3; 53,3] | 26,7% [6,7; 46,7] |
+| TRUNG TÍNH | 5–7 | 57,1% [28,6; 85,7] | 40,0% [0; 80] |
+| ĐẮT | 2 | 0% | 0% |
+| **vô điều kiện** | 23–25 | **36,0%** | **26,1%** |
+
+**Đọc thẳng: nhãn RẺ KHÔNG hạ được xác suất rơi sâu thêm.** 26,7% (RẺ) vs 26,1% (vô điều kiện) —
+chênh 0,6pp, tức **bằng không**. Kiểm chứng bằng cách đếm ngược: trong 6 sự kiện có `mdd12M ≤ −20%`
+(2011-02-21, 2011-04-21, 2020-02-03, 2022-04-19, 2022-06-15, 2022-09-28), **4 sự kiện mang nhãn RẺ**
+— trong khi tỷ lệ nền của nhãn RẺ là 15/23 = 65%, kỳ vọng 3,9. **Quan sát 4, kỳ vọng 3,9: đúng bằng
+base rate, không mang một chút thông tin nào.**
+
+**(e) Độ nhạy ngưỡng — dấu hiệu bất ổn thật, không phải giả định:**
+
+| Ngưỡng "RẺ" | N_RẺ | N_khác | r12M trung vị RẺ | r12M trung vị khác |
+|---|---|---|---|---|
+| < 20 | 7 | 18 | +20,4 | +3,0 |
+| **< 25** | 10 | 15 | **+10,9** | **+5,6** |
+| < 27,5 | 14 | 11 | +19,0 | +2,5 |
+| < 33 *(ngưỡng chuẩn)* | 16 | 9 | +17,7 | +3,0 |
+
+Dịch ngưỡng 4 điểm (33 → 25) làm hiệu 12M **co từ +14,7pp xuống +5,3pp** rồi lại nở ra ở 27,5.
+**Không đơn điệu theo ngưỡng** = dấu hiệu kinh điển của việc đang khớp nhiễu, không phải đo một hiệu
+ứng bền. (Cùng bản chất với phát hiện "đầu RẺ không đơn điệu" ở C.4.4 §3.)
+
+**(f) Radar tại washout KHÔNG phải chiều thông tin mới so với thứ đã bị bác:**
+
+Spearman trên 25 sự kiện: ρ(radar_roll, **%ile P/B expanding**) = **+0,835**; ρ(radar_roll,
+radar_expanding) = +0,944. Mà **%ile P/B chính là chỉ số đã nằm trong họ 56 phép thử của
+`fundamental_valuation_framework` §2.3 và đã 0/56 qua BH.** Nói cách khác bài này phần lớn **chạy lại
+một phép thử đã trượt**, chỉ đổi cách đóng gói. Đây là lý lẽ mạnh hơn mọi con số p ở trên.
+
+---
+
+## D.5 Sự kiện đang sống: CAPIT fire 2026-07-20 — đặt vào đúng phân phối lịch sử
+
+| | Giá trị |
+|---|---|
+| Radar rolling-10Y tại **ngày fire 2026-07-20** | **27,8 → RẺ** |
+| Radar expanding-2008 cùng ngày (đã báo cáo C.4.3) | 38,4 → TRUNG TÍNH |
+| Thành phần: %ile P/E rolling / P/B rolling / spread rolling | 12,9 / 29,6 / 40,9 |
+| **Xếp hạng trong 25 sự kiện washout lịch sử** | **thứ 15/25 từ rẻ nhất (phân vị ~58)** |
+| Radar hôm nay 2026-07-30 (để tham chiếu, KHÔNG phải ngày fire) | 25,9 → RẺ |
+
+Phân phối radar rolling tại 25 sự kiện lịch sử:
+`3,2 · 3,6 · 9,1 · 16,6 · 17,1 · 18,1 · 19,5 · 21,3 · 22,3 · 22,9 · 26,7 · 27,1 · 27,2 · 27,4 · [27,8 ←LIVE] · 31,8 · 34,3 · 36,6 · 37,1 · 40,0 · 47,1 · 52,8 · 54,9 · 84,0 · 88,3`
+
+**Cách đọc táo-với-táo — quan trọng, dễ bị đọc sai:** nhãn "RẺ" nghe như một sự ủng hộ mạnh, nhưng
+so với **chính các đợt washout khác** (mới là mẫu đối chiếu đúng, vì mọi lần CAPIT mua đều là mua ở
+washout), lần này chỉ **rẻ ở mức trung bình** — 14 đợt lịch sử rẻ hơn, 10 đợt đắt hơn. Radar **không
+đưa ra bằng chứng nào** rằng đợt giải ngân hiện tại thuộc nhóm hấp dẫn bất thường. Nó cũng không nói
+ngược lại. **Nó im lặng.**
+
+---
+
+## D.6 Trả lời thẳng câu hỏi cốt lõi
+
+> **"Kết hợp Value Radar (rolling-10Y) tại thời điểm washout có tăng độ tin cậy quyết định mua so với
+> chỉ dùng tín hiệu washout của DT5G/CAPIT một mình hay không?"**
+
+### **KHÔNG ĐỦ BẰNG CHỨNG.** (không phải "không có tác dụng" — là *không đo được*, ở cỡ mẫu này thì không thể phân biệt hai điều đó)
+
+Bốn lý do độc lập, **mỗi lý do một mình đã đủ** để không kết luận CÓ:
+
+1. **Không phép thử nào tới gần ý nghĩa thống kê thô.** p nhỏ nhất trong 10 phép thử mới = **0,133**,
+   trên một họ mà một nửa số hiệu **đảo dấu** (r3M: RẺ *tệ hơn* −0,9pp; P(rơi sâu 12M): RẺ *cao hơn*
+   nhóm ĐẮT). CI90 của mọi hiệu đều phủ 0 với biên rộng gấp nhiều lần chính hiệu đó.
+2. **Cỡ mẫu đối chứng thực chất bằng 1.** Nhóm ĐẮT = 2 sự kiện, cách nhau 5 tuần, cùng chu kỳ 2018 —
+   không phải 2 quan sát độc lập. Rolling-10Y đẩy 64% sự kiện washout vào nhóm RẺ (§D.3), tức tại
+   chính hoàn cảnh cần phân biệt thì thước đo gần như hằng số.
+3. **Hiệu chỉnh đa kiểm định CỘNG DỒN giết mọi thứ.** N_trials tích luỹ của cả mạch:
+
+   | Báo cáo | Số phép thử khai báo |
+   |---|---|
+   | Phụ lục A (ROE) | 12 |
+   | Phụ lục B (P/B ex-VIC, 9 cách đo) | 9 |
+   | `fundamental_valuation_framework` §2 (CAPIT-conditional) | 56 |
+   | Phụ lục C (17 lăng kính + 4 biến thể radar + 2 cách ngưỡng) | 23 |
+   | **Phụ lục D (bài này: 6 so nhóm + 4 Spearman)** | **10** |
+   | **TỔNG** | **110** |
+
+   Ngưỡng **Bonferroni 5% = 0,00045**; ngưỡng **BH (FDR 10%) cho p nhỏ nhất = 0,00091**.
+   **p nhỏ nhất của TOÀN BỘ mạch** — kể cả con số đẹp nhất từng tìm được là hiệu RẺ−ĐẮT p=0,049 ở
+   C.4.4 — **vẫn lớn hơn ngưỡng ~54 lần. 0/110 sống sót.** Đây là điểm khác biệt so với 4 báo cáo
+   trước (mỗi báo cáo tự tính BH trong phạm vi riêng): khi cộng dồn đúng cách, **kể cả kết quả từng
+   được coi là "vừa đủ loại 0" cũng không còn**.
+4. **Bài này không phải bằng chứng độc lập.** ρ(radar rolling, %ile P/B) = 0,835 tại washout, mà
+   %ile P/B đã nằm trong họ 56 phép thử trượt BH. Về bản chất đây là **lần đo lại thứ 5 của cùng một
+   giả thuyết trên cùng ~26 quan sát**, không phải bằng chứng mới cộng thêm.
+
+### Điều gì CÓ thể nói cho công bằng (không được trích như bằng chứng)
+
+- Chiều của hiệu **nhất quán với kinh tế học** ở 6M/12M/mdd12M (rẻ hơn → tốt hơn, đỡ sụt hơn). Nếu
+  có một hiệu thật thì nó **đúng chiều này** — nhưng "đúng chiều" là điều kiện cần, không phải bằng
+  chứng.
+- Phần **đáng tin nhất của radar vẫn là đầu ĐẮT** (C.4.4 §1) và nó **sống sót** trong bài này ở dạng
+  giai thoại: 2 sự kiện ĐẮT duy nhất (2018) cho r6M −0,9% / r12M +5,6% — kém nhất ở khung 6M. Nhưng
+  N=2 (thực chất 1 chu kỳ).
+- **Cái radar KHÔNG làm được, đã đo rõ**: nó không hạ được xác suất rơi sâu thêm (§D.4d) — đúng cái
+  rủi ro mà người mua ở washout sợ nhất.
+
+### Hàm ý thực tế (mô tả, không phải khuyến nghị)
+
+Với đợt CAPIT đang giải ngân: radar đọc **RẺ nhưng ở mức trung bình so với các washout khác**
+(§D.5). Đó là một **dòng bối cảnh** cho người duyệt plan đọc, **không phải** một lý do để tăng hay
+giảm size. Quyết định giải ngân tiếp tục do đúng cơ chế đang chạy quyết định (`capit_fired`,
+`capit_size`, `capit_adv_caps`, gate due-diligence) — **radar không được, và theo bài này càng không
+nên, tham gia vào đó**.
+
+---
+
+## D.7 Ranh giới — KHÔNG đề xuất đổi gì (giữ nguyên C.5.4)
+
+- **KHÔNG** đổi `capit_size`, `WASHOUT_GATE` (0,30/0,31), sizing CAPIT/LAG/BAL, hay bất kỳ tham số
+  production nào.
+- **KHÔNG** wire radar vào code quyết định. Ranh giới display-only trong docstring `value_radar.py`
+  giữ **nguyên văn**; bài này chỉ **củng cố** nó bằng một họ phép thử nữa cùng trượt.
+- Nếu sau này vẫn có người muốn wire: điều kiện tối thiểu **tăng lên** so với C.5.4 — phải khai báo
+  **N_trials ≥ 110** (không phải ≥23), tính DSR + PBO/CSCV, per-year LOO, rồi mới tới quant-skeptic.
+  Với p tốt nhất của cả mạch = 0,049 so với ngưỡng cần 0,00091, **dự đoán: không có cửa** trừ khi có
+  **dữ liệu mới thật sự** (≥5 đợt washout mới, tức ~3-5 năm nữa).
+- **Không cần quant-skeptic cho bài này** (research thuần, không wire) — đúng như dispatch nêu.
+
+---
+
+## D.8 Giới hạn của Phụ lục D
+
+1. **N = 25 sự kiện, nhóm ĐẮT = 2.** Mọi CI ở đây rộng đến mức chỉ loại được các hiệu ứng khổng lồ.
+   Bài này **không chứng minh radar vô dụng** — nó chứng minh **dữ liệu VN hiện có không đủ để trả
+   lời câu hỏi**, một kết luận khác hẳn.
+2. **Cửa sổ forward chồng lấn.** Các sự kiện cách nhau <12 tháng (vd 2011-02-21 / 2011-04-21;
+   2022-04/06/09) chia sẻ phần lớn cửa sổ r12M ⇒ **số quan sát độc lập thật < 25**, có thể chỉ ~15.
+   Bootstrap theo sự kiện **không** sửa được điều này (nó giả định các sự kiện độc lập) ⇒ **CI thật
+   còn rộng hơn bảng D.4**, tức kết luận "không đủ bằng chứng" **càng chắc**, không lung lay.
+3. **Kế thừa toàn bộ giới hạn Phụ lục C** (§C.6): lãi suất huy động không point-in-time (bias
+   hindsight ở thành phần 3), đa cộng tuyến P/E–P/B chưa khử, chưa kiểm chứng độ trễ công bố của
+   `PE`/`PB`/`BVPS`/`OShares` trong `tav2_bq.ticker`.
+4. **Kế thừa giới hạn định nghĩa sự kiện** (`fundamental_valuation_framework` §4): 4 sự kiện
+   (2015-05-18, 2018-07-05, 2020-02-03, 2020-07-27) chưa đối chiếu chéo được với artifact
+   `*_elig_*.csv` cũ. Cả 4 đều nằm ở các nhóm khác nhau nên không lệch kết luận một chiều.
+5. **`mdd12M`/`r12M` của 3 sự kiện gần nhất chưa đủ cửa sổ** và đã bị loại khỏi đúng metric đó —
+   nhưng điều đó nghĩa là **giai đoạn gần nhất (2025-10 → nay) chưa đóng góp gì** vào kết luận 12M.
+6. **Không backtest NAV.** Bài này so sánh kết cục VNINDEX sau sự kiện, **không** mô phỏng rổ CAPIT
+   thật. Muốn biết radar ảnh hưởng P&L thật phải replay 26 sự kiện qua `pt_v23_audit_2014.py` — và
+   theo đúng §3.2 của `fundamental_valuation_framework`, **chỉ đáng làm nếu tín hiệu qua được cổng
+   thống kê trước đã**, mà nó không qua.
+
+---
+
+## D.9 Tái lập
+
+```bash
+cd /home/trido/thanhdt/WorkingClaude && source wc_env.sh
+E=mike/agents/Taylor/exp_value_radar
+$DNA_PYEXE $E/v7_washout.py      # merge 26 su kien CAPIT x radar3_roll + bootstrap + risk
+$DNA_PYEXE $E/v7b_spearman.py    # Spearman lien tuc + cong don N_trials 110
+```
+
+Đầu vào tái dùng (không sinh lại): `exp_valframe/capit_events_gate0.3.csv` (26 sự kiện),
+`exp_value_radar/radar.csv` (chuỗi radar PIT, cột `radar3_roll`).
+Đầu ra: `exp_value_radar/{washout_radar,washout_radar_groups,washout_radar_tests,washout_radar_spearman}.csv`.
+Interpreter: `$DNA_PYEXE` (= `/home/trido/thanhdt/wc_venv/bin/python`). Seed bootstrap = 20260730.
