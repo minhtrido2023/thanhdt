@@ -6,7 +6,8 @@
 #   1. Xung đột file plan (vd v1/v2 cùng ngày, chỉ 1 bản được executor đọc thật)
 #   2. Vòng lặp lỗi bất thường trong journal (vd retry T+2 hàng ngàn lần)
 #   3. Circuit breaker / job board bất thường
-#   4. Câu hỏi (event_type=question) đang chờ user chưa trả lời
+#   4. Câu hỏi (event_type=question) đang chờ user chưa trả lời — 2 dòng: trong 48h (có
+#      dispatch autofix) và TREO LÂU >48h (WARN-only, không dispatch — chỉ user quyết được)
 #   5. Kill-switch / macro freshness / BQ freshness (tái dùng preflight_check.sh)
 #   6. Corp-action backlog (sự kiện tồn đọng >7 ngày chưa resolve, thêm 2026-07-10)
 #   7. Báo cáo tuần/tháng quá hạn (WARN-only, thêm 2026-07-13 — bổ sung sau sự kiện tuan
@@ -190,9 +191,19 @@ else:
 # match trong-cùng-file như bản cũ khiến answer chéo-agent không bao giờ clear question,
 # wags_autofix bị dispatch lặp cho question đã trả lời — fix Wags 2026-07-10).
 import datetime as dt
-cutoff = dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=48)
+_now = dt.datetime.now(dt.timezone.utc)
+cutoff = _now - dt.timedelta(hours=48)
+# Horizon cho backlog TREO LÂU: câu hỏi >48h mà chưa có answer/decision trước đây RƠI KHỎI
+# radar hoàn toàn (check chỉ nhìn 48h) → chết im, không owner, không ai nhắc user quyết
+# (đúng gap mà comment nhánh dispatch dưới đã ghi nhận nhưng chưa bịt — sự cố THẬT:
+# question Winston/dt5g-live-2-writer-can-quyet 2026-07-29, cần user chọn A/B/C, sẽ vô hình
+# từ 2026-07-31). 30 ngày là horizon để câu hỏi bị bỏ hẳn không nhắc mãi mãi. Dòng này
+# CỐ TÌNH không dispatch autofix (xem grep COORD_WARN/OTHER_WARN): loại câu hỏi này chỉ
+# user quyết được, spawn Wags lặp lại vô nghĩa — cần VISIBILITY cho người, không cần agent.
+aged_horizon = _now - dt.timedelta(days=30)
 inbox_dir = os.path.join(wc_root, "mike", "bus", "inbox")
 pending_q = []
+aged_q = []
 if os.path.isdir(inbox_dir):
     files = glob.glob(os.path.join(inbox_dir, "*.jsonl"))
     def iter_events(path):
@@ -231,12 +242,20 @@ if os.path.isdir(inbox_dir):
                 ts_dt = dt.datetime.fromisoformat(rec.get("ts", "").replace("Z", "+00:00"))
             except Exception:
                 continue
-            if ts_dt >= cutoff and not _resolved(rec.get("topic")):
+            if _resolved(rec.get("topic")):
+                continue
+            if ts_dt >= cutoff:
                 pending_q.append(f"{agent}/{rec.get('topic')}")
+            elif ts_dt >= aged_horizon:
+                age_d = (_now - ts_dt).days
+                aged_q.append(f"{agent}/{rec.get('topic')} ({age_d}d)")
 if pending_q:
     W(f"Có {len(pending_q)} câu hỏi (question) trong 48h qua CHƯA thấy answer tương ứng: {pending_q}")
 else:
     OK("Không có câu hỏi (question) nào đang chờ xử lý trong 48h qua.")
+if aged_q:
+    aged_q.sort()
+    W(f"Câu hỏi TREO LÂU (>48h, chưa ai quyết) — {len(aged_q)} mục, cần USER quyết: {aged_q}")
 
 # 6. Corp-action backlog (data/corp_action_backlog.json, ghi bởi update_shares_live.py
 #    --scan mỗi ngày 18:40 ICT — đọc file local, KHÔNG query BQ trực tiếp ở đây để giữ
@@ -456,8 +475,14 @@ if [ "${WARN_COUNT:-0}" -gt 0 ]; then
   # "Job board:" cũng là FLEET-WIDE (đọc bus/jobs toàn cục) → phải nằm ở COORD_WARN, nếu
   # không nó rơi vào OTHER_WARN → ops_autofix label per-account, chạy lặp theo số account
   # cho một tình trạng toàn cục (arch-reviewer NEEDS_CHANGES coord-2026-07-22).
+  # "Câu hỏi TREO LÂU" (>48h) bị loại khỏi CẢ HAI nhánh có chủ đích: chỉ user quyết được
+  # (vd A/B/C liên quan team ngoài), Wags/Winston không resolve được → dispatch lặp 2 job/ngày
+  # là token thuần lãng phí. Dòng đó chỉ cần NẰM TRONG báo cáo Trading Daily để user thấy
+  # (thêm Wags 2026-07-30, coord-2026-07-30).
+  # (COORD_WARN không cần loại thêm: pattern "câu hỏi \(question\)" chữ thường + "(question)"
+  # không khớp chuỗi "Câu hỏi TREO LÂU (>48h…)".)
   COORD_WARN="$(echo "$MSG" | grep -E '⚠️|❌' | grep -E "Circuit breaker|câu hỏi \(question\)|Job board:" || true)"
-  OTHER_WARN="$(echo "$MSG" | grep -E '⚠️|❌' | grep -vE "NOT_APPROVED|KHÔNG TÌM THẤY|Circuit breaker|câu hỏi \(question\)|Job board:" || true)"
+  OTHER_WARN="$(echo "$MSG" | grep -E '⚠️|❌' | grep -vE "NOT_APPROVED|KHÔNG TÌM THẤY|Circuit breaker|câu hỏi \(question\)|Job board:|Câu hỏi TREO LÂU" || true)"
   if [ -n "$COORD_WARN" ]; then
     # Label KHÔNG kèm ACCOUNT: circuit breaker + question tồn đọng là trạng thái FLEET-WIDE
     # (đọc state/circuit/* + bus/inbox/* toàn cục, nội dung y hệt cho mọi account) — label

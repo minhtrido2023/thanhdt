@@ -57,6 +57,14 @@ chưa ăn → notify "cần người xem", không dispatch lặp vô hạn.
   đuôi, hoặc bằng decision chủ đề rời) → checker KHÔNG thấy → question "tồn đọng" vĩnh viễn
   → spawn Wags vô nghĩa. Trước 2026-07-21 checker so topic BẰNG NHAU TUYỆT ĐỐI nên cả hậu-tố
   `-closed` cũng trượt (7 answer trên bus dính lỗi này).
+- **Question TREO LÂU >48h** (thêm Wags 2026-07-30): checker có dòng WARN riêng
+  `⚠️ Câu hỏi TREO LÂU (>48h, chưa ai quyết)` cho question quá cửa sổ 48h mà vẫn chưa có
+  answer/decision (horizon 30 ngày). Trước đó question >48h RƠI KHỎI radar hoàn toàn → chết
+  im, không owner (vd `Winston/dt5g-live-2-writer-can-quyet` 07-29 sẽ vô hình từ 07-31).
+  Dòng này **CỐ TÌNH không dispatch autofix** (loại khỏi cả `COORD_WARN` và `OTHER_WARN`):
+  loại question này chỉ USER quyết được, spawn Wags/Winston lặp là token thuần lãng phí — nó
+  chỉ cần hiện trong báo cáo Trading Daily để người thấy. Muốn dòng ngắn lại → đóng question
+  đã xong theo QUY ƯỚC ĐÓNG ở trên (đúng việc Wags làm 2026-07-30: 6→2 mục).
 
 ## Macro health — phân biệt 3 tầng khi FAILED (bài học 2026-07-06, 3 bug chồng nhau)
 
