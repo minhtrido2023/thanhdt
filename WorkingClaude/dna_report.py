@@ -313,6 +313,26 @@ def build_dt_gate_line(html=True):
             f"base giữ từ {c['start']}, committed {comm}){base}{thin}  {asof}")
 
 
+def build_value_radar_line(html=True):
+    """Value Radar — lăng kính ĐỊNH GIÁ (phân vị rolling 10 năm của P/E + P/B capped-10%
+    + spread earnings-yield vs lãi suất huy động), hiển thị NGAY CẠNH state DT5G để người
+    đọc có cả góc định giá lẫn góc tâm lý/kỹ thuật.
+
+    Nguồn duy nhất: `value_radar.py` (Phụ lục C của market_regime_probability_20260729.md,
+    user chốt cửa sổ rolling-10Y ngày 2026-07-30). **THUẦN HIỂN THỊ** — giống DT4-gate clock,
+    KHÔNG nối vào sizing/allocator/threshold nào. None khi lỗi ⇒ caller bỏ dòng, không crash."""
+    try:
+        import sys
+        if W not in sys.path:
+            sys.path.insert(0, W)
+        from value_radar import build_value_radar_line as _vr
+        return _vr(html=html)
+    except Exception as e:
+        import sys as _sys
+        print(f"[dna_report] value_radar skipped (fail-safe): {e}", file=_sys.stderr)
+        return None
+
+
 _NBASE_CACHE = {"t": 0.0, "val": None}
 
 
@@ -505,6 +525,9 @@ def build_report(tk):
     dtline = build_dt_gate_line()
     if dtline:
         L.append(dtline)
+    vrline = build_value_radar_line()
+    if vrline:
+        L.append(vrline)
     comp = build_compass_line()
     if comp:
         L.append(comp)
