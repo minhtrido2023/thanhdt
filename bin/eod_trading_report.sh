@@ -22,14 +22,15 @@ TRADING_THREAD="1522576692638388364"  # Trading report (đổi từ Trading Dail
 PLAN_FILE="$WC_ROOT/data/trade_plans/plan_${ACCOUNT}_${PLAN_DATE}.json"
 STATE_FILE="$WC_ROOT/data/execution_logs/exec_${ACCOUNT}_${PLAN_DATE}_state.json"
 
-# --- Gate DT4 (candidate streak clock) — bối cảnh CẤP THỊ TRƯỜNG (không theo account) ---
-# Tái dùng build_dt_gate_line() của dna_report.py (html=False → text sạch cho Discord
-# markdown, không thẻ <i>/<b>). Chỉ dùng ở case HOLD-day + full-render (không chèn vào
-# cảnh báo lỗi vận hành case 1/3 để không làm loãng cảnh báo). Fail-safe: mọi lỗi (thiếu
-# BQ cred / thiếu CSV hazard / import lỗi) → in "" → bỏ qua dòng lặng lẽ, KHÔNG crash report.
+# --- Gate DT4 (candidate streak clock) + Value Radar — bối cảnh CẤP THỊ TRƯỜNG (không theo account) ---
+# Tái dùng build_dt_gate_line() / build_value_radar_line() của dna_report.py (html=False →
+# text sạch cho Discord markdown, không thẻ <i>/<b>). Chỉ dùng ở case HOLD-day + full-render
+# (không chèn vào cảnh báo lỗi vận hành case 1/3 để không làm loãng cảnh báo). Fail-safe: mọi
+# lỗi (thiếu BQ cred / thiếu CSV hazard / thiếu cache radar / import lỗi) → in "" → bỏ qua dòng
+# lặng lẽ, KHÔNG crash report.
 # 2 account chạy report riêng cùng ngày sẽ hiện dòng này 2 lần — chấp nhận được (info thị trường).
 _dt_gate_line() {
-  cd "$WC_ROOT" && timeout 120 python3 -c "
+  cd "$WC_ROOT" && timeout 180 python3 -c "
 import sys
 sys.path.insert(0, '$WC_ROOT')
 try:
@@ -42,6 +43,15 @@ try:
         nb = build_neutral_base_line(html=False)
         if nb:
             print('  ↳ ' + nb)
+except Exception:
+    pass
+try:
+    # Value Radar (định giá, phân vị rolling 10 năm) — đặt NGAY CẠNH khối regime DT5G để
+    # có cả góc định giá lẫn góc tâm lý/kỹ thuật. THUẦN HIỂN THỊ, không phải tín hiệu.
+    from dna_report import build_value_radar_line
+    vr = build_value_radar_line(html=False)
+    if vr:
+        print('🧭 ' + vr)
 except Exception:
     pass
 " 2>/dev/null || true

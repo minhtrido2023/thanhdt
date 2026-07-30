@@ -869,3 +869,580 @@ tưởng nên rủi ro thấp hơn ta tưởng" là đang vượt quá bằng ch
 **Tái lập**: `mike/agents/Taylor/exp_pb_exvic/` — `fetch2.py` (kéo panel) → `final.py` (9 cách đo +
 phân vị + biểu đồ) → `scan.py` (quét méo mó theo mã/năm) → `baserate_robust.py` (base rate có điều kiện).
 Dữ liệu trung gian: `t100_panel2.csv` (463k dòng), `pb_variants_final.csv`, `percentiles_final.csv`.
+
+---
+
+# PHỤ LỤC C — VALUE RADAR: lăng kính ĐỊNH GIÁ độc lập bên cạnh DT5G
+
+**Ngày dữ liệu: 2026-07-30** · job `Taylor_20260730_154733` · Taylor (Quant)
+**Nguồn gốc: 5 việc user đặt ra sau khi đọc Phụ lục A + Phụ lục B + `fundamental_valuation_framework_20260729.md`.**
+**Loại: RESEARCH — KHÔNG wire production, không đề xuất đổi tham số. Tham chiếu chéo, không lặp lại:
+Phụ lục B (phương pháp bền cho P/B), `fundamental_valuation_framework_20260729.md` (CAPE/EV-EBITDA/ERP NO-GO).**
+
+> **Cảnh báo đọc:** user vào job này với quan điểm "thị trường đã rẻ". Phụ lục này có **cả bằng chứng
+> ủng hộ lẫn bằng chứng phản bác** quan điểm đó, và **kết luận cuối là KHÔNG đủ mạnh để nói mua bây
+> giờ có xác suất thắng cao hơn**. Xem C.5.
+
+---
+
+## C.0 Trả lời ngắn — 5 việc, 5 câu
+
+| # | Câu hỏi | Trả lời |
+|---|---|---|
+| **1** | PE có bị méo bởi 1 mã như PB không? | **CÓ — và tiền đề của dispatch SAI.** Aggregate ratio-of-sums **KHÔNG miễn nhiễm**: VIC đóng 20,0% vốn hoá nhưng ~0,1% lợi nhuận ⇒ nâng PE aggregate **+2,46 điểm (phân vị méo mó 99,1)**. Nhưng sau khi khử, **PE vẫn rẻ** (phân vị 3 năm **0,5–5,6** tuỳ cách đo bền). |
+| **2** | Các góc nhìn khác có xác nhận "rẻ"? | **KHÔNG đồng thuận.** EY-spread vs lãi suất huy động ở **giữa** (phân vị 52–65 trên 2011+), **3 năm chỉ 11,9–24,7** ⇒ *đắt hơn* so với chính 3 năm qua. Rẻ là **do ngân hàng + do PE**, KHÔNG phải toàn diện: P/B phi-ngân-hàng (capped-10%) vẫn ở phân vị **56,9**. PEG "rẻ" nhưng chỉ vì tăng trưởng đang ở đỉnh (phân vị 87,8). **0/17 lăng kính qua BH(FDR 10%) hay Bonferroni.** |
+| **3** | "PB<1 chiếm gần 60%" — đúng không? | **ĐÚNG VỀ SỐ, SAI VỀ Ý NGHĨA.** Hôm nay **55,9%** (429/768 mã toàn universe) — gần 60% thật. Nhưng đó **gần bằng mức bình thường của VN** (trung vị lịch sử 53,7%, kỷ lục 86,2% ngày 2012-01-13), phân vị 2008+ chỉ **64,3**. Và chỉ **14,0%** trong top-100 vốn hoá. |
+| **4** | Radar đọc gì tại 2018/2022 và hôm nay? | **2018-Q4 = ĐẮT (74,7)** ✅ đúng trí nhớ user. **2022-Q2 = TRUNG TÍNH (35,5)** ❌ không phải "đắt". **2022-Q4 = RẺ (7,2)** ❌ ngược hẳn trí nhớ. **HÔM NAY = 36,0 → TRUNG TÍNH**, ngay sát biên RẺ (4/7 phiên gần nhất đã ở vùng RẺ). |
+| **5** | Mua bây giờ có xác suất thắng cao hơn không? | **KHÔNG CÓ BẰNG CHỨNG ĐỦ MẠNH.** Radar hôm nay ở dải TRUNG TÍNH 33-45 → fwd 12M trung vị lịch sử **+9,2%** vs vô điều kiện **+8,3%**, P(bear) 15,9% vs 20,4% ⇒ **gần như không có lợi thế**. Radar chỉ loại được một lý do phản đối ("thị trường đắt" — 2018 kiểu), **không cấp một lý do ủng hộ**. |
+
+---
+
+## C.1 VIỆC 1 — Robust hoá chuỗi PE (y hệt cách Phụ lục B làm cho PB)
+
+### C.1.1 Kiểm chứng tái lập TRƯỚC (self-check bắt buộc)
+
+Panel dựng lại độc lập từ `tav2_bq.ticker` (top-300 vốn hoá/phiên, 2008-01-01→2026-07-30,
+**1.357.548 dòng**), rồi lọc `PB>0` và cắt top-100 — **đúng định nghĩa rổ của Phụ lục B**.
+Kết quả 463.300 dòng / 4.633 phiên (B: 463.102 / 4.633 — chênh do 2 phiên dữ liệu mới 07-29/07-30).
+
+| Kiểm định parity (4.631 phiên chung) | corr | sai lệch trung vị | sai lệch tối đa |
+|---|---|---|---|
+| `pb_cw` (aggregate) vs Phụ lục B | 0,9999889 | **2,2×10⁻¹⁶** | 2,07×10⁻² |
+| `pb_cap10` vs Phụ lục B | 0,9999482 | 4,4×10⁻¹⁶ | 4,94×10⁻² |
+| `pb_ewmed` vs Phụ lục B | 0,9999253 | **0** | 7,37×10⁻² |
+| `pe_agg_pos` vs `pe_cw` Phụ lục B | 0,9999868 | **0** | 1,52×10⁻¹ |
+
+⇒ Cùng một chuỗi. Sai lệch tối đa xuất hiện ở vài phiên có **đồng hạng vốn hoá** khi cắt top-100 —
+đúng hiện tượng Phụ lục B đã ghi nhận. Giá trị ngày 07-24 và 07-27 **trùng khít tới 12 chữ số thập
+phân** với chuỗi cũ. Floor **2008-01-01** áp cho mọi phân vị (quy ước `data_registry/price-volume/vnindex_pe_mirror_col.md`).
+
+### C.1.2 Bảng 9 cách đo PE — giá trị hiện tại + phân vị (100 = ĐẮT nhất)
+
+| Cách đo P/E (rổ top-100) | Hiện tại | 2008+ | 10 năm | 5 năm | **3 năm** |
+|---|---|---|---|---|---|
+| **Aggregate ratio-of-sums, KỂ CẢ mã lỗ** (chuẩn S&P) | **13,282** | 37,1 | 15,4 | 27,5 | **11,1** |
+| Aggregate, chỉ mã có lãi (= `pe_cw` Phụ lục B) | 13,282 | 44,3 | 22,9 | 41,5 | 28,5 |
+| **Σ wᵢ × PEᵢ — cap-weighted AVERAGE-OF-RATIOS** | **47,310** | **97,9** | **96,1** | **93,1** | **96,4** |
+| — | | | | | |
+| Aggregate **EX-VIC** | 10,823 | 20,5 | 6,4 | 11,3 | **0,8** |
+| Aggregate, **bỏ mã lớn nhất MỖI PHIÊN** (đối xứng) | 10,823 | 19,9 | 6,2 | 11,1 | **0,8** |
+| **Capped-weight 10%/mã** (đối xứng) | 11,928 | 27,4 | 10,6 | 19,2 | **5,6** |
+| **Trimmed 5%** (bỏ 5% PE cao + 5% PE thấp) | 11,007 | 19,6 | 3,7 | 6,3 | **0,8** |
+| **Trung vị equal-weight** (mã điển hình) | 12,573 | 49,8 | 14,6 | 6,7 | **0,5** |
+| Trung bình equal-weight | 39,096 | 92,0 | 85,8 | 77,1 | 74,9 |
+
+Hôm nay: **top-1 = VIC, tỷ trọng 20,0%, PE riêng 146,6**; **0 mã lỗ** trong top-100 (nên hai dòng
+aggregate trùng nhau ở giá trị hiện tại, chỉ khác ở chuỗi lịch sử).
+
+### C.1.3 Kết luận Việc 1 — và một ĐÍNH CHÍNH đối với tiền đề của dispatch
+
+**Dispatch giả định: "aggregate ratio-of-sums về bản chất KHÔNG bị méo bởi 1 mã". Điều đó SAI, và
+đây là phát hiện phương pháp quan trọng nhất của Việc 1.**
+
+Aggregate miễn nhiễm với việc **tỷ lệ riêng của một mã bị cực đoan** *nếu* đóng góp của mã đó vào tử
+số và mẫu số cân xứng. Với VIC hiện nay **chúng không cân xứng**: 20,0% vốn hoá nhưng gần như không
+lợi nhuận ⇒ tử số tăng 20%, mẫu số gần như không tăng.
+
+Đo trực tiếp (`PE aggregate − PE bỏ mã lớn nhất`):
+
+| | Giá trị |
+|---|---|
+| Hiện tại (VIC) | **+2,458 điểm PE (+22,7%)** — phân vị **99,1** |
+| Trung vị lịch sử | +0,393 |
+| **Cao nhất TRƯỚC 2025** | **+1,787 — BVH, 2011-01-21** |
+| Cao nhất toàn lịch sử | +2,671 — VIC, 2026-04-28 |
+
+Các mã từng gây méo PE >1,0 điểm: **VIC** (740 phiên, 2018→nay), BVH (109), MSN (90), GAS (33),
+TCB (16), VNM (15), VHM (11), VCB (3) — cùng danh sách "mã siêu lớn" của Phụ lục B, xác nhận đây là
+bệnh cấu trúc của cap-weighting chứ không phải sự kiện một lần. **Khác Phụ lục B ở một điểm:** méo mó
+PE hôm nay (+2,458) **gấp 1,38 lần kỷ lục cũ** (+1,787), trong khi méo mó PB hôm nay chỉ nhỉnh hơn kỷ
+lục GAS-2014 một chút. Tức **PE bị VIC bóp méo nặng hơn PB**, đúng như Phụ lục B đã tiên đoán.
+
+**Ba câu trả lời rõ ràng:**
+
+1. **PE hiện tại CÓ bị méo bởi một mã đơn lẻ.** Mức méo ở phân vị 99,1 của lịch sử.
+2. **Nếu robust hoá, phân vị đổi rất mạnh**: 3 năm từ **28,5 → 0,5–5,6**; 2008+ từ 44,3 → 19,6–27,4.
+   (Đây là bảng so sánh cùng format Phụ lục B đã yêu cầu.)
+3. **Nhưng kết luận "PE rẻ" KHÔNG đảo chiều — nó mạnh thêm.** Khác hẳn PB: PB gốc nói "đắt" và bị
+   lật thành "rẻ"; PE gốc đã nói "rẻ" và sau khử méo nói "rẻ hơn nữa". Đây là **góc nhìn Phương
+   pháp** như dispatch định nghĩa: thị trường rẻ theo PE một cách **chân thực**, không phải ảo giác.
+
+⚠️ **Một cạm bẫy phải nói thẳng:** dòng **Σ wᵢ×PEᵢ = 47,31 (phân vị 96–98)** là cách đo mà rất nhiều
+báo cáo thị trường dùng mặc định. Nếu ai từng nói "PE thị trường VN đang cao" bằng phương pháp đó thì
+họ **đang đo PE của VIC**, không phải của thị trường. Không có ai trong đội dùng cách này (báo cáo gốc
+dùng aggregate) — nêu ra để đóng cửa nguồn nhầm lẫn tương lai.
+
+### C.1.4 Đối chiếu độc lập với PE CHÍNH THỨC
+
+| Nguồn | Hiện tại | Phân vị 2008+ | 10 năm | 5 năm | 3 năm |
+|---|---|---|---|---|---|
+| `t.VNINDEX_PE` chính thức (BQ live, đã backfill 2006) | **12,97** | 32,7 | 12,5 | 21,7 | **9,0** |
+| PE aggregate tự đúc (bài này) | 13,28 | 44,3 | 22,9 | 41,5 | 28,5 |
+| `pe_t100` báo cáo gốc §1.1 (07-28) | 12,93 | — | — | — | — |
+
+corr(PE tự đúc, PE chính thức) = **0,9665** trên 2.516 phiên chồng lấn (2016-07→2026-07 — đoạn duy
+nhất chuỗi cache `panel_fwd.csv` có PE chính thức; bản BQ đã backfill về 2006 nhưng cache dựng trước
+07-29). PE chính thức **cũng là chỉ số cap-weighted có VIC bên trong**, nên nó **không phải kiểm
+chứng độc lập với vấn đề méo mó** — chỉ xác nhận chuỗi tự đúc không bịa số.
+
+---
+
+## C.2 VIỆC 2 — Ba góc nhìn khác, trước khi chốt "rẻ hay chưa"
+
+### C.2.1 Earnings yield vs lãi suất huy động — **góc nhìn PHẢN BÁC mạnh nhất**
+
+Spread = `1/PE − lãi suất tiết kiệm Big-4 12M` (nguồn `deposit_rate_vn.py`, CANONICAL-PROXY, chuỗi
+step 2011→nay). Vì chuỗi lãi suất bắt đầu 2011, **cửa sổ đầy đủ ở đây là 2011+ (N=3.884 phiên / 16
+năm), KHÔNG phải 2008+**.
+
+| PE dùng làm EY | EY | **Spread** | Phân vị 2011+ | CI90 | 10 năm | 5 năm | **3 năm** |
+|---|---|---|---|---|---|---|---|
+| PE aggregate | 7,53% | **+0,73pp** | 52,1 | [34, 69] | 48,9 | 19,7 | **11,9** |
+| PE capped-10% (bền) | 8,38% | **+1,58pp** | 65,2 | [48, 81] | 62,7 | 30,6 | **24,7** |
+| PE trung vị EW | 7,95% | +1,15pp | 52,3 | [37, 68] | 72,9 | 76,4 | 79,5 |
+
+*(Ở bảng này 100 = spread RỘNG nhất = RẺ nhất so với gửi tiết kiệm — **ngược chiều** bảng PE.)*
+
+Spread trung bình theo năm (PE capped-10%): 2015 **+2,39** · 2022 +1,97 · 2023 +2,22 · 2024 **+2,32**
+· 2025 +2,27 · **2026 +0,99** · (âm: 2011 −2,71, 2018 −1,54, 2019 −1,02, 2017 −0,49).
+
+**Đây là bằng chứng đi NGƯỢC luận điểm "rẻ", và phải nói thẳng:**
+- Trên toàn chuỗi 2011+, spread hôm nay ở **giữa** (phân vị 52–65), CI90 phủ 50 ⇒ **không phân biệt
+  được với mức bình thường**.
+- Trên 3 năm gần nhất, spread hôm nay **hẹp hơn 75–88% số phiên** ⇒ so với chính giai đoạn gần đây,
+  cổ phiếu **kém hấp dẫn hơn** so với tiền gửi, chứ không hấp dẫn hơn.
+- Nguyên nhân cơ học rõ ràng: **lãi suất huy động đã tăng 4,7% (2024) → 6,8% (nay), +2,1pp**. PE rẻ
+  đi nhưng lãi suất tăng nhanh hơn ⇒ phần bù của cổ phiếu **teo lại**.
+
+⚠️ **Giới hạn nghiêm trọng của chính lăng kính này (caveat (b) của registry):** 26 mốc lãi suất lịch
+sử được neo hồi tố **một lần duy nhất ngày 2026-06-19** — **không phải point-in-time thật**. Mọi phân
+vị lịch sử ở đây mang bias "biết trước". Chỉ mốc từ 2026-06 trở đi (CSV append-only) mới thật sự PIT.
+⇒ **Đây là thành phần yếu nhất trong 3 thành phần của radar ở C.4** — nêu ra vì nó đang là thành phần
+duy nhất kéo radar xuống phía "rẻ" trong tuần qua.
+
+### C.2.2 Tách ngành: ngân hàng vs phi-ngân-hàng — "rẻ" là **do ngân hàng**
+
+Ngân hàng = ICB 8355 (xác minh: VCB/MBB/ACB/HDB/CTG/BID/TCB/VPB đều = 8355). Chiếm **27,0% vốn hoá**
+rổ PB>0 toàn universe. Bảng dưới đo trên **rổ top-100** (aggregate ratio-of-sums, cùng chuẩn C.1):
+
+| Nhóm | Hiện tại | 2008+ | 10 năm | 5 năm | **3 năm** |
+|---|---|---|---|---|---|
+| **P/B ngân hàng** | 1,394 | 19,5 | 6,2 | 4,0 | **1,7** |
+| **P/E ngân hàng** | 8,806 | 7,3 | 9,7 | 18,6 | **7,6** |
+| P/B phi-ngân-hàng (thô, CÓ VIC) | 2,689 | 72,6 | 54,7 | 72,1 | **79,7** |
+| P/E phi-ngân-hàng (thô, CÓ VIC) | 16,955 | 62,5 | 32,9 | 38,2 | 20,9 |
+| P/B phi-ngân-hàng **EX-VIC** | 2,065 | 36,7 | 16,7 | 27,1 | 20,5 |
+| P/E phi-ngân-hàng **EX-VIC** | 12,535 | 32,3 | 4,2 | 5,9 | **0,7** |
+| **P/B phi-ngân-hàng capped-10%** (đối xứng, nên tin nhất) | **2,242** | **56,9** | 36,6 | 54,7 | **63,3** |
+
+**Đọc bảng:**
+1. **Ngân hàng rẻ rõ ràng và bền** — P/B phân vị 1,7 trên 3 năm, P/E 7,6. Không cần khử méo (không
+   ngân hàng nào là mã lớn nhất rổ hôm nay).
+2. **Phi-ngân-hàng: P/E rẻ, P/B thì KHÔNG.** Sau khi khử VIC đối xứng (capped-10%), P/B phi-ngân-hàng
+   vẫn ở phân vị **56,9 (2008+) / 63,3 (3 năm)** — tức **trên trung vị**. Đây là điều bảng ex-VIC
+   (36,7) che mất, và là lý do phải dùng cột đối xứng đúng như Phụ lục B §B.3 đã kết luận.
+3. ⇒ **"Thị trường rẻ" hiện nay KHÔNG đồng đều.** Nó là: **ngân hàng rẻ (cả P/E lẫn P/B) + phần còn
+   lại rẻ theo lợi nhuận nhưng không rẻ theo sổ sách.** Cấu trúc này khác hẳn 2022-11 hay 2020-03,
+   khi cả hai chỉ báo cùng rẻ ở cả hai nhóm.
+
+*(Ghi chú: `ICB_Code` là phân loại **hiện tại** gắn ngược lịch sử — có look-ahead nhẹ về ngành. Ảnh
+hưởng thấp vì mã hiếm khi đổi ngành, nhưng chưa kiểm chứng độc lập.)*
+
+### C.2.3 PEG — **lăng kính yếu nhất, không nên dùng**
+
+PEG aggregate = `PE_aggregate / tăng-trưởng-LN-%`, tăng trưởng = `(ΣNP_P0/ΣNP_P4 − 1)×100` trên
+top-100 (đúng định nghĩa cột `PEG` của `ticker_financial`, áp ở cấp chỉ số).
+
+| Chỉ báo | Hiện tại | 2008+ | CI90 | 10 năm | 5 năm | 3 năm |
+|---|---|---|---|---|---|---|
+| PEG aggregate | 0,233 | 37,7 | [26, 50] | 21,7 | 20,1 | 16,4 |
+| PEG trung vị EW | 0,297 | 62,1 | [51, 74] | 38,6 | 33,8 | 25,8 |
+| **Tăng trưởng LN gộp** | **+57,0%** | **87,8** | [80, 94] | **94,9** | **95,1** | **99,9** |
+
+**Hai lý do loại lăng kính này:**
+1. **PEG "rẻ" hoàn toàn nhờ mẫu số.** Tăng trưởng lợi nhuận +57% đang ở **phân vị 99,9 của 3 năm**.
+   Đây chính xác là rủi ro **"E ở đỉnh chu kỳ"** mà Phụ lục A đã cảnh báo (ROE gộp phân vị 97,7).
+   Chia một PE rẻ cho một tăng trưởng đỉnh chu kỳ ⇒ **nhân đôi cùng một giả định**, không phải thêm
+   thông tin độc lập.
+2. **PEG vô nghĩa về mặt toán học 25,7% thời gian** (1.192/4.633 phiên có tăng trưởng ≤0 ⇒ PEG âm
+   hoặc vô định). Một chỉ báo hỏng 1/4 thời gian không dùng làm thành phần của radar được.
+
+### C.2.4 Kỷ luật đa kiểm định — **0/17 lăng kính sống sót**
+
+Xếp 17 lăng kính đã thử (kể cả của Phụ lục B) theo "p 1 phía" = phân vị/100 cho tuyên bố *"rẻ hơn
+lịch sử của chính nó"*:
+
+| Hạng | Lăng kính | Phân vị | p₁ phía | Ngưỡng BH(10%) | Qua BH? | Qua Bonferroni(5%)? |
+|---|---|---|---|---|---|---|
+| 1 | P/B ngân hàng | 16,9 | 0,169 | 0,0059 | ❌ | ❌ |
+| 2 | P/E ngân hàng | 17,8 | 0,178 | 0,0118 | ❌ | ❌ |
+| 3 | P/E trimmed-5% | 19,6 | 0,196 | 0,0176 | ❌ | ❌ |
+| 4 | P/E bỏ mã lớn nhất | 19,9 | 0,199 | 0,0235 | ❌ | ❌ |
+| 5 | P/B bỏ mã lớn nhất (Phụ lục B) | 22,9 | 0,229 | 0,0294 | ❌ | ❌ |
+| 6 | P/E capped-10% | 27,4 | 0,274 | 0,0353 | ❌ | ❌ |
+| 7–17 | (P/B capped-10%, P/B median EW, %PB<1, PEG, P/E aggregate, EY-spread, P/E & P/B phi-NH…) | 35,0–70,1 | ≥0,35 | ≤0,10 | ❌ | ❌ |
+
+**Số lăng kính thử = 17 · Qua BH (FDR 10%) = 0 · Qua Bonferroni (5%) = 0.**
+
+⚠️ **Đọc bảng này cho đúng — và đây là chỗ dễ bị lạm dụng theo cả hai chiều:**
+- **p₁ phía = phân vị/100 KHÔNG phải p-value thật.** Chuỗi định giá tự tương quan cực mạnh; N độc lập
+  ≈ **19 năm**, không phải 4.633 ngày. Bảng này chỉ để **xếp hạng độ mạnh tương đối** và để đếm số lần
+  đã "ngó" vào dữ liệu, **không phải kiểm định chính thức**.
+- Vì vậy **"0/17 qua BH" KHÔNG chứng minh thị trường không rẻ** — nó chứng minh **không lăng kính nào
+  đủ cực đoan để một mình chịu được chi phí đa kiểm định**. Đó là lý do tồn tại của radar ở C.4: gộp
+  nhiều lăng kính yếu thay vì chọn ra lăng kính rẻ nhất rồi trích dẫn nó một mình.
+- Chiều ngược lại cũng đúng: ai muốn trích "P/E trimmed phân vị 0,8 trên 3 năm" làm bằng chứng mạnh
+  thì đang bỏ qua 16 lăng kính còn lại đã được thử cùng lúc.
+
+---
+
+## C.3 VIỆC 3 — Truy lại và XÁC MINH "PB<1 chiếm gần 60%"
+
+**Tính lại từ đầu, không dựa vào trí nhớ.** Nguồn: `tav2_bq.ticker`, mọi mã ≠ VNINDEX có
+`OShares>0, Price>0, PB>0`, ngày **2026-07-30**.
+
+### C.3.1 Con số hiện tại
+
+| Rổ | Số mã PB<1 / tổng PB>0 | **Tỷ lệ** |
+|---|---|---|
+| **Toàn universe** | **429 / 768** | **55,9%** |
+| Top-500 vốn hoá | — | 29,7% |
+| Top-250 vốn hoá | — | 26,8% |
+| **Top-100 vốn hoá** | — | **14,0%** |
+
+**⇒ "gần 60%" là ĐÚNG** — trên rổ toàn universe. Con số chính xác là **55,9%**. Nguồn tra được từ
+nay: `exp_value_radar/fetch.py` (SQL_B) → `breadth_pb_lt1.csv`, cột `pct_lt1_all`.
+
+### C.3.2 Nhưng phân vị lịch sử nói con số đó **KHÔNG cực đoan**
+
+| Chỉ báo | Cửa sổ | Hiện tại | **Phân vị** | CI90 | N năm | Trung vị | p90 |
+|---|---|---|---|---|---|---|---|
+| Toàn universe | 2008+ | 55,9% | **64,3** | [51, 78] | 19 | 53,7% | 77,4% |
+| Toàn universe | 10 năm | 55,9% | 79,4 | | 11 | 51,4% | 57,3% |
+| Toàn universe | 5 năm | 55,9% | 91,4 | | 6 | 49,0% | 55,5% |
+| Toàn universe | **3 năm** | 55,9% | **98,4** | | 4 | 49,3% | 52,8% |
+| Top-100 | 2008+ | 14,0% | **38,3** | [26, 52] | 19 | 17,0% | 46,0% |
+| Top-100 | 3 năm | 14,0% | 84,8 | | 4 | 9,0% | 15,0% |
+| Top-250 | 2008+ | 26,8% | 50,9 | [36, 66] | 19 | 26,4% | 64,0% |
+
+**Kỷ lục lịch sử: 86,2% ngày 2012-01-13.** Trung bình theo năm (toàn universe / top-100):
+
+| Năm | Toàn | Top-100 | | Năm | Toàn | Top-100 |
+|---|---|---|---|---|---|---|
+| 2008 | 30,1% | 21,3% | | 2018 | 54,1% | 14,9% |
+| 2009 | 36,5% | 20,4% | | 2019 | 55,8% | 17,2% |
+| 2010 | 20,9% | 12,6% | | 2020 | 60,4% | 22,7% |
+| **2011** | **71,8%** | **45,5%** | | 2021 | 38,0% | 4,2% |
+| **2012** | **81,3%** | **52,6%** | | 2022 | 38,3% | 9,0% |
+| **2013** | **77,0%** | **40,5%** | | 2023 | 53,0% | 15,0% |
+| 2014 | 60,1% | 22,0% | | 2024 | 49,5% | 10,3% |
+| 2015–17 | 50,9–55,0% | 12,4–22,8% | | 2025 | 47,5% | 8,5% |
+| | | | | **2026** | **51,7%** | **7,7%** |
+
+### C.3.3 Hai chỉ báo, hai câu hỏi khác nhau — **không được lẫn lộn**
+
+| | %mã PB<1 (bài này) | Phân vị P/B chỉ số (§B.1/B.2) |
+|---|---|---|
+| Cách đo | **đếm đầu mã**, equal-weight | **cân theo vốn hoá** (aggregate hoặc capped) |
+| Trả lời | "Có bao nhiêu **doanh nghiệp** đang bị bán dưới giá trị sổ sách?" | "**Thị trường nói chung** đắt hay rẻ?" |
+| Bị chi phối bởi | đuôi mã nhỏ/UPCOM (768 mã, phần lớn thanh khoản thấp) | vài mã siêu lớn (VIC 20%) |
+| Hôm nay | 55,9% — phân vị 64,3 (2008+) | phân vị 35,0–56,9 tuỳ cách đo |
+
+**Kết luận Việc 3, nói thẳng cả hai chiều:**
+
+- **Ủng hộ user:** 55,9% là số thật, và trên **3 năm gần nhất nó ở phân vị 98,4** — nhiều mã dưới giá
+  trị sổ sách nhất kể từ 2023. Ở top-250 cũng vậy (phân vị 3 năm 98,5).
+- **Phản bác user:** trên thang **19 năm**, 55,9% chỉ là **hơi trên mức bình thường của VN** (trung vị
+  53,7%). VN thường xuyên có ~50% số mã dưới book — đó là đặc tính cấu trúc của một thị trường có
+  đuôi mã nhỏ rất dài, **không phải tín hiệu khủng hoảng**. Muốn thấy khủng hoảng thật thì phải là
+  **2011-2013 (72–81%)** hoặc kỷ lục 86,2%.
+- **Điểm quan trọng nhất:** ở **top-100 chỉ 14,0%** dưới book. Tức "60% doanh nghiệp dưới giá trị sổ
+  sách" **hầu như không chạm tới rổ mà chiến lược của đội thực sự mua** (BAL/LAG/custom30V đều lọc
+  thanh khoản). Trích con số 55,9% để biện minh cho việc giải ngân vào rổ liquid là **so sai rổ**.
+
+---
+
+## C.4 VIỆC 4 — VALUE RADAR
+
+### C.4.1 Thiết kế (và điều đã phải sửa so với đề xuất trong dispatch)
+
+**Thành phần** (mỗi thành phần quy về **phân vị PIT expanding, floor 2008, tối thiểu 500 phiên** ⇒
+đọc tại ngày t chỉ dùng dữ liệu **đến** ngày t, **hoàn toàn nhân quả, không nhìn trước**):
+
+| # | Thành phần | Vì sao chọn |
+|---|---|---|
+| 1 | **P/E capped-10%** | Cách đo bền, đối xứng theo thời gian (C.1) |
+| 2 | **P/B capped-10%** | Cột "bền mặc định" đã chốt ở §B.4 |
+| 3 | **Spread EY − lãi suất huy động** (đảo chiều) | Trục **duy nhất** không phải là một biến thể của giá/sổ-sách (C.2.1) |
+
+**PEG bị LOẠI khỏi radar** (dispatch không yêu cầu đưa vào, nhưng cần nói rõ vì sao không): hỏng
+25,7% thời gian + trùng giả định "E đỉnh chu kỳ" với chính PE (C.2.3).
+
+**Kiểm tra đa cộng tuyến TRƯỚC khi gộp** (N=3.385 phiên chung, 2013-01→2026-07):
+
+| corr (chuỗi phân vị PIT) | p_pe | p_pb | p_sp | | VIF |
+|---|---|---|---|---|---|
+| p_pe | 1,000 | **0,823** | 0,718 | | 3,14 |
+| p_pb | 0,823 | 1,000 | **0,833** | | **4,97** |
+| p_sp | 0,718 | 0,833 | 1,000 | | 3,31 |
+
+Trên **giá trị thô**: corr(PE, PB) = **0,913** — rất cao (đúng như dispatch lo ngại và đúng đồng nhất
+thức §A.4.1: PB = PE × ROE).
+
+**Quyết định + nói thẳng giới hạn:** VIF cao nhất 4,97 < ngưỡng quy ước 10 ⇒ **vẫn gộp**, nhưng
+**radar KHÔNG phải 3 lăng kính độc lập — thực chất ~1,5–2 chiều thông tin.** Điều này đã được kiểm
+chứng: `radar2` (chỉ PE+PB) cho **36,6** so với `radar3` **36,0** — chênh 0,6 điểm ⇒ thành phần thứ 3
+gần như không thêm gì ở thời điểm hiện tại. Ai đọc radar như "3 nguồn bằng chứng độc lập cùng nói
+rẻ" là **đếm trùng**.
+
+**Điểm composite** = trung bình 3 phân vị. **Ngưỡng cố định, khai báo trước, không tinh chỉnh:**
+**RẺ < 33 · TRUNG TÍNH 33–67 · ĐẮT > 67** (tercile quy ước, chọn trước khi nhìn kết quả 2018/2022).
+
+⚠️ Vì spread cần chuỗi lãi suất từ 2011 + 500 phiên khởi động, `radar3` chỉ có từ **2013-01-03**.
+Trước mốc đó `radar3` = `radar2` (trung bình bỏ NaN) ⇒ **các đọc số trước 2013 thực chất là radar
+2-thành-phần**, đã ghi rõ trong bảng.
+
+Phân bố nhãn trên 4.134 phiên có dữ liệu: TRUNG TÍNH 2.019 · ĐẮT 1.061 · RẺ 1.054.
+
+### C.4.2 Radar đọc gì tại MỌI đợt sụt giảm lớn 2008+ (không chọn lọc case)
+
+Đợt = chuỗi phiên có drawdown từ đỉnh 52 tuần ≤ −20%, kết thúc khi hồi lên > −10%. Đọc radar **tại
+ngày đáy** của mỗi đợt:
+
+| Đợt | Ngày đáy | DD tại đáy | VNINDEX | **Radar** | **Nhãn** | P/E | P/B | Spread | DT5G | fwd 6M | fwd 12M |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 2008-04 → 2009-06 | 2008-12-10 | −68,9% | 286,8 | *n/a* | *(trước 2010)* | 7,0 | 1,30 | — | — | +64,7% | +54,9% |
+| 2009-06 → 2009-08 | 2009-07-20 | −26,5% | 412,9 | *n/a* | *(trước 2010)* | 13,9 | 1,99 | — | — | +24,1% | +22,4% |
+| 2009-11 → 2011-01 | 2010-08-25 | −32,1% | 423,9 | 24,8 | **RẺ** | 10,0 | 1,93 | — | — | +8,0% | +0,4% |
+| 2011-05 → 2011-09 | 2011-08-12 | −26,5% | 383,9 | 5,8 | **RẺ** | 8,0 | 1,41 | −1,48 | — | +3,5% | +11,9% |
+| 2011-10 → 2012-03 | **2012-01-06** | −35,6% | 336,7 | **0,0** | **RẺ** | 6,7 | 1,13 | +1,02 | — | +21,4% | **+33,3%** |
+| 2012-08 → 2013-01 | 2012-11-02 | −23,1% | 375,3 | 13,8 | **RẺ** | 8,9 | 1,33 | +2,24 | — | +28,9% | +33,2% |
+| **2018-05 → 2019-04** | **2019-01-03** | −27,1% | 878,2 | **73,9** | **ĐẮT** | 15,9 | 2,36 | −0,72 | NEUTRAL | +11,4% | **+9,2%** |
+| 2020-03 → 2020-10 | **2020-03-24** | −35,7% | 659,2 | 11,0 | **RẺ** | 10,3 | 1,54 | +3,21 | CRISIS | +37,5% | **+76,4%** |
+| **2022-05 → 2023-07** | **2022-11-15** | −40,3% | 911,9 | **7,2** | **RẺ** | 9,3 | 1,55 | +3,92 | CRISIS | +16,9% | **+20,8%** |
+
+### C.4.3 Kiểm chứng ĐÚNG các mốc user nhắc — **trí nhớ đúng 1/3**
+
+| Mốc | Ngày | Radar | Nhãn | p_pe | p_pb | p_sp | P/E | P/B | fwd 12M | min 12M |
+|---|---|---|---|---|---|---|---|---|---|---|
+| **2018 đáy giữa năm** | 2018-07-11 | **82,1** | **ĐẮT** | 91,5 | 83,9 | 70,8 | 17,32 | 2,45 | +10,0% | −1,7% |
+| **2018-Q4 đáy (thương chiến)** | 2018-12-28 | **74,7** | **ĐẮT** | 82,3 | 79,1 | 62,8 | 16,20 | 2,40 | +8,1% | −1,6% |
+| **2022-Q2 đáy** | 2022-06-16 | **35,5** | **TRUNG TÍNH** | 39,7 | 59,2 | 7,6 | 12,83 | 2,23 | **−10,1%** | **−26,3%** |
+| **2022-Q4 đáy (SCB/Terra)** | 2022-11-15 | **7,2** | **RẺ** | 11,2 | 10,5 | 0,0 | 9,33 | 1,55 | +20,8% | +3,4% |
+| 2020-03 đáy COVID | 2020-03-30 | 11,0 | RẺ | 19,8 | 12,7 | 0,6 | 10,24 | 1,55 | +79,9% | 0,0% |
+| 2012-01 đáy | 2012-01-06 | 0,0 | RẺ | 0,0 | 0,0 | — | 6,66 | 1,13 | +33,3% | +0,8% |
+| **CAPIT fire** | **2026-07-20** | **38,4** | **TRUNG TÍNH** | 31,4 | 45,5 | 38,1 | 12,20 | 1,91 | — | — |
+| **HÔM NAY** | **2026-07-30** | **36,0** | **TRUNG TÍNH** | 27,4 | 45,8 | 34,8 | 11,93 | 1,91 | — | — |
+
+**Xác minh trí nhớ "cả 2018 và 2022 radar đều đọc ĐẮT" — kết quả 1 đúng, 2 sai:**
+
+1. ✅ **2018 ĐÚNG, và đúng rất đẹp.** Cả hai đáy 2018 đều đọc **ĐẮT** (82,1 và 74,7) — thị trường sập
+   −27% nhưng **định giá vẫn ở phân vị 75–82** vì nó rơi từ một đỉnh định giá (2017-2018 radar trung
+   bình năm 85,1 và 87,1 — hai năm đắt nhất lịch sử chuỗi). Đây **đúng là loại bằng chứng có giá trị
+   thật** mà user mô tả: radar phân biệt được "**giảm giá vì bong bóng xì hơi**" (2018 → fwd 12M chỉ
+   +8,1%) khỏi "**giảm giá vì hoảng loạn**" (2020-03, 2022-11 → +76,4% và +20,8%).
+2. ❌ **2022-Q4 SAI HẲN.** 2022-11-15 là **RẺ 7,2** — một trong những đọc số rẻ nhất của cả kỷ nguyên
+   hiện đại, và nó **hoạt động đúng**: fwd 12M +20,8% với mức lỗ sâu nhất chỉ **+3,4%** (không bao giờ
+   âm). Đây là ca thành công lớn nhất của radar, không phải ca thất bại.
+3. ⚠️ **2022-Q2 GẦN ĐÚNG NHƯNG KHÔNG PHẢI "ĐẮT".** 2022-06-16 đọc **TRUNG TÍNH 35,5** — và đó chính
+   là ca cảnh báo giá trị nhất: thị trường đã sập −19% và *cảm giác* như washout, nhưng radar nói
+   **chưa rẻ**, sau đó **rơi tiếp −26,3%** trước khi chạm đáy thật vào tháng 11. Trí nhớ "radar nói
+   đắt nên đừng mua" **về mặt HÀNH ĐỘNG là đúng**, chỉ sai về nhãn.
+
+### C.4.4 Radar có phân biệt kết cục không? — **có, nhưng biên độ mỏng ở mức thống kê**
+
+Base rate 12 tháng theo nhãn, CI90 **block-bootstrap theo episode** (khối tách khi cách >21 phiên,
+4.000 lần) — đúng phương pháp §2:
+
+| Nhãn | N ngày | **N episode** | fwd 12M trung vị | **CI90** | P(bear ≤−20%) | CI90 |
+|---|---|---|---|---|---|---|
+| **RẺ** | 1.049 | **18** | **+14,1%** | **[+5,7; +25,6]** | 15,6% | [2, 31] |
+| TRUNG TÍNH | 1.784 | 13 | +8,8% | [−1,1; +22,7] | 17,4% | [5, 42] |
+| **ĐẮT** | 1.047 | **7** | **−1,2%** | **[−6,9; +15,8]** | 30,3% | [24, 31] |
+| *(vô điều kiện)* | 3.880 | — | +8,3% | — | 20,4% | — |
+
+**Hiệu RẺ − ĐẮT = +15,3pp · CI90 [+0,1; +27,8] · P(hiệu ≤ 0) = 0,049.**
+corr(radar, fwd 12M) = **−0,188** (Spearman **−0,212**), N ≈ 16 năm độc lập.
+
+Chi tiết theo dải (đây là bảng quan trọng nhất cho Việc 5):
+
+| Dải radar | N ngày | N episode | fwd 12M trung vị | P(bear) | P(fwd<0) |
+|---|---|---|---|---|---|
+| 0–20 (rẻ cực đoan) | 449 | 9 | +11,7% | **20,9%** | 27,8% |
+| **20–33 (rẻ)** | 600 | 22 | **+16,0%** | **11,7%** | **12,7%** |
+| **33–45 (trung tính thấp ← HÔM NAY)** | **826** | **21** | **+9,2%** | **15,9%** | **27,4%** |
+| 45–55 | 552 | 18 | +7,5% | 11,8% | 26,4% |
+| 55–67 | 406 | 11 | +9,0% | 28,1% | 36,2% |
+| 67–100 (đắt) | 1.047 | 7 | −1,2% | 30,3% | 52,9% |
+
+**Ba điều phải nói thẳng:**
+1. **Xếp hạng đúng chiều và đơn điệu ở đầu ĐẮT** — dải 67-100 tệ hơn hẳn mọi dải khác trên cả hai
+   thước đo. Đây là phần **đáng tin nhất** của radar.
+2. **NHƯNG hiệu RẺ−ĐẮT chỉ vừa đủ loại 0** (CI90 chạm +0,1; P=0,049), và **N_episode phía ĐẮT chỉ
+   bằng 7** — đúng cái bẫy cỡ mẫu §2.1/A.4.3. Ngoài ra 7 episode ĐẮT đó **tập trung vào 2017-2019 và
+   2021** ⇒ phần lớn "bằng chứng radar hiệu quả" đến từ **2-3 chu kỳ**, không phải 16 sự kiện độc lập.
+3. **Đầu RẺ KHÔNG đơn điệu**: dải rẻ-cực-đoan (0-20) **tệ hơn** dải rẻ-vừa (20-33) trên cả fwd 12M
+   (+11,7% vs +16,0%) lẫn P(bear) (20,9% vs 11,7%). Lý giải cơ học: radar chạm 0-20 khi đang **ở giữa**
+   một cuộc khủng hoảng, tức còn dư địa rơi tiếp. **⇒ "radar càng rẻ càng nên mua" là SAI.**
+
+### C.4.5 Đọc số HIỆN TẠI — và độ nhạy của nhãn
+
+> **Cập nhật 2026-07-30 (job `Taylor_20260730_164533`) — ĐÃ ĐÓNG GÓI THÀNH MODULE HIỂN THỊ.**
+> User chốt dùng **cửa sổ ROLLING 10 NĂM** làm bản chính (lựa chọn phương pháp của user, không
+> phải kết luận thống kê của phụ lục này) ⇒ radar 07-30 hiển thị **25,9 RẺ**, không phải 36,0.
+> Module canonical: **`value_radar.py`** (repo `WorkingClaude`) + cache `data/value_radar_series.csv`;
+> registry: `kb/data_registry/market-state/value_radar_series.md`. Hiển thị cạnh DT5G ở
+> `dna_report.py` (khối NOW) + `mike/bin/eod_trading_report.sh`. Parity self-check với
+> `exp_value_radar/radar.csv`: lệch nhãn **0/4.134 phiên**. **Ranh giới giữ nguyên: THUẦN HIỂN THỊ,
+> KHÔNG code quyết định trading nào được đọc** (0/17 lăng kính qua BH/Bonferroni, đầu RẺ không đơn điệu).
+
+**Radar 07-30 = 36,0 → TRUNG TÍNH.** Nhưng nhãn này **cực kỳ sát biên**, phải công bố đầy đủ:
+
+| Biến thể | Giá trị | Nhãn |
+|---|---|---|
+| radar3 (trung bình 3 thành phần, PIT expanding) — **bản chính** | **36,0** | **TRUNG TÍNH** |
+| radar3 trung vị (thay vì trung bình) | 34,8 | TRUNG TÍNH |
+| radar2 (chỉ P/E + P/B) | 36,6 | TRUNG TÍNH |
+| **radar3 cửa sổ ROLLING 10 năm** (thay vì expanding) | **25,9** | **RẺ** ← *cửa sổ CHÍNH kể từ 2026-07-30 (user chốt)* |
+| radar3 với **tercile thực nghiệm** của chính chuỗi (p33 = 37,7) | 36,0 | **RẺ** |
+
+Và 8 phiên gần nhất:
+
+| Ngày | P/E₁₀ | P/B₁₀ | Spread | radar3 | Nhãn |
+|---|---|---|---|---|---|
+| 2026-07-20 *(CAPIT fire)* | 12,20 | 1,91 | +1,39 | 38,4 | TRUNG TÍNH |
+| 2026-07-22 | 11,80 | 1,85 | +1,68 | **31,7** | **RẺ** |
+| 2026-07-23 | 11,83 | 1,86 | +1,65 | 33,0 | TRUNG TÍNH |
+| 2026-07-24 | 11,72 | 1,85 | +1,73 | **31,0** | **RẺ** |
+| 2026-07-27 | 11,50 | 1,83 | +1,89 | **27,9** | **RẺ** |
+| 2026-07-28 | 11,56 | 1,84 | +1,85 | **29,1** | **RẺ** |
+| 2026-07-29 | 11,65 | 1,86 | +1,78 | **31,3** | **RẺ** |
+| **2026-07-30** | **11,93** | **1,91** | **+1,58** | **36,0** | **TRUNG TÍNH** |
+
+**Đọc trung thực:** radar **đã ở vùng RẺ 5/7 phiên vừa qua** (đúng cửa sổ CAPIT đang giải ngân), và
+trở lại TRUNG TÍNH hôm nay **chỉ vì VNINDEX bật +3,8% trong 2 phiên** (1.680,6 → radar +6,9 điểm).
+Câu đúng là: **"thị trường đang dao động ngay trên biên RẺ/TRUNG TÍNH"**, không phải "đã rẻ" cũng
+không phải "chưa rẻ". Bất kỳ ai trích một trong hai nhãn mà không nói nó lật qua lại theo ±4% chỉ số
+là đang trình bày sai độ chắc chắn.
+
+**Bối cảnh drawdown** (để so đúng loại sự kiện): hôm nay **−12,8%** từ đỉnh 52 tuần — **nông hơn hẳn**
+2018-12-28 (−25,9%), 2022-06-16 (−19,1%), 2022-11-15 (−40,3%). ⇒ Hôm nay **không phải một đáy
+washout**; so nó với các *đáy* trong bảng C.4.2/C.4.3 là so hai loại thời điểm khác nhau.
+
+![Value Radar](value_radar_20260730.png)
+
+---
+
+## C.5 VIỆC 5 — Hàm ý cho quyết định mua hiện tại (CAPIT đang giải ngân)
+
+### C.5.1 Trả lời THẲNG câu hỏi cốt lõi của user
+
+> *"Hiện tại tôi thấy rẻ. Mua vào có đảm bảo xác suất thắng cao hơn không, dựa trên radar giá trị
+> (độc lập với tâm lý DT5G)?"*
+
+**Trả lời: KHÔNG — bằng chứng hiện có KHÔNG đủ để nói xác suất thắng cao hơn.** Bốn lý do, theo thứ
+tự sức nặng:
+
+1. **Radar hôm nay ở dải 33–45, và dải đó gần như không có lợi thế.** fwd 12M trung vị **+9,2%** so
+   với vô điều kiện **+8,3%** (chênh 0,9pp); P(bear) **15,9%** vs **20,4%**. Với N_episode = 21 và
+   CI90 của chính nhãn TRUNG TÍNH là **[−1,1; +22,7]**, chênh lệch này **không phân biệt được với 0**.
+   Muốn có lợi thế đo được thì cần vào dải **20–33** (+16,0%, P_bear 11,7%) — radar đã ở đó 5 phiên
+   tuần trước nhưng **hôm nay đã ra khỏi**.
+2. **Ba trên bốn góc nhìn mới ở Việc 2 KHÔNG xác nhận "rẻ".** Spread EY−lãi suất ở giữa (và **hẹp
+   hơn 88% số phiên 3 năm qua**); P/B phi-ngân-hàng đo bền vẫn ở phân vị 56,9; PEG rẻ chỉ nhờ tăng
+   trưởng ở phân vị 99,9 — tức **rẻ có điều kiện "E giữ được đỉnh"**, đúng rủi ro Phụ lục A đã cảnh
+   báo. Chỉ **ngân hàng** là rẻ không tranh cãi.
+3. **Analog gần nhất theo radar là 2022-06-16 (TRUNG TÍNH 35,5), và nó rơi tiếp −26,3%.** N = 1, tuyệt
+   đối **không được dùng làm dự báo** — nhưng nó đủ để bác bỏ luận điểm "TRUNG TÍNH-thấp là đủ an
+   toàn để tăng cược".
+4. **"0/17 lăng kính qua BH"** (C.2.4) — không có một góc nhìn định giá nào đủ cực đoan để một mình
+   chịu chi phí đa kiểm định.
+
+### C.5.2 Nhưng điều gì **CÓ** ủng hộ user — nói cho công bằng
+
+1. **Hôm nay KHÁC HẲN 2018.** Radar 36,0 vs 74,7/82,1 — đây là bằng chứng thật, có hướng, và là điểm
+   trí nhớ user đúng. Kịch bản "sập tiếp vì bong bóng định giá xì hơi" (2018 kiểu) **không phải là
+   kịch bản đang mở hôm nay**. Điều này **loại một rủi ro**, dù không tạo một lợi thế.
+2. **P/E đo bền rẻ thật, không phải ảo giác** (C.1): phân vị 3 năm 0,5–5,6 qua **4 cách đo đối xứng
+   độc lập**. Cộng với Phụ lục B đã lật P/B ⇒ **cả hai chỉ báo cổ điển cùng nói rẻ** cho cổ phiếu
+   điển hình.
+3. **Ngân hàng (27% vốn hoá) rẻ rõ ràng**: P/B phân vị 1,7 và P/E 7,6 trên 3 năm. Đội đang có
+   MBB/ACB/HDB ở Tier 1 — luận điểm định giá cho riêng nhóm này **đứng vững**.
+4. **%mã PB<1 ở phân vị 98,4 của 3 năm** — nhiều doanh nghiệp bị bán dưới sổ sách nhất kể từ 2023
+   (dù không cực đoan trên thang 19 năm).
+
+### C.5.3 Cỡ mẫu thật cho câu hỏi "washout + rẻ thì sao?"
+
+Dispatch yêu cầu báo N thật. Trên **7 đợt sụt giảm ≤−20% có radar đọc được và có dữ liệu forward**:
+
+| Nhóm | N | fwd 12M | Chi tiết |
+|---|---|---|---|
+| Đáy **RẺ** | **6** | trung vị **+27,0%** | +0,4 / +11,9 / +33,3 / +33,2 / +76,4 / +20,8 |
+| Đáy **KHÔNG-RẺ** | **1** | +9,2% | 2019-01-03 (ĐẮT) |
+
+**N = 6 + 1.** Không có kiểm định thống kê nào có nghĩa trên cỡ mẫu này — CI sẽ phủ toàn bộ khoảng
+có thể. Bảng này chỉ có giá trị **minh hoạ**, không phải bằng chứng. **Ai trích "đáy rẻ cho +27% còn
+đáy đắt chỉ +9%" như một base rate là đang bịa độ chắc chắn từ 1 quan sát ở nhóm đối chứng.**
+
+Cỡ mẫu **dùng được** là bảng theo dải ở C.4.4 (N_episode 7–22), và ở đó kết luận đã nêu ở C.5.1.
+
+### C.5.4 Ranh giới — KHÔNG đề xuất đổi gì
+
+- **KHÔNG đề xuất đổi `capit_size`, `WASHOUT_GATE`, sizing CAPIT, hay bất kỳ tham số production nào.**
+  Radar không phải input của DT5G/CAPIT/V2.4 và bài này không đề nghị biến nó thành input.
+- Nếu sau này có ai muốn wire radar (dù chỉ là tilt nhẹ hay gate), **bắt buộc**: khai báo **N trials**
+  (bài này đã dùng ≥17 lăng kính + 4 biến thể radar + 2 cách chọn ngưỡng ⇒ N_trials ≥ 23), tính
+  **DSR** trên NAV của config sắp deploy, **PBO/CSCV** vì radar được chọn từ một họ biến thể, cộng
+  **per-year leave-one-out** (nghi vấn hiện tại: phần lớn edge nằm ở 2017-2019 + 2021), rồi mới tới
+  **quant-skeptic**. Với hiệu RẺ−ĐẮT có P = 0,049 **trước** mọi hiệu chỉnh đa kiểm định, khả năng cao
+  nó **không sống sót** qua DSR — đây là dự đoán, không phải kết quả đã đo.
+- **Dùng radar như thế nào cho ĐÚNG ngay bây giờ**: như một **lăng kính mô tả song song DT5G** trong
+  macro-view và báo cáo (đúng tinh thần §3.2 shadow-log của `fundamental_valuation_framework_20260729.md`,
+  nay có số đọc được thay vì log câm), **không phải cổng, không phải tilt, không phải lý do đổi
+  sizing**. Giá trị lớn nhất của nó là **cảnh báo chiều ngược** (nhãn ĐẮT), không phải cấp phép mua
+  (nhãn RẺ) — vì đó là phần đơn điệu và tách bạch nhất trong C.4.4.
+
+---
+
+## C.6 Giới hạn của Phụ lục C (đọc trước khi trích dẫn)
+
+1. **Đa cộng tuyến chưa khử, chỉ khai báo.** corr(P/E, P/B) thô = 0,913; radar thực chất ~1,5–2 chiều.
+   Không dùng PCA/orthogonalize vì sẽ mất tính diễn giải — đánh đổi có chủ đích, nhưng nó có nghĩa
+   **radar không "gộp 3 bằng chứng độc lập"**.
+2. **Chuỗi lãi suất huy động KHÔNG point-in-time** (26 mốc neo hồi tố 2026-06-19). Thành phần thứ 3
+   của radar mang bias hindsight cho toàn bộ lịch sử trước 2026-06. Đây là **lỗi hệ thống chưa sửa
+   được**, không phải nhiễu.
+3. **Ngưỡng 33/67, cap 10%, trim 5%, MINP=500, khối 21 phiên** đều là quy ước, **không quét độ nhạy
+   đầy đủ**. Đã cho thấy nhãn hôm nay lật giữa RẺ/TRUNG TÍNH tuỳ expanding-vs-rolling và tuỳ tercile
+   cố định-vs-thực nghiệm ⇒ **độ nhạy thật, không phải giả định**.
+4. **N_episode nhỏ ở nhánh ĐẮT (=7)** và tập trung 2017-2019/2021. Chưa làm per-year leave-one-out —
+   nếu 2018 gánh phần lớn edge thì kết luận C.4.4 yếu đi đáng kể. **Việc còn để ngỏ.**
+5. **`ICB_Code` là phân loại hiện tại gắn ngược lịch sử** (look-ahead nhẹ ở C.2.2).
+6. **Trôi thành phần rổ + vintage quý** — kế thừa nguyên §B.6.4/B.6.5: giả định các cột `PE`/`PB`/
+   `BVPS`/`OShares` trong `tav2_bq.ticker` tôn trọng độ trễ công bố **vẫn chưa được kiểm chứng độc
+   lập**. Nếu chúng ghép theo ngày kết thúc quý thì mọi phân vị lệch nhẹ và **radar có look-ahead nhẹ
+   ở tầng dữ liệu** (chưa đo được mức độ).
+7. **Rổ toàn universe ở Việc 3 gồm 768 mã, phần lớn thanh khoản rất thấp** — không lọc ADV. Con số
+   55,9% vì thế **không mô tả rổ mà đội có thể mua** (top-100: 14,0%).
+8. **Không backtest, không đổi production, không cần quant-skeptic** — như bản chính, Phụ lục A và B.
+   Cần quant-skeptic **ngay khi** ai đó đề xuất dùng radar để đổi hành vi giao dịch.
+
+---
+
+## C.7 Tái lập
+
+Thư mục: `mike/agents/Taylor/exp_value_radar/`
+
+| Bước | Script | Đầu ra |
+|---|---|---|
+| 1 | `fetch.py` | `panel300.parquet` (1.357.548 dòng, top-300/phiên, 2008+) · `agg_universe.csv` (4.635 phiên, tổng hợp toàn universe) |
+| 2 | `v1_pe.py` | Việc 1 — self-check parity + 9 cách đo PE → `pe_variants.csv`, `pe_percentiles.csv` |
+| 3 | `v2v3.py` | Việc 2 + 3 → `ey_spread.csv`, `sector_split.csv`, `peg.csv`, `breadth_pb_lt1.csv` |
+| 4 | `v4_radar.py` | Việc 4 — radar PIT + episode → `radar.csv`, `episodes.csv`, `dt5g.csv` |
+| 5 | `v5_stats.py` | CI90 bootstrap + BH/Bonferroni + sector robust + chart → `sector_robust.csv`, `research/value_radar_20260730.png` |
+| 6 | `v6_extra.py` | Đối chiếu PE chính thức, độ nhạy ngưỡng, dải radar, `vnindex_pe_official.csv` |
+
+Interpreter: `/home/trido/thanhdt/wc_venv/bin/python` (= `$DNA_PYEXE`). Nguồn BQ: `tav2_bq.ticker`
+(CANONICAL, `data_registry/fundamentals/valuation_pe_pb_pcf_ps.md`), `tav2_bq.vnindex_5state_dt5g_live`
+(CANONICAL, KHÔNG dùng `vnindex_5state` — bẫy đã biết), `deposit_rate_vn.py` (CANONICAL-PROXY).
+Chuỗi forward returns tái dùng `exp_market_prob/panel_fwd.csv` (đã kiểm parity ở C.1.1).

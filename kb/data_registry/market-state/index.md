@@ -16,6 +16,7 @@ title: Market state / regime (nhóm rủi ro cao nhất — đã có sự cố t
 | [`pt_v12_live_logs.md`](pt_v12_live_logs.md) — data/pt_v12_live_logs.csv | DEAD |
 | [`pt_v12_macro.md`](pt_v12_macro.md) — data/pt_v12_macro*.csv | RESEARCH |
 | [`pt_v22_dt5g_open_positions.md`](pt_v22_dt5g_open_positions.md) — data/pt_v22_dt5g_open_positions.csv | DERIVED |
+| [`value_radar_series.md`](value_radar_series.md) — data/value_radar_series.csv (+ value_radar.py) | CANONICAL (DISPLAY-ONLY, cấm consumer quyết định) |
 | [`vn30f_daily.md`](vn30f_daily.md) — tav2_bq.vn30f_daily | DEAD |
 | [`vnindex_5state.md`](vnindex_5state.md) — tav2_bq.vnindex_5state | TRAP |
 | [`vnindex_5state_archive_family.md`](vnindex_5state_archive_family.md) — tav2_bq.vnindex_5state_staging / _archive_* / _v2g_* / _tam_quan_v31/v33b_clean / _baseline_* | ARCHIVE |
