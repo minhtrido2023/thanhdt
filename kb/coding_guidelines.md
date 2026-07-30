@@ -358,3 +358,41 @@ giống hệt nhau = gần như chắc chắn đang đọc chung không lọc �
 đọc xem record có bị lọc account trước khi vào phép tính hay không (audit 2026-07-22: 4/4 script
 kế toán đã lọc đúng; `execution_quality_review.py` chỉ lọc KHI truyền `--account`, mặc định gộp cả
 2 account — chấp nhận được cho công cụ review ad-hoc, KHÔNG được dùng làm nguồn số báo cáo).
+
+## 13. Sửa 1 file `kb/` cần Mike duyệt trước khi live → ghi ra `<file>.proposed`, KHÔNG sửa tại chỗ
+
+**Root cause (2026-07-30, 2 lần cùng ngày):** một agent được dặn "sửa `kb/canonical.md` nhưng để
+CHƯA commit, chờ Mike đọc diff" — cả 2 lần, `bin/consolidate.sh` (cron mỗi giờ + tự trigger sau MỌI
+dispatch) quét `git add kb/` + `git commit -- kb/` **BLANKET**, cuốn bản sửa dở vào 1 commit thường
+lệ trong vài chục giây, trước khi Mike kịp đọc. Thử vá bằng cơ chế "hold-list" (`state/
+kb_pending_review.txt` + TTL + pathspec exclude trong `consolidate.sh`) — arch-reviewer bác bỏ:
+`bin/fleet_backup.sh` (00:00 ICT, `git add -A`) và `bin/kb_nightly.sh` (02:00 ICT, `git add kb/`)
+vẫn quét blanket ĐỘC LẬP, không biết gì về hold-list; đo được **32,8% job dispatch bắt đầu đúng
+trong khung giờ mà TTL không kịp cảnh báo trước khi 1 trong 2 sweeper đó quét qua** — và khi bị
+cuốn, `publish_context.sh` (đọc `git show HEAD:<path>`) xuất bản đúng bản CHƯA duyệt kèm banner
+khẳng định "đây là bản đã duyệt" — cổng mở nhưng tự nhận là đóng, tệ hơn không có cổng nào.
+
+**Quy ước đúng, đã dùng sẵn cho code (`bin/*.sh.draft`, §10) — áp dụng y hệt cho nội dung `kb/`:**
+khi 1 agent/Mike sửa `kb/<file>` mà cần Mike đọc/duyệt trước khi live, **ghi bản mới ra
+`kb/<file>.proposed`** (file anh em, cùng thư mục) — **KHÔNG đụng vào `kb/<file>` gốc**. Vì:
+- `consolidate.sh`/`fleet_backup.sh`/`kb_nightly.sh` chỉ `git add`/`commit` các đường dẫn **thật**
+  — file `.proposed` được add như 1 file mới vô hại, không ảnh hưởng nội dung file gốc.
+- `publish_context.sh` chỉ `cat` đúng tên file thật (`current_ops.md`, `canonical.md`,
+  `projects/INDEX.md`) — không bao giờ đọc `.proposed`, nên bản đang chờ duyệt **không thể** lọt
+  vào `context_pack.md` dù có bao nhiêu lần consolidate chạy.
+- Các file role-scoped `@`-import thẳng từ working tree (`context_safety_core.md`,
+  `context_planning_mini.md`, `context_execution_mini.md`, `context_dataops_mini.md`,
+  `context_ops_mini.md`) — hold-list KHÔNG che được các file này (chỉ publish_context.sh mới hiểu
+  hold-list); `.proposed` che được VÌ agent đơn giản không viết vào file thật.
+- **Không cần state file, không cần TTL/debounce, không cần lock** — không có gì để mất-cập-nhật
+  hay quên-release: `.proposed` mồ côi vô hại (Mike hoặc `kb_nightly.sh` grep `find kb/ -name
+  '*.proposed' -mtime +1` định kỳ nhắc dọn/áp dụng, không phải gate).
+
+**Mike áp dụng khi duyệt xong:** đọc `diff kb/<file> kb/<file>.proposed`, nếu OK →
+`mv kb/<file>.proposed kb/<file>` rồi `git add`+`commit` như thường lệ (Mike tự commit, không dựa
+consolidate.sh sweep hộ). Nếu cần sửa thêm → sửa tiếp `.proposed`, không đụng file gốc, không lo
+mất bản đang chờ duyệt vì không tiến trình nào khác động vào đường dẫn `.proposed`.
+
+**Dặn rõ trong MỌI dispatch prompt yêu cầu "sửa X nhưng để Mike duyệt trước":** nói thẳng tên file
+`.proposed`, đừng chỉ nói "để uncommitted" — đó là chỗ 2 lần sự cố hôm nay bị hiểu nhầm thành "sửa
+tại chỗ, đừng git commit" trong khi mối nguy thật không nằm ở git.

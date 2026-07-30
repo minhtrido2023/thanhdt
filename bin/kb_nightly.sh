@@ -545,6 +545,22 @@ for f in "$ROOT/kb/memory/"*.md; do
     fi
 done
 
+# ── Phase 2b: nag on stale kb/*.proposed files (coding_guidelines.md §13, 2026-07-30) ─────────
+# Reminder only, NOT a gate — a `.proposed` file is inert (no script reads it, consolidate.sh
+# never sweeps it into the real file), so a forgotten one costs nothing except staying unapplied.
+# mtime of the file itself is the "since when" marker; no separate state file needed.
+STALE_PROPOSED=""
+while IFS= read -r -d '' f; do
+    age_h=$(( ( $(date -u +%s) - $(stat -c %Y "$f") ) / 3600 ))
+    if [ "$age_h" -gt 24 ]; then
+        STALE_PROPOSED="$STALE_PROPOSED ${f#$ROOT/}(${age_h}h)"
+    fi
+done < <(find "$ROOT/kb" -name "*.proposed" -print0 2>/dev/null)
+if [ -n "$STALE_PROPOSED" ]; then
+    log "STALE .proposed files (>24h, chưa áp dụng):$STALE_PROPOSED"
+    "$ROOT/bin/notify.sh" "ℹ️ [kb_nightly] File .proposed chờ Mike duyệt >24h, chưa áp dụng:$STALE_PROPOSED — diff + mv nếu OK, hoặc xoá nếu không cần nữa." >/dev/null 2>&1 || true
+fi
+
 # ── Phase 3: commit if changed ────────────────────────────────────────────────
 if git -C "$ROOT" diff --quiet && git -C "$ROOT" status --porcelain | grep -q .; then
     :  # new untracked files
