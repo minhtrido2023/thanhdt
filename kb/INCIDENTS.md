@@ -4529,3 +4529,22 @@ vì nằm lẫn trong một khối text dài không ai rà.
 (account-scope exclude LIVE mặc định + None-check rõ ràng cho BQ cache), `cash_only_loan_package_selfcheck.py`
 (test tổng quát mọi BrokerBase subclass), `mike/bin/paper_programs_daily_report.py` (attention-flag scan
 cho mọi probe "command").
+
+**Addendum (cùng ngày) — review độc lập thay vì quant-skeptic:** user hỏi có cần quant-skeptic
+verify không. Đánh giá: KHÔNG phù hợp — checklist 7-attack của quant-skeptic (look-ahead,
+OOS, panel-curation, param-overfit, capacity/ADV, arithmetic CAGR/Sharpe) toàn bộ nhắm vào
+claim R&D/backtest, không áp dụng cho bug plumbing (không có claim định lượng nào để bác bỏ).
+Thay vào đó dispatch review độc lập (agent tổng quát, không thấy lý luận gốc, tự chạy lại mọi
+thứ) nhắm đúng vào correctness — và tìm ra 1 gap thật: **4 file selfcheck khác
+(`churn_guard_selfcheck.py`, `extreme_regime_selfcheck.py`, `tick_retry_selfcheck.py`,
+`t2_settlement_selfcheck.py`) dùng `FakeBroker`/`_RecordingBroker` test double cũng thiếu tham
+số `cash_only`** — cùng lỗ hổng như PaperBroker nhưng bản test double, đã bị hỏng ÂM THẦM từ
+07-28 (khi `executor.py` thêm `cash_only=` vào lời gọi) không ai biết, đúng tinh thần "lỗi mà
+không biết" của điều tra hôm nay. Đã tự verify độc lập (chạy lại cả 4, thấy đúng lỗi) rồi fix
+cùng pattern (`cash_only=False`, bỏ qua) — cả 4 giờ PASS 100%. Commit `ac62143` (repo
+WorkingClaude). 1 mục KHÔNG fix hôm nay (pre-existing, không liên quan sự cố này): assertion
+"engine order cash_only=True" trong `cash_only_loan_package_selfcheck.py` đọc thẳng file state
+mutable `data/trade_plans/discretionary/state_TV1_SpaceX.json` — TV1 đã chuyển `status:
+completed` (chương trình xong 07-29) nên assertion tự nhiên FAIL, không phải regression; nên
+đóng băng 1 bản fixture riêng cho test này thay vì đọc state sống, nhưng để dành việc đó cho
+lúc khác (không thuộc phạm vi điều tra hôm nay).
