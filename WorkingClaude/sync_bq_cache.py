@@ -11,6 +11,7 @@ Cache dir: data/bq_cache/ (relative to WORKDIR).
 Manifest: data/bq_cache/manifest.json — records row counts, max dates, verification.
 """
 import argparse
+import fcntl
 import io
 import json
 import os
@@ -57,6 +58,16 @@ def _apply_date_dtypes(df: pd.DataFrame) -> pd.DataFrame:
 CACHE_DIR = os.path.join(WORKDIR, "data", "bq_cache")
 PROJECT = "lithe-record-440915-m9"
 MANIFEST_PATH = os.path.join(CACHE_DIR, "manifest.json")
+
+# Khoá độc quyền cho TOÀN BỘ tiến trình sync (download + verify + ghi manifest).
+LOCK_PATH = os.path.join(CACHE_DIR, ".sync.lock")
+# Exit code riêng cho "bỏ qua vì tiến trình khác đang sync" — KHÔNG phải lỗi thật.
+# 75 = EX_TEMPFAIL (sysexits.h): thử lại sau thì được, không cần người can thiệp.
+EXIT_LOCKED = 75
+# Hậu tố file tạm khi ghi atomic. CỐ Ý không kết thúc bằng ".parquet": mọi consumer
+# quét cache theo `*.parquet` (preflight_bq_cache.py, bq_local_cache.py read_parquet
+# glob, phần tính size_mb dưới đây) nên file tạm/rác không bao giờ bị đọc như dữ liệu.
+TMP_SUFFIX = ".tmp"
 
 # Timeout mặc định cho 1 lệnh `bq query` (giây). Bảng lớn khai báo riêng qua
 # key "query_timeout" trong TABLES — 300s cứng cho MỌI bảng là quá ngắn cho chunk
@@ -266,6 +277,86 @@ def log(msg: str):
     print(f"{ts} {msg}", flush=True)
 
 
+_LOCK_HANDLE = None  # giữ tham chiếu tới khi process thoát (đóng file = nhả khoá)
+
+
+def acquire_sync_lock() -> bool:
+    """Khoá độc quyền LIÊN TIẾN TRÌNH cho cả cache dir. True = giữ được khoá.
+
+    Vì sao cần: hai lần sync chạy chồng lên CÙNG `data/bq_cache` (điển hình: một full
+    re-sync thủ công còn đang chạy thì cron 23:45 `--delta` khởi động) có thể để lại
+    cache TRỘN VINTAGE mà manifest vẫn `verified=true` — bảng/chunk của bên này lẫn với
+    bên kia, còn manifest thì bị bên ghi sau (load lúc bắt đầu, ghi lúc kết thúc) xoá
+    mất phần cập nhật của bên ghi trước (lost update). Suýt xảy ra thật 2026-07-29
+    (job re-pin R3): tránh được chỉ vì MAY về thứ tự ghi manifest, không phải do thiết kế.
+
+    Non-blocking (trylock) là CHỦ ĐÍCH, khác `_otp_flow_lock` bên bot_execute.py: hai lần
+    sync trùng nhau là vô tình, và một lần sync có thể chạy hàng giờ (`ticker` full ~2h)
+    — bắt bên đến sau chờ chỉ để làm lại đúng việc bên kia đang làm là vô nghĩa và có
+    nguy cơ treo cron. Bên đến sau thoát SẠCH với EXIT_LOCKED, không ghi gì.
+    (Sync bị bỏ qua vẫn phát hiện được: `preflight_bq_cache.py` trong cùng wrapper chạy
+    độc lập và cảnh báo khi `verified_at` cũ quá 36h.)
+    """
+    global _LOCK_HANDLE
+    f = open(LOCK_PATH, "a")
+    try:
+        fcntl.flock(f.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        f.close()
+        return False
+    _LOCK_HANDLE = f
+    return True
+
+
+def _tmp_path(dest: str) -> str:
+    """Đường dẫn file tạm CÙNG thư mục với đích (bắt buộc: os.replace chỉ atomic khi
+    cùng filesystem) và có PID (phòng xa — khoá đã chặn 2 syncer, nhưng nếu ai đó chạy
+    sync ngoài khoá thì 2 tiến trình cũng không cướp file tạm của nhau)."""
+    d, base = os.path.split(dest)
+    return os.path.join(d, f".{base}.{os.getpid()}{TMP_SUFFIX}")
+
+
+def atomic_to_parquet(df: pd.DataFrame, dest: str):
+    """Ghi parquet kiểu tmp + os.replace (coding_guidelines §5, giống `_save_state()`
+    trong trading_bot/executor.py).
+
+    `df.to_parquet(dest)` ghi ĐÈ TRỰC TIẾP lên đích: bị kill/OOM/hết đĩa giữa lúc ghi là
+    để lại chunk parquet cụt (footer thiếu) — lần đọc sau crash hoặc, tệ hơn, đọc thiếu
+    dòng mà không ai biết. os.replace là một rename atomic trên POSIX: người đọc luôn
+    thấy HOẶC bản cũ nguyên vẹn HOẶC bản mới nguyên vẹn, không có ở giữa.
+    Lợi ích kèm theo: file mới là inode mới, nên snapshot vintage bằng hardlink không
+    còn bị hỏng lặng lẽ (trước đây to_parquet đè lên chính inode đang được hardlink).
+    """
+    tmp = _tmp_path(dest)
+    try:
+        df.to_parquet(tmp, index=False)
+        os.replace(tmp, dest)
+    except BaseException:
+        # BaseException để dọn cả khi SIGINT/SystemExit; SIGKILL thì không dọn được —
+        # đó là việc của sweep_stale_tmp() ở lần chạy sau (rác .tmp có thể là hàng trăm MB).
+        try:
+            os.remove(tmp)
+        except OSError:
+            pass
+        raise
+
+
+def sweep_stale_tmp():
+    """Xoá file tạm còn sót từ lần chạy bị kill cứng (SIGKILL/reboot). Chỉ gọi khi ĐANG
+    GIỮ khoá — lúc đó không tiến trình sync nào khác đang ghi, nên mọi *.tmp đều là rác."""
+    n = 0
+    for root, _dirs, files in os.walk(CACHE_DIR):
+        for fn in files:
+            if fn.endswith(TMP_SUFFIX):
+                try:
+                    os.remove(os.path.join(root, fn))
+                    n += 1
+                except OSError:
+                    pass
+    if n:
+        log(f"  dọn {n} file tạm sót lại từ lần chạy trước bị kill")
+
+
 def bq_query_to_df(
     sql: str,
     max_rows: int = 10_000_000,
@@ -307,8 +398,20 @@ def load_manifest() -> dict:
 
 
 def save_manifest(manifest: dict):
-    with open(MANIFEST_PATH, "w") as f:
-        json.dump(manifest, f, indent=2, default=str)
+    # tmp + os.replace: manifest.json là "cổng" của cả cache (bq_local_cache.py từ chối
+    # chạy nếu verified=false / thiếu bảng) — một bản cụt vì bị kill giữa lúc ghi làm
+    # MỌI consumer đọc cache fail cứng, kể cả khi parquet vẫn nguyên.
+    tmp = _tmp_path(MANIFEST_PATH)
+    try:
+        with open(tmp, "w") as f:
+            json.dump(manifest, f, indent=2, default=str)
+        os.replace(tmp, MANIFEST_PATH)
+    except BaseException:
+        try:
+            os.remove(tmp)
+        except OSError:
+            pass
+        raise
 
 
 def download_table(name: str, config: dict, manifest: dict, delta: bool):
@@ -345,7 +448,7 @@ def download_table(name: str, config: dict, manifest: dict, delta: bool):
                 )
                 yr_df = bq_query_to_df(yr_sql, timeout=qtimeout)
                 if not yr_df.empty:
-                    yr_df.to_parquet(yr_path, index=False)
+                    atomic_to_parquet(yr_df, yr_path)
                     total_rows += len(yr_df)
                     yr_max = pd.to_datetime(yr_df[col]).max()
                     if max_time_val is None or yr_max > max_time_val:
@@ -376,7 +479,7 @@ def download_table(name: str, config: dict, manifest: dict, delta: bool):
                 return
             existing = pd.read_parquet(pq_path)
             combined = pd.concat([existing, new_df], ignore_index=True)
-            combined.to_parquet(pq_path, index=False)
+            atomic_to_parquet(combined, pq_path)
             table_info["rows"] = len(combined)
             if col in combined.columns:
                 table_info["max_time"] = str(
@@ -403,7 +506,7 @@ def download_table(name: str, config: dict, manifest: dict, delta: bool):
             yr_df = bq_query_to_df(yr_sql, timeout=qtimeout)
             if not yr_df.empty:
                 yr_path = os.path.join(chunk_dir, f"{yr}.parquet")
-                yr_df.to_parquet(yr_path, index=False)
+                atomic_to_parquet(yr_df, yr_path)
                 total_rows += len(yr_df)
                 yr_max = pd.to_datetime(yr_df[col]).max()
                 if max_time_val is None or yr_max > max_time_val:
@@ -434,7 +537,7 @@ def download_table(name: str, config: dict, manifest: dict, delta: bool):
         log(f"  {name}: 0 rows (empty)")
         return
 
-    df.to_parquet(pq_path, index=False)
+    atomic_to_parquet(df, pq_path)
     size_mb = os.path.getsize(pq_path) / 1e6
     table_info = {
         "file": f"{name}.parquet",
@@ -565,6 +668,16 @@ def main():
     args = parser.parse_args()
 
     os.makedirs(CACHE_DIR, exist_ok=True)
+
+    # Khoá TRƯỚC load_manifest(): kể cả `--verify` (không tải gì) vẫn ghi lại manifest.json,
+    # nên chạy song song với một lần sync sẽ xoá mất phần cập nhật của bên kia.
+    if not acquire_sync_lock():
+        log(f"BỎ QUA: một tiến trình sync_bq_cache.py khác đang giữ khoá {LOCK_PATH} "
+            f"(pgrep -af sync_bq_cache để xem) — thoát sạch, không ghi gì "
+            f"(exit {EXIT_LOCKED}, không phải lỗi).")
+        sys.exit(EXIT_LOCKED)
+    sweep_stale_tmp()
+
     manifest = load_manifest()
 
     if not args.verify:
