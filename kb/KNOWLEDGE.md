@@ -16,7 +16,8 @@
 - **LAG** — PEAD/earnings drift. Allocator w_LAG theo state {CRISIS 50 / BEAR 0 / NEUTRAL-BULL-EXBULL 65}, band ±10pp.
 
 **Performance đã pin (threads=1, self-check 0 VND):**
-- R3 NEUTRAL-only @50B: CAGR **28.05%** / Sharpe 1.87 / DD −18.8% / Calmar 1.50 (pin gốc, job `_130720`). As-of re-run 2026-07-09 cho drift batch ~−1.3pp (28.05→~26.75%) — **drift đã biết** (batch/as-of recompute variance), KHÔNG phải regression; pin gốc vẫn là số tham chiếu chính thức trong `data/results_registry.md`.
+- R3 NEUTRAL-only @50B: CAGR **27.60%** / Sharpe **1.84** / DD **−17.5%** / Calmar **1.58** — **pin CHÍNH THỨC từ 2026-07-29**, đo trên `universe_pit`, quant-skeptic CONFIRMED (high). Re-pin do **VINTAGE DỮ LIỆU, KHÔNG đổi mô hình**. Nguồn sống (đừng chép số ra chỗ khác): `data/results_registry.md` mục **"2026-07-29 — ⭐ RE-PIN R3 SAU RESTATE DT5G"**.
+  - *Số LỊCH SỬ, KHÁC VINTAGE — không so trực tiếp, không dùng cho việc mới:* 27.16%/1.81/−18.1%/1.50 (pin 07-22, vintage đã bị ghi đè, KHÔNG tái lập được); 27.84%/1.84/−18.2%/1.53 (pin 07-12, `ticker_prune`, sau khi đóng kênh MOM); 28.05%/1.87/−18.8%/1.50 (pin gốc, job `_130720` — as-of re-run 2026-07-09 cho ~26.75% do batch/as-of recompute variance, **KHÔNG phải regression**).
 - R1 @20B: CAGR **29.01%**
 - Bootstrap 5th-pct: CAGR 18.6%, DD −28.6% (anchor DD ~−29%, KHÔNG phải −18%).
 - **DSR/PBO annex (2026-07, `dsr_pbo_annex.py`):** R3 đã qua chuẩn deflated-Sharpe/PBO — DSR≈1.0, PBO≈0.20 (robust, không phải may mắn overfit). Đây là baseline cho mọi so sánh DSR mới (xem "Multiple-testing discipline" dưới).
@@ -62,13 +63,13 @@
 **Production state:** bảng `tav2_bq.vnindex_5state_dt5g_live`, đọc qua `get_gated_state()`.
 **KHÔNG đọc** `vnindex_5state` — đó là v3.4b BASE (153 transitions), KHÔNG phải DT5G (49 transitions).
 
-**⚠️ INCIDENT LỚN 2026-07-10 — BULL commit giả do bug stale EW-leg, ĐÃ FIX local, publish BQ ĐANG CHỜ:**
+**✅ INCIDENT LỚN 2026-07-10 — BULL commit giả do bug stale EW-leg — ĐÃ ĐÓNG 2026-07-13** (đường đi B/zero-touch: Taylor backfill EW-leg thủ công tối CN 07-12 + cron `daily_refresh` 18:30 ICT thứ Hai 07-13 recompute toàn cửa sổ và publish → `dt5g_live` có đủ cả 07-10 lẫn 07-13, `macro_health.json` tươi lại; trong lúc stale `get_gated_state()` fail-closed về DT4-only đúng thiết kế, DT4==DT5G==NEUTRAL nên không lệch hành vi. Chi tiết: `kb/INCIDENTS.md` mục 2026-07-13). *Ghi chép root-cause dưới đây giữ nguyên làm bài học:*
 - **Root cause:** repo reorg 2026-06-21 (commit `10ae395`) đổi path reader sang `data/` nhưng writer trong `vnindex_5state_ew_v1.py` (dòng 519) vẫn ghi ra WORKDIR root → `data/vnindex_5state_ew_full.csv` đóng băng ở 06-19 từ 06-22. Base v3.4b mất 30-42% trọng số EW-leg + factor breadth (NaN) đúng lúc concentration cao → mọi cơ chế chống rally hẹp bất hoạt từ TRƯỚC khi episode BULL bắt đầu (06-24).
 - **Phát hiện (Taylor, job `Taylor_20260710_163939`):** candidate BULL (streak 9/10, sắp commit tối 07-10) có breadth/thanh khoản TỆ NHẤT so với cả 8 lần BULL-commit thật lịch sử 2014-2026 (breadth 0.32 vs min lịch sử 0.52; thanh khoản 0.60 vs min 1.06) — dấu hiệu rõ ràng đây là artifact, không phải regime thật.
 - **Fix + verify (job `Taylor_20260710_170527`, commit `498c3a6`):** sửa 1 dòng (ew_v1.py ghi ra `data/`), rerun toàn chain local. Counterfactual KHỚP: base giữ NEUTRAL(3) LIÊN TỤC 06-22→07-10, episode BULL giả 06-24→07-06 biến mất hoàn toàn.
-- **Publish BQ: BỊ CHẶN** bởi harness permission classifier (`bq load --replace` là production write, dispatch relay không tính là consent trực tiếp) — Taylor dừng đúng guardrail, KHÔNG lách. Backup rollback đã tạo (`vnindex_5state_archive_predeploy_20260711_002056`). BQ hiện tại (07-10) vẫn bản cũ nhưng **`dt5g_live` (production consumer thật) vẫn NEUTRAL(3), KHÔNG bị ảnh hưởng** — chưa có quyết định trading nào dựa trên tín hiệu hỏng.
-- **Đường đi tiếp (câu hỏi mở, chờ user/Mike):** (A) chạy manual `daily_refresh_v34b_linux.sh` publish ngay, hoặc (B, khuyến nghị — zero-touch) để cron thứ Hai 2026-07-13 18:30 ICT tự chạy NGOÀI harness (không bị classifier chặn) với code đã fix, publish đúng TRƯỚC preflight/plan cần dùng state. Plan 07-13 đã lập HOLD/NEUTRAL 70% — không có deadline gấp.
-- **Audit mở rộng (Winston, job `Winston_20260710_173031`, DONE_FULL_AUDIT, read-only):** tìm thêm 2 path-mismatch mới (không ảnh hưởng production, chỉ research-path đọc file frozen) + 1 "trap ngược" do chính fix trên tạo ra (root `ew_full.csv` giờ orphan, 2 script research đọc phải, trong đó có chính `bull_commit_breadth_check.py` Taylor vừa dùng hôm 07-10) + 1 bug freshness-check no-op (`bq_freshness_check.sh:75` dùng `-le` nên MAX_STATE_LAG 2→1 không có tác dụng chặn lag=1 như comment ý định). **Lỗ hổng gốc thật sự** khiến bug sống 3 tuần không bị phát hiện: KHÔNG có bất kỳ check freshness/mtime nào cho các file trung gian trong chain local (ew_full/ew_staging/dual_v3_staging/concentration/v3_1_clean/v3_4b/dt_4gate) — mọi check hiện có chỉ nhìn ngày trên tên/timestamp output cuối, không phải nội dung input có thật sự mới hay không. **Đề xuất chưa áp dụng** (chờ Mike duyệt): thêm post-chain assertion vào `daily_refresh_v34b_linux.sh` — sau step cuối, kiểm mtime TOÀN BỘ file output kỳ vọng ≥ thời điểm chain bắt đầu, thiếu/cũ → die+alert (bắt generic mọi writer sót tương lai, không chỉ path này).
+- **Publish BQ: BỊ CHẶN (tại thời điểm 07-10, đã giải quyết 07-13)** bởi harness permission classifier (`bq load --replace` là production write, dispatch relay không tính là consent trực tiếp) — Taylor dừng đúng guardrail, KHÔNG lách. Backup rollback đã tạo (`vnindex_5state_archive_predeploy_20260711_002056`). BQ hiện tại (07-10) vẫn bản cũ nhưng **`dt5g_live` (production consumer thật) vẫn NEUTRAL(3), KHÔNG bị ảnh hưởng** — chưa có quyết định trading nào dựa trên tín hiệu hỏng.
+- **Đường đi ĐÃ CHỌN & ĐÃ CHẠY = (B) zero-touch:** cron thứ Hai 2026-07-13 18:30 ICT tự chạy NGOÀI harness (không bị classifier chặn) với code đã fix, publish TRƯỚC preflight/plan cần dùng state. *(Phương án A — manual publish ngay — không dùng.)*
+- **Audit mở rộng (Winston, job `Winston_20260710_173031`, DONE_FULL_AUDIT, read-only):** tìm thêm 2 path-mismatch mới (không ảnh hưởng production, chỉ research-path đọc file frozen) + 1 "trap ngược" do chính fix trên tạo ra (root `ew_full.csv` giờ orphan, 2 script research đọc phải, trong đó có chính `bull_commit_breadth_check.py` Taylor vừa dùng hôm 07-10) + 1 bug freshness-check no-op (`bq_freshness_check.sh:75` dùng `-le` nên MAX_STATE_LAG 2→1 không có tác dụng chặn lag=1 như comment ý định). **Lỗ hổng gốc thật sự** khiến bug sống 3 tuần không bị phát hiện: KHÔNG có bất kỳ check freshness/mtime nào cho các file trung gian trong chain local (ew_full/ew_staging/dual_v3_staging/concentration/v3_1_clean/v3_4b/dt_4gate) — mọi check hiện có chỉ nhìn ngày trên tên/timestamp output cuối, không phải nội dung input có thật sự mới hay không. **Đề xuất ĐÃ WIRE** (verify 2026-07-30 trong code): post-chain assertion nằm ở `daily_refresh_v34b_linux.sh` step **[8b]** (`assert_chain_outputs.sh "$CHAIN_START_EPOCH" …`) — mọi file output kỳ vọng phải có mtime ≥ lúc chain bắt đầu, thiếu/cũ → alert + `die` **TRƯỚC khi publish BQ** (bắt generic mọi writer sót tương lai, không chỉ path này).
 
 **Trạng thái trước incident trên (baseline, vẫn đúng):** EASING_FLOOR disabled 2026-06-03 (re-risk chỉ qua price-based DT base). Nhãn bảng đã chốt 2026-06-26 (`vnindex_5state`=v3.4b BASE, `vnindex_5state_dt5g_live`=DT5G thật). DT5G là gate PHÒNG THỦ (insurance), KHÔNG phải return-enhancer (performance annex đầy đủ trong CLAUDE.md).
 
@@ -160,7 +161,7 @@ Mọi agent khác (Taylor, DollarBill, Mafee, Wags, ...) headless/native on-dema
 
 **AlphaLens Paper Portfolio** (DollarBill phụ trách): FPT@70,200 + ACB@22,650 + MBB@25,200 + HDB@25,850 (equal-weight 25%/tên), benchmark entry VNINDEX 1860.01, tracking 2026-07-01→2026-09-30, Taylor audit cuối kỳ.
 
-**Workflow ngày trading đầy đủ (T2-T6, ICT):** 17:30 `bq_freshness_check.sh` → 19:30 `send_plan_report.sh` → 08:20 `ops_health_check.sh` (tự kiểm vận hành trước phiên) → 08:45 `preflight_check.sh` → 09:05 `run_bot.sh --auto-otp` → 11:30 nghỉ trưa → 12:45 `ops_health_check.sh` lần 2 → 13:00 resume chiều → ~14:50 ATC → 15:00 `eod_trading_report.sh` (+ `daily_nav_snapshot.py`). 3 Discord topic tách biệt: Trading Daily (vận hành sống), DollarBill plan channel (lập kế hoạch), Trading report (báo cáo tổng hợp ngày/tuần/tháng). Chi tiết đầy đủ + cron mapping: `kb/current_ops.md`.
+**Workflow ngày trading đầy đủ (T2-T6, ICT — giờ chuẩn tắc ở `kb/ops_runbook.md`):** 19:00 `bq_freshness_check.sh` → 21:00 `send_plan_report.sh` → 08:20 `ops_health_check.sh` (tự kiểm vận hành trước phiên) → 08:45 `preflight_check.sh` → 09:05 `run_bot.sh --auto-otp` → 11:30 nghỉ trưa → 12:45 `ops_health_check.sh` lần 2 → 13:00 resume chiều → ~14:50 ATC → 19:10 `eod_trading_report.sh` (+ `daily_nav_snapshot.py`). 3 Discord topic tách biệt: Trading Daily (vận hành sống), DollarBill plan channel (lập kế hoạch), Trading report (báo cáo tổng hợp ngày/tuần/tháng). Chi tiết đầy đủ + cron mapping: `kb/current_ops.md`.
 
 **Vận hành hàng ngày = tự phát hiện lỗi → tự sửa → báo cáo** (mandate 2026-07-07): `kb/ops_runbook.md` + `bin/ops_autofix.sh`. Ranh giới cứng KHÔNG BAO GIỜ tự sửa: trade plan, `trading_rules.json`, logic đặt lệnh, dòng cron thực thi, xoá dữ liệu, `BOT_STOP`.
 
@@ -257,13 +258,13 @@ Mọi agent khác (Taylor, DollarBill, Mafee, Wags, ...) headless/native on-dema
 - `kb/paper_programs_registry.json` — 9 chương trình paper-trading chính thức (bao gồm `pt_v22_dt5g` = production signal book, KHÔNG phải paper mirror).
 - `kb/archive/` — raw consolidation blocks cũ (không cần đọc thường xuyên).
 
-**Cron quan trọng (ICT):**
-- 17:30 T2-T6: `bq_freshness_check.sh` → DollarBill lập plan T+1.
-- 19:30 T2-T6: `send_plan_report.sh` → gửi plan qua Telegram + Discord.
+**Cron quan trọng (ICT)** — *nguồn sống là `kb/ops_runbook.md` (bảng timeline) + `crontab -l`; bảng dưới chỉ là bản tóm, đã đối chiếu 2026-07-30:*
+- 19:00 T2-T6: `bq_freshness_check.sh` → DollarBill lập plan T+1 *(đổi từ 17:30, 2026-07-10)*.
+- 21:00 T2-T6: `send_plan_report.sh` → gửi plan qua Telegram + Discord *(đổi từ 19:30, 2026-07-10; thêm 23:00 `--second-chance` từ 2026-07-13)*.
 - 08:20 & 12:45 T2-T6: `ops_health_check.sh` — tự kiểm vận hành, post Trading Daily.
 - 08:45 T2-T6: `preflight_check.sh`.
 - 09:05 & 13:00 (sau nghỉ trưa) T2-T6: `run_bot.sh --auto-otp`.
-- 15:00 T2-T6: `eod_trading_report.sh` (+ `daily_nav_snapshot.py`) → Trading report.
+- 19:10 T2-T6: `eod_trading_report.sh` (+ `daily_nav_snapshot.py`) → Trading report *(đổi từ 15:00, 2026-07-15, user duyệt — chạy sau publish DT5G 19:01 để "tình trạng thị trường" là regime HÔM NAY)*.
 - 23:45 T2-T6: `sync_bq_cache_daily.sh`.
 - 00:30 daily: `daily_retro.sh` (đổi từ 22:00, 2026-07-10).
 - 00:00 daily: `backup.sh` → GitHub.

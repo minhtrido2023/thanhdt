@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v1538)
+# Mike fleet — context pack (v1539)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-30T11:50:15] Wags/finding — audit-file-rac-toan-he-thong + thiet ke fleet_housekeeping (NHAP): {"loai": "AUDIT + DESIGN — khong file nao bi xoa/di chuyen", "bao_cao": "mike/agents/Wags/research/fleet_housekeeping_audit_20260730.md", "script_nhap": "mike/b …
 - [2026-07-30T11:11:19] Winston/finding — new-listings-daily: {"date": "2026-07-30", "lookback_days": 90, "total_new": 1, "needs_manual_rating": 0, "fresh_ipo": 0, "research_queue": [], "snapshot": "/home/trido/thanhdt/Wor …
 - [2026-07-30T12:12:39] Wags/finding — fleet_housekeeping v2 — da qua arch-review (NEEDS_CHANGES->da sua 11/12), cho user duyet: {"trang_thai": "HOAN TAT — audit + design v2 da qua arch-review va da sua xong. CHO Mike trinh user quyet co trien khai khong.", "arch_review": {"verdict": "NEE …
 - [2026-07-30T12:13:47] DollarBill/decision — plan-2026-07-31: {"account": "SpaceX", "plan_date": "2026-07-31", "state": "NEUTRAL(3)", "orders": 0, "action": "HOLD_ALL", "nav_vnd": 926852648, "cash_vnd": 4527648, "bal_signa …
@@ -11,6 +10,7 @@
 - [2026-07-30T12:14:25] DollarBill/answer — plan-ZaloPay-2026-07-31-done: {"status": "complete", "file": "data/trade_plans/plan_ZaloPay_2026-07-31.json", "discord_sent": true, "summary": "HOLD — 0 orders. AGG BAL deferred (cash thiếu) …
 - [2026-07-30T13:00:57] Taylor/decision — housekeeping exp_*/probe_* — untrack 194MB archive-first, git 244->139MB, DE XUAT KHONG rewrite history: {"scope": "audit fleet_housekeeping (Wags_20260730_112912) §5 muc B — agents/Taylor/exp_*/probe_*", "ket_qua": {"git_dir": "244MB -> 139MB (-105MB) bang `git gc …
 - [2026-07-30T14:18:08] Winston/finding — OKF canonical.md: KHONG nen tach — tang chi tiet da ton tai (KNOWLEDGE.md) va dang troi so: {"job": "Winston_20260730_141312", "ket_luan": "KHONG OKF-split kb/canonical.md (ket qua kieu cron_registry, hop le) — de xuat thay the: trim tai cho ~2KB + tro …
+- [2026-07-30T14:29:04] Winston/finding — trim canonical.md -1354B + sua 4 stale KNOWLEDGE.md (chua commit): {"job": "Winston_20260730_142006", "decision_source": "Mike duyet Q1 khong OKF-split / Q2 phuong an B trim tai cho / Q3 sua stale", "report": "mike/agents/Winst …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -279,11 +279,9 @@ treo thật** (1 mục, ưu tiên thấp): dọn crontab paper-trading lạc h�
 (`Winston_20260712_151206`), chưa áp dụng.
 
 ## Tri thức chung của đội (canonical — Mike biên tập; MỌI agent phải nắm)
-> Cập nhật 2026-07-01. Chi tiết: `kb/KNOWLEDGE.md`. Số liệu gốc: `data/results_registry.md`.
-> Codebase: `/home/trido/thanhdt/WorkingClaude` (BigQuery `tav2_bq`). **Live từ 2026-07-01.**
-
-### Mục tiêu
-Vận hành chiến lược **production V2.4**, **go-live 2026-07-01**, tài khoản SpaceX (DNSE), 1B VND.
+> Cập nhật 2026-07-30. Chi tiết: `kb/KNOWLEDGE.md`. Số liệu gốc: `data/results_registry.md`.
+> Codebase: `/home/trido/thanhdt/WorkingClaude` (BigQuery `tav2_bq`).
+> **Mục tiêu**: vận hành chiến lược **production V2.4**, **live từ 2026-07-01**, tài khoản SpaceX (DNSE), 1B VND.
 
 ### V2.4 — chiến lược trung tâm (đã verify, self-check 0 VND, threads=1)
 - = **V2.3A + custom30V parking (NEUTRAL) + gated-overflow (bear-washout) + HAG eq_flag fix**.
@@ -309,16 +307,15 @@ custom30V permanent-exclude 7 tên (−1.0pp); LAG SUE-tilt 3 tầng (−0.66pp)
 stability floor ROE_Min<0 (−0.45pp); liq-tilt custom30 (REFUTED); deep-discount sleeve (PARKED);
 pbcombo dual-vehicle (Calmar 1.48→1.37); gq_score growth gate (−IC); composite v3 as entry-selector (NO).
 
-### MOM_N/MOM_S ĐÃ ĐÓNG (2026-07-12) — thay đổi production chính thức, không phải "thử bị loại"
-`MOMENTUM_N`+`MOMENTUM_S` đóng khỏi `TIER_BAL` (giữ `MOMENTUM`/`MEGA` generic — vẫn đóng góp thật):
-thành công lịch sử 2 tier này chủ yếu do dồn mẫu regime 2020-21, hậu-2021 gần hoà vốn, quant-skeptic
-CONFIRMED cả chuỗi R&D. Chi tiết: `plan_close_mom_20260712.md`.
+**MOM_N/MOM_S ĐÃ ĐÓNG (2026-07-12)** — thay đổi production chính thức, không phải "thử bị loại":
+`MOMENTUM_N`+`MOMENTUM_S` gỡ khỏi `TIER_BAL` (giữ `MOMENTUM`/`MEGA` generic — vẫn đóng góp thật).
+Lý do + chuỗi R&D: `kb/projects/momentum-deals.md`, `plan_close_mom_20260712.md`.
 
 ### DT5G — market regime gate
 - Production: `tav2_bq.vnindex_5state_dt5g_live` qua `get_gated_state()`.
 - **KHÔNG đọc** `vnindex_5state` — đó là v3.4b BASE (153 transitions ≠ DT5G 49 transitions).
 - Gate phòng thủ (insurance), KHÔNG phải return-enhancer.
-- State hiện tại 2026-07-01: **NEUTRAL(3)**, DT5G_macro HEALTHY.
+- State live hôm nay = `kb/current_ops.md` / `golive_state_today` (fact động, KHÔNG pin ở đây).
 
 ### 8L Rating & Composite
 - Composite v3 LIVE (`rating_8l.py`): value = ey(1/PE) + cfy(1/PCF) + ps(1/PS). Golden floor: ROE_Min3Y≥0 ∧ CF_OA_3Y>0.
@@ -327,50 +324,35 @@ CONFIRMED cả chuỗi R&D. Chi tiết: `plan_close_mom_20260712.md`.
 
 ### Hạ tầng giao dịch
 - `bot_execute.py --auto-otp`: execution deterministic (Python, không phải LLM headless).
-- `bin/run_bot.sh`: wrapper gọi bot_execute.py, Discord notify, publish bus event.
 - **`data/BOT_STOP`** = kill-switch tức thì.
-- BQ Local Cache (DuckDB, threads=1): `data/bq_cache/`, ~100ms vs 5-15s BQ. Sync 23:45 ICT.
-- Auto-OTP Gmail: `gmail_otp_reader.py` dùng `internalDate` filter (KHÔNG `newer_than`).
-- PHS: **BLOCKED** (lỗi -700003, chờ credential) → paper only.
-- **Workflow ngày trading đầy đủ** (T2-T6, giờ chuẩn tắc ở `kb/ops_runbook.md`): BQ
-  freshness(19:00) → plan T+1(21:00) → preflight(08:45) → execute sáng(09:05) →
-  resume chiều(13:00) → **EOD report(19:10, `eod_trading_report.sh`)**. Alert vận hành sống
-  post vào Trading Daily (1521470705563340910); EOD/tuần/tháng vào Trading report
-  (1522576692638388364) — xem chi tiết routing ở `kb/current_ops.md`.
+- Giờ chuẩn tắc chuỗi ngày trading (T2-T6) + xử lý khi lỗi: `kb/ops_runbook.md`. Routing Discord:
+  `kb/current_ops.md`. BQ cache / auto-OTP / PHS: `kb/KNOWLEDGE.md` §4.
 
 ### Kiến trúc fleet
-- Companion daemon: **CHỈ Mike**. Mọi agent khác (Taylor, Bill, Mafee, v.v.) headless/native on-demand.
-- Winston/Spyros/Wendy = native subagent `Agent(subagent_type=...)`, không còn daemon.
-- Dispatch đúng: `bin/dispatch.sh`. Directive = mandate dài hạn only (deprecated cho task).
-- Self-dispatch chặn. Agent → Mike phải escalate (event `question`), KHÔNG spawn Mike headless.
 - **quant-skeptic**: REFUTED/INCONCLUSIVE = KHÔNG wire. Bắt buộc trước mọi thay đổi production.
 - **Execution**: bot_execute.py (Python) cho đặt lệnh thật. LLM headless bị classifier block khi thao tác tiền.
+- Daemon / dispatch / escalate (cơ chế đầy đủ): `MIKE.md` + `kb/KNOWLEDGE.md` §3.
 
 ### Quy chuẩn làm việc
 1. Backtest: self-check 0 VND + walk-forward IS(2014–19)/OOS(2020+) + threads=1. Edge rớt OOS = loại.
 2. No look-ahead: `profit_*` chỉ train, KHÔNG filter live.
 3. Pin kết quả: `data/results_registry.md`. Ghi bus ngay (`append_event.sh`).
 4. Human-in-the-loop: Taylor (rules) → Bill (plan, user duyệt) → Mafee (plan-bound only).
-5. **Multiple-testing discipline (chốt 2026-07-05, R&D Q3 program H2, Bailey-López de Prado):** mọi
+5. **Multiple-testing discipline (chốt 2026-07-05, Bailey-López de Prado):** mọi
    wire production khai báo **N trials** (số config đã so sánh để tới đó) + **DSR** (Deflated Sharpe
    Ratio) trên NAV daily của config sắp deploy. **DSR < 0.95 → RED FLAG**, không wire nếu chưa có
    sign-off rõ ràng (bổ sung cho, không thay thế, gate quant-skeptic + walk-forward IS/OOS hiện có).
-   Khi wire được chọn từ 1 họ ≥~8 biến thể (parking/lever/basket sweep): báo thêm **PBO** (Probability
+   Khi wire được chọn từ 1 họ ≥~8 biến thể: báo thêm **PBO** (Probability
    of Backtest Overfitting, CSCV) — PBO≥0.5 = ưu tiên config robust-trung vị thay vì IS-best. Kèm
    **per-year leave-one-out** khi edge OOS mỏng năm — 1-2 năm carry hết edge = reshuffle-luck, không
-   phải signal bền (bài học Wave1/H8a-tiebreaker 2026-07-05: OOS CAGR/Calmar tăng đúng luật nhưng
-   toàn bộ đến từ 2021+2023, LOO rớt → route qua skeptic trước khi wire). V2.4/R3 đã qua chuẩn DSR/PBO
-   (DSR≈1.0, PBO≈0.20 — xem `data/results_registry.md` mục "DSR / PBO Robustness Annex", script
-   `dsr_pbo_annex.py`).
+   phải signal bền (ca Wave1/H8a-tiebreaker 2026-07-05: `kb/KNOWLEDGE.md` §8). V2.4/R3 đã qua chuẩn
+   DSR/PBO (DSR≈1.0, PBO≈0.20 — `data/results_registry.md` mục "DSR / PBO Robustness Annex").
 
 ### Cổ phiếu — quy tắc nhanh
 - **BANNED vĩnh viễn**: PC1, VVS, KSF, NKG, HSG, HVN, VJC, NVL, GEG, SBA, DMC/IMP/TRA, TOS, VTP.
 - Banking (MBB/ACB/HDB): Tier 1. FPT: Tier 1. CTR: Tier 2. Pharma: buy-and-hold only (timing phá alpha).
 - DGC: 2 nhánh tách biệt — compounder-screen (exclude) ≠ special-situation case.
-- Sector sweeps #1–9 xong: tất cả = lens/tilt, không phải standalone book (banking có OOS edge nhưng 74% trong custom30V).
-
-### Backup / DR
-`~/thanhdt/backup.sh` → GitHub `minhtrido2023/thanhdt` (private). Daily 00:00 ICT.
+- Sector sweeps #1–9 (đã đóng, kết luận lens/tilt): `kb/KNOWLEDGE.md` §7.
 
 ## Dự án đã đóng — chi tiết theo yêu cầu (đọc khi cần: `cat kb/projects/<file>.md`)
 - 2026-07-28 **DGC + TV1 fear-buy discretionary due-diligence** → `kb/projects/dgc-tv1-fearbuy-discretionary.md` — XONG (research) — cả 2 QUALIFIED YES, đã chuyển sang theo dõi discretionary riêng ngoài current_ops.md (TV1: context_planning_mini.md + plan file; DGC: excluded_tickers + finding Taylor).
