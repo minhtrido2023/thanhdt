@@ -4,13 +4,26 @@
 **KHÔNG file nào bị xoá/di chuyển trong lần chạy này.** Script chỉ ở dạng nháp `.draft`, chưa
 executable, chưa đăng ký cron.
 
+> **Bản v2 — đã qua arch-review (verdict NEEDS_CHANGES, confidence high), đã sửa xong.**
+> Reviewer bác bỏ 2 điểm THẬT và tôi đã đo lại xác nhận cả hai:
+> 1. **Killer**: category `empty` xoá mất **6 file 0-byte là bằng chứng DUY NHẤT** (không job
+>    record hot lẫn archive, không bus event, không KB; `logs/` lại `.gitignore`). Đúng lớp lỗi tôi
+>    đã tự bắt ở `jobtmp` nhưng **quên áp cùng guard** — và 2 trong 6 file đó chính là mẫu ở §2.3
+>    do tôi tự đo. → đã áp guard, dry-run nay GIỮ đủ 6/6.
+> 2. **Số sai trong chính báo cáo này**: §3.3 khẳng định "không phải ước tính, là output dry-run
+>    thật" nhưng dòng `datacold` lại là số của ngưỡng **>30d** trong khi script chạy **>60d** —
+>    thật chỉ **188 file / 42,26 MB**, không phải 671 file / 0,72 GB (**phóng đại ~18 lần**).
+>    → category `datacold` đã bị **gỡ hẳn**, các số dưới đây đã đo lại toàn bộ.
+>
+> Chi tiết 12 thay đổi + số trước/sau: **§6**. Số ở §0–§3 dưới đây là **bản đã sửa**.
+
 ---
 
 ## 0. Kết luận điều hướng trước (đọc 30 giây)
 
 | Câu hỏi | Trả lời thật |
 |---|---|
-| Hệ thống có đang "nặng nề" vì rác fleet không? | **Không, về disk.** Toàn bộ rác thật của fleet ≈ **26 MB** (chủ yếu `__pycache__`). `mike/logs` chỉ 17 MB, `mike/bus` 9,7 MB. |
+| Hệ thống có đang "nặng nề" vì rác fleet không? | **Không, về disk.** Sau khi thu phạm vi `pycache` về đúng fleet (mike/ + trading_bot/), toàn bộ rác thật ≈ **0,86 MB**. `mike/logs` chỉ 17 MB, `mike/bus` 9,7 MB. (Con số 20,3 MB ở bản v1 là do quét cả `WorkingClaude/stockquery` — app **ngoài** phạm vi fleet, 219/250 dir.) |
 | Vậy vấn đề thật là gì? | **HAI vấn đề khác nhau, đừng trộn:** (1) **Token**: `ls data/` = ~19K token, `ls mike/logs/` = ~17K token — đây đúng là lo ngại của user và có thật. (2) **Disk**: `/` đang **91% (13 GB trống)** — nhưng nguyên nhân KHÔNG phải fleet. |
 | Ai chiếm disk? | `/workspace/kaffa_v2` = **45 GB**, owner `hainguyen`, **không thuộc fleet/trading**. Toàn bộ `/home/trido/thanhdt` (cả WorkingClaude + mike) chỉ 13 GB. |
 | Cơ chế dọn dẹp đã có chưa? | `bus/` **ĐÃ CÓ và đã xác minh chạy đúng** (kb_nightly Phase 1b/1b2/1b3/1c, Wags làm 2026-07-27). `logs/` **KHÔNG CÓ GÌ** — 0 cơ chế. `WorkingClaude/data` **KHÔNG CÓ GÌ** ngoài quy ước thủ công. |
@@ -315,69 +328,68 @@ tiết kiệm token nhiều hơn thì **phải kèm 3 dòng fallback trong `trac
 
 ### 3.2 Bảng quy tắc theo category
 
-| # | Category | Đường dẫn | Ngưỡng | Hành động | Bằng chứng |
+Bảng dưới là **bản sau arch-review**. Mỗi guard in đậm là 1 required_change đã áp.
+
+| # | Category | Đường dẫn | Ngưỡng | Hành động | Guard bằng chứng |
 |---|---|---|---|---|---|
-| 1 | `pid` | `mike/logs/.dispatch_*.pid` | mọi tuổi | **DELETE** | §2.1 grep 0 reader |
-| 2 | `empty` | `mike/logs/*.log`, `*.err` size 0 | ≥1d | **DELETE** (test -s lại) | §2.2 |
-| 3 | `errnoise` | `mike/logs/*.err` ≤200B chứa `no stdin data received` | ≥1d | **DELETE** (grep lại) | §2.2 đọc thật |
-| 4 | `jobtmp` | `mike/bus/jobs/*.json.tmp` | ≥7d | **DELETE** | §1.2 |
-| 5 | `pycache` | `__pycache__/` cả 2 repo | mọi tuổi | **DELETE** | regenerable, đã gitignore |
-| 6 | `dispatchlog` | `mike/logs/dispatch_*.log` | **>30d** | **ARCHIVE** → `logs/archive/<YYYY-MM>/*.log.gz` | §2.3 — KHÔNG delete |
+| 1 | `pid` | `mike/logs/.dispatch_*.pid` | **≥1d** | **DELETE** | §2.1 grep 0 reader; `-mtime +1` để không xoá pid của job vừa dispatch (là bản ghi OS-pid duy nhất để kill tay) |
+| 2 | `empty` | `mike/logs/*.log`, `*.err` size 0 | ≥1d | **DELETE** | `test -s` lại **+ BẮT BUỘC có `bus/jobs/<job_id>.json` ở hot HOẶC archive**; không có ⇒ GIỮ (§6.1) |
+| 3 | `errnoise` | `mike/logs/*.err` ≤200B | ≥1d | **DELETE** | **MỌI dòng non-blank** phải khớp warning (không còn `grep -q`) |
+| 4 | `jobtmp` | `mike/bus/jobs/*.json.tmp` | ≥7d | **DELETE** | phải có bản `.json` đầy đủ ở hot/archive |
+| 5 | `pycache` | **`mike/` + `trading_bot/`** (KHÔNG phải cả `WorkingClaude`) | mọi tuổi | **DELETE** | regenerable + đã gitignore; thu phạm vi vì 219/250 dir nằm ở `stockquery/` ngoài fleet |
+| 6 | `dispatchlog` | `mike/logs/dispatch_*.log` | **>30d** | **ARCHIVE** → `logs/archive/<YYYY-MM>/*.log.gz` | §2.3 KHÔNG delete; **bỏ qua job có record hot NON-TERMINAL** (`orphaned`/`usage_limited`/`cancelled`/`superseded`) vì `trace.sh --log` của nhóm đó đang chạy được |
 | 7 | `toollog` | `mike/logs/{verify_,arch_review_,wags_pipeline_,daily_retro_draft_}*` | >30d | ARCHIVE cùng đích | |
-| 8 | `registry` | `mike/bus/registry/*.json` | >30d | ARCHIVE → `bus/registry/archive/` | §1.2 gap |
-| 9 | `croncron` | `mike/logs/{discover,notify,watchdog,consolidator,…}.log` | >10 MB | **ROTATE** (`.1.gz`, giữ 3 đời) | §1.1 append vô hạn |
-| 10 | `datacold` | `data/*.csv|pkl|parquet` >60d **VÀ** không có tham chiếu literal | >60d | **GZIP tại chỗ** (`--only=datacold`, không bật mặc định) | §1.4 + cảnh báo filename động |
+| 8 | `registry` | `mike/bus/registry/*.json` | >30d | ARCHIVE → `bus/registry/archive/` | **loại trừ 9 agent trong roster** — `cmd_fleet_status` glob không đệ quy ⇒ archive làm agent BIẾN MẤT khỏi `fleet_health.sh` thay vì hiện `dead` |
+| 9 | `rotate` | `mike/logs/{discover,notify,watchdog,…}.log` | >10 MB | **ROTATE** (`.1.gz`, giữ 3 đời) | **nén+verify XONG mới dịch thế hệ** (thứ tự cũ: gzip fail = mất đời cũ nhất) |
+| ~~10~~ | ~~`datacold`~~ | | | **ĐÃ GỠ HẲN** | lợi ích thật 42 MB không phải 0,72 GB; phép thử an toàn sai cấu trúc (§6.2) |
 | — | `run_bot_*` | | | **KHÔNG động** | bằng chứng thực thi bot, 0 file >30d |
 | — | `execution_logs`, `bq_cache*`, `agents/*/exp_*` | | | **DENY-LIST** | §2.4 |
 
-### 3.3 Ước tính lần chạy đầu tiên
+### 3.3 Lần chạy đầu tiên — số ĐO THẬT (bản đã sửa sau arch-review)
 
-Các số dưới đây **không phải ước tính** — chúng là output `--dry-run` thật của script nháp, chạy
-từng category (`bash bin/fleet_housekeeping.sh.draft --only=<cat>`), không file nào bị đổi:
+Các số dưới đây là output `--dry-run` thật của script **bản v2**, chạy từng category
+(`bash bin/fleet_housekeeping.sh.draft --only=<cat>`), không file nào bị đổi. Cột "v1" là số cũ,
+giữ lại để thấy đúng chỗ nào đã sai và vì sao.
 
-**Nhóm DELETE** (category 1–5):
+**Nhóm DELETE:**
 
-| Category | Số mục | Giải phóng (đo) |
-|---|---|---|
-| `pid` | **1153** file | 0,01 MB |
-| `empty` (`.log`/`.err` 0 byte) | **289** file | 0 MB |
-| `errnoise` | **25** file | 0 MB |
-| `jobtmp` | **0** ← guard giữ cả 3 (§1.2 đính chính) | 0 MB |
-| `pycache` | **250** dir | **20,29 MB** |
-| **Tổng** | **1467 file + 250 dir** | **20,30 MB** |
+| Category | v1 (sai/quá rộng) | **v2 đo thật** | Giải phóng | Vì sao đổi |
+|---|---|---|---|---|
+| `pid` | 1153 file | **1114 file** | 0,01 MB | thêm `-mtime +1` ⇒ giữ pid của job <1 ngày |
+| `empty` | 289 file | **264 file** | ~0 MB | **guard giữ lại 25 file** (6 `.log` + 19 `.err`) không có job record |
+| `errnoise` | 25 file | **25 file** | ~0 MB | siết "mọi dòng non-blank" ⇒ mất 0 file, đúng như dự đoán |
+| `jobtmp` | 0 | **0** | 0 MB | guard giữ cả 3 (§1.2) |
+| `pycache` | 250 dir / 20,29 MB | **5 dir / 0,84 MB** | 0,84 MB | thu về `mike/` + `trading_bot/`; 219 dir / 14,0 MB nằm ở `stockquery/` **ngoài fleet** |
+| **Tổng** | 1467 file + 250 dir / 20,30 MB | **1408 mục / 0,86 MB** | | |
 
-**Nhóm ARCHIVE** (category 6–9):
+**Nhóm ARCHIVE:**
 
-| Category | Số mục | Trước | Sau (gz đo thật ~3,5x) |
-|---|---|---|---|
-| `dispatchlog` (>30d) | **668** | 0,50 MB | ~0,15 MB |
-| `toollog` (>30d) | **2** | 0,01 MB | — |
-| `registry` (>30d) | **55** | 0,02 MB | ~0,01 MB |
-| `rotate` | **0** | — | ngưỡng 10 MB, file lớn nhất hiện 1,6 MB ⇒ **chưa kích hoạt**, là hàng rào cho tương lai |
-| **Tổng** | **725** | **0,52 MB** | ~0,16 MB |
+| Category | v1 | **v2 đo thật** | Trước nén | Vì sao đổi |
+|---|---|---|---|---|
+| `dispatchlog` | 668 | **664** | 0,50 MB | **giữ lại 5 log** của job record hot `orphaned` (trace.sh --log đang dùng được) |
+| `toollog` | 2 | **2** | 0,01 MB | — |
+| `registry` | 55 | **55** | 0,02 MB | roster-guard chưa bắn hôm nay (`Bob.json` mới 28d, sẽ vượt 30d trong ~2 ngày) |
+| `rotate` | 0 | **0** | — | ngưỡng 10 MB, log lớn nhất 1,6 MB ⇒ hàng rào cho tương lai |
+| **Tổng** | 725 / 0,52 MB | **721 mục / 0,52 MB** | → ~0,16 MB sau gz | |
 
-**Nhóm `datacold`** (opt-in, KHÔNG bật mặc định): 671 file / 0,72 GB → gzip ~0,21 GB ⇒ **giảm
-~0,5 GB**. Tỉ số nén đo thật trên 3 file mẫu: 2,8x / 3,9x / 4,1x (**không phải 6–8x**).
+**`datacold`: ĐÃ GỠ.** Số v1 (671 file / 0,72 GB → tiết kiệm ~0,5 GB) là **SAI** — đó là con số
+của ngưỡng >30d trong khi script chạy >60d. Đo lại đúng: **188 file / 42,26 MB** (~30 MB sau nén).
+Cộng với lỗi cấu trúc ở phép thử an toàn (§6.2) ⇒ gỡ hẳn, không phải hoãn.
 
 **Tác động THẬT — nói thẳng:**
 
-| | Trước | Sau (mặc định) | Sau (+datacold) |
-|---|---|---|---|
-| Disk giải phóng | — | **20,3 MB (đo)** | **~0,53 GB** |
-| `ls mike/logs/` | 1928 entry / ~17K token | **~1256 entry / ~11K token** | như trên |
-| File trong `mike/logs` (kể cả ẩn `.pid`) | 3080 | **~1170** (−62%) | như trên |
-| `ls data/` | 2083 entry / ~19K token | không đổi | không đổi* |
-| Disk `/` | 91% | **91%** | **91%** |
+| | Trước | Sau (v2, mặc định) |
+|---|---|---|
+| Disk giải phóng | — | **0,86 MB** (v1 ghi 20,3 MB nhưng 14,0 MB trong đó ngoài phạm vi fleet) |
+| File trong `mike/logs` (kể cả ẩn `.pid`) | 3082 | **~1179** (−62%) |
+| `ls mike/logs/` | ~1928 entry / ~17K token | **~1260 entry / ~11K token** |
+| `ls data/` | 2083 entry / ~19K token | **không đổi** (datacold đã gỡ) |
+| Disk `/` | 91% | **91%** |
 
-\* gzip đổi tên `x.csv`→`x.csv.gz`, số entry không giảm ⇒ **`datacold` giúp disk, KHÔNG giúp token.**
-Muốn giảm token của `ls data/` thì phải **di chuyển** file lạnh vào `data/cold/<YYYY-MM>/`, mà việc
-đó có rủi ro làm vỡ script dùng filename động ⇒ **không đề xuất trong vòng này**, cần Taylor xác
-nhận từng nhóm trước.
-
-**Nói rõ để tránh kỳ vọng sai: cơ chế này KHÔNG giải quyết `/` 91%.** Nó lấy lại 20,3 MB (0,15% của
-13 GB trống), và **20,29/20,30 MB trong đó là `__pycache__`** — tức toàn bộ "rác fleet" thực sự
-(pid/err/log rỗng) chỉ **0,013 MB**. Giá trị thật của script là **giảm 62% số file trong
-`mike/logs` ⇒ giảm token khi agent `ls`/glob**, không phải disk.
+**Kết luận không được làm tròn cho đẹp: giá trị của script này là TOKEN, gần như bằng 0 về disk.**
+Disk thu về 0,86 MB = 0,006% của 13 GB trống. Nếu mục tiêu là disk thì §5 (`/workspace` 45 GB,
+`~/.cache/pip` 703 MB, `~/backup_thanhdt` 5,5 GB) là chỗ duy nhất có khối lượng — housekeeping fleet
+**không** giải quyết được 91%.
 
 ### 3.4 Kiểm chứng script nháp đã làm
 
@@ -392,26 +404,37 @@ nhận từng nhóm trước.
 
 ---
 
-## 4. Câu hỏi kiểm tra dành cho arch-reviewer
+## 4. Kết quả arch-review — 5 câu hỏi tôi tự nêu, đã có trả lời
 
-Thiết kế này cố ý đánh đổi vài chỗ; đề nghị soi đúng những điểm sau:
+Verdict: **NEEDS_CHANGES / confidence high** → đã sửa xong toàn bộ (§6).
 
-1. **Category 3 (`errnoise`)**: xoá theo *nội dung khớp 1 chuỗi* — nếu harness đổi câu warning,
-   file mới sẽ không khớp và được giữ (fail-safe đúng chiều). Nhưng ngược lại: có nguy cơ 1 file
-   ≤200 B *vừa* chứa warning đó *vừa* có dòng lỗi thật sau đó? (script hiện dùng `grep -q` ⇒ **có
-   nguy cơ**; có nên siết thành "toàn bộ nội dung CHỈ gồm warning" không?)
-2. **Category 6 ngưỡng 30d vs 14d**: chọn 30d để đồng bộ với Phase 1b3 và không phải sửa
-   `trace.sh`. Nhưng 30d chỉ dọn 668/1294 file ⇒ lợi ích token bằng nửa so với 14d. Đánh đổi
-   "không sửa tool điều phối" vs "gấp đôi lợi ích" — chọn đúng chưa?
-3. **Category 10 (`datacold`)**: "không tìm thấy tham chiếu literal" có đủ làm điều kiện để gzip
-   không, khi filename động không bị grep bắt? (mitigations hiện có: opt-in, gzip đảo ngược được,
-   không delete, ngưỡng 60d)
-4. **Deny-list** đặt ở đâu là đủ an toàn — hiện kiểm trong 1 hàm chung mọi category gọi trước khi
-   động vào từng file. Có kẽ nào 1 category bỏ qua được nó?
-5. Có category nào tôi xếp DELETE mà thực ra là bằng chứng? (đặc biệt 66 file `.log` 0 byte — lập
-   luận "trạng thái fail đã ở job record" có đủ chắc?)
+| # | Câu tôi hỏi | Reviewer trả lời | Xử lý |
+|---|---|---|---|
+| 1 | `errnoise` dùng `grep -q` có để lọt file vừa có warning vừa có lỗi thật? | **CÓ nguy cơ. Và siết là MIỄN PHÍ**: đọc cả 25 file, tất cả đúng 157 B, 0 dòng non-blank thừa ⇒ siết mất 0 file | ĐÃ SIẾT — "mọi dòng non-blank phải khớp". Đo lại: vẫn 25 file, đúng như dự đoán |
+| 2 | Ngưỡng 30d vs 14d cho `dispatchlog` | **Tiền đề 30d chỉ ĐÚNG MỘT NỬA**: `kb_nightly.sh:490` chỉ archive status TERMINAL; record `orphaned`/`usage_limited`/`cancelled`/`superseded` nằm hot VĨNH VIỄN ⇒ với nhóm đó `--log` đang chạy được và archive sẽ làm im lặng MỚI | GIỮ 30d + **thêm guard bỏ qua job non-terminal**. Đo thật: 9 job orphaned 30,3–33,3d; dry-run hôm nay giữ 5 |
+| 3 | `datacold`: "0 tham chiếu literal" có đủ để gzip? | **KHÔNG — và lợi ích bị phóng đại ~18 lần.** Corpus prune mất `data/results_registry.md` (4447 dòng, chính nguồn §1.4), + 30 mục trong sổ lưu tên rút gọn nên `grep -qF` không bao giờ khớp | **GỠ HẲN** category. 30 MB không đáng đánh đổi |
+| 4 | Deny-list đặt vậy đủ chưa, có kẽ nào lọt? | **PASS** — cả 8 nhánh mutation đều gọi `denied()` trước; bash `case` glob có match `/` nên path lồng sâu vẫn phủ; xác nhận nó BẮN thật 5 lần trong dry-run | giữ nguyên |
+| 5 | Có category nào tôi xếp DELETE mà thực ra là bằng chứng? | **CÓ — đây là killer objection.** `empty`: 6 file `.log` 0-byte không có job record/bus/KB nào; lập luận "trạng thái fail đã ở job record" SAI với ~9% | ĐÃ ÁP GUARD (§6.1) |
 
----
+**Reviewer còn tìm ra 5 rủi ro tôi KHÔNG nêu** — phần giá trị nhất của vòng review:
+
+- **`registry` làm hỏng `fleet_health.sh`**: `mike_json.py:402 cmd_fleet_status` glob
+  `bus/registry/*.json` **không đệ quy** ⇒ archive registry của 1 agent làm nó **biến mất** khỏi
+  bảng sức khoẻ thay vì hiện `dead` — mất tín hiệu đúng lúc cần nhất. Không phải giả thuyết:
+  `bus/registry/Bob.json` đang **28 ngày**, vượt 30d trong ~2 ngày nữa.
+- **Script exit 1 khi dry-run THÀNH CÔNG** (`say()` kết thúc bằng `[ … ] && printf` ⇒ return 1),
+  còn `--apply` lại exit 0 — **ngược**. Dưới cron `… || notify` sẽ báo động giả mỗi lần → nhờn
+  cảnh báo, đúng bệnh fail-silent mà fleet đã dính nhiều lần.
+- **`pid` không có age guard** trong khi `empty`/`errnoise` có ⇒ xoá pid của job vừa dispatch vài
+  giây trước (là bản ghi OS-pid duy nhất để kill tay).
+- **`pycache` scope creep**: 219/250 dir và **14,0/20,3 MB** nằm ở `WorkingClaude/stockquery` —
+  app ngoài fleet ⇒ 69% "thành tích" disk đến từ chỗ không thuộc phạm vi được giao.
+- **`rotate` không kill-idempotent**: dịch thế hệ (`rm .3.gz`, `.2→.3`, `.1→.2`) **trước** khi
+  gzip mới thành công ⇒ gzip fail = mất đời cũ nhất mà không thêm được gì.
+
+Reviewer cũng **xác minh độc lập** 2 lần tự đính chính của tôi (3 file `.json.tmp` là artifact duy
+nhất; 4/12 log không có dấu vết — thực tế 3/4 còn **không có cả job record**) và xác nhận dry-run
+thật sự inert (md5 fingerprint `find logs bus` giống hệt trước/sau).
 
 ## 5. Việc cần user/Mike quyết (vượt quyền Wags)
 
@@ -438,3 +461,81 @@ tại trong 1 bus event. Đề xuất đưa vào `coding_guidelines §8` + `kb/d
 
 **E. Không đề xuất gì cho `execution_logs/`** ngoài "để nguyên". Chỉ 3 file >30d, nén không đáng,
 và nghĩa vụ lưu trữ cần Wendy/Spyros xác nhận trước khi bàn tới.
+
+---
+
+## 6. Nhật ký sửa sau arch-review (v1 → v2)
+
+12 required_changes, **đã áp 11, 1 chuyển thành việc riêng**. Mọi số dưới đây tôi đo lại độc lập
+trước khi sửa — không sửa theo lời reviewer mà không kiểm.
+
+### 6.1 BẮT BUỘC — `empty`: guard bằng-chứng-duy-nhất *(killer objection)*
+
+Tôi đã tự phát minh guard này cho `jobtmp` (§1.2) rồi **quên áp cho `empty`** — dù 2 trong 6 file
+nạn nhân chính là mẫu trong §2.3 do tôi tự đo. Đó là lỗi đáng nói nhất của vòng v1: không phải
+thiếu thông tin, mà là **có dữ liệu đúng trong tay và không nối hai đầu lại**.
+
+Đo lại xác nhận 6/6 file 0-byte không có `bus/jobs/<id>.json` ở hot lẫn archive:
+`Taylor_20260625_013357`, `Winston_20260624_144409`, `Winston_20260626_020936`,
+`Taylor_20260625_022912`, `Mike_20260627_024240`, `Winston_20260626_020407`.
+Cộng với `logs/` bị `.gitignore` (`git ls-files logs/` = 0) ⇒ xoá = **mất vĩnh viễn dấu vết duy
+nhất** của 6 dispatch.
+
+Sau sửa: dry-run in `GIỮ (0 byte NHƯNG không có job record hot lẫn archive — artifact DUY NHẤT)`
+cho **25 file** (6 `.log` + 19 `.err` cùng job). Số xoá 289 → **264**; lợi ích token gần như không
+đổi, rủi ro mất bằng chứng về 0.
+
+### 6.2 BẮT BUỘC — gỡ hẳn `datacold` + đính chính số sai trong báo cáo
+
+Đây là lỗi của chính báo cáo, không phải của script: §3.3 v1 khẳng định **"các số dưới đây không
+phải ước tính — chúng là output `--dry-run` thật"**, nhưng dòng `datacold` lại là con số của ngưỡng
+**>30d** trong khi script chạy **>60d**. Chạy lại đúng lệnh: **188 file / 42,26 MB**, không phải
+671 file / 0,72 GB ⇒ **phóng đại ~18 lần**.
+
+Reviewer còn chỉ ra phép thử an toàn **sai cấu trúc**, không chỉ sai số: corpus (dòng 266)
+`-path "$WC_ROOT/data" -prune` ⇒ **không đọc `data/results_registry.md`** — đúng cái sổ ghim kết
+quả mà §1.4 của báo cáo này dựa vào; và 30 mục trong sổ lưu tên rút gọn (`..._nav20B.csv`) nên
+`grep -qF` **không bao giờ** khớp được. Hôm nay 0 va chạm, nhưng **lập luận** phải đúng chứ không
+chỉ **kết quả** (§10 mục 1). ⇒ Gỡ hẳn, không hoãn. 30 MB không đáng dựng lại hàng rào này.
+
+### 6.3 Bảng 12 thay đổi
+
+| # | Loại | Thay đổi | Bằng chứng đo lại |
+|---|---|---|---|
+| 1 | BẮT BUỘC | `empty` guard job-record | 6 file sole-artifact, dry-run giữ 25 |
+| 2 | BẮT BUỘC | gỡ `datacold` | 188 file/42,26 MB (không phải 671/0,72 GB) |
+| 3 | BẮT BUỘC | sửa §3.3 + bảng "Tác động THẬT" | đã viết lại toàn bộ, có cột v1 vs v2 |
+| 4 | BẮT BUỘC | `dispatchlog` bỏ qua job non-terminal | 9 job `orphaned` 30,3–33,3d; dry-run giữ 5 |
+| 5 | BẮT BUỘC | `registry` loại trừ roster | `Bob.json` 28d; `mike_json.py:402` glob không đệ quy |
+| 6 | BẮT BUỘC | `exit 0` + `return 0` trong `say()` | trước: dry-run exit=1; sau: exit=0 |
+| 7 | NÊN | `errnoise` siết "mọi dòng non-blank" | 25 → 25 file (mất 0, đúng dự đoán) |
+| 8 | NÊN | `pid` thêm `-mtime +1` | 1153 → 1114 file |
+| 9 | NÊN | `pycache` thu về `mike/`+`trading_bot/` | 250 dir/20,29 MB → 5 dir/0,84 MB |
+| 10 | NÊN | `rotate` nén+verify xong mới dịch thế hệ | dormant (log lớn nhất 1,6 MB < 10 MB) |
+| 11 | NÊN | retention cấp 2 cho `logs/archive/` | **KHÔNG làm** — xem dưới |
+| 12 | TÁCH RIÊNG | bug `trace.sh --log` với job >30d | đã xác minh THẬT — xem dưới |
+
+**#11 — cố ý không làm (§2 simplicity).** Reviewer đúng khi nói archive tăng một chiều, nhưng khối
+lượng thật là **0,16 MB/tuần sau nén**; thêm 1 tầng retention nữa là code chưa ai cần cho vấn đề
+chưa tồn tại. Ghi lại thành ngưỡng để người sau biết khi nào phải làm: **xem lại khi
+`logs/archive/` vượt 100 MB hoặc 5000 file** (với tốc độ hiện tại ≈ **hơn 10 năm**).
+
+**#12 — bug có sẵn, KHÔNG do housekeeping gây ra, cần việc riêng.** `bin/trace.sh:30-35` lấy path
+logfile **từ job record** rồi `tail`; `cmd_job_get` (`bin/mike_json.py:744`) mở
+`_job_path(jobs_dir, job_id)` **không đệ quy** ⇒ job đã vào `bus/jobs/archive/` (do kb_nightly
+Phase 1b3 từ 2026-07-27) trả not-found. Kiểm thật: `bash bin/trace.sh DollarBill_20260627_052257
+--log` không in gì trong khi `logs/dispatch_DollarBill_20260627_052257.log` **vẫn còn trên đĩa**.
+⇒ `trace.sh --log` **hiện đã hỏng** cho mọi job >30d. Fix đúng = cho `cmd_job_get` fallback sang
+`archive/` (+ fallback tra `logs/archive/*/<name>.log.gz` nếu sau này hạ ngưỡng xuống 14d).
+Chưa sửa trong job này vì nằm ngoài phạm vi được giao — đề nghị mở việc riêng.
+
+### 6.4 Kiểm chứng lại sau khi sửa
+
+- `bash -n` PASS.
+- Dry-run toàn bộ: **exit=0** (trước khi sửa: exit=1), fingerprint `find logs bus -printf '%p %s
+  %T@'| md5sum` **giống hệt trước/sau** (`7df8152712…`), `logs/` vẫn **3082 file**, không tạo
+  `logs/fleet_housekeeping.log`, không tạo thư mục archive nào.
+- 4/5 guard **bắn thật** trong dry-run: `empty` giữ 25, `dispatchlog` giữ 5, `jobtmp` giữ 3,
+  deny-list chặn 5. Hai guard ra 0 **đúng như dự đoán**: `errnoise` (siết không mất file nào) và
+  `registry` roster (`Bob.json` mới 28d, chưa tới ngưỡng 30d).
+- **CHƯA** `chmod +x`, **CHƯA** bỏ hậu tố `.draft`, **CHƯA** thêm dòng cron nào.

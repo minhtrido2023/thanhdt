@@ -50,10 +50,7 @@ Category ARCHIVE (đảo ngược được, giữ nguyên nội dung):
   registry    bus/registry/*.json  >30d  -> bus/registry/archive/
   rotate      logs/<cron>.log >10MB      -> .1.gz .2.gz .3.gz
 
-Category OPT-IN (KHÔNG chạy nếu không gọi tên trong --only):
-  datacold   data/*.csv|pkl|parquet >60d VÀ không có tham chiếu literal -> gzip TẠI CHỖ
-             ⚠️ grep basename KHÔNG bắt được filename sinh động (f-string/OUT_CSV=). Vì vậy chỉ
-             gzip (đảo ngược được), không di chuyển, không xoá. §10 mục 1.
+Không có category OPT-IN nào. (`datacold` đã bị gỡ sau arch-review 2026-07-30 — xem §10 cuối file.)
 EOF
 }
 for a in "$@"; do
@@ -73,7 +70,10 @@ want() {
 
 # ── Đếm để báo cáo ───────────────────────────────────────────────────────────
 N_DEL=0; B_DEL=0; N_ARC=0; B_ARC=0
-say() { printf '%s\n' "$*"; [ "$APPLY" = 1 ] && printf '[%s] %s\n' "$(date -u +%FT%TZ)" "$*" >>"$LOG"; }
+# `return 0` cuối hàm là BẮT BUỘC: nếu để `[ "$APPLY" = 1 ] && printf …` là lệnh cuối thì say()
+# trả 1 trong mọi lần dry-run ⇒ script exit 1 dù chạy THÀNH CÔNG (arch-review 2026-07-30 bắt được).
+# Dưới cron dạng `... || notify` thì mỗi lần dry-run sẽ báo động giả → nhờn cảnh báo.
+say() { printf '%s\n' "$*"; [ "$APPLY" = 1 ] && printf '[%s] %s\n' "$(date -u +%FT%TZ)" "$*" >>"$LOG"; return 0; }
 hdr() { say ""; say "── $* ─────────────────────────────────────────"; }
 
 # ── HÀNG RÀO CUỐI: deny-list ─────────────────────────────────────────────────
@@ -135,34 +135,67 @@ do_archive() {  # do_archive <path> <thư mục đích>
 say "=== fleet_housekeeping $( [ "$APPLY" = 1 ] && echo APPLY || echo 'DRY-RUN (mặc định)') $(date -u +%FT%TZ) ==="
 [ -n "$ONLY" ] && say "chỉ chạy category: $ONLY"
 
+# ── HÀM CHUNG: job record của 1 dispatch log có còn tồn tại ở đâu không? ─────
+# Dùng cho category `empty` (guard bằng-chứng-duy-nhất) và `dispatchlog` (guard trace.sh).
+# Trả về job_id qua stdout nếu tên file có dạng dispatch_<job_id>.<ext>, rỗng nếu không phải.
+jobid_of() {
+  local b; b="$(basename "$1")"
+  case "$b" in dispatch_*) ;; *) return 1 ;; esac
+  b="${b#dispatch_}"; b="${b%.err}"; b="${b%.log}"
+  printf '%s' "$b"
+}
+# 0 = có record (hot hoặc archive), 1 = KHÔNG có bản nào
+has_job_record() {
+  [ -f "$ROOT/bus/jobs/$1.json" ] || [ -f "$ROOT/bus/jobs/archive/$1.json" ]
+}
+
 # ── 1. pid — 0 reader trong toàn repo (báo cáo §2.1) ─────────────────────────
+# `-mtime +1` cho nhất quán với empty/errnoise: file .pid là bản ghi DUY NHẤT của OS-pid một
+# dispatch đang chạy (dùng để kill tay), không xoá của job vừa mới dispatch vài giây trước.
 if want pid; then
-  hdr "pid — logs/.dispatch_*.pid (0 reader: chỉ dispatch.sh:753 GHI, không ai ĐỌC)"
+  hdr "pid — logs/.dispatch_*.pid >1d (0 reader: chỉ dispatch.sh:753 GHI, không ai ĐỌC)"
   while IFS= read -r f; do do_delete "$f" "pid không ai đọc"; done \
-    < <(find "$ROOT/logs" -maxdepth 1 -name '.dispatch_*.pid' -type f 2>/dev/null)
+    < <(find "$ROOT/logs" -maxdepth 1 -name '.dispatch_*.pid' -type f -mtime +1 2>/dev/null)
 fi
 
-# ── 2. empty — file 0 byte ────────────────────────────────────────────────────
+# ── 2. empty — file 0 byte, CÓ GUARD BẰNG-CHỨNG-DUY-NHẤT ─────────────────────
 # Kiểm lại bằng `-s` ngay trước khi xoá (KHÔNG tin danh sách find đã cũ) — một job đang chạy có
 # thể vừa ghi dòng đầu vào file mà lúc find còn rỗng.
+#
+# ⚠️ SỬA SAU ARCH-REVIEW (2026-07-30, killer objection — ĐÃ ĐO LẠI VÀ ĐÚNG): lý do biện minh cũ
+# ("trạng thái fail đã nằm ở bus/jobs/<job>.json") SAI với 6/66 file (~9%):
+#   Taylor_20260625_013357, Winston_20260624_144409, Winston_20260626_020936,
+#   Taylor_20260625_022912, Mike_20260627_024240, Winston_20260626_020407
+# — không có job record (hot lẫn archive), không bus event, không tham chiếu KB. logs/ lại bị
+# .gitignore (0 backup GitHub) ⇒ với 6 job này, filename+mtime là artifact DUY NHẤT còn sót.
+# Đây đúng lớp lỗi đã bắt được ở `jobtmp`; nay áp CÙNG guard đó cho `empty`.
 if want empty; then
-  hdr "empty — logs/*.log|*.err đúng 0 byte (trạng thái fail đã nằm ở bus/jobs/<job>.json)"
+  hdr "empty — logs/*.log|*.err 0 byte + CÓ job record thật (không thì GIỮ: là dấu vết duy nhất)"
   while IFS= read -r f; do
     [ -s "$f" ] && { say "  bỏ qua (đã có nội dung sau khi quét): $f"; continue; }
-    do_delete "$f" "0 byte"
+    if jid="$(jobid_of "$f")" && ! has_job_record "$jid"; then
+      say "  GIỮ (0 byte NHƯNG không có job record hot lẫn archive — artifact DUY NHẤT): $f"
+      continue
+    fi
+    do_delete "$f" "0 byte, job record còn tra được"
   done < <(find "$ROOT/logs" -maxdepth 1 -type f \( -name '*.log' -o -name '*.err' \) -size 0 -mtime +1 2>/dev/null)
 fi
 
 # ── 3. errnoise — .err chỉ chứa warning boilerplate của harness ───────────────
 # Đã đọc thật 33 file .err không rỗng: 25 file đúng 157 B và chỉ có dòng warning này; 8 file còn
 # lại có nội dung khác ⇒ GIỮ. Xoá theo NỘI DUNG, không theo tên/kích thước.
-# TODO(arch-reviewer, câu hỏi §4.1): `grep -q` cho phép file vừa có warning vừa có lỗi thật đi qua.
-#   Nên siết thành "toàn bộ non-blank line phải khớp warning"? Đề xuất chờ verdict rồi mới chốt.
+# SIẾT SAU ARCH-REVIEW: `grep -q` cho phép file vừa có warning vừa có dòng lỗi THẬT phía sau lọt
+# qua. Nay yêu cầu MỌI dòng non-blank đều phải khớp warning. Đo thật trước khi đổi: cả 25 file
+# hiện đúng 157 B và 0 dòng non-blank thừa ⇒ siết này mất 0 file, chỉ thêm an toàn.
 if want errnoise; then
-  hdr "errnoise — logs/*.err ≤200B chỉ chứa warning stdin của harness"
+  hdr "errnoise — logs/*.err ≤200B mà MỌI dòng non-blank đều là warning stdin của harness"
   while IFS= read -r f; do
     [ "$(wc -c <"$f")" -le 200 ] || continue
     grep -q 'no stdin data received' "$f" 2>/dev/null || continue
+    # còn dòng non-blank nào KHÔNG phải warning ⇒ có nội dung thật ⇒ giữ
+    if grep -v '^[[:space:]]*$' "$f" | grep -qv 'no stdin data received'; then
+      say "  GIỮ (có dòng khác ngoài warning): $f"; continue
+    fi
     do_delete "$f" "chỉ có warning stdin, không phải lỗi"
   done < <(find "$ROOT/logs" -maxdepth 1 -type f -name '*.err' ! -size 0 -mtime +1 2>/dev/null)
 fi
@@ -189,15 +222,18 @@ if want jobtmp; then
 fi
 
 # ── 5. pycache — regenerable theo định nghĩa ─────────────────────────────────
+# PHẠM VI SAU ARCH-REVIEW: chỉ $ROOT (mike/) + trading_bot/, KHÔNG quét cả $WC_ROOT.
+# Lý do: đo thật 250 dir thì 219 dir / 14,0 MB nằm ở WorkingClaude/stockquery — app không thuộc
+# fleet, ngoài phạm vi được giao. Thu hẹp lại còn ~6 MB nhưng đúng thẩm quyền.
 if want pycache; then
-  hdr "pycache — __pycache__/ (đã .gitignore cả 2 repo, Python tự tạo lại)"
+  hdr "pycache — __pycache__/ trong mike/ + trading_bot/ (đã .gitignore, Python tự tạo lại)"
   while IFS= read -r d; do
     if denied "$d/"; then say "  DENY-LIST chặn: $d"; continue; fi
     sz=$(du -sb "$d" 2>/dev/null | cut -f1); sz=${sz:-0}
     N_DEL=$((N_DEL+1)); B_DEL=$((B_DEL+sz))
     if [ "$APPLY" = 1 ]; then rm -rf -- "$d" && say "  DEL  $d/ ($sz B)"
     else say "  [dry] DEL  $d/ ($sz B)"; fi
-  done < <(find "$WC_ROOT" -type d -name '__pycache__' -not -path '*/.git/*' 2>/dev/null)
+  done < <(find "$ROOT" "$WC_ROOT/trading_bot" -type d -name '__pycache__' -not -path '*/.git/*' 2>/dev/null)
 fi
 
 # ── 6. dispatchlog — ARCHIVE, KHÔNG XOÁ ──────────────────────────────────────
@@ -210,10 +246,28 @@ fi
 # cùng lúc, không tạo khoảng thời gian mà trace vẫn tìm log nhưng log đã đi.
 # ⚠️ Nếu hạ xuống 14d (lợi token gấp đôi: 1007 vs 668 file) thì PHẢI thêm fallback tra
 #    logs/archive/*/<name>.log.gz trong trace.sh — nếu không, --log im lặng không ra gì.
+#
+# ⚠️ GUARD THÊM SAU ARCH-REVIEW: lập luận "30d thì job record cũng đã rời hot" chỉ ĐÚNG MỘT NỬA.
+# kb_nightly.sh:490 chỉ archive status TERMINAL {done,failed,timeout}; record `orphaned` /
+# `usage_limited` / `cancelled` / `superseded` nằm hot VĨNH VIỄN ⇒ với nhóm đó `trace.sh --log`
+# HIỆN ĐANG CHẠY ĐƯỢC và sẽ bị archive này làm im lặng MỚI. Đo thật 2026-07-30: 9 job (tất cả
+# `orphaned`, 30,3–33,3d — Mafee_20260627_045844, Taylor_20260627_115036, Winston_20260627_195420,
+# Winston_20260628_065538, Taylor_20260628_064658, Wendy_20260629_131236, Wendy_20260629_160847,
+# Taylor_20260630_033117, Taylor_20260630_034617). Đây đúng nhóm job cần điều tra nhất (việc của
+# Wags) ⇒ giữ log của chúng ở hot cho tới khi record rời đi.
 if want dispatchlog; then
-  hdr "dispatchlog — logs/dispatch_*.log >30d -> logs/archive/ (ARCHIVE, không xoá)"
-  while IFS= read -r f; do do_archive "$f" "$ROOT/logs/archive"; done \
-    < <(find "$ROOT/logs" -maxdepth 1 -type f -name 'dispatch_*.log' -mtime +30 2>/dev/null)
+  hdr "dispatchlog — logs/dispatch_*.log >30d -> logs/archive/ (ARCHIVE; giữ lại job non-terminal)"
+  while IFS= read -r f; do
+    if jid="$(jobid_of "$f")" && [ -f "$ROOT/bus/jobs/$jid.json" ]; then
+      st="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1])).get("status",""))' \
+             "$ROOT/bus/jobs/$jid.json" 2>/dev/null || echo '')"
+      case "$st" in
+        done|failed|timeout|'') ;;
+        *) say "  GIỮ (job record còn hot, status=$st — trace.sh --log đang dùng được): $f"; continue ;;
+      esac
+    fi
+    do_archive "$f" "$ROOT/logs/archive"
+  done < <(find "$ROOT/logs" -maxdepth 1 -type f -name 'dispatch_*.log' -mtime +30 2>/dev/null)
 fi
 
 # ── 7. toollog ───────────────────────────────────────────────────────────────
@@ -226,10 +280,20 @@ if want toollog; then
 fi
 
 # ── 8. registry — gap duy nhất của bus mà kb_nightly không chạm ──────────────
+# ⚠️ LOẠI TRỪ ROSTER SAU ARCH-REVIEW: `mike_json.py:402 cmd_fleet_status` glob bus/registry/*.json
+# KHÔNG đệ quy ⇒ archive registry của 1 agent chính danh làm nó BIẾN MẤT khỏi bin/fleet_health.sh
+# thay vì hiện `dead` — mất tín hiệu đúng lúc cần nhất (agent im lâu = dấu hiệu hỏng).
+# Không phải giả thuyết: bus/registry/Bob.json đang 28 ngày, sẽ vượt 30d ngay tuần chạy đầu.
+ROSTER='Mike Taylor Winston Wendy Spyros Mafee DollarBill Wags Bob'
 if want registry; then
-  hdr "registry — bus/registry/*.json >30d -> bus/registry/archive/"
-  while IFS= read -r f; do do_archive "$f" "$ROOT/bus/registry/archive"; done \
-    < <(find "$ROOT/bus/registry" -maxdepth 1 -type f -name '*.json' -mtime +30 2>/dev/null)
+  hdr "registry — bus/registry/*.json >30d -> archive/ (trừ agent trong roster: $ROSTER)"
+  while IFS= read -r f; do
+    b="$(basename "$f" .json)"
+    case " $ROSTER " in
+      *" $b "*) say "  GIỮ (agent trong roster — archive sẽ làm biến mất khỏi fleet_health): $f"; continue ;;
+    esac
+    do_archive "$f" "$ROOT/bus/registry/archive"
+  done < <(find "$ROOT/bus/registry" -maxdepth 1 -type f -name '*.json' -mtime +30 2>/dev/null)
 fi
 
 # ── 9. rotate — log cron append vô hạn, chưa ai rotate ───────────────────────
@@ -241,43 +305,37 @@ if want rotate; then
     if denied "$f"; then say "  DENY-LIST chặn: $f"; continue; fi
     sz=$(stat -c %s "$f")
     if [ "$APPLY" = 1 ]; then
-      rm -f "$f.3.gz"; [ -f "$f.2.gz" ] && mv -f "$f.2.gz" "$f.3.gz"
-      [ -f "$f.1.gz" ] && mv -f "$f.1.gz" "$f.2.gz"
-      gzip -c -6 -- "$f" > "$f.1.gz.part" && mv -f "$f.1.gz.part" "$f.1.gz" && : >"$f"
-      say "  ROT  $f ($sz B -> 0, đời trước ở $f.1.gz)"
+      # §5 idempotent: nén XONG và verify TRƯỚC, chỉ khi đó mới dịch thế hệ + truncate.
+      # (Thứ tự cũ dịch thế hệ trước ⇒ gzip fail/bị kill = mất đời cũ nhất mà không thêm được gì.)
+      if gzip -c -6 -- "$f" > "$f.1.gz.part" 2>/dev/null && [ -s "$f.1.gz.part" ] \
+         && gzip -t "$f.1.gz.part" 2>/dev/null; then
+        rm -f "$f.3.gz"; [ -f "$f.2.gz" ] && mv -f "$f.2.gz" "$f.3.gz"
+        [ -f "$f.1.gz" ] && mv -f "$f.1.gz" "$f.2.gz"
+        mv -f "$f.1.gz.part" "$f.1.gz"
+        : >"$f"   # copytruncate: writer dùng >> ghi tiếp bình thường; writer dùng `>` sẽ để lại
+                  # lỗ NUL sparse — chấp nhận được vì mọi log cron ở đây đều append.
+        say "  ROT  $f ($sz B -> 0, đời trước ở $f.1.gz)"
+      else
+        rm -f "$f.1.gz.part"; say "  !! rotate THẤT BẠI, giữ nguyên (chưa dịch thế hệ): $f"
+      fi
     else say "  [dry] ROT  $f ($sz B) -> $f.1.gz, truncate bản hot"; fi
     N_ARC=$((N_ARC+1)); B_ARC=$((B_ARC+sz))
   done < <(find "$ROOT/logs" -maxdepth 1 -type f -name '*.log' -size +10M 2>/dev/null)
 fi
 
-# ── 10. datacold — OPT-IN, không bao giờ chạy mặc định ───────────────────────
-# gzip TẠI CHỖ (không di chuyển, không xoá) cho data/*.csv|pkl|parquet >60d mà grep basename không
-# thấy tham chiếu nào trong toàn bộ .py/.sh/.md của cả 2 repo.
-# ⚠️ HAI GIỚI HẠN PHẢI BIẾT TRƯỚC KHI BẬT:
-#   (a) grep basename literal KHÔNG bắt filename sinh động (f-string, OUT_CSV=, ghép suffix từ env)
-#       ⇒ "không tham chiếu" ≠ "không dùng". §10 mục 1: never archive on a name guess alone.
-#       Vì vậy chỉ gzip — đảo ngược bằng `gunzip` trong 1 lệnh.
-#   (b) gzip đổi tên x.csv -> x.csv.gz nên SỐ ENTRY trong data/ KHÔNG giảm ⇒ category này giúp
-#       DISK (~0,5 GB), KHÔNG giúp token. Muốn giảm token phải DI CHUYỂN vào data/cold/, việc đó
-#       cần Taylor xác nhận từng nhóm trước — cố ý KHÔNG làm ở đây.
-if want datacold; then
-  hdr "datacold (OPT-IN) — data/*.csv|pkl|parquet >60d, 0 tham chiếu literal -> gzip tại chỗ"
-  CORPUS="$(mktemp)"; trap 'rm -f "$CORPUS"' EXIT
-  find "$WC_ROOT" -path '*/.git' -prune -o -path "$WC_ROOT/data" -prune -o \
-       -type f \( -name '*.py' -o -name '*.sh' -o -name '*.md' -o -name '*.json' -o -name '*.txt' \) \
-       -print 2>/dev/null | xargs -r cat 2>/dev/null > "$CORPUS"
-  while IFS= read -r f; do
-    if denied "$f"; then say "  DENY-LIST chặn: $f"; continue; fi
-    base="$(basename "$f")"
-    if grep -qF -- "$base" "$CORPUS"; then continue; fi        # có tham chiếu ⇒ để nguyên
-    sz=$(stat -c %s "$f"); N_ARC=$((N_ARC+1)); B_ARC=$((B_ARC+sz))
-    if [ "$APPLY" = 1 ]; then
-      if gzip -6 -- "$f" 2>/dev/null; then say "  GZ   $f ($sz B -> $(stat -c %s "$f.gz" 2>/dev/null))"
-      else say "  !! gzip thất bại, giữ nguyên: $f"; fi
-    else say "  [dry] GZ   $f ($sz B, không tìm thấy tham chiếu literal)"; fi
-  done < <(find "$WC_ROOT/data" -maxdepth 1 -type f \
-             \( -name '*.csv' -o -name '*.pkl' -o -name '*.parquet' \) -mtime +60 2>/dev/null)
-fi
+# ── 10. (ĐÃ GỠ) datacold — arch-review 2026-07-30 bác bỏ ─────────────────────
+# Category cũ: gzip tại chỗ data/*.csv|pkl|parquet >60d "không có tham chiếu literal".
+# GỠ HẲN, 3 lý do đo được (không phải quan điểm):
+#   (a) Lợi ích thật chỉ 188 file / 42,26 MB (~30 MB sau nén) — báo cáo bản đầu ghi nhầm
+#       671 file / 0,72 GB, đó là con số của ngưỡng >30d trong khi script chạy >60d ⇒ phóng đại
+#       ~18 lần. 30 MB = 0,2% của 13 GB trống, không đáng đánh đổi gì.
+#   (b) Phép thử an toàn SAI CẤU TRÚC: corpus prune $WC_ROOT/data nên KHÔNG đọc
+#       data/results_registry.md (4447 dòng — chính là sổ ghim kết quả mà báo cáo §1.4 dựa vào),
+#       và 30 mục trong sổ đó lưu tên rút gọn dạng "..._x.csv" nên `grep -qF` không bao giờ khớp.
+#       Hôm nay 0 va chạm, nhưng phải đúng LẬP LUẬN chứ không chỉ đúng kết quả (§10 mục 1).
+#   (c) Ngay cả khi chạy đúng, gzip không giảm số entry ⇒ KHÔNG giúp token, mục tiêu chính.
+# Muốn làm lại: phải đưa data/*.md vào corpus, thêm .sql/.yaml/.ipynb + `crontab -l`, và có
+# Taylor xác nhận từng nhóm file trước. Không thuộc phạm vi housekeeping tự động.
 
 # ── Tổng kết ─────────────────────────────────────────────────────────────────
 say ""
@@ -292,3 +350,5 @@ else
   say ""
   say "Đây là DRY-RUN. Chạy lại với --apply để thực thi."
 fi
+
+exit 0
