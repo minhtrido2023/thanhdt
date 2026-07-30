@@ -186,6 +186,24 @@ sig = inspect.signature(DNSEBroker.place_order)
 check("cash_only" in sig.parameters and "no_loan_package" not in sig.parameters,
       "DNSEBroker.place_order has cash_only param, no stale no_loan_package")
 
+print("=== plumbing: EVERY concrete BrokerBase subclass accepts cash_only ===")
+# Root cause of the 2026-07-30 paper-main outage (386 PLACE_FAIL/day, kb/INCIDENTS.md):
+# this exact fix pattern (add a kwarg to BrokerBase.place_order) was applied to
+# DNSEBroker/PHSBroker but PaperBroker was missed — executor.py calls
+# broker.place_order(..., cash_only=...) unconditionally regardless of broker class, so any
+# subclass missing the kwarg crashes 100% of orders for that broker. The single-class check
+# above did not generalize; this one walks every subclass so a future kwarg addition to
+# BrokerBase can't repeat the same miss.
+from trading_bot.brokers import BrokerBase
+import trading_bot.brokers as brokers_mod
+base_params = set(inspect.signature(BrokerBase.place_order).parameters)
+subclasses = [c for c in vars(brokers_mod).values()
+              if isinstance(c, type) and issubclass(c, BrokerBase) and c is not BrokerBase]
+for cls in subclasses:
+    missing = base_params - set(inspect.signature(cls.place_order).parameters)
+    check(not missing, f"{cls.__name__}.place_order carries all of BrokerBase's params "
+                        f"(missing: {sorted(missing) or 'none'})")
+
 print("=== discretionary engine stamps cash_only=True on injected order ===")
 from trading_bot.discretionary_accumulation import compute_session_order
 import json

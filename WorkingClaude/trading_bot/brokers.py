@@ -725,7 +725,10 @@ class PaperBroker(BrokerBase):
             return Quote({"symbol": symbol, "refPrice": ref, "lastPrice": ref})
         return None
 
-    def place_order(self, symbol, qty, side, price=None, order_type="LO"):
+    def place_order(self, symbol, qty, side, price=None, order_type="LO",
+                    cash_only=False):
+        # Paper broker không dùng gói vay DNSE → cờ cash_only không áp dụng, chấp nhận để
+        # interface đồng nhất với DNSEBroker/PHSBroker (executor gọi chung 1 chữ ký).
         oid = f"P{self.state['next_id']:06d}"
         self.state["next_id"] += 1
         self.state["open_orders"][oid] = {

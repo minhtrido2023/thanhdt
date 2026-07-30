@@ -19,13 +19,28 @@ if "--since" in sys.argv:
 # --account LABEL: filter on the ORDER OBJECT's accountNo (present in every order record since
 # go-live) — the top-level account_no field only exists in files written after the 2026-07-06
 # cross-account log fix, so filtering on it would silently drop all 07-01/07-02 go-live data.
+#
+# Registry's daily probe (paper_programs_registry.json id=fill_timing) calls this script with
+# NO --account — it means "the paper main fill-timing harness", which never writes to dnse_raw
+# at all (main is mode=paper -> PaperBroker, dnse_raw only ever holds LIVE DNSE broker records).
+# Before 2026-07-30 an unfiltered ACCT=None let EVERY live account's real order flow (SpaceX/
+# ZaloPay/RocketX) leak into what the report presented as the paper harness's BUY/SELL-window
+# adherence and reject counts (found investigating a user report that the paper reports "don't
+# work" — e.g. persistent ~0% BUY-window adherence was real trading orders that have no reason
+# to cluster in the paper harness's test window, not a paper-harness bug). Fix: when no
+# --account is given, EXCLUDE every configured LIVE account instead of leaving it unfiltered —
+# "no account_no in scope" must never mean "no filter" (coding_guidelines.md §12).
 ACCT = None
+LIVE_IDS = set()
+accs = json.load(open("secrets/trading_bot_accounts.json"))["accounts"]
 if "--account" in sys.argv:
     label = sys.argv[sys.argv.index("--account") + 1]
-    accs = json.load(open("secrets/trading_bot_accounts.json"))["accounts"]
     ACCT = next((a.get("account_id") for a in accs if a.get("label") == label), None)
     if not ACCT:
         sys.exit(f"unknown account label or no account_id: {label}")
+else:
+    LIVE_IDS = {str(a["account_id"]) for a in accs
+                if a.get("mode") == "live" and a.get("account_id")}
 
 def _in(t, win):
     return win[0] <= t <= win[1]
@@ -42,6 +57,7 @@ order_state, first_fill_ts = {}, {}
 def _ingest(o, ts, d):
     if not isinstance(o, dict) or not o.get("symbol") or o.get("id") is None: return
     if ACCT and str(o.get("accountNo")) != str(ACCT): return
+    if LIVE_IDS and str(o.get("accountNo")) in LIVE_IDS: return
     key = (d, o["id"])
     side = o.get("side", "")               # NB=buy, NS=sell
     fq = o.get("fillQuantity", 0) or 0
@@ -119,28 +135,38 @@ if not J.empty and "event" in J.columns:
 # ---- C. directional fill sanity (buy not > open, sell not < open) ----
 print("\n--- C. DIRECTIONAL FILL SANITY (needs day-open; bps EDGE itself needs weeks, not gated here) ---")
 if len(real):
-    try:
-        sys.path.insert(0, os.getcwd()); os.environ.setdefault("BQ_LOCAL_CACHE", "data/bq_cache")
-        from bq_local_cache import get_cache
-        lc = get_cache()
-        tks = "','".join(sorted(real["ticker"].dropna().unique()))
-        opens = lc.query(f"SELECT ticker, time, Open FROM tav2_bq.ticker_1m WHERE ticker IN ('{tks}') AND time >= DATE '{since}'")
-        opens["key"] = opens["ticker"] + "|" + pd.to_datetime(opens["time"]).dt.strftime("%Y-%m-%d")
-        omap = dict(zip(opens["key"], opens["Open"]))
-        real["dopen"] = real.apply(lambda r: omap.get(f"{r['ticker']}|{r['date']}"), axis=1)
-        v = real.dropna(subset=["dopen"])
-        v = v[v["avg_price"] > 0]
-        if len(v):
-            v = v.copy(); v["bps_vs_open"] = (v["avg_price"] / v["dopen"] - 1) * 1e4
-            for sd in ("buy", "sell"):
-                s = v[v["side"] == sd]
-                if len(s):
-                    good = "lower=better" if sd == "buy" else "higher=better"
-                    print(f"   {sd.upper()} fill vs day-open: mean {s['bps_vs_open'].mean():+.1f} bps (n={len(s)}, {good})")
-        else:
-            print("   day-open not in cache yet for these dates (cache syncs 23:45) — re-run after sync")
-    except Exception as e:
-        print(f"   (skipped vs-open: {str(e)[:80]})")
+    sys.path.insert(0, os.getcwd()); os.environ.setdefault("BQ_LOCAL_CACHE", "data/bq_cache")
+    from bq_local_cache import get_cache
+    lc = get_cache()
+    if lc is None:
+        # get_cache() already printed why (unverified/stale/missing manifest) and returns None
+        # by design — it does NOT actually fall back to a real BQ client despite its own log
+        # line saying "falling back to real BQ". Calling .query() on None used to raise a bare
+        # 'NoneType' object has no attribute 'query', caught by a broad except and printed as a
+        # generic "(skipped vs-open: ...)" — indistinguishable from an unexpected crash. This
+        # happened on ~55% of report runs (found investigating a user report that the paper
+        # reports "don't work"). Now stated plainly instead of masked as an opaque exception.
+        print("   BQ local cache unavailable (see [BQ_LOCAL_CACHE] line above) — skip vs-open sanity for this run")
+    else:
+        try:
+            tks = "','".join(sorted(real["ticker"].dropna().unique()))
+            opens = lc.query(f"SELECT ticker, time, Open FROM tav2_bq.ticker_1m WHERE ticker IN ('{tks}') AND time >= DATE '{since}'")
+            opens["key"] = opens["ticker"] + "|" + pd.to_datetime(opens["time"]).dt.strftime("%Y-%m-%d")
+            omap = dict(zip(opens["key"], opens["Open"]))
+            real["dopen"] = real.apply(lambda r: omap.get(f"{r['ticker']}|{r['date']}"), axis=1)
+            v = real.dropna(subset=["dopen"])
+            v = v[v["avg_price"] > 0]
+            if len(v):
+                v = v.copy(); v["bps_vs_open"] = (v["avg_price"] / v["dopen"] - 1) * 1e4
+                for sd in ("buy", "sell"):
+                    s = v[v["side"] == sd]
+                    if len(s):
+                        good = "lower=better" if sd == "buy" else "higher=better"
+                        print(f"   {sd.upper()} fill vs day-open: mean {s['bps_vs_open'].mean():+.1f} bps (n={len(s)}, {good})")
+            else:
+                print("   day-open not in cache yet for these dates (cache syncs 23:45) — re-run after sync")
+        except Exception as e:
+            print(f"   (skipped vs-open: {str(e)[:80]})")
 else:
     print("   no completed fills yet")
 
