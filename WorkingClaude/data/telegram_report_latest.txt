@@ -1,5 +1,5 @@
-🛰️ V2.3 (DT5G) REPORT — 2026-07-29
-Sent: 2026-07-29 19:35 (next session T+1 entry)
+🛰️ V2.3 (DT5G) REPORT — 2026-07-30
+Sent: 2026-07-30 19:35 (next session T+1 entry)
 Market regime (DT5G): 🟡 NEUTRAL (state=3)
 Strategy: V2.3 = BAL | LAG static (always-on, no ensemble switch) + allocator + CAPIT v2
 BAL: max=12 · 10%/pos (book) · hold 45d · stop -20% · Fin/RE cap 4 · 8L≥4 half-size in BEAR/CRISIS
@@ -7,58 +7,32 @@ LAG: PEAD T+5 entry · hold 25td · NO stop · LAG_HI 10% / LAG_LO 8% (book)
 ETF parking: 70% idle cash → E1VFVN30 (NEUTRAL, cả 2 book)
 Guards: SV_TIGHT Fresh-Q · overheat P3 · AVOID_exbull (momentum chặn ở state 5)
 ⚖️ Allocator w_LAG: target 50% (state 3) · current 49% → trong band ±10pp, không trim
-📋 BOOK A — BAL (momentum, allocator-weighted)
-Không có signal — giữ cash cho book này.
-📋 BOOK B — LAG (PEAD always-on, 50% NAV target) (27 entries)
+📋 BOOK A — BAL (momentum, allocator-weighted) (1 mã)
 
-Ticker  Tier     W% Status              
-------------------------------------------
-DHD     LAG_LO    8 UPCOMING T+3 phiên tới
-MAC     LAG_HI   10 UPCOMING T+4 phiên tới
-PCT     LAG_HI   10 UPCOMING T+1 phiên tới
-TV3     LAG_LO    8 UPCOMING T+4 phiên tới
-VVS     LAG_HI   10 UPCOMING T+1 phiên tới
-XPH     LAG_HI   10 UPCOMING T+1 phiên tới
-AMC     LAG_HI   10 WINDOW_PASSED 2026-07-29
-BMS     LAG_HI   10 WINDOW_PASSED 2026-07-27
-BSI     LAG_LO    8 WINDOW_PASSED 2026-07-27
-CLC     LAG_LO    8 WINDOW_PASSED 2026-07-27
-CSV     LAG_HI   10 WINDOW_PASSED 2026-07-28
-EVF     LAG_LO    8 WINDOW_PASSED 2026-07-28
-FTS     LAG_LO    8 WINDOW_PASSED 2026-07-27
-GEE     LAG_LO    8 WINDOW_PASSED 2026-07-27
-HAR     LAG_LO    8 WINDOW_PASSED 2026-07-27
-HCM     LAG_LO    8 WINDOW_PASSED 2026-07-27
-HT1     LAG_HI   10 WINDOW_PASSED 2026-07-28
-IDV     LAG_HI   10 WINDOW_PASSED 2026-07-28
-KHS     LAG_HI   10 WINDOW_PASSED 2026-07-27
-MDF     LAG_HI   10 WINDOW_PASSED 2026-07-29
-NBC     LAG_HI   10 WINDOW_PASSED 2026-07-27
-SPM     LAG_HI   10 WINDOW_PASSED 2026-07-27
-TIN     LAG_LO    8 WINDOW_PASSED 2026-07-29
-VCI     LAG_LO    8 WINDOW_PASSED 2026-07-28
-VE9     LAG_LO    8 WINDOW_PASSED 2026-07-29
-VND     LAG_HI   10 WINDOW_PASSED 2026-07-27
-VPB     LAG_LO    8 WINDOW_PASSED 2026-07-27
+Ticker  Tier   R     Close   Sc  FA   RSI  Days
+--------------------------------------------------
+AGG     RE_BAC 2    11,750  121   D  0.62    1d
 
-UPCOMING = vào lệnh phiên tới (T+5 sau release) · WINDOW_PASSED = cửa sổ entry đã qua, đối chiếu vị thế thực · W% trên vốn book LAG
-🧯 CAPIT v2: breadth oversold 29.2% &lt; gate 30% — dormant
+R = 8L rating 1-5 (1=cao nhất, ≤3=đầu tư) · Days = ngày từ Q-report (Fresh-Q ≤60)
+📋 BOOK B — LAG (PEAD always-on, 50% NAV target)
+Không có entry PEAD đến hạn — giữ vị thế LAG hiện có (hold 25td, NO stop) + parking.
+🧯 CAPIT v2: breadth oversold 10.0% &lt; gate 30% — dormant
 📊 Universe distribution
-  BA-core: 0 mã | Compounder/info: 2 mã
-  Wait/Pass/Avoid: 211 mã
+  BA-core: 0 mã | Compounder/info: 7 mã
+  Wait/Pass/Avoid: 202 mã
 💡 Execution checklist (T+1 next session)
   • Vốn: BAL 50% / LAG 50% NAV (rebal CHỈ khi lệch &gt;10pp)
-  • BAL: 0 pos × 10% book · stop -20% · hold 45d
-  • LAG: 6 entry mới (10/8% book) · NO stop · hold 25td
+  • BAL: 1 pos × 10% book · stop -20% · hold 45d
+  • LAG: 0 entry mới (10/8% book) · NO stop · hold 25td
   • Cash dư cả 2 book → 70% E1VFVN30
 🛰️ MARKET-STATE ENGINE — DT5G (gated live)
 
-As of:   2026-07-29
+As of:   2026-07-30
 Source:  DT5G + macro overlay
 
 🔄 DT5G transitions từ 2026-04-01
 
-Số ngày: 83   |   transitions: 0
+Số ngày: 84   |   transitions: 0
   (không có transition — state ổn định)
 
 📊 V2.4 GO-LIVE paper-trade
