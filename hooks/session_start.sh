@@ -219,24 +219,49 @@ source "$ROOT/hooks/_directives.sh"
 # are genuinely new user-facing input, source "resume", with no recent compact stamp) — they
 # still get a "ready" ping.
 #
-# Known tradeoff, not yet resolved (2026-07-30, needs a user decision): both compacts in today's
-# incident were user-typed `/compact` (manual, confirmed via `compactMetadata.trigger` in the
-# transcript — the bridge has no code path that issues `/compact` itself), and the
-# `source: "compact"` SessionStart fires at compaction COMPLETION, not start — i.e. it IS the
-# literal "your big compact just finished" signal the 2026-07-03 feature request wanted. This fix
-# suppresses that ping (plus the following ~60s of resume pings) to kill the spam, which means a
-# manual `/compact` now gets NO "ready" confirmation at all — the original use case is currently
-# unserved, not just de-spammed. Left as-is pending explicit user sign-off on whether that's the
-# right tradeoff, or whether a distinct "compact truly done" signal should be re-added later
-# (e.g. fired once, from the LAST compact-sourced SessionStart in a chain instead of every one —
-# distinguishing "last" from "not last" would need the same ccdb env-var signal discussed above).
+# Distinct "compact xong" signal (2026-07-30, restores the 2026-07-03 use case the above filter
+# silenced — user explicitly asked for this after reviewing the spam fix): `source == "compact"`
+# IS the literal "a /compact just finished" event — suppressing its own "Đã resume xong" ping is
+# right (mid-turn noise), but that event is the only place the fact is observable at all, so it
+# can't just be deleted outright. Two things it must NOT do, found by arch-reviewer before this
+# shipped:
+#   1. Fire once per compact in a chain (back to spam) — a manual `/compact` that itself
+#      immediately re-triggers ccdb's guardrail-rerun-then-recompact path produces exactly ONE
+#      extra compact, never more (structural, not just observed: the rerun replays the SAME
+#      `/compact` prompt — `_run_helper.py` `replace(config, session_id=..., prompt` unchanged —
+#      and `event_processor.py`'s own loop guard blocks a third `compact_occurred`). Measured gap
+#      between chained compacts across every episode on record: 102-175s, bounded because a
+#      second-in-chain compaction always starts from a tiny already-compacted context (a few
+#      thousand tokens vs hundreds of thousands for the first) so it finishes fast. So: stamp a
+#      per-topic marker with a timestamp (content compared later — mtime alone can't tell one
+#      compact's stamp from the next) and hand off to `bin/compact_done_watcher.sh`, spawned
+#      fully detached (setsid+nohup+backgrounded — survives this hook process exiting; does NOT
+#      survive a ccdb-mike.service restart mid-wait, since setsid escapes the process group but
+#      not the systemd cgroup — acceptable silent-miss for a UX nicety, not a correctness issue).
+#      It sleeps 240s (comfortable margin over the observed 102-175s) then fires only if no NEWER
+#      compact re-stamped the marker meanwhile — i.e. only the actual last compact in a chain
+#      ever produces a ping, exactly once.
+#   2. Fire for a compact the user never asked for, or while the turn is still genuinely running
+#      (recreating the exact false-"ready" problem this whole fix exists to remove) — auto-
+#      compactions (context hit the size ceiling mid-task, no `/compact` typed) are common and
+#      ccdb ALREADY posts its own "-# 🗜️ Context compacted (auto|manual) — was N tokens" notice
+#      for every one, so signaling again here would be pure noise for those, not signal. The
+#      watcher checks `compactMetadata.trigger == "manual"` from the transcript's own
+#      `compact_boundary` record (passed `MIKE_TRANSCRIPT_PATH`, already parsed by
+#      `_resolve_id.sh`) and an idle check (no transcript activity in the last 60s) before ever
+#      notifying — see that script's own comment for the exact logic.
 if [ "$id" = "Mike" ] && [ -n "$INTERACTIVE_TID" ]; then
   _compact_marker="$ROOT/agents/Mike/state/last_compact_${INTERACTIVE_TID}.txt"
   _should_notify=1
   if [ "${MIKE_HOOK_SOURCE:-}" = "compact" ]; then
     _should_notify=0
     mkdir -p "$(dirname "$_compact_marker")"
-    : > "$_compact_marker"
+    _compact_stamp="$(date +%s)"
+    _compact_marker_tmp="${_compact_marker}.tmp.$$"
+    printf '%s' "$_compact_stamp" > "$_compact_marker_tmp" && mv -f "$_compact_marker_tmp" "$_compact_marker"
+    nohup setsid "$ROOT/bin/compact_done_watcher.sh" "$INTERACTIVE_TID" "$_compact_stamp" "${MIKE_TRANSCRIPT_PATH:-}" \
+      >/dev/null 2>&1 < /dev/null &
+    disown 2>/dev/null || true
   elif [ -f "$_compact_marker" ]; then
     _compact_age=$(( $(date +%s) - $(stat -c %Y "$_compact_marker" 2>/dev/null || echo 0) ))
     if [ "$_compact_age" -ge 0 ] && [ "$_compact_age" -lt 60 ]; then
