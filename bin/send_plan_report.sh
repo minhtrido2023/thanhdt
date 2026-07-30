@@ -93,7 +93,7 @@ if [ "$SECOND_CHANCE" = "1" ] && [ -n "$MARKER_FILE" ] && [ -f "$MARKER_FILE" ];
 fi
 
 RESULT=$(cd "$WORKDIR" && python3 - "$PLAN_FILE" "$EXPECTED_DATE" "$TODAY" "$NOW_ICT" "$ACCOUNT" << 'PY'
-import sys, json
+import sys, json, os
 
 plan_file, expected_date, today, now_ict, acct = sys.argv[1:6]
 
@@ -134,12 +134,130 @@ src    = plan.get("state_source", "")
 nav_b  = plan.get("nav_basis") if isinstance(plan.get("nav_basis"), dict) else {}
 nav    = (nav_b.get("active_nav_vnd") or nav_b.get("nav_vnd") or nav_b.get("account_nav")
           or plan.get("nav_basis_vnd") or plan.get("nav_estimate"))
-orders = plan.get("orders", [])
+# `.get(..., [])` only guards a MISSING key — "orders": null (present, value None) is
+# schema-valid per the check above but used to crash the price-gate below (arch-reviewer
+# 2026-07-30 found this replaying a synthetic fixture: TypeError -> empty $RESULT -> silent
+# no-send that still writes the "sent OK" marker, disarming the 23:00 second-chance).
+orders = plan.get("orders") or []
+if not isinstance(orders, list):
+    escalate("plan_orders_not_list", f"{plan_file}: 'orders' không phải list ({type(orders).__name__}).")
+    sys.exit(0)
 summary = plan.get("summary", {}) if isinstance(plan.get("summary"), dict) else {}
 action  = summary.get("action", "HOLD" if not orders else "TRADE")
 reasons = summary.get("reasons") or []
 approved = plan.get("approved_by")
 requires = plan.get("requires_user_approval", False)
+
+# --- Content-verification gates (Wags audit 2026-07-30, P1 — catches plan ZaloPay 2026-07-10:
+# 2/4 orders priced off a stale BQ close, +5.7% off, passed every gate that existed at the time
+# because they only check SHAPE (file exists, right date, has 'orders'), never whether the
+# numbers inside are actually right. This is the one artifact gate that sits in front of the
+# human approver — a shape-correct/content-wrong plan renders identically to a good one, so
+# "user approved it" is not an independent check unless the numbers were verified first. ---
+
+# 1c: identity asserts — cheap, catch gross mismatches (wrong account/state baked into a plan).
+plan_account = plan.get("account")
+if plan_account and plan_account != acct:
+    escalate("plan_account_mismatch",
+             f"{plan_file}: plan['account']={plan_account!r} nhưng đang gửi cho account "
+             f"{acct!r} — plan có thể bị lẫn giữa 2 account.")
+    sys.exit(0)
+
+try:
+    with open("deploy_golive_dt5g_v4/golive_state_today.json") as f:
+        golive = json.load(f)
+    plan_src = plan.get("state_source")
+    golive_src = golive.get("source")
+    if plan_src and golive_src and plan_src != golive_src:
+        escalate("plan_state_source_mismatch",
+                 f"{plan_file}: state_source={plan_src!r} nhưng golive_state_today.json (nguồn "
+                 f"DT5G thật hôm nay) nói {golive_src!r} — plan có thể được sinh từ state cũ.")
+        sys.exit(0)
+except FileNotFoundError:
+    pass  # không phải nguồn bắt buộc; thiếu file thì bỏ qua assert này, không chặn plan
+except Exception:
+    pass
+
+# 1a: price-plausibility gate — so giá ref mỗi lệnh với giá đóng cửa DNSE THẬT hôm nay (nguồn
+# plan BẮT BUỘC phải đã dùng — coding_guidelines §6 "same-day data: DNSE API, never BigQuery").
+# KHÔNG fallback BQ: sync_bq_cache_daily.sh chạy 23:45, SAU cả lúc DollarBill sinh plan (19:00)
+# lẫn lúc script này chạy (21:00) — BQ chưa hề có giá đóng cửa hôm nay tại 2 thời điểm đó, đúng
+# cái bẫy đã gây ra sự cố 07-10 (BQ lặng lẽ trả về giá phiên trước). Bất đối xứng có chủ đích:
+# CHẶN khi có tín hiệu lệch giá rõ ràng (bảo vệ tiền), nhưng KHÔNG chặn khi DNSE tạm không trả
+# lời được (tránh biến 1 lần API chập chờn buổi tối thành dừng hẳn việc gửi plan mỗi ngày) — chỉ
+# im lặng bỏ qua khi TOÀN BỘ orders không xác minh được (báo hiệu DNSE outage thật, không phải
+# lỗi giá), còn lệch giá xác nhận được ở dù chỉ 1 lệnh vẫn chặn. Verified/skipped count được
+# ghi lại (price_verify_note bên dưới) và IN VÀO report — arch-reviewer 2026-07-30 chỉ ra bản
+# đầu fail-open ÂM THẦM (0/N verify vẫn render y hệt N/N verify), đúng kiểu lỗi "self-report
+# không kèm bằng chứng" mà chính gate này được viết ra để chặn.
+#
+# 3% CHƯA PHẢI ngưỡng đã hiệu chỉnh kỹ — đo nhanh trên lịch sử: ~1.7% số lệnh (6/362 kể từ
+# 06-25) lệch >3% so giá đóng cửa NGÀY SINH plan, phần lớn do plan được lập giữa phiên (vd
+# ref_price_source "DNSE_G1_latest_trade_09:24") chứ không phải lỗi nguồn giá — tức threshold
+# này CÓ rủi ro false-positive thật trên ngày biến động mạnh/HNX-UPCOM biên độ rộng. Chấp nhận
+# đánh đổi này lúc đầu (chặn nhầm 1 ngày còn rẻ hơn gửi nhầm giá), nhưng nếu false-positive xảy
+# ra thật, đây là chỗ đầu tiên cần xem lại — không phải bug, là tham số cần tinh chỉnh thêm.
+PRICE_TOLERANCE = 0.03
+
+def _order_price(o):
+    # Khớp ĐÚNG chuỗi fallback renderer dùng bên dưới (ref_price -> mtm_price_ref -> price) —
+    # bản đầu CHỈ đọc ref_price nên là no-op với plan ZaloPay (dùng mtm_price_ref), tái lập lại
+    # đúng sự cố 07-10 mà gate này được viết ra để chặn (arch-reviewer 2026-07-30 phát hiện
+    # bằng cách replay lại file plan thật của 07-10, không phải fixture giả).
+    p = o.get("ref_price", o.get("mtm_price_ref", o.get("price")))
+    return p if isinstance(p, (int, float)) else None
+
+buy_sell_orders = [o for o in orders if isinstance(o, dict) and _order_price(o) is not None]
+price_verify_note = ""
+if buy_sell_orders:
+    tickers = sorted({o.get("ticker") for o in buy_sell_orders if o.get("ticker")})
+    dnse_prices = {}
+    try:
+        sys.path.insert(0, os.getcwd())
+        from trading_bot.brokers import get_dnse_client
+        client = get_dnse_client()
+        for tk in tickers:
+            try:
+                r = client.close_price(tk)
+            except Exception:
+                continue
+            entries = (r or {}).get("prices") or []
+            g1 = next((e for e in entries
+                       if e.get("boardId") == "G1" and e.get("closePrice")), None)
+            if g1:
+                dnse_prices[tk] = float(g1["closePrice"]) * 1000
+    except Exception:
+        dnse_prices = {}
+
+    implausible = []
+    verified_n = 0
+    for o in buy_sell_orders:
+        tk = o.get("ticker")
+        dp = dnse_prices.get(tk)
+        if dp is None or not dp:
+            continue  # không xác minh được lệnh này riêng lẻ (kể cả G1 closePrice=0 thật, đã
+                       # thấy trực tiếp lúc test — coi như chưa xác minh, không suy diễn) — không
+                       # chặn, chỉ bỏ qua, nhưng vẫn tính vào verified_n=0 cho lệnh đó
+        else:
+            verified_n += 1
+            ref_p = _order_price(o)
+            diff = abs(ref_p - dp) / dp
+            if diff > PRICE_TOLERANCE:
+                implausible.append(
+                    f"{o.get('side','?')} {tk}: giá plan={ref_p:,.0f}đ vs DNSE close "
+                    f"thật={dp:,.0f}đ (lệch {diff*100:.1f}%)")
+    price_verify_note = (
+        f"✅ giá đã xác minh {verified_n}/{len(buy_sell_orders)} lệnh có giá so DNSE close hôm nay"
+        f"{f' (trên tổng {len(orders)} lệnh)' if len(buy_sell_orders) != len(orders) else ''}" if verified_n
+        else f"⚠️ KHÔNG xác minh được giá lệnh nào so DNSE ({len(buy_sell_orders)}/{len(orders)} lệnh có giá cần kiểm) — "
+             f"DNSE có thể đang gặp sự cố hoặc giá đóng cửa chưa có, không chặn plan nhưng cần "
+             f"người tự đối chiếu giá trước khi duyệt")
+    if implausible:
+        escalate("plan_price_implausible",
+                 f"{plan_file}: {len(implausible)}/{len(buy_sell_orders)} lệnh có giá lệch "
+                 f">{PRICE_TOLERANCE*100:.0f}% so giá đóng cửa DNSE thật hôm nay — nghi dùng "
+                 f"nhầm nguồn giá cũ/BQ (đúng dạng sự cố 07-10). Chi tiết: " + "; ".join(implausible))
+        sys.exit(0)
 
 lines = [f"📋 **Kế hoạch giao dịch ngày mai {date} — Account {acct}**"]
 
@@ -177,6 +295,8 @@ if orders:
     buys  = [o for o in orders if str(o.get("side","")).lower() in ("buy","mua","b")]
     sells = [o for o in orders if str(o.get("side","")).lower() in ("sell","ban","s")]
     lines.append(f"🎯 Hành động: **{len(orders)} lệnh** ({len(sells)} bán, {len(buys)} mua):")
+    if price_verify_note:
+        lines.append(f"   {price_verify_note}")
     for o in orders:
         side_vn = "BÁN" if str(o.get("side","")).lower() in ("sell","ban","s") else "MUA"
         is_buy = side_vn == "MUA"
@@ -265,6 +385,23 @@ if [ "$STATUS" = "ESCALATE" ]; then
     echo "[send_plan_report] DRY-RUN — không gửi notify/bus."
   fi
   exit 0
+fi
+
+if [ "$STATUS" != "OK" ]; then
+  # $RESULT rỗng/không đúng format (arch-reviewer 2026-07-30: "orders": null từng crash python
+  # heredoc TypeError trước khi in được dòng nào — traceback ra stderr, $RESULT rỗng) KHÔNG
+  # được coi ngầm là thành công. Trước đây rơi xuống nhánh "đã gửi OK" phía dưới, ghi marker
+  # "đã gửi" dù KHÔNG gửi gì thật — làm mất second-chance 23:00 trong im lặng tuyệt đối.
+  MSG="🔴 [$TODAY $NOW_ICT] Plan T+1 LỖI KHÔNG XÁC ĐỊNH (render_crashed, status='${STATUS:-<rỗng>}') — script bên trong crash hoặc trả kết quả không đúng format, xem log. Cần Mike/user kiểm tra thủ công, KHÔNG tự phục hồi. Plan CHƯA được coi là đã gửi."
+  echo "$MSG"
+  if [ "$DRY_RUN" = "0" ]; then
+    "$ROOT/bin/notify.sh" "$MSG" 2>/dev/null || true
+    "$ROOT/bin/notify_thread.sh" "$MSG" "$DISCORD_PLAN_CHANNEL" 2>/dev/null || true
+    "$ROOT/bin/append_event.sh" Mike question "plan-t1-render-crashed-${ACCOUNT}" \
+      "{\"status\":\"${STATUS}\",\"expected_date\":\"$EXPECTED_DATE\",\"account\":\"$ACCOUNT\",\"checked_at\":\"$TODAY $NOW_ICT\"}" \
+      2>/dev/null || true
+  fi
+  exit 1
 fi
 
 SUMMARY="$(echo "$RESULT" | tail -n +2)"

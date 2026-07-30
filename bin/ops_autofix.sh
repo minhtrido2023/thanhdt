@@ -43,7 +43,72 @@ mkdir -p "$STATE_DIR"
 # cooldown 2026-07-07: SLUG lệch tên stamp file → cooldown không khớp → dispatch lặp.
 SLUG="$(printf '%s' "$LABEL" | tr -cs 'a-zA-Z0-9' '-' | cut -c1-60)"
 STAMP_FILE="$STATE_DIR/$SLUG.last"
+STARTED_ISO_FILE="$STATE_DIR/$SLUG.started_iso"
+CONFIRM_FILE="$STATE_DIR/$SLUG.confirmed"
 NOW=$(date +%s)
+
+# Post-condition check của LẦN DISPATCH TRƯỚC (Wags audit 2026-07-30, P2): cooldown stamp bị
+# ghi TRƯỚC khi fixer chạy, và user đã được báo "đã cử agent sửa" ngay lúc đó — nếu fixer lạc
+# đề/chết im, KHÔNG GÌ phản bác câu đó trong suốt cooldown (đúng lớp lỗi vừa vá ở daily_retro
+# hôm nay: rc=0/exit-code không nói lên nội dung có đúng việc không). Kiểm 1 lần duy nhất mỗi
+# dispatch (cache ở CONFIRM_FILE, không hỏi bus lặp lại mỗi lần gọi) — nếu có STAMP từ lần
+# trước mà CHƯA từng xác nhận xong: tra bus Winston tìm finding 'ops-autofix-done: <label>'
+# hoặc question 'ops-autofix-unresolved: <label>' xuất hiện SAU thời điểm dispatch đó (hợp
+# đồng đầu ra bắt buộc ở prompt bên dưới). Không thấy ⇒ notify thật, không im lặng chờ hết
+# cooldown rồi mới lộ ra.
+#
+# ⚠️ Giới hạn THẬT (arch-reviewer 2026-07-30, khác với refresh_deposit_rate_vn.sh — script đó
+# dispatch ĐỒNG BỘ nên tự check ngay trong CÙNG lần chạy; ops_autofix.sh này dispatch --bg nên
+# CHỈ tự check được ở LẦN GỌI SAU cho ĐÚNG label đó): những label gắn ngày vào tên (vd
+# `run-bot-fail-SpaceX-2026-07-28`, dùng đúng 1 lần rồi không lặp lại) sẽ KHÔNG BAO GIỜ được
+# check bởi cơ chế này — không có "lần gọi sau" nào cho 1 label chỉ xảy ra 1 lần. Cơ chế này
+# chỉ thật sự hiệu quả cho label LẶP LẠI theo tên (ops-health-*, bq-cache-sync-verify, ...).
+# Muốn phủ cả nhóm label-1-lần cần thêm 1 sweep định kỳ (từ ops_health_check.sh/daily_retro.sh)
+# quét state/autofix/*.started_iso thiếu .confirmed quá N giờ — CHƯA làm, ghi nhận là nợ.
+if [ -f "$STAMP_FILE" ] && [ ! -f "$CONFIRM_FILE" ] && [ -s "$STARTED_ISO_FILE" ]; then
+  LAST_ISO="$(cat "$STARTED_ISO_FILE" 2>/dev/null || true)"
+  if [ -n "$LAST_ISO" ]; then
+    CONFIRMED="$(python3 - "$LAST_ISO" "$LABEL" "$ROOT/bus/inbox/Winston.jsonl" <<'PYEOF' 2>/dev/null || echo no
+import json, sys
+from datetime import datetime
+start_iso, label, path = sys.argv[1:4]
+start = datetime.strptime(start_iso, "%Y-%m-%dT%H:%M:%SZ")
+allowed = {f"ops-autofix-done: {label}": "finding",
+           f"ops-autofix-unresolved: {label}": "question"}
+found = False
+try:
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                rec = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            topic = rec.get("topic")
+            if topic not in allowed or rec.get("event_type") != allowed[topic]:
+                continue
+            try:
+                rts = datetime.strptime(rec.get("ts", ""), "%Y-%m-%dT%H:%M:%SZ")
+            except ValueError:
+                continue
+            if rts >= start:
+                found = True
+    print("yes" if found else "no")
+except FileNotFoundError:
+    print("no")
+PYEOF
+)"
+    if [ "$CONFIRMED" = "yes" ]; then
+      touch "$CONFIRM_FILE"
+    else
+      echo "[ops_autofix] '$LABEL' — lần autofix TRƯỚC (dispatch lúc $LAST_ISO) KHÔNG có kết quả xác nhận được trên bus."
+      "$ROOT/bin/notify_thread.sh" "⚠️ [ops-autofix] Lần tự sửa TRƯỚC cho '$LABEL' (lúc $LAST_ISO) KHÔNG có kết quả xác nhận được (không có finding/question khớp trên bus) — fixer có thể đã lạc đề/chết im. Cần người kiểm tra trực tiếp, đừng tin thông báo 'đã sửa' trước đó." "$TRADING_DAILY_THREAD" 2>/dev/null || true
+    fi
+  fi
+fi
+
 if [ -f "$STAMP_FILE" ]; then
   LAST=$(cat "$STAMP_FILE" 2>/dev/null || echo 0)
   if [ $((NOW - LAST)) -lt "$AUTOFIX_COOLDOWN" ]; then
@@ -73,6 +138,8 @@ if [ "$AUTOFIX_GLOBAL_GUARD" -gt 0 ] && [ -f "$GLOBAL_STAMP" ]; then
 fi
 echo "$NOW" > "$STAMP_FILE"
 echo "$NOW" > "$GLOBAL_STAMP"
+date -u +%Y-%m-%dT%H:%M:%SZ > "$STARTED_ISO_FILE"
+rm -f "$CONFIRM_FILE"  # dispatch mới — chưa xác nhận, lần gọi sau phải tự tra lại bus
 
 "$ROOT/bin/notify_thread.sh" "🔧 [ops-autofix] Phát hiện vấn đề '$LABEL' — đã tự động cử agent chẩn đoán + sửa (Winston/fable). Sẽ báo kết quả vào đây khi xong." "$TRADING_DAILY_THREAD" 2>/dev/null || true
 
@@ -97,7 +164,8 @@ QUY TRÌNH BẮT BUỘC:
 2. SỬA trong giới hạn: ĐƯỢC sửa bug code script report/check/pipeline/cache, resync cache, resend report, dọn lock/flag kẹt, restart daemon phụ trợ; commit fix với message rõ ràng.
 3. CẤM TUYỆT ĐỐI (dù thấy 'cần thiết'): sửa trade plan, trading_rules.json, logic đặt lệnh executor/brokers, crontab dòng thực thi (run_bot/heartbeat/pkill), xoá dữ liệu, tạo/xoá BOT_STOP. Nếu root cause nằm ở đó → append_event.sh Winston question '<topic>' với mô tả + đề xuất, notify Telegram, rồi DỪNG.
 4. VERIFY artifact sau khi sửa (chạy lại checker/script bị lỗi, xác nhận hết lỗi thật) — không tin self-report.
-5. BÁO CÁO: notify_thread.sh vào thread $TRADING_DAILY_THREAD — ngắn gọn: hỏng gì, nguyên nhân, đã sửa gì, verify thế nào. Nếu ảnh hưởng workflow sống → thêm entry kb/INCIDENTS.md. Ghi bus event finding như thường lệ." \
+5. BÁO CÁO: notify_thread.sh vào thread $TRADING_DAILY_THREAD — ngắn gọn: hỏng gì, nguyên nhân, đã sửa gì, verify thế nào. Nếu ảnh hưởng workflow sống → thêm entry kb/INCIDENTS.md.
+6. BẮT BUỘC (khác việc 5, đây là hợp đồng đầu ra máy đọc được — dispatch này chạy nền, không ai chờ trực tiếp, nên đây là tín hiệu DUY NHẤT phân biệt \"đã xong thật\" với \"lạc đề/chết im\"): kết thúc bằng ĐÚNG MỘT trong hai lệnh sau — (a) nếu đã chẩn đoán+sửa+verify xong (hoặc xác nhận không có gì để sửa): append_event.sh Winston finding \"ops-autofix-done: $LABEL\" \"<JSON: root_cause, fix, verify>\"; (b) nếu gặp ranh giới cấm ở việc 3 hoặc không chẩn đoán được: append_event.sh Winston question \"ops-autofix-unresolved: $LABEL\" \"<JSON: ly_do>\". Thiếu bước này = lần chạy này coi như KHÔNG xác nhận được, dù các việc 1-5 có làm đúng đến đâu." \
   --bg --thread "$TRADING_DAILY_THREAD" --timeout "$AUTOFIX_TIMEOUT" --model opus 2>&1 | tail -3
 
 echo "[ops_autofix] dispatched fixer for '$LABEL'"

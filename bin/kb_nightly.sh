@@ -54,6 +54,62 @@ if ! python3 "$ROOT/bin/consolidate_git_scope_selfcheck.py" >> "$LOG" 2>&1; then
       >/dev/null 2>&1 || true
 fi
 
+# ── Phase 0b: post-condition check của Friday editorial dispatch (Wags audit 2026-07-30, P3)
+# Dispatch Friday chạy NỀN (`&` ở cuối, xem Phase 5 dưới) — không exit-code check, không
+# artifact check. Đã từng im lặng fail 2 TUẦN LIỀN (06-27→07-09, xem comment ở Phase 5) vì
+# self-dispatch guard; nguyên nhân ĐÓ đã fix, nhưng cơ chế thiếu-verify khiến điều tương tự có
+# thể tái diễn vì lý do KHÁC (phiên Mike lạc đề/chết im — đúng họ lỗi vừa vá ở daily_retro.sh
+# + ops_autofix.sh hôm nay) mà không ai biết cho tới khi tự ý phát hiện. Prompt Friday đã bắt
+# buộc kết bằng `append_event.sh Mike decision 'kb-weekly-editorial'` — hợp đồng đầu ra đã có
+# sẵn, chỉ thiếu người đọc lại. Kiểm NGAY ở lần chạy kế tiếp (thứ Bảy, cùng biến DOW dùng ở
+# Phase 5 dưới) xem event đó có xuất hiện trong ~30h qua không (đủ rộng để không kén giờ chạy
+# chính xác, hẹp đủ để không lẫn tuần trước). Không tự sửa gì — chỉ log + notify, giống hệt
+# tinh thần leftover-draft staleness check của daily_retro.sh.
+DOW_CHECK="$(date -u +%u)"
+if [ "$DOW_CHECK" -eq 6 ]; then
+    SINCE_ISO="$(date -u -d '30 hours ago' +%Y-%m-%dT%H:%M:%SZ 2>/dev/null \
+        || date -u -v-30H +%Y-%m-%dT%H:%M:%SZ 2>/dev/null \
+        || python3 -c "import datetime; print((datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=30)).strftime('%Y-%m-%dT%H:%M:%SZ'))")"
+    FRIDAY_CONFIRMED="$(python3 - "$SINCE_ISO" "$ROOT/bus/inbox/Mike.jsonl" <<'PYEOF' 2>/dev/null || echo no
+import json, sys
+from datetime import datetime
+since_iso, path = sys.argv[1:3]
+since = datetime.strptime(since_iso, "%Y-%m-%dT%H:%M:%SZ")
+found = False
+try:
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                rec = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if rec.get("topic") != "kb-weekly-editorial" or rec.get("event_type") != "decision":
+                continue
+            try:
+                rts = datetime.strptime(rec.get("ts", ""), "%Y-%m-%dT%H:%M:%SZ")
+            except ValueError:
+                continue
+            if rts >= since:
+                found = True
+    print("yes" if found else "no")
+except FileNotFoundError:
+    print("no")
+PYEOF
+)"
+    if [ "$FRIDAY_CONFIRMED" = "yes" ]; then
+        log "Phase 0b: Friday KB editorial post-condition OK (event kb-weekly-editorial tìm thấy trong ~30h qua)."
+    else
+        log "WARNING Phase 0b: KHÔNG tìm thấy event 'Mike decision kb-weekly-editorial' trong ~30h qua — Friday editorial review tuần này có thể đã lạc đề/chết im, không ai biết."
+        "$ROOT/bin/notify.sh" "⚠️ [kb_nightly] Friday KB editorial review tuần này KHÔNG có kết quả xác nhận được (không có bus event 'kb-weekly-editorial' trong ~30h qua) — phiên Mike thứ Sáu có thể đã lạc đề/chết im. Cần người kiểm tra logs/kb_nightly.log của thứ Sáu tuần này." >/dev/null 2>&1 || true
+        "$ROOT/bin/append_event.sh" Mike question "kb-weekly-editorial-unconfirmed-$(date -u +%Y-%m-%d)" \
+          "{\"reason\":\"khong tim thay event Mike/decision/kb-weekly-editorial trong ~30h truoc lan chay nay\",\"checked_since\":\"$SINCE_ISO\"}" \
+          >/dev/null 2>&1 || true
+    fi
+fi
+
 # ── Lock: Phase 1a/1 (events_buffer.md) + 1b/1b2 (bus/inbox + offsets) ───────
 # consolidate.sh holds locks/consolidator.lock while it appends to the same file, and it
 # runs after EVERY dispatch (dispatch.sh, run_bot.sh, verify_finding.sh, fleet_backup.sh)
@@ -653,7 +709,7 @@ schedule-drift từng lọt qua nhiều tuần vì không mục nào ở trên �
 thật). Finding có rủi ro cao (chạm 'ranh giới cứng' của skill — có thể làm sai lệch 1 fact
 đang backing quyết định thật) → CHỈ báo cáo, KHÔNG tự sửa trong review này, để user/Mike xem lại
 riêng; finding rủi ro thấp (đúng dedup/pointer thuần tuý) → sửa luôn như việc 1-6.
-KHÔNG xóa archive. Không cần hỏi user cho việc 1-6, 10 — đây là routine maintenance đã được user uỷ quyền. Sau khi xong: ghi sự thay đổi lên bus (append_event.sh Mike decision 'kb-weekly-editorial') và notify Telegram.${CTX_BLOAT_WARN}${STALE_SECTIONS_WARN}" \
+KHÔNG xóa archive. Không cần hỏi user cho việc 1-6, 10 — đây là routine maintenance đã được user uỷ quyền. Sau khi xong: notify Telegram, VÀ BẮT BUỘC (hợp đồng đầu ra máy đọc được — dispatch này chạy nền, không ai chờ trực tiếp, kb_nightly.sh thứ Bảy tự kiểm event này để phát hiện lạc đề/chết im, đúng NGUYÊN VĂN topic sau, không viết biến thể khác dù có vẻ tương đương): append_event.sh Mike decision 'kb-weekly-editorial' \"<JSON tóm tắt thay đổi>\".${CTX_BLOAT_WARN}${STALE_SECTIONS_WARN}" \
         --timeout 900 >> "$LOG" 2>&1 &
     log "Editorial dispatch launched (background)."
 fi
