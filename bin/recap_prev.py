@@ -1,14 +1,24 @@
 #!/usr/bin/env python3
-"""recap_prev.py <cwd> <current_session_id> [n]
+"""recap_prev.py <cwd> <current_session_id> [n] [explicit_prev_session_id]
 
-Prints a short recap of THIS agent's previous session — the last n user/assistant turns
-of the most recent OTHER transcript in the agent's project dir — so a restarted agent
-continues its own thread instead of starting blank.
+Prints a short recap of THIS agent's previous session so a restarted agent continues its
+own thread instead of starting blank.
 
-Only for child agents whose cwd is under mike/agents/<id>/ (there the project dir maps 1:1
-to one logical agent, so "most recent other transcript" == that agent's previous session).
-For shared cwds (external/retrofit sessions) transcript identity is ambiguous → prints
-nothing. Always exits 0; any problem → silent (the hook must never break a session start).
+Default mode (3 args): the last n user/assistant turns of the most recent OTHER transcript
+in the agent's project dir. Only safe for child agents whose cwd is under mike/agents/<id>/
+AND whose cwd only ever holds sequential one-shot sessions (true for every headless-only
+agent) — there "most recent other transcript" == that agent's previous session.
+
+Explicit mode (4th arg given, non-empty): skip the mtime guess entirely and recap exactly
+that session id's transcript. For cwds shared between a live daemon and headless dispatches
+(Mike is the only current case — see hooks/session_start.sh's live_session_ptr.txt) the
+mtime guess can pick up a same-directory headless dispatch's transcript instead of the
+daemon's own prior turns; the caller tracks "my own last session id" explicitly and passes
+it here instead of trusting mtime ordering.
+
+For shared cwds (external/retrofit sessions) with neither mode applicable, transcript
+identity is ambiguous → prints nothing. Always exits 0; any problem → silent (the hook must
+never break a session start).
 """
 import sys, os, json, glob
 
@@ -37,15 +47,25 @@ def main():
         return
     cwd, cur = sys.argv[1], sys.argv[2]
     n = int(sys.argv[3]) if len(sys.argv) > 3 else 12
+    explicit_sid = sys.argv[4] if len(sys.argv) > 4 and sys.argv[4] else None
+    if explicit_sid:
+        explicit_sid = os.path.basename(explicit_sid)  # defense-in-depth; caller passes our own ids
+        if explicit_sid == cur:                         # never recap our own current transcript
+            return
     if "/mike/agents/" not in cwd:          # only stable 1:1 child cwds
         return
 
     pdir = os.path.join(PROJ, cwd.replace("/", "-"))
-    files = [f for f in glob.glob(os.path.join(pdir, "*.jsonl"))
-             if os.path.basename(f) != cur + ".jsonl"]
-    if not files:
-        return
-    prev = max(files, key=os.path.getmtime)
+    if explicit_sid:
+        prev = os.path.join(pdir, explicit_sid + ".jsonl")
+        if not os.path.isfile(prev):
+            return
+    else:
+        files = [f for f in glob.glob(os.path.join(pdir, "*.jsonl"))
+                 if os.path.basename(f) != cur + ".jsonl"]
+        if not files:
+            return
+        prev = max(files, key=os.path.getmtime)
 
     msgs = []
     try:

@@ -77,12 +77,47 @@ fi
 # Headless Mike dispatches are fully self-contained one-shot prompts by design (see
 # daily_retro.sh's own "viết xong draft là DỪNG" instruction) and were never meant to inherit
 # prior-turn context, so skip recap for them entirely — only recap on a genuine live-companion
-# restart (arch-reviewer note: this guard keys on the literal id "Mike" — the actual precondition
-# is "a live daemon shares this cwd with headless dispatches", so if any other agent is ever
-# re-enabled as a daemon via `systemctl --user enable --now mike@<id>`, revisit this guard for it too)
-# restart (INTERACTIVE_TID non-empty, same signal the job-board/notice blocks above already use).
-if [ -n "${MIKE_CWD:-}" ] && { [ "$id" != "Mike" ] || [ -n "$INTERACTIVE_TID" ]; }; then
-  python3 "$ROOT/bin/recap_prev.py" "$MIKE_CWD" "${MIKE_SID:-}" 6 2>/dev/null || true
+# restart (INTERACTIVE_TID non-empty, same signal the job-board/notice blocks above already use;
+# arch-reviewer note: this guard keys on the literal id "Mike" — the actual precondition is "a
+# live daemon shares this cwd with headless dispatches", so if any other agent is ever re-enabled
+# as a daemon via `systemctl --user enable --now mike@<id>`, revisit this guard for it too).
+#
+# Mirror-direction carve-out (2026-07-30, arch-reviewer follow-up finding from the above fix):
+# the SAME collision runs backwards. ccdb re-invokes `claude --resume <sid>` on every single user
+# message (so SessionStart fires every turn, not just on a genuine restart), but MIKE_SID (the
+# real Claude Code session_id) stays IDENTICAL across all those turns of ONE conversation — only a
+# genuine restart (a fresh session, e.g. after a crash — NOT compaction, which keeps the same sid
+# and transcript file; verified against real transcripts with 12-18 compact events each, still a
+# single sessionId) produces a new one. Default recap_prev.py always excludes only "$MIKE_SID.jsonl"
+# and picks the mtime-newest OTHER file in the shared agents/Mike project dir — on an ordinary
+# turn that's most often harmless, but whenever a headless dispatch (daily_retro.sh, kb_nightly.sh,
+# ops_autofix, ...) happens to be the most recently touched file at that instant, the LIVE companion
+# inherits the HEADLESS job's one-shot task as "your own previous session, continue this thread" —
+# same bug class, opposite direction (observed 245 non-empty recap injections across one live
+# transcript, i.e. this was firing on nearly every turn, most wastefully re-printing stale content
+# with no restart to justify it). Fix: track "our own last live session id" explicitly in a pointer
+# file, and only recap — using recap_prev.py's explicit-sid mode, bypassing the mtime guess — when
+# that id actually CHANGES (a genuine restart), never on an ordinary same-session resume.
+#
+# Pointer is keyed PER TOPIC ($INTERACTIVE_TID), not global (arch-reviewer caught this on the first
+# draft): ccdb keeps one long-lived live session PER Discord topic, all sharing this same cwd
+# (confirmed via ccdb's session DB — dozens of distinct topic sessions, several concurrently active
+# within days of each other) — a single global pointer file would leak topic A's last turns into
+# topic B on every topic switch (the exact cross-topic bleed the job-board audit block below this
+# one was already hardened against), and would lose topic A's own recap on its next real restart if
+# any other topic had a turn in between. Keying by topic makes each topic's pointer independent.
+if [ -n "${MIKE_CWD:-}" ]; then
+  if [ "$id" = "Mike" ] && [ -n "$INTERACTIVE_TID" ]; then
+    _live_ptr="$ROOT/agents/Mike/state/live_session_ptr_${INTERACTIVE_TID}.txt"
+    _prev_live_sid="$(cat "$_live_ptr" 2>/dev/null || true)"
+    if [ -n "$_prev_live_sid" ] && [ "$_prev_live_sid" != "${MIKE_SID:-}" ]; then
+      python3 "$ROOT/bin/recap_prev.py" "$MIKE_CWD" "${MIKE_SID:-}" 6 "$_prev_live_sid" 2>/dev/null || true
+    fi
+    mkdir -p "$(dirname "$_live_ptr")"
+    printf '%s' "${MIKE_SID:-}" > "$_live_ptr"
+  elif [ "$id" != "Mike" ]; then
+    python3 "$ROOT/bin/recap_prev.py" "$MIKE_CWD" "${MIKE_SID:-}" 6 2>/dev/null || true
+  fi
 fi
 
 # Job board audit: surface any OVERDUE jobs immediately on restart (Mike only — coordinator owns the board).
