@@ -2,7 +2,7 @@
 # ops_health_check.sh --label "Trước phiên sáng" | "Trước phiên chiều"
 #
 # Kiểm tra sức khỏe vận hành tổng quát (không riêng 1 account) trước mỗi phiên giao dịch,
-# đúc kết từ các sự cố THẬT phát hiện 2026-07-06 (xem kb/INCIDENTS.md):
+# đúc kết từ các sự cố THẬT phát hiện 2026-07-06 (xem kb/incidents/2026-07/, các file 2026-07-06-*):
 #   1. Xung đột file plan (vd v1/v2 cùng ngày, chỉ 1 bản được executor đọc thật)
 #   2. Vòng lặp lỗi bất thường trong journal (vd retry T+2 hàng ngàn lần)
 #   3. Circuit breaker / job board bất thường
@@ -130,7 +130,7 @@ if os.path.exists(jpath):
         OK("Journal hôm nay không có lỗi lặp lại bất thường ngoài các trường hợp đã biết rõ nguyên nhân.")
     if t2_signature > 20:
         lines.append(f"ℹ️ {t2_signature} lượt PLACE_FAIL 'Trade quantity not enough' (mẫu T+2 đã biết, "
-                     f"xem kb/INCIDENTS.md 2026-07-06) — sẽ tự giảm sau khi bot dùng code mới (fix "
+                     f"xem kb/incidents/2026-07/, các file 2026-07-06-*) — sẽ tự giảm sau khi bot dùng code mới (fix "
                      f"commit 2cee603, có hiệu lực từ lần restart tự nhiên tiếp theo).")
     t2_waits = counts.get("WAIT_T2_SETTLEMENT", 0)
     if t2_waits:

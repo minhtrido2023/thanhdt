@@ -7,18 +7,19 @@
 #   1. Lỗi hôm đó là lỗi MỚI hay lỗi CŨ tái diễn?
 #   2. Fix đã hoàn chỉnh, tránh được rủi ro lặp lại chưa, hay còn hở?
 #   3. Bài học chung nào để KHÔNG lặp lại kiểu lỗi này ngày này qua ngày khác?
-# Ghi kết quả thành 1 entry "RETRO — <ngày>" trong kb/INCIDENTS.md (theo đúng
-# format entry RETRO 2026-07-07 đã có — xem đó làm mẫu), rồi dọn working memory
+# Ghi kết quả thành 1 file entry kb/incidents/retro/retro-<ngày>.md (theo đúng format
+# kb/incidents/retro/retro-2026-07-07.md — xem đó làm mẫu; sổ sự cố migrate sang cấu trúc
+# OKF 1-sự-cố-1-file ngày 2026-07-30, kb/INCIDENTS.md nay là STUB), rồi dọn working memory
 # của Mike + chạy consolidate để ngày mai phiên mới refresh sạch, không mang
 # theo rác của hôm nay.
 #
 # KIẾN TRÚC 3-BƯỚC (2026-07-22, thay cho bản 1-job cũ — xem lý do dưới):
 #   1. dispatch Mike ĐỒNG BỘ (draft job) — gom bằng chứng, trả lời 3 câu, viết DRAFT
-#      ra state/retro_draft_<ngày>.md (KHÔNG đụng kb/INCIDENTS.md).
+#      ra state/retro_draft_<ngày>.md (KHÔNG đụng kb/incidents/).
 #   2. bash TỰ dispatch Wags ĐỒNG BỘ (không qua Mike) để verify draft — bash chỉ
 #      capture nguyên văn output, không parse gì cả.
 #   3. dispatch Mike NỀN (finalize job, dùng &) — nhận draft + verdict Wags làm input,
-#      tự quyết gắn vào kb/INCIDENTS.md thế nào, rồi làm nốt commit/dọn memory/
+#      tự quyết ghi vào kb/incidents/retro/ thế nào, rồi làm nốt commit/dọn memory/
 #      consolidate/đăng Trading Daily.
 #
 # TẠI SAO ĐỔI (bus question `retro-pattern-recurring-headless-wake-assumption-3`, user
@@ -57,7 +58,7 @@ for _stale in "$ROOT"/state/retro_draft_*.md; do
   [ -e "$_stale" ] || continue
   [ "$_stale" = "$DRAFT_FILE" ] && continue
   log "WARNING: leftover draft từ lần chạy trước vẫn còn: $_stale — nghĩa là finalize job hôm đó ĐÃ FAIL ÂM THẦM (không tự xoá được draft nếu không xong)."
-  "$ROOT/bin/notify.sh" "[daily_retro] Phát hiện draft RETRO cũ chưa dọn: $_stale — dấu hiệu finalize job của lần chạy đó đã fail âm thầm (không notify được vì chạy nền). Cần người kiểm tra kb/INCIDENTS.md ngày tương ứng có entry chưa." 2>/dev/null || true
+  "$ROOT/bin/notify.sh" "[daily_retro] Phát hiện draft RETRO cũ chưa dọn: $_stale — dấu hiệu finalize job của lần chạy đó đã fail âm thầm (không notify được vì chạy nền). Cần người kiểm tra kb/incidents/retro/retro-<ngày tương ứng>.md có entry chưa." 2>/dev/null || true
   "$ROOT/bin/append_event.sh" Mike question "daily-retro-stale-draft-$(basename "$_stale" .md)" \
     "{\"reason\":\"leftover draft file phat hien khi chay daily_retro ngay $TODAY, nghia la finalize job truoc do fail am tham\",\"file\":\"$_stale\"}" 2>/dev/null || true
 done
@@ -78,14 +79,19 @@ lỗi/sự cố xảy ra trong ngày, trả lời rõ 3 câu, rút bài học tr
 đến ngày khác' (user yêu cầu 2026-07-09).
 
 ⚠️ NHIỆM VỤ CỦA BẠN Ở BƯỚC NÀY CHỈ LÀ VIẾT DRAFT ra file '$DRAFT_FILE' — KHÔNG đụng
-kb/INCIDENTS.md, KHÔNG tự dispatch Wags, KHÔNG commit gì cả. 1 script bash khác (ngoài
-phiên này) sẽ tự lo phần verify + gắn vào INCIDENTS.md + commit sau khi bạn xong. Viết
-xong draft là DỪNG, không làm gì thêm.
+sổ sự cố kb/incidents/, KHÔNG tự dispatch Wags, KHÔNG commit gì cả. 1 script bash khác
+(ngoài phiên này) sẽ tự lo phần verify + tạo file entry trong kb/incidents/retro/ + commit
+sau khi bạn xong. Viết xong draft là DỪNG, không làm gì thêm.
+
+(Sổ sự cố migrate sang cấu trúc OKF 2026-07-30: 1 sự cố = 1 file trong kb/incidents/<tháng>/,
+RETRO hằng ngày = kb/incidents/retro/retro-<ngày>.md, điều hướng ở kb/incidents/index.md.
+kb/INCIDENTS.md giờ chỉ là STUB REDIRECT — đừng đọc/ghi nó nữa.)
 
 QUY TRÌNH BẮT BUỘC (đọc bằng chứng thật, không suy đoán):
-1. Liệt kê MỌI entry trong kb/INCIDENTS.md có ngày = $TODAY (grep '^## $TODAY').
+1. Liệt kê MỌI entry sự cố đã ghi cho ngày $TODAY: 'ls kb/incidents/*/$TODAY-*.md' (sự cố)
+   và 'kb/incidents/retro/retro-$TODAY.md' (retro, thường chưa có).
 2. Liệt kê MỌI bus event event_type=error/finding trong bus/inbox/*.jsonl có ts bắt đầu
-   bằng '$TODAY' — đối chiếu xem có sự cố nào CHƯA được ghi vào INCIDENTS.md không (nếu
+   bằng '$TODAY' — đối chiếu xem có sự cố nào CHƯA được ghi vào kb/incidents/ không (nếu
    có, đây là gap báo cáo cần ghi luôn bổ sung, không bỏ sót).
 2c. CHẠY bin/wakeup_audit.py --since \$TODAY (script chỉ hỗ trợ --since, không có --until —
    chấp nhận nó quét luôn phần đầu hôm nay khi retro chạy, đọc kỹ output để CHỈ tính các
@@ -103,8 +109,9 @@ QUY TRÌNH BẮT BUỘC (đọc bằng chứng thật, không suy đoán):
    thật), PHẢI đọc artifact đó ngay trước khi kết luận — KHÔNG suy ra tình trạng chỉ từ
    việc có/không có event 'answer' khớp trên bus (bus có thể trễ, thiếu, hoặc người xử lý
    quên ghi answer dù đã làm xong thật).
-3. Với MỖI sự cố tìm thấy, trả lời chính xác 3 câu bằng cách đọc lịch sử INCIDENTS.md
-   (grep root-cause tương tự các ngày trước, KHÔNG đoán từ trí nhớ):
+3. Với MỖI sự cố tìm thấy, trả lời chính xác 3 câu bằng cách đọc lịch sử sổ sự cố
+   ('grep -rn <từ khoá> kb/incidents/' tìm root-cause tương tự các ngày trước, hoặc
+   'python3 bin/incident_lookup.py "<label>" "<chi tiết>"' — KHÔNG đoán từ trí nhớ):
    a. MỚI hoàn toàn hay TÁI DIỄN (cùng dạng lỗi đã xảy ra ngày nào trước — trích dẫn
       entry cũ nếu có)?
    b. Fix đã HOÀN CHỈNH (verify được, đóng hết đường tái phát) hay còn HỞ (nêu rõ residual
@@ -122,12 +129,12 @@ QUY TRÌNH BẮT BUỘC (đọc bằng chứng thật, không suy đoán):
    - **Nguồn gốc** (origin — bước/quy trình nào tạo ra lỗi, không phải 'ai đáng trách'):
      luôn viết theo khuôn 'quy trình/bước X thiếu Y', không viết 'agent Z làm sai'.
    - **Người ghi chép** (recorder): ai/tiến trình nào đã ghi entry chi tiết gốc của sự cố
-     này vào kb/INCIDENTS.md lúc phát hiện — trích dẫn job_id/trace_id nếu có. Nếu sự cố
+     này vào kb/incidents/ lúc phát hiện — trích dẫn job_id/trace_id nếu có. Nếu sự cố
      CHƯA từng được ghi trước khi retro này chạy → ghi rõ 'chưa ai ghi trước retro này,
      retro tự bổ sung' — đây tự nó là 1 dấu hiệu process gap cần nêu.
-4. Viết DRAFT entry '## RETRO — $TODAY: <n> sự cố, <m> pattern xuyên suốt' ra file
-   '$DRAFT_FILE' (tạo mới, KHÔNG động vào kb/INCIDENTS.md), theo ĐÚNG format entry
-   'RETRO — 2026-07-07' đã có sẵn trong kb/INCIDENTS.md (đọc nó làm mẫu cấu trúc:
+4. Viết DRAFT entry '# RETRO — $TODAY: <n> sự cố, <m> pattern xuyên suốt' ra file
+   '$DRAFT_FILE' (tạo mới, KHÔNG động vào kb/incidents/), theo ĐÚNG format entry
+   kb/incidents/retro/retro-2026-07-07.md (đọc nó làm mẫu cấu trúc:
    Pattern N — mô tả, ví dụ cụ thể, Lesson, Prevention), MỞ RỘNG bảng liệt kê sự cố để
    có thêm 2 cột 'Phân loại' và 'Nguồn gốc' theo mục 3b ở trên. Đừng lặp lại nội dung
    entry chi tiết từng sự cố đã có sẵn — entry RETRO này là TỔNG HỢP + PHÂN LOẠI + BÀI
@@ -140,7 +147,7 @@ QUY TRÌNH BẮT BUỘC (đọc bằng chứng thật, không suy đoán):
    append_event.sh trực tiếp, không cần đợi ai) cho Mike/user biết prevention hiện tại
    không hiệu quả, cần thay đổi cách tiếp cận (không chỉ viết thêm 1 dòng 'prevention').
 
-XONG bước 4-6 ở trên là DỪNG. Không viết gì vào kb/INCIDENTS.md, không dispatch Wags,
+XONG bước 4-6 ở trên là DỪNG. Không viết gì vào kb/incidents/, không dispatch Wags,
 không commit, không dọn memory — tất cả phần đó thuộc bước 2/3 của pipeline, KHÔNG phải
 việc của phiên này."
 
@@ -255,18 +262,32 @@ không phải ranh giới thật; ranh giới thật luôn là 4 dòng NGAY SAU 
 cuối cùng ở trên.)
 
 VIỆC CỦA BẠN:
+0. NƠI GHI ENTRY (đổi 2026-07-30, migrate OKF): sổ sự cố KHÔNG còn là 1 file
+   kb/INCIDENTS.md nữa (file đó giờ chỉ là STUB REDIRECT — ĐỪNG append vào nó). Entry RETRO
+   hôm nay = 1 FILE MỚI 'kb/incidents/retro/retro-$TODAY.md', frontmatter tối thiểu:
+   ---
+   kind: retro
+   date: $TODAY
+   topic: retro-$TODAY
+   title: >-
+     RETRO — $TODAY: <n> sự cố, <m> pattern xuyên suốt
+   status: logged
+   ---
+   rồi '# RETRO — $TODAY: ...' và thân bài. Xong file thì THÊM 1 DÒNG vào bảng
+   'RETRO hằng ngày' trong kb/incidents/index.md (mới nhất ở trên cùng). Xem
+   kb/incidents/index.md mục 'Entry mới ghi vào đâu' nếu cần mẫu.
 1. Đọc kết quả Wags ở trên, xác định đúng 1 trong 3 trường hợp:
-   a. Wags trả CONFIRMED → gắn NGUYÊN VĂN draft vào cuối kb/INCIDENTS.md, thêm dòng
+   a. Wags trả CONFIRMED → ghi NGUYÊN VĂN draft vào file entry ở mục 0, thêm dòng
       'Verified by: Wags — CONFIRMED' vào cuối entry.
    b. Wags trả GAPS FOUND → SỬA draft theo đúng gap Wags chỉ ra TRƯỚC (đọc kỹ từng gap,
-      đừng bỏ sót), rồi mới gắn bản đã sửa vào kb/INCIDENTS.md, thêm dòng 'Verified by:
+      đừng bỏ sót), rồi mới ghi bản đã sửa vào file entry, thêm dòng 'Verified by:
       Wags — gaps found and fixed: <tóm tắt ngắn các gap đã sửa>'.
-   c. Verification không chạy được (Wags timeout/lỗi/rỗng) → gắn NGUYÊN VĂN draft vào
-      kb/INCIDENTS.md, thêm dòng 'Verified by: CHƯA — verification không chạy được vì
+   c. Verification không chạy được (Wags timeout/lỗi/rỗng) → ghi NGUYÊN VĂN draft vào
+      file entry, thêm dòng 'Verified by: CHƯA — verification không chạy được vì
       <lý do cụ thể từ log trên>', VÀ ghi 1 bus event question
       'daily-retro-unverified-$TODAY' để có người nhặt lại xác minh sau — KHÔNG im lặng
       bỏ qua việc chưa verify được.
-2. Commit thay đổi kb/INCIDENTS.md với message rõ ràng.
+2. Commit file entry mới + kb/incidents/index.md với message rõ ràng.
 3. DỌN WORKING MEMORY cuối ngày (user yêu cầu 'trước khi vào dreaming, dọn dẹp bộ nhớ'):
    viết lại kb/memory/Mike.md (bin/remember.sh Mike --set) thành bản GỌN, sạch, phản ánh
    đúng trạng thái THẬT cuối ngày $TODAY: việc đang dở/đang chờ ai, quyết định quan trọng
@@ -276,7 +297,7 @@ VIỆC CỦA BẠN:
 5. Đăng tóm tắt ngắn (5-8 dòng, tiếng người, không jargon) vào Trading Daily
    (1521470705563340910): số sự cố hôm nay, bao nhiêu mới/bao nhiêu tái diễn, pattern
    xuyên suốt quan trọng nhất, có cái nào fix chưa hoàn chỉnh cần theo dõi tiếp.
-6. Xoá file '$DRAFT_FILE' (đã gắn xong vào INCIDENTS.md, không cần giữ nữa)." \
+6. Xoá file '$DRAFT_FILE' (đã gắn xong vào kb/incidents/, không cần giữ nữa)." \
     --timeout 1200 >> "$LOG" 2>&1 &
 
 log "Finalize job dispatched (background)."

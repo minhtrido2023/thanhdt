@@ -23,7 +23,7 @@ ROOT = `/home/trido/thanhdt/WorkingClaude/mike`. Mọi đường dẫn dưới �
 **1. KHÔNG BAO GIỜ theo dõi job nền bằng Bash/Monitor giữ live.** Dispatch `--bg` xong là quay lại
 việc khác ngay — dùng `ScheduleWakeup` để quay lại poll `bin/jobs.sh status <job_id>` sau. Lý do:
 nếu Mike ngồi canh 1 tool call foreground để theo dõi job và chính phiên Mike bị restart, tiến
-trình theo dõi đó chết theo dù job thật vẫn chạy đúng (sự cố 2026-07-02, chi tiết `kb/INCIDENTS.md`).
+trình theo dõi đó chết theo dù job thật vẫn chạy đúng (sự cố 2026-07-02, chi tiết `kb/incidents/2026-07/2026-07-02-bg-dispatch-died-with-coordinator-restart.md`).
 
 **2. KHÔNG BAO GIỜ tin job status một mình.** Trước khi coi 1 dispatch là thất bại (timeout/failed),
 luôn kiểm tra xem deliverable thật (file kết quả, event trên bus) đã được tạo ra chưa — job có thể
@@ -39,14 +39,13 @@ tiếp bị chặn (`exit 4`) trong `DISPATCH_CIRCUIT_COOLDOWN` giây (mặc đ�
 (repo WorkingClaude) — lớp phòng thủ THỨ HAI độc lập với `fcntl.flock`: mỗi `step()` đối chiếu sổ
 lệnh broker sống với state; mã nào có lệnh không rõ nguồn gốc (vd process chết giữa `place_order()`
 và `_save_state()`) → TẠM DỪNG đặt lệnh mã đó (fail-safe-pause, không tự suy đoán) + báo bus.
-`poll_orders()` tự lỗi → fail-safe TOÀN BỘ mã trong plan. Chi tiết + self-check: `kb/INCIDENTS.md`
-(mục 2026-07-02 double-buy) + `ghost_order_selfcheck.py` ở root WorkingClaude.
+`poll_orders()` tự lỗi → fail-safe TOÀN BỘ mã trong plan. Chi tiết + self-check: `kb/incidents/2026-07/2026-07-02-double-buy-concurrent-bot-execute.md` + `ghost_order_selfcheck.py` ở root WorkingClaude.
 
 **5. `trace_id` trong bus event (thêm 2026-07-02).** `append_event.sh` giờ nhận `trace_id` tùy chọn
 (arg thứ 5), tự fallback về `$JOB_ID` (dispatch.sh export sẵn vào môi trường agent headless) — nối
 mọi event của MỘT chuỗi dispatch (caller → agent → auto-callback) mà không cần agent tự truyền tay.
 
-**Nhật ký sự cố đầy đủ (blameless postmortem):** `kb/INCIDENTS.md` — mọi sự cố ảnh hưởng hoạt động
+**Nhật ký sự cố đầy đủ (blameless postmortem):** `kb/incidents/` (điều hướng: `kb/incidents/index.md`) — mọi sự cố ảnh hưởng hoạt động
 thật, root cause, fix, bài học. Cập nhật mỗi khi có sự cố mới (không phải mọi bug, chỉ sự cố ảnh
 hưởng workflow sống hoặc cần người can thiệp ngoài happy path).
 
@@ -73,7 +72,7 @@ suất cao sẽ tự chạy tiếp, nhưng nếu phiên tôi restart giữa ch�
 **8. Fast wake-on-completion sau `dispatch.sh ... --bg`**
 
 > **§8 rút gọn — 3 dòng phải nhớ (thêm 2026-07-20, sau sự cố `missed-wakeup-after-bg-dispatch`,
-> xem `kb/INCIDENTS.md` + job `Wags_20260720_121120`):**
+> xem `kb/incidents/2026-07/2026-07-20-missed-wakeup-after-bg-dispatch.md` + job `Wags_20260720_121120`):**
 > 1. `dispatch.sh --bg` xong thì `ScheduleWakeup` là tool call CUỐI CÙNG của lượt, không ngoại lệ.
 >    3 lần tỉnh ĐẦU dùng 240-270s (bắt job xong sớm); từ lần tỉnh thứ 4 trở đi mà job vẫn running
 >    thì TĂNG DẦN khoảng cách (240→480→900→trần 1200s), không quay lại ngắn trừ khi có job MỚI
@@ -184,7 +183,7 @@ sự cố Taylor 2026-07-01).
 ## Model routing — ladder 3 tầng theo độ phức tạp task (cập nhật 2026-07-14, user yêu cầu)
 
 **Checklist thủ công SAU MỖI LẦN đổi model của chính Mike** (bài học sự cố schema-drift 07-06,
-`kb/INCIDENTS.md`): hỏi thử "liệt kê các tham số của Agent tool hiện có" và so với §8, nếu khác →
+`kb/incidents/2026-07/`, tìm `2026-07-06-*`): hỏi thử "liệt kê các tham số của Agent tool hiện có" và so với §8, nếu khác →
 cập nhật §8 + snippet `dispatch.sh` NGAY. Không xây cron cho việc này (đổi model không thường xuyên).
 `bin/model_config_watch.py` (watchdog.sh mỗi 10') là lớp phòng thủ RIÊNG cho model CONFIG (khác
 tool-schema drift ở trên, không thay được cho nhau).
@@ -210,7 +209,7 @@ cực kỳ phức tạp.**
 Không chắc → mặc định Sonnet 5. Việc phức tạp mà lưỡng lự Opus-hay-Fable → chọn **Opus** (Fable chỉ
 khi thực sự vượt tầm). Tránh dùng model đắt cho việc thường lệ.
 
-**⚠️ Sự cố model-drift đã đo được (2026-07-17, chi tiết `kb/INCIDENTS.md`)**: %fable dispatch lên
+**⚠️ Sự cố model-drift đã đo được (2026-07-17, chi tiết `kb/incidents/2026-07/2026-07-17-model-tier-drift-fable.md`)**: %fable dispatch lên
 58%/tuần dù hầu hết là task "phức tạp thường" (Q2, tầng Opus), không phải Q3 — compute wall-clock
 tăng 150% trong khi job count giảm. Lưới an toàn (không thay quyết định thật của Mike): `dispatch.sh`
 in nhắc stderr mỗi lần `--model fable`; `bin/spend_report.py` cảnh báo khi %fable tổng ≥30% (Friday
@@ -366,7 +365,7 @@ Lý do: các file trên Mike đã cập nhật NGAY LÚC quyết định (không
 ## Context theo vai trò (role-scoped) — quy tắc ghi chép & bảo trì (thêm 2026-07-17)
 
 **Nguyên tắc: mỗi agent chỉ import ĐÚNG phần việc của mình** (trước 2026-07-17 mọi agent import
-y hệt `context_pack.md` toàn bộ domain — tốn token vô ích, xem `kb/INCIDENTS.md` nếu cần chi tiết
+y hệt `context_pack.md` toàn bộ domain — tốn token vô ích, xem `kb/incidents/index.md` nếu cần chi tiết
 sự cố gốc):
 
 | Agent | File(s) import (qua CLAUDE.md, KHÔNG qua hook nữa — xem cost-opt #1b) | Vì sao |

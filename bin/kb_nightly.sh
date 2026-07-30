@@ -766,9 +766,9 @@ context_planning_mini.md và ngược lại).
 0→36KB trong 3 tuần, đè phí token lên MỌI dispatch qua context_pack.md; ngưỡng nâng 20→28KB
 2026-07-30 sau khi context_pack.md tổng cũng nâng 20→45KB, xem kb/current_ops.md đầu file)**:
 đọc kích thước file ('wc -c $ROOT/kb/current_ops.md'). Nếu >28KB HOẶC có mục nào mô tả 1 sự cố đã ghi rõ 'FIXED'/
-'XONG'/'ĐÃ VÁ' + có pointer 'kb/INCIDENTS.md' nhưng VẪN giữ nguyên narrative đầy đủ (thay vì
+'XONG'/'ĐÃ VÁ' + có pointer 'kb/incidents/' nhưng VẪN giữ nguyên narrative đầy đủ (thay vì
 rút về 1-2 câu như quy ước ở đầu file current_ops.md) → rút gọn ngay theo đúng mẫu đã làm hôm
-07-17 (giữ current-state + pointer INCIDENTS.md, xoá play-by-play đã có nơi khác lưu). CHỈ rút
+07-17 (giữ current-state + pointer kb/incidents/, xoá play-by-play đã có nơi khác lưu). CHỈ rút
 gọn mục đã XÁC NHẬN đóng — mục còn 'CHỜ USER'/'chưa quyết' GIỮ NGUYÊN, không rút gọn nhầm việc
 đang mở thành trông như đã xong.
 10. **Token-saver skill audit** (thêm 2026-07-29, user yêu cầu): invoke Skill \`token-saver\`

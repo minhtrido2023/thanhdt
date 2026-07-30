@@ -143,7 +143,7 @@ rm -f "$CONFIRM_FILE"  # dispatch mới — chưa xác nhận, lần gọi sau p
 
 "$ROOT/bin/notify_thread.sh" "🔧 [ops-autofix] Phát hiện vấn đề '$LABEL' — đã tự động cử agent chẩn đoán + sửa (Winston/fable). Sẽ báo kết quả vào đây khi xong." "$TRADING_DAILY_THREAD" 2>/dev/null || true
 
-# Known-issue lookup (cost-opt #2, 2026-07-30): grep kb/INCIDENTS.md by keyword BEFORE
+# Known-issue lookup (cost-opt #2, 2026-07-30): grep kb/incidents/ by keyword BEFORE
 # dispatch, inline the top matches into the prompt — saves the fixer its own search round-trips
 # for a pattern that already happened (checked: data-registry-accuracy alone has recurred ≥5
 # times per the retro log). Only shortcuts the SEARCH step; prompt below still requires the
@@ -160,11 +160,11 @@ ${KNOWN_ISSUE:+
 $KNOWN_ISSUE
 }
 QUY TRÌNH BẮT BUỘC:
-1. CHẨN ĐOÁN từ bằng chứng thật (log/file/API), không đoán. Đọc kb/ops_runbook.md trước. Nếu có mục 'khớp từ khoá' ở trên, đọc kỹ và tự xác nhận có thực sự CÙNG root cause không (đừng áp mù) — nếu khác, vẫn phải grep kb/INCIDENTS.md tự tìm thêm như trước giờ.
+1. CHẨN ĐOÁN từ bằng chứng thật (log/file/API), không đoán. Đọc kb/ops_runbook.md trước. Nếu có mục 'khớp từ khoá' ở trên, đọc kỹ và tự xác nhận có thực sự CÙNG root cause không (đừng áp mù) — nếu khác, vẫn phải grep -rn kb/incidents/ tự tìm thêm như trước giờ.
 2. SỬA trong giới hạn: ĐƯỢC sửa bug code script report/check/pipeline/cache, resync cache, resend report, dọn lock/flag kẹt, restart daemon phụ trợ; commit fix với message rõ ràng.
 3. CẤM TUYỆT ĐỐI (dù thấy 'cần thiết'): sửa trade plan, trading_rules.json, logic đặt lệnh executor/brokers, crontab dòng thực thi (run_bot/heartbeat/pkill), xoá dữ liệu, tạo/xoá BOT_STOP. Nếu root cause nằm ở đó → append_event.sh Winston question '<topic>' với mô tả + đề xuất, notify Telegram, rồi DỪNG.
 4. VERIFY artifact sau khi sửa (chạy lại checker/script bị lỗi, xác nhận hết lỗi thật) — không tin self-report.
-5. BÁO CÁO: notify_thread.sh vào thread $TRADING_DAILY_THREAD — ngắn gọn: hỏng gì, nguyên nhân, đã sửa gì, verify thế nào. Nếu ảnh hưởng workflow sống → thêm entry kb/INCIDENTS.md.
+5. BÁO CÁO: notify_thread.sh vào thread $TRADING_DAILY_THREAD — ngắn gọn: hỏng gì, nguyên nhân, đã sửa gì, verify thế nào. Nếu ảnh hưởng workflow sống → thêm 1 FILE entry mới kb/incidents/<YYYY-MM>/<YYYY-MM-DD>-<topic>.md + 1 dòng trong kb/incidents/index.md (KHÔNG append vào kb/INCIDENTS.md — file đó nay chỉ là STUB REDIRECT).
 6. BẮT BUỘC (khác việc 5, đây là hợp đồng đầu ra máy đọc được — dispatch này chạy nền, không ai chờ trực tiếp, nên đây là tín hiệu DUY NHẤT phân biệt \"đã xong thật\" với \"lạc đề/chết im\"): kết thúc bằng ĐÚNG MỘT trong hai lệnh sau — (a) nếu đã chẩn đoán+sửa+verify xong (hoặc xác nhận không có gì để sửa): append_event.sh Winston finding \"ops-autofix-done: $LABEL\" \"<JSON: root_cause, fix, verify>\"; (b) nếu gặp ranh giới cấm ở việc 3 hoặc không chẩn đoán được: append_event.sh Winston question \"ops-autofix-unresolved: $LABEL\" \"<JSON: ly_do>\". Thiếu bước này = lần chạy này coi như KHÔNG xác nhận được, dù các việc 1-5 có làm đúng đến đâu." \
   --bg --thread "$TRADING_DAILY_THREAD" --timeout "$AUTOFIX_TIMEOUT" --model opus 2>&1 | tail -3
 

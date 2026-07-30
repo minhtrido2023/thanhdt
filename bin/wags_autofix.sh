@@ -137,7 +137,7 @@ echo "$NOW" > "$STAMP"
 _notify_arch "🔧 **[wags-autofix] Nhận issue điều phối: '$LABEL'** — Wags đang chẩn đoán + sửa; arch-reviewer sẽ audit trước khi báo hoàn tất. Chi tiết issue:
 $DETAILS"
 
-# Known-issue lookup (cost-opt #2, 2026-07-30): grep kb/INCIDENTS.md by keyword before
+# Known-issue lookup (cost-opt #2, 2026-07-30): grep kb/incidents/ by keyword before
 # dispatch — same rationale/caveats as ops_autofix.sh's identical wiring (see there): only
 # shortcuts the search step, Wags still must verify a match actually applies.
 KNOWN_ISSUE="$(python3 "$ROOT/bin/incident_lookup.py" "$LABEL" "$DETAILS" 2>/dev/null || true)"
