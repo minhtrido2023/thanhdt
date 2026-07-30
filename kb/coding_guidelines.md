@@ -198,7 +198,9 @@ BOTH a unique account tag AND a module-load-time cleanup of any stale fixture at
 
 ## 8. Never Write Experiment Output to a Canonical / Registry-Pinned Filename
 
-**Root cause (2026-07-06 R3-CSV overwrite, `data/results_registry.md` line ~142):** an output
+**Root cause (2026-07-06 R3-CSV overwrite, `data/results_registry.md` mục `## KẾT QUẢ THAM CHIẾU
+phiên 2026-06-19` — cite by section title, not line number: line refs in this ledger drift as new
+entries get inserted, see the file's own top-of-file navigation note):** an output
 filename built from only a SUBSET of env knobs (e.g. `BASKET_SELECT` / combination-mode had no
 suffix) — a config axis that materially changes the result but has no filename suffix lets an
 experiment run silently clobber the registry-pinned production baseline. A lock wouldn't help —

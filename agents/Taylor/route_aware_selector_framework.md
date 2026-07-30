@@ -286,8 +286,9 @@ Theo cửa sổ — **(b) ÂM ở CẢ HAI**, không phải hiện tượng mộ
 
 ## 10.4 Đòn kết liễu thứ hai: `v3latest` ĐÃ BỊ BÁC TỪ 2026-06-22 — và cấp vehicle **ĐẢO DẤU** OOS
 
-`v3latest` không phải phát hiện mới đáng mừng. `results_registry.md` (dòng ~145-154, THREAD (b),
-2026-06-22, drift-controlled, self-check 0 VND) **đã đo nó ở CẤP HỆ và bác**:
+`v3latest` không phải phát hiện mới đáng mừng. `results_registry.md` (mục `## 🔬 IC PANEL 8L —
+bản đồ marginal-IC đồng bộ của mọi lăng kính`, subsection "THREAD (b) ĐÓNG" — cite by section
+title, không phải số dòng, 2026-06-22, drift-controlled, self-check 0 VND) **đã đo nó ở CẤP HỆ và bác**:
 
 | `v3latest` vs `yieldcombo` | IS | **OOS** | verdict |
 |---|---|---|---|

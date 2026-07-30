@@ -23,7 +23,9 @@ Cập nhật tay khi schema đổi.
 logic"): (1) **`CF_OA_P0` (2026-07-20, job `Taylor_20260720_111429`/`Winston_20260720_114006`)** — dict
 cũ ghi "Cashflow over assets" (ngụ ý tỷ lệ 0..1) nhưng thực tế là **VND thô** (HPG 2026Q1 = 6.82e12,
 cùng bậc với NP_P0). Đã sửa mô tả trong dict. Hậu quả thật: prototype R&D `ic_panel_ext_q3.py:57-60` (H4
-accruals, kết quả CLOSED ghi ở `data/results_registry.md` dòng ~245) trừ nhầm 1 SỐ TIỀN THÔ cho 1 TỶ
+accruals, kết quả CLOSED ghi ở `data/results_registry.md` mục `## 🟢 REAL-MARGIN self-check FIXED +
+1.3x chốt làm trần...` — phần "T2 IC-PANEL EXTENSION", dòng "H4 accruals... INVALID (unit bug)";
+cite by section title, số dòng trong sổ cái này trôi mỗi lần chèn mục mới) trừ nhầm 1 SỐ TIỀN THÔ cho 1 TỶ
 LỆ → kết quả đã bị đánh dấu INVALID (không xoá, chỉ dán cảnh báo). Đã có tiền lệ mờ hơn ở
 [`../fundamentals/roe_roic_fscore_quality.md`](../fundamentals/roe_roic_fscore_quality.md) (`CF_OA_3Y`)
 ghi "KHÔNG phải sum ratio" nhưng chưa lan sang sửa field gốc `CF_OA_P0` — bài học: khi phát hiện 1
