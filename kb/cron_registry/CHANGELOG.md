@@ -21,6 +21,24 @@ preserve_verbatim: >
 
 # Log thay đổi Cron Registry
 
+- 2026-07-30 (Winston, job `Winston_20260730_014022` — user duyệt sau khi Taylor phát hiện trong job
+  re-pin R3 2026-07-29): **KHÔNG đổi lịch cron nào**, chỉ đổi HÀNH VI của script mà cron 23:45
+  (`sync_bq_cache_daily.sh`) gọi — ghi ở đây vì operator cần biết. `sync_bq_cache.py` trước đây không
+  có khoá và ghi `to_parquet` đè TRỰC TIẾP lên file đích: 23:45 `--delta` khởi động đè lên cùng
+  `data/bq_cache` với một full re-sync thủ công đang chạy (đúng tình huống 2026-07-29, né được chỉ vì
+  MAY về thứ tự ghi manifest) → cache có thể TRỘN VINTAGE mà manifest vẫn `verified=true`.
+  Nay: (1) `fcntl` **trylock** trên `data/bq_cache/.sync.lock`, bao cả download + verify + ghi manifest
+  (kể cả `--verify`, vì nó cũng ghi lại manifest) — lần sync đến sau **BỎ QUA sạch, exit 75**
+  (EX_TEMPFAIL, không ghi gì); non-blocking là chủ đích vì `ticker` full chạy ~2h, bắt cron chờ sẽ dồn
+  job; (2) mọi parquet + `manifest.json` ghi qua file tạm cùng thư mục rồi `os.replace` (atomic).
+  **Ảnh hưởng operator**: exit 75 KHÔNG phá wrapper (`... || true`) và thông báo "BỎ QUA" không khớp
+  grep `FAILED|FAIL —|RESULT: FAIL` nên KHÔNG kích `ops_autofix` giả; một đêm sync bị bỏ qua vẫn phát
+  hiện được vì `preflight_bq_cache.py` trong cùng wrapper chạy độc lập và cảnh báo khi `verified_at`
+  cũ >36h. Self-check `sync_cache_lock_selfcheck.py` 20/20 PASS (gồm đối chứng: cách ghi CŨ bị SIGKILL
+  → file đích hỏng thật) + smoke thật trên BQ; quant-skeptic **CONFIRMED (high)**, killer-objection duy
+  nhất (flock trên NFS không đảm bảo) đã đóng: `data/bq_cache` nằm trên ext4 local
+  (`/dev/mapper/pve-vm--102--disk--2`), 1 host duy nhất.
+
 - 2026-07-29 (Winston, job `Winston_20260729_152037` — user CHỐT sau khi 2 job cùng ngày
   (`Winston_20260729_132257` + `Taylor_20260729_132056`) phát hiện production BQ bị restate ÂM THẦM
   ba lần: `ticker_prune` TRUNCATE+rebuild 07:27 xoá 58 mã khỏi TOÀN BỘ lịch sử, `VNINDEX_PE` backfill
