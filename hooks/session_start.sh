@@ -171,14 +171,82 @@ source "$ROOT/hooks/_directives.sh"
 # apart from just trying a new message. This fires LAST in the hook — after KB/memory/job
 # board/directives are all loaded — so it's a truthful "actually ready" signal, not a guess
 # fired before startup work is done. Fire-and-forget: never blocks/breaks session start if
-# Discord is unreachable. Fires on every SessionStart (fresh start, compact-resume, or a
-# watchdog-triggered restart) — all of those are cases where the user benefits from knowing
-# Mike just became ready again.
+# Discord is unreachable.
 # INTERACTIVE_TID (not DISCORD_THREAD_ID): a headless dispatched session has no human waiting
 # on a "ready" signal — announcing there is pure noise in the user's topic.
+#
+# Dedupe guard (2026-07-30, fix for a real spam incident — root-caused via
+# `journalctl -u ccdb-mike.service`, thread 1521475726329516122, 07:37-07:49 UTC = 14:37-14:49
+# ICT, then cross-checked mechanically against the whole retained journal 06-24→07-30). The old
+# version fired on EVERY SessionStart unconditionally; that premise was wrong in TWO distinct
+# ways, found across two review rounds — both fixed here, together:
+#
+# (a) ccdb's "post-compact guardrail" (`_run_helper.py` ~407-415, intentional, has its own loop
+#     guard — not itself a bug): when `compact_boundary` fires mid-stream, ccdb interrupts and
+#     RERUNS `claude --resume <sid>` with a guardrail prompt appended. That in-process
+#     compact_boundary event itself fires a SessionStart with `source: "compact"` (Claude Code's
+#     hook payload field, confirmed against the installed CLI's own schema — enum
+#     startup/resume/clear/compact/fork) — filtering `source == "compact"` kills this one.
+# (b) The guardrail RERUN's own fresh process (`runner.py` → `--resume <sid>`) reports
+#     `source: "resume"`, indistinguishable by field alone from a genuine new user turn — an
+#     earlier version of this fix missed this and only closed (a), leaving the worse half of the
+#     spam (a mid-turn "ready" ping while the turn is still actually running — measured via
+#     journal timing: 18 of 28 guardrail reruns in the retained window fired a ping 11-19s after
+#     the rerun's own `Claude CLI started`) unfixed. Since ccdb doesn't expose an env var for
+#     "this launch is an internal rerun" (checked: `post_compact_rerun` only reaches the
+#     subprocess as appended system-prompt text — exposing it as an env var would be the
+#     precise fix but means patching `/workspace/claude-code-discord-bridge` and restarting the
+#     shared ccdb-mike.service, which can interrupt OTHER topics' live sessions concurrently on
+#     that same bridge (its own process-wide `asyncio.Semaphore(3)` allows up to 3 concurrent
+#     live sessions across ALL topics — `_run_helper.py` ~41-54) — needs an explicit user
+#     decision, not a unilateral edit here), this uses a same-topic proximity heuristic instead:
+#     any `source == "compact"` firing stamps a per-topic marker (re-stamped on every compact, so
+#     a chain of 2+ compacts just keeps refreshing it — chain length doesn't widen the window
+#     needed); a following `resume`/`startup` firing within 60s is treated as "still the same
+#     rerun chain" and suppressed too — measured against the full 06-24→07-30 journal, every
+#     compact→rerun-ping gap was 8-23s (n=18), so 60s carries >2.5x margin while still letting a
+#     genuinely independent user message through quickly (3 real user-turn pings in that same
+#     window would have been wrongly swallowed at a naively "safe-looking" 600s — this constant
+#     was deliberately re-measured down after review, not guessed). No lock is needed on the
+#     marker file itself: it's 0-byte / mtime-only, so a concurrent truncating write can't corrupt
+#     it — worst case from any overlap is one extra or one missing ping, not corruption (ccdb does
+#     NOT serialize per-topic — the semaphore above is process-wide, not per-thread — so this
+#     robustness-to-corruption property is what actually matters here, not serialization).
+#     Negative age (marker mtime in the future — NTP step-back) is treated as stale/expired, not
+#     "very recent" — an earlier marker-based attempt at this fix silently suppressed forever on
+#     that path; this one fails toward notifying instead.
+# AskUserQuestion-answer reruns and ScheduleWakeup resumes are unaffected by either clause (both
+# are genuinely new user-facing input, source "resume", with no recent compact stamp) — they
+# still get a "ready" ping.
+#
+# Known tradeoff, not yet resolved (2026-07-30, needs a user decision): both compacts in today's
+# incident were user-typed `/compact` (manual, confirmed via `compactMetadata.trigger` in the
+# transcript — the bridge has no code path that issues `/compact` itself), and the
+# `source: "compact"` SessionStart fires at compaction COMPLETION, not start — i.e. it IS the
+# literal "your big compact just finished" signal the 2026-07-03 feature request wanted. This fix
+# suppresses that ping (plus the following ~60s of resume pings) to kill the spam, which means a
+# manual `/compact` now gets NO "ready" confirmation at all — the original use case is currently
+# unserved, not just de-spammed. Left as-is pending explicit user sign-off on whether that's the
+# right tradeoff, or whether a distinct "compact truly done" signal should be re-added later
+# (e.g. fired once, from the LAST compact-sourced SessionStart in a chain instead of every one —
+# distinguishing "last" from "not last" would need the same ccdb env-var signal discussed above).
 if [ "$id" = "Mike" ] && [ -n "$INTERACTIVE_TID" ]; then
-  "$ROOT/bin/notify_thread.sh" "🟢 Đã resume xong — sẵn sàng nhận việc tiếp." "$INTERACTIVE_TID" \
-    >/dev/null 2>&1 || true
+  _compact_marker="$ROOT/agents/Mike/state/last_compact_${INTERACTIVE_TID}.txt"
+  _should_notify=1
+  if [ "${MIKE_HOOK_SOURCE:-}" = "compact" ]; then
+    _should_notify=0
+    mkdir -p "$(dirname "$_compact_marker")"
+    : > "$_compact_marker"
+  elif [ -f "$_compact_marker" ]; then
+    _compact_age=$(( $(date +%s) - $(stat -c %Y "$_compact_marker" 2>/dev/null || echo 0) ))
+    if [ "$_compact_age" -ge 0 ] && [ "$_compact_age" -lt 60 ]; then
+      _should_notify=0
+    fi
+  fi
+  if [ "$_should_notify" = 1 ]; then
+    "$ROOT/bin/notify_thread.sh" "🟢 Đã resume xong — sẵn sàng nhận việc tiếp." "$INTERACTIVE_TID" \
+      >/dev/null 2>&1 || true
+  fi
 fi
 
 exit 0

@@ -1,5 +1,5 @@
-# _resolve_id.sh — sourced by the hooks. Sets $id, and exports $MIKE_SID / $MIKE_CWD
-# (this session's id + cwd, from the hook's stdin JSON) for recap/continuity use.
+# _resolve_id.sh — sourced by the hooks. Sets $id, and exports $MIKE_SID / $MIKE_CWD / $MIKE_HOOK_SOURCE
+# (this session's id + cwd + hook trigger source, from the hook's stdin JSON) for recap/continuity use.
 #   - If $1 is given (spawn_child children with a baked id) → use it as $id.
 #   - Else (retrofit: shared settings.local.json, no baked id) → resolve session_id to the
 #     friendly fleet label and use that.
@@ -13,15 +13,18 @@
 [ -n "${MIKE_SKIP:-}" ] && exit 0
 id="${1:-}"
 _payload="$(cat 2>/dev/null || true)"
-# Pull session_id (line 1) and cwd (line 2) — separate lines tolerate spaces in cwd.
+# Pull session_id (line 1), cwd (line 2), and hook source (line 3, SessionStart-only field —
+# "startup"/"resume"/"clear"/"compact"; empty for hooks that don't carry it) — separate lines
+# tolerate spaces in cwd.
 _meta="$(printf '%s' "$_payload" | python3 -c 'import sys, json
 try:
-    d = json.load(sys.stdin); print(d.get("session_id", "")); print(d.get("cwd", ""))
+    d = json.load(sys.stdin); print(d.get("session_id", "")); print(d.get("cwd", "")); print(d.get("source", ""))
 except Exception:
-    print(""); print("")' 2>/dev/null || true)"
+    print(""); print(""); print("")' 2>/dev/null || true)"
 MIKE_SID="$(printf '%s\n' "$_meta" | sed -n 1p)"
 MIKE_CWD="$(printf '%s\n' "$_meta" | sed -n 2p)"
-export MIKE_SID MIKE_CWD
+MIKE_HOOK_SOURCE="$(printf '%s\n' "$_meta" | sed -n 3p)"
+export MIKE_SID MIKE_CWD MIKE_HOOK_SOURCE
 
 if [ -z "$id" ]; then
   id="$("$ROOT/bin/discover_sessions.py" --resolve "$MIKE_SID" 2>/dev/null || true)"
