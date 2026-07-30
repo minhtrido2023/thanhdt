@@ -76,14 +76,24 @@ echo "$NOW" > "$GLOBAL_STAMP"
 
 "$ROOT/bin/notify_thread.sh" "🔧 [ops-autofix] Phát hiện vấn đề '$LABEL' — đã tự động cử agent chẩn đoán + sửa (Winston/fable). Sẽ báo kết quả vào đây khi xong." "$TRADING_DAILY_THREAD" 2>/dev/null || true
 
+# Known-issue lookup (cost-opt #2, 2026-07-30): grep kb/INCIDENTS.md by keyword BEFORE
+# dispatch, inline the top matches into the prompt — saves the fixer its own search round-trips
+# for a pattern that already happened (checked: data-registry-accuracy alone has recurred ≥5
+# times per the retro log). Only shortcuts the SEARCH step; prompt below still requires the
+# fixer to verify the match actually applies before reusing an old fix (each occurrence so far
+# has had a genuinely different specific root cause even within the same family).
+KNOWN_ISSUE="$(python3 "$ROOT/bin/incident_lookup.py" "$LABEL" "$DETAILS" 2>/dev/null || true)"
+
 "$ROOT/bin/dispatch.sh" Winston "NHIỆM VỤ OPS-AUTOFIX (mandate user 2026-07-07: tự phát hiện tự sửa, báo cáo sau): checker định kỳ vừa phát hiện vấn đề vận hành.
 
 CONTEXT: $LABEL
 CHI TIẾT TỪ CHECKER:
 $DETAILS
-
+${KNOWN_ISSUE:+
+$KNOWN_ISSUE
+}
 QUY TRÌNH BẮT BUỘC:
-1. CHẨN ĐOÁN từ bằng chứng thật (log/file/API), không đoán. Đọc kb/INCIDENTS.md + kb/ops_runbook.md trước — vấn đề có thể là dạng đã biết có sẵn cách xử lý.
+1. CHẨN ĐOÁN từ bằng chứng thật (log/file/API), không đoán. Đọc kb/ops_runbook.md trước. Nếu có mục 'khớp từ khoá' ở trên, đọc kỹ và tự xác nhận có thực sự CÙNG root cause không (đừng áp mù) — nếu khác, vẫn phải grep kb/INCIDENTS.md tự tìm thêm như trước giờ.
 2. SỬA trong giới hạn: ĐƯỢC sửa bug code script report/check/pipeline/cache, resync cache, resend report, dọn lock/flag kẹt, restart daemon phụ trợ; commit fix với message rõ ràng.
 3. CẤM TUYỆT ĐỐI (dù thấy 'cần thiết'): sửa trade plan, trading_rules.json, logic đặt lệnh executor/brokers, crontab dòng thực thi (run_bot/heartbeat/pkill), xoá dữ liệu, tạo/xoá BOT_STOP. Nếu root cause nằm ở đó → append_event.sh Winston question '<topic>' với mô tả + đề xuất, notify Telegram, rồi DỪNG.
 4. VERIFY artifact sau khi sửa (chạy lại checker/script bị lỗi, xác nhận hết lỗi thật) — không tin self-report.

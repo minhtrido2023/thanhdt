@@ -221,7 +221,11 @@ _circuit_record() {
 # has rolled over. Capped at DISPATCH_MAX_USAGE_RESUMES consecutive resumes so a GENUINE
 # recurring bug can't hide behind "still waiting for reset" forever.
 _current_resume_count() {  # parse "[RESUME sau usage-limit #<n> ..." prefix from $prompt, else 0
-  if [[ "$prompt" =~ RESUME\ sau\ usage-limit\ \#([0-9]+) ]]; then
+  # Anchored to the literal start of $prompt (2026-07-30, hardening after incident_lookup.py
+  # started inlining kb/INCIDENTS.md excerpts into dispatch prompts): resume_pending.py always
+  # places this marker at position 0 (bin/resume_pending.py:55) — an unanchored match could be
+  # spoofed by incident text quoting the mechanism itself appearing later in the prompt body.
+  if [[ "$prompt" =~ ^\[RESUME\ sau\ usage-limit\ \#([0-9]+) ]]; then
     echo "${BASH_REMATCH[1]}"
   else
     echo 0

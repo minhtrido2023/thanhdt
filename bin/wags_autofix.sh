@@ -137,11 +137,17 @@ echo "$NOW" > "$STAMP"
 _notify_arch "🔧 **[wags-autofix] Nhận issue điều phối: '$LABEL'** — Wags đang chẩn đoán + sửa; arch-reviewer sẽ audit trước khi báo hoàn tất. Chi tiết issue:
 $DETAILS"
 
+# Known-issue lookup (cost-opt #2, 2026-07-30): grep kb/INCIDENTS.md by keyword before
+# dispatch — same rationale/caveats as ops_autofix.sh's identical wiring (see there): only
+# shortcuts the search step, Wags still must verify a match actually applies.
+KNOWN_ISSUE="$(python3 "$ROOT/bin/incident_lookup.py" "$LABEL" "$DETAILS" 2>/dev/null || true)"
+
 # Pipeline chạy nền tách session (setsid) — caller (cron/Mike turn) không bị giữ; job
 # board + bus vẫn theo dõi được từng bước (nguyên tắc MIKE.md §1: không canh foreground).
 PIPELOG="$ROOT/logs/wags_pipeline_$(date -u +%Y%m%d_%H%M%S).log"
 setsid bash -c '
   ROOT="'"$ROOT"'"; LABEL='"$(printf %q "$LABEL")"'; DETAILS='"$(printf %q "$DETAILS")"'
+  KNOWN_ISSUE='"$(printf %q "$KNOWN_ISSUE")"'
   ARCH_TOPIC="'"$ARCH_TOPIC"'"
   _notify_arch() { "$ROOT/bin/notify_thread.sh" "$1" "$ARCH_TOPIC" >/dev/null 2>&1 || true; }
 
@@ -154,7 +160,10 @@ setsid bash -c '
   #    self-report, cùng nguyên tắc đã áp dụng ở idempotency guard/ghost-order).
   out="$("$ROOT/bin/dispatch.sh" Wags "NHIỆM VỤ WAGS-AUTOFIX (issue điều phối giữa agent, mandate 2026-07-07): '"'"'$LABEL'"'"'
 CHI TIẾT: $DETAILS
-Quy trình: (1) chẩn đoán từ artifact thật (jobs.sh list cột HB_AGE, trace.sh, bus, log) — đọc kb/ops_runbook.md + working memory của bạn trước; (2) SỬA trong ranh giới: được sửa tooling điều phối (dispatch.sh/jobs.sh/mike_json.py/ops_autofix/wags_autofix/checker) sau khi test, TUYỆT ĐỐI không đụng trading (plan/executor/cron thực thi/trading_rules); (3) verify artifact sau sửa (chạy lại lệnh lỗi, xác nhận hết); (4) ghi bus finding topic bắt đầu bằng '"'"'wags-fix: $LABEL'"'"' kèm root_cause/fix/verify/commit + field \"files_changed\": [danh sách ĐẦY ĐỦ đường dẫn tương đối bạn đã sửa, vd [\"bin/dispatch.sh\",\"MIKE.md\"]] — field này quyết định fix có cần arch-reviewer audit đầy đủ hay không, KHÔNG được bỏ trống hay báo thiếu file." --timeout 1500 --retries 0 --model opus 2>&1)" || true
+${KNOWN_ISSUE:+
+$KNOWN_ISSUE
+}
+Quy trình: (1) chẩn đoán từ artifact thật (jobs.sh list cột HB_AGE, trace.sh, bus, log) — đọc kb/ops_runbook.md + working memory của bạn trước (nếu có mục \"khớp từ khoá\" ở trên, tự xác nhận có thực sự cùng root cause không trước khi áp lại cách sửa cũ); (2) SỬA trong ranh giới: được sửa tooling điều phối (dispatch.sh/jobs.sh/mike_json.py/ops_autofix/wags_autofix/checker) sau khi test, TUYỆT ĐỐI không đụng trading (plan/executor/cron thực thi/trading_rules); (3) verify artifact sau sửa (chạy lại lệnh lỗi, xác nhận hết); (4) ghi bus finding topic bắt đầu bằng '"'"'wags-fix: $LABEL'"'"' kèm root_cause/fix/verify/commit + field \"files_changed\": [danh sách ĐẦY ĐỦ đường dẫn tương đối bạn đã sửa, vd [\"bin/dispatch.sh\",\"MIKE.md\"]] — field này quyết định fix có cần arch-reviewer audit đầy đủ hay không, KHÔNG được bỏ trống hay báo thiếu file." --timeout 1500 --retries 0 --model opus 2>&1)" || true
   echo "$out" >> "'"$PIPELOG"'"
 
   # 2) Phân loại rủi ro (cost-opt #2, 2026-07-17): fix chỉ đụng path an toàn tuyệt đối
