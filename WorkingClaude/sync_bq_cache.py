@@ -162,11 +162,31 @@ TABLES = {
             FROM `{project}.tav2_bq.ticker_1m` AS t
         """,
     },
+    # vnindex_5state* (4 bảng): full_only + liệt kê cột tường minh, CỐ Ý — 2 lý do độc lập.
+    #
+    # (1) RESTATE ĐUÔI: từ 2026-07-30 `state_publish_immutable.py` (step [10]/[12] của
+    #     daily_refresh_v34b_linux.sh) publish bằng MERGE có CẢ UPDATE lẫn DELETE trên
+    #     `time > cutoff` với cutoff = SEAL_N = 25 phiên giao dịch. Delta ở đây chỉ kéo
+    #     `time > max_cached` (= ngày cuối đã cache) — hẹp hơn cửa sổ restate rất nhiều — nên
+    #     mọi UPDATE/DELETE trong đuôi 25 phiên KHÔNG BAO GIỜ tới được cache. Tệ hơn: verify
+    #     dung sai max(50, 0.1%) rộng hơn 25 dòng ⇒ lệch này im lặng vĩnh viễn, không alert.
+    #     Cùng lớp lỗi đã ghi ở fa_ratings/fa_ratings_8l/ticker_financial bên dưới/trên.
+    #
+    # (2) SCHEMA DRIFT: cùng publisher thêm cột `asof_date`. `SELECT *` + delta sẽ concat
+    #     delta 4 cột lên parquet 3 cột đang có ⇒ pandas union cột, 6332 dòng lịch sử mang
+    #     asof_date = NaT trong khi BQ có giá trị thật. Không crash, không trượt verify
+    #     (`asof_date` không nằm trong DATE_COLS) — đúng kiểu bẫy im lặng: cột chống
+    #     look-ahead lại là cột sai. Liệt kê cột tường minh ⇒ hợp đồng cache cố định 3 cột
+    #     (time/state/state_raw); muốn dùng asof_date thì đọc BQ, đừng đọc cache.
+    #
+    # Chi phí: 4 bảng đều ~6.3k dòng / ~40KB ⇒ full mỗi đêm là không đáng kể.
     "vnindex_5state_dt5g_live": {
         "sql": """
-            SELECT * FROM `{project}.tav2_bq.vnindex_5state_dt5g_live` AS t
+            SELECT t.time, t.state, t.state_raw
+            FROM `{project}.tav2_bq.vnindex_5state_dt5g_live` AS t
         """,
         "partition_col": "time",
+        "full_only": True,
         "verify_sql": """
             SELECT COUNT(*) AS cnt, MAX(t.time) AS max_time
             FROM `{project}.tav2_bq.vnindex_5state_dt5g_live` AS t
@@ -174,9 +194,11 @@ TABLES = {
     },
     "vnindex_5state": {
         "sql": """
-            SELECT * FROM `{project}.tav2_bq.vnindex_5state` AS t
+            SELECT t.time, t.state, t.state_raw
+            FROM `{project}.tav2_bq.vnindex_5state` AS t
         """,
         "partition_col": "time",
+        "full_only": True,
         "verify_sql": """
             SELECT COUNT(*) AS cnt, MAX(t.time) AS max_time
             FROM `{project}.tav2_bq.vnindex_5state` AS t
@@ -184,9 +206,11 @@ TABLES = {
     },
     "vnindex_5state_tam_quan_v34b_clean": {
         "sql": """
-            SELECT * FROM `{project}.tav2_bq.vnindex_5state_tam_quan_v34b_clean` AS t
+            SELECT t.time, t.state, t.state_raw
+            FROM `{project}.tav2_bq.vnindex_5state_tam_quan_v34b_clean` AS t
         """,
         "partition_col": "time",
+        "full_only": True,
         "verify_sql": """
             SELECT COUNT(*) AS cnt, MAX(t.time) AS max_time
             FROM `{project}.tav2_bq.vnindex_5state_tam_quan_v34b_clean` AS t
@@ -194,9 +218,11 @@ TABLES = {
     },
     "vnindex_5state_dt_4gate": {
         "sql": """
-            SELECT * FROM `{project}.tav2_bq.vnindex_5state_dt_4gate` AS t
+            SELECT t.time, t.state, t.state_raw
+            FROM `{project}.tav2_bq.vnindex_5state_dt_4gate` AS t
         """,
         "partition_col": "time",
+        "full_only": True,
         "verify_sql": """
             SELECT COUNT(*) AS cnt, MAX(t.time) AS max_time
             FROM `{project}.tav2_bq.vnindex_5state_dt_4gate` AS t
