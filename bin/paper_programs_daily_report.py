@@ -17,6 +17,7 @@ import datetime as dt
 import glob
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -96,6 +97,26 @@ def progress_line(prog, today):
 
 # ---------------- probes ----------------
 
+# Generic "did this probe's own output already say something is broken?" scan — added
+# 2026-07-30 after a user report that paper reports "don't work" traced back to a real
+# outage (PaperBroker.place_order crash, 386 FAIL/day) that WAS visible in the section 4 body
+# the whole time as "journal FAIL/ERROR events: 431", just buried in a long wall of text no
+# one was scanning for it. Matches the "<label>: <positive count>" convention several probe
+# scripts already use (execution_quality_review.py's "rejected/failed orders: N" / "journal
+# FAIL/ERROR events: N") plus a bare Python crash trace — NOT a semantic understanding of any
+# one script, just a cheap textual tripwire so a real problem can't scroll by unnoticed.
+_ATTENTION_RE = re.compile(r"^.*\b(FAIL|ERROR|Reject(?:ed)?)\b[^\n:]*:\s*([1-9]\d*)\s*$", re.MULTILINE)
+
+
+def _attention_flags(out):
+    flags = []
+    if "Traceback (most recent call last)" in out:
+        flags.append("Python traceback trong output")
+    for m in _ATTENTION_RE.finditer(out):
+        flags.append(m.group(0).strip())
+    return flags
+
+
 def probe_command(probe):
     """Chạy 1 lệnh trong WC_ROOT, trả stdout (cắt max_chars). Non-zero exit vẫn trả output."""
     cmd = probe["cmd"]
@@ -105,9 +126,13 @@ def probe_command(probe):
     out = (r.stdout or "").strip()
     if not out:
         out = (r.stderr or "").strip()[:400] or "(không có output)"
+    flags = _attention_flags(out)
     if len(out) > max_chars:
         out = out[:max_chars] + f"\n… (cắt bớt, xem nguồn để đủ; exit={r.returncode})"
-    lines = [out]
+    lines = []
+    if flags:
+        lines.append("⚠️ **CẦN CHÚ Ý** — " + " | ".join(flags))
+    lines.append(out)
     if r.returncode != 0:
         lines.append(f"⚠️ lệnh exit={r.returncode} — output ở trên có thể không đầy đủ")
     return {"body": "\n".join(lines)}
