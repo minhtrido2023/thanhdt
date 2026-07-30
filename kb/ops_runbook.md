@@ -57,6 +57,27 @@ chưa ăn → notify "cần người xem", không dispatch lặp vô hạn.
   đuôi, hoặc bằng decision chủ đề rời) → checker KHÔNG thấy → question "tồn đọng" vĩnh viễn
   → spawn Wags vô nghĩa. Trước 2026-07-21 checker so topic BẰNG NHAU TUYỆT ĐỐI nên cả hậu-tố
   `-closed` cũng trượt (7 answer trên bus dính lỗi này).
+- **Event đóng phải xuất hiện SAU question** (fix Wags 2026-07-30 round2, arch-reviewer
+  required_change #1): `_resolved()` giờ so `resolver.ts >= question.ts`. Vì sao bắt buộc —
+  nhiều alert TỰ ĐỘNG LẶP dùng topic **không có ngày**, nên chỉ cần đóng MỘT lần bằng hậu-tố
+  là mọi lần alert TƯƠNG LAI bị pre-resolve vĩnh viễn (checker mù luôn):
+  | Topic alert lặp (không có ngày) | Emitter |
+  |---|---|
+  | `plan-t1-not-ready-<ACCOUNT>` | `bin/send_plan_report.sh:380` |
+  | `ops-autofix-unresolved: ops-health-<ACCOUNT>` | `bin/ops_autofix.sh:168` |
+  Sự cố thật: ZaloPay mù từ answer Winston 2026-07-14, SpaceX mù từ đợt vệ sinh
+  coord-2026-07-30 — 2 alert `plan-t1-not-ready-ZaloPay` (07-24) chỉ hiện lại SAU khi thêm
+  so-ts. Ai thêm topic question mới cho alert lặp: **nên nhúng ngày vào topic** (vd
+  `plan-t1-not-ready-SpaceX-2026-07-30`); sửa emitter thuộc surface trading → escalate cho
+  owner, Wags không tự sửa.
+- **Hết hạn 30 ngày phải có DẤU VẾT** (required_change #4): question vượt horizon 30d không
+  còn im lặng biến mất — checker phát 1 `decision` topic
+  `<topic-hỏi> — EXPIRED-30d-khong-ai-tra-loi` (đóng theo HẾT HẠN, KHÔNG phải đã trả lời) và
+  in 1 dòng WARN-only. Idempotent nhờ chính quy ước hậu-tố. Vẫn cần quyết → mở question MỚI.
+- **Marker `[WARN-ONLY]`** (required_change #5): dòng WARN mang tiền tố này bị loại khỏi CẢ
+  `COORD_WARN` và `OTHER_WARN` → không spawn agent. Phân luồng dispatch bám MARKER, không bám
+  câu chữ tiếng Việt (đổi wording WARN trước đây âm thầm đổi routing; topic tự do nhúng trong
+  dòng chứa "Circuit breaker"/"Job board:" từng kéo cả dòng vào COORD_WARN → dispatch oan).
 - **Question TREO LÂU >48h** (thêm Wags 2026-07-30): checker có dòng WARN riêng
   `⚠️ Câu hỏi TREO LÂU (>48h, chưa ai quyết)` cho question quá cửa sổ 48h mà vẫn chưa có
   answer/decision (horizon 30 ngày). Trước đó question >48h RƠI KHỎI radar hoàn toàn → chết

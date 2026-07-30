@@ -201,9 +201,16 @@ cutoff = _now - dt.timedelta(hours=48)
 # CỐ TÌNH không dispatch autofix (xem grep COORD_WARN/OTHER_WARN): loại câu hỏi này chỉ
 # user quyết được, spawn Wags lặp lại vô nghĩa — cần VISIBILITY cho người, không cần agent.
 aged_horizon = _now - dt.timedelta(days=30)
+# Marker ỔN ĐỊNH để nhánh dispatch dưới (bash grep) nhận ra "dòng này chỉ để NGƯỜI đọc,
+# không spawn agent". Trước đây routing dựa vào CHỮ HOA/câu chữ tiếng Việt của chính dòng
+# WARN ("Câu hỏi TREO LÂU" vs "câu hỏi (question)") → đổi câu chữ là routing thay đổi im
+# lặng, và topic tự do nhúng trong dòng (chứa "Circuit breaker"/"Job board:") có thể kéo
+# cả dòng vào COORD_WARN → dispatch Wags oan (arch-reviewer required_change #5).
+WARN_ONLY = "[WARN-ONLY]"
 inbox_dir = os.path.join(wc_root, "mike", "bus", "inbox")
 pending_q = []
 aged_q = []
+expired_q = []
 if os.path.isdir(inbox_dir):
     files = glob.glob(os.path.join(inbox_dir, "*.jsonl"))
     def iter_events(path):
@@ -219,20 +226,34 @@ if os.path.isdir(inbox_dir):
     # Khớp exact-topic như bản cũ bỏ sót cả 2 dạng → false-positive backlog, Wags bị
     # dispatch lặp cho câu hỏi ĐÃ giải quyết (sự cố Wags 2026-07-21: 2/5 "pending" thực ra
     # đã đóng — Winston deposit-rate + Taylor plan-SpaceX).
+    # Resolver lưu kèm ts: một answer/decision chỉ đóng được câu hỏi phát SINH TRƯỚC nó.
+    # Không so ts là điểm mù VĨNH VIỄN cho các topic alert LẶP không có ngày (vd
+    # send_plan_report.sh:380 phát `plan-t1-not-ready-<ACCOUNT>`): 1 lần đóng bằng hậu-tố
+    # `-question-closed` sẽ pre-resolve MỌI lần alert tương lai (ZaloPay mù từ answer
+    # Winston 2026-07-14, SpaceX mù từ vệ sinh coord-2026-07-30) → alert plan T+1 chưa
+    # sẵn sàng của account tiền thật biến mất khỏi check #5. Fix: required_change #1 của
+    # arch-reviewer, NEEDS_CHANGES coord-2026-07-30.
     resolvers = []
     for p in files:
         for rec in iter_events(p):
             if rec.get("event_type") in ("answer", "decision"):
                 t = rec.get("topic")
-                if t:
-                    resolvers.append(t)
-    def _resolved(q_topic):
-        # Exact-match, HOẶC resolver CHỨA nguyên topic câu hỏi (quy ước hậu-tố trạng thái).
-        # Chỉ 1 chiều (resolver ⊇ topic-hỏi) để 1 decision topic-ngắn KHÔNG vô tình khớp
-        # câu hỏi dài khác chủ đề.
+                if not t:
+                    continue
+                try:
+                    r_ts = dt.datetime.fromisoformat(rec.get("ts", "").replace("Z", "+00:00"))
+                except Exception:
+                    # Không đọc được ts → coi như rất cũ, KHÔNG cho đóng gì (fail-closed:
+                    # thà báo pending thừa hơn làm mù 1 alert thật).
+                    continue
+                resolvers.append((t, r_ts))
+    def _resolved(q_topic, q_ts):
+        # Exact-match, HOẶC resolver CHỨA nguyên topic câu hỏi (quy ước hậu-tố trạng thái) —
+        # và resolver phải xuất hiện SAU câu hỏi. Chỉ 1 chiều (resolver ⊇ topic-hỏi) để 1
+        # decision topic-ngắn KHÔNG vô tình khớp câu hỏi dài khác chủ đề.
         if not q_topic:
             return False
-        return any(r == q_topic or q_topic in r for r in resolvers)
+        return any((r == q_topic or q_topic in r) and r_ts >= q_ts for r, r_ts in resolvers)
     for p in files:
         agent = os.path.basename(p).replace(".jsonl", "")
         for rec in iter_events(p):
@@ -242,20 +263,43 @@ if os.path.isdir(inbox_dir):
                 ts_dt = dt.datetime.fromisoformat(rec.get("ts", "").replace("Z", "+00:00"))
             except Exception:
                 continue
-            if _resolved(rec.get("topic")):
+            if _resolved(rec.get("topic"), ts_dt):
                 continue
             if ts_dt >= cutoff:
                 pending_q.append(f"{agent}/{rec.get('topic')}")
             elif ts_dt >= aged_horizon:
                 age_d = (_now - ts_dt).days
                 aged_q.append(f"{agent}/{rec.get('topic')} ({age_d}d)")
+            else:
+                expired_q.append((agent, rec.get("topic"), (_now - ts_dt).days))
 if pending_q:
     W(f"Có {len(pending_q)} câu hỏi (question) trong 48h qua CHƯA thấy answer tương ứng: {pending_q}")
 else:
     OK("Không có câu hỏi (question) nào đang chờ xử lý trong 48h qua.")
 if aged_q:
     aged_q.sort()
-    W(f"Câu hỏi TREO LÂU (>48h, chưa ai quyết) — {len(aged_q)} mục, cần USER quyết: {aged_q}")
+    W(f"{WARN_ONLY} Câu hỏi TREO LÂU (>48h, chưa ai quyết) — {len(aged_q)} mục, cần USER quyết: {aged_q}")
+# Hết horizon 30 ngày: TRƯỚC ĐÂY câu hỏi rơi khỏi radar KHÔNG dấu vết nào (đúng "chết im"
+# mà dòng aged vừa bịt, chỉ hoãn 30 ngày — arch-reviewer required_change #4). Nay phát 1
+# event decision "EXPIRED" để có dấu vết bền trên bus + 1 dòng WARN-only cho người thấy.
+# Idempotent: topic event CHỨA nguyên topic câu hỏi và ts SAU nó → _resolved() lần chạy
+# sau tự bỏ qua (không phát lại). Không làm mù alert lặp tương lai vì _resolved() so ts.
+if expired_q:
+    ae = os.path.join(wc_root, "mike", "bin", "append_event.sh")
+    for agent, q_topic, age_d in expired_q:
+        try:
+            subprocess.run([ae, "Mike", "decision",
+                            f"{q_topic} — EXPIRED-30d-khong-ai-tra-loi",
+                            json.dumps({"expired_after_days": age_d, "asked_by": agent,
+                                        "closed_by": "ops_health_check horizon 30d",
+                                        "note": "Đóng theo HẾT HẠN, không phải đã trả lời — "
+                                                "mở lại bằng question mới nếu vẫn cần quyết."},
+                                       ensure_ascii=False)],
+                           capture_output=True, timeout=30)
+        except Exception:
+            pass
+    W(f"{WARN_ONLY} Câu hỏi HẾT HẠN 30 ngày (đóng theo hết hạn, đã ghi decision lên bus) — "
+      f"{len(expired_q)} mục: {[f'{a}/{t} ({d}d)' for a, t, d in expired_q]}")
 
 # 6. Corp-action backlog (data/corp_action_backlog.json, ghi bởi update_shares_live.py
 #    --scan mỗi ngày 18:40 ICT — đọc file local, KHÔNG query BQ trực tiếp ở đây để giữ
@@ -475,14 +519,15 @@ if [ "${WARN_COUNT:-0}" -gt 0 ]; then
   # "Job board:" cũng là FLEET-WIDE (đọc bus/jobs toàn cục) → phải nằm ở COORD_WARN, nếu
   # không nó rơi vào OTHER_WARN → ops_autofix label per-account, chạy lặp theo số account
   # cho một tình trạng toàn cục (arch-reviewer NEEDS_CHANGES coord-2026-07-22).
-  # "Câu hỏi TREO LÂU" (>48h) bị loại khỏi CẢ HAI nhánh có chủ đích: chỉ user quyết được
-  # (vd A/B/C liên quan team ngoài), Wags/Winston không resolve được → dispatch lặp 2 job/ngày
-  # là token thuần lãng phí. Dòng đó chỉ cần NẰM TRONG báo cáo Trading Daily để user thấy
-  # (thêm Wags 2026-07-30, coord-2026-07-30).
-  # (COORD_WARN không cần loại thêm: pattern "câu hỏi \(question\)" chữ thường + "(question)"
-  # không khớp chuỗi "Câu hỏi TREO LÂU (>48h…)".)
-  COORD_WARN="$(echo "$MSG" | grep -E '⚠️|❌' | grep -E "Circuit breaker|câu hỏi \(question\)|Job board:" || true)"
-  OTHER_WARN="$(echo "$MSG" | grep -E '⚠️|❌' | grep -vE "NOT_APPROVED|KHÔNG TÌM THẤY|Circuit breaker|câu hỏi \(question\)|Job board:|Câu hỏi TREO LÂU" || true)"
+  # Dòng mang marker "[WARN-ONLY]" bị loại khỏi CẢ HAI nhánh có chủ đích: chỉ user quyết được
+  # (vd question TREO LÂU >48h A/B/C liên quan team ngoài), Wags/Winston không resolve được →
+  # dispatch lặp 2 job/ngày là token thuần lãng phí. Dòng đó chỉ cần NẰM TRONG báo cáo Trading
+  # Daily để user thấy (thêm Wags 2026-07-30, coord-2026-07-30). Lọc bằng MARKER chứ không bằng
+  # câu chữ tiếng Việt: đổi wording WARN không còn âm thầm đổi routing, và topic tự do nhúng
+  # trong dòng không kéo được dòng đó vào COORD_WARN (arch-reviewer required_change #5).
+  ROUTABLE_WARN="$(echo "$MSG" | grep -E '⚠️|❌' | grep -vF '[WARN-ONLY]' || true)"
+  COORD_WARN="$(echo "$ROUTABLE_WARN" | grep -E "Circuit breaker|câu hỏi \(question\)|Job board:" || true)"
+  OTHER_WARN="$(echo "$ROUTABLE_WARN" | grep -vE "NOT_APPROVED|KHÔNG TÌM THẤY|Circuit breaker|câu hỏi \(question\)|Job board:" || true)"
   if [ -n "$COORD_WARN" ]; then
     # Label KHÔNG kèm ACCOUNT: circuit breaker + question tồn đọng là trạng thái FLEET-WIDE
     # (đọc state/circuit/* + bus/inbox/* toàn cục, nội dung y hệt cho mọi account) — label
