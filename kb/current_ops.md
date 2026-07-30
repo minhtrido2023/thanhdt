@@ -78,8 +78,10 @@ alert mới trước cổng xác nhận thật tháng 10, cần theo dõi không
 backtest được (n=1) — coi là bảo hiểm chi phí chưa đo được, không phải alpha đã kiểm chứng; loại
 1 mã thanh khoản khỏi rổ có thể làm nặng thêm vấn đề sizing của mã còn lại trong rổ — theo dõi ADV
 cap thật (`capit_adv_caps`) khi fire.
-> ⚠️ File này inject vào MỌI phiên/dispatch qua `context_pack.md` (ngưỡng cứng 20KB, kiểm tra
-> SAME-DAY qua `kb_nightly.sh` — xem §Cron) — giữ NHỎ, chỉ mục LIVE/đang-mở. Dự án ĐÓNG → 1 file
+> ⚠️ File này inject vào MỌI phiên/dispatch qua `context_pack.md` (ngưỡng cứng **45KB** — nâng
+> từ 20KB 2026-07-30, `context_pack.md` thật ~39KB sau trim #3 không xuống được 20KB mà không
+> cắt fact quyết định; file này riêng có ngưỡng phụ 28KB — kiểm tra SAME-DAY qua `kb_nightly.sh`,
+> không chỉ Thứ Sáu, xem §Cron) — giữ NHỎ, chỉ mục LIVE/đang-mở. Dự án ĐÓNG → 1 file
 > `kb/projects/<slug>.md` + 1 dòng `kb/projects/INDEX.md`. Sự cố ĐÃ GIẢI QUYẾT → **1-2 câu + pointer
 > `kb/INCIDENTS.md`** ngay khi đóng, không giữ play-by-play (bài học phình 0→36KB trong 3 tuần,
 > 2026-07-17).

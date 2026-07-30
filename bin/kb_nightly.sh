@@ -599,6 +599,10 @@ python3 "$ROOT/bin/spend_report.py" --days 7 --csv-append "$ROOT/state/spend_his
 # a human/Mike-in-a-live-session does the actual edit, keeping a reviewer in the loop for the
 # single most-injected file in the fleet (this exact file class already produced 2 real fact
 # errors in past trims — see kb/INCIDENTS.md).
+# POSTSCRIPT (same day, 2026-07-30): user accepted the 20KB context_pack.md target could not be
+# hit without cutting real facts (canonical.md/projects/INDEX.md are evergreen, not prose to
+# trim) -> threshold RAISED to 45KB below (MIKE.md stays 40KB, unchanged). Deep OKF-restructure
+# of canonical.md is a separate follow-up, not required to land this mechanism.
 _ctx_kb_or_missing() {  # "MISSING" beats silently reporting 0KB as healthy when the file is gone
     # -s (not -f): publish_context.sh:46 truncates-in-place (no tmp+rename), so a kill mid-write
     # leaves an EMPTY or TRUNCATED file, not a missing one — -f alone would silently treat that
@@ -613,8 +617,8 @@ _BREACH_KEY=""           # stable membership key, NO numbers — debounce compar
 if [ "$_CP_KB" = "MISSING" ]; then
     SAME_DAY_BREACH="${SAME_DAY_BREACH}kb/context_pack.md MẤT/rỗng (publish_context.sh có thể đã chết); "
     _BREACH_KEY="${_BREACH_KEY}CP:MISSING|"
-elif [ "$_CP_KB" -gt 20 ]; then
-    SAME_DAY_BREACH="${SAME_DAY_BREACH}kb/context_pack.md=${_CP_KB}KB(ngưỡng 20KB); "
+elif [ "$_CP_KB" -gt 45 ]; then
+    SAME_DAY_BREACH="${SAME_DAY_BREACH}kb/context_pack.md=${_CP_KB}KB(ngưỡng 45KB); "
     _BREACH_KEY="${_BREACH_KEY}CP:OVER|"
 fi
 if [ "$_MIKE_KB" = "MISSING" ]; then
@@ -672,7 +676,7 @@ if [ "$DOW" -eq 5 ]; then
 - ⚠️ $label = ${kb}KB (ngưỡng cứng ${limit_kb}KB) — VƯỢT ngưỡng, cần archive bớt."
         fi
     }
-    ctx_check "$ROOT/kb/context_pack.md" 20 "kb/context_pack.md"
+    ctx_check "$ROOT/kb/context_pack.md" 45 "kb/context_pack.md"
     ctx_check "$ROOT/MIKE.md" 40 "MIKE.md"
     if [ -n "$CTX_BLOAT_WARN" ]; then
         CTX_BLOAT_WARN="
@@ -759,8 +763,9 @@ mới ảnh hưởng thực thi/lập plan/data-ops) nhưng CHƯA lan sang (các
 → sửa ngay, đúng file theo bảng trong MIKE.md (đừng sửa nhầm — fact riêng Mafee không thuộc
 context_planning_mini.md và ngược lại).
 7. **`kb/current_ops.md` bloat check (bài học sự cố context-bloat 2026-07-17 — file này phình
-0→36KB trong 3 tuần, đè phí token lên MỌI dispatch qua context_pack.md)**: đọc kích thước file
-('wc -c $ROOT/kb/current_ops.md'). Nếu >20KB HOẶC có mục nào mô tả 1 sự cố đã ghi rõ 'FIXED'/
+0→36KB trong 3 tuần, đè phí token lên MỌI dispatch qua context_pack.md; ngưỡng nâng 20→28KB
+2026-07-30 sau khi context_pack.md tổng cũng nâng 20→45KB, xem kb/current_ops.md đầu file)**:
+đọc kích thước file ('wc -c $ROOT/kb/current_ops.md'). Nếu >28KB HOẶC có mục nào mô tả 1 sự cố đã ghi rõ 'FIXED'/
 'XONG'/'ĐÃ VÁ' + có pointer 'kb/INCIDENTS.md' nhưng VẪN giữ nguyên narrative đầy đủ (thay vì
 rút về 1-2 câu như quy ước ở đầu file current_ops.md) → rút gọn ngay theo đúng mẫu đã làm hôm
 07-17 (giữ current-state + pointer INCIDENTS.md, xoá play-by-play đã có nơi khác lưu). CHỈ rút
