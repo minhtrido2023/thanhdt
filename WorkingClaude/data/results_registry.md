@@ -6,6 +6,20 @@
 > File này KHỬ vấn đề đó: mỗi kết quả công bố được PIN với (a) lệnh chạy ĐẦY ĐỦ, (b) AUDIT_END cố định,
 > (c) đường dẫn CSV đông cứng. **ĐỌC FILE NÀY TRƯỚC khi tái chạy/đối chứng — đừng tái dựng config từ trí nhớ.**
 
+> ⚠️ **ĐỪNG `Read()` cả file này (548KB, 135 mục)** — đây là sổ cái append-only theo thời gian
+> (~1,5 mục/ngày), không phải danh mục fact độc lập; đọc tuyến tính quanh 1 mục là cách duy nhất
+> thấy được chuỗi supersede (số cũ bị thay vẫn giữ lại có gạch ngang, KHÔNG xoá — đừng trích số cũ
+> làm số hiện hành). Điều hướng đúng cách:
+> ```bash
+> grep -n "^## " data/results_registry.md | grep "<ngày hoặc từ khoá>"   # tìm mục
+> sed -n '<dòng bắt đầu>,<dòng kết thúc>p' data/results_registry.md       # đọc đúng đoạn cần
+> ```
+> Số R3 (chiến lược production V2.4) hiện hành: xem khối `## ⭐ CONFIG TỐT NHẤT = V2.4` ngay dưới —
+> LUÔN lấy dòng **KHÔNG bị gạch ngang/SUPERSEDED**, các dòng có gạch ngang là lịch sử, không phải
+> số hiện hành. Trích dẫn từ registry này ở nơi khác nên nêu **TÊN MỤC** (`## ...`), không phải số
+> dòng — số dòng trôi mỗi lần có mục mới chèn vào giữa (bài học 2026-07-30: 3 tham chiếu số dòng ở
+> nơi khác đã sai vì lý do này, xem `mike/agents/Taylor/research/okf_results_registry_assessment_20260730.md`).
+
 ## QUY TẮC TÁI LẬP (bắt buộc từ 2026-06-19)
 1. **Số "công bố" PHẢI pin `AUDIT_END`** (vd `AUDIT_END=2026-06-19`). Không pin = số sẽ trôi theo data → vô nghĩa để đối chứng.
 2. **CSV LÀ ARTIFACT ĐÔNG CỨNG** (ghi ra rồi là bất biến; mỗi dòng TX dò được vs BQ thô). "Đối chứng" = `python extract_peryear.py <csv>` recompute từ CSV (KHÔNG trôi). "Tái lập" = chạy lại lệnh đã pin.
