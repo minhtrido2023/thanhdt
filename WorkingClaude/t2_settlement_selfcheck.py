@@ -77,7 +77,7 @@ class _RecordingBroker:
     def get_quote(self, symbol, *a, **k):
         return make_quote(symbol)
 
-    def place_order(self, symbol, qty, side, price=None, order_type="LO"):
+    def place_order(self, symbol, qty, side, price=None, order_type="LO", cash_only=False):
         if symbol in self._forbidden:
             raise AssertionError(f"place_order called for {symbol} — should have been "
                                   f"skipped by the T+2 sellable cap!")

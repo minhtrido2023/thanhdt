@@ -50,7 +50,7 @@ class FakeBroker:
         self.cash = 10_000_000_000
     def get_quote(self, sym):
         return self.quotes.get(sym)
-    def place_order(self, symbol, qty, side, price=None, order_type="LO"):
+    def place_order(self, symbol, qty, side, price=None, order_type="LO", cash_only=False):
         self._oid += 1
         self.placed.append(dict(symbol=symbol, qty=qty, side=side, price=price, type=order_type))
         return f"OID{self._oid}"
