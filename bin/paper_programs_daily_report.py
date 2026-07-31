@@ -310,6 +310,7 @@ def _journal_activity(spec, today):
         ev[r.get("event")] = ev.get(r.get("event"), 0) + 1
     fills = [r for r in rows if r.get("event") == "FILL"]
     bad = sum(v for k, v in ev.items() if k and ("FAIL" in k or "ERROR" in k))
+    no_quote = ev.get("NO_QUOTE", 0)
     if not (ev.get("PLACE") or fills):
         if bad:
             # Phiên "chạy mà không làm được gì" (vd sự cố PaperBroker 2026-07-30: 431 lỗi, 0 lệnh)
@@ -317,8 +318,16 @@ def _journal_activity(spec, today):
             return (f"🔴 **0 lệnh đặt / {bad} sự kiện LỖI** — executor có chạy nhưng không đặt "
                     f"hay khớp được lệnh nào ⇒ MẤT phiên evidence, không phải 'ngày yên ả' · "
                     f"nguồn `{rel}`"), "error"
+        if no_quote:
+            # NO_QUOTE không mang chữ FAIL/ERROR nên lọt check `bad` ở trên, nhưng vẫn là "không
+            # quan sát được", không phải "quan sát được và thấy yên ả" — 2 việc khác nhau
+            # (quant-skeptic verify_20260731_051111, repro: mất quote toàn phiên trông giống hệt
+            # ngày calm thật nếu không tách riêng).
+            return (f"🔴 **0 lệnh đặt / {no_quote} lần thiếu quote (NO_QUOTE)** — executor chạy "
+                    f"nhưng KHÔNG quan sát được giá để hành động ⇒ mất phiên evidence, không phải "
+                    f"'ngày yên ả' · nguồn `{rel}`"), "error"
         return (f"**Không có giao dịch** — journal `{rel}` có {len(rows)} dòng nhưng 0 lệnh đặt "
-                f"(0 PLACE / 0 FILL)"), None
+                f"(0 PLACE / 0 FILL / 0 NO_QUOTE)"), None
 
     def _num(x):
         try:

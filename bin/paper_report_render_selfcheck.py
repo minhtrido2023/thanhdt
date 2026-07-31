@@ -218,6 +218,50 @@ def main():
     out4, _ = run_report(m, root, reg, D, ["--no-state"])
     check("gate FAIL → badge RED", "🔴 RED" in out4, out4[:300])
 
+    print("== D. 3 lỗ hổng quant-skeptic bắt được (verify_20260731_051111, REFUTED trước fix) ==")
+    # D1 — idx==0 (dòng ĐẦU TIÊN của chuỗi unchanged_vs_prev) không có phiên trước để đối chiếu:
+    # trước đây rơi vào nhánh else, tuyên bố "CÓ giao dịch" từ 0 bằng chứng.
+    write(os.path.join(root, "data/sleeve_firstrow.csv"), f"date,nav\n{D},1000000000\n")
+    reg_d1 = {"version": "t", "programs": [
+        act("first_row", {"mode": "csv_row", "path": "data/sleeve_firstrow.csv",
+                          "zero_when": {"col": "nav", "unchanged_vs_prev": True},
+                          "template": "NAV {nav}"}),
+    ]}
+    outd1, _ = run_report(m, root, reg_d1, D, ["--no-state"])
+    check("D1: dòng đầu tiên chuỗi unchanged_vs_prev → n/a, KHÔNG tuyên bố 'CÓ giao dịch'",
+          "n/a — chưa so sánh được" in outd1 and "**CÓ giao dịch**" not in outd1, outd1[:400])
+
+    # D2 — phiên chỉ toàn NO_QUOTE (mất quote, không FAIL/ERROR literal trong tên event): trước
+    # đây lọt qua check `bad` (chỉ soi substring FAIL/ERROR) và bị coi là "ngày yên ả" y hệt calm
+    # thật, dù executor không hề quan sát được giá để hành động.
+    write(os.path.join(jdir, f"exec_noquote_{D}_journal.csv"),
+          "ts,event,parent_id,ticker,side,child_oid,qty,price,filled_total,note\n"
+          + "".join(f"{D}T10:{i:02d}:00,NO_QUOTE,P{i},HPG,buy,,100,0,0,thieu quote\n" for i in range(20)))
+    reg_d2 = {"version": "t", "programs": [
+        act("noquote", {"mode": "journal", "account": "noquote"}),
+    ]}
+    outd2, _ = run_report(m, root, reg_d2, D, ["--no-state"])
+    check("D2: phiên toàn NO_QUOTE → RED + KHÔNG tuyên bố 'Không có giao dịch' như ngày calm thật",
+          "NO_QUOTE" in outd2 and "🔴 RED" in outd2 and "**Không có giao dịch**" not in outd2,
+          outd2[:400])
+
+    # D3 — probe chính kiểu journal_scan (dùng bởi extreme_regime/vol_scale_chase_cap trong
+    # registry thật) có marker bắn HÔM NAY (vd EXTREME_SELL/EXTREME_DOWN) phải đẩy qua
+    # res["flags"] để badge_of thấy — trước đây probe_journal_scan không set "flags" nên marker
+    # bắn thật (10 hit) vẫn hiện badge XANH bình thường, không ai chú ý.
+    write(os.path.join(jdir, f"exec_markers_{D}_journal.csv"),
+          "ts,event,parent_id,ticker,side,child_oid,qty,price,filled_total,note\n"
+          + "".join(f"{D}T10:{i:02d}:00,EXTREME_SELL,,HPG,sell,,100,0,0,x\n" for i in range(5))
+          + "".join(f"{D}T10:{i:02d}:10,EXTREME_DOWN,,HPG,sell,,100,0,0,x\n" for i in range(5)))
+    reg_d3 = {"version": "t", "programs": [
+        prog("markers", probe={"type": "journal_scan", "account": "markers",
+                               "markers": ["EXTREME_SELL", "EXTREME_DOWN", "EXTREME_PAUSE"]},
+             today_activity={"mode": "static", "text": "**Không có giao dịch** — static"}),
+    ]}
+    outd3, _ = run_report(m, root, reg_d3, D, ["--no-state"])
+    check("D3: probe journal_scan marker bắn hôm nay → badge RED (không lọt qua thành XANH)",
+          "🔴 RED" in outd3 and "bắn hôm nay" in outd3, outd3[:500])
+
     print(f"\n{'ALL PASS' if not FAILS else 'FAILED: ' + ', '.join(FAILS)}  (tmp: {root})")
     return 1 if FAILS else 0
 
