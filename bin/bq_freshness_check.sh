@@ -563,20 +563,36 @@ print(int(p.get('manual_offbook_assets_vnd') or 0))
   # sau khi Taylor audit readiness (job Taylor_20260720_074025) phát hiện mâu thuẫn công
   # thức vốn (MD "size × free cash" vs paper code "NAV × capit_size", chênh ~100x) và
   # free-cash luôn ≈0 ở NEUTRAL parking. User chốt: NAV × capit_size ĐÚNG ý đồ, nguồn vốn
-  # = user tự rút Trứng vàng trong ngày khi CAPIT kích hoạt. Chỉ chèn note khi capit_fired
-  # thật (tránh nhiễu ngày thường).
-  CAPIT_FIRED="$(cd "$WORKDIR" && python3 -c "
+  # = user tự rút Trứng vàng trong ngày khi CAPIT kích hoạt.
+  # Gate note = `capit_signal_today OR capit_episode_open` (2026-07-31): cờ tín hiệu là điều kiện
+  # CỦA NGÀY CHẠY, tắt ngay khi breadth rớt dưới gate — trong khi vị thế THẬT vẫn đang giữ. Chỉ
+  # gate theo cờ tín hiệu ⇒ prompt DollarBill im lặng hoàn toàn về CAPIT từ 07-29 dù còn 5 mã ở
+  # 2 account (sự cố visibility, job Taylor_20260731_025222).
+  CAPIT_STATE="$(cd "$WORKDIR" && python3 -c "
 import json
 try:
     s = json.load(open('data/golive_v23_status.json'))
     # capit_fired -> capit_signal_today (2026-07-31); fallback cho status ghi trước lần đổi tên.
-    print('yes' if s.get('capit_signal_today', s.get('capit_fired')) else 'no')
+    if s.get('capit_signal_today', s.get('capit_fired')):
+        print('fired')
+    elif s.get('capit_episode_open'):
+        held = s.get('capit_sessions_held')
+        print('holding|%s|%s|%s' % (s.get('capit_episode_entry_date') or '?',
+                                    '?' if held is None else held,
+                                    ','.join(s.get('capit_episode_basket') or []) or '?'))
+    else:
+        print('no')
 except Exception:
     print('no')
 " 2>/dev/null)"
   CAPIT_NOTE=""
-  if [ "$CAPIT_FIRED" = "yes" ]; then
-    CAPIT_NOTE=" ⚠️ CAPIT (bear-washout) ĐÃ KÍCH HOẠT hôm nay (golive_v23_status.json capit_fired=true) — book CAPIT xuất hiện trong CSV recommend. Công thức vốn ĐÃ CHỐT (user 2026-07-20): size deploy = NAV_book_LAG × capit_size (KHÔNG PHẢI 'size × tiền mặt rảnh' — đó là công thức cũ trong MD, đã sai). Nguồn vốn: user sẽ TỰ RÚT Trứng vàng trong ngày để có tiền mặt sẵn sàng sáng mai — ghi rõ trong plan note số tiền cần rút (nếu cash thật hiện có không đủ), ĐỪNG tự shrink size xuống theo cash hiện tại. Basket CAPIT: hold 60 phiên, stop-exempt, slot-exempt (không tính vào slot BAL/LAG thường) — giữ nguyên các cờ này trong plan."
+  if [ "$CAPIT_STATE" = "fired" ]; then
+    CAPIT_NOTE=" ⚠️ CAPIT (bear-washout) ĐÃ KÍCH HOẠT hôm nay (golive_v23_status.json capit_signal_today=true) — book CAPIT xuất hiện trong CSV recommend. Công thức vốn ĐÃ CHỐT (user 2026-07-20): size deploy = NAV_book_LAG × capit_size (KHÔNG PHẢI 'size × tiền mặt rảnh' — đó là công thức cũ trong MD, đã sai). Nguồn vốn: user sẽ TỰ RÚT Trứng vàng trong ngày để có tiền mặt sẵn sàng sáng mai — ghi rõ trong plan note số tiền cần rút (nếu cash thật hiện có không đủ), ĐỪNG tự shrink size xuống theo cash hiện tại. Basket CAPIT: hold 60 phiên, stop-exempt, slot-exempt (không tính vào slot BAL/LAG thường) — giữ nguyên các cờ này trong plan."
+  elif [ "${CAPIT_STATE%%|*}" = "holding" ]; then
+    CAPIT_ENTRY="$(echo "$CAPIT_STATE" | cut -d'|' -f2)"
+    CAPIT_SESS="$(echo "$CAPIT_STATE" | cut -d'|' -f3)"
+    CAPIT_BASKET="$(echo "$CAPIT_STATE" | cut -d'|' -f4)"
+    CAPIT_NOTE=" 📌 CAPIT (bear-washout) ĐANG GIỮ VỊ THẾ — tín hiệu breadth HÔM NAY đã tắt (capit_signal_today=false) nhưng đó chỉ là điều kiện của RIÊNG ngày chạy, KHÔNG có nghĩa đã thoát: episode vào lệnh ${CAPIT_ENTRY}, đã ${CAPIT_SESS} phiên, rổ gốc ${CAPIT_BASKET} (nguồn: capit_episode_open=true trong golive_v23_status.json + data/capit_episode.json). Trong plan: các mã CAPIT là stop-exempt và slot-exempt (KHÔNG tính vào slot BAL/LAG thường, KHÔNG áp stop -20% của BAL). TUYỆT ĐỐI KHÔNG tự sinh lệnh BÁN để 'dọn' rổ CAPIT hay để 'cân' tỷ trọng — exit CAPIT do NGƯỜI quyết định, hệ thống KHÔNG có luật tự bán CAPIT ở đường live. Nếu bạn thấy lý do phải đụng tới 1 mã CAPIT, ghi rõ đề xuất + lý do trong plan note và để user duyệt, đừng tự đưa vào orders."
   fi
   "$ROOT/bin/dispatch.sh" DollarBill \
     "Lập plan T+1 cho tài khoản $ACCT. Đọc DT5G từ deploy_golive_dt5g_v4/golive_state_today.json và recommend output mới nhất trong data/. Ghi plan vào data/plan_${ACCT}_${NEXT_TRADING_DAY}.json — dùng ĐÚNG NGUYÊN VĂN ngày $NEXT_TRADING_DAY (đã tính sẵn bằng next_trading_day(), bỏ T7/CN/lễ) làm plan_date và tên file, TUYỆT ĐỐI KHÔNG tự suy ra 'ngày mai' bằng cách cộng 1 vào ngày hôm nay (sự cố thật 2026-07-10: dispatch thứ Sáu tự tính '07-11' là ngày mai, nhưng đó là thứ Bảy không phải ngày giao dịch, đúng ra phải là 07-13 thứ Hai). Ngày hôm nay: $TODAY (ICT).${NAV_NOTE}${CAPIT_NOTE} YÊU CẦU VĂN PHONG (user 2026-07-07): kết thúc final message bằng 3-5 dòng tóm tắt DỄ HIỂU cho người đọc không chuyên — bắt buộc nêu rõ: Account nào · plan ngày nào · hành động chính (HOLD hay mấy lệnh gì) · VÌ SAO 1-2 câu · trạng thái duyệt — vì message này được đăng nguyên văn vào Discord plan channel. Lệnh MUA size bằng tiền bán cùng ngày: trừ phí 0.075% + chừa biên giá, đừng size khít ref price. BẮT BUỘC VỀ GIÁ THAM CHIẾU (user 2026-07-09, tái diễn nhiều lần): mtm_price_ref/ref_price của MỌI mã trong plan phải lấy từ DNSE live quote (dnse_api.py secdef/latest_trade — giá đóng cửa THẬT hôm nay $TODAY) — TUYỆT ĐỐI KHÔNG dùng giá đóng cửa BQ ('ticker'/'ticker_1m' close) làm ref_price, vì BQ cache local chỉ sync đêm 23:45 ICT nên tại giờ bạn chạy (~19:00) BQ cache luôn trễ ít nhất 1 ngày giao dịch — dùng BQ ở đây LUÔN cho ra giá sai/cũ, không phải thỉnh thoảng. Sự cố thật đã xảy ra: plan ZaloPay 07-10 có 2/4 mã (BID, MBB) dùng nhầm 'BQ close 07-08' lệch tới +5.7% so với giá đóng cửa thật 07-09, trong khi 2 mã còn lại dùng đúng DNSE live. Nếu DNSE live quote lỗi/thiếu cho 1 mã nào đó, ghi rõ note 'THIẾU GIÁ LIVE — cần kiểm tra tay' thay vì âm thầm dùng BQ thay thế." \
