@@ -150,7 +150,20 @@ def status_check(universe):
     return changes
 
 
-def write_flags(alerts_df):
+def write_flags(alerts_df, scan_asof=None):
+    """Ghi/merge cờ + ĐÓNG DẤU ĐỘ TƯƠI của cả FILE vào `_meta.generated_at`.
+
+    `_meta` KHÁC HẲN `last_alert` của từng cờ: `last_alert` = phiên cờ đó nổ (TTL 30 ngày,
+    chính sách hiệu lực của 1 cờ); `_meta.generated_at` = lần cuối scan này CHẠY XONG, tức
+    file có được làm mới hôm nay không. Không có nó thì một file đứng im 1 tuần (scan chết
+    im lặng) đọc y hệt file mới — consumer downstream (golive_recommend_v23 → plan tiền
+    thật) không phân biệt được (audit §14 cron freshness, Winston_20260731_060739).
+
+    Cố ý dùng key lồng `_meta` (dict) chứ KHÔNG phải field top-level kiểu chuỗi: mọi reader
+    hiện có duyệt `flags.items()` rồi gọi `f.get("last_alert")` — một giá trị CHUỖI ở
+    top-level sẽ ném AttributeError, rơi vào except fail-open và TẮT ÂM THẦM cả cái gate an
+    toàn. `_meta` là dict nên `.get()` vẫn chạy, trả "" ⇒ tự động rớt khỏi cửa sổ TTL.
+    """
     flags = {}
     if os.path.exists(FLAGS_PATH):
         flags = json.load(open(FLAGS_PATH))
@@ -161,6 +174,11 @@ def write_flags(alerts_df):
                   "reasons": r["reasons"], "ret": round(float(r["ret"]), 2),
                   "idio": round(float(r["idio"]), 2), "vol_x": round(float(r["vol_x"]), 2)})
         flags[r["ticker"]] = f
+    flags["_meta"] = {
+        "generated_at": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "scan_asof": str(scan_asof) if scan_asof is not None else None,
+        "n_alerts_this_run": int(len(alerts_df)),
+    }
     tmp = FLAGS_PATH + ".tmp"
     json.dump(flags, open(tmp, "w"), ensure_ascii=False, indent=1)
     os.replace(tmp, FLAGS_PATH)
@@ -235,9 +253,12 @@ def main():
             print(f"  [{r['tier']}] {r['time'].date()} {r['ticker']}: {r['reasons']} | ret {r['ret']:+.1f}% "
                   f"(VNI {r['vni_ret']:+.1f}%, idio {r['idio']:+.1f}%) vol {r['vol_x']:.1f}x "
                   f"val {r['val_bn']:.1f}B close {r['Close']:,.0f}")
-        if not args.no_flags:
-            write_flags(al)
-            print(f"→ đã ghi cờ vào {FLAGS_PATH}")
+    # Đóng dấu độ tươi CẢ KHI KHÔNG có tín hiệu — "hôm nay không có anomaly" là kết quả
+    # hợp lệ của một lần scan chạy tốt; nếu chỉ ghi khi có alert thì ngày sạch cũng làm
+    # file trông cũ y như ngày scan chết → cảnh báo giả mỗi ngày, WARN mất giá trị.
+    if not args.no_flags:
+        write_flags(al, scan_asof=last.date())
+        print(f"→ đã ghi cờ + dấu độ tươi (_meta.generated_at) vào {FLAGS_PATH}")
     if args.status_check:
         ch = status_check(uni)
         emit["status_changes"] = ch

@@ -56,6 +56,24 @@ except Exception:
     pass
 " 2>/dev/null || true
 }
+# --- Cảnh báo độ tươi DT5G (audit §14, job Winston_20260731_062642) ---------------------
+# Report chạy 19:10 trong khi chuỗi daily_refresh 18:30 worst-case ~90'. Khối regime bên
+# dưới chỉ đọc GIÁ TRỊ state, không biết chain đã publish xong hôm nay chưa — và bảng
+# dt5g_live có writer thứ hai (kaffa_v2 ~17:12) nên MAX(time)=hôm nay KHÔNG chứng minh được
+# gì. Bằng chứng thật = golive_state_today.json, đọc qua dt5g_freshness.py: CÙNG artifact +
+# CÙNG luật với gate bq_freshness_check.sh 19:00, không dựng cơ chế freshness thứ hai.
+# CHỈ CẢNH BÁO: báo cáo không gửi được là rủi ro vận hành lớn hơn regime trễ 1 phiên.
+# Đặt ĐẦU báo cáo (không phải cạnh khối regime ở cuối) để người đọc thấy trước mọi con số.
+# Case 1/3 (cảnh báo lỗi vận hành) CỐ Ý không chèn — giữ nguyên nguyên tắc của file này là
+# không pha bối cảnh thị trường vào cảnh báo lỗi.
+# Đặt biến DT5G_WARN (1 dòng, "" khi state tươi) thay vì in ra stdout: `$(f)` NUỐT newline
+# cuối nên nếu in "dòng cảnh báo\n\n" thì nó dính liền tiêu đề báo cáo. Chèn bằng
+# ${DT5G_WARN:+...} giữ được dòng trống ngăn cách.
+DT5G_WARN=""
+_dt5g_warn_set() {
+  DT5G_WARN="$(cd "$WC_ROOT" && timeout 60 python3 dt5g_freshness.py --warn-line 2>/dev/null || true)"
+}
+
 # Trả về block (có newline dẫn đầu) khi có dữ liệu, "" khi lỗi/không có. Gọi LAZY — chỉ
 # ở case HOLD-day + full-render, tránh chạy BQ trong nhánh cảnh báo lỗi (case 1/3).
 # Có thể nhiều dòng (gate + base-rate) — prefix đã gắn sẵn từng dòng trong python.
@@ -92,7 +110,10 @@ elif [ "$N_ORDERS_TODAY" = "0" ]; then
   # grep -v [dnse]: lọc log kết nối broker debug (connect()/token) — không thuộc về
   # report client-facing, giữ minh bạch/gọn (user 2026-07-07).
   NAV_SECTION="$(python3 "$ROOT/bin/daily_nav_snapshot.py" --account "$ACCOUNT" --date "$PLAN_DATE" 2>&1 | grep -v '^\[dnse\]')"
-  MSG="📊 **EOD Trading Report — $ACCOUNT ($PLAN_DATE)**
+  _dt5g_warn_set
+  MSG="${DT5G_WARN:+$DT5G_WARN
+
+}📊 **EOD Trading Report — $ACCOUNT ($PLAN_DATE)**
 ✅ HOLD — kế hoạch hôm nay không có lệnh nào (đúng thiết kế, không phải lỗi). Bot đã trực phiên đồng bộ trạng thái.
 
 $NAV_SECTION$(_dt_gate_block)"
@@ -370,7 +391,10 @@ NAV_SECTION="$(python3 "$ROOT/bin/daily_nav_snapshot.py" --account "$ACCOUNT" --
 # bin/paper_programs_daily_report.sh) để tránh trùng lặp giữa các kênh. Nó đã có mặt đầy
 # đủ ở đó (registry chương trình #1) — không cần render lại ở đây nữa.
 
-FULL_REPORT="$REPORT
+_dt5g_warn_set
+FULL_REPORT="${DT5G_WARN:+$DT5G_WARN
+
+}$REPORT
 
 $NAV_SECTION$(_dt_gate_block)"
 
