@@ -870,3 +870,34 @@
 - [2026-07-31T09:22:15Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20260731_085810", "source": "watcher"}
 - [2026-07-31T09:23:15Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "still_running", "elapsed_min": 25, "job_id": "Taylor_20260731_085810", "source": "watcher"}
 - [2026-07-31T09:24:15Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "still_running", "elapsed_min": 26, "job_id": "Taylor_20260731_085810", "source": "watcher"}
+
+## Consolidation 2026-07-31T10:07:02Z
+- [2026-07-31T09:43:34Z] Taylor/heartbeat — Taylor_20260731_094324: {"status": "in_progress", "note": "start: recon CAPIT sizing code + prior research"}
+- [2026-07-31T09:44:25Z] Taylor/heartbeat — Taylor_20260731_094324: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260731_094324", "source": "watcher"}
+- [2026-07-31T09:45:00Z] Taylor/heartbeat — Taylor_20260731_094324: {"status": "in_progress", "note": "Viec1: 6 leg CSV da co san tu job truoc, da trich metric. ctrl khop pin R3 27.60/-17.5/1.58. Tiep: panel event + Viec2"}
+- [2026-07-31T09:45:26Z] Taylor/heartbeat — Taylor_20260731_094324: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260731_094324", "source": "watcher"}
+- [2026-07-31T09:46:27Z] Taylor/heartbeat — Taylor_20260731_094324: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260731_094324", "source": "watcher"}
+- [2026-07-31T09:46:42Z] Taylor/heartbeat — Taylor_20260731_094324: {"status": "in_progress", "note": "Viec2: them mode CAPIT_SIZE_BASE=park:<f>, dang chay 2 leg park0.25/park0.50. Dang dung panel 18 event."}
+- [2026-07-31T09:47:27Z] Taylor/heartbeat — Taylor_20260731_094324: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260731_094324", "source": "watcher"}
+- [2026-07-31T09:48:27Z] Taylor/heartbeat — Taylor_20260731_094324: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260731_094324", "source": "watcher"}
+- [2026-07-31T09:48:36Z] Taylor/heartbeat — Taylor_20260731_094324: {"status": "in_progress", "note": "panel 15 event xong (winrate 73.3%, payoff 13x). Cho 2 leg park + queue 2 leg navsize. Dang viet doc."}
+- [2026-07-31T09:49:27Z] Taylor/heartbeat — Taylor_20260731_094324: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260731_094324", "source": "watcher"}
+- [2026-07-31T09:50:27Z] Taylor/heartbeat — Taylor_20260731_094324: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260731_094324", "source": "watcher"}
+- [2026-07-31T09:51:07Z] Taylor/heartbeat — Taylor_20260731_094324: {"status": "in_progress", "note": "doc khung xong; overlap CAPIT-vs-parking = 16,7%. Cho 2 leg park (~17:00) roi 2 leg navsize (~17:25)."}
+- [2026-07-31T09:51:27Z] Taylor/heartbeat — Taylor_20260731_094324: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260731_094324", "source": "watcher"}
+- [2026-07-31T09:52:27Z] Taylor/heartbeat — Taylor_20260731_094324: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260731_094324", "source": "watcher"}
+- [2026-07-31T09:53:27Z] Taylor/heartbeat — Taylor_20260731_094324: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260731_094324", "source": "watcher"}
+- [2026-07-31T09:54:28Z] Taylor/heartbeat — Taylor_20260731_094324: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260731_094324", "source": "watcher"}
+- [2026-07-31T09:55:28Z] Taylor/heartbeat — Taylor_20260731_094324: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260731_094324", "source": "watcher"}
+- [2026-07-31T09:56:28Z] Taylor/heartbeat — Taylor_20260731_094324: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260731_094324", "source": "watcher"}
+- [2026-07-31T09:57:28Z] Taylor/heartbeat — Taylor_20260731_094324: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260731_094324", "source": "watcher"}
+- [2026-07-31T09:58:28Z] Taylor/heartbeat — Taylor_20260731_094324: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20260731_094324", "source": "watcher"}
+- [2026-07-31T09:59:28Z] Taylor/heartbeat — Taylor_20260731_094324: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20260731_094324", "source": "watcher"}
+- [2026-07-31T10:00:28Z] Taylor/heartbeat — Taylor_20260731_094324: {"status": "in_progress", "note": "8/10 leg xong. park dose-response: f=0 1.58, .25 1.58, .50 1.57, 1.0 1.60 Calmar. Cho 2 leg navsize."}
+- [2026-07-31T10:00:28Z] Taylor/heartbeat — Taylor_20260731_094324: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20260731_094324", "source": "watcher"}
+- [2026-07-31T10:01:29Z] Taylor/heartbeat — Taylor_20260731_094324: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20260731_094324", "source": "watcher"}
+- [2026-07-31T10:02:29Z] Taylor/heartbeat — Taylor_20260731_094324: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20260731_094324", "source": "watcher"}
+- [2026-07-31T10:03:29Z] Taylor/heartbeat — Taylor_20260731_094324: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20260731_094324", "source": "watcher"}
+- [2026-07-31T10:04:29Z] Taylor/heartbeat — Taylor_20260731_094324: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20260731_094324", "source": "watcher"}
+- [2026-07-31T10:05:29Z] Taylor/heartbeat — Taylor_20260731_094324: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20260731_094324", "source": "watcher"}
+- [2026-07-31T10:06:29Z] Taylor/heartbeat — Taylor_20260731_094324: {"status": "still_running", "elapsed_min": 23, "job_id": "Taylor_20260731_094324", "source": "watcher"}
