@@ -210,7 +210,13 @@
      "execution_quality_review.py"
     ],
     "timeout": 120,
-    "max_chars": 1600
+    "max_chars": 1600,
+    "drop_regex": [
+     "^--- A\\. WINDOW ADHERENCE",
+     "^\\s*journal ft-notes:",
+     "^--- B\\. ERRORS / REJECTS",
+     "^\\s*journal FAIL/ERROR events:"
+    ]
    },
    "data_sources": [
     "execution_quality_review.py",
