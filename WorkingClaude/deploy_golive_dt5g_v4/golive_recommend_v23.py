@@ -696,6 +696,23 @@ if capit_fired:
             capit_caps = {a: {t: v * s for t, v in capit_caps_total.items()}
                           for a, s in capit_shares.items()}
 
+# ── 6b. Sổ episode CAPIT (QUAN SÁT THUẦN — bên NGOÀI nhánh `if capit_fired`) ──
+# `capit_fired` là điều kiện CỦA NGÀY CHẠY: breadth rớt dưới gate ⇒ cờ về False và basket/size về
+# rỗng NGAY, dù vị thế thật vẫn đang giữ (đúng cái đã xảy ra 07-29/07-30 khi còn đủ 5 mã ở 2
+# account). Sổ episode giữ "đã vào lệnh 07-20, còn mở" để mọi kênh báo cáo không im lặng.
+# RÀNG BUỘC: khối này chỉ ĐỌC basket/capit_size/capit_fired đã tính xong ở trên và GHI 1 file log
+# riêng — không gán lại biến quyết định nào. Xem capit_episode.py (giới hạn + cơ chế đóng episode).
+import capit_episode
+capit_ep = capit_episode.update(
+    signal_date=str(LATEST.date()), signal_today=capit_fired, basket=basket, size=capit_size,
+    session_dates=[str(d.date()) for d in vnh.index])
+if capit_ep.get("capit_episode_open"):
+    print(f"  CAPIT episode {capit_ep['capit_episode_id']} ĐANG MỞ "
+          f"(entry {capit_ep['capit_episode_entry_date']}, {capit_ep['capit_sessions_held']} phiên, "
+          f"rổ gốc {capit_ep['capit_episode_basket']})")
+if capit_ep.get("capit_episode_error"):
+    print(f"  WARNING: sổ episode CAPIT — {capit_ep['capit_episode_error']}")
+
 # ── 7. emit recommendations (CSV + MD + status JSON) ──
 etf_frac = ETF_PARK.get(state_today, 0.0)
 
@@ -812,6 +829,9 @@ status = {
     "n_lag_rating_excluded": len(lag_rating_dropped),
     "lag_rating_filter_error": lag_rating_error,
     "n_capit_basket": len(basket),
+    # Sổ episode (§6b) — TRẠNG THÁI ĐANG GIỮ, khác hẳn capit_fired/capit_signal_today (điều kiện
+    # của ngày chạy). Mọi gate báo cáo phải nhìn `capit_signal_today OR capit_episode_open`.
+    **capit_ep,
     "n_park": len(_park_basket) if _park_basket is not None else 0,
     "park_rebal_date": _park_rebal_date,
 }
