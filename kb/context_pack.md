@@ -1,16 +1,16 @@
-# Mike fleet — context pack (v1583)
+# Mike fleet — context pack (v1584)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-07-31T12:12:29] DollarBill/decision — plan-2026-08-03-SpaceX: {"account": "SpaceX", "plan_date": "2026-08-03", "state": "NEUTRAL(3)", "nav_vnd": 928666848, "cash_vnd": 4551848, "orders": 0, "deferred": 4, "deferred_value_v …
-- [2026-07-31T12:13:00] DollarBill/decision — plan-ZaloPay-2026-08-03: {"plan_date": "2026-08-03", "account": "ZaloPay", "state": "NEUTRAL(3)", "active_nav": 491382099, "cash": 5783999, "orders": [{"ticker": "DHD", "side": "BUY", " …
-- [2026-07-31T12:13:16] DollarBill/answer — plan-08-03-SpaceX-complete: {"job": "DollarBill_20260731_120354", "result": "OK", "plan_file": "data/trade_plans/plan_SpaceX_2026-08-03.json", "plan_date": "2026-08-03", "account": "SpaceX …
-- [2026-07-31T15:32:59] Taylor/decision — capit-sizing-pbo-robustness-DUNG-khong-wire: {"job": "Taylor_20260731_151958", "quyet_dinh": "DUNG — KHONG implement navsize:0.25, KHONG sua production", "dieu_kien_dung_kich_hoat": true, "pbo_theo_dac_ta" …
-- [2026-07-31T15:33:23] Taylor/answer — capit-navsize025-co-wire-khong-KET-LUAN-CUOI: {"job": "Taylor_20260731_151958", "cau_hoi": "Sau 2 viec robustness-check PBO, co implement navsize:0.25 vao production khong", "tra_loi": "KHONG — dieu kien du …
-- [2026-07-31T15:47:51] Taylor/finding — capit-0721-cong-thuc-thuc-te-booknav-nhung-SpaceX-double-count: {"job": "Taylor_20260731_154624", "cau_hoi": "Ngay 21/07 CAPIT deploy that co theo cong thuc booknav (NAV_book_LAG x capit_size) user chot 20/07 khong", "tra_lo …
-- [2026-07-31T16:16:17] Taylor/finding — capit-fix-nhan-doi-capit_size-VIEC1-XONG: {"job": "Taylor_20260731_155814", "viec": "VIEC 1 — sua goc loi nhan capit_size hai lan", "trang_thai": "XONG, commit, self-check 24/24 PASS", "root_cause_chinh …
-- [2026-07-31T16:17:03] Taylor/answer — capit-bu-93tr-thieu-cho-SpaceX-KHUYEN-NGHI-KHONG-BU: {"job": "Taylor_20260731_155814", "cau_hoi": "Co nen bu ~93,2tr thieu cho CAPIT SpaceX (loi nhan doi 07-21) khong", "khuyen_nghi": "KHONG BU — phuong an C (de n …
+- [2026-07-21T01:30:33] Spyros/finding — SHS-IDIOCRASH-FINAL-2026-07-20: {"ticker": "SHS", "event": "IDIOCRASH 2026-07-20 — FINAL VERDICT (Winston callback received)", "halt_triggered": false, "verdict": "HOLD — không vi phạm ngưỡng  …
+- [2026-07-21T12:03:28] Spyros/finding — asymmetric-beta-risk-note-ack: {"ack": "Đã nắm ghi chú hiệu chỉnh từ Taylor (asymmetric_beta_regime.md, router §8): beta CRISIS/BEAR > beta BULL/EXBULL, chênh +0.23 IS / +0.34 OOS, sống qua c …
+- [2026-07-21T12:14:52] Spyros/finding — eod-mismatch-ZaloPay-07-21-FALSE-POSITIVE: {"verdict": "FALSE_POSITIVE — KHÔNG phải double-buy, KHÔNG có sự cố thật", "account": "ZaloPay", "date": "2026-07-21", "root_cause": "Bug trong eod_trading_repo …
+- [2026-07-21T12:15:48] Spyros/answer — EOD-mismatch-ZaloPay-07-21-audit-complete: {"job": "Spyros_20260721_121017", "verdict": "FALSE_POSITIVE", "severity": "LOW — không có sự cố thật, không cần action khẩn cấp", "summary": "Mismatch là artif …
+- [2026-07-21T12:17:11] Spyros/finding — eod-mismatch-SpaceX-07-21-FALSE-POSITIVE: {"verdict": "FALSE_POSITIVE", "severity": "LOW - bug trong recon script, không phải sự cố giao dịch", "account": "SpaceX", "date": "2026-07-21", "summary": "Mis …
+- [2026-07-21T12:17:23] Spyros/answer — eod-mismatch-SpaceX-07-21-audit: {"topic": "EOD Mismatch SpaceX 2026-07-21 — Audit Kết Quả", "verdict": "FALSE POSITIVE — không phải sự cố giao dịch", "discord_thread": 1522576692638388364}
+- [2026-07-24T01:24:00] Spyros/finding — DGC-risk-audit-07-23: governance-escalation+IDIOCRASH — HOLD, EXIT-FEASIBLE, escalate-user: {"job": "Spyros_20260724_012025", "dispatch_from": "Taylor", "verdict": "KHÔNG HALT | THOÁT ĐƯỢC | CẦN USER QUYẾT VỀ EXIT DGC", "summary": "DGC phiên 07-23: -6. …
+- [2026-07-28T01:24:17] Spyros/finding — VND-idiocrash-20260727-risk-audit: {"job": "Spyros_20260728_012023", "ticker": "VND", "crash_date": "2026-07-27", "price_ret": -0.07, "idio_ret": -0.06, "verdict": "HOLD_UNTIL_REBAL — không halt, …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -89,6 +89,23 @@ thông tin thật (user phát hiện 07-31), đang xử lý (xem việc đang ch
 (chặn ghi đè artifact khi sai pandas version — chặn nguyên nhân sự cố (c) cùng job); (4) đổi tên
 `capit_fired`→`capit_signal_today` cho đúng ngữ nghĩa; (5) cập nhật data_registry. Kiểm tra lại
 `kb/incidents/2026-07/` khi cần xem đã đóng chưa.
+
+**Sự cố sizing 07-21 — ĐÃ ĐÓNG (2026-07-31, job `Taylor_20260731_154624`+`_155814`,
+commit `53cb117`/`d3aa3f05`).** Phát hiện: plan SpaceX 07-21 nhân `capit_size` HAI LẦN (đọc nhầm
+cột `weight_pct` đa nghĩa) → deploy 254,4tr thay vì đúng 348,4tr theo booknav, thiếu 87,1tr (ghi
+chú cũ sai lầm quy hết cho "rounding lots", thực ra rounding chỉ giải thích 6,8tr). ZaloPay không
+bị lỗi (đọc đúng cột). **Đã fix gốc**: `golive_recommend_v23.py` publish sẵn `capit_slot_targets`
+(VND/slot từng account) để tầng plan copy thẳng không tự lắp công thức; CSV thêm cột `weight_base`
+làm rõ mẫu số từng book; `send_plan_report.sh` đối chiếu Σ lệnh CAPIT vs mục tiêu ở bước duyệt
+21:00 (WARN-only, ngưỡng 10%). Self-check 24/24 PASS, Mike verify độc lập cả 2 commit.
+**User CHỐT: KHÔNG bù phần 87,1tr thiếu cho SpaceX** (phương án C) — 4 căn cứ: (1) rổ hiện −1,15%
+từ 07-21 nên thiếu tiền vô tình tránh lỗ, không phải thiệt hại cần bù; (2) điều kiện kích hoạt
+CAPIT hôm nay đang tắt (`capit_size=0`), bù = quyết định discretionary mới không nằm trong rule
+nào; (3) đúng 2/5 mã (NCT, SAB) đã rớt sàn chất lượng của chính rổ CAPIT và cũng là 2 mã giảm sâu
+nhất; (4) LAG book chung sổ đã oversubscribe, không có ngân sách thật.
+**Việc R&D mở, chưa làm** (không sửa nóng giữa episode đang mở): CAPIT hiện không có cơ chế
+quality-exit khi 1 mã rớt sàn chất lượng sau khi mua (chỉ hold cố định 60 phiên) — NCT/SAB là ca
+thật đầu tiên để khảo sát, cần backtest riêng trước khi cân nhắc thêm cơ chế này.
 
 Rổ hiện tại luôn đọc `data/golive_v23_status.json` (`n_capit_basket`, `capit_adv_caps`,
 `capit_dd_excluded`) — ĐỪNG chép cứng danh sách mã vào đây, rổ đổi theo phiên (đã từng sai lệch:
