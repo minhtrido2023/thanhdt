@@ -43,4 +43,33 @@ bị chạy-lại ghi đè — coding_guidelines §8), không phải sổ lịch
 ## Bẫy #3 — state source
 Kiểm tra `state_source` field = `DT5G_macro`, không phải suy đoán.
 
+## ⚠️ Bẫy #4 — cột `weight_pct` trong CSV có **4 mẫu số khác nhau** tuỳ book
+Một tên cột, bốn nghĩa. Cột `weight_base` (thêm 2026-07-31) nói rõ 100% là của cái gì:
+
+| book | `weight_base` | 100% = |
+|---|---|---|
+| BAL | `BAL_book` | vốn book BAL |
+| LAG | `LAG_book` | vốn book LAG (giá trị = trọng số tier) |
+| CAPIT | `NAV_book_LAG__DA_GOM_capit_size__KHONG_NHAN_LAI` | NAV_book_LAG, **đã nhân `capit_size` sẵn** |
+| PARK | `parking_basket` | rổ parking custom30V |
+
+**Sự cố thật 2026-07-21** (finding `Taylor_20260731_154624`): plan SpaceX lấy `weight_pct`=15,0
+của dòng CAPIT (= `capit_size`/n = 0,75/5) rồi nhân lên `capit_total_target_vnd` (vốn đã =
+NAV_book_LAG × `capit_size`) ⇒ hiệu lực `capit_size²`. Deploy 254,4tr thay vì 348,4tr — thiếu
+93,9tr, trong đó **87,1tr do nhân đôi**, chỉ 6,8tr do làm tròn lô (plan tự ghi chú "chênh do
+rounding lots" nên không ai để ý). Cùng ngày, cùng CSV, plan ZaloPay chia đúng `/n` ⇒ đây là lỗi
+đọc-cột-đa-nghĩa, không phải lỗi số học ngẫu nhiên.
+
+**Lập plan CAPIT thì ĐỪNG tự lắp lại công thức** — đọc thẳng `status["capit_slot_targets"]`
+(thêm 2026-07-31), đã tính sẵn **theo từng account**:
+`{label: {nav_basis_vnd, nav_basis_source, w_lag_target, capit_size, nav_book_lag_vnd,
+capit_total_target_vnd, n_slots, capit_slot_target_vnd, formula}}`, cơ sở NAV = `active_nav`
+(đúng con số DollarBill dùng sizing, đã trừ `excluded_tickers`). Thiếu NAV ⇒ field `error`,
+KHÔNG bịa số.
+
+Phân biệt với `capit_adv_caps`: đó là **TRẦN** thanh khoản (`bot_execute.py` enforce cứng,
+fail-closed); `capit_slot_targets` là **MỤC TIÊU** phân bổ. Lệnh thật = min(mục tiêu, trần) rồi
+mới làm tròn lô. `send_plan_report.sh` đối chiếu Σ lệnh CAPIT vs mục tiêu và WARN khi lệch >10%
+(WARN-only: lệch lớn có thể đúng — trần %ADV cắt, thiếu cash, mua chia nhiều phiên).
+
 ↩ [Nhóm market-state](index.md)

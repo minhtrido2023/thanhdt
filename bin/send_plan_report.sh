@@ -259,6 +259,49 @@ if buy_sell_orders:
                  f"nhầm nguồn giá cũ/BQ (đúng dạng sự cố 07-10). Chi tiết: " + "; ".join(implausible))
         sys.exit(0)
 
+# ── CAPIT: Σ lệnh mua thật vs VND mục tiêu đã publish (WARN, KHÔNG chặn) ────────────────
+# Sự cố 07-21 (finding Taylor_20260731_154624): plan SpaceX nhân `capit_size` HAI LẦN (lấy
+# weight_pct=15,0 của CSV — vốn ĐÃ = capit_size/n — nhân lên tổng vốn CAPIT vốn ĐÃ × capit_size)
+# ⇒ deploy 254,4tr thay vì 348,4tr, thiếu 87,1tr (~27%). Plan tự ghi chú "chênh do rounding lots"
+# nên KHÔNG ai để ý; làm tròn lô chỉ giải thích 6,8tr. Không cổng nào đối chiếu Σ VND với mục
+# tiêu ⇒ sai 27% đi qua im lặng. Đây là đối chiếu đó, đặt ở BƯỚC DUYỆT (21:00, trước khi user
+# bấm duyệt) chứ không ở executor 09:05 — chỗ duy nhất còn sửa được.
+# WARN-only có chủ đích: chênh lớn có thể ĐÚNG (trần %ADV cắt, thiếu cash, mua chia nhiều phiên)
+# — máy không phân biệt được, người duyệt phân biệt được. Ngưỡng 10% > làm tròn lô điển hình
+# (<5% ở lô 100 với giá 2 chữ số) nhưng << 27% của sự cố thật.
+capit_note = ""
+_capit_buys = [o for o in orders if isinstance(o, dict)
+               and str(o.get("book", "")).upper() == "CAPIT"
+               and str(o.get("side", "")).lower() in ("buy", "mua", "b")]
+if _capit_buys:
+    try:
+        # python này chạy sau `cd "$WORKDIR"` (dòng RESULT=$(...)), nên đường dẫn tương đối
+        _st = json.load(open(os.path.join("data", "golive_v23_status.json"), encoding="utf-8"))
+        _tg = ((_st.get("capit_slot_targets") or {}).get(acct)) or {}
+        _slot = _tg.get("capit_slot_target_vnd")
+        if _slot:
+            _actual = sum(float(o.get("actual_vnd") or 0)
+                          or float(o.get("qty") or o.get("quantity") or 0) * float(_order_price(o) or 0)
+                          for o in _capit_buys)
+            _target = float(_slot) * len(_capit_buys)
+            _dev = (_actual - _target) / _target if _target > 0 else 0.0
+            if abs(_dev) > 0.10:
+                capit_note = (f"⚠️ CAPIT: Σ lệnh mua {_actual/1e6:,.0f}tr vs mục tiêu "
+                              f"{_target/1e6:,.0f}tr ({len(_capit_buys)} mã × "
+                              f"{_slot/1e6:,.1f}tr) — lệch {_dev*100:+.1f}%. Nếu KHÔNG do trần "
+                              f"%ADV/thiếu cash thì kiểm tra đã nhân capit_size hai lần chưa "
+                              f"(lỗi thật 07-21). Nguồn mục tiêu: golive_v23_status.json "
+                              f"`capit_slot_targets`.")
+            else:
+                capit_note = (f"✅ CAPIT: Σ lệnh mua {_actual/1e6:,.0f}tr khớp mục tiêu "
+                              f"{_target/1e6:,.0f}tr (lệch {_dev*100:+.1f}%)")
+        else:
+            capit_note = ("⚠️ CAPIT: có lệnh CAPIT nhưng status chưa publish "
+                          "`capit_slot_targets` cho account này — KHÔNG đối chiếu được cỡ deploy, "
+                          "người duyệt tự kiểm Σ VND vs NAV_book_LAG × capit_size.")
+    except Exception as _e:      # fail-open: không chặn plan vì một dòng đối chiếu
+        capit_note = f"⚠️ CAPIT: không đối chiếu được cỡ deploy ({type(_e).__name__}: {_e})"
+
 lines = [f"📋 **Kế hoạch giao dịch ngày mai {date} — Account {acct}**"]
 
 src_vn = " (nguồn DT5G đầy đủ)" if src == "DT5G_macro" else (f" (nguồn {src})" if src else "")
@@ -297,6 +340,8 @@ if orders:
     lines.append(f"🎯 Hành động: **{len(orders)} lệnh** ({len(sells)} bán, {len(buys)} mua):")
     if price_verify_note:
         lines.append(f"   {price_verify_note}")
+    if capit_note:
+        lines.append(f"   {capit_note}")
     for o in orders:
         side_vn = "BÁN" if str(o.get("side","")).lower() in ("sell","ban","s") else "MUA"
         is_buy = side_vn == "MUA"
