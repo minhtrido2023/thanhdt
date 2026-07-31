@@ -1,4 +1,4 @@
-# Mike fleet — context pack (v1555)
+# Mike fleet — context pack (v1556)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
@@ -73,14 +73,30 @@ bug). Tài liệu đầy đủ:
 `mike/agents/Winston/universe_pit_ops_feasibility_20260722.md` +
 `mike/agents/Winston/research/ticker_prune_hidden_risk_audit_20260729.md`.
 
-## CAPIT (bear-washout) — ĐÃ FIRE từ 07-20/07-21, đang giải ngân dở (cập nhật 2026-07-22)
-`capit_fired=true` từ 07-20 (`data/golive_v23_status.json`, breadth_oversold vượt xa
-washout_gate=0,3). Rổ hiện tại luôn đọc `data/golive_v23_status.json` (`n_capit_basket`,
-`capit_adv_caps`, `capit_dd_excluded`) — ĐỪNG chép cứng danh sách mã vào đây, rổ đổi theo phiên (đã
-từng sai lệch: bản trước ghi cứng NCT/SAB dù rổ đã đổi). Nguồn vốn: `NAV_book_LAG × capit_size`
-(user chốt 07-20). 2 điểm cần nhớ: (a) sát biên
-"grind" (91 vs cửa sổ 20-90 phiên — lệch 1 phiên đổi size full 0,75 vs 0,375); (b) dd52w lúc fire
-(~-7%) nông nhất lịch sử 2014-2026 (kỷ lục cũ -7,4%) — ngoài rìa mẫu dữ liệu đã biết.
+## CAPIT (bear-washout) — vị thế THẬT vẫn đang giữ (verify DNSE 07-31), `capit_fired` KHÔNG phải "đang giữ" (cập nhật 2026-07-31)
+⚠️ **Đính chính quan trọng (job `Taylor_20260731_025222`,
+`mike/agents/Taylor/research/capit_state_visibility_gap_20260731.md`)**: `capit_fired` trong
+`data/golive_v23_status.json` là **điều kiện đúng của NGÀY CHẠY** (`breadth_today >= WASHOUT_GATE`,
+tính lại từ đầu mỗi phiên), **KHÔNG PHẢI** cờ "đang giữ vị thế CAPIT". Đã tắt về `false` từ 07-29
+(breadth phục hồi dưới gate) — nhưng **vị thế THẬT vẫn còn giữ đủ**, verify trực tiếp DNSE API
+2026-07-31 03:00 ICT: **5 mã** SAB/SIP/VNM/PVT/**NCT** (rổ đúng gồm NCT — bản trước ghi thiếu, chỉ
+4 mã), SpaceX + ZaloPay đều chưa bán mã nào. Từ 07-29 tới nay **mọi kênh báo cáo (Telegram, EOD,
+prompt DollarBill) đã im lặng hoàn toàn về CAPIT** vì đều gate theo `capit_fired` — đây là lỗ hổng
+thông tin thật (user phát hiện 07-31), đang xử lý (xem việc đang chạy bên dưới).
+**Việc đang triển khai** (dispatch `Taylor`, user duyệt 07-31): (1) `data/capit_episode.json` ghi
+1 episode khi fire lần đầu, đóng khi exit thật; (2) đổi mọi kênh báo cáo sang
+`capit_fired OR capit_episode_open`; (3) fail-closed interpreter trong `golive_recommend_v23.py`
+(chặn ghi đè artifact khi sai pandas version — chặn nguyên nhân sự cố (c) cùng job); (4) đổi tên
+`capit_fired`→`capit_signal_today` cho đúng ngữ nghĩa; (5) cập nhật data_registry. Kiểm tra lại
+`kb/incidents/2026-07/` khi cần xem đã đóng chưa.
+
+Rổ hiện tại luôn đọc `data/golive_v23_status.json` (`n_capit_basket`, `capit_adv_caps`,
+`capit_dd_excluded`) — ĐỪNG chép cứng danh sách mã vào đây, rổ đổi theo phiên (đã từng sai lệch:
+bản trước ghi cứng NCT/SAB dù rổ đã đổi — con số 5 mã ở trên là XÁC NHẬN MỘT LẦN có mốc thời gian
+07-31, không phải danh sách sống). Nguồn vốn: `NAV_book_LAG × capit_size` (user chốt 07-20). 2
+điểm cần nhớ: (a) sát biên "grind" (91 vs cửa sổ 20-90 phiên — lệch 1 phiên đổi size full 0,75 vs
+0,375); (b) dd52w lúc fire (~-7%) nông nhất lịch sử 2014-2026 (kỷ lục cũ -7,4%) — ngoài rìa mẫu dữ
+liệu đã biết.
 
 **PNJ EXCLUDED khỏi rổ CAPIT** (due-diligence gate, 2026-07-20, quant-skeptic CONFIRMED cao — PNJ
 xếp HẠNG 1 pool CAPIT 07-17 nếu không gate). PNJ khủng hoảng thật (lãnh đạo bị bắt buôn lậu kim
