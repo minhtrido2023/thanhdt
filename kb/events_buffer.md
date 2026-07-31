@@ -843,3 +843,30 @@
 - [2026-07-31T09:04:12Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260731_085810", "source": "watcher"}
 - [2026-07-31T09:05:12Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260731_085810", "source": "watcher"}
 - [2026-07-31T09:06:13Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260731_085810", "source": "watcher"}
+
+## Consolidation 2026-07-31T09:24:51Z
+- [2026-07-31T09:07:13Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260731_085810", "source": "watcher"}
+- [2026-07-31T09:08:13Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260731_085810", "source": "watcher"}
+- [2026-07-31T09:09:13Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260731_085810", "source": "watcher"}
+- [2026-07-31T09:10:13Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260731_085810", "source": "watcher"}
+- [2026-07-31T09:10:24Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "in_progress", "note": "bat dau: tai dung lich su quyet dinh CAPIT sizing 07-20/21"}
+- [2026-07-31T09:11:13Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "in_progress", "note": "3 leg A/B (ctrl/idle/booknav) dang chay tu lan truoc; dang tai dung quyet dinh 07-20"}
+- [2026-07-31T09:11:14Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260731_085810", "source": "watcher"}
+- [2026-07-31T09:12:11Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "in_progress", "note": "da tim ra lich su quyet dinh 07-20 (audit Taylor_20260720_074025): cong thuc chot trong ~2h, KHONG backtest. Dang dung buc tranh portfolio 07-20"}
+- [2026-07-31T09:12:14Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260731_085810", "source": "watcher"}
+- [2026-07-31T09:13:05Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "in_progress", "note": "Buc tranh 07-20 xong. Phat hien them: plan SpaceX ap 15%/slot len TONG TARGET (da nhan 0.75) => deploy 254M thay vi 348M, ghi nham la rounding. ZaloPay tinh dung."}
+- [2026-07-31T09:13:14Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20260731_085810", "source": "watcher"}
+- [2026-07-31T09:14:14Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20260731_085810", "source": "watcher"}
+- [2026-07-31T09:15:10Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "in_progress", "note": "muc 1-2 xong (co so lieu fill that). 6 leg backtest dang chay. Dang doc capit_tranche_deployment_20260724.md"}
+- [2026-07-31T09:15:14Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20260731_085810", "source": "watcher"}
+- [2026-07-31T09:16:14Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20260731_085810", "source": "watcher"}
+- [2026-07-31T09:16:39Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "in_progress", "note": "3/6 leg xong: ctrl 27.60/1.84/-17.5/1.58 (tai lap DUNG pin R3); idle 27.92/1.85/-17.4/1.60; booknav(LIVE) 27.34/1.82/-18.0/1.52 = TE HON moi chieu. Cho 3 leg con lai"}
+- [2026-07-31T09:17:14Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20260731_085810", "source": "watcher"}
+- [2026-07-31T09:18:14Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20260731_085810", "source": "watcher"}
+- [2026-07-31T09:18:47Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "in_progress", "note": "da viet dsr_capit_sizing.py; cho 3 leg cuoi (nav10/nav20/idlecap30) xong roi chay DSR+PBO"}
+- [2026-07-31T09:19:14Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20260731_085810", "source": "watcher"}
+- [2026-07-31T09:20:14Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20260731_085810", "source": "watcher"}
+- [2026-07-31T09:21:14Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "still_running", "elapsed_min": 23, "job_id": "Taylor_20260731_085810", "source": "watcher"}
+- [2026-07-31T09:22:15Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20260731_085810", "source": "watcher"}
+- [2026-07-31T09:23:15Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "still_running", "elapsed_min": 25, "job_id": "Taylor_20260731_085810", "source": "watcher"}
+- [2026-07-31T09:24:15Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "still_running", "elapsed_min": 26, "job_id": "Taylor_20260731_085810", "source": "watcher"}
