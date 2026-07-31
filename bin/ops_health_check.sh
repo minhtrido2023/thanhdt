@@ -193,14 +193,22 @@ else:
 import datetime as dt
 _now = dt.datetime.now(dt.timezone.utc)
 cutoff = _now - dt.timedelta(hours=48)
-# Horizon cho backlog TREO LÂU: câu hỏi >48h mà chưa có answer/decision trước đây RƠI KHỎI
-# radar hoàn toàn (check chỉ nhìn 48h) → chết im, không owner, không ai nhắc user quyết
-# (đúng gap mà comment nhánh dispatch dưới đã ghi nhận nhưng chưa bịt — sự cố THẬT:
-# question Winston/dt5g-live-2-writer-can-quyet 2026-07-29, cần user chọn A/B/C, sẽ vô hình
-# từ 2026-07-31). 30 ngày là horizon để câu hỏi bị bỏ hẳn không nhắc mãi mãi. Dòng này
-# CỐ TÌNH không dispatch autofix (xem grep COORD_WARN/OTHER_WARN): loại câu hỏi này chỉ
-# user quyết được, spawn Wags lặp lại vô nghĩa — cần VISIBILITY cho người, không cần agent.
-aged_horizon = _now - dt.timedelta(days=30)
+# Backlog TREO LÂU: câu hỏi >48h mà chưa có answer/decision trước đây RƠI KHỎI radar hoàn
+# toàn (check chỉ nhìn 48h) → chết im, không owner, không ai nhắc user quyết (đúng gap mà
+# comment nhánh dispatch dưới đã ghi nhận nhưng chưa bịt — sự cố THẬT: question
+# Winston/dt5g-live-2-writer-can-quyet 2026-07-29, cần user chọn A/B/C, sẽ vô hình từ
+# 2026-07-31). Dòng này CỐ TÌNH không dispatch autofix (xem grep COORD_WARN/OTHER_WARN):
+# loại câu hỏi này chỉ user quyết được, spawn Wags lặp lại vô nghĩa — cần VISIBILITY cho
+# người, không cần agent.
+# KHÔNG cắt theo thời gian — câu hỏi treo mãi thì hiện mãi, chỉ cắt theo ĐỘ DÀI dòng in.
+# Bản 2026-07-30 từng auto-close sau horizon 30 ngày (phát 1 `decision` "EXPIRED-30d" dưới
+# agent_id=Mike). arch-reviewer NEEDS_CHANGES (high, round-2 coord-2026-07-30) bác: cơ chế
+# đó DỰNG LẠI đúng lỗi nó định bịt — check #5 là kênh backlog DUY NHẤT của fleet (đã grep
+# hết consolidate/daily_retro/kb_nightly/staleness_watch), nên sau EXPIRED question biến
+# mất khỏi MỌI dòng báo cáo, chỉ hoãn chết-im từ 48h thành 30d; lại để MÁY viết `decision`
+# nhân danh người trên escalation tiền thật (DGC ZaloPay 46,8% NAV) và ô nhiễm KB
+# (kb_nightly giữ decision vĩnh viễn), qua một đường ghi bus nuốt lỗi im lặng.
+AGED_SHOWN = 5
 # Marker ỔN ĐỊNH để nhánh dispatch dưới (bash grep) nhận ra "dòng này chỉ để NGƯỜI đọc,
 # không spawn agent". Trước đây routing dựa vào CHỮ HOA/câu chữ tiếng Việt của chính dòng
 # WARN ("Câu hỏi TREO LÂU" vs "câu hỏi (question)") → đổi câu chữ là routing thay đổi im
@@ -210,7 +218,6 @@ WARN_ONLY = "[WARN-ONLY]"
 inbox_dir = os.path.join(wc_root, "mike", "bus", "inbox")
 pending_q = []
 aged_q = []
-expired_q = []
 if os.path.isdir(inbox_dir):
     files = glob.glob(os.path.join(inbox_dir, "*.jsonl"))
     def iter_events(path):
@@ -267,39 +274,21 @@ if os.path.isdir(inbox_dir):
                 continue
             if ts_dt >= cutoff:
                 pending_q.append(f"{agent}/{rec.get('topic')}")
-            elif ts_dt >= aged_horizon:
-                age_d = (_now - ts_dt).days
-                aged_q.append(f"{agent}/{rec.get('topic')} ({age_d}d)")
             else:
-                expired_q.append((agent, rec.get("topic"), (_now - ts_dt).days))
+                age_d = (_now - ts_dt).days
+                aged_q.append((age_d, f"{agent}/{rec.get('topic')} ({age_d}d)"))
 if pending_q:
     W(f"Có {len(pending_q)} câu hỏi (question) trong 48h qua CHƯA thấy answer tương ứng: {pending_q}")
 else:
     OK("Không có câu hỏi (question) nào đang chờ xử lý trong 48h qua.")
 if aged_q:
-    aged_q.sort()
-    W(f"{WARN_ONLY} Câu hỏi TREO LÂU (>48h, chưa ai quyết) — {len(aged_q)} mục, cần USER quyết: {aged_q}")
-# Hết horizon 30 ngày: TRƯỚC ĐÂY câu hỏi rơi khỏi radar KHÔNG dấu vết nào (đúng "chết im"
-# mà dòng aged vừa bịt, chỉ hoãn 30 ngày — arch-reviewer required_change #4). Nay phát 1
-# event decision "EXPIRED" để có dấu vết bền trên bus + 1 dòng WARN-only cho người thấy.
-# Idempotent: topic event CHỨA nguyên topic câu hỏi và ts SAU nó → _resolved() lần chạy
-# sau tự bỏ qua (không phát lại). Không làm mù alert lặp tương lai vì _resolved() so ts.
-if expired_q:
-    ae = os.path.join(wc_root, "mike", "bin", "append_event.sh")
-    for agent, q_topic, age_d in expired_q:
-        try:
-            subprocess.run([ae, "Mike", "decision",
-                            f"{q_topic} — EXPIRED-30d-khong-ai-tra-loi",
-                            json.dumps({"expired_after_days": age_d, "asked_by": agent,
-                                        "closed_by": "ops_health_check horizon 30d",
-                                        "note": "Đóng theo HẾT HẠN, không phải đã trả lời — "
-                                                "mở lại bằng question mới nếu vẫn cần quyết."},
-                                       ensure_ascii=False)],
-                           capture_output=True, timeout=30)
-        except Exception:
-            pass
-    W(f"{WARN_ONLY} Câu hỏi HẾT HẠN 30 ngày (đóng theo hết hạn, đã ghi decision lên bus) — "
-      f"{len(expired_q)} mục: {[f'{a}/{t} ({d}d)' for a, t, d in expired_q]}")
+    # Cũ nhất trước — nếu phải cắt thì cắt phần MỚI, giữ phần treo lâu nhất trong tầm mắt.
+    aged_q.sort(key=lambda x: -x[0])
+    shown = [lbl for _, lbl in aged_q[:AGED_SHOWN]]
+    more = len(aged_q) - len(shown)
+    tail = f" …và {more} mục khác" if more > 0 else ""
+    W(f"{WARN_ONLY} Câu hỏi TREO LÂU (>48h, chưa ai quyết) — {len(aged_q)} mục, cần USER "
+      f"quyết; {len(shown)} mục cũ nhất: {shown}{tail}")
 
 # 6. Corp-action backlog (data/corp_action_backlog.json, ghi bởi update_shares_live.py
 #    --scan mỗi ngày 18:40 ICT — đọc file local, KHÔNG query BQ trực tiếp ở đây để giữ

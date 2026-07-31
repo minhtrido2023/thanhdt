@@ -70,17 +70,20 @@ chưa ăn → notify "cần người xem", không dispatch lặp vô hạn.
   so-ts. Ai thêm topic question mới cho alert lặp: **nên nhúng ngày vào topic** (vd
   `plan-t1-not-ready-SpaceX-2026-07-30`); sửa emitter thuộc surface trading → escalate cho
   owner, Wags không tự sửa.
-- **Hết hạn 30 ngày phải có DẤU VẾT** (required_change #4): question vượt horizon 30d không
-  còn im lặng biến mất — checker phát 1 `decision` topic
-  `<topic-hỏi> — EXPIRED-30d-khong-ai-tra-loi` (đóng theo HẾT HẠN, KHÔNG phải đã trả lời) và
-  in 1 dòng WARN-only. Idempotent nhờ chính quy ước hậu-tố. Vẫn cần quyết → mở question MỚI.
+- **KHÔNG có auto-expire** (Wags 2026-07-31): question chưa ai trả lời thì hiện MÃI ở dòng
+  TREO LÂU — checker KHÔNG tự đóng theo thời gian. Chỉ `answer`/`decision` của NGƯỜI mới đóng
+  được. (Bản 07-30 từng auto-close sau 30 ngày bằng 1 `decision` "EXPIRED-30d" ghi dưới
+  `agent_id=Mike`; arch-reviewer NEEDS_CHANGES high bác: check #5 là kênh backlog DUY NHẤT của
+  fleet → sau EXPIRED question biến mất khỏi mọi báo cáo, chỉ hoãn chết-im 48h→30d, lại để MÁY
+  quyết thay người trên escalation tiền thật và ô nhiễm KB. Đã gỡ hẳn khối đó.)
 - **Marker `[WARN-ONLY]`** (required_change #5): dòng WARN mang tiền tố này bị loại khỏi CẢ
   `COORD_WARN` và `OTHER_WARN` → không spawn agent. Phân luồng dispatch bám MARKER, không bám
   câu chữ tiếng Việt (đổi wording WARN trước đây âm thầm đổi routing; topic tự do nhúng trong
   dòng chứa "Circuit breaker"/"Job board:" từng kéo cả dòng vào COORD_WARN → dispatch oan).
 - **Question TREO LÂU >48h** (thêm Wags 2026-07-30): checker có dòng WARN riêng
   `⚠️ Câu hỏi TREO LÂU (>48h, chưa ai quyết)` cho question quá cửa sổ 48h mà vẫn chưa có
-  answer/decision (horizon 30 ngày). Trước đó question >48h RƠI KHỎI radar hoàn toàn → chết
+  answer/decision (KHÔNG có horizon — cắt theo ĐỘ DÀI: in 5 mục cũ nhất + "…và N mục khác",
+  cũ nhất luôn nằm trong tầm mắt). Trước đó question >48h RƠI KHỎI radar hoàn toàn → chết
   im, không owner (vd `Winston/dt5g-live-2-writer-can-quyet` 07-29 sẽ vô hình từ 07-31).
   Dòng này **CỐ TÌNH không dispatch autofix** (loại khỏi cả `COORD_WARN` và `OTHER_WARN`):
   loại question này chỉ USER quyết được, spawn Wags/Winston lặp là token thuần lãng phí — nó
