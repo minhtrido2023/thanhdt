@@ -77,6 +77,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Sự cố | status |
 |---|---|---|
+| 2026-07-31 | [2026-07-31: `capit_fired` bị hiểu nhầm là "đang giữ vị thế" khiến mọi kênh báo cáo im lặng về CAPIT từ 07-29 dù vẫn giữ đủ 5 mã; + 1 lần artifact 07-30 bị ghi đè bởi sai interpreter](2026-07/2026-07-31-capit-status-visibility-gap-interpreter-overwrite.md) | open-items |
 | 2026-07-30 | [2026-07-30: paper-trading report "báo không hoạt động" — 3 root causes tìm + sửa cùng phiên (không phải 1 bug, 3 bug độc lập chồng lên nhau)](2026-07/2026-07-30-paper-trading-report-3-root-causes.md) | logged |
 | 2026-07-29 | [2026-07-29: daily_retro root-cause fix — session-directory collision (Pattern A closed)](2026-07/2026-07-29-daily-retro-session-directory-collision.md) | open-items |
 | 2026-07-28 | [2026-07-28 — `spacex-loanpackageid-order-reject`: SpaceX (margin) TV1 buy orders bị DNSE từ chối `HTTP 400: loanPackageId is required` suốt ~30' phiê…](2026-07/2026-07-28-spacex-loanpackageid-order-reject.md) | logged |
