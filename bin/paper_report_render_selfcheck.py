@@ -20,9 +20,14 @@ from contextlib import redirect_stdout
 
 SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "paper_programs_daily_report.py")
 FAILS = []
+N_RUN = 0  # đếm THẬT số check() đã chạy — đừng gõ tay con số vào commit message (quant-skeptic
+           # verify_20260731_052807 bắt được 2 lần liên tiếp commit message ghi sai: 28/28 rồi
+           # 31/31 trong khi thực chạy là 31 rồi 34).
 
 
 def check(name, cond, extra=""):
+    global N_RUN
+    N_RUN += 1
     print(f"  {'PASS' if cond else 'FAIL'}  {name}{'' if cond else '  <<< ' + str(extra)[:400]}")
     if not cond:
         FAILS.append(name)
@@ -245,6 +250,26 @@ def main():
           "NO_QUOTE" in outd2 and "🔴 RED" in outd2 and "**Không có giao dịch**" not in outd2,
           outd2[:400])
 
+    # D2b (quant-skeptic verify_20260731_052807 đề xuất) — phiên có CẢ PLACE/FILL thật LẪN vài
+    # dòng NO_QUOTE (vd 1 lệnh bị thiếu quote, thử lại xong khớp lệnh khác): NO_QUOTE không được
+    # phép ghi đè lên 1 ngày CÓ giao dịch thật. Guard `if not (PLACE or fills)` đã bao NO_QUOTE ở
+    # bên trong nên về cấu trúc không thể xảy ra — test này khoá lại bằng chứng, chống hồi quy.
+    write(os.path.join(jdir, f"exec_mixed_{D}_journal.csv"),
+          "ts,event,parent_id,ticker,side,child_oid,qty,price,filled_total,note\n"
+          f"{D}T09:15:03,NO_QUOTE,P1,VNM,sell,,100,0,0,thieu quote lan 1\n"
+          f"{D}T09:15:05,PLACE,P1,VNM,sell,C1,100,61200,0,retry ok\n"
+          f"{D}T09:15:09,FILL,P1,VNM,sell,C1,100,61200,100,x\n")
+    reg_d2b = {"version": "t", "programs": [
+        act("mixed", {"mode": "journal", "account": "mixed"}),
+    ]}
+    outd2b, _ = run_report(m, root, reg_d2b, D, ["--no-state"])
+    # Dòng đầu tiên của khối chi tiết chương trình mang badge THẬT; phần dưới report luôn có chú
+    # thích cuối trang liệt kê nghĩa của "🔴 RED" nên KHÔNG được grep "🔴 RED" trên toàn bộ đuôi.
+    header_line = outd2b.split("── **")[1].split("\n")[0]
+    check("D2b: có NO_QUOTE NHƯNG cũng có PLACE/FILL thật → vẫn báo lệnh khớp, KHÔNG bị NO_QUOTE ghi đè",
+          "1 lệnh khớp" in outd2b and "SELL VNM" in outd2b and "🔴 RED" not in header_line,
+          outd2b[:400])
+
     # D3 — probe chính kiểu journal_scan (dùng bởi extreme_regime/vol_scale_chase_cap trong
     # registry thật) có marker bắn HÔM NAY (vd EXTREME_SELL/EXTREME_DOWN) phải đẩy qua
     # res["flags"] để badge_of thấy — trước đây probe_journal_scan không set "flags" nên marker
@@ -262,7 +287,9 @@ def main():
     check("D3: probe journal_scan marker bắn hôm nay → badge RED (không lọt qua thành XANH)",
           "🔴 RED" in outd3 and "bắn hôm nay" in outd3, outd3[:500])
 
-    print(f"\n{'ALL PASS' if not FAILS else 'FAILED: ' + ', '.join(FAILS)}  (tmp: {root})")
+    n_pass = N_RUN - len(FAILS)
+    status = f"ALL PASS ({n_pass}/{N_RUN})" if not FAILS else f"FAILED {len(FAILS)}/{N_RUN}: " + ", ".join(FAILS)
+    print(f"\n{status}  (tmp: {root})")
     return 1 if FAILS else 0
 
 
