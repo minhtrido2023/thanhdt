@@ -1,0 +1,94 @@
+legs=13  T=3106 phien  [2014-01-03 00:00:00 -> 2026-06-19 00:00:00]
+
+So phien co it nhat 1 leg khac baseline `cash`: 2805/3106 (90.3%)
+So RUN khac-baseline (gap>20 phien tach doi) = 5
+  run 0: 2014-05-09 00:00:00 -> 2016-12-05 00:00:00  (647 phien)
+  run 1: 2017-01-19 00:00:00 -> 2022-03-11 00:00:00  (1284 phien)
+  run 2: 2022-04-20 00:00:00 -> 2022-09-19 00:00:00  (105 phien)
+  run 3: 2022-11-03 00:00:00 -> 2022-12-14 00:00:00  (30 phien)
+  run 4: 2023-04-13 00:00:00 -> 2026-06-19 00:00:00  (793 phien)
+
+Variant A — 5 doan lich phu kin T, moi doan chua dung 1 su kien (do dai: min=86 median=741 max=1312)
+Variant B — chi 2859 phien active, 5 khoi
+
+=== VIEC 1a — episode-stratified CSCV (doan lich, 1 su kien/khoi, S=5) ===
+  S=5 khoi, IS=2 khoi, so to hop=10
+  PBO = 0.6000   median OOS-rank(IS-best) = 6.0/13   logit mean = -0.2763
+  tan suat thang IS:
+    navsize:0.40          4/10 ( 40.0%)
+    cash                  3/10 ( 30.0%)
+    park:0.25             2/10 ( 20.0%)
+    nav:0.20              1/10 ( 10.0%)
+
+=== VIEC 1b — episode-stratified CSCV (CHI phien active, S=5) ===
+  S=5 khoi, IS=2 khoi, so to hop=10
+  PBO = 0.6000   median OOS-rank(IS-best) = 6.0/13   logit mean = -0.3091
+  tan suat thang IS:
+    navsize:0.40          4/10 ( 40.0%)
+    cash                  3/10 ( 30.0%)
+    park:0.25             2/10 ( 20.0%)
+    nav:0.20              1/10 ( 10.0%)
+
+=== VIEC 1c — bootstrap 20000 lan chia doi 5 su kien roi rac (chi phien active) ===
+  PBO = 0.5968   median OOS-rank = 6.0/13
+    navsize:0.40       8063/20000 ( 40.3%)
+    cash               6041/20000 ( 30.2%)
+    park:0.25          3946/20000 ( 19.7%)
+    nav:0.20           1950/20000 (  9.8%)
+
+======================================================================
+
+[S=8] block=388 phien; so khoi RONG (khong su kien CAPIT nao) = 0/8
+
+=== VIEC 2 — calendar CSCV S=8 ===
+  S=8 khoi, IS=4 khoi, so to hop=70
+  PBO = 0.8143   median OOS-rank(IS-best) = 5.5/13   logit mean = -0.6154
+  tan suat thang IS:
+    navsize:0.40         27/70 ( 38.6%)
+    park:0.50            18/70 ( 25.7%)
+    idle                 13/70 ( 18.6%)
+    cash                  5/70 (  7.1%)
+    booknav               3/70 (  4.3%)
+    navsize:0.35          2/70 (  2.9%)
+
+[S=16] block=194 phien; so khoi RONG (khong su kien CAPIT nao) = 0/16
+
+=== VIEC 2 — calendar CSCV S=16 ===
+  S=16 khoi, IS=8 khoi, so to hop=12870
+  PBO = 0.7319   median OOS-rank(IS-best) = 5.0/13   logit mean = -0.5261
+  tan suat thang IS:
+    navsize:0.40       4921/12870 ( 38.2%)
+    park:0.50          2871/12870 ( 22.3%)
+    idle               2788/12870 ( 21.7%)
+    navsize:0.35        771/12870 (  6.0%)
+    booknav             525/12870 (  4.1%)
+    cash                472/12870 (  3.7%)
+
+[S=32] block=97 phien; so khoi RONG (khong su kien CAPIT nao) = 0/32
+
+=== VIEC 2 — calendar CSCV S=32 ===
+  S=32 khoi, IS=16 khoi, so to hop=40000 (LAY MAU tu 601080390)
+  PBO = 0.7360   median OOS-rank(IS-best) = 5.0/13   logit mean = -0.5498
+  tan suat thang IS:
+    park:0.50         10449/40000 ( 26.1%)
+    navsize:0.40      10046/40000 ( 25.1%)
+    idle               8221/40000 ( 20.6%)
+    navsize:0.35       4279/40000 ( 10.7%)
+    booknav            2343/40000 (  5.9%)
+    cash               1537/40000 (  3.8%)
+
+======================================================================
+Xep hang Sharpe toan mau (de doi chieu, KHONG phai cong chon):
+   1. navsize:0.40     SR=1.8611
+   2. park:0.50        SR=1.8586
+   3. navsize:0.35     SR=1.8502
+   4. idle             SR=1.8453
+   5. cash             SR=1.8428
+   6. park:0.25        SR=1.8427
+   7. navsize:0.30     SR=1.8401
+   8. idlecap:0.30     SR=1.8348
+   9. navsize:0.25     SR=1.8259  <== de xuat
+  10. nav:0.20         SR=1.8242
+  11. booknav          SR=1.8159  (LIVE)
+  12. nav:0.10         SR=1.7938
+  13. navsize:0.15     SR=1.7885

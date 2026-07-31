@@ -1,0 +1,65 @@
+legs=13  T=3106 phien  [2014-01-03 -> 2026-06-19]
+
+So su kien CAPIT (EVENT_CAPIT) = 18
+  E 0 2014-05-08 -> 2014-08-04  size=1.000    63 phien  n_tx=16
+  E 1 2015-05-18 size=0.750  — KHONG co TX, bo qua
+  E 2 2015-08-24 -> 2015-11-19  size=0.375    63 phien  n_tx=10
+  E 3 2016-01-18 -> 2016-04-21  size=0.750    63 phien  n_tx=34
+  E 4 2018-05-28 -> 2018-08-22  size=1.000    63 phien  n_tx=26
+  E 5 2018-07-05 -> 2018-10-02  size=0.375    63 phien  n_tx=4
+  E 6 2020-02-03 -> 2020-05-04  size=0.750    63 phien  n_tx=46
+  E 7 2020-03-11 -> 2020-06-10  size=0.250    63 phien  n_tx=25
+  E 8 2020-07-27 -> 2020-10-22  size=0.375    63 phien  n_tx=43
+  E 9 2022-04-19 size=0.000  — KHONG co TX, bo qua
+  E10 2022-06-15 -> 2022-09-13  size=0.250    63 phien  n_tx=34
+  E11 2022-09-28 size=0.000  — KHONG co TX, bo qua
+  E12 2023-10-30 -> 2024-01-25  size=1.000    63 phien  n_tx=38
+  E13 2024-04-17 -> 2024-07-18  size=0.500    63 phien  n_tx=33
+  E14 2024-08-05 -> 2024-11-01  size=0.500    63 phien  n_tx=28
+  E15 2025-04-03 -> 2025-07-04  size=0.500    63 phien  n_tx=21
+  E16 2025-10-20 -> 2026-01-16  size=0.750    63 phien  n_tx=26
+  E17 2026-03-09 -> 2026-06-08  size=0.750    63 phien  n_tx=48
+
+15 su kien -> 945 phien-khoi (874 phien rieng biet, 28.1% timeline)
+
+=== VIEC 1 (a) — CSCV day du tren 15 su kien CAPIT that ===
+  CSCV day du C(15,7)=6435
+  PBO = 0.0726   median OOS-rank(IS-best) = 13.0/13   logit mean = +1.9772
+  tan suat thang IS:
+    idle               5288/6435 ( 82.2%)
+    cash                563/6435 (  8.7%)
+    idlecap:0.30        219/6435 (  3.4%)
+    booknav             192/6435 (  3.0%)
+    park:0.50           138/6435 (  2.1%)
+    navsize:0.35         16/6435 (  0.2%)
+
+=== VIEC 1 (b) — bootstrap tren 15 su kien CAPIT that ===
+  bootstrap 20000 lan chia doi 15 su kien
+  PBO = 0.0736   median OOS-rank(IS-best) = 13.0/13   logit mean = +1.9704
+  tan suat thang IS:
+    idle              16368/20000 ( 81.8%)
+    cash               1771/20000 (  8.9%)
+    idlecap:0.30        726/20000 (  3.6%)
+    booknav             568/20000 (  2.8%)
+    park:0.50           454/20000 (  2.3%)
+    navsize:0.35         63/20000 (  0.3%)
+
+Xep hang Sharpe CHI trong cua so su kien CAPIT (KHONG phai cong chon):
+   1. idle             SR=2.4801
+   2. park:0.50        SR=2.3998
+   3. idlecap:0.30     SR=2.3876
+   4. cash             SR=2.3857
+   5. park:0.25        SR=2.3682
+   6. nav:0.20         SR=2.3451
+   7. navsize:0.40     SR=2.3325
+   8. navsize:0.35     SR=2.3312
+   9. navsize:0.30     SR=2.2961
+  10. booknav          SR=2.2851  (LIVE)
+  11. navsize:0.25     SR=2.2721  <== de xuat
+  12. nav:0.10         SR=2.2309
+  13. navsize:0.15     SR=2.2153
+
+--- TOM TAT PBO moi dac ta ---
+  episode-anchored CSCV day du (S=15 su kien) : 0.0726
+  episode-anchored bootstrap  (S=15 su kien) : 0.0736
+  (calendar S=8/16/32 xem job_20260731_151958_pbo_episode.log)
