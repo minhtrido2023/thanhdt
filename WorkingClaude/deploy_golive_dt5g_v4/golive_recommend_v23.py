@@ -686,6 +686,7 @@ vn_cool_now = bool(vnh["vn_cooling"].iloc[-1]) if len(vnh) and pd.notna(vnh["vn_
 
 capit_size, capit_grind, basket, capit_dd_excluded = 0.0, False, [], []
 capit_caps_total, capit_caps, capit_shares, capit_share_mode, capit_share_detail = {}, {}, {}, "n/a", {}
+capit_targets = {}
 if capit_signal_today:
     wdays = br[br["oversold"] >= WASHOUT_GATE]["time"].tolist()
     bdates = br["time"].tolist(); i0 = len(bdates) - 1
@@ -714,6 +715,35 @@ if capit_signal_today:
             capit_shares, capit_share_mode, capit_share_detail = capit_account_shares()
             capit_caps = {a: {t: v * s for t, v in capit_caps_total.items()}
                           for a, s in capit_shares.items()}
+            # ── VND mục tiêu/slot, TÍNH SẴN MỘT LẦN cho từng account ────────────────────
+            # Sự cố 07-21 (finding Taylor_20260731_154624): plan SpaceX nhân `capit_size`
+            # HAI LẦN — lấy `weight_pct`=15,0 của dòng CAPIT trong CSV (vốn ĐÃ = capit_size/n)
+            # rồi nhân lên `capit_total_target_vnd` (vốn ĐÃ = NAV_book_LAG × capit_size) ⇒
+            # hiệu lực capit_size². Deploy 254,4tr thay vì 348,4tr (thiếu 87,1tr; phần còn
+            # lại 6,8tr mới là làm tròn lô). Cùng ngày, cùng tín hiệu, plan ZaloPay chia
+            # đúng /n ⇒ đây là lỗi ĐỌC MỘT CỘT ĐA NGHĨA, không phải lỗi số học ngẫu nhiên.
+            # Cách sửa: publish thẳng VND để tầng plan KHÔNG phải tự lắp lại công thức.
+            # Cơ sở NAV = _account_nav_basis() = đúng `active_nav` DollarBill dùng sizing.
+            for _a in sorted(capit_shares):
+                _nav = (capit_share_detail.get(_a) or {}).get("nav")
+                if not _nav:
+                    capit_targets[_a] = {"nav_basis_vnd": None, "nav_basis_source":
+                                         (capit_share_detail.get(_a) or {}).get("source"),
+                                         "error": "không có cơ sở NAV — tầng plan phải tự tính"}
+                    continue
+                _book = float(_nav) * float(w_tgt)
+                _tot = _book * capit_size
+                capit_targets[_a] = {
+                    "nav_basis_vnd": round(float(_nav)), "nav_basis_source":
+                        (capit_share_detail.get(_a) or {}).get("source"),
+                    "w_lag_target": w_tgt, "capit_size": round(capit_size, 4),
+                    "nav_book_lag_vnd": round(_book), "capit_total_target_vnd": round(_tot),
+                    "n_slots": len(basket),
+                    "capit_slot_target_vnd": round(_tot / len(basket)),
+                    "formula": "slot = active_nav × w_lag_target × capit_size / n_slots "
+                               "(công thức booknav user chốt 2026-07-20). ĐÃ GỒM capit_size — "
+                               "KHÔNG nhân capit_size hay weight_pct thêm lần nữa.",
+                }
 
 # ── 6b. Sổ episode CAPIT (QUAN SÁT THUẦN — bên NGOÀI nhánh `if capit_signal_today`) ──
 # `capit_signal_today` là điều kiện CỦA NGÀY CHẠY: breadth rớt dưới gate ⇒ cờ về False và
@@ -754,24 +784,37 @@ if etf_frac > 0:
 # Tên field cố tình xấu (audit Taylor_20260711_031821 F2): sự cố 07-09 cho thấy prompt cấm
 # không đủ ngăn LLM lấy field "close" tiện tay làm ref_price — đổi tên để ref_price bắt buộc
 # phải lấy từ DNSE live, không còn field "close" nào trong context lập plan để với nhầm.
+#
+# `weight_pct` DÙNG CHUNG cho 4 book nhưng MẪU SỐ KHÁC NHAU ở mỗi book — cột `weight_base`
+# đi kèm nói rõ 100% là của cái gì. Không có nó, sự cố 07-21 đã xảy ra: dòng CAPIT ghi 15,0
+# (= capit_size/n, tức ĐÃ gồm capit_size) bị hiểu là "15% của tổng vốn CAPIT" rồi nhân tiếp
+# lên tổng ⇒ capit_size². Cùng ngày, cùng CSV, hai plan đọc ra hai nghĩa khác nhau.
 recs = []
 for _, r in bal.iterrows():
     recs.append({"book": "BAL", "ticker": r["ticker"], "play_type": r["play_type"],
                  "ta": round(float(r["ta"]), 0), "close_bq_stale_DO_NOT_USE_AS_REFPRICE": round(float(r["Close"]), 1),
                  "sector": int(r["sec"]) if pd.notna(r["sec"]) else None,
-                 "weight_pct": r["weight"]*100, "status": "HALF_SIZE" if (r["weak"] and half_in_state) else "FULL"})
+                 "weight_pct": r["weight"]*100, "weight_base": "BAL_book",
+                 "status": "HALF_SIZE" if (r["weak"] and half_in_state) else "FULL"})
 for it in lag_up:
     recs.append({"book": "LAG", "ticker": it["ticker"], "play_type": it["tier"],
                  "ta": None, "close_bq_stale_DO_NOT_USE_AS_REFPRICE": None, "sector": sec_map.get(it["ticker"]),
-                 "weight_pct": LAG_TW[it["tier"]]*100, "status": f"UPCOMING {it['entry']}"})
+                 "weight_pct": LAG_TW[it["tier"]]*100, "weight_base": "LAG_book",
+                 "status": f"UPCOMING {it['entry']}"})
 for it in lag_recent:
     recs.append({"book": "LAG", "ticker": it["ticker"], "play_type": it["tier"],
                  "ta": None, "close_bq_stale_DO_NOT_USE_AS_REFPRICE": None, "sector": sec_map.get(it["ticker"]),
-                 "weight_pct": LAG_TW[it["tier"]]*100, "status": f"WINDOW_PASSED {it['entry']}"})
+                 "weight_pct": LAG_TW[it["tier"]]*100, "weight_base": "LAG_book",
+                 "status": f"WINDOW_PASSED {it['entry']}"})
 for tk in basket:
     recs.append({"book": "CAPIT", "ticker": tk, "play_type": "CAPIT_GOLDEN",
                  "ta": None, "close_bq_stale_DO_NOT_USE_AS_REFPRICE": None, "sector": sec_map.get(tk),
-                 "weight_pct": round(capit_size / max(len(basket), 1) * 100, 2), "status": "WASHOUT",
+                 "weight_pct": round(capit_size / max(len(basket), 1) * 100, 2),
+                 # Mẫu số là NAV_book_LAG (= active_nav × w_lag_target), và con số này ĐÃ
+                 # nhân capit_size sẵn. VND/slot đã tính sẵn ở status["capit_slot_targets"] —
+                 # DÙNG THẲNG số đó, đừng lắp lại công thức từ cột này.
+                 "weight_base": "NAV_book_LAG__DA_GOM_capit_size__KHONG_NHAN_LAI",
+                 "status": "WASHOUT",
                  # TỔNG cả fleet — CSV này account-agnostic. Trần của TỪNG account (đã chia)
                  # nằm ở status["capit_adv_caps"][<label>] và đó mới là cái executor enforce.
                  "capit_cap_total_vnd": round(capit_caps_total[tk]) if tk in capit_caps_total else None})
@@ -782,7 +825,7 @@ if _park_basket is not None:
                      "ta": float(pr.rating_8l) if pd.notna(pr.rating_8l) else None,
                      "close_bq_stale_DO_NOT_USE_AS_REFPRICE": None, "sector": None,
                      "weight_pct": round(float(pr.weight) * 100, 4),
-                     "status": "PARK_ADVISORY"})
+                     "weight_base": "parking_basket", "status": "PARK_ADVISORY"})
 # ── Due-diligence tổng hợp cho MỌI ứng cử viên (mandate user 2026-07-21) ──
 # Đây là CHOKE-POINT SỚM NHẤT: mọi mã ở đây mới chỉ là ứng cử viên, chưa thành lệnh. Lớp này
 # THUẦN THÔNG TIN (thanh khoản/universe/cơ học surprise/cờ bất thường/FA/định giá) — KHÔNG loại
@@ -802,7 +845,7 @@ for _r in recs:
     _s = dd_map.get((_r["ticker"], _r["book"]), "")
     _r["due_diligence"] = " | ".join(x.strip() for x in str(_s).splitlines()) if _s else ""
 
-rec_df = pd.DataFrame(recs, columns=["book","ticker","play_type","ta","close_bq_stale_DO_NOT_USE_AS_REFPRICE","sector","weight_pct","status","capit_cap_total_vnd","due_diligence"])
+rec_df = pd.DataFrame(recs, columns=["book","ticker","play_type","ta","close_bq_stale_DO_NOT_USE_AS_REFPRICE","sector","weight_pct","weight_base","status","capit_cap_total_vnd","due_diligence"])
 csv_path = os.path.join(OUTDIR, f"golive_v23_recommendations_{END}.csv")
 rec_df.to_csv(csv_path, index=False)
 
@@ -840,6 +883,13 @@ status = {
     "capit_adv_share_mode": capit_share_mode,
     "capit_adv_share_nav": {a: d for a, d in sorted(capit_share_detail.items())},
     "capit_adv_x": ADV_X, "capit_adv_d": ADV_D,
+    # VND MỤC TIÊU/slot ĐÃ TÍNH SẴN cho từng account — NGUỒN CHUẨN TẮC để lập plan CAPIT.
+    # Tầng plan COPY thẳng `capit_slot_target_vnd`, KHÔNG nhân thêm `weight_pct` của CSV
+    # (cột đó ĐÃ gồm capit_size — nhân lại là ra capit_size², đúng lỗi 07-21 làm SpaceX
+    # thiếu 87,1tr). KHÁC HẲN `capit_adv_caps`: đó là TRẦN thanh khoản (ràng buộc trên,
+    # executor enforce cứng); đây là MỤC TIÊU phân bổ. Lệnh thật = min(mục tiêu, trần),
+    # rồi mới làm tròn lô.
+    "capit_slot_targets": capit_targets,
     "dd52w": round(dd52_now, 1), "vn_cooling": vn_cool_now,
     "n_bal": int(len(bal)), "n_lag_upcoming": len(lag_up), "n_lag_recent": len(lag_recent),
     "lag_source_error": lag_source_error,
@@ -955,9 +1005,27 @@ if breadth_stale:
              f"`mike/bin/build_universe_pit.py --date <ngày>` + `build_universe_pit_quality.py`.")
 if capit_signal_today:
     L.append(f"- 🚨 **WASHOUT GATE FIRED** — state routing size = **{capit_size:.2f}** (grind={capit_grind}, dd52w={dd52_now:.1f}%, vn_cooling={vn_cool_now})")
-    L.append(f"- Committed VND = size × free cash mỗi book, hold {CAPIT_HOLD}td, stop-exempt, slot-exempt.")
+    # NHÃN CŨ SAI, đã xoá 2026-07-31: dòng này từng ghi "Committed VND = size x free-cash mỗi
+    # book" — công thức free-cash KHÔNG còn dùng từ khi user chốt booknav 2026-07-20. Không
+    # plan nào thật sự dùng nó, nhưng để lại là một cách đọc thứ ba cho cùng một con số.
+    L.append(f"- **Vốn triển khai = NAV_book_LAG × capit_size** = (active_nav × w_lag_target "
+             f"{w_tgt:.0%}) × {capit_size:.2f} — công thức user chốt 2026-07-20. "
+             f"Hold {CAPIT_HOLD}td, stop-exempt, slot-exempt.")
     if basket:
         L.append(f"- Basket quality-golden ({len(basket)} mã): " + ", ".join(basket))
+        L.append(f"- 💰 **VND MỤC TIÊU/mã — DÙNG THẲNG SỐ NÀY, KHÔNG TỰ NHÂN LẠI** "
+                 f"(= status `capit_slot_targets`). Cột `weight_pct`={capit_size/max(len(basket),1)*100:.2f} "
+                 f"của dòng CAPIT trong CSV ĐÃ gồm capit_size — nhân nó lên tổng vốn CAPIT "
+                 f"là ra capit_size² (lỗi thật 07-21, SpaceX thiếu 87,1tr):")
+        for a in sorted(capit_targets):
+            _t = capit_targets[a]
+            if _t.get("capit_slot_target_vnd") is None:
+                L.append(f"    · {a} — ⚠️ {_t.get('error')}")
+                continue
+            L.append(f"    · {a} — book LAG {_t['nav_book_lag_vnd']/1e6:,.0f}tr × "
+                     f"{capit_size:.2f} = tổng {_t['capit_total_target_vnd']/1e6:,.0f}tr "
+                     f"⇒ **{_t['capit_slot_target_vnd']/1e6:,.1f}tr/mã** × {_t['n_slots']} mã")
+        L.append(f"  Lệnh thật = min(mục tiêu ở trên, trần %ADV bên dưới), rồi mới làm tròn lô.")
         L.append(f"- Trần %ADV/tên — TỔNG cả fleet ({ADV_X:.0%}·ADV20·{ADV_D:.0f} phiên, VND "
                  f"tuyệt đối; phần dư để CASH, không dồn sang tên khác): "
                  + ", ".join(f"{t} {capit_caps_total[t]/1e6:,.0f}tr" if t in capit_caps_total
