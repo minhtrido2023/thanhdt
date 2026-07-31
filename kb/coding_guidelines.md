@@ -398,3 +398,41 @@ mất bản đang chờ duyệt vì không tiến trình nào khác động vào
 **Dặn rõ trong MỌI dispatch prompt yêu cầu "sửa X nhưng để Mike duyệt trước":** nói thẳng tên file
 `.proposed`, đừng chỉ nói "để uncommitted" — đó là chỗ 2 lần sự cố hôm nay bị hiểu nhầm thành "sửa
 tại chỗ, đừng git commit" trong khi mối nguy thật không nằm ở git.
+
+## 14. Every Internal Producer→Consumer Pipeline Pair Needs a Real Freshness Check, Not Just a Loose Tolerance
+
+**Root cause (2026-07-10 DT5G cron-order incident, bus question `retro-pattern-recurring-
+dataprovenance-2`):** `daily_refresh_v34b` computed DT5G at 23:15, but `bq_freshness_check` read
+it at 17:30 — 6 hours *before* that day's compute ran, so it silently read *yesterday's* value
+every single day. This wasn't a BQ-vs-DNSE source mistake (§6's rule doesn't cover it — DT5G has
+no DNSE-equivalent live source); it was two **internal cron jobs racing**, hidden for weeks by a
+tolerance (`MAX_STATE_LAG=2`) loose enough to never trip on a 1-day-late read. §6 closed the
+narrow cut (same-day price/volume must come from DNSE, not BQ); this rule generalizes past it —
+the actual failure mode is "code silently consumes data that isn't ready yet, hidden by a
+tolerance or schedule assumption wider than the real risk," and that shape recurs for ANY
+producer→consumer pair, not just BQ-vs-DNSE.
+
+**Rule:** when a script's output feeds another script that runs on its own cron schedule (not
+triggered directly by the producer finishing) — before trusting "producer already ran by the
+time I run" on schedule alone:
+- Add a **real freshness precheck** in the consumer: read the producer's own timestamp/marker
+  (a `_asof`/`_generated_at` field, file mtime, a `*_ok` flag) and confirm it's from *today's*
+  run — not just "a file exists" or "cron order says it should be done by now." Schedule
+  assumptions drift (a producer that starts running late, a job that silently fails but leaves
+  yesterday's output in place) and a precheck is the only thing that catches it.
+- Set the tolerance **as tight as the real risk allows** — wide enough to survive normal jitter
+  (a job finishing 5 minutes late), tight enough that a full day's staleness (or a full skipped
+  run) trips it. `MAX_STATE_LAG=2` days is the concrete anti-pattern: it papered over a
+  structural 6-hour-early read for weeks because "2 days behind" never looked urgent.
+- When adding or changing a cron schedule for either side of a pair, this check is now folded
+  into §11's mandatory 4 questions (`kb/cron_registry.md`) — "đọc gì+vintage" already asks this;
+  treat "does the consumer verify freshness or just trust timing" as part of answering it, not a
+  separate step to skip.
+- This applies to ANY internal producer→consumer relationship on independent cron schedules —
+  not just BQ/DNSE, not just DT5G. Same reasoning as §6 and §9, generalized: verify the artifact
+  you're about to consume is actually the one you think it is, don't infer it from schedule math.
+
+**Not a mandate to retrofit every existing pair at once** — apply going forward on every new/
+changed cron pair (§11), and treat a periodic sweep of *existing* pairs (checking `cron_registry.md`
+for any pair whose consumer trusts schedule-order alone) as Friday KB editorial review material,
+same as the data-registry and stale-duplicate audits already folded in there.
