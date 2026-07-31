@@ -139,13 +139,14 @@ def _attention_flags(out, prog):
         raw.append("Python traceback trong output")
     for m in _ATTENTION_RE.finditer(out):
         raw.append(m.group(0).strip())
-    flags = []
-    for text in raw:
-        hit = next((n for n in notes if n.get("match") and n["match"] in text), None)
-        flags.append({"text": text,
-                      "note": hit.get("note") if hit else None,
-                      "severity": (hit or {}).get("severity", "red")})
-    return flags
+    return [_flag(text, notes) for text in raw]
+
+
+def _flag(text, notes):
+    """1 cờ cảnh báo + note giải thích khớp từ registry (không khớp ⇒ note=None ⇒ RED)."""
+    hit = next((n for n in notes if n.get("match") and n["match"] in text), None)
+    return {"text": text, "note": hit.get("note") if hit else None,
+            "severity": (hit or {}).get("severity", "red")}
 
 
 def probe_command(probe, prog):
@@ -212,11 +213,17 @@ def probe_journal_scan(probe, prog, today):
                             today_hits[m] += 1
     last = os.path.basename(files[-1])[len(f"exec_{account}_"):-len("_journal.csv")]
     head = f"{len(files)} phiên journal `{account}` (gần nhất {last})"
-    body = ""
+    body, flags = "", []
     if markers:
         head += f" · marker hôm nay **{sum(today_hits.values())}** / lũy kế **{sum(total_hits.values())}**"
         body = "- Marker: " + ", ".join(f"{m}={total_hits[m]}" for m in markers)
-    return {"headline": head, "body": body}
+        # Marker bắn HÔM NAY = sự kiện cần người đọc, không phải con số trần: đẩy qua đúng cơ chế
+        # attention_notes như probe_command (chưa có giải thích trong registry ⇒ badge RED).
+        # Chỉ tính hits HÔM NAY — lũy kế sẽ kêu mãi mãi sau 1 lần bắn.
+        notes = prog.get("attention_notes") or []
+        flags = [_flag(f"marker {m}={today_hits[m]} bắn hôm nay", notes)
+                 for m in markers if today_hits[m]]
+    return {"headline": head, "body": body, "flags": flags}
 
 
 def probe_alphalens(probe, prog, today):
@@ -358,6 +365,7 @@ def _csv_row_activity(spec, today):
     row = rows[idx]
     vintage = f" (vintage T-{lag} theo thiết kế, phiên {ts})" if lag and not stale else ""
     lead = ""
+    zw_gap = None
     zw = spec.get("zero_when")
     if zw:
         col = zw["col"]
@@ -368,9 +376,15 @@ def _csv_row_activity(spec, today):
             except (TypeError, ValueError, KeyError):
                 lead = ""
         elif zw.get("unchanged_vs_prev"):
-            prev = rows[idx - 1] if idx > 0 else None
-            lead = ("**Không có giao dịch** — " if prev is not None and prev.get(col) == row.get(col)
-                    else "**CÓ giao dịch** — ")
+            # idx==0: dòng ĐẦU TIÊN của chuỗi, KHÔNG có phiên trước để đối chiếu ⇒ không kết luận
+            # được gì. Trước đây rơi vào nhánh else và tuyên bố "CÓ giao dịch" từ 0 bằng chứng
+            # (ngày đầu của mọi sleeve mới dùng mode này).
+            if idx == 0:
+                lead, zw_gap = ("**n/a — chưa so sánh được** (dòng đầu tiên của `"
+                                f"{spec['path']}`, không có phiên trước để đối chiếu `{col}`) — "), "data"
+            else:
+                lead = ("**Không có giao dịch** — "
+                        if rows[idx - 1].get(col) == row.get(col) else "**CÓ giao dịch** — ")
     try:
         text = _fmt_row(spec["template"], row)
     except (KeyError, ValueError, IndexError) as e:
@@ -380,7 +394,7 @@ def _csv_row_activity(spec, today):
         return (f"**n/a — `{spec['path']}` CHƯA có dòng cho phiên {ts}** (pipeline sinh dữ liệu "
                 f"chạy 15:05/15:30 ICT; nếu đã quá giờ đó ⇒ pipeline chưa chạy/lỗi) · dòng gần "
                 f"nhất {str(row.get(dcol, '?'))[:10]}: {text}"), "data"
-    return f"{lead}{text}{vintage} · nguồn `{spec['path']}`", None
+    return f"{lead}{text}{vintage} · nguồn `{spec['path']}`", zw_gap
 
 
 def today_activity(prog, today):
