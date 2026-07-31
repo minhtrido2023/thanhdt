@@ -72,7 +72,15 @@ chưa ăn → notify "cần người xem", không dispatch lặp vô hạn.
   owner, Wags không tự sửa.
 - **KHÔNG có auto-expire** (Wags 2026-07-31): question chưa ai trả lời thì hiện MÃI ở dòng
   TREO LÂU — checker KHÔNG tự đóng theo thời gian. Chỉ `answer`/`decision` của NGƯỜI mới đóng
-  được. (Bản 07-30 từng auto-close sau 30 ngày bằng 1 `decision` "EXPIRED-30d" ghi dưới
+  được. **Điều này CHỈ đúng vì check #5 quét cả `bus/inbox/archive/*.jsonl.gz`** (Wags
+  2026-07-31 round-4): `kb_nightly.sh` Phase 1b2 (`EVENT_KEEP_DAYS=30`) chuyển MỌI event
+  >30 ngày khỏi hot inbox sang archive nén, KHÔNG lọc `event_type` — nên trước fix này có
+  một **cliff 30 ngày IM LẶNG** ở kb_nightly (không WARN, không dấu vết) dù checker đã gỡ
+  hết horizon. Đã xảy ra THẬT: `Wendy/confirm-dnse-phs-margin-thresholds` (06-22) và
+  `Taylor/cache-stability go-live blocker` (06-27) biến mất khỏi mọi kênh dù CHƯA TỪNG được
+  trả lời; sau fix cả hai hiện lại ở dòng TREO LÂU (38d/34d). Ai đổi Phase 1b2 hoặc đường
+  dẫn archive: phải cập nhật glob của check #5 cùng lúc.
+  (Bản 07-30 từng auto-close sau 30 ngày bằng 1 `decision` "EXPIRED-30d" ghi dưới
   `agent_id=Mike`; arch-reviewer NEEDS_CHANGES high bác: check #5 là kênh backlog DUY NHẤT của
   fleet → sau EXPIRED question biến mất khỏi mọi báo cáo, chỉ hoãn chết-im 48h→30d, lại để MÁY
   quyết thay người trên escalation tiền thật và ô nhiễm KB. Đã gỡ hẳn khối đó.)
@@ -83,7 +91,8 @@ chưa ăn → notify "cần người xem", không dispatch lặp vô hạn.
 - **Question TREO LÂU >48h** (thêm Wags 2026-07-30): checker có dòng WARN riêng
   `⚠️ Câu hỏi TREO LÂU (>48h, chưa ai quyết)` cho question quá cửa sổ 48h mà vẫn chưa có
   answer/decision (KHÔNG có horizon — cắt theo ĐỘ DÀI: in 5 mục cũ nhất + "…và N mục khác",
-  cũ nhất luôn nằm trong tầm mắt). Trước đó question >48h RƠI KHỎI radar hoàn toàn → chết
+  cũ nhất luôn nằm trong tầm mắt; nguồn quét = hot inbox **+ archive nén**, xem gạch đầu
+  dòng auto-expire ở trên). Trước đó question >48h RƠI KHỎI radar hoàn toàn → chết
   im, không owner (vd `Winston/dt5g-live-2-writer-can-quyet` 07-29 sẽ vô hình từ 07-31).
   Dòng này **CỐ TÌNH không dispatch autofix** (loại khỏi cả `COORD_WARN` và `OTHER_WARN`):
   loại question này chỉ USER quyết được, spawn Wags/Winston lặp là token thuần lãng phí — nó

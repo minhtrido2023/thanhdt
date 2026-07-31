@@ -42,7 +42,7 @@ TODAY="$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)"
 NOW_ICT="$(TZ='Asia/Ho_Chi_Minh' date '+%Y-%m-%d %H:%M ICT')"
 
 REPORT="$(python3 - "$WC_ROOT" "$TODAY" "$ACCOUNT" << 'PYEOF'
-import glob, json, os, sys, subprocess, csv
+import glob, gzip, json, os, re, sys, subprocess, csv
 from collections import defaultdict
 
 wc_root, today, account = sys.argv[1:4]
@@ -201,6 +201,9 @@ cutoff = _now - dt.timedelta(hours=48)
 # loại câu hỏi này chỉ user quyết được, spawn Wags lặp lại vô nghĩa — cần VISIBILITY cho
 # người, không cần agent.
 # KHÔNG cắt theo thời gian — câu hỏi treo mãi thì hiện mãi, chỉ cắt theo ĐỘ DÀI dòng in.
+# LƯU Ý: "hiện mãi" chỉ đúng vì vòng lặp dưới quét CẢ bus/inbox/archive/*.jsonl.gz. Bản
+# 2026-07-31 (round-3) tưởng đã gỡ hết horizon nhưng chỉ gỡ ở checker — horizon 30d THẬT
+# nằm ở kb_nightly Phase 1b2 (archive) và vẫn cắt im lặng cho tới khi archive được đọc.
 # Bản 2026-07-30 từng auto-close sau horizon 30 ngày (phát 1 `decision` "EXPIRED-30d" dưới
 # agent_id=Mike). arch-reviewer NEEDS_CHANGES (high, round-2 coord-2026-07-30) bác: cơ chế
 # đó DỰNG LẠI đúng lỗi nó định bịt — check #5 là kênh backlog DUY NHẤT của fleet (đã grep
@@ -219,14 +222,34 @@ inbox_dir = os.path.join(wc_root, "mike", "bus", "inbox")
 pending_q = []
 aged_q = []
 if os.path.isdir(inbox_dir):
-    files = glob.glob(os.path.join(inbox_dir, "*.jsonl"))
+    # PHẢI quét CẢ archive: kb_nightly Phase 1b2 (EVENT_KEEP_DAYS=30) chuyển MỌI event cũ
+    # hơn 30 ngày khỏi bus/inbox/*.jsonl sang bus/inbox/archive/<id>_<YYYY-MM>.jsonl.gz,
+    # KHÔNG lọc theo event_type. Glob chỉ hot inbox = cliff 30 ngày IM LẶNG: câu hỏi chưa
+    # ai trả lời tự biến mất khỏi kênh backlog duy nhất của fleet, không WARN, không dấu
+    # vết (đã xảy ra THẬT 2 lần: Wendy/confirm-dnse-phs-margin-thresholds 2026-06-22 và
+    # Taylor/cache-stability go-live blocker 2026-06-27 — cả hai CHƯA TỪNG được trả lời).
+    # Quét cả 2 pass (question + resolver) trên cùng tập file, giữ matcher ở MỘT nơi
+    # (arch-reviewer required_change #1/#2, NEEDS_CHANGES coord-2026-07-31). Chi phí không
+    # đáng kể: toàn bộ archive ~778 event / 252KB nén.
+    files = sorted(glob.glob(os.path.join(inbox_dir, "*.jsonl"))) + \
+            sorted(glob.glob(os.path.join(inbox_dir, "archive", "*.jsonl.gz")))
     def iter_events(path):
-        with open(path, encoding="utf-8") as f:
-            for line in f:
-                try:
-                    yield json.loads(line)
-                except Exception:
-                    continue
+        opener = (lambda p: gzip.open(p, "rt", encoding="utf-8")) if path.endswith(".gz") \
+                 else (lambda p: open(p, encoding="utf-8"))
+        try:
+            with opener(path) as f:
+                for line in f:
+                    try:
+                        yield json.loads(line)
+                    except Exception:
+                        continue
+        except Exception:
+            # File archive hỏng/đang ghi dở → bỏ qua file đó, KHÔNG làm chết cả check.
+            return
+    def _agent_of(path):
+        # "Wendy.jsonl" → Wendy; "Wendy_2026-06.jsonl.gz" → Wendy (bỏ hậu tố tháng).
+        name = os.path.basename(path).replace(".jsonl.gz", "").replace(".jsonl", "")
+        return re.sub(r"_\d{4}-\d{2}$", "", name)
     # Resolver = answer HOẶC decision — 1 quyết định thường đóng câu hỏi mà không lặp lại
     # y hệt topic (vd decision "deposit-rate-autowrite-removed"), và người trả lời hay
     # thêm hậu-tố trạng thái vào topic gốc (…-question-closed / …-confirmed / … [RESOLVED]).
@@ -261,8 +284,9 @@ if os.path.isdir(inbox_dir):
         if not q_topic:
             return False
         return any((r == q_topic or q_topic in r) and r_ts >= q_ts for r, r_ts in resolvers)
+    seen_q = set()
     for p in files:
-        agent = os.path.basename(p).replace(".jsonl", "")
+        agent = _agent_of(p)
         for rec in iter_events(p):
             if rec.get("event_type") != "question":
                 continue
@@ -272,6 +296,12 @@ if os.path.isdir(inbox_dir):
                 continue
             if _resolved(rec.get("topic"), ts_dt):
                 continue
+            # Chống đếm đôi nếu 1 event vừa còn ở hot inbox vừa đã sang archive (kb_nightly
+            # bị kill giữa chừng): khoá theo (agent, topic, ts).
+            key = (agent, rec.get("topic"), rec.get("ts"))
+            if key in seen_q:
+                continue
+            seen_q.add(key)
             if ts_dt >= cutoff:
                 pending_q.append(f"{agent}/{rec.get('topic')}")
             else:
