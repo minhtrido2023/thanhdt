@@ -568,7 +568,9 @@ print(int(p.get('manual_offbook_assets_vnd') or 0))
   CAPIT_FIRED="$(cd "$WORKDIR" && python3 -c "
 import json
 try:
-    print('yes' if json.load(open('data/golive_v23_status.json')).get('capit_fired') else 'no')
+    s = json.load(open('data/golive_v23_status.json'))
+    # capit_fired -> capit_signal_today (2026-07-31); fallback cho status ghi trước lần đổi tên.
+    print('yes' if s.get('capit_signal_today', s.get('capit_fired')) else 'no')
 except Exception:
     print('no')
 " 2>/dev/null)"
