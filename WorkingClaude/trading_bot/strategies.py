@@ -229,7 +229,13 @@ class V23Strategy(StrategyBase):
 
     def _load_status(self):
         with open(STATUS_FILE, encoding="utf-8") as f:
-            return json.load(f)
+            st = json.load(f)
+        # `capit_fired` đổi tên -> `capit_signal_today` (2026-07-31, job Taylor_20260731_031434):
+        # tên cũ bị đọc nhầm thành "đang giữ CAPIT" trong khi nó chỉ là gate breadth CỦA NGÀY CHẠY.
+        # Fallback vì file này có thể là bản chạy TRƯỚC lần đổi tên (chỉ có key cũ).
+        if "capit_signal_today" not in st and "capit_fired" in st:
+            st["capit_signal_today"] = st["capit_fired"]
+        return st
 
     def _load_recs(self, signal_date):
         path = os.path.join(GOLIVE_OUT, f"golive_v23_recommendations_{signal_date}.csv")
@@ -342,7 +348,10 @@ class V23Strategy(StrategyBase):
                     continue           # chỉ vào lệnh LAG đến hạn phiên tới
                 book_nav = paper["lag_nav"] * scale
             elif book == "CAPIT":
-                if not status.get("capit_fired"):
+                # Vào lệnh CAPIT MỚI chỉ khi gate fire ĐÚNG NGÀY CHẠY — đây là đúng chỗ dùng
+                # capit_signal_today (không phải capit_episode_open: episode đang mở nghĩa là
+                # ĐANG GIỮ, không phải được mua thêm).
+                if not status.get("capit_signal_today"):
                     continue
                 book_nav = paper["lag_nav"] * scale * float(status.get("capit_size", 0))
                 w = w if w > 0 else 1.0 / max(1, int(status.get("n_capit_basket", 1)))

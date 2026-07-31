@@ -48,7 +48,7 @@ brk.PAPER_STATE_FILE = os.path.join(TMP, "paper_main.json")
 # --- fixtures ---
 SIG = "2026-06-11"
 json.dump({"date": SIG, "signal_date": SIG, "state": 3, "state_name": "NEUTRAL",
-           "capit_fired": False, "n_capit_basket": 0},
+           "capit_signal_today": False, "n_capit_basket": 0},
           open(strat.STATUS_FILE, "w", encoding="utf-8"))
 
 pd.DataFrame([

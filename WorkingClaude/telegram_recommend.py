@@ -460,7 +460,9 @@ def build_message(target: str, state5, state_label: str,
     br = st.get("breadth_oversold")
     if br is not None:
         lines.append("")
-        if st.get("capit_fired"):
+        # capit_fired -> capit_signal_today (2026-07-31): gate breadth CỦA NGÀY CHẠY, KHÔNG phải
+        # "đang giữ CAPIT". Fallback vì status có thể là bản chạy trước lần đổi tên.
+        if st.get("capit_signal_today", st.get("capit_fired")):
             lines.append(f"<b>🧯 CAPIT v2:</b> 🚨 <b>WASHOUT</b> — breadth oversold {br*100:.1f}% ≥ gate 30%")
             lines.append(f"  size={st.get('capit_size', 0):.2f} (grind={st.get('capit_grind')}, "
                          f"dd52w={st.get('dd52w', '?')}%, vn_cooling={st.get('vn_cooling')})")

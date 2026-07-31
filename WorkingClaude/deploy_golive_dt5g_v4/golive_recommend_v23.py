@@ -197,7 +197,7 @@ WASHOUT_GATE = 0.31 if CAPIT_BREADTH_SOURCE == "pit" else 0.30
 # Switch RIÊNG với breadth ở trên vì hai thứ này hỏng theo hai kiểu khác nhau: breadth sai thì
 # sai NGÀY kích hoạt, pool sai thì sai TÊN MÃ được mua. Cutover trigger đã đo là 0 tác động
 # ngày LIVE; cutover pool thì KHÔNG:
-#   Đo ngày 2026-07-22 (universe_pit_p4_selfcheck.py T6c/T6d, trong lúc `capit_fired=true` và
+#   Đo ngày 2026-07-22 (universe_pit_p4_selfcheck.py T6c/T6d, trong lúc `capit_signal_today=true` và
 #   đợt giải ngân CAPIT đang DỞ): pool "pit" thêm **HVT** (pbz −1,362 ⇒ đứng HẠNG 3) ⇒ rổ đổi
 #   từ 4 mã [PVT, SAB, SIP, VNM] thành 5 mã [HVT, PVT, SAB, SIP, VNM] — vừa thêm một lệnh mua
 #   thật, vừa pha loãng equal-weight 25% → 20% cho 4 mã đang khớp dở.
@@ -206,14 +206,14 @@ WASHOUT_GATE = 0.31 if CAPIT_BREADTH_SOURCE == "pit" else 0.30
 #   turnover MỘT NGÀY (hôm nay 2,063 tỷ — sát mép) chứ không đo ADV. `ticker_prune` vô tình che
 #   lỗ hổng này bao lâu nay; bỏ prune ra là lộ. Sửa sàn thanh khoản của pool (ADV thay vì
 #   turnover-1-ngày) là ĐỔI CHIẾN LƯỢC — cần R&D + backtest riêng, KHÔNG làm lẫn vào migration.
-# ⇒ Ghim tại đây tới khi (a) `capit_fired` về false, VÀ (b) user duyệt riêng khoản sàn thanh
-#   khoản pool. Cổng "không cutover P4 khi capit_fired=true" (§4.4 mục 4, user duyệt Q5) đang
+# ⇒ Ghim tại đây tới khi (a) `capit_signal_today` về false, VÀ (b) user duyệt riêng khoản sàn thanh
+#   khoản pool. Cổng "không cutover P4 khi capit_signal_today=true" (§4.4 mục 4, user duyệt Q5) đang
 #   CHẶN đúng chỗ nó sinh ra để chặn.
 CAPIT_POOL_SOURCE = "prune"         # "pit" | "prune"  ← cutover 1 dòng khi 2 điều kiện trên đủ
 
 
 def capit_breadth_sql(start, end):
-    """Chuỗi breadth oversold — nguồn của trigger `capit_fired` VÀ của `capit_grind` (size)."""
+    """Chuỗi breadth oversold — nguồn của trigger `capit_signal_today` VÀ của `capit_grind` (size)."""
     if CAPIT_BREADTH_SOURCE == "prune":
         return f"""SELECT p.time, AVG(CASE WHEN p.D_RSI<0.3 THEN 1.0 ELSE 0 END) oversold
 FROM tav2_bq.ticker_prune p
@@ -654,7 +654,7 @@ if breadth_stale:
     print(f"  WARNING: breadth CAPIT CŨ — chuỗi tới {br['time'].max() if len(br) else 'rỗng'} "
           f"nhưng dữ liệu giá đã có tới {breadth_src_max}. CAPIT FAIL-CLOSED (không fire lệnh "
           f"mới trên dữ liệu cũ). Chạy mike/bin/build_universe_pit.py + _quality.py cho ngày thiếu.")
-capit_fired = bool(pd.notna(breadth_today) and breadth_today >= WASHOUT_GATE and not breadth_stale)
+capit_signal_today = bool(pd.notna(breadth_today) and breadth_today >= WASHOUT_GATE and not breadth_stale)
 vnh = bq(f"""SELECT t.time, t.Close FROM tav2_bq.ticker AS t
 WHERE t.ticker='VNINDEX' AND t.time BETWEEN DATE '{START_VNI}' AND DATE '{END}' ORDER BY t.time""")
 vnh["time"] = pd.to_datetime(vnh["time"]); vnh = vnh.set_index("time")
@@ -667,7 +667,7 @@ vn_cool_now = bool(vnh["vn_cooling"].iloc[-1]) if len(vnh) and pd.notna(vnh["vn_
 
 capit_size, capit_grind, basket, capit_dd_excluded = 0.0, False, [], []
 capit_caps_total, capit_caps, capit_shares, capit_share_mode, capit_share_detail = {}, {}, {}, "n/a", {}
-if capit_fired:
+if capit_signal_today:
     wdays = br[br["oversold"] >= WASHOUT_GATE]["time"].tolist()
     bdates = br["time"].tolist(); i0 = len(bdates) - 1
     wset = set(wdays)
@@ -696,15 +696,15 @@ if capit_fired:
             capit_caps = {a: {t: v * s for t, v in capit_caps_total.items()}
                           for a, s in capit_shares.items()}
 
-# ── 6b. Sổ episode CAPIT (QUAN SÁT THUẦN — bên NGOÀI nhánh `if capit_fired`) ──
-# `capit_fired` là điều kiện CỦA NGÀY CHẠY: breadth rớt dưới gate ⇒ cờ về False và basket/size về
-# rỗng NGAY, dù vị thế thật vẫn đang giữ (đúng cái đã xảy ra 07-29/07-30 khi còn đủ 5 mã ở 2
+# ── 6b. Sổ episode CAPIT (QUAN SÁT THUẦN — bên NGOÀI nhánh `if capit_signal_today`) ──
+# `capit_signal_today` là điều kiện CỦA NGÀY CHẠY: breadth rớt dưới gate ⇒ cờ về False và
+# basket/size về rỗng NGAY, dù vị thế thật vẫn đang giữ (đúng cái đã xảy ra 07-29/07-30 khi còn đủ 5 mã ở 2
 # account). Sổ episode giữ "đã vào lệnh 07-20, còn mở" để mọi kênh báo cáo không im lặng.
-# RÀNG BUỘC: khối này chỉ ĐỌC basket/capit_size/capit_fired đã tính xong ở trên và GHI 1 file log
+# RÀNG BUỘC: khối này chỉ ĐỌC basket/capit_size/capit_signal_today đã tính xong ở trên và GHI 1 file log
 # riêng — không gán lại biến quyết định nào. Xem capit_episode.py (giới hạn + cơ chế đóng episode).
 import capit_episode
 capit_ep = capit_episode.update(
-    signal_date=str(LATEST.date()), signal_today=capit_fired, basket=basket, size=capit_size,
+    signal_date=str(LATEST.date()), signal_today=capit_signal_today, basket=basket, size=capit_size,
     session_dates=[str(d.date()) for d in vnh.index])
 if capit_ep.get("capit_episode_open"):
     print(f"  CAPIT episode {capit_ep['capit_episode_id']} ĐANG MỞ "
@@ -794,7 +794,14 @@ status = {
     "alloc_band": ALLOC_BAND, "band_breach": bool(band_breach), "alloc_note": alloc_note,
     "etf_park_frac": etf_frac,
     "breadth_oversold": (round(breadth_today, 4) if pd.notna(breadth_today) else None),
-    "washout_gate": WASHOUT_GATE, "capit_fired": capit_fired,
+    # ĐỌC KỸ TÊN: `capit_signal_today` = gate breadth CỦA RIÊNG NGÀY CHẠY (tên cũ `capit_fired`
+    # đọc nhầm thành "đang giữ CAPIT" — đúng cái sai đã xảy ra 07-30). Muốn biết CÓ ĐANG GIỮ hay
+    # không thì đọc `capit_episode_open` (§6b), không đọc cờ này.
+    "washout_gate": WASHOUT_GATE, "capit_signal_today": capit_signal_today,
+    # ALIAS TƯƠNG THÍCH NGƯỢC — giữ, KHÔNG bỏ: (a) cột BQ `recommend_v23.status.capit_fired` đã có
+    # lịch sử, push_recommend_v23_to_bq.py map theo đúng tên này; (b) bản release đóng gói
+    # release_8l_full/ là ảnh chụp, không sửa theo. Consumer MỚI phải dùng capit_signal_today.
+    "capit_fired": capit_signal_today,
     # P4 (§4.4-C-conserv): mẫu số breadth + ngưỡng ĐI KÈM NHAU — ghi cả hai vào artifact để một
     # bản ghi lịch sử luôn tự nói được nó sinh ra trên thang đo nào.
     "capit_universe_source": CAPIT_BREADTH_SOURCE,
@@ -829,8 +836,8 @@ status = {
     "n_lag_rating_excluded": len(lag_rating_dropped),
     "lag_rating_filter_error": lag_rating_error,
     "n_capit_basket": len(basket),
-    # Sổ episode (§6b) — TRẠNG THÁI ĐANG GIỮ, khác hẳn capit_fired/capit_signal_today (điều kiện
-    # của ngày chạy). Mọi gate báo cáo phải nhìn `capit_signal_today OR capit_episode_open`.
+    # Sổ episode (§6b) — TRẠNG THÁI ĐANG GIỮ, khác hẳn capit_signal_today (điều kiện của ngày
+    # chạy). Mọi gate báo cáo phải nhìn `capit_signal_today OR capit_episode_open`.
     **capit_ep,
     "n_park": len(_park_basket) if _park_basket is not None else 0,
     "park_rebal_date": _park_rebal_date,
@@ -913,7 +920,7 @@ if breadth_stale:
              f"{br['time'].max().date() if len(br) else 'rỗng'} trong khi dữ liệu giá đã có tới "
              f"{breadth_src_max}. KHÔNG fire lệnh CAPIT mới trên dữ liệu cũ. Khắc phục: chạy "
              f"`mike/bin/build_universe_pit.py --date <ngày>` + `build_universe_pit_quality.py`.")
-if capit_fired:
+if capit_signal_today:
     L.append(f"- 🚨 **WASHOUT GATE FIRED** — state routing size = **{capit_size:.2f}** (grind={capit_grind}, dd52w={dd52_now:.1f}%, vn_cooling={vn_cool_now})")
     L.append(f"- Committed VND = size × free cash mỗi book, hold {CAPIT_HOLD}td, stop-exempt, slot-exempt.")
     if basket:
@@ -969,7 +976,7 @@ open(md_path, "w", encoding="utf-8").write("\n".join(L))
 print(f"\n  state={state_today}({SNAME.get(state_today,'?')})  w_LAG tgt={w_tgt*100:.0f}%" +
       (f" cur={w_cur*100:.0f}%" if w_cur is not None else "") +
       f"  parking={etf_frac*100:.0f}%  breadth={breadth_today*100:.1f}%")
-print(f"  BAL picks: {len(bal)} | LAG upcoming: {len(lag_up)} | CAPIT fired: {capit_fired}")
+print(f"  BAL picks: {len(bal)} | LAG upcoming: {len(lag_up)} | CAPIT fired: {capit_signal_today}")
 print(f"  -> {md_path}")
 print(f"  -> {csv_path}")
 print("DONE.")
