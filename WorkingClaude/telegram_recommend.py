@@ -457,21 +457,56 @@ def build_message(target: str, state5, state_label: str,
     lines.append(build_lag_section(lag_df, w_tgt))
 
     # ── CAPIT v2 monitor ──
+    # Gate hiển thị = `capit_signal_today OR capit_episode_open` (2026-07-31). Chỉ nhìn cờ tín
+    # hiệu là nguồn của sự cố im lặng 07-29→07-31: breadth rớt dưới gate ⇒ cờ về False NGAY trong
+    # khi vị thế THẬT vẫn còn đủ 5 mã ở 2 account — báo cáo nói "dormant" như thể đã thoát hết.
     br = st.get("breadth_oversold")
-    if br is not None:
+    if "capit_episode_open" not in st:
+        # status JSON ở đây là bản của lần golive TRƯỚC (telegram 18:00 < golive 19:00) — trước
+        # lần golive đầu tiên sau khi sổ episode ra đời, key này chưa tồn tại. Đọc thẳng sổ để
+        # không im lặng suốt cửa sổ đó. Status thắng khi có key (nguồn cùng ngày với báo cáo).
+        try:
+            import capit_episode
+            st = {**capit_episode.observe(), **st}
+        except Exception as e:
+            st = {**st, "capit_episode_error": f"không đọc được sổ episode: {e}"}
+    ep_open = bool(st.get("capit_episode_open"))
+    if br is not None or ep_open:
         lines.append("")
         # capit_fired -> capit_signal_today (2026-07-31): gate breadth CỦA NGÀY CHẠY, KHÔNG phải
         # "đang giữ CAPIT". Fallback vì status có thể là bản chạy trước lần đổi tên.
+        br_txt = f"breadth oversold {br*100:.1f}%" if br is not None else "breadth oversold n/a"
         if st.get("capit_signal_today", st.get("capit_fired")):
-            lines.append(f"<b>🧯 CAPIT v2:</b> 🚨 <b>WASHOUT</b> — breadth oversold {br*100:.1f}% ≥ gate 30%")
+            lines.append(f"<b>🧯 CAPIT v2:</b> 🚨 <b>WASHOUT</b> — {br_txt} ≥ gate 30%")
             lines.append(f"  size={st.get('capit_size', 0):.2f} (grind={st.get('capit_grind')}, "
                          f"dd52w={st.get('dd52w', '?')}%, vn_cooling={st.get('vn_cooling')})")
             if capit_df is not None and not capit_df.empty:
                 lines.append(f"  basket ({len(capit_df)}): " +
                              ", ".join(_esc(t) for t in capit_df["ticker"].tolist()))
             lines.append("  → committed = size × free cash mỗi book · hold 60td · stop/slot-exempt")
+        elif ep_open:
+            # Tín hiệu ngày hôm nay TẮT nhưng episode CHƯA đóng ⇒ vẫn đang giữ vị thế thật.
+            held = st.get("capit_sessions_held")
+            lines.append(f"<b>🧯 CAPIT v2:</b> 📌 <b>ĐANG GIỮ</b> (episode "
+                         f"{_esc(st.get('capit_episode_id') or '?')}) — tín hiệu hôm nay TẮT "
+                         f"({br_txt} &lt; gate 30%) nhưng vị thế CHƯA thoát")
+            lines.append(f"  entry {_esc(st.get('capit_episode_entry_date') or '?')} · "
+                         f"{held if held is not None else '?'} phiên · "
+                         f"size={st.get('capit_episode_size', 0):.2f}")
+            ep_basket = st.get("capit_episode_basket") or []
+            if ep_basket:
+                lines.append(f"  rổ gốc ({len(ep_basket)}): " +
+                             ", ".join(_esc(t) for t in ep_basket))
+            rem = st.get("capit_episode_remaining_qty") or {}
+            for acct in sorted(rem):
+                q = rem[acct] or {}
+                lines.append(f"  còn ở {_esc(acct)}: " +
+                             ", ".join(f"{_esc(t)} {q[t]:,}" for t in sorted(q)))
+            lines.append("  → exit do NGƯỜI quyết (không có luật tự bán) · stop/slot-exempt")
         else:
-            lines.append(f"<b>🧯 CAPIT v2:</b> breadth oversold {br*100:.1f}% &lt; gate 30% — dormant")
+            lines.append(f"<b>🧯 CAPIT v2:</b> {br_txt} &lt; gate 30% — dormant")
+        if st.get("capit_episode_error"):
+            lines.append(f"  ⚠️ sổ episode: {_esc(st['capit_episode_error'])}")
 
     # Universe stats
     if include_universe and pt_counts:

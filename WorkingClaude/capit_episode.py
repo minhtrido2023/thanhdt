@@ -279,6 +279,23 @@ def _report(ep, stale=None):
     }
 
 
+def observe(ledger_path=None):
+    """ĐỌC THUẦN sổ episode — không gọi broker, không ghi gì, không bao giờ raise.
+
+    Cho consumer BÁO CÁO đọc trực tiếp khi status JSON chưa có key episode: file status là bản
+    ghi của lần golive TRƯỚC (telegram_recommend chạy 18:00, golive 19:00), nên có một cửa sổ
+    thật mà status còn là bản cũ trong khi sổ đã có episode đang mở.
+    """
+    try:
+        return _report(_open_episode(_load(ledger_path or LEDGER_PATH)))
+    except Exception as e:
+        return {"capit_episode_open": None, "capit_episode_id": None,
+                "capit_episode_entry_date": None, "capit_episode_basket": [],
+                "capit_episode_size": 0.0, "capit_sessions_held": None,
+                "capit_episode_remaining_qty": {},
+                "capit_episode_error": f"{type(e).__name__}: {e}"}
+
+
 def update(signal_date, signal_today, basket, size, session_dates,
            workdir=WORKDIR, ledger_path=None, write=True):
     """Cập nhật sổ episode và trả về các field quan sát cho status JSON.
