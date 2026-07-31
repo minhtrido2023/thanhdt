@@ -1,0 +1,80 @@
+{
+  "episodes": [
+    {
+      "episode_id": "CAPIT-2026-07-20",
+      "entry_signal_date": "2026-07-20",
+      "basket": [
+        "NCT",
+        "PVT",
+        "SAB",
+        "SIP",
+        "VNM"
+      ],
+      "size": 0.75,
+      "status": "open",
+      "opened_by": "golive_recommend_v23",
+      "note": "rổ/size chốt tại phiên gate fire lần đầu; rổ được golive tính LẠI mỗi ngày và co dần — sổ này giữ rổ GỐC lúc vào lệnh",
+      "sessions_held": 8,
+      "sessions_held_note": "số phiên giao dịch đã trôi qua KỂ TỪ SAU ngày tín hiệu vào",
+      "accounts": [
+        "SpaceX",
+        "ZaloPay"
+      ],
+      "qty_per_account": {
+        "SpaceX": {
+          "NCT": 500,
+          "PVT": 3500,
+          "SAB": 1100,
+          "SIP": 1700,
+          "VNM": 900
+        },
+        "ZaloPay": {
+          "NCT": 373,
+          "PVT": 2071,
+          "SAB": 744,
+          "SIP": 749,
+          "VNM": 601
+        }
+      },
+      "qty_per_account_planned": {
+        "SpaceX": {
+          "NCT": 500,
+          "PVT": 3500,
+          "SAB": 1100,
+          "SIP": 1700,
+          "VNM": 900
+        },
+        "ZaloPay": {
+          "NCT": 373,
+          "PVT": 2070,
+          "SAB": 744,
+          "SIP": 749,
+          "VNM": 601
+        }
+      },
+      "deployed": true,
+      "qty_source": "fill broker dnse_raw kind=orders (lọc account_label), quy book CAPIT qua data/trade_plans/plan_*.json",
+      "remaining_qty_broker": {
+        "SpaceX": {
+          "NCT": 500,
+          "PVT": 3500,
+          "SAB": 1100,
+          "SIP": 1700,
+          "VNM": 900
+        },
+        "ZaloPay": {
+          "NCT": 373,
+          "PVT": 2071,
+          "SAB": 744,
+          "SIP": 749,
+          "VNM": 601
+        }
+      },
+      "remaining_qty_asof": "2026-07-30",
+      "remaining_qty_note": "vị thế broker KHÔNG mang nhãn book — số này là TỔNG mọi book (PVT/SIP còn nằm trong custom30V parking), không phải riêng CAPIT",
+      "evidence_error": null,
+      "last_update": "2026-07-30"
+    }
+  ],
+  "updated_at": "2026-07-31T10:32:14"
+}

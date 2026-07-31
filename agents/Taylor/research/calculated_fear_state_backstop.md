@@ -985,3 +985,79 @@ giữ mù chờ đủ 2 năm.
 3. **Trần sleeve ≤3% NAV, ≤3 tên** đồng thời (tần suất ~1/năm, tương quan thấp, worst-case −2 tới −3pp).
 4. **Vẫn CHỈ mua case qua due-diligence §2/§10 + user duyệt.** Screen cơ học idiosyncratic **KHÔNG** có
    edge (median LỖ) → tuyệt đối không auto-buy; DD định tính gánh 100% việc phân biệt.
+
+---
+
+## §13. Nhật ký QUÉT TUẦN (mandate user 2026-07-23) — mỗi tuần 1 mục, kể cả tuần sạch
+
+> Quy tắc quiet-heartbeat: tuần không có case mới VẪN ghi 1 dòng (phân biệt "đã quét, sạch" với
+> "pipeline chết"). Chỉ case đủ dữ liệu mới nâng thành mục §6/§7 riêng.
+
+### 2026-07-31 (job `Taylor_20260731_011001`) — 0 QUALIFY mới · 1 case mới AMBIGUOUS (TV4) · 2 read-through cho case cũ
+
+**Phần 1 — anomaly_scan** (`anomaly_scan.py`, phiên 2026-07-30, universe 245 mã = 23 holding + 236
+watchlist rating≤2; cache BQ refresh 30/07 23:55).
+Cờ MỚI trong 7 phiên (24/07→30/07): **chỉ 1** — VRE `CEIL2` 30/07 (+6,8%, tăng trần 2 phiên) → tín
+hiệu TĂNG, không thuộc phạm vi fear-buy.
+Cụm 27/07 (**CSV, CTS, MBS, VND, SHS** cùng sàn −6,5…−7,0% trong phiên VNINDEX chỉ −1,0%) = **flush
+beta ngành chứng khoán**, KHÔNG phải sự kiện riêng lẻ: không có tin khởi tố/pháp lý nào, cả 5 mã hồi
+lại trong 3 phiên (VND 15.350→17.050, CTS 20.000→21.600, MBS 17.400→18.400, SHS 14.300→15.600, CSV
+20.000→21.250). Đọc theo §2.5: KHÔNG có sàn tài sản hữu hình (PB 1,12–2,05, không mã nào ≲1), CF_OA
+âm là cấu trúc của CTCK (cho vay margin) chứ không phải tín hiệu chất lượng → **NON**.
+Riêng **CSV** (Hoá chất Cơ bản Miền Nam) là tên chất lượng nhất cụm — PE 8,8 · PB 1,31 · ROE5Y 18,3% ·
+Debt_Eq 0,29 · FSCORE 6 — nhưng nhịp giảm 23.800→20.000 (−16%/8 phiên) là **trôi theo chu kỳ hoá chất
++ lây từ DGC**, không có sự kiện khủng hoảng rời rạc, và PB 1,31 > sàn §2.5 → **WATCH, chưa QUALIFY**.
+Ngưỡng falsify: PB về ≲1,0 kèm bằng chứng đáy giá phốt-pho → xét lại theo §2.5.
+
+**Phần 2 — WebSearch tin khởi tố/bắt giữ 7–14 ngày** (bù điểm mù của scan giá/KL). 2 tin mới:
+
+| Mã | Sự kiện | Phản ứng giá | Kết luận |
+|---|---|---|---|
+| **PAT** (Phốt pho Apatit VN, DGC chi phối) | CT HĐQT **Lưu Bách Đạt** khởi tố 22/07, tội **gây ô nhiễm môi trường** (cùng người, cùng vụ với DGC) | **KHÔNG có** — 21/07: 63.000 → 22/07: 63.000 → 23/07: 62.800; cả tuần −3% | **KHÔNG phải case fear-buy**: (a) thị trường không định giá nỗi sợ nào để mua rẻ; (b) tội danh môi trường/khai thác tài nguyên **chạm lõi** (rủi ro giấy phép mỏ) — sai chiều tiêu chí §2#1; (c) PB 2,13 → không có sàn tài sản. Bổ nhiệm CT mới 28/07 (6 ngày). |
+| **TV4** (PECC4) | 11/06 khởi tố+tạm giam **CT Lê Cao Quyền, TGĐ, Phó TGĐ VÀ Kế toán trưởng** (đại án ngành điện: 47 bị can / 5 tội danh gồm **vi phạm kế toán**, tham ô, hối lộ). 24/07 miễn nhiệm toàn bộ 4 người, ĐHĐCĐ bất thường tháng 8 kiện toàn | Sập −25% hồi 06, nay **đi ngang 12.800–13.000 hai tuần** (+3% từ đáy) | **AMBIGUOUS — xem dưới** |
+
+**Phần 3 — TV4: case mới đáng ghi (anh em của TV1, trước nay chỉ là 1 dòng base-rate ở §1)**
+
+Số tại 30/07 (BQ cache, Q2/2026 đã công bố 21/07): giá 13.000 · **PB 0,98** (BVPS 13.269) · PE 5,85 vs
+PE_MA5Y 8,37 · **DY 7,8%** · ROE_Trailing 15,8% · ROE_Min3Y 11,7% · **Debt_Eq 0,56 · CR 1,72 · tiền
+59,5 tỷ / tổng TS 410 tỷ** · CF_OA_P0 10,75 tỷ vs NP_P0 3,60 tỷ (**≈3× NP** ✓) · CF_OA_3Y lật từ
+−24,8 tỷ (2025) sang **+67,3 tỷ**.
+
+Chấm theo §2: #2 backstop *(EVN-family — **⚠️ tỷ lệ sở hữu NN chưa verify, phải xác nhận trước nếu
+theo đuổi**)*; #3 CF_OA≥NP ✓ (Q2 3×, nhưng Q4/25 thì 17,2 vs 32,3 ✗ — mùa vụ Q4 nặng, hồ sơ yếu hơn
+TV1 rõ); #4 solvent ✓ **mạnh** (nợ thấp nhất họ TV, CR 1,72, tiền 15% tổng TS); #5 sàn định giá ✓
+(PB 0,98, PE 5,85 < PE_MA5Y).
+**Điểm CHẶN — khác TV1 về CHẤT:** vụ án bắt **cả Kế toán trưởng** với tội danh **vi phạm quy định về
+kế toán** → đánh thẳng vào tính toàn vẹn của chính BCTC vừa dùng để định giá. Đây đúng gạch đầu dòng
+❌ của §2 ("cáo buộc gian lận BCTC làm *toàn bộ* con số vô giá trị"). TV1 chỉ bị ở tầng Chủ tịch (rủi
+ro tương đương của TV1 đến từ đường khác: 4 Big4 từ chối kiểm toán).
+Hai chặn phụ: (a) **thanh khoản ~6.260 cp/phiên ≈ 81 triệu VND/ngày** — chỉ bằng ~1/7 TV1, ràng buộc
+thanh khoản binding trước Kelly (§12#5) rất sớm; (b) **không còn dislocation để mua** — giá đã đi ngang
+2 tuần, nhịp sợ hãi xảy ra từ tháng 6.
+
+→ **TV4 = AMBIGUOUS (không nâng lên QUALIFY).** **Cổng xác nhận nhị phân: ý kiến kiểm toán BCTC bán
+niên soát xét 2026 (hạn ~30/08)** — ý kiến chấp nhận toàn phần sau khi Kế toán trưởng bị bắt sẽ gỡ
+đúng tiêu chí #1; ý kiến ngoại trừ / từ chối / chậm nộp = **NON**, đóng case. Cổng phụ: kết quả ĐHĐCĐ
+bất thường tháng 8 (ban lãnh đạo mới) + verify tỷ lệ sở hữu EVN.
+
+**Phần 4 — read-through cho case đang theo dõi (không làm lại từ đầu)**
+- **DGC** (§6, AMBIGUOUS-nghiêng-constructive): dữ liệu Q2 của **PAT** — công ty con phốt-pho — về
+  ngày 22/07 và **xác nhận từ phía dưới** luận điểm dòng tiền của RE-DO: FSCORE 2→7, **PCF lật từ
+  −27,2 sang +4,0** (CF_OA dương trở lại), Debt_Eq 0,44→0,36, DY 15,8%, ROE5Y 72%, ROIC5Y 52,5%. Giá
+  DGC cũng đã hồi 36.000 (27/07) → **39.050 (30/07)**, tức đáy sàn 23-27/07 giữ được. Không đổi khung
+  QUALIFIED-YES vị thế NHỎ ≤0,5–1,0% NAV; chưa có tín hiệu §3-T2 đủ (higher-low mới 1 tuần).
+- **TV1** (§4): **không có tin mới**. Giá 19.400–20.000 (đi ngang, đáy 19.400 ngày 28/07). Hai cổng
+  vẫn nguyên: lấy ý kiến chọn đơn vị kiểm toán **10/08**, ngày ĐKCC cổ tức 15% chưa công bố.
+  **Catalyst-confirm gián tiếp mới, có lợi:** **TV2 công bố LNST Q2/2026 ~49 tỷ (+750% YoY) và tăng
+  trần 29/07** (23.700→25.350, KL 307k ≈ 2–3× bình thường) — bằng chứng sống rằng một CTCP tư vấn điện
+  có lãnh đạo bị khởi tố vẫn công bố được KQKD bình thường và thị trường **re-rate ngay**. ⚠️ Chất
+  lượng lợi nhuận có ngoại lệ: phần lớn mức tăng đến từ **doanh thu tài chính (lãi tiền gửi/cho vay:
+  2,8 tỷ → 44 tỷ)**, không phải lõi tư vấn → đọc là tín hiệu *thị trường sẵn sàng tha thứ*, KHÔNG phải
+  bằng chứng lõi khoẻ.
+- **PNJ** (§7, AMBIGUOUS): không có tin mới. Giá ổn định 32.500–32.900 sau đáy 30.750 (24/07) — đã
+  ngừng rơi 4 phiên. Cổng xác nhận vẫn là **BCTC Q3/2026 (~cuối 10/2026)**. ⚠️ Nhắc: cờ
+  `anomaly_flags.json` của PNJ có **TTL 30 ngày** (last_alert 24/07 → hết hạn ~23/08), tức gate loại
+  PNJ khỏi rổ CAPIT sẽ **tự mở** trước cổng xác nhận thật — cần quyết định gia hạn trước 23/08.
+
+**Tổng kết tuần**: 245 mã quét cơ học + 5 truy vấn tin tức · **0 QUALIFY mới** · 1 AMBIGUOUS mới (TV4,
+cổng 30/08) · 1 WATCH (CSV) · 5 NON (cụm CTCK 27/07) · 1 loại thẳng (PAT — không có nỗi sợ để mua).

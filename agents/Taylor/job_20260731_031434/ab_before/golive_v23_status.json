@@ -1,0 +1,441 @@
+{
+  "date": "2026-07-31",
+  "signal_date": "2026-07-30",
+  "state": 3,
+  "state_name": "NEUTRAL",
+  "source": "DT5G_macro",
+  "w_lag_target": 0.5,
+  "w_lag_current": 0.4935,
+  "alloc_band": 0.1,
+  "band_breach": false,
+  "alloc_note": "as of 2026-07-29",
+  "etf_park_frac": 0.7,
+  "breadth_oversold": 0.1,
+  "washout_gate": 0.31,
+  "capit_fired": false,
+  "capit_universe_source": "pit",
+  "capit_breadth_topn": 250,
+  "capit_breadth_stale": false,
+  "capit_breadth_src_max": "2026-07-30",
+  "capit_size": 0.0,
+  "capit_grind": false,
+  "capit_dd_excluded": [],
+  "capit_adv_caps": {},
+  "capit_adv_caps_total": {},
+  "capit_adv_shares": {},
+  "capit_adv_share_mode": "n/a",
+  "capit_adv_share_nav": {},
+  "capit_adv_x": 0.1,
+  "capit_adv_d": 2.0,
+  "dd52w": -9.5,
+  "vn_cooling": false,
+  "n_bal": 0,
+  "n_lag_upcoming": 5,
+  "n_lag_recent": 24,
+  "lag_source_error": null,
+  "lag_liq_excluded": [
+    {
+      "ticker": "ATS",
+      "reason": "Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)"
+    },
+    {
+      "ticker": "BTW",
+      "reason": "Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)"
+    },
+    {
+      "ticker": "DNN",
+      "reason": "dữ liệu ADV cũ 42 ngày (> 30) — có thể ngừng giao dịch/huỷ niêm yết"
+    },
+    {
+      "ticker": "DP2",
+      "reason": "Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)"
+    },
+    {
+      "ticker": "DWS",
+      "reason": "Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)"
+    },
+    {
+      "ticker": "HDW",
+      "reason": "Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)"
+    },
+    {
+      "ticker": "HOT",
+      "reason": "dữ liệu ADV cũ 42 ngày (> 30) — có thể ngừng giao dịch/huỷ niêm yết"
+    },
+    {
+      "ticker": "L10",
+      "reason": "Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)"
+    },
+    {
+      "ticker": "MNB",
+      "reason": "Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)"
+    },
+    {
+      "ticker": "NAP",
+      "reason": "Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)"
+    },
+    {
+      "ticker": "PBT",
+      "reason": "Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)"
+    },
+    {
+      "ticker": "PEN",
+      "reason": "dữ liệu ADV cũ 42 ngày (> 30) — có thể ngừng giao dịch/huỷ niêm yết"
+    },
+    {
+      "ticker": "PXI",
+      "reason": "Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)"
+    },
+    {
+      "ticker": "QHD",
+      "reason": "Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)"
+    },
+    {
+      "ticker": "SBL",
+      "reason": "Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)"
+    },
+    {
+      "ticker": "SDC",
+      "reason": "Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)"
+    },
+    {
+      "ticker": "SDN",
+      "reason": "Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)"
+    },
+    {
+      "ticker": "SSH",
+      "reason": "dữ liệu ADV cũ 34 ngày (> 30) — có thể ngừng giao dịch/huỷ niêm yết"
+    },
+    {
+      "ticker": "TIX",
+      "reason": "Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)"
+    },
+    {
+      "ticker": "TMG",
+      "reason": "Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)"
+    },
+    {
+      "ticker": "VDL",
+      "reason": "Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)"
+    }
+  ],
+  "n_lag_liq_excluded": 21,
+  "lag_liq_filter_error": null,
+  "lag_rating_excluded": [
+    {
+      "ticker": "AAV",
+      "rating": 5,
+      "reason": "RATING_FAIL 8L=5 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "ABC",
+      "rating": 5,
+      "reason": "RATING_FAIL 8L=5 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "AFX",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "AGR",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "APS",
+      "rating": 5,
+      "reason": "RATING_FAIL 8L=5 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "ASP",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "BCA",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "BCE",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "C32",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "C47",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "C69",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "CDP",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "CEO",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "CMX",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "CSI",
+      "rating": 5,
+      "reason": "RATING_FAIL 8L=5 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "DDN",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "DHM",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "DPM",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "DXS",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "FID",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "HBC",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "HHC",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "HKT",
+      "rating": 5,
+      "reason": "RATING_FAIL 8L=5 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "HMR",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "IDI",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "IPA",
+      "rating": 5,
+      "reason": "RATING_FAIL 8L=5 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "ITQ",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "IVS",
+      "rating": 5,
+      "reason": "RATING_FAIL 8L=5 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "KLB",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "L40",
+      "rating": 5,
+      "reason": "RATING_FAIL 8L=5 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "MCP",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "MST",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "MZG",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "NSH",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "PET",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "PMB",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "PRC",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "PSI",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "PV2",
+      "rating": 5,
+      "reason": "RATING_FAIL 8L=5 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "PVS",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "PXL",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "S99",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "SBG",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "SD3",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "SDT",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "SMC",
+      "rating": 5,
+      "reason": "RATING_FAIL 8L=5 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "STK",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "TCI",
+      "rating": 5,
+      "reason": "RATING_FAIL 8L=5 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "TDP",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "TLH",
+      "rating": 5,
+      "reason": "RATING_FAIL 8L=5 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "TNH",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "TRC",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "UNI",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "VC7",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "VCA",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "VCR",
+      "rating": 5,
+      "reason": "RATING_FAIL 8L=5 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "VLG",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "VNA",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "VNP",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "VOS",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "VTV",
+      "rating": 4,
+      "reason": "RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27)"
+    },
+    {
+      "ticker": "WSS",
+      "rating": 5,
+      "reason": "RATING_FAIL 8L=5 (≥4) (auto-excluded per user policy 2026-07-27)"
+    }
+  ],
+  "n_lag_rating_excluded": 62,
+  "lag_rating_filter_error": null,
+  "n_capit_basket": 0,
+  "n_park": 30,
+  "park_rebal_date": "2026-05-05"
+}

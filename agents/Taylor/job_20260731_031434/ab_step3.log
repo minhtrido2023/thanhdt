@@ -1,0 +1,22 @@
+/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/google/auth/_default.py:113: UserWarning: Your application has authenticated using end user credentials from Google Cloud SDK without a quota project. You might receive a "quota exceeded" or "API not enabled" error. See the following page for troubleshooting: https://cloud.google.com/docs/authentication/adc-troubleshooting/user-creds. 
+  warnings.warn(_CLOUD_SDK_CREDENTIALS_WARNING)
+==========================================================================================
+  V2.3 + DT5G — DAILY RECOMMENDATIONS  (2026-07-31)
+==========================================================================================
+  state source: DT5G_macro | as_of 2026-07-30 | state 3 (NEUTRAL)
+  latest signal date: 2026-07-30 | 19,538 signal rows in window
+  D1 panel universe source: pit
+  [lag-live] 1481 events in window, 189 qualify, release max 2026-07-29
+  [lag-liq] loại 21 ứng viên không đo được thanh khoản: ATS (Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)), BTW (Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)), DNN (dữ liệu ADV cũ 42 ngày (> 30) — có thể ngừng giao dịch/huỷ niêm yết), DP2 (Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)), DWS (Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)), HDW (Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)), HOT (dữ liệu ADV cũ 42 ngày (> 30) — có thể ngừng giao dịch/huỷ niêm yết), L10 (Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)), MNB (Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)), NAP (Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)), PBT (Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)), PEN (dữ liệu ADV cũ 42 ngày (> 30) — có thể ngừng giao dịch/huỷ niêm yết), PXI (Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)), QHD (Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)), SBL (Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)), SDC (Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)), SDN (Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)), SSH (dữ liệu ADV cũ 34 ngày (> 30) — có thể ngừng giao dịch/huỷ niêm yết), TIX (Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)), TMG (Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)), VDL (Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive))
+  [lag-rating] loại 62 ứng viên RATING_FAIL (8L≥4): AAV (8L=5), ABC (8L=5), AFX (8L=4), AGR (8L=4), APS (8L=5), ASP (8L=4), BCA (8L=4), BCE (8L=4), C32 (8L=4), C47 (8L=4), C69 (8L=4), CDP (8L=4), CEO (8L=4), CMX (8L=4), CSI (8L=5), DDN (8L=4), DHM (8L=4), DPM (8L=4), DXS (8L=4), FID (8L=4), HBC (8L=4), HHC (8L=4), HKT (8L=5), HMR (8L=4), IDI (8L=4), IPA (8L=5), ITQ (8L=4), IVS (8L=5), KLB (8L=4), L40 (8L=5), MCP (8L=4), MST (8L=4), MZG (8L=4), NSH (8L=4), PET (8L=4), PMB (8L=4), PRC (8L=4), PSI (8L=4), PV2 (8L=5), PVS (8L=4), PXL (8L=4), S99 (8L=4), SBG (8L=4), SD3 (8L=4), SDT (8L=4), SMC (8L=5), STK (8L=4), TCI (8L=5), TDP (8L=4), TLH (8L=5), TNH (8L=4), TRC (8L=4), UNI (8L=4), VC7 (8L=4), VCA (8L=4), VCR (8L=5), VLG (8L=4), VNA (8L=4), VNP (8L=4), VOS (8L=4), VTV (8L=4), WSS (8L=5)
+  LAG entries: 5 upcoming, 24 entered in last sessions
+  [edge-alloc] mean12 as-of 2026-07-30 = 0.5% vs thr 4% -> w_LAG 0.50
+  CAPIT episode CAPIT-2026-07-20 ĐANG MỞ (entry 2026-07-20, 8 phiên, rổ gốc ['NCT', 'PVT', 'SAB', 'SIP', 'VNM'])
+
+  state=3(NEUTRAL)  w_LAG tgt=50% cur=49%  parking=70%  breadth=10.0%
+  BAL picks: 0 | LAG upcoming: 5 | CAPIT fired: False
+  -> /home/trido/thanhdt/WorkingClaude/deploy_golive_dt5g_v4/out/golive_v23_recommendations_2026-07-31.md
+  -> /home/trido/thanhdt/WorkingClaude/deploy_golive_dt5g_v4/out/golive_v23_recommendations_2026-07-31.csv
+DONE.
+
+[ab_sandbox_run] after DONE -> /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/job_20260731_031434/ab_step3
