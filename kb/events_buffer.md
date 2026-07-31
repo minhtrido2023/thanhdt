@@ -830,3 +830,16 @@
 
 ## Consolidation 2026-07-31T08:07:01Z
 - [2026-07-31T08:00:32Z] Winston/finding — sbv-weekly-check-2026-07-31: {"date": "2026-07-31", "current_rate": 4.5, "fetch_status": "fetch_failed", "rate_changed": false, "note": "fetch_failed_assumed_unchanged", "verify_log": "/home/trido/thanhdt/WorkingClaude/data/sbv_verify_log.json"}
+
+## Consolidation 2026-07-31T09:07:02Z
+- [2026-07-31T08:58:26Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "in_progress", "note": "bat dau: tai dung lich su quyet dinh CAPIT sizing 07-20"}
+- [2026-07-31T08:59:11Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260731_085810", "source": "watcher"}
+- [2026-07-31T09:00:11Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260731_085810", "source": "watcher"}
+- [2026-07-31T09:00:51Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "in_progress", "note": "phat hien chinh: cong thuc live NAV_book_LAG x size KHAC cong thuc backtest (size x free cash, ca 2 book). Dang truy lich su quyet dinh 07-20"}
+- [2026-07-31T09:01:12Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260731_085810", "source": "watcher"}
+- [2026-07-31T09:02:12Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260731_085810", "source": "watcher"}
+- [2026-07-31T09:02:57Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "in_progress", "note": "xac nhan 2 defect: (1) base mismatch live lag_nav vs backtest free-cash; (2) double-apply capit_size trong strategies.py + plan SpaceX. Dang do fill that + chuan bi backtest"}
+- [2026-07-31T09:03:12Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260731_085810", "source": "watcher"}
+- [2026-07-31T09:04:12Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260731_085810", "source": "watcher"}
+- [2026-07-31T09:05:12Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260731_085810", "source": "watcher"}
+- [2026-07-31T09:06:13Z] Taylor/heartbeat — Taylor_20260731_085810: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260731_085810", "source": "watcher"}
