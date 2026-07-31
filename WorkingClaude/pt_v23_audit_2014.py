@@ -131,6 +131,9 @@ def _c30v_asof(d):
 # stress-obs / 9y: forward-2M return rises MONOTONICALLY with pb_z depth (pbz>0 -> -4%, -1 -> +7%,
 # <-2.5 -> +23%) -> deploy bigger when deeper. Robust SHAPE (whole sample), not a fitted point. Env-gated.
 CAPIT_DEPTH_SIZING = os.environ.get("CAPIT_DEPTH_SIZING", "0") == "1"
+# Sizing BASE for the CAPIT arm — see add_capit_arm(). "cash" = production (byte-identical default).
+CAPIT_SIZE_BASE = os.environ.get("CAPIT_SIZE_BASE", "cash").strip()
+CAPIT_SIZE_DIAG = os.environ.get("CAPIT_SIZE_DIAG", "0") == "1"
 _basket_pbz_cache = {}
 def _depth_mult(pbz):
     if pbz is None or not (pbz == pbz): return 1.0          # NaN -> neutral
@@ -334,6 +337,8 @@ else:
     BASKET_QTILT = {int(k): float(v) for k, v in (kv.split(":") for kv in _qt_raw.split(","))}
     _qt_tag = "_qtcustom"
 _capsuf = "" if CAPIT_EVENT_CAP is None else f"_cap{int(round(CAPIT_EVENT_CAP*100))}"
+# §8: any result-affecting knob MUST change the output filename.
+_capsuf += "" if CAPIT_SIZE_BASE == "cash" else ("_szb" + CAPIT_SIZE_BASE.replace(":", "").replace(".", ""))
 _matsuf = "" if MATURITY is None else (f"_mat{MATURITY}" + (f"_shrink{int(round(EW2D_SHRINK*100))}" if MATURITY in ("ew2d", "postbull") and abs(EW2D_SHRINK - 0.30) > 1e-9 else ""))
 _matsuf += "_edge" if USE_EDGE_ALLOC else ""
 _matsuf += "_holdneutral" if CAPIT_HOLD_NEUTRAL else ""
@@ -1282,6 +1287,11 @@ def add_capit_arm(sig_book, base_nav_df, tw_base, tag, book_prices):
     if not capit_events:
         return sig_book, tw2, {}
     basecash = (base_nav_df.set_index("time")["cash_pct"] / 100.0).clip(lower=0)
+    # CAPIT_SIZE_BASE (Taylor 2026-07-31, job Taylor_20260731_085810): what the state-size is a
+    # fraction OF. Default "cash" = production/pinned spec (size x FREE cash of this book, parking
+    # NOT counted) -> byte-identical when unset. Other modes exist only to A/B the live formula.
+    _baseidle = ((base_nav_df.set_index("time")["cash_pct"]
+                  + base_nav_df.set_index("time")["cash_etf_pct"]) / 100.0).clip(lower=0)
     for i, e in enumerate(capit_events):
         if e["size"] <= 0.005: continue
         d = e["date"]
@@ -1299,7 +1309,27 @@ def add_capit_arm(sig_book, base_nav_df, tw_base, tag, book_prices):
             continue
         pos = basecash.index.searchsorted(d)
         cf = float(basecash.iloc[max(0, pos-2):pos+1].mean()) if len(basecash) else 0.0
-        wt = e["size"] * max(cf, 0.0)
+        cfi = float(_baseidle.iloc[max(0, pos-2):pos+1].mean()) if len(_baseidle) else 0.0
+        if CAPIT_SIZE_BASE == "cash":
+            wt = e["size"] * max(cf, 0.0)                    # PRODUCTION spec
+        elif CAPIT_SIZE_BASE == "idle":                      # cash + parked custom30V (park is sellable)
+            wt = e["size"] * max(cfi, 0.0)
+        elif CAPIT_SIZE_BASE == "booknav":                   # LIVE formula: size x book NAV, LAG book only
+            wt = e["size"] if tag == "L" else 0.0
+        elif CAPIT_SIZE_BASE.startswith("nav:"):             # fixed % of EVERY book's NAV (= % of total NAV)
+            wt = float(CAPIT_SIZE_BASE.split(":", 1)[1])
+        elif CAPIT_SIZE_BASE.startswith("idlecap:"):         # size x idle, capped at c of book NAV
+            wt = min(e["size"] * max(cfi, 0.0), float(CAPIT_SIZE_BASE.split(":", 1)[1]))
+        elif CAPIT_SIZE_BASE.startswith("navsize:"):         # conviction-scaled fixed %NAV: state-size x X
+            wt = e["size"] * float(CAPIT_SIZE_BASE.split(":", 1)[1])
+        elif CAPIT_SIZE_BASE.startswith("park:"):            # size x (cash + f x park): sell at most f of custom30V
+            _f = float(CAPIT_SIZE_BASE.split(":", 1)[1])     # f=0 == "cash", f=1 == "idle" (dose-response curve)
+            wt = e["size"] * max(cf + _f * max(cfi - cf, 0.0), 0.0)
+        else:
+            raise SystemExit(f"CAPIT_SIZE_BASE khong hop le: {CAPIT_SIZE_BASE}")
+        if CAPIT_SIZE_DIAG:
+            print(f"    [capit-size {tag} E{i} {d.date()}] size={e['size']:.3f} cash={cf:.4f} "
+                  f"idle={cfi:.4f} -> wt={wt:.4f} (base={CAPIT_SIZE_BASE})")
         if CAPIT_DEPTH_SIZING:                              # scale by basket pb_z depth (deeper=bigger)
             _dm = _depth_mult(_basket_pbz_cache.get(d))
             wt *= _dm

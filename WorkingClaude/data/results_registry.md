@@ -4459,3 +4459,133 @@ drift-vs-co-rổ (giữ `ticker_prune` cố định, chỉ đẩy cửa sổ ng�
 cho `sync_bq_cache.py`** — lần này tránh được va chạm với cron 23:45 ICT là do **may** (thứ tự ghi
 manifest), không phải do thiết kế (vi phạm `coding_guidelines` §5); (c) rerun base-rate
 P(NEUTRAL→BEAR/CRISIS) trên chuỗi DT5G đã restate (101 ngày đổi tier).
+
+---
+
+## 2026-07-31 — CAPIT SIZING BASE A/B (10 leg) — NGHIÊN CỨU, **CHƯA WIRE**
+
+Job `Taylor_20260731_094324` (nối `_085810`). Doc: `mike/agents/Taylor/research/capit_sizing_backtest_20260731.md`.
+Pre-reg: `research/capit_sizing_PREREG_20260731.md`. **N_trials = 10** (pre-reg 6 + 4 leg thêm).
+Snapshot đóng cứng `data/bq_cache_asof20260729_postrestate`, NAV_TOTAL_B=50, ETF_LIQ=custompitg,
+BASKET_WT=namecap, BASKET_SELECT=yieldcombo, PARK_STATES=3:0.7, AUDIT_END=2026-06-19, threads=1, `$DNA_PYEXE`.
+Runner `data/capit_sizing_20260731/run_leg.sh` (env `CAPIT_SIZE_BASE`), log cùng thư mục.
+**10/10 EXIT=0, self-check cash-flow identity = 0 VND cả BAL+LAG.**
+Control `cash` tái lập ĐÚNG pin R3 cả 4 chỉ tiêu: 27,60% / 1,84 / −17,5% / 1,58.
+
+| base | CAGR | Sharpe | MaxDD | Calmar | IS 14-19 | OOS 20-26 |
+|---|---|---|---|---|---|---|
+| `cash` (baseline=pin R3) | 27,60% | 1,84 | −17,5% | 1,58 | 23,38% | 28,49% |
+| `idle` | 27,92% | 1,85 | −17,4% | 1,60 | 23,68% | 28,59% |
+| `booknav` (= công thức LIVE) | 27,34% | 1,82 | −18,0% | 1,52 | 22,37% | 28,76% |
+| `nav:0.10` | 26,72% | 1,79 | −17,3% | 1,54 | 22,79% | 27,37% |
+| `nav:0.20` | 27,25% | 1,82 | −17,3% | 1,57 | 23,11% | 27,94% |
+| `idlecap:0.30` | 27,53% | 1,83 | −17,7% | 1,55 | 23,32% | 28,20% |
+| `park:0.25` | 27,69% | 1,84 | −17,5% | 1,58 | 23,49% | 28,42% |
+| `park:0.50` | 27,99% | 1,86 | −17,9% | 1,57 | 23,60% | 28,87% |
+| `navsize:0.25` | 27,30% | 1,83 | −17,5% | 1,56 | 22,90% | 28,23% |
+| `navsize:0.40` | 27,90% | 1,86 | −18,0% | 1,55 | 23,22% | 29,00% |
+
+**Kết luận**: (1) cả họ chỉ trải 1,27pp CAGR / 0,08 Calmar ⇒ cơ sở sizing CAPIT **không phải đòn bẩy
+tầng danh mục** (15 sự kiện/12 năm); (2) chỉ `idle` qua cổng pre-reg, biên +0,02 Calmar = nhiễu ⇒
+**KHÔNG đủ căn cứ đổi spec đã pin**; (3) bỏ conviction-scaling là thiệt hại rõ duy nhất (`nav:0.10`
+−0,88pp, âm cả IS lẫn OOS) ⇒ `state_size` mang thông tin thật; (4) công thức **LIVE `booknav` yếu
+nhất họ về rủi ro** (Calmar 1,52 / MaxDD −18,0% / IS −1,01pp) — lẫn hiệu ứng cấu trúc 1-sổ, xem doc §5.
+**Đề xuất (chưa wire)**: `navsize:0.25` = `state_size × 25% NAV tổng` — không thắng baseline
+(−0,30pp CAGR) nhưng chặn hai đuôi bệnh lý (E17 chỉ vào 0,7% NAV vì hết tiền; `booknav` từng nhắm
+54,5% NAV) và tốt hơn cái đang chạy live ở mọi chỉ tiêu rủi ro. Funding: cho bán custom30V, dose-
+response Calmar phẳng 1,57–1,60 ⇒ vô hại; loại trước các tên trùng rổ CAPIT (16,7%).
+**CỔNG CÒN THIẾU**: `bin/verify_finding.sh` (quant-skeptic) + DSR trên N=10 + đối chiếu trần %ADV thật.
+
+## 2026-07-31 — CAPIT sizing: 4 cổng wire (job Taylor_20260731_111654)
+Follow-up verdict quant-skeptic CONFIRMED (`logs/verify_20260731_105431.log`) cho job
+`Taylor_20260731_094324`. Doc: `mike/agents/Taylor/research/capit_sizing_wire_gate_20260731.md`.
+Snapshot: `data/bq_cache_asof20260729_postrestate` (cùng vintage re-pin R3 07-29), NAV_TOTAL_B=50,
+ETF_LIQ=custompitg, BASKET_WT=namecap, BASKET_SELECT=yieldcombo, PARK_STATES=3:0.7,
+AUDIT_END=2026-06-19, threads=1, $DNA_PYEXE. Runner `data/capit_sizing_20260731/run_leg.sh`.
+
+**N_trials = 13** (10 leg job trước + 3 leg navsize 0.15/0.30/0.35 job này). 13/13 EXIT=0,
+self-check cash-flow identity 0 VND cả BAL+LAG.
+
+| base | CAGR | Sharpe | MaxDD | Calmar | IS 14-19 | OOS 20-26 |
+|---|---|---|---|---|---|---|
+| `cash` (baseline pin R3) | 27,60% | 1,84 | -17,5% | 1,58 | 23,38% | 28,49% |
+| `navsize:0.15` | 26,66% | 1,79 | -17,3% | 1,54 | 22,74% | 27,35% |
+| `navsize:0.25` | 27,30% | 1,83 | -17,5% | 1,56 | 22,90% | 28,23% |
+| `navsize:0.30` | 27,54% | 1,84 | -17,6% | 1,56 | 23,00% | 28,61% |
+| `navsize:0.35` | 27,74% | 1,85 | -17,6% | 1,57 | 23,11% | 28,85% |
+| `navsize:0.40` | 27,90% | 1,86 | -18,0% | 1,55 | 23,22% | 29,00% |
+| `booknav` (ĐANG LIVE) | 27,34% | 1,82 | -18,0% | 1,52 | 22,37% | 28,76% |
+
+- **DSR = 1,0000 mọi leg nhưng KHÔNG thông tin** — tương quan họ 0,982-0,998 ⇒ DSR đo Sharpe của
+  V2.3A, không đo lựa chọn sizing. ~~**PBO (CSCV S=16, 12.870 combo) = 0,732 CAO** ⇒ cấm chọn theo
+  thứ hạng backtest; bác `idle` (leg duy nhất qua cổng pre-reg job trước) và `navsize:0.40`.~~
+  ⚠️ **SUPERSEDED 2026-07-31 (cùng ngày)** bởi mục **`## 2026-07-31 — CAPIT SIZING: ROBUSTNESS-CHECK
+  PBO ⇒ DỪNG, KHÔNG WIRE`** (cuối file): PBO **không ổn định theo đặc tả (0,073–0,814)**, đặc tả
+  neo-sự-kiện cho 0,073 (ngược chiều). **ĐỪNG trích 0,732 như một cổng đã qua** — và do đó 2 kết
+  luận "bác `idle`"/"bác `navsize:0.40`" ở dòng này KHÔNG còn căn cứ PBO (lý do bác `idle` còn lại
+  chỉ là stress washout sâu S3, xem mục mới).
+- **Trần %ADV thật KHÔNG binding** ở NAV fleet hiện tại (1,823 tỷ): util median 1,6%, max 21,1%
+  (E4 2018-05-28), 0/15 sự kiện vượt. Khả thi tới NAV fleet **~8,6 tỷ** (worst event) / ~23,6 tỷ
+  (p10) / ~117,8 tỷ (median). Ở mức sổ 50 tỷ của backtest thì 4/15 sự kiện vượt cho MỌI leg kể cả
+  baseline — hiện tượng quy mô, không phải lỗi riêng navsize.
+- **Stress washout sâu** (phơi nhiễm = số thật đọc từ TX, chỉ đường giá là giả lập): độ rộng giữa
+  công thức ở mẫu lịch sử chỉ 0,46pp nhưng ở kịch bản -30% cắt lỗ tại đáy = **3,86pp (x8,4)**.
+  Xếp hạng ĐẢO: `idle` -10,65% và `cash` -10,51% là TỆ NHẤT; `navsize:0.25` -7,16%; `booknav` LIVE
+  -7,64%. Đuôi phơi nhiễm max: `cash` 35,05% NAV / `idle` 35,52% / `navsize:0.25` 23,87%.
+- **Đính chính job trước**: cột "%NAV cash" §2 (max 87,4%) là MỤC TIÊU `wt`, không phải phần khớp
+  lệnh thật (max thật 35,05%). Kết luận định tính không đổi.
+- **Giới hạn**: ở 5/15 sự kiện engine triển khai như nhau bất kể `wt` (CAPIT là tier duy nhất tranh
+  vốn) ⇒ backtest ƯỚC LƯỢNG THẤP hiệu ứng cắt đuôi thật của navsize khi chạy live.
+- **Kết luận**: `navsize:0.25` (= state_size x 25% NAV tổng) ĐỦ ĐIỀU KIỆN đề xuất wire — lý do là
+  tính xác định + tốt hơn công thức đang chạy live, **KHÔNG** phải hiệu năng (-0,30pp CAGR vs
+  baseline). Kèm gate quy mô: NAV fleet > ~8,6 tỷ thì chạy lại đối chiếu ADV. CHƯA implement/commit.
+
+---
+
+## 2026-07-31 — CAPIT SIZING: ROBUSTNESS-CHECK PBO ⇒ **DỪNG, KHÔNG WIRE** (supersede kết luận mục trên)
+
+**Job** `Taylor_20260731_151958` (re-dispatch của `_121454` chết trắng tay, log 0 byte).
+**Báo cáo**: `mike/agents/Taylor/research/capit_sizing_pbo_robustness_20260731.md`.
+**Script**: `mike/agents/Taylor/job_20260731_151958_{pbo_episode,pbo_event15,diag}.py` (+ `.log`).
+**Nguồn**: 13 audit CSV `data/v23_golive_audit_2014_now_*_exp_capsz_*_univpit.csv` (T=3106 phiên,
+2014-01-03 → 2026-06-19) — KHÔNG chạy lại backtest, cùng nguồn/quy ước mục `CAPIT SIZING BASE A/B`.
+
+### PBO KHÔNG ỔN ĐỊNH theo đặc tả — 0,073 đến 0,814
+
+| đặc tả (đều hợp lệ về phương pháp) | PBO | median OOS-rank IS-best |
+|---|---|---|
+| calendar CSCV S=8 (70 tổ hợp) | 0,8143 | 5,5/13 |
+| calendar CSCV S=32 (40.000 mẫu từ 601.080.390) | 0,7360 | 5,0/13 |
+| ~~calendar CSCV S=16 — con số wire-gate đang trích~~ | ~~0,7319~~ | 5,0/13 |
+| episode-run (5 run khác-baseline) | 0,6000 | 6,0/13 |
+| **event-anchored, 15 sự kiện CAPIT thật (C(15,7)=6435)** | **0,0726** | **13,0/13** |
+| event-anchored bootstrap 20.000 lần | 0,0736 | 13,0/13 |
+
+Biên độ **0,07–0,81 phủ toàn dải quyết định, cắt ngang ngưỡng 0,5 theo CẢ HAI chiều** ⇒ con số
+0,732 trong mục trên **KHÔNG đủ tư cách làm cổng** §Quy chuẩn 5. Không đặc tả nào là chuẩn tắc.
+
+### Chẩn đoán (bác giả thuyết "PBO thấp là hiện vật mẫu")
+- 13/15 cửa sổ sự kiện dương, chỉ 2 âm (E6 −5,4%, E17 −9,2%) ⇒ objection gốc (mẫu không có washout
+  thất bại sâu) VẪN NGUYÊN. Nhưng tương đối thì `idle` thua `cash` ở **5/15** sự kiện.
+- Spearman(Sharpe cửa sổ sự kiện, phơi nhiễm) = **−0,121** ⇒ PBO thấp **KHÔNG** do "càng to càng thắng".
+- Leave-best-out: bỏ 1/2/3 sự kiện đóng góp lớn nhất → PBO 0,145 / 0,240 / **0,327**, leg thắng IS
+  đổi `idle`→`cash` ⇒ PBO=0,073 mỏng, do vài sự kiện gánh (mẫu hình reshuffle-luck §Quy chuẩn 5).
+- Phản chứng tiền đề reviewer: số khối RỖNG = **0/8, 0/16, 0/32** (không phải 4/16) — vì NAV đã lệch
+  thì lệch mãi, 90,3% phiên có ≥1 leg khác baseline.
+
+### Xếp hạng Sharpe CHỈ trong cửa sổ 15 sự kiện (nơi công thức sizing có tác dụng)
+`idle` 2,4801 (1) · `cash` 2,3857 (4) · **`booknav` LIVE 2,2851 (10)** · **`navsize:0.25` 2,2721 (11)**
+· `navsize:0.15` 2,2153 (13). ⇒ `navsize:0.25` **dưới** công thức đang live (ngược toàn mẫu 1,8259
+vs 1,8159). Chênh 0,013 SR/945 quan sát = **trong nhiễu**, KHÔNG chứng minh chiều ngược lại.
+
+### QUYẾT ĐỊNH
+**KHÔNG implement, KHÔNG commit thay đổi production.** Điều kiện dừng của dispatch đã kích hoạt
+(PBO tụt dưới đúng đặc tả reviewer yêu cầu + `navsize:0.25` không còn rõ ràng tốt hơn).
+CAPIT giữ nguyên `booknav`; 5 mã đang giữ thật (SAB/SIP/VNM/PVT/NCT) không bị đụng.
+`golive_recommend_v23.py` / `trading_rules.json` / `kb/current_ops.md` **không sửa 1 dòng**.
+
+**Còn đứng vững sau khi bỏ hết lập luận PBO** (2 căn cứ độc lập, không dùng PBO):
+(1) stress washout sâu S3 — độ rộng ×8,4 (0,46→3,86pp), `idle` TỆ NHẤT −10,65%, `navsize:0.25`
+−7,16% vs `booknav` −7,64%; (2) tính xác định (sàn 6,25% / trần 25% NAV vs 0,7%→35% NAV hiện tại).
+3 phương án trả user: **A** giữ `booknav` · **B** wire `navsize:0.25` (chỉ được trình là "thiết kế
+xác định + phòng thủ đuôi", CẤM trình kèm PBO như cổng đã qua) · **C** chờ thêm mẫu (~10 năm, loại).
