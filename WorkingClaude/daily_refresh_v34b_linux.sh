@@ -32,6 +32,15 @@ echo "==================================================================="
 die() { echo "!!! ABORT: $* (at $(date))"; exit 1; }
 step() { echo; echo "--- $* ---"; }
 
+# --- 0-pre. Giám sát WRITER LẠ trên dt5g_live — lấy mẫu TRƯỚC khi ta ghi đè (2026-07-31,
+# job Winston_20260731_014953). Bảng production có writer thứ hai (pipeline kaffa_v2 của team
+# dữ liệu, ~17:12 ICT, implementation DT5G riêng — user quyết 2026-07-31 là ta CHỈ giám sát,
+# KHÔNG can thiệp hệ thống của họ). `lastModifiedTime` chỉ giữ lần ghi CUỐI, nên đây là điểm
+# lấy mẫu DUY NHẤT trong ngày còn nhìn thấy được dấu vết của họ: sau step [12] mọi dấu vết
+# thời gian bị publish của ta đè lên. WARN-only, luôn exit 0, KHÔNG chặn chain.
+step "[0-pre] dt5g_writer_watch (mẫu trước publish)"
+python3 "$WORKDIR_8L/mike/bin/dt5g_writer_watch.py" --label pre-publish-1830 || true
+
 # --- 0. freshness precheck: verify TODAY's ticker_prune ingest is actually complete before
 # computing on it. Found 2026-07-10 (user asked "does this really need to wait for the full
 # BQ sync?"): ticker_prune/ticker were BOTH already complete (normal-range row counts) well
@@ -56,7 +65,13 @@ for attempt in $(seq 1 6); do
   echo "  not ready yet: ticker_prune has ${n:-0} tickers for $TODAY_ICT (need >=$MIN_TICKERS) — attempt $attempt/6, waiting 15m"
   [ "$attempt" -lt 6 ] && sleep 900
 done
-[ "$ready" = 1 ] || die "ticker_prune still incomplete for $TODAY_ICT after 6 attempts (~1.5h) — refusing to compute DT5G on a stale/partial day. bq_freshness_check.sh's own gate will BLOCK DollarBill downstream since vnindex_5state_dt5g_live won't advance today."
+# CẢNH BÁO (sửa 2026-07-31, Winston_20260731_014953): lý do cũ ghi ở đây — "bq_freshness_check
+# sẽ chặn DollarBill vì dt5g_live không advance" — ĐÃ SAI từ 2026-06-08: bảng dt5g_live có
+# writer thứ hai (pipeline kaffa_v2 team dữ liệu, ~17:12 ICT) vẫn đẩy MAX(time)=hôm nay kể cả
+# khi chain này abort ở đây. Cái CHẶN thật bây giờ là gate publisher-evidence trong
+# bq_freshness_check.sh (golive_state_today.json as_of/mtime/bq_publish_ok — writer ngoài không
+# ghi được file local đó).
+[ "$ready" = 1 ] || die "ticker_prune still incomplete for $TODAY_ICT after 6 attempts (~1.5h) — refusing to compute DT5G on a stale/partial day. bq_freshness_check.sh's PUBLISHER-EVIDENCE gate will BLOCK DollarBill downstream since golive_state_today.json won't be written today."
 
 # --- 1. upstream local rebuild (produces vnindex_5state_tam_quan_v3_4b_full_history.csv) ---
 # Mốc thời gian cho post-chain freshness assertion (step [8b] dưới): mọi file output kỳ
