@@ -9,7 +9,12 @@
 #
 # Tables checked (BLOCK = stale ⇒ chặn pipeline + DollarBill; WARN = alert Discord, không chặn):
 #   tav2_bq.ticker_prune              BLOCK — daily EOD price (pipeline step H)
-#   tav2_bq.vnindex_5state_dt5g_live  BLOCK — DT5G regime (pipeline step G)
+#   tav2_bq.vnindex_5state_dt5g_live  BLOCK — DT5G regime (pipeline step G). ⚠️ MAX(time) của bảng
+#                                             KHÔNG đủ: bảng có WRITER THỨ HAI (pipeline kaffa_v2
+#                                             của team dữ liệu, ~17:12 ICT) vẫn đẩy MAX(time)=hôm nay
+#                                             kể cả khi publisher của ta chết ⇒ có thêm gate
+#                                             "publisher-evidence" ngay dưới (2026-07-31,
+#                                             Winston_20260731_014953) + monitor dt5g_writer_watch.py
 #   tav2_bq.ticker_financial          BLOCK — quarterly fundamentals (pipeline step H financial)
 #   tav2_bq.ticker_1m                 BLOCK — live screening snapshot (thêm 2026-07-11, audit Winston_20260711_031745 #3)
 #   tav2_bq.shares_outstanding_live   WARN  — corp-action shares (sửa 2026-07-12, audit Winston_20260712_142100
@@ -205,6 +210,80 @@ else
   FAILED=1
 fi
 _check "vnindex_5state_dt5g_live (DT5G)"  "tav2_bq.vnindex_5state_dt5g_live"  "t.time"  $MAX_STATE_LAG  "trading"  || true
+# --- DT5G PUBLISHER-EVIDENCE gate (2026-07-31, job Winston_20260731_014953) ------------------
+# VÌ SAO cần: bảng dt5g_live có WRITER THỨ HAI ngoài luồng — pipeline kaffa_v2 của team dữ liệu
+# (/workspace/kaffa_v2, task update_market_regime_state) tự tính DT5G bằng implementation RIÊNG
+# và ghi thẳng vào bảng production ~17:12 ICT mỗi ngày (từ 2026-06-08; truy vết đầy đủ:
+# mike/agents/Winston/dt5g_live_second_writer_20260729.md). Hệ quả: _check MAX(time) NGAY TRÊN
+# bị CHE HOÀN TOÀN — kaffa đẩy MAX(time)=hôm nay lúc 17:12 nên gate PASS kể cả khi publisher
+# CỦA TA (daily_refresh step [12], ~18:35) chết sạch. Giả định load-bearing ở
+# daily_refresh_v34b_linux.sh:59 ("bảng sẽ không advance nếu chain của ta abort") ĐÃ SAI.
+# User quyết 2026-07-31 (PHƯƠNG ÁN B): KHÔNG yêu cầu team dữ liệu đổi bảng, KHÔNG đụng hệ thống
+# của họ — ta tự vá gate phía mình + giám sát, và báo họ khi có sự cố.
+# CÁCH VÁ: gate bằng BẰNG CHỨNG publisher CỦA TA đã chạy, không bằng nội dung bảng (bảng là thứ
+# writer ngoài ghi được, 2 file dưới thì KHÔNG — chỉ publish_gated_state.py ghi chúng):
+#   deploy_golive_dt5g_v4/golive_state_today.json  →  as_of == phiên giao dịch mới nhất
+#                                                  +  bq_publish_ok == true
+#                                                  +  mtime = HÔM NAY (nếu hôm nay là phiên)
+# Ngày KHÔNG giao dịch (lễ giữa tuần — cron vẫn chạy T2-T6): bỏ điều kiện mtime, chỉ đòi
+# as_of == phiên gần nhất. Không có nó thì gate sẽ chặn oan mọi ngày lễ (step [0] của
+# daily_refresh cố tình die khi không có ingest hôm nay ⇒ không có file mới).
+# CSV mirror data/vnindex_5state_dt5g_live.csv = WARN chứ không BLOCK: publish BQ có thể OK mà
+# export CSV lỗi (publish_gated_state.py bắt riêng exception đó) — lúc đó consumer production
+# vẫn đúng, chỉ nhóm script nghiên cứu đọc CSV là cũ ⇒ chặn cả plan vì nó là quá tay.
+read -r LAST_TRADING_DAY IS_TRADING_TODAY <<< "$(cd "$WORKDIR" && python3 -c "
+from trading_bot.vn_market import is_holiday
+import datetime as dt
+d = dt.date.fromisoformat('$TODAY')
+trading = 0 if (d.weekday() >= 5 or is_holiday(d)) else 1
+while d.weekday() >= 5 or is_holiday(d):
+    d -= dt.timedelta(days=1)
+print(d, trading)
+" 2>/dev/null)"
+STATE_JSON_F="$WORKDIR/deploy_golive_dt5g_v4/golive_state_today.json"
+DT5G_CSV_F="$WORKDIR/data/vnindex_5state_dt5g_live.csv"
+dt5g_pub_reason=""
+if [ -z "${LAST_TRADING_DAY:-}" ]; then
+  dt5g_pub_reason="không tính được phiên giao dịch gần nhất (trading_bot.vn_market lỗi)"
+elif [ ! -f "$STATE_JSON_F" ]; then
+  dt5g_pub_reason="golive_state_today.json KHÔNG TỒN TẠI — publisher của ta chưa từng chạy"
+else
+  read -r DT5G_AS_OF DT5G_PUB_OK <<< "$(python3 -c "
+import json
+d = json.load(open('$STATE_JSON_F', encoding='utf-8'))
+print(d.get('as_of', '?'), 'ok' if d.get('bq_publish_ok') else 'FAIL')
+" 2>/dev/null)"
+  DT5G_JSON_MDATE="$(date -d @"$(stat -c %Y "$STATE_JSON_F")" +%Y-%m-%d 2>/dev/null)"
+  if [ "${DT5G_AS_OF:-?}" != "$LAST_TRADING_DAY" ]; then
+    dt5g_pub_reason="golive_state_today.json as_of=${DT5G_AS_OF:-?} ≠ phiên gần nhất $LAST_TRADING_DAY"
+  elif [ "${DT5G_PUB_OK:-FAIL}" != "ok" ]; then
+    dt5g_pub_reason="golive_state_today.json bq_publish_ok=false — publish lên BQ đã HỎNG"
+  elif [ "$IS_TRADING_TODAY" = "1" ] && [ "$DT5G_JSON_MDATE" != "$TODAY" ]; then
+    dt5g_pub_reason="golive_state_today.json mtime=$DT5G_JSON_MDATE ≠ hôm nay $TODAY — publisher của ta KHÔNG chạy hôm nay"
+  fi
+fi
+if [ -n "$dt5g_pub_reason" ]; then
+  pub_msg="⚠️ DT5G PUBLISHER ($TODAY $NOW_ICT): $dt5g_pub_reason. Bảng vnindex_5state_dt5g_live CÓ THỂ vẫn tươi do writer thứ hai (pipeline kaffa_v2 team dữ liệu ~17:12 ICT) — nhưng đó KHÔNG PHẢI state của engine ta công bố. Chặn pipeline/DollarBill. Kiểm tra daily_refresh_v34b_linux.sh step [12] + data/refresh_v34b_linux_$TODAY.log"
+  echo "FAIL DT5G publisher-evidence: $dt5g_pub_reason"
+  "$ROOT/bin/notify.sh" "$pub_msg" 2>/dev/null || true
+  "$ROOT/bin/notify_thread.sh" "$pub_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+  FAILED=1
+else
+  [ -z "$QUIET" ] && echo "OK   DT5G publisher-evidence: golive_state_today.json as_of=$DT5G_AS_OF (phiên gần nhất), bq_publish_ok=true, mtime=$DT5G_JSON_MDATE"
+  DT5G_CSV_MDATE="$(date -d @"$(stat -c %Y "$DT5G_CSV_F" 2>/dev/null || echo 0)" +%Y-%m-%d 2>/dev/null)"
+  if [ "$IS_TRADING_TODAY" = "1" ] && [ "$DT5G_CSV_MDATE" != "$TODAY" ]; then
+    csv_msg="🟡 DT5G CSV MIRROR ($TODAY $NOW_ICT): data/vnindex_5state_dt5g_live.csv mtime=${DT5G_CSV_MDATE:-MISSING} ≠ hôm nay dù publish BQ OK — export CSV từ BQ đã lỗi. Production (BQ) vẫn ĐÚNG; nhóm script nghiên cứu đọc CSV này đang dùng bản cũ. Không chặn pipeline."
+    echo "WARN DT5G csv mirror: mtime=${DT5G_CSV_MDATE:-MISSING} ≠ $TODAY — non-blocking"
+    "$ROOT/bin/notify_thread.sh" "$csv_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+    WARNED=$((WARNED + 1))
+  else
+    [ -z "$QUIET" ] && echo "OK   DT5G csv mirror: mtime=${DT5G_CSV_MDATE:-?}"
+  fi
+fi
+# Giám sát WRITER LẠ (WARN-only, không bao giờ chặn) — xem docstring mike/bin/dt5g_writer_watch.py.
+# Lấy mẫu ở đây là mẫu SAU publish của daily_refresh; mẫu QUAN TRỌNG hơn (thấy được writer ngoài
+# trước khi ta đè lên) nằm ở đầu daily_refresh_v34b_linux.sh.
+python3 "$ROOT/bin/dt5g_writer_watch.py" --label bq-freshness-19h || true
 _check "ticker_financial (fundamentals)"  "tav2_bq.ticker_financial"          "t.time"  $MAX_FIN_LAG    "calendar" || true
 # --- mở rộng 2026-07-11 (audit Winston_20260711_031745 #3) ---
 _check "ticker_1m (live screening)"       "tav2_bq.ticker_1m"                 "t.time"  $MAX_1M_LAG     "trading"  || true
