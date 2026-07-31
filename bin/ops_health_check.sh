@@ -186,6 +186,9 @@ else:
         OK("Job board: không có bản ghi nào kẹt status=running quá hạn.")
 
 # 5. Câu hỏi (event_type=question) chưa được trả lời trong 48h gần nhất
+# Sibling: bin/bus_question_audit.py port lại ĐÚNG thuật toán match dưới đây cho báo cáo
+# TUẦN (kb_nightly.sh Phase 5, việc 11, thêm 2026-07-31) — đầy đủ không cắt AGED_SHOWN.
+# Sửa thuật toán match ở đây (resolvers/_resolved) → sửa luôn bên đó, đừng để 2 bản lệch.
 # 2 pass: answers gom TOÀN CỤC trước (append_event.sh ghi event vào file của TÁC GIẢ —
 # bus/inbox/<agent_id>.jsonl — nên answer của agent KHÁC người hỏi nằm ở file khác;
 # match trong-cùng-file như bản cũ khiến answer chéo-agent không bao giờ clear question,

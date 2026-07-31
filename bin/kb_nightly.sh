@@ -796,7 +796,25 @@ schedule-drift từng lọt qua nhiều tuần vì không mục nào ở trên �
 thật). Finding có rủi ro cao (chạm 'ranh giới cứng' của skill — có thể làm sai lệch 1 fact
 đang backing quyết định thật) → CHỈ báo cáo, KHÔNG tự sửa trong review này, để user/Mike xem lại
 riêng; finding rủi ro thấp (đúng dedup/pointer thuần tuý) → sửa luôn như việc 1-6.
-KHÔNG xóa archive. Không cần hỏi user cho việc 1-6, 10 — đây là routine maintenance đã được user uỷ quyền. Sau khi xong: notify Telegram, VÀ BẮT BUỘC (hợp đồng đầu ra máy đọc được — dispatch này chạy nền, không ai chờ trực tiếp, kb_nightly.sh thứ Bảy tự kiểm event này để phát hiện lạc đề/chết im, đúng NGUYÊN VĂN topic sau, không viết biến thể khác dù có vẻ tương đương): append_event.sh Mike decision 'kb-weekly-editorial' \"<JSON tóm tắt thay đổi>\".${CTX_BLOAT_WARN}${STALE_SECTIONS_WARN}" \
+11. **Bus-question hygiene weekly accountability report** (thêm 2026-07-31, user mandate — \"đáng
+lẽ phải làm hàng ngày, cuối tuần ít nhất phải có kiểm tra báo cáo lại đã hoàn thành chưa, không để
+im im không quản lý\"). Daily surfacing ĐÃ có (\`bin/ops_health_check.sh\` check #5, 08:20+12:45,
+top-5-cũ-nhất + \"…và N khác\") — việc NÀY là lớp accountability THIẾU: chạy
+\`python3 $ROOT/bin/bus_question_audit.py\` (liệt kê ĐẦY ĐỦ, không cắt, quét cả hot inbox lẫn
+archive — cùng thuật toán match đã hardening ở check #5, KHÔNG phải bản khác có thể lệch kết quả).
+Với MỖI câu hỏi PENDING liệt kê: (a) nếu là quyết định Mike có thể tự quyết dựa trên KB/context
+hiện có (không cần thẩm quyền user riêng, ví dụ câu hỏi kỹ thuật đã có đủ thông tin để trả lời) →
+tự quyết NGAY trong review này, ghi answer + dispatch xuống agent đã hỏi nếu cần; (b) nếu thật sự
+cần user quyết → GIỮ PENDING, liệt kê rõ trong báo cáo cuối kèm tuổi; (c) nếu đã lỗi thời/bị sự
+kiện sau vượt qua (vd alert vận hành cho 1 ngày đã qua, plan ngày đó đã chạy xong) → ghi answer
+\"SUPERSEDED — <lý do cụ thể>\" để đóng hình thức, KHÔNG bịa lý do nếu không chắc — chỉ đóng khi có
+bằng chứng thật (grep KB/git log/bus xác nhận), câu nào không chắc thì để PENDING cho tuần sau.
+Báo cáo cuối review PHẢI có: tổng số PENDING đầu review, số đã đóng tuần này (tách tự-quyết/
+superseded), số CÒN LẠI kèm tuổi từng câu — post báo cáo này (không chỉ ghi bus) vào Architecture
+channel qua \`bash $ROOT/bin/notify_thread.sh \"<báo cáo>\" 1521475726329516122\`. Đây LÀ cơ chế
+\"cuối tuần kiểm tra báo cáo lại đã hoàn thành chưa\" user yêu cầu — KHÔNG được bỏ qua mục này dù
+các mục 1-10 đã chiếm nhiều thời gian.
+KHÔNG xóa archive. Không cần hỏi user cho việc 1-6, 10-11 — đây là routine maintenance đã được user uỷ quyền. Sau khi xong: notify Telegram, VÀ BẮT BUỘC (hợp đồng đầu ra máy đọc được — dispatch này chạy nền, không ai chờ trực tiếp, kb_nightly.sh thứ Bảy tự kiểm event này để phát hiện lạc đề/chết im, đúng NGUYÊN VĂN topic sau, không viết biến thể khác dù có vẻ tương đương): append_event.sh Mike decision 'kb-weekly-editorial' \"<JSON tóm tắt thay đổi>\".${CTX_BLOAT_WARN}${STALE_SECTIONS_WARN}" \
         --timeout 900 >> "$LOG" 2>&1 &
     log "Editorial dispatch launched (background)."
 fi
