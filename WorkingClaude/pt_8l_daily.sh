@@ -37,6 +37,22 @@ notify_fails() {
   "${NOTIFY_THREAD_BIN:-/home/trido/thanhdt/WorkingClaude/mike/bin/notify_thread.sh}" "$msg" "1521470705563340910" 2>/dev/null || true
 }
 
+# --- Độ tươi DT5G (audit §14, job Winston_20260731_062642) ------------------------------
+# Chain chạy 19:20 còn daily_refresh 18:30 worst-case ~90' ⇒ có thể chạy khi publisher CỦA TA
+# chưa xong. rating_8l đọc state cho deposit-tilt (NEUTRAL) và các step alert 8L gửi Telegram
+# dựa trên bảng xếp hạng đó — không được âm thầm coi regime hôm qua là regime hôm nay.
+# Bằng chứng = golive_state_today.json qua dt5g_freshness.py (CÙNG artifact + CÙNG luật với
+# gate bq_freshness_check 19:00). CHỈ CẢNH BÁO, KHÔNG chặn chain (báo trễ > không báo).
+DT5G_WARN="$(timeout 60 $PY dt5g_freshness.py --warn-line 2>/dev/null || true)"
+if [ -n "$DT5G_WARN" ]; then
+  echo; echo "--- [0-fresh] DT5G STALE --- $DT5G_WARN"
+  _m="⚠️ pt_8l_daily $(date +%F): $DT5G_WARN Bảng xếp hạng + alert 8L tối nay chạy trên regime CHƯA xác nhận."
+  "${NOTIFY_BIN:-/home/trido/thanhdt/WorkingClaude/mike/bin/notify.sh}" "$_m" 2>/dev/null || true
+  "${NOTIFY_THREAD_BIN:-/home/trido/thanhdt/WorkingClaude/mike/bin/notify_thread.sh}" "$_m" "1521470705563340910" 2>/dev/null || true
+else
+  echo; echo "--- [0-fresh] DT5G tươi (publisher của ta đã xác nhận hôm nay) ---"
+fi
+
 run "[1] rating_8l"            rating_8l.py
 run "[2] unified_screener"     unified_screener.py
 run "[3] rank_8l"              rank_8l.py

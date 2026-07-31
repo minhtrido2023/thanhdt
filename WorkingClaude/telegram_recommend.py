@@ -420,7 +420,16 @@ def build_message(target: str, state5, state_label: str,
     w_tgt = st.get("w_lag_target")
     w_cur = st.get("w_lag_current")
 
-    lines = [
+    # Cảnh báo độ tươi INPUT do caller truyền qua env — telegram_run_daily.sh kiểm mtime
+    # data/rating_8l.csv: pt_8l_daily 19:20 fail im lặng thì cột R ở đây là của hôm trước
+    # mà tin nhắn không hề nói (audit §14 cron freshness, job Winston_20260731_062642).
+    # Mặc định TRỐNG ⇒ mọi caller khác (chạy tay, script khác) không đổi một chữ nào.
+    # Đặt DÒNG ĐẦU, không giấu ở cuối: người đọc phải thấy trước khi đọc các con số.
+    lines = []
+    _warn = (os.environ.get("EXTRA_WARN_HEADER") or "").strip()
+    if _warn:
+        lines += [f"<b>{_warn}</b>", ""]
+    lines += [
         f"<b>🛰️ V2.3 (DT5G) REPORT — {target}</b>",
         f"<i>Sent: {now} (next session T+1 entry)</i>",
         "",

@@ -75,6 +75,7 @@ os.environ.pop("BQ_LOCAL_CACHE", None)
 from simulate_holistic_nav import bq
 from signal_v11_sql import SIGNAL_V11
 from anomaly_gate import anomaly_excluded as _anomaly_excluded_shared
+from anomaly_gate import anomaly_flags_freshness as _anomaly_flags_freshness
 from lag_liquidity_filter import lag_filter_illiquid
 from lag_rating_filter import lag_filter_low_rating
 
@@ -484,6 +485,24 @@ try:
 except Exception as e:
     print(f"  WARNING: golive_state_today.json missing ({e}); run publish_gated_state.py first")
 
+# ── độ tươi CỦA FILE cờ due-diligence (KHÁC TTL 30d của từng cờ) ───────────────────────
+# anomaly_flags.json do ops_health_check 08:20 ghi; nếu scan chết im lặng thì file đứng im
+# và gate ở §6 sẽ THIẾU mọi mã mới nổ cờ mà không ai biết — người duyệt plan phải THẤY.
+# Fail-open giữ nguyên (không loại thêm/bớt mã nào), chỉ THÊM cảnh báo hiển thị.
+anomaly_fresh = _anomaly_flags_freshness()
+if anomaly_fresh["is_stale"]:
+    print(f"  ⚠️ WARNING: anomaly_flags.json KHÔNG tươi hôm nay — {anomaly_fresh['reason']}")
+    try:
+        import subprocess
+        subprocess.run([os.path.join(WORKDIR, "mike", "bin", "append_event.sh"), "Winston", "error",
+                        "anomaly-flags-stale",
+                        json.dumps({"consumer": "golive_recommend_v23", "date": END,
+                                    "generated_at": anomaly_fresh["generated_at"],
+                                    "reason": anomaly_fresh["reason"]}, ensure_ascii=False)],
+                       timeout=30, capture_output=True)
+    except Exception as _e:      # bus lỗi KHÔNG được làm hỏng luồng lập plan
+        print(f"  WARNING: không ghi được bus event anomaly-flags-stale ({_e})")
+
 # ── 1. signals with state5 from the gated DT5G series ──
 SIG = SIGNAL_V11.replace("tav2_bq.vnindex_5state AS s", "tav2_bq." + DT_TABLE + " AS s")
 sig = bq(SIG.format(start=START, end=END)); sig["time"] = pd.to_datetime(sig["time"])
@@ -841,6 +860,12 @@ status = {
     **capit_ep,
     "n_park": len(_park_basket) if _park_basket is not None else 0,
     "park_rebal_date": _park_rebal_date,
+    # Độ tươi CỦA FILE cờ due-diligence (KHÁC TTL 30d của từng cờ). True ⇒ gate anomaly có
+    # thể THIẾU mã mới nổ cờ; hành vi loại trừ KHÔNG đổi (fail-open), chỉ để người/máy đọc
+    # biết mà tự kiểm thêm trước khi duyệt plan.
+    "anomaly_flags_stale": bool(anomaly_fresh["is_stale"]),
+    "anomaly_flags_generated_at": anomaly_fresh["generated_at"],
+    "anomaly_flags_stale_reason": anomaly_fresh["reason"] or None,
 }
 with open(os.path.join(WORKDIR, "data", "golive_v23_status.json"), "w", encoding="utf-8") as f:
     json.dump(status, f, ensure_ascii=False, indent=2)
@@ -848,6 +873,14 @@ with open(os.path.join(WORKDIR, "data", "golive_v23_status.json"), "w", encoding
 L = []
 L.append(f"# V2.3 + DT5G — Daily Recommendations — {END}\n")
 L.append(f"*Generated {datetime.now():%Y-%m-%d %H:%M}. System: V2.3 = BAL | LAG (static, always-on) + allocator + parking + CAPIT v2, gated DT5G state (fail-safe DT4).*\n")
+if anomaly_fresh["is_stale"]:
+    # Đặt NGAY ĐẦU báo cáo, không giấu trong log: đây là thứ người duyệt plan phải thấy
+    # trước khi nhìn danh sách mua (audit §14 cron freshness, Winston_20260731_062642).
+    L.append(f"> ⚠️ **`anomaly_flags.json` KHÔNG tươi hôm nay** (generated_at="
+             f"`{anomaly_fresh['generated_at'] or 'thiếu'}` — {anomaly_fresh['reason']}). Gate "
+             f"due-diligence vẫn chạy trên cờ CŨ ⇒ **CÓ THỂ THIẾU mã vừa nổ cờ bất thường**. "
+             f"Tự kiểm tra tin tức/giá các mã trong danh sách mua trước khi duyệt; "
+             f"kiểm tra `ops_health_check.sh`/`anomaly_scan.py` có chạy sáng nay không.\n")
 L.append("## Regime, allocator & parking\n")
 L.append(f"- **Market state (gated):** {state_today} = **{SNAME.get(state_today,'?')}**  (source: {prov.get('source','?')})")
 L.append(f"- **Allocator w_LAG:** target **{w_tgt*100:.0f}%**" +

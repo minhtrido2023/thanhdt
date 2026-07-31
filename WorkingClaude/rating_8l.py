@@ -134,6 +134,48 @@ MOAT_TIER = {}   # {ticker: 'WIDE'/'NARROW'/'NONE'} loaded from data/moat_tags.c
 # data/forensic_flags.csv. This is the persistence layer so a once-found forensic case is remembered forever.
 FORENSIC = {}    # {ticker: (severity, flag_type, note)}
 
+# Cờ "state DT5G đọc được có thể là của HÔM QUA" — mặc định False, chỉ `dt5g_state_today()`
+# bật lên. Để MODULE-LEVEL (không đổi chữ ký hàm nào) vì rating_8l có >20 caller: thêm tham
+# số/giá trị trả về mới sẽ phá caller chưa sẵn sàng. Caller nào quan tâm thì đọc thêm
+# `rating_8l.DT5G_STALE` / `DT5G_STALE_REASON`; caller cũ không đọc thì hành vi y hệt trước.
+DT5G_STALE = False
+DT5G_STALE_REASON = ""
+
+
+def dt5g_state_today(quiet=False):
+    """State DT5G của phiên gần nhất + cờ "publisher CỦA TA đã chạy xong hôm nay chưa".
+
+    `SELECT state ... ORDER BY time DESC LIMIT 1` KHÔNG đủ để biết state có tươi không:
+    bảng `vnindex_5state_dt5g_live` có writer thứ hai (pipeline kaffa_v2 ~17:12 ICT) đẩy
+    MAX(time)=hôm nay kể cả khi chain của ta chết sạch — query vẫn trả 1 dòng "của hôm nay"
+    (audit §14, job Winston_20260731_062642). Bằng chứng DUY NHẤT cho việc publisher của ta
+    chạy xong là `golive_state_today.json`, dùng lại y nguyên artifact + luật của gate
+    `bq_freshness_check.sh` (module `dt5g_freshness`), KHÔNG dựng cơ chế freshness thứ hai.
+
+    Trả (state:int|None, stale:bool). KHÔNG chặn: state cũ vẫn trả về, chỉ gắn cờ + in WARN.
+    """
+    dt5g_freshness_flag(quiet=quiet)
+    st = bq("SELECT state FROM tav2_bq.vnindex_5state_dt5g_live ORDER BY time DESC LIMIT 1")
+    return (int(st["state"].iloc[0]) if len(st) else None), DT5G_STALE
+
+
+def dt5g_freshness_flag(quiet=False):
+    """Chỉ phần KIỂM ĐỘ TƯƠI (đọc 1 file, không chạm BQ) — tách khỏi `dt5g_state_today` để
+    gọi được SỚM trong main(): chỗ đọc state nằm sâu trong khối `try` deposit-tilt, một lỗi
+    không liên quan ở đó (thiếu deposit_rate_vn…) sẽ nuốt luôn cảnh báo độ tươi.
+    """
+    global DT5G_STALE, DT5G_STALE_REASON
+    try:
+        from dt5g_freshness import dt5g_publisher_evidence
+        ev = dt5g_publisher_evidence()
+    except Exception as e:                      # thiếu module ⇒ coi như KHÔNG biết ⇒ cảnh báo
+        ev = {"is_stale": True, "reason": f"không kiểm được bằng chứng publisher ({e})"}
+    DT5G_STALE, DT5G_STALE_REASON = bool(ev["is_stale"]), ev.get("reason", "")
+    if DT5G_STALE and not quiet:
+        print(f"  ⚠️ DT5G có thể là state HÔM QUA — {DT5G_STALE_REASON}")
+    return DT5G_STALE
+
+
 # ---------- scorecards ----------
 def real_lev(r):
     """Interest-bearing debt/equity (STLTDebt_Eq). Debt_Eq_P0 is TOTAL-liabilities/equity — it counts
@@ -398,6 +440,9 @@ def rate_power(r):
     return 3, "power-other"
 
 def main():
+    # Kiểm độ tươi DT5G NGAY ĐẦU run: dòng WARN này nằm trong log pt_8l_daily và là thứ
+    # eod_trading_report/telegram_run_daily soi để chèn cảnh báo vào báo cáo người đọc.
+    dt5g_freshness_flag()
     df = bq(MAIN_SQL)
     try:
         fin = bq(FIN_SQL); df = df.merge(fin, on="ticker", how="left")
@@ -747,7 +792,7 @@ def main():
     try:
         from deposit_rate_vn import current_deposit_rate
         _dep = current_deposit_rate()
-        _st = bq("SELECT state FROM tav2_bq.vnindex_5state_dt5g_live ORDER BY time DESC LIMIT 1")["state"].iloc[0]
+        _st, _dt5g_stale = dt5g_state_today()   # state cũ VẪN dùng (hành vi không đổi), chỉ thêm cờ
         if int(_st) == 3 and os.environ.get("DEPOSIT_TILT", "1") == "1":          # NEUTRAL only
             _spread = scr["earn_yield"] * 100 - _dep                              # 1/PE(%) - deposit(%)
             _tilt = np.where(scr["val_route"].isin(["COMPOUNDER","CYCLICAL","RETAIL"]) & _spread.notna(),
