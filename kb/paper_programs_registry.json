@@ -1,213 +1,423 @@
 {
-  "version": 2,
-  "updated": "2026-07-15",
-  "description": "Registry các chương trình PAPER-TRADING đang active — nguồn duy nhất cho paper_programs_daily_report.py. Thêm sleeve mới = thêm 1 entry (không sửa code render). Probe types: command | journal_scan | alphalens.",
-  "programs": [
+ "version": 3,
+ "updated": "2026-07-31",
+ "description": "Registry các chương trình PAPER-TRADING đang active — nguồn duy nhất cho paper_programs_daily_report.py. Thêm sleeve mới = thêm 1 entry (không sửa code render). Probe types: command | journal_scan | alphalens. Field BẮT BUỘC cho entry mới (v3, redesign trình bày 2026-07-31): today_activity (mode journal|csv_row|static|none_available — thiếu field này thì report báo WATCH vì không phân biệt được 'không có giao dịch' với 'không đo được'), review_short (mốc nghiệm thu 1 dòng), và nên có headline (csv_row hoặc regex) để dòng đầu section có số. objective/end_or_trigger/gate_criteria/notes = phần TĨNH, KHÔNG in lại mỗi ngày nữa — tự sinh ra mike/kb/paper_programs_charter/<id>.md, report chỉ link tới.",
+ "programs": [
+  {
+   "id": "dc_waterfall",
+   "name": "DC-book NEUTRAL idle-cash Waterfall",
+   "owner": "Taylor",
+   "objective": "Khi NEUTRAL và BAL/LAG rỗng, giải ngân tiền rảnh theo thứ tự BAL/LAG → DC book (double-confirm, ex-DHG) → custom30V có thắng để-nguyên-custom30V không? (backtest +5.0pp sleeve, DSR 0.775 = insurance-grade, chưa phải alpha tin cậy cao)",
+   "start": "2026-07-06",
+   "end": null,
+   "end_or_trigger": "Event-anchored: chu kỳ reverse-unwind ĐẦU TIÊN hoàn tất (LAG dự kiến refill cuối 07) + settle 4-6 tuần. Sàn ~2 tháng, trần 2026-10-06 (né mùa BCTC Q3). LAG refill trượt lịch → mốc trượt theo.",
+   "gate_criteria": [
     {
-      "id": "dc_waterfall",
-      "name": "DC-book NEUTRAL idle-cash Waterfall",
-      "owner": "Taylor",
-      "objective": "Khi NEUTRAL và BAL/LAG rỗng, giải ngân tiền rảnh theo thứ tự BAL/LAG → DC book (double-confirm, ex-DHG) → custom30V có thắng để-nguyên-custom30V không? (backtest +5.0pp sleeve, DSR 0.775 = insurance-grade, chưa phải alpha tin cậy cao)",
-      "start": "2026-07-06",
-      "end": null,
-      "end_or_trigger": "Event-anchored: chu kỳ reverse-unwind ĐẦU TIÊN hoàn tất (LAG dự kiến refill cuối 07) + settle 4-6 tuần. Sàn ~2 tháng, trần 2026-10-06 (né mùa BCTC Q3). LAG refill trượt lịch → mốc trượt theo.",
-      "gate_criteria": [
-        {"text": "Trọn 1 chu kỳ deploy → reverse-unwind → settle trên paper, đúng thứ tự ưu tiên thiết kế", "status": "pending"},
-        {"text": "P&L sleeve NET-of-TC không mâu thuẫn backtest (+5.0pp/năm sleeve parking kỳ vọng)", "status": "pending"},
-        {"text": "User sign-off sau review event-anchored (Mike + Taylor đề xuất ngày khi đủ điều kiện)", "status": "pending"}
-      ],
-      "probe": {
-        "type": "command",
-        "cmd": ["python3", "dc_book_waterfall_paper.py", "--section", "--account", "main"],
-        "timeout": 200,
-        "max_chars": 1400
-      },
-      "data_sources": [
-        "data/dc_book_waterfall_paper_state.json",
-        "data/dc_book_waterfall_paper_nav.csv"
-      ],
-      "notes": "Sleeve clock chạy từ 2026-06-26 (backfill NAV cơ sở 1B); user duyệt paper 2026-07-06 (job Taylor_20260706_132553)."
+     "text": "Trọn 1 chu kỳ deploy → reverse-unwind → settle trên paper, đúng thứ tự ưu tiên thiết kế",
+     "status": "pending"
     },
     {
-      "id": "extreme_regime",
-      "name": "EXTREME-regime gate",
-      "owner": "Taylor",
-      "objective": "Gate phòng thủ intraday (arm 2-poll, sell-to-floor, buy-pause, cadence ×0.25) có ZERO false-trigger trong thị trường benign không? (stress-injection đã PASS 24/24)",
-      "start": "2026-07-01",
-      "end": null,
-      "end_or_trigger": "20 phiên EVIDENCE (executor chạy thật trên paper main) từ phiên thật đầu tiên 2026-07-07 → ước ~2026-08-03. Mốc cũ 2026-07-28 bỏ — 07-01→07-06 flag bật nhưng 0 phiên executor = 0 evidence, không đếm.",
-      "progress": {"mode": "evidence_sessions", "account": "main", "target_sessions": 20, "count_from": "2026-07-07"},
-      "gate_criteria": [
-        {"text": "Stress-injection 24/24 PASS (arm 2-poll · sell-to-floor · buy-pause · cadence ×0.25 + negative controls)", "status": "pass", "note": "stress_extreme_regime.py, week-1"},
-        {"text": "ZERO false-trigger qua ~4 tuần benign trên account paper main", "status": "pending"},
-        {"text": "Không can thiệp NORMAL-path", "status": "pending"},
-        {"text": "User sign-off trước khi bật live", "status": "pending"}
-      ],
-      "probe": {
-        "type": "journal_scan",
-        "account": "main",
-        "markers": ["EXTREME_PAUSE", "EXTREME_SELL", "EXTREME_DOWN", "EXTREME_UP"]
-      },
-      "data_sources": [
-        "data/execution_logs/exec_main_*_journal.csv",
-        "secrets/trading_bot_accounts.json (extreme_regime_enabled=true, chỉ paper main)",
-        "stress_extreme_regime.py"
-      ],
-      "notes": "Evidence tích lũy CHỈ khi executor chạy phiên trên account main — 0 phiên = 0 evidence, không tính là PASS. Từ 2026-07-07: probe harness chạy paper main mỗi ngày T2-T6 (cron 08:52 sinh plan mike/bin/paper_main_probe_plan.py, executor 09:10 + 13:05, log mike/logs/run_bot_main_*.log)."
+     "text": "P&L sleeve NET-of-TC không mâu thuẫn backtest (+5.0pp/năm sleeve parking kỳ vọng)",
+     "status": "pending"
     },
     {
-      "id": "vol_scale_chase_cap",
-      "name": "Vol-scale buy chase-cap (patch#3)",
-      "owner": "Taylor",
-      "objective": "Nới trần đuổi mua theo realised vol 20d (clamp(k·rvol, static, ceil), k=2.0/ceil=0.04, monotone-safe, fail-safe về static) có wiring đúng trên quote thật không? (executor-path stress đã PASS 15/15)",
-      "start": "2026-07-01",
-      "end": null,
-      "end_or_trigger": "10 phiên EVIDENCE (executor chạy thật trên paper main) từ phiên thật đầu tiên 2026-07-07 → ước ~2026-07-20. Mốc cũ 2026-07-14 bỏ — 07-01→07-06 flag bật nhưng 0 phiên executor = 0 evidence, không đếm.",
-      "progress": {"mode": "evidence_sessions", "account": "main", "target_sessions": 10, "count_from": "2026-07-07"},
-      "gate_criteria": [
-        {"text": "Executor-path stress 15/15 PASS (wiring · WIDEN clamp-to-ceil · MONOTONE · fail-safe rvol absent/0/<0 · NEG-control)", "status": "pass", "note": "stress_vol_scale_chase_cap.py"},
-        {"text": "Paper sạch: wiring đúng trên quote thật + fail-safe khi thiếu rvol cache", "status": "pending"},
-        {"text": "Không can thiệp NORMAL-path ngày non-gap", "status": "pending"},
-        {"text": "Skeptic rerun REAL-fill vs min(open,L) proxy trên correlated gap-up @NAV target", "status": "pending"},
-        {"text": "User sign-off trước khi bật live", "status": "pending"}
-      ],
-      "probe": {
-        "type": "journal_scan",
-        "account": "main",
-        "markers": []
-      },
-      "data_sources": [
-        "data/execution_logs/exec_main_*_journal.csv",
-        "secrets/trading_bot_accounts.json (chase_cap_vol_scale_enabled=true, chỉ paper main)",
-        "stress_vol_scale_chase_cap.py"
-      ],
-      "notes": "Cap-widen KHÔNG có marker riêng trong journal (áp silent trong _buy_chase_pct) — đo qua stress script + so limit price ngày gap-up; cần phiên executor paper + ngày gap mới có evidence tự động. Từ 2026-07-07: probe harness chạy paper main mỗi ngày (6 BUY/phiên trên quote thật — xem entry extreme_regime cho cron)."
-    },
-    {
-      "id": "fill_timing",
-      "name": "Fill-timing window (BUY 10:45-11:15 / SELL 09:15-09:45)",
-      "owner": "Taylor",
-      "objective": "Edge backtest (BUY 11:15 rẻ hơn open +17.6bps t=12.0; SELL tại open +11.8bps vs ATC) có capture được NET-of-noise trên fill thật không? (noise 110-220bps >> edge 17bps → cần nhiều tuần)",
-      "start": "2026-07-01",
-      "end": "2026-07-31",
-      "end_or_trigger": "Checkpoint ~cuối tháng 7 (cần ~3-4 tuần fill tích lũy)",
-      "gate_criteria": [
-        {"text": "BUY window adherence cao (lệnh dồn 10:45-11:15)", "status": "pending"},
-        {"text": "SELL window adherence cao (lệnh tại open 09:15-09:45)", "status": "pending"},
-        {"text": "0 rejects/fails (hoặc từng cái được giải thích)", "status": "pending"},
-        {"text": "BUY fill không tệ hơn open đáng kể; SELL không thấp hơn open đáng kể", "status": "pending"},
-        {"text": "quant-skeptic → user sign-off mới flip fill_timing_live_gate", "status": "pending"}
-      ],
-      "probe": {
-        "type": "command",
-        "cmd": ["python3", "execution_quality_review.py"],
-        "timeout": 120,
-        "max_chars": 1600
-      },
-      "data_sources": [
-        "execution_quality_review.py",
-        "data/execution_logs/exec_*_journal.csv (ft-notes)"
-      ],
-      "notes": "Mechanics (window adherence) đo được sớm; EDGE bps cần nhiều tuần — không gate sớm trên bps."
-    },
-    {
-      "id": "alphalens",
-      "name": "AlphaLens Paper (FPT/ACB/MBB/HDB vs VNINDEX)",
-      "owner": "DollarBill",
-      "objective": "4 tên Tier-1 chọn bằng lens định giá (PE vs PE_MA1Y; PB vs Gordon justified-PB) có beat VNINDEX qua 3 tháng không? Buy-and-hold, equal-weight 25%/tên.",
-      "start": "2026-07-01",
-      "end": "2026-09-30",
-      "end_or_trigger": "2026-09-30 (audit: Taylor)",
-      "gate_criteria": [
-        {"text": "Excess return dương vs VNINDEX qua full window 3 tháng", "status": "pending"},
-        {"text": "Exit conditions per-name không bị vi phạm sớm (PE > PE_MA1Y / PB > justPB)", "status": "pending"},
-        {"text": "Audit độc lập bởi Taylor tại 2026-09-30", "status": "pending"}
-      ],
-      "probe": {
-        "type": "alphalens",
-        "json_path": "data/alphalens_paper.json",
-        "prices_parquet": "data/bq_cache/ticker_1m.parquet"
-      },
-      "data_sources": [
-        "data/alphalens_paper.json",
-        "data/bq_cache/ticker_1m.parquet (Close + VNINDEX, sync 23:45 ICT)"
-      ],
-      "notes": "Giá MTM từ BQ cache (close phiên gần nhất đã sync) — trong phiên sẽ trễ 1 ngày, đúng thiết kế EOD."
-    },
-    {
-      "id": "orb_intraday",
-      "name": "ORB intraday VN30F (ring-fenced)",
-      "owner": "Taylor",
-      "objective": "Chiến lược opening-range-breakout VN30F (sign OR 09:00-09:30 → giữ tới 14:30, no stop) có sống sót qua regime BẤT LỢI không? Verdict quant-skeptic 2026-07-01: NO-integrate — n≈17-21 phiên toàn NEUTRAL uptrend benign, Sharpe cao là artifact mẫu nhỏ; walk-forward 2024 lỗ cả năm chưa được giải quyết. Paper tích lũy tiếp để có bằng chứng đủ mạnh.",
-      "start": "2026-06-09",
-      "end": null,
-      "end_or_trigger": "≥60 phiên GỒM ít nhất một giai đoạn chop/bear → re-eval quant-skeptic. Không có deadline lịch — điều kiện là REGIME, không phải số ngày.",
-      "gate_criteria": [
-        {"text": "≥60 phiên paper GỒM giai đoạn chop/bear (hiện toàn benign uptrend — chưa đủ điều kiện đánh giá)", "status": "pending"},
-        {"text": "Walk-forward 2024 full-year loss được giải thích/không lặp lại trong forward window", "status": "pending"},
-        {"text": "Hạ tầng phái sinh: tài khoản VSD margin + đường thực thi VN30F (bot hiện CASH-EQUITY ONLY — chưa thể live dù edge có thật)", "status": "pending"},
-        {"text": "Nếu tích hợp: sleeve RIÊNG vốn riêng ≤5% NAV + quant-skeptic + user sign-off", "status": "pending"}
-      ],
-      "probe": {
-        "type": "command",
-        "cmd": ["python3", "-c", "import json; s=json.load(open('data/orb_pt_status.json')); print(f\"asof {s['last_date']} | {s['n_days']} phiên từ {s['window_start']} | NAV {s['nav']/1e9:.3f}B ({s['cum_ret']*100:+.2f}%) | WR {s['wr']*100:.1f}% | phiên cuối {s['last_net']*100:+.2f}% (sig {s['last_sig']:+d}) | Sharpe report {s['sharpe']} (mẫu nhỏ — đọc thận trọng)\")"],
-        "timeout": 30,
-        "max_chars": 600
-      },
-      "data_sources": [
-        "data/orb_pt_status.json",
-        "data/orb_pt_log.csv (orb_pt.py, papertrade_daily.sh 15:30 ICT)"
-      ],
-      "notes": "Section ORB trong Telegram 18:00 (telegram_recommend.py) đã GỠ 2026-07-07 để hết trùng — report này là kênh duy nhất. Verdict đầy đủ: bus event Taylor 2026-07-01 (job Taylor_20260701_113638)."
-    },
-    {
-      "id": "capitulation_shadow",
-      "name": "Capitulation-sleeve shadow (DT5G × 8L washout)",
-      "owner": "Taylor",
-      "objective": "Sleeve dự trữ 50B nằm CASH, deploy vào rổ 8L quality+golden khi có tín hiệu washout (rule v2 2026-06-10, crisis_playbook.md §0b/§1), giữ 60 phiên rồi về cash — forward NAV là bằng chứng OOS cho overlay khi có khủng hoảng thật. Point-in-time: basket FREEZE tại ngày signal, không hindsight.",
-      "start": "2026-06-10",
-      "end": null,
-      "end_or_trigger": "EVENT-DRIVEN — đánh giá sau sự kiện washout THẬT đầu tiên (đến nay chưa có: mode CASH liên tục). Không có deadline lịch; sleeve rẻ, chạy chờ event.",
-      "gate_criteria": [
-        {"text": "Sự kiện washout đầu tiên được xử lý đúng point-in-time (basket freeze tại signal date, entry price log đủ)", "status": "pending"},
-        {"text": "Fwd NAV sleeve qua trọn chu kỳ deploy→60 phiên→cash beat cash (kỳ vọng nghiên cứu: fwd60 +7%/81% winrate vùng WASHED-OUT)", "status": "pending"},
-        {"text": "Audit độc lập sau event trước khi cân nhắc wire overlay live", "status": "pending"}
-      ],
-      "probe": {
-        "type": "command",
-        "cmd": ["python3", "-c", "import json; s=json.load(open('data/pt_capitulation_state.json')); print(f\"asof {s['last_date']} | mode {s['mode']} | NAV {s['nav']/1e9:.2f}B | tier {s['tier']} | entry {s['entry_date']} | basket {len(s['basket'])} mã\")"],
-        "timeout": 30,
-        "max_chars": 400
-      },
-      "data_sources": [
-        "data/pt_capitulation_state.json",
-        "data/pt_capitulation_logs.csv + baskets.csv (pt_capitulation_shadow.py, papertrade_daily.sh)"
-      ],
-      "notes": "crisis_alert_push.py (cùng pipeline 15:30) là CÒI Telegram của cùng signal — chỉ kêu khi WATCH/STRONG, im lặng ngày thường → là alert vận hành, KHÔNG phải report trùng, giữ nguyên. VINTAGE: pt_capitulation_shadow.py query BQ LIVE (ticker_prune + dt5g_live), mà BQ chưa có close phiên T lúc 15:30 → last_date LUÔN = T-1. Đây là SÀN CẤU TRÚC, không phải stale: muốn asof=T phải chờ ingest ~17:30 / sync 23:45, tức dời report sang tối hoặc sáng hôm sau."
-    },
-    {
-      "id": "engine_room_oos",
-      "name": "Engine-room OOS panel (V11/V12/V4 vs V2.3-book vs VNINDEX)",
-      "owner": "Taylor",
-      "objective": "V2.3-book (NGUỒN TÍN HIỆU của live V2.4 — trading_bot/strategies.py đọc pt_v22_dt5g_open_positions.csv để build plan thật) có tiếp tục thắng các kiến trúc BỊ LOẠI (V11 Song Sinh, V12 Âm Dương, V4 switched-allocator) trên OOS forward không? = validation liên tục của lựa chọn V2.4. Nếu một hệ bị loại dominate BỀN risk-adjusted → mở lại câu hỏi rotation (qua quant-skeptic + DSR/PBO, không tự wire).",
-      "start": "2026-06-11",
-      "end": null,
-      "end_or_trigger": "Review 2026-12-01 (~6 tháng OOS trên cửa sổ chung từ 2026-06-11) — Taylor trình bảng + khuyến nghị giữ panel / thu gọn / mở câu hỏi rotation.",
-      "gate_criteria": [
-        {"text": "V2.3-book không bị hệ đã loại dominate risk-adjusted qua 6 tháng OOS chung (so trên CỬA SỔ CHUNG — NAV thô khác inception là apples-oranges)", "status": "pending"},
-        {"text": "pt_v22 artifacts fresh mỗi phiên (PRODUCTION DEPENDENCY — plan live scale từ sổ này; stale = sự cố ops, đã có tiền lệ 2026-07-07)", "status": "pending"}
-      ],
-      "probe": {
-        "type": "command",
-        "cmd": ["python3", "-c", "import pandas as pd; d=pd.read_csv('data/papertrade_compare5.csv',parse_dates=['ymd']).set_index('ymd'); r=d.loc[d.index>=d.dropna().index.min()]; b,l=r.iloc[0],r.iloc[-1]; BASE=50e9; print(f'Cửa sổ so sánh CHUNG {r.index[0].date()} → {r.index[-1].date()} ({len(r)} phiên), NAV rebase {BASE/1e9:.0f}B tại đầu cửa sổ (không phải NAV thô từ inception gốc):'); [print(f'  {c:8s} {(l[c]/b[c]-1)*100:+6.2f}%  (NAV {BASE*l[c]/b[c]/1e9:.2f}B)') for c in d.columns]"],
-        "timeout": 60,
-        "max_chars": 900
-      },
-      "data_sources": [
-        "data/papertrade_compare5.csv (papertrade_compare.py)",
-        "data/pt_v22_dt5g_*.csv (V2.3-book = production signal), data/pt_v4_dt5g_logs.csv, data/pt_v11_tq34b_logs.csv, data/pt_v12_macro_logs.csv"
-      ],
-      "notes": "pt_v22_dt5g KHÔNG PHẢI paper thí nghiệm — là sổ tín hiệu production, KHÔNG BAO GIỜ retire khi V2.4 còn live. V11/V12/V4 giữ chạy làm control arms (chi phí ~0, không gửi kênh nào). Inception khác nhau (V11/V12 cũ hơn, V4 06-01, V23 06-11) — probe tự rebase về cửa sổ chung. VINTAGE: các sim sinh papertrade_compare5.csv chạy trên giá đến T-1 lúc 15:30 → dòng cuối cửa sổ LUÔN = T-1 (sàn cấu trúc như capitulation_shadow, không phải stale)."
+     "text": "User sign-off sau review event-anchored (Mike + Taylor đề xuất ngày khi đủ điều kiện)",
+     "status": "pending"
     }
-  ]
+   ],
+   "probe": {
+    "type": "command",
+    "cmd": [
+     "python3",
+     "dc_book_waterfall_paper.py",
+     "--section",
+     "--account",
+     "main"
+    ],
+    "timeout": 200,
+    "max_chars": 1100,
+    "drop_regex": [
+     "^- DCF check",
+     "^\\s*ℹ️ _DCF",
+     "^\\s*ℹ️ _Due-diligence"
+    ]
+   },
+   "data_sources": [
+    "data/dc_book_waterfall_paper_state.json",
+    "data/dc_book_waterfall_paper_nav.csv"
+   ],
+   "notes": "Sleeve clock chạy từ 2026-06-26 (backfill NAV cơ sở 1B); user duyệt paper 2026-07-06 (job Taylor_20260706_132553).",
+   "review_short": "event-anchored: chu kỳ reverse-unwind ĐẦU TIÊN + settle 4-6 tuần · trần 2026-10-06",
+   "headline": {
+    "mode": "csv_row",
+    "path": "data/dc_book_waterfall_paper_nav.csv",
+    "template": "NAV {nav_vnd:,.0f}đ · lũy kế {cum_pnl_pct:+.2f}% · phiên gần nhất {sleeve_ret_pct:+.2f}% (as-of {date:.10})"
+   },
+   "today_activity": {
+    "mode": "csv_row",
+    "path": "data/dc_book_waterfall_paper_nav.csv",
+    "date_col": "date",
+    "zero_when": {
+     "col": "turnover",
+     "zero_value": 0.0
+    },
+    "template": "turnover {turnover:.2%} · rebalanced={rebalanced} · deployed={deployed} · sleeve {sleeve_ret_pct:+.2f}%"
+   }
+  },
+  {
+   "id": "extreme_regime",
+   "name": "EXTREME-regime gate",
+   "owner": "Taylor",
+   "objective": "Gate phòng thủ intraday (arm 2-poll, sell-to-floor, buy-pause, cadence ×0.25) có ZERO false-trigger trong thị trường benign không? (stress-injection đã PASS 24/24)",
+   "start": "2026-07-01",
+   "end": null,
+   "end_or_trigger": "20 phiên EVIDENCE (executor chạy thật trên paper main) từ phiên thật đầu tiên 2026-07-07 → ước ~2026-08-03. Mốc cũ 2026-07-28 bỏ — 07-01→07-06 flag bật nhưng 0 phiên executor = 0 evidence, không đếm.",
+   "progress": {
+    "mode": "evidence_sessions",
+    "account": "main",
+    "target_sessions": 20,
+    "count_from": "2026-07-07"
+   },
+   "gate_criteria": [
+    {
+     "text": "Stress-injection 24/24 PASS (arm 2-poll · sell-to-floor · buy-pause · cadence ×0.25 + negative controls)",
+     "status": "pass",
+     "note": "stress_extreme_regime.py, week-1"
+    },
+    {
+     "text": "ZERO false-trigger qua ~4 tuần benign trên account paper main",
+     "status": "pending"
+    },
+    {
+     "text": "Không can thiệp NORMAL-path",
+     "status": "pending"
+    },
+    {
+     "text": "User sign-off trước khi bật live",
+     "status": "pending"
+    }
+   ],
+   "probe": {
+    "type": "journal_scan",
+    "account": "main",
+    "markers": [
+     "EXTREME_PAUSE",
+     "EXTREME_SELL",
+     "EXTREME_DOWN",
+     "EXTREME_UP"
+    ]
+   },
+   "data_sources": [
+    "data/execution_logs/exec_main_*_journal.csv",
+    "secrets/trading_bot_accounts.json (extreme_regime_enabled=true, chỉ paper main)",
+    "stress_extreme_regime.py"
+   ],
+   "notes": "Evidence tích lũy CHỈ khi executor chạy phiên trên account main — 0 phiên = 0 evidence, không tính là PASS. Từ 2026-07-07: probe harness chạy paper main mỗi ngày T2-T6 (cron 08:52 sinh plan mike/bin/paper_main_probe_plan.py, executor 09:10 + 13:05, log mike/logs/run_bot_main_*.log).",
+   "review_short": "đủ 20 phiên evidence benign + 0 false-trigger → user sign-off (ước ~2026-08-03)",
+   "today_activity": {
+    "mode": "journal",
+    "account": "main"
+   }
+  },
+  {
+   "id": "vol_scale_chase_cap",
+   "name": "Vol-scale buy chase-cap (patch#3)",
+   "owner": "Taylor",
+   "objective": "Nới trần đuổi mua theo realised vol 20d (clamp(k·rvol, static, ceil), k=2.0/ceil=0.04, monotone-safe, fail-safe về static) có wiring đúng trên quote thật không? (executor-path stress đã PASS 15/15)",
+   "start": "2026-07-01",
+   "end": null,
+   "end_or_trigger": "10 phiên EVIDENCE (executor chạy thật trên paper main) từ phiên thật đầu tiên 2026-07-07 → ước ~2026-07-20. Mốc cũ 2026-07-14 bỏ — 07-01→07-06 flag bật nhưng 0 phiên executor = 0 evidence, không đếm.",
+   "progress": {
+    "mode": "evidence_sessions",
+    "account": "main",
+    "target_sessions": 10,
+    "count_from": "2026-07-07"
+   },
+   "gate_criteria": [
+    {
+     "text": "Executor-path stress 15/15 PASS (wiring · WIDEN clamp-to-ceil · MONOTONE · fail-safe rvol absent/0/<0 · NEG-control)",
+     "status": "pass",
+     "note": "stress_vol_scale_chase_cap.py"
+    },
+    {
+     "text": "Paper sạch: wiring đúng trên quote thật + fail-safe khi thiếu rvol cache",
+     "status": "pending"
+    },
+    {
+     "text": "Không can thiệp NORMAL-path ngày non-gap",
+     "status": "pending"
+    },
+    {
+     "text": "Skeptic rerun REAL-fill vs min(open,L) proxy trên correlated gap-up @NAV target",
+     "status": "pending"
+    },
+    {
+     "text": "User sign-off trước khi bật live",
+     "status": "pending"
+    }
+   ],
+   "probe": {
+    "type": "journal_scan",
+    "account": "main",
+    "markers": []
+   },
+   "data_sources": [
+    "data/execution_logs/exec_main_*_journal.csv",
+    "secrets/trading_bot_accounts.json (chase_cap_vol_scale_enabled=true, chỉ paper main)",
+    "stress_vol_scale_chase_cap.py"
+   ],
+   "notes": "Cap-widen KHÔNG có marker riêng trong journal (áp silent trong _buy_chase_pct) — đo qua stress script + so limit price ngày gap-up; cần phiên executor paper + ngày gap mới có evidence tự động. Từ 2026-07-07: probe harness chạy paper main mỗi ngày (6 BUY/phiên trên quote thật — xem entry extreme_regime cho cron).",
+   "review_short": "paper sạch + skeptic rerun REAL-fill + user sign-off (checkpoint ~2026-07-14 đã qua, CHƯA xác nhận)",
+   "today_activity": {
+    "mode": "journal",
+    "account": "main"
+   }
+  },
+  {
+   "id": "fill_timing",
+   "name": "Fill-timing window (BUY 10:45-11:15 / SELL 09:15-09:45)",
+   "owner": "Taylor",
+   "objective": "Edge backtest (BUY 11:15 rẻ hơn open +17.6bps t=12.0; SELL tại open +11.8bps vs ATC) có capture được NET-of-noise trên fill thật không? (noise 110-220bps >> edge 17bps → cần nhiều tuần)",
+   "start": "2026-07-01",
+   "end": "2026-07-31",
+   "end_or_trigger": "Checkpoint ~cuối tháng 7 (cần ~3-4 tuần fill tích lũy)",
+   "gate_criteria": [
+    {
+     "text": "BUY window adherence cao (lệnh dồn 10:45-11:15)",
+     "status": "pending"
+    },
+    {
+     "text": "SELL window adherence cao (lệnh tại open 09:15-09:45)",
+     "status": "pending"
+    },
+    {
+     "text": "0 rejects/fails (hoặc từng cái được giải thích)",
+     "status": "pending"
+    },
+    {
+     "text": "BUY fill không tệ hơn open đáng kể; SELL không thấp hơn open đáng kể",
+     "status": "pending"
+    },
+    {
+     "text": "quant-skeptic → user sign-off mới flip fill_timing_live_gate",
+     "status": "pending"
+    }
+   ],
+   "probe": {
+    "type": "command",
+    "cmd": [
+     "python3",
+     "execution_quality_review.py"
+    ],
+    "timeout": 120,
+    "max_chars": 1600
+   },
+   "data_sources": [
+    "execution_quality_review.py",
+    "data/execution_logs/exec_*_journal.csv (ft-notes)"
+   ],
+   "notes": "Mechanics (window adherence) đo được sớm; EDGE bps cần nhiều tuần — không gate sớm trên bps.",
+   "review_short": "≥5 phiên có BUY fill trong cửa sổ + 0 reject → quant-skeptic → user sign-off",
+   "headline": {
+    "regex": "journal ft-notes:\\s*(.+)$",
+    "template": "ft-notes {0}"
+   },
+   "today_activity": {
+    "mode": "journal",
+    "account": "main"
+   },
+   "attention_notes": [
+    {
+     "match": "journal FAIL/ERROR events",
+     "severity": "watch",
+     "note": "431 sự kiện lỗi này TOÀN BỘ thuộc 1 ngày 2026-07-30 (sự cố A: PaperBroker.place_order thiếu tham số cash_only → mọi lệnh paper-main crash), đã fix + verify cùng ngày; 0 lỗi trong journal 2026-07-31. Đây là số LŨY KẾ từ 2026-06-26 nên còn hiện cho tới khi cửa sổ trượt qua. Chi tiết: mike/kb/incidents/2026-07/2026-07-30-paper-trading-report-3-root-causes.md"
+    }
+   ]
+  },
+  {
+   "id": "alphalens",
+   "name": "AlphaLens Paper (FPT/ACB/MBB/HDB vs VNINDEX)",
+   "owner": "DollarBill",
+   "objective": "4 tên Tier-1 chọn bằng lens định giá (PE vs PE_MA1Y; PB vs Gordon justified-PB) có beat VNINDEX qua 3 tháng không? Buy-and-hold, equal-weight 25%/tên.",
+   "start": "2026-07-01",
+   "end": "2026-09-30",
+   "end_or_trigger": "2026-09-30 (audit: Taylor)",
+   "gate_criteria": [
+    {
+     "text": "Excess return dương vs VNINDEX qua full window 3 tháng",
+     "status": "pending"
+    },
+    {
+     "text": "Exit conditions per-name không bị vi phạm sớm (PE > PE_MA1Y / PB > justPB)",
+     "status": "pending"
+    },
+    {
+     "text": "Audit độc lập bởi Taylor tại 2026-09-30",
+     "status": "pending"
+    }
+   ],
+   "probe": {
+    "type": "alphalens",
+    "json_path": "data/alphalens_paper.json",
+    "prices_parquet": "data/bq_cache/ticker_1m.parquet"
+   },
+   "data_sources": [
+    "data/alphalens_paper.json",
+    "data/bq_cache/ticker_1m.parquet (Close + VNINDEX, sync 23:45 ICT)"
+   ],
+   "notes": "Giá MTM từ BQ cache (close phiên gần nhất đã sync) — trong phiên sẽ trễ 1 ngày, đúng thiết kế EOD.",
+   "review_short": "2026-09-30 — audit độc lập bởi Taylor",
+   "today_activity": {
+    "mode": "static",
+    "text": "**Không có giao dịch** — buy-and-hold theo thiết kế (equal-weight 25%/tên, không rebalance, giữ tới 2026-09-30)"
+   }
+  },
+  {
+   "id": "orb_intraday",
+   "name": "ORB intraday VN30F (ring-fenced)",
+   "owner": "Taylor",
+   "objective": "Chiến lược opening-range-breakout VN30F (sign OR 09:00-09:30 → giữ tới 14:30, no stop) có sống sót qua regime BẤT LỢI không? Verdict quant-skeptic 2026-07-01: NO-integrate — n≈17-21 phiên toàn NEUTRAL uptrend benign, Sharpe cao là artifact mẫu nhỏ; walk-forward 2024 lỗ cả năm chưa được giải quyết. Paper tích lũy tiếp để có bằng chứng đủ mạnh.",
+   "start": "2026-06-09",
+   "end": null,
+   "end_or_trigger": "≥60 phiên GỒM ít nhất một giai đoạn chop/bear → re-eval quant-skeptic. Không có deadline lịch — điều kiện là REGIME, không phải số ngày.",
+   "gate_criteria": [
+    {
+     "text": "≥60 phiên paper GỒM giai đoạn chop/bear (hiện toàn benign uptrend — chưa đủ điều kiện đánh giá)",
+     "status": "pending"
+    },
+    {
+     "text": "Walk-forward 2024 full-year loss được giải thích/không lặp lại trong forward window",
+     "status": "pending"
+    },
+    {
+     "text": "Hạ tầng phái sinh: tài khoản VSD margin + đường thực thi VN30F (bot hiện CASH-EQUITY ONLY — chưa thể live dù edge có thật)",
+     "status": "pending"
+    },
+    {
+     "text": "Nếu tích hợp: sleeve RIÊNG vốn riêng ≤5% NAV + quant-skeptic + user sign-off",
+     "status": "pending"
+    }
+   ],
+   "probe": {
+    "type": "command",
+    "cmd": [
+     "python3",
+     "-c",
+     "import json; s=json.load(open('data/orb_pt_status.json')); print(f\"asof {s['last_date']} | {s['n_days']} phiên từ {s['window_start']} | NAV {s['nav']/1e9:.3f}B ({s['cum_ret']*100:+.2f}%) | WR {s['wr']*100:.1f}% | phiên cuối {s['last_net']*100:+.2f}% (sig {s['last_sig']:+d}) | Sharpe report {s['sharpe']} (mẫu nhỏ — đọc thận trọng)\")"
+    ],
+    "timeout": 30,
+    "max_chars": 600
+   },
+   "data_sources": [
+    "data/orb_pt_status.json",
+    "data/orb_pt_log.csv (orb_pt.py, papertrade_daily.sh 15:30 ICT)"
+   ],
+   "notes": "Section ORB trong Telegram 18:00 (telegram_recommend.py) đã GỠ 2026-07-07 để hết trùng — report này là kênh duy nhất. Verdict đầy đủ: bus event Taylor 2026-07-01 (job Taylor_20260701_113638).",
+   "review_short": "≥60 phiên GỒM chop/bear → re-eval quant-skeptic (điều kiện REGIME, không có deadline lịch)",
+   "today_activity": {
+    "mode": "csv_row",
+    "path": "data/orb_pt_log.csv",
+    "date_col": "date",
+    "zero_when": {
+     "col": "sig",
+     "zero_value": 0.0
+    },
+    "template": "sig {sig:+.0f} · vào {entry:,.1f} → ra {exit:,.1f} · net {net:+.2%} (1 lượt/phiên theo thiết kế ORB)"
+   }
+  },
+  {
+   "id": "capitulation_shadow",
+   "name": "Capitulation-sleeve shadow (DT5G × 8L washout)",
+   "owner": "Taylor",
+   "objective": "Sleeve dự trữ 50B nằm CASH, deploy vào rổ 8L quality+golden khi có tín hiệu washout (rule v2 2026-06-10, crisis_playbook.md §0b/§1), giữ 60 phiên rồi về cash — forward NAV là bằng chứng OOS cho overlay khi có khủng hoảng thật. Point-in-time: basket FREEZE tại ngày signal, không hindsight.",
+   "start": "2026-06-10",
+   "end": null,
+   "end_or_trigger": "EVENT-DRIVEN — đánh giá sau sự kiện washout THẬT đầu tiên (đến nay chưa có: mode CASH liên tục). Không có deadline lịch; sleeve rẻ, chạy chờ event.",
+   "gate_criteria": [
+    {
+     "text": "Sự kiện washout đầu tiên được xử lý đúng point-in-time (basket freeze tại signal date, entry price log đủ)",
+     "status": "pending"
+    },
+    {
+     "text": "Fwd NAV sleeve qua trọn chu kỳ deploy→60 phiên→cash beat cash (kỳ vọng nghiên cứu: fwd60 +7%/81% winrate vùng WASHED-OUT)",
+     "status": "pending"
+    },
+    {
+     "text": "Audit độc lập sau event trước khi cân nhắc wire overlay live",
+     "status": "pending"
+    }
+   ],
+   "probe": {
+    "type": "command",
+    "cmd": [
+     "python3",
+     "-c",
+     "import json; s=json.load(open('data/pt_capitulation_state.json')); print(f\"asof {s['last_date']} | mode {s['mode']} | NAV {s['nav']/1e9:.2f}B | tier {s['tier']} | entry {s['entry_date']} | basket {len(s['basket'])} mã\")"
+    ],
+    "timeout": 30,
+    "max_chars": 400
+   },
+   "data_sources": [
+    "data/pt_capitulation_state.json",
+    "data/pt_capitulation_logs.csv + baskets.csv (pt_capitulation_shadow.py, papertrade_daily.sh)"
+   ],
+   "notes": "crisis_alert_push.py (cùng pipeline 15:30) là CÒI Telegram của cùng signal — chỉ kêu khi WATCH/STRONG, im lặng ngày thường → là alert vận hành, KHÔNG phải report trùng, giữ nguyên. VINTAGE: pt_capitulation_shadow.py query BQ LIVE (ticker_prune + dt5g_live), mà BQ chưa có close phiên T lúc 15:30 → last_date LUÔN = T-1. Đây là SÀN CẤU TRÚC, không phải stale: muốn asof=T phải chờ ingest ~17:30 / sync 23:45, tức dời report sang tối hoặc sáng hôm sau.",
+   "review_short": "EVENT-DRIVEN: sau sự kiện washout THẬT đầu tiên (chưa có deadline lịch)",
+   "today_activity": {
+    "mode": "csv_row",
+    "path": "data/pt_capitulation_logs.csv",
+    "date_col": "date",
+    "zero_when": {
+     "col": "n_holdings",
+     "unchanged_vs_prev": true
+    },
+    "template": "mode {mode} · {n_holdings:.0f} mã · {note}",
+    "lag_days": 1
+   }
+  },
+  {
+   "id": "engine_room_oos",
+   "name": "Engine-room OOS panel (V11/V12/V4 vs V2.3-book vs VNINDEX)",
+   "owner": "Taylor",
+   "objective": "V2.3-book (NGUỒN TÍN HIỆU của live V2.4 — trading_bot/strategies.py đọc pt_v22_dt5g_open_positions.csv để build plan thật) có tiếp tục thắng các kiến trúc BỊ LOẠI (V11 Song Sinh, V12 Âm Dương, V4 switched-allocator) trên OOS forward không? = validation liên tục của lựa chọn V2.4. Nếu một hệ bị loại dominate BỀN risk-adjusted → mở lại câu hỏi rotation (qua quant-skeptic + DSR/PBO, không tự wire).",
+   "start": "2026-06-11",
+   "end": null,
+   "end_or_trigger": "Review 2026-12-01 (~6 tháng OOS trên cửa sổ chung từ 2026-06-11) — Taylor trình bảng + khuyến nghị giữ panel / thu gọn / mở câu hỏi rotation.",
+   "gate_criteria": [
+    {
+     "text": "V2.3-book không bị hệ đã loại dominate risk-adjusted qua 6 tháng OOS chung (so trên CỬA SỔ CHUNG — NAV thô khác inception là apples-oranges)",
+     "status": "pending"
+    },
+    {
+     "text": "pt_v22 artifacts fresh mỗi phiên (PRODUCTION DEPENDENCY — plan live scale từ sổ này; stale = sự cố ops, đã có tiền lệ 2026-07-07)",
+     "status": "pending"
+    }
+   ],
+   "probe": {
+    "type": "command",
+    "cmd": [
+     "python3",
+     "-c",
+     "import pandas as pd; d=pd.read_csv('data/papertrade_compare5.csv',parse_dates=['ymd']).set_index('ymd'); r=d.loc[d.index>=d.dropna().index.min()]; b,l=r.iloc[0],r.iloc[-1]; BASE=50e9; print(f'Cửa sổ so sánh CHUNG {r.index[0].date()} → {r.index[-1].date()} ({len(r)} phiên), NAV rebase {BASE/1e9:.0f}B tại đầu cửa sổ (không phải NAV thô từ inception gốc):'); [print(f'  {c:8s} {(l[c]/b[c]-1)*100:+6.2f}%  (NAV {BASE*l[c]/b[c]/1e9:.2f}B)') for c in d.columns]"
+    ],
+    "timeout": 60,
+    "max_chars": 900
+   },
+   "data_sources": [
+    "data/papertrade_compare5.csv (papertrade_compare.py)",
+    "data/pt_v22_dt5g_*.csv (V2.3-book = production signal), data/pt_v4_dt5g_logs.csv, data/pt_v11_tq34b_logs.csv, data/pt_v12_macro_logs.csv"
+   ],
+   "notes": "pt_v22_dt5g KHÔNG PHẢI paper thí nghiệm — là sổ tín hiệu production, KHÔNG BAO GIỜ retire khi V2.4 còn live. V11/V12/V4 giữ chạy làm control arms (chi phí ~0, không gửi kênh nào). Inception khác nhau (V11/V12 cũ hơn, V4 06-01, V23 06-11) — probe tự rebase về cửa sổ chung. VINTAGE: các sim sinh papertrade_compare5.csv chạy trên giá đến T-1 lúc 15:30 → dòng cuối cửa sổ LUÔN = T-1 (sàn cấu trúc như capitulation_shadow, không phải stale).",
+   "review_short": "2026-12-01 (~6 tháng OOS trên cửa sổ chung từ 2026-06-11)",
+   "headline": {
+    "regex": "V23\\s+([-+][\\d.]+%).*?VNI_BH\\s+([-+][\\d.]+%)",
+    "template": "V2.3-book {0} vs VNINDEX {1} (cửa sổ chung, NAV rebase 50B)",
+    "dotall": true
+   },
+   "today_activity": {
+    "mode": "none_available",
+    "reason": "panel so sánh NAV của 5 sổ MÔ PHỎNG (V11/V12/V4/V23/VNI_BH) — panel không giữ nhật ký lệnh tách bạch; giao dịch THẬT của sổ production V2.3 nằm ở báo cáo EOD live, không phải ở đây"
+   }
+  }
+ ]
 }
