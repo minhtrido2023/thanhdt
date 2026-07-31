@@ -33,6 +33,30 @@ from datetime import datetime, timedelta
 import numpy as np, pandas as pd
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+
+# ── FAIL-CLOSED INTERPRETER GUARD (2026-07-31, sự cố ghi đè artifact 07-30) ──
+# Sự cố thật: script này bị chạy lại bằng `python3` hệ thống (3.10 / pandas 2.3) lúc 19:04 ICT
+# 07-30, ghi ĐÈ artifact canonical của bản chạy đúng lúc 19:00 bằng $DNA_PYEXE (3.12 / pandas 3).
+# pandas 2 KHÔNG unpickle được data/earnings_surprise_data.pkl (viết bằng pandas 3) → nhánh except
+# → LAG rỗng: bản trên đĩa mất 29 dòng LAG, n_lag_upcoming=0 GIẢ. BQ giữ bản đúng, đĩa giữ bản
+# hỏng — và đĩa mới là thứ người/bot đọc. Điều tra: mike/agents/Taylor/research/
+# capit_state_visibility_gap_20260731.md §3; incident kb/incidents/2026-07/2026-07-31-*.md
+# Cảnh báo LAG PKL WARN (bq_freshness_check.sh:426) chạy TRƯỚC pipeline và bằng $DNA_PYEXE nên
+# về bản chất không bắt được lần ghi đè xảy ra SAU đó bằng interpreter khác → chặn tại nguồn.
+# Đặt NGAY sau import pandas và TRƯỚC mọi thao tác ghi (os.chdir/OUTDIR/makedirs/mọi open(...,"w")):
+# thoát ở đây là thoát SẠCH, không file nào trên đĩa bị đụng tới.
+# Kỷ luật liên quan: kb/coding_guidelines.md §8 (interpreter pinned $DNA_PYEXE cho mọi lệnh sinh
+# artifact canonical). bq_freshness_check.sh:93 dùng `PY="${DNA_PYEXE:-python3}"` — fallback python3
+# im lặng khi env thiếu, đúng con đường tái diễn sự cố; guard này biến nó thành lỗi to, không im.
+_PD_MAJOR = int(str(pd.__version__).split(".")[0])
+if _PD_MAJOR != 3:
+    sys.stderr.write(
+        f"FATAL golive_recommend_v23: interpreter SAI — pandas {pd.__version__} "
+        f"(cần major 3), sys.executable={sys.executable}.\n"
+        f"Artifact canonical (data/golive_v23_status.json, out/golive_v23_recommendations_*.csv|md) "
+        f"KHÔNG được ghi. Chạy lại bằng $DNA_PYEXE (/home/trido/thanhdt/wc_venv/bin/python).\n")
+    sys.exit(2)
+
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
 os.chdir(WORKDIR); sys.path.insert(0, WORKDIR)
 
