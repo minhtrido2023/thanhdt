@@ -70,6 +70,7 @@ import json
 import os
 import subprocess
 import sys
+from zoneinfo import ZoneInfo
 
 WORKDIR = os.environ.get("WORKDIR_8L", "/home/trido/thanhdt/WorkingClaude")
 MIKE = os.path.join(WORKDIR, "mike")
@@ -78,6 +79,14 @@ TABLE = "tav2_bq.vnindex_5state_dt5g_live"
 LOCAL_CSV = os.path.join(WORKDIR, "data/vnindex_5state_dt5g_live.csv")
 STATE_CSV = os.path.join(WORKDIR, "data/dt5g_writer_watch.csv")
 DISCORD_TRADING_DAILY = "1521470705563340910"
+
+# MỌI mốc thời gian trong file này là ICT TƯỜNG MINH — KHÔNG dựa vào TZ hệ thống. Host chạy
+# `Etc/UTC` (`timedatectl`); TZ=Asia/Ho_Chi_Minh chỉ có khi caller đã source `wc_env.sh`. Chạy
+# tay / selfcheck / caller tương lai quên source ⇒ `datetime.now()` và `fromtimestamp()` naive
+# sẽ lệch -7h, đẩy lastModifiedTime thật 19:01 ICT thành "12:01" ⇒ rơi ra ngoài cả OURS_WINDOW
+# lẫn KAFFA_WINDOW ⇒ WARN GIẢ mỗi ngày dù mọi thứ bình thường (bắt được 2026-07-31,
+# job Winston_20260731_022341).
+ICT = ZoneInfo("Asia/Ho_Chi_Minh")
 
 # Cửa sổ writer (giờ ICT, [start, end)) — đo thật từ log: daily_refresh START 18:30,
 # step [9] backup 18:35:47, DONE 18:38:42; bq_freshness [pipeline-1] ~19:01:08.
@@ -114,7 +123,8 @@ def table_lastmod():
         ms = int(json.loads(out)["lastModifiedTime"])
     except Exception as e:                                  # noqa: BLE001
         return None, f"parse lastModifiedTime: {e}"
-    return dt.datetime.fromtimestamp(ms / 1000.0), None     # process TZ = ICT trên host này
+    # epoch ms (UTC) → ICT tường minh (xem chú thích ở hằng ICT phía trên).
+    return dt.datetime.fromtimestamp(ms / 1000.0, ICT), None
 
 
 def classify(when):
@@ -179,7 +189,7 @@ def main():
     ap.add_argument("--quiet", action="store_true")
     a = ap.parse_args()
 
-    now = dt.datetime.now()
+    now = dt.datetime.now(ICT)          # ICT tường minh, KHÔNG theo TZ hệ thống
     today = now.strftime("%Y-%m-%d")
     say = (lambda *x: None) if a.quiet else print
 

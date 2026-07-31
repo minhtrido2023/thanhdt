@@ -19,6 +19,9 @@ REAL_MIKE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 REAL_WC="$(cd "$REAL_MIKE/.." && pwd)"
 REAL_CSV="$REAL_WC/data/vnindex_5state_dt5g_live.csv"
 [ -f "$REAL_CSV" ] || { echo "FATAL: không có $REAL_CSV để làm nền so sánh"; exit 1; }
+# Selfcheck đọc bảng BQ THẬT (không stub bq). Thiếu `bq` thì monitor rơi vào nhánh fail-safe
+# "metadata mù" và mọi ca đều sai vì lý do vô nghĩa ⇒ dừng sớm, nói rõ, đừng để hiểu nhầm là PASS.
+command -v bq >/dev/null 2>&1 || { echo "FATAL: không thấy 'bq' trên PATH — source wc_env.sh trước"; exit 1; }
 
 SANDBOX="$(mktemp -d)"
 trap 'rm -rf "$SANDBOX"' EXIT
@@ -47,7 +50,10 @@ w = csv.DictWriter(open(dst, "w", newline="", encoding="utf-8"), fieldnames=rows
 w.writeheader(); w.writerows(rows)
 PY
   local out tier pings
-  out=$(WORKDIR_8L="$SANDBOX" python3 "$REAL_MIKE/bin/dt5g_writer_watch.py" --label selfcheck 2>&1)
+  # `env -u TZ` CỐ Ý: host chạy Etc/UTC, TZ=ICT chỉ có khi caller đã source wc_env.sh. Chạy
+  # selfcheck dưới TZ THỪA HƯỞNG sẽ che mất bug "giờ naive" (đúng vụ 2026-07-31: cửa sổ
+  # writer lệch -7h ⇒ WARN giả mỗi ngày). Ca A dưới đây chỉ QUIET nếu monitor tự neo ICT.
+  out=$(env -u TZ WORKDIR_8L="$SANDBOX" python3 "$REAL_MIKE/bin/dt5g_writer_watch.py" --label selfcheck 2>&1)
   # tier suy ra từ dòng kết luận của monitor
   if   grep -q "^  QUIET:"  <<<"$out"; then tier=QUIET
   elif grep -q "^  \[HIGH\]" <<<"$out"; then tier=HIGH
@@ -82,7 +88,7 @@ grep -q "vùng ĐÃ CHỐT" <<<"$LAST_OUT" \
 # (D) chống lặp: chạy LẠI ngay ca (C) trên cùng state CSV → không được ping lần hai
 echo "--- D. chống lặp (chạy lại cùng sự cố trong cùng ngày) ---"
 before=$(wc -l < "$SANDBOX/pings.log")
-WORKDIR_8L="$SANDBOX" python3 "$REAL_MIKE/bin/dt5g_writer_watch.py" --label selfcheck --quiet
+env -u TZ WORKDIR_8L="$SANDBOX" python3 "$REAL_MIKE/bin/dt5g_writer_watch.py" --label selfcheck --quiet
 after=$(wc -l < "$SANDBOX/pings.log")
 if [ "$before" -eq "$after" ]; then
   printf 'PASS  %-56s pings vẫn %s (không ping lại)\n' "D. cùng chữ ký trong ngày → im lặng" "$after"

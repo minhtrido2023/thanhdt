@@ -37,6 +37,11 @@ set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 [ -f "$ROOT/../wc_env.sh" ] && source "$ROOT/../wc_env.sh" 2>/dev/null || true
+# Neo TZ ICT tường minh: host chạy Etc/UTC và cron gọi script này KHÔNG có prefix TZ, nên mọi
+# `$(date ...)` bên dưới (TODAY, tuổi file, mốc log) phụ thuộc hoàn toàn vào TZ mà wc_env.sh
+# export — mà dòng trên lại tha thứ lỗi (`|| true`). Thiếu wc_env ⇒ TODAY lùi 1 ngày sau 17:00
+# ICT. Dòng này giữ nguyên TZ nếu caller đã đặt, chỉ vá trường hợp KHÔNG có (2026-07-31).
+export TZ="${TZ:-Asia/Ho_Chi_Minh}"
 
 QUIET="${1:-}"
 PROJECT="lithe-record-440915-m9"
