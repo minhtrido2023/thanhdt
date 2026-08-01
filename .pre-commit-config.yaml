@@ -1,0 +1,24 @@
+# Pre-commit config — mike fleet repo.
+#
+# Added 2026-08-01 (user mandate, after 4 real bugs traced to the same root cause: unescaped
+# `"`/`` ` `` inside multi-line bash strings used as dispatch prompts or heredocs). Research:
+# industry-standard practice is "escalate postmortem action items into automated checks that
+# run before the bug can ship" (Google SRE postmortem culture) — for shell scripts, that means
+# ShellCheck (the standard bash static analyzer) wired into a commit-time gate, not another
+# paragraph in kb/coding_guidelines.md that has to be remembered by hand every time.
+#
+# See bin/shellcheck_gate.sh for WHY this gates on a curated code list instead of "any finding"
+# (76 pre-existing advisory findings across this repo would otherwise block every commit) and
+# kb/incidents/2026-08/2026-08-01-shellcheck-precommit-gate.md for the full incident trail.
+#
+# Setup (one-time per clone/worktree): pip install --user pre-commit shellcheck-py && pre-commit install
+# Run by hand: pre-commit run --all-files
+
+repos:
+  - repo: local
+    hooks:
+      - id: shellcheck-gate
+        name: ShellCheck (curated hard-block list — see bin/shellcheck_gate.sh)
+        entry: bin/shellcheck_gate.sh
+        language: system
+        files: '\.sh$'

@@ -4,6 +4,20 @@ Behavioral guidelines to reduce common LLM coding mistakes.
 
 **Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
 
+**Enforcement policy (thêm 2026-08-01, user mandate — "đẩy bài học cũ ra công cụ/linter thay vì
+văn xuôi"):** khi 1 lesson dưới đây có thể diễn đạt thành 1 PATTERN CƠ HỌC trong code (không cần
+phán đoán ngữ nghĩa) — mục tiêu là 1 check tự động chặn commit, KHÔNG chỉ thêm đoạn văn xuôi này
+để hy vọng agent tương lai nhớ đọc. Nguyên tắc theo đúng SRE postmortem culture (Google SRE
+workbook — action item tốt nhất là 1 CI rule, không phải 1 dòng ghi chú) và kỷ luật viết rule của
+Semgrep ("1 rule bắt đúng 2 lần còn hơn 1 rule bắt nhầm 200 lần" — luôn test rule mới trên file
+thật trước khi bật, không đoán). Cơ chế đang có, đã verify bằng `git commit` thật (không chỉ đọc
+lại): **`bin/shellcheck_gate.sh`** (pre-commit hook, ShellCheck — bắt được cả 4 sự cố quoting
+thật trong bash strings/heredoc-as-dispatch-prompt 2026-07-17→08-01, xem §15 + `kb/incidents/
+2026-08/2026-08-01-shellcheck-precommit-gate.md`). Setup 1 lần/repo (hook dùng chung mọi
+worktree): `pip install --user pre-commit shellcheck-py && pre-commit install`. Không phải mọi
+lesson đều mechanize được — nhiều mục dưới đây (§7, §10, §11, §13) là quy trình/judgment call,
+KHÔNG có pattern cú pháp rõ ràng để lint; giữ nguyên dạng văn xuôi là đúng, không phải thiếu sót.
+
 ## 1. Think Before Coding
 
 **Don't assume. Don't hide confusion. Surface tradeoffs.**
@@ -436,3 +450,48 @@ time I run" on schedule alone:
 changed cron pair (§11), and treat a periodic sweep of *existing* pairs (checking `cron_registry.md`
 for any pair whose consumer trusts schedule-order alone) as Friday KB editorial review material,
 same as the data-registry and stale-duplicate audits already folded in there.
+
+## 15. Bash Strings Doubling as LLM Prompts: Escape `"`/`` ` ``, Then Verify by Running, Not Reading
+
+**Root cause (4 real incidents, 2026-07-17 → 2026-08-01, all the same shape):** this fleet's
+dispatch scripts (`daily_retro.sh`, `kb_nightly.sh`, `fleet_housekeeping.sh`) build large
+multi-line bash double-quoted strings that double as LLM prompt text — Vietnamese prose full of
+markdown emphasis (`"quoted phrase"`) and inline-code backticks (`` `filename` ``). Both `"` and
+`` ` `` are live bash metacharacters even inside a double-quoted string (unlike single quotes) —
+an unescaped one silently terminates the string or triggers real command substitution. Every
+occurrence went undetected for weeks because the symptom is either a **fatal crash before any
+notify.sh call runs** (daily_retro.sh: 2 nights silent) or a **corrupted-but-still-launched**
+dispatch (kb_nightly.sh: `dispatch.sh` received extra positional args, exited 1 immediately —
+2 weeks of Friday/Saturday editorial review silently never ran) or **bash executing the quoted
+text as a command** (`fleet_housekeeping.sh --help`: `` `datacold` `` got run as a command,
+silently swallowed, word vanished from the output). "The script ran" / "the dispatch launched"
+was mistaken for "the content parsed as intended" every time.
+
+**Rule:**
+1. Any `"` or `` ` `` inside a bash double-quoted string must be escaped (`\"`, `` \` ``) — no
+   exceptions, even for text that "looks like it's just prose."
+2. **Prefer a single-quoted heredoc** (`<<'EOF'`) for large prompt-text bodies when you don't
+   need variable interpolation — it needs zero escaping of either character (see
+   `bin/weekly_ops_audit.sh` for the pattern). If you DO need `$VAR` interpolation, either accept
+   the escaping burden or hardcode the (usually-fixed) absolute paths as literal text instead.
+3. **Verify by running, not by reading.** Re-reading the text "looks fine" is exactly how all 4
+   instances shipped — a quote 40 lines into an 80-line string is not something a re-read catches
+   reliably. Extract the assignment/heredoc in isolation and actually execute it (see the 4
+   incident writeups for the exact technique used each time) before trusting a fix.
+
+**Enforced by:** `bin/shellcheck_gate.sh` (pre-commit hook) — ShellCheck already detects this
+exact pattern for free (`SC1078`/`SC1079` unterminated/suspicious string quote, `SC2006` legacy
+backtick used where `$(...)`-style command substitution wasn't intended, `SC2261` competing
+redirections — the downstream symptom when a quote break leaves stray text mid-command). No
+custom rule needed; the fix was turning ShellCheck ON as a hard gate with a curated code list
+(see `bin/shellcheck_gate.sh`'s own header for why curated, not "any finding," and why `SC2154`
+was tried and dropped — false positives on `hooks/*.sh`'s cross-file `source` chains).
+
+**Evaluated and NOT shipped:** a Semgrep rule for §12 (missing `accountNo` filter when reading
+`dnse_raw_*.jsonl`) — tested against `bin/verify_account_snapshot.py` (which has the correct
+filter); a naive `pattern-not: for $REC in $ITER: ... $REC.get("accountNo") ...` fires on every
+unrelated loop in the file (not scoped to loops that actually read the shared file) — this needs
+dataflow-aware rule engineering (semgrep taint mode or similar), not a quick pattern match, to
+reach the "fires twice at 100% accuracy" bar. Left as a documented prose lesson (§12) until
+someone has time to build and test that properly — shipping a noisy rule would erode trust in
+the whole gate faster than having no rule at all.

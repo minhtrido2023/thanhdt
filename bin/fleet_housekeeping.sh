@@ -48,7 +48,7 @@ Category ARCHIVE (đảo ngược được, giữ nguyên nội dung):
   registry    bus/registry/*.json  >30d  -> bus/registry/archive/
   rotate      logs/<cron>.log >10MB      -> .1.gz .2.gz .3.gz
 
-Không có category OPT-IN nào. (`datacold` đã bị gỡ sau arch-review 2026-07-30 — xem §10 cuối file.)
+Không có category OPT-IN nào. (\`datacold\` đã bị gỡ sau arch-review 2026-07-30 — xem §10 cuối file.)
 EOF
 }
 for a in "$@"; do
