@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+# weekly_ops_audit.sh — Sáng thứ Bảy hàng tuần: audit vận hành sâu, "giống như Mike vừa làm"
+# (mandate user 2026-08-01, sau khi Mike tự tay rà soát và bắt được 2 bug quoting âm thầm sống
+# 2 tuần trong kb_nightly.sh + 2 đêm trong daily_retro.sh — xem kb/incidents/2026-08/).
+#
+# KHÁC với kb_nightly.sh's Friday/Saturday editorial dispatch (KB content curation, data
+# registry audit, fable-drift): job NÀY tập trung vào "có bug thật đang sống mà không ai biết
+# không" — sweep log lỗi, verify các fix tuần qua CÓ THẬT SỰ chạy đúng trong production (không
+# chỉ tin commit message), theo đúng nguyên tắc "verify artifact, không tin self-report"
+# (MIKE.md §Quy chuẩn bắt buộc mục 2, coding_guidelines.md §6). Tách riêng khỏi kb_nightly.sh
+# vì dispatch đó đã khá nặng (11 mục) — dồn thêm việc sâu này vào có rủi ro hết turns trước khi
+# xong (đã từng thấy job hết max-turns 50 cho khối lượng việc nhỏ hơn, 2026-07-31).
+#
+# Lịch: 03:30 ICT Thứ Bảy (SAU kb_nightly.sh 02:00, tránh tranh chấp tài nguyên/git lock).
+set -uo pipefail
+ROOT="/home/trido/thanhdt/WorkingClaude/mike"
+LOG="$ROOT/logs/weekly_ops_audit.log"
+ARCH_THREAD="1521475726329516122"
+
+log() { echo "[$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%dT%H:%M:%S%z)] $*" | tee -a "$LOG"; }
+log "=== weekly_ops_audit START ==="
+
+# Prompt xây bằng heredoc QUOTED ('PROMPT_EOF') — cố tình, để loại hẳn lớp lỗi vừa vá 2 lần
+# hôm nay (unescaped " / ` bên trong chuỗi bash double-quoted làm dispatch.sh nhận sai
+# argument hoặc bash cố thực thi 1 đoạn text như lệnh). Heredoc quoted không bash-parse bất
+# kỳ ký tự nào bên trong (không cần escape " hay `), chỉ cần path là literal (không biến).
+PROMPT="$(cat <<'PROMPT_EOF'
+WEEKLY OPS AUDIT (automated, sáng thứ Bảy hàng tuần). Bạn đang ở headless mode.
+
+Bối cảnh: user yêu cầu (2026-08-01) lặp lại định kỳ đúng kiểu rà soát Mike vừa tự tay làm hôm đó
+— rà soát KHÔNG PHẢI để tìm thấy "mọi thứ ổn" mà để CHỦ ĐỘNG săn bug thật đang sống, verify các
+fix gần đây CÓ THỰC SỰ chạy đúng trong production hay không (không chỉ tin commit message/log
+"launched"/rc=0). Bài học gốc cùng ngày: 2 script cron (daily_retro.sh, kb_nightly.sh) đều có bug
+quoting âm thầm — 1 cái crash 2 đêm liền, 1 cái làm CẢ review Friday/Saturday chết 2 TUẦN LIỀN —
+không ai biết vì log "đã dispatch"/"đã launch" không đồng nghĩa "chạy đúng". Xem
+kb/incidents/2026-08/2026-08-01-daily-retro-quoting-bug-silent-2day-outage.md và
+kb/incidents/2026-08/2026-08-01-kb-nightly-friday-dispatch-silently-broken-2-weeks.md làm mẫu
+tinh thần rà soát (đọc log thật, tái hiện lỗi, verify bằng cách CHẠY THỬ chứ không chỉ đọc lại).
+
+VIỆC CẦN LÀM (mỗi mục xong ghi 1-2 câu kết luận, đừng chỉ nói "đã kiểm tra"):
+
+1. SWEEP LOG LỖI 7 NGÀY QUA: grep mọi file logs/*.log đổi trong 7 ngày qua tìm dấu hiệu crash
+   (Traceback, "unbound variable", "No such file or directory" ngay sau tên script ở đầu dòng,
+   "syntax error", "command not found", "Permission denied", "ERROR: unknown argument"). Với
+   MỖI hit: đối chiếu kb/incidents/ xem đã ghi chưa (dùng bin/incident_lookup.py). Chưa ghi và
+   còn ảnh hưởng workflow sống → điều tra root cause (đọc script liên quan), nếu nằm trong ranh
+   giới tự sửa an toàn (bug code trong script report/check/pipeline/cache — KHÔNG CHẠM trade
+   plan/trading_rules.json/logic đặt lệnh/crontab dòng thực thi/xoá dữ liệu/BOT_STOP, giống hệt
+   guardrail ops_autofix.sh) → tự sửa, verify bằng cách CHẠY THỬ đoạn code sau khi sửa (không chỉ
+   đọc lại), ghi entry kb/incidents/<YYYY-MM>/<ngày>-<topic>.md, commit. Vượt ranh giới → escalate
+   bus question + notify, KHÔNG tự sửa.
+
+2. VERIFY CÁC FIX TUẦN QUA THẬT SỰ CHẠY ĐÚNG: liệt kê mọi commit "fix(...)" trong git log 7 ngày
+   qua (mike repo) + mọi entry kb/incidents/ status=fixed mới trong 7 ngày. Với MỖI cái: tìm 1
+   ARTIFACT THẬT xác nhận nó đang hoạt động đúng trong production (dòng log thật gần nhất khớp
+   hành vi mong đợi, file state được ghi đúng, output đúng định dạng) — KHÔNG chỉ tin commit
+   message. Không tìm được artifact xác nhận → ghi rõ "CHƯA VERIFY ĐƯỢC (chưa có lần trigger
+   thật kể từ khi fix)" thay vì suy đoán là đã ổn.
+
+3. TOKEN/COST TREND: đọc state/spend_history.csv. Báo cáo %fable VÀ %opus tuần mới nhất + so 3
+   tuần gần nhất (không chỉ tuần này). %opus tăng ≥20 điểm % trong 3 tuần HOẶC ≥60% tuần mới nhất
+   → lấy mẫu 5-8 dispatch opus gần nhất (bus/jobs/*.json), đánh giá có thật sự "task nặng cần
+   planning nhiều" theo MIKE.md §Model routing hay không. Không tự sửa thói quen dispatch, chỉ
+   đo + báo cáo minh bạch (đây là hành vi con người của Mike, không phải bug code).
+
+4. KÍCH THƯỚC FILE KB QUAN TRỌNG: wc -c cho kb/context_pack.md, kb/current_ops.md, MIKE.md,
+   kb/coding_guidelines.md. So với ngưỡng đã biết (context_pack.md 45KB, current_ops.md 28KB).
+   Nếu đang tăng, ước lượng tốc độ tăng gần đây (so với git log trước đó ~1-2 tuần, dùng
+   `git log --format=%H -- <file>` rồi `git show <commit>:<file> | wc -c` vài điểm) và số ngày
+   còn lại trước khi chạm ngưỡng. KHÔNG tự trim ở đây (việc đó thuộc kb_nightly.sh Friday review
+   + Mike phiên sống) — chỉ đo + cảnh báo nếu <7 ngày còn lại trước ngưỡng.
+
+5. OKF TREE STALENESS: kb/data_registry/ và kb/incidents/ — so sánh danh sách file thật
+   (`find kb/incidents -name '*.md'`, `find kb/data_registry -name '*.md'`) với bảng liệt kê
+   trong index.md tương ứng. Lệch (file có nhưng không có trong bảng, hoặc ngược lại) → tự sửa
+   index.md (việc tài liệu thuần, không rủi ro) + commit.
+
+6. BUS QUESTION BACKLOG: chạy `python3 bin/bus_question_audit.py`. Câu nào Mike có đủ thông tin
+   tự quyết (không cần thẩm quyền user riêng) → tự quyết + ghi answer. Câu nào thật cần user →
+   giữ PENDING, liệt kê rõ trong báo cáo cuối kèm tuổi.
+
+7. daily_retro.sh COVERAGE: liệt kê 7 ngày gần nhất có/thiếu kb/incidents/retro/retro-<ngày>.md.
+   Thiếu ngày nào → ghi rõ, đối chiếu logs/daily_retro.log xem có lỗi bash không (đúng check đã
+   thêm vào ops_health_check.sh mục 9, đây là lớp xác nhận thêm ở tầng tuần).
+
+BÁO CÁO CUỐI (bắt buộc, dù mọi mục đều sạch — quiet-heartbeat: "không có gì mới" vẫn phải nói rõ
+ràng, im lặng hoàn toàn không phân biệt được với job chết): tổng hợp ngắn gọn 7 mục trên, bug nào
+tìm thấy + đã tự sửa (kèm commit hash) hay đang escalate, số PENDING bus question, %fable/%opus,
+kích thước kb file quan trọng. Post báo cáo này vào Architecture channel bằng:
+bash bin/notify_thread.sh "<báo cáo>" 1521475726329516122
+VÀ notify Telegram (bin/notify.sh "<tóm tắt ngắn>"). Sau đó append_event.sh Mike decision
+'weekly-ops-audit' "<JSON tóm tắt: bugs_found, bugs_fixed, escalated, pct_fable, pct_opus>".
+
+KHÔNG cần hỏi user trước cho việc 1,5,6 (tài liệu/dọn backlog thuần, đã uỷ quyền). Việc 1 chỉ tự
+sửa trong đúng ranh giới đã nêu — vượt ranh giới luôn escalate, không tự quyết.
+PROMPT_EOF
+)"
+
+DISPATCH_FROM=user "$ROOT/bin/dispatch.sh" Mike "$PROMPT" \
+    --model opus --effort high --timeout 3600 >> "$LOG" 2>&1 &
+
+log "Weekly ops audit dispatch launched (background)."
+log "=== weekly_ops_audit DONE (dispatch chạy nền) ==="
