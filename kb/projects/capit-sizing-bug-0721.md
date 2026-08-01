@@ -21,6 +21,20 @@ hoạt CAPIT hôm nay đang tắt (`capit_size=0`), bù = quyết định discre
 rule nào; (3) đúng 2/5 mã (NCT, SAB) đã rớt sàn chất lượng của chính rổ CAPIT và cũng là 2 mã
 giảm sâu nhất; (4) LAG book chung sổ đã oversubscribe, không có ngân sách thật.
 
-**Việc R&D mở, chưa làm** (không sửa nóng giữa episode đang mở): CAPIT hiện không có cơ chế
-quality-exit khi 1 mã rớt sàn chất lượng sau khi mua (chỉ hold cố định 60 phiên) — NCT/SAB là ca
-thật đầu tiên để khảo sát, cần backtest riêng trước khi cân nhắc thêm cơ chế này.
+**R&D quality-exit — ĐÃ KHẢO SÁT (2026-08-01, job `Taylor_20260801_073610`, báo cáo
+`mike/agents/Taylor/research/capit_quality_exit_20260801.md`, artifact `data/capit_qexit_20260801/`).**
+Kết luận: **GIỮ NGUYÊN production, không thêm cơ chế thoát sớm.** Lưới 24 chiến lược (bán ngay /
+bán sau K phiên / trim 50%, theo 4 metric rớt-sàn khác nhau) đều ≤ baseline ở tầng vị thế (N=85 vị
+thế / 14 sự kiện / 11 quyết định thật), và 4/4 leg engine đầy đủ đều ≤ control ở tầng danh mục
+(CAGR/Sharpe/Calmar), MaxDD giống hệt −17,5% ở cả 5 leg — không mua được bảo hiểm rủi ro nào. Root
+cause: "rớt sàn chất lượng" trong cửa sổ hold 60 phiên gần như 100% do FSCORE (nhiễu kế toán quý,
+0/85 vị thế thật sự vi phạm golden floor ROE_Min5Y/ROIC5Y dài hạn) — bán ở đó = hiện thực hoá đáy
+(giữ tới hết +13,7% vs bán tại ngày cờ +2,7%, bỏ lại ~11pp). **Đối chiếu case NCT/SAB**: cả hai chỉ
+rớt vì FSCORE, KHÔNG rớt theo ROE/ROIC/8L rating — 8L (cổng chất lượng chuẩn của hệ) vẫn xác nhận cả
+hai đạt, nên căn cứ (3) ở trên ("2/5 mã rớt sàn chất lượng") cần đọc lại: đúng về mặt cờ FSCORE,
+nhưng KHÔNG phải suy giảm chất lượng dài hạn — không đổi kết luận không-bù, chỉ làm rõ cơ chế.
+Mẫu nhỏ (sign test p=0,549 không có ý nghĩa tần suất; bootstrap+LOO có ý nghĩa về độ lớn, nhưng
+tầng danh mục kém sạch hơn — năm 2025 gánh gần hết hiệu ứng âm) — đã dispatch quant-skeptic verify
+(`bin/verify_finding.sh --topic capit-quality-exit`), verdict chưa về lúc ghi note này. Code: knob
+`CAPIT_QEXIT` env-gated default OFF trong `pt_v23_audit_2014.py`/`simulate_holistic_nav.py`,
+production byte-identical, KHÔNG wire.
