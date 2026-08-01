@@ -48,3 +48,32 @@ treatment, không thể tạo ra underperformance báo cáo). Killer objection d
 CAGR tầng danh mục không bền theo năm (2025 gánh gần hết) — nhưng khuyến nghị "không đổi gì"
 không phụ thuộc số đó, đã đứng vững một mình trên kết quả tầng vị thế (28/28 cấu hình ≤ baseline,
 MaxDD giống hệt mọi leg). **Chấp nhận là tri thức chốt của fleet.**
+
+**Follow-up: review vai trò FSCORE trong 8L — GIỮ NGUYÊN cả 2 tầng (2026-08-01, job
+`Taylor_20260801_082823`, báo cáo `mike/agents/Taylor/research/fscore_role_review_20260801.md`,
+artifact `data/fscore_review_20260801/`, Mike verify độc lập self-check + git-diff production
+sạch).** User nghi ngờ FSCORE quá mạnh sau finding trên, đề xuất bỏ/nới nhánh FSCORE ở cổng VÀO
+của CAPIT hoặc giảm trọng số trục FSCORE trong `core_score()` cho công ty tài sản nhẹ. Kết quả
+NGƯỢC nghi ngờ ở cả 2 câu:
+- **Cổng VÀO CAPIT** (`capit_basket()`, `FSCORE>=6`): mọi cách nới (bỏ hẳn, hạ ngưỡng, xác nhận
+  2 quý theo đúng đề xuất của user, route qua 8L sector-aware) đều làm rổ CAPIT TỆ ĐI theo
+  dose-response đơn điệu (−6,94pp đến +0,73pp tuỳ mức nới), 3/5 biến thể nới mạnh nhất giữ dấu
+  14/14 LOO. Engine A/B: bỏ hẳn FSCORE thua trên MỌI trục kể cả MaxDD (−17,5%→−18,3%) — rổ rộng
+  hơn không có nghĩa an toàn hơn, FSCORE đang loại đúng nhóm mã dễ sập. Đề xuất "2 quý liên tiếp"
+  của user đã test đúng như phát biểu và vẫn thua (−3,06pp).
+- **Trục FSCORE trong `core_score()` chung** (chỉ COMPOUNDER+CYCLICAL dùng, không có route
+  RETAIL, POWER không dùng trục này — sửa lại brief ban đầu): trực giác "chỉ hợp tài sản nặng"
+  đúng CHIỀU nhưng nhỏ, không có ý nghĩa thống kê (heavy−light IC chênh t=1,52 theo
+  `FAsset_Eq_P0`, biến mất theo `FAssetTurn_P0` t=0,39). Nhóm tài sản NHẸ vẫn IC dương vững
+  (+0,034, t=4,70, IS/OOS đều dương) — không mất sức dự báo.
+- **Case DGC (capex Nghi Sơn) — giả thuyết "cùng gốc lỗi" với NCT/SAB BỊ BÁC**, ngược chiều dự
+  đoán ở cả 3 lát cắt: nhóm capex nặng KHÔNG bị hạ FSCORE cơ học (61,0% vs 65,9% nhóm capex nhẹ),
+  và sức dự báo của FSCORE MẠNH NHẤT chính ở nhóm capex nặng. Không bác luận điểm đầu tư riêng về
+  DGC — chỉ bác việc khái quát hoá thành lỗi hệ thống.
+- **Hoà giải với finding quality-exit ở trên**: không mâu thuẫn — cổng VÀO là so sánh CẮT NGANG
+  giữa các mã (có tín hiệu thật, IC +0,179 trong pool CAPIT), cổng RA là so sánh CHUỖI THỜI GIAN
+  trong 1 mã giữa kỳ hold (là nhiễu). Một chỉ số có thể vừa là tín hiệu cắt ngang vừa là nhiễu
+  chuỗi thời gian cùng lúc.
+- Không cần quant-skeptic (kết luận không đổi gì, không có thay đổi production). Lead còn mở,
+  CHƯA làm: registry IC-panel-8L từng ghi FSCORE marginal là "ứng viên enhancer selection, chưa
+  test trong custom30V" — đo lần này ủng hộ (+0,037 marginal) nhưng vẫn chưa test thật.
