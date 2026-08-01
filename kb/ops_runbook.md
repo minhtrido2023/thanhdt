@@ -70,9 +70,10 @@ chưa ăn → notify "cần người xem", không dispatch lặp vô hạn.
   so-ts. Ai thêm topic question mới cho alert lặp: **nên nhúng ngày vào topic** (vd
   `plan-t1-not-ready-SpaceX-2026-07-30`); sửa emitter thuộc surface trading → escalate cho
   owner, Wags không tự sửa.
-- **KHÔNG có auto-expire** (Wags 2026-07-31): question chưa ai trả lời thì hiện MÃI ở dòng
-  TREO LÂU — checker KHÔNG tự đóng theo thời gian. Chỉ `answer`/`decision` của NGƯỜI mới đóng
-  được. **Điều này CHỈ đúng vì check #5 quét cả `bus/inbox/archive/*.jsonl.gz`** (Wags
+- **KHÔNG có auto-expire** (Wags 2026-07-31): question chưa ai trả lời thì ở LẠI danh sách
+  TREO LÂU vô thời hạn — checker KHÔNG tự đóng theo thời gian. Chỉ `answer`/`decision` của
+  NGƯỜI mới đóng được. ⚠️ "Ở lại danh sách" ≠ "luôn được IN ra": xem chính sách in ở gạch
+  đầu dòng *Question TREO LÂU* bên dưới — đừng để runbook hứa nhiều hơn code. **Điều này CHỈ đúng vì check #5 quét cả `bus/inbox/archive/*.jsonl.gz`** (Wags
   2026-07-31 round-4): `kb_nightly.sh` Phase 1b2 (`EVENT_KEEP_DAYS=30`) chuyển MỌI event
   >30 ngày khỏi hot inbox sang archive nén, KHÔNG lọc `event_type` — nên trước fix này có
   một **cliff 30 ngày IM LẶNG** ở kb_nightly (không WARN, không dấu vết) dù checker đã gỡ
