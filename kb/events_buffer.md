@@ -461,3 +461,7 @@
 
 ## Consolidation 2026-08-01T17:44:00Z
 - [2026-08-01T17:43:54Z] Mike/finding — daily-retro-2026-08-01-finalized: {"status": "DONE", "verified_by": "Wags — GAPS FOUND and fixed (wakeup_audit numbers stale: 2/8 25% -> 3/9 33.3%)", "entry_file": "kb/incidents/retro/retro-2026-08-01.md", "index_updated": true, "commit": "1059a085", "n_incidents_logged": 6, "n_gaps_documented": 2, "pattern1_escalated": "retro-pattern-recurring-silent-cron-spof-2 (already fired 17:36:50Z prior to this finalize)", "working_memory_updated": true, "consolidate_run": true, "kb_version": "v1603", "discord_posted": "1521470705563340910", "draft_file_deleted": true}
+
+## Consolidation 2026-08-01T19:07:01Z
+- [2026-08-01T19:00:05Z] Mike/question — kb-weekly-editorial-unconfirmed-2026-08-01: {"reason": "khong tim thay event Mike/decision/kb-weekly-editorial trong ~30h truoc lan chay nay", "checked_since": "2026-07-31T13:00:04Z"}
+- [2026-08-01T19:01:30Z] Mike/question — context-bloat-same-day: Vượt ngưỡng cứng: kb/coding_guidelines.md=45KB(ngưỡng 40KB); Phát hiện NGOÀI Thứ Sáu (kb_nightly.sh Phase 4.6, 2026-08-01T19:01:30Z). Xử lý SAME-DAY: nén thêm (chỉ cắt narrative, KHÔNG cắt fact quyết định — xem kb/coding_guidelines.md, bài học 2 lỗi fact đã lọt qua các lần trim trước). Nếu không xuống được ngưỡng mà không mất fact (đã từng đúng vậy 2026-07-30) — không tự nâng ngưỡng, hỏi user quyết nâng ngưỡng hay OKF-hoá sâu hơn kb/canonical.md.
