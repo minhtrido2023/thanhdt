@@ -543,3 +543,7 @@
 - [2026-08-01T07:59:14Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "still_running", "elapsed_min": 23, "job_id": "Taylor_20260801_073610", "source": "watcher"}
 - [2026-08-01T08:00:15Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20260801_073610", "source": "watcher"}
 - [2026-08-01T08:01:15Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "still_running", "elapsed_min": 25, "job_id": "Taylor_20260801_073610", "source": "watcher"}
+
+## Consolidation 2026-08-01T08:07:01Z
+- [2026-08-01T08:05:36Z] Taylor/heartbeat — Taylor_20260801_080509: {"status": "in_progress", "note": "đọc nav_history 2 account + template báo cáo tuần; phát hiện gap SpaceX thiếu row 07-21,07-22"}
+- [2026-08-01T08:06:10Z] Taylor/heartbeat — Taylor_20260801_080509: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260801_080509", "source": "watcher"}
