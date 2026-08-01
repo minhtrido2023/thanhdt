@@ -4670,3 +4670,68 @@ bị phá** trong 12 năm cửa sổ hold CAPIT.
 Báo cáo đầy đủ: `mike/agents/Taylor/research/capit_quality_exit_20260801.md`.
 Log/CSV: `data/capit_qexit_20260801/` (`strategy_grid.csv`, `holdings_panel.csv`, `event_rollup.csv`,
 `qx_*.log`).
+
+## 2026-08-01 — FSCORE làm ENHANCER cho custom30V (yieldcombo) ⇒ **NO-GO, KHÔNG WIRE** — job `Taylor_20260801_131833`
+
+**Lead được test** (mở từ IC PANEL 8L, mục 2026-06-21): *"FSCORE robustly thêm marginal TRONG gate
+(+0,031 pooled) — ứng viên enhancer selection, CHƯA test trong custom30V"*. Nay **đã test đúng bài
+và ĐÓNG**: âm ở tier quyết định (NAV danh mục).
+
+**Config** = lệnh pin R3 hiện hành (mục `2026-07-29 RE-PIN R3`) **nguyên vẹn**, chỉ thêm
+`EXP_TAG`/`AUDIT_EXP_TAG` để output rơi vào tên non-canonical (coding_guidelines §8):
+`BQ_LOCAL_CACHE=data/bq_cache_asof20260729_postrestate BQ_CACHE_THREADS=1 NAV_TOTAL_B=50
+ETF_LIQ=custompitg BASKET_WT=namecap BASKET_SELECT=yieldcombo PARK_STATES="3:0.7"
+AUDIT_END=2026-06-19  $DNA_PYEXE data/fscore_c30v_20260801/engine_fsx.py v23a none postbull 0 edge`
+
+**Harness hợp lệ**: ctrl `fsctrl` tái lập số pin R3 **tuyệt đối** — CAGR **27,600%** / Sharpe
+**1,843** / MaxDD **−17,463%** / Calmar **1,580** (pin: 27,60/1,84/−17,5/1,58). Self-check
+**0 VND × 2 (BAL+LAG) trên 17/17 leg**. Module audit OFF == production (`members_identical=True,
+levels_max_abs_diff=0.0`). `fsctrl2` (chạy lại ctrl sau khi vá thêm nhánh placebo) = delta 0,000
+mọi cột ⇒ 11 leg chạy trước bản vá vẫn hợp lệ. PIT audit 1.440 ô: `rows_effective_after_d=0`,
+`stale_pick=0`; FSCORE coverage rổ 99,9%.
+
+**N_trials = 11** biến thể thật (tiebreak K=5/10/20 · blend w=0,1/0,2/0,4/0,8/2,0 · wtilt
+T=0,3/0,6/0,9) + 4 leg placebo (hoán vị NGẪU NHIÊN cùng dải K=10, seed 1-4) + 1 ctrl lặp.
+N độc lập = **48 kỳ rebalance** (46-47 kỳ có swap), KHÔNG phải 1.440 ô hay 3.107 phiên.
+
+**Δ CAGR (pp) vs ctrl — engine tier, OOS là trọng tài:**
+
+| leg | Full | IS 2014-19 | OOS 2020+ | | leg | Full | IS | OOS |
+|---|---:|---:|---:|---|---|---:|---:|---:|
+| tieb_k05 | −0,22 | −0,52 | +0,07 | | blend_w080 | +0,06 | −0,83 | +0,96 |
+| tieb_k10 | +0,07 | −0,59 | +0,72 | | blend_w200 | −0,57 | −1,38 | +0,24 |
+| tieb_k20 | +0,09 | −0,44 | +0,61 | | wtilt_t030 | +0,08 | +0,07 | +0,08 |
+| blend_w010 | +0,14 | +0,02 | +0,25 | | wtilt_t060 | −0,19 | +0,20 | −0,56 |
+| blend_w020 | −0,03 | +0,02 | −0,08 | | wtilt_t090 | −0,11 | +0,31 | −0,51 |
+| blend_w040 | −0,03 | −0,42 | +0,36 | | *placebo s1-s4* | *−1,09…+0,03* | *−0,87…−0,26* | *−1,59…+0,33* |
+
+**Kết luận: KHÔNG biến thể nào thắng cả 2 nửa ở mức phân biệt được với nhiễu.** Hai leg dương cả
+2 nửa (`blend_w010` +0,02/+0,25; `wtilt_t030` +0,07/+0,08) là hai leg **liều nhỏ nhất**, biên độ
+= 0,07–0,25 lần sd placebo. Bốn lý do độc lập:
+1. **Placebo null**: `tieb_k10` vs 4 seed ngẫu nhiên — Δ**IS** z=−0,27, **hạng 3/5** (2 seed ngẫu
+   nhiên còn tốt hơn FSCORE thật); ΔOOS z=+1,77 hạng 1/5 nhưng n=4 ⇒ p≥0,20. Đảo ngẫu nhiên ở
+   đường cắt tự nó tốn **−0,60pp Full** (phí churn) — đó là mốc so đúng, không phải 0.
+2. **Dose-response ngược dấu, bù trừ nhau**: blend IS đơn điệu GIẢM theo w (+0,02→−1,38); wtilt IS
+   TĂNG theo T (+0,07→+0,31) nhưng OOS GIẢM (+0,08→−0,51). Tín hiệu thật cho dose-response
+   **cùng dấu** ở cả 2 nửa.
+3. **Ngược chiều phơi nhiễm**: rổ = 33,0% NAV trong IS vs 19,8% OOS ⇒ cải thiện thật phải lộ ra
+   MẠNH HƠN ở IS; quan sát ngược lại (IS âm / OOS dương) ⇒ path noise.
+4. **Tier vị thế mâu thuẫn tier engine + phân rã swap giết nhân quả**: `tieb_k10` ở tier rổ thắng
+   cả 2 nửa (basket +1,88pp Full) nhưng engine IS lật −0,59pp; và ở **OOS**, các mã FSCORE THÊM
+   VÀO chạy **kém hơn** các mã nó LOẠI RA (−1,24pp, hit 40%, t=0,92 toàn kỳ) — lãi OOS ở engine
+   **không đến từ chọn mã tốt hơn**. `blend_w080` OOS +0,96pp: bỏ riêng năm 2021 ra → **−0,70pp**.
+
+**DSR/PBO KHÔNG chạy** (skill §12: khuyến nghị là "không đổi gì", không có config nào được chọn
+để deploy). **quant-skeptic không bắt buộc** (kết quả âm, không đề xuất đổi production).
+Production `custom_basket.py` / `pt_v23_audit_2014.py` / `rating_8l.py`: `git status` **sạch**.
+
+**Vì sao IC +0,037 (job Taylor_20260801_082823) không chảy vào NAV**: mặt cắt rộng ≠ biên của một
+lát cắt hẹp đã lọc; FSCORE là số nguyên 0-9 nên hoà điểm rất phổ biến trong dải quanh đường cắt;
+rổ chỉ 26% NAV ⇒ pha loãng ~4 lần; và phí đảo danh mục (−0,60pp theo placebo) ăn hết phần còn
+lại. FSCORE giữ nguyên chỗ nó có ích: trục 2/12 trong `core_score()` + gate `FSCORE>=6` trong
+`capit_basket()` (tái xác nhận GIỮ NGUYÊN cùng ngày).
+
+Báo cáo đầy đủ: `mike/agents/Taylor/research/fscore_custom30v_enhancer_20260801.md`.
+Log/CSV: `data/fscore_c30v_20260801/` (`SELFCHECK.log`, `tier1_basket_metrics.csv`,
+`tier1_swap_decomp.csv`, `tier2_engine_metrics.csv`, `tier2_peryear.csv`, `tier2_loo.csv`,
+`eng_*.log` 17 leg, `patch_fsx.py`/`analyze_*.py`).
