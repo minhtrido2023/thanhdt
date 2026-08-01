@@ -49,7 +49,13 @@ if o.returncode != 0:
 days = sorted(pd.read_csv(io.StringIO(o.stdout))["time"].astype(str))
 
 flags = json.load(open(os.path.join(W, "data", "anomaly_flags.json"), encoding="utf-8"))
-print(f"cờ hiện có: { {t: f['last_alert'] for t, f in flags.items()} }")
+# "_meta" là dấu độ tươi CỦA CẢ FILE (anomaly_scan.py write_flags(), audit §14 2026-08-01),
+# KHÔNG phải 1 cờ mã CK — không có "last_alert". anomaly_excluded() production đã loại tường
+# minh key bắt đầu bằng "_"; selfcheck NÀY tự duyệt flags.items() riêng cho dòng in debug,
+# bỏ sót cùng exclusion nên crash KeyError khi chạy lại lần đầu sau khi _meta được thêm vào
+# (bắt được bởi bin/run_selfchecks.sh — chính selfcheck production đã PASS lúc đó vì đi qua
+# anomaly_excluded(), file NÀY không được re-run cùng lúc).
+print(f"cờ hiện có: { {t: f['last_alert'] for t, f in flags.items() if not t.startswith('_')} }")
 
 diffs, n_active, n_empty = [], 0, 0
 for d in days:
