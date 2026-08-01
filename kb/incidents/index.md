@@ -148,6 +148,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Tóm tắt (nguyên văn tiêu đề) | status |
 |---|---|---|
+| 2026-08-01 | [RETRO — 2026-08-01: 6 sự cố đã ghi + 2 gap chưa ghi, 3 pattern xuyên suốt (1 escalate)](retro/retro-2026-08-01.md) | open-items |
 | 2026-07-29 | [RETRO — 2026-07-29: 4 sự cố, 1 pattern xuyên suốt tái diễn (data-registry-accuracy), 0 vi phạm §8 wakeup](retro/retro-2026-07-29.md) | open-items |
 | 2026-07-28 | [RETRO — 2026-07-28: 3 sự cố, 1 pattern xuyên suốt CỰC KỲ QUAN TRỌNG (retro pipeline tự nó chết lặng 4 ngày 07-24→07-27, đúng lúc pattern funding_requ…](retro/retro-2026-07-28.md) | open-items |
 | 2026-07-23 | [RETRO — 2026-07-23: 0 sự cố mới, 0 pattern mới (ngày sạch — 1 near-incident đã tự xác định NOT-A-BUG cùng ngày, khớp tiền lệ 07-20)](retro/retro-2026-07-23.md) | open-items |
