@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# dispatch.sh <agent_id> "prompt" [--bg] [--timeout SEC] [--retries N] [--model NAME] [--effort LEVEL]
+# dispatch.sh <agent_id> "prompt" [--bg] [--timeout SEC] [--retries N] [--model NAME] [--effort LEVEL] [--max-turns N]
 #
 # Run a HEADLESS Claude session as the specified agent. The session inherits the
 # agent's CLAUDE.md + hooks (KB context injection, bus writes, heartbeat).
@@ -44,6 +44,16 @@
 #                  (task thường lệ). Task phức tạp → --effort high. CHÍNH SÁCH user
 #                  (2026-07-14): model 'fable' bị chặn tối đa 'high' — truyền xhigh/max
 #                  cho fable sẽ tự clamp về high + cảnh báo stderr. Xem MIKE.md §Model routing.
+#   --max-turns N  override trần lượt tool-call (mặc định 50, KHÔNG đổi khi omit — thêm
+#                  2026-07-31 sau sự cố job fail "Reached max turns (50)" 2 lần cho 1 task
+#                  gộp nhiều deliverable độc lập dù nội dung thật đã gần xong). Task ước
+#                  lượng chạm/vượt 40 lượt → cân nhắc TĂNG (vd 80) THAY VÌ chia task nếu các
+#                  phần phụ thuộc lẫn nhau (không chia được sạch); ngược lại, ưu tiên chia
+#                  thành nhiều dispatch độc lập theo ranh giới tự nhiên (mỗi phần tự
+#                  commit+report) — chia rẻ hơn nâng trần vô hạn vì mỗi dispatch giữ được
+#                  toàn bộ lượt cho ĐÚNG 1 việc. Không có công cụ đo trước số lượt cần —
+#                  dùng tín hiệu THẬT (1 lần fail max-turns) làm cớ chia/tăng cho lần sau,
+#                  đừng đoán trước khi chưa có bằng chứng.
 # Context injection tier is fixed per AGENT IDENTITY, not per dispatch: each agent's
 # own agents/<id>/CLAUDE.md statically imports its role-scoped default — see MIKE.md
 # §"Context theo vai trò (role-scoped)" for the full table (Mike/Taylor -> full
@@ -89,9 +99,12 @@ RETRIES=1
 MODEL=""
 EFFORT=""
 FORCE_TID=""
+MAX_TURNS=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --bg) bg="--bg" ;;
+    --max-turns) MAX_TURNS="${2:?--max-turns needs a value}"; shift ;;
+    --max-turns=*) MAX_TURNS="${1#*=}" ;;
     # --thread: pin this job's Discord topic EXPLICITLY — beats both the per-agent
     # override and the ambient session topic. This is the escape hatch that makes it
     # safe for _agent_thread_override to outrank ambient DISCORD_THREAD_ID
@@ -157,6 +170,18 @@ if [ "$MODEL" = "fable" ] && { [ "$EFFORT" = "xhigh" ] || [ "$EFFORT" = "max" ];
   EFFORT="high"
 fi
 EFFORT_FLAG="--effort $EFFORT"
+
+# --- Max-turns override (2026-07-31, sau sự cố Winston_20260731_062642 fail "Reached
+# max turns (50)" 2 lần liên tiếp cho 1 task gộp 3 deliverable độc lập — 50 là hằng số
+# cứng không có lối thoát, dù nội dung thật đã gần xong khi kiểm tay). Mặc định GIỮ
+# NGUYÊN 50 (không đổi hành vi khi caller không truyền) — chỉ cho phép caller nâng lên
+# khi biết trước task cần nhiều lượt hơn (vd gộp nhiều deliverable theo đúng quy tắc
+# cost-opt #3 ở MIKE.md), thay vì âm thầm tạch giữa chừng rồi phải retry tốn gấp đôi.
+case "$MAX_TURNS" in
+  "") MAX_TURNS=50 ;;
+  *[!0-9]*) echo "ERROR: --max-turns '$MAX_TURNS' phải là số nguyên dương." >&2; exit 1 ;;
+  *) ;;
+esac
 
 # Heartbeat-aware deadline knobs (see _hb_aware_timeout). MAX_EXT bounds the TOTAL
 # lifetime of one attempt at TIMEOUT×(MAX_EXT+1) — every worst-case computation below
@@ -586,9 +611,27 @@ if [ "$bg" = "--bg" ]; then
     while [ "$attempt" -le "$max_attempts" ]; do
       astart="$(date +%s)"
       JSET status=running attempt="$attempt" started_at="$astart" deadline=$((astart + TIMEOUT))
+      # Salvage-trước-retry (2026-07-31, sau sự cố Winston_20260731_062642): AUTO-CALLBACK-FAIL
+      # KHÔNG chạy được cho job from=Mike/user (guard "$from" != "Mike"/"user" ở dưới chặn
+      # chính case phổ biến nhất) — chỗ đúng để mã hoá "kiểm việc đã làm tới đâu trước khi
+      # làm lại" là NGAY TRONG prompt của lần thử tiếp theo, chạy bất kể từ đâu dispatch.
+      # Bằng chứng cơ chế có tác dụng thật: job Winston_20260731_014953 tự làm đúng việc này
+      # ở attempt=2 (đọc thấy code cũ dở dang, hoàn tất phần thiếu thay vì viết lại) — nhưng
+      # đó là agent TỰ NGHĨ RA, không phải luôn xảy ra. Mã hoá thành chỉ dẫn tường minh.
+      run_prompt="$dispatch_prompt"
+      if [ "$attempt" -gt 1 ]; then
+        run_prompt="$dispatch_prompt
+
+⚠️ ĐÂY LÀ LẦN THỬ LẠI (attempt $attempt/$max_attempts) sau khi lần trước fail/timeout/hết
+lượt. TRƯỚC KHI làm lại từ đầu: chạy 'git status' + 'git diff' ở MỌI repo bạn có thể đã sửa
+(kể cả nested repo, vd mike/ bên trong WorkingClaude/) để xem việc đã làm tới đâu. Nếu code/
+nội dung đã gần xong (chỉ thiếu verify/commit/report bus) → HOÀN TẤT phần còn thiếu thay vì
+viết lại từ đầu (tốn gấp đôi vô ích). Nếu phần dở dang sai/không dùng được → nói rõ lý do rồi
+làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ mà không giải thích."
+      fi
       set +e
-      _hb_aware_timeout "$CLAUDE" -p "$dispatch_prompt" \
-        --permission-mode auto --max-turns 50 $MODEL_FLAG $EFFORT_FLAG > "$logfile" 2>&1
+      _hb_aware_timeout "$CLAUDE" -p "$run_prompt" \
+        --permission-mode auto --max-turns $MAX_TURNS $MODEL_FLAG $EFFORT_FLAG > "$logfile" 2>&1
       rc=$?
       set -e
       if [ "$rc" -eq 0 ]; then
@@ -778,7 +821,7 @@ else
   trap _sync_killed_guard TERM INT HUP
   set +e
   _hb_aware_timeout "$CLAUDE" -p "$dispatch_prompt" \
-    --permission-mode auto --max-turns 50 $MODEL_FLAG $EFFORT_FLAG \
+    --permission-mode auto --max-turns $MAX_TURNS $MODEL_FLAG $EFFORT_FLAG \
     2>"$logfile.err" | tee "$logfile"
   rc=${PIPESTATUS[0]}
   set -e
