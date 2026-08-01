@@ -80,7 +80,23 @@ chưa ăn → notify "cần người xem", không dispatch lặp vô hạn.
   hết horizon. Đã xảy ra THẬT: `Wendy/confirm-dnse-phs-margin-thresholds` (06-22) và
   `Taylor/cache-stability go-live blocker` (06-27) biến mất khỏi mọi kênh dù CHƯA TỪNG được
   trả lời; sau fix cả hai hiện lại ở dòng TREO LÂU (38d/34d). Ai đổi Phase 1b2 hoặc đường
-  dẫn archive: phải cập nhật glob của check #5 cùng lúc.
+  dẫn archive: phải cập nhật glob của check #5 cùng lúc — ràng buộc này giờ được **khoá bằng
+  test**, không còn bằng văn xuôi: `bin/ops_health_check_selfcheck.py` (dựng archive theo
+  đúng layout Phase 1b2 rồi assert question >30d VẪN hiện), chạy mỗi đêm ở `kb_nightly.sh`
+  Phase 0 (alert-only, không gate prune). Selfcheck trích code thật giữa 2 marker
+  `# CHECK5_BEGIN` / `# CHECK5_END` trong `ops_health_check.sh` — xoá/đổi marker là test đỏ.
+- **Đường lỗi ĐỌC không được im lặng** (Wags 2026-08-01 round-5): file bus/archive hỏng
+  (gz cắt cụt, đang ghi dở) → check #5 bỏ qua file đó nhưng PHÁT WARN đếm rõ file nào; và
+  nếu `bus/inbox/archive/` tồn tại mà glob `*.jsonl.gz` khớp 0 file (dấu hiệu Phase 1b2 đổi
+  layout) cũng WARN. Cả hai WARN này **không** mang `[WARN-ONLY]` → route về `COORD_WARN`
+  (Wags sửa), vì đó là lỗi tooling sửa được chứ không phải backlog chờ user.
+- **Dọn `bus/inbox/archive/`: KHÔNG BAO GIỜ DỌN TỰ ĐỘNG** (quyết định Wags 2026-08-01,
+  required_change #4). Không có cron/script nào xoá archive; đây là bản ghi lịch sử bus duy
+  nhất còn lại sau khi Phase 1b2 prune hot inbox, và check #5 phụ thuộc nó để không dựng lại
+  cliff 30d. Chi phí: check #5 đọc TOÀN BỘ archive 2 lần mỗi lần chạy (2 pass), 4 lần/ngày
+  (2 khung giờ × 2 account). Mốc hiện tại 2026-08-01: ~778 event / **252KB nén**, full run
+  5.4s — tăng ~250KB nén/tháng. **Mốc phải xem lại: archive >20MB nén hoặc check #5 >15s**
+  → khi đó mới bàn nén theo năm / index riêng, KHÔNG xoá event.
   (Bản 07-30 từng auto-close sau 30 ngày bằng 1 `decision` "EXPIRED-30d" ghi dưới
   `agent_id=Mike`; arch-reviewer NEEDS_CHANGES high bác: check #5 là kênh backlog DUY NHẤT của
   fleet → sau EXPIRED question biến mất khỏi mọi báo cáo, chỉ hoãn chết-im 48h→30d, lại để MÁY
@@ -91,9 +107,14 @@ chưa ăn → notify "cần người xem", không dispatch lặp vô hạn.
   dòng chứa "Circuit breaker"/"Job board:" từng kéo cả dòng vào COORD_WARN → dispatch oan).
 - **Question TREO LÂU >48h** (thêm Wags 2026-07-30): checker có dòng WARN riêng
   `⚠️ Câu hỏi TREO LÂU (>48h, chưa ai quyết)` cho question quá cửa sổ 48h mà vẫn chưa có
-  answer/decision (KHÔNG có horizon — cắt theo ĐỘ DÀI: in 5 mục cũ nhất + "…và N mục khác",
-  cũ nhất luôn nằm trong tầm mắt; nguồn quét = hot inbox **+ archive nén**, xem gạch đầu
-  dòng auto-expire ở trên). Trước đó question >48h RƠI KHỎI radar hoàn toàn → chết
+  answer/decision (KHÔNG có horizon thời gian — chỉ cắt theo ĐỘ DÀI DÒNG IN; nguồn quét =
+  hot inbox **+ archive nén**, xem gạch đầu dòng auto-expire ở trên).
+  **Chính sách IN (sửa Wags 2026-08-01 round-5)**: ≤10 mục → in ĐỦ; >10 mục → in 5 mục CŨ
+  NHẤT + 5 mục giữa bị giấu + 3 mục MỚI NHẤT, kèm trỏ sang `bin/bus_question_audit.py` cho
+  danh sách đầy đủ. Lý do đổi: pool này không bao giờ tự cạn (drain rate thực nghiệm = 0),
+  bản cũ chỉ in 5 mục CŨ NHẤT nên chỉ cần thêm 2 zombie già hơn là escalation tiền thật MỚI
+  (vd `Taylor/DGC ZaloPay 46,8% NAV`, 7d) bị đẩy vào "…và N mục khác" — tức đổi một cliff-30d
+  im lặng lấy một crowd-out im lặng. Khoá bằng test ở `ops_health_check_selfcheck.py`. Trước đó question >48h RƠI KHỎI radar hoàn toàn → chết
   im, không owner (vd `Winston/dt5g-live-2-writer-can-quyet` 07-29 sẽ vô hình từ 07-31).
   Dòng này **CỐ TÌNH không dispatch autofix** (loại khỏi cả `COORD_WARN` và `OTHER_WARN`):
   loại question này chỉ USER quyết được, spawn Wags/Winston lặp là token thuần lãng phí — nó

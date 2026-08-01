@@ -352,13 +352,24 @@ if pending_q:
 else:
     OK("Không có câu hỏi (question) nào đang chờ xử lý trong 48h qua.")
 if aged_q:
-    # Cũ nhất trước — nếu phải cắt thì cắt phần MỚI, giữ phần treo lâu nhất trong tầm mắt.
-    aged_q.sort(key=lambda x: -x[0])
-    shown = [lbl for _, lbl in aged_q[:AGED_SHOWN]]
-    more = len(aged_q) - len(shown)
-    tail = f" …và {more} mục khác" if more > 0 else ""
-    W(f"{WARN_ONLY} Câu hỏi TREO LÂU (>48h, chưa ai quyết) — {len(aged_q)} mục, cần USER "
-      f"quyết; {len(shown)} mục cũ nhất: {shown}{tail}")
+    aged_q.sort(key=lambda x: -x[0])   # cũ nhất trước
+    if len(aged_q) <= AGED_SHOW_ALL_UPTO:
+        shown = [lbl for _, lbl in aged_q]
+        W(f"{WARN_ONLY} Câu hỏi TREO LÂU (>48h, chưa ai quyết) — {len(aged_q)} mục, cần "
+          f"USER quyết (in đủ): {shown}")
+    else:
+        # Cắt GIỮA: giữ cả mục treo lâu nhất LẪN mục mới nhất — zombie cũ không được phép
+        # chèn escalation mới ra khỏi màn hình (xem chú thích AGED_SHOW_ALL_UPTO ở trên).
+        # Cắt trên phần CÒN LẠI (không dùng aged_q[-N:]) — với N=0 thì aged_q[-0:] trả về
+        # NGUYÊN danh sách, in trùng toàn bộ. Bẫy này bị mutation-test bắt được.
+        oldest = [lbl for _, lbl in aged_q[:AGED_OLDEST]]
+        rest = aged_q[AGED_OLDEST:]
+        newest = [lbl for _, lbl in (rest[-AGED_NEWEST:] if AGED_NEWEST > 0 else [])]
+        more = len(rest) - len(newest)
+        W(f"{WARN_ONLY} Câu hỏi TREO LÂU (>48h, chưa ai quyết) — {len(aged_q)} mục, cần "
+          f"USER quyết; {len(oldest)} cũ nhất: {oldest} …và {more} mục giữa… "
+          f"{len(newest)} mới nhất: {newest}. Danh sách ĐẦY ĐỦ: bin/bus_question_audit.py")
+# CHECK5_END
 
 # 6. Corp-action backlog (data/corp_action_backlog.json, ghi bởi update_shares_live.py
 #    --scan mỗi ngày 18:40 ICT — đọc file local, KHÔNG query BQ trực tiếp ở đây để giữ

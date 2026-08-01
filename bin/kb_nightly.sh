@@ -54,6 +54,21 @@ if ! python3 "$ROOT/bin/consolidate_git_scope_selfcheck.py" >> "$LOG" 2>&1; then
       >/dev/null 2>&1 || true
 fi
 
+# check #5 của ops_health_check.sh (kênh backlog `question` DUY NHẤT của fleet) đọc CẢ
+# bus/inbox/archive/*.jsonl.gz — nó phụ thuộc TRỰC TIẾP vào layout archive mà Phase 1b2 dưới
+# đây tạo ra (EVENT_KEEP_DAYS + đường dẫn/đuôi file). Ràng buộc đó trước chỉ được canh bằng
+# văn xuôi trong runbook và đã thất bại IM LẶNG 38 ngày (2 câu hỏi chưa ai trả lời biến mất
+# khỏi mọi báo cáo). Chạy ở đây để đổi layout archive là test ĐỎ ngay đêm đó, thay vì phát
+# hiện bằng mắt người 1 tháng sau. Alert-only, KHÔNG gate Phase 1b/1b2: check #5 chỉ ĐỌC,
+# nó hỏng không làm hỏng dữ liệu prune.
+if ! python3 "$ROOT/bin/ops_health_check_selfcheck.py" >> "$LOG" 2>&1; then
+    log "FAIL: ops_health_check_selfcheck.py — check #5 (backlog question) regressed, see $LOG"
+    "$ROOT/bin/notify.sh" "🟡 kb_nightly: ops_health_check_selfcheck.py FAILED — check #5 (backlog câu hỏi) có thể lại đang bỏ sót question âm thầm; nghi liên quan layout archive Phase 1b2: $LOG" >/dev/null 2>&1 || true
+    "$ROOT/bin/append_event.sh" Mike error "ops-health-check5-selfcheck-failed" \
+      "{\"note\": \"kb_nightly Phase 0 selfcheck FAIL — check #5 backlog question co the dang bo sot cau hoi (nghi doi layout archive Phase 1b2)\", \"log\": \"$LOG\"}" \
+      >/dev/null 2>&1 || true
+fi
+
 # ── Phase 0b: post-condition check của Friday editorial dispatch (Wags audit 2026-07-30, P3)
 # Dispatch Friday chạy NỀN (`&` ở cuối, xem Phase 5 dưới) — không exit-code check, không
 # artifact check. Đã từng im lặng fail 2 TUẦN LIỀN (06-27→07-09, xem comment ở Phase 5) vì
