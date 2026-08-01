@@ -580,8 +580,11 @@ else
     log "No KB changes to commit."
 fi
 
-# Backup
-"$ROOT/bin/backup.sh" "kb_nightly $(date -u +%Y-%m-%d)" >> "$LOG" 2>&1 || true
+# Backup (fix 2026-08-01, cron_health_check.py audit: đã trỏ sai đường dẫn "$ROOT/bin/backup.sh"
+# — file đó CHƯA TỪNG tồn tại kể từ khi dòng này được thêm 2026-06-30 (commit 044c63ca9), silent
+# "No such file or directory" mỗi đêm suốt hơn 1 tháng vì có `|| true`. Đích đúng là script backup
+# top-level WorkingClaude (nhận message argument), không phải mike/bin/.
+"$ROOT/../../backup.sh" "kb_nightly $(date -u +%Y-%m-%d)" >> "$LOG" 2>&1 || true
 
 # ── Phase 4: notify ──────────────────────────────────────────────────────────
 MSG="🌙 KB nightly done ($(date -u +%Y-%m-%d))"

@@ -21,6 +21,27 @@ preserve_verbatim: >
 
 # Log thay đổi Cron Registry
 
+- 2026-08-01 (Mike, user mandate sau 2 sự cố cùng ngày — `kb_nightly.sh`/`daily_retro.sh` quoting
+  bug chết lặng 2 tuần/2 đêm mà không ai biết): audit TOÀN BỘ 64 dòng crontab bằng công cụ mới
+  `mike/bin/cron_health_check.py` (parse crontab thật, đối chiếu mtime + tail log tìm dấu hiệu
+  crash cho từng job). Kết quả: 1 bug thật mới tìm thấy + sửa (`kb_nightly.sh:584` gọi
+  `$ROOT/bin/backup.sh` — file KHÔNG TỒN TẠI từ khi thêm 2026-06-30, `|| true` nuốt lỗi mỗi đêm
+  hơn 1 tháng; đích đúng là `/home/trido/thanhdt/backup.sh`, đã sửa + verify bằng cách chạy thật).
+  **Không đổi giờ/lịch dòng nào** — chỉ THÊM `>> mike/logs/<name>.log 2>&1` cho 9 dòng script
+  WorkingClaude-root trước đó không có log target khai báo (`papertrade_daily.sh`,
+  `pt_8l_daily.sh`, `telegram_run_daily.sh`, `daily_refresh_v34b_linux.sh`,
+  `auto_update_commodity_wb.sh` ×2, `rubber_weekly.sh`, `update_shares_live.sh`,
+  `fetch_new_listings_daily.sh`) — output trước đây đi vào cron mail mặc định (postfix có chạy
+  nhưng KHÔNG có mailbox local `/var/mail/trido`, tức mail không ai đọc được — tương đương mất).
+  Hầu hết các script này đã tự quản log riêng (`data/refresh_v34b_linux_<date>.log` v.v.) nên rủi
+  ro thực tế thấp hơn `kb_nightly.sh`/`daily_retro.sh`, nhưng vẫn thêm redirect làm lớp phòng thủ
+  thứ 2 bắt crash SỚM (trước khi script tự log kịp khởi tạo) — đúng lớp lỗi vừa xảy ra hôm nay.
+  **Không đụng** `discord_bot/start.sh` (hệ thống khác, không thuộc sở hữu fleet Mike). 4 câu hỏi
+  §11: không áp dụng (không đổi lịch/nguồn đọc — chỉ thêm observability). Cài `cron_health_check.py`
+  làm job DAILY ĐỘC LẬP (`cron_health_check_daily.sh`, 08:25 T2-T6) — CỐ Ý KHÔNG nhét vào
+  `ops_health_check.sh` vì đó là fleet-wide, nhét vào loop `for_each_live_account.sh` sẽ chạy
+  lặp theo số account (đúng bẫy "Job board:" đã ghi nhận coord-2026-07-22). Xem bảng chính dòng
+  08:25 + `kb/incidents/2026-08/`.
 - 2026-07-30 (Winston, job `Winston_20260730_014022` — user duyệt sau khi Taylor phát hiện trong job
   re-pin R3 2026-07-29): **KHÔNG đổi lịch cron nào**, chỉ đổi HÀNH VI của script mà cron 23:45
   (`sync_bq_cache_daily.sh`) gọi — ghi ở đây vì operator cần biết. `sync_bq_cache.py` trước đây không

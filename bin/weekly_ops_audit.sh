@@ -39,10 +39,17 @@ tinh thần rà soát (đọc log thật, tái hiện lỗi, verify bằng cách
 
 VIỆC CẦN LÀM (mỗi mục xong ghi 1-2 câu kết luận, đừng chỉ nói "đã kiểm tra"):
 
-1. SWEEP LOG LỖI 7 NGÀY QUA: grep mọi file logs/*.log đổi trong 7 ngày qua tìm dấu hiệu crash
-   (Traceback, "unbound variable", "No such file or directory" ngay sau tên script ở đầu dòng,
-   "syntax error", "command not found", "Permission denied", "ERROR: unknown argument"). Với
-   MỖI hit: đối chiếu kb/incidents/ xem đã ghi chưa (dùng bin/incident_lookup.py). Chưa ghi và
+1. SWEEP LOG LỖI: chạy `python3 bin/cron_health_check.py` (audit CƠ HỌC toàn bộ crontab — mtime +
+   quét lỗi có ngày-nhận-biết cho mọi job có log target; đã chạy DAILY qua
+   cron_health_check_daily.sh 08:25 T2-T6, nhưng chạy lại ở đây để có bức tranh MỚI NHẤT ngay
+   lúc review). Đọc kỹ CẢ 4 nhóm (ERRORS_FOUND/STALE/LOG_MISSING/NO_LOG_REDIRECT) — STALE/
+   LOG_MISSING có thể là false positive hợp lệ (job mới cài chưa tới lần chạy đầu, script chỉ
+   log khi CÓ việc) nên đừng tự động coi là bug, đối chiếu ngày cài đặt (kb/cron_registry.md)
+   trước khi kết luận. Bổ sung thêm: grep mọi file logs/*.log đổi trong 7 ngày qua mà
+   cron_health_check.py CHƯA có log-target khai báo cho (dấu hiệu tự viết script mới chưa đăng
+   ký vào crontab đúng cách) tìm dấu hiệu crash tương tự (Traceback, "unbound variable", "No such
+   file or directory" ngay sau tên script ở đầu dòng, "syntax error", "command not found",
+   "Permission denied", "ERROR: unknown argument"). Với MỖI hit: đối chiếu kb/incidents/ xem đã ghi chưa
    còn ảnh hưởng workflow sống → điều tra root cause (đọc script liên quan), nếu nằm trong ranh
    giới tự sửa an toàn (bug code trong script report/check/pipeline/cache — KHÔNG CHẠM trade
    plan/trading_rules.json/logic đặt lệnh/crontab dòng thực thi/xoá dữ liệu/BOT_STOP, giống hệt
