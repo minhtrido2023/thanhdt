@@ -81,6 +81,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 | 2026-08-01 | [2026-08-01: audit toàn bộ crontab (64 dòng) — 1 bug thật mới (kb_nightly.sh backup.sh) + 9 log-observability gap + cron_health_check.py mới](2026-08/2026-08-01-full-crontab-audit-cron-health-check.md) | fixed |
 | 2026-08-01 | [2026-08-01: kb_nightly.sh Friday/Saturday editorial dispatch silently FAILED every week since 07-17 — 2 unescaped-quote bugs](2026-08/2026-08-01-kb-nightly-friday-dispatch-silently-broken-2-weeks.md) | fixed |
 | 2026-08-01 | [2026-08-01: daily_retro.sh crashed silently 2 đêm liên tiếp (07-31, 08-01) — bug quoting do chính commit migrate OKF gây ra](2026-08/2026-08-01-daily-retro-quoting-bug-silent-2day-outage.md) | fixed |
+| 2026-08-01 | [2026-08-01: báo cáo tuần/tháng chết 2 tuần liền — WARN chạy đúng nhưng bị chôn trong ops_health_check 4 lần/ngày, không ai action](2026-08/2026-08-01-weekly-monthly-report-dead.md) | fixed |
 
 ### 2026-07
 

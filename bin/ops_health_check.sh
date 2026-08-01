@@ -10,11 +10,13 @@
 #      dispatch autofix) và TREO LÂU >48h (WARN-only, không dispatch — chỉ user quyết được)
 #   5. Kill-switch / macro freshness / BQ freshness (tái dùng preflight_check.sh)
 #   6. Corp-action backlog (sự kiện tồn đọng >7 ngày chưa resolve, thêm 2026-07-10)
-#   7. Báo cáo tuần/tháng quá hạn (WARN-only, thêm 2026-07-13 — bổ sung sau sự kiện tuan
-#      07-06→07-10 bi bo sot toi 07-13 moi phat hien, user tu hoi):
-#      - Thứ Hai: nếu file *_weekly_report_*.md mới nhất > 7 ngày → WARN
-#      - Ngày ≥5 trong tháng: nếu không có *_monthly_report_*<thang-truoc>*.md → WARN
-#      (Hiện chưa có file monthly nào, WARN ngay lần đầu chạy — đây là kỳ vọng, không phải bug)
+#   7. [GỠ 2026-08-01] Báo cáo tuần/tháng quá hạn — chuyển sang bin/check_report_cadence.sh
+#      (cron riêng 1 lần/ngày). Lý do gỡ khỏi đây: bản WARN cũ chỉ in 1 dòng, bị CHÔN trong
+#      message chạy 4 lần/ngày (2 khung giờ x 2 account) — không có forcing function, kết quả
+#      là WARN lặp lại ~20 lần suốt 5 ngày (07-27→08-01) mà không ai action, 2 tuần báo cáo
+#      bị bỏ sót thật (kb/incidents/2026-08/2026-08-01-weekly-monthly-report-dead.md). Script
+#      mới tự dispatch Taylor soạn+gửi khi quá hạn (không chỉ cảnh báo) + post riêng vào
+#      Trading report topic (không chôn ở Trading Daily) + bus event question.
 #
 # Đây là lớp CẢNH BÁO SỚM bổ sung, KHÔNG thay thế preflight_check.sh (08:45) hay
 # eod_trading_report.sh (15:00) — chạy TRƯỚC mỗi phiên để con người có thời gian phản ứng.
@@ -193,6 +195,10 @@ else:
 # bus/inbox/<agent_id>.jsonl — nên answer của agent KHÁC người hỏi nằm ở file khác;
 # match trong-cùng-file như bản cũ khiến answer chéo-agent không bao giờ clear question,
 # wags_autofix bị dispatch lặp cho question đã trả lời — fix Wags 2026-07-10).
+# CHECK5_BEGIN — marker ỔN ĐỊNH: bin/ops_health_check_selfcheck.py trích ĐÚNG khối giữa
+# CHECK5_BEGIN/CHECK5_END rồi chạy nó trên bus giả để khoá hồi quy (kb_nightly Phase 0).
+# Đổi/xoá 2 marker này → selfcheck FAIL ngay, không im lặng. Khối chỉ được phép dùng:
+# glob/gzip/json/os/re + biến wc_root + hàm W()/OK() (selfcheck cung cấp đúng bấy nhiêu).
 import datetime as dt
 _now = dt.datetime.now(dt.timezone.utc)
 cutoff = _now - dt.timedelta(hours=48)
@@ -214,7 +220,16 @@ cutoff = _now - dt.timedelta(hours=48)
 # mất khỏi MỌI dòng báo cáo, chỉ hoãn chết-im từ 48h thành 30d; lại để MÁY viết `decision`
 # nhân danh người trên escalation tiền thật (DGC ZaloPay 46,8% NAV) và ô nhiễm KB
 # (kb_nightly giữ decision vĩnh viễn), qua một đường ghi bus nuốt lỗi im lặng.
-AGED_SHOWN = 5
+# Chính sách IN (round-5, arch-reviewer required_change #1, NEEDS_CHANGES coord-2026-07-31):
+# pool aged KHÔNG BAO GIỜ tự cạn — chỉ answer/decision của NGƯỜI mới đóng, drain rate thực
+# nghiệm = 0 (2 câu hỏi 38d/34d không ai đụng suốt hơn 1 tháng). Bản cũ in 5 mục CŨ NHẤT
+# nên chỉ cần thêm 2 zombie già hơn là escalation tiền thật MỚI (Taylor/DGC ZaloPay 46,8%
+# NAV, 7d) bị chèn vào "…và N mục khác" = đổi cliff-30d-im-lặng lấy crowd-out-im-lặng.
+# Fix: in ĐỦ khi pool còn nhỏ; khi buộc phải cắt thì cắt GIỮA, giữ CẢ đầu (treo lâu nhất)
+# LẪN đuôi (mới nhất — thường là cái đang khẩn) trong tầm mắt.
+AGED_SHOW_ALL_UPTO = 10   # ≤10 mục: in HẾT, không cắt
+AGED_OLDEST = 5           # >10 mục: 5 mục cũ nhất …
+AGED_NEWEST = 3           # … + 3 mục mới nhất
 # Marker ỔN ĐỊNH để nhánh dispatch dưới (bash grep) nhận ra "dòng này chỉ để NGƯỜI đọc,
 # không spawn agent". Trước đây routing dựa vào CHỮ HOA/câu chữ tiếng Việt của chính dòng
 # WARN ("Câu hỏi TREO LÂU" vs "câu hỏi (question)") → đổi câu chữ là routing thay đổi im
@@ -234,8 +249,21 @@ if os.path.isdir(inbox_dir):
     # Quét cả 2 pass (question + resolver) trên cùng tập file, giữ matcher ở MỘT nơi
     # (arch-reviewer required_change #1/#2, NEEDS_CHANGES coord-2026-07-31). Chi phí không
     # đáng kể: toàn bộ archive ~778 event / 252KB nén.
-    files = sorted(glob.glob(os.path.join(inbox_dir, "*.jsonl"))) + \
-            sorted(glob.glob(os.path.join(inbox_dir, "archive", "*.jsonl.gz")))
+    archive_dir = os.path.join(inbox_dir, "archive")
+    archive_files = sorted(glob.glob(os.path.join(archive_dir, "*.jsonl.gz")))
+    files = sorted(glob.glob(os.path.join(inbox_dir, "*.jsonl"))) + archive_files
+    # Nếu kb_nightly Phase 1b2 đổi đường dẫn/đuôi file archive, glob dưới khớp 0 file và
+    # check lặng lẽ quay về ĐÚNG cliff 30d cũ (chính lỗi round-3 mắc: sửa checker trong
+    # khi horizon nằm chỗ khác). Thư mục tồn tại mà rỗng = tín hiệu đó → phải nói ra.
+    if os.path.isdir(archive_dir) and not archive_files:
+        W(f"bus/inbox/archive tồn tại nhưng KHÔNG khớp file *.jsonl.gz nào — backlog "
+          f"câu hỏi (question) có thể THIẾU phần >30 ngày. Kiểm tra kb_nightly Phase 1b2 "
+          f"(EVENT_KEEP_DAYS/đường dẫn archive) có đổi layout không.")
+    # Đường lỗi ĐỌC phải đếm được, không nuốt: gz cắt cụt/hỏng từng làm 1 câu hỏi biến mất
+    # hoàn toàn mà không một dòng cảnh báo nào (arch-reviewer required_change #2, tái hiện
+    # được trên bản copy). Set theo path vì mỗi file được đọc 2 lần (pass resolver + pass
+    # question) — không muốn đếm đôi.
+    read_errors = {}
     def iter_events(path):
         opener = (lambda p: gzip.open(p, "rt", encoding="utf-8")) if path.endswith(".gz") \
                  else (lambda p: open(p, encoding="utf-8"))
@@ -246,8 +274,10 @@ if os.path.isdir(inbox_dir):
                         yield json.loads(line)
                     except Exception:
                         continue
-        except Exception:
-            # File archive hỏng/đang ghi dở → bỏ qua file đó, KHÔNG làm chết cả check.
+        except Exception as e:
+            # File archive hỏng/đang ghi dở → bỏ qua file đó, KHÔNG làm chết cả check,
+            # nhưng GHI LẠI để WARN bên dưới (im lặng ở đây = đúng lớp bug đang sửa).
+            read_errors[os.path.basename(path)] = type(e).__name__
             return
     def _agent_of(path):
         # "Wendy.jsonl" → Wendy; "Wendy_2026-06.jsonl.gz" → Wendy (bỏ hậu tố tháng).
@@ -310,6 +340,13 @@ if os.path.isdir(inbox_dir):
             else:
                 age_d = (_now - ts_dt).days
                 aged_q.append((age_d, f"{agent}/{rec.get('topic')} ({age_d}d)"))
+    if read_errors:
+        # KHÔNG gắn [WARN-ONLY]: đây là lỗi TOOLING sửa được (khác với backlog chờ user).
+        # Câu chữ cố ý chứa "câu hỏi (question)" để nhánh routing dưới đưa về COORD_WARN
+        # → wags_autofix (Wags), không rơi vào OTHER_WARN → ops_autofix per-account.
+        W(f"{len(read_errors)} file bus KHÔNG ĐỌC ĐƯỢC — backlog câu hỏi (question) có thể "
+          f"THIẾU (bỏ sót toàn bộ event trong các file này): "
+          f"{ {k: v for k, v in sorted(read_errors.items())} }")
 if pending_q:
     W(f"Có {len(pending_q)} câu hỏi (question) trong 48h qua CHƯA thấy answer tương ứng: {pending_q}")
 else:
@@ -349,62 +386,10 @@ if os.path.exists(backlog_path):
 else:
     lines.append("ℹ️ Chưa có data/corp_action_backlog.json — update_shares_live.py --scan (18:40 ICT) chưa chạy lần nào kể từ khi thêm check này.")
 
-# 7. Báo cáo tuần/tháng quá hạn (WARN-only, thêm 2026-07-13)
-import re
+# 7. [GỠ 2026-08-01] Báo cáo tuần/tháng quá hạn — xem bin/check_report_cadence.sh (cron riêng).
+#    today_d/_date/_timedelta vẫn cần cho mục 8 + phần retro bên dưới, giữ lại định nghĩa.
 from datetime import date as _date, timedelta as _timedelta
-
-def _dates_from_fname(fname):
-    """Trích tất cả YYYY-MM-DD trong tên file, trả về list date."""
-    return [_date.fromisoformat(m) for m in re.findall(r'\d{4}-\d{2}-\d{2}', fname)]
-
-reports_dir = os.path.join(wc_root, "mike", "reports")
 today_d = _date.fromisoformat(today)
-
-# --- 7a. Báo cáo tuần: chỉ kiểm tra vào thứ Hai ---
-if today_d.weekday() == 0:  # Monday = 0
-    weekly_files = glob.glob(os.path.join(reports_dir, "*_weekly_report_*.md"))
-    weekly_max_dates = []
-    for wf in weekly_files:
-        dates = _dates_from_fname(os.path.basename(wf))
-        if dates:
-            weekly_max_dates.append(max(dates))
-    most_recent_weekly = max(weekly_max_dates) if weekly_max_dates else None
-    # Tuần trước: thứ Hai = today - 7, thứ Sáu = today - 3
-    last_monday = today_d - _timedelta(days=7)
-    last_friday = today_d - _timedelta(days=3)
-    if most_recent_weekly is None or (today_d - most_recent_weekly).days > 7:
-        W(f"Báo cáo tuần quá hạn — tuần {last_monday}→{last_friday} chưa có báo cáo, "
-          f"Mike cần soạn (file mới nhất: {most_recent_weekly}).")
-    else:
-        OK(f"Báo cáo tuần: đã có (file mới nhất chứa ngày {most_recent_weekly}).")
-else:
-    day_name = ["Thứ Hai","Thứ Ba","Thứ Tư","Thứ Năm","Thứ Sáu","Thứ Bảy","Chủ Nhật"][today_d.weekday()]
-    lines.append(f"ℹ️ Kiểm tra báo cáo tuần: bỏ qua (chỉ chạy thứ Hai, hôm nay {day_name}).")
-
-# --- 7b. Báo cáo tháng: kiểm tra từ ngày 5 trong tháng ---
-# Sàn go-live: live trading bắt đầu 2026-07-01 (SpaceX) — tháng nằm TRỌN trước đó
-# không có dữ liệu tài khoản live nào để báo cáo, đòi báo cáo là false-positive
-# (fix 2026-07-14, ops-autofix Winston: checker đòi báo cáo tháng 2026-06).
-GO_LIVE_MONTH = (2026, 7)
-if today_d.day >= 5:
-    monthly_files = glob.glob(os.path.join(reports_dir, "*_monthly_report_*.md"))
-    # Tháng trước
-    if today_d.month == 1:
-        last_month_year, last_month_num = today_d.year - 1, 12
-    else:
-        last_month_year, last_month_num = today_d.year, today_d.month - 1
-    last_month_str = f"{last_month_year}-{last_month_num:02d}"
-    has_last_month = any(last_month_str in os.path.basename(f) for f in monthly_files)
-    if (last_month_year, last_month_num) < GO_LIVE_MONTH:
-        lines.append(f"ℹ️ Kiểm tra báo cáo tháng: bỏ qua — tháng {last_month_str} "
-                     f"trước go-live 2026-07, không có dữ liệu live để báo cáo.")
-    elif not has_last_month:
-        W(f"Báo cáo tháng quá hạn — tháng {last_month_str} chưa có báo cáo "
-          f"(hôm nay ngày {today_d.day} >= 5), Mike cần soạn.")
-    else:
-        OK(f"Báo cáo tháng {last_month_str}: đã có.")
-else:
-    lines.append(f"ℹ️ Kiểm tra báo cáo tháng: bỏ qua (hôm nay ngày {today_d.day} < 5, chờ sau ngày 5).")
 
 # 8. Lãi suất tiết kiệm (deposit_rate_vn) freshness — WARN-only, thêm 2026-07-17 (proposal §4).
 #    Input LIVE cho rating_8l NEUTRAL tilt. Mốc cuối = collected_date mới nhất trong
