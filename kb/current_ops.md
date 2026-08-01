@@ -131,7 +131,7 @@ Telegram + Discord + bus event `question` (`plan-t1-not-ready`). KHÔNG tự đ�
 | Giờ | Lịch | Việc |
 |---|---|---|
 | 08:25 | T2-T6 | cron_health_check_daily.sh — audit toàn bộ crontab (mới 2026-08-01) |
-| 08:30 | T2-T6 | check_report_cadence.sh — báo cáo tuần/tháng quá hạn thì TỰ dispatch Taylor soạn+gửi + escalate Trading report topic (mới 2026-08-01, thay WARN cũ bị chôn im lặng 5 ngày) |
+| 08:30 | T2-T6 | check_report_cadence.sh — báo cáo tuần/tháng quá hạn thì TỰ dispatch Taylor soạn+gửi + escalate Trading report topic (mới 2026-08-01, thay WARN cũ bị chôn im lặng 5 ngày); mỗi lần chạy cũng quét + gửi email (send_report_email.py, Gmail SMTP app password) mọi report chưa từng gửi qua email (thêm 2026-08-01, user yêu cầu) |
 | 23:45 | T2-T6 | sync_bq_cache_daily.sh |
 | 02:00 | Daily | kb_nightly.sh — archive events, trim memory, check ngưỡng cứng kb file MỖI đêm |
 | 02:00 (UTC Fri = ICT Sat sáng) | Weekly | kb_nightly.sh → dispatch Mike editorial KB review (đầy đủ) |
