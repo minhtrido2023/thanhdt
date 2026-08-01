@@ -34,7 +34,17 @@ rớt vì FSCORE, KHÔNG rớt theo ROE/ROIC/8L rating — 8L (cổng chất lư
 hai đạt, nên căn cứ (3) ở trên ("2/5 mã rớt sàn chất lượng") cần đọc lại: đúng về mặt cờ FSCORE,
 nhưng KHÔNG phải suy giảm chất lượng dài hạn — không đổi kết luận không-bù, chỉ làm rõ cơ chế.
 Mẫu nhỏ (sign test p=0,549 không có ý nghĩa tần suất; bootstrap+LOO có ý nghĩa về độ lớn, nhưng
-tầng danh mục kém sạch hơn — năm 2025 gánh gần hết hiệu ứng âm) — đã dispatch quant-skeptic verify
-(`bin/verify_finding.sh --topic capit-quality-exit`), verdict chưa về lúc ghi note này. Code: knob
-`CAPIT_QEXIT` env-gated default OFF trong `pt_v23_audit_2014.py`/`simulate_holistic_nav.py`,
-production byte-identical, KHÔNG wire.
+tầng danh mục kém sạch hơn — năm 2025 gánh gần hết hiệu ứng âm). Code: knob `CAPIT_QEXIT`
+env-gated default OFF trong `pt_v23_audit_2014.py`/`simulate_holistic_nav.py`, production
+byte-identical, KHÔNG wire.
+
+**quant-skeptic verify: CONFIRMED, confidence high** (2026-08-01, verdict trên bus trace_id
+`Taylor_20260801_073610`). Recompute độc lập khớp 24/24 ô lưới + case NCT/SAB (FSCORE 6→3/6→5,
+ROE/ROIC bất động, 8L rating ≤3 suốt) trực tiếp từ parquet cache — không dùng lại số Taylor báo
+cáo. Xác nhận `capit_basket()` entry-gate SQL byte-identical với Python re-implementation của
+metric `floor` (không lệch ngưỡng thật-vs-thử). Không look-ahead (floor/8L point-in-time,
+full-exit route qua T+1 Open giống cơ chế TIME/STOP có sẵn; trim same-day mark bias LỢI cho
+treatment, không thể tạo ra underperformance báo cáo). Killer objection duy nhất: con số −0,35pp
+CAGR tầng danh mục không bền theo năm (2025 gánh gần hết) — nhưng khuyến nghị "không đổi gì"
+không phụ thuộc số đó, đã đứng vững một mình trên kết quả tầng vị thế (28/28 cấu hình ≤ baseline,
+MaxDD giống hệt mọi leg). **Chấp nhận là tri thức chốt của fleet.**
