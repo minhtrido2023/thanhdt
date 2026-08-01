@@ -571,3 +571,21 @@ blanket rewrite of every `bus/inbox` reader in the fleet to be archive-aware —
 (shows only the newest N lines for `context_pack.md`) and the `cursor-advance` consolidator
 cursor are correctly hot-only (their entire purpose is "what's new," not "what's still owed");
 making them archive-aware would be a behavior change nobody asked for, not a fix.
+
+## 18. Any Quant R&D Task (Backtest, IC Test, Gate/Selector Change) — Follow `.claude/skills/quant-research/`
+
+Before designing or running any backtest, factor-IC test, or production-rule review — check the
+`quant-research` skill (`/home/trido/thanhdt/WorkingClaude/.claude/skills/quant-research/SKILL.md`,
+invoke via the Skill tool where available, or read directly in a headless dispatch). It's the
+fixed order of operations this fleet has converged on from real jobs (2026-08-01 CAPIT
+quality-exit + FSCORE-role reviews and earlier): scope by reading the real code first, check
+`mike/kb/data_registry/`, pin the environment, declare N as independent events not row count,
+match the statistical tool to N (IS/OOS when large, LOO+bootstrap when small — always disclosed),
+verify at both position-tier and full-engine-tier, self-check 0 VND with the control leg
+reproducing the pinned number, point-in-time joins only, look for dose-response across variants,
+decompose kept-vs-added when basket size changes, reconcile against adjacent findings, DSR/PBO
+only when a config is actually being recommended for wire, confirm production untouched via
+`git diff`, quant-skeptic gate before any production-change recommendation, and independently
+verify the artifact (not the self-report) before relaying a conclusion. When dispatching Taylor
+for R&D, point at this skill explicitly in the prompt rather than re-deriving the checklist by
+hand each time — see `bin/dispatch.sh` prompts from 2026-08-01 for the reference wording.
