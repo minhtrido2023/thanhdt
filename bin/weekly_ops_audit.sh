@@ -89,10 +89,15 @@ VIỆC CẦN LÀM (mỗi mục xong ghi 1-2 câu kết luận, đừng chỉ nó
    còn lại trước khi chạm ngưỡng. KHÔNG tự trim ở đây (việc đó thuộc kb_nightly.sh Friday review
    + Mike phiên sống) — chỉ đo + cảnh báo nếu <7 ngày còn lại trước ngưỡng.
 
-5. OKF TREE STALENESS: kb/data_registry/ và kb/incidents/ — so sánh danh sách file thật
-   (`find kb/incidents -name '*.md'`, `find kb/data_registry -name '*.md'`) với bảng liệt kê
+5. OKF TREE STALENESS (kb/data_registry/ thôi — kb/incidents/ đã tự động hoá hàng ngày, xem
+   dưới): so sánh danh sách file thật (`find kb/data_registry -name '*.md'`) với bảng liệt kê
    trong index.md tương ứng. Lệch (file có nhưng không có trong bảng, hoặc ngược lại) → tự sửa
    index.md (việc tài liệu thuần, không rủi ro) + commit.
+   (`kb/incidents/index.md` KHÔNG cần làm ở đây nữa — `bin/incidents_index_sync.py --check/--fix`
+   đã chạy hàng ngày qua `cron_health_check_daily.sh` 08:25, tự sửa + commit khi lệch, khảo sát
+   vận hành 2026-08-01. Chỉ cần LIỆT KÊ ở báo cáo cuối nếu 7 ngày qua có commit
+   "chore(incidents): auto-sync index.md" nào bất thường/lặp lại nhiều lần — dấu hiệu drift tái
+   diễn nhanh, đáng điều tra root cause thay vì để tự sửa lặp lại mãi.)
 
 6. BUS QUESTION BACKLOG: chạy `python3 bin/bus_question_audit.py`. Câu nào Mike có đủ thông tin
    tự quyết (không cần thẩm quyền user riêng) → tự quyết + ghi answer. Câu nào thật cần user →

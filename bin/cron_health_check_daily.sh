@@ -31,4 +31,24 @@ $OUT"
   "$ROOT/bin/notify.sh" "🩺 [cron_health_check] ${BAD_COUNT} job crontab cần chú ý hôm nay — xem Architecture channel." 2>/dev/null || true
 fi
 
+
+# incidents/index.md sync (khảo sát vận hành 2026-08-01, item #4 đã duyệt) — trước đây giao cho
+# 1 job LLM/tuần (weekly_ops_audit.sh mục 5) cho 1 phép so file cơ học; giờ chạy hàng ngày ở đây
+# (cùng khe đã có, không cần cron mới). Việc tài liệu thuần (không rủi ro trading) → tự sửa +
+# commit, đúng ranh giới đã xác lập ở nơi mục 5 cũ (index.md lệch → tự sửa, không cần hỏi user).
+if ! python3 "$ROOT/bin/incidents_index_sync.py" --check >/tmp/incidents_sync_check.$$ 2>&1; then
+  DRIFT="$(cat /tmp/incidents_sync_check.$$)"
+  python3 "$ROOT/bin/incidents_index_sync.py" --fix >/dev/null 2>&1 || true
+  if git -C "$ROOT" diff --quiet -- kb/incidents/index.md; then
+    "$ROOT/bin/notify.sh" "🟡 [cron_health_check] incidents_index_sync phát hiện drift nhưng --fix không đổi gì file — cần người kiểm tay: $DRIFT" 2>/dev/null || true
+  else
+    git -C "$ROOT" add kb/incidents/index.md
+    git -C "$ROOT" commit -q -m "chore(incidents): auto-sync index.md ($(date -u +%Y-%m-%d), cron_health_check_daily.sh)
+
+$DRIFT" 2>/dev/null || true
+    "$ROOT/bin/notify.sh" "🩺 [cron_health_check] incidents_index_sync tự sửa drift + commit: $DRIFT" 2>/dev/null || true
+  fi
+fi
+rm -f /tmp/incidents_sync_check.$$
+
 exit 0  # never fail the cron slot itself — this is a checker, not a gate
