@@ -4589,3 +4589,84 @@ CAPIT giữ nguyên `booknav`; 5 mã đang giữ thật (SAB/SIP/VNM/PVT/NCT) kh
 −7,16% vs `booknav` −7,64%; (2) tính xác định (sàn 6,25% / trần 25% NAV vs 0,7%→35% NAV hiện tại).
 3 phương án trả user: **A** giữ `booknav` · **B** wire `navsize:0.25` (chỉ được trình là "thiết kế
 xác định + phòng thủ đuôi", CẤM trình kèm PBO như cổng đã qua) · **C** chờ thêm mẫu (~10 năm, loại).
+
+---
+
+## 2026-08-01 — CAPIT QUALITY-EXIT (rớt sàn chất lượng giữa kỳ hold) ⇒ **KHÔNG WIRE, giữ hold 60 phiên** — job `Taylor_20260801_073610`
+
+**Câu hỏi (dispatch Mike, từ `kb/projects/capit-sizing-bug-0721.md`):** khi 1 vị thế CAPIT rớt dưới
+sàn chất lượng của chính bộ lọc CAPIT SAU khi mua (ca thật NCT/SAB đợt washout 07-20) — nên giữ đủ
+60 phiên hay bán sớm? So (a) baseline / (b) exit ngay / (c) exit sau K kỳ xác nhận / (d) trim 50%.
+
+**Điều kiện:** snapshot `data/bq_cache_asof20260729_postrestate` (cùng vintage số pin R3 hiện hành),
+`BQ_CACHE_THREADS=1`, NAV 50B, `AUDIT_END=2026-06-19`, `$DNA_PYEXE`. Nguồn (tra
+`kb/data_registry/` trước): sàn chất lượng + giá = `ticker_prune` (CAPIT pool CỐ Ý còn ghim
+`ticker_prune`, chưa cutover `universe_pit` ⇒ nhất quán production); 8L = `fa_ratings_8l` (phủ
+2014-07-09→); regime = `vnindex_5state_dt5g_live`.
+
+**Mẫu thật, không nguỵ trang:** **14 sự kiện CAPIT** (2014-05-09 → 2026-03-10), **85 vị thế mã-cấp**
+(cặp BAL/LAG tương quan ~1 ⇒ N hiệu dụng ~45-50), **11 sự kiện** là nơi luật thực sự hành động.
+
+### Kết quả tầng vị thế (lưới 24 ô, `data/capit_qexit_20260801/strategy_grid.csv`)
+Baseline (a) = **+19,34%** lợi suất cost-weighted/vị thế. **MỌI ô ≤ baseline, không ô nào dương.**
+(b) exit K=1 **−6,64pp** · (c) K=5 phiên −5,65pp · (c) K=20 phiên −2,87pp · (d) trim50 K=1 −3,32pp ·
+(d) trim50 K=20 −1,43pp · (b) 8L>3 −0,28pp · **`floornf` (chỉ ROE_Min5Y/ROIC5Y) = no-op 0/85**.
+
+### Ba phát hiện cơ chế (giá trị bền nhất)
+1. **"Rớt sàn" trong cửa sổ hold = 100% do FSCORE.** 0/85 vi phạm `ROE_Min5Y>=0,12 ∧ ROIC5Y>=0,10`;
+   37/85 (43,5%) vi phạm `FSCORE>=6`. FSCORE = Piotroski đo *biến động YoY* → lật theo quý, là nhiễu.
+2. **Cờ đến SAU cú giảm, TRƯỚC cú hồi.** Nhóm bị cờ giữ tới hết hạn +13,72% (vs không cờ +22,81%) —
+   cờ chọn đúng nửa yếu — nhưng **bán tại ngày cờ chỉ được +2,72% ⇒ bỏ lại 11,0pp**; giá đi tiếp có
+   lợi ở 23/37 ca. Đuôi bất đối xứng: MWG E8 −45,4pp, GIL E8 −42,6pp, TNG E15 −37,2pp; ô tốt nhất +1,35pp.
+3. **(c) "N kỳ liên tiếp" theo QUÝ là bất khả thi về cấu trúc**: hold 60 phiên ≈ 1 kỳ công bố ⇒ N≥2
+   quý **đồng nhất với (a)**. Chỉ xác nhận theo PHIÊN (K) cài được — và K dài → thiệt hại nhỏ dần
+   (dấu vân tay của nhiễu).
+
+### Kết quả tầng danh mục (engine V2.4/R3 đầy đủ, 5 leg)
+**5/5 `EXIT=0`, self-check cash-flow + NAV identity = 0 VND cả 2 sổ. Control tái lập ĐÚNG pin R3
+27,60% / 1,84 / −17,5% / 1,58.**
+
+| Leg | CAGR | Sharpe | MaxDD | Calmar | ΔCAGR |
+|---|---|---|---|---|---|
+| ctrl (a) `off` | **27,60%** | **1,84** | −17,5% | **1,58** | — |
+| (b) `floor:1:1.0` | 27,25% | 1,82 | −17,5% | 1,55 | −0,35pp |
+| (d) `floor:1:0.5` | 27,43% | 1,83 | −17,5% | 1,57 | −0,17pp |
+| (c) `floor:20:1.0` | 27,44% | 1,83 | −17,5% | 1,57 | −0,16pp |
+| (b) `r8l:1:1.0` | 27,60% | 1,84 | −17,5% | 1,58 | −0,00pp |
+
+**`MaxDD −17,5%` GIỐNG HỆT ở cả 5 leg** ⇒ luật KHÔNG mua được bảo hiểm rủi ro nào để bù CAGR mất đi;
+không có đánh đổi return-vs-risk để cân nhắc.
+
+### Độ tin cậy — nói thẳng phần yếu
+- Tầng vị thế: sign test 11 sự kiện **p=0,549 (KHÔNG có ý nghĩa về TẦN SUẤT)**; bằng chứng nằm ở ĐỘ
+  LỚN: bootstrap-theo-sự-kiện 10k → Δ **−4,05pp, CI90% [−7,32; −1,33], P(Δ>0)=0,001**; LOO **0/14 đổi dấu**.
+- Tầng danh mục: **per-year LOO KHÔNG bền** — (b) tổng Δ theo năm −2,24pp nhưng **riêng 2025 −8,86pp**
+  (bỏ 2025 ⇒ hoà/dương); (c) K=20 tổng Δ theo năm **+0,16pp**, ngược dấu ΔCAGR compound; **2021 luật
+  LÃI +7,94pp** (cơ chế *tái triển khai* vốn thoát sớm vào bull, không phải cờ chọn đúng mã). Đúng
+  khuôn mẫu "1-2 năm gánh hết hiệu ứng = reshuffle-luck" (§Quy chuẩn 5) — lần này nó bác **độ tin cậy
+  của con số ÂM**. ⇒ **KHÔNG trích −0,35pp CAGR như hằng số.**
+- Walk-forward IS/OOS **bỏ qua có chủ ý**: 14 sự kiện chia 6/8 thì mỗi nửa không kết luận được gì hơn
+  tổng thể; LOO-theo-sự-kiện là công cụ đúng cho n nhỏ và đã chạy đủ (bài học 07-31: không ép chia block).
+- **N_trials = 28** (24 ô panel + 4 leg engine). **Không ô nào dương ⇒ không có gì để chọn ⇒ DSR/PBO
+  không áp dụng** (là cổng cho cấu hình sắp deploy; ở đây khuyến nghị là KHÔNG deploy).
+- Khiếm khuyết quy trình đã ghi nhận: **chưa pre-register** trước khi nhìn số (khác job 07-31 có
+  `capit_sizing_PREREG`); lưới metric × K mở rộng SAU khi thấy `floornf` không bắn.
+
+### QUYẾT ĐỊNH
+**GIỮ NGUYÊN production: hold cố định 60 phiên, KHÔNG cơ chế quality-exit.** Knob `CAPIT_QEXIT`
+(`pt_v23_audit_2014.py`) + kwarg `quality_exit_dates` (`simulate_holistic_nav.py`) cài **env-gated,
+mặc định `off`/`None` = production byte-identical** (control tái lập đúng pin R3 là bằng chứng chạy
+thật, không phải đọc code). 0 file production đổi hành vi; 5 mã CAPIT đang giữ thật không bị đụng.
+
+**Đối chiếu ca NCT/SAB (07-20, NGOÀI mẫu vì > `AUDIT_END`):** cả hai **không hề mất chất lượng** —
+ROE_Min5Y/ROIC5Y đạt, **8L rating vẫn ≤3**; rớt sàn CHỈ vì FSCORE (NCT 3, SAB 5). Đúng dạng 37 ca
+nhiễu ⇒ base rate nói **đừng bán** (kỳ vọng thiệt ~11pp).
+
+**Điều nên nhớ:** khi ai đó nói "mã X rớt sàn chất lượng rổ CAPIT", câu hỏi đầu tiên là **"rớt leg
+nào?"** — FSCORE = nhiễu kế toán quý; chỉ ROE/ROIC nhiều năm mới là chất lượng, và leg đó **chưa từng
+bị phá** trong 12 năm cửa sổ hold CAPIT.
+
+**Đề xuất quant-skeptic verify** (mẫu nhỏ + kết luận dựa vào độ lớn chứ không phải tần suất).
+Báo cáo đầy đủ: `mike/agents/Taylor/research/capit_quality_exit_20260801.md`.
+Log/CSV: `data/capit_qexit_20260801/` (`strategy_grid.csv`, `holdings_panel.csv`, `event_rollup.csv`,
+`qx_*.log`).

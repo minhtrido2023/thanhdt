@@ -353,6 +353,29 @@ CAPIT_DIV_GATE = os.environ.get("CAPIT_DIV_GATE", "off").lower()
 CAPIT_DIV_MINN = int(os.environ.get("CAPIT_DIV_MINN", "3"))
 _div_tag = "" if CAPIT_DIV_GATE == "off" else f"_capdiv{CAPIT_DIV_GATE}{CAPIT_DIV_MINN}"
 _matsuf += _div_tag
+# CAPIT QUALITY-EXIT (R&D, job Taylor_20260801_073610) — env-gated, default off = production
+# byte-identical. Question: a CAPIT name that FALLS BELOW the sleeve's own entry-quality gate
+# mid-hold — hold the fixed 60td anyway (production today), or cut early?
+#   CAPIT_QEXIT="off"                (default) : never — fixed CAPIT_HOLD for every name.
+#   CAPIT_QEXIT="<metric>:<K>:<frac>"          : exit a name once it has been BELOW the floor for
+#                                                K consecutive sessions; frac=1.0 full exit,
+#                                                0<frac<1 one-shot trim (rest runs to 60td).
+# metric ∈ {floor, floornf, fscore, r8l}:
+#   floor   = the CAPIT entry gate itself: ROE_Min5Y>=0.12 AND ROIC5Y>=0.10 AND FSCORE>=6
+#   floornf = same WITHOUT the FSCORE leg (multi-year quality only — FSCORE is a YoY-change score
+#             that flips quarter-to-quarter; this leg isolates whether the signal is real or noise)
+#   fscore  = FSCORE>=6 alone (the complement of floornf)
+#   r8l     = 8L composite rating <= 3 (tav2_bq.fa_ratings_8l, point-in-time as-of)
+CAPIT_QEXIT = os.environ.get("CAPIT_QEXIT", "off").strip().lower()
+if CAPIT_QEXIT != "off":
+    _qx = CAPIT_QEXIT.split(":")
+    assert len(_qx) == 3, "CAPIT_QEXIT phai la 'off' hoac '<metric>:<K>:<frac>'"
+    QEXIT_METRIC, QEXIT_K, QEXIT_FRAC = _qx[0], int(_qx[1]), float(_qx[2])
+    assert QEXIT_METRIC in ("floor", "floornf", "fscore", "r8l"), f"CAPIT_QEXIT metric {QEXIT_METRIC!r} khong hop le"
+    assert 0 < QEXIT_FRAC <= 1.0 and QEXIT_K >= 0
+    _matsuf += f"_qx{QEXIT_METRIC}{QEXIT_K}f{int(round(QEXIT_FRAC*100))}"
+else:
+    QEXIT_METRIC, QEXIT_K, QEXIT_FRAC = None, 0, 0.0
 LABEL = {"v23a": "V2.3A (allocator + CAPIT)",
          "v23c": "V2.3C (static 50/50 + CAPIT)",
          "v22base": "V2.2-base (static 50/50, NO CAPIT)",
@@ -1207,6 +1230,52 @@ for e in capit_events:
     if e["size"] > 0.005:
         capit_names_all |= set(capit_basket(e["date"]))
 
+# ---- CAPIT quality-exit panel (R&D, default off -> not fetched at all) --------------------
+# below_floor[(ticker, date)] = True when the name FAILS the chosen quality metric on that session.
+# Causal by construction: ticker_prune columns are as-of-that-session values (a quarter's figures
+# only appear from its Release_Date onward); fa_ratings_8l rows are point-in-time eff_dates.
+_qexit_below = {}
+if CAPIT_QEXIT != "off" and capit_names_all:
+    _qn = ",".join(f"'{t}'" for t in sorted(capit_names_all))
+    if QEXIT_METRIC == "r8l":
+        _qr = bq(f"""SELECT r.ticker, r.time, r.rating FROM tav2_bq.fa_ratings_8l AS r
+WHERE r.ticker IN ({_qn}) AND r.time <= DATE '{END_DATE}'""")
+        _qr["time"] = pd.to_datetime(_qr["time"])
+        _vd = pd.DatetimeIndex(vni_dates)
+        for tk, g in _qr.sort_values("time").groupby("ticker"):
+            s = g.drop_duplicates("time", keep="last").set_index("time")["rating"]
+            s = s.reindex(_vd, method="ffill")            # as-of: last published rating, no hindsight
+            for d, v in s.items():
+                if pd.notna(v) and float(v) > 3:
+                    _qexit_below[(tk, d)] = True
+    else:
+        _qq = bq(f"""SELECT p.ticker, p.time, p.ROE_Min5Y, p.ROIC5Y, p.FSCORE
+FROM tav2_bq.ticker_prune AS p
+WHERE p.ticker IN ({_qn}) AND p.time BETWEEN DATE '{START_DATE}' AND DATE '{END_DATE}'""")
+        _qq["time"] = pd.to_datetime(_qq["time"])
+        _ok_nf = (_qq["ROE_Min5Y"] >= 0.12) & (_qq["ROIC5Y"] >= 0.10)
+        _ok_fs = (_qq["FSCORE"] >= 6)
+        _ok = {"floor": _ok_nf & _ok_fs, "floornf": _ok_nf, "fscore": _ok_fs}[QEXIT_METRIC]
+        _bad = _qq[~_ok.fillna(False)]                    # NaN quality data = treated as BELOW floor
+        _qexit_below = {(t, d): True for t, d in zip(_bad["ticker"], _bad["time"])}
+    print(f"[qexit] metric={QEXIT_METRIC} K={QEXIT_K} frac={QEXIT_FRAC:.2f} — "
+          f"{len(_qexit_below):,} (ticker,session) cells below floor over {len(capit_names_all)} capit names")
+
+def _qexit_date(tk, d0, hold):
+    """First session in (d0, d0+hold] on which `tk` has been BELOW the quality floor for K consecutive
+    sessions. Returns None if it never happens inside the hold window (-> name runs to TIME as today)."""
+    try:
+        i0 = vni_dates.index(d0)
+    except ValueError:
+        return None
+    run = 0
+    for j in range(i0 + 1, min(i0 + hold + 1, len(vni_dates))):
+        dj = vni_dates[j]
+        run = run + 1 if _qexit_below.get((tk, dj)) else 0
+        if run >= max(QEXIT_K, 1):
+            return dj
+    return None
+
 # ============================================================================
 # 4b. LAG-book price panels from BQ (auditable; replaces local pkl panels)
 # ============================================================================
@@ -1377,6 +1446,15 @@ def add_capit_arm(sig_book, base_nav_df, tw_base, tag, book_prices):
     extra = dict(hold_days_by_tier=hold_map,
                  stop_exempt_tiers=set(tiers), slot_exempt_tiers=set(tiers),
                  tier_position_limit={t: 15 for t in tiers})
+    if CAPIT_QEXIT != "off":                            # per-NAME quality exit (R&D; default off)
+        qmap, _nflag = {}, 0
+        for r in rows:
+            qd = _qexit_date(r["ticker"], r["time"], hold_map[r["play_type"]])
+            if qd is not None:
+                qmap[(r["play_type"], r["ticker"])] = (qd, QEXIT_FRAC)
+                _nflag += 1
+        extra["quality_exit_dates"] = qmap
+        print(f"    [qexit {tag}] {_nflag}/{len(rows)} capit holdings flagged below floor inside their hold window")
     if CAPIT_STOP is not None:                          # cutloss for capit (liquid custom30 can exit; golden can't)
         extra["stop_by_tier"] = {t: CAPIT_STOP for t in tiers}
     return pd.concat([sig_book, pd.DataFrame(rows)], ignore_index=True), tw2, extra
@@ -1390,6 +1468,9 @@ def merge_extra(base_extra, cap_extra):
     out["tier_position_limit"] = {**base_extra.get("tier_position_limit", {}), **cap_extra["tier_position_limit"]}
     if "stop_by_tier" in cap_extra:
         out["stop_by_tier"] = {**base_extra.get("stop_by_tier", {}), **cap_extra["stop_by_tier"]}
+    if "quality_exit_dates" in cap_extra:
+        out["quality_exit_dates"] = {**base_extra.get("quality_exit_dates", {}),
+                                     **cap_extra["quality_exit_dates"]}
     return out
 
 # ============================================================================

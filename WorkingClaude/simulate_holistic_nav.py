@@ -309,6 +309,7 @@ def simulate(signals_df, prices, vni_dates, *,
              stop_exempt_tiers=None,         # optional set of play_types exempt from STOP/soft-stop (committed sleeves hold through the flush)
              stop_by_tier=None,              # optional {play_type: stop_loss} — per-tier hard stop; overrides exempt for that tier (e.g. liquid custom30 capit can cutloss)
              slot_exempt_tiers=None,         # optional set of play_types that don't count toward (or get blocked by) max_positions; cap them via tier_position_limit
+             quality_exit_dates=None,        # optional {(play_type, ticker): (pd.Timestamp, frac)} — per-NAME early exit when a committed sleeve's holding loses its entry-quality gate mid-hold; frac>=1 full close, 0<frac<1 one-shot trim. None = off (byte-identical)
              force_close_tiers_dates=None,   # optional dict {pd.Timestamp: set(play_types)} — on that date queue close (T+1 Open) of ALL positions in those tiers + cancel their pending entries; real mode-flips in switched books
              cash_etf_states_by_date=None,   # optional dict {pd.Timestamp: {state: etf_frac}} — per-date override of cash_etf_states (e.g. concentration-tilted parking); falls back to cash_etf_states when date absent
              max_gross_exposure=None,        # optional float (e.g. 1.5 = V6-v3 margin<=150%): stock buys may draw cash negative down to -(mge-1)*NAV; negative cash pays borrow_annual; ETF parking never uses margin
@@ -697,6 +698,18 @@ def simulate(signals_df, prices, vni_dates, *,
             if pos["days_held"] >= pos_hold_cap:
                 to_close.append((tk, "TIME"))
                 continue
+            # Quality exit (per-NAME, R&D 2026-08-01): a committed sleeve normally holds to TIME, but
+            # this lets a caller name individual (tier, ticker) holdings that lose their entry-quality
+            # gate mid-hold. frac >= 1 -> full close; 0 < frac < 1 -> one-shot partial trim.
+            if quality_exit_dates:
+                _qe = quality_exit_dates.get((pos.get("play_type"), tk))
+                if _qe is not None and today >= _qe[0]:
+                    _qfrac = float(_qe[1])
+                    if _qfrac >= 1.0:
+                        to_close.append((tk, "QUALITY_EXIT"))
+                        continue
+                    if _qfrac > 0 and "_qexit" not in pos.get("partial_taken", set()):
+                        partial_sells.append((tk, _qfrac, "_qexit"))
             # Committed-sleeve tiers (e.g. CAPIT) hold through the flush: no stop, no trim
             _stop_exempt = (stop_exempt_tiers is not None
                             and pos.get("play_type") in stop_exempt_tiers)
@@ -755,7 +768,9 @@ def simulate(signals_df, prices, vni_dates, *,
             ret_gross = (cur_price / pos["entry_price"]) - 1
             ret_net = (proceeds / cost_sold) - 1
             # Reason label: state-exit uses large negative marker (< -1); soft-stop is small negative (-1..0); profit is positive
-            if thr < -1:
+            if isinstance(thr, str):
+                reason_label = "QUALITY_TRIM"
+            elif thr < -1:
                 reason_label = f"STATE_PARTIAL_S{int(-thr - 100)}"
             elif thr < 0:
                 reason_label = f"SOFT_STOP_{int(thr*100)}"
@@ -786,7 +801,9 @@ def simulate(signals_df, prices, vni_dates, *,
             pos["shares"] *= (1 - frac)
             pos["cost_basis"] *= (1 - frac)
             # Soft-stop uses a string key to allow multiple thresholds; profit uses raw thr
-            if thr < 0 and thr > -1:
+            if isinstance(thr, str):
+                pos["partial_taken"].add(thr)
+            elif thr < 0 and thr > -1:
                 pos["partial_taken"].add(f"_softstop_{thr}")
             else:
                 pos["partial_taken"].add(thr)
