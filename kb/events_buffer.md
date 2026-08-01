@@ -502,3 +502,6 @@
 
 ## Consolidation 2026-07-31T20:07:01Z
 - [2026-07-31T19:07:03Z] Mike/error — consolidate-cursor-repair: {"detail": "CURSOR-REPAIR Spyros.jsonl resync-ts prev=12 total=12 resume_from=0 recovered=12", "note": "cursor state/offsets lech so voi bus/inbox — da tu chua; prev cu nam trong detail de doi chieu neu can khoi phuc tay"}
+
+## Consolidation 2026-08-01T02:07:01Z
+- [2026-08-01T01:31:04Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 53190}
