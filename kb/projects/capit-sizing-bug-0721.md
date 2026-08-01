@@ -74,6 +74,23 @@ NGƯỢC nghi ngờ ở cả 2 câu:
   giữa các mã (có tín hiệu thật, IC +0,179 trong pool CAPIT), cổng RA là so sánh CHUỖI THỜI GIAN
   trong 1 mã giữa kỳ hold (là nhiễu). Một chỉ số có thể vừa là tín hiệu cắt ngang vừa là nhiễu
   chuỗi thời gian cùng lúc.
-- Không cần quant-skeptic (kết luận không đổi gì, không có thay đổi production). Lead còn mở,
-  CHƯA làm: registry IC-panel-8L từng ghi FSCORE marginal là "ứng viên enhancer selection, chưa
-  test trong custom30V" — đo lần này ủng hộ (+0,037 marginal) nhưng vẫn chưa test thật.
+- Không cần quant-skeptic (kết luận không đổi gì, không có thay đổi production).
+
+**Lead cuối cùng ("FSCORE làm enhancer cho custom30V") — ĐÃ TEST, NO-GO (2026-08-01, job
+`Taylor_20260801_131833`, báo cáo `mike/agents/Taylor/research/fscore_custom30v_enhancer_20260801.md`,
+`data/results_registry.md` mục "2026-08-01 — FSCORE làm ENHANCER cho custom30V").** Test 11 biến
+thể thật (tiebreak K=5/10/20 · blend w=0.1-2.0 · trọng số-nghiêng T=0.3/0.6/0.9) + 4 leg placebo
+đối chứng, đúng checklist `.claude/skills/quant-research/SKILL.md` mới ban hành cùng ngày.
+Control leg tái lập đúng số pin R3 tuyệt đối (27,600/1,843/−17,463/1,580), self-check 0 VND 17/17
+leg, production sạch. **Không biến thể nào thắng cả IS lẫn OOS ở mức phân biệt được với nhiễu** —
+2 biến thể dương cả 2 nửa chính là 2 biến thể liều nhỏ nhất (0,02-0,08pp = 0,07-0,25 lần sd
+placebo). 4 lý do độc lập: (1) dose-response ngược dấu/bù trừ giữa IS-OOS ở cả 3 họ biến thể;
+(2) hiệu ứng đi ngược mức phơi nhiễm của rổ (rổ chiếm NAV nhiều hơn ở IS nhưng hiệu ứng âm ở IS);
+(3) tier vị thế và tier engine mâu thuẫn dấu, phân rã mã-thêm-vào-vs-mã-loại-ra cho thấy lãi OOS
+không đến từ chọn mã tốt hơn; (4) 1 biến thể đẹp nhất (blend_w080 OOS +0,955pp) hoá ra chỉ đến từ
+riêng năm 2021, bỏ năm đó ra thành −0,70pp. Hoà giải với IC +0,037 đo sáng cùng ngày (không mâu
+thuẫn — IC đo trên mặt cắt rộng vài trăm mã, custom30V chỉ có 30 mã ở biên cắt nơi phương sai
+FSCORE còn lại rất nhỏ, pha loãng NAV ~4 lần, phí đảo danh mục ăn hết phần còn lại). Đóng lead
+trong IC PANEL 8L §6 — không mở lại trừ khi cơ chế đổi (custom30V tăng tỷ trọng NAV mạnh hoặc rổ
+nới ra nhiều hơn 30 mã). FSCORE giữ nguyên ở 2 nơi nó có ích: trục 2/12 trong `core_score()` và
+gate `FSCORE>=6` trong `capit_basket()`.
