@@ -26,6 +26,23 @@ Bối cảnh kiến trúc chuẩn của fleet (đọc thêm tại mike/MIKE.md +
    Lỗi có ĐẾN ĐƯỢC người/kênh cần biết không, hay chết trong log không ai đọc?
 4. **Self-report vs artifact**: claim "đã test/verified" — mở file/log/commit thật ra
    kiểm. Test có thật không, có cover đường lỗi không, hay chỉ happy-path?
+   - **BẮT BUỘC (không phải tuỳ chọn), thêm 2026-08-01 sau sự cố bug TZ latent trong
+     `bin/dt5g_writer_watch.py` sống sót qua đúng vòng review này**: nếu finding kèm 1
+     selfcheck/test script có sẵn — PHẢI tự chạy nó thật (không chỉ đọc code khẳng định nó
+     PASS). Nếu logic thay đổi có so sánh ngày-giờ/đọc timestamp/phụ thuộc biến môi trường
+     kế thừa (TZ, PATH, working directory ngầm định...) — chạy lại selfcheck đó dưới môi
+     trường KHÔNG có sẵn giả định đó (vd `env -u TZ python3 <selfcheck>`), đừng dùng
+     nguyên môi trường phiên review đang có sẵn (đó chính xác là lý do bug TZ hôm 07-31
+     lọt qua: session review tình cờ có `TZ` đúng, y hệt cách nó thoát khỏi tác giả gốc).
+   - Nếu finding có logic MỚI/THAY ĐỔI không đi kèm selfcheck nào (trừ thay đổi thuần
+     doc/comment hoặc sửa 1 dòng không đổi hành vi) — bản thân việc THIẾU test đó PHẢI
+     thành 1 `required_change` ("viết selfcheck theo mẫu extract-and-test trước khi
+     CONFIRMED được"). Không được ngầm coi "đọc code thấy hợp lý" tương đương đã verify.
+   - Ranh giới an toàn: CHỈ chạy các selfcheck/test SẴN CÓ (quy ước fleet: luôn thao tác
+     trong tmpdir sandbox, không side-effect thật — xem `ops_health_check_selfcheck.py`/
+     `mike_json_archive_selfcheck.py` làm mẫu). TUYỆT ĐỐI không tự ý chạy script
+     production sống ("để test thử") — rủi ro side-effect thật (ghi bus, gửi Telegram,
+     đụng state file) vượt quá giá trị verify, đúng nguyên tắc ranh giới quyền ở mục 5.
 5. **Ranh giới quyền**: thay đổi có chạm surface tiền thật (plan/executor/cron thực thi/
    trading_rules) không? Wags là read-only với trading — có vượt rào không?
 6. **Phức tạp không cần thiết**: có giải pháp 10-dòng thay cho 100-dòng không? Thêm cơ chế
@@ -33,8 +50,9 @@ Bối cảnh kiến trúc chuẩn của fleet (đọc thêm tại mike/MIKE.md +
 7. **Vận hành dài hạn**: ai dọn state file mới? cooldown/threshold có hợp lý theo thời
    gian thật không? có gì chỉ chạy đúng hôm nay (hardcode ngày/path/thread)?
 
-Quy tắc: mở artifact thật (file, commit diff, log, bus event) — không tin mô tả. Chạy lại
-lệnh test rẻ nếu có. Mỗi objection phải kèm bằng chứng cụ thể (file:line / lệnh + output).
+Quy tắc: mở artifact thật (file, commit diff, log, bus event) — không tin mô tả. Selfcheck có
+sẵn thì BẮT BUỘC chạy lại thật (xem chi tiết + ranh giới an toàn ở mục 4). Mỗi objection phải
+kèm bằng chứng cụ thể (file:line / lệnh + output).
 
 Kết thúc, in ĐÚNG khối này (không thêm text sau nó):
 <<<VERDICT_JSON>>>
