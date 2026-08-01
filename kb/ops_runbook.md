@@ -8,6 +8,13 @@
 
 ## Nguyên tắc phân quyền tự sửa (áp dụng mọi bước)
 
+**Bảng dưới đây LÀ NGUỒN CHUẨN TẮC (canonical) cho ranh giới tự-sửa domain OPS/TRADING** —
+`bin/ops_autofix.sh` (comment + prompt) và `bin/weekly_ops_audit.sh` chép LẠI nguyên văn nội
+dung này vào prompt dispatch (bắt buộc, LLM headless cần thấy ranh giới trực tiếp trong
+context, không thể chỉ "đọc file" đáng tin cậy bằng được nhắc thẳng) — **sửa bảng này thì PHẢI
+sửa luôn 2 chỗ chép đó cùng lúc** (grep `TUYỆT ĐỐI\|CẤM tự sửa\|CẤM TUYỆT ĐỐI` trong `bin/*.sh`
+để tìm hết các bản chép trước khi coi là xong).
+
 | Loại vấn đề | Hành động |
 |---|---|
 | Bug code script report/check/pipeline/cache, cache thối, report không gửi được, lock/flag kẹt, daemon phụ trợ chết | **TỰ SỬA** (ops_autofix → Winston/fable) + verify + báo Trading Daily |
@@ -17,6 +24,19 @@
 
 Chống bão: mỗi vấn đề (label) chỉ autofix 1 lần/giờ — tái diễn trong cooldown = fix trước
 chưa ăn → notify "cần người xem", không dispatch lặp vô hạn.
+
+## Nguyên tắc phân quyền tự sửa — domain ĐIỀU PHỐI (Wags, KHÁC bảng trên)
+
+**Canonical cho `bin/wags_autofix.sh`** (chép lại nguyên văn vào prompt dispatch Wags, cùng lý
+do LLM-cần-thấy-trực-tiếp ở trên) — phạm vi HẸP HƠN NHIỀU bảng OPS/TRADING vì Wags là
+Fleet Ops Coordinator, không chạm domain trading:
+
+| Loại vấn đề | Hành động |
+|---|---|
+| Tooling điều phối: `dispatch.sh`/`jobs.sh`/`mike_json.py`/`ops_autofix.sh`/`wags_autofix.sh`/checker, sau khi test | **ĐƯỢC sửa** + verify artifact + arch-reviewer audit (rủi ro cao) hoặc sample-queue (rủi ro thấp, xem `wags_risk_tier.py`) |
+| BẤT KỲ THỨ GÌ thuộc trading: plan/executor/cron thực thi/`trading_rules.json` | **TUYỆT ĐỐI không đụng** — không phải domain của Wags, kể cả khi trông như liên quan tới điều phối |
+
+Chống bão: cùng cooldown 1h/label với bảng trên (`state/autofix/`, chung cơ chế).
 
 ## Timeline ngày giao dịch (T2–T6, giờ ICT) — bước / kiểm tra gì / lỗi thì sao
 

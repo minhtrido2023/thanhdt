@@ -161,6 +161,10 @@ setsid bash -c '
   #    input DUY NHẤT cho phân loại rủi ro ở bước 2 (không dựa vào Wags tự chấm "rủi ro
   #    thấp", tránh Wags tự miễn review cho chính nó — verify ARTIFACT, không tin
   #    self-report, cùng nguyên tắc đã áp dụng ở idempotency guard/ghost-order).
+  #    NGUỒN CHUẨN TẮC cho ranh giới trong prompt "Quy trình" dưới = kb/ops_runbook.md §
+  #    Nguyên tắc phân quyền tự sửa — domain ĐIỀU PHỐI (Wags, KHÁC bảng OPS/TRADING của
+  #    ops_autofix.sh). Sửa ranh giới ở đó thì PHẢI sửa lại câu "(2) SỬA trong ranh giới"
+  #    dưới cho khớp (khảo sát vận hành 2026-08-01).
   out="$("$ROOT/bin/dispatch.sh" Wags "NHIỆM VỤ WAGS-AUTOFIX (issue điều phối giữa agent, mandate 2026-07-07): '"'"'$LABEL'"'"'
 CHI TIẾT: $DETAILS
 ${KNOWN_ISSUE:+

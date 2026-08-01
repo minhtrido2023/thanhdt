@@ -12,7 +12,9 @@
 # không phải "cực kỳ phức tạp" cần fable. Cần fable thật (issue khó bất thường) → dispatch
 # tay lại với --model fable, đừng mặc định.
 #
-# GUARDRAILS (nhúng thẳng vào prompt — fixer KHÔNG được vượt):
+# GUARDRAILS (nhúng thẳng vào prompt — fixer KHÔNG được vượt). NGUỒN CHUẨN TẮC =
+# kb/ops_runbook.md § Nguyên tắc phân quyền tự sửa — bản chép NÀY (comment + prompt dòng
+# ~165 dưới) phải khớp bảng đó, sửa 1 chỗ phải sửa cả 2 (khảo sát vận hành 2026-08-01):
 #   ĐƯỢC tự sửa : bug code trong script report/check/pipeline/cache, resync cache, resend
 #                 report, dọn lock/flag kẹt, restart daemon phụ trợ, commit fix.
 #   CẤM tự sửa  : mọi thứ chạm tiền thật — trade plan, trading_rules.json, logic đặt lệnh
@@ -150,6 +152,11 @@ rm -f "$CONFIRM_FILE"  # dispatch mới — chưa xác nhận, lần gọi sau p
 # fixer to verify the match actually applies before reusing an old fix (each occurrence so far
 # has had a genuinely different specific root cause even within the same family).
 KNOWN_ISSUE="$(python3 "$ROOT/bin/incident_lookup.py" "$LABEL" "$DETAILS" 2>/dev/null || true)"
+
+# Prompt dưới (việc 2/3) chép NGUYÊN VĂN ranh giới tự-sửa từ kb/ops_runbook.md § Nguyên tắc
+# phân quyền tự sửa — bắt buộc nhúng trực tiếp vào prompt (LLM headless cần thấy ranh giới
+# ngay trong context, không thể chỉ "đọc file" đáng tin cậy bằng). Sửa ranh giới ở
+# ops_runbook.md thì PHẢI sửa lại việc 2/3 dưới cho khớp (khảo sát vận hành 2026-08-01).
 
 "$ROOT/bin/dispatch.sh" Winston "NHIỆM VỤ OPS-AUTOFIX (mandate user 2026-07-07: tự phát hiện tự sửa, báo cáo sau): checker định kỳ vừa phát hiện vấn đề vận hành.
 
