@@ -107,6 +107,16 @@ VIỆC CẦN LÀM (mỗi mục xong ghi 1-2 câu kết luận, đừng chỉ nó
    Thiếu ngày nào → ghi rõ, đối chiếu logs/daily_retro.log xem có lỗi bash không (đúng check đã
    thêm vào ops_health_check.sh mục 9, đây là lớp xác nhận thêm ở tầng tuần).
 
+8. SELFCHECK BASELINE (khảo sát vận hành 2026-08-01, bin/run_selfchecks.sh — kết quả THẬT của
+   lần chạy TRƯỚC dispatch này, nối ở CUỐI prompt bên dưới, không phải bạn tự chạy lại): đọc
+   phần "=== SELFCHECK RESULTS ===" ở cuối. Với MỖI FAIL: đọc kỹ, phân biệt (a) regression thật
+   (code sản xuất đổi làm selfcheck sai — tự sửa nếu trong ranh giới mục 1, verify lại bằng
+   cách CHẠY THẬT không chỉ đọc) vs (b) selfcheck tự nó có giả định sai/lỗi thời (dữ liệu ngày
+   cụ thể đổi, ground-truth cần cập nhật — sửa selfcheck, ghi rõ lý do KHÔNG phải bug production)
+   vs (c) chưa đủ thông tin để kết luận (ghi rõ "CẦN ĐIỀU TRA SÂU HƠN", đừng đoán). KHÔNG cần
+   sửa hết trong 1 lần nếu nhiều — ưu tiên FAIL nào có khả năng chạm surface tiền thật/dữ liệu
+   client-facing trước.
+
 BÁO CÁO CUỐI (bắt buộc, dù mọi mục đều sạch — quiet-heartbeat: "không có gì mới" vẫn phải nói rõ
 ràng, im lặng hoàn toàn không phân biệt được với job chết): tổng hợp ngắn gọn 7 mục trên, bug nào
 tìm thấy + đã tự sửa (kèm commit hash) hay đang escalate, số PENDING bus question, %fable/%opus,
@@ -119,6 +129,16 @@ KHÔNG cần hỏi user trước cho việc 1,5,6 (tài liệu/dọn backlog thu
 sửa trong đúng ranh giới đã nêu — vượt ranh giới luôn escalate, không tự quyết.
 PROMPT_EOF
 )"
+
+# Chạy selfcheck baseline THẬT trước dispatch (khảo sát vận hành 2026-08-01, item #2 đã duyệt)
+# — nối kết quả vào PROMPT bằng string concatenation (KHÔNG chèn vào bên trong heredoc quoted
+# ở trên, giữ nguyên lý do heredoc quoted ban đầu: tránh lại đúng lớp lỗi quoting đã vá 2 lần).
+log "Chạy selfcheck baseline (bin/run_selfchecks.sh, offline tier)..."
+SELFCHECK_OUT="$(bash "$ROOT/bin/run_selfchecks.sh" 2>&1 | tail -200)"
+PROMPT="$PROMPT
+
+=== SELFCHECK RESULTS (chạy thật trước dispatch này, xem việc 8) ===
+$SELFCHECK_OUT"
 
 DISPATCH_FROM=user "$ROOT/bin/dispatch.sh" Mike "$PROMPT" \
     --model opus --effort high --timeout 3600 >> "$LOG" 2>&1 &
