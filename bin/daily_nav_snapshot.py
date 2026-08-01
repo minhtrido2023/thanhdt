@@ -250,6 +250,26 @@ def main():
         return 2
 
     stock = bal["payload"]["stock"]
+
+    # INVARIANT (bug 2026-07-27, Taylor phát hiện qua báo cáo tuần 07-27→07-31): DNSE có lúc
+    # trả về block `stock` TOÀN SỐ 0 (cả totalCash/availableCash/depositInterest/
+    # depositFeeAmount/cashDividendReceiving = 0) — đó là API lỗi tạm thời, KHÔNG phải tiền
+    # mặt thật về 0. Ngày 27/07 cả 2 lần đọc 19:04:59 và 19:10:20 đều toàn 0, script cũ nhận
+    # số 0 đó và ghi NAV=804.077.200 (thiếu đúng 32.011.420đ tiền mặt = -3,83% NAV), làm
+    # thổi phồng vol năm hoá 26,5%→37,7% và MaxDD -16,12%→-19,33% trong báo cáo tuần.
+    # Tài khoản live có cổ phiếu thì depositInterest/depositFeeAmount gần như không bao giờ
+    # đồng loạt bằng 0 → toàn-0 = dấu hiệu lỗi feed rõ ràng. FAIL-SAFE: từ chối ghi, KHÔNG
+    # tự đoán số đúng (người chạy lại script/lấy bản đọc tươi hôm sau mới là nguồn thật).
+    numeric = [v for v in stock.values() if isinstance(v, (int, float)) and not isinstance(v, bool)]
+    if numeric and not any(numeric):
+        print(f"❌ [{args.date}] Balance record ({bal.get('ts')}) trả về TOÀN SỐ 0 "
+              f"(totalCash=0, totalDebt=0, và mọi field số khác =0) — đây là lỗi API tạm "
+              f"thời của DNSE, KHÔNG phải NAV thật về 0. KHÔNG tính NAV để tránh ghi số sai "
+              f"vào nav_history. Chạy lại script để lấy bản đọc balance tươi; nếu cuối ngày "
+              f"vẫn toàn 0, lấy bản đọc đầu phiên hôm sau (TRƯỚC cú khớp đầu tiên) và điền "
+              f"tay sau khi đối chiếu.", file=sys.stderr)
+        return 2
+
     cash, debt = stock["totalCash"], stock["totalDebt"]
 
     # INVARIANT (bug 2026-07-07 lần 2, user chỉ ra): bản ghi balance phải MỚI HƠN cú khớp
