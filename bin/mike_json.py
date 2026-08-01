@@ -33,7 +33,7 @@ Centralizes all JSON building/reading so the shell scripts depend only on python
       -> seconds since the job's last AGENT-written bus event ('-' if none); excludes
          _job_watcher liveness pings — input to dispatch.sh heartbeat-aware deadline
 """
-import sys, os, json, uuid, glob, datetime, hashlib
+import sys, os, json, uuid, glob, datetime, hashlib, gzip, re
 
 TS_FMT = "%Y-%m-%dT%H:%M:%SZ"
 
@@ -55,10 +55,14 @@ def out(obj):
 
 
 def load_jsonl(paths):
+    """Đọc .jsonl thường VÀ .jsonl.gz (kb_nightly Phase 1b2 archive layout) trong suốt —
+    caller chỉ cần đưa đúng đường dẫn, không cần biết file nào nén. Hành vi KHÔNG đổi cho
+    caller chỉ truyền .jsonl thường (mọi caller hiện có trước 2026-08-01)."""
     rows = []
     for fp in paths:
+        opener = gzip.open if fp.endswith(".gz") else open
         try:
-            with open(fp, encoding="utf-8") as f:
+            with opener(fp, "rt", encoding="utf-8") as f:
                 for line in f:
                     line = line.strip()
                     if not line:
@@ -67,9 +71,53 @@ def load_jsonl(paths):
                         rows.append(json.loads(line))
                     except Exception:
                         pass
-        except FileNotFoundError:
+        except (FileNotFoundError, OSError, EOFError):
+            # OSError bắt hầu hết lỗi gzip (vd BadGzipFile ở open() nếu header hỏng); EOFError
+            # RIÊNG vì nó KHÔNG phải subclass của OSError — đây là lỗi thật xảy ra khi stream bị
+            # cắt cụt GIỮA CHỪNG lúc đang đọc (khác lỗi ở open()), bắt được bằng chính selfcheck
+            # (mike_json_archive_selfcheck.py ca 6) khi viết xong, không phải đoán trước — cùng
+            # nguyên tắc fail-safe đã dùng ở ops_health_check.sh check #5 (đừng chết cả lệnh vì
+            # 1 file archive hỏng).
             pass
     return rows
+
+
+# 2026-08-01 (audit kiến trúc fleet §14/committee — Fable plan + Opus critique): reader nào
+# báo cáo trạng thái CÒN TREO (không chỉ hiển thị hoạt động gần đây) phải quét đủ mọi tầng
+# lưu trữ mover có thể đặt dữ liệu vào — xem coding_guidelines.md §17. `cmd_trace` và
+# `cmd_verify_coverage` từng chỉ glob hot inbox, mù với `bus/inbox/archive/*.jsonl.gz`
+# (kb_nightly Phase 1b2) VÀ `bus/jobs/archive/*.json` (fleet_housekeeping Phase 1b3) — job/
+# event nào cũ hơn ngưỡng archive sẽ âm thầm "không tìm thấy" thay vì báo rõ đã bị archive.
+def _inbox_files(bus_dir):
+    """Mọi file event của MỌI agent, hot + archive, đã sort theo tên (không theo ts — caller
+    tự sort theo ts nếu cần thứ tự thời gian, file .jsonl.gz có thể chứa nhiều tháng)."""
+    inbox_dir = os.path.join(bus_dir, "inbox")
+    return (sorted(glob.glob(os.path.join(inbox_dir, "*.jsonl"))) +
+            sorted(glob.glob(os.path.join(inbox_dir, "archive", "*.jsonl.gz"))))
+
+
+def _agent_files(bus_dir, agent_id):
+    """File event của 1 agent cụ thể, hot + archive. Archive filename = <agent>_<YYYY-MM>.jsonl.gz
+    (kb_nightly Phase 1b2) — match bằng prefix để không vô tình khớp agent khác có tên là
+    prefix của agent này (vd "Wags" không được khớp "WagsX_2026-07.jsonl.gz")."""
+    inbox_dir = os.path.join(bus_dir, "inbox")
+    hot = [os.path.join(inbox_dir, agent_id + ".jsonl")]
+    pat = re.compile(re.escape(agent_id) + r"_\d{4}-\d{2}\.jsonl\.gz$")
+    arch = sorted(f for f in glob.glob(os.path.join(inbox_dir, "archive", "*.jsonl.gz"))
+                  if pat.search(os.path.basename(f)))
+    return hot + arch
+
+
+def _job_record_path(bus_dir, job_id):
+    """bus/jobs/<id>.json (hot) hoặc bus/jobs/archive/<id>.json (fleet_housekeeping Phase 1b3)
+    — trả None nếu không thấy ở cả hai, để caller phân biệt được "archived" vs "chưa từng có"."""
+    hot = os.path.join(bus_dir, "jobs", job_id + ".json")
+    if os.path.exists(hot):
+        return hot, False
+    arch = os.path.join(bus_dir, "jobs", "archive", job_id + ".json")
+    if os.path.exists(arch):
+        return arch, True
+    return None, False
 
 
 # Verdict-prominent rendering for `verification` events (quant-skeptic output). MIKE.md
@@ -656,37 +704,27 @@ def cmd_job_list(a):
 
 
 def cmd_trace(a):
-    """trace <bus_dir> <trace_id> — every bus event (any agent's inbox) sharing this
-    trace_id (= a dispatch job_id, by convention), sorted chronologically. Prints the
-    job record first if bus_dir/jobs/<trace_id>.json exists. Exit 1 if no events found."""
+    """trace <bus_dir> <trace_id> — every bus event (any agent's inbox, hot HOẶC archive)
+    sharing this trace_id (= a dispatch job_id, by convention), sorted chronologically.
+    Prints the job record first (hot HOẶC bus/jobs/archive/). Exit 1 if no events found."""
     bus_dir, trace_id = a[0], a[1]
-    jobs_fp = os.path.join(bus_dir, "jobs", trace_id + ".json")
-    if os.path.exists(jobs_fp):
+    jobs_fp, jobs_archived = _job_record_path(bus_dir, trace_id)
+    if jobs_fp:
         try:
             with open(jobs_fp, encoding="utf-8") as f:
                 jo = json.load(f)
-            print("=== job %s ===" % trace_id)
+            print("=== job %s%s ===" % (trace_id, " (archived)" if jobs_archived else ""))
             for k in ("from", "to", "status", "started_at", "ended_at", "exit_code", "logfile"):
                 if k in jo:
                     print("%-12s %s" % (k + ":", jo[k]))
             print()
         except Exception:
             pass
-    events = []
-    for fn in sorted(glob.glob(os.path.join(bus_dir, "inbox", "*.jsonl"))):
-        for ln in open(fn, encoding="utf-8"):
-            ln = ln.strip()
-            if not ln:
-                continue
-            try:
-                e = json.loads(ln)
-            except Exception:
-                continue
-            if e.get("trace_id") == trace_id:
-                events.append(e)
+    events = [e for e in load_jsonl(_inbox_files(bus_dir)) if e.get("trace_id") == trace_id]
     events.sort(key=lambda e: e.get("ts", ""))
     if not events:
-        print("no bus events found with trace_id=%s" % trace_id)
+        print("no bus events found with trace_id=%s (đã quét cả bus/inbox/archive/*.jsonl.gz)"
+              % trace_id)
         sys.exit(1)
     for e in events:
         print(fmt_event(e))
@@ -703,23 +741,21 @@ def cmd_verify_coverage(a):
     Exit 0 always (report tool, not pass/fail) — read the table."""
     bus_dir, agent_id = a[0], a[1]
     days = _as_int(a[2], 14) if len(a) > 2 else 14
-    inbox_dir = os.path.join(bus_dir, "inbox")
-    agent_fp = os.path.join(inbox_dir, agent_id + ".jsonl")
-    if not os.path.exists(agent_fp):
-        print("no inbox for agent '%s'" % agent_id)
+    agent_files = [f for f in _agent_files(bus_dir, agent_id) if os.path.exists(f)]
+    if not agent_files:
+        print("no inbox for agent '%s' (đã kiểm cả hot + bus/inbox/archive/)" % agent_id)
         return
     cutoff = (datetime.datetime.utcnow() - datetime.timedelta(days=days)).strftime(TS_FMT)
-    findings = [e for e in load_jsonl([agent_fp])
+    findings = [e for e in load_jsonl(agent_files)
                 if e.get("event_type") == "finding" and e.get("ts", "") >= cutoff]
     if not findings:
         print("no `finding` events from %s in the last %d days" % (agent_id, days))
         return
     verifications = {}  # trace_id -> verdict
-    for fn in sorted(glob.glob(os.path.join(inbox_dir, "*.jsonl"))):
-        for e in load_jsonl([fn]):
-            if e.get("event_type") == "verification" and e.get("trace_id"):
-                p = e.get("payload")
-                verifications[e["trace_id"]] = p.get("verdict", "?") if isinstance(p, dict) else "?"
+    for e in load_jsonl(_inbox_files(bus_dir)):
+        if e.get("event_type") == "verification" and e.get("trace_id"):
+            p = e.get("payload")
+            verifications[e["trace_id"]] = p.get("verdict", "?") if isinstance(p, dict) else "?"
     print("%-20s %-26s %-30s %-12s" % ("ts", "trace_id", "topic", "verified"))
     n_unverified = 0
     for e in sorted(findings, key=lambda e: e.get("ts", "")):

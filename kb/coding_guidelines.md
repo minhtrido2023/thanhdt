@@ -534,3 +534,40 @@ an adversarial environment (`env -u TZ`), rather than trying to catch it by stat
 Documentation (this section) plus a single `TZ=Asia/Ho_Chi_Minh` export at the top of the
 crontab (so every cron-invoked script gets a correct ambient `TZ` by default, closing the
 specific gap that made this bug latent-not-live) is the shipped fix — not a lint rule.
+
+## 17. A Reader Reporting "Still Open" State Must Scan Every Retention Tier a Mover Can Reach
+
+**Root cause (2026-08-01, audit kiến trúc fleet — Fable plan + Opus adversarial critique,
+so sánh với Paseo):** `bin/mike_json.py`'s `trace`/`verify-coverage` commands globbed only
+`bus/inbox/*.jsonl` (hot) — a job/event older than the archive threshold (`kb_nightly.sh`
+Phase 1b2 = 30 days for bus events, `fleet_housekeeping.sh` Phase 1b3 for `bus/jobs/`) silently
+came back "not found" instead of "archived." This is the SAME shape as the 2026-07-31 bug where
+`ops_health_check.sh`'s check #5 lost visibility into 2 never-answered questions for over a
+month (§ fixed, see `ops_health_check_selfcheck.py`) — but it is NOT the same fix. An adversarial
+review first proposed a generic "conservation check" (`count_before == count_after +
+count_archived`) — that invariant is trivially satisfied by every mover in this fleet already
+(nothing is silently deleted, everything is genuinely moved); it would NOT have caught either
+bug. The actual defect is per-READER, not per-mover: does THIS specific reader, which reports
+unresolved/pending/backlog state to a human for a decision, scan every tier a mover can place
+data into? A reader that only shows "recent activity" (e.g. `context_pack.md`'s "MỚI NHẤT"
+section) is correctly hot-only by design — excluding 2-month-old chatter is the point, not a bug.
+
+**Rule:** before shipping a new reader (or auditing an existing one) that answers "is X still
+open / unresolved / pending," identify every mover that can place X's data into cold storage
+(`kb/cron_registry.md` + this file's archival scripts — currently `kb_nightly.sh` Phase 1b2 for
+`bus/inbox/`, `fleet_housekeeping.sh` for `bus/jobs/`, `logs/`, `bus/registry/`) and confirm the
+reader globs ALL of them, not just the hot path. Use `mike_json.py`'s `_inbox_files()`/
+`_agent_files()`/`_job_record_path()` helpers (added 2026-08-01) instead of hand-rolling
+`glob.glob(".../inbox/*.jsonl")` again — that literal pattern is exactly what went stale twice.
+Ship the new/fixed reader WITH a regression test in the extract-and-test style already
+established (`ops_health_check.sh`'s `CHECK5_BEGIN`/`CHECK5_END` marker +
+`ops_health_check_selfcheck.py`; `mike_json_archive_selfcheck.py` for `trace`/`verify-coverage`)
+— a prose claim of "scans both tiers" is exactly the kind of self-report that has already failed
+twice without a test forcing it to stay true as the archival layout evolves.
+
+**Evaluated and NOT shipped:** a generic `conservation_check.py` invariant across every mover
+(see root-cause paragraph above for why it targets the wrong layer). Also not shipped: a
+blanket rewrite of every `bus/inbox` reader in the fleet to be archive-aware — `cmd_recent`
+(shows only the newest N lines for `context_pack.md`) and the `cursor-advance` consolidator
+cursor are correctly hot-only (their entire purpose is "what's new," not "what's still owed");
+making them archive-aware would be a behavior change nobody asked for, not a fix.
