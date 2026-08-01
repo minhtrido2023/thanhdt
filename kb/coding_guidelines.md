@@ -589,3 +589,22 @@ only when a config is actually being recommended for wire, confirm production un
 verify the artifact (not the self-report) before relaying a conclusion. When dispatching Taylor
 for R&D, point at this skill explicitly in the prompt rather than re-deriving the checklist by
 hand each time — see `bin/dispatch.sh` prompts from 2026-08-01 for the reference wording.
+
+## 19. Any Task With a Selfcheck/Test — Follow `~/.claude/skills/verify-before-done/`
+
+Before reporting a coding/fix task "done" when it includes (or should include) a selfcheck —
+check the `verify-before-done` skill (`/home/trido/.claude/skills/verify-before-done/SKILL.md`,
+invoke via the Skill tool where available, or read directly in a headless dispatch). Built
+2026-08-01 from a same-day pair of incidents: a selfcheck that reported PASS in its author's
+own session but FAILED under an independent re-run (`dt5g_writer_watch.py`'s TZ bug — the
+author's session happened to inherit a correct `TZ`, an independent run didn't), and a
+brand-new selfcheck that caught a real bug on its very first execution (`EOFError` not being
+an `OSError` subclass) — the second case is the skill working as intended, not a
+counter-example. Core habit: run the selfcheck for real, name what it implicitly depends on
+from the environment (timezone easily tops the list — see §16), re-run under a stripped/
+adversarial variant of that dependency, and treat a result that differs between environments
+as the finding itself. Applies both to the author before claiming done and to anyone
+independently re-verifying that claim (this is now baked into `arch-reviewer`'s mandate, §5 of
+the fleet's architecture-review changelog — see `~/.claude/agents/arch-reviewer.md`). When
+dispatching an agent for a coding/fix task, point at this skill explicitly rather than
+re-deriving the checklist by hand each time.
