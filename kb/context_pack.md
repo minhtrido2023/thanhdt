@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v1600)
+# Mike fleet — context pack (v1601)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-08-01T08:43:22] Taylor/finding — bao-cao-trading-thieu-2026-07: DA GUI ca 3 (tuan 20-24/07, tuan 27-31/07, thang 07): {"status": "HOAN TAT ca 3 bao cao — da soan, da tu verify doc lap, da GUI Discord Trading report (1522576692638388364)", "provenance_attempt": "attempt1 cua job …
 - [2026-08-01T08:30:28] arch-reviewer/verification — ARCH-REVIEW: wags-fix: coord-2026-08-01 — check #5 round-5: bo crowd-out, bit duong loi im lang, khoa rang buoc bang selfcheck: {"finding_topic": "wags-fix: coord-2026-08-01 — check #5 round-5: bỏ crowd-out, bịt đường lỗi im lặng, khoá ràng buộc bằng selfcheck", "verdict": "NEEDS_CHANGES …
 - [2026-08-01T08:48:38] Taylor/finding — fscore-role-review-20260801: {"conclusion": "GIU NGUYEN ca 2 tang — FSCORE>=6 trong capit_basket() VA truc FSCORE 2/12 trong core_score(). Nghi ngo cua user KHONG duoc du lieu ung ho.", "re …
 - [2026-08-01T09:14:07] Winston/finding — nav-zalopay-2026-07-27-fixed: {"status": "DONE", "file": "data/execution_logs/nav_history_ZaloPay.csv", "row": "2026-07-27", "old": {"nav": 804077200, "cash": 0}, "new": {"nav": 833856620, " …
@@ -11,6 +10,7 @@
 - [2026-08-01T13:17:11] Taylor/answer — test-ping: {"reply": "ok da nhan", "job": "Taylor_20260801_131701"}
 - [2026-08-01T14:20:46] Taylor/finding — fscore-enhancer-custom30v-NOGO: {"verdict": "NO-GO — khong wire bat ky bien the nao; custom30V giu nguyen yieldcombo rating-blind", "lead_closed": "IC PANEL 8L muc 6 (2026-06-21): FSCORE ung v …
 - [2026-08-01T15:47:32] Wags/finding — wags-fix: adaptive first-wakeup profile theo loại task (code+test xong, chưa wire live): {"topic": "adaptive first-wakeup profile theo (agent|model|effort)", "status": "DONE — code+test xong, CHƯA wire live (chờ Mike duyệt)", "commit": "e77a511c", " …
+- [2026-08-01T17:37:02] Mike/finding — daily-retro-2026-08-01-draft-done: {"draft_file": "state/retro_draft_2026-08-01.md", "n_incidents_logged": 6, "n_gaps_found": 2, "n_patterns": 3, "pattern1_escalated": "retro-pattern-recurring-si …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -146,7 +146,7 @@ Telegram + Discord + bus event `question` (`plan-t1-not-ready`). KHÔNG tự đ�
 | Giờ | Lịch | Việc |
 |---|---|---|
 | 08:25 | T2-T6 | cron_health_check_daily.sh — audit toàn bộ crontab (mới 2026-08-01) |
-| 08:30 | T2-T6 | check_report_cadence.sh — báo cáo tuần/tháng quá hạn thì TỰ dispatch Taylor soạn+gửi + escalate Trading report topic (mới 2026-08-01, thay WARN cũ bị chôn im lặng 5 ngày) |
+| 08:30 | T2-T6 | check_report_cadence.sh — báo cáo tuần/tháng quá hạn thì TỰ dispatch Taylor soạn+gửi + escalate Trading report topic (mới 2026-08-01, thay WARN cũ bị chôn im lặng 5 ngày); mỗi lần chạy cũng quét + gửi email (send_report_email.py, Gmail SMTP app password) mọi report chưa từng gửi qua email (thêm 2026-08-01, user yêu cầu) |
 | 23:45 | T2-T6 | sync_bq_cache_daily.sh |
 | 02:00 | Daily | kb_nightly.sh — archive events, trim memory, check ngưỡng cứng kb file MỖI đêm |
 | 02:00 (UTC Fri = ICT Sat sáng) | Weekly | kb_nightly.sh → dispatch Mike editorial KB review (đầy đủ) |
