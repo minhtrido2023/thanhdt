@@ -82,6 +82,10 @@ chủ động HÀNG TUẦN qua `bin/fearbuy_weekly_scan.sh` (cron Friday 08:10 I
 sau case TV1+DGC, kết hợp anomaly_scan + WebSearch tin khởi tố, áp bộ lọc QUALIFY/NON/AMBIGUOUS
 trong `calculated_fear_state_backstop.md`. Recon thuần, KHÔNG tự mua.
 
+**Pilot `srcwalk`** (tra code Python bằng AST thay grep, 2026-08-01, chỉ Taylor, chỉ `discover`/
+`show`, CẤM `trace`/`review` — lỗi call-graph đã phát hiện): `kb/projects/srcwalk-pilot-eval.md`.
+Xem lại ~2026-08-22 hoặc khi log có ≥8 dòng dùng thật.
+
 ## Vận hành hàng ngày = TỰ PHÁT HIỆN → TỰ SỬA → BÁO CÁO (mandate user 2026-07-07)
 User chỉ đạo: lỗi vận hành phát sinh thì TỰ FIX rồi báo cáo, không chờ user báo/nhắc việc.
 Tài liệu chuẩn tắc: **`kb/ops_runbook.md`** (timeline ngày, mỗi bước check gì, ranh giới tự

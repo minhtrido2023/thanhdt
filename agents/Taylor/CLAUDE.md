@@ -122,3 +122,26 @@ Nếu việc ĐANG DỞ mà có nguy cơ bị cắt → ghi NGAY:
   breadth), không override chủ quan lên hệ. Dữ liệu vĩ mô tươi do Winston lo (Data/Regime Ops).
 
 **Làm việc trực tiếp với user.** **Ranh giới:** không đặt lệnh thật (Mafee); không chạy pipeline daily-ops (Winston) — chỉ R&D/đổi mô hình.
+
+## PILOT hẹp — `srcwalk` cho tra cứu code Python (2026-08-01, đang đánh giá, xem `kb/projects/srcwalk-pilot-eval.md`)
+Đã cài `srcwalk` (tree-sitter, tra symbol theo AST) ở `~/.local/bin`. **Phạm vi CHỈ**: dùng
+`srcwalk discover <tên hàm/biến> --scope <thư mục>` hoặc `srcwalk show <file>:<dòng/hàm>` thay cho
+`grep`+`Read` khi khám phá code Python trong `trading_bot/` hoặc script nghiên cứu — 2 lệnh này
+cho biết NGAY "dòng này nằm trong hàm nào" mà grep không cho, đáng thử.
+
+**TUYỆT ĐỐI KHÔNG dùng `srcwalk trace`/`srcwalk review`** — kiểm tra tay 2026-08-01 phát hiện lỗi
+thật: `trace callers` khớp nhầm theo TÊN HÀM CHUNG CHUNG (`main`, `run`) xuyên file không liên quan
+(vd báo `dcf_fv_sens_cache.py` "bị ảnh hưởng" bởi thay đổi ở `bot_execute.py` — SAI, đã verify bằng
+grep, 2 file không hề gọi nhau); `review` bỏ sót gắn tên hàm mới vào bằng chứng diff. Đừng tin
+"blast radius"/call-graph của công cụ này cho tới khi có xác nhận khác.
+
+**KHÔNG áp dụng cho bash** (`bin/*.sh`) — công cụ không hỗ trợ ngôn ngữ này, đừng thử.
+
+**Ghi log MỖI lần dùng thật** (bắt buộc, đây là cách duy nhất Mike đánh giá được, không dựa tự
+báo cáo cảm tính) — 1 dòng JSONL:
+```bash
+python3 -c "import json,sys,time; open('/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/srcwalk_pilot_log.jsonl','a').write(json.dumps({'ts':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'cmd':sys.argv[1],'task':sys.argv[2],'useful':sys.argv[3]=='true','note':sys.argv[4]})+'\n')" \
+  "srcwalk discover <query thật>" "<mô tả việc đang làm>" "true|false" "<1 câu: có giúp hơn grep+Read không, vì sao>"
+```
+Nếu `srcwalk` không có trên PATH lúc dispatch (kiểm bằng `command -v srcwalk`) → bỏ qua, dùng
+`grep`+`Read` như bình thường, KHÔNG chặn việc đang làm, không cần ghi log cho lần đó.
