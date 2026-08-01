@@ -631,6 +631,7 @@ _ctx_kb_or_missing() {  # "MISSING" beats silently reporting 0KB as healthy when
 }
 _CP_KB=$(_ctx_kb_or_missing "$ROOT/kb/context_pack.md")
 _MIKE_KB=$(_ctx_kb_or_missing "$ROOT/MIKE.md")
+_CG_KB=$(_ctx_kb_or_missing "$ROOT/kb/coding_guidelines.md")
 SAME_DAY_BREACH=""       # human-readable, WITH numbers — for the alert text/payload only
 _BREACH_KEY=""           # stable membership key, NO numbers — debounce compares THIS
 if [ "$_CP_KB" = "MISSING" ]; then
@@ -646,6 +647,16 @@ if [ "$_MIKE_KB" = "MISSING" ]; then
 elif [ "$_MIKE_KB" -gt 40 ]; then
     SAME_DAY_BREACH="${SAME_DAY_BREACH}MIKE.md=${_MIKE_KB}KB(ngưỡng 40KB); "
     _BREACH_KEY="${_BREACH_KEY}MIKE:OVER|"
+fi
+# coding_guidelines.md — thêm 2026-08-01 (user mandate, gap tìm thấy: file này ĐÃ 32KB, tăng đều
+# 6KB→26KB→32KB trong 4 tuần (~1KB/bài học mới), KHÔNG có ngưỡng cứng nào từ trước — chỉ 2 file
+# context_pack.md/MIKE.md được canh, file này lọt lưới dù cũng inject vào 4/8 agent mỗi dispatch.
+if [ "$_CG_KB" = "MISSING" ]; then
+    SAME_DAY_BREACH="${SAME_DAY_BREACH}kb/coding_guidelines.md MẤT/rỗng; "
+    _BREACH_KEY="${_BREACH_KEY}CG:MISSING|"
+elif [ "$_CG_KB" -gt 40 ]; then
+    SAME_DAY_BREACH="${SAME_DAY_BREACH}kb/coding_guidelines.md=${_CG_KB}KB(ngưỡng 40KB); "
+    _BREACH_KEY="${_BREACH_KEY}CG:OVER|"
 fi
 mkdir -p "$ROOT/state"
 _CTXBLOAT_STAMP="$ROOT/state/ctxbloat_episode.txt"
@@ -697,6 +708,7 @@ if [ "$DOW" -eq 5 ]; then
     }
     ctx_check "$ROOT/kb/context_pack.md" 45 "kb/context_pack.md"
     ctx_check "$ROOT/MIKE.md" 40 "MIKE.md"
+    ctx_check "$ROOT/kb/coding_guidelines.md" 40 "kb/coding_guidelines.md"
     if [ -n "$CTX_BLOAT_WARN" ]; then
         CTX_BLOAT_WARN="
 8. **Context-bloat hard-threshold cảnh báo (VIỆC 3, 2026-07-27)** — các file dưới đây VƯỢT ngưỡng cứng và load vào MỌI turn Mike + MỌI dispatch. Đưa cảnh báo này RÕ RÀNG vào output review; **KHÔNG tự cắt nội dung** — để user/Mike quyết định phần nào archive:${CTX_BLOAT_WARN}"

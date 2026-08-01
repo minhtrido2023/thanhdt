@@ -92,9 +92,8 @@ batch** (không phải 1 lượt/job); **luôn dùng, không "fire-and-forget"**
 bước tự trị — ngoại lệ duy nhất là 1 job đứng riêng không có bước kế tiếp phụ thuộc; `dispatch.sh
 --bg` in sẵn các bước theo dõi ra stderr sau dòng "Theo dõi:" — làm theo đúng bản in.
 
-Cơ chế `Agent(run_in_background)` wrapper (2026-07-03, đã MOOT từ 2026-07-07) — lịch sử đầy đủ ở
-[`kb/archive/wake_on_completion_wrapper_history_20260707.md`](kb/archive/wake_on_completion_wrapper_history_20260707.md),
-chỉ khôi phục nếu harness tương lai thêm lại tham số nền cho Agent tool.
+(Lịch sử cơ chế `Agent(run_in_background)` wrapper, MOOT từ 2026-07-07:
+[`kb/archive/wake_on_completion_wrapper_history_20260707.md`](kb/archive/wake_on_completion_wrapper_history_20260707.md).)
 
 ## Việc định kỳ
 - Cron 30' chạy `bin/consolidate.sh` (cơ khí): gộp event mới từ bus → `KNOWLEDGE.md`, bump version,
@@ -152,14 +151,11 @@ Quy tắc CỨNG:
    phải truyền `--thread` tường minh.
 
 ## Chọn agent nào cho việc gì
-**1 lớp duy nhất (cập nhật 2026-07-01):** *companion daemon* (persistent, systemd) chỉ còn **Mike** —
-đầu mối duy nhất user tương tác trực tiếp (Discord/desktop/mobile). **Mọi agent khác đều
-headless/native on-demand**, gọi bởi Mike, KHÔNG có daemon riêng, KHÔNG user tự mở session trực
-tiếp. Lý do: `dispatch.sh` luôn tạo tiến trình `claude -p` độc lập — daemon riêng của 1 agent
-KHÔNG được dùng bởi cơ chế dispatch (mỗi lần gọi là phiên mới, liên tục dựa vào
-`kb/memory/<id>.md` + KB, không phải conversation sống của daemon) → daemon phụ không tạo giá trị
-thực tế, chỉ tốn tài nguyên + rủi ro vận hành (watchdog, ZOMBIE-fix, duplicate-environment — xem
-sự cố Taylor 2026-07-01).
+**1 lớp duy nhất:** *companion daemon* (persistent, systemd) chỉ còn **Mike** — đầu mối duy nhất
+user tương tác trực tiếp. **Mọi agent khác đều headless/native on-demand**, gọi bởi Mike, KHÔNG
+có daemon riêng, KHÔNG user tự mở session trực tiếp — daemon phụ không được dùng bởi cơ chế
+dispatch (mỗi lần gọi là phiên mới dựa vào `kb/memory/<id>.md` + KB) nên không tạo giá trị, chỉ
+tốn tài nguyên + rủi ro vận hành (chi tiết/lý do đầy đủ: sự cố Taylor 2026-07-01, `kb/incidents/`).
 
 | Vai trò | Lớp | Cách gọi | Khi nào |
 |-------|-----|----------|---------|
@@ -265,79 +261,40 @@ production.** Verifier read-only (Bash/Read/Grep/Glob), không sửa code/KB.
 - Thu: `systemctl --user disable --now mike@<id>` (tri thức đã ở KB, không mất). Giữ `agents/<id>/` để audit.
 
 ## Giám sát sức khỏe fleet (auto-recovery cho nhân viên)
-Cơ chế hồi phục giống hệt cái WorkingClaude dựng cho Mike — vì `mike@.service` là *template*, cả
-fleet dùng chung unit đã hardened (`Restart=always`, `StartLimit`, `RestartSec=10`).
-Watchdog bắt **2 kiểu chết** (vì `systemctl is-active` KHÔNG đủ — host có thể "Ready" mà session đã chết):
-- **`bin/is_serving.py <id>`** — oracle liveness tin cậy: exit 0 nếu agent thực sự đang phục vụ 1 session
-  (có record sống trong `~/.claude/sessions/*.json` với cwd `…/mike/agents/<id>`), exit 1 nếu không.
-  Mạnh hơn systemd: bắt được ca **ZOMBIE** (host sống nhưng không serving) — chính là ca giết Mafee.
-- **`bin/watchdog.sh`** (cron 10'): với mỗi unit enabled:
-  - **DOWN** (unit không active) → restart; ≥`WATCHDOG_ESCALATE_AFTER=3` lần liên tiếp → log "PERSISTENT
-    DOWN — likely OAuth logout: `claude login` + restart".
-  - **ZOMBIE** (active nhưng `is_serving`=false) → **tự sửa**: `clear_bridge` (dời `bridge-pointer.json`
-    kẹt để host xin environment MỚI) + restart. Đã kiểm chứng 2026-06-22: plain restart KHÔNG cứu
-    được Mafee, nhưng xoá bridge-pointer + restart → serving sau ~10s. Nếu sau `ESCALATE_AFTER` vẫn
-    không serving → escalate "MANUAL: mở agent trong app Claude / `claude login`" rồi ngừng restart.
-  - Đếm bad-streak ở `state/flap/<unit>`. Gọi `bin/notify.sh "<msg>"` → **đẩy cảnh báo ra Telegram**
-    (bot `@AbV6_bot`, cred `secrets/telegram_config.json`). notify.sh tự dedup (cùng tin <`NOTIFY_DEDUP_SEC`=300s
-    chỉ log không gửi lại), luôn exit 0 (không làm gãy watchdog), kill-switch `MIKE_NOTIFY_OFF=1` hoặc file
-    `state/NOTIFY_OFF`. Tắt push tạm: `touch state/NOTIFY_OFF`.
-- **`bin/fleet_health.sh`** (chạy tay bất kỳ lúc nào): bảng sức khỏe — STATE, **SERVING** (yes/NO từ
-  is_serving), **CTX** (% context của hội thoại sống), NRestarts, uptime, STREAK, LAST HB. Cờ **DOWN** /
-  **ZOMBIE** / **ZOMBIE PERSISTENT → re-pair in Claude app** / **context cao**. exit 1 nếu degraded.
-- **`bin/context_watch.py`** + cảnh báo trong watchdog: canh độ dài hội thoại để không phiên nào gãy vì
-  quá dài. Đọc token thực tế ở lượt assistant cuối của transcript sống (input+cache ≈ context đang dùng)
-  so với `CTX_LIMIT` (mặc định 1M). Watchdog log cảnh báo (debounce ở `state/ctxwarn/<id>`) khi vượt
-  `CTX_WARN_PCT=85%`. **Việc COMPACT là tự động sẵn của Claude Code** (auto-compact mặc định ON, fire
-  ~90%+) cho TỪNG phiên — Mike KHÔNG `/compact` hộ phiên khác được (companion model), chỉ canh + cảnh báo.
-- **`bin/usage_watch.py`** + cảnh báo trong watchdog: canh **trần 5-giờ của TÀI KHOẢN** (cả fleet + mọi
-  phiên khác dùng CHUNG một ví usage → một phiên ngốn nhiều là cả đội chạm trần). Tổng output-token mọi
-  phiên trong cửa sổ 5h, hiệu chỉnh theo app `/usage` (`USAGE_TOKENS_AT_100`, seed 2026-06-22: ~1.15M≈22%
-  → ~5.2M=100%). Watchdog log cảnh báo (debounce ở `state/usagewarn`) khi vượt `USAGE_WARN_PCT=80%`.
-  fleet_health in 1 dòng "5-hour account usage (est)". **Là ƯỚC LƯỢNG** (không có API chính thức) → cập
-  nhật lại calib từ app khi lệch. **Không tự resume hộ phiên khác được** (companion model) — giá trị chính
-  là PHÒNG NGỪA: cảnh báo sớm để giãn việc nặng trước khi chạm tường; Mike có thể tự `ScheduleWakeup` việc
-  của CHÍNH nó tới lúc cửa sổ roll.
-- **2 việc chỉ con người làm tay** (restart không cứu): (a) **logout** → `claude login` + restart;
-  (b) **zombie dai dẳng** → mở agent trong app Claude để re-pair. Watchdog chỉ phát hiện + log, không tự sửa.
+`bin/watchdog.sh` (cron 10') giám sát mọi unit `mike@<id>` bằng `bin/is_serving.py` (oracle liệu
+agent có THỰC SỰ đang phục vụ session hay không — mạnh hơn `systemctl is-active`, bắt được ca
+ZOMBIE host sống nhưng không serving). DOWN → restart (persistent DOWN sau 3 lần → nghi OAuth
+logout). ZOMBIE → tự sửa bằng `clear_bridge` + restart (plain restart không đủ, xem
+`kb/incidents/`). Alert qua `bin/notify.sh` → Telegram (dedup 300s, kill-switch
+`state/NOTIFY_OFF`). Chạy tay `bin/fleet_health.sh` bất kỳ lúc nào để xem bảng sức khỏe đầy đủ
+(STATE/SERVING/CTX/uptime/streak). `bin/context_watch.py` + `bin/usage_watch.py` (cùng cron 10')
+canh độ dài hội thoại từng phiên (auto-compact của Claude Code tự lo, Mike chỉ cảnh báo) và trần
+5h usage CHUNG của tài khoản (ước lượng, không phải API chính thức — cảnh báo sớm để giãn việc
+nặng, không tự resume hộ phiên khác được). **2 việc CHỈ con người làm tay** (restart không cứu):
+logout → `claude login`; zombie dai dẳng → mở agent trong app Claude để re-pair.
 
 ## Công cụ
-- **`bin/dispatch.sh <id> "prompt" [--bg] [--timeout SEC] [--retries N] [--model NAME]`** — dispatch
-  việc cho agent (headless `claude -p`). Đồng bộ (mặc định) hoặc bất đồng bộ (`--bg`). Log ở
-  `logs/dispatch_<id>_<ts>.log`. `--model` (`sonnet|opus|haiku|fable`, omit = default CLI) chọn theo
-  độ phức tạp TASK — xem §Model routing.
-  **Điều phối KHÔNG-CHẶN (2026-06-27):** mỗi dispatch là một **JOB** ở `bus/jobs/<job_id>.json`; `claude`
-  bọc trong `timeout` (mặc định 600s) nên **không bao giờ treo vô hạn**. `--bg` trả `job_id` **tức thì**
-  (kể cả khi caller dùng `$(...)`), tự **retry 1 lần** (`--retries`, mặc định 1) khi fail/timeout rồi
-  Telegram notify. **Đừng ngồi chờ** — fan-out `--bg` nhiều con, theo dõi bằng `bin/jobs.sh`, dùng
-  `ScheduleWakeup` để quay lại poll. Đồng bộ dùng cho việc ngắn cần kết quả ngay (vẫn có trần `--timeout`).
-  **Routing guards (2026-06-27):** (a) **self-dispatch** (`from==id`) → chặn; (b) **target Mike** chỉ
-  cho `DISPATCH_FROM=user` — agent muốn tới Mike phải **escalate** bằng event `question`, KHÔNG spawn
-  Mike lạnh để điều phối (đảo cấp + nest headless). Dispatch xuống/ngang bình thường không đổi.
-- **`bin/jobs.sh {list | status <job_id> | wait <job_id> [--timeout SEC]}`** — poll job board (read-only).
-  `status` exit-code: `0=done 2=running 3=overdue 1=failed/timeout 4=not-found`. `list` in STATUS/AGE/
-  LOG_AGE/ATT (LOG_AGE = giây từ lần log ghi cuối → liveness mềm: nghi treo khi log đứng mà chưa tới deadline).
-- `bin/append_event.sh`, `bin/heartbeat.sh`, `bin/consolidate.sh`, `bin/publish_context.sh`,
-  `bin/spawn_child.sh`, `bin/watchdog.sh`, `bin/fleet_health.sh`, `bin/is_serving.py`,
-  `bin/context_watch.py`, `bin/usage_watch.py`, `bin/session_brief.py`, `bin/discover_sessions.py`,
-  `bin/notify.sh` (push cảnh báo ra Telegram — dùng bởi watchdog), `bin/jobs.sh` (poll job board),
-  helper JSON `bin/mike_json.py` (gồm `job-set/job-list/job-get/trace/verify-coverage`).
-- **`bin/trace.sh <job_id> [--log]`** (thêm 2026-07-03) — gộp job record + mọi bus event cùng
-  `trace_id` (=job_id) thành 1 timeline, thay vì grep tay nhiều file. `append_event.sh` tự truyền
-  `trace_id` khi agent copy đúng mẫu lệnh trong prompt dispatch (tham số thứ 5).
-- **`bin/staleness_watch.py`** (thêm 2026-07-03) — watch-the-watcher cho pipeline tự báo cáo
-  freshness qua field `ts` (hiện có `data/macro_health.json`); nối vào `watchdog.sh` cron 10',
-  phân biệt STALE (quá cũ) vs UNKNOWN (mất/hỏng file). Thêm artifact mới vào `WATCH` trong script
-  khi có pipeline khác từng gây sự cố tương tự.
-- **`bin/verification_audit.sh <agent_id> [days]`** (thêm 2026-07-03) — báo cáo (KHÔNG phải gate)
-  coverage kiểm chứng: mỗi `finding` của agent trong N ngày gần nhất có `verification` khớp
-  `trace_id` chưa. Không tự đoán "quan trọng hay không" (tránh fragile keyword-classifier) — chỉ
-  hiện dữ liệu, Mike/user tự quyết định UNVERIFIED nào đáng lo.
-- **`bin/resume_pending.py`** (thêm 2026-07-03, cron `*/10 * * * *`) — fire mọi record đến hạn
-  trong `bus/pending_resumes/` (do `dispatch.sh` ghi khi phát hiện dispatch fail vì hết usage
-  limit tài khoản, không phải task lỗi thật) bằng cách `dispatch.sh` lại agent đó với prompt
-  "tiếp tục từ working memory". Đây là cơ chế đứng sau việc task tự động research không còn
-  cần user quay lại nhắc "tiếp tục" sau khi hết giờ usage limit — xem §Quy chuẩn bắt buộc mục 6.
+- **`bin/dispatch.sh <id> "prompt" [--bg] [--timeout SEC] [--retries N] [--model NAME] [--effort LV]`**
+  — dispatch việc cho agent (headless `claude -p`). Đồng bộ (mặc định) hoặc bất đồng bộ (`--bg`).
+  `--model`/`--effort` chọn theo độ phức tạp TASK — xem §Model routing. Mỗi dispatch = 1 JOB ở
+  `bus/jobs/<job_id>.json`, bọc trong `timeout` (mặc định 600s, **không bao giờ treo vô hạn**).
+  `--bg` trả `job_id` tức thì, tự retry 1 lần khi fail/timeout rồi Telegram notify. **Đừng ngồi
+  chờ** — fan-out `--bg` nhiều con, theo dõi bằng `bin/jobs.sh`, dùng `ScheduleWakeup`. Guards:
+  self-dispatch (`from==id`) bị chặn; target Mike chỉ cho `DISPATCH_FROM=user` (agent muốn tới
+  Mike phải escalate bằng event `question`, không spawn Mike lạnh).
+- **`bin/jobs.sh {list | status <job_id> | wait <job_id>}`** — poll job board (read-only).
+  `status` exit-code: `0=done 2=running 3=overdue 1=failed/timeout 4=not-found`.
+- **`bin/trace.sh <job_id> [--log]`** — gộp job record + mọi bus event cùng `trace_id` (=job_id)
+  thành 1 timeline, thay vì grep tay nhiều file.
+- **`bin/verification_audit.sh <agent_id> [days]`** — báo cáo (KHÔNG phải gate) coverage kiểm
+  chứng: mỗi `finding` trong N ngày gần nhất có `verification` khớp `trace_id` chưa.
+- **`bin/resume_pending.py`** (cron `*/10 * * * *`) — cơ chế auto-resume sau usage-limit, xem
+  §Quy chuẩn bắt buộc mục 6.
+- Khác (đọc header từng script khi cần chi tiết, không lặp lại ở đây): `bin/append_event.sh`,
+  `bin/heartbeat.sh`, `bin/consolidate.sh`, `bin/publish_context.sh`, `bin/spawn_child.sh`,
+  `bin/watchdog.sh`, `bin/fleet_health.sh`, `bin/staleness_watch.py`, `bin/session_brief.py`,
+  `bin/discover_sessions.py`, `bin/notify.sh`, `bin/cron_health_check.py` (audit toàn bộ crontab,
+  mới 2026-08-01), helper JSON `bin/mike_json.py`.
 - `claude agents` (dashboard mọi phiên nền), Monitor (stream live giữa hai nhịp 30').
 
 ## Bus event — chỉ dành cho báo cáo KHÔNG đồng bộ (cập nhật 2026-07-01)
@@ -383,16 +340,11 @@ sự cố gốc):
 switch, banned tickers, human-in-the-loop, danh tính 2 account LIVE) — tách riêng để 1 fact an
 toàn chỉ cần sửa ĐÚNG 1 chỗ, không lệch giữa nhiều bản sao.
 
-**`kb/coding_guidelines.md` (23KB) — quyết định TƯỜNG MINH, không phải mặc định** (audit
-2026-07-28, token-cost review): file tự nhận "áp dụng cho toàn fleet" nhưng chỉ 4/8 agent import
-(Mike/Taylor/DollarBill/Mafee) — đây là chủ ý, KHÔNG phải thiếu sót: cả 4 đều thật sự sở hữu/sửa
-code sản xuất thường xuyên (xem cột "Vì sao"). Winston và Wags CŨNG sửa code qua cơ chế autofix
-(`ops_autofix.sh`/`wags_autofix.sh`) nhưng KHÔNG import file này — cân nhắc có thật nhưng chưa
-thêm vì sẽ tăng chi phí mỗi dispatch (Wags ~22 job/tuần × 23KB ≈ +500KB/tuần) ngược với mục tiêu
-giảm token; nếu autofix của 2 agent này bắt đầu tái phạm đúng loại lỗi guideline này nhắm tới
-(surgical changes, idempotent side effects, canonical-filename...) thì đó là tín hiệu nên thêm.
-Đừng tự ý bớt file này khỏi Mafee/DollarBill để "tiết kiệm token" mà không kiểm tra lại bảng "File
-sở hữu" trong CLAUDE.md của agent đó trước — cả 2 sở hữu code chạm tiền thật.
+**`kb/coding_guidelines.md` — chỉ 4/8 agent import (Mike/Taylor/DollarBill/Mafee), CHỦ Ý**: cả 4
+đều sở hữu/sửa code sản xuất thường xuyên (cột "Vì sao" ở bảng trên). Đừng tự ý bớt file này khỏi
+Mafee/DollarBill để "tiết kiệm token" mà không kiểm tra lại bảng "File sở hữu" trong CLAUDE.md
+của agent đó trước — cả 2 sở hữu code chạm tiền thật. Winston/Wags cân nhắc thêm nếu autofix của
+họ bắt đầu tái phạm đúng loại lỗi guideline này nhắm tới (chưa cần, lý do đầy đủ: git log file này).
 
 **Quy tắc ghi chép — mở rộng nguyên tắc "ghi 1 lần đúng chỗ" ở trên:** khi tạo tri thức bền mới
 (quyết định/kết luận/quy tắc), trước khi ghi vào `context_pack.md`/`canonical.md` như cũ, tự hỏi

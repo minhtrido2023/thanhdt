@@ -1,4 +1,5 @@
 ## Dự án đã đóng — chi tiết theo yêu cầu (đọc khi cần: `cat kb/projects/<file>.md`)
+- 2026-07-31 **CAPIT sizing bug 07-21 (thiếu 87,1tr SpaceX)** → `kb/projects/capit-sizing-bug-0721.md` — ĐÓNG — root cause (nhân capit_size 2 lần) đã fix (commit 53cb117/d3aa3f05) + gate WARN-only mới ở send_plan_report.sh; user chốt KHÔNG bù phần thiếu (4 căn cứ cụ thể).
 - 2026-07-28 **DGC + TV1 fear-buy discretionary due-diligence** → `kb/projects/dgc-tv1-fearbuy-discretionary.md` — XONG (research) — cả 2 QUALIFIED YES, đã chuyển sang theo dõi discretionary riêng ngoài current_ops.md (TV1: context_planning_mini.md + plan file; DGC: excluded_tickers + finding Taylor).
 - 2026-07-21 **LAG 07-24 (IVS/TMG/TRC)** → `kb/projects/lag-0724-ivs-tmg-trc.md` — XONG — user chốt phương án C (chỉ mua TRC), gate %ADV LIVE wired, lọc thanh khoản LAG tầng tín hiệu wired, trần vị thế LAG=12 xác nhận là hệ quả tiền chứ không phải tham số riêng — quyết định bound tới phiên 07-24 đã qua.
 - 2026-07-20 **Deposit-rate auto-crosscheck automation** → `kb/projects/deposit-rate-autocheck.md` — DONE — refresh_deposit_rate_vn.sh tự dispatch Winston xác nhận + ghi (không cần người), 10 vòng quant-skeptic REFUTED→fix→re-review (mỗi vòng 1 lỗi thật, khác nhau) rồi CONFIRMED — kể cả 1 bug thật trong `deposit_rate_vn.current_deposit_rate()` (consumer, không phải chỉ writer).
@@ -18,3 +19,9 @@
 - 2026-07-12 **Audit sẵn sàng mùa BCTC Q2/2026** → `kb/projects/bctc-q2-readiness-audit.md` — KHÉP KÍN — fix CRITICAL LAG-blind + MEDIUM freshness + 3 mục nhỏ, đều verified.
 - 2026-07-03 **Usage-limit auto-resume** → `kb/projects/usage-limit-auto-resume.md` — XONG — dispatch.sh phát hiện usage-limit → pending_resumes → resume_pending.py cron.
 - 2026-07-02 **Reliability hardening (4 việc AgentOps)** → `kb/projects/reliability-hardening.md` — XONG — circuit breaker + idempotency guard + trace_id + INCIDENTS.md (commit e1d9b7c).
+
+## Dự án ĐANG MỞ nhưng chi tiết tách riêng (KHÔNG inline `current_ops.md`, thêm 2026-08-01)
+Khác nhóm trên (đã ĐÓNG) — 2 mục dưới đây vẫn đang chạy, nhưng chi tiết ngày-qua-ngày không cần
+đọc mỗi phiên. `current_ops.md` giữ 1 đoạn tóm tắt + pointer; đọc file khi cần theo dõi tiến độ.
+- **R&D pipeline (mọi thử nghiệm paper-only)** → `kb/projects/rnd-pipeline-tracker.md`
+- **Migration `ticker_prune` → `universe_pit` (checklist G5-G9)** → `kb/projects/universe-pit-migration.md`
