@@ -13,6 +13,11 @@ Credential (CHƯA có, cần user cung cấp trước khi dùng được):
 
 Không tự đoán/tự tạo credential này — script CHỦ Ý fail rõ ràng (exit 2 + thông báo) nếu thiếu,
 thay vì âm thầm no-op hoặc dùng giá trị mặc định sai.
+
+Thân email = HTML render qua render_report_html.py (bin/), theo chuẩn trình bày ngành quản lý
+đầu tư (GIPS/CFA Asset Manager Code/tear-sheet/investor-letter — xem docstring file đó) — KHÔNG
+còn gửi markdown thô làm plain text (2026-08-01, user phản ánh format "kiểu LLM khó nhìn"). File
+.md gốc vẫn đính kèm để có bản nguồn tham chiếu.
 """
 import argparse
 import json
@@ -26,6 +31,9 @@ from email.mime.text import MIMEText
 ROOT = os.path.dirname(os.path.abspath(__file__))
 WC_ROOT = os.path.abspath(os.path.join(ROOT, "..", ".."))
 SECRETS_PATH = os.path.join(WC_ROOT, "secrets", "gmail_smtp_app_password.json")
+
+sys.path.insert(0, ROOT)
+from render_report_html import render_html  # noqa: E402
 
 
 def main():
@@ -48,16 +56,21 @@ def main():
     from_email, app_password, to_email = cfg["from_email"], cfg["app_password"], cfg["to_email"]
 
     with open(args.report_path, encoding="utf-8") as f:
-        body = f.read()
+        md_body = f.read()
 
     fname = os.path.basename(args.report_path)
     subject = args.subject or f"[Trading Report] {fname}"
+
+    title_line = md_body.split("\n", 1)[0]
+    import re as _re
+    title = _re.sub(r"^#+\s*", "", title_line).strip() or fname
+    html_body = render_html(md_body, title)
 
     msg = MIMEMultipart()
     msg["From"] = from_email
     msg["To"] = to_email
     msg["Subject"] = subject
-    msg.attach(MIMEText(body, "plain", "utf-8"))
+    msg.attach(MIMEText(html_body, "html", "utf-8"))
 
     with open(args.report_path, "rb") as f:
         part = MIMEApplication(f.read(), Name=fname)
