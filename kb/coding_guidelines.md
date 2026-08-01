@@ -495,3 +495,42 @@ dataflow-aware rule engineering (semgrep taint mode or similar), not a quick pat
 reach the "fires twice at 100% accuracy" bar. Left as a documented prose lesson (§12) until
 someone has time to build and test that properly — shipping a noisy rule would erode trust in
 the whole gate faster than having no rule at all.
+
+## 16. Never Trust the Host's System Timezone for Date/Time Comparisons — Anchor Explicitly
+
+**Root cause (2026-07-31, `bin/dt5g_writer_watch.py`):** the host runs `Etc/UTC`
+(`timedatectl` confirmed), but the code read a BQ table's `lastModifiedTime` (epoch millis, UTC)
+with `datetime.fromtimestamp(ms/1000.0)` and a comment claiming *"process TZ = ICT trên host
+này"* — a false, unverified assumption. Under the host's real UTC clock, a write that happened
+at 19:01 ICT got labeled "12:01" and compared against ICT-denominated time windows, missing by
+exactly 7 hours. The bug was **real but latent**: production cron callers happened to
+`source wc_env.sh` (which exports `TZ=Asia/Ho_Chi_Minh`) before invoking the script, so it never
+fired live — it was only caught because Mike ran the same code by hand (no inherited `TZ`) while
+independently verifying a dispatched fix, and separately by running the script's own selfcheck
+under `env -u TZ`.
+
+**Rule:** any code that computes "today," parses a date, or compares two timestamps for
+freshness/staleness MUST anchor the timezone explicitly — never assume the calling process
+happens to have the right `TZ` in its environment:
+- Python: `datetime.now(ZoneInfo("Asia/Ho_Chi_Minh"))` / `datetime.fromtimestamp(epoch_ms/1000,
+  ZoneInfo("Asia/Ho_Chi_Minh"))` — not bare `datetime.now()`/`.fromtimestamp()` with an implicit
+  local-time interpretation.
+- Bash: `TZ='Asia/Ho_Chi_Minh' date ...` — not bare `date` in any script that compares dates
+  (see `bin/csv_fresh_today.sh` for the reference pattern, added same day as this rule).
+- When writing a selfcheck for freshness/date logic, run it under `env -u TZ` (and ideally a
+  second foreign TZ, e.g. `TZ=America/New_York`) — the exact test that caught this bug. A
+  selfcheck that inherits the developer's own correctly-set `TZ` will pass even when the
+  underlying code is wrong, exactly as happened here on the first pass.
+
+**Evaluated and NOT shipped:** a static grep/lint gate for this class of bug (`datetime.now()`/
+`date.today()`/`utcnow()` without `tz=`/`ZoneInfo`, or `date +...` without a `TZ=` prefix) —
+measured against the real repo: **243 matches for the naive Python pattern alone**, spot-checked
+finding zero live bugs among them (the one real bug already fixed) and several false positives,
+including the gate matching its **own explanatory comment** in the just-fixed file. Same verdict
+as §12's Semgrep evaluation: a rule this noisy erodes trust in the whole gate faster than having
+none. The cheaper, already-verified-effective mitigation is the pattern this fleet already relies
+on for the actual class of bug found today (§14): **run the changed code path for real**, under
+an adversarial environment (`env -u TZ`), rather than trying to catch it by static reading alone.
+Documentation (this section) plus a single `TZ=Asia/Ho_Chi_Minh` export at the top of the
+crontab (so every cron-invoked script gets a correct ambient `TZ` by default, closing the
+specific gap that made this bug latent-not-live) is the shipped fix — not a lint rule.

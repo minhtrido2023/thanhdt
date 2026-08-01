@@ -16,6 +16,15 @@ enforced_by: kb/coding_guidelines.md §11
 > Giờ = ICT (UTC+7). Cột "Đọc" ghi rõ vintage (live/T-1/T-2...) — cache `BQ_LOCAL_CACHE` luôn = T-1,
 > sync 23:45 T2-T6, KHÔNG sync cuối tuần.
 
+> ⚠️ **Host chạy `Etc/UTC` — crontab tự set `TZ=Asia/Ho_Chi_Minh` làm biến môi trường TOÀN CỤC**
+> (dòng 2 crontab, thêm 2026-07-31, `kb/coding_guidelines.md` §16). Trước đó chỉ 8/66 dòng có
+> `TZ=Asia/Ho_Chi_Minh` prefix RIÊNG (script cần so sánh ngày mà không tự source `wc_env.sh`) —
+> mọi script khác trông cậy vào việc TỰ MÌNH source `wc_env.sh` (cũng export TZ) hoặc không chạm
+> logic ngày-giờ. Dòng global này KHÔNG thay thế `wc_env.sh` (vẫn cần cho `PATH`/BQ SDK/venv) —
+> chỉ đóng đúng lỗ hổng "script quên source, không thấy lỗi tới khi chạy dưới env thù địch"
+> (bài học `bin/dt5g_writer_watch.py`, bug TZ latent 07-31). Prefix per-dòng cũ vẫn an toàn giữ
+> nguyên (trùng lặp vô hại), không cần dọn.
+
 > 📎 **Phần tham chiếu tách ra [`cron_registry/`](cron_registry/)** (2026-07-28, OKF): quy tắc thêm
 > cron mới (4 câu hỏi §11) → [`cron_registry/_adding-cron-policy.md`](cron_registry/_adding-cron-policy.md);
 > chi tiết step `papertrade_daily.sh` → [`cron_registry/papertrade_daily_steps.md`](cron_registry/papertrade_daily_steps.md);

@@ -21,6 +21,17 @@ preserve_verbatim: >
 
 # Log thay đổi Cron Registry
 
+- 2026-08-01 (Mike, việc #3 đã duyệt trong review kiến trúc fleet — nghiên cứu Paseo + phản biện
+  Fable-plan/Opus-critique, 2026-07-31→08-01): thêm dòng `TZ=Asia/Ho_Chi_Minh` làm biến môi trường
+  TOÀN CỤC ở đầu crontab (sau dòng `PATH=`, trước mọi job) — 4 câu hỏi §11: (1) đọc gì+vintage —
+  không đọc gì, đây là biến môi trường ambient; (2) nguồn tươi lúc nào — N/A, không phải job có
+  lịch; (3) cần T hay T-1 — N/A; (4) ai tiêu thụ+deadline — MỌI job cron kế thừa biến này làm TZ
+  mặc định, đóng đúng lỗ hổng khiến bug TZ trong `bin/dt5g_writer_watch.py` (host chạy `Etc/UTC`,
+  code giả định ICT) chỉ latent chứ chưa live — trước đó chỉ 8/66 dòng có `TZ=Asia/Ho_Chi_Minh`
+  prefix riêng, còn lại trông cậy script tự source `wc_env.sh`. **Không đổi giờ/lịch dòng nào**,
+  backup trước khi sửa: `mike/logs/crontab_backup_before_tz_default_20260801.txt`; verify `diff`
+  xác nhận đúng 1 dòng thêm, không dòng nào khác đổi. Chi tiết + rule chung:
+  `kb/coding_guidelines.md` §16.
 - 2026-08-01 (Mike, user mandate sau 2 sự cố cùng ngày — `kb_nightly.sh`/`daily_retro.sh` quoting
   bug chết lặng 2 tuần/2 đêm mà không ai biết): audit TOÀN BỘ 64 dòng crontab bằng công cụ mới
   `mike/bin/cron_health_check.py` (parse crontab thật, đối chiếu mtime + tail log tìm dấu hiệu
