@@ -751,7 +751,8 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
             _maybe_schedule_usage_resume _looks_like_usage_limit _parse_reset_epoch \
             _current_resume_count _job_thread_id _hb_aware_timeout
   export ROOT JOBS_DIR job_id from id ts TIMEOUT RETRIES CLAUDE dispatch_prompt logfile prompt \
-         CIRCUIT_DIR CIRCUIT_THRESHOLD CIRCUIT_COOLDOWN MODEL_FLAG EFFORT_FLAG MAX_EXT HB_FRESH_S
+         CIRCUIT_DIR CIRCUIT_THRESHOLD CIRCUIT_COOLDOWN MODEL_FLAG EFFORT_FLAG MAX_EXT HB_FRESH_S \
+         MAX_TURNS
   # systemd-run --user needs the user manager socket; cron strips XDG_RUNTIME_DIR.
   export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
   _detach_ok=0
