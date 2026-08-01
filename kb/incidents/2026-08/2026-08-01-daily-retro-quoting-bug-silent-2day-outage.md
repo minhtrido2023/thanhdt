@@ -85,3 +85,35 @@ lập, nhưng bắt được CHÍNH XÁC lớp lỗi này, rẻ hơn arch-review
 **Cập nhật cùng ngày:** áp dụng đúng cách tự-kiểm này khi sửa `kb_nightly.sh` (thêm opus%-alert)
 phát hiện thêm **2 lỗi CÙNG LỚP đã sống 2 TUẦN** làm cả review Friday/Saturday chết hẳn — nghiêm
 trọng hơn bug này nhiều. Xem [[2026-08-01-kb-nightly-friday-dispatch-silently-broken-2-weeks]].
+
+---
+
+**Follow-up 2026-08-01 15:2x ICT (Winston, job `Winston_20260801_081056`) — BUG THỨ HAI nằm ngay
+sau bug quoting, đã sửa trước khi nó kịp nổ.** `ops_health_check` 15:10 vẫn flag "thiếu
+retro-2026-07-31" (đúng: RC đã fix lúc 10:49 nhưng chưa ai backfill). Khi verify xem đêm nay
+00:30 có chạy trót lọt không, phát hiện `_draft_valid()` — content-shape gate thêm ngày 07-30 —
+yêu cầu `^## RETRO — <ngày>` (2 dấu #), trong khi **prompt bước 1 mục 4 ra lệnh viết `# RETRO —`
+(1 dấu #)** và mọi entry đã finalize trong `kb/incidents/retro/` cũng dùng 1 dấu #. Tức gate sẽ
+loại đúng cái draft ĐÚNG ĐỊNH DẠNG → reject cả 2 attempt → abort.
+
+Lý do latent: gate được thêm lúc **07-30 00:48 ICT** (`01a7f991`) — tức SAU lần chạy thành công
+cuối cùng (07-30 00:36), và 2 đêm sau đó (07-31, 08-01) script chết ở bug quoting *trước* khi tới
+dòng gate. **Gate chưa từng chạy thật một lần nào**; đêm nay là lần đầu — và nó sẽ fail (lần này
+có notify, nhưng vẫn không có retro). `state/retro_rejected_*` rỗng = bằng chứng gate chưa từng
+loại gì.
+
+Fix (`68757b7e`): gate nhận `^#{1,2} RETRO — <ngày>`. Giữ nguyên tính chất chống-lạc-đề (vẫn bắt
+buộc đúng header + đúng ngày). Verify 6/6 trên gate trích nguyên văn: 1-dấu-# ACCEPT, 2-dấu-#
+ACCEPT, lạc đề / sai ngày / rỗng / 3-dấu-# đều REJECT; `bash -n` OK; ShellCheck pre-commit gate
+Passed. Cũng verify độc lập bug quoting đã hết: chạy thật khối gán `draft_prompt` (dòng 76–152)
+dưới `set -u` → RC=0, 5709 ký tự.
+
+**Bài học cộng thêm (khác với bài học quoting ở trên):** một *gate phòng thủ* mới thêm mà chưa
+từng chạy production một lần nào thì bản thân nó là code chưa được test — và ở đây nó bị che bởi
+đúng cái bug mà nó đứng sau. Khi thêm gate cơ khí kiểu "output phải khớp định dạng X", phải
+kiểm chứng X **đối chiếu với prompt sinh ra output đó và với artifact thật đang có trên đĩa**,
+đừng viết định dạng từ trí nhớ. Prevention: sau khi một cron pipeline được sửa RC, verify luôn
+các bước *phía sau* điểm crash cũ — chúng chưa hề chạy.
+
+**Vẫn treo (cần USER/Mike quyết, KHÔNG tự làm):** backfill RETRO 2026-07-30 + 2026-07-31 (và tiền
+lệ 07-24→07-27 vẫn "chưa quyết").
