@@ -55,7 +55,21 @@ VIỆC CẦN LÀM:
 Đây là recon hàng tuần, KHÔNG phải quyết định mua — chỉ báo cáo case đáng chú ý để user/Mike xem
 xét due-diligence sâu hơn nếu quan tâm, giống quy trình đã làm với TV1/DGC. Không cần quant-skeptic
 (chưa chạm production/tiền thật).
+
+BẮT BUỘC (hợp đồng đầu ra máy đọc được — xem mike/kb/dispatch_output_contract.md — dispatch này
+chạy nền, không ai chờ trực tiếp): dù có case mới hay không, KẾT THÚC bằng ĐÚNG lệnh sau, nguyên
+văn topic:
+mike/bin/append_event.sh Taylor finding "fearbuy-weekly-scan" "<JSON: n_ma_ra_qua, n_case_moi, qualify_list>"
 EOF
 )
 
 "$MIKEDIR/bin/dispatch.sh" Taylor "$PROMPT" --bg --timeout 2400 --retries 1 --model opus --effort high --thread "$TAYLOR_THREAD"
+
+# Post-condition check của LẦN CHẠY TUẦN TRƯỚC (khảo sát vận hành 2026-08-01) — cùng lý do/mẫu
+# như weekly_ops_audit.sh: job này KHÔNG có "lần gọi lại" tự nhiên trong tuần, điểm đúng để tự
+# kiểm là ĐẦU lần chạy TUẦN SAU. Cửa sổ 9 ngày (rộng hơn chu kỳ 7 ngày 1 chút).
+SINCE_LAST_WEEK="$(TZ=UTC date -u -d '9 days ago' +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || true)"
+if [ -n "$SINCE_LAST_WEEK" ] && ! python3 "$MIKEDIR/bin/mike_json.py" has-event "$MIKEDIR/bus" Taylor \
+     "$SINCE_LAST_WEEK" "finding:fearbuy-weekly-scan" >/dev/null 2>&1; then
+  "$MIKEDIR/bin/notify.sh" "🟡 fearbuy_weekly_scan: KHÔNG tìm thấy finding 'fearbuy-weekly-scan' nào trong 9 ngày qua — lần chạy tuần trước có thể đã lạc đề/chết im." >/dev/null 2>&1 || true
+fi

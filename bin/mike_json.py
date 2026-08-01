@@ -32,6 +32,11 @@ Centralizes all JSON building/reading so the shell scripts depend only on python
   job-hb-age <jobs_dir> <job_id>
       -> seconds since the job's last AGENT-written bus event ('-' if none); excludes
          _job_watcher liveness pings — input to dispatch.sh heartbeat-aware deadline
+  has-event <bus_dir> <agent_id> <since_iso> <event_type:topic> [...]
+      -> exit 0 + print match if agent's inbox (hot+archive) has any of the given
+         (event_type, topic) pairs since since_iso; exit 1 otherwise. Generic
+         post-condition/"output contract" check for background-dispatch pipelines —
+         see mike/kb/dispatch_output_contract.md.
 """
 import sys, os, json, uuid, glob, datetime, hashlib, gzip, re
 
@@ -773,6 +778,44 @@ def cmd_verify_coverage(a):
           (len(findings), n_unverified))
 
 
+def cmd_has_event(a):
+    """has-event <bus_dir> <agent_id> <since_iso> <event_type:topic> [<event_type:topic> ...]
+
+    Generic "post-condition check": does this agent's inbox (hot + archive) contain ANY of
+    the given (event_type, topic) pairs with ts >= since_iso? Exit 0 + print the match if
+    yes; exit 1 + print "no match" if not. Generalizes the hand-rolled matcher every
+    background-dispatch pipeline was writing separately (ops_autofix.sh's `allowed = {topic:
+    type}` dict is the reference this was extracted from) — see mike/kb/
+    dispatch_output_contract.md for the pipeline-author-facing doc, coding_guidelines.md for
+    the rule. Exact topic match only (no prefix/substring) — same semantics as the
+    hand-rolled versions this replaces; construct the exact expected topic string before
+    calling (e.g. "wags-fix: %s" % label), same as callers already did by hand.
+
+    Deliberately does NOT default `since_iso` to "N hours ago" — callers must pass the
+    actual dispatch start time. A relative-hours cutoff would let a STALE event from an
+    earlier, unrelated dispatch with the same topic false-positive; requiring the real
+    start timestamp is the same discipline ops_autofix.sh already uses (STARTED_ISO_FILE).
+    """
+    bus_dir, agent_id, since_iso = a[0], a[1], a[2]
+    pairs = []
+    for spec in a[3:]:
+        if ":" not in spec:
+            sys.stderr.write("has-event: bad spec '%s', expected event_type:topic\n" % spec)
+            sys.exit(2)
+        etype, topic = spec.split(":", 1)
+        pairs.append((etype, topic))
+    for e in load_jsonl(_agent_files(bus_dir, agent_id)):
+        if e.get("ts", "") < since_iso:
+            continue
+        for etype, topic in pairs:
+            if e.get("event_type") == etype and e.get("topic") == topic:
+                print("MATCH %s %s/%s at %s" % (agent_id, etype, topic, e.get("ts", "")))
+                sys.exit(0)
+    print("no match: %s has none of %s since %s (đã quét cả archive)" %
+          (agent_id, ["%s:%s" % p for p in pairs], since_iso))
+    sys.exit(1)
+
+
 def cmd_job_get(a):
     """job-get <jobs_dir> <job_id> — print one job; exit code reflects state.
     0=done 2=running 3=overdue 1=failed/timeout 4=not-found."""
@@ -942,7 +985,7 @@ CMDS = {"event": cmd_event, "heartbeat": cmd_heartbeat, "recent": cmd_recent,
         "circuit-check": cmd_circuit_check, "circuit-record": cmd_circuit_record,
         "pending-resume-set": cmd_pending_resume_set,
         "settings": cmd_settings, "trace": cmd_trace,
-        "verify-coverage": cmd_verify_coverage}
+        "verify-coverage": cmd_verify_coverage, "has-event": cmd_has_event}
 
 
 def main():

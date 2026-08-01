@@ -420,10 +420,27 @@ fi
 # Phương án B (user duyệt 2026-07-02): kiểm toán độc lập CÓ ĐIỀU KIỆN — chỉ kích hoạt
 # risk-auditor khi đối soát cơ học phía trên đã phát hiện lệch, không chạy tốn kém mỗi
 # ngày. Dispatch headless (không phải Agent() — cron không có phiên Claude sống).
+#
+# Post-condition check (khảo sát vận hành 2026-08-01, mike/kb/dispatch_output_contract.md):
+# label gắn ngày (account+plan_date) dùng 1 lần, không có "lần gọi lại đúng label" tự nhiên —
+# thay vào đó SWEEP marker CŨ mỗi lần script này chạy (hàng ngày), đúng mẫu ops_autofix.sh's
+# STARTED_ISO/CONFIRM cache. Đặt TRƯỚC block dispatch mới để không tự confirm nhầm bằng
+# chính lần dispatch hôm nay.
+_MISMATCH_MARKER="$ROOT/state/autofix/eod-mismatch-${ACCOUNT}.started_iso"
+if [ -s "$_MISMATCH_MARKER" ]; then
+  _prev_started="$(cat "$_MISMATCH_MARKER" 2>/dev/null || true)"
+  if [ -n "$_prev_started" ] && ! python3 "$ROOT/bin/mike_json.py" has-event "$ROOT/bus" Spyros \
+       "$_prev_started" "finding:eod-mismatch-audit: $ACCOUNT" >/dev/null 2>&1; then
+    "$ROOT/bin/notify.sh" "🟡 eod_trading_report ($ACCOUNT): kiểm toán risk-auditor cho lệch đối soát TRƯỚC ($_prev_started) chưa thấy finding xác nhận — có thể đã lạc đề/chết im." >/dev/null 2>&1 || true
+  fi
+  rm -f "$_MISMATCH_MARKER"   # đã kiểm 1 lần, không lặp cảnh báo mỗi ngày cho cùng 1 marker cũ
+fi
 MISMATCH_FILE="$WC_ROOT/data/execution_logs/eod_mismatch_${ACCOUNT}_${PLAN_DATE}.json"
 if [ -f "$MISMATCH_FILE" ]; then
   _discord_thread="1522576692638388364"  # Trading report
   "$ROOT/bin/notify_thread.sh" "🔍 Phát hiện lệch đối soát — tự động kích hoạt kiểm toán độc lập (risk-auditor)..." "$_discord_thread" 2>/dev/null || true
+  mkdir -p "$ROOT/state/autofix"
+  date -u +%Y-%m-%dT%H:%M:%SZ > "$_MISMATCH_MARKER"
   DISPATCH_FROM=Mafee "$ROOT/bin/dispatch.sh" Spyros \
     "$(cat <<PROMPT
 EOD reconciliation vừa phát hiện LỆCH giữa state nội bộ và broker thật cho account $ACCOUNT ngày $PLAN_DATE (xem chi tiết: $MISMATCH_FILE). Bạn là risk-auditor — kiểm toán độc lập việc này:
@@ -432,7 +449,7 @@ EOD reconciliation vừa phát hiện LỆCH giữa state nội bộ và broker 
 3. Điều tra nguyên nhân khả dĩ: có process bot_execute.py chạy trùng không (kiểm tra log run_bot*/autoheal* quanh thời điểm), hay lý do khác (cancel/reprice, modify-order quirk DNSE, lỗi đồng bộ khác)?
 4. Đánh giá tác động: lệch làm portfolio vượt giới hạn trading_rules.json nào không (concentration, gross exposure)?
 5. Kết luận rõ: đây có phải sự cố NGHIÊM TRỌNG cần escalate ngay cho user, hay là sai lệch nhỏ/false-positive của chính cơ chế đối soát (vd do lệnh bị modify đổi order id, dedup sai)?
-Báo cáo ngắn gọn lên bus + Discord Trading report topic (1522576692638388364). Đây là kiểm toán READ-ONLY — không sửa code/state/lệnh gì.
+Báo cáo ngắn gọn lên bus + Discord Trading report topic (1522576692638388364). BẮT BUỘC (hợp đồng đầu ra máy đọc được, xem mike/kb/dispatch_output_contract.md): kết thúc bằng đúng lệnh sau, nguyên văn topic — mike/bin/append_event.sh Spyros finding "eod-mismatch-audit: $ACCOUNT" "<JSON: plan_date, ket_luan, muc_do_nghiem_trong>". Đây là kiểm toán READ-ONLY — không sửa code/state/lệnh gì.
 PROMPT
 )" --bg --thread "$_discord_thread" --timeout 900 2>&1 || true
 fi

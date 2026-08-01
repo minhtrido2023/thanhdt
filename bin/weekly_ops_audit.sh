@@ -20,6 +20,18 @@ ARCH_THREAD="1521475726329516122"
 log() { echo "[$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%dT%H:%M:%S%z)] $*" | tee -a "$LOG"; }
 log "=== weekly_ops_audit START ==="
 
+# Post-condition check của LẦN CHẠY TUẦN TRƯỚC (khảo sát vận hành 2026-08-01, xem
+# kb/dispatch_output_contract.md) — job này chạy `&` fire-and-forget từ cron, KHÔNG có "lần
+# gọi lại" tự nhiên trong ngày như ops_autofix.sh; điểm đúng để tự kiểm là ĐẦU lần chạy TUẦN
+# SAU (cùng nguyên tắc kb_nightly.sh Phase 0b). Cửa sổ 9 ngày (rộng hơn chu kỳ 7 ngày 1 chút,
+# chống lệch giờ chạy) — không chặn dispatch tuần này dù tuần trước lỗi, chỉ báo rõ.
+SINCE_LAST_WEEK="$(TZ=UTC date -u -d '9 days ago' +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || true)"
+if [ -n "$SINCE_LAST_WEEK" ] && ! python3 "$ROOT/bin/mike_json.py" has-event "$ROOT/bus" Mike \
+     "$SINCE_LAST_WEEK" "decision:weekly-ops-audit" >/dev/null 2>&1; then
+  log "WARNING: không tìm thấy decision 'weekly-ops-audit' nào trong 9 ngày qua — lần chạy tuần trước có thể đã lạc đề/chết im."
+  "$ROOT/bin/notify.sh" "🟡 weekly_ops_audit: KHÔNG tìm thấy decision 'weekly-ops-audit' nào trong 9 ngày qua — lần chạy tuần trước có thể đã lạc đề/chết im. Kiểm logs/weekly_ops_audit.log." >/dev/null 2>&1 || true
+fi
+
 # Prompt xây bằng heredoc QUOTED ('PROMPT_EOF') — cố tình, để loại hẳn lớp lỗi vừa vá 2 lần
 # hôm nay (unescaped " / ` bên trong chuỗi bash double-quoted làm dispatch.sh nhận sai
 # argument hoặc bash cố thực thi 1 đoạn text như lệnh). Heredoc quoted không bash-parse bất

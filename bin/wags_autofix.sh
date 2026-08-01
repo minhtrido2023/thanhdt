@@ -145,10 +145,13 @@ KNOWN_ISSUE="$(python3 "$ROOT/bin/incident_lookup.py" "$LABEL" "$DETAILS" 2>/dev
 # Pipeline chạy nền tách session (setsid) — caller (cron/Mike turn) không bị giữ; job
 # board + bus vẫn theo dõi được từng bước (nguyên tắc MIKE.md §1: không canh foreground).
 PIPELOG="$ROOT/logs/wags_pipeline_$(date -u +%Y%m%d_%H%M%S).log"
+# Mốc THẬT trước khi dispatch (không phải "N giờ trước") — dùng cho has-event ở bước 1.5
+# dưới, đúng nguyên tắc mike/kb/dispatch_output_contract.md (chống khớp nhầm finding cũ).
+DISPATCH_START_ISO="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 setsid bash -c '
   ROOT="'"$ROOT"'"; LABEL='"$(printf %q "$LABEL")"'; DETAILS='"$(printf %q "$DETAILS")"'
   KNOWN_ISSUE='"$(printf %q "$KNOWN_ISSUE")"'
-  ARCH_TOPIC="'"$ARCH_TOPIC"'"
+  ARCH_TOPIC="'"$ARCH_TOPIC"'"; DISPATCH_START_ISO="'"$DISPATCH_START_ISO"'"
   _notify_arch() { "$ROOT/bin/notify_thread.sh" "$1" "$ARCH_TOPIC" >/dev/null 2>&1 || true; }
 
   # 1) Wags fix (đồng bộ trong pipeline nền; timeout rộng vì job chẩn đoán sâu). Wags
@@ -165,6 +168,17 @@ $KNOWN_ISSUE
 }
 Quy trình: (1) chẩn đoán từ artifact thật (jobs.sh list cột HB_AGE, trace.sh, bus, log) — đọc kb/ops_runbook.md + working memory của bạn trước (nếu có mục \"khớp từ khoá\" ở trên, tự xác nhận có thực sự cùng root cause không trước khi áp lại cách sửa cũ); (2) SỬA trong ranh giới: được sửa tooling điều phối (dispatch.sh/jobs.sh/mike_json.py/ops_autofix/wags_autofix/checker) sau khi test, TUYỆT ĐỐI không đụng trading (plan/executor/cron thực thi/trading_rules); (3) verify artifact sau sửa (chạy lại lệnh lỗi, xác nhận hết); (4) ghi bus finding topic bắt đầu bằng '"'"'wags-fix: $LABEL'"'"' kèm root_cause/fix/verify/commit + field \"files_changed\": [danh sách ĐẦY ĐỦ đường dẫn tương đối bạn đã sửa, vd [\"bin/dispatch.sh\",\"MIKE.md\"]] — field này quyết định fix có cần arch-reviewer audit đầy đủ hay không, KHÔNG được bỏ trống hay báo thiếu file." --timeout 1500 --retries 0 --model opus 2>&1)" || true
   echo "$out" >> "'"$PIPELOG"'"
+
+  # 1.5) Kiểm tường minh Wags có thật sự ghi finding "wags-fix: $LABEL" không (khảo sát vận
+  #      hành 2026-08-01, xem mike/kb/dispatch_output_contract.md). wags_risk_tier.py bước 2
+  #      dưới ĐÃ fail-safe về "high" khi không tìm thấy finding (đã verify code), nên gap
+  #      thực tế nhỏ hơn khảo sát ban đầu nêu — nhưng check tường minh ở đây làm hợp đồng RÕ
+  #      RÀNG thay vì dựa ngầm vào fail-safe của 1 script khác, và báo sớm hơn (ngay bước
+  #      này) thay vì đợi hết cả chuỗi risk-tier + arch-review mới lộ ra là INCONCLUSIVE.
+  if ! python3 "$ROOT/bin/mike_json.py" has-event "$ROOT/bus" Wags "$DISPATCH_START_ISO" \
+       "finding:wags-fix: $LABEL" >>"'"$PIPELOG"'" 2>&1; then
+    _notify_arch "🟡 [wags-autofix] Wags KHÔNG ghi finding '"'"'wags-fix: $LABEL'"'"' sau dispatch — có thể đã lạc đề/chết im. Tiếp tục qua bước phân loại rủi ro (fail-safe mặc định high nếu không tìm thấy)."
+  fi
 
   # 2) Phân loại rủi ro (cost-opt #2, 2026-07-17): fix chỉ đụng path an toàn tuyệt đối
   #    (kb/docs, notify.sh, chính wags_autofix.sh/ops_autofix.sh/jobs.sh) -> bỏ qua
