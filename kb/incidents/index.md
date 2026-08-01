@@ -4,7 +4,7 @@ title: Incidents — Mike fleet (sổ postmortem, cấu trúc OKF)
 owner: Mike fleet (mọi agent ghi; daily_retro.sh ghi entry RETRO hằng đêm)
 format: OKF (Open Knowledge Format) — markdown + YAML frontmatter, 1 sự cố = 1 file
 migrated_from: kb/INCIDENTS.md (single-file 408KB, migrate → OKF 2026-07-30 job Winston_20260730_144031)
-entries: 69 file (49 sự cố + 19 RETRO + 1 mục open-items chung)
+entries: 70 file (50 sự cố + 19 RETRO + 1 mục open-items chung)
 ---
 
 # Incidents — Mike fleet
@@ -27,6 +27,7 @@ commit hash where one exists).
 
 | Thư mục | Nội dung |
 |---|---|
+| [`2026-08/`](2026-08/) | Sự cố tháng 8/2026 — tên file `YYYY-MM-DD-<topic>.md` |
 | [`2026-07/`](2026-07/) | Sự cố tháng 7/2026 — tên file `YYYY-MM-DD-<topic>.md` |
 | [`2026-06/`](2026-06/) | Sự cố tháng 6/2026 |
 | [`retro/`](retro/) | Entry **RETRO** hằng ngày (tổng hợp/phân loại sự cố cả ngày do `bin/daily_retro.sh` sinh) — `retro-YYYY-MM-DD.md` |
@@ -72,6 +73,11 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 ## Sự cố (mới nhất trước)
 
+### 2026-08
+
+| Ngày | Sự cố | status |
+|---|---|---|
+| 2026-08-01 | [2026-08-01: daily_retro.sh crashed silently 2 đêm liên tiếp (07-31, 08-01) — bug quoting do chính commit migrate OKF gây ra](2026-08/2026-08-01-daily-retro-quoting-bug-silent-2day-outage.md) | fixed |
 
 ### 2026-07
 

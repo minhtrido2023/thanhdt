@@ -111,7 +111,7 @@ QUY TRÌNH BẮT BUỘC (đọc bằng chứng thật, không suy đoán):
    quên ghi answer dù đã làm xong thật).
 3. Với MỖI sự cố tìm thấy, trả lời chính xác 3 câu bằng cách đọc lịch sử sổ sự cố
    ('grep -rn <từ khoá> kb/incidents/' tìm root-cause tương tự các ngày trước, hoặc
-   'python3 bin/incident_lookup.py "<label>" "<chi tiết>"' — KHÔNG đoán từ trí nhớ):
+   'python3 bin/incident_lookup.py \"<label>\" \"<chi tiết>\"' — KHÔNG đoán từ trí nhớ):
    a. MỚI hoàn toàn hay TÁI DIỄN (cùng dạng lỗi đã xảy ra ngày nào trước — trích dẫn
       entry cũ nếu có)?
    b. Fix đã HOÀN CHỈNH (verify được, đóng hết đường tái phát) hay còn HỞ (nêu rõ residual
