@@ -508,3 +508,38 @@
 
 ## Consolidation 2026-08-01T03:07:01Z
 - [2026-08-01T02:15:46Z] Taylor/status — fa_ratings-refresh-ok: {"rows": 12630}
+
+## Consolidation 2026-08-01T08:01:29Z
+- [2026-08-01T07:34:28Z] Taylor/heartbeat — Taylor_20260801_073402: {"status": "in_progress", "note": "orient: doc CAPIT impl trong pt_v23_audit_2014.py + data_registry rating-8l"}
+- [2026-08-01T07:35:03Z] Taylor/heartbeat — Taylor_20260801_073402: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260801_073402", "source": "watcher"}
+- [2026-08-01T07:36:38Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "in_progress", "note": "Doc engine CAPIT (pt_v23_audit_2014.py add_capit_arm/capit_basket) + bao cao sizing 07-31 de tranh lap loi PBO"}
+- [2026-08-01T07:37:11Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260801_073610", "source": "watcher"}
+- [2026-08-01T07:38:11Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260801_073610", "source": "watcher"}
+- [2026-08-01T07:39:12Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260801_073610", "source": "watcher"}
+- [2026-08-01T07:39:57Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "in_progress", "note": "Da xac minh premise: NCT/SAB ROT FLOOR do FSCORE (3/5<6), ROE_Min5Y+ROIC5Y van rat cao; 8L rating KHONG rot (NCT 1->2). Dang wire quality_exit_dates vao simulator (default off)"}
+- [2026-08-01T07:40:12Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260801_073610", "source": "watcher"}
+- [2026-08-01T07:41:12Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260801_073610", "source": "watcher"}
+- [2026-08-01T07:42:12Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260801_073610", "source": "watcher"}
+- [2026-08-01T07:43:12Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260801_073610", "source": "watcher"}
+- [2026-08-01T07:44:12Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260801_073610", "source": "watcher"}
+- [2026-08-01T07:45:12Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260801_073610", "source": "watcher"}
+- [2026-08-01T07:45:24Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "in_progress", "note": "Panel mo ta XONG (85 holding/15 event): floornf (ROE_Min5Y+ROIC5Y) KHONG BAO GIO ban (0/85) => tin hieu rot san 100%% do FSCORE; exit-on-flag AM o MOI bien the (floor K1 -6.6pp). Dang chay 5 leg engine A/B."}
+- [2026-08-01T07:46:13Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260801_073610", "source": "watcher"}
+- [2026-08-01T07:47:13Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260801_073610", "source": "watcher"}
+- [2026-08-01T07:48:14Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260801_073610", "source": "watcher"}
+- [2026-08-01T07:49:04Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "in_progress", "note": "Panel + bao cao draft xong. Dang cho 5 leg engine A/B (portfolio-level CAGR/Sharpe/MaxDD) chay xong de dien bang muc 6."}
+- [2026-08-01T07:49:14Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260801_073610", "source": "watcher"}
+- [2026-08-01T07:50:14Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260801_073610", "source": "watcher"}
+- [2026-08-01T07:51:14Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20260801_073610", "source": "watcher"}
+- [2026-08-01T07:52:14Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20260801_073610", "source": "watcher"}
+- [2026-08-01T07:53:14Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20260801_073610", "source": "watcher"}
+- [2026-08-01T07:54:14Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20260801_073610", "source": "watcher"}
+- [2026-08-01T07:55:14Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20260801_073610", "source": "watcher"}
+- [2026-08-01T07:56:14Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20260801_073610", "source": "watcher"}
+- [2026-08-01T07:56:47Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "in_progress", "note": "start: orient CAPIT mechanism + data_registry lookup"}
+- [2026-08-01T07:57:14Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20260801_073610", "source": "watcher"}
+- [2026-08-01T07:58:14Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20260801_073610", "source": "watcher"}
+- [2026-08-01T07:58:34Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "in_progress", "note": "5/5 engine leg xong EXIT=0 selfcheck 0 VND, ctrl tai lap dung pin R3; dang viet §6 + per-year LOO"}
+- [2026-08-01T07:59:14Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "still_running", "elapsed_min": 23, "job_id": "Taylor_20260801_073610", "source": "watcher"}
+- [2026-08-01T08:00:15Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20260801_073610", "source": "watcher"}
+- [2026-08-01T08:01:15Z] Taylor/heartbeat — Taylor_20260801_073610: {"status": "still_running", "elapsed_min": 25, "job_id": "Taylor_20260801_073610", "source": "watcher"}
