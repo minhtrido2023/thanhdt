@@ -4,7 +4,7 @@ title: Incidents — Mike fleet (sổ postmortem, cấu trúc OKF)
 owner: Mike fleet (mọi agent ghi; daily_retro.sh ghi entry RETRO hằng đêm)
 format: OKF (Open Knowledge Format) — markdown + YAML frontmatter, 1 sự cố = 1 file
 migrated_from: kb/INCIDENTS.md (single-file 408KB, migrate → OKF 2026-07-30 job Winston_20260730_144031)
-entries: 73 file (53 sự cố + 19 RETRO + 1 mục open-items chung)
+entries: 74 file (54 sự cố + 19 RETRO + 1 mục open-items chung)
 ---
 
 # Incidents — Mike fleet
