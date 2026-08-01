@@ -160,7 +160,13 @@ việc của phiên này."
 _draft_valid() {
   local f="$1"
   [ -s "$f" ] || return 1
-  grep -q "^## RETRO — $TODAY" "$f"
+  # Chấp nhận CẢ '# RETRO —' lẫn '## RETRO —': prompt bước 1 (mục 4) ra lệnh viết 1 dấu #,
+  # các entry đã finalize trong kb/incidents/retro/ cũng dùng 1 dấu #. Bản gate đầu tiên
+  # chỉ khớp '##' → sẽ loại đúng cái draft ĐÚNG ĐỊNH DẠNG. Gate chưa từng chạy thật trước
+  # 2026-08-01 (thêm 07-30 00:48 ICT, sau lần chạy thành công cuối; 2 đêm sau đó script
+  # chết ở bug quoting 77cfe4ab trước khi tới đây) nên mismatch này chưa lộ ra.
+  # Vẫn giữ nguyên tính chất chống-lạc-đề: output lạc đề không tình cờ khớp header + ngày.
+  grep -qE "^#{1,2} RETRO — $TODAY" "$f"
 }
 
 rc1=0
@@ -174,7 +180,7 @@ for _attempt in 1 2; do
   if [ -s "$DRAFT_FILE" ]; then
     _bad="$ROOT/state/retro_rejected_${TODAY}_a${_attempt}.md"
     mv "$DRAFT_FILE" "$_bad"
-    log "WARNING: draft attempt $_attempt viết ra file nhưng SAI ĐỊNH DẠNG (thiếu header '## RETRO — $TODAY' — nghi lạc đề/trả nhầm task cũ). Giữ lại để chẩn đoán: $_bad (đầu file: $(head -c 200 "$_bad" | tr '\n' ' '))"
+    log "WARNING: draft attempt $_attempt viết ra file nhưng SAI ĐỊNH DẠNG (thiếu header '# RETRO — $TODAY' — nghi lạc đề/trả nhầm task cũ). Giữ lại để chẩn đoán: $_bad (đầu file: $(head -c 200 "$_bad" | tr '\n' ' '))"
   fi
   # Draft rỗng/sai định dạng: nếu do usage-limit thì DỪNG (transient quota, retry vô nghĩa) —
   # để block phân loại phía dưới xử lý calm-skip. Nếu KHÔNG phải usage-limit thì retry 1 lần
