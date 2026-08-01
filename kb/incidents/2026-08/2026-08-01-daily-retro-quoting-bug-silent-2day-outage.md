@@ -81,3 +81,7 @@ cho `dispatch.sh`) trong các file cron-driven (`daily_retro.sh`, `kb_nightly.sh
 `wags_autofix.sh`, `send_plan_report.sh`) nên chạy `bash -c 'source <(sed -n "START,ENDp" file); echo OK'`
 (hoặc tương đương) như 1 bước self-check tối thiểu trước khi commit — không thay được review độc
 lập, nhưng bắt được CHÍNH XÁC lớp lỗi này, rẻ hơn arch-reviewer nhiều.
+
+**Cập nhật cùng ngày:** áp dụng đúng cách tự-kiểm này khi sửa `kb_nightly.sh` (thêm opus%-alert)
+phát hiện thêm **2 lỗi CÙNG LỚP đã sống 2 TUẦN** làm cả review Friday/Saturday chết hẳn — nghiêm
+trọng hơn bug này nhiều. Xem [[2026-08-01-kb-nightly-friday-dispatch-silently-broken-2-weeks]].

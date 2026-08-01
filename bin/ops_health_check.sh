@@ -445,6 +445,23 @@ if dep_last is not None:
 else:
     lines.append("ℹ️ deposit_rate_vn freshness: không đọc được mốc cuối (bỏ qua).")
 
+# 9. daily_retro.sh freshness (thêm 2026-08-01, sau sự cố script crash âm thầm 2 đêm liền
+#    07-31/08-01 do lỗi quoting — kb/incidents/2026-08/2026-08-01-daily-retro-quoting-bug-
+#    silent-2day-outage.md). daily_retro.sh chạy 00:30 ICT, review NGÀY HÔM QUA (ICT) và ghi
+#    kb/incidents/retro/retro-<ngày đó>.md khi xong. Checker này chạy 08:20/12:45 ICT — đủ
+#    trễ để lần chạy 00:30 đêm qua chắc chắn đã xong (hoặc đã crash). Thiếu file = dấu hiệu
+#    daily_retro.sh crash/không hoàn tất — chính lớp lỗi mà bản thân RETRO được dựng ra để
+#    bắt, nhưng lại là nạn nhân của nó (crash trước khi kịp tự báo). WARN-only, KHÔNG tự
+#    sửa ở đây — rơi vào OTHER_WARN nên tự động dispatch ops_autofix.sh (Winston chẩn đoán+sửa).
+retro_yday = today_d - _timedelta(days=1)
+retro_file = os.path.join(wc_root, "mike", "kb", "incidents", "retro", f"retro-{retro_yday.isoformat()}.md")
+if os.path.exists(retro_file):
+    OK(f"daily_retro.sh: có entry cho {retro_yday} ({os.path.basename(retro_file)}).")
+else:
+    W(f"daily_retro.sh KHÔNG có entry RETRO cho {retro_yday} (thiếu {os.path.relpath(retro_file, wc_root)}) "
+      f"— nghi cron 00:30 ICT đêm qua crash/không hoàn tất (đúng lớp lỗi 08-01: quoting bug làm "
+      f"script chết trước khi kịp notify). Kiểm logs/daily_retro.log tìm lỗi bash gần nhất.")
+
 print("\n".join(lines))
 print(f"__WARN_COUNT__={warn}")
 PYEOF

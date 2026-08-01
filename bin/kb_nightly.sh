@@ -768,9 +768,21 @@ jobs+opus_jobs+fable_jobs+default_jobs). Sự cố thật: job count giảm 76% 
 compute TĂNG 150% vì %fable đi từ 0%→58% — chỉ đếm job/KB log đã KHÔNG bắt được, chỉ
 '$ROOT/bin/spend_report.py' bản có model-mix mới bắt được. Nếu %fable tổng (mọi category)
 ≥30% ở tuần mới nhất → đọc lại các dispatch fable thật (bus/jobs, field prompt_summary) xem
-có phải phần lớn là audit/fix routine (đáng lẽ Opus) hay thật sự "cực kỳ phức tạp" theo đúng
+có phải phần lớn là audit/fix routine (đáng lẽ Opus) hay thật sự \"cực kỳ phức tạp\" theo đúng
 ladder MIKE.md §Model routing — ghi nhận vào KNOWLEDGE.md nếu lệch, không tự sửa thói quen
 dispatch của Mike (đây là hành vi con người, không phải 1 lỗi code có thể fix 1 lần).
+5c. **Opus-drift check (thêm 2026-08-01, user yêu cầu sau khi %fable=0% nhưng %opus âm thầm đi
+từ ~14% (07-17) lên ~73% (07-31) — cùng dạng drift, khác tầng)**: cùng file, cột opus_jobs/
+(sonnet_jobs+opus_jobs+fable_jobs+default_jobs) MỖI tuần trong toàn bộ file (không chỉ tuần mới
+nhất). Flag nếu (a) opus% tuần mới nhất ≥60%, HOẶC (b) opus% tăng ≥20 điểm % so với 3 tuần trước
+(drift bền vững, không phải 1 tuần đột biến do 1 việc đơn lẻ). Nếu flag: lấy mẫu 5-8 dispatch
+opus gần nhất (bus/jobs/*.json field prompt/prompt_summary), tự hỏi ĐÚNG câu ladder MIKE.md
+§Model routing đặt ra — \"task thực sự nặng, cần planning nhiều mới dùng Opus\" (Q2/Q3), hay là
+việc cơ học/lookup/fix-1-script đáng lẽ Sonnet (Q1) nhưng bị chọn Opus theo phản xạ \"nghe có vẻ
+quan trọng\"? Ghi nhận tỷ lệ lệch vào KNOWLEDGE.md nếu có — cùng nguyên tắc như 5b: đây là hành
+vi con người (thói quen dispatch của Mike), không tự sửa thói quen, chỉ đo + báo cáo minh bạch
+để Mike tự điều chỉnh. KHÔNG cần ngưỡng cảnh báo riêng cho sonnet/default (2 tầng đó rẻ nhất,
+không phải nguồn drift chi phí).
 6. Role-scoped context drift check (MIKE.md §Context theo vai trò, 2026-07-17): đọc
 '$ROOT/kb/context_safety_core.md', 'context_execution_mini.md', 'context_planning_mini.md',
 'context_dataops_mini.md' — đối chiếu với KNOWLEDGE.md/current_ops.md mới nhất. Fact nào đã
@@ -778,7 +790,7 @@ dispatch của Mike (đây là hành vi con người, không phải 1 lỗi code
 mới ảnh hưởng thực thi/lập plan/data-ops) nhưng CHƯA lan sang (các) file role-scoped liên quan
 → sửa ngay, đúng file theo bảng trong MIKE.md (đừng sửa nhầm — fact riêng Mafee không thuộc
 context_planning_mini.md và ngược lại).
-7. **`kb/current_ops.md` bloat check (bài học sự cố context-bloat 2026-07-17 — file này phình
+7. **\`kb/current_ops.md\` bloat check (bài học sự cố context-bloat 2026-07-17 — file này phình
 0→36KB trong 3 tuần, đè phí token lên MỌI dispatch qua context_pack.md; ngưỡng nâng 20→28KB
 2026-07-30 sau khi context_pack.md tổng cũng nâng 20→45KB, xem kb/current_ops.md đầu file)**:
 đọc kích thước file ('wc -c $ROOT/kb/current_ops.md'). Nếu >28KB HOẶC có mục nào mô tả 1 sự cố đã ghi rõ 'FIXED'/
