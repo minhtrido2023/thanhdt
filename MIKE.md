@@ -74,9 +74,15 @@ suất cao sẽ tự chạy tiếp, nhưng nếu phiên tôi restart giữa ch�
 > **§8 rút gọn — 3 dòng phải nhớ (thêm 2026-07-20, sau sự cố `missed-wakeup-after-bg-dispatch`,
 > xem `kb/incidents/2026-07/2026-07-20-missed-wakeup-after-bg-dispatch.md` + job `Wags_20260720_121120`):**
 > 1. `dispatch.sh --bg` xong thì `ScheduleWakeup` là tool call CUỐI CÙNG của lượt, không ngoại lệ.
->    3 lần tỉnh ĐẦU dùng 240-270s (bắt job xong sớm); từ lần tỉnh thứ 4 trở đi mà job vẫn running
->    thì TĂNG DẦN khoảng cách (240→480→900→trần 1200s), không quay lại ngắn trừ khi có job MỚI
->    phát sinh trong batch.
+>    **Lần tỉnh ĐẦU: tra `state/wakeup_profile.json`** (sinh mỗi đêm bởi `bin/wakeup_profile.py`)
+>    theo khoá `"<to>|<model>|<effort>"` — có bucket → dùng `median_s` kẹp trong [90s, 1200s];
+>    không có → `global_fallback.median_s` kẹp tương tự; **file thiếu/hỏng → 240-270s như cũ,
+>    không bao giờ chặn**. Fan-out nhiều job → lấy `min(delay)` của cả batch.
+>    Từ lần tỉnh thứ 2 trở đi mà job vẫn running thì TĂNG DẦN khoảng cách
+>    (240→480→900→trần 1200s), không quay lại ngắn trừ khi có job MỚI phát sinh trong batch.
+>    *(Lý do bỏ "3 lần tỉnh đầu 240-270s" cố định: đo trên 1192 job thật, ladder cố định tỉnh
+>    thừa 21% và vẫn trễ hơn — job `Winston` đồng bộ median 16s vs job `Wags|opus|high` median
+>    751s không thể dùng chung 1 con số. Wags 2026-08-01, job `Wags_20260801_153657`.)*
 > 2. **Nếu trong cùng lượt bạn còn định viết một câu trả lời thực chất cho user — đó chính là lúc
 >    nguy hiểm nhất** (đo được từ 147 lượt: lượt QUÊN wakeup viết trung vị 1.755 ký tự văn xuôi
 >    sau dispatch, lượt NHỚ chỉ 343 ký tự — rủi ro gấp ~25 lần). Đặt `ScheduleWakeup` NGAY sau

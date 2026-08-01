@@ -700,6 +700,22 @@ elif [ -f "$_CTXBLOAT_STAMP" ]; then
     log "Context-bloat episode cleared."
 fi
 
+# ── Phase 4.7: hồ sơ thời lượng job → độ trễ wakeup thích ứng (Wags 2026-08-01) ──
+# Sinh state/wakeup_profile.json: median/p75 thời lượng job theo (agent|model|effort),
+# cửa sổ trượt 6 tuần, chỉ bucket n>=8. Mike ĐỌC file này để chọn độ trễ cho lần
+# ScheduleWakeup ĐẦU TIÊN sau dispatch --bg, thay cho ladder cứng 240-270s (MIKE.md §8).
+# Deterministic, không LLM, đo 0,07s trên 1294 job record → chạy MỖI ĐÊM (không phải chỉ
+# Thứ Bảy): profile chỉ hữu ích khi tươi, và với ngưỡng n>=8 thì 1 bucket mới (agent mới,
+# model routing đổi) vừa đủ mẫu hôm Thứ Hai sẽ phải chờ tới Thứ Bảy mới dùng được nếu chạy
+# hàng tuần — trong khi chi phí chạy hàng đêm gần bằng 0. Output nằm trong state/ (đã
+# gitignore) nên không đụng Phase 3 commit.
+# Đặt SAU Phase 1b3 (archive job record) là cố ý: script đọc CẢ bus/jobs/ lẫn
+# bus/jobs/archive/ nên thứ tự không đổi kết quả, nhưng chạy sau thì số liệu phản ánh đúng
+# board vừa được dọn.
+# Fail-safe: lỗi → chỉ log, KHÔNG chặn nightly; thiếu/hỏng file thì Mike tự rơi về ladder mặc định.
+log "Rebuilding wakeup duration profile → state/wakeup_profile.json..."
+python3 "$ROOT/bin/wakeup_profile.py" >> "$LOG" 2>&1 || log "wakeup_profile: lỗi (non-fatal, Mike dùng ladder mặc định)"
+
 # ── Phase 5: Friday = LLM editorial review ──────────────────────────────────
 DOW=$(date -u +%u)  # 1=Mon … 7=Sun; 5=Fri
 if [ "$DOW" -eq 5 ]; then
