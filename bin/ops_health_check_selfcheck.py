@@ -270,13 +270,61 @@ def case_fresh_question_is_pending():
         shutil.rmtree(root, ignore_errors=True)
 
 
+# ── Ca 10 (2026-07-31, audit kiến trúc fleet #14): câu hỏi wags-fix-not-confirmed:*
+#    <48h KHÔNG được re-trigger COORD_WARN — đây chính là input của vòng lặp Wags
+#    coord-fix tự nuôi quan sát được thật hôm 07-31 (arch-reviewer NEEDS_CHANGES → question
+#    → question đó tự nó lại là "câu hỏi tồn đọng" khiến ops_health_check dispatch LẠI
+#    wags_autofix cho ĐÚNG issue vừa NEEDS_CHANGES). Câu hỏi KHÁC (không phải wags-fix) vẫn
+#    phải routable như cũ — ca 9 ở trên đã khoá phần đó, ca này chỉ khoá phần MỚI.
+def case_wagsfix_not_confirmed_is_warn_only():
+    root, inbox = mkbus()
+    try:
+        write_events(os.path.join(inbox, "Wags.jsonl"),
+                     [ev("Wags", "question", "wags-fix-not-confirmed: coord-2026-07-31", ago(0, 3)),
+                      ev("Wags", "question", "coord-that-su-moi", ago(0, 1))])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        wagsfix_lines = [ln for ln in lines if "vòng wags-fix CHƯA CONFIRMED" in ln]
+        pending_lines = [ln for ln in lines if "trong 48h qua CHƯA thấy answer" in ln]
+        check("wags-fix-not-confirmed <48h: có dòng riêng, mang [WARN-ONLY]",
+              len(wagsfix_lines) == 1 and "[WARN-ONLY]" in wagsfix_lines[0]
+              and "wags-fix-not-confirmed: coord-2026-07-31" in wagsfix_lines[0], out)
+        check("wags-fix-not-confirmed <48h: KHÔNG lẫn vào dòng pending routable",
+              not any("wags-fix-not-confirmed" in ln for ln in pending_lines), out)
+        check("câu hỏi coordination KHÁC (không phải wags-fix) vẫn ở dòng pending routable",
+              len(pending_lines) == 1 and "coord-that-su-moi" in pending_lines[0], out)
+        check("câu hỏi coordination khác đó KHÔNG mang [WARN-ONLY]",
+              not any("[WARN-ONLY]" in ln for ln in pending_lines), out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 11: chỉ có wags-fix-not-confirmed (không có câu hỏi routable nào khác) — dòng
+#    "Không có câu hỏi nào đang chờ" KHÔNG được in (sẽ nói dối — vẫn có 1 mục đang chờ,
+#    chỉ là WARN-ONLY).
+def case_wagsfix_only_no_false_ok():
+    root, inbox = mkbus()
+    try:
+        write_events(os.path.join(inbox, "Wags.jsonl"),
+                     [ev("Wags", "question", "wags-fix-not-confirmed: coord-2026-07-31", ago(0, 3))])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        check("chỉ có wags-fix: KHÔNG in 'Không có câu hỏi nào đang chờ' (sẽ nói dối)",
+              "Không có câu hỏi (question) nào đang chờ xử lý" not in out, out)
+        check("chỉ có wags-fix: vẫn có dòng WARN-ONLY nêu rõ",
+              "vòng wags-fix CHƯA CONFIRMED" in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
 def main():
     print("ops_health_check_selfcheck: check #5 (backlog question) regression")
     for fn in (case_archived_question_visible, case_cross_layer_resolve,
                case_resolver_must_be_after, case_dedupe_hot_and_archive,
                case_no_crowd_out, case_small_pool_prints_all,
                case_corrupt_gz_warns, case_empty_archive_warns,
-               case_fresh_question_is_pending):
+               case_fresh_question_is_pending,
+               case_wagsfix_not_confirmed_is_warn_only, case_wagsfix_only_no_false_ok):
         fn()
     if FAILS:
         print(f"\nFAIL: {len(FAILS)} assertion hỏng")

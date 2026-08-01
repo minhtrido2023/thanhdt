@@ -238,6 +238,7 @@ AGED_NEWEST = 3           # … + 3 mục mới nhất
 WARN_ONLY = "[WARN-ONLY]"
 inbox_dir = os.path.join(wc_root, "mike", "bus", "inbox")
 pending_q = []
+pending_q_wagsfix = []   # xem chú thích ở khối "if pending_q_wagsfix" phía dưới
 aged_q = []
 if os.path.isdir(inbox_dir):
     # PHẢI quét CẢ archive: kb_nightly Phase 1b2 (EVENT_KEEP_DAYS=30) chuyển MỌI event cũ
@@ -336,7 +337,20 @@ if os.path.isdir(inbox_dir):
                 continue
             seen_q.add(key)
             if ts_dt >= cutoff:
-                pending_q.append(f"{agent}/{rec.get('topic')}")
+                # wags-fix-not-confirmed:* là câu hỏi TỰ chính pipeline wags_autofix sinh ra khi
+                # arch-reviewer verdict != CONFIRMED (xem bin/wags_autofix.sh). Đưa nó vào
+                # pending_q (routable) như mọi câu hỏi khác từng khiến COORD_WARN dispatch LẠI
+                # wags_autofix cho ĐÚNG issue vừa NEEDS_CHANGES — vòng phản hồi dương tự nuôi
+                # (audit §14 kiến trúc fleet 2026-07-31, Fable plan + Opus critique: "output
+                # của vòng lặp là input của vòng kế tiếp"). Comment thiết kế gốc của
+                # wags_autofix.sh đã NÓI RÕ ý định "không tự ép vòng 2 vô hạn — con người quyết"
+                # nhưng nhánh dispatch ở dưới (COORD_WARN) không tôn trọng ý định đó cho đúng
+                # loại câu hỏi này. Tách riêng + gắn WARN_ONLY: vẫn hiện trong báo cáo cho
+                # người thấy, KHÔNG tự re-trigger — người/Mike quyết vòng kế tiếp tường minh.
+                if str(rec.get("topic") or "").startswith("wags-fix-not-confirmed:"):
+                    pending_q_wagsfix.append(f"{agent}/{rec.get('topic')}")
+                else:
+                    pending_q.append(f"{agent}/{rec.get('topic')}")
             else:
                 age_d = (_now - ts_dt).days
                 aged_q.append((age_d, f"{agent}/{rec.get('topic')} ({age_d}d)"))
@@ -349,8 +363,13 @@ if os.path.isdir(inbox_dir):
           f"{ {k: v for k, v in sorted(read_errors.items())} }")
 if pending_q:
     W(f"Có {len(pending_q)} câu hỏi (question) trong 48h qua CHƯA thấy answer tương ứng: {pending_q}")
-else:
+elif not pending_q_wagsfix:
     OK("Không có câu hỏi (question) nào đang chờ xử lý trong 48h qua.")
+if pending_q_wagsfix:
+    W(f"{WARN_ONLY} {len(pending_q_wagsfix)} vòng wags-fix CHƯA CONFIRMED trong 48h qua — KHÔNG tự "
+      f"re-trigger (đã qua ít nhất 1 vòng fix+arch-review, lặp tự động là vòng lặp tự nuôi vô "
+      f"nghĩa — người/Mike quyết vòng kế tiếp tường minh, hoặc chờ cooldown hôm sau tự thử lại): "
+      f"{pending_q_wagsfix}")
 if aged_q:
     aged_q.sort(key=lambda x: -x[0])   # cũ nhất trước
     if len(aged_q) <= AGED_SHOW_ALL_UPTO:
