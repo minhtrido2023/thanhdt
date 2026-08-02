@@ -4,8 +4,17 @@
 **Tài khoản 1:** SpaceX · DNSE, số hiệu 0002023347 · V2.4 live từ 01/07/2026 (có margin)
 **Tài khoản 2:** ZaloPay · DNSE, số hiệu 0001743768 · V2.4 live từ 06/07/2026 (cash-only, không margin)
 **Chiến lược:** V2.4 (2 book BAL/LAG + parking custom30V tại NEUTRAL + rổ CAPIT bear-washout)
-**Ngày lập báo cáo:** 01/08/2026 · **Người lập:** Taylor (Quant) — số liệu đối soát qua pipeline xác minh chuẩn (Mục 8)
+**Ngày lập báo cáo:** 01/08/2026 · **Bản sửa:** 02/08/2026 · **Người lập:** Taylor (Quant) — số liệu đối soát qua pipeline xác minh chuẩn (Mục 8)
 **Đối tượng:** Báo cáo hiệu suất & vận hành — có thể chia sẻ với nhà đầu tư
+
+> ## 🔧 BẢN SỬA 02/08/2026 — ĐIỀU CHỈNH CỔ TỨC TIỀN MẶT
+> Bản đầu tiên (01/08) tính lãi/lỗ danh mục bằng **giá đã hồi tố điều chỉnh cổ tức** trừ **giá vốn
+> thô**, tức trừ phần cổ tức hai lần → **báo lỗ nặng hơn thực tế**. Số đã sửa: SpaceX
+> **−94.079.443 (−9,90%) → −81.915.443 (−8,62%)** (Mục 5); ZaloPay phần bot mua
+> **−33.737.560 (−7,75%) → −27.291.500 (−6,27%)** (Mục 6.4).
+> **NAV cuối kỳ, giá trị danh mục, số dư tiền mặt và mọi lệnh giao dịch: KHÔNG đổi** — tiền cổ tức
+> vốn đã nằm trong số dư tài khoản. Công bố đầy đủ nguyên nhân + một sai sót thứ hai vừa phát hiện
+> (chuỗi NAV đếm hai lần cổ tức đúng ngày chốt quyền): **Mục 7.5**.
 
 > ⚠️ **BÁO CÁO NỘP CHẬM 8 NGÀY — công bố thẳng, không giấu.** Báo cáo tuần này lẽ ra phát hành
 > ngày 25–26/07. Cơ chế cảnh báo "báo cáo tuần quá hạn" **có chạy** nhưng cảnh báo bị chôn trong
@@ -242,9 +251,22 @@ không bán bớt ngân hàng, mà **pha loãng** nó bằng một nhóm tài s�
 cải thiện thật về đa dạng hoá, nhưng **không** làm giảm tổng rủi ro thị trường — tổng tỷ trọng cổ
 phiếu vẫn tăng (Mục 2.2).
 
-**Lãi/lỗ chưa thực hiện cuối kỳ:** giá vốn thật 950.720.443 → thị giá 856.641.000 *(tính theo giá
-đã điều chỉnh cổ tức)* = **−94.079.443 (−9,90%)**. Con số này phản ánh việc phần lớn danh mục được
-mua trong tháng 7 — ngay trước nhịp giảm 9,7% của thị trường.
+**Lãi/lỗ cuối kỳ — 🔧 ĐÃ SỬA 02/08 (số cũ sai, xem Mục 9):**
+
+| | VND | % giá vốn |
+|---|---:|---:|
+| Giá vốn thật | 950.720.443 | |
+| Thị giá 24/07 **(giá thật trên sàn)** | 863.930.000 | |
+| → Lãi/lỗ do giá | **−86.790.443** | −9,13% |
+| + Cổ tức tiền mặt đã nhận/chờ về (MBB, BID, CTG, VCB) | **+4.875.000** | |
+| **= Tổng lãi/lỗ** | **−81.915.443** | **−8,62%** |
+
+*Số cũ công bố: −94.079.443 (−9,90%) — sai do lấy **giá đã điều chỉnh cổ tức** (856.641.000) trừ
+**giá vốn thô**, tức trừ phần cổ tức hai lần. Nguyên nhân và cách sửa: Mục 7.5.*
+
+Con số này phản ánh việc phần lớn danh mục được mua trong tháng 7 — ngay trước nhịp giảm 9,7% của
+thị trường. *(Cổ tức NCT 4,0tr và SAB 3,3tr **chưa** được cộng ở đây: tại 24/07 giá cổ phiếu vẫn còn
+bao gồm quyền nhận cổ tức, cộng thêm sẽ là đếm hai lần — hai khoản này vào số của kỳ sau.)*
 
 ---
 
@@ -340,12 +362,27 @@ là giảm rủi ro tập trung, chấp nhận hiện thực hoá lỗ. Chương
 | **NAV** | | **849.855.112** | 100% | | Active NAV (loại DGC): **481.355.112** |
 
 \* NCT tính theo giá thực tế phiên 24/07 (92.800), chưa trừ cổ tức 8.000đ/cp có hiệu lực từ 27/07 —
-xem giải thích ở Mục 7.2. Cộng dồn: cổ phiếu 822.474.300 + tiền 27.380.812 = **849.855.112** ✓ khớp
+xem giải thích ở Mục 7.3. Cộng dồn: cổ phiếu 822.474.300 + tiền 27.380.812 = **849.855.112** ✓ khớp
 từng đồng với chuỗi NAV đã xác minh.
 
-**Lãi/lỗ chưa thực hiện phần bot mua** (13 mã có lịch sử khớp nội bộ, giá vốn thật đã xác minh):
-giá vốn 435.098.300 → thị giá 401.360.740 = **−33.737.560 (−7,75%)**. DGC và VPB (vị thế legacy)
-**không** nằm trong con số này — xem Mục 8.
+**Lãi/lỗ phần bot mua — 🔧 ĐÃ SỬA 02/08 (số cũ sai, xem Mục 7.5):** 13 mã có lịch sử khớp nội bộ,
+giá vốn thật đã xác minh. DGC và VPB (vị thế legacy) **không** nằm trong con số này — xem Mục 8.
+
+| | VND | % giá vốn |
+|---|---:|---:|
+| Giá vốn thật | 435.098.300 | |
+| Thị giá 24/07 **(giá thật trên sàn)** | 406.569.300 | |
+| → Lãi/lỗ do giá | **−28.529.000** | −6,56% |
+| + Cổ tức tiền mặt đã nhận/chờ về (BID, CTG, VCB) | **+1.237.500** | |
+| **= Tổng lãi/lỗ** | **−27.291.500** | **−6,27%** |
+
+*Số cũ công bố: −33.737.560 (−7,75%) — cùng một lỗi như phần SpaceX: lấy **giá đã điều chỉnh cổ tức**
+(401.360.740) trừ **giá vốn thô**. Chênh lệch 5.208.560đ chính là phần điều chỉnh NCT/SAB nêu ở
+Mục 7.3.*
+
+*(MBB **không** có cổ tức ở đây: ZaloPay mua MBB sau ngày chốt quyền 09/07 nên không được hưởng.
+Cổ tức NCT 2.984.000đ và SAB 2.232.000đ **chưa** cộng: tại 24/07 giá cổ phiếu vẫn còn bao gồm quyền
+nhận cổ tức — hai khoản này vào số của kỳ sau.)*
 
 ---
 
@@ -376,7 +413,8 @@ ngẫu nhiên**, cần tìm nguyên nhân gốc chứ không chỉ vá dữ li�
 **hạn 08/08/2026**.
 
 ### 7.3 Chênh lệch giá do điều chỉnh cổ tức NCT/SAB (KHÔNG phải lỗi — cần biết để đọc số cho đúng)
-NCT và SAB **giao dịch không hưởng cổ tức từ 27/07** (NCT 8.000đ/cp, SAB 2.990đ/cp). Cơ sở dữ liệu
+NCT **giao dịch không hưởng cổ tức từ 27/07** (8.000đ/cp) và SAB **từ 28/07** (3.000đ/cp). *(🔧 Sửa
+02/08: bản cũ ghi SAB "27/07, 2.990đ" — sai cả ngày lẫn số tiền, nguyên nhân ở Mục 7.5.)* Cơ sở dữ liệu
 thị trường **hồi tố điều chỉnh giá lịch sử** về sau ngày này, nên nếu hôm nay tính lại NAV ngày
 24/07 bằng giá đã điều chỉnh, kết quả sẽ **thấp hơn 7.289.000đ (SpaceX)** và **5.208.560đ (ZaloPay)**
 so với NAV thật đã ghi nhận. Đã kiểm chứng đối chiếu **khớp đến từng đồng**:
@@ -395,6 +433,46 @@ Lỗi "công cụ đối soát không lọc theo tài khoản" nêu ở báo cá
 từ cấu hình nếu không truyền) và **báo lỗi thay vì lấy nhầm** khi không tìm được bản ghi đúng tài
 khoản. Báo cáo này đã chạy cả 2 công cụ với `--account-no` tường minh cho cả 2 tài khoản, kết quả
 **Verified = True, 0 lệch khối lượng**.
+
+### 7.5 🔧 BẢN SỬA 02/08/2026 — lãi/lỗ theo mã tính THIẾU phần cổ tức tiền mặt
+
+**Chuyện gì đã xảy ra.** Bản phát hành đầu tiên tính lãi/lỗ danh mục bằng công thức
+`(thị giá cuối kỳ − giá vốn) / giá vốn`, trong đó **thị giá lấy từ cột giá đã hồi tố điều chỉnh cổ
+tức** còn **giá vốn là giá khớp thô đã trả thật**. Trộn hai hệ quy chiếu giá như vậy làm phần cổ tức
+bị **trừ hai lần**, khiến danh mục bị **báo lỗ nặng hơn thực tế**.
+
+| Tài khoản | Chỉ tiêu | Số CŨ (sai) | Số MỚI (đúng) | Chênh |
+|---|---|---:|---:|---:|
+| SpaceX | Lãi/lỗ cuối kỳ (Mục 5) | −94.079.443 (−9,90%) | **−81.915.443 (−8,62%)** | +1,28pp |
+| ZaloPay | Lãi/lỗ phần bot mua (Mục 6.4) | −33.737.560 (−7,75%) | **−27.291.500 (−6,27%)** | +1,48pp |
+
+Số mới gồm hai phần được tách rõ: **lãi/lỗ do giá** (so với giá **thô** trên bảng điện) **+ cổ tức
+tiền mặt** đã nhận/chờ về tính đến 24/07 (SpaceX 4.875.000đ từ MBB/BID/CTG/VCB; ZaloPay 1.237.500đ
+từ BID/CTG/VCB). Cổ tức NCT/SAB **không** nằm trong kỳ này vì ngày chốt quyền rơi vào 27–28/07.
+
+**KHÔNG thay đổi:** NAV cuối kỳ, giá trị danh mục, số dư tiền mặt, mọi lệnh mua/bán và giá khớp —
+tiền cổ tức vốn đã nằm sẵn trong số dư tài khoản. Sai sót chỉ ở **cách chia lãi/lỗ cho từng mã**.
+
+**Sai sót thứ hai phát hiện khi rà soát — chuỗi NAV đếm hai lần cổ tức đúng ngày chốt quyền.**
+Công ty chứng khoán ghi khoản cổ tức phải thu vào cuối **ngày cuối cùng còn hưởng quyền**, trong khi
+giá dùng định giá danh mục ngày đó **vẫn là giá còn quyền** (đã bao gồm giá trị cổ tức). Tác vụ ghi
+NAV lấy tiền mặt = `totalCash` (đã gồm cổ tức phải thu) → **cộng hai lần** đúng phiên đó, và tự
+triệt tiêu ở phiên kế tiếp. Ngày 24/07 (cuối kỳ báo cáo này) là một trong các ngày bị ảnh hưởng:
+
+| Tài khoản | NAV 24/07 đã ghi | Đếm trùng (NCT) | NAV đúng |
+|---|---:|---:|---:|
+| SpaceX | 910.995.894 | 4.000.000 | **906.995.894** |
+| ZaloPay | 849.855.112 | 2.984.000 | **846.871.112** |
+
+Hệ quả: **NAV đầu kỳ của tuần kế tiếp bị ghi cao hơn thực tế**, nên tỷ suất tuần 20–24/07 hơi **tốt
+hơn** và tuần 27–31/07 hơi **xấu hơn** số đã công bố — tổng hai tuần **không đổi**. Chuỗi NAV lịch sử
+**chưa tự sửa** (`nav_history_*.csv` là dữ liệu vận hành production, sửa cần quy trình riêng) — đã
+đưa vào việc cần làm.
+
+**Chống tái diễn:** công cụ dùng chung `mike/bin/dividend_adjusted_return.py` (tự phát hiện sự kiện
+cổ tức, **bắt buộc đối soát sổ broker** trước khi đưa vào báo cáo, 16 phép tự kiểm) — bắt buộc dùng
+cho mọi tỉ suất per-position từ kỳ sau. Công bố đầy đủ nhất về sự cố này nằm ở **báo cáo tháng 7,
+Mục 8.4–8.5**.
 
 ---
 
@@ -435,6 +513,8 @@ vốn vị thế legacy trước khi có thể so sánh **tỷ suất sinh lời
 |---|---|---|
 | Tách cảnh báo "báo cáo quá hạn" ra khỏi log tổng hợp, gửi đích danh (Mục 7.1) | Mike | 08/08/2026 |
 | Bổ sung 2 dòng NAV thiếu 21–22/07 + kiểm tra "đủ dòng NAV mọi tài khoản" (Mục 7.2) | Winston | 08/08/2026 |
+| 🔧 **MỚI 02/08** — sửa `daily_nav_snapshot.py` để không đếm hai lần cổ tức đúng ngày chốt quyền + hiệu chỉnh các dòng NAV lịch sử bị ảnh hưởng (Mục 7.5) | Winston / Taylor | 08/08/2026 |
+| 🔧 **MỚI 02/08** — bắt buộc mọi tỉ suất per-position trong báo cáo đi qua `mike/bin/dividend_adjusted_return.py` (Mục 7.5) | Taylor | đã xong 02/08 |
 | Giữ rổ CAPIT đủ 60 phiên (đến ~mid-10/2026), **không cắt lỗ, không bán sớm** | Hệ thống (tự động) | ~15/10/2026 |
 | Hoàn tất trim VPB legacy về dưới trần 10% active NAV | Hệ thống (đã xong 27/07) | ✅ đã xong |
 | Hoàn tất chương trình gom TV1 (PECC1) — giới hạn giá ≤19.900 | Hệ thống + DollarBill | ✅ đã xong 29/07 |
