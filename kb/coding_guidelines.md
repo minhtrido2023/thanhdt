@@ -551,3 +551,24 @@ not wrongdoing by itself.
 **Not shipped:** enforcing this at `append_event.sh` (would touch every fleet-wide caller for a
 field only meaningful on question-closures). Documented convention + report, same tier as §7/
 §10/§11/§13 — judgment calls without a clean mechanical gate.
+
+## 21. Tỉ suất Lợi Nhuận Per-Position Trong Báo Cáo: BẮT BUỘC Cộng Lại Cổ Tức Tiền Mặt
+
+**Root cause (2026-08-02, 3 báo cáo client-facing tháng 7/2026 — tuần 20-24, tuần 27-31, tháng 7):**
+báo cáo tính lãi/lỗ từng mã bằng `(giá cuối kỳ − giá vốn)/giá vốn`. Ngày chốt quyền (ex-date), giá
+sàn giảm **đúng bằng** cổ tức — giá trị chuyển từ *giá cổ phiếu* sang *tiền mặt* — nên công thức đó
+chỉ bắt phần giá và **báo lỗ oan** cho mã trả cổ tức cao: NCT **−11,6% → −3,1%**, SAB **−8,1% →
+−1,7%**. Nghiêm trọng hơn con số: lỗi **đảo dấu một kết luận attribution** (rổ CAPIT bị mô tả "chỉ
+gánh 2,6% mức lỗ" trong khi thực tế **LÃI +5,66tr**). NAV tổng vẫn đúng (tiền cổ tức đã nằm trong
+`totalCash`) — đây chính là lý do lỗi sống sót: mọi phép đối soát NAV đều PASS.
+
+**Quy tắc:** mọi tỉ suất per-position trong bất kỳ báo cáo nào (ngày/tuần/tháng) **PHẢI** đi qua
+`mike/bin/dividend_adjusted_return.py` — không tự viết lại công thức, không suy cổ tức bằng hiệu
+`Close − Price` (quan hệ là phép NHÂN; hiệu số biến thiên theo giá và cho sai cả số tiền lẫn ex-date).
+Sự kiện chưa đối soát được với sổ broker bị gắn cờ `UNVERIFIED` và **CẤM** đưa vào báo cáo gửi nhà
+đầu tư — vì `Close/Price` không phân biệt được cổ tức tiền mặt với chia tách cổ phiếu.
+
+Chi tiết cơ chế, 4 cái bẫy cụ thể và cách kiểm chứng 3 nguồn độc lập:
+**`mike/kb/data_registry/price-volume/ticker_close_vs_price_dividend_adj.md`**. Bổ sung cho §6
+(provenance số liệu báo cáo), không thay thế: §6 lo "số này lấy từ nguồn có thẩm quyền chưa", §21 lo
+"công thức có bỏ sót cấu phần lợi nhuận nào không".

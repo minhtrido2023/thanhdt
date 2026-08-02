@@ -11,6 +11,7 @@ title: Giá / khối lượng cổ phiếu
 | [`corp_action_pending.md`](corp_action_pending.md) — data/corp_action_pending.json + data/corp_action_backlog.json | VANHANH |
 | [`dnse_api_live.md`](dnse_api_live.md) — DNSE API live (dnse_api.py secdef/latest_trade/positions/balances) | CANONICAL |
 | [`shares_outstanding_live.md`](shares_outstanding_live.md) — tav2_bq.shares_outstanding_live | CANONICAL |
+| [`ticker_close_vs_price_dividend_adj.md`](ticker_close_vs_price_dividend_adj.md) — cặp cột Close (đã điều chỉnh) vs Price (thô) trong tav2_bq.ticker | TRAP |
 | [`ticker_ohlcv_tables.md`](ticker_ohlcv_tables.md) — tav2_bq.ticker / ticker_1m / ticker_prune | CANONICAL |
 | [`ticker_prune.md`](ticker_prune.md) — tav2_bq.ticker_prune | TRAP |
 | [`universe_pit.md`](universe_pit.md) — lithe-record-440915-m9.tav2_mike.universe_pit | CANONICAL |
