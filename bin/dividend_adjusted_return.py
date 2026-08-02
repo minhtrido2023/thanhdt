@@ -376,6 +376,10 @@ def solve_from_broker(adjustments: list, accounts: dict, deltas=None, qtys=None)
                    for lb in accounts
                    if (adj.ticker, adj.last_cum_date) in qtys[lb] and (adj.ticker, adj.ex_date) in qtys[lb]
                    and qtys[lb][(adj.ticker, adj.last_cum_date)] != qtys[lb][(adj.ticker, adj.ex_date)]]
+        # ⚠️ DƯƠNG TÍNH GIẢ ĐÃ BIẾT: dấu hiệu này KHÔNG phân biệt được "thưởng CP" với "nhà đầu tư
+        # vừa mua/bán đúng ngày đó". Một lệnh khớp thật quanh ex-date sẽ nén cổ tức tiền mặt thật
+        # xuống 0. Sai theo hướng AN TOÀN (thiếu, không bao giờ thừa) nên giữ nguyên; xem selfcheck
+        # mục 13. Muốn tách đúng phải có lịch sử lệnh khớp, không suy được từ số lượng cuối ngày.
         if changed:
             adj.kind = "STOCK_SUSPECTED"
             adj.note = ("số lượng cổ phiếu đổi tại ex-date (" + "; ".join(changed)
@@ -684,7 +688,19 @@ def _selfcheck() -> int:
     _solve_offline([bid], ACCOUNTS)
     check("BID per_share vẫn đúng 450 (delta âm 17/07 đã bị loại)", bid.per_share, 450.0)
 
-    print("13) Tổng cộng lại phải khớp tiền cổ tức thật từng tài khoản:")
+    print("13) DƯƠNG TÍNH GIẢ đã biết: MUA/BÁN THẬT đúng cửa sổ ex-date cũng làm đổi openQuantity")
+    # quant-skeptic 2026-08-02: dấu hiệu `openQuantity` đổi KHÔNG phân biệt được "thưởng CP" với
+    # "nhà đầu tư vừa khớp lệnh". Kết quả là NÉN cổ tức tiền mặt thật xuống 0 — sai theo hướng AN
+    # TOÀN (thiếu, không bao giờ thừa), nhưng phải có test ghim lại để không ai tưởng là bug mới.
+    traded = _mk("CTG", "2026-07-23", "2026-07-22", 29700.0, 450.0)
+    _solve_offline([traded], {"SpaceX": ACCOUNTS["SpaceX"]},
+                   qty={"SpaceX": {("CTG", "2026-07-22"): 2300, ("CTG", "2026-07-23"): 2800}},
+                   delta={"SpaceX": {"2026-07-22": 1_035_000.0}})
+    same("CTG bị gắn nhầm STOCK_SUSPECTED khi vừa mua thêm", traded.kind, "STOCK_SUSPECTED")
+    check("→ cash_per_share = 0 (fail-closed: THIẾU cổ tức, không bao giờ THỪA)",
+          traded.cash_per_share, 0.0, tol=1e-9)
+
+    print("14) Tổng cộng lại phải khớp tiền cổ tức thật từng tài khoản:")
     check("SpaceX tổng", 2400 * 1000 + 1900 * 450 + 2300 * 450 + 1300 * 450 + 500 * 8000 + 1100 * 3000,
           12_175_000, tol=1)
     check("ZaloPay tổng (không có MBB — mua sau ex-date 09/07)",

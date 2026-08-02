@@ -142,7 +142,12 @@ Helper gắn cờ trạng thái xác minh:
 **Giới hạn còn lại (nói thẳng):** hệ vô định không tách được là **giới hạn dữ liệu** — DNSE không
 phát hành số dư cổ tức theo từng mã. `STOCK_SUSPECTED` dò bằng biến động `openQuantity` tại ex-date
 là dấu hiệu **yếu** (cổ phiếu thưởng thường về sau ex-date vài tuần) — sự kiện thưởng CP có thể lọt
-thành `UNVERIFIED` (an toàn: không cộng như tiền) chứ không được gắn nhãn đúng. Đường xác minh này
+thành `UNVERIFIED` (an toàn: không cộng như tiền) chứ không được gắn nhãn đúng. **Ngược lại cũng có
+dương tính giả**: một lệnh **mua/bán thật** khớp đúng cửa sổ ex-date cũng làm `openQuantity` đổi ⇒
+cổ tức tiền mặt thật bị gắn `STOCK_SUSPECTED` và **nén xuống 0**. Cả hai chiều đều sai theo hướng
+**thiếu, không bao giờ thừa** (fail-closed) — chấp nhận được cho báo cáo gửi NĐT, nhưng khi thấy một
+mã "mất" cổ tức thì kiểm tra xem hôm đó có giao dịch không trước khi nghi code hỏng
+(selfcheck mục 13 ghim ca này). Đường xác minh này
 chỉ phủ từ ngày bắt đầu ghi `dnse_raw_*.jsonl` (06/07/2026).
 
 ## Liên quan — lỗi NAV đếm hai lần cổ tức (khác lỗi trên, độc lập)
