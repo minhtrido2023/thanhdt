@@ -51,4 +51,10 @@ $DRIFT" 2>/dev/null || true
 fi
 rm -f /tmp/incidents_sync_check.$$
 
+# claude-code-discord-bridge upstream drift (2026-08-02, kb/incidents/2026-08/) — the shared
+# Discord bridge ALL Claude sessions depend on sat 115 commits / 3+ weeks behind origin with no
+# one watching, including 3 real security fixes. Detect+alert only (never auto-merge — the fix
+# needed real judgment on a genuine concurrency-lock conflict). Same "gắn vào nhịp có sẵn" slot.
+"$ROOT/bin/ccdb_bridge_drift_check.sh" >/dev/null 2>&1 || true
+
 exit 0  # never fail the cron slot itself — this is a checker, not a gate
