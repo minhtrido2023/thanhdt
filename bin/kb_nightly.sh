@@ -675,9 +675,72 @@ elif [ "$_CG_KB" -gt 40 ]; then
 fi
 mkdir -p "$ROOT/state"
 _CTXBLOAT_STAMP="$ROOT/state/ctxbloat_episode.txt"
+_CTXBLOAT_AUTOFIX_STAMP="$ROOT/state/ctxbloat_autofix_attempted.txt"
+
+# ── Auto-fix (2026-08-02, user directive — "làm luôn tự động khi vượt ngưỡng để giữ kỷ luật,
+# không hỏi lại"): a same-day breach now gets ONE automatic compression attempt per episode
+# before falling back to the question-escalation this phase always had. Bounded to exactly 1
+# attempt per _BREACH_KEY (tracked in $_CTXBLOAT_AUTOFIX_STAMP, separate from $_CTXBLOAT_STAMP)
+# so this can NEVER become the treadmill the first draft of this mechanism was reverted for
+# (see POSTSCRIPT above / arch-review 2026-07-30): a structurally-incompressible file (e.g.
+# context_pack.md, whose 45KB threshold was itself raised because canonical.md/projects/
+# INDEX.md content can't shrink without cutting facts) fails its one attempt and then sits in
+# human escalation exactly like before — it does not get re-dispatched every night.
+#
+# Safety gate is MECHANICAL, not the dispatched agent's self-report (coding_guidelines.md's own
+# "Enforcement policy" + §19 verify-before-done): bin/ctxbloat_fact_check.py diffs every
+# date/%/KB-VND/commit-sha/job-id token and every filename mention between the original file and
+# the agent's `.proposed` output — ANY dropped fact rejects the compression outright, matching
+# the existing kb/<file>.proposed convention (coding_guidelines.md §13) so a bad attempt never
+# touches the live file. Only "OVER" files are auto-fix candidates — "MISSING" means the file
+# itself vanished (publish_context.sh dead, or worse), a different failure that needs human eyes
+# immediately, not a compression job.
+_ctxbloat_autofix_one() {
+    local file="$1" limit_kb="$2" label="$3" old_kb="$4"
+    local proposed="${file}.proposed"
+    rm -f "$proposed"
+    log "AUTO-FIX: dispatching compression for $label (${old_kb}KB > ${limit_kb}KB)..."
+    DISPATCH_FROM=user "$ROOT/bin/dispatch.sh" Mike \
+"KB context-bloat auto-fix (tự động, kb_nightly.sh Phase 4.6, $(date -u +%Y-%m-%dT%H:%M:%SZ)).
+File \`$file\` (label: $label) đang ${old_kb}KB, vượt ngưỡng cứng ${limit_kb}KB.
+Nhiệm vụ DUY NHẤT: đọc TOÀN BỘ file, viết bản NÉN ra \`$proposed\` (file anh em cùng thư mục —
+quy ước kb/coding_guidelines.md §13, KHÔNG được sửa \`$file\` gốc, KHÔNG git commit gì cả).
+BẮT BUỘC tuân thủ, không có ngoại lệ: CHỈ được cắt câu văn/từ đệm THỪA (giải thích lặp lại,
+diễn giải dài dòng cho cùng 1 ý). TUYỆT ĐỐI KHÔNG xoá hoặc đổi bất kỳ: số liệu (%, KB, VND, pp),
+ngày tháng (YYYY-MM-DD), tên file/script/path, câu phát biểu rule/threshold, tên sự cố/incident
+ID. Nếu không chắc 1 câu là narrative hay fact — GIỮ NGUYÊN câu đó, đừng đoán.
+Mục tiêu: xuống dưới ${limit_kb}KB có biên độ an toàn (~2KB). Khi ghi xong \`$proposed\`, DỪNG —
+không làm gì thêm. kb_nightly.sh sẽ tự kiểm bằng công cụ cơ học (ctxbloat_fact_check.py, diff
+từng fact token giữa bản gốc và \`$proposed\`) rồi mới quyết định có áp dụng hay không; agent
+không tự quyết định việc này." \
+        --model opus --effort high --timeout 900 >> "$LOG" 2>&1 || true
+
+    if [ ! -s "$proposed" ]; then
+        log "AUTO-FIX FAILED: $label — dispatch không tạo được $proposed (rỗng/thiếu)."
+        return 1
+    fi
+    if ! python3 "$ROOT/bin/ctxbloat_fact_check.py" "$file" "$proposed" >> "$LOG" 2>&1; then
+        log "AUTO-FIX REJECTED: $label — ctxbloat_fact_check.py phát hiện mất fact, KHÔNG áp dụng. Chi tiết: $LOG"
+        rm -f "$proposed"
+        return 1
+    fi
+    local new_kb=$(( $(wc -c < "$proposed") / 1024 ))
+    if [ "$new_kb" -gt "$limit_kb" ]; then
+        log "AUTO-FIX INSUFFICIENT: $label vẫn ${new_kb}KB > ${limit_kb}KB sau nén (fact-check PASS nhưng chưa đủ nhỏ) — có thể là nội dung cấu trúc (evergreen), không nén thêm được đêm nay."
+        rm -f "$proposed"
+        return 1
+    fi
+    mv "$proposed" "$file"
+    (cd "$ROOT" && git add "$file" && git commit -q -m "kb: auto-compress $label ${old_kb}KB→${new_kb}KB (ctxbloat_autofix, mechanical fact-check PASS, kb_nightly.sh Phase 4.6)") >> "$LOG" 2>&1 || true
+    log "AUTO-FIX APPLIED: $label ${old_kb}KB → ${new_kb}KB, committed."
+    return 0
+}
+
 if [ -n "$SAME_DAY_BREACH" ]; then
     log "SAME-DAY CONTEXT-BLOAT: $SAME_DAY_BREACH"
     _prev="$(cat "$_CTXBLOAT_STAMP" 2>/dev/null || true)"
+    _attempted="$(cat "$_CTXBLOAT_AUTOFIX_STAMP" 2>/dev/null || true)"
+    _is_new_episode=0
     if [ "$_prev" != "$_BREACH_KEY" ]; then
         # Debounce on WHICH FILE(S) breach, not the exact KB number — context_pack.md is
         # rewritten hourly by consolidate.sh and its size drifts a few KB within the same day,
@@ -685,18 +748,50 @@ if [ -n "$SAME_DAY_BREACH" ]; then
         # resolve each other (ops_health_check.sh's stale-question matcher requires the
         # answer's topic to contain the question's topic verbatim) — arch-review catch.
         printf '%s' "$_BREACH_KEY" > "$_CTXBLOAT_STAMP"
-        MSG="⚠️ [kb_nightly] SAME-DAY context-bloat: ${SAME_DAY_BREACH}Cần Mike/user xử lý HÔM NAY (không chờ Thứ Sáu) — xem kb/current_ops.md §Cron quan trọng khác."
-        "$ROOT/bin/notify.sh" "$MSG" >/dev/null 2>&1 || true
-        "$ROOT/bin/notify_thread.sh" "$MSG" "1521475726329516122" >/dev/null 2>&1 || true
-        "$ROOT/bin/append_event.sh" Mike question "context-bloat-same-day" \
-"Vượt ngưỡng cứng: ${SAME_DAY_BREACH}Phát hiện NGOÀI Thứ Sáu (kb_nightly.sh Phase 4.6, $(date -u +%Y-%m-%dT%H:%M:%SZ)). Xử lý SAME-DAY: nén thêm (chỉ cắt narrative, KHÔNG cắt fact quyết định — xem kb/coding_guidelines.md, bài học 2 lỗi fact đã lọt qua các lần trim trước). Nếu không xuống được ngưỡng mà không mất fact (đã từng đúng vậy 2026-07-30) — không tự nâng ngưỡng, hỏi user quyết nâng ngưỡng hay OKF-hoá sâu hơn kb/canonical.md." \
-            2>/dev/null || true
-        log "Escalated (new/changed episode)."
-    else
-        log "Same breach as last check -- đã escalate 1 lần cho đợt này, giữ im lặng tới khi đổi."
+        _is_new_episode=1
     fi
-elif [ -f "$_CTXBLOAT_STAMP" ]; then
-    rm -f "$_CTXBLOAT_STAMP"
+    # Only attempt auto-fix once per breach EPISODE (tracked separately from the alert stamp so
+    # a restart mid-attempt can't silently skip it, but a second night of the SAME unresolved
+    # episode never re-dispatches — that's the treadmill guard).
+    if [ "$_attempted" != "$_BREACH_KEY" ]; then
+        printf '%s' "$_BREACH_KEY" > "$_CTXBLOAT_AUTOFIX_STAMP"
+        _ANY_FIXED=0
+        _STILL_OVER=""
+        if [ "$_CP_KB" != "MISSING" ] && [ "$_CP_KB" -gt 45 ]; then
+            if _ctxbloat_autofix_one "$ROOT/kb/context_pack.md" 45 "kb/context_pack.md" "$_CP_KB"; then _ANY_FIXED=1; else _STILL_OVER="${_STILL_OVER}kb/context_pack.md "; fi
+        fi
+        if [ "$_MIKE_KB" != "MISSING" ] && [ "$_MIKE_KB" -gt 40 ]; then
+            if _ctxbloat_autofix_one "$ROOT/MIKE.md" 40 "MIKE.md" "$_MIKE_KB"; then _ANY_FIXED=1; else _STILL_OVER="${_STILL_OVER}MIKE.md "; fi
+        fi
+        if [ "$_CG_KB" != "MISSING" ] && [ "$_CG_KB" -gt 40 ]; then
+            if _ctxbloat_autofix_one "$ROOT/kb/coding_guidelines.md" 40 "kb/coding_guidelines.md" "$_CG_KB"; then _ANY_FIXED=1; else _STILL_OVER="${_STILL_OVER}kb/coding_guidelines.md "; fi
+        fi
+        # Re-measure after the attempt(s) — a file fixed above no longer belongs in the alert.
+        _REMAIN=""
+        [[ "$SAME_DAY_BREACH" == *"context_pack.md MẤT"* ]] && _REMAIN="${_REMAIN}kb/context_pack.md MẤT/rỗng; "
+        [[ "$SAME_DAY_BREACH" == *"MIKE.md MẤT"* ]] && _REMAIN="${_REMAIN}MIKE.md MẤT/rỗng; "
+        [[ "$SAME_DAY_BREACH" == *"coding_guidelines.md MẤT"* ]] && _REMAIN="${_REMAIN}kb/coding_guidelines.md MẤT/rỗng; "
+        for f in $_STILL_OVER; do _REMAIN="${_REMAIN}${f} vẫn vượt ngưỡng sau auto-fix; "; done
+        if [ -z "$_REMAIN" ]; then
+            MSG="✅ [kb_nightly] context-bloat auto-fix: $SAME_DAY_BREACH đã tự nén xong, dưới ngưỡng, đã commit — không cần người can thiệp."
+            "$ROOT/bin/notify.sh" "$MSG" >/dev/null 2>&1 || true
+            "$ROOT/bin/notify_thread.sh" "$MSG" "1521475726329516122" >/dev/null 2>&1 || true
+            log "Episode resolved by auto-fix, no escalation needed."
+            rm -f "$_CTXBLOAT_STAMP"
+        else
+            MSG="⚠️ [kb_nightly] context-bloat auto-fix KHÔNG đủ: ${_REMAIN}Đã thử tự nén 1 lần (fact-check cơ học chặn hoặc không đủ nhỏ) — cần Mike/user xử lý HÔM NAY, xem $LOG."
+            "$ROOT/bin/notify.sh" "$MSG" >/dev/null 2>&1 || true
+            "$ROOT/bin/notify_thread.sh" "$MSG" "1521475726329516122" >/dev/null 2>&1 || true
+            "$ROOT/bin/append_event.sh" Mike question "context-bloat-same-day" \
+"Vượt ngưỡng cứng: ${_REMAIN}Phát hiện NGOÀI Thứ Sáu (kb_nightly.sh Phase 4.6, $(date -u +%Y-%m-%dT%H:%M:%SZ)). Auto-fix ĐÃ THỬ 1 lần đêm nay (bin/ctxbloat_fact_check.py chặn mất-fact HOẶC nén không đủ nhỏ — xem $LOG để biết lý do cụ thể) — sẽ KHÔNG tự thử lại đêm sau cho cùng đợt vượt ngưỡng này (tránh treadmill, xem kb/coding_guidelines.md §Enforcement policy). Cần người/Mike quyết: nén tay sâu hơn, hay đây là nội dung evergreen không thể nén thêm mà không mất fact (như context_pack.md 2026-07-30) → nâng ngưỡng hay OKF-hoá sâu hơn." \
+                2>/dev/null || true
+            log "Escalated after auto-fix attempt (still over threshold)."
+        fi
+    else
+        log "Same breach episode as last check -- đã tự nén 1 lần cho đợt này rồi (xem state/ctxbloat_autofix_attempted.txt), không thử lại tới khi đổi."
+    fi
+elif [ -f "$_CTXBLOAT_STAMP" ] || [ -f "$_CTXBLOAT_AUTOFIX_STAMP" ]; then
+    rm -f "$_CTXBLOAT_STAMP" "$_CTXBLOAT_AUTOFIX_STAMP"
     log "Context-bloat episode cleared."
 fi
 
