@@ -111,10 +111,14 @@ phải **gửi nhầm**. `notify_discord.sh` đã fix truncate; lỗi UTF-8 ở 
   (fail-loud, không rơi topic khác). Không tin nhắn nào tới Discord thật.
 - Gate: chạy sạch toàn `bin/`+`hooks/` (exit 0); CHẶN ID trần cố ý (exit 1); KHÔNG bắt nhầm
   float dài 20+ chữ số (exit 0).
-- `--thread` của `dispatch.sh`: tên → ID thật; **tên sai ⇒ topic RỖNG** (fail-safe: job chạy
-  không có topic, không bao giờ gửi nhầm topic khác). `_agent_thread_override` trả đúng ID cũ
-  cho `DollarBill`/`Wags`. Quét toàn repo: **0** ID trần còn trong bất kỳ `.sh`/`.py` nào;
-  crontab sạch; chỉ `notify_thread.sh`+`notify_discord.sh` chạm API Discord (không đường vòng).
+- `--thread` của `dispatch.sh`: tên → ID thật. `_agent_thread_override` trả đúng ID cũ cho
+  `DollarBill`/`Wags`. Quét toàn repo: **0** ID trần còn trong bất kỳ `.sh`/`.py` nào; crontab
+  sạch; chỉ `notify_thread.sh`+`notify_discord.sh` chạm API Discord (không đường vòng).
+  > ⚠️ **ĐÍNH CHÍNH 2026-08-02 (vòng 3)** — mô tả cũ ở đây ("tên sai ⇒ topic RỖNG, fail-safe:
+  > job chạy không có topic") KHÔNG còn đúng và bản thân nó cũng KHÔNG fail-safe như tưởng.
+  > Pin rỗng khiến MỌI consumer bên dưới tự suy lại topic qua `_ambient_thread`/con trỏ toàn
+  > cục ⇒ tin nhắn rơi đúng vào topic ambient của dispatcher — chính cơ chế rò rỉ. Hành vi
+  > HIỆN TẠI: **`--thread` tên sai ⇒ HUỶ CẢ DISPATCH** (exit 1, không tạo job record).
 
 **2 lỗi THẬT phát hiện thêm ở vòng 2 (đã sửa):**
 1. `discord_id_gate.sh:28` — dòng comment mở đầu bằng `# shellcheck` khiến shellcheck đọc nhầm
@@ -123,6 +127,42 @@ phải **gửi nhầm**. `notify_discord.sh` đã fix truncate; lỗi UTF-8 ở 
 2. `weekly_ops_audit.sh` — biến `ARCH_THREAD` **chết từ TRƯỚC** refactor (prompt tự ghi topic,
    không đọc biến). Đúng lớp lỗi của sự cố 2026-07-22 "override thành dead-code": sửa biến,
    tưởng đã đổi đích, thực tế không. Đã xoá kèm comment cảnh báo.
+
+## VÒNG 3 (2026-08-02 tối, job `Wags_20260802_165836`) — arch-reviewer audit trạng thái ĐÃ COMMIT
+
+Vòng 2 đóng lại quá sớm. Audit hoàn chỉnh (có mutation test) tìm thêm 4 lỗi, **2 trong đó là
+lỗi thật của hệ, không phải của tài liệu**:
+
+1. **`_bg_wrapper` chết khi pin rỗng** (nặng nhất, có TỪ TRƯỚC bản vá nhưng bản vá lại *chính
+   thức hoá* "pin rỗng là trạng thái bình thường"): `mike_json.py job-field` **exit 1 khi field
+   rỗng**, `_job_thread_id()` không có `|| true`, mà `_bg_wrapper` bật lại `set -e` giữa chừng
+   ⇒ `local _tid; _tid="$(_job_thread_id ...)"` **giết cả wrapper**. Hậu quả: mọi `--bg` job có
+   pin rỗng (cron `check_report_cadence.sh`, `ops_autofix.sh`, `weekly_ops_audit.sh`) KHÔNG BAO
+   GIỜ chạy `AUTO-CALLBACK`/`AUTO-CALLBACK-FAIL` → agent gọi việc không bao giờ biết kết quả.
+   Đo được: pin rỗng ⇒ 1 job record, pin có ⇒ 2. Sửa: `|| true` ngay trong `_job_thread_id`.
+   *Bài học*: "im lặng phía Discord" chỉ an toàn khi giá trị rỗng là **giá trị hợp lệ**, không
+   phải một lỗi làm sập luồng — kiểm tra exit code của mọi hàm đọc field trước khi coi rỗng là OK.
+2. **`watchdog.sh` vẫn đoán topic**: nó tự `cat agents/Mike/state/ccdb_thread_id` rồi truyền ID
+   tường minh, nên việc gỡ tầng đó khỏi `notify_thread.sh` KHÔNG chặn được. Cron 10 phút ⇒ cảnh
+   báo "Job OVERDUE" của job pin rỗng rơi vào topic user vừa mở. Đã gỡ.
+   *Bài học*: sửa một tầng "đoán" ở nơi TIÊU THỤ chưa đủ — phải grep mọi nơi tự đọc NGUỒN đoán.
+
+**Quyết định đánh đổi (F4)** — registry hỏng + agent CÓ override (vd `DollarBill`):
+`bq_freshness_check.sh` dispatch DollarBill **không kèm `--thread`**, nên ABORT vì lỗi registry
+sẽ chặn luôn job **sinh plan T+1** ⇒ sáng hôm sau bot chạy không có plan. Đổi "user không thấy
+1 tin nhắn" lấy "không có việc" là sai hướng cho một sự cố thuần định tuyến thông báo.
+→ **CHỌN: pin RỖNG + alert Telegram + VẪN CHẠY** (không tụt về ambient — đó mới là rò rỉ).
+ABORT **chỉ còn** cho `--thread` tường minh: caller đã nêu đích danh 1 topic thì phải dừng.
+An toàn được vì lỗi (1) đã sửa: pin rỗng không còn giết wrapper.
+
+Sửa kèm: `--thread=` (rỗng, biến chưa set) nay báo lỗi thay vì âm thầm tụt về ambient.
+
+**Test giữ các nguyên tắc này khỏi mục**: `bin/dispatch_discord_topic_selfcheck.sh` (chạy trên
+code production qua symlink, `claude` là stub). Vòng 3 thêm 2 ca sau khi mutation test cho thấy
+bộ ca cũ **PASS y hệt trên code TRƯỚC bản vá** (⇒ không test gì cả): ca "pin rỗng + con trỏ
+toàn cục xuất hiện GIỮA CHỪNG ⇒ 0 tin nhắn" và ca "pin rỗng ⇒ AUTO-CALLBACK vẫn chạy".
+*Bài học*: một selfcheck chỉ có giá trị khi nó **FAIL trên code cũ** — luôn thử revert bản vá
+rồi chạy lại test; ca nào vẫn PASS là ca không bảo vệ gì.
 
 ## Bài học
 
