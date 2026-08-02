@@ -5013,3 +5013,195 @@ dùng thật thì bắt buộc gate lại** — lúc đó số 29,07% mới rờ
   ~4 KB/~21 KB dữ liệu thật (phần còn lại là symlink tới snapshot pin, **không** tốn ~2 GB), và là
   bằng chứng DUY NHẤT chứng minh negative/positive control chạy trên đầu vào khác nhau thật
   (coding_guidelines §8 — artifact audit-trail, không phải script chạy nhầm được).
+
+---
+
+## 2026-08-02/03 — HAI BẢN SỬA FIDELITY THANH KHOẢN LAG (`liq<=0` fail-closed + cơ sở giá ADV) — job `Taylor_20260802_163657` → kết luận lại ở `Taylor_20260802_175754`
+
+> ### ⚠️ ĐỌC TRƯỚC — quant-skeptic chấm **INCONCLUSIVE**, KHÔNG có số pin mới nào ra đời từ mục này
+> `mike/logs/verify_20260802_173456.log`. **KHÔNG được trích 31,32% / 32,71% làm cơ sở kỳ vọng**
+> ở bất kỳ đâu. Pin R3 chính thức **VẪN LÀ 27,24%** (mục 2026-08-02 RE-PIN). Mục này ghi lại một
+> phép đo hợp lệ về mặt cơ học nhưng **chưa giải thích được về mặt kinh tế** — xem "Verdict" dưới.
+> Bản viết đầu tiên của mục này (soạn TRƯỚC khi có verdict) từng kết luận "chân trung thực =
+> 32,71%"; **kết luận đó SAI và đã bị gỡ** — không phải vì số tính sai, mà vì nó trả lời nhầm câu hỏi.
+
+**Bối cảnh:** hai lỗi fidelity ĐỘC LẬP trong nhánh thanh khoản sổ LAG, tách khỏi saga Price/Close
+(khác tầng: đây là *khả năng khớp lệnh*, không phải *chọn rổ/định giá*).
+Báo cáo: `mike/agents/Taylor/research/liq_fidelity_and_adv_basis_20260802.md` ·
+Incident: `mike/kb/incidents/2026-08/2026-08-02-lag-liquidity-fidelity-two-fixes.md`
+
+**Hai việc này có số phận KHÁC NHAU — đừng gộp** (đây chính là chỗ bản viết đầu bị lẫn):
+
+| | Bản sửa code | Mặc định engine | Trạng thái |
+|---|---|---|---|
+| **Việc 1** `LIQ_ZERO_BLOCK` | GIỮ (logic đúng) | **`""` = TẮT (opt-in)** | ⏸️ TREO — Δ +4,08pp chưa phân rã cơ chế |
+| **Việc 2** `LAG_ADV_BASIS` | GIỮ | **`"price"` = BẬT** | ✅ Merge trên căn cứ RIÊNG (point-in-time + parity live) |
+
+- **Việc 1** — `LIQ_ZERO_BLOCK` (`pt_v23_audit_2014.py`). Mã `Volume_3M_P50<=0`/không đo được ADV
+  thì **KHÔNG mua được** (engine gốc: bỏ qua trần ⇒ mua trọn size 1 phiên). Logic ĐÚNG và đường
+  LIVE thật sự đã chặn nhóm này ở **cả 2 tầng** từ 07-21 (tín hiệu `lag_filter_illiquid` +
+  executor `cap_lag_orders`). **NHƯNG mặc định giữ TẮT**: bật cờ này là toàn bộ nguồn của Δ
+  +4,08pp đang bị chấm INCONCLUSIVE ⇒ để mặc định BẬT thì mọi backtest sau này mặc nhiên mang Δ
+  chưa phân rã vào số của nó — "wire" số NAV bằng cửa sau. ⇒ **Chấp nhận một độ lệch fidelity ĐÃ
+  BIẾT, ĐÃ ĐO (cận trên +4,08pp) giữa engine và live**, cố ý, cho tới khi phân rã xong. Bật lại:
+  `LIQ_ZERO_BLOCK=lag` (có tag filename `_liqzblag`).
+- **Việc 2** — cơ sở giá ADV `Close` → `COALESCE(Price, Close)`, sửa **ĐỒNG THỜI 3 điểm**
+  (`lag_liquidity_filter.py` SQL · `trading_bot/due_diligence.py:adv_vnd` · `pt_v23_audit_2014.py`
+  `liq_lag`) để giữ bất biến *trần live == trần đã mô phỏng*. Căn cứ: `Volume_3M_P50` là số lượng
+  CP THÔ — `Trading_Value == Volume × Price` khớp **100% số dòng**; `Close` đã điều chỉnh hồi tố ⇒
+  vừa sai độ lớn vừa look-ahead. Knob `LAG_ADV_BASIS=close` giữ lại để tái lập lịch sử.
+  **Mặc định BẬT (`"price"`)** trên căn cứ ĐỘC LẬP với mọi con số NAV: (a) gỡ look-ahead đúng
+  cùng logic đã CONFIRMED cho PE/ps/`custom_basket` cùng ngày; (b) **đường LIVE đã dùng `price`**
+  (`due_diligence.adv_vnd`) ⇒ nếu hoàn nguyên riêng engine về `close` thì **phá bất biến
+  *trần live == trần đã mô phỏng*** — engine sẽ đo một ràng buộc mà sổ live không hề chịu.
+  quant-skeptic **không nêu phản đối riêng nào cho Việc 2**: cả 2 check FAIL đều trỏ về Δ
+  +4,08/+4,11pp của Việc 1 (xem "Verdict" dưới). Tác động live thật đo được = **0 lệnh đổi**.
+
+  ⚠️ **HỆ QUẢ PHẢI BIẾT — chạy engine mặc định KHÔNG còn tái lập số pin 27,24%.** Mặc định nay
+  gắn tag `_advprice` và ra **28,86%** (chân L2). Pin R3 chính thức 27,24% đo trên cơ sở `close`
+  ⇒ muốn tái lập pin phải **`LAG_ADV_BASIS=close`**. Tag filename khác nhau nên **không thể đè**
+  CSV canonical (coding_guidelines §8 OK). **Việc re-pin R3 sang cơ sở `price` là món NỢ, CHƯA
+  LÀM** — 28,86% chưa qua cổng re-pin riêng của nó và **không được coi là pin**.
+
+### A/B 4 chân — snapshot đóng cứng `bq_cache_asof20260729_postrestate` (ĐÚNG vintage số pin), threads=1
+
+| Chân | `LIQ_ZERO_BLOCK` | `LAG_ADV_BASIS` | CAGR | Sharpe | MaxDD | Calmar | NAV cuối | IS 14–19 | OOS 20+ |
+|---|---|---|---|---|---|---|---|---|---|
+| **L0** đối chứng | off | close | **27,24%** | 1,81 | −18,4% | 1,48 | 1.006,33B | 23,81% | 30,46% |
+| L1 chỉ Việc 1 | lag | close | 31,32% | 1,88 | −18,8% | 1,67 | 1.490,21B | 24,67% | 37,75% |
+| L2 chỉ Việc 2 | off | price | 28,86% | 1,90 | −17,8% | 1,62 | 1.178,01B | 27,09% | 30,48% |
+| **L3 cả hai** | lag | price | **32,71%** | **1,95** | −19,1% | **1,71** | 1.699,09B | 27,22% | 37,96% |
+
+**L0 tái lập số pin hiện hành CHÍNH XÁC** (kể cả NAV cuối) ⇒ A/B hợp lệ; không tái lập được thì
+mọi kết luận L1/L2/L3 vô hiệu. Self-check **0 VND** cả BAL+LAG ở **CẢ 4 chân**; coverage
+`universe_pit` OK 3107/3107; `extract_peryear.py` recompute độc lập khớp chính xác cả 4 chân.
+
+⚠️ **Δ KHÔNG cộng tuyến tính** (+4,08 + 1,62 = 5,70 > 5,47 thực đo): hai bản sửa **giao thoa**
+(cùng tác động lên khả năng/tốc độ fill sổ LAG) ⇒ **phải chạy L3 thật**, cấm cộng L1+L2.
+
+### Per-year LOO trên Δ — dương 13/13 ở CẢ BA cặp
+Việc 1 `+2,59…+5,54pp` · Việc 2 `+0,86…+1,98pp` (rất ổn định) · cả hai `+4,01…+6,76pp`.
+Không phép nào đảo dấu ⇒ **không do 1–2 năm carry**. (Mức *tuyệt đối* vẫn phụ thuộc 2021 nặng ở
+**mọi** chân — đặc tính sẵn có của R3, không phải của hai bản sửa.)
+
+### DSR / PBO / bootstrap trên L3 (`data/liqadv_ab_20260802/annex_L3.py`, wrapper §8)
+ann-SR **1,871**; **DSR = 1,0000** mọi N (232 CSV / 120 / 200). PBO family-level **0,4430** —
+nói về **cả họ tìm kiếm 232 CSV**, KHÔNG phải về hai bản sửa fidelity **N=1** này (sửa lỗi, không
+chọn config thắng ⇒ không có multiple-testing để deflate). Bootstrap circular-block L=21:
+CAGR 5th-pct **22,2%** (med 33,0%); MaxDD 5th-pct **−30,2%**; **P(DD<−30%) = 5,2%**.
+
+⇒ **ANCHOR DD GIỮ NGUYÊN ~−30%**, KHÔNG dùng −19,1% làm kỳ vọng. Điểm ước lượng MaxDD xấu đi nhẹ
+(−18,4% → −19,1%) là ĐÚNG KỲ VỌNG: sổ LAG chạy nhiều vốn hơn trong nhóm **mua được thật** thì cũng
+ăn drawdown thật hơn — fidelity, không phải suy giảm chất lượng.
+
+⚠️ **DSR=1,0000 KHÔNG giải cứu được vấn đề cơ chế** (nói rõ để không ai đọc nhầm theo hướng có
+lợi): DSR/PBO chỉ trả lời *"chuỗi lợi nhuận này có phải sản phẩm của việc dò nhiều config
+không"* — và câu trả lời là không, vì đây là sửa lỗi N=1. Chúng **hoàn toàn không** kiểm được
+liệu bản thân chuỗi NAV ấy có sinh ra từ một **hiện vật của mô hình fill** hay không. Một Δ do
+capacity-artifact vẫn sẽ cho DSR≈1,0 y hệt. Đây cũng chính là lý do cả LOO 13/13 lẫn
+dose-response đều **không** phải bằng chứng bác bỏ objection của quant-skeptic đối với Việc 1.
+
+### Dose-response — kiểm chứng falsifiable cho Việc 2 (median `Close/Price` theo năm, n=156k–316k dòng/năm)
+| 2014 | 2015 | 2016 | 2017 | 2018 | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025 | 2026 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 0,443 | 0,487 | 0,530 | 0,586 | 0,643 | 0,686 | 0,731 | 0,784 | 0,833 | 0,887 | 0,934 | 0,979 | **1,000** |
+
+**Đơn điệu 13/13 năm, hội tụ đúng 1,000 ở 2026** (không còn sự kiện quyền tương lai). Năm 2014 ADV
+bị hạ **2,26 lần**. Đây là lời giải cho bất đối xứng IS/OOS của Việc 2 (IS +3,28pp, OOS +0,02pp):
+phần hơn **tỉ lệ thuận với độ lớn của chính lỗi đang sửa**, ~0 đúng nơi lỗi ~0 ⇒ **ngược hẳn**
+chữ ký reshuffle-luck (bài học MOM/Wave1), KHÔNG phải overfit.
+
+### HAI ĐIỀU KIỆN TREO CỦA PIN 07-21 — đóng 2/3, **điều kiện thứ BA mới là điều kiện chặn**
+1. **Vintage** — chạy trên snapshot đóng cứng đúng vintage số pin (07-21 phải chạy live BQ vì cache hỏng). ✔
+2. **Substitution** — 07-21 lo engine cho vốn chảy ngay sang ứng viên kế tiếp còn live để tiền nằm
+   im (vì chỉ chặn ở executor) ⇒ 31,33% chỉ là *cận trên*. Nhưng từ 07-21 live **đã có** lọc tầng
+   tín hiệu `lag_filter_illiquid` ⇒ sổ live tự chọn ứng viên kế tiếp **đúng như engine**. Đây chính
+   là "việc cần quyết #3" của 07-21 và **đã làm rồi**. ✔
+3. **PHÂN RÃ CƠ CHẾ của Δ** — ❌ **CHƯA ĐÓNG, và đây mới là điều kiện quyết định.** Job này ban
+   đầu bỏ sót nó vì chỉ đi kiểm 2 điều kiện đã liệt kê sẵn từ 07-21.
+
+⇒ Khoảng `[~27,2%; ~31,3%]` **HẾT HIỆU LỰC** (nó dựng từ pin tạm 07-21 sai vintage) — **NHƯNG
+KHÔNG CÓ KHOẢNG MỚI THAY THẾ. Mục này để TREO, không phải đã đóng.** Ai cần một con số để dùng:
+**dùng pin R3 = 27,24%**, và biết rằng nó nằm trên một engine có độ lệch fidelity đã đo (Việc 1
+tắt, cận trên +4,08pp) — tức 27,24% nhiều khả năng là **cận DƯỚI**, nhưng cận trên thì **chưa
+biết** vì chưa rõ phần nào của +4,08pp là thật.
+
+### 🔴 VERDICT quant-skeptic: **INCONCLUSIVE** (confidence medium) — `mike/logs/verify_20260802_173456.log`
+
+**5/7 check PASS** và đều được tái tính ĐỘC LẬP, không tranh cãi gì: `look_ahead_leak` (SQL
+`t.time <= DATE asof`, không chạm cột forward), `oos_robustness` (chạy lại `extract_peryear.py`
+trên cả 2 CSV, khớp chính xác), `panel_curation_bias` (cả 2 chân cùng `universe_pit` + cùng bộ
+forensic-exclude), `reproducibility_selfcheck` (`err = 0 VND` cả BAL+LAG; L0 tái lập pin
+bit-for-bit), `param_overfit` (cờ nhị phân mirror gate live, không phải tham số quét từ 1 họ).
+
+**2 check FAIL — CẢ HAI cùng một nội dung, và đều chỉ trỏ vào Việc 1:**
+- `capacity_adv_realism` — sổ LAG 25B có thực sự hấp thụ nổi size mục tiêu của chính nó không?
+- `arithmetic_mechanism` — Δ này **đã bị review 2 lần trước và CẢ HAI cách giải thích đều bị REFUTED**.
+
+> **Killer objection (nguyên văn):** *"The +4.08/+4.11pp delta this finding certifies as
+> 'reproducible and robust' is the SAME number the codebase's own `lag_liquidity_filter.py`
+> docstring already flags as mechanism-undecomposed after two prior refuted explanations: TREAT
+> enters 30% more LAG orders but completes 16% fewer positions, with abandonment rising
+> 59.2%→73.8%. If that's driven by the 25B LAG book being unable to fill its own target sizing
+> (a capacity artifact) rather than genuine capital reallocation to better opportunities, the
+> entire delta is a fill-model artifact, not a real edge."*
+
+**Đây là RỦI RO CŨ, không phải phát hiện mới** — chính docstring `lag_liquidity_filter.py:28-31`
+đã ghi "CHƯA PHÂN RÃ ĐƯỢC… RỦI RO CÒN MỞ" và dặn thẳng *"ĐỪNG dùng +4,11pp làm cơ sở kỳ vọng cho
+tới khi tách xong"*. **Job này là lần thứ BA câu hỏi đó không được trả lời.** Toàn bộ chứng cứ cơ
+học ở trên (self-check 0 VND, LOO 13/13, DSR, dose-response) đều ĐÚNG — nhưng chúng trả lời câu
+"phép đo có tái lập được không", **không** trả lời câu "Δ này có phải alpha thật không". Hai
+giả thuyết — *vốn chảy sang event LAG tốt hơn* (edge thật) vs *sổ 25B không fill nổi* (hiện vật
+mô hình fill) — **để lại CÙNG một dấu vết trên CSV**, nên không phép thử nào ở trên tách được chúng.
+
+⚠️ Lưu ý phân định: verdict là INCONCLUSIVE cho **toàn bộ finding**; hai objection cụ thể thì
+truy được về **Việc 1**. Điều đó **KHÔNG** đồng nghĩa quant-skeptic đã CONFIRM riêng Việc 2 hay
+số 28,86% — nó **không xét riêng** phần đó. Việc 2 được merge trên **căn cứ thiết kế** (look-ahead
++ parity live), **không phải** trên uy tín của một con số NAV.
+
+### Tác động LIVE (đo, không suy đoán)
+Việc 2 **nới** trần `cap_lag_orders` theo hệ số `1/(Close/Price)`. Rổ ứng viên LAG thật
+(asof 2026-07-31, 152 mã): **1 mã duy nhất — DNN (0,7%)** có `Close≠Price` (trần ×2,215), và DNN
+**đã bị loại ở tầng tín hiệu** ⇒ **0 lệnh thật đổi**. Đúng như dose-response dự báo (2026 ratio=1,000).
+Self-check `lag_liq_signal_filter_selfcheck.py --live`: **22 PASS / 0 FAIL**, gồm **positive control
+2 chiều** mới (`ADV(CLL) == Volume×Price` VÀ `!= Volume×Close`). ⚠️ Chạy KHÔNG có `--live` chỉ ra
+13 PASS — toàn bộ kiểm cơ sở giá nằm sau cờ `--live`.
+
+### Residual đã biết, CỐ Ý chưa sửa (ngoài phạm vi)
+6 harness R&D còn dùng `Volume_3M_P50 * Close`: `build_state_free_signals.py`, `build_v21_and_test.py`,
+`pt_lagvn30_audit_2014.py`, `pt_dt4_vs_tq34b_ab.py`, `fa_bank_integrated.py`, `sim_v5_dt4_transparent.py`
+(+`simulate_lh_v2.py`). Đã verify **0/7 nằm trên cron/production path** (grep crontab + `cron_registry.md`
++ `bin/*.sh`) ⇒ không chạm số pin R3. Sửa sau nếu có ai dùng lại chúng để ra số mới.
+
+### QUYẾT ĐỊNH CODE (2026-08-03, job `Taylor_20260802_175754`)
+| Thành phần | Quyết định | Căn cứ |
+|---|---|---|
+| `LAG_ADV_BASIS` (3 điểm: SQL lọc · `due_diligence.adv_vnd` · engine) | **GIỮ, mặc định `price`** | Look-ahead thật + parity live==sim; 0 lệnh live đổi |
+| `LIQ_ZERO_BLOCK` code + knob | **GIỮ** | Logic đúng, cần cho lần phân rã sau |
+| `LIQ_ZERO_BLOCK` **mặc định** | **HOÀN NGUYÊN `"lag"` → `""` (opt-in)** | Kỷ luật INCONCLUSIVE: không để Δ chưa phân rã chảy ngầm vào mọi backtest sau |
+
+⚠️ **Cách 2 bản sửa lọt vào repo** (ghi lại để không tái diễn): cả hai bị commit auto-backup
+`11d28ca` (cron 17:00) **cuốn vào repo TRƯỚC KHI có verdict** — không ai chủ động merge. Đúng
+pattern coding_guidelines §13 (sweeper blanket `git add`), nhưng ở nhánh **code**, không phải
+`kb/`. Bài học: sửa code đang chờ verdict cũng cần chỗ đậu an toàn, không để trong working tree.
+
+### BƯỚC TIẾP THEO — ĐỀ XUẤT, CHƯA LÀM (Mike/user quyết có mở sprint riêng không)
+Mục tiêu duy nhất: **tách capital-velocity thật khỏi capacity/fill-shortfall artifact.** Cả 3 việc
+dưới đây **không cần chạy lại backtest** — dữ liệu đã nằm sẵn trong 2 CSV audit L0/L1.
+1. **Phân rã Δ trên chuỗi `ENTRY_FILL` / `ABANDONED_REFUND`** (chính việc quant-skeptic yêu cầu):
+   với mỗi lệnh bị `LIQ_ZERO_BLOCK` chặn ở L1, truy vốn đó **thực sự đi đâu** — (a) vào một event
+   LAG khác *hoàn tất*, (b) vào một event khác rồi *cũng bỏ dở*, hay (c) **nằm im**. Nếu (c)+(b)
+   chiếm phần lớn thì Δ là hiện vật, kết thúc tranh luận theo hướng bác bỏ.
+2. **Kiểm chất lượng vốn được giải phóng**: vốn ở L1 có rơi vào event LAG *tốt hơn thật* không
+   (phân tầng theo earnings-surprise tercile), hay chỉ là parking/idle-cash? Idle-cash return
+   trong cửa sổ này tự nó đã giải thích được một phần uplift.
+3. **Phép thử quyết định nhất — hạ NAV**: chạy L0/L1 ở quy mô **NAV nhỏ** (vd 5–10B) nơi
+   capacity **không** phải ràng buộc. Nếu Δ **teo về ~0** ⇒ artifact (capacity), nếu Δ **giữ
+   nguyên** ⇒ edge thật. Đây là phép thử **falsifiable** rẻ nhất và cắt trực diện đúng câu hỏi;
+   đề nghị làm việc này TRƯỚC (1)/(2).
+4. (Nếu sau đó vẫn muốn tiến) cross-check `ticker_prune` live-BQ cho L1 — quant-skeptic lưu ý
+   31,32% vượt trần auditable ~25,7–27,7% của doctrine cho quy mô NAV này.
+
+**Files:** harness `data/liqadv_ab_20260802/run_leg.sh` · LOO `.../loo_delta.py` · annex `.../annex_L3.py` ·
+log `.../{L0_legacy,L1_liqzb,L2_advprice,L3_both}.log` · CSV `data/v23_..._exp_L{0..3}_*_univpit.csv`.
+Canonical `..._wtnamecap.csv` **KHÔNG bị đụng**.

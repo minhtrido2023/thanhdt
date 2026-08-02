@@ -24,6 +24,10 @@ def lag_filter_illiquid(bq, cand, asof, max_stale_days=LAG_ADV_MAX_STALE_DAYS):
     27,22% → 31,33%. Lọc ở đây = mã đó KHÔNG BAO GIỜ thành mục tiêu ⇒ vốn tự chảy sang event
     kế tiếp đúng như engine mô phỏng. Đây là ĐIỀU KIỆN để kỳ vọng nằm ở PHẦN TRÊN của khoảng
     [~27,2%; 31,3%], KHÔNG phải cam kết đạt 31,33% (xem "còn lệch" dưới).
+    ⚠️ CẬP NHẬT 2026-08-03 (job Taylor_20260802_175754): khoảng [~27,2%; 31,3%] nay HẾT HIỆU LỰC
+    và KHÔNG có khoảng mới thay thế — A/B lại trên đúng vintage bị quant-skeptic chấm INCONCLUSIVE
+    đúng vì lý do ghi ở "CHƯA PHÂN RÃ ĐƯỢC" bên dưới (lần thứ BA). Số dùng được duy nhất: pin R3
+    27,24%, hiểu như CẬN DƯỚI. Engine để `LIQ_ZERO_BLOCK=""` (opt-in) cho tới khi phân rã xong.
 
     CƠ CHẾ THAY THẾ = CHỦ YẾU LÀ VỐN, thỉnh thoảng mới thêm slot (bản đo được, 2026-07-21;
     đây là lần đính chính THỨ HAI — cả hai cách diễn đạt trước đều bị quant-skeptic REFUTED:

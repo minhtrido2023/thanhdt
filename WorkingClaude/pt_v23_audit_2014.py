@@ -250,11 +250,23 @@ if os.environ.get("BASKET_LIQ_FLOOR_B", "").strip(): _qs_tag += f"_liqf{os.envir
 # KHÔNG MUA ĐƯỢC, thay vì "bỏ qua trần ⇒ mua trọn size" của engine gốc — mirror gate live
 # `trading_bot.plan.cap_lag_orders`. "lag"|"1" = chỉ book LAG (đúng phạm vi gate live);
 # "both" = cả BAL (chỉ để đo, live KHÔNG có gate cho BAL).
-# MẶC ĐỊNH ĐỔI 2026-08-02 (job Taylor_20260802_163657): "" -> "lag". Đường LIVE nay chặn nhóm này
-# ở CẢ HAI tầng (tín hiệu `lag_liquidity_filter.lag_filter_illiquid` từ 07-21 + executor
-# `cap_lag_orders`), nên để engine mua trọn size trên mã không đo được thanh khoản là mô tả một
-# đường live KHÔNG đi được. "off" = hành vi cũ (giữ để tái lập pin lịch sử), có tag filename.
-LIQ_ZERO_BLOCK = os.environ.get("LIQ_ZERO_BLOCK", "lag").strip().lower()
+# ⚠️ MẶC ĐỊNH GIỮ "" (OPT-IN) — quyết định 2026-08-03, job Taylor_20260802_175754.
+# Lần job Taylor_20260802_163657 đã đổi mặc định "" -> "lag" và bản đổi đó bị commit auto-backup
+# `11d28ca` cuốn vào repo TRƯỚC KHI có verdict; nay HOÀN NGUYÊN về opt-in. Lý do:
+#   · Bật cờ này là toàn bộ nguồn của Δ +4,08pp (27,24% -> 31,32%), và quant-skeptic
+#     (`mike/logs/verify_20260802_173456.log`) chấm **INCONCLUSIVE**: 2 check FAIL
+#     (`capacity_adv_realism`, `arithmetic_mechanism`) đều nói CÙNG một điều — chưa tách được
+#     "vốn chảy sang event LAG tốt hơn" (edge thật) khỏi "sổ 25B đơn giản KHÔNG fill nổi"
+#     (hiện vật mô hình fill). TREAT vào lệnh +30,1% nhưng HOÀN TẤT vị thế −16,3%,
+#     ABANDONED_REFUND 59,2% -> 73,8%. Đây là lần thứ BA câu hỏi này chưa được trả lời
+#     (2 lần trước bị REFUTED — xem docstring `lag_liquidity_filter.py`).
+#   · Kỷ luật INCONCLUSIVE = KHÔNG wire số NAV. Để mặc định "lag" thì MỌI backtest sau này
+#     mặc nhiên mang Δ chưa phân rã đó vào số của nó — chính là "wire" bằng cửa sau.
+# LOGIC của bộ lọc vẫn ĐÚNG (không mua được thì đừng đặt mục tiêu) và đường LIVE thật sự đã chặn
+# nhóm này ở cả 2 tầng từ 07-21 ⇒ mặc định "" để lại một ĐỘ LỆCH FIDELITY ĐÃ BIẾT, ĐÃ ĐO
+# (cận trên +4,08pp) giữa engine và live — cố ý chấp nhận, KHÔNG phải bỏ sót: đổi mặc định phải
+# chờ phân rã xong cơ chế. Bật lại bằng `LIQ_ZERO_BLOCK=lag` (có tag filename, không đè pin cũ).
+LIQ_ZERO_BLOCK = os.environ.get("LIQ_ZERO_BLOCK", "").strip().lower()
 if LIQ_ZERO_BLOCK in ("off", "none", "0", ""): LIQ_ZERO_BLOCK = ""       # legacy: tên file canonical cũ
 elif LIQ_ZERO_BLOCK in ("1", "lag"): _qs_tag += "_liqzblag"
 elif LIQ_ZERO_BLOCK == "both": _qs_tag += "_liqzbboth"
