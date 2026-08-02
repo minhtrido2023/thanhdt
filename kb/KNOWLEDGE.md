@@ -16,7 +16,7 @@
 - **LAG** — PEAD/earnings drift. Allocator w_LAG theo state {CRISIS 50 / BEAR 0 / NEUTRAL-BULL-EXBULL 65}, band ±10pp.
 
 **Performance đã pin (threads=1, self-check 0 VND):**
-- R3 NEUTRAL-only @50B: CAGR **27.60%** / Sharpe **1.84** / DD **−17.5%** / Calmar **1.58** — **pin CHÍNH THỨC từ 2026-07-29**, đo trên `universe_pit`, quant-skeptic CONFIRMED (high). Re-pin do **VINTAGE DỮ LIỆU, KHÔNG đổi mô hình**. Nguồn sống (đừng chép số ra chỗ khác): `data/results_registry.md` mục **"2026-07-29 — ⭐ RE-PIN R3 SAU RESTATE DT5G"**.
+- R3 NEUTRAL-only @50B: CAGR **27.24%** / Sharpe **1.81** / DD **−18.4%** / Calmar **1.48** — **pin CHÍNH THỨC từ 2026-08-02**, đo trên `universe_pit`, quant-skeptic CONFIRMED (high). Re-pin lần này do **SỬA LOOK-AHEAD THẬT trong code** (khác 2 lần trước là vintage dữ liệu): `custom_basket.py` + publisher `custom30_history.py` dùng `Close` (điều chỉnh hồi tố) làm cơ sở **chọn rổ / trọng số** cross-sectional. A/B 1 biến: 27,60% → 27,24% (**−0,36pp**), chân đối chứng tái lập 27,60% tuyệt đối ⇒ **số cũ 27,60% là số BỊ THỔI PHỒNG bởi lỗi**, giữ làm lịch sử. −0,36pp là **CẬN DƯỚI** (nhánh CAPIT-membership chưa phủ). Nguồn sống (đừng chép số ra chỗ khác): `data/results_registry.md` mục **"2026-08-02 — ⭐ RE-PIN R3 SAU KHI TÁCH VAI CƠ SỞ GIÁ"**.
   - *Số LỊCH SỬ, KHÁC VINTAGE — không so trực tiếp, không dùng cho việc mới:* 27.16%/1.81/−18.1%/1.50 (pin 07-22, vintage đã bị ghi đè, KHÔNG tái lập được); 27.84%/1.84/−18.2%/1.53 (pin 07-12, `ticker_prune`, sau khi đóng kênh MOM); 28.05%/1.87/−18.8%/1.50 (pin gốc, job `_130720` — as-of re-run 2026-07-09 cho ~26.75% do batch/as-of recompute variance, **KHÔNG phải regression**).
 - R1 @20B: CAGR **29.01%**
 - Bootstrap 5th-pct: CAGR 18.6%, DD −28.6% (anchor DD ~−29%, KHÔNG phải −18%).

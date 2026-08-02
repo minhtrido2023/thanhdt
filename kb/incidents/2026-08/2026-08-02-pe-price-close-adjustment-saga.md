@@ -220,3 +220,82 @@ giao dịch nào đọc nó. Ưu tiên **thấp**, xử lý khi có người đ�
 - `mike/agents/Taylor/exp_ps_basis/` — script + CSV + log (`measure_ps_basis.py`, `diff_legs.py`)
 - `mike/logs/verify_20260802_082245.log` — verdict quant-skeptic thô (CONFIRMED / high)
 - Commit: `rating_8l.py` (repo WorkingClaude) + incident/report này (repo mike)
+
+---
+
+# PHẦN 3 — cùng họ lỗi, lần này CHẠM SỐ PIN: rổ parking custom30V (job `Taylor_20260802_141725` + `Taylor_20260802_150945`)
+
+## 14. Vì sao phần 3 nặng hơn phần 1 và 2
+
+Phần 1 **bác bỏ** một tiền đề sai (PE không hề bị điều chỉnh). Phần 2 sửa một lens
+**diagnostic-only** (`ps`), NAV impact = 0. **Phần 3 là lần đầu cùng họ lỗi này nằm trong đường
+tính NAV thật và trong bảng LIVE** — nó làm đổi số pin chính thức của R3.
+
+Điểm chung cả 3 phần: `Close` trong `tav2_bq.ticker` là chuỗi **bị viết lại hồi tố** sau mỗi sự
+kiện quyền, còn `Price`/`Volume_3M_P50`/`OShares` là đại lượng **PIT thô**. Ghép 2 loại vào một
+phép **cross-sectional** = đưa thông tin tương lai vào.
+
+## 15. Hai lỗi được sửa
+
+| Commit | File | Vai bị dùng sai | LIVE? |
+|---|---|---|---|
+| `ebeacad` | `custom_basket.py` | `Close × OShares` và `Volume_3M_P50 × Close` dùng cho **chọn rổ + trọng số**, trong khi 3 dòng bên cạnh nhánh ADV đã dùng đúng `COALESCE(Price,Close)` — file tự mâu thuẫn | backtest |
+| `be6b976` | `custom30_history.py` | **Publisher** của `tav2_bq.custom30v_8l` lấy `mcap` (= chân **LỢI SUẤT**) làm **TRỌNG SỐ công bố** | **CÓ** |
+
+`2c098c1` thêm self-check 2 chiều + knob `BASKET_PRICE_BASIS` (`legacy` = rollback 1 chữ).
+
+**Vì sao lỗi publisher âm ỉ lâu:** nó chạy lại **mỗi phiên** (`papertrade_daily.sh` [6b]) nhưng
+`rebal_date` chỉ đổi **mỗi quý**. `Close` bị viết lại hồi tố ⇒ trọng số công bố của MỘT rebal cố
+định **trôi dần** mỗi lần có mã chốt quyền. Đúng ngày công bố (2026-05-05) hệ số = 1,00 cho cả 30
+mã ⇒ **trọng số ĐÚNG hôm publish rồi hỏng dần từ đó** — nên không có ngày nào "sai rõ" để ai đó
+bắt được bằng mắt.
+
+## 16. Số
+
+A/B 1 biến duy nhất, snapshot đóng cứng đúng vintage số pin:
+
+| | CAGR | Sharpe | MaxDD | Calmar | Final NAV |
+|---|---|---|---|---|---|
+| legA `legacy` (tiền-sửa) | **27,60%** | 1,84 | −17,5% | 1,58 | 1.041,95B |
+| legB `split` (bản sửa) | **27,24%** | 1,81 | −18,4% | 1,48 | 1.006,33B |
+
+legA **tái lập số pin 07-29 tuyệt đối** ⇒ A/B hợp lệ. Self-check 0 VND cả 2 chân.
+**Bản sửa làm số XẤU ĐI −0,36pp** — đó là bằng chứng lỗi cũ đang **thổi phồng** pin, không phải lý
+do bỏ bản sửa. Tác động LIVE: **thành viên 0/30 đổi**, chỉ lệch trọng số Σ|Δw| = 1,6526pp (ACB
++0,478pp); **không đề xuất giao dịch nào**.
+
+quant-skeptic **CONFIRMED (high)** — `mike/logs/verify_20260802_151136.log`, có independent
+recompute thật (tự chạy lại cả 2 self-check + `extract_peryear.py` + 1 truy vấn BQ riêng).
+
+## 17. Bài học (khác 2 phần trước)
+
+1. **Bản đồ bước 1 quét theo FILE là chưa đủ.** Lỗi thứ 2 (`custom30_history.py`) nằm **một tầng
+   downstream** của file được quét, và nó mới là cái nằm trên đường LIVE. Quét theo **luồng dữ
+   liệu** (ai tiêu thụ output của hàm này), không chỉ theo file đang sửa.
+2. **"Live impact = 0 vì Close≈Price hôm nay" là lập luận SAI khi hệ thống có replay.** Đúng ở
+   **hàng as-of**, sai ở mọi **cửa sổ lịch sử**: 2025-01..2026-06 hệ số p50 0,926 với 55,8% số dòng
+   lệch >5%. Phần 2 dùng được lập luận đó vì lens `ps` chỉ đọc ngày chạy; phần 3 thì không.
+3. **Một self-check sai vẫn có ích nếu nó FAIL.** T3 bản đầu giả định "factor<1 ⇒ trọng số phải
+   TĂNG" — sai, vì trọng số là đại lượng **tương đối**. Test sai, code đúng; thay bằng bất biến đại
+   số (`w_new/w_old == (1/factor) × k` chung) thì spread 1,1e-15.
+4. **Δ per-year không phải lúc nào cũng quy kết được.** Năm Δ âm lớn nhất (2025, −6pp) lại là năm
+   mức lỗi ~0 ⇒ về cơ chế không thể do cơ sở giá. Đây là **single-path carry**. Headline A/B hợp lệ,
+   phân rã theo năm thì không — đừng kể chuyện nhân quả theo năm chỉ vì bảng có sẵn cột năm.
+
+## 18. Còn mở sau phần 3
+
+- **Nhánh CAPIT-membership** (`pt_v23_audit_2014.py:124`, `_c30v_asof`) đọc thành viên từ bảng đã
+  publish ⇒ trong A/B vẫn là thành viên cơ sở CŨ ⇒ **−0,36pp là CẬN DƯỚI**. Đo đủ cần republish rồi
+  chạy lại. Đây cũng là *killer objection* quant-skeptic nêu.
+- `lag_liquidity_filter.py:100` — **cố ý không đụng** (1 trong 5 điểm giữ bất biến parity
+  live==sim). Job riêng.
+- Script audit/nghiên cứu cùng họ lỗi, chưa sửa: `basket_concentration.py:28`,
+  `basket_scheme_concentration.py:23`, `custom30_core_select_audit.py:101`, `v4final_lib.py:103`.
+
+## 19. Tham chiếu (phần 3)
+
+- `mike/agents/Taylor/research/basket_price_basis_ab_20260802.md` — báo cáo A/B đầy đủ
+- `data/basis_ab_20260802/` — runner + log 2 chân
+- `basket_price_basis_selfcheck.py` (4 test), `custom30_publish_weight_selfcheck.py` (5 test)
+- `data/results_registry.md` mục **2026-08-02 — ⭐ RE-PIN R3 SAU KHI TÁCH VAI CƠ SỞ GIÁ**
+- Commit: `ebeacad`, `2c098c1`, `be6b976` (repo WorkingClaude)

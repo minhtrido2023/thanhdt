@@ -7,16 +7,21 @@
 - = **V2.3A + custom30V parking (NEUTRAL) + gated-overflow (bear-washout) + HAG eq_flag fix**.
 - 2 book: **BAL** (momentum SIGNAL_V11, yieldcombo: 1/PE + 1/PCF) + **LAG** (PEAD/earnings drift).
 - Allocator w_LAG: {CRISIS 50 / BEAR 0 / NEUTRAL-BULL-EXBULL 65}, band ±10pp.
-- **R3 NEUTRAL-only @50B: CAGR 27.60% / Sharpe 1.84 / DD −17.5% / Calmar 1.58** — pin CHÍNH THỨC từ
-  **2026-07-29**, đo trên **`universe_pit`** (point-in-time, không look-ahead). quant-skeptic
-  **CONFIRMED (high)**. Re-pin do **VINTAGE DỮ LIỆU, KHÔNG đổi mô hình** (restate DT5G + trôi
-  corp-action + `ticker_prune` mất 58 mã) — phân rã đủ 3 hiệu ứng + AS-OF snapshot pin ở
-  `data/results_registry.md` (mục **2026-07-29 RE-PIN R3 SAU RESTATE DT5G**), KHÔNG lặp lại ở đây.
-  **Số lịch sử KHÁC VINTAGE, không so trực tiếp**: 27.16%/1.81/−18.1%/1.50 (pin 07-22, đã mất, không
-  tái lập được); 27.84%/1.84/−18.2%/1.53 (pin 07-12, `ticker_prune`).
+- **R3 NEUTRAL-only @50B: CAGR 27.24% / Sharpe 1.81 / DD −18.4% / Calmar 1.48** — pin CHÍNH THỨC từ
+  **2026-08-02**, đo trên **`universe_pit`** (point-in-time, không look-ahead). quant-skeptic
+  **CONFIRMED (high)**. Re-pin lần này do **SỬA LOOK-AHEAD THẬT TRONG CODE** (khác 2 lần trước là
+  vintage dữ liệu): `custom_basket.py` + publisher `custom30_history.py` dùng `Close` (đã điều chỉnh
+  hồi tố) làm cơ sở **chọn rổ / trọng số** cross-sectional — hệ số `Close/Price` phụ thuộc sự kiện
+  quyền SAU ngày t. A/B 1 biến, chân đối chứng tái lập 27.60% tuyệt đối: **27.60% → 27.24%
+  (−0.36pp)** ⇒ **27.60% là số BỊ THỔI PHỒNG bởi lỗi**. −0.36pp là **CẬN DƯỚI** (nhánh
+  CAPIT-membership chưa phủ). Chi tiết ở `data/results_registry.md` (mục **2026-08-02 RE-PIN R3 SAU
+  KHI TÁCH VAI CƠ SỞ GIÁ**), KHÔNG lặp lại ở đây.
+  **Số lịch sử KHÁC VINTAGE / CÓ LỖI, không so trực tiếp**: 27.60%/1.84/−17.5%/1.58 (pin 07-29, có
+  look-ahead cơ sở giá); 27.16%/1.81/−18.1%/1.50 (pin 07-22, đã mất, không tái lập được);
+  27.84%/1.84/−18.2%/1.53 (pin 07-12, `ticker_prune`).
   ⚠️ **MIXED-universe khi trích dẫn**: `universe_pit` cho cổng quyết định, `ticker_prune` vẫn cho
-  CAPIT pool/maturity. Lỗi fidelity `liq<=0` vẫn MỞ ⇒ khoảng kỳ vọng trung thực **[~27,6%; ~31,3%]**,
-  **anchor DD ~−30%** (KHÔNG phải −17,5%).
+  CAPIT pool/maturity. Lỗi fidelity `liq<=0` vẫn MỞ ⇒ khoảng kỳ vọng trung thực **[~27,2%; ~31,3%]**,
+  **anchor DD ~−30%** (KHÔNG phải −18,4%).
 - Bootstrap 5th-pct: CAGR 18.6%, DD −28.6% (anchor DD ~−29%, KHÔNG phải −18%).
 - **NEUTRAL parking custom30V = phần tin cậy nhất: +7.4pp Full.** (30 mã, cap 0.10)
 - Bull parking: NAV ≥150B. **(30, 0.15) = OVERFIT**, walk-forward bác.
