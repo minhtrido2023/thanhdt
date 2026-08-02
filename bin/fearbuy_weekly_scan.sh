@@ -16,7 +16,7 @@ MIKEDIR="$WORKDIR/mike"
 TODAY=$(date +%Y-%m-%d)
 
 # Route to Taylor's designated thread for this research line (user directive, this thread).
-TAYLOR_THREAD="1521735922066919515"
+TAYLOR_THREAD="taylor_research"
 
 PROMPT=$(cat <<EOF
 Quét hàng tuần định kỳ ($TODAY) cho sleeve "mua khi sợ hãi có tính toán" (calculated fear-buy) —

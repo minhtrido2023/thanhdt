@@ -15,8 +15,11 @@
 # sent at all".
 set -euo pipefail
 
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MIKE_DISCORD_API="${MIKE_DISCORD_API:-http://127.0.0.1:8199}"
-MIKE_DISCORD_CHANNEL="${MIKE_DISCORD_CHANNEL:-1519342571812421753}"
+# Kênh tra qua registry duy nhất kb/discord_channels.json (bin/discord_channel.sh). Biến môi
+# trường vẫn override được và nay nhận CẢ tên lẫn ID trần.
+MIKE_DISCORD_CHANNEL="$("$ROOT/bin/discord_channel.sh" "${MIKE_DISCORD_CHANNEL:-mikefleet}")"
 EMBED_DESC_LIMIT=4000   # margin under Discord's hard 4096 cap
 
 msg="${1:-}"

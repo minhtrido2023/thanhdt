@@ -93,7 +93,7 @@ PROJECT = "lithe-record-440915-m9"
 PIN_DATASET = "tav2_pin"
 LOCATION = "asia-southeast1"
 REPORT_DIR = os.path.join(MIKE, "logs", "bq_pin")
-DISCORD_STALE_CHANNEL = "1521470705563340910"  # Trading Daily — same target as bq_freshness_check.sh
+DISCORD_STALE_CHANNEL = "trading_daily"   # tên trong kb/discord_channels.json — same target as bq_freshness_check.sh
 
 # ── what gets pinned ──────────────────────────────────────────────────────────────────────
 # compare=False => snapshot it, but never diff it: `ticker_1m` is a ROLLING ~1-month window by

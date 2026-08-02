@@ -24,7 +24,7 @@ MIKE="$ROOT/mike"
 PROJECT="lithe-record-440915-m9"
 TABLE="tav2_bq.fa_ratings_8l"
 MIN_ROWS=50000                      # last known good: 52,433 (2026-06-20); rows only grow
-DISCORD_TRADING_DAILY="1521470705563340910"
+DISCORD_TRADING_DAILY="trading_daily"
 export PATH="/home/trido/google-cloud-sdk/bin:$PATH"
 
 START_EPOCH="$(date +%s)"

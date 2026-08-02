@@ -31,7 +31,7 @@ import argparse, json, os, subprocess, datetime
 ROOT = "/home/trido/thanhdt/WorkingClaude/mike"
 WC = "/home/trido/thanhdt/WorkingClaude"
 LEDGER = os.path.join(WC, "data", "anomaly_escalations.json")
-TRADING_DAILY = "1521470705563340910"
+TRADING_DAILY = "trading_daily"   # tên trong kb/discord_channels.json
 NOTIFY = os.path.join(ROOT, "bin", "notify_thread.sh")
 DISPATCH = os.path.join(ROOT, "bin", "dispatch.sh")
 

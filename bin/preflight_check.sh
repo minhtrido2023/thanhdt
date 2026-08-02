@@ -14,7 +14,7 @@ NOW_ICT="$(TZ='Asia/Ho_Chi_Minh' date +'%H:%M ICT')"
 DOW_ICT="$(TZ='Asia/Ho_Chi_Minh' date +%u)"   # 1=thứ Hai … 7=CN
 # Trading Daily — mọi nội dung giao dịch hàng ngày gộp về 1 thread cố định (không phụ thuộc
 # session Mike gần nhất mở từ thread nào).
-DISCORD_TRADING_THREAD="1521470705563340910"
+TRADING_DAILY_THREAD="trading_daily"
 
 # --account LABEL — mặc định SpaceX để giữ nguyên hành vi cũ khi gọi không kèm cờ (vd tay).
 # Cron thật gọi qua for_each_live_account.sh (lặp mọi account enabled=live/dnse) — thêm
@@ -188,8 +188,8 @@ for line in "${LINES[@]}"; do MSG+="$line"$'\n'; done
 
 "$ROOT/bin/notify.sh" "$MSG" 2>/dev/null || true
 
-if [ -n "${DISCORD_TRADING_THREAD:-}" ]; then
-  "$ROOT/bin/notify_thread.sh" "$MSG" "$DISCORD_TRADING_THREAD" 2>/dev/null || true
+if [ -n "${TRADING_DAILY_THREAD:-}" ]; then
+  "$ROOT/bin/notify_thread.sh" "$MSG" "$TRADING_DAILY_THREAD" 2>/dev/null || true
 fi
 
 "$ROOT/bin/append_event.sh" Mike status "preflight-${ACCOUNT}-$TODAY" \

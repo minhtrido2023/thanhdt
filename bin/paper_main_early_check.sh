@@ -11,7 +11,7 @@ set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WC_ROOT="$(cd "$ROOT/.." && pwd)"
 
-TRADING_DAILY_THREAD="1521470705563340910"
+TRADING_DAILY_THREAD="trading_daily"
 TODAY="$(TZ=Asia/Ho_Chi_Minh date +%Y-%m-%d)"
 NOW_ICT="$(TZ=Asia/Ho_Chi_Minh date +'%H:%M ICT')"
 SESSION="${1:-morning}"   # morning | afternoon — chỉ để hiển thị trong message

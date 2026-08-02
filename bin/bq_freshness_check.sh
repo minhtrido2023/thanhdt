@@ -107,7 +107,7 @@ if [ -z "$NEXT_TRADING_DAY" ]; then
 fi
 
 # Discord: Trading Daily thread — mọi nội dung giao dịch hàng ngày gộp về 1 topic.
-DISCORD_STALE_CHANNEL="1521470705563340910"
+DISCORD_STALE_CHANNEL="trading_daily"   # tên trong kb/discord_channels.json
 
 # _check <label> <table> <colexpr> <max_lag> <trading|calendar> [BLOCK|WARN]
 #   colexpr = biểu thức SQL đầy đủ với alias `t.` (vd "t.time", "DATE(t.updated_at)",

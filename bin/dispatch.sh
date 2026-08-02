@@ -333,10 +333,11 @@ from="${DISPATCH_FROM:-Mike}"
 # regardless of which thread Mike's live session happens to be active in right now
 # (root cause of thread-leak incidents 2026-07-01: dynamic ccdb_thread_id points at
 # whatever thread last invoked Mike). Add entries here as the user requests them.
+# Tên topic tra qua kb/discord_channels.json (registry duy nhất) — không viết ID trần.
 _agent_thread_override() {
   case "$1" in
-    DollarBill) echo "1521183164364754974" ;;  # DollarBill trading-plan channel
-    Wags) echo "1521475726329516122" ;;  # Architecture topic — Wags = fleet-ops/coordination
+    DollarBill) "$ROOT/bin/discord_channel.sh" plan_approval ;;  # DollarBill trading-plan channel
+    Wags) "$ROOT/bin/discord_channel.sh" architecture ;;  # Architecture topic — Wags = fleet-ops/coordination
           # role, output luôn thuộc Architecture bất kể Mike dispatch từ topic nào (thêm
           # 2026-07-20 sau feedback user: dispatch Wags cho incident missed-wakeup mà không
           # set DISCORD_THREAD_ID đã khiến notify rơi vào topic Mike đang nói chuyện thay vì
@@ -574,6 +575,19 @@ echo "JOB $job_id (from=$from, timeout=${TIMEOUT}s) → $ROOT/bin/jobs.sh status
 # "current" topic later (see _job_thread_id comment for why that was the actual bug).
 _start_ts="$(date +%s)"
 _dtid0="${FORCE_TID:-$(_ambient_thread "$id")}"
+# `--thread` chấp nhận TÊN trong kb/discord_channels.json (vd `--thread architecture`) ngoài
+# ID trần. Phân giải NGAY TẠI ĐÂY để job record + $DISCORD_THREAD_ID của tiến trình con luôn
+# giữ ID THẬT — mọi tầng sau chỉ đọc lại ID đã ghim, không bao giờ phải phân giải tên lần nữa.
+# Tên sai ⇒ bỏ trống + cảnh báo, KHÔNG âm thầm rơi về topic khác (fallback im lặng chính là
+# cơ chế rò rỉ chéo topic của 4 sự cố trước).
+if [ -n "$_dtid0" ]; then
+  if _dtid0_resolved="$("$ROOT/bin/discord_channel.sh" "$_dtid0" 2>&1)"; then
+    _dtid0="$_dtid0_resolved"
+  else
+    echo "dispatch: KHÔNG phân giải được topic '$_dtid0' — job chạy KHÔNG có Discord topic. $_dtid0_resolved" >&2
+    _dtid0=""
+  fi
+fi
 # …and hand that SAME pinned topic to the agent process itself (fix 2026-07-22b).
 # Without this the child `claude` merely inherited the DISPATCHING session's ambient
 # DISCORD_THREAD_ID, so the job record said topic A while the agent's own

@@ -13,7 +13,7 @@
 set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WC_ROOT="$(cd "$ROOT/.." && pwd)"
-TRADING_DAILY_THREAD="1521470705563340910"
+TRADING_DAILY_THREAD="trading_daily"
 PHASE="${1:?usage: session_announce.sh <lunch|afternoon|close>}"
 TODAY="$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)"
 

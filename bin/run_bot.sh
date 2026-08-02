@@ -28,7 +28,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-_tid="1521470705563340910"  # Trading Daily thread — mọi giao dịch hàng ngày gộp về đây
+_tid="trading_daily"  # tên registry — mọi giao dịch hàng ngày gộp về đây
 _discord() {
   "$ROOT/bin/notify_thread.sh" "$1" "$_tid" 2>/dev/null || true
 }

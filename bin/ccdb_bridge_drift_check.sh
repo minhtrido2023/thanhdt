@@ -16,7 +16,7 @@
 set -uo pipefail
 ROOT="/home/trido/thanhdt/WorkingClaude/mike"
 BRIDGE="${CCDB_BRIDGE_DIR:-/workspace/claude-code-discord-bridge}"
-ARCH_THREAD="1521475726329516122"
+ARCH_THREAD="architecture"
 STAMP="$ROOT/state/ccdb_bridge_drift_alerted_sha.txt"
 BEHIND_THRESHOLD=10
 

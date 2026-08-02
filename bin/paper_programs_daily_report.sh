@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # paper_programs_daily_report.sh [--post] [--date YYYY-MM-DD]
 # Báo cáo paper-trading hợp nhất hàng ngày (registry-driven, xem paper_programs_daily_report.py).
-# Mặc định in ra stdout. --post = gửi vào Discord topic "Trading report" (1522576692638388364)
+# Mặc định in ra stdout. --post = gửi vào Discord topic "Trading report" (tên registry: trading_report)
 # qua notify_thread.sh (tự chunk <2000 chars).
 # Luôn exit 0 khi render được report (kể cả có sleeve lỗi) — chỉ exit ≠0 khi python chết hẳn.
 set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 export TZ="Asia/Ho_Chi_Minh"
 
-TRADING_REPORT_TOPIC="1522576692638388364"
+TRADING_REPORT_TOPIC="trading_report"
 POST=0
 ARGS=()
 for a in "$@"; do

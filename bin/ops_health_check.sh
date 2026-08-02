@@ -25,7 +25,7 @@
 set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WC_ROOT="$(cd "$ROOT/.." && pwd)"
-TRADING_DAILY_THREAD="1521470705563340910"
+TRADING_DAILY_THREAD="trading_daily"
 
 LABEL="Kiểm tra vận hành"
 # --account LABEL — mặc định SpaceX để giữ nguyên hành vi cũ khi gọi không kèm cờ. Cron

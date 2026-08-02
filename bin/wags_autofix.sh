@@ -6,7 +6,7 @@
 # 2026-07-07): Wags (Fleet Ops Coordinator) tìm lỗi + tự sửa → arch-reviewer (chuyên gia
 # kiến trúc tổ chức/điều phối agent, ~/.claude/agents/arch-reviewer.md, model opus — hạ từ
 # fable 2026-07-17, xem note dưới, sinh ra để BÁC BỎ) audit lại → báo cáo hoàn tất vào TOPIC
-# ARCHITECTURE (1521475726329516122).
+# ARCHITECTURE (tên registry: architecture).
 #
 # Phân định domain với ops_autofix.sh (Winston): Winston = lỗi vận hành TRADING/data/
 # pipeline/report; Wags = lỗi ĐIỀU PHỐI giữa agent (dispatch treo/timeout, circuit breaker,
@@ -33,7 +33,7 @@
 set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WC_ROOT="$(cd "$ROOT/.." && pwd)"
-ARCH_TOPIC="1521475726329516122"
+ARCH_TOPIC="architecture"
 CLAUDE="/home/trido/.local/bin/claude"
 AGENT_DEF="$HOME/.claude/agents/arch-reviewer.md"
 AUTOFIX_COOLDOWN="${AUTOFIX_COOLDOWN:-3600}"

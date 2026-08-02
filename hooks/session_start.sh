@@ -176,7 +176,7 @@ source "$ROOT/hooks/_directives.sh"
 # on a "ready" signal — announcing there is pure noise in the user's topic.
 #
 # Dedupe guard (2026-07-30, fix for a real spam incident — root-caused via
-# `journalctl -u ccdb-mike.service`, thread 1521475726329516122, 07:37-07:49 UTC = 14:37-14:49
+# `journalctl -u ccdb-mike.service`, topic Architecture, 07:37-07:49 UTC = 14:37-14:49
 # ICT, then cross-checked mechanically against the whole retained journal 06-24→07-30). The old
 # version fired on EVERY SessionStart unconditionally; that premise was wrong in TWO distinct
 # ways, found across two review rounds — both fixed here, together:

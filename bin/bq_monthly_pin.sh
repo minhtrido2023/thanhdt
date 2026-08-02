@@ -32,6 +32,6 @@ echo "--- exit=$rc $(date +%FT%T%z) ---" >> "$LOG"
 # timeout/crash thì nó chưa kịp gửi gì -> wrapper phải tự báo, nếu không cron chết = im lặng.
 if [ "$rc" -ge 3 ]; then
   "$ROOT/mike/bin/notify.sh" "BQ monthly pin FAIL (exit=$rc$([ "$rc" = 124 ] && echo ' TIMEOUT')) — xem $LOG" 2>/dev/null || true
-  "$ROOT/mike/bin/notify_thread.sh" "BQ monthly pin FAIL (exit=$rc$([ "$rc" = 124 ] && echo ' TIMEOUT')) — xem $LOG" "1521470705563340910" 2>/dev/null || true
+  "$ROOT/mike/bin/notify_thread.sh" "BQ monthly pin FAIL (exit=$rc$([ "$rc" = 124 ] && echo ' TIMEOUT')) — xem $LOG" "trading_daily" 2>/dev/null || true
 fi
 exit "$rc"

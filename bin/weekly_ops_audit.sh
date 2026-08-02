@@ -15,7 +15,9 @@
 set -uo pipefail
 ROOT="/home/trido/thanhdt/WorkingClaude/mike"
 LOG="$ROOT/logs/weekly_ops_audit.log"
-ARCH_THREAD="1521475726329516122"
+# (Không còn biến ARCH_THREAD: nó đã CHẾT từ TRƯỚC refactor 2026-08-02 — prompt bên dưới tự
+# ghi topic, không đọc biến này. Một biến giữ tên channel mà không ai đọc chính là dạng lỗi
+# của sự cố 2026-07-22 "override thành dead-code": sửa biến, tưởng đã đổi đích, thực tế không.)
 
 log() { echo "[$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%dT%H:%M:%S%z)] $*" | tee -a "$LOG"; }
 log "=== weekly_ops_audit START ==="
@@ -121,7 +123,7 @@ BÁO CÁO CUỐI (bắt buộc, dù mọi mục đều sạch — quiet-heartbea
 ràng, im lặng hoàn toàn không phân biệt được với job chết): tổng hợp ngắn gọn 7 mục trên, bug nào
 tìm thấy + đã tự sửa (kèm commit hash) hay đang escalate, số PENDING bus question, %fable/%opus,
 kích thước kb file quan trọng. Post báo cáo này vào Architecture channel bằng:
-bash bin/notify_thread.sh "<báo cáo>" 1521475726329516122
+bash bin/notify_thread.sh "<báo cáo>" architecture
 VÀ notify Telegram (bin/notify.sh "<tóm tắt ngắn>"). Sau đó append_event.sh Mike decision
 'weekly-ops-audit' "<JSON tóm tắt: bugs_found, bugs_fixed, escalated, pct_fable, pct_opus>".
 

@@ -609,7 +609,7 @@ MSG="🌙 KB nightly done ($(date -u +%Y-%m-%d))"
 # Topic CỐ ĐỊNH (Architecture) — trước 2026-07-22 đọc con trỏ global
 # state/ccdb_thread_id = "topic Mike mở phiên gần nhất", nên tin bảo trì KB đêm nào cũng
 # rơi vào topic user vừa đọc, bất kể topic đó về việc gì.
-_tid="1521475726329516122"
+_tid="architecture"
 "$ROOT/bin/notify_thread.sh" "$MSG" "$_tid" 2>/dev/null || true
 
 # ── Phase 4.5: weekly ops-vs-research spend trend (cost-opt #5, 2026-07-17) ──
@@ -775,13 +775,13 @@ if [ -n "$SAME_DAY_BREACH" ]; then
         if [ -z "$_REMAIN" ]; then
             MSG="✅ [kb_nightly] context-bloat auto-fix: $SAME_DAY_BREACH đã tự nén xong, dưới ngưỡng, đã commit — không cần người can thiệp."
             "$ROOT/bin/notify.sh" "$MSG" >/dev/null 2>&1 || true
-            "$ROOT/bin/notify_thread.sh" "$MSG" "1521475726329516122" >/dev/null 2>&1 || true
+            "$ROOT/bin/notify_thread.sh" "$MSG" "architecture" >/dev/null 2>&1 || true
             log "Episode resolved by auto-fix, no escalation needed."
             rm -f "$_CTXBLOAT_STAMP"
         else
             MSG="⚠️ [kb_nightly] context-bloat auto-fix KHÔNG đủ: ${_REMAIN}Đã thử tự nén 1 lần (fact-check cơ học chặn hoặc không đủ nhỏ) — cần Mike/user xử lý HÔM NAY, xem $LOG."
             "$ROOT/bin/notify.sh" "$MSG" >/dev/null 2>&1 || true
-            "$ROOT/bin/notify_thread.sh" "$MSG" "1521475726329516122" >/dev/null 2>&1 || true
+            "$ROOT/bin/notify_thread.sh" "$MSG" "architecture" >/dev/null 2>&1 || true
             "$ROOT/bin/append_event.sh" Mike question "context-bloat-same-day" \
 "Vượt ngưỡng cứng: ${_REMAIN}Phát hiện NGOÀI Thứ Sáu (kb_nightly.sh Phase 4.6, $(date -u +%Y-%m-%dT%H:%M:%SZ)). Auto-fix ĐÃ THỬ 1 lần đêm nay (bin/ctxbloat_fact_check.py chặn mất-fact HOẶC nén không đủ nhỏ — xem $LOG để biết lý do cụ thể) — sẽ KHÔNG tự thử lại đêm sau cho cùng đợt vượt ngưỡng này (tránh treadmill, xem kb/coding_guidelines.md §Enforcement policy). Cần người/Mike quyết: nén tay sâu hơn, hay đây là nội dung evergreen không thể nén thêm mà không mất fact (như context_pack.md 2026-07-30) → nâng ngưỡng hay OKF-hoá sâu hơn." \
                 2>/dev/null || true
@@ -964,7 +964,7 @@ kiện sau vượt qua (vd alert vận hành cho 1 ngày đã qua, plan ngày đ
 bằng chứng thật (grep KB/git log/bus xác nhận), câu nào không chắc thì để PENDING cho tuần sau.
 Báo cáo cuối review PHẢI có: tổng số PENDING đầu review, số đã đóng tuần này (tách tự-quyết/
 superseded), số CÒN LẠI kèm tuổi từng câu — post báo cáo này (không chỉ ghi bus) vào Architecture
-channel qua \`bash $ROOT/bin/notify_thread.sh \"<báo cáo>\" 1521475726329516122\`. Đây LÀ cơ chế
+channel qua \`bash $ROOT/bin/notify_thread.sh \"<báo cáo>\" architecture\`. Đây LÀ cơ chế
 \"cuối tuần kiểm tra báo cáo lại đã hoàn thành chưa\" user yêu cầu — KHÔNG được bỏ qua mục này dù
 các mục 1-10 đã chiếm nhiều thời gian.
 KHÔNG xóa archive. Không cần hỏi user cho việc 1-6, 10-11 — đây là routine maintenance đã được user uỷ quyền. Sau khi xong: notify Telegram, VÀ BẮT BUỘC (hợp đồng đầu ra máy đọc được — dispatch này chạy nền, không ai chờ trực tiếp, kb_nightly.sh thứ Bảy tự kiểm event này để phát hiện lạc đề/chết im, đúng NGUYÊN VĂN topic sau, không viết biến thể khác dù có vẻ tương đương): append_event.sh Mike decision 'kb-weekly-editorial' \"<JSON tóm tắt thay đổi>\".${CTX_BLOAT_WARN}${STALE_SECTIONS_WARN}" \

@@ -22,3 +22,13 @@ repos:
         entry: bin/shellcheck_gate.sh
         language: system
         files: '\.sh$'
+
+      # Thêm 2026-08-02, sau lần thứ 5 user báo "message các topic Discord bị lẫn lộn". 4 lần
+      # vá trước (2026-07-01, 07-06, 07-22, 07-22b) đều sửa đúng chỗ hỏng rồi vẫn tái phát
+      # dưới dạng MỚI, vì cả 4 lần đều dựa vào CON NGƯỜI NHỚ dùng đúng biến/hàm có sẵn. Gate
+      # này biến "dùng tên trong kb/discord_channels.json" thành điều kiện CƠ HỌC để commit.
+      - id: discord-id-gate
+        name: Discord ID trần (dùng tên trong kb/discord_channels.json — xem bin/discord_id_gate.sh)
+        entry: bin/discord_id_gate.sh
+        language: system
+        files: '^(bin|hooks)/.*\.(sh|py)$'

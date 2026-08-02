@@ -24,7 +24,7 @@
 set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WC_ROOT="$(cd "$ROOT/.." && pwd)"
-TRADING_REPORT_THREAD="1522576692638388364"
+TRADING_REPORT_THREAD="trading_report"
 STATE="$ROOT/state/report_cadence_dispatched.json"
 TODAY="$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)"
 

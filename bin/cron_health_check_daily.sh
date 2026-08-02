@@ -11,8 +11,8 @@
 # âm thầm chạy, âm thầm lỗi không ai xử lý."
 set -uo pipefail
 ROOT="/home/trido/thanhdt/WorkingClaude/mike"
-ARCH_THREAD="1521475726329516122"
-TRADING_DAILY_THREAD="1521470705563340910"
+ARCH_THREAD="architecture"
+TRADING_DAILY_THREAD="trading_daily"
 
 OUT="$(python3 "$ROOT/bin/cron_health_check.py" 2>&1)"
 RC=$?

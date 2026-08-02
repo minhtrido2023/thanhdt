@@ -78,7 +78,7 @@ PROJECT = "lithe-record-440915-m9"
 TABLE = "tav2_bq.vnindex_5state_dt5g_live"
 LOCAL_CSV = os.path.join(WORKDIR, "data/vnindex_5state_dt5g_live.csv")
 STATE_CSV = os.path.join(WORKDIR, "data/dt5g_writer_watch.csv")
-DISCORD_TRADING_DAILY = "1521470705563340910"
+DISCORD_TRADING_DAILY = "trading_daily"   # tên trong kb/discord_channels.json
 
 # MỌI mốc thời gian trong file này là ICT TƯỜNG MINH — KHÔNG dựa vào TZ hệ thống. Host chạy
 # `Etc/UTC` (`timedatectl`); TZ=Asia/Ho_Chi_Minh chỉ có khi caller đã source `wc_env.sh`. Chạy

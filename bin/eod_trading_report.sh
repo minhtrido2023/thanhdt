@@ -17,7 +17,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-TRADING_THREAD="1522576692638388364"  # Trading report (đổi từ Trading Daily 2026-07-03, theo yêu cầu user)
+TRADING_REPORT_THREAD="trading_report"   # tên trong kb/discord_channels.json (đổi từ Trading Daily 2026-07-03, theo yêu cầu user)
 
 PLAN_FILE="$WC_ROOT/data/trade_plans/plan_${ACCOUNT}_${PLAN_DATE}.json"
 STATE_FILE="$WC_ROOT/data/execution_logs/exec_${ACCOUNT}_${PLAN_DATE}_state.json"
@@ -100,7 +100,7 @@ if [ ! -f "$PLAN_FILE" ]; then
   # Không có bằng chứng → nêu cả 2 khả năng, để người đọc xác nhận, không buộc kết luận.
   MSG="🟡 **EOD $ACCOUNT ($PLAN_DATE)** — KHÔNG TÌM THẤY file plan hôm nay. 2 khả năng: (i) CHỦ ĐỘNG không lập plan cho account này (quyết định HOLD có chủ đích — bình thường), hoặc (ii) DollarBill lỗi lúc 17:30/19:30 hôm qua. Kiểm tra plan channel / bus để xác nhận là chủ động hay lỗi — báo cáo này không đủ bằng chứng tự kết luận."
   echo "$MSG"
-  "$ROOT/bin/notify_thread.sh" "$MSG" "$TRADING_THREAD" 2>/dev/null || true
+  "$ROOT/bin/notify_thread.sh" "$MSG" "$TRADING_REPORT_THREAD" 2>/dev/null || true
   "$ROOT/bin/append_event.sh" Mafee status "eod-trading-report" \
     "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"delivered_via\":\"no_plan_alert\"}" 2>/dev/null || true
   exit 0
@@ -118,7 +118,7 @@ elif [ "$N_ORDERS_TODAY" = "0" ]; then
 
 $NAV_SECTION$(_dt_gate_block)"
   echo "$MSG"
-  "$ROOT/bin/notify_thread.sh" "$MSG" "$TRADING_THREAD" 2>/dev/null || true
+  "$ROOT/bin/notify_thread.sh" "$MSG" "$TRADING_REPORT_THREAD" 2>/dev/null || true
   "$ROOT/bin/append_event.sh" Mafee status "eod-trading-report" \
     "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"delivered_via\":\"hold_day\"}" 2>/dev/null || true
   exit 0
@@ -127,7 +127,7 @@ elif [ ! -f "$STATE_FILE" ]; then
   # khi ghi state đầu tiên. Vấn đề thật, khác hẳn case 1/2.
   MSG="🔴 **EOD $ACCOUNT ($PLAN_DATE)** — Plan có $N_ORDERS_TODAY lệnh nhưng KHÔNG có state file thực thi. Bot có thể chưa chạy được lần nào hôm nay (kiểm tra run_bot.sh log / bot_heartbeat) — cần xem ngay."
   echo "$MSG"
-  "$ROOT/bin/notify_thread.sh" "$MSG" "$TRADING_THREAD" 2>/dev/null || true
+  "$ROOT/bin/notify_thread.sh" "$MSG" "$TRADING_REPORT_THREAD" 2>/dev/null || true
   "$ROOT/bin/append_event.sh" Mafee error "eod-trading-report" \
     "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"delivered_via\":\"missing_state_alert\"}" 2>/dev/null || true
   exit 0
@@ -404,9 +404,9 @@ echo "$FULL_REPORT"
 # nhận được report ngày và không ai biết). Fallback 2 tầng khi post thất bại: (1) Telegram
 # qua notify.sh, (2) Trading Daily thread kèm cảnh báo — và luôn ghi bus event nêu rõ kênh
 # nào nhận được.
-TRADING_DAILY_THREAD="1521470705563340910"
+TRADING_DAILY_THREAD="trading_daily"
 DELIVERED_VIA="trading_report_thread"
-if ! "$ROOT/bin/notify_thread.sh" "$FULL_REPORT" "$TRADING_THREAD" 2>>"$ROOT/logs/eod_notify_errors.log"; then
+if ! "$ROOT/bin/notify_thread.sh" "$FULL_REPORT" "$TRADING_REPORT_THREAD" 2>>"$ROOT/logs/eod_notify_errors.log"; then
   DELIVERED_VIA="fallback"
   FALLBACK_HEADER="⚠️ **Topic Trading report đang không truy cập được (bot Missing Access) — gửi tạm qua kênh dự phòng.**"
   "$ROOT/bin/notify.sh" "$FALLBACK_HEADER
@@ -437,7 +437,7 @@ if [ -s "$_MISMATCH_MARKER" ]; then
 fi
 MISMATCH_FILE="$WC_ROOT/data/execution_logs/eod_mismatch_${ACCOUNT}_${PLAN_DATE}.json"
 if [ -f "$MISMATCH_FILE" ]; then
-  _discord_thread="1522576692638388364"  # Trading report
+  _discord_thread="trading_report"
   "$ROOT/bin/notify_thread.sh" "🔍 Phát hiện lệch đối soát — tự động kích hoạt kiểm toán độc lập (risk-auditor)..." "$_discord_thread" 2>/dev/null || true
   mkdir -p "$ROOT/state/autofix"
   date -u +%Y-%m-%dT%H:%M:%SZ > "$_MISMATCH_MARKER"
@@ -449,7 +449,7 @@ EOD reconciliation vừa phát hiện LỆCH giữa state nội bộ và broker 
 3. Điều tra nguyên nhân khả dĩ: có process bot_execute.py chạy trùng không (kiểm tra log run_bot*/autoheal* quanh thời điểm), hay lý do khác (cancel/reprice, modify-order quirk DNSE, lỗi đồng bộ khác)?
 4. Đánh giá tác động: lệch làm portfolio vượt giới hạn trading_rules.json nào không (concentration, gross exposure)?
 5. Kết luận rõ: đây có phải sự cố NGHIÊM TRỌNG cần escalate ngay cho user, hay là sai lệch nhỏ/false-positive của chính cơ chế đối soát (vd do lệnh bị modify đổi order id, dedup sai)?
-Báo cáo ngắn gọn lên bus + Discord Trading report topic (1522576692638388364). BẮT BUỘC (hợp đồng đầu ra máy đọc được, xem mike/kb/dispatch_output_contract.md): kết thúc bằng đúng lệnh sau, nguyên văn topic — mike/bin/append_event.sh Spyros finding "eod-mismatch-audit: $ACCOUNT" "<JSON: plan_date, ket_luan, muc_do_nghiem_trong>". Đây là kiểm toán READ-ONLY — không sửa code/state/lệnh gì.
+Báo cáo ngắn gọn lên bus + Discord Trading report topic (bin/notify_thread.sh "<msg>" trading_report). BẮT BUỘC (hợp đồng đầu ra máy đọc được, xem mike/kb/dispatch_output_contract.md): kết thúc bằng đúng lệnh sau, nguyên văn topic — mike/bin/append_event.sh Spyros finding "eod-mismatch-audit: $ACCOUNT" "<JSON: plan_date, ket_luan, muc_do_nghiem_trong>". Đây là kiểm toán READ-ONLY — không sửa code/state/lệnh gì.
 PROMPT
 )" --bg --thread "$_discord_thread" --timeout 900 2>&1 || true
 fi

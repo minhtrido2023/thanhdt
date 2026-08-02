@@ -26,7 +26,7 @@ PROJECT="lithe-record-440915-m9"
 TABLE="tav2_bq.fa_ratings"
 MIN_ROWS=12000                     # frozen history alone is 12,367 minus at most the 2
                                    # open quarters' churn; anything under 12k = truncated
-DISCORD_TRADING_DAILY="1521470705563340910"
+DISCORD_TRADING_DAILY="trading_daily"
 export PATH="/home/trido/google-cloud-sdk/bin:$PATH"
 
 START_EPOCH="$(date +%s)"

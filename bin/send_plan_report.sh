@@ -50,7 +50,7 @@ done
 
 # Discord: DollarBill trading-plan channel — tách riêng khỏi Trading Daily (2026-07-01,
 # user chỉ đạo) để tránh spam các topic khác khi Mike dispatch DollarBill từ bất kỳ đâu.
-DISCORD_PLAN_CHANNEL="1521183164364754974"
+DISCORD_PLAN_CHANNEL="plan_approval"
 
 EXPECTED_DATE="$(cd "$WORKDIR" && python3 -c "
 import datetime as dt

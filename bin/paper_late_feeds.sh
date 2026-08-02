@@ -40,7 +40,7 @@ run "[21] fetch_bdi_daily"   fetch_bdi_daily.py
 if [ "$FAILS" -gt 0 ]; then
   msg="⚠️ paper_late_feeds $(date +%F): $FAILS step FAIL:$FAILED_STEPS — chi tiết: grep '\[FAIL' $WORKDIR_8L/$LOG"
   "${NOTIFY_BIN:-/home/trido/thanhdt/WorkingClaude/mike/bin/notify.sh}" "$msg" 2>/dev/null || true
-  "${NOTIFY_THREAD_BIN:-/home/trido/thanhdt/WorkingClaude/mike/bin/notify_thread.sh}" "$msg" "1521470705563340910" 2>/dev/null || true
+  "${NOTIFY_THREAD_BIN:-/home/trido/thanhdt/WorkingClaude/mike/bin/notify_thread.sh}" "$msg" "trading_daily" 2>/dev/null || true
 fi
 
 find data -name 'paper_late_feeds_*.log' -mtime +30 -delete 2>/dev/null

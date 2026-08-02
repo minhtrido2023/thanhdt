@@ -301,7 +301,7 @@ VIỆC CỦA BẠN:
    tục mạch việc, xoá bỏ chi tiết đã xong/không còn liên quan.
 4. Chạy bin/consolidate.sh để gộp bus→KB, đảm bảo context_pack.md tươi cho phiên ngày mai.
 5. Đăng tóm tắt ngắn (5-8 dòng, tiếng người, không jargon) vào Trading Daily
-   (1521470705563340910): số sự cố hôm nay, bao nhiêu mới/bao nhiêu tái diễn, pattern
+   (topic trading_daily): số sự cố hôm nay, bao nhiêu mới/bao nhiêu tái diễn, pattern
    xuyên suốt quan trọng nhất, có cái nào fix chưa hoàn chỉnh cần theo dõi tiếp.
 6. Xoá file '$DRAFT_FILE' (đã gắn xong vào kb/incidents/, không cần giữ nữa)." \
     --timeout 1200 >> "$LOG" 2>&1 &
