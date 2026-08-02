@@ -1,0 +1,26 @@
+Sự kiện 2026-07-01 → 2026-08-01 (giải từ tiền broker: SpaceX, ZaloPay):
+
+  MBB   ex 2026-07-09               1,000đ/cp  [CASH_CONFIRMED/broker_solved]
+        ước lượng tỉ số (chỉ để đối chiếu): 1,000đ/cp
+        giải từ tiền mặt broker thật (1 phương trình / 1 ẩn: MBB@2026-07-09)
+        Dividend_1Y: match — Dividend_1Y 300→1,300 (delta +1,000)
+  BID   ex 2026-07-17                 450đ/cp  [CASH_CONFIRMED/broker_solved]
+        ước lượng tỉ số (chỉ để đối chiếu): 450đ/cp
+        giải từ tiền mặt broker thật (2 phương trình / 1 ẩn: BID@2026-07-17)
+        Dividend_1Y: unavailable — chưa có kỳ báo cáo quý nào sau ex-date (độ trễ theo quý) — KHÔNG kết luận gì
+  CTG   ex 2026-07-23                 450đ/cp  [CASH_CONFIRMED/broker_solved]
+        ước lượng tỉ số (chỉ để đối chiếu): 450đ/cp
+        giải từ tiền mặt broker thật (2 phương trình / 2 ẩn: CTG@2026-07-23, VCB@2026-07-23)
+        Dividend_1Y: match — Dividend_1Y 450→900 (delta +450)
+  VCB   ex 2026-07-23                 450đ/cp  [CASH_CONFIRMED/broker_solved]
+        ước lượng tỉ số (chỉ để đối chiếu): 450đ/cp
+        giải từ tiền mặt broker thật (2 phương trình / 2 ẩn: CTG@2026-07-23, VCB@2026-07-23)
+        Dividend_1Y: match — Dividend_1Y 450→900 (delta +450)
+  NCT   ex 2026-07-27               8,000đ/cp  [CASH_CONFIRMED/broker_solved]
+        ước lượng tỉ số (chỉ để đối chiếu): 8,000đ/cp
+        giải từ tiền mặt broker thật (2 phương trình / 1 ẩn: NCT@2026-07-27)
+        Dividend_1Y: unavailable — chưa có kỳ báo cáo quý nào sau ex-date (độ trễ theo quý) — KHÔNG kết luận gì
+  SAB   ex 2026-07-28               3,000đ/cp  [CASH_CONFIRMED/broker_solved]
+        ước lượng tỉ số (chỉ để đối chiếu): 3,000đ/cp
+        giải từ tiền mặt broker thật (2 phương trình / 1 ẩn: SAB@2026-07-28)
+        Dividend_1Y: unavailable — chưa có kỳ báo cáo quý nào sau ex-date (độ trễ theo quý) — KHÔNG kết luận gì
