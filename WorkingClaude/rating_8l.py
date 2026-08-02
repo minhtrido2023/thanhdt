@@ -529,9 +529,21 @@ def main():
     out["earn_yield"] = np.where(out["PE"] > 0, (1.0 / out["PE"]).round(4), np.nan)
     # SALES yield = 1/PS, current-price PS = mktcap/TTM-revenue. Value-IC validated 2026-06-19: PS is the
     # DOMINANT value lens for CONSUMER/RETAIL (IC +0.135) and strong broadly (+0.072, 99% cov) -> v3 lens.
+    # ⚠️ mktcap MUST use `Price` (unadjusted, point-in-time), NOT `Close` (retro-adjusted). Same saga as the
+    # PE note above but the OPPOSITE direction: PE was already Price-based (so rescaling it was wrong), while
+    # this lens self-computes mktcap and so must pick the PIT basis itself. `OShares` is the PIT share count
+    # of its own quarter, so pairing it with an adjusted price mixes two bases. Proven 2026-08-02 (job
+    # Taylor_20260802_081308, exp_ps_basis/measure_ps_basis.py, n=7,377 rows 2014-2016 vs the stored
+    # ticker_financial.PS): Price*OShares/Rev_ttm reproduces stored PS in 98.9% of rows (median rel-err
+    # 0.0000); Close*OShares/Rev_ttm only 11.8% (median rel-err 0.5261). A `Close` basis lived here until
+    # 2026-08-02: live impact 0 (Price==Close 859/859 on the latest snapshot, adj-factor is 1 on the newest
+    # date), but any backward-looking recompute was distorted — median sales_yield off 47.5-56.7%, Spearman
+    # 0.889-0.909, 10-15 of the 30 cheapest-on-PS names swapped (2014/2015/2016 cuts).
+    # See kb/incidents/2026-08/2026-08-02-pe-price-close-adjustment-saga.md (Phần 2) and
+    # kb/data_registry/fundamentals/valuation_pe_pb_pcf_ps.md.
     _ttm_rev = out[[f"Revenue_P{i}" for i in range(4)]].sum(axis=1, min_count=1)
-    out["ps"] = np.where((_ttm_rev > 0) & out["OShares"].notna() & out["Close"].notna(),
-                         (out["Close"] * out["OShares"] / _ttm_rev), np.nan)
+    out["ps"] = np.where((_ttm_rev > 0) & out["OShares"].notna() & out["Price"].notna(),
+                         (out["Price"] * out["OShares"] / _ttm_rev), np.nan)
     out["sales_yield"] = np.where(out["ps"] > 0, (1.0 / out["ps"]).round(4), np.nan)
     # DIVIDEND yield = Dividend_Min3Y (VND/sh, MINIMUM cash dividend over 3Y, event-based from VCI ex-dates)
     # / unadjusted Price. Validated 2026-07-14 (job Taylor_20260714_033021, dividend_upgrade_test.py): the
