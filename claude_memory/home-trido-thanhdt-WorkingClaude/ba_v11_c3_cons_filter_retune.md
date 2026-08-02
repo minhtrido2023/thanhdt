@@ -83,7 +83,7 @@ This came after a multi-stream research showing:
 SV_TIGHT_DAYS = {1: 30, 2: 60, 3: 90}     # was {1: 30, 2: 60, 3: 60}
 
 # In simulate() call:
-cash_etf_states = {2: 0.5, 3: 0.7}         # was {3: 0.7}
+cash_etf_states = {2: 0.5, 3: 0.7}[REDACTED] # was {3: 0.7}
 ```
 
 ### Unchanged

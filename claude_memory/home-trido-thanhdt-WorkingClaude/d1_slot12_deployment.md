@@ -24,10 +24,10 @@ Coverage: 87.8% AdvCust, 85.8% UnearnRev trên 66K rows từ 2000.
 
 ```sql
 WHEN icb_code = 8633.0
- AND adv_yoy > 0.5               -- AdvCust_P0 / AdvCust_P4 - 1
- AND fa_tier IN ('C','D')        -- không fire trên A/B (preserve v10 sector tilt) hoặc E
- AND ta >= 120                   -- TA confirmation (round-12 v10 score)
- AND state5 IN (3,4,5)           -- skip BEAR/CRISIS
+ AND adv_yoy > 0.5[REDACTED]       -- AdvCust_P0 / AdvCust_P4 - 1
+ AND fa_tier IN ('C','D')[REDACTED]-- không fire trên A/B (preserve v10 sector tilt) hoặc E
+ AND ta >= 120[REDACTED][REDACTED]   -- TA confirmation (round-12 v10 score)
+ AND state5 IN (3,4,5)[REDACTED]   -- skip BEAR/CRISIS
  AND (np_yoy > 0 OR rev_yoy > 0) -- earnings momentum (avoid mua đỉnh khi NP suy giảm)
  THEN 'RE_BACKLOG_BUY'
 ```

@@ -8,7 +8,7 @@
 
 Note: "Tam Thế" reserved for BA system v13 (different family). Ngũ Hành 5-state uses "Tam Quan" = "three perspectives". v3.1 adds US shock as 4th view, but kept "Tam Quan" since US is asymmetric defensive cap (not equal weight).
 
-## Architecture
+## [REDACTED]
 
 ### 1. Two parallel r_scores
 - **r_score_raw**: 8 factors on raw VNINDEX = 7 base (P3M, P1M, MA200_dev, RSI, MACD, CMF, Breadth) + PE-comp w=0.03

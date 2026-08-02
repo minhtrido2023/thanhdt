@@ -87,10 +87,10 @@ V11 integrated sweep tested 4 smoothing levels:
 
 **Refresh pipeline (weekly):**
 ```bash
-python clean_vnindex_pe.py            # fresh BQ pull + clean PE
-python test_v2g_pe3.py                # build v2g_pe3 state
+python clean_vnindex_pe.py[REDACTED]    # fresh BQ pull + clean PE
+python test_v2g_pe3.py[REDACTED][REDACTED]# build v2g_pe3 state
 python generate_smoothed_v2g_pe3c.py  # apply s3 smoothing + upload variants to BQ
-python deploy_v2g_pe3c_s3.py          # overwrite canonical with s3 + auto-backup
+python deploy_v2g_pe3c_s3.py[REDACTED]  # overwrite canonical with s3 + auto-backup
 ```
 
 ## State distribution (v2g_pe3c_s3, 2000-2026)

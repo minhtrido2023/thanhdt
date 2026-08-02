@@ -11,7 +11,7 @@ originSessionId: df3c1340-40c2-46c7-b6dc-247737308843
 (Layer 3 v4, 2026-05-17) continues to deliver alpha in live BA-system flow.
 Raise alarm if/when the rule stops working.
 
-## Architecture
+## [REDACTED]
 
 Script: `layer3_v4_shadow.py`
 Bat wrapper: `layer3_v4_shadow_run.bat`
@@ -49,16 +49,16 @@ Positive alpha = we paid LESS than baseline (good).
 
 ```bash
 # Daily auto-run
-python layer3_v4_shadow.py update                # process new picks (default from today)
+python layer3_v4_shadow.py update[REDACTED][REDACTED]# process new picks (default from today)
 python layer3_v4_shadow.py update --from-date 2026-05-01
 
 # Bulk backfill
-python layer3_v4_shadow.py backfill              # default from 2025-06-01
+python layer3_v4_shadow.py backfill[REDACTED]      # default from 2025-06-01
 python layer3_v4_shadow.py backfill --fetch-missing  # use vnstock for missing intraday (slow)
 
 # Reports
-python layer3_v4_shadow.py report                # full markdown report
-python layer3_v4_shadow.py alert                 # one-line traffic light (Telegram-ready)
+python layer3_v4_shadow.py report[REDACTED][REDACTED]# full markdown report
+python layer3_v4_shadow.py alert[REDACTED][REDACTED] # one-line traffic light (Telegram-ready)
 ```
 
 ## Decision rule (statistical alarms)

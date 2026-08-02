@@ -21,7 +21,7 @@ metadata:
 
 **Bằng chứng (faithful, `[REDACTED]b_stage1.py` + `[REDACTED]b_blend.py`, 2014→2026-06):**
 - **IC-in-bull** (`value_bull_factor_ic.py`): trong BULL4_broad (state4 & breadth≥0.60) 1/PE IC **+0.161** = factor sạch CAO NHẤT (> junk +0.145 = bẫy "be fearful", > momentum +0.082). Quality (FSCORE/ROE) decay về +0.017. EXBULL fwd-r3 tụt (+8.3 vs +11.1) + junk IC fade = đỉnh hưng phấn. → 1/PE là vua, momentum bổ trợ, giữ rating-gate.
-- **Bull-days head-to-head** (return rổ CHỈ trên 465 ngày bull/exbull): [REDACTED]B pemom1.0 **18.5%/Sh2.76/DD−18.2/Cal1.01/OOS22.2** > [REDACTED]V 1/PE+1/PCF **17.5%/Sh2.66/DD−19.7/Cal0.89/OOS21.0** — thắng MỌI trục, PASS chữ-ký (IS+OOS>0). Momentum tilt giúp (pemom>petop). **namecap ≫ cap-weight** (18.5 vs 16.5) → "đầu tư hết tiền" = trải 30 mã, KHÔNG mega-lean (cũng đóng lại ý megacap-sleeve cũ).
+- **Bull-days head-to-head** (return rổ CHỈ trên 465 ngày bull/exbull): [REDACTED]B pemom1.0 **18.5%/Sh2.76/DD−18.2/Cal1.01/OOS22.2** > [REDACTED]V 1/PE+1/PCF **17.5%/Sh2.66/DD−19.7/Cal0.89/OOS21.0** — thắng MỌI trục, PASS chữ-ký (IS+OOS>0). [REDACTED] tilt giúp (pemom>petop). **namecap ≫ cap-weight** (18.5 vs 16.5) → "đầu tư hết tiền" = trải 30 mã, KHÔNG mega-lean (cũng đóng lại ý megacap-sleeve cũ).
 - **All-day**: [REDACTED]V (36.6%) > [REDACTED]B (27.9%) NGOÀI bull → [REDACTED]B đúng nghĩa vehicle CHỈ-bull (momentum hại ở neutral/bear); [REDACTED]V vẫn là parking NEUTRAL.
 
 **Mức đóng góp THẬT (đừng overclaim):**

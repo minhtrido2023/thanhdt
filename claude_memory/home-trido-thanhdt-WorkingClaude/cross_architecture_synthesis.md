@@ -1,10 +1,10 @@
-# Cross-Architecture Optimization Synthesis (2026-05-27)
+# Cross-[REDACTED] Optimization Synthesis (2026-05-27)
 
 **Status**: 🟢 RESEARCH COMPLETE — synthesizing 26 tests across state/filter/architecture/ensemble dimensions
 
 ## TL;DR — Optimal stack per system
 
-| System | Architecture | State | ETF | Filter | Expected Full CAGR |
+| System | [REDACTED] | State | ETF | Filter | Expected Full CAGR |
 |--------|--------------|-------|-----|--------|---------------------|
 | V1-V3 | BAL+VN30 | TQ34b | BASE {3:0.7} | **C3_clean** | ~20.5-21% |
 | V4 | BAL+VN30 | TQ34b | BASE | V_PROD | ~20% (defensive) |
@@ -17,8 +17,8 @@
 
 | Lever | Mechanism | Magnitude |
 |-------|-----------|-----------|
-| Architecture: VN30 → LAGGED HL_3y | post-earnings drift alpha | +1.4pp |
-| Architecture: S2 sizing on LAGGED | surprise-conditioned sizing | +0.85pp |
+| [REDACTED]: VN30 → LAGGED HL_3y | post-earnings drift alpha | +1.4pp |
+| [REDACTED]: S2 sizing on LAGGED | surprise-conditioned sizing | +0.85pp |
 | Ensemble: M1+M3 AND-HOLD | regime timing | +2.1pp |
 | State: DT_10_25_25 | smoother transitions | +0.46 to +1.30pp (context-dependent) |
 | Filter: C3_clean (no SVT) | remove obsolete legacy filter | +0.3pp Full / +3.6pp OOS |
@@ -26,7 +26,7 @@
 
 ## Key empirical findings (validated)
 
-### Finding 1: Architecture is the biggest lever
+### Finding 1: [REDACTED] is the biggest lever
 - V11 static → V12.1 ensemble: +4.3pp Full CAGR
 - Other levers max +1.5pp each
 - **Priority: upgrade architecture first**
@@ -69,7 +69,7 @@ Validated for V11 (BA v11) and V5:
 | Variant | Pre-2014 7y CAGR | DD | Note |
 |---------|-------------------|-----|------|
 | V_PROD (V11 BAL only) | -0.08% | -12.2% | Capacity-limited, defensive |
-| V5_TQ_KELLY | +7.26% | -37.8% | Architecture risky pre-2014 |
+| V5_TQ_KELLY | +7.26% | -37.8% | [REDACTED] risky pre-2014 |
 | V5_DT_KELLY | +4.01% | **-44.2%** | DT misses 2009 V-recovery |
 | C3_safer (V_PROD + SVT s3=90) | -0.08% | -12.2% | IDENTICAL to baseline ✅ |
 | C3_clean (V_PROD no SVT) | -0.08% | -12.2% | IDENTICAL to baseline ✅ |
@@ -131,12 +131,12 @@ Canonical 26.07% matches memory note 26.09% — implementation validated.
 ### Lever pattern (validated comprehensively)
 
 ```
-                    NO ENSEMBLE        WITH M1+M3 ENSEMBLE
-              ┌──────────┬──────────┬──────────┬──────────┐
-              │  BASE    │  KELLY   │  BASE    │  KELLY   │
+[REDACTED][REDACTED]    NO ENSEMBLE[REDACTED]WITH M1+M3 ENSEMBLE
+[REDACTED]      ┌──────────┬──────────┬──────────┬──────────┐
+[REDACTED]      │  BASE    │  KELLY   │  BASE    │  KELLY   │
 DT impact:    │  +0.28pp │ +1.90pp  │ +0.46pp  │ -1.29pp  │
-              │ marginal │  BIG ⭐   │ marginal │  HURT ❌ │
-              └──────────┴──────────┴──────────┴──────────┘
+[REDACTED]      │ marginal │  BIG ⭐   │ marginal │  HURT ❌ │
+[REDACTED]      └──────────┴──────────┴──────────┴──────────┘
 ```
 
 **Insight**: DT works best in MODERATE complexity. In high complexity (ensemble + KELLY), KELLY amplifies DT's downside (delayed CRISIS exit → miss bull recovery).
@@ -164,11 +164,11 @@ Tested V121_ENS × 4 combos (state × filter):
 **V121_ENS FINAL recommendation**: Keep CANONICAL TQ+PROD.
 - All optimizations marginal (within noise)
 - Canonical wins Sharpe (1.65) + OOS 20-26 (30.63%)
-- Architecture+ensemble is the value, not parameter tuning
+- [REDACTED]+ensemble is the value, not parameter tuning
 
 ### Diminishing returns pattern
 
-| System | Architecture layers | Best tune value |
+| System | [REDACTED] layers | Best tune value |
 |--------|---------------------|-----------------|
 | V11 (BAL only) | 1 | C3_clean +3.6pp OOS |
 | V5 KELLY | 2 (BAL+VN30+ETF_KELLY) | DT +1.90pp Full |

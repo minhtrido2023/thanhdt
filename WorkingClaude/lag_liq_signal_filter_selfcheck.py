@@ -33,7 +33,8 @@ def cand_df(tickers):
 
 
 def fake_bq(rows):
-    """rows: {ticker: (days_stale, Volume_3M_P50, Close)}; ticker vắng mặt = không có dòng giá."""
+    """rows: {ticker: (days_stale, Volume_3M_P50, px)}; ticker vắng mặt = không có dòng giá.
+    `px` = COALESCE(Price, Close) — cơ sở giá THÔ, đúng SELECT hiện tại (đổi 2026-08-02)."""
     def _bq(sql):
         recs = []
         for tk, (st, vol, px) in rows.items():
@@ -41,8 +42,8 @@ def fake_bq(rows):
                 continue
             adv = None if (vol is None or px is None) else vol * px
             recs.append({"ticker": tk, "time": ASOF - pd.Timedelta(days=st),
-                         "Volume_3M_P50": vol, "Close": px, "adv_vnd": adv})
-        return pd.DataFrame(recs, columns=["ticker", "time", "Volume_3M_P50", "Close", "adv_vnd"])
+                         "Volume_3M_P50": vol, "px": px, "adv_vnd": adv})
+        return pd.DataFrame(recs, columns=["ticker", "time", "Volume_3M_P50", "px", "adv_vnd"])
     return _bq
 
 
@@ -138,6 +139,30 @@ WHERE t.ticker IN ({tl}) AND t.time <= DATE '{asof.date()}'
 QUALIFY ROW_NUMBER() OVER (PARTITION BY t.ticker ORDER BY t.time DESC)=1""")
     check("phạm vi: rổ PARK custom30V không có mã ADV≤0",
           bool(((pl["adv"].notna()) & (pl["adv"] > 0)).all()), f"{pl[pl['adv'].fillna(0)<=0]}")
+
+    # CƠ SỞ GIÁ (thêm 2026-08-02, job Taylor_20260802_163657) — positive control 2 chiều:
+    # module PHẢI trả ADV theo giá THÔ (Price), KHÔNG theo Close đã điều chỉnh. Chọn mã có
+    # Close != Price để hai chân tách rời được; nếu không có mã nào như vậy thì check vô nghĩa
+    # và phải nói ra, không im lặng PASS.
+    probe = bq(f"""SELECT t.ticker, t.time, t.Volume_3M_P50, t.Price, t.Close
+FROM tav2_bq.ticker AS t
+WHERE t.time <= DATE '{asof.date()}' AND t.time >= DATE_SUB(DATE '{asof.date()}', INTERVAL 10 DAY)
+  AND t.Volume_3M_P50 > 0 AND t.Price > 0 AND ABS(t.Close - t.Price) / t.Price > 0.05
+ORDER BY t.time DESC, t.ticker LIMIT 1""")
+    check("cơ sở giá: tìm được mã Close≠Price để kiểm", len(probe) == 1, "0 mã — check dưới vô nghĩa")
+    if len(probe) == 1:
+        r0 = probe.iloc[0]
+        # CÙNG (ticker, time) với dòng probe — nếu để cửa sổ ngày rộng thì hai truy vấn có thể
+        # rơi vào HAI phiên khác nhau và check so hai số không cùng gốc (đã bị chính nó bắt).
+        a = bq(f"""SELECT t.Volume_3M_P50 * COALESCE(t.Price, t.Close) AS adv_vnd
+FROM tav2_bq.ticker AS t
+WHERE t.ticker='{r0.ticker}' AND t.time = DATE '{pd.Timestamp(r0.time).date()}'""")["adv_vnd"].iloc[0]
+        want_px = float(r0.Volume_3M_P50) * float(r0.Price)
+        want_cl = float(r0.Volume_3M_P50) * float(r0.Close)
+        check(f"cơ sở giá: ADV({r0.ticker}) == Volume_3M_P50 × Price",
+              abs(float(a) - want_px) < 1.0, f"got {a:,.0f} want {want_px:,.0f}")
+        check(f"cơ sở giá: ADV({r0.ticker}) != Volume_3M_P50 × Close (chiều ngược)",
+              abs(float(a) - want_cl) > 1.0, f"got {a:,.0f} == Close-basis {want_cl:,.0f}")
 
 print("=" * 78)
 print(f"  {PASS} PASS / {FAIL} FAIL")

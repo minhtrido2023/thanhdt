@@ -21,7 +21,7 @@ v12.1 = v12 với **S2 sizing modulation** trên LAGGED leg:
 
 ---
 
-## Architecture
+## [REDACTED]
 
 ```
 50B NAV
@@ -84,7 +84,7 @@ Same as v11/v12: SIGNAL_V11_UNIFIED + P3 overheat + 5 TIER_BAL + sec_lim Fin/RE 
 
 ## Naming convention (updated)
 
-| Casual | Formal | Architecture | Status |
+| Casual | Formal | [REDACTED] | Status |
 |---|---|---|---|
 | v11 | BA v11 "Song Sinh" 🐦 | BAL + VN30 + ETF | Production current |
 | v12 | BA v12 "Âm Dương" ☯️ | BAL + LAGGED HL_3y + ETF | Deploy candidate |
@@ -144,7 +144,7 @@ No new BQ pulls needed — surprise is computed from existing NP_P0..P7 data.
 ```
 v12.1 "Âm Dương Tinh Tế" 🎯 deploy summary
 ───────────────────────────────────────────
-Architecture:  BAL@25B + LAGGED_HL3+S2sizing@25B + V6 ETF
+[REDACTED]:  BAL@25B + LAGGED_HL3+S2sizing@25B + V6 ETF
 Total NAV:     50B (optimal sweet spot)
 Expected:      CAGR 21.8% / Sh 1.62 / DD -13.3%
 Y2022 hedge:   +0.50% (vs v11 -13%)

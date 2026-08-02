@@ -5,7 +5,7 @@
 
 ## Naming convention (locked)
 
-| Casual | Formal | Architecture | Status |
+| Casual | Formal | [REDACTED] | Status |
 |---|---|---|---|
 | **v11** | BA v11 "Song Sinh" 🐦 | BAL + VN30 + ETF | Production current (19.42% / Sh 1.32 / DD -19%) |
 | **v12** | BA v12 "Âm Dương" ☯️ | BAL + **LAGGED HL_3y** + ETF | Deploy candidate ⭐ (21.37% / Sh 1.67 / DD -14.9%) |

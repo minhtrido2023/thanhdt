@@ -23,7 +23,7 @@
 
 ---
 
-## Architecture
+## [REDACTED]
 
 ```
 TOTAL NAV (50B baseline)
@@ -125,7 +125,7 @@ TOTAL NAV (50B baseline)
 python lagged_pos_papertrade.py --start <deployment_start_date>
 
 # Outputs:
-#   lagged_paper_nav.csv         — NAV history
+#   lagged_paper_nav.csv[REDACTED] — NAV history
 #   lagged_paper_trades.csv      — all events
 #   lagged_paper_positions.csv   — current open
 #   lagged_paper_state.json      — summary
@@ -214,7 +214,7 @@ python lagged_pos_papertrade.py --start <deployment_start_date>
 ```
 v12 "Âm Dương" deploy summary
 ─────────────────────────────────────
-Architecture:  BAL@25B + LAGGED@25B + V6 ETF
+[REDACTED]:  BAL@25B + LAGGED@25B + V6 ETF
 Total NAV:     50B (optimal)
 Expected:      CAGR 21.4% / Sh 1.67 / DD -15%
 Y2022 hedge:   +9.88pp vs v11

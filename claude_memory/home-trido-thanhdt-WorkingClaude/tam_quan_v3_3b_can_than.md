@@ -8,8 +8,8 @@
 
 ```python
 # Khi v3.1 fire 1-step downgrade tại ngày t:
-if (state_v31[t-1] - state_v31[t] == 1)        # 1-step down only
-   and (RSI_VN(14)[t] >= 55)                   # momentum vẫn lên
+if (state_v31[t-1] - state_v31[t] == 1)[REDACTED]# 1-step down only
+   and (RSI_VN(14)[t] >= 55)[REDACTED][REDACTED]   # momentum vẫn lên
    and (concentration_smooth[t] <= 0.55):      # broad market (không VIC-led)
     # Block downgrade — giữ state cao
     state[t] = state[t-1]

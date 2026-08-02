@@ -13,7 +13,7 @@ User ([REDACTED]20) raised 2 gaps: (1) golden-cell (pb_z) chỉ nhìn lịch-s�
 - Golden absolute-backstop KHÔNG được data ủng hộ: sau gate CF_OA_3Y>0+book-OK (CTF fix), golden cohort robust mọi bucket PB-tuyệt-đối (rẻ +7.1%/mid +5.2%/đắt +5.0%, crash 5-7%); chia theo earnings-yield tuyệt-đối thì NGƯỢC (golden "đắt-trên-earnings" +7.1% > "rẻ" +4.3% = earnings đáy chu kỳ sắp hồi). → blanket absolute-valuation rule phản tác dụng; KHÔNG thêm.
 - KSF forensic: NPM 0.45/EBITM 0.59/ROE **50%** nhưng **AR/rev 2.0x + cash-cycle 1256d** (lãi siêu cao, không thu tiền). cfo_np 1-quý 3.27 nhìn "đẹp" → ratio chuẩn KHÔNG bắt chắc related-party (chồng lấn BĐS). → cần lớp GHI NHỚ người.
 
-**LAYER 1 — FORENSIC REGISTRY (`data/forensic_flags.csv`)** = persistence (giải đúng "không nhớ"). Cols: ticker,flag_type,severity(exclude|watch),date,source,note. Mirror moat_tags.csv nhưng cờ ÂM. Seeded: **KSF (related_party, exclude)**, CTF (distress_cashburn, watch).
+**LAYER 1 — FORENSIC [REDACTED] (`data/forensic_flags.csv`)** = persistence (giải đúng "không nhớ"). Cols: ticker,flag_type,severity(exclude|watch),date,source,note. Mirror moat_tags.csv nhưng cờ ÂM. Seeded: **KSF (related_party, exclude)**, CTF (distress_cashburn, watch).
 
 **ĐÃ MỞ RỘNG TOÀN BỘ trade-universe + cap rating (user chọn "mạnh nhất", [REDACTED]20) — exclude áp 4 nơi, date-aware NO hindsight (chỉ từ flag date trở đi):**
 1. `rating_8l.py` live: FORENSIC global → force zone 4_TRAP + loại golden-floor + **cap rating≥4** (out top30/buynow/live-[REDACTED]). KSF rating 2→4 ✓verified.

@@ -159,17 +159,20 @@ def _in_universe(ticker, asof):
 
 
 def adv_vnd(ticker, asof):
-    """ADV notional (VND/phiên) theo ĐÚNG công thức backtest LAG dùng: Volume_3M_P50 × Close
-    (pt_v23_audit_2014.py:1132-1135 — chỉ nhận dòng có CẢ HAI cột notna).
+    """ADV notional (VND/phiên) theo ĐÚNG công thức backtest LAG dùng:
+    Volume_3M_P50 × COALESCE(Price, Close) (`pt_v23_audit_2014.py` LAG_ADV_BASIS="price").
 
     Trả (adv, data_date, err): adv=None khi không tính được, err = lý do (chuỗi) để caller
     tự quyết fail-closed. KHÔNG raise — nhưng KHÁC run_due_diligence ở chỗ lỗi được trả về
     tường minh thay vì nuốt thành text, vì caller (trading_bot.plan.cap_lag_orders) là một
     hard-gate chặn lệnh thật và phải phân biệt được "ADV mỏng" với "không đọc được dữ liệu".
 
-    Lưu ý đơn vị: Close là giá ĐÃ điều chỉnh (≤ giá thật khi mã đã chia cổ tức), nên ADV tính
-    ra có xu hướng THẤP hơn notional thật → trần chặt hơn, lệch về phía an toàn. Giữ đúng
-    công thức backtest thay vì "sửa cho đúng thực tế" để trần live == trần đã mô phỏng.
+    CƠ SỞ GIÁ = `Price` (THÔ), sửa 2026-08-02 (job Taylor_20260802_163657) — trước đó dùng
+    `Close`. `Volume_3M_P50` là SỐ LƯỢNG CP THÔ: đo được `Trading_Value == Volume × Price` khớp
+    100% số dòng, `Volume × Close` thì không ⇒ ADV tiền đồng đúng phải nhân giá THÔ. `Close` đã
+    điều chỉnh hồi tố nên vừa SAI ĐỘ LỚN (~−7,4% median, trần live chặt hơn thực tế) vừa mang
+    LOOK-AHEAD khi hệ thống replay lịch sử (hệ số Close/Price phụ thuộc sự kiện quyền SAU ngày t).
+    Bất biến parity live == mô phỏng được GIỮ NGUYÊN: engine đổi cùng lúc (`LAG_ADV_BASIS`).
     """
     import pandas as pd
     try:
@@ -179,10 +182,12 @@ def adv_vnd(ticker, asof):
     if row is None:
         return None, None, "không có dòng nào trong bq_cache/ticker"
     data_date = str(row.get("time"))[:10]
-    v50, close = row.get("Volume_3M_P50"), row.get("Close")
-    if pd.isna(v50) or pd.isna(close):
-        return None, data_date, "thiếu Volume_3M_P50 hoặc Close"
-    return float(v50) * float(close), data_date, None
+    v50, px = row.get("Volume_3M_P50"), row.get("Price")
+    if pd.isna(px):                       # COALESCE(Price, Close) — đúng engine
+        px = row.get("Close")
+    if pd.isna(v50) or pd.isna(px):
+        return None, data_date, "thiếu Volume_3M_P50 hoặc Price/Close"
+    return float(v50) * float(px), data_date, None
 
 
 def _anomaly_note(ticker, asof):

@@ -12,11 +12,11 @@ originSessionId: 637d3857-e32a-46ff-8dc2-9739c4574bd9
 
 | State   | H-system (original) | P-system (new) | Thay đổi |
 |---------|---------------------|----------------|----------|
-| CRISIS  | 0%                  | 0%             | Giữ nguyên — bảo vệ tối đa |
-| BEAR    | 20%                 | **50%**        | +30pp — BEAR thường là điều chỉnh tạm thời |
-| NEUTRAL | 70%                 | **85%**        | +15pp — chiếm 77% thời gian, lever chính |
-| BULL    | 100%                | 100%           | Giữ nguyên |
-| EX-BULL | 130%               | **120%**       | -10pp — giảm nhẹ margin |
+| CRISIS  | 0%[REDACTED][REDACTED]  | 0%[REDACTED]     | Giữ nguyên — bảo vệ tối đa |
+| BEAR    | 20%[REDACTED][REDACTED] | **50%**[REDACTED]| +30pp — BEAR thường là điều chỉnh tạm thời |
+| NEUTRAL | 70%[REDACTED][REDACTED] | **85%**[REDACTED]| +15pp — chiếm 77% thời gian, lever chính |
+| BULL    | 100%[REDACTED][REDACTED]| 100%[REDACTED]   | Giữ nguyên |
+| EX-BULL | 130%[REDACTED]       | **120%**       | -10pp — giảm nhẹ margin |
 
 ### Backtest results (VNINDEX NAV simulation, since 2011)
 

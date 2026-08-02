@@ -13,71 +13,71 @@ originSessionId: 762b6179-ddcb-41b7-ac2b-ee8d2f143ccc
 
 ```python
 def get_subsector(icb_code, ticker):
-    if icb_code == 8355:               return "BANK"
+    if icb_code == 8355:[REDACTED]       return "BANK"
     if icb_code in (8775, 8777):       return "SECURITIES"
-    if icb_code == 8536:               return "INSURANCE"
+    if icb_code == 8536:[REDACTED]       return "INSURANCE"
     if icb_code in (8633, 8637):
-        if ticker in RESIDENTIAL_TICKERS: return "REIT_RES"
-        return "REIT"  # KCN + everything else REIT
-    if icb_code == 3353:               return "BLACKLIST_AUTO"  # force E tier
+[REDACTED]if ticker in RESIDENTIAL_TICKERS: return "REIT_RES"
+[REDACTED]return "REIT"  # KCN + everything else REIT
+    if icb_code == 3353:[REDACTED]       return "BLACKLIST_AUTO"  # force E tier
     return "DEFAULT"
 
 RESIDENTIAL_TICKERS = {"VHM","NVL","DXG","KDH","NLG","AGG","KHG","HDG","CRE","FLC",
-                       "IJC","HDC","TIG","QCG","DIG","DXS","HQC","API","AAV","BII",
-                       "C21","ITC","SCR","VPI","CEO","TCH","NTL"}
+[REDACTED][REDACTED]       "IJC","HDC","TIG","QCG","DIG","DXS","HQC","API","AAV","BII",
+[REDACTED][REDACTED]       "C21","ITC","SCR","VPI","CEO","TCH","NTL"}
 ```
 
 ## Schemas (each weight sums to 1.0)
 
 ### BANK (ICB 8355) — Q+V simple
 ```
-quality:     [ROE_Min5Y, ROE_Trailing]                     × 0.40
-shareholder: [DY_adj, Dividend_Min3Y]                       × 0.20
-valuation:   [smoothed_EY, BY]                              × 0.40
+quality:     [ROE_Min5Y, ROE_Trailing][REDACTED][REDACTED]     × 0.40
+shareholder: [DY_adj, Dividend_Min3Y][REDACTED][REDACTED]       × 0.20
+valuation:   [smoothed_EY, BY][REDACTED][REDACTED][REDACTED]      × 0.40
 ```
 
 ### SECURITIES (ICB 8775/8777) — growth-focused
 ```
-quality:     [ROE_Min5Y, ROE_Trailing]                     × 0.20
-stability:   [NP_CV]                                        × 0.10
-shareholder: [DY_adj, Dividend_Min3Y]                       × 0.10
+quality:     [ROE_Min5Y, ROE_Trailing][REDACTED][REDACTED]     × 0.20
+stability:   [NP_CV][REDACTED][REDACTED][REDACTED][REDACTED][REDACTED]× 0.10
+shareholder: [DY_adj, Dividend_Min3Y][REDACTED][REDACTED]       × 0.10
 growth:      [NP_R, NP_TTM_growth, NP_peak_ratio] (POS!)    × 0.35
-valuation:   [smoothed_EY, BY]                              × 0.25
+valuation:   [smoothed_EY, BY][REDACTED][REDACTED][REDACTED]      × 0.25
 ```
 
 ### INSURANCE (ICB 8536) — same as BANK (limited N=28 data)
 ```
-quality:     [ROE_Min5Y, ROE_Trailing]                     × 0.40
-shareholder: [DY_adj, Dividend_Min3Y]                       × 0.20
-valuation:   [smoothed_EY, BY]                              × 0.40
+quality:     [ROE_Min5Y, ROE_Trailing][REDACTED][REDACTED]     × 0.40
+shareholder: [DY_adj, Dividend_Min3Y][REDACTED][REDACTED]       × 0.20
+valuation:   [smoothed_EY, BY][REDACTED][REDACTED][REDACTED]      × 0.40
 ```
 
 ### REIT_RES (residential developers, manual list) — value-quality
 ```
-quality:     [ROE_Min5Y, ROIC5Y]                           × 0.25
-valuation:   [smoothed_EY, EY, CFY]                         × 0.40
-stability:   [NP_CV]                                        × 0.15
-shareholder: [DY_adj, Dividend_Min3Y]                       × 0.10
-growth:      [NP_peak_ratio]                                × 0.10
+quality:     [ROE_Min5Y, ROIC5Y][REDACTED][REDACTED][REDACTED]   × 0.25
+valuation:   [smoothed_EY, EY, CFY][REDACTED][REDACTED][REDACTED] × 0.40
+stability:   [NP_CV][REDACTED][REDACTED][REDACTED][REDACTED][REDACTED]× 0.15
+shareholder: [DY_adj, Dividend_Min3Y][REDACTED][REDACTED]       × 0.10
+growth:      [NP_peak_ratio][REDACTED][REDACTED][REDACTED][REDACTED]× 0.10
 ```
 
 ### REIT (ICB 8633/8637 non-RES — includes KCN, other dev) — v8b custom
 ```
-quality:     [ROE_Min5Y, ROE_Trailing]                     × 0.20
-cash:        [CF_OA_5Y, FCF_yield]                          × 0.20
-shareholder: [DY_adj, Dividend_Min3Y, DY_sust]              × 0.20
-valuation:   [smoothed_EY, BY, magic_pb]                    × 0.40
+quality:     [ROE_Min5Y, ROE_Trailing][REDACTED][REDACTED]     × 0.20
+cash:[REDACTED][CF_OA_5Y, FCF_yield][REDACTED][REDACTED][REDACTED]  × 0.20
+shareholder: [DY_adj, Dividend_Min3Y, DY_sust][REDACTED]      × 0.20
+valuation:   [smoothed_EY, BY, magic_pb][REDACTED][REDACTED]    × 0.40
 ```
 
 ### DEFAULT (everything else) — v6b universal (within-sub-sector ranking)
 ```
-quality:     [ROIC5Y, ROE_Min5Y]                           × 0.18
-stability:   [NP_CV, Rev_CV, LT_CAGR]                       × 0.18
-cash:        [CF_OA_5Y, CFOA_NP]                            × 0.18
+quality:     [ROIC5Y, ROE_Min5Y][REDACTED][REDACTED][REDACTED]   × 0.18
+stability:   [NP_CV, Rev_CV, LT_CAGR][REDACTED][REDACTED]       × 0.18
+cash:[REDACTED][CF_OA_5Y, CFOA_NP][REDACTED][REDACTED][REDACTED]    × 0.18
 shareholder: [DY_adj, Dividend_Min3Y, FCF_OA_ratio, DY_sust]× 0.15
 growth:      [GPM_change, NP_peak_ratio, Rev_peak_ratio]    × 0.13
 health:      [Cash_MktCap, NetDebt_EBITDA_inv, IntCov_inv]  × 0.08
-valuation:   [smoothed_EY, FCF_yield, magic_pe]             × 0.10
+valuation:   [smoothed_EY, FCF_yield, magic_pe][REDACTED]     × 0.10
 ```
 
 ### BLACKLIST_AUTO (ICB 3353)

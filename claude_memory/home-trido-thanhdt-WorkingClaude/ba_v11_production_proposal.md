@@ -16,15 +16,15 @@ originSessionId: 762b6179-ddcb-41b7-ac2b-ee8d2f143ccc
 def filter_v11(cand, state5_today, vni_close_today, vni_ma200_today):
     # P3: skip new bull buys when VNI/MA200 > 1.30 (overheated)
     if vni_ma200_today > 0 and vni_close_today / vni_ma200_today > 1.30:
-        BUY_TYPES = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S",
-                     "MOMENTUM_QUALITY","DEEP_VALUE_RECOVERY","S_PRO"}
-        cand = cand[~cand["play_type"].isin(BUY_TYPES)]
+[REDACTED]BUY_TYPES = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S",
+[REDACTED][REDACTED]     "MOMENTUM_QUALITY","DEEP_VALUE_RECOVERY","S_PRO"}
+[REDACTED]cand = cand[~cand["play_type"].isin(BUY_TYPES)]
 
     # State-conditional Fresh-Q:
-    if state5_today == 1:        # CRISIS
-        return cand[cand["days_since_release"] <= 30]   # super tight
+    if state5_today == 1:[REDACTED]# CRISIS
+[REDACTED]return cand[cand["days_since_release"] <= 30]   # super tight
     if state5_today in (2, 3):   # BEAR/NEUTRAL
-        return cand[cand["days_since_release"] <= 60]   # standard
+[REDACTED]return cand[cand["days_since_release"] <= 60]   # standard
     return cand   # BULL (4,5): no filter
 ```
 
@@ -240,12 +240,12 @@ If 1.30 structurally obsolete:
 def filter_v11(cand, state5_today, days_since_release, vni_ratio, vni_rsi):
     # P3 COMPOSITE: numeric + regime confirmation
     if vni_ratio > 1.30 and (state5_today == 5 or vni_rsi > 75):
-        cand = cand[~cand["play_type"].isin(BUY_TYPES)]
+[REDACTED]cand = cand[~cand["play_type"].isin(BUY_TYPES)]
     # SV_TIGHT: state-conditional Fresh-Q
     if state5_today == 1:
-        return cand[days_since_release <= 30]
+[REDACTED]return cand[days_since_release <= 30]
     if state5_today in (2, 3):
-        return cand[days_since_release <= 60]
+[REDACTED]return cand[days_since_release <= 60]
     return cand  # BULL: no filter
 ```
 

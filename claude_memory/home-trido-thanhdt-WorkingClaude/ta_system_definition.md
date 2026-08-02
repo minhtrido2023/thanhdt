@@ -199,13 +199,13 @@ Trong khi các nhân tố momentum/strength đều có edge dương:
 
 ```
 TA Score (max ~184) → Bucket by score
-        ↓
+[REDACTED]↓
 JOIN fa_ratings → fa_tier (A/B/C/D/E)
-        ↓
+[REDACTED]↓
 JOIN vnindex_5state → state5 (1-5)
-        ↓
+[REDACTED]↓
 Tier function: tier(score, state5, fa_tier)
-        ↓
+[REDACTED]↓
 MEGA / S_PRO / S_HIGH / S_HIGH_AB / S / A / B / ...
 ```
 

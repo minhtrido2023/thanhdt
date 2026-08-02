@@ -249,11 +249,25 @@ if os.environ.get("BASKET_LIQ_FLOOR_B", "").strip(): _qs_tag += f"_liqf{os.envir
 # LIQ_ZERO_BLOCK (2026-07-21, job Taylor_20260721_162243): coi ADV không đo được / <=0 là
 # KHÔNG MUA ĐƯỢC, thay vì "bỏ qua trần ⇒ mua trọn size" của engine gốc — mirror gate live
 # `trading_bot.plan.cap_lag_orders`. "lag"|"1" = chỉ book LAG (đúng phạm vi gate live);
-# "both" = cả BAL (chỉ để đo, live KHÔNG có gate cho BAL). Unset = hành vi cũ, byte-identical.
-LIQ_ZERO_BLOCK = os.environ.get("LIQ_ZERO_BLOCK", "").strip().lower()
-if LIQ_ZERO_BLOCK in ("1", "lag"): _qs_tag += "_liqzblag"
+# "both" = cả BAL (chỉ để đo, live KHÔNG có gate cho BAL).
+# MẶC ĐỊNH ĐỔI 2026-08-02 (job Taylor_20260802_163657): "" -> "lag". Đường LIVE nay chặn nhóm này
+# ở CẢ HAI tầng (tín hiệu `lag_liquidity_filter.lag_filter_illiquid` từ 07-21 + executor
+# `cap_lag_orders`), nên để engine mua trọn size trên mã không đo được thanh khoản là mô tả một
+# đường live KHÔNG đi được. "off" = hành vi cũ (giữ để tái lập pin lịch sử), có tag filename.
+LIQ_ZERO_BLOCK = os.environ.get("LIQ_ZERO_BLOCK", "lag").strip().lower()
+if LIQ_ZERO_BLOCK in ("off", "none", "0", ""): LIQ_ZERO_BLOCK = ""       # legacy: tên file canonical cũ
+elif LIQ_ZERO_BLOCK in ("1", "lag"): _qs_tag += "_liqzblag"
 elif LIQ_ZERO_BLOCK == "both": _qs_tag += "_liqzbboth"
-elif LIQ_ZERO_BLOCK: raise SystemExit(f"LIQ_ZERO_BLOCK không hợp lệ: {LIQ_ZERO_BLOCK!r} (lag|both)")
+else: raise SystemExit(f"LIQ_ZERO_BLOCK không hợp lệ: {LIQ_ZERO_BLOCK!r} (lag|both|off)")
+# LAG_ADV_BASIS (2026-08-02, job Taylor_20260802_163657): cơ sở giá của ADV book LAG.
+# `Volume_3M_P50` là SỐ LƯỢNG CP THÔ — đo được: `Trading_Value == Volume*Price` khớp 100% số dòng
+# (r=1,000000), `Volume*Close` thì không. Vậy ADV tiền đồng đúng = Volume_3M_P50 × Price (thô).
+# `Close` đã điều chỉnh hồi tố ⇒ hệ số Close/Price phụ thuộc sự kiện quyền SAU ngày t (look-ahead)
+# và sai độ lớn (~−7,4% median). "price" = bản sửa (mặc định, COALESCE(Price,Close));
+# "close" = hành vi cũ, có tag filename.
+LAG_ADV_BASIS = os.environ.get("LAG_ADV_BASIS", "price").strip().lower()
+if LAG_ADV_BASIS == "price": _qs_tag += "_advprice"
+elif LAG_ADV_BASIS != "close": raise SystemExit(f"LAG_ADV_BASIS không hợp lệ: {LAG_ADV_BASIS!r} (price|close)")
 # LAG_SLOT_INFLIGHT (2026-07-22, job Taylor_20260722_030015): vá "cổng rò" trần vị thế LAG.
 # Engine gốc chỉ đếm vị thế ĐÃ HOÀN TẤT khi kiểm max_positions/tier_position_limit, nên tối đa
 # max_fill_days=5 phiên lệnh đang khớp dở là VÔ HÌNH với trần ⇒ concurrency thực vượt 12
@@ -1285,7 +1299,8 @@ _chunks = [lag_universe[i:i+250] for i in range(0, len(lag_universe), 250)]
 _parts = []
 for ci, ch in enumerate(_chunks):
     in_list = ",".join(f"'{t}'" for t in ch)
-    part = bq(f"""SELECT t.ticker, t.time, t.Open, t.Close, t.Volume_3M_P50
+    part = bq(f"""SELECT t.ticker, t.time, t.Open, t.Close, t.Volume_3M_P50,
+       COALESCE(t.Price, t.Close) AS PxAdv
 FROM tav2_bq.ticker AS t
 WHERE t.time BETWEEN DATE '{START_DATE}' AND DATE '{END_DATE}' AND t.ticker IN ({in_list})""")
     assert len(part) < 1_990_000, f"bq() max_rows cap risk (lag prices chunk {ci})"
@@ -1299,8 +1314,9 @@ for tk, g in lagpx.groupby("ticker"):
     prices_lag[tk] = dict(zip(gc["time"], gc["Close"].astype(float)))
     go = g[g["Open"].notna()]
     opens_lag[tk] = dict(zip(go["time"], go["Open"].astype(float)))
-    gl = g[g["Volume_3M_P50"].notna() & g["Close"].notna()]
-    for d, adv, px in zip(gl["time"], gl["Volume_3M_P50"].astype(float), gl["Close"].astype(float)):
+    _advcol = "Close" if LAG_ADV_BASIS == "close" else "PxAdv"   # xem LAG_ADV_BASIS ở đầu file
+    gl = g[g["Volume_3M_P50"].notna() & g[_advcol].notna()]
+    for d, adv, px in zip(gl["time"], gl["Volume_3M_P50"].astype(float), gl[_advcol].astype(float)):
         liq_lag[(tk, d)] = adv * px
 LIQ_LAG = {"liquidity_volume_pct": 0.20, "max_fill_days": 5,
            "liquidity_lookup": liq_lag, "exit_slippage_tiered": True,

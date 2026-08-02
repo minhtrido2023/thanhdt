@@ -13,12 +13,12 @@ originSessionId: 762b6179-ddcb-41b7-ac2b-ee8d2f143ccc
 
 | Variant | A% | E% | Spread | Δ vs base | Verdict |
 |---------|----|----|--------|-----------|---------|
-| baseline (v4)        | 6.67 | -3.76 | **10.43** | — | reference |
+| baseline (v4)[REDACTED]| 6.67 | -3.76 | **10.43** | — | reference |
 | T1 Margin slope      | 6.27 | -3.50 |  9.77 | **-0.66** | ❌ hurt (E mean +0.61, pha loãng growth) |
 | T2 Beneish-lite      | 6.65 | -4.01 | 10.67 | +0.23 | ⚠️ marginal |
 | T3 Working capital   | 5.98 | -2.96 |  8.94 | **-1.50** | ❌ hurt nặng |
 | T4 Solvency depth    | 6.74 | -3.70 | 10.44 | +0.01 | ⚪ neutral |
-| T5 ROIC trend        | 6.65 | -3.70 | 10.35 | -0.08 | ⚪ neutral |
+| T5 ROIC trend[REDACTED]| 6.65 | -3.70 | 10.35 | -0.08 | ⚪ neutral |
 | **T6 Industry mod**  | 6.66 | **-5.29** | **11.95** | **+1.52** | 🏆 **ADOPT** |
 
 Tất cả variants giữ monotonic A>B>C>D>E (0 inversions).
@@ -29,11 +29,11 @@ Tất cả variants giữ monotonic A>B>C>D>E (0 inversions).
 ```python
 SECTOR_WEIGHTS = {
     "NH": {quality:0.25, stability:0.20, cash:0.05, shareholder:0.15,
-           growth:0.10, health:0.15, valuation:0.10},
+[REDACTED]   growth:0.10, health:0.15, valuation:0.10},
     "CK": {quality:0.22, stability:0.20, cash:0.05, shareholder:0.15,
-           growth:0.13, health:0.10, valuation:0.15},
+[REDACTED]   growth:0.13, health:0.10, valuation:0.15},
     "BH": {quality:0.22, stability:0.22, cash:0.05, shareholder:0.15,
-           growth:0.13, health:0.10, valuation:0.13},
+[REDACTED]   growth:0.13, health:0.10, valuation:0.13},
     "CT": baseline,  # default
 }
 ```

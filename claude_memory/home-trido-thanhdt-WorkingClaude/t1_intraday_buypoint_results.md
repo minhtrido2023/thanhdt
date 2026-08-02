@@ -99,7 +99,7 @@ Tested every 15-min bar from 09:15 to 14:45. Script: `layer3_t1_buypoint_curve.p
 ### FULL 2.5y alpha (vs OPEN baseline 19.01% CAGR / 1.17 Sh):
 
 ```
-Slot         Alpha    Sharpe   Calmar
+Slot[REDACTED] Alpha    Sharpe   Calmar
 09:15      +1.34pp     1.24     1.27
 09:30      +1.21pp     1.24     1.26
 09:45      +0.83pp     1.22     1.24   ← curve trough
@@ -229,7 +229,7 @@ Scenario A: BUY=OPEN, vary SELL slot vs OPEN/OPEN baseline 19.01%
 Combined optimum:
 ```
 BUY=ATC + SELL=OPEN (current canonical SELL):  +1.81pp full / +0.74pp BEAR
-BUY=ATC + SELL=ATC                          :  +0.16pp full / -6.34pp BEAR
+BUY=ATC + SELL=ATC[REDACTED][REDACTED][REDACTED]  :  +0.16pp full / -6.34pp BEAR
 ```
 
 **Mechanism — opposite-sign drifts**:

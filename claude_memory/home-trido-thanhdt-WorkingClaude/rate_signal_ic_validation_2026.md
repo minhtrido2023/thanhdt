@@ -10,7 +10,7 @@ metadata:
 Validate [REDACTED]03 (triggered by tienphong.vn bài lãi suất tiết kiệm tăng): DT5G macro Pillar A "DOMESTIC MONEY" đo **SBV refi rate (policy)**, KHÔNG phải lãi suất tiết kiệm thương mại — hai cái phân kỳ được (NH đẩy deposit rate mà SBV chưa đổi policy). Live: refi=4.5% đứng yên từ 2023-06-19 (1079d), cap=9/easing=false → Pillar A ngủ đông, cú deposit-rate tăng trong bài KHÔNG được đo.
 
 IC test (`test_rates_regime_signal.py`, lending_rate macro_daily.csv 2000-2023 annual+ffill, lag 21d, BQ vnindex_5state_dt_4gate):
-- **Momentum là carrier, không phải level**: `rate_chg6m` IC −0.110/−0.150/−0.159 (fwd20/60/120, âm=tăng→giảm); level/rank chỉ −0.05..−0.10; real_rate ~0.
+- **[REDACTED] là carrier, không phải level**: `rate_chg6m` IC −0.110/−0.150/−0.159 (fwd20/60/120, âm=tăng→giảm); level/rank chỉ −0.05..−0.10; real_rate ~0.
 - Conditional fwd120 đơn điệu sạch: rates RISING fast −3.81% / flat +10.48% / FALLING +6.48% (chênh ~7-14pp).
 - **KHÔNG lead CRISIS** (4/18 onsets có rates rising) → headwind mềm / sizing, không phải trigger lật state. Khớp [[dt5g_walkforward_event_audit]]: macro = gate phòng thủ không phải alpha, edge dồn vào đợt thắt chặt.
 - Recovery: sau rate đỉnh + giảm → fwd120 +17.1% vs +8.6% → validate nhánh easing.

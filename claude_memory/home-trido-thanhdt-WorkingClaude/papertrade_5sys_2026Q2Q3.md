@@ -14,7 +14,7 @@ Each system starts fresh at 50B VND on Apr 1. All use Tam Quan v3.4b state class
 **Script**: `pt_v11_tq34b.py`
 **Output prefix**: `data/pt_v11_tq34b_*`
 
-**Architecture**:
+**[REDACTED]**:
 - 25B BAL leg: BA v11 stack (SV_TIGHT + P3 overheat guard + RE_BACKLOG_BUY + V6 ETF parking)
 - 25B VN30 leg: BA v11 on top-30 universe (by Volume_3M_P50 × Close)
 - Each leg parks idle cash in E1VFVN30 ETF (state 3 NEUTRAL: 70%)
@@ -40,7 +40,7 @@ Each system starts fresh at 50B VND on Apr 1. All use Tam Quan v3.4b state class
 **Script**: `pt_v12_tq34b.py`
 **Output prefix**: `data/pt_v12_tq34b_*`
 
-**Architecture**:
+**[REDACTED]**:
 - 25B BAL leg: same as V1
 - 25B LAGGED HL_3y leg: V12 (fixed 8% per-position sizing, half-life 3y prior-good filter)
 - BAL parks ETF; LAGGED no ETF (state-independent earnings drift play)
@@ -67,7 +67,7 @@ Each system starts fresh at 50B VND on Apr 1. All use Tam Quan v3.4b state class
 **Script**: `pt_v12_live.py`
 **Output prefix**: `data/pt_v12_live_*`
 
-**Architecture**: identical to V2 (BAL + LAGGED V12 fixed 8%)
+**[REDACTED]**: identical to V2 (BAL + LAGGED V12 fixed 8%)
 
 **Config difference vs V2**:
 - State source: **LIVE Ngũ Hành "Tinh Tế / Sâu Sắc"** (production 5-state, not TQ v3.4b)
@@ -85,7 +85,7 @@ Each system starts fresh at 50B VND on Apr 1. All use Tam Quan v3.4b state class
 **Script**: `pt_v121_ensemble.py`
 **Output prefix**: `data/pt_v121_ens_*`
 
-**Architecture**:
+**[REDACTED]**:
 - 25B BAL leg: BA v11 (same as V1/V2/V3)
 - 25B SWITCHED leg: routes between two systems by ensemble signal
   - When `ens_signal=1` (V11 mode): VN30 active (BA v11 on top-30 + ETF parking)
@@ -122,7 +122,7 @@ Each system starts fresh at 50B VND on Apr 1. All use Tam Quan v3.4b state class
 **Script**: `pt_v121_ens_q2.py` (created 2026-05-23, copy of pt_v121_ensemble.py)
 **Output prefix**: `data/pt_v121_ens_q2_*`
 
-**Architecture**: **IDENTICAL to V4** (BAL + SWITCHED with M1+M3r AND-HOLD ensemble + S2 sizing on LAGGED V12.1)
+**[REDACTED]**: **IDENTICAL to V4** (BAL + SWITCHED with M1+M3r AND-HOLD ensemble + S2 sizing on LAGGED V12.1)
 
 **Single change vs V4**: ETF schedule
 - V4: `cash_etf_states={3: 0.7}` (NEUTRAL ETF 70%)

@@ -371,7 +371,7 @@ def cap_lag_orders(plan, account_label, asof=None, live_labels=None, account_mod
     nên một lệnh LAG trên mã mỏng (IVS ADV 0,18 tỷ/phiên) đặt được ở live với size mà
     backtest không bao giờ cho phép = giao dịch NGOÀI mô hình.
 
-    Trần = LAG_ADV_PCT × ADV × share, ADV = Volume_3M_P50 × Close đúng công thức backtest
+    Trần = LAG_ADV_PCT × ADV × share, ADV = Volume_3M_P50 × COALESCE(Price,Close) đúng công thức backtest
     (`due_diligence.adv_vnd`, đọc `data/bq_cache/ticker/` — trễ tối đa 1 phiên, chấp nhận
     được vì đây là trung vị 3 tháng; TUYỆT ĐỐI không dùng số này làm giá, §6 bright-line).
 
@@ -477,7 +477,7 @@ def cap_lag_orders(plan, account_label, asof=None, live_labels=None, account_mod
                        f"(> {LAG_ADV_MAX_STALE_DAYS}) — mã có thể ngừng giao dịch/huỷ niêm yết")
                 continue
         if adv <= 0:
-            _block(f"ADV = 0 (Volume_3M_P50×Close, data {data_date}) — mã không có thanh "
+            _block(f"ADV = 0 (Volume_3M_P50×Price, data {data_date}) — mã không có thanh "
                    f"khoản thật, đóng góp 0 vào backtest")
             continue
 

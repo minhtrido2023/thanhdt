@@ -15,7 +15,7 @@ As of [REDACTED]21: **Mike is running** as systemd user service `mike@Mike` (`cl
 linger on) — visible in the Claude mobile app. 3 cron jobs added (consolidate :07/:37, watchdog + discover */10)
 alongside the 6 existing trading jobs.
 
-Mike monitors **all account sessions except `tri`** via `bin/discover_sessions.py --exclude tri` (inventory →
+Mike monitors **all account sessions except `tri`** via `[REDACTED]over_sessions.py --exclude tri` (inventory →
 registry, kind=[REDACTED]) + `bin/session_brief.py <name>` (read transcript, observe). Sessions under
 `mike/agents/<id>/` self-label as that child. Discovery is the liveness source (Stop-hook heartbeat only fires
 on a turn, so idle sessions would else look dead).
@@ -30,7 +30,7 @@ Locked decisions ([REDACTED]21):
 - **Git-markdown KB first, no BigQuery** (deferred to Phase-2 only if needed).
 - Mechanical cron consolidator only (no autonomous `claude -p` writing shared context).
 
-Architecture: per-child JSONL bus (`bus/inbox/<id>.jsonl`, append-only, flock), atomic heartbeat registry,
+[REDACTED]: per-child JSONL bus (`bus/inbox/<id>.jsonl`, append-only, flock), atomic heartbeat registry,
 `UserPromptSubmit` hook injects the RECENT delta when `kb/version.txt` bumps (version-cache dedup → child
 sees other children's results without repeating), `consolidate.sh` (cron :07/:37) merges via line-offset
 tracking (idempotent), rebuilds `context_pack.md`, dead-detects >30min, commits.

@@ -120,7 +120,7 @@ Trong quá trình so sánh, phát hiện baseline BA "v11" được dùng trư�
 
 ---
 
-## 7. Architecture exploration: Option 1 ⭐
+## 7. [REDACTED] exploration: Option 1 ⭐
 
 ### Hypothesis
 LAGGED và BAL có correlation thấp (~0.30 vs VN30 BAL correlation ~0.7-0.8) → thay VN30 book bằng LAGGED book sẽ cho diversification thật.
@@ -180,7 +180,7 @@ Script: `test_capacity_option1.py`
 
 User-locked nomenclature:
 
-| Short | Formal | Architecture | Status |
+| Short | Formal | [REDACTED] | Status |
 |---|---|---|---|
 | **v11** | Song Sinh 🐦 | BAL + VN30 + ETF | Production (deployed) |
 | **v12** | Âm Dương ☯️ | BAL + LAGGED + ETF | Deploy candidate ⭐ |
@@ -197,7 +197,7 @@ User-locked nomenclature:
 - **Time-decay weighting**: exp decay với half-life match natural cycle (3y match VN earnings) là khoá; ROLL_N và TIME_window có cliff effect
 
 ### Strategy design
-- **Architecture > scoring**: integrate factor mới vào BA score → −1.2pp (BOTH variant). Standalone book → +1.95pp
+- **[REDACTED] > scoring**: integrate factor mới vào BA score → −1.2pp (BOTH variant). Standalone book → +1.95pp
 - **Correlation matters**: VN30 BAL corr 0.7-0.8 (cùng universe ticker_prune) vs LAGGED corr ~0.30 (universe khác, signal khác)
 - **BA scoring saturation**: bonus +5 trong score 100+ là noise; LAGGED standalone book pure exposure
 - **Capacity ≠ linear**: LAGGED degrade nhanh hơn BAL do liq cap saturate; sweet spot 50-100B
@@ -285,31 +285,31 @@ User-locked nomenclature:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│  STRATEGY COMPARISON (12y backtest, 50B init, canonical sim)        │
+│  STRATEGY COMPARISON (12y backtest, 50B init, canonical sim)[REDACTED]│
 ├─────────────────────────────────────────────────────────────────────┤
-│                          CAGR     Sharpe    DD       Wealth         │
-│  VNI buy&hold           11.42%    0.68    −45.26%    3.81x          │
-│  BA v11 Song Sinh       19.42%    1.32    −19.00%    8.98x          │
-│  LAGGED EQUAL (honest)  13.09%    1.16    −22.45%    2.38x          │
-│  LAGGED HL_3y default   17.05%    1.41    −17.59%    ~5.6x          │
-│  LAGGED HL_3y tuned     19.33%    1.43    −15.70%    ~6.2x          │
-│  BA v12 Âm Dương ⭐    21.37%    1.67    −14.92%   10.96x          │
+│[REDACTED][REDACTED][REDACTED]  CAGR     Sharpe    DD       Wealth[REDACTED] │
+│  VNI buy&hold[REDACTED]   11.42%    0.68    −45.26%    3.81x[REDACTED]  │
+│  BA v11 Song Sinh       19.42%    1.32    −19.00%    8.98x[REDACTED]  │
+│  LAGGED EQUAL (honest)  13.09%    1.16    −22.45%    2.38x[REDACTED]  │
+│  LAGGED HL_3y default   17.05%    1.41    −17.59%    ~5.6x[REDACTED]  │
+│  LAGGED HL_3y tuned     19.33%    1.43    −15.70%    ~6.2x[REDACTED]  │
+│  BA v12 Âm Dương ⭐    21.37%    1.67    −14.92%   10.96x[REDACTED]  │
 ├─────────────────────────────────────────────────────────────────────┤
-│  BEAR/RECOVERY DEFENSIVE                                            │
-│                          Y2022    Q1 2026                           │
-│  VNI                    −34.39%   +25.28%                           │
-│  BA v11                 −12.95%   −4.40%                            │
-│  LAGGED HL_3y           +7.77%    +9.21%                            │
-│  v12 Âm Dương           −3.07%    −1.89%                            │
+│  BEAR/RECOVERY DEFENSIVE[REDACTED][REDACTED][REDACTED][REDACTED][REDACTED]    │
+│[REDACTED][REDACTED][REDACTED]  Y2022    Q1 2026[REDACTED][REDACTED][REDACTED]   │
+│  VNI[REDACTED][REDACTED]    −34.39%   +25.28%[REDACTED][REDACTED][REDACTED]   │
+│  BA v11[REDACTED][REDACTED] −12.95%   −4.40%[REDACTED][REDACTED][REDACTED]    │
+│  LAGGED HL_3y[REDACTED]   +7.77%    +9.21%[REDACTED][REDACTED][REDACTED]    │
+│  v12 Âm Dương[REDACTED]   −3.07%    −1.89%[REDACTED][REDACTED][REDACTED]    │
 ├─────────────────────────────────────────────────────────────────────┤
-│  CAPACITY (Option 1)                                                │
-│   50B:  CAGR 21.37%  Sh 1.67  DD −14.92%  LAG cap 33%               │
-│  100B:  CAGR 18.93%  Sh 1.56  DD −12.21%  LAG cap 55%               │
-│  200B:  CAGR 16.11%  Sh 1.49  DD −11.97%  LAG cap 70%               │
-│  400B:  CAGR 14.59%  Sh 1.39  DD −11.17%  LAG cap 82%               │
+│  CAPACITY (Option 1)[REDACTED][REDACTED][REDACTED][REDACTED][REDACTED][REDACTED]│
+│   50B:  CAGR 21.37%  Sh 1.67  DD −14.92%  LAG cap 33%[REDACTED]       │
+│  100B:  CAGR 18.93%  Sh 1.56  DD −12.21%  LAG cap 55%[REDACTED]       │
+│  200B:  CAGR 16.11%  Sh 1.49  DD −11.97%  LAG cap 70%[REDACTED]       │
+│  400B:  CAGR 14.59%  Sh 1.39  DD −11.17%  LAG cap 82%[REDACTED]       │
 ├─────────────────────────────────────────────────────────────────────┤
-│  WALK-FORWARD (v12 vs v11 across 7 windows)                         │
-│  Sharpe wins: 7/7   |   DD wins: 7/7   |   CAGR wins: 6/7           │
+│  WALK-FORWARD (v12 vs v11 across 7 windows)[REDACTED][REDACTED][REDACTED] │
+│  Sharpe wins: 7/7   |   DD wins: 7/7   |   CAGR wins: 6/7[REDACTED]   │
 │  Annual: v12 beats v11 8/12 years, avg +1.69pp, median +2.98pp      │
 └─────────────────────────────────────────────────────────────────────┘
 ```

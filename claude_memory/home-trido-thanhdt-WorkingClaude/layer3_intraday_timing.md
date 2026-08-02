@@ -18,11 +18,11 @@ Sau khi Holistic engine chọn top picks (BUY priority list từ EOD), Layer 3 q
 
 ```
 EOD T-1 → recommend_holistic.py output watchlist
-           ↓
+[REDACTED]   ↓
 Trong phiên T → layer3_intraday_timing.py quét intraday
-           ↓
+[REDACTED]   ↓
 GO_STRONG / GO / WAIT / AVOID per ticker
-           ↓
+[REDACTED]   ↓
 Trader quyết định: enter trong phiên T hay đợi
 ```
 
@@ -56,10 +56,10 @@ Trader quyết định: enter trong phiên T hay đợi
 
 ```
 ticker   verdict   score  close  vs_VWAP  RSI  pos_in_range  trend_1h
-HPG    GO_STRONG    75   27.85   +0.27%   57.0    86%        +0.36%
-PVS    GO_STRONG    60   38.70   +0.08%   43.4    45%        +0.78%
-FPT      AVOID    -15   71.90   -0.58%   27.5     0%        -0.42%
-VNM      AVOID    -10   60.90   -0.36%   41.7     0%        -0.16%
+HPG    GO_STRONG    75   27.85   +0.27%   57.0    86%[REDACTED]+0.36%
+PVS    GO_STRONG    60   38.70   +0.08%   43.4    45%[REDACTED]+0.78%
+FPT      AVOID    -15   71.90   -0.58%   27.5     0%[REDACTED]-0.42%
+VNM      AVOID    -10   60.90   -0.36%   41.7     0%[REDACTED]-0.16%
 ```
 
 ## Usage
@@ -75,7 +75,7 @@ python layer3_intraday_timing.py "FPT,VNM,HPG,VVS"
 python layer3_intraday_timing.py "HPG" 2026-02-02
 ```
 
-## Architecture
+## [REDACTED]
 
 - Calls `stockquery.StockQuery.get_historical_symbol(ticker, "15m")` → ~7 days × 16 bars/day
 - Computes session VWAP, RSI(14), MACD(12,26,9) histogram, volume MA(20)

@@ -74,10 +74,10 @@ Current LH design failed because:
 1. **Static FA score** — doesn't capture price/regime dynamics
 2. **Quarterly rebal** — too slow to react
 3. **Equal-weight** — doesn't size by conviction
-4. **Single-factor (FA)** — needs Quality + Value + Momentum + Low-Vol multi-factor
+4. **Single-factor (FA)** — needs Quality + Value + [REDACTED] + Low-Vol multi-factor
 
 ### Hypothesis for LH v3 (future work, not implemented)
-- **Multi-factor portfolio**: Quality (ROIC, ROE) + Value (smoothed_EY) + Momentum (12M ret pos) + Low-Vol (lower NP_CV)
+- **Multi-factor portfolio**: Quality (ROIC, ROE) + Value (smoothed_EY) + [REDACTED] (12M ret pos) + Low-Vol (lower NP_CV)
 - **Monthly rebalance** instead of quarterly (faster signal incorporation)
 - **Score-weighted sizing** (higher score → more capital)
 - **Sector tilt**: rotate based on regime — overweight defensive sectors in BEAR, growth in BULL

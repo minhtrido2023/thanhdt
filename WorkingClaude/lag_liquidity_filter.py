@@ -67,8 +67,14 @@ def lag_filter_illiquid(bq, cand, asof, max_stale_days=LAG_ADV_MAX_STALE_DAYS):
     thứ bộ lọc này sinh ra); nếu sau này user duyệt mirror trần sang live thì phải neo vào con
     số đo được ở trên, đừng copy hằng số 12.
 
-    ADV = `Volume_3M_P50 × Close` trên dòng MỚI NHẤT có time ≤ asof — đúng công thức engine
-    (pt_v23_audit_2014.py:1142-1144) và `cap_lag_orders`. Live không biết ADV của ngày vào
+    ADV = `Volume_3M_P50 × COALESCE(Price, Close)` trên dòng MỚI NHẤT có time ≤ asof — đúng
+    công thức engine (`pt_v23_audit_2014.py` `LAG_ADV_BASIS="price"`) và `cap_lag_orders`.
+    ⚠️ CƠ SỞ GIÁ ĐỔI 2026-08-02 (job Taylor_20260802_163657), ĐỒNG THỜI ở cả 3 điểm live +
+    engine để KHÔNG phá bất biến parity: `Volume_3M_P50` là số lượng CP THÔ (đo được
+    `Trading_Value == Volume × Price` khớp 100% số dòng), nên nhân `Close` (đã điều chỉnh hồi
+    tố) vừa sai độ lớn (~−7,4% median) vừa là look-ahead khi replay lịch sử. Ở CHÍNH tầng này
+    ADV chỉ dùng cho phép thử `> 0` nên đổi cơ sở KHÔNG đổi kết quả lọc (cả hai giá đều dương
+    cùng lúc); tác động thật nằm ở `cap_lag_orders` (độ lớn trần) và engine (tốc độ fill). Live không biết ADV của ngày vào
     lệnh (T+5 ở tương lai) nên dùng dòng gần nhất — nhân quả, và Volume_3M_P50 là trung vị 3
     tháng nên trễ vài phiên không đổi dấu. CÒN LỆCH so với engine (ghi nhận, không tự vá):
     engine tra ADV theo TỪNG NGÀY FILL, tầng này chốt một lần theo ngày tín hiệu.
@@ -96,8 +102,8 @@ def lag_filter_illiquid(bq, cand, asof, max_stale_days=LAG_ADV_MAX_STALE_DAYS):
     asof_d = pd.Timestamp(asof).date()
     try:
         tl = ",".join(f"'{t}'" for t in tks)
-        a = bq(f"""SELECT t.ticker, t.time, t.Volume_3M_P50, t.Close,
-       t.Volume_3M_P50 * t.Close AS adv_vnd
+        a = bq(f"""SELECT t.ticker, t.time, t.Volume_3M_P50, COALESCE(t.Price, t.Close) AS px,
+       t.Volume_3M_P50 * COALESCE(t.Price, t.Close) AS adv_vnd
 FROM tav2_bq.ticker AS t
 WHERE t.ticker IN ({tl}) AND t.time <= DATE '{asof_d}'
   AND t.time >= DATE_SUB(DATE '{asof_d}', INTERVAL {LOOKBACK_DAYS} DAY)

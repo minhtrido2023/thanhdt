@@ -9,7 +9,7 @@ metadata:
 
 P1 "la bàn thứ hai" — breadth từ `ticker_prune` (% Close>MA200, MA10 smooth, ≥100 mã, causal), ghép DT5G state 2014→2026-06. Scripts: analyze_breadth_compass.py + analyze_breadth_momentum.py; panel data/breadth_compass_panel.csv. EW-prune fwd60 làm proxy sách.
 
-**Giả thuyết ngây thơ BỊ BÁC**: "index khỏe × breadth WEAK = độc" SAI ở mức level (NEUTRAL×WEAK +1.4% vs STRONG +2.5%, spread chỉ 1.1pp; BULL×WEAK lại là ô TỐT NHẤT +21%/100% n=20 = recovery). Momentum BLEED cũng forward-DƯƠNG (mean-reversion thống trị 60d) → **rule "thấy phân kỳ thì thoát" sẽ bán đúng đáy hồi — KHÔNG deploy de-risk trigger từ breadth** (khớp chuỗi finding overlay-phòng-thủ-fail: f_protect, vol-target).
+**Giả thuyết ngây thơ BỊ BÁC**: "index khỏe × breadth WEAK = độc" SAI ở mức level (NEUTRAL×WEAK +1.4% vs STRONG +2.5%, spread chỉ 1.1pp; BULL×WEAK lại là ô TỐT NHẤT +21%/100% n=20 = recovery). [REDACTED] BLEED cũng forward-DƯƠNG (mean-reversion thống trị 60d) → **rule "thấy phân kỳ thì thoát" sẽ bán đúng đáy hồi — KHÔNG deploy de-risk trigger từ breadth** (khớp chuỗi finding overlay-phòng-thủ-fail: f_protect, vol-target).
 
 **3 tín hiệu THẬT của la bàn 2**:
 1. **CRISIS-phase refinement (mạnh nhất, đơn điệu)**: trong DT5G CRISIS, breadth level đảo dấu kết cục — WEAK (washed-out) +7.0%/81% win vs STRONG (crash mới bắt đầu, breadth chưa gãy) **−4.3%/31%** n=310. → DT5G flip CRISIS sớm khi breadth còn khỏe = ĐỪNG bắt đáy, còn rơi tiếp. Cùng vật lý với capit playbook washout-30% gate, nhìn từ phía ngược.

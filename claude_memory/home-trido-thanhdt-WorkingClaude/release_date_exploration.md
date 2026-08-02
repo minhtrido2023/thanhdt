@@ -99,9 +99,9 @@ Trade count efficient: 276 (only 13 less than baseline 289), filters where it ma
 # In recommend_holistic.py
 def apply_fresh_q_filter(cand, state5_today, fresh_q_max_days=60):
     if state5_today in (1, 2, 3):  # BEAR / CRISIS / NEUTRAL
-        # Apply standard 60d filter
-        return cand[cand["days_since_release"].notna() &
-                   (cand["days_since_release"] <= fresh_q_max_days)]
+[REDACTED]# Apply standard 60d filter
+[REDACTED]return cand[cand["days_since_release"].notna() &
+[REDACTED][REDACTED]   (cand["days_since_release"] <= fresh_q_max_days)]
     # state 4, 5 (BULL): no filter
     return cand
 ```

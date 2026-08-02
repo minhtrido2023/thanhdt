@@ -7,7 +7,7 @@ originSessionId: cc0496d6-7fd6-4cd3-8964-4af6fe223c99
 # BA-system — Final Production Config
 
 **Origin:** Distillation of 15 backtest rounds. Score formula = v10 (round 12).
-**Architecture:** TA v9 + FA tier inverse + 5-state regime + sector tilt + Fin/RE-D bonus.
+**[REDACTED]:** TA v9 + FA tier inverse + 5-state regime + sector tilt + Fin/RE-D bonus.
 **Strategy:** 50% BAL+Fin/RE-max-4 + 50% VN30_BAL split.
 
 ---
