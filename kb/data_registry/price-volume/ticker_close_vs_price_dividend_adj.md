@@ -117,6 +117,45 @@ của SAB (27/07); để cửa sổ rộng thì NCT bị đếm ở cả hai ng�
 - **Delta có thể ÂM**: SAB `5.000 → 2.000` (Δ −3.000) là một cổ tức **cũ rơi khỏi cửa sổ 1 năm**,
   không liên quan cổ tức mới. Đọc như "cổ tức mới" là sai cả dấu.
 
+## Bẫy (5) — số broker là **GỘP**; thuế TNCN 5% trừ lúc **CHI TRẢ** (thêm 2026-08-02)
+
+Cổ tức tiền mặt của **cá nhân cư trú** chịu thuế TNCN **5%**, khấu trừ **tại nguồn** bởi tổ chức chi
+trả (nhà đầu tư không tự kê khai, không quyết toán lại theo biểu lũy tiến).
+Căn cứ: **Thông tư 111/2013/TT-BTC Điều 10** (thuế suất 5% với thu nhập từ đầu tư vốn) + **Điều 25**
+(khấu trừ tại nguồn); **Luật Thuế TNCN số 109/2025/QH15**, hiệu lực **01/07/2026** — tức ĐANG chi
+phối chính các sự kiện tháng 7/2026 — **GIỮ NGUYÊN mức 5%** cho thu nhập từ đầu tư vốn.
+
+**`cashDividendReceiving` của DNSE ghi số GỘP** theo mệnh giá công bố. Đây **KHÔNG phải suy đoán từ
+thông lệ** — đo được bằng tiền thật trên ca chi trả MBB của SpaceX ngày **17/07/2026**:
+
+| | 16/07 | 17/07 | Δ |
+|---|---:|---:|---:|
+| `cashDividendReceiving` | 3.255.000 | 855.000 | **−2.400.000** (= 2.400cp × 1.000đ, đúng mệnh giá ⇒ GỘP) |
+| `availableCash` *(sau khi trừ khoản rút Trứng vàng 302.108.211)* | 2.925 | 2.282.925 | **+2.280.000** (RÒNG) |
+| chênh lệch | | | **120.000 = 5,00% chính xác** |
+
+Hằng đẳng thức dùng để tách: **`totalCash == availableCash + cashDividendReceiving + depositInterest`**
+— khớp **từng đồng** cả 16/07, 17/07, 20/07. Không có nhiễu: `positions` 16/07 vs 17/07 **không đổi
+một mã nào** (không lệnh khớp), lãi tiền gửi chỉ +37đ. Khoản rút 302.108.211đ **không phải giả định
+ép cho khớp** — xác nhận độc lập bởi `data/execution_logs/nav_snapshot_SpaceX_2026-07-17.json`
+(`offbook_assets`, chuyển Trứng vàng, job `Mafee_20260716_164743`) và bằng `withdrawableCash` 16/07 =
+đúng 302.108.211.
+
+**Hệ quả bắt buộc:**
+1. Tỉ suất per-position công bố phải cộng cổ tức **RÒNG**; luôn in kèm **GỘP + số thuế**, không thay
+   số lặng lẽ (`--div-tax-rate`, mặc định `0.05`).
+2. **Khoản còn ở dạng phải thu vẫn ghi GỘP** ⇒ `totalCash`/NAV đang **cao hơn thực tế đúng 5% của
+   phần chưa chi trả** (31/07: SpaceX 488.750đ = 0,052% NAV; ZaloPay 322.675đ = 0,036% NAV). Nhỏ
+   nhưng có thật — báo cáo phải nói ra.
+3. Thuế suất là **tham số**, không hardcode: tài khoản tổ chức/quỹ có chế độ khác (Luật 109/2025 còn
+   **giảm 50%** thuế cho lợi tức chia từ **quỹ đầu tư chứng khoán / bất động sản**, và miễn thuế
+   chuyển nhượng chứng chỉ quỹ mở nắm giữ ≥2 năm). **SpaceX + ZaloPay đều là tài khoản CÁ NHÂN ⇒ 5%.**
+
+⚠️ **Cơ sở thực nghiệm là n=1.** Tới 02/08/2026 mới đúng **một** sự kiện chi trả thật; 5 sự kiện còn
+lại vẫn nằm ở khoản phải thu (SpaceX 9.775.000đ, ZaloPay 6.453.500đ — chưa hề giảm). Mức 5% có căn
+cứ pháp lý vững và số đo khớp tuyệt đối, nhưng **sự kiện chi trả thứ hai phải được đối chiếu lại
+theo đúng bảng trên** trước khi coi là quy luật đã đóng. Ghim ở `_selfcheck()` **mục 15**.
+
 ## BẮT BUỘC DÙNG — `mike/bin/dividend_adjusted_return.py`
 
 Mọi báo cáo (ngày/tuần/tháng) và mọi phép tính tỉ suất per-position **PHẢI** đi qua helper này, không
@@ -134,7 +173,8 @@ python3 mike/bin/dividend_adjusted_return.py --selfcheck    # offline, không c�
 
 Helper gắn cờ trạng thái xác minh:
 
-- `CASH_CONFIRMED` — `per_share` **giải ra từ tiền mặt broker thật** → **được phép** dùng trong báo cáo.
+- `CASH_CONFIRMED` — `per_share` **giải ra từ tiền mặt broker thật** (số **GỘP**, xem Bẫy 5) →
+  **được phép** dùng trong báo cáo, sau khi trừ thuế qua `PositionReturn`.
 - `STOCK_SUSPECTED` — số lượng CP đổi tại ex-date → nghi chia tách, **không** cộng vào tử số.
 - `UNVERIFIED` — chưa xác minh được → **CẤM** đưa vào báo cáo gửi nhà đầu tư. Nếu lý do là "hệ vô
   định", chạy lại bằng `--resolve` với **đủ rổ mã** thì thường tách được.
@@ -167,5 +207,12 @@ phải thu) ⇒ **cộng hai lần**, tự triệt tiêu phiên sau. Ảnh hư�
   **Số liệu KHÔNG đổi** (6/6 khớp phương pháp cũ) ⇒ 3 báo cáo tháng 7 không phải phát hành lại.
 - Bằng chứng độc lập thứ 2: Winston job 2026-07-31 (`cashDividendReceiving` jump 744 × 3.000 cho SAB).
 - Báo cáo tháng 7/2026 Mục 8.4 / 8.5 / 10.2 (cạm bẫy #4, #5).
+- Job `Taylor_20260802_143541` (2026-08-02) — **Bẫy (5), thuế TNCN 5%**: user phát hiện số đang dùng
+  là GỘP. Tiền đề ban đầu ("chưa sự kiện nào settle, chỉ suy được từ thông lệ") **SAI** — ca MBB
+  17/07 ĐÃ chi trả và cho phép đo trực tiếp 5,00%. Báo cáo:
+  `mike/agents/Taylor/research/dividend_tax_5pct_20260802.md`.
+  Luật: [TT 111/2013/TT-BTC](https://thuvienphapluat.vn/van-ban/Thue-Phi-Le-Phi/Thong-tu-111-2013-TT-BTC-Huong-dan-Luat-thue-thu-nhap-ca-nhan-va-Nghi-dinh-65-2013-ND-CP-205356.aspx)
+  Đ.10+Đ.25; [Luật TNCN 109/2025/QH15](https://xaydungchinhsach.chinhphu.vn/gioi-thieu-luat-thue-thu-nhap-ca-nhan-so-109-2025-qh15-119260123145437408.htm)
+  (hiệu lực 01/07/2026, giữ nguyên 5%).
 
 ↩ [Về index nhóm](index.md)
