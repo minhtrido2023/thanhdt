@@ -1,0 +1,16 @@
+
+=== (A) IDENTITY vs PS luu (ticker_financial), 2014-01-01..2016-12-31 ===
+n_rows = 7,377
+  Price*OShares/Rev_ttm khop PS luu (sai so <2%):   98.9%   | sai so tuong doi trung vi: 0.0000
+  Close*OShares/Rev_ttm khop PS luu (sai so <2%):   11.8%   | sai so tuong doi trung vi: 0.5261
+
+=== (B) LICH SU — tai lap cong thuc rating_8l tren 3 ngay cat ===
+ngay            n   F=Price/Close med   sales_yield lech med   Spearman  top30 doi
+2014-06-30    589               2.308                  56.7%      0.889      15/30
+2015-06-30    620               2.074                  51.8%      0.907      10/30
+2016-06-30    702               1.906                  47.5%      0.909      13/30
+
+=== (C) LIVE (2026-07-31) ===
+  n co ca Price & Close: 859   | Price == Close: 859/859   | max |Price/Close-1|: 0.000000
+
+[done] artifacts -> /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/exp_ps_basis

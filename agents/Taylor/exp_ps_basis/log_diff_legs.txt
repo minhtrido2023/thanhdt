@@ -1,0 +1,16 @@
+
+=== rating_8l.csv ===
+  shape BEFORE=(859, 39) AFTER=(859, 39)
+  IDENTICAL (moi cot, moi ma)
+
+=== rating_8l_top30.csv ===
+  shape BEFORE=(30, 43) AFTER=(30, 43)
+  IDENTICAL (moi cot, moi ma)
+
+=== rating_8l_buynow.csv ===
+  shape BEFORE=(72, 41) AFTER=(72, 41)
+  IDENTICAL (moi cot, moi ma)
+
+=== rating_8l_screener.csv ===
+  shape BEFORE=(104, 28) AFTER=(104, 28)
+  IDENTICAL (moi cot, moi ma)

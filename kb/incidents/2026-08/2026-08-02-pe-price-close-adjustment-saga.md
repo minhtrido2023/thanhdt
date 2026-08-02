@@ -4,7 +4,12 @@
 **Mức độ**: MEDIUM — sai số liệu trên màn hình lọc human-facing; **đường giao dịch LIVE không bị
 nhiễm** (chứng minh bên dưới). Không mất tiền, không lệnh sai.
 **Job liên quan**: `Taylor_20260802_042110` (suy diễn sai) → `Taylor_20260802_054825` (bác bỏ) →
-`Taylor_20260802_063752` (khôi phục + incident này).
+`Taylor_20260802_063752` (khôi phục + incident này) → `Taylor_20260802_081308` (**Phần 2**: lens
+`ps`, ngược chiều — §8-§13 cuối file).
+
+> **File này có 2 phần.** Phần 1 (§1-§7) = `PE` bị nhân thừa `Price/Close`. Phần 2 (§8-§13) =
+> lens `ps` dùng thiếu, phải đổi `Close`→`Price`. **Hai phép sửa NGƯỢC CHIỀU nhau** — đọc §8 trước
+> khi kết luận "cột nào đúng" ở chỗ khác trong repo.
 
 ## 1. Chuyện gì đã xảy ra
 
@@ -91,7 +96,7 @@ chỉ nằm trong văn xuôi incident này. Không viết lint rule: pattern "nh
 định giá" không có dạng cú pháp cơ học đủ chính xác (cùng lý do đã ghi ở §12/§16 — rule nhiễu làm hỏng
 niềm tin vào cả cổng nhanh hơn là không có rule).
 
-## 6. Việc còn MỞ (đã đo, chưa sửa — chờ Mike/user quyết)
+## 6. Việc còn MỞ (đã đo, chưa sửa — chờ Mike/user quyết) → **ĐÃ ĐÓNG, xem Phần 2 (§8)**
 
 Lens `ps` trong `rating_8l.py` dùng `Close·OShares/Revenue_ttm` — **sai cơ sở cùng họ** (đo ở job
 này: `PS` lưu khớp cơ sở `Price` 99,7% vs `Close` 11,9% trên 7.321 dòng 2014-2016). Tác động LIVE
@@ -99,9 +104,119 @@ hôm nay = **0** (F≡1); tác động nếu tính lùi lịch sử: `sales_yiel
 11-15/30 tên rẻ nhất. Đề xuất đổi sang `Price`, ưu tiên thấp. Chi tiết + số liệu:
 `mike/agents/Taylor/research/rating8l_pe_adj_removal_20260802.md` (Bước 4).
 
+**Cập nhật cùng ngày**: user đã duyệt, sửa xong trong job `Taylor_20260802_081308` — xem **§8**.
+
 ## 7. Tham chiếu
 
 - `mike/agents/Taylor/research/pe_priceadj_refutation_ab_20260802.md` — bằng chứng bác bỏ + A/B NAV
 - `mike/agents/Taylor/research/rating8l_pe_adj_removal_20260802.md` — thực thi + self-check 2 chiều
+- `mike/agents/Taylor/research/rating8l_ps_price_basis_20260802.md` — **Phần 2** (lens `ps`)
 - `mike/kb/data_registry/fundamentals/valuation_pe_pb_pcf_ps.md` — "Bẫy (4)" (chốt chặn chuẩn tắc)
 - `coding_guidelines.md` §9 (tra data_registry trước khi wire nguồn), §18 (skill `quant-research`)
+
+---
+
+# PHẦN 2 — lens `ps`: cùng họ lỗi, **NGƯỢC CHIỀU** (job `Taylor_20260802_081308`)
+
+## 8. Chuyện gì đã xảy ra (phần 2)
+
+**Trạng thái**: ĐÓNG — sửa xong, self-check 2 chiều + 2 negative control PASS, quant-skeptic
+**CONFIRMED (confidence high)**, đã commit.
+**Mức độ**: LOW — thấp hơn phần 1. Chỉ nhiễm màn hình lọc human-facing; **tác động LIVE = 0**,
+**ZERO NAV impact**, không đụng rating 8L (1-5) lẫn bảng `fa_ratings_8l`.
+
+Cùng ngày, sau khi đóng phần 1, kiểm tra tiếp §6 và xác nhận lens `ps` sai cơ sở giá — **nhưng
+theo chiều ngược lại**, và đây là điểm dễ hiểu nhầm nhất của cả saga:
+
+| | Phần 1 — `PE` | Phần 2 — `ps` |
+|---|---|---|
+| Cột này lấy giá từ đâu | **Đã có sẵn** trong `ticker_financial`, vốn ĐÃ ở cơ sở `Price` (PIT) đúng | **Tự dựng** vốn hoá trong `rating_8l.py`, nên phải tự chọn cơ sở |
+| Lỗi là gì | **Nhân thêm** `Price/Close` vào một số vốn đã đúng | Dùng `Close` (đã điều chỉnh) nhân `OShares` (PIT) — **trộn 2 cơ sở** |
+| Phép sửa | **Gỡ** phép nhân, về `1/PE` | **Đổi** `Close` → `Price` |
+| Hướng | Bỏ bớt `Price/Close` | Thêm vào `Price` |
+
+> **Bài học cốt lõi của phần 2**: cùng một quan sát đúng (`F=Price/Close` giảm đơn điệu) dẫn tới
+> **hai phép sửa ngược nhau** ở hai chỗ khác nhau — vì câu hỏi quyết định KHÔNG phải "cột nào đã
+> điều chỉnh", mà là "**đại lượng này đã ở cơ sở nào rồi?**". Trả lời câu đó bằng phép kiểm định
+> danh, đừng suy từ tên cột.
+
+## 9. Khảo cổ git — không có comment sai, chỉ chọn nhầm cột
+
+`git log -S'out["ps"] = np.where' -- rating_8l.py` → **duy nhất** `c9cc670` (2026-06-21, commit
+checkpoint gộp) ⇒ lens `ps` có trước mốc đó, **không commit nào giải thích vì sao chọn `Close`**.
+Khác phần 1 ở điểm quan trọng: phần 1 có comment **khẳng định sai** (`PE_stored = Close_adj/EPS`)
+bị tái sử dụng như bằng chứng 6 tuần sau; ở đây comment gốc nói *"current-price PS =
+mktcap/TTM-revenue"* — **ý đồ ĐÚNG**, chỉ lấy nhầm cột. Tức là: lỗi ít độc hại hơn (không lan
+truyền thành tiền đề sai cho công việc khác), nhưng cũng **khó bị phát hiện hơn** vì đọc comment
+không thấy gì bất thường.
+
+## 10. Bằng chứng (tự đo lại trong job này, không copy số job trước)
+
+**Phép định danh** — `PS` lưu trong `ticker_financial` ở cơ sở nào? (2014-01-01→2016-12-31,
+`n = 7.377`):
+
+```
+Price·OShares/Rev_ttm khớp PS lưu (sai số <2%):  98,9%   | sai số tương đối trung vị: 0,0000
+Close·OShares/Rev_ttm khớp PS lưu (sai số <2%):  11,8%   | sai số tương đối trung vị: 0,5261
+```
+
+**Tái lập công thức `rating_8l` trên 3 ngày cắt**:
+
+| Ngày | n | F=Price/Close (trung vị) | \|sales_yield lệch\| trung vị | Spearman(fix,bug) | Top-30 rẻ nhất đổi |
+|---|---|---|---|---|---|
+| 2014-06-30 | 589 | 2,308 | **56,7%** | 0,889 | **15/30** |
+| 2015-06-30 | 620 | 2,074 | 51,8% | 0,907 | 10/30 |
+| 2016-06-30 | 702 | 1,906 | 47,5% | 0,909 | 13/30 |
+
+> **Đối chiếu với §6 (90-131%) — KHÔNG mâu thuẫn, khác mẫu số**: §6 báo `sy_bug/sy_fix − 1 = F−1`;
+> bảng trên báo `|sy_fix/sy_bug − 1| = 1 − 1/F`. Kiểm: F=2,308 ⇒ F−1 = 130,8% ≈ 131% ✓ và
+> 1−1/F = 56,7% ✓. Chênh nhỏ còn lại (98,9% vs 99,7%; n 7.377 vs 7.321) do job này thêm điều kiện
+> lọc `Price > 0`. **Ghi lại đối chiếu này ngay trong incident** vì hai con số cùng mô tả một sự
+> kiện mà nhìn qua tưởng đá nhau — đúng loại nhầm lẫn saga này sinh ra.
+
+**LIVE (2026-07-31)**: `Price == Close` **859/859**, `max|Price/Close−1| = 0,000000` ⇒ tác động
+hôm nay bằng 0. Coverage: `Close IS NOT NULL AND Price IS NULL` = **0** ⇒ đổi cột không mất mã nào.
+
+## 11. Self-check 2 chiều + 2 negative control
+
+Sandbox 4 leg (`BEFORE/AFTER/PERTURB/PERTURB2`) trong `/tmp`; production CSV **không bị chạm**
+(mtime giữ nguyên `2026-07-30 19:20`, quant-skeptic tự kiểm lại).
+
+- **(a) Parity hôm nay — PASS**: cả 4 CSV output (`rating_8l` 859×39, `top30`, `buynow`,
+  `screener`) **IDENTICAL** mọi cột, mọi mã.
+- **(b) Positive control 2014-2016 — PASS**: có đổi thật, đúng bảng §10.
+- **(c) `rate_row()` / `fa_ratings_8l` — KHÔNG ảnh hưởng** (kiểm RIÊNG cho `ps`, không giả định
+  giống PE): (i) 7 hàm rating dòng 187-429 có **0** tham chiếu `ps`/`sales_yield`/`PS`; (ii)
+  `out["ps"]` gán dòng 545 **sau** `rate_row` apply dòng 500 ⇒ bất khả về cấu trúc; (iii) thực
+  nghiệm: cột `rating` IDENTICAL cả ở phép sửa thật lẫn ở NC2.
+
+**⚠️ "IDENTICAL 100%" cũng là kết quả của một harness mù — nên phải bác bỏ khả năng đó.** Đây là
+phần phương pháp đáng giữ lại nhất của job này:
+
+| Negative control | Kết quả | Ý nghĩa |
+|---|---|---|
+| NC1: `ps × 1,5` (đều tay) | `sales_yield` khác 816/859; screener IDENTICAL | Harness BẮT được diff. Screener không đổi là **đúng kỳ vọng** — nhân vô hướng đều tay bảo toàn thứ hạng chéo ⇒ `ps_pct` không đổi |
+| NC2: `ps × (1 + 1,5·i/n)` (đổi hạng) | `ps_pct` 59, `value_score_v3` 39, `value_score` 25, `value_pct` 58, **`zone` 2 mã**; `rating` **vẫn IDENTICAL** | Harness bắt được cả đường `ps→ps_pct→value_score→zone`, đồng thời xác nhận **thực nghiệm** rằng `rating` miễn nhiễm với `ps` |
+
+⇒ "0 khác" của phép sửa thật là **thật**. NC1 một mình chưa đủ (không đụng tới đường xếp hạng) —
+cần **NC2 đổi hạng** mới chứng minh được harness nhìn thấy đường `ps → zone`.
+
+## 12. Việc còn MỞ sau phần 2 (quant-skeptic nêu, CHƯA giải quyết)
+
+Comment trong code ghi lens `ps` được validate IC ngày **2026-06-19** (IC +0,135 CONSUMER/RETAIL;
++0,072 broad). **Nếu** nghiên cứu đó tính `ps` bằng chính công thức `Close`-based này thì con số IC
+đó nhiễm và cần đo lại; nếu nó đọc thẳng `ticker_financial.PS` (đã chứng minh ở §10 là cơ sở
+`Price` đúng) thì sạch. **Chưa xác định được** — tìm trong job này không ra script/report của
+2026-06-19 (`agents/Taylor/research/` không có file tương ứng; các `exp_valframe`/`exp_value_radar`
+là nghiên cứu khác và đều đã dùng `Price*OShares`).
+
+**Không chặn phần 2**: phép sửa hôm nay đúng độc lập với câu hỏi này (chứng minh bằng phép định
+danh §10, không dựa vào con số IC nào), và `value_score_v3` là **diagnostic-only** — không selector
+giao dịch nào đọc nó. Ưu tiên **thấp**, xử lý khi có người đụng lại lens `ps`.
+
+## 13. Tham chiếu (phần 2)
+
+- `mike/agents/Taylor/research/rating8l_ps_price_basis_20260802.md` — báo cáo đầy đủ 5 bước
+- `mike/agents/Taylor/exp_ps_basis/` — script + CSV + log (`measure_ps_basis.py`, `diff_legs.py`)
+- `mike/logs/verify_20260802_082245.log` — verdict quant-skeptic thô (CONFIRMED / high)
+- Commit: `rating_8l.py` (repo WorkingClaude) + incident/report này (repo mike)
