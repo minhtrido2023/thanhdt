@@ -4,7 +4,7 @@ title: Incidents — Mike fleet (sổ postmortem, cấu trúc OKF)
 owner: Mike fleet (mọi agent ghi; daily_retro.sh ghi entry RETRO hằng đêm)
 format: OKF (Open Knowledge Format) — markdown + YAML frontmatter, 1 sự cố = 1 file
 migrated_from: kb/INCIDENTS.md (single-file 408KB, migrate → OKF 2026-07-30 job Winston_20260730_144031)
-entries: 76 file (56 sự cố + 19 RETRO + 1 mục open-items chung)
+entries: 78 file (57 sự cố + 20 RETRO + 1 mục open-items chung)
 ---
 
 # Incidents — Mike fleet
@@ -77,6 +77,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Sự cố | status |
 |---|---|---|
+| 2026-08-02 | [2026-08-02: user noticed "Mike seems to stop / not follow topics" — root cause is /api/notify silently dropping ~10 messages/3 days on oversized embeds, one bug fixed, one flagged unfixed](2026-08/2026-08-02-notify-api-silent-message-loss.md) | partially-fixed |
 | 2026-08-01 | [2026-08-01: MAX_TURNS missing from --bg export list — every background dispatch fleet-wide broken for ~1h10m, caught mid-research by Mike, root-caused via bash -x trace, fixed same-turn](2026-08/2026-08-01-dispatch-max-turns-export-missing-bg-broken.md) | fixed |
 | 2026-08-01 | [2026-08-01: ShellCheck pre-commit gate — đẩy bài học quoting sang công cụ, tìm+sửa thêm 1 bug thật thứ 4](2026-08/2026-08-01-shellcheck-precommit-gate.md) | fixed |
 | 2026-08-01 | [2026-08-01: audit toàn bộ crontab (64 dòng) — 1 bug thật mới (kb_nightly.sh backup.sh) + 9 log-observability gap + cron_health_check.py mới](2026-08/2026-08-01-full-crontab-audit-cron-health-check.md) | fixed |
