@@ -39,7 +39,20 @@ for i, rd in enumerate(rebals):
     mem = memdf[memdf["rebal_date"] == rd].sort_values("liq_rank")
     tks = list(mem["ticker"])
     sub = bx[(bx["ticker"].isin(tks)) & (bx["time"] <= rd)]
-    mc = sub.sort_values("time").groupby("ticker")["mcap"].last().reindex(tks)
+    # PRICE BASIS — WEIGHT leg uses `mcapw` (raw PIT COALESCE(Price,Close) x OShares), NOT `mcap`
+    # (retroactively-adjusted Close x OShares, which is build_pit's RETURN leg). See the PRICE BASIS
+    # block in custom_basket.py and mike/kb/data_registry/price-volume/
+    # ticker_close_vs_price_dividend_adj.md. This is a cross-sectional weight AT ONE DATE, so it
+    # must not be built from a series that gets restated afterwards.
+    #   Why it mattered here specifically (job Taylor_20260802_141725, step 5): this publisher is
+    #   re-run EVERY session by papertrade_daily.sh [6b], but `rebal_date` only moves quarterly --
+    #   so with `mcap` the published weights of a FIXED past rebal silently drifted every time a
+    #   member went ex-dividend. Measured on the live 2026-05-05 rebal at the 2026-07-29 vintage:
+    #   18/30 members already had Close/Price != 1.00 (ACB 0.862, IDC 0.873), sum|dw| = 1.65pp,
+    #   max single name 0.478pp (ACB). On 2026-05-05 itself the factor was 1.00 for all 30, i.e.
+    #   the weights were right the day they were published and decayed from there. `Price` is never
+    #   restated, so the fixed weights are stable. Membership is unaffected (it comes from `memdf`).
+    mc = sub.sort_values("time").groupby("ticker")["mcapw"].last().reindex(tks)
     mc = mc.fillna(0.0)
     base = (mc / mc.sum()).values if mc.sum() > 0 else np.ones(len(tks)) / len(tks)
     w = cb._cap_names(base, NAME_CAP)
