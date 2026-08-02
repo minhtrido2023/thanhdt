@@ -171,3 +171,55 @@ Ba lần trước đều sửa **cơ chế**; lần này sửa **điều kiện 
 tiếp theo — đúng bài học đã ghi ở `2026-07-20` ("chỉ nhắc trong prose không đủ, cần cơ chế")
 nhưng lần đó mới áp cho **một** agent (`_agent_thread_override` cho Wags), chưa áp cho **lớp
 lỗi**.
+
+---
+
+## Vòng 4 (2026-08-02, job `Wags_20260802_182051`) — ROOT CAUSE THẬT SỰ: tầng đoán ở NƠI SINH RA pin
+
+Ba vòng trước đều gỡ tầng "đoán topic" ở nơi **TIÊU THỤ** (`notify_thread.sh` R1 → `watchdog.sh`
+F1). Vòng 4 xác định: điều kiện tồn tại của **cả 4 sự cố** (07-01, 07-22a, 07-22b, 08-02) là
+tầng 3 trong `_ambient_thread` của chính `dispatch.sh` — `agents/Mike/state/ccdb_thread_id`
+("topic Mike mở phiên gần nhất").
+
+Vì sao nó độc: tầng 3 **chỉ kích hoạt khi `$DISCORD_THREAD_ID` rỗng**, tức đúng ngữ cảnh **CRON** —
+nơi "topic Mike mở gần nhất" không có quan hệ nhân quả nào với job đang chạy. Tệ hơn bản gốc ở
+chỗ cú đoán được **GHIM thành pin trên job record**, trông như sự thật đã chốt, nên không
+consumer nào bên dưới còn phát hiện được nữa.
+
+**Bằng chứng đo trên job board** — cùng MỘT dòng cron `daily_retro` (`30 17 * * *`) ghim hai
+topic **khác nhau** hai ngày liên tiếp, cả hai đều **ngoài registry**:
+
+| job | `discord_thread_id` bị ghim |
+|-----|------------------------------|
+| `Mike_20260801_173001` | `1522519012066721923` |
+| `Mike_20260802_173001` | `1532076080175779942` |
+
+### Bản vá
+
+| # | Chỗ sửa | Nội dung |
+|---|---------|----------|
+| B1 | `dispatch.sh` | **Xoá hẳn tầng 3**. Chuỗi còn đúng 2 tầng: `_agent_thread_override` → `$DISCORD_THREAD_ID`. Cron không nêu topic ⇒ pin RỖNG ⇒ im lặng phía Discord (Telegram vẫn chạy). |
+| B1 | `daily_retro.sh`, `weekly_ops_audit.sh`, `check_report_cadence.sh` | Nêu **đích danh** `--thread architecture` / `--thread <trading_report>` thay vì để hệ đoán. *Nêu đích danh là hợp lệ; đoán thì không.* |
+| M2 | `dispatch.sh` | Thêm nhánh `else export DISCORD_THREAD_ID=""`. Thiếu nó, pin rỗng vẫn để agent con **thừa kế** biến của tiến trình cha ⇒ job record nói "không có topic" trong khi báo cáo do **chính agent** gửi rơi vào topic Mike đang chat — đúng lớp lỗi 07-22b. Pin rỗng phải rỗng ở **cả hai** phía. |
+| m6 | `notify_thread.sh` | **ID trần đi thẳng**, không spawn `discord_channel.sh`. Bắt mọi tin nhắn của fleet qua 1 tiến trình con biến script đó thành **SPOF**: đã xảy ra thật (`2026-08-02T23:14:57 discord_channel.sh: Permission denied` ⇒ nuốt trọn 1 tin nhắn). Nhánh **TÊN** vẫn qua registry. |
+| M5 | `ops_health_check.sh` (check #10 mới) | Đọc `logs/notify_thread_errors.log`, WARN nếu có lỗi gửi trong 24h qua. Trước đó **không script nào đọc file này** — fail-loud mà không có người đọc thì vẫn là fail-silent. |
+| — | `hooks/session_start.sh` | Ghi chú rõ: con trỏ nay là **GHI CHẾT** (0 nơi đọc). Cố ý **giữ** dòng ghi (rẻ, không side-effect, còn hữu ích để chẩn đoán thủ công), nhưng cấm dùng lại cho định tuyến. |
+
+### Verify
+
+- `bin/dispatch_discord_topic_selfcheck.sh`: **41/41 PASS** (37 → 41 assertion).
+  - **CA 10** đổi ngưỡng `1 → 0` nơi ĐỌC con trỏ (bất biến mới: 0 đọc / 1 ghi, và nơi ghi phải là
+    `hooks/session_start.sh`). Phân biệt GHI/ĐỌC bằng dấu `>` **chứ không theo tên file**, để một
+    hàm đọc mới thêm vào chính `session_start.sh` vẫn bị bắt.
+  - **CA 3 / CA 4**: mong đợi `CHILD_TID` **rỗng** thay vì `<UNSET>` (khớp M2).
+  - **CA 4b (mới)**: pin RỖNG trong khi tiến trình cha CÓ ambient ⇒ agent con không được thừa kế.
+    Ca duy nhất phủ được lỗi 07-22b ở dạng mới.
+- **Mutation test** (quy tắc vòng 3 — test không bao giờ FAIL thì không chứng minh gì):
+  (a) thêm 1 file có dòng đọc con trỏ vào `bin/` ⇒ **CA 10 FAIL** đúng 1 assertion;
+  (b) bỏ nhánh `else export DISCORD_THREAD_ID=""` khỏi `dispatch.sh` ⇒ **CA 3/4/4b FAIL**, riêng
+  CA 4b bắt đúng `CHILD_TID = 1521475726329516122` = ambient của cha (⇒ M2 là lỗi THẬT, không
+  phải phòng xa).
+- Check #10 test **cả hai nhánh**: WARN trên log thật (4 bản ghi 2026-08-02), OK sau khi archive
+  log → `logs/archive/notify_thread_errors.20260802-selfcheck-vong34.log` (4 bản ghi đó đều là
+  tạo tác của chính phép thử vòng 3/4; archive để không bắn WARN giả lúc 08:20).
+- `bash -n` sạch 8 file; `discord_id_gate` + `shellcheck_gate` PASS lúc commit.

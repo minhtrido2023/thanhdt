@@ -461,7 +461,21 @@ _job_thread_id() {
 # (old in-flight jobs, cron dispatches). Precedence, HIGHEST first:
 #   1. _agent_thread_override  — agent whose output ALWAYS belongs to one fixed topic
 #   2. $DISCORD_THREAD_ID      — ambient topic of the session that happens to be dispatching
-#   3. state/ccdb_thread_id    — global "last topic Mike was active in" (last resort)
+# Hết. KHÔNG có tầng 3.
+#
+# TẦNG 3 `state/ccdb_thread_id` ("topic Mike mở phiên gần nhất") BỎ HẲN 2026-08-02, vòng 4
+# (arch-reviewer, B1) — đây mới là ĐIỀU KIỆN TỒN TẠI của cả 4 sự cố rò rỉ, không phải các
+# consumer. Ba vòng trước đều gỡ tầng đoán ở nơi TIÊU THỤ, nhưng chính NƠI SINH RA pin vẫn
+# đoán: tầng 3 chỉ kích hoạt khi $DISCORD_THREAD_ID rỗng = đúng ngữ cảnh CRON, nơi "topic Mike
+# mở gần nhất" không có quan hệ nhân quả nào với job. Tệ hơn bản gốc ở chỗ cú đoán được GHIM
+# thành pin, trông như sự thật đã chốt, nên không consumer nào phát hiện được nữa.
+# Bằng chứng đo trên job board: cùng một dòng cron daily_retro `30 17 * * *` ghim HAI topic KHÁC
+# nhau trong 2 ngày liên tiếp (job Mike_20260801_173001 vs Mike_20260802_173001), cả hai đều
+# NGOÀI registry. (ID cụ thể xem kb/incidents/2026-08/2026-08-02-discord-channel-registry.md —
+# không chép ID trần vào code, đó chính là thứ discord_id_gate chặn.)
+# Nay: cron không nêu topic ⇒ pin RỖNG ⇒ im lặng phía Discord (Telegram vẫn chạy). Cron nào
+# THẬT SỰ cần báo vào 1 topic thì nêu ĐÍCH DANH `--thread <tên>` (đã thêm cho daily_retro.sh,
+# weekly_ops_audit.sh, check_report_cadence.sh) — nêu đích danh là hợp lệ, đoán thì không.
 #
 # The override MUST outrank the ambient env (fixed 2026-07-22). Before this, the chain was
 # `${DISCORD_THREAD_ID:-$(_agent_thread_override ...)}` — env FIRST — which made the override
@@ -477,7 +491,6 @@ _ambient_thread() {
   # tuyệt đối không rơi xuống ambient (arch-reviewer S2, 2026-08-02).
   _t="$(_agent_thread_override "$1")" || return 1
   [ -n "$_t" ] || _t="${DISCORD_THREAD_ID:-}"
-  [ -n "$_t" ] || _t="$(cat "$ROOT/agents/Mike/state/ccdb_thread_id" 2>/dev/null || true)"
   printf '%s' "$_t"
 }
 
@@ -731,7 +744,12 @@ fi
 # id=Mike here: the stale proxy was the root cause, and an id-keyed exemption would leave the
 # job record and the agent's env disagreeing for Mike alone, which is the exact class of bug
 # this commit chain exists to remove.
-if [ -n "$_dtid0" ]; then export DISCORD_THREAD_ID="$_dtid0"; fi
+# Nhánh `else` là BẮT BUỘC (thêm 2026-08-02, arch-reviewer vòng 4 M2): thiếu nó thì pin RỖNG
+# vẫn để agent con THỪA KẾ $DISCORD_THREAD_ID của tiến trình cha ⇒ job record nói "không có
+# topic" (wrapper im lặng đúng như thiết kế) trong khi BÁO CÁO DO CHÍNH AGENT gửi
+# (`notify_thread.sh "<msg>"` không đối số 2) lại rơi vào topic Mike đang chat — đúng lớp lỗi
+# 07-22b (record và env của agent bất đồng). Pin rỗng phải rỗng ở CẢ HAI phía.
+if [ -n "$_dtid0" ]; then export DISCORD_THREAD_ID="$_dtid0"; else export DISCORD_THREAD_ID=""; fi
 JSET job_id="$job_id" from="$from" to="$id" status=running attempt=1 \
      max_attempts=$((RETRIES + 1)) started_at="$_start_ts" \
      deadline=$((_start_ts + TIMEOUT)) logfile="$logfile" discord_thread_id="$_dtid0" \

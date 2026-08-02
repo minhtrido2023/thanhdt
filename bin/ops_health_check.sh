@@ -477,6 +477,29 @@ else:
       f"— nghi cron 00:30 ICT đêm qua crash/không hoàn tất (đúng lớp lỗi 08-01: quoting bug làm "
       f"script chết trước khi kịp notify). Kiểm logs/daily_retro.log tìm lỗi bash gần nhất.")
 
+# 10. notify_thread.sh không phân giải được topic ⇒ TIN NHẮN BỊ NUỐT (thêm 2026-08-02, saga
+#     discord-routing vòng 4). notify_thread.sh ghi 1 dòng vào logs/notify_thread_errors.log
+#     mỗi lần nó không gửi được; mọi caller đều bọc `2>/dev/null || true` nên KHÔNG ai thấy
+#     lỗi qua exit code. Trước check này KHÔNG script nào đọc file đó — fail-loud mà không có
+#     người đọc thì vẫn là fail-silent (đã mất thật 1 tin momentum_deals 2026-08-02T23:14).
+#     WARN-only, cửa sổ 24h để cảnh báo tự tắt sau khi hết lỗi.
+import time as _time
+nte_file = os.path.join(wc_root, "mike", "logs", "notify_thread_errors.log")
+if os.path.exists(nte_file) and (_time.time() - os.path.getmtime(nte_file)) < 86400:
+    try:
+        # Chỉ lấy dòng MỞ ĐẦU BẢN GHI (có timestamp) — thông điệp lỗi có thể tràn nhiều dòng
+        # (discord_channel.sh in thêm danh sách tên hợp lệ), lấy dòng cuối thô sẽ ra đúng cái
+        # đuôi vô nghĩa đó.
+        _nte_last = [l for l in open(nte_file, encoding="utf-8", errors="replace").read().splitlines()
+                     if re.match(r"^\d{4}-\d{2}-\d{2}T", l)][-1]
+    except Exception:
+        _nte_last = "(không đọc được nội dung)"
+    W(f"notify_thread.sh có lỗi gửi Discord trong 24h qua — TIN NHẮN ĐÃ BỊ NUỐT. "
+      f"Dòng cuối: {_nte_last[:300]} — kiểm tên topic trong mike/kb/discord_channels.json "
+      f"và quyền chạy bin/discord_channel.sh.")
+else:
+    OK("notify_thread.sh: không có lỗi gửi Discord trong 24h qua.")
+
 print("\n".join(lines))
 print(f"__WARN_COUNT__={warn}")
 PYEOF

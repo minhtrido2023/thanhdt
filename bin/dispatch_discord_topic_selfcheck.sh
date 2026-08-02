@@ -164,7 +164,11 @@ rm -f "$MK/agents/Mike/state/ccdb_thread_id"
 run_dispatch -u DISCORD_THREAD_ID -- Taylor "selfcheck ca3" --timeout 60
 assert "exit code" "$RC" "0"
 assert "ID ghim rỗng (không đoán)" "$PINNED" ""
-assert "agent con KHÔNG có DISCORD_THREAD_ID" "$CHILD_TID" "<UNSET>"
+# Mong đợi RỖNG chứ không phải <UNSET> (đổi 2026-08-02, vòng 4 M2): dispatch.sh nay LUÔN
+# `export DISCORD_THREAD_ID` — bằng pin, hoặc bằng chuỗi rỗng tường minh khi pin rỗng. Với
+# consumer thì rỗng ≡ không có (`${DISCORD_THREAD_ID:-}` ở khắp nơi), nhưng export tường minh
+# chặn được việc agent con THỪA KẾ biến của tiến trình cha — xem CA 4b.
+assert "agent con KHÔNG có topic (biến rỗng tường minh)" "$CHILD_TID" ""
 assert "số tin nhắn Discord" "$NCALLS" "0"
 
 echo "== CA 4: registry HỎNG + agent CÓ override ⇒ VẪN chạy, pin RỖNG, Discord im lặng (S2/F4)"
@@ -178,9 +182,22 @@ run_dispatch -u DISCORD_THREAD_ID DISCORD_CHANNELS_REGISTRY=/nonexistent/registr
 assert "exit code" "$RC" "0"
 assert "job VẪN chạy (có job record)" "$NJOBS" "1"
 assert "ID ghim RỖNG (không đoán topic thay thế)" "$PINNED" ""
-assert "agent con KHÔNG có DISCORD_THREAD_ID" "$CHILD_TID" "<UNSET>"
+assert "agent con KHÔNG có topic (biến rỗng tường minh)" "$CHILD_TID" ""
 assert "số tin nhắn Discord" "$NCALLS" "0"
 assert "cảnh báo registry hỏng (Telegram)" "$(grep -c 'registry' "$SB/notify.calls" 2>/dev/null || echo 0)" "1"
+
+echo "== CA 4b: pin RỖNG trong khi tiến trình cha CÓ ambient ⇒ agent con KHÔNG được thừa kế (M2)"
+# Ca DUY NHẤT phủ được lỗi 07-22b ở dạng mới: job record nói "không có topic" nhưng agent con
+# lại thấy topic của phiên cha ⇒ mọi `notify_thread.sh "<msg>"` (không đối số 2) do CHÍNH agent
+# gọi rơi vào topic Mike đang chat, dù wrapper im lặng đúng thiết kế. Record và env phải đồng ý.
+# Dựng cửa sổ đó: registry hỏng + agent CÓ override ⇒ pin bị xoá rỗng, NHƯNG $DISCORD_THREAD_ID
+# của cha VẪN còn giá trị. Thiếu nhánh `else export DISCORD_THREAD_ID=""` là ca này FAIL ngay.
+run_dispatch DISCORD_THREAD_ID="$ARCH_ID" DISCORD_CHANNELS_REGISTRY=/nonexistent/registry.json -- \
+  Wags "selfcheck ca4b" --timeout 60
+assert "exit code" "$RC" "0"
+assert "ID ghim RỖNG" "$PINNED" ""
+assert "agent con KHÔNG thừa kế ambient của cha" "$CHILD_TID" ""
+assert "số tin nhắn Discord" "$NCALLS" "0"
 
 echo "== CA 5: registry hỏng + agent KHÔNG override + có ID trần ⇒ VẪN chạy (abort phải ĐÚNG chỗ)"
 run_dispatch DISCORD_THREAD_ID="$ARCH_ID" DISCORD_CHANNELS_REGISTRY=/nonexistent/registry.json -- \
@@ -240,19 +257,30 @@ assert "có job AUTO-CALLBACK (wrapper sống qua chỗ đọc pin rỗng)" "$NJ
 assert "job callback đúng là gửi về người gọi (Wags)" \
   "$(find "$MK/bus/jobs" -name 'Wags_*.json' | wc -l | tr -d ' ')" "1"
 
-echo "== CA 10: chỉ còn ĐÚNG 1 nơi ĐỌC con trỏ toàn cục — _ambient_thread lúc dispatch (F1)"
+echo "== CA 10: KHÔNG còn nơi nào ĐỌC con trỏ toàn cục (F1 + vòng 4: tầng đoán bỏ HẲN)"
 # Ca hành vi không phủ được `watchdog.sh`: nó tự `cat` con trỏ rồi truyền ID TƯỜNG MINH, nên
 # việc gỡ tầng đoán khỏi notify_thread.sh KHÔNG chặn được nó (đúng lỗi F1). Bài học của sự cố
 # là "sửa nơi TIÊU THỤ chưa đủ, phải grep mọi nơi tự đọc NGUỒN" ⇒ mã hoá thành bất biến tĩnh.
 # Chạy trên cây nguồn THẬT ($REAL), không phải sandbox. (watchdog.sh không test hành vi được:
 # nó quét systemd unit thật của user, chạy trong test là đụng dịch vụ sống.)
-_readers="$(grep -rn 'ccdb_thread_id' "$REAL/bin" "$REAL/hooks" 2>/dev/null \
+#
+# NGƯỠNG ĐỔI 1 → 0 (2026-08-02, vòng 4): vòng 3 chấp nhận ĐÚNG 1 nơi đọc (`_ambient_thread`
+# tầng 3 trong dispatch.sh) vì lúc đó tầng đoán vẫn còn. Vòng 4 xác định chính tầng đó là điều
+# kiện tồn tại của cả 4 sự cố và đã XOÁ HẲN ⇒ bất biến đúng bây giờ là KHÔNG AI ĐỌC. Con trỏ
+# chỉ còn được GHI (hooks/session_start.sh) và không còn người tiêu thụ — xem chú thích "code
+# chết" tại chính chỗ ghi đó.
+_mentions="$(grep -rn 'ccdb_thread_id' "$REAL/bin" "$REAL/hooks" 2>/dev/null \
             | grep -v 'dispatch_discord_topic_selfcheck.sh' \
-            | grep -v ':[0-9]*: *#' \
-            | grep -v "> *\"\$ROOT/agents/Mike/state/ccdb_thread_id\"" || true)"
-assert "số nơi ĐỌC con trỏ toàn cục" "$(printf '%s' "$_readers" | grep -c . )" "1"
-assert "nơi duy nhất đó nằm trong dispatch.sh" \
-  "$(printf '%s' "$_readers" | grep -c '/bin/dispatch\.sh:')" "1"
+            | grep -v ':[0-9]*: *#' || true)"
+# GHI = có dấu chuyển hướng `>` trước tên file; mọi dạng khác (cat/$(<)/read) tính là ĐỌC.
+# Không khớp theo tên file để một hàm đọc mới thêm vào session_start.sh vẫn bị bắt.
+_writes="$(printf '%s' "$_mentions" | grep '>[^>]*ccdb_thread_id' || true)"
+_readers="$(printf '%s' "$_mentions" | grep -v '>[^>]*ccdb_thread_id' || true)"
+assert "số nơi ĐỌC con trỏ toàn cục (tầng đoán đã bỏ hẳn ⇒ phải là 0)" \
+  "$(printf '%s' "$_readers" | grep -c . )" "0"
+assert "số nơi GHI con trỏ toàn cục" "$(printf '%s' "$_writes" | grep -c . )" "1"
+assert "nơi GHI duy nhất là hooks/session_start.sh" \
+  "$(printf '%s' "$_writes" | grep -c '/hooks/session_start\.sh:')" "1"
 
 echo
 if [ "$FAILS" -eq 0 ]; then

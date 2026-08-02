@@ -142,8 +142,9 @@ PROMPT="$PROMPT
 === SELFCHECK RESULTS (chạy thật trước dispatch này, xem việc 8) ===
 $SELFCHECK_OUT"
 
+# `--thread architecture` tường minh — xem chú thích cùng ngày trong daily_retro.sh (B1).
 DISPATCH_FROM=user "$ROOT/bin/dispatch.sh" Mike "$PROMPT" \
-    --model opus --effort high --timeout 3600 >> "$LOG" 2>&1 &
+    --thread architecture --model opus --effort high --timeout 3600 >> "$LOG" 2>&1 &
 
 log "Weekly ops audit dispatch launched (background)."
 log "=== weekly_ops_audit DONE (dispatch chạy nền) ==="

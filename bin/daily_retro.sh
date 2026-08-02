@@ -172,8 +172,11 @@ _draft_valid() {
 rc1=0
 for _attempt in 1 2; do
   draft_log="$ROOT/logs/daily_retro_draft_$(date -u +%Y%m%d_%H%M%S)_a${_attempt}.log"
+  # `--thread architecture` TƯỜNG MINH (2026-08-02, arch-reviewer vòng 4 B1): dispatch.sh
+  # không còn đoán topic từ con trỏ toàn cục, nên cron muốn báo vào topic nào phải nêu đích danh
+  # (retro fleet = nội dung ops/kiến trúc). Không nêu ⇒ pin rỗng ⇒ im lặng phía Discord.
   DISPATCH_FROM=user "$ROOT/bin/dispatch.sh" Mike "$draft_prompt" \
-      --timeout 1500 > "$draft_log" 2>&1
+      --thread architecture --timeout 1500 > "$draft_log" 2>&1
   rc1=$?
   log "Draft attempt $_attempt exit code: $rc1 (log: $draft_log)"
   _draft_valid "$DRAFT_FILE" && break

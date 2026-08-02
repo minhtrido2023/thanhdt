@@ -52,10 +52,20 @@ fi
 
 [ -n "$thread_id" ] || { echo "notify_thread: empty thread_id" >&2; exit 1; }
 
-# Tên-ý-nghĩa → ID thật (ID trần đi thẳng qua). Hỏng ở đây là hỏng TO: mọi caller đều bọc
-# `2>/dev/null || true`, nên nếu chỉ in stderr thì một tên gõ sai sẽ nuốt tin nhắn mà không ai
-# biết. Ghi thêm 1 dòng vào logs/notify_thread_errors.log để ops_health_check còn thấy được.
-if ! resolved="$("$ROOT/bin/discord_channel.sh" "$thread_id" 2>&1)"; then
+# Tên-ý-nghĩa → ID thật. Hỏng ở đây là hỏng TO: mọi caller đều bọc `2>/dev/null || true`, nên
+# nếu chỉ in stderr thì một tên gõ sai sẽ nuốt tin nhắn mà không ai biết. Ghi thêm 1 dòng vào
+# logs/notify_thread_errors.log — bin/ops_health_check.sh ĐỌC file này mỗi lần chạy (thêm
+# 2026-08-02, arch-reviewer vòng 4 M5; trước đó không ai đọc ⇒ fail-loud chỉ là fail-silent
+# chậm hơn).
+#
+# ID TRẦN ĐI THẲNG, không spawn discord_channel.sh (2026-08-02, arch-reviewer vòng 4 m6): bắt
+# MỌI tin nhắn của fleet đi qua 1 tiến trình con biến script đó thành SPOF — nó lỗi exec là
+# toàn fleet câm phía Discord mà không ai biết (đã xảy ra THẬT: logs/notify_thread_errors.log
+# 2026-08-02T23:14:57 "discord_channel.sh: Permission denied" ⇒ mất 1 tin momentum_deals).
+# Nhánh TÊN vẫn qua registry như cũ — chỉ chỗ đó mới cần phân giải.
+if [[ "$thread_id" =~ ^[0-9]{17,20}$ ]]; then
+  resolved="$thread_id"
+elif ! resolved="$("$ROOT/bin/discord_channel.sh" "$thread_id" 2>&1)"; then
   mkdir -p "$ROOT/logs"
   printf '%s notify_thread: KHONG phan giai duoc topic %q — TIN NHAN KHONG GUI. %s\n' \
     "$(date -Iseconds)" "$thread_id" "$resolved" >> "$ROOT/logs/notify_thread_errors.log"

@@ -40,6 +40,16 @@ fi
 
 # Persist the active Discord thread so _bg_wrapper can post to it even after this session ends.
 # DISCORD_THREAD_ID is injected by the CCDB bot when it launches Mike's session.
+#
+# ⚠️ GHI CHÉT — KHÔNG CÒN AI ĐỌC (2026-08-02, saga discord-routing vòng 4). Mọi tầng tiêu thụ
+# con trỏ này đã bị gỡ: `_ambient_thread` tầng 3 trong dispatch.sh (vòng 4), watchdog.sh (F1,
+# vòng 3), notify_thread.sh (R1, vòng 2). Lý do: "topic Mike mở phiên gần nhất" KHÔNG có quan
+# hệ nhân quả nào với job đang chạy, nên mọi lần rơi về nó là một cú ĐOÁN — và nó chỉ kích
+# hoạt khi $DISCORD_THREAD_ID rỗng, tức đúng ngữ cảnh CRON, nơi cú đoán sai gần như chắc chắn.
+# `bin/dispatch_discord_topic_selfcheck.sh` CA 10 khoá bất biến này: 0 nơi đọc, 1 nơi ghi (là
+# đúng dòng dưới đây). CỐ Ý GIỮ LẠI dòng ghi thay vì xoá: rẻ, không side-effect, và còn hữu ích
+# để chẩn đoán thủ công ("phiên interactive gần nhất ở topic nào"). Muốn dùng lại nó cho định
+# tuyến ⇒ ĐỪNG — hãy truyền `--thread <tên>` tường minh.
 if [ "$id" = "Mike" ] && [ -n "$INTERACTIVE_TID" ]; then
   mkdir -p "$ROOT/agents/Mike/state"
   printf '%s' "$INTERACTIVE_TID" > "$ROOT/agents/Mike/state/ccdb_thread_id"
