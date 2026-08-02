@@ -47,9 +47,17 @@ Họ config = **V2.3A (argv `v23a none postbull 0 edge`) + custom30V parking (ET
 - Capacity: nhỏ NAV cao hơn (R1 @20B 31.69 > R2 @50B 29.24), decay theo vốn.
 
 ### 🔁 RE-PIN 2026-06-25 — threads=1 DETERMINISTIC (thay số threads=4 1-sample ở trên)
-> ⭐ **SỐ R3 CHÍNH THỨC HIỆN HÀNH (từ 2026-07-29, RE-PIN sau restate DT5G): CAGR 27,60% / Sharpe 1,84 /
-> MaxDD −17,5% / Calmar 1,58** (Final NAV 1.041,95B, universe = MIXED `universe_pit` + `ticker_prune`).
-> Mọi trích dẫn MỚI dùng số này. Xem section **"2026-07-29 — ⭐ RE-PIN R3 SAU RESTATE DT5G"** cuối file.
+> ⭐ **SỐ R3 CHÍNH THỨC HIỆN HÀNH (từ 2026-08-02, RE-PIN sau khi GỠ LOOK-AHEAD cơ sở giá rổ parking):
+> CAGR 27,24% / Sharpe 1,81 / MaxDD −18,4% / Calmar 1,48** (Final NAV 1.006,33B, universe = MIXED
+> `universe_pit` + `ticker_prune`). Mọi trích dẫn MỚI dùng số này. Xem section
+> **"2026-08-02 — ⭐ RE-PIN R3 SAU KHI TÁCH VAI CƠ SỞ GIÁ (Price vs Close) TRONG custom30V"** cuối file.
+>
+> ~~⭐ **SỐ R3 (từ 2026-07-29, RE-PIN sau restate DT5G): CAGR 27,60% / Sharpe 1,84 / MaxDD −17,5% /
+> Calmar 1,58** (Final NAV 1.041,95B).~~ → **SUPERSEDED 2026-08-02.** Lý do: số đó được đo bằng code
+> có **look-ahead THẬT** trong rổ parking custom30V (`Close` đã điều chỉnh hồi tố dùng làm cơ sở
+> CHỌN-RỔ và TRỌNG SỐ cross-sectional). A/B contemporaneous 1 biến: **27,60% → 27,24% (−0,36pp)**,
+> chân đối chứng tái lập 27,60% TUYỆT ĐỐI. Giữ làm lịch sử; **27,60% là số bị THỔI PHỒNG bởi lỗi**,
+> không dùng cho việc mới. quant-skeptic CONFIRMED (high).
 >
 > ~~⭐ **SỐ R3 CHÍNH THỨC (từ 2026-07-22, CUTOVER `universe_pit`): CAGR 27,16% / Sharpe 1,81 /
 > MaxDD −18,1% / Calmar 1,50.**~~ → **SUPERSEDED 2026-07-29.** Lý do: KHÔNG phải đổi mô hình —
@@ -4823,3 +4831,75 @@ phải một nhánh phụ.
 `mike/agents/Taylor/research/pe_priceadj_refutation_ab_20260802.md`.
 **N_trials = 1** (một A/B đã khai báo trước, không sweep). Không tính DSR/PBO vì **không có đề xuất
 wire nào** — khuyến nghị là GIỮ NGUYÊN production.
+
+---
+
+## 2026-08-02 — ⭐ RE-PIN R3 SAU KHI TÁCH VAI CƠ SỞ GIÁ (Price vs Close) TRONG custom30V — job `Taylor_20260802_141725` + `Taylor_20260802_150945`
+
+**SỐ CHÍNH THỨC MỚI: CAGR 27,24% / Sharpe 1,81 / MaxDD −18,4% / Calmar 1,48 / Final NAV 1.006,33B.**
+Thay cho 27,60% / 1,84 / −17,5% / 1,58 (pin 07-29). **KHÔNG phải đổi mô hình, KHÔNG phải đổi vintage
+dữ liệu** — lần này là **SỬA LOOK-AHEAD THẬT trong code**: số cũ cao hơn vì lỗi.
+
+### Lỗi được sửa (2 commit, 2 tầng)
+
+| Commit | File | Lỗi | Đường LIVE? |
+|---|---|---|---|
+| `ebeacad` | `custom_basket.py` | `Close` (điều chỉnh hồi tố) ghép với đại lượng PIT thô (`Volume_3M_P50`, `OShares`) ở 2 vai **cross-sectional** (chọn rổ + trọng số), trong khi chính file đó đã dùng đúng `COALESCE(Price,Close)` cho ADV — tự mâu thuẫn | backtest |
+| `be6b976` | `custom30_history.py` | **Publisher** của `tav2_bq.custom30v_8l` dùng `mcap` (= chân LỢI SUẤT) làm **TRỌNG SỐ công bố** | **CÓ — chạy mỗi phiên** |
+| `2c098c1` | — | self-check 2 chiều + knob `BASKET_PRICE_BASIS` (`split` = production, `legacy` = rollback 1 chữ) | — |
+
+Cơ chế: hệ số `Close/Price` phụ thuộc sự kiện quyền **SAU** ngày t và khác nhau theo mã (median
+0,219 năm 2007 → 1,000 năm 2026) ⇒ **sắp lại thứ tự cross-section bằng thông tin tương lai**.
+Bằng chứng: `Trading_Value == Volume * Price` tái lập **100,0%** số dòng mọi năm 2010-2026 (n~850k);
+`Volume * Close` chỉ 1,1-69,8%.
+
+### A/B NAV (bước 4) — `data/basis_ab_20260802/run_leg.sh`
+
+Đúng **1 biến** (`BASKET_PRICE_BASIS`), snapshot đóng cứng `data/bq_cache_asof20260729_postrestate`
+(= đúng vintage số pin 07-29), `BQ_CACHE_THREADS=1`, `$DNA_PYEXE`, lệnh pin R3 nguyên văn.
+
+| | CAGR | Sharpe | MaxDD | Calmar | Final NAV | self-check |
+|---|---|---|---|---|---|---|
+| **legA `legacy`** (tiền-sửa, đối chứng) | **27,60%** | **1,84** | **−17,5%** | **1,58** | **1.041,95B** | 0 VND (BAL+LAG) |
+| **legB `split`** (bản sửa = production) | **27,24%** | 1,81 | −18,4% | 1,48 | 1.006,33B | 0 VND (BAL+LAG) |
+| **Δ (fix − cũ)** | **−0,36pp** | −0,03 | −0,9pp | −0,10 | −35,6B | |
+
+**legA khớp số pin 07-29 TUYỆT ĐỐI cả 5 chỉ tiêu** ⇒ A/B hợp lệ, engine tất định, −0,36pp là chênh
+lệch thật do bản sửa. IS 2014-19: 23,45% → **23,81%** (+0,36). OOS 2020-26: 31,51% → **30,46%** (−1,05).
+
+**Δ per-year KHÔNG quy kết được** (đã kiểm dose-response): năm Δ âm lớn nhất (2025, −6pp) lại là năm
+mức lỗi ~0 (`Close≈Price`) ⇒ về cơ chế **không thể** do cơ sở giá; `corr(dose,Δ)=+0,347` (n=13, không
+ý nghĩa). Đây là **single-path carry** — đúng hiện tượng bản re-pin 07-29 đã ghi. Headline −0,36pp
+hợp lệ (A/B contemporaneous 1 biến); **phân rã theo năm thì không**. Dose-response ở tầng CƠ CHẾ thì
+sạch: **4,60 mã/rebal đổi ở cửa sổ cũ vs 1,50 gần đây**.
+
+### DSR (bước 6)
+`N_trials = 1` — khôi phục tính đúng đắn, **không** dò tham số. DSR = 1,000000 cả 2 chân; ép stress
+N=199 (toàn họ tìm kiếm V2.4) vẫn ≥ 0,9995. Câu hỏi data-mining **moot**: bản sửa làm số **XẤU ĐI**,
+tức ngược hướng data-mining. Không báo PBO (1 bản sửa, không phải chọn giữa nhiều biến thể).
+
+### Tác động LIVE (bước 5)
+Rổ 30 mã tại rebal hiện hành 2026-05-05: **THÀNH VIÊN KHÔNG ĐỔI (0/30)** ⇒ **không phát sinh mã
+mua/bán**. Chỉ lệch trọng số: **Σ|Δw| = 1,6526pp**, lớn nhất **ACB +0,478pp**, 18/30 mã có
+`Close/Price ≠ 1,00`, 4 mã ghim trần 10% (CTG/BID/VCB/VHM) không đổi. Chân tiền-sửa tái lập **bảng
+`custom30v_8l` đang publish** tới 5 chữ số thập phân (ACB 0,038783 vs 0,03878) ⇒ chẩn đoán neo vào
+artifact THẬT. Rebal kế tiếp **2026-08-05** dựng lại toàn bộ trên cơ sở đã sửa.
+
+### Gate
+quant-skeptic **CONFIRMED (high)** — `mike/logs/verify_20260802_151136.log`. Reviewer **tự chạy lại**
+cả 2 self-check, `extract_peryear.py` trên CSV thô (khớp tới từng chữ số), và 1 truy vấn BQ độc lập.
+
+### Giới hạn PHẢI đọc kèm
+1. **−0,36pp là CẬN DƯỚI về độ phủ.** `pt_v23_audit_2014.py:124` (`_c30v_asof`) đọc **THÀNH VIÊN** từ
+   bảng đã publish cho nhánh **CAPIT**; trong A/B bảng đó vẫn là thành viên dựng bằng cơ sở CŨ. Đo
+   đầy đủ cần republish rồi chạy lại (chưa làm — sẽ ghi đè bảng production). Đây cũng chính là
+   *killer objection* quant-skeptic nêu.
+2. Lỗi fidelity `liq<=0` **VẪN MỞ** ⇒ khoảng kỳ vọng trung thực vẫn đọc kèm, **anchor DD ~−30%**
+   (bootstrap 5th-pct), **không phải −18,4%**.
+3. **KHÔNG đụng** `lag_liquidity_filter.py:100` — `Volume_3M_P50*Close` ở đó là 1 trong **5 điểm**
+   giữ bất biến parity live==sim có chủ đích; sửa 1/5 sẽ phá bất biến trong im lặng. Job riêng.
+4. Cùng họ lỗi, **chưa sửa vì là script audit/nghiên cứu** (không production):
+   `basket_concentration.py:28`, `basket_scheme_concentration.py:23`,
+   `custom30_core_select_audit.py:101`, `v4final_lib.py:103`.
+
+Báo cáo đầy đủ: `mike/agents/Taylor/research/basket_price_basis_ab_20260802.md`.
