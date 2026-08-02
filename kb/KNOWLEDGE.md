@@ -188,6 +188,13 @@ Mọi agent khác (Taylor, DollarBill, Mafee, Wags, ...) headless/native on-dema
 
 **8L Rating system:**
 - 1/PE dominant factor (IC +0.125, hit 94%). Rating = binary gate ≤3, KHÔNG phải return tilt.
+  - ⚠️ **+0.125 ĐÚNG, đừng hạ.** Đề xuất đọc lại thành +0.096/+0.034 (job `Taylor_20260802_042110`,
+    lập luận "PE lưu theo Close đã điều chỉnh, phải nhân `Price/Close`") **ĐÃ BỊ BÁC BỎ** bởi job
+    `Taylor_20260802_054825`: `PE/PB/PCF` trong `tav2_bq.ticker` đã ở cơ sở `Price` **thô**,
+    point-in-time đúng (`PE/Price` hằng số trong kỳ 93,1% vs `PE/Close` 11,0%, 1,42M dòng
+    2014-2021). Nhân `Price/Close` là **đưa look-ahead VÀO** — áp vào selector custom30V làm R3
+    **xấu −1,70pp CAGR** (27,60→25,90, A/B cùng vintage, self-check 0 VND). Chi tiết:
+    `kb/data_registry/fundamentals/valuation_pe_pb_pcf_ps.md` "Bẫy (4)".
 - Composite v3 LIVE: value = ey(1/PE) + cfy(1/PCF) + ps(1/PS). Golden floor: ROE_Min3Y≥0 VÀ CF_OA_3Y>0. **Value dominates ALL regimes** kể cả BULL (IC 1/PE +0.156 trong BULL, momentum chỉ +0.002).
 - **VALUE_VERSION=v3_da PROMOTED thành default (2026-07-04, job `Taylor_20260704_111020`):** wired D&A_HEAVY route classification vào `rating_8l.py` — sửa gap EV/EBITDA cho nhóm D&A nặng (đã audit route/tên qua job `_100727` trước khi wire).
 - **Composite v3 as entry-selector**: bị loại hẳn (xem §1 "đã thử bị loại").
