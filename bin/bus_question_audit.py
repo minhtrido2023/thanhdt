@@ -13,6 +13,19 @@ Output: mỗi dòng PENDING = 1 câu hỏi, cũ nhất trước, KHÔNG cắt b�
 AGED_SHOWN=5 của check #5 — báo cáo tuần cần thấy hết, không phải digest hàng ngày).
 Exit code: số lượng PENDING (0 = sạch, không dùng exit>0 làm "lỗi" theo nghĩa thường —
 đây là audit, không phải health-gate).
+
+Thêm 2026-08-01 (saga "coord-" round-5/6, arch-reviewer killer_objection): PROVENANCE của
+closure — bao nhiêu câu hỏi đóng gần đây có `decided_by=user` (quyết định NGƯỜI thật, real-
+time) so với không có field đó (agent/Mike tự đóng bằng judgment call, dù có lý do chính đáng
+vẫn KHÔNG phải xác nhận trực tiếp của user). Sự cố thật: 1 phiên Mike đóng 13-15 câu hỏi cũ
+07-31 (đa số hợp lý, nhưng KHÔNG đánh dấu decided_by) đúng lúc Wags's coord- saga round-5 đang
+tự-verify bằng cách đếm pool — pool tụt về 0 bị round-5 hiểu nhầm là "fix của mình có tác dụng"
+thay vì "1 đợt dọn dẹp không liên quan trùng giờ". Không có field này thì KHÔNG CÁCH NÀO phân
+biệt được 2 nguyên nhân đó chỉ bằng cách đếm số lượng. Quy ước (coding_guidelines.md §20): mọi
+answer/decision đóng 1 câu hỏi money/decision-adjacent NÊN kèm `"decided_by": "user"` trong
+payload khi thật sự có xác nhận real-time của user; thiếu field này được hiểu là "đóng bằng
+judgment call" (agent hoặc Mike tự quyết, có lý do nhưng không phải user xác nhận trực tiếp) —
+không sai, chỉ cần được ĐẾM RIÊNG để không lẫn vào "đã qua kiểm chứng người dùng thật".
 """
 import argparse
 import datetime as dt
@@ -49,13 +62,26 @@ def agent_of(path):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--json", action="store_true", help="output JSON thay vì text")
+    ap.add_argument("--provenance-days", type=int, default=14,
+                     help="cửa sổ ngày để đếm provenance closure gần đây (mặc định 14)")
     a = ap.parse_args()
 
     now = dt.datetime.now(dt.timezone.utc)
     files = sorted(glob.glob(os.path.join(INBOX_DIR, "*.jsonl"))) + \
         sorted(glob.glob(os.path.join(INBOX_DIR, "archive", "*.jsonl.gz")))
 
+    # Pass 1: mọi topic TỪNG là 1 question thật (để lọc closure noise — phần lớn answer/decision
+    # trong fleet là báo cáo thường lệ, KHÔNG đóng 1 question nào cả; provenance chỉ nên tính
+    # closure THẬT SỰ đóng 1 backlog item, không phải mọi answer/decision trong 14 ngày).
+    all_question_topics = set()
+    for p in files:
+        for rec in iter_events(p):
+            if rec.get("event_type") == "question" and rec.get("topic"):
+                all_question_topics.add(rec.get("topic"))
+
     resolvers = []
+    prov_cutoff = now - dt.timedelta(days=a.provenance_days)
+    recent_closures = []   # (ts, agent_of_file, topic, decided_by_or_None)
     for p in files:
         for rec in iter_events(p):
             if rec.get("event_type") in ("answer", "decision"):
@@ -67,6 +93,13 @@ def main():
                 except Exception:
                     continue
                 resolvers.append((t, r_ts))
+                # chỉ đếm provenance nếu topic này THẬT SỰ đóng 1 question đã biết (exact hoặc
+                # chứa nguyên topic câu hỏi gốc, cùng quy ước hậu-tố trạng thái đã dùng ở resolved())
+                closes_real_question = any(t == qt or qt in t for qt in all_question_topics)
+                if r_ts >= prov_cutoff and closes_real_question:
+                    payload = rec.get("payload")
+                    decided_by = payload.get("decided_by") if isinstance(payload, dict) else None
+                    recent_closures.append((r_ts, agent_of(p), t, decided_by))
 
     def resolved(q_topic, q_ts):
         if not q_topic:
@@ -96,12 +129,27 @@ def main():
 
     pending.sort(key=lambda x: -x["age_days"])
 
+    n_user = sum(1 for _, _, _, db in recent_closures if db == "user")
+    n_agent = len(recent_closures) - n_user
+
     if a.json:
-        print(json.dumps({"count": len(pending), "pending": pending}, ensure_ascii=False, indent=2))
+        print(json.dumps({
+            "count": len(pending), "pending": pending,
+            "provenance": {"window_days": a.provenance_days, "decided_by_user": n_user,
+                            "decided_by_agent_or_unmarked": n_agent,
+                            "agent_or_unmarked_topics": [t for _, _, t, db in recent_closures if db != "user"]},
+        }, ensure_ascii=False, indent=2))
     else:
         print(f"PENDING questions (hot+archive): {len(pending)}")
         for q in pending:
             print(f"  {q['age_days']:>4}d  {q['agent']}/{q['topic']}  ({q['ts']})")
+        print(f"\nCLOSURE PROVENANCE (last {a.provenance_days}d, {len(recent_closures)} closure(s)): "
+              f"{n_user} decided_by=user, {n_agent} agent/Mike judgment call (không đánh dấu"
+              f" decided_by=user) — mục sau CẦN spot-review định kỳ, không phải lỗi tự nó,"
+              f" chỉ là chưa được người xác nhận trực tiếp:")
+        for ts, agent, topic, db in sorted(recent_closures, reverse=True):
+            if db != "user":
+                print(f"    {ts.strftime('%Y-%m-%d')}  {agent}/{topic}")
 
     return len(pending)
 

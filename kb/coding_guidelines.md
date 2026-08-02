@@ -608,3 +608,41 @@ independently re-verifying that claim (this is now baked into `arch-reviewer`'s 
 the fleet's architecture-review changelog — see `~/.claude/agents/arch-reviewer.md`). When
 dispatching an agent for a coding/fix task, point at this skill explicitly rather than
 re-deriving the checklist by hand each time.
+
+## 20. Mark `decided_by: "user"` When a Real User Confirmed a Closure — Not Just "Seemed Reasonable"
+
+**Root cause (2026-08-01, saga "coord-" round 5, `wags-fix-not-confirmed: coord-2026-08-01`):**
+Wags's self-fix loop for `ops_health_check.sh` check #5 reasoned "the aged-question pool has a
+measured 0% natural drain rate" as the PROBLEM it was fixing, then separately observed "the pool
+went to 0" as EVIDENCE its fix worked — arch-reviewer caught the contradiction: the pool didn't
+drain on its own, a Mike session closed ~15 stale bus questions in an unrelated cleanup pass that
+happened to overlap in time. The fix's own self-verification couldn't tell "coincidental
+external cleanup" from "the fix's mechanism actually working," because nothing on a closure event
+records WHO made the call and how. This generalizes a risk arch-reviewer had already flagged
+narrowly (round 2: don't let a CRON auto-expire a real pending decision) — the same danger exists
+when a HUMAN OR AN AGENT SESSION closes a question with its own judgment, however well-reasoned,
+without the user explicitly confirming it in the moment. A downstream counting/verification
+mechanism has no way to distinguish the two just by observing "the pool shrank."
+
+**Rule:** when writing an `answer`/`decision` event that closes a bus `question` — especially one
+that's money/decision-adjacent (a real escalation, not routine status) — include `"decided_by":
+"user"` in the payload **only when the user actually confirmed this closure in real time** (e.g.
+"anh chốt GIỮ full" said directly, or an explicit yes/no to a presented option). When Mike or an
+agent closes a question on its own judgment — even a well-evidenced one (checked commits, checked
+logs, genuinely stale) — **omit the field** (or use `"decided_by": "agent"` for clarity). This
+isn't a quality judgment on the closure itself (an agent's well-evidenced stale-superseded call
+can be entirely correct) — it's a **provenance record**, so anything counting/reporting backlog
+state later can separate "confirmed by a real person" from "judged, not confirmed" without having
+to re-read every closure's prose by hand.
+
+**Enforced by:** `bin/bus_question_audit.py`'s closure-provenance report (added same day) — prints
+a breakdown of recent closures by `decided_by` for the last N days (`--provenance-days`, default
+14), always shown (not gated), feeding the weekly review. This is a REPORT, not a gate — it does
+not block anything or auto-classify; a high count of unmarked agent closures is a prompt for
+periodic human spot-review, not evidence of wrongdoing by itself.
+
+**Not evaluated/shipped:** enforcing this at the `append_event.sh` layer (a hard requirement for
+every answer/decision to declare provenance) — would touch every caller fleet-wide for a field
+that's only meaningful on CLOSURES of tracked questions, most answer/decision events aren't that.
+Left as a documented convention + report, same tier as several other process rules in this file
+(§7, §10, §11, §13) that are judgment calls without a clean mechanical gate.
