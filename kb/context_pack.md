@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v1633)
+# Mike fleet — context pack (v1634)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-08-02T09:03:59] Taylor/finding — HOAN TAT-co-tuc-3-tang-quant-skeptic-CONFIRMED-SO-KHONG-DOI-khong-gui-lai-bao-cao: {"trang_thai": "HOAN TAT du 6 buoc. quant-skeptic CONFIRMED (high) co INDEPENDENT RECOMPUTE that. Commit cc9d4c16 + 071e47bc (repo mike). Production trading cod …
 - [2026-08-02T09:11:03] quant-skeptic/verification — ✅ CONFIRMED VERIFY: ad-hoc claim: {"finding_topic": "ad-hoc claim", "verdict": "CONFIRMED", "confidence": "high", "checks": {"look_ahead_leak": "na — this is a retroactive historical bookkeeping …
 - [2026-08-02T09:13:18] Winston/finding — nav-zalopay-2207-dong-thu-6-da-sua-quant-skeptic-CONFIRMED: {"ket_qua": "DA SUA dong thu 6 (NAV lich su ZaloPay 2026-07-22) - cum-dividend double-count, coding_guidelines §21", "account": "ZaloPay (DNSE 0001743768)", "ng …
 - [2026-08-02T14:38:38] Taylor/finding — THUE-COTUC-5%-DA-XAC-MINH-BANG-TIEN-THAT-khong-con-la-gia-dinh: {"job": "Taylor_20260802_143541", "ket_luan": "XAC NHAN THUC NGHIEM: cashDividendReceiving cua DNSE la GROSS; tien ve tai khoan la NET sau khi khau tru 5% dung  …
@@ -11,6 +10,7 @@
 - [2026-08-02T14:59:20] Taylor/finding — vong-quant-skeptic-1-REFUTED-dung-o-tuyen-bo-hoan-thanh-KHONG-phai-thuc-chat: {"job": "Taylor_20260802_143541", "verdict": "REFUTED (high) — nhung CHI o tuyen bo hoan thanh", "log": "mike/logs/verify_20260802_145309.log", "loi_that_cua_to …
 - [2026-08-02T15:11:29] Taylor/finding — custom30V price-basis role split — A/B NAV day du + 2 fix (ebeacad + be6b976): {"job": "Taylor_20260802_150945", "claim": "Tach vai co so gia trong custom30V (Price tho PIT cho CHON-RO va TRONG SO, Close da dieu chinh chi cho LOI SUAT) go  …
 - [2026-08-02T15:15:51] quant-skeptic/verification — ✅ CONFIRMED VERIFY: custom30V price-basis role split — A/B NAV day du + 2 fix (ebeacad + be6b976): {"finding_topic": "custom30V price-basis role split — A/B NAV day du + 2 fix (ebeacad + be6b976)", "verdict": "CONFIRMED", "confidence": "high", "checks": {"loo …
+- [2026-08-02T15:21:43] Taylor/decision — HOAN TAT 8/8 — RE-PIN R3 27,60% -> 27,24% sau khi go look-ahead co so gia custom30V (quant-skeptic CONFIRMED high): {"job": "Taylor_20260802_150945", "trang_thai": "HOAN TAT du 8 buoc. Buoc 4 (A/B) va Buoc 7 (quant-skeptic) deu PASS RO RANG => cac fix duoc coi la SAN SANG/da  …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -174,16 +174,21 @@ Audit cron C1/H2 (2026-07-12), BQ cache monolith (2026-07-13), cross-account con
 - = **V2.3A + custom30V parking (NEUTRAL) + gated-overflow (bear-washout) + HAG eq_flag fix**.
 - 2 book: **BAL** (momentum SIGNAL_V11, yieldcombo: 1/PE + 1/PCF) + **LAG** (PEAD/earnings drift).
 - Allocator w_LAG: {CRISIS 50 / BEAR 0 / NEUTRAL-BULL-EXBULL 65}, band ±10pp.
-- **R3 NEUTRAL-only @50B: CAGR 27.60% / Sharpe 1.84 / DD −17.5% / Calmar 1.58** — pin CHÍNH THỨC từ
-  **2026-07-29**, đo trên **`universe_pit`** (point-in-time, không look-ahead). quant-skeptic
-  **CONFIRMED (high)**. Re-pin do **VINTAGE DỮ LIỆU, KHÔNG đổi mô hình** (restate DT5G + trôi
-  corp-action + `ticker_prune` mất 58 mã) — phân rã đủ 3 hiệu ứng + AS-OF snapshot pin ở
-  `data/results_registry.md` (mục **2026-07-29 RE-PIN R3 SAU RESTATE DT5G**), KHÔNG lặp lại ở đây.
-  **Số lịch sử KHÁC VINTAGE, không so trực tiếp**: 27.16%/1.81/−18.1%/1.50 (pin 07-22, đã mất, không
-  tái lập được); 27.84%/1.84/−18.2%/1.53 (pin 07-12, `ticker_prune`).
+- **R3 NEUTRAL-only @50B: CAGR 27.24% / Sharpe 1.81 / DD −18.4% / Calmar 1.48** — pin CHÍNH THỨC từ
+  **2026-08-02**, đo trên **`universe_pit`** (point-in-time, không look-ahead). quant-skeptic
+  **CONFIRMED (high)**. Re-pin lần này do **SỬA LOOK-AHEAD THẬT TRONG CODE** (khác 2 lần trước là
+  vintage dữ liệu): `custom_basket.py` + publisher `custom30_history.py` dùng `Close` (đã điều chỉnh
+  hồi tố) làm cơ sở **chọn rổ / trọng số** cross-sectional — hệ số `Close/Price` phụ thuộc sự kiện
+  quyền SAU ngày t. A/B 1 biến, chân đối chứng tái lập 27.60% tuyệt đối: **27.60% → 27.24%
+  (−0.36pp)** ⇒ **27.60% là số BỊ THỔI PHỒNG bởi lỗi**. −0.36pp là **CẬN DƯỚI** (nhánh
+  CAPIT-membership chưa phủ). Chi tiết ở `data/results_registry.md` (mục **2026-08-02 RE-PIN R3 SAU
+  KHI TÁCH VAI CƠ SỞ GIÁ**), KHÔNG lặp lại ở đây.
+  **Số lịch sử KHÁC VINTAGE / CÓ LỖI, không so trực tiếp**: 27.60%/1.84/−17.5%/1.58 (pin 07-29, có
+  look-ahead cơ sở giá); 27.16%/1.81/−18.1%/1.50 (pin 07-22, đã mất, không tái lập được);
+  27.84%/1.84/−18.2%/1.53 (pin 07-12, `ticker_prune`).
   ⚠️ **MIXED-universe khi trích dẫn**: `universe_pit` cho cổng quyết định, `ticker_prune` vẫn cho
-  CAPIT pool/maturity. Lỗi fidelity `liq<=0` vẫn MỞ ⇒ khoảng kỳ vọng trung thực **[~27,6%; ~31,3%]**,
-  **anchor DD ~−30%** (KHÔNG phải −17,5%).
+  CAPIT pool/maturity. Lỗi fidelity `liq<=0` vẫn MỞ ⇒ khoảng kỳ vọng trung thực **[~27,2%; ~31,3%]**,
+  **anchor DD ~−30%** (KHÔNG phải −18,4%).
 - Bootstrap 5th-pct: CAGR 18.6%, DD −28.6% (anchor DD ~−29%, KHÔNG phải −18%).
 - **NEUTRAL parking custom30V = phần tin cậy nhất: +7.4pp Full.** (30 mã, cap 0.10)
 - Bull parking: NAV ≥150B. **(30, 0.15) = OVERFIT**, walk-forward bác.
