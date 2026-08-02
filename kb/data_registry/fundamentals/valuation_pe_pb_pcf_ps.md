@@ -3,7 +3,7 @@ kind: bigquery-column
 status: CANONICAL
 source: PE / PB / PCF / PS (cột trong ticker + ticker_financial)
 group: fundamentals
-note: công thức đã verify bằng tính tay (job Winston_20260717_063633); cơ sở giá = Price THÔ, re-verify quy mô universe job Taylor_20260802_054825 — xem Bẫy (4)
+note: công thức đã verify bằng tính tay (job Winston_20260717_063633); cơ sở giá = Price THÔ cho MỌI cột (PE/PB/PCF/EVEB/DY/PS/PEG), xác nhận 2007-2026 job Taylor_20260802_083624 — xem Bẫy (4)(6)(7)
 writer: Ingest ETL, cùng cadence ticker_financial
 ---
 
@@ -56,8 +56,8 @@ cross-sectional lịch sử bằng thông tin tương lai.
 - `rating_8l.py` (dòng ~521–524, `_pe_adj_factor`) **đang làm đúng phép nhân sai này**, kèm comment
   sai "PE_stored = Close_adj/EPS". Tác động LIVE ≈ 0 (hôm nay `Price≈Close` ⇒ hệ số ≈1) và bảng
   lịch sử `fa_ratings_8l` là snapshot **ghi nối tiếp từng ngày** (mỗi dòng viết lúc hệ số ≈1) nên
-  chưa nhiễm; nhưng **bất kỳ lần rebuild lịch sử nào từ `tav2_bq.ticker` sẽ nhiễm**. Đây là lỗi
-  MỞ, chưa sửa (sửa `rating_8l.py` = chạm production, cần user duyệt + quant-skeptic).
+  chưa nhiễm; nhưng **bất kỳ lần rebuild lịch sử nào từ `tav2_bq.ticker` sẽ nhiễm**. ✅ **ĐÃ SỬA
+  2026-08-02** (gỡ `_pe_adj_factor`, commit `beec96c`, quant-skeptic CONFIRMED high) — lỗi đã ĐÓNG.
 - `custom_basket.py::_yield_piv` đọc thẳng `AVG(1/PE)` **KHÔNG nhân hệ số — ĐÚNG**, đừng "sửa".
 - Job `Taylor_20260802_042110` (`value_regime_crosssectional_20260802.md` §5) kết luận ngược lại
   (nói `PE` có look-ahead) — **§5 của file đó ĐÃ BỊ BÁC BỎ**; các số "đã sửa" +0,096 / +0,034 là số
@@ -65,5 +65,47 @@ cross-sectional lịch sử bằng thông tin tương lai.
 
 **(5) `ps` tự tính trong `rating_8l.py` dùng `Close × OShares / Revenue_ttm`** — `Close` là chuỗi ĐÃ
 điều chỉnh còn `OShares` là số cổ phiếu **của kỳ báo cáo hiện hành** ⇒ market-cap hàm ý sai ở dữ liệu
-lịch sử (cùng họ vấn đề với (4), chiều ngược lại). Live không ảnh hưởng. Chưa đo tác động — ghi ra
-đây để lần sau không phải phát hiện lại.
+lịch sử (cùng họ vấn đề với (4), chiều ngược lại). Live không ảnh hưởng. ✅ **ĐÃ SỬA 2026-08-02**
+(sang cơ sở `Price`, commit `6ea466f`, quant-skeptic CONFIRMED high): trước khi sửa, trung vị
+`sales_yield` lệch 47,5-56,7%, Spearman 0,889-0,909, 10-15/30 tên rẻ-nhất-theo-PS bị đổi.
+
+**(6) ✅ RÀ SOÁT MỞ RỘNG 2026-08-02 (job `Taylor_20260802_083624`) — TẤT CẢ cột định giá lưu sẵn đều
+trên cơ sở `Price` thô, xác nhận liên tục 2007→2026.** Đóng lỗ hổng "chưa kiểm trước 2014" mà
+quant-skeptic nêu. Báo cáo đầy đủ + bằng chứng:
+`mike/agents/Taylor/research/pe_pb_basis_broad_audit_20260802.md` (SQL thô: `WorkingClaude/exp_basis_audit/`).
+- **PE = `Price`/EPS_ttm tái lập 100,0% MỖI NĂM 2007-2026** (n≈2,9tr dòng; cơ sở `Close` 1,1-67%).
+- **PB = `Price`/BVPS** (trong-kỳ 96,7% pre-2014 / 95,0% sau, vs `Close` 5,7%/19,2%).
+- **PCF** trong-kỳ 84,8%/88,8% vs `Close` 18,2%/24,0% (phủ dày chỉ từ 2013).
+- **EVEB = (`Price`×OShares + NetDebt)/`EBITDA_P0`** — phép thử ĐỘ DỐC (EVEB affine theo giá nên
+  tỉ-số-hằng-số KHÔNG áp dụng): `dEVEB/dPrice` khớp `OShares/EBITDA_P0` ở **95,6%/95,4%** kỳ, sai số
+  tương đối trung vị **0,00000**; `Close` chỉ 4,8%/19,0%.
+- **DY = `Dividend_1Y` / `Price`, là PHÂN SỐ không phải %** — tái lập **100,0% mỗi năm 2008-2026**
+  (VNM 2012-05-02: DY×Price = 4.000 VND tròn; DY×Close = 578,6 vô nghĩa).
+- **PS = `Price`×OShares/Rev_ttm 100,0% mỗi năm 2007-2026** · **PEG = PE/(g×100) 100,0% mỗi năm** ⇒
+  PEG kế thừa cơ sở của PE, tự động đúng.
+- **`Dividend_Min3Y` là VND danh nghĩa THÔ** ⇒ `rating_8l` `div_yield = Dividend_Min3Y/Price` ĐÚNG.
+- Sức phân giải phép thử đã đo trước khi tin: `Close/Price` đổi trong kỳ ở 94,2% kỳ (2007-2013) /
+  80,8% (2014-2026); trung vị `Close/Price` 0,219 (2007) → 1,000 (2026) ⇒ **pre-2014 là vùng phân
+  giải MẠNH NHẤT**, không phải vùng mù. **Trước 2007 KHÔNG kiểm định được** (PE/PB/PCF/EVEB toàn NULL).
+- Ghi nhận riêng (KHÔNG phải lỗi cơ sở giá): **`PB` tái lập chỉ 59-69% ở 2015-2017 ở CẢ 2 bảng** —
+  lệch **vintage `BVPS`**, đáng mở ticket riêng.
+
+**(7) ⚠️ CƠ SỞ ĐÚNG CHO THANH KHOẢN/VỐN HOÁ TỰ TÍNH = `Price`, KHÔNG PHẢI `Close` — lỗi cùng họ CÒN MỞ
+trong CODE (chưa sửa, phát hiện 2026-08-02).** `Trading_Value = Volume × Price` khớp **100,0% mỗi năm
+2010-2026** (`Volume × Close` chỉ 1-70%) ⇒ `Volume` là số cổ phiếu THÔ, và `OShares` cũng là PIT thô.
+Vì vậy `Volume_3M_P50 * Close` và `Close * OShares` là **biểu thức TRỘN CƠ SỞ**, mang look-ahead
+(hệ số `Close/Price` phụ thuộc cổ tức/thưởng xảy ra SAU ngày t, khác nhau giữa các mã).
+- **`custom_basket.py` (PRODUCTION, custom30V)**: chọn rổ `AVG(Volume_3M_P50*Close)` (dòng 163/249) và
+  trọng số `mcap = Close*OShares` (183/1077/716). Đo được: **8,46/30 tên rổ đổi (2008-2013), 5,04/30
+  (2014-2026)**; lệch trọng số TB 1,62pp / max 8,59pp, Spearman 0,762 (pre-2014).
+  ⚠️ **KHÔNG "sửa" bằng cách thay `Close`→`Price` toàn file** — chuỗi *lợi suất*
+  `mcap_t/mcap_{t-1}` BẮT BUỘC giữ `Close` (nếu không, ngày chốt quyền thành LỖ giả). Bản sửa đúng =
+  tách vai: trọng số/sàng lọc dùng `Price`, lợi suất giữ `Close`. **Cần kế hoạch riêng + A/B backtest +
+  quant-skeptic** (đổi số R3 đã pin). Cùng dòng 175 của chính file này đã dùng `COALESCE(Price,Close)*Volume`
+  cho ADV — file tự mâu thuẫn.
+- `lag_liquidity_filter.py:100` (wired production) + `score_live_signals.py:157/411`: cùng lỗi nhưng
+  **live impact = 0** (đọc as-of hôm nay, `Price==Close`) — sửa vệ sinh, không khẩn.
+- ~22 script nghiên cứu (`test_fa_*` với `smoothed_EY = NP_ttm/OShares/Close`, `sim_*`, `test_round*`,
+  `lag_dnpr_harness.py`, `converge_fullharness_test.py`) kế thừa lỗi ⇒ **kết luận IC lịch sử của chúng
+  chưa tin cậy**, đặc biệt `test_fa_ic_2007_2013_crisis.py` / `test_fa_ic_regime_2008_2026.py`.
+- `value_radar.py` (`Price*OShares`) và `dcf_valuation.py` (`Price`) **ĐÚNG — đừng "sửa"**.
