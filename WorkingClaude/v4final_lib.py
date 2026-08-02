@@ -100,7 +100,15 @@ def daily_fin_weights(bx, mem, name_cap=0.10, fin_cap=None):
     daily weight vector. fin_cap=None reproduces plain `namecap`; a float reproduces `fincap`."""
     bx = bx.copy()
     bx["time"] = pd.to_datetime(bx["time"])
+    # PRICE BASIS (custom_basket.py module header, fix 2026-08-02): `mcap` = adjusted Close x OShares
+    # is the RETURN leg; the cross-sectional WEIGHT base must be `mcapw` = raw COALESCE(Price,Close)
+    # x OShares, or a corporate action AFTER date t silently reorders the weights this function
+    # claims to re-derive. `mcap` is kept only for the validity mask, exactly as build_pit does.
+    if "mcapw" not in bx.columns:
+        raise ValueError("bx lacks 'mcapw' (WEIGHT leg) — rebuild it with custom_basket.build_pit")
     mcap = bx.pivot_table(index="time", columns="ticker", values="mcap").sort_index()
+    mcapw = (bx.pivot_table(index="time", columns="ticker", values="mcapw")
+               .reindex(index=mcap.index, columns=mcap.columns))
     m = mem.copy()
     m["rebal_date"] = pd.to_datetime(m["rebal_date"])
     m["quarter"] = pd.to_datetime(m["quarter"])
@@ -123,9 +131,12 @@ def daily_fin_weights(bx, mem, name_cap=0.10, fin_cap=None):
         qm = np.array([q for t, q in mem_a if t in mcap.columns])
         today = mcap.loc[d, tks].values.astype(float)
         yest = mcap.loc[prev, tks].values.astype(float)
+        yestw = mcapw.loc[prev, tks].values.astype(float)
         valid = ~np.isnan(today) & ~np.isnan(yest)
         if valid.sum() > 0:
-            base = yest[valid] * qm[valid]
+            # fail-safe back to the adjusted basis only on a genuine data hole (COALESCE(Price,Close)
+            # is non-NULL wherever Close is) — same guard as build_pit's daily loop.
+            base = np.where(np.isnan(yestw[valid]), yest[valid], yestw[valid]) * qm[valid]
             W = base / base.sum() if base.sum() > 0 else base
             fv = np.array([route_asof(t, src_q[aq]) in FIN_ROUTES
                            for t, ok in zip(tks, valid) if ok])

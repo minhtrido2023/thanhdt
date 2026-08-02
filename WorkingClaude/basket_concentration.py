@@ -17,15 +17,27 @@ tickers = sorted(m[m["ymd"] == last]["ticker"].unique())
 print(f"rổ rebal {last.date()} — {len(tickers)} mã\n")
 inlist = ",".join(f"'{t}'" for t in tickers)
 
+# PRICE BASIS (fix 2026-08-02, job Taylor_20260802_154231; see custom_basket.py's PRICE BASIS
+# header + mike/kb/data_registry/price-volume/ticker_close_vs_price_dividend_adj.md): market cap is
+# a CROSS-SECTIONAL weight, so it must be built from the RAW PIT price COALESCE(Price,Close), never
+# from the retroactively-adjusted `Close`. `OShares` is a raw share count, so pairing it with an
+# adjusted price mixes two reference frames.
+#   Measured impact on the CURRENT basket: exactly ZERO — all 30 members are actively-traded names
+#   whose latest bar is the latest session, where Close == Price to the cent. The fix matters when a
+#   member STOPS trading (suspension/delisting — the DGC/PNJ situation this desk actually hits): its
+#   last bar then goes stale while `Close` keeps being restated by later corporate actions, so the
+#   ratio drifts off 1.0 and that name's weight in this report silently deforms. Measured on the
+#   whole table at the same vintage: 19 of 1261 names already have Close/Price != 1 at their last
+#   bar, up to a 3.06x gap (TRT). Correct by construction rather than correct by coincidence.
 q = f"""
-WITH px AS (SELECT t.ticker AS ticker, t.Close AS Close, t.ICB_Code AS ICB_Code,
+WITH px AS (SELECT t.ticker AS ticker, COALESCE(t.Price,t.Close) AS pxw, t.ICB_Code AS ICB_Code,
        ROW_NUMBER() OVER (PARTITION BY t.ticker ORDER BY t.time DESC) rn
      FROM tav2_bq.ticker AS t WHERE t.ticker IN ({inlist}) AND t.Close IS NOT NULL),
 sh AS (SELECT f.ticker AS ticker, f.OShares AS OShares,
        ROW_NUMBER() OVER (PARTITION BY f.ticker ORDER BY f.time DESC) rn
      FROM tav2_bq.ticker_financial AS f WHERE f.ticker IN ({inlist}) AND f.OShares IS NOT NULL)
-SELECT p.ticker AS ticker, p.Close AS Close, p.ICB_Code AS ICB_Code, s.OShares AS OShares,
-       p.Close*s.OShares AS mcap
+SELECT p.ticker AS ticker, p.pxw AS pxw, p.ICB_Code AS ICB_Code, s.OShares AS OShares,
+       p.pxw*s.OShares AS mcap
 FROM px AS p JOIN sh AS s ON p.ticker=s.ticker WHERE p.rn=1 AND s.rn=1"""
 d = bq(q)
 d["mcap"] = d["mcap"].astype(float)

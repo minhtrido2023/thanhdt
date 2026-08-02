@@ -34,7 +34,13 @@ def cap_names(w, cap):
     return w
 
 print("[1] pull selection inputs (liquidity / ratings / cfo by quarter)...")
-qliq = bq("""SELECT t.ticker, DATE_TRUNC(t.time, QUARTER) AS q, AVG(t.Volume_3M_P50*t.Close) AS liq, COUNT(*) nd
+# PRICE BASIS (fix 2026-08-02, job Taylor_20260802_154231) — SELECTION leg. Liquidity in VND is a
+# raw traded quantity x a raw traded price: `Volume_3M_P50` is a raw PIT share count, so it must be
+# paired with the raw PIT price COALESCE(Price,Close), not the retroactively-adjusted `Close`. With
+# `Close` a corporate action AFTER quarter q silently re-scales q's liquidity and reorders the
+# top-30/top-60 cross-section this backtest selects on. (This occurrence is NOT the one named in the
+# dispatch — found by reading the file; same bug family, one leg earlier than the mcap weight below.)
+qliq = bq("""SELECT t.ticker, DATE_TRUNC(t.time, QUARTER) AS q, AVG(t.Volume_3M_P50*COALESCE(t.Price,t.Close)) AS liq, COUNT(*) nd
 FROM tav2_bq.ticker t WHERE t.ticker IN (SELECT DISTINCT t2.ticker FROM tav2_bq.ticker_prune t2)
   AND t.ICB_Code IS NOT NULL AND t.time BETWEEN DATE '2013-06-01' AND DATE '2026-06-16'
 GROUP BY t.ticker,q HAVING nd>=20""")
@@ -93,12 +99,20 @@ print(f"    rebals={len(rebal_dates)} union_tickers={len(union)}")
 
 print("[2] pull prices (Open/Close/OShares) for union...")
 inl = ",".join(f"'{t}'" for t in union)
-px = bq(f"""SELECT t.ticker,t.time,t.Open,t.Close,t.OShares FROM tav2_bq.ticker t
+px = bq(f"""SELECT t.ticker,t.time,t.Open,t.Close,COALESCE(t.Price,t.Close) AS pxw,t.OShares FROM tav2_bq.ticker t
 WHERE t.ticker IN ({inl}) AND t.time BETWEEN DATE '2014-07-01' AND DATE '2026-06-16' AND t.Open IS NOT NULL ORDER BY t.ticker,t.time""")
 px["time"] = pd.to_datetime(px["time"])
 opn = {t:dict(zip(g.time,g.Open.astype(float))) for t,g in px.groupby("ticker")}
 cls = {t:dict(zip(g.time,g.Close.astype(float))) for t,g in px.groupby("ticker")}
-mcap = {t:dict(zip(g.time,(g.Close*g.OShares).astype(float))) for t,g in px.groupby("ticker")}
+# PRICE BASIS (fix 2026-08-02, job Taylor_20260802_154231) — SPLIT BY ROLE, exactly as
+# custom_basket.py's header prescribes:
+#   `cls` (adjusted Close) stays the RETURN leg  -> correct, ex-div safe, must NOT change.
+#   `mcap` is the cap-weight base in weights() below = a CROSS-SECTIONAL weight at the exec date,
+#   so it moves to the raw PIT price. Built from `Close` it let a corporate action AFTER the exec
+#   date reorder that date's weights (`OShares` is a raw count; pairing it with an adjusted price
+#   mixes reference frames). Unlike the two concentration scripts this one is HISTORICAL, so the
+#   impact is real rather than nil: 48 quarterly rebals over 2014-2026, all pre-dating today.
+mcap = {t:dict(zip(g.time,(g.pxw*g.OShares).astype(float))) for t,g in px.groupby("ticker")}
 dates = sorted(px.time.unique())
 
 # exec date per rebal = first trading date >= rebal_date

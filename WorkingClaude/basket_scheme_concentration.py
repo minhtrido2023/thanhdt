@@ -13,14 +13,20 @@ df = pd.read_csv(max(cands, key=os.path.getmtime), low_memory=False)
 m = df[df["record_type"] == "CUSTOM_MEMBERS"].copy(); m["ymd"] = pd.to_datetime(m["ymd"])
 tickers = sorted(m[m["ymd"] == m["ymd"].max()]["ticker"].unique())
 inlist = ",".join(f"'{t}'" for t in tickers)
+# PRICE BASIS (fix 2026-08-02, job Taylor_20260802_154231) — identical reasoning to
+# basket_concentration.py: `mcap` here is the cap-weight BASE every scheme below de-concentrates,
+# i.e. a cross-sectional weight, so it must use the raw PIT COALESCE(Price,Close), not the
+# retroactively-adjusted `Close`. Zero measured change on the current basket (Close == Price for
+# all 30 actively-traded members); it protects the report when a member stops trading and its last
+# bar goes stale. See custom_basket.py's PRICE BASIS header.
 q = f"""
-WITH px AS (SELECT t.ticker AS ticker, t.Close AS Close, t.ICB_Code AS ICB_Code,
+WITH px AS (SELECT t.ticker AS ticker, COALESCE(t.Price,t.Close) AS pxw, t.ICB_Code AS ICB_Code,
        ROW_NUMBER() OVER (PARTITION BY t.ticker ORDER BY t.time DESC) rn
      FROM tav2_bq.ticker AS t WHERE t.ticker IN ({inlist}) AND t.Close IS NOT NULL),
 sh AS (SELECT f.ticker AS ticker, f.OShares AS OShares,
        ROW_NUMBER() OVER (PARTITION BY f.ticker ORDER BY f.time DESC) rn
      FROM tav2_bq.ticker_financial AS f WHERE f.ticker IN ({inlist}) AND f.OShares IS NOT NULL)
-SELECT p.ticker AS ticker, p.ICB_Code AS ICB_Code, p.Close*s.OShares AS mcap
+SELECT p.ticker AS ticker, p.ICB_Code AS ICB_Code, p.pxw*s.OShares AS mcap
 FROM px AS p JOIN sh AS s ON p.ticker=s.ticker WHERE p.rn=1 AND s.rn=1"""
 d = bq(q)
 d["mcap"] = d["mcap"].astype(float)
