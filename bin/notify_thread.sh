@@ -24,30 +24,28 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 msg="${1:?usage: notify_thread.sh \"<message>\" [thread_id]}"
 thread_id="${2:-}"
 
-# Default target, in order: the CALLER's own session/job topic ($DISCORD_THREAD_ID, injected
-# per-session by the bridge and inherited by dispatched agents), then the global
-# state/ccdb_thread_id pointer. The global is "the last topic Mike started a session in" —
-# using it while a caller has its own topic in env posted the message into whatever topic the
-# user happened to be reading (fixed 2026-07-22, same cross-topic leak family as dispatch.sh).
+# Chỉ CÒN 1 tầng mặc định: $DISCORD_THREAD_ID = topic RIÊNG của chính caller — bridge bơm vào
+# mỗi phiên tương tác, dispatch.sh export ID ĐÃ GHIM cho tiến trình agent con. Đó là ngữ cảnh
+# tường minh của người gọi, KHÔNG phải phỏng đoán.
 if [ -z "$thread_id" ]; then
   thread_id="${DISCORD_THREAD_ID:-}"
 fi
+# TẦNG con-trỏ-toàn-cục (agents/Mike/state/ccdb_thread_id) ĐÃ BỊ BỎ 2026-08-02 (arch-reviewer
+# S1 — cùng lớp rủi ro R1 vừa gỡ khỏi dispatch.sh). Con trỏ đó = "topic Mike vào gần nhất",
+# bị hooks/session_start.sh ghi đè mỗi lần Mike start/resume ở BẤT KỲ topic nào; khi 2 tầng
+# trên rỗng, tin nhắn KHÔNG fail mà rơi vào topic user tình cờ đang đọc — đúng cơ chế rò rỉ
+# chéo topic của cả 4 sự cố 2026-07. Nguyên tắc thống nhất toàn fleet: KHÔNG ĐOÁN topic — không
+# ai truyền gì thì im lặng phía Discord (thoát lỗi, caller đều bọc `|| true`) + ghi 1 dòng vào
+# logs/notify_thread_errors.log để call site quên truyền topic hiện ra ngay thay vì biểu hiện
+# thành "message lẫn topic" không truy được. Đã grep toàn repo 2026-08-02: 0 call site đi vào
+# nhánh này (mọi caller truyền tên/ID tường minh).
 if [ -z "$thread_id" ]; then
-  # TẦNG CUỐI = con trỏ TOÀN CỤC "topic Mike vào gần nhất", bị hooks/session_start.sh ghi đè
-  # mỗi lần Mike start/resume ở BẤT KỲ topic nào. Đây CHÍNH LÀ cơ chế rò rỉ của cả 4 sự cố
-  # 2026-07: khi 2 tầng trên rỗng, tin nhắn KHÔNG fail — nó rơi vào topic user tình cờ đang
-  # đọc. Tính đến 2026-08-02 KHÔNG còn call site nào trong bin/ đi vào nhánh này (mọi caller
-  # đều truyền tên/ID tường minh, đã kiểm bằng grep toàn repo), nên giữ lại chỉ để phiên tương
-  # tác của Mike không mất thông báo. Ghi log MỖI LẦN dùng để nhánh này không bao giờ âm thầm
-  # sống lại: một call site mới quên truyền topic sẽ hiện ra trong logs/notify_thread_errors.log
-  # thay vì biểu hiện thành "message lẫn topic" mà không ai truy được.
-  state_file="$ROOT/agents/Mike/state/ccdb_thread_id"
-  [ -f "$state_file" ] || { echo "notify_thread: no thread_id and state file missing" >&2; exit 1; }
-  thread_id="$(cat "$state_file")"
   mkdir -p "$ROOT/logs"
-  printf '%s notify_thread: WARN fallback con-tro-toan-cuc (khong ai truyen topic) -> %s | caller=%s | msg=%.80s\n' \
-    "$(date -Iseconds)" "$thread_id" "${0##*/}<-$(ps -o comm= -p "$PPID" 2>/dev/null)" "$msg" \
+  printf '%s notify_thread: KHONG CO topic (khong ai truyen, $DISCORD_THREAD_ID rong) — TIN NHAN KHONG GUI, khong doan topic. caller=%s | msg=%.80s\n' \
+    "$(date -Iseconds)" "${0##*/}<-$(ps -o comm= -p "$PPID" 2>/dev/null)" "$msg" \
     >> "$ROOT/logs/notify_thread_errors.log"
+  echo "notify_thread: no thread_id (arg rỗng + \$DISCORD_THREAD_ID rỗng) — không gửi, không đoán topic" >&2
+  exit 1
 fi
 
 [ -n "$thread_id" ] || { echo "notify_thread: empty thread_id" >&2; exit 1; }

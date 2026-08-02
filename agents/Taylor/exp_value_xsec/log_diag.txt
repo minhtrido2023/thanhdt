@@ -1,0 +1,20 @@
+fwd20 mean 0.937% median 0.000%  fwd60 mean 2.872%
+panel_raw rows 51989  sau gate rating<=3&liq: 15232
+  gate-pool  ey_pct         fwd20: N=143 IC=-0.0136 t=-1.12
+  gate-pool  ey_pct         fwd60: N=141 IC=-0.0371 t=-2.91
+  gate-pool  ey_rank_glob   fwd20: N=143 IC=-0.0080 t=-0.60
+  gate-pool  ey_rank_glob   fwd60: N=141 IC=-0.0335 t=-2.37
+  gate-pool  ey_raw         fwd20: N=143 IC=-0.0080 t=-0.60
+  gate-pool  ey_raw         fwd60: N=141 IC=-0.0335 t=-2.37
+  gate-pool  vs_proxy       fwd20: N=143 IC=-0.0044 t=-0.37
+  gate-pool  vs_proxy       fwd60: N=141 IC=-0.0190 t=-1.50
+  gate-pool  cfy_pct        fwd20: N=143 IC=-0.0043 t=-0.31
+  gate-pool  cfy_pct        fwd60: N=141 IC=-0.0072 t=-0.50
+  gate-pool  dy_pct         fwd20: N=143 IC=+0.0252 t=+2.26
+  gate-pool  dy_pct         fwd60: N=141 IC=+0.0500 t=+4.17
+  gate-pool  eveb_pct       fwd20: N=143 IC=-0.0160 t=-1.27
+  gate-pool  eveb_pct       fwd60: N=141 IC=-0.0360 t=-2.88
+  WIDE(liq only, 26507 dong)  ey_rank fwd20: N=145 IC=-0.0058 t=-0.50
+  WIDE(liq only, 26507 dong)  ey_rank fwd60: N=143 IC=-0.0149 t=-1.18
+  WIDE khong sua gia   ey_rank fwd20: N=145 IC=+0.0391 t=+3.59
+  WIDE khong sua gia   ey_rank fwd60: N=143 IC=+0.0592 t=+5.48

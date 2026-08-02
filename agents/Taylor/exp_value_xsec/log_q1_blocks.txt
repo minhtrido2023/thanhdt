@@ -1,0 +1,54 @@
+
+=== CAU HOI 1 muc EPISODE — ey_pct/fwd20 ===
+TAT CA(thang) N_block=143  IC=-0.0136  t=-1.12  p=0.265  CI90=[-0.034;+0.007]
+  CRISIS+BEAR   N_block= 12  IC=-0.0458  t=-1.80  p=0.099  CI90=[-0.091;-0.000]   [34 thang]
+  NEUTRAL       N_block= 20  IC=+0.0094  t=+0.42  p=0.682  CI90=[-0.030;+0.049]   [85 thang]
+  BULL+EXBULL   N_block= 10  IC=+0.0311  t=+0.92  p=0.384  CI90=[-0.031;+0.093]   [24 thang]
+     CRISIS+BEAR - NEUTRAL: d=-0.055 t=-1.62 p=0.117
+     BULL+EXBULL - NEUTRAL: d=+0.022 t=+0.53 p=0.602
+     CRISIS+BEAR - BULL+EXBULL: d=-0.077 t=-1.81 p=0.087
+
+=== CAU HOI 1 muc EPISODE — ey_pct/fwd60 ===
+TAT CA(thang) N_block=141  IC=-0.0371  t=-2.91  p=0.004  CI90=[-0.058;-0.016]
+  CRISIS+BEAR   N_block= 12  IC=-0.0686  t=-1.25  p=0.239  CI90=[-0.167;+0.030]   [34 thang]
+  NEUTRAL       N_block= 20  IC=-0.0287  t=-1.10  p=0.285  CI90=[-0.074;+0.016]   [83 thang]
+  BULL+EXBULL   N_block= 10  IC=+0.0258  t=+1.12  p=0.290  CI90=[-0.016;+0.068]   [24 thang]
+     CRISIS+BEAR - NEUTRAL: d=-0.040 t=-0.66 p=0.522
+     BULL+EXBULL - NEUTRAL: d=+0.054 t=+1.57 p=0.129
+     CRISIS+BEAR - BULL+EXBULL: d=-0.094 t=-1.58 p=0.135
+
+=== CAU HOI 1 muc EPISODE — vs_proxy/fwd20 ===
+TAT CA(thang) N_block=143  IC=-0.0044  t=-0.37  p=0.714  CI90=[-0.024;+0.016]
+  CRISIS+BEAR   N_block= 12  IC=-0.0119  t=-0.42  p=0.683  CI90=[-0.063;+0.039]   [34 thang]
+  NEUTRAL       N_block= 20  IC=+0.0146  t=+0.70  p=0.494  CI90=[-0.022;+0.051]   [85 thang]
+  BULL+EXBULL   N_block= 10  IC=+0.0190  t=+0.48  p=0.644  CI90=[-0.054;+0.092]   [24 thang]
+     CRISIS+BEAR - NEUTRAL: d=-0.026 t=-0.75 p=0.460
+     BULL+EXBULL - NEUTRAL: d=+0.004 t=+0.10 p=0.923
+     CRISIS+BEAR - BULL+EXBULL: d=-0.031 t=-0.63 p=0.535
+
+=== CAU HOI 1 muc EPISODE — vs_proxy/fwd60 ===
+TAT CA(thang) N_block=141  IC=-0.0190  t=-1.50  p=0.136  CI90=[-0.040;+0.002]
+  CRISIS+BEAR   N_block= 12  IC=-0.0316  t=-0.59  p=0.566  CI90=[-0.127;+0.064]   [34 thang]
+  NEUTRAL       N_block= 20  IC=-0.0114  t=-0.41  p=0.686  CI90=[-0.059;+0.037]   [83 thang]
+  BULL+EXBULL   N_block= 10  IC=+0.0175  t=+0.56  p=0.590  CI90=[-0.040;+0.075]   [24 thang]
+     CRISIS+BEAR - NEUTRAL: d=-0.020 t=-0.34 p=0.741
+     BULL+EXBULL - NEUTRAL: d=+0.029 t=+0.69 p=0.497
+     CRISIS+BEAR - BULL+EXBULL: d=-0.049 t=-0.79 p=0.438
+
+=== CAU HOI 2 — kiem tra nham lan voi HIEU UNG THOI KY ===
+
+ey_pct/fwd20: IC 2014-2019 = -0.0648 (N=65 thang, RONG 2)  |  2020-2026 = +0.0291 (N=78, RONG 45)
+    trong 2014-19: khong du thang o 1 trong 2 tercile (RONG=2, HEP=41) -> KHONG kiem dinh duoc
+    trong 2020-26: RONG(45t)=+0.036 HEP(7t)=-0.063 d=+0.099 t=+2.48 p=0.035
+
+ey_pct/fwd60: IC 2014-2019 = -0.1048 (N=65 thang, RONG 2)  |  2020-2026 = +0.0208 (N=76, RONG 43)
+    trong 2014-19: khong du thang o 1 trong 2 tercile (RONG=2, HEP=41) -> KHONG kiem dinh duoc
+    trong 2020-26: RONG(43t)=+0.038 HEP(7t)=-0.082 d=+0.120 t=+3.90 p=0.002
+
+vs_proxy/fwd20: IC 2014-2019 = -0.0549 (N=65 thang, RONG 2)  |  2020-2026 = +0.0376 (N=78, RONG 45)
+    trong 2014-19: khong du thang o 1 trong 2 tercile (RONG=2, HEP=41) -> KHONG kiem dinh duoc
+    trong 2020-26: RONG(45t)=+0.053 HEP(7t)=-0.056 d=+0.108 t=+2.59 p=0.031
+
+vs_proxy/fwd60: IC 2014-2019 = -0.0923 (N=65 thang, RONG 2)  |  2020-2026 = +0.0436 (N=76, RONG 43)
+    trong 2014-19: khong du thang o 1 trong 2 tercile (RONG=2, HEP=41) -> KHONG kiem dinh duoc
+    trong 2020-26: RONG(43t)=+0.068 HEP(7t)=-0.041 d=+0.109 t=+4.43 p=0.000

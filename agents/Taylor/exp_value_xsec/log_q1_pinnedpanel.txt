@@ -1,0 +1,30 @@
+
+(1) TOAN UNIVERSE, ey KHONG sua gia  [tai lap THREAD (c) da pin]
+  nhom          N quy       IC  t(quy)  N episode    IC_ep   t(ep)            CI90(ep)
+  TAT CA           49   +0.125  +10.88         20   +0.128   +7.32     [+0.098;+0.158]
+  CRISIS+BEAR      13   +0.145   +5.40          6   +0.148   +5.97     [+0.098;+0.197]
+  NEUTRAL          27   +0.114   +7.48         10   +0.112   +3.67     [+0.056;+0.168]
+  BULL+EXBULL       9   +0.130   +6.69          4   +0.139   +5.16     [+0.076;+0.203]
+     [episode] CRISIS+BEAR - NEUTRAL: d=+0.035 t=+0.90 p=0.383
+     [episode] BULL+EXBULL - NEUTRAL: d=+0.027 t=+0.66 p=0.525
+     [episode] CRISIS+BEAR - BULL+EXBULL: d=+0.009 t=+0.23 p=0.823
+
+(2) TOAN UNIVERSE, ey DA sua gia
+  nhom          N quy       IC  t(quy)  N episode    IC_ep   t(ep)            CI90(ep)
+  TAT CA           49   +0.095   +8.25         20   +0.102   +6.53     [+0.075;+0.129]
+  CRISIS+BEAR      13   +0.135   +5.06          6   +0.131   +4.83     [+0.076;+0.186]
+  NEUTRAL          27   +0.071   +5.03         10   +0.076   +3.25     [+0.033;+0.120]
+  BULL+EXBULL       9   +0.113   +5.99          4   +0.122   +4.85     [+0.063;+0.181]
+     [episode] CRISIS+BEAR - NEUTRAL: d=+0.055 t=+1.52 p=0.155
+     [episode] BULL+EXBULL - NEUTRAL: d=+0.046 t=+1.32 p=0.221
+     [episode] CRISIS+BEAR - BULL+EXBULL: d=+0.009 t=+0.25 p=0.811
+
+(3) TRONG CONG production (rating<=3 & liq>=3ty), ey DA sua gia
+  nhom          N quy       IC  t(quy)  N episode    IC_ep   t(ep)            CI90(ep)
+  TAT CA           42   +0.034   +1.37         18   +0.057   +2.24     [+0.013;+0.101]
+  CRISIS+BEAR      10   +0.093   +1.88          4   +0.121   +2.20     [-0.009;+0.250]
+  NEUTRAL          24   -0.013   -0.38          9   +0.002   +0.06     [-0.053;+0.056]
+  BULL+EXBULL       8   +0.098   +2.51          5   +0.104   +2.27     [+0.006;+0.202]
+     [episode] CRISIS+BEAR - NEUTRAL: d=+0.119 t=+1.91 p=0.117
+     [episode] BULL+EXBULL - NEUTRAL: d=+0.103 t=+1.89 p=0.099
+     [episode] CRISIS+BEAR - BULL+EXBULL: d=+0.017 t=+0.23 p=0.823

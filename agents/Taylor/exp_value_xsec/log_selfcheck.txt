@@ -1,0 +1,6 @@
+[1] cong rating<=3 & liq>=3ty: OK (15232 dong, 145 thang, 494 ma)
+[2] IC tong the tinh lai -0.0136 vs fm CSV -0.0136 (lech 0.000000)
+[3] fwd20 khop lai tu panel_raw: sai so max 1.11e-16
+[4] F=Price/Close: 0.37% dong <0.99 (chap nhan <1%: Price tho le/stale o vai ma UPCOM), median 2014 2.31 > 2026 1.00
+[5] state trong panel khop dt5g_live: 0 ngay lech
+SELF-CHECK: PASS

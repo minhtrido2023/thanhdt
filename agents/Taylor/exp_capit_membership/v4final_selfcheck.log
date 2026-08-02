@@ -1,0 +1,68 @@
+============================================================================================
+v4final selector selfcheck — job Taylor_20260714_140127
+window 2022-01-04 → 2026-06-19; PIT {'quality': 'none', 'rebal': 'q2m5', 'gate_rating': 3, 'top_n': 30, 'name_cap': 0.1, 'qtilt': None}
+============================================================================================
+
+[1] OFF byte-identical vs pre-edit module (production yieldcombo + namecap)
+[BQ_LOCAL_CACHE] WARNING: cache verified 93h ago (>36h) — consider re-running sync_bq_cache.py
+[BQ_LOCAL_CACHE] ready — 14 tables from /home/trido/thanhdt/WorkingClaude/data/bq_cache_asof20260729_postrestate
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 11.8s (102462 rows)
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 11.9s (102462 rows)
+  [PASS] yieldcombo/namecap membership identical to pre-edit
+  [PASS] yieldcombo/namecap level series identical to pre-edit — max |Δ| = 0.000e+00
+
+[2] eyonly ignores PCF entirely (all-ticker PCF reversal)
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 11.5s (99115 rows)
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 11.5s (99115 rows)
+  [PASS] eyonly membership frozen under full PCF reversal
+
+[2-neg] control: the SAME corruption must move yieldcombo
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 13.1s (113526 rows)
+  [PASS] yieldcombo membership DOES move under full PCF reversal — 17/18 rebals changed
+
+[3] eyfin ignores PCF for FINANCIAL routes only (financial-only PCF reversal)
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 11.9s (102462 rows)
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 11.9s (102462 rows)
+  [PASS] eyfin: every FINANCIAL's score bit-identical under financial-only PCF reversal — 264 financial picks compared, 0 differ
+      (design note, not a failure: 17/18 rebals still shift — financial PCF sets the pool-wide rank denominator the NON-financial cfy leg is scored on)
+
+[3-neg] control: financial-only corruption must move yieldcombo
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 11.8s (102462 rows)
+  [PASS] yieldcombo membership DOES move under financial-only PCF reversal — 17/18 rebals changed
+
+[4] eyfin score range is route-independent ([0,2] both sides)
+  [PASS] eyfin financial score max == non-financial score max — 2*ey ∈ [0,2] vs ey+cfy ∈ [0,2] — no cross-route scale gap
+
+[5] fincap: financial-route weight <= cap on EVERY day, measured on real weights
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+  [fincap] cap BANK+INSURANCE+SECURITIES total weight at 0.30, then name_cap 0.10 (1283 tickers routed, PIT as-of selection quarter)
+[BQ_LOCAL_CACHE] query took 11.5s (99115 rows)
+  [fincap] cap 0.30 feasible on all 1114 days
+  [PASS] fincap@0.3: Σw == 1 every day — max |Σw−1| = 4.44e-16
+  [PASS] fincap@0.3: financial weight <= effective cap every day — max 0.3000 / mean 0.3000 over 1090 days; 0 days cap infeasible (eff max 0.300)
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+  [fincap] cap BANK+INSURANCE+SECURITIES total weight at 0.50, then name_cap 0.10 (1283 tickers routed, PIT as-of selection quarter)
+[BQ_LOCAL_CACHE] query took 12.4s (99115 rows)
+  [fincap] cap 0.50 feasible on all 1114 days
+  [PASS] fincap@0.5: Σw == 1 every day — max |Σw−1| = 4.44e-16
+  [PASS] fincap@0.5: financial weight <= effective cap every day — max 0.5000 / mean 0.4957 over 1090 days; 0 days cap infeasible (eff max 0.500)
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 12.3s (99115 rows)
+      (uncapped eyonly financial weight: mean 0.672 / max 0.927)
+
+[6] fincap OFF-path unaffected + unknown route -> non-financial
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 12.3s (99115 rows)
+  [PASS] eyonly/namecap unaffected by fincap code
+
+============================================================================================
+PASS 12 / FAIL 0
+ALL GUARDS PASS

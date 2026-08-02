@@ -1,0 +1,13 @@
+khop Price: 99.1% | F median theo nam: {2014: 2.23, 2015: 2.04, 2016: 1.88, 2017: 1.7, 2018: 1.55, 2019: 1.45, 2020: 1.36, 2021: 1.27, 2022: 1.19, 2023: 1.12, 2024: 1.07, 2025: 1.02, 2026: 1.0}
+  ey_uncorr : N=49 quy  IC=+0.1254  t=+10.88  hit=94%
+  ey_corr   : N=49 quy  IC=+0.0955  t=+8.25  hit=88%
+
+--- ap CONG production len chinh panel pin (kiem tra pipeline cua toi co bug khong) ---
+  ey_uncorr | toan universe             : N=49 quy  IC=+0.1254  t=+10.88  hit=94%
+  ey_uncorr | rating<=3                 : N=47 quy  IC=+0.1037  t=+9.38  hit=94%
+  ey_uncorr | rating<=3 & turnover>=3ty : N=42 quy  IC=+0.0878  t=+3.62  hit=67%
+  ey_uncorr | turnover>=3ty             : N=49 quy  IC=+0.0978  t=+4.75  hit=73%
+  ey_corr | toan universe               : N=49 quy  IC=+0.0955  t=+8.25  hit=88%
+  ey_corr | rating<=3                   : N=47 quy  IC=+0.0748  t=+6.39  hit=83%
+  ey_corr | rating<=3 & turnover>=3ty   : N=42 quy  IC=+0.0336  t=+1.37  hit=62%
+  ey_corr | turnover>=3ty               : N=49 quy  IC=+0.0455  t=+2.06  hit=67%

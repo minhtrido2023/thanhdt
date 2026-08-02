@@ -1,0 +1,11 @@
+building 8L custom30 (namecap 10%) 2014-01-02 -> 2026-07-30 ...
+[BQ_LOCAL_CACHE] WARNING: cache verified 93h ago (>36h) — consider re-running sync_bq_cache.py
+[BQ_LOCAL_CACHE] ready — 14 tables from /home/trido/thanhdt/WorkingClaude/data/bq_cache_asof20260729_postrestate
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 70.4s (629668 rows)
+  1440 rows, 48 rebals -> /home/trido/thanhdt/WorkingClaude/data/c30v_regen_legacy.csv
+OK basis=legacy rows=1440 rebals=48 -> c30v_REGEN_legacy.parquet
+
+real	1m26.985s
+user	1m29.355s
+sys	0m0.792s

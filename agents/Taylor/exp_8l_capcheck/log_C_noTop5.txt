@@ -1,0 +1,312 @@
+  ⚠️ DT5G có thể là state HÔM QUA — golive_state_today.json KHÔNG TỒN TẠI — publisher của ta chưa từng chạy
+  [moat-gov] 39 5F tiers; only WIDE earns +1 notch: ['DHG', 'TLG', 'VNM']; registry NARROW/NONE -> no notch
+  [forensic-gov] 11 flagged (8 exclude: ['BFC', 'DIG', 'HHS', 'KLB', 'KSF', 'L40', 'PC1', 'VVS']); excluded from golden-floor + BUY/ACC
+  [forensic rating-cap] 8 capped rating>=4 (fails gate<=3): ['VVS', 'L40', 'PC1', 'KSF', 'BFC', 'HHS', 'DIG', 'KLB']
+rated 854 tickers -> data/rating_8l.csv
+
+distribution by route x rating:
+rating       1   2    3    4    5
+route                            
+BANK         1   3   17    1    3
+COMPOUNDER  47  69  163  246  100
+CYCLICAL     0   8   11    7    4
+INSURANCE    2   6    2    1    0
+POWER        0  26   11    0    0
+REALESTATE   0  15   19   37   10
+SECURITIES   0   6   10   13   16
+
+known names (review):
+ticker      route  rating  core_score      moat   ROIC3Y  ROE_Trailing  ROE_Min3Y  STLTDebt_Eq_P0  cfo_np  FSCORE                      note redflag
+   VNM COMPOUNDER       1          11    STRONG 0.232113      0.304423   0.288182        0.282544    0.76     9.0                                  
+   FPT COMPOUNDER       2           8    STRONG 0.189687      0.260635   0.280985        0.450008    0.73     5.0 moat↑1 REVOKED(5F:NARROW)        
+   MWG COMPOUNDER       3           6 MODERATE+ 0.064931      0.287931   0.007047        0.800234    2.06     7.0                                  
+   HPG   CYCLICAL       3           6      WEAK 0.074293      0.171281   0.068771        0.648273    1.25     7.0                                  
+   QTP      POWER       2          12      WEAK 0.164756      0.204166   0.107419        0.000000    1.23     8.0              MATURE_YIELD        
+   MBB       BANK       2           3    STRONG 0.000000      0.157708   0.206722        0.000000     NaN     3.0      strong asset-quality        
+   ACB       BANK       2           3    STRONG 0.000000      0.163258   0.175577        0.000000   -0.28     1.0      strong asset-quality        
+   VCS COMPOUNDER       3           6    STRONG 0.152322      0.111001   0.135607        0.123434     NaN     3.0 moat↑1 REVOKED(5F:NARROW)        
+   DGC   CYCLICAL       2           7    STRONG 0.194785      0.147178   0.212899        0.115122    0.49     4.0                                  
+   REE COMPOUNDER       3           5 MODERATE+ 0.083944      0.133266   0.110038        0.432579    1.61     4.0                                  
+   PVT COMPOUNDER       3           4  MODERATE 0.100416      0.149622   0.126618        0.607408     NaN     4.0                                  
+   GAS COMPOUNDER       2           8 MODERATE+ 0.184338      0.172206   0.167158        0.046515    0.73     3.0                                  
+   PNJ COMPOUNDER       1          11 MODERATE+ 0.197499      0.271498   0.200821        0.200930    1.05     7.0                                  
+   DHC COMPOUNDER       2           8      WEAK 0.124745      0.236033   0.125877        0.453260    1.01     6.0                                  
+   BMP COMPOUNDER       2           9    STRONG 0.509712      0.426474   0.367766        0.019250    0.44     6.0 moat↑1 REVOKED(5F:NARROW)        
+   NT2      POWER       2           5      WEAK 0.083205      0.271829   0.019224        0.308421    1.12     5.0              MATURE_YIELD        
+   DRI   CYCLICAL       2          10    STRONG 0.196399      0.301102   0.134532        0.154162    0.73     6.0                      cap2        
+   PHR   CYCLICAL       3           6    STRONG 0.057995      0.157495   0.123150        0.001534    1.07     6.0                                  
+   SAB COMPOUNDER       2           8    STRONG 0.169118      0.215362   0.173956        0.017113    0.67     5.0 moat↑1 REVOKED(5F:NARROW)        
+   VHC COMPOUNDER       2           7 MODERATE+ 0.107132      0.152660   0.114417        0.251584    1.01     4.0                                  
+   GVR   CYCLICAL       2           7      WEAK 0.059786      0.123671   0.052516        0.038859    1.60     8.0                                  
+
+=== TOP 30 INVESTABLE (rating<=3, liq>=3.0bn) — ranked by rating x STABILITY-adj quality ===
+   ticker       route  rating  qual_adj       moat  ROE_Trailing        PB  pb_z  drop_pct           val
+0     CTG        BANK       1      12.0     STRONG      0.218274  1.194829 -1.16     -15.0  1_DISLOCATED
+1     PNJ  COMPOUNDER       1      11.0  MODERATE+      0.271498  1.101534 -3.31     -55.8  1_DISLOCATED
+2     VNM  COMPOUNDER       1      11.0     STRONG      0.304423  3.568583 -0.88      -0.8   2_below-avg
+3     ACV  COMPOUNDER       1      11.0  MODERATE+      0.190004  1.893132 -2.27     -15.2  1_DISLOCATED
+4     HAH  COMPOUNDER       1       9.0     STRONG      0.268133  1.397712 -0.50     -18.9   2_below-avg
+5     TLG  COMPOUNDER       1       8.0     STRONG      0.183817  1.824253 -0.77      -6.3   2_below-avg
+6     VIX  SECURITIES       2      11.4     STRONG      0.190153  0.974260 -0.70     -34.5   2_below-avg
+7     QNS    CYCLICAL       2      10.0     STRONG      0.183787  1.629635 -1.26      -4.8  1_DISLOCATED
+8     SIP  REALESTATE       2      10.0       WEAK      0.270780  2.166780 -1.20     -13.8  1_DISLOCATED
+9     ACB        BANK       2       9.8     STRONG      0.163258  1.279942 -0.87      -8.2   2_below-avg
+10    MBB        BANK       2       9.5     STRONG      0.157708  1.262238 -0.27     -11.9        3_fair
+11    TCB        BANK       2       9.2     STRONG      0.153856  1.085448 -0.52     -16.3   2_below-avg
+12    BMP  COMPOUNDER       2       9.0     STRONG      0.426474  4.400225  1.59      -1.7        4_rich
+13    SCS  COMPOUNDER       2       9.0     STRONG      0.460881  2.563670 -1.97     -14.2  1_DISLOCATED
+14    SSI  SECURITIES       2       8.3  MODERATE+      0.138806  1.484838 -1.07     -18.2  1_DISLOCATED
+15    TCX  SECURITIES       2       8.2     STRONG      0.137354  2.484633   NaN     -11.4           n/a
+16    FPT  COMPOUNDER       2       8.0     STRONG      0.260635  2.805933 -1.66     -13.6  1_DISLOCATED
+17    MBS  SECURITIES       2       8.0  MODERATE+           NaN  1.508735 -1.23     -20.7  1_DISLOCATED
+18    GAS  COMPOUNDER       2       8.0  MODERATE+      0.172206  2.344934 -1.09     -28.2  1_DISLOCATED
+19    CTS  SECURITIES       2       8.0  MODERATE+      0.133157  2.075545 -0.09     -25.7        3_fair
+20    SAB  COMPOUNDER       2       8.0     STRONG      0.215362  2.603403 -0.92      -6.6   2_below-avg
+21    VTP  COMPOUNDER       2       8.0       WEAK      0.215563  5.522671 -0.14     -22.7        3_fair
+22    CSV    CYCLICAL       2       8.0     STRONG      0.164909  1.306168 -0.86     -21.5   2_below-avg
+23    DRI    CYCLICAL       2       7.5     STRONG      0.301102  1.172403 -0.61     -16.2   2_below-avg
+24    BVH   INSURANCE       2       7.1       WEAK      0.118591  1.696595  0.14     -17.1        3_fair
+25    GMD  COMPOUNDER       2       7.0     STRONG      0.204093  2.104179  0.08      -4.0        3_fair
+26    IDC  REALESTATE       2       7.0     STRONG      0.295921  1.541178 -1.35     -19.1  1_DISLOCATED
+27    MCH  COMPOUNDER       2       7.0     STRONG      0.392485  9.548910  0.99      -1.3        4_rich
+28    DGC    CYCLICAL       2       7.0     STRONG      0.147178  0.914288 -1.69     -28.0  1_DISLOCATED
+29    VHC  COMPOUNDER       2       7.0  MODERATE+      0.152660  1.122215 -1.41     -15.7  1_DISLOCATED
+
+=== BUY-NOW (rating<=3 + pb_z<=-0.3 + ROE_Min5Y>=0 book-trustworthy + liq>=3.0bn) — 70 names ===
+   ticker       route  rating       moat  stab        PB  pb_z  earn_yield  cfo_yield  cf_peak  drop_pct  ROE_Trailing  ROE_Min5Y  liq_bn           val
+1     PNJ  COMPOUNDER       1  MODERATE+  1.00  1.101534 -3.31      0.2283     0.2403     True     -55.8      0.271498   0.181568  307.84  1_DISLOCATED
+2     ACV  COMPOUNDER       1  MODERATE+  1.00  1.893132 -2.27      0.0796     0.0967     True     -15.2      0.190004   0.014191   15.63  1_DISLOCATED
+3     CTG        BANK       1     STRONG  1.00  1.194829 -1.16      0.1681     0.6511     True     -15.0      0.218274   0.167620  285.24  1_DISLOCATED
+4     VNM  COMPOUNDER       1     STRONG  1.00  3.568583 -0.88      0.0861     0.0658    False      -0.8      0.304423   0.259520  229.29   2_below-avg
+5     TLG  COMPOUNDER       1     STRONG  1.00  1.824253 -0.77      0.0991     0.0440    False      -6.3      0.183817   0.151883    3.26   2_below-avg
+6     HAH  COMPOUNDER       1     STRONG  1.00  1.397712 -0.50      0.1481     0.2623     True     -18.9      0.268133   0.154829   24.39   2_below-avg
+7     NT2       POWER       2       WEAK  0.50  1.122457 -2.29      0.2232     0.2491     True     -13.0      0.271829   0.019224    9.85  1_DISLOCATED
+8     SCS  COMPOUNDER       2     STRONG  1.00  2.563670 -1.97      0.1808     0.1626    False     -14.2      0.460881   0.359236    6.10  1_DISLOCATED
+9     DGC    CYCLICAL       2     STRONG  1.00  0.914288 -1.69      0.1462     0.0712    False     -28.0      0.147178   0.212899   27.47  1_DISLOCATED
+10    FPT  COMPOUNDER       2     STRONG  1.00  2.805933 -1.66      0.0870     0.0635    False     -13.6      0.260635   0.230485  475.97  1_DISLOCATED
+11    HDG  REALESTATE       2  MODERATE+  1.00  0.790164 -1.44      0.1116     0.1558    False     -30.6      0.117044   0.057988   29.60  1_DISLOCATED
+12    VHC  COMPOUNDER       2  MODERATE+  1.00  1.122215 -1.41      0.1312     0.1325    False     -15.7      0.152660   0.114417   11.34  1_DISLOCATED
+13    IDC  REALESTATE       2     STRONG  1.00  1.541178 -1.35      0.1595     0.2585    False     -19.1      0.295921   0.119328   39.36  1_DISLOCATED
+14    QNS    CYCLICAL       2     STRONG  1.00  1.629635 -1.26      0.1116     0.1275    False      -4.8      0.183787   0.176877    5.22  1_DISLOCATED
+15    MBS  SECURITIES       2  MODERATE+  1.00  1.508735 -1.23      0.0684        NaN    False     -20.7           NaN   0.122825  166.68  1_DISLOCATED
+16    SIP  REALESTATE       2       WEAK  1.00  2.166780 -1.20      0.1232     0.2239     True     -13.8      0.270780   0.278724    3.39  1_DISLOCATED
+17    VRE  REALESTATE       2  MODERATE+  1.00  1.142826 -1.13      0.1287        NaN    False     -31.0      0.149845   0.057973  129.99  1_DISLOCATED
+18    GAS  COMPOUNDER       2  MODERATE+  1.00  2.344934 -1.09      0.0701     0.0509    False     -28.2      0.172206   0.167158   68.00  1_DISLOCATED
+19    SSI  SECURITIES       2  MODERATE+  1.00  1.484838 -1.07      0.0771        NaN    False     -18.2      0.138806   0.090924  489.63  1_DISLOCATED
+20    SAB  COMPOUNDER       2     STRONG  1.00  2.603403 -0.92      0.0855     0.0570    False      -6.6      0.215362   0.173956   23.78   2_below-avg
+21    ACB        BANK       2     STRONG  1.00  1.279942 -0.87      0.1233        NaN    False      -8.2      0.163258   0.175577  349.04   2_below-avg
+22    CSV    CYCLICAL       2     STRONG  1.00  1.306168 -0.86      0.1138        NaN    False     -21.5      0.164909   0.136564    8.13   2_below-avg
+23    DPR    CYCLICAL       2  MODERATE+  1.00  0.881660 -0.80      0.1143     0.1128    False     -19.8      0.122793   0.088834    5.80   2_below-avg
+24    DHC  COMPOUNDER       2       WEAK  0.75  1.390330 -0.76      0.1572     0.1582    False      -5.6      0.236033   0.125877    9.13   2_below-avg
+25    VIX  SECURITIES       2     STRONG  1.00  0.974260 -0.70      0.1241        NaN    False     -34.5      0.190153   0.053167  668.76   2_below-avg
+26    DRI    CYCLICAL       2     STRONG  0.75  1.172403 -0.61      0.2398     0.1755    False     -16.2      0.301102   0.106717    4.23   2_below-avg
+27    GVR    CYCLICAL       2       WEAK  0.75  1.644703 -0.55      0.0648     0.1039     True     -31.3      0.123671   0.052516   38.65   2_below-avg
+28    TCB        BANK       2     STRONG  1.00  1.085448 -0.52      0.1321     0.2053    False     -16.3      0.153856   0.147473  361.35   2_below-avg
+29    PAN  COMPOUNDER       2       WEAK  0.75  0.571927 -0.40      0.2342     1.1928     True     -19.1      0.188984   0.054466    5.03   2_below-avg
+30    FOX  COMPOUNDER       2     STRONG  1.00  3.563930 -0.32      0.0779     0.0454    False     -30.4      0.316448   0.291167    5.02   2_below-avg
+31    TCM  COMPOUNDER       3   MODERATE  1.00  0.808281 -2.09      0.1129     0.2380     True     -23.1      0.091609   0.066232   21.68  1_DISLOCATED
+32    CMG  COMPOUNDER       3   MODERATE  1.00  1.384627 -2.08      0.0730     0.1077    False     -16.2      0.131214   0.103049    4.58  1_DISLOCATED
+33    VSC  COMPOUNDER       3       WEAK  1.00  0.763180 -1.87      0.0530     0.2967     True     -39.9           NaN   0.043786   94.85  1_DISLOCATED
+34    REE  COMPOUNDER       3  MODERATE+  1.00  1.128044 -1.70      0.0912     0.1469     True     -15.1      0.133266   0.110038   22.68  1_DISLOCATED
+35    VGC  COMPOUNDER       3     STRONG  1.00  1.445416 -1.68      0.0838     0.2023    False     -11.8      0.163393   0.136853   13.63  1_DISLOCATED
+36    VCI  SECURITIES       3  MODERATE+  1.00  1.432063 -1.62      0.0593        NaN    False     -19.5      0.092058   0.070974  195.94  1_DISLOCATED
+37    SZC  REALESTATE       3  MODERATE+  1.00  1.048091 -1.56      0.0503     0.1681    False     -35.3      0.050266   0.109314    6.72  1_DISLOCATED
+38    IJC  REALESTATE       3  MODERATE+  1.00  0.571418 -1.49      0.1427        NaN    False     -25.4      0.095858   0.078958   15.63  1_DISLOCATED
+39    ANV  COMPOUNDER       3   MODERATE  0.50  1.176963 -1.40      0.1905     0.1358    False     -28.5      0.238711   0.014340    9.91  1_DISLOCATED
+40    CTF  COMPOUNDER       3       WEAK  1.00  1.582510 -1.33      0.0057     0.1467    False      -1.6      0.012312   0.008942    5.59  1_DISLOCATED
+41    TPB        BANK       3     STRONG  1.00  0.789134 -1.24      0.1969     1.5385     True     -16.1      0.166898   0.137186  119.21  1_DISLOCATED
+42    CTR  COMPOUNDER       3       WEAK  1.00  4.104790 -1.21      0.0711     0.0583    False     -14.1      0.301796   0.279187   17.80  1_DISLOCATED
+43    HQC  REALESTATE       3       WEAK  0.50  0.244031 -1.21      0.0528        NaN    False     -27.1      0.012923   0.000986    4.76  1_DISLOCATED
+44    VIB        BANK       3     STRONG  1.00  1.031779 -1.13      0.1504     0.4886     True     -14.5      0.156463   0.164148   97.06  1_DISLOCATED
+45    DGW  COMPOUNDER       3       WEAK  0.75  2.153532 -1.12      0.1032     0.0861    False     -15.0      0.234848   0.142039   23.38  1_DISLOCATED
+46    PVT  COMPOUNDER       3   MODERATE  1.00  0.776591 -1.11      0.1481     0.3522    False     -21.4      0.149622   0.124112   49.55  1_DISLOCATED
+47    TV2  COMPOUNDER       3       WEAK  0.50  1.362418 -1.10      0.0943     1.1276     True     -25.3      0.127633   0.039257    3.72  1_DISLOCATED
+48    DCM    CYCLICAL       3  MODERATE+  0.75  1.413454 -1.07      0.1610        NaN    False     -28.9      0.232482   0.108060   63.95  1_DISLOCATED
+49    BSI  SECURITIES       3  MODERATE+  1.00  1.307849 -1.06      0.0702        NaN    False     -26.2      0.094325   0.036965   17.65  1_DISLOCATED
+50    MSH  COMPOUNDER       3  MODERATE+  1.00  1.437748 -1.00      0.1969     0.0966    False     -14.8      0.295826   0.149614    3.75  1_DISLOCATED
+51    HHV  COMPOUNDER       3       WEAK  1.00  0.444031 -0.98      0.1074     0.3521     True     -17.0      0.058369   0.036450   26.71   2_below-avg
+52    FTS  SECURITIES       3     STRONG  1.00  1.839397 -0.98      0.0516        NaN    False     -24.9      0.094719   0.092939   34.61   2_below-avg
+53    DXG  REALESTATE       3       WEAK  0.75  0.619017 -0.96      0.0169     0.0585    False     -28.8      0.037034   0.016323  106.24   2_below-avg
+54    MWG  COMPOUNDER       3  MODERATE+  0.50  2.837751 -0.88      0.0955     0.1972     True     -17.4      0.287931   0.007047  295.28   2_below-avg
+55    TNG  COMPOUNDER       3       WEAK  0.75  1.148654 -0.87      0.1898     0.0499    False     -14.4      0.219559   0.129455    8.56   2_below-avg
+56    BWE  COMPOUNDER       3     STRONG  1.00  1.704152 -0.84      0.0991     0.1291    False      -4.4      0.175041   0.126022    3.24   2_below-avg
+57    GEG       POWER       3       WEAK  1.00  0.674307 -0.84      0.0877     0.2044    False     -17.7      0.067167   0.026085    3.18   2_below-avg
+58    HPG    CYCLICAL       3       WEAK  0.75  1.294640 -0.80      0.1267     0.1579     True     -13.2      0.171281   0.068771  506.90   2_below-avg
+59    VPB        BANK       3  MODERATE+  0.75  1.029004 -0.77      0.1515     0.1690    False     -12.2      0.171002   0.084495  340.59   2_below-avg
+60    PHR    CYCLICAL       3     STRONG  1.00  1.702422 -0.74      0.0860     0.0922     True     -24.0      0.157495   0.123150   15.36   2_below-avg
+61    NTL  REALESTATE       3  MODERATE+  0.55  1.014023 -0.73      0.0173        NaN    False     -18.5      0.017261   0.010350    3.80   2_below-avg
+62    OCB        BANK       3  MODERATE+  1.00  0.867751 -0.67      0.1433     0.3756    False     -12.5      0.130349   0.104709   25.64   2_below-avg
+63    VND  SECURITIES       3     STRONG  1.00  1.179079 -0.66      0.1068     0.0591    False     -13.1      0.128151   0.094940  295.24   2_below-avg
+64    YEG  COMPOUNDER       3       WEAK  0.80  0.705705 -0.64      0.0399     0.3361    False     -25.8      0.032520   0.012262    4.81   2_below-avg
+65    DDV    CYCLICAL       3       WEAK  0.75  1.212277 -0.58      0.2222     0.0042    False     -29.5      0.265044   0.040184    7.34   2_below-avg
+66    TCH  REALESTATE       3       WEAK  1.00  0.715670 -0.53      0.0287     0.0887    False     -34.7      0.025464   0.018063   54.84   2_below-avg
+67    SHB        BANK       3     STRONG  1.00  0.817689 -0.51      0.1969     0.5649     True     -19.3      0.171421   0.159259  561.34   2_below-avg
+68    BVB        BANK       3       WEAK  0.50  0.995012 -0.50      0.0989     0.3754     True     -14.0      0.102207   0.010431   30.70   2_below-avg
+69    TAL  REALESTATE       3  MODERATE+  1.00  1.704575 -0.47      0.0786     0.0782    False     -33.7      0.143602   0.000000    4.28   2_below-avg
+70    EVF  SECURITIES       3       WEAK  0.75  0.890949 -0.41      0.1044        NaN    False     -15.9      0.096253   0.051172   21.33   2_below-avg
+
+  [EXCLUDED as PB_z-traps — chronic capital-destroyers (ROE_Min3Y<0), distorted book/PB]: NRC(z-0.6,ROEmin3 -13%)
+  ⚠️ DT5G có thể là state HÔM QUA — golive_state_today.json KHÔNG TỒN TẠI — publisher của ta chưa từng chạy
+  [deposit tilt] skipped ('state')
+  [VALUE_VERSION=v3_div] composite on 57 COMPOUNDER/CYCLICAL/RETAIL/D&A_HEAVY/POWER names; 43 others keep v2
+  [golden floor] 12 cash-generative dislocations floored to BUY-NOW: ['ACV', 'GAS', 'FPT', 'CTR', 'DGW', 'CMG', 'TV2', 'REE', 'VSC', 'QNS', 'DGC', 'SZC']
+  [golden floor SKIP] 7 pb_z<=-1 but CFO_3Y<=0 (cash-burn) NOT floored: ['CTF', 'HQC', 'IJC', 'SSI', 'MBS', 'BSI', 'VCI']
+
+  [v3-vs-v2 paper-diff] VALUE_VERSION=v3_div: 23 names changed zone (BUY-NOW v3 42 vs v2 30):
+    DHC   1_BUY-NOW    ->2_ACCUMULATE  [COMPOUNDER] ey% 81 cfy% 72 ps% 58 pb_z-0.8 score 0.95->0.79
+    HHV   1_BUY-NOW    ->2_ACCUMULATE  [D&A_HEAVY ] ey% 65 cfy% 87 ps% 42 pb_z-1.0 score 0.85->0.57 (kept-v2; reshuffle)
+    VGC   2_ACCUMULATE ->1_BUY-NOW     [D&A_HEAVY ] ey% 35 cfy% 92 ps% 51 pb_z-1.7 score 0.69->0.82 (kept-v2; reshuffle)
+    VPB   2_ACCUMULATE ->1_BUY-NOW     [BANK      ] ey% 65 cfy% 14 ps% 53 pb_z-0.8 score 0.81->0.81 (kept-v2; reshuffle)
+    HPG   2_ACCUMULATE ->1_BUY-NOW     [CYCLICAL  ] ey% 64 cfy% 88 ps% 64 pb_z-0.8 score 0.68->0.81
+    TV2   2_ACCUMULATE ->1_BUY-NOW     [COMPOUNDER] ey% 47 cfy% 97 ps% 47 pb_z-1.1 score 0.73->0.77
+    DGW   2_ACCUMULATE ->1_BUY-NOW     [RETAIL    ] ey% 60 cfy%  3 ps% 93 pb_z-1.1 score 0.69->0.77
+    QNS   2_ACCUMULATE ->1_BUY-NOW     [CYCLICAL  ] ey% 36 cfy% 75 ps% 36 pb_z-1.3 score 0.70->0.76
+    SZC   2_ACCUMULATE ->1_BUY-NOW     [REALESTATE] ey% 42 cfy% 60 ps% 42 pb_z-1.6 score 0.73->0.73 (kept-v2; reshuffle)
+    REE   2_ACCUMULATE ->1_BUY-NOW     [D&A_HEAVY ] ey% 44 cfy% 62 ps% 19 pb_z-1.7 score 0.70->0.71 (kept-v2; reshuffle)
+    CTR   2_ACCUMULATE ->1_BUY-NOW     [COMPOUNDER] ey% 21 cfy% 67 ps% 72 pb_z-1.2 score 0.55->0.65
+    FPT   2_ACCUMULATE ->1_BUY-NOW     [COMPOUNDER] ey% 42 cfy% 51 ps% 33 pb_z-1.7 score 0.68->0.62
+    CMG   2_ACCUMULATE ->1_BUY-NOW     [COMPOUNDER] ey% 23 cfy% 59 ps% 70 pb_z-2.1 score 0.56->0.59
+    ACV   2_ACCUMULATE ->1_BUY-NOW     [D&A_HEAVY ] ey% 30 cfy% 44 ps%  9 pb_z-2.3 score 0.58->0.54 (kept-v2; reshuffle)
+    GAS   2_ACCUMULATE ->1_BUY-NOW     [COMPOUNDER] ey% 19 cfy% 36 ps% 49 pb_z-1.1 score 0.53->0.53
+    VNM   2_ACCUMULATE ->3_WATCH-RICH  [RETAIL    ] ey% 40 cfy% 31 ps% 30 pb_z-0.9 score 0.65->0.47
+    SAB   2_ACCUMULATE ->3_WATCH-RICH  [RETAIL    ] ey% 37 cfy% 28 ps% 28 pb_z-0.9 score 0.64->0.46
+    DDV   2_ACCUMULATE ->3_WATCH-RICH  [CYCLICAL  ] ey% 91 cfy% 12 ps%100 pb_z-0.6 score 0.82->0.46
+    POW   2_ACCUMULATE ->3_WATCH-RICH  [POWER     ] ey% 74 cfy% 29 ps% 77 pb_z-0.0 score 0.69->0.39 (kept-v2; reshuffle)
+    VSC   3_WATCH-RICH ->1_BUY-NOW     [D&A_HEAVY ] ey% 16 cfy% 49 ps% 40 pb_z-1.9 score 0.49->0.49 (kept-v2; reshuffle)
+    BMP   3_WATCH-RICH ->2_ACCUMULATE  [COMPOUNDER] ey% 58 cfy% 54 ps% 26 pb_z+1.6 score 0.41->0.57
+    BSR   3_WATCH-RICH ->2_ACCUMULATE  [COMPOUNDER] ey% 79 cfy% 15 ps% 63 pb_z+0.6 score 0.53->0.51
+    CTS   3_WATCH-RICH ->2_ACCUMULATE  [SECURITIES] ey% 46 cfy%  0 ps% 85 pb_z-0.1 score 0.49->0.49 (kept-v2; reshuffle)
+  ✓ assert: no PB<0 / PE<=0 name surfaces as BUY-NOW
+
+  [composite value] 45 names changed zone vs pb_z-only (BUY-NOW 42 vs old 70):
+    PVP   2_ACCUMULATE ->1_BUY-NOW     (pb_z +0.11, ey_pct 88%, vscore 0.90, cfo_confirm True)
+    NAB   2_ACCUMULATE ->1_BUY-NOW     (pb_z -0.22, ey_pct 88%, vscore 0.90, cfo_confirm True)
+    BSI   1_BUY-NOW    ->2_ACCUMULATE  (pb_z -1.06, ey_pct 69%, vscore 0.80, cfo_confirm False)
+    EVF   1_BUY-NOW    ->2_ACCUMULATE  (pb_z -0.41, ey_pct 85%, vscore 0.80, cfo_confirm False)
+    DHC   1_BUY-NOW    ->2_ACCUMULATE  (pb_z -0.76, ey_pct 81%, vscore 0.79, cfo_confirm True)
+    OCB   1_BUY-NOW    ->2_ACCUMULATE  (pb_z -0.67, ey_pct 53%, vscore 0.75, cfo_confirm True)
+    MBS   1_BUY-NOW    ->2_ACCUMULATE  (pb_z -1.23, ey_pct 54%, vscore 0.73, cfo_confirm False)
+    HQC   1_BUY-NOW    ->2_ACCUMULATE  (pb_z -1.21, ey_pct 50%, vscore 0.70, cfo_confirm False)
+    GEG   1_BUY-NOW    ->2_ACCUMULATE  (pb_z -0.84, ey_pct 41%, vscore 0.64, cfo_confirm True)
+    TAL   1_BUY-NOW    ->2_ACCUMULATE  (pb_z -0.47, ey_pct 58%, vscore 0.64, cfo_confirm False)
+    DPR   1_BUY-NOW    ->2_ACCUMULATE  (pb_z -0.80, ey_pct 55%, vscore 0.62, cfo_confirm False)
+    TCB   1_BUY-NOW    ->2_ACCUMULATE  (pb_z -0.52, ey_pct 35%, vscore 0.60, cfo_confirm True)
+    ACB   1_BUY-NOW    ->2_ACCUMULATE  (pb_z -0.87, ey_pct 29%, vscore 0.58, cfo_confirm False)
+    BMP   3_WATCH-RICH ->2_ACCUMULATE  (pb_z +1.59, ey_pct 58%, vscore 0.57, cfo_confirm False)
+    VCI   1_BUY-NOW    ->2_ACCUMULATE  (pb_z -1.62, ey_pct 35%, vscore 0.57, cfo_confirm False)
+    HHV   1_BUY-NOW    ->2_ACCUMULATE  (pb_z -0.98, ey_pct 65%, vscore 0.57, cfo_confirm True)
+    MWG   1_BUY-NOW    ->2_ACCUMULATE  (pb_z -0.88, ey_pct 49%, vscore 0.54, cfo_confirm False)
+    BWE   1_BUY-NOW    ->2_ACCUMULATE  (pb_z -0.84, ey_pct 52%, vscore 0.53, cfo_confirm False)
+    CSV   1_BUY-NOW    ->2_ACCUMULATE  (pb_z -0.86, ey_pct 45%, vscore 0.52, cfo_confirm False)
+    BSR   3_WATCH-RICH ->2_ACCUMULATE  (pb_z +0.62, ey_pct 79%, vscore 0.51, cfo_confirm False)
+    TLG   1_BUY-NOW    ->2_ACCUMULATE  (pb_z -0.77, ey_pct 52%, vscore 0.50, cfo_confirm False)
+    VNM   1_BUY-NOW    ->3_WATCH-RICH  (pb_z -0.88, ey_pct 40%, vscore 0.47, cfo_confirm False)
+    BVB   1_BUY-NOW    ->3_WATCH-RICH  (pb_z -0.50, ey_pct 18%, vscore 0.46, cfo_confirm True)
+    SAB   1_BUY-NOW    ->3_WATCH-RICH  (pb_z -0.92, ey_pct 37%, vscore 0.46, cfo_confirm False)
+    DDV   1_BUY-NOW    ->3_WATCH-RICH  (pb_z -0.58, ey_pct 91%, vscore 0.46, cfo_confirm False)
+    FTS   1_BUY-NOW    ->3_WATCH-RICH  (pb_z -0.98, ey_pct 15%, vscore 0.45, cfo_confirm False)
+    CTF   1_BUY-NOW    ->3_WATCH-RICH  (pb_z -1.33, ey_pct 2%, vscore 0.44, cfo_confirm False)
+    NTL   1_BUY-NOW    ->3_WATCH-RICH  (pb_z -0.73, ey_pct 17%, vscore 0.44, cfo_confirm False)
+    TCH   1_BUY-NOW    ->3_WATCH-RICH  (pb_z -0.53, ey_pct 25%, vscore 0.43, cfo_confirm False)
+    DXG   1_BUY-NOW    ->3_WATCH-RICH  (pb_z -0.96, ey_pct 8%, vscore 0.40, cfo_confirm False)
+    MSB   2_ACCUMULATE ->3_WATCH-RICH  (pb_z +0.28, ey_pct 24%, vscore 0.39, cfo_confirm True)
+    POW   2_ACCUMULATE ->3_WATCH-RICH  (pb_z -0.01, ey_pct 74%, vscore 0.39, cfo_confirm False)
+    VTP   2_ACCUMULATE ->3_WATCH-RICH  (pb_z -0.14, ey_pct 12%, vscore 0.38, cfo_confirm False)
+    BVH   2_ACCUMULATE ->3_WATCH-RICH  (pb_z +0.14, ey_pct 22%, vscore 0.37, cfo_confirm True)
+    FOX   1_BUY-NOW    ->3_WATCH-RICH  (pb_z -0.32, ey_pct 26%, vscore 0.36, cfo_confirm False)
+    GVR   1_BUY-NOW    ->3_WATCH-RICH  (pb_z -0.55, ey_pct 9%, vscore 0.36, cfo_confirm False)
+    PHR   1_BUY-NOW    ->3_WATCH-RICH  (pb_z -0.74, ey_pct 18%, vscore 0.36, cfo_confirm False)
+    YEG   1_BUY-NOW    ->3_WATCH-RICH  (pb_z -0.64, ey_pct 14%, vscore 0.35, cfo_confirm False)
+    TVN   2_ACCUMULATE ->3_WATCH-RICH  (pb_z -0.09, ey_pct 63%, vscore 0.32, cfo_confirm False)
+    DPM   2_ACCUMULATE ->3_WATCH-RICH  (pb_z +0.02, ey_pct 27%, vscore 0.30, cfo_confirm False)
+    GMD   2_ACCUMULATE ->3_WATCH-RICH  (pb_z +0.08, ey_pct 28%, vscore 0.28, cfo_confirm False)
+    NVB   2_ACCUMULATE ->3_WATCH-RICH  (pb_z +0.08, ey_pct 6%, vscore 0.20, cfo_confirm False)
+    HCM   2_ACCUMULATE ->3_WATCH-RICH  (pb_z +0.41, ey_pct 8%, vscore 0.15, cfo_confirm False)
+    HSL   2_ACCUMULATE ->3_WATCH-RICH  (pb_z +0.57, ey_pct 5%, vscore 0.13, cfo_confirm False)
+    HVN   2_ACCUMULATE ->4_TRAP        (pb_z -0.12, ey_pct 70%, vscore 0.67, cfo_confirm False)
+
+=== 2-AXIS SCREENER (DEFAULT) — quality(rating<=3) × COMPOSITE value (relative pb_z + absolute 1/PE + CFO-confirm) × liq>=3.0bn ===
+
+  🟢 BUY-NOW  (rẻ trên trục TỔNG HỢP relative+absolute, book-OK) — 42 mã:
+   ticker       route  rating  moat5f  pb_z  value_yield_pct  cfo_confirm  value_score  cf_peak  drop_pct  liq_bn
+1     DRI    CYCLICAL       2  NARROW -0.61         1.000000        False        1.000    False     -16.2    4.23
+2     IDC  REALESTATE       2  NARROW -1.35         1.000000         True        1.000    False     -19.1   39.36
+3     SHB        BANK       3       — -0.51         0.970588         True        1.000     True     -19.3  561.34
+4     TPB        BANK       3       — -1.24         0.970588         True        1.000     True     -16.1  119.21
+5     MSH  COMPOUNDER       3       — -1.00         0.953488        False        0.985    False     -14.8    3.75
+6     DCM    CYCLICAL       3       — -1.07         0.818182        False        0.978    False     -28.9   63.95
+7     PNJ  COMPOUNDER       1       — -3.31         0.976744        False        0.973     True     -55.8  307.84
+8     PVT  COMPOUNDER       3       — -1.11         0.755814         True        0.966    False     -21.4   49.55
+9     CTG        BANK       1       — -1.16         0.764706         True        0.957     True     -15.0  285.24
+10    TNG  COMPOUNDER       3       — -0.87         0.906977         True        0.952    False     -14.4    8.56
+11    VIX  SECURITIES       2       — -0.70         1.000000        False        0.948    False     -34.5  668.76
+12    IJC  REALESTATE       3       — -1.49         0.916667        False        0.946    False     -25.4   15.63
+13    VRE  REALESTATE       2       — -1.13         0.833333        False        0.922    False     -31.0  129.99
+14    NT2       POWER       2       — -2.29         0.970000         True        0.904     True     -13.0    9.85
+15    SIP  REALESTATE       2       — -1.20         0.750000        False        0.898     True     -13.8    3.39
+16    PVP  COMPOUNDER       3       —  0.11         0.883721         True        0.898    False     -17.9    7.13
+17    NAB        BANK       3       — -0.22         0.882353         True        0.897     True     -10.0   28.99
+18    ANV  COMPOUNDER       3       — -1.40         0.930233         True        0.892    False     -28.5    9.91
+19    VND  SECURITIES       3       — -0.66         0.923077        False        0.891    False     -13.1  295.24
+20    HDG  REALESTATE       2       — -1.44         0.666667         True        0.863    False     -30.6   29.60
+21    VHC  COMPOUNDER       2       — -1.41         0.720930         True        0.857    False     -15.7   11.34
+22    SSI  SECURITIES       2       — -1.07         0.769231        False        0.850    False     -18.2  489.63
+23    SCS  COMPOUNDER       2  NARROW -1.97         0.860465         True        0.844    False     -14.2    6.10
+24    VIB        BANK       3       — -1.13         0.588235         True        0.842     True     -14.5   97.06
+25    PAN  COMPOUNDER       2       — -0.40         1.000000         True        0.839     True     -19.1    5.03
+
+  🟡 ACCUMULATE  (định giá hợp lý) — 25 mã:
+   ticker       route  rating  moat5f  pb_z  value_yield_pct  cfo_confirm  value_score  cf_peak  drop_pct  liq_bn
+43    BSI  SECURITIES       3       — -1.06         0.692308        False        0.800    False     -26.2   17.65
+44    EVF  SECURITIES       3       — -0.41         0.846154        False        0.797    False     -15.9   21.33
+45    MBB        BANK       2       — -0.27         0.705882         True        0.791     True     -11.9  303.83
+46    DHC  COMPOUNDER       2       — -0.76         0.813953         True        0.788    False      -5.6    9.13
+47    OCB        BANK       3       — -0.67         0.529412         True        0.746    False     -12.5   25.64
+48    MBS  SECURITIES       2       — -1.23         0.538462        False        0.730    False     -20.7  166.68
+49    VAB        BANK       3       —  0.07         0.823529        False        0.728    False     -15.5    6.84
+50    HQC  REALESTATE       3       — -1.21         0.500000        False        0.705    False     -27.1    4.76
+51    VEA  COMPOUNDER       3       — -0.21         0.837209        False        0.657    False      -5.0    6.17
+52    GEG       POWER       3       — -0.84         0.410000         True        0.642    False     -17.7    3.18
+53    TAL  REALESTATE       3       — -0.47         0.583333        False        0.636    False     -33.7    4.28
+54    DPR    CYCLICAL       2       — -0.80         0.545455        False        0.623    False     -19.8    5.80
+55    TCB        BANK       2       — -0.52         0.352941         True        0.605    False     -16.3  361.35
+56    ACB        BANK       2       — -0.87         0.294118        False        0.578    False      -8.2  349.04
+57    BMP  COMPOUNDER       2  NARROW  1.59         0.581395        False        0.575    False      -1.7   19.24
+58    VCI  SECURITIES       3       — -1.62         0.346154        False        0.575    False     -19.5  195.94
+59    HHV  COMPOUNDER       3       — -0.98         0.651163         True        0.574     True     -17.0   26.71
+60    PHP  COMPOUNDER       2       —  0.34         0.558140        False        0.547    False     -10.2    3.94
+61    MWG  COMPOUNDER       3       — -0.88         0.488372        False        0.540     True     -17.4  295.28
+62    HDB        BANK       3       —  0.11         0.411765         True        0.533     True     -10.3  294.76
+63    BWE  COMPOUNDER       3  NARROW -0.84         0.523256        False        0.530    False      -4.4    3.24
+64    CSV    CYCLICAL       2  NARROW -0.86         0.454545        False        0.515    False     -21.5    8.13
+65    BSR  COMPOUNDER       3       —  0.62         0.790698        False        0.509    False     -25.3  210.85
+66    TLG  COMPOUNDER       1    WIDE -0.77         0.523256        False        0.500    False      -6.3    3.26
+67    CTS  SECURITIES       2       — -0.09         0.461538        False        0.491    False     -25.7   65.05
+
+  🔴 WATCH-RICH  (chất lượng nhưng ĐẮT cả 2 trục — đừng đuổi) — 31 mã:
+   ticker       route  rating  moat5f  pb_z  value_yield_pct  cfo_confirm  value_score  cf_peak  drop_pct  liq_bn
+68    VNM  COMPOUNDER       1    WIDE -0.88         0.395349        False        0.467    False      -0.8  229.29
+69    BVB        BANK       3       — -0.50         0.176471         True        0.457     True     -14.0   30.70
+70    SAB  COMPOUNDER       2  NARROW -0.92         0.372093        False        0.456    False      -6.6   23.78
+71    DDV    CYCLICAL       3       — -0.58         0.909091        False        0.455    False     -29.5    7.34
+72    ABW  SECURITIES       3       —  0.71         0.615385        False        0.451    False      -4.7    5.83
+73    FTS  SECURITIES       3       — -0.98         0.153846        False        0.446    False     -24.9   34.61
+74    CTF  COMPOUNDER       3       — -1.33         0.023256        False        0.442    False      -1.6    5.59
+75    NTL  REALESTATE       3       — -0.73         0.166667        False        0.441    False     -18.5    3.80
+76    GEE  COMPOUNDER       3       —  0.70         0.325581        False        0.440    False     -51.0   84.30
+77    TCH  REALESTATE       3       — -0.53         0.250000        False        0.430    False     -34.7   54.84
+78    DXG  REALESTATE       3       — -0.96         0.083333        False        0.397    False     -28.8  106.24
+79    MSB        BANK       3       —  0.28         0.235294         True        0.389     True      -3.0   99.87
+80    POW       POWER       3       — -0.01         0.745000        False        0.387    False     -10.2  115.99
+81    ABB        BANK       3       —  1.46         0.470588         True        0.386     True      -7.9   34.76
+82    VTP  COMPOUNDER       2       — -0.14         0.116279        False        0.377     True     -22.7   16.17
+83    BVH   INSURANCE       2       —  0.14         0.220000         True        0.373    False     -17.1   19.21
+84    FOX  COMPOUNDER       2  NARROW -0.32         0.255814        False        0.363    False     -30.4    5.02
+85    GVR    CYCLICAL       2       — -0.55         0.090909        False        0.362     True     -31.3   38.65
+86    PHR    CYCLICAL       3       — -0.74         0.181818        False        0.358     True     -24.0   15.36
+87    YEG  COMPOUNDER       3       — -0.64         0.139535        False        0.354    False     -25.8    4.81
+88    TVN  COMPOUNDER       3       — -0.09         0.627907        False        0.321    False     -29.3    3.63
+89    DPM    CYCLICAL       3       —  0.02         0.272727        False        0.303    False     -17.2   65.42
+90    GMD  COMPOUNDER       2  NARROW  0.08         0.279070        False        0.281     True      -4.0  110.45
+91    NVB        BANK       3       —  0.08         0.058824        False        0.199    False     -26.5    6.23
+92    MCH  COMPOUNDER       2  NARROW  0.99         0.093023        False        0.194    False      -1.3   31.04
