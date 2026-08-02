@@ -5,11 +5,18 @@
 nhiễm** (chứng minh bên dưới). Không mất tiền, không lệnh sai.
 **Job liên quan**: `Taylor_20260802_042110` (suy diễn sai) → `Taylor_20260802_054825` (bác bỏ) →
 `Taylor_20260802_063752` (khôi phục + incident này) → `Taylor_20260802_081308` (**Phần 2**: lens
-`ps`, ngược chiều — §8-§13 cuối file).
+`ps`, ngược chiều) → `Taylor_20260802_141725` + `_150945` (**Phần 3**: rổ parking custom30V, re-pin
+R3) → `Taylor_20260802_154231` + `_161942` (**Phần 4**: đóng nhánh CAPIT-membership).
 
-> **File này có 2 phần.** Phần 1 (§1-§7) = `PE` bị nhân thừa `Price/Close`. Phần 2 (§8-§13) =
-> lens `ps` dùng thiếu, phải đổi `Close`→`Price`. **Hai phép sửa NGƯỢC CHIỀU nhau** — đọc §8 trước
-> khi kết luận "cột nào đúng" ở chỗ khác trong repo.
+> **File này có 4 phần.**
+> - **Phần 1 (§1-§7)** — `PE` bị nhân thừa `Price/Close`. Human-facing, không chạm LIVE.
+> - **Phần 2 (§8-§13)** — lens `ps` dùng thiếu, phải đổi `Close`→`Price`. **NGƯỢC CHIỀU phần 1** —
+>   đọc §8 trước khi kết luận "cột nào đúng" ở chỗ khác trong repo.
+> - **Phần 3 (§14-§19)** — rổ parking custom30V: lần đầu cùng họ lỗi **chạm số pin** ⇒ **re-pin R3
+>   27,60% → 27,24%** (số cũ bị lỗi thổi phồng).
+> - **Phần 4 (§20-§27)** — đóng khoảng mở cuối (nhánh CAPIT-membership): **gap = 0,00pp**, số pin
+>   **không đổi**. Lý do là **bất biến cơ cấu** (R3 không đọc bảng đó), KHÔNG phải "đo ra ~0" —
+>   §21 giải thích vì sao phân biệt này quan trọng.
 
 ## 1. Chuyện gì đã xảy ra
 
@@ -282,15 +289,19 @@ recompute thật (tự chạy lại cả 2 self-check + `extract_peryear.py` + 1
    mức lỗi ~0 ⇒ về cơ chế không thể do cơ sở giá. Đây là **single-path carry**. Headline A/B hợp lệ,
    phân rã theo năm thì không — đừng kể chuyện nhân quả theo năm chỉ vì bảng có sẵn cột năm.
 
-## 18. Còn mở sau phần 3
+## 18. Còn mở sau phần 3 → **cả 2 mục đầu ĐÃ ĐÓNG ở Phần 4, xem §25**
 
-- **Nhánh CAPIT-membership** (`pt_v23_audit_2014.py:124`, `_c30v_asof`) đọc thành viên từ bảng đã
+- ~~**Nhánh CAPIT-membership**~~ (`pt_v23_audit_2014.py:124`, `_c30v_asof`) đọc thành viên từ bảng đã
   publish ⇒ trong A/B vẫn là thành viên cơ sở CŨ ⇒ **−0,36pp là CẬN DƯỚI**. Đo đủ cần republish rồi
   chạy lại. Đây cũng là *killer objection* quant-skeptic nêu.
+  → ✅ **ĐÓNG (Phần 4, §20-§22)**: gap = **0,00pp**, số pin không đổi. Không cần republish — R3
+  (`CAPIT_BEAR_OVERFLOW` mặc định OFF) **không hề đọc** bảng đó. **−0,36pp là số ĐẦY ĐỦ.**
 - `lag_liquidity_filter.py:100` — **cố ý không đụng** (1 trong 5 điểm giữ bất biến parity
-  live==sim). Job riêng.
-- Script audit/nghiên cứu cùng họ lỗi, chưa sửa: `basket_concentration.py:28`,
+  live==sim). Job riêng. → vẫn giữ nguyên chủ đích, không phải nợ kỹ thuật.
+- ~~Script audit/nghiên cứu cùng họ lỗi, chưa sửa~~: `basket_concentration.py:28`,
   `basket_scheme_concentration.py:23`, `custom30_core_select_audit.py:101`, `v4final_lib.py:103`.
+  → ✅ **ĐÓNG**: commit `76ba560` (+ phát hiện thêm 1 lỗi tại `custom30_core_select_audit.py:37`),
+  kèm `basket_price_basis_audit_selfcheck.py`.
 
 ## 19. Tham chiếu (phần 3)
 
@@ -299,3 +310,114 @@ recompute thật (tự chạy lại cả 2 self-check + `extract_peryear.py` + 1
 - `basket_price_basis_selfcheck.py` (4 test), `custom30_publish_weight_selfcheck.py` (5 test)
 - `data/results_registry.md` mục **2026-08-02 — ⭐ RE-PIN R3 SAU KHI TÁCH VAI CƠ SỞ GIÁ**
 - Commit: `ebeacad`, `2c098c1`, `be6b976` (repo WorkingClaude)
+
+---
+
+# PHẦN 4 — ĐÓNG khoảng mở cuối cùng: nhánh CAPIT-membership (job `Taylor_20260802_154231` chạy + `Taylor_20260802_161942` đọc kết quả/viết kết luận)
+
+## 20. Khoảng mở là gì và vì sao phải đóng
+
+§18 để lại **1 khoảng mở chạm số pin**: A/B ở Phần 3 chỉ đổi cơ sở giá trên **đường dựng rổ trực
+tiếp**; nhánh **CAPIT** lại đọc THÀNH VIÊN rổ từ **bảng đã publish** `tav2_bq.custom30v_8l`
+(`pt_v23_audit_2014.py`, hàm `_c30v_asof`), mà bảng đó trong A/B vẫn dựng bằng cơ sở **CŨ**. Nên
+**−0,36pp phải ghi là CẬN DƯỚI** — đúng *killer objection* quant-skeptic nêu. Chừng nào chưa đóng,
+số pin R3 còn kèm một dấu hỏi về độ phủ.
+
+## 21. Kết quả: gap = **0,00pp**, số pin **KHÔNG đổi**
+
+`27,24% / 1,81 / −18,4% / 1,48 / 1.006,33B` giữ nguyên từng chữ số.
+
+⚠️ **Điểm dễ chép sai nhất của phần này — LÝ DO, không phải con số.** 0,00pp **không** có nghĩa "đã
+đo một chênh lệch và nó nhỏ tới mức làm tròn thành 0". Nó là **BẤT BIẾN CƠ CẤU**: cấu hình R3
+production **không hề đọc** bảng đó, nên nội dung bảng (cơ sở cũ hay đã sửa) **không thể** ảnh hưởng
+tới số R3 — dù đầu vào lệch bao nhiêu đi nữa.
+
+Đường đọc `custom30v_8l` **duy nhất** trong toàn engine nằm TRỌN trong nhánh cờ mặc định TẮT:
+```
+105 : CAPIT_BEAR_OVERFLOW = os.environ.get("CAPIT_BEAR_OVERFLOW", "0") == "1"   # mặc định OFF
+1203: if CAPIT_BEAR_OVERFLOW and len(golden) < CAPIT_OVERFLOW_MIN:
+1214:     vmems = _c30v_asof(d)        # <-- lần đọc DUY NHẤT (grep chỉ ra 3 hit: 121/124 định nghĩa, 1214 gọi)
+```
+
+## 22. Vì sao phải có CẢ negative control LẪN positive control
+
+Đây là bài học phương pháp chính của phần 4. Một mình negative control (**đổi bảng → kết quả không
+đổi**) **không chứng minh được gì** — nó không phân biệt nổi 2 khả năng:
+(a) bất biến thật, và (b) **đường ống hỏng / overlay không được đọc**, tức thí nghiệm vô hiệu.
+
+| | Đầu vào `custom30v_8l` | md5 CSV | CAGR |
+|---|---|---|---|
+| **NC** legB (số pin) | bảng gốc trong snapshot | `51a1ec0f` | 27,2438% |
+| **NC** bảng **RỖNG** | **0 dòng** | `51a1ec0f` | 27,2438% |
+| **NC** membership **ĐÃ SỬA** | **1.440 dòng** (cơ sở `split`) | `51a1ec0f` | 27,2438% |
+| **PC** cờ BẬT, bảng **CŨ** | 1.440 dòng (cơ sở `legacy`) | `c6d56907` | 29,0938% |
+| **PC** cờ BẬT, bảng **ĐÃ SỬA** | 1.440 dòng (cơ sở `split`) | `58208ffa` | 29,0749% |
+
+- **NC**: 3 chân **BYTE-IDENTICAL** — trùng cả 3.107 dòng DAILY + 10.750 dòng TX, không chỉ trùng
+  chỉ tiêu tổng hợp. Self-check `nav_identity_err` = **0 VND** (BAL và LAG) mọi chân.
+- Đầu vào **thật sự khác nhau**: overlay rỗng (0 dòng, 4.025 B) vs overlay đã sửa (1.440 dòng,
+  21.073 B); bản `split` lệch bản `legacy` **346/1.613 dòng thành viên**, `max|Δw| = 0,0656`.
+  ⇒ chặn được phản bác "chạy trùng một cấu hình hai lần".
+- **PC**: 2 chân **KHÁC nhau** ⇒ overlay **được đọc thật**, engine **thực sự dùng** bảng khi cờ bật
+  ⇒ bất biến ở NC là **tính chất thật của cấu hình R3**, không phải thí nghiệm hỏng.
+
+Kỹ thuật overlay đáng tái dùng: symlink **toàn bộ** snapshot cache đã pin, **chỉ thay đúng 1 file**
+parquet cần thử. Cô lập 1 biến tuyệt đối, tốn ~4-21 KB đĩa thay vì nhân bản ~2 GB.
+
+## 23. Số `29,07%` — hàng rào chống trích dẫn nhầm
+
+**29,0938% / 29,0749% là số của một cấu hình KHÔNG DÙNG (`CAPIT_BEAR_OVERFLOW=1`).** Tuyệt đối
+không trộn với số R3 hiện hành. Ý nghĩa duy nhất: **nếu tương lai** ai bật cờ đó lên thì cơ sở giá
+của bảng **mới bắt đầu** có tác dụng, và tác dụng đó đo được là **−0,019pp CAGR** — nhỏ hơn **một
+bậc** so với −0,36pp của kênh dựng rổ trực tiếp. Số này **chưa** qua quant-skeptic, **chưa** được
+pin; chỉ là tài liệu tham khảo cho job tương lai.
+
+## 24. Bài học (khác 3 phần trước)
+
+1. **"Không đo được chênh lệch" ≠ "chênh lệch bằng 0" ≠ "kênh đó không tồn tại".** Ba mệnh đề khác
+   nhau, và chỉ mệnh đề thứ ba đúng ở đây. Viết registry bằng mệnh đề sai sẽ khiến người sau tưởng
+   đã có một phép đo bao phủ kênh CAPIT — trong khi thực tế kênh ấy chưa từng được kích hoạt. Đây
+   đúng cái bẫy Phần 1 và Phần 2 đã mắc theo kiểu khác: **suy diễn nhầm từ một quan sát ĐÚNG**.
+2. **Negative control không có positive control là bằng chứng rỗng.** "Đổi đầu vào mà đầu ra không
+   đổi" là hình dạng giống hệt nhau giữa *bất biến thật* và *thí nghiệm chưa từng chạy đúng*. Bắt
+   buộc phải có một chân chứng minh đường ống sống.
+3. **Bằng chứng cơ cấu (đọc code) mạnh hơn bằng chứng thực nghiệm** cho loại khẳng định "X không ảnh
+   hưởng Y". `grep -n` ra 3 dòng cho kết luận phổ quát trên MỌI dữ liệu; chạy mô phỏng chỉ cho kết
+   luận trên đúng bộ dữ liệu đã chạy. Ở đây có cả hai, và chúng khớp nhau.
+4. **Tham chiếu treo còn nguy hiểm hơn thiếu tài liệu.** Job trước chết giữa chừng, kịp sửa "Giới
+   hạn #1" thành "ĐÃ ĐÓNG, xem mục bên dưới" nhưng **chưa kịp viết mục đó**. Người đọc gặp một
+   khẳng định dứt khoát ("0,00pp CHÍNH XÁC") không kèm bằng chứng, mà lại **trông như** đã có bằng
+   chứng ở chỗ khác. Sửa "còn mở → đã đóng" phải nằm **cùng một commit** với phần bằng chứng, không
+   bao giờ tách ra (cùng tinh thần `coding_guidelines` §10: canonical hoá và dọn biến thể trong
+   cùng một lượt).
+
+## 25. Trạng thái các mục "còn mở" của §18 sau phần 4
+
+| Mục §18 | Trạng thái |
+|---|---|
+| Nhánh CAPIT-membership ⇒ −0,36pp là cận dưới | ✅ **ĐÓNG** — gap 0,00pp (bất biến cơ cấu); −0,36pp là số **đầy đủ** cho cấu hình R3 |
+| 4 script audit/nghiên cứu cùng họ lỗi | ✅ **ĐÓNG** — commit `76ba560` (+ 1 lỗi nữa phát hiện thêm tại `custom30_core_select_audit.py:37`), kèm `basket_price_basis_audit_selfcheck.py` |
+| `lag_liquidity_filter.py:100` | ⏸️ **CỐ Ý GIỮ** — 1 trong 5 điểm giữ bất biến parity live==sim. Job riêng, không phải nợ kỹ thuật bỏ quên |
+| Lỗi fidelity `liq<=0` | 🔴 **VẪN MỞ** — ngoài phạm vi saga này; khoảng kỳ vọng trung thực **[~27,2%; ~31,3%]**, **anchor DD ~−30%** (không phải −18,4%) |
+
+⇒ **Saga cơ sở giá `Price` vs `Close` khép lại ở đây.** Còn lại chỉ là mục `liq<=0` (họ lỗi khác) và
+một lựa chọn có chủ đích.
+
+## 26. Vì sao KHÔNG chạy lại quant-skeptic cho phần 4
+
+Số cuối cùng **không đổi một chữ số** so với bản đã CONFIRMED (high)
+(`mike/logs/verify_20260802_151136.log`); phần 4 **không đề xuất thay đổi production nào**, không
+đổi tham số, không wire gì mới — chỉ biến một **luận cứ** từ "cận dưới" thành "đầy đủ, có lý do cơ
+cấu". Bằng chứng lại thuộc loại **cơ học, tự kiểm chứng trong vài giây**: `md5sum` 3 file CSV +
+`grep -n` 3 dòng code — không phải suy luận thống kê cần phản biện. **Bắt buộc gate lại NẾU** sau
+này có ai bật `CAPIT_BEAR_OVERFLOW=1` để dùng thật; lúc đó 29,07% mới rời diện tham chiếu.
+
+## 27. Tham chiếu (phần 4)
+
+- `data/results_registry.md` mục **2026-08-02 — ĐÓNG KHOẢNG CÁCH CAPIT-MEMBERSHIP** — bằng chứng đầy đủ
+- CSV: `data/v23_golive_audit_..._exp_{nc_c30v_empty,fix_c30v_membership,pc_ovf_oldtable,pc_ovf_fixtable}_univpit.csv`
+- Overlay cache (**GIỮ** làm audit trail, chỉ ~4/21 KB dữ liệu thật, phần còn lại symlink):
+  `data/bq_cache_ov_c30v_empty/`, `data/bq_cache_ov_c30v_fix/`
+- Bảng regen 2 cơ sở: `data/c30v_regen_legacy.csv`, `data/c30v_regen_split.csv`
+- Code: `pt_v23_audit_2014.py` dòng 105 / 121-124 / 1203 / 1214
+- Commit: `982621a` (registry phần 4), `76ba560` (4 script audit)
