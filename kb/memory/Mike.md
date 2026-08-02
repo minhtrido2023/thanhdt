@@ -2,30 +2,25 @@
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
 
 # Working memory — Mike
-> Cập nhật lần cuối: 2026-08-01 EOD (sau daily retro finalize, Wags GAPS FOUND → fixed → kb/incidents/retro/retro-2026-08-01.md, commit 1059a085)
+> Cập nhật lần cuối: 2026-08-02 EOD (sau daily retro finalize, Wags GAPS FOUND → fixed → kb/incidents/retro/retro-2026-08-02.md, 7 sự cố)
 
-## RETRO 2026-08-01 — 8 sự cố (6 đã ghi trước, 2 gap tự bổ sung), Pattern 1 ESCALATED
-Ngày nặng: 4 cơ chế nền của chính fleet chết ÂM THẦM (daily_retro.sh 2 đêm, kb_nightly.sh 2 tuần,
-dispatch --bg toàn fleet 1h10m, báo cáo tuần/tháng 2 tuần) — TÁI DIỄN đúng Pattern A mà RETRO 07-28
-đã cảnh báo. Đã escalate `retro-pattern-recurring-silent-cron-spof-2` lên bus. Tin tốt: hôm nay
-ship prevention thật (không chỉ prose) — `bin/cron_health_check_daily.sh` (cron 08:25) +
-`bin/shellcheck_gate.sh` (pre-commit, chặn đúng lớp bug quoting gây sự cố 1+4) + forcing-function
-báo cáo cadence. Cả 3 CHƯA qua 1 chu kỳ production thật nào tại thời điểm viết retro.
+## RETRO 2026-08-02 — 7 sự cố (6 draft + 1 bổ sung sau verify Wags), Pattern 2 (MỚI) nêu bật
+Ngày nhẹ hơn 08-01 (không cron chết) nhưng dày sự cố data-accuracy: saga Price/Close look-ahead
+(re-pin R3 27,60%→27,24%), Discord routing vá lần thứ 5 (chuyển hẳn kiến trúc: registry +
+pre-commit gate, commit 79b16173), LAG liquidity 2 fix, NAV cum-dividend double-count (Winston,
+6 dòng NAV lịch sử sửa, quant-skeptic CONFIRMED 2 vòng, commit 354eaa88). Wags verify độc lập bắt
+đúng 1 gap thật (sự cố NAV thiếu file incident) — đã bổ sung. Pattern 2 mới: "1 loại lỗi lặp ở
+nhiều thực thể/tầng trong CÙNG NGÀY trước khi có fix cấu trúc" — 3 ví dụ (Price/Close, Discord
+routing N=5, NAV invariant-tổng-che-lỗi-cục-bộ). Chưa escalate (lần đầu gọi tên) — nếu mai lại
+thấy ví dụ tương tự → escalate `retro-pattern-recurring-generalize-without-full-sweep`.
 
-## Việc còn treo sang mai (ưu tiên cao nhất trước)
-- **Sự cố 7 (saga "coord-", ưu tiên CAO — human-in-the-loop integrity)**: Wags tự sửa
-  ops_health_check.sh check #5, ≥5 vòng arch-review (07-30→08-01) vẫn NEEDS_CHANGES. Round-5 phát
-  hiện: 1 phiên Mike đã tự tay đóng 21 bus question (07-31, closed_by=Mike/stale_superseded) —
-  round-5 nhầm "pool đã cạn" là bằng chứng fix đúng. Bus question mới nhất:
-  `wags-fix-not-confirmed: coord-2026-08-01` (08:30:29Z) CHƯA có answer. Cần user/Mike quyết
-  bước tiếp theo — KHÔNG tự dispatch Wags thêm vòng nữa cho tới khi có quyết định rõ.
-- Xác nhận `cron_health_check_daily.sh` chạy chu kỳ thật đầu tiên (08:25 ICT 08-02).
-- `bin/wakeup_profile.py` (Wags DONE, code+test xong, CHƯA wire live) — chờ Mike duyệt; có thể
-  giúp giảm vi phạm §8 wakeup (3/9 = 33,3% hôm nay, cả 3 dạng "bundle").
-- Backfill RETRO 07-30/07-31 hay bỏ qua — nợ cũ (07-24→07-27 vẫn treo, giờ +2 ngày = 6 ngày chưa
-  từng review).
-- Kế thừa treo cũ (không mới hôm nay): funding_required residual risk (theo dõi lần 4 nếu xảy
-  ra), PNJ TTL anomaly_flags (~08-23), dt5g-live-2-writer quyết định A/B/C (bus question 07-29,
-  vẫn PENDING).
+## Việc treo sang mai (ưu tiên)
+- Xác nhận `cron_health_check_daily.sh` chu kỳ thật ĐẦU TIÊN chạy đúng 08-03 (T2) 08:25 ICT.
+- `/api/notify` root cause UTF-8 payload lỗi CHƯA xác định (script nào gửi) — cần forensics thêm.
+- 2/21 lượt `--bg` thiếu ScheduleWakeup hôm 08-02 (9,5%, đã giảm từ 33,3%) — theo dõi tiếp,
+  `bin/wakeup_profile.py` (Wags DONE) vẫn chờ Mike duyệt wire live.
+- Job `Taylor_20260802_163657` (LAG liquidity fix, sự cố 5) — confirm status kết thúc sạch khi
+  tra lại (đang RUNNING lúc viết retro, code đã landed qua commit 11d28ca).
+- Kế thừa cũ (không mới): backfill RETRO 07-30/07-31 hay bỏ; funding_required residual risk; PNJ
+  TTL anomaly_flags (~08-23); dt5g-live-2-writer A/B/C (bus question 07-29, vẫn PENDING).
 
-- [2026-08-02T17:20:54Z] 2026-08-02: user hỏi về job fail 'quá 50 tasks' (max-turns) — có bình thường không, nên điều chỉnh sao. Điều tra data thật: 29 lần trong lịch sử, 5 lần NGAY HÔM NAY, tất cả attempt 2/2 dùng CHUNG 1 trần 50 (retry vô ích, đúng 'chạy tới chạy lui' user mô tả), tất cả effort=high/opus (task thật sự phức tạp, không phải lỗi). Fix 2 lớp mirror cơ chế usage-limit-resume có sẵn: (1) default --max-turns SCALE theo effort khi omit (high→80, xhigh/max→120); (2) auto-continuation thật — hết lượt còn attempt thì BUMP gấp đôi retry ngay trong loop, hết attempt thì queue bus/pending_resumes (kind=max_turns, resume NGAY ~30s, giữ nguyên model/effort, trần bump thêm lần nữa, cap DISPATCH_MAX_TURNS_RESUMES=2). Bonus fix: usage-limit resume trước đây CŨNG âm thầm rơi model/effort về default mỗi lần resume — giờ cả 2 loại đều giữ nguyên. Tự bắt lỗi export list thiếu (function mới chạy trong systemd-run --scope detached child cần export -f tường minh) trước khi test. Verify end-to-end thật: mock claude binary tái hiện đúng lỗi, chạy dispatch.sh thật, xác nhận đúng chuỗi 80→160→200(cap)→pending_resumes, xác nhận resume_pending.py build đúng argv --model/--effort/--max-turns, xác nhận backward-compat record cũ (6 arg, không có kind) vẫn hoạt động đúng. Commit + incident kb/incidents/2026-08/2026-08-02-max-turns-auto-continuation.md.
