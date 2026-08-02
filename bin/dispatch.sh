@@ -44,16 +44,17 @@
 #                  (task thường lệ). Task phức tạp → --effort high. CHÍNH SÁCH user
 #                  (2026-07-14): model 'fable' bị chặn tối đa 'high' — truyền xhigh/max
 #                  cho fable sẽ tự clamp về high + cảnh báo stderr. Xem MIKE.md §Model routing.
-#   --max-turns N  override trần lượt tool-call (mặc định 50, KHÔNG đổi khi omit — thêm
-#                  2026-07-31 sau sự cố job fail "Reached max turns (50)" 2 lần cho 1 task
-#                  gộp nhiều deliverable độc lập dù nội dung thật đã gần xong). Task ước
-#                  lượng chạm/vượt 40 lượt → cân nhắc TĂNG (vd 80) THAY VÌ chia task nếu các
-#                  phần phụ thuộc lẫn nhau (không chia được sạch); ngược lại, ưu tiên chia
-#                  thành nhiều dispatch độc lập theo ranh giới tự nhiên (mỗi phần tự
+#   --max-turns N  override trần lượt tool-call. Mặc định SCALE theo --effort khi omit
+#                  (high->80, xhigh/max->120, còn lại 50 — thêm 2026-08-02). Task ước
+#                  lượng chạm/vượt trần → cân nhắc TĂNG THÊM THỦ CÔNG THAY VÌ chia task nếu
+#                  các phần phụ thuộc lẫn nhau (không chia được sạch); ngược lại, ưu tiên
+#                  chia thành nhiều dispatch độc lập theo ranh giới tự nhiên (mỗi phần tự
 #                  commit+report) — chia rẻ hơn nâng trần vô hạn vì mỗi dispatch giữ được
-#                  toàn bộ lượt cho ĐÚNG 1 việc. Không có công cụ đo trước số lượt cần —
-#                  dùng tín hiệu THẬT (1 lần fail max-turns) làm cớ chia/tăng cho lần sau,
-#                  đừng đoán trước khi chưa có bằng chứng.
+#                  toàn bộ lượt cho ĐÚNG 1 việc. Nếu vẫn hết lượt giữa chừng: dispatch.sh TỰ
+#                  ĐỘNG nâng trần + retry (trong-vòng-lặp, rồi qua bus/pending_resumes/ nếu
+#                  hết attempt — xem _maybe_schedule_maxturns_resume), không cần làm gì thêm;
+#                  chỉ cân nhắc tự tăng --max-turns thủ công khi ĐÃ THẤY job đó tự-resume mà
+#                  vẫn không đủ (DISPATCH_MAX_TURNS_RESUMES mặc định 2 lần rồi dừng).
 # Context injection tier is fixed per AGENT IDENTITY, not per dispatch: each agent's
 # own agents/<id>/CLAUDE.md statically imports its role-scoped default — see MIKE.md
 # §"Context theo vai trò (role-scoped)" for the full table (Mike/Taylor -> full
@@ -173,12 +174,23 @@ EFFORT_FLAG="--effort $EFFORT"
 
 # --- Max-turns override (2026-07-31, sau sự cố Winston_20260731_062642 fail "Reached
 # max turns (50)" 2 lần liên tiếp cho 1 task gộp 3 deliverable độc lập — 50 là hằng số
-# cứng không có lối thoát, dù nội dung thật đã gần xong khi kiểm tay). Mặc định GIỮ
-# NGUYÊN 50 (không đổi hành vi khi caller không truyền) — chỉ cho phép caller nâng lên
-# khi biết trước task cần nhiều lượt hơn (vd gộp nhiều deliverable theo đúng quy tắc
-# cost-opt #3 ở MIKE.md), thay vì âm thầm tạch giữa chừng rồi phải retry tốn gấp đôi.
+# cứng không có lối thoát, dù nội dung thật đã gần xong khi kiểm tay). Caller vẫn có thể
+# nâng thủ công khi biết trước task cần nhiều lượt hơn (cost-opt #3 ở MIKE.md).
+#
+# Mặc định SCALE theo effort khi omit (thêm 2026-08-02, sau 5 job fail max-turns cùng
+# 1 ngày — tất cả đều effort=high/opus, cả 2 attempt trong loop retry DÙNG CHUNG 1 trần
+# 50 nên attempt 2 tạch giống hệt attempt 1, đúng kiểu "chạy tới chạy lui" vô ích user
+# nêu). effort=high đã tự khai "việc phức tạp" qua ladder MIKE.md §Model routing — tận
+# dụng tín hiệu có sẵn thay vì bắt Mike nhớ ước lượng + truyền --max-turns tay mỗi lần
+# (thực tế đã KHÔNG xảy ra đủ, bằng chứng là 5 job fail hôm nay không job nào override).
 case "$MAX_TURNS" in
-  "") MAX_TURNS=50 ;;
+  "")
+    case "$EFFORT" in
+      high) MAX_TURNS=80 ;;
+      xhigh|max) MAX_TURNS=120 ;;
+      *) MAX_TURNS=50 ;;
+    esac
+    ;;
   *[!0-9]*) echo "ERROR: --max-turns '$MAX_TURNS' phải là số nguyên dương." >&2; exit 1 ;;
   *) ;;
 esac
@@ -320,6 +332,60 @@ _maybe_schedule_usage_resume() {
   # Telegram vẫn chạy), không bao giờ đoán topic.
   if [ -n "$_tid" ]; then
     "$ROOT/bin/notify_thread.sh" "⏳ **$id** hết usage limit tài khoản (job \`$job_id\`) — không phải lỗi task. TỰ ĐỘNG resume lúc ~${resume_ict} ICT. Không cần làm gì." "$_tid" 2>/dev/null || true
+  fi
+  return 0
+}
+
+# --- Max-turns auto-continuation (2026-08-02, user mandate: 5 job fail "Reached max
+# turns (50)" trong 1 ngày, tất cả effort=high, cả 2 attempt trong retry loop dùng
+# CHUNG 1 trần nên attempt 2 tạch giống hệt attempt 1 — retry vô ích, đúng "chạy tới
+# chạy lui" user mô tả). Mirrors _maybe_schedule_usage_resume's shape/contract (0 =
+# resume scheduled, treat as pending not failed; 1 = not this failure type or cap hit)
+# nhưng khác 2 điểm: (a) resume NGAY, không có "giờ reset" nào phải chờ; (b) mỗi lần
+# resume NÂNG --max-turns thay vì giữ nguyên — hết lượt là tín hiệu NGÂN SÁCH xác định,
+# không phải lỗi thoáng qua đáng thử lại y hệt.
+_looks_like_max_turns() {
+  local lf="$1"
+  [ -f "$lf" ] && grep -qi "Reached max turns" "$lf" 2>/dev/null
+}
+
+MAXTURNS_CEILING="${DISPATCH_MAX_TURNS_CEILING:-200}"
+
+_bumped_max_turns() {  # next ceiling for a max-turns-triggered retry/resume — doubles, capped
+  local next=$((MAX_TURNS * 2))
+  [ "$next" -gt "$MAXTURNS_CEILING" ] && next=$MAXTURNS_CEILING
+  echo "$next"
+}
+
+_current_maxturns_resume_count() {  # same anchoring discipline as _current_resume_count
+  if [[ "$prompt" =~ ^\[RESUME\ sau\ max-turns\ \#([0-9]+) ]]; then
+    echo "${BASH_REMATCH[1]}"
+  else
+    echo 0
+  fi
+}
+
+_maybe_schedule_maxturns_resume() {
+  local lf="$1" ef="${2:-}"
+  _looks_like_max_turns "$lf" || { [ -n "$ef" ] && _looks_like_max_turns "$ef"; } || return 1
+  local n; n="$(_current_maxturns_resume_count)"
+  local cap="${DISPATCH_MAX_TURNS_RESUMES:-2}"
+  if [ "$n" -ge "$cap" ]; then
+    "$ROOT/bin/notify.sh" "[dispatch] $id: hết turn-budget lặp lại $((n + 1)) lần liên tiếp (job $job_id, trần đã tới $MAX_TURNS) — DỪNG auto-resume (chạm trần $cap lần). Task có thể quá lớn để tự chia — cần người xem lại, cân nhắc chia thủ công thành nhiều dispatch độc lập (rẻ hơn nâng trần vô hạn). Log: $lf" 2>/dev/null || true
+    return 1
+  fi
+  local bumped; bumped="$(_bumped_max_turns)"
+  local resume_at=$(( $(date +%s) + 30 ))
+  mkdir -p "$ROOT/bus/pending_resumes"
+  printf '%s' "$prompt" | python3 "$ROOT/bin/mike_json.py" pending-resume-set \
+    "$ROOT/bus/pending_resumes/${job_id}.json" "$id" "$from" "$job_id" "$resume_at" "$((n + 1))" \
+    "max_turns" "${MODEL:-}" "$EFFORT" "$bumped"
+  JSET status=maxturns_pending ended_at="$(date +%s)" \
+       result_summary="hết turn budget (--max-turns=$MAX_TURNS) — auto-resume ngay với --max-turns=$bumped (lần thử #$((n + 1))/$cap)"
+  "$ROOT/bin/notify.sh" "[dispatch] $id: hết turn budget (job $job_id, --max-turns=$MAX_TURNS) — KHÔNG PHẢI lỗi nội dung. Tự động resume NGAY với trần cao hơn (--max-turns=$bumped, lần thử #$((n + 1))/$cap)." 2>/dev/null || true
+  local _tid; _tid="$(_job_thread_id "$job_id")"
+  if [ -n "$_tid" ]; then
+    "$ROOT/bin/notify_thread.sh" "⏳ **$id** hết turn budget (job \`$job_id\`) — không phải lỗi nội dung, chỉ hết lượt tool-call (--max-turns=$MAX_TURNS). TỰ ĐỘNG resume NGAY với trần cao hơn (--max-turns=$bumped)." "$_tid" 2>/dev/null || true
   fi
   return 0
 }
@@ -736,6 +802,22 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
         "$ROOT/bin/consolidate.sh" >> "$ROOT/logs/consolidator.log" 2>&1 || true
         return 0
       fi
+      # Max-turns: if an in-loop attempt remains, bump the ceiling and retry immediately
+      # (cheaper than a full async pending-resume cycle) — otherwise the next attempt
+      # would use the SAME $MAX_TURNS and fail identically (the exact "chạy tới chạy lui"
+      # pattern observed 2026-08-02: 5/5 jobs failed on attempt 2/2 with an unchanged cap).
+      # Only escalate to the cross-dispatch pending-resume once in-loop attempts are spent.
+      if _looks_like_max_turns "$logfile"; then
+        if [ "$attempt" -lt "$max_attempts" ]; then
+          MAX_TURNS="$(_bumped_max_turns)"
+          JSET status=retrying exit_code="$rc" result_summary="hết turn budget, retry attempt $((attempt + 1)) với --max-turns=$MAX_TURNS"
+          attempt=$((attempt + 1))
+          continue
+        elif _maybe_schedule_maxturns_resume "$logfile"; then
+          "$ROOT/bin/consolidate.sh" >> "$ROOT/logs/consolidator.log" 2>&1 || true
+          return 0
+        fi
+      fi
       if [ "$attempt" -lt "$max_attempts" ]; then
         JSET status=retrying exit_code="$rc"
         attempt=$((attempt + 1))
@@ -798,10 +880,12 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
   # `setsid _bg_wrapper &` silently fails to find "_bg_wrapper" as a command.
   export -f _bg_wrapper _job_watcher JSET SUMMARY _agent_thread_override _ambient_thread _circuit_record \
             _maybe_schedule_usage_resume _looks_like_usage_limit _parse_reset_epoch \
-            _current_resume_count _job_thread_id _hb_aware_timeout
+            _current_resume_count _job_thread_id _hb_aware_timeout \
+            _maybe_schedule_maxturns_resume _looks_like_max_turns _bumped_max_turns \
+            _current_maxturns_resume_count
   export ROOT JOBS_DIR job_id from id ts TIMEOUT RETRIES CLAUDE dispatch_prompt logfile prompt \
          CIRCUIT_DIR CIRCUIT_THRESHOLD CIRCUIT_COOLDOWN MODEL_FLAG EFFORT_FLAG MAX_EXT HB_FRESH_S \
-         MAX_TURNS
+         MAX_TURNS MAXTURNS_CEILING MODEL EFFORT
   # systemd-run --user needs the user manager socket; cron strips XDG_RUNTIME_DIR.
   export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
   _detach_ok=0
@@ -889,6 +973,11 @@ else
     if _maybe_schedule_usage_resume "$logfile" "$logfile.err"; then
       echo "NOTE: dispatch $id (job $job_id) hết usage limit tài khoản — KHÔNG PHẢI lỗi task." >&2
       echo "      Đã tự động lên lịch resume (bin/resume_pending.py sẽ tự chạy lại, không cần làm gì)." >&2
+      exit 5
+    fi
+    if _maybe_schedule_maxturns_resume "$logfile" "$logfile.err"; then
+      echo "NOTE: dispatch $id (job $job_id) hết turn budget (--max-turns=$MAX_TURNS) — KHÔNG PHẢI lỗi task." >&2
+      echo "      Đã tự động lên lịch resume NGAY với trần cao hơn (bin/resume_pending.py sẽ tự chạy lại)." >&2
       exit 5
     fi
     fstatus=failed

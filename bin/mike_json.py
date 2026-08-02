@@ -25,8 +25,12 @@ Centralizes all JSON building/reading so the shell scripts depend only on python
   circuit-record <state_dir> <agent_id> <success|fail> [threshold] [cooldown_sec]
       -> updates the counter; exit 1 if this call tripped the breaker
   pending-resume-set <path> <agent_id> <from> <orig_job_id> <resume_at_epoch> <resume_count>
+                     [kind] [model] [effort] [max_turns]
       -> writes a bus/pending_resumes/<job_id>.json record; prompt text read from STDIN
-         (avoids shell-quoting a large/multiline string as a CLI arg)
+         (avoids shell-quoting a large/multiline string as a CLI arg). kind defaults to
+         "usage_limit" when omitted (back-compat with the original 6-arg call); the
+         max-turns auto-continuation (2026-08-02) passes kind="max_turns" plus the
+         model/effort to preserve on resume and the bumped max_turns to resume with.
   job-field <jobs_dir> <job_id> <field_name>
       -> print one field's raw value (exit 1 if job/field missing) — e.g. discord_thread_id
   job-hb-age <jobs_dir> <job_id>
@@ -945,12 +949,18 @@ def cmd_circuit_record(a):
 
 def cmd_pending_resume_set(a):
     """pending-resume-set <path> <agent_id> <from> <orig_job_id> <resume_at_epoch>
-    <resume_count> — prompt text read from STDIN (avoids shell-quoting a large/multiline
-    string as a CLI arg). Atomic write."""
-    fp, agent_id, frm, orig_job_id, resume_at, resume_count = a
+    <resume_count> [kind] [model] [effort] [max_turns] — prompt text read from STDIN
+    (avoids shell-quoting a large/multiline string as a CLI arg). Atomic write."""
+    fp, agent_id, frm, orig_job_id, resume_at, resume_count = a[:6]
+    kind = a[6] if len(a) > 6 and a[6] else "usage_limit"
+    model = a[7] if len(a) > 7 and a[7] else None
+    effort = a[8] if len(a) > 8 and a[8] else None
+    max_turns = a[9] if len(a) > 9 and a[9] else None
     prompt = sys.stdin.read()
     obj = {"agent": agent_id, "from": frm, "orig_job_id": orig_job_id,
            "resume_at": _as_int(resume_at), "resume_count": _as_int(resume_count),
+           "kind": kind, "model": model, "effort": effort,
+           "max_turns": _as_int(max_turns) if max_turns else None,
            "prompt": prompt, "created_at": now_iso()}
     os.makedirs(os.path.dirname(fp), exist_ok=True)
     tmp = fp + ".tmp"

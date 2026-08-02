@@ -59,6 +59,20 @@ Dấu hiệu hết usage limit (không phải fail thật): log khớp "usage li
 báo user "đang chờ tự chạy tiếp" chứ không phải lỗi. **Giới hạn: KHÔNG cứu được phiên tương tác sống
 của chính Mike** (turn hiện tại chết thì chết luôn) — xem mục 7.
 
+**6b. Auto-continuation khi hết turn budget (`--max-turns`, thêm 2026-08-02, sau 5 job fail
+"Reached max turns (50)" cùng 1 ngày, tất cả effort=high).** Khác usage-limit (transient, chờ
+reset-time): hết lượt là tín hiệu NGÂN SÁCH xác định — retry y hệt trần cũ chỉ tạch lại giống hệt
+("chạy tới chạy lui" vô ích). 2 lớp: (a) **mặc định scale theo effort** khi omit `--max-turns`
+(`high`→80, `xhigh`/`max`→120, còn lại giữ 50) — giảm tần suất chạm trần cho task đã tự khai phức
+tạp; (b) **trong-vòng-lặp**: hết lượt ở attempt còn dư → NÂNG gấp đôi (trần `DISPATCH_MAX_TURNS_CEILING`,
+mặc định 200) rồi retry ngay, không đợi hết attempt; hết TOÀN BỘ attempt vẫn tạch → queue
+`bus/pending_resumes/` (kind=`max_turns`, resume NGAY ~30s, không có giờ reset nào phải chờ) giữ
+nguyên model/effort, mang trần đã nâng thêm 1 lần nữa. Trần lặp riêng: `DISPATCH_MAX_TURNS_RESUMES`
+(mặc định 2) — quá trần thì dừng, báo cần người xem lại (task có thể quá lớn để tự chia). Cùng
+đường ống `resume_pending.py`/exit-code-5 như usage-limit, giờ CŨNG giữ nguyên model/effort/max-turns
+qua mọi lần resume (trước đây kể cả nhánh usage-limit cũng âm thầm rơi về default CLI mỗi lần resume
+— fix chung). Chi tiết: `kb/incidents/2026-08/2026-08-02-max-turns-auto-continuation.md`.
+
 **7. Khi CHÍNH phiên Mike sắp hết usage limit giữa 1 task dài (chỉ đạo user).** Khi tự kiểm
 `usage_watch.py` thấy ≥~85% giữa task dài chưa xong: chủ động báo TRƯỚC cho user, và tự đề xuất
 `CronCreate` 1 job one-shot NGAY TRONG phiên hiện tại (`recurring: false`, giờ = reset-time + đệm),
