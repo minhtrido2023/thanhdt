@@ -518,10 +518,14 @@ def main():
     # PRIMARY stable yield axis = earnings yield (1/PE). Chosen over 1/PCF (user 2026-06-16: CFO not always
     # positive over 4Q -> sign-unstable/cyclical, only ~67% populated). 1/PE: 94-100% populated, highest
     # signal persistence (0.96 vs 0.90), 11/13yr-consistent, equal-or-better IC. (EVEB/DY tested & rejected.)
-    # PE_stored = Close_adj/EPS; correct to unadjusted price basis: PE_true = PE * (Price/Close).
-    # Live impact ≈ 0 (Price≈Close when no recent bonus); fixes historical inflate of earn_yield pre-2016.
-    _pe_adj_factor = np.where(out["Close"] > 0, out["Price"] / out["Close"], 1.0)
-    out["PE"] = np.where(out["PE"] > 0, (out["PE"] * _pe_adj_factor).round(2), out["PE"])
+    # ⚠️ DO NOT rescale PE by (Price/Close). The stored PE is ALREADY on the unadjusted, point-in-time
+    # price basis of its own day (PE = Price_raw/EPS_ttm) — proven 2026-08-02 (job Taylor_20260802_054825,
+    # in-period-constant test over 2014-2021: PE/Price constant in 93.1% of report periods vs PE/Close 11.0%;
+    # hand-verified VNM 2015-06-30 / FPT). Multiplying by Price/Close INJECTS look-ahead (the factor depends
+    # on bonus/dividend events AFTER day t) and measurably degrades the book: A/B on custom30V cost
+    # −1.70pp CAGR / −0.19 Calmar. A wrong `_pe_adj_factor` multiply lived here 2026-06-24 → 2026-08-02;
+    # see kb/incidents/2026-08/2026-08-02-pe-price-close-adjustment-saga.md and
+    # kb/data_registry/fundamentals/valuation_pe_pb_pcf_ps.md "Bẫy (4)".
     out["earn_yield"] = np.where(out["PE"] > 0, (1.0 / out["PE"]).round(4), np.nan)
     # SALES yield = 1/PS, current-price PS = mktcap/TTM-revenue. Value-IC validated 2026-06-19: PS is the
     # DOMINANT value lens for CONSUMER/RETAIL (IC +0.135) and strong broadly (+0.072, 99% cov) -> v3 lens.
