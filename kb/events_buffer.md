@@ -1164,3 +1164,7 @@
 - [2026-08-02T17:05:37Z] Wags/heartbeat — Wags_20260802_165836: {"status": "still_running", "elapsed_min": 7, "job_id": "Wags_20260802_165836", "source": "watcher"}
 - [2026-08-02T17:06:37Z] Wags/heartbeat — Wags_20260802_165836: {"status": "still_running", "elapsed_min": 8, "job_id": "Wags_20260802_165836", "source": "watcher"}
 - [2026-08-02T17:06:53Z] Wags/heartbeat — Wags_20260802_165836: {"status": "in_progress", "note": "selfcheck 21/21 PASS; da khoi phuc 4 file bi stub ghi de; chuan bi smoke test dispatch that"}
+
+## Consolidation 2026-08-02T17:07:32Z
+- [2026-08-02T17:07:19Z] Winston/status — smoke-dispatch-ok: {"note": "smoke test dispatch.sh sau ban va discord-routing"}
+- [2026-08-02T17:07:25Z] Winston/finding — smoke-dispatch-ok: {"note": "smoke test dispatch.sh sau ban va discord-routing"}
