@@ -5,18 +5,17 @@ Behavioral guidelines to reduce common LLM coding mistakes.
 **Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
 
 **Enforcement policy (thêm 2026-08-01, user mandate — "đẩy bài học cũ ra công cụ/linter thay vì
-văn xuôi"):** khi 1 lesson dưới đây có thể diễn đạt thành 1 PATTERN CƠ HỌC trong code (không cần
-phán đoán ngữ nghĩa) — mục tiêu là 1 check tự động chặn commit, KHÔNG chỉ thêm đoạn văn xuôi này
-để hy vọng agent tương lai nhớ đọc. Nguyên tắc theo đúng SRE postmortem culture (Google SRE
-workbook — action item tốt nhất là 1 CI rule, không phải 1 dòng ghi chú) và kỷ luật viết rule của
-Semgrep ("1 rule bắt đúng 2 lần còn hơn 1 rule bắt nhầm 200 lần" — luôn test rule mới trên file
-thật trước khi bật, không đoán). Cơ chế đang có, đã verify bằng `git commit` thật (không chỉ đọc
-lại): **`bin/shellcheck_gate.sh`** (pre-commit hook, ShellCheck — bắt được cả 4 sự cố quoting
-thật trong bash strings/heredoc-as-dispatch-prompt 2026-07-17→08-01, xem §15 + `kb/incidents/
-2026-08/2026-08-01-shellcheck-precommit-gate.md`). Setup 1 lần/repo (hook dùng chung mọi
-worktree): `pip install --user pre-commit shellcheck-py && pre-commit install`. Không phải mọi
-lesson đều mechanize được — nhiều mục dưới đây (§7, §10, §11, §13) là quy trình/judgment call,
-KHÔNG có pattern cú pháp rõ ràng để lint; giữ nguyên dạng văn xuôi là đúng, không phải thiếu sót.
+văn xuôi"):** lesson nào diễn đạt được thành 1 PATTERN CƠ HỌC trong code (không cần phán đoán ngữ
+nghĩa) → mục tiêu là 1 check tự động chặn commit, KHÔNG chỉ thêm văn xuôi. Theo SRE postmortem
+culture (Google SRE workbook — action item tốt nhất là 1 CI rule, không phải 1 dòng ghi chú) và
+kỷ luật viết rule của Semgrep ("1 rule bắt đúng 2 lần còn hơn 1 rule bắt nhầm 200 lần" — luôn
+test rule mới trên file thật trước khi bật, không đoán). Cơ chế đang có, đã verify bằng
+`git commit` thật: **`bin/shellcheck_gate.sh`** (pre-commit hook, ShellCheck — bắt được cả 4 sự
+cố quoting thật trong bash strings/heredoc-as-dispatch-prompt 2026-07-17→08-01, xem §15 +
+`kb/incidents/2026-08/2026-08-01-shellcheck-precommit-gate.md`). Setup 1 lần/repo (hook dùng chung
+mọi worktree): `pip install --user pre-commit shellcheck-py && pre-commit install`. Không phải mọi
+lesson đều mechanize được — §7, §10, §11, §13 là quy trình/judgment call, KHÔNG có pattern cú pháp
+rõ ràng để lint; giữ dạng văn xuôi là đúng, không phải thiếu sót.
 
 ## 1. Think Before Coding
 
@@ -79,23 +78,21 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 **Any script that can be killed mid-run and re-run must not repeat an external action.**
 
 Root cause (2026-07-02 double-buy, `kb/incidents/2026-07/2026-07-02-double-buy-concurrent-bot-execute.md`): a lock only stops two runs from
-overlapping — it does nothing for one run dying mid-write between the external action and
-persisting that fact locally. Fixed in `trading_bot/executor.py` (`_ghost_tickers` + atomic
-`_save_state`); apply the same reasoning to every new script.
+overlapping — nothing for one run dying mid-write between the external action and persisting
+that fact locally. Fixed in `trading_bot/executor.py` (`_ghost_tickers` + atomic `_save_state`);
+apply the same reasoning to every new script.
 
 Before writing any script that calls an external system with a side effect (place an order,
 send a message, write a shared file, call an API that isn't naturally idempotent):
 - Ask: "if this process is killed right after the external call succeeds but before local
   state is saved, what does the next run do?" If the answer is "repeats the action," that's
   a bug, not an edge case.
-- Prefer checking the external system's own source of truth (broker's live order book,
-  the sent-messages log, etc.) over trusting only local state — local state can lag reality.
+- Prefer the external system's own source of truth (broker's live order book, the sent-messages
+  log) over local state — local state can lag reality.
 - When you can't tell whether an action already happened, **fail-safe pause and flag for a
-  human** — do not guess-and-merge into local state, and do not silently proceed as if
-  nothing happened. Guessing wrong is worse than stopping.
+  human** — do not guess-and-merge into local state, do not silently proceed.
 - Persist "the action happened" as close to the actual external call as possible (write
-  immediately after, not batched at the end of a longer loop) — this shrinks the crash
-  window rather than closing it, but every bit of shrinkage matters.
+  immediately after, not batched at the end of a longer loop).
 - Writes to shared state files must be atomic (`tmp` + `os.replace`/`os.rename`), never a
   direct overwrite — a kill mid-write must never leave a half-written file for the next run
   to trust.
@@ -108,14 +105,13 @@ snapshot field labeled `"source": "ref_px_approx"` (an approximate price for an 
 purpose) and reported it as real cost basis, unchecked, in a client-facing doc.
 
 Before any number reaches a report (daily/weekly/monthly, or any client-facing artifact):
-- Trace it to the *authoritative* system — for fills, that's the broker's own confirmation
+- Trace it to the *authoritative* system — for fills, the broker's own confirmation
   (`dnse_raw_*.jsonl`'s `averagePrice`/`fillQuantity`), never a downstream summary file.
 - Cross-check a second independent source (internal journal `FILL` events, an audited snapshot)
   — see `bin/verify_account_snapshot.py`, the only script permitted to compute cost-basis/P&L
   for a SpaceX report. Disagreement beyond a tight tolerance → fail loudly, don't silently pick one.
-- Aggregate totals can be right while per-item attribution is wrong (NAV only depends on
-  quantity × market price, not cost basis, so it survived unscathed here) — a correct total
-  doesn't verify the breakdown a client reads.
+- Aggregate totals can be right while per-item attribution is wrong (NAV depends on quantity ×
+  market price, not cost basis, so it survived unscathed here).
 - Same principle as [[verify-real-facts-dont-self-invent]] / MIKE.md §Quy chuẩn bắt buộc mục 2:
   verify the artifact, don't trust a field because its value looks plausible.
 
@@ -124,7 +120,7 @@ Before any number reaches a report (daily/weekly/monthly, or any client-facing a
    internal journal vs audited snapshot).
 2. `bin/daily_nav_snapshot.py` — true NAV/date (MTM stock + real cash − margin debt from a
    fresh `dnse_raw_*.jsonl` `balances` record), appended to `nav_history_{account}.csv` so every
-   cadence reads the same series instead of recomputing differently each time.
+   cadence reads the same series.
 3. `bin/reconcile_equity.py` — identity check (`starting_capital + unrealized_P&L − fees −
    margin_interest == market_value + cash − margin_debt`); fee rate **0.075%** of true cost
    basis (not 0.1%, corrected 2026-07-03); residual checked against *estimated* margin accrual
@@ -142,8 +138,7 @@ others used live DNSE — the inconsistency is what surfaced it.
 - BQ OK only for: (a) historical/backtest queries, (b) same-day queries AFTER BQ's sync has
   demonstrably completed (verify via `bq_freshness_check.sh`'s gate, don't assume by clock time).
 - In dispatch prompts (DollarBill etc.): state as unconditional MUST with a concrete wrong-vs-
-  right example (see `bq_freshness_check.sh`'s DollarBill prompt) — a generic "verify your data"
-  reminder doesn't reliably stop an LLM reaching for the easiest source.
+  right example (see `bq_freshness_check.sh`'s DollarBill prompt).
 
 **Cadence-specific scope** (depth differs; pipeline above does not):
 - **Daily**: short — trades today, NAV + day-over-day change, margin/risk flag if any.
@@ -170,7 +165,7 @@ use the general mechanism, since more accounts of this shape are expected:
    dependency on our execution journal, unlike `verify_account_snapshot.py`/
    `daily_nav_snapshot.py`, which need fill history that doesn't exist for a pre-existing
    position). Whoever builds the plan must use this as the allocation basis — sizing against
-   total NAV when a third is locked in an excluded position tries to deploy unavailable capital.
+   total NAV when a third is locked in an excluded position deploys unavailable capital.
 4. **Known gap**: `daily_nav_snapshot.py`'s P&L still assumes journal-tracked fills for cost
    basis, so it can't produce unrealized-P&L for legacy positions (NAV/active_nav are correct via
    `compute_active_nav.py`; a P&L-capable version is separate future work — needed before
@@ -190,9 +185,8 @@ stale default-path fixture — see `ghost_order_selfcheck.py`'s `TAG` comment.
 **Root cause (2026-07-06 R3-CSV overwrite, `data/results_registry.md` mục `## KẾT QUẢ THAM CHIẾU
 phiên 2026-06-19` — cite by section title, not line: refs drift as entries get inserted):** an
 output filename built from only a SUBSET of env knobs (`BASKET_SELECT`/combination-mode had no
-suffix) — a config axis that materially changes the result but has no filename suffix let an
-experiment silently clobber the pinned production baseline. A lock wouldn't have helped — both
-runs were legitimate, just colliding on an output name.
+suffix) let an experiment silently clobber the pinned production baseline. A lock wouldn't have
+helped — both runs were legitimate, just colliding on an output name.
 
 Rules when a script's output feeds `data/results_registry.md` or any pinned baseline:
 
@@ -227,7 +221,7 @@ job Wags_20260730_112912).** Mỗi snapshot ~2,0GB, không tái tạo được (
 
 **Root cause (2026-07-11 SIGNAL_V11 base-leak, `kb/INCIDENTS.md`):** four production consumers
 silently read a trap table (documented as a trap in `CLAUDE.md`, but nothing forced a check
-before each new script picked a table name that *sounded* right) instead of the real production
+before a new script picked a table name that *sounded* right) instead of the real production
 regime table — a live paper-trading book entered 6 tickers on a fake signal.
 
 **Mandatory rule, user directive 2026-07-11:** before reading ANY data source (BQ table, local
@@ -252,8 +246,8 @@ LLM reaching for whichever table name sounds closest; naming the registry file d
 
 **Why this matters (2026-07-11 fa_ratings incident, `kb/incidents/2026-07/2026-07-11-fa-ratings-8l-silent-write-failure.md`):** confirming which file is
 canonical is only half the fix — near-identical variant files left in the repo root under
-slightly different names are exactly the landmine that causes the next agent (or human) doing a
-quick grep to pick the wrong one.
+slightly different names are the landmine that makes the next agent (or human) grep and pick the
+wrong one.
 
 **Rule: when a script/file is confirmed canonical for a purpose** (a builder is identified as *the*
 one that produces a pinned table, a cron is installed pointing at a specific script, a migration
@@ -261,16 +255,16 @@ decision names a specific file as the production source) — in the **same commi
 1. **Identify superseded variants** — files with a similar name/purpose that are NOT the confirmed
    canonical one, and grep the whole repo (scripts + crontab) to confirm zero active callers
    reference them. Never archive on a name-similarity guess alone; verify with a real grep.
-2. **`git mv` them into an `archive/` subdirectory** (preserving git history, not `rm`) — this is
-   reversible and auditable, unlike deletion, but it removes the file from the root namespace where
-   a casual `ls`/glob would surface it as a live candidate.
+2. **`git mv` them into an `archive/` subdirectory** (preserving git history, not `rm`) — reversible
+   and auditable, and it removes the file from the root namespace where a casual `ls`/glob would
+   surface it as a live candidate.
 3. **Update the source's file in `mike/kb/data_registry/`** to reflect the new archive path and mark the entry
    `DEPRECATED` with a pointer to the confirmed canonical replacement (per §5's obsolete-marking
    rule if this is a data-source migration, or a plain note if it's just script hygiene).
 4. **Do NOT apply this to genuine audit-trail artifacts** — rejected-hypothesis backtest CSVs, dry-run
    logs proving a mechanism works, anything already namespaced into an experiment directory per §8
    (`data/*_exp/`, `agents/<id>/probe_*/`). Those are inert data files kept as evidence, not scripts
-   that could be run by mistake — archiving them is unnecessary churn, not safety.
+   that could be run by mistake — archiving them is churn, not safety.
 
 **Periodic check**: `bin/data_registry_audit.sh`'s stale-duplicate scan (added 2026-07-11) flags
 repo-root files with a name similar to an already-CANONICAL registry entry that are NOT yet under
@@ -280,9 +274,9 @@ repo-root files with a name similar to an already-CANONICAL registry entry that 
 
 **Root cause (2026-07-12 C1 CRITICAL, `kb/incidents/2026-07/2026-07-12-audit-cron-order-publish-cache-t1.md`):** a publish script silently read a
 process-inherited T-1 cache env var for ~2.5 weeks despite its own comment stating live BQ as the
-source of truth — the code didn't actually enforce the intent the comment stated. Nobody had
-asked "what vintage does this publish step actually read?" before a downstream gate tightened and
-turned the mismatch into a structural, always-fails contradiction.
+source of truth — the code didn't enforce the intent the comment stated. Nobody had asked "what
+vintage does this publish step actually read?" before a downstream gate tightened and turned the
+mismatch into a structural, always-fails contradiction.
 
 **Mandatory rule**: before adding a new cron entry or changing an existing one's schedule, read
 `mike/kb/cron_registry.md` first (the bảng chính) — it answers, per job, what it reads (source +
@@ -324,8 +318,8 @@ tổng-mọi-account có chủ đích.
 
 **Self-check trước khi commit** bất kỳ script nào đọc file dùng chung: chạy nó cho CẢ 2 account
 (`SpaceX` và `ZaloPay`) trong cùng 1 ngày có giao dịch, và xác nhận 2 kết quả KHÁC nhau. Hai output
-giống hệt nhau = gần như chắc chắn đang đọc chung không lọc — đây là dấu hiệu rẻ nhất, bắt được cả
-3 sự cố trên nếu có ai chạy.
+giống hệt nhau = gần như chắc chắn đang đọc chung không lọc — dấu hiệu rẻ nhất, bắt được cả 3 sự
+cố trên nếu có ai chạy.
 
 **Grep sweep không đủ nếu chỉ tìm tên file.** Lần sweep 2026-07-19 grep `dnse_raw` vẫn bỏ sót
 `eod_trading_report.sh` vì file CÓ nhắc tên nhưng lọc thiếu ở 1 nhánh. Sweep đúng = với MỖI hit,
@@ -338,12 +332,11 @@ kế toán đã lọc đúng; `execution_quality_review.py` chỉ lọc KHI truy
 **Root cause (2026-07-30, 2 lần cùng ngày):** dặn agent "sửa `kb/canonical.md` nhưng để CHƯA
 commit, chờ Mike đọc diff" — cả 2 lần, `bin/consolidate.sh` (cron mỗi giờ + tự trigger sau MỌI
 dispatch) quét `git add kb/` + `commit -- kb/` **BLANKET**, cuốn bản sửa dở vào 1 commit thường lệ
-trong vài chục giây trước khi Mike kịp đọc. Vá bằng "hold-list" (`state/kb_pending_review.txt` +
-TTL + pathspec exclude) — arch-reviewer bác bỏ: `fleet_backup.sh` (00:00, `git add -A`) và
-`kb_nightly.sh` (02:00, `git add kb/`) vẫn quét blanket ĐỘC LẬP, không biết hold-list; đo được
-**32,8% job dispatch rơi đúng khung giờ TTL không kịp cảnh báo trước khi 1 sweeper quét qua** —
-và khi bị cuốn, `publish_context.sh` xuất bản đúng bản CHƯA duyệt kèm banner khẳng định "đã
-duyệt" — cổng mở nhưng tự nhận đóng, tệ hơn không có cổng nào.
+trước khi Mike kịp đọc. Vá bằng "hold-list" (`state/kb_pending_review.txt` + TTL + pathspec
+exclude) — arch-reviewer bác bỏ: `fleet_backup.sh` (00:00, `git add -A`) và `kb_nightly.sh`
+(02:00, `git add kb/`) vẫn quét blanket ĐỘC LẬP, không biết hold-list; đo được **32,8% job
+dispatch rơi đúng khung giờ TTL không kịp cảnh báo trước khi 1 sweeper quét qua**; khi bị cuốn,
+`publish_context.sh` xuất bản bản CHƯA duyệt kèm banner "đã duyệt" — cổng mở nhưng tự nhận đóng.
 
 **Quy ước đúng (đã dùng cho code `bin/*.sh.draft`, §10) — áp dụng y hệt cho `kb/`:** khi cần Mike
 duyệt trước khi live, **ghi bản mới ra `kb/<file>.proposed`** (file anh em, cùng thư mục) —
@@ -372,37 +365,35 @@ chỗ, đừng git commit" trong khi mối nguy thật không nằm ở git.
 **Root cause (2026-07-10 DT5G cron-order incident, bus question `retro-pattern-recurring-
 dataprovenance-2`):** `daily_refresh_v34b` computed DT5G at 23:15, but `bq_freshness_check` read
 it at 17:30 — 6 hours *before* that day's compute ran, so it silently read *yesterday's* value
-every single day. This wasn't a BQ-vs-DNSE source mistake (§6's rule doesn't cover it — DT5G has
-no DNSE-equivalent live source); it was two **internal cron jobs racing**, hidden for weeks by a
-tolerance (`MAX_STATE_LAG=2`) loose enough to never trip on a 1-day-late read. §6 closed the
-narrow cut (same-day price/volume must come from DNSE, not BQ); this rule generalizes past it —
-the actual failure mode is "code silently consumes data that isn't ready yet, hidden by a
-tolerance or schedule assumption wider than the real risk," and that shape recurs for ANY
-producer→consumer pair, not just BQ-vs-DNSE.
+every single day. Not a BQ-vs-DNSE source mistake (§6's rule doesn't cover it — DT5G has no
+DNSE-equivalent live source); two **internal cron jobs racing**, hidden for weeks by a tolerance
+(`MAX_STATE_LAG=2`) loose enough to never trip on a 1-day-late read. §6 closed the narrow cut
+(same-day price/volume from DNSE, not BQ); the failure mode this rule generalizes to: "code
+silently consumes data that isn't ready yet, hidden by a tolerance or schedule assumption wider
+than the real risk."
 
-**Rule:** when a script's output feeds another script that runs on its own cron schedule (not
-triggered directly by the producer finishing) — before trusting "producer already ran by the
-time I run" on schedule alone:
+**Rule:** when a script's output feeds another script on its own cron schedule (not triggered
+by the producer finishing) — before trusting "producer already ran by the time I run" on
+schedule alone:
 - Add a **real freshness precheck** in the consumer: read the producer's own timestamp/marker
   (a `_asof`/`_generated_at` field, file mtime, a `*_ok` flag) and confirm it's from *today's*
   run — not just "a file exists" or "cron order says it should be done by now." Schedule
-  assumptions drift (a producer that starts running late, a job that silently fails but leaves
-  yesterday's output in place) and a precheck is the only thing that catches it.
+  assumptions drift (a producer running late, a job that silently fails but leaves yesterday's
+  output in place); a precheck is the only thing that catches it.
 - Set the tolerance **as tight as the real risk allows** — wide enough to survive normal jitter
   (a job finishing 5 minutes late), tight enough that a full day's staleness (or a full skipped
   run) trips it. `MAX_STATE_LAG=2` days is the concrete anti-pattern: it papered over a
   structural 6-hour-early read for weeks because "2 days behind" never looked urgent.
-- When adding or changing a cron schedule for either side of a pair, this check is now folded
-  into §11's mandatory 4 questions (`kb/cron_registry.md`) — "đọc gì+vintage" already asks this;
-  treat "does the consumer verify freshness or just trust timing" as part of answering it, not a
-  separate step to skip.
-- This applies to ANY internal producer→consumer relationship on independent cron schedules —
-  not just BQ/DNSE, not just DT5G. Same reasoning as §6 and §9, generalized: verify the artifact
-  you're about to consume is actually the one you think it is, don't infer it from schedule math.
+- Cron schedule change on either side of a pair: this check is folded into §11's mandatory 4
+  questions (`kb/cron_registry.md`) — "đọc gì+vintage" already asks it; treat "does the consumer
+  verify freshness or just trust timing" as part of answering, not a separate step.
+- Applies to ANY internal producer→consumer relationship on independent cron schedules — not
+  just BQ/DNSE, not just DT5G. Same reasoning as §6 and §9: verify the artifact you're about to
+  consume is actually the one you think it is, don't infer it from schedule math.
 
 **Not a mandate to retrofit every existing pair at once** — apply going forward on every new/
-changed cron pair (§11), and treat a periodic sweep of *existing* pairs (checking `cron_registry.md`
-for any pair whose consumer trusts schedule-order alone) as Friday KB editorial review material,
+changed cron pair (§11); a periodic sweep of *existing* pairs (checking `cron_registry.md` for
+any pair whose consumer trusts schedule-order alone) is Friday KB editorial review material,
 same as the data-registry and stale-duplicate audits already folded in there.
 
 ## 15. Bash Strings Doubling as LLM Prompts: Escape `"`/`` ` ``, Then Verify by Running, Not Reading
@@ -412,14 +403,13 @@ dispatch scripts (`daily_retro.sh`, `kb_nightly.sh`, `fleet_housekeeping.sh`) bu
 multi-line bash double-quoted strings that double as LLM prompt text — Vietnamese prose full of
 markdown emphasis (`"quoted phrase"`) and inline-code backticks (`` `filename` ``). Both `"` and
 `` ` `` are live bash metacharacters even inside a double-quoted string (unlike single quotes) —
-an unescaped one silently terminates the string or triggers real command substitution. Every
-occurrence went undetected for weeks because the symptom is either a **fatal crash before any
-notify.sh call runs** (daily_retro.sh: 2 nights silent) or a **corrupted-but-still-launched**
-dispatch (kb_nightly.sh: `dispatch.sh` received extra positional args, exited 1 immediately —
-2 weeks of Friday/Saturday editorial review silently never ran) or **bash executing the quoted
-text as a command** (`fleet_housekeeping.sh --help`: `` `datacold` `` got run as a command,
-silently swallowed, word vanished from the output). "The script ran" / "the dispatch launched"
-was mistaken for "the content parsed as intended" every time.
+an unescaped one silently terminates the string or triggers real command substitution. Symptoms:
+a **fatal crash before any notify.sh call runs** (daily_retro.sh: 2 nights silent); a
+**corrupted-but-still-launched** dispatch (kb_nightly.sh: `dispatch.sh` received extra positional
+args, exited 1 immediately — 2 weeks of Friday/Saturday editorial review silently never ran);
+**bash executing the quoted text as a command** (`fleet_housekeeping.sh --help`: `` `datacold` ``
+got run as a command, silently swallowed, word vanished from the output). "The script ran" / "the
+dispatch launched" was mistaken for "the content parsed as intended" every time.
 
 **Rule:**
 1. Any `"` or `` ` `` inside a bash double-quoted string must be escaped (`\"`, `` \` ``) — no
@@ -428,10 +418,10 @@ was mistaken for "the content parsed as intended" every time.
    need variable interpolation — it needs zero escaping of either character (see
    `bin/weekly_ops_audit.sh` for the pattern). If you DO need `$VAR` interpolation, either accept
    the escaping burden or hardcode the (usually-fixed) absolute paths as literal text instead.
-3. **Verify by running, not by reading.** Re-reading the text "looks fine" is exactly how all 4
-   instances shipped — a quote 40 lines into an 80-line string is not something a re-read catches
-   reliably. Extract the assignment/heredoc in isolation and actually execute it (see the 4
-   incident writeups for the exact technique used each time) before trusting a fix.
+3. **Verify by running, not by reading.** Re-reading "looks fine" is how all 4 instances shipped
+   — a quote 40 lines into an 80-line string is not something a re-read catches reliably. Extract
+   the assignment/heredoc in isolation and actually execute it (see the 4 incident writeups for
+   the exact technique used each time) before trusting a fix.
 
 **Enforced by:** `bin/shellcheck_gate.sh` (pre-commit hook) — ShellCheck already detects this
 exact pattern for free (`SC1078`/`SC1079` unterminated/suspicious string quote, `SC2006` legacy
@@ -444,11 +434,10 @@ was tried and dropped — false positives on `hooks/*.sh`'s cross-file `source` 
 **Evaluated and NOT shipped:** a Semgrep rule for §12 (missing `accountNo` filter when reading
 `dnse_raw_*.jsonl`) — tested against `bin/verify_account_snapshot.py` (which has the correct
 filter); a naive `pattern-not: for $REC in $ITER: ... $REC.get("accountNo") ...` fires on every
-unrelated loop in the file (not scoped to loops that actually read the shared file) — this needs
+unrelated loop in the file (not scoped to loops that actually read the shared file) — needs
 dataflow-aware rule engineering (semgrep taint mode or similar), not a quick pattern match, to
-reach the "fires twice at 100% accuracy" bar. Left as a documented prose lesson (§12) until
-someone has time to build and test that properly — shipping a noisy rule would erode trust in
-the whole gate faster than having no rule at all.
+reach the "fires twice at 100% accuracy" bar. Left as a prose lesson (§12) until someone has time
+to build and test that properly — a noisy rule erodes trust in the whole gate faster than no rule.
 
 ## 16. Never Trust the Host's System Timezone for Date/Time Comparisons — Anchor Explicitly
 
@@ -467,9 +456,9 @@ Mike ran the code by hand (no inherited `TZ`) and via the script's own selfcheck
 
 **Evaluated and NOT shipped:** a static lint gate (`datetime.now()`/`date.today()` without
 `tz=`) — measured **243 matches** in the real repo, 0 live bugs among them, several false
-positives (including matching its own explanatory comment). Same verdict as §12: a noisy rule
-erodes trust faster than none. Shipped instead: this doc + a `TZ=Asia/Ho_Chi_Minh` crontab
-export (closes the ambient-env gap) + relying on §14's "run the real code path" habit.
+positives (including matching its own explanatory comment); same verdict as §12. Shipped
+instead: this doc + a `TZ=Asia/Ho_Chi_Minh` crontab export (closes the ambient-env gap) +
+relying on §14's "run the real code path" habit.
 
 ## 17. A Reader Reporting "Still Open" State Must Scan Every Retention Tier a Mover Can Reach
 
@@ -478,12 +467,12 @@ export (closes the ambient-env gap) + relying on §14's "run the real code path"
 (`kb_nightly.sh` Phase 1b2 = 30d for bus events, `fleet_housekeeping.sh` Phase 1b3 for
 `bus/jobs/`) silently read as "not found" instead of "archived." Same shape as the 2026-07-31
 `ops_health_check.sh` check-#5 bug (2 questions invisible for a month, fixed via
-`ops_health_check_selfcheck.py`) but
-NOT the same fix: a proposed generic `conservation_check.py` (count_before==count_after+
-archived) was rejected — every mover already conserves counts correctly, so it wouldn't have
-caught either bug. The real defect is per-READER: does THIS reader (reporting unresolved state
-for a human decision) scan every tier a mover can place data into? Hot-only readers showing
-"recent activity" (`context_pack.md`'s "MỚI NHẤT") are correctly hot-only by design.
+`ops_health_check_selfcheck.py`) but NOT the same fix: a proposed generic `conservation_check.py`
+(count_before==count_after+archived) was rejected — every mover already conserves counts
+correctly, so it wouldn't have caught either bug. The defect is per-READER: does THIS reader
+(reporting unresolved state for a human decision) scan every tier a mover can place data into?
+Hot-only readers showing "recent activity" (`context_pack.md`'s "MỚI NHẤT") are correctly
+hot-only by design.
 
 **Rule:** before shipping/auditing a "is X still open" reader, check `kb/cron_registry.md` for
 every mover that can archive X's data, and confirm the reader globs ALL tiers — use
@@ -492,17 +481,17 @@ every mover that can archive X's data, and confirm the reader globs ALL tiers �
 test in the extract-and-test style (`CHECK5_BEGIN`/`END` marker; `mike_json_archive_selfcheck.py`)
 — a prose "scans both tiers" claim has already failed twice without a test enforcing it.
 
-**Evaluated and NOT shipped:** the generic conservation-check (wrong layer, see above); a
-blanket archive-aware rewrite of every bus reader — `cmd_recent`/`cursor-advance` are correctly
-hot-only (their job is "what's new," not "what's owed"); making them archive-aware would be an
-unrequested behavior change.
+**Evaluated and NOT shipped:** the generic conservation-check (wrong layer, above); a blanket
+archive-aware rewrite of every bus reader — `cmd_recent`/`cursor-advance` are correctly hot-only
+("what's new," not "what's owed"); making them archive-aware would be an unrequested behavior
+change.
 
 ## 18. Any Quant R&D Task (Backtest, IC Test, Gate/Selector Change) — Follow `.claude/skills/quant-research/`
 
 Before designing/running a backtest, factor-IC test, or production-rule review, check the
 `quant-research` skill (`/home/trido/thanhdt/WorkingClaude/.claude/skills/quant-research/SKILL.md`
-— Skill tool or direct read in headless dispatch). The fixed order of operations this fleet
-converged on: scope by reading real code first, check `mike/kb/data_registry/`, pin the
+— Skill tool or direct read in headless dispatch). Fixed order of operations this fleet converged
+on: scope by reading real code first, check `mike/kb/data_registry/`, pin the
 environment, declare N as independent events not row count, match statistical tool to N
 (IS/OOS large, LOO+bootstrap small, always disclosed), verify position-tier AND full-engine-tier,
 self-check 0 VND with control leg reproducing the pinned number, point-in-time joins only, look
@@ -518,12 +507,12 @@ skill (`/home/trido/.claude/skills/verify-before-done/SKILL.md`). Built 2026-08-
 same-day pair: a selfcheck that PASSED in its author's session but FAILED under independent
 re-run (§16's TZ bug — author's session inherited a correct `TZ`, the re-run didn't), and a
 brand-new selfcheck that caught a real bug on its first execution (`EOFError` not an `OSError`
-subclass) — the second is the skill working as intended, not a counter-example. Core habit: run
-the selfcheck for real, name its environment dependencies (TZ tops the list), re-run under a
-stripped/adversarial variant, treat any cross-environment difference as the finding itself.
-Applies to the author before claiming done AND to anyone re-verifying (baked into
-`arch-reviewer`'s mandate — see `~/.claude/agents/arch-reviewer.md`). Point agents at this skill
-explicitly rather than re-deriving the checklist each time.
+subclass) — the second is the skill working as intended. Core habit: run the selfcheck for real,
+name its environment dependencies (TZ tops the list), re-run under a stripped/adversarial
+variant, treat any cross-environment difference as the finding itself. Applies to the author
+before claiming done AND to anyone re-verifying (baked into `arch-reviewer`'s mandate — see
+`~/.claude/agents/arch-reviewer.md`). Point agents at this skill explicitly rather than
+re-deriving the checklist each time.
 
 ## 20. Mark `decided_by: "user"` When a Real User Confirmed a Closure — Not Just "Seemed Reasonable"
 
@@ -532,10 +521,10 @@ explicitly rather than re-deriving the checklist each time.
 0" as evidence the fix worked — arch-reviewer caught the contradiction: a Mike session had
 closed ~15 stale questions in an unrelated cleanup that overlapped in time. Nothing on a closure
 event recorded WHO decided it, so the self-verification couldn't tell "coincidental cleanup"
-from "the fix's mechanism working." Generalizes a risk arch-reviewer already flagged narrowly
-(round 2: don't let a CRON auto-expire a real pending decision) — the same danger applies when a
-human OR agent session closes a question on its own judgment, however well-reasoned, without the
-user confirming in the moment.
+from "the fix's mechanism working." Generalizes a risk arch-reviewer flagged narrowly (round 2:
+don't let a CRON auto-expire a real pending decision) — same danger when a human OR agent session
+closes a question on its own judgment, however well-reasoned, without the user confirming in the
+moment.
 
 **Rule:** when an `answer`/`decision` closes a money/decision-adjacent `question`, include
 `"decided_by": "user"` in the payload ONLY when the user actually confirmed it in real time.
