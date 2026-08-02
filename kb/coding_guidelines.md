@@ -102,193 +102,151 @@ send a message, write a shared file, call an API that isn't naturally idempotent
 
 ## 6. Verify Report Data Provenance (client-facing numbers)
 
-**A field's name and a plausible-looking value are not verification.** Root cause (2026-07-03
-weekly-report incident, `kb/incidents/2026-07/2026-07-03-weekly-report-estimated-cost-basis.md`): a P&L calc read a snapshot field labeled
-`"source": "ref_px_approx"` (an approximate price for an unrelated purpose) and reported it as
-real cost basis, unchecked, into a client-facing document.
+**A field's name and a plausible-looking value are not verification.** Root cause (2026-07-03,
+`kb/incidents/2026-07/2026-07-03-weekly-report-estimated-cost-basis.md`): a P&L calc read a
+snapshot field labeled `"source": "ref_px_approx"` (an approximate price for an unrelated
+purpose) and reported it as real cost basis, unchecked, in a client-facing doc.
 
 Before any number reaches a report (daily/weekly/monthly, or any client-facing artifact):
-- Trace it back to the system that is *authoritative* for that fact — for trade prices/fills,
-  that is the broker's own fill confirmation (`dnse_raw_*.jsonl`'s `averagePrice`/
-  `fillQuantity`), never a downstream summary file written for a different purpose.
-- Cross-check against a second independent source (internal execution journal `FILL` events,
-  an already-audited snapshot) before trusting either — see `bin/verify_account_snapshot.py`,
-  the only script now permitted to compute cost-basis/P&L for a SpaceX trading report. If two
-  independent sources disagree beyond a tight tolerance, fail loudly (non-zero exit) — do not
-  silently pick one and proceed.
-- Aggregate totals can be accidentally right while per-item attribution is wrong (NAV here only
-  depends on quantity × market price, not cost basis, so it happened to survive unscathed) —
-  don't let a correct-looking total substitute for verifying the breakdown a client will read.
-- This is the same principle as [[verify-real-facts-dont-self-invent]] and the artifact-vs-
-  self-report rule (MIKE.md §Quy chuẩn bắt buộc mục 2) applied to report generation: verify the
-  artifact, don't trust a field because its value looks plausible.
+- Trace it to the *authoritative* system — for fills, that's the broker's own confirmation
+  (`dnse_raw_*.jsonl`'s `averagePrice`/`fillQuantity`), never a downstream summary file.
+- Cross-check a second independent source (internal journal `FILL` events, an audited snapshot)
+  — see `bin/verify_account_snapshot.py`, the only script permitted to compute cost-basis/P&L
+  for a SpaceX report. Disagreement beyond a tight tolerance → fail loudly, don't silently pick one.
+- Aggregate totals can be right while per-item attribution is wrong (NAV only depends on
+  quantity × market price, not cost basis, so it survived unscathed here) — a correct total
+  doesn't verify the breakdown a client reads.
+- Same principle as [[verify-real-facts-dont-self-invent]] / MIKE.md §Quy chuẩn bắt buộc mục 2:
+  verify the artifact, don't trust a field because its value looks plausible.
 
-**Standing pipeline for ALL cadences (daily/weekly/monthly), locked in 2026-07-03:**
-1. `bin/verify_account_snapshot.py` — true cost basis per ticker, cross-checked (broker raw log
-   vs internal journal vs any audited snapshot).
-2. `bin/daily_nav_snapshot.py` — true NAV for one date (MTM stock + real cash − real margin debt
-   from a fresh `dnse_raw_*.jsonl` `balances` record), appended to `nav_history_{account}.csv` so
-   every cadence reads the same day-by-day series instead of recomputing NAV differently each time.
-3. `bin/reconcile_equity.py` — the two-sided identity check (`starting_capital + unrealized_P&L −
-   fees − margin_interest == market_value + cash − margin_debt`); confirmed fee rate is
-   **0.075%** of true cost basis (not 0.1%, corrected 2026-07-03), and any residual after that
-   should be checked against an *estimated* margin-interest accrual (`--margin-rate-annual`,
-   12.5%/year per user, unverified against DNSE's actual contract) before being called
-   "unexplained" — see the 2026-07-03 report for a worked example (residual matched ~4 days of
-   accrued-but-not-yet-posted interest almost exactly).
-4. If a number can't be traced through this pipeline, don't put it in the report — say what's
-   missing instead of estimating silently.
+**Standing pipeline for ALL cadences, locked 2026-07-03:**
+1. `bin/verify_account_snapshot.py` — true cost basis/ticker, cross-checked (broker raw vs
+   internal journal vs audited snapshot).
+2. `bin/daily_nav_snapshot.py` — true NAV/date (MTM stock + real cash − margin debt from a
+   fresh `dnse_raw_*.jsonl` `balances` record), appended to `nav_history_{account}.csv` so every
+   cadence reads the same series instead of recomputing differently each time.
+3. `bin/reconcile_equity.py` — identity check (`starting_capital + unrealized_P&L − fees −
+   margin_interest == market_value + cash − margin_debt`); fee rate **0.075%** of true cost
+   basis (not 0.1%, corrected 2026-07-03); residual checked against *estimated* margin accrual
+   (`--margin-rate-annual`, 12.5%/yr per user, unverified against DNSE's contract) before
+   calling it "unexplained."
+4. Can't trace a number through this pipeline → don't put it in the report, say what's missing.
 
-**Bright-line rule — same-day data: DNSE API, never BigQuery (user directive, 2026-07-09).**
-BQ (`tav2_bq.ticker`/`ticker_1m`) only syncs overnight (`sync_bq_cache_daily.sh`, 23:45 ICT) —
-any script reading BQ for "today's" price/volume before that sync is reading **yesterday's**
-close, structurally, every time (BQ physically cannot have today's data yet). Incident
-2026-07-09 (`kb/INCIDENTS.md`): a plan generator priced 2/4 orders off stale BQ close (+5.7%
-off) while 2 others happened to use live DNSE — the inconsistency is what let it go unnoticed.
-- Any same-day/live calculation (order sizing, ref prices for a T+1 plan, live NAV/exposure
-  checks, anything a report will call "today's" number) MUST read DNSE (`dnse_api.py`
-  secdef/latest_trade/positions/balances) — never BQ — regardless of what hour the script runs.
-- BQ is fine ONLY for: (a) historical/backtest queries on past trading days, (b) same-day
-  queries run AFTER BigQuery's own daily sync has demonstrably completed (verify via
-  `bq_freshness_check.sh`'s own freshness gate, not by assuming "it's after 18:00 so it must be
-  synced" — confirm the gate passed).
-- When adding this constraint to a dispatch prompt (LLM-authored script/plan, e.g. DollarBill),
-  state it as an unconditional MUST with a concrete example of the wrong vs right source (see
-  `mike/bin/bq_freshness_check.sh`'s DollarBill prompt for the wording already in place) — a
-  general "verify your data" reminder does not reliably stop an LLM from reaching for whichever
-  source is easiest to query in the moment.
+**Bright-line rule — same-day data: DNSE API, never BigQuery (user directive, 2026-07-09).** BQ
+(`tav2_bq.ticker`/`ticker_1m`) syncs overnight only (`sync_bq_cache_daily.sh`, 23:45 ICT) — any
+"today" query before that sync structurally reads **yesterday's** close. Incident 2026-07-09
+(`kb/INCIDENTS.md`): a plan generator priced 2/4 orders off stale BQ close (+5.7% off) while 2
+others used live DNSE — the inconsistency is what surfaced it.
+- Any same-day/live calc (order sizing, T+1 ref prices, live NAV/exposure) MUST read DNSE
+  (`dnse_api.py` secdef/latest_trade/positions/balances) — never BQ, regardless of hour.
+- BQ OK only for: (a) historical/backtest queries, (b) same-day queries AFTER BQ's sync has
+  demonstrably completed (verify via `bq_freshness_check.sh`'s gate, don't assume by clock time).
+- In dispatch prompts (DollarBill etc.): state as unconditional MUST with a concrete wrong-vs-
+  right example (see `bq_freshness_check.sh`'s DollarBill prompt) — a generic "verify your data"
+  reminder doesn't reliably stop an LLM reaching for the easiest source.
 
-**Cadence-specific scope** (content depth differs; the verification pipeline above does not):
-- **Daily**: keep it short — trades executed today, NAV + day-over-day change, and a margin/risk
-  flag if one exists. No attribution, no methodology appendix.
-- **Weekly**: full narrative (see `mike/reports/SpaceX_weekly_report_*.md` as the reference
-  template) — activity log, incident disclosures, sector/position tables, next-week plan, full
-  methodology appendix.
-- **Monthly**: apply institutional asset-management conventions on top of the weekly template —
-  MTD/QTD/YTD returns, benchmark comparison, sector/name attribution, risk metrics (drawdown,
-  volatility — once enough daily NAV history exists), fee/expense summary, compliance
-  disclosures, outlook. Same verified-data pipeline underneath; more sections on top.
+**Cadence-specific scope** (depth differs; pipeline above does not):
+- **Daily**: short — trades today, NAV + day-over-day change, margin/risk flag if any.
+- **Weekly**: full narrative (`mike/reports/SpaceX_weekly_report_*.md` = template) — activity
+  log, incident disclosures, sector/position tables, next-week plan, methodology appendix.
+- **Monthly**: institutional conventions on top — MTD/QTD/YTD, benchmark comparison,
+  attribution, risk metrics, fee/expense summary, compliance disclosures, outlook.
 
 ## 7. Onboarding a New Account With Legacy/Excluded Holdings
 
 **When an account brought under management already holds positions the bot didn't buy** (e.g.
-ZaloPay's pre-existing DGC position, kept for its own thesis under a trading restriction — see
-`kb/INCIDENTS.md`), don't hand-roll a one-off workaround — use the general mechanism, since more
-accounts of this shape are expected:
+ZaloPay's pre-existing DGC position, kept under a trading restriction — see `kb/INCIDENTS.md`),
+use the general mechanism, since more accounts of this shape are expected:
 
-1. **Declare it in config, not code**: set `"excluded_tickers": [...]` on the account's profile
-   in `secrets/trading_bot_accounts.json` (field added to `ACCOUNT_DEFAULTS` in
-   `trading_bot/config.py`). Empty by default for every other account.
-2. **Enforcement lives in ONE place**: `trading_bot.plan.filter_excluded_tickers()`, called from
-   `bot_execute.py` immediately after `load_plan()` — this makes it apply no matter how the plan
-   was generated (DollarBill's LLM-authored JSON, `bot_prepare_plan.py`'s templated strategy, or
-   a hand-edited file), so a plan generator forgetting the exclusion can never actually place a
-   forbidden order. Never rely on the plan generator remembering to leave the ticker out.
-3. **Size the strategy against `active_nav`, not total NAV**: `bin/compute_active_nav.py --account
-   <label>` computes `total_nav − market_value(excluded_tickers)` from LIVE broker
-   positions/prices (no dependency on our own execution journal, unlike
-   `verify_account_snapshot.py`/`daily_nav_snapshot.py` — those need fill history WE recorded,
-   which doesn't exist for a position the account already held before bot management). Whoever
-   builds the plan (DollarBill, or Mike dispatching it) must use this number as the allocation
-   basis — sizing V2.4 targets against total NAV when a third of it is locked in an excluded
-   position tries to deploy capital that isn't actually available.
-4. **Known gap, not yet closed**: `daily_nav_snapshot.py`'s P&L computation still assumes
-   journal-tracked fills for cost basis, so it can't yet produce a correct unrealized-P&L
-   breakdown for legacy positions (NAV/active_nav are correct today via
-   `compute_active_nav.py`; a P&L-capable version for legacy-position accounts is separate future
-   work — needed before any report that compares this account's *return*, not just its NAV,
-   against a clean-slate account like SpaceX).
-5. **Test it**: `excluded_tickers_selfcheck.py` is the reference — covers empty/None config
-   no-op, single/multi-ticker exclusion, the all-excluded edge case, and exact-case-only
-   matching (a lowercase config typo must not silently fail to exclude). Extend this file rather
-   than writing a parallel one when the mechanism itself changes.
+1. **Declare in config, not code**: `"excluded_tickers": [...]` on the account's profile in
+   `secrets/trading_bot_accounts.json` (`ACCOUNT_DEFAULTS` in `trading_bot/config.py`). Empty by
+   default elsewhere.
+2. **Enforcement in ONE place**: `trading_bot.plan.filter_excluded_tickers()`, called from
+   `bot_execute.py` right after `load_plan()` — applies no matter how the plan was generated
+   (DollarBill's LLM JSON, `bot_prepare_plan.py`'s template, a hand-edited file), so a plan
+   generator forgetting the exclusion can never place a forbidden order.
+3. **Size against `active_nav`, not total NAV**: `bin/compute_active_nav.py --account <label>`
+   computes `total_nav − market_value(excluded_tickers)` from LIVE broker positions/prices (no
+   dependency on our execution journal, unlike `verify_account_snapshot.py`/
+   `daily_nav_snapshot.py`, which need fill history that doesn't exist for a pre-existing
+   position). Whoever builds the plan must use this as the allocation basis — sizing against
+   total NAV when a third is locked in an excluded position tries to deploy unavailable capital.
+4. **Known gap**: `daily_nav_snapshot.py`'s P&L still assumes journal-tracked fills for cost
+   basis, so it can't produce unrealized-P&L for legacy positions (NAV/active_nav are correct via
+   `compute_active_nav.py`; a P&L-capable version is separate future work — needed before
+   comparing this account's *return* against a clean-slate account like SpaceX).
+5. **Test it**: `excluded_tickers_selfcheck.py` is the reference — empty/None no-op, single/
+   multi-ticker, all-excluded edge case, exact-case-only matching. Extend this file, don't
+   parallel it.
 
 **Test-infrastructure lesson (same root cause, different files):** `Executor.__init__` eagerly
 loads `state.json` from the DEFAULT `(account, plan_date)` path *before* test code can redirect
-it to a tmpdir — a stale file from an earlier run (or another selfcheck reusing the same account
-tag) silently corrupts the next run's starting state. Every selfcheck driving `Executor` needs
-BOTH a unique account tag AND a module-load-time cleanup of any stale fixture at the default path
-— see `ghost_order_selfcheck.py`'s `TAG` comment for the pattern.
+it to a tmpdir — a stale file from an earlier run silently corrupts the next run's start state.
+Every selfcheck driving `Executor` needs a unique account tag AND module-load-time cleanup of any
+stale default-path fixture — see `ghost_order_selfcheck.py`'s `TAG` comment.
 
 ## 8. Never Write Experiment Output to a Canonical / Registry-Pinned Filename
 
 **Root cause (2026-07-06 R3-CSV overwrite, `data/results_registry.md` mục `## KẾT QUẢ THAM CHIẾU
-phiên 2026-06-19` — cite by section title, not line number: line refs in this ledger drift as new
-entries get inserted, see the file's own top-of-file navigation note):** an output
-filename built from only a SUBSET of env knobs (e.g. `BASKET_SELECT` / combination-mode had no
-suffix) — a config axis that materially changes the result but has no filename suffix lets an
-experiment run silently clobber the registry-pinned production baseline. A lock wouldn't help —
-both runs were legitimate, just colliding on an output name.
+phiên 2026-06-19` — cite by section title, not line: refs drift as entries get inserted):** an
+output filename built from only a SUBSET of env knobs (`BASKET_SELECT`/combination-mode had no
+suffix) — a config axis that materially changes the result but has no filename suffix let an
+experiment silently clobber the pinned production baseline. A lock wouldn't have helped — both
+runs were legitimate, just colliding on an output name.
 
 Rules when a script's output feeds `data/results_registry.md` or any pinned baseline:
 
-- **Any config axis that changes the numbers MUST change the filename.** If a script derives its
-  output path from env vars, every result-affecting knob needs a suffix tag — or the run must
-  pass an explicit `OUT_CSV=` override. Before running an experiment variant, check whether your
-  changed knob is actually reflected in the output filename; if not, set an explicit distinct
-  output path.
-- **Experiment/ad-hoc runs write to a clearly non-canonical name** — add an experiment suffix
-  (`_exp_<what>`, `_probeNNN`, dispatcher job-id) so a canonical pinned CSV is never a possible
-  target. Treat the registry-pinned filenames as read-only artifacts owned by the pinned command.
-- **Regenerating a pinned baseline: use the EXACT pinned command AND the pinned interpreter.**
-  The registry pins `$DNA_PYEXE` (= `/home/trido/thanhdt/wc_venv/bin/python`, pandas 3), NOT
-  system `python3` (pandas 2.3, which cannot unpickle `data/earnings_surprise_data.pkl` — raises
-  `NotImplementedError` in `NDArrayBacked.__setstate__`). Copy the command verbatim including
-  `$DNA_PYEXE`; don't substitute `python3` even if a prompt writes it that way.
+- **Any config axis that changes the numbers MUST change the filename.** Every result-affecting
+  env knob needs a suffix tag, or the run must pass an explicit `OUT_CSV=` override. Before
+  running an experiment variant, check whether the changed knob is reflected in the filename.
+- **Experiment/ad-hoc runs write to a clearly non-canonical name** (`_exp_<what>`, `_probeNNN`,
+  dispatcher job-id) so a canonical pinned CSV is never a possible target.
+- **Regenerating a pinned baseline: use the EXACT pinned command AND interpreter.** Registry pins
+  `$DNA_PYEXE` (= `/home/trido/thanhdt/wc_venv/bin/python`, pandas 3), NOT system `python3`
+  (pandas 2.3 cannot unpickle `data/earnings_surprise_data.pkl` — `NotImplementedError` in
+  `NDArrayBacked.__setstate__`). Copy the command verbatim; don't substitute `python3`.
 - **After regenerating, verify before trusting**: metric in expected range, `self-check 0 VND`,
-  and an independent recompute from the CSV (`extract_peryear.py <CSV>`) matching the print — then
-  note the regeneration in the registry so the overwrite episode is auditable.
+  independent recompute (`extract_peryear.py <CSV>`) matching the print — then note the
+  regeneration in the registry for auditability.
 
-**§8b. `data/bq_cache_asof*` snapshot retention (policy chốt 2026-07-30, user directive, sau audit
-`fleet_housekeeping` job Wags_20260730_112912).** Mỗi snapshot ~2,0GB, không tái tạo được (BQ
-time-travel tắt, `ticker`/`ticker_prune` TRUNCATE+rebuild mỗi ngày) — xoá sai = mất vĩnh viễn bằng
-chứng cho 1 kết quả pinned.
-
-- **Giữ tối đa 1 bản/tháng.** Nhiều snapshot cùng tháng dương lịch (vd nhiều lần re-pin do restate
-  trong cùng tháng) → chỉ giữ bản MỚI NHẤT của tháng đó là bản "hiện hành" cho AS-OF vintage.
-- **>3 tháng tuổi → xoá được, NẾU không có vấn đề** — "không có vấn đề" nghĩa là: (a) KHÔNG phải
-  bản snapshot pin CHÍNH THỨC hiện hành cho 1 kết quả sống trong `current_ops.md`/
-  `results_registry.md` (grep xác nhận trước khi xoá, đúng kỷ luật §10 — không đoán theo tuổi/tên);
-  (b) KHÔNG được đánh dấu **"mốc lịch sử đặc biệt — giữ riêng"** (vd `bq_cache_asof20260728` =
-  mốc TRƯỚC restate DT5G 07-29, bằng chứng duy nhất cho attribution +0,47pp CAGR do trôi dữ liệu —
-  **KHÔNG BAO GIỜ xoá theo tuổi**, chỉ xoá nếu người quyết định tường minh việc này không còn giá
-  trị bằng chứng).
-- **Xoá snapshot cũ CHỈ SAU KHI số pin mới đã qua quant-skeptic** — không xoá bản đang dùng để
-  chờ verify xong bản thay thế (tránh mất cả 2 nếu bản mới bị REFUTED).
-- **Không tạo cadence re-pin riêng** — gắn vào nhịp snapshot BQ hàng tháng Winston đã dựng
-  (`bin/bq_monthly_pin.py`, cron ngày 1 hàng tháng) thay vì đặt lịch mới.
-- Nguồn đề xuất gốc: Taylor job `Taylor_20260729_155142`, `agents/Taylor/research/asof_vintage_label_20260729.md`.
+**§8b. `data/bq_cache_asof*` snapshot retention (chốt 2026-07-30, sau audit `fleet_housekeeping`
+job Wags_20260730_112912).** Mỗi snapshot ~2,0GB, không tái tạo được (BQ time-travel tắt,
+`ticker`/`ticker_prune` TRUNCATE+rebuild mỗi ngày) — xoá sai = mất vĩnh viễn bằng chứng pin.
+- **Giữ tối đa 1 bản/tháng** — nhiều re-pin cùng tháng → chỉ bản MỚI NHẤT là "hiện hành".
+- **>3 tháng tuổi → xoá được NẾU**: (a) KHÔNG phải bản pin CHÍNH THỨC hiện hành cho kết quả sống
+  trong `current_ops.md`/`results_registry.md` (grep xác nhận, kỷ luật §10, không đoán theo
+  tuổi/tên); (b) KHÔNG đánh dấu **"mốc lịch sử đặc biệt"** (vd `bq_cache_asof20260728` = mốc
+  TRƯỚC restate DT5G 07-29, bằng chứng duy nhất cho attribution +0,47pp CAGR do trôi dữ liệu —
+  KHÔNG BAO GIỜ xoá theo tuổi, chỉ xoá nếu người quyết định tường minh mất giá trị bằng chứng).
+- **Xoá cũ CHỈ SAU KHI pin mới đã qua quant-skeptic** — không xoá bản đang chờ verify thay thế.
+- **Không tạo cadence riêng** — gắn nhịp snapshot BQ hàng tháng có sẵn (`bin/bq_monthly_pin.py`,
+  cron ngày 1 hàng tháng).
+- Nguồn: Taylor job `Taylor_20260729_155142`, `agents/Taylor/research/asof_vintage_label_20260729.md`.
 
 ## 9. Check `mike/kb/data_registry/` Before Wiring a New Data Source
 
 **Root cause (2026-07-11 SIGNAL_V11 base-leak, `kb/INCIDENTS.md`):** four production consumers
 silently read a trap table (documented as a trap in `CLAUDE.md`, but nothing forced a check
-against it before each new script picked a table name that *sounded* right) instead of the real
-production regime table — causing a live paper-trading book to enter 6 tickers on a fake signal.
+before each new script picked a table name that *sounded* right) instead of the real production
+regime table — a live paper-trading book entered 6 tickers on a fake signal.
 
 **Mandatory rule, user directive 2026-07-11:** before reading ANY data source (BQ table, local
-CSV/pickle/JSON, published state file) in new research or production code — check
-`mike/kb/data_registry/` first (start at `index.md`; it is now an OKF tree, 1 source = 1 file —
-`kb/data_registry.md` is a stub redirect). Grep still works: `grep -rn "<source>" mike/kb/data_registry/`.
-- If the source is listed as `CANONICAL` — use it directly.
-- If listed as `TRAP` — read the "Bẫy" section before touching it; there is almost always a
-  correctly-named sibling table/file to use instead.
-- If listed as `DEPRECATED/DEAD` — don't wire it into anything new; it may still exist for
-  historical reference only.
-- **If the source isn't in the registry at all** — don't assume it's safe by default. Add an
-  entry (status verified against real evidence — crontab, file mtime, code that writes it — not
-  guessed from the name) before wiring it in, or ask Winston/Mike to verify first.
+CSV/pickle/JSON, published state file) in new code — check `mike/kb/data_registry/` first (start
+`index.md`; OKF tree, 1 source = 1 file — `kb/data_registry.md` is a stub redirect). Grep:
+`grep -rn "<source>" mike/kb/data_registry/`.
+- `CANONICAL` — use directly. `TRAP` — read "Bẫy" section first; usually a correctly-named
+  sibling exists instead. `DEPRECATED/DEAD` — don't wire into anything new.
+- **Not in the registry at all** — don't assume safe by default. Add an entry (status verified
+  against real evidence — crontab, mtime, code that writes it — not guessed from the name) before
+  wiring in, or ask Winston/Mike to verify first.
 
-**Ownership**: Winston (data-ops) keeps the registry current ad-hoc whenever a new source
-surfaces in other work. A full periodic audit (re-verify every entry's freshness, sweep the
-codebase for sources still missing) is folded into the existing Friday KB editorial review
-(`kb_nightly.sh`'s headless Mike dispatch) rather than a separate new cron job.
+**Ownership**: Winston (data-ops) keeps the registry current ad-hoc. Full periodic audit folded
+into the Friday KB editorial review (`kb_nightly.sh`), not a separate cron job.
 
-**When dispatching Taylor (or anyone) for new R&D**: the dispatch prompt should explicitly say
-"tra `mike/kb/data_registry/` (index.md) trước khi chọn nguồn dữ liệu, đặc biệt bảng market-state/regime"
-— matching the same pattern already used for DollarBill's DNSE-vs-BQ rule (§6). A general
-"verify your data" reminder does not reliably stop an LLM from reaching for whichever table name
-sounds closest to what it needs in the moment; naming the specific registry file does.
+**When dispatching Taylor (or anyone) for new R&D**: state explicitly "tra `mike/kb/data_registry/`
+(index.md) trước khi chọn nguồn dữ liệu, đặc biệt bảng market-state/regime" — same pattern as
+DollarBill's DNSE-vs-BQ rule (§6). A generic "verify your data" reminder doesn't reliably stop an
+LLM reaching for whichever table name sounds closest; naming the registry file does.
 
 ## 10. When a File Becomes Canonical, Archive Its Superseded Variants in the Same Pass
 
@@ -377,41 +335,37 @@ kế toán đã lọc đúng; `execution_quality_review.py` chỉ lọc KHI truy
 
 ## 13. Sửa 1 file `kb/` cần Mike duyệt trước khi live → ghi ra `<file>.proposed`, KHÔNG sửa tại chỗ
 
-**Root cause (2026-07-30, 2 lần cùng ngày):** một agent được dặn "sửa `kb/canonical.md` nhưng để
-CHƯA commit, chờ Mike đọc diff" — cả 2 lần, `bin/consolidate.sh` (cron mỗi giờ + tự trigger sau MỌI
-dispatch) quét `git add kb/` + `git commit -- kb/` **BLANKET**, cuốn bản sửa dở vào 1 commit thường
-lệ trong vài chục giây, trước khi Mike kịp đọc. Thử vá bằng cơ chế "hold-list" (`state/
-kb_pending_review.txt` + TTL + pathspec exclude trong `consolidate.sh`) — arch-reviewer bác bỏ:
-`bin/fleet_backup.sh` (00:00 ICT, `git add -A`) và `bin/kb_nightly.sh` (02:00 ICT, `git add kb/`)
-vẫn quét blanket ĐỘC LẬP, không biết gì về hold-list; đo được **32,8% job dispatch bắt đầu đúng
-trong khung giờ mà TTL không kịp cảnh báo trước khi 1 trong 2 sweeper đó quét qua** — và khi bị
-cuốn, `publish_context.sh` (đọc `git show HEAD:<path>`) xuất bản đúng bản CHƯA duyệt kèm banner
-khẳng định "đây là bản đã duyệt" — cổng mở nhưng tự nhận là đóng, tệ hơn không có cổng nào.
+**Root cause (2026-07-30, 2 lần cùng ngày):** dặn agent "sửa `kb/canonical.md` nhưng để CHƯA
+commit, chờ Mike đọc diff" — cả 2 lần, `bin/consolidate.sh` (cron mỗi giờ + tự trigger sau MỌI
+dispatch) quét `git add kb/` + `commit -- kb/` **BLANKET**, cuốn bản sửa dở vào 1 commit thường lệ
+trong vài chục giây trước khi Mike kịp đọc. Vá bằng "hold-list" (`state/kb_pending_review.txt` +
+TTL + pathspec exclude) — arch-reviewer bác bỏ: `fleet_backup.sh` (00:00, `git add -A`) và
+`kb_nightly.sh` (02:00, `git add kb/`) vẫn quét blanket ĐỘC LẬP, không biết hold-list; đo được
+**32,8% job dispatch rơi đúng khung giờ TTL không kịp cảnh báo trước khi 1 sweeper quét qua** —
+và khi bị cuốn, `publish_context.sh` xuất bản đúng bản CHƯA duyệt kèm banner khẳng định "đã
+duyệt" — cổng mở nhưng tự nhận đóng, tệ hơn không có cổng nào.
 
-**Quy ước đúng, đã dùng sẵn cho code (`bin/*.sh.draft`, §10) — áp dụng y hệt cho nội dung `kb/`:**
-khi 1 agent/Mike sửa `kb/<file>` mà cần Mike đọc/duyệt trước khi live, **ghi bản mới ra
-`kb/<file>.proposed`** (file anh em, cùng thư mục) — **KHÔNG đụng vào `kb/<file>` gốc**. Vì:
-- `consolidate.sh`/`fleet_backup.sh`/`kb_nightly.sh` chỉ `git add`/`commit` các đường dẫn **thật**
-  — file `.proposed` được add như 1 file mới vô hại, không ảnh hưởng nội dung file gốc.
+**Quy ước đúng (đã dùng cho code `bin/*.sh.draft`, §10) — áp dụng y hệt cho `kb/`:** khi cần Mike
+duyệt trước khi live, **ghi bản mới ra `kb/<file>.proposed`** (file anh em, cùng thư mục) —
+**KHÔNG đụng `kb/<file>` gốc**. Vì:
+- `consolidate.sh`/`fleet_backup.sh`/`kb_nightly.sh` chỉ add/commit đường dẫn **thật** — `.proposed`
+  là file mới vô hại, không ảnh hưởng file gốc.
 - `publish_context.sh` chỉ `cat` đúng tên file thật (`current_ops.md`, `canonical.md`,
-  `projects/INDEX.md`) — không bao giờ đọc `.proposed`, nên bản đang chờ duyệt **không thể** lọt
-  vào `context_pack.md` dù có bao nhiêu lần consolidate chạy.
-- Các file role-scoped `@`-import thẳng từ working tree (`context_safety_core.md`,
+  `projects/INDEX.md`), không bao giờ đọc `.proposed` — bản chờ duyệt **không thể** lọt vào
+  `context_pack.md` dù consolidate chạy bao nhiêu lần.
+- File role-scoped `@`-import thẳng từ working tree (`context_safety_core.md`,
   `context_planning_mini.md`, `context_execution_mini.md`, `context_dataops_mini.md`,
-  `context_ops_mini.md`) — hold-list KHÔNG che được các file này (chỉ publish_context.sh mới hiểu
-  hold-list); `.proposed` che được VÌ agent đơn giản không viết vào file thật.
-- **Không cần state file, không cần TTL/debounce, không cần lock** — không có gì để mất-cập-nhật
-  hay quên-release: `.proposed` mồ côi vô hại (Mike hoặc `kb_nightly.sh` grep `find kb/ -name
-  '*.proposed' -mtime +1` định kỳ nhắc dọn/áp dụng, không phải gate).
+  `context_ops_mini.md`) — hold-list không che được, `.proposed` che được (agent không viết vào
+  file thật).
+- **Không cần state file/TTL/lock** — `.proposed` mồ côi vô hại (`kb_nightly.sh` grep `find kb/
+  -name '*.proposed' -mtime +1` định kỳ nhắc dọn, không phải gate).
 
-**Mike áp dụng khi duyệt xong:** đọc `diff kb/<file> kb/<file>.proposed`, nếu OK →
-`mv kb/<file>.proposed kb/<file>` rồi `git add`+`commit` như thường lệ (Mike tự commit, không dựa
-consolidate.sh sweep hộ). Nếu cần sửa thêm → sửa tiếp `.proposed`, không đụng file gốc, không lo
-mất bản đang chờ duyệt vì không tiến trình nào khác động vào đường dẫn `.proposed`.
+**Mike duyệt xong:** `diff kb/<file> kb/<file>.proposed`, OK → `mv .proposed <file>` rồi tự
+`git add`+`commit` (không dựa consolidate.sh sweep hộ). Cần sửa thêm → sửa tiếp `.proposed`.
 
-**Dặn rõ trong MỌI dispatch prompt yêu cầu "sửa X nhưng để Mike duyệt trước":** nói thẳng tên file
-`.proposed`, đừng chỉ nói "để uncommitted" — đó là chỗ 2 lần sự cố hôm nay bị hiểu nhầm thành "sửa
-tại chỗ, đừng git commit" trong khi mối nguy thật không nằm ở git.
+**Dặn rõ trong MỌI dispatch prompt "sửa X nhưng để Mike duyệt trước":** nói thẳng tên file
+`.proposed`, đừng chỉ nói "để uncommitted" — đó là chỗ 2 sự cố hôm đó bị hiểu nhầm thành "sửa tại
+chỗ, đừng git commit" trong khi mối nguy thật không nằm ở git.
 
 ## 14. Every Internal Producer→Consumer Pipeline Pair Needs a Real Freshness Check, Not Just a Loose Tolerance
 
@@ -498,151 +452,102 @@ the whole gate faster than having no rule at all.
 
 ## 16. Never Trust the Host's System Timezone for Date/Time Comparisons — Anchor Explicitly
 
-**Root cause (2026-07-31, `bin/dt5g_writer_watch.py`):** the host runs `Etc/UTC`
-(`timedatectl` confirmed), but the code read a BQ table's `lastModifiedTime` (epoch millis, UTC)
-with `datetime.fromtimestamp(ms/1000.0)` and a comment claiming *"process TZ = ICT trên host
-này"* — a false, unverified assumption. Under the host's real UTC clock, a write that happened
-at 19:01 ICT got labeled "12:01" and compared against ICT-denominated time windows, missing by
-exactly 7 hours. The bug was **real but latent**: production cron callers happened to
-`source wc_env.sh` (which exports `TZ=Asia/Ho_Chi_Minh`) before invoking the script, so it never
-fired live — it was only caught because Mike ran the same code by hand (no inherited `TZ`) while
-independently verifying a dispatched fix, and separately by running the script's own selfcheck
-under `env -u TZ`.
+**Root cause (2026-07-31, `bin/dt5g_writer_watch.py`):** host runs `Etc/UTC` (`timedatectl`
+confirmed), but code read a BQ `lastModifiedTime` with `datetime.fromtimestamp(ms/1000.0)` +
+a false comment claiming "process TZ = ICT". A 19:01 ICT write got labeled "12:01", missing
+ICT time windows by 7h. **Real but latent**: production callers `source wc_env.sh` (exports
+`TZ=Asia/Ho_Chi_Minh`) before running the script, so it never fired live — caught only because
+Mike ran the code by hand (no inherited `TZ`) and via the script's own selfcheck under `env -u TZ`.
 
-**Rule:** any code that computes "today," parses a date, or compares two timestamps for
-freshness/staleness MUST anchor the timezone explicitly — never assume the calling process
-happens to have the right `TZ` in its environment:
-- Python: `datetime.now(ZoneInfo("Asia/Ho_Chi_Minh"))` / `datetime.fromtimestamp(epoch_ms/1000,
-  ZoneInfo("Asia/Ho_Chi_Minh"))` — not bare `datetime.now()`/`.fromtimestamp()` with an implicit
-  local-time interpretation.
-- Bash: `TZ='Asia/Ho_Chi_Minh' date ...` — not bare `date` in any script that compares dates
-  (see `bin/csv_fresh_today.sh` for the reference pattern, added same day as this rule).
-- When writing a selfcheck for freshness/date logic, run it under `env -u TZ` (and ideally a
-  second foreign TZ, e.g. `TZ=America/New_York`) — the exact test that caught this bug. A
-  selfcheck that inherits the developer's own correctly-set `TZ` will pass even when the
-  underlying code is wrong, exactly as happened here on the first pass.
+**Rule:** anchor timezone explicitly, never assume the calling process has the right `TZ`:
+- Python: `datetime.now(ZoneInfo("Asia/Ho_Chi_Minh"))`, not bare `datetime.now()`.
+- Bash: `TZ='Asia/Ho_Chi_Minh' date ...` (ref pattern: `bin/csv_fresh_today.sh`).
+- Selfchecks for date/freshness logic: run under `env -u TZ` (+ a foreign TZ) — the exact test
+  that caught this bug; a selfcheck inheriting the author's own correct `TZ` passes regardless.
 
-**Evaluated and NOT shipped:** a static grep/lint gate for this class of bug (`datetime.now()`/
-`date.today()`/`utcnow()` without `tz=`/`ZoneInfo`, or `date +...` without a `TZ=` prefix) —
-measured against the real repo: **243 matches for the naive Python pattern alone**, spot-checked
-finding zero live bugs among them (the one real bug already fixed) and several false positives,
-including the gate matching its **own explanatory comment** in the just-fixed file. Same verdict
-as §12's Semgrep evaluation: a rule this noisy erodes trust in the whole gate faster than having
-none. The cheaper, already-verified-effective mitigation is the pattern this fleet already relies
-on for the actual class of bug found today (§14): **run the changed code path for real**, under
-an adversarial environment (`env -u TZ`), rather than trying to catch it by static reading alone.
-Documentation (this section) plus a single `TZ=Asia/Ho_Chi_Minh` export at the top of the
-crontab (so every cron-invoked script gets a correct ambient `TZ` by default, closing the
-specific gap that made this bug latent-not-live) is the shipped fix — not a lint rule.
+**Evaluated and NOT shipped:** a static lint gate (`datetime.now()`/`date.today()` without
+`tz=`) — measured **243 matches** in the real repo, 0 live bugs among them, several false
+positives (including matching its own explanatory comment). Same verdict as §12: a noisy rule
+erodes trust faster than none. Shipped instead: this doc + a `TZ=Asia/Ho_Chi_Minh` crontab
+export (closes the ambient-env gap) + relying on §14's "run the real code path" habit.
 
 ## 17. A Reader Reporting "Still Open" State Must Scan Every Retention Tier a Mover Can Reach
 
-**Root cause (2026-08-01, audit kiến trúc fleet — Fable plan + Opus adversarial critique,
-so sánh với Paseo):** `bin/mike_json.py`'s `trace`/`verify-coverage` commands globbed only
-`bus/inbox/*.jsonl` (hot) — a job/event older than the archive threshold (`kb_nightly.sh`
-Phase 1b2 = 30 days for bus events, `fleet_housekeeping.sh` Phase 1b3 for `bus/jobs/`) silently
-came back "not found" instead of "archived." This is the SAME shape as the 2026-07-31 bug where
-`ops_health_check.sh`'s check #5 lost visibility into 2 never-answered questions for over a
-month (§ fixed, see `ops_health_check_selfcheck.py`) — but it is NOT the same fix. An adversarial
-review first proposed a generic "conservation check" (`count_before == count_after +
-count_archived`) — that invariant is trivially satisfied by every mover in this fleet already
-(nothing is silently deleted, everything is genuinely moved); it would NOT have caught either
-bug. The actual defect is per-READER, not per-mover: does THIS specific reader, which reports
-unresolved/pending/backlog state to a human for a decision, scan every tier a mover can place
-data into? A reader that only shows "recent activity" (e.g. `context_pack.md`'s "MỚI NHẤT"
-section) is correctly hot-only by design — excluding 2-month-old chatter is the point, not a bug.
+**Root cause (2026-08-01, fleet architecture audit vs Paseo):** `mike_json.py`'s `trace`/
+`verify-coverage` globbed only hot `bus/inbox/*.jsonl` — anything past the archive threshold
+(`kb_nightly.sh` Phase 1b2 = 30d for bus events, `fleet_housekeeping.sh` Phase 1b3 for
+`bus/jobs/`) silently read as "not found" instead of "archived." Same shape as the 2026-07-31
+`ops_health_check.sh` check-#5 bug (2 questions invisible for a month, fixed via
+`ops_health_check_selfcheck.py`) but
+NOT the same fix: a proposed generic `conservation_check.py` (count_before==count_after+
+archived) was rejected — every mover already conserves counts correctly, so it wouldn't have
+caught either bug. The real defect is per-READER: does THIS reader (reporting unresolved state
+for a human decision) scan every tier a mover can place data into? Hot-only readers showing
+"recent activity" (`context_pack.md`'s "MỚI NHẤT") are correctly hot-only by design.
 
-**Rule:** before shipping a new reader (or auditing an existing one) that answers "is X still
-open / unresolved / pending," identify every mover that can place X's data into cold storage
-(`kb/cron_registry.md` + this file's archival scripts — currently `kb_nightly.sh` Phase 1b2 for
-`bus/inbox/`, `fleet_housekeeping.sh` for `bus/jobs/`, `logs/`, `bus/registry/`) and confirm the
-reader globs ALL of them, not just the hot path. Use `mike_json.py`'s `_inbox_files()`/
-`_agent_files()`/`_job_record_path()` helpers (added 2026-08-01) instead of hand-rolling
-`glob.glob(".../inbox/*.jsonl")` again — that literal pattern is exactly what went stale twice.
-Ship the new/fixed reader WITH a regression test in the extract-and-test style already
-established (`ops_health_check.sh`'s `CHECK5_BEGIN`/`CHECK5_END` marker +
-`ops_health_check_selfcheck.py`; `mike_json_archive_selfcheck.py` for `trace`/`verify-coverage`)
-— a prose claim of "scans both tiers" is exactly the kind of self-report that has already failed
-twice without a test forcing it to stay true as the archival layout evolves.
+**Rule:** before shipping/auditing a "is X still open" reader, check `kb/cron_registry.md` for
+every mover that can archive X's data, and confirm the reader globs ALL tiers — use
+`mike_json.py`'s `_inbox_files()`/`_agent_files()`/`_job_record_path()` helpers (added
+2026-08-01) instead of hand-rolling `glob.glob(inbox/*.jsonl)` again. Ship WITH a regression
+test in the extract-and-test style (`CHECK5_BEGIN`/`END` marker; `mike_json_archive_selfcheck.py`)
+— a prose "scans both tiers" claim has already failed twice without a test enforcing it.
 
-**Evaluated and NOT shipped:** a generic `conservation_check.py` invariant across every mover
-(see root-cause paragraph above for why it targets the wrong layer). Also not shipped: a
-blanket rewrite of every `bus/inbox` reader in the fleet to be archive-aware — `cmd_recent`
-(shows only the newest N lines for `context_pack.md`) and the `cursor-advance` consolidator
-cursor are correctly hot-only (their entire purpose is "what's new," not "what's still owed");
-making them archive-aware would be a behavior change nobody asked for, not a fix.
+**Evaluated and NOT shipped:** the generic conservation-check (wrong layer, see above); a
+blanket archive-aware rewrite of every bus reader — `cmd_recent`/`cursor-advance` are correctly
+hot-only (their job is "what's new," not "what's owed"); making them archive-aware would be an
+unrequested behavior change.
 
 ## 18. Any Quant R&D Task (Backtest, IC Test, Gate/Selector Change) — Follow `.claude/skills/quant-research/`
 
-Before designing or running any backtest, factor-IC test, or production-rule review — check the
-`quant-research` skill (`/home/trido/thanhdt/WorkingClaude/.claude/skills/quant-research/SKILL.md`,
-invoke via the Skill tool where available, or read directly in a headless dispatch). It's the
-fixed order of operations this fleet has converged on from real jobs (2026-08-01 CAPIT
-quality-exit + FSCORE-role reviews and earlier): scope by reading the real code first, check
-`mike/kb/data_registry/`, pin the environment, declare N as independent events not row count,
-match the statistical tool to N (IS/OOS when large, LOO+bootstrap when small — always disclosed),
-verify at both position-tier and full-engine-tier, self-check 0 VND with the control leg
-reproducing the pinned number, point-in-time joins only, look for dose-response across variants,
-decompose kept-vs-added when basket size changes, reconcile against adjacent findings, DSR/PBO
-only when a config is actually being recommended for wire, confirm production untouched via
-`git diff`, quant-skeptic gate before any production-change recommendation, and independently
-verify the artifact (not the self-report) before relaying a conclusion. When dispatching Taylor
-for R&D, point at this skill explicitly in the prompt rather than re-deriving the checklist by
-hand each time — see `bin/dispatch.sh` prompts from 2026-08-01 for the reference wording.
+Before designing/running a backtest, factor-IC test, or production-rule review, check the
+`quant-research` skill (`/home/trido/thanhdt/WorkingClaude/.claude/skills/quant-research/SKILL.md`
+— Skill tool or direct read in headless dispatch). The fixed order of operations this fleet
+converged on: scope by reading real code first, check `mike/kb/data_registry/`, pin the
+environment, declare N as independent events not row count, match statistical tool to N
+(IS/OOS large, LOO+bootstrap small, always disclosed), verify position-tier AND full-engine-tier,
+self-check 0 VND with control leg reproducing the pinned number, point-in-time joins only, look
+for dose-response, decompose kept-vs-added on basket-size changes, reconcile adjacent findings,
+DSR/PBO before recommending a wire, confirm production untouched via `git diff`, quant-skeptic
+gate before any production-change recommendation, verify the artifact not the self-report before
+relaying a conclusion. Point Taylor at this skill explicitly rather than re-deriving by hand.
 
 ## 19. Any Task With a Selfcheck/Test — Follow `~/.claude/skills/verify-before-done/`
 
-Before reporting a coding/fix task "done" when it includes (or should include) a selfcheck —
-check the `verify-before-done` skill (`/home/trido/.claude/skills/verify-before-done/SKILL.md`,
-invoke via the Skill tool where available, or read directly in a headless dispatch). Built
-2026-08-01 from a same-day pair of incidents: a selfcheck that reported PASS in its author's
-own session but FAILED under an independent re-run (`dt5g_writer_watch.py`'s TZ bug — the
-author's session happened to inherit a correct `TZ`, an independent run didn't), and a
-brand-new selfcheck that caught a real bug on its very first execution (`EOFError` not being
-an `OSError` subclass) — the second case is the skill working as intended, not a
-counter-example. Core habit: run the selfcheck for real, name what it implicitly depends on
-from the environment (timezone easily tops the list — see §16), re-run under a stripped/
-adversarial variant of that dependency, and treat a result that differs between environments
-as the finding itself. Applies both to the author before claiming done and to anyone
-independently re-verifying that claim (this is now baked into `arch-reviewer`'s mandate, §5 of
-the fleet's architecture-review changelog — see `~/.claude/agents/arch-reviewer.md`). When
-dispatching an agent for a coding/fix task, point at this skill explicitly rather than
-re-deriving the checklist by hand each time.
+Before reporting a coding/fix task done with a selfcheck involved, check the `verify-before-done`
+skill (`/home/trido/.claude/skills/verify-before-done/SKILL.md`). Built 2026-08-01 from a
+same-day pair: a selfcheck that PASSED in its author's session but FAILED under independent
+re-run (§16's TZ bug — author's session inherited a correct `TZ`, the re-run didn't), and a
+brand-new selfcheck that caught a real bug on its first execution (`EOFError` not an `OSError`
+subclass) — the second is the skill working as intended, not a counter-example. Core habit: run
+the selfcheck for real, name its environment dependencies (TZ tops the list), re-run under a
+stripped/adversarial variant, treat any cross-environment difference as the finding itself.
+Applies to the author before claiming done AND to anyone re-verifying (baked into
+`arch-reviewer`'s mandate — see `~/.claude/agents/arch-reviewer.md`). Point agents at this skill
+explicitly rather than re-deriving the checklist each time.
 
 ## 20. Mark `decided_by: "user"` When a Real User Confirmed a Closure — Not Just "Seemed Reasonable"
 
-**Root cause (2026-08-01, saga "coord-" round 5, `wags-fix-not-confirmed: coord-2026-08-01`):**
-Wags's self-fix loop for `ops_health_check.sh` check #5 reasoned "the aged-question pool has a
-measured 0% natural drain rate" as the PROBLEM it was fixing, then separately observed "the pool
-went to 0" as EVIDENCE its fix worked — arch-reviewer caught the contradiction: the pool didn't
-drain on its own, a Mike session closed ~15 stale bus questions in an unrelated cleanup pass that
-happened to overlap in time. The fix's own self-verification couldn't tell "coincidental
-external cleanup" from "the fix's mechanism actually working," because nothing on a closure event
-records WHO made the call and how. This generalizes a risk arch-reviewer had already flagged
-narrowly (round 2: don't let a CRON auto-expire a real pending decision) — the same danger exists
-when a HUMAN OR AN AGENT SESSION closes a question with its own judgment, however well-reasoned,
-without the user explicitly confirming it in the moment. A downstream counting/verification
-mechanism has no way to distinguish the two just by observing "the pool shrank."
+**Root cause (2026-08-01, saga "coord-" round 5):** Wags's self-fix loop for check #5 reasoned
+"aged-question pool has 0% natural drain rate" as the bug it was fixing, then used "pool went to
+0" as evidence the fix worked — arch-reviewer caught the contradiction: a Mike session had
+closed ~15 stale questions in an unrelated cleanup that overlapped in time. Nothing on a closure
+event recorded WHO decided it, so the self-verification couldn't tell "coincidental cleanup"
+from "the fix's mechanism working." Generalizes a risk arch-reviewer already flagged narrowly
+(round 2: don't let a CRON auto-expire a real pending decision) — the same danger applies when a
+human OR agent session closes a question on its own judgment, however well-reasoned, without the
+user confirming in the moment.
 
-**Rule:** when writing an `answer`/`decision` event that closes a bus `question` — especially one
-that's money/decision-adjacent (a real escalation, not routine status) — include `"decided_by":
-"user"` in the payload **only when the user actually confirmed this closure in real time** (e.g.
-"anh chốt GIỮ full" said directly, or an explicit yes/no to a presented option). When Mike or an
-agent closes a question on its own judgment — even a well-evidenced one (checked commits, checked
-logs, genuinely stale) — **omit the field** (or use `"decided_by": "agent"` for clarity). This
-isn't a quality judgment on the closure itself (an agent's well-evidenced stale-superseded call
-can be entirely correct) — it's a **provenance record**, so anything counting/reporting backlog
-state later can separate "confirmed by a real person" from "judged, not confirmed" without having
-to re-read every closure's prose by hand.
+**Rule:** when an `answer`/`decision` closes a money/decision-adjacent `question`, include
+`"decided_by": "user"` in the payload ONLY when the user actually confirmed it in real time.
+When Mike/an agent closes on its own judgment (even well-evidenced) — omit the field, or use
+`"decided_by": "agent"`. Not a quality judgment on the closure — a provenance record, so later
+counting/reporting can separate "confirmed by a person" from "judged, not confirmed."
 
-**Enforced by:** `bin/bus_question_audit.py`'s closure-provenance report (added same day) — prints
-a breakdown of recent closures by `decided_by` for the last N days (`--provenance-days`, default
-14), always shown (not gated), feeding the weekly review. This is a REPORT, not a gate — it does
-not block anything or auto-classify; a high count of unmarked agent closures is a prompt for
-periodic human spot-review, not evidence of wrongdoing by itself.
+**Enforced by:** `bin/bus_question_audit.py`'s closure-provenance report (same day) — breakdown
+by `decided_by` for the last N days (`--provenance-days`, default 14), always shown, feeding
+weekly review. A report, not a gate — high unmarked-agent-closure counts prompt spot-review,
+not wrongdoing by itself.
 
-**Not evaluated/shipped:** enforcing this at the `append_event.sh` layer (a hard requirement for
-every answer/decision to declare provenance) — would touch every caller fleet-wide for a field
-that's only meaningful on CLOSURES of tracked questions, most answer/decision events aren't that.
-Left as a documented convention + report, same tier as several other process rules in this file
-(§7, §10, §11, §13) that are judgment calls without a clean mechanical gate.
+**Not shipped:** enforcing this at `append_event.sh` (would touch every fleet-wide caller for a
+field only meaningful on question-closures). Documented convention + report, same tier as §7/
+§10/§11/§13 — judgment calls without a clean mechanical gate.
