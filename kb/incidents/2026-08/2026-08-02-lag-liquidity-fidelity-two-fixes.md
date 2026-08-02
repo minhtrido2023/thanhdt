@@ -1,8 +1,13 @@
 # 2026-08-02 — Hai lỗi fidelity thanh khoản sổ LAG: engine mô phỏng một đường live không đi được
 
-**Job:** `Taylor_20260802_163657` (attempt 2/2) · **Trạng thái:** ĐÃ SỬA + ĐÃ ĐO
+**Job:** `Taylor_20260802_163657` → kết luận lại ở `Taylor_20260802_175754`
+**Trạng thái:** ⏸️ **MỘT PHẦN CÒN TREO** — Việc 2 đóng, **Việc 1 KHÔNG đóng** (xem §3bis)
 **Báo cáo đầy đủ:** `mike/agents/Taylor/research/liq_fidelity_and_adv_basis_20260802.md`
 **Liên quan (KHÁC tầng, cùng họ cơ chế ở Việc 2):** `2026-08-02-pe-price-close-adjustment-saga.md`
+
+> ⚠️ **quant-skeptic chấm INCONCLUSIVE** (`mike/logs/verify_20260802_173456.log`). Bản đầu của
+> incident này viết TRƯỚC verdict và kết luận nhầm rằng mọi điều kiện treo đã đóng. **KHÔNG được
+> trích 31,32% / 32,71% làm cơ sở kỳ vọng.** Pin R3 chính thức vẫn là **27,24%**.
 
 ---
 
@@ -57,7 +62,7 @@ giữ. Đã sửa **đồng thời cả 3**.
 
 ---
 
-## 3. Hai điều kiện treo của pin 07-21 — nay ĐÃ ĐÓNG CẢ HAI
+## 3. Hai điều kiện treo của pin 07-21 — đóng cả hai, NHƯNG có điều kiện thứ BA (xem §3bis)
 
 Pin 07-21 tự đánh dấu **PIN TẠM**. Job này đóng nốt:
 
@@ -67,7 +72,50 @@ Pin 07-21 tự đánh dấu **PIN TẠM**. Job này đóng nốt:
 | **#2 Substitution** — engine cho vốn chảy ngay sang ứng viên kế tiếp, còn live (chỉ chặn ở executor) thì để tiền nằm im ⇒ 31,33% chỉ là **cận trên** | **ĐÓNG** — từ 07-21 live đã có lọc **tầng tín hiệu** `lag_filter_illiquid`, nên sổ live tự chọn ứng viên kế tiếp **đúng như engine**. Đây chính là "việc cần quyết #3" của 07-21 và nó đã làm rồi |
 
 ⇒ Khoảng `[~27,2%; ~31,3%]` ghi trong registry/current_ops **hết hiệu lực**: đó là khoảng *chưa
-đo được* dựng từ pin tạm. Nay đo trực tiếp trên đúng vintage.
+đo được* dựng từ pin tạm. **NHƯNG không có khoảng mới thay thế** — xem §3bis.
+
+---
+
+## 3bis. ĐIỀU KIỆN THỨ BA — chưa ai liệt kê, và nó mới là điều kiện chặn
+
+Job này đi kiểm đúng 2 điều kiện đã được liệt kê sẵn từ 07-21, rồi kết luận "đóng hết". Sai ở
+chỗ: danh sách 07-21 **không đầy đủ**. Điều kiện thật sự quyết định là **phân rã cơ chế của Δ**,
+và nó đã nằm sẵn trong docstring `lag_liquidity_filter.py:28-31` từ trước ("CHƯA PHÂN RÃ
+ĐƯỢC… RỦI RO CÒN MỞ"), kèm lời dặn thẳng *"ĐỪNG dùng +4,11pp làm cơ sở kỳ vọng"*.
+
+**Objection quyết định (quant-skeptic, nguyên văn):**
+> *"The +4.08/+4.11pp delta this finding certifies as 'reproducible and robust' is the SAME number
+> the codebase's own `lag_liquidity_filter.py` docstring already flags as mechanism-undecomposed
+> after two prior refuted explanations: TREAT enters 30% more LAG orders but completes 16% fewer
+> positions, with abandonment rising 59.2%→73.8%. If that's driven by the 25B LAG book being
+> unable to fill its own target sizing (a capacity artifact) rather than genuine capital
+> reallocation to better opportunities, the entire delta is a fill-model artifact, not a real edge."*
+
+Hai giả thuyết — *vốn chảy sang event LAG tốt hơn* (edge thật) vs *sổ 25B không fill nổi size mục
+tiêu* (hiện vật mô hình fill) — **để lại CÙNG một dấu vết trên CSV**. Đây là **lần thứ BA** câu
+hỏi này không được trả lời (2 lần trước: cả hai cách giải thích đều bị REFUTED).
+
+**Điều KHÔNG bị tranh cãi:** 5/7 check PASS, tái tính độc lập — không có look-ahead mới,
+self-check 0 VND, L0 tái lập pin bit-for-bit, IS/OOS khớp, LOO 13/13, cờ nhị phân không phải
+tham số quét. Toàn bộ chỗ đó trả lời câu *"phép đo có tái lập được không"* (có), **không** trả
+lời câu *"Δ này có phải alpha thật không"* (chưa biết). **DSR=1,0000 cũng không cứu được**: nó
+chỉ khử multiple-testing, một Δ do capacity-artifact vẫn cho DSR≈1,0 y hệt.
+
+### Quyết định (job `Taylor_20260802_175754`)
+| Thành phần | Quyết định | Căn cứ |
+|---|---|---|
+| **Việc 2** `LAG_ADV_BASIS` (3 điểm) | **GIỮ, mặc định `price`** | Căn cứ RIÊNG, độc lập với mọi số NAV: gỡ look-ahead thật + giữ bất biến parity *live == mô phỏng* (đường live đã dùng `price`; hoàn nguyên riêng engine sẽ **phá** bất biến). quant-skeptic không nêu objection riêng nào cho phần này. Tác động live đo được: **0 lệnh đổi** |
+| **Việc 1** code + knob | **GIỮ** | Logic đúng (không mua được thì đừng đặt mục tiêu), cần cho lần phân rã sau |
+| **Việc 1 — mặc định** | **HOÀN NGUYÊN `"lag"` → `""` (opt-in)** | Bật cờ = toàn bộ nguồn của Δ đang INCONCLUSIVE. Để mặc định BẬT thì mọi backtest sau này mặc nhiên mang Δ chưa phân rã vào số của nó — "wire" số NAV bằng cửa sau |
+
+⇒ Chấp nhận **có chủ đích** một độ lệch fidelity **đã biết, đã đo** (cận trên +4,08pp) giữa engine
+và live, thay vì đóng nó bằng một con số chưa hiểu. Hệ quả: pin R3 **27,24%** nhiều khả năng là
+**cận DƯỚI**, còn cận trên **chưa biết**.
+
+⚠️ Lưu ý phân định, đừng đọc rộng hơn thực tế: verdict INCONCLUSIVE là cho **toàn bộ finding**;
+hai objection thì truy được về **Việc 1**. Điều đó **không** có nghĩa quant-skeptic đã CONFIRM
+riêng Việc 2 hay số 28,86% — nó **không xét riêng** phần đó. Việc 2 merge trên **căn cứ thiết
+kế**, không phải trên uy tín một con số NAV.
 
 ---
 
@@ -87,6 +135,11 @@ L0 tái lập số pin hiện hành **chính xác** (kể cả NAV cuối 1.006,
 Δ **không cộng tuyến tính** (4,08 + 1,62 = 5,70 > 5,47 thực đo) — hai bản sửa giao thoa vì cùng
 tác động lên một cơ chế (khả năng/tốc độ fill sổ LAG). Vì vậy **phải chạy L3 thật**, không được
 cộng L1+L2.
+
+🔴 **Mọi số ở bảng trên là ĐO ĐƯỢC và tái lập được — nhưng L1/L3 KHÔNG phải kỳ vọng** (§3bis).
+Chân duy nhất được dùng làm số pin vẫn là **L0 = 27,24%**. Chạy engine **mặc định** hôm nay ra
+**L2 = 28,86%** (vì Việc 2 bật, Việc 1 tắt) — số này **cũng chưa phải pin**: re-pin R3 sang cơ sở
+`price` là món **NỢ CHƯA LÀM**, cần cổng riêng. Muốn tái lập đúng pin 27,24% ⇒ `LAG_ADV_BASIS=close`.
 
 ---
 
@@ -142,8 +195,30 @@ mandate Taylor, không tự coi là dọn dẹp nội bộ.
 
 ---
 
-## 7. Tham chiếu
+## 7. Việc còn TREO — đề xuất, CHƯA LÀM (Mike/user quyết có mở sprint riêng)
 
+Mục tiêu duy nhất: **tách capital-velocity thật khỏi capacity/fill-shortfall artifact**. Cả 3 việc
+đều **không cần chạy lại backtest** — dữ liệu đã nằm trong 2 CSV audit L0/L1.
+
+1. **Hạ NAV (đề nghị làm TRƯỚC)** — chạy L0/L1 ở quy mô **5–10B**, nơi capacity **không** phải
+   ràng buộc. Δ **teo về ~0** ⇒ artifact; Δ **giữ nguyên** ⇒ edge thật. Phép thử falsifiable rẻ
+   nhất và cắt trực diện đúng câu hỏi.
+2. **Truy vốn trên chuỗi `ENTRY_FILL`/`ABANDONED_REFUND`** — mỗi lệnh bị chặn ở L1, vốn đó đi
+   đâu: (a) event LAG khác *hoàn tất*, (b) event khác rồi *cũng bỏ dở*, (c) **nằm im**. (b)+(c)
+   chiếm phần lớn ⇒ Δ là hiện vật.
+3. **Chất lượng vốn được giải phóng** — vốn ở L1 có rơi vào event LAG *tốt hơn thật* không (phân
+   tầng earnings-surprise tercile), hay chỉ parking/idle-cash?
+4. (Nếu vẫn muốn tiến) cross-check `ticker_prune` live-BQ cho L1 — quant-skeptic lưu ý 31,32%
+   vượt trần auditable ~25,7–27,7% của doctrine ở quy mô NAV này.
+
+**Món nợ riêng, không phụ thuộc mấy việc trên:** re-pin R3 sang cơ sở ADV `price` (L2 = 28,86%)
+qua một cổng re-pin đầy đủ — hiện engine mặc định đã chạy `price` nhưng pin vẫn là số `close`.
+
+---
+
+## 8. Tham chiếu
+
+- Verdict quant-skeptic: `mike/logs/verify_20260802_173456.log` (**INCONCLUSIVE**, confidence medium)
 - Báo cáo: `mike/agents/Taylor/research/liq_fidelity_and_adv_basis_20260802.md`
 - Harness/log/CSV: `data/liqadv_ab_20260802/`
 - Nguồn root cause Việc 1: `data/results_registry.md` §"2026-07-21 — RE-PIN R3 (SỬA ENGINE `liq<=0`)"
