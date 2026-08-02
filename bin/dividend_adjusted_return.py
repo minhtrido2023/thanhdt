@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*-
 """Tỉ suất lợi nhuận ĐÃ ĐIỀU CHỈNH CỔ TỨC cho một vị thế — BẮT BUỘC dùng trong mọi báo cáo.
 
-KIẾN TRÚC 3 TẦNG — mỗi tầng một vai trò, KHÔNG lẫn lộn (sửa 2026-08-02, phản biện của user)
+KIẾN TRÚC 4 TẦNG — mỗi tầng một vai trò, KHÔNG lẫn lộn (sửa 2026-08-02, phản biện của user)
 -------------------------------------------------------------------------------------------
     TẦNG 1 · PHÁT HIỆN (BigQuery `Close/Price`)   → "mã nào, ngày nào có sự kiện"
-    TẦNG 2 · ĐO LƯỜNG (tiền mặt broker DNSE)      → "bao nhiêu đồng/cp"  ← SỐ CHÍNH THỨC
+    TẦNG 2 · ĐO LƯỜNG (tiền mặt broker DNSE)      → "bao nhiêu đồng/cp"  ← SỐ GỘP (GROSS)
     TẦNG 3 · ĐỐI SOÁT CHẬM (`Dividend_1Y` delta)  → xác nhận độc lập, trễ theo quý
+    TẦNG 4 · THUẾ TNCN 5%                         → "về túi bao nhiêu"   ← SỐ VÀO BÁO CÁO
 
 `tav2_bq.ticker` có 2 cột giá:
   * `Price` — giá THÔ, đúng giá thật trên bảng điện (báo cáo mark-to-market dùng cột này).
@@ -54,12 +55,51 @@ ticker_close_vs_price_dividend_adj.md`):
      thực tế (NCT báo −11,6% trong khi thật là −3,1%).
   2. Lấy `Close` (đã điều chỉnh) trừ giá vốn THÔ → phạt cổ tức HAI LẦN.
 
+TẦNG 4 · THUẾ TNCN 5% — SỐ BROKER LÀ GỘP, TIỀN VỀ TÚI LÀ RÒNG (thêm 2026-08-02)
+Cổ tức tiền mặt của cá nhân cư trú chịu thuế TNCN **5%** (thu nhập từ đầu tư vốn), khấu trừ TẠI
+NGUỒN bởi tổ chức chi trả — nhà đầu tư không phải tự kê khai. Căn cứ: Thông tư 111/2013/TT-BTC
+Điều 10 (thuế suất 5%) + Điều 25 (khấu trừ tại nguồn); Luật Thuế TNCN số 109/2025/QH15 (hiệu lực
+01/07/2026, tức ĐANG chi phối các sự kiện tháng 7/2026 này) GIỮ NGUYÊN mức 5%.
+
+⚠️ `cashDividendReceiving` của DNSE ghi số **GỘP (gross)** theo mệnh giá công bố; thuế bị trừ ở
+thời điểm **CHI TRẢ THẬT** vào tiền mặt. KHÔNG phải giả định — đo được bằng tiền thật:
+
+    Hằng đẳng thức đã kiểm (khớp từng đồng 16/07, 17/07, 20/07):
+        totalCash == availableCash + cashDividendReceiving + depositInterest
+
+    SpaceX, cổ tức MBB chi trả 17/07/2026 (2.400cp × 1.000đ):
+        khoản phải thu xoá :  3.255.000 → 855.000        = −2.400.000  (GỘP, đúng mệnh giá)
+        tiền vào availableCash:   2.925 → 2.282.925      = +2.280.000  (RÒNG)
+        chênh lệch                                        =   120.000  = 5,00% CHÍNH XÁC
+
+    Không có nhiễu: `positions` 16/07 vs 17/07 KHÔNG đổi một mã nào (không lệnh khớp), lãi tiền
+    gửi chỉ +37đ. Khoản rút 302.108.211đ cùng kỳ KHÔNG phải giả định để ép số khớp — xác nhận
+    ĐỘC LẬP bởi `data/execution_logs/nav_snapshot_SpaceX_2026-07-17.json`
+    (`offbook_assets`, chuyển Trứng vàng, job Mafee_20260716_164743) và bằng
+    `withdrawableCash` 16/07 = đúng 302.108.211.
+
+Hệ quả cho báo cáo:
+  * `Adjustment.per_share` / `.cash_per_share` là **GỘP** — giữ nguyên nghĩa, đó là số giải ra
+    từ sổ broker và là số đối chiếu được với mệnh giá công bố.
+  * Tỉ suất lợi nhuận công bố dùng **RÒNG** (`pl_total`, `pct_total_return`) — đó mới là tiền
+    nhà đầu tư thực sự giữ. Nhưng LUÔN in kèm số gộp + số thuế, không thay số lặng lẽ.
+  * **Khoản còn ở dạng phải thu vẫn đang ghi GỘP** ⇒ NAV/`totalCash` đang cao hơn thực tế đúng
+    5% của phần chưa chi trả. Số nhỏ nhưng có thật — báo cáo phải nói ra, đừng lặng lẽ bỏ qua.
+  * Thuế suất là THAM SỐ (`--div-tax-rate`), không hardcode vào công thức: tài khoản tổ chức/
+    quỹ có chế độ khác (Luật 109/2025 còn giảm 50% thuế cho lợi tức từ quỹ đầu tư chứng khoán/
+    bất động sản). SpaceX + ZaloPay đều là tài khoản CÁ NHÂN ⇒ 5%.
+
+⚠️ CƠ SỞ THỰC NGHIỆM LÀ n=1 (mới đúng một sự kiện chi trả thật tính tới 02/08/2026 — 5 sự kiện
+còn lại vẫn nằm ở khoản phải thu). Mức 5% có căn cứ pháp lý vững và số đo khớp tuyệt đối, nhưng
+sự kiện chi trả THỨ HAI phải được đối chiếu lại theo đúng cách trên trước khi coi là quy luật
+đã đóng. Xem `_selfcheck()` mục 15 (đã ghim số thật của ca 17/07).
+
 QUY TẮC
 -------
 * Giá vốn (`cost`) là giá khớp THẬT đã trả — số THÔ, chưa điều chỉnh.
 * Giá cuối kỳ dùng `Price` (thô) — đúng thứ nhà đầu tư thấy trên bảng điện.
-* Cổ tức tiền mặt CỘNG VÀO TỬ SỐ, mẫu số giữ nguyên giá vốn gốc:
-      total_return = (P_end + D − cost) / cost
+* Cổ tức tiền mặt CỘNG VÀO TỬ SỐ (số RÒNG sau thuế), mẫu số giữ nguyên giá vốn gốc:
+      total_return = (P_end + D×(1 − thuế) − cost) / cost
   KHÔNG dùng `Close_end/Close_start` để so với giá vốn: chuỗi `Close` được hồi tố từ vintage
   HÔM NAY nên mức giá của nó không cùng hệ quy chiếu với một giá khớp thô. (`Close/Close` chỉ
   đúng khi so hai NGÀY với nhau — ví dụ "mã X tăng bao nhiêu trong tuần" — không phải để so với
@@ -95,6 +135,12 @@ from dataclasses import dataclass, field
 BQ_PROJECT = "lithe-record-440915-m9"
 EXEC_LOG_DIR = "/home/trido/thanhdt/WorkingClaude/data/execution_logs"
 ACCOUNTS = {"SpaceX": "0002023347", "ZaloPay": "0001743768"}
+
+# Thuế TNCN trên cổ tức tiền mặt của CÁ NHÂN cư trú — khấu trừ tại nguồn lúc chi trả.
+# TT 111/2013/TT-BTC Đ.10 + Đ.25; Luật TNCN 109/2025/QH15 (hiệu lực 01/07/2026) giữ nguyên 5%.
+# Đo được đúng 5,00% trên ca chi trả thật MBB 17/07/2026 (xem docstring TẦNG 4).
+# THAM SỐ, không phải hằng số bất biến: tài khoản tổ chức/quỹ có chế độ khác → `--div-tax-rate`.
+PIT_DIVIDEND_RATE = 0.05
 
 # Nhiễu làm tròn: `Close` được làm tròn tới 10 VND nên tỉ số dao động ~10/Price.
 # Ngưỡng 0,3% đủ rộng để bỏ qua nhiễu, đủ hẹp để bắt cổ tức nhỏ nhất đã gặp (450đ/34.000 = 1,3%).
@@ -134,12 +180,20 @@ class Adjustment:
 
 @dataclass
 class PositionReturn:
+    """`dividend_per_share` nhận số **GỘP** (như sổ broker ghi); thuế được trừ ở đây.
+
+    Hai bộ số song song, CỐ Ý không giấu bộ nào:
+      * `*_gross` — cổ tức danh nghĩa theo mệnh giá công bố, đối chiếu được với sổ broker.
+      * mặc định (`pl_total`, `pct_total_return`) — RÒNG sau thuế = tiền thật về túi ⇒ số công bố.
+    """
+
     ticker: str
     qty: int
     cost_per_share: float
     end_price: float
-    dividend_per_share: float
+    dividend_per_share: float          # GỘP (trước thuế)
     adjustments: list = field(default_factory=list)
+    tax_rate: float = PIT_DIVIDEND_RATE
 
     @property
     def cost_total(self) -> float:
@@ -151,8 +205,21 @@ class PositionReturn:
         return self.qty * (self.end_price - self.cost_per_share)
 
     @property
-    def dividend_total(self) -> float:
+    def dividend_total_gross(self) -> float:
         return self.qty * self.dividend_per_share
+
+    @property
+    def dividend_tax(self) -> float:
+        return self.dividend_total_gross * self.tax_rate
+
+    @property
+    def dividend_total(self) -> float:
+        """RÒNG sau thuế — số được cộng vào tỉ suất công bố."""
+        return self.dividend_total_gross - self.dividend_tax
+
+    @property
+    def pl_total_gross(self) -> float:
+        return self.pl_price + self.dividend_total_gross
 
     @property
     def pl_total(self) -> float:
@@ -161,6 +228,10 @@ class PositionReturn:
     @property
     def pct_price_only(self) -> float:
         return self.pl_price / self.cost_total * 100.0
+
+    @property
+    def pct_total_return_gross(self) -> float:
+        return self.pl_total_gross / self.cost_total * 100.0
 
     @property
     def pct_total_return(self) -> float:
@@ -520,7 +591,7 @@ def resolve_dividends(tickers, start: str, end: str, accounts: dict = None,
 
 
 def position_total_return(ticker, qty, cost_per_share, start, end, end_price=None,
-                          account_no=None) -> PositionReturn:
+                          account_no=None, tax_rate: float = PIT_DIVIDEND_RATE) -> PositionReturn:
     """Tỉ suất TỔNG (giá + cổ tức tiền mặt) của một vị thế giữ từ `start` tới `end`.
 
     `start` = ngày mua (chỉ tính cổ tức có ex-date SAU ngày này).
@@ -544,7 +615,8 @@ def position_total_return(ticker, qty, cost_per_share, start, end, end_price=Non
         solve_from_broker(adjs, {label: str(account_no)})
     # CHỈ số đã xác minh mới được cộng — `cash_per_share` trả 0 cho UNVERIFIED/STOCK_SUSPECTED.
     div = sum(a.cash_per_share for a in adjs)
-    return PositionReturn(ticker, qty, float(cost_per_share), float(end_price), div, adjs)
+    return PositionReturn(ticker, qty, float(cost_per_share), float(end_price), div, adjs,
+                          tax_rate=tax_rate)
 
 
 # --------------------------------------------------------------------------------------
@@ -616,19 +688,23 @@ def _selfcheck() -> int:
     # SAB phiên 24/07: Price 46.500, Close 43.510 → hiệu 2.990 ≠ cổ tức thật 3.000
     check("SAB hiệu số tại 24/07 lệch so với 3.000", 46500.0 - 43510.0, 2990.0, tol=0.5)
 
-    print("3) Tỉ suất tổng của vị thế (số thật SpaceX 31/07):")
-    for tk, qty, cost, px, div, want_old, want_new in [
-        ("NCT", 500, 94360, 83400, 8000, -11.61, -3.14),
-        ("SAB", 1100, 47368, 43550, 3000, -8.06, -1.73),
-        ("MBB", 2400, 25850, 22500, 1000, -12.96, -9.09),
+    print("3) Tỉ suất tổng của vị thế (số thật SpaceX 31/07) — ba mức: giá / gộp / ròng sau thuế:")
+    for tk, qty, cost, px, div, want_px, want_gross, want_net in [
+        ("NCT", 500, 94360, 83400, 8000, -11.61, -3.14, -3.56),
+        ("SAB", 1100, 47368, 43550, 3000, -8.06, -1.73, -2.04),
+        ("MBB", 2400, 25850, 22500, 1000, -12.96, -9.09, -9.28),
     ]:
         pr = PositionReturn(tk, qty, cost, px, div)
-        check(f"{tk} % chỉ-giá", pr.pct_price_only, want_old, tol=0.01)
-        check(f"{tk} % tổng (gồm cổ tức)", pr.pct_total_return, want_new, tol=0.01)
+        check(f"{tk} % chỉ-giá", pr.pct_price_only, want_px, tol=0.01)
+        check(f"{tk} % tổng GỘP", pr.pct_total_return_gross, want_gross, tol=0.01)
+        check(f"{tk} % tổng RÒNG (sau thuế 5%)", pr.pct_total_return, want_net, tol=0.01)
 
     print("4) Tổng danh mục SpaceX 31/07 (giá vốn 986.725.443):")
-    check("lãi/lỗ gồm cổ tức", -62_610_443 + 12_175_000, -50_435_443, tol=1)
-    check("% tổng", (-62_610_443 + 12_175_000) / 986_725_443 * 100, -5.11, tol=0.01)
+    check("lãi/lỗ gồm cổ tức GỘP", -62_610_443 + 12_175_000, -50_435_443, tol=1)
+    check("% tổng GỘP", (-62_610_443 + 12_175_000) / 986_725_443 * 100, -5.11, tol=0.01)
+    check("thuế TNCN 5% trên 12.175.000", 12_175_000 * PIT_DIVIDEND_RATE, 608_750, tol=1)
+    check("lãi/lỗ gồm cổ tức RÒNG", -62_610_443 + 12_175_000 * 0.95, -51_044_193, tol=1)
+    check("% tổng RÒNG", (-62_610_443 + 12_175_000 * 0.95) / 986_725_443 * 100, -5.17, tol=0.01)
 
     print("5) Vị thế KHÔNG có cổ tức thì hai con số phải trùng khít:")
     pr = PositionReturn("PVT", 3500, 17100, 18300, 0)
@@ -700,11 +776,30 @@ def _selfcheck() -> int:
     check("→ cash_per_share = 0 (fail-closed: THIẾU cổ tức, không bao giờ THỪA)",
           traded.cash_per_share, 0.0, tol=1e-9)
 
-    print("14) Tổng cộng lại phải khớp tiền cổ tức thật từng tài khoản:")
+    print("14) Tổng cộng lại phải khớp tiền cổ tức thật từng tài khoản (GỘP, như sổ broker ghi):")
     check("SpaceX tổng", 2400 * 1000 + 1900 * 450 + 2300 * 450 + 1300 * 450 + 500 * 8000 + 1100 * 3000,
           12_175_000, tol=1)
     check("ZaloPay tổng (không có MBB — mua sau ex-date 09/07)",
           900 * 450 + 1050 * 450 + 800 * 450 + 373 * 8000 + 744 * 3000, 6_453_500, tol=1)
+    check("SpaceX RÒNG sau thuế 5%", 12_175_000 * (1 - PIT_DIVIDEND_RATE), 11_566_250, tol=1)
+    check("ZaloPay RÒNG sau thuế 5%", 6_453_500 * (1 - PIT_DIVIDEND_RATE), 6_130_825, tol=1)
+
+    print("15) GHIM BẰNG CHỨNG THỰC NGHIỆM: ca chi trả THẬT duy nhất (MBB, SpaceX, 17/07/2026)")
+    print("    — đây là thứ chứng minh `cashDividendReceiving` là GỘP và thuế trừ lúc CHI TRẢ.")
+    # Số thật đọc từ data/execution_logs/dnse_raw_2026-07-1{6,7}.jsonl (đã lọc account §12).
+    aC16, cd16, di16, tc16 = 302_111_136, 3_255_000, 22_501, 305_388_637
+    aC17, cd17, di17, tc17 = 2_282_925, 855_000, 22_538, 3_160_463
+    withdrawn = 302_108_211        # Trứng vàng, xác nhận bởi nav_snapshot_SpaceX_2026-07-17.json
+    check("hằng đẳng thức totalCash 16/07", aC16 + cd16 + di16, tc16, tol=0)
+    check("hằng đẳng thức totalCash 17/07", aC17 + cd17 + di17, tc17, tol=0)
+    check("khoản phải thu xoá = GỘP 2400cp×1.000đ", cd16 - cd17, 2_400_000, tol=0)
+    cash_in = (aC17 - aC16) + withdrawn
+    check("tiền THẬT vào availableCash", cash_in, 2_280_000, tol=0)
+    check("thuế suy ra từ tiền thật (%)", (1 - cash_in / (cd16 - cd17)) * 100, 5.00, tol=0.001)
+    same("khớp đúng hằng số PIT_DIVIDEND_RATE", round(1 - cash_in / (cd16 - cd17), 6),
+         round(PIT_DIVIDEND_RATE, 6))
+    check("rút Trứng vàng == withdrawableCash 16/07 (không phải số ép cho khớp)",
+          withdrawn, 302_108_211, tol=0)
 
     print(f"\n=== SELFCHECK: {passed} PASS / {failed} FAIL ===")
     return 1 if failed else 0
@@ -722,6 +817,9 @@ def main() -> int:
     ap.add_argument("--end-price", type=float, help="ghi đè giá cuối kỳ (mặc định lấy Price thô từ BQ)")
     ap.add_argument("--account-no", help="số tài khoản DNSE để xác minh cổ tức với broker")
     ap.add_argument("--account", help="nhãn tài khoản (SpaceX/ZaloPay) — tự tra số hiệu")
+    ap.add_argument("--div-tax-rate", type=float, default=PIT_DIVIDEND_RATE,
+                    help="thuế TNCN cổ tức tiền mặt (mặc định 0.05 = 5%% cho tài khoản CÁ NHÂN; "
+                         "đặt 0 để xem số gộp, hoặc mức khác cho tài khoản tổ chức/quỹ)")
     ap.add_argument("--selfcheck", action="store_true")
     a = ap.parse_args()
 
@@ -733,9 +831,12 @@ def main() -> int:
             ap.error("--resolve cần thêm --from --to")
         adjs = resolve_dividends([t.strip().upper() for t in a.resolve.split(",")], a.start, a.end)
         print(f"Sự kiện {a.start} → {a.end} (giải từ tiền broker: {', '.join(ACCOUNTS)}):\n")
+        rate = a.div_tax_rate
+        print(f"  (thuế TNCN cổ tức {rate * 100:g}% — GỘP = sổ broker, RÒNG = tiền về túi)\n")
         for x in sorted(adjs, key=lambda z: (z.ex_date, z.ticker)):
-            ps = f"{x.per_share:,.0f}đ/cp" if x.kind == "CASH_CONFIRMED" else "— (chưa xác minh)"
-            print(f"  {x.ticker:5s} ex {x.ex_date}  {ps:>22s}  [{x.kind}/{x.source}]")
+            ps = (f"{x.per_share:,.0f} → {x.per_share * (1 - rate):,.1f}đ/cp"
+                  if x.kind == "CASH_CONFIRMED" else "— (chưa xác minh)")
+            print(f"  {x.ticker:5s} ex {x.ex_date}  {ps:>26s}  [{x.kind}/{x.source}]")
             print(f"        ước lượng tỉ số (chỉ để đối chiếu): {x.ratio_per_share:,.0f}đ/cp")
             print(f"        {x.note}")
             print(f"        Dividend_1Y: {x.fin_check} — {x.fin_note}")
@@ -748,16 +849,23 @@ def main() -> int:
         ap.error("cần --ticker --cost --from --to (hoặc --resolve, hoặc --selfcheck)")
 
     acc = a.account_no or ACCOUNTS.get(a.account or "")
-    pr = position_total_return(a.ticker, a.qty, a.cost, a.start, a.end, a.end_price, acc)
+    pr = position_total_return(a.ticker, a.qty, a.cost, a.start, a.end, a.end_price, acc,
+                               tax_rate=a.div_tax_rate)
 
     print(f"{pr.ticker}  {pr.qty:,}cp · giá vốn {pr.cost_per_share:,.0f} · giá {a.end} {pr.end_price:,.0f}")
     for adj in pr.adjustments:
         print(f"  · ex-date {adj.ex_date}: {adj.per_share:,.0f}đ/cp  [{adj.kind}] {adj.note}")
     if not pr.adjustments:
         print("  · không có sự kiện điều chỉnh giá trong kỳ")
-    print(f"  Lãi/lỗ do GIÁ      : {pr.pl_price:>15,.0f}  ({pr.pct_price_only:+.2f}%)")
-    print(f"  Cổ tức tiền mặt    : {pr.dividend_total:>15,.0f}  ({pr.dividend_per_share:,.0f}đ/cp)")
-    print(f"  TỔNG (dùng báo cáo): {pr.pl_total:>15,.0f}  ({pr.pct_total_return:+.2f}%)")
+    print(f"  Lãi/lỗ do GIÁ        : {pr.pl_price:>15,.0f}  ({pr.pct_price_only:+.2f}%)")
+    print(f"  Cổ tức GỘP           : {pr.dividend_total_gross:>15,.0f}  "
+          f"({pr.dividend_per_share:,.0f}đ/cp danh nghĩa)")
+    print(f"  − thuế TNCN {pr.tax_rate * 100:g}%      : {-pr.dividend_tax:>15,.0f}  "
+          f"(khấu trừ tại nguồn lúc chi trả)")
+    print(f"  = Cổ tức RÒNG        : {pr.dividend_total:>15,.0f}  "
+          f"({pr.dividend_per_share * (1 - pr.tax_rate):,.1f}đ/cp thực nhận)")
+    print(f"  Tổng (gộp, tham chiếu): {pr.pl_total_gross:>14,.0f}  ({pr.pct_total_return_gross:+.2f}%)")
+    print(f"  TỔNG RÒNG (dùng báo cáo): {pr.pl_total:>12,.0f}  ({pr.pct_total_return:+.2f}%)")
     if pr.unverified:
         print("\n  ⚠️ CÓ SỰ KIỆN CHƯA XÁC MINH VỚI BROKER — không đưa số này vào báo cáo gửi nhà đầu tư"
               " trước khi đối soát cashDividendReceiving / số lượng cổ phiếu.")

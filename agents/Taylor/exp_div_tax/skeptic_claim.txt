@@ -1,0 +1,52 @@
+THAM DINH LAI DOC LAP — thue TNCN 5% tren co tuc tien mat, job Taylor_20260802_143541.
+
+BAO CAO DAY DU: mike/agents/Taylor/research/dividend_tax_5pct_20260802.md
+CODE DA SUA:    mike/bin/dividend_adjusted_return.py (them PIT_DIVIDEND_RATE=0.05, TANG 4)
+REGISTRY:       mike/kb/data_registry/price-volume/ticker_close_vs_price_dividend_adj.md (Bay 5)
+
+CLAIM 1 (quan trong nhat — HAY CO GANG BAC BO): truong `cashDividendReceiving` cua DNSE la GROSS,
+va thue 5% bi khau tru luc CHI TRA THAT. Bang chung KHONG phai thong le thi truong ma la do truc tiep:
+  - Hang dang thuc: totalCash == availableCash + cashDividendReceiving + depositInterest
+    (khop tung dong ca 3 phien 2026-07-16, 07-17, 07-20 — TU KIEM LAI, dung tin toi)
+  - SpaceX 0002023347, su kien MBB chi tra 2026-07-17:
+      cashDividendReceiving 3.255.000 -> 855.000  = -2.400.000 (= 2400cp x 1.000d menh gia => GROSS)
+      availableCash 302.111.136 -> 2.282.925      = -299.828.211
+      hoan nguyen khoan rut 302.108.211 => tien co tuc thuc vao = +2.280.000 (NET)
+      chenh 120.000 = 5,00% chinh xac
+  - Khoan rut 302.108.211 KHONG phai gia dinh cua toi: xac nhan boi
+    data/execution_logs/nav_snapshot_SpaceX_2026-07-17.json (offbook_assets, job Mafee_20260716_164743)
+    VA bang withdrawableCash phien 16/07 = dung 302.108.211.
+  - Chan nhieu: positions 07-16 vs 07-17 KHONG doi 1 ma nao; depositInterest chi +37d.
+
+HAY TAN CONG CU THE:
+ (a) Co cach giai thich khac cho 120.000d khong (phi thu ho co tuc? lam tron? mot dong tien khac
+     ma toi bo sot)? Hay tu doc lai dnse_raw_2026-07-16.jsonl va dnse_raw_2026-07-17.jsonl
+     (LOC account_no, coding_guidelines muc 12).
+ (b) Gia dinh "khoan rut dung bang withdrawableCash" co the la trung hop nguoc (tuc thuc te rut
+     302.228.211 va co tuc ve GROSS 2.400.000)? Danh gia xac suat + tim bang chung doc lap.
+ (c) n=1 co du de ket luan khong? Toi da gan canh bao n=1 trong ca code, registry va bao cao —
+     canh bao do da DU MANH chua, hay phai ha xuong UNVERIFIED cho toi khi co su kien settle thu 2?
+     LUU Y: neu bat UNVERIFIED thi hau qua la bao cao QUAY VE dung so GROSS (da biet la sai theo
+     mot chieu xac dinh) — hay can nhac cai nao te hon.
+
+CLAIM 2 (phap ly): thue suat 5% dung cho tai khoan CA NHAN. TT 111/2013/TT-BTC Dieu 10 (thue suat)
++ Dieu 25 (khau tru tai nguon). Luat TNCN 109/2025/QH15 hieu luc 01/07/2026 (CHI PHOI cac su kien
+thang 7/2026 nay) GIU NGUYEN 5%. SpaceX/ZaloPay deu la tieu khoan DNSE dung ten ca nhan.
+Kiem: co dieu khoan nao trong luat moi doi muc 5% cho thu nhap tu dau tu von khong? Co uu dai nao
+ap dung nham (giam 50% cho quy dau tu chung khoan — danh muc la CO PHIEU TRUC TIEP, khong phai
+chung chi quy) khong?
+
+CLAIM 3 (so lieu client-facing): tinh lai 6 su kien. SpaceX co tuc GROSS 12.175.000 -> thue 608.750
+-> NET 11.566.250; danh muc -5,11% -> -5,17% (0,062pp). ZaloPay 6.453.500 -> 6.130.825; -1,63% ->
+-1,71% (0,071pp). Per-ticker: NCT -0,42pp, SAB -0,32pp, MBB -0,19pp (VUOT nguong 0,1pp),
+CTG/BID/VCB duoi nguong. Ngoai ra NAV dang cao hon thuc te 5% cua khoan phai thu chua chi tra
+(SpaceX 488.750 = 0,052% NAV; ZaloPay 322.675 = 0,036% NAV).
+Kiem lai so hoc doc lap. Quyet dinh cua toi: VAN phat hanh lai 3 bao cao du muc danh muc duoi
+nguong, vi 3 ma vuot nguong chinh la 3 ma ma ban sua so 1 vua lay lam tieu de dinh chinh. Danh gia
+quyet dinh nay co hop ly khong.
+
+CLAIM 4 (code): selfcheck 58/58 PASS, chay lai duoi "env -u TZ" va "TZ=America/New_York LC_ALL=C"
+deu 58/58. Khong consumer nao vo (chi daily_nav_snapshot.py import, va chi dung
+detect_adjustments_batch). HAY TU CHAY LAI selfcheck, dung tin bao cao cua toi.
+Kiem xem tang 2 (per_share GROSS tu so broker) co bi lam hong khong — do la so doi chieu duoc voi
+menh gia cong bo, KHONG duoc tru thue o tang do.

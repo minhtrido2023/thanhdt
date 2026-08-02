@@ -28,6 +28,24 @@
 > Các mục đã sửa: **3.1, 3.2, 3.3, 3.5** · Công bố đầy đủ nguyên nhân, số cũ/số mới: **Mục 8.4** ·
 > Cạm bẫy số liệu ghi thêm: **Mục 10.2**.
 
+> ## 🔧 BẢN SỬA #2 — phát hành lại lần hai, cùng ngày 02/08/2026
+>
+> **Bản sửa #1 (sáng 02/08) cộng cổ tức theo số GỘP — chưa trừ thuế thu nhập cá nhân 5%.** Cổ tức
+> tiền mặt của nhà đầu tư cá nhân bị khấu trừ **5% ngay tại nguồn** khi công ty chứng khoán chi trả,
+> nên số thực về tài khoản chỉ bằng **95%** mệnh giá công bố (VD: NCT 8.000đ/cp → thực nhận
+> 7.600đ/cp). Bản sửa #1 vì vậy báo lãi/lỗ **tốt hơn thực tế một chút** — ngược chiều với sai sót
+> của bản gốc, và nhỏ hơn nhiều về độ lớn.
+>
+> **Ảnh hưởng:** SpaceX lãi/lỗ chưa thực hiện **−50.435.443 (−5,11%) → −51.044.193 (−5,17%)** ·
+> ZaloPay **−7.436.700 (−1,63%) → −7.759.375 (−1,71%)**. Ba mã vượt ngưỡng đáng công bố:
+> **NCT −0,42pp · SAB −0,32pp · MBB −0,19pp**.
+>
+> **Kết luận rổ CAPIT có lãi vẫn ĐỨNG VỮNG** — thuế làm mỏng khoản lãi (**+5.660.000 → +5.295.000**)
+> nhưng không đảo dấu. **NAV, tỷ suất tháng, giá trị danh mục, tiền mặt và mọi lệnh giao dịch: vẫn
+> KHÔNG đổi.**
+>
+> Các mục sửa thêm: **3.1, 3.2, 3.3, 3.5** · Căn cứ pháp lý + bằng chứng đo từ tiền thật: **Mục 8.6**.
+
 ---
 
 ## MỤC LỤC
@@ -135,8 +153,10 @@ cố mua trùng lệnh 02/07 (Mục 6.1). ² Từ NAV bàn giao 06/07.
 |---|---:|---|
 | Vốn góp ban đầu (01/07) | 1.000.000.000 | |
 | **Lãi/lỗ do GIÁ trên danh mục cuối tháng** | **−62.610.443** | ✅ đã xác minh từng mã |
-| **+ Cổ tức tiền mặt được hưởng trong tháng** | **+12.175.000** | ✅ 6 mã, đối soát khớp sổ broker |
-| **= Lãi/lỗ chưa thực hiện (tổng, gồm cổ tức)** | **−50.435.443** | **−5,11%** trên giá vốn |
+| **+ Cổ tức tiền mặt được hưởng trong tháng (gộp)** | +12.175.000 | ✅ 6 mã, đối soát khớp sổ broker |
+| **− Thuế TNCN 5% khấu trừ tại nguồn** | **−608.750** | 🔧 bản sửa #2 — xem Mục 8.6 |
+| **+ Cổ tức RÒNG thực nhận** | **+11.566.250** | |
+| **= Lãi/lỗ chưa thực hiện (tổng, gồm cổ tức ròng)** | **−51.044.193** | **−5,17%** trên giá vốn |
 | Lãi/lỗ **đã thực hiện** ròng − phí/thuế | **−11.128.846** | ⚠️ số dư gộp — xem dưới |
 | **= NAV 31/07** | **938.435.711** | ✅ khớp từng đồng với sổ broker |
 
@@ -157,23 +177,24 @@ thực chất là một khoản **lỗ** ≈ −11,1tr, chủ yếu từ 23 lệ
 > 🔧 **Bảng này ĐÃ SỬA 02/08** — thêm cột **Cổ tức**. Kết luận về rổ CAPIT trong bản cũ **SAI VỀ
 > DẤU** (mô tả là "gánh 2,6% mức lỗ", thực tế **có lãi**). Số cũ và lý do: Mục 8.4.
 
-| Nhóm | Giá trị TT 31/07 | % NAV | Lãi/lỗ do giá | + Cổ tức | **= Lãi/lỗ tổng** |
-|---|---:|---:|---:|---:|---:|
-| **Ngân hàng** (11 mã) | 534.870.000 | 57,0% | −56.220.442 | +4.875.000 | **−51.345.442** |
-| Chứng khoán (VIX, VND, SHS) | 17.120.000 | 1,8% | −3.900.000 | 0 | **−3.900.000** |
-| **Rổ CAPIT** (SIP, PVT, VNM, SAB, NCT) | 290.235.000 | 30,9% | −1.640.000 | **+7.300.000** | **+5.660.000** ✅ |
-| Bất động sản (VHM) | 74.050.000 | 7,9% | −850.000 | 0 | **−850.000** |
-| TV1 (ngoài V2.4) | 7.840.000 | 0,8% | 0 | 0 | **0** |
-| **Tổng** | **924.115.000** | **98,5%** | **−62.610.443** | **+12.175.000** | **−50.435.443** |
+| Nhóm | Giá trị TT 31/07 | % NAV | Lãi/lỗ do giá | + Cổ tức gộp | − Thuế 5% | **= Lãi/lỗ tổng (ròng)** |
+|---|---:|---:|---:|---:|---:|---:|
+| **Ngân hàng** (11 mã) | 534.870.000 | 57,0% | −56.220.442 | +4.875.000 | −243.750 | **−51.589.192** |
+| Chứng khoán (VIX, VND, SHS) | 17.120.000 | 1,8% | −3.900.000 | 0 | 0 | **−3.900.000** |
+| **Rổ CAPIT** (SIP, PVT, VNM, SAB, NCT) | 290.235.000 | 30,9% | −1.640.000 | **+7.300.000** | −365.000 | **+5.295.000** ✅ |
+| Bất động sản (VHM) | 74.050.000 | 7,9% | −850.000 | 0 | 0 | **−850.000** |
+| TV1 (ngoài V2.4) | 7.840.000 | 0,8% | 0 | 0 | 0 | **0** |
+| **Tổng** | **924.115.000** | **98,5%** | **−62.610.443** | **+12.175.000** | **−608.750** | **−51.044.193** |
 
 **Kết luận attribution rõ ràng: toàn bộ khoản lỗ chưa thực hiện đến từ nhóm ngân hàng**, chiếm 57%
 NAV. Nguyên nhân: danh mục ngân hàng được xây trong 2 phiên đầu tháng (01–02/07) ở vùng giá cao
 nhất của tháng, ngay trước nhịp giảm; nhóm ngân hàng cũng dẫn dắt đà giảm của thị trường trong tháng.
-Cổ tức từ 4 mã ngân hàng (MBB, BID, CTG, VCB) bù lại được 4,9tr, đưa mức lỗ nhóm này từ −56,2tr
-xuống **−51,3tr**.
+Cổ tức từ 4 mã ngân hàng (MBB, BID, CTG, VCB) bù lại được 4,6tr **sau thuế**, đưa mức lỗ nhóm này
+từ −56,2tr xuống **−51,6tr**.
 
-**Rổ CAPIT LÃI +5.660.000đ trong tháng** — chiếm gần 31% NAV. Phần giá gần như đi ngang (−1,6tr),
-và **cổ tức 7,3tr (NCT 4,0tr + SAB 3,3tr) đưa cả rổ sang trạng thái lãi**. Rổ này nhận **60% toàn bộ
+**Rổ CAPIT LÃI +5.295.000đ trong tháng (sau thuế TNCN 5%)** — chiếm gần 31% NAV. Phần giá gần như đi ngang (−1,6tr),
+và **cổ tức 7,3tr gộp / 6,9tr ròng (NCT 4,0tr + SAB 3,3tr) đưa cả rổ sang trạng thái lãi** — thuế
+làm mỏng khoản lãi (+5,66tr → +5,30tr) nhưng **không đảo dấu kết luận**. Rổ này nhận **60% toàn bộ
 cổ tức của tài khoản** dù chỉ chiếm 31% NAV — đúng đặc tính thiết kế: CAPIT chọn cổ phiếu phòng thủ,
 định giá rẻ, cổ tức cao. *(Bản cũ mô tả rổ này "chỉ gánh 2,6% mức lỗ" — đúng về phần giá nhưng bỏ
 sót toàn bộ phần cổ tức, làm sai dấu kết luận.)*
@@ -183,20 +204,24 @@ tài khoản — phần giá nằm trong giá trị cổ phiếu, phần cổ t�
 khoản phải thu). Cộng gộp một cột sẽ không đối chiếu được với sổ broker.
 
 *Ghi chú làm tròn: cột "lãi/lỗ do giá" giữ nguyên số đã công bố (tính trên giá vốn có phần thập
-phân). Tính lại chi tiết từng mã với giá vốn làm tròn cho rổ CAPIT **+5.659.900đ** — chênh 100đ so
-với bảng, thuần tuý do làm tròn.*
+phân). Tính lại chi tiết từng mã với giá vốn làm tròn cho rổ CAPIT **+5.294.900đ ròng** (gộp
++5.659.900đ) — chênh 100đ so với bảng, thuần tuý do làm tròn.*
 
 ### 3.3 SpaceX — 5 vị thế tốt nhất & 5 tệ nhất (lãi/lỗ chưa thực hiện, 31/07)
 
-> 🔧 **ĐÃ SỬA 02/08** — các số dưới đây là **lãi/lỗ tổng (đã cộng cổ tức)**, xếp theo VND.
+> 🔧 **ĐÃ SỬA 02/08 (bản sửa #2)** — các số dưới đây là **lãi/lỗ tổng đã cộng cổ tức RÒNG sau thuế
+> TNCN 5%**, xếp theo VND. Thứ tự xếp hạng **không đổi** so với bản sửa #1.
 
 | Tốt nhất | VND | % | | Tệ nhất | VND | % |
 |---|---:|---:|---|---|---:|---:|
 | PVT | **+4.200.000** | +7,0% | | TCB | **−9.900.000** | −14,6% |
-| VNM | +2.070.000 | +3,9% | | BID | −8.627.900 | −10,6% |
-| SIP | +1.769.700 | +2,2% | | CTG | −7.422.100 | −9,4% |
+| VNM | +2.070.000 | +3,9% | | BID | −8.670.650 | −10,6% |
+| SIP | +1.769.700 | +2,2% | | CTG | −7.473.850 | −9,4% |
 | TV1 | 0 | 0,0% | | VPB | −7.162.200 | −11,2% |
-| LPB | −704.700 | −1,5% | | MBB | −5.640.000 | −9,1% |
+| LPB | −704.700 | −1,5% | | MBB | −5.760.000 | −9,3% |
+
+*(Bốn mã ở cột "tốt nhất" cùng TCB/VPB **không trả cổ tức** trong tháng nên không đổi. BID/CTG/MBB
+giảm đúng bằng thuế 5% của phần cổ tức: −42.750 / −51.750 / −120.000.)*
 
 **Cả 3 vị thế lãi đều thuộc rổ CAPIT. Cả 5 vị thế lỗ nặng nhất đều là ngân hàng.** *(Kết luận này
 không đổi sau khi sửa.)*
@@ -234,21 +259,26 @@ vị thế**.
 
 ### 3.5 ZaloPay — lãi/lỗ chưa thực hiện phần bot mua (đã xác minh)
 
-> 🔧 **ĐÃ SỬA 02/08** — bản cũ thiếu toàn bộ phần cổ tức. Số cũ: **−13.890.200 (−3,05%)**.
+> 🔧 **ĐÃ SỬA 02/08 (bản sửa #2)** — bản gốc thiếu toàn bộ phần cổ tức (**−13.890.200 / −3,05%**);
+> bản sửa #1 cộng cổ tức **gộp** (−7.436.700 / −1,63%); bản này trừ thêm **thuế TNCN 5%**.
 
 | | VND | % giá vốn |
 |---|---:|---:|
 | Giá vốn thật (14 mã) | 454.848.300 | |
 | Thị giá 31/07 | 440.958.100 | |
 | → Lãi/lỗ do giá | −13.890.200 | −3,05% |
-| **+ Cổ tức tiền mặt (5 mã: NCT, SAB, CTG, BID, VCB)** | **+6.453.500** | |
-| **= Tổng lãi/lỗ chưa thực hiện** | **−7.436.700** | **−1,63%** |
+| **+ Cổ tức tiền mặt gộp (5 mã: NCT, SAB, CTG, BID, VCB)** | +6.453.500 | |
+| **− Thuế TNCN 5% khấu trừ tại nguồn** | **−322.675** | |
+| **+ Cổ tức RÒNG thực nhận** | **+6.130.825** | |
+| **= Tổng lãi/lỗ chưa thực hiện (ròng)** | **−7.759.375** | **−1,71%** |
 
-Vị thế lãi tốt nhất: **CSV +7,3%** · PVT +6,1% · VNM +3,7% · SIP +2,0%.
-Vị thế lỗ nặng nhất **(sau khi cộng cổ tức)**: **MBB −8,5%** · TCB −8,4% · LPB −5,5% · CTG −4,1%.
+Vị thế lãi tốt nhất: **CSV +7,3%** · PVT +6,1% · VNM +3,7% · SIP +2,0% *(bốn mã này không có cổ tức
+trong kỳ nên thuế không ảnh hưởng)*.
+Vị thế lỗ nặng nhất **(sau khi cộng cổ tức ròng)**: **MBB −8,5%** · TCB −8,4% · LPB −5,5% · CTG −4,2%.
 
-**Thay đổi đáng kể nhất so với bản cũ:** NCT **−11,7% → −3,2%** và SAB **−8,2% → −1,9%** — bản cũ
-xếp hai mã này đứng đầu danh sách lỗ, sau khi sửa cả hai đều rời khỏi nhóm đó.
+**Thay đổi đáng kể nhất so với bản gốc:** NCT **−11,7% → −3,6%** và SAB **−8,2% → −2,2%** — bản gốc
+xếp hai mã này đứng đầu danh sách lỗ, sau khi sửa cả hai đều rời khỏi nhóm đó. *(Bản sửa #1 ghi
+−3,2% và −1,9% theo cổ tức gộp; chênh lệch đúng bằng thuế 5%.)*
 
 ⚠️ **Một chi tiết dễ tính nhầm — MBB của ZaloPay KHÔNG được hưởng cổ tức:** tài khoản này mua MBB
 **sau** ngày chốt quyền 09/07, nên dù MBB có trả 1.000đ/cp trong tháng, ZaloPay không nhận đồng nào
@@ -353,9 +383,10 @@ Nguồn vốn: **rút toàn bộ tiền gửi "Trứng vàng" off-book** (449,6t
 thiết kế.** Hệ quả: tỷ trọng cổ phiếu tăng từ ~68%/82% lên **98,5%/98,6%**.
 
 **Bằng chứng sớm về tác dụng:** phiên sập 22/07, VN-Index **−3,58%** nhưng SpaceX chỉ **−1,67%**
-(hơn 1,91 điểm % trong một phiên). Cuối tháng rổ CAPIT **có lãi +5.660.000đ** dù chiếm 31% NAV — phần
-giá gần như đi ngang (−1,6tr) và cổ tức 7,3tr (NCT + SAB) đưa cả rổ sang trạng thái lãi *(🔧 sửa
-02/08: bản cũ ghi "chỉ gánh 2,6% khoản lỗ", thiếu phần cổ tức — Mục 8.4)*. **Một tháng chưa đủ để kết
+(hơn 1,91 điểm % trong một phiên). Cuối tháng rổ CAPIT **có lãi +5.295.000đ (sau thuế)** dù chiếm 31% NAV —
+phần giá gần như đi ngang (−1,6tr) và cổ tức 7,3tr gộp / 6,9tr ròng (NCT + SAB) đưa cả rổ sang trạng
+thái lãi *(🔧 sửa 02/08: bản gốc ghi "chỉ gánh 2,6% khoản lỗ", thiếu phần cổ tức — Mục 8.4; bản sửa
+#2 trừ thêm thuế TNCN 5% — Mục 8.6)*. **Một tháng chưa đủ để kết
 luận** — cần theo dõi hết chu kỳ khoá 60 phiên.
 
 ### 6.4 Book LAG kích hoạt lần đầu trên tiền thật (27–28/07)
@@ -486,18 +517,22 @@ trả cổ tức càng lớn thì bị **báo lỗ oan càng nhiều**.
 
 **Sáu sự kiện cổ tức trong tháng và mức ảnh hưởng:**
 
-| Mã | Ngày chốt quyền | Cổ tức/cp | SpaceX: KL → tiền | % CŨ (sai) | % MỚI (đúng) | Chênh |
-|---|---|---:|---|---:|---:|---:|
-| MBB | 09/07 | 1.000 | 2.400cp → 2.400.000 | −13,0% | **−9,1%** | +3,91pp |
-| BID | 17/07 | 450 | 1.900cp → 855.000 | −11,6% | **−10,6%** | +1,04pp |
-| CTG | 23/07 | 450 | 2.300cp → 1.035.000 | −10,7% | **−9,4%** | +1,34pp |
-| VCB | 23/07 | 450 | 1.300cp → 585.000 | −4,8% | **−4,1%** | +0,71pp |
-| **NCT** | 27/07 | **8.000** | 500cp → 4.000.000 | −11,6% | **−3,1%** | **+8,46pp** |
-| **SAB** | 28/07 | **3.000** | 1.100cp → 3.300.000 | −8,1% | **−1,7%** | **+6,37pp** |
-| | | | **Tổng SpaceX: 12.175.000** | −6,35% | **−5,11%** | +1,24pp |
+> 🔧 **Bản sửa #2 (02/08)** thêm hai cột cuối: cổ tức bị khấu trừ **thuế TNCN 5% tại nguồn** (Mục 8.6),
+> nên cột **% RÒNG** mới là số nhà đầu tư thực nhận.
 
-Với **ZaloPay**, 5 mã được hưởng (**tổng 6.453.500đ**) — MBB không được hưởng vì tài khoản mua **sau**
-ngày chốt quyền 09/07. Tổng phần bot quản lý: **−3,05% → −1,63%**.
+| Mã | Ngày chốt quyền | Cổ tức/cp | SpaceX: KL → tiền gộp | % CŨ (sai) | % gộp (sửa #1) | Thuế 5% | **% RÒNG (đúng)** |
+|---|---|---:|---|---:|---:|---:|---:|
+| MBB | 09/07 | 1.000 | 2.400cp → 2.400.000 | −13,0% | −9,1% | −120.000 | **−9,3%** |
+| BID | 17/07 | 450 | 1.900cp → 855.000 | −11,6% | −10,6% | −42.750 | **−10,6%** |
+| CTG | 23/07 | 450 | 2.300cp → 1.035.000 | −10,7% | −9,4% | −51.750 | **−9,4%** |
+| VCB | 23/07 | 450 | 1.300cp → 585.000 | −4,8% | −4,1% | −29.250 | **−4,1%** |
+| **NCT** | 27/07 | **8.000** | 500cp → 4.000.000 | −11,6% | −3,1% | −200.000 | **−3,6%** |
+| **SAB** | 28/07 | **3.000** | 1.100cp → 3.300.000 | −8,1% | −1,7% | −165.000 | **−2,0%** |
+| | | | **Tổng SpaceX: 12.175.000** | −6,35% | −5,11% | **−608.750** | **−5,17%** |
+
+Với **ZaloPay**, 5 mã được hưởng (**tổng gộp 6.453.500đ**, thuế **−322.675đ**, ròng **6.130.825đ**) —
+MBB không được hưởng vì tài khoản mua **sau** ngày chốt quyền 09/07. Tổng phần bot quản lý:
+**−3,05% (bản gốc) → −1,63% (gộp) → −1,71% (ròng)**.
 
 **Vì sao khẳng định đây là cổ tức TIỀN MẶT chứ không phải chia tách cổ phiếu** (hai loại sự kiện này
 đều làm giá tham chiếu giảm, nhưng ý nghĩa hoàn toàn khác): đã kiểm chứng bằng **ba nguồn độc lập** —
@@ -513,9 +548,10 @@ báo** đã bị trừ đúng phần cổ tức (ví dụ MBB: 24.850 + 1.000 = 
 - Các mục 2 (hiệu suất vs chỉ số), 4 (rủi ro), 5 (phí), 6 (nhật ký), 7 (danh mục) **không đổi**.
 - Sai sót nằm ở **Mục 3 — phần giải thích/phân rã kết quả**, không phải bản thân kết quả.
 
-**Một kết luận bị sai về dấu:** rổ CAPIT trong bản cũ được mô tả là "chỉ gánh 2,6% mức lỗ" — sau khi
-cộng cổ tức, rổ này thực chất **LÃI +5.660.000đ**. Đây là sai sót có ý nghĩa vì nó đảo ngược nhận
-định về cấu phần phòng thủ quan trọng nhất của danh mục (31% NAV).
+**Một kết luận bị sai về dấu:** rổ CAPIT trong bản gốc được mô tả là "chỉ gánh 2,6% mức lỗ" — sau khi
+cộng cổ tức, rổ này thực chất **LÃI +5.660.000đ gộp / +5.295.000đ ròng sau thuế** (Mục 8.6). Đây là
+sai sót có ý nghĩa vì nó đảo ngược nhận định về cấu phần phòng thủ quan trọng nhất của danh mục
+(31% NAV) — và kết luận "có lãi" **đứng vững cả sau thuế**.
 
 **Chống tái diễn:** đã viết công cụ dùng chung `mike/bin/dividend_adjusted_return.py` — tự phát hiện
 sự kiện cổ tức từ cơ sở dữ liệu thị trường, **bắt buộc đối soát với sổ broker** trước khi đưa vào báo
@@ -547,6 +583,75 @@ công bố trong hai báo cáo tuần tương ứng.
 trình riêng) — đã công bố ở đây và đề xuất khắc phục vào việc cần làm Mục 9.4.
 
 ---
+
+### 8.6 🔴 Sai sót thứ ba (bản sửa #2, 02/08) — cổ tức phải trừ thuế TNCN 5%
+
+**Phát hiện:** 02/08/2026, do nhà đầu tư nêu vấn đề (lần thứ hai trong ngày). **Trạng thái:** đã sửa
+trong bản này.
+
+**Cơ chế.** Bản sửa #1 sáng nay cộng cổ tức theo **số GỘP** (mệnh giá công bố). Nhưng cổ tức tiền mặt
+trả cho **nhà đầu tư cá nhân** bị khấu trừ **thuế thu nhập cá nhân 5% ngay tại nguồn** — công ty
+chứng khoán trừ trước khi tiền vào tài khoản. Nhà đầu tư **không phải tự kê khai** và **không quyết
+toán lại** theo biểu lũy tiến: 5% là mức khoán, xong nghĩa vụ. Vì vậy số thực nhận chỉ bằng **95%**:
+
+| Mã | Cổ tức công bố | Thực nhận sau thuế |
+|---|---:|---:|
+| NCT | 8.000đ/cp | **7.600đ/cp** |
+| SAB | 3.000đ/cp | **2.850đ/cp** |
+| MBB | 1.000đ/cp | **950đ/cp** |
+| CTG · BID · VCB | 450đ/cp | **427,5đ/cp** |
+
+Lưu ý **chiều của sai sót**: bản gốc báo lỗ **nặng hơn** thực tế (bỏ quên cổ tức); bản sửa #1 báo
+**tốt hơn** thực tế (quên thuế). Sai sót lần này **nhỏ hơn nhiều** về độ lớn (−0,06pp ở mức danh mục
+so với +1,24pp của lần trước), nhưng vẫn công bố vì ba mã vượt ngưỡng: **NCT −0,42pp · SAB −0,32pp ·
+MBB −0,19pp** — đúng những mã mà bản sửa #1 vừa lấy làm tiêu đề đính chính.
+
+**Đây không phải giả định — đã đo được bằng tiền thật.** Ngày **17/07/2026**, cổ tức MBB của SpaceX là
+khoản **duy nhất trong tháng 7 đã thực sự chi trả** (5 khoản còn lại tới 02/08 vẫn là *phải thu*):
+
+| | 16/07 | 17/07 | Chênh |
+|---|---:|---:|---:|
+| Cổ tức phải thu | 3.255.000 | 855.000 | **−2.400.000** *(= 2.400cp × 1.000đ, đúng mệnh giá ⇒ ghi GỘP)* |
+| Tiền thật vào tài khoản | | | **+2.280.000** |
+| **Chênh lệch = thuế** | | | **120.000 = đúng 5,0000%** |
+
+*(Cùng ngày có khoản rút tiền 302.108.211đ — đã hoàn nguyên; con số này được xác nhận độc lập bởi hai
+nguồn có trước phép tính: bản chụp tài sản ngoài sổ 17/07 và trường "tiền được phép rút" 16/07. Danh
+mục cổ phiếu hai ngày **không đổi một mã nào** nên không có dòng tiền nào khác gây nhiễu. Giả thuyết
+cạnh tranh "đây là phí thu hộ cổ tức" đã bị loại: con số đúng bằng 5,0000% chứ không phải một biểu
+phí cố định, và DNSE không công bố loại phí này.)*
+
+**Căn cứ pháp lý:** Thông tư 111/2013/TT-BTC — Điều 10 (thuế suất 5% với thu nhập từ đầu tư vốn),
+Điều 25 (khấu trừ tại nguồn, thời điểm khấu trừ là **lúc chi trả thật**, không phải lúc ghi nhận phải
+thu). Luật Thuế TNCN mới **109/2025/QH15** (hiệu lực **01/07/2026**, áp dụng cho toàn bộ 6 sự kiện
+này) **giữ nguyên mức 5%** cho thu nhập từ đầu tư vốn — luật mới chỉ sửa biểu lũy tiến của thu nhập
+từ tiền lương. Cả hai tài khoản đều đứng tên **cá nhân**, đúng đối tượng chịu mức 5%.
+
+*(Ưu đãi giảm 50% thuế của Luật 109/2025 chỉ áp dụng cho lợi tức chia từ **quỹ đầu tư**; danh mục hiện
+tại là **cổ phiếu trực tiếp** nên giữ 5%. Đây là lý do thuế suất được cài đặt thành **tham số** trong
+công cụ tính, không cố định cứng.)*
+
+#### Ảnh hưởng tới NAV — khoản thuế sẽ bị trừ trong tương lai
+
+Tại 31/07, phần cổ tức **chưa được chi trả** vẫn nằm trong số dư theo **số gộp**, nên NAV công bố cao
+hơn thực tế đúng bằng khoản thuế sẽ bị khấu trừ khi tiền về:
+
+| Tài khoản | Cổ tức còn phải thu (gộp) | Thuế sẽ bị trừ | NAV đã công bố | NAV sau điều chỉnh | Tỉ lệ |
+|---|---:|---:|---:|---:|---:|
+| SpaceX | 9.775.000 | −488.750 | 938.435.711 | 937.946.961 | 0,052% |
+| ZaloPay | 6.453.500 | −322.675 | 888.828.498 | 888.505.823 | 0,036% |
+
+Khoản này **chắc chắn sẽ mất** (nghĩa vụ thuế theo luật), không phải rủi ro ước lượng — nên công bố dù
+nhỏ. Các bảng NAV trong báo cáo giữ nguyên số gốc để khớp sổ đã ghi; **tỷ suất tháng −6,16% / −10,03%
+không đổi**.
+
+**Giới hạn cần nói rõ:** phép đo 5,00% dựa trên **một** sự kiện đã chi trả (n=1). Khi khoản thứ hai về
+tiền sẽ lặp lại đúng phép đo này để xác nhận. Mức 5% đồng thời khớp với luật định nên rủi ro còn lại
+thấp — nhưng vẫn được ghi nhận là n=1.
+
+**Công cụ đã cập nhật:** `mike/bin/dividend_adjusted_return.py` thêm tầng thuế (tham số
+`--div-tax-rate`, mặc định 5%), **luôn hiển thị cả số gộp lẫn số ròng** để đối chiếu. Tự kiểm
+**58/58 đạt**, tái lập được dưới nhiều môi trường khác nhau.
 
 ## 9. TRIỂN VỌNG & VIỆC CẦN LÀM
 

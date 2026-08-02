@@ -16,6 +16,14 @@
 > vốn đã nằm trong số dư tài khoản. Công bố đầy đủ nguyên nhân + một sai sót thứ hai vừa phát hiện
 > (chuỗi NAV đếm hai lần cổ tức đúng ngày chốt quyền): **Mục 7.5**.
 
+> ## 🔧 BẢN SỬA #2 — phát hành lại lần hai, cùng ngày 02/08/2026
+> **Bản sửa #1 cộng cổ tức theo số GỘP — chưa trừ thuế thu nhập cá nhân 5%.** Cổ tức tiền mặt của
+> nhà đầu tư cá nhân bị khấu trừ **5% tại nguồn**, nên số thực về tài khoản chỉ bằng **95%** mệnh giá
+> công bố. **Ảnh hưởng kỳ này nhỏ** (kỳ 20–24/07 chỉ gồm 4 mã cổ tức thấp, NCT/SAB rơi vào kỳ sau):
+> **SpaceX −8,62% → −8,64%** (thuế 243.750đ) · **ZaloPay −6,27% → −6,29%** (thuế 61.875đ).
+> **NAV, giá trị danh mục, tiền mặt và mọi lệnh giao dịch: vẫn KHÔNG đổi.** Căn cứ pháp lý đầy đủ +
+> bằng chứng đo từ tiền thật: **Mục 7.6**.
+
 > ⚠️ **BÁO CÁO NỘP CHẬM 8 NGÀY — công bố thẳng, không giấu.** Báo cáo tuần này lẽ ra phát hành
 > ngày 25–26/07. Cơ chế cảnh báo "báo cáo tuần quá hạn" **có chạy** nhưng cảnh báo bị chôn trong
 > log `ops_health_check` 4 lần/ngày, không ai xử lý — 2 tuần liên tiếp bị bỏ sót (tuần 20–24/07 và
@@ -258,11 +266,14 @@ phiếu vẫn tăng (Mục 2.2).
 | Giá vốn thật | 950.720.443 | |
 | Thị giá 24/07 **(giá thật trên sàn)** | 863.930.000 | |
 | → Lãi/lỗ do giá | **−86.790.443** | −9,13% |
-| + Cổ tức tiền mặt đã nhận/chờ về (MBB, BID, CTG, VCB) | **+4.875.000** | |
-| **= Tổng lãi/lỗ** | **−81.915.443** | **−8,62%** |
+| + Cổ tức tiền mặt đã nhận/chờ về (MBB, BID, CTG, VCB) — **gộp** | +4.875.000 | |
+| − Thuế TNCN 5% khấu trừ tại nguồn | **−243.750** | |
+| + Cổ tức **ròng** thực nhận | **+4.631.250** | |
+| **= Tổng lãi/lỗ (ròng, số công bố)** | **−82.159.193** | **−8,64%** |
 
-*Số cũ công bố: −94.079.443 (−9,90%) — sai do lấy **giá đã điều chỉnh cổ tức** (856.641.000) trừ
-**giá vốn thô**, tức trừ phần cổ tức hai lần. Nguyên nhân và cách sửa: Mục 7.5.*
+*Bản gốc công bố −94.079.443 (−9,90%) — sai do lấy **giá đã điều chỉnh cổ tức** (856.641.000) trừ
+**giá vốn thô**, tức trừ phần cổ tức hai lần (Mục 7.5). Bản sửa #1 công bố −81.915.443 (−8,62%) theo
+cổ tức **gộp**; bản sửa #2 trừ thêm thuế TNCN 5% (Mục 7.6).*
 
 Con số này phản ánh việc phần lớn danh mục được mua trong tháng 7 — ngay trước nhịp giảm 9,7% của
 thị trường. *(Cổ tức NCT 4,0tr và SAB 3,3tr **chưa** được cộng ở đây: tại 24/07 giá cổ phiếu vẫn còn
@@ -373,8 +384,10 @@ giá vốn thật đã xác minh. DGC và VPB (vị thế legacy) **không** n�
 | Giá vốn thật | 435.098.300 | |
 | Thị giá 24/07 **(giá thật trên sàn)** | 406.569.300 | |
 | → Lãi/lỗ do giá | **−28.529.000** | −6,56% |
-| + Cổ tức tiền mặt đã nhận/chờ về (BID, CTG, VCB) | **+1.237.500** | |
-| **= Tổng lãi/lỗ** | **−27.291.500** | **−6,27%** |
+| + Cổ tức tiền mặt đã nhận/chờ về (BID, CTG, VCB) — **gộp** | +1.237.500 | |
+| − Thuế TNCN 5% khấu trừ tại nguồn | **−61.875** | |
+| + Cổ tức **ròng** thực nhận | **+1.175.625** | |
+| **= Tổng lãi/lỗ (ròng, số công bố)** | **−27.353.375** | **−6,29%** |
 
 *Số cũ công bố: −33.737.560 (−7,75%) — cùng một lỗi như phần SpaceX: lấy **giá đã điều chỉnh cổ tức**
 (401.360.740) trừ **giá vốn thô**. Chênh lệch 5.208.560đ chính là phần điều chỉnh NCT/SAB nêu ở
@@ -441,10 +454,12 @@ khoản. Báo cáo này đã chạy cả 2 công cụ với `--account-no` tư�
 tức** còn **giá vốn là giá khớp thô đã trả thật**. Trộn hai hệ quy chiếu giá như vậy làm phần cổ tức
 bị **trừ hai lần**, khiến danh mục bị **báo lỗ nặng hơn thực tế**.
 
-| Tài khoản | Chỉ tiêu | Số CŨ (sai) | Số MỚI (đúng) | Chênh |
+| Tài khoản | Chỉ tiêu | Số gốc (sai) | Bản sửa #1 (cổ tức gộp) | **Bản sửa #2 (ròng sau thuế)** |
 |---|---|---:|---:|---:|
-| SpaceX | Lãi/lỗ cuối kỳ (Mục 5) | −94.079.443 (−9,90%) | **−81.915.443 (−8,62%)** | +1,28pp |
-| ZaloPay | Lãi/lỗ phần bot mua (Mục 6.4) | −33.737.560 (−7,75%) | **−27.291.500 (−6,27%)** | +1,48pp |
+| SpaceX | Lãi/lỗ cuối kỳ (Mục 5) | −94.079.443 (−9,90%) | −81.915.443 (−8,62%) | **−82.159.193 (−8,64%)** |
+| ZaloPay | Lãi/lỗ phần bot mua (Mục 6.4) | −33.737.560 (−7,75%) | −27.291.500 (−6,27%) | **−27.353.375 (−6,29%)** |
+
+*(Cột cuối trừ thuế TNCN 5% trên cổ tức — Mục 7.6. Số công bố chính thức là cột này.)*
 
 Số mới gồm hai phần được tách rõ: **lãi/lỗ do giá** (so với giá **thô** trên bảng điện) **+ cổ tức
 tiền mặt** đã nhận/chờ về tính đến 24/07 (SpaceX 4.875.000đ từ MBB/BID/CTG/VCB; ZaloPay 1.237.500đ
@@ -475,6 +490,33 @@ cho mọi tỉ suất per-position từ kỳ sau. Công bố đầy đủ nhất
 Mục 8.4–8.5**.
 
 ---
+
+### 7.6 🔧 BẢN SỬA #2 (02/08) — cổ tức phải trừ thuế TNCN 5%
+
+**Bản sửa #1 cộng cổ tức theo số GỘP.** Cổ tức tiền mặt trả cho **nhà đầu tư cá nhân** bị khấu trừ
+**thuế thu nhập cá nhân 5% ngay tại nguồn** — công ty chứng khoán trừ trước khi tiền vào tài khoản.
+Nhà đầu tư **không phải tự kê khai** và **không quyết toán lại** theo biểu lũy tiến: 5% là mức khoán.
+
+Kỳ 20–24/07 chỉ gồm bốn mã cổ tức thấp (MBB 1.000đ/cp; BID/CTG/VCB 450đ/cp — NCT và SAB có ngày chốt
+quyền 27–28/07 nên thuộc kỳ sau), vì vậy **ảnh hưởng ở mức danh mục là nhỏ**:
+
+| Tài khoản | Cổ tức gộp | Thuế 5% | Cổ tức ròng | % bản sửa #1 | **% bản sửa #2** |
+|---|---:|---:|---:|---:|---:|
+| SpaceX | 4.875.000 | −243.750 | 4.631.250 | −8,62% | **−8,64%** |
+| ZaloPay | 1.237.500 | −61.875 | 1.175.625 | −6,27% | **−6,29%** |
+
+**Đây không phải giả định — đã đo được bằng tiền thật.** Ngày **17/07/2026** (nằm ngay trước kỳ này),
+cổ tức MBB của SpaceX là khoản **duy nhất trong tháng 7 đã thực sự chi trả**: khoản phải thu giảm
+**2.400.000đ** (= 2.400cp × 1.000đ, đúng mệnh giá công bố ⇒ khoản phải thu ghi **GỘP**) trong khi
+tiền thật vào tài khoản chỉ **2.280.000đ** — chênh lệch **120.000đ = đúng 5,0000%**. Chi tiết đầy đủ
+phép tách số dư, cùng cách loại trừ khoản rút tiền cùng ngày, xem **Mục 11.6 của báo cáo tuần
+27–31/07**.
+
+**Căn cứ pháp lý:** Thông tư 111/2013/TT-BTC — Điều 10 (thuế suất 5% với thu nhập từ đầu tư vốn),
+Điều 25 (khấu trừ tại nguồn, **lúc chi trả thật**). Luật Thuế TNCN **109/2025/QH15** (hiệu lực
+01/07/2026) **giữ nguyên** mức 5% này. Cả hai tài khoản đều đứng tên **cá nhân**.
+
+**Giới hạn:** phép đo dựa trên **một** sự kiện đã chi trả (n=1); sẽ lặp lại khi khoản thứ hai về tiền.
 
 ## 8. ĐỐI SOÁT ĐẲNG THỨC HAI CHIỀU
 

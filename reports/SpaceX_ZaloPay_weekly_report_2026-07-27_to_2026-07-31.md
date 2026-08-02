@@ -20,6 +20,16 @@
 > Chi tiết đầy đủ số cũ/số mới/nguyên nhân: **Mục 11 — ĐIỀU CHỈNH CỔ TỨC**. Mục 11 cũng công bố
 > thêm một sai sót thứ hai vừa phát hiện (chuỗi NAV đếm hai lần cổ tức đúng ngày chốt quyền).
 
+> ## 🔧 BẢN SỬA #2 — phát hành lại lần hai, cùng ngày 02/08/2026
+> **Bản sửa #1 (sáng 02/08) cộng cổ tức theo số GỘP — chưa trừ thuế thu nhập cá nhân 5%.** Cổ tức
+> tiền mặt của nhà đầu tư cá nhân bị khấu trừ **5% tại nguồn** khi công ty chứng khoán chi trả, nên
+> số thực về tài khoản chỉ bằng **95%** mệnh giá công bố (VD: NCT 8.000đ/cp → thực nhận 7.600đ/cp).
+> Bản sửa #1 vì vậy báo lãi/lỗ **tốt hơn thực tế một chút**, ngược chiều với sai sót của bản gốc.
+> **Ảnh hưởng: SpaceX −5,1% → −5,2%; ZaloPay (phần bot mua) −1,63% → −1,71%.** Ba mã vượt ngưỡng
+> đáng công bố: **NCT −0,42pp · SAB −0,32pp · MBB −0,19pp**.
+> **NAV, giá trị danh mục, tiền mặt và mọi lệnh giao dịch: vẫn KHÔNG đổi.** Chi tiết + căn cứ pháp
+> lý + bằng chứng đo từ tiền thật: **Mục 11.6**.
+
 ---
 
 > **✅ Nguồn số liệu:** NAV/giá vốn/lãi-lỗ chạy qua pipeline xác minh bắt buộc:
@@ -185,21 +195,24 @@ hàng hồi chậm) rồi **bứt lên ở 2 phiên cuối** khi nhóm CAPIT và
 > và cột **% tổng** = (giá cuối kỳ + cổ tức − giá vốn) / giá vốn. Bản cũ chỉ có cột "%" tính theo
 > giá, làm 6 mã có cổ tức bị **báo lỗ nặng hơn thực tế**. Số cũ ghi ở Mục 9.
 
-| Mã | KL | Giá vốn thật | Giá 31/07 | Giá trị TT (VND) | Lãi/lỗ do giá | Cổ tức | % tổng | Nhóm |
+> 🔧 **CẬP NHẬT BẢN SỬA #2 (02/08):** cột **Cổ tức** dưới đây là số **RÒNG sau thuế TNCN 5%** (số
+> gộp theo mệnh giá công bố ghi trong ngoặc), và cột **% tổng** tính theo số ròng. Xem Mục 11.6.
+
+| Mã | KL | Giá vốn thật | Giá 31/07 | Giá trị TT (VND) | Lãi/lỗ do giá | Cổ tức ròng *(gộp)* | % tổng | Nhóm |
 |---|---:|---:|---:|---:|---:|---:|---:|---|
 | SIP | 1.700 | 47.059 | 48.100 | 81.770.000 | **+1.770.000** | — | +2,2% | CAPIT |
-| VCB | 1.300 | 62.300 | 59.300 | 77.090.000 | −3.900.000 | +585.000 | **−4,1%** | Ngân hàng |
+| VCB | 1.300 | 62.300 | 59.300 | 77.090.000 | −3.900.000 | +555.750 *(585.000)* | **−4,1%** | Ngân hàng |
 | VHM | 500 | 149.800 | 148.100 | 74.050.000 | −850.000 | — | −1,1% | Bất động sản |
-| BID | 1.900 | 42.991 | 38.000 | 72.200.000 | −9.483.478 | +855.000 | **−10,6%** | Ngân hàng |
-| CTG | 2.300 | 34.477 | 30.800 | 70.840.000 | −8.456.607 | +1.035.000 | **−9,4%** | Ngân hàng |
+| BID | 1.900 | 42.991 | 38.000 | 72.200.000 | −9.483.478 | +812.250 *(855.000)* | **−10,6%** | Ngân hàng |
+| CTG | 2.300 | 34.477 | 30.800 | 70.840.000 | −8.456.607 | +983.250 *(1.035.000)* | **−9,4%** | Ngân hàng |
 | PVT | 3.500 | 17.100 | 18.300 | 64.050.000 | **+4.200.000** | — | **+7,0%** | CAPIT |
 | TCB | 2.000 | 33.900 | 28.950 | 57.900.000 | −9.900.000 | — | −14,6% | Ngân hàng |
 | VPB | 2.300 | 27.914 | 24.800 | 57.040.000 | −7.162.857 | — | −11,2% | Ngân hàng |
 | VNM | 900 | 58.600 | 60.900 | 54.810.000 | **+2.070.000** | — | +3,9% | CAPIT |
-| MBB | 2.400 | 25.850 | 22.500 | 54.000.000 | −8.040.000 | +2.400.000 | **−9,1%** | Ngân hàng |
-| SAB | 1.100 | 47.368 | 43.550 | 47.905.000 | −4.200.000 | +3.300.000 | **−1,7%** | CAPIT |
+| MBB | 2.400 | 25.850 | 22.500 | 54.000.000 | −8.040.000 | +2.280.000 *(2.400.000)* | **−9,3%** | Ngân hàng |
+| SAB | 1.100 | 47.368 | 43.550 | 47.905.000 | −4.200.000 | +3.135.000 *(3.300.000)* | **−2,0%** | CAPIT |
 | LPB | 900 | 52.583 | 51.800 | 46.620.000 | −705.000 | — | −1,5% | Ngân hàng |
-| NCT | 500 | 94.360 | 83.400 | 41.700.000 | −5.480.000 | +4.000.000 | **−3,1%** | CAPIT |
+| NCT | 500 | 94.360 | 83.400 | 41.700.000 | −5.480.000 | +3.800.000 *(4.000.000)* | **−3,6%** | CAPIT |
 | HDB | 1.500 | 26.675 | 25.200 | 37.800.000 | −2.212.500 | — | −5,5% | Ngân hàng |
 | ACB | 1.500 | 22.650 | 21.900 | 32.850.000 | −1.125.000 | — | −3,3% | Ngân hàng |
 | SHB | 1.500 | 13.550 | 11.500 | 17.250.000 | −3.075.000 | — | −15,1% | Ngân hàng |
@@ -208,7 +221,7 @@ hàng hồi chậm) rồi **bứt lên ở 2 phiên cuối** khi nhóm CAPIT và
 | TV1 | 400 | 19.600 | 19.600 | 7.840.000 | 0 | — | 0,0% | Ngoài V2.4 |
 | VND | 300 | 17.800 | 16.600 | 4.980.000 | −360.000 | — | −6,7% | Chứng khoán |
 | SHS | 200 | 18.900 | 15.200 | 3.040.000 | −740.000 | — | −19,6% | Chứng khoán |
-| **Tổng cổ phiếu** | | **986.725.443** | | **924.115.000** | **−62.610.443** | **+12.175.000** | **−5,1%** | |
+| **Tổng cổ phiếu** | | **986.725.443** | | **924.115.000** | **−62.610.443** | **+11.566.250** *(12.175.000)* | **−5,2%** | |
 | Tiền mặt *(đã gồm cổ tức)* | | | | 14.326.923 | | | | |
 | Phí phải trả | | | | −6.212 | | | | |
 | **NAV** | | | | **938.435.711** | | | | |
@@ -317,13 +330,18 @@ Cộng dồn kiểm tra: cổ phiếu 876.598.100 + tiền 12.237.594 − 7.196 
 mục đích.
 
 **Lãi/lỗ phần bot mua** (14 mã có lịch sử khớp nội bộ, **không gồm DGC và toàn bộ VPB**) — 🔧 **đã
-sửa 02/08, cộng lại cổ tức**: giá vốn 454.848.300 → thị giá 440.958.100 (**−13.890.200** do giá)
-**+ cổ tức 6.453.500** = **−7.436.700 (−1,63%)**. *(Số cũ công bố: −13.890.200 / −3,05% — thiếu
-toàn bộ phần cổ tức.)*
+sửa 02/08 (bản sửa #2), cộng lại cổ tức RÒNG sau thuế**: giá vốn 454.848.300 → thị giá 440.958.100
+(**−13.890.200** do giá) **+ cổ tức ròng 6.130.825** *(gộp 6.453.500 − thuế TNCN 5% là 322.675)*
+= **−7.759.375 (−1,71%)**. *(Bản sửa #1 công bố −7.436.700 / −1,63% theo số gộp; bản gốc
+−13.890.200 / −3,05% thiếu toàn bộ phần cổ tức.)*
 
-Vị thế tốt nhất: **CSV +7,3%** · PVT +6,1% · VNM +3,7% · SIP +2,0%. Vị thế yếu nhất **sau khi cộng
-cổ tức**: TCB −8,4% · MBB −8,5% · LPB −5,5% (trước đây NCT và SAB đứng đầu danh sách lỗ — nay lần
-lượt còn **−3,2%** và **−1,9%**). Lý do loại VPB khỏi con số này: hệ thống không tách được giá vốn
+Vị thế tốt nhất: **CSV +7,3%** · PVT +6,1% · VNM +3,7% · SIP +2,0% (bốn mã này **không có cổ tức**
+trong kỳ nên thuế không ảnh hưởng). Vị thế yếu nhất **sau khi cộng cổ tức ròng**: TCB −8,4% ·
+MBB −8,5% · LPB −5,5% (ba mã cũng không có cổ tức; MBB tại ZaloPay mua **sau** ngày chốt quyền 09/07
+nên không được hưởng). Trước đây NCT và SAB đứng đầu danh sách lỗ — nay lần lượt còn **−3,6%** và
+**−2,2%** *(bản sửa #1 ghi −3,2% và −1,9% theo cổ tức gộp; phần giảm đúng bằng thuế: NCT −400đ/cp,
+SAB −150đ/cp)*. Ba mã cổ tức nhỏ còn lại dịch chuyển dưới 0,07pp: CTG −4,1% → **−4,2%**,
+VCB −2,6% → **−2,7%**, BID giữ **−5,7%**. Lý do loại VPB khỏi con số này: hệ thống không tách được giá vốn
 của 1.100cp legacy khỏi 700cp mua mới trong cùng một vị thế broker — xem Mục 8.
 
 ---
@@ -503,21 +521,24 @@ giá và bỏ quên phần tiền**. Hệ quả: mã nào trả cổ tức càng
 
 ### 11.2 Sáu mã bị ảnh hưởng — số cũ so với số mới
 
-| Tài khoản | Mã | Ngày chốt quyền | Cổ tức | KL | Tiền cổ tức | % CŨ (sai) | % MỚI (đúng) | Chênh |
-|---|---|---|---:|---:|---:|---:|---:|---:|
-| SpaceX | **NCT** | 27/07 | 8.000đ/cp | 500 | 4.000.000 | −11,6% | **−3,1%** | **+8,5pp** |
-| SpaceX | **SAB** | 28/07 | 3.000đ/cp | 1.100 | 3.300.000 | −8,1% | **−1,7%** | **+6,4pp** |
-| SpaceX | **MBB** | 09/07 | 1.000đ/cp | 2.400 | 2.400.000 | −13,0% | **−9,1%** | **+3,9pp** |
-| SpaceX | **CTG** | 23/07 | 450đ/cp | 2.300 | 1.035.000 | −10,7% | **−9,4%** | +1,3pp |
-| SpaceX | **BID** | 17/07 | 450đ/cp | 1.900 | 855.000 | −11,6% | **−10,6%** | +1,0pp |
-| SpaceX | **VCB** | 23/07 | 450đ/cp | 1.300 | 585.000 | −4,8% | **−4,1%** | +0,7pp |
-| | | | | | **12.175.000** | **−6,3%** | **−5,1%** | **+1,2pp** |
-| ZaloPay | **NCT** | 27/07 | 8.000đ/cp | 373 | 2.984.000 | −11,7% | **−3,2%** | **+8,5pp** |
-| ZaloPay | **SAB** | 28/07 | 3.000đ/cp | 744 | 2.232.000 | −8,2% | **−1,9%** | **+6,3pp** |
-| ZaloPay | **CTG** | 23/07 | 450đ/cp | 1.050 | 472.500 | −5,5% | **−4,1%** | +1,4pp |
-| ZaloPay | **BID** | 17/07 | 450đ/cp | 900 | 405.000 | −6,8% | **−5,7%** | +1,1pp |
-| ZaloPay | **VCB** | 23/07 | 450đ/cp | 800 | 360.000 | −3,4% | **−2,6%** | +0,7pp |
-| | | | | | **6.453.500** | **−3,05%** | **−1,63%** | **+1,42pp** |
+> 🔧 **Bản sửa #2 (02/08)** thêm hai cột cuối: cổ tức bị khấu trừ **thuế TNCN 5% tại nguồn**, nên
+> cột **% RÒNG** mới là số nhà đầu tư thực nhận. Cột "% gộp" giữ lại để đối chiếu với bản sửa #1.
+
+| Tài khoản | Mã | Ngày chốt quyền | Cổ tức | KL | Cổ tức gộp | % CŨ (sai) | % gộp (bản sửa #1) | Thuế 5% | **% RÒNG (đúng)** |
+|---|---|---|---:|---:|---:|---:|---:|---:|---:|
+| SpaceX | **NCT** | 27/07 | 8.000đ/cp | 500 | 4.000.000 | −11,6% | −3,1% | −200.000 | **−3,6%** |
+| SpaceX | **SAB** | 28/07 | 3.000đ/cp | 1.100 | 3.300.000 | −8,1% | −1,7% | −165.000 | **−2,0%** |
+| SpaceX | **MBB** | 09/07 | 1.000đ/cp | 2.400 | 2.400.000 | −13,0% | −9,1% | −120.000 | **−9,3%** |
+| SpaceX | **CTG** | 23/07 | 450đ/cp | 2.300 | 1.035.000 | −10,7% | −9,4% | −51.750 | **−9,4%** |
+| SpaceX | **BID** | 17/07 | 450đ/cp | 1.900 | 855.000 | −11,6% | −10,6% | −42.750 | **−10,6%** |
+| SpaceX | **VCB** | 23/07 | 450đ/cp | 1.300 | 585.000 | −4,8% | −4,1% | −29.250 | **−4,1%** |
+| | | | | | **12.175.000** | **−6,3%** | **−5,1%** | **−608.750** | **−5,2%** |
+| ZaloPay | **NCT** | 27/07 | 8.000đ/cp | 373 | 2.984.000 | −11,7% | −3,2% | −149.200 | **−3,6%** |
+| ZaloPay | **SAB** | 28/07 | 3.000đ/cp | 744 | 2.232.000 | −8,2% | −1,9% | −111.600 | **−2,2%** |
+| ZaloPay | **CTG** | 23/07 | 450đ/cp | 1.050 | 472.500 | −5,5% | −4,1% | −23.625 | **−4,2%** |
+| ZaloPay | **BID** | 17/07 | 450đ/cp | 900 | 405.000 | −6,8% | −5,7% | −20.250 | **−5,7%** |
+| ZaloPay | **VCB** | 23/07 | 450đ/cp | 800 | 360.000 | −3,4% | −2,6% | −18.000 | **−2,7%** |
+| | | | | | **6.453.500** | **−3,05%** | **−1,63%** | **−322.675** | **−1,71%** |
 
 **MBB của ZaloPay KHÔNG được điều chỉnh** — tài khoản này mua MBB *sau* ngày chốt quyền 09/07 nên
 không được hưởng cổ tức. Đã kiểm chứng bằng số dư cổ tức phải thu của công ty chứng khoán (bằng 0
@@ -536,16 +557,18 @@ cho tới 15/07). Đây là lý do phải kiểm tra **từng tài khoản riên
 Rổ CAPIT nhận **7,3tr trên tổng 12,2tr cổ tức của SpaceX** (NCT + SAB), vì đây là nhóm cổ phiếu
 phòng thủ, cổ tức cao. Sau khi cộng lại:
 
-| Nhóm (SpaceX, 31/07) | Lãi/lỗ do giá | Cổ tức | **Tổng thật** |
-|---|---:|---:|---:|
-| Ngân hàng (11 mã) | −56.220.442 | +4.875.000 | **−51.345.442** |
-| Chứng khoán (VIX/VND/SHS) | −3.900.000 | — | −3.900.000 |
-| **Rổ CAPIT** (SIP/PVT/VNM/SAB/NCT) | −1.640.000 | +7.300.000 | **+5.660.000 → LÃI** |
-| Bất động sản (VHM) | −850.000 | — | −850.000 |
-| **Tổng** | **−62.610.443** | **+12.175.000** | **−50.435.443** |
+| Nhóm (SpaceX, 31/07) | Lãi/lỗ do giá | Cổ tức gộp | Thuế 5% | Cổ tức ròng | **Tổng thật (ròng)** |
+|---|---:|---:|---:|---:|---:|
+| Ngân hàng (11 mã) | −56.220.442 | +4.875.000 | −243.750 | +4.631.250 | **−51.589.192** |
+| Chứng khoán (VIX/VND/SHS) | −3.900.000 | — | — | — | −3.900.000 |
+| **Rổ CAPIT** (SIP/PVT/VNM/SAB/NCT) | −1.640.000 | +7.300.000 | −365.000 | +6.935.000 | **+5.295.000 → LÃI** |
+| Bất động sản (VHM) | −850.000 | — | — | — | −850.000 |
+| **Tổng** | **−62.610.443** | **+12.175.000** | **−608.750** | **+11.566.250** | **−51.044.193** |
 
-**Rổ CAPIT thực tế đang LÃI +5,66tr, không phải lỗ nhẹ như bản cũ mô tả.** Đây là thay đổi **về
-dấu**, không chỉ về độ lớn — nhận định "CAPIT chỉ gánh 2,6% mức lỗ" ở bản cũ là **sai bản chất**.
+**Rổ CAPIT thực tế đang LÃI +5,30tr (sau thuế), không phải lỗ nhẹ như bản gốc mô tả.** Đây là thay
+đổi **về dấu**, không chỉ về độ lớn — nhận định "CAPIT chỉ gánh 2,6% mức lỗ" ở bản gốc là **sai bản
+chất**. Thuế 5% làm mỏng khoản lãi này (+5,66tr gộp → **+5,30tr ròng**) nhưng **không đảo lại dấu**:
+kết luận rổ CAPIT có lãi trong tháng 7 vẫn đứng vững.
 
 ### 11.5 🔴 Sai sót thứ hai, vừa phát hiện khi rà soát — chuỗi NAV đếm hai lần cổ tức
 
@@ -580,9 +603,63 @@ tăng cả tuần bị **báo thấp đi**:
 gốc trong các bảng để khớp với sổ đã ghi, và công bố số trung hoà ở đây để nhà đầu tư đối chiếu.
 
 **Chưa sửa chuỗi NAV gốc** (`nav_history_*.csv`): đây là dữ liệu vận hành thật, việc ghi đè lịch sử
-cần nhà đầu tư/người phụ trách quỹ đồng ý trước. Đề xuất xử lý ở 11.7.
+cần nhà đầu tư/người phụ trách quỹ đồng ý trước. Đề xuất xử lý ở 11.8.
 
-### 11.6 Cách kiểm chứng lại (để bên thứ ba tái lập được)
+### 11.6 🔴 Sai sót thứ ba (bản sửa #2, 02/08) — cổ tức phải trừ thuế TNCN 5%
+
+**Bản sửa #1 sáng nay cộng cổ tức theo số GỘP.** Cổ tức tiền mặt trả cho **nhà đầu tư cá nhân** bị
+khấu trừ **thuế thu nhập cá nhân 5% ngay tại nguồn** — công ty chứng khoán trừ trước khi tiền vào
+tài khoản. Nhà đầu tư **không phải tự kê khai** và **không quyết toán lại** theo biểu lũy tiến: 5%
+là mức khoán, xong nghĩa vụ.
+
+Vậy con số thực nhận chỉ bằng **95%** mệnh giá công bố:
+
+| Mã | Cổ tức công bố | Thực nhận sau thuế |
+|---|---:|---:|
+| NCT | 8.000đ/cp | **7.600đ/cp** |
+| SAB | 3.000đ/cp | **2.850đ/cp** |
+| MBB | 1.000đ/cp | **950đ/cp** |
+| CTG · BID · VCB | 450đ/cp | **427,5đ/cp** |
+
+**Đây không phải giả định — đã đo được bằng tiền thật.** Ngày **17/07/2026**, cổ tức MBB của SpaceX
+là khoản **duy nhất trong tháng 7 đã thực sự chi trả** (5 khoản còn lại tới 02/08 vẫn là *phải thu*).
+Số dư tài khoản hôm đó cho phép tách bạch từng đồng:
+
+| | 16/07 | 17/07 | Chênh |
+|---|---:|---:|---:|
+| Cổ tức phải thu | 3.255.000 | 855.000 | **−2.400.000** *(= 2.400cp × 1.000đ, đúng mệnh giá ⇒ ghi GỘP)* |
+| Tiền thật vào tài khoản | | | **+2.280.000** |
+| **Chênh lệch = thuế** | | | **120.000 = đúng 5,0000%** |
+
+*(Cùng ngày có một khoản rút tiền lớn 302.108.211đ — đã hoàn nguyên, và con số này được xác nhận
+độc lập bởi hai nguồn có trước phép tính: bản chụp tài sản ngoài sổ ngày 17/07 và trường "tiền được
+phép rút" ngày 16/07. Danh mục cổ phiếu hai ngày **không đổi một mã nào**, nên không có dòng tiền
+nào khác gây nhiễu.)*
+
+**Căn cứ pháp lý:** Thông tư 111/2013/TT-BTC — Điều 10 (thuế suất 5% với thu nhập từ đầu tư vốn) và
+Điều 25 (khấu trừ tại nguồn, thời điểm khấu trừ là **lúc chi trả thật**, không phải lúc ghi nhận
+phải thu). Luật Thuế TNCN mới **109/2025/QH15** (hiệu lực **01/07/2026**, tức áp dụng cho toàn bộ
+6 sự kiện này) **giữ nguyên mức 5%** cho thu nhập từ đầu tư vốn — luật mới chỉ sửa biểu lũy tiến của
+thu nhập từ lương. Cả hai tài khoản đều đứng tên **cá nhân**, đúng đối tượng chịu mức 5% này.
+
+#### Ảnh hưởng tới NAV — khoản thuế sẽ bị trừ trong tương lai
+
+Tại 31/07, phần cổ tức **chưa được chi trả** vẫn nằm trong số dư theo **số gộp**, nên NAV công bố
+đang cao hơn thực tế một khoản đúng bằng thuế sẽ bị khấu trừ khi tiền về:
+
+| Tài khoản | Cổ tức còn phải thu (gộp) | Thuế sẽ bị trừ | NAV đã công bố | NAV sau điều chỉnh | Tỉ lệ |
+|---|---:|---:|---:|---:|---:|
+| SpaceX | 9.775.000 | −488.750 | 938.435.711 | 937.946.961 | 0,052% |
+| ZaloPay | 6.453.500 | −322.675 | 888.828.498 | 888.505.823 | 0,036% |
+
+Khoản này **chắc chắn sẽ mất** (nghĩa vụ thuế theo luật), không phải rủi ro ước lượng — nên công bố
+dù nhỏ. Các bảng NAV trong báo cáo giữ nguyên số gốc để khớp sổ đã ghi.
+
+**Giới hạn cần nói rõ:** phép đo 5,00% dựa trên **một** sự kiện đã chi trả (MBB 17/07). Khi khoản
+thứ hai về tiền, sẽ lặp lại đúng phép đo này để xác nhận. Mức 5% đồng thời khớp với luật định, nên
+rủi ro còn lại là thấp — nhưng đây vẫn là n=1 và được ghi nhận như vậy.
+
+### 11.7 Cách kiểm chứng lại (để bên thứ ba tái lập được)
 
 Ba nguồn **hoàn toàn độc lập** cho cùng một kết quả:
 
@@ -597,7 +674,7 @@ Kiểm tra chéo mạnh nhất: dựng lại con số **454.848.300** (giá vố
 (−3,05%)** đã công bố, đi từ đường dữ liệu số 3 — ra **đúng từng đồng**, xác nhận cả phương pháp lẫn
 mức cổ tức.
 
-### 11.7 Việc cần làm để không tái diễn
+### 11.8 Việc cần làm để không tái diễn
 
 | # | Việc | Trạng thái |
 |---|---|---|
