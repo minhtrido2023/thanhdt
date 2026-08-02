@@ -223,3 +223,53 @@ topic **khác nhau** hai ngày liên tiếp, cả hai đều **ngoài registry**
   log → `logs/archive/notify_thread_errors.20260802-selfcheck-vong34.log` (4 bản ghi đó đều là
   tạo tác của chính phép thử vòng 3/4; archive để không bắn WARN giả lúc 08:20).
 - `bash -n` sạch 8 file; `discord_id_gate` + `shellcheck_gate` PASS lúc commit.
+
+---
+
+## Vòng 5 (2026-08-02) — audit đóng saga: "alert dự phòng" biện minh cho F4 KHÔNG TỒN TẠI
+
+arch-reviewer audit toàn bộ trạng thái đã commit (`752abe98` + `c050bd57`): **lõi định tuyến
+ĐÚNG** — không còn đường nào rơi vào topic không nêu đích danh (0 nơi đọc con trỏ trong repo
+lẫn `discord_bot/`; 69 call site `notify_thread.sh` đều truyền TÊN registry hoặc pin đã ghim),
+không cảnh báo tiền thật nào bị câm vì bỏ tầng 3. Verdict: NEEDS_CHANGES với **3 MINOR**, không
+BLOCKER/MAJOR.
+
+**Phát hiện lớn nhất (MINOR-1, mở rộng khi tự kiểm chứng lại):** cả hai quyết định lớn của vòng
+3/4 được ghi vào code + sổ này kèm lý do *"pin RỖNG nhưng alert Telegram vẫn chạy"*. **Fleet
+không có kênh Telegram**: `notify.sh` → `notify_discord.sh` → `POST 127.0.0.1:8199/api/notify`
+= **CÙNG bridge** với `notify_thread.sh`. Tự đo thêm, tệ hơn một bậc:
+
+```
+$ MIKE_DISCORD_API=http://127.0.0.1:1 DISCORD_CHANNELS_REGISTRY=/nonexistent notify.sh "probe"
+notify.sh: send failed (rc=1)          # notify_discord.sh:22 phân giải 'mikefleet' QUA CHÍNH
+                                        # registry đang hỏng, set -e ⇒ chết trước curl
+```
+
+⇒ Trong **đúng** ca mà đánh đổi F4 nói tới (registry hỏng), cảnh báo dùng để biện minh cho
+"cứ chạy tiếp" **không bao giờ tới**. Job chạy hoàn toàn im lặng, không ai biết.
+
+**Sửa** (giữ nguyên quyết định VẪN CHẠY — nó đúng; chỉ vá đường báo):
+- `dispatch.sh` nhánh registry-hỏng nay ghi `logs/notify_thread_errors.log` — đường báo **không
+  phụ thuộc Discord**, và là file mà `ops_health_check.sh` check #10 ĐỌC lúc 08:20/12:45.
+- Sửa 9 chỗ nói "Telegram" trong `dispatch.sh` / selfcheck / sổ này thành sự thật (#mikefleet,
+  CÙNG bridge). Gồm cả dòng in ra cho người vận hành (`dispatch.sh` nhánh registry hỏng) — họ
+  đang được bảo đi tìm một tin nhắn Telegram không bao giờ tồn tại.
+- Thông điệp `notify.sh` trong `_agent_thread_override` sửa "dispatch bị CHẶN" → "job VẪN CHẠY
+  nhưng KHÔNG có topic" (câu cũ sai từ khi F4 đảo quyết định).
+- **MINOR-2**: bọc check #10 bằng marker `CHECK10_BEGIN/END`, thêm 4 ca vào
+  `bin/ops_health_check_selfcheck.py` (khuôn extract-and-test đã dùng cho check #5): không file
+  / log tươi / log tươi KHÔNG có dòng timestamp (IndexError → phải WARN chứ không được ném ra
+  ngoài làm chết CẢ báo cáo) / log >24h.
+- **MINOR-3**: gắn `[WARN-ONLY]` vào WARN của check #10. Cảnh báo này dựa trên **mtime** nên
+  không tắt được bằng cách sửa root cause ⇒ nếu routable, nó dispatch tới **4 job autofix/ngày**
+  (08:20 + 12:45 × 2 account) cho một sự cố đã xử lý xong.
+
+**Verify vòng 5**: `dispatch_discord_topic_selfcheck.sh` **42/42 PASS** (thêm assertion "registry
+hỏng ⇒ có ghi notify_thread_errors.log"); `ops_health_check_selfcheck.py` **PASS** (17 ca cũ + 4
+ca check #10). Mutation test cả 3 bất biến mới: xoá dòng ghi log ⇒ CA 4 FAIL; bỏ `[WARN-ONLY]`
+⇒ ca marker FAIL; bỏ `try/except` ⇒ ca IndexError FAIL.
+
+**Bài học vòng 5**: một *đánh đổi* chỉ đúng bằng độ đúng của **cơ chế dự phòng mà nó viện dẫn**.
+Ba vòng liên tiếp viết "vẫn có alert" mà không ai chạy thử `notify.sh` trong đúng điều kiện hỏng
+đang bàn — và câu đó được chép sang code, comment, sổ sự cố như sự thật đã chốt. Trước khi chấp
+nhận im lặng ở một đường, phải **chạy thật** đường còn lại trong đúng ca hỏng đó.

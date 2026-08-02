@@ -483,6 +483,13 @@ else:
 #     lỗi qua exit code. Trước check này KHÔNG script nào đọc file đó — fail-loud mà không có
 #     người đọc thì vẫn là fail-silent (đã mất thật 1 tin momentum_deals 2026-08-02T23:14).
 #     WARN-only, cửa sổ 24h để cảnh báo tự tắt sau khi hết lỗi.
+#
+#     Marker `[WARN-ONLY]` là CỐ Ý (thêm vòng 5, arch-reviewer MINOR-3): cảnh báo này dựa trên
+#     MTIME nên KHÔNG tắt được bằng cách sửa root cause — sửa xong nó vẫn kêu tới hết 24h. Nếu
+#     để nó rơi vào OTHER_WARN thì mỗi ngày dispatch tới 4 job autofix (08:20 + 12:45 × 2
+#     account) cho một sự cố đã xử lý xong. Dòng này chỉ cần NẰM TRONG báo cáo cho người đọc.
+# CHECK10_BEGIN — marker ỔN ĐỊNH: bin/ops_health_check_selfcheck.py trích ĐÚNG khối giữa
+# CHECK10_BEGIN/CHECK10_END rồi chạy nó trên log giả. Đổi/xoá marker ⇒ selfcheck FAIL ngay.
 import time as _time
 nte_file = os.path.join(wc_root, "mike", "logs", "notify_thread_errors.log")
 if os.path.exists(nte_file) and (_time.time() - os.path.getmtime(nte_file)) < 86400:
@@ -494,11 +501,12 @@ if os.path.exists(nte_file) and (_time.time() - os.path.getmtime(nte_file)) < 86
                      if re.match(r"^\d{4}-\d{2}-\d{2}T", l)][-1]
     except Exception:
         _nte_last = "(không đọc được nội dung)"
-    W(f"notify_thread.sh có lỗi gửi Discord trong 24h qua — TIN NHẮN ĐÃ BỊ NUỐT. "
+    W(f"[WARN-ONLY] notify_thread.sh có lỗi gửi Discord trong 24h qua — TIN NHẮN ĐÃ BỊ NUỐT. "
       f"Dòng cuối: {_nte_last[:300]} — kiểm tên topic trong mike/kb/discord_channels.json "
       f"và quyền chạy bin/discord_channel.sh.")
 else:
     OK("notify_thread.sh: không có lỗi gửi Discord trong 24h qua.")
+# CHECK10_END
 
 print("\n".join(lines))
 print(f"__WARN_COUNT__={warn}")

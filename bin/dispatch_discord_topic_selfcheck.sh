@@ -177,6 +177,7 @@ echo "== CA 4: registry HỎNG + agent CÓ override ⇒ VẪN chạy, pin RỖNG
 # hỏng sẽ chặn luôn job SINH PLAN T+1 ⇒ sáng hôm sau bot chạy không có plan. Đổi "user không
 # thấy 1 tin nhắn" lấy "không có việc" là sai hướng cho một sự cố THUẦN ĐỊNH TUYẾN THÔNG BÁO.
 # Nay: pin RỖNG + alert Telegram + VẪN CHẠY. Vẫn KHÔNG tụt về ambient (đó mới là rò rỉ).
+rm -f "$MK/logs/notify_thread_errors.log"
 run_dispatch -u DISCORD_THREAD_ID DISCORD_CHANNELS_REGISTRY=/nonexistent/registry.json -- \
   Wags "selfcheck ca4" --timeout 60
 assert "exit code" "$RC" "0"
@@ -184,7 +185,15 @@ assert "job VẪN chạy (có job record)" "$NJOBS" "1"
 assert "ID ghim RỖNG (không đoán topic thay thế)" "$PINNED" ""
 assert "agent con KHÔNG có topic (biến rỗng tường minh)" "$CHILD_TID" ""
 assert "số tin nhắn Discord" "$NCALLS" "0"
-assert "cảnh báo registry hỏng (Telegram)" "$(grep -c 'registry' "$SB/notify.calls" 2>/dev/null || echo 0)" "1"
+assert "cảnh báo registry hỏng (notify.sh → #mikefleet)" "$(grep -c 'registry' "$SB/notify.calls" 2>/dev/null || echo 0)" "1"
+# Vòng 5: đường báo TRÊN không đáng tin trong ĐÚNG ca này — `notify_discord.sh:22` cũng phân
+# giải tên `mikefleet` qua CHÍNH registry đang hỏng (`set -e` ⇒ chết trước curl; đo thật:
+# `DISCORD_CHANNELS_REGISTRY=/nonexistent notify.sh "..."` → "send failed (rc=1)"). Ở đây
+# notify.sh là STUB nên nó "thành công" — đúng lớp PASS-GIẢ. Vậy nên bất biến thật phải là
+# đường KHÔNG phụ thuộc Discord: ghi logs/notify_thread_errors.log (ops_health_check check #10
+# đọc file này 08:20/12:45). Đó mới là thứ bảo đảm sự cố registry không im lặng.
+assert "ghi logs/notify_thread_errors.log (đường báo KHÔNG phụ thuộc Discord)" \
+  "$(grep -c 'registry Discord HONG' "$MK/logs/notify_thread_errors.log" 2>/dev/null || echo 0)" "1"
 
 echo "== CA 4b: pin RỖNG trong khi tiến trình cha CÓ ambient ⇒ agent con KHÔNG được thừa kế (M2)"
 # Ca DUY NHẤT phủ được lỗi 07-22b ở dạng mới: job record nói "không có topic" nhưng agent con

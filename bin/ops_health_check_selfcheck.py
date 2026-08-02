@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Regression selfcheck cho check #5 (backlog câu hỏi) của bin/ops_health_check.sh.
+"""Regression selfcheck cho check #5 (backlog câu hỏi) và check #10 (notify_thread.sh nuốt
+tin nhắn) của bin/ops_health_check.sh.
 
 TẠI SAO tồn tại: check #5 là kênh backlog `question` DUY NHẤT của fleet. Nó đã hỏng
 IM LẶNG 2 lần liên tiếp và mỗi lần chỉ được phát hiện bằng mắt người:
@@ -33,21 +34,22 @@ SRC = os.environ.get("OPS_HEALTH_CHECK_SRC") or os.path.join(ROOT, "bin", "ops_h
 FAILS = []
 
 
-def extract_check5():
-    """Trích khối check #5 thật giữa CHECK5_BEGIN … CHECK5_END."""
+def extract_block(tag):
+    """Trích khối check thật giữa <TAG>_BEGIN … <TAG>_END trong ops_health_check.sh."""
     with open(SRC, encoding="utf-8") as f:
         src = f.read()
-    m = re.search(r"^# CHECK5_BEGIN.*?\n(.*?)^# CHECK5_END", src, re.S | re.M)
+    m = re.search(rf"^# {tag}_BEGIN.*?\n(.*?)^# {tag}_END", src, re.S | re.M)
     if not m:
         raise SystemExit(
-            "FAIL: không tìm thấy marker CHECK5_BEGIN/CHECK5_END trong bin/ops_health_check.sh "
+            f"FAIL: không tìm thấy marker {tag}_BEGIN/{tag}_END trong bin/ops_health_check.sh "
             "— ai đó đổi/xoá marker, selfcheck này không còn kiểm được code thật. "
             "Khôi phục marker hoặc cập nhật selfcheck."
         )
     return m.group(1)
 
 
-CHECK5_SRC = extract_check5()
+CHECK5_SRC = extract_block("CHECK5")
+CHECK10_SRC = extract_block("CHECK10")
 
 
 def run_check5(wc_root):
@@ -317,14 +319,98 @@ def case_wagsfix_only_no_false_ok():
         shutil.rmtree(root, ignore_errors=True)
 
 
+# ── Check #10 (notify_thread.sh nuốt tin nhắn) ────────────────────────────────────────────
+# Thêm 2026-08-02 vòng 5 (arch-reviewer MINOR-2): check #10 là logic MỚI, lúc commit chỉ được
+# verify bằng 1 lần chạy tay. "Đọc code thấy hợp lý + chạy tay 1 lần" chính là loại guard đã
+# thất bại 2 lần với check #5 — nên nó được đưa vào đúng khuôn extract-and-test này.
+def run_check10(wc_root):
+    lines, warn = [], []
+
+    def W(msg):
+        warn.append(msg)
+        lines.append(f"⚠️ {msg}")
+
+    def OK(msg):
+        lines.append(f"✅ {msg}")
+
+    ns = {"os": os, "re": re, "wc_root": wc_root, "W": W, "OK": OK, "lines": lines}
+    exec(compile(CHECK10_SRC, SRC + ":CHECK10", "exec"), ns)
+    return lines, warn
+
+
+def _mklog(content, age_seconds=0):
+    """Dựng wc_root giả có mike/logs/notify_thread_errors.log; content=None ⇒ không tạo file."""
+    d = tempfile.mkdtemp(prefix="ops_health_check10_")
+    if content is not None:
+        logdir = os.path.join(d, "mike", "logs")
+        os.makedirs(logdir, exist_ok=True)
+        path = os.path.join(logdir, "notify_thread_errors.log")
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(content)
+        if age_seconds:
+            old = dt.datetime.now().timestamp() - age_seconds
+            os.utime(path, (old, old))
+    return d
+
+
+def case_c10_no_file_is_ok():
+    root = _mklog(None)
+    try:
+        lines, warn = run_check10(root)
+        check("check10: không có file log ⇒ OK, 0 WARN", not warn, joined(lines))
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c10_fresh_log_warns():
+    root = _mklog("2026-08-02T23:14:57+07:00 notify_thread: KHONG phan giai duoc topic foo\n"
+                  "  ten hop le: architecture, trading_daily\n")
+    try:
+        lines, warn = run_check10(root)
+        out = joined(lines)
+        check("check10: log tươi ⇒ WARN", len(warn) == 1, out)
+        # Bản đầu lấy dòng cuối THÔ ⇒ in ra đúng cái đuôi "ten hop le: ..." vô nghĩa.
+        check("check10: trích dòng CÓ timestamp, không phải dòng tràn",
+              "KHONG phan giai duoc topic foo" in out and "Dòng cuối:   ten hop le" not in out, out)
+        # MINOR-3: không có marker ⇒ dòng này kéo ops_autofix 4 lần/ngày cho sự cố đã sửa.
+        check("check10: WARN mang marker [WARN-ONLY] (không kéo autofix)",
+              "[WARN-ONLY]" in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c10_fresh_log_without_timestamp_line():
+    # Log tươi nhưng KHÔNG có dòng nào khớp timestamp ⇒ IndexError; phải WARN, KHÔNG được ném
+    # exception (ném là chết CẢ khối python ⇒ mất TOÀN BỘ báo cáo health-check).
+    root = _mklog("dong rac khong co timestamp\n")
+    try:
+        lines, warn = run_check10(root)
+        out = joined(lines)
+        check("check10: log không có dòng timestamp ⇒ vẫn WARN, không ném exception",
+              len(warn) == 1 and "không đọc được nội dung" in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c10_old_log_is_ok():
+    root = _mklog("2026-07-01T10:00:00+07:00 notify_thread: loi cu\n", age_seconds=86400 + 3600)
+    try:
+        lines, warn = run_check10(root)
+        check("check10: log cũ hơn 24h ⇒ OK (cảnh báo tự tắt)", not warn, joined(lines))
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
 def main():
-    print("ops_health_check_selfcheck: check #5 (backlog question) regression")
+    print("ops_health_check_selfcheck: check #5 (backlog question) + check #10 (notify_thread) regression")
     for fn in (case_archived_question_visible, case_cross_layer_resolve,
                case_resolver_must_be_after, case_dedupe_hot_and_archive,
                case_no_crowd_out, case_small_pool_prints_all,
                case_corrupt_gz_warns, case_empty_archive_warns,
                case_fresh_question_is_pending,
-               case_wagsfix_not_confirmed_is_warn_only, case_wagsfix_only_no_false_ok):
+               case_wagsfix_not_confirmed_is_warn_only, case_wagsfix_only_no_false_ok,
+               case_c10_no_file_is_ok, case_c10_fresh_log_warns,
+               case_c10_fresh_log_without_timestamp_line, case_c10_old_log_is_ok):
         fn()
     if FAILS:
         print(f"\nFAIL: {len(FAILS)} assertion hỏng")

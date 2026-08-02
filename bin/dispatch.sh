@@ -17,7 +17,8 @@
 #
 # After the agent finishes, auto-runs consolidate.sh so bus findings land in KB
 # immediately (no waiting for the 30-min cron). In --bg mode, also pushes a
-# Telegram notification via notify.sh.
+# notification via notify.sh (Discord #mikefleet — CÙNG bridge với notify_thread.sh, không
+# phải kênh độc lập).
 #
 # Default (synchronous): blocks until done (bounded by --timeout), prints Claude's
 #   response to stdout. Best for short tasks where the caller wants the result now.
@@ -42,8 +43,9 @@
 #                  thầm rơi về topic khác — caller đã nêu đích danh 1 topic thì không đoán
 #                  (2026-08-02). Bỏ cờ này ⇒ _ambient_thread: override theo agent → topic
 #                  phiên gọi → con trỏ toàn cục. Registry hỏng khi agent CÓ override ⇒ pin
-#                  RỖNG + alert Telegram + job VẪN CHẠY (không chặn việc vì lỗi định tuyến
-#                  thông báo). Pin rỗng ⇒ im lặng phía Discord, không bao giờ đoán topic.
+#                  RỖNG + job VẪN CHẠY (không chặn việc vì lỗi định tuyến thông báo) + ghi
+#                  logs/notify_thread_errors.log để ops_health_check báo lên. Pin rỗng ⇒ im
+#                  lặng phía Discord, không bao giờ đoán topic.
 #   --effort LEVEL reasoning effort (low|medium|high|xhigh|max). Omit → 'medium'
 #                  (task thường lệ). Task phức tạp → --effort high. CHÍNH SÁCH user
 #                  (2026-07-14): model 'fable' bị chặn tối đa 'high' — truyền xhigh/max
@@ -236,7 +238,7 @@ if [ "${DISPATCH_FORCE:-}" != "1" ]; then
 fi
 
 # _circuit_record <agent_id> <success|fail> — call after a dispatch reaches a terminal
-# state. On the failure that trips the breaker, notify (Telegram + Discord thread).
+# state. On the failure that trips the breaker, notify (#mikefleet qua notify.sh + Discord thread).
 _circuit_record() {
   local _cr_out _cr_rc
   set +e
@@ -247,7 +249,8 @@ _circuit_record() {
     "$ROOT/bin/notify.sh" "[circuit-breaker] $1 TRIPPED ($_cr_out) — dispatch tạm dừng ${CIRCUIT_COOLDOWN}s." 2>/dev/null || true
     local _cbtid; _cbtid="$(_job_thread_id "$job_id")"
     # Không suy lại topic (2026-08-02, arch-reviewer S1) — chỉ đọc pin. Xem chú thích ở
-    # điểm ghim: pin rỗng ⇒ im lặng phía Discord, KHÔNG đoán topic. Telegram vẫn báo ở trên.
+    # điểm ghim: pin rỗng ⇒ im lặng phía Discord, KHÔNG đoán topic. notify.sh ở trên vẫn bắn vào
+    # #mikefleet — cùng bridge Discord, nên nó KHÔNG cứu được ca bridge chết.
     if [ -n "$_cbtid" ]; then
       "$ROOT/bin/notify_thread.sh" "🔴 **Circuit breaker OPEN** cho **$1** ($_cr_out) — $CIRCUIT_THRESHOLD+ lỗi liên tiếp, tạm dừng dispatch ${CIRCUIT_COOLDOWN}s. Ép chạy: \`DISPATCH_FORCE=1\`." "$_cbtid" 2>/dev/null || true
     fi
@@ -336,8 +339,9 @@ _maybe_schedule_usage_resume() {
   local _tid; _tid="$(_job_thread_id "$job_id")"
   # KHÔNG suy lại topic ở đây (sửa 2026-08-02, arch-reviewer S1): chỉ đọc field đã GHIM lúc
   # dispatch. Trước đây `[ -n "$X" ] || X="$(_ambient_thread ...)"` khiến pin rỗng rơi về topic
-  # ambient của dispatcher — đúng cơ chế rò rỉ. Pin rỗng ⇒ IM LẶNG phía Discord (notify.sh
-  # Telegram vẫn chạy), không bao giờ đoán topic.
+  # ambient của dispatcher — đúng cơ chế rò rỉ. Pin rỗng ⇒ IM LẶNG phía Discord, không bao giờ
+  # đoán topic. (KHÔNG có kênh dự phòng độc lập nào ở đây: `notify.sh` cũng đi qua CÙNG bridge
+  # Discord 127.0.0.1:8199 — xem chú thích tại nhánh "registry hỏng" bên dưới.)
   if [ -n "$_tid" ]; then
     "$ROOT/bin/notify_thread.sh" "⏳ **$id** hết usage limit tài khoản (job \`$job_id\`) — không phải lỗi task. TỰ ĐỘNG resume lúc ~${resume_ict} ICT. Không cần làm gì." "$_tid" 2>/dev/null || true
   fi
@@ -431,7 +435,12 @@ _agent_thread_override() {
   local _id
   if ! _id="$("$ROOT/bin/discord_channel.sh" "$_name" 2>&1)"; then
     echo "dispatch: registry HỎNG — không phân giải được override '$_name' cho $1: $_id" >&2
-    "$ROOT/bin/notify.sh" "[dispatch] registry Discord HỎNG: không phân giải được '$_name' cho $1 — dispatch bị CHẶN (không đoán topic)." 2>/dev/null || true
+    # Câu "dispatch bị CHẶN" ở đây SAI từ vòng 3 (F4 đã đổi sang VẪN CHẠY) — sửa 2026-08-02
+    # vòng 5. Và bản thân lời gọi này gần như chắc chắn KHÔNG tới nơi: notify.sh →
+    # notify_discord.sh cũng phân giải `mikefleet` qua CHÍNH registry đang hỏng (`set -e` ⇒
+    # chết trước curl). Vẫn gọi (rẻ, cứu được ca registry hỏng CỤC BỘ cho 1 tên), nhưng đường
+    # báo THẬT cho ca này là dòng ghi logs/notify_thread_errors.log ở chỗ gọi (xem F4).
+    "$ROOT/bin/notify.sh" "[dispatch] registry Discord HỎNG: không phân giải được '$_name' cho $1 — job VẪN CHẠY nhưng KHÔNG có topic (không đoán); mọi thông báo Discord của job này bị mất." 2>/dev/null || true
     return 1
   fi
   printf '%s' "$_id"
@@ -508,8 +517,9 @@ _job_watcher() {
   discord_thread_id="$(_job_thread_id "$jid")"
   # KHÔNG suy lại topic ở đây (sửa 2026-08-02, arch-reviewer S1): chỉ đọc field đã GHIM lúc
   # dispatch. Trước đây `[ -n "$X" ] || X="$(_ambient_thread ...)"` khiến pin rỗng rơi về topic
-  # ambient của dispatcher — đúng cơ chế rò rỉ. Pin rỗng ⇒ IM LẶNG phía Discord (notify.sh
-  # Telegram vẫn chạy), không bao giờ đoán topic.
+  # ambient của dispatcher — đúng cơ chế rò rỉ. Pin rỗng ⇒ IM LẶNG phía Discord, không bao giờ
+  # đoán topic. (KHÔNG có kênh dự phòng độc lập nào ở đây: `notify.sh` cũng đi qua CÙNG bridge
+  # Discord 127.0.0.1:8199 — xem chú thích tại nhánh "registry hỏng" bên dưới.)
   local milestones="600 1800"  # 10 min, 30 min; max 2 Discord progress messages total
 
   _discord() {
@@ -696,13 +706,27 @@ _start_ts="$(date +%s)"
 # `bq_freshness_check.sh` dispatch DollarBill (có override) KHÔNG kèm `--thread`, nên một
 # registry Discord hỏng sẽ chặn luôn job SINH PLAN T+1 ⇒ sáng hôm sau bot chạy không có plan.
 # Đó là đổi "user không thấy 1 tin nhắn" lấy "không có việc" — sai hướng với một sự cố thuần
-# định tuyến thông báo. Nay: pin RỖNG + alert Telegram + VẪN CHẠY. Vẫn KHÔNG tụt về ambient
+# định tuyến thông báo. Nay: pin RỖNG + VẪN CHẠY + ghi log lỗi có người đọc. Vẫn KHÔNG tụt về ambient
 # (đó mới là cơ chế rò rỉ mà S2 sinh ra để diệt) — pin rỗng ⇒ im lặng phía Discord, an toàn
 # vì F2 đã được sửa (pin rỗng không còn giết _bg_wrapper).
 # ABORT chỉ còn giữ cho `--thread` tường minh ở ngay dưới: caller đã nêu đích danh 1 topic thì
 # không phân giải được phải dừng, không đoán.
+#
+# ⚠️ ĐO ĐƯỢC 2026-08-02 (vòng 5, arch-reviewer MINOR-1 + tự kiểm chứng): "đã cảnh báo qua
+# Telegram" — câu ghi ở đây trước kia — LÀ SAI HAI LẦN. (a) Fleet không có kênh Telegram:
+# `notify.sh` → `notify_discord.sh` → CÙNG bridge `127.0.0.1:8199` với `notify_thread.sh`.
+# (b) Tệ hơn: trong ĐÚNG ca này (registry hỏng) `notify_discord.sh:22` cũng phân giải tên
+# `mikefleet` QUA CHÍNH REGISTRY ĐÓ, `set -e` ⇒ nó chết trước khi curl. Đo thật:
+# `DISCORD_CHANNELS_REGISTRY=/nonexistent notify.sh "..."` → "send failed (rc=1)", KHÔNG có
+# tin nào đi. Nghĩa là lập luận đánh đổi F4 ("vẫn chạy vì dù sao cũng có alert") dựa trên một
+# cảnh báo KHÔNG BAO GIỜ TỚI. Giữ nguyên quyết định VẪN CHẠY (đúng: không chặn việc vì lỗi
+# định tuyến), nhưng cảnh báo phải đi bằng đường KHÔNG phụ thuộc Discord: ghi
+# `logs/notify_thread_errors.log` — file mà `ops_health_check.sh` check #10 ĐỌC mỗi 08:20/12:45.
 if ! _dtid0="${FORCE_TID:-$(_ambient_thread "$id")}"; then
-  echo "dispatch: registry Discord hỏng cho override của '$id' — job VẪN CHẠY nhưng KHÔNG có topic Discord (không đoán). Đã cảnh báo qua Telegram." >&2
+  echo "dispatch: registry Discord hỏng cho override của '$id' — job VẪN CHẠY nhưng KHÔNG có topic Discord (không đoán). Đã ghi logs/notify_thread_errors.log (ops_health_check sẽ báo)." >&2
+  mkdir -p "$ROOT/logs"
+  printf '%s dispatch: registry Discord HONG cho override cua %q (job cho %s) — job VAN CHAY nhung KHONG co topic, moi thong bao Discord cua job nay bi MAT.\n' \
+    "$(date -Iseconds)" "$id" "${job_id:-<chua-tao>}" >> "$ROOT/logs/notify_thread_errors.log" 2>/dev/null || true
   _dtid0=""
 fi
 # `--thread` chấp nhận TÊN trong kb/discord_channels.json (vd `--thread architecture`) ngoài
@@ -800,8 +824,9 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
         local _tid; _tid="$(_job_thread_id "$job_id")"
   # KHÔNG suy lại topic ở đây (sửa 2026-08-02, arch-reviewer S1): chỉ đọc field đã GHIM lúc
   # dispatch. Trước đây `[ -n "$X" ] || X="$(_ambient_thread ...)"` khiến pin rỗng rơi về topic
-  # ambient của dispatcher — đúng cơ chế rò rỉ. Pin rỗng ⇒ IM LẶNG phía Discord (notify.sh
-  # Telegram vẫn chạy), không bao giờ đoán topic.
+  # ambient của dispatcher — đúng cơ chế rò rỉ. Pin rỗng ⇒ IM LẶNG phía Discord, không bao giờ
+  # đoán topic. (KHÔNG có kênh dự phòng độc lập nào ở đây: `notify.sh` cũng đi qua CÙNG bridge
+  # Discord 127.0.0.1:8199 — xem chú thích tại nhánh "registry hỏng" bên dưới.)
         if [ -n "$_tid" ]; then
           # DollarBill's plan-generation jobs route straight into the user-facing plan
           # channel (_agent_thread_override) — a raw tail-c-500 preview strips newlines
@@ -956,7 +981,7 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
   _detached_spawn '_job_watcher "$job_id" "$from" "$id" "$logfile"' "mike-dispatch-watcher $job_id"
   disown 2>/dev/null || true
   echo "DISPATCHED $id (job=$job_id pid=$pid) → log: $logfile"
-  echo "Theo dõi: $ROOT/bin/jobs.sh status $job_id | Khi xong: auto consolidate + Telegram notify."
+  echo "Theo dõi: $ROOT/bin/jobs.sh status $job_id | Khi xong: auto consolidate + notify #mikefleet."
   # Fast wake-on-completion snippet (MIKE.md §Quy chuẩn 8; sửa 2026-07-07 incident
   # agent-wrapper-monitor-gap): cơ chế CHÍNH = ScheduleWakeup poll NGẮN lặp lại (~240-270s) —
   # không phụ thuộc schema Agent tool. Harness Fable-5 (Mike restart 2026-07-06) đã BỎ tham số
@@ -974,8 +999,9 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
   { _dtid="$(_job_thread_id "$job_id")"
   # KHÔNG suy lại topic ở đây (sửa 2026-08-02, arch-reviewer S1): chỉ đọc field đã GHIM lúc
   # dispatch. Trước đây `[ -n "$X" ] || X="$(_ambient_thread ...)"` khiến pin rỗng rơi về topic
-  # ambient của dispatcher — đúng cơ chế rò rỉ. Pin rỗng ⇒ IM LẶNG phía Discord (notify.sh
-  # Telegram vẫn chạy), không bao giờ đoán topic.
+  # ambient của dispatcher — đúng cơ chế rò rỉ. Pin rỗng ⇒ IM LẶNG phía Discord, không bao giờ
+  # đoán topic. (KHÔNG có kênh dự phòng độc lập nào ở đây: `notify.sh` cũng đi qua CÙNG bridge
+  # Discord 127.0.0.1:8199 — xem chú thích tại nhánh "registry hỏng" bên dưới.)
     if [ -n "${_dtid:-}" ]; then
       _dp="$(printf '%s' "$prompt" | head -c 120 | tr '\n\t' '  ')"
       "$ROOT/bin/notify_thread.sh" "🚀 **$id** nhận việc (job \`$job_id\`): $_dp… Sẽ notify khi xong." "$_dtid" 2>/dev/null || true
