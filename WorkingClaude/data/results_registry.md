@@ -157,6 +157,18 @@ custom30V parking trong NEUTRAL + **custom30B trong BULL/EXBULL** (state-spliced
 
 **KẾT LUẬN (robust IS 2014-19 **và** OOS 2020+, trừ khi ghi rõ):**
 1. **1/PE (ey) = lăng kính value VÔ ĐỊCH** — raw IC **+0.125 (t=11.0, hit 94%)**, marginal +0.100, trong-gate +0.079; IS+OOS +0.101/+0.149. Mọi thứ khác phải biện minh *thêm* vào ey.
+   - ⚠️ **ĐỀ XUẤT HẠ SỐ NÀY ĐÃ BỊ BÁC BỎ — +0.125 VẪN LÀ SỐ ĐÚNG, KHÔNG SỬA.** Job
+     `Taylor_20260802_042110` đề nghị đọc lại ~~"+0.125 → +0.096 (toàn universe, 'đã khử bias giá
+     điều chỉnh') / +0.034 (t=1.37, không có ý nghĩa, trong cổng production)"~~ với lập luận rằng
+     `tav2_bq.ticker.PE` lưu trên cơ sở **Close đã điều chỉnh** nên phải nhân `Price/Close`.
+     **Tiền đề đó SAI.** Job `Taylor_20260802_054825` verify quy mô universe (2014–2021,
+     1.419.351 dòng / 23.067 cặp ticker × kỳ báo cáo): `PE/Price` hằng số trong kỳ ở **93,1%** số
+     kỳ vs `PE/Close` **11,0%** (PB 94,6/12,6; PCF 86,9/20,3); đối chiếu tay VNM & FPT 2015-06-30
+     tái lập `NP_ttm/OShares` **chỉ từ `Price` thô**. ⇒ `PE` đã là point-in-time đúng; **nhân
+     `Price/Close` là ĐƯA look-ahead VÀO**. Hai con số +0.096 / +0.034 là số **ĐÃ NHIỄM** — không
+     dùng. Số trong-gate đúng vẫn là **+0.079** ở dòng này (job 042110 đo lại độc lập ra +0.088,
+     cùng bậc). Chi tiết: `mike/kb/data_registry/fundamentals/valuation_pe_pb_pcf_ps.md` "Bẫy (4)"
+     + `mike/agents/Taylor/research/pe_priceadj_refutation_ab_20260802.md`.
 2. **Rating = RISK-GATE, KHÔNG phải return-tilt** (trả lời đòn bẩy #1, robust 2 nửa): raw IC full-universe +0.065 (gate hoạt động) NHƯNG **marginal trong-gate ÂM** (−0.024 pooled; IS −0.035 / OOS −0.015). Bảng (C): fwd-2M **lồi** (rating-1 chỉ 2.49% < rating-3 3.21%) trong khi **crash% đơn điệu** 3.3→4.8→6.5→9.8→9.1. ⇒ **Overweight rating-1 (QTILT=1.5) làm LOÃNG return**; cú cắt cứng ≤3 đặt đúng (rating-4 crash vọt 9.8%). *Không có alpha bỏ quên ở tilt rating.*
 3. **cfo_normy marginal = 0 (cả 2 nửa: +0.000/−0.002)** — cú swap v3 2026-06-20 sang cfo_normy cho non-cyclical KHÔNG thêm tín hiệu return vs ey+cfy+ps. Ứng viên đơn giản hoá.
 4. **PS phải route-conditioned, không pool** — pooled marginal đổi dấu (IS +0.042 / OOS −0.031) nhưng per-route mạnh ở COMPOUNDER +0.082 / BANK +0.119 / RE +0.090, vô dụng POWER −0.007 / CYCLICAL −0.002. ⇒ route-gating PS của v3 ĐÚNG.
@@ -4735,3 +4747,79 @@ Báo cáo đầy đủ: `mike/agents/Taylor/research/fscore_custom30v_enhancer_2
 Log/CSV: `data/fscore_c30v_20260801/` (`SELFCHECK.log`, `tier1_basket_metrics.csv`,
 `tier1_swap_decomp.csv`, `tier2_engine_metrics.csv`, `tier2_peryear.csv`, `tier2_loo.csv`,
 `eng_*.log` 17 leg, `patch_fsx.py`/`analyze_*.py`).
+
+---
+
+## 2026-08-02 — BÁC BỎ "look-ahead giá điều chỉnh trong PE" + A/B NAV custom30V — job `Taylor_20260802_054825`
+
+**Kết luận 1 câu:** `tav2_bq.ticker.PE/PB/PCF` đã ở **cơ sở `Price` thô, point-in-time ĐÚNG**;
+"phép sửa" nhân thêm `Price/Close` do job `Taylor_20260802_042110` đề xuất là **ĐƯA look-ahead
+VÀO**, và nếu áp vào selector custom30V thì **làm XẤU R3 −1,70pp CAGR**. **KHÔNG sửa
+`custom_basket.py`. Số pin R3 27,60% và IC 1/PE +0,125 GIỮ NGUYÊN.**
+
+### (a) Bằng chứng cơ sở dữ liệu (quyết định — A/B chỉ là hệ quả)
+
+| phép thử (BQ, 2014-01-01→2021-12-31) | `X/Price` hằng số trong kỳ báo cáo | `X/Close` hằng số |
+|---|---|---|
+| `PE` (1.419.351 dòng / 23.067 cặp ticker×kỳ) | **93,1%** (TB 1,22 giá trị/kỳ) | 11,0% (TB 17,8) |
+| `PB` (1.104.345 dòng / 17.944 cặp) | **94,6%** | 12,6% |
+| `PCF` (cùng mẫu) | **86,9%** | 20,3% |
+
+Đối chiếu tay: VNM 2015-06-30 `Price`=113.000 / `PE`=18,116 ⇒ EPS hàm ý 6.237,5 = **đúng**
+`Σ(NP_P0..P3)/OShares`=6.237,5 (`ticker_financial` 2015Q1); từ `Close`=32.510 sẽ ra 1.795 (vô lý).
+FPT 2015-06-30: 46.400/10,900 = 4.256,9 = `NP_ttm/OShares`. (Phần dư ~7% kỳ không hằng số = `OShares`
+đổi giữa kỳ, không phải giá.)
+
+### (b) A/B NAV custom30V trên snapshot ĐÓNG CỨNG (cùng vintage cả 2 chân)
+
+Lệnh = **lệnh pin R3 nguyên văn**, chỉ thêm `EXP_TAG` (§8) và biến `BASKET_PEADJ`:
+```bash
+cd /home/trido/thanhdt/WorkingClaude && source ./wc_env.sh
+[BASKET_PEADJ=1] BQ_LOCAL_CACHE=data/bq_cache_asof20260729_postrestate BQ_CACHE_THREADS=1 \
+NAV_TOTAL_B=50 ETF_LIQ=custompitg BASKET_WT=namecap BASKET_SELECT=yieldcombo PARK_STATES="3:0.7" \
+AUDIT_END=2026-06-19 EXP_TAG=peadj_ctrl|peadj_on $DNA_PYEXE pt_v23_audit_2014.py v23a none postbull 0 edge
+```
+
+| leg | công thức yield | CAGR | Sharpe | MaxDD | Calmar | Final NAV | IS 2014-19 | OOS 2020+ | self-check |
+|---|---|---|---|---|---|---|---|---|---|
+| **A — ctrl (production)** | `AVG(1/PE)`, `AVG(1/PCF)` | **27,60%** | **1,84** | **−17,5%** | **1,58** | **1.041,95B** | 23,45% | 31,51% | 0 VND BAL+LAG |
+| B — `BASKET_PEADJ=1` | `AVG(1/(PE×Price/Close))` | 25,90% | 1,78 | −18,6% | 1,39 | 881,89B | 20,88% | 30,69% | 0 VND BAL+LAG |
+| **Δ (B−A)** | | **−1,70pp** | −0,06 | **+1,1pp xấu** | **−0,19** | **−160,06B** | −2,57pp | −0,82pp | |
+
+- **Chân A tái lập CHÍNH XÁC số pin 07-29** — 27,60 / 1,84 / −17,5 / 1,58 / NAV 1.041,95B / 18.496
+  dòng, và recompute độc lập `extract_peryear.py` ra **FULL 27,60% / IS 23,45% / OOS 31,51%**, khớp
+  từng chữ số với mục "RE-PIN R3 SAU RESTATE DT5G". ⇒ harness sạch, Δ đo được là thật.
+- **Xấu đi đồng thời trên CẢ 4 trục** + **11/13 năm xấu hơn** (chỉ 2015 +2,26pp và 2021 +8,49pp khá
+  hơn; bỏ 2021 ra thì khoảng cách còn rộng hơn) ⇒ **KHÔNG phải nhiễu**, khác hẳn pattern
+  PE-2006-2008 hôm 07-29.
+- Cả 2 chân chạy `BQ_CACHE_THREADS=1` trên **cùng** snapshot `bq_cache_asof20260729_postrestate`
+  ⇒ Δ **không** lẫn vintage. Cache là lớp DuckDB-trên-parquet (thực thi SQL cục bộ), không phải
+  cache theo chuỗi SQL ⇒ query đổi vẫn đọc đúng vintage đóng cứng.
+- ⚠️ **A/B này KHÔNG phải bằng chứng về CHIỀU ĐÚNG** — một look-ahead có thể làm đẹp *hoặc* làm xấu
+  backtest tuỳ nó tương quan thế nào với return. Bằng chứng quyết định là (a); (b) chỉ định lượng
+  **cái giá** của việc làm sai. (Cơ chế xấu đi: `F` lớn ⇔ mã sẽ chia cổ tức/thưởng NHIỀU về sau
+  ⇒ nhân vào làm yield nhỏ đi ⇒ đẩy TỤT hạng đúng nhóm đó.)
+
+### (c) R3 có phụ thuộc custom30V không — ĐỌC CODE XÁC NHẬN (không giả định)
+
+**CÓ.** `ETF_LIQ=custompitg` → `pt_v23_audit_2014.py:199-205` bật `_IS_CUSTOM` → `custom_basket.build_pit(...)`
+với `BASKET_SELECT=yieldcombo` → `_yield_piv("PE")` + `_yield_piv("PCF")`. Đây chính là rổ parking
+NEUTRAL custom30V mà KB mô tả "+7,4pp Full". Nên A/B trên `_yield_piv` **đo thẳng vào R3**, không
+phải một nhánh phụ.
+
+### (d) Việc CÒN MỞ (không tự sửa — chạm production)
+
+- **`rating_8l.py:521-524` (`_pe_adj_factor`) đang thực hiện đúng phép nhân sai này** kèm comment sai
+  "PE_stored = Close_adj/EPS". Tác động **LIVE ≈ 0** (hôm nay `Price≈Close` ⇒ hệ số ≈1) và bảng
+  `fa_ratings_8l` là snapshot **ghi nối tiếp từng ngày** (mỗi dòng viết khi hệ số ≈1) nên lịch sử
+  chưa nhiễm; **rủi ro thật = bất kỳ lần rebuild lịch sử nào**. Gỡ 3 dòng này = **thay đổi
+  production**, cần user duyệt + quant-skeptic ⇒ **ĐỀ XUẤT, chưa phải quyết định.**
+- `rating_8l.py` `ps` tự tính = `Close × OShares / Revenue_ttm` (Close **đã điều chỉnh** × OShares
+  **kỳ hiện hành**) — cùng họ vấn đề, chiều ngược lại, **chưa đo tác động**.
+
+**Artifact:** `data/peadj_ab/{legA_ctrl.log,legB_peadj.log}` · CSV
+`data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_peadj_{ctrl,on}_univpit.csv`
+(canonical `..._wtnamecap.csv` **KHÔNG bị đụng**) · báo cáo
+`mike/agents/Taylor/research/pe_priceadj_refutation_ab_20260802.md`.
+**N_trials = 1** (một A/B đã khai báo trước, không sweep). Không tính DSR/PBO vì **không có đề xuất
+wire nào** — khuyến nghị là GIỮ NGUYÊN production.
