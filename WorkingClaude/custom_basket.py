@@ -72,6 +72,24 @@ UNIVERSE_SOURCE = "pit"
 UNIVERSE_PIT_TABLE = "lithe-record-440915-m9.tav2_mike.universe_pit_q"
 
 
+def pxw_sql(alias="t"):
+    """SQL for the RAW point-in-time price used by the SELECTION and WEIGHT legs (see the module
+    header's PRICE BASIS block). The RETURN leg never calls this — it always uses adjusted Close.
+
+    env BASKET_PRICE_BASIS:
+      "split"  (default = PRODUCTION since 2026-08-02, job Taylor_20260802_141725) — raw
+               COALESCE(Price,Close). Correct: `Volume`/`OShares` are raw PIT quantities.
+      "legacy" — pre-fix behaviour (adjusted `Close` for selection/weight too). Kept ONLY as the
+               A/B control leg and as a one-word rollback, same role as UNIVERSE_SOURCE="prune".
+               NEVER for production: it lets post-t corporate actions reorder the cross-section.
+    The ADV/`tv` column is deliberately NOT routed through here — it was already on the raw basis
+    before the fix, so the legacy leg must leave it alone to stay a clean single-variable control.
+    """
+    if os.environ.get("BASKET_PRICE_BASIS", "split").lower() == "legacy":
+        return f"{alias}.Close"
+    return f"COALESCE({alias}.Price,{alias}.Close)"
+
+
 def universe_pred(alias="t"):
     """SQL predicate restricting `alias` (a tav2_bq.ticker row) to the universe.
 
@@ -177,7 +195,7 @@ def select_members(bq):
 WHERE t.time BETWEEN DATE '{SEL_START}' AND DATE '{SEL_END}'
   AND {universe_pred()}
   AND {UNIVERSE_FILTER}
-GROUP BY t.ticker ORDER BY AVG(t.Volume_3M_P50*COALESCE(t.Price,t.Close)) DESC LIMIT {N_MEMBERS}""")
+GROUP BY t.ticker ORDER BY AVG(t.Volume_3M_P50*{pxw_sql()}) DESC LIMIT {N_MEMBERS}""")
     return list(df["ticker"])
 
 
@@ -190,7 +208,7 @@ def build(bq, names, start_date, end_date):
   SELECT f.ticker, f.time AS ftime, f.OShares,
     LEAD(f.time) OVER (PARTITION BY f.ticker ORDER BY f.time) AS nft
   FROM tav2_bq.ticker_financial AS f WHERE f.OShares IS NOT NULL)
-SELECT t.ticker, t.time, t.Close, COALESCE(t.Price,t.Close) AS pxw,
+SELECT t.ticker, t.time, t.Close, {pxw_sql()} AS pxw,
        COALESCE(t.Price,t.Close)*t.Volume AS tv, fin.OShares
 FROM tav2_bq.ticker AS t
 LEFT JOIN fin ON fin.ticker=t.ticker AND t.time>=fin.ftime AND (fin.nft IS NULL OR t.time<fin.nft)
@@ -273,7 +291,7 @@ def build_pit(bq, start_date, end_date, top_n=N_MEMBERS, quality="none",
     # raw PIT share count, so `Volume_3M_P50*Close` mixed bases and let post-t corporate actions
     # reorder the cross-section (measured: 8.5/30 names differed pre-2014, 5.0/30 2014+).
     qliq = bq(f"""SELECT t.ticker, DATE_TRUNC(t.time, QUARTER) AS q,
-  AVG(t.Volume_3M_P50*COALESCE(t.Price,t.Close)) AS liq, COUNT(*) AS nd
+  AVG(t.Volume_3M_P50*{pxw_sql()}) AS liq, COUNT(*) AS nd
 FROM tav2_bq.ticker t
 WHERE {universe_pred()}
   AND {UNIVERSE_FILTER}
@@ -742,7 +760,7 @@ WHERE t.time IN ({_rebal_in}) AND t.Price IS NOT NULL""")
     LEAD(f.time) OVER (PARTITION BY f.ticker ORDER BY f.time) AS nft
   FROM tav2_bq.ticker_financial AS f WHERE f.OShares IS NOT NULL)
 SELECT t.time, CAST(FLOOR(t.ICB_Code/1000) AS INT64) AS sec,
-       SUM(COALESCE(t.Price,t.Close)*fin.OShares) AS mcap
+       SUM({pxw_sql()}*fin.OShares) AS mcap
 FROM tav2_bq.ticker AS t
 JOIN fin ON fin.ticker=t.ticker AND t.time>=fin.ftime AND (fin.nft IS NULL OR t.time<fin.nft)
 WHERE t.time IN ({_rin}) AND t.ICB_Code IS NOT NULL AND t.Close IS NOT NULL
@@ -1095,7 +1113,7 @@ WHERE x.rn=1""")
   SELECT f.ticker, f.time AS ftime, f.OShares,
     LEAD(f.time) OVER (PARTITION BY f.ticker ORDER BY f.time) AS nft
   FROM tav2_bq.ticker_financial AS f WHERE f.OShares IS NOT NULL)
-SELECT t.ticker, t.time, t.Close, COALESCE(t.Price,t.Close) AS pxw,
+SELECT t.ticker, t.time, t.Close, {pxw_sql()} AS pxw,
        COALESCE(t.Price,t.Close)*t.Volume AS tv, fin.OShares
 FROM tav2_bq.ticker AS t
 LEFT JOIN fin ON fin.ticker=t.ticker AND t.time>=fin.ftime AND (fin.nft IS NULL OR t.time<fin.nft)
