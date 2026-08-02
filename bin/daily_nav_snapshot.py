@@ -11,6 +11,7 @@ JSON chi tiết ra `data/execution_logs/nav_snapshot_{account}_{date}.json`.
 """
 import argparse
 import csv
+import datetime
 import glob
 import json
 import os
@@ -125,6 +126,145 @@ def latest_balance(raw_path, account_no=None):
             f"dnse_raw file có bản ghi balances nhưng KHÔNG bản nào khớp account_no="
             f"{account_no!r} — file này dùng chung cho nhiều account, tránh dùng nhầm.")
     return latest
+
+
+def _stock_all_zero(stock):
+    """Khối `stock` TOÀN SỐ 0 = lỗi API tạm thời của DNSE (xem invariant trong main())."""
+    nums = [v for v in stock.values() if isinstance(v, (int, float)) and not isinstance(v, bool)]
+    return bool(nums) and not any(nums)
+
+
+def previous_balance(account_no, date):
+    """Bản ghi 'balances' hợp lệ MỚI NHẤT của account, ở phiên TRƯỚC `date`.
+
+    Dùng để đo mức TĂNG của `cashDividendReceiving` trong ngày (xem
+    cum_dividend_double_count). Bỏ qua bản ghi toàn-số-0 vì nó tạo ra một cú sụt rồi bật
+    giả trong chuỗi và làm hỏng phép so delta.
+    """
+    for path in sorted(glob.glob(os.path.join(EXEC_DIR, "dnse_raw_*.jsonl")), reverse=True):
+        d = os.path.basename(path)[len("dnse_raw_"):-len(".jsonl")]
+        if d >= date:
+            continue
+        latest = None
+        with open(path, encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    rec = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if rec.get("kind") != "balances":
+                    continue
+                if account_no is not None and rec.get("account_no") not in (None, account_no):
+                    continue
+                if _stock_all_zero(rec.get("payload", {}).get("stock") or {}):
+                    continue
+                latest = rec
+        if latest is not None:
+            return latest
+    return None
+
+
+# Thị trường đóng 14:45 ICT; DNSE ghi khoản cổ tức phải thu trong đợt xử lý sau phiên. Bản ghi
+# balance từ 16:00 trở đi coi là "cuối ngày" — đủ muộn để đã thấy đợt xử lý đó.
+CUM_DIV_EOD_HHMM = "16:00"
+
+
+def cum_dividend_double_count(account_no, date, positions, cur_bal, prev_bal,
+                              events=None, bq_max_date=None):
+    """Cổ tức tiền mặt ĐÃ nằm trong `totalCash` nhưng giá cổ phiếu CHƯA rơi ex-date.
+
+    BUG GỐC (báo cáo tuần 27–31/07/2026 Mục 11.5, 5 dòng NAV lịch sử sai): DNSE ghi khoản
+    `cashDividendReceiving` vào số dư ngay TỐI NGÀY CUỐI CÙNG CÒN HƯỞNG QUYỀN (last-cum-date),
+    trong khi giá đóng cửa phiên đó VẪN CÒN bao gồm quyền nhận cổ tức. NAV cuối ngày =
+    cổ phiếu (giá cum) + tiền (đã gồm khoản phải thu) → ĐẾM 2 LẦN cùng một khoản cổ tức, tự
+    triệt tiêu ở phiên kế tiếp khi giá rơi về mức không hưởng quyền. NAV tổng cuối tháng vẫn
+    đúng, nên mọi phép đối soát NAV đều PASS — đó là lý do lỗi sống sót (xem coding_guidelines §21).
+
+    HAI ĐƯỜNG XÁC ĐỊNH, cố ý tách vai:
+      * SỐ TIỀN phải trừ = mức TĂNG thật của `cashDividendReceiving` so với bản ghi balance
+        hợp lệ cuối cùng của phiên trước. Chỉ số này mới biết chắc "bao nhiêu tiền đang thực
+        sự nằm trong totalCash" (chia tách cổ phiếu không sinh tiền → delta = 0, tự loại).
+      * TÍNH HỢP LỆ (có đúng là chưa qua ex-date không) = tỉ số Close/Price trong BQ
+        (`dividend_adjusted_return.detect_adjustments_batch`) — nguồn có thẩm quyền về ex-date.
+        NHƯNG cú nhảy tỉ số chỉ lộ ra ĐÚNG Ở phiên ex, nên chạy live lúc 19:10 (BQ mới sync
+        tới hôm qua) sẽ KHÔNG thấy gì. Vì vậy khi BQ chưa có phiên nào sau `date`, ta lùi về
+        quy tắc thời điểm: bản ghi phiên trước là bản CUỐI NGÀY (≥16:00) ⇒ khoản tăng chắc
+        chắn mới được ghi tối nay ⇒ ex-date là phiên sau ⇒ trừ.
+
+    Ca thật minh hoạ vì sao cần cả hai (SpaceX 09/07/2026, MBB): khoản 2.400.000đ lần đầu
+    QUAN SÁT được lúc 09/07 15:00 nhưng ex-date đúng là 09/07 (giá đã rơi) — bản ghi phiên
+    trước lại là bản GIỮA PHIÊN (08/07 15:00), không kết luận được bằng thời điểm. BQ (lịch
+    sử) trả lời dứt khoát: không còn ex-date nào phía sau 09/07 ⇒ KHÔNG trừ. Đúng.
+
+    Trả về dict (đưa nguyên vào JSON snapshot để truy vết được về sau).
+    """
+    res = {"amount": 0.0, "delta": 0.0, "expected_bq": None, "tickers": [],
+           "bq_max_date": bq_max_date, "note": "", "warnings": []}
+    cur_cd = float((cur_bal.get("payload", {}).get("stock") or {}).get("cashDividendReceiving") or 0)
+    if prev_bal is None:
+        if cur_cd:
+            res["warnings"].append(
+                f"Không có bản ghi balances hợp lệ nào ở phiên trước {date} — KHÔNG kiểm được "
+                f"cổ tức phải thu ({cur_cd:,.0f}đ) có bị đếm 2 lần hay không.")
+        return res
+    prev_cd = float((prev_bal.get("payload", {}).get("stock") or {}).get("cashDividendReceiving") or 0)
+    res["delta"] = cur_cd - prev_cd
+    if res["delta"] <= 0:
+        return res
+
+    if events is None and positions:
+        try:
+            sys.path.insert(0, MIKE_BIN)
+            from dividend_adjusted_return import detect_adjustments_batch
+            d0 = datetime.date.fromisoformat(date)
+            events, bq_max_date = detect_adjustments_batch(
+                sorted(positions), (d0 - datetime.timedelta(days=15)).isoformat(),
+                (d0 + datetime.timedelta(days=15)).isoformat())
+            res["bq_max_date"] = bq_max_date
+        except Exception as e:  # BQ hỏng/không với tới được → vẫn còn quy tắc thời điểm
+            res["warnings"].append(f"Không tra được ex-date từ BigQuery ({e}) — chỉ dựa vào "
+                                   f"thời điểm bản ghi balance.")
+            events = None
+
+    pending = [a for tk, advs in (events or {}).items() if tk in positions
+               for a in advs if a.last_cum_date <= date < a.ex_date]
+    # BQ chỉ KẾT LUẬN ĐƯỢC khi đã có ít nhất 1 phiên sau `date` (ex-date lộ ra ở phiên ex).
+    if events is not None and bq_max_date and bq_max_date > date and not pending:
+        res["note"] = (f"cashDividendReceiving tăng {res['delta']:,.0f}đ nhưng BQ (dữ liệu tới "
+                       f"{bq_max_date}) xác nhận không mã nào còn ex-date sau {date} — khoản này "
+                       f"ĐÃ qua ex-date, không trừ.")
+        return res
+
+    prev_ts = prev_bal.get("ts", "")
+    prev_is_eod = len(prev_ts) >= 16 and prev_ts[11:16] >= CUM_DIV_EOD_HHMM
+    if not pending and not prev_is_eod:
+        res["warnings"].append(
+            f"cashDividendReceiving tăng {res['delta']:,.0f}đ nhưng KHÔNG kết luận được đã qua "
+            f"ex-date hay chưa: BQ chưa có phiên sau {date} và bản ghi balance phiên trước "
+            f"({prev_ts or '?'}) là bản GIỮA PHIÊN. KHÔNG tự trừ — cần người đối chiếu.")
+        return res
+
+    res["amount"] = res["delta"]
+    res["tickers"] = sorted({a.ticker for a in pending})
+    if pending:
+        res["expected_bq"] = sum(positions.get(a.ticker, 0) * a.per_share for a in pending)
+        tol = max(10.0, res["delta"] * 0.005)
+        if abs(res["expected_bq"] - res["delta"]) > tol:
+            res["warnings"].append(
+                f"Cổ tức chờ theo BQ ({res['expected_bq']:,.0f}đ cho {res['tickers']}) LỆCH so với "
+                f"mức tăng thật của cashDividendReceiving ({res['delta']:,.0f}đ) — trừ theo số "
+                f"tiền thật trong tài khoản, nhưng cần người kiểm tra nguyên nhân lệch.")
+        res["note"] = (f"Trừ {res['amount']:,.0f}đ cổ tức phải thu của {', '.join(res['tickers'])} "
+                       f"(ex-date {sorted({a.ex_date for a in pending})[0]}) — giá đóng cửa {date} "
+                       f"vẫn CÒN quyền, cộng vào tiền nữa là đếm 2 lần.")
+    else:
+        res["note"] = (f"Trừ {res['amount']:,.0f}đ cổ tức phải thu vừa ghi nhận tối {date} "
+                       f"(bản ghi phiên trước {prev_ts} là bản cuối ngày ⇒ ex-date là phiên sau; "
+                       f"BQ chưa có dữ liệu sau {date} để xác nhận mã cụ thể).")
+    return res
 
 
 def load_history(account):
@@ -291,6 +431,13 @@ def main():
               file=sys.stderr)
         return 2
 
+    # ── Cổ tức phải thu ghi TRƯỚC ex-date: loại ra khỏi tiền để không đếm 2 lần ──
+    # (bug 2026-08-02, coding_guidelines §21 — xem docstring cum_dividend_double_count)
+    cum_div = cum_dividend_double_count(account_no, args.date, positions, bal,
+                                        previous_balance(account_no, args.date))
+    cash_broker = cash
+    cash -= cum_div["amount"]
+
     # NAV = Tiền + Cổ phiếu − Nợ (đúng như app DNSE hiển thị "Tài sản ròng" — user xác nhận
     # 2026-07-06 bằng ảnh chụp thật, khớp chính xác đến từng đồng: 709.276.086 + 683.590.000
     # − 409.863.737 = 983.002.349). KHÔNG cần tự ước tính "tiền bán chờ T+2" cộng riêng —
@@ -341,9 +488,13 @@ def main():
     hist_rows = [row for row in hist_rows if row["date"] != args.date]
     hist_rows.append({"date": args.date, "nav": f"{nav:.0f}", "mtm_stock": f"{mtm_stock:.0f}",
                        "cash": f"{cash:.0f}", "margin_debt": f"{debt:.0f}",
-                       "offbook_assets": f"{offbook:.0f}", "balance_ts": bal["ts"]})
+                       "offbook_assets": f"{offbook:.0f}", "balance_ts": bal["ts"],
+                       "cum_dividend_excl": f"{cum_div['amount']:.0f}"})
     hist_rows.sort(key=lambda r: r["date"])
-    fieldnames = ["date", "nav", "mtm_stock", "cash", "margin_debt", "offbook_assets", "balance_ts"]
+    # `cash` = tiền THẬT của broker TRỪ cổ tức phải thu chưa qua ex-date (cum_dividend_excl),
+    # để bất biến nav = mtm_stock + cash − margin_debt + offbook_assets luôn đúng trên mọi dòng.
+    fieldnames = ["date", "nav", "mtm_stock", "cash", "margin_debt", "offbook_assets",
+                  "balance_ts", "cum_dividend_excl"]
     _write_nav_history(hist_path, hist_rows, fieldnames)
 
     since_inception = nav - args.starting_capital
@@ -355,6 +506,11 @@ def main():
         + (f" · Off-book {offbook:,.0f}" if offbook else ""),
         f"   Từ go-live: {since_inception:+,.0f} VND ({since_inception_pct:+.2f}%)",
     ]
+    if cum_div["amount"]:
+        lines.append(f"   ℹ️ Đã LOẠI {cum_div['amount']:,.0f} VND cổ tức phải thu khỏi tiền mặt "
+                      f"(broker báo {cash_broker:,.0f}) — {cum_div['note']}")
+    for w in cum_div["warnings"]:
+        lines.append(f"   ⚠️ {w}")
     if offbook:
         lines.append(f"   ℹ️ Off-book {offbook:,.0f} VND ({offbook_note or 'không có ghi chú'}, "
                       f"user tự báo asof {offbook_asof or '?'}) — KHÔNG lộ qua API broker, đã "
@@ -370,7 +526,8 @@ def main():
     print("\n".join(lines))
 
     out = {"account": args.account, "date": args.date, "nav": nav,
-           "mtm_stock": mtm_stock, "cash": cash, "margin_debt": debt,
+           "mtm_stock": mtm_stock, "cash": cash, "cash_broker": cash_broker,
+           "cum_dividend_excl": cum_div, "margin_debt": debt,
            "offbook_assets": offbook, "offbook_assets_note": offbook_note,
            "offbook_assets_asof": offbook_asof, "offbook_stale_warning": offbook_stale_warning,
            "stale_warning": stale_warning, "prev_nav": prev_nav, "day_change": day_change,
