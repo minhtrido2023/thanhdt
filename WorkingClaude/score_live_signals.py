@@ -88,6 +88,7 @@ print(f"  HOLD (active): {len(hold):,} | {hold['ticker'].nunique()} tickers | "
 # ── FETCH BQ FUNDAMENTALS ─────────────────────────────────────────────────────
 FUND_COLS = """
     t.ticker, t.time,
+    t.Price,
     t.PE, t.PB, t.PCF,
     t.ROE5Y, t.ROE_Min3Y, t.ROE_Min5Y,
     t.ROIC5Y, t.ROIC_Min3Y,
@@ -144,6 +145,10 @@ def make_features(src, fund):
 
     # Use BQ Close if profile Close is missing
     close_col = "Close" if "Close" in m.columns else "Close_bq"
+    # PRICE BASIS (job Taylor_20260802_141725): a per-share yield divides by a raw PIT share count
+    # (OShares), so its denominator must be the raw `Price`, not adjusted `Close`. Trend ratios
+    # (Close/MA*) legitimately stay on `close_col` — both sides share one adjusted series.
+    px_col = next((c for c in ("Price", "Price_bq") if c in m.columns), close_col)
 
     # Valuation vs history
     m["pe_vs_hist"]    = m["PE"] / m["PE_MA5Y"].clip(lower=0.5)
@@ -155,7 +160,7 @@ def make_features(src, fund):
     m["np_growth_1q"]  = m["NP_P0"] / m["NP_P1"].replace(0, np.nan)
     m["np_growth_1y"]  = m["NP_P0"] / m["NP_P4"].replace(0, np.nan)
     m["cf_yield"]      = (m["CF_OA_5Y"] / m["OShares"].clip(lower=1)
-                          / m[close_col].clip(lower=1)) * 100
+                          / m[px_col].fillna(m[close_col]).clip(lower=1)) * 100
 
     # Trend
     m["price_vs_ma200"] = m[close_col] / m["MA200"].clip(lower=1)
@@ -373,7 +378,7 @@ print(f"{'='*60}")
 sql_latest = f"""
 SELECT
     t.ticker, t.time,
-    t.Close, t.Open,
+    t.Close, t.Price, t.Open,
     t.D_RSI, t.D_MACDdiff, t.D_CMF,
     t.MA10, t.MA50, t.MA200,
     t.PE, t.PB, t.PCF,
@@ -408,8 +413,12 @@ if latest_df is not None and not latest_df.empty:
     latest_df["pb_z_score"]    = (latest_df["PB"] - latest_df["PB_MA5Y"]) / latest_df["PB_SD5Y"].clip(lower=0.01)
     latest_df["np_growth_1q"]  = latest_df["NP_P0"] / latest_df["NP_P1"].replace(0, np.nan)
     latest_df["np_growth_1y"]  = latest_df["NP_P0"] / latest_df["NP_P4"].replace(0, np.nan)
+    # PRICE BASIS: per-share yield vs a raw PIT share count (OShares) -> raw `Price`, not the
+    # retroactively-adjusted `Close` (job Taylor_20260802_141725; see custom_basket.py header and
+    # mike/kb/data_registry/price-volume/ticker_close_vs_price_dividend_adj.md). Trend ratios below
+    # keep `Close` on purpose: both sides of Close/MA are on the same adjusted series.
     latest_df["cf_yield"]      = (latest_df["CF_OA_5Y"] / latest_df["OShares"].clip(lower=1)
-                                   / latest_df["Close"].clip(lower=1)) * 100
+                                   / latest_df["Price"].fillna(latest_df["Close"]).clip(lower=1)) * 100
     latest_df["price_vs_ma200"]= latest_df["Close"] / latest_df["MA200"].clip(lower=1)
     latest_df["price_vs_ma50"] = latest_df["Close"] / latest_df["MA50"].clip(lower=1)
     latest_df["ma10_vs_ma200"] = latest_df["MA10"] / latest_df["MA200"].clip(lower=1)

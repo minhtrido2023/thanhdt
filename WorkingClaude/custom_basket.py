@@ -15,12 +15,29 @@ competes like any name; it is admitted iff it passes the 8L quality gate (see bu
 -> in practice gated out ~24/25 quarters because its 8L rating is 4-5, admitted when it earns <=3.
 
 Construction (cap-weighted CHAINED index):
-  members  = top-30 by AVG(Volume_3M_P50*Close); build()=static window, build_pit()=PIT-per-quarter.
-  mcap_i,t = adjusted Close_i,t * OShares_i (OShares from ticker_financial, as-of/ffilled to daily).
-  ret_t    = SUM_i(mcap_i,t) / SUM_i(mcap_i,t-1) - 1   over names valid on BOTH t-1 and t
-             (chained -> listings/halts cause no composition jumps).
+  members  = top-30 by AVG(Volume_3M_P50*COALESCE(Price,Close)); build()=static, build_pit()=PIT/quarter.
+  mcap_i,t  = adjusted Close_i,t * OShares_i  -> RETURN leg only (see PRICE BASIS below).
+  mcapw_i,t = raw COALESCE(Price,Close)_i,t * OShares_i  -> WEIGHT leg only.
+  r_i,t    = mcap_i,t / mcap_i,t-1 - 1   (adjusted -> an ex-dividend date is NOT a loss)
+  ret_t    = SUM_i(mcapw_i,t-1 * qmult_i * r_i,t) / SUM_i(mcapw_i,t-1 * qmult_i)  over names valid
+             on BOTH t-1 and t (chained -> listings/halts cause no composition jumps).
   level_t  = 1000 * cumprod(1 + ret_t).   (base 1000 arbitrary; only returns matter for parking.)
   adv_t    = 60-session rolling mean of SUM_i(COALESCE(Price,Close)_i,t * Volume_i,t)  [creation capacity].
+
+PRICE BASIS — SPLIT BY ROLE (fix 2026-08-02, job Taylor_20260802_141725; same bug family as the
+`ps` lens fix `6ea466f` and the refuted PE rescale `beec96c`):
+  `Close` is RETROACTIVELY adjusted for dividends/splits/bonuses; `Price` is the raw point-in-time
+  quote. The adjustment factor Close/Price depends on corporate actions that happen AFTER date t
+  and differs per name (median 0.219 in 2007 -> 1.000 by 2026), so pairing `Close` with a raw PIT
+  quantity (`Volume`, `OShares`) injects look-ahead into any CROSS-SECTIONAL comparison.
+    - SELECTION / WEIGHTING at one point in time -> raw `COALESCE(Price,Close)`. Evidence:
+      `Trading_Value == Volume * Price` reproduces 100.0% of rows every year 2010-2026 (n~850k);
+      `Volume * Close` only 1.1-69.8%.  (audit job Taylor_20260802_083624 §2f)
+    - RETURN / momentum chains (mcap_t / mcap_t-1) -> keep adjusted `Close`. Using raw `Price` here
+      would book every ex-dividend date as a price crash. This is why the fix is a ROLE SPLIT and
+      NOT a file-wide Close->Price replace.
+  Report: mike/agents/Taylor/research/pe_pb_basis_broad_audit_20260802.md §3
+  Registry: mike/kb/data_registry/price-volume/ticker_close_vs_price_dividend_adj.md
 """
 import bisect
 import os
@@ -160,19 +177,21 @@ def select_members(bq):
 WHERE t.time BETWEEN DATE '{SEL_START}' AND DATE '{SEL_END}'
   AND {universe_pred()}
   AND {UNIVERSE_FILTER}
-GROUP BY t.ticker ORDER BY AVG(t.Volume_3M_P50*t.Close) DESC LIMIT {N_MEMBERS}""")
+GROUP BY t.ticker ORDER BY AVG(t.Volume_3M_P50*COALESCE(t.Price,t.Close)) DESC LIMIT {N_MEMBERS}""")
     return list(df["ticker"])
 
 
 def build(bq, names, start_date, end_date):
     """Build the basket. Returns (level_dict{ts:level}, adv_dict{ts:adv_vnd}, raw_df).
-    raw_df has columns time,ticker,Close,tv,OShares,mcap for full reconstruction transparency."""
+    raw_df has columns time,ticker,Close,pxw,tv,OShares,mcap,mcapw for reconstruction transparency
+    (`mcap` = RETURN leg / adjusted Close; `mcapw` = WEIGHT leg / raw price — module header)."""
     inlist = ",".join(f"'{x}'" for x in names)
     bx = bq(f"""WITH fin AS (
   SELECT f.ticker, f.time AS ftime, f.OShares,
     LEAD(f.time) OVER (PARTITION BY f.ticker ORDER BY f.time) AS nft
   FROM tav2_bq.ticker_financial AS f WHERE f.OShares IS NOT NULL)
-SELECT t.ticker, t.time, t.Close, COALESCE(t.Price,t.Close)*t.Volume AS tv, fin.OShares
+SELECT t.ticker, t.time, t.Close, COALESCE(t.Price,t.Close) AS pxw,
+       COALESCE(t.Price,t.Close)*t.Volume AS tv, fin.OShares
 FROM tav2_bq.ticker AS t
 LEFT JOIN fin ON fin.ticker=t.ticker AND t.time>=fin.ftime AND (fin.nft IS NULL OR t.time<fin.nft)
 WHERE t.ticker IN ({inlist})
@@ -180,11 +199,16 @@ WHERE t.ticker IN ({inlist})
     bx["time"] = pd.to_datetime(bx["time"])
     bx = bx.sort_values(["ticker", "time"])
     bx["OShares"] = bx.groupby("ticker")["OShares"].ffill().bfill()
-    bx["mcap"] = bx["Close"] * bx["OShares"]
+    bx["mcap"] = bx["Close"] * bx["OShares"]          # RETURN leg (adjusted; ex-div is not a loss)
+    bx["mcapw"] = bx["pxw"] * bx["OShares"]           # WEIGHT leg (raw PIT; see PRICE BASIS header)
     piv = bx.pivot_table(index="time", columns="ticker", values="mcap").sort_index()
-    num = piv.where(piv.shift().notna())       # today's mcap where yesterday valid
-    den = piv.shift().where(piv.notna())       # yesterday's mcap where today valid
-    ret = (num.sum(axis=1) / den.sum(axis=1) - 1.0).fillna(0.0)
+    pivw = (bx.pivot_table(index="time", columns="ticker", values="mcapw")
+              .reindex(index=piv.index, columns=piv.columns))
+    valid = piv.notna() & piv.shift().notna()  # name priced on BOTH t-1 and t
+    r = (piv / piv.shift() - 1.0).where(valid)                 # adjusted-Close return
+    wprev = pivw.shift().where(valid).fillna(piv.shift().where(valid))  # raw-Price weight as of t-1
+    # Identity: with wprev == piv.shift() this is exactly the legacy SUM(mcap_t)/SUM(mcap_t-1)-1.
+    ret = (wprev.mul(r).sum(axis=1) / wprev.sum(axis=1)).fillna(0.0)
     lvl = BASE_LEVEL * (1.0 + ret).cumprod()
     adv_src = bx.groupby("time", as_index=False)["tv"].sum().sort_values("time")
     adv_src["adv"] = adv_src["tv"].rolling(60, min_periods=20).mean()
@@ -245,8 +269,11 @@ def build_pit(bq, start_date, end_date, top_n=N_MEMBERS, quality="none",
     # when it fails the 8L gate below.
     assert_universe_covers(bq, (pd.Timestamp(eff_start) - pd.Timedelta(days=380)).strftime("%Y-%m-%d"),
                            str(end_date))
+    # PRICE BASIS (see module header): liquidity in VND = raw share count x RAW price. `Volume` is a
+    # raw PIT share count, so `Volume_3M_P50*Close` mixed bases and let post-t corporate actions
+    # reorder the cross-section (measured: 8.5/30 names differed pre-2014, 5.0/30 2014+).
     qliq = bq(f"""SELECT t.ticker, DATE_TRUNC(t.time, QUARTER) AS q,
-  AVG(t.Volume_3M_P50*t.Close) AS liq, COUNT(*) AS nd
+  AVG(t.Volume_3M_P50*COALESCE(t.Price,t.Close)) AS liq, COUNT(*) AS nd
 FROM tav2_bq.ticker t
 WHERE {universe_pred()}
   AND {UNIVERSE_FILTER}
@@ -695,8 +722,9 @@ WHERE t.time IN ({_rebal_in}) AND t.Price IS NOT NULL""")
     #   | "mktcap"   (variant B: cap sector_code at its PIT market-cap weight in ticker_prune)
     #   | "mktx<f>"  (variant B': same x <f>, e.g. mktx1.5 = allow a 1.5x value tilt over market).
     # Only meaningful with weight_scheme='sectorcap'. The cap is recomputed at EACH rebal date from
-    # ONLY that day's data (mcap = Close x as-of OShares, identical definition to the basket's own
-    # mcap, so basket weight and market weight are on one scale) -> no look-ahead.
+    # ONLY that day's data (mcap = raw COALESCE(Price,Close) x as-of OShares — identical definition
+    # to the basket's own WEIGHT leg `mcapw`, so basket weight and market weight stay on one scale;
+    # price basis split by role 2026-08-02, see module header) -> no look-ahead.
     SECCAP_MODE = os.environ.get("BASKET_SECCAP_MODE", "").lower()
     seccap_by_date = {}
     if SECCAP_MODE:
@@ -713,7 +741,8 @@ WHERE t.time IN ({_rebal_in}) AND t.Price IS NOT NULL""")
   SELECT f.ticker, f.time AS ftime, f.OShares,
     LEAD(f.time) OVER (PARTITION BY f.ticker ORDER BY f.time) AS nft
   FROM tav2_bq.ticker_financial AS f WHERE f.OShares IS NOT NULL)
-SELECT t.time, CAST(FLOOR(t.ICB_Code/1000) AS INT64) AS sec, SUM(t.Close*fin.OShares) AS mcap
+SELECT t.time, CAST(FLOOR(t.ICB_Code/1000) AS INT64) AS sec,
+       SUM(COALESCE(t.Price,t.Close)*fin.OShares) AS mcap
 FROM tav2_bq.ticker AS t
 JOIN fin ON fin.ticker=t.ticker AND t.time>=fin.ftime AND (fin.nft IS NULL OR t.time<fin.nft)
 WHERE t.time IN ({_rin}) AND t.ICB_Code IS NOT NULL AND t.Close IS NOT NULL
@@ -1066,7 +1095,8 @@ WHERE x.rn=1""")
   SELECT f.ticker, f.time AS ftime, f.OShares,
     LEAD(f.time) OVER (PARTITION BY f.ticker ORDER BY f.time) AS nft
   FROM tav2_bq.ticker_financial AS f WHERE f.OShares IS NOT NULL)
-SELECT t.ticker, t.time, t.Close, COALESCE(t.Price,t.Close)*t.Volume AS tv, fin.OShares
+SELECT t.ticker, t.time, t.Close, COALESCE(t.Price,t.Close) AS pxw,
+       COALESCE(t.Price,t.Close)*t.Volume AS tv, fin.OShares
 FROM tav2_bq.ticker AS t
 LEFT JOIN fin ON fin.ticker=t.ticker AND t.time>=fin.ftime AND (fin.nft IS NULL OR t.time<fin.nft)
 WHERE t.ticker IN ({inlist})
@@ -1074,8 +1104,11 @@ WHERE t.ticker IN ({inlist})
     bx["time"] = pd.to_datetime(bx["time"])
     bx = bx.sort_values(["ticker", "time"])
     bx["OShares"] = bx.groupby("ticker")["OShares"].ffill().bfill()
-    bx["mcap"] = bx["Close"] * bx["OShares"]
+    bx["mcap"] = bx["Close"] * bx["OShares"]          # RETURN leg (adjusted; ex-div is not a loss)
+    bx["mcapw"] = bx["pxw"] * bx["OShares"]           # WEIGHT leg (raw PIT; see PRICE BASIS header)
     mcap = bx.pivot_table(index="time", columns="ticker", values="mcap").sort_index()
+    mcapw = (bx.pivot_table(index="time", columns="ticker", values="mcapw")
+               .reindex(index=mcap.index, columns=mcap.columns))
     tvv = bx.pivot_table(index="time", columns="ticker", values="tv").sort_index()
     # (6) chained quality/cap-weighted return using each day's active-quarter membership
     idx_dates = mcap.index
@@ -1096,16 +1129,22 @@ WHERE t.ticker IN ({inlist})
             w = np.array([qm for t, qm in mem if t in mcap.columns])
             today = mcap.loc[d, tks].values.astype(float)
             yest = mcap.loc[prev, tks].values.astype(float)
+            yestw = mcapw.loc[prev, tks].values.astype(float)
             valid = ~np.isnan(today) & ~np.isnan(yest)
             if valid.sum() > 0:
+                yv = yest[valid]
+                # SPLIT BY ROLE (see module header PRICE BASIS): the RETURN uses adjusted Close, the
+                # WEIGHT uses the raw PIT price. COALESCE(Price,Close) is non-NULL wherever Close is,
+                # so this fills only on a genuine data hole -> fail-safe back to the legacy basis.
+                yvw = np.where(np.isnan(yestw[valid]), yv, yestw[valid])
+                r = today[valid] / yv - 1.0                   # adjusted-Close return, ex-div safe
                 if weight_scheme == "capwt":
-                    # legacy path — kept byte-identical (mcap x qmult cap-weight)
-                    num = np.nansum(today[valid] * w[valid]); den = np.nansum(yest[valid] * w[valid])
-                    if den > 0: ret.loc[d] = num / den - 1.0
+                    base = yvw * w[valid]                     # cap-weight (x qmult) base
+                    if base.sum() > 0:
+                        ret.loc[d] = float(np.nansum(base / base.sum() * r))
                 else:
-                    yv = yest[valid]
                     base = (np.ones(int(valid.sum())) if weight_scheme == "ew"
-                            else yv * w[valid])              # cap-weight (x qmult) base
+                            else yvw * w[valid])             # cap-weight (x qmult) base
                     W = base / base.sum() if base.sum() > 0 else base
                     if weight_scheme == "sectorcap":
                         sv = np.array([sec_map.get(t, -1) for t, ok in zip(tks, valid) if ok])
@@ -1123,7 +1162,6 @@ WHERE t.ticker IN ({inlist})
                         if _ce > FIN_CAP + 1e-9: fincap_infeasible.append((d, _ce, int((~fv).sum())))
                     elif weight_scheme == "namecap":
                         W = _cap_names(W, name_cap)
-                    r = today[valid] / yv - 1.0
                     ret.loc[d] = float(np.nansum(W * r))
             adv_tv.loc[d] = np.nansum(tvv.loc[d, tks].values.astype(float))
         prev = d
