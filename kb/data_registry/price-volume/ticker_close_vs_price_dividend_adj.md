@@ -55,19 +55,67 @@ cao bị báo lỗ nặng hơn thực tế. Ca thật tháng 7/2026: **NCT −11
 **SAB −8,1% → −1,7%** (6,4 điểm %). Lỗi này **đảo dấu một kết luận attribution**: rổ CAPIT bị mô tả
 là "chỉ gánh 2,6% mức lỗ" trong khi thực tế **LÃI +5.659.900đ**.
 
-## Bẫy (4) — `Close/Price` KHÔNG phân biệt cổ tức tiền mặt vs chia tách/thưởng CP
+## Bẫy (4) — `Close/Price` KHÔNG phân biệt loại sự kiện ⇒ **KHÔNG được dùng làm nguồn SỐ LIỆU**
 
-Cả hai loại sự kiện đều làm `ratio` nhảy, nhưng ý nghĩa hoàn toàn khác nhau:
+*(nâng cấp 2026-08-02, phản biện của user, job `Taylor_20260802_082124`)*
+
+Cổ tức tiền mặt, cổ tức cổ phiếu, thưởng CP, chia tách, phát hành thêm — **tất cả** làm `ratio` nhảy
+y hệt nhau:
 
 | | Số lượng CP | Tiền về tài khoản |
 |---|---|---|
 | Cổ tức tiền mặt | KHÔNG đổi | CÓ |
 | Chia tách / thưởng CP | TĂNG | KHÔNG |
 
-→ **Bắt buộc đối soát với sổ broker** trước khi đưa vào báo cáo. Ba nguồn kiểm chứng độc lập (đã
-dùng thật 2026-08-02): (i) `openQuantity` của broker không đổi qua ex-date; (ii)
-`cashDividendReceiving` của DNSE tăng đúng `KL × cổ tức`; (iii) `costPrice` broker báo đã bị trừ
-đúng phần cổ tức.
+Suy ngược ra "đồng/cp" từ tỉ số là **áp một giả định** (rằng sự kiện này là tiền mặt) mà chính dữ
+liệu đó **không kiểm chứng được**. Vì vậy `Close/Price` **chỉ còn vai trò PHÁT HIỆN**.
+
+## Kiến trúc 3 tầng — mỗi tầng một vai trò, KHÔNG lẫn lộn
+
+| Tầng | Nguồn | Vai trò |
+|---|---|---|
+| **1 · PHÁT HIỆN** | `tav2_bq.ticker` `Close/Price` | "mã nào, ngày nào có sự kiện" + ước lượng thô để khoanh cửa sổ ngày đi tra broker, và làm **lưới an toàn** phát hiện phương trình bị nhiễm. **Không bao giờ là con số vào báo cáo.** |
+| **2 · ĐO LƯỜNG** | `cashDividendReceiving` (DNSE, `dnse_raw_*.jsonl`) | **SỐ CHÍNH THỨC** (đồng/cp) — tiền mặt thật đã về |
+| **3 · ĐỐI SOÁT** | `ticker_financial.Dividend_1Y` delta | xác nhận độc lập, **trễ theo quý**, không bao giờ ghi đè tầng 2 |
+
+### BigQuery KHÔNG có cột raw per-event (đã quét toàn bộ, 2026-08-02)
+
+Có đúng **một** bảng đúng hình dạng cần tìm — `tav2_bq.shares_outstanding_live`
+(`ex_date` + `cash_div_per_share` + `stock_div_ratio` + `price_adj_factor`) — nhưng nó chỉ có
+**4 dòng** (ACB/HDC/EVG/DDV, tháng 6/2026), do Winston chạy tay `update_shares_live.py` khi cần
+override `OShares`, **không phải chuỗi lịch sử cổ tức**; 0 dòng cho cả 6 sự kiện tháng 7/2026.
+Dùng làm **ưu tiên 1 khi có** (đã phân loại sẵn tiền/cổ phiếu), nhưng không coi là nguồn có sẵn.
+
+⚠️ Grep cột theo chuỗi `'divid'` sẽ **bỏ sót** `cash_div_per_share` (chỉ chứa `div`) — lỗi này đã
+xảy ra thật. Tìm theo `div` / `corp` / `ex_date` / `split` / `payout`, quét **cả 5 dataset**
+(`tav2_bq`, `tav2_mike`, `tav2_pin`, `tav2_monitor`, `recommend_v23`).
+
+### Tầng 2 là một HỆ PHƯƠNG TRÌNH, không phải phép chia
+
+`cashDividendReceiving` là số dư **của TOÀN TÀI KHOẢN** — delta của nó là **theo NGÀY, không tách
+theo mã**. Nhiều mã cùng ngày chốt quyền rơi chung một delta ⇒ **không** chia được `delta / qty`:
+
+    với mỗi (tài khoản a, ngày d):   delta(a,d) = Σ_mã  qty(a, mã) × per_share(mã)
+
+Hai tài khoản có **tỉ lệ nắm giữ khác nhau** → hai phương trình độc lập → hệ 2×2 ngày 23/07 (CTG và
+VCB cùng ex-date) có **nghiệm duy nhất**, suy hoàn toàn từ tiền thật:
+
+    2300·CTG + 1300·VCB = 1.620.000   (SpaceX)     ⇒ CTG = 450
+    1050·CTG +  800·VCB =   832.500   (ZaloPay)    ⇒ VCB = 450
+
+Giải theo từng **thành phần liên thông**. Vô định (nhiều mã trùng ex-date mà chỉ 1 tài khoản nắm
+giữ) hoặc dư số lớn ⇒ giữ `UNVERIFIED`, **cấm vào báo cáo** — không lấp bằng ước lượng tỉ số.
+
+⚠️ **Mỗi sự kiện chỉ được gán vào ĐÚNG MỘT ngày** trong cửa sổ `{ngày cuối còn quyền, ex-date}` —
+khoản phải thu chỉ được ghi một lần. Bẫy thật: ex-date của NCT (27/07) **trùng** ngày-cuối-còn-quyền
+của SAB (27/07); để cửa sổ rộng thì NCT bị đếm ở cả hai ngày, hệ mâu thuẫn, hỏng cả hai mã.
+
+### Tầng 3 KHÔNG BAO GIỜ được ghi đè tầng 2
+
+`Dividend_1Y` là **tổng TRAILING 1 năm**, cập nhật theo **chu kỳ báo cáo quý**:
+- **Độ trễ**: kỳ gần nhất của SAB là 23/07 < ex-date 28/07 ⇒ chưa xuất hiện, không kết luận được.
+- **Delta có thể ÂM**: SAB `5.000 → 2.000` (Δ −3.000) là một cổ tức **cũ rơi khỏi cửa sổ 1 năm**,
+  không liên quan cổ tức mới. Đọc như "cổ tức mới" là sai cả dấu.
 
 ## BẮT BUỘC DÙNG — `mike/bin/dividend_adjusted_return.py`
 
@@ -75,16 +123,27 @@ Mọi báo cáo (ngày/tuần/tháng) và mọi phép tính tỉ suất per-posi
 tự viết lại công thức:
 
 ```bash
+# Làm báo cáo: GIẢI CẢ RỔ — mới đủ phương trình tách những ngày nhiều mã cùng chốt quyền.
+python3 mike/bin/dividend_adjusted_return.py --resolve MBB,BID,CTG,VCB,NCT,SAB \
+    --from 2026-07-01 --to 2026-08-01
+# Một vị thế:
 python3 mike/bin/dividend_adjusted_return.py --ticker NCT --from 2026-07-21 --to 2026-07-31 \
     --cost 94360 --qty 500 --account SpaceX
-python3 mike/bin/dividend_adjusted_return.py --selfcheck    # 16 phép thử
+python3 mike/bin/dividend_adjusted_return.py --selfcheck    # offline, không cần BQ/log
 ```
 
-Helper tự phát hiện sự kiện từ BQ, gắn cờ trạng thái xác minh:
+Helper gắn cờ trạng thái xác minh:
 
-- `CASH_CONFIRMED` — khớp `cashDividendReceiving` của DNSE → **được phép** dùng trong báo cáo.
+- `CASH_CONFIRMED` — `per_share` **giải ra từ tiền mặt broker thật** → **được phép** dùng trong báo cáo.
 - `STOCK_SUSPECTED` — số lượng CP đổi tại ex-date → nghi chia tách, **không** cộng vào tử số.
-- `UNVERIFIED` — chưa đối soát được với broker → **CẤM** đưa vào báo cáo gửi nhà đầu tư.
+- `UNVERIFIED` — chưa xác minh được → **CẤM** đưa vào báo cáo gửi nhà đầu tư. Nếu lý do là "hệ vô
+  định", chạy lại bằng `--resolve` với **đủ rổ mã** thì thường tách được.
+
+**Giới hạn còn lại (nói thẳng):** hệ vô định không tách được là **giới hạn dữ liệu** — DNSE không
+phát hành số dư cổ tức theo từng mã. `STOCK_SUSPECTED` dò bằng biến động `openQuantity` tại ex-date
+là dấu hiệu **yếu** (cổ phiếu thưởng thường về sau ex-date vài tuần) — sự kiện thưởng CP có thể lọt
+thành `UNVERIFIED` (an toàn: không cộng như tiền) chứ không được gắn nhãn đúng. Đường xác minh này
+chỉ phủ từ ngày bắt đầu ghi `dnse_raw_*.jsonl` (06/07/2026).
 
 ## Liên quan — lỗi NAV đếm hai lần cổ tức (khác lỗi trên, độc lập)
 
@@ -97,6 +156,10 @@ phải thu) ⇒ **cộng hai lần**, tự triệt tiêu phiên sau. Ảnh hư�
 ## Nguồn
 
 - Job `Taylor_20260802_060243` (2026-08-02) — phát hiện + sửa 3 báo cáo.
+- Job `Taylor_20260802_082124` (2026-08-02) — phản biện của user: đổi vai trò `Close/Price` thành
+  **chỉ phát hiện**, số chính thức lấy từ tiền broker qua hệ phương trình. Bằng chứng + đối soát đủ
+  6 sự kiện: `mike/agents/Taylor/exp_div_broker_solve/` (`README.md`, `reconcile_july.txt`).
+  **Số liệu KHÔNG đổi** (6/6 khớp phương pháp cũ) ⇒ 3 báo cáo tháng 7 không phải phát hành lại.
 - Bằng chứng độc lập thứ 2: Winston job 2026-07-31 (`cashDividendReceiving` jump 744 × 3.000 cho SAB).
 - Báo cáo tháng 7/2026 Mục 8.4 / 8.5 / 10.2 (cạm bẫy #4, #5).
 
