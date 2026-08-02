@@ -4890,10 +4890,14 @@ quant-skeptic **CONFIRMED (high)** — `mike/logs/verify_20260802_151136.log`. R
 cả 2 self-check, `extract_peryear.py` trên CSV thô (khớp tới từng chữ số), và 1 truy vấn BQ độc lập.
 
 ### Giới hạn PHẢI đọc kèm
-1. **−0,36pp là CẬN DƯỚI về độ phủ.** `pt_v23_audit_2014.py:124` (`_c30v_asof`) đọc **THÀNH VIÊN** từ
-   bảng đã publish cho nhánh **CAPIT**; trong A/B bảng đó vẫn là thành viên dựng bằng cơ sở CŨ. Đo
-   đầy đủ cần republish rồi chạy lại (chưa làm — sẽ ghi đè bảng production). Đây cũng chính là
-   *killer objection* quant-skeptic nêu.
+1. ~~**−0,36pp là CẬN DƯỚI về độ phủ.**~~ → **ĐÃ ĐÓNG 2026-08-02** (job `Taylor_20260802_154231`
+   chạy mô phỏng, `Taylor_20260802_161942` đọc kết quả + viết kết luận).
+   **Với ĐÚNG cấu hình R3 production, −0,36pp là số ĐẦY ĐỦ; khoảng cách CAPIT-membership = 0,00pp.**
+   ⚠️ **Đọc kỹ LÝ DO** — 0,00pp KHÔNG phải "đã đo và ra xấp xỉ 0", mà vì **R3 (mặc định
+   `CAPIT_BEAR_OVERFLOW=0`) KHÔNG HỀ ĐỌC bảng `custom30v_8l`**: đường dẫn đọc duy nhất
+   (`pt_v23_audit_2014.py:1214 _c30v_asof`) nằm TRỌN trong nhánh `if CAPIT_BEAR_OVERFLOW and ...`
+   (dòng 1203), cờ mặc định OFF (dòng 105). Bất biến, không phải trùng số ngẫu nhiên.
+   Xem mục **"2026-08-02 — ĐÓNG KHOẢNG CÁCH CAPIT-MEMBERSHIP"** cuối file.
 2. Lỗi fidelity `liq<=0` **VẪN MỞ** ⇒ khoảng kỳ vọng trung thực vẫn đọc kèm, **anchor DD ~−30%**
    (bootstrap 5th-pct), **không phải −18,4%**.
 3. **KHÔNG đụng** `lag_liquidity_filter.py:100` — `Volume_3M_P50*Close` ở đó là 1 trong **5 điểm**
@@ -4903,3 +4907,109 @@ cả 2 self-check, `extract_peryear.py` trên CSV thô (khớp tới từng ch�
    `custom30_core_select_audit.py:101`, `v4final_lib.py:103`.
 
 Báo cáo đầy đủ: `mike/agents/Taylor/research/basket_price_basis_ab_20260802.md`.
+
+---
+
+## 2026-08-02 — ĐÓNG KHOẢNG CÁCH CAPIT-MEMBERSHIP (giới hạn #1 của bản re-pin R3) — job `Taylor_20260802_154231` (chạy) + `Taylor_20260802_161942` (đọc kết quả, viết kết luận)
+
+**KẾT LUẬN: khoảng cách = 0,00pp. Số pin R3 GIỮ NGUYÊN `27,24% / 1,81 / −18,4% / 1,48 /
+1.006,33B` — KHÔNG đổi một chữ số nào.**
+
+⚠️ **LÝ DO mới là phần quan trọng, đừng chép mỗi con số 0,00pp:** đây **KHÔNG phải** "đo được một
+chênh lệch rồi nó xấp xỉ 0". Đây là **BẤT BIẾN CƠ CẤU** — cấu hình R3 production **không đọc**
+bảng `custom30v_8l`, nên nội dung bảng đó (dựng bằng cơ sở giá cũ hay đã sửa) **không thể** ảnh
+hưởng tới số R3, dù chênh lệch đầu vào lớn tới đâu.
+
+### Khoảng hở cần đóng là gì (nhắc lại)
+Bản re-pin R3 (mục ngay trên) sửa look-ahead cơ sở giá trong `custom_basket.py` + `custom30_history.py`,
+đo được **−0,36pp** (27,60% → 27,24%). Nhưng A/B đó chỉ đổi cơ sở giá ở **đường dựng rổ trực tiếp**;
+còn **1 kênh thứ hai** chưa phủ: `pt_v23_audit_2014.py:1214` (`_c30v_asof`) đọc **THÀNH VIÊN** rổ từ
+**bảng đã publish** `tav2_bq.custom30v_8l` cho nhánh **CAPIT** — mà bảng ấy trong A/B vẫn là bảng dựng
+bằng cơ sở **CŨ**. Vì vậy −0,36pp khi đó phải ghi là **CẬN DƯỚI**. Đây đúng là *killer objection*
+quant-skeptic nêu. Mục này đóng nó.
+
+### Bằng chứng 1 — CƠ CẤU (đọc code, mạnh nhất)
+`custom30v_8l` chỉ được đọc ở **ĐÚNG 1 chỗ** trong toàn engine (`grep -n "_c30v_asof\|custom30v_8l"
+pt_v23_audit_2014.py` → 3 hit: định nghĩa dòng 121/124, gọi dòng 1214):
+
+```
+105:  CAPIT_BEAR_OVERFLOW = os.environ.get("CAPIT_BEAR_OVERFLOW", "0") == "1"   # MẶC ĐỊNH OFF
+1203: if CAPIT_BEAR_OVERFLOW and len(golden) < CAPIT_OVERFLOW_MIN:
+1214:     vmems = _c30v_asof(d)          # <-- lần đọc DUY NHẤT, nằm TRỌN trong nhánh trên
+```
+
+⇒ R3 production chạy với `CAPIT_BEAR_OVERFLOW` mặc định **OFF** ⇒ dòng 1214 **không bao giờ thực thi**
+⇒ bảng không được đọc ⇒ **gap ≡ 0,00pp theo cấu trúc**, không phụ thuộc dữ liệu.
+
+### Bằng chứng 2 — NEGATIVE CONTROL (thực nghiệm: làm bảng RỖNG hẳn)
+Overlay cache: symlink toàn bộ snapshot pin `bq_cache_asof20260729_postrestate`, **chỉ thay đúng 1
+file** `custom30v_8l.parquet`.
+
+| Chân | `custom30v_8l` đầu vào | md5 CSV kết quả | CAGR | Final NAV |
+|---|---|---|---|---|
+| **legB `split`** (số pin R3) | bảng gốc trong snapshot | `51a1ec0f…` | **27,2438%** | 1.006,325830B |
+| **nc — bảng RỖNG** (`data/bq_cache_ov_c30v_empty/`) | **0 dòng** | `51a1ec0f…` | **27,2438%** | 1.006,325830B |
+| **fix — membership ĐÃ SỬA** (`data/bq_cache_ov_c30v_fix/`) | **1.440 dòng**, cơ sở `split` | `51a1ec0f…` | **27,2438%** | 1.006,325830B |
+
+**Ba chân BYTE-IDENTICAL** (`md5sum` trùng khít, không chỉ trùng ở chỉ tiêu tổng hợp mà trùng **toàn
+bộ 3.107 dòng DAILY + 10.750 dòng TX**). Sharpe 1,807656 / MaxDD −18,4094% / Calmar 1,479883 /
+self-check `final_nav_identity_err_vnd` = **0,0 VND** cả BAL lẫn LAG ở cả 3 chân.
+
+**Đầu vào THẬT SỰ khác nhau** (chống phản bác "chạy trùng 1 cấu hình 2 lần"):
+- overlay `empty` = **0 dòng** vs overlay `fix` = **1.440 dòng** (4.025 B vs 21.073 B trên đĩa);
+- overlay `fix` khớp **CHÍNH XÁC** `data/c30v_regen_split.csv` (đã verify bằng so khớp DataFrame), và
+  **KHÁC** `data/c30v_regen_legacy.csv`;
+- legacy vs split lệch **346/1.613 dòng thành viên**, `max|Δweight| = 0,0656` — chênh lệch đầu vào
+  **rất lớn**, mà đầu ra **không nhúc nhích một VND nào**.
+
+### Bằng chứng 3 — POSITIVE CONTROL (bật cờ lên thì bảng CÓ tác dụng thật)
+Nếu thiếu bước này, negative control ở trên vô nghĩa (không phân biệt được "bất biến thật" với
+"đường ống hỏng / overlay không được đọc"). Chạy lại đúng 2 chân trên nhưng **`CAPIT_BEAR_OVERFLOW=1`**:
+
+| Chân (cờ **BẬT**) | CAGR | Sharpe | MaxDD | Calmar | Final NAV |
+|---|---|---|---|---|---|
+| `pc_ovf_oldtable` (bảng cơ sở CŨ) | **29,0938%** | 1,8606 | −18,409% | 1,5804 | 1.204,606B |
+| `pc_ovf_fixtable` (bảng ĐÃ SỬA) | **29,0749%** | 1,8520 | −18,409% | 1,5793 | 1.202,418B |
+| **Δ (fix − cũ)** | **−0,0188pp** | −0,0086 | 0,0pp | −0,0010 | −2,188B |
+
+⇒ Hai chân **KHÁC nhau** (md5 khác: `c6d56907…` vs `58208ffa…`) ⇒ đường ống overlay **hoạt động
+thật**, engine **thực sự đọc** bảng khi cờ bật. Vậy việc 3 chân R3 trùng byte ở Bằng chứng 2 là
+**bất biến thật của cấu hình R3**, không phải artifact.
+
+**⚠️ 29,09% / 29,07% CHỈ LÀ SỐ THAM CHIẾU CỦA MỘT CẤU HÌNH KHÔNG DÙNG — TUYỆT ĐỐI KHÔNG trích dẫn
+lẫn với số R3 hiện hành.** Ý nghĩa duy nhất: **nếu tương lai** có ai bật `CAPIT_BEAR_OVERFLOW=1`
+thì cơ sở giá của bảng **mới bắt đầu** ảnh hưởng, và ảnh hưởng đó đo được là **−0,019pp CAGR**
+(nhỏ hơn 1 bậc so với −0,36pp của kênh dựng rổ trực tiếp). Con số này **chưa** qua quant-skeptic
+và **chưa** là kết quả được pin — chỉ là tài liệu tham khảo cho job tương lai.
+
+### Self-check (bước 5)
+`extract_peryear.py` (đúng công cụ dùng suốt saga) chạy trực tiếp trên CSV thô, `$DNA_PYEXE`:
+
+```
+basis_legB_split      FULL 27.24%  IS 23.81%  OOS 30.46%
+nc_c30v_empty         FULL 27.24%  IS 23.81%  OOS 30.46%
+fix_c30v_membership   FULL 27.24%  IS 23.81%  OOS 30.46%
+```
+Per-year trùng khít cả 13 năm. **Khớp tuyệt đối số pin 27,24% / IS 23,81% / OOS 30,46%.** Chân đối
+chứng `basis_legA_legacy` vẫn tái lập **27,60% / 1,8428 / −17,463% / 1,5805 / 1.041,95B** ⇒ engine
+tất định, bộ CSV không bị lẫn.
+
+### Gate quant-skeptic (bước 6) — KHÔNG chạy lại, có lý do
+Số cuối cùng **không đổi một chữ số** (27,24% / 1,81 / −18,4% / 1,48) so với bản đã được
+quant-skeptic **CONFIRMED (high)** (`mike/logs/verify_20260802_151136.log`). Mục này **không đề xuất
+thay đổi production nào**, không đổi tham số, không wire gì mới — chỉ **đóng một luận cứ** (biến
+"cận dưới" thành "đầy đủ, có lý do cơ cấu"). Bằng chứng lại thuộc loại **cơ học, tự kiểm chứng
+được trong vài giây** (`md5sum` 3 file + `grep -n` 3 dòng code), không phải suy luận thống kê cần
+phản biện. ⇒ Không thuộc diện bắt buộc gate. **Nếu sau này có ai bật `CAPIT_BEAR_OVERFLOW=1` để
+dùng thật thì bắt buộc gate lại** — lúc đó số 29,07% mới rời khỏi diện tham chiếu.
+
+### Tệp bằng chứng (giữ làm audit trail)
+- `data/v23_golive_audit_..._exp_nc_c30v_empty_univpit.csv` (negative control, bảng rỗng)
+- `data/v23_golive_audit_..._exp_fix_c30v_membership_univpit.csv` (membership đã sửa)
+- `data/v23_golive_audit_..._exp_pc_ovf_oldtable_univpit.csv` / `..._exp_pc_ovf_fixtable_univpit.csv`
+  (positive control, cờ BẬT)
+- `data/c30v_regen_legacy.csv` / `data/c30v_regen_split.csv` (2 bản regen bảng theo 2 cơ sở giá)
+- `data/bq_cache_ov_c30v_empty/` + `data/bq_cache_ov_c30v_fix/` — **GIỮ**, không xoá: mỗi thư mục chỉ
+  ~4 KB/~21 KB dữ liệu thật (phần còn lại là symlink tới snapshot pin, **không** tốn ~2 GB), và là
+  bằng chứng DUY NHẤT chứng minh negative/positive control chạy trên đầu vào khác nhau thật
+  (coding_guidelines §8 — artifact audit-trail, không phải script chạy nhầm được).
