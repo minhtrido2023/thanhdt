@@ -1,6 +1,6 @@
 # custom30V — tách vai cơ sở giá (Price vs Close): A/B NAV đầy đủ + tác động LIVE
 
-**Job:** `Taylor_20260802_141725` (attempt 2) · **Ngày:** 2026-08-02
+**Job:** `Taylor_20260802_141725` → hoàn tất ở `Taylor_20260802_150945` · **Ngày:** 2026-08-02
 **Tiền đề:** job `Taylor_20260802_083624` (`pe_pb_basis_broad_audit_20260802.md` §3) phát hiện
 `custom_basket.py` ghép `Close` (đã điều chỉnh hồi tố) với đại lượng PIT thô (`Volume_3M_P50`,
 `OShares`) ở 2 vai cross-sectional, trong khi chính file đó đã dùng đúng `COALESCE(Price,Close)`
@@ -21,8 +21,8 @@ bằng chứng lỗi cũ **đang thổi phồng số pin R3**, không phải lý
 | 4 | A/B backtest NAV đầy đủ | ✅ dưới đây |
 | 5 | Tác động lên rổ đang giữ THẬT | ✅ dưới đây — **phát hiện lỗi MỚI, đã sửa** (`be6b976`) |
 | 6 | DSR | ✅ dưới đây |
-| 7 | quant-skeptic | ⏳ đang chạy |
-| 8 | Cập nhật tài liệu | ⏳ chỉ sau khi bước 7 CONFIRMED |
+| 7 | quant-skeptic | ✅ **CONFIRMED (high)** — `mike/logs/verify_20260802_151136.log` |
+| 8 | Cập nhật tài liệu | ✅ commit `ad46cb1` (registry) + `ba26c304` (KB + saga phần 3) |
 
 ---
 
