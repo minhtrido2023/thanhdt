@@ -4,7 +4,7 @@ title: Incidents — Mike fleet (sổ postmortem, cấu trúc OKF)
 owner: Mike fleet (mọi agent ghi; daily_retro.sh ghi entry RETRO hằng đêm)
 format: OKF (Open Knowledge Format) — markdown + YAML frontmatter, 1 sự cố = 1 file
 migrated_from: kb/INCIDENTS.md (single-file 408KB, migrate → OKF 2026-07-30 job Winston_20260730_144031)
-entries: 80 file (59 sự cố + 20 RETRO + 1 mục open-items chung)
+entries: 83 file (62 sự cố + 20 RETRO + 1 mục open-items chung)
 ---
 
 # Incidents — Mike fleet
@@ -77,6 +77,9 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Sự cố | status |
 |---|---|---|
+| 2026-08-02 | [2026-08/2026-08-02-lag-liquidity-fidelity-two-fixes.md](2026-08/2026-08-02-lag-liquidity-fidelity-two-fixes.md) | ? |
+| 2026-08-02 | [2026-08-02: lần thứ 5 "message các topic Discord lẫn lộn" — bỏ vá từng lớp, chuyển sang registry duy nhất + pre-commit gate chặn ID trần](2026-08/2026-08-02-discord-channel-registry.md) | fixed |
+| 2026-08-02 | [2026-08-02: 5 job failed "Reached max turns (50)" in one day, all attempt 2/2 with an unchanged cap — added effort-scaled defaults + auto-continuation with a bumped ceiling](2026-08/2026-08-02-max-turns-auto-continuation.md) | fixed |
 | 2026-08-02 | [2026-08-02: claude-code-discord-bridge (shared infra, every Claude session on the account) found 115 commits / 3+ weeks behind origin, incl. 3 unpatched security fixes — merged + fixed](2026-08/2026-08-02-ccdb-bridge-115-commits-behind-upstream.md) | fixed |
 | 2026-08-02 | [2026-08-02: saga "PE có look-ahead giá điều chỉnh" — phép nhân Price/Close sai sống 6 tuần trong rating_8l.py (từ 06-24), bị bác bỏ bằng kiểm định trong-kỳ-hằng-số rồi khôi phục; lần 2 fleet suy diễn nhầm từ 1 quan sát đúng vì test trên dữ liệu gần đây](2026-08/2026-08-02-pe-price-close-adjustment-saga.md) | fixed |
 | 2026-08-02 | [2026-08-02: user noticed "Mike seems to stop / not follow topics" — root cause is /api/notify silently dropping ~10 messages/3 days on oversized embeds, one bug fixed, one flagged unfixed](2026-08/2026-08-02-notify-api-silent-message-loss.md) | partially-fixed |
