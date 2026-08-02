@@ -1,0 +1,59 @@
+{
+  "_README": [
+    "REGISTRY DUY NHAT anh xa TEN-Y-NGHIA -> Discord channel/topic ID that cua fleet Mike.",
+    "",
+    "DAY LA NOI DUY NHAT trong repo duoc phep chua mot Discord snowflake ID viet tran.",
+    "bin/discord_id_gate.sh (pre-commit) CHAN commit neu ID 18-19 chu so xuat hien trong",
+    "bin/*.sh, bin/*.py hay hooks/*.sh o ngoai file nay.",
+    "",
+    "CACH DUNG:",
+    "  bash : bin/notify_thread.sh \"<msg>\" trading_daily      # truyen TEN, khong truyen ID",
+    "         id=$(bin/discord_channel.sh trading_daily)       # khi that su can ID tran",
+    "  py   : from discord_channels import resolve; resolve('trading_daily')",
+    "",
+    "THEM CHANNEL MOI: them 1 entry vao 'channels' duoi day (ten slug snake_case) roi dung",
+    "ten do o moi noi. KHONG bao gio copy ID vao file khac.",
+    "",
+    "Lich su: 4 lan ro ri cheo topic (2026-07-01 DollarBill, 2026-07-06 Taylor multi-topic,",
+    "2026-07-22 override dead-code, 2026-07-22b job-record/agent-env lech nhau) deu vi ID",
+    "tran khong kiem chung duoc + logic phan giai bi nhan ban o nhieu file. Xem",
+    "kb/incidents/2026-08/2026-08-02-discord-channel-registry.md"
+  ],
+  "channels": {
+    "mikefleet": {
+      "id": "1519342571812421753",
+      "title": "#mikefleet",
+      "purpose": "Channel goc cua fleet — notify_discord.sh dang embed/forum post (thread_name tao thread con). KHONG phai topic hoi thoai."
+    },
+    "plan_approval": {
+      "id": "1521183164364754974",
+      "title": "Plan approval / DollarBill plan",
+      "purpose": "Plan T+1 cua DollarBill + MOI ban ghi duyet plan. Moi yeu cau/xac nhan duyet plan phai mirror vao day du hoi thoai that dien ra o dau."
+    },
+    "trading_daily": {
+      "id": "1521470705563340910",
+      "title": "Trading Daily",
+      "purpose": "Alert VAN HANH SONG trong ngay: preflight, run_bot, bot_heartbeat, bq freshness/pin, ops autofix, anomaly escalate. KHONG phai bao cao tong hop."
+    },
+    "trading_report": {
+      "id": "1522576692638388364",
+      "title": "Trading report",
+      "purpose": "Kenh DUY NHAT cho bao cao TONG HOP ngay/tuan/thang (eod_trading_report, check_report_cadence, paper_programs_daily_report). Tach khoi trading_daily."
+    },
+    "architecture": {
+      "id": "1521475726329516122",
+      "title": "Architecture",
+      "purpose": "Kien truc fleet + dieu phoi agent: output cua Wags, arch-reviewer, cron_health_check, weekly_ops_audit, kb_nightly, ccdb bridge drift, DT5G restate alert."
+    },
+    "taylor_research": {
+      "id": "1521735922066919515",
+      "title": "Taylor research",
+      "purpose": "Topic nghien cuu do Taylor phu trach (fearbuy_weekly_scan...)."
+    },
+    "momentum_deals": {
+      "id": "1525112292159651940",
+      "title": "Momentum deals (project)",
+      "purpose": "Topic rieng cua du an momentum-deals — tach khoi van hanh hang ngay. Chua co script nao dung; dispatch dung --thread/ten nay."
+    }
+  }
+}
