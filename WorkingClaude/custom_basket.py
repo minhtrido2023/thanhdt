@@ -335,9 +335,24 @@ FROM tav2_bq.ticker_financial f WHERE f.time <= DATE '{end_date}'""")
     LIQ_FLOOR = float(os.environ.get("BASKET_LIQ_FLOOR_B", "0")) * 1e9
     MOM_W = float(os.environ.get("BASKET_MOM_W", "0.5"))
     RSI_W = float(os.environ.get("BASKET_RSI_W", "0"))   # custom30B: + RSI_W*rank(prior-q avg D_RSI) (best bull add)
+    # AUDIT-ONLY knob BASKET_PEADJ=1 (default OFF -> byte-identical): multiply PE/PCF by the price
+    # ratio Price/Close before inverting, i.e. yield = 1/(col * Price/Close) instead of 1/col.
+    # ⚠️ THIS IS THE *BIASED* LEG, KEPT ONLY TO MEASURE THE COST OF A MISTAKE — never turn it on in
+    # production. Job Taylor_20260802_042110 claimed tav2_bq.ticker.PE was stored on an ADJUSTED-close
+    # basis and that this multiplication removes a look-ahead. Job Taylor_20260802_054825 REFUTED that
+    # at universe scale (2014-2021, 1,419,351 rows / 23,067 ticker x report-period): PE/Price is exactly
+    # constant within a report period in 93.1% of periods vs 11.0% for PE/Close (PB 94.6/12.6, PCF
+    # 86.9/20.3); hand-check VNM & FPT 2015-06-30 reproduce NP_ttm/OShares from the RAW Price only.
+    # => PE/PB/PCF are already raw-Price point-in-time correct; multiplying by Price/Close INJECTS
+    # look-ahead (the ratio depends on dividend/bonus events AFTER date t). See the data_registry entry
+    # mike/kb/data_registry/fundamentals/valuation_pe_pb_pcf_ps.md "Bay (4)".
+    PEADJ = os.environ.get("BASKET_PEADJ", "") == "1"
     def _yield_piv(col):
-        _y = bq(f"""SELECT t.ticker, DATE_TRUNC(t.time, QUARTER) AS q, AVG(SAFE_DIVIDE(1, t.{col})) AS y
-FROM tav2_bq.ticker t WHERE t.{col} > 0 AND t.time BETWEEN DATE '{eff_start}' AND DATE '{end_date}'
+        _expr = (f"SAFE_DIVIDE(1, t.{col} * SAFE_DIVIDE(t.Price, t.Close))" if PEADJ
+                 else f"SAFE_DIVIDE(1, t.{col})")
+        _extra = " AND t.Price > 0 AND t.Close > 0" if PEADJ else ""
+        _y = bq(f"""SELECT t.ticker, DATE_TRUNC(t.time, QUARTER) AS q, AVG({_expr}) AS y
+FROM tav2_bq.ticker t WHERE t.{col} > 0{_extra} AND t.time BETWEEN DATE '{eff_start}' AND DATE '{end_date}'
 GROUP BY t.ticker, q""")
         _y["q"] = pd.to_datetime(_y["q"])
         return _y.pivot_table(index="q", columns="ticker", values="y")
