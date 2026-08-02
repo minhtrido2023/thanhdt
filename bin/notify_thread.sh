@@ -10,7 +10,9 @@
 # Tên KHÔNG có trong registry ⇒ thoát lỗi + ghi logs/notify_thread_errors.log (fail loud),
 # KHÔNG rơi về topic mặc định — chính cái fallback im lặng đó là cơ chế rò rỉ.
 #
-# thread_id defaults to contents of state/ccdb_thread_id.
+# Đối số 2 bỏ trống ⇒ dùng $DISCORD_THREAD_ID (topic RIÊNG của caller, do bridge/dispatch bơm).
+# Cũng rỗng nốt ⇒ THOÁT LỖI + ghi logs/notify_thread_errors.log; KHÔNG còn rơi về con trỏ toàn
+# cục state/ccdb_thread_id (tầng đó bỏ hẳn 2026-08-02 — chính là cơ chế rò rỉ).
 # Uses ccdb-mike's /api/notify with channel_id=thread_id (threads are channels in Discord).
 #
 # Discord messages cap at ~2000 chars; /api/notify has no file-attachment support (that path

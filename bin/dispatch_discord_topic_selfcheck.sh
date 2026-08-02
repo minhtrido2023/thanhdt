@@ -9,8 +9,17 @@
 #   S1 — KHÔNG ĐOÁN: mọi consumer sau lúc dispatch chỉ ĐỌC LẠI ID đã ghim trên job record.
 #        Ghim rỗng ⇒ IM LẶNG phía Discord (không rơi về ambient / con trỏ toàn cục).
 #   S2 — Phân biệt "agent KHÔNG có override" (hợp lệ, đi tiếp) với "CÓ override nhưng registry
-#        hỏng" (ABORT). Gộp 2 cái này thành chuỗi rỗng = override cố định của Wags/DollarBill
-#        âm thầm biến thành topic ambient — chính là lỗi 07-22 "override thành dead-code".
+#        hỏng" (trường hợp bất thường: pin RỖNG + alert Telegram, KHÔNG tụt về ambient). Gộp 2
+#        cái này thành chuỗi rỗng = override cố định của Wags/DollarBill âm thầm biến thành topic
+#        ambient — chính là lỗi 07-22 "override thành dead-code".
+#   ABORT chỉ dành cho `--thread` TƯỜNG MINH không phân giải được: caller đã nêu đích danh 1 topic
+#        thì phải dừng. Registry hỏng KHÔNG được chặn việc (F4, vòng 3): cron sinh plan T+1 dispatch
+#        DollarBill không kèm `--thread`, chặn nó = "không có plan sáng mai" đổi lấy 1 tin nhắn.
+#
+# KỶ LUẬT (vòng 3 — bộ ca đầu tiên PASS Y HỆT trên code TRƯỚC bản vá, tức không test gì cả):
+# mỗi ca phải được MUTATION TEST — revert đúng dòng nó canh rồi chạy lại, ca đó PHẢI FAIL.
+# Đã đo 2026-08-02: bỏ `|| true` trong _job_thread_id ⇒ CA 9 fail; khôi phục fallback ambient ở
+# done-notify ⇒ CA 8 fail; khôi phục `cat ccdb_thread_id` trong watchdog.sh ⇒ CA 10 fail.
 #
 # CÁCH TEST (điểm mấu chốt — KHÔNG copy logic): dựng một ROOT mike GIẢ trong tmpdir, bin/ là
 # SYMLINK tới file THẬT (dispatch.sh, discord_channel.sh, mike_json.py…) nên test luôn chạy
@@ -58,9 +67,12 @@ exit 0"
 _stub consolidate.sh "#!/usr/bin/env bash
 exit 0"
 # claude stub: dump env con (⇒ kiểm được ID agent THẬT SỰ nhận) + báo đã chạy.
+# SELFCHECK_MIDRUN_POINTER: dựng con trỏ toàn cục XUẤT HIỆN GIỮA CHỪNG (user mở 1 topic khác
+# trong lúc job đang chạy) — mô phỏng đúng cửa sổ mà tầng "đoán lại topic" từng rò rỉ qua.
 cat > "$SB/claude_stub.sh" <<EOF
 #!/usr/bin/env bash
 { echo "DISCORD_THREAD_ID=\${DISCORD_THREAD_ID-<UNSET>}"; echo "JOB_ID=\${JOB_ID-<UNSET>}"; } > "$SB/claude.env"
+[ -n "\${SELFCHECK_MIDRUN_POINTER:-}" ] && printf '%s\n' "\$SELFCHECK_MIDRUN_POINTER" > "$MK/agents/Mike/state/ccdb_thread_id"
 echo "[claude-stub] ok"
 exit \${CLAUDE_STUB_RC:-0}
 EOF
@@ -84,25 +96,53 @@ assert() {
   fi
 }
 
-RC=0; PINNED=""; CHILD_TID=""; NCALLS=0; NJOBS=0
-# run_dispatch <env_assignments...> -- <dispatch args...>
-run_dispatch() {
-  rm -f "$SB"/*.calls "$SB/claude.env"
-  rm -f "$MK/bus/jobs"/*.json "$MK/logs"/*.log "$MK/logs"/*.err
-  local envs=() ; while [ "$1" != "--" ]; do envs+=("$1"); shift; done; shift
-  ( cd "$MK" && env "${envs[@]}" \
-      DISPATCH_CGROUP_DETACH=0 DISPATCH_CLAUDE_BIN="$SB/claude_stub.sh" DISPATCH_FROM=Mike \
-      DISPATCH_TIMEOUT_DOLLARBILL=60 \
-      bash "$MK/bin/dispatch.sh" "$@" ) > "$SB/out" 2> "$SB/err"
-  RC=$?
+RC=0; PINNED=""; CHILD_TID=""; NCALLS=0; NJOBS=0; FROM_AGENT=Mike
+# _collect — đọc lại trạng thái quan sát được sau một lần dispatch (dùng chung sync/bg).
+_collect() {
   NJOBS="$(find "$MK/bus/jobs" -name '*.json' | wc -l | tr -d ' ')"
-  local jf; jf="$(find "$MK/bus/jobs" -name '*.json' | head -1)"
+  local jf; jf="$(find "$MK/bus/jobs" -name '*.json' | sort | head -1)"
   PINNED=""
   [ -n "$jf" ] && PINNED="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1])).get("discord_thread_id",""))' "$jf")"
   CHILD_TID="$(sed -n 's/^DISCORD_THREAD_ID=//p' "$SB/claude.env" 2>/dev/null || true)"
   [ -f "$SB/claude.env" ] || CHILD_TID="<CLAUDE-KHONG-CHAY>"
   NCALLS=0
   [ -f "$SB/notify_thread.calls" ] && NCALLS="$(wc -l < "$SB/notify_thread.calls" | tr -d ' ')"
+}
+# run_dispatch <env_assignments...> -- <dispatch args...>
+# ⚠️ "${envs[@]}" PHẢI đứng đầu: `env` chỉ nhận cờ (`-u VAR`) TRƯỚC NAME=VALUE đầu tiên, đặt sau
+# thì `-u` bị hiểu là tên lệnh ⇒ exit 127 (đã dẫm phải khi viết ca 9).
+# Người gọi (DISPATCH_FROM) đổi qua biến $FROM_AGENT, không qua envs — ca AUTO-CALLBACK cần nó
+# là agent thật, vì Mike/user bị guard chặn callback.
+run_dispatch() {
+  rm -f "$SB"/*.calls "$SB/claude.env"
+  rm -f "$MK/bus/jobs"/*.json "$MK/logs"/*.log "$MK/logs"/*.err
+  local envs=() ; while [ "$1" != "--" ]; do envs+=("$1"); shift; done; shift
+  ( cd "$MK" && env "${envs[@]}" \
+      DISPATCH_CGROUP_DETACH=0 DISPATCH_CLAUDE_BIN="$SB/claude_stub.sh" \
+      DISPATCH_FROM="${FROM_AGENT:-Mike}" \
+      DISPATCH_TIMEOUT_DOLLARBILL=60 \
+      bash "$MK/bin/dispatch.sh" "$@" ) > "$SB/out" 2> "$SB/err"
+  RC=$?
+  _collect
+}
+# _wait_bg <số job record mong đợi> — job `--bg` chạy tách tiến trình, phải CHỜ rồi mới đo.
+# Chờ tới khi đủ số record VÀ record đầu đã chốt trạng thái (hoặc hết 40s), + 2s cho các
+# tác dụng phụ đuôi (notify/auto-callback) kịp xảy ra ⇒ "0 tin nhắn" là kết luận thật.
+_wait_bg() {
+  local want="$1" i jf st
+  for i in $(seq 1 80); do
+    jf="$(find "$MK/bus/jobs" -name '*.json' | sort | head -1)"
+    if [ -n "$jf" ]; then
+      st="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1])).get("status",""))' "$jf" 2>/dev/null || true)"
+      if [ "$st" != "running" ] && [ "$st" != "" ] \
+         && [ "$(find "$MK/bus/jobs" -name '*.json' | wc -l | tr -d ' ')" -ge "$want" ]; then
+        break
+      fi
+    fi
+    sleep 0.5
+  done
+  sleep 2
+  _collect
 }
 
 echo "== CA 1: dispatch bình thường (Wags, không --thread) — override ghim + agent nhận ĐÚNG ID"
@@ -127,12 +167,19 @@ assert "ID ghim rỗng (không đoán)" "$PINNED" ""
 assert "agent con KHÔNG có DISCORD_THREAD_ID" "$CHILD_TID" "<UNSET>"
 assert "số tin nhắn Discord" "$NCALLS" "0"
 
-echo "== CA 4: registry HỎNG + agent CÓ override ⇒ ABORT rõ ràng (S2)"
+echo "== CA 4: registry HỎNG + agent CÓ override ⇒ VẪN chạy, pin RỖNG, Discord im lặng (S2/F4)"
+# ĐÁNH ĐỔI chốt 2026-08-02 (arch-reviewer vòng 3, F4): bản trước ABORT ở đây. Sai — cron
+# `bq_freshness_check.sh` dispatch DollarBill (có override) KHÔNG kèm `--thread`, nên registry
+# hỏng sẽ chặn luôn job SINH PLAN T+1 ⇒ sáng hôm sau bot chạy không có plan. Đổi "user không
+# thấy 1 tin nhắn" lấy "không có việc" là sai hướng cho một sự cố THUẦN ĐỊNH TUYẾN THÔNG BÁO.
+# Nay: pin RỖNG + alert Telegram + VẪN CHẠY. Vẫn KHÔNG tụt về ambient (đó mới là rò rỉ).
 run_dispatch -u DISCORD_THREAD_ID DISCORD_CHANNELS_REGISTRY=/nonexistent/registry.json -- \
   Wags "selfcheck ca4" --timeout 60
-assert "exit code khác 0" "$([ "$RC" -ne 0 ] && echo yes || echo no)" "yes"
-assert "claude KHÔNG được chạy" "$CHILD_TID" "<CLAUDE-KHONG-CHAY>"
-assert "không tạo job record" "$NJOBS" "0"
+assert "exit code" "$RC" "0"
+assert "job VẪN chạy (có job record)" "$NJOBS" "1"
+assert "ID ghim RỖNG (không đoán topic thay thế)" "$PINNED" ""
+assert "agent con KHÔNG có DISCORD_THREAD_ID" "$CHILD_TID" "<UNSET>"
+assert "số tin nhắn Discord" "$NCALLS" "0"
 assert "cảnh báo registry hỏng (Telegram)" "$(grep -c 'registry' "$SB/notify.calls" 2>/dev/null || echo 0)" "1"
 
 echo "== CA 5: registry hỏng + agent KHÔNG override + có ID trần ⇒ VẪN chạy (abort phải ĐÚNG chỗ)"
@@ -151,6 +198,61 @@ assert "exit code khác 0" "$([ "$rc6" -ne 0 ] && echo yes || echo no)" "yes"
 assert "báo không đoán topic" "$(printf '%s' "$out6" | grep -c 'không đoán topic')" "1"
 assert "ghi vào notify_thread_errors.log" \
   "$(grep -c 'KHONG CO topic' "$MK/logs/notify_thread_errors.log" 2>/dev/null || echo 0)" "1"
+# ⚠️ TRẢ LẠI STUB NGAY: CA 6 vừa thay symlink notify_thread.sh THẬT vào sandbox. Ca nào chạy sau
+# mà quên bước này sẽ (a) gọi API Discord THẬT, và (b) đếm "0 tin nhắn" từ file .calls không bao
+# giờ được ghi ⇒ PASS GIẢ. Đúng lớp lỗi mà chính script này sinh ra để chặn.
+_stub notify_thread.sh "#!/usr/bin/env bash
+printf '%s\n' \"\${2:-<NO_TOPIC>}\" >> \"$SB/notify_thread.calls\""
+
+echo "== CA 7: --thread= RỖNG (biến chưa set) ⇒ ABORT, không âm thầm tụt về ambient (F6)"
+printf '%s\n' "$ARCH_ID" > "$MK/agents/Mike/state/ccdb_thread_id"   # ambient CÓ, phải KHÔNG được dùng
+run_dispatch -u DISCORD_THREAD_ID -- Wags "selfcheck ca7" --thread= --timeout 60
+assert "exit code khác 0" "$([ "$RC" -ne 0 ] && echo yes || echo no)" "yes"
+assert "claude KHÔNG được chạy" "$CHILD_TID" "<CLAUDE-KHONG-CHAY>"
+assert "không tạo job record" "$NJOBS" "0"
+
+echo "== CA 8: pin RỖNG + con trỏ toàn cục xuất hiện GIỮA CHỪNG ⇒ 0 tin nhắn (S1, --bg)"
+# Ca này là ca DUY NHẤT bắt được đúng cửa sổ rò rỉ thật: lúc dispatch không có topic nào (pin
+# rỗng), rồi user mở một topic khác trong lúc job chạy ⇒ con trỏ toàn cục đổi. Mọi tầng "đoán
+# lại" sau đó sẽ gửi vào topic user vừa mở. Bộ ca cũ KHÔNG bắt được vì con trỏ luôn tĩnh.
+rm -f "$MK/agents/Mike/state/ccdb_thread_id"
+run_dispatch -u DISCORD_THREAD_ID SELFCHECK_MIDRUN_POINTER="$ARCH_ID" -- \
+  Taylor "selfcheck ca8" --bg --timeout 60
+_wait_bg 1
+assert "exit code" "$RC" "0"
+assert "ID ghim rỗng" "$PINNED" ""
+assert "con trỏ toàn cục ĐÃ xuất hiện giữa chừng" \
+  "$(cat "$MK/agents/Mike/state/ccdb_thread_id" 2>/dev/null || echo '<KHONG-CO>')" "$ARCH_ID"
+assert "số tin nhắn Discord" "$NCALLS" "0"
+
+echo "== CA 9: pin RỖNG ⇒ AUTO-CALLBACK vẫn chạy (pin rỗng không được GIẾT _bg_wrapper, F2)"
+# `mike_json.py job-field` EXIT 1 khi field rỗng; `_bg_wrapper` bật lại `set -e` giữa chừng ⇒
+# thiếu `|| true` trong _job_thread_id là cả wrapper chết ngay tại dòng đọc pin, mất luôn
+# AUTO-CALLBACK báo kết quả về agent đã gọi việc. Đo bằng SỐ JOB RECORD: 1 = wrapper chết,
+# 2 = wrapper sống và đã đẻ job callback.
+rm -f "$MK/agents/Mike/state/ccdb_thread_id"
+FROM_AGENT=Wags run_dispatch -u DISCORD_THREAD_ID -- Taylor "selfcheck ca9" --bg --timeout 60
+FROM_AGENT=Mike
+_wait_bg 2
+assert "exit code" "$RC" "0"
+assert "ID ghim rỗng" "$PINNED" ""
+assert "có job AUTO-CALLBACK (wrapper sống qua chỗ đọc pin rỗng)" "$NJOBS" "2"
+assert "job callback đúng là gửi về người gọi (Wags)" \
+  "$(find "$MK/bus/jobs" -name 'Wags_*.json' | wc -l | tr -d ' ')" "1"
+
+echo "== CA 10: chỉ còn ĐÚNG 1 nơi ĐỌC con trỏ toàn cục — _ambient_thread lúc dispatch (F1)"
+# Ca hành vi không phủ được `watchdog.sh`: nó tự `cat` con trỏ rồi truyền ID TƯỜNG MINH, nên
+# việc gỡ tầng đoán khỏi notify_thread.sh KHÔNG chặn được nó (đúng lỗi F1). Bài học của sự cố
+# là "sửa nơi TIÊU THỤ chưa đủ, phải grep mọi nơi tự đọc NGUỒN" ⇒ mã hoá thành bất biến tĩnh.
+# Chạy trên cây nguồn THẬT ($REAL), không phải sandbox. (watchdog.sh không test hành vi được:
+# nó quét systemd unit thật của user, chạy trong test là đụng dịch vụ sống.)
+_readers="$(grep -rn 'ccdb_thread_id' "$REAL/bin" "$REAL/hooks" 2>/dev/null \
+            | grep -v 'dispatch_discord_topic_selfcheck.sh' \
+            | grep -v ':[0-9]*: *#' \
+            | grep -v "> *\"\$ROOT/agents/Mike/state/ccdb_thread_id\"" || true)"
+assert "số nơi ĐỌC con trỏ toàn cục" "$(printf '%s' "$_readers" | grep -c . )" "1"
+assert "nơi duy nhất đó nằm trong dispatch.sh" \
+  "$(printf '%s' "$_readers" | grep -c '/bin/dispatch\.sh:')" "1"
 
 echo
 if [ "$FAILS" -eq 0 ]; then

@@ -36,10 +36,14 @@
 #                  mechanical lookups and deep R&D, so the CALLER judges complexity
 #                  per task and passes --model explicitly when it's warranted (see
 #                  MIKE.md §Model routing for the 3-question heuristic).
-#   --thread ID    pin this job's Discord topic explicitly (highest precedence). Omit and
-#                  the topic is resolved by _ambient_thread: per-agent override → ambient
-#                  session topic → global last-active pointer. Use when a job legitimately
-#                  belongs to a topic other than the dispatching one.
+#   --thread NAME|ID  pin this job's Discord topic explicitly (highest precedence). NHẬN TÊN
+#                  trong kb/discord_channels.json (vd `--thread architecture`) hoặc ID trần.
+#                  TÊN SAI / không phân giải được ⇒ **HUỶ CẢ DISPATCH** (exit 1), không âm
+#                  thầm rơi về topic khác — caller đã nêu đích danh 1 topic thì không đoán
+#                  (2026-08-02). Bỏ cờ này ⇒ _ambient_thread: override theo agent → topic
+#                  phiên gọi → con trỏ toàn cục. Registry hỏng khi agent CÓ override ⇒ pin
+#                  RỖNG + alert Telegram + job VẪN CHẠY (không chặn việc vì lỗi định tuyến
+#                  thông báo). Pin rỗng ⇒ im lặng phía Discord, không bao giờ đoán topic.
 #   --effort LEVEL reasoning effort (low|medium|high|xhigh|max). Omit → 'medium'
 #                  (task thường lệ). Task phức tạp → --effort high. CHÍNH SÁCH user
 #                  (2026-07-14): model 'fable' bị chặn tối đa 'high' — truyền xhigh/max
@@ -111,7 +115,11 @@ while [ $# -gt 0 ]; do
     # safe for _agent_thread_override to outrank ambient DISCORD_THREAD_ID
     # (fix 2026-07-22, see the _ambient_thread comment).
     --thread) FORCE_TID="${2:?--thread needs a value}"; shift ;;
-    --thread=*) FORCE_TID="${1#*=}" ;;
+    # `--thread=` (rỗng) phải BÁO LỖI y như `--thread ""`, đừng âm thầm tụt về ambient —
+    # caller gõ `--thread=$MISSING_VAR` là đang NÊU ĐÍCH DANH 1 topic, không phải bỏ trống
+    # (arch-reviewer vòng cuối F6, 2026-08-02).
+    --thread=*) FORCE_TID="${1#*=}"
+                [ -n "$FORCE_TID" ] || { echo "ERROR: --thread= rỗng (biến chưa set?) — nêu tên topic hoặc bỏ hẳn cờ này." >&2; exit 1; } ;;
     --timeout) TIMEOUT="${2:?--timeout needs a value}"; shift ;;
     --timeout=*) TIMEOUT="${1#*=}" ;;
     --retries) RETRIES="${2:?--retries needs a value}"; shift ;;
@@ -439,8 +447,14 @@ _agent_thread_override() {
 # later becomes active in "vĩ mô" would report its completion into "vĩ mô" instead. Reading
 # the job's OWN persisted field removes this ambiguity regardless of the exact mechanism
 # that made a live/global source unreliable (env staleness, restart, concurrent topics, ...).
+# `|| true` KHÔNG PHẢI trang trí (sửa 2026-08-02, arch-reviewer vòng cuối, F2): mike_json.py
+# `job-field` EXIT 1 khi field RỖNG, mà `_bg_wrapper` bật lại `set -e` tường minh giữa chừng ⇒
+# mọi call site dạng `local _tid; _tid="$(_job_thread_id ...)"` GIẾT CẢ WRAPPER khi pin rỗng,
+# làm mất AUTO-CALLBACK báo kết quả/thất bại về agent đã gọi việc (đo được: pin rỗng ⇒ 1 job
+# record, pin có ⇒ 2). "Pin rỗng ⇒ im lặng phía Discord" chỉ đúng khi pin rỗng là GIÁ TRỊ hợp
+# lệ (chuỗi rỗng), không phải một lỗi làm sập luồng điều phối.
 _job_thread_id() {
-  python3 "$ROOT/bin/mike_json.py" job-field "$JOBS_DIR" "$1" discord_thread_id 2>/dev/null
+  python3 "$ROOT/bin/mike_json.py" job-field "$JOBS_DIR" "$1" discord_thread_id 2>/dev/null || true
 }
 
 # _ambient_thread <agent> — fallback topic when the job record carries no discord_thread_id
@@ -663,10 +677,20 @@ echo "JOB $job_id (from=$from, timeout=${TIMEOUT}s) → $ROOT/bin/jobs.sh status
 # notification for this job reads it back via _job_thread_id instead of re-deriving a
 # "current" topic later (see _job_thread_id comment for why that was the actual bug).
 _start_ts="$(date +%s)"
-# _ambient_thread trả về 1 KHI VÀ CHỈ KHI registry hỏng ⇒ ABORT, không dispatch mù.
+# _ambient_thread trả 1 KHI VÀ CHỈ KHI registry hỏng cho một agent CÓ override cố định.
+#
+# ĐÁNH ĐỔI, sửa 2026-08-02 sau arch-reviewer vòng cuối (F4) — bản trước ABORT ở đây, SAI:
+# `bq_freshness_check.sh` dispatch DollarBill (có override) KHÔNG kèm `--thread`, nên một
+# registry Discord hỏng sẽ chặn luôn job SINH PLAN T+1 ⇒ sáng hôm sau bot chạy không có plan.
+# Đó là đổi "user không thấy 1 tin nhắn" lấy "không có việc" — sai hướng với một sự cố thuần
+# định tuyến thông báo. Nay: pin RỖNG + alert Telegram + VẪN CHẠY. Vẫn KHÔNG tụt về ambient
+# (đó mới là cơ chế rò rỉ mà S2 sinh ra để diệt) — pin rỗng ⇒ im lặng phía Discord, an toàn
+# vì F2 đã được sửa (pin rỗng không còn giết _bg_wrapper).
+# ABORT chỉ còn giữ cho `--thread` tường minh ở ngay dưới: caller đã nêu đích danh 1 topic thì
+# không phân giải được phải dừng, không đoán.
 if ! _dtid0="${FORCE_TID:-$(_ambient_thread "$id")}"; then
-  echo "dispatch: HUỶ — registry Discord hỏng, không xác định được topic cho '$id'." >&2
-  exit 1
+  echo "dispatch: registry Discord hỏng cho override của '$id' — job VẪN CHẠY nhưng KHÔNG có topic Discord (không đoán). Đã cảnh báo qua Telegram." >&2
+  _dtid0=""
 fi
 # `--thread` chấp nhận TÊN trong kb/discord_channels.json (vd `--thread architecture`) ngoài
 # ID trần. Phân giải NGAY TẠI ĐÂY để job record + $DISCORD_THREAD_ID của tiến trình con luôn
