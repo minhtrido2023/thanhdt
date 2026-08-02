@@ -77,6 +77,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Sự cố | status |
 |---|---|---|
+| 2026-08-02 | [2026-08-02: saga "PE có look-ahead giá điều chỉnh" — phép nhân Price/Close sai sống 6 tuần trong rating_8l.py (từ 06-24), bị bác bỏ bằng kiểm định trong-kỳ-hằng-số rồi khôi phục; lần 2 fleet suy diễn nhầm từ 1 quan sát đúng vì test trên dữ liệu gần đây](2026-08/2026-08-02-pe-price-close-adjustment-saga.md) | fixed |
 | 2026-08-02 | [2026-08-02: user noticed "Mike seems to stop / not follow topics" — root cause is /api/notify silently dropping ~10 messages/3 days on oversized embeds, one bug fixed, one flagged unfixed](2026-08/2026-08-02-notify-api-silent-message-loss.md) | partially-fixed |
 | 2026-08-01 | [2026-08-01: MAX_TURNS missing from --bg export list — every background dispatch fleet-wide broken for ~1h10m, caught mid-research by Mike, root-caused via bash -x trace, fixed same-turn](2026-08/2026-08-01-dispatch-max-turns-export-missing-bg-broken.md) | fixed |
 | 2026-08-01 | [2026-08-01: ShellCheck pre-commit gate — đẩy bài học quoting sang công cụ, tìm+sửa thêm 1 bug thật thứ 4](2026-08/2026-08-01-shellcheck-precommit-gate.md) | fixed |
