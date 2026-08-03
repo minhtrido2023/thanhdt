@@ -119,6 +119,20 @@ def _dcf_check_for_order(ticker, price, asof):
                 "robust": False, "reason": f"dcf_error: {str(exc)[:80]}",
                 "conglomerate": _dcf_is_conglomerate(ticker), "as_of": str(asof)[:10]}
 
+def _dd_check_for_order(ticker, book, asof, est_value_vnd=None):
+    """dd_check dict cho 1 BUY order — wrapper fail-safe quanh due_diligence.dd_check_for_order.
+
+    Tách ra để (a) self-check monkeypatch được, (b) một sự cố bq_cache/BQ không bao giờ làm
+    hỏng việc dựng plan (trả None → order không có dd_check, y như trước khi có cơ chế này).
+    """
+    try:
+        from .due_diligence import dd_check_for_order
+        return dd_check_for_order(ticker, book, asof, est_value_vnd)
+    except Exception as exc:
+        _log.warning("DD check lỗi cho %s: %s", ticker, exc)
+        return None
+
+
 def _format_alt_lens(ticker):
     """Lăng kính định giá thay thế khi DCF NOT_COMPUTED. Fail-safe: import/lỗi → ""."""
     if not ticker:
@@ -406,9 +420,17 @@ class V23Strategy(StrategyBase):
                             f"⚠ DCF: {t} RICH & robust (MoS={dcf.get('margin_of_safety',0):.1%}) "
                             f"— ghi dcf_override_reason nếu vẫn mua"
                         )
+                    # Due-diligence cờ đỏ (2026-08-03, case DHD): cùng cơ chế WARN với DCF ngay
+                    # trên — thông tin, KHÔNG loại lệnh, KHÔNG đổi qty.
+                    dd = _dd_check_for_order(t, book, str(signal_date)[:10], qty * px)
+                    if dd and dd.get("has_red_flag"):
+                        notes.append(
+                            f"⚠ DD: {t} cờ đỏ [{', '.join(dd.get('red_flags') or [])}] "
+                            f"— ghi dd_override_reason nếu vẫn mua"
+                        )
                     orders.append(PlannedOrder(
                         id="", ticker=t, side="buy", qty=qty, ref_price=px,
-                        book=book, play_type=play, dcf_check=dcf))
+                        book=book, play_type=play, dcf_check=dcf, dd_check=dd))
             else:
                 qty = min(round_lot(-diff), sellable)
                 if qty >= LOT:

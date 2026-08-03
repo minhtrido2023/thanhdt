@@ -215,17 +215,19 @@ def _fmt_vnd(x):
 
 
 def _liquidity_part(row, in_universe, universe_last, est_value_vnd, quality_flag=None):
+    """Trả (text, red_flags) — red_flags = list mã cờ ĐỎ (xem RED_FLAG_CODES)."""
     import pandas as pd
     v50 = row.get("Volume_3M_P50")
     px = row.get("Price") if pd.notna(row.get("Price")) else row.get("Close")
     adv = None
     if pd.notna(v50) and pd.notna(px):
         adv = float(v50) * float(px)
-    bits = []
+    bits, red = [], []
     if adv is None:
         bits.append("⚠ thanh khoản: n/a (thiếu Volume_3M_P50)")
     elif adv <= ADV_DEAD_VND:
         bits.append(f"🔴 thanh khoản ~0 (ADV3T {_fmt_vnd(adv)}/phiên) — NGOÀI mô hình backtest")
+        red.append("THANH_KHOAN_CHET")
     elif adv < ADV_THIN_VND:
         bits.append(f"⚠ thanh khoản mỏng (ADV3T {_fmt_vnd(adv)}/phiên < sàn {ADV_THIN_VND/1e9:.0f} tỷ)")
     else:
@@ -235,33 +237,38 @@ def _liquidity_part(row, in_universe, universe_last, est_value_vnd, quality_flag
         bits.append(f"⚠ {src}: n/a (không đọc được)")
     elif not in_universe:
         bits.append(f"🔴 NGOÀI {src}" + (f" (lần cuối {universe_last})" if universe_last else ""))
+        red.append("NGOAI_UNIVERSE")
     elif quality_flag and quality_flag != "QUALITY_OK":
         # Q-C: cờ THUẦN THÔNG TIN cho due-diligence, KHÔNG chặn gì (§3.2b, user chốt 2026-07-22)
         bits.append(f"⚠ cờ chất lượng {quality_flag}")
     if est_value_vnd and adv:
         pct = est_value_vnd / adv
         mark = "🔴" if pct > ORDER_ADV_HARD else ("⚠" if pct > ORDER_ADV_WARN else "")
+        if pct > ORDER_ADV_HARD:
+            red.append("LENH_QUA_LON_VS_ADV")
         bits.append(f"{mark} lệnh dự kiến {_fmt_vnd(est_value_vnd)} = {pct*100:.0f}% ADV".strip())
-    return " · ".join(bits)
+    return " · ".join(bits), red
 
 
 def _pead_part(row):
     """Tính CƠ HỌC của surprise PEAD: nền YoY (NP_P4) âm hay có quý lỗ trong 4 quý nền
-    → % surprise phồng lên do mẫu số/nền âm, không phải cải thiện thật."""
+    → % surprise phồng lên do mẫu số/nền âm, không phải cải thiện thật.
+
+    Trả (text, red_flags) — cùng convention với _liquidity_part."""
     import pandas as pd
     np0 = row.get("NP_P0")
     base = [row.get(f"NP_P{i}") for i in (1, 2, 3, 4)]
     if pd.isna(np0) or all(pd.isna(b) for b in base):
-        return "surprise: n/a (thiếu NP_P0..P4)"
+        return "surprise: n/a (thiếu NP_P0..P4)", []
     np4 = row.get("NP_P4")
     neg_q = [f"P{i}" for i in (1, 2, 3, 4)
              if pd.notna(row.get(f"NP_P{i}")) and float(row.get(f"NP_P{i}")) <= 0]
     if pd.notna(np4) and float(np4) <= 0:
         return ("🔴 surprise PHỒNG CƠ HỌC: nền YoY NP_P4 ≤ 0 "
-                f"({float(np4)/1e9:,.1f} tỷ) — %YoY vô nghĩa")
+                f"({float(np4)/1e9:,.1f} tỷ) — %YoY vô nghĩa"), ["SURPRISE_PHONG_CO_HOC"]
     if neg_q:
-        return (f"⚠ có quý LỖ trong nền 4 quý ({','.join(neg_q)}) — surprise có thể do nền thấp")
-    return "nền YoY dương (surprise không phồng do nền âm)"
+        return (f"⚠ có quý LỖ trong nền 4 quý ({','.join(neg_q)}) — surprise có thể do nền thấp"), []
+    return "nền YoY dương (surprise không phồng do nền âm)", []
 
 
 def _fa_part(row):
@@ -275,6 +282,63 @@ def _fa_part(row):
             f"FSCORE {g('FSCORE', dec=0)} · D/E {g('Debt_Eq_P0')} · PE {g('PE')}")
 
 
+# ---------------------------------------------------------------------------------------
+# Cờ ĐỎ cơ học (2026-08-03, sau case DHD) — bước XÁC NHẬN ĐÃ ĐỌC, KHÔNG phải hard-gate.
+#
+# VÌ SAO CÓ: mandate 07-21 sinh ra lớp DD thuần thông tin, nhưng không ai BUỘC phải đọc/quyết
+# định trước khi mua → thực tế bị bỏ qua (DHD 08-03: ADV3T ~58,7tr/phiên + NGOÀI universe_pit,
+# hai dòng 🔴 hiện đủ trong report mà vẫn lọt vào plan). Cơ chế bắt buộc dùng lại ĐÚNG pattern
+# dcf_override_reason (Pha 2 DCF, 2026-07-14): có cờ đỏ + side=buy mà thiếu `dd_override_reason`
+# → hiện ⚠ ở mọi kênh + bus event audit-trail khi khớp lệnh thật. KHÔNG chặn lệnh (mandate gốc
+# "THUẦN THÔNG TIN — KHÔNG chặn lệnh" của file này giữ nguyên, user KHÔNG yêu cầu đảo ngược).
+#
+# Cờ được sinh TẠI CHỖ tính (mỗi nhánh 🔴 trong _liquidity_part/_pead_part trả kèm mã cờ), KHÔNG
+# grep emoji ở tầng trên — đổi câu chữ hiển thị không được làm vỡ cơ chế phát hiện.
+#
+# KHÔNG nằm trong danh sách này (có chủ ý):
+#   · DCF RICH+robust → đã có `dcf_override_reason` riêng, không hỏi người 2 lần cùng 1 việc.
+#   · Các cảnh báo ⚠ (thanh khoản mỏng <2 tỷ, cờ chất lượng Q-C, quý lỗ trong nền, anomaly tier)
+#     → mức CÂN NHẮC, không phải mức "phải viết lý do"; giữ ngưỡng ⚠/🔴 sẵn có, không đẻ ngưỡng mới.
+RED_FLAG_CODES = {
+    "THANH_KHOAN_CHET":      f"ADV3T ≤ {ADV_DEAD_VND/1e6:.0f}tr/phiên — ngoài mô hình backtest",
+    "NGOAI_UNIVERSE":        "không nằm trong universe (universe_pit/ticker_prune)",
+    "LENH_QUA_LON_VS_ADV":   f"lệnh dự kiến > {ORDER_ADV_HARD:.0%} ADV — impact/không khớp nổi",
+    "SURPRISE_PHONG_CO_HOC": "nền YoY NP_P4 ≤ 0 → %surprise PEAD vô nghĩa",
+    "DD_KHONG_CHAY_DUOC":    "không chạy được due-diligence (thiếu dữ liệu/lỗi đọc) — mua mù",
+}
+
+
+def format_dd_check(dd, side="buy", has_override=False):
+    """1 dòng hiển thị chuẩn cho dd_check dict — analog format_dcf_check(). Informational.
+
+    Trả "" khi không có cờ đỏ (hoặc side != buy) — caller bỏ dòng, không hiện gì."""
+    if not dd or not isinstance(dd, dict) or not dd.get("has_red_flag"):
+        return ""
+    if str(side).lower() != "buy":
+        return ""
+    flags = ", ".join(dd.get("red_flags") or [])
+    out = f"🔴 DD cờ đỏ: {flags}"
+    return out + (" ⚠" if has_override else " ⚠ cần dd_override_reason")
+
+
+def dd_check_for_order(ticker, book=None, asof=None, est_value_vnd=None):
+    """dict gọn để GẮN VÀO PlannedOrder.dd_check — analog _dcf_check_for_order().
+
+    Cố ý KHÔNG chứa text dài (plan JSON đọc bằng mắt): chỉ cờ + bằng chứng 1 dòng thanh khoản.
+    skip_dcf=True — trục định giá đã có dcf_check riêng. KHÔNG BAO GIỜ raise."""
+    ctx = {"asof": asof or dt.date.today(), "skip_dcf": True}
+    if est_value_vnd:
+        ctx["est_value_vnd"] = est_value_vnd
+    d = run_due_diligence(ticker, book, ctx, as_dict=True)
+    if not isinstance(d, dict):
+        return None
+    return {"has_red_flag": bool(d.get("has_red_flag")),
+            "red_flags": list(d.get("red_flags") or []),
+            "as_of": d.get("as_of"), "data_date": d.get("data_date"),
+            "universe_source": d.get("universe_source"),
+            "evidence": str(d.get("liquidity") or d.get("error") or "")[:200]}
+
+
 def run_due_diligence(ticker, book=None, context=None, as_dict=False):
     """Due-diligence tổng hợp cho 1 ứng cử viên mua. Trả 1-3 dòng text (informational).
 
@@ -282,26 +346,38 @@ def run_due_diligence(ticker, book=None, context=None, as_dict=False):
     book    : "BAL"/"LAG"/"CAPIT"/"DC"/"PARK"/... — chỉ dùng để chọn trục cần soi
               (trục PEAD chỉ có nghĩa với LAG/PEAD) + hiển thị.
     context : dict tuỳ chọn — {"asof": date, "price": float, "est_value_vnd": float,
-              "dcf": dcf_check dict đã tính sẵn, "skip_dcf": True}.
-    as_dict : True → trả dict các trục thay vì text (cho caller muốn tự render).
+              "dcf": dcf_check dict đã tính sẵn, "skip_dcf": True,
+              "side": "buy"|"sell", "dd_override_reason": str}.
+              side/dd_override_reason CHỈ đổi dòng ⚠ cuối (mirror format_dcf_check(has_override)),
+              không đổi nội dung phân tích.
+    as_dict : True → trả dict các trục thay vì text (cho caller muốn tự render);
+              luôn kèm "red_flags" (list) + "has_red_flag" (bool).
 
     KHÔNG BAO GIỜ raise.
     """
     ctx = context or {}
     asof = str(ctx.get("asof") or dt.date.today())[:10]
     prefix = f"DD {ticker}" + (f" [{book}]" if book else "")
+    is_buy = str(ctx.get("side", "buy")).lower() in ("buy", "mua", "b")
+    has_override = bool(ctx.get("dd_override_reason") or ctx.get("has_override"))
     try:
         row = _latest_row(ticker, asof)
         if row is None:
             out = {"ticker": ticker, "book": book, "as_of": asof,
-                   "error": "không có dữ liệu trong bq_cache/ticker"}
-            return out if as_dict else f"{prefix}: ⚠ DD n/a — không thấy mã trong bq_cache/ticker"
+                   "error": "không có dữ liệu trong bq_cache/ticker",
+                   "red_flags": ["DD_KHONG_CHAY_DUOC"], "has_red_flag": True}
+            if as_dict:
+                return out
+            msg = f"{prefix}: ⚠ DD n/a — không thấy mã trong bq_cache/ticker"
+            warn = format_dd_check(out, "buy" if is_buy else "sell", has_override)
+            return msg + (f"\n    {warn}" if warn else "")
 
         in_universe, universe_last, quality_flag = _in_universe(ticker, asof)
         est_val = ctx.get("est_value_vnd")
+        liq_s, red = _liquidity_part(row, in_universe, universe_last, est_val, quality_flag)
         parts = {
             "data_date": str(row.get("time"))[:10],
-            "liquidity": _liquidity_part(row, in_universe, universe_last, est_val, quality_flag),
+            "liquidity": liq_s,
             "in_universe": in_universe,
             "universe_source": UNIVERSE_SOURCE,
             "quality_flag": quality_flag,
@@ -309,7 +385,10 @@ def run_due_diligence(ticker, book=None, context=None, as_dict=False):
             "anomaly": _anomaly_note(ticker, asof),
         }
         if str(book or "").upper() in ("LAG", "PEAD"):
-            parts["signal_mechanics"] = _pead_part(row)
+            parts["signal_mechanics"], _pead_red = _pead_part(row)
+            red += _pead_red
+        parts["red_flags"] = red
+        parts["has_red_flag"] = bool(red)
 
         # ---- valuation: gọi lại lăng kính DCF/sector sẵn có, không viết lại ----
         dcf_s = ""
@@ -341,14 +420,24 @@ def run_due_diligence(ticker, book=None, context=None, as_dict=False):
                  f"    {parts['fundamentals']}"]
         if dcf_s:
             lines.append(f"    {dcf_s}")
+        warn = format_dd_check(parts, "buy" if is_buy else "sell", has_override)
+        if warn:
+            lines.append(f"    {warn}")
         return "\n".join(lines)
 
     except Exception as exc:
         _log.warning("run_due_diligence lỗi (%s): %s", ticker, exc)
+        out = {"ticker": ticker, "book": book, "error": str(exc)[:200],
+               "red_flags": ["DD_KHONG_CHAY_DUOC"], "has_red_flag": True}
+        if as_dict:
+            return out
         msg = f"{prefix}: ⚠ DD n/a ({str(exc)[:80]})"
-        return {"ticker": ticker, "book": book, "error": str(exc)[:200]} if as_dict else msg
+        warn = format_dd_check(out, "buy" if is_buy else "sell", has_override)
+        return msg + (f"\n    {warn}" if warn else "")
 
 
 DD_DISCLAIMER = ("Due-diligence tự động = LỚP THÔNG TIN (thanh khoản/universe/cơ học tín hiệu/"
                  "cờ bất thường/FA thô/định giá). KHÔNG phải gate chặn lệnh; số từ bq_cache "
-                 "local (trễ tối đa 1 phiên), không dùng làm giá tham chiếu.")
+                 "local (trễ tối đa 1 phiên), không dùng làm giá tham chiếu. "
+                 "Có 🔴 cờ đỏ mà vẫn mua → PHẢI ghi `dd_override_reason` trong plan (thiếu = WARN, "
+                 "vẫn thực thi).")

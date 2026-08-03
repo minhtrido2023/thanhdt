@@ -30,6 +30,12 @@ class PlannedOrder:
     dcf_check: dict = dataclasses.field(default=None)
     # BẮT BUỘC ghi khi dcf_check.status=RICH AND robust=true AND side=buy; nếu trống → WARN.
     dcf_override_reason: str = ""
+    # Due-diligence (mandate 2026-07-21; bước xác nhận thêm 2026-08-03 sau case DHD):
+    # informational, KHÔNG block lệnh — mirror ĐÚNG pattern dcf_check ngay trên.
+    # {"has_red_flag":<bool>,"red_flags":[...],"as_of":"YYYY-MM-DD","data_date":"...","evidence":"..."}
+    dd_check: dict = dataclasses.field(default=None)
+    # BẮT BUỘC ghi khi dd_check.has_red_flag=true AND side=buy; nếu trống → WARN.
+    dd_override_reason: str = ""
     # cash_only=True → executor chọn gói vay HỢP LỆ RIÊNG cho mã (query loan-packages
     # theo symbol) thay vì gói default account. Cần cho book DISCRETIONARY_SPECIAL trên
     # mã (vd TV1/UPCOM) mà gói 1841 mainboard của SpaceX KHÔNG hợp lệ → DNSE reject
@@ -244,6 +250,8 @@ def net_offsetting_orders(plan):
             note=note,
             dcf_check=(lead.dcf_check if side == "buy" else None),
             dcf_override_reason=(lead.dcf_override_reason if side == "buy" else ""),
+            dd_check=(lead.dd_check if side == "buy" else None),
+            dd_override_reason=(lead.dd_override_reason if side == "buy" else ""),
         )
         new_orders.append(net_order)
         rec["action"] = "NETTED"

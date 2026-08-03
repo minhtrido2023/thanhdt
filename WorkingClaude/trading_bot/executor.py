@@ -548,6 +548,18 @@ class Executor:
                                 "dcf_check": _dcf,
                                 "dcf_override_reason": o.dcf_override_reason or None,
                             })
+                        # Audit-trail bus event khi mua mã có cờ ĐỎ due-diligence (2026-08-03,
+                        # case DHD). Chỉ log — không chặn, không thay đổi execution logic; ĐÚNG
+                        # cơ chế dcf-rich-fill ngay trên (kể cả khi ĐÃ có override, để đối chiếu
+                        # sau: mã nào bị override, lý do gì, kết quả ra sao).
+                        _dd = o.dd_check
+                        if o.side == "buy" and _dd and _dd.get("has_red_flag") is True:
+                            _publish_bot_event("finding", "dd-redflag-fill", {
+                                "ticker": o.ticker, "order_id": o.id,
+                                "filled_delta": delta, "child_oid": c["oid"],
+                                "dd_check": _dd,
+                                "dd_override_reason": o.dd_override_reason or None,
+                            })
                     if c["status"] == "open" and u.is_dead:
                         c["status"] = "closed"
                         self._release_child(o.ticker, c)
