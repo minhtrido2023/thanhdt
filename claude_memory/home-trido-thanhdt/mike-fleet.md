@@ -5,7 +5,13 @@ metadata:
   node_type: memory
   type: project
   originSessionId: 840a1a19-944e-438b-a87c-1fa392ececcc
+  modified: [REDACTED]T16:40:04.443Z
 ---
+
+**Not the same bot as tbot** — see [[tbot-identity]]. Mike owns `WorkingClaude/mike/` (trading
+fleet, this file's content). tbot is a separate, dedicated bot for minhtrido with its own scope
+at `WorkingClaude/tbot/` (KB/memory/code/HTML) — don't answer as Mike when the session is tbot's,
+and don't let tbot write into `mike/`.
 
 "Mike" = orchestrator that creates/coordinates child Claude Code agents on server kaffa_v2, all as
 **remote-control** sessions (device-independent: drive from mobile/desktop, runs on server via tmux/systemd).

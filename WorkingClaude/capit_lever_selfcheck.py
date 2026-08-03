@@ -46,7 +46,8 @@ sys.path.insert(0, HERE)
 
 from trading_bot.brokers import OrderUpdate, PaperBroker, DNSEBroker  # noqa: E402
 import trading_bot.plan as _planmod  # noqa: E402
-from trading_bot.plan import PlannedOrder, TradePlan, apply_capit_lever  # noqa: E402
+from trading_bot.plan import (PlannedOrder, TradePlan, apply_capit_lever,  # noqa: E402
+                             margin_day_approval, lever_live_preflight)
 from trading_bot.executor import Executor  # noqa: E402
 from trading_bot.config import load_config, EXEC_DIR  # noqa: E402
 
@@ -59,6 +60,24 @@ REAL_RULES = os.path.join(HERE, "data", "trading_rules.json")
 TAG = "selfcheck-lever"
 for _f in glob.glob(os.path.join(EXEC_DIR, f"exec_{TAG}_*")):
     os.remove(_f)
+
+# NGUỒN `state` ĐỘC LẬP DÙNG CHO TEST — KHÔNG đọc file production.
+# `_verify_targets_integrity` neo trần `capit_size`/`w_lag_target` theo `state` và chốt state
+# đó bằng nguồn thứ hai (`deploy_golive_dt5g_v4/golive_state_today.json`). Nếu test đọc file
+# THẬT thì mọi ca kiểm sẽ đổi kết quả theo regime của hôm chạy — đúng loại phụ thuộc môi
+# trường mà skill verify-before-done bắt phải khai và loại bỏ. Fixture ghim state 3 (NEUTRAL,
+# trần capit_size 0,75) nên các ca C* có nghĩa cố định mọi ngày.
+_STATE_FIX = os.path.join(EXEC_DIR, f"{TAG}_state_today.json")
+with open(_STATE_FIX, "w", encoding="utf-8") as _f:
+    json.dump({"state": 3, "as_of": "2099-01-01", "source": "selfcheck-fixture"}, _f)
+
+_apply_real = apply_capit_lever
+
+
+def apply_capit_lever(*a, **kw):        # noqa: F811 — bọc để mọi ca kiểm dùng state fixture
+    kw.setdefault("state_path", _STATE_FIX)
+    return _apply_real(*a, **kw)
+
 
 fails = []
 
@@ -176,9 +195,17 @@ def run_block(rules_dir, *, dd52, signal, size, basket, targets):
 
 
 def base_targets():
-    return {"SpaceX": {"nav_book_lag_vnd": 500_000_000, "capit_total_target_vnd": 250_000_000,
+    """Fixture phải mang ĐỦ BA THỪA SỐ mà golive công bố (nav_basis × w_lag × capit_size), vì
+    `_verify_targets_integrity` (2026-08-03, đóng khe C29b) đối chiếu chính ba đẳng thức đó.
+    Số ở đây khớp nhau đúng như production: 1,0 tỷ × 0,50 = 500tr book → × 0,50 = 250tr tổng
+    → / 5 slot = 50tr/slot."""
+    return {"SpaceX": {"nav_basis_vnd": 1_000_000_000, "w_lag_target": 0.50,
+                       "capit_size": 0.50,
+                       "nav_book_lag_vnd": 500_000_000, "capit_total_target_vnd": 250_000_000,
                        "capit_slot_target_vnd": 50_000_000, "n_slots": 5},
-            "ZaloPay": {"nav_book_lag_vnd": 200_000_000, "capit_total_target_vnd": 100_000_000,
+            "ZaloPay": {"nav_basis_vnd": 400_000_000, "w_lag_target": 0.50,
+                        "capit_size": 0.50,
+                        "nav_book_lag_vnd": 200_000_000, "capit_total_target_vnd": 100_000_000,
                         "capit_slot_target_vnd": 20_000_000, "n_slots": 5}}
 
 
@@ -354,7 +381,7 @@ with tempfile.TemporaryDirectory() as TMP:
     ADV_CAPS5 = {"SpaceX": {t: 10 ** 12 for t in BASKET5}}
     for p, blob in ((ART_ON, lev_on), (ART_OFF, lev_off)):
         with open(p, "w", encoding="utf-8") as f:
-            json.dump({"signal_date": "2099-01-01", "capit_lever": blob,
+            json.dump({"signal_date": "2099-01-01", "state": 3, "capit_lever": blob,
                        "capit_adv_caps": ADV_CAPS5,
                        "capit_slot_targets": tgt_on_art}, f, ensure_ascii=False)
 
@@ -366,6 +393,39 @@ with tempfile.TemporaryDirectory() as TMP:
     RULES_ON = os.path.join(_rules_dir(TMP, "c_pol_on"), "data", "trading_rules.json")
     RULES_OFF = os.path.join(_rules_dir(TMP, "c_pol_off", enabled=False),
                              "data", "trading_rules.json")
+
+    # CỔNG DUYỆT RIÊNG TỪNG NGÀY CÓ VAY (user chốt 2026-08-03) là cổng NGƯỜI thứ hai, độc lập
+    # với công tắc tổng. Nhóm C/F kiểm logic ARTIFACT/ENVELOPE, nên phải trỏ nó vào một bản
+    # ghi duyệt HỢP LỆ ở tmpdir — cùng lý lẽ RULES_ON ở ngay trên: nếu không, mọi ca "được
+    # cấp" sẽ đỏ vì thiếu duyệt chứ không vì điều đang được kiểm ("PASS/FAIL vì lý do SAI").
+    # CHÍNH cổng duyệt được kiểm RIÊNG ở nhóm I, ở đó gọi thẳng `_apply_raw` KHÔNG qua wrapper.
+    APPROVALS_OK = os.path.join(TMP, "approvals_ok")
+    os.makedirs(APPROVALS_OK, exist_ok=True)
+
+    def write_approval(d, account="SpaceX", plan_date="2099-01-02", **over):
+        rec = {"account": account, "plan_date": plan_date,
+               "approved_by": "user (selfcheck) — xác nhận trong hội thoại",
+               "approved_at": "2099-01-01T21:37:00+07:00",
+               "lever_f": _planmod.CAPIT_LEVER_APPROVED_F,
+               "loan_package_id": _planmod.CAPIT_LEVER_APPROVED_PACKAGE,
+               "max_lever_total_vnd": 10 ** 12,
+               "tickers": sorted(set(BASKET5) | {"FPT", "TRC", "HAG", "TV1"})}
+        rec.update(over)
+        os.makedirs(d, exist_ok=True)
+        p = os.path.join(d, f"margin_approval_{rec['account']}_{rec['plan_date']}.json")
+        with open(p, "w", encoding="utf-8") as fh:
+            json.dump(rec, fh, ensure_ascii=False)
+        return p
+
+    write_approval(APPROVALS_OK)
+    write_approval(APPROVALS_OK, account="ZaloPay")     # để C11 đỏ vì PHẠM VI, không vì duyệt
+
+    _apply_raw = apply_capit_lever
+
+    def apply_capit_lever(plan, account_label, status_path=None, rules_path=None, **kw):
+        kw.setdefault("approvals_dir", APPROVALS_OK)
+        return _apply_raw(plan, account_label, status_path=status_path,
+                          rules_path=rules_path, **kw)
 
     def mkplan(orders, account="SpaceX"):
         return TradePlan(plan_date="2099-01-02", signal_date="2099-01-01",
@@ -433,7 +493,7 @@ with tempfile.TemporaryDirectory() as TMP:
 
     stale = os.path.join(TMP, "status_stale.json")
     with open(stale, "w", encoding="utf-8") as f:
-        json.dump({"signal_date": "2098-12-25", "capit_lever": lev_on}, f, ensure_ascii=False)
+        json.dump({"signal_date": "2098-12-25", "state": 3, "capit_lever": lev_on}, f, ensure_ascii=False)
     plan = mkplan([o("B1", "SAB")])
     plan.orders[0].loan_package_id = 1840      # cờ có sẵn ⇒ ép nhánh GỠ phải thật sự chạy
     plan, adj = apply_capit_lever(plan, "SpaceX", status_path=stale, rules_path=RULES_ON)
@@ -482,14 +542,15 @@ with tempfile.TemporaryDirectory() as TMP:
 
     no_tgt = os.path.join(TMP, "status_notgt.json")
     with open(no_tgt, "w", encoding="utf-8") as f:
-        json.dump({"signal_date": "2099-01-01", "capit_lever": lev_on,
+        json.dump({"signal_date": "2099-01-01", "state": 3, "capit_lever": lev_on,
                    "capit_adv_caps": ADV_CAPS5}, f, ensure_ascii=False)
     plan = mkplan([o("B1", "SAB")])
     plan, adj = apply_capit_lever(plan, "SpaceX", status_path=no_tgt, rules_path=RULES_ON)
     check("C17 artifact BẬT nhưng THIẾU capit_slot_targets → fail-closed, không cấp "
-          "(không có trần thì không cho vay)",
+          "(không có trần thì không cho vay) VÀ để lại 1 dòng cho người đọc log — artifact "
+          "hỏng không được trông giống một ngày không có sự kiện CAPIT",
           plan.orders[0].loan_package_id is None
-          and adj and adj[0]["action"] == "DENIED", detail=str(adj))
+          and adj and adj[0]["action"] == "LEVER_REFUSED_ARTIFACT_ACTIVE", detail=str(adj))
 
     # M8: tên khoá của fixture phải khớp schema THẬT mà golive công bố — nếu §6 đổi tên
     # khoá, đây là chỗ vỡ, thay vì production âm thầm hết đòn bẩy còn test vẫn xanh.
@@ -551,7 +612,7 @@ with tempfile.TemporaryDirectory() as TMP:
     _t_notot = copy.deepcopy(tgt_on_art)
     _t_notot["SpaceX"].pop("capit_total_target_vnd_levered", None)
     with open(no_tot, "w", encoding="utf-8") as f:
-        json.dump({"signal_date": "2099-01-01", "capit_lever": lev_on,
+        json.dump({"signal_date": "2099-01-01", "state": 3, "capit_lever": lev_on,
                    "capit_adv_caps": {"SpaceX": {t: 10 ** 12 for t in BASKET5}},
                    "capit_slot_targets": _t_notot}, f, ensure_ascii=False)
     plan = mkplan([o("B1", "SAB")])
@@ -574,7 +635,7 @@ with tempfile.TemporaryDirectory() as TMP:
 
     no_bskt = os.path.join(TMP, "status_nobasket.json")
     with open(no_bskt, "w", encoding="utf-8") as f:
-        json.dump({"signal_date": "2099-01-01", "capit_lever": lev_on,
+        json.dump({"signal_date": "2099-01-01", "state": 3, "capit_lever": lev_on,
                    "capit_slot_targets": tgt_on_art}, f, ensure_ascii=False)
     plan = mkplan([o("B1", "SAB")])
     plan.orders[0].loan_package_id = 1840
@@ -598,7 +659,7 @@ with tempfile.TemporaryDirectory() as TMP:
     _t_blown["SpaceX"]["capit_slot_target_vnd_levered"] = 10 ** 10
     _t_blown["SpaceX"]["capit_total_target_vnd_levered"] = 10 ** 10
     with open(blown, "w", encoding="utf-8") as f:
-        json.dump({"signal_date": "2099-01-01", "capit_lever": lev_on,
+        json.dump({"signal_date": "2099-01-01", "state": 3, "capit_lever": lev_on,
                    "capit_adv_caps": ADV_CAPS5,
                    "capit_slot_targets": _t_blown}, f, ensure_ascii=False)
     big = o("B1", "SAB")
@@ -622,7 +683,7 @@ with tempfile.TemporaryDirectory() as TMP:
     _t_nobase = copy.deepcopy(tgt_on_art)
     _t_nobase["SpaceX"].pop("capit_total_target_vnd", None)
     with open(no_base, "w", encoding="utf-8") as f:
-        json.dump({"signal_date": "2099-01-01", "capit_lever": lev_on,
+        json.dump({"signal_date": "2099-01-01", "state": 3, "capit_lever": lev_on,
                    "capit_adv_caps": ADV_CAPS5,
                    "capit_slot_targets": _t_nobase}, f, ensure_ascii=False)
     plan = mkplan([o("B1", "SAB")])
@@ -630,20 +691,23 @@ with tempfile.TemporaryDirectory() as TMP:
     check("C28 artifact THIẾU trường GỐC `capit_total_target_vnd` → fail-closed (không có mốc "
           "độc lập nào để soi trần vay thì không cho vay, dù trường levered vẫn có)",
           plan.orders[0].loan_package_id is None
-          and adj and adj[0]["action"] == "DENIED" and "GỐC" in adj[0]["reason"],
-          detail=(adj[0]["reason"][:100] if adj else "(không có adj)"))
+          and adj and "capit_total_target_vnd" in adj[0]["reason"],
+          detail=(adj[0]["reason"][:110] if adj else "(không có adj)"))
+    # Từ 2026-08-03 ca này bị `_verify_targets_integrity` bắt SỚM HƠN (trường gốc cũng là một
+    # thừa số phải tự kiểm) nên `action` là cảnh báo cấp-plan chứ không còn là DENIED per-order.
+    # Cả hai đều fail-closed; ghi rõ ở đây để lần sau không ai đọc nhầm là nới lỏng.
+    check("C28b …và lý do nói thẳng THIẾU THỪA SỐ nào, không im lặng bỏ qua",
+          any("thiếu thừa số" in x["reason"] for x in adj),
+          detail=str([x["action"] for x in adj]))
 
-    # GIỚI HẠN CÒN LẠI, ĐƯỢC GHI NHẬN CÓ CHỦ ĐÍCH (quant-skeptic 2026-08-03, verify_20260803_143700):
-    # mốc neo dùng TRƯỜNG GỐC của chính artifact, nên nó chỉ chặn được ca sửa MỘT trường
-    # (thổi `_levered`, để `_gốc` trung thực) — đúng ca arch-reviewer probe hỏng. Một lần sửa
-    # ĐỒNG BỘ CẢ HAI trường (gốc ×3, levered = gốc ×3 ×1,3) vẫn qua được cổng envelope lẫn
-    # cổng neo, vì mọi tỷ lệ đều đúng. Cross-check duy nhất trên trường GỐC hiện nay là cổng
-    # WARN 07-21 ở send_plan_report.sh, chạy lúc DUYỆT PLAN (~21:00) chứ không phải lúc THỰC
-    # THI (~09:05 hôm sau) ⇒ còn khe ~12h.
-    # KIỂM Ở ĐÂY ĐỂ NÓ LÀ MỘT RANH GIỚI ĐÃ BIẾT VÀ CÓ TEST, không phải một giả định êm ái:
-    # nếu ai đó về sau đóng được khe này thì test này sẽ FAIL và buộc phải đọc lại đoạn văn
-    # trên. Đây là lý do `capit_margin_lever.known_limits` liệt kê nó như ĐIỀU KIỆN TIÊN
-    # QUYẾT phải xử lý TRƯỚC khi `enabled=true` (tính năng đang TẮT nên rủi ro chưa hiện thực).
+    # KHE ĐÃ ĐÓNG 2026-08-03 (job Taylor_20260803_154258) — ca này TRƯỚC ĐÂY pin hành vi "khe
+    # còn mở": mốc neo dùng TRƯỜNG GỐC của chính artifact nên chỉ chặn ca sửa MỘT trường; sửa
+    # ĐỒNG BỘ cả hai (gốc ×3, levered = gốc ×3 ×1,3) thì mọi tỷ lệ vẫn đúng ⇒ qua sạch
+    # (quant-skeptic verify_20260803_143700 thu hẹp tuyên bố đúng như vậy).
+    # Đóng bằng `_verify_targets_integrity`: golive công bố CẢ BA THỪA SỐ sinh ra mục tiêu, nên
+    # `capit_total_target_vnd` phải giải thích được bằng `nav_basis_vnd × w_lag_target ×
+    # capit_size`. Sửa gốc ×3 mà không sửa thừa số ⇒ đẳng thức vỡ. Sửa cả thừa số ⇒ rơi vào
+    # trần cơ học (w_lag/capit_size) hoặc vào neo NAV SỐNG đo ở tầng broker (nhóm J).
     both = os.path.join(TMP, "status_bothfields.json")
     _t_both = copy.deepcopy(tgt_on_art)
     _t_both["SpaceX"]["capit_slot_target_vnd"] = 150_000_000          # gốc ×3
@@ -651,18 +715,159 @@ with tempfile.TemporaryDirectory() as TMP:
     _t_both["SpaceX"]["capit_total_target_vnd"] = 750_000_000
     _t_both["SpaceX"]["capit_total_target_vnd_levered"] = 975_000_000
     with open(both, "w", encoding="utf-8") as f:
-        json.dump({"signal_date": "2099-01-01", "capit_lever": lev_on,
+        json.dump({"signal_date": "2099-01-01", "state": 3, "capit_lever": lev_on,
                    "capit_adv_caps": ADV_CAPS5,
                    "capit_slot_targets": _t_both}, f, ensure_ascii=False)
     infl = o("B1", "SAB")
     infl.qty, infl.ref_price = 9_750, 20_000                          # 195tr = trần đã thổi
     plan = mkplan([infl])
     plan, adj = apply_capit_lever(plan, "SpaceX", status_path=both, rules_path=RULES_ON)
-    check("C29b GIỚI HẠN ĐÃ BIẾT: sửa ĐỒNG BỘ cả trường gốc lẫn levered (mọi tỷ lệ vẫn đúng) "
-          "VẪN qua được — mốc neo là kiểm soát PHÁT HIỆN, không phải kiểm soát NGĂN CHẶN. "
-          "Phải đóng bằng integrity-check artifact lúc thực thi TRƯỚC khi enabled=true",
+    check("C29b sửa ĐỒNG BỘ cả trường gốc lẫn levered (mọi tỷ lệ vẫn đúng) → BỊ CHẶN bởi kiểm "
+          "nhất quán nội tại (tổng ≠ nav_basis × w_lag × capit_size) — khe hai-trường ĐÃ ĐÓNG",
+          plan.orders[0].loan_package_id is None
+          and any("TỰ MÂU THUẪN" in x["reason"] for x in adj),
+          detail=(adj[0]["reason"][:130] if adj else "(không có adj)"))
+
+    # Bước tiếp theo của CÙNG kẻ tấn công: sửa luôn thừa số cho ba đẳng thức khớp lại. Hai ca
+    # dưới đây là hai lối duy nhất còn lại, và cả hai đều đụng trần CƠ HỌC ghim trong code.
+    for _name, _over, _kw in (
+            ("w_lag_target ×3 (1,50)", {"w_lag_target": 1.50}, "w_lag_target"),
+            ("capit_size ×3 (1,50)", {"capit_size": 1.50}, "capit_size")):
+        _t_fac = copy.deepcopy(tgt_on_art)
+        _t_fac["SpaceX"].update(_over)
+        _t_fac["SpaceX"]["nav_book_lag_vnd"] = (_t_fac["SpaceX"]["nav_basis_vnd"]
+                                                * _t_fac["SpaceX"]["w_lag_target"])
+        _t_fac["SpaceX"]["capit_total_target_vnd"] = (_t_fac["SpaceX"]["nav_book_lag_vnd"]
+                                                      * _t_fac["SpaceX"]["capit_size"])
+        _t_fac["SpaceX"]["capit_slot_target_vnd"] = (_t_fac["SpaceX"]["capit_total_target_vnd"]
+                                                     / _t_fac["SpaceX"]["n_slots"])
+        _t_fac["SpaceX"]["capit_slot_target_vnd_levered"] = \
+            _t_fac["SpaceX"]["capit_slot_target_vnd"] * 1.3
+        _t_fac["SpaceX"]["capit_total_target_vnd_levered"] = \
+            _t_fac["SpaceX"]["capit_total_target_vnd"] * 1.3
+        _p = os.path.join(TMP, f"status_fac_{_kw}.json")
+        with open(_p, "w", encoding="utf-8") as f:
+            json.dump({"signal_date": "2099-01-01", "state": 3, "capit_lever": lev_on,
+                       "capit_adv_caps": ADV_CAPS5, "capit_slot_targets": _t_fac},
+                      f, ensure_ascii=False)
+        _big = o("B1", "SAB")
+        _big.qty, _big.ref_price = 9_750, 20_000
+        plan = mkplan([_big])
+        plan, adj = apply_capit_lever(plan, "SpaceX", status_path=_p, rules_path=RULES_ON)
+        check(f"C29c[{_name}] sửa THỪA SỐ cho ba đẳng thức khớp lại → vẫn bị TRẦN NEO THEO "
+              f"STATE chặn (thừa số vượt bảng sizing của chính state phiên đó)",
+              plan.orders[0].loan_package_id is None
+              and any(_kw in x["reason"] and "ngoài biên của state" in x["reason"] for x in adj),
+              detail=(adj[0]["reason"][:120] if adj else "(không có adj)"))
+
+    # Lối cuối: giữ w_lag/capit_size hợp lệ, thổi `nav_basis_vnd` ×3 (ba đẳng thức vẫn khớp,
+    # trần cơ học không đụng tới). Đó là ca mà CHỈ neo NAV sống bắt được → nhóm J. Ở tầng
+    # offline, ca này ĐI QUA có chủ đích; ghim lại để ranh giới giữa hai tầng luôn tường minh.
+    _t_nav = copy.deepcopy(tgt_on_art)
+    for _k in ("nav_basis_vnd", "nav_book_lag_vnd", "capit_total_target_vnd",
+               "capit_slot_target_vnd", "capit_total_target_vnd_levered",
+               "capit_slot_target_vnd_levered"):
+        _t_nav["SpaceX"][_k] = _t_nav["SpaceX"][_k] * 3
+    NAV_INFLATED_ART = os.path.join(TMP, "status_navx3.json")
+    with open(NAV_INFLATED_ART, "w", encoding="utf-8") as f:
+        json.dump({"signal_date": "2099-01-01", "state": 3, "capit_lever": lev_on,
+                   "capit_adv_caps": ADV_CAPS5, "capit_slot_targets": _t_nav},
+                  f, ensure_ascii=False)
+    _b3 = o("B1", "SAB")
+    _b3.qty, _b3.ref_price = 9_750, 20_000                            # 195tr = trần đã thổi ×3
+    plan = mkplan([_b3])
+    plan, adj = apply_capit_lever(plan, "SpaceX", status_path=NAV_INFLATED_ART,
+                                  rules_path=RULES_ON)
+    check("C29d thổi ĐỒNG BỘ cả nav_basis_vnd (ba đẳng thức vẫn khớp) → tầng OFFLINE cho qua "
+          "ĐÚNG NHƯ THIẾT KẾ; ca này thuộc về neo NAV SỐNG ở nhóm J, không phải chỗ này",
           plan.orders[0].loan_package_id == 1840,
-          detail="đây là hành vi ĐANG CÓ, được ghim lại để không ai tưởng khe này đã đóng")
+          detail="ranh giới hai tầng — J6 chứng minh nó bị chặn ở tầng broker sống")
+
+    # ── C30: TRẦN NEO THEO STATE (arch-reviewer vòng 3 #2 — ca thật nó đo được) ──────────
+    # Tấn công KHÔNG đụng `nav_basis_vnd` (nên neo NAV sống ở nhóm J MÙ hoàn toàn) và KHÔNG
+    # vượt trần phẳng cũ: chỉ sửa `capit_size` từ 0,375 (NEUTRAL thường lệ = capit_base 0,75
+    # × grind 0,5) lên 1,0 — đúng giá trị hợp lệ ở CRISIS. Trần phẳng `≤1,0` cho lọt 2,67×
+    # mục tiêu. Trần neo theo state chặn vì state phiên là 3 ⇒ capit_size ≤ capit_base(3)=0,75.
+    _t_st = copy.deepcopy(tgt_on_art)
+    _t_st["SpaceX"]["capit_size"] = 1.0
+    _t_st["SpaceX"]["capit_total_target_vnd"] = (_t_st["SpaceX"]["nav_book_lag_vnd"] * 1.0)
+    _t_st["SpaceX"]["capit_slot_target_vnd"] = (_t_st["SpaceX"]["capit_total_target_vnd"]
+                                                / _t_st["SpaceX"]["n_slots"])
+    _t_st["SpaceX"]["capit_slot_target_vnd_levered"] = \
+        _t_st["SpaceX"]["capit_slot_target_vnd"] * 1.3
+    _t_st["SpaceX"]["capit_total_target_vnd_levered"] = \
+        _t_st["SpaceX"]["capit_total_target_vnd"] * 1.3
+    _p_st = os.path.join(TMP, "status_state_size.json")
+    with open(_p_st, "w", encoding="utf-8") as f:
+        json.dump({"signal_date": "2099-01-01", "state": 3, "capit_lever": lev_on,
+                   "capit_adv_caps": ADV_CAPS5, "capit_slot_targets": _t_st},
+                  f, ensure_ascii=False)
+    plan = mkplan([o("B1", "SAB")])
+    plan, adj = apply_capit_lever(plan, "SpaceX", status_path=_p_st, rules_path=RULES_ON)
+    check("C30 capit_size 0,375→1,0 (hợp lệ ở CRISIS, KHÔNG ở NEUTRAL), ba đẳng thức khớp, "
+          "nav_basis KHÔNG đổi ⇒ neo NAV sống mù → TRẦN NEO THEO STATE chặn (trần phẳng cũ "
+          "cho lọt 2,67×)",
+          plan.orders[0].loan_package_id is None
+          and any("capit_size" in x["reason"] and "state 3" in x["reason"] for x in adj),
+          detail=(adj[0]["reason"][:130] if adj else "(không có adj)"))
+
+    # …và kẻ tấn công đi tiếp: khai luôn `state=1` (CRISIS) để mở trần capit_size lên 1,0.
+    # Chặn bằng nguồn state ĐỘC LẬP (golive_state_today.json do publish_gated_state.py ghi):
+    # muốn lọt phải nói dối KHỚP NHAU ở HAI artifact do hai bước khác nhau sinh ra.
+    _p_st2 = os.path.join(TMP, "status_state_lie.json")
+    with open(_p_st2, "w", encoding="utf-8") as f:
+        json.dump({"signal_date": "2099-01-01", "state": 1, "capit_lever": lev_on,
+                   "capit_adv_caps": ADV_CAPS5, "capit_slot_targets": _t_st},
+                  f, ensure_ascii=False)
+    plan = mkplan([o("B1", "SAB")])
+    plan, adj = apply_capit_lever(plan, "SpaceX", status_path=_p_st2, rules_path=RULES_ON)
+    check("C30b …khai luôn `state=1` để mở trần → nguồn state ĐỘC LẬP bác (artifact 1 vs "
+          "golive_state_today 3): một lời nói dối phải khớp ở HAI artifact khác tiến trình",
+          plan.orders[0].loan_package_id is None
+          and any("nguồn độc lập" in x["reason"] for x in adj),
+          detail=(adj[0]["reason"][:130] if adj else "(không có adj)"))
+
+    _p_st3 = os.path.join(TMP, "status_state_missing.json")
+    with open(_p_st3, "w", encoding="utf-8") as f:
+        json.dump({"signal_date": "2099-01-01", "capit_lever": lev_on,
+                   "capit_adv_caps": ADV_CAPS5, "capit_slot_targets": tgt_on_art},
+                  f, ensure_ascii=False)
+    plan = mkplan([o("B1", "SAB")])
+    plan, adj = apply_capit_lever(plan, "SpaceX", status_path=_p_st3, rules_path=RULES_ON)
+    check("C30c artifact KHÔNG khai `state` → fail-closed (không biết state thì không biết "
+          "trần nào đúng; fail-safe = không đòn bẩy, lệnh vẫn chạy vốn tự có)",
+          plan.orders[0].loan_package_id is None and len(plan.orders) == 1,
+          detail=(adj[0]["reason"][:110] if adj else "(không có adj)"))
+
+    # ── C31: thiếu ADV20 của 1 mã KHÔNG được đọc thành "artifact TỰ MÂU THUẪN" (#4) ──────
+    # golive.capit_adv_caps() bỏ mã thiếu adv20 và tự in WARNING (mã đó bị cap_capit_orders
+    # chặn riêng), trong khi n_slots vẫn chia theo rổ ĐẦY ĐỦ. So n_slots với số khoá
+    # capit_adv_caps sẽ TẮT đòn bẩy cả phiên cho một lỗ hổng dữ liệu thường lệ.
+    _caps4 = {k: v for k, v in ADV_CAPS5.items() if k != "NCT"}       # 4/5 mã có ADV20
+    _p_adv = os.path.join(TMP, "status_adv_gap.json")
+    with open(_p_adv, "w", encoding="utf-8") as f:
+        json.dump({"signal_date": "2099-01-01", "state": 3, "capit_lever": lev_on,
+                   "capit_adv_caps": _caps4, "n_capit_basket": 5,
+                   "capit_slot_targets": tgt_on_art}, f, ensure_ascii=False)
+    plan = mkplan([o("B1", "SAB")])
+    plan, adj = apply_capit_lever(plan, "SpaceX", status_path=_p_adv, rules_path=RULES_ON)
+    check("C31 thiếu ADV20 của 1/5 mã (n_slots=5 vs 4 khoá adv_caps) → VẪN cấp đòn bẩy cho mã "
+          "hợp lệ: đó là lỗ hổng dữ liệu thường lệ, không phải artifact bị giả mạo",
+          plan.orders[0].loan_package_id == 1840,
+          detail=str([(x["ticker"], x["action"]) for x in adj]))
+
+    _p_adv2 = os.path.join(TMP, "status_nslots_bad.json")
+    with open(_p_adv2, "w", encoding="utf-8") as f:
+        json.dump({"signal_date": "2099-01-01", "state": 3, "capit_lever": lev_on,
+                   "capit_adv_caps": ADV_CAPS5, "n_capit_basket": 9,
+                   "capit_slot_targets": tgt_on_art}, f, ensure_ascii=False)
+    plan = mkplan([o("B1", "SAB")])
+    plan, adj = apply_capit_lever(plan, "SpaceX", status_path=_p_adv2, rules_path=RULES_ON)
+    check("C31b …nhưng n_slots(5) ≠ n_capit_basket(9) VẪN chặn — rổ mà mục tiêu chia theo KHÁC "
+          "rổ của phiên là mâu thuẫn thật, không phải thiếu ADV20",
+          plan.orders[0].loan_package_id is None
+          and any("n_capit_basket" in x["reason"] for x in adj),
+          detail=(adj[0]["reason"][:110] if adj else "(không có adj)"))
 
     # ĐỆM TỔNG tách khỏi đệm per-order (#5). Giữ 1,10 ở tầng tổng biến envelope f=1,3 thành
     # 1,43 thực tế: sai số làm tròn lô của N lệnh triệt tiêu lẫn nhau chứ không cộng dồn.
@@ -832,7 +1037,7 @@ with tempfile.TemporaryDirectory() as TMP:
     art_dir = os.path.join(TMP, "wk", "data")
     os.makedirs(art_dir, exist_ok=True)
     with open(os.path.join(art_dir, "golive_v23_status.json"), "w", encoding="utf-8") as f:
-        json.dump({"signal_date": "2099-01-01", "capit_lever": lev_off}, f, ensure_ascii=False)
+        json.dump({"signal_date": "2099-01-01", "state": 3, "capit_lever": lev_off}, f, ensure_ascii=False)
     import trading_bot.config as _cfgmod
     _real_workdir = _cfgmod.WORKDIR
     _cfgmod.WORKDIR = os.path.dirname(art_dir)
@@ -905,7 +1110,7 @@ with tempfile.TemporaryDirectory() as TMP:
                                    basket=BASKET5, targets=base_targets())
         art = os.path.join(TMP, f"art_{tag}.json")
         with open(art, "w", encoding="utf-8") as f:
-            json.dump({"signal_date": "2099-01-01", "capit_lever": lever,
+            json.dump({"signal_date": "2099-01-01", "state": 3, "capit_lever": lever,
                        "capit_adv_caps": ADV_CAPS5,
                        "capit_slot_targets": targets}, f, ensure_ascii=False)
         orders = [o(f"B{i}", tk) for i, tk in enumerate(BASKET5)]
@@ -1024,6 +1229,521 @@ with tempfile.TemporaryDirectory() as TMP:
     check("H5 BẬT nhưng lệnh sizing SAI cỡ thật (40tr vs 65tr) → vẫn cảnh báo "
           "(fix này chỉ đổi MỐC SO, không tắt cổng)",
           n_real.startswith("⚠️") and "-38" in n_real, detail=n_real[:100])
+
+    # ───────── I. CỔNG DUYỆT RIÊNG TỪNG NGÀY CÓ VAY (user chốt 2026-08-03) ─────────
+    # "Khi DollarBill tạo plan dùng margin tôi sẽ phải đồng ý duyệt thì hệ thống mới được phép
+    # vận hành": `enabled=true` là điều kiện CẦN, mỗi ngày có vay cần thêm 1 lần duyệt riêng.
+    # Mọi ca ở đây gọi `_apply_raw` — KHÔNG qua wrapper mặc-định-có-duyệt của nhóm C.
+    section("I. Cổng duyệt RIÊNG từng ngày có vay (margin_day_approval)")
+
+    NO_APPROVAL = os.path.join(TMP, "approvals_empty")
+    os.makedirs(NO_APPROVAL, exist_ok=True)
+
+    plan = mkplan([o("B1", "SAB"), o("B2", "VNM")])
+    plan, adj = _apply_raw(plan, "SpaceX", status_path=ART_ON, rules_path=RULES_ON,
+                           approvals_dir=NO_APPROVAL)
+    check("I1 mọi cổng KHÁC đều đạt nhưng CHƯA có duyệt riêng cho ngày này → KHÔNG lệnh nào "
+          "mang cờ vay",
+          all(x.loan_package_id is None for x in plan.orders),
+          detail=str([(x.ticker, x.loan_package_id) for x in plan.orders]))
+    check("I2 …và có ĐÚNG 1 dòng cấp-plan nói rõ thiếu duyệt + cách duyệt (không im lặng)",
+          sum(1 for x in adj if x["action"] == "MARGIN_APPROVAL_REQUIRED") == 1
+          and any("approve_margin_day.py" in x["reason"] for x in adj),
+          detail=str([x["action"] for x in adj]))
+    check("I3 …lệnh VẪN CÒN trong plan (fail-safe = không đòn bẩy, KHÔNG phải chặn lệnh)",
+          len(plan.orders) == 2, detail=f"{len(plan.orders)} lệnh")
+
+    plan = mkplan([o("B1", "SAB"), o("B2", "VNM")])
+    plan, adj = _apply_raw(plan, "SpaceX", status_path=ART_ON, rules_path=RULES_ON,
+                           approvals_dir=APPROVALS_OK)
+    check("I4 có bản duyệt HỢP LỆ cho đúng ngày → cấp bình thường "
+          "(cổng mới không chặn nhầm ca đã duyệt)",
+          all(x.loan_package_id == 1840 for x in plan.orders)
+          and not any(x["action"] == "MARGIN_APPROVAL_REQUIRED" for x in adj),
+          detail=str([x["action"] for x in adj]))
+
+    # Từng cách "duyệt giả" — đây đúng là chỗ quant-skeptic soi ở vòng trước.
+    for _nm, _over, _why in (
+            ("approved_by rỗng", {"approved_by": ""}, "duyệt trống"),
+            ("approved_by='pending'", {"approved_by": "pending"}, "giữ chỗ"),
+            ("approved_by='agent'", {"approved_by": "agent"}, "agent tự duyệt bị nhận diện"),
+            ("plan_date của NGÀY KHÁC", {"plan_date": "2099-01-02", "_fname_date": "2099-01-02",
+                                         "_inner_date": "2098-12-31"}, "duyệt ngày khác"),
+            ("account của account KHÁC", {"account": "ZaloPay", "_fname_acct": "SpaceX"},
+             "duyệt account khác"),
+            ("lever_f = 3,0", {"lever_f": 3.0}, "hệ số ngoài bản duyệt"),
+            ("gói vay 9999", {"loan_package_id": 9999}, "gói ngoài bản duyệt"),
+            ("thiếu trần VND", {"max_lever_total_vnd": 0}, "duyệt khống"),
+            ("tickers rỗng", {"tickers": []}, "duyệt khống rổ"),
+            ("revoked=true", {"revoked": True, "revoked_reason": "user đổi ý 08:10"},
+             "đã thu hồi"),
+            # Cờ HUỶ phải fail-SAFE, ngược chiều cờ BẬT (arch-reviewer vòng 3 #3): đường thu
+            # hồi được thiết kế cho người sửa gấp lúc 08:10, và người sửa tay JSON viết
+            # `"revoked": "true"` hay `1` là chuyện thường. Với `is True` cả hai bị BỎ QUA im
+            # lặng và 09:05 vẫn vay — một cờ huỷ fail-OPEN trong bản ghi ủy quyền vay tiền.
+            ("revoked='true' (chuỗi, sửa tay)", {"revoked": "true"}, "thu hồi viết tay"),
+            ("revoked=1 (int, sửa tay)", {"revoked": 1}, "thu hồi viết tay"),
+            ("revoked='yes' (chuỗi lạ)", {"revoked": "yes"}, "giá trị lạ vẫn phải nghiêng "
+                                                             "về HUỶ")):
+        _d = os.path.join(TMP, f"appr_{abs(hash(_nm))}")
+        os.makedirs(_d, exist_ok=True)
+        _rec_over = {k: v for k, v in _over.items() if not k.startswith("_")}
+        _p = write_approval(_d, **_rec_over)
+        # Ca "đổi tên file": nội dung ghi ngày/account KHÁC nhưng file mang tên đúng ngày/
+        # account đang chạy — chứng minh đổi tên file KHÔNG đủ để tái sử dụng một bản duyệt.
+        if "_fname_date" in _over or "_fname_acct" in _over:
+            with open(_p, encoding="utf-8") as fh:
+                _r = json.load(fh)
+            if "_inner_date" in _over:
+                _r["plan_date"] = _over["_inner_date"]
+            os.replace(_p, os.path.join(
+                _d, f"margin_approval_{_over.get('_fname_acct', _r['account'])}_"
+                    f"{_over.get('_fname_date', _r['plan_date'])}.json"))
+            with open(os.path.join(_d, f"margin_approval_"
+                                       f"{_over.get('_fname_acct', _r['account'])}_"
+                                       f"{_over.get('_fname_date', _r['plan_date'])}.json"),
+                      "w", encoding="utf-8") as fh:
+                json.dump(_r, fh, ensure_ascii=False)
+        plan = mkplan([o("B1", "SAB")])
+        plan, adj = _apply_raw(plan, "SpaceX", status_path=ART_ON, rules_path=RULES_ON,
+                               approvals_dir=_d)
+        check(f"I5[{_nm}] bản duyệt không hợp lệ ({_why}) → KHÔNG cấp đòn bẩy",
+              plan.orders[0].loan_package_id is None
+              and any(x["action"] == "MARGIN_APPROVAL_REQUIRED" for x in adj),
+              detail=str([x["action"] for x in adj]))
+
+    # Trần Σ VND của bản duyệt: user duyệt MỘT SỐ TIỀN, không duyệt khống.
+    _d_cap = os.path.join(TMP, "appr_cap")
+    write_approval(_d_cap, max_lever_total_vnd=100_000_000)
+    two = [o("B1", "SAB"), o("B2", "VNM")]
+    for _od in two:
+        _od.qty, _od.ref_price = 3_250, 20_000                # 65tr/lệnh ⇒ Σ 130tr > 100tr
+    plan = mkplan(two)
+    plan, adj = _apply_raw(plan, "SpaceX", status_path=ART_ON, rules_path=RULES_ON,
+                           approvals_dir=_d_cap)
+    check("I6 Σ lệnh được cấp (130tr) VƯỢT trần user duyệt (100tr) → gỡ SẠCH, không cấp một "
+          "phần (cấp một phần = tự quyết hộ user vay bao nhiêu)",
+          all(x.loan_package_id is None for x in plan.orders)
+          and any("VƯỢT mức user đã duyệt" in x["reason"] for x in adj),
+          detail=str([x["action"] for x in adj]))
+
+    _d_tk = os.path.join(TMP, "appr_tk")
+    write_approval(_d_tk, tickers=["SAB"])
+    plan = mkplan([o("B1", "SAB"), o("B2", "VNM")])
+    plan, adj = _apply_raw(plan, "SpaceX", status_path=ART_ON, rules_path=RULES_ON,
+                           approvals_dir=_d_tk)
+    check("I7 plan cấp cho mã NGOÀI rổ user đã duyệt (VNM ∉ [SAB]) → gỡ sạch, đòi duyệt lại "
+          "(rổ đổi sau khi duyệt là một quyết định mới)",
+          all(x.loan_package_id is None for x in plan.orders)
+          and any("KHÔNG có trong rổ user đã duyệt" in x["reason"] for x in adj),
+          detail=str([x["action"] for x in adj]))
+
+    # Chế độ PREVIEW — đường DUY NHẤT nhìn thấy tập lệnh đang chờ duyệt. Nó phải KHÔNG BAO GIỜ
+    # trở thành đường vòng qua cổng duyệt.
+    plan_src = mkplan([o("B1", "SAB"), o("B2", "FPT", book="BAL")])
+    ret, adj_pv = _apply_raw(plan_src, "SpaceX", status_path=ART_ON, rules_path=RULES_ON,
+                             approvals_dir=NO_APPROVAL, preview=True)
+    check("I8 preview trả về None thay cho plan → KHÔNG có đối tượng plan mang cờ vay nào "
+          "thoát ra, kể cả khi caller gán lại biến",
+          ret is None, detail=repr(ret)[:60])
+    check("I9 preview KHÔNG sửa plan gốc của caller (chạy trên bản sao)",
+          all(x.lever_f is None and x.loan_package_id is None for x in plan_src.orders),
+          detail=str([(x.ticker, x.loan_package_id) for x in plan_src.orders]))
+    check("I10 preview vẫn THẤY tập lệnh sẽ vay (dù chưa duyệt) — nếu không thì không ai "
+          "duyệt được cái gì",
+          [x["ticker"] for x in adj_pv if x["action"] == "APPLIED"] == ["SAB"],
+          detail=str([(x["ticker"], x["action"]) for x in adj_pv]))
+    _, adj_pv_off = _apply_raw(mkplan([o("B1", "SAB")]), "SpaceX", status_path=ART_ON,
+                               rules_path=RULES_OFF, approvals_dir=APPROVALS_OK, preview=True)
+    check("I11 preview bỏ qua ĐÚNG cổng duyệt-ngày, KHÔNG bỏ qua cổng nào khác "
+          "(chính sách TẮT ⇒ preview cũng rỗng)",
+          not any(x["action"] in ("APPLIED", "OVERRIDDEN") for x in adj_pv_off),
+          detail=str([x["action"] for x in adj_pv_off]))
+
+    check("I12 giá trị VND đi kèm từng dòng cấp (bước duyệt cần số tiền, không chỉ tên mã)",
+          all(isinstance(x.get("value"), (int, float)) and x["value"] > 0
+              for x in adj_pv if x["action"] == "APPLIED"),
+          detail=str([(x["ticker"], x.get("value")) for x in adj_pv]))
+
+    # HỢP ĐỒNG GHI↔ĐỌC: script duyệt và hàm đọc duyệt phải nói cùng một schema. Kiểm bằng AST
+    # trên source THẬT của script (§17) thay vì chép tay danh sách khoá sang test.
+    APPR_SCRIPT = os.path.join(HERE, "mike", "bin", "approve_margin_day.py")
+    _appr_src = open(APPR_SCRIPT, encoding="utf-8").read()
+    _keys = set()
+    for _n in ast.walk(ast.parse(_appr_src)):
+        if isinstance(_n, ast.Assign) and isinstance(_n.value, ast.Dict) \
+                and any(getattr(t, "id", "") == "rec" for t in _n.targets):
+            _keys = {k.value for k in _n.value.keys if isinstance(k, ast.Constant)}
+    _need = {"account", "plan_date", "approved_by", "lever_f", "loan_package_id",
+             "max_lever_total_vnd", "tickers"}
+    check("I13 approve_margin_day.py ghi ĐỦ mọi khoá mà margin_day_approval() bắt buộc "
+          "(hợp đồng ghi↔đọc, kiểm trên source thật)",
+          _need <= _keys, detail=f"thiếu: {sorted(_need - _keys) or 'không'}")
+
+    check("I13b …và dùng CHUNG danh sách 'không phải người duyệt thật' với hàm đọc "
+          "(import, không chép) — hai bản sao là cách để một chuỗi qua bên này chặn bên kia",
+          "from trading_bot.plan import APPROVAL_PLACEHOLDERS" in _appr_src,
+          detail="APPROVAL_PLACEHOLDERS")
+
+    _rc = os.system(f"{sys.executable} {APPR_SCRIPT} --account SpaceX --date 2099-01-02 "
+                    f"--dry-run >/dev/null 2>&1")
+    check("I14 chạy THẬT approve_margin_day.py --dry-run trên cấu hình production (đang TẮT) "
+          "→ TỪ CHỐI ghi bản duyệt khống, exit≠0",
+          os.WEXITSTATUS(_rc) != 0, detail=f"exit={os.WEXITSTATUS(_rc)}")
+    check("I15 …và KHÔNG tạo file duyệt nào trong data/margin_approvals/",
+          not os.path.exists(os.path.join(HERE, "data", "margin_approvals",
+                                          "margin_approval_SpaceX_2099-01-02.json")))
+
+    # I16-I18: DẤU VẾT là lá chắn thật chống "agent tự duyệt hộ" (danh sách placeholder chỉ là
+    # quy ước mềm — nó cho qua "system-auto"/"Claude"/"yes"). Nên nếu bus/Discord hỏng mà
+    # script im lặng trả 0 thì lá chắn biến mất đúng lúc cần nhất (arch-reviewer vòng 3 #5).
+    check("I16 _bus/_notify KIỂM returncode, không chỉ bắt exception — bus hỏng phải nói ra",
+          _appr_src.count("r.returncode != 0") >= 2 and "check=False" in _appr_src,
+          detail=f"{_appr_src.count('r.returncode != 0')} chỗ kiểm rc")
+    check("I17 …và exit code phản ánh việc dấu vết KHÔNG để lại được (không nuốt im lặng)",
+          "_trace_exit" in _appr_src and "return 3" in _appr_src)
+    check("I18 `decided_by` KHÔNG hard-code 'user' — script chạy được bởi cả người lẫn agent "
+          "nên phải KHAI, không TỰ NHẬN (coding_guidelines §20)",
+          '"decided_by": "user"' not in _appr_src
+          and '"decided_by": args.decided_by' in _appr_src
+          and '"--decided-by"' in _appr_src)
+    check("I19 đường --revoke ghi NGUYÊN TỬ như đường tạo (§5) — bản ghi ủy quyền vay tiền "
+          "không được để lại JSON cụt khi bị kill giữa chừng",
+          _appr_src.count("os.replace(tmp, path)") >= 2,
+          detail=f"{_appr_src.count('os.replace(tmp, path)')} chỗ os.replace")
+
+    # ───────── J. PREFLIGHT SỐNG: neo NAV + đọc thật pp0Buy (lever_live_preflight) ─────────
+    section("J. Preflight sống trước lệnh đòn bẩy (neo NAV + pp0Buy@gói của lệnh)")
+
+    class _Q:
+        def __init__(self, px):
+            self.last, self.ref = px, px
+
+        def ok(self):
+            return self.last is not None
+
+    class _PFBroker:
+        """Broker giả tối thiểu cho preflight: đủ cash/positions/quote/buying_power."""
+
+        def __init__(self, cash=300_000_000, positions=None, prices=None, bp=10 ** 9,
+                     bp_exc=False, cash_exc=False):
+            self.cash, self.positions = cash, positions or {}
+            self.prices = prices or {}
+            self.bp, self.bp_exc, self.cash_exc = bp, bp_exc, cash_exc
+            self.calls = []
+
+        def get_cash(self):
+            if self.cash_exc:
+                raise RuntimeError("balances API lỗi")
+            return self.cash
+
+        def get_positions(self):
+            return {k: {"total": v} for k, v in self.positions.items()}
+
+        def get_quote(self, sym):
+            px = self.prices.get(sym)
+            return _Q(px) if px is not None else _Q(None)
+
+        def get_buying_power(self, symbol, price, loan_package_id=None):
+            self.calls.append({"symbol": symbol, "price": price,
+                               "loan_package_id": loan_package_id})
+            if self.bp_exc:
+                raise RuntimeError("ppse timeout")
+            return self.bp
+
+    def mk_levered_plan(n=2, qty=3_250, px=20_000):
+        ords = []
+        for i, tk in enumerate(BASKET5[:n]):
+            od = o(f"B{i}", tk)
+            od.qty, od.ref_price = qty, px
+            od.lever_f, od.loan_package_id = 1.3, 1840
+            ords.append(od)
+        return mkplan(ords)
+
+    # NAV sống = tiền 300tr + 700tr cổ phiếu = 1,0 tỷ, khớp `nav_basis_vnd` của fixture.
+    LIVE_OK = dict(cash=300_000_000, positions={"FPT": 10_000}, prices={"FPT": 70_000})
+
+    p1 = mk_levered_plan()
+    b1 = _PFBroker(**LIVE_OK)
+    p1, a1 = lever_live_preflight(p1, "SpaceX", b1, "live", status_path=ART_ON)
+    check("J1 NAV sống khớp artifact + đọc được pp0Buy → GIỮ đòn bẩy, 1 dòng log đọc được "
+          "bằng mắt", all(x.loan_package_id == 1840 for x in p1.orders)
+          and a1 and a1[0]["action"] == "LIVE_PREFLIGHT_OK",
+          detail=(a1[0]["reason"][:120] if a1 else "(rỗng)"))
+    check("J2 …và pp0Buy được đo bằng ĐÚNG gói vay của lệnh (1840), KHÔNG phải gói default "
+          "1841 (đo sai gói ⇒ báo thiếu một nửa sức mua)",
+          b1.calls and b1.calls[0]["loan_package_id"] == 1840, detail=str(b1.calls))
+
+    p2 = mk_levered_plan()
+    b2 = _PFBroker(bp=None, **LIVE_OK)
+    p2, a2 = lever_live_preflight(p2, "SpaceX", b2, "live", status_path=ART_ON)
+    check("J3 KHÔNG đọc được sức mua (None) → GỠ đòn bẩy, lệnh VẪN chạy bằng vốn tự có "
+          "(diễn tập paper không phủ được tầng ppse ⇒ không đọc được là không tin)",
+          all(x.loan_package_id is None for x in p2.orders) and len(p2.orders) == 2
+          and a2[0]["action"] == "LIVE_PREFLIGHT_STRIP", detail=a2[0]["reason"][:110])
+
+    p3 = mk_levered_plan()
+    b3 = _PFBroker(bp_exc=True, **LIVE_OK)
+    p3, a3 = lever_live_preflight(p3, "SpaceX", b3, "live", status_path=ART_ON)
+    check("J4 ppse ném exception (mạng lỗi) → GỠ, không để exception thoát ra làm hỏng phiên",
+          all(x.loan_package_id is None for x in p3.orders)
+          and a3[0]["action"] == "LIVE_PREFLIGHT_STRIP", detail=a3[0]["reason"][:100])
+
+    p4 = mk_levered_plan()
+    b4 = _PFBroker(bp=50_000_000, **LIVE_OK)          # < Σ 130tr
+    p4, a4 = lever_live_preflight(p4, "SpaceX", b4, "live", status_path=ART_ON)
+    check("J5 pp0Buy đọc ĐƯỢC nhưng NHỎ HƠN Σ lệnh → CẢNH BÁO, KHÔNG gỡ "
+          "(gỡ đòn bẩy lúc thiếu tiền làm lệnh cần NHIỀU tiền hơn — sai chiều fail-safe)",
+          all(x.loan_package_id == 1840 for x in p4.orders)
+          and any(x["action"] == "LIVE_PREFLIGHT_WARN" for x in a4),
+          detail=str([x["action"] for x in a4]))
+
+    p5 = mk_levered_plan()
+    b5 = _PFBroker(**LIVE_OK)
+    p5, a5 = lever_live_preflight(p5, "SpaceX", b5, "live", status_path=NAV_INFLATED_ART)
+    check("J6 artifact thổi `nav_basis_vnd` ×3 (ca C29d mà tầng offline cho qua) → NEO NAV "
+          "SỐNG chặn — đây là mảnh cuối đóng khe artifact hai-trường",
+          all(x.loan_package_id is None for x in p5.orders)
+          and a5[0]["action"] == "LIVE_PREFLIGHT_STRIP"
+          and "NAV SỐNG" in a5[0]["reason"], detail=a5[0]["reason"][:130])
+
+    p6 = mk_levered_plan()
+    b6 = _PFBroker(cash=900_000_000, positions={"FPT": 10_000}, prices={"FPT": 70_000})
+    p6, a6 = lever_live_preflight(p6, "SpaceX", b6, "live", status_path=ART_ON)
+    check("J7 NAV sống LỚN HƠN artifact (1,6 tỷ vs 1,0 tỷ) → KHÔNG chặn: chiều đó chỉ là "
+          "sizing thận trọng, không sinh vay vượt mức (cổng bất đối xứng có chủ đích)",
+          all(x.loan_package_id == 1840 for x in p6.orders),
+          detail=str([x["action"] for x in a6]))
+
+    p7 = mk_levered_plan()
+    b7 = _PFBroker(**LIVE_OK)
+    p7, a7 = lever_live_preflight(p7, "SpaceX", b7, "paper", status_path=ART_ON)
+    check("J8 mode=paper → bỏ qua có ghi log, KHÔNG gỡ (pp0Buy là khái niệm của broker thật; "
+          "diễn tập paper nhóm F phải chạy được)",
+          all(x.loan_package_id == 1840 for x in p7.orders)
+          and a7[0]["action"] == "LIVE_PREFLIGHT_SKIPPED" and not b7.calls,
+          detail=str([x["action"] for x in a7]))
+
+    p8 = mkplan([o("B1", "FPT", book="BAL"), o("B2", "TRC", book="LAG")])
+    b8 = _PFBroker(**LIVE_OK)
+    p8, a8 = lever_live_preflight(p8, "SpaceX", b8, "live", status_path=ART_ON)
+    check("J9 plan KHÔNG có lệnh đòn bẩy nào → 0 dòng log, 0 lệnh gọi broker "
+          "(mọi phiên thường lệ không tốn thêm gì)",
+          a8 == [] and not b8.calls, detail=str(a8))
+
+    p9 = mk_levered_plan()
+    b9 = _PFBroker(cash=300_000_000, positions={"FPT": 10_000, "HAG": 5_000},
+                   prices={"FPT": 70_000})               # HAG không có giá
+    p9, a9 = lever_live_preflight(p9, "SpaceX", b9, "live", status_path=ART_ON)
+    check("J10 không định giá được một vị thế → GỠ (NAV sống không đủ tin cậy để làm mốc; "
+          "KHÔNG đoán giá)",
+          all(x.loan_package_id is None for x in p9.orders)
+          and "HAG" in a9[0]["reason"], detail=a9[0]["reason"][:100])
+
+    p10 = mk_levered_plan()
+    b10 = _PFBroker(cash_exc=True, positions={"FPT": 10_000}, prices={"FPT": 70_000})
+    p10, a10 = lever_live_preflight(p10, "SpaceX", b10, "live", status_path=ART_ON)
+    check("J11 broker lỗi khi đo NAV → GỠ (fail-closed, không bỏ qua bước neo)",
+          all(x.loan_package_id is None for x in p10.orders)
+          and a10[0]["action"] == "LIVE_PREFLIGHT_STRIP", detail=a10[0]["reason"][:100])
+
+    p11 = mk_levered_plan()
+    b11 = _PFBroker(cash=300_000_000, positions={"FPT": 10_000, "DGC": 10_000},
+                    prices={"FPT": 70_000, "DGC": 100_000})
+    p11, a11 = lever_live_preflight(p11, "SpaceX", b11, "live", status_path=ART_ON,
+                                    excluded_tickers=["DGC"])
+    check("J12 vị thế excluded_tickers bị TRỪ khỏi NAV sống (đúng công thức active_nav mà "
+          "golive dùng làm cơ sở) → 1,0 tỷ khớp artifact, không báo động giả",
+          all(x.loan_package_id == 1840 for x in p11.orders),
+          detail=str([x["action"] for x in a11]))
+
+    p12 = mk_levered_plan()
+    b12 = _PFBroker(cash=300_000_000, positions={"FPT": 10_000, "DGC": 10_000},
+                    prices={"FPT": 70_000, "DGC": 100_000})
+    p12, a12 = lever_live_preflight(p12, "SpaceX", b12, "live", status_path=ART_ON)
+    check("J12b …và nếu KHÔNG khai excluded thì NAV sống là 2,0 tỷ (> artifact) → vẫn không "
+          "chặn: chứng minh J12 kiểm phép TRỪ chứ không phải trùng hợp",
+          all(x.loan_package_id == 1840 for x in p12.orders))
+
+    # J13: `bp == 0` KHÔNG còn là điều kiện GỠ (arch-reviewer vòng 3 #1, chân thứ hai).
+    # Hết sức mua là trạng thái BÌNH THƯỜNG sau khi sleeve giải ngân xong; gỡ đòn bẩy lúc đó
+    # làm lệnh cần NHIỀU tiền hơn — cùng lý lẽ đã dùng cho nhánh `bp < total`.
+    p13 = mk_levered_plan()
+    b13 = _PFBroker(cash=300_000_000, positions={"FPT": 10_000}, prices={"FPT": 70_000}, bp=0)
+    p13, a13 = lever_live_preflight(p13, "SpaceX", b13, "live", status_path=ART_ON)
+    check("J13 pp0Buy ĐỌC ĐƯỢC nhưng = 0 (sleeve đã giải ngân hết) → CẢNH BÁO, KHÔNG gỡ — "
+          "'hết sức mua' khác 'không đọc được', chỉ cái sau mới là bằng chứng chưa thông tuyến",
+          all(x.loan_package_id == 1840 for x in p13.orders)
+          and any(x["action"] == "LIVE_PREFLIGHT_WARN" for x in a13),
+          detail=str([x["action"] for x in a13]))
+
+    # ───── J14-J17: HAI LƯỢT CRON CÙNG PHIÊN (09:05 + 13:00 ICT) — bug CRITICAL vòng 3 ─────
+    # crontab thật có 2 lượt `run_bot.sh --account SpaceX` mỗi ngày giao dịch (09:05 và 13:00
+    # "khởi động lại sau nghỉ trưa"). Lượt 13:00 là tiến trình MỚI chạy lại TRỌN cascade.
+    # Trước fix: preflight đo NAV sống giữa lúc đang giải ngân (availableCash đã trừ tiền giữ
+    # cho lệnh treo) → thấp hơn cơ sở tối qua → GỠ sạch cờ vay → Executor._lever_package_audit
+    # mất tập cấp phép → PAUSE cả rổ CAPIT cả buổi chiều kèm sự cố NÓI SAI ("đòn bẩy không ai
+    # duyệt") cho đúng những lệnh đã qua CẢ HAI cổng người sáng hôm đó.
+    _EXEC_STATE = os.path.join(EXEC_DIR, "exec_SpaceX_2099-01-02_state.json")
+
+    def _write_session_state(n_children):
+        """Giả lập state của Executor sau lượt 09:05 (đã đặt n lệnh con, đã khớp một phần)."""
+        with open(_EXEC_STATE, "w", encoding="utf-8") as f:
+            json.dump({"plan_date": "2099-01-02", "plan_created_at": "x", "parents": {
+                "B1": {"filled": 500, "done": False, "children": [
+                    {"oid": f"P{i:06d}", "qty": 100, "filled": 100, "status": "closed"}
+                    for i in range(n_children)]}}}, f)
+
+    try:
+        # lượt 09:05 — phiên SẠCH, chưa lệnh nào: neo NAV vẫn GỠ đầy đủ (bảo vệ không mất)
+        if os.path.exists(_EXEC_STATE):
+            os.remove(_EXEC_STATE)
+        p14 = mk_levered_plan()
+        p14, a14 = lever_live_preflight(p14, "SpaceX", _PFBroker(**LIVE_OK), "live",
+                                        status_path=NAV_INFLATED_ART)
+        check("J14 [lượt 09:05, phiên SẠCH] artifact thổi NAV → VẪN GỠ đầy đủ: lớp bảo vệ "
+              "chính (chặn khoản vay ĐẦU TIÊN đi ra trên cơ sở vốn giả) KHÔNG bị nới",
+              all(x.loan_package_id is None for x in p14.orders)
+              and a14[0]["action"] == "LIVE_PREFLIGHT_STRIP",
+              detail=a14[0]["action"])
+
+        # lượt 13:00 — phiên ĐÃ đặt lệnh: cùng đầu vào, KHÔNG được gỡ nữa
+        _write_session_state(5)
+        p15 = mk_levered_plan()
+        p15, a15 = lever_live_preflight(p15, "SpaceX", _PFBroker(**LIVE_OK), "live",
+                                        status_path=NAV_INFLATED_ART)
+        check("J15 [lượt 13:00, phiên ĐÃ đặt lệnh] CÙNG đầu vào → KHÔNG gỡ, chỉ CẢNH BÁO: NAV "
+              "sống tụt giữa lúc giải ngân là bình thường, còn gỡ thì treo cả rổ CAPIT",
+              all(x.loan_package_id == 1840 for x in p15.orders)
+              and a15[0]["action"] == "LIVE_PREFLIGHT_WARN"
+              and "ĐÃ đặt lệnh" in a15[0]["reason"],
+              detail=a15[0]["reason"][:120])
+
+        # …và ngay cả khi preflight CÓ gỡ, audit tầng lệnh vẫn phải im: sổ `_lever_authorized`
+        # ghi lại "ai ĐÃ được cấp phép hôm nay", tách khỏi "lệnh này đi ra bằng gói nào".
+        os.remove(_EXEC_STATE)          # phiên SẠCH ⇒ preflight thật sự GỠ (ca khắc nghiệt hơn)
+        _pa = mkplan([o("B1", "SAB")])
+        _pa, _ = apply_capit_lever(_pa, "SpaceX", status_path=ART_ON, rules_path=RULES_ON,
+                                   approvals_dir=APPROVALS_OK)
+        _granted_before = copy.deepcopy(getattr(_pa, "_lever_authorized", None))
+        _pa, _ = lever_live_preflight(_pa, "SpaceX", _PFBroker(**LIVE_OK), "live",
+                                      status_path=NAV_INFLATED_ART)
+        check("J16 preflight GỠ cờ vay nhưng sổ `_lever_authorized` GIỮ NGUYÊN — hai khái niệm "
+              "tách bạch: 'lệnh đi ra bằng gói nào' vs 'hôm nay ai đã được cấp phép vay'",
+              _granted_before == {"1840": {"SAB"}}
+              and getattr(_pa, "_lever_authorized", None) == {"1840": {"SAB"}}
+              and _pa.orders[0].loan_package_id is None,
+              detail=str(getattr(_pa, "_lever_authorized", None)))
+
+        _ex = Executor(_pa, PaperBroker(load_config()), load_config())
+        _upd = {"P000001": OrderUpdate("P000001", "Filled", 500, 20_000,
+                                       {"symbol": "SAB", "loanPackageId": 1840})}
+        _pause, _warns = _ex._lever_package_audit(_upd)
+        check("J17 …nên audit tầng lệnh KHÔNG dựng sự cố GIẢ: lệnh gói 1840 của lượt sáng "
+              "(đã qua cả 2 cổng người) KHÔNG bị coi là 'đòn bẩy không ai duyệt' → 0 mã pause",
+              _pause == set() and _warns == [],
+              detail=f"pause={sorted(_pause)} warns={len(_warns)}")
+
+        # đối chứng: mã KHÔNG hề được cấp phép vẫn bị bắt y như cũ (sổ không làm yếu guard)
+        _upd2 = {"P000002": OrderUpdate("P000002", "Filled", 500, 20_000,
+                                        {"symbol": "VNM", "loanPackageId": 1840})}
+        _pause2, _warns2 = _ex._lever_package_audit(_upd2)
+        check("J17b …nhưng mã NGOÀI tập được cấp phép vẫn bị bắt (sổ chỉ chứa mã đã qua đủ "
+              "cổng — nó không nới guard, chỉ vá chỗ guard đọc nhầm nguồn)",
+              _warns2 and _warns2[0]["ticker"] == "VNM",
+              detail=str([w["ticker"] for w in _warns2]))
+    finally:
+        if os.path.exists(_EXEC_STATE):
+            os.remove(_EXEC_STATE)
+
+    # ───────── K. MỐI NỐI trong bot_execute.py (đúng vị trí, không chỉ 'có gọi') ─────────
+    section("K. Mối nối cascade trong bot_execute.py")
+
+    _bx = open(os.path.join(HERE, "bot_execute.py"), encoding="utf-8").read()
+    _i_lever = _bx.find("apply_capit_lever(plan")
+    _i_conn = _bx.find("make_broker(cfg, otp=otp, profile=p).connect()")
+    _i_pref = _bx.find("lever_live_preflight(")
+    _i_shadow = _bx.find("_log_plan_buying_power_shadow(p[")
+    check("K1 bot_execute.py có gọi lever_live_preflight", _i_pref > 0)
+    check("K2 …SAU connect() (cần sổ broker sống) và TRƯỚC shadow-log P0 (shadow phải đo "
+          "theo trạng thái đòn bẩy CHUNG CUỘC, nếu không nó ghi would_block GIẢ)",
+          0 < _i_conn < _i_pref < _i_shadow,
+          detail=f"connect={_i_conn} preflight={_i_pref} shadow={_i_shadow}")
+    check("K3 …và cascade vẫn gọi apply_capit_lever TRƯỚC đó (preflight chỉ GỠ, không cấp)",
+          0 < _i_lever < _i_conn)
+    check("K4 bot_execute.py KHÔNG BAO GIỜ gọi apply_capit_lever ở chế độ preview "
+          "(preview bỏ qua cổng duyệt-ngày — đường thực thi tuyệt đối không được dùng)",
+          "preview=True" not in _bx and "preview =" not in _bx)
+    check("K5 …và in ra dòng riêng khi đòn bẩy bị gỡ vì thiếu duyệt riêng",
+          "MARGIN_APPROVAL_REQUIRED" in _bx and "THIẾU DUYỆT RIÊNG" in _bx)
+
+    # ───────── L. Khối MARGIN trong báo cáo duyệt plan (send_plan_report.sh) ─────────
+    # Chạy CHÍNH đoạn source production (§17): người duyệt phải THẤY plan có vay, và thấy
+    # đúng số tiền vay — không lẫn vào dòng duyệt plan thường lệ.
+    section("L. Khối cảnh báo MARGIN trong báo cáo duyệt plan")
+
+    _mbeg = "# ── ĐÒN BẨY MARGIN: nêu BẬT LOẠT"
+    _mend = 'lines = [f"📋'
+    check("L0 trích được khối margin từ send_plan_report.sh production",
+          _spr.count(_mbeg) == 1 and _spr.count(_mend) == 1)
+    MARGIN_SRC = _mbeg + _spr.split(_mbeg, 1)[1].split(_mend, 1)[0]
+
+    def run_margin(pv, rec, aerr=""):
+        """exec khối production với preview/duyệt giả lập (vá ở tầng MODULE vì khối tự
+        `from trading_bot.plan import ...` — vá namespace sẽ bị chính dòng import ghi đè)."""
+        _o_pv, _o_ap = _planmod.preview_margin_day, _planmod.margin_day_approval
+        _planmod.preview_margin_day = lambda a, d, **k: pv
+        _planmod.margin_day_approval = lambda a, d, **k: (rec, aerr)
+        ns = {"acct": "SpaceX", "date": "2099-01-02"}
+        try:
+            exec(MARGIN_SRC, ns)
+        finally:
+            _planmod.preview_margin_day, _planmod.margin_day_approval = _o_pv, _o_ap
+        return "\n".join(ns["margin_note"])
+
+    _PV_NONE = {"error": "", "orders": [], "tickers": [], "total_vnd": 0.0,
+                "borrow_vnd": 0.0, "lever_f": None, "loan_package_id": None, "reasons": []}
+    _PV_ON = {"error": "", "lever_f": 1.3, "loan_package_id": 1840,
+              "orders": [{"order_id": "B1", "ticker": "SAB", "value_vnd": 65_000_000},
+                         {"order_id": "B2", "ticker": "VNM", "value_vnd": 65_000_000}],
+              "tickers": ["SAB", "VNM"], "total_vnd": 130_000_000,
+              "borrow_vnd": 30_000_000, "reasons": []}
+
+    m_none = run_margin(_PV_NONE, None, "chưa có duyệt")
+    check("L1 plan KHÔNG có lệnh vay → KHÔNG thêm dòng nào (0 nhiễu vào báo cáo thường lệ)",
+          m_none == "", detail=repr(m_none)[:80])
+
+    m_wait = run_margin(_PV_ON, None, "CHƯA CÓ duyệt riêng cho ngày 2099-01-02")
+    check("L2 plan CÓ vay + chưa duyệt riêng → nêu BẬT LOẠT: có margin, Σ tiền vay, và "
+          "CẦN DUYỆT RIÊNG (không lẫn vào dòng duyệt plan thường)",
+          "CÓ DÙNG MARGIN" in m_wait and "CẦN DUYỆT RIÊNG" in m_wait
+          and "tiền VAY dự kiến" in m_wait, detail=m_wait[:130])
+    check("L3 …và chỉ ra ĐÚNG lệnh phải chạy để duyệt (người duyệt không phải tự tra)",
+          "approve_margin_day.py" in m_wait and "--date 2099-01-02" in m_wait,
+          detail=m_wait[-150:])
+    check("L4 …và nói rõ không duyệt thì KHÔNG bị chặn lệnh, chỉ chạy bằng vốn tự có",
+          "VỐN TỰ CÓ" in m_wait)
+
+    m_ok = run_margin(_PV_ON, {"approved_by": "user (John) 21:37",
+                               "max_lever_total_vnd": 130_000_000}, "")
+    check("L5 đã duyệt riêng → báo cáo xác nhận ai duyệt + trần Σ, không đòi duyệt lại",
+          "ĐÃ ĐƯỢC DUYỆT RIÊNG" in m_ok and "John" in m_ok
+          and "CẦN DUYỆT RIÊNG" not in m_ok, detail=m_ok[-120:])
+
+    # L6: plan ĐÃ sizing 1,3× nhưng đòn bẩy sẽ KHÔNG được cấp — trước đây nhánh này IM LẶNG
+    # (chỉ có `if error: pass` / `elif orders:`), nên người duyệt 21:00 chỉ thấy cảnh báo
+    # "lệch +30%" của cổng 07-21, vốn quy sai nguyên nhân sang "nhân capit_size hai lần".
+    # Đúng phát hiện #3a của vòng 2, dịch sang tầng báo cáo (arch-reviewer vòng 3 #7).
+    _PV_OFF = dict(_PV_NONE, reasons=[
+        "artifact CÓ mục tiêu đã nhân f (`capit_slot_target_vnd_levered`=65,000,000 VND/mã) "
+        "nhưng đòn bẩy KHÔNG được cấp: chính sách đang TẮT. Lệnh CAPIT có thể đã được sizing "
+        "theo mục tiêu ĐÃ NHÂN f trong khi chỉ có vốn tự có."])
+    m_off = run_margin(_PV_OFF, None, "chưa có duyệt")
+    check("L6 plan sizing theo ĐÒN BẨY nhưng sẽ chạy VỐN TỰ CÓ → báo cáo 21:00 PHẢI nói ra "
+          "(trước đây im lặng, người duyệt chỉ thấy cảnh báo lệch +30% quy sai nguyên nhân)",
+          "VỐN TỰ CÓ" in m_off and "sizing" in m_off.lower(), detail=m_off[:150])
+    check("L7 …nhưng plan bình thường (không lý do nào) vẫn KHÔNG thêm dòng nào",
+          run_margin(dict(_PV_NONE, reasons=[]), None, "x") == "")
 
 print(f"\nENV: TZ={os.environ.get('TZ', '(không đặt)')!r} · "
       f"python={sys.version.split()[0]} · cwd={os.getcwd()}")

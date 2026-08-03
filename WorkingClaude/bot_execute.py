@@ -35,7 +35,7 @@ from trading_bot.config import load_config, load_accounts, pick_accounts, EXEC_D
 from trading_bot.brokers import make_broker, get_quote_source, get_dnse_client
 from trading_bot.plan import (load_plan, filter_excluded_tickers, net_offsetting_orders,
                               cap_capit_orders, cap_lag_orders, filter_lag_rating_orders,
-                              apply_capit_lever, approval_block_reason)
+                              apply_capit_lever, lever_live_preflight, approval_block_reason)
 from trading_bot.netting_recon import (reconcile_netted_fills, get_net_fill_from_journal,
                                        write_recon_log)
 from trading_bot.executor import Executor, run_session, _publish_bot_event
@@ -415,7 +415,16 @@ def main():
         # nhìn thấy tập lệnh chung cuộc (lệnh đã bị các trần/gate loại thì không gắn cờ).
         plan, lever_adj = apply_capit_lever(plan, p["label"])
         for a in lever_adj:
-            if a["action"] == "PLAN_SIZED_LEVERED_BUT_OFF":
+            if a["action"] == "MARGIN_APPROVAL_REQUIRED":
+                # Cổng NGƯỜI thứ hai (user chốt 2026-08-03): công tắc tổng `enabled=true` là
+                # ĐIỀU KIỆN CẦN; mỗi ngày thật sự có vay còn cần 1 lần duyệt riêng cho đúng
+                # ngày đó. Thiếu ⇒ phiên chạy vốn tự có, và phải nói to lý do ở đây.
+                print(f"[{p['label']}] ⛔ ĐÒN BẨY BỊ GỠ — THIẾU DUYỆT RIÊNG NGÀY CÓ VAY: "
+                      f"{a['reason']}")
+            elif a["action"] == "LEVER_REFUSED_ARTIFACT_ACTIVE":
+                print(f"[{p['label']}] ⚠️ ARTIFACT NÓI ĐÒN BẨY BẬT NHƯNG KHÔNG CẤP ĐƯỢC — "
+                      f"{a['reason']}")
+            elif a["action"] == "PLAN_SIZED_LEVERED_BUT_OFF":
                 # Cảnh báo cấp-PLAN (không gắn với lệnh nào): plan đã sizing theo đòn bẩy
                 # nhưng thực thi chạy bằng vốn tự có. Nếu không in dòng này thì triệu chứng
                 # duy nhất là WAIT_CASH, trông y hệt thiếu tiền bình thường.
@@ -450,6 +459,19 @@ def main():
         broker = make_broker(cfg, otp=otp, profile=p).connect()
         if cfg["mode"] == "paper" and hasattr(broker, "set_fallback_refs"):
             broker.set_fallback_refs({o.ticker: o.ref_price for o in plan.orders})
+        # PREFLIGHT SỐNG cho lệnh ĐÒN BẨY — phải nằm SAU connect() (cần sổ broker sống) và
+        # TRƯỚC shadow-log + Executor (shadow-log đo sức mua theo gói vay của lệnh, nên nó
+        # phải thấy trạng thái đòn bẩy CHUNG CUỘC). Chỉ GỠ, không bao giờ cấp: neo NAV sống
+        # (đóng khe artifact hai-trường) + đọc thật pp0Buy ở gói vay của lệnh. Không có lệnh
+        # đòn bẩy nào ⇒ hàm trả rỗng, 0 dòng log, 0 lệnh gọi broker (mọi phiên thường lệ).
+        plan, pf_adj = lever_live_preflight(
+            plan, p["label"], broker, cfg["mode"],
+            excluded_tickers=p.get("excluded_tickers"),
+            offbook_vnd=p.get("manual_offbook_assets_vnd") or 0)
+        for a in pf_adj:
+            icon = {"LIVE_PREFLIGHT_OK": "🔎", "LIVE_PREFLIGHT_STRIP": "⛔",
+                    "LIVE_PREFLIGHT_WARN": "⚠️", "LIVE_PREFLIGHT_SKIPPED": "ℹ️"}.get(a["action"], "•")
+            print(f"[{p['label']}] {icon} PREFLIGHT ĐÒN BẨY {a['action']}: {a['reason']}")
         # SHADOW (chỉ log, không chặn) — plan đã qua TOÀN BỘ cascade + approval gate ở trên,
         # và chưa lệnh nào được đặt (run_session chạy sau). Đặt sau connect() vì sức mua phải
         # đọc từ broker SỐNG (§6), không suy từ cash tĩnh/BQ.

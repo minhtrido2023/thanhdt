@@ -1,0 +1,16 @@
+concept: dnse-openapi-v2-calling-guideline
+title: DNSE OpenAPI v2 — calling guideline for a portfolio dashboard
+current_version: 2
+status: unverified
+aliases:
+- dnse-api-guide
+- dnse-calling-convention
+related: []
+tags:
+- dnse
+- api
+- portfolio
+- execution
+owner: tbot
+created: '2026-08-03'
+updated: '2026-08-03'

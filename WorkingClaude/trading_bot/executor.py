@@ -636,6 +636,21 @@ class Executor:
                 continue
             packages.add(str(lp))
             authorized.setdefault(str(lp), set()).add(o.ticker)
+        # Sổ "ĐÃ ĐƯỢC CẤP PHÉP" do trading_bot.plan.apply_capit_lever ghi (xem chú thích ở đó).
+        # PHẢI hợp vào `authorized`, nếu không lượt chạy 13:00 ICT sẽ dựng sự cố GIẢ: ở lượt
+        # đó `lever_live_preflight` gỡ cờ vay khỏi plan (NAV sống đo giữa lúc đang giải ngân
+        # thấp hơn cơ sở tối qua là chuyện bình thường), trong khi lệnh gói 1840 của lượt
+        # 09:05 vẫn sống trên sổ broker ⇒ vòng lặp trên cho `authorized` RỖNG ⇒ guard này
+        # PAUSE cả rổ CAPIT cả buổi chiều và báo "đòn bẩy không ai duyệt" cho đúng những lệnh
+        # đã qua cả hai cổng người (arch-reviewer vòng 3 #1).
+        #
+        # KHÔNG làm yếu guard: sổ chỉ chứa mã mà `apply_capit_lever` đã cấp trong CHÍNH tiến
+        # trình này sau khi qua đủ mọi cổng (artifact, chính sách, trần VND, duyệt-ngày). Ca
+        # mà guard sinh ra để bắt — lệnh mang gói 1840 trên mã KHÔNG hề được cấp phép — vẫn
+        # bị bắt y như cũ, vì mã đó không có trong sổ.
+        for lp, tks in (getattr(self.plan, "_lever_authorized", None) or {}).items():
+            packages.add(str(lp))
+            authorized.setdefault(str(lp), set()).update(tks)
         # Không có lệnh đòn bẩy nào trong plan ⇒ MỌI gói lạ đều đáng ngờ, nhưng ta chỉ biết
         # "lạ" so với gói default account — cái đó là chuyện bình thường của BAL/LAG. Nên khi
         # plan không xin đòn bẩy, guard chỉ soi các gói mà chính sách đòn bẩy CÓ THỂ cấp.

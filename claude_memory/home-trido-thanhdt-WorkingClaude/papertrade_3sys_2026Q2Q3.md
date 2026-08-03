@@ -1,6 +1,6 @@
 ---
 name: papertrade-3sys-2026q2q3
-description: "Paper-trade A/B/C 3-system comparison infrastructure running 2026-04-01 → 2026-08-31, daily refresh 15:30 via Windows scheduled task. Decision input for go-live choice in Sept 2026."
+description: "Paper-trade A/B/C 3-system comparison infrastructure running 2026-04-01 → [REDACTED]31, daily refresh 15:30 via Windows scheduled task. Decision input for go-live choice in Sept 2026."
 metadata: 
   node_type: memory
   type: project
@@ -14,7 +14,7 @@ metadata:
 **How to apply:** Khi user hỏi về tiến độ paper-trade hoặc kết quả 3 hệ thống, đọc `data/papertrade_compare3.md` và `data/papertrade_compare3.csv`. Không invent số, không re-run sim trừ khi user yêu cầu. Daily refresh tự động qua scheduled task, baseline accumulate dần qua các ngày.
 
 **[REDACTED]:**
-- Window: 2026-04-01 → 2026-08-31 (~5 months, ~110 trading days expected)
+- Window: 2026-04-01 → [REDACTED]31 (~5 months, ~110 trading days expected)
 - 3 systems, mỗi cái start fresh 50B all-cash 2026-04-01:
   1. **V11 Song Sinh + Tam Quan v3.4b** (`pt_v11_tq34b.py`) — 25B BAL + 25B VN30
   2. **V12 Âm Dương + Tam Quan v3.4b** (`pt_v12_tq34b.py`) — 25B BAL + 25B LAGGED HL3y

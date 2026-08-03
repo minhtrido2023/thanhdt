@@ -1,0 +1,6 @@
+# Published HTML may hold real financial/portfolio data — never commit.
+html/
+
+# Per-project local data caches (nav history, fetched snapshots) — same
+# regenerable-data policy as the rest of the repo's root .gitignore.
+projects/*/data/

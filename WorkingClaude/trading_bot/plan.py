@@ -5,6 +5,7 @@ File: data/trade_plans/plan_<account>_<YYYY-MM-DD>.json
 (ngày = ngày THỰC THI, T+1 của signal; mỗi account 1 plan riêng).
 """
 
+import copy
 import dataclasses
 import datetime as dt
 import json
@@ -624,6 +625,293 @@ CAPIT_LEVER_APPROVED_F = 1.3
 CAPIT_LEVER_APPROVED_PACKAGE = 1840          # DNSE "RocketX" (gói default account là 1841)
 CAPIT_LEVER_APPROVED_ACCOUNTS = ["SpaceX"]   # ZaloPay cash-only ⇒ ngoài phạm vi
 
+# TRẦN cho hai thừa số sinh ra mục tiêu VND (dùng ở _verify_targets_integrity) — NEO THEO
+# `state` mà chính artifact công bố, KHÔNG phải trần phẳng.
+#
+# VÌ SAO KHÔNG PHẢI TRẦN PHẲNG (arch-reviewer vòng 3, phát hiện #2 — đo được, không phải lý
+# thuyết): bản đầu đặt `capit_size ≤ 1,0`, mà 1,0 ĐÚNG BẰNG giá trị hợp lệ LỚN NHẤT
+# (`capit_base` ở CRISIS). Ngày NEUTRAL thường lệ capit_size = 0,375 (0,75 × grind 0,5), nên
+# trần phẳng không ràng buộc gì: sửa `capit_size` 0,375 → 1,0 rồi tính lại 2 số dẫn xuất là
+# ba đẳng thức vẫn đúng, `nav_basis_vnd` KHÔNG đổi nên neo NAV sống cũng không thấy gì. Probe
+# đo được **2,67×** mục tiêu (envelope tối đa lọt được 111,6% NAV, so với thiết kế 13,6%).
+#
+# Neo theo state đóng đúng bậc tự do đó: hai bảng dưới là BẢN SAO CỦA CODE SẢN XUẤT
+# (`deploy_golive_dt5g_v4/golive_recommend_v23.py`: `capit_base()` dòng ~555 và
+# `STATE_LAG_WEIGHT` dòng 97) — chép vào đây có chủ đích, vì tầng thực thi KHÔNG được import
+# script golive (nó chạy BQ lúc import). Đổi bảng bên kia mà quên bên này ⇒ cổng SIẾT chặt
+# hơn thực tế (không cấp đòn bẩy), tức lệch về phía an toàn; ca kiểm C30 ghim đúng cặp số này.
+# `capit_size = capit_base(state) × (0,5 nếu grind)` ⇒ luôn ≤ capit_base(state).
+_CAPIT_BASE_BY_STATE = {1: 1.0, 2: 0.5, 3: 0.75, 4: 0.5, 5: 0.5}    # CRISIS/BEAR/NEUTRAL/BULL/EX
+_W_LAG_MAX_BY_STATE = {1: 0.50, 2: 0.00, 3: 0.65, 4: 0.65, 5: 0.65}  # golive.STATE_LAG_WEIGHT
+# Nguồn ĐỘC LẬP để đối chiếu `state` mà artifact tự khai (publish_gated_state.py ghi, KHÁC
+# tiến trình/khác file với golive_recommend_v23.py). Khai `state=1` để mở trần capit_size lên
+# 1,0 thì phải sửa KHỚP cả file này — hai artifact, hai lần ghi, cùng một lời nói dối.
+GOLIVE_STATE_TODAY_REL = ("deploy_golive_dt5g_v4", "golive_state_today.json")
+# Neo NAV sống: chỉ chặn khi artifact khai NAV LỚN HƠN thực tế quá biên này (chiều duy
+# nhất tạo ra vay vượt mức). Biên nới tay có chủ đích — giữa lúc công bố (~19:03) và lúc
+# thực thi (~09:05 hôm sau) NAV đổi thật do giá mở cửa (biên độ HOSE ±7%/phiên) và do
+# lệnh đã khớp. 15% >> nhiễu thật, << mọi bội số mà một lần sửa artifact nhắm tới.
+CAPIT_LEVER_NAV_TOL = 0.15
+# `approved_by` KHÔNG được là một chuỗi giữ chỗ hay tên một tác nhân tự động. Cùng tinh thần
+# coding_guidelines §20 (`decided_by: "user"` chỉ ghi khi user xác nhận THẬT): bản ghi duyệt
+# vay tiền phải trỏ về một NGƯỜI. So khớp NGUYÊN chuỗi (lower/strip), nên
+# "user (John) — Mike ghi hộ lúc 21:37" vẫn hợp lệ; đúng một chữ "mike" thì không.
+# `mike/bin/approve_margin_day.py` IMPORT chính danh sách này (một nguồn, không hai bản sao).
+#
+# ⚠️ ĐÂY LÀ QUY ƯỚC MỀM, KHÔNG PHẢI BỘ LỌC (arch-reviewer vòng 3 #9 — đo được): nó chặn
+# "mike"/"bot"/"agent"/"auto" nhưng CHO QUA "system-auto", "Claude", "yes", "u", "-". Không
+# cơ học hoá được việc "chuỗi này có trỏ về một người thật không" — cùng kết luận với
+# coding_guidelines §20 (quy ước + báo cáo, không phải cổng). Thứ THẬT SỰ chặn agent tự duyệt
+# là dấu vết: mỗi lần ghi đều bắn bus + Discord, và từ vòng 3 script còn đổi exit code khi
+# dấu vết đó gửi KHÔNG thành công. Đừng đọc danh sách này như một lá chắn.
+APPROVAL_PLACEHOLDERS = ("", "none", "null", "nil", "nan", "false", "0", "pending", "tbd",
+                         "auto", "agent", "bot", "system", "mike", "dollarbill", "taylor",
+                         "mafee", "winston", "wags", "spyros", "wendy")
+
+
+def _artifact_state(st, state_path):
+    """`state` của phiên, ĐÃ đối chiếu 2 nguồn độc lập → (state|None, lý do nếu không tin được).
+
+    `state` quyết định trần của `capit_size`/`w_lag_target` (xem `_verify_targets_integrity`),
+    nên nó tự trở thành một bậc tự do: khai `state=1` (CRISIS) là mở trần capit_size 0,75 → 1,0.
+    Chốt lại bằng nguồn ĐỘC LẬP `golive_state_today.json` — file khác, do `publish_gated_state.py`
+    ghi ở một bước khác của chuỗi, mang chính con số mà `get_gated_state()` công bố.
+
+    Fail-closed (trả None) khi không đọc được HOẶC hai nguồn lệch nhau: không biết chắc state
+    thì không biết trần nào đúng, và fail-safe ở đây là KHÔNG đòn bẩy (lệnh vẫn chạy vốn tự có).
+    """
+    try:
+        s_art = int(st.get("state"))
+    except (TypeError, ValueError):
+        return None, (f"artifact không khai `state` hợp lệ ({st.get('state')!r}) — không xác "
+                      f"định được trần sizing của phiên, KHÔNG cấp đòn bẩy")
+    path = state_path
+    try:
+        with open(path, encoding="utf-8") as f:
+            s_pub = int((json.load(f) or {})["state"])
+    except Exception as ex:
+        return None, (f"không đọc được `state` từ nguồn độc lập {path} "
+                      f"({type(ex).__name__}: {ex}) — không đối chiếu được state mà artifact "
+                      f"tự khai, KHÔNG cấp đòn bẩy")
+    if s_art != s_pub:
+        return None, (f"artifact khai `state`={s_art} nhưng nguồn độc lập "
+                      f"golive_state_today.json khai {s_pub} — state quyết định trần sizing, "
+                      f"hai nguồn lệch nhau ⇒ KHÔNG cấp đòn bẩy")
+    return s_art, ""
+
+
+def _verify_targets_integrity(t, basket, st=None, state_path=None, n_basket=None):
+    """Kiểm TÍNH NHẤT QUÁN NỘI TẠI của khối `capit_slot_targets[<account>]` → "" nếu sạch,
+    chuỗi lý do nếu hỏng (caller fail-closed).
+
+    THU HẸP KHE ĐÃ GHI Ở `known_limits` (quant-skeptic 2026-08-03, ca kiểm C29b cũ): mốc neo
+    trần VND dùng TRƯỜNG GỐC *của chính artifact đó*, nên nó chỉ chặn ca sửa MỘT trường.
+    Sửa ĐỒNG BỘ cả hai (gốc ×3, levered = gốc ×3 ×1,3) thì mọi tỷ lệ vẫn đúng ⇒ qua sạch.
+
+    Cách thu hẹp: golive KHÔNG chỉ công bố kết quả, nó công bố cả BA thừa số sinh ra kết quả
+    (`nav_basis_vnd` × `w_lag_target` × `capit_size` → `capit_total_target_vnd`, rồi
+    `/n_slots` → slot). Ba đẳng thức đó là ràng buộc MIỄN PHÍ mà một lần sửa tay/LLM gần
+    như chắc chắn phá vỡ. Muốn giữ nguyên vẹn phải sửa ĐỒNG BỘ nhiều trường, và khi đó thừa
+    số bị sửa lại rơi vào trần NEO THEO STATE (`w_lag`/`capit_size`, mà `state` lại bị chốt
+    bằng một artifact thứ hai), hoặc vào neo NAV SỐNG đo ở tầng broker
+    (`lever_live_preflight`). Bốn lớp, bốn nguồn: số học nội tại · bảng sizing trong code ·
+    artifact state độc lập · sổ broker sống.
+
+    ⚠️ **KHE NÀY THU HẸP, CHƯA ĐÓNG HẲN** (arch-reviewer vòng 3 đo được, đừng đọc đoạn trên
+    thành "đã đóng"): bản trần PHẲNG đầu tiên cho lọt **2,67×** mục tiêu (envelope tối đa
+    111,6% NAV) chỉ bằng cách sửa 3 trường nhất quán mà không đụng `nav_basis_vnd`. Neo theo
+    state cắt bậc tự do đó xuống còn phần dư trong CÙNG một state (NEUTRAL: 0,375 → trần
+    0,75, tức tối đa 2× chứ không phải 2,67×, và phải khai thêm `capit_grind=false`). Cổng
+    THẬT SỰ chặn quy mô ở đây là **cổng người thứ hai** (`margin_day_approval`): user nhìn Σ
+    tiền vay ở báo cáo 21:00 và duyệt đúng một rổ + một trần VND. Đây không phải chữ ký số:
+    nó chứng minh "các con số còn giải thích được lẫn nhau", không chứng minh "chưa ai sửa".
+
+    `st`/`state_path` — artifact đầy đủ + đường dẫn nguồn state ĐỘC LẬP, để đối chiếu `state`
+    qua `_artifact_state`. Thiếu (gọi kiểu cũ) ⇒ bỏ qua neo state, giữ các kiểm còn lại.
+    `n_basket` — `n_capit_basket` của artifact (rổ ĐẦY ĐỦ của phiên), dùng thay cho số khoá
+    `capit_adv_caps` khi đối chiếu `n_slots` (xem bên dưới).
+    """
+    need = ("nav_basis_vnd", "w_lag_target", "capit_size", "nav_book_lag_vnd",
+            "capit_total_target_vnd", "n_slots", "capit_slot_target_vnd")
+    miss = [k for k in need if t.get(k) in (None, "")]
+    if miss:
+        return (f"artifact BẬT đòn bẩy nhưng `capit_slot_targets` thiếu thừa số để tự kiểm "
+                f"{miss} — không đối chiếu được mục tiêu VND với NAV/cơ sở nào, KHÔNG cấp "
+                f"đòn bẩy (fail-closed)")
+    try:
+        nav = float(t["nav_basis_vnd"]); w = float(t["w_lag_target"])
+        size = float(t["capit_size"]); book = float(t["nav_book_lag_vnd"])
+        tot = float(t["capit_total_target_vnd"]); n = int(t["n_slots"])
+        slot = float(t["capit_slot_target_vnd"])
+    except (TypeError, ValueError) as ex:
+        return f"`capit_slot_targets` có trường không phải số ({ex}) — KHÔNG cấp đòn bẩy"
+    if nav <= 0 or book <= 0 or tot <= 0 or slot <= 0 or n < 1:
+        return (f"`capit_slot_targets` có giá trị ≤0 (nav={nav}, book={book}, total={tot}, "
+                f"slot={slot}, n_slots={n}) — KHÔNG cấp đòn bẩy")
+    # TRẦN NEO THEO STATE — thay trần phẳng (arch-reviewer vòng 3 #2: trần phẳng 1,0 = đúng
+    # giá trị hợp lệ lớn nhất ⇒ không ràng buộc gì trên ngày NEUTRAL thường lệ).
+    if st is not None and state_path is not None:
+        s, s_err = _artifact_state(st, state_path)
+        if s is None:
+            return s_err
+        w_max = _W_LAG_MAX_BY_STATE.get(s, 0.65)
+        size_max = _CAPIT_BASE_BY_STATE.get(s, 0.75)
+        if not (0 < w <= w_max):
+            return (f"w_lag_target={w} ngoài biên của state {s} (0; {w_max}] — thừa số này "
+                    f"nhân thẳng vào vốn triển khai, giá trị lạ ⇒ KHÔNG cấp đòn bẩy")
+        if not (0 < size <= size_max):
+            return (f"capit_size={size} ngoài biên của state {s} (0; {size_max}] — "
+                    f"`capit_size = capit_base(state) × grind` nên KHÔNG thể vượt "
+                    f"capit_base({s})={size_max} ⇒ KHÔNG cấp đòn bẩy")
+    elif not (0 < w <= 0.65) or not (0 < size <= 1.0):
+        return (f"w_lag_target={w} / capit_size={size} ngoài biên cơ học — KHÔNG cấp đòn bẩy")
+
+    def _off(a, b):
+        """Lệch tương đối, chịu được làm tròn số nguyên của chính golive."""
+        return abs(a - b) / max(abs(b), 1.0)
+
+    if _off(book, nav * w) > 0.002:
+        return (f"artifact TỰ MÂU THUẪN: nav_book_lag_vnd={book:,.0f} ≠ nav_basis_vnd "
+                f"{nav:,.0f} × w_lag_target {w} = {nav * w:,.0f} — KHÔNG cấp đòn bẩy")
+    if _off(tot, book * size) > 0.002:
+        return (f"artifact TỰ MÂU THUẪN: capit_total_target_vnd={tot:,.0f} ≠ "
+                f"nav_book_lag_vnd {book:,.0f} × capit_size {size} = {book * size:,.0f} — "
+                f"đây ĐÚNG hình dạng của một lần sửa tay/regenerate hỏng, KHÔNG cấp đòn bẩy")
+    if _off(slot, tot / n) > 0.002:
+        return (f"artifact TỰ MÂU THUẪN: capit_slot_target_vnd={slot:,.0f} ≠ "
+                f"capit_total_target_vnd {tot:,.0f} / n_slots {n} = {tot / n:,.0f} — "
+                f"KHÔNG cấp đòn bẩy")
+    # `n_slots` phải khớp rổ ĐẦY ĐỦ của phiên (`n_capit_basket`), KHÔNG phải số khoá
+    # `capit_adv_caps` (arch-reviewer vòng 3 #4). Hai số này LỆCH NHAU một cách hợp lệ và
+    # thường xuyên: `golive.capit_adv_caps()` bỏ mã thiếu `adv20` và tự in WARNING (mã đó bị
+    # `cap_capit_orders` chặn riêng ở tầng dưới) trong khi `n_slots` vẫn chia theo rổ đầy đủ.
+    # So với `len(basket)` thì một lỗ hổng dữ liệu ADV20 thường lệ — hay gặp đúng ở rổ washout,
+    # nơi mã đang bị đình chỉ/thanh khoản cạn — sẽ TẮT đòn bẩy cả phiên và báo là "artifact TỰ
+    # MÂU THUẪN", đẩy người trực đi điều tra giả mạo artifact cho một chuyện bình thường.
+    if n_basket is not None and n != int(n_basket):
+        return (f"artifact TỰ MÂU THUẪN: n_slots={n} ≠ n_capit_basket={n_basket} — mục tiêu/"
+                f"slot đang chia theo một rổ KHÁC rổ CAPIT của phiên, KHÔNG cấp đòn bẩy")
+    if basket and n < len(basket):
+        return (f"artifact TỰ MÂU THUẪN: n_slots={n} NHỎ HƠN số mã có trần ADV trong rổ "
+                f"({len(basket)}) — chia mục tiêu cho ít slot hơn số mã sẽ mua là chiều làm "
+                f"slot TO ra, KHÔNG cấp đòn bẩy")
+    return ""
+
+
+def margin_day_approval(account_label, plan_date, approvals_dir=None):
+    """CỔNG DUYỆT RIÊNG TỪNG NGÀY CÓ VAY (user chốt 2026-08-03) → (record, "") | (None, lý do).
+
+    `capit_margin_lever.enabled=true` là ĐIỀU KIỆN CẦN (công tắc tổng, bật 1 lần) — user chốt
+    thêm: MỖI NGÀY mà plan thực sự có lệnh được cấp đòn bẩy còn cần MỘT lần duyệt riêng cho
+    ĐÚNG ngày đó. Bản ghi duyệt là file `data/margin_approvals/margin_approval_<account>_
+    <plan_date>.json`, do `mike/bin/approve_margin_day.py` ghi khi user xác nhận thật.
+
+    VÌ SAO KHÔNG dùng field trong chính file plan (như `approved_by` của plan-approval-gate):
+    plan là JSON do LLM (DollarBill) sinh / người sửa tay — đặt cờ duyệt đòn bẩy vào đó là
+    trao quyền duyệt cho nơi sinh plan, đúng cái mà `apply_capit_lever` tồn tại để chặn
+    (coding_guidelines §7). File duyệt nằm NGOÀI plan, và không tầng sinh plan nào ghi nó.
+
+    Fail-safe: thiếu/hỏng/không khớp ⇒ KHÔNG đòn bẩy (lệnh vẫn chạy bằng vốn tự có), KHÔNG
+    chặn lệnh — under-deploy là sai số lành, vay không ai duyệt là tiền thật.
+    """
+    from .config import WORKDIR
+    d = approvals_dir or os.path.join(WORKDIR, "data", "margin_approvals")
+    path = os.path.join(d, f"margin_approval_{account_label}_{plan_date}.json")
+    if not os.path.exists(path):
+        return None, (f"CHƯA CÓ duyệt riêng cho ngày {plan_date} [{account_label}] "
+                      f"({path}) — công tắc `enabled=true` là điều kiện CẦN, mỗi ngày có vay "
+                      f"cần thêm 1 lần user duyệt riêng (mike/bin/approve_margin_day.py)")
+    try:
+        with open(path, encoding="utf-8") as f:
+            rec = json.load(f) or {}
+    except Exception as ex:
+        return None, f"không đọc được bản ghi duyệt {path}: {type(ex).__name__}: {ex}"
+    # Cờ THU HỒI đọc theo chiều NGƯỢC với cờ BẬT: `capit_lever_enabled` dùng `is True` (chỉ
+    # đúng boolean mới bật được — fail-closed), còn ở đây BẤT KỲ giá trị lạ nào cũng phải
+    # nghiêng về HUỶ. Lý do (arch-reviewer vòng 3 #3): đường thu hồi được thiết kế cho người
+    # sửa gấp lúc 08:10, và người sửa tay JSON viết `"revoked": "true"` (chuỗi) hay `1` là
+    # chuyện thường — với `is True` thì cả hai bị BỎ QUA im lặng và 09:05 vẫn vay. Một cờ huỷ
+    # fail-OPEN là đúng thứ không được phép tồn tại trong bản ghi ủy quyền vay tiền.
+    _rv = rec.get("revoked")
+    if "revoked" in rec and _rv not in (False, None, "", 0, "false", "False", "no", "0"):
+        return None, (f"bản ghi duyệt {plan_date} [{account_label}] đã bị THU HỒI "
+                      f"(revoked={_rv!r}, lý do: {rec.get('revoked_reason') or 'không ghi'})")
+    if str(rec.get("account") or "") != account_label:
+        return None, (f"bản ghi duyệt ghi account={rec.get('account')!r} ≠ {account_label!r} "
+                      f"— duyệt của account khác KHÔNG dùng chéo được")
+    if str(rec.get("plan_date") or "") != str(plan_date):
+        return None, (f"bản ghi duyệt ghi plan_date={rec.get('plan_date')!r} ≠ {plan_date!r} "
+                      f"— duyệt của ngày khác KHÔNG dùng lại được (đổi tên file không đủ)")
+    who = rec.get("approved_by")
+    who = who.strip() if isinstance(who, str) else ""
+    if who.lower() in APPROVAL_PLACEHOLDERS:
+        return None, (f"bản ghi duyệt có approved_by={rec.get('approved_by')!r} — chưa phải "
+                      f"một NGƯỜI duyệt thật (chuỗi giữ chỗ hoặc tên một tác nhân tự động)")
+    if rec.get("lever_f") != CAPIT_LEVER_APPROVED_F:
+        return None, (f"bản ghi duyệt ghi lever_f={rec.get('lever_f')!r} ≠ hệ số đã duyệt "
+                      f"trong code {CAPIT_LEVER_APPROVED_F}")
+    if rec.get("loan_package_id") != CAPIT_LEVER_APPROVED_PACKAGE:
+        return None, (f"bản ghi duyệt ghi loan_package_id={rec.get('loan_package_id')!r} ≠ "
+                      f"gói đã duyệt trong code {CAPIT_LEVER_APPROVED_PACKAGE}")
+    try:
+        cap = float(rec.get("max_lever_total_vnd"))
+    except (TypeError, ValueError):
+        cap = 0.0
+    if cap <= 0:
+        return None, (f"bản ghi duyệt thiếu/không hợp lệ `max_lever_total_vnd` "
+                      f"({rec.get('max_lever_total_vnd')!r}) — không có trần thì bản duyệt "
+                      f"không ràng buộc được điều gì")
+    tickers = rec.get("tickers")
+    if not isinstance(tickers, list) or not all(isinstance(x, str) and x for x in tickers) \
+            or not tickers:
+        return None, (f"bản ghi duyệt thiếu/không hợp lệ danh sách `tickers` "
+                      f"({rec.get('tickers')!r}) — user duyệt một RỔ cụ thể, không duyệt khống")
+    return rec, ""
+
+
+def _enforce_margin_day_approval(plan, account_label, adj, approvals_dir=None):
+    """Áp cổng duyệt-riêng-từng-ngày lên tập lệnh VỪA ĐƯỢC CẤP trong `adj` (sửa tại chỗ).
+
+    Chạy SAU vòng cấp/gỡ của apply_capit_lever, ngay trong cùng hàm đó, để không có đường
+    nào ra khỏi hàm với cờ vay mà chưa qua cổng này. Không khớp ⇒ GỠ SẠCH đòn bẩy của phiên
+    (không chặn lệnh) + 1 dòng cấp-plan để log vận hành nói thẳng vì sao.
+    """
+    granted = [a for a in adj if a["action"] in ("APPLIED", "OVERRIDDEN")]
+    if not granted:
+        return
+    rec, err = margin_day_approval(account_label, plan.plan_date, approvals_dir)
+    if rec is not None:
+        want = sum(float(a.get("value") or 0) for a in granted)
+        cap = float(rec["max_lever_total_vnd"])
+        approved_tk = set(rec["tickers"])
+        extra = sorted({a["ticker"] for a in granted} - approved_tk)
+        if extra:
+            err = (f"plan cấp đòn bẩy cho mã {extra} KHÔNG có trong rổ user đã duyệt "
+                   f"{sorted(approved_tk)} — rổ đổi sau khi duyệt thì phải duyệt lại")
+        elif want > cap:
+            err = (f"Σ giá trị lệnh được cấp đòn bẩy {want:,.0f} VND VƯỢT mức user đã duyệt "
+                   f"{cap:,.0f} VND cho ngày {plan.plan_date} — duyệt lại nếu thật sự muốn "
+                   f"tăng quy mô vay")
+    if not err:
+        return
+    by_id = {o.id: o for o in plan.orders}
+    for a in granted:
+        o = by_id.get(a["order_id"])
+        if o is not None:
+            o.lever_f = None
+            o.loan_package_id = None
+        a["action"] = "DENIED"
+        a["reason"] = (f"CỔNG DUYỆT RIÊNG NGÀY CÓ VAY: {err} — GỠ đòn bẩy, lệnh vẫn chạy "
+                       f"bằng vốn tự có")
+    adj.append({"ticker": "-", "order_id": "-", "action": "MARGIN_APPROVAL_REQUIRED",
+                "lever_f": None, "loan_package_id": None,
+                "reason": (f"{len(granted)} lệnh CAPIT ĐỦ điều kiện đòn bẩy nhưng KHÔNG có "
+                           f"duyệt riêng hợp lệ cho ngày {plan.plan_date} [{account_label}]: "
+                           f"{err}. Phiên này chạy bằng vốn tự có. Muốn có đòn bẩy: user xác "
+                           f"nhận → Mike chạy `mike/bin/approve_margin_day.py --account "
+                           f"{account_label} --date {plan.plan_date} --approved-by \"...\"` "
+                           f"TRƯỚC 09:05.")})
+
 
 def capit_lever_enabled(rules_path=None):
     """Công tắc BẬT/TẮT đọc từ `data/trading_rules.json` → (bật?, lý do nếu tắt).
@@ -654,7 +942,8 @@ def capit_lever_enabled(rules_path=None):
     return True, ""
 
 
-def apply_capit_lever(plan, account_label, status_path=None, rules_path=None):
+def apply_capit_lever(plan, account_label, status_path=None, rules_path=None,
+                      preview=False, approvals_dir=None, state_path=None):
     """ĐÒN BẨY MARGIN cho lệnh MUA book CAPIT — ĐÚNG MỘT CHỖ THỰC THI, cấp phép bởi artifact.
 
     CHÍNH SÁCH (user duyệt 2026-08-03, chuỗi nghiên cứu p1–p5 cùng ngày): vay margin CHỈ trên
@@ -687,10 +976,32 @@ def apply_capit_lever(plan, account_label, status_path=None, rules_path=None):
     lag_rating → **LEVER** → approval. Đặt CUỐI vì nó phải nhìn thấy tập lệnh chung cuộc: một
     lệnh bị các tầng trên loại thì không cần (và không được) gắn cờ vay.
 
+    HAI CỔNG NGƯỜI, KHÔNG PHẢI MỘT (user chốt 2026-08-03): `capit_margin_lever.enabled=true`
+    là công tắc TỔNG (bật 1 lần, cần user xác nhận riêng) — CẦN nhưng KHÔNG ĐỦ. Mỗi NGÀY mà
+    hàm này thật sự cấp cờ vay cho ≥1 lệnh còn cần một bản ghi duyệt riêng cho ĐÚNG ngày đó
+    (`margin_day_approval`, xem `_enforce_margin_day_approval` ở cuối hàm). Không có ⇒ gỡ
+    sạch đòn bẩy của phiên, lệnh vẫn chạy bằng vốn tự có.
+
     Trả (plan đã sửa, list dict mô tả từng thay đổi) — KHÔNG log, caller tự báo.
-    Mỗi dict: {"ticker","order_id","action","lever_f","loan_package_id","reason"}.
+    Mỗi dict: {"ticker","order_id","action","lever_f","loan_package_id","value","reason"}.
+
+    `preview=True` — CHẾ ĐỘ XEM TRƯỚC cho bước duyệt (send_plan_report 21:00 và
+    approve_margin_day.py) cần biết "nếu được duyệt thì những lệnh nào sẽ vay, bao nhiêu":
+    bỏ qua ĐÚNG cổng duyệt-riêng-từng-ngày (nếu không thì vòng lặp chết — không xem trước
+    được thứ đang chờ duyệt), giữ nguyên MỌI cổng còn lại. Để chế độ này không bao giờ trở
+    thành đường vòng: hàm deepcopy plan NGAY DÒNG ĐẦU và trả `(None, adj)` — hàm KHÔNG TRẢ RA
+    đối tượng plan nào mang cờ vay, kể cả khi caller gán lại biến, và cũng không ghi sổ
+    `_lever_authorized`.
+    ⚠️ Nó KHÔNG làm sạch plan mà caller TRUYỀN VÀO: một plan JSON tự ghi sẵn `lever_f`/
+    `loan_package_id` thì sau lượt preview vẫn còn nguyên cờ đó trên đối tượng của caller
+    (arch-reviewer vòng 3 #8). Hai caller hiện tại đều tự `load_plan` rồi vứt nên vô hại;
+    caller mới PHẢI chạy lại `apply_capit_lever(...)` (không preview) trước khi thực thi —
+    đừng dựa vào preview để "dọn" plan.
     """
     from .config import WORKDIR
+
+    if preview:
+        plan = copy.deepcopy(plan)
 
     def _is_capit_buy(o):
         return (o.book or "").upper() == "CAPIT" and (o.side or "").lower() == "buy"
@@ -765,6 +1076,18 @@ def apply_capit_lever(plan, account_label, status_path=None, rules_path=None):
             authorized = False
             err = (f"artifact BẬT đòn bẩy nhưng `capit_adv_caps.{account_label}` rỗng — không "
                    f"xác định được rổ CAPIT của phiên, KHÔNG áp đòn bẩy (fail-closed)")
+
+    # TÍNH NHẤT QUÁN NỘI TẠI của mục tiêu VND — thu hẹp khe "sửa ĐỒNG BỘ hai trường" mà vòng 2
+    # còn để mở (xem docstring _verify_targets_integrity). Đặt TRƯỚC _anchored_cap vì mốc neo
+    # của nó chỉ có nghĩa khi trường GỐC còn giải thích được bằng NAV × w_lag × capit_size.
+    if authorized:
+        _int_err = _verify_targets_integrity(
+            (st.get("capit_slot_targets") or {}).get(account_label) or {}, basket,
+            st=st, n_basket=st.get("n_capit_basket"),
+            state_path=state_path or os.path.join(WORKDIR, *GOLIVE_STATE_TODAY_REL))
+        if _int_err:
+            authorized = False
+            err = _int_err
 
     # TRẦN VND cho quyền vay (arch-reviewer 2026-08-03). "Được vay" mà không kèm trần khối
     # lượng là đúng hình dạng bug 07-21 (nhân capit_size hai lần, thiếu 87,1tr) — chỉ khác
@@ -867,11 +1190,13 @@ def apply_capit_lever(plan, account_label, status_path=None, rules_path=None):
             if had and (o.lever_f != float(f_val) or o.loan_package_id != lp_val):
                 adj.append({"ticker": o.ticker, "order_id": o.id, "action": "OVERRIDDEN",
                             "lever_f": float(f_val), "loan_package_id": lp_val,
+                            "value": o.value,
                             "reason": f"plan ghi sẵn (f={o.lever_f!r}, lp={o.loan_package_id!r}) "
                                       f"— ghi đè bằng giá trị của artifact"})
             else:
                 adj.append({"ticker": o.ticker, "order_id": o.id, "action": "APPLIED",
                             "lever_f": float(f_val), "loan_package_id": lp_val,
+                            "value": o.value,
                             "reason": f"CAPIT buy, cổng {lever.get('gate')} đạt "
                                       f"(dd52={lever.get('dd52_pct')}%)"})
             o.lever_f = float(f_val)
@@ -896,6 +1221,36 @@ def apply_capit_lever(plan, account_label, status_path=None, rules_path=None):
                                    f"KHÔNG thuộc phạm vi đòn bẩy (chỉ CAPIT buy)")})
             o.lever_f = None
             o.loan_package_id = None
+
+    # CỔNG NGƯỜI THỨ HAI — duyệt riêng cho ĐÚNG ngày có vay (user chốt 2026-08-03). Đặt ở
+    # ĐÂY, trong cùng hàm cấp phép, chứ không ở một tầng khác: mọi đường ra khỏi hàm này với
+    # cờ vay đều phải đi qua nó. `preview` bỏ qua đúng cổng này (và chỉ cổng này) để bước
+    # duyệt xem trước được tập lệnh đang chờ duyệt — an toàn vì preview chạy trên bản sao và
+    # trả về `None` thay cho plan (xem docstring).
+    if not preview:
+        _enforce_margin_day_approval(plan, account_label, adj, approvals_dir)
+
+    # ── SỔ "ĐÃ ĐƯỢC CẤP PHÉP" cho lưới an toàn tầng lệnh ────────────────────────────────
+    # Executor._lever_package_audit hỏi "mã này có được cấp phép đòn bẩy hôm nay không" và
+    # trước đây suy ra câu trả lời từ CHÍNH `o.loan_package_id` của plan. Điều đó SAI kể từ
+    # khi `lever_live_preflight` tồn tại: nó GỠ cờ vay ở lượt chạy sau (13:00 ICT, cron
+    # "khởi động lại sau nghỉ trưa" — có thật trong crontab), trong khi các lệnh gói 1840 của
+    # lượt 09:05 VẪN nằm trên sổ broker. Audit khi đó thấy "đòn bẩy trên mã không được cấp
+    # phép" và PAUSE cả rổ CAPIT suốt buổi chiều kèm một sự cố NÓI SAI — trong khi đòn bẩy đó
+    # đã qua ĐỦ CẢ HAI cổng người sáng hôm ấy (arch-reviewer vòng 3 #1, probe tái lập được).
+    #
+    # Tách hai khái niệm: `o.loan_package_id` = "lệnh này ĐI RA bằng gói vay nào" (preflight
+    # được phép hạ về None), còn sổ dưới đây = "hôm nay ai ĐÃ ĐƯỢC CẤP PHÉP vay" (chỉ hàm này
+    # ghi, sau khi qua mọi cổng kể cả duyệt-ngày; preflight KHÔNG được đụng). Đặt trên đối
+    # tượng plan RUNTIME, không phải field dataclass: `load_plan` lọc theo field khai báo
+    # (plan.py:143/150) nên một plan JSON tự ghi `_lever_authorized` KHÔNG thể chạm tới nó —
+    # nếu để dạng field thì chính nó thành đường qua mặt lưới an toàn cuối cùng.
+    if not preview:
+        _granted = {}
+        for a in adj:
+            if a["action"] in ("APPLIED", "OVERRIDDEN") and a.get("loan_package_id") is not None:
+                _granted.setdefault(str(a["loan_package_id"]), set()).add(a["ticker"])
+        plan._lever_authorized = _granted
 
     # KHÔNG ĐƯỢC IM LẶNG khi plan đã sizing theo đòn bẩy mà thực thi lại không có đòn bẩy
     # (arch-reviewer vòng 2, phát hiện #3a). Kịch bản thật: golive công bố artifact có đòn
@@ -931,7 +1286,243 @@ def apply_capit_lever(plan, account_label, status_path=None, rules_path=None):
                                 f"cấp vốn, không đổi khối lượng plan đã chốt).")})
         except Exception:
             pass
-    return plan, adj
+
+    # ARTIFACT NÓI ĐÒN BẨY ĐANG BẬT MÀ TA TỪ CHỐI — luôn để lại đúng 1 dòng, kể cả khi không
+    # có cờ nào để "GỠ" và không có mục tiêu levered để cảnh báo sizing (ca artifact thiếu
+    # `capit_slot_targets`, thiếu thừa số, tự mâu thuẫn…). Trước đây những ca đó fail-closed
+    # ĐÚNG nhưng IM LẶNG: một artifact hỏng trông y hệt một ngày không có sự kiện CAPIT.
+    # Điều kiện `active is True` giữ log vận hành thường lệ sạch: ngày chính sách tắt/không có
+    # washout thì artifact không claim gì, và hàm này vẫn trả 0 dòng như trước.
+    if (not authorized and lever.get("active") is True
+            and not any(a["ticker"] == "-" for a in adj)
+            and any(_is_capit_buy(o) for o in plan.orders)):
+        adj.append({"ticker": "-", "order_id": "-", "action": "LEVER_REFUSED_ARTIFACT_ACTIVE",
+                    "lever_f": None, "loan_package_id": None, "value": 0,
+                    "reason": (f"artifact công bố `capit_lever.active=true` nhưng KHÔNG cấp "
+                               f"được đòn bẩy: {err}. Phiên chạy bằng vốn tự có — đúng chiều "
+                               f"an toàn, nhưng đây là DỮ LIỆU HỎNG cần người xem, không phải "
+                               f"một ngày bình thường không có sự kiện.")})
+    return (None if preview else plan), adj
+
+
+def preview_margin_day(account_label, plan_date, status_path=None, rules_path=None,
+                       state_path=None):
+    """"Nếu được duyệt thì phiên {plan_date} sẽ vay những gì" → dict, dùng CHUNG cho:
+      · `mike/bin/send_plan_report.sh` — nêu bật trong báo cáo user duyệt (~21:00);
+      · `mike/bin/approve_margin_day.py` — ghi ĐÚNG rổ + trần đó vào bản ghi duyệt;
+      · `capit_lever_selfcheck.py` nhóm I.
+    Một nguồn duy nhất ⇒ số user NHÌN THẤY lúc duyệt == số bị ràng buộc lúc thực thi; hai
+    bản sao công thức là cách chắc chắn nhất để hai con số trôi khỏi nhau.
+
+    Chạy `apply_capit_lever(preview=True)`: đủ MỌI cổng (chính sách, envelope code, rổ, trần
+    VND neo, nhất quán artifact) trừ đúng cổng duyệt-riêng-từng-ngày — thứ đang chờ user.
+
+    `total_vnd` là CẬN TRÊN: preview chạy trên plan THÔ, chưa qua trần %ADV `cap_capit_orders`
+    (áp lúc thực thi và chỉ cắt xuống). Σ thật lúc 09:05 ≤ số này ⇒ trần trong bản ghi duyệt
+    không bao giờ chặn oan một plan không đổi.
+    """
+    plan = load_plan(plan_date, account=account_label)
+    out = {"account": account_label, "plan_date": plan_date, "orders": [], "tickers": [],
+           "total_vnd": 0.0, "borrow_vnd": 0.0, "lever_f": None, "loan_package_id": None,
+           "reasons": [], "error": ""}
+    if plan is None:
+        out["error"] = f"không có file plan_{account_label}_{plan_date}.json"
+        return out
+    _, adj = apply_capit_lever(plan, account_label, status_path=status_path,
+                               rules_path=rules_path, preview=True, state_path=state_path)
+    granted = [a for a in adj if a["action"] in ("APPLIED", "OVERRIDDEN")]
+    out["reasons"] = [a["reason"] for a in adj
+                      if a["action"] in ("DENIED", "STRIPPED", "PLAN_SIZED_LEVERED_BUT_OFF")]
+    if not granted:
+        return out
+    out["orders"] = [{"order_id": a["order_id"], "ticker": a["ticker"],
+                      "value_vnd": float(a.get("value") or 0)} for a in granted]
+    out["tickers"] = sorted({a["ticker"] for a in granted})
+    out["total_vnd"] = sum(o["value_vnd"] for o in out["orders"])
+    out["lever_f"] = granted[0]["lever_f"]
+    out["loan_package_id"] = granted[0]["loan_package_id"]
+    f = float(out["lever_f"] or 1.0)
+    # Phần VƯỢT trên vốn tự có mới là tiền VAY (lever_formula của golive): với f=1,3 thì
+    # 1 − 1/1,3 = 23,1% giá trị lệnh.
+    out["borrow_vnd"] = out["total_vnd"] * (1 - 1 / f) if f > 0 else 0.0
+    return out
+
+
+def _session_already_placed(account_label, plan_date, exec_dir=None):
+    """Phiên (account, plan_date) này ĐÃ đặt lệnh con nào chưa → (bool, mô tả ngắn).
+
+    Đọc CHÍNH file state mà `Executor` sẽ load (`exec_<account>_<date>_state.json`,
+    executor.py:78-79) — nguồn duy nhất ghi lại "lệnh đã thật sự đi ra", cập nhật ngay sau
+    mỗi `place_order` (coding_guidelines §5). Không đọc được ⇒ coi như CHƯA đặt: đó là chiều
+    thận trọng (preflight giữ toàn quyền GỠ, tức không cấp đòn bẩy).
+    """
+    from .config import EXEC_DIR
+    d = exec_dir or EXEC_DIR
+    path = os.path.join(d, f"exec_{account_label}_{plan_date}_state.json")
+    try:
+        with open(path, encoding="utf-8") as f:
+            st = json.load(f) or {}
+    except Exception:
+        return False, ""
+    n_child = sum(len(p.get("children") or []) for p in (st.get("parents") or {}).values())
+    n_filled = sum(1 for p in (st.get("parents") or {}).values() if (p.get("filled") or 0) > 0)
+    if n_child:
+        return True, (f"state {os.path.basename(path)} có {n_child} lệnh con đã đặt, "
+                      f"{n_filled} mã đã khớp")
+    return False, ""
+
+
+def lever_live_preflight(plan, account_label, broker, mode, status_path=None,
+                         excluded_tickers=None, offbook_vnd=0.0):
+    """PREFLIGHT SỐNG trước khi đặt bất kỳ lệnh đòn bẩy nào — CHỈ GỠ, không bao giờ cấp.
+
+    Hai việc mà chỉ tầng broker sống làm được, nên không thể nằm trong apply_capit_lever
+    (chạy trước khi connect):
+
+    (1) **NEO NAV SỐNG** (đóng nốt khe artifact hai-trường, §10.3 báo cáo wiring). Ba đẳng
+        thức nội tại ở `_verify_targets_integrity` buộc kẻ muốn thổi mục tiêu phải sửa cả
+        `nav_basis_vnd`; đây là chỗ bắt đúng nước đi đó — đo lại NAV từ SỔ BROKER SỐNG
+        (tiền + vị thế × giá thị trường, trừ excluded_tickers, cộng off-book) theo đúng công
+        thức `mike/bin/compute_active_nav.py` mà chính golive dùng làm cơ sở. Chỉ chặn CHIỀU
+        artifact khai NAV LỚN HƠN thực tế (chiều duy nhất sinh ra vay vượt mức); NAV thực tế
+        lớn hơn artifact chỉ là sizing thận trọng, không phải rủi ro.
+
+    (2) **ĐỌC THẬT `pp0Buy` theo ĐÚNG gói vay của lệnh** (việc kiểm tay ở phiên LIVE đầu tiên,
+        `known_limits` mục 2 — nay có lưới TỰ ĐỘNG chạy trước, không thay người). Diễn tập
+        paper KHÔNG phủ được tầng này (`PaperBroker` không có `ppse`), nên trước khi bot đặt
+        lệnh vay tiền THẬT lần đầu, nó phải tự chứng minh đọc được sức mua ở gói 1840. Đọc
+        KHÔNG được (mạng lỗi/None/≤0) ⇒ GỠ đòn bẩy phiên đó (chạy vốn tự có), KHÔNG đoán.
+
+    KHÔNG gỡ khi pp0Buy đọc ĐƯỢC nhưng NHỎ HƠN Σ lệnh: gỡ đòn bẩy lúc đó làm lệnh cần NHIỀU
+    tiền hơn (gói 1840 initialRate 0,5 ⇒ sức mua gấp đôi) — sai chiều fail-safe. Chỉ CẢNH BÁO
+    to; phần không đủ tiền để `executor` xử như mọi phiên (WAIT_CASH).
+
+    Chỉ chạy ở account mode=live. Paper/backtest: bỏ qua có ghi dòng log — `pp0Buy` là khái
+    niệm của broker thật, và không có khoản vay thật nào để bảo vệ.
+
+    Trả (plan, list dict) — cùng schema `adj` của apply_capit_lever.
+    """
+    levered = [o for o in plan.orders if getattr(o, "loan_package_id", None) is not None]
+    if not levered:
+        return plan, []
+    total = sum(o.value for o in levered)
+    tickers = sorted({o.ticker for o in levered})
+    started, started_why = _session_already_placed(account_label, plan.plan_date)
+
+    def _strip(reason):
+        """GỠ — nhưng CHỈ khi phiên chưa đặt lệnh nào. Đã đặt rồi thì hạ xuống CẢNH BÁO.
+
+        VÌ SAO BẤT ĐỐI XỨNG (arch-reviewer vòng 3 #1): cron chạy `run_bot.sh` HAI lượt mỗi
+        phiên (09:05 và 13:00 ICT "khởi động lại sau nghỉ trưa"), lượt sau là tiến trình MỚI
+        chạy lại trọn cascade. Ở lượt 13:00 cả hai phép đo của preflight đều lệch một cách
+        BÌNH THƯỜNG, không phải vì artifact giả: `availableCash` đã trừ phần tiền bị giữ cho
+        lệnh đang treo nên NAV sống đo được THẤP hơn cơ sở tối qua (đo được −46% ở sizing
+        CRISIS, −14,5% ở NEUTRAL — ăn gần hết biên 15%), và `pp0Buy@1840` tụt về ~0 sau khi
+        sleeve đã giải ngân xong. GỠ khi ấy vừa VÔ ÍCH (lệnh đã ra rồi) vừa CÓ HẠI: nó khiến
+        `Executor._lever_package_audit` mất tập cấp phép và PAUSE cả rổ CAPIT cả buổi chiều.
+        Sổ `plan._lever_authorized` đã chặn đúng ca đó ở tầng audit; đây là lớp thứ hai, chặn
+        ngay từ nguồn — và quan trọng hơn, nó giữ đòn bẩy cho phần rổ CHƯA giải ngân xong.
+
+        Giá trị bảo vệ KHÔNG mất: mục tiêu của preflight là chặn khoản vay đầu tiên đi ra
+        trên một cơ sở vốn giả. Lượt 09:05 (phiên sạch, chưa lệnh nào) vẫn GỠ đầy đủ.
+        """
+        if started:
+            return plan, [{"ticker": "-", "order_id": "-", "action": "LIVE_PREFLIGHT_WARN",
+                           "lever_f": None, "loan_package_id": None, "value": total,
+                           "reason": (f"{reason} — NHƯNG phiên này ĐÃ đặt lệnh ({started_why}), "
+                                      f"nên KHÔNG gỡ đòn bẩy: ở lượt chạy lại (13:00 ICT) NAV "
+                                      f"sống/pp0Buy tụt là chuyện bình thường giữa lúc giải "
+                                      f"ngân, còn gỡ thì làm audit tầng lệnh mất tập cấp phép "
+                                      f"và treo cả rổ CAPIT. Chỉ CẢNH BÁO — người trực xem lại.")}]
+        for o in levered:
+            o.lever_f = None
+            o.loan_package_id = None
+        return plan, [{"ticker": "-", "order_id": "-", "action": "LIVE_PREFLIGHT_STRIP",
+                       "lever_f": None, "loan_package_id": None, "value": total,
+                       "reason": (f"{reason} — GỠ đòn bẩy khỏi {len(levered)} lệnh "
+                                  f"({', '.join(tickers)}), lệnh VẪN chạy bằng vốn tự có")}]
+
+    if str(mode or "").lower() != "live":
+        return plan, [{"ticker": "-", "order_id": "-", "action": "LIVE_PREFLIGHT_SKIPPED",
+                       "lever_f": None, "loan_package_id": None, "value": total,
+                       "reason": f"account mode={mode!r} (không phải live) — bỏ qua neo NAV "
+                                 f"sống + đọc pp0Buy; không có khoản vay thật nào ở đây"}]
+
+    # ── (1) neo NAV sống ────────────────────────────────────────────────────────────────
+    from .config import WORKDIR
+    path = status_path or os.path.join(WORKDIR, "data", "golive_v23_status.json")
+    try:
+        with open(path, encoding="utf-8") as f:
+            t = ((json.load(f) or {}).get("capit_slot_targets") or {}).get(account_label) or {}
+        nav_art = float(t["nav_basis_vnd"])
+    except Exception as ex:
+        return _strip(f"không đọc được `nav_basis_vnd` từ {path} ({type(ex).__name__}: {ex}) "
+                      f"⇒ không có mốc nào để đối chiếu với NAV sống")
+    excluded = set(excluded_tickers or [])
+    try:
+        cash = float(broker.get_cash() or 0)
+        pos = broker.get_positions() or {}
+        mv = excl_mv = 0.0
+        missing = []
+        for sym, p in pos.items():
+            q = broker.get_quote(sym)
+            px = (q.last or q.ref) if q is not None and getattr(q, "ok", lambda: False)() else None
+            if not px:
+                missing.append(sym)
+                continue
+            v = float(p.get("total", 0)) * float(px)
+            mv += v
+            if sym in excluded:
+                excl_mv += v
+        if missing:
+            return _strip(f"không định giá được vị thế {sorted(missing)} ⇒ NAV sống không đủ "
+                          f"tin cậy để làm mốc neo (fail-closed, không đoán giá)")
+        nav_live = cash + mv + float(offbook_vnd or 0) - excl_mv
+    except Exception as ex:
+        return _strip(f"không đo được NAV sống từ broker ({type(ex).__name__}: {ex}) ⇒ không "
+                      f"xác minh được cơ sở vốn mà mục tiêu vay dựa vào")
+    if nav_live <= 0:
+        return _strip(f"NAV sống đo được = {nav_live:,.0f} VND (≤0) — vô lý, fail-closed")
+    if nav_art > nav_live * (1 + CAPIT_LEVER_NAV_TOL):
+        return _strip(
+            f"artifact khai `nav_basis_vnd`={nav_art:,.0f} VND nhưng NAV SỐNG đo từ sổ broker "
+            f"= {nav_live:,.0f} VND (vượt {nav_art / nav_live - 1:+.1%} > biên "
+            f"{CAPIT_LEVER_NAV_TOL:.0%}) ⇒ mục tiêu vay đang dựa trên một cơ sở vốn KHÔNG có "
+            f"thật")
+
+    # ── (2) pp0Buy theo ĐÚNG gói vay của lệnh ───────────────────────────────────────────
+    probe = max(levered, key=lambda o: o.value)
+    lp = probe.loan_package_id
+    try:
+        bp = broker.get_buying_power(probe.ticker, int(probe.ref_price), loan_package_id=lp)
+    except Exception as ex:
+        return _strip(f"đọc sức mua gói vay {lp} lỗi ({type(ex).__name__}: {ex}) ⇒ chưa chứng "
+                      f"minh được bot đặt được lệnh bằng tiền vay thật")
+    # ĐỌC KHÔNG ĐƯỢC (None) ⇒ GỠ — đó là điều kiện mà bước này tồn tại để chứng minh: bot có
+    # thật sự nói chuyện được với tầng `ppse` theo đúng gói vay hay không (diễn tập paper
+    # không phủ được). Nhưng `bp == 0` là ĐỌC ĐƯỢC, chỉ là hết sức mua — trạng thái BÌNH
+    # THƯỜNG sau khi sleeve giải ngân xong, và gỡ đòn bẩy lúc hết tiền làm lệnh cần NHIỀU tiền
+    # hơn (gói 1840 initialRate 0,5 ⇒ sức mua gấp đôi): đúng chiều sai của fail-safe, cùng lý
+    # lẽ với nhánh `bp < total` ngay dưới (arch-reviewer vòng 3 #1, chân thứ hai).
+    if bp is None:
+        return _strip(f"đọc sức mua gói vay {lp} trả về None ⇒ chưa chứng minh được bot đặt "
+                      f"được lệnh bằng tiền vay thật (kiểm tay `pp0Buy@{lp}` trước khi bật lại)")
+    out = [{"ticker": "-", "order_id": "-", "action": "LIVE_PREFLIGHT_OK",
+            "lever_f": getattr(probe, "lever_f", None), "loan_package_id": lp, "value": total,
+            "reason": (f"NAV sống {nav_live:,.0f} VND vs artifact `nav_basis_vnd` "
+                       f"{nav_art:,.0f} ({nav_art / nav_live - 1:+.1%}, biên "
+                       f"{CAPIT_LEVER_NAV_TOL:.0%}) · sức mua pp0Buy@{lp} đo trên "
+                       f"{probe.ticker}@{probe.ref_price:,.0f} = {bp:,.0f} VND vs Σ lệnh đòn "
+                       f"bẩy {total:,.0f} VND ({len(levered)} lệnh: {', '.join(tickers)})")}]
+    if bp < total:
+        out.append({"ticker": "-", "order_id": "-", "action": "LIVE_PREFLIGHT_WARN",
+                    "lever_f": None, "loan_package_id": lp, "value": total,
+                    "reason": (f"sức mua đo được {bp:,.0f} VND < Σ lệnh đòn bẩy {total:,.0f} "
+                               f"VND — KHÔNG gỡ đòn bẩy (gỡ sẽ cần NHIỀU tiền hơn, sai chiều "
+                               f"fail-safe); phần thiếu sẽ đi đường WAIT_CASH như mọi phiên"
+                               + (f". Phiên đã đặt lệnh ({started_why}) ⇒ sức mua tụt là "
+                                  f"chuyện bình thường của lượt chạy lại." if started else ""))})
+    return plan, out
 
 
 def approval_block_reason(plan):
