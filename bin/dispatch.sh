@@ -1001,8 +1001,31 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
   # lại" không bao giờ báo lại được). Wrapper Agent nền CHỈ dùng nếu schema phiên hiện tại thật
   # sự có tham số nền. In sẵn để khỏi soạn lại từ trí nhớ — BẮT BUỘC ngay sau dispatch này.
   _ww=$((TIMEOUT * (MAX_EXT + 1) * (RETRIES + 1) + 60))
+  # Gợi ý độ trễ tỉnh ĐẦU tiên từ state/wakeup_profile.json (Wags 2026-08-01, wired live
+  # 2026-08-03 — trước đây script này chỉ SINH file, dispatch.sh vẫn in ladder cứng cũ ở đây
+  # khiến hint thực tế mâu thuẫn với MIKE.md §8 đã tài liệu hoá). Bucket đúng field sẽ ghi
+  # cho CHÍNH job này (model mặc định "default", effort rỗng -> "?", khớp bucket_key() của
+  # wakeup_profile.py). File thiếu/hỏng/không có bucket khớp -> _wsugg rỗng, in ladder cũ
+  # 240-270s như trước — KHÔNG BAO GIỜ chặn dispatch dù lỗi gì.
+  _wkey="${id}|${MODEL:-default}|${EFFORT:-?}"
+  _wsugg="$(python3 -c "
+import json, sys
+key = sys.argv[1]
+try:
+    with open(sys.argv[2], encoding='utf-8') as f:
+        prof = json.load(f)
+    b = prof.get('buckets', {}).get(key) or prof.get('global_fallback', {})
+    m = b.get('median_s')
+    print(max(90, min(1200, int(m))) if m else '')
+except Exception:
+    print('')
+" "$_wkey" "$ROOT/state/wakeup_profile.json" 2>/dev/null)"
   echo "⚠️ BẮT BUỘC ngay sau dispatch này (MIKE.md §8, sửa 2026-07-07 — Agent tool KHÔNG còn run_in_background):" >&2
-  echo "  1) CƠ CHẾ CHÍNH: ScheduleWakeup THÍCH ỨNG — 3 lần tỉnh ĐẦU ~240-270s (bắt job xong sớm); từ lần thứ 4 trở đi mà job vẫn running thì TĂNG DẦN (240→480→900→trần 1200s), không quay lại ngắn trừ khi có job MỚI phát sinh trong batch. Mỗi lần tỉnh chạy '$ROOT/bin/jobs.sh status $job_id'; chưa done → đặt lại wakeup theo bậc thang; done → xử lý ngay. KHÔNG đặt 1 lần chờ dài (worst-case chờ tối đa ~${_ww}s vẫn phủ qua nhiều lần poll)." >&2
+  if [ -n "$_wsugg" ]; then
+    echo "  1) CƠ CHẾ CHÍNH: ScheduleWakeup THÍCH ỨNG — lần tỉnh ĐẦU dùng gợi ý wakeup_profile.json cho bucket '$_wkey': ~${_wsugg}s (kẹp [90,1200]); từ lần thứ 2 trở đi mà job vẫn running thì TĂNG DẦN (nhân ~1.6-2x, trần 1200s), không quay lại ngắn trừ khi có job MỚI phát sinh trong batch. Mỗi lần tỉnh chạy '$ROOT/bin/jobs.sh status $job_id'; chưa done → đặt lại wakeup theo bậc thang; done → xử lý ngay. KHÔNG đặt 1 lần chờ dài (worst-case chờ tối đa ~${_ww}s vẫn phủ qua nhiều lần poll)." >&2
+  else
+    echo "  1) CƠ CHẾ CHÍNH: ScheduleWakeup THÍCH ỨNG — không có gợi ý wakeup_profile.json cho bucket '$_wkey' (file thiếu/hỏng/mẫu quá ít) → dùng ladder mặc định: 3 lần tỉnh ĐẦU ~240-270s; từ lần thứ 4 trở đi mà job vẫn running thì TĂNG DẦN (240→480→900→trần 1200s), không quay lại ngắn trừ khi có job MỚI phát sinh trong batch. Mỗi lần tỉnh chạy '$ROOT/bin/jobs.sh status $job_id'; chưa done → đặt lại wakeup theo bậc thang; done → xử lý ngay. KHÔNG đặt 1 lần chờ dài (worst-case chờ tối đa ~${_ww}s vẫn phủ qua nhiều lần poll)." >&2
+  fi
   echo "  2) CHỈ nếu schema tool phiên này THẬT SỰ có tham số nền (run_in_background trên Agent/Bash) mới thêm wrapper bọc '$ROOT/bin/jobs.sh wait $job_id --timeout $_ww'. isolation:worktree KHÔNG phải background — cấm dùng thay thế." >&2
   echo "  3) SELF-CHECK: trước khi nói với user bất kỳ điều gì về trạng thái job này (đang chờ/xong/chết), chạy '$ROOT/bin/jobs.sh status $job_id' trong CÙNG turn — không nói từ trí nhớ." >&2
   echo "$pid" > "$ROOT/logs/.dispatch_${id}_${ts}.pid"
