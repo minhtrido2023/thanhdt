@@ -1,0 +1,194 @@
+====================================================================================================
+  V2.3A (allocator + CAPIT) + maturity:postbull + edge-cond-allocator(thr4%) — FULL AUDIT SIMULATION 2014-01-02 -> 2026-06-19
+  NAV=50B (25B BAL + 25B LAG)   state=tav2_bq.vnindex_5state_dt5g_live
+  PARK vehicle=custompitg  parking policy (cash_etf_states) {3: 0.7}
+  combine=allocator ON {1: 0.5, 2: 0.0, 3: 0.65, 4: 0.65, 5: 0.65} band ±10pp   CAPIT=ON
+  fills=T+1 Open (BQ-auditable, no intraday)   -> v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_D_f11_univpit_mge110cap.csv
+====================================================================================================
+
+[2] Loading v11 signals + Release_Date + 5-state + overheat + D1...
+[BQ_LOCAL_CACHE] WARNING: cache verified 111h ago (>36h) — consider re-running sync_bq_cache.py
+[BQ_LOCAL_CACHE] ready — 14 tables from /home/trido/thanhdt/WorkingClaude/data/bq_cache_asof20260729_postrestate
+  [universe_pit] coverage OK: 3107 phien >= ticker 3107 phien (depth>=50)
+[BQ_LOCAL_CACHE] query took 182.5s (777736 rows)
+  signals: 777,736 rows
+[BQ_LOCAL_CACHE] query took 96.2s (166845 rows)
+  [EXBULL fix] suppressed 891 momentum signals in EX-BULL (state==5)
+  [regime_size] rating coverage 97.4%; weak buy-rows flagged (rating>=4): 2,652 -> halved to 5% ONLY in BEAR/CRISIS (state<=2), full 10% elsewhere
+
+[3] Loading prices/Open/sector/E1VFVN30...
+  opens: 1,991,501 rows (13 year chunks)
+  [universe] pt_v23=pit custom_basket=pit
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 66.7s (585845 rows)
+  [ETF-LIQ custompitg] ex-VIC PIT basket (quality=none, rebal=q2m5, gate=3, weight=namecap): 48 rebals, 204 union names, avg 30/rebal
+  [ETF-LIQ custompitg] cap=20% of ADV; median ADV 1743.7B/day -> ~348.7B/day parkable
+
+[4] Building LAGGED schedule...
+  [LAG gate] non_op=False forensic=True -> 5389 entries (dropped 0 by gates)
+  LAG candidate events in window: 5319
+
+[5] CAPIT v2 washout events...
+  washout 2014-05-08: state=1 grind=False dd52=-13.2% cool=False -> size=1.00
+  washout 2015-05-18: state=3 grind=False dd52=-17.4% cool=True -> size=0.75
+  washout 2015-08-24: state=3 grind=True dd52=-17.8% cool=False -> size=0.38
+  washout 2016-01-18: state=3 grind=False dd52=-17.6% cool=False -> size=0.75
+  washout 2018-05-28: state=1 grind=False dd52=-22.6% cool=True -> size=1.00
+  washout 2018-07-05: state=3 grind=True dd52=-25.3% cool=True -> size=0.38
+  washout 2020-02-03: state=3 grind=False dd52=-9.4% cool=False -> size=0.75
+  washout 2020-03-11: state=2 grind=True dd52=-20.8% cool=False -> size=0.25
+  washout 2020-07-27: state=3 grind=True dd52=-23.4% cool=False -> size=0.38
+    [postbull] 2022-04-19 ret2y=+83% dd1y=-8% -> post-strong-bull + shallow -> size x0.00 (1.00->0.00)
+  washout 2022-04-19: state=1 grind=False dd52=-8.0% cool=False -> size=0.00
+  washout 2022-06-15: state=2 grind=True dd52=-20.6% cool=True -> size=0.25
+  washout 2022-09-28: state=2 grind=True dd52=-25.2% cool=False -> size=0.00
+  washout 2023-10-30: state=1 grind=False dd52=-16.3% cool=False -> size=1.00
+  washout 2024-04-17: state=4 grind=False dd52=-7.5% cool=False -> size=0.50
+  washout 2024-08-05: state=1 grind=True dd52=-8.7% cool=False -> size=0.50
+  washout 2025-04-03: state=4 grind=False dd52=-8.0% cool=False -> size=0.50
+  washout 2025-10-20: state=3 grind=False dd52=-7.4% cool=False -> size=0.75
+  washout 2026-03-09: state=3 grind=False dd52=-13.1% cool=False -> size=0.75
+
+[4b] Fetching BQ prices for LAG universe (797 tickers)...
+  chunk 1/4: 675,458 rows
+  chunk 2/4: 676,873 rows
+  chunk 3/4: 696,356 rows
+  chunk 4/4: 128,356 rows
+  LAG signals in window: 5317  [fund_dnpr_reorder=False]
+
+[6] BOOK A — BAL 25B...
+    [capit-size B E0 2014-05-08] size=1.000 cash=1.0000 idle=1.0000 -> wt=1.0000 (base=cash)
+    [capit-lever-force B] E0 2014-05-08: f=1.10 wt 1.0000 -> 1.1000 (loan 0.1000 of book NAV)
+    [capit-size B E2 2015-08-24] size=0.375 cash=0.3013 idle=1.0000 -> wt=0.1130 (base=cash)
+    [capit-lever-force B] E2 2015-08-24: f=1.10 wt 0.1130 -> 0.1243 (loan 0.0113 of book NAV)
+    [capit-size B E3 2016-01-18] size=0.750 cash=0.2513 idle=0.8350 -> wt=0.1885 (base=cash)
+    [capit-lever-force B] E3 2016-01-18: f=1.10 wt 0.1885 -> 0.2073 (loan 0.0188 of book NAV)
+    [capit-size B E4 2018-05-28] size=1.000 cash=0.3909 idle=0.3909 -> wt=0.3909 (base=cash)
+    [capit-lever-force B] E4 2018-05-28: f=1.10 wt 0.3909 -> 0.4300 (loan 0.0391 of book NAV)
+    [capit-size B E5 2018-07-05] size=0.375 cash=0.2993 idle=1.0000 -> wt=0.1122 (base=cash)
+    [capit-lever-force B] E5 2018-07-05: f=1.10 wt 0.1122 -> 0.1235 (loan 0.0112 of book NAV)
+    [capit-size B E6 2020-02-03] size=0.750 cash=0.1993 idle=0.7799 -> wt=0.1495 (base=cash)
+    [capit-lever-force B] E6 2020-02-03: f=1.10 wt 0.1495 -> 0.1644 (loan 0.0149 of book NAV)
+    [capit-size B E7 2020-03-11] size=0.250 cash=0.8535 idle=0.8535 -> wt=0.2134 (base=cash)
+    [capit-lever-force B] E7 2020-03-11: f=1.10 wt 0.2134 -> 0.2347 (loan 0.0213 of book NAV)
+    [capit-size B E8 2020-07-27] size=0.375 cash=0.1370 idle=0.4749 -> wt=0.0514 (base=cash)
+    [capit-lever-force B] E8 2020-07-27: f=1.10 wt 0.0514 -> 0.0565 (loan 0.0051 of book NAV)
+    [capit-size B E10 2022-06-15] size=0.250 cash=1.0000 idle=1.0000 -> wt=0.2500 (base=cash)
+    [capit-lever-force B] E10 2022-06-15: f=1.10 wt 0.2500 -> 0.2750 (loan 0.0250 of book NAV)
+    [capit-size B E12 2023-10-30] size=1.000 cash=1.0000 idle=1.0000 -> wt=1.0000 (base=cash)
+    [capit-lever-force B] E12 2023-10-30: f=1.10 wt 1.0000 -> 1.1000 (loan 0.1000 of book NAV)
+    [capit-size B E13 2024-04-17] size=0.500 cash=0.0242 idle=0.0242 -> wt=0.0121 (base=cash)
+    [capit-lever-force B] E13 2024-04-17: f=1.10 wt 0.0121 -> 0.0133 (loan 0.0012 of book NAV)
+    [capit-size B E14 2024-08-05] size=0.500 cash=1.0000 idle=1.0000 -> wt=0.5000 (base=cash)
+    [capit-lever-force B] E14 2024-08-05: f=1.10 wt 0.5000 -> 0.5500 (loan 0.0500 of book NAV)
+    [capit-size B E15 2025-04-03] size=0.500 cash=0.0015 idle=0.0015 -> wt=0.0008 (base=cash)
+    [capit-lever-force B] E15 2025-04-03: f=1.10 wt 0.0008 -> 0.0008 (loan 0.0001 of book NAV)
+    [capit-size B E16 2025-10-20] size=0.750 cash=0.1153 idle=0.3850 -> wt=0.0865 (base=cash)
+    [capit-lever-force B] E16 2025-10-20: f=1.10 wt 0.0865 -> 0.0951 (loan 0.0086 of book NAV)
+    [capit-size B E17 2026-03-09] size=0.750 cash=0.0094 idle=0.0312 -> wt=0.0070 (base=cash)
+    [capit-lever-force B] E17 2026-03-09: f=1.10 wt 0.0070 -> 0.0077 (loan 0.0007 of book NAV)
+  [capit-lever-force BAL] f=1.10 share=0.0909 on 14 CAPIT tier(s) @ borrow 10.0%/yr
+  [real-margin] max_gross_exposure=1.1 | margin_tiers=CAPIT-only | borrow 10%/yr
+  BAL events: 1944 stock + 664 ETF; final 520.5860B
+
+[7] BOOK B — LAG 25B (always-on, parked)...
+    [capit-size L E0 2014-05-08] size=1.000 cash=0.7394 idle=0.7394 -> wt=0.7394 (base=cash)
+    [capit-lever-force L] E0 2014-05-08: f=1.10 wt 0.7394 -> 0.8133 (loan 0.0739 of book NAV)
+    [capit-size L E2 2015-08-24] size=0.375 cash=0.0006 idle=0.0019 -> wt=0.0002 (base=cash)
+    [capit-lever-force L] E2 2015-08-24: f=1.10 wt 0.0002 -> 0.0002 (loan 0.0000 of book NAV)
+    [capit-size L E3 2016-01-18] size=0.750 cash=0.3010 idle=1.0000 -> wt=0.2258 (base=cash)
+    [capit-lever-force L] E3 2016-01-18: f=1.10 wt 0.2258 -> 0.2483 (loan 0.0226 of book NAV)
+    [capit-size L E4 2018-05-28] size=1.000 cash=0.0000 idle=0.0000 -> wt=0.0000 (base=cash)
+    [capit-lever-force L] E4 2018-05-28: f=1.10 wt 0.0000 -> 0.0000 (loan 0.0000 of book NAV)
+    [capit-size L E5 2018-07-05] size=0.375 cash=0.2993 idle=1.0000 -> wt=0.1122 (base=cash)
+    [capit-lever-force L] E5 2018-07-05: f=1.10 wt 0.1122 -> 0.1235 (loan 0.0112 of book NAV)
+    [capit-size L E6 2020-02-03] size=0.750 cash=0.1471 idle=0.7159 -> wt=0.1103 (base=cash)
+    [capit-lever-force L] E6 2020-02-03: f=1.10 wt 0.1103 -> 0.1214 (loan 0.0110 of book NAV)
+    [capit-size L E7 2020-03-11] size=0.250 cash=0.6108 idle=0.6108 -> wt=0.1527 (base=cash)
+    [capit-lever-force L] E7 2020-03-11: f=1.10 wt 0.1527 -> 0.1680 (loan 0.0153 of book NAV)
+    [capit-size L E8 2020-07-27] size=0.375 cash=0.0862 idle=0.6391 -> wt=0.0323 (base=cash)
+    [capit-lever-force L] E8 2020-07-27: f=1.10 wt 0.0323 -> 0.0355 (loan 0.0032 of book NAV)
+    [capit-size L E10 2022-06-15] size=0.250 cash=1.0000 idle=1.0000 -> wt=0.2500 (base=cash)
+    [capit-lever-force L] E10 2022-06-15: f=1.10 wt 0.2500 -> 0.2750 (loan 0.0250 of book NAV)
+    [capit-size L E12 2023-10-30] size=1.000 cash=0.0537 idle=0.0537 -> wt=0.0537 (base=cash)
+    [capit-lever-force L] E12 2023-10-30: f=1.10 wt 0.0537 -> 0.0591 (loan 0.0054 of book NAV)
+    [capit-size L E13 2024-04-17] size=0.500 cash=0.9242 idle=0.9242 -> wt=0.4621 (base=cash)
+    [capit-lever-force L] E13 2024-04-17: f=1.10 wt 0.4621 -> 0.5083 (loan 0.0462 of book NAV)
+    [capit-size L E14 2024-08-05] size=0.500 cash=0.0000 idle=0.0000 -> wt=0.0000 (base=cash)
+    [capit-lever-force L] E14 2024-08-05: f=1.10 wt 0.0000 -> 0.0000 (loan 0.0000 of book NAV)
+    [capit-size L E15 2025-04-03] size=0.500 cash=1.0000 idle=1.0000 -> wt=0.5000 (base=cash)
+    [capit-lever-force L] E15 2025-04-03: f=1.10 wt 0.5000 -> 0.5500 (loan 0.0500 of book NAV)
+    [capit-size L E16 2025-10-20] size=0.750 cash=0.1585 idle=0.7047 -> wt=0.1189 (base=cash)
+    [capit-lever-force L] E16 2025-10-20: f=1.10 wt 0.1189 -> 0.1308 (loan 0.0119 of book NAV)
+    [capit-size L E17 2026-03-09] size=0.750 cash=0.0175 idle=0.0584 -> wt=0.0131 (base=cash)
+    [capit-lever-force L] E17 2026-03-09: f=1.10 wt 0.0131 -> 0.0145 (loan 0.0013 of book NAV)
+  [capit-lever-force LAG] f=1.10 share=0.0909 on 12 CAPIT tier(s) @ borrow 10.0%/yr
+  LAG events: 5997 stock + 1226 ETF; final 594.8915B
+
+[8] Combine books (allocator)...
+  [edge-alloc] thr=4.0%; mean12 latest=0.5%, %time<thr=53%
+  37 band rebalances; final combined = 1183.5456B
+
+[9] Building TX table + self-checks...
+  [selfcheck BAL] cash-flow identity max err = 0 VND; final NAV identity err = 0 VND
+  [selfcheck LAG] cash-flow identity max err = 0 VND; final NAV identity err = 0 VND
+  [borrow-audit] total borrow cost = 1,387,748,810 VND (BAL 536,885,184 / LAG 850,863,626); max gross BAL 1.000 LAG 1.090 combined 1.000; borrow-days BAL 89 LAG 85
+  [forced-borrow] f=1.10 | 30 levered CAPIT slug(s) | total loan at entry = 126,400,321,389 VND | peak simultaneous notional = 16,991,320,778 VND | loan-days = 1435 | FORCED interest paid = 1,365,444,421 VND (BAL 536,866,602 / LAG 828,577,819); native negative-cash interest = 1,387,748,810 VND
+  [forced-borrow] per-event ledger -> /home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_D_f11_univpit_mge110cap_leveraudit.csv
+      B E 0 2014-05-08: book NAV  25.000B  wt 1.0000->1.1000  LOAN    2500.0tr VND  position   27500.0tr VND
+      B E 2 2015-08-24: book NAV  27.752B  wt 0.1130->0.1243  LOAN     313.5tr VND  position    3449.0tr VND
+      B E 3 2016-01-18: book NAV  28.954B  wt 0.1885->0.2073  LOAN     545.7tr VND  position    6003.0tr VND
+      B E 4 2018-05-28: book NAV  57.382B  wt 0.3909->0.4300  LOAN    2243.3tr VND  position   24676.1tr VND
+      B E 5 2018-07-05: book NAV  53.012B  wt 0.1122->0.1235  LOAN     595.0tr VND  position    6544.6tr VND
+      B E 6 2020-02-03: book NAV  77.946B  wt 0.1495->0.1644  LOAN    1164.9tr VND  position   12814.4tr VND
+      B E 7 2020-03-11: book NAV  77.435B  wt 0.2134->0.2347  LOAN    1652.3tr VND  position   18174.8tr VND
+      B E 8 2020-07-27: book NAV  72.886B  wt 0.0514->0.0565  LOAN     374.4tr VND  position    4118.4tr VND
+      B E10 2022-06-15: book NAV 250.329B  wt 0.2500->0.2750  LOAN    6258.2tr VND  position   68840.5tr VND
+      B E12 2023-10-30: book NAV 260.421B  wt 1.0000->1.1000  LOAN   26042.1tr VND  position  286463.1tr VND
+      B E13 2024-04-17: book NAV 288.541B  wt 0.0121->0.0133  LOAN     348.4tr VND  position    3832.8tr VND
+      B E14 2024-08-05: book NAV 334.671B  wt 0.5000->0.5500  LOAN   16733.5tr VND  position  184068.9tr VND
+      B E15 2025-04-03: book NAV 342.071B  wt 0.0008->0.0008  LOAN      25.9tr VND  position     284.4tr VND
+      B E16 2025-10-20: book NAV 509.590B  wt 0.0865->0.0951  LOAN    4407.2tr VND  position   48479.6tr VND
+      B E17 2026-03-09: book NAV 516.842B  wt 0.0070->0.0077  LOAN     364.1tr VND  position    4005.3tr VND
+      L E 0 2014-05-08: book NAV  26.871B  wt 0.7394->0.8133  LOAN    1986.7tr VND  position   21854.0tr VND
+      L E 2 2015-08-24: book NAV  53.372B  wt 0.0002->0.0002  LOAN       1.1tr VND  position      12.3tr VND
+      L E 3 2016-01-18: book NAV  54.271B  wt 0.2258->0.2483  LOAN    1225.2tr VND  position   13477.5tr VND
+      L E 4 2018-05-28: book NAV  84.005B  wt 0.0000->0.0000  LOAN       0.0tr VND  position       0.0tr VND
+      L E 5 2018-07-05: book NAV  79.689B  wt 0.1122->0.1235  LOAN     894.4tr VND  position    9838.2tr VND
+      L E 6 2020-02-03: book NAV 109.609B  wt 0.1103->0.1214  LOAN    1209.5tr VND  position   13304.1tr VND
+      L E 7 2020-03-11: book NAV 104.858B  wt 0.1527->0.1680  LOAN    1601.2tr VND  position   17612.8tr VND
+      L E 8 2020-07-27: book NAV  89.344B  wt 0.0323->0.0355  LOAN     288.7tr VND  position    3175.7tr VND
+      L E10 2022-06-15: book NAV 257.514B  wt 0.2500->0.2750  LOAN    6437.8tr VND  position   70816.2tr VND
+      L E12 2023-10-30: book NAV 285.957B  wt 0.0537->0.0591  LOAN    1536.9tr VND  position   16905.7tr VND
+      L E13 2024-04-17: book NAV 346.685B  wt 0.4621->0.5083  LOAN   16019.6tr VND  position  176215.1tr VND
+      L E14 2024-08-05: book NAV 370.448B  wt 0.0000->0.0000  LOAN       0.0tr VND  position       0.0tr VND
+      L E15 2025-04-03: book NAV 466.323B  wt 0.5000->0.5500  LOAN   23316.1tr VND  position  256477.5tr VND
+      L E16 2025-10-20: book NAV 629.699B  wt 0.1189->0.1308  LOAN    7487.8tr VND  position   82366.2tr VND
+      L E17 2026-03-09: book NAV 628.981B  wt 0.0131->0.0145  LOAN     826.7tr VND  position    9093.4tr VND
+
+====================================================================================================
+ V2.3A (allocator + CAPIT) + maturity:postbull + edge-cond-allocator(thr4%) AUDIT — FULL 2014-01-02 -> 2026-06-19 (12.46y)
+ Final NAV 1,183.55B  CAGR 28.91%  Sharpe(252) 1.90  MaxDD -17.8%  Calmar 1.63
+ VNINDEX B&H: CAGR 10.87%  Sharpe 0.66  MaxDD -45.3%
+====================================================================================================
+
+[11] Writing audit file...
+  -> /home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_D_f11_univpit_mge110cap.csv  (17,658 rows)
+
+ANNUAL (sys vs VNINDEX):
+  2014: +49.81%   (vni=+0.0815)
+  2015: +27.59%   (vni=+0.0635)
+  2016: +14.21%   (vni=+0.1575)
+  2017: +33.57%   (vni=+0.4646)
+  2018: +27.32%   (vni=-0.1037)
+  2019: +13.64%   (vni=+0.0776)
+  2020: +27.75%   (vni=+0.1419)
+  2021: +107.95%   (vni=+0.3372)
+  2022: -8.09%   (vni=-0.3399)
+  2023: +22.55%   (vni=+0.0824)
+  2024: +25.11%   (vni=+0.1193)
+  2025: +48.32%   (vni=+0.4054)
+  2026: -1.14%   (vni=+0.0202)
+
+Done.
+EXIT=0 (D_f11 CAPIT_LEVER_FORCE=1.1 MGE=1.1 MGE_CAPIT_ONLY=1)

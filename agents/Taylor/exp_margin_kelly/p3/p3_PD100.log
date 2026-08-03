@@ -1,0 +1,159 @@
+====================================================================================================
+  V2.3A (allocator + CAPIT) + maturity:postbull + edge-cond-allocator(thr4%) — FULL AUDIT SIMULATION 2014-01-02 -> 2026-06-19
+  NAV=50B (25B BAL + 25B LAG)   state=tav2_bq.vnindex_5state_dt5g_live
+  PARK vehicle=custompitg  parking policy (cash_etf_states) {3: 0.7}
+  combine=allocator ON {1: 0.5, 2: 0.0, 3: 0.65, 4: 0.65, 5: 0.65} band ±10pp   CAPIT=ON
+  fills=T+1 Open (BQ-auditable, no intraday)   -> v23_golive_audit_2014_now_szbparkdd10_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_p3_PD100_univpit.csv
+====================================================================================================
+
+[2] Loading v11 signals + Release_Date + 5-state + overheat + D1...
+[BQ_LOCAL_CACHE] WARNING: cache verified 109h ago (>36h) — consider re-running sync_bq_cache.py
+[BQ_LOCAL_CACHE] ready — 14 tables from /home/trido/thanhdt/WorkingClaude/data/bq_cache_asof20260729_postrestate
+  [universe_pit] coverage OK: 3107 phien >= ticker 3107 phien (depth>=50)
+[BQ_LOCAL_CACHE] query took 180.6s (777736 rows)
+  signals: 777,736 rows
+[BQ_LOCAL_CACHE] query took 96.5s (166845 rows)
+  [EXBULL fix] suppressed 891 momentum signals in EX-BULL (state==5)
+  [regime_size] rating coverage 97.4%; weak buy-rows flagged (rating>=4): 2,652 -> halved to 5% ONLY in BEAR/CRISIS (state<=2), full 10% elsewhere
+
+[3] Loading prices/Open/sector/E1VFVN30...
+  opens: 1,991,501 rows (13 year chunks)
+  [universe] pt_v23=pit custom_basket=pit
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 66.2s (585845 rows)
+  [ETF-LIQ custompitg] ex-VIC PIT basket (quality=none, rebal=q2m5, gate=3, weight=namecap): 48 rebals, 204 union names, avg 30/rebal
+  [ETF-LIQ custompitg] cap=20% of ADV; median ADV 1743.7B/day -> ~348.7B/day parkable
+
+[4] Building LAGGED schedule...
+  [LAG gate] non_op=False forensic=True -> 5389 entries (dropped 0 by gates)
+  LAG candidate events in window: 5319
+
+[5] CAPIT v2 washout events...
+  washout 2014-05-08: state=1 grind=False dd52=-13.2% cool=False -> size=1.00
+  washout 2015-05-18: state=3 grind=False dd52=-17.4% cool=True -> size=0.75
+  washout 2015-08-24: state=3 grind=True dd52=-17.8% cool=False -> size=0.38
+  washout 2016-01-18: state=3 grind=False dd52=-17.6% cool=False -> size=0.75
+  washout 2018-05-28: state=1 grind=False dd52=-22.6% cool=True -> size=1.00
+  washout 2018-07-05: state=3 grind=True dd52=-25.3% cool=True -> size=0.38
+  washout 2020-02-03: state=3 grind=False dd52=-9.4% cool=False -> size=0.75
+  washout 2020-03-11: state=2 grind=True dd52=-20.8% cool=False -> size=0.25
+  washout 2020-07-27: state=3 grind=True dd52=-23.4% cool=False -> size=0.38
+    [postbull] 2022-04-19 ret2y=+83% dd1y=-8% -> post-strong-bull + shallow -> size x0.00 (1.00->0.00)
+  washout 2022-04-19: state=1 grind=False dd52=-8.0% cool=False -> size=0.00
+  washout 2022-06-15: state=2 grind=True dd52=-20.6% cool=True -> size=0.25
+  washout 2022-09-28: state=2 grind=True dd52=-25.2% cool=False -> size=0.00
+  washout 2023-10-30: state=1 grind=False dd52=-16.3% cool=False -> size=1.00
+  washout 2024-04-17: state=4 grind=False dd52=-7.5% cool=False -> size=0.50
+  washout 2024-08-05: state=1 grind=True dd52=-8.7% cool=False -> size=0.50
+  washout 2025-04-03: state=4 grind=False dd52=-8.0% cool=False -> size=0.50
+  washout 2025-10-20: state=3 grind=False dd52=-7.4% cool=False -> size=0.75
+  washout 2026-03-09: state=3 grind=False dd52=-13.1% cool=False -> size=0.75
+
+[4b] Fetching BQ prices for LAG universe (797 tickers)...
+  chunk 1/4: 675,458 rows
+  chunk 2/4: 676,873 rows
+  chunk 3/4: 696,356 rows
+  chunk 4/4: 128,356 rows
+  LAG signals in window: 5317  [fund_dnpr_reorder=False]
+
+[6] BOOK A — BAL 25B...
+    [parkdd B] E0 2014-05-08: dd52=-13.2% th=-20.0% f=1.00->0.00 cash=1.0000 idle=1.0000 wt=1.0000
+    [capit-size B E0 2014-05-08] size=1.000 cash=1.0000 idle=1.0000 -> wt=1.0000 (base=parkdd:1.0)
+    [parkdd B] E2 2015-08-24: dd52=-17.8% th=-20.0% f=1.00->0.00 cash=0.3013 idle=1.0000 wt=0.1130
+    [capit-size B E2 2015-08-24] size=0.375 cash=0.3013 idle=1.0000 -> wt=0.1130 (base=parkdd:1.0)
+    [parkdd B] E3 2016-01-18: dd52=-17.6% th=-20.0% f=1.00->0.00 cash=0.2513 idle=0.8350 wt=0.1885
+    [capit-size B E3 2016-01-18] size=0.750 cash=0.2513 idle=0.8350 -> wt=0.1885 (base=parkdd:1.0)
+    [parkdd B] E4 2018-05-28: dd52=-22.6% th=-20.0% f=1.00->1.00 cash=0.3909 idle=0.3909 wt=0.3909
+    [capit-size B E4 2018-05-28] size=1.000 cash=0.3909 idle=0.3909 -> wt=0.3909 (base=parkdd:1.0)
+    [parkdd B] E5 2018-07-05: dd52=-25.3% th=-20.0% f=1.00->1.00 cash=0.2993 idle=1.0000 wt=0.3750
+    [capit-size B E5 2018-07-05] size=0.375 cash=0.2993 idle=1.0000 -> wt=0.3750 (base=parkdd:1.0)
+    [parkdd B] E6 2020-02-03: dd52=-9.4% th=-20.0% f=1.00->0.00 cash=0.1993 idle=0.7799 wt=0.1495
+    [capit-size B E6 2020-02-03] size=0.750 cash=0.1993 idle=0.7799 -> wt=0.1495 (base=parkdd:1.0)
+    [parkdd B] E7 2020-03-11: dd52=-20.8% th=-20.0% f=1.00->1.00 cash=0.8535 idle=0.8535 wt=0.2134
+    [capit-size B E7 2020-03-11] size=0.250 cash=0.8535 idle=0.8535 -> wt=0.2134 (base=parkdd:1.0)
+    [parkdd B] E8 2020-07-27: dd52=-23.4% th=-20.0% f=1.00->1.00 cash=0.1370 idle=0.4749 wt=0.1781
+    [capit-size B E8 2020-07-27] size=0.375 cash=0.1370 idle=0.4749 -> wt=0.1781 (base=parkdd:1.0)
+    [parkdd B] E10 2022-06-15: dd52=-20.6% th=-20.0% f=1.00->1.00 cash=1.0000 idle=1.0000 wt=0.2500
+    [capit-size B E10 2022-06-15] size=0.250 cash=1.0000 idle=1.0000 -> wt=0.2500 (base=parkdd:1.0)
+    [parkdd B] E12 2023-10-30: dd52=-16.3% th=-20.0% f=1.00->0.00 cash=1.0000 idle=1.0000 wt=1.0000
+    [capit-size B E12 2023-10-30] size=1.000 cash=1.0000 idle=1.0000 -> wt=1.0000 (base=parkdd:1.0)
+    [parkdd B] E13 2024-04-17: dd52=-7.5% th=-20.0% f=1.00->0.00 cash=0.0242 idle=0.0242 wt=0.0121
+    [capit-size B E13 2024-04-17] size=0.500 cash=0.0242 idle=0.0242 -> wt=0.0121 (base=parkdd:1.0)
+    [parkdd B] E14 2024-08-05: dd52=-8.7% th=-20.0% f=1.00->0.00 cash=1.0000 idle=1.0000 wt=0.5000
+    [capit-size B E14 2024-08-05] size=0.500 cash=1.0000 idle=1.0000 -> wt=0.5000 (base=parkdd:1.0)
+    [parkdd B] E15 2025-04-03: dd52=-8.0% th=-20.0% f=1.00->0.00 cash=0.0015 idle=0.0015 wt=0.0008
+    [capit-size B E15 2025-04-03] size=0.500 cash=0.0015 idle=0.0015 -> wt=0.0008 (base=parkdd:1.0)
+    [parkdd B] E16 2025-10-20: dd52=-7.4% th=-20.0% f=1.00->0.00 cash=0.1153 idle=0.3850 wt=0.0865
+    [capit-size B E16 2025-10-20] size=0.750 cash=0.1153 idle=0.3850 -> wt=0.0865 (base=parkdd:1.0)
+    [parkdd B] E17 2026-03-09: dd52=-13.1% th=-20.0% f=1.00->0.00 cash=0.0094 idle=0.0312 wt=0.0070
+    [capit-size B E17 2026-03-09] size=0.750 cash=0.0094 idle=0.0312 -> wt=0.0070 (base=parkdd:1.0)
+  BAL events: 2014 stock + 687 ETF; final 556.4594B
+
+[7] BOOK B — LAG 25B (always-on, parked)...
+    [parkdd L] E0 2014-05-08: dd52=-13.2% th=-20.0% f=1.00->0.00 cash=0.7394 idle=0.7394 wt=0.7394
+    [capit-size L E0 2014-05-08] size=1.000 cash=0.7394 idle=0.7394 -> wt=0.7394 (base=parkdd:1.0)
+    [parkdd L] E2 2015-08-24: dd52=-17.8% th=-20.0% f=1.00->0.00 cash=0.0006 idle=0.0019 wt=0.0002
+    [capit-size L E2 2015-08-24] size=0.375 cash=0.0006 idle=0.0019 -> wt=0.0002 (base=parkdd:1.0)
+    [parkdd L] E3 2016-01-18: dd52=-17.6% th=-20.0% f=1.00->0.00 cash=0.3010 idle=1.0000 wt=0.2258
+    [capit-size L E3 2016-01-18] size=0.750 cash=0.3010 idle=1.0000 -> wt=0.2258 (base=parkdd:1.0)
+    [parkdd L] E4 2018-05-28: dd52=-22.6% th=-20.0% f=1.00->1.00 cash=0.0000 idle=0.0000 wt=0.0000
+    [capit-size L E4 2018-05-28] size=1.000 cash=0.0000 idle=0.0000 -> wt=0.0000 (base=parkdd:1.0)
+    [parkdd L] E5 2018-07-05: dd52=-25.3% th=-20.0% f=1.00->1.00 cash=0.2993 idle=1.0000 wt=0.3750
+    [capit-size L E5 2018-07-05] size=0.375 cash=0.2993 idle=1.0000 -> wt=0.3750 (base=parkdd:1.0)
+    [parkdd L] E6 2020-02-03: dd52=-9.4% th=-20.0% f=1.00->0.00 cash=0.1471 idle=0.7159 wt=0.1103
+    [capit-size L E6 2020-02-03] size=0.750 cash=0.1471 idle=0.7159 -> wt=0.1103 (base=parkdd:1.0)
+    [parkdd L] E7 2020-03-11: dd52=-20.8% th=-20.0% f=1.00->1.00 cash=0.6108 idle=0.6108 wt=0.1527
+    [capit-size L E7 2020-03-11] size=0.250 cash=0.6108 idle=0.6108 -> wt=0.1527 (base=parkdd:1.0)
+    [parkdd L] E8 2020-07-27: dd52=-23.4% th=-20.0% f=1.00->1.00 cash=0.0862 idle=0.6391 wt=0.2397
+    [capit-size L E8 2020-07-27] size=0.375 cash=0.0862 idle=0.6391 -> wt=0.2397 (base=parkdd:1.0)
+    [parkdd L] E10 2022-06-15: dd52=-20.6% th=-20.0% f=1.00->1.00 cash=1.0000 idle=1.0000 wt=0.2500
+    [capit-size L E10 2022-06-15] size=0.250 cash=1.0000 idle=1.0000 -> wt=0.2500 (base=parkdd:1.0)
+    [parkdd L] E12 2023-10-30: dd52=-16.3% th=-20.0% f=1.00->0.00 cash=0.0537 idle=0.0537 wt=0.0537
+    [capit-size L E12 2023-10-30] size=1.000 cash=0.0537 idle=0.0537 -> wt=0.0537 (base=parkdd:1.0)
+    [parkdd L] E13 2024-04-17: dd52=-7.5% th=-20.0% f=1.00->0.00 cash=0.9242 idle=0.9242 wt=0.4621
+    [capit-size L E13 2024-04-17] size=0.500 cash=0.9242 idle=0.9242 -> wt=0.4621 (base=parkdd:1.0)
+    [parkdd L] E14 2024-08-05: dd52=-8.7% th=-20.0% f=1.00->0.00 cash=0.0000 idle=0.0000 wt=0.0000
+    [capit-size L E14 2024-08-05] size=0.500 cash=0.0000 idle=0.0000 -> wt=0.0000 (base=parkdd:1.0)
+    [parkdd L] E15 2025-04-03: dd52=-8.0% th=-20.0% f=1.00->0.00 cash=1.0000 idle=1.0000 wt=0.5000
+    [capit-size L E15 2025-04-03] size=0.500 cash=1.0000 idle=1.0000 -> wt=0.5000 (base=parkdd:1.0)
+    [parkdd L] E16 2025-10-20: dd52=-7.4% th=-20.0% f=1.00->0.00 cash=0.1585 idle=0.7047 wt=0.1189
+    [capit-size L E16 2025-10-20] size=0.750 cash=0.1585 idle=0.7047 -> wt=0.1189 (base=parkdd:1.0)
+    [parkdd L] E17 2026-03-09: dd52=-13.1% th=-20.0% f=1.00->0.00 cash=0.0175 idle=0.0584 wt=0.0131
+    [capit-size L E17 2026-03-09] size=0.750 cash=0.0175 idle=0.0584 -> wt=0.0131 (base=parkdd:1.0)
+  LAG events: 6006 stock + 1231 ETF; final 597.6565B
+
+[8] Combine books (allocator)...
+  [edge-alloc] thr=4.0%; mean12 latest=0.5%, %time<thr=53%
+  37 band rebalances; final combined = 1229.0934B
+
+[9] Building TX table + self-checks...
+  [selfcheck BAL] cash-flow identity max err = 0 VND; final NAV identity err = 0 VND
+  [selfcheck LAG] cash-flow identity max err = 0 VND; final NAV identity err = 0 VND
+  [borrow-audit] total borrow cost = 0 VND (BAL 0 / LAG 0); max gross BAL 1.000 LAG 1.000 combined 1.000; borrow-days BAL 7 LAG 41
+
+====================================================================================================
+ V2.3A (allocator + CAPIT) + maturity:postbull + edge-cond-allocator(thr4%) AUDIT — FULL 2014-01-02 -> 2026-06-19 (12.46y)
+ Final NAV 1,229.09B  CAGR 29.30%  Sharpe(252) 1.93  MaxDD -17.8%  Calmar 1.65
+ VNINDEX B&H: CAGR 10.87%  Sharpe 0.66  MaxDD -45.3%
+====================================================================================================
+
+[11] Writing audit file...
+  -> /home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_szbparkdd10_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_p3_PD100_univpit.csv  (17,762 rows)
+
+ANNUAL (sys vs VNINDEX):
+  2014: +49.14%   (vni=+0.0815)
+  2015: +27.48%   (vni=+0.0635)
+  2016: +14.22%   (vni=+0.1575)
+  2017: +33.73%   (vni=+0.4646)
+  2018: +29.35%   (vni=-0.1037)
+  2019: +13.58%   (vni=+0.0776)
+  2020: +28.06%   (vni=+0.1419)
+  2021: +109.58%   (vni=+0.3372)
+  2022: -6.67%   (vni=-0.3399)
+  2023: +22.59%   (vni=+0.0824)
+  2024: +24.36%   (vni=+0.1193)
+  2025: +48.02%   (vni=+0.4054)
+  2026: -0.23%   (vni=+0.0202)
+
+Done.
+EXIT=0 (p3_PD100 CAPIT_SIZE_BASE=parkdd:1.0)

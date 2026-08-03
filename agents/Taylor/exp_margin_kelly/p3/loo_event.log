@@ -1,0 +1,21 @@
+REGRESSION: p3_LOOnone (park:0.25, CAPIT_PARK_LOO rong) vs p3_PK025 (truoc khi them knob LOO)
+  LOOnone CAGR 29.6811%  |  PK025 CAGR 29.6811%  => IDENTICAL
+
+Chan day du park:0.25: dCAGR +0.82pp, dOOS +1.45pp, MaxDD -17.79%
+
+======================================================================================================================
+Bo TUNG su kien khoi boost parking (van giu co so `cash` cho su kien do):
+======================================================================================================================
+bo su kien                   CAGR   dCAGR vs ctl   con lai % edge   dOOS vs ctl   con lai % OOS    MaxDD
+E2 2015-08-24 (IS)        29.67%         +0.81pp              99%        +1.45pp            100%  -17.79%
+E3 2016-01-18 (IS)        29.68%         +0.81pp              99%        +1.45pp            100%  -17.79%
+E5 2018-07-05 (IS)        29.63%         +0.76pp              93%        +1.46pp            101%  -17.79%
+E6 2020-02-03 (OOS)       29.66%         +0.80pp              98%        +1.41pp             97%  -17.79%
+E8 2020-07-27 (OOS)       29.13%         +0.27pp              33%        +0.38pp             26%  -17.79%
+E16 2025-10-20 (OOS)       29.45%         +0.59pp              72%        +0.99pp             69%  -17.79%
+E17 2026-03-09 (OOS)       29.68%         +0.82pp             100%        +1.45pp            100%  -17.79%
+
+Su kien ganh nhieu nhat (FULL): E8 2020-07-27 (OOS) — bo di con 33% edge (+0.27pp / +0.82pp)
+Su kien ganh nhieu nhat (OOS):  E8 2020-07-27 (OOS) — bo di con 26% edge OOS (+0.38pp / +1.45pp)
+So su kien mà bo di lam edge doi DAU (am): 0/7 (FULL), 0/7 (OOS)
+DONE

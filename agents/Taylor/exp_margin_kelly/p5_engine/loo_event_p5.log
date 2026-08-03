@@ -1,0 +1,22 @@
+================================================================================================================
+KIEM TRA INERT — hunk CAPIT_LEVER_LOO phai VO HAI khi khong dat
+================================================================================================================
+  E125_f13 (truoc khi them knob) vs INERT_f13 (sau khi them, knob TAT)
+  CAGR 29.526083% vs 29.526083%   |   NAV cuoi 1255.846345B vs 1255.846345B
+  sai lech NAV tuyet doi lon nhat tren 3107 phien = 0.00 VND  -> INERT DUNG
+
+================================================================================================================
+LEAVE-ONE-EVENT-OUT — bo don bay o DUNG 1 su kien (cac su kien khac giu nguyen f=1,3 @12,5%)
+================================================================================================================
+  Chan day du  : dCAGR +0.6634pp   dOOS +0.8321pp   MaxDD -17.852%
+bo su kien                                       dCAGR  % edge mat      dOOS     MaxDD   ket luan
+  E0  2014-05-08 (IS, dot dau, vay 25,9% NAV)    0.5391pp       18.7%   0.8334pp  -17.813%   phan tan, lanh manh
+  E12 2023-10-30 (OOS, vay tuyet doi lon nhat 88,7B)   0.6709pp       -1.1%   0.8468pp  -17.852%   phan tan, lanh manh
+  E14 2024-08-05 (OOS, r_i am -0,53%)            0.6634pp        0.0%   0.8321pp  -17.852%   phan tan, lanh manh
+  E16 2025-10-20 (OOS, r_i +33,8%)               0.5507pp       17.0%   0.6119pp  -17.852%   phan tan, lanh manh
+  E17 2026-03-09 (OOS, gan cuoi mau)             0.6650pp       -0.2%   0.8352pp  -17.852%   phan tan, lanh manh
+
+  Su kien ganh nang nhat: E0 2014-05-08 (IS, dot dau, vay 25,9% NAV) = 18.7% tong edge
+  -> edge PHAN TAN qua nhieu dot — khong phai ao anh 1-su-kien
+
+-> loo_event_p5.csv

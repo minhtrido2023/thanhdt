@@ -1,0 +1,67 @@
+==============================================================================
+BUOC A — duong cong tang truong hinh hoc g(f), N=17 su kien washout 2014+
+Ke hoach: margin_kelly_full_cycle_plan_20260803.md §3 | GATE G-A §5
+==============================================================================
+N = 17 su kien | TB r = +13.5663% | ty le duong = 70.6%
+MAE xau nhat = -25.1406% | cal_days TB = 86.6
+
+Khoi bootstrap (su kien cach nhau <183 ngay = 1 khoi):
+  khoi 0: 2014-05-08
+  khoi 1: 2015-08-24, 2016-01-18
+  khoi 2: 2018-05-28, 2018-07-05
+  khoi 3: 2020-02-03, 2020-03-11, 2020-07-27
+  khoi 4: 2022-04-19, 2022-06-15, 2022-09-28
+  khoi 5: 2023-10-30, 2024-04-17, 2024-08-05
+  khoi 6: 2025-04-03
+  khoi 7: 2025-10-20, 2026-03-09
+  -> 8 khoi doc lap tren 17 su kien
+
+------------------------------------------------------------------------------
+BANG 1 — f*_geo va g(f) theo kich ban (call_rule = §1.2 chuan tac, accrue=True)
+------------------------------------------------------------------------------
+kich ban                                        f*_geo    g(1,0)     g(f*)  f_break
+BASE      (c=12,5% maint=30% pen=1%)              2.00   0.11484   0.17577     2.05
+ADV lai   (c=14,0% maint=30% pen=1%)              2.00   0.11484   0.17267     2.05
+ADV maint (c=12,5% maint=35% pen=2%)              1.85   0.11484   0.16795     1.90
+ADV full  (c=14,0% maint=35% pen=2%)              1.85   0.11484   0.16531     1.90
+ADV edge  (c=12,5% maint=30% pen=1%, r-6,6pp)     1.50   0.05347   0.05629     1.90
+
+kich ban                                          g(1,3)    g(1,5)  call@1,3  call@1,5
+BASE      (c=12,5% maint=30% pen=1%)             0.13538   0.14795         0         0
+ADV lai   (c=14,0% maint=30% pen=1%)             0.13443   0.14638         0         0
+ADV maint (c=12,5% maint=35% pen=2%)             0.13538   0.14795         0         0
+ADV full  (c=14,0% maint=35% pen=2%)             0.13443   0.14638         0         0
+ADV edge  (c=12,5% maint=30% pen=1%, r-6,6pp)    0.05590   0.05629         0         0
+
+------------------------------------------------------------------------------
+BANG 1b — sensitivity dinh nghia margin-call (BASE c=12,5%)
+------------------------------------------------------------------------------
+  §1.2 + cong don lai (headline)       f*_geo=2.00  g(1,0)=+0.11484  g(1,3)=+0.13538  call@1,3=0
+  §1.2 + KHONG cong don lai            f*_geo=2.10  g(1,0)=+0.11484  g(1,3)=+0.13538  call@1,3=0
+  §3.1 nguyen van (chat hon)           f*_geo=1.35  g(1,0)=+0.11484  g(1,3)=+0.13538  call@1,3=0
+
+==============================================================================
+GATE G-A — bootstrap B=10.000, lai suat 12,5% (§5, dang ky truoc)
+==============================================================================
+[iid] P(g(1,3) > g(1,0)) = 0.9789   (nguong G-A: >= 0,90)
+       CI90 cua g(1,3)-g(1,0) = [+0.00429, +0.03631], trung vi +0.02070
+       f*_geo bootstrap: trung vi 2.00, pct5 1.85, pct95 2.35, P(f*<=1,0) = 0.018
+[khoi] P(g(1,3) > g(1,0)) = 0.9610   (nguong G-A: >= 0,90)
+       CI90 cua g(1,3)-g(1,0) = [+0.00172, +0.03870], trung vi +0.02143
+       f*_geo bootstrap: trung vi 2.00, pct5 1.35, pct95 2.35, P(f*<=1,0) = 0.037
+
+  dieu kien 1: f*_geo > 1,0            -> f*_geo = 2.00  PASS
+  dieu kien 2: P_boot >= 0,90 ca 2 don vi -> iid 0.9789 / khoi 0.9610  PASS
+
+  >>> GATE G-A: PASS
+  >>> Di tiep BUOC B (§1.2, §2).
+
+------------------------------------------------------------------------------
+META-GATE trung thuc (§5): ket luan co doi dau giua cac lua chon khong?
+------------------------------------------------------------------------------
+  BASE      (c=12,5% maint=30% pen=1%)           -> NEN VAY (f*>1)
+  ADV lai   (c=14,0% maint=30% pen=1%)           -> NEN VAY (f*>1)
+  ADV maint (c=12,5% maint=35% pen=2%)           -> NEN VAY (f*>1)
+  ADV full  (c=14,0% maint=35% pen=2%)           -> NEN VAY (f*>1)
+  ADV edge  (c=12,5% maint=30% pen=1%, r-6,6pp)  -> NEN VAY (f*>1)
+  P_boot(khoi) tai lai 14%/nam = 0.9544

@@ -1,0 +1,14 @@
+============================================================================================
+BUOC C-bis — overlay CO TAI DAU TU (bien the CO LOI NHAT cho phe 'margin tot')
+============================================================================================
+CONTROL: CAGR 28.86% | MaxDD -17.79% | IS 27.09% | OOS 30.48%
+
+     f     CAGR    dCAGR    MaxDD  dMaxDD xau  dCAGR_IS  dCAGR_OOS  #call
+  1.00   28.86%   +0.00%  -17.79%      -0.00pp    +0.00%     +0.00%     16
+  1.10   29.49%   +0.63%  -18.08%      +0.30pp    +0.86%     +0.42%     16
+  1.20   30.12%   +1.26%  -18.38%      +0.60pp    +1.71%     +0.83%     16
+  1.30   30.73%   +1.87%  -18.68%      +0.90pp    +2.54%     +1.23%     16
+  1.50   31.93%   +3.07%  -19.28%      +1.49pp    +4.18%     +2.02%     16
+
+DOC: neu dCAGR_OOS VAN am o bien the co tai dau tu nay thi ket luan NO-GO cua G-C
+KHONG phai san pham cua gia dinh ke toan 'tien mat nam im' o step_c_wholebook.py.

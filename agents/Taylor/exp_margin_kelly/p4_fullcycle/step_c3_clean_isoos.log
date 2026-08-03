@@ -1,0 +1,60 @@
+================================================================================================
+AUDIT BUOC C (guard #10 §4 + meta-gate §5) — phep do SACH tung cua so
+================================================================================================
+Van de: ban cong-them de lai IS cua giai doan truoc duoi dang tien mat 0%/nam trong
+suot OOS => dCAGR_OOS am co the la AO ANH DO LUONG. Phep do sach: overlay CHI su kien
+cua tung cua so, do CAGR trong DUNG cua so do (khong mang von tu ky truoc sang).
+
+------------------------------------------------------------------------------------------------
+BAN: CONG-THEM (tien mat nam im)   [adversarial c=14%, maint 35%, pen 2%]
+------------------------------------------------------------------------------------------------
+cua so               f     CAGR    dCAGR    MaxDD  dMaxDD xau  #call
+IS  2014-2019     1.10   27.94%   +0.85%  -18.08%      +0.29pp      0
+                  1.20   28.76%   +1.67%  -18.36%      +0.58pp      0
+                  1.30   29.56%   +2.47%  -18.64%      +0.85pp      0
+                  1.50   31.09%   +3.99%  -19.17%      +1.38pp      0
+
+OOS 2020-nay      1.10   30.90%   +0.42%  -16.87%      -0.35pp      0
+                  1.20   31.31%   +0.83%  -16.52%      -0.70pp      0
+                  1.30   31.71%   +1.23%  -16.17%      -1.05pp      0
+                  1.50   32.50%   +2.02%  -16.22%      -1.00pp      0
+
+FULL 2014-nay     1.10   29.48%   +0.62%  -18.08%      +0.29pp      0
+                  1.20   30.07%   +1.21%  -18.36%      +0.58pp      0
+                  1.30   30.63%   +1.77%  -18.64%      +0.85pp      0
+                  1.50   31.67%   +2.81%  -19.17%      +1.38pp      0
+
+------------------------------------------------------------------------------------------------
+BAN: TAI DAU TU (compounding)   [adversarial c=14%, maint 35%, pen 2%]
+------------------------------------------------------------------------------------------------
+cua so               f     CAGR    dCAGR    MaxDD  dMaxDD xau  #call
+IS  2014-2019     1.10   27.95%   +0.86%  -18.08%      +0.30pp      0
+                  1.20   28.80%   +1.71%  -18.38%      +0.60pp      0
+                  1.30   29.63%   +2.54%  -18.68%      +0.90pp      0
+                  1.50   31.28%   +4.18%  -19.28%      +1.49pp      0
+
+OOS 2020-nay      1.10   30.90%   +0.42%  -16.87%      -0.35pp      0
+                  1.20   31.31%   +0.83%  -16.53%      -0.69pp      0
+                  1.30   31.71%   +1.23%  -16.20%      -1.02pp      0
+                  1.50   32.50%   +2.02%  -16.17%      -1.05pp      0
+
+FULL 2014-nay     1.10   29.49%   +0.63%  -18.08%      +0.30pp      0
+                  1.20   30.12%   +1.26%  -18.38%      +0.60pp      0
+                  1.30   30.73%   +1.87%  -18.68%      +0.90pp      0
+                  1.50   31.93%   +3.07%  -19.28%      +1.49pp      0
+
+================================================================================================
+AUDIT TRAN KY VONG (guard #10) — tinh lai tran bang SO LIEU THUC DO, khong dung xap xi §2.2
+================================================================================================
+  sleeve TB thuc do        = 37.5% NAV  (§2.2 gia dinh 31%)
+  edge sau lai vay 14%     = +9.39%/su kien  (§2.2 dung +9,75%)
+  tan suat su kien thuc do = 1.36/nam  (§2.2 dung 1,4)
+  tran tinh lai f=1.10: +0.48pp/nam
+  tran tinh lai f=1.20: +0.96pp/nam
+  tran tinh lai f=1.30: +1.44pp/nam
+  tran tinh lai f=1.50: +2.40pp/nam
+
+  => Tran §2.2 (+2,1pp) tinh cho sleeve 31%; sleeve THUC lon hon nen tran that cao hon.
+     Nhung phan VUOT tran cua ban tai-dau-tu con den tu viec sleeve duoc scale theo NAV
+     da phinh (lai kep chong lai kep) — day la ban DOC NHIEU NHAT co the, khong phai so
+     trung tam. Bao cao phai neo vao ban cong-them (than trong) lam so chinh.

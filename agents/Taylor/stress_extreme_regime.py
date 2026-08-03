@@ -68,7 +68,8 @@ class FakeBroker:
     def get_cash(self):
         return 10_000_000_000
 
-    def place_order(self, symbol, qty, side, price=None, order_type="LO"):
+    def place_order(self, symbol, qty, side, price=None, order_type="LO",
+                    cash_only=False, loan_package_id=None):
         self._oid += 1
         self.placed.append((symbol, qty, side, price))
         return f"OID{self._oid}"

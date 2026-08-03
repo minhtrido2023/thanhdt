@@ -1,0 +1,130 @@
+====================================================================================================
+  V2.3A (allocator + CAPIT) + maturity:postbull + edge-cond-allocator(thr4%) — FULL AUDIT SIMULATION 2014-01-02 -> 2026-06-19
+  NAV=50B (25B BAL + 25B LAG)   state=tav2_bq.vnindex_5state_dt5g_live
+  PARK vehicle=custompitg  parking policy (cash_etf_states) {3: 0.7}
+  combine=allocator ON {1: 0.5, 2: 0.0, 3: 0.65, 4: 0.65, 5: 0.65} band ±10pp   CAPIT=ON
+  fills=T+1 Open (BQ-auditable, no intraday)   -> v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_s4p2_L2_mge150_univpit_mge150cap_real_lgdep.csv
+====================================================================================================
+
+[2] Loading v11 signals + Release_Date + 5-state + overheat + D1...
+[BQ_LOCAL_CACHE] WARNING: cache verified 108h ago (>36h) — consider re-running sync_bq_cache.py
+[BQ_LOCAL_CACHE] ready — 14 tables from /home/trido/thanhdt/WorkingClaude/data/bq_cache_asof20260729_postrestate
+  [universe_pit] coverage OK: 3107 phien >= ticker 3107 phien (depth>=50)
+[BQ_LOCAL_CACHE] query took 178.4s (777736 rows)
+  signals: 777,736 rows
+[BQ_LOCAL_CACHE] query took 96.5s (166845 rows)
+  [EXBULL fix] suppressed 891 momentum signals in EX-BULL (state==5)
+  [regime_size] rating coverage 97.4%; weak buy-rows flagged (rating>=4): 2,652 -> halved to 5% ONLY in BEAR/CRISIS (state<=2), full 10% elsewhere
+
+[3] Loading prices/Open/sector/E1VFVN30...
+  opens: 1,991,501 rows (13 year chunks)
+  [universe] pt_v23=pit custom_basket=pit
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 66.0s (585845 rows)
+  [ETF-LIQ custompitg] ex-VIC PIT basket (quality=none, rebal=q2m5, gate=3, weight=namecap): 48 rebals, 204 union names, avg 30/rebal
+  [ETF-LIQ custompitg] cap=20% of ADV; median ADV 1743.7B/day -> ~348.7B/day parkable
+
+[4] Building LAGGED schedule...
+  [LAG gate] non_op=False forensic=True -> 5389 entries (dropped 0 by gates)
+  LAG candidate events in window: 5319
+
+[5] CAPIT v2 washout events...
+  washout 2014-05-08: state=1 grind=False dd52=-13.2% cool=False -> size=1.00
+  washout 2015-05-18: state=3 grind=False dd52=-17.4% cool=True -> size=0.75
+  washout 2015-08-24: state=3 grind=True dd52=-17.8% cool=False -> size=0.38
+  washout 2016-01-18: state=3 grind=False dd52=-17.6% cool=False -> size=0.75
+  washout 2018-05-28: state=1 grind=False dd52=-22.6% cool=True -> size=1.00
+  washout 2018-07-05: state=3 grind=True dd52=-25.3% cool=True -> size=0.38
+  washout 2020-02-03: state=3 grind=False dd52=-9.4% cool=False -> size=0.75
+  washout 2020-03-11: state=2 grind=True dd52=-20.8% cool=False -> size=0.25
+  washout 2020-07-27: state=3 grind=True dd52=-23.4% cool=False -> size=0.38
+    [postbull] 2022-04-19 ret2y=+83% dd1y=-8% -> post-strong-bull + shallow -> size x0.00 (1.00->0.00)
+  washout 2022-04-19: state=1 grind=False dd52=-8.0% cool=False -> size=0.00
+  washout 2022-06-15: state=2 grind=True dd52=-20.6% cool=True -> size=0.25
+  washout 2022-09-28: state=2 grind=True dd52=-25.2% cool=False -> size=0.00
+  washout 2023-10-30: state=1 grind=False dd52=-16.3% cool=False -> size=1.00
+  washout 2024-04-17: state=4 grind=False dd52=-7.5% cool=False -> size=0.50
+  washout 2024-08-05: state=1 grind=True dd52=-8.7% cool=False -> size=0.50
+  washout 2025-04-03: state=4 grind=False dd52=-8.0% cool=False -> size=0.50
+  washout 2025-10-20: state=3 grind=False dd52=-7.4% cool=False -> size=0.75
+  washout 2026-03-09: state=3 grind=False dd52=-13.1% cool=False -> size=0.75
+
+[4b] Fetching BQ prices for LAG universe (797 tickers)...
+  chunk 1/4: 675,458 rows
+  chunk 2/4: 676,873 rows
+  chunk 3/4: 696,356 rows
+  chunk 4/4: 128,356 rows
+  LAG signals in window: 5317  [fund_dnpr_reorder=False]
+
+[6] BOOK A — BAL 25B...
+    [force-real-lever B] E0 2014-05-08: m=1.00 wt 1.000 -> 1.500 (x1.50)
+    [force-real-lever B] E2 2015-08-24: m=1.00 wt 0.113 -> 0.169 (x1.50)
+    [force-real-lever B] E3 2016-01-18: m=1.00 wt 0.188 -> 0.283 (x1.50)
+    [force-real-lever B] E4 2018-05-28: m=1.00 wt 0.391 -> 0.586 (x1.50)
+    [force-real-lever B] E5 2018-07-05: m=1.00 wt 0.112 -> 0.168 (x1.50)
+    [force-real-lever B] E6 2020-02-03: m=1.00 wt 0.149 -> 0.224 (x1.50)
+    [force-real-lever B] E7 2020-03-11: m=1.00 wt 0.213 -> 0.320 (x1.50)
+    [force-real-lever B] E8 2020-07-27: m=1.00 wt 0.051 -> 0.077 (x1.50)
+    [force-real-lever B] E10 2022-06-15: m=1.00 wt 0.250 -> 0.375 (x1.50)
+    [force-real-lever B] E12 2023-10-30: m=1.00 wt 1.000 -> 1.500 (x1.50)
+    [force-real-lever B] E13 2024-04-17: m=1.00 wt 0.012 -> 0.018 (x1.50)
+    [force-real-lever B] E14 2024-08-05: m=1.00 wt 0.500 -> 0.750 (x1.50)
+    [force-real-lever B] E15 2025-04-03: m=1.00 wt 0.001 -> 0.001 (x1.50)
+    [force-real-lever B] E16 2025-10-20: m=1.00 wt 0.086 -> 0.130 (x1.50)
+    [force-real-lever B] E17 2026-03-09: m=1.00 wt 0.007 -> 0.011 (x1.50)
+  [real-margin] max_gross_exposure=1.5 | margin_tiers=CAPIT-only | borrow 12%/yr
+  BAL events: 1969 stock + 677 ETF; final 580.8396B
+
+[7] BOOK B — LAG 25B (always-on, parked)...
+    [force-real-lever L] E0 2014-05-08: m=1.00 wt 0.739 -> 1.109 (x1.50)
+    [force-real-lever L] E2 2015-08-24: m=1.00 wt 0.000 -> 0.000 (x1.50)
+    [force-real-lever L] E3 2016-01-18: m=1.00 wt 0.226 -> 0.339 (x1.50)
+    [force-real-lever L] E4 2018-05-28: m=1.00 wt 0.000 -> 0.000 (x1.50)
+    [force-real-lever L] E5 2018-07-05: m=1.00 wt 0.112 -> 0.168 (x1.50)
+    [force-real-lever L] E6 2020-02-03: m=1.00 wt 0.110 -> 0.166 (x1.50)
+    [force-real-lever L] E7 2020-03-11: m=1.00 wt 0.153 -> 0.229 (x1.50)
+    [force-real-lever L] E8 2020-07-27: m=1.00 wt 0.032 -> 0.048 (x1.50)
+    [force-real-lever L] E10 2022-06-15: m=1.00 wt 0.250 -> 0.375 (x1.50)
+    [force-real-lever L] E12 2023-10-30: m=1.00 wt 0.054 -> 0.081 (x1.50)
+    [force-real-lever L] E13 2024-04-17: m=1.00 wt 0.462 -> 0.693 (x1.50)
+    [force-real-lever L] E14 2024-08-05: m=1.00 wt 0.000 -> 0.000 (x1.50)
+    [force-real-lever L] E15 2025-04-03: m=1.00 wt 0.500 -> 0.750 (x1.50)
+    [force-real-lever L] E16 2025-10-20: m=1.00 wt 0.119 -> 0.178 (x1.50)
+    [force-real-lever L] E17 2026-03-09: m=1.00 wt 0.013 -> 0.020 (x1.50)
+  LAG events: 6111 stock + 1240 ETF; final 643.6943B
+
+[8] Combine books (allocator)...
+  [edge-alloc] thr=4.0%; mean12 latest=0.5%, %time<thr=53%
+  38 band rebalances; final combined = 1306.0200B
+
+[9] Building TX table + self-checks...
+  [selfcheck BAL] cash-flow identity max err = 0 VND; final NAV identity err = 0 VND
+  [selfcheck LAG] cash-flow identity max err = 0 VND; final NAV identity err = 0 VND
+  [borrow-audit] total borrow cost = 199,630,541 VND (BAL 0 / LAG 199,630,541); max gross BAL 1.000 LAG 1.374 combined 1.000; borrow-days BAL 6 LAG 134
+
+====================================================================================================
+ V2.3A (allocator + CAPIT) + maturity:postbull + edge-cond-allocator(thr4%) AUDIT — FULL 2014-01-02 -> 2026-06-19 (12.46y)
+ Final NAV 1,306.02B  CAGR 29.93%  Sharpe(252) 1.95  MaxDD -17.8%  Calmar 1.68
+ VNINDEX B&H: CAGR 10.87%  Sharpe 0.66  MaxDD -45.3%
+====================================================================================================
+
+[11] Writing audit file...
+  -> /home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_s4p2_L2_mge150_univpit_mge150cap_real_lgdep.csv  (17,822 rows)
+
+ANNUAL (sys vs VNINDEX):
+  2014: +56.54%   (vni=+0.0815)
+  2015: +28.11%   (vni=+0.0635)
+  2016: +14.41%   (vni=+0.1575)
+  2017: +33.64%   (vni=+0.4646)
+  2018: +27.63%   (vni=-0.1037)
+  2019: +13.03%   (vni=+0.0776)
+  2020: +27.72%   (vni=+0.1419)
+  2021: +107.85%   (vni=+0.3372)
+  2022: -4.04%   (vni=-0.3399)
+  2023: +22.57%   (vni=+0.0824)
+  2024: +24.25%   (vni=+0.1193)
+  2025: +48.43%   (vni=+0.4054)
+  2026: +0.52%   (vni=+0.0202)
+
+Done.
+EXIT=0 (s4p2_L2_mge150 MGE=1.5 MGE_CAPIT_ONLY=1 FORCE_REAL_LEVER=1 MGE_GATE=dd52 MGE_DD52=-20 BORROW_ANNUAL=0.125)

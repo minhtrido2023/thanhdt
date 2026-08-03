@@ -324,7 +324,59 @@ if _capit_buys:
     except Exception as _e:      # fail-open: không chặn plan vì một dòng đối chiếu
         capit_note = f"⚠️ CAPIT: không đối chiếu được cỡ deploy ({type(_e).__name__}: {_e})"
 
+# ── ĐÒN BẨY MARGIN: nêu BẬT LOẠT, cổng duyệt RIÊNG (user chốt 2026-08-03) ───────────────
+# "Khi DollarBill tạo plan dùng margin tôi sẽ phải đồng ý duyệt thì hệ thống mới được phép
+# vận hành" — nên một plan có vay KHÔNG được lẫn vào dòng duyệt plan thường lệ. Khối này
+# hiện Σ tiền vay + đúng lệnh phải chạy để duyệt riêng. Nguồn số = `preview_margin_day()`,
+# CÙNG hàm mà `approve_margin_day.py` dùng để ghi trần vào bản duyệt và CÙNG cổng mà
+# `apply_capit_lever` áp lúc 09:05 ⇒ số user thấy == số bị ràng buộc, không có bản sao
+# công thức nào trôi khỏi nhau. Fail-open có ghi rõ: một dòng báo cáo không được chặn plan.
+margin_note = []
+try:
+    from trading_bot.plan import preview_margin_day, margin_day_approval
+    _pv = preview_margin_day(acct, date)
+    if _pv.get("error"):
+        pass                     # không đọc được plan qua load_plan ⇒ im lặng, gate 09:05 vẫn đủ
+    elif not _pv["orders"] and _pv.get("reasons"):
+        # Plan ĐÃ sizing theo đòn bẩy nhưng đòn bẩy sẽ KHÔNG được cấp (công tắc tắt, artifact
+        # từ chối…). Trước đây khối này im lặng ở nhánh đó, nên người duyệt 21:00 chỉ thấy
+        # cảnh báo "lệch +30%" của cổng 07-21 — vốn quy sai nguyên nhân sang "nhân capit_size
+        # hai lần". Đây đúng là phát hiện #3a của vòng 2, dịch sang tầng báo cáo
+        # (arch-reviewer vòng 3 #7).
+        _r = [r for r in _pv["reasons"] if "sizing" in r.lower() or "active" in r.lower()]
+        if _r:
+            margin_note.append("⚠️ **Plan có dấu hiệu đã sizing theo ĐÒN BẨY nhưng phiên sẽ "
+                               "chạy bằng VỐN TỰ CÓ** — khối lượng tính cho 1,3× vốn mà chỉ "
+                               "có 1,0× vốn; triệu chứng sẽ là WAIT_CASH, không phải lỗi rõ.")
+            for _x in _r[:2]:
+                margin_note.append(f"   · {_x}")
+    elif _pv["orders"]:
+        _rec, _aerr = margin_day_approval(acct, date)
+        margin_note.append(
+            f"🔺 **PLAN NÀY CÓ DÙNG MARGIN** — {len(_pv['orders'])} lệnh CAPIT "
+            f"({', '.join(_pv['tickers'])}), Σ giá trị {_pv['total_vnd']/1e6:,.1f}tr, "
+            f"**tiền VAY dự kiến ~{_pv['borrow_vnd']/1e6:,.1f}tr** "
+            f"(f={_pv['lever_f']}, gói {_pv['loan_package_id']}).")
+        if _rec is not None:
+            margin_note.append(
+                f"   ✅ Đòn bẩy ĐÃ ĐƯỢC DUYỆT RIÊNG cho phiên này "
+                f"({_rec.get('approved_by')}) — trần Σ "
+                f"{float(_rec.get('max_lever_total_vnd') or 0)/1e6:,.1f}tr.")
+        else:
+            margin_note.append(
+                f"   ⛔ **CẦN DUYỆT RIÊNG CHO ĐÒN BẨY** (khác với duyệt plan thường): {_aerr}")
+            margin_note.append(
+                f"   Duyệt xong, Mike chạy: `python3 mike/bin/approve_margin_day.py "
+                f"--account {acct} --date {date} --approved-by \"...\"`. Không duyệt ⇒ bot TỰ "
+                f"GỠ đòn bẩy và chạy {len(_pv['orders'])} lệnh này bằng VỐN TỰ CÓ (không chặn "
+                f"lệnh).")
+except Exception as _e:          # fail-open: không chặn plan vì một dòng báo cáo
+    margin_note = [f"⚠️ ĐÒN BẨY: không kiểm được trạng thái duyệt margin "
+                   f"({type(_e).__name__}: {_e}) — nếu plan có lệnh CAPIT, kiểm tay trước 09:05."]
+
 lines = [f"📋 **Kế hoạch giao dịch ngày mai {date} — Account {acct}**"]
+for _m in margin_note:
+    lines.append(_m)
 
 src_vn = " (nguồn DT5G đầy đủ)" if src == "DT5G_macro" else (f" (nguồn {src})" if src else "")
 nav_str = f"{nav:,.0f}đ" if isinstance(nav, (int, float)) else "n/a"

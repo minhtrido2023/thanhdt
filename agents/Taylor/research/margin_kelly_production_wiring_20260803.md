@@ -395,3 +395,143 @@ chứng minh **lệnh đặt được bằng tiền vay thật**. Phiên LIVE c�
 2. **Kiểm tay `pp0Buy@1840`** ở phiên LIVE có đòn bẩy đầu tiên; tới lúc đó, dòng shadow-log P0 của
    phiên có đòn bẩy **không hợp lệ** để promote P0 → ACTIVE.
 3. User xác nhận riêng, tường minh. **Không agent nào được lật cờ này.**
+
+---
+
+## 11. VÒNG 3 — đóng 2 khe `known_limits` + CỔNG DUYỆT RIÊNG TỪNG NGÀY CÓ VAY (2026-08-03, job `Taylor_20260803_154258`)
+
+User (John) duyệt 2 việc: **A** = đóng 2 khe đã ghi ở §10.5, **B** = *"khi DollarBill tạo plan
+dùng margin tôi sẽ phải đồng ý duyệt thì hệ thống mới được phép vận hành"*.
+
+Nguyên tắc thiết kế giữ nguyên xuyên suốt: **fail-safe luôn là KHÔNG đòn bẩy (chạy vốn tự có),
+không bao giờ là chặn toàn bộ lệnh** — under-deploy là sai số lành, vay quá mức là margin call.
+
+### 11.1 VIỆC B — cổng người THỨ HAI (`margin_day_approval`)
+
+`capit_margin_lever.enabled=true` là công tắc TỔNG = điều kiện **CẦN, không đủ**. Mỗi NGÀY mà
+`apply_capit_lever` thật sự cấp cờ vay cho ≥1 lệnh còn cần một bản ghi duyệt riêng cho **đúng ngày
+đó**: `data/margin_approvals/margin_approval_<account>_<plan_date>.json`.
+
+| Thành phần | Vai trò |
+|---|---|
+| `mike/bin/approve_margin_day.py` | Đường **DUY NHẤT** ghi bản duyệt. Mike chạy sau khi user xác nhận. Rổ mã + trần VND **không gõ tay** — lấy từ `preview_margin_day()`, đúng hàm mà báo cáo 21:00 dùng để hiển thị. |
+| `trading_bot.plan.margin_day_approval()` | Đọc + kiểm: đúng account, đúng `plan_date`, `approved_by` là người thật, `lever_f`/`loan_package_id` khớp hằng trong code, có trần `max_lever_total_vnd` > 0, có danh sách `tickers` không rỗng, chưa `revoked`. |
+| `_enforce_margin_day_approval()` | Áp cổng lên tập lệnh **vừa được cấp**, chạy **bên trong** `apply_capit_lever` ⇒ không đường nào ra khỏi hàm với cờ vay mà chưa qua cổng. Rổ đổi sau khi duyệt, hoặc Σ vượt trần ⇒ **gỡ SẠCH** (không cấp một phần — cấp một phần là tự quyết hộ user vay bao nhiêu). |
+| `send_plan_report.sh` | Nêu **BẬT LOẠT** trong báo cáo 21:00: Σ tiền vay dự kiến + lệnh chính xác phải chạy để duyệt. Không lẫn vào dòng duyệt plan thường. |
+
+**Vì sao là FILE RIÊNG, không phải field trong plan** (như `approved_by` của plan-approval-gate):
+plan là JSON do LLM (DollarBill) sinh hoặc người sửa tay. Đặt cờ duyệt đòn bẩy vào đó = trao quyền
+duyệt cho chính nơi sinh plan — đúng cái mà `apply_capit_lever` tồn tại để chặn.
+
+`preview=True` (chế độ xem trước cho bước duyệt) bỏ qua **đúng** cổng này và chỉ cổng này, chạy trên
+`deepcopy` và trả `(None, adj)` — hàm không trả ra đối tượng plan nào mang cờ vay.
+
+### 11.2 VIỆC A1 — khe artifact hai-trường: **THU HẸP, chưa đóng hẳn**
+
+Chọn hướng **(b) recompute độc lập** thay vì (a) hash, sau khi đọc kiến trúc: `trading_rules.json`
+và `golive_v23_status.json` đều bị `.gitignore` — một chữ ký nằm cùng chỗ với thứ nó ký thì ai sửa
+được file cũng sửa được chữ ký. Thay vào đó, **4 lớp, 4 nguồn khác nhau**:
+
+1. **Số học nội tại** (`_verify_targets_integrity`) — golive công bố cả BA thừa số, nên có 3 đẳng
+   thức miễn phí: `nav_basis × w_lag × capit_size → total → /n_slots → slot`.
+2. **Bảng sizing ghim trong code** — `capit_size ≤ capit_base(state)`, `w_lag ≤ STATE_LAG_WEIGHT[state]`.
+3. **Artifact state độc lập** — `state` được chốt bằng `golive_state_today.json` (file khác, bước
+   khác, do `publish_gated_state.py` ghi).
+4. **Sổ broker sống** (`lever_live_preflight`) — đo lại NAV theo đúng công thức `compute_active_nav.py`.
+
+> ⚠️ **Đọc đúng mức độ.** arch-reviewer vòng 3 đo bằng probe thật: bản trần **PHẲNG** đầu tiên
+> (`capit_size ≤ 1,0`) **không ràng buộc gì** trên ngày NEUTRAL thường lệ, vì 1,0 đúng bằng giá trị
+> hợp lệ lớn nhất (CRISIS) trong khi ngày thường là 0,375. Sửa 3 trường nhất quán mà **không đụng**
+> `nav_basis_vnd` cho lọt **2,67×** mục tiêu, envelope tối đa **111,6% NAV** (thiết kế: 13,6%) —
+> và neo NAV sống MÙ hoàn toàn với ca này. Neo theo `state` cắt bậc tự do đó xuống phần dư trong
+> CÙNG một state (NEUTRAL ≤2×). **Cổng thật sự chặn quy mô là VIỆC B**, không phải A1.
+> Ghim thành ca kiểm `C30`/`C30b`/`C30c`. `known_limits` đã được **viết lại** kèm số đo, không xoá.
+
+### 11.3 VIỆC A2 — preflight sống (`lever_live_preflight`)
+
+Chạy **sau `connect()`** (cần sổ broker sống), **trước** shadow-log P0 và `run_session`. **Chỉ GỠ,
+không bao giờ cấp.** Đọc thật `get_buying_power(symbol, price, loan_package_id=1840)` và ghi một
+dòng log đọc được bằng mắt. Đây là lưới **tự động** chạy trước việc người xem phiên đầu, không thay
+thế nó — nhưng nếu không ai xem thì hệ thống **không tự ý đoán**.
+
+Phân biệt có chủ đích: **đọc không được** (`None`/exception) ⇒ GỠ; **đọc được nhưng =0 hoặc < Σ
+lệnh** ⇒ chỉ CẢNH BÁO — gỡ đòn bẩy lúc thiếu tiền làm lệnh cần **nhiều** tiền hơn (gói 1840
+`initialRate` 0,5 ⇒ sức mua gấp đôi), tức sai chiều fail-safe.
+
+### 11.4 Lỗi CRITICAL do chính vòng 3 tạo ra, arch-reviewer bắt được — đã sửa
+
+Bản đầu của `lever_live_preflight` **phá tính idempotent** (`coding_guidelines` §5) và tạo ra một
+sự cố giả nghiêm trọng hơn thứ nó bảo vệ:
+
+crontab thật có **hai** lượt `run_bot.sh --account SpaceX` mỗi phiên — 09:05 và **13:00 ICT**
+("khởi động lại sau nghỉ trưa"). Lượt 13:00 là tiến trình MỚI chạy lại trọn cascade. Giữa lúc đang
+giải ngân, `availableCash` đã trừ tiền giữ cho lệnh treo ⇒ NAV sống đo được **thấp hơn** cơ sở tối
+qua (**−46%** ở sizing CRISIS, **−14,5%** ở NEUTRAL — ăn gần hết biên 15%), và `pp0Buy@1840` tụt về
+~0 sau khi sleeve giải ngân xong. Preflight khi đó GỠ sạch cờ vay ⇒ `Executor._lever_package_audit`
+suy tập cấp phép từ chính `o.loan_package_id` nên thấy **rỗng** ⇒ **PAUSE cả rổ CAPIT suốt buổi
+chiều**, kèm journal + bus event tuyên bố "đòn bẩy KHÔNG ai duyệt" cho đúng những lệnh đã qua **cả
+hai** cổng người sáng hôm đó — nội dung sự cố **nói sai**, người trực điều tra nhầm hướng.
+
+Sửa bằng **hai lớp bổ trợ**:
+
+- **Tách hai khái niệm.** `o.loan_package_id` = "lệnh này ĐI RA bằng gói nào" (preflight được phép
+  hạ về `None`); sổ `plan._lever_authorized` = "hôm nay ai ĐÃ ĐƯỢC CẤP PHÉP vay" (chỉ
+  `apply_capit_lever` ghi, sau khi qua mọi cổng kể cả duyệt-ngày). Audit hợp cả hai.
+  Đặt trên đối tượng plan **runtime**, không phải field dataclass — `load_plan` lọc theo field khai
+  báo, nên một plan JSON tự ghi `_lever_authorized` **không thể** chạm tới nó; để dạng field thì
+  chính nó thành đường qua mặt lưới an toàn cuối cùng.
+- **Preflight chỉ GỠ khi phiên CHƯA đặt lệnh nào** (đọc `exec_<account>_<date>_state.json`, đúng file
+  `Executor` sẽ load). Đã đặt rồi ⇒ hạ xuống CẢNH BÁO. Lớp bảo vệ chính **không mất**: lượt 09:05
+  (phiên sạch) vẫn GỠ đầy đủ — ca kiểm `J14` ghim đúng điều đó.
+
+### 11.5 Toàn bộ phát hiện vòng 3 và cách xử lý
+
+| # | Mức | Nội dung | Xử lý |
+|---|---|---|---|
+| 1 | CRITICAL | Lượt cron 13:00 gỡ đòn bẩy đã duyệt → audit dựng sự cố giả, treo rổ CAPIT | Sửa (§11.4). Ca kiểm `J13`–`J17b` |
+| 2 | HIGH | Trần phẳng `capit_size ≤ 1,0` không ràng buộc (lọt 2,67×) | Neo theo `state` + chốt state bằng nguồn độc lập; `known_limits` viết lại kèm số đo. `C30`/`C30b`/`C30c` |
+| 3 | MED-HIGH | `revoked` kiểm bằng `is True` ⇒ thu hồi viết tay (`"true"`/`1`) fail-OPEN im lặng | Đảo chiều: mọi giá trị lạ ⇒ THU HỒI. `I5[revoked='true'/1/'yes']` |
+| 4 | MEDIUM | Thiếu ADV20 của 1 mã ⇒ tắt đòn bẩy cả phiên, báo "artifact TỰ MÂU THUẪN" | Đối chiếu `n_capit_basket` thay vì số khoá `capit_adv_caps`. `C31`/`C31b` |
+| 5 | MEDIUM | `_bus`/`_notify` nuốt lỗi im lặng; `decided_by:"user"` hard-code (§20) | Kiểm `returncode` + exit 3; thêm cờ `--decided-by` mặc định `agent`. `I16`–`I18` |
+| 6 | MED-LOW | Đường `--revoke` ghi không nguyên tử (§5) | `tmp` + `os.replace`. `I19` |
+| 7 | LOW-MED | Báo cáo 21:00 vứt `_pv["reasons"]` ⇒ ca "sizing 1,3× nhưng chạy vốn tự có" im lặng | Thêm nhánh `else`. `L6`/`L7` |
+| 8 | LOW | Docstring `preview` nói mạnh hơn thực tế (không làm sạch plan caller truyền vào) | Sửa docstring |
+| 9 | LOW | `APPROVAL_PLACEHOLDERS` tạo cảm giác an toàn sai ("system-auto"/"Claude"/"yes" lọt) | Ghi thẳng đó là **quy ước mềm**, không phải bộ lọc; lá chắn thật là dấu vết |
+| 10 | LOW | `known_limits` + §10.5 lệch khỏi code | Viết lại (không xoá) + mục này |
+
+**Không tìm được (arch-reviewer kết luận SẠCH sau khi tự viết 6 probe phản chứng):** đường bypass
+cổng duyệt riêng; `apply_capit_lever` vẫn là nơi **duy nhất** trong repo gán `lever_f`/
+`loan_package_id` (grep toàn repo); công thức NAV trong preflight **khớp** `compute_active_nav.py`
+(đối chiếu số thật: lệch 1,03%); hợp đồng ghi↔đọc bản duyệt đủ khoá; bash quoting an toàn (khối
+margin nằm trong heredoc `<<'PY'` nên `\"` là escape của Python, không phải bash); thứ tự cascade
+không đổi; `preview_margin_day` chạy trên plan thô chỉ tạo **cận trên** nên trần trong bản duyệt
+không chặn oan.
+
+> **Caveat trung thực** (arch-reviewer nêu, giữ nguyên): cả `lever_live_preflight` lẫn
+> `compute_active_nav.py` đều **không trừ `totalDebt`**, trong khi NAV chuẩn tắc của fleet
+> (`daily_nav_snapshot.py`) có trừ. Khi đòn bẩy chạy, "NAV sống" bị thổi đúng bằng nợ margin ⇒ neo
+> **lỏng dần** theo mức vay. Không sai chiều (nó chỉ làm cổng dễ dãi hơn, không chặt hơn), nhưng
+> đừng mô tả con số đó là "NAV".
+
+### 11.6 Bằng chứng vòng 3
+
+- `capit_lever_selfcheck.py` — **170/170 PASS, 0 FAIL** (vòng 2: 97; đầu vòng 3: 150), tái lập
+  **giống hệt** trên **5 môi trường**: `TZ=Asia/Ho_Chi_Minh`, `env -u TZ`, `TZ=America/New_York`,
+  `TZ=UTC`, `TZ=Pacific/Kiritimati`.
+- Test **không còn phụ thuộc regime của ngày chạy**: nguồn `state` độc lập được trỏ vào fixture
+  (`_STATE_FIX`), không đọc `golive_state_today.json` production — nếu không, mọi ca `C*` sẽ đổi
+  kết quả theo state hôm chạy (đúng loại phụ thuộc môi trường mà skill `verify-before-done` bắt
+  phải khai và loại bỏ).
+- `bin/shellcheck_gate.sh bin/send_plan_report.sh` → rc=0; `bash -n` OK.
+- `data/trading_rules.json` → `capit_margin_lever.enabled` = **`false`**, không đổi.
+  `data/margin_approvals/` **chưa tồn tại** (không bản duyệt nào bị tạo ra trong lúc làm việc này).
+- **Không** đặt lệnh thật, **không** gọi API DNSE đổi `loanPackageId`.
+
+### 11.7 Việc còn lại trước khi ai đó đề nghị `enabled=true`
+
+1. **Kiểm tay `pp0Buy@1840`** ở phiên LIVE có đòn bẩy đầu tiên (nay đã có lưới tự động chạy trước,
+   nhưng vẫn cần người xem phiên đầu). Tới lúc đó, dòng shadow-log P0 của phiên có đòn bẩy **không
+   hợp lệ** để promote P0 → ACTIVE.
+2. Hiểu rằng **A1 chỉ thu hẹp** khe artifact (§11.2) — cổng chặn quy mô là **người duyệt từng ngày**.
+3. User xác nhận riêng, tường minh, cho **công tắc tổng**; rồi vẫn phải duyệt **từng ngày có vay**.
+   **Không agent nào được lật cờ này.**
