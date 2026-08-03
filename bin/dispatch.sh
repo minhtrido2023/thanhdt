@@ -402,6 +402,38 @@ _maybe_schedule_usage_resume() {
   return 0
 }
 
+# _maybe_fallback_provider_on_usage_limit <logfile> [<err_logfile>] -> 0 nếu ĐÃ fallback
+# sang claude (caller coi job này là "handled", không phải fail thật); 1 nếu không áp dụng
+# (không phải usage-limit-shaped, hoặc dispatch này vốn đã là claude — không có gì để
+# fallback TỪ).
+#
+# User mandate 2026-08-03: task dùng provider phụ (opencode/deepseek...) hết usage/rate
+# limit → CHUYỂN NGAY sang claude, KHÔNG xếp hàng chờ cùng provider như
+# _maybe_schedule_usage_resume làm cho claude. Lý do khác nhau về BẢN CHẤT, không phải
+# cùng 1 cơ chế đổi tên: claude có cửa sổ 5h/tuần với giờ reset DỰ ĐOÁN ĐƯỢC (usage_watch.py
+# đọc trực tiếp), nên "chờ rồi thử lại đúng provider đó" là hợp lý. Provider phụ có
+# usage_probe=null (kb/cli_providers.json) — KHÔNG có cách nào biết khi nào quota thật sự
+# hồi, nên "chờ 5h rồi thử lại" chỉ là đoán mù, dễ tạch lại y hệt cho tới khi chạm trần
+# DISPATCH_MAX_USAGE_RESUMES rồi bó tay — trong khi claude là quota ĐỘC LẬP, luôn sẵn sàng
+# ngay lập tức. PHẢI gọi hàm này TRƯỚC _maybe_schedule_usage_resume ở mọi call site (thứ
+# tự if/elif quyết định provider phụ đi fallback-ngay, claude thật đi chờ-resume).
+_maybe_fallback_provider_on_usage_limit() {
+  local lf="$1" ef="${2:-}"
+  [ -n "${PROVIDER:-}" ] && [ "$PROVIDER" != "claude" ] || return 1
+  _looks_like_usage_limit "$lf" "$ef" || return 1
+  JSET status=provider_fallback ended_at="$(date +%s)" \
+       result_summary="provider '$PROVIDER' hết usage/rate limit — fallback NGAY sang claude (quota độc lập, không chờ)"
+  local _fb_argv=("$ROOT/bin/dispatch.sh" "$id" "[FALLBACK provider->claude sau usage-limit, job gốc=$job_id] $prompt" --bg --timeout "$TIMEOUT")
+  [ -n "${EFFORT:-}" ] && _fb_argv+=(--effort "$EFFORT")
+  DISPATCH_FROM="$from" "${_fb_argv[@]}" >> "$ROOT/logs/dispatch_${id}_${ts}.log" 2>&1 || true
+  "$ROOT/bin/notify.sh" "[dispatch] $id: provider '$PROVIDER' hết usage/rate limit (job $job_id) — đã fallback NGAY sang claude (không chờ, quota độc lập)." 2>/dev/null || true
+  local _tid; _tid="$(_job_thread_id "$job_id")"
+  if [ -n "$_tid" ]; then
+    "$ROOT/bin/notify_thread.sh" "🔀 **$id** provider '$PROVIDER' hết usage/rate limit (job \`$job_id\`) — đã tự chuyển sang claude ngay, không chờ reset." "$_tid" 2>/dev/null || true
+  fi
+  return 0
+}
+
 # --- Max-turns auto-continuation (2026-08-02, user mandate: 5 job fail "Reached max
 # turns (50)" trong 1 ngày, tất cả effort=high, cả 2 attempt trong retry loop dùng
 # CHUNG 1 trần nên attempt 2 tạch giống hệt attempt 1 — retry vô ích, đúng "chạy tới
@@ -1009,7 +1041,12 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
       fi
       # Check for a usage-limit-shaped failure on EVERY attempt, not just after retries are
       # exhausted — no point burning the remaining retries immediately against a still-full
-      # account window.
+      # account window. Non-claude provider → fallback to claude NOW (checked first: a
+      # provider fallback is always preferred over queuing a same-provider blind-wait resume).
+      if _maybe_fallback_provider_on_usage_limit "$logfile"; then
+        "$ROOT/bin/consolidate.sh" >> "$ROOT/logs/consolidator.log" 2>&1 || true
+        return 0
+      fi
       if _maybe_schedule_usage_resume "$logfile"; then
         "$ROOT/bin/consolidate.sh" >> "$ROOT/logs/consolidator.log" 2>&1 || true
         return 0
@@ -1219,6 +1256,10 @@ else
     JSET status=done ended_at="$(date +%s)" exit_code=0 result_summary="$(SUMMARY)"
     _circuit_record "$CIRCUIT_KEY" success
   else
+    if _maybe_fallback_provider_on_usage_limit "$logfile" "$logfile.err"; then
+      echo "NOTE: dispatch $id (job $job_id) provider '$PROVIDER' hết usage/rate limit — đã fallback NGAY sang claude (job mới chạy nền, không chờ reset)." >&2
+      exit 5
+    fi
     if _maybe_schedule_usage_resume "$logfile" "$logfile.err"; then
       echo "NOTE: dispatch $id (job $job_id) hết usage limit tài khoản — KHÔNG PHẢI lỗi task." >&2
       echo "      Đã tự động lên lịch resume (bin/resume_pending.py sẽ tự chạy lại, không cần làm gì)." >&2
