@@ -1202,3 +1202,22 @@
 - [2026-08-03T13:04:59Z] Taylor/heartbeat — Taylor_20260803_122554: {"status": "still_running", "elapsed_min": 39, "job_id": "Taylor_20260803_122554", "source": "watcher"}
 - [2026-08-03T13:06:00Z] Taylor/heartbeat — Taylor_20260803_122554: {"status": "still_running", "elapsed_min": 40, "job_id": "Taylor_20260803_122554", "source": "watcher"}
 - [2026-08-03T13:07:00Z] Taylor/heartbeat — Taylor_20260803_122554: {"status": "still_running", "elapsed_min": 41, "job_id": "Taylor_20260803_122554", "source": "watcher"}
+
+## Consolidation 2026-08-03T13:21:11Z
+- [2026-08-03T13:19:00Z] Mafee/error — GHOST_ORDER_DETECTED: {"account": "selfcheck-lever4", "ticker": "FPT", "plan_date": "2099-01-02", "note": "Lệnh tồn tại ở broker nhưng state.json không biết (khả năng crash giữa place_order và _save_state). Bot ĐÃ TỰ DỪNG đặt lệnh mới cho mã này để tránh double-buy — cần đối soát tay rồi mới cho tiếp tục."}
+- [2026-08-03T13:19:27Z] Mafee/error — GHOST_ORDER_DETECTED: {"account": "dbg-lever", "ticker": "FPT", "plan_date": "2099-01-02", "note": "Lệnh tồn tại ở broker nhưng state.json không biết (khả năng crash giữa place_order và _save_state). Bot ĐÃ TỰ DỪNG đặt lệnh mới cho mã này để tránh double-buy — cần đối soát tay rồi mới cho tiếp tục."}
+- [2026-08-03T13:20:27Z] Mafee/error — LEVER_PACKAGE_UNAUTHORIZED: {"account": "selfcheck-lever4", "ticker": "FPT", "plan_date": "2099-01-02", "order_id": "9", "loan_package_id": 1840, "in_plan": true, "note": "lệnh broker 9 trên FPT mang gói vay ĐÒN BẨY 1840 nhưng mã này KHÔNG được cấp phép đòn bẩy trong plan hôm nay (được cấp: KHÔNG MÃ NÀO) — Bot ĐÃ TỰ DỪNG đặt lệnh mới cho mã này. Đây là ĐÒN BẨY KHÔNG ĐƯỢC CẤP PHÉP (nợ vay thật): đối soát ngay với sổ lệnh DNSE trước khi cho chạy tiếp."}
+- [2026-08-03T13:08:00Z] Taylor/heartbeat — Taylor_20260803_122554: {"status": "still_running", "elapsed_min": 42, "job_id": "Taylor_20260803_122554", "source": "watcher"}
+- [2026-08-03T13:09:00Z] Taylor/heartbeat — Taylor_20260803_122554: {"status": "still_running", "elapsed_min": 43, "job_id": "Taylor_20260803_122554", "source": "watcher"}
+- [2026-08-03T13:10:00Z] Taylor/heartbeat — Taylor_20260803_122554: {"status": "still_running", "elapsed_min": 44, "job_id": "Taylor_20260803_122554", "source": "watcher"}
+- [2026-08-03T13:11:00Z] Taylor/heartbeat — Taylor_20260803_122554: {"status": "still_running", "elapsed_min": 45, "job_id": "Taylor_20260803_122554", "source": "watcher"}
+- [2026-08-03T13:12:00Z] Taylor/heartbeat — Taylor_20260803_122554: {"status": "still_running", "elapsed_min": 46, "job_id": "Taylor_20260803_122554", "source": "watcher"}
+- [2026-08-03T13:13:00Z] Taylor/heartbeat — Taylor_20260803_122554: {"status": "still_running", "elapsed_min": 47, "job_id": "Taylor_20260803_122554", "source": "watcher"}
+- [2026-08-03T13:14:00Z] Taylor/heartbeat — Taylor_20260803_122554: {"status": "still_running", "elapsed_min": 48, "job_id": "Taylor_20260803_122554", "source": "watcher"}
+- [2026-08-03T13:15:00Z] Taylor/heartbeat — Taylor_20260803_122554: {"status": "still_running", "elapsed_min": 49, "job_id": "Taylor_20260803_122554", "source": "watcher"}
+- [2026-08-03T13:16:00Z] Taylor/heartbeat — Taylor_20260803_122554: {"status": "still_running", "elapsed_min": 50, "job_id": "Taylor_20260803_122554", "source": "watcher"}
+- [2026-08-03T13:17:01Z] Taylor/heartbeat — Taylor_20260803_122554: {"status": "still_running", "elapsed_min": 51, "job_id": "Taylor_20260803_122554", "source": "watcher"}
+- [2026-08-03T13:18:01Z] Taylor/heartbeat — Taylor_20260803_122554: {"status": "still_running", "elapsed_min": 52, "job_id": "Taylor_20260803_122554", "source": "watcher"}
+- [2026-08-03T13:19:01Z] Taylor/heartbeat — Taylor_20260803_122554: {"status": "still_running", "elapsed_min": 53, "job_id": "Taylor_20260803_122554", "source": "watcher"}
+- [2026-08-03T13:20:01Z] Taylor/heartbeat — Taylor_20260803_122554: {"status": "still_running", "elapsed_min": 54, "job_id": "Taylor_20260803_122554", "source": "watcher"}
+- [2026-08-03T13:21:01Z] Taylor/heartbeat — Taylor_20260803_122554: {"status": "still_running", "elapsed_min": 55, "job_id": "Taylor_20260803_122554", "source": "watcher"}
