@@ -401,8 +401,66 @@ def case_c10_old_log_is_ok():
         shutil.rmtree(root, ignore_errors=True)
 
 
+# ── Khối DELIVER (giao báo cáo: Discord → Telegram dự phòng) ─────────────────────────────
+# Thêm 2026-08-03 vòng 6 (arch-reviewer): check #10 phát hiện sự cố định tuyến, nhưng khâu GIAO
+# của chính báo cáo chứa nó lại đi qua CÙNG registry đang hỏng ⇒ registry hỏng kéo dài thì
+# không ai nhận được cảnh báo nào. Nhánh dự phòng Telegram vá chỗ đó; 2 ca dưới canh nó.
+# Khối này là BASH (không phải python như check #5/#10) nên chạy bằng bash thật trên sandbox
+# có stub `notify_thread.sh` / `notify_telegram.sh`, thay vì exec trong python.
+def run_deliver(thread_rc, telegram_rc=0):
+    """Chạy khối DELIVER thật với stub. Trả về (calls, log_content) — calls là danh sách tên
+    script đã được gọi, theo thứ tự."""
+    src = extract_block("DELIVER")
+    d = tempfile.mkdtemp(prefix="ops_health_deliver_")
+    bindir, logdir = os.path.join(d, "bin"), os.path.join(d, "logs")
+    os.makedirs(bindir, exist_ok=True)
+    os.makedirs(logdir, exist_ok=True)
+    calls = os.path.join(d, "calls")
+    for name, rc in (("notify_thread.sh", thread_rc), ("notify_telegram.sh", telegram_rc)):
+        p = os.path.join(bindir, name)
+        with open(p, "w", encoding="utf-8") as f:
+            # CHỈ ghi TÊN, không ghi "$*": tin nhắn có nhiều dòng ⇒ ghi cả đối số thì mỗi dòng
+            # thân tin thành 1 "lần gọi" giả khi đọc lại.
+            f.write(f'#!/usr/bin/env bash\necho "{name}" >> "{calls}"\nexit {rc}\n')
+        os.chmod(p, 0o755)
+    # append_event.sh bị gọi ngay sau khối ⇒ không nằm trong DELIVER, không cần stub.
+    script = ('set -uo pipefail\nROOT=%s\nMSG="bao cao test"\nTRADING_DAILY_THREAD=trading_daily\n'
+              'ACCOUNT=SpaceX\nTODAY=2026-08-03\n' % json.dumps(d)) + src
+    import subprocess
+    subprocess.run(["bash", "-c", script], capture_output=True, timeout=30)
+    got = []
+    if os.path.exists(calls):
+        with open(calls, encoding="utf-8") as f:
+            got = [ln.split()[0] for ln in f if ln.strip()]
+    logpath = os.path.join(logdir, "notify_thread_errors.log")
+    log = open(logpath, encoding="utf-8").read() if os.path.exists(logpath) else ""
+    shutil.rmtree(d, ignore_errors=True)
+    return got, log
+
+
+def case_deliver_discord_ok_no_telegram():
+    calls, _ = run_deliver(thread_rc=0)
+    # Gửi song song = nhân đôi mọi báo cáo 08:20/12:45. Dự phòng phải là DỰ PHÒNG.
+    check("deliver: Discord OK ⇒ KHÔNG gửi Telegram (không nhân đôi tin)",
+          calls == ["notify_thread.sh"], f"calls={calls}")
+
+
+def case_deliver_discord_fails_falls_back_to_telegram():
+    calls, _ = run_deliver(thread_rc=1)
+    check("deliver: Discord lỗi (registry hỏng) ⇒ rơi sang Telegram",
+          calls == ["notify_thread.sh", "notify_telegram.sh"], f"calls={calls}")
+
+
+def case_deliver_both_fail_logs_for_check10():
+    calls, log = run_deliver(thread_rc=1, telegram_rc=1)
+    check("deliver: cả 2 đường chết ⇒ ghi notify_thread_errors.log (check #10 lượt sau tố cáo)",
+          calls == ["notify_thread.sh", "notify_telegram.sh"] and "CA HAI duong bao" in log,
+          f"calls={calls} log={log!r}")
+
+
 def main():
-    print("ops_health_check_selfcheck: check #5 (backlog question) + check #10 (notify_thread) regression")
+    print("ops_health_check_selfcheck: check #5 (backlog question) + check #10 (notify_thread) "
+          "+ khối DELIVER (Discord→Telegram) regression")
     for fn in (case_archived_question_visible, case_cross_layer_resolve,
                case_resolver_must_be_after, case_dedupe_hot_and_archive,
                case_no_crowd_out, case_small_pool_prints_all,
@@ -410,7 +468,10 @@ def main():
                case_fresh_question_is_pending,
                case_wagsfix_not_confirmed_is_warn_only, case_wagsfix_only_no_false_ok,
                case_c10_no_file_is_ok, case_c10_fresh_log_warns,
-               case_c10_fresh_log_without_timestamp_line, case_c10_old_log_is_ok):
+               case_c10_fresh_log_without_timestamp_line, case_c10_old_log_is_ok,
+               case_deliver_discord_ok_no_telegram,
+               case_deliver_discord_fails_falls_back_to_telegram,
+               case_deliver_both_fail_logs_for_check10):
         fn()
     if FAILS:
         print(f"\nFAIL: {len(FAILS)} assertion hỏng")

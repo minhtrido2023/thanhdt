@@ -284,3 +284,47 @@ ca check #10). Mutation test cả 3 bất biến mới: xoá dòng ghi log ⇒ C
 Ba vòng liên tiếp viết "vẫn có alert" mà không ai chạy thử `notify.sh` trong đúng điều kiện hỏng
 đang bàn — và câu đó được chép sang code, comment, sổ sự cố như sự thật đã chốt. Trước khi chấp
 nhận im lặng ở một đường, phải **chạy thật** đường còn lại trong đúng ca hỏng đó.
+
+---
+
+## Vòng 6 (2026-08-03) — đính chính lời lẽ + vá khâu GIAO của health-check
+
+arch-reviewer audit riêng commit `0f64be2b`: **NEEDS_CHANGES, không BLOCKER** — *"cơ chế ĐÚNG và
+đã test thật (42/42 + 29 assertion, 5/5 mutation kill độc lập), nhưng LỜI LẼ trong code/sổ sự cố
+SAI"*. Ba chỗ sai, đã sửa (0 thay đổi hành vi ở phần này — chỉ văn bản):
+
+| # | Câu sai | Sự thật |
+|---|---------|---------|
+| 1 | *"Fleet KHÔNG có kênh Telegram"* (`dispatch.sh:716`, sổ này, commit message) | Fleet **CÓ** Telegram thật: `secrets/telegram_config.json` + `telegram_recommend.send_telegram_text`, ~15 script production dùng (`bot_execute.py`, `macro_healthcheck.py`, `crisis_alert_push.py`, `risk_monitor.py`…). Câu đúng: **`mike/bin/notify.sh` KHÔNG phải Telegram** — nó đi cùng bridge `127.0.0.1:8199` và chết vì cùng registry. |
+| 2 | *"đường báo KHÔNG phụ thuộc Discord"* (`dispatch.sh:723-724`, selfcheck, sổ này) | Quá rộng. Chỉ khâu **GHI** (`logs/notify_thread_errors.log`) là độc lập. Khâu **GIAO TỚI NGƯỜI** vẫn là `ops_health_check.sh:587` → `notify_thread.sh` TÊN `trading_daily` → `discord_channel.sh` → **chính registry đang hỏng**. |
+| 3 | 5 chỗ còn khẳng định điều đã bị bác bỏ (`dispatch.sh:485`, selfcheck `:12`/`:179`, sổ này `:154`/`:201` bảng B1) | Sổ **tự mâu thuẫn**: khẳng định ở bảng quyết định, bác bỏ ở mục dưới. Đã sửa cả 5. |
+
+**Hệ quả THẬT của (2)** — cũng là lý do vòng 6 không dừng ở sửa chữ: registry hỏng **kéo dài**
+(dùng cả viên đạn F4 "vẫn chạy") thì báo cáo health-check — thứ duy nhất tố cáo sự cố qua check
+#10 — **cũng câm theo**. Guard tự vô hiệu hoá đúng lúc cần nhất.
+
+**Vá (thay đổi hành vi, có test)**:
+- Mới `bin/notify_telegram.sh` — HTTPS thẳng `api.telegram.org`: **không** bridge 127.0.0.1:8199,
+  **không** registry, credential riêng ⇒ không chết chung nguyên nhân với Discord. Bọc lại
+  `telegram_recommend.send_telegram_text` (đã production), cố ý không định nghĩa lại cách gửi.
+  Tự kiểm `res["ok"]` vì `send_telegram_text` **không raise** khi Telegram từ chối (chỉ in
+  WARNING) — thiếu chỗ này là báo thành công cho tin chưa bao giờ tới.
+- `ops_health_check.sh` khối `DELIVER_BEGIN/END`: Discord trước; `notify_thread.sh` trả **khác 0**
+  ⇒ rơi sang Telegram. **Chỉ khi thất bại**, không gửi song song (song song = nhân đôi mọi báo
+  cáo 08:20/12:45). Cả 2 chết ⇒ ghi `notify_thread_errors.log` để lượt sau check #10 tố cáo.
+
+**Verify vòng 6**:
+- `ops_health_check_selfcheck.py`: **PASS** (21 ca cũ + **3 ca DELIVER mới**). Khối DELIVER là
+  BASH nên chạy bằng `bash` thật trên sandbox có stub, không exec trong python như check #5/#10.
+- **Mutation test 3/3 kill**: bỏ hẳn fallback ⇒ 2 ca FAIL; gửi song song ⇒ ca "không nhân đôi"
+  FAIL; bỏ dòng ghi log ⇒ ca "cả 2 chết" FAIL.
+- `dispatch_discord_topic_selfcheck.sh`: **42/42 PASS** (không đổi — phần đó chỉ sửa chữ).
+- **CHẠY THẬT đường dự phòng** (đúng bài học vòng 5, không lặp lại lỗi "viết mà không chạy"):
+  `notify_telegram.sh "<probe>"` → **exit 0, tin tới thật**. Ca hỏng: thiếu credential → exit 2;
+  token sai → exit 1 (`401 Unauthorized`) ⇒ nhánh "cả 2 chết" thật sự kích hoạt được.
+
+**Bài học vòng 6**: sai lệch của vòng 5 KHÔNG phải sai về cơ chế mà sai về **phạm vi của câu
+chữ** — "không có Telegram" (sai) thay vì "notify.sh không phải Telegram" (đúng), và "đường báo
+không phụ thuộc Discord" (quá rộng) thay vì "khâu GHI không phụ thuộc Discord" (đúng). Câu quá
+rộng nguy hiểm hơn câu sai rõ: nó **đóng cửa điều tra** — đọc thấy "đã có đường báo" thì không ai
+đi kiểm khâu giao, và lỗ hổng sống thêm một vòng nữa. Viết phạm vi hẹp nhất mà mình đã ĐO được.

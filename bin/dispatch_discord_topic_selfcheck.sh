@@ -9,7 +9,8 @@
 #   S1 — KHÔNG ĐOÁN: mọi consumer sau lúc dispatch chỉ ĐỌC LẠI ID đã ghim trên job record.
 #        Ghim rỗng ⇒ IM LẶNG phía Discord (không rơi về ambient / con trỏ toàn cục).
 #   S2 — Phân biệt "agent KHÔNG có override" (hợp lệ, đi tiếp) với "CÓ override nhưng registry
-#        hỏng" (trường hợp bất thường: pin RỖNG + alert Telegram, KHÔNG tụt về ambient). Gộp 2
+#        hỏng" (trường hợp bất thường: pin RỖNG + ghi logs/notify_thread_errors.log, KHÔNG tụt
+#        về ambient — KHÔNG phải "alert Telegram", xem vòng 5/6 ở CA 4). Gộp 2
 #        cái này thành chuỗi rỗng = override cố định của Wags/DollarBill âm thầm biến thành topic
 #        ambient — chính là lỗi 07-22 "override thành dead-code".
 #   ABORT chỉ dành cho `--thread` TƯỜNG MINH không phân giải được: caller đã nêu đích danh 1 topic
@@ -176,7 +177,8 @@ echo "== CA 4: registry HỎNG + agent CÓ override ⇒ VẪN chạy, pin RỖNG
 # `bq_freshness_check.sh` dispatch DollarBill (có override) KHÔNG kèm `--thread`, nên registry
 # hỏng sẽ chặn luôn job SINH PLAN T+1 ⇒ sáng hôm sau bot chạy không có plan. Đổi "user không
 # thấy 1 tin nhắn" lấy "không có việc" là sai hướng cho một sự cố THUẦN ĐỊNH TUYẾN THÔNG BÁO.
-# Nay: pin RỖNG + alert Telegram + VẪN CHẠY. Vẫn KHÔNG tụt về ambient (đó mới là rò rỉ).
+# Nay: pin RỖNG + ghi logs/notify_thread_errors.log + VẪN CHẠY. Vẫn KHÔNG tụt về ambient (đó mới
+# là rò rỉ). (Bản trước ghi "alert Telegram" ở đây — SAI, xem ghi chú vòng 5/6 dưới.)
 rm -f "$MK/logs/notify_thread_errors.log"
 run_dispatch -u DISCORD_THREAD_ID DISCORD_CHANNELS_REGISTRY=/nonexistent/registry.json -- \
   Wags "selfcheck ca4" --timeout 60
@@ -189,10 +191,15 @@ assert "cảnh báo registry hỏng (notify.sh → #mikefleet)" "$(grep -c 'regi
 # Vòng 5: đường báo TRÊN không đáng tin trong ĐÚNG ca này — `notify_discord.sh:22` cũng phân
 # giải tên `mikefleet` qua CHÍNH registry đang hỏng (`set -e` ⇒ chết trước curl; đo thật:
 # `DISCORD_CHANNELS_REGISTRY=/nonexistent notify.sh "..."` → "send failed (rc=1)"). Ở đây
-# notify.sh là STUB nên nó "thành công" — đúng lớp PASS-GIẢ. Vậy nên bất biến thật phải là
-# đường KHÔNG phụ thuộc Discord: ghi logs/notify_thread_errors.log (ops_health_check check #10
-# đọc file này 08:20/12:45). Đó mới là thứ bảo đảm sự cố registry không im lặng.
-assert "ghi logs/notify_thread_errors.log (đường báo KHÔNG phụ thuộc Discord)" \
+# notify.sh là STUB nên nó "thành công" — đúng lớp PASS-GIẢ. Vậy nên bất biến thật phải là khâu
+# GHI không chết cùng registry: ghi logs/notify_thread_errors.log (ops_health_check check #10
+# đọc file này 08:20/12:45). Đó là thứ bảo đảm sự cố registry không im lặng Ở KHÂU GHI.
+# Vòng 6 (arch-reviewer) — PHẠM VI: chỉ khâu GHI mới độc lập với Discord. Khâu GIAO TỚI NGƯỜI
+# của check #10 là `ops_health_check.sh:587` → notify_thread.sh TÊN 'trading_daily' → CHÍNH
+# registry này ⇒ registry hỏng kéo dài thì báo cáo health-check cũng câm. Vá: ops_health_check
+# rơi sang Telegram khi notify_thread.sh trả khác 0 (canh bởi ops_health_check_selfcheck.py,
+# khối DELIVER — không thuộc phạm vi file này).
+assert "ghi logs/notify_thread_errors.log (khâu GHI không chết cùng registry)" \
   "$(grep -c 'registry Discord HONG' "$MK/logs/notify_thread_errors.log" 2>/dev/null || echo 0)" "1"
 
 echo "== CA 4b: pin RỖNG trong khi tiến trình cha CÓ ambient ⇒ agent con KHÔNG được thừa kế (M2)"

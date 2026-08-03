@@ -623,7 +623,7 @@ echo "$MSG"
 # → người sửa hoặc né verify, hoặc gây nhiễu vận hành. Mặc định (biến không set) = y như cũ.
 DRY_RUN="${OPS_HEALTH_DRY_RUN:-0}"
 if [ "$DRY_RUN" = "1" ]; then
-  echo "[DRY-RUN] bỏ qua: notify_thread / append_event / dispatch autofix"
+  echo "[DRY-RUN] bỏ qua: notify_thread (+dự phòng notify_telegram) / append_event / dispatch autofix"
 else
 # DELIVER_BEGIN — giao báo cáo tới người: Discord trước, Telegram nếu Discord hỏng.
 #

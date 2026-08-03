@@ -482,7 +482,9 @@ _job_thread_id() {
 # nhau trong 2 ngày liên tiếp (job Mike_20260801_173001 vs Mike_20260802_173001), cả hai đều
 # NGOÀI registry. (ID cụ thể xem kb/incidents/2026-08/2026-08-02-discord-channel-registry.md —
 # không chép ID trần vào code, đó chính là thứ discord_id_gate chặn.)
-# Nay: cron không nêu topic ⇒ pin RỖNG ⇒ im lặng phía Discord (Telegram vẫn chạy). Cron nào
+# Nay: cron không nêu topic ⇒ pin RỖNG ⇒ im lặng phía Discord cho job đó. (Fleet CÓ Telegram
+# thật, nhưng đó là đường RIÊNG của pipeline trading — bot_execute/crisis_alert_push — không đi
+# qua dispatch, nên KHÔNG được viện dẫn nó để biện minh cho im lặng ở đây.) Cron nào
 # THẬT SỰ cần báo vào 1 topic thì nêu ĐÍCH DANH `--thread <tên>` (đã thêm cho daily_retro.sh,
 # weekly_ops_audit.sh, check_report_cadence.sh) — nêu đích danh là hợp lệ, đoán thì không.
 #
@@ -713,15 +715,24 @@ _start_ts="$(date +%s)"
 # không phân giải được phải dừng, không đoán.
 #
 # ⚠️ ĐO ĐƯỢC 2026-08-02 (vòng 5, arch-reviewer MINOR-1 + tự kiểm chứng): "đã cảnh báo qua
-# Telegram" — câu ghi ở đây trước kia — LÀ SAI HAI LẦN. (a) Fleet không có kênh Telegram:
-# `notify.sh` → `notify_discord.sh` → CÙNG bridge `127.0.0.1:8199` với `notify_thread.sh`.
+# Telegram" — câu ghi ở đây trước kia — LÀ SAI HAI LẦN. (a) `mike/bin/notify.sh` KHÔNG phải
+# Telegram: `notify.sh` → `notify_discord.sh` → CÙNG bridge `127.0.0.1:8199` với
+# `notify_thread.sh`, tức nó chết vì CÙNG registry. (Fleet CÓ Telegram thật —
+# `secrets/telegram_config.json` + `telegram_recommend.send_telegram_text`, ~15 script production
+# dùng: bot_execute.py, macro_healthcheck.py, crisis_alert_push.py… — nhưng `notify.sh` không
+# phải nó, nên "Telegram vẫn chạy" KHÔNG bao che được cho đường báo của dispatch.)
 # (b) Tệ hơn: trong ĐÚNG ca này (registry hỏng) `notify_discord.sh:22` cũng phân giải tên
 # `mikefleet` QUA CHÍNH REGISTRY ĐÓ, `set -e` ⇒ nó chết trước khi curl. Đo thật:
 # `DISCORD_CHANNELS_REGISTRY=/nonexistent notify.sh "..."` → "send failed (rc=1)", KHÔNG có
 # tin nào đi. Nghĩa là lập luận đánh đổi F4 ("vẫn chạy vì dù sao cũng có alert") dựa trên một
 # cảnh báo KHÔNG BAO GIỜ TỚI. Giữ nguyên quyết định VẪN CHẠY (đúng: không chặn việc vì lỗi
-# định tuyến), nhưng cảnh báo phải đi bằng đường KHÔNG phụ thuộc Discord: ghi
+# định tuyến), nhưng cảnh báo phải đi bằng đường không chết cùng registry: ghi
 # `logs/notify_thread_errors.log` — file mà `ops_health_check.sh` check #10 ĐỌC mỗi 08:20/12:45.
+# PHẠM VI CHÍNH XÁC (vòng 6, arch-reviewer): chỉ khâu **GHI** là độc lập với Discord. Khâu
+# **GIAO TỚI NGƯỜI** của check #10 vẫn là `ops_health_check.sh:587` → `notify_thread.sh` với TÊN
+# `trading_daily` → `discord_channel.sh` → CHÍNH registry đang hỏng ⇒ registry hỏng KÉO DÀI thì
+# báo cáo health-check CŨNG câm theo, không ai được báo gì. Vá ở vòng 6: `ops_health_check.sh`
+# rơi sang Telegram (đường thật, không qua registry) khi `notify_thread.sh` trả về khác 0.
 if ! _dtid0="${FORCE_TID:-$(_ambient_thread "$id")}"; then
   echo "dispatch: registry Discord hỏng cho override của '$id' — job VẪN CHẠY nhưng KHÔNG có topic Discord (không đoán). Đã ghi logs/notify_thread_errors.log (ops_health_check sẽ báo)." >&2
   mkdir -p "$ROOT/logs"
