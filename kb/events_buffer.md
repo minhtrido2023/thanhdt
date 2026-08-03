@@ -613,3 +613,7 @@
 - [2026-08-03T02:25:54Z] Taylor/heartbeat — Taylor_20260803_015850: {"status": "still_running", "elapsed_min": 27, "job_id": "Taylor_20260803_015850", "source": "watcher"}
 - [2026-08-03T02:26:18Z] Taylor/heartbeat — Taylor_20260803_021414: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260803_021414", "source": "watcher"}
 - [2026-08-03T02:26:24Z] Taylor/finding — echo-test wakeup_profile hint verify: {"job": "Taylor_20260803_022601", "type": "no-op echo test", "result": "OK", "note": "Dispatch nhan duoc, session headless khoi dong binh thuong, bus ghi duoc. Khong co thay doi code/du lieu nao.", "ts_utc": "2026-08-03T02:26:15Z"}
+
+## Consolidation 2026-08-03T02:26:59Z
+- [2026-08-03T02:26:51Z] Taylor/finding — echo-test wakeup_profile hint verify (job 022638): {"job": "Taylor_20260803_022638", "type": "no-op echo test", "result": "OK", "note": "Dispatch nhan duoc, session headless khoi dong binh thuong, context pack + working memory nap du, bus ghi duoc. Khong co thay doi code/production."}
+- [2026-08-03T02:26:54Z] Taylor/heartbeat — Taylor_20260803_015850: {"status": "still_running", "elapsed_min": 28, "job_id": "Taylor_20260803_015850", "source": "watcher"}
