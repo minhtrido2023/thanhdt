@@ -168,7 +168,8 @@ $KNOWN_ISSUE
 }
 QUY TRÌNH BẮT BUỘC:
 1. CHẨN ĐOÁN từ bằng chứng thật (log/file/API), không đoán. Đọc kb/ops_runbook.md trước. Nếu có mục 'khớp từ khoá' ở trên, đọc kỹ và tự xác nhận có thực sự CÙNG root cause không (đừng áp mù) — nếu khác, vẫn phải grep -rn kb/incidents/ tự tìm thêm như trước giờ.
-2. SỬA trong giới hạn: ĐƯỢC sửa bug code script report/check/pipeline/cache, resync cache, resend report, dọn lock/flag kẹt, restart daemon phụ trợ; commit fix với message rõ ràng.
+2. SỬA trong giới hạn: ĐƯỢC sửa bug code script report/check/pipeline/cache, resync cache, resend report, dọn lock/flag kẹt, restart daemon phụ trợ.
+2b. COMMIT AN TOÀN: chạy git status TRƯỚC git add — CHỈ git add đúng các file bạn thực sự sửa (liệt kê tường minh), TUYỆT ĐỐI không git add -A / git add . ; có thể có phiên khác (Wags/Mike/Winston khác) đang sửa file khác CÙNG LÚC, add rộng sẽ cuốn thay đổi CHƯA XONG của người khác vào commit của bạn (sự cố thật 2026-08-02: 2 job Wags cùng sửa ops_health_check.sh). Nếu git status cho thấy file đã modify mà KHÔNG phải do bạn sửa, đừng add file đó, ghi rõ trong finding. Sau đó mới commit fix với message rõ ràng.
 3. CẤM TUYỆT ĐỐI (dù thấy 'cần thiết'): sửa trade plan, trading_rules.json, logic đặt lệnh executor/brokers, crontab dòng thực thi (run_bot/heartbeat/pkill), xoá dữ liệu, tạo/xoá BOT_STOP. Nếu root cause nằm ở đó → append_event.sh Winston question '<topic>' với mô tả + đề xuất, notify Telegram, rồi DỪNG.
 4. VERIFY artifact sau khi sửa (chạy lại checker/script bị lỗi, xác nhận hết lỗi thật) — không tin self-report.
 5. BÁO CÁO: notify_thread.sh vào thread $TRADING_DAILY_THREAD — ngắn gọn: hỏng gì, nguyên nhân, đã sửa gì, verify thế nào. Nếu ảnh hưởng workflow sống → thêm 1 FILE entry mới kb/incidents/<YYYY-MM>/<YYYY-MM-DD>-<topic>.md + 1 dòng trong kb/incidents/index.md (KHÔNG append vào kb/INCIDENTS.md — file đó nay chỉ là STUB REDIRECT).
