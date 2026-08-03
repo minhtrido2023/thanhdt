@@ -47,10 +47,21 @@ Họ config = **V2.3A (argv `v23a none postbull 0 edge`) + custom30V parking (ET
 - Capacity: nhỏ NAV cao hơn (R1 @20B 31.69 > R2 @50B 29.24), decay theo vốn.
 
 ### 🔁 RE-PIN 2026-06-25 — threads=1 DETERMINISTIC (thay số threads=4 1-sample ở trên)
-> ⭐ **SỐ R3 CHÍNH THỨC HIỆN HÀNH (từ 2026-08-02, RE-PIN sau khi GỠ LOOK-AHEAD cơ sở giá rổ parking):
-> CAGR 27,24% / Sharpe 1,81 / MaxDD −18,4% / Calmar 1,48** (Final NAV 1.006,33B, universe = MIXED
-> `universe_pit` + `ticker_prune`). Mọi trích dẫn MỚI dùng số này. Xem section
-> **"2026-08-02 — ⭐ RE-PIN R3 SAU KHI TÁCH VAI CƠ SỞ GIÁ (Price vs Close) TRONG custom30V"** cuối file.
+> ⭐ **SỐ R3 CHÍNH THỨC HIỆN HÀNH (từ 2026-08-03, RE-PIN theo đúng mặc định production
+> `LAG_ADV_BASIS=price`): CAGR 28,86% / Sharpe 1,90 / MaxDD −17,8% / Calmar 1,62** (Final NAV
+> 1.178,01B, universe = MIXED `universe_pit` + `ticker_prune`). Mọi trích dẫn MỚI dùng số này.
+> **KHÔNG phải "hệ tốt lên"** — không có thay đổi mô hình; đây là đồng bộ registry theo code
+> production (mặc định ADV book LAG đổi `close`→`price` ngày 08-02, commit `0062aa0`). Toàn bộ chênh
+> nằm ở IS (+3,28pp), OOS +0,02pp. Xem section
+> **"2026-08-03 — ⭐ RE-PIN R3 THEO ĐÚNG MẶC ĐỊNH PRODUCTION `LAG_ADV_BASIS=price`"** cuối file.
+>
+> ~~⭐ **SỐ R3 (từ 2026-08-02, RE-PIN sau khi GỠ LOOK-AHEAD cơ sở giá rổ parking):
+> CAGR 27,24% / Sharpe 1,81 / MaxDD −18,4% / Calmar 1,48** (Final NAV 1.006,33B).~~ →
+> **SUPERSEDED 2026-08-03.** Lý do: KHÔNG phải sai — số đó đúng với `LAG_ADV_BASIS=close`, nhưng
+> mặc định production đã là `price` từ 08-02 ⇒ 27,24% không còn tái lập được bằng lệnh pin trên code
+> hôm nay. Chân control 08-03 tái lập 27,24% TUYỆT ĐỐI cả 5 chỉ tiêu. Giữ làm lịch sử; nội dung
+> section **"2026-08-02 — ⭐ RE-PIN R3 SAU KHI TÁCH VAI CƠ SỞ GIÁ (Price vs Close) TRONG custom30V"**
+> (cuối file) vẫn có hiệu lực về mặt CƠ CHẾ look-ahead đã sửa.
 >
 > ~~⭐ **SỐ R3 (từ 2026-07-29, RE-PIN sau restate DT5G): CAGR 27,60% / Sharpe 1,84 / MaxDD −17,5% /
 > Calmar 1,58** (Final NAV 1.041,95B).~~ → **SUPERSEDED 2026-08-02.** Lý do: số đó được đo bằng code
@@ -5204,4 +5215,73 @@ dưới đây **không cần chạy lại backtest** — dữ liệu đã nằm 
 
 **Files:** harness `data/liqadv_ab_20260802/run_leg.sh` · LOO `.../loo_delta.py` · annex `.../annex_L3.py` ·
 log `.../{L0_legacy,L1_liqzb,L2_advprice,L3_both}.log` · CSV `data/v23_..._exp_L{0..3}_*_univpit.csv`.
+Canonical `..._wtnamecap.csv` **KHÔNG bị đụng**.
+
+---
+
+## 2026-08-03 — ⭐ RE-PIN R3 THEO ĐÚNG MẶC ĐỊNH PRODUCTION `LAG_ADV_BASIS=price` — job `Taylor_20260803_035250` (user duyệt; phát hiện gốc: `Taylor_20260803_015850`)
+
+**SỐ CHÍNH THỨC MỚI: CAGR 28,86% / Sharpe 1,90 / MaxDD −17,8% / Calmar 1,62 / Final NAV 1.178,01B.**
+Thay cho 27,24% / 1,81 / −18,4% / 1,48 / 1.006,33B (pin 08-02, mục ngay trên — giữ làm **lịch sử,
+SUPERSEDED**, KHÔNG xoá).
+
+⚠️ **ĐÂY KHÔNG PHẢI "hệ tốt lên +1,62pp".** Không có thay đổi mô hình nào giữa 2 lần pin. Đây là
+**sửa DRIFT giữa registry và code**: mặc định `LAG_ADV_BASIS` đã đổi `close` → `price` ngày
+2026-08-02 (job `Taylor_20260802_163657`, giữ lại bởi commit `0062aa0`) mà registry chưa cập nhật ⇒
+số pin 27,24% **KHÔNG còn tái lập được** bằng lệnh pin chạy trên code production hôm nay. Re-pin này
+chỉ đưa registry về đúng thứ production ĐANG chạy.
+
+### Vì sao mặc định là `price` (căn cứ, KHÔNG phải chọn theo số đẹp)
+Ghi lại ở đây vì đây mới là lý do nền của con số mới (chi tiết ở commit `0062aa0`):
+(a) **gỡ look-ahead thật** — ADV phải dùng giá thô point-in-time (`COALESCE(Price,Close)`), cùng
+logic đã CONFIRMED cho PE/ps/`custom_basket.py` cùng ngày; (b) **giữ bất biến "trần live == trần đã
+mô phỏng"** — đường LIVE (`due_diligence.adv_vnd`, `cap_lag_orders`) vốn đã dùng `price`, hoàn nguyên
+riêng engine sẽ PHÁ bất biến này. Selfcheck `--live` 22 PASS / 0 FAIL; tác động live đo được: **0
+lệnh đổi**. quant-skeptic (`mike/logs/verify_20260802_173456.log`) **không nêu objection nào riêng
+cho phần này** — verdict INCONCLUSIVE của phiên đó nhắm vào `LIQ_ZERO_BLOCK` (Việc 1), đã được xử lý
+riêng bằng cách trả mặc định về opt-in (`""`).
+
+### A/B 1 biến trên ENGINE PRODUCTION (`data/.../lag_repin_20260803/run_repin.sh`)
+Snapshot đóng cứng `data/bq_cache_asof20260729_postrestate` (đúng vintage 2 lần pin trước),
+`BQ_CACHE_THREADS=1`, `$DNA_PYEXE`, lệnh pin R3 nguyên văn, engine = **`pt_v23_audit_2014.py` bản
+production, `git status` sạch** (không bản sao nghiên cứu nào).
+
+| Leg | `LAG_ADV_BASIS` | CAGR | Sharpe | MaxDD | Calmar | Final NAV | IS 14-19 | OOS 20+ | self-check |
+|---|---|---|---|---|---|---|---|---|---|
+| **PIN MỚI** | `price` (mặc định) | **28,86%** | **1,90** | **−17,8%** | **1,62** | **1.178,01B** | 27,09% | 30,48% | 0 VND (BAL+LAG) |
+| control | `close` (= pin 08-02) | 27,24% | 1,81 | −18,4% | 1,48 | 1.006,33B | 23,81% | 30,46% | 0 VND (BAL+LAG) |
+| Δ | | +1,62pp | +0,09 | +0,6pp | +0,14 | +171,68B | +3,28 | +0,02 | |
+
+- **Chân control tái lập số pin 08-02 TUYỆT ĐỐI cả 5 chỉ tiêu + cả 2 số IS/OOS** ⇒ harness hợp lệ,
+  engine tất định, Δ là chênh lệch thật do đúng 1 biến.
+- **Đối chứng độc lập từ CSV thô** (`extract_peryear.py`): price FULL 28,86% / IS 27,09% / OOS 30,48%;
+  close FULL 27,24% / IS 23,81% / OOS 30,46% — khớp bản in.
+- **CSV kết quả chân `price` BYTE-IDENTICAL** (`md5 7d053e6201c9d107685ff4d1dd9d2d2a`) với 2 lần chạy
+  độc lập của job trước (`exp_lagq_L0_control`, `exp_lagq_L0b_prodrepro`) ⇒ tái lập được ở phiên khác,
+  không phải một lần chạy may mắn.
+- **Đọc Δ cho đúng**: toàn bộ chênh nằm ở **IS (+3,28pp)**, OOS gần như bằng nhau (**+0,02pp**). Đúng
+  cơ chế: hệ số `Close/Price` lệch xa 1 ở giai đoạn cũ (median 0,22 năm 2007) và hội tụ về 1,00 gần
+  đây ⇒ cơ sở giá chỉ còn khác biệt ở nửa đầu mẫu. **KHÔNG được đọc +1,62pp như "edge mới"** — nó là
+  hệ quả kế toán của việc đổi cơ sở giá trong công thức ADV, và nó nằm ở phần mẫu đã cũ nhất.
+
+### Multiple-testing
+`N_trials = 1` (không dò tham số; đây là đồng bộ registry theo một quyết định code đã có căn cứ độc
+lập). **DSR/PBO không áp dụng** — không có cấu hình nào được CHỌN từ một họ biến thể ở bước này.
+
+### Giới hạn PHẢI đọc kèm (không đổi so với pin trước)
+1. Lỗi fidelity `liq<=0` **VẪN MỞ** ⇒ **anchor DD vẫn ~−30%** (bootstrap 5th-pct), **KHÔNG phải
+   −17,8%**. Khoảng `[~27,2%; ~31,3%]` của pin 07-21/07-22 **đã HẾT HIỆU LỰC** từ 2026-08-03 (A/B
+   `LIQ_ZERO_BLOCK` bị quant-skeptic chấm INCONCLUSIVE lần thứ ba) và **chưa có khoảng thay thế** —
+   dùng 28,86% như một CẬN DƯỚI, đừng gắn thêm cận trên nào chưa được verify.
+2. Universe vẫn **MIXED**: `universe_pit` cho cổng quyết định, `ticker_prune` cho CAPIT pool/maturity.
+3. Số lịch sử KHÁC VINTAGE / CÓ LỖI, **không so trực tiếp**: 27,24% (pin 08-02, cơ sở ADV `close`);
+   27,60% (pin 07-29, có look-ahead cơ sở giá rổ); 27,16% (pin 07-22, không tái lập được);
+   27,84% (pin 07-12, `ticker_prune`).
+4. Gate quản trị BANNED/forensic thêm vào đường live cùng ngày (mục dưới) **KHÔNG đụng con số này**:
+   mọi cờ `exclude` đều ghi ngày 2026-06-20 > `AUDIT_END=2026-06-19` ⇒ 0 event trong cửa sổ pin
+   (đã verify cơ học trong `lag_forensic_filter_selfcheck.py`).
+
+**Files:** `mike/agents/Taylor/research/lag_repin_20260803/{run_repin.sh,repin0803_price.log,repin0803_close.log}` ·
+CSV `data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_repin0803_price_univpit.csv`
+(17.660 dòng) và `..._wtnamecap_exp_repin0803_close_univpit.csv` (18.553 dòng).
 Canonical `..._wtnamecap.csv` **KHÔNG bị đụng**.
