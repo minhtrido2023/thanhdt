@@ -17,12 +17,18 @@
 #                                             Winston_20260731_014953) + monitor dt5g_writer_watch.py
 #   tav2_bq.ticker_financial          BLOCK — quarterly fundamentals (pipeline step H financial)
 #   tav2_bq.ticker_1m                 BLOCK — live screening snapshot (thêm 2026-07-11, audit Winston_20260711_031745 #3)
-#   tav2_bq.shares_outstanding_live   WARN  — corp-action shares (sửa 2026-07-12, audit Winston_20260712_142100
-#                                             H2: cron update_shares_live.sh 18:40 chỉ chạy --scan detection-only,
-#                                             KHÔNG BAO GIỜ merge updated_at daily; mốc "~17:44 ICT daily" cũ là
-#                                             SAI — đó chỉ là 1 lần xử lý corp-action thủ công tình cờ. Cadence thật
-#                                             là event-driven, không phải daily, nên BLOCK trên lag≤2 sẽ false-block
-#                                             oan bất cứ khi nào không có corp-action nào cần xử lý tay trong 2 phiên)
+#   tav2_bq.shares_outstanding_live   WARN  — corp-action scanner-alive (SỬA LẠI 2026-08-03, user báo cáo
+#                                             warning liên tục vô ích — 24 ngày WARN liền 07-10→08-03 dù backlog
+#                                             thật sạch). Bản 2026-07-12 (audit Winston_20260712_142100 H2) đã
+#                                             đúng khi nhận ra bảng này event-driven (chỉ ghi khi có sự kiện thật),
+#                                             nhưng vẫn đo SAI tín hiệu: lag=bao lâu chưa GHI vào bảng BQ — với
+#                                             writer event-driven, "chưa ghi" thường xuyên là HOÀN TOÀN BÌNH THƯỜNG
+#                                             (không phải "gần die"), không phải chỉ báo sức khoẻ. Giờ đo đúng thứ
+#                                             cần biết: scanner (`update_shares_live.py --scan`, cron 18:40 ICT
+#                                             hàng ngày) có còn CHẠY không, qua `checked_at` của
+#                                             `data/corp_action_backlog.json` (file này được ghi MỖI LẦN scan chạy,
+#                                             kể cả khi 0 sự kiện mới). Backlog-tồn-đọng-thật (>7 ngày chưa resolve)
+#                                             đã có check RIÊNG đúng chỗ ở `ops_health_check.sh` #6 — không lặp lại.
 #   tav2_bq.custom30v_8l              BLOCK content-age + WARN writer-alive — V2.4 PRODUCTION parking basket
 #   tav2_bq.custom30_8l               BLOCK content-age + WARN writer-alive — legacy blend (audit consumers)
 #   tav2_bq.risk_rating               WARN  — research-only, KHÔNG consumer production (orphan, stale từ 2025Q4)
@@ -36,6 +42,7 @@
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+WC_ROOT="$(cd "$ROOT/.." && pwd)"
 [ -f "$ROOT/../wc_env.sh" ] && source "$ROOT/../wc_env.sh" 2>/dev/null || true
 # Neo TZ ICT tường minh: host chạy Etc/UTC và cron gọi script này KHÔNG có prefix TZ, nên mọi
 # `$(date ...)` bên dưới (TODAY, tuổi file, mốc log) phụ thuộc hoàn toàn vào TZ mà wc_env.sh
@@ -59,10 +66,10 @@ MAX_FIN_LAG=90       # calendar days: financial data quarterly (Q1 results ~Apr,
 # --- Ngưỡng cho các bảng mở rộng 2026-07-11 (audit Winston_20260711_031745 #3 — bài học
 # "custom30v_8l writer chết âm thầm 3 tuần"; mọi ngưỡng calibrate bằng query BQ thật, không bịa):
 MAX_1M_LAG=2         # trading days: ticker_1m cùng ingest upstream với ticker_prune → cùng ngưỡng PRICE=2
-MAX_SHARES_LAG=2     # trading days trên DATE(MAX(updated_at)) — WARN-only từ 2026-07-12 (H2, xem dòng 15).
-                     # Ngưỡng giữ nguyên =2 (chỉ đổi mode, không đổi số) vì vẫn có ý nghĩa cảnh báo dù
-                     # cadence thật event-driven: lag>2 phiên liên tục vẫn đáng ngờ nếu có corp-action
-                     # đang chờ xử lý tay, chỉ là không còn đủ căn cứ để BLOCK cả pipeline vì nó.
+MAX_SCANNER_IDLE=3   # calendar days trên checked_at của corp_action_backlog.json (SỬA 2026-08-03,
+                     # thay MAX_SHARES_LAG — xem giải thích ở khối comment đầu file). Scanner chạy
+                     # T2-T6 (cron 40 11 * * 1-5 UTC = 18:40 ICT) — 3 ngày lịch dung sai cuối tuần
+                     # (Fri chạy → Mon kỳ vọng, cách nhau đúng 3 ngày lịch) mà không WARN giả.
 MAX_REBAL_AGE=98     # calendar days trên MAX(rebal_date) của custom30_8l/custom30v_8l: rebal q2m5 spacing
                      # thực tế 92d (05-02→05-05..., max shift lịch sử 1 ngày: 2024-05-06) + 6d grace.
                      # >98 = kỳ rebal kế tiếp KHÔNG materialize ~1 tuần sau hạn → đúng time-bomb 08-05.
@@ -182,6 +189,37 @@ _check_lastmod() {
   fi
 }
 
+# _check_corp_action_scanner: thay cho _check cũ trên shares_outstanding_live (xem giải thích
+# đầy đủ ở khối comment đầu file, mục "SỬA LẠI 2026-08-03"). Đo scanner có còn chạy qua
+# checked_at của corp_action_backlog.json — KHÔNG đo lag ghi bảng BQ (writer event-driven,
+# "chưa ghi" không phải tín hiệu bệnh).
+_check_corp_action_scanner() {
+  local backlog="$WC_ROOT/data/corp_action_backlog.json"
+  local age_days
+  age_days=$(python3 -c "
+import json
+from datetime import datetime
+try:
+    d = json.load(open('$backlog', encoding='utf-8'))
+    checked = datetime.fromisoformat(d['checked_at'])
+    print((datetime.now() - checked).days)
+except Exception:
+    print(999)
+" 2>/dev/null)
+  age_days="${age_days:-999}"
+
+  if [ "$age_days" -le "$MAX_SCANNER_IDLE" ] 2>/dev/null; then
+    [ -z "$QUIET" ] && echo "OK   shares_outstanding_live scanner (corp-action): checked_at ${age_days}d trước (≤${MAX_SCANNER_IDLE})"
+    return 0
+  else
+    local warn_msg="🟡 BQ WARN ($TODAY $NOW_ICT): corp-action scanner (update_shares_live.py --scan, cron 18:40 ICT hàng ngày) chưa chạy ${age_days}d (>${MAX_SCANNER_IDLE}) — có thể đã chết. Kiểm tra crontab + logs/update_shares_live.log."
+    echo "WARN shares_outstanding_live scanner (corp-action): checked_at ${age_days}d trước (>${MAX_SCANNER_IDLE}) — scanner có thể chết, non-blocking"
+    "$ROOT/bin/notify_thread.sh" "$warn_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+    WARNED=$((WARNED + 1))
+    return 0
+  fi
+}
+
 _run_pipeline() {
   local label="$1" script="$2"
   echo; echo "--- $label ---"
@@ -292,7 +330,7 @@ python3 "$ROOT/bin/dt5g_writer_watch.py" --label bq-freshness-19h || true
 _check "ticker_financial (fundamentals)"  "tav2_bq.ticker_financial"          "t.time"  $MAX_FIN_LAG    "calendar" || true
 # --- mở rộng 2026-07-11 (audit Winston_20260711_031745 #3) ---
 _check "ticker_1m (live screening)"       "tav2_bq.ticker_1m"                 "t.time"  $MAX_1M_LAG     "trading"  || true
-_check "shares_outstanding_live (corp-action)" "tav2_bq.shares_outstanding_live" "DATE(t.updated_at)" $MAX_SHARES_LAG "trading" "WARN" || true
+_check_corp_action_scanner || true
 _check "custom30v_8l content (V2.4 PARK rebal-age)" "tav2_bq.custom30v_8l"    "t.rebal_date" $MAX_REBAL_AGE "calendar" || true
 _check "custom30_8l content (blend rebal-age)"      "tav2_bq.custom30_8l"     "t.rebal_date" $MAX_REBAL_AGE "calendar" || true
 # risk_rating không có cột DATE — đổi MAX(quarter) '2025Q4' thành ngày cuối quý rồi đo tuổi.
