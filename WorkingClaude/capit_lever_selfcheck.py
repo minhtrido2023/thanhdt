@@ -433,7 +433,12 @@ with tempfile.TemporaryDirectory() as TMP:
         return TradePlan(plan_date="2099-01-02", signal_date="2099-01-01",
                          strategy="selfcheck", strategy_version="0", state=1,
                          state_name="CRISIS", nav_basis={"account_nav": 1e9, "scale": 1.0},
-                         orders=orders, account=account, created_at="2099-01-01T00:00:00")
+                         orders=orders, account=account,
+                         # RỖNG = đúng production (vòng 6): plan thật do DollarBill/người sinh
+                         # KHÔNG có khoá `created_at`; chỉ `TradePlan.save()` mới điền, mà
+                         # production không đi qua đường đó. Fixture điền chuỗi ISO giả sẽ làm
+                         # mọi ca `created_at` PASS mà không chứng minh được gì về đường thật.
+                         created_at="")
 
     def o(oid, tk, book="CAPIT", side="buy", **kw):
         return PlannedOrder(id=oid, ticker=tk, side=side, qty=1000, ref_price=20000,
@@ -1655,15 +1660,23 @@ with tempfile.TemporaryDirectory() as TMP:
     # duyệt") cho đúng những lệnh đã qua CẢ HAI cổng người sáng hôm đó.
     _EXEC_STATE = os.path.join(EXEC_DIR, "exec_SpaceX_2099-01-02_state.json")
     _LEDGER = _planmod._lever_ledger_path("SpaceX", "2099-01-02")
-    _PLAN_CREATED = "2099-01-01T00:00:00"          # = mkplan().created_at
 
-    def _write_session_state(n_children, created_at=_PLAN_CREATED):
-        """Giả lập state của Executor sau lượt 09:05 (đã đặt n lệnh con, đã khớp một phần)."""
+    def _write_session_state(n_children, created_at="", parent_ids=("B0", "B1")):
+        """Giả lập state của Executor sau lượt 09:05 (đã đặt n lệnh con, đã khớp một phần).
+
+        `created_at` MẶC ĐỊNH RỖNG = đúng hiện trạng production (vòng 6): không plan thật nào
+        có khoá `created_at`, nên state thật ghi `plan_created_at: ""`. Fixture trước đây điền
+        một chuỗi ISO giả nên mọi ca `created_at` đều PASS trong khi đường thật không bao giờ
+        chạm tới nhánh đó — đúng loại phụ thuộc môi trường mà `verify-before-done` bắt phải
+        khai. `parent_ids` = tập id lệnh mà PHIÊN ĐANG CHẠY biết (state của plan v1).
+        """
         with open(_EXEC_STATE, "w", encoding="utf-8") as f:
             json.dump({"plan_date": "2099-01-02", "plan_created_at": created_at, "parents": {
-                "B1": {"filled": 500, "done": False, "children": [
-                    {"oid": f"P{i:06d}", "qty": 100, "filled": 100, "status": "closed"}
-                    for i in range(n_children)]}}}, f)
+                pid: {"filled": 500 if pid == "B1" else 0, "done": False,
+                      "children": [{"oid": f"P{i:06d}", "qty": 100, "filled": 100,
+                                    "status": "closed"} for i in range(n_children)]
+                                  if pid == "B1" else []}
+                for pid in parent_ids}}, f)
 
     def _clean_session():
         for _p in (_EXEC_STATE, _LEDGER):
@@ -1698,18 +1711,46 @@ with tempfile.TemporaryDirectory() as TMP:
               and a15[0]["action"] == "LIVE_PREFLIGHT_WARN"
               and "ĐÃ đặt lệnh" in a15[0]["reason"], detail=a15[0]["reason"][:110])
 
-        # ── J15b: state CŨ nhưng plan phát hành lại (created_at MỚI) → Executor sẽ tạo state
-        # SẠCH, nên preflight PHẢI gỡ như phiên sạch. Bỏ qua `plan_created_at` ở đây sẽ cho
-        # một loạt lệnh vay HOÀN TOÀN MỚI đi ra mà không qua neo NAV lẫn pp0Buy (vòng 4 #2).
+        # ── J15b: CA CỦA ĐƯỜNG PRODUCTION THẬT (vòng 6, rủi ro dư #1 §11.10). Plan phát hành
+        # lại giữa ngày mang lệnh vay MỚI, nhưng `created_at` hai bên đều RỖNG như production
+        # ⇒ bản khoá-theo-`created_at` thấy `"" == ""` và kết luận "phiên đã bắt đầu" ⇒ lệnh
+        # vay HOÀN TOÀN MỚI đi ra chỉ với WARN. Vân tay nội dung (id lệnh vay) thấy id lạ ⇒ GỠ.
         _clean_session()
-        _write_session_state(5, created_at="2099-01-01T09:30:00")     # plan v2, created_at khác
+        _write_session_state(5, parent_ids=("B0", "B1"))       # state của plan v1
         p15b = mk_levered_plan()
+        p15b.orders[0].id = "B9-MOI"                           # plan v2: 1 lệnh vay MỚI TINH
         p15b, a15b = lever_live_preflight(p15b, "SpaceX", _PFBroker(**LIVE_OK), "live",
                                           status_path=NAV_INFLATED_ART)
-        check("J15b state CŨ + plan phát hành lại (created_at MỚI) → VẪN GỠ: Executor vứt "
-              "state cũ và chạy phiên SẠCH, nên preflight phải theo đúng semantics đó",
+        check("J15b [ĐƯỜNG THẬT: created_at RỖNG cả hai bên] plan phát hành lại giữa ngày có "
+              "lệnh vay MỚI → VẪN GỠ nhờ vân tay id, không còn phụ thuộc `created_at` chết",
               all(x.loan_package_id is None for x in p15b.orders)
               and a15b[0]["action"] == "LIVE_PREFLIGHT_STRIP", detail=a15b[0]["action"])
+
+        # ── J15c: chiều NGƯỢC lại phải KHÔNG gỡ oan — plan v2 BỚT lệnh (một fail-safe phía
+        # trên loại bớt giữa 2 lượt chạy) không sinh khoản vay mới nào. Bắt "bằng nhau" thay vì
+        # "bao hàm" sẽ GỠ đòn bẩy hợp lệ cả buổi chiều — đúng sự cố CRITICAL vòng 3.
+        _clean_session()
+        _write_session_state(5, parent_ids=("B0", "B1"))
+        p15c = mk_levered_plan(n=1)                            # chỉ còn B0, đã có trong state
+        p15c, a15c = lever_live_preflight(p15c, "SpaceX", _PFBroker(**LIVE_OK), "live",
+                                          status_path=NAV_INFLATED_ART)
+        check("J15c plan v2 BỚT lệnh (không thêm lệnh vay mới) → KHÔNG gỡ, chỉ CẢNH BÁO: "
+              "so bao hàm (⊆) chứ không bằng nhau, chiều nguy hiểm chỉ là chiều THÊM",
+              all(x.loan_package_id == 1840 for x in p15c.orders)
+              and a15c[0]["action"] == "LIVE_PREFLIGHT_WARN", detail=a15c[0]["action"])
+
+        # ── J15d: ghim tường minh rằng `created_at` KHÔNG còn là điều kiện. State mang chuỗi
+        # ISO khác hẳn plan; id khớp ⇒ vẫn WARN. (Trước vòng 6 ca này GỠ — đổi hành vi CÓ CHỦ Ý:
+        # `created_at` không phân biệt được gì trên production nên không được quyền quyết định.)
+        _clean_session()
+        _write_session_state(5, created_at="2099-01-01T09:30:00")
+        p15d = mk_levered_plan()
+        p15d, a15d = lever_live_preflight(p15d, "SpaceX", _PFBroker(**LIVE_OK), "live",
+                                          status_path=NAV_INFLATED_ART)
+        check("J15d `created_at` lệch nhưng tập id lệnh vay khớp → KHÔNG gỡ: quyết định nay "
+              "dựa vào NỘI DUNG, và lệch chiều này chỉ có thể GỠ chứ không bao giờ CẤP",
+              all(x.loan_package_id == 1840 for x in p15d.orders)
+              and a15d[0]["action"] == "LIVE_PREFLIGHT_WARN", detail=a15d[0]["action"])
 
         # ── J16/J17: STRIP phải THU HỒI luôn khỏi sổ cấp phép (vòng 4 #1). Nếu không, đúng
         # lúc preflight nói "cơ sở vốn không có thật" thì audit tầng lệnh lại MÙ với chính
@@ -1773,16 +1814,16 @@ with tempfile.TemporaryDirectory() as TMP:
               detail=str([w["ticker"] for w in _warns19b]))
 
         # ── J20: STRIP chỉ được thu hồi phần CHÍNH tiến trình này cấp (vòng 5 #1) ──────────
-        # Sổ CỐ Ý day-scoped, còn điều kiện vào nhánh STRIP lại khoá theo `created_at`. Plan
-        # phát hành lại giữa ngày ⇒ started=False dù lệnh 1840 buổi sáng vẫn sống trên sổ
-        # broker; trừ SẠCH sẽ xoá đúng bản ghi đó và dựng lại sự cố giả.
+        # Sổ CỐ Ý day-scoped, còn điều kiện vào nhánh STRIP lại khoá theo vân tay của CHÍNH
+        # tập lệnh vay lượt này (vòng 6; trước đó là `created_at`). Plan phát hành lại giữa
+        # ngày ⇒ started=False dù lệnh 1840 buổi sáng vẫn sống trên sổ broker; trừ SẠCH sẽ xoá
+        # đúng bản ghi đó và dựng lại sự cố giả.
         _clean_session()
         _q1 = mkplan([o("B1", "SAB")])                       # 09:05: cấp + đặt lệnh thật
         _q1, _ = apply_capit_lever(_q1, "SpaceX", status_path=ART_ON, rules_path=RULES_ON,
                                    approvals_dir=APPROVALS_OK)
         _write_session_state(3)                              # state của plan v1
-        _q2 = mkplan([o("B1", "SAB")])                       # 13:00: plan v2, created_at MỚI
-        _q2.created_at = "2099-01-01T09:30:00"
+        _q2 = mkplan([o("B1-V2", "SAB")])                    # 13:00: plan v2, id lệnh vay MỚI
         _q2, _ = apply_capit_lever(_q2, "SpaceX", status_path=ART_ON, rules_path=RULES_ON,
                                    approvals_dir=APPROVALS_OK)
         _q2, _a20 = lever_live_preflight(_q2, "SpaceX", _PFBroker(**LIVE_OK), "live",

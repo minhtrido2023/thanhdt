@@ -1386,8 +1386,8 @@ def _lever_ledger_merge(account_label, plan_date, granted, exec_dir=None):
     NGUYÊN TỬ (§5). CỐ Ý **không** khoá theo `plan_created_at`: nếu plan được phát hành lại
     giữa ngày, các lệnh gói 1840 đã đi ra dưới plan cũ vẫn là lệnh THẬT và vẫn đã được cấp
     phép hợp lệ — audit tầng lệnh phải tiếp tục biết điều đó, nếu không ta lại dựng sự cố giả.
-    (Khác `_session_already_placed`, vốn hỏi "CHÍNH plan này đã đặt lệnh chưa" nên PHẢI khoá
-    theo `created_at`.)
+    (Khác `_session_already_placed`, vốn hỏi "phiên đang chạy có biết đúng những lệnh vay này
+    chưa" nên PHẢI khoá theo vân tay nội dung — tập id lệnh vay; xem docstring hàm đó.)
 
     Ranh giới tin cậy: ai ghi được file này thì cũng ghi được `state.json` — cùng thư mục,
     cùng mức quyền, và `state.json` đã là chân lý của lưới chống double-buy từ trước. Đây
@@ -1451,19 +1451,49 @@ def _lever_ledger_write(path, granted):
               f"an toàn tầng lệnh có thể báo 'đòn bẩy không ai duyệt' NHẦM cho lệnh hợp lệ.")
 
 
-def _session_already_placed(account_label, plan_date, plan_created_at=None, exec_dir=None):
-    """CHÍNH plan này đã đặt lệnh con nào chưa → (bool, mô tả ngắn).
+def _session_already_placed(account_label, plan_date, order_ids=None, exec_dir=None):
+    """Phiên đang chạy đã đặt lệnh con nào chưa, VÀ nó có biết đúng những lệnh này không
+    → (bool, mô tả ngắn).
 
     Đọc CHÍNH file state mà `Executor` sẽ load (`exec_<account>_<date>_state.json`,
     executor.py:78-79) — nguồn duy nhất ghi lại "lệnh đã thật sự đi ra", cập nhật ngay sau
     mỗi `place_order` (coding_guidelines §5). Không đọc được ⇒ coi như CHƯA đặt: đó là chiều
     thận trọng (preflight giữ toàn quyền GỠ, tức không cấp đòn bẩy).
 
-    PHẢI khớp `plan_created_at` ĐÚNG NHƯ `Executor._load_state` (executor.py:202) —
-    arch-reviewer vòng 4 #2. Nếu plan được phát hành lại cùng ngày (`created_at` mới),
-    Executor VỨT state cũ và bắt đầu phiên SẠCH; đọc state cũ mà kết luận "đã đặt lệnh" sẽ
-    cho một loạt lệnh vay HOÀN TOÀN MỚI đi ra trong khi bỏ qua cả neo NAV sống lẫn đọc
-    `pp0Buy` — đúng hai thứ preflight tồn tại để làm. Lệch ⇒ coi như CHƯA đặt (chỉ SIẾT).
+    ── VÂN TAY NỘI DUNG, KHÔNG PHẢI `created_at` (vòng 6, rủi ro dư #1 của §11.10) ──────────
+    Bản trước khoá theo `plan_created_at` cho khớp `Executor._load_state` (executor.py:202).
+    Kiểm artifact THẬT cho thấy đó là **code chết trên đường production**: không plan
+    `data/trade_plans/plan_*.json` nào do DollarBill/người sinh có khoá `created_at` (chỉ
+    `TradePlan.save()` mới điền, mà production không đi qua đường đó) ⇒ `plan.created_at ==
+    ""` và state cũng ghi `plan_created_at: ""` ⇒ so sánh `"" == ""` LUÔN khớp ⇒ nhánh này
+    luôn trả `started=True`, tức lưới "phát hiện plan phát hành lại giữa ngày" CHƯA BAO GIỜ
+    kích hoạt thật, dù fixture có `created_at` kiểm rất kỹ.
+
+    Thay bằng thứ plan thật LUÔN có: **tập id lệnh** (`order_ids`, caller truyền tập id của
+    đúng những lệnh đang mang cờ vay). Điều kiện `started` = state có ≥1 lệnh con đã đặt VÀ
+    **mọi** id trong `order_ids` đã có mặt trong `state["parents"]` — tức phiên đang chạy đã
+    biết đúng những lệnh này. Một lệnh vay MỚI xuất hiện giữa ngày (id chưa từng có trong
+    state) ⇒ `started=False` ⇒ preflight GỠ như phiên sạch, đúng ý đồ ban đầu.
+
+    Vì sao SO SÁNH BAO HÀM (`⊆`) chứ không BẰNG NHAU: một fail-safe phía trên (`cap_capit_orders`,
+    `filter_lag_rating_orders`…) có thể loại bớt lệnh giữa hai lượt chạy — plan v2 NHỎ hơn
+    state không sinh khoản vay mới nào nên không phải rủi ro, mà bắt bằng-nhau ở đó sẽ GỠ oan
+    đòn bẩy hợp lệ buổi chiều. Chỉ chiều THÊM lệnh mới là chiều nguy hiểm.
+
+    Vì sao được phép LỆCH khỏi `Executor._load_state` (nới ràng buộc vòng 4 #2): hai bên chỉ
+    cần khớp ở MỘT chiều — chiều "Executor chạy phiên SẠCH mà ta lại tưởng đã đặt lệnh", vì
+    chỉ chiều đó mới cho lệnh vay mới đi ra với WARN. Vân tay nội dung **chặt hơn hoặc bằng**
+    quyết định resume của Executor trên mọi đầu vào (Executor `""==""` → resume; ta còn đòi
+    thêm id khớp), nên chiều nguy hiểm là bất khả; chiều còn lại (`started=False` trong khi
+    Executor resume) chỉ dẫn tới GỠ đòn bẩy = chạy vốn tự có = under-deploy, "sai số lành"
+    đúng nguyên tắc fail-safe của cả module này.
+
+    Giới hạn còn lại, có chủ đích: đổi RIÊNG `qty` mà giữ nguyên id (`BUY-SAB-01`) thì vân tay
+    này không thấy — state của Executor không lưu qty ở tầng parent, và bắt nó lưu thêm sẽ
+    phải sửa cả bên ghi (ngoài phạm vi 1 điểm). Quy mô của ca đó bị chặn bởi cổng người thứ
+    hai: `_enforce_margin_day_approval` so Σ VND của LỆNH THẬT với trần `max_lever_total_vnd`
+    trong bản duyệt của đúng ngày ⇒ qty phình lên quá trần thì GỠ SẠCH cờ vay trước khi tới
+    đây. Ghi lại ở §12 báo cáo wiring, không phải chỗ chưa ai nghĩ tới.
     """
     from .config import EXEC_DIR
     d = exec_dir or EXEC_DIR
@@ -1473,8 +1503,11 @@ def _session_already_placed(account_label, plan_date, plan_created_at=None, exec
             st = json.load(f) or {}
     except Exception:
         return False, ""
-    if plan_created_at is not None and st.get("plan_created_at") != plan_created_at:
-        return False, ""
+    if order_ids is not None:
+        known = set((st.get("parents") or {}))
+        new_ids = {str(i) for i in order_ids} - known
+        if new_ids:
+            return False, ""
     n_child = sum(len(p.get("children") or []) for p in (st.get("parents") or {}).values())
     n_filled = sum(1 for p in (st.get("parents") or {}).values() if (p.get("filled") or 0) > 0)
     if n_child:
@@ -1519,7 +1552,7 @@ def lever_live_preflight(plan, account_label, broker, mode, status_path=None,
     total = sum(o.value for o in levered)
     tickers = sorted({o.ticker for o in levered})
     started, started_why = _session_already_placed(account_label, plan.plan_date,
-                                                   getattr(plan, "created_at", None))
+                                                   {o.id for o in levered})
 
     def _strip(reason):
         """GỠ — nhưng CHỈ khi phiên chưa đặt lệnh nào. Đã đặt rồi thì hạ xuống CẢNH BÁO.
@@ -1553,10 +1586,11 @@ def lever_live_preflight(plan, account_label, broker, mode, status_path=None,
         # có thật", `Executor._lever_package_audit` lại MÙ với chính những mã đó — lệnh 1840
         # thật trên SAB cho `pause=set()`, bỏ sổ đi thì `pause={'SAB'}`.
         #
-        # Vì sao KHÔNG được trừ sạch: sổ CỐ Ý không khoá theo `plan_created_at` (lệnh cũ vẫn
-        # là lệnh thật đã được cấp phép hợp lệ), trong khi điều kiện vào nhánh STRIP này lại
-        # ĐI QUA `_session_already_placed` vốn KHOÁ theo `created_at`. Plan phát hành lại giữa
-        # ngày ⇒ `started=False` dù lệnh 1840 buổi sáng vẫn sống trên sổ broker ⇒ trừ sạch sẽ
+        # Vì sao KHÔNG được trừ sạch: sổ CỐ Ý day-scoped (lệnh cũ vẫn là lệnh thật đã được
+        # cấp phép hợp lệ), trong khi điều kiện vào nhánh STRIP này lại ĐI QUA
+        # `_session_already_placed` vốn khoá theo VÂN TAY của CHÍNH tập lệnh vay lượt này
+        # (trước vòng 6 là `created_at`). Plan phát hành lại giữa ngày với lệnh vay MỚI ⇒
+        # `started=False` dù lệnh 1840 buổi sáng vẫn sống trên sổ broker ⇒ trừ sạch sẽ
         # xoá đúng bản ghi đó và dựng lại sự cố giả (probe vòng 5: `pause=['SAB']`). `prior` =
         # nội dung sổ TRƯỚC khi tiến trình này hợp vào, tức phần thuộc về lệnh đã đi ra thật.
         _led = getattr(plan, "_lever_authorized", None)
