@@ -561,3 +561,9 @@
 
 ## Consolidation 2026-08-03T02:05:17Z
 - [2026-08-03T02:05:15Z] Mafee/error — bot-fail: {"account": "ZaloPay", "plan_date": "2026-08-03", "elapsed_s": 14, "rc": 2, "log": "/home/trido/thanhdt/WorkingClaude/mike/logs/run_bot_ZaloPay_2026-08-03.log"}
+
+## Consolidation 2026-08-03T02:07:01Z
+- [2026-08-03T02:05:52Z] Taylor/heartbeat — Taylor_20260803_015850: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260803_015850", "source": "watcher"}
+- [2026-08-03T02:06:52Z] Taylor/heartbeat — Taylor_20260803_015850: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260803_015850", "source": "watcher"}
+- [2026-08-03T02:05:51Z] Winston/heartbeat — Winston_20260803_020516: {"status": "in_progress", "note": "root cause = approval gate: plan_ZaloPay_2026-08-03 requires_user_approval=true, approved_by=null. Đang kiểm tra plan đã được gửi user duyệt chưa"}
+- [2026-08-03T02:06:16Z] Winston/heartbeat — Winston_20260803_020516: {"status": "still_running", "elapsed_min": 1, "job_id": "Winston_20260803_020516", "source": "watcher"}
