@@ -82,7 +82,26 @@ Mọi agent khác (Taylor, DollarBill, Mafee, Wags, ...) headless/native on-dema
 
 **Cơ chế dispatch đúng:** `bin/dispatch.sh` (headless `claude -p`). Directive/inbox deprecated cho task — chỉ dùng cho mandate dài hạn.
 
-**Model routing Sonnet 5 vs Fable 5 (thêm 2026-07-06):** `dispatch.sh --model NAME` (`sonnet|opus|haiku|fable`) — chọn theo **TASK, không phải theo agent cố định**: Q1 tra cứu/query cơ học → Sonnet 5 (mặc định); Q2 trade-off/tổng hợp/sinh giả thuyết/phản biện tinh vi → Fable 5; Q3 chạm production/live-trading chưa có template → Fable 5 bất kể Q1. Native subagent dùng tham số `model` sẵn có.
+**Model routing — ladder 3 tầng Sonnet → Opus → Fable (SỬA 2026-07-14, cập nhật KNOWLEDGE.md
+2026-08-03 vì bản mô tả cũ ở đây đã lệch ~3 tuần):** `dispatch.sh --model NAME`
+(`sonnet|opus|haiku|fable`) — chọn theo **TASK, không phải theo agent cố định**: Q1 tra cứu/query
+cơ học có 1 đáp án rõ ràng → **Sonnet 5** (mặc định, omit `--model`); Q2 trade-off/tổng hợp/sinh
+giả thuyết/phản biện tinh vi/chạm production chưa có template → **Opus**; Q3 CỰC KỲ phức tạp
+(thiết kế chiến lược mới từ đầu, backtest đa-giả-thuyết, verify đối kháng vượt tầm Opus) → **Fable
+5**, hiếm. Ưu tiên Opus/Sonnet, Fable chỉ khi thực sự vượt tầm — KHÔNG còn "Q2/Q3 → Fable bất kể"
+như ladder cũ 07-06. Chi tiết đầy đủ + `--effort` per-dispatch: `MIKE.md §Model routing`. Native
+subagent dùng tham số `model` sẵn có.
+
+**Opus-drift check (item 5c KB editorial, thêm 2026-08-01, đo lần đầu 2026-08-03):** opus%
+(opus_jobs/tổng job có model) đi từ 14,3% (07-17) lên **74,2% (08-02)**, sustained ≥60% liên tục
+11 ngày (từ 07-22) — vượt ngưỡng flag của item 5c. Lấy mẫu 8 dispatch opus gần nhất (bus/jobs):
+đa số là saga kiến trúc Discord-routing 6 vòng của Wags (Q2/Q3 chính đáng — sửa cơ chế dùng
+chung toàn fleet) + R&D LAG-fidelity của Taylor (Q2 chính đáng) + `ops_autofix.sh`'s hardcoded
+`--model opus` (quyết định cấu trúc 07-17, không phải phản xạ per-dispatch) — **KHÔNG giống sự
+cố fable-drift 07-17** (lúc đó là lạm dụng thật cho việc cơ học). Kết luận: opus% cao hiện tại có
+lý do chính đáng (giai đoạn bất thường phức tạp), không phải thói quen sai — nhưng NÊN giảm về
+gần baseline sau khi saga Discord-routing đóng (round 6 xong 2026-08-02); nếu tuần tới opus% vẫn
+≥60% mà KHÔNG có 1 sự kiện lớn tương đương giải thích, đó mới là dấu hiệu thật của thói quen lệch.
 **Model mặc định của chính Mike:** đổi sang Fable 5 (2026-07-06) rồi **ĐẢO NGƯỢC LẠI Sonnet 5** (2026-07-07, user yêu cầu). Phát hiện **3 tầng config** trong bridge Discord (`ccdb-mike`): thread override (DB) > global (DB) > `.env` fallback — sửa `.env` vô tác dụng nếu DB đã có row cũ. Dọn 4 dòng rác sai format (`"Sonnet 5"`/`"sonnet 5"` có dấu cách — CLI từ chối) từng gây lỗi `/model` ở 1 thread. Đã đồng bộ cả 3 nơi.
 
 **Routing guards (2026-06-27):**
