@@ -7,21 +7,26 @@
 - = **V2.3A + custom30V parking (NEUTRAL) + gated-overflow (bear-washout) + HAG eq_flag fix**.
 - 2 book: **BAL** (momentum SIGNAL_V11, yieldcombo: 1/PE + 1/PCF) + **LAG** (PEAD/earnings drift).
 - Allocator w_LAG: {CRISIS 50 / BEAR 0 / NEUTRAL-BULL-EXBULL 65}, band ±10pp.
-- **R3 NEUTRAL-only @50B: CAGR 27.24% / Sharpe 1.81 / DD −18.4% / Calmar 1.48** — pin CHÍNH THỨC từ
-  **2026-08-02**, đo trên **`universe_pit`** (point-in-time, không look-ahead). quant-skeptic
-  **CONFIRMED (high)**. Re-pin lần này do **SỬA LOOK-AHEAD THẬT TRONG CODE** (khác 2 lần trước là
-  vintage dữ liệu): `custom_basket.py` + publisher `custom30_history.py` dùng `Close` (đã điều chỉnh
-  hồi tố) làm cơ sở **chọn rổ / trọng số** cross-sectional — hệ số `Close/Price` phụ thuộc sự kiện
-  quyền SAU ngày t. A/B 1 biến, chân đối chứng tái lập 27.60% tuyệt đối: **27.60% → 27.24%
-  (−0.36pp)** ⇒ **27.60% là số BỊ THỔI PHỒNG bởi lỗi**. −0.36pp là **CẬN DƯỚI** (nhánh
-  CAPIT-membership chưa phủ). Chi tiết ở `data/results_registry.md` (mục **2026-08-02 RE-PIN R3 SAU
-  KHI TÁCH VAI CƠ SỞ GIÁ**), KHÔNG lặp lại ở đây.
-  **Số lịch sử KHÁC VINTAGE / CÓ LỖI, không so trực tiếp**: 27.60%/1.84/−17.5%/1.58 (pin 07-29, có
-  look-ahead cơ sở giá); 27.16%/1.81/−18.1%/1.50 (pin 07-22, đã mất, không tái lập được);
-  27.84%/1.84/−18.2%/1.53 (pin 07-12, `ticker_prune`).
+- **R3 NEUTRAL-only @50B: CAGR 28.86% / Sharpe 1.90 / DD −17.8% / Calmar 1.62** — pin CHÍNH THỨC từ
+  **2026-08-03** (Final NAV 1.178,01B), đo trên **`universe_pit`** (point-in-time, không look-ahead).
+  ⚠️ **KHÔNG phải "hệ tốt lên"** — KHÔNG có thay đổi mô hình nào. Đây là **đồng bộ registry theo
+  code production**: mặc định `LAG_ADV_BASIS` (cơ sở giá của ADV book LAG) đã đổi `close`→`price`
+  ngày 08-02 (commit `0062aa0`, để gỡ look-ahead + giữ bất biến "trần live == trần đã mô phỏng")
+  nên số pin cũ không còn tái lập được bằng lệnh pin trên code hôm nay. Chân control (`close`) tái
+  lập 27.24% TUYỆT ĐỐI cả 5 chỉ tiêu + cả 2 số IS/OOS ⇒ A/B hợp lệ. **Toàn bộ chênh nằm ở IS
+  (+3,28pp), OOS chỉ +0,02pp** — hệ số `Close/Price` hội tụ về 1,00 gần đây nên chỉ khác ở nửa đầu
+  mẫu; **KHÔNG trích +1,62pp như "edge mới"**. Chi tiết ở `data/results_registry.md` (mục
+  **2026-08-03 RE-PIN R3 THEO ĐÚNG MẶC ĐỊNH PRODUCTION `LAG_ADV_BASIS=price`**), KHÔNG lặp lại ở đây.
+  **Số lịch sử KHÁC VINTAGE / KHÁC CƠ SỞ / CÓ LỖI, không so trực tiếp**: 27.24%/1.81/−18.4%/1.48
+  (pin 08-02, cơ sở ADV `close` — đúng với cơ sở đó, đã SUPERSEDED); 27.60%/1.84/−17.5%/1.58 (pin
+  07-29, có look-ahead cơ sở giá rổ); 27.16%/1.81/−18.1%/1.50 (pin 07-22, đã mất, không tái lập
+  được); 27.84%/1.84/−18.2%/1.53 (pin 07-12, `ticker_prune`).
   ⚠️ **MIXED-universe khi trích dẫn**: `universe_pit` cho cổng quyết định, `ticker_prune` vẫn cho
-  CAPIT pool/maturity. Lỗi fidelity `liq<=0` vẫn MỞ ⇒ khoảng kỳ vọng trung thực **[~27,2%; ~31,3%]**,
-  **anchor DD ~−30%** (KHÔNG phải −18,4%).
+  CAPIT pool/maturity. Lỗi fidelity `liq<=0` vẫn MỞ ⇒ **anchor DD ~−30%** (KHÔNG phải −17,8%);
+  khoảng **[~27,2%; ~31,3%] đã HẾT HIỆU LỰC** từ 08-03 và **chưa có khoảng thay thế** — đọc 28,86%
+  như một CẬN DƯỚI, đừng tự gắn cận trên. Việc phân rã (+4,11pp của `lag_filter_illiquid()`,
+  quant-skeptic INCONCLUSIVE 3 lần) nay đã có sổ theo dõi + **mốc cứng 2026-12-15 / 2027-03-31**:
+  `kb/projects/lag-adv-filter-tracking.md`. Trước mốc đó **không trích +4,11pp như edge**.
 - Bootstrap 5th-pct: CAGR 18.6%, DD −28.6% (anchor DD ~−29%, KHÔNG phải −18%).
 - **NEUTRAL parking custom30V = phần tin cậy nhất: +7.4pp Full.** (30 mã, cap 0.10)
 - Bull parking: NAV ≥150B. **(30, 0.15) = OVERFIT**, walk-forward bác.
