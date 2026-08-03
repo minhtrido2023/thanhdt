@@ -151,7 +151,9 @@ lỗi thật của hệ, không phải của tài liệu**:
 `bq_freshness_check.sh` dispatch DollarBill **không kèm `--thread`**, nên ABORT vì lỗi registry
 sẽ chặn luôn job **sinh plan T+1** ⇒ sáng hôm sau bot chạy không có plan. Đổi "user không thấy
 1 tin nhắn" lấy "không có việc" là sai hướng cho một sự cố thuần định tuyến thông báo.
-→ **CHỌN: pin RỖNG + alert Telegram + VẪN CHẠY** (không tụt về ambient — đó mới là rò rỉ).
+→ **CHỌN: pin RỖNG + ghi `logs/notify_thread_errors.log` + VẪN CHẠY** (không tụt về ambient — đó
+mới là rò rỉ). *Bản gốc của dòng này ghi "alert Telegram" — SAI, đã bác bỏ ở vòng 5 (`notify.sh`
+không phải Telegram) và thu hẹp phạm vi ở vòng 6; xem mục "Vòng 5" / "Vòng 6" cuối sổ.*
 ABORT **chỉ còn** cho `--thread` tường minh: caller đã nêu đích danh 1 topic thì phải dừng.
 An toàn được vì lỗi (1) đã sửa: pin rỗng không còn giết wrapper.
 
@@ -198,7 +200,7 @@ topic **khác nhau** hai ngày liên tiếp, cả hai đều **ngoài registry**
 
 | # | Chỗ sửa | Nội dung |
 |---|---------|----------|
-| B1 | `dispatch.sh` | **Xoá hẳn tầng 3**. Chuỗi còn đúng 2 tầng: `_agent_thread_override` → `$DISCORD_THREAD_ID`. Cron không nêu topic ⇒ pin RỖNG ⇒ im lặng phía Discord (Telegram vẫn chạy). |
+| B1 | `dispatch.sh` | **Xoá hẳn tầng 3**. Chuỗi còn đúng 2 tầng: `_agent_thread_override` → `$DISCORD_THREAD_ID`. Cron không nêu topic ⇒ pin RỖNG ⇒ im lặng phía Discord cho job đó. *(Bản gốc ghi "Telegram vẫn chạy" — bỏ: `notify.sh` không phải Telegram; Telegram thật là đường riêng của pipeline trading, không đi qua dispatch. Xem vòng 5/6.)* |
 | B1 | `daily_retro.sh`, `weekly_ops_audit.sh`, `check_report_cadence.sh` | Nêu **đích danh** `--thread architecture` / `--thread <trading_report>` thay vì để hệ đoán. *Nêu đích danh là hợp lệ; đoán thì không.* |
 | M2 | `dispatch.sh` | Thêm nhánh `else export DISCORD_THREAD_ID=""`. Thiếu nó, pin rỗng vẫn để agent con **thừa kế** biến của tiến trình cha ⇒ job record nói "không có topic" trong khi báo cáo do **chính agent** gửi rơi vào topic Mike đang chat — đúng lớp lỗi 07-22b. Pin rỗng phải rỗng ở **cả hai** phía. |
 | m6 | `notify_thread.sh` | **ID trần đi thẳng**, không spawn `discord_channel.sh`. Bắt mọi tin nhắn của fleet qua 1 tiến trình con biến script đó thành **SPOF**: đã xảy ra thật (`2026-08-02T23:14:57 discord_channel.sh: Permission denied` ⇒ nuốt trọn 1 tin nhắn). Nhánh **TÊN** vẫn qua registry. |
@@ -235,9 +237,15 @@ không cảnh báo tiền thật nào bị câm vì bỏ tầng 3. Verdict: NEED
 BLOCKER/MAJOR.
 
 **Phát hiện lớn nhất (MINOR-1, mở rộng khi tự kiểm chứng lại):** cả hai quyết định lớn của vòng
-3/4 được ghi vào code + sổ này kèm lý do *"pin RỖNG nhưng alert Telegram vẫn chạy"*. **Fleet
-không có kênh Telegram**: `notify.sh` → `notify_discord.sh` → `POST 127.0.0.1:8199/api/notify`
-= **CÙNG bridge** với `notify_thread.sh`. Tự đo thêm, tệ hơn một bậc:
+3/4 được ghi vào code + sổ này kèm lý do *"pin RỖNG nhưng alert Telegram vẫn chạy"*.
+**`mike/bin/notify.sh` KHÔNG phải Telegram**: `notify.sh` → `notify_discord.sh` →
+`POST 127.0.0.1:8199/api/notify` = **CÙNG bridge** với `notify_thread.sh`, nên nó chết vì **cùng
+registry**. (Đính chính vòng 6 — bản trước viết "Fleet không có kênh Telegram", SAI: fleet **có**
+Telegram thật, `secrets/telegram_config.json` + `telegram_recommend.send_telegram_text`, ~15
+script production dùng — `bot_execute.py`, `macro_healthcheck.py`, `crisis_alert_push.py`,
+`risk_monitor.py`… Điều sai của vòng 3/4 không phải "Telegram không tồn tại" mà là **đường báo
+của dispatch không phải Telegram**, nên nó không hề độc lập với sự cố đang bàn.) Tự đo thêm, tệ
+hơn một bậc:
 
 ```
 $ MIKE_DISCORD_API=http://127.0.0.1:1 DISCORD_CHANNELS_REGISTRY=/nonexistent notify.sh "probe"
@@ -249,11 +257,14 @@ notify.sh: send failed (rc=1)          # notify_discord.sh:22 phân giải 'mike
 "cứ chạy tiếp" **không bao giờ tới**. Job chạy hoàn toàn im lặng, không ai biết.
 
 **Sửa** (giữ nguyên quyết định VẪN CHẠY — nó đúng; chỉ vá đường báo):
-- `dispatch.sh` nhánh registry-hỏng nay ghi `logs/notify_thread_errors.log` — đường báo **không
-  phụ thuộc Discord**, và là file mà `ops_health_check.sh` check #10 ĐỌC lúc 08:20/12:45.
-- Sửa 9 chỗ nói "Telegram" trong `dispatch.sh` / selfcheck / sổ này thành sự thật (#mikefleet,
-  CÙNG bridge). Gồm cả dòng in ra cho người vận hành (`dispatch.sh` nhánh registry hỏng) — họ
-  đang được bảo đi tìm một tin nhắn Telegram không bao giờ tồn tại.
+- `dispatch.sh` nhánh registry-hỏng nay ghi `logs/notify_thread_errors.log` — **khâu GHI** không
+  chết cùng registry, và là file mà `ops_health_check.sh` check #10 ĐỌC lúc 08:20/12:45.
+  *(Đính chính vòng 6: bản trước gọi đây là "đường báo không phụ thuộc Discord" — QUÁ RỘNG. Chỉ
+  khâu GHI mới độc lập; khâu **GIAO TỚI NGƯỜI** vẫn qua Discord — xem mục "Vòng 6" dưới.)*
+- Sửa 9 chỗ nói "Telegram" trong `dispatch.sh` / selfcheck / sổ này thành sự thật (đường báo của
+  dispatch = `notify.sh` → #mikefleet, CÙNG bridge — KHÔNG phải Telegram). Gồm cả dòng in ra cho
+  người vận hành (`dispatch.sh` nhánh registry hỏng) — họ đang được bảo đi tìm một tin nhắn
+  Telegram mà đường này không bao giờ gửi.
 - Thông điệp `notify.sh` trong `_agent_thread_override` sửa "dispatch bị CHẶN" → "job VẪN CHẠY
   nhưng KHÔNG có topic" (câu cũ sai từ khi F4 đảo quyết định).
 - **MINOR-2**: bọc check #10 bằng marker `CHECK10_BEGIN/END`, thêm 4 ca vào
