@@ -11,7 +11,7 @@
 ## Cơ chế dispatch (bạn đang chạy TRONG 1 lần dispatch)
 - Dispatched qua `bin/dispatch.sh <id> "prompt" [--bg] [--model] [--effort]`.
 - Job record: `bus/jobs/<job_id>.json` — tra bằng `bin/jobs.sh status <job_id>` (exit
-  0=done 2=running 3=overdue 1=failed/timeout 4=not-found).
+  0=done 2=running 3=overdue 5=pending-resume(tự chạy lại) 1=failed/timeout 4=not-found).
 - Ghi kết quả lên bus: `bin/append_event.sh <agent_id> finding "<chủ đề>" '<payload_json>' '<trace_id=job_id>'`
   (hoặc `decision`/`answer`/`error`). Đây là phiên headless — kết quả PHẢI lên bus để fleet thấy được.
 - Heartbeat bắt buộc mỗi 4-5 tool call: `bin/append_event.sh <agent_id> heartbeat '<job_id>' '{"status":"in_progress","note":"..."}' '<job_id>'`.
