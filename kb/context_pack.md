@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v1701)
+# Mike fleet — context pack (v1702)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-08-03T09:34:36] Taylor/finding — margin full-cycle A+B+C: ca 3 gate PASS o f<=1,3 (f=1,5 loai vi DD) — NHUNG la tang PROXY, lan thu 4; KHONG dao nguoc NO-GO cua p1: {"job": "Taylor_20260803_091342", "bao_cao": "mike/agents/Taylor/research/margin_kelly_full_cycle_result_20260803.md", "artifact": "mike/agents/Taylor/exp_margi …
 - [2026-08-03T09:35:15] Taylor/answer — HOAN TAT job Taylor_20260803_091342 — chay het A+B+C, khong dung som; ca 3 gate PASS o f<=1,3; deliverable = ung cu vien cho buoc D, KHONG phai de xuat wire: {"job": "Taylor_20260803_091342", "bao_cao": "mike/agents/Taylor/research/margin_kelly_full_cycle_result_20260803.md", "tra_loi_phe_binh_user_John": "Phe binh C …
 - [2026-08-03T09:47:47] quant-skeptic/verification — ✅ CONFIRMED VERIFY: margin full-cycle A+B+C: ca 3 gate PASS o f<=1,3 (f=1,5 loai vi DD) — NHUNG la tang PROXY, lan thu 4; KHONG dao nguoc NO-GO cua p1: {"finding_topic": "margin full-cycle A+B+C: cả 3 gate PASS ở f<=1,3 (f=1,5 loại vì DD) — NHƯNG là tầng PROXY, lần thứ 4; KHÔNG đảo ngược NO-GO của p1", "verdict …
 - [2026-08-03T11:11:05] Taylor/finding — BUOC D engine that: don bay CO kich hoat that (44,5B/50B), ca 4 gate G-D PASS o 12,5% va 14% — NHUNG loi ich chi +0,663pp (p4-proxy noi +1,82pp); co che = PHA LOANG chu khong phai mat edge: {"job": "Taylor_20260803_101341", "bao_cao": "mike/agents/Taylor/research/margin_kelly_engine_confirmation_20260803.md", "artifact": "mike/agents/Taylor/exp_mar …
@@ -11,6 +10,7 @@
 - [2026-08-03T11:17:08] quant-skeptic/verification — ✅ CONFIRMED VERIFY: BUOC D engine that: don bay CO kich hoat that (44,5B/50B), ca 4 gate G-D PASS o 12,5% va 14% — NHUNG loi ich chi +0,663pp (p4-proxy noi +1,82pp); co che = PHA LOANG chu khong phai mat edge: {"finding_topic": "BUOC D engine that: don bay CO kich hoat that (44,5B/50B), ca 4 gate G-D PASS o 12,5% va 14% — NHUNG loi ich chi +0,663pp (p4-proxy noi +1,82 …
 - [2026-08-03T11:20:18] Taylor/finding — DINH CHINH BUOC D: du no dinh cao dung la 30,55B/50B va 835 NGAY (khong phai 44,5B/1.435 phien) — quant-skeptic bat dung, da sua engine_lever.py + cau1_borrow_table.py; ket luan gate-PASS KHONG doi: {"job": "Taylor_20260803_101341", "loai": "dinh chinh so lieu + ket qua verify", "verdict_quant_skeptic": "CONFIRMED (medium)", "log_verify": "mike/logs/verify_ …
 - [2026-08-03T11:21:20] Taylor/answer — HOAN TAT job Taylor_20260803_101341 (BUOC D) — tra loi day du CAU 1/2/3 bang so; ca 4 gate G-D PASS o tang engine that; quant-skeptic CONFIRMED (medium) sau khi toi sua 1 loi that no bat duoc; VAN KHONG de xuat wire: {"job": "Taylor_20260803_101341", "bao_cao": "mike/agents/Taylor/research/margin_kelly_engine_confirmation_20260803.md", "artifact": "mike/agents/Taylor/exp_mar …
+- [2026-08-03T11:30:07] Winston/finding — dt5g-live-writer-la: {"tier": "WARN", "label": "pre-publish-1830", "table": "tav2_bq.vnindex_5state_dt5g_live", "lastmod_ict": "2026-08-03 16:21:05", "writer_class": "OTHER", "n_sta …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -97,13 +97,15 @@ chủ động HÀNG TUẦN qua `bin/fearbuy_weekly_scan.sh` (cron Friday 08:10 I
 sau case TV1+DGC, kết hợp anomaly_scan + WebSearch tin khởi tố, áp bộ lọc QUALIFY/NON/AMBIGUOUS
 trong `calculated_fear_state_backstop.md`. Recon thuần, KHÔNG tự mua.
 
-**`srcwalk` — ĐÃ MỞ TOÀN FLEET 2026-08-03** (user directive; pilot hẹp 2026-08-01 đóng sớm). Cài dạng
-skill `~/.claude/skills/srcwalk/`, binary v1.3.0. Là công cụ đọc code MẶC ĐỊNH thay Read/grep —
-quy tắc + bảng lệnh ở `WorkingClaude/CLAUDE.md` § Code navigation, tóm tắt ở `kb/coding_guidelines.md`
-§18b. ⚠️ **3 giới hạn đã verify lại trên v1.3.0, VẪN CÒN**: không hỗ trợ bash (`bin/` 63 `.sh` vs 46
-`.py`); `trace callers --depth ≥2`/khối "impact" khớp nhầm theo tên hàm chung (496 cạnh rác) → chỉ
-`--depth 1`; `review` bỏ sót hàm mới thêm → dùng `git diff`. Chi tiết + cách test lại khi lên version:
-`kb/projects/srcwalk-pilot-eval.md`.
+**`srcwalk` — MỞ TOÀN FLEET 2026-08-03, nhưng CHIA THEO VIỆC** (skill `~/.claude/skills/srcwalk/`,
+binary v1.3.0). Benchmark N=200 symbol + N=150 file cùng ngày (`kb/projects/srcwalk-benchmark-20260803.md`,
+ground truth `ast`, bootstrap CI) chốt ranh giới: **`srcwalk` để ĐỌC file** (−88,8% token CI[86,5–90,7],
+giữ 95,7% symbol, 0/150 phản ví dụ); **`grep` để TÌM** định nghĩa/call site (thắng ΔF1 +0,05/+0,06 CI
+không chứa 0, rẻ 3–25×, và **0% im lặng trả rỗng** vs 8,2% của srcwalk). Ngoại lệ: tên rất phổ biến
+(`main`/`run`) thì `srcwalk discover --scope <dir>` hơn (P 0,84 vs 0,46). ⚠️ **Bẫy `.gitignore`**:
+`.gitignore` ẩn `mike/` ⇒ 44% file `.py` vô hình với discovery, `--scope .` cho F1 0,065 trên code
+fleet → LUÔN scope vào thư mục chứa code. Vẫn cấm: `trace --depth ≥2`, khối "impact", symbol list của
+`review`, bash. Quy tắc đầy đủ: `WorkingClaude/CLAUDE.md` § Code navigation.
 
 ## Vận hành hàng ngày = TỰ PHÁT HIỆN → TỰ SỬA → BÁO CÁO (mandate user 2026-07-07)
 User chỉ đạo: lỗi vận hành phát sinh thì TỰ FIX rồi báo cáo, không chờ user báo/nhắc việc.
