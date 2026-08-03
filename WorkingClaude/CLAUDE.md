@@ -2,6 +2,61 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Code navigation — `srcwalk` to READ, `grep` to SEARCH
+
+Split by task, not by preference. This split is measured, not assumed: benchmark of 2026-08-03,
+N=200 symbols + N=150 files, ground truth built independently with Python's `ast` (import-resolved
+call sites), bootstrap 95% CIs. Report: `mike/kb/projects/srcwalk-benchmark-20260803.md`.
+Reproduce: `mike/agents/Mike/srcwalk_bench/`.
+
+| Task | Tool | Measured basis |
+| --- | --- | --- |
+| Read / understand a file | **`srcwalk <path>`** | −88.8% tokens CI[86.5,90.7]; 0/150 files where it cost more |
+| Read one range or one symbol | **`srcwalk <path>:120-160`**, `--section <sym>` | same mechanism |
+| Orient in an unknown dir | **`srcwalk overview --scope <dir>`** | outline, not a file dump |
+| **Find a definition** | **`grep -rnE "^\s*(def\|class) NAME\b"`** | grep F1 **+0.052** CI[+0.015,+0.093]; 19 tok vs 472, 6× faster |
+| **Find call sites** | **`grep -rnE "\bNAME\s*\("`** | grep F1 **+0.062** CI[+0.010,+0.115]; **0% silent misses vs srcwalk's 8–10%** |
+| Find a *very common* name (`main`, `run`, `load`) | **`srcwalk discover NAME --scope <dir>`** | for names appearing in >10 files: srcwalk precision 0.844 vs grep 0.459, 200 tok vs 740 |
+
+**`srcwalk` (v1.3.0, `~/.local/bin`, skill `~/.claude/skills/srcwalk/`) is the default way to READ
+a file** — it returns an outline (symbols + line ranges) instead of bytes, saving ~89% of tokens
+while keeping 95.7% of top-level symbols (94% of files keep 100%). Run `srcwalk guide` once per
+session before non-trivial use. Structural languages: Python, TS/JS, Go, Rust, Java, C/C++, C#,
+Ruby, PHP, Swift, Markdown.
+
+**`grep` remains the default way to SEARCH.** It won both search tasks with non-overlapping CIs,
+costs 3–25× fewer tokens, and — the reason that matters most — **never silently returned nothing**.
+
+### The three traps, all measured on this repo
+
+1. **`.gitignore` blindness — the biggest one.** srcwalk's discovery commands respect ignore files.
+   `.gitignore:107` ignores `WorkingClaude/mike/` (it is a nested repo), which hides **44% of the
+   repo's `.py` files, including the entire fleet**. `srcwalk overview --scope .` does not even list
+   `mike/`. On symbols inside `mike/`, `--scope .` scores **F1 0.065**; `--scope mike` scores 0.978.
+   → **Always `--scope` the directory that contains the code. Never rely on `--scope .`.**
+   Explicit file reads (`srcwalk mike/foo.py`) are unaffected — only discovery is.
+2. **Silent zero results.** Even with correct scoping, srcwalk answered "no call sites found" for
+   **8.2%** CI[4.4,12.6] of symbols that provably had callers (e.g. `build_obs`, called on the very
+   next screen of the same file). grep: 0%. A wrong answer is detectable; an empty one is not.
+   → Never conclude "nothing calls this" from srcwalk alone. Confirm absence with `grep`.
+3. **Call-graph beyond hop 1 is name-matched, not resolved.** `trace callers X --depth 2` on
+   `filter_lag_rating_orders` returned **500 edges across 121 files** — every `main()`, every
+   `run(...)`, including `subprocess.run(...)` counted as a caller of `run`. Depth 1 is accurate.
+   → `--depth 1` only; ignore the "impact (2nd hop)" block; verify blast radius with `grep`.
+
+### Where srcwalk does not apply
+
+- **Bash — no structural support.** `srcwalk bin/dispatch.sh` (1244 lines) prints only the header
+  comment; `discover` never returns a bash function. `mike/bin/` is **63 `.sh` vs 46 `.py`**.
+- **`srcwalk review`** omits newly-added functions: it attributes a hunk to a symbol only when the
+  hunk is *contained* in it, so a hunk that adds top-level functions spans symbol boundaries and
+  falls back to `file-level`. Use `git diff` as the authoritative change set.
+- `.json` (parser fails on `filter.json`), `.sql` (single-line files), `.csv` (columns + row count
+  only) → `Read`. Long `.md` outlines well; short `.md` is cheaper to `Read`.
+
+Its output is *structural navigation* evidence, not runtime proof — carry any `confidence:` /
+`caveat:` line it prints into what you report.
+
 ## BigQuery (Google Cloud)
 
 - **Project ID**: `lithe-record-440915-m9`
