@@ -8,6 +8,7 @@ title: Trading bot / execution (money-path thật)
 
 | Nguồn (file) | Status |
 |---|---|
+| [`dnse_openapi_v2_calling_guideline.md`](dnse_openapi_v2_calling_guideline.md) — cách gọi DNSE OpenAPI v2 (signing/OTP/endpoint/gotcha), cho dashboard quản lý danh mục | CANONICAL |
 | [`bot_stop.md`](bot_stop.md) — data/BOT_STOP | CANONICAL |
 | [`dnse_raw_execution_logs.md`](dnse_raw_execution_logs.md) — data/execution_logs/dnse_raw_<date>.jsonl | CANONICAL |
 | [`executor_state_journal.md`](executor_state_journal.md) — data/execution_logs/exec_<label>_<date>_state.json / _journal.csv | CANONICAL |
