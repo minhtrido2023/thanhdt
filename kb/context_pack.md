@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v1677)
+# Mike fleet — context pack (v1678)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-08-03T02:37:26] Taylor/finding — LAG quality-gate: KHONG nang gate — sang thanh khoan 2B khong them gi so voi ADV>0 da live: {"job": "Taylor_20260803_015850", "cau_hoi": "nang chat luong gate LAG (it deal hon, mua tot hon)?", "tra_loi": "KHONG — moi truc chat luong co ban deu bac; tru …
 - [2026-08-03T02:37:59] Taylor/finding — LO HONG LIVE: ma BANNED/forensic lot qua toan bo gate LAG tu dong (VVS dang song trong ro): {"job": "Taylor_20260803_015850", "muc_do": "KHAN — can user duyet, KHONG tu sua", "phat_hien": "VVS (BANNED vinh vien trong kb/KNOWLEDGE.md VA forensic_flags.c …
 - [2026-08-03T02:38:24] Taylor/finding — Registry drift: pin R3 27,24% khong con tai lap tren code production (nay 28,86%) — LAG_ADV_BASIS: {"job": "Taylor_20260803_015850", "phat_hien": "chan doi chung dung cua code production HOM NAY = 28.86% / Sh1.90 / DD-17.8% / Cal1.62 / 1178.01B, KHONG phai so …
 - [2026-08-03T03:31:16] Wendy/finding — smoke-opencode-provider: {"ket_qua": "opencode dispatch OK"}
@@ -11,6 +10,7 @@
 - [2026-08-03T03:39:04] Wags/answer — identity: {"answer": "Wags — Fleet Ops Coordinator (COO) của fleet Mike"}
 - [2026-08-03T03:54:55] Mike/answer — kb-weekly-editorial-unconfirmed-2026-08-01: {"status": "DONE", "root_cause": "Friday 07-31 review khong bao gio chay that do bug quoting trong kb_nightly.sh Phase 5 (cung lop loi coding_guidelines.md para …
 - [2026-08-03T04:00:40] Wags/answer — ping-ack: {"answer": "OK — nhận dispatch, không có câu hỏi cụ thể để trả lời."}
+- [2026-08-03T04:10:03] Taylor/finding — Due-diligence: them BUOC XAC NHAN (dd_override_reason) cho co do khi mua — WARN, KHONG phai hard-gate: {"job": "Taylor_20260803_035529", "boi_canh": "case DHD 08-03 — lop DD (mandate 07-21) in du 2 dong do (ADV3T ~59tr/phien + NGOAI universe_pit) o MOI kenh nhung …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
