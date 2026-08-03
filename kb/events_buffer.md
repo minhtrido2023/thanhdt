@@ -783,3 +783,37 @@
 - [2026-08-03T19:14:30Z] Mike/heartbeat — Mike_20260803_190228: {"status": "still_running", "elapsed_min": 12, "job_id": "Mike_20260803_190228", "source": "watcher"}
 - [2026-08-03T19:15:30Z] Mike/heartbeat — Mike_20260803_190228: {"status": "still_running", "elapsed_min": 13, "job_id": "Mike_20260803_190228", "source": "watcher"}
 - [2026-08-03T19:16:30Z] Mike/heartbeat — Mike_20260803_190228: {"status": "still_running", "elapsed_min": 14, "job_id": "Mike_20260803_190228", "source": "watcher"}
+
+## Consolidation 2026-08-03T19:43:46Z
+- [2026-08-03T19:18:35Z] Mike/heartbeat — Mike_20260803_191734: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20260803_191734", "source": "watcher"}
+- [2026-08-03T19:18:47Z] Mike/heartbeat — Mike_20260803_191734: {"status": "in_progress", "note": "da doc xong coding_guidelines.md (43230 bytes), dang viet ban nen ra .proposed"}
+- [2026-08-03T19:19:35Z] Mike/heartbeat — Mike_20260803_191734: {"status": "still_running", "elapsed_min": 2, "job_id": "Mike_20260803_191734", "source": "watcher"}
+- [2026-08-03T19:20:35Z] Mike/heartbeat — Mike_20260803_191734: {"status": "still_running", "elapsed_min": 3, "job_id": "Mike_20260803_191734", "source": "watcher"}
+- [2026-08-03T19:21:35Z] Mike/heartbeat — Mike_20260803_191734: {"status": "still_running", "elapsed_min": 4, "job_id": "Mike_20260803_191734", "source": "watcher"}
+- [2026-08-03T19:22:35Z] Mike/heartbeat — Mike_20260803_191734: {"status": "still_running", "elapsed_min": 5, "job_id": "Mike_20260803_191734", "source": "watcher"}
+- [2026-08-03T19:23:35Z] Mike/heartbeat — Mike_20260803_191734: {"status": "still_running", "elapsed_min": 6, "job_id": "Mike_20260803_191734", "source": "watcher"}
+- [2026-08-03T19:24:35Z] Mike/heartbeat — Mike_20260803_191734: {"status": "still_running", "elapsed_min": 7, "job_id": "Mike_20260803_191734", "source": "watcher"}
+- [2026-08-03T19:25:35Z] Mike/heartbeat — Mike_20260803_191734: {"status": "still_running", "elapsed_min": 8, "job_id": "Mike_20260803_191734", "source": "watcher"}
+- [2026-08-03T19:26:35Z] Mike/heartbeat — Mike_20260803_191734: {"status": "still_running", "elapsed_min": 9, "job_id": "Mike_20260803_191734", "source": "watcher"}
+- [2026-08-03T19:27:35Z] Mike/heartbeat — Mike_20260803_191734: {"status": "still_running", "elapsed_min": 10, "job_id": "Mike_20260803_191734", "source": "watcher"}
+- [2026-08-03T19:28:35Z] Mike/heartbeat — Mike_20260803_191734: {"status": "still_running", "elapsed_min": 11, "job_id": "Mike_20260803_191734", "source": "watcher"}
+- [2026-08-03T19:29:35Z] Mike/heartbeat — Mike_20260803_191734: {"status": "still_running", "elapsed_min": 12, "job_id": "Mike_20260803_191734", "source": "watcher"}
+- [2026-08-03T19:30:36Z] Mike/heartbeat — Mike_20260803_191734: {"status": "still_running", "elapsed_min": 13, "job_id": "Mike_20260803_191734", "source": "watcher"}
+- [2026-08-03T19:31:36Z] Mike/heartbeat — Mike_20260803_191734: {"status": "still_running", "elapsed_min": 14, "job_id": "Mike_20260803_191734", "source": "watcher"}
+- [2026-08-03T19:31:41Z] Mike/heartbeat — Mike_20260803_191734: {"status": "in_progress", "note": "ban nen vong 2, dang do kich thuoc + fact-check"}
+- [2026-08-03T19:32:35Z] Mike/status — Mike_20260803_191734: {"status": "deadline_extended", "hb_age_s": 54, "extension": 1, "max_ext": 3, "source": "watcher"}
+- [2026-08-03T19:32:36Z] Mike/heartbeat — Mike_20260803_191734: {"status": "still_running", "elapsed_min": 15, "job_id": "Mike_20260803_191734", "source": "watcher"}
+- [2026-08-03T19:33:36Z] Mike/heartbeat — Mike_20260803_191734: {"status": "still_running", "elapsed_min": 16, "job_id": "Mike_20260803_191734", "source": "watcher"}
+- [2026-08-03T19:34:36Z] Mike/heartbeat — Mike_20260803_191734: {"status": "still_running", "elapsed_min": 17, "job_id": "Mike_20260803_191734", "source": "watcher"}
+- [2026-08-03T19:35:36Z] Mike/heartbeat — Mike_20260803_191734: {"status": "still_running", "elapsed_min": 18, "job_id": "Mike_20260803_191734", "source": "watcher"}
+- [2026-08-03T19:35:54Z] Mike/heartbeat — Mike_20260803_191734: {"status": "in_progress", "note": "nen tung doan: 42232 -> dang tiep tuc, muc tieu <39KB"}
+- [2026-08-03T19:36:36Z] Mike/heartbeat — Mike_20260803_191734: {"status": "still_running", "elapsed_min": 19, "job_id": "Mike_20260803_191734", "source": "watcher"}
+- [2026-08-03T19:37:36Z] Mike/heartbeat — Mike_20260803_191734: {"status": "still_running", "elapsed_min": 20, "job_id": "Mike_20260803_191734", "source": "watcher"}
+- [2026-08-03T19:38:36Z] Mike/heartbeat — Mike_20260803_191734: {"status": "still_running", "elapsed_min": 21, "job_id": "Mike_20260803_191734", "source": "watcher"}
+- [2026-08-03T19:39:36Z] Mike/heartbeat — Mike_20260803_191734: {"status": "still_running", "elapsed_min": 22, "job_id": "Mike_20260803_191734", "source": "watcher"}
+- [2026-08-03T19:40:36Z] Mike/heartbeat — Mike_20260803_191734: {"status": "still_running", "elapsed_min": 23, "job_id": "Mike_20260803_191734", "source": "watcher"}
+- [2026-08-03T19:41:34Z] Mike/heartbeat — Mike_20260803_191734: {"status": "in_progress", "note": "41.6KB, tiep tuc nen cac doan con lai"}
+- [2026-08-03T19:41:36Z] Mike/heartbeat — Mike_20260803_191734: {"status": "still_running", "elapsed_min": 24, "job_id": "Mike_20260803_191734", "source": "watcher"}
+- [2026-08-03T19:42:37Z] Mike/heartbeat — Mike_20260803_191734: {"status": "still_running", "elapsed_min": 25, "job_id": "Mike_20260803_191734", "source": "watcher"}
+- [2026-08-03T19:43:26Z] Mike/finding — ctxbloat-autofix-coding-guidelines-20260803: {"file": "kb/coding_guidelines.md", "proposed": "kb/coding_guidelines.md.proposed", "old_bytes": 43230, "new_bytes": 41578, "old_kb_int": 42, "new_kb_int": 40, "cut_bytes": 1652, "cut_pct": 3.8, "fact_check": "PASS (bin/ctxbloat_fact_check.py: khong mat date/percent/KB-VND/job_id/filename nao)", "method": "chi cat cau van/menh de giai thich lap lai; giu nguyen 100% so lieu, ngay thang, ten file/script, cau phat bieu rule/threshold, ten su co", "gate_status": "DU DIEU KIEN AP DUNG: new_kb=40, khong > limit 40 -> _ctxbloat_autofix_one chap nhan; ctx_check dem sau cung se het bao vuot nguong", "caveat": "KHONG dat duoc bien do an toan ~2KB (muc tieu <39KB) — file nay dac fact (moi doan deu mang so lieu/path/incident ID). Cat them 2.6KB nua se phai xoa noi dung thuc chat, vi pham rang buoc cua chinh task nay. Neu Mike/nguoi muon nho hon that su: nen OKF-hoa (tach §6 cadence-scope, §7, §8b, §18b ra file rieng trong kb/) chu khong nen nen tiep bang van xuoi — giong ca context_pack.md 2026-07-30", "margin_to_reject_line": "405 bytes duoi nguong reject 41983"}
+- [2026-08-03T19:43:37Z] Mike/heartbeat — Mike_20260803_191734: {"status": "still_running", "elapsed_min": 26, "job_id": "Mike_20260803_191734", "source": "watcher"}
