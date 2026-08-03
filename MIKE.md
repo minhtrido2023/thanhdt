@@ -254,7 +254,8 @@ entry, KHÔNG sửa `dispatch.sh`.
 |---|---|---|
 | **claude** (mặc định) | Mọi việc chạm tiền thật, lập plan, điều phối, sửa production, và toàn bộ việc thường lệ | Không giới hạn agent |
 | **opencode** | **Ý kiến độc lập từ họ model KHÁC** (deepseek/ling/nemotron…): phản biện một kết luận của claude, cross-check một lập luận, brainstorm phương án, tra cứu đọc-nhiều | Chỉ `Taylor·Winston·Wendy·Spyros·Wags`; **read-only cưỡng chế** (`permission` trong `agents/<id>/opencode.json`); free tier **KHÔNG đảm bảo độ trễ** ⇒ cấm dùng cho việc trên đường găng (plan T+1, EOD report) |
-| **codex** | Chưa bật (`enabled:false`) | Mở sau khi user chạy `codex login`, rồi đặt `enabled:true` |
+| **codex** | Chưa bật (`enabled:false`) | Chỉ cần `codex login` + `enabled:true` — identity/context đã wire sẵn qua `profile:prompt-inline` |
+| **antigravity** (`agy`, Gemini) | Chưa bật (`enabled:false`) | Cần cài `agy` + login Gemini + điền `models` (`agy models`) + `enabled:true`. Gọi thẳng `agy -p`, KHÔNG qua ACP — xem `notes` trong registry |
 
 Giá trị thật của multi-CLI ở đây là **bất đồng ý kiến**, không phải throughput: một kết luận mà
 claude và một họ model khác cùng ra thì đáng tin hơn hẳn. Dùng nó như `quant-skeptic` thứ hai.

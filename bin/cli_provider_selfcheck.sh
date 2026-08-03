@@ -177,6 +177,55 @@ _tc="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1])).get("turn_
 chk "job.provider" "$_pv" "opencode"
 chk "job.turn_cap (opencode khong co turn-cap)" "$_tc" "unsupported"
 
+echo "== CA 12: profile=prompt-inline ⇒ identity+context ĐƯỢC BƠM VÀO PROMPT"
+echo "   (provider khong doc duoc CLAUDE.md/AGENTS.md cua fleet — vd codex, agy)"
+# Bat codex trong registry SANDBOX + tro bin sang stub. Khong dung registry that.
+python3 - "$MK/kb/cli_providers.json" "$SB/cli_stub.sh" <<'PY'
+import json, sys
+p, stub = sys.argv[1], sys.argv[2]
+reg = json.load(open(p, encoding="utf-8"))
+c = reg["providers"]["codex"]
+c["enabled"] = True
+c["bin"] = stub
+c["env"] = {}
+json.dump(reg, open(p, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+PY
+printf '# Taylor test\n@%s/kb/context_ops_mini.md\n' "$REAL" > "$MK/agents/Taylor/CLAUDE.md"
+run Taylor "viec test" --provider codex
+_pin="$(python3 -c '
+import sys
+raw = open(sys.argv[1],"rb").read().split(b"\0")[:-1]
+args=[a.decode("utf-8","replace") for a in raw]
+hits=[a for a in args if "[DISPATCH" in a]
+p = hits[0] if hits else ""
+print("yes" if "BOI CANH THUONG TRUC" in p else "no")
+print("yes" if "Taylor test" in p else "no")
+print("yes" if "ROOT" in p and "context ops-mini" in p else "no")
+' "$SB/argv.bin" 2>/dev/null)"
+chk "prompt co khoi identity"       "$(echo "$_pin"|sed -n 1p)" "yes"
+chk "prompt co CLAUDE.md cua agent"  "$(echo "$_pin"|sed -n 2p)" "yes"
+chk "prompt co @import DA EXPAND"    "$(echo "$_pin"|sed -n 3p)" "yes"
+
+echo "== CA 13: provider antigravity (agy) — argv + prompt-inline"
+python3 - "$MK/kb/cli_providers.json" "$SB/cli_stub.sh" <<'PY'
+import json, sys
+p, stub = sys.argv[1], sys.argv[2]
+reg = json.load(open(p, encoding="utf-8"))
+a = reg["providers"]["antigravity"]
+a["enabled"] = True
+a["bin"] = stub
+json.dump(reg, open(p, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+PY
+run Taylor "viec test" --provider antigravity
+argv_is "argv agy (--add-dir, -p o cuoi)" --add-dir "$MK/agents/Taylor" -p "<PROMPT>"
+_agyp="$(python3 -c '
+import sys
+raw = open(sys.argv[1],"rb").read().split(b"\0")[:-1]
+args=[a.decode("utf-8","replace") for a in raw]
+hits=[a for a in args if "[DISPATCH" in a]
+print("yes" if hits and "BOI CANH THUONG TRUC" in hits[0] else "no")' "$SB/argv.bin" 2>/dev/null)"
+chk "agy cung duoc bom identity (prompt-inline)" "$_agyp" "yes"
+
 echo
 if [ "$FAIL" -eq 0 ]; then
   echo "PASS — $PASS/$((PASS+FAIL)) assertion dung"

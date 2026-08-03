@@ -332,11 +332,15 @@ MIKE.md §Model routing hiện là ladder 1 chiều `sonnet → opus → fable`.
 2. **Streaming log chưa đo** — chưa có mẫu task opencode đủ dài để xác nhận log ghi dần hay chỉ
    ghi lúc thoát. Không chặn gì hiện tại (heartbeat đi qua bus, không qua log), nhưng
    `_job_watcher`'s anomaly track ("log trống 60s/stale 120s") có thể báo động giả cho opencode.
-3. **codex `profile=prompt-inline` chưa wire** — codex đọc `AGENTS.md`, fleet không có file nào,
-   nên context phải prepend vào prompt. Làm khi user `codex login` + đặt `enabled:true`.
-4. **§5.2 recap_prev** — `hooks/session_start.sh` bơm 3 thứ (working memory + recap phiên trước +
-   directive); provider `hooks:none` mất cả 3. Hiện `opencode.json` `instructions` mới thay được
-   phần context tĩnh. Working memory/directive/recap **chưa** được prepend vào prompt.
+3. ~~codex `profile=prompt-inline` chưa wire~~ → **XONG 2026-08-03** (`bin/render_profile_prompt.sh`
+   + nhánh `CLI_PROFILE=prompt-inline` trong `dispatch.sh`). Bơm: CLAUDE.md tổ tiên + CLAUDE.md
+   agent (đã expand `@import`) + working memory. Verify: selfcheck CA 12/13. codex giờ chỉ còn
+   chờ `codex login` + `enabled:true`. Cơ chế này dùng chung cho **antigravity** (`agy`).
+4. **§5.2 recap_prev + directive** — `hooks/session_start.sh` bơm 3 thứ; `render_profile_prompt.sh`
+   nay đã phủ **working memory**, còn **recap phiên trước** (`recap_prev.py` đọc transcript
+   `~/.claude`, không có khái niệm tương đương cho CLI khác) và **directive** (`bus/directives/`)
+   thì **chưa**. Directive là cái đáng làm tiếp — nó rẻ (đọc 1 file JSONL) và là kênh Mike giao
+   việc thường trực.
 5. **Nhiễm chéo còn lại** (arch-reviewer F10, đã sửa 3/6): đã sửa `usage_probe`, circuit-breaker
    key, wakeup bucket. **Chưa**: `context_watch.py`, `is_serving.py`, `wakeup_audit.py` vẫn neo
    `~/.claude` ⇒ fleet_health CTX/SERVING mù cho job non-claude; `spend_report.py` gom theo field

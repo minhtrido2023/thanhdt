@@ -196,6 +196,7 @@ EFFORT_FLAG="--effort $EFFORT"
 # Binary + env cua provider. `bin` da ap dung bin_env_override (DISPATCH_CLAUDE_BIN...) nen
 # bin/dispatch_discord_topic_selfcheck.sh van lai duoc dispatch qua stub (F11 arch-reviewer).
 CLI_BIN="$("$ROOT/bin/cli_provider.sh" bin "$PROVIDER")" || { echo "ERROR: khong phan giai duoc binary cua provider '$PROVIDER'." >&2; exit 1; }
+CLI_PROFILE="$("$ROOT/bin/cli_provider.sh" field "$PROVIDER" profile 2>/dev/null || echo claude-native)"
 CLI_SUPPORTS_TURNS="$("$ROOT/bin/cli_provider.sh" field "$PROVIDER" supports_turns 2>/dev/null || echo true)"
 CLI_USAGE_PROBE="$("$ROOT/bin/cli_provider.sh" field "$PROVIDER" usage_probe 2>/dev/null || true)"
 CLI_MAXTURNS_PAT="$("$ROOT/bin/cli_provider.sh" field "$PROVIDER" max_turns_pattern 2>/dev/null || true)"
@@ -765,6 +766,14 @@ _build_argv() {
       if [ -n "$EFFORT" ]; then CLI_ARGV+=( -c "model_reasoning_effort=\"$EFFORT\"" ); fi
       CLI_ARGV+=( "$_p" )
       ;;
+    antigravity)
+      # `agy -p` = headless print mode (giong `claude -p`). Contract lay tu src/adapter.rs
+      # :611-634 cua agy-acp.zip — nguon co tham quyen, khong doan.
+      # KHONG di qua agy-acp (ACP adapter): xem notes trong kb/cli_providers.json.
+      CLI_ARGV=( "$CLI_BIN" --add-dir "$AGENT_DIR" )
+      if [ -n "$MODEL" ]; then CLI_ARGV+=( --model "$MODEL" ); fi
+      CLI_ARGV+=( -p "$_p" )
+      ;;
     *)
       echo "dispatch: provider '$PROVIDER' chua co bo dung argv trong _build_argv()." >&2
       return 1
@@ -782,6 +791,25 @@ nguyên literal này, KHÔNG đổi tên biến — để mọi event của job 
 
 Heartbeat (bắt buộc): mỗi 4-5 tool call, ghi tiến độ để caller biết bạn còn sống:
   $ROOT/bin/append_event.sh $id heartbeat '$job_id' '{\"status\":\"in_progress\",\"note\":\"<đang làm gì>\"}' '$job_id'"
+
+# --- profile = prompt-inline (2026-08-03) ---------------------------------------
+# Provider KHONG doc duoc file profile nao cua fleet (codex doc AGENTS.md chu khong doc
+# CLAUDE.md; agy khong doc file nao) => identity + context phai di VAO PROMPT, neu khong
+# agent chay nhu mot model trang tron, khong biet minh la Taylor hay Wendy.
+# claude-native / opencode-json KHONG di qua day (claude tu nap CLAUDE.md + @import;
+# opencode doc CLAUDE.md tu --dir + `instructions` trong agents/<id>/opencode.json).
+if [ "$CLI_PROFILE" = "prompt-inline" ]; then
+  _profile_txt="$("$ROOT/bin/render_profile_prompt.sh" "$id" 2>/dev/null)"
+  if [ -z "$_profile_txt" ]; then
+    # Fail LOUD: chay tiep voi prompt khong co identity la ca te nhat — agent se lam sai
+    # ma trong nhu that. Tha huy dispatch.
+    echo "ERROR: HUY dispatch — provider '$PROVIDER' can profile prompt-inline nhung" >&2
+    echo "  render_profile_prompt.sh '$id' khong tra ve gi. Khong chay agent thieu identity." >&2
+    exit 1
+  fi
+  dispatch_prompt="$_profile_txt
+$dispatch_prompt"
+fi
 
 # Source wc_env.sh so google-cloud-sdk/bin is in PATH (needed by bq CLI + sync_bq_cache verify)
 [ -f "$ROOT/../wc_env.sh" ] && source "$ROOT/../wc_env.sh" 2>/dev/null || true
@@ -1064,7 +1092,7 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
   export ROOT JOBS_DIR job_id from id ts TIMEOUT RETRIES CLAUDE dispatch_prompt logfile prompt \
          CIRCUIT_DIR CIRCUIT_THRESHOLD CIRCUIT_COOLDOWN MODEL_FLAG EFFORT_FLAG MAX_EXT HB_FRESH_S \
          MAX_TURNS MAXTURNS_CEILING MODEL EFFORT \
-         PROVIDER CLI_BIN AGENT_DIR CLI_SUPPORTS_TURNS CLI_USAGE_PROBE CLI_MAXTURNS_PAT CIRCUIT_KEY
+         PROVIDER CLI_BIN AGENT_DIR CLI_SUPPORTS_TURNS CLI_USAGE_PROBE CLI_MAXTURNS_PAT CIRCUIT_KEY CLI_PROFILE
   # systemd-run --user needs the user manager socket; cron strips XDG_RUNTIME_DIR.
   export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
   _detach_ok=0
