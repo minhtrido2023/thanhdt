@@ -126,6 +126,45 @@
         "Sandbox: dung -s read-only / workspace-write, KHONG dung",
         "--dangerously-bypass-approvals-and-sandbox (arch-reviewer required_change #6c)."
       ]
+    },
+
+    "antigravity": {
+      "label": "Google Antigravity CLI (agy) — Gemini",
+      "enabled": false,
+      "bin": "agy",
+      "bin_env_override": "DISPATCH_AGY_BIN",
+      "env": {},
+      "models": [],
+      "efforts": [],
+      "effort_caps": {},
+      "supports_turns": false,
+      "profile": "prompt-inline",
+      "usage_probe": null,
+      "max_turns_pattern": null,
+      "allow_agents": ["Taylor", "Winston", "Wendy", "Spyros", "Wags"],
+      "notes": [
+        "enabled=false: `agy` CHUA CAI tren may nay va ~/.gemini chua ton tai (kiem 2026-08-03).",
+        "Bat khi: (1) cai agy tu github google-antigravity/antigravity-cli, (2) user login Gemini",
+        "hoac dat GEMINI_API_KEY, (3) doi bin= duong dan tuyet doi that, (4) enabled=true.",
+        "",
+        "CLI contract lay tu NGUON CO THAM QUYEN — src/adapter.rs:611-634 cua agy-acp.zip:",
+        "  agy --add-dir <DIR> --log-file <P> --print-timeout <D> [--conversation ID] [--model M] -p <PROMPT>",
+        "Tuc `agy -p` la headless print mode giong `claude -p` => cam thang vao dispatch.sh duoc.",
+        "",
+        "models=[] CO Y de rong: chua cai agy nen KHONG the liet ke that (`agy models`). Rong =>",
+        "validate BO QUA kiem model, khong chan. Khi cai xong: chay `agy models` roi dien vao day",
+        "— dung doan ten model.",
+        "",
+        "⚠️ VI SAO KHONG DUNG agy-acp (file mike/agy-acp.zip user cung cap):",
+        "agy-acp la ACP stdio adapter (JSON-RPC) de cam `agy` vao ACP HOST tuong tac nhu Zed",
+        "Agent Panel. Chinh README cua no ghi: no SPAWN `agy` lam subprocess va dung `agy --print`",
+        "lam nguon cau tra loi cuoi. Fleet minh dispatch la one-shot headless, khong dung streaming",
+        "session/update lan session resume — nen goi thang `agy` don gian hon va KHONG MAT GI.",
+        "Di duong ACP se phai: cai Rust toolchain + build binary + viet 1 ACP CLIENT (JSON-RPC",
+        "stdio) trong dispatch.sh — nhieu viec, them 1 tien trinh trung gian, de doi lay tinh nang",
+        "fleet khong dung. Zip van giu lai o mike/agy-acp.zip: dung khi muon dung agy TRONG Zed,",
+        "hoac neu sau nay can streaming/session-resume that su."
+      ]
     }
   }
 }
