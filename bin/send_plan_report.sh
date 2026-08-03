@@ -372,7 +372,11 @@ if orders:
             if is_buy and o.get("dcf_override_reason"):
                 lines.append(f"      ↳ lý do override DCF: {str(o['dcf_override_reason'])[:120]}")
         if is_buy and run_due_diligence:
-            dd_ctx = {"asof": date, "skip_dcf": True}
+            # dd_override_reason đi vào ctx để dòng cờ đỏ tự biết đã có lý do override hay chưa
+            # (mirror has_override của format_dcf_check) — thiếu lý do thì hiện "cần
+            # dd_override_reason" NGAY tại bước user duyệt plan, đúng chỗ quyết định.
+            dd_ctx = {"asof": date, "skip_dcf": True, "side": "buy",
+                      "dd_override_reason": o.get("dd_override_reason") or ""}
             if isinstance(price, (int, float)):
                 dd_ctx["price"] = price
             if isinstance(val, (int, float)):
@@ -382,6 +386,8 @@ if orders:
                 for dl in str(dd_s).splitlines():
                     lines.append(f"      ↳ {dl.strip()}")
                 dd_shown = True
+            if o.get("dd_override_reason"):
+                lines.append(f"      ↳ lý do override DD: {str(o['dd_override_reason'])[:120]}")
     if dcf_shown and DCF_DISCLAIMER:
         lines.append(f"ℹ️ _{DCF_DISCLAIMER}_")
     if dd_shown and DD_DISCLAIMER:
