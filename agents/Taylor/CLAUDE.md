@@ -123,25 +123,39 @@ Nếu việc ĐANG DỞ mà có nguy cơ bị cắt → ghi NGAY:
 
 **Làm việc trực tiếp với user.** **Ranh giới:** không đặt lệnh thật (Mafee); không chạy pipeline daily-ops (Winston) — chỉ R&D/đổi mô hình.
 
-## PILOT hẹp — `srcwalk` cho tra cứu code Python (2026-08-01, đang đánh giá, xem `kb/projects/srcwalk-pilot-eval.md`)
-Đã cài `srcwalk` (tree-sitter, tra symbol theo AST) ở `~/.local/bin`. **Phạm vi CHỈ**: dùng
-`srcwalk discover <tên hàm/biến> --scope <thư mục>` hoặc `srcwalk show <file>:<dòng/hàm>` thay cho
-`grep`+`Read` khi khám phá code Python trong `trading_bot/` hoặc script nghiên cứu — 2 lệnh này
-cho biết NGAY "dòng này nằm trong hàm nào" mà grep không cho, đáng thử.
+## `srcwalk` — mặc định đọc code Python (pilot ĐÃ ĐÓNG 2026-08-03, user chốt mở toàn fleet)
+Pilot hẹp 2026-08-01 (chỉ bạn, `discover`/`show`, log JSONL) đã kết thúc — user chỉ đạo dùng
+`srcwalk` làm công cụ đọc code mặc định cho cả fleet, cài dạng skill (`~/.claude/skills/srcwalk/`),
+binary v1.3.0 ở `~/.local/bin`. **Không cần ghi `srcwalk_pilot_log.jsonl` nữa.**
 
-**TUYỆT ĐỐI KHÔNG dùng `srcwalk trace`/`srcwalk review`** — kiểm tra tay 2026-08-01 phát hiện lỗi
-thật: `trace callers` khớp nhầm theo TÊN HÀM CHUNG CHUNG (`main`, `run`) xuyên file không liên quan
-(vd báo `dcf_fv_sens_cache.py` "bị ảnh hưởng" bởi thay đổi ở `bot_execute.py` — SAI, đã verify bằng
-grep, 2 file không hề gọi nhau); `review` bỏ sót gắn tên hàm mới vào bằng chứng diff. Đừng tin
-"blast radius"/call-graph của công cụ này cho tới khi có xác nhận khác.
+**Ranh giới đúng = chia theo VIỆC** (benchmark N=200 symbol + N=150 file, 2026-08-03, ground truth
+dựng bằng `ast` — báo cáo `kb/projects/srcwalk-benchmark-20260803.md`, script tái lập
+`agents/Mike/srcwalk_bench/`):
+- **ĐỌC file → `srcwalk`**: `srcwalk <file>` (outline, tiết kiệm 88,8% token CI[86,5–90,7], giữ
+  95,7% top-level symbol, 0/150 file bị đắt hơn), `srcwalk <file>:120-160`, `--section <symbol>`,
+  `srcwalk overview --scope <dir>`. `srcwalk guide` 1 lần trước khi dùng sâu.
+- **TÌM định nghĩa / call site → `grep`**, KHÔNG phải `discover`/`trace`. grep thắng có ý nghĩa
+  (ΔF1 +0,052 CI[+0,015,+0,093] và +0,062 CI[+0,010,+0,115]), rẻ 3–25×, nhanh 6×.
+- Ngoại lệ nghiêng về `srcwalk discover --scope <dir>`: tên xuất hiện ở >10 file (`main`/`run`) —
+  precision srcwalk 0,844 vs grep 0,459, 200 token vs 740.
 
-**KHÔNG áp dụng cho bash** (`bin/*.sh`) — công cụ không hỗ trợ ngôn ngữ này, đừng thử.
+⚠️ **Bẫy `.gitignore` (mới, 2026-08-03)**: srcwalk theo ignore file khi discovery, mà
+`.gitignore:107` ẩn `WorkingClaude/mike/` → **44% file `.py` của repo vô hình**, gồm TOÀN BỘ code
+fleet. Trên symbol trong `mike/`: `--scope .` cho F1 **0,065**, `--scope mike` cho 0,978.
+**Luôn scope vào thư mục chứa code.** Đọc file tường minh (`srcwalk mike/foo.py`) không bị ảnh hưởng.
 
-**Ghi log MỖI lần dùng thật** (bắt buộc, đây là cách duy nhất Mike đánh giá được, không dựa tự
-báo cáo cảm tính) — 1 dòng JSONL:
-```bash
-python3 -c "import json,sys,time; open('/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/srcwalk_pilot_log.jsonl','a').write(json.dumps({'ts':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'cmd':sys.argv[1],'task':sys.argv[2],'useful':sys.argv[3]=='true','note':sys.argv[4]})+'\n')" \
-  "srcwalk discover <query thật>" "<mô tả việc đang làm>" "true|false" "<1 câu: có giúp hơn grep+Read không, vì sao>"
-```
-Nếu `srcwalk` không có trên PATH lúc dispatch (kiểm bằng `command -v srcwalk`) → bỏ qua, dùng
-`grep`+`Read` như bình thường, KHÔNG chặn việc đang làm, không cần ghi log cho lần đó.
+⚠️ **Im lặng trả rỗng**: kể cả scope đúng, srcwalk báo "no call sites found" ở **8,2%** CI[4,4–12,6]
+số symbol có caller thật (ca `build_obs`: call nằm ngay dưới trong CÙNG file). grep: 0%. Đừng bao
+giờ kết luận "không ai gọi hàm này" chỉ từ srcwalk — xác nhận bằng `grep`.
+
+**2 lỗi accuracy bạn phát hiện 2026-08-01 vẫn CHƯA được sửa** — Mike chạy lại đúng 2 test đó trên
+v1.3.0 ngày 2026-08-03, cả 2 tái hiện, nên các cấm đoán dưới đây GIỮ NGUYÊN:
+- `trace callers --depth ≥2` và khối "impact (2nd hop)": hop-2 nở ra **496 cạnh** gần như toàn rác
+  (mọi `main()`, mọi `run(...)`, kể cả `subprocess.run(...)` bị khớp là caller của `run`). Chỉ dùng
+  `--depth 1` và chỉ đọc danh sách call-site trực tiếp; mọi tuyên bố blast-radius phải verify bằng
+  `grep` trước khi báo.
+- `review`: bỏ sót hàm MỚI THÊM (trên `d64717f`, hunk chứa `filter_lag_rating_orders` bị gắn nhãn
+  `file-level`, không có trong "changed symbols"). Dùng `git diff` làm nguồn chuẩn tắc cho change set.
+
+**KHÔNG áp dụng cho bash** (`bin/*.sh`) — vẫn không parse được (verify lại 2026-08-03:
+`srcwalk bin/dispatch.sh` 1244 dòng chỉ ra comment header, `discover` không thấy hàm bash nào).

@@ -38,6 +38,7 @@
       "wc *": "allow",
       "grep *": "allow",
       "rg *": "allow",
+      "srcwalk *": "allow",
       "find *": "allow",
       "stat *": "allow",
       "git status*": "allow",

@@ -1,0 +1,1502 @@
+[
+ {
+  "file": "capit_stock_optimizer.py",
+  "lines": 563,
+  "read_tok": 6181.0,
+  "sw_tok": 169.25,
+  "n_toplevel": 4,
+  "n_in_outline": 4,
+  "sec": 0.011781721375882626,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "pt_v6v3_faithful.py",
+  "lines": 135,
+  "read_tok": 1859.75,
+  "sw_tok": 80.5,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.005420790985226631,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "compare_integrated_bav11_dt.py",
+  "lines": 255,
+  "read_tok": 2929.25,
+  "sw_tok": 131.5,
+  "n_toplevel": 3,
+  "n_in_outline": 3,
+  "sec": 0.00694962777197361,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "extended_overlay_grind.py",
+  "lines": 107,
+  "read_tok": 1418.5,
+  "sw_tok": 135.0,
+  "n_toplevel": 4,
+  "n_in_outline": 4,
+  "sec": 0.004665769636631012,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/vnstock/core/base/registry.py",
+  "lines": 357,
+  "read_tok": 2531.75,
+  "sw_tok": 76.25,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.00454083364456892,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "8l_package/pt_8l_quarterly.py",
+  "lines": 87,
+  "read_tok": 1402.75,
+  "sw_tok": 150.75,
+  "n_toplevel": 5,
+  "n_in_outline": 5,
+  "sec": 0.0052328575402498245,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "data/v23_audit_spotcheck.py",
+  "lines": 199,
+  "read_tok": 3030.25,
+  "sw_tok": 98.0,
+  "n_toplevel": 2,
+  "n_in_outline": 2,
+  "sec": 0.007331859320402145,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/vnstock/config.py",
+  "lines": 76,
+  "read_tok": 616.5,
+  "sw_tok": 76.25,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.00252488162368536,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "mike/agents/Taylor/research/fearbuy_blend/phase_deals.py",
+  "lines": 19,
+  "read_tok": 318.75,
+  "sw_tok": 102.0,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.0028286688029766083,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "data/dcf_exp_logs/compare_dcf.py",
+  "lines": 101,
+  "read_tok": 1086.0,
+  "sw_tok": 110.25,
+  "n_toplevel": 3,
+  "n_in_outline": 3,
+  "sec": 0.004465336911380291,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/build/lib/build/lib/build/lib/build/lib/vnstock/explorer/kbs/quote.py",
+  "lines": 550,
+  "read_tok": 5383.5,
+  "sw_tok": 193.25,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.0059041716158390045,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "investigate_v3_1_downgrade_weakness.py",
+  "lines": 318,
+  "read_tok": 4171.5,
+  "sw_tok": 147.5,
+  "n_toplevel": 4,
+  "n_in_outline": 4,
+  "sec": 0.008732186630368233,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/build/lib/build/lib/build/lib/build/lib/build/lib/vnstock/explorer/kbs/financial.py",
+  "lines": 800,
+  "read_tok": 7775.75,
+  "sw_tok": 351.25,
+  "n_toplevel": 2,
+  "n_in_outline": 2,
+  "sec": 0.007379276677966118,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "analyze_rating_sleeve.py",
+  "lines": 96,
+  "read_tok": 1227.25,
+  "sw_tok": 110.25,
+  "n_toplevel": 3,
+  "n_in_outline": 3,
+  "sec": 0.0041182637214660645,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "wrap_score_1_6.py",
+  "lines": 205,
+  "read_tok": 2002.5,
+  "sw_tok": 208.25,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.004695242270827293,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/build/lib/build/lib/tests/integration/test_vnstock_client.py",
+  "lines": 83,
+  "read_tok": 738.5,
+  "sw_tok": 80.25,
+  "n_toplevel": 1,
+  "n_in_outline": 0,
+  "sec": 0.0030181370675563812,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "mike/bin/render_report_html.py",
+  "lines": 293,
+  "read_tok": 2876.75,
+  "sw_tok": 275.5,
+  "n_toplevel": 12,
+  "n_in_outline": 12,
+  "sec": 0.004951740615069866,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "mike/agents/Taylor/exp_pb_exvic/main.py",
+  "lines": 74,
+  "read_tok": 877.25,
+  "sw_tok": 106.0,
+  "n_toplevel": 2,
+  "n_in_outline": 2,
+  "sec": 0.004024770110845566,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/build/lib/build/lib/build/lib/build/lib/vnstock/explorer/vci/trading.py",
+  "lines": 144,
+  "read_tok": 1542.75,
+  "sw_tok": 150.25,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.004395963624119759,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/build/lib/build/lib/build/lib/vnstock/common/indices.py",
+  "lines": 221,
+  "read_tok": 1402.75,
+  "sw_tok": 427.25,
+  "n_toplevel": 12,
+  "n_in_outline": 12,
+  "sec": 0.0036136899143457413,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "test_round17.py",
+  "lines": 184,
+  "read_tok": 1974.75,
+  "sw_tok": 81.5,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.005241435952484608,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "research_lh_v3_c14_hybrid.py",
+  "lines": 192,
+  "read_tok": 2191.5,
+  "sw_tok": 100.75,
+  "n_toplevel": 2,
+  "n_in_outline": 2,
+  "sec": 0.006306065246462822,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "neutral_glide_backtest.py",
+  "lines": 192,
+  "read_tok": 2834.25,
+  "sw_tok": 337.5,
+  "n_toplevel": 11,
+  "n_in_outline": 11,
+  "sec": 0.005501657724380493,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "probe_cheapness_payoff.py",
+  "lines": 77,
+  "read_tok": 1182.0,
+  "sw_tok": 80.0,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.003983956761658192,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "mike/bin/compute_active_nav.py",
+  "lines": 229,
+  "read_tok": 2668.25,
+  "sw_tok": 168.25,
+  "n_toplevel": 5,
+  "n_in_outline": 5,
+  "sec": 0.0055643413215875626,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "mike/agents/Taylor/exp_insider/overlap_analysis.py",
+  "lines": 145,
+  "read_tok": 2027.25,
+  "sw_tok": 105.75,
+  "n_toplevel": 2,
+  "n_in_outline": 2,
+  "sec": 0.006666979752480984,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/vnstock/api/quote.py",
+  "lines": 225,
+  "read_tok": 2075.75,
+  "sw_tok": 128.25,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.0035342825576663017,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "backtest_v5b_hybrid_variants.py",
+  "lines": 227,
+  "read_tok": 3015.5,
+  "sw_tok": 125.0,
+  "n_toplevel": 2,
+  "n_in_outline": 2,
+  "sec": 0.008176742121577263,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/build/lib/build/lib/vnstock/api/trading.py",
+  "lines": 201,
+  "read_tok": 1468.75,
+  "sw_tok": 127.0,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.003956206142902374,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/vnstock/core/utils/field/validator.py",
+  "lines": 395,
+  "read_tok": 3626.25,
+  "sw_tok": 452.0,
+  "n_toplevel": 2,
+  "n_in_outline": 2,
+  "sec": 0.0060044387355446815,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "release_8l_full/8L_system_full/asset_play_detector.py",
+  "lines": 80,
+  "read_tok": 1159.0,
+  "sw_tok": 94.5,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.004276569001376629,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/build/lib/build/lib/build/lib/build/lib/build/lib/vnstock/core/utils/browser_profiles.py",
+  "lines": 123,
+  "read_tok": 1311.0,
+  "sw_tok": 99.25,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.002891324460506439,
+  "outline_mode": "outline"
+ },
+ {
+  "file": ".claude/skills/kronos/vendor/Kronos/model/__init__.py",
+  "lines": 18,
+  "read_tok": 98.75,
+  "sw_tok": 81.5,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.0023961272090673447,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/build/lib/build/lib/build/lib/build/lib/build/lib/build/lib/vnstock/core/utils/market.py",
+  "lines": 251,
+  "read_tok": 2538.5,
+  "sw_tok": 124.5,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.004324795678257942,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "mike/agents/Taylor/probe_golive_live_20260715/ab_old.py",
+  "lines": 450,
+  "read_tok": 7174.75,
+  "sw_tok": 173.75,
+  "n_toplevel": 5,
+  "n_in_outline": 5,
+  "sec": 0.01116431225091219,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "mike/agents/Taylor/research/fearbuy_screen/analyze3.py",
+  "lines": 73,
+  "read_tok": 985.25,
+  "sw_tok": 166.25,
+  "n_toplevel": 4,
+  "n_in_outline": 4,
+  "sec": 0.005557402037084103,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "pt_v23_audit_ddpark.py",
+  "lines": 1064,
+  "read_tok": 17422.75,
+  "sw_tok": 412.75,
+  "n_toplevel": 15,
+  "n_in_outline": 15,
+  "sec": 0.019240145571529865,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "wyckoff_warning_logger.py",
+  "lines": 237,
+  "read_tok": 2725.0,
+  "sw_tok": 247.25,
+  "n_toplevel": 7,
+  "n_in_outline": 7,
+  "sec": 0.005170317366719246,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "neutral_exposure_sweep.py",
+  "lines": 99,
+  "read_tok": 1104.5,
+  "sw_tok": 122.5,
+  "n_toplevel": 2,
+  "n_in_outline": 2,
+  "sec": 0.003978637978434563,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/tests/examples/vci_proxy_demo.py",
+  "lines": 253,
+  "read_tok": 2007.75,
+  "sw_tok": 239.75,
+  "n_toplevel": 3,
+  "n_in_outline": 3,
+  "sec": 0.00472661666572094,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/build/lib/build/lib/build/lib/vnstock/core/utils/validation.py",
+  "lines": 123,
+  "read_tok": 871.75,
+  "sw_tok": 186.75,
+  "n_toplevel": 6,
+  "n_in_outline": 6,
+  "sec": 0.0033941473811864853,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "golden_calibrate.py",
+  "lines": 62,
+  "read_tok": 936.5,
+  "sw_tok": 109.0,
+  "n_toplevel": 3,
+  "n_in_outline": 3,
+  "sec": 0.0043809860944747925,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "sim_dt4g_macro_overlay.py",
+  "lines": 307,
+  "read_tok": 4462.25,
+  "sw_tok": 213.75,
+  "n_toplevel": 7,
+  "n_in_outline": 7,
+  "sec": 0.008570373058319092,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "div_marginal_ic.py",
+  "lines": 235,
+  "read_tok": 2567.0,
+  "sw_tok": 195.25,
+  "n_toplevel": 5,
+  "n_in_outline": 5,
+  "sec": 0.007054808549582958,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "test_v4_dynamic_overheat.py",
+  "lines": 227,
+  "read_tok": 2617.75,
+  "sw_tok": 216.5,
+  "n_toplevel": 6,
+  "n_in_outline": 6,
+  "sec": 0.006630989722907543,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "score_fa_lh.py",
+  "lines": 241,
+  "read_tok": 2983.75,
+  "sw_tok": 157.75,
+  "n_toplevel": 4,
+  "n_in_outline": 4,
+  "sec": 0.006595040671527386,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "f_system_improve_test.py",
+  "lines": 259,
+  "read_tok": 3000.5,
+  "sw_tok": 212.0,
+  "n_toplevel": 8,
+  "n_in_outline": 8,
+  "sec": 0.007781323045492172,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "mike/agents/Taylor/job_20260731_121454_pbo_episode.py",
+  "lines": 175,
+  "read_tok": 1750.5,
+  "sw_tok": 115.0,
+  "n_toplevel": 2,
+  "n_in_outline": 2,
+  "sec": 0.005413633771240711,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "hog_price_feed.py",
+  "lines": 160,
+  "read_tok": 1310.5,
+  "sw_tok": 153.5,
+  "n_toplevel": 4,
+  "n_in_outline": 4,
+  "sec": 0.003999793902039528,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "paper_trade_review.py",
+  "lines": 117,
+  "read_tok": 1481.0,
+  "sw_tok": 157.0,
+  "n_toplevel": 6,
+  "n_in_outline": 6,
+  "sec": 0.004135824739933014,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "bottom_recovery_regime.py",
+  "lines": 205,
+  "read_tok": 2249.0,
+  "sw_tok": 174.5,
+  "n_toplevel": 4,
+  "n_in_outline": 4,
+  "sec": 0.005411100573837757,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "release_8l_full/8L_system_full/dna_card.py",
+  "lines": 198,
+  "read_tok": 3272.75,
+  "sw_tok": 167.75,
+  "n_toplevel": 5,
+  "n_in_outline": 5,
+  "sec": 0.007790847681462765,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/build/lib/build/lib/build/lib/build/lib/build/lib/build/lib/vnstock/core/base/provider.py",
+  "lines": 256,
+  "read_tok": 1780.25,
+  "sw_tok": 312.75,
+  "n_toplevel": 4,
+  "n_in_outline": 4,
+  "sec": 0.0037870248779654503,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "test_production_etf.py",
+  "lines": 177,
+  "read_tok": 1888.75,
+  "sw_tok": 107.25,
+  "n_toplevel": 2,
+  "n_in_outline": 2,
+  "sec": 0.004906380549073219,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/build/lib/build/lib/build/lib/vnstock/explorer/misc/gold_price.py",
+  "lines": 111,
+  "read_tok": 910.25,
+  "sw_tok": 142.0,
+  "n_toplevel": 2,
+  "n_in_outline": 2,
+  "sec": 0.0035654203966259956,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "converge_union_test.py",
+  "lines": 320,
+  "read_tok": 4248.0,
+  "sw_tok": 234.0,
+  "n_toplevel": 8,
+  "n_in_outline": 8,
+  "sec": 0.007265932857990265,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "gpm_corr.py",
+  "lines": 59,
+  "read_tok": 796.5,
+  "sw_tok": 88.5,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.0038595255464315414,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "compare_v11_5state_versions.py",
+  "lines": 256,
+  "read_tok": 2941.75,
+  "sw_tok": 138.75,
+  "n_toplevel": 2,
+  "n_in_outline": 2,
+  "sec": 0.006898145191371441,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/vnstock/core/utils/validation.py",
+  "lines": 123,
+  "read_tok": 871.75,
+  "sw_tok": 179.25,
+  "n_toplevel": 6,
+  "n_in_outline": 6,
+  "sec": 0.0035207541659474373,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "final_overlay_realcash_rscap.py",
+  "lines": 72,
+  "read_tok": 1079.0,
+  "sw_tok": 138.75,
+  "n_toplevel": 4,
+  "n_in_outline": 4,
+  "sec": 0.005183033645153046,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/build/lib/build/lib/build/lib/vnstock/core/utils/help.py",
+  "lines": 31,
+  "read_tok": 249.25,
+  "sw_tok": 88.25,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.0025569936260581017,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/vnstock/core/converter/export.py",
+  "lines": 13,
+  "read_tok": 95.0,
+  "sw_tok": 92.0,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.0026248032227158546,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/vnstock/core/utils/proxy_manager.py",
+  "lines": 400,
+  "read_tok": 3035.0,
+  "sw_tok": 266.0,
+  "n_toplevel": 2,
+  "n_in_outline": 2,
+  "sec": 0.005167962051928043,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/build/lib/build/lib/build/lib/build/lib/vnstock/core/utils/env.py",
+  "lines": 178,
+  "read_tok": 1255.25,
+  "sw_tok": 325.0,
+  "n_toplevel": 13,
+  "n_in_outline": 13,
+  "sec": 0.004524373449385166,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "layer3_sell_anticipate.py",
+  "lines": 193,
+  "read_tok": 2580.5,
+  "sw_tok": 80.75,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.006111473776400089,
+  "outline_mode": "outline"
+ },
+ {
+  "file": ".claude/skills/kronos/vendor/Kronos/webui/app.py",
+  "lines": 709,
+  "read_tok": 7616.0,
+  "sw_tok": 200.75,
+  "n_toplevel": 11,
+  "n_in_outline": 4,
+  "sec": 0.010025330819189548,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/build/lib/build/lib/build/lib/build/lib/build/lib/build/lib/vnstock/explorer/__init__.py",
+  "lines": 16,
+  "read_tok": 127.5,
+  "sw_tok": 99.75,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.0024297405034303665,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/build/lib/build/lib/build/lib/build/lib/build/lib/vnstock/core/utils/auth.py",
+  "lines": 31,
+  "read_tok": 215.5,
+  "sw_tok": 149.0,
+  "n_toplevel": 3,
+  "n_in_outline": 3,
+  "sec": 0.0027624592185020447,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "mike/bin/spend_report.py",
+  "lines": 247,
+  "read_tok": 2610.0,
+  "sw_tok": 144.25,
+  "n_toplevel": 5,
+  "n_in_outline": 5,
+  "sec": 0.005338897928595543,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/build/lib/build/lib/build/lib/build/lib/build/lib/build/lib/vnstock/explorer/kbs/company.py",
+  "lines": 756,
+  "read_tok": 5829.5,
+  "sw_tok": 611.75,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.00681560393422842,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "sbv_macro_tracker.py",
+  "lines": 165,
+  "read_tok": 1662.25,
+  "sw_tok": 95.25,
+  "n_toplevel": 2,
+  "n_in_outline": 2,
+  "sec": 0.004885898903012276,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "run_fa8l_ab.py",
+  "lines": 166,
+  "read_tok": 2418.0,
+  "sw_tok": 161.5,
+  "n_toplevel": 5,
+  "n_in_outline": 5,
+  "sec": 0.00619764719158411,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "test_grind_arm_b.py",
+  "lines": 43,
+  "read_tok": 606.0,
+  "sw_tok": 81.0,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.0035160211846232414,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "mike/agents/Taylor/research/fearbuy_idio/analyze_cond.py",
+  "lines": 31,
+  "read_tok": 431.5,
+  "sw_tok": 91.5,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.004155997186899185,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "sleeve_pnl_full.py",
+  "lines": 121,
+  "read_tok": 1365.5,
+  "sw_tok": 141.75,
+  "n_toplevel": 5,
+  "n_in_outline": 5,
+  "sec": 0.004902610555291176,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "backtest_recovery_alloc.py",
+  "lines": 150,
+  "read_tok": 2095.0,
+  "sw_tok": 137.0,
+  "n_toplevel": 5,
+  "n_in_outline": 5,
+  "sec": 0.005496392026543617,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "mike/agents/Taylor/job_20260731_151958_pbo_episode.py",
+  "lines": 194,
+  "read_tok": 1923.0,
+  "sw_tok": 135.0,
+  "n_toplevel": 2,
+  "n_in_outline": 2,
+  "sec": 0.005573817528784275,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "walkforward_holistic.py",
+  "lines": 151,
+  "read_tok": 1466.0,
+  "sw_tok": 88.0,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.0051596565172076225,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "approval_gate_selfcheck.py",
+  "lines": 146,
+  "read_tok": 1833.5,
+  "sw_tok": 131.0,
+  "n_toplevel": 3,
+  "n_in_outline": 3,
+  "sec": 0.003936858847737312,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "lag_liq_ledger.py",
+  "lines": 251,
+  "read_tok": 2861.75,
+  "sw_tok": 179.0,
+  "n_toplevel": 6,
+  "n_in_outline": 6,
+  "sec": 0.005772707052528858,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/vnstock/core/settings.py",
+  "lines": 338,
+  "read_tok": 2326.75,
+  "sw_tok": 262.0,
+  "n_toplevel": 13,
+  "n_in_outline": 10,
+  "sec": 0.004762418568134308,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "mike/bin/anomaly_escalate.py",
+  "lines": 168,
+  "read_tok": 2000.5,
+  "sw_tok": 162.75,
+  "n_toplevel": 6,
+  "n_in_outline": 6,
+  "sec": 0.00481368787586689,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/build/lib/build/lib/vnstock/connector/dnse/trade.py",
+  "lines": 842,
+  "read_tok": 7286.5,
+  "sw_tok": 583.5,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.008435767143964767,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "breadth_universe_analysis.py",
+  "lines": 110,
+  "read_tok": 1302.5,
+  "sw_tok": 82.25,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.004822219721972942,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "mike/agents/Taylor/exp_valframe/capit_incr.py",
+  "lines": 60,
+  "read_tok": 723.75,
+  "sw_tok": 101.25,
+  "n_toplevel": 2,
+  "n_in_outline": 2,
+  "sec": 0.004272809252142906,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/build/lib/build/lib/build/lib/build/lib/build/lib/vnstock/api/trading.py",
+  "lines": 201,
+  "read_tok": 1468.75,
+  "sw_tok": 134.5,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.0038372548297047615,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "final_overlay_realcash.py",
+  "lines": 72,
+  "read_tok": 1074.5,
+  "sw_tok": 137.25,
+  "n_toplevel": 4,
+  "n_in_outline": 4,
+  "sec": 0.0052056750282645226,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/tests/unit/api/test_quote.py",
+  "lines": 104,
+  "read_tok": 990.5,
+  "sw_tok": 76.0,
+  "n_toplevel": 1,
+  "n_in_outline": 0,
+  "sec": 0.0036521703004837036,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/build/lib/build/lib/build/lib/vnstock/__init__.py",
+  "lines": 91,
+  "read_tok": 606.0,
+  "sw_tok": 144.75,
+  "n_toplevel": 3,
+  "n_in_outline": 3,
+  "sec": 0.002947254106402397,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "analyze_crisis_transitions.py",
+  "lines": 408,
+  "read_tok": 3710.5,
+  "sw_tok": 230.75,
+  "n_toplevel": 8,
+  "n_in_outline": 8,
+  "sec": 0.007792385295033455,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "demo_c4_benchmark_difference.py",
+  "lines": 135,
+  "read_tok": 1518.0,
+  "sw_tok": 110.25,
+  "n_toplevel": 2,
+  "n_in_outline": 2,
+  "sec": 0.005165950395166874,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/build/lib/build/lib/vnstock/explorer/kbs/company.py",
+  "lines": 756,
+  "read_tok": 5829.5,
+  "sw_tok": 601.75,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.006711574271321297,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "append_deposit_rate.py",
+  "lines": 364,
+  "read_tok": 5721.5,
+  "sw_tok": 144.5,
+  "n_toplevel": 5,
+  "n_in_outline": 5,
+  "sec": 0.006339585408568382,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "mike/agents/Mafee/probe_margin.py",
+  "lines": 82,
+  "read_tok": 852.75,
+  "sw_tok": 91.75,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.0040281228721141815,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "pt_salvage_test.py",
+  "lines": 184,
+  "read_tok": 2693.0,
+  "sw_tok": 194.75,
+  "n_toplevel": 7,
+  "n_in_outline": 7,
+  "sec": 0.007761609740555286,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/build/lib/vnstock/core/base/provider.py",
+  "lines": 256,
+  "read_tok": 1780.25,
+  "sw_tok": 300.25,
+  "n_toplevel": 4,
+  "n_in_outline": 4,
+  "sec": 0.0036851242184638977,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "paper_trade_daily.py",
+  "lines": 410,
+  "read_tok": 4626.5,
+  "sw_tok": 245.5,
+  "n_toplevel": 10,
+  "n_in_outline": 10,
+  "sec": 0.0080951526761055,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "test_v2g_vs_baseline.py",
+  "lines": 294,
+  "read_tok": 3316.25,
+  "sw_tok": 92.25,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.005293825641274452,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/build/lib/build/lib/build/lib/tests/unit/explorer/test_vci_listing_comprehensive.py",
+  "lines": 243,
+  "read_tok": 2311.0,
+  "sw_tok": 90.25,
+  "n_toplevel": 1,
+  "n_in_outline": 0,
+  "sec": 0.00477727223187685,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "bq_local_cache.py",
+  "lines": 270,
+  "read_tok": 2459.5,
+  "sw_tok": 234.5,
+  "n_toplevel": 2,
+  "n_in_outline": 2,
+  "sec": 0.004681028425693512,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "converge_fullharness_test.py",
+  "lines": 2350,
+  "read_tok": 42391.5,
+  "sw_tok": 492.75,
+  "n_toplevel": 19,
+  "n_in_outline": 19,
+  "sec": 0.03954371064901352,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/build/lib/build/lib/build/lib/build/lib/vnstock/core/utils/ext.py",
+  "lines": 45,
+  "read_tok": 412.25,
+  "sw_tok": 131.5,
+  "n_toplevel": 2,
+  "n_in_outline": 2,
+  "sec": 0.0034724827855825424,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/vnstock/explorer/kbs/financial.py",
+  "lines": 800,
+  "read_tok": 7775.75,
+  "sw_tok": 338.75,
+  "n_toplevel": 2,
+  "n_in_outline": 2,
+  "sec": 0.00815528817474842,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "value_book_realistic.py",
+  "lines": 164,
+  "read_tok": 1785.0,
+  "sw_tok": 184.0,
+  "n_toplevel": 7,
+  "n_in_outline": 7,
+  "sec": 0.006159473210573196,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "backtest_anticipate_exit.py",
+  "lines": 202,
+  "read_tok": 2022.75,
+  "sw_tok": 165.75,
+  "n_toplevel": 4,
+  "n_in_outline": 4,
+  "sec": 0.005922289565205574,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "trading_bot/netting_recon.py",
+  "lines": 240,
+  "read_tok": 3266.75,
+  "sw_tok": 174.75,
+  "n_toplevel": 4,
+  "n_in_outline": 4,
+  "sec": 0.0048759570345282555,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "mike/agents/Taylor/probe_real_premium_20260713.py",
+  "lines": 71,
+  "read_tok": 686.75,
+  "sw_tok": 84.5,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.0037663523107767105,
+  "outline_mode": "outline"
+ },
+ {
+  "file": ".claude/skills/kronos/vendor/Kronos/finetune_csv/finetune_tokenizer.py",
+  "lines": 360,
+  "read_tok": 3432.75,
+  "sw_tok": 230.0,
+  "n_toplevel": 7,
+  "n_in_outline": 7,
+  "sec": 0.006457608193159103,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "compare_live_vs_tq34b_V4V5.py",
+  "lines": 457,
+  "read_tok": 6072.25,
+  "sw_tok": 294.5,
+  "n_toplevel": 9,
+  "n_in_outline": 9,
+  "sec": 0.010031252168118954,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "sim_v11_tamquan.py",
+  "lines": 697,
+  "read_tok": 9304.75,
+  "sw_tok": 139.0,
+  "n_toplevel": 3,
+  "n_in_outline": 3,
+  "sec": 0.013255815021693707,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/build/lib/build/lib/build/lib/build/lib/build/lib/tests/unit/explorer/test_vci_quote_comprehensive.py",
+  "lines": 314,
+  "read_tok": 2906.0,
+  "sw_tok": 94.75,
+  "n_toplevel": 1,
+  "n_in_outline": 0,
+  "sec": 0.005387330427765846,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "mike/bin/is_serving.py",
+  "lines": 50,
+  "read_tok": 425.0,
+  "sw_tok": 88.0,
+  "n_toplevel": 2,
+  "n_in_outline": 2,
+  "sec": 0.002849951386451721,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "test_capacity_option1.py",
+  "lines": 239,
+  "read_tok": 3034.25,
+  "sw_tok": 150.75,
+  "n_toplevel": 5,
+  "n_in_outline": 5,
+  "sec": 0.007397624664008617,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "test_v121_ens_dt_c3clean.py",
+  "lines": 341,
+  "read_tok": 4453.5,
+  "sw_tok": 255.25,
+  "n_toplevel": 7,
+  "n_in_outline": 7,
+  "sec": 0.00874696858227253,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "backtest_recovery_signal.py",
+  "lines": 540,
+  "read_tok": 6038.5,
+  "sw_tok": 277.25,
+  "n_toplevel": 11,
+  "n_in_outline": 11,
+  "sec": 0.01263430342078209,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "mike/agents/Taylor/exp_margin_kelly/p4_fullcycle/step_c2_compounded.py",
+  "lines": 124,
+  "read_tok": 1310.0,
+  "sw_tok": 121.25,
+  "n_toplevel": 3,
+  "n_in_outline": 3,
+  "sec": 0.004371043294668198,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "dnse_api_full_test.py",
+  "lines": 239,
+  "read_tok": 2312.0,
+  "sw_tok": 153.75,
+  "n_toplevel": 5,
+  "n_in_outline": 5,
+  "sec": 0.005378734320402145,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "mike/bin/wags_risk_tier.py",
+  "lines": 87,
+  "read_tok": 784.0,
+  "sw_tok": 74.5,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.003019174560904503,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "f_system_accuracy.py",
+  "lines": 680,
+  "read_tok": 7566.25,
+  "sw_tok": 459.25,
+  "n_toplevel": 16,
+  "n_in_outline": 16,
+  "sec": 0.012302068062126637,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "tier2b_overlay.py",
+  "lines": 164,
+  "read_tok": 1843.75,
+  "sw_tok": 128.25,
+  "n_toplevel": 3,
+  "n_in_outline": 3,
+  "sec": 0.006244671531021595,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "f_fast_hedge_test.py",
+  "lines": 92,
+  "read_tok": 1139.25,
+  "sw_tok": 353.75,
+  "n_toplevel": 11,
+  "n_in_outline": 11,
+  "sec": 0.004592811688780785,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "layer3_backtest_rules.py",
+  "lines": 342,
+  "read_tok": 3858.25,
+  "sw_tok": 293.25,
+  "n_toplevel": 11,
+  "n_in_outline": 11,
+  "sec": 0.007485641166567802,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/build/lib/build/lib/build/lib/build/lib/build/lib/build/lib/vnstock/core/settings.py",
+  "lines": 338,
+  "read_tok": 2326.75,
+  "sw_tok": 277.0,
+  "n_toplevel": 13,
+  "n_in_outline": 10,
+  "sec": 0.0045651765540242195,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "dcf_rate_robustness.py",
+  "lines": 147,
+  "read_tok": 1946.25,
+  "sw_tok": 134.75,
+  "n_toplevel": 2,
+  "n_in_outline": 2,
+  "sec": 0.005209013819694519,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "state_vintage_loader.py",
+  "lines": 49,
+  "read_tok": 425.75,
+  "sw_tok": 111.25,
+  "n_toplevel": 3,
+  "n_in_outline": 3,
+  "sec": 0.0032304218038916588,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/vnstock/core/utils/transform.py",
+  "lines": 877,
+  "read_tok": 7841.75,
+  "sw_tok": 480.5,
+  "n_toplevel": 14,
+  "n_in_outline": 14,
+  "sec": 0.007921265438199043,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/build/lib/build/lib/build/lib/build/lib/build/lib/build/lib/vnstock/explorer/vci/trading.py",
+  "lines": 144,
+  "read_tok": 1542.75,
+  "sw_tok": 155.25,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.004798318259418011,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "anomaly_gate.py",
+  "lines": 135,
+  "read_tok": 1700.25,
+  "sw_tok": 190.75,
+  "n_toplevel": 5,
+  "n_in_outline": 5,
+  "sec": 0.003663797862827778,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "mike/bin/build_universe_pit.py",
+  "lines": 429,
+  "read_tok": 4951.75,
+  "sw_tok": 360.25,
+  "n_toplevel": 12,
+  "n_in_outline": 12,
+  "sec": 0.0065873488783836365,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "f_v5_drawdown_stop_test.py",
+  "lines": 75,
+  "read_tok": 918.5,
+  "sw_tok": 107.25,
+  "n_toplevel": 3,
+  "n_in_outline": 3,
+  "sec": 0.004094974137842655,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "release_8l/8L_update_since_2026-06-02/code/vn30_8l.py",
+  "lines": 72,
+  "read_tok": 751.5,
+  "sw_tok": 126.5,
+  "n_toplevel": 4,
+  "n_in_outline": 4,
+  "sec": 0.0035170912742614746,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "analyze_ticker_pattern.py",
+  "lines": 401,
+  "read_tok": 4117.5,
+  "sw_tok": 106.5,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.008604275994002819,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/build/lib/build/lib/build/lib/build/lib/build/lib/build/lib/vnstock/core/utils/upgrade.py",
+  "lines": 383,
+  "read_tok": 3553.5,
+  "sw_tok": 273.25,
+  "n_toplevel": 7,
+  "n_in_outline": 7,
+  "sec": 0.0057436274364590645,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "compare_ba_canonical_v4_vs_v9.py",
+  "lines": 179,
+  "read_tok": 2119.5,
+  "sw_tok": 140.0,
+  "n_toplevel": 3,
+  "n_in_outline": 3,
+  "sec": 0.00714741088449955,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "data/capit_ew_maturity.py",
+  "lines": 90,
+  "read_tok": 1147.0,
+  "sw_tok": 111.75,
+  "n_toplevel": 3,
+  "n_in_outline": 3,
+  "sec": 0.003968291915953159,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "analyze_gmd_bmp_cycle.py",
+  "lines": 127,
+  "read_tok": 1557.75,
+  "sw_tok": 90.25,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.004882057197391987,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "backtest_recovery_alloc_2011.py",
+  "lines": 190,
+  "read_tok": 2635.75,
+  "sw_tok": 173.5,
+  "n_toplevel": 6,
+  "n_in_outline": 6,
+  "sec": 0.006326706148684025,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "loo_h8a_dnpr.py",
+  "lines": 109,
+  "read_tok": 1189.25,
+  "sw_tok": 131.75,
+  "n_toplevel": 4,
+  "n_in_outline": 4,
+  "sec": 0.0037921201437711716,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/build/lib/build/lib/build/lib/build/lib/build/lib/build/lib/vnstock/bot/notify.py",
+  "lines": 596,
+  "read_tok": 4771.75,
+  "sw_tok": 381.0,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.005761571228504181,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "f_system_backtest.py",
+  "lines": 715,
+  "read_tok": 8034.5,
+  "sw_tok": 358.75,
+  "n_toplevel": 12,
+  "n_in_outline": 12,
+  "sec": 0.012006155215203762,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "test_lagged_timedecay.py",
+  "lines": 258,
+  "read_tok": 2997.25,
+  "sw_tok": 130.5,
+  "n_toplevel": 2,
+  "n_in_outline": 2,
+  "sec": 0.006937315687537193,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/build/lib/build/lib/build/lib/build/lib/vnstock/api/listing.py",
+  "lines": 185,
+  "read_tok": 1471.25,
+  "sw_tok": 127.0,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.003349481150507927,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "test_scaling_extended.py",
+  "lines": 207,
+  "read_tok": 2114.0,
+  "sw_tok": 87.75,
+  "n_toplevel": 1,
+  "n_in_outline": 1,
+  "sec": 0.0061472337692976,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/build/lib/build/lib/build/lib/build/lib/tests/unit/api/test_listing.py",
+  "lines": 76,
+  "read_tok": 686.5,
+  "sw_tok": 86.25,
+  "n_toplevel": 1,
+  "n_in_outline": 0,
+  "sec": 0.003882128745317459,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/build/lib/build/lib/build/lib/build/lib/build/lib/vnstock/core/types.py",
+  "lines": 581,
+  "read_tok": 3746.75,
+  "sw_tok": 315.25,
+  "n_toplevel": 21,
+  "n_in_outline": 15,
+  "sec": 0.005031205713748932,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "pt_v121_ensemble.py",
+  "lines": 755,
+  "read_tok": 9974.5,
+  "sw_tok": 235.75,
+  "n_toplevel": 8,
+  "n_in_outline": 8,
+  "sec": 0.014935258775949478,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "trading_bot/executor.py",
+  "lines": 1211,
+  "read_tok": 16291.0,
+  "sw_tok": 990.5,
+  "n_toplevel": 4,
+  "n_in_outline": 4,
+  "sec": 0.016816964372992516,
+  "outline_mode": "outline"
+ },
+ {
+  "file": ".claude/skills/kronos/vendor/Kronos/examples/prediction_new_GUI.py",
+  "lines": 1625,
+  "read_tok": 14525.75,
+  "sw_tok": 1259.0,
+  "n_toplevel": 23,
+  "n_in_outline": 23,
+  "sec": 0.018951546400785446,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "stockquery/vnstock_stockquery/build/lib/build/lib/build/lib/build/lib/vnstock/core/utils/client.py",
+  "lines": 352,
+  "read_tok": 2763.0,
+  "sw_tok": 261.5,
+  "n_toplevel": 10,
+  "n_in_outline": 10,
+  "sec": 0.005454043857753277,
+  "outline_mode": "outline"
+ },
+ {
+  "file": "test_v3_5_vs_v3_4b.py",
+  "lines": 149,
+  "read_tok": 1935.25,
+  "sw_tok": 121.5,
+  "n_toplevel": 3,
+  "n_in_outline": 3,
+  "sec": 0.00554130133241415,
+  "outline_mode": "outline"
+ }
+]

@@ -20,6 +20,19 @@ Nhiệm vụ: Giữ chuỗi DT5G daily refresh + Telegram + freshness dữ liệ
   tự bịa 4 tham số — để mọi event của job này gộp lại thành 1 timeline tra được (`bin/jobs.sh`).
 - **Phạm vi**: làm việc trong thư mục của mình; phối hợp qua bus + dispatch, không sửa file của con khác.
 - Stop hook tự ghi heartbeat sau mỗi lượt — không cần làm thủ công.
+- **Đọc file bằng `srcwalk`, TÌM KIẾM bằng `grep`** (chia theo việc, đã benchmark N=200 symbol +
+  N=150 file ngày 2026-08-03 — không phải sở thích):
+  - ĐỌC: `srcwalk <file>` (outline, −89% token), `srcwalk <file>:120-160`, `--section <symbol>`,
+    `srcwalk overview --scope <dir>`. Chạy `srcwalk guide` 1 lần trước khi dùng sâu.
+  - TÌM định nghĩa / call site: **dùng `grep`** — thắng srcwalk có ý nghĩa thống kê, rẻ 3–25×, và
+    **không bao giờ im lặng trả về rỗng** (srcwalk bỏ sót hẳn 8–10% số ca).
+  - Ngoại lệ dùng `srcwalk discover --scope <dir>`: tên RẤT phổ biến (`main`, `run`, `load`) — chỗ
+    đó grep nhiễu nặng (precision 0,46).
+  - ⚠️ **Luôn `--scope <thư mục>`, đừng bao giờ tin `--scope .`** — srcwalk tôn trọng `.gitignore`,
+    mà `.gitignore` ẩn cả `mike/` (44% file `.py` của repo). Scope sai thì F1 tụt còn 0,065.
+  - ⚠️ KHÔNG dùng cho bash (`bin/*.sh`), `.json`/`.sql`/`.csv`; KHÔNG tin `trace --depth ≥2`, khối
+    "impact", hay danh sách symbol của `review` (dùng `git diff`).
+  Bằng chứng đầy đủ: `WorkingClaude/CLAUDE.md` § Code navigation.
 
 ## Dispatch ngang hàng — trao đổi trực tiếp giữa agent
 Bạn CÓ THỂ dispatch việc cho agent khác **trực tiếp** mà không cần qua Mike hay user. Dùng khi bạn

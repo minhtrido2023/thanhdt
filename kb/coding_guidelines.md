@@ -500,18 +500,30 @@ DSR/PBO before recommending a wire, confirm production untouched via `git diff`,
 gate before any production-change recommendation, verify the artifact not the self-report before
 relaying a conclusion. Point Taylor at this skill explicitly rather than re-deriving by hand.
 
-## 18b. Đọc/tra code — mặc định `srcwalk`, KHÔNG phải Read/grep (chốt 2026-08-03, user directive)
+## 18b. `srcwalk` để ĐỌC file, `grep` để TÌM — chia theo VIỆC, đã đo (chốt 2026-08-03)
 
-`srcwalk` (tree-sitter CLI, v1.3.0 ở `~/.local/bin`, skill `~/.claude/skills/srcwalk/`) là công cụ
-mặc định để đọc và điều hướng code Python/TS/JS/Go/Rust/… — trả về outline (symbol + dải dòng) thay
-vì nguyên file. Quy tắc đầy đủ + bảng đối chiếu lệnh: **`WorkingClaude/CLAUDE.md` § Code navigation**
-(nguồn duy nhất, đừng chép lại ở đây).
+Quy tắc đầy đủ: **`WorkingClaude/CLAUDE.md` § Code navigation** (nguồn duy nhất). Số liệu + script
+tái lập: `kb/projects/srcwalk-benchmark-20260803.md` · `agents/Mike/srcwalk_bench/`.
 
-**3 giới hạn đã đo thật, đừng bỏ qua** (pilot 2026-08-01 phát hiện, Mike verify lại trên v1.3.0 ngày
-2026-08-03 — cả 3 VẪN CÒN): (1) **bash không được hỗ trợ** — `mike/bin/` có 63 `.sh` vs 46 `.py`, với
-bash vẫn dùng `grep`+`Read`; (2) `trace callers --depth ≥2` và khối "impact" khớp nhầm theo tên hàm
-chung chung (`main`/`run`/cả `subprocess.run`) → 496 cạnh rác, chỉ dùng `--depth 1`; (3) `review` bỏ
-sót hàm MỚI THÊM khỏi "changed symbols" → `git diff` mới là nguồn chuẩn tắc cho change set.
+**Bài học phương pháp, quan trọng hơn cả kết luận:** bản §18b đầu tiên (sáng 2026-08-03) viết
+"srcwalk thay Read/grep làm mặc định" dựa trên **N=1 symbol và N=1 file** — đúng loại lỗi mà §18 và
+`quant-research` cấm (khai N là số sự kiện độc lập). Benchmark N=200 symbol + N=150 file sau đó
+**bác bỏ nửa kết luận**: srcwalk thắng áp đảo ở ĐỌC file, nhưng THUA grep ở TÌM kiếm. Kỷ luật "khai
+N + CI" áp cho cả quyết định về CÔNG CỤ, không riêng gì backtest tài chính.
+
+- **ĐỌC file → `srcwalk`**: tiết kiệm 88,8% token CI[86,5–90,7], giữ 95,7% top-level symbol,
+  0/150 file bị đắt hơn `Read`. Không có phản ví dụ.
+- **TÌM định nghĩa / call site → `grep`**: thắng có ý nghĩa (ΔF1 +0,052 và +0,062, CI không chứa 0),
+  rẻ 3–25×, nhanh 6×, và **0% im lặng trả rỗng** so với **8,2%** CI[4,4–12,6] của srcwalk.
+- Ngoại lệ nghiêng về `srcwalk discover`: tên xuất hiện >10 file (`main`/`run`) — grep nhiễu nặng
+  (precision 0,459 vs 0,844) và tốn 740 token vs 200.
+
+**4 cạm bẫy** (đều đo trên repo này): (1) **`.gitignore`** — srcwalk theo ignore file khi discovery,
+`.gitignore` ẩn `mike/` ⇒ **44% file `.py` vô hình**, `--scope .` cho F1 0,065 trên code fleet →
+LUÔN scope vào thư mục chứa code; (2) **im lặng trả rỗng** — đừng kết luận "không ai gọi" chỉ từ
+srcwalk; (3) `trace --depth ≥2`/khối "impact" khớp theo tên trần (500 cạnh / 121 file rác) → chỉ
+`--depth 1`; (4) `review` gắn hunk theo phép BAO HÀM nên bỏ sót mọi hàm mới thêm → `git diff`.
+Bash/`.json`/`.sql`/`.csv`: không hỗ trợ.
 
 Cùng tinh thần §6/§9/§14: đây là bằng chứng **điều hướng cấu trúc**, không phải bằng chứng runtime —
 giữ nguyên dòng `confidence:`/`caveat:` mà công cụ tự in ra khi trích dẫn kết luận.

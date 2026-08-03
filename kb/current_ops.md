@@ -82,13 +82,15 @@ chủ động HÀNG TUẦN qua `bin/fearbuy_weekly_scan.sh` (cron Friday 08:10 I
 sau case TV1+DGC, kết hợp anomaly_scan + WebSearch tin khởi tố, áp bộ lọc QUALIFY/NON/AMBIGUOUS
 trong `calculated_fear_state_backstop.md`. Recon thuần, KHÔNG tự mua.
 
-**`srcwalk` — ĐÃ MỞ TOÀN FLEET 2026-08-03** (user directive; pilot hẹp 2026-08-01 đóng sớm). Cài dạng
-skill `~/.claude/skills/srcwalk/`, binary v1.3.0. Là công cụ đọc code MẶC ĐỊNH thay Read/grep —
-quy tắc + bảng lệnh ở `WorkingClaude/CLAUDE.md` § Code navigation, tóm tắt ở `kb/coding_guidelines.md`
-§18b. ⚠️ **3 giới hạn đã verify lại trên v1.3.0, VẪN CÒN**: không hỗ trợ bash (`bin/` 63 `.sh` vs 46
-`.py`); `trace callers --depth ≥2`/khối "impact" khớp nhầm theo tên hàm chung (496 cạnh rác) → chỉ
-`--depth 1`; `review` bỏ sót hàm mới thêm → dùng `git diff`. Chi tiết + cách test lại khi lên version:
-`kb/projects/srcwalk-pilot-eval.md`.
+**`srcwalk` — MỞ TOÀN FLEET 2026-08-03, nhưng CHIA THEO VIỆC** (skill `~/.claude/skills/srcwalk/`,
+binary v1.3.0). Benchmark N=200 symbol + N=150 file cùng ngày (`kb/projects/srcwalk-benchmark-20260803.md`,
+ground truth `ast`, bootstrap CI) chốt ranh giới: **`srcwalk` để ĐỌC file** (−88,8% token CI[86,5–90,7],
+giữ 95,7% symbol, 0/150 phản ví dụ); **`grep` để TÌM** định nghĩa/call site (thắng ΔF1 +0,05/+0,06 CI
+không chứa 0, rẻ 3–25×, và **0% im lặng trả rỗng** vs 8,2% của srcwalk). Ngoại lệ: tên rất phổ biến
+(`main`/`run`) thì `srcwalk discover --scope <dir>` hơn (P 0,84 vs 0,46). ⚠️ **Bẫy `.gitignore`**:
+`.gitignore` ẩn `mike/` ⇒ 44% file `.py` vô hình với discovery, `--scope .` cho F1 0,065 trên code
+fleet → LUÔN scope vào thư mục chứa code. Vẫn cấm: `trace --depth ≥2`, khối "impact", symbol list của
+`review`, bash. Quy tắc đầy đủ: `WorkingClaude/CLAUDE.md` § Code navigation.
 
 ## Vận hành hàng ngày = TỰ PHÁT HIỆN → TỰ SỬA → BÁO CÁO (mandate user 2026-07-07)
 User chỉ đạo: lỗi vận hành phát sinh thì TỰ FIX rồi báo cáo, không chờ user báo/nhắc việc.

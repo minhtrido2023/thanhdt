@@ -5,6 +5,11 @@
 > dùng thật lần nào). Theo ngưỡng gốc bên dưới, "<3 lần dùng thật" đáng lẽ = tín hiệu BỎ; user
 > quyết định ngược lại và đó là quyền của user — ghi lại đây cho minh bạch, không phải để phản đối.
 
+> **CẬP NHẬT cuối ngày 2026-08-03**: quyết định "mở toàn fleet" bên dưới đã được BENCHMARK DIỆN RỘNG
+> thay thế — xem **`kb/projects/srcwalk-benchmark-20260803.md`** (N=200 symbol + N=150 file, ground
+> truth `ast`, bootstrap CI). Kết luận cuối: `srcwalk` để **ĐỌC file**, `grep` để **TÌM kiếm** —
+> không phải "srcwalk thay grep" như đoạn dưới từng ghi. Pilot log JSONL vẫn bỏ.
+
 ## Quyết định 2026-08-03 (thay thế phần "Phạm vi pilot" bên dưới)
 - **Cài dạng skill**: `~/.claude/skills/srcwalk/` (SKILL.md + GUIDE.md từ repo upstream, version
   khớp binary). Binary `~/.local/bin/srcwalk` **v1.3.0** (tarball musl tĩnh, thay bản npm của pilot).

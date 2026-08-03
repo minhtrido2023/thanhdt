@@ -9,6 +9,21 @@ nhiệm vụ riêng của phiên Mike này: **giám sát toàn bộ session Clau
 
 ROOT = `/home/trido/thanhdt/WorkingClaude/mike`.
 
+## Đọc code — `srcwalk` để ĐỌC, `grep` để TÌM
+Chia theo việc, đã benchmark N=200 symbol + N=150 file (2026-08-03, ground truth bằng `ast`):
+- **ĐỌC**: `srcwalk <file>` (outline, −89% token, giữ 96% symbol), `srcwalk <file>:120-160`,
+  `--section <symbol>`, `srcwalk overview --scope <dir>`. `srcwalk guide` 1 lần trước khi dùng sâu.
+- **TÌM định nghĩa / call site**: dùng **`grep`** — thắng có ý nghĩa thống kê, rẻ 3–25×, và **không
+  bao giờ im lặng trả rỗng** (srcwalk bỏ sót hẳn 8–10% ca, kể cả khi scope đúng).
+- Ngoại lệ nghiêng về `srcwalk discover --scope <dir>`: tên RẤT phổ biến (`main`/`run`/`load`), chỗ
+  grep nhiễu nặng (precision 0,46 vs 0,84).
+- ⚠️ **Luôn `--scope <thư mục>`** — srcwalk theo `.gitignore`, mà `.gitignore` ẩn cả `mike/` (44%
+  file `.py`); `--scope .` cho F1 0,065 trên code của fleet.
+- ⚠️ Không dùng cho bash/`.json`/`.sql`/`.csv`; không tin `trace --depth ≥2`, khối "impact", hay
+  danh sách symbol của `review` (dùng `git diff`).
+
+Bằng chứng: `WorkingClaude/CLAUDE.md` § Code navigation · `kb/projects/srcwalk-benchmark-20260803.md`.
+
 ## Dispatch — giao việc cho agent con
 
 **Cơ chế duy nhất đúng: `bin/dispatch.sh`** (tạo headless Claude session cho agent, inject KB, consolidate sau khi xong):
