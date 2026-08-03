@@ -34,6 +34,7 @@ Run: python capit_lever_selfcheck.py     (exit 0 = all pass)
 """
 import ast
 import copy
+import dataclasses
 import datetime as _dt
 import glob
 import json
@@ -67,9 +68,10 @@ for _f in glob.glob(os.path.join(EXEC_DIR, f"exec_{TAG}_*")):
 # THẬT thì mọi ca kiểm sẽ đổi kết quả theo regime của hôm chạy — đúng loại phụ thuộc môi
 # trường mà skill verify-before-done bắt phải khai và loại bỏ. Fixture ghim state 3 (NEUTRAL,
 # trần capit_size 0,75) nên các ca C* có nghĩa cố định mọi ngày.
-_STATE_FIX = os.path.join(EXEC_DIR, f"{TAG}_state_today.json")
-with open(_STATE_FIX, "w", encoding="utf-8") as _f:
-    json.dump({"state": 3, "as_of": "2099-01-01", "source": "selfcheck-fixture"}, _f)
+_STATE_FIX = os.path.join(EXEC_DIR, f"exec_{TAG}_state_today.json")   # tiền tố `exec_` để
+with open(_STATE_FIX, "w", encoding="utf-8") as _f:                  # glob dọn dẹp trên quét
+    json.dump({"state": 3, "as_of": "2099-01-01",                    # được (vòng 4 #7)
+               "source": "selfcheck-fixture"}, _f)
 
 _apply_real = apply_capit_lever
 
@@ -839,6 +841,39 @@ with tempfile.TemporaryDirectory() as TMP:
           plan.orders[0].loan_package_id is None and len(plan.orders) == 1,
           detail=(adj[0]["reason"][:110] if adj else "(không có adj)"))
 
+    # C30d: `state` lạ (khai KHỚP ở cả hai nguồn) không được rơi về mặc định NEUTRAL — không
+    # có trần nào áp được thì phải TỪ CHỐI (arch-reviewer vòng 4 #6).
+    _st99 = os.path.join(TMP, "state_today_99.json")
+    with open(_st99, "w", encoding="utf-8") as f:
+        json.dump({"state": 99, "as_of": "2099-01-01"}, f)
+    _p99 = os.path.join(TMP, "status_state99.json")
+    with open(_p99, "w", encoding="utf-8") as f:
+        json.dump({"signal_date": "2099-01-01", "state": 99, "capit_lever": lev_on,
+                   "capit_adv_caps": ADV_CAPS5, "capit_slot_targets": tgt_on_art},
+                  f, ensure_ascii=False)
+    plan = mkplan([o("B1", "SAB")])
+    plan, adj = apply_capit_lever(plan, "SpaceX", status_path=_p99, rules_path=RULES_ON,
+                                  state_path=_st99)
+    check("C30d state=99 khai KHỚP ở CẢ HAI nguồn → vẫn TỪ CHỐI (không rơi về trần NEUTRAL): "
+          "state ngoài bảng sizing nghĩa là không trần nào áp được",
+          plan.orders[0].loan_package_id is None
+          and any("không nằm trong bảng sizing" in x["reason"] for x in adj),
+          detail=(adj[0]["reason"][:110] if adj else "(không có adj)"))
+
+    # C30e: nguồn "độc lập" phải TƯƠI. Nếu publish_gated_state chết im lặng, file đứng lại ở
+    # hôm qua và vẫn KHỚP giá trị — khớp do trùng, không phải do được xác nhận (§14, vòng 4 #5).
+    _st_old = os.path.join(TMP, "state_today_stale.json")
+    with open(_st_old, "w", encoding="utf-8") as f:
+        json.dump({"state": 3, "as_of": "2098-12-31"}, f)      # as_of ≠ signal_date 2099-01-01
+    plan = mkplan([o("B1", "SAB")])
+    plan, adj = apply_capit_lever(plan, "SpaceX", status_path=ART_ON, rules_path=RULES_ON,
+                                  state_path=_st_old)
+    check("C30e nguồn state độc lập STALE (as_of=2098-12-31 ≠ signal_date 2099-01-01) → TỪ "
+          "CHỐI: nó khớp do TRÙNG giá trị hôm qua, không phải do xác nhận phiên này",
+          plan.orders[0].loan_package_id is None
+          and any("as_of" in x["reason"] for x in adj),
+          detail=(adj[0]["reason"][:120] if adj else "(không có adj)"))
+
     # ── C31: thiếu ADV20 của 1 mã KHÔNG được đọc thành "artifact TỰ MÂU THUẪN" (#4) ──────
     # golive.capit_adv_caps() bỏ mã thiếu adv20 và tự in WARNING (mã đó bị cap_capit_orders
     # chặn riêng), trong khi n_slots vẫn chia theo rổ ĐẦY ĐỦ. So n_slots với số khoá
@@ -1385,6 +1420,40 @@ with tempfile.TemporaryDirectory() as TMP:
           "from trading_bot.plan import APPROVAL_PLACEHOLDERS" in _appr_src,
           detail="APPROVAL_PLACEHOLDERS")
 
+    # I13c: chạy THẬT `preview_margin_day` đầu-cuối (arch-reviewer vòng 4: nhóm I/L STUB hàm
+    # này, nên thứ mà báo cáo 21:00 và approve_margin_day.py thực sự gọi chưa từng chạy trong
+    # selfcheck). Nó phải tự `load_plan` từ PLAN_DIR ⇒ ghi 1 plan thật vào đó rồi dọn.
+    _PLAN_F = os.path.join(_planmod.PLAN_DIR, "plan_SpaceX_2099-01-02.json")
+    try:
+        _pv_plan = mkplan([o("B1", "SAB"), o("B2", "FPT", book="BAL")])
+        os.makedirs(_planmod.PLAN_DIR, exist_ok=True)
+        with open(_PLAN_F, "w", encoding="utf-8") as _f:
+            json.dump({"plan_date": "2099-01-02", "signal_date": "2099-01-01",
+                       "strategy": "selfcheck", "strategy_version": "0", "state": 1,
+                       "state_name": "CRISIS", "nav_basis": {"account_nav": 1e9},
+                       "account": "SpaceX", "created_at": "2099-01-01T00:00:00",
+                       "orders": [dataclasses.asdict(x) for x in _pv_plan.orders]},
+                      _f, ensure_ascii=False)
+        # dọn sổ do các ca KHÔNG-preview ở trên để lại, để khẳng định I13d nói về preview
+        if os.path.exists(_planmod._lever_ledger_path("SpaceX", "2099-01-02")):
+            os.remove(_planmod._lever_ledger_path("SpaceX", "2099-01-02"))
+        _pv_real = _planmod.preview_margin_day("SpaceX", "2099-01-02", status_path=ART_ON,
+                                               rules_path=RULES_ON, state_path=_STATE_FIX)
+        check("I13c chạy THẬT preview_margin_day() đầu-cuối (không stub) → thấy ĐÚNG lệnh "
+              "CAPIT sẽ vay, kèm Σ VND và phần vay — đây là số user nhìn thấy lúc duyệt",
+              _pv_real["tickers"] == ["SAB"] and _pv_real["lever_f"] == 1.3
+              and _pv_real["loan_package_id"] == 1840 and _pv_real["total_vnd"] > 0
+              and abs(_pv_real["borrow_vnd"] - _pv_real["total_vnd"] * (1 - 1 / 1.3)) < 1,
+              detail=f"{_pv_real['tickers']} Σ={_pv_real['total_vnd']:,.0f} "
+                     f"vay={_pv_real['borrow_vnd']:,.0f}")
+        check("I13d …và preview KHÔNG ghi sổ cấp phép ra đĩa (chế độ xem trước không được để "
+              "lại dấu vết cấp phép nào)",
+              not os.path.exists(_planmod._lever_ledger_path("SpaceX", "2099-01-02")))
+    finally:
+        for _p in (_PLAN_F, _planmod._lever_ledger_path("SpaceX", "2099-01-02")):
+            if os.path.exists(_p):
+                os.remove(_p)
+
     _rc = os.system(f"{sys.executable} {APPR_SCRIPT} --account SpaceX --date 2099-01-02 "
                     f"--dry-run >/dev/null 2>&1")
     check("I14 chạy THẬT approve_margin_day.py --dry-run trên cấu hình production (đang TẮT) "
@@ -1577,7 +1646,7 @@ with tempfile.TemporaryDirectory() as TMP:
           and any(x["action"] == "LIVE_PREFLIGHT_WARN" for x in a13),
           detail=str([x["action"] for x in a13]))
 
-    # ───── J14-J17: HAI LƯỢT CRON CÙNG PHIÊN (09:05 + 13:00 ICT) — bug CRITICAL vòng 3 ─────
+    # ── J14-J19: HAI LƯỢT CRON CÙNG PHIÊN (09:05 + 13:00 ICT) — bug CRITICAL vòng 3+4 ──
     # crontab thật có 2 lượt `run_bot.sh --account SpaceX` mỗi ngày giao dịch (09:05 và 13:00
     # "khởi động lại sau nghỉ trưa"). Lượt 13:00 là tiến trình MỚI chạy lại TRỌN cascade.
     # Trước fix: preflight đo NAV sống giữa lúc đang giải ngân (availableCash đã trừ tiền giữ
@@ -1585,29 +1654,40 @@ with tempfile.TemporaryDirectory() as TMP:
     # mất tập cấp phép → PAUSE cả rổ CAPIT cả buổi chiều kèm sự cố NÓI SAI ("đòn bẩy không ai
     # duyệt") cho đúng những lệnh đã qua CẢ HAI cổng người sáng hôm đó.
     _EXEC_STATE = os.path.join(EXEC_DIR, "exec_SpaceX_2099-01-02_state.json")
+    _LEDGER = _planmod._lever_ledger_path("SpaceX", "2099-01-02")
+    _PLAN_CREATED = "2099-01-01T00:00:00"          # = mkplan().created_at
 
-    def _write_session_state(n_children):
+    def _write_session_state(n_children, created_at=_PLAN_CREATED):
         """Giả lập state của Executor sau lượt 09:05 (đã đặt n lệnh con, đã khớp một phần)."""
         with open(_EXEC_STATE, "w", encoding="utf-8") as f:
-            json.dump({"plan_date": "2099-01-02", "plan_created_at": "x", "parents": {
+            json.dump({"plan_date": "2099-01-02", "plan_created_at": created_at, "parents": {
                 "B1": {"filled": 500, "done": False, "children": [
                     {"oid": f"P{i:06d}", "qty": 100, "filled": 100, "status": "closed"}
                     for i in range(n_children)]}}}, f)
 
+    def _clean_session():
+        for _p in (_EXEC_STATE, _LEDGER):
+            if os.path.exists(_p):
+                os.remove(_p)
+
+    def _audit(plan, ticker, lp=1840):
+        _ex = Executor(plan, PaperBroker(load_config()), load_config())
+        return _ex._lever_package_audit({"P1": OrderUpdate(
+            "P1", "Filled", 500, 20_000, {"symbol": ticker, "loanPackageId": lp})})
+
     try:
-        # lượt 09:05 — phiên SẠCH, chưa lệnh nào: neo NAV vẫn GỠ đầy đủ (bảo vệ không mất)
-        if os.path.exists(_EXEC_STATE):
-            os.remove(_EXEC_STATE)
+        # ── J14: lượt 09:05 — phiên SẠCH: neo NAV vẫn GỠ đầy đủ (bảo vệ chính không bị nới)
+        _clean_session()
         p14 = mk_levered_plan()
         p14, a14 = lever_live_preflight(p14, "SpaceX", _PFBroker(**LIVE_OK), "live",
                                         status_path=NAV_INFLATED_ART)
         check("J14 [lượt 09:05, phiên SẠCH] artifact thổi NAV → VẪN GỠ đầy đủ: lớp bảo vệ "
               "chính (chặn khoản vay ĐẦU TIÊN đi ra trên cơ sở vốn giả) KHÔNG bị nới",
               all(x.loan_package_id is None for x in p14.orders)
-              and a14[0]["action"] == "LIVE_PREFLIGHT_STRIP",
-              detail=a14[0]["action"])
+              and a14[0]["action"] == "LIVE_PREFLIGHT_STRIP", detail=a14[0]["action"])
 
-        # lượt 13:00 — phiên ĐÃ đặt lệnh: cùng đầu vào, KHÔNG được gỡ nữa
+        # ── J15: lượt 13:00 — phiên ĐÃ đặt lệnh (state khớp created_at): KHÔNG gỡ nữa
+        _clean_session()
         _write_session_state(5)
         p15 = mk_levered_plan()
         p15, a15 = lever_live_preflight(p15, "SpaceX", _PFBroker(**LIVE_OK), "live",
@@ -1616,45 +1696,126 @@ with tempfile.TemporaryDirectory() as TMP:
               "sống tụt giữa lúc giải ngân là bình thường, còn gỡ thì treo cả rổ CAPIT",
               all(x.loan_package_id == 1840 for x in p15.orders)
               and a15[0]["action"] == "LIVE_PREFLIGHT_WARN"
-              and "ĐÃ đặt lệnh" in a15[0]["reason"],
-              detail=a15[0]["reason"][:120])
+              and "ĐÃ đặt lệnh" in a15[0]["reason"], detail=a15[0]["reason"][:110])
 
-        # …và ngay cả khi preflight CÓ gỡ, audit tầng lệnh vẫn phải im: sổ `_lever_authorized`
-        # ghi lại "ai ĐÃ được cấp phép hôm nay", tách khỏi "lệnh này đi ra bằng gói nào".
-        os.remove(_EXEC_STATE)          # phiên SẠCH ⇒ preflight thật sự GỠ (ca khắc nghiệt hơn)
+        # ── J15b: state CŨ nhưng plan phát hành lại (created_at MỚI) → Executor sẽ tạo state
+        # SẠCH, nên preflight PHẢI gỡ như phiên sạch. Bỏ qua `plan_created_at` ở đây sẽ cho
+        # một loạt lệnh vay HOÀN TOÀN MỚI đi ra mà không qua neo NAV lẫn pp0Buy (vòng 4 #2).
+        _clean_session()
+        _write_session_state(5, created_at="2099-01-01T09:30:00")     # plan v2, created_at khác
+        p15b = mk_levered_plan()
+        p15b, a15b = lever_live_preflight(p15b, "SpaceX", _PFBroker(**LIVE_OK), "live",
+                                          status_path=NAV_INFLATED_ART)
+        check("J15b state CŨ + plan phát hành lại (created_at MỚI) → VẪN GỠ: Executor vứt "
+              "state cũ và chạy phiên SẠCH, nên preflight phải theo đúng semantics đó",
+              all(x.loan_package_id is None for x in p15b.orders)
+              and a15b[0]["action"] == "LIVE_PREFLIGHT_STRIP", detail=a15b[0]["action"])
+
+        # ── J16/J17: STRIP phải THU HỒI luôn khỏi sổ cấp phép (vòng 4 #1). Nếu không, đúng
+        # lúc preflight nói "cơ sở vốn không có thật" thì audit tầng lệnh lại MÙ với chính
+        # những mã đó.
+        _clean_session()
         _pa = mkplan([o("B1", "SAB")])
         _pa, _ = apply_capit_lever(_pa, "SpaceX", status_path=ART_ON, rules_path=RULES_ON,
                                    approvals_dir=APPROVALS_OK)
         _granted_before = copy.deepcopy(getattr(_pa, "_lever_authorized", None))
         _pa, _ = lever_live_preflight(_pa, "SpaceX", _PFBroker(**LIVE_OK), "live",
                                       status_path=NAV_INFLATED_ART)
-        check("J16 preflight GỠ cờ vay nhưng sổ `_lever_authorized` GIỮ NGUYÊN — hai khái niệm "
-              "tách bạch: 'lệnh đi ra bằng gói nào' vs 'hôm nay ai đã được cấp phép vay'",
+        check("J16 preflight STRIP → THU HỒI khỏi sổ cấp phép (cả RAM lẫn đĩa), không chỉ gỡ "
+              "cờ trên lệnh — nếu không, lưới an toàn tầng lệnh mù đúng lúc cần nhất",
               _granted_before == {"1840": {"SAB"}}
-              and getattr(_pa, "_lever_authorized", None) == {"1840": {"SAB"}}
+              and not getattr(_pa, "_lever_authorized", None)
               and _pa.orders[0].loan_package_id is None,
-              detail=str(getattr(_pa, "_lever_authorized", None)))
+              detail=f"trước={_granted_before} sau={getattr(_pa, '_lever_authorized', None)}")
 
-        _ex = Executor(_pa, PaperBroker(load_config()), load_config())
-        _upd = {"P000001": OrderUpdate("P000001", "Filled", 500, 20_000,
-                                       {"symbol": "SAB", "loanPackageId": 1840})}
-        _pause, _warns = _ex._lever_package_audit(_upd)
-        check("J17 …nên audit tầng lệnh KHÔNG dựng sự cố GIẢ: lệnh gói 1840 của lượt sáng "
-              "(đã qua cả 2 cổng người) KHÔNG bị coi là 'đòn bẩy không ai duyệt' → 0 mã pause",
-              _pause == set() and _warns == [],
+        _pause, _warns = _audit(_pa, "SAB")
+        check("J17 …nên audit VẪN bắt được lệnh gói 1840 thật trên mã vừa bị GỠ (ca "
+              "state.json hỏng/bị xoá: preflight tưởng phiên sạch mà broker đang có lệnh sống)",
+              _pause == {"SAB"} and len(_warns) == 1,
               detail=f"pause={sorted(_pause)} warns={len(_warns)}")
 
-        # đối chứng: mã KHÔNG hề được cấp phép vẫn bị bắt y như cũ (sổ không làm yếu guard)
-        _upd2 = {"P000002": OrderUpdate("P000002", "Filled", 500, 20_000,
-                                        {"symbol": "VNM", "loanPackageId": 1840})}
-        _pause2, _warns2 = _ex._lever_package_audit(_upd2)
-        check("J17b …nhưng mã NGOÀI tập được cấp phép vẫn bị bắt (sổ chỉ chứa mã đã qua đủ "
-              "cổng — nó không nới guard, chỉ vá chỗ guard đọc nhầm nguồn)",
-              _warns2 and _warns2[0]["ticker"] == "VNM",
-              detail=str([w["ticker"] for w in _warns2]))
+        # ── J18: nhánh WARN (phiên đã đặt lệnh) thì GIỮ sổ — đây mới là ca chống sự cố giả
+        _clean_session()
+        _write_session_state(5)
+        _pb = mkplan([o("B1", "SAB")])
+        _pb, _ = apply_capit_lever(_pb, "SpaceX", status_path=ART_ON, rules_path=RULES_ON,
+                                   approvals_dir=APPROVALS_OK)
+        _pb, _ = lever_live_preflight(_pb, "SpaceX", _PFBroker(**LIVE_OK), "live",
+                                      status_path=NAV_INFLATED_ART)
+        _pause18, _warns18 = _audit(_pb, "SAB")
+        check("J18 nhánh WARN (phiên đã đặt lệnh) GIỮ sổ → audit KHÔNG dựng sự cố giả cho "
+              "lệnh đã qua cả 2 cổng người sáng nay",
+              _pause18 == set() and _warns18 == [],
+              detail=f"pause={sorted(_pause18)} sổ={getattr(_pb, '_lever_authorized', None)}")
+
+        # ── J19: sổ PERSIST QUA TIẾN TRÌNH (vòng 4 #3). Lượt 13:00 chạy với chính sách đã bị
+        # TẮT giữa phiên (`enabled=false`) ⇒ apply_capit_lever cấp 0 mã. Nếu sổ chỉ nằm trong
+        # RAM thì audit lại tuyên bố "được cấp: KHÔNG MÃ NÀO" và treo cả rổ CAPIT cả buổi
+        # chiều — đúng sự cố giả mà vòng 3 tưởng đã đóng, chỉ qua một trigger khác.
+        _clean_session()
+        _p1 = mkplan([o("B1", "SAB")])                       # tiến trình 1 (09:05): cấp bình thường
+        _p1, _ = apply_capit_lever(_p1, "SpaceX", status_path=ART_ON, rules_path=RULES_ON,
+                                   approvals_dir=APPROVALS_OK)
+        _write_session_state(3)                              # …và đã đặt lệnh thật
+        _p2 = mkplan([o("B1", "SAB")])                       # tiến trình 2 (13:00): chính sách TẮT
+        _p2, _ = apply_capit_lever(_p2, "SpaceX", status_path=ART_ON, rules_path=RULES_OFF,
+                                   approvals_dir=APPROVALS_OK)
+        _pause19, _warns19 = _audit(_p2, "SAB")
+        check("J19 tiến trình 13:00 với `enabled=false` (tắt giữa phiên) → sổ ĐỌC TỪ ĐĨA nên "
+              "audit KHÔNG treo rổ CAPIT vì lệnh gói 1840 hợp lệ của buổi sáng (§5 idempotent)",
+              _pause19 == set() and _warns19 == [],
+              detail=f"pause={sorted(_pause19)} sổ={getattr(_p2, '_lever_authorized', None)}")
+
+        _pause19b, _warns19b = _audit(_p2, "VNM")
+        check("J19b …nhưng mã CHƯA TỪNG được cấp vẫn bị bắt — sổ không nới guard, nó chỉ vá "
+              "chỗ guard đọc nhầm nguồn (đối chứng bắt buộc)",
+              _warns19b and _warns19b[0]["ticker"] == "VNM",
+              detail=str([w["ticker"] for w in _warns19b]))
+
+        # ── J20: STRIP chỉ được thu hồi phần CHÍNH tiến trình này cấp (vòng 5 #1) ──────────
+        # Sổ CỐ Ý day-scoped, còn điều kiện vào nhánh STRIP lại khoá theo `created_at`. Plan
+        # phát hành lại giữa ngày ⇒ started=False dù lệnh 1840 buổi sáng vẫn sống trên sổ
+        # broker; trừ SẠCH sẽ xoá đúng bản ghi đó và dựng lại sự cố giả.
+        _clean_session()
+        _q1 = mkplan([o("B1", "SAB")])                       # 09:05: cấp + đặt lệnh thật
+        _q1, _ = apply_capit_lever(_q1, "SpaceX", status_path=ART_ON, rules_path=RULES_ON,
+                                   approvals_dir=APPROVALS_OK)
+        _write_session_state(3)                              # state của plan v1
+        _q2 = mkplan([o("B1", "SAB")])                       # 13:00: plan v2, created_at MỚI
+        _q2.created_at = "2099-01-01T09:30:00"
+        _q2, _ = apply_capit_lever(_q2, "SpaceX", status_path=ART_ON, rules_path=RULES_ON,
+                                   approvals_dir=APPROVALS_OK)
+        _q2, _a20 = lever_live_preflight(_q2, "SpaceX", _PFBroker(**LIVE_OK), "live",
+                                         status_path=NAV_INFLATED_ART)
+        _pause20, _warns20 = _audit(_q2, "SAB")
+        check("J20 plan phát hành lại giữa ngày + STRIP → sổ GIỮ bản ghi của lệnh tiến trình "
+              "TRƯỚC đã đặt thật ⇒ audit KHÔNG treo rổ (thu hồi chỉ phần tiến trình này cấp)",
+              _a20[0]["action"] == "LIVE_PREFLIGHT_STRIP" and _pause20 == set()
+              and _warns20 == [],
+              detail=f"{_a20[0]['action']} pause={sorted(_pause20)} "
+                     f"sổ={getattr(_q2, '_lever_authorized', None)}")
+
+        # ── J21: sổ hỏng mang khoá gói DEFAULT 1841 → phải bị LỌC khi đọc (vòng 5 #2) ─────
+        # `_lever_package_audit` bơm thẳng khoá của sổ vào tập `packages` nó đi soi, nên một
+        # khoá 1841 làm nó soi MỌI lệnh BAL/LAG thường lệ và pause sạch cả phiên.
+        _clean_session()
+        with open(_LEDGER, "w", encoding="utf-8") as f:
+            json.dump({"granted": {"1841": ["ZZZ"], "1840": "SAB"}}, f)   # + value là CHUỖI
+        _q3 = mkplan([o("B1", "SAB"), o("B2", "FPT", book="BAL")])
+        _q3, _ = apply_capit_lever(_q3, "SpaceX", status_path=ART_ON, rules_path=RULES_OFF,
+                                   approvals_dir=APPROVALS_OK)
+        _pause21, _ = _audit(_q3, "FPT", lp=1841)
+        check("J21 sổ hỏng chứa khoá gói DEFAULT 1841 → bị LỌC khi đọc, audit KHÔNG soi lệnh "
+              "chạy gói mặc định (nếu không, 1 file hỏng đóng băng cả phiên BAL/LAG)",
+              _pause21 == set()
+              and set(getattr(_q3, "_lever_authorized", {})) <= {"1840"},
+              detail=f"pause={sorted(_pause21)} sổ={getattr(_q3, '_lever_authorized', None)}")
+        check("J21b …và value dạng CHUỖI được ép về tập 1 phần tử, không vỡ thành từng ký tự "
+              "(set('SAB') = {'S','A','B'} là bẫy im lặng)",
+              getattr(_q3, "_lever_authorized", {}).get("1840") == {"SAB"},
+              detail=str(getattr(_q3, "_lever_authorized", None)))
     finally:
-        if os.path.exists(_EXEC_STATE):
-            os.remove(_EXEC_STATE)
+        _clean_session()
 
     # ───────── K. MỐI NỐI trong bot_execute.py (đúng vị trí, không chỉ 'có gọi') ─────────
     section("K. Mối nối cascade trong bot_execute.py")
@@ -1744,6 +1905,17 @@ with tempfile.TemporaryDirectory() as TMP:
           "VỐN TỰ CÓ" in m_off and "sizing" in m_off.lower(), detail=m_off[:150])
     check("L7 …nhưng plan bình thường (không lý do nào) vẫn KHÔNG thêm dòng nào",
           run_margin(dict(_PV_NONE, reasons=[]), None, "x") == "")
+
+# DỌN artifact của chính test khỏi thư mục PRODUCTION (arch-reviewer vòng 4 #7). Glob dọn ở
+# đầu file chạy TRƯỚC khi các file này được tạo, nên nếu không dọn ở đây thì mỗi lần chạy để
+# lại rác trong data/execution_logs/ — nơi người vận hành đọc để tìm state thật của phiên.
+for _leftover in (glob.glob(os.path.join(EXEC_DIR, "exec_*_2099-01-02_lever_authorized.json"))
+                  + glob.glob(os.path.join(EXEC_DIR, "exec_*_2099-01-02_state.json"))
+                  + [_STATE_FIX]):
+    try:
+        os.remove(_leftover)
+    except OSError:
+        pass
 
 print(f"\nENV: TZ={os.environ.get('TZ', '(không đặt)')!r} · "
       f"python={sys.version.split()[0]} · cwd={os.getcwd()}")

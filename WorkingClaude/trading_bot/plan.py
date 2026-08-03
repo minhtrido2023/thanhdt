@@ -688,11 +688,22 @@ def _artifact_state(st, state_path):
     path = state_path
     try:
         with open(path, encoding="utf-8") as f:
-            s_pub = int((json.load(f) or {})["state"])
+            _pub = json.load(f) or {}
+        s_pub = int(_pub["state"])
     except Exception as ex:
         return None, (f"không đọc được `state` từ nguồn độc lập {path} "
                       f"({type(ex).__name__}: {ex}) — không đối chiếu được state mà artifact "
                       f"tự khai, KHÔNG cấp đòn bẩy")
+    # ĐỘ TƯƠI của nguồn độc lập (arch-reviewer vòng 4 #5). Hai file được sinh trong CÙNG chuỗi
+    # 19:00-19:03 (`publish_gated_state.py` rồi `golive_recommend_v23.py`), nên `as_of` phải
+    # bằng `signal_date`. Không kiểm thì một lần publish chết im lặng biến "artifact thứ hai"
+    # thành vô nghĩa: nó vẫn khớp, nhưng khớp do TRÙNG giá trị của hôm qua chứ không phải do
+    # được xác nhận. Đây đúng bài §14 (consumer phải tự kiểm độ tươi, không tin thứ tự cron).
+    _asof, _sig = str(_pub.get("as_of") or ""), str(st.get("signal_date") or "")
+    if _sig and _asof != _sig:
+        return None, (f"nguồn state độc lập {os.path.basename(path)} có as_of={_asof!r} ≠ "
+                      f"signal_date của artifact {_sig!r} — nó KHÔNG xác nhận phiên này (có "
+                      f"thể publish_gated_state đã chết im lặng), KHÔNG cấp đòn bẩy")
     if s_art != s_pub:
         return None, (f"artifact khai `state`={s_art} nhưng nguồn độc lập "
                       f"golive_state_today.json khai {s_pub} — state quyết định trần sizing, "
@@ -754,8 +765,14 @@ def _verify_targets_integrity(t, basket, st=None, state_path=None, n_basket=None
         s, s_err = _artifact_state(st, state_path)
         if s is None:
             return s_err
-        w_max = _W_LAG_MAX_BY_STATE.get(s, 0.65)
-        size_max = _CAPIT_BASE_BY_STATE.get(s, 0.75)
+        # State lạ ⇒ TỪ CHỐI, không rơi về mặc định NEUTRAL (arch-reviewer vòng 4 #6): rơi về
+        # mặc định nghĩa là `state=99` (khai khớp ở cả hai file) vẫn được trần của NEUTRAL.
+        if s not in _CAPIT_BASE_BY_STATE or s not in _W_LAG_MAX_BY_STATE:
+            return (f"state={s} không nằm trong bảng sizing đã biết "
+                    f"{sorted(_CAPIT_BASE_BY_STATE)} — không có trần nào áp được, KHÔNG cấp "
+                    f"đòn bẩy (fail-closed)")
+        w_max = _W_LAG_MAX_BY_STATE[s]
+        size_max = _CAPIT_BASE_BY_STATE[s]
         if not (0 < w <= w_max):
             return (f"w_lag_target={w} ngoài biên của state {s} (0; {w_max}] — thừa số này "
                     f"nhân thẳng vào vốn triển khai, giá trị lạ ⇒ KHÔNG cấp đòn bẩy")
@@ -1250,7 +1267,15 @@ def apply_capit_lever(plan, account_label, status_path=None, rules_path=None,
         for a in adj:
             if a["action"] in ("APPLIED", "OVERRIDDEN") and a.get("loan_package_id") is not None:
                 _granted.setdefault(str(a["loan_package_id"]), set()).add(a["ticker"])
-        plan._lever_authorized = _granted
+        # HỢP với sổ ĐÃ GHI RA ĐĨA của phiên (arch-reviewer vòng 4 #3). Sổ chỉ nằm trong RAM
+        # là trạng thái một tiến trình cho một sự kiện đã xảy ra THẬT ngoài hệ (lệnh gói 1840
+        # nằm trên sổ broker) — đúng cái coding_guidelines §5 cấm. Lượt 13:00 là tiến trình
+        # MỚI: nếu hàm này từ chối vì BẤT KỲ lý do gì (người vận hành tắt `enabled=false` giữa
+        # phiên, `--revoke`, artifact publish lại), sổ RAM rỗng ⇒ audit lại dựng đúng sự cố
+        # GIẢ mà vòng 3 vừa đóng, và unpause chỉ bằng tay sửa JSON. Đọc file ⇒ lượt sau kế
+        # thừa được sự thật "sáng nay ai đã được cấp".
+        plan._lever_authorized, plan._lever_ledger_prior = _lever_ledger_merge(
+            account_label, plan.plan_date, _granted)
 
     # KHÔNG ĐƯỢC IM LẶNG khi plan đã sizing theo đòn bẩy mà thực thi lại không có đòn bẩy
     # (arch-reviewer vòng 2, phát hiện #3a). Kịch bản thật: golive công bố artifact có đòn
@@ -1348,13 +1373,97 @@ def preview_margin_day(account_label, plan_date, status_path=None, rules_path=No
     return out
 
 
-def _session_already_placed(account_label, plan_date, exec_dir=None):
-    """Phiên (account, plan_date) này ĐÃ đặt lệnh con nào chưa → (bool, mô tả ngắn).
+def _lever_ledger_path(account_label, plan_date, exec_dir=None):
+    from .config import EXEC_DIR
+    return os.path.join(exec_dir or EXEC_DIR,
+                        f"exec_{account_label}_{plan_date}_lever_authorized.json")
+
+
+def _lever_ledger_merge(account_label, plan_date, granted, exec_dir=None):
+    """Sổ "hôm nay ai ĐÃ ĐƯỢC CẤP PHÉP vay" — hợp `granted` vào sổ trên đĩa → dict đã hợp.
+
+    Cùng vòng đời với `exec_<account>_<date>_state.json` (một phiên = một cặp file), ghi
+    NGUYÊN TỬ (§5). CỐ Ý **không** khoá theo `plan_created_at`: nếu plan được phát hành lại
+    giữa ngày, các lệnh gói 1840 đã đi ra dưới plan cũ vẫn là lệnh THẬT và vẫn đã được cấp
+    phép hợp lệ — audit tầng lệnh phải tiếp tục biết điều đó, nếu không ta lại dựng sự cố giả.
+    (Khác `_session_already_placed`, vốn hỏi "CHÍNH plan này đã đặt lệnh chưa" nên PHẢI khoá
+    theo `created_at`.)
+
+    Ranh giới tin cậy: ai ghi được file này thì cũng ghi được `state.json` — cùng thư mục,
+    cùng mức quyền, và `state.json` đã là chân lý của lưới chống double-buy từ trước. Đây
+    không mở rộng bề mặt tấn công, chỉ dùng lại đúng bề mặt sẵn có.
+
+    ĐỌC CÓ LỌC (arch-reviewer vòng 5 #2): chỉ nhận đúng gói vay đã duyệt trong code, và ép
+    kiểu chặt. Sổ là đầu vào ngoài tiến trình, mà `_lever_package_audit` bơm thẳng khoá của
+    nó vào tập `packages` nó đi soi — một sổ hỏng mang khoá 1841 (gói DEFAULT của account) làm
+    guard bắt đầu soi MỌI lệnh BAL/LAG thường lệ và pause sạch cả phiên (probe đo được:
+    `pause=['FPT','SAB']`). Lọc 1 dòng, bán kính nổ về 0. Ép kiểu vì `set("SAB")` cho ra
+    `{'S','A','B'}` nếu ai đó ghi value là chuỗi thay vì list.
+
+    Trả (dict đã hợp, dict nội dung TRƯỚC khi hợp) — cái sau để `_strip` biết phần nào do
+    CHÍNH tiến trình này cấp mà thu hồi, phần nào là của lệnh tiến trình trước đã đặt thật.
+    """
+    path = _lever_ledger_path(account_label, plan_date, exec_dir)
+    ok_lp = str(CAPIT_LEVER_APPROVED_PACKAGE)
+    prior = {}
+    try:
+        with open(path, encoding="utf-8") as f:
+            for lp, tks in ((json.load(f) or {}).get("granted") or {}).items():
+                if str(lp) != ok_lp:
+                    continue
+                if isinstance(tks, str):
+                    tks = [tks]
+                prior[str(lp)] = {str(t) for t in (tks or [])}
+    except Exception:
+        pass
+    out = {lp: set(tks) for lp, tks in prior.items()}
+    for lp, tks in (granted or {}).items():
+        if str(lp) != ok_lp:
+            continue
+        out.setdefault(str(lp), set()).update(str(t) for t in tks)
+    _lever_ledger_write(path, out)
+    return out, prior
+
+
+def _lever_ledger_write(path, granted):
+    """Ghi sổ, nguyên tử. KHÔNG raise (sổ hỏng không được làm chết phiên) nhưng PHẢI nói ra.
+
+    Câm ở đây là fail-silent thật (arch-reviewer vòng 5 #4): ghi hỏng ⇒ lượt 13:00 mất phần
+    kế thừa ⇒ dựng lại đúng sự cố giả mà sổ này sinh ra để chặn, mà không một dòng nào giải
+    thích vì sao. Hàm chạy trong ngữ cảnh stdout được ghi vào log run_bot nên `print` là đủ.
+
+    Sổ RỖNG thì KHÔNG tạo file mới (vòng 5 #3): tính năng đang TẮT vẫn chạy qua đây mỗi phiên
+    trên MỌI account, tạo ~2 file rỗng/ngày trong `data/execution_logs/` mà không ai sở hữu
+    vòng đời. File đã tồn tại thì vẫn ghi (để `_strip` thu hồi được về rỗng).
+    """
+    try:
+        if not granted and not os.path.exists(path):
+            return
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        tmp = path + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump({"granted": {lp: sorted(tks) for lp, tks in granted.items()}}, f,
+                      ensure_ascii=False, indent=2)
+        os.replace(tmp, path)
+    except Exception as ex:
+        print(f"⚠ KHÔNG ghi được sổ cấp phép đòn bẩy {path} ({type(ex).__name__}: {ex}) — "
+              f"lượt chạy sau trong CÙNG phiên sẽ không kế thừa được tập mã đã cấp, và lưới "
+              f"an toàn tầng lệnh có thể báo 'đòn bẩy không ai duyệt' NHẦM cho lệnh hợp lệ.")
+
+
+def _session_already_placed(account_label, plan_date, plan_created_at=None, exec_dir=None):
+    """CHÍNH plan này đã đặt lệnh con nào chưa → (bool, mô tả ngắn).
 
     Đọc CHÍNH file state mà `Executor` sẽ load (`exec_<account>_<date>_state.json`,
     executor.py:78-79) — nguồn duy nhất ghi lại "lệnh đã thật sự đi ra", cập nhật ngay sau
     mỗi `place_order` (coding_guidelines §5). Không đọc được ⇒ coi như CHƯA đặt: đó là chiều
     thận trọng (preflight giữ toàn quyền GỠ, tức không cấp đòn bẩy).
+
+    PHẢI khớp `plan_created_at` ĐÚNG NHƯ `Executor._load_state` (executor.py:202) —
+    arch-reviewer vòng 4 #2. Nếu plan được phát hành lại cùng ngày (`created_at` mới),
+    Executor VỨT state cũ và bắt đầu phiên SẠCH; đọc state cũ mà kết luận "đã đặt lệnh" sẽ
+    cho một loạt lệnh vay HOÀN TOÀN MỚI đi ra trong khi bỏ qua cả neo NAV sống lẫn đọc
+    `pp0Buy` — đúng hai thứ preflight tồn tại để làm. Lệch ⇒ coi như CHƯA đặt (chỉ SIẾT).
     """
     from .config import EXEC_DIR
     d = exec_dir or EXEC_DIR
@@ -1363,6 +1472,8 @@ def _session_already_placed(account_label, plan_date, exec_dir=None):
         with open(path, encoding="utf-8") as f:
             st = json.load(f) or {}
     except Exception:
+        return False, ""
+    if plan_created_at is not None and st.get("plan_created_at") != plan_created_at:
         return False, ""
     n_child = sum(len(p.get("children") or []) for p in (st.get("parents") or {}).values())
     n_filled = sum(1 for p in (st.get("parents") or {}).values() if (p.get("filled") or 0) > 0)
@@ -1407,7 +1518,8 @@ def lever_live_preflight(plan, account_label, broker, mode, status_path=None,
         return plan, []
     total = sum(o.value for o in levered)
     tickers = sorted({o.ticker for o in levered})
-    started, started_why = _session_already_placed(account_label, plan.plan_date)
+    started, started_why = _session_already_placed(account_label, plan.plan_date,
+                                                   getattr(plan, "created_at", None))
 
     def _strip(reason):
         """GỠ — nhưng CHỈ khi phiên chưa đặt lệnh nào. Đã đặt rồi thì hạ xuống CẢNH BÁO.
@@ -1434,6 +1546,28 @@ def lever_live_preflight(plan, account_label, broker, mode, status_path=None,
                                       f"sống/pp0Buy tụt là chuyện bình thường giữa lúc giải "
                                       f"ngân, còn gỡ thì làm audit tầng lệnh mất tập cấp phép "
                                       f"và treo cả rổ CAPIT. Chỉ CẢNH BÁO — người trực xem lại.")}]
+        # THU HỒI khỏi sổ cấp phép — nhưng CHỈ phần do CHÍNH tiến trình này vừa cấp
+        # (arch-reviewer vòng 4 #1, thu hẹp lại ở vòng 5 #1).
+        #
+        # Vì sao chỉ gỡ cờ trên lệnh là chưa đủ: đúng lúc preflight tuyên bố "cơ sở vốn KHÔNG
+        # có thật", `Executor._lever_package_audit` lại MÙ với chính những mã đó — lệnh 1840
+        # thật trên SAB cho `pause=set()`, bỏ sổ đi thì `pause={'SAB'}`.
+        #
+        # Vì sao KHÔNG được trừ sạch: sổ CỐ Ý không khoá theo `plan_created_at` (lệnh cũ vẫn
+        # là lệnh thật đã được cấp phép hợp lệ), trong khi điều kiện vào nhánh STRIP này lại
+        # ĐI QUA `_session_already_placed` vốn KHOÁ theo `created_at`. Plan phát hành lại giữa
+        # ngày ⇒ `started=False` dù lệnh 1840 buổi sáng vẫn sống trên sổ broker ⇒ trừ sạch sẽ
+        # xoá đúng bản ghi đó và dựng lại sự cố giả (probe vòng 5: `pause=['SAB']`). `prior` =
+        # nội dung sổ TRƯỚC khi tiến trình này hợp vào, tức phần thuộc về lệnh đã đi ra thật.
+        _led = getattr(plan, "_lever_authorized", None)
+        if _led:
+            _prior = getattr(plan, "_lever_ledger_prior", None) or {}
+            _tks = {o.ticker for o in levered}
+            for _lp in list(_led):
+                _led[_lp] -= (_tks - _prior.get(_lp, set()))
+                if not _led[_lp]:
+                    del _led[_lp]
+            _lever_ledger_write(_lever_ledger_path(account_label, plan.plan_date), _led)
         for o in levered:
             o.lever_f = None
             o.loan_package_id = None
