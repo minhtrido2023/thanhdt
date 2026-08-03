@@ -193,7 +193,10 @@ except Exception:
 def _dd_str(o):
     if not run_due_diligence or o.get('side') != 'buy':
         return ''
-    ctx = {'asof': plan_date, 'skip_dcf': True}
+    # dd_override_reason đi kèm để dòng cờ đỏ (2026-08-03) nói ĐÚNG trạng thái: lệnh đã có
+    # lý do override thì không được báo "cần dd_override_reason" trong báo cáo sau phiên.
+    ctx = {'asof': plan_date, 'skip_dcf': True, 'side': 'buy',
+           'dd_override_reason': o.get('dd_override_reason') or ''}
     px = o.get('ref_price')
     if isinstance(px, (int, float)) and px:
         ctx['price'] = px
