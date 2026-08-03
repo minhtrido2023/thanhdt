@@ -612,7 +612,9 @@ Rủi ro đó bị **chặn quy mô** bởi cổng người thứ hai (rổ mã 
 
 ### 11.10 Rủi ro dư đã biết — phải xử lý TRƯỚC khi lật `enabled=true`
 
-1. **`created_at` là code chết trên plan thật.** Kiểm artifact thật: `plan_SpaceX_2026-08-04.json`,
+1. ✅ **ĐÃ ĐÓNG ở §12 (vòng 6)** — đổi sang vân tay nội dung (tập id lệnh vay). Phần dư còn lại
+   (đổi RIÊNG `qty` giữ nguyên `id`) ghi ở §12.4. Nội dung gốc giữ nguyên bên dưới:
+   **`created_at` là code chết trên plan thật.** Kiểm artifact thật: `plan_SpaceX_2026-08-04.json`,
    `plan_SpaceX_2026-08-03.json`, `plan_ZaloPay_*` — **không file nào có khoá `created_at`** ⇒
    `plan.created_at == ""`, `Executor._load_state` luôn RESUME, `_session_already_placed` luôn
    `started=True`. Hai bên vẫn **khớp nhau** (đúng yêu cầu vòng 4) nhưng nhánh bảo vệ không bao giờ
@@ -638,3 +640,120 @@ Rủi ro đó bị **chặn quy mô** bởi cổng người thứ hai (rổ mã 
   `approval_gate`, `excluded_tickers`.
 - `data/execution_logs/` **sạch** sau khi chạy (không rác test).
 - `enabled` = **`false`**. `data/margin_approvals/` chưa tồn tại. Không đặt lệnh thật, không gọi API DNSE.
+
+---
+
+## 12. VÒNG 6 — đóng rủi ro dư #1: `created_at` là code chết ⇒ đổi sang VÂN TAY NỘI DUNG (2026-08-03, job `Taylor_20260803_180244`)
+
+Job này làm **đúng một việc**: đóng mục 1 của §11.10. Không đụng gì khác.
+
+### 12.1 Lỗ hổng — đo lại trên artifact THẬT trước khi sửa
+
+| Thứ kiểm | Kết quả đo |
+|---|---|
+| **Account LIVE** — quét TOÀN BỘ `plan_SpaceX_*` (28 file) + `plan_ZaloPay_*` (21) | SpaceX: **0/25** file **từ 2026-07-06 trở đi** có `created_at` (3 file duy nhất có là 07-01/02/03, trước khi quy ước sinh plan đổi); ZaloPay: **0/21**. ⇒ `plan.created_at == ""` trên toàn bộ đường LIVE hiện hành |
+| Account **paper `main`** (đối chứng — quant-skeptic vòng 6 bắt bản đầu của mục này viết "0 file" quá rộng) | **CÓ** `created_at` mỗi ngày (sinh bằng `bot_prepare_plan.py` → `TradePlan.save()`, đường DUY NHẤT điền khoá này). Không liên quan tới đòn bẩy: `mode != live` ⇒ preflight bỏ qua từ đầu. Đây chính là lý do khoá này "trông như đang sống" |
+| `data/execution_logs/exec_SpaceX_2026-07-29_state.json` (state THẬT của phiên có lệnh đã khớp) | `plan_created_at` = `""` |
+| Phép so của bản cũ | `"" == ""` → **luôn khớp** ⇒ `_session_already_placed` luôn `started=True` |
+
+Hệ quả: nhánh "phát hiện plan phát hành lại giữa ngày" (`J15b` cũ, vòng 4 #2) **chưa bao giờ chạy
+trên đường production** — nó chỉ PASS vì fixture tự điền một chuỗi ISO giả (`2099-01-01T00:00:00`)
+mà plan thật không có. Đúng loại "selfcheck PASS trong môi trường tác giả, sai ở môi trường thật"
+mà skill `verify-before-done` tồn tại để bắt; ở đây "môi trường" là **hình dạng artifact**, không
+phải `TZ`. Kết quả thật: một plan phát hành lại giữa ngày mang **lệnh vay MỚI TINH** vẫn đi ra chỉ
+với `LIVE_PREFLIGHT_WARN` — bỏ qua cả neo NAV sống lẫn `pp0Buy`, đúng hai thứ preflight tồn tại để làm.
+
+### 12.2 Hướng đã chọn: vân tay nội dung, KHÔNG sửa plan generator
+
+Hai hướng §11.10 nêu. Chọn **vân tay nội dung** vì hướng "bắt generator ghi `created_at`" phải sửa
+DollarBill (prompt LLM) + `bot_prepare_plan.py` + mọi đường sửa tay plan, và **fail-safe sai chiều**:
+một generator quên ghi ⇒ quay lại đúng lỗ hổng này mà không ai biết. Vân tay lấy từ thứ plan thật
+**luôn có** và preflight **đang cầm trong tay**: tập `id` của đúng những lệnh đang mang cờ vay.
+
+**Sửa đúng 1 điểm** — `trading_bot/plan.py::_session_already_placed` (+ dòng gọi nó, + 2 comment đã
+thành sai). Tham số `plan_created_at` → `order_ids`; điều kiện mới:
+
+> `started` = state có ≥1 lệnh con đã đặt **VÀ** mọi id trong `order_ids` đã có mặt trong
+> `state["parents"]` (tức phiên đang chạy đã biết đúng những lệnh vay này).
+
+**Bao hàm (`⊆`), không bằng nhau.** Một fail-safe phía trên (`cap_capit_orders`,
+`filter_lag_rating_orders`…) có thể loại bớt lệnh giữa hai lượt chạy; plan v2 **nhỏ hơn** không sinh
+khoản vay mới nào, mà bắt bằng-nhau ở đó sẽ GỠ oan đòn bẩy hợp lệ cả buổi chiều — đúng sự cố
+CRITICAL vòng 3. **Chỉ chiều THÊM lệnh mới là chiều nguy hiểm.** Ca kiểm `J15c` ghim điều đó.
+
+**Vì sao được phép lệch khỏi `Executor._load_state`** (nới ràng buộc vòng 4 #2): hai bên chỉ cần
+khớp ở MỘT chiều — "Executor chạy phiên SẠCH mà preflight tưởng đã đặt lệnh", vì chỉ chiều đó mới
+cho lệnh vay mới đi ra với WARN. Vân tay nội dung **chặt hơn hoặc bằng** quyết định resume của
+Executor trên mọi đầu vào (Executor thấy `""==""` → resume; ta còn đòi thêm id khớp), nên chiều nguy
+hiểm là **bất khả**. Chiều còn lại (`started=False` trong khi Executor resume) chỉ dẫn tới GỠ đòn
+bẩy = chạy vốn tự có = under-deploy — "sai số lành" đúng nguyên tắc fail-safe của cả module.
+`J15d` ghim tường minh rằng `created_at` **không còn** là điều kiện (đổi hành vi CÓ CHỦ Ý).
+
+### 12.3 Bằng chứng — có cả phép PHẢN CHỨNG, không chỉ "test xanh"
+
+**(a) Chạy thẳng trên artifact production thật** (`plan_SpaceX_2026-07-29.json` + state thật cùng
+ngày, cả hai `created_at`/`plan_created_at` = `""`, đọc-chỉ-đọc):
+
+| Ca | Kết quả |
+|---|---|
+| Vân tay khớp (lượt 13:00 bình thường) | `(True, 'state … có 7 lệnh con đã đặt, 1 mã đã khớp')` |
+| Plan phát hành lại, lệnh vay MỚI (`BUY-SAB-99`) | `(False, '')` ⇒ **GỠ** ✅ (bản cũ: `True` ⇒ chỉ WARN) |
+| Plan BỚT lệnh | `(True, …)` ⇒ không GỠ oan |
+
+**(b) Falsification — bắt buộc, vì "182/182 PASS" tự nó không chứng minh gì.** Lần chạy đầu tiên
+`J15b` **PASS cả trên code CŨ** (`git stash` plan.py, chạy selfcheck mới): nó PASS vì fixture vẫn
+để plan mang `created_at` ISO giả nên code cũ thấy *lệch* và GỠ — **đúng kết quả, sai lý do**, tức
+ca kiểm không phân biệt được gì. Sửa `mkplan()` để `created_at=""` (đúng production) rồi chạy lại:
+
+```
+selfcheck MỚI trên plan.py CŨ →  [FAIL] J15b  (LIVE_PREFLIGHT_WARN, đáng lẽ STRIP)
+                                 [FAIL] J15d
+                                 [FAIL] J20   (WARN — nhánh STRIP không bao giờ tới)
+selfcheck MỚI trên plan.py MỚI → 182/182 PASS, 0 FAIL
+```
+
+3 ca đỏ trên code cũ / xanh trên code mới = ca kiểm **thật sự** đo lỗ hổng. Mọi ca khác (`J14`,
+`J15`, `J16`–`J19b`, `J21`) xanh ở **cả hai** ⇒ không hồi quy.
+
+**(c) Đầy đủ:** `capit_lever_selfcheck.py` **182/182 PASS, 0 FAIL** (97 → 170 → 177 → 180 → 182),
+**giống hệt trên 5 môi trường**: `TZ=Asia/Ho_Chi_Minh`, `env -u TZ`, `TZ=America/New_York`, `TZ=UTC`,
+`TZ=Pacific/Kiritimati`. Regression **6/6 rc=0** (`ghost_order`, `tick_retry`, `t2_settlement`,
+`churn_guard`, `approval_gate`, `excluded_tickers`). `git diff` chạm **đúng 2 file**
+(`trading_bot/plan.py`, `capit_lever_selfcheck.py`). `data/execution_logs/` không còn rác
+`exec_SpaceX_2099-*`. `data/trading_rules.json` → `capit_margin_lever.enabled` = **`false`**, KHÔNG
+đổi. `data/margin_approvals/` vẫn chưa tồn tại. **Không** đặt lệnh thật, **không** gọi API DNSE.
+
+### 12.3b Cổng quant-skeptic — `CONFIRMED` (confidence **high**), kèm 1 đính chính bắt buộc
+
+Reviewer tự chạy lại toàn bộ: selfcheck 182/182 × 5 TZ, tự `git stash` plan.py để tái lập đúng bộ
+`J15b`/`J15d`/`J20` FAIL, tự chạy 6 regression rc=0, tự xác minh `enabled=false`, 1 caller duy nhất,
+và sự tồn tại của `_enforce_margin_day_approval` (plan.py:889) chống lưng cho mitigation rủi ro #1.
+
+**Killer objection ĐÚNG, đã sửa ngay:** bản đầu của bảng §12.1 (và payload bus) viết
+`plan_files_with_created_at: 0` như một sự thật tuyệt đối. Quét đủ cho thấy **3 file SpaceX
+(07-01/02/03)** và **toàn bộ `plan_main_*` (paper, 1 file/ngày)** vẫn CÓ `created_at`. Bảng trên đã
+viết lại theo phạm vi đo thật. Không đụng tới tính đúng của bản sửa (logic mới **không đọc**
+`created_at` nữa), nhưng đúng tinh thần §6/§18: khai đúng cái đã đo, không nới thành tuyên bố phổ quát.
+Bài học đi kèm: khoá này "trông như đang sống" chính vì account **paper** vẫn điền nó đều đặn.
+
+### 12.4 `known_limits` — cập nhật danh sách rủi ro dư §11.10
+
+- **#1 `created_at` code chết → ĐÓNG** (mục này). Còn lại phần **có chủ ý không đóng**: đổi RIÊNG
+  `qty` mà giữ nguyên `id` (`BUY-SAB-01`) thì vân tay id không thấy — state của Executor không lưu
+  `qty` ở tầng parent, bắt nó lưu thêm sẽ phải sửa cả bên GHI (ngoài phạm vi "sửa 1 điểm"). Quy mô
+  ca đó bị chặn bởi **cổng người thứ hai**: `_enforce_margin_day_approval` so Σ VND của **lệnh
+  THẬT** với trần `max_lever_total_vnd` trong bản duyệt của đúng ngày ⇒ qty phình quá trần thì GỠ
+  SẠCH cờ vay trước khi tới preflight. Dư lại: qty tăng mà **vẫn dưới trần đã duyệt**.
+- **#2–#7 giữ nguyên** như §11.10.
+- **#8 MỚI, phát hiện trong lúc phân tích, CỐ Ý không sửa ở vòng này**: nếu lượt **09:05** đã GỠ đòn
+  bẩy (artifact xấu) và lệnh đã đi ra bằng vốn tự có, thì lượt **13:00** với **cùng** plan có
+  `started=True` ⇒ nhánh WARN ⇒ phần rổ chưa giải ngân **được cấp lại** đòn bẩy trên đúng cơ sở mà
+  buổi sáng vừa bác. **Đây KHÔNG phải lỗi do vòng 6 tạo ra** — bản cũ hành xử y hệt (`""==""` ⇒
+  `started=True`). Sửa được bằng cách đòi thêm "mọi mã đang cấp phải nằm trong `prior` của sổ", 2
+  dòng — nhưng nó **lật kỳ vọng của `J18`/`J19`** (hai ca chống sự cố giả CRITICAL vòng 3/4), nên
+  cần một vòng review riêng chứ không nhét vào job "sửa đúng 1 điểm" này. Ghi lại để người quyết định.
+
+### 12.5 Việc còn lại trước khi ai đó đề nghị `enabled=true`
+
+Không đổi so với §11.7 + §11.10 (trừ #1 đã đóng). `enabled` vẫn **`false`** — **không agent nào
+được lật cờ này**.
