@@ -515,11 +515,21 @@ def cmd_job_set(a):
     os.replace(tmp, fp)
 
 
+# Trang thai CHO TIEP TUC: lan chay nay da ket thuc, NHUNG viec chua chet — dispatch.sh da ghi
+# bus/pending_resumes/<job>.json va resume_pending.py (cron 10') se dispatch lai thanh job MOI.
+# Tach rieng vi truoc 2026-08-03 chung bi map thanh exit 1 = FAILED, khien nguoi/Mike doc job
+# board tuong viec chet roi re-dispatch => nhan doi cong viec.
+PENDING_RESUME_STATES = ("usage_limited", "maxturns_pending")
+
+
 def _job_display_status(obj, n):
-    """running + past deadline -> OVERDUE (soft flag; the hard timeout lives in dispatch.sh)."""
+    """running + past deadline -> OVERDUE (soft flag; the hard timeout lives in dispatch.sh).
+    usage_limited/maxturns_pending -> PENDING-RESUME (viec chua chet, se tu chay lai)."""
     st = obj.get("status", "?")
     if st == "running" and _as_int(obj.get("deadline"), 0) and n > _as_int(obj.get("deadline")):
         return "OVERDUE"
+    if st in PENDING_RESUME_STATES:
+        return "PENDING-RESUME"
     return st
 
 
@@ -822,7 +832,8 @@ def cmd_has_event(a):
 
 def cmd_job_get(a):
     """job-get <jobs_dir> <job_id> — print one job; exit code reflects state.
-    0=done 2=running 3=overdue 1=failed/timeout 4=not-found."""
+    0=done 2=running 3=overdue 5=pending-resume (usage limit/max turns — se tu chay lai)
+    1=failed/timeout/unknown 4=not-found."""
     jobs_dir, job_id = a[0], a[1]
     fp = _job_path(jobs_dir, job_id)
     try:
@@ -851,6 +862,14 @@ def cmd_job_get(a):
         sys.exit(0)
     if st in ("running", "retrying"):
         sys.exit(2)
+    # 5 = CHO TIEP TUC (usage limit / het turn budget). KHONG phai that bai: resume_pending.py
+    # se dispatch lai thanh job MOI. Dung lai dung ma 5 ma dispatch.sh da tra o nhanh dong bo
+    # cho cung tinh huong (xem header dispatch.sh "Exit code 5 (sync mode)") — khong bia ma moi.
+    # Truoc 2026-08-03 hai trang thai nay roi vao sys.exit(1) ben duoi => `jobs.sh wait` tra ve
+    # "failed" ngay lap tuc va vong poll cua Mike ket luan viec chet -> re-dispatch, nhan doi
+    # cong viec. Do la lop loi "im lang khong phan biet duoc voi that bai".
+    if st in PENDING_RESUME_STATES:
+        sys.exit(5)
     sys.exit(1)  # failed / timeout / unknown
 
 

@@ -5,7 +5,7 @@
 # sitting idle. Read-only; depends only on python3 (via mike_json.py).
 #
 #   jobs.sh list [limit]              recent jobs, newest first (default 20)
-#   jobs.sh status <job_id>           one job; exit 0=done 2=running 3=overdue
+#   jobs.sh status <job_id>           one job; exit 0=done 2=running 3=overdue 5=pending-resume
 #                                     1=failed/timeout 4=not-found
 #   jobs.sh wait <job_id> [--timeout SEC]   poll every 15s until the job leaves
 #                                     'running' or SEC elapse (default 900); exits

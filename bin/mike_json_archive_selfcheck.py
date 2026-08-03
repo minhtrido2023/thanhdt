@@ -168,6 +168,34 @@ def case_corrupt_archive_does_not_crash():
         shutil.rmtree(root, ignore_errors=True)
 
 
+# --- 2026-08-03: exit-code cho trang thai CHO TIEP TUC -------------------------------
+# Truoc day usage_limited / maxturns_pending roi vao sys.exit(1) = FAILED, khien
+# `jobs.sh wait` tra ve "that bai" NGAY cho mot job se tu chay lai (resume_pending.py),
+# va vong poll cua Mike ket luan viec chet -> re-dispatch -> NHAN DOI cong viec.
+def check_pending_resume_exitcode():
+    import subprocess, tempfile, json as _json, os as _os
+    mj = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "mike_json.py")
+    want = {"done": 0, "running": 2, "usage_limited": 5, "maxturns_pending": 5, "failed": 1}
+    with tempfile.TemporaryDirectory() as d:
+        jd = _os.path.join(d, "jobs"); _os.makedirs(jd)
+        for st in want:
+            _json.dump({"job_id": st, "status": st, "deadline": 9999999999, "started_at": 1},
+                       open(_os.path.join(jd, st + ".json"), "w"))
+        bad = []
+        for st, exp in want.items():
+            r = subprocess.run(["python3", mj, "job-get", jd, st],
+                               capture_output=True, text=True)
+            if r.returncode != exp:
+                bad.append(f"{st}: exit={r.returncode} want={exp}")
+            # trang thai cho-tiep-tuc phai HIEN RO cho nguoi doc, khong chi khac ma so
+            if exp == 5 and "PENDING-RESUME" not in r.stdout:
+                bad.append(f"{st}: display khong co PENDING-RESUME")
+        assert not bad, "exit-code/display sai: " + "; ".join(bad)
+    print("  ok  exit-code pending-resume (usage_limited/maxturns_pending = 5, khong phai 1)")
+
+
+
+
 def main():
     print("mike_json_archive_selfcheck: trace + verify-coverage hot+archive scope")
     for fn in (case_trace_finds_archived_event, case_trace_finds_archived_job_record,
@@ -175,6 +203,7 @@ def main():
                case_verify_coverage_matches_archived_verification,
                case_corrupt_archive_does_not_crash):
         fn()
+    check_pending_resume_exitcode()
     if FAILS:
         print(f"\nFAIL: {len(FAILS)} assertion hỏng")
         for f in FAILS:
@@ -186,3 +215,4 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
+

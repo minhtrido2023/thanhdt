@@ -61,7 +61,7 @@ out=$(DISPATCH_FROM=Taylor $ROOT/bin/dispatch.sh Mafee "mô tả việc" --bg --
 job=$(echo "$out" | sed -n 's/.*job=\([^ )]*\).*/\1/p')
 
 # 2) LÀM VIỆC KHÁC của mình. Lượt sau (hoặc sau ScheduleWakeup ≤10') kiểm tra:
-$ROOT/bin/jobs.sh status "$job"   # exit 0=done 2=running 3=overdue 1=failed/timeout 4=not-found
+$ROOT/bin/jobs.sh status "$job"   # exit 0=done 2=running 3=overdue 5=pending-resume(tự chạy lại) 1=failed/timeout 4=not-found
 $ROOT/bin/jobs.sh list            # bảng mọi job: STATUS / AGE / LOG_AGE / ATT
 ```
 

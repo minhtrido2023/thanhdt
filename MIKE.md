@@ -390,7 +390,7 @@ logout → `claude login`; zombie dai dẳng → mở agent trong app Claude đ�
   self-dispatch (`from==id`) bị chặn; target Mike chỉ cho `DISPATCH_FROM=user` (agent muốn tới
   Mike phải escalate bằng event `question`, không spawn Mike lạnh).
 - **`bin/jobs.sh {list | status <job_id> | wait <job_id>}`** — poll job board (read-only).
-  `status` exit-code: `0=done 2=running 3=overdue 1=failed/timeout 4=not-found`.
+  `status` exit-code: `0=done 2=running 3=overdue 5=pending-resume(tự chạy lại) 1=failed/timeout 4=not-found`.
 - **`bin/trace.sh <job_id> [--log]`** — gộp job record + mọi bus event cùng `trace_id` (=job_id)
   thành 1 timeline, thay vì grep tay nhiều file.
 - **`bin/verification_audit.sh <agent_id> [days]`** — báo cáo (KHÔNG phải gate) coverage kiểm
