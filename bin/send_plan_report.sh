@@ -278,7 +278,29 @@ if _capit_buys:
         # python này chạy sau `cd "$WORKDIR"` (dòng RESULT=$(...)), nên đường dẫn tương đối
         _st = json.load(open(os.path.join("data", "golive_v23_status.json"), encoding="utf-8"))
         _tg = ((_st.get("capit_slot_targets") or {}).get(acct)) or {}
-        _slot = _tg.get("capit_slot_target_vnd")
+        # ĐÒN BẨY CAPIT (2026-08-03, arch-reviewer F3): khi `capit_margin_lever` ĐANG BẬT cho
+        # account này, lệnh được sizing theo slot ĐÃ NHÂN f — đối chiếu với slot GỐC sẽ báo
+        # lệch ~+30% và in ra đúng câu "nghi nhân capit_size hai lần". Tức là cổng bảo vệ sự
+        # cố 07-21 sẽ kêu SAI ngay phiên đầu tiên có đòn bẩy, dạy người duyệt bỏ qua nó — và
+        # lần sau lỗi THẬT cũng bị bỏ qua. Mốc so phải cùng cơ sở với mốc đã sizing.
+        # Đọc `capit_lever` của CHÍNH artifact này (không đọc trading_rules.json): mục tiêu đã
+        # publish và cờ bật/tắt phải đến từ cùng một ảnh chụp, nếu không hai nguồn lệch nhau
+        # lại thành một cách sai mới.
+        _lv = _st.get("capit_lever") or {}
+        _lv_on = (_lv.get("active") is True and acct in (_lv.get("accounts") or []))
+        _slot = _tg.get("capit_slot_target_vnd_levered") if _lv_on else None
+        _basis = ""
+        if _lv_on and _slot:
+            _basis = (f" [đòn bẩy CAPIT ĐANG BẬT f={_lv.get('f')} gói {_lv.get('loan_package_id')}"
+                      f" — mốc so là slot ĐÃ nhân f]")
+        elif _lv_on:
+            # Bật nhưng thiếu trường levered ⇒ nói thẳng là không đối chiếu được, KHÔNG lặng lẽ
+            # rơi về slot gốc (rơi về sẽ in ra một cảnh báo sai với vẻ chắc chắn).
+            _basis = (" [⚠️ đòn bẩy BẬT nhưng artifact thiếu `capit_slot_target_vnd_levered` — "
+                      "đối chiếu dưới đây dùng slot GỐC nên lệch dương ~f là BÌNH THƯỜNG, "
+                      "không phải lỗi sizing]")
+        if not _slot:
+            _slot = _tg.get("capit_slot_target_vnd")
         if _slot:
             _actual = sum(float(o.get("actual_vnd") or 0)
                           or float(o.get("qty") or o.get("quantity") or 0) * float(_order_price(o) or 0)
@@ -291,10 +313,10 @@ if _capit_buys:
                               f"{_slot/1e6:,.1f}tr) — lệch {_dev*100:+.1f}%. Nếu KHÔNG do trần "
                               f"%ADV/thiếu cash thì kiểm tra đã nhân capit_size hai lần chưa "
                               f"(lỗi thật 07-21). Nguồn mục tiêu: golive_v23_status.json "
-                              f"`capit_slot_targets`.")
+                              f"`capit_slot_targets`.{_basis}")
             else:
                 capit_note = (f"✅ CAPIT: Σ lệnh mua {_actual/1e6:,.0f}tr khớp mục tiêu "
-                              f"{_target/1e6:,.0f}tr (lệch {_dev*100:+.1f}%)")
+                              f"{_target/1e6:,.0f}tr (lệch {_dev*100:+.1f}%){_basis}")
         else:
             capit_note = ("⚠️ CAPIT: có lệnh CAPIT nhưng status chưa publish "
                           "`capit_slot_targets` cho account này — KHÔNG đối chiếu được cỡ deploy, "
