@@ -133,3 +133,27 @@ thật 2026-07-23: DollarBill lập plan SpaceX 07-24 với 6 lệnh tổng 177,
 ~49,1M, rồi yêu cầu user tự rút thêm ~128-134M "Trứng vàng" — nguồn đã xác nhận không còn tồn
 tại. Nếu user báo có nạp tiền mới (không phải Trứng vàng, có thể là chuyển khoản khác) → đó là
 fact mới, hỏi rõ nguồn trước khi đưa vào plan như đã xác nhận.
+
+## LAG entry window — CHỈ T+1 vào plan hôm nay, T+2/T+3 để dành cho `lag_upcoming_for_next_plans` (thêm 2026-08-03)
+`golive_v23_recommendations_*.csv` (nguồn CHUNG cho cả 2 account) gắn `status` đúng theo từng mã:
+`UPCOMING T+1 phiên tới` / `T+2` / `T+3`. **KHÔNG có script nào tự sinh `window_analysis`/
+`orders`/`deferred_orders` từ CSV này** — mỗi plan JSON là do DollarBill tự đọc CSV và viết tay
+mỗi lần dispatch, nên window filter là judgment call thủ công, không phải phép tính cơ học sẵn có.
+Đây chính là chỗ đã ra sai lệch: plan SpaceX 08-04 lọc ĐÚNG (chỉ đưa T+1 vào `deferred_orders`
+của hôm nay, T+2/T+3 xếp riêng vào `lag_upcoming_for_next_plans` chờ đúng ngày mở), còn plan
+ZaloPay 08-04 (cùng CSV, cùng ngày) lọc SAI — đưa thẳng DCM (T+2) và DRI/POW (T+3) vào
+`deferred_orders` của hôm nay như thể đã tới hạn, ĐỒNG THỜI bỏ sót hẳn APF (T+1, đủ điều kiện
+đúng hôm nay, DD sạch y hệt TV2) — không xuất hiện ở đâu trong plan, và không đánh giá MAC/TV3.
+0 lệnh đặt thật (orders=0 cả 2 plan) nên không có sự cố live, nhưng bug data-accuracy.
+
+**Quy tắc bắt buộc mỗi lần lập plan T+1 (áp dụng CẢ 2 account, nhất quán):**
+1. Liệt kê TOÀN BỘ mã LAG_HI/LAG_LO có `status` chứa `T+1` trong CSV signal_date hôm nay — đây là
+   danh sách ứng viên duy nhất được xét vào `orders[]`/`deferred_orders[]` của plan hôm nay. Đối
+   chiếu số lượng T+1 candidate giữa 2 account phải BẰNG NHAU (cùng CSV nguồn) trước khi viết plan
+   — nếu khác nhau, đó là dấu hiệu bỏ sót, dừng lại kiểm tra lại.
+2. Mã `status` chứa `T+2`/`T+3` → CHỈ được đưa vào `lag_upcoming_for_next_plans` (ghi rõ
+   `entry_date` = ngày mở cửa sổ thật), KHÔNG được vào `orders[]`/`deferred_orders[]` của plan
+   hôm nay dù DD sạch đến đâu — cửa sổ entry chưa mở.
+3. Trước khi hoàn tất plan, tự hỏi: "mọi mã trong `deferred_orders[]`/`orders[]` của tôi có đúng
+   `status=T+1` trong CSV không, không có mã T+2/T+3 lẫn vào?" — nếu không chắc, grep lại CSV
+   bằng ticker, đừng tin trí nhớ từ session trước.
