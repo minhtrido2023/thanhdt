@@ -515,6 +515,15 @@ else
 fi
 
 _run_pipeline "[pipeline-2] golive_recommend_v23"     deploy_golive_dt5g_v4/golive_recommend_v23.py
+
+# Sổ append-only các ứng viên LAG bị loại ở tầng tín hiệu (Taylor_20260803_035250 việc 3).
+# CỐ Ý không dùng _run_pipeline: đây KHÔNG phải bước sinh artifact mà DollarBill đọc, chỉ là
+# theo dõi — không được đếm vào WARN pipeline, và `|| true` để tuyệt đối không chặn chuỗi lập
+# plan T+1 dù có hỏng. Phải chạy NGAY SAU pipeline-2 vì nó đọc data/golive_v23_status.json,
+# file bị GHI ĐÈ mỗi lần golive chạy (không có lịch sử — đó chính là lỗ hổng nó vá).
+# Lý do tồn tại + mốc rà soát: mike/kb/projects/lag-adv-filter-tracking.md
+(cd "$WORKDIR" && python3 lag_liq_ledger.py) || true
+
 _run_pipeline "[pipeline-3] push_recommend_v23_to_bq" mike/agents/Mafee/push_recommend_v23_to_bq.py
 
 # _assert_fresh_artifact <label> <path> — file phải tồn tại và mtime >= PIPELINE_START_EPOCH,

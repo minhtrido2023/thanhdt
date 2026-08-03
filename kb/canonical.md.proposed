@@ -24,7 +24,9 @@
   ⚠️ **MIXED-universe khi trích dẫn**: `universe_pit` cho cổng quyết định, `ticker_prune` vẫn cho
   CAPIT pool/maturity. Lỗi fidelity `liq<=0` vẫn MỞ ⇒ **anchor DD ~−30%** (KHÔNG phải −17,8%);
   khoảng **[~27,2%; ~31,3%] đã HẾT HIỆU LỰC** từ 08-03 và **chưa có khoảng thay thế** — đọc 28,86%
-  như một CẬN DƯỚI, đừng tự gắn cận trên.
+  như một CẬN DƯỚI, đừng tự gắn cận trên. Việc phân rã (+4,11pp của `lag_filter_illiquid()`,
+  quant-skeptic INCONCLUSIVE 3 lần) nay đã có sổ theo dõi + **mốc cứng 2026-12-15 / 2027-03-31**:
+  `kb/projects/lag-adv-filter-tracking.md`. Trước mốc đó **không trích +4,11pp như edge**.
 - Bootstrap 5th-pct: CAGR 18.6%, DD −28.6% (anchor DD ~−29%, KHÔNG phải −18%).
 - **NEUTRAL parking custom30V = phần tin cậy nhất: +7.4pp Full.** (30 mã, cap 0.10)
 - Bull parking: NAV ≥150B. **(30, 0.15) = OVERFIT**, walk-forward bác.

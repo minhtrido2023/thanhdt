@@ -25,3 +25,4 @@ Khác nhóm trên (đã ĐÓNG) — 2 mục dưới đây vẫn đang chạy, nh
 đọc mỗi phiên. `current_ops.md` giữ 1 đoạn tóm tắt + pointer; đọc file khi cần theo dõi tiến độ.
 - **R&D pipeline (mọi thử nghiệm paper-only)** → `kb/projects/rnd-pipeline-tracker.md`
 - **Migration `ticker_prune` → `universe_pit` (checklist G5-G9)** → `kb/projects/universe-pit-migration.md`
+- **LAG ADV>0 filter — tích luỹ dữ liệu phân rã edge vs hiện vật fill** → `kb/projects/lag-adv-filter-tracking.md` — mở 2026-08-03, chủ Taylor. `lag_liq_ledger.py` ghi sổ append-only từ mỗi phiên EOD (khe hổng: `golive_v23_status.json` bị ghi đè, 0 lịch sử). **KHÔNG kết luận gì** cho tới 2 mốc CỨNG: checkpoint **2026-12-15** (kiểm sổ có tích luỹ được không) và rà soát đầy đủ **2027-03-31** (Q3+Q4/2026 xong 25 phiên). Tới đó mới tách được +4,11pp (quant-skeptic INCONCLUSIVE 3 lần).
