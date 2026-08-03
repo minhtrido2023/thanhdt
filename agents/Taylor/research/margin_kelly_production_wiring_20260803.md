@@ -439,13 +439,19 @@ và `golive_v23_status.json` đều bị `.gitignore` — một chữ ký nằm 
    khác, do `publish_gated_state.py` ghi).
 4. **Sổ broker sống** (`lever_live_preflight`) — đo lại NAV theo đúng công thức `compute_active_nav.py`.
 
-> ⚠️ **Đọc đúng mức độ.** arch-reviewer vòng 3 đo bằng probe thật: bản trần **PHẲNG** đầu tiên
-> (`capit_size ≤ 1,0`) **không ràng buộc gì** trên ngày NEUTRAL thường lệ, vì 1,0 đúng bằng giá trị
-> hợp lệ lớn nhất (CRISIS) trong khi ngày thường là 0,375. Sửa 3 trường nhất quán mà **không đụng**
-> `nav_basis_vnd` cho lọt **2,67×** mục tiêu, envelope tối đa **111,6% NAV** (thiết kế: 13,6%) —
-> và neo NAV sống MÙ hoàn toàn với ca này. Neo theo `state` cắt bậc tự do đó xuống phần dư trong
-> CÙNG một state (NEUTRAL ≤2×). **Cổng thật sự chặn quy mô là VIỆC B**, không phải A1.
-> Ghim thành ca kiểm `C30`/`C30b`/`C30c`. `known_limits` đã được **viết lại** kèm số đo, không xoá.
+> ⚠️ **Đọc đúng mức độ — số đã đo lại ở vòng 4.** arch-reviewer đo bằng probe thật: bản trần
+> **PHẲNG** đầu tiên (`capit_size ≤ 1,0`) **không ràng buộc gì** trên ngày NEUTRAL thường lệ, vì
+> 1,0 đúng bằng giá trị hợp lệ lớn nhất (CRISIS) trong khi ngày thường là 0,375 — sửa 3 trường
+> nhất quán mà **không đụng** `nav_basis_vnd` cho lọt **2,67×**, và neo NAV sống MÙ hoàn toàn với
+> ca này. Trần **neo theo `state`** thu hẹp nhưng **chưa đóng**: nó khoá trục `capit_size`
+> (0,375 → trần 0,75 = 2,0×) mà **vẫn còn trục `w_lag_target`** (0,50 → trần 0,65 = 1,3×) ⇒ đo
+> trên **đúng regime hiện tại** (`state=3`, `w_lag_target=0,50` vì `lag_edge_health.mean12=0,48%
+> < ngưỡng 4%) bội số dư là **2,60×**, envelope tối đa **63,4% NAV** so với thiết kế 24,4% NAV.
+> **KHÔNG phải "≤2×"** như bản vòng 3 của mục này viết. `capit_grind` **không được đọc** ở tầng
+> thực thi (grep `plan.py`) nên đừng coi nó là điều kiện gì.
+> **Cổng thật sự chặn quy mô là VIỆC B**, không phải A1 — và nó chặn được vì Σ VND trong báo cáo
+> 21:00 tính từ **lệnh thật**, không từ artifact, nên user nhìn thấy đúng số tiền sẽ vay.
+> Ghim thành ca kiểm `C30`–`C30e`. `known_limits` đã được **viết lại** kèm số đo, không xoá.
 
 ### 11.3 VIỆC A2 — preflight sống (`lever_live_preflight`)
 
@@ -535,3 +541,100 @@ không chặn oan.
 2. Hiểu rằng **A1 chỉ thu hẹp** khe artifact (§11.2) — cổng chặn quy mô là **người duyệt từng ngày**.
 3. User xác nhận riêng, tường minh, cho **công tắc tổng**; rồi vẫn phải duyệt **từng ngày có vay**.
    **Không agent nào được lật cờ này.**
+
+---
+
+## 11.8 VÒNG 4 — arch-reviewer bắt 3 lỗ hổng do chính fix vòng 3 tạo ra, đã sửa
+
+Vòng 4 xác nhận **6/10** phát hiện vòng 3 đóng đúng (tự probe, không tin mô tả: sổ không bơm được
+từ plan JSON vì `load_plan` lọc theo `dataclasses.fields`; `preview=True` không ghi sổ; guard vẫn
+bắt ca gốc). Nhưng fix cho phát hiện #1 tạo ra lỗ hổng mới:
+
+| # | Mức | Lỗi (do fix vòng 3 sinh ra) | Sửa |
+|---|---|---|---|
+| 1 | MED-HIGH | `_strip()` gỡ cờ trên lệnh nhưng **không gỡ sổ** `_lever_authorized` ⇒ audit tầng lệnh MÙ **đúng lúc** preflight vừa tuyên bố "cơ sở vốn không có thật". Probe: lệnh 1840 thật trên SAB → `pause=set()`; bỏ sổ đi → `pause={'SAB'}`. Trigger dễ xảy ra: `state.json` hỏng/bị xoá ⇒ `_session_already_placed`=False ⇒ vào nhánh STRIP dù broker đang có lệnh 1840 sống | Nhánh STRIP (và **chỉ** nhánh đó — nhánh WARN giữ nguyên có chủ đích) thu hồi mã khỏi sổ, cả RAM lẫn đĩa. Ca kiểm `J16`/`J17` |
+| 2 | MEDIUM | `_session_already_placed` bỏ qua `plan_created_at`, **lệch semantics** với `Executor._load_state` (executor.py:202). Plan phát hành lại cùng ngày ⇒ Executor vứt state cũ và chạy phiên SẠCH, nhưng preflight tưởng "đã đặt lệnh" ⇒ một loạt lệnh vay **hoàn toàn mới** đi ra mà bỏ qua cả neo NAV lẫn `pp0Buy` | Nhận `plan.created_at`, chỉ tính "đã đặt" khi khớp. Chiều fix chỉ SIẾT. Ca kiểm `J15b` |
+| 3 | MEDIUM | Sổ chỉ sống trong **RAM một tiến trình** ⇒ sự cố giả vẫn tái hiện qua **mọi đường từ chối khác** ở lượt 13:00 (`enabled=false` giữa phiên · `--revoke` · artifact publish lại). Probe: `pause={'SAB','VNM'}`, "được cấp: KHÔNG MÃ NÀO", unpause chỉ bằng tay sửa JSON. Nghịch lý: comment trong code khuyên dùng `enabled=false` để dừng cấp vốn giữa phiên — làm đúng thế lại đóng băng rổ CAPIT | **Persist sổ ra đĩa** (`exec_<acct>_<date>_lever_authorized.json`, ghi nguyên tử, cùng vòng đời state file), audit union file đó ⇒ tiến trình 13:00 kế thừa "sáng nay ai đã được cấp". Đúng bài §5. Ca kiểm `J19`/`J19b` |
+| 4 | MEDIUM | `known_limits` ghi "≤2×" — **sai**: trần neo theo state khoá trục `capit_size` nhưng bỏ quên trục `w_lag_target` (0,50→0,65). Đo thật trên regime hiện tại: **2,60×**, envelope **63,4% NAV**. Mệnh đề "phải khai thêm `capit_grind=false`" cũng sai — không code nào đọc `capit_grind` | Viết lại `known_limits` + §11.2 kèm số đúng |
+| 5 | LOW | `_artifact_state` không kiểm **độ tươi** nguồn độc lập ⇒ publish chết im lặng thì lớp "artifact thứ hai" khớp do **trùng** giá trị hôm qua, không phải do xác nhận (§14) | So `as_of` với `signal_date`, lệch ⇒ fail-closed. Ca kiểm `C30e` |
+| 6 | LOW | State lạ rơi về **mặc định NEUTRAL** thay vì từ chối (`state=99` khai khớp cả 2 file vẫn được trần) | Ngoài bảng sizing ⇒ TỪ CHỐI. Ca kiểm `C30d` |
+| 7 | LOW | Selfcheck để lại rác trong `data/execution_logs/` (thư mục production) + `preview_margin_day` **thật** bị stub ở mọi nhóm nên chưa từng chạy đầu-cuối | Dọn ở cuối test; thêm `I13c`/`I13d` chạy thật `preview_margin_day` |
+
+**Ranh giới tin cậy của sổ trên đĩa** (nêu tường minh): ai ghi được
+`exec_*_lever_authorized.json` thì cũng ghi được `exec_*_state.json` — cùng thư mục, cùng mức
+quyền, và `state.json` đã là chân lý của lưới chống double-buy từ trước. Không mở rộng bề mặt tấn
+công, chỉ dùng lại đúng bề mặt sẵn có.
+
+**Sổ CỐ Ý không khoá theo `plan_created_at`** (khác `_session_already_placed`): nếu plan được phát
+hành lại giữa ngày, các lệnh gói 1840 đã đi ra dưới plan cũ **vẫn là lệnh thật và vẫn đã được cấp
+phép hợp lệ** — audit phải tiếp tục biết điều đó, nếu không ta lại dựng sự cố giả.
+
+### Bằng chứng vòng 4
+
+- `capit_lever_selfcheck.py` — **177/177 PASS, 0 FAIL** (vòng 2: 97 · vòng 3: 170), tái lập giống
+  hệt trên **5 môi trường**: `TZ=Asia/Ho_Chi_Minh`, `env -u TZ`, `TZ=America/New_York`, `TZ=UTC`,
+  `TZ=Pacific/Kiritimati`.
+- Selfcheck **không để lại rác** trong `data/execution_logs/` (kiểm sau khi chạy: sạch).
+- `data/trading_rules.json` → `enabled` = **`false`**, không đổi. `data/margin_approvals/` chưa
+  tồn tại. Không đặt lệnh thật, không gọi API DNSE.
+
+---
+
+## 11.9 VÒNG 5 — arch-reviewer + quant-skeptic; 4 fix cuối, và MỘT khuyến nghị bị BÁC BỎ có lý do
+
+**quant-skeptic: `CONFIRMED` (confidence medium).** Tự chạy lại selfcheck ở 3 múi giờ (177/177 lúc
+đó), tự tính lại envelope `0,65 × 0,75 × 1,3 = 63,4% NAV` khớp số công bố, grep toàn repo xác nhận
+`lever_f`/`loan_package_id` chỉ được gán ở **đúng một** chỗ, và xác nhận bản ghi duyệt được kiểm
+theo **giá trị caller truyền vào** chứ không theo tên file (đóng đường đổi-tên-để-dùng-lại).
+
+**arch-reviewer vòng 5: 5/7 mục vòng 4 sạch**, còn 4 mục đã sửa nốt:
+
+| # | Mức | Lỗi | Sửa | Ca kiểm |
+|---|---|---|---|---|
+| 1 | MEDIUM | **Fix #1 và fix #3 của vòng 4 loại trừ nhau**: sổ CỐ Ý day-scoped, nhưng điều kiện vào nhánh STRIP lại đi qua `_session_already_placed` vốn khoá `created_at`. Plan phát hành lại giữa ngày ⇒ `started=False` dù lệnh 1840 buổi sáng vẫn sống ⇒ STRIP trừ SẠCH sổ ⇒ `pause=['SAB']` — đúng sự cố giả vòng 3/4 vừa đóng, qua trigger thứ ba | `_lever_ledger_merge` trả thêm `prior` (nội dung sổ TRƯỚC khi hợp); `_strip` chỉ trừ `{ticker levered} − prior` | `J20` |
+| 2 | MED-LOW | Sổ trên đĩa là **đầu vào không kiểm chứng** bơm thẳng vào tập `packages` mà guard đi soi. Một khoá `1841` (gói DEFAULT account) ⇒ guard soi mọi lệnh BAL/LAG thường lệ, `pause=['FPT','SAB']` — 1 file hỏng đóng băng cả phiên | Lọc khoá `!= CAPIT_LEVER_APPROVED_PACKAGE` khi đọc; ép value về `set[str]` (`set("SAB")` = `{'S','A','B'}` là bẫy im lặng) | `J21`/`J21b` |
+| 3 | LOW | Sổ được GHI cho mọi account mọi ngày kể cả khi tính năng TẮT và không cấp gì (~2 file rỗng/ngày vào `data/execution_logs/`, đã 198 file `exec_*`, **không có job dọn nào**) | Sổ rỗng + file chưa tồn tại ⇒ không tạo | — |
+| 4 | LOW | `_lever_ledger_write` `except: pass` câm ⇒ ghi hỏng thì lượt 13:00 mất kế thừa và dựng lại sự cố giả **không một dòng giải thích** | `print` cảnh báo (vẫn không raise) | — |
+
+### Một khuyến nghị của quant-skeptic bị BÁC BỎ — và vì sao
+
+quant-skeptic đề nghị: *"thêm trần độ lớn cho nhánh WARN — nếu lệch NAV vượt ~2× `CAPIT_LEVER_NAV_TOL`
+thì escalate về STRIP kể cả khi phiên đã bắt đầu"*. Nghe hợp lý, nhưng **áp vào sẽ hồi sinh đúng lỗi
+CRITICAL vòng 3**: arch-reviewer đo được lệch NAV **bình thường** giữa lúc giải ngân là **−46%** ở
+sizing CRISIS và **−14,5%** ở NEUTRAL — tức "2× tolerance" (30%) sẽ trip ngay trong ca vận hành lành
+mạnh, GỠ đòn bẩy đã duyệt và treo cả rổ CAPIT buổi chiều. Hai reviewer nhìn cùng cơ chế từ hai phía;
+số đo thực nghiệm quyết định. **Giữ nguyên nhánh WARN không có trần độ lớn.**
+
+Điều đó KHÔNG có nghĩa quan sát của quant-skeptic sai: nhánh WARN **đúng là** mù với độ lớn, nên khi
+phiên đã bắt đầu thì các lệnh vay CHƯA khớp còn lại vẫn đi ra dù neo NAV vừa báo artifact sai nặng.
+Rủi ro đó bị **chặn quy mô** bởi cổng người thứ hai (rổ mã + trần Σ VND của đúng ngày). Ghi lại ở
+đây như **rủi ro dư đã biết**, không phải chỗ chưa ai nghĩ tới.
+
+### 11.10 Rủi ro dư đã biết — phải xử lý TRƯỚC khi lật `enabled=true`
+
+1. **`created_at` là code chết trên plan thật.** Kiểm artifact thật: `plan_SpaceX_2026-08-04.json`,
+   `plan_SpaceX_2026-08-03.json`, `plan_ZaloPay_*` — **không file nào có khoá `created_at`** ⇒
+   `plan.created_at == ""`, `Executor._load_state` luôn RESUME, `_session_already_placed` luôn
+   `started=True`. Hai bên vẫn **khớp nhau** (đúng yêu cầu vòng 4) nhưng nhánh bảo vệ không bao giờ
+   kích hoạt trên đường production ⇒ plan thay giữa ngày vẫn cho lệnh vay MỚI đi ra chỉ với WARN.
+   Hướng sửa: vân tay nội dung plan (hash `order id+qty`) thay `created_at`, hoặc bắt plan generator
+   ghi `created_at`.
+2. **Nhánh WARN mù độ lớn** (trên).
+3. **`APPROVAL_PLACEHOLDERS` là quy ước mềm**, không phải cổng — `"Claude"`, `"system-auto"`,
+   `"yes"` đều lọt. Lá chắn thật là **dấu vết** (bus + Discord + exit 3 khi gửi hỏng).
+4. **Vòng đời `exec_*_lever_authorized.json`** chưa có ai sở hữu — cần 1 dòng trong
+   `kb/ops_runbook.md` hoặc `kb/cron_registry.md`.
+5. **NAV sống không trừ `totalDebt`** ⇒ neo lỏng dần theo mức vay (đã ghi ở §11.5).
+6. **Kiểm tay `pp0Buy@1840`** phiên LIVE đầu tiên.
+7. Mọi mitigation ở đây **chưa từng chạy với broker THẬT** (tính năng luôn TẮT) — quant-skeptic đề
+   nghị chạy lại trọn bộ 7 hướng tấn công này một lần nữa ngay sau khi lật cờ. Đồng ý.
+
+### Bằng chứng vòng 5
+
+- `capit_lever_selfcheck.py` — **180/180 PASS, 0 FAIL** (97 → 170 → 177 → 180), tái lập giống hệt
+  trên 5 môi trường: `TZ=Asia/Ho_Chi_Minh`, `env -u TZ`, `TZ=America/New_York`, `TZ=UTC`,
+  `TZ=Pacific/Kiritimati`.
+- Regression **6/6 rc=0**: `ghost_order`, `tick_retry`, `t2_settlement`, `churn_guard`,
+  `approval_gate`, `excluded_tickers`.
+- `data/execution_logs/` **sạch** sau khi chạy (không rác test).
+- `enabled` = **`false`**. `data/margin_approvals/` chưa tồn tại. Không đặt lệnh thật, không gọi API DNSE.
