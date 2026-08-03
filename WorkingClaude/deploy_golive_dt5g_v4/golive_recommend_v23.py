@@ -78,6 +78,7 @@ from anomaly_gate import anomaly_excluded as _anomaly_excluded_shared
 from anomaly_gate import anomaly_flags_freshness as _anomaly_flags_freshness
 from lag_liquidity_filter import lag_filter_illiquid
 from lag_rating_filter import lag_filter_low_rating
+from lag_forensic_filter import lag_filter_forensic_banned
 
 OUTDIR = os.path.join(WORKDIR, "deploy_golive_dt5g_v4", "out"); os.makedirs(OUTDIR, exist_ok=True)
 DT_TABLE = "vnindex_5state_dt5g_live"
@@ -606,6 +607,7 @@ def td_offset(ref, off):
 lag_up, lag_recent, lag_source_error = [], [], None
 lag_liq_dropped, lag_liq_error = [], None
 lag_rating_dropped, lag_rating_error = [], None
+lag_forensic_dropped, lag_forensic_error = [], None
 try:
     # Point-in-time candidate source (fix 2026-07-12, audit Taylor_20260712_121642 R1):
     # events must be visible here FROM their release date. The old source
@@ -635,6 +637,15 @@ try:
     if lag_rating_dropped:
         print(f"  [lag-rating] loại {len(lag_rating_dropped)} ứng viên RATING_FAIL (8L≥4): "
               + ", ".join(f"{d['ticker']} (8L={d['rating']})" for d in lag_rating_dropped))
+    # GATE QUẢN TRỊ: BANNED vĩnh viễn + cờ forensic severity=exclude (user duyệt 2026-08-03,
+    # job Taylor_20260803_035250) — xem lag_filter_forensic_banned(). Engine backtest đã có gate
+    # này từ 2026-06-20 (LAG_FORENSIC_GATE) nhưng đường live thì KHÔNG: VVS (BANNED + forensic)
+    # và BFC (forensic) qua sạch mọi gate tự động, chỉ được chặn BẰNG TAY trong plan note 07-30.
+    cand, lag_forensic_dropped, lag_forensic_error = lag_filter_forensic_banned(
+        cand, LATEST, workdir=WORKDIR)
+    if lag_forensic_dropped:
+        print(f"  [lag-forensic] loại {len(lag_forensic_dropped)} ứng viên BANNED/forensic: "
+              + ", ".join(f"{d['ticker']} ({d['kind']})" for d in lag_forensic_dropped))
     for _, row in cand.iterrows():
         entry, ahead = td_offset(row["Release_Date"], 5)
         tier = row["tier"]
@@ -904,6 +915,12 @@ status = {
     "lag_rating_excluded": lag_rating_dropped,
     "n_lag_rating_excluded": len(lag_rating_dropped),
     "lag_rating_filter_error": lag_rating_error,
+    # Ứng viên LAG bị loại vì GATE QUẢN TRỊ: BANNED vĩnh viễn hoặc cờ forensic severity=exclude.
+    # `lag_forensic_filter_error` != None ⇒ CHỈ phần cờ forensic không chạy được (fail-open);
+    # danh sách BANNED là hằng số trong code nên LUÔN áp, không phụ thuộc file.
+    "lag_forensic_excluded": lag_forensic_dropped,
+    "n_lag_forensic_excluded": len(lag_forensic_dropped),
+    "lag_forensic_filter_error": lag_forensic_error,
     "n_capit_basket": len(basket),
     # Sổ episode (§6b) — TRẠNG THÁI ĐANG GIỮ, khác hẳn capit_signal_today (điều kiện của ngày
     # chạy). Mọi gate báo cáo phải nhìn `capit_signal_today OR capit_episode_open`.
@@ -993,6 +1010,13 @@ elif lag_liq_dropped:
     _lq = ", ".join(d["ticker"] for d in lag_liq_dropped[:12]) + (" …" if len(lag_liq_dropped) > 12 else "")
     L.append(f"\n_Đã loại ở tầng tín hiệu (ADV≤0/thiếu/cũ — không mua được; vốn dồn sang ứng viên "
              f"kế tiếp thay vì nằm im): {len(lag_liq_dropped)} mã — {_lq}_")
+if lag_forensic_error:
+    L.append(f"\n⚠️ Cờ forensic KHÔNG đọc được ({lag_forensic_error}) — danh sách trên CHƯA lọc mã "
+             "bị cờ `exclude` (danh sách BANNED vĩnh viễn VẪN đã áp). Kiểm `data/forensic_flags.csv` "
+             "trước khi duyệt plan.")
+if lag_forensic_dropped:
+    L.append(f"\n_Đã loại ở tầng tín hiệu (gate quản trị BANNED/forensic): "
+             + ", ".join(f"{d['ticker']} ({d['kind']})" for d in lag_forensic_dropped) + "_")
 if state_today == 2:
     L.append("\n⚠️ BEAR: allocator w_LAG=0 — KHÔNG cấp vốn entry LAG mới cho tới khi thoát BEAR.")
 L.append(f"\n## CAPIT v2 monitor\n")
