@@ -44,6 +44,11 @@ for f in "$REAL/bin"/*; do
   [ -f "$f" ] && ln -s "$f" "$MK/bin/$(basename "$f")"
 done
 cp "$REAL/kb/discord_channels.json" "$MK/kb/discord_channels.json"
+# Registry provider (2026-08-03, multi-CLI): dispatch.sh phan giai binary qua
+# bin/cli_provider.sh -> $ROOT/kb/cli_providers.json. ROOT o day = $MK, nen thieu file nay
+# thi MOI ca deu fail o buoc validate provider — khong lien quan gi topic routing.
+# DISPATCH_CLAUDE_BIN van thang (bin_env_override) nen stub claude o duoi giu nguyen tac dung.
+cp "$REAL/kb/cli_providers.json" "$MK/kb/cli_providers.json"
 
 # Stub: ghi lại lời gọi thay vì gửi thật. `$2` của notify_thread.sh = topic ⇒ đó chính là thứ
 # ta cần quan sát (gửi vào topic nào, hay không gửi gì cả).

@@ -91,6 +91,12 @@ def fire(fp, rec):
     # resuming from). max_turns only makes sense to force for a max_turns-kind resume;
     # for usage_limit, the original run's own --max-turns wasn't the failure cause, so
     # only carry it if explicitly present too (harmless either way — same value as before).
+    # provider PHẢI đi cùng model: một job opencode mà resume không kèm --provider sẽ chạy
+    # trên claude với --model của opencode → cổng provider từ chối (exit 1) → task mất im
+    # (record đã bị xoá trước khi fire). Bản ghi cũ không có field này → giữ nguyên hành vi
+    # cũ (default_provider = claude), đúng vì mọi job trước 2026-08-03 đều là claude.
+    if rec.get("provider"):
+        argv += ["--provider", str(rec["provider"])]
     if rec.get("model"):
         argv += ["--model", str(rec["model"])]
     if rec.get("effort"):
@@ -108,11 +114,20 @@ def fire(fp, rec):
     try:
         r = subprocess.run(argv, env=env,
                            capture_output=True, text=True, timeout=30)
-        log("RESUMED %s (orig_job=%s, attempt #%d) -> %s"
-            % (agent, orig_job, count, r.stdout.strip()[:200] or r.stderr.strip()[:200]))
     except Exception as e:
         log("FAILED to resume %s (orig_job=%s): %s" % (agent, orig_job, e))
-        return
+        return False
+    # PHẢI kiểm returncode (sửa 2026-08-03, arch-reviewer F9). Trước đây rc bị BỎ QUA và
+    # notify "được tự động resume" bắn VÔ ĐIỀU KIỆN — cộng với việc record bị xoá TRƯỚC khi
+    # fire, một dispatch fail = task chết hẳn TRONG KHI user nhận tin báo thành công. Đó là
+    # kiểu hỏng tệ nhất: mất việc + mất cả tín hiệu là đã mất việc.
+    if r.returncode != 0:
+        log("DISPATCH-FAILED %s (orig_job=%s, attempt #%d, rc=%d) argv=%s -> %s"
+            % (agent, orig_job, count, r.returncode, argv[3:],
+               (r.stderr.strip() or r.stdout.strip())[:300]))
+        return False
+    log("RESUMED %s (orig_job=%s, attempt #%d) -> %s"
+        % (agent, orig_job, count, r.stdout.strip()[:200] or r.stderr.strip()[:200]))
     if os.path.isfile(NOTIFY):
         reason = "hết turn budget, trần đã nâng" if kind == "max_turns" else "usage limit đã reset"
         try:
@@ -121,6 +136,7 @@ def fire(fp, rec):
                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         except Exception:
             pass
+    return True
 
 
 def main():
@@ -140,7 +156,37 @@ def main():
             os.remove(fp)  # remove BEFORE firing — see module docstring
         except Exception:
             pass
-        fire(fp, rec)
+        if fire(fp, rec):
+            continue
+        # Dispatch KHÔNG chạy được. Record đã bị xoá ở trên (cố ý, chống double-fire), nên
+        # nếu dừng ở đây thì task biến mất không dấu vết — đúng lỗ hổng F9. Khôi phục record
+        # CÓ TRẦN: thử lại sau 30' tối đa 2 lần, rồi bỏ kèm cảnh báo TO. Có trần để một lỗi
+        # cấu hình thường trực (vd provider bị tắt) không thành vòng lặp cron vô hạn.
+        nfail = int(rec.get("dispatch_fail_count", 0)) + 1
+        agent = rec.get("agent", "?")
+        orig_job = rec.get("orig_job_id", "?")
+        if nfail <= 2:
+            rec["dispatch_fail_count"] = nfail
+            rec["resume_at"] = int(now) + 1800
+            try:
+                tmp = fp + ".tmp"
+                with open(tmp, "w", encoding="utf-8") as f:
+                    json.dump(rec, f, ensure_ascii=False)
+                os.replace(tmp, fp)
+                log("RESTORED pending record %s (dispatch_fail_count=%d, thử lại sau 30')" % (fp, nfail))
+            except Exception as e:
+                log("LOST %s: khôi phục record thất bại: %s" % (fp, e))
+        else:
+            log("GIVE-UP %s (orig_job=%s): dispatch fail %d lần — BỎ record" % (agent, orig_job, nfail))
+            if os.path.isfile(NOTIFY):
+                try:
+                    subprocess.Popen(
+                        [NOTIFY, "⚠️ [auto-resume] %s: KHÔNG resume được task (job gốc=%s) sau "
+                                 "%d lần thử — record đã bỏ, TASK NÀY SẼ KHÔNG TỰ CHẠY LẠI. "
+                                 "Cần người xem: logs/resume_pending.log" % (agent, orig_job, nfail)],
+                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                except Exception:
+                    pass
 
 
 if __name__ == "__main__":

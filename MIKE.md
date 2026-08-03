@@ -240,6 +240,38 @@ editorial review). Tự hỏi đúng Q1-Q3, đừng phản xạ chọn tier cao 
 - **Fable 5**: chỉ khi task thực sự **cực kỳ phức tạp** (thiết kế chiến lược mới toàn diện, chuỗi
   giả thuyết lớn nhiều tầng vượt tầm Opus) — dùng dè, không phải mặc định cho R&D thường.
 
+### Provider routing — CHỌN CLI trước, rồi mới chọn model (thêm 2026-08-03, multi-CLI)
+
+`dispatch.sh` nhận thêm **`--provider claude|opencode|codex`**. Bỏ qua ⇒ `claude` (mọi lệnh
+dispatch cũ chạy y nguyên, 0 thay đổi hành vi — đã chứng minh bằng `bin/cli_provider_selfcheck.sh`
+so argv byte-for-byte). Khai báo provider ở **`kb/cli_providers.json`** — thêm CLI mới = thêm 1
+entry, KHÔNG sửa `dispatch.sh`.
+
+**Q0 (hỏi TRƯỚC Q1-Q3): việc này có lý do cụ thể để rời khỏi claude không?** Không có lý do ⇒
+`claude`. Chống đúng phản xạ "chọn CLI nghe có vẻ mạnh hơn" — cùng bệnh với model-drift 07-17.
+
+| Dùng | Khi nào | Ràng buộc |
+|---|---|---|
+| **claude** (mặc định) | Mọi việc chạm tiền thật, lập plan, điều phối, sửa production, và toàn bộ việc thường lệ | Không giới hạn agent |
+| **opencode** | **Ý kiến độc lập từ họ model KHÁC** (deepseek/ling/nemotron…): phản biện một kết luận của claude, cross-check một lập luận, brainstorm phương án, tra cứu đọc-nhiều | Chỉ `Taylor·Winston·Wendy·Spyros·Wags`; **read-only cưỡng chế** (`permission` trong `agents/<id>/opencode.json`); free tier **KHÔNG đảm bảo độ trễ** ⇒ cấm dùng cho việc trên đường găng (plan T+1, EOD report) |
+| **codex** | Chưa bật (`enabled:false`) | Mở sau khi user chạy `codex login`, rồi đặt `enabled:true` |
+
+Giá trị thật của multi-CLI ở đây là **bất đồng ý kiến**, không phải throughput: một kết luận mà
+claude và một họ model khác cùng ra thì đáng tin hơn hẳn. Dùng nó như `quant-skeptic` thứ hai.
+
+```bash
+# Ý kiến độc lập, model khác họ, không tốn tiền:
+bin/dispatch.sh Taylor "Phản biện kết luận X trong <file>. Chỉ đọc, đừng sửa gì." \
+  --provider opencode --model opencode/deepseek-v4-flash-free
+bin/cli_provider.sh list                 # provider đang bật
+bin/cli_provider.sh check opencode       # CLI có chạy được không (phân biệt 'provider hỏng' vs 'task lỗi')
+```
+
+⚠️ `allow_agents` trong registry chỉ chặn ở tầng `dispatch.sh` — agent có Bash vẫn gọi thẳng
+binary được. Cưỡng chế THẬT là `permission` trong `agents/<id>/opencode.json`, và **nó không phải
+sandbox bảo mật**: pattern khớp trên chuỗi lệnh nên một lệnh trong allowlist vẫn có thể kèm
+chuyển hướng (`grep x y > z`) để ghi file. Nó giảm bề mặt **tai nạn**, không chặn được chủ đích.
+
 Ví dụ: `bin/dispatch.sh Taylor "Thiết kế lại toàn bộ hệ thống chọn cổ phiếu từ đầu" --model fable --effort high`
 · `bin/dispatch.sh Taylor "Backtest thêm 1 sector cho family có sẵn" --model opus --effort high`
 · `bin/dispatch.sh Taylor "Query PE hiện tại của VNM"` (omit `--model` → Sonnet 5, medium).

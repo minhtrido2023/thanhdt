@@ -949,18 +949,26 @@ def cmd_circuit_record(a):
 
 def cmd_pending_resume_set(a):
     """pending-resume-set <path> <agent_id> <from> <orig_job_id> <resume_at_epoch>
-    <resume_count> [kind] [model] [effort] [max_turns] — prompt text read from STDIN
-    (avoids shell-quoting a large/multiline string as a CLI arg). Atomic write."""
+    <resume_count> [kind] [model] [effort] [max_turns] [provider] — prompt text read from
+    STDIN (avoids shell-quoting a large/multiline string as a CLI arg). Atomic write.
+
+    `provider` added 2026-08-03 (multi-CLI). Without it, a resume ALWAYS re-dispatches on
+    the default provider (claude) while still passing the ORIGINAL provider's --model —
+    e.g. an opencode job resumes as `claude --model opencode/deepseek-v4-flash-free`, which
+    dispatch.sh's provider gate rejects (exit 1). Combined with resume_pending.py removing
+    the record BEFORE firing, that silently loses the task."""
     fp, agent_id, frm, orig_job_id, resume_at, resume_count = a[:6]
     kind = a[6] if len(a) > 6 and a[6] else "usage_limit"
     model = a[7] if len(a) > 7 and a[7] else None
     effort = a[8] if len(a) > 8 and a[8] else None
     max_turns = a[9] if len(a) > 9 and a[9] else None
+    provider = a[10] if len(a) > 10 and a[10] else None
     prompt = sys.stdin.read()
     obj = {"agent": agent_id, "from": frm, "orig_job_id": orig_job_id,
            "resume_at": _as_int(resume_at), "resume_count": _as_int(resume_count),
            "kind": kind, "model": model, "effort": effort,
            "max_turns": _as_int(max_turns) if max_turns else None,
+           "provider": provider,
            "prompt": prompt, "created_at": now_iso()}
     os.makedirs(os.path.dirname(fp), exist_ok=True)
     tmp = fp + ".tmp"

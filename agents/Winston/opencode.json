@@ -1,0 +1,55 @@
+// Profile opencode cho agent Winston — sibling cua .claude/settings.json, TRACK GIT.
+// Chi tiet + bang chung kiem chung: agents/Wags/design_multi_cli_dispatch_20260803.md
+//
+// instructions = DUNG danh sach @import trong agents/Winston/CLAUDE.md, CONG CLAUDE.md TO TIEN
+//   (WorkingClaude/CLAUDE.md: BQ schema, DT5G, filter.json) — Claude Code tu nap khi di len
+//   cay thu muc, opencode thi KHONG, va no cung khong hieu cu phap @import (arch-reviewer F7).
+//
+// permission = gate NANG LUC, cuong che luc chay. ⚠️ KHONG PHAI SANDBOX BAO MAT: pattern khop
+//   tren CHUOI LENH nen lenh trong allowlist van co the kem chuyen huong (`grep x y > z`) de
+//   ghi file. Giam be mat TAI NAN, khong chan duoc chu dich. Vi vay allowlist CO Y khong chua
+//   echo/tee/python/sh/bash/cp/mv/rm/sed/awk.
+// LUU Y: opencode validate schema NGHIEM — khoa la dung `//` (JSONC), KHONG duoc them khoa la
+//   nhu "_README" (da do: "Configuration is invalid ↳ Unrecognized key").
+{
+  "$schema": "https://opencode.ai/config.json",
+
+  "instructions": [
+    "/home/trido/thanhdt/WorkingClaude/mike/kb/context_safety_core.md",
+    "/home/trido/thanhdt/WorkingClaude/mike/kb/context_dataops_mini.md",
+    "/home/trido/thanhdt/WorkingClaude/mike/kb/coding_guidelines.md",
+    "/home/trido/thanhdt/WorkingClaude/CLAUDE.md"
+  ],
+
+  "permission": {
+    "edit": { "*": "deny" },
+    "webfetch": "allow",
+    "bash": {
+      "*": "deny",
+
+      "/home/trido/thanhdt/WorkingClaude/mike/bin/append_event.sh *": "allow",
+      "/home/trido/thanhdt/WorkingClaude/mike/bin/heartbeat.sh *": "allow",
+      "/home/trido/thanhdt/WorkingClaude/mike/bin/jobs.sh *": "allow",
+
+      "ls *": "allow",
+      "cat *": "allow",
+      "head *": "allow",
+      "tail *": "allow",
+      "wc *": "allow",
+      "grep *": "allow",
+      "rg *": "allow",
+      "find *": "allow",
+      "stat *": "allow",
+      "git status*": "allow",
+      "git log*": "allow",
+      "git diff*": "allow",
+      "git show*": "allow",
+
+      "*trading_rules*": "deny",
+      "*bot_execute*": "deny",
+      "*secrets*": "deny",
+      "*crontab*": "deny",
+      "*BOT_STOP*": "deny"
+    }
+  }
+}

@@ -107,9 +107,17 @@ MODEL=""
 EFFORT=""
 FORCE_TID=""
 MAX_TURNS=""
+PROVIDER=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --bg) bg="--bg" ;;
+    # --provider: CLI nao chay job nay (claude|opencode|codex...). Bo qua => default_provider
+    # trong kb/cli_providers.json (= claude) ⇒ MOI lenh dispatch cu chay y nguyen.
+    # Ten sai / provider dang tat / agent khong duoc phep ⇒ HUY dispatch (exit 1), KHONG bao
+    # gio am tham roi ve claude — cung ky luat voi --thread (2026-08-02).
+    --provider) PROVIDER="${2:?--provider needs a value}"; shift ;;
+    --provider=*) PROVIDER="${1#*=}"
+                  [ -n "$PROVIDER" ] || { echo "ERROR: --provider= rong (bien chua set?)" >&2; exit 1; } ;;
     --max-turns) MAX_TURNS="${2:?--max-turns needs a value}"; shift ;;
     --max-turns=*) MAX_TURNS="${1#*=}" ;;
     # --thread: pin this job's Discord topic EXPLICITLY — beats both the per-agent
@@ -149,12 +157,16 @@ if [ -z "$TIMEOUT" ]; then
     *)          TIMEOUT=600 ;;
   esac
 fi
-case "$MODEL" in
-  ""|sonnet|opus|haiku|fable) ;;
-  *) echo "ERROR: --model '$MODEL' không hợp lệ — dùng sonnet|opus|haiku|fable." >&2; exit 1 ;;
-esac
-MODEL_FLAG=""
-[ -n "$MODEL" ] && MODEL_FLAG="--model $MODEL"
+# --- Provider resolution (2026-08-03, multi-CLI) --------------------------------
+# Danh sach model/effort hop le KHONG con hardcode o day — moi provider tu khai trong
+# kb/cli_providers.json. `validate` kiem: enabled + allow_agents + model thuoc provider +
+# effort hop le, va tra ve effort DA CLAMP (effort_caps, vd fable<=high).
+# KHONG tu dich tier giua provider (--model opus KHONG tu thanh gpt-5.1-codex) — do dung la
+# lop su co model-drift 07-17. Sai model cho provider ⇒ exit 1.
+if [ -z "$PROVIDER" ]; then
+  PROVIDER="$(python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['default_provider'])" \
+              "$ROOT/kb/cli_providers.json" 2>/dev/null || echo claude)"
+fi
 # Soft nudge (2026-07-17, model-drift incident — see kb/INCIDENTS.md): fable should be
 # rare per MIKE.md §Model routing ("dùng dè, không phải mặc định"), but measured
 # 2026-07-17 showed 82/94 fable dispatches to Taylor/Winston in one week were Mike
@@ -171,16 +183,28 @@ fi
 # Reasoning-effort per dispatch. Mặc định 'medium' (task thường lệ). Task phức tạp:
 # truyền --effort high. Chính sách CỨNG của user: model 'fable' chỉ được tối đa 'high'
 # — xhigh/max bị clamp về high (Fable dùng high cho phức tạp, medium cho phần còn lại).
-case "$EFFORT" in
-  ""|low|medium|high|xhigh|max) ;;
-  *) echo "ERROR: --effort '$EFFORT' không hợp lệ — dùng low|medium|high|xhigh|max." >&2; exit 1 ;;
-esac
 [ -z "$EFFORT" ] && EFFORT="medium"
-if [ "$MODEL" = "fable" ] && { [ "$EFFORT" = "xhigh" ] || [ "$EFFORT" = "max" ]; }; then
-  echo "WARN: fable giới hạn effort tối đa 'high' (chính sách user) — hạ '$EFFORT'→'high'." >&2
-  EFFORT="high"
+# Cong provider DUY NHAT: enabled + allow_agents + model hop le cho provider + effort hop le,
+# tra ve effort DA CLAMP (fable<=high van duoc giu, nay khai trong registry `effort_caps`
+# thay vi hardcode o day). Fail => HUY dispatch, khong am tham roi ve claude.
+if ! _eff_clamped="$("$ROOT/bin/cli_provider.sh" validate "$PROVIDER" "$id" "$MODEL" "$EFFORT")"; then
+  echo "ERROR: HUY dispatch — provider '$PROVIDER' khong nhan job nay (ly do o tren)." >&2
+  exit 1
 fi
+[ -n "$_eff_clamped" ] && EFFORT="$_eff_clamped"
 EFFORT_FLAG="--effort $EFFORT"
+# Binary + env cua provider. `bin` da ap dung bin_env_override (DISPATCH_CLAUDE_BIN...) nen
+# bin/dispatch_discord_topic_selfcheck.sh van lai duoc dispatch qua stub (F11 arch-reviewer).
+CLI_BIN="$("$ROOT/bin/cli_provider.sh" bin "$PROVIDER")" || { echo "ERROR: khong phan giai duoc binary cua provider '$PROVIDER'." >&2; exit 1; }
+CLI_SUPPORTS_TURNS="$("$ROOT/bin/cli_provider.sh" field "$PROVIDER" supports_turns 2>/dev/null || echo true)"
+CLI_USAGE_PROBE="$("$ROOT/bin/cli_provider.sh" field "$PROVIDER" usage_probe 2>/dev/null || true)"
+CLI_MAXTURNS_PAT="$("$ROOT/bin/cli_provider.sh" field "$PROVIDER" max_turns_pattern 2>/dev/null || true)"
+# env bo sung (pin interpreter cho CLI dang shim node — xem registry _README).
+while IFS= read -r _envline; do
+  [ -n "$_envline" ] && export "${_envline?}"
+done < <("$ROOT/bin/cli_provider.sh" env-exports "$PROVIDER" 2>/dev/null)
+# Giu ten bien cu: mot so nhanh/ban ghi van tham chieu $CLAUDE.
+CLAUDE="$CLI_BIN"
 
 # --- Max-turns override (2026-07-31, sau sự cố Winston_20260731_062642 fail "Reached
 # max turns (50)" 2 lần liên tiếp cho 1 task gộp 3 deliverable độc lập — 50 là hằng số
@@ -225,13 +249,18 @@ fi
 CIRCUIT_DIR="$ROOT/state/circuit"
 CIRCUIT_THRESHOLD="${DISPATCH_CIRCUIT_THRESHOLD:-3}"
 CIRCUIT_COOLDOWN="${DISPATCH_CIRCUIT_COOLDOWN:-1800}"
+# Khoa breaker theo AGENT+PROVIDER, khong phai agent khong (sua 2026-08-03, arch-reviewer F10).
+# Neu chi theo agent: opencode hong 3 lan lien tiep se KHOA LUON Taylor tren claude — tuc mot
+# provider phu lam dung viec production tren provider chinh. claude giu nguyen ten khoa cu
+# ("Taylor") de khong mat trang thai breaker lich su dang co trong state/circuit/.
+if [ "$PROVIDER" = "claude" ]; then CIRCUIT_KEY="$id"; else CIRCUIT_KEY="${id}@${PROVIDER}"; fi
 if [ "${DISPATCH_FORCE:-}" != "1" ]; then
   set +e
-  _cc_out="$(python3 "$ROOT/bin/mike_json.py" circuit-check "$CIRCUIT_DIR" "$id")"
+  _cc_out="$(python3 "$ROOT/bin/mike_json.py" circuit-check "$CIRCUIT_DIR" "$CIRCUIT_KEY")"
   _cc_rc=$?
   set -e
   if [ "$_cc_rc" -ne 0 ]; then
-    echo "ERROR: circuit breaker OPEN for '$id' ($_cc_out) — $CIRCUIT_THRESHOLD+ lỗi liên tiếp, đang cooldown." >&2
+    echo "ERROR: circuit breaker OPEN for '$CIRCUIT_KEY' ($_cc_out) — $CIRCUIT_THRESHOLD+ lỗi liên tiếp, đang cooldown." >&2
     echo "  Bỏ qua dispatch này. Ép chạy bất chấp: DISPATCH_FORCE=1 bin/dispatch.sh $id ..." >&2
     exit 4
   fi
@@ -293,8 +322,16 @@ _looks_like_usage_limit() {  # <logfile> [<err_logfile>] -> 0 if the failure loo
   # the rolling 5-HOUR window; it CANNOT catch a WEEKLY-cap exhaustion (different ceiling,
   # 5h pct reads low while weekly is blocked) — that case is caught by the phrase list
   # above ("weekly limit"), which is why the shared list is the primary signal.
+  #
+  # ⚠️ PROBE THEO PROVIDER (sua 2026-08-03, arch-reviewer): bin/usage_watch.py doc
+  # ~/.claude/projects = usage cua CLAUDE. Dung no lam doi chung cho provider KHAC la doc
+  # NHAM TAI KHOAN: 1 job opencode/codex fail vi ly do bat ky, dung luc quota claude >=95%,
+  # se bi phan loai nham "usage-limited" -> day vao bus/pending_resumes/ -> hen resume theo
+  # GIO RESET CUA CLAUDE, va co y KHONG trip circuit breaker => job hong that lang le retry
+  # roi im. usage_probe=null (opencode/codex) => CHI dung phrase-match o tren.
+  [ -n "${CLI_USAGE_PROBE:-}" ] || return 1
   local pct
-  pct="$(python3 "$ROOT/bin/usage_watch.py" --oneline 2>/dev/null | awk '{print $1}')"
+  pct="$(python3 "$ROOT/$CLI_USAGE_PROBE" --oneline 2>/dev/null | awk '{print $1}')"
   [ -n "$pct" ] && [ "${pct%%.*}" -ge "${DISPATCH_USAGE_LIMIT_PCT:-95}" ] 2>/dev/null
 }
 
@@ -325,13 +362,22 @@ _maybe_schedule_usage_resume() {
     return 1
   fi
   local reset_hhmm resume_at
-  reset_hhmm="$(python3 "$ROOT/bin/usage_watch.py" --oneline 2>/dev/null | awk '{print $4}')"
+  # Gio reset cung phai lay tu probe CUA PROVIDER — khong co probe thi KHONG DOAN gio reset,
+  # roi ve buffer 5h mac dinh o dong duoi (cung ly do §5.4 o _looks_like_usage_limit).
+  reset_hhmm=""
+  [ -n "${CLI_USAGE_PROBE:-}" ] && \
+    reset_hhmm="$(python3 "$ROOT/$CLI_USAGE_PROBE" --oneline 2>/dev/null | awk '{print $4}')"
   resume_at="$(_parse_reset_epoch "$reset_hhmm")"
   [ -n "$resume_at" ] || resume_at=$(( $(date +%s) + 5 * 3600 ))  # unknown reset -> assume full window
   resume_at=$((resume_at + ${DISPATCH_USAGE_RESUME_BUFFER:-600}))
   mkdir -p "$ROOT/bus/pending_resumes"
+  # Truyen day du kind/model/effort/provider (sua 2026-08-03): nhanh usage_limit truoc day
+  # chi truyen 6 tham so nen MODEL/EFFORT bi mat khi resume — trai voi chinh docstring cua
+  # resume_pending.py. Thieu `provider` thi job opencode se resume bang CLAUDE kem --model
+  # cua opencode => cong provider tu choi (exit 1) => task mat im (arch-reviewer F9).
   printf '%s' "$prompt" | python3 "$ROOT/bin/mike_json.py" pending-resume-set \
-    "$ROOT/bus/pending_resumes/${job_id}.json" "$id" "$from" "$job_id" "$resume_at" "$((n + 1))"
+    "$ROOT/bus/pending_resumes/${job_id}.json" "$id" "$from" "$job_id" "$resume_at" "$((n + 1))" \
+    "usage_limit" "${MODEL:-}" "$EFFORT" "" "$PROVIDER"
   JSET status=usage_limited ended_at="$(date +%s)" \
        result_summary="account usage limit — auto-resume scheduled at epoch $resume_at (attempt $((n + 1))/$cap)"
   local resume_ict; resume_ict="$(TZ=Asia/Ho_Chi_Minh date -d "@$resume_at" '+%H:%M %d/%m' 2>/dev/null || echo '?')"
@@ -358,7 +404,12 @@ _maybe_schedule_usage_resume() {
 # không phải lỗi thoáng qua đáng thử lại y hệt.
 _looks_like_max_turns() {
   local lf="$1"
-  [ -f "$lf" ] && grep -qi "Reached max turns" "$lf" 2>/dev/null
+  # "Reached max turns" la wording RIENG cua Claude CLI. Moi provider khai pattern cua no
+  # trong kb/cli_providers.json (max_turns_pattern); null/rong = provider KHONG co khai niem
+  # turn-cap (vd opencode, codex) => khong bao gio khop, ca nhanh auto-resume nang tran bi
+  # BO HAN thay vi bia ra mot luoi an toan khong ton tai.
+  [ -n "${CLI_MAXTURNS_PAT:-}" ] || return 1
+  [ -f "$lf" ] && grep -qi "$CLI_MAXTURNS_PAT" "$lf" 2>/dev/null
 }
 
 MAXTURNS_CEILING="${DISPATCH_MAX_TURNS_CEILING:-200}"
@@ -391,7 +442,7 @@ _maybe_schedule_maxturns_resume() {
   mkdir -p "$ROOT/bus/pending_resumes"
   printf '%s' "$prompt" | python3 "$ROOT/bin/mike_json.py" pending-resume-set \
     "$ROOT/bus/pending_resumes/${job_id}.json" "$id" "$from" "$job_id" "$resume_at" "$((n + 1))" \
-    "max_turns" "${MODEL:-}" "$EFFORT" "$bumped"
+    "max_turns" "${MODEL:-}" "$EFFORT" "$bumped" "$PROVIDER"
   JSET status=maxturns_pending ended_at="$(date +%s)" \
        result_summary="hết turn budget (--max-turns=$MAX_TURNS) — auto-resume ngay với --max-turns=$bumped (lần thử #$((n + 1))/$cap)"
   "$ROOT/bin/notify.sh" "[dispatch] $id: hết turn budget (job $job_id, --max-turns=$MAX_TURNS) — KHÔNG PHẢI lỗi nội dung. Tự động resume NGAY với trần cao hơn (--max-turns=$bumped, lần thử #$((n + 1))/$cap)." 2>/dev/null || true
@@ -676,6 +727,52 @@ _hb_aware_timeout() {
   wait "$pid"
 }
 
+# _build_argv <prompt_text> — dung mang CLI_ARGV cho $PROVIDER hien tai.
+#
+# ⚠️ PHAI goi BEN TRONG _bg_wrapper (hoac nhanh sync), KHONG BAO GIO dung san roi van chuyen
+# mang nay qua ranh gioi tien trinh. Ly do da do thuc nghiem (arch-reviewer 2026-08-03):
+#   - array bash khong export duoc: `arr=(a "b c"); export arr; bash -c 'declare -p arr'`
+#     -> "bash: declare: arr: not found". Ma _bg_wrapper duoc re-enter bang `bash -c`.
+#   - NUL khong song qua $( ): `x="$(printf 'a\0b\0c')"` -> len=3 "abc".
+#   - moi duong di qua `eval` chuoi tai sinh lop loi quoting §15 (4 su co 07-17 -> 08-01),
+#     ma prompt fleet la tieng Viet day dau " va backtick.
+# => registry CHI tra FIELD; argv dung tai cho, bang bash thuan, khong quote thu cong.
+_build_argv() {
+  local _p="$1"
+  case "$PROVIDER" in
+    claude)
+      # Phai BYTE-FOR-BYTE bang chuoi cu:
+      #   "$CLAUDE" -p "$P" --permission-mode auto --max-turns $MAX_TURNS $MODEL_FLAG $EFFORT_FLAG
+      # ($MODEL_FLAG/$EFFORT_FLAG KHONG quote nen word-split thanh 2 word, hoac 0 word khi rong.)
+      CLI_ARGV=( "$CLI_BIN" -p "$_p" --permission-mode auto --max-turns "$MAX_TURNS" )
+      if [ -n "$MODEL" ]; then CLI_ARGV+=( --model "$MODEL" ); fi
+      CLI_ARGV+=( --effort "$EFFORT" )
+      ;;
+    opencode)
+      # prompt la POSITIONAL (`opencode run [message..]`) => de CUOI CUNG.
+      # --auto: auto-approve nhung KHONG de len rule `deny` (da kiem chung 2026-08-03:
+      # bash deny-by-default van chan, tra loi sach ~7s, khong treo).
+      CLI_ARGV=( "$CLI_BIN" run --dir "$AGENT_DIR" --auto )
+      if [ -n "$MODEL" ]; then CLI_ARGV+=( -m "$MODEL" ); fi
+      if [ -n "$EFFORT" ]; then CLI_ARGV+=( --variant "$EFFORT" ); fi
+      CLI_ARGV+=( "$_p" )
+      ;;
+    codex)
+      # -s workspace-write (KHONG dung --dangerously-bypass-approvals-and-sandbox —
+      # arch-reviewer required_change #6c). Chua wire that: enabled=false toi khi user login.
+      CLI_ARGV=( "$CLI_BIN" exec --skip-git-repo-check -C "$AGENT_DIR" -s workspace-write )
+      if [ -n "$MODEL" ]; then CLI_ARGV+=( -m "$MODEL" ); fi
+      if [ -n "$EFFORT" ]; then CLI_ARGV+=( -c "model_reasoning_effort=\"$EFFORT\"" ); fi
+      CLI_ARGV+=( "$_p" )
+      ;;
+    *)
+      echo "dispatch: provider '$PROVIDER' chua co bo dung argv trong _build_argv()." >&2
+      return 1
+      ;;
+  esac
+  return 0
+}
+
 dispatch_prompt="[DISPATCH từ $from | job=$job_id] $prompt
 
 Khi hoàn thành, GHI KẾT QUẢ lên bus bằng (tham số cuối '$job_id' là trace_id — LUÔN giữ
@@ -789,6 +886,7 @@ JSET job_id="$job_id" from="$from" to="$id" status=running attempt=1 \
      max_attempts=$((RETRIES + 1)) started_at="$_start_ts" \
      deadline=$((_start_ts + TIMEOUT)) logfile="$logfile" discord_thread_id="$_dtid0" \
      model="${MODEL:-default}" effort="$EFFORT" \
+     provider="$PROVIDER" turn_cap="$([ "$CLI_SUPPORTS_TURNS" = "true" ] && echo "$MAX_TURNS" || echo unsupported)" \
      prompt_summary="$(printf '%s' "$prompt" | head -c 160 | tr '\n\t' '  ')"
 
 if [ "$bg" = "--bg" ]; then
@@ -819,13 +917,14 @@ viết lại từ đầu (tốn gấp đôi vô ích). Nếu phần dở dang sa
 làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ mà không giải thích."
       fi
       set +e
-      _hb_aware_timeout "$CLAUDE" -p "$run_prompt" \
-        --permission-mode auto --max-turns $MAX_TURNS $MODEL_FLAG $EFFORT_FLAG > "$logfile" 2>&1
+      # argv dung TAI DAY (trong tien trinh con), khong phai o tien trinh cha — xem _build_argv.
+      CLI_ARGV=()
+      _build_argv "$run_prompt" && _hb_aware_timeout "${CLI_ARGV[@]}" > "$logfile" 2>&1
       rc=$?
       set -e
       if [ "$rc" -eq 0 ]; then
         JSET status=done ended_at="$(date +%s)" exit_code=0 result_summary="$(SUMMARY)"
-        _circuit_record "$id" success
+        _circuit_record "$CIRCUIT_KEY" success
         "$ROOT/bin/consolidate.sh" >> "$ROOT/logs/consolidator.log" 2>&1 || true
         "$ROOT/bin/notify.sh" "[dispatch] $id hoàn thành (job $job_id): $(SUMMARY)" 2>/dev/null || true
         # Discord thread notification — always, regardless of who dispatched. Read the
@@ -907,7 +1006,7 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
     local fstatus=failed why="THẤT BẠI"
     if [ "$rc" -eq 124 ]; then fstatus=timeout; why="QUÁ HẠN (timeout ${TIMEOUT}s)"; fi
     JSET status="$fstatus" ended_at="$(date +%s)" exit_code="$rc" result_summary="$(SUMMARY)"
-    _circuit_record "$id" fail
+    _circuit_record "$CIRCUIT_KEY" fail
     "$ROOT/bin/consolidate.sh" >> "$ROOT/logs/consolidator.log" 2>&1 || true
     "$ROOT/bin/notify.sh" "[dispatch] $id $why sau $max_attempts lần (job $job_id) — xem $logfile" 2>/dev/null || true
     local _tid; _tid="$(_job_thread_id "$job_id")"
@@ -960,10 +1059,12 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
             _maybe_schedule_usage_resume _looks_like_usage_limit _parse_reset_epoch \
             _current_resume_count _job_thread_id _hb_aware_timeout \
             _maybe_schedule_maxturns_resume _looks_like_max_turns _bumped_max_turns \
-            _current_maxturns_resume_count
+            _current_maxturns_resume_count _build_argv
+  # Chi export SCALAR (bash khong export duoc array — do la ly do _build_argv chay trong con).
   export ROOT JOBS_DIR job_id from id ts TIMEOUT RETRIES CLAUDE dispatch_prompt logfile prompt \
          CIRCUIT_DIR CIRCUIT_THRESHOLD CIRCUIT_COOLDOWN MODEL_FLAG EFFORT_FLAG MAX_EXT HB_FRESH_S \
-         MAX_TURNS MAXTURNS_CEILING MODEL EFFORT
+         MAX_TURNS MAXTURNS_CEILING MODEL EFFORT \
+         PROVIDER CLI_BIN AGENT_DIR CLI_SUPPORTS_TURNS CLI_USAGE_PROBE CLI_MAXTURNS_PAT CIRCUIT_KEY
   # systemd-run --user needs the user manager socket; cron strips XDG_RUNTIME_DIR.
   export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
   _detach_ok=0
@@ -1007,7 +1108,15 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
   # cho CHÍNH job này (model mặc định "default", effort rỗng -> "?", khớp bucket_key() của
   # wakeup_profile.py). File thiếu/hỏng/không có bucket khớp -> _wsugg rỗng, in ladder cũ
   # 240-270s như trước — KHÔNG BAO GIỜ chặn dispatch dù lỗi gì.
-  _wkey="${id}|${MODEL:-default}|${EFFORT:-?}"
+  # Provider KHONG doi dinh dang key cho claude (giu nguyen bucket lich su trong
+  # state/wakeup_profile.json — doi dinh dang la moi hint cu tro thanh khong khop, hint rong
+  # im lang). Provider khac lay namespace RIENG: chua co mau do tre nao nen se roi ve ladder
+  # mac dinh — dung, vi do tre opencode/codex khong duoc phep lam nhieu hint cua claude (F10).
+  if [ "$PROVIDER" = "claude" ]; then
+    _wkey="${id}|${MODEL:-default}|${EFFORT:-?}"
+  else
+    _wkey="${id}|${PROVIDER}:${MODEL:-default}|${EFFORT:-?}"
+  fi
   _wsugg="$(python3 -c "
 import json, sys
 key = sys.argv[1]
@@ -1059,10 +1168,13 @@ else
   }
   trap _sync_killed_guard TERM INT HUP
   set +e
-  _hb_aware_timeout "$CLAUDE" -p "$dispatch_prompt" \
-    --permission-mode auto --max-turns $MAX_TURNS $MODEL_FLAG $EFFORT_FLAG \
-    2>"$logfile.err" | tee "$logfile"
-  rc=${PIPESTATUS[0]}
+  CLI_ARGV=()
+  if _build_argv "$dispatch_prompt"; then
+    _hb_aware_timeout "${CLI_ARGV[@]}" 2>"$logfile.err" | tee "$logfile"
+    rc=${PIPESTATUS[0]}
+  else
+    rc=78   # loi CAU HINH provider, khong phai loi agent
+  fi
   set -e
   trap - TERM INT HUP  # claude finished — normal finalize below owns the record now
   kill "$_wpid" 2>/dev/null || true  # watcher no longer needed
@@ -1070,7 +1182,7 @@ else
   "$ROOT/bin/consolidate.sh" >> "$ROOT/logs/consolidator.log" 2>&1 || true
   if [ "$rc" -eq 0 ]; then
     JSET status=done ended_at="$(date +%s)" exit_code=0 result_summary="$(SUMMARY)"
-    _circuit_record "$id" success
+    _circuit_record "$CIRCUIT_KEY" success
   else
     if _maybe_schedule_usage_resume "$logfile" "$logfile.err"; then
       echo "NOTE: dispatch $id (job $job_id) hết usage limit tài khoản — KHÔNG PHẢI lỗi task." >&2
@@ -1090,7 +1202,7 @@ else
       echo "WARNING: dispatch $id kết thúc bất thường (exit=$rc, job $job_id) — xem $logfile.err" >&2
     fi
     JSET status="$fstatus" ended_at="$(date +%s)" exit_code="$rc" result_summary="$(SUMMARY)"
-    _circuit_record "$id" fail
+    _circuit_record "$CIRCUIT_KEY" fail
     exit "$rc"
   fi
 fi
