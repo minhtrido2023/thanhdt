@@ -13,6 +13,19 @@
 # CHARACTER-wise (Python str slicing, never a raw byte cut) to a safe margin before building the
 # payload, so a long report/incident message degrades to "sent but shortened" instead of "not
 # sent at all".
+#
+# Second root cause (2026-08-03, same incident's other unresolved half — the malformed-UTF-8
+# 500s): under a minimal locale (cron/systemd env with no LANG/PYTHONIOENCODING — confirmed via
+# `env -i python3 -c "print(sys.stdout.encoding, sys.stdout.errors)"` → utf-8/surrogateescape),
+# Python decodes argv with 'surrogateescape'. If $msg upstream ever contains a byte that isn't
+# valid UTF-8 (e.g. Vietnamese text mangled by a Windows-encoding mismatch somewhere in the
+# fleet), that byte survives as a lone surrogate codepoint straight through json.dumps(...,
+# ensure_ascii=False) and back out through print()'s surrogateescape-encoded stdout — reproduced
+# live: a single bad byte in argv comes out the other end as the exact same invalid byte on the
+# wire, which aiohttp's strict-UTF-8 request.json() then 500s on. Fix: sanitize every text field
+# by round-tripping surrogateescape-decode → UTF-8 re-encode with errors='replace' BEFORE it
+# enters the JSON payload, so a corrupt upstream byte becomes a visible U+FFFD instead of an
+# invalid byte on the wire — degrades to "sent with a replacement char" instead of "not sent".
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -31,15 +44,22 @@ thread_name="${4:-}"
 
 payload=$(python3 -c "
 import json, sys
+
+def _clean(s):
+    # undo argv's surrogateescape decode of any non-UTF-8 byte, then re-encode with
+    # errors='replace' so a corrupt upstream byte becomes U+FFFD instead of round-tripping
+    # back out as the original invalid byte (see header comment, 2026-08-03 fix).
+    return s.encode('utf-8', 'surrogateescape').decode('utf-8', 'replace')
+
 limit = int(sys.argv[6])
-message = sys.argv[1]
+message = _clean(sys.argv[1])
 if len(message) > limit:
     message = message[:limit - 20] + '\n… (cắt bớt, quá dài cho embed)'
 d = {'message': message, 'channel_id': int(sys.argv[2]), 'format': 'embed', 'color': int(sys.argv[3])}
 if sys.argv[4]:
-    d['title'] = sys.argv[4]
+    d['title'] = _clean(sys.argv[4])
 if sys.argv[5]:
-    d['thread_name'] = sys.argv[5]
+    d['thread_name'] = _clean(sys.argv[5])
 print(json.dumps(d, ensure_ascii=False))
 " "$msg" "$MIKE_DISCORD_CHANNEL" "$color" "$title" "$thread_name" "$EMBED_DESC_LIMIT" 2>/dev/null) || exit 0
 

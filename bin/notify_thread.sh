@@ -78,6 +78,10 @@ python3 - "$thread_id" "$msg" << 'PY'
 import sys, json, urllib.request
 
 thread_id, message = sys.argv[1], sys.argv[2]
+# sanitize: undo argv's surrogateescape decode of any non-UTF-8 byte upstream, re-encode
+# with errors='replace' so a corrupt byte becomes U+FFFD instead of round-tripping back out
+# as invalid UTF-8 on the wire (same root cause + fix as notify_discord.sh, 2026-08-03).
+message = message.encode("utf-8", "surrogateescape").decode("utf-8", "replace")
 LIMIT = 1900  # safety margin under Discord's ~2000-char message cap
 
 def chunk(text, limit):
