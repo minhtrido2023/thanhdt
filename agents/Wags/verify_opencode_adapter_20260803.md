@@ -20,7 +20,17 @@ Môi trường: `opencode-ai@1.18.11`, cài qua `npm install -g opencode-ai`, bi
 | 1 | Zen free tier chạy **không cần login** | `opencode run -m opencode/deepseek-v4-flash-free "Reply with exactly: PONG"` | ✅ ra `PONG`, rc=0, 0 credentials. **Không có blocker auth cho opencode** |
 | 2 | Đọc `CLAUDE.md` từ `--dir` (không cần sinh `AGENTS.md`) | tạo `CLAUDE.md` chứa mã bí mật `ROLE-ALPHA-771`, hỏi lại | ✅ trả đúng `ROLE-ALPHA-771` |
 | 3 | Nạp context ngoài qua `opencode.json` → `instructions` (đường dẫn TUYỆT ĐỐI) | `{"instructions":["<abs>/extra_context.md"]}` chứa `CTX-BRAVO-442` | ✅ trả đúng `CTX-BRAVO-442` |
-| 4 | Chạy được bash ⇒ ghi được bus (`append_event.sh`) | `--auto` + yêu cầu `echo BUSWRITE-OK > proof.txt` | ✅ file được ghi thật, log hiện dòng tool `$ echo …` |
+| 4 | Chạy được bash ⇒ ghi được bus (`append_event.sh`) | ~~`echo BUSWRITE-OK > proof.txt`~~ → **dispatch thật `Wendy_20260803_033110`** dưới ĐÚNG gate production | ✅ 2 bus event thật, đúng `trace_id` |
+
+> **⚠️ Đính chính #4 (2026-08-03, do `bin/second_opinion.sh` bắt được — xem cuối file).**
+> Bằng chứng ban đầu tôi trích cho dòng #4 là **SAI**, dù kết luận đúng. Test `echo BUSWRITE-OK
+> > proof.txt` chạy trong thư mục tạm mà `opencode.json` ở đó **chỉ có `instructions`, KHÔNG có
+> khối `permission`** (đã kiểm lại: `keys: ['$schema','instructions']`) — tức nó chứng minh
+> "bash chạy được khi KHÔNG có gate", không phải "ghi được bus DƯỚI gate production". Tệ hơn,
+> `echo` **không nằm trong allowlist** của gate thật, nên chính test đó sẽ bị chặn nếu chạy đúng
+> cấu hình — mâu thuẫn với dòng 61-64 của bản gốc.
+> Bằng chứng ĐÚNG cho #4 là job `Wendy_20260803_033110`: chạy dưới `agents/Wendy/opencode.json`
+> thật (deny-by-default + allowlist có `append_event.sh`) và ghi được 2 bus event đúng `trace_id`.
 
 ⇒ **Artifact 3 (`render_agent_profile.sh`, flatten `@import`, sinh `AGENTS.md`) KHÔNG CẦN cho
 opencode.** Thay bằng 1 file khai báo `agents/<id>/opencode.json` — sibling của
@@ -46,11 +56,19 @@ boot — đáng cân nhắc nếu dispatch nhiều), `opencode models`, `opencod
 ## ⚠️ Rủi ro vận hành đã QUAN SÁT ĐƯỢC, chưa giải thích
 
 Một lần chạy (prompt 3 việc, `--auto`) **treo và bị `timeout 150` giết**, không ra output nào.
-Chạy lại prompt tương tự (ngắn hơn) xong trong <15s. Chưa root-cause: nghi free tier bị
-throttle/queue. ⇒ **Free tier KHÔNG đảm bảo độ trễ**. Hệ quả cho thiết kế:
-- Không dùng Zen free cho việc nằm trên đường găng vận hành (plan T+1, EOD report…).
-- Đúng lý do `allow_agents` phải giữ hẹp ở v1 (research/read-only).
-- Cần đo lại độ trễ p50/p95 trước khi tin vào bất kỳ TIMEOUT mặc định nào.
+Chạy lại prompt tương tự (ngắn hơn) xong trong <15s. Chưa root-cause.
+
+**Đính chính (2026-08-03, second_opinion bắt):** bản gốc suy từ **n=1** thành mệnh đề chắc nịch
+"Free tier KHÔNG đảm bảo độ trễ" rồi lấy nó biện minh cho `allow_agents` hẹp. Cả hai đều quá tay:
+- n=1 chưa loại trừ được nguyên nhân thay thế (prompt 3 việc dài, cold-start model, mạng, hoặc
+  `timeout` giết trong khi process con vẫn đang chờ). Đúng mức là: **đã quan sát 1 lần độ trễ
+  bất thường, chưa đủ mẫu để kết luận phân phối** — muốn khẳng định phải đo ≥20 lần lấy p50/p95
+  và đối chứng cùng prompt trên claude để tách biến model / CLI / mạng.
+- `allow_agents` hẹp là quyết định **AN TOÀN** (gate `permission` có lỗ hổng chuyển hướng `>`),
+  **không phải** quyết định độ trễ. Trộn 2 khái niệm làm cả hai lý lẽ yếu đi.
+
+Vẫn giữ khuyến nghị **không dùng Zen free cho việc trên đường găng** (plan T+1, EOD report) — nhưng
+ghi đúng căn cứ: đó là lựa chọn thận trọng trước một biến chưa đo, không phải kết luận đã chứng minh.
 
 ## Chưa kiểm được (nợ, đừng coi là đã xong)
 
@@ -58,7 +76,35 @@ throttle/queue. ⇒ **Free tier KHÔNG đảm bảo độ trễ**. Hệ quả ch
   giữa chừng. Đây là dữ kiện QUYẾT ĐỊNH cho `heartbeat: "log-mtime"`; nếu log chỉ được ghi lúc
   process thoát thì `log-mtime` vô dụng. **Phải đo bằng 1 task đủ dài trước khi wire.**
 - `--format json` schema thật (mới đọc doc, chưa chạy).
-- `permission: {edit|bash: allow|ask|deny}` có thật sự cưỡng chế khi kèm `--auto` không —
-  `--auto` mô tả là "auto-approve permissions **that are not explicitly denied**", ngụ ý `deny`
-  vẫn thắng, nhưng **chưa kiểm bằng thực nghiệm**. Đây là luận điểm an toàn chính của việc
-  chọn opencode ⇒ không được tin vào doc, phải test.
+- ~~`permission` có cưỡng chế khi kèm `--auto` không~~ → **ĐÃ KIỂM 2026-08-03, cưỡng chế thật:**
+  với `bash: {"*":"deny", "echo ALLOWED*":"allow"}` + `--auto` — lệnh trong allowlist chạy (6s),
+  lệnh ngoài allowlist **bị chặn**, trả lỗi sạch trong 7s (*"The user has specified a rule which
+  prevents you from using this specific tool call"*, kèm liệt kê rule), **không treo**, file không
+  được tạo. Output còn cho thấy `--auto` thêm rule `{"permission":"*","action":"allow"}` nhưng rule
+  `bash deny` cụ thể vẫn thắng ⇒ xác nhận `--auto` KHÔNG đè lên `deny`.
+  ⚠️ Nhưng đây là gate **chống tai nạn**, không phải sandbox: pattern khớp trên chuỗi lệnh nên một
+  lệnh trong allowlist vẫn có thể kèm chuyển hướng (`grep x y > z`) để ghi file.
+
+---
+
+## Hậu kiểm: chính tài liệu này bị `bin/second_opinion.sh` phản biện (2026-08-03)
+
+Lần chạy thật đầu tiên của `bin/second_opinion.sh` (opencode + `deepseek-v4-flash-free`, job
+`Wags_20260803_041742`) lấy chính file này làm đối tượng, và **bắt được 3 điểm — 1 trong đó là
+lỗi thật**:
+
+1. **Bằng chứng cho giả định #4 không hợp lệ** (đã đính chính ở trên). Nó chỉ ra mâu thuẫn nội
+   tại: doc vừa nói `echo > file` ghi được, vừa nói gate chặn `echo` — hai mệnh đề không thể cùng
+   đúng. Kiểm lại: test đó chạy với `opencode.json` **không có khối `permission`**. Đúng.
+2. **Suy từ n=1 thành chính sách độ trễ** + trộn nó với lý do an toàn (đã đính chính).
+3. **"0 credentials" chỉ dựa trên 1 file** `auth.json`; chưa loại trừ keyring/env var. Điểm phụ
+   (bằng chứng hành vi `PONG` rc=0 đã khá trực tiếp) nhưng nhận xét đúng.
+
+Nó cũng **tự xác nhận độc lập** được giả định #2 và #3 — vì chính nó đang chạy dưới cấu hình đó và
+thấy `agents/Wags/CLAUDE.md` + `context_ops_mini.md` + `WorkingClaude/CLAUDE.md` trong context của
+mình — và **tự khai đúng cái nó không kiểm được** (bash bị gate chặn nên không chạy lại được
+`opencode run --help`, không đọc được `auth.json`).
+
+**Ý nghĩa**: đây đúng là giá trị mà multi-CLI được dựng lên để lấy — một họ model khác đọc cùng
+tài liệu và thấy chỗ tác giả không thấy, với chi phí ~0. Lưu ý nó bắt lỗi **lập luận/bằng chứng**,
+không phải lỗi domain; và nó vẫn là ADVISORY, không phải cổng duyệt.

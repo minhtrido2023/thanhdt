@@ -196,6 +196,13 @@ EFFORT_FLAG="--effort $EFFORT"
 # Binary + env cua provider. `bin` da ap dung bin_env_override (DISPATCH_CLAUDE_BIN...) nen
 # bin/dispatch_discord_topic_selfcheck.sh van lai duoc dispatch qua stub (F11 arch-reviewer).
 CLI_BIN="$("$ROOT/bin/cli_provider.sh" bin "$PROVIDER")" || { echo "ERROR: khong phan giai duoc binary cua provider '$PROVIDER'." >&2; exit 1; }
+# default_model: provider khai model mac dinh rieng (vd opencode -> deepseek free tier).
+# Chi ap khi caller KHONG truyen --model. claude de null => giu nguyen hanh vi cu (omit co
+# => khong truyen --model => CLI lay tu agents/<id>/.claude/settings.json).
+if [ -z "$MODEL" ]; then
+  _defmodel="$("$ROOT/bin/cli_provider.sh" field "$PROVIDER" default_model 2>/dev/null || true)"
+  [ -n "$_defmodel" ] && MODEL="$_defmodel"
+fi
 CLI_PROFILE="$("$ROOT/bin/cli_provider.sh" field "$PROVIDER" profile 2>/dev/null || echo claude-native)"
 CLI_SUPPORTS_TURNS="$("$ROOT/bin/cli_provider.sh" field "$PROVIDER" supports_turns 2>/dev/null || echo true)"
 CLI_USAGE_PROBE="$("$ROOT/bin/cli_provider.sh" field "$PROVIDER" usage_probe 2>/dev/null || true)"

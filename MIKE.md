@@ -225,6 +225,22 @@ cực kỳ phức tạp.**
 Không chắc → mặc định Sonnet 5. Việc phức tạp mà lưỡng lự Opus-hay-Fable → chọn **Opus** (Fable chỉ
 khi thực sự vượt tầm). Tránh dùng model đắt cho việc thường lệ.
 
+**⚠️ "Omit `--model`" KHÔNG có nghĩa là "Sonnet 5" — nó có nghĩa là "lấy model trong
+`agents/<id>/.claude/settings.json`".** `dispatch.sh` khi `MODEL` rỗng thì **không truyền cờ nào**,
+nên CLI tự lấy từ file đó. Hai thứ này chỉ trùng nhau CHỪNG NÀO cả 8 `settings.json` còn ghi
+`claude-sonnet-5` — kiểm bằng:
+```bash
+for a in $(ls agents/); do printf '%-11s %s\n' "$a" \
+  "$(python3 -c "import json,sys;print(json.load(open(sys.argv[1])).get('model','-'))" agents/$a/.claude/settings.json)"; done
+```
+**Đã từng lệch và không ai thấy** (sửa 2026-08-03): commit `759ed5e8` (2026-06-23) đặt chính sách
+gắn model theo AGENT — Taylor=`claude-opus-4-8`, 6 agent còn lại=`claude-sonnet-4-6`. Chính sách
+2026-07-14 ("model chọn theo TASK, không gắn cứng theo AGENT") thay thế nó nhưng **`settings.json`
+không được cập nhật**. Hệ quả đo được: `--model sonnet` → `claude-sonnet-5`, nhưng **omit** →
+`claude-sonnet-4-6` (đời trước); với Taylor omit → `claude-opus-4-8` (tầng ĐẮT NHẤT, đúng ngược ý
+"mặc định = tầng rẻ"). 64/400 job gần nhất chạy `model=default` — tức chạy model đời cũ mà không
+ai biết. Nay cả 8 đã về `claude-sonnet-5`; đổi model của một agent thì phải sửa cả mô tả này.
+
 **⚠️ Sự cố model-drift đã đo được (2026-07-17, chi tiết `kb/incidents/2026-07/2026-07-17-model-tier-drift-fable.md`)**: %fable dispatch lên
 58%/tuần dù hầu hết là task "phức tạp thường" (Q2, tầng Opus), không phải Q3 — compute wall-clock
 tăng 150% trong khi job count giảm. Lưới an toàn (không thay quyết định thật của Mike): `dispatch.sh`
@@ -261,12 +277,22 @@ Giá trị thật của multi-CLI ở đây là **bất đồng ý kiến**, kh�
 claude và một họ model khác cùng ra thì đáng tin hơn hẳn. Dùng nó như `quant-skeptic` thứ hai.
 
 ```bash
-# Ý kiến độc lập, model khác họ, không tốn tiền:
-bin/dispatch.sh Taylor "Phản biện kết luận X trong <file>. Chỉ đọc, đừng sửa gì." \
-  --provider opencode --model opencode/deepseek-v4-flash-free
+# CÁCH DÙNG CHÍNH — công cụ chuyên dụng, tự lo prompt phản biện + ghi bus:
+bin/second_opinion.sh <file-hoặc-kết-luận> [--agent Taylor] [--bg]
+
+# Hoặc dispatch thủ công (omit --model ⇒ default_model = deepseek free):
+bin/dispatch.sh Taylor "Phản biện kết luận X. Chỉ đọc, đừng sửa gì." --provider opencode
+
 bin/cli_provider.sh list                 # provider đang bật
 bin/cli_provider.sh check opencode       # CLI có chạy được không (phân biệt 'provider hỏng' vs 'task lỗi')
 ```
+
+**`bin/second_opinion.sh` — việc chính đang chạy trên opencode.** Lấy phản biện độc lập về một
+kết luận/tài liệu, ghi lên bus dưới topic `second-opinion: <chủ đề>`. **ADVISORY, KHÔNG phải cổng
+duyệt** — cổng thật vẫn là `verify_finding.sh` (quant-skeptic) và `arch-reviewer`, cố ý giữ trên
+một CLI đã hiệu chuẩn. Lần chạy đầu tiên (job `Wags_20260803_041742`) đã bắt được **1 lỗi bằng
+chứng thật** trong chính tài liệu kiểm chứng của Mike — xem
+`agents/Wags/verify_opencode_adapter_20260803.md` §Hậu kiểm.
 
 ⚠️ `allow_agents` trong registry chỉ chặn ở tầng `dispatch.sh` — agent có Bash vẫn gọi thẳng
 binary được. Cưỡng chế THẬT là `permission` trong `agents/<id>/opencode.json`, và **nó không phải
