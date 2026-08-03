@@ -20,6 +20,13 @@ SỐNG với state nội bộ; mã nào có lệnh không rõ nguồn gốc trê
 lần đặt lệnh thành công (không đợi hết `step()`) để thu hẹp cửa sổ crash. `poll_orders()` tự lỗi
 → fail-safe TOÀN BỘ mã trong plan (không fail-open).
 
+## Domain-constraint layer P1 — order-tier LAG rating gate (LIVE từ 2026-07-29)
+`filter_lag_rating_orders()` — lưới an toàn tầng ORDER cho gate 8L rating≤3 của LAG (vá lỗ hổng
+gate cũ chỉ sống ở tầng sinh tín hiệu, không chặn được nếu plan/generator quên áp). Verify:
+14/14 + 22/22 selfcheck, replay case thật (TRC/MST) bị chặn đúng, 0 lệnh khác đổi trên 21 plan
+thật. Khác `excluded_tickers` ở trên (loại trừ theo TICKER cố định) — đây loại trừ theo RATING
+tại thời điểm đặt lệnh. Chi tiết thiết kế: `agents/Taylor/research/ontology_constraint_layer_design_20260729.md`.
+
 ## excluded_tickers — enforcement
 `trading_bot.plan.filter_excluded_tickers()`, gọi NGAY sau `load_plan()` trong `bot_execute.py`
 — áp dụng bất kể plan generator có nhớ loại trừ hay không. Đọc từ

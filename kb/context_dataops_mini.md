@@ -9,8 +9,17 @@ Project `lithe-record-440915-m9`, dataset `tav2_bq` (region `asia-southeast1`).
 ```
 bq query --use_legacy_sql=false --project_id=lithe-record-440915-m9 'SQL'
 ```
-Bảng hay chạm: `ticker` (daily OHLCV+indicator), `ticker_prune` (universe chất lượng, dùng cho
-freshness/breadth), `ticker_financial` (quý), `ticker_1m` (rolling snapshot live).
+Bảng hay chạm: `ticker` (daily OHLCV+indicator), `ticker_prune` (universe chất lượng, legacy —
+xem breadth bên dưới), `ticker_financial` (quý), `ticker_1m` (rolling snapshot live).
+
+## Breadth guard — `universe_pit`, KHÔNG còn `ticker_prune` (đổi 2026-07-29)
+`macro_state_live.py`'s breadth-decoupling guard (§4 DT5G) đọc **`tav2_mike.universe_pit`**
+(point-in-time, per-day membership) từ 2026-07-29, module constant `BREADTH_SOURCE="pit"` —
+KHÔNG phải `ticker_prune` nữa. Lý do đổi: SQL cũ join `ticker_prune` KHÔNG có time condition
+(look-ahead — 1 mã được thêm hôm nay bị tính vào MỌI ngày lịch sử), và lần TRUNCATE+rebuild
+07-29 từng âm thầm rớt 58 mã khỏi breadth series. `BREADTH_SOURCE="prune"` = rollback 1 chữ về
+hành vi cũ nếu cần. CAPIT pool/ADV cap CỐ Ý vẫn ghim `ticker_prune` (khác breadth guard — đừng
+gộp 2 việc).
 
 ## DT5G — bảng production, KHÔNG nhầm với base (bẫy đã gây sự cố thật)
 Production = `tav2_bq.vnindex_5state_dt5g_live` (qua `get_gated_state()`). Bare

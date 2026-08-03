@@ -19,3 +19,7 @@ Không ai ghi (mtime 2026-05-27).
 
 ## Bẫy
 Bị thay bởi `data/vnindex_5state_dt_4gate.csv`; ~16 script research-era còn reference.
+
+⚠️ **SUPERSEDED BY `data/vnindex_5state_dt_4gate.csv` ON 2026-05-27** (marker bổ sung 2026-08-03,
+KB weekly editorial review — trước đó chỉ có `superseded_by` ở frontmatter, thiếu dòng bắt buộc
+trong Bẫy theo quy ước `data_registry/index.md` §5).
