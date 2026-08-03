@@ -77,6 +77,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Sự cố | status |
 |---|---|---|
+| 2026-08-02 | [daily_nav_snapshot.py đếm 2 lần cổ tức tiền mặt vào tối ngày chốt quyền (last-cum-date) — NAV lịch sử SpaceX/ZaloPay sai 6 dòng trên 5 phiên, tự triệt tiêu nên sống sót mọi đối soát](2026-08/2026-08-02-nav-cum-dividend-double-count.md) | fixed |
 | 2026-08-02 | [2026-08/2026-08-02-lag-liquidity-fidelity-two-fixes.md](2026-08/2026-08-02-lag-liquidity-fidelity-two-fixes.md) | ? |
 | 2026-08-02 | [2026-08-02: lần thứ 5 "message các topic Discord lẫn lộn" — bỏ vá từng lớp, chuyển sang registry duy nhất + pre-commit gate chặn ID trần](2026-08/2026-08-02-discord-channel-registry.md) | fixed |
 | 2026-08-02 | [2026-08-02: 5 job failed "Reached max turns (50)" in one day, all attempt 2/2 with an unchanged cap — added effort-scaled defaults + auto-continuation with a bumped ceiling](2026-08/2026-08-02-max-turns-auto-continuation.md) | fixed |
