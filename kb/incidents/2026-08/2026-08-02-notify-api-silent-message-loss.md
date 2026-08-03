@@ -4,8 +4,8 @@ date: 2026-08-02
 topic: notify-api-silent-message-loss
 title: >-
   2026-08-02: user noticed "Mike seems to stop / not follow topics" — root cause is /api/notify
-  silently dropping ~10 messages/3 days on oversized embeds, one bug fixed, one flagged unfixed
-status: partially-fixed
+  silently dropping ~10 messages/3 days on oversized embeds + malformed UTF-8, both fixed
+status: fixed
 category: dispatch-orchestration
 origin: >-
   user reported a vague feeling that Mike stops abnormally / doesn't follow a Discord topic
@@ -60,14 +60,35 @@ fixing this one) to 4000 chars before building the payload, with a "cắt bớt"
 Verified live against the running bridge: a 7080-char test message that previously 500'd now
 returns 200.
 
-## NOT fixed — needs explicit go-ahead
+## UnicodeDecodeError — RESOLVED 2026-08-03 (commit `cacbfb9c`)
 
-The UnicodeDecodeError's root cause lives in `/workspace/claude-code-discord-bridge` — shared
-infrastructure outside this repo, used by every concurrent Claude session on the account, not
-just Mike's. Two follow-ups, neither done yet:
-1. **Identify the actual sender** of the malformed-UTF-8 body (needs broader forensics across
-   the account, not just `mike/bin/`).
-2. **Harden the bridge itself** to catch `UnicodeDecodeError` in the `/api/notify` handler and
-   return a clean 400 instead of a 500 traceback — a defensive fix, but it touches shared code
-   used by other sessions, so it needs explicit user sign-off before editing, per the standing
-   rule on actions with a blast radius beyond this repo.
+Root cause found by tracing the actual mechanism, not by finding "who sends bad bytes":
+under a minimal locale (cron/systemd env, confirmed via `env -i python3 -c "print(sys.stdout.
+encoding, sys.stdout.errors)"` → `utf-8 surrogateescape`), Python decodes argv with
+`surrogateescape`. Any invalid UTF-8 byte that ever reaches `$msg` upstream (e.g. Vietnamese
+text mangled by a Windows-encoding mismatch somewhere in the fleet — this codebase runs
+partly on Windows per `CLAUDE.md`) survives as a lone surrogate codepoint straight through
+`json.dumps(message, ensure_ascii=False)` and round-trips back out through `print()`'s
+surrogateescape-encoded stdout as the exact same invalid byte. Reproduced live (single bad
+byte in argv → identical bad byte in the JSON payload bytes → fails `.decode('utf-8')`).
+aiohttp's strict-UTF-8 `request.json()` then 500s and the message is dropped, no retry.
+
+**Fix**: `bin/notify_discord.sh` and `bin/notify_thread.sh` now sanitize `message`/`title`/
+`thread_name` by round-tripping `encode('utf-8','surrogateescape').decode('utf-8','replace')`
+before building the JSON payload — any corrupt byte becomes a visible U+FFFD instead of an
+invalid byte on the wire. This fixes the bug class regardless of which upstream script
+introduces bad bytes — no single "sender" needed to be identified. Verified live: a message
+with an injected `0xc4` byte now returns HTTP 200 from the real `ccdb-mike` bridge (journalctl
+confirms), where it previously would have 500'd.
+
+**Separately discovered, NOT acted on (needs explicit sign-off)**: `/workspace/claude-code-
+discord-bridge` (shared infra, used by every concurrent session on the account) already
+gained its own defensive fix for this same class of error upstream — commit `ca0fde9`
+(2026-08-02 06:01:51 UTC), "catch UnicodeDecodeError alongside JSONDecodeError on all 8
+request.json() call sites". But `ccdb-mike.service`'s running process was started
+**2026-07-31 15:17:39 UTC — before that fix landed** (`systemctl --user show ccdb-mike.service
+-p ActiveEnterTimestamp` confirms no restart since). The live process does not have that fix
+loaded. This sender-side fix is independent and closes the hole either way, but the bridge
+itself is running stale code; restarting `ccdb-mike.service` affects every concurrent session
+on the account right now, so that restart was intentionally left for the user to authorize
+rather than done unilaterally.
