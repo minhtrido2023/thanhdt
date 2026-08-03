@@ -458,6 +458,56 @@ def case_deliver_both_fail_logs_for_check10():
           f"calls={calls} log={log!r}")
 
 
+# ── Ca 12 (Wags coord-2026-08-03): ack "triaged-needs-human:" tắt auto-dispatch nhưng
+#    KHÔNG được đóng/giấu câu hỏi, và chỉ ăn khi ack ĐÚNG topic + đăng SAU câu hỏi.
+def case_triaged_needs_human_ack():
+    root, inbox = mkbus()
+    try:
+        write_events(os.path.join(inbox, "Mike.jsonl"),
+                     [ev("Mike", "question", "can-nguoi-quyet", ago(0, 5)),
+                      ev("Mike", "question", "chua-ai-xem", ago(0, 5)),
+                      ev("Mike", "question", "ack-truoc-cau-hoi", ago(0, 2))])
+        write_events(os.path.join(inbox, "Wags.jsonl"),
+                     [ev("Wags", "status", "triaged-needs-human: can-nguoi-quyet", ago(0, 4)),
+                      ev("Wags", "status", "triaged-needs-human: ack-truoc-cau-hoi", ago(0, 3))])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        human_lines = [ln for ln in lines if "ĐÃ TRIAGE, chờ NGƯỜI quyết" in ln]
+        pending_lines = [ln for ln in lines if "trong 48h qua CHƯA thấy answer" in ln]
+        check("ack đúng: câu hỏi sang dòng riêng mang [WARN-ONLY] (không spawn wags_autofix)",
+              len(human_lines) == 1 and "[WARN-ONLY]" in human_lines[0]
+              and "can-nguoi-quyet" in human_lines[0], out)
+        check("ack đúng: câu hỏi vẫn HIỆN trong báo cáo, không bị đóng/giấu",
+              "can-nguoi-quyet" in out, out)
+        check("ack đúng: câu hỏi đó KHÔNG còn ở dòng pending routable",
+              not any("can-nguoi-quyet" in ln for ln in pending_lines), out)
+        check("không có ack: câu hỏi vẫn routable như cũ (fail-closed)",
+              len(pending_lines) == 1 and "chua-ai-xem" in pending_lines[0], out)
+        check("ack đăng TRƯỚC câu hỏi: KHÔNG được tắt dispatch",
+              "ack-truoc-cau-hoi" in pending_lines[0]
+              and "ack-truoc-cau-hoi" not in human_lines[0], out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 13: chỉ có câu hỏi đã ack → KHÔNG được in "Không có câu hỏi nào đang chờ".
+def case_triaged_only_no_false_ok():
+    root, inbox = mkbus()
+    try:
+        write_events(os.path.join(inbox, "Mike.jsonl"),
+                     [ev("Mike", "question", "can-nguoi-quyet", ago(0, 5))])
+        write_events(os.path.join(inbox, "Wags.jsonl"),
+                     [ev("Wags", "status", "triaged-needs-human: can-nguoi-quyet", ago(0, 4))])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        check("chỉ có câu hỏi đã ack: KHÔNG in 'Không có câu hỏi nào đang chờ' (sẽ nói dối)",
+              "Không có câu hỏi (question) nào đang chờ xử lý" not in out, out)
+        check("chỉ có câu hỏi đã ack: vẫn có dòng WARN-ONLY nêu rõ",
+              "ĐÃ TRIAGE, chờ NGƯỜI quyết" in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
 def main():
     print("ops_health_check_selfcheck: check #5 (backlog question) + check #10 (notify_thread) "
           "+ khối DELIVER (Discord→Telegram) regression")
@@ -467,6 +517,7 @@ def main():
                case_corrupt_gz_warns, case_empty_archive_warns,
                case_fresh_question_is_pending,
                case_wagsfix_not_confirmed_is_warn_only, case_wagsfix_only_no_false_ok,
+               case_triaged_needs_human_ack, case_triaged_only_no_false_ok,
                case_c10_no_file_is_ok, case_c10_fresh_log_warns,
                case_c10_fresh_log_without_timestamp_line, case_c10_old_log_is_ok,
                case_deliver_discord_ok_no_telegram,

@@ -77,6 +77,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Sự cố | status |
 |---|---|---|
+| 2026-08-03 | [2026-08-03: check #5 dispatch LẶP wags_autofix cho câu hỏi đã triage là "chỉ NGƯỜI quyết được" — ranh giới WARN-ONLY bám TUỔI 48h thay vì TRẠNG THÁI triage; thêm ACK `triaged-needs-human:`](2026-08/2026-08-03-coord-question-redispatch-triaged-ack.md) | fixed |
 | 2026-08-02 | [daily_nav_snapshot.py đếm 2 lần cổ tức tiền mặt vào tối ngày chốt quyền (last-cum-date) — NAV lịch sử SpaceX/ZaloPay sai 6 dòng trên 5 phiên, tự triệt tiêu nên sống sót mọi đối soát](2026-08/2026-08-02-nav-cum-dividend-double-count.md) | fixed |
 | 2026-08-02 | [2026-08/2026-08-02-lag-liquidity-fidelity-two-fixes.md](2026-08/2026-08-02-lag-liquidity-fidelity-two-fixes.md) | ? |
 | 2026-08-02 | [2026-08-02: lần thứ 5 "message các topic Discord lẫn lộn" — bỏ vá từng lớp, chuyển sang registry duy nhất + pre-commit gate chặn ID trần](2026-08/2026-08-02-discord-channel-registry.md) | fixed |

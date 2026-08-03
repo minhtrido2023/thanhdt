@@ -236,9 +236,24 @@ AGED_NEWEST = 3           # … + 3 mục mới nhất
 # lặng, và topic tự do nhúng trong dòng (chứa "Circuit breaker"/"Job board:") có thể kéo
 # cả dòng vào COORD_WARN → dispatch Wags oan (arch-reviewer required_change #5).
 WARN_ONLY = "[WARN-ONLY]"
+# ACK "đã triage, chờ NGƯỜI" (Wags coord-2026-08-03). Vấn đề: một câu hỏi <48h mà Wags đã
+# triage và kết luận "THẬT — cần user/thời gian quyết, KHÔNG có fix tooling nào" vẫn nằm
+# trong pending_q → COORD_WARN → dispatch wags_autofix LẠI, 2 lần/ngày, cho tới khi câu hỏi
+# quá 48h mới rơi vào nhánh aged_q (vốn đã WARN_ONLY vì ĐÚNG lý do này). Ca thật: run
+# 2026-08-03T01:20 triage 4 câu hỏi, kết luận Mike/retro-pattern-recurring-silent-cron-spof-2
+# + Winston/ops-autofix-unresolved:run-bot-fail-ZaloPay-2026-08-03 đều cần NGƯỜI; Mike weekly
+# editorial 02:38 xác nhận lại y hệt; 05:45 checker vẫn đốt thêm 1 job Wags cho đúng 2 câu đó.
+# Cơ chế: agent ghi 1 event `status` topic "triaged-needs-human: <topic câu hỏi gốc>". Nó
+# CHỈ tắt auto-dispatch, KHÔNG đóng câu hỏi (không đụng resolvers/_resolved), KHÔNG giấu khỏi
+# báo cáo — chỉ chuyển dòng WARN sang [WARN-ONLY] để người vẫn thấy. Fail-closed: không có ack
+# → hành vi y hệt trước. Không cần hạn dùng: quá 48h câu hỏi tự sang aged_q (cũng WARN_ONLY).
+ACK_PREFIX = "triaged-needs-human:"
 inbox_dir = os.path.join(wc_root, "mike", "bus", "inbox")
 pending_q = []
 pending_q_wagsfix = []   # xem chú thích ở khối "if pending_q_wagsfix" phía dưới
+# Câu hỏi ĐÃ được triage và kết luận "chỉ NGƯỜI quyết được, không có fix tooling" →
+# vẫn HIỆN đầy đủ trong báo cáo nhưng KHÔNG spawn wags_autofix nữa (xem ACK_PREFIX).
+pending_q_needs_human = []
 pending_q_meta = []      # (agent, topic, ts) song song pending_q — chỉ để dựng dòng HINT
 closure_cands = []       # (agent, topic, ts) mọi finding/answer/decision — chỉ để HINT
 aged_q = []
@@ -300,6 +315,7 @@ if os.path.isdir(inbox_dir):
     # sẵn sàng của account tiền thật biến mất khỏi check #5. Fix: required_change #1 của
     # arch-reviewer, NEEDS_CHANGES coord-2026-07-30.
     resolvers = []
+    acks = []                # (topic_câu_hỏi_được_ack, ts) — xem ACK_PREFIX
     # HINT-ONLY (Wags coord-2026-08-03): ngoài resolver ĐÚNG quy ước, gom thêm MỌI
     # finding/answer/decision (kèm agent + ts) để GỢI Ý "có thể đã đóng nhưng sai quy ước".
     # KHÔNG dùng để đóng câu hỏi — chỉ in thêm 1 dòng [WARN-ONLY] cho người/Wags triage
@@ -313,6 +329,13 @@ if os.path.isdir(inbox_dir):
         agent_p = _agent_of(p)
         for rec in iter_events(p):
             etype = rec.get("event_type")
+            if etype == "status" and str(rec.get("topic") or "").startswith(ACK_PREFIX):
+                try:
+                    a_ts = dt.datetime.fromisoformat(rec.get("ts", "").replace("Z", "+00:00"))
+                except Exception:
+                    continue   # fail-closed: ack không đọc được ts thì KHÔNG tắt dispatch
+                acks.append((rec["topic"][len(ACK_PREFIX):].strip(), a_ts))
+                continue
             if etype in ("answer", "decision", "finding"):
                 t = rec.get("topic")
                 if not t:
@@ -333,6 +356,15 @@ if os.path.isdir(inbox_dir):
         if not q_topic:
             return False
         return any((r == q_topic or q_topic in r) and r_ts >= q_ts for r, r_ts in resolvers)
+    def _acked(q_agent, q_topic, q_ts):
+        # Khớp CHÍNH XÁC (không substring như _resolved): ack chỉ tắt auto-dispatch nên sai
+        # sót về phía "vẫn dispatch" là an toàn; nới lỏng match ở đây thì 1 ack topic ngắn
+        # có thể tắt dispatch cho câu hỏi khác chưa ai xem. Chấp nhận cả dạng "Agent/topic"
+        # (đúng chuỗi checker in ra) để người copy thẳng từ báo cáo.
+        if not q_topic:
+            return False
+        want = (q_topic, f"{q_agent}/{q_topic}")
+        return any(a in want and a_ts >= q_ts for a, a_ts in acks)
     seen_q = set()
     for p in files:
         agent = _agent_of(p)
@@ -364,6 +396,8 @@ if os.path.isdir(inbox_dir):
                 # người thấy, KHÔNG tự re-trigger — người/Mike quyết vòng kế tiếp tường minh.
                 if str(rec.get("topic") or "").startswith("wags-fix-not-confirmed:"):
                     pending_q_wagsfix.append(f"{agent}/{rec.get('topic')}")
+                elif _acked(agent, str(rec.get("topic") or ""), ts_dt):
+                    pending_q_needs_human.append(f"{agent}/{rec.get('topic')}")
                 else:
                     pending_q.append(f"{agent}/{rec.get('topic')}")
                     pending_q_meta.append((agent, str(rec.get("topic") or ""), ts_dt))
@@ -396,8 +430,12 @@ if pending_q:
         W(f"{WARN_ONLY} {len(hints)}/{len(pending_q)} câu hỏi trên CÓ THỂ đã xử lý xong "
           f"nhưng ghi bus SAI QUY ƯỚC (sự kiện cùng tác giả, đăng sau, topic cùng tiền tố "
           f"— quy ước đóng: `answer`/`decision` GIỮ NGUYÊN topic câu hỏi): {hints}")
-elif not pending_q_wagsfix:
+elif not pending_q_wagsfix and not pending_q_needs_human:
     OK("Không có câu hỏi (question) nào đang chờ xử lý trong 48h qua.")
+if pending_q_needs_human:
+    W(f"{WARN_ONLY} {len(pending_q_needs_human)} câu hỏi ĐÃ TRIAGE, chờ NGƯỜI quyết (không "
+      f"có fix tooling — KHÔNG tự dispatch lại, vẫn hiện ở đây cho tới khi có "
+      f"answer/decision thật): {pending_q_needs_human}")
 if pending_q_wagsfix:
     W(f"{WARN_ONLY} {len(pending_q_wagsfix)} vòng wags-fix CHƯA CONFIRMED trong 48h qua — KHÔNG tự "
       f"re-trigger (đã qua ít nhất 1 vòng fix+arch-review, lặp tự động là vòng lặp tự nuôi vô "

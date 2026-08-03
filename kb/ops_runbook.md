@@ -125,6 +125,19 @@ Chống bão: cùng cooldown 1h/label với bảng trên (`state/autofix/`, chun
   `COORD_WARN` và `OTHER_WARN` → không spawn agent. Phân luồng dispatch bám MARKER, không bám
   câu chữ tiếng Việt (đổi wording WARN trước đây âm thầm đổi routing; topic tự do nhúng trong
   dòng chứa "Circuit breaker"/"Job board:" từng kéo cả dòng vào COORD_WARN → dispatch oan).
+- **ACK `triaged-needs-human:`** (thêm Wags 2026-08-03): câu hỏi <48h mà đã triage và kết
+  luận "chỉ NGƯỜI/thời gian quyết được, không có fix tooling" trước đây vẫn nằm trong
+  `pending_q` → `COORD_WARN` → `wags_autofix` bị dispatch LẠI 2 lần/ngày cho tới khi câu hỏi
+  quá 48h mới rơi vào nhánh TREO LÂU (vốn đã `[WARN-ONLY]` vì ĐÚNG lý do đó). Ca thật
+  2026-08-03: cùng 2 câu hỏi bị triage 01:20, Mike xác nhận lại 02:38, checker vẫn đốt thêm
+  1 job Wags lúc 05:45. Cách dùng — agent triage ghi 1 event:
+  `append_event.sh <id> status "triaged-needs-human: <topic câu hỏi gốc>" '<lý do>'`.
+  Khớp CHÍNH XÁC topic (hoặc dạng `Agent/topic` copy thẳng từ báo cáo) và ack phải đăng SAU
+  câu hỏi. Nó **chỉ tắt auto-dispatch**: không đụng `resolvers`/`_resolved()`, không đóng câu
+  hỏi, không giấu khỏi báo cáo — chỉ chuyển sang dòng `[WARN-ONLY] … ĐÃ TRIAGE, chờ NGƯỜI
+  quyết`. Fail-closed: không ack (hoặc ack sai topic/sai thứ tự thời gian) → dispatch như cũ.
+  Không cần hạn dùng: quá 48h câu hỏi tự sang nhánh TREO LÂU (cũng WARN-ONLY). Khoá bằng
+  regression ca 12–13 trong `bin/ops_health_check_selfcheck.py` (2 mutation độc lập đều đỏ).
 - **Question TREO LÂU >48h** (thêm Wags 2026-07-30): checker có dòng WARN riêng
   `⚠️ Câu hỏi TREO LÂU (>48h, chưa ai quyết)` cho question quá cửa sổ 48h mà vẫn chưa có
   answer/decision (KHÔNG có horizon thời gian — chỉ cắt theo ĐỘ DÀI DÒNG IN; nguồn quét =
