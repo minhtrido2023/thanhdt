@@ -239,6 +239,8 @@ WARN_ONLY = "[WARN-ONLY]"
 inbox_dir = os.path.join(wc_root, "mike", "bus", "inbox")
 pending_q = []
 pending_q_wagsfix = []   # xem chú thích ở khối "if pending_q_wagsfix" phía dưới
+pending_q_meta = []      # (agent, topic, ts) song song pending_q — chỉ để dựng dòng HINT
+closure_cands = []       # (agent, topic, ts) mọi finding/answer/decision — chỉ để HINT
 aged_q = []
 if os.path.isdir(inbox_dir):
     # PHẢI quét CẢ archive: kb_nightly Phase 1b2 (EVENT_KEEP_DAYS=30) chuyển MỌI event cũ
@@ -298,9 +300,20 @@ if os.path.isdir(inbox_dir):
     # sẵn sàng của account tiền thật biến mất khỏi check #5. Fix: required_change #1 của
     # arch-reviewer, NEEDS_CHANGES coord-2026-07-30.
     resolvers = []
+    # HINT-ONLY (Wags coord-2026-08-03): ngoài resolver ĐÚNG quy ước, gom thêm MỌI
+    # finding/answer/decision (kèm agent + ts) để GỢI Ý "có thể đã đóng nhưng sai quy ước".
+    # KHÔNG dùng để đóng câu hỏi — chỉ in thêm 1 dòng [WARN-ONLY] cho người/Wags triage
+    # nhanh. Ca thật: Winston hỏi `nav-zalopay-2207-dong-thu-6-can-duyet` (08-02 08:41) rồi
+    # 32 phút sau đăng KẾT QUẢ dưới dạng `finding` với topic ĐỔI KHÁC
+    # (`...-dong-thu-6-da-sua-quant-skeptic-CONFIRMED`) → không phải answer/decision, cũng
+    # không chứa nguyên topic gốc → matcher (đúng, fail-closed) vẫn báo pending 17h sau và
+    # đốt 1 job Wags. Nới matcher để tự đóng ca này là NGUY HIỂM (prefix chung sẽ đóng oan
+    # escalation tiền thật) → chọn gợi ý, không tự đóng.
     for p in files:
+        agent_p = _agent_of(p)
         for rec in iter_events(p):
-            if rec.get("event_type") in ("answer", "decision"):
+            etype = rec.get("event_type")
+            if etype in ("answer", "decision", "finding"):
                 t = rec.get("topic")
                 if not t:
                     continue
@@ -310,7 +323,9 @@ if os.path.isdir(inbox_dir):
                     # Không đọc được ts → coi như rất cũ, KHÔNG cho đóng gì (fail-closed:
                     # thà báo pending thừa hơn làm mù 1 alert thật).
                     continue
-                resolvers.append((t, r_ts))
+                closure_cands.append((agent_p, t, r_ts))
+                if etype != "finding":
+                    resolvers.append((t, r_ts))
     def _resolved(q_topic, q_ts):
         # Exact-match, HOẶC resolver CHỨA nguyên topic câu hỏi (quy ước hậu-tố trạng thái) —
         # và resolver phải xuất hiện SAU câu hỏi. Chỉ 1 chiều (resolver ⊇ topic-hỏi) để 1
@@ -351,6 +366,7 @@ if os.path.isdir(inbox_dir):
                     pending_q_wagsfix.append(f"{agent}/{rec.get('topic')}")
                 else:
                     pending_q.append(f"{agent}/{rec.get('topic')}")
+                    pending_q_meta.append((agent, str(rec.get("topic") or ""), ts_dt))
             else:
                 age_d = (_now - ts_dt).days
                 aged_q.append((age_d, f"{agent}/{rec.get('topic')} ({age_d}d)"))
@@ -363,6 +379,23 @@ if os.path.isdir(inbox_dir):
           f"{ {k: v for k, v in sorted(read_errors.items())} }")
 if pending_q:
     W(f"Có {len(pending_q)} câu hỏi (question) trong 48h qua CHƯA thấy answer tương ứng: {pending_q}")
+    # Dòng HINT: câu hỏi nào có sự kiện CÙNG TÁC GIẢ, đăng SAU nó, topic dùng chung tiền tố
+    # dài (≥ STEM_MIN ký tự) — dấu hiệu đã xử lý xong nhưng ghi bus sai quy ước (đăng
+    # `finding`/đổi topic thay vì `answer`/`decision` GIỮ NGUYÊN topic gốc). Chỉ GỢI Ý:
+    # không đóng, không loại khỏi pending_q, không đổi routing của dòng WARN ở trên.
+    STEM_MIN = 16
+    hints = []
+    for q_agent, q_topic, q_ts in pending_q_meta:
+        for c_agent, c_topic, c_ts in closure_cands:
+            if c_agent != q_agent or c_topic == q_topic or c_ts < q_ts:
+                continue
+            if len(os.path.commonprefix([q_topic, c_topic])) >= STEM_MIN:
+                hints.append(f"{q_agent}/{q_topic} ~ {c_topic}")
+                break
+    if hints:
+        W(f"{WARN_ONLY} {len(hints)}/{len(pending_q)} câu hỏi trên CÓ THỂ đã xử lý xong "
+          f"nhưng ghi bus SAI QUY ƯỚC (sự kiện cùng tác giả, đăng sau, topic cùng tiền tố "
+          f"— quy ước đóng: `answer`/`decision` GIỮ NGUYÊN topic câu hỏi): {hints}")
 elif not pending_q_wagsfix:
     OK("Không có câu hỏi (question) nào đang chờ xử lý trong 48h qua.")
 if pending_q_wagsfix:
@@ -584,16 +617,47 @@ else
 fi
 
 echo "$MSG"
-"$ROOT/bin/notify_thread.sh" "$MSG" "$TRADING_DAILY_THREAD" 2>/dev/null || true
+# OPS_HEALTH_DRY_RUN=1 → chỉ IN báo cáo, không gửi Discord / không ghi bus / không dispatch
+# autofix (thêm Wags coord-2026-08-03). Trước đây KHÔNG có đường chạy thử: mỗi lần verify 1
+# fix của check này đều bắn 1 tin Trading Daily thật + 1 bus event + có thể spawn job autofix
+# → người sửa hoặc né verify, hoặc gây nhiễu vận hành. Mặc định (biến không set) = y như cũ.
+DRY_RUN="${OPS_HEALTH_DRY_RUN:-0}"
+if [ "$DRY_RUN" = "1" ]; then
+  echo "[DRY-RUN] bỏ qua: notify_thread / append_event / dispatch autofix"
+else
+# DELIVER_BEGIN — giao báo cáo tới người: Discord trước, Telegram nếu Discord hỏng.
+#
+# VÌ SAO CÓ NHÁNH DỰ PHÒNG (2026-08-03, vòng 6 arch-reviewer, sự cố registry 2026-08-02):
+# `notify_thread.sh` với TÊN `trading_daily` phân giải qua `discord_channel.sh` →
+# `kb/discord_channels.json` — CHÍNH registry đã hỏng thật hôm 2026-08-02. Nghĩa là check #10
+# (đọc `logs/notify_thread_errors.log` để phát hiện sự cố định tuyến) trước đây tự vô hiệu hoá
+# đúng lúc cần nhất: registry hỏng KÉO DÀI ⇒ chính báo cáo tố cáo nó cũng câm ⇒ không ai được
+# báo gì cả. Khâu GHI độc lập với Discord là chưa đủ — khâu GIAO cũng phải có đường thoát.
+# `notify_telegram.sh` đi thẳng HTTPS tới api.telegram.org: không bridge 127.0.0.1:8199, không
+# registry, credential riêng ⇒ không chết chung nguyên nhân.
+# CHỈ chạy khi Discord THẤT BẠI (không gửi song song — tránh nhân đôi tin mỗi 08:20/12:45).
+if ! "$ROOT/bin/notify_thread.sh" "$MSG" "$TRADING_DAILY_THREAD" 2>/dev/null; then
+  if ! "$ROOT/bin/notify_telegram.sh" "⚠️ [Discord không gửi được — đường dự phòng Telegram]
+$MSG"; then
+    # Cả 2 đường chết: ghi vào chính file mà check #10 đọc, để lượt chạy sau tố cáo được.
+    mkdir -p "$ROOT/logs"
+    printf '%s ops_health_check: CA HAI duong bao deu that bai (Discord %s + Telegram) — bao cao %s KHONG toi tay ai.\n' \
+      "$(date -Iseconds)" "$TRADING_DAILY_THREAD" "${ACCOUNT}-${TODAY}" \
+      >> "$ROOT/logs/notify_thread_errors.log" 2>/dev/null || true
+    echo "ops_health_check: CẢ Discord LẪN Telegram đều không gửi được báo cáo" >&2
+  fi
+fi
+# DELIVER_END
 "$ROOT/bin/append_event.sh" Mike status "ops-health-check-${ACCOUNT}-${TODAY}" \
   "{\"account\":\"${ACCOUNT}\",\"label\":\"${LABEL}\",\"warn_count\":${WARN_COUNT:-0}}" 2>/dev/null || true
+fi
 
 # Tự sửa thay vì chỉ cảnh báo (mandate user 2026-07-07, xem kb/ops_runbook.md) — trừ
 # trường hợp DUY NHẤT plan chưa duyệt/chưa có (việc của user, autofix không tạo/duyệt
 # plan được). Chia domain (mandate mở rộng 2026-07-07): lỗi ĐIỀU PHỐI giữa agent
 # (circuit breaker, question tồn đọng) → Wags (wags_autofix, có arch-reviewer audit);
 # lỗi vận hành trading/pipeline còn lại → Winston (ops_autofix). Cả 2 tự chống lặp 1h.
-if [ "${WARN_COUNT:-0}" -gt 0 ]; then
+if [ "${WARN_COUNT:-0}" -gt 0 ] && [ "$DRY_RUN" != "1" ]; then
   # Circuit breaker + question tồn đọng = lỗi ĐIỀU PHỐI → wags_autofix (Wags triage + re-escalate
   # lên Mike). GIỮ nhánh dispatch question ở đây có chủ đích: đây là kênh escalate CHỦ ĐỘNG duy
   # nhất cho question fleet-wide — bỏ nó thì question chết im sau cutoff 48h, không owner
