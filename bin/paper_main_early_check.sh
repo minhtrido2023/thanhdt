@@ -18,6 +18,9 @@ SESSION="${1:-morning}"   # morning | afternoon — chỉ để hiển thị tro
 
 PLAN_FILE="$WC_ROOT/data/trade_plans/plan_main_${TODAY}.json"
 JOURNAL="$WC_ROOT/data/execution_logs/exec_main_${TODAY}_journal.csv"
+RUNBOT_SUFFIX=""
+[ "$SESSION" = "afternoon" ] && RUNBOT_SUFFIX="_afternoon"
+RUNBOT_LOG="$ROOT/logs/run_bot_main_${TODAY}${RUNBOT_SUFFIX}.log"
 
 _notify() {
   "$ROOT/bin/notify_thread.sh" "$1" "$TRADING_DAILY_THREAD" 2>/dev/null || true
@@ -31,7 +34,17 @@ if [ ! -f "$PLAN_FILE" ]; then
 fi
 
 if [ ! -f "$JOURNAL" ]; then
-  _notify "🔴 **paper-main early-check ($SESSION, $NOW_ICT)** — có plan nhưng KHÔNG có journal ($JOURNAL thiếu). Executor có thể chưa chạy/chết ngay khi khởi động — kiểm tra mike/logs/run_bot_main_${TODAY}*.log."
+  # False-positive found 2026-08-03 (user báo cáo, log thật xác nhận): khi TOÀN BỘ lệnh trong
+  # plan tự netting về đúng 0 (mua=bán cùng khối lượng mọi mã — probe harness's SELL-hôm-qua +
+  # BUY-evidence thường trùng qty), run_bot.sh's own netting layer thoát SỚM và KHÔNG BAO GIỜ
+  # tạo journal — đây là hành vi ĐÚNG thiết kế (run_bot's own log nói rõ "không phải lỗi, chỉ
+  # là ngày không giao dịch"), không phải executor crash. Check cũ không phân biệt được 2 case
+  # này, gây RED giả liên tục (đã xảy ra ít nhất 08-03 sáng+chiều). Đọc lại chính log run_bot
+  # của phiên này — nếu nó TỰ xác nhận "không phải lỗi" thì im lặng, không báo RED.
+  if [ -f "$RUNBOT_LOG" ] && grep -q "không phải lỗi, chỉ là ngày không giao dịch" "$RUNBOT_LOG" 2>/dev/null; then
+    exit 0
+  fi
+  _notify "🔴 **paper-main early-check ($SESSION, $NOW_ICT)** — có plan nhưng KHÔNG có journal ($JOURNAL thiếu), và log run_bot ($RUNBOT_LOG) không tự xác nhận đây là ngày 0-lệnh-hợp-lệ. Executor có thể chưa chạy/chết ngay khi khởi động — kiểm tra $RUNBOT_LOG."
   exit 1
 fi
 
