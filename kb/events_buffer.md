@@ -681,3 +681,21 @@
 - [2026-08-03T03:59:52Z] Taylor/heartbeat — Taylor_20260803_035250: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260803_035250", "source": "watcher"}
 - [2026-08-03T04:00:31Z] Taylor/heartbeat — Taylor_20260803_035529: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260803_035529", "source": "watcher"}
 - [2026-08-03T04:00:40Z] Wags/answer — ping-ack: {"answer": "OK — nhận dispatch, không có câu hỏi cụ thể để trả lời."}
+
+## Consolidation 2026-08-03T04:07:01Z
+- [2026-08-03T04:00:52Z] Taylor/heartbeat — Taylor_20260803_035250: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260803_035250", "source": "watcher"}
+- [2026-08-03T04:01:01Z] Taylor/heartbeat — Taylor_20260803_035529: {"status": "in_progress", "note": "da wire: due_diligence red_flags + plan.py dd_check/dd_override_reason + strategies + executor + send_plan_report; dang test"}
+- [2026-08-03T04:01:31Z] Taylor/heartbeat — Taylor_20260803_035529: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260803_035529", "source": "watcher"}
+- [2026-08-03T04:01:52Z] Taylor/heartbeat — Taylor_20260803_035250: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260803_035250", "source": "watcher"}
+- [2026-08-03T04:02:31Z] Taylor/heartbeat — Taylor_20260803_035529: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260803_035529", "source": "watcher"}
+- [2026-08-03T04:02:52Z] Taylor/heartbeat — Taylor_20260803_035250: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260803_035250", "source": "watcher"}
+- [2026-08-03T04:03:26Z] Taylor/heartbeat — Taylor_20260803_035250: {"status": "in_progress", "note": "Viec2: lag_forensic_filter.py + selfcheck 26/26 PASS (3 bien the TZ); phat hien+sua thiet ke: moc date-aware phai la ASOF chu khong phai Release_Date (neu khong BFC lot). Tiep: chay duong live that."}
+- [2026-08-03T04:03:31Z] Taylor/heartbeat — Taylor_20260803_035529: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260803_035529", "source": "watcher"}
+- [2026-08-03T04:03:53Z] Taylor/heartbeat — Taylor_20260803_035250: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260803_035250", "source": "watcher"}
+- [2026-08-03T04:04:31Z] Taylor/heartbeat — Taylor_20260803_035529: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260803_035529", "source": "watcher"}
+- [2026-08-03T04:04:53Z] Taylor/heartbeat — Taylor_20260803_035250: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260803_035250", "source": "watcher"}
+- [2026-08-03T04:05:31Z] Taylor/heartbeat — Taylor_20260803_035529: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260803_035529", "source": "watcher"}
+- [2026-08-03T04:05:49Z] Taylor/heartbeat — Taylor_20260803_035529: {"status": "in_progress", "note": "selfcheck 35/35 PASS (ke ca env -u TZ + TZ la); dang chay regression selfcheck lan can + viet skill"}
+- [2026-08-03T04:05:53Z] Taylor/heartbeat — Taylor_20260803_035250: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260803_035250", "source": "watcher"}
+- [2026-08-03T04:06:32Z] Taylor/heartbeat — Taylor_20260803_035529: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260803_035529", "source": "watcher"}
+- [2026-08-03T04:06:53Z] Taylor/heartbeat — Taylor_20260803_035250: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260803_035250", "source": "watcher"}
