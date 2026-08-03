@@ -621,3 +621,6 @@
 ## Consolidation 2026-08-03T02:27:24Z
 - [2026-08-03T02:27:18Z] Taylor/heartbeat — Taylor_20260803_021414: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260803_021414", "source": "watcher"}
 - [2026-08-03T02:27:18Z] Taylor/finding — echo-test2 wakeup_profile hint verify (job 022709): {"job": "Taylor_20260803_022709", "type": "no-op echo test 2", "result": "OK", "note": "Dispatch bg nhan duoc, session headless khoi dong, bus ghi duoc, thoat ngay khong lam gi them."}
+
+## Consolidation 2026-08-03T02:27:38Z
+- [2026-08-03T02:27:31Z] Winston/answer — echo-test3-wakeup-profile-hint-verify-bg: {"result": "ok", "note": "dispatch received, no model/effort override, bg wakeup_profile hint verified"}
