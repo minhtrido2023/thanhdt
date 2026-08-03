@@ -69,7 +69,23 @@ def _parse_args(argv):
     return days, csv_path
 
 
+# Nhan model cua CLAUDE. Provider khac (opencode/codex/antigravity) KHONG dung nhan nay —
+# xem _model_key(). Truoc 2026-08-03 moi model la khong nam trong list nay bi gan thanh
+# "default", nen job opencode se bi dem lan vao claude: viec chia tai sang provider re tro
+# thanh VO HINH, va ty le model-mix cua claude (chi so da bat duoc drift fable 07-17) bi loang.
 MODELS = ["sonnet", "opus", "fable", "default"]
+# Provider != claude duoc gom theo TEN PROVIDER, khong theo ten model, vi ten model cua ho
+# (vd "opencode/deepseek-v4-flash-free") khong so sanh duoc voi tier cua claude.
+PROVIDER_KEYS = ["opencode", "codex", "antigravity"]
+
+
+def _model_key(rec):
+    """Nhan de gom 1 job: model cua claude, hoac ten provider neu chay CLI khac."""
+    provider = rec.get("provider") or "claude"
+    if provider != "claude":
+        return provider if provider in PROVIDER_KEYS else "other-provider"
+    model = rec.get("model") or "default"
+    return model if model in MODELS else "default"
 
 
 def _scan_jobs(since_ts):
@@ -94,10 +110,8 @@ def _scan_jobs(since_ts):
         )
         b["jobs"] += 1
         b["agents"][agent] = b["agents"].get(agent, 0) + 1
-        model = rec.get("model") or "default"
-        if model not in MODELS:
-            model = "default"
-        b["models"][model] = b["models"].get(model, 0) + 1
+        mk = _model_key(rec)
+        b["models"][mk] = b["models"].get(mk, 0) + 1
         logfile = rec.get("logfile")
         if logfile and os.path.isfile(logfile):
             b["log_bytes"] += os.path.getsize(logfile)
@@ -151,7 +165,7 @@ def main():
     total_jobs = 0
     total_bytes = 0
     total_dur = 0
-    total_models = {m: 0 for m in MODELS}
+    total_models = {m: 0 for m in MODELS + PROVIDER_KEYS}
     for cat in ["research", "production", "ops-coordination", "other"]:
         b = job_buckets.get(cat, empty)
         total_jobs += b["jobs"]
@@ -178,10 +192,17 @@ def main():
             f"{m}={100*n/total_jobs:.0f}%" for m, n in sorted(total_models.items()) if n
         )
         print(f"    overall model mix: {overall_mix}")
-        fable_pct = 100 * total_models.get("fable", 0) / total_jobs
+        claude_jobs = sum(total_models.get(m, 0) for m in MODELS)
+        offload = sum(total_models.get(p, 0) for p in PROVIDER_KEYS)
+        if offload:
+            print(f"    offload: {offload}/{total_jobs} job ({100*offload/total_jobs:.0f}%) "
+                  f"chay tren provider KHAC claude — phan nay khong tieu quota claude")
+        # Mau so = job CLAUDE, khong phai tong. Neu chia mau bang total_jobs thi cang chuyen
+        # tai sang opencode, fable% cang tut gia tao => canh bao tu tat, dung luc can nhat.
+        fable_pct = 100 * total_models.get("fable", 0) / claude_jobs if claude_jobs else 0
         if fable_pct >= 30:
             print(
-                f"    ⚠ fable = {fable_pct:.0f}% of all dispatches — ladder policy "
+                f"    ⚠ fable = {fable_pct:.0f}% of CLAUDE dispatches — ladder policy "
                 f"(MIKE.md §Model routing) says fable should be rare, reserved for "
                 f"genuinely exceptional complexity, not routine audit/fix work."
             )

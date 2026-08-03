@@ -108,3 +108,28 @@ mình — và **tự khai đúng cái nó không kiểm được** (bash bị ga
 **Ý nghĩa**: đây đúng là giá trị mà multi-CLI được dựng lên để lấy — một họ model khác đọc cùng
 tài liệu và thấy chỗ tác giả không thấy, với chi phí ~0. Lưu ý nó bắt lỗi **lập luận/bằng chứng**,
 không phải lỗi domain; và nó vẫn là ADVISORY, không phải cổng duyệt.
+
+---
+
+## A/B trên TASK THẬT: deepseek vs claude, cùng một việc tra cứu (2026-08-03)
+
+Chính sách user 2026-08-03 coi `deepseek-v4-flash-free` ngang tầm Sonnet để chia tải. Dưới đây là
+phép đối chứng đầu tiên trên **một task vận hành có thật, lặp lại hàng tháng** (tra lãi suất huy
+động Big-4 — 7+ lần trong mẫu job gần đây), với **ground truth độc lập**:
+
+| | Job | Kết quả VCB 12T online |
+|---|---|---|
+| **claude** | `Winston_20260803_011003` (01:18Z, cron thật) | **5,9%** (trong chuỗi Agribank 6,8 / BIDV 6,8 / VietinBank 6,05 / VCB 5,9 → escalate vì phân kỳ) |
+| **opencode + deepseek** | `Winston_20260803_045321` (04:53Z, dispatch tay) | **5,9%** |
+
+Hai lần chạy **độc lập**, khác họ model, khác thời điểm, **ra cùng con số**.
+
+Đáng chú ý hơn con số: bản deepseek **tự phát hiện 3 nguồn mâu thuẫn (5,2 / 5,9 / 4,6)**, nói
+thẳng *"Cần đối chiếu thêm trước khi kết luận — không đoán"*, rồi đối chiếu 2 nguồn, dẫn tên trang
++ ngày khảo sát, và tự nêu giới hạn (*"chưa có khảo sát riêng cho tháng 8/2026; số mới nhất đã xác
+minh là khảo sát 07/07/2026"*). Đó đúng kỷ luật provenance mà `coding_guidelines.md` §6 đòi — không
+phải hành vi phải nhắc riêng.
+
+**Kết luận có mức độ**: đủ để tin cho **lớp task tra-cứu-web read-only**, là đúng lớp đang được
+chuyển tải. **KHÔNG** suy rộng ra lớp task khác (quant, code, phán đoán domain) — chưa đo.
+n=1 task, 1 lần chạy: đây là tín hiệu ủng hộ chính sách, không phải phép đo phân phối.

@@ -263,18 +263,46 @@ dispatch cũ chạy y nguyên, 0 thay đổi hành vi — đã chứng minh bằ
 so argv byte-for-byte). Khai báo provider ở **`kb/cli_providers.json`** — thêm CLI mới = thêm 1
 entry, KHÔNG sửa `dispatch.sh`.
 
-**Q0 (hỏi TRƯỚC Q1-Q3): việc này có lý do cụ thể để rời khỏi claude không?** Không có lý do ⇒
-`claude`. Chống đúng phản xạ "chọn CLI nghe có vẻ mạnh hơn" — cùng bệnh với model-drift 07-17.
+**Chính sách user 2026-08-03: coi `deepseek-v4-flash-free` ngang tầm Sonnet ⇒ CHỦ ĐỘNG đẩy việc
+tầng-Sonnet sang opencode để tiết kiệm quota claude.** Không còn là "chỉ dùng khi cần ý kiến trái
+chiều" — nay là kênh chia tải mặc định cho tầng rẻ.
 
-| Dùng | Khi nào | Ràng buộc |
+**Chọn provider theo 3 bước, hỏi ĐÚNG THỨ TỰ (dừng ở bước nào ra `claude` thì dừng luôn):**
+
+**Bước 1 — Task có GHI gì không?** (sửa file/code/KB, sinh plan, đặt lệnh, ghi BQ, đổi cron)
+→ **CÓ ⇒ `claude`. Hết.** Agent opencode **không có tool `write`/`edit`** (đã xác minh: chỉ có
+bash·glob·grep·read·webfetch·websearch·skill·task·todowrite) và `bash` bị deny-by-default. Giao
+việc ghi cho nó = job chạy rồi thất bại giữa chừng, tốn thời gian mà không ra kết quả.
+
+**Bước 2 — Task có nằm trên ĐƯỜNG GĂNG vận hành không?** (plan T+1, EOD report, run_bot,
+alert chặn thực thi, bất cứ thứ gì có deadline trong ngày)
+→ **CÓ ⇒ `claude`.** Độ trễ free tier chưa đo đủ mẫu (mới n=1 quan sát bất thường) — không đặt
+cược deadline vào biến chưa biết.
+
+**Bước 3 — Còn lại (chỉ ĐỌC, không deadline): áp ladder Q1-Q3 như cũ, nhưng Q1 đổi đích.**
+
+| | Loại task | Đích |
 |---|---|---|
-| **claude** (mặc định) | Mọi việc chạm tiền thật, lập plan, điều phối, sửa production, và toàn bộ việc thường lệ | Không giới hạn agent |
-| **opencode** | **Ý kiến độc lập từ họ model KHÁC** (deepseek/ling/nemotron…): phản biện một kết luận của claude, cross-check một lập luận, brainstorm phương án, tra cứu đọc-nhiều | Chỉ `Taylor·Winston·Wendy·Spyros·Wags`; **read-only cưỡng chế** (`permission` trong `agents/<id>/opencode.json`); free tier **KHÔNG đảm bảo độ trễ** ⇒ cấm dùng cho việc trên đường găng (plan T+1, EOD report) |
-| **codex** | Chưa bật (`enabled:false`) | Chỉ cần `codex login` + `enabled:true` — identity/context đã wire sẵn qua `profile:prompt-inline` |
-| **antigravity** (`agy`, Gemini) | Chưa bật (`enabled:false`) | Cần cài `agy` + login Gemini + điền `models` (`agy models`) + `enabled:true`. Gọi thẳng `agy -p`, KHÔNG qua ACP — xem `notes` trong registry |
+| **Q1** | Tra cứu web (lãi suất, tin tức, corp-action), đọc/tóm tắt/so sánh tài liệu, phản biện một kết luận, smoke test, kiểm tra trạng thái | **`--provider opencode`** ⟵ *đổi từ Sonnet* |
+| **Q2** | Trade-off, tổng hợp nhiều nguồn, sinh giả thuyết, soi lỗi tinh vi | `claude --model opus` |
+| **Q3** | Cực kỳ phức tạp, vượt tầm Opus | `claude --model fable` (hiếm) |
 
-Giá trị thật của multi-CLI ở đây là **bất đồng ý kiến**, không phải throughput: một kết luận mà
-claude và một họ model khác cùng ra thì đáng tin hơn hẳn. Dùng nó như `quant-skeptic` thứ hai.
+**Ngoại lệ cần nhớ: `bq` KHÔNG nằm trong allowlist của opencode** ⇒ mọi task cần query BigQuery
+vẫn phải đi `claude`, dù nó chỉ là tra cứu cơ học.
+
+Agent được phép trên opencode: `Taylor · Winston · Wendy · Spyros · Wags`
+(`DollarBill`/`Mafee`/`Mike` bị chặn — surface tiền thật + điều phối).
+
+**Đo hiệu quả chia tải**: `python3 bin/spend_report.py --days 7` — có dòng `offload: N/M job (x%)`
+và `model mix` tách riêng `opencode` khỏi model của claude. Nếu offload% không tăng thì chính sách
+này chỉ nằm trên giấy.
+
+| Provider | Trạng thái |
+|---|---|
+| **claude** | ✅ mặc định |
+| **opencode** | ✅ dùng được ngay, 0 credentials |
+| **codex** | ❌ `enabled:false` — chỉ cần `codex login` + `enabled:true` (identity đã wire sẵn) |
+| **antigravity** (`agy`) | ❌ `enabled:false` — cần cài `agy` + login Gemini + điền `models` thật |
 
 ```bash
 # CÁCH DÙNG CHÍNH — công cụ chuyên dụng, tự lo prompt phản biện + ghi bus:
