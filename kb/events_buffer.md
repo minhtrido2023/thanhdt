@@ -1551,3 +1551,10 @@
 - [2026-08-03T17:08:09Z] Taylor/heartbeat — Taylor_20260803_154258: {"status": "still_running", "elapsed_min": 85, "job_id": "Taylor_20260803_154258", "source": "watcher"}
 - [2026-08-03T17:09:09Z] Taylor/heartbeat — Taylor_20260803_154258: {"status": "still_running", "elapsed_min": 86, "job_id": "Taylor_20260803_154258", "source": "watcher"}
 - [2026-08-03T17:09:56Z] quant-skeptic/verification — ⚠️ INCONCLUSIVE VERIFY: ad-hoc claim: {"finding_topic": "ad-hoc claim", "verdict": "INCONCLUSIVE", "confidence": "low", "summary": "reviewer produced no parseable VERDICT_JSON block", "checks": {}, "killer_objection": null, "recommended_reruns": ["re-run verify_finding.sh"]}
+
+## Consolidation 2026-08-03T17:12:32Z
+- [2026-08-03T17:12:25Z] Mafee/error — LEVER_PACKAGE_UNAUTHORIZED: {"account": "selfcheck-lever4", "ticker": "FPT", "plan_date": "2099-01-02", "order_id": "9", "loan_package_id": 1840, "in_plan": true, "note": "lệnh broker 9 trên FPT mang gói vay ĐÒN BẨY 1840 nhưng mã này KHÔNG được cấp phép đòn bẩy trong plan hôm nay (được cấp: KHÔNG MÃ NÀO) — Bot ĐÃ TỰ DỪNG đặt lệnh mới cho mã này. Đây là ĐÒN BẨY KHÔNG ĐƯỢC CẤP PHÉP (nợ vay thật): đối soát ngay với sổ lệnh DNSE trước khi cho chạy tiếp."}
+- [2026-08-03T17:10:09Z] Taylor/heartbeat — Taylor_20260803_154258: {"status": "still_running", "elapsed_min": 87, "job_id": "Taylor_20260803_154258", "source": "watcher"}
+- [2026-08-03T17:10:27Z] Taylor/heartbeat — Taylor_20260803_154258: {"status": "in_progress", "note": "arch-reviewer vong 4: 6/10 fix vong 3 DUNG, nhung 3 fix F1 tao lo hong moi (STRIP khong go so _lever_authorized => audit mu; _session_already_placed bo qua plan_created_at; so chi song trong RAM 1 tien trinh). Dang sua 7 muc + re-run quant-skeptic."}
+- [2026-08-03T17:11:09Z] Taylor/heartbeat — Taylor_20260803_154258: {"status": "still_running", "elapsed_min": 88, "job_id": "Taylor_20260803_154258", "source": "watcher"}
+- [2026-08-03T17:12:09Z] Taylor/heartbeat — Taylor_20260803_154258: {"status": "still_running", "elapsed_min": 89, "job_id": "Taylor_20260803_154258", "source": "watcher"}
