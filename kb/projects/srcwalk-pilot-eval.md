@@ -1,7 +1,39 @@
 # Pilot đánh giá `srcwalk` — tra cứu code Python bằng AST thay vì grep+Read
 
-> Status: PILOT ĐANG CHẠY (bắt đầu 2026-08-01). Không phải dự án đã đóng — file này track tới khi
-> có quyết định giữ/bỏ, lúc đó chuyển ghi chú đóng vào `kb/projects/INDEX.md` như thường lệ.
+> **Status: ĐÓNG SỚM 2026-08-03 — user chỉ đạo mở toàn fleet, KHÔNG chờ hết cửa sổ 3 tuần.**
+> Pilot chạy 2026-08-01 → 2026-08-03 (2 ngày), `srcwalk_pilot_log.jsonl` **0 dòng** (Taylor chưa
+> dùng thật lần nào). Theo ngưỡng gốc bên dưới, "<3 lần dùng thật" đáng lẽ = tín hiệu BỎ; user
+> quyết định ngược lại và đó là quyền của user — ghi lại đây cho minh bạch, không phải để phản đối.
+
+## Quyết định 2026-08-03 (thay thế phần "Phạm vi pilot" bên dưới)
+- **Cài dạng skill**: `~/.claude/skills/srcwalk/` (SKILL.md + GUIDE.md từ repo upstream, version
+  khớp binary). Binary `~/.local/bin/srcwalk` **v1.3.0** (tarball musl tĩnh, thay bản npm của pilot).
+- **Phạm vi**: TOÀN FLEET (8 agent), làm công cụ đọc code mặc định thay Read/grep.
+- **Docs đã sửa**: `WorkingClaude/CLAUDE.md` § Code navigation (nguồn chi tiết duy nhất),
+  `kb/coding_guidelines.md` §18b, `agents/*/CLAUDE.md` (8 file).
+- **Bỏ cơ chế log JSONL** — không còn đo pilot nữa.
+
+## ⚠️ 3 lỗi của pilot ĐÃ VERIFY LẠI TRÊN v1.3.0 (2026-08-03) — VẪN CÒN, không được coi là đã fix
+Mike chạy lại đúng các test của pilot trên binary mới:
+1. **`trace callers --depth ≥2` / khối "impact"**: `srcwalk trace callers filter_lag_rating_orders
+   --scope . --depth 2` → **496 cạnh hop-2**, gần như toàn rác (mọi `main()`, mọi `run(...)`, kể cả
+   `subprocess.run(...)` bị khớp là caller của `run`). Ngay ở `--depth 1`, khối "impact" đã có false
+   positive `setup_gmail_oauth.py:81`. Hop-1 (4 call site trực tiếp) thì ĐÚNG.
+   → Chỉ dùng `--depth 1`, chỉ đọc danh sách call-site trực tiếp, verify blast-radius bằng `grep`.
+2. **`review` bỏ sót hàm mới thêm**: trên `d64717f`, hunk `trading_bot/plan.py:509-598` (nơi
+   `filter_lag_rating_orders` được THÊM ở 532-604) bị gắn nhãn `file-level`; "changed symbols" chỉ
+   liệt kê `main` + `lag_filter_low_rating`. Hunk nằm TRONG hàm có sẵn thì gắn context đúng.
+   → `git diff` là nguồn chuẩn tắc cho change set.
+3. **Bash vẫn không được hỗ trợ**: `srcwalk bin/dispatch.sh` (1244 dòng) chỉ in comment header dạng
+   raw preview, không có outline symbol; `srcwalk discover <fn> --scope bin` chỉ trả về định nghĩa
+   Python, không thấy hàm bash nào. `mike/bin/` = **63 `.sh` vs 46 `.py`** → phần lớn khối lượng đọc
+   file hạ tầng của fleet KHÔNG hưởng lợi từ công cụ này.
+
+**Việc nên làm sau này**: khi lên version srcwalk mới, chạy lại đúng 3 test trên TRƯỚC khi nới lỏng
+bất kỳ cấm đoán nào — đừng tin changelog.
+
+---
+> _Phần dưới là nội dung pilot gốc (2026-08-01), giữ nguyên làm hồ sơ._
 
 ## Bối cảnh
 User yêu cầu tham khảo `github.com/sting8k/srcwalk` (công cụ CLI dùng tree-sitter để tra symbol

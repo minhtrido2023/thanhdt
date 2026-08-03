@@ -500,6 +500,22 @@ DSR/PBO before recommending a wire, confirm production untouched via `git diff`,
 gate before any production-change recommendation, verify the artifact not the self-report before
 relaying a conclusion. Point Taylor at this skill explicitly rather than re-deriving by hand.
 
+## 18b. Đọc/tra code — mặc định `srcwalk`, KHÔNG phải Read/grep (chốt 2026-08-03, user directive)
+
+`srcwalk` (tree-sitter CLI, v1.3.0 ở `~/.local/bin`, skill `~/.claude/skills/srcwalk/`) là công cụ
+mặc định để đọc và điều hướng code Python/TS/JS/Go/Rust/… — trả về outline (symbol + dải dòng) thay
+vì nguyên file. Quy tắc đầy đủ + bảng đối chiếu lệnh: **`WorkingClaude/CLAUDE.md` § Code navigation**
+(nguồn duy nhất, đừng chép lại ở đây).
+
+**3 giới hạn đã đo thật, đừng bỏ qua** (pilot 2026-08-01 phát hiện, Mike verify lại trên v1.3.0 ngày
+2026-08-03 — cả 3 VẪN CÒN): (1) **bash không được hỗ trợ** — `mike/bin/` có 63 `.sh` vs 46 `.py`, với
+bash vẫn dùng `grep`+`Read`; (2) `trace callers --depth ≥2` và khối "impact" khớp nhầm theo tên hàm
+chung chung (`main`/`run`/cả `subprocess.run`) → 496 cạnh rác, chỉ dùng `--depth 1`; (3) `review` bỏ
+sót hàm MỚI THÊM khỏi "changed symbols" → `git diff` mới là nguồn chuẩn tắc cho change set.
+
+Cùng tinh thần §6/§9/§14: đây là bằng chứng **điều hướng cấu trúc**, không phải bằng chứng runtime —
+giữ nguyên dòng `confidence:`/`caveat:` mà công cụ tự in ra khi trích dẫn kết luận.
+
 ## 19. Any Task With a Selfcheck/Test — Follow `~/.claude/skills/verify-before-done/`
 
 Before reporting a coding/fix task done with a selfcheck involved, check the `verify-before-done`

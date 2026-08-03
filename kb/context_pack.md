@@ -1,4 +1,4 @@
-# Mike fleet — context pack (v1698)
+# Mike fleet — context pack (v1699)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
@@ -97,9 +97,13 @@ chủ động HÀNG TUẦN qua `bin/fearbuy_weekly_scan.sh` (cron Friday 08:10 I
 sau case TV1+DGC, kết hợp anomaly_scan + WebSearch tin khởi tố, áp bộ lọc QUALIFY/NON/AMBIGUOUS
 trong `calculated_fear_state_backstop.md`. Recon thuần, KHÔNG tự mua.
 
-**Pilot `srcwalk`** (tra code Python bằng AST thay grep, 2026-08-01, chỉ Taylor, chỉ `discover`/
-`show`, CẤM `trace`/`review` — lỗi call-graph đã phát hiện): `kb/projects/srcwalk-pilot-eval.md`.
-Xem lại ~2026-08-22 hoặc khi log có ≥8 dòng dùng thật.
+**`srcwalk` — ĐÃ MỞ TOÀN FLEET 2026-08-03** (user directive; pilot hẹp 2026-08-01 đóng sớm). Cài dạng
+skill `~/.claude/skills/srcwalk/`, binary v1.3.0. Là công cụ đọc code MẶC ĐỊNH thay Read/grep —
+quy tắc + bảng lệnh ở `WorkingClaude/CLAUDE.md` § Code navigation, tóm tắt ở `kb/coding_guidelines.md`
+§18b. ⚠️ **3 giới hạn đã verify lại trên v1.3.0, VẪN CÒN**: không hỗ trợ bash (`bin/` 63 `.sh` vs 46
+`.py`); `trace callers --depth ≥2`/khối "impact" khớp nhầm theo tên hàm chung (496 cạnh rác) → chỉ
+`--depth 1`; `review` bỏ sót hàm mới thêm → dùng `git diff`. Chi tiết + cách test lại khi lên version:
+`kb/projects/srcwalk-pilot-eval.md`.
 
 ## Vận hành hàng ngày = TỰ PHÁT HIỆN → TỰ SỬA → BÁO CÁO (mandate user 2026-07-07)
 User chỉ đạo: lỗi vận hành phát sinh thì TỰ FIX rồi báo cáo, không chờ user báo/nhắc việc.
