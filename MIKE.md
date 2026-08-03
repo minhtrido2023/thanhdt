@@ -297,6 +297,17 @@ Agent được phép trên opencode: `Taylor · Winston · Wendy · Spyros · Wa
 và `model mix` tách riêng `opencode` khỏi model của claude. Nếu offload% không tăng thì chính sách
 này chỉ nằm trên giấy.
 
+**Auto-fallback claude khi provider phụ hết usage/rate limit (chốt 2026-08-03, user mandate)**:
+`dispatch.sh` tự phát hiện lỗi dạng usage-limit ở BẤT KỲ provider phụ nào (opencode/deepseek...)
+và **fallback NGAY sang claude** (không chờ) — khác hẳn cách xử lý cho chính claude (đợi tới giờ
+reset dự đoán được rồi thử lại). Lý do khác nhau: claude có cửa sổ 5h/tuần đo được qua
+`usage_watch.py`; provider phụ có `usage_probe=null` (không đoán được giờ hồi quota) nên "chờ rồi
+thử lại provider đó" chỉ là đoán mù — trong khi claude là quota ĐỘC LẬP, luôn sẵn sàng ngay. Cơ
+chế: `_maybe_fallback_provider_on_usage_limit()` trong `dispatch.sh`, chạy TRƯỚC
+`_maybe_schedule_usage_resume` ở cả 2 nhánh (`--bg` và đồng bộ) — spawn 1 job `--bg` mới cho ĐÚNG
+agent/prompt/effort đó nhưng KHÔNG truyền `--provider`/`--model` (rơi về routing claude bình
+thường, tức Sonnet cho việc Q1 vốn đã được route sang opencode). Không cần làm gì thêm — tự động.
+
 | Provider | Trạng thái |
 |---|---|
 | **claude** | ✅ mặc định |
