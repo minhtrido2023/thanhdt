@@ -26,6 +26,8 @@
     "                   ⚠️ BAT BUOC cho CLI dang shim `#!/usr/bin/env node`: pin `bin` KHONG",
     "                   pin interpreter. Do that duoi PATH crontab: codex -> SyntaxError vi",
     "                   /usr/bin/node = v12.22.9 < engines>=16. opencode KHONG can (ELF native).",
+    "  default_model  : model dung khi caller KHONG truyen --model. null => khong truyen co",
+    "                   nao (claude: CLI tu lay tu agents/<id>/.claude/settings.json).",
     "  supports_turns : false => dispatch.sh BO HAN nhanh max-turns resume, khong bia",
     "  profile        : cach nap identity cua agent (xem bang duoi)",
     "  usage_probe    : script uoc luong usage. null => CHI phrase-match, khong doi chung,",
@@ -43,14 +45,14 @@
     "  opencode-json : opencode doc CLAUDE.md tu --dir (da kiem chung), nhung KHONG hieu",
     "                  @import => danh sach file context khai bao trong agents/<id>/opencode.json",
     "                  field `instructions` (duong dan tuyet doi). Da kiem chung nap dung.",
-    "  prompt-inline : chua dung. Provider khong doc file profile nao => phai prepend vao prompt.",
+    "  prompt-inline : provider khong doc file profile nao cua fleet (codex doc AGENTS.md chu",
+    "                  khong doc CLAUDE.md; agy khong doc file nao) => dispatch.sh prepend",
+    "                  identity+context vao PROMPT bang bin/render_profile_prompt.sh.",
     "",
     "NANG CAP nvm/node lam `bin` va `env` lech: `check` se bao LOUD luc dispatch.",
     "Sua o day, dung sua rai rac trong script."
   ],
-
   "default_provider": "claude",
-
   "providers": {
     "claude": {
       "label": "Claude Code",
@@ -58,17 +60,30 @@
       "bin": "/home/trido/.local/bin/claude",
       "bin_env_override": "DISPATCH_CLAUDE_BIN",
       "env": {},
-      "models": ["sonnet", "opus", "haiku", "fable"],
-      "efforts": ["low", "medium", "high", "xhigh", "max"],
-      "effort_caps": { "fable": "high" },
+      "models": [
+        "sonnet",
+        "opus",
+        "haiku",
+        "fable"
+      ],
+      "efforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ],
+      "effort_caps": {
+        "fable": "high"
+      },
       "supports_turns": true,
       "profile": "claude-native",
       "usage_probe": "bin/usage_watch.py",
       "max_turns_pattern": "Reached max turns",
       "allow_agents": "*",
-      "notes": "Mac dinh. Duy nhat duoc dung cho surface tien that (Mafee/DollarBill) va dieu phoi (Mike/Wags)."
+      "notes": "Mac dinh. Duy nhat duoc dung cho surface tien that (Mafee/DollarBill) va dieu phoi (Mike/Wags).",
+      "default_model": null
     },
-
     "opencode": {
       "label": "opencode (SST) — Zen free tier",
       "enabled": true,
@@ -84,22 +99,34 @@
         "opencode/north-mini-code-free",
         "opencode/big-pickle"
       ],
-      "efforts": ["low", "medium", "high", "max", "minimal"],
+      "efforts": [
+        "low",
+        "medium",
+        "high",
+        "max",
+        "minimal"
+      ],
       "effort_caps": {},
       "supports_turns": false,
       "profile": "opencode-json",
       "usage_probe": null,
       "max_turns_pattern": null,
-      "allow_agents": ["Taylor", "Winston", "Wendy", "Spyros", "Wags"],
+      "allow_agents": [
+        "Taylor",
+        "Winston",
+        "Wendy",
+        "Spyros",
+        "Wags"
+      ],
       "notes": [
         "ELF binary native => CHAY DUOC duoi PATH crontab (da do: in 1.18.11, rc=0). Khac codex.",
         "Zen free tier chay voi 0 credentials (da do). KHONG dam bao do tre: da quan sat 1 lan",
         "treo >150s roi lan sau xong trong 6s. => KHONG dung cho viec tren duong gang van hanh",
         "(plan T+1, EOD report). Chi research/doi-chung.",
         "effort anh xa sang --variant. turns khong co flag (co `steps` trong agent config)."
-      ]
+      ],
+      "default_model": "opencode/deepseek-v4-flash-free"
     },
-
     "codex": {
       "label": "OpenAI Codex CLI",
       "enabled": false,
@@ -108,14 +135,27 @@
       "env": {
         "PATH": "/home/trido/.nvm/versions/node/v22.23.0/bin:${PATH}"
       },
-      "models": ["gpt-5.1-codex", "gpt-5.1-codex-mini"],
-      "efforts": ["low", "medium", "high"],
+      "models": [
+        "gpt-5.1-codex",
+        "gpt-5.1-codex-mini"
+      ],
+      "efforts": [
+        "low",
+        "medium",
+        "high"
+      ],
       "effort_caps": {},
       "supports_turns": false,
       "profile": "prompt-inline",
       "usage_probe": null,
       "max_turns_pattern": null,
-      "allow_agents": ["Taylor", "Winston", "Wendy", "Spyros", "Wags"],
+      "allow_agents": [
+        "Taylor",
+        "Winston",
+        "Wendy",
+        "Spyros",
+        "Wags"
+      ],
       "notes": [
         "enabled=false cho toi khi user chay `codex login` (da kiem 2026-08-03: Not logged in).",
         "env.PATH BAT BUOC: codex la shim `#!/usr/bin/env node`, engines>=16, ma /usr/bin/node",
@@ -127,7 +167,6 @@
         "--dangerously-bypass-approvals-and-sandbox (arch-reviewer required_change #6c)."
       ]
     },
-
     "antigravity": {
       "label": "Google Antigravity CLI (agy) — Gemini",
       "enabled": false,
@@ -141,7 +180,13 @@
       "profile": "prompt-inline",
       "usage_probe": null,
       "max_turns_pattern": null,
-      "allow_agents": ["Taylor", "Winston", "Wendy", "Spyros", "Wags"],
+      "allow_agents": [
+        "Taylor",
+        "Winston",
+        "Wendy",
+        "Spyros",
+        "Wags"
+      ],
       "notes": [
         "enabled=false: `agy` CHUA CAI tren may nay va ~/.gemini chua ton tai (kiem 2026-08-03).",
         "Bat khi: (1) cai agy tu github google-antigravity/antigravity-cli, (2) user login Gemini",
