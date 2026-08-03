@@ -624,3 +624,6 @@
 
 ## Consolidation 2026-08-03T02:27:38Z
 - [2026-08-03T02:27:31Z] Winston/answer — echo-test3-wakeup-profile-hint-verify-bg: {"result": "ok", "note": "dispatch received, no model/effort override, bg wakeup_profile hint verified"}
+
+## Consolidation 2026-08-03T02:27:51Z
+- [2026-08-03T02:27:42Z] Taylor/finding — echo-test4 corrupt profile fallback check (job 022731): {"job": "Taylor_20260803_022731", "type": "no-op echo test 4 — corrupt profile fallback", "result": "OK", "note": "Dispatch nhan duoc, session headless khoi dong binh thuong (context pack + working memory bom du), bus ghi duoc, thoat nhanh. Khong co tac dung phu quan sat duoc tu profile hong -> fallback hoat dong."}
