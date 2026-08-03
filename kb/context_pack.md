@@ -1,16 +1,16 @@
-# Mike fleet — context pack (v1681)
+# Mike fleet — context pack (v1682)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-08-03T04:00:40] Wags/answer — ping-ack: {"answer": "OK — nhận dispatch, không có câu hỏi cụ thể để trả lời."}
-- [2026-08-03T04:10:03] Taylor/finding — Due-diligence: them BUOC XAC NHAN (dd_override_reason) cho co do khi mua — WARN, KHONG phai hard-gate: {"job": "Taylor_20260803_035529", "boi_canh": "case DHD 08-03 — lop DD (mandate 07-21) in du 2 dong do (ADV3T ~59tr/phien + NGOAI universe_pit) o MOI kenh nhung …
 - [2026-08-03T04:12:48] Taylor/finding — RE-PIN R3: 27,24% -> 28,86% (dong bo registry theo mac dinh production LAG_ADV_BASIS=price): {"job": "Taylor_20260803_035250", "viec": "1/3 — user duyet", "so_pin_moi": "CAGR 28,86% / Sharpe 1,90 / MaxDD -17,8% / Calmar 1,62 / Final NAV 1.178,01B", "so_ …
 - [2026-08-03T04:15:39] Taylor/finding — Gate quan tri BANNED/forensic cho duong live LAG — lag_filter_forensic_banned(): {"job": "Taylor_20260803_035250", "viec": "2/3 — user duyet, CHO quant-skeptic truoc khi commit", "thay_doi": "them lag_forensic_filter.lag_filter_forensic_bann …
 - [2026-08-03T04:19:31] quant-skeptic/verification — ✅ CONFIRMED VERIFY: Gate quan tri BANNED/forensic cho duong live LAG — lag_filter_forensic_banned(): {"finding_topic": "Gate quan tri BANNED/forensic cho duong live LAG — lag_filter_forensic_banned()", "verdict": "CONFIRMED", "confidence": "high", "checks": {"l …
 - [2026-08-03T04:20:26] Taylor/decision — MERGE gate BANNED/forensic vao duong live LAG (quant-skeptic CONFIRMED high): {"job": "Taylor_20260803_035250", "verdict": "CONFIRMED (high) — mike/logs/verify_20260803_041544.log", "reviewer_tu_lam": "chay lai selfcheck bang $DNA_PYEXE d …
 - [2026-08-03T04:20:21] Wags/finding — second-opinion: verify_opencode_adapter_20260803.md: {"doi_tuong": "verify_opencode_adapter_20260803.md", "nguon": "opencode", "diem_dang_ngo": [{"van_de": "Assumption #4 (ghi duoc bus) duoc dung lam bang chung: e …
 - [2026-08-03T04:24:22] Wendy/finding — model-id: claude-sonnet-5
+- [2026-08-03T04:35:20] Taylor/finding — Viec 3: thiet lap theo doi ADV>0 filter — lag_liq_ledger.py + moc cung 2026-12-15/2027-03-31: {"job": "Taylor_20260803_035250", "viec": "3/3 — tracking, KHONG fix, KHONG ket luan", "cau_hoi_dispatch_1": "edge_health_monitor.py da tach duoc dong gop cua l …
+- [2026-08-03T04:35:47] Taylor/answer — HOAN TAT job Taylor_20260803_035250 — ca 3 viec (attempt 2): {"job": "Taylor_20260803_035250", "attempt": "2/2 — attempt 1 da lam xong viec 1+2, attempt 2 xac nhan roi lam tiep viec 3 (KHONG lam lai tu dau)", "viec_1_repi …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -276,6 +276,7 @@ Khác nhóm trên (đã ĐÓNG) — 2 mục dưới đây vẫn đang chạy, nh
 đọc mỗi phiên. `current_ops.md` giữ 1 đoạn tóm tắt + pointer; đọc file khi cần theo dõi tiến độ.
 - **R&D pipeline (mọi thử nghiệm paper-only)** → `kb/projects/rnd-pipeline-tracker.md`
 - **Migration `ticker_prune` → `universe_pit` (checklist G5-G9)** → `kb/projects/universe-pit-migration.md`
+- **LAG ADV>0 filter — tích luỹ dữ liệu phân rã edge vs hiện vật fill** → `kb/projects/lag-adv-filter-tracking.md` — mở 2026-08-03, chủ Taylor. `lag_liq_ledger.py` ghi sổ append-only từ mỗi phiên EOD (khe hổng: `golive_v23_status.json` bị ghi đè, 0 lịch sử). **KHÔNG kết luận gì** cho tới 2 mốc CỨNG: checkpoint **2026-12-15** (kiểm sổ có tích luỹ được không) và rà soát đầy đủ **2027-03-31** (Q3+Q4/2026 xong 25 phiên). Tới đó mới tách được +4,11pp (quant-skeptic INCONCLUSIVE 3 lần).
 
 ## Nguồn chuẩn tắc đầy đủ
 Chi tiết: kb/KNOWLEDGE.md (§1-9). Dự án đã đóng: kb/projects/ (index ở trên). Events: kb/events_buffer.md. Fleet: kb/fleet_status.md.
