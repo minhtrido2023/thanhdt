@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v1682)
+# Mike fleet — context pack (v1683)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-08-03T04:12:48] Taylor/finding — RE-PIN R3: 27,24% -> 28,86% (dong bo registry theo mac dinh production LAG_ADV_BASIS=price): {"job": "Taylor_20260803_035250", "viec": "1/3 — user duyet", "so_pin_moi": "CAGR 28,86% / Sharpe 1,90 / MaxDD -17,8% / Calmar 1,62 / Final NAV 1.178,01B", "so_ …
 - [2026-08-03T04:15:39] Taylor/finding — Gate quan tri BANNED/forensic cho duong live LAG — lag_filter_forensic_banned(): {"job": "Taylor_20260803_035250", "viec": "2/3 — user duyet, CHO quant-skeptic truoc khi commit", "thay_doi": "them lag_forensic_filter.lag_filter_forensic_bann …
 - [2026-08-03T04:19:31] quant-skeptic/verification — ✅ CONFIRMED VERIFY: Gate quan tri BANNED/forensic cho duong live LAG — lag_filter_forensic_banned(): {"finding_topic": "Gate quan tri BANNED/forensic cho duong live LAG — lag_filter_forensic_banned()", "verdict": "CONFIRMED", "confidence": "high", "checks": {"l …
 - [2026-08-03T04:20:26] Taylor/decision — MERGE gate BANNED/forensic vao duong live LAG (quant-skeptic CONFIRMED high): {"job": "Taylor_20260803_035250", "verdict": "CONFIRMED (high) — mike/logs/verify_20260803_041544.log", "reviewer_tu_lam": "chay lai selfcheck bang $DNA_PYEXE d …
@@ -11,6 +10,7 @@
 - [2026-08-03T04:24:22] Wendy/finding — model-id: claude-sonnet-5
 - [2026-08-03T04:35:20] Taylor/finding — Viec 3: thiet lap theo doi ADV>0 filter — lag_liq_ledger.py + moc cung 2026-12-15/2027-03-31: {"job": "Taylor_20260803_035250", "viec": "3/3 — tracking, KHONG fix, KHONG ket luan", "cau_hoi_dispatch_1": "edge_health_monitor.py da tach duoc dong gop cua l …
 - [2026-08-03T04:35:47] Taylor/answer — HOAN TAT job Taylor_20260803_035250 — ca 3 viec (attempt 2): {"job": "Taylor_20260803_035250", "attempt": "2/2 — attempt 1 da lam xong viec 1+2, attempt 2 xac nhan roi lam tiep viec 3 (KHONG lam lai tu dau)", "viec_1_repi …
+- [2026-08-03T04:50:42] Winston/finding — tools-inventory-20260803: {"tools": ["bash", "glob", "grep", "read", "webfetch", "websearch", "skill", "task", "todowrite"], "has_web_search": true, "has_url_fetch": true, "has_bash": tr …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -174,21 +174,26 @@ Audit cron C1/H2 (2026-07-12), BQ cache monolith (2026-07-13), cross-account con
 - = **V2.3A + custom30V parking (NEUTRAL) + gated-overflow (bear-washout) + HAG eq_flag fix**.
 - 2 book: **BAL** (momentum SIGNAL_V11, yieldcombo: 1/PE + 1/PCF) + **LAG** (PEAD/earnings drift).
 - Allocator w_LAG: {CRISIS 50 / BEAR 0 / NEUTRAL-BULL-EXBULL 65}, band ±10pp.
-- **R3 NEUTRAL-only @50B: CAGR 27.24% / Sharpe 1.81 / DD −18.4% / Calmar 1.48** — pin CHÍNH THỨC từ
-  **2026-08-02**, đo trên **`universe_pit`** (point-in-time, không look-ahead). quant-skeptic
-  **CONFIRMED (high)**. Re-pin lần này do **SỬA LOOK-AHEAD THẬT TRONG CODE** (khác 2 lần trước là
-  vintage dữ liệu): `custom_basket.py` + publisher `custom30_history.py` dùng `Close` (đã điều chỉnh
-  hồi tố) làm cơ sở **chọn rổ / trọng số** cross-sectional — hệ số `Close/Price` phụ thuộc sự kiện
-  quyền SAU ngày t. A/B 1 biến, chân đối chứng tái lập 27.60% tuyệt đối: **27.60% → 27.24%
-  (−0.36pp)** ⇒ **27.60% là số BỊ THỔI PHỒNG bởi lỗi**. −0.36pp là **CẬN DƯỚI** (nhánh
-  CAPIT-membership chưa phủ). Chi tiết ở `data/results_registry.md` (mục **2026-08-02 RE-PIN R3 SAU
-  KHI TÁCH VAI CƠ SỞ GIÁ**), KHÔNG lặp lại ở đây.
-  **Số lịch sử KHÁC VINTAGE / CÓ LỖI, không so trực tiếp**: 27.60%/1.84/−17.5%/1.58 (pin 07-29, có
-  look-ahead cơ sở giá); 27.16%/1.81/−18.1%/1.50 (pin 07-22, đã mất, không tái lập được);
-  27.84%/1.84/−18.2%/1.53 (pin 07-12, `ticker_prune`).
+- **R3 NEUTRAL-only @50B: CAGR 28.86% / Sharpe 1.90 / DD −17.8% / Calmar 1.62** — pin CHÍNH THỨC từ
+  **2026-08-03** (Final NAV 1.178,01B), đo trên **`universe_pit`** (point-in-time, không look-ahead).
+  ⚠️ **KHÔNG phải "hệ tốt lên"** — KHÔNG có thay đổi mô hình nào. Đây là **đồng bộ registry theo
+  code production**: mặc định `LAG_ADV_BASIS` (cơ sở giá của ADV book LAG) đã đổi `close`→`price`
+  ngày 08-02 (commit `0062aa0`, để gỡ look-ahead + giữ bất biến "trần live == trần đã mô phỏng")
+  nên số pin cũ không còn tái lập được bằng lệnh pin trên code hôm nay. Chân control (`close`) tái
+  lập 27.24% TUYỆT ĐỐI cả 5 chỉ tiêu + cả 2 số IS/OOS ⇒ A/B hợp lệ. **Toàn bộ chênh nằm ở IS
+  (+3,28pp), OOS chỉ +0,02pp** — hệ số `Close/Price` hội tụ về 1,00 gần đây nên chỉ khác ở nửa đầu
+  mẫu; **KHÔNG trích +1,62pp như "edge mới"**. Chi tiết ở `data/results_registry.md` (mục
+  **2026-08-03 RE-PIN R3 THEO ĐÚNG MẶC ĐỊNH PRODUCTION `LAG_ADV_BASIS=price`**), KHÔNG lặp lại ở đây.
+  **Số lịch sử KHÁC VINTAGE / KHÁC CƠ SỞ / CÓ LỖI, không so trực tiếp**: 27.24%/1.81/−18.4%/1.48
+  (pin 08-02, cơ sở ADV `close` — đúng với cơ sở đó, đã SUPERSEDED); 27.60%/1.84/−17.5%/1.58 (pin
+  07-29, có look-ahead cơ sở giá rổ); 27.16%/1.81/−18.1%/1.50 (pin 07-22, đã mất, không tái lập
+  được); 27.84%/1.84/−18.2%/1.53 (pin 07-12, `ticker_prune`).
   ⚠️ **MIXED-universe khi trích dẫn**: `universe_pit` cho cổng quyết định, `ticker_prune` vẫn cho
-  CAPIT pool/maturity. Lỗi fidelity `liq<=0` vẫn MỞ ⇒ khoảng kỳ vọng trung thực **[~27,2%; ~31,3%]**,
-  **anchor DD ~−30%** (KHÔNG phải −18,4%).
+  CAPIT pool/maturity. Lỗi fidelity `liq<=0` vẫn MỞ ⇒ **anchor DD ~−30%** (KHÔNG phải −17,8%);
+  khoảng **[~27,2%; ~31,3%] đã HẾT HIỆU LỰC** từ 08-03 và **chưa có khoảng thay thế** — đọc 28,86%
+  như một CẬN DƯỚI, đừng tự gắn cận trên. Việc phân rã (+4,11pp của `lag_filter_illiquid()`,
+  quant-skeptic INCONCLUSIVE 3 lần) nay đã có sổ theo dõi + **mốc cứng 2026-12-15 / 2027-03-31**:
+  `kb/projects/lag-adv-filter-tracking.md`. Trước mốc đó **không trích +4,11pp như edge**.
 - Bootstrap 5th-pct: CAGR 18.6%, DD −28.6% (anchor DD ~−29%, KHÔNG phải −18%).
 - **NEUTRAL parking custom30V = phần tin cậy nhất: +7.4pp Full.** (30 mã, cap 0.10)
 - Bull parking: NAV ≥150B. **(30, 0.15) = OVERFIT**, walk-forward bác.
