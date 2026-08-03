@@ -1,0 +1,131 @@
+{
+  "_README": [
+    "REGISTRY DUY NHAT khai bao CLI provider cho bin/dispatch.sh.",
+    "Them 1 CLI moi = them 1 entry o day. KHONG sua dispatch.sh.",
+    "",
+    "QUY TAC CUNG (arch-reviewer 2026-08-03, required_change #2):",
+    "  File nay chi chua FIELD de TRA CUU. No KHONG BAO GIO chua/van chuyen argv.",
+    "  argv duoc dung bang ARRAY bash ngay trong _bg_wrapper (ham _build_argv cua",
+    "  dispatch.sh). Ly do da do thuc nghiem: NUL bi $( ) nuot (len=3 cho a\\0b\\0c) va",
+    "  array bash KHONG vuot duoc `bash -c '_bg_wrapper'` (export arr => declare: not found).",
+    "  Moi duong di qua eval chuoi = tai sinh lop loi quoting §15 coding_guidelines.",
+    "",
+    "CACH DUNG:",
+    "  bin/cli_provider.sh field <provider> <key>      # tra 1 field, exit 1 neu thieu",
+    "  bin/cli_provider.sh list                        # provider dang enabled",
+    "  bin/cli_provider.sh check <provider>            # chay <bin> --version => phan biet",
+    "                                                  # 'PROVIDER HONG' voi 'task loi'",
+    "  bin/cli_provider.sh validate <provider> <agent> <model> <effort>",
+    "",
+    "FIELD:",
+    "  enabled        : false => dispatch.sh tu choi, KHONG bao gio am tham roi ve claude",
+    "  bin            : duong dan tuyet doi toi binary",
+    "  bin_env_override: ten bien env duoc phep de len `bin` (giu DISPATCH_CLAUDE_BIN song,",
+    "                   neu khong dispatch_discord_topic_selfcheck.sh tat den — F11)",
+    "  env            : bien moi truong bo sung. Ho tro ${PATH} de noi chuoi.",
+    "                   ⚠️ BAT BUOC cho CLI dang shim `#!/usr/bin/env node`: pin `bin` KHONG",
+    "                   pin interpreter. Do that duoi PATH crontab: codex -> SyntaxError vi",
+    "                   /usr/bin/node = v12.22.9 < engines>=16. opencode KHONG can (ELF native).",
+    "  supports_turns : false => dispatch.sh BO HAN nhanh max-turns resume, khong bia",
+    "  profile        : cach nap identity cua agent (xem bang duoi)",
+    "  usage_probe    : script uoc luong usage. null => CHI phrase-match, khong doi chung,",
+    "                   khong doan gio reset. bin/usage_watch.py doc ~/.claude/projects nen",
+    "                   CHI dung cho claude — dung cho provider khac la doc nham tai khoan.",
+    "  allow_agents   : '*' hoac list. ⚠️ Day la DAI THU HAI, khong phai co che chinh.",
+    "                   No CHI chan o dispatch.sh — agent co Bash van goi thang binary duoc.",
+    "                   Cuong che THAT nam o `permission` trong agents/<id>/opencode.json",
+    "                   (da kiem chung 2026-08-03: bash deny-by-default + allowlist chan",
+    "                   duoc `echo > file`, tra loi sach trong 7s, --auto KHONG de len deny).",
+    "",
+    "PROFILE — cach agent nhan identity + context:",
+    "  claude-native : cd vao agents/<id>/ => Claude Code tu nap CLAUDE.md + @import +",
+    "                  CLAUDE.md to tien. Khong can lam gi them.",
+    "  opencode-json : opencode doc CLAUDE.md tu --dir (da kiem chung), nhung KHONG hieu",
+    "                  @import => danh sach file context khai bao trong agents/<id>/opencode.json",
+    "                  field `instructions` (duong dan tuyet doi). Da kiem chung nap dung.",
+    "  prompt-inline : chua dung. Provider khong doc file profile nao => phai prepend vao prompt.",
+    "",
+    "NANG CAP nvm/node lam `bin` va `env` lech: `check` se bao LOUD luc dispatch.",
+    "Sua o day, dung sua rai rac trong script."
+  ],
+
+  "default_provider": "claude",
+
+  "providers": {
+    "claude": {
+      "label": "Claude Code",
+      "enabled": true,
+      "bin": "/home/trido/.local/bin/claude",
+      "bin_env_override": "DISPATCH_CLAUDE_BIN",
+      "env": {},
+      "models": ["sonnet", "opus", "haiku", "fable"],
+      "efforts": ["low", "medium", "high", "xhigh", "max"],
+      "effort_caps": { "fable": "high" },
+      "supports_turns": true,
+      "profile": "claude-native",
+      "usage_probe": "bin/usage_watch.py",
+      "max_turns_pattern": "Reached max turns",
+      "allow_agents": "*",
+      "notes": "Mac dinh. Duy nhat duoc dung cho surface tien that (Mafee/DollarBill) va dieu phoi (Mike/Wags)."
+    },
+
+    "opencode": {
+      "label": "opencode (SST) — Zen free tier",
+      "enabled": true,
+      "bin": "/home/trido/.nvm/versions/node/v22.23.0/bin/opencode",
+      "bin_env_override": "DISPATCH_OPENCODE_BIN",
+      "env": {},
+      "models": [
+        "opencode/deepseek-v4-flash-free",
+        "opencode/ling-3.0-flash-free",
+        "opencode/nemotron-3-ultra-free",
+        "opencode/mimo-v2.5-free",
+        "opencode/laguna-s-2.1-free",
+        "opencode/north-mini-code-free",
+        "opencode/big-pickle"
+      ],
+      "efforts": ["low", "medium", "high", "max", "minimal"],
+      "effort_caps": {},
+      "supports_turns": false,
+      "profile": "opencode-json",
+      "usage_probe": null,
+      "max_turns_pattern": null,
+      "allow_agents": ["Taylor", "Winston", "Wendy", "Spyros", "Wags"],
+      "notes": [
+        "ELF binary native => CHAY DUOC duoi PATH crontab (da do: in 1.18.11, rc=0). Khac codex.",
+        "Zen free tier chay voi 0 credentials (da do). KHONG dam bao do tre: da quan sat 1 lan",
+        "treo >150s roi lan sau xong trong 6s. => KHONG dung cho viec tren duong gang van hanh",
+        "(plan T+1, EOD report). Chi research/doi-chung.",
+        "effort anh xa sang --variant. turns khong co flag (co `steps` trong agent config)."
+      ]
+    },
+
+    "codex": {
+      "label": "OpenAI Codex CLI",
+      "enabled": false,
+      "bin": "/home/trido/.nvm/versions/node/v22.23.0/bin/codex",
+      "bin_env_override": "DISPATCH_CODEX_BIN",
+      "env": {
+        "PATH": "/home/trido/.nvm/versions/node/v22.23.0/bin:${PATH}"
+      },
+      "models": ["gpt-5.1-codex", "gpt-5.1-codex-mini"],
+      "efforts": ["low", "medium", "high"],
+      "effort_caps": {},
+      "supports_turns": false,
+      "profile": "prompt-inline",
+      "usage_probe": null,
+      "max_turns_pattern": null,
+      "allow_agents": ["Taylor", "Winston", "Wendy", "Spyros", "Wags"],
+      "notes": [
+        "enabled=false cho toi khi user chay `codex login` (da kiem 2026-08-03: Not logged in).",
+        "env.PATH BAT BUOC: codex la shim `#!/usr/bin/env node`, engines>=16, ma /usr/bin/node",
+        "la v12.22.9 => duoi PATH crontab no chet SyntaxError. Da do ca 2 chieu:",
+        "  co nvm bin trong PATH -> 'codex-cli 0.146.0' rc=0 ; khong co -> SyntaxError.",
+        "profile=prompt-inline: codex doc AGENTS.md chu khong doc CLAUDE.md, va fleet khong co",
+        "AGENTS.md nao => context phai prepend vao prompt. CHUA WIRE, lam khi user login xong.",
+        "Sandbox: dung -s read-only / workspace-write, KHONG dung",
+        "--dangerously-bypass-approvals-and-sandbox (arch-reviewer required_change #6c)."
+      ]
+    }
+  }
+}
