@@ -169,21 +169,33 @@ class BrokerBase:
         """Tiền mặt khả dụng (VND)."""
         raise NotImplementedError
 
-    def get_max_buy_qty(self, symbol, price):
+    def get_max_buy_qty(self, symbol, price, loan_package_id=None):
         """Sức mua tối đa (số CP) theo mã+giá từ CHÍNH broker, hoặc None nếu broker không
         hỗ trợ/lỗi. Khác get_cash(): sức mua của broker thường ĐÃ TÍNH cả tiền bán chờ về
         (T+0 reuse) mà availableCash chưa phản ánh — xác nhận thực nghiệm DNSE 2026-07-07
         (ZaloPay cash-only: bán MSH 09:42, availableCash đứng yên nhưng ppse pp0Buy đã
         cộng đủ tiền bán lúc 09:56, user dự đoán đúng). None = caller tự rơi về check
-        get_cash() cũ (fail-safe, không nới lỏng khi không chắc)."""
+        get_cash() cũ (fail-safe, không nới lỏng khi không chắc).
+
+        `loan_package_id`: đo sức mua THEO ĐÚNG gói vay mà lệnh sẽ dùng (đòn bẩy CAPIT dùng
+        gói 1840 initialRate 0,5 ⇒ sức mua GẤP ĐÔI gói default 1841 — Mafee đo 2026-08-03).
+        Bỏ trống ⇒ gói default account: đúng cho lệnh thường, nhưng nếu lệnh đi ra bằng 1840
+        mà lại đo bằng 1841 thì sức mua bị báo thiếu một nửa, lệnh đòn bẩy sẽ kẹt WAIT_CASH
+        trông y hệt "thiếu tiền bình thường" (arch-reviewer 2026-08-03, phát hiện #2)."""
         return None
 
-    def get_buying_power(self, symbol, price):
+    def get_buying_power(self, symbol, price, loan_package_id=None):
         """Sức mua CÒN LẠI tính bằng VND theo chính broker, hoặc None nếu broker không hỗ
         trợ/lỗi. Anh em với get_max_buy_qty() (cùng nguồn ppse) nhưng trả TIỀN chứ không
         phải số CP — cần cho các kiểm tra ở cấp PLAN (Σ giá trị lệnh mua vs sức mua), nơi
         không có một mã/giá duy nhất để quy ra số CP. None = không đo được (caller KHÔNG
-        được đoán thay)."""
+        được đoán thay).
+
+        `loan_package_id`: đo sức mua THEO ĐÚNG gói vay mà lệnh sẽ dùng (đòn bẩy CAPIT dùng
+        gói 1840 initialRate 0,5 ⇒ sức mua GẤP ĐÔI gói default 1841 — Mafee đo 2026-08-03).
+        Bỏ trống ⇒ gói default account: đúng cho lệnh thường, nhưng nếu lệnh đi ra bằng 1840
+        mà lại đo bằng 1841 thì sức mua bị báo thiếu một nửa, lệnh đòn bẩy sẽ kẹt WAIT_CASH
+        trông y hệt "thiếu tiền bình thường" (arch-reviewer 2026-08-03, phát hiện #2)."""
         return None
 
     def get_positions(self):
@@ -205,11 +217,15 @@ class BrokerBase:
         return cash + mv
 
     def place_order(self, symbol, qty, side, price=None, order_type="LO",
-                    cash_only=False):
+                    cash_only=False, loan_package_id=None):
         """→ order_id (str). cash_only=True: lệnh tiền mặt thuần — chọn gói vay HỢP LỆ
         RIÊNG cho mã này (vd TV1/UPCOM cần 1122 thay vì gói mainboard 1841) thay vì gói
         default account; xem DNSEBroker._resolve_loan_package_id. Broker không dùng gói
-        vay DNSE có thể bỏ qua cờ này."""
+        vay DNSE có thể bỏ qua cờ này.
+
+        loan_package_id: gói vay CHỈ ĐỊNH cho ĐÚNG lệnh này (đòn bẩy sleeve CAPIT, chính
+        sách capit_margin_lever — do trading_bot.plan.apply_capit_lever cấp, không phải do
+        plan generator tự khai). None = hành vi cũ nguyên vẹn (gói default account)."""
         raise NotImplementedError
 
     def cancel_order(self, order_id):
@@ -296,9 +312,9 @@ class PHSBroker(BrokerBase):
         return q
 
     def place_order(self, symbol, qty, side, price=None, order_type="LO",
-                    cash_only=False):
-        # PHS không dùng gói vay DNSE → cờ cash_only không áp dụng, chấp nhận để
-        # interface đồng nhất với DNSEBroker (executor gọi chung 1 chữ ký).
+                    cash_only=False, loan_package_id=None):
+        # PHS không dùng gói vay DNSE → cờ cash_only/loan_package_id không áp dụng, chấp nhận
+        # để interface đồng nhất với DNSEBroker (executor gọi chung 1 chữ ký).
         r = self.client.place_order(self.account_id, symbol, qty=int(qty), side=side,
                                     order_type=order_type, price=price)
         self._log_raw("place_order", {"req": [symbol, qty, side, price, order_type],
@@ -357,6 +373,7 @@ class DNSEBroker(BrokerBase):
         self._quote_cache = {}      # symbol -> (ts, Quote)
         self._secdef_cache = {}     # symbol -> dict (trần/sàn/ref — tĩnh trong ngày)
         self._loan_pkg_cache = {}   # symbol -> loanPackageId đã giải (cash_only, theo phiên)
+        self._lever_pkg_cache = {}  # (symbol, gói CHỈ ĐỊNH) -> (id dùng, ok, note) — đòn bẩy CAPIT
         self._quote_ttl = 3.0
         self._raw_log = os.path.join(
             EXEC_DIR, f"dnse_raw_{today_ict():%Y-%m-%d}.jsonl")
@@ -415,26 +432,30 @@ class DNSEBroker(BrokerBase):
                        default=0))
         return v or 0.0
 
-    def get_max_buy_qty(self, symbol, price):
+    def get_max_buy_qty(self, symbol, price, loan_package_id=None):
         """Sức mua tối đa theo mã+giá qua GET /accounts/{acc}/ppse (qmaxBuy). ppse đã tính
         cả tiền bán chờ về T+0 — availableCash thì chưa (xem BrokerBase docstring). Mọi
         lỗi → None (caller rơi về check get_cash cũ, không nới lỏng khi không chắc)."""
         try:
-            r = self.client.ppse(self.account_id, symbol, int(price))
-            self._log_raw("ppse", {"symbol": symbol, "price": price, "resp": r})
+            r = self.client.ppse(self.account_id, symbol, int(price),
+                                 loan_package_id=loan_package_id)
+            self._log_raw("ppse", {"symbol": symbol, "price": price,
+                                   "loan_package_id": loan_package_id, "resp": r})
             v = _fnum(qget(r, "qmaxBuy", "qmaxbuy"))
             return int(v) if v is not None and v >= 0 else None
         except Exception:
             return None
 
-    def get_buying_power(self, symbol, price):
+    def get_buying_power(self, symbol, price, loan_package_id=None):
         """Sức mua VND = `pp0Buy` của GET /accounts/{acc}/ppse (cùng response với qmaxBuy).
         pp0Buy là số của CHÍNH broker: đã gồm tiền bán chờ về T+0 và hạn mức vay của gói
         loanPackageId đang dùng (đo được 2026-07-28 ZaloPay cash-only: pp0Buy 25,54M trong
         khi availableCash chỉ 5,68M). Mọi lỗi → None, KHÔNG suy ra từ get_cash()."""
         try:
-            r = self.client.ppse(self.account_id, symbol, int(price))
-            self._log_raw("ppse", {"symbol": symbol, "price": price, "resp": r})
+            r = self.client.ppse(self.account_id, symbol, int(price),
+                                 loan_package_id=loan_package_id)
+            self._log_raw("ppse", {"symbol": symbol, "price": price,
+                                   "loan_package_id": loan_package_id, "resp": r})
             v = _fnum(qget(r, "pp0Buy", "pp0buy"))
             return float(v) if v is not None and v >= 0 else None
         except Exception:
@@ -570,14 +591,61 @@ class DNSEBroker(BrokerBase):
         self._loan_pkg_cache[symbol] = resolved
         return resolved
 
+    def _validate_lever_package(self, symbol, want):
+        """Gói vay CHỈ ĐỊNH `want` có hợp lệ cho `symbol` không → (id_sẽ_dùng, ok, note).
+
+        Dùng cho đòn bẩy sleeve CAPIT (gói 1840 "RocketX"). KHÔNG hợp lệ / không kiểm được
+        (mạng lỗi, danh sách rỗng) → trả gói DEFAULT của account, tức lệnh đi ra KHÔNG có đòn
+        bẩy. Đây là chiều fail-safe ĐÚNG: đặt lệnh với ít đòn bẩy hơn dự kiến chỉ làm sleeve
+        under-deploy (hoặc bị DNSE từ chối vì thiếu sức mua — vẫn an toàn), còn đặt với NHIỀU
+        đòn bẩy hơn duyệt là rủi ro margin call bằng tiền thật. Đối xứng với
+        _resolve_loan_package_id: không bao giờ BỎ trường (thiếu = HTTP 400, bug TV1 07-28).
+        Cache theo (symbol, want) trong phiên."""
+        cache = self.__dict__.setdefault("_lever_pkg_cache", {})
+        key = (symbol, str(want))
+        if key in cache:
+            return cache[key]
+        default = getattr(self.client, "loan_package_id", None)
+        try:
+            pkgs = self._extract_loan_pkgs(
+                self.client.loan_packages(self.account_id, symbol=symbol))
+            ids = {str(qget(p, "id", "loanpackageid", "loanproductid")) for p in pkgs}
+            ids.discard("None")
+            if not ids:
+                res = (default, False, f"danh sách gói vay RỖNG cho {symbol}")
+            elif str(want) in ids:
+                res = (want, True, "")
+            else:
+                res = (default, False, f"gói {want} KHÔNG hợp lệ cho {symbol} "
+                                       f"(hợp lệ: {sorted(ids)})")
+        except Exception as e:
+            res = (default, False, f"không kiểm được danh sách gói vay ({e})")
+        self._log_raw("lever_package_validate",
+                      {"symbol": symbol, "want": want, "resolved": res[0],
+                       "ok": res[1], "note": res[2], "account_default": default})
+        cache[key] = res
+        return res
+
     def place_order(self, symbol, qty, side, price=None, order_type="LO",
-                    cash_only=False):
-        lp = self._resolve_loan_package_id(symbol) if cash_only else None
+                    cash_only=False, loan_package_id=None):
+        lever_note, lever_ok = "", None
+        if loan_package_id is not None:
+            # Gói CHỈ ĐỊNH (đòn bẩy CAPIT) — ưu tiên cao nhất, nhưng phải hợp lệ với mã.
+            lp, lever_ok, lever_note = self._validate_lever_package(symbol, loan_package_id)
+            if not lever_ok:
+                print(f"[dnse] ⚠ ĐÒN BẨY KHÔNG ÁP ĐƯỢC cho {symbol}: {lever_note} → dùng gói "
+                      f"default {lp} (lệnh này KHÔNG có đòn bẩy — fail-safe, KHÔNG chặn lệnh)")
+        elif cash_only:
+            lp = self._resolve_loan_package_id(symbol)
+        else:
+            lp = None
         r = self.client.place_order(self.account_id, symbol, qty=int(qty),
                                     side=side, order_type=order_type, price=price,
                                     loan_package_id=lp)
         self._log_raw("place_order", {"req": [symbol, qty, side, price, order_type],
                                       "cash_only": cash_only, "loan_package_id": lp,
+                                      "lever_requested": loan_package_id,
+                                      "lever_applied": lever_ok, "lever_note": lever_note,
                                       "resp": r})
         oid = qget(r, "id", "orderid", "orderId")
         if oid is None:
@@ -726,14 +794,16 @@ class PaperBroker(BrokerBase):
         return None
 
     def place_order(self, symbol, qty, side, price=None, order_type="LO",
-                    cash_only=False):
-        # Paper broker không dùng gói vay DNSE → cờ cash_only không áp dụng, chấp nhận để
-        # interface đồng nhất với DNSEBroker/PHSBroker (executor gọi chung 1 chữ ký).
+                    cash_only=False, loan_package_id=None):
+        # Paper broker không vay thật → cờ cash_only không áp dụng. `loan_package_id` thì có
+        # GHI LẠI (không dùng để tính tiền): diễn tập đòn bẩy CAPIT cần bằng chứng cờ vay đi
+        # trọn đường từ tín hiệu → plan → lệnh, chứ không phải mô tả suông.
         oid = f"P{self.state['next_id']:06d}"
         self.state["next_id"] += 1
         self.state["open_orders"][oid] = {
             "symbol": symbol, "qty": int(qty), "side": side, "price": price,
             "type": order_type, "filled": 0, "status": "open",
+            "loanPackageId": loan_package_id,
             "ts": now_ict().isoformat(timespec="seconds")}
         self._try_fill(oid)
         self._save()
@@ -763,8 +833,14 @@ class PaperBroker(BrokerBase):
         # never resolve a symbol for a paper order (qget(None, ...) -> None), so paper
         # trading could never rehearse the idempotency guard — same shape as the real
         # DNSEBroker.poll_orders(), which always sets raw to the full broker order row.
+        # `loanPackageId` added 2026-08-03 for the same reason, one guard later:
+        # Executor._lever_package_audit() reads the loan package off the broker order row
+        # (verified present on 23.124 real DNSE rows in data/execution_logs/dnse_raw_*.jsonl).
+        # Omitting it here would leave the CAPIT-leverage guard un-rehearsable on paper —
+        # exactly the hole raw=None left in the ghost guard until 2026-07-02.
         return {oid: OrderUpdate(oid, o["status"], o["filled"], o.get("avg_price"),
-                                 raw={"symbol": o["symbol"]})
+                                 raw={"symbol": o["symbol"],
+                                      "loanPackageId": o.get("loanPackageId")})
                 for oid, o in self.state["open_orders"].items()
                 if o.get("ts", "")[:10] == today}
 

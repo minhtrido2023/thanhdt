@@ -44,6 +44,14 @@ class PlannedOrder:
     # order BAL/LAG/CAPIT giữ nguyên hành vi (gói default account, KHÔNG query thêm).
     # Nằm trong dataclasses.fields nên load_plan() KHÔNG lọc mất field này.
     cash_only: bool = False
+    # ── ĐÒN BẨY MARGIN cho RIÊNG sleeve CAPIT (chính sách 2026-08-03, MẶC ĐỊNH TẮT) ────────
+    # lever_f = hệ số đòn bẩy đã áp cho lệnh này; loan_package_id = gói vay DNSE dùng cho
+    # ĐÚNG lệnh này (override gói default account). CẢ HAI chỉ được gán bởi apply_capit_lever()
+    # từ artifact golive — KHÔNG BAO GIỜ tin giá trị do plan generator tự viết vào (LLM/người
+    # sửa tay): hàm đó GỠ mọi giá trị không được artifact cho phép. Default None = hành vi cũ
+    # nguyên vẹn (gói default account, không đòn bẩy) cho mọi lệnh BAL/LAG/CAPIT/ETF.
+    lever_f: float = None
+    loan_package_id: int = None
 
     @property
     def value(self):
@@ -602,6 +610,328 @@ def filter_lag_rating_orders(plan, asof=None):
                         "action": "BLOCKED", "qty_before": o.qty, "reason": d.get("reason")})
     plan.orders = keep
     return plan, blocked
+
+
+# ── PHẠM VI USER DUYỆT cho đòn bẩy CAPIT (2026-08-03) — NGUỒN CHUẨN TẮC DUY NHẤT ──────────
+# Ghim ở ĐÂY, tầng thực thi, chứ không phải chỉ ở tầng sinh tín hiệu. Lý do (arch-reviewer
+# 2026-08-03, phát hiện F2): CẢ HAI file mà runtime đọc — `data/trading_rules.json` VÀ
+# `data/golive_v23_status.json` — đều khớp `.gitignore:12` (`*.json`), tức không diff, không
+# blame, không backup. Nếu envelope chỉ được ép ở `golive_recommend_v23.py` thì cổng CUỐI
+# trước tiền vay vẫn tin tuyệt đối vào một artifact không ai canh: sửa `f: 5.0` vào artifact
+# là đủ để vay gấp 5. Ép ở cả hai tầng ⇒ muốn nới thật phải sửa CODE (có version control)
+# và đi qua review. `golive_recommend_v23.py` import chính 3 hằng này (không tự khai lại).
+CAPIT_LEVER_APPROVED_F = 1.3
+CAPIT_LEVER_APPROVED_PACKAGE = 1840          # DNSE "RocketX" (gói default account là 1841)
+CAPIT_LEVER_APPROVED_ACCOUNTS = ["SpaceX"]   # ZaloPay cash-only ⇒ ngoài phạm vi
+
+
+def capit_lever_enabled(rules_path=None):
+    """Công tắc BẬT/TẮT đọc từ `data/trading_rules.json` → (bật?, lý do nếu tắt).
+
+    TÁCH RIÊNG khỏi artifact vì đây là công tắc VẬN HÀNH, và nó phải hoạt động ở thời điểm
+    THỰC THI (arch-reviewer 2026-08-03, phát hiện F1). Chuỗi thời gian thật: golive công bố
+    artifact ~19:03 → plan 21:00 → đặt lệnh 09:05 hôm sau. Nếu hàm cấp phép chỉ đọc artifact
+    thì trong ~14h đó việc đặt `enabled=false` KHÔNG tắt được gì — công tắc duy nhất còn tác
+    dụng sẽ là `BOT_STOP` (dừng toàn bộ giao dịch, quá tay). Đọc lại file chính sách ngay
+    trước khi cấp cờ vay ⇒ tắt là tắt thật, ở mọi thời điểm.
+
+    `is True`, KHÔNG `bool(...)`: `bool("false")` là True — một lỗi gõ có nháy sẽ BẬT đòn bẩy.
+    Không đọc được file / thiếu khối ⇒ TẮT (fail-closed).
+    """
+    from .config import WORKDIR
+    path = rules_path or os.path.join(WORKDIR, "data", "trading_rules.json")
+    try:
+        with open(path, encoding="utf-8") as f:
+            blk = (json.load(f) or {}).get("capit_margin_lever") or {}
+    except Exception as ex:
+        return False, (f"không đọc được chính sách {path}: {type(ex).__name__}: {ex} — "
+                       f"coi như TẮT")
+    if not blk:
+        return False, "trading_rules.json không có khối capit_margin_lever — coi như TẮT"
+    if blk.get("enabled") is not True:
+        return False, (f"capit_margin_lever.enabled={blk.get('enabled')!r} (không phải literal "
+                       f"JSON true) — chính sách đòn bẩy ĐANG TẮT, cần user xác nhận riêng")
+    return True, ""
+
+
+def apply_capit_lever(plan, account_label, status_path=None, rules_path=None):
+    """ĐÒN BẨY MARGIN cho lệnh MUA book CAPIT — ĐÚNG MỘT CHỖ THỰC THI, cấp phép bởi artifact.
+
+    CHÍNH SÁCH (user duyệt 2026-08-03, chuỗi nghiên cứu p1–p5 cùng ngày): vay margin CHỈ trên
+    sleeve CAPIT, hệ số CỐ ĐỊNH f=1,3, cổng `dd52<=−20%`, gói vay DNSE 1840 "RocketX", CHỈ
+    account SpaceX. Khai báo ở `data/trading_rules.json` → `capit_margin_lever`
+    (**enabled=false** mặc định); tín hiệu của NGÀY do golive_recommend_v23.py công bố ở
+    `data/golive_v23_status.json` → `capit_lever`.
+
+    HAI CHIỀU, và chiều thứ hai mới là lý do hàm này tồn tại:
+      · CẤP: lệnh mua book CAPIT được gắn `lever_f` + `loan_package_id` khi VÀ CHỈ KHI artifact
+        nói `capit_lever.active=true` và account này nằm trong `capit_lever.accounts`.
+      · GỠ: MỌI lệnh khác (khác book, khác chiều, account ngoài phạm vi, hoặc khi lever TẮT)
+        bị XOÁ SẠCH hai field đó — kể cả khi plan tự ghi sẵn. Plan là JSON do LLM (DollarBill)
+        sinh hoặc người sửa tay; một dòng `"loan_package_id": 1840` viết thẳng vào plan mà
+        không có hàm này sẽ đi tới broker và tạo đòn bẩy KHÔNG AI DUYỆT. Cùng lý lẽ
+        filter_excluded_tickers/cap_capit_orders tồn tại (coding_guidelines §7): quyền không
+        nằm ở nơi sinh plan.
+
+    FAIL-CLOSED mọi hướng: thiếu/hỏng artifact, artifact của signal_date khác plan, schema lạ,
+    `active` không phải true, account ngoài danh sách, f<1 hoặc thiếu loan_package_id → KHÔNG
+    cấp đòn bẩy (và vẫn GỠ cờ lạ). "Không vay được" chỉ làm hệ chạy đúng như V2.4 hôm nay;
+    "vay nhầm" là tiền thật với rủi ro margin call — hai vế không cân nhau.
+
+    KHÔNG đụng tới sizing/qty: số lượng do plan quyết định (tầng plan đọc
+    `capit_slot_targets[<acct>].capit_slot_target_vnd_levered` mà golive đã tính sẵn), trần %ADV
+    do cap_capit_orders() enforce TRƯỚC hàm này và KHÔNG nhân f (trần đo tác động thị trường,
+    độc lập nguồn vốn). Hàm này chỉ quyết định lệnh đi ra broker bằng gói vay nào.
+
+    Vị trí trong cascade (bot_execute.py): filter_excluded → net → cap_capit → cap_lag →
+    lag_rating → **LEVER** → approval. Đặt CUỐI vì nó phải nhìn thấy tập lệnh chung cuộc: một
+    lệnh bị các tầng trên loại thì không cần (và không được) gắn cờ vay.
+
+    Trả (plan đã sửa, list dict mô tả từng thay đổi) — KHÔNG log, caller tự báo.
+    Mỗi dict: {"ticker","order_id","action","lever_f","loan_package_id","reason"}.
+    """
+    from .config import WORKDIR
+
+    def _is_capit_buy(o):
+        return (o.book or "").upper() == "CAPIT" and (o.side or "").lower() == "buy"
+
+    st, lever, err = {}, {}, None
+    # CÔNG TẮC VẬN HÀNH đọc NGAY LÚC THỰC THI, độc lập với artifact (F1). Kiểm TRƯỚC tiên:
+    # chính sách tắt thì không cần biết artifact nói gì.
+    _pol_on, _pol_why = capit_lever_enabled(rules_path)
+    if not _pol_on:
+        err = _pol_why
+
+    path = status_path or os.path.join(WORKDIR, "data", "golive_v23_status.json")
+    if not err:
+        try:
+            with open(path, encoding="utf-8") as f:
+                st = json.load(f)
+            lever = st.get("capit_lever") or {}
+            if not lever:
+                err = ("artifact không có khối `capit_lever` (golive_recommend_v23.py bản cũ) — "
+                       "KHÔNG áp đòn bẩy")
+            # THIẾU signal_date ở BẤT KỲ bên nào ⇒ fail-closed (F6). Bản đầu chỉ so khi CẢ HAI
+            # bên có giá trị, nên một plan không ghi signal_date sẽ chấp nhận artifact ở bất kỳ
+            # tuổi nào. Với tiền vay, "không chứng minh được là tươi" phải đọc là "cũ".
+            elif not st.get("signal_date") or not plan.signal_date:
+                err = (f"không xác minh được độ tươi của artifact (signal_date artifact="
+                       f"{st.get('signal_date')!r}, plan={plan.signal_date!r}) — KHÔNG áp đòn bẩy")
+            elif st["signal_date"] != plan.signal_date:
+                err = (f"golive_v23_status.json là của signal_date {st['signal_date']} ≠ plan "
+                       f"{plan.signal_date} (artifact cũ) — KHÔNG áp đòn bẩy")
+        except Exception as ex:
+            err = f"không đọc được {path}: {type(ex).__name__}: {ex} — KHÔNG áp đòn bẩy"
+
+    f_val = lever.get("f")
+    lp_val = lever.get("loan_package_id")
+    authorized = bool(
+        not err
+        and lever.get("active") is True
+        and lever.get("scope") == "capit_only"
+        and account_label in (lever.get("accounts") or [])
+        and isinstance(f_val, (int, float)) and float(f_val) >= 1.0
+        and lp_val is not None
+    )
+    # PHẠM VI DUYỆT ép ở CHÍNH tầng thực thi (F2) — không chỉ tin artifact. `f` và gói vay
+    # quyết định ĐỘ LỚN khoản vay; artifact bị gitignore y như trading_rules.json, nên nếu
+    # không so ở đây thì sửa một số trong artifact là đủ để vay vượt mức user duyệt.
+    if authorized and (float(f_val) != CAPIT_LEVER_APPROVED_F
+                       or lp_val != CAPIT_LEVER_APPROVED_PACKAGE
+                       or account_label not in CAPIT_LEVER_APPROVED_ACCOUNTS):
+        authorized = False
+        err = (f"artifact LỆCH phạm vi user duyệt (f={f_val!r} ≠ {CAPIT_LEVER_APPROVED_F}, "
+               f"gói={lp_val!r} ≠ {CAPIT_LEVER_APPROVED_PACKAGE}, account={account_label!r} "
+               f"∉ {CAPIT_LEVER_APPROVED_ACCOUNTS}) — KHÔNG áp đòn bẩy; nới phạm vi phải sửa "
+               f"CODE (trading_bot/plan.py), không sửa JSON")
+    if not authorized and not err:
+        if lever.get("active") is not True:
+            err = (f"capit_lever.active={lever.get('active')!r} — {lever.get('reason') or 'lever TẮT'}")
+        elif account_label not in (lever.get("accounts") or []):
+            err = (f"account '{account_label}' KHÔNG trong phạm vi duyệt "
+                   f"{lever.get('accounts')} — KHÔNG áp đòn bẩy")
+        else:
+            err = (f"tham số lever không hợp lệ (f={f_val!r}, loan_package_id={lp_val!r}, "
+                   f"scope={lever.get('scope')!r}) — KHÔNG áp đòn bẩy")
+
+    # RỔ CAPIT của phiên, theo account — `capit_adv_caps[<acct>]` là {mã: trần VND}. Kiểm
+    # thành viên rổ NGAY TẠI ĐÂY (F5): tính chất "chỉ mã trong rổ" trước đây chỉ đúng nhờ
+    # cap_capit_orders() chạy TRƯỚC trong cascade — một hợp đồng ngầm theo thứ tự gọi ở
+    # bot_execute.py, không có gì trong hàm này bảo đảm. Hàm cấp quyền vay tiền phải tự đủ.
+    basket = set()
+    if authorized:
+        basket = set((st.get("capit_adv_caps") or {}).get(account_label) or {})
+        if not basket:
+            authorized = False
+            err = (f"artifact BẬT đòn bẩy nhưng `capit_adv_caps.{account_label}` rỗng — không "
+                   f"xác định được rổ CAPIT của phiên, KHÔNG áp đòn bẩy (fail-closed)")
+
+    # TRẦN VND cho quyền vay (arch-reviewer 2026-08-03). "Được vay" mà không kèm trần khối
+    # lượng là đúng hình dạng bug 07-21 (nhân capit_size hai lần, thiếu 87,1tr) — chỉ khác
+    # là với gói 1840 (initialRate 0,5 ⇒ sức mua gấp đôi, Mafee đo 2026-08-03) một sai số
+    # sizing của tầng sinh plan (DollarBill là LLM) sẽ bị chặn bởi 2× SỨC MUA thay vì bởi
+    # tiền mặt. `cap_capit_orders` chỉ chặn %ADV/mã, KHÔNG chặn mục tiêu vốn — nên trần
+    # phải nằm ở đây. Vượt trần ⇒ GỠ đòn bẩy (lệnh vẫn chạy, chỉ bằng vốn tự có), KHÔNG
+    # huỷ lệnh: under-deploy là sai số lành, vay quá mức là rủi ro margin call.
+    # ĐỆM: tách per-order và TỔNG (arch-reviewer vòng 2, phát hiện #5). Một lệnh cần đệm
+    # thật vì làm tròn lô 100 trên slot ~65tr đã là ~7,7%; còn TỔNG thì không — sai số làm
+    # tròn của N lệnh triệt tiêu lẫn nhau, nên giữ 1,10 ở tầng tổng biến envelope f=1,3
+    # thành 1,43 trên thực tế (đo thật: 6 lệnh × 71,5tr = 357,5tr trên trần tổng 325tr).
+    LEVER_VALUE_TOL = 1.10          # per-order: đệm làm tròn lô + giá nhích so với ref
+    LEVER_TOTAL_TOL = 1.02          # tổng: chỉ đệm sai số làm tròn, KHÔNG nới envelope
+
+    # TRẦN VND cho quyền vay — NEO VÀO TRƯỜNG GỐC, không tin số levered của artifact
+    # (arch-reviewer vòng 2, phát hiện #1 — lỗ hổng CAO, đã probe hỏng thật).
+    #
+    # Bản đầu đọc thẳng `capit_*_target_vnd_levered` từ artifact. Nhưng đó CHÍNH LÀ file mà
+    # F2 tuyên bố là không đáng tin (khớp `.gitignore:12 *.json` ⇒ không diff, không blame,
+    # không backup). Envelope ghim trong code chỉ ép f / gói vay / account — tức là ép
+    # *tỷ lệ*, KHÔNG ép *độ lớn*. Probe của arch-reviewer: để nguyên `f: 1.3` (khớp hằng
+    # CAPIT_LEVER_APPROVED_F, qua sạch mọi cổng envelope), chỉ sửa hai trường VND ⇒ được
+    # cấp đòn bẩy cho 10.000.000.000 VND trên một mốc 325.000.000 VND — vượt 30,8 lần.
+    # F2 đóng cửa trước thì F4 mở cửa sau, cùng một file.
+    #
+    # Sửa: trần = min(số artifact tự khai, TRƯỜNG GỐC chưa nhân f × f ĐÃ DUYỆT TRONG CODE).
+    # Trường gốc (`capit_total_target_vnd`) nằm ngay trong cùng dict và được tính từ NAV
+    # book LAG × capit_size — sửa nó cũng làm sai lệch mọi con số CAPIT khác trong artifact
+    # (báo cáo duyệt plan, cổng WARN 07-21 ở send_plan_report.sh), nên nó không phải là chỗ
+    # sửa lén được. Nhân bằng CAPIT_LEVER_APPROVED_F chứ KHÔNG bằng `f_val` của artifact:
+    # dùng f_val thì artifact lại tự nhân cho chính mình, quay về đúng lỗ hổng cũ.
+    # Thiếu trường gốc ⇒ fail-closed (không có mốc độc lập nào để soi ⇒ không cấp đòn bẩy).
+    def _anchored_cap(levered_key, base_key, tol):
+        """→ (trần VND, lý do fail-closed nếu None)."""
+        if err:
+            return None, ""
+        t = (st.get("capit_slot_targets") or {}).get(account_label) or {}
+        base, lev = t.get(base_key), t.get(levered_key)
+        if not base:
+            return None, (f"artifact BẬT đòn bẩy nhưng thiếu trường GỐC `capit_slot_targets."
+                          f"{account_label}.{base_key}` — không có mốc độc lập nào để soi trần "
+                          f"vay, KHÔNG cấp đòn bẩy (fail-closed)")
+        if not lev:
+            return None, (f"artifact BẬT đòn bẩy nhưng thiếu `capit_slot_targets."
+                          f"{account_label}.{levered_key}` — không có trần VND nào để soi khối "
+                          f"lượng, KHÔNG cấp đòn bẩy (fail-closed)")
+        anchored = float(base) * CAPIT_LEVER_APPROVED_F
+        if float(lev) > anchored * 1.001:      # 0,1% cho làm tròn của chính golive
+            return anchored * tol, (
+                f"artifact khai `{levered_key}`={float(lev):,.0f} VƯỢT mốc neo "
+                f"{anchored:,.0f} (= gốc {float(base):,.0f} × f duyệt "
+                f"{CAPIT_LEVER_APPROVED_F}) — dùng mốc NEO, bỏ số artifact tự khai")
+        return float(lev) * tol, ""
+
+    slot_cap, slot_cap_err = _anchored_cap(
+        "capit_slot_target_vnd_levered", "capit_slot_target_vnd", LEVER_VALUE_TOL)
+    # TRẦN TỔNG (F4). Trần slot ở trên là PER-ORDER, và `cap_capit_orders` cũng per-order,
+    # còn `Executor.state["parents"]` khoá theo `o.id` chứ không theo mã — nên N lệnh trùng
+    # mã, mỗi lệnh vừa đúng trần slot, sẽ chạy CẢ N. Đo thật (arch-reviewer probe P4): 4 lệnh
+    # × 65tr = 260tr được cấp đòn bẩy trên một slot levered 65tr. Với gói 1840 (initialRate
+    # 0,5) ràng buộc chặn cuối cùng là 2× SỨC MUA chứ không phải tiền mặt ⇒ phải có trần tổng.
+    total_cap, total_cap_err = _anchored_cap(
+        "capit_total_target_vnd_levered", "capit_total_target_vnd", LEVER_TOTAL_TOL)
+    lever_spent = 0.0
+
+    adj = []
+    for o in plan.orders:
+        had = (o.lever_f is not None) or (o.loan_package_id is not None)
+        # cash_only đi với bộ giải gói vay THEO MÃ (bug TV1 07-28) — hai cơ chế chọn gói vay
+        # không được chồng lên nhau; CAPIT không bao giờ cash_only, nên đây là kiểm tra phòng xa.
+        eligible = authorized and _is_capit_buy(o) and not getattr(o, "cash_only", False)
+        # Lý do từ chối RIÊNG của lệnh này — KHÔNG ghi đè `err` (thông điệp cấp-plan dùng
+        # chung cho mọi lệnh; sửa nó trong vòng lặp sẽ rò lý do của mã này sang mã sau).
+        deny = ""
+        # `slot_cap`/`total_cap` ĐÃ gồm đệm tolerance (tính trong _anchored_cap) — KHÔNG
+        # nhân lại ở đây, nếu không đệm sẽ được áp hai lần.
+        if eligible and slot_cap is None:
+            eligible, deny = False, slot_cap_err
+        elif eligible and o.value > slot_cap:
+            eligible, deny = False, (
+                f"giá trị lệnh {o.value:,.0f} VND vượt trần vay {slot_cap:,.0f} "
+                f"(mốc neo = slot gốc × f duyệt {CAPIT_LEVER_APPROVED_F} × đệm "
+                f"{LEVER_VALUE_TOL}) — GỠ đòn bẩy, lệnh vẫn chạy bằng vốn tự có")
+        elif eligible and o.ticker not in basket:
+            eligible, deny = False, (
+                f"{o.ticker} KHÔNG thuộc rổ CAPIT của phiên ({sorted(basket)}) — GỠ đòn bẩy. "
+                f"Lệnh mang nhãn book CAPIT nhưng không có trong rổ artifact công bố là mâu "
+                f"thuẫn dữ liệu, không phải cơ sở để vay tiền")
+        elif eligible and total_cap is None:
+            eligible, deny = False, total_cap_err
+        elif eligible and (lever_spent + o.value) > total_cap:
+            eligible, deny = False, (
+                f"tổng lệnh đã cấp đòn bẩy {lever_spent:,.0f} + lệnh này {o.value:,.0f} = "
+                f"{lever_spent + o.value:,.0f} VND vượt trần TỔNG {total_cap:,.0f} "
+                f"(mốc neo = tổng gốc × f duyệt {CAPIT_LEVER_APPROVED_F} × đệm "
+                f"{LEVER_TOTAL_TOL}) — GỠ đòn bẩy lệnh này, lệnh vẫn chạy bằng vốn tự có")
+        if eligible:
+            lever_spent += o.value
+            if had and (o.lever_f != float(f_val) or o.loan_package_id != lp_val):
+                adj.append({"ticker": o.ticker, "order_id": o.id, "action": "OVERRIDDEN",
+                            "lever_f": float(f_val), "loan_package_id": lp_val,
+                            "reason": f"plan ghi sẵn (f={o.lever_f!r}, lp={o.loan_package_id!r}) "
+                                      f"— ghi đè bằng giá trị của artifact"})
+            else:
+                adj.append({"ticker": o.ticker, "order_id": o.id, "action": "APPLIED",
+                            "lever_f": float(f_val), "loan_package_id": lp_val,
+                            "reason": f"CAPIT buy, cổng {lever.get('gate')} đạt "
+                                      f"(dd52={lever.get('dd52_pct')}%)"})
+            o.lever_f = float(f_val)
+            o.loan_package_id = lp_val
+            continue
+        if deny:
+            # Lệnh ĐÁNG LẼ được cấp nhưng bị trần VND chặn. Ghi lại KỂ CẢ khi lệnh không có
+            # cờ sẵn để gỡ: nếu im lặng thì một plan sizing sai sẽ chạy như một phiên
+            # CAPIT bình thường và không ai biết đòn bẩy đã bị rút khỏi nó.
+            adj.append({"ticker": o.ticker, "order_id": o.id, "action": "DENIED",
+                        "lever_f": o.lever_f, "loan_package_id": o.loan_package_id,
+                        "reason": deny})
+            o.lever_f = None
+            o.loan_package_id = None
+            continue
+        if had:
+            adj.append({"ticker": o.ticker, "order_id": o.id, "action": "STRIPPED",
+                        "lever_f": o.lever_f, "loan_package_id": o.loan_package_id,
+                        "reason": (err if not authorized else
+                                   f"lệnh {o.side}/{o.book or '?'}"
+                                   f"{'/cash_only' if getattr(o, 'cash_only', False) else ''} "
+                                   f"KHÔNG thuộc phạm vi đòn bẩy (chỉ CAPIT buy)")})
+            o.lever_f = None
+            o.loan_package_id = None
+
+    # KHÔNG ĐƯỢC IM LẶNG khi plan đã sizing theo đòn bẩy mà thực thi lại không có đòn bẩy
+    # (arch-reviewer vòng 2, phát hiện #3a). Kịch bản thật: golive công bố artifact có đòn
+    # bẩy lúc ~19:03, plan sizing 1,3× lúc 21:00, rồi người vận hành đặt `enabled=false`
+    # trong đêm (đúng cái công tắc F1 vừa tạo ra). Sáng hôm sau các lệnh KHÔNG mang cờ vay
+    # sẵn nên vòng lặp trên không có gì để "GỠ" ⇒ `adj` rỗng ⇒ bot_execute.py in 0 dòng.
+    # Hệ vào phiên với khối lượng tính cho 1,3× vốn nhưng chỉ có 1,0× vốn, và triệu chứng
+    # duy nhất là WAIT_CASH "thiếu tiền" — không phân biệt được với thiếu tiền bình thường.
+    # Ghi 1 dòng cấp-plan để người đọc log thấy NGAY nguyên nhân.
+    if not authorized:
+        try:
+            # ĐỌC LẠI artifact ở đây: khi công tắc chính sách TẮT, `err` được đặt TRƯỚC khi
+            # mở artifact nên `st` còn rỗng — chính là ca kiểm C30 bắt được. Cảnh báo này
+            # cần biết artifact có mục tiêu đã nhân f hay không, nên phải tự đọc.
+            _st = st
+            if not _st:
+                with open(path, encoding="utf-8") as _f:
+                    _st = json.load(_f) or {}
+            _t = (_st.get("capit_slot_targets") or {}).get(account_label) or {}
+            if _t.get("capit_slot_target_vnd_levered") and any(_is_capit_buy(o)
+                                                               for o in plan.orders):
+                adj.append({"ticker": "-", "order_id": "-", "action": "PLAN_SIZED_LEVERED_BUT_OFF",
+                            "lever_f": None, "loan_package_id": None,
+                            "reason": (
+                                f"artifact CÓ mục tiêu đã nhân f "
+                                f"(`capit_slot_target_vnd_levered`="
+                                f"{float(_t['capit_slot_target_vnd_levered']):,.0f} VND/mã) nhưng "
+                                f"đòn bẩy KHÔNG được cấp: {err}. Lệnh CAPIT có thể đã được sizing "
+                                f"theo mục tiêu ĐÃ NHÂN f trong khi chỉ có vốn tự có — chờ đợi "
+                                f"WAIT_CASH/khớp thiếu là HẬU QUẢ của việc này, không phải thiếu "
+                                f"tiền bất thường. Muốn dừng đòn bẩy GIỮA PHIÊN thì dùng "
+                                f"`data/BOT_STOP` (dừng hẳn), không dùng `enabled=false` (chỉ đổi "
+                                f"cấp vốn, không đổi khối lượng plan đã chốt).")})
+        except Exception:
+            pass
+    return plan, adj
 
 
 def approval_block_reason(plan):

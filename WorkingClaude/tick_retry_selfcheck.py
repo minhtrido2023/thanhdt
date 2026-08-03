@@ -82,7 +82,8 @@ class FakeBroker:
     def get_quote(self, sym):
         return self.quotes.get(sym)
 
-    def place_order(self, symbol, qty, side, price=None, order_type="LO", cash_only=False):
+    def place_order(self, symbol, qty, side, price=None, order_type="LO",
+                    cash_only=False, loan_package_id=None):
         if price is not None and round(price) % 100 != 0:
             raise FakeTickError("HTTP 400: Invalid price lot", status=400)
         self._oid += 1

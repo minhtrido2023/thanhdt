@@ -469,6 +469,89 @@ def capit_account_shares():
     return {l: 1.0 / len(labels) for l in labels}, "equal-split-fallback", detail
 
 
+# ── ĐÒN BẨY MARGIN CHO RIÊNG SLEEVE CAPIT (chính sách, MẶC ĐỊNH TẮT) ────────────────────
+# Chuỗi nghiên cứu p1–p5 ngày 2026-08-03 (p5 tầng engine, quant-skeptic CONFIRMED-medium):
+# vay margin CHỈ trên rổ CAPIT, hệ số CỐ ĐỊNH f, cổng `dd52<=−20%` — trục DUY NHẤT còn đứng
+# vững sau cả 5 phần (p1 §4.1 bác cổng valuation; p3 chưa đủ bằng chứng cho cổng NEUTRAL-only).
+# Ở ĐÂY chỉ ĐỌC chính sách + CÔNG BỐ tín hiệu ra artifact; việc gắn cờ vào từng lệnh nằm
+# ĐÚNG MỘT CHỖ là trading_bot/plan.py::apply_capit_lever() (coding_guidelines §7).
+# FAIL-CLOSED: thiếu file/sai schema/không đọc được → coi như TẮT, không bao giờ đoán "chắc bật".
+#
+# PHẠM VI USER DUYỆT — ghim trong code có version-control, KHÔNG chỉ trong JSON.
+# `data/trading_rules.json` khớp `.gitignore` (`*.json`) nên không có diff/blame/backup nào
+# canh nó: sửa `f` hay thêm account vào đó là thay đổi tiền thật mà không để lại dấu vết.
+# JSON giữ quyền BẬT/TẮT (đó là công tắc vận hành); nới PHẠM VI thì phải sửa 3 hằng dưới
+# đây và đi qua review, như mọi tham số quyết định khác.
+#
+# IMPORT, không khai lại: nguồn chuẩn tắc là `trading_bot/plan.py` — TẦNG THỰC THI, nơi ép
+# envelope lần cuối trước khi lệnh đi ra broker (arch-reviewer 2026-08-03 F2). Hai bản sao
+# rời nhau sẽ trôi khỏi nhau, và bản ở tầng thực thi mới là bản giữ tiền.
+from trading_bot.plan import (CAPIT_LEVER_APPROVED_F, CAPIT_LEVER_APPROVED_PACKAGE,
+                              CAPIT_LEVER_APPROVED_ACCOUNTS)
+
+
+def capit_lever_policy():
+    """Đọc `data/trading_rules.json` → (policy dict, error str|None). Không raise."""
+    path = os.path.join(WORKDIR, "data", "trading_rules.json")
+    try:
+        with open(path, encoding="utf-8") as f:
+            blk = (json.load(f) or {}).get("capit_margin_lever") or {}
+        if not blk:
+            return {}, "trading_rules.json không có khối capit_margin_lever"
+        raw_enabled = blk.get("enabled")
+        pol = {
+            # `is True`, KHÔNG `bool(...)`. Đây là công tắc DUY NHẤT giữa "tắt" và tiền vay
+            # thật, mà nó nằm trong một file JSON sửa tay/LLM sửa. `bool("false")` là True
+            # — nghĩa là một lỗi gõ tầm thường (`"enabled": "false"` có nháy) sẽ BẬT đòn bẩy.
+            # Mọi tham số khác trong khối đã được validate chặt; công tắc chính không được
+            # phép là cái duy nhất fail-OPEN. Chỉ đúng literal JSON `true` mới tính là bật.
+            "enabled": raw_enabled is True,
+            "f": float(blk.get("f") or 0),
+            "loan_package_id": blk.get("loan_package_id"),
+            "gate": blk.get("gate"),
+            "scope": blk.get("scope"),
+            "accounts": sorted(blk.get("accounts") or []),
+        }
+        if raw_enabled is not None and not isinstance(raw_enabled, bool):
+            return pol, (f"capit_margin_lever.enabled = {raw_enabled!r} KHÔNG phải boolean "
+                         f"JSON (true/false) — coi như TẮT, sửa file cho đúng kiểu")
+        # Sanity: mọi tham số quyết định phải hợp lệ, nếu không thì TẮT (không "chạy tạm").
+        if pol["f"] < 1.0 or pol["loan_package_id"] is None or pol["scope"] != "capit_only" \
+                or not pol["accounts"]:
+            return pol, (f"tham số capit_margin_lever không hợp lệ (f={pol['f']}, "
+                         f"lp={pol['loan_package_id']}, scope={pol['scope']}, "
+                         f"accounts={pol['accounts']}) — coi như TẮT")
+        # PHẠM VI ĐÃ DUYỆT ghim trong CODE (được version-control), không chỉ trong JSON.
+        # `data/trading_rules.json` bị .gitignore ⇒ không diff, không blame, không backup:
+        # một lần sửa f=5.0 hay thêm ZaloPay vào `accounts` sẽ không để lại dấu vết nào.
+        # Ba hằng dưới là bản duyệt của user ngày 2026-08-03; JSON được phép TẮT hoặc BẬT,
+        # nhưng KHÔNG được phép tự nới rộng phạm vi. Muốn đổi thật thì phải sửa code +
+        # qua review, đúng như mọi tham số quyết định khác.
+        if (pol["f"] != CAPIT_LEVER_APPROVED_F
+                or pol["loan_package_id"] != CAPIT_LEVER_APPROVED_PACKAGE
+                or pol["accounts"] != CAPIT_LEVER_APPROVED_ACCOUNTS):
+            return pol, (f"capit_margin_lever LỆCH phạm vi user duyệt "
+                         f"(f={pol['f']} ≠ {CAPIT_LEVER_APPROVED_F}, "
+                         f"lp={pol['loan_package_id']} ≠ {CAPIT_LEVER_APPROVED_PACKAGE}, "
+                         f"accounts={pol['accounts']} ≠ {CAPIT_LEVER_APPROVED_ACCOUNTS}) "
+                         f"— coi như TẮT; nới phạm vi phải sửa CODE, không sửa JSON")
+        return pol, None
+    except Exception as ex:
+        return {}, f"không đọc được {path}: {type(ex).__name__}: {ex}"
+
+
+# Ngưỡng cổng: dd52 trong file này tính theo PHẦN TRĂM (−20.0 == −20%). Hằng số ở đây khớp
+# `gate: "dd52<=-0.20"` của trading_rules.json; hai bên lệch nhau ⇒ TẮT (kiểm ngay dưới).
+CAPIT_LEVER_DD52_PCT = -20.0
+# SÀN TỈNH TÁO, không phải tham số chiến lược. `dd52_now` rơi về sentinel −99.0 khi chuỗi
+# VNINDEX RỖNG (dòng ~734) — tức là "KHÔNG CÓ DỮ LIỆU", nhưng đọc theo nghĩa đen thì nó THOẢ
+# một cổng "≤ −20%" một cách ngoạn mục. Đúng hình dạng bẫy §14: một giá trị canh khuyết được
+# tầng dưới hiểu thành tín hiệu cực đoan. Sự cố dữ liệu KHÔNG được phép mở đường vay tiền, nên
+# mọi dd52 dưới sàn này bị coi là HỎNG (fail-closed), không phải "washout sâu kỷ lục".
+# −95% chọn để tách bạch sentinel: đáy tệ nhất lịch sử VNINDEX còn cách xa mức này.
+CAPIT_LEVER_DD52_SANITY_FLOOR = -95.0
+
+
 def capit_base(state, dd52w, vn_cooling):
     if state == 1: return 1.0
     if state == 3: return 0.75
@@ -756,6 +839,79 @@ if capit_signal_today:
                                "KHÔNG nhân capit_size hay weight_pct thêm lần nữa.",
                 }
 
+# ── 6a. Đòn bẩy margin CHỈ cho sự kiện CAPIT vừa fire (cổng dd52<=−20%) ─────────────────
+# Khối này KHÔNG gán lại biến quyết định nào của §6 — nó chỉ ĐỌC (dd52_now, capit_signal_today,
+# capit_size, basket) và THÊM trường vào artifact. `enabled=false` ⇒ `active=false` ⇒ mọi tầng
+# dưới hành xử y hệt trước khi có tính năng này (không có lệnh nào đổi, không có sizing nào đổi).
+#
+# Cặp mốc CAPIT_LEVER_BEGIN/END dưới đây KHÔNG phải chú thích trang trí: capit_lever_selfcheck.py
+# CẮT ĐÚNG đoạn source giữa hai mốc rồi exec nó với đầu vào washout giả lập. Diễn tập vì thế chạy
+# TRÊN CHÍNH code production này, không phải một bản chép tay sẽ trôi khỏi nó (bài học §17
+# extract-and-test: tuyên bố "đã kiểm" mà không có test neo vào source thật đã hỏng 2 lần).
+# Đổi/di chuyển hai mốc này ⇒ selfcheck fail ngay, đó là chủ đích.
+# CAPIT_LEVER_BEGIN
+_lever_pol, _lever_err = capit_lever_policy()
+# Cổng chỉ được coi là "đạt" khi ngưỡng trong code KHỚP ngưỡng khai trong file chính sách —
+# lệch nhau là dấu hiệu ai đó sửa 1 bên (fail-closed, không tự hoà giải).
+_gate_decl_ok = str(_lever_pol.get("gate") or "") == f"dd52<={CAPIT_LEVER_DD52_PCT / 100:.2f}"
+if _lever_pol and not _gate_decl_ok and not _lever_err:
+    _lever_err = (f"gate khai trong trading_rules.json = {_lever_pol.get('gate')!r} ≠ ngưỡng "
+                  f"code {CAPIT_LEVER_DD52_PCT}% — coi như TẮT")
+_gate_pass = bool(pd.notna(dd52_now)
+                  and CAPIT_LEVER_DD52_SANITY_FLOOR <= dd52_now <= CAPIT_LEVER_DD52_PCT)
+if pd.notna(dd52_now) and dd52_now < CAPIT_LEVER_DD52_SANITY_FLOOR and not _lever_err:
+    _lever_err = (f"dd52={dd52_now} dưới sàn tỉnh táo {CAPIT_LEVER_DD52_SANITY_FLOOR}% — "
+                  f"gần như chắc chắn là sentinel thiếu dữ liệu, KHÔNG phải washout; coi như TẮT")
+_lever_active = bool(_lever_pol.get("enabled") and not _lever_err and _gate_pass
+                     and capit_signal_today and capit_size > 0.005 and basket)
+if _lever_active:
+    _f = float(_lever_pol["f"])
+    for _a in list(capit_targets):
+        if _a not in _lever_pol["accounts"]:
+            continue                      # account ngoài phạm vi duyệt → KHÔNG chạm
+        _t = capit_targets[_a]
+        if not _t.get("capit_total_target_vnd"):
+            continue                      # thiếu cơ sở NAV → để tầng plan tự xử, không bịa số
+        _t["lever_f"] = _f
+        _t["lever_loan_package_id"] = _lever_pol["loan_package_id"]
+        _t["capit_total_target_vnd_levered"] = round(_t["capit_total_target_vnd"] * _f)
+        _t["capit_slot_target_vnd_levered"] = round(
+            _t["capit_total_target_vnd_levered"] / max(len(basket), 1))
+        _t["lever_formula"] = (
+            "slot_levered = capit_slot_target_vnd × f. Phần VƯỢT trên vốn tự có là VAY "
+            f"(gói {_lever_pol['loan_package_id']}). Trần %ADV `capit_adv_caps` KHÔNG nhân f "
+            "(trần đo tác động thị trường, không phụ thuộc nguồn vốn) ⇒ lệnh thật vẫn = "
+            "min(mục tiêu, trần).")
+capit_lever = {
+    "enabled": bool(_lever_pol.get("enabled")),
+    "active": _lever_active,
+    "f": (_lever_pol.get("f") if _lever_pol else None),
+    "loan_package_id": (_lever_pol.get("loan_package_id") if _lever_pol else None),
+    "accounts": (_lever_pol.get("accounts") if _lever_pol else []),
+    "scope": (_lever_pol.get("scope") if _lever_pol else None),
+    "gate": f"dd52<={CAPIT_LEVER_DD52_PCT}%",
+    "gate_threshold_pct": CAPIT_LEVER_DD52_PCT,
+    "dd52_pct": (round(dd52_now, 2) if pd.notna(dd52_now) else None),
+    "gate_pass": _gate_pass,
+    "capit_signal_today": capit_signal_today,
+    "capit_size": round(capit_size, 4),
+    "n_capit_basket": len(basket),
+    "policy_error": _lever_err,
+    "reason": ("đòn bẩy CAPIT ĐANG ÁP cho sự kiện này" if _lever_active else
+               ("chính sách TẮT (enabled=false) — cần user xác nhận riêng mới bật"
+                if not _lever_pol.get("enabled") else
+                (_lever_err or ("cổng dd52 chưa đạt "
+                                f"({dd52_now:.2f}% > {CAPIT_LEVER_DD52_PCT}%)" if not _gate_pass
+                                else "không có sự kiện CAPIT đang fire hôm nay")))),
+}
+if _lever_err:
+    print(f"  WARNING: chính sách đòn bẩy CAPIT — {_lever_err} (fail-closed: KHÔNG áp đòn bẩy)")
+if _lever_active:
+    print(f"  🔺 ĐÒN BẨY CAPIT ÁP DỤNG: f={_lever_pol['f']} gói vay "
+          f"{_lever_pol['loan_package_id']} cho account {_lever_pol['accounts']} "
+          f"(dd52={dd52_now:.1f}% ≤ {CAPIT_LEVER_DD52_PCT}%)")
+# CAPIT_LEVER_END
+
 # ── 6b. Sổ episode CAPIT (QUAN SÁT THUẦN — bên NGOÀI nhánh `if capit_signal_today`) ──
 # `capit_signal_today` là điều kiện CỦA NGÀY CHẠY: breadth rớt dưới gate ⇒ cờ về False và
 # basket/size về rỗng NGAY, dù vị thế thật vẫn đang giữ (đúng cái đã xảy ra 07-29/07-30 khi còn đủ 5 mã ở 2
@@ -901,6 +1057,11 @@ status = {
     # executor enforce cứng); đây là MỤC TIÊU phân bổ. Lệnh thật = min(mục tiêu, trần),
     # rồi mới làm tròn lô.
     "capit_slot_targets": capit_targets,
+    # ĐÒN BẨY MARGIN cho RIÊNG sleeve CAPIT (§6a) — NGUỒN CHUẨN TẮC mà bot_execute.py đọc
+    # (trading_bot/plan.py::apply_capit_lever). `active=false` ⇒ KHÔNG lệnh nào được gắn cờ
+    # vay; plan có tự viết `lever_f` vào cũng bị GỠ. Xem data/trading_rules.json
+    # → capit_margin_lever (mặc định enabled=false, bật cần user xác nhận riêng).
+    "capit_lever": capit_lever,
     "dd52w": round(dd52_now, 1), "vn_cooling": vn_cool_now,
     "n_bal": int(len(bal)), "n_lag_upcoming": len(lag_up), "n_lag_recent": len(lag_recent),
     "lag_source_error": lag_source_error,
@@ -1029,6 +1190,12 @@ if breadth_stale:
              f"`mike/bin/build_universe_pit.py --date <ngày>` + `build_universe_pit_quality.py`.")
 if capit_signal_today:
     L.append(f"- 🚨 **WASHOUT GATE FIRED** — state routing size = **{capit_size:.2f}** (grind={capit_grind}, dd52w={dd52_now:.1f}%, vn_cooling={vn_cool_now})")
+    # Đòn bẩy margin (§6a) — LUÔN in 1 dòng khi có washout, kể cả khi TẮT: người duyệt plan
+    # phải thấy trạng thái của nó, không phải suy ra từ việc thiếu dòng (bài học capit_fired).
+    L.append(f"- ⚙️ Đòn bẩy margin CAPIT: **{'ĐANG ÁP' if capit_lever['active'] else 'TẮT'}** "
+             f"(enabled={capit_lever['enabled']}, cổng {capit_lever['gate']} "
+             f"{'ĐẠT' if capit_lever['gate_pass'] else 'chưa đạt'} @dd52={dd52_now:.1f}%) — "
+             f"{capit_lever['reason']}")
     # NHÃN CŨ SAI, đã xoá 2026-07-31: dòng này từng ghi "Committed VND = size x free-cash mỗi
     # book" — công thức free-cash KHÔNG còn dùng từ khi user chốt booknav 2026-07-20. Không
     # plan nào thật sự dùng nó, nhưng để lại là một cách đọc thứ ba cho cùng một con số.
@@ -1049,6 +1216,11 @@ if capit_signal_today:
             L.append(f"    · {a} — book LAG {_t['nav_book_lag_vnd']/1e6:,.0f}tr × "
                      f"{capit_size:.2f} = tổng {_t['capit_total_target_vnd']/1e6:,.0f}tr "
                      f"⇒ **{_t['capit_slot_target_vnd']/1e6:,.1f}tr/mã** × {_t['n_slots']} mã")
+            if _t.get("lever_f"):
+                L.append(f"      🔺 ĐÒN BẨY f={_t['lever_f']} (gói vay "
+                         f"{_t['lever_loan_package_id']}) ⇒ **{_t['capit_slot_target_vnd_levered']/1e6:,.1f}tr/mã** "
+                         f"(tổng {_t['capit_total_target_vnd_levered']/1e6:,.0f}tr, phần vượt vốn "
+                         f"tự có là VAY). Trần %ADV KHÔNG nhân f.")
         L.append(f"  Lệnh thật = min(mục tiêu ở trên, trần %ADV bên dưới), rồi mới làm tròn lô.")
         L.append(f"- Trần %ADV/tên — TỔNG cả fleet ({ADV_X:.0%}·ADV20·{ADV_D:.0f} phiên, VND "
                  f"tuyệt đối; phần dư để CASH, không dồn sang tên khác): "

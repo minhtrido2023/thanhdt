@@ -57,7 +57,7 @@ class FakeBroker:
     def __init__(self, bp=None, boom=False):
         self.bp, self.boom, self.calls = bp, boom, []
 
-    def get_buying_power(self, symbol, price):
+    def get_buying_power(self, symbol, price, loan_package_id=None):
         if self.boom:
             raise RuntimeError("ppse down")
         self.calls.append((symbol, price))
@@ -137,7 +137,7 @@ check("chỉ tính vế MUA, không trừ/không cộng lệnh bán",
 
 
 class _BadBroker:
-    def get_buying_power(self, s, p):
+    def get_buying_power(self, s, p, loan_package_id=None):
         raise SystemError("nổ sâu")
 
     def __getattr__(self, k):

@@ -224,8 +224,17 @@ with tempfile.TemporaryDirectory() as tmp:
                                            qty=1000, ref_price=20000)])
     paper_updates = pb.poll_orders()
     ghosts = ex3._ghost_tickers(paper_updates)
-    check("J1 PaperBroker order now carries raw.symbol (not None)",
-          paper_updates["P000001"].raw == {"symbol": "PAPERGHOST"})
+    # Asserts the PROPERTY the guard depends on (a resolvable symbol), not an exact dict:
+    # the raw row is deliberately grown over time to mirror the real DNSEBroker row, and an
+    # equality assertion turns every such addition into a false failure. It already did once
+    # — 2026-08-03 added raw["loanPackageId"] so Executor._lever_package_audit (CAPIT margin
+    # leverage) could be rehearsed on paper, and this check failed while the guard worked fine.
+    check("J1 PaperBroker order carries a resolvable raw.symbol (not None)",
+          (paper_updates["P000001"].raw or {}).get("symbol") == "PAPERGHOST",
+          detail=str(paper_updates["P000001"].raw))
+    check("J1b …and raw carries loanPackageId, so the CAPIT-leverage guard is rehearsable",
+          "loanPackageId" in (paper_updates["P000001"].raw or {}),
+          detail=str(paper_updates["P000001"].raw))
     check("J2 untracked paper order is correctly detected as a ghost",
           ghosts == {"PAPERGHOST"}, detail=str(ghosts))
 

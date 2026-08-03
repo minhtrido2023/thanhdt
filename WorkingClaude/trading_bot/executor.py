@@ -454,7 +454,8 @@ class Executor:
             return None
         try:
             oid = self.broker.place_order(o.ticker, qty, o.side, price=px_alt,
-                                          cash_only=getattr(o, "cash_only", False))
+                                          cash_only=getattr(o, "cash_only", False),
+                                          loan_package_id=getattr(o, "loan_package_id", None))
         except Exception:
             overrides.pop(o.ticker, None)     # vẫn lỗi ở exchange thay thế → không phải do tick, bỏ học
             return None
@@ -604,6 +605,103 @@ class Executor:
             if sym in plan_tickers:
                 ghosts.add(sym)
         return ghosts
+
+    def _lever_package_audit(self, updates):
+        """Lưới an toàn cho ĐÒN BẨY sleeve CAPIT — bắt đòn bẩy KHÔNG ĐƯỢC CẤP PHÉP.
+
+        VÌ SAO CẦN, khi đã có _ghost_tickers: guard kia trả lời "có lệnh nào ở broker mà state
+        không biết không" (chống double-buy) và nó ĐÃ phủ cả lệnh CAPIT vì nó xét theo mã của
+        plan. Cái nó KHÔNG trả lời được — và là rủi ro MỚI mà tính năng đòn bẩy mang vào — là
+        "lệnh đó đi ra bằng gói vay NÀO". Một lệnh đúng mã, đúng KL, nhưng mang gói 1840 trong
+        khi chính sách đang TẮT (hoặc mang nó trên một mã ngoài rổ CAPIT) là đòn bẩy không ai
+        duyệt: nợ vay thật, rủi ro margin call thật, mà mọi phép đối soát KL/mã đều PASS.
+
+        Cơ chế: đọc gói vay THẬT trên sổ lệnh broker sống (`loanPackageId` có sẵn trong record
+        đơn hàng DNSE — đã kiểm trên data/execution_logs/dnse_raw_*.jsonl) và so với tập mã mà
+        cascade plan (trading_bot.plan.apply_capit_lever) đã cấp phép. Mã nào có lệnh mang gói
+        đòn bẩy mà KHÔNG được cấp phép → trả về để step() TẠM DỪNG mã đó, y hệt đường xử lý
+        ghost order (fail-safe-pause + người thật vào xem), KHÔNG tự huỷ lệnh (huỷ mù còn rủi ro
+        hơn: có thể đã khớp một phần, và ta không biết vì sao nó ra như vậy).
+
+        Chiều ngược lại — được cấp phép nhưng broker trả về gói KHÁC — KHÔNG pause: đó là chiều
+        an toàn (lệnh chạy không đòn bẩy, xem DNSEBroker._validate_lever_package), chỉ ghi journal.
+
+        Trả (set mã phải tạm dừng, list dict cảnh báo). KHÔNG raise: lỗi đọc/parse coi như không
+        thấy gì ở CHÍNH guard này — nhưng poll_orders() hỏng đã được step() xử fail-safe riêng.
+        """
+        authorized, packages = {}, set()
+        for o in self.plan.orders:
+            lp = getattr(o, "loan_package_id", None)
+            if lp is None:
+                continue
+            packages.add(str(lp))
+            authorized.setdefault(str(lp), set()).add(o.ticker)
+        # Không có lệnh đòn bẩy nào trong plan ⇒ MỌI gói lạ đều đáng ngờ, nhưng ta chỉ biết
+        # "lạ" so với gói default account — cái đó là chuyện bình thường của BAL/LAG. Nên khi
+        # plan không xin đòn bẩy, guard chỉ soi các gói mà chính sách đòn bẩy CÓ THỂ cấp.
+        #
+        # HAI nguồn, hợp lại, vì mỗi nguồn tự nó đều có lúc câm:
+        #   · artifact `golive_v23_status.json` — chỉ có khoá `capit_lever` SAU khi golive chạy
+        #     bằng code mới. Đo thật 2026-08-03: artifact của phiên hôm nay KHÔNG có khoá đó,
+        #     nên nếu chỉ dựa vào nó thì lưới an toàn ĐANG TẮT trong production, đúng giai đoạn
+        #     tính năng mới vào và rủi ro sai sót cao nhất (arch-reviewer bắt được).
+        #   · `data/trading_rules.json` — file chính sách, có mặt từ trước khi golive chạy lần
+        #     nào; ngay cả khi `enabled=false` nó vẫn khai gói vay mà chính sách có thể dùng.
+        # Đọc CẢ HAI, không "hoặc": một lệnh mang gói 1840 là đáng ngờ bất kể hôm nay golive
+        # đã kịp công bố gì. Không đọc được nguồn nào → mới chịu im lặng.
+        if not packages:
+            # CACHE 1 LẦN/PHIÊN (arch-reviewer vòng 2, #6): guard này chạy mỗi chu kỳ step()
+            # trên MỌI account, kể cả ZaloPay cash-only vốn không bao giờ vay. Danh sách gói
+            # mà chính sách CÓ THỂ cấp là hằng số trong phiên — mở+parse 2 file JSON mỗi vòng
+            # là chi phí thuần. Đọc một lần rồi giữ (kể cả kết quả RỖNG, để không thử lại).
+            cached = getattr(self, "_lever_policy_packages", None)
+            if cached is None:
+                from .config import WORKDIR
+                cached = set()
+                for _path, _dig in (
+                        (os.path.join(WORKDIR, "data", "golive_v23_status.json"),
+                         lambda d: (d.get("capit_lever") or {}).get("loan_package_id")),
+                        (os.path.join(WORKDIR, "data", "trading_rules.json"),
+                         lambda d: (d.get("capit_margin_lever") or {}).get("loan_package_id"))):
+                    try:
+                        with open(_path, encoding="utf-8") as f:
+                            lp = _dig(json.load(f) or {})
+                        if lp is not None:
+                            cached.add(str(lp))
+                    except Exception:
+                        continue
+                self._lever_policy_packages = cached
+            packages = set(cached)
+            if not packages:
+                return set(), []      # không biết gói đòn bẩy là gì → không phán đoán
+        plan_tickers = {o.ticker for o in self.plan.orders}
+        pause, warns = set(), []
+        for oid, u in updates.items():
+            raw = u.raw if isinstance(u.raw, dict) else {}
+            lp = qget(raw, "loanPackageId", "loanpackageid", "loan_package_id")
+            if lp is None or str(lp) not in packages:
+                continue
+            # Lệnh ĐÃ CHẾT mà chưa khớp gì → không có nợ vay nào phát sinh, bỏ qua. Đối xứng
+            # với _ghost_tickers (dòng ~601). Thiếu dòng này thì một lệnh 1840 bị HUỶ, 0 khớp
+            # vẫn treo mã đó cả ngày (arch-reviewer vòng 2, #4 — đã probe).
+            if u.filled_qty <= 0 and u.is_dead:
+                continue
+            sym = qget(raw, "symbol", "instrument", "code")
+            if sym is None:
+                continue
+            if sym in authorized.get(str(lp), set()):
+                continue                  # đúng mã đã được cấp phép, đúng gói
+            # Chỉ TẠM DỪNG mã có trong plan — pause một mã ta không định giao dịch hôm nay
+            # không ngăn được gì (không có lệnh nào để chặn) mà chỉ gây nhiễu. Vẫn CẢNH BÁO
+            # để người thật biết có đòn bẩy lạ trên tài khoản.
+            if sym in plan_tickers:
+                pause.add(sym)
+            warns.append({"ticker": sym, "oid": oid, "loan_package_id": lp,
+                          "in_plan": sym in plan_tickers,
+                          "reason": (f"lệnh broker {oid} trên {sym} mang gói vay ĐÒN BẨY {lp} "
+                                     f"nhưng mã này KHÔNG được cấp phép đòn bẩy trong plan hôm "
+                                     f"nay (được cấp: {sorted(authorized.get(str(lp), set())) or 'KHÔNG MÃ NÀO'})")})
+        return pause, warns
 
     def _would_be_unchanged(self, o, ps, c, now):
         """True nếu huỷ lệnh con `c` ngay bây giờ rồi đặt lại (theo đúng logic _place_slices)
@@ -933,7 +1031,13 @@ class Executor:
                     # hỗ trợ/lỗi → None → giữ WAIT_CASH như cũ (fail-safe). Nếu ppse nói
                     # đủ mà thực tế không đủ, place_order sẽ bị broker từ chối → chỉ 1
                     # dòng PLACE_FAIL, không rủi ro tiền.
-                    qmax = self.broker.get_max_buy_qty(o.ticker, px)
+                    # Đo sức mua bằng ĐÚNG gói vay lệnh này sẽ dùng: lệnh đòn bẩy CAPIT đi ra
+                    # bằng gói 1840 (initialRate 0,5 ⇒ sức mua gấp đôi 1841). Hỏi bằng gói
+                    # default trong khi đặt bằng 1840 sẽ báo thiếu tiền ở đúng nửa phần vay
+                    # (arch-reviewer 2026-08-03 #2) — và WAIT_CASH đó không phân biệt được
+                    # với thiếu tiền thật.
+                    qmax = self.broker.get_max_buy_qty(
+                        o.ticker, px, loan_package_id=getattr(o, "loan_package_id", None))
                     if qmax is None or qmax < qty:
                         self._journal("WAIT_CASH", o, qty=qty, price=px,
                                       note="thiếu tiền — chờ lệnh bán khớp"
@@ -941,7 +1045,8 @@ class Executor:
                         continue
             try:
                 oid = self.broker.place_order(o.ticker, qty, o.side, price=px,
-                                              cash_only=getattr(o, "cash_only", False))
+                                              cash_only=getattr(o, "cash_only", False),
+                                              loan_package_id=getattr(o, "loan_package_id", None))
             except Exception as e:
                 retry = self._retry_tick_mismatch(o, q, cross, extreme_down, px, qty, e)
                 if retry is None:
@@ -1014,7 +1119,8 @@ class Executor:
             try:
                 oid = self.broker.place_order(o.ticker, remaining, o.side,
                                               price=None, order_type="ATC",
-                                              cash_only=getattr(o, "cash_only", False))
+                                              cash_only=getattr(o, "cash_only", False),
+                                              loan_package_id=getattr(o, "loan_package_id", None))
                 ps["children"].append({"oid": oid, "qty": remaining, "price": None,
                                        "filled": 0, "status": "open",
                                        "ts": now_ict().isoformat(timespec="seconds")})
@@ -1059,6 +1165,24 @@ class Executor:
                     "note": "Lệnh tồn tại ở broker nhưng state.json không biết (khả năng crash "
                             "giữa place_order và _save_state). Bot ĐÃ TỰ DỪNG đặt lệnh mới cho "
                             "mã này để tránh double-buy — cần đối soát tay rồi mới cho tiếp tục."
+                })
+            # Lưới an toàn ĐÒN BẨY CAPIT — gói vay thật trên sổ broker vs tập mã được cấp phép.
+            # Cùng đường TẠM DỪNG với ghost order (không tự huỷ lệnh, gọi người thật).
+            lever_pause, lever_warns = self._lever_package_audit(updates)
+            ghost_tickers |= lever_pause
+            for w in lever_warns:
+                seen = self.state.setdefault("_lever_warned", {})
+                if w["ticker"] in seen:
+                    continue
+                seen[w["ticker"]] = now.isoformat(timespec="seconds")
+                self._journal("LEVER_PACKAGE_UNAUTHORIZED", note=w["reason"])
+                _publish_bot_event("error", "LEVER_PACKAGE_UNAUTHORIZED", {
+                    "account": self.label, "ticker": w["ticker"],
+                    "plan_date": self.plan.plan_date, "order_id": w["oid"],
+                    "loan_package_id": w["loan_package_id"], "in_plan": w["in_plan"],
+                    "note": w["reason"] + " — Bot ĐÃ TỰ DỪNG đặt lệnh mới cho mã này. Đây là "
+                            "ĐÒN BẨY KHÔNG ĐƯỢC CẤP PHÉP (nợ vay thật): đối soát ngay với sổ "
+                            "lệnh DNSE trước khi cho chạy tiếp."
                 })
         except Exception as e:
             # Fail-safe, NOT fail-open: poll_orders() is what the ghost guard depends on to

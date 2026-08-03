@@ -35,7 +35,7 @@ from trading_bot.config import load_config, load_accounts, pick_accounts, EXEC_D
 from trading_bot.brokers import make_broker, get_quote_source, get_dnse_client
 from trading_bot.plan import (load_plan, filter_excluded_tickers, net_offsetting_orders,
                               cap_capit_orders, cap_lag_orders, filter_lag_rating_orders,
-                              approval_block_reason)
+                              apply_capit_lever, approval_block_reason)
 from trading_bot.netting_recon import (reconcile_netted_fills, get_net_fill_from_journal,
                                        write_recon_log)
 from trading_bot.executor import Executor, run_session, _publish_bot_event
@@ -187,9 +187,18 @@ def _log_plan_buying_power_shadow(label, plan, broker, mode):
         buy_value = sum(o.value for o in buys)
         biggest = max(buys, key=lambda o: o.value)
         bp = src = None
+        # Đo bằng ĐÚNG gói vay của lệnh được lấy làm mốc. Nếu phiên này có đòn bẩy CAPIT,
+        # `pp0Buy` ở gói default 1841 là số của MỘT NỬA sức mua thật (gói 1840 initialRate
+        # 0,5) ⇒ log sẽ ghi `would_block=true` GIẢ. Đây chính là bộ dữ liệu ≥10 phiên đang
+        # tích luỹ để quyết P0 → ACTIVE, nên một cột sai ở đây sẽ biến thành một cổng chặn
+        # sai sau này (arch-reviewer 2026-08-03, phát hiện #2).
+        _lp = getattr(biggest, "loan_package_id", None)
         try:
-            bp = broker.get_buying_power(biggest.ticker, int(biggest.ref_price))
-            src = f"dnse:ppse.pp0Buy@{biggest.ticker}" if bp is not None else "unavailable:ppse"
+            bp = broker.get_buying_power(biggest.ticker, int(biggest.ref_price),
+                                         loan_package_id=_lp)
+            src = (f"dnse:ppse.pp0Buy@{biggest.ticker}"
+                   + (f"/pkg{_lp}" if _lp is not None else "")) if bp is not None \
+                else "unavailable:ppse"
         except Exception as ex:
             src = f"unavailable:{type(ex).__name__}"
         would_block = "unknown" if bp is None else str(buy_value > bp).lower()
@@ -399,6 +408,25 @@ def main():
             else:
                 print(f"[{p['label']}] ⛔ LAG BỎ lệnh {a['ticker']} ({a['qty_before']:,} cp, "
                       f"8L rating={a['rating']}) — {a['reason']}")
+        # ĐÒN BẨY MARGIN sleeve CAPIT (chính sách 2026-08-03, data/trading_rules.json →
+        # capit_margin_lever, MẶC ĐỊNH enabled=false). Cấp cờ vay CHỈ cho lệnh mua CAPIT khi
+        # artifact golive nói active=true; đồng thời GỠ mọi cờ vay lạ mà plan tự viết vào —
+        # đó mới là lý do hàm này nằm ở cascade chứ không nằm ở nơi sinh plan. Đặt CUỐI để
+        # nhìn thấy tập lệnh chung cuộc (lệnh đã bị các trần/gate loại thì không gắn cờ).
+        plan, lever_adj = apply_capit_lever(plan, p["label"])
+        for a in lever_adj:
+            if a["action"] == "PLAN_SIZED_LEVERED_BUT_OFF":
+                # Cảnh báo cấp-PLAN (không gắn với lệnh nào): plan đã sizing theo đòn bẩy
+                # nhưng thực thi chạy bằng vốn tự có. Nếu không in dòng này thì triệu chứng
+                # duy nhất là WAIT_CASH, trông y hệt thiếu tiền bình thường.
+                print(f"[{p['label']}] ⚠️ ĐÒN BẨY TẮT NHƯNG PLAN ĐÃ SIZING THEO ĐÒN BẨY — "
+                      f"{a['reason']}")
+            elif a["action"] == "STRIPPED":
+                print(f"[{p['label']}] ⛔ GỠ cờ đòn bẩy khỏi lệnh {a['ticker']} "
+                      f"(f={a['lever_f']}, gói={a['loan_package_id']}) — {a['reason']}")
+            else:
+                print(f"[{p['label']}] 🔺 ĐÒN BẨY {a['action']} {a['ticker']}: f={a['lever_f']}, "
+                      f"gói vay {a['loan_package_id']} — {a['reason']}")
         if not plan.orders:
             print(f"[{p['label']}] plan {plan_date} không có lệnh — bỏ qua")
             continue
