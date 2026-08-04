@@ -1467,3 +1467,10 @@
 - [2026-08-04T12:11:37Z] DollarBill/finding — plan-2026-08-05-ZaloPay-report-sent: {"thread": "1521183164364754974", "status": "sent"}
 - [2026-08-04T12:10:38Z] Mafee/status — eod-trading-report: {"account": "ZaloPay", "plan_date": "2026-08-04", "delivered_via": "hold_day"}
 - [2026-08-04T12:11:04Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-08-04", "delivered_via": "hold_day"}
+
+## Consolidation 2026-08-04T12:14:32Z
+- [2026-08-04T12:11:48Z] DollarBill/heartbeat — DollarBill_20260804_120345: {"status": "still_running", "elapsed_min": 8, "job_id": "DollarBill_20260804_120345", "source": "watcher"}
+- [2026-08-04T12:12:48Z] DollarBill/heartbeat — DollarBill_20260804_120345: {"status": "still_running", "elapsed_min": 9, "job_id": "DollarBill_20260804_120345", "source": "watcher"}
+- [2026-08-04T12:13:33Z] DollarBill/heartbeat — DollarBill_20260804_120345: {"status": "in_progress", "note": "đã ghi plan_SpaceX_2026-08-05.json, đang verify JSON + soạn báo cáo Discord"}
+- [2026-08-04T12:13:48Z] DollarBill/heartbeat — DollarBill_20260804_120345: {"status": "still_running", "elapsed_min": 10, "job_id": "DollarBill_20260804_120345", "source": "watcher"}
+- [2026-08-04T12:13:51Z] DollarBill/decision — plan-2026-08-05: {"account": "SpaceX", "plan_date": "2026-08-05", "orders": 0, "deferred_orders": 4, "deferred_value_vnd": 347625523, "park_trim_decision": "TRIM", "park_trim_value_vnd": 85310000, "cash_vnd": 4821143, "active_nav_vnd": 955641143, "dt5g_state": "NEUTRAL(3)", "note": "HOLD ALL — 0 lệnh mua/bán V2.4 thực thi (cash 4.82M quá nhỏ so với 4 candidate deferred: VIC/TV2/APF/DCM tổng 347.6M). PVT LAG window mở nhưng trùng CAPIT holding — escalate user quyết định riêng, không tự đưa vào orders/deferred. park_trim_proposal mới (L1 BẬT từ 08-04): đề xuất bán 12 mã PARK 85.31M để về mục tiêu 80%, chờ duyệt riêng."}
