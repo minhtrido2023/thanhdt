@@ -4,7 +4,7 @@ title: Incidents — Mike fleet (sổ postmortem, cấu trúc OKF)
 owner: Mike fleet (mọi agent ghi; daily_retro.sh ghi entry RETRO hằng đêm)
 format: OKF (Open Knowledge Format) — markdown + YAML frontmatter, 1 sự cố = 1 file
 migrated_from: kb/INCIDENTS.md (single-file 408KB, migrate → OKF 2026-07-30 job Winston_20260730_144031)
-entries: 86 file (63 sự cố + 22 RETRO + 1 mục open-items chung)
+entries: 89 file (65 sự cố + 23 RETRO + 1 mục open-items chung)
 ---
 
 # Incidents — Mike fleet
@@ -158,6 +158,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 |---|---|---|
 | 2026-08-02 | [RETRO — 2026-08-02: 7 sự cố, 2 pattern xuyên suốt (1 tiếp tục ESCALATED từ 07-28/08-01, 1 MỚI nêu bật, +1 sự cố bổ sung sau verify độc lập của Wags)](retro/retro-2026-08-02.md) | logged |
 | 2026-08-03 | [RETRO — 2026-08-03: 5 sự cố (1 đã ghi trước, 4 bổ sung), 2 pattern xuyên suốt (1 CẢI THIỆN nhưng CHƯA về 0 — wakeup compliance dao động ngược; 1 TIẾP TỤC chờ xác nhận đa chu kỳ)](retro/retro-2026-08-03.md) | logged |
+| 2026-08-04 | [RETRO — 2026-08-04: 2 sự cố ghi trước + 1 mục theo dõi liên-ngày, 1 pattern xuyên suốt (recovery-not-prevention), wakeup compliance VỀ 0% — Pattern 1 từ retro 08-03 ĐÓNG](retro/retro-2026-08-04.md) | logged |
 | 2026-08-01 | [RETRO — 2026-08-01: 6 sự cố đã ghi + 2 gap chưa ghi, 3 pattern xuyên suốt (1 escalate)](retro/retro-2026-08-01.md) | open-items |
 | 2026-07-29 | [RETRO — 2026-07-29: 4 sự cố, 1 pattern xuyên suốt tái diễn (data-registry-accuracy), 0 vi phạm §8 wakeup](retro/retro-2026-07-29.md) | open-items |
 | 2026-07-28 | [RETRO — 2026-07-28: 3 sự cố, 1 pattern xuyên suốt CỰC KỲ QUAN TRỌNG (retro pipeline tự nó chết lặng 4 ngày 07-24→07-27, đúng lúc pattern funding_requ…](retro/retro-2026-07-28.md) | open-items |
