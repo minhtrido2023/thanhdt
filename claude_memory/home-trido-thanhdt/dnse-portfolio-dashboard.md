@@ -5,7 +5,7 @@ metadata:
   node_type: memory
   type: project
   originSessionId: a784d880-5a9e-4603-b19e-20d46f573eff
-  modified: [REDACTED]T16:39:56.129Z
+  modified: [REDACTED]03T16:39:56.129Z
 ---
 
 This is **tbot's** project (see [[tbot-identity]], [[tbot-scaffold]]) — read-only DNSE dashboard
@@ -17,7 +17,7 @@ OTP flow entirely and avoid that whole class of incident (OTP races between sub-
 one DNSE login).
 
 **How to apply:** code lives at `WorkingClaude/tbot/projects/dnse_dashboard/build_dashboard.py`
-(moved [REDACTED]04 from a loose `WorkingClaude/dnse_dashboard/` — everything tbot owns now lives
+(moved [REDACTED] from a loose `WorkingClaude/dnse_dashboard/` — everything tbot owns now lives
 under `tbot/`, per the write-scope rule). Output HTML goes to
 `WorkingClaude/tbot/html/dashboards/dnse_portfolio/` (gitignored — holds real financial data).
 `--demo` mode works today with synthetic data; real use needs DNSE credentials (see the script's

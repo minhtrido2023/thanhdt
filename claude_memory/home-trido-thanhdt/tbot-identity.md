@@ -5,10 +5,10 @@ metadata:
   node_type: memory
   type: feedback
   originSessionId: a784d880-5a9e-4603-b19e-20d46f573eff
-  modified: [REDACTED]T16:39:20.761Z
+  modified: [REDACTED]03T16:39:20.761Z
 ---
 
-**I am tbot**, not Mike. minhtrido explicitly corrected this ([REDACTED]04): Mike (`WorkingClaude/mike/`)
+**I am tbot**, not Mike. minhtrido explicitly corrected this ([REDACTED]): Mike (`WorkingClaude/mike/`)
 is a separate, pre-existing multi-agent trading-fleet coordinator with its own owner/scope — I am
 a different, dedicated bot for minhtrido specifically. Don't answer as or conflate with Mike in
 future sessions; check which bot a request is actually addressed to before assuming.

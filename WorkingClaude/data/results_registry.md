@@ -5285,3 +5285,417 @@ lập). **DSR/PBO không áp dụng** — không có cấu hình nào được C
 CSV `data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_repin0803_price_univpit.csv`
 (17.660 dòng) và `..._wtnamecap_exp_repin0803_close_univpit.csv` (18.553 dòng).
 Canonical `..._wtnamecap.csv` **KHÔNG bị đụng**.
+
+## 2026-08-04 — GATE CỨNG ADV 2 TỶ/PHIÊN CHO BOOK LAG: **NO-GO (vì lợi nhuận)** — job `Taylor_20260804_080547`
+
+**Câu hỏi (user John):** nâng `ADV_THIN_VND=2e9` (hiện CHỈ hiển thị cảnh báo trong
+`trading_bot/due_diligence.py:45`) thành **gate cứng** loại ứng viên LAG có ADV3T < 2 tỷ tại ngày tín
+hiệu — R3 đổi thế nào, mất bao nhiêu deal?
+
+**KẾT LUẬN: KHÔNG WIRE VÌ LỢI NHUẬN.** Toàn bộ Δ đo được là **hiệu ứng ĐÃ BIẾT** (chặn mã ADV≤0 =
+không fill nổi), **không phải** do ngưỡng 2 tỷ. ⚠️ **KHÔNG trích 32,4% như số mới của R3** — pin R3
+giữ nguyên **28,86%**.
+
+### Bảng 7 chân (snapshot `bq_cache_asof20260729_postrestate`, threads=1, `$DNA_PYEXE`, lệnh pin R3 nguyên văn, `EXP_TAG` mọi chân, self-check **0 VND** cả 7)
+
+| Chân | engine chặn ADV≤0 | gate độ lớn @ngày tín hiệu | CAGR | Sharpe | MaxDD | Calmar | IS 14-19 | OOS 20+ |
+|---|---|---|---|---|---|---|---|---|
+| **control = pin R3** | không | không | **28,86%** | 1,90 | −17,8% | 1,62 | 27,09% | 30,48% |
+| gate 0,5 tỷ | không | 0,5 tỷ | 32,38% | 1,92 | −18,3% | 1,77 | 27,31% | 37,21% |
+| gate 1 tỷ | không | 1 tỷ | 32,41% | 1,92 | −18,3% | 1,77 | 27,58% | 37,02% |
+| **gate 2 tỷ (câu hỏi)** | không | **2 tỷ** | **32,44%** | 1,93 | −18,2% | 1,78 | 27,52% | 37,12% |
+| gate 5 tỷ | không | 5 tỷ | 32,23% | 1,92 | −18,5% | 1,74 | 26,77% | 37,45% |
+| **L1** (`LIQ_ZERO_BLOCK=lag`) | **CÓ** | không | **32,71%** | 1,95 | −19,1% | 1,71 | 27,22% | 37,96% |
+| **L1 + gate 2 tỷ** | **CÓ** | **2 tỷ** | **32,45%** | 1,93 | −18,2% | 1,78 | 27,63% | 37,04% |
+
+**Chân đối chứng tái lập TUYỆT ĐỐI 2 số đã pin**: control = 28,86/1,90/−17,8/1,62/1.178,01B (pin
+08-03) và L1 = 32,71/1,95/−19,1/1,71/1.699,09B (job `Taylor_20260803_052705`) ⇒ harness hợp lệ.
+
+### 3 căn cứ NO-GO (độc lập nhau)
+1. **Phần GIA TĂNG bằng ~0**: L1 → L1+gate2tỷ = **−0,26pp CAGR, −0,02 Sharpe, −0,92pp OOS**. Đổi lại
+   MaxDD −19,1→−18,2% và Calmar 1,71→1,78. Tập ADV<2tỷ là **tập cha** của ADV≤0 nên `gate2tỷ` một
+   mình (32,44%) ≈ `L1+gate2tỷ` (32,45%), lệch 0,01pp — cơ chế khớp cơ học.
+2. **Thang liều PHẲNG**: bước 0→0,5 tỷ ăn **98%** hiệu ứng; 0,5→5 tỷ biên độ chỉ 0,21pp (5 tỷ còn
+   thấp hơn 2 tỷ). Ngưỡng 2 tỷ **không có nội dung kinh tế riêng**.
+3. **Δ không bền theo năm**: gate thắng **6/13 năm** (sign test p=0,709); LOO-1-năm 13/13 dương
+   nhưng **bỏ đồng thời 2017+2020+2021 ⇒ Δ ĐỔI DẤU −1,24pp** (bỏ 2020+2021 còn +0,40pp). Đúng dạng
+   reshuffle-luck (`KNOWLEDGE.md` §8).
+
+### Deal LAG mất bao nhiêu
+Ứng viên 5.317 → 2.085 (**−3.232 = −60,8%**, 653 mã); vị thế mở 1.901 → 1.465 (−436); **bỏ dở**
+853 → 464. ⇒ **deal HOÀN TẤT chỉ 1.048 → 1.001 = −47 (−4,5%)**, vì **89,2% (389/436) vị thế bị cắt
+vốn đang BỎ DỞ không fill nổi**. Mã giao dịch phân biệt 522 → 300.
+Phân rã tầng vị thế trên sổ lệnh control: nhóm bị gate loại **n=918, hút 4.539B vốn (28% tổng) sinh
+1,682%/chu kỳ, bỏ dở 68,1%** vs nhóm giữ lại **n=983, 11.560B, 4,234%/chu kỳ, bỏ dở 23,2%**.
+ADV trung vị nhóm bị loại = **0,043 tỷ/phiên** (p90 1,017 tỷ) ⇒ gate chủ yếu bắt nhóm gần-như-không-
+giao-dịch, KHÔNG phải vùng "mỏng". Ví dụ: VSI, CAP, DNC, TYA, SFN, TV3, MAC, PRC, BED, GDT.
+
+### Multiple-testing
+`N_trials=5` ngưỡng cùng họ (+2 chân L1 kiểm cơ chế = 7 lần chạy). **DSR=1,0000 cả 5 chân nhưng VÔ
+NGHĨA để phân biệt** (SR/quan sát cả 5 nằm trong 0,11538–0,11665, chênh <1,1%). **PBO (CSCV, S=16,
+12.870 tổ hợp, Ncfg=5, T=3.104) = 0,916**, median logit −1,609; **kiểm khối suy biến trước khi chạy:
+0/16 khối sd≈0 hoặc NaN** (bài học CAPIT navsize 07-31). PBO≫0,5 ⇒ **không ngưỡng nào trong họ được
+chọn theo số IS**.
+
+### Ràng buộc kế thừa
+Mọi số CAGR ở đây dùng chung mô hình fill 20%ADV/phiên **chưa neo vào fill thật** (live chỉ xác nhận
+tới 3,86%ADV/phiên) ⇒ chịu nguyên cảnh báo của `lag_liquidity_filter.py` docstring + 2 mốc cứng
+**2026-12-15 / 2027-03-31** (`kb/projects/lag-adv-filter-tracking.md`). **Không tạo khoảng thay thế,
+không re-pin.** Production: engine dùng bản sao `pt_v23_advgate.py` (khác đúng 3 khối ghi
+chú, no-op khi `LAG_ADV_MIN_VND=0`); `git status` SẠCH trên `pt_v23_audit_2014.py`,
+`lag_liquidity_filter.py`, `trading_bot/due_diligence.py`, `simulate_holistic_nav.py`,
+`trading_bot/plan.py`. ⚠️ Đính chính (quant-skeptic bắt đúng): `deploy_golive_dt5g_v4/golive_recommend_v23.py`
+CÓ diff chưa commit — của job KHÁC cùng ngày (`ETF_PARK {3:0.7}→{3:0.8}`, F1 park, 11:33 ICT), không
+liên quan và không được backtest này import (chân chạy đặt `PARK_STATES="3:0.7"` tường minh).
+
+**Báo cáo:** `mike/agents/Taylor/research/lag_hard_adv_gate_2ty_20260804.md` ·
+**Hiện vật:** `mike/agents/Taylor/exp_lag_advgate_20260804/` (7 log + `dropped_*.json` + `dsr_pbo_advgate.py`).
+
+## 2026-08-04 — GATE ĐỘNG THEO NĂNG LỰC FILL (executability) CHO BOOK LAG: **KHÔNG WIRE VÌ LỢI NHUẬN**, nhưng luật có nội dung cơ học thật — job `Taylor_20260804_085248`
+
+**Câu hỏi (user John, follow-up của `Taylor_20260804_080547`):** thay gate ADV bằng một số VND **cố
+định** (2 tỷ — đã NO-GO) bằng gate **scale theo slot thật của từng lệnh**:
+`required_ADV = slot_size_vnd / (fill_pct_live × N_sessions)`, neo vào `%ADV/phiên` **đã xác nhận
+LIVE** (3,86%), **không** phải tham số model `LAG_ADV_PCT=0,20`.
+
+**KẾT LUẬN: KHÔNG WIRE VÌ LỢI NHUẬN.** Luật ĐÚNG về cơ chế và làm được đúng việc nó hứa — vị thế
+**kẹt-không-fill-nổi 35,0% → 0,0%** bằng **quan hệ định danh** (số học), không phải thống kê — nhưng
+phần gia tăng CAGR **đổi dấu** khi bỏ 2020+2021 (**−0,22pp**), sign test **8/13 năm (p=0,291)**.
+⚠️ **KHÔNG trích 33,75% như số mới của R3** — pin R3 giữ nguyên **28,86%**.
+
+### Tham số hoá: MỘT hệ số `K = 1/(f × N)`, `required_ADV = K × slot_size_vnd`
+
+| K | = f × N | Ý nghĩa |
+|---|---|---|
+| 1,00 | 20% × 5 | chính mô hình engine tự nói là fill được (`LIQ_LAG` nguyên văn) |
+| 2,59 | 3,86% × 10 | neo fill LIVE, cửa sổ rộng 10 phiên |
+| **5,18** | **3,86% × 5** | **neo fill LIVE, đúng `max_fill_days=5` của engine** ← chân chính |
+| 12,95 | 3,86% × 2 | neo LIVE, cửa sổ ngắn 2 phiên |
+| 44,4 | 0,45% × 5 | neo **chỉ-sổ-LAG** (T4: sổ LAG thật chỉ xác nhận tới 0,45%ADV, N=2) |
+
+⚠️ **ĐÍNH CHÍNH một con số của mục 08-04 gate tĩnh ở trên:** "ở NAV 50B, LAG_HI ≈3,25B" là **SAI cơ
+sở** — nó dùng trọng số allocator `w_LAG=0,65`, nhưng engine mô phỏng sổ LAG trên sổ cái tham chiếu
+riêng `LAG_NAV = TOTAL_NAV/2 = 25B` (`pt_v23_audit_2014.py:57`). Slot **engine** tại t=0 là **2,5B**.
+Không đổi kết luận nào của mục đó (nó không dùng số này để chạy gì).
+
+### Bảng 12 chân (snapshot `bq_cache_asof20260729_postrestate`, threads=1, `$DNA_PYEXE`, `LAG_ADV_BASIS=price`, `EXP_TAG` mọi chân, self-check **0 VND** cả 12, `EXIT=0` cả 12)
+
+**@ NAV 50 tỷ** (so apple-to-apple với job gate tĩnh):
+
+| Chân | CAGR | Sharpe | MaxDD | Calmar | NAV cuối | vị thế mở | bỏ dở | %bỏ | deal xong |
+|---|---|---|---|---|---|---|---|---|---|
+| **control = pin R3** | **28,86%** | 1,90 | −17,8% | 1,62 | 1.178,0B | 1.498 | 848 | **56,6%** | 650 |
+| **L1** (`LIQ_ZERO_BLOCK=lag`) | **32,71%** | 1,95 | −19,1% | 1,71 | 1.699,1B | 2.004 | 1.395 | **69,6%** | 609 |
+| K=1,00 | 31,88% | 1,89 | −18,6% | 1,71 | 1.571,3B | 516 | 15 | 2,9% | 501 |
+| K=2,59 | 29,93% | 1,85 | −19,1% | 1,57 | 1.305,2B | 328 | **0** | **0,0%** | 328 |
+| **K=5,18** | 27,52% | 1,77 | −18,8% | 1,46 | 1.033,8B | 233 | **0** | **0,0%** | 233 |
+| K=12,95 | 24,86% | 1,69 | −17,2% | 1,44 | 794,9B | 126 | **0** | 0,0% | 126 |
+| K=44,4 | 21,97% | 1,62 | −16,5% | 1,33 | 593,6B | 28 | **0** | 0,0% | 28 |
+
+**@ NAV 1 tỷ** (≈ `active_nav` THẬT: SpaceX ~950tr, ZaloPay cỡ tương tự):
+
+| Chân | CAGR | Sharpe | MaxDD | Calmar | NAV cuối | vị thế mở | bỏ dở | %bỏ | deal xong |
+|---|---|---|---|---|---|---|---|---|---|
+| control (production) | 25,90% | 1,67 | −17,7% | 1,46 | 17,64B | 795 | 200 | 25,2% | 595 |
+| **L1** (`LIQ_ZERO_BLOCK=lag`) | **32,13%** | 1,87 | −19,3% | 1,66 | 32,20B | 932 | 326 | **35,0%** | 606 |
+| K=1,00 | 32,62% | 1,88 | −19,6% | 1,66 | 33,72B | 591 | 16 | 2,7% | 575 |
+| **K=5,18** | **33,75%** | **1,90** | −19,3% | **1,75** | 37,45B | 541 | **0** | **0,0%** | 541 |
+| K=44,4 | 31,03% | 1,81 | −17,8% | 1,75 | 29,00B | 458 | **0** | 0,0% | 458 |
+
+**Chân đối chứng tái lập TUYỆT ĐỐI (lần thứ 4 cho L1), qua ĐƯỜNG NẠP MODULE KHÁC HẲN job trước**
+(bản sao `simulate_holistic_nav.py` thay vì bản sao `pt_v23`): control = 28,86/1,90/−17,8/1,62/1.178,01B
+và L1 = 32,71/1,95/−19,1/1,71/1.699,09B ⇒ mọi Δ là chênh lệch thật do đúng biến can thiệp.
+
+### ⚠️ Chân so sánh chính ĐANG BỊ TREO — đọc trước mọi số ở trên
+Phép so **quyết định** là vs **L1**, và L1 (32,71% / 32,13%) chính là con số mà mục *"PHÂN RÃ CƠ CHẾ
+của Δ"* (quant-skeptic **INCONCLUSIVE**, `mike/logs/verify_20260802_173456.log`) ghi thẳng:
+***"KHÔNG được trích 31,32%/32,71% làm cơ sở kỳ vọng ở bất kỳ đâu"***. Báo cáo này dùng L1 làm **mốc
+đối chiếu nội bộ** (để đo phần GIA TĂNG), **không** làm cơ sở kỳ vọng. Chiều sai số **bảo thủ**: nếu
+L1 bị thổi phồng bởi hiện vật thì kết luận "không có edge gia tăng trên nền L1" chỉ càng **chắc hơn**.
+**Đừng trích 32,71% / 32,13% / 33,75% ra khỏi ngữ cảnh này.**
+
+### 3 điều bảng số nói (theo thứ tự quan trọng)
+1. **Vị thế kẹt bị xoá SẠCH, bằng SỐ HỌC.** Gate đòi `ADV ≥ K × slot`; engine fill `0,20 × ADV`/phiên
+   và coi xong khi đạt 95%. Với K=5,18: fill ngay phiên đầu = `0,20 × 5,18 × slot = 1,04 × slot > 0,95`
+   ⇒ **không thể bỏ dở** trừ khi ADV sụp sau ngày vào lệnh. Vì thế K≥2,59 cho **đúng 0**, còn K=1,00
+   vẫn còn 15-16 ca (biên bằng 0). Khớp ở **cả hai thang NAV** — quan hệ định danh, không cần p-value.
+2. **`LIQ_ZERO_BLOCK` LÀM TỆ ĐI hồ sơ thi hành** (chi tiết chưa từng đo): L1 bỏ dở **nhiều hơn**
+   control (69,6% vs 56,6% @50B; 35,0% vs 25,2% @1B), vốn kẹt **×3** (773,7B → 2.305,9B). Cơ chế: chặn
+   nhóm ADV≤0 (vốn fill TRỌN trong 1 phiên vì không bị trần) dồn vốn sang nhóm **đo được ADV nhưng
+   mỏng** — chính nhóm này mới bị bóp 20%/phiên rồi bỏ dở. ⇒ thêm một lý do độc lập để **không** đọc
+   +3,85pp của L1 như "cải thiện".
+3. **@50B gate PHÁ giá trị, @1B gate CẢI THIỆN — đó là CAPACITY, không mâu thuẫn.** `required_ADV`
+   trung vị theo năm (đo trên chính ứng viên bị loại), K=5,18:
+
+   | | 2014 | 2017 | 2020 | 2023 | 2026 |
+   |---|---|---|---|---|---|
+   | @NAV 50B | 14,0 tỷ | 23,4 tỷ | 33,7 tỷ | 94,9 tỷ | **209,3 tỷ** |
+   | @NAV 1B | 0,34 tỷ | 0,69 tỷ | 1,04 tỷ | 4,67 tỷ | 12,98 tỷ |
+
+   Sổ cái LAG compound **25B → 590B (23,6×)** trong mẫu ⇒ gate tỉ-lệ-NAV **tự siết 23,6 lần** dọc mẫu
+   trong khi ADV cổ phiếu VN thì không. ⇒ **chuỗi @50B KHÔNG đo "luật tốt hay xấu", nó đo "chiến lược
+   LAG đã vượt sức chứa của chính rổ tên nó mua"**. Hệ quả phải nói thẳng: **pin R3 28,86% @50B đạt
+   được nhờ mua những mã mà một tài khoản 50B không bao giờ fill nổi — 56,6% vị thế của chính chân pin
+   bị bỏ dở.**
+
+### Δ CAGR có bền không? — KHÔNG (giống kết luận gate tĩnh, dù cơ chế khác hẳn)
+Phép so quyết định `K=5,18` vs `L1` @1B. **N khai đúng = 13 năm dương lịch** (không phải 3.522 lần
+loại ứng viên, không phải 3.106 phiên NAV).
+- Δ = **+1,62pp CAGR** / +0,03 Sharpe / 0,0pp MaxDD / +0,09 Calmar / **−65 deal xong (−10,7%)** / **−326 vị thế bỏ dở**.
+- **Sign test 8/13 năm, p=0,291** ⇒ không có ý nghĩa trên tần suất.
+- **LOO/bỏ-nhóm** (ghép từ tỷ suất năm ⇒ +1,53pp thay vì +1,62pp, sai số làm tròn): bỏ 2021 → +0,56pp;
+  bỏ 2020 → +0,85pp; **bỏ 2020+2021 → −0,22pp (ĐỔI DẤU)**; bỏ 2014+2020+2021 → **−0,72pp**.
+  2 năm (2020 +10,77pp, 2021 +22,23pp) gánh gần trọn Δ ⇒ chữ ký **reshuffle-luck** (`KNOWLEDGE.md` §8).
+- **KHÁC BIỆT THẬT so với gate tĩnh, phải ghi nhận:** thang liều ở đây **có dose-response đơn điệu**
+  (@50B: 31,88 → 29,93 → 27,52 → 24,86 → 21,97 khi K tăng; @1B có cực đại nội tại tại K=5,18), trong
+  khi gate tĩnh 2 tỷ có thang **phẳng** (biên độ 0,21pp từ 0,5→5 tỷ). ⇒ luật này **có nội dung kinh tế
+  riêng**; nó chỉ không có **edge lợi nhuận bền**.
+
+### Multiple-testing
+`N_trials = 12 lần chạy engine` (@50B: K∈{0, 1,00, 2,59, 5,18, 12,95, 44,4} + L1; @1B: K∈{0, 1,00,
+5,18, 44,4} + L1).
+
+| Họ | DSR | PBO (CSCV, S=16, 12.870 tổ hợp) | median logit | khối suy biến |
+|---|---|---|---|---|
+| @50B, Ncfg=6, T=3.104 | 1,0000 | **0,301** | +0,288 | **0/16** |
+| @1B, Ncfg=4, T=3.104 | 1,0000 | **0,299** | +0,405 | **0/16** |
+
+- **DSR = 1,0 VÔ NGHĨA để phân biệt** (như job trước): SR/quan sát cả họ nằm trong 0,098–0,115 ⇒ DSR
+  chỉ nói "chiến lược nền có Sharpe dương chắc chắn", **không** nói chân nào hơn chân nào.
+- **PBO ≈ 0,30 < 0,5**, khác hẳn gate tĩnh (**0,916**). Đọc đúng: PBO thấp nói **thứ hạng cấu hình ổn
+  định IS→OOS** — hệ quả trực tiếp của dose-response đơn điệu — **không** nói "edge có thật". Cấu hình
+  xếp hạng ổn định vẫn có thể có Δ không bền theo năm, và đúng là như vậy.
+
+### Ngưỡng VẬN HÀNH thật hôm nay (số học trực tiếp, không qua backtest)
+```
+slot_live    = 0,95 tỷ (active_nav) × 0,65 (w_LAG) × 0,10 (LAG_HI) = 61,7 triệu
+required_ADV = 5,18 × 61,7tr = 0,32 tỷ/phiên          (f=3,86%, N=5)
+```
+
+| Ngưỡng | Nguồn gốc | Ứng viên bị loại (rổ 5.317) | % rổ |
+|---|---|---|---|
+| **0,32 tỷ** | **executability tại NAV THẬT hôm nay** | 2.401 | **45,2%** |
+| 0,62 tỷ | biên an toàn 2× (K=10) | 2.673 | 50,3% |
+| 1 tỷ | — | 2.904 | 54,6% |
+| **2 tỷ** | gate tĩnh (**đã NO-GO**) | 3.232 | 60,8% |
+| **17 tỷ** | con số mục trước, neo ở **NAV 50B** | >3.751 | **>70,5%** |
+
+⚠️ **Đính chính quan trọng cho mục gate tĩnh ở trên:** câu *"2 tỷ vẫn lỏng hơn ~8 lần yêu cầu vận
+hành"* **chỉ đúng cho tài khoản 50 tỷ**. Áp vào tài khoản đang chạy thì **ngược dấu hoàn toàn**: gate
+tĩnh 2 tỷ **CHẶT HƠN 6,3×** nhu cầu thật, và **17 tỷ chặt hơn 53×** (sai số **hai bậc độ lớn**).
+Ngay cả ngưỡng "lỏng" 0,32 tỷ vẫn cắt 45,2% rổ (đuôi ứng viên LAG cực mỏng: trong nhóm ADV<5 tỷ, phân
+vị 25 = **0,002 tỷ**, trung vị 0,088 tỷ) ⇒ về tác động, **gate động tại NAV thật ≈ gate tĩnh 0,5 tỷ**.
+Ưu điểm thật của bản động: **tự siết khi tài khoản lớn lên** (NAV 5 tỷ → 1,7 tỷ; NAV 20 tỷ → 6,7 tỷ).
+
+### Bằng chứng MỚI (HẬU-KIỂM) cho câu hỏi treo 3 vòng "L1 là edge thật hay hiện vật fill?"
+Job này vô tình tạo **trục tách mới: thu nhỏ sổ 50 lần** (`LAG_NAV` 25B → 0,5B). Áp lực sức chứa giảm
+đo được (bỏ dở của control 56,6% → 25,2%). Nếu Δ của L1 thuần tuý là hiện vật sức chứa thì nó phải **co lại**.
+
+| | Δ CAGR của L1 vs control | %bỏ dở của control |
+|---|---|---|
+| Sổ LAG 25B (`NAV_TOTAL_B=50`) | **+3,85pp** (28,86 → 32,71) | 56,6% |
+| Sổ LAG 0,5B (`NAV_TOTAL_B=1`) | **+6,23pp** (25,90 → 32,13) | 25,2% |
+
+**Δ KHÔNG co lại — nó LỚN HƠN 1,6 lần ở sổ nhỏ hơn 50 lần** ⇒ chứng cứ **nghịch chiều** giả thuyết
+"thuần hiện vật sức chứa". **Giới hạn, không đọc quá:** (a) **hậu-kiểm**, không phải phép thử đăng ký
+trước, N=2 điểm thang NAV; (b) cơ chế sinh hiện vật (mã `liq≤0` không bị trần) **không tắt** khi thu
+nhỏ NAV, chỉ giảm tương đối ⇒ trục **làm nhạt**, không phải trục **tắt hẳn**; (c) một quan sát cùng
+job lại **thuận chiều** giả thuyết cũ (L1 làm hồ sơ thi hành tệ đi). ⇒ **KHÔNG đóng được câu hỏi
+treo**, nhưng lần đầu có phép đo **phân biệt được** hai giả thuyết. **Phép thử đăng ký trước để đóng
+hẳn** (rẻ, tái dùng đúng harness): quét `NAV_TOTAL_B ∈ {1,5,10,25,50,100}` × {có/không `LIQ_ZERO_BLOCK`}
+= 12 chân — "hiện vật" dự báo Δ **tăng đơn điệu theo NAV**, "edge thật" dự báo Δ **phẳng/giảm**.
+
+### Khuyến nghị
+**KHÔNG wire vì lợi nhuận** (3 căn cứ độc lập): Δ vs L1 @NAV thật đổi dấu khi bỏ 2020+2021 (−0,22pp);
+sign test 8/13 (p=0,291); @50B gate **phá** giá trị đơn điệu theo K.
+
+**CÓ căn cứ cân nhắc như LUẬT VẬN HÀNH** (mạnh hơn đề xuất 2 tỷ ở 3 điểm): (a) xoá **100%** vị thế kẹt
+bằng quan hệ định danh, không bằng thống kê; (b) **tự scale theo NAV**, không cần chỉnh tay; (c) neo
+vào đại lượng **đo được** (`%ADV/phiên` fill thật) thay vì số mượn từ rổ CAPIT. Nếu đi tiếp — **đây là
+đề xuất, CHƯA phải khuyến nghị wire**: ngưỡng `required_ADV = slot_live/(0,0386 × 5)` tính lại mỗi
+phiên từ `active_nav` thật; đặt ở **tầng ORDER** (`trading_bot/plan.py`, cạnh `cap_lag_orders`),
+**không** ở tầng tín hiệu (slot chỉ biết được khi có NAV live); chế độ **WARN_ONLY ≥10 phiên** trước
+(như P0 buying-power shadow). **Việc user phải chốt, backtest không chốt thay được:** neo **3,86%**
+(suy rộng từ sổ CAPIT ⇒ ngưỡng 0,32 tỷ) hay **0,45%** (chỉ-sổ-LAG, N=2 ⇒ ngưỡng **2,7 tỷ**, và khi đó
+**gate tĩnh 2 tỷ lại gần đúng**). Chênh nhau **8,4 lần**.
+
+### Ràng buộc kế thừa
+Mọi số CAGR ở đây chịu nguyên 2 mốc cứng **2026-12-15 / 2027-03-31** (`kb/projects/lag-adv-filter-tracking.md`).
+**Không tạo khoảng thay thế cho `[~27,2%; 31,3%]` (đã hết hiệu lực), không re-pin.** Production KHÔNG
+bị đụng: engine dùng **bản sao** `exp_lag_dyngate_20260804/simulate_holistic_nav.py` (khác đúng 2
+khối: khai báo knob + gate; **no-op khi `LAG_EXEC_GATE_K=0`**), `pt_v23_audit_2014.py` nạp qua
+`run_leg.py` pre-seed `sys.modules` + assert cứng. `git status` SẠCH trên `simulate_holistic_nav.py`,
+`pt_v23_audit_2014.py`, `trading_bot/plan.py`, `lag_liquidity_filter.py`, `trading_bot/due_diligence.py`.
+File duy nhất còn diff là `deploy_golive_dt5g_v4/golive_recommend_v23.py` (`ETF_PARK {3:0.7}→{3:0.8}`)
+— **việc của job khác cùng ngày**, không được backtest này import (mọi chân đặt `PARK_STATES="3:0.7"` tường minh).
+
+**quant-skeptic: CONFIRMED, confidence cao** (7/7 check pass — skeptic tự chạy lại `analyze.py`
+end-to-end tái lập TOÀN BỘ bảng kết quả cả 2 thang NAV đến từng chữ số, tự kiểm `[selfcheck]`=0 VND +
+`EXIT=0` trong cả 12 log thô, tự tái dựng sign test/LOO từ log năm, tự kiểm mọi công thức trích dẫn
+đối chiếu source live).
+
+**Báo cáo:** `mike/agents/Taylor/research/lag_dynamic_adv_gate_executability_20260804.md` ·
+**Hiện vật:** `mike/agents/Taylor/exp_lag_dyngate_20260804/` (12 log `n50_*`/`n1_*` + `drops_*.json`
+ghi mọi lần loại: ticker/ngày/ADV/slot/required + `analyze.py` + `dsr_pbo_dyngate.py` + `run_leg.py`).
+CSV audit: `data/v23_golive_audit_..._exp_n50_*_univpit.csv` và `..._exp_n1_*_univpit_nav1B.csv`.
+CSV canonical `..._wtnamecap.csv` **KHÔNG bị đụng**.
+
+## 2026-08-04 — ĐƯỜNG CONG CAPACITY CỦA V2.4 R3 THEO QUY MÔ NAV: **độ lệch NGƯỢC DẤU với giả định — không có "chi phí capacity" đo được ở tầng vào lệnh** — job `Taylor_20260804_102015`
+
+**Câu hỏi (user John):** ở các mốc `NAV_TOTAL_B` khác nhau, **CAGR THẬT** (đã tính vị thế bỏ dở /
+`ABANDONED_REFUND`) lệch **CAGR LÝ TƯỞNG** (fill hoàn hảo, bỏ trần thanh khoản) bao nhiêu — cho cả
+3 sổ BAL/LAG/CAPIT? Điểm NAV nào độ lệch vượt 1pp (= "capacity ceiling" để cân nhắc bơm vốn)?
+
+**KẾT LUẬN: nghiên cứu thuần, KHÔNG đề xuất gate, KHÔNG re-pin.** Pin R3 giữ nguyên **28,86%**
+(chân `cap50b_real` tái lập TUYỆT ĐỐI pin đó). ⚠️ **Câu hỏi "điểm vượt 1pp" không áp dụng được
+theo chiều dispatch giả định**: chân LÝ TƯỞNG cho CAGR **THẤP HƠN** chân thật ở **8/8 mốc**.
+
+### Cơ chế fill-capacity — đã ĐỌC CODE, không giả định
+`ABANDONED_REFUND` áp cho **CẢ BA** sổ. Trần = `20% ADV/phiên × max_fill_days=5`; `fill_pct <
+min_fill_pct=0,30` → hoàn tiền (`simulate_holistic_nav.py:1202-1210`, `:1281-1306`).
+- `LIQ_FULL` (`pt_v23_audit_2014.py:990`) → sim **BAL** (`:1952`, `:1983`).
+- `LIQ_LAG` (`:1333`, `LAG_ADV_BASIS=price` mặc định production) → sim **LAG** (`:2011`, `:2037`).
+- **CAPIT không phải sim riêng** — `add_capit_arm()` gộp `CAPITB_*` vào sim BAL và `CAPITL_*` vào
+  sim LAG, nên chịu đúng trần của sim tương ứng (tách ra được bằng `play_type`).
+- `NAV_TOTAL_B` (`:55-57`): `TOTAL_NAV = NAV_TOTAL_B × 1e9`, chia đôi **cứng** `BAL = LAG = /2`.
+
+### BẢNG 1 — đường cong chính (16/16 chân self-check **0 VND** cả 2 sổ + EXIT=0)
+
+| NAV | CAGR **thật** | CAGR **lý tưởng** | lệch (lt−thật) | Sharpe | MaxDD | Calmar | IS 14-19 | OOS 20+ | **%bỏ dở TỔNG** |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1B | 25,90% | 23,81% | **−2,09** | 1,67 | −17,7% | 1,46 | 24,19% | 27,38% | 17,5% |
+| 5B | 29,50% | 23,36% | **−6,14** | 1,86 | −17,9% | 1,65 | 28,37% | 30,42% | 28,6% |
+| 10B | 28,57% | 23,18% | **−5,39** | 1,81 | −17,3% | 1,65 | 26,47% | 30,42% | 33,0% |
+| 20B | 28,14% | 22,95% | **−5,19** | 1,83 | −17,4% | 1,61 | 25,80% | 30,25% | 40,7% |
+| 30B | 29,26% | 22,89% | **−6,37** | 1,91 | −18,0% | 1,63 | 25,64% | 32,64% | 44,2% |
+| **50B = pin R3** | **28,86%** | 22,79% | **−6,07** | 1,90 | −17,8% | 1,62 | 27,09% | 30,48% | 50,8% |
+| 75B | 28,05% | 22,86% | **−5,19** | 1,87 | −18,3% | 1,53 | 26,23% | 29,73% | 54,6% |
+| 100B | 27,17% | 22,83% | **−4,34** | 1,83 | −18,9% | 1,43 | 25,02% | 29,16% | 58,2% |
+
+### BẢNG 2 — %vị thế bỏ dở TÁCH THEO SỔ (chân thật) — đơn điệu tăng ở cả 3 sổ, không ngoại lệ
+
+| NAV | BAL | **LAG** | CAPIT | vốn kẹt B (BAL/LAG/CAPIT) |
+|---:|---:|---:|---:|---:|
+| 1B | 0,4% | **25,2%** | 0,0% | 0,3 / 5,0 / 0,0 |
+| 10B | 14,0% | 41,0% | 2,0% | 59,3 / 95,9 / 2,6 |
+| 50B | 40,7% | **56,6%** | 11,3% | 616,8 / 773,7 / 36,1 |
+| 100B | 53,3% | 62,0% | 22,7% | 1407,8 / 1764,7 / 113,0 |
+
+Ngưỡng vượt 10% bỏ dở: **LAG đã vượt từ TRƯỚC 1B** (25,2% @1B = tại NAV LIVE hôm nay) · **BAL**
+giữa 5B–10B · **CAPIT** giữa 30B–50B. (`LAG 56,6% @50B` khớp job `Taylor_20260804_085248`.)
+
+### Vì sao "lý tưởng" lại TỆ hơn — đo, không lập luận
+Nhóm `ONLY_IDEAL` (mã **chỉ** mở được vị thế khi bỏ trần) hút **11,0% → 33,1%** tổng vốn quay vòng
+(NAV 1→100B) nhưng chỉ lãi **+1,55 / +0,63 / +2,60 / +2,24 %/vòng** so với **+7,02 / +7,41 / +7,42
+/ +7,65** của nhóm chung ⇒ chênh **−4,82 đến −6,78pp mỗi vòng**, chủ yếu sổ LAG (175/206 vòng
+@50B). Dose-response rõ theo NAV. ⇒ **trần thanh khoản đang hoạt động như BỘ LỌC CHỌN MÃ có lợi,
+không phải chi phí.** Trùng khớp hiện vật đã đo độc lập 2026-07-21 (microcap `liq<=0`: −1,11%/vòng
+vs +4,82%). ⚠️ Bộ lọc này **rẻ phi thực tế**: `ABANDONED_REFUND` bán lại ngay trong ngày theo giá
+hôm đó, chỉ mất phí — ngoài đời lệnh mua dở không tự hoàn tiền ⇒ **"lợi ích" này không chuyển
+thành tiền thật được.**
+
+### Robustness — cái nào thật, cái nào reshuffle-luck (per-year LOO, 1B→100B)
+- **Chân LÝ TƯỞNG: 13/13 năm cùng dấu** ⇒ hiệu ứng THẬT. **Chi phí capacity SẠCH** (kênh còn lại:
+  `exit_slippage_tiered` theo %ADV + trần ADV rổ parking + ngưỡng lệnh tối thiểu), so với 1B:
+  **−0,45pp @5B · −0,63 @10B · −0,86 @20B · −0,92 @30B · −1,02 @50B · −0,95 @75B · −0,98 @100B**
+  → **vượt 1pp ở ≈50B rồi BÃO HOÀ** (không xấu thêm tới 100B).
+- **Chân THẬT: chỉ 5/13 năm** ⇒ **RESHUFFLE-LUCK**. Mức "50B > 1B" (+2,96pp) là hiệu số ròng của
+  dao động lớn ngược chiều (2014 +11,45pp, 2021 +25,93pp bù trừ 2024 −10,39pp, 2019 −5,40pp).
+  ⚠️ **KHÔNG đọc "28,86% @50B > 25,90% @1B" là "bơm vốn thì lãi hơn"**, và **KHÔNG đọc "5B =
+  29,50% là mốc NAV tối ưu"** — cả hai nằm gọn trong biên độ hiện vật.
+- **DSR/PBO KHÔNG tính, CÓ Ý**: không cấu hình nào được CHỌN để wire, 16/16 chân báo cáo hết,
+  không lọc. Kiểm định đúng cho câu hỏi này là per-year LOO — đã làm, đã bác bỏ chân THẬT.
+
+### Trả lời "khi nào đừng bơm thêm vốn"
+Ràng buộc đang cắn **KHÔNG PHẢI lợi nhuận mà là THI HÀNH**, và nó cắn **ngay ở quy mô hiện tại**
+(LAG 25,2% bỏ dở @1B). Chi phí lợi nhuận đo được khi bơm tới 50B chỉ **~1pp CAGR**.
+**Không con số nào ở đây đủ tư cách làm căn cứ DUY NHẤT cho quyết định bơm vốn thật.**
+
+### Giới hạn (phải đọc cùng mọi số ở trên)
+1. **Toàn bộ đường cong treo trên MỘT tham số CHƯA NEO**: trần **20% ADV/phiên**, trong khi fill
+   THẬT của DNSE mới xác nhận tới **~3,86% ADV/phiên** và 90-96% phiên-fill mô phỏng nằm **Ở
+   TRẦN** (`kb/projects/lag-adv-filter-tracking.md`, mốc cứng 2026-12-15 / 2027-03-31) ⇒ Bảng 2 là
+   **cận dưới**.
+2. **%bỏ dở là cận dưới lần 2**: lệnh khớp **0 cổ** không sinh dòng log nào (chỉ
+   `skipped_for_liquidity += 1`).
+3. **Không tách được capacity ở tầng VÀO lệnh** khỏi hiệu ứng chọn mã — thuộc tính CẤU TRÚC của
+   engine (bỏ trần đồng thời đổi cả tập mã giao dịch được). Muốn tách phải lọc thanh khoản ở
+   **tầng TÍN HIỆU** — thí nghiệm khác, **chưa chạy**.
+4. `NAV_TOTAL_B` chia đôi cứng BAL/LAG 50/50 ⇒ **không** trả lời "đổi tỷ lệ 2 sổ theo quy mô".
+
+### Môi trường & tính toàn vẹn
+Snapshot `bq_cache_asof20260729_postrestate`, `BQ_CACHE_THREADS=1`, `$DNA_PYEXE`,
+`AUDIT_END=2026-06-19`, `universe_pit`, `LAG_ADV_BASIS=price`, `ETF_LIQ=custompitg BASKET_WT=namecap
+BASKET_SELECT=yieldcombo PARK_STATES="3:0.7"`. **`EXP_TAG` set trên MỌI chân** ⇒ CSV canonical
+`..._wtnamecap.csv` **KHÔNG bị đụng** (coding_guidelines §8). Cổng chống no-op im lặng
+(`[CAPACITY] LIQ_UNCAP=… | BAL cap=… | LAG cap=… | NAV_TOTAL_B=…` + `assert`): **16/16 chân xác
+nhận đúng cấu hình**. Chân control tái lập TUYỆT ĐỐI: `cap1b_real` = 17,64B/25,90%/1,67/−17,7%/1,46
+(trùng `n1_ctrl` job `Taylor_20260804_085248`), `cap50b_real` = 1.178,01B/28,86%/1,90/−17,8%/1,62
+(trùng pin R3). **Production KHÔNG đụng**: `git diff` sạch trên `pt_v23_audit_2014.py` và
+`simulate_holistic_nav.py`; knob `LIQ_UNCAP` chỉ tồn tại trong bản sao nghiên cứu
+`exp_capacity_20260804/pt_v23_capacity.py` (diff = **đúng 3 hunk**).
+
+**quant-skeptic: ✅ CONFIRMED (high)** — tự tái lập độc lập 4 hạng mục: diff 3 hunk chỉ chạm
+`liquidity_volume_pct`; `cap1b_real` byte-identical với `n1_ctrl`; `cap50b_real` byte-identical với
+pin R3; tự chạy lại `decomp.py 1 50` khớp §5 và tự tính lại per-year LOO từ khối `ANNUAL` thô
+(lý tưởng 13/13 âm, thật đúng 5/13 — mọi giá trị pp khớp tới 2 chữ số thập phân).
+
+**Báo cáo:** `mike/agents/Taylor/research/capacity_curve_nav_20260804.md` ·
+**Hiện vật:** `mike/agents/Taylor/exp_capacity_20260804/` (16 log `cap{NAV}b_{real|ideal}.log` +
+`capacity_curve_raw.csv` + `collect.py` + `decomp.py` + `run_cap.sh` + `pt_v23_capacity.py`).
+CSV audit: `data/v23_golive_audit_..._exp_cap{NAV}b_{real|ideal}_univpit_nav{NAV}B.csv` (16 file).
+
+### BỔ SUNG attempt-2 cùng ngày — ĐỘ NHẠY THEO TRẦN FILL: trần capacity ĐÃ ĐỊNH VỊ ĐƯỢC ở **~10–20B**, KHÔNG phải ≈50B
+
+quant-skeptic CONFIRMED mục trên nhưng nêu `killer_objection`: cả đường cong treo trên trần **20%
+ADV/phiên** (≈5× fill THẬT DNSE ~3,86%) mà **chưa chân nào chạy ở trần chặt hơn**. Đã chạy chân
+THẬT ở **`LIQ_PCT=0.04`** cho **cả 8 mốc** ⇒ **24 chân (8 NAV × 3 biến thể), self-check 0 VND
+24/24**, cổng `[CAPACITY]` khớp trần đang chạy 24/24.
+
+⚠️ **Lỗi hạ tầng đã bắt** (đúng loại bẫy `run_jit.sh` 2026-08-03): knob `LIQ_PCT` được **khai báo +
+gắn hậu tố tên file** `_liqpct0p04` nhưng **KHÔNG áp** vào `LIQ_FULL`/`LIQ_LAG` (vẫn hardcode 0,20)
+⇒ chân sensitivity sẽ **mang tên khác mà trùng byte** với chân 20% (**no-op im lặng**). Đã wire +
+thêm `assert` thứ 2. **Regression**: chạy lại `cap50b_real` ở mặc định 0,20 cho log **byte-identical**
+với bản gốc (trừ dòng đồng hồ cache) ⇒ sửa là **no-op tuyệt đối ở mặc định**, 16 chân gốc không đổi.
+
+| NAV | CAGR @20% | **CAGR @4%** | Δpp | Calmar @4% | %bỏ dở TỔNG @4% (@20%) |
+|---:|---:|---:|---:|---:|---:|
+| 1B | 25,90% | 29,22% | +3,32 | 1,63 | 27,0% (17,5%) |
+| 5B | 29,50% | 29,08% | −0,42 | 1,61 | 40,8% (28,6%) |
+| **10B** | 28,57% | **29,70%** ← đỉnh | +1,13 | **1,69** | 50,1% (33,0%) |
+| 20B | 28,14% | 28,04% | −0,10 | 1,50 | 57,4% (40,7%) |
+| 30B | 29,26% | 26,87% | −2,39 | 1,37 | 61,7% (44,2%) |
+| 50B | 28,86% | 24,50% | **−4,36** | **1,11** | 66,6% (50,8%) |
+| 75B | 28,05% | 23,55% | −4,50 | 1,13 | 70,7% (54,6%) |
+| 100B | 27,17% | **21,92%** | **−5,25** | **1,02** | 72,1% (58,2%) |
+
+**3 kết luận:**
+1. **Kết luận định tính SỐNG SÓT 7/8 mốc** — chân lý tưởng vẫn thấp hơn chân thật ở cả 2 trần ⇒ cơ
+   chế "trần thanh khoản = bộ lọc chọn mã có lợi" **không phải hiện vật của tham số 20%**. **Ngoại
+   lệ 100B: ĐỔI DẤU (lệch +0,91)** — mốc đầu tiên ràng buộc capacity thật thắng hẳn lợi ích bộ lọc.
+2. **Ở trần neo theo fill thật, đường cong có hình dạng KINH ĐIỂN mà trần 20% che mất**: đỉnh
+   **10B (29,70%)** rồi giảm **ĐƠN ĐIỆU** tới 100B (21,92%). Ở trần 20% đường này gần như **phẳng**
+   ⇒ **chính tham số chưa neo đã xoá mất tín hiệu capacity.**
+3. ⇒ **TRẦN CAPACITY THỰC DỤNG = ~10–20B**: mất **>1pp so với đỉnh ngay ở 20B** (−1,66pp), rồi
+   −2,83 @30B · −5,20 @50B · −6,15 @75B · −7,78 @100B; Calmar 1,69 → 1,02; MaxDD −17,6% → −22,1%.
+   Sụt giảm 10B→50B **bền hơn hẳn: 11/13 năm** (so với 8/13 ở trần 20%). ⚠️ **Dòng "~1pp ở ≈50B"
+   của mục trên đọc là CẬN DƯỚI LẠC QUAN** — nó đến từ chân LÝ TƯỞNG (chỉ còn slippage-thoát), không
+   phải chi phí nhà đầu tư thật gánh.
+
+**Giới hạn:** `LIQ_PCT=0.04` là **một** giá trị thay thế hợp lý, **không phải giá trị đúng đã đo** —
+sự thật nằm giữa 4% và 20%, nên **vị trí đỉnh 10B sẽ trôi lên** nếu fill thật hội tụ về 8–10%. Chỉ
+tích luỹ fill THẬT mới đóng được (mốc cứng **2026-12-15 / 2027-03-31**). CHƯA chạy: quét
+`LIQ_PCT ∈ {0.04…0.20}` ở NAV cố định để biết **độ dốc** chỗ sụp thay vì 2 đầu mút.
+**Không con số nào ở đây đủ tư cách làm căn cứ DUY NHẤT cho quyết định bơm vốn thật.**
+
+**quant-skeptic: ✅ CONFIRMED (high)** — tự chạy lại `sens.py`, tái lập S1/S2/S3/S5 đúng từng số;
+tự diff `cap50b_real.log.orig` xác nhận fix là no-op ở mặc định; xác nhận `LIQ_PCT=0.04` **không
+phải tham số được dò tìm** mà neo vào số fill thật đã pin (`lag-adv-filter-tracking.md:150,173,228`);
+IS/OOS đều xấu đi @50B/4% (IS 27,09→20,72; OOS 30,48→28,10) ⇒ không phải hiện vật riêng IS.
+(Log: `mike/logs/verify_20260804_114135.log`.) Verify này chạy khi mới có 3/8 mốc; 5 mốc bổ sung
+sau đó dùng **cùng hạ tầng, cùng cổng chống no-op, cùng self-check** và chỉ **củng cố** kết luận
+(định vị được đỉnh mà lần verify đó nêu là còn "bracket, chưa định vị").
+
+**Báo cáo:** `mike/agents/Taylor/research/capacity_curve_nav_20260804.md` **§10** ·
+**Hiện vật bổ sung:** `cap{1,5,10,20,30,50,75,100}b_real_liqpct0p04.log` (8 log) + `sens.py` +
+`sens_liqpct_raw.csv` + `cap50b_real.log.orig` (đối chứng regression).

@@ -5,7 +5,7 @@ metadata:
   node_type: memory
   type: project
   originSessionId: 840a1a19-944e-438b-a87c-1fa392ececcc
-  modified: [REDACTED]T16:40:04.443Z
+  modified: [REDACTED]03T16:40:04.443Z
 ---
 
 **Not the same bot as tbot** — see [[tbot-identity]]. Mike owns `WorkingClaude/mike/` (trading

@@ -260,17 +260,43 @@ class Executor:
         os.replace(tmp, self.state_file)
 
     def _journal(self, event, o=None, child_oid="", qty="", price="", note=""):
+        # `book`/`play_type` (P0 book-tagging, 2026-08-04): tag sổ TẠI THỜI ĐIỂM khớp, để
+        # dựng lại được vị thế theo book (PARK/LAG/CAPIT/...) mà không phải suy luận theo tên
+        # mã — suy-luận-theo-tên đã sai thật với VPB (nằm cả LAG lẫn PARK). Nguồn là
+        # PlannedOrder.book/.play_type đã có sẵn (plan.py:24-25), không đổi plan, không đụng
+        # đường đặt lệnh. Ghi ở đây (không ở chỗ gọi) ⇒ MỌI event được tag đồng nhất.
+        # ⚠️ Chèn TRƯỚC `note`: `note` là trường tự do có thể chứa dấu phẩy, giữ nó ở cột
+        # cuối là quy ước của file này; đồng thời chỉ số cột 0-8 giữ nguyên nên các reader
+        # positional hiện có (row[1] == event) không vỡ. Journal CŨ có 10 cột, journal MỚI
+        # có 12 ⇒ reader phải dùng csv.DictReader + row.get("book", ""), không đọc theo vị trí.
         new = not os.path.exists(self.journal_file)
+        # File ĐANG MỞ DỞ do bản code CŨ tạo (10 cột) — chỉ xảy ra khi executor khởi động lại
+        # giữa phiên ngay sau khi deploy thay đổi này. Ghi 12 giá trị dưới một header 10 cột sẽ
+        # làm cả file lệch cột (DictReader đọc `note` thành `book`) ⇒ giữ nguyên layout CŨ cho
+        # đúng file đó. Hệ quả: phiên đó không có tag ⇒ park_holdings coi là chưa xác định
+        # (UNVERIFIED) và L1 tự chặn — fail-safe, không phải im lặng sai.
+        legacy = False
+        if not new:
+            try:
+                with open(self.journal_file, newline="", encoding="utf-8") as rf:
+                    legacy = "book" not in (next(csv.reader(rf), []) or [])
+            except (OSError, StopIteration):
+                legacy = False
         with open(self.journal_file, "a", newline="", encoding="utf-8") as f:
             w = csv.writer(f)
             if new:
                 w.writerow(["ts", "event", "parent_id", "ticker", "side",
-                            "child_oid", "qty", "price", "filled_total", "note"])
+                            "child_oid", "qty", "price", "filled_total",
+                            "book", "play_type", "note"])
             ps = self.state["parents"].get(o.id) if o else None
-            w.writerow([now_ict().isoformat(timespec="seconds"), event,
-                        o.id if o else "", o.ticker if o else "",
-                        o.side if o else "", child_oid, qty, price,
-                        ps["filled"] if ps else "", note])
+            row = [now_ict().isoformat(timespec="seconds"), event,
+                   o.id if o else "", o.ticker if o else "",
+                   o.side if o else "", child_oid, qty, price,
+                   ps["filled"] if ps else ""]
+            if not legacy:
+                row += [(getattr(o, "book", "") or "") if o else "",
+                        (getattr(o, "play_type", "") or "") if o else ""]
+            w.writerow(row + [note])
 
     # ------------------------------------------------------------ pricing/sizing
 

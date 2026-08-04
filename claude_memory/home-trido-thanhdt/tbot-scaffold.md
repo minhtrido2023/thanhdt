@@ -5,10 +5,10 @@ metadata:
   node_type: memory
   type: project
   originSessionId: a784d880-5a9e-4603-b19e-20d46f573eff
-  modified: [REDACTED]T16:39:37.192Z
+  modified: [REDACTED]03T16:39:37.192Z
 ---
 
-Built [REDACTED]04 at minhtrido's request: multiple bots share `WorkingClaude/`, and there was no
+Built [REDACTED] at minhtrido's request: multiple bots share `WorkingClaude/`, and there was no
 dedicated, well-governed place for tbot's own KB/memory/code/HTML — everything was landing ad hoc
 (a DNSE dashboard project sitting loose at the repo root, a KB entry written into Mike's fleet
 folder instead of tbot's own).
