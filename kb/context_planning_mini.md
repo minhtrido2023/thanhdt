@@ -8,10 +8,19 @@
 ## V2.4 — chiến lược production (tóm tắt, không phải phương pháp)
 2 book: **BAL** (momentum SIGNAL_V11, yieldcombo 1/PE+1/PCF) + **LAG** (PEAD/earnings drift).
 Allocator `w_LAG` theo regime: {CRISIS 50 / BEAR 0 / NEUTRAL-BULL-EXBULL 65}, band ±10pp.
-**NEUTRAL parking = custom30V**, target **70%** phần idle cash khi BAL/LAG rỗng (đã backtest xác
-nhận thắng risk-adjusted so với 93.8-94.7% go-live gốc — Sharpe 1.78 vs 1.66, DD -16.5% vs -18.8%).
-Đổi target 70% cần field `risk_dial_confirmed_by_user` + `risk_dial_warning_acknowledged` trong
-`trading_rules.json`, thiếu 1 trong 2 → Mafee tự block plan.
+**NEUTRAL parking = custom30V**, target **80%** phần idle cash khi BAL/LAG rỗng (cấu hình **F1**,
+user chốt 2026-08-04, thay mức 70% cũ — `trading_rules.json` v2.3 `neutral_parking`). Số đúng phải
+trích (cùng 1 vintage `universe_pit`/`LAG_ADV_BASIS=price`, nguồn
+`agents/Taylor/research/park_wiring_two_options_20260804.md`): **70% = CAGR 28,86% / Sharpe 1,90 /
+MaxDD −17,8% / Calmar 1,62** · **80% (F1) = 29,85% / 1,87 / −18,3% / Calmar 1,63** (đỉnh Calmar cả
+dải) · 85% = 30,51% / 1,86 / −18,9% / 1,62. **KHÔNG trích bảng cũ** `measured_tradeoff_job_130720`
+(Sharpe 1,78 vs 1,66 / DD −16,5%) — vintage 07-03 khác cơ sở và không hề có mức 80%.
+Đổi target khỏi **80%** cần field `risk_dial_confirmed_by_user` + `risk_dial_warning_acknowledged`
+trong `trading_rules.json`, thiếu 1 trong 2 → Mafee tự block plan. Plan chạy đúng mặc định 80%
+thì **không cần** 2 field đó.
+⚠️ **Chưa đồng bộ với engine**: `golive_recommend_v23.py` vẫn publish `etf_park_frac=0,70` (đường
+MUA), nên hôm nay chính sách 0,80 mới chỉ áp cho đường BÁN (L1). Đừng đọc "80%" như là hệ đã chạy
+80% — xem `neutral_parking.pending_engine_consistency`.
 
 ## DT5G — market regime, ĐỌC ĐÚNG BẢNG (bẫy đã gây sự cố thật)
 Chỉ đọc **`tav2_bq.vnindex_5state_dt5g_live`** qua `get_gated_state()`. **KHÔNG đọc bare
@@ -171,3 +180,62 @@ nguồn xác nhận từ fill history thật + user đã duyệt (`_status: "APP
 lại theo tên mã hay theo "mã nào từng thấy trong rổ nào". Mã KHÔNG có trong snapshot (mua sau
 ngày snapshot) → dùng đúng `book`/`play_type` đã ghi trên order lúc đặt lệnh (đã có sẵn trong
 plan ngày đó), không đoán.
+
+## L1 park-trim — MỖI LẦN lập plan phải chạy `compute_park_trim.py` trước (thêm 2026-08-04, ĐÃ BẬT)
+
+> **TRẠNG THÁI: BẬT từ 2026-08-04.** Cả 3 điều kiện đã đủ: (a) quant-skeptic CONFIRMED cao
+> (2026-08-04T03:16Z), (b) Mike đọc lại diff `executor.py`, (c) target 0,80 đã được ghi nhận là
+> **mặc định mới** trong `trading_rules.json` v2.3 (job `Taylor_20260804_034133`).
+> ⚠️ **Script vẫn tự in dòng "CỔNG CHƯA MỞ"** vì nó so target 0,80 với `etf_park_frac=0,70` mà
+> engine `golive_recommend_v23.py` còn publish. Dòng đó nói về **đường MUA của engine chưa đồng bộ**
+> (`neutral_parking.pending_engine_consistency`), KHÔNG phải cổng chính sách — cổng chính sách đã
+> mở. Cứ chạy và đính `park_trim_proposal` như dưới, nhưng **chép nguyên dòng cảnh báo đó vào
+> `notes` của plan** để user thấy hệ đang ở trạng thái lai (mua tới 70%, chỉ trim khi vượt 80%).
+
+**Vấn đề nó vá** (`mike/agents/Taylor/research/park_unpark_live_wiring_20260803.md` §A5): engine mô
+phỏng có BA đường vào/ra sổ PARK, live chỉ có MỘT — và nó là đường MUA. Không có đường bán nào ⇒
+tỷ trọng PARK live trôi lên trên trần mà chính backtest của nó đã mô phỏng. Đo thật 08-03: SpaceX
+giữ PARK vượt trần **+189,4tr** trong khi cùng ngày plan ghi `HOLD ALL — chờ user nạp vốn` cho 2
+lệnh cần 171,1tr. Đây KHÔNG phải rule mới — là **live đang vi phạm một rule đã có**.
+
+**Quy trình bắt buộc mỗi lần lập plan (khi đã bật):**
+1. Chạy TRƯỚC khi viết `orders[]`, cho ĐÚNG account đang lập plan:
+   ```bash
+   python3 mike/bin/compute_park_trim.py --account <SpaceX|ZaloPay> \
+       --out data/trade_plans/park_trim_<account>_<plan_date>.json
+   ```
+2. `decision == "NO_TRIM"` → không làm gì thêm, KHÔNG thêm field nào vào plan.
+3. `decision == "TRIM"` → đưa nguyên `orders[]` của nó vào plan JSON dưới key riêng
+   **`park_trim_proposal`** (KHÔNG trộn vào `orders[]` của V2.4 — nguồn khác nhau, cơ chế duyệt phải
+   thấy được nó là đề xuất tuân-thủ-trần chứ không phải tín hiệu mua/bán của book BAL/LAG):
+   ```json
+   "park_trim_proposal": {
+     "source": "mike/bin/compute_park_trim.py",
+     "asof": "<asof>", "decision": "TRIM",
+     "target_park": 0.80, "park_mv_vnd": ..., "pool_vnd": ...,
+     "trim_total_vnd": ..., "trim_proposed_vnd": ..., "trim_shortfall_vnd": ...,
+     "risk_dial_override": "<id/ghi chú xác nhận của user — CHƯA CÓ thì để null và KHÔNG đề xuất>",
+     "orders": [ { "ticker": ..., "side": "sell", "qty": ..., "ref_price": ...,
+                   "book": "PARK", "play_type": "PARK_TRIM", "reason": "..." } ],
+     "blocked": [ ... ], "notes": [ ... ]
+   }
+   ```
+4. `decision` bắt đầu bằng `BLOCKED_` → **KHÔNG tự sửa, KHÔNG tự bỏ qua**: ghi nguyên `decision` +
+   `notes` vào plan dưới `park_trim_proposal` và báo lên bus. `BLOCKED_RECONCILE` nghĩa là sổ lô
+   lệch sổ broker — đó là việc phải có người xem, không phải lý do để im lặng.
+
+**Ranh giới CỨNG — không được nới trong bất kỳ plan nào:**
+- Lệnh trong `park_trim_proposal` **vẫn phải qua đúng cơ chế duyệt như mọi lệnh khác**: user duyệt
+  plan → Mafee plan-bound. Script CHỈ ĐỌC, tự nó không đặt gì.
+- **Không sửa `qty`/`ticker`** mà script đề xuất, cũng không thêm mã script đã bỏ qua. Pro-rata theo
+  trọng số + FIFO theo lô là ĐÚNG cơ chế engine đã backtest; bán sạch vài mã "cho gọn" = đổi cấu
+  trúc rổ = đi ra ngoài thứ đã đo (§B4 báo cáo gốc).
+- **Chỉ sleeve PARK.** CAPIT (stop_exempt/slot_exempt), LAG, BAL, DISCRETIONARY_SPECIAL và
+  `excluded_tickers` (DGC ở ZaloPay) KHÔNG BAO GIỜ nằm trong đề xuất này. Thấy chúng xuất hiện =
+  bug, dừng lại báo, đừng sửa tay cho qua.
+- Tiền thu từ trim là dry powder cho LAG/BAL — nhưng nó **không tạo quyền mua**: mọi lệnh mua vẫn
+  đi qua gate hiện có (DD, 8L rating≤3, `cap_lag_orders` %ADV, `filter_lag_rating_orders`).
+
+**L2 (JIT unpark — bán PARK để cấp vốn cho một lệnh mua cụ thể đang thiếu tiền) CHƯA làm.** Khi
+thiếu tiền cho lệnh LAG/BAL, giữ nguyên hành vi hiện tại (defer lệnh) — đừng tự chế đường bán PARK
+tại chỗ trong plan.
