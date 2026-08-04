@@ -93,14 +93,14 @@ fi
 
 mkdir -p "$ROOT/logs"
 ts="$(date -u +%Y%m%d_%H%M%S)"
-log="$ROOT/logs/verify_${ts}.log"
+log="$ROOT/logs/verify_${ts}_$$.log"
 
 run_and_record() {
   cd "$WORKDIR"
   "$CLAUDE" -p "$prompt" \
     --permission-mode auto \
     --allowedTools "Bash Read Grep Glob" \
-    --max-turns 30 \
+    --max-turns 50 \
     > "$log" 2>"$log.err" || true
 
   # extract the VERDICT_JSON block → verdict_json
