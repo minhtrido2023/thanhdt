@@ -83,8 +83,14 @@ DEFAULTS = {
     # when rvol_20d is missing/<=0. Independent of allocator/selection (touches only _limit_price buy).
     # Backtest (chase_cap_backtest.py, quant-skeptic CONFIRMED): fill 97.5→99.3%, +6.6bps common-case
     # entry cost, tail-catch trades +5.9% fwd20 / win 68%; NET ~0 on avg → INSURANCE, not return-enhancer.
-    # DEFAULT OFF; LIVE enable needs explicit user sign-off after paper-trading.
-    "chase_cap_vol_scale_enabled": False,  # DEFAULT OFF — paper only until user approves LIVE.
+    # LIVE since 2026-08-04 (user sign-off "phương án A"; quant-skeptic CONFIRMED high, job
+    # Taylor_20260804_124404). Paper gates 1-3 PASS on 80 real BUY orders / 13 executor sessions;
+    # gate 4 (real-fill vs min(open,L) proxy at 50B NAV) was RE-SCOPED, not passed — PaperBroker
+    # fills exactly at the placed price by construction, so paper can never yield real-fill data.
+    # ACCEPTED OPEN RISK: size-impact at 50B NAV untested; live NAV today (~0.97B/0.91B ≈ 1.9% of
+    # that target) is the same order of magnitude as the paper-tested regime. REOPEN gate 4 as NAV
+    # grows toward 50B, and re-verify the resolved flag before enabling any new live account.
+    "chase_cap_vol_scale_enabled": True,   # LIVE 2026-08-04 (was False = paper-only).
     "chase_cap_vol_k": 2.0,                # k in clamp(k*rvol_20d, static, ceil).
     "chase_cap_vol_ceil": 0.04,            # hard ceiling on the widened buy cap (never chase beyond +4%).
 

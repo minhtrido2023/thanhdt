@@ -221,9 +221,12 @@ print("D. NEGATIVE CONTROL (production untouched)")
 # the real gating lives in trading_bot.config, unpatched)
 from trading_bot.config import DEFAULTS, load_config, load_accounts, pick_accounts
 ok("D1 DEFAULTS flag present & False", DEFAULTS.get("dc_book_waterfall_enabled") is False)
-ok("D1 prior paper flags untouched (default False)",
-   DEFAULTS.get("extreme_regime_enabled") is False
-   and DEFAULTS.get("chase_cap_vol_scale_enabled") is False)
+ok("D1 extreme_regime still paper-only (default False)",
+   DEFAULTS.get("extreme_regime_enabled") is False)
+# chase_cap_vol_scale went LIVE 2026-08-04 (user sign-off + quant-skeptic CONFIRMED,
+# job Taylor_20260804_124404) — its global default is now True BY DESIGN, not a leak.
+ok("D1 chase_cap_vol_scale is LIVE (default True since 2026-08-04)",
+   DEFAULTS.get("chase_cap_vol_scale_enabled") is True)
 
 profiles = {p["label"]: p for p in load_accounts(load_config())}
 ok("D2 main resolves flag ON", profiles["main"]["cfg"].get("dc_book_waterfall_enabled") is True)
