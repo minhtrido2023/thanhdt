@@ -240,3 +240,22 @@ lệnh cần 171,1tr. Đây KHÔNG phải rule mới — là **live đang vi ph�
 **L2 (JIT unpark — bán PARK để cấp vốn cho một lệnh mua cụ thể đang thiếu tiền) CHƯA làm.** Khi
 thiếu tiền cho lệnh LAG/BAL, giữ nguyên hành vi hiện tại (defer lệnh) — đừng tự chế đường bán PARK
 tại chỗ trong plan.
+
+## "FLOOR_FAIL" KHÔNG phải gate cứng cho LAG — áp lăng kính ngành TRƯỚC khi skip (thêm 2026-08-04)
+Root cause (grep toàn bộ `.py` production: 0 kết quả cho `FLOOR_FAIL`) — đây KHÔNG phải field code
+sinh ra, mà là chữ DollarBill tự viết mỗi phiên để mô tả 1 mã trượt "golden floor" (ROE_Min3Y≥0 ∧
+CF_OA_3Y>0, một phần của hệ 8L). Vì không có code backing, 2 phiên dispatch khác nhau diễn giải khác
+nhau: `plan_SpaceX_2026-07-28.json` gặp EVF/PSI/VCI (chứng khoán) FLOOR_FAIL nhưng áp đúng lăng kính
+thay thế theo ngành (P/B<1,8 + ROE_TTM≥8% → CHEAP cho nhóm chứng khoán, giống Gordon P/B cho ngân
+hàng) rồi đưa vào lệnh; **cùng ngày, cùng 3 mã, `plan_ZaloPay_2026-07-28.json` chỉ ghi "FLOOR_FAIL —
+skip"** — coi nhãn thông tin như gate chặn cứng, bỏ qua bước phân tích ngành.
+
+**Quy tắc bắt buộc**: `FLOOR_FAIL`/golden-floor **KHÔNG** phải gate cứng cho LAG book — LAG chỉ có
+đúng 1 gate cứng là **8L rating≤3** (`lag_filter_low_rating()`, đã chạy sẵn ở nguồn). Một mã
+FLOOR_FAIL vẫn có thể rating≤3 và đủ điều kiện. Trước khi SKIP một mã LAG chỉ vì FLOOR_FAIL, PHẢI áp
+lăng kính thay thế theo ngành nếu áp dụng được (Gordon P/B ngân hàng, P/B+ROE chứng khoán, EV/EBITDA
+cảng-viễn thông, P/B trough vận tải biển — cùng khung đã dùng cho DCF NOT_COMPUTED) — chỉ SKIP thật
+khi lăng kính thay thế CŨNG không ủng hộ (định giá đắt) hoặc mã không thuộc ngành có lăng kính thay
+thế. Áp dụng NHẤT QUÁN cho CẢ 2 account — nếu 1 account áp lăng kính ngành cho 1 mã, account kia gặp
+đúng mã đó cùng ngày cũng phải áp, không tự ý khác nhau giữa 2 lần dispatch (cùng nguyên tắc đã chốt
+ở mục cash-discipline phía trên).
