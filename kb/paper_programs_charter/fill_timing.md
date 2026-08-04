@@ -15,13 +15,13 @@ Edge backtest (BUY 11:15 rẻ hơn open +17.6bps t=12.0; SELL tại open +11.8bp
 
 ## 📅 Nghiệm thu / mốc kết thúc
 
-Checkpoint ~cuối tháng 7 (cần ~3-4 tuần fill tích lũy)
+Checkpoint 2026-07-31 ĐÃ CHẠY 2026-08-04. Mốc mới: sau khi gỡ blocker netting + 1 phiên BUY-window nữa (ước ~1 tuần) → quant-skeptic → user quyết flip gate theo MECHANICS.
 
 ## ✅ Tiêu chí GO/NO-GO
 
 - ⏳ (pending) BUY window adherence cao (lệnh dồn 10:45-11:15)
-- ⏳ (pending) SELL window adherence cao (lệnh tại open 09:15-09:45)
-- ⏳ (pending) 0 rejects/fails (hoặc từng cái được giải thích)
+- ✅ (pass) SELL window adherence cao (lệnh tại open 09:15-09:45)
+- ✅ (pass) 0 rejects/fails (hoặc từng cái được giải thích)
 - ⏳ (pending) BUY fill không tệ hơn open đáng kể; SELL không thấp hơn open đáng kể
 - ⏳ (pending) quant-skeptic → user sign-off mới flip fill_timing_live_gate
 
