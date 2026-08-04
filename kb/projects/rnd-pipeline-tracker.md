@@ -21,18 +21,28 @@ Chi tiết đầy đủ từng mục: bus finding của Taylor + `kb/incidents/i
   exclude ở bất kỳ giai đoạn nào** — 85% mã bị cờ không sập (§3.5 research file), chỉ là dòng bằng
   chứng WATCH cho người duyệt plan cân nhắc. Research đầy đủ:
   `mike/agents/Taylor/research/insider_transaction_scoping_20260729.md`.
-- **EXTREME-regime gate** (paper `main` only, từ 07-01): stress PASS 24/24, target checkpoint
-  ~2026-07-28 **ĐÃ QUA, CHƯA XÁC NHẬN trạng thái** (không tìm thấy sign-off/close nào — cần dispatch
-  Taylor kiểm tra lại, không tự đoán). Điều kiện LIVE (chưa đổi): 0 false-trigger ~4 tuần benign +
-  không can thiệp NORMAL-path + user sign-off. ⚠️ audit `Winston_20260712_142100` (M5, xem
-  `kb/incidents/index.md`) từng nêu `executor.py` đọc `ticker_prune.parquet` monolith đông cứng từ 06-26
-  khiến rvol/prior_close trial này tính trên giá cũ 2+ tuần — bug monolith đã **FIXED 07-13**
-  (Winston_20260713_143546), câu hỏi mở CHỈ còn là evidence giai đoạn 06-26→07-13 có giá trị
-  không, cần Taylor xác nhận cùng lúc. KHÔNG bật ở live cho tới khi có xác nhận.
-- **Vol-scale buy chase-cap patch#3** (paper `main` only, từ 07-01, k=2.0/ceil=0.04): stress PASS
-  15/15, target checkpoint ~2026-07-14 **ĐÃ QUA HƠN 2 TUẦN, CHƯA XÁC NHẬN**. Điều kiện LIVE (chưa
-  đổi): paper sạch, không đụng NORMAL-path ngày non-gap, skeptic rerun REAL-fill, user sign-off.
-  Cùng câu hỏi M5 (evidence 06-26→07-13) áp dụng. KHÔNG bật ở live cho tới khi có xác nhận.
+- **EXTREME-regime gate** (paper `main` only, từ 07-01): checkpoint 07-28 kiểm lại 2026-08-04
+  (job `Taylor_20260804_124404`) — **CHƯA đủ điều kiện chuyển bước**. Evidence 15/20 phiên (đếm
+  bằng hàm production thật), nhưng **0/15 marker EXTREME từng bắn** — gate chưa từng bị thử thách
+  thật. Ước đủ 20 phiên ~2026-08-11 (evidence chạy lại từ 08-05 sau khi gỡ bug netting probe
+  07-28→08-04). Câu hỏi M5 (giá đông cứng 06-26→07-13) **giải xong**: chỉ chạm nhánh trigger (ii)
+  3-sigma (3 phiên 07-07/10/13), trigger (i) không bị ảnh hưởng vì đọc quote sống; đếm bảo thủ
+  trigger (i) 15/20, trigger (ii) 12/20. User quan sát "hiệu quả cho case PNJ" **KHÔNG xác nhận
+  được** — PNJ chưa từng nằm trong phạm vi thử nghiệm (0 dòng/0 marker); hệ thống không mua PNJ
+  nhờ vòng chọn mã lọc bỏ, không nhờ gate này — case 07-13 còn lộ ra gate **thất bại** (khớp lệnh
+  trước khi kịp chặn), giá trị thật của case là phơi ra lỗ hổng đã vá (`_floor_guard_buy`). Bắt
+  thêm 2 lỗi khai báo marker trong registry (tên không tồn tại + thiếu marker bản vá), đã sửa.
+  KHÔNG bật live cho tới khi đủ 20 phiên + có marker EXTREME thật đã qua thử thách.
+- **Vol-scale buy chase-cap patch#3 — ĐÃ LIVE từ 2026-08-04** (`chase_cap_vol_scale_enabled=True`,
+  k=2.0/ceil=0.04, commit `d4f667b` + mike `1396db13`, job `Taylor_20260804_124404`). Checkpoint
+  07-28 kiểm lại: gate 1-3 PASS (80 lệnh BUY thật/13 phiên), gate 4 (real-fill vs proxy @50B)
+  **RE-SCOPED chứ không PASS** — PaperBroker khớp đúng giá đặt nên không bao giờ sinh được bằng
+  chứng fill thật; user chọn phương án A (chấp nhận rủi ro size-impact @50B chưa kiểm, NAV live
+  hiện ~1,9% mức đó nên cùng bậc với paper đã test) — quant-skeptic CONFIRMED cao trước khi flip.
+  Taylor chuẩn bị patch sẵn nhưng bị auto-mode classifier chặn khi tự áp ở phiên headless (đúng
+  thiết kế); Mike áp trong phiên tương tác, 3 self-check chạy lại THẬT (không mô phỏng) đều PASS,
+  commit ban đầu cũng bị classifier chặn — user cấp quyền tường minh mới qua được.
+  **Mốc mở lại gate 4**: NAV live tiến gần 50 tỷ (theo dõi: gross lệnh/phiên vượt ~343tr).
 - **Sector sweep #10+**: chờ Mike dispatch.
 - **Fill-timing khung giờ** (BUY 11:15 / SELL open): edge thật đo được (+17.6bps BUY t=12.0,
   +11.8bps SELL), KHÔNG flip `fill_timing_live_gate` — cần ≥5 phiên paper có BUY fill trong cửa sổ
@@ -57,7 +67,9 @@ Chi tiết đầy đủ từng mục: bus finding của Taylor + `kb/incidents/i
   (3) cap gộp 0.15/tên (chống trùng DC↔custom30V); (4) liquidity floor 3B thay hard-exclude DHG.
   4 góc khác đã kiểm tra kỹ, không còn dư địa cải thiện — không cần backtest thêm cho chúng.
 
-## Checkpoint quá hạn chưa xác nhận (cần dispatch Taylor, đừng tự đoán trạng thái)
-- EXTREME-regime gate: checkpoint 2026-07-28 đã qua.
-- Vol-scale chase-cap patch#3: checkpoint 2026-07-14 đã qua hơn 2 tuần.
-- Fill-timing: checkpoint cuối 07 đã tới.
+## Checkpoint quá hạn — cập nhật 2026-08-04
+- EXTREME-regime gate: kiểm lại 08-04, 15/20 phiên, 0 marker bắn — CHƯA đủ điều kiện, ước đủ mẫu ~08-11.
+- Vol-scale chase-cap patch#3: **ĐÃ LIVE 2026-08-04** (xem mục ở trên) — đóng, không còn treo.
+- Fill-timing: 2/5 gate PASS (job Taylor_20260804_091703), vẫn bị chặn cấu trúc gate 4 (paper
+  không sinh được fill thật). Bug netting giết bằng chứng cả 3 chương trình từ 07-28 đã fix
+  (job Taylor_20260804_094514), evidence tích luỹ lại từ 08-05.
