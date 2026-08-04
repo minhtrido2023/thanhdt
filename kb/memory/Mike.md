@@ -30,3 +30,4 @@
 - funding_required residual risk; PNJ TTL anomaly_flags (~08-23 review);
   coding_guidelines.md ~39KB gần ngưỡng 40KB.
 
+- [2026-08-04T09:34:02Z] PENDING DECISION user: 2 câu hỏi từ Taylor (job 091700/091703, bus question vol-scale-chase-cap-gate4-can-user-quyet-huong) — (1) netting production (commit ab20a77, 07-27) đang giết evidence paper của CẢ vol_scale_chase_cap lẫn fill_timing từ 07-28 (0 lệnh BUY probe chạm executor); Taylor đề xuất sửa paper_main_probe_plan.py để basket mua≠bán hoặc miễn netting cho account paper. (2) vol_scale_chase_cap gate 4 (real-fill vs proxy) KHÔNG BAO GIỜ đóng được bằng paper (PaperBroker luôn khớp đúng giá limit) — 3 lựa chọn A(re-scope+đóng, Taylor đề xuất)/B(live pilot nhỏ ZaloPay)/C(park). Chưa bật live gì, production không đổi.
