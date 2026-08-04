@@ -116,3 +116,37 @@ Căn cứ: Thông tư 96/2020/TT-BTC — BCTC quý công bố trong **20 ngày**
 - `kb/projects/lag-edge-health-staleness.md`, `kb/projects/lag-0724-ivs-tmg-trc.md`
 - `mike/agents/Taylor/research/lag_quality_gate_20260803.md` (báo cáo mở ra việc này)
 - `data/results_registry.md` mục **2026-08-03 RE-PIN R3 … LAG_ADV_BASIS=price**
+
+---
+
+## 2026-08-04 — Câu hỏi LÂN CẬN đã đóng: "nâng 2 tỷ/phiên thành GATE CỨNG?" → NO-GO (vì lợi nhuận)
+
+**Job `Taylor_20260804_080547`, quant-skeptic CONFIRMED cao** (`mike/logs/verify_20260804_083418.log`
+— skeptic tự chạy lại `dsr_pbo_advgate.py`, tự tính lại sign test + LOO drop-3 + ADV median).
+Báo cáo: `mike/agents/Taylor/research/lag_hard_adv_gate_2ty_20260804.md`.
+
+**Vì sao ghi vào ĐÚNG file này dù dispatch nói "câu hỏi KHÁC":** đúng, câu hỏi xuất phát khác
+(ngưỡng ĐỘ LỚN 2 tỷ vs gate nhị phân ADV≤0 của dự án này) — **nhưng kết quả cho thấy hai câu hỏi hội
+tụ về CÙNG một cơ chế**, nên mọi con số của nó bị chặn bởi đúng 2 mốc cứng của dự án này.
+
+**Cơ chế (đây là phần đáng nhớ, không phải con số):** tập `ADV < 2 tỷ` là **tập cha** của tập
+`ADV ≤ 0`. Vì thế một gate độ lớn 2 tỷ **tự động bao trọn** hiệu ứng `LIQ_ZERO_BLOCK` đã đo. Muốn
+biết ngưỡng 2 tỷ có nội dung riêng hay không thì **phải đo phần GIA TĂNG trên nền L1**, không được
+so thẳng với pin R3 — so thẳng sẽ đọc ra "+3,58pp" và tưởng là edge mới.
+- L1 (chặn ADV≤0) = 32,71% · **L1 + gate 2 tỷ = 32,45%** ⇒ phần gia tăng **−0,26pp CAGR, −0,02
+  Sharpe, −0,92pp OOS**; chỉ được MaxDD −19,1→−18,2% và Calmar 1,71→1,78.
+- Thang liều **phẳng**: 0→0,5 tỷ ăn 98% hiệu ứng, 0,5→5 tỷ biên độ 0,21pp (5 tỷ *thấp hơn* 2 tỷ).
+- Δ vs pin **đổi dấu (−1,24pp)** khi bỏ đồng thời 2017+2020+2021; thắng 6/13 năm (p=0,709);
+  **PBO = 0,916** (CSCV S=16, 0/16 khối suy biến) ⇒ không ngưỡng nào trong họ được chọn theo IS.
+
+**Hiện vật vận hành đáng giữ (dùng được cho câu hỏi MỨC của dự án này):** ở chân control, nhóm ứng
+viên có ADV<2 tỷ hút **28% tổng vốn triển khai LAG** (4.539B/16.099B) để sinh **1,682%/chu kỳ** (vs
+4,234% nhóm còn lại) và **bỏ dở 68,1%**. Cắt nhóm đó làm mất **60,8% ứng viên** và 436 vị thế nhưng
+**chỉ −47 deal HOÀN TẤT (−4,5%)** — vì 89,2% phần bị cắt vốn đã không fill nổi.
+
+**Lập luận CÒN SỐNG (chưa quyết, không dựa vào CAGR):** nếu user muốn gate này thì chọn nó như
+**luật khả-thi-thi-hành** (đừng đặt mục tiêu vào mã không mua nổi — cùng tinh thần
+`lag_filter_illiquid`), và ngưỡng phải neo vào **năng lực fill THẬT**: ở NAV 50B, w_LAG≈65%, một vị
+thế `LAG_HI` ≈3,25B, fill trong `max_fill_days=5` ở mức live đã xác nhận 3,86%ADV/phiên ⇒ cần
+**ADV ≳ ~17 tỷ/phiên**. Tức **2 tỷ vẫn lỏng hơn ~8 lần** so với yêu cầu vận hành — chọn 2 tỷ vì nó
+là ngưỡng đã dùng ở rổ CAPIT, KHÔNG phải vì backtest.
