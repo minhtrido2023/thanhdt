@@ -1692,3 +1692,23 @@
 - [2026-08-04T17:34:03Z] Mike/heartbeat — Mike_20260804_173001: {"status": "still_running", "elapsed_min": 4, "job_id": "Mike_20260804_173001", "source": "watcher"}
 - [2026-08-04T17:35:03Z] Mike/heartbeat — Mike_20260804_173001: {"status": "still_running", "elapsed_min": 5, "job_id": "Mike_20260804_173001", "source": "watcher"}
 - [2026-08-04T17:35:24Z] Mike/finding — retro-2026-08-04-draft-hoan-thanh: {"file": "state/retro_draft_2026-08-04.md", "so_su_co": 2, "so_pattern": 2, "tom_tat": "2 sự cố đã ghi trước (crontab wipe near-miss, paper-main netting silent-8-days) đều VERIFY khớp bằng chứng bus/artifact. LEVER_PACKAGE_UNAUTHORIZED x3 + dd-redflag-fill x51 = selfcheck noise Taylor (khong phai su co that, giong ket luan retro 08-03). Pattern MOI quan trong nhat: mot ban sua monitoring de dap false-positive (paper_main_early_check.sh, 08-03) tu no tro thanh nguon loi im lang moi cho case khac (paper main netting) - de xuat prevention: checklist kiem tra TOAN BO doi tuong monitor khi sua 1 false-positive. Wakeup compliance MIKE.md par8 VE 0% (19/19), dong han dieu kien escalate dat ra tu retro 08-03. dt5g-live-writer-la TAI XUAT ngay thu 2 lien tiep cung khung gio (~16:21-16:26 ICT), khong khop cron nao tren host - uu tien dieu tra ngay mai. Khong escalate moi (khong pattern nao thoa dieu kien buoc 6)."}
+
+## Consolidation 2026-08-04T17:40:30Z
+- [2026-08-04T17:36:34Z] Wags/heartbeat — Wags_20260804_173533: {"status": "still_running", "elapsed_min": 1, "job_id": "Wags_20260804_173533", "source": "watcher"}
+- [2026-08-04T17:36:44Z] Wags/heartbeat — Wags_20260804_173533: {"status": "in_progress", "note": "da doi chieu bus sweep 08-04 xong, phat hien sai lech so lieu; dang xac minh commit hash + job_id"}
+- [2026-08-04T17:37:35Z] Wags/heartbeat — Wags_20260804_173533: {"status": "still_running", "elapsed_min": 2, "job_id": "Wags_20260804_173533", "source": "watcher"}
+- [2026-08-04T17:38:36Z] Wags/heartbeat — Wags_20260804_173533: {"status": "still_running", "elapsed_min": 3, "job_id": "Wags_20260804_173533", "source": "watcher"}
+- [2026-08-04T17:39:33Z] Wags/heartbeat — Wags_20260804_173533: {"status": "in_progress", "note": "da xac minh commit hash + job_id + crontab claim, deu khop; dang soan bao cao GAPS FOUND ve so lieu bus sweep sai"}
+- [2026-08-04T17:39:36Z] Wags/heartbeat — Wags_20260804_173533: {"status": "still_running", "elapsed_min": 4, "job_id": "Wags_20260804_173533", "source": "watcher"}
+- [2026-08-04T17:40:13Z] Wags/finding — verify-retro-draft-2026-08-04-GAPS-FOUND: {
+  "verdict": "GAPS_FOUND",
+  "method": "grep bus/inbox/*.jsonl ts=2026-08-04 doc lap tu dau (khong tin so lieu draft), doi chieu git show + jobs.sh status cho moi commit/job_id trich dan, doc lai cot Nguon goc",
+  "gaps": [
+    {
+      "gap": "bus-sweep-so-lieu-sai",
+      "detail": "Draft dong 18-20 ghi finding=83 (81 unique topic), verification=15, decision=5, heartbeat=630. Tu grep lai (cung dieu kien ts 2026-08-04, field topic dung): finding=82, verification=14, decision=3, heartbeat=634. Lech lon nhat: unique-topic 81 vs THAT LA 32 (sai gan 2.5x). decision 5 vs that la 3 (chi co DollarBill x2 + Taylor x1 08-04, khong tim thay 2 decision con lai duoi bat ky format ts nao khac).",
+      "impact": "Khong phat hien sau khi rieng-liet-ke 32 topic that: khong co su co production nao bi bo sot (dung ket luan cua draft), nhung con so 81 topic la sai du kien dung de cung co luan diem do — nen sua lai truoc khi finalize."
+    },
+    {
+      "gap": "viec-treo-2-danh-gia-thap-hon-thuc-te",
+      "detail": "Draft muc Viec
