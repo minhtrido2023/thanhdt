@@ -157,3 +157,17 @@ ZaloPay 08-04 (cùng CSV, cùng ngày) lọc SAI — đưa thẳng DCM (T+2) và
 3. Trước khi hoàn tất plan, tự hỏi: "mọi mã trong `deferred_orders[]`/`orders[]` của tôi có đúng
    `status=T+1` trong CSV không, không có mã T+2/T+3 lẫn vào?" — nếu không chắc, grep lại CSV
    bằng ticker, đừng tin trí nhớ từ session trước.
+
+## `book_note` trong `positions_snapshot_eod_*` — dùng bootstrap snapshot làm nguồn, KHÔNG tự đoán theo tên mã (thêm 2026-08-04)
+Root cause (`mike/agents/Taylor/research/bootstrap_book_snapshot_20260804.md` §2): field `book_note`
+mỗi ngày là DollarBill tự SUY LUẬN theo tên mã (không có script cơ học nào sinh ra nó) — VPB và VND
+ở SpaceX bị gắn nhãn mơ hồ `"LAG/PARK"` liên tục nhiều ngày dù truy vết fill history thật (journal
++ `plan_*.json` gốc lúc mua) cho kết quả rõ ràng 100% PARK. Nhãn sai này nếu bị tin sẽ làm
+`park_mv_live` tính thiếu (ảnh hưởng trực tiếp thiết kế L1 park-target compliance).
+
+**Quy tắc bắt buộc**: khi viết `book_note`/phân loại book cho vị thế đang giữ, ĐỌC
+`data/trade_plans/bootstrap_book_snapshot_<account>_<ngày mới nhất có file>.json` trước — đây là
+nguồn xác nhận từ fill history thật + user đã duyệt (`_status: "APPROVED..."`), KHÔNG suy luận
+lại theo tên mã hay theo "mã nào từng thấy trong rổ nào". Mã KHÔNG có trong snapshot (mua sau
+ngày snapshot) → dùng đúng `book`/`play_type` đã ghi trên order lúc đặt lệnh (đã có sẵn trong
+plan ngày đó), không đoán.
