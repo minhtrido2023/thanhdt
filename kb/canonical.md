@@ -22,11 +22,22 @@
   07-29, có look-ahead cơ sở giá rổ); 27.16%/1.81/−18.1%/1.50 (pin 07-22, đã mất, không tái lập
   được); 27.84%/1.84/−18.2%/1.53 (pin 07-12, `ticker_prune`).
   ⚠️ **MIXED-universe khi trích dẫn**: `universe_pit` cho cổng quyết định, `ticker_prune` vẫn cho
-  CAPIT pool/maturity. Lỗi fidelity `liq<=0` vẫn MỞ ⇒ **anchor DD ~−30%** (KHÔNG phải −17,8%);
-  khoảng **[~27,2%; ~31,3%] đã HẾT HIỆU LỰC** từ 08-03 và **chưa có khoảng thay thế** — đọc 28,86%
-  như một CẬN DƯỚI, đừng tự gắn cận trên. Việc phân rã (+4,11pp của `lag_filter_illiquid()`,
-  quant-skeptic INCONCLUSIVE 3 lần) nay đã có sổ theo dõi + **mốc cứng 2026-12-15 / 2027-03-31**:
-  `kb/projects/lag-adv-filter-tracking.md`. Trước mốc đó **không trích +4,11pp như edge**.
+  CAPIT pool/maturity. Lỗi fidelity `liq<=0` — **cơ chế nay đã tách được (T1-T5, job
+  `Taylor_20260803_021414`/`_045138`, quant-skeptic CONFIRMED cao)**: giả thuyết "hiện vật sức
+  chứa" BỊ BÁC BỎ hai lần bằng hai knob trực giao (`%ADV/ngày` và NAV), cả hai lần bằng SAI DẤU
+  đạo hàm — không phải "chưa loại trừ được". Nhưng **MỨC thì KHÔNG tách được**: cả hai chân đứng
+  trên 1 tham số mô hình fill (trần 20% ADV/phiên) mà 90-96% số phiên-fill sống Ở TRẦN đó, trong
+  khi fill THẬT (DNSE) mới chỉ xác nhận tới ~3,86% ADV/phiên — 2 thiên lệch NGƯỢC CHIỀU cùng bậc
+  độ lớn (+4,08pp do sửa đúng nhóm mã không mua được vs. −4,0..4,5pp do giả định fill quá lỏng)
+  gần **triệt tiêu nhau**. ⇒ **28,86% ĐỌC LÀ ƯỚC LƯỢNG ĐIỂM có điều kiện vào 1 tham số chưa neo**,
+  KHÔNG PHẢI cận dưới, không phải cận trên (đổi nhãn 2026-08-03, thay khoảng `[~27,2%;~31,3%]`
+  đã hết hiệu lực) — **không trích +3,85pp/+4,08pp/+4,11pp như edge đã kiểm chứng** ở bất kỳ
+  chiều nào. Follow-up 08-04 (gate động theo executability thật) củng cố thêm: giải quyết được
+  vấn đề cơ học (vị thế kẹt 35%→0%) nhưng KHÔNG cho lợi nhuận bền (đổi dấu khi bỏ 2020-2021,
+  PBO cao) — cùng chữ ký reshuffle-luck. Đóng hẳn câu hỏi CHỈ bằng tích luỹ fill thật, không
+  bằng backtest thêm — sổ theo dõi + **mốc cứng 2026-12-15 / 2027-03-31**:
+  `kb/projects/lag-adv-filter-tracking.md`, chi tiết cơ chế: `agents/Taylor/research/
+  lag_fidelity_decomp_20260803/T5_DECISION.md`.
 - Bootstrap 5th-pct: CAGR 18.6%, DD −28.6% (anchor DD ~−29%, KHÔNG phải −18%).
 - **NEUTRAL parking custom30V = phần tin cậy nhất: +7.4pp Full.** (30 mã, cap 0.10)
 - Bull parking: NAV ≥150B. **(30, 0.15) = OVERFIT**, walk-forward bác.
