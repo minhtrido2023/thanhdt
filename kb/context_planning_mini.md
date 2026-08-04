@@ -18,9 +18,10 @@ dải) · 85% = 30,51% / 1,86 / −18,9% / 1,62. **KHÔNG trích bảng cũ** `m
 Đổi target khỏi **80%** cần field `risk_dial_confirmed_by_user` + `risk_dial_warning_acknowledged`
 trong `trading_rules.json`, thiếu 1 trong 2 → Mafee tự block plan. Plan chạy đúng mặc định 80%
 thì **không cần** 2 field đó.
-⚠️ **Chưa đồng bộ với engine**: `golive_recommend_v23.py` vẫn publish `etf_park_frac=0,70` (đường
-MUA), nên hôm nay chính sách 0,80 mới chỉ áp cho đường BÁN (L1). Đừng đọc "80%" như là hệ đã chạy
-80% — xem `neutral_parking.pending_engine_consistency`.
+✅ **Đồng bộ engine xong 2026-08-04T11:34 ICT**: `golive_recommend_v23.py:96 ETF_PARK` đổi
+`{3:0.7}`→`{3:0.8}` (user xác nhận qua Mike) — đường MUA và đường BÁN (L1) giờ cùng nhắm 0,80.
+Còn nợ xác minh: lần chạy live kế tiếp (09:05 ICT) phải in ra `etf_park_frac=0.8` trong
+`golive_v23_status.json` — kiểm tra thật, đừng suy từ việc đã đổi dòng code.
 
 ## DT5G — market regime, ĐỌC ĐÚNG BẢNG (bẫy đã gây sự cố thật)
 Chỉ đọc **`tav2_bq.vnindex_5state_dt5g_live`** qua `get_gated_state()`. **KHÔNG đọc bare
