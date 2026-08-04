@@ -156,8 +156,8 @@
         },
         {
           "text": "User sign-off trước khi bật live",
-          "status": "pending",
-          "note": "2026-08-04: user ĐÃ sign-off hướng đi (phương án A, go-live). Bước bắt buộc còn lại trước khi chạm cờ live = quant-skeptic verify quyết định re-scope gate 4 + đề xuất flip live (job Taylor_20260804_124404). CONFIRMED → flip; REFUTED/INCONCLUSIVE → dừng, không flip."
+          "status": "pass",
+          "note": "2026-08-04 (job Taylor_20260804_124404): user John sign-off phương án A cho go-live ('Vol-scale vì là bước bảo hiểm rẻ tiền, tôi đồng ý chọn A cho go-live'). quant-skeptic verify quyết định re-scope gate 4 + đề xuất flip live: **CONFIRMED / confidence high** (log mike/logs/verify_20260804_124744.log) — independent recompute khớp: base-rate gap-up 10/642=1,5576%, NAV live SpaceX/ZaloPay ~1,8-1,9% NAV target 50B, 5 script chạy lại ALL-PASS, và skeptic tự xác minh trong brokers.py::_try_fill rằng PaperBroker khớp đúng giá đặt (⇒ gate 4 đúng là RE-SCOPE, không phải PASS). 3 recommended_reruns đã ghi nhận: (i) mở lại gate 4 khi NAV live tiến gần 50B / gross lệnh vượt ~343tr/phiên, (ii) verify lại cờ hiệu lực của account RocketX (enabled=false) TRƯỚC khi cho nó giao dịch, (iii) xử lý netting nội bộ probe harness."
         }
       ],
       "probe": {
@@ -171,7 +171,7 @@
         "stress_vol_scale_chase_cap.py"
       ],
       "notes": "Cap-widen KHÔNG có marker riêng trong journal (áp silent trong _buy_chase_pct) — đo qua stress script + so limit price ngày gap-up; cần phiên executor paper + ngày gap mới có evidence tự động. Từ 2026-07-07: probe harness chạy paper main mỗi ngày (6 BUY/phiên trên quote thật — xem entry extreme_regime cho cron). | 2026-08-04 (job Taylor_20260804_091700): kiểm checkpoint bằng dữ liệu thật — báo cáo mike/agents/Taylor/research/vol_scale_chase_cap_checkpoint_20260804.md. Từ 2026-07-28 probe harness netting nội bộ (INTERNAL_ONLY/NETTED) nên 0 lệnh BUY tới executor → luồng evidence dừng. | 2026-08-04 (job Taylor_20260804_124404): user chốt phương án A → gate 4 re-scoped, chương trình paper ĐÓNG (luồng evidence paper main đã chết từ 07-28 do netting nội bộ, và kể cả sống lại cũng không đóng được gate 4). Bước kế: quant-skeptic verify rồi mới flip chase_cap_vol_scale_enabled ở live.",
-      "review_short": "2026-08-04 (job Taylor_20260804_124404): user chốt PHƯƠNG ÁN A — gate 4 RE-SCOPED (paper không thể sinh fill thật; rủi ro size-impact @50B chấp nhận treo, NAV live hiện ~1,9% mức đó). Gate 1-3 PASS trên 80 lệnh BUY thật/13 phiên. CÒN LẠI: quant-skeptic verify (gate 5) NGAY, CONFIRMED mới được flip cờ live.",
+      "review_short": "2026-08-04 (job Taylor_20260804_124404): ĐỦ ĐIỀU KIỆN GO-LIVE — user sign-off phương án A + quant-skeptic CONFIRMED high. Gate 4 RE-SCOPED (paper không sinh được fill thật), rủi ro size-impact @50B chấp nhận treo (NAV live ~1,9% mức đó). ⚠️ CỜ LIVE CHƯA ĐƯỢC BẬT: thao tác sửa trading_bot/config.py bị auto-mode classifier chặn trong phiên headless (đúng thiết kế). Patch 4 file đã dựng sẵn + verify PASS dưới flip mô phỏng: mike/agents/Taylor/pending_live_flip_chase_cap_20260804/ — cần 1 phiên interactive `git apply`.",
       "today_activity": {
         "mode": "journal",
         "account": "main"
