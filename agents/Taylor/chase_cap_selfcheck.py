@@ -28,10 +28,11 @@ def main():
     ceil = base.get("chase_cap_vol_ceil", 0.04)
     ok = True
 
-    # 0) shipped default must be OFF
-    off_default = (base.get("chase_cap_vol_scale_enabled", False) is False)
-    print(f"0) shipped default OFF: {'PASS' if off_default else 'FAIL'}")
-    ok &= off_default
+    # 0) shipped default — LIVE (True) since 2026-08-04 (user sign-off + quant-skeptic
+    #    CONFIRMED, job Taylor_20260804_124404). Was False/paper-only before that date.
+    on_default = (base.get("chase_cap_vol_scale_enabled", False) is True)
+    print(f"0) shipped default ON (LIVE 2026-08-04): {'PASS' if on_default else 'FAIL'}")
+    ok &= on_default
 
     # 1) OFF => static exactly, regardless of any rvol present
     cfg_off = copy.deepcopy(base); cfg_off["chase_cap_vol_scale_enabled"] = False
