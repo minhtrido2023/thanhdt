@@ -144,29 +144,24 @@ thật 2026-07-23: DollarBill lập plan SpaceX 07-24 với 6 lệnh tổng 177,
 tại. Nếu user báo có nạp tiền mới (không phải Trứng vàng, có thể là chuyển khoản khác) → đó là
 fact mới, hỏi rõ nguồn trước khi đưa vào plan như đã xác nhận.
 
-## LAG entry window — CHỈ T+1 vào plan hôm nay, T+2/T+3 để dành cho `lag_upcoming_for_next_plans` (thêm 2026-08-03)
-`golive_v23_recommendations_*.csv` (nguồn CHUNG cho cả 2 account) gắn `status` đúng theo từng mã:
-`UPCOMING T+1 phiên tới` / `T+2` / `T+3`. **KHÔNG có script nào tự sinh `window_analysis`/
-`orders`/`deferred_orders` từ CSV này** — mỗi plan JSON là do DollarBill tự đọc CSV và viết tay
-mỗi lần dispatch, nên window filter là judgment call thủ công, không phải phép tính cơ học sẵn có.
-Đây chính là chỗ đã ra sai lệch: plan SpaceX 08-04 lọc ĐÚNG (chỉ đưa T+1 vào `deferred_orders`
-của hôm nay, T+2/T+3 xếp riêng vào `lag_upcoming_for_next_plans` chờ đúng ngày mở), còn plan
-ZaloPay 08-04 (cùng CSV, cùng ngày) lọc SAI — đưa thẳng DCM (T+2) và DRI/POW (T+3) vào
-`deferred_orders` của hôm nay như thể đã tới hạn, ĐỒNG THỜI bỏ sót hẳn APF (T+1, đủ điều kiện
-đúng hôm nay, DD sạch y hệt TV2) — không xuất hiện ở đâu trong plan, và không đánh giá MAC/TV3.
-0 lệnh đặt thật (orders=0 cả 2 plan) nên không có sự cố live, nhưng bug data-accuracy.
+## LAG entry window — CHẠY SCRIPT, KHÔNG tự lọc bằng mắt (thêm 2026-08-03, chuyển sang code 2026-08-04)
+Root cause cũ (sự cố 08-03/08-04): lọc `status` T+1 vs T+2/T+3 trong `golive_v23_recommendations_
+*.csv` từng là judgment call thủ công mỗi lần dispatch — 1 phiên lọc đúng, phiên kia lẫn T+2/T+3
+vào như đã tới hạn + bỏ sót ứng viên T+1 thật. Đã chuyển thành quyết định CƠ HỌC.
 
-**Quy tắc bắt buộc mỗi lần lập plan T+1 (áp dụng CẢ 2 account, nhất quán):**
-1. Liệt kê TOÀN BỘ mã LAG_HI/LAG_LO có `status` chứa `T+1` trong CSV signal_date hôm nay — đây là
-   danh sách ứng viên duy nhất được xét vào `orders[]`/`deferred_orders[]` của plan hôm nay. Đối
-   chiếu số lượng T+1 candidate giữa 2 account phải BẰNG NHAU (cùng CSV nguồn) trước khi viết plan
-   — nếu khác nhau, đó là dấu hiệu bỏ sót, dừng lại kiểm tra lại.
-2. Mã `status` chứa `T+2`/`T+3` → CHỈ được đưa vào `lag_upcoming_for_next_plans` (ghi rõ
-   `entry_date` = ngày mở cửa sổ thật), KHÔNG được vào `orders[]`/`deferred_orders[]` của plan
-   hôm nay dù DD sạch đến đâu — cửa sổ entry chưa mở.
-3. Trước khi hoàn tất plan, tự hỏi: "mọi mã trong `deferred_orders[]`/`orders[]` của tôi có đúng
-   `status=T+1` trong CSV không, không có mã T+2/T+3 lẫn vào?" — nếu không chắc, grep lại CSV
-   bằng ticker, đừng tin trí nhớ từ session trước.
+**Quy trình bắt buộc mỗi lần lập plan** (43/43 selfcheck PASS, `mike/agents/Taylor/research/
+deterministic_plan_decisions_20260804.md`):
+```bash
+python3 mike/bin/filter_lag_entry_window.py --account <SpaceX|ZaloPay> --json
+```
+- Output liệt kê đúng danh sách T+1 (đưa vào `orders[]`/`deferred_orders[]` hôm nay) và T+2/T+3
+  (xếp vào `lag_upcoming_for_next_plans`, ghi `entry_date` script trả về). **KHÔNG tự lọc lại bằng
+  mắt, không sửa danh sách script trả về.**
+- Script **fail-closed theo lịch**: nếu `plan_date` không khớp phiên kế tiếp thật của
+  `signal_date`, script thoát exit 2 thay vì đoán — thấy lỗi này thì dừng lại kiểm tra ngày, đừng
+  tự suy diễn cho qua.
+- Kết quả từ script cho 2 account CÙNG 1 CSV phải cho ra CÙNG danh sách T+1 — nếu thấy khác nhau,
+  đó là dấu hiệu 1 trong 2 lần chạy dùng sai `--signal-date`, dừng lại kiểm tra tham số.
 
 ## `book_note` trong `positions_snapshot_eod_*` — dùng bootstrap snapshot làm nguồn, KHÔNG tự đoán theo tên mã (thêm 2026-08-04)
 Root cause (`mike/agents/Taylor/research/bootstrap_book_snapshot_20260804.md` §2): field `book_note`
@@ -241,21 +236,22 @@ lệnh cần 171,1tr. Đây KHÔNG phải rule mới — là **live đang vi ph�
 thiếu tiền cho lệnh LAG/BAL, giữ nguyên hành vi hiện tại (defer lệnh) — đừng tự chế đường bán PARK
 tại chỗ trong plan.
 
-## "FLOOR_FAIL" KHÔNG phải gate cứng cho LAG — áp lăng kính ngành TRƯỚC khi skip (thêm 2026-08-04)
-Root cause (grep toàn bộ `.py` production: 0 kết quả cho `FLOOR_FAIL`) — đây KHÔNG phải field code
-sinh ra, mà là chữ DollarBill tự viết mỗi phiên để mô tả 1 mã trượt "golden floor" (ROE_Min3Y≥0 ∧
-CF_OA_3Y>0, một phần của hệ 8L). Vì không có code backing, 2 phiên dispatch khác nhau diễn giải khác
-nhau: `plan_SpaceX_2026-07-28.json` gặp EVF/PSI/VCI (chứng khoán) FLOOR_FAIL nhưng áp đúng lăng kính
-thay thế theo ngành (P/B<1,8 + ROE_TTM≥8% → CHEAP cho nhóm chứng khoán, giống Gordon P/B cho ngân
-hàng) rồi đưa vào lệnh; **cùng ngày, cùng 3 mã, `plan_ZaloPay_2026-07-28.json` chỉ ghi "FLOOR_FAIL —
-skip"** — coi nhãn thông tin như gate chặn cứng, bỏ qua bước phân tích ngành.
+## "FLOOR_FAIL" KHÔNG phải gate cứng cho LAG — TRÍCH lăng kính ngành có sẵn, đừng đọc dở CSV (thêm 2026-08-04, đính chính + chuyển code cùng ngày)
+`FLOOR_FAIL` là chữ DollarBill tự viết để mô tả 1 mã trượt "golden floor" (ROE_Min3Y≥0 ∧ CF_OA_3Y>0)
+— KHÔNG phải gate cứng cho LAG (LAG chỉ gate cứng ở 8L rating≤3, `lag_filter_low_rating()`).
 
-**Quy tắc bắt buộc**: `FLOOR_FAIL`/golden-floor **KHÔNG** phải gate cứng cho LAG book — LAG chỉ có
-đúng 1 gate cứng là **8L rating≤3** (`lag_filter_low_rating()`, đã chạy sẵn ở nguồn). Một mã
-FLOOR_FAIL vẫn có thể rating≤3 và đủ điều kiện. Trước khi SKIP một mã LAG chỉ vì FLOOR_FAIL, PHẢI áp
-lăng kính thay thế theo ngành nếu áp dụng được (Gordon P/B ngân hàng, P/B+ROE chứng khoán, EV/EBITDA
-cảng-viễn thông, P/B trough vận tải biển — cùng khung đã dùng cho DCF NOT_COMPUTED) — chỉ SKIP thật
-khi lăng kính thay thế CŨNG không ủng hộ (định giá đắt) hoặc mã không thuộc ngành có lăng kính thay
-thế. Áp dụng NHẤT QUÁN cho CẢ 2 account — nếu 1 account áp lăng kính ngành cho 1 mã, account kia gặp
-đúng mã đó cùng ngày cũng phải áp, không tự ý khác nhau giữa 2 lần dispatch (cùng nguyên tắc đã chốt
-ở mục cash-discipline phía trên).
+**Đính chính root cause** (bản đầu 2026-08-04 sai): lăng kính ngành (Gordon P/B ngân hàng, P/B+ROE
+chứng khoán...) **không hề thiếu** — `alt_valuation_lens.py` có từ 07-20, và `golive_recommend_v23.
+py` đã **in sẵn** kết luận CHEAP/RICH vào đúng ô CSV mà cả 2 phiên cùng đọc. Sự cố 07-28
+(`plan_ZaloPay_2026-07-28.json` skip EVF/PSI/VCI trong khi SpaceX mua) không phải "1 bên biết áp
+lăng kính, bên kia không" — mà là **ZaloPay đọc dở ô dữ liệu**, không đọc tới phần kết luận đã có
+sẵn ở cuối. Xem `mike/agents/Taylor/research/deterministic_plan_decisions_20260804.md`.
+
+**Quy trình bắt buộc**: đừng tự đọc/diễn giải cột DD, TRÍCH bằng script (51/51 selfcheck PASS):
+```bash
+python3 mike/bin/sector_valuation_lens.py --floor-fail-only --json
+```
+Output trả về đúng 1 trong: `CHEAP` (mua bình thường), `RICH` (skip, cần `dcf_override_reason` nếu
+muốn override), `SKIP_CO_CAN_CU` (skip có bằng chứng, vd ngoài universe_pit), `CAN_NGUOI_QUYET`
+(không đủ dữ liệu áp lăng kính, escalate). Áp dụng NHẤT QUÁN cho CẢ 2 account — cùng CSV phải cho
+ra cùng kết luận, khác nhau là dấu hiệu 1 bên dùng sai tham số.
