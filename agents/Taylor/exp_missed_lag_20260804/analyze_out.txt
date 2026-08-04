@@ -1,0 +1,76 @@
+==============================================================================
+A. NHOM BO LO (deferred vi THIEU TIEN, cua so het han, khong bao gio mua)
+==============================================================================
+TICK  ACCT     ENTRY         P_entry   P_0803    RET% phien  size_du_kien
+AGR   ZaloPay  2026-07-27      12250    13200   +7.76     5  n/a
+BSI   ZaloPay  2026-07-27      26250    28200   +7.43     5  n/a
+FTS   ZaloPay  2026-07-27      20100    22100   +9.95     5  n/a
+HCM   ZaloPay  2026-07-27      25000    25150   +0.60     5  n/a
+VND   ZaloPay  2026-07-27      15350    16850   +9.77     5  n/a
+CSV   SpaceX   2026-07-28      20750    21700   +4.58     4  90.1tr
+EVF   SpaceX   2026-07-28      11800    12400   +5.08     4  72.1tr
+PSI   SpaceX   2026-07-28      10000     9900   -1.00     4  72.6tr
+VCI   SpaceX   2026-07-28      19700    21750  +10.41     4  72.0tr
+
+==============================================================================
+B. NHOM DA MUA THAT (fill xac nhan broker)
+==============================================================================
+TICK  ACCT     ENTRY            fill  P_entry   P_0803  RET%_BQ RET%_fill phien
+VPB   ZaloPay  2026-07-27      24950    24550    25500    +3.87     +2.20     5
+CSV   ZaloPay  2026-07-28      19750    20750    21700    +4.58     +9.87     4
+
+VNINDEX cung cua so: tu 07-27 +5.62%  |  tu 07-28 +4.89%
+
+==============================================================================
+C. SO SANH
+==============================================================================
+BO LO   : N=9  mean +6.06%  median +7.43%  min -1.00%  max +10.41%  sd 4.11
+DA MUA  : N=2  mean +4.22%  median +4.22%  min +3.87%  max +4.58%  (fill-basis mean +6.04%)
+CHENH   : +1.84 pp (bo lo - da mua)
+Bootstrap 95% CI cho chenh lech: [-0.87, +4.28] pp  (20.000 resample)
+  -> khoang rong 5.2 pp, chua 0 = KHONG phan biet duoc voi 0.
+Permutation test (exact, 55 hoan vi): p = 0.582
+
+==============================================================================
+D. THI NGHIEM TU NHIEN SACH NHAT — CSV cung ma, cung ngay, 2 account
+==============================================================================
+  ZaloPay MUA THAT CSV 1.000cp @ 19.750 (07-28) -> 08-03 21700 = +9.87%
+  SpaceX  DEFER CSV 4.500cp (90,07tr, thieu tien) -> cung gia, cung ngay, ret +4.58% (BQ close basis)
+  => Chenh lech giua 2 account KHONG do chat luong tin hieu, chi do CO TIEN hay KHONG.
+  Gia tri SpaceX bo lo tren CSV: 90,07tr x +4.58% = +4.12 tr VND (chua tinh 20 phien con lai cua hold 25)
+
+==============================================================================
+E. TIEN BI BO LO (chi cac lenh CO SIZE du kien tuong minh — SpaceX 07-28)
+==============================================================================
+  CSV:   90.1tr x  +4.58% =  +4.12tr
+  EVF:   72.1tr x  +5.08% =  +3.66tr
+  PSI:   72.6tr x  -1.00% =  -0.73tr
+  VCI:   72.0tr x +10.41% =  +7.49tr
+  TONG: 306.7tr trien khai hut -> P&L gia dinh +14.55tr (+4.75% tren von)
+  (5 ma ZaloPay 07-27 khong co size tuong minh trong plan -> khong quy ra tien duoc)
+
+F. CANH BAO PHAM VI: hold LAG = 25 phien. Moi do duoc 5/25 va 4/25 phien (16-20% cua chu ky). CHUA phai ket qua cuoi cung.
+
+==============================================================================
+G. CHUAN HOA — tru beta thi truong (VNINDEX) va so voi NGUON VON THAT SU
+==============================================================================
+TICK  NHOM     ENTRY           RET%  VNINDEX%  EXCESS%
+AGR   BO LO    2026-07-27     +7.76     +5.62    +2.13
+BSI   BO LO    2026-07-27     +7.43     +5.62    +1.81
+FTS   BO LO    2026-07-27     +9.95     +5.62    +4.33
+HCM   BO LO    2026-07-27     +0.60     +5.62    -5.02
+VND   BO LO    2026-07-27     +9.77     +5.62    +4.15
+CSV   BO LO    2026-07-28     +4.58     +4.89    -0.31
+EVF   BO LO    2026-07-28     +5.08     +4.89    +0.19
+PSI   BO LO    2026-07-28     -1.00     +4.89    -5.89
+VCI   BO LO    2026-07-28    +10.41     +4.89    +5.51
+VPB   DA MUA   2026-07-27     +3.87     +5.62    -1.75
+CSV   DA MUA   2026-07-28     +4.58     +4.89    -0.31
+
+EXCESS vs VNINDEX: BO LO mean +0.77pp (N=9) | DA MUA mean -1.03pp (N=2) | chenh +1.80pp
+  -> CA HAI nhom deu ~= hoac THUA thi truong. Khong nhom nao co alpha nhin thay duoc.
+
+--- Doi chieu NGUON VON THAT: muon mua LAG phai BAN PARK (cash chi 4,5tr) ---
+  ZaloPay 07-27: LAG bo lo mean +7.10%  vs  PARK (nguon von) +7.66%  => doi PARK->LAG se -0.56 pp
+  SpaceX 07-28: LAG bo lo mean +4.77%  vs  PARK (nguon von) +6.96%  => doi PARK->LAG se -2.20 pp
+  -> Trong cua so nay, BAN PARK de mua LAG se LAM XAU ket qua o CA HAI ngay.

@@ -7,5 +7,6 @@
 ====================================================================================================
 
 [2] Loading v11 signals + Release_Date + 5-state + overheat + D1...
-[BQ_LOCAL_CACHE] WARNING: cache verified 117h ago (>36h) — consider re-running sync_bq_cache.py
+[BQ_LOCAL_CACHE] WARNING: cache verified 118h ago (>36h) — consider re-running sync_bq_cache.py
 [BQ_LOCAL_CACHE] ready — 14 tables from /home/trido/thanhdt/WorkingClaude/data/bq_cache_asof20260729_postrestate
+EXIT=0 (jit_C_skip PARK_JIT=skip)

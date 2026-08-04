@@ -1,0 +1,79 @@
+diff --git a/mike/bin/send_plan_report.sh b/mike/bin/send_plan_report.sh
+index 9386e32..c33abb5 100755
+--- a/mike/bin/send_plan_report.sh
++++ b/mike/bin/send_plan_report.sh
+@@ -301,12 +301,24 @@ if _capit_buys:
+                       "không phải lỗi sizing]")
+         if not _slot:
+             _slot = _tg.get("capit_slot_target_vnd")
++        # PHỦ RỔ (Taylor A3, 2026-08-04): mốc so là `_slot × SỐ LỆNH TRONG PLAN`, nên một plan
++        # viết THIẾU MÃ vẫn ra lệch 0% và hiện ✅ — đo được: 3/5 mã đúng cỡ slot → "✅ khớp
++        # mục tiêu" trong khi 40% vốn không được triển khai. Rổ có bao nhiêu tên thì
++        # `n_capit_basket` đã publish sẵn; chỉ là chưa ai đọc. Thiếu mã có thể ĐÚNG (đã giữ
++        # đủ, trần %ADV = 0, DD loại) nên đây là một DÒNG THÔNG TIN, không đổi ngưỡng.
++        _nb = _st.get("n_capit_basket") or 0
++        _cov = ""
++        if _nb and len(_capit_buys) < _nb:
++            _cov = (f" [phủ {len(_capit_buys)}/{_nb} mã của rổ — {_nb - len(_capit_buys)} mã "
++                    f"KHÔNG có lệnh; mốc so trên chỉ tính số mã CÓ trong plan, nên lệch ~0% "
++                    f"KHÔNG có nghĩa đã triển khai đủ vốn]")
+         if _slot:
+             _actual = sum(float(o.get("actual_vnd") or 0)
+                           or float(o.get("qty") or o.get("quantity") or 0) * float(_order_price(o) or 0)
+                           for o in _capit_buys)
+             _target = float(_slot) * len(_capit_buys)
+             _dev = (_actual - _target) / _target if _target > 0 else 0.0
++            _basis += _cov
+             if abs(_dev) > 0.10:
+                 capit_note = (f"⚠️ CAPIT: Σ lệnh mua {_actual/1e6:,.0f}tr vs mục tiêu "
+                               f"{_target/1e6:,.0f}tr ({len(_capit_buys)} mã × "
+@@ -318,9 +330,46 @@ if _capit_buys:
+                 capit_note = (f"✅ CAPIT: Σ lệnh mua {_actual/1e6:,.0f}tr khớp mục tiêu "
+                               f"{_target/1e6:,.0f}tr (lệch {_dev*100:+.1f}%){_basis}")
+         else:
+-            capit_note = ("⚠️ CAPIT: có lệnh CAPIT nhưng status chưa publish "
+-                          "`capit_slot_targets` cho account này — KHÔNG đối chiếu được cỡ deploy, "
+-                          "người duyệt tự kiểm Σ VND vs NAV_book_LAG × capit_size.")
++            # PHIÊN TOP-UP (Taylor A3, 2026-08-04). `capit_slot_targets` CHỈ được publish khi
++            # `capit_signal_today=true`; trong một episode đang mở thì hầu hết phiên là
++            # top-up (đo 2026-08-04: episode CAPIT-2026-07-20 mở, capit_sessions_held=11,
++            # capit_slot_targets={}) ⇒ nhánh "không đối chiếu được" bên dưới là chỗ MỌI plan
++            # top-up rơi vào. Đúng cảnh báo sai chỗ: cổng sinh ra để canh cỡ deploy lại tối
++            # đúng lúc deploy đang diễn ra. Mốc so đúng cho top-up KHÔNG phải slot VND mà là
++            # `capit_episode_remaining_qty` (số CP CÒN THIẾU/mã/account) — engine đã publish
++            # sẵn (golive_recommend_v23.py `**capit_ep`), chỉ chưa ai đọc.
++            _rem = ((_st.get("capit_episode_remaining_qty") or {}).get(acct)) or {}
++            if _st.get("capit_episode_open") and _rem:
++                _over, _out, _tot_q, _tot_r = [], [], 0, 0
++                for _o in _capit_buys:
++                    _tk = str(_o.get("ticker") or _o.get("symbol") or "").upper()
++                    _q = int(float(_o.get("qty") or _o.get("quantity") or 0))
++                    _tot_q += _q
++                    if _tk not in _rem:
++                        _out.append(_tk)
++                        continue
++                    _r = int(_rem[_tk])
++                    _tot_r += _r
++                    if _q > _r:
++                        _over.append(f"{_tk} {_q}cp > còn thiếu {_r}cp")
++                _ep = _st.get("capit_episode_id") or "?"
++                if _over or _out:
++                    capit_note = (f"⚠️ CAPIT top-up (episode {_ep}): "
++                                  + ("MUA VƯỢT phần còn thiếu: " + "; ".join(_over) + ". "
++                                     if _over else "")
++                                  + ("mã KHÔNG thuộc rổ episode: " + ", ".join(_out) + ". "
++                                     if _out else "")
++                                  + "Nguồn: golive_v23_status.json `capit_episode_remaining_qty`.")
++                else:
++                    capit_note = (f"✅ CAPIT top-up (episode {_ep}): {len(_capit_buys)} lệnh "
++                                  f"{_tot_q:,}cp ≤ phần còn thiếu {_tot_r:,}cp, không mã nào "
++                                  f"vượt. (Ngày tín hiệu mới có `capit_slot_targets`; phiên "
++                                  f"top-up đối chiếu theo số CP còn thiếu.)")
++            else:
++                capit_note = ("⚠️ CAPIT: có lệnh CAPIT nhưng status chưa publish "
++                              "`capit_slot_targets` cho account này VÀ không có episode mở để "
++                              "đối chiếu — KHÔNG đối chiếu được cỡ deploy, người duyệt tự kiểm "
++                              "Σ VND vs NAV_book_LAG × capit_size.")
+     except Exception as _e:      # fail-open: không chặn plan vì một dòng đối chiếu
+         capit_note = f"⚠️ CAPIT: không đối chiếu được cỡ deploy ({type(_e).__name__}: {_e})"
+ 

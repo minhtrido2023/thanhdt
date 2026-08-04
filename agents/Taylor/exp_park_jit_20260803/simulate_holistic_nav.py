@@ -32,6 +32,16 @@ import os
 # PARK_JIT=skip           -> never unpark AND skip the buy (today's LIVE behaviour).
 _PARK_JIT = os.environ.get("PARK_JIT", "on").lower()
 _PARK_JIT_SKIPPED = [0]
+# PARK_PREFILL=on (default) -> byte-identical: khoi 4c (PREFILL_STATE_REBAL) chay moi phien.
+# PARK_PREFILL=off          -> tat han 4c => park KHONG BAO GIO tu trim ve target (= live hom nay).
+_PARK_PREFILL = os.environ.get("PARK_PREFILL", "on").lower()
+assert _PARK_JIT in ("on", "off", "skip") and _PARK_PREFILL in ("on", "off")
+# PARK_BAND (job Taylor_20260804_012953) -> deadband cua khoi 4c, don vi = ti le pool.
+# 0.005 (mac dinh) = hang so goc trong engine da pin => byte-identical.
+# Gia tri LON HON = noi bien trim (park duoc phep vuot target lau hon truoc khi bi cat)
+# = truc "Aggressive" thu 2, ben canh truc PARK_STATES (target park).
+_PARK_BAND = float(os.environ.get("PARK_BAND", "0.005"))
+assert 0.0 <= _PARK_BAND <= 0.5
 import re
 import subprocess
 import sys
@@ -903,7 +913,10 @@ def simulate(signals_df, prices, vni_dates, *,
         #     cash to ETF AFTER BA fills. During BA fills (step 5), JIT sell unwinds
         #     ETF on demand if cash short. Net effect: deals get priority, ETF holds
         #     only the remainder. This block is SELL-only.
-        if cash_etf_states is not None and state_by_date is not None:
+        # ABLATION SWITCH (research copy only, job Taylor_20260803_180602): PARK_PREFILL=off tắt
+        # HẲN khối 4c để tách riêng đóng góp của L1 (park-target compliance) khỏi L2 (JIT unpark).
+        # PARK_PREFILL=on (mặc định) => byte-identical với production.
+        if cash_etf_states is not None and state_by_date is not None and _PARK_PREFILL != "off":
             today_state_int = int(state_by_date.get(today, 3)) if state_by_date.get(today) is not None else None
             if today_state_int is not None:
                 _etf_map = (cash_etf_states_by_date.get(today, cash_etf_states)
@@ -916,7 +929,7 @@ def simulate(signals_df, prices, vni_dates, *,
                 px = vn30_underlying.get(today) if vn30_underlying is not None else None
                 px_ok = px is not None and not pd.isna(px) and px > 0
                 # SELL only (delta < 0 means current ETF > target → reduce)
-                if delta < -total_cash_pool * 0.005 and px_ok:
+                if delta < -total_cash_pool * _PARK_BAND and px_ok:
                     px_f = float(px)
                     sell_vnd_target = min(-delta, _etf_day_cap(today))   # cap by ETF daily liquidity
                     friction = sell_vnd_target * etf_rebalance_friction

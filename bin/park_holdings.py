@@ -1,0 +1,414 @@
+#!/usr/bin/env python3
+"""Dựng lại vị thế THEO BOOK (PARK/LAG/CAPIT/...) cho một account tại một ngày.
+
+VÌ SAO (§A7 báo cáo `park_unpark_live_wiring_20260803.md`): live KHÔNG có sổ quy vị thế về
+book, nên `park_mv_live` trước đây phải SUY LUẬN THEO TÊN MÃ — cách đó đã sai thật với VPB
+(nằm cả LAG lẫn PARK) và với VND. Không có sổ này thì L1 (park-target compliance) không có
+đầu vào đúng, và lỗi sẽ là dạng IM LẶNG: park_mv thấp hơn thực tế ⇒ "chưa vượt target" ⇒
+không trim gì cả.
+
+CƠ CHẾ (đúng §F2 của thiết kế):
+  điểm xuất phát = bootstrap snapshot ngày 0 (đã được USER duyệt), rồi FIFO tiến lên bằng
+  các dòng FILL của journal executor SAU thời điểm snapshot.
+
+  1. FILL `qty` là TÍCH LUỸ THEO `child_oid`, KHÔNG phải delta ⇒
+     delta = qty(dòng này) − qty(dòng trước CÙNG child_oid). Cộng dồn thô = đếm trùng
+     (bẫy số 1 của file journal).
+  2. side=buy  → push lô {ticker, book, play_type, entry_date, qty, price}.
+  3. side=sell → tiêu thụ FIFO **TRONG CÙNG BOOK** của lệnh bán. Đây chính là chỗ cách
+     suy-luận-theo-tên chết.
+  4. Lệnh bán KHÔNG có tag book (journal cũ 10 cột, hoặc GHOST_ORDER) → FIFO theo ticker
+     oldest-first + gắn cờ UNVERIFIED cho toàn bộ ticker đó. Số UNVERIFIED **CẤM** dùng làm
+     cơ sở sinh lệnh trim (§21 coding_guidelines — cùng tinh thần "không đưa số chưa đối
+     soát vào quyết định").
+  5. park_mv = Σ(qty × marketPrice của broker) trên các lô book == "PARK".
+     Giá từ DNSE, KHÔNG từ BQ (§6 bright-line: BQ same-day = giá hôm qua).
+
+ĐỐI SOÁT BẮT BUỘC: Σ qty các lô mỗi ticker phải bằng `openQuantity` của broker. Lệch ⇒ BÁO
+RÕ (`reconcile.ok=False`), **KHÔNG tự sửa lô cho khớp** (§5 coding_guidelines: không
+đoán-rồi-gộp). Caller phải tự quyết định có dùng số hay không.
+
+Tương thích ngược: journal cũ 10 cột / mới 12 cột đều đọc được — csv.DictReader +
+row.get("book", ""), tuyệt đối không đọc theo chỉ số cột.
+
+Dùng như thư viện:
+    from park_holdings import park_holdings
+    h = park_holdings("SpaceX")            # asof mặc định = hôm nay (ICT)
+    h["park_mv_vnd"], h["reconcile"]["ok"]
+
+Dùng như CLI:
+    python3 mike/bin/park_holdings.py --account SpaceX [--asof 2026-08-03] [--json]
+"""
+import argparse
+import csv
+import datetime as dt
+import glob
+import json
+import os
+import re
+import sys
+from zoneinfo import ZoneInfo
+
+ICT = ZoneInfo("Asia/Ho_Chi_Minh")          # §16: neo TZ tường minh, không tin TZ của process
+WC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+EXEC_DIR = os.path.join(WC_ROOT, "data", "execution_logs")
+PLAN_DIR = os.path.join(WC_ROOT, "data", "trade_plans")
+
+# Ánh xạ tên `book` của plan → tên sổ chuẩn. GIỮ ĐỒNG BỘ với bootstrap builder
+# (mike/agents/Taylor/bootstrap_book_20260804/make_snapshot.py::BOOK_MAP) — hai bên lệch nhau
+# thì lô bootstrap và lô replay rơi vào 2 sổ khác nhau và FIFO trong-cùng-book sẽ sai.
+BOOK_MAP = {
+    "custom30V_parking": "PARK",
+    "PARK": "PARK",
+    "CAPIT": "CAPIT",
+    "LAG": "LAG",
+    "BAL": "BAL",
+    "DISCRETIONARY_SPECIAL": "DISCRETIONARY_SPECIAL",
+    "legacy_orphan": "LEGACY_ORPHAN",
+    "LEGACY_ORPHAN": "LEGACY_ORPHAN",
+    "EXCLUDED": "EXCLUDED",
+}
+BOOTSTRAP_GLOB = "bootstrap_book_snapshot_{label}_*.json"
+_JOURNAL_RE = re.compile(r"^exec_(?P<label>.+)_(?P<date>\d{4}-\d{2}-\d{2})_journal\.csv$")
+
+
+def today_ict():
+    return dt.datetime.now(ICT).date().isoformat()
+
+
+def norm_book(raw):
+    raw = (raw or "").strip()
+    if not raw:
+        return ""
+    return BOOK_MAP.get(raw, raw.upper())
+
+
+# ───────────────────────────────────────────────────────────── nguồn dữ liệu
+
+def account_profile(label):
+    path = os.path.join(WC_ROOT, "secrets", "trading_bot_accounts.json")
+    for a in json.load(open(path, encoding="utf-8")).get("accounts", []):
+        if a.get("label") == label:
+            return a
+    raise SystemExit(f"[park_holdings] không có account '{label}' trong {path}")
+
+
+def load_bootstrap(label, plan_dir=PLAN_DIR):
+    """Snapshot ngày 0 đã được USER duyệt. Bắt buộc `_status` bắt đầu bằng APPROVED —
+    một snapshot mới chỉ là ĐỀ XUẤT không được phép làm điểm xuất phát cho số đi vào lệnh."""
+    cands = sorted(glob.glob(os.path.join(plan_dir, BOOTSTRAP_GLOB.format(label=label))))
+    if not cands:
+        raise SystemExit(f"[park_holdings] THIẾU bootstrap snapshot cho '{label}' trong {plan_dir} — "
+                         f"không có ngày 0 thì sổ chỉ thấy phần mua SAU cutover ⇒ park_mv THẤP HƠN "
+                         f"thực tế ⇒ L1 im lặng không trim. Xem §F3 thiết kế.")
+    path = cands[-1]
+    snap = json.load(open(path, encoding="utf-8"))
+    status = str(snap.get("_status", ""))
+    if not status.upper().startswith("APPROVED"):
+        raise SystemExit(f"[park_holdings] {os.path.basename(path)} có _status='{status[:40]}' — "
+                         f"CHƯA được duyệt, không dùng làm ngày 0.")
+    if not snap.get("reconcile_ok"):
+        raise SystemExit(f"[park_holdings] {os.path.basename(path)} có reconcile_ok=false — "
+                         f"ngày 0 chưa khớp broker, không dùng.")
+    return snap, path
+
+
+def journal_files(label, since_date, until_date, exec_dir=EXEC_DIR):
+    """Journal của ĐÚNG account này, ngày trong [since_date, until_date], sắp theo NGÀY
+    parse ra date (không sort chuỗi tên file — §F2 bước 1)."""
+    out = []
+    for p in glob.glob(os.path.join(exec_dir, "exec_*_journal.csv")):
+        m = _JOURNAL_RE.match(os.path.basename(p))
+        if not m or m.group("label") != label:
+            continue
+        d = m.group("date")
+        if since_date <= d <= until_date:
+            out.append((d, p))
+    return [p for _, p in sorted(out)]
+
+
+def read_broker_snapshot(label, account_no, asof, exec_dir=EXEC_DIR):
+    """Vị thế + tiền của broker tại `asof`.
+
+    asof == hôm nay  → gọi DNSE LIVE (§6: same-day không bao giờ đọc BQ, và file
+                        dnse_raw hôm nay có thể chưa có bản ghi nào).
+    asof quá khứ     → đọc data/execution_logs/dnse_raw_{asof}.jsonl, LỌC accountNo ngay
+                        dòng đầu (§12 — file này DÙNG CHUNG cho mọi account).
+
+    Trả (positions {tk: {qty, market_price}}, cash_available, meta).
+    """
+    if asof == today_ict():
+        sys.path.insert(0, WC_ROOT)
+        from trading_bot.brokers import DNSEBroker
+        b = DNSEBroker(account_id=account_no, credentials_file=None, label=label)
+        b.connect()
+        raw = b.client.positions(account_no)
+        bal = b.client.balances(account_no)
+        rows = (raw.get("positions") or raw.get("data") or []) if isinstance(raw, dict) else (raw or [])
+        pos = {}
+        for p in rows:
+            if str(p.get("accountNo") or account_no) != str(account_no):   # §12
+                continue
+            if str(p.get("status", "OPEN")).upper() == "CLOSED":
+                continue
+            q = int(p.get("openQuantity") or 0)      # KHÔNG dùng accumulateQuantity (§D4)
+            if q > 0 and p.get("symbol"):
+                pos[p["symbol"]] = {"qty": q, "market_price": float(p.get("marketPrice") or 0),
+                                    "sellable": int(p.get("tradeQuantity") or 0)}
+        st = (bal[0] if isinstance(bal, list) and bal else bal) or {}
+        st = st.get("stock", st) if isinstance(st, dict) else {}
+        cash = float(st.get("availableCash") or 0)   # KHÔNG totalCash (§B5: gồm cổ tức chưa về)
+        return pos, cash, {"source": "dnse_live", "asof": asof, "ts": dt.datetime.now(ICT).isoformat(timespec="seconds")}
+
+    path = os.path.join(exec_dir, f"dnse_raw_{asof}.jsonl")
+    if not os.path.exists(path):
+        raise SystemExit(f"[park_holdings] không có {path} để đối soát tại asof={asof}")
+    pos, cash, ts_pos, ts_bal = {}, None, None, None
+    for line in open(path, encoding="utf-8"):
+        try:
+            rec = json.loads(line)
+        except Exception:
+            continue
+        if str(rec.get("account_no")) != str(account_no):     # §12 — lọc TRƯỚC mọi phép tính
+            continue
+        payload = rec.get("payload") or {}
+        if rec.get("kind") == "positions":
+            cur = {}
+            for p in (payload.get("positions") or payload.get("data") or []):
+                if str(p.get("accountNo") or account_no) != str(account_no):
+                    continue
+                if str(p.get("status", "OPEN")).upper() == "CLOSED":
+                    continue
+                q = int(p.get("openQuantity") or 0)
+                if q > 0 and p.get("symbol"):
+                    cur[p["symbol"]] = {"qty": q, "market_price": float(p.get("marketPrice") or 0),
+                                        "sellable": int(p.get("tradeQuantity") or 0)}
+            if cur and (ts_pos is None or rec.get("ts", "") >= ts_pos):
+                pos, ts_pos = cur, rec.get("ts", "")          # bản ghi MỚI NHẤT trong ngày
+        elif rec.get("kind") == "balances":
+            st = payload.get("stock", payload) if isinstance(payload, dict) else {}
+            if "availableCash" in st and (ts_bal is None or rec.get("ts", "") >= ts_bal):
+                cash, ts_bal = float(st.get("availableCash") or 0), rec.get("ts", "")
+    if not pos:
+        raise SystemExit(f"[park_holdings] {path} không có bản ghi positions nào của account "
+                         f"{account_no} — không đối soát được")
+    return pos, cash, {"source": os.path.basename(path), "asof": asof,
+                       "ts_positions": ts_pos, "ts_balances": ts_bal}
+
+
+# ─────────────────────────────────────────────────────────────── sổ lô FIFO
+
+class LotBook:
+    """Sổ lô theo (ticker, book). Bán tiêu thụ FIFO TRONG CÙNG BOOK."""
+
+    def __init__(self):
+        self.lots = []              # thứ tự append = thứ tự thời gian
+        self.unverified = set()     # ticker có ít nhất một thao tác không xác định được book
+        self.warnings = []
+
+    def buy(self, ticker, book, qty, price, date, source, play_type=""):
+        if qty <= 0:
+            return
+        self.lots.append({"ticker": ticker, "book": book, "play_type": play_type,
+                          "entry_date": date, "qty": int(qty), "price": float(price or 0),
+                          "source": source})
+
+    def sell(self, ticker, book, qty, date, source):
+        """Trả số lượng KHÔNG khớp được lô nào (thừa) — caller phải báo, không tự bỏ qua."""
+        if qty <= 0:
+            return 0
+        remain = int(qty)
+        if book:
+            pool = [l for l in self.lots if l["ticker"] == ticker and l["book"] == book]
+        else:
+            # §F2 bước 4: bán không tag book → FIFO theo ticker oldest-first + cờ UNVERIFIED
+            pool = [l for l in self.lots if l["ticker"] == ticker]
+            self.unverified.add(ticker)
+            self.warnings.append(f"{date} SELL {ticker} {qty}cp KHÔNG có tag book ({source}) → "
+                                 f"FIFO oldest-first toàn ticker, {ticker} gắn cờ UNVERIFIED")
+        for lot in pool:
+            if remain <= 0:
+                break
+            take = min(lot["qty"], remain)
+            lot["qty"] -= take
+            remain -= take
+        self.lots = [l for l in self.lots if l["qty"] > 0]
+        if remain > 0:
+            self.unverified.add(ticker)
+            self.warnings.append(f"{date} SELL {ticker} {qty}cp ({source}) THỪA {remain}cp so với "
+                                 f"lô đang có trong sổ book='{book or 'KHÔNG TAG'}' → {ticker} UNVERIFIED")
+        return remain
+
+    def by_ticker_qty(self):
+        out = {}
+        for l in self.lots:
+            out[l["ticker"]] = out.get(l["ticker"], 0) + l["qty"]
+        return out
+
+
+def _fill_deltas(path):
+    """Sinh (ts, ticker, side, book, play_type, delta_qty, price) cho từng dòng FILL.
+
+    delta = qty(dòng này) − qty(dòng TRƯỚC CÙNG child_oid). Đây là điểm chết người: cộng dồn
+    thô Σqty sẽ đếm trùng vì `qty` là TÍCH LUỸ theo child_oid (đo thật trên
+    exec_SpaceX_2026-07-29_journal.csv: 3 dòng FILL cùng parent, qty tăng dần).
+    """
+    prev = {}
+    with open(path, newline="", encoding="utf-8") as f:
+        for row in csv.DictReader(f):                # DictReader: journal 10 cột và 12 cột
+            if (row.get("event") or "") != "FILL":   # đều đọc được, không theo vị trí cột
+                continue
+            try:
+                cum = int(round(float(row.get("qty") or 0)))
+            except (TypeError, ValueError):
+                continue
+            oid = row.get("child_oid") or f"__noid__{row.get('parent_id')}"
+            delta = cum - prev.get(oid, 0)
+            prev[oid] = cum
+            if delta <= 0:
+                continue
+            try:
+                px = float(row.get("price") or 0)
+            except (TypeError, ValueError):
+                px = 0.0
+            yield {"ts": row.get("ts") or "", "ticker": row.get("ticker") or "",
+                   "side": (row.get("side") or "").lower(),
+                   "book": norm_book(row.get("book", "")),
+                   "play_type": row.get("play_type", "") or "",
+                   "qty": delta, "price": px, "parent_id": row.get("parent_id") or ""}
+
+
+def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR,
+                  broker=None):
+    """Vị thế theo book tại `asof` (mặc định hôm nay ICT).
+
+    `broker` = (positions, cash, meta) truyền sẵn — chỉ dùng cho selfcheck; production để None.
+    """
+    asof = asof or today_ict()
+    prof = account_profile(account_label)
+    account_no = prof.get("account_id")
+    excluded = set(prof.get("excluded_tickers") or [])
+
+    snap, snap_path = load_bootstrap(account_label, plan_dir)
+    day0 = snap["day0_date"]
+    snap_ts = (snap.get("broker_source") or {}).get("ts") or ""
+    if asof < day0:
+        raise SystemExit(f"[park_holdings] asof={asof} TRƯỚC ngày 0 của bootstrap ({day0}) — "
+                         f"sổ không lùi được về trước snapshot.")
+
+    book = LotBook()
+    for p in snap["positions"]:
+        book.buy(p["ticker"], norm_book(p.get("book")), p["qty"], p.get("cost_price_vnd"),
+                 p.get("entry_date") or day0, "bootstrap", p.get("play_type", ""))
+        if p.get("needs_user_confirmation") and not str(snap.get("_status", "")).upper().startswith("APPROVED"):
+            book.unverified.add(p["ticker"])
+
+    # Replay: journal từ ngày 0 trở đi, và CHỈ các dòng FILL sau thời điểm chụp snapshot
+    # (chống đếm trùng phần đã nằm trong bootstrap).
+    applied = []
+    for path in journal_files(account_label, day0, asof, exec_dir):
+        for ev in _fill_deltas(path):
+            if snap_ts and ev["ts"] and ev["ts"] <= snap_ts:
+                continue
+            src = f"{os.path.basename(path)}:{ev['parent_id']}"
+            if ev["side"] == "buy":
+                book.buy(ev["ticker"], ev["book"], ev["qty"], ev["price"], ev["ts"][:10], src,
+                         ev["play_type"])
+            elif ev["side"] == "sell":
+                book.sell(ev["ticker"], ev["book"], ev["qty"], ev["ts"][:10], src)
+            else:
+                book.unverified.add(ev["ticker"])
+                book.warnings.append(f"{ev['ts'][:10]} side='{ev['side']}' lạ ({src}) → "
+                                     f"{ev['ticker']} UNVERIFIED")
+                continue
+            applied.append(ev)
+
+    positions, cash, bmeta = broker if broker else read_broker_snapshot(
+        account_label, account_no, asof, exec_dir)
+
+    # ── Đối soát: Σ lô mỗi ticker PHẢI bằng openQuantity broker. Lệch → BÁO, KHÔNG tự sửa.
+    ledger_qty = book.by_ticker_qty()
+    mismatches = []
+    for tk in sorted(set(ledger_qty) | set(positions)):
+        lq, bq = ledger_qty.get(tk, 0), positions.get(tk, {}).get("qty", 0)
+        if lq != bq:
+            mismatches.append({"ticker": tk, "ledger_qty": lq, "broker_qty": bq, "diff": lq - bq})
+            book.unverified.add(tk)
+    reconcile = {"ok": not mismatches, "n_tickers": len(set(ledger_qty) | set(positions)),
+                 "mismatches": mismatches, "broker": bmeta}
+
+    # ── Định giá theo marketPrice broker (§6: KHÔNG BQ)
+    by_book, park_lots = {}, []
+    for l in book.lots:
+        px = positions.get(l["ticker"], {}).get("market_price", 0)
+        mv = l["qty"] * px
+        b = by_book.setdefault(l["book"] or "UNTAGGED",
+                               {"qty": 0, "mv_vnd": 0.0, "tickers": set()})
+        b["qty"] += l["qty"]
+        b["mv_vnd"] += mv
+        b["tickers"].add(l["ticker"])
+        if l["book"] == "PARK":
+            park_lots.append(dict(l, market_price=px, mv_vnd=mv))
+    for b in by_book.values():
+        b["tickers"] = sorted(b["tickers"])
+
+    # excluded_tickers (DGC/ZaloPay) không bao giờ là PARK — kiểm tra bất biến, không tự sửa.
+    bad_excl = sorted({l["ticker"] for l in park_lots} & excluded)
+    if bad_excl:
+        book.warnings.append(f"⛔ ticker EXCLUDED nằm trong sổ PARK: {bad_excl} — sai bất biến, "
+                             f"KHÔNG được trim, cần người xử lý")
+        for tk in bad_excl:
+            book.unverified.add(tk)
+
+    park_mv = sum(l["mv_vnd"] for l in park_lots)
+    park_mv_verified = sum(l["mv_vnd"] for l in park_lots if l["ticker"] not in book.unverified)
+    return {
+        "account_label": account_label, "account_no": account_no, "asof": asof,
+        "day0_date": day0, "bootstrap": os.path.basename(snap_path),
+        "excluded_tickers": sorted(excluded),
+        "lots": book.lots, "park_lots": park_lots, "by_book": by_book,
+        "broker_positions": positions,
+        "park_mv_vnd": park_mv, "park_mv_verified_vnd": park_mv_verified,
+        "cash_available_vnd": cash,
+        "unverified_tickers": sorted(book.unverified), "warnings": book.warnings,
+        "n_fills_applied": len(applied), "reconcile": reconcile,
+    }
+
+
+def main():
+    ap = argparse.ArgumentParser(description="Vị thế theo book (PARK/LAG/CAPIT/...) cho 1 account")
+    ap.add_argument("--account", required=True)
+    ap.add_argument("--asof", default=None, help="YYYY-MM-DD (mặc định: hôm nay ICT)")
+    ap.add_argument("--json", action="store_true")
+    a = ap.parse_args()
+    h = park_holdings(a.account, a.asof)
+    if a.json:
+        out = dict(h)
+        out["by_book"] = {k: dict(v) for k, v in h["by_book"].items()}
+        print(json.dumps(out, ensure_ascii=False, indent=1, default=str))
+        return 0 if h["reconcile"]["ok"] else 1
+    print(f"=== {h['account_label']} ({h['account_no']}) asof={h['asof']} "
+          f"| ngày 0 {h['day0_date']} ({h['bootstrap']}) | {h['n_fills_applied']} FILL replay ===")
+    print(f"broker: {h['reconcile']['broker']}")
+    for b in sorted(h["by_book"]):
+        v = h["by_book"][b]
+        print(f"  {b:<22} qty {v['qty']:>8,}  MV {v['mv_vnd']/1e6:>10,.2f} tr  "
+              f"n={len(v['tickers'])}  {','.join(v['tickers'][:8])}"
+              f"{'...' if len(v['tickers']) > 8 else ''}")
+    print(f"  PARK MV = {h['park_mv_vnd']/1e6:,.2f} tr  "
+          f"(đã đối soát: {h['park_mv_verified_vnd']/1e6:,.2f} tr)")
+    print(f"  availableCash = {(h['cash_available_vnd'] or 0)/1e6:,.2f} tr")
+    r = h["reconcile"]
+    print(f"đối soát broker: {'✅ KHỚP' if r['ok'] else '❌ LỆCH'} ({r['n_tickers']} mã)")
+    for m in r["mismatches"]:
+        print(f"   ✗ {m['ticker']}: sổ {m['ledger_qty']:,} vs broker {m['broker_qty']:,} "
+              f"(lệch {m['diff']:+,}) — KHÔNG tự sửa, cần người xử lý")
+    for w in h["warnings"]:
+        print(f"   ⚠ {w}")
+    if h["unverified_tickers"]:
+        print(f"UNVERIFIED (cấm dùng sinh lệnh trim): {', '.join(h['unverified_tickers'])}")
+    return 0 if r["ok"] else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

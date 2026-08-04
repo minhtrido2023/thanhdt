@@ -1,0 +1,314 @@
+{
+ "_meta": {
+  "label": "ZaloPay",
+  "account_no": "0001743768"
+ },
+ "positions": [
+  {
+   "ticker": "BID",
+   "qty": 900,
+   "book": "PARK",
+   "entry_date": "2026-07-13",
+   "cost_price_vnd": 40766.67,
+   "evidence": "2026-07-13 BUY 900@40767 (journal exec_ZaloPay_2026-07-13_journal.csv, parent_id=BUY-BID-02); plan_ZaloPay_2026-07-13.json order id=BUY-BID-02 book='custom30V_parking'"
+  },
+  {
+   "ticker": "CSV",
+   "qty": 1000,
+   "book": "LAG",
+   "entry_date": "2026-07-28",
+   "cost_price_vnd": 19750.0,
+   "evidence": "2026-07-28 BUY 1000@19750 (journal exec_ZaloPay_2026-07-28_journal.csv, parent_id=BUY-CSV-00); plan_ZaloPay_2026-07-28.json order id=BUY-CSV-00 book='LAG'"
+  },
+  {
+   "ticker": "CTG",
+   "qty": 850,
+   "book": "PARK",
+   "entry_date": "2026-07-15",
+   "cost_price_vnd": 32685.29,
+   "evidence": "2026-07-15 BUY 850@32685 (journal exec_ZaloPay_2026-07-15_journal.csv, parent_id=BUY-CTG-02); plan_ZaloPay_2026-07-15.json order id=BUY-CTG-02 book='custom30V_parking'"
+  },
+  {
+   "ticker": "CTG",
+   "qty": 200,
+   "book": "PARK",
+   "entry_date": "2026-07-16",
+   "cost_price_vnd": 32150.0,
+   "evidence": "2026-07-16 BUY 200@32150 (journal exec_ZaloPay_2026-07-16_journal.csv, parent_id=BUY-CTG-02); plan_ZaloPay_2026-07-16.json order id=BUY-CTG-02 book='custom30V_parking'"
+  },
+  {
+   "ticker": "DGC",
+   "qty": 10000,
+   "book": "EXCLUDED",
+   "entry_date": "2026-06-26",
+   "cost_price_vnd": 47775.0,
+   "evidence": "vi the mo dau truoc khi bot quan ly; broker snapshot dau tien cua account (dnse_raw_2026-07-06.jsonl, accountNo=0001743768): openQuantity=10000, costPrice=47775.0, createdDate=2026-06-26"
+  },
+  {
+   "ticker": "HDB",
+   "qty": 659,
+   "book": "PARK",
+   "entry_date": "2026-07-23",
+   "cost_price_vnd": 25891.05,
+   "evidence": "2026-07-23 BUY 659@25891 (journal exec_ZaloPay_2026-07-23_journal.csv, parent_id=BUY-HDB-02); plan_ZaloPay_2026-07-23.json order id=BUY-HDB-02 book='custom30V_parking'"
+  },
+  {
+   "ticker": "LPB",
+   "qty": 352,
+   "book": "PARK",
+   "entry_date": "2026-07-22",
+   "cost_price_vnd": 54843.18,
+   "evidence": "2026-07-22 BUY 352@54843 (journal exec_ZaloPay_2026-07-22_journal.csv, parent_id=BUY-LPB-02); plan_ZaloPay_2026-07-22.json order id=BUY-LPB-02 book='custom30V_parking'"
+  },
+  {
+   "ticker": "MBB",
+   "qty": 1000,
+   "book": "PARK",
+   "entry_date": "2026-07-10",
+   "cost_price_vnd": 24700.0,
+   "evidence": "2026-07-10 BUY 1000@24700 (journal exec_ZaloPay_2026-07-10_journal.csv, parent_id=BUY-MBB-04); plan_ZaloPay_2026-07-10.json order id=BUY-MBB-04 book='custom30V_parking'"
+  },
+  {
+   "ticker": "MBB",
+   "qty": 102,
+   "book": "PARK",
+   "entry_date": "2026-07-20",
+   "cost_price_vnd": 23597.06,
+   "evidence": "2026-07-20 BUY 102@23597 (journal exec_ZaloPay_2026-07-20_journal.csv, parent_id=BUY-MBB-03); plan_ZaloPay_2026-07-20.json order id=BUY-MBB-03 book='custom30V_parking'"
+  },
+  {
+   "ticker": "NCT",
+   "qty": 373,
+   "book": "CAPIT",
+   "entry_date": "2026-07-21",
+   "cost_price_vnd": 94400.0,
+   "evidence": "2026-07-21 BUY 373@94400 (journal exec_ZaloPay_2026-07-21_journal.csv, parent_id=BUY-NCT-02); plan_ZaloPay_2026-07-21.json order id=BUY-NCT-02 book='CAPIT'"
+  },
+  {
+   "ticker": "PVT",
+   "qty": 2071,
+   "book": "CAPIT",
+   "entry_date": "2026-07-21",
+   "cost_price_vnd": 17248.31,
+   "evidence": "2026-07-21 BUY 2071@17248 (journal exec_ZaloPay_2026-07-21_journal.csv, parent_id=BUY-PVT-03); plan_ZaloPay_2026-07-21.json order id=BUY-PVT-03 book='CAPIT'"
+  },
+  {
+   "ticker": "SAB",
+   "qty": 744,
+   "book": "CAPIT",
+   "entry_date": "2026-07-21",
+   "cost_price_vnd": 47450.2,
+   "evidence": "2026-07-21 BUY 744@47450 (journal exec_ZaloPay_2026-07-21_journal.csv, parent_id=BUY-SAB-04); plan_ZaloPay_2026-07-21.json order id=BUY-SAB-04 book='CAPIT'"
+  },
+  {
+   "ticker": "SIP",
+   "qty": 749,
+   "book": "CAPIT",
+   "entry_date": "2026-07-21",
+   "cost_price_vnd": 47140.05,
+   "evidence": "2026-07-21 BUY 749@47140 (journal exec_ZaloPay_2026-07-21_journal.csv, parent_id=BUY-SIP-05); plan_ZaloPay_2026-07-21.json order id=BUY-SIP-05 book='CAPIT'"
+  },
+  {
+   "ticker": "TCB",
+   "qty": 600,
+   "book": "PARK",
+   "entry_date": "2026-07-17",
+   "cost_price_vnd": 31850.0,
+   "evidence": "2026-07-17 BUY 600@31850 (journal exec_ZaloPay_2026-07-17_journal.csv, parent_id=BUY-TCB-02); plan_ZaloPay_2026-07-17.json order id=BUY-TCB-02 book='custom30V_parking'"
+  },
+  {
+   "ticker": "TCB",
+   "qty": 356,
+   "book": "PARK",
+   "entry_date": "2026-07-20",
+   "cost_price_vnd": 31207.87,
+   "evidence": "2026-07-20 BUY 356@31208 (journal exec_ZaloPay_2026-07-20_journal.csv, parent_id=BUY-TCB-02); plan_ZaloPay_2026-07-20.json order id=BUY-TCB-02 book='custom30V_parking'"
+  },
+  {
+   "ticker": "VCB",
+   "qty": 100,
+   "book": "PARK",
+   "entry_date": "2026-07-07",
+   "cost_price_vnd": 61100.0,
+   "evidence": "2026-07-07 BUY 100@61100 (journal exec_ZaloPay_2026-07-07_journal.csv, parent_id=BUY-VCB-02); plan_ZaloPay_2026-07-07.json order id=BUY-VCB-02 book='custom30V_parking'"
+  },
+  {
+   "ticker": "VCB",
+   "qty": 700,
+   "book": "PARK",
+   "entry_date": "2026-07-09",
+   "cost_price_vnd": 61400.0,
+   "evidence": "2026-07-09 BUY 700@61400 (journal exec_ZaloPay_2026-07-09_journal.csv, parent_id=BUY-VCB-02); plan_ZaloPay_2026-07-09.json order id=BUY-VCB-02 book='custom30V_parking'"
+  },
+  {
+   "ticker": "VHC",
+   "qty": 600,
+   "book": "LEGACY_ORPHAN",
+   "entry_date": "2025-11-19",
+   "cost_price_vnd": 60188.9,
+   "evidence": "vi the mo dau truoc khi bot quan ly; broker snapshot dau tien cua account (dnse_raw_2026-07-06.jsonl, accountNo=0001743768): openQuantity=1800, costPrice=60188.9, createdDate=2025-11-19"
+  },
+  {
+   "ticker": "VHM",
+   "qty": 100,
+   "book": "PARK",
+   "entry_date": "2026-07-08",
+   "cost_price_vnd": 149900.0,
+   "evidence": "2026-07-08 BUY 100@149900 (journal exec_ZaloPay_2026-07-08_journal.csv, parent_id=BUY-VHM-02); plan_ZaloPay_2026-07-08.json order id=BUY-VHM-02 book='custom30V_parking'"
+  },
+  {
+   "ticker": "VHM",
+   "qty": 200,
+   "book": "PARK",
+   "entry_date": "2026-07-10",
+   "cost_price_vnd": 148000.0,
+   "evidence": "2026-07-10 BUY 200@148000 (journal exec_ZaloPay_2026-07-10_journal.csv, parent_id=BUY-VHM-02); plan_ZaloPay_2026-07-10.json order id=BUY-VHM-02 book='custom30V_parking'"
+  },
+  {
+   "ticker": "VNM",
+   "qty": 601,
+   "book": "CAPIT",
+   "entry_date": "2026-07-21",
+   "cost_price_vnd": 58699.83,
+   "evidence": "2026-07-21 BUY 601@58700 (journal exec_ZaloPay_2026-07-21_journal.csv, parent_id=BUY-VNM-06); plan_ZaloPay_2026-07-21.json order id=BUY-VNM-06 book='CAPIT'"
+  },
+  {
+   "ticker": "VPB",
+   "qty": 700,
+   "book": "LAG",
+   "entry_date": "2026-07-27",
+   "cost_price_vnd": 24950.0,
+   "evidence": "2026-07-27 BUY 700@24950 (journal exec_ZaloPay_2026-07-27_journal.csv, parent_id=BUY-VPB-01); plan_ZaloPay_2026-07-27.json order id=BUY-VPB-01 book='LAG'"
+  },
+  {
+   "ticker": "VPB",
+   "qty": 1100,
+   "book": "PARK",
+   "entry_date": "2025-11-20",
+   "cost_price_vnd": 27886.7,
+   "evidence": "vi the mo dau truoc khi bot quan ly; broker snapshot dau tien cua account (dnse_raw_2026-07-06.jsonl, accountNo=0001743768): openQuantity=7500, costPrice=27886.7, createdDate=2025-11-20"
+  }
+ ],
+ "reconcile": [
+  {
+   "ticker": "BID",
+   "broker_openQuantity": 900,
+   "ledger_qty": 900,
+   "diff": 0,
+   "broker_cost_price": 40316.6667
+  },
+  {
+   "ticker": "CSV",
+   "broker_openQuantity": 1000,
+   "ledger_qty": 1000,
+   "diff": 0,
+   "broker_cost_price": 19750
+  },
+  {
+   "ticker": "CTG",
+   "broker_openQuantity": 1050,
+   "ledger_qty": 1050,
+   "diff": 0,
+   "broker_cost_price": 32133.3334
+  },
+  {
+   "ticker": "DGC",
+   "broker_openQuantity": 10000,
+   "ledger_qty": 10000,
+   "diff": 0,
+   "broker_cost_price": 47775
+  },
+  {
+   "ticker": "HDB",
+   "broker_openQuantity": 659,
+   "ledger_qty": 659,
+   "diff": 0,
+   "broker_cost_price": 25891.047
+  },
+  {
+   "ticker": "LPB",
+   "broker_openQuantity": 352,
+   "ledger_qty": 352,
+   "diff": 0,
+   "broker_cost_price": 54843.1818
+  },
+  {
+   "ticker": "MBB",
+   "broker_openQuantity": 1102,
+   "ledger_qty": 1102,
+   "diff": 0,
+   "broker_cost_price": 24597.9129
+  },
+  {
+   "ticker": "NCT",
+   "broker_openQuantity": 373,
+   "ledger_qty": 373,
+   "diff": 0,
+   "broker_cost_price": 86400
+  },
+  {
+   "ticker": "PVT",
+   "broker_openQuantity": 2071,
+   "ledger_qty": 2071,
+   "diff": 0,
+   "broker_cost_price": 17248.31
+  },
+  {
+   "ticker": "SAB",
+   "broker_openQuantity": 744,
+   "ledger_qty": 744,
+   "diff": 0,
+   "broker_cost_price": 44450.2016
+  },
+  {
+   "ticker": "SIP",
+   "broker_openQuantity": 749,
+   "ledger_qty": 749,
+   "diff": 0,
+   "broker_cost_price": 47140.0534
+  },
+  {
+   "ticker": "TCB",
+   "broker_openQuantity": 956,
+   "ledger_qty": 956,
+   "diff": 0,
+   "broker_cost_price": 31610.8786
+  },
+  {
+   "ticker": "VCB",
+   "broker_openQuantity": 800,
+   "ledger_qty": 800,
+   "diff": 0,
+   "broker_cost_price": 60912.5
+  },
+  {
+   "ticker": "VHC",
+   "broker_openQuantity": 0,
+   "ledger_qty": 600,
+   "diff": -600,
+   "broker_cost_price": null
+  },
+  {
+   "ticker": "VHM",
+   "broker_openQuantity": 300,
+   "ledger_qty": 300,
+   "diff": 0,
+   "broker_cost_price": 148633.3333
+  },
+  {
+   "ticker": "VNM",
+   "broker_openQuantity": 601,
+   "ledger_qty": 601,
+   "diff": 0,
+   "broker_cost_price": 58699.8336
+  },
+  {
+   "ticker": "VPB",
+   "broker_openQuantity": 1800,
+   "ledger_qty": 1800,
+   "diff": 0,
+   "broker_cost_price": 26744.6297
+  }
+ ],
+ "warnings": []
+}

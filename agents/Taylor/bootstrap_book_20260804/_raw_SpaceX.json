@@ -1,0 +1,350 @@
+{
+ "_meta": {
+  "label": "SpaceX",
+  "account_no": "0002023347"
+ },
+ "positions": [
+  {
+   "ticker": "ACB",
+   "qty": 1500,
+   "book": "PARK",
+   "entry_date": "2026-07-01",
+   "cost_price_vnd": 22650.0,
+   "evidence": "2026-07-01 BUY 1800@22650 (journal exec_SpaceX_2026-07-01_journal.csv, parent_id=BUY-ACB-11); plan_SpaceX_2026-07-01.json order id=BUY-ACB-11 book='custom30V_parking'"
+  },
+  {
+   "ticker": "BID",
+   "qty": 1900,
+   "book": "PARK",
+   "entry_date": "2026-07-02",
+   "cost_price_vnd": 42991.3,
+   "evidence": "2026-07-02 BUY 4600@42991 (journal exec_SpaceX_2026-07-02_journal.csv, parent_id=BUY-BID-01); plan_SpaceX_2026-07-02.json order id=BUY-BID-01 book='custom30V_parking'"
+  },
+  {
+   "ticker": "CTG",
+   "qty": 2300,
+   "book": "PARK",
+   "entry_date": "2026-07-02",
+   "cost_price_vnd": 34476.79,
+   "evidence": "2026-07-02 BUY 5600@34477 (journal exec_SpaceX_2026-07-02_journal.csv, parent_id=BUY-CTG-02); plan_SpaceX_2026-07-02.json order id=BUY-CTG-02 book='custom30V_parking'"
+  },
+  {
+   "ticker": "HDB",
+   "qty": 1500,
+   "book": "PARK",
+   "entry_date": "2026-07-02",
+   "cost_price_vnd": 26675.0,
+   "evidence": "2026-07-02 BUY 3600@26675 (journal exec_SpaceX_2026-07-02_journal.csv, parent_id=BUY-HDB-05); plan_SpaceX_2026-07-02.json order id=BUY-HDB-05 book='custom30V_parking'"
+  },
+  {
+   "ticker": "LPB",
+   "qty": 900,
+   "book": "PARK",
+   "entry_date": "2026-07-15",
+   "cost_price_vnd": 51466.67,
+   "evidence": "2026-07-15 BUY 900@51467 (journal exec_SpaceX_2026-07-15_journal.csv, parent_id=BUY-LPB-01); plan_SpaceX_2026-07-15.json: strategy=v24_custom30v, allocation_strategy.rule='neutral_parking v2.1 + basket_drift_swap', buy_note='Mua LPB 900 co de thay the HPG (basket swap, weight 5.22% trong CUSTOM30V_8L)'; allocator_w_lag.actionable=false, 'BAL/LAG deu co 0 active deals'"
+  },
+  {
+   "ticker": "MBB",
+   "qty": 2400,
+   "book": "PARK",
+   "entry_date": "2026-07-02",
+   "cost_price_vnd": 25850.0,
+   "evidence": "2026-07-02 BUY 5800@25850 (journal exec_SpaceX_2026-07-02_journal.csv, parent_id=BUY-MBB-04); plan_SpaceX_2026-07-02.json order id=BUY-MBB-04 book='custom30V_parking'"
+  },
+  {
+   "ticker": "NCT",
+   "qty": 500,
+   "book": "CAPIT",
+   "entry_date": "2026-07-21",
+   "cost_price_vnd": 94360.0,
+   "evidence": "2026-07-21 BUY 500@94360 (journal exec_SpaceX_2026-07-21_journal.csv, parent_id=BUY-NCT-01); plan_SpaceX_2026-07-21.json order id=BUY-NCT-01 book='CAPIT'"
+  },
+  {
+   "ticker": "PVT",
+   "qty": 3000,
+   "book": "CAPIT",
+   "entry_date": "2026-07-21",
+   "cost_price_vnd": 17100.0,
+   "evidence": "2026-07-21 BUY 3000@17100 (journal exec_SpaceX_2026-07-21_journal.csv, parent_id=BUY-PVT-02); plan_SpaceX_2026-07-21.json order id=BUY-PVT-02 book='CAPIT'"
+  },
+  {
+   "ticker": "PVT",
+   "qty": 500,
+   "book": "CAPIT",
+   "entry_date": "2026-07-24",
+   "cost_price_vnd": 17100.0,
+   "evidence": "2026-07-24 BUY 500@17100 (journal exec_SpaceX_2026-07-24_journal.csv, parent_id=BUY-PVT-00); plan_SpaceX_2026-07-24.json order id=BUY-PVT-00 book='CAPIT'"
+  },
+  {
+   "ticker": "SAB",
+   "qty": 1100,
+   "book": "CAPIT",
+   "entry_date": "2026-07-21",
+   "cost_price_vnd": 47368.18,
+   "evidence": "2026-07-21 BUY 1100@47368 (journal exec_SpaceX_2026-07-21_journal.csv, parent_id=BUY-SAB-03); plan_SpaceX_2026-07-21.json order id=BUY-SAB-03 book='CAPIT'"
+  },
+  {
+   "ticker": "SHB",
+   "qty": 1500,
+   "book": "PARK",
+   "entry_date": "2026-07-01",
+   "cost_price_vnd": 13550.0,
+   "evidence": "2026-07-01 BUY 1800@13550 (journal exec_SpaceX_2026-07-01_journal.csv, parent_id=BUY-SHB-12); plan_SpaceX_2026-07-01.json order id=BUY-SHB-12 book='custom30V_parking'"
+  },
+  {
+   "ticker": "SHS",
+   "qty": 200,
+   "book": "PARK",
+   "entry_date": "2026-07-02",
+   "cost_price_vnd": 18900.0,
+   "evidence": "2026-07-02 BUY 600@18900 (journal exec_SpaceX_2026-07-02_journal.csv, parent_id=BUY-SHS-11); plan_SpaceX_2026-07-02.json order id=BUY-SHS-11 book='custom30V_parking'"
+  },
+  {
+   "ticker": "SIP",
+   "qty": 1100,
+   "book": "CAPIT",
+   "entry_date": "2026-07-21",
+   "cost_price_vnd": 47122.73,
+   "evidence": "2026-07-21 BUY 1100@47123 (journal exec_SpaceX_2026-07-21_journal.csv, parent_id=BUY-SIP-04); plan_SpaceX_2026-07-21.json order id=BUY-SIP-04 book='CAPIT'"
+  },
+  {
+   "ticker": "SIP",
+   "qty": 600,
+   "book": "CAPIT",
+   "entry_date": "2026-07-27",
+   "cost_price_vnd": 46941.67,
+   "evidence": "2026-07-27 BUY 600@46942 (journal exec_SpaceX_2026-07-27_journal.csv, parent_id=BUY-SIP-00); plan_SpaceX_2026-07-27.json order id=BUY-SIP-00 book='CAPIT'"
+  },
+  {
+   "ticker": "TCB",
+   "qty": 2000,
+   "book": "PARK",
+   "entry_date": "2026-07-01",
+   "cost_price_vnd": 33900.0,
+   "evidence": "2026-07-01 BUY 2400@33900 (journal exec_SpaceX_2026-07-01_journal.csv, parent_id=BUY-TCB-05); plan_SpaceX_2026-07-01.json order id=BUY-TCB-05 book='custom30V_parking'"
+  },
+  {
+   "ticker": "TPB",
+   "qty": 800,
+   "book": "PARK",
+   "entry_date": "2026-07-02",
+   "cost_price_vnd": 16800.0,
+   "evidence": "2026-07-02 BUY 1800@16800 (journal exec_SpaceX_2026-07-02_journal.csv, parent_id=BUY-TPB-07); plan_SpaceX_2026-07-02.json order id=BUY-TPB-07 book='custom30V_parking'"
+  },
+  {
+   "ticker": "TV1",
+   "qty": 100,
+   "book": "DISCRETIONARY_SPECIAL",
+   "entry_date": "2026-07-28",
+   "cost_price_vnd": 19600.0,
+   "evidence": "2026-07-28 BUY 100@19600 (journal exec_SpaceX_2026-07-28_journal.csv, parent_id=BUY-TV1-DISC-03); plan_SpaceX_2026-07-28.json order id=BUY-TV1-DISC-03 book='DISCRETIONARY_SPECIAL'"
+  },
+  {
+   "ticker": "TV1",
+   "qty": 300,
+   "book": "DISCRETIONARY_SPECIAL",
+   "entry_date": "2026-07-29",
+   "cost_price_vnd": 19600.0,
+   "evidence": "2026-07-29 BUY 300@19600 (journal exec_SpaceX_2026-07-29_journal.csv, parent_id=BUY-TV1-DISC-04); plan_SpaceX_2026-07-29.json order id=BUY-TV1-DISC-04 book='DISCRETIONARY_SPECIAL'"
+  },
+  {
+   "ticker": "VCB",
+   "qty": 1300,
+   "book": "PARK",
+   "entry_date": "2026-07-01",
+   "cost_price_vnd": 62300.0,
+   "evidence": "2026-07-01 BUY 1600@62300 (journal exec_SpaceX_2026-07-01_journal.csv, parent_id=BUY-VCB-02); plan_SpaceX_2026-07-01.json order id=BUY-VCB-02 book='custom30V_parking'"
+  },
+  {
+   "ticker": "VHM",
+   "qty": 500,
+   "book": "PARK",
+   "entry_date": "2026-07-01",
+   "cost_price_vnd": 149800.0,
+   "evidence": "2026-07-01 BUY 600@149800 (journal exec_SpaceX_2026-07-01_journal.csv, parent_id=BUY-VHM-03); plan_SpaceX_2026-07-01.json order id=BUY-VHM-03 book='custom30V_parking'"
+  },
+  {
+   "ticker": "VIX",
+   "qty": 700,
+   "book": "PARK",
+   "entry_date": "2026-07-01",
+   "cost_price_vnd": 17000.0,
+   "evidence": "2026-07-01 BUY 800@17000 (journal exec_SpaceX_2026-07-01_journal.csv, parent_id=BUY-VIX-15); plan_SpaceX_2026-07-01.json order id=BUY-VIX-15 book='custom30V_parking'"
+  },
+  {
+   "ticker": "VND",
+   "qty": 300,
+   "book": "PARK",
+   "entry_date": "2026-07-01",
+   "cost_price_vnd": 17800.0,
+   "evidence": "2026-07-01 BUY 400@17800 (journal exec_SpaceX_2026-07-01_journal.csv, parent_id=BUY-VND-17); plan_SpaceX_2026-07-01.json order id=BUY-VND-17 book='custom30V_parking'"
+  },
+  {
+   "ticker": "VNM",
+   "qty": 900,
+   "book": "CAPIT",
+   "entry_date": "2026-07-21",
+   "cost_price_vnd": 58600.0,
+   "evidence": "2026-07-21 BUY 900@58600 (journal exec_SpaceX_2026-07-21_journal.csv, parent_id=BUY-VNM-05); plan_SpaceX_2026-07-21.json order id=BUY-VNM-05 book='CAPIT'"
+  },
+  {
+   "ticker": "VPB",
+   "qty": 2300,
+   "book": "PARK",
+   "entry_date": "2026-07-02",
+   "cost_price_vnd": 27914.29,
+   "evidence": "2026-07-02 BUY 5600@27914 (journal exec_SpaceX_2026-07-02_journal.csv, parent_id=BUY-VPB-03); plan_SpaceX_2026-07-02.json order id=BUY-VPB-03 book='custom30V_parking'"
+  }
+ ],
+ "reconcile": [
+  {
+   "ticker": "ACB",
+   "broker_openQuantity": 1500,
+   "ledger_qty": 1500,
+   "diff": 0,
+   "broker_cost_price": 22650
+  },
+  {
+   "ticker": "BID",
+   "broker_openQuantity": 1900,
+   "ledger_qty": 1900,
+   "diff": 0,
+   "broker_cost_price": 42541.3043
+  },
+  {
+   "ticker": "CTG",
+   "broker_openQuantity": 2300,
+   "ledger_qty": 2300,
+   "diff": 0,
+   "broker_cost_price": 34026.7857
+  },
+  {
+   "ticker": "HDB",
+   "broker_openQuantity": 1500,
+   "ledger_qty": 1500,
+   "diff": 0,
+   "broker_cost_price": 26675
+  },
+  {
+   "ticker": "LPB",
+   "broker_openQuantity": 900,
+   "ledger_qty": 900,
+   "diff": 0,
+   "broker_cost_price": 51466.6667
+  },
+  {
+   "ticker": "MBB",
+   "broker_openQuantity": 2400,
+   "ledger_qty": 2400,
+   "diff": 0,
+   "broker_cost_price": 24850
+  },
+  {
+   "ticker": "NCT",
+   "broker_openQuantity": 500,
+   "ledger_qty": 500,
+   "diff": 0,
+   "broker_cost_price": 86360
+  },
+  {
+   "ticker": "PVT",
+   "broker_openQuantity": 3500,
+   "ledger_qty": 3500,
+   "diff": 0,
+   "broker_cost_price": 17100
+  },
+  {
+   "ticker": "SAB",
+   "broker_openQuantity": 1100,
+   "ledger_qty": 1100,
+   "diff": 0,
+   "broker_cost_price": 44368.1818
+  },
+  {
+   "ticker": "SHB",
+   "broker_openQuantity": 1500,
+   "ledger_qty": 1500,
+   "diff": 0,
+   "broker_cost_price": 13550
+  },
+  {
+   "ticker": "SHS",
+   "broker_openQuantity": 200,
+   "ledger_qty": 200,
+   "diff": 0,
+   "broker_cost_price": 18900
+  },
+  {
+   "ticker": "SIP",
+   "broker_openQuantity": 1700,
+   "ledger_qty": 1700,
+   "diff": 0,
+   "broker_cost_price": 47058.8235
+  },
+  {
+   "ticker": "TCB",
+   "broker_openQuantity": 2000,
+   "ledger_qty": 2000,
+   "diff": 0,
+   "broker_cost_price": 33900
+  },
+  {
+   "ticker": "TPB",
+   "broker_openQuantity": 800,
+   "ledger_qty": 800,
+   "diff": 0,
+   "broker_cost_price": 16800
+  },
+  {
+   "ticker": "TV1",
+   "broker_openQuantity": 400,
+   "ledger_qty": 400,
+   "diff": 0,
+   "broker_cost_price": 19600
+  },
+  {
+   "ticker": "VCB",
+   "broker_openQuantity": 1300,
+   "ledger_qty": 1300,
+   "diff": 0,
+   "broker_cost_price": 61850
+  },
+  {
+   "ticker": "VHM",
+   "broker_openQuantity": 500,
+   "ledger_qty": 500,
+   "diff": 0,
+   "broker_cost_price": 149800
+  },
+  {
+   "ticker": "VIX",
+   "broker_openQuantity": 700,
+   "ledger_qty": 700,
+   "diff": 0,
+   "broker_cost_price": 17000
+  },
+  {
+   "ticker": "VND",
+   "broker_openQuantity": 300,
+   "ledger_qty": 300,
+   "diff": 0,
+   "broker_cost_price": 17800
+  },
+  {
+   "ticker": "VNM",
+   "broker_openQuantity": 900,
+   "ledger_qty": 900,
+   "diff": 0,
+   "broker_cost_price": 58600
+  },
+  {
+   "ticker": "VPB",
+   "broker_openQuantity": 2300,
+   "ledger_qty": 2300,
+   "diff": 0,
+   "broker_cost_price": 27914.2857
+  }
+ ],
+ "warnings": []
+}

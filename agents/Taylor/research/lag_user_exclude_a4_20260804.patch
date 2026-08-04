@@ -1,0 +1,620 @@
+diff --git a/WorkingClaude/bot_execute.py b/WorkingClaude/bot_execute.py
+index 0a30452..535946c 100644
+--- a/WorkingClaude/bot_execute.py
++++ b/WorkingClaude/bot_execute.py
+@@ -35,6 +35,7 @@ from trading_bot.config import load_config, load_accounts, pick_accounts, EXEC_D
+ from trading_bot.brokers import make_broker, get_quote_source, get_dnse_client
+ from trading_bot.plan import (load_plan, filter_excluded_tickers, net_offsetting_orders,
+                               cap_capit_orders, cap_lag_orders, filter_lag_rating_orders,
++                              filter_lag_governance_orders,
+                               apply_capit_lever, lever_live_preflight, approval_block_reason)
+ from trading_bot.plan_funding_gate import check_plan_funding
+ from trading_bot.netting_recon import (reconcile_netted_fills, get_net_fill_from_journal,
+@@ -445,6 +446,18 @@ def main():
+             else:
+                 print(f"[{p['label']}] ⛔ LAG BỎ lệnh {a['ticker']} ({a['qty_before']:,} cp, "
+                       f"8L rating={a['rating']}) — {a['reason']}")
++        # GATE QUẢN TRỊ book LAG: BANNED vĩnh viễn + mã user LOẠI TƯỜNG MINH (LAG_USER_EXCLUDED)
++        # + cờ forensic severity=exclude. LƯỚI AN TOÀN tầng order cho gate vốn chỉ sống ở tầng
++        # sinh ứng viên (lag_forensic_filter.py tự ghi là thiếu lưới executor) — chính tầng mà
++        # sự cố 2026-07-23 xảy ra (IVS vào plan CẢ 2 account dù user đã loại 07-21).
++        # Fail-closed cho 2 hằng số trong code; fail-OPEN + báo to khi CSV forensic hỏng.
++        plan, gov_blocked = filter_lag_governance_orders(plan)
++        for a in gov_blocked:
++            if a["action"] in ("FAIL_OPEN", "FAIL_OPEN_FORENSIC"):
++                print(f"[{p['label']}] ⚠⚠ LAG gate quản trị KHÔNG ĐẦY ĐỦ — {a['reason']}")
++            else:
++                print(f"[{p['label']}] ⛔ LAG BỎ lệnh {a['ticker']} ({a['qty_before']:,} cp, "
++                      f"{a['kind']}) — {a['reason']}")
+         # ĐÒN BẨY MARGIN sleeve CAPIT (chính sách 2026-08-03, data/trading_rules.json →
+         # capit_margin_lever, MẶC ĐỊNH enabled=false). Cấp cờ vay CHỈ cho lệnh mua CAPIT khi
+         # artifact golive nói active=true; đồng thời GỠ mọi cờ vay lạ mà plan tự viết vào —
+diff --git a/WorkingClaude/lag_forensic_filter.py b/WorkingClaude/lag_forensic_filter.py
+index 571899e..d056d3b 100644
+--- a/WorkingClaude/lag_forensic_filter.py
++++ b/WorkingClaude/lag_forensic_filter.py
+@@ -17,11 +17,16 @@ BẢN CHẤT = CỔNG AN TOÀN/QUẢN TRỊ, KHÔNG PHẢI THAM SỐ TỐI ƯU L
+ trong cửa sổ backtest (`AUDIT_END=2026-06-19`) mọi cờ forensic đều ghi ngày 2026-06-20 ⇒ drop 0
+ event (đã verify lại, job Taylor_20260803_035250).
+ 
+-HAI NGUỒN, HAI NGỮ NGHĨA KHÁC NHAU:
++BA NGUỒN, BA NGỮ NGHĨA KHÁC NHAU:
+   1. `BANNED` (hằng số dưới) — cấm VĨNH VIỄN, KHÔNG có ngày hiệu lực ⇒ áp mọi lúc. Nguồn chuẩn
+      tắc = `mike/kb/KNOWLEDGE.md` ("Cổ phiếu BANNED vĩnh viễn"). Hằng số này được nhân bản
+      (giống `mike/bin/build_universe_pit_quality.py:71`) vì module này phải chạy được không cần
+      BQ client; self-check ĐỐI CHIẾU CƠ HỌC cả 2 nguồn để không trôi lệch âm thầm.
++  1b. `LAG_USER_EXCLUDED` (hằng số dưới, thêm 2026-08-04 job Taylor_20260804_155443) — mã user
++     LOẠI TƯỜNG MINH khỏi book LAG, có ngày quyết định, hiệu lực tới khi user ra chỉ đạo mới.
++     KHÁC `BANNED` ở PHẠM VI: `BANNED` là cấm toàn hệ (nhân bản vào `universe_pit_quality` ⇒ chạm
++     custom30V/BAL/CAPIT), còn đây CHỈ book LAG — đúng phạm vi quyết định user đã ra, không nới
++     rộng hộ. Xem §"VÌ SAO KHÔNG DÙNG 2 NGUỒN CÓ SẴN" dưới.
+   2. `data/forensic_flags.csv` severity=`exclude` — CÓ NGÀY hiệu lực (`date`). Áp khi
+      `date <= asof` (asof = NGÀY RA QUYẾT ĐỊNH, live = hôm nay). KHÔNG hồi tố: replay một ngày
+      trong quá khứ sẽ KHÔNG thấy cờ được gắn sau ngày đó. severity=`watch` KHÔNG loại.
+@@ -36,8 +41,29 @@ HAI NGUỒN, HAI NGỮ NGHĨA KHÁC NHAU:
+      job Taylor_20260803_015850 §7 nêu là lỗ hổng. Hai mốc trùng nhau trong mọi ca event mới
+      (release ≥ ngày cờ), chỉ khác ở event cũ — và ở đó `asof` mới là đáp án đúng.
+ 
++VÌ SAO KHÔNG DÙNG 2 NGUỒN CÓ SẴN cho danh sách user-loại (đo, không phán):
++  · KHÔNG thêm vào `data/forensic_flags.csv`: file đó có **NHIỀU consumer ngoài LAG** —
++    `rating_8l.py:465` ÉP rating=5 cho mã bị cờ (tức đổi chính bảng 8L mà BAL/custom30V/CAPIT
++    đọc), `custom_basket.py:307`, và 5 engine backtest (`pt_v22_dt5g.py:433`,
++    `pt_v23_lagqual_research.py:1046`, `pt_v23_lagcap_research.py:1046`,
++    `converge_fullharness_test.py:896`, `lag_dnpr_harness.py:784`). Thêm IVS/TMG vào đó sẽ đổi
++    bảng rating + đổi hành vi engine ⇒ **số pin R3 không còn tái lập được**. Ngoài ra sai NGỮ
++    NGHĨA: IVS/TMG KHÔNG phải ca forensic/kế toán (lý do loại là thanh khoản mỏng + ngoài mô
++    hình + chất lượng yếu), ghi vào registry forensic là làm bẩn nguồn phán quyết đó.
++  · KHÔNG thêm vào `BANNED`: hằng số đó nhân bản ở `mike/bin/build_universe_pit_quality.py:71`
++    và được ghi thành cột `banned` của bảng `universe_pit_quality` ⇒ chạm custom30V + toàn
++    universe, và phải rebuild lịch sử. User quyết "không mua IVS/TMG cho LAG", KHÔNG quyết cấm
++    toàn hệ — nới hộ phạm vi là tự ý mở rộng quyết định của user.
++  · Vì vậy: hằng số RIÊNG, trong CODE (không phải file dữ liệu). Là hằng số nên KHÔNG THỂ bị
++    xoá âm thầm và muốn sửa phải qua version control + review — cùng lý lẽ đã ghim ở
++    `trading_bot/plan.py::CAPIT_LEVER_APPROVED_*`. Một file CSV cạnh nó sẽ thêm đúng một
++    fail-mode mới (thiếu file ⇒ fail-open ⇒ im lặng thôi loại) mà chính lỗ hổng "chỉ tồn tại
++    dạng văn xuôi, ai cũng có thể quên" là thứ ta đang vá.
++
+ FAIL-SAFE (khác nhau theo nguồn, có chủ ý):
+-  · `BANNED` là hằng số trong code ⇒ KHÔNG THỂ hỏng ⇒ luôn áp, fail-closed tuyệt đối.
++  · `BANNED` và `LAG_USER_EXCLUDED` là hằng số trong code ⇒ KHÔNG THỂ hỏng ⇒ luôn áp,
++    fail-closed tuyệt đối (`LAG_USER_EXCLUDED` vẫn tôn trọng ngày quyết định qua `asof`,
++    xem dưới; `asof` không đọc được → coi mọi mục đã hiệu lực = fail-closed).
+   · Đọc `forensic_flags.csv` hỏng (thiếu file/hỏng định dạng) → GIỮ NGUYÊN danh sách + trả
+     error string (fail-open) để `status.json` phân biệt "không có mã nào bị cờ" vs "gate không
+     chạy được". Fail-CLOSED ở đây sẽ phải chặn TOÀN BỘ book LAG vì một file lỗi — thiệt hại lớn
+@@ -68,6 +94,24 @@ FORENSIC_CSV = "data/forensic_flags.csv"
+ EXCLUDE_SEVERITY = "exclude"
+ BANNED_TAG = "BANNED vĩnh viễn (mike/kb/KNOWLEDGE.md)"
+ 
++# ── Mã user LOẠI TƯỜNG MINH khỏi book LAG — {ticker: (ngày quyết định, lý do)} ──────────────
++# PHẠM VI = CHỈ book LAG (khác `BANNED` = cấm toàn hệ). Hiệu lực từ ngày quyết định tới khi
++# user ra chỉ đạo mới — KHÔNG có TTL, KHÔNG tự hết hạn (một cơ chế tự hết hạn sẽ âm thầm mở
++# lại một quyết định của user; xem coding_guidelines §20 và cảnh báo arch-reviewer về việc để
++# CRON tự đóng quyết định đang treo). Muốn bỏ một mã khỏi đây: user ra chỉ đạo → sửa code →
++# review. Nguồn văn xuôi gốc: `mike/kb/context_planning_mini.md` §"LAG entry EXCLUDE list".
++LAG_USER_EXCLUDED = {
++    "IVS": ("2026-07-21",
++            "user chốt phương án C (job Taylor_20260721_130404/_133858): thanh khoản mỏng "
++            "(ADV3T ~175-180M, phải ADV-cap ~10% mới mua được), ngoài universe_pit, "
++            "ROE_Trailing 1,89%, surprise +136,7% phồng cơ học do nền lỗ; PEAD nhóm CTCK "
++            "không dự báo được (IC +0,051 p=0,35)"),
++    "TMG": ("2026-07-21",
++            "user chốt phương án C cùng lúc với IVS: Volume_3M_P50=0 ⇒ ngoài mô hình "
++            "backtest hoàn toàn (đóng góp ĐÚNG 0), mua live = mua ngoài mô hình"),
++}
++USER_EXCLUDE_TAG = "LAG_USER_EXCLUDED (user loại tường minh, chỉ book LAG)"
++
+ 
+ def _load_forensic_excludes(csv_path):
+     """{ticker: Timestamp ngày hiệu lực} cho các dòng severity=exclude. Ném lỗi nếu đọc hỏng."""
+@@ -97,7 +141,7 @@ def lag_filter_forensic_banned(cand, asof, workdir=None, csv_path=None):
+     KHÔNG nhận `bq` (khác 2 filter anh em): cả 2 nguồn đều là dữ liệu cục bộ, không truy vấn BQ.
+ 
+     Trả (cand đã lọc, list dict mô tả mã bị loại, lỗi-nguồn|None). Mỗi dict:
+-    {"ticker", "kind" ("banned"|"forensic"), "flag_date" (str|None), "reason"}.
++    {"ticker", "kind" ("banned"|"user_exclude"|"forensic"), "flag_date" (str|None), "reason"}.
+     """
+     if cand is None or not len(cand):
+         return cand, [], None
+@@ -119,11 +163,28 @@ def lag_filter_forensic_banned(cand, asof, workdir=None, csv_path=None):
+     # Cờ đã hiệu lực TÍNH TỚI asof (điều kiện duy nhất — không dùng Release_Date, xem docstring).
+     active = {tk for tk, fd in forx.items() if fd <= asof_ts}
+ 
++    # Mã user loại tường minh, đã tới ngày quyết định (cùng mốc `asof` như cờ forensic — cùng
++    # lý lẽ: thời điểm ra quyết định là HÔM NAY, không phải Release_Date của event).
++    user_active = {}
++    for tk, (d, why) in LAG_USER_EXCLUDED.items():
++        try:
++            dts = pd.Timestamp(d)
++        except Exception:
++            dts = pd.Timestamp.min      # ngày hỏng → coi như đã hiệu lực (fail-closed)
++        if dts <= asof_ts:
++            user_active[tk] = (dts, why)
++
+     dropped = []
+     for tk in sorted(set(str(t).strip() for t in cand["ticker"])):
+         if tk in BANNED:
+             dropped.append({"ticker": tk, "kind": "banned", "flag_date": None,
+                             "reason": f"BANNED_TICKER — {BANNED_TAG}"})
++        elif tk in user_active:
++            dts, why = user_active[tk]
++            dropped.append({"ticker": tk, "kind": "user_exclude",
++                            "flag_date": str(dts.date()),
++                            "reason": f"LAG_USER_EXCLUDED — quyết định {dts.date()} ≤ asof "
++                                      f"{asof_ts.date()}, {USER_EXCLUDE_TAG}: {why}"})
+         elif tk in active:
+             fd = forx[tk].date()
+             dropped.append({"ticker": tk, "kind": "forensic", "flag_date": str(fd),
+diff --git a/WorkingClaude/lag_forensic_filter_selfcheck.py b/WorkingClaude/lag_forensic_filter_selfcheck.py
+index 1de987c..5777959 100644
+--- a/WorkingClaude/lag_forensic_filter_selfcheck.py
++++ b/WorkingClaude/lag_forensic_filter_selfcheck.py
+@@ -20,7 +20,7 @@ import tempfile
+ import pandas as pd
+ 
+ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+-from lag_forensic_filter import (BANNED, FORENSIC_CSV,  # noqa: E402
++from lag_forensic_filter import (BANNED, FORENSIC_CSV, LAG_USER_EXCLUDED,  # noqa: E402
+                                  lag_filter_forensic_banned)
+ 
+ WORKDIR = os.path.dirname(os.path.abspath(__file__))
+@@ -166,6 +166,67 @@ _min_excl = pd.to_datetime(_ff[_ff["severity"].str.strip() == "exclude"]["date"]
+ check("mọi cờ exclude đều có ngày > AUDIT_END 2026-06-19 (⇒ 0 event trong cửa sổ pin)",
+       _min_excl > pd.Timestamp("2026-06-19"), f"min={_min_excl}")
+ 
++# --- 8b. LAG_USER_EXCLUDED (nguồn 1b, thêm 2026-08-04 job Taylor_20260804_155443) ---
++# Bối cảnh đo được ngày 2026-08-04: IVS VÀ TMG ĐỀU là ứng viên LAG trở lại (nằm trong
++# lag_rating_excluded / lag_liq_excluded của golive_v23_status.json), tức "cửa sổ đã đóng" là
++# SAI. Hiện mỗi mã chỉ bị chặn bởi ĐÚNG MỘT cổng KHÔNG mang quyết định của user (IVS: rating
++# 8L=5; TMG: ADV=0) — các ca dưới kiểm chính cơ chế mang quyết định đó.
++check("IVS + TMG có trong LAG_USER_EXCLUDED", set(LAG_USER_EXCLUDED) >= {"IVS", "TMG"})
++
++kept, dropped, err = lag_filter_forensic_banned(
++    cand_df([("IVS", "2026-08-03"), ("TMG", "2026-08-03"), ("POW", "2026-08-03")]), ASOF,
++    csv_path=p)
++check("IVS+TMG bị loại vì user-exclude, POW giữ",
++      list(kept["ticker"]) == ["POW"] and len(dropped) == 2
++      and all(d["kind"] == "user_exclude" for d in dropped))
++check("dropped ghi ngày quyết định + lý do (audit trail đọc được)",
++      all(d["flag_date"] == "2026-07-21" and "LAG_USER_EXCLUDED" in d["reason"]
++          and len(d["reason"]) > 60 for d in dropped))
++
++# Không hồi tố: replay một ngày TRƯỚC khi user quyết (07-21) phải KHÔNG chặn — nếu không,
++# mọi backtest/replay lịch sử sẽ mang hindsight của quyết định 07-21.
++kept, dropped, _ = lag_filter_forensic_banned(
++    cand_df([("IVS", "2026-05-04")]), pd.Timestamp("2026-07-20"), csv_path=p)
++check("asof TRƯỚC ngày user quyết → KHÔNG hồi tố (giữ IVS)",
++      list(kept["ticker"]) == ["IVS"] and not dropped)
++kept, dropped, _ = lag_filter_forensic_banned(
++    cand_df([("IVS", "2026-05-04")]), pd.Timestamp("2026-07-21"), csv_path=p)
++check("asof ĐÚNG ngày user quyết → chặn (biên <=)", len(kept) == 0 and len(dropped) == 1)
++
++# Fail-closed: hằng số trong CODE nên KHÔNG phụ thuộc file nào — CSV forensic hỏng vẫn chặn.
++kept, dropped, err = lag_filter_forensic_banned(
++    cand_df([("IVS", "2026-08-03")]), ASOF, csv_path="/nonexistent/forensic.csv")
++check("CSV forensic hỏng nhưng user-exclude VẪN chặn (fail-closed tuyệt đối)",
++      len(kept) == 0 and len(dropped) == 1 and err is not None)
++kept, dropped, _ = lag_filter_forensic_banned(cand_df([("IVS", "2026-08-03")]), pd.NaT,
++                                              csv_path=p)
++check("asof = NaT → user-exclude fail-closed (chặn)", len(kept) == 0 and len(dropped) == 1)
++
++# Ưu tiên nguồn: BANNED thắng trước user-exclude (thông điệp mạnh hơn), và một mã user-exclude
++# KHÔNG được lẫn vào BANNED (khác phạm vi: BANNED chạm toàn hệ qua universe_pit_quality).
++check("IVS/TMG KHÔNG nằm trong BANNED (phạm vi CHỈ LAG, không nới hộ toàn hệ)",
++      not (set(LAG_USER_EXCLUDED) & set(BANNED)))
++_ff_all = set(pd.read_csv(real)["ticker"].astype(str).str.strip())
++check("IVS/TMG KHÔNG nằm trong forensic_flags.csv (tránh đổi bảng 8L + số pin R3)",
++      not (set(LAG_USER_EXCLUDED) & _ff_all))
++
++# Bất biến với số pin R3: mọi mục user-exclude phải có ngày > AUDIT_END, nếu không nó sẽ drop
++# event TRONG cửa sổ backtest và số pin không còn tái lập được.
++_min_ux = min(pd.Timestamp(d) for d, _ in LAG_USER_EXCLUDED.values())
++check("mọi mục LAG_USER_EXCLUDED có ngày > AUDIT_END 2026-06-19 (⇒ 0 event trong cửa sổ pin)",
++      _min_ux > pd.Timestamp("2026-06-19"), f"min={_min_ux}")
++
++# Đối chiếu CƠ HỌC với nguồn văn xuôi: mọi mã trong file văn xuôi phải có trong hằng số này.
++# Đây là lý do §A4 tồn tại — trước đó danh sách CHỈ sống ở văn xuôi.
++_pm = open("/home/trido/thanhdt/WorkingClaude/mike/kb/context_planning_mini.md",
++           encoding="utf-8").read()
++_prose_sec = _pm.split("## LAG entry EXCLUDE list")[1].split("\n## ")[0] if \
++    "## LAG entry EXCLUDE list" in _pm else ""
++_prose_tk = set(re.findall(r"\*\*([A-Z0-9]{3})\*\*", _prose_sec))
++check("mọi mã trong văn xuôi context_planning_mini.md đều có trong LAG_USER_EXCLUDED",
++      _prose_tk and _prose_tk <= set(LAG_USER_EXCLUDED),
++      f"văn xuôi={sorted(_prose_tk)} hằng số={sorted(LAG_USER_EXCLUDED)}")
++
+ # --- 9. Guard nối dây: golive_recommend_v23.py có thật sự gọi gate này không ---
+ _gl = open(os.path.join(WORKDIR, "deploy_golive_dt5g_v4", "golive_recommend_v23.py"),
+            encoding="utf-8").read()
+diff --git a/WorkingClaude/lag_governance_order_gate_selfcheck.py b/WorkingClaude/lag_governance_order_gate_selfcheck.py
+new file mode 100644
+index 0000000..4169c6b
+--- /dev/null
++++ b/WorkingClaude/lag_governance_order_gate_selfcheck.py
+@@ -0,0 +1,281 @@
++# -*- coding: utf-8 -*-
++"""lag_governance_order_gate_selfcheck.py — self-check cho
++trading_bot.plan.filter_lag_governance_orders (lưới an toàn tầng ORDER cho gate quản trị book
++LAG: BANNED vĩnh viễn + LAG_USER_EXCLUDED + cờ forensic severity=exclude).
++
++Chạy:  $DNA_PYEXE lag_governance_order_gate_selfcheck.py          (unit, offline — không cần BQ)
++       $DNA_PYEXE lag_governance_order_gate_selfcheck.py --live   (thêm REPLAY plan THẬT:
++           ca IVS 2026-07-23 CẢ 2 ACCOUNT, và toàn bộ plan thật 07-20→08-04 để xác nhận
++           0 lệnh nào KHÁC bị đổi)
++
++Khác `lag_forensic_filter_selfcheck.py`: file kia kiểm hàm lọc ỨNG VIÊN ở tầng tín hiệu
++(DataFrame candidate); file này kiểm việc áp cùng gate đó lên TỪNG ORDER trong TradePlan ở tầng
++executor — tức tầng mà sự cố 2026-07-23 thật sự xảy ra.
++
++Không phụ thuộc TZ/đồng hồ hệ thống: mọi mốc thời gian truyền tường minh (coding_guidelines §16;
++kiểm lại bằng `env -u TZ` + một TZ ngoại lai — xem phần cuối README của skill verify-before-done).
++"""
++import os
++import re
++import sys
++
++WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
++os.chdir(WORKDIR)
++sys.path.insert(0, WORKDIR)
++
++import pandas as pd
++
++from trading_bot import plan as plan_mod
++from trading_bot.plan import (PlannedOrder, TradePlan,  # noqa: E402
++                              filter_lag_governance_orders)
++from lag_forensic_filter import BANNED, LAG_USER_EXCLUDED  # noqa: E402
++
++ASOF = "2026-08-04"
++PASS = FAIL = 0
++
++
++def check(name, cond, detail=""):
++    global PASS, FAIL
++    if cond:
++        PASS += 1
++        print(f"  PASS  {name}")
++    else:
++        FAIL += 1
++        print(f"  FAIL  {name}  {detail}")
++
++
++def mk_plan(specs, plan_date=ASOF):
++    """specs: list (ticker, book, side). qty/ref_price cố định — gate không phụ thuộc chúng."""
++    orders = [PlannedOrder(id=f"{sd.upper()}-{tk}-{i:02d}", ticker=tk, side=sd, qty=1000,
++                           ref_price=20000.0, book=bk)
++              for i, (tk, bk, sd) in enumerate(specs)]
++    return TradePlan(plan_date=plan_date, signal_date=plan_date, strategy="test",
++                     strategy_version="0", state=3, state_name="NEUTRAL",
++                     nav_basis={}, orders=orders, account="SELFCHECK")
++
++
++def run(specs, plan_date=ASOF, asof=None):
++    return filter_lag_governance_orders(mk_plan(specs, plan_date), asof=asof)
++
++
++print("=== lag_governance_order_gate self-check ===")
++
++# --- 1. Ca sự cố THẬT 2026-07-23: IVS vào plan LAG (đây là lý do hàm này tồn tại) ---
++pl, blk = run([("IVS", "LAG", "buy")])
++check("IVS lệnh MUA book LAG bị CHẶN (ca sự cố 07-23)",
++      len(pl.orders) == 0 and len(blk) == 1 and blk[0]["action"] == "BLOCKED"
++      and blk[0]["kind"] == "user_exclude", f"blk={blk}")
++check("bản ghi chặn có order_id + qty_before + ngày quyết định (audit trail)",
++      blk and blk[0]["order_id"] == "BUY-IVS-00" and blk[0]["qty_before"] == 1000
++      and blk[0]["flag_date"] == "2026-07-21")
++
++pl, blk = run([("TMG", "LAG", "buy")])
++check("TMG lệnh MUA book LAG bị CHẶN", len(pl.orders) == 0 and blk[0]["kind"] == "user_exclude")
++
++# Ca sự cố ĐẦY ĐỦ: cả 2 account trong cùng một plan-shape + một lệnh sạch đi kèm
++pl, blk = run([("IVS", "LAG", "buy"), ("TRC", "LAG", "buy"), ("TMG", "LAG", "buy")])
++check("plan hỗn hợp: chặn IVS+TMG, GIỮ TRC (không kêu oan)",
++      [o.ticker for o in pl.orders] == ["TRC"] and len(blk) == 2)
++
++# --- 2. Ba nguồn đều có hiệu lực ở tầng lệnh ---
++pl, blk = run([("VVS", "LAG", "buy")])
++check("BANNED (VVS) bị chặn ở tầng lệnh", len(pl.orders) == 0 and blk[0]["kind"] == "banned")
++pl, blk = run([("BFC", "LAG", "buy")])
++check("cờ forensic exclude (BFC) bị chặn ở tầng lệnh",
++      len(pl.orders) == 0 and blk[0]["kind"] == "forensic")
++pl, blk = run([("POW", "LAG", "buy")])
++check("mã sạch (POW) KHÔNG bị chặn", len(pl.orders) == 1 and not blk)
++
++# --- 3. PHẠM VI: chỉ lệnh MUA, chỉ book LAG ---
++pl, blk = run([("IVS", "LAG", "sell")])
++check("lệnh BÁN IVS book LAG KHÔNG bị chặn (thoát vị thế phải luôn đi được)",
++      len(pl.orders) == 1 and not blk)
++pl, blk = run([("IVS", "BAL", "buy")])
++check("IVS book BAL KHÔNG bị chặn (phạm vi CHỈ LAG — không nới hộ sang book khác)",
++      len(pl.orders) == 1 and not blk)
++pl, blk = run([("IVS", "CAPIT", "buy"), ("IVS", "custom30V_parking", "buy")])
++check("IVS book CAPIT/parking KHÔNG bị chặn (phạm vi CHỈ LAG)",
++      len(pl.orders) == 2 and not blk)
++pl, blk = run([("IVS", "lag", "BUY")])
++check("book/side không phân biệt hoa-thường ('lag'/'BUY') vẫn chặn", len(pl.orders) == 0)
++pl, blk = run([("POW", "BAL", "buy"), ("VNM", "CAPIT", "buy")])
++check("plan KHÔNG có lệnh LAG buy → no-op, không gọi nguồn nào", len(pl.orders) == 2 and not blk)
++
++# --- 4. Ngày hiệu lực: KHÔNG hồi tố (replay quá khứ không mang hindsight 07-21) ---
++pl, blk = run([("IVS", "LAG", "buy")], asof="2026-07-20")
++check("asof 07-20 (TRƯỚC ngày user quyết) → KHÔNG chặn IVS",
++      len(pl.orders) == 1 and not blk)
++pl, blk = run([("IVS", "LAG", "buy")], asof="2026-07-21")
++check("asof 07-21 (ĐÚNG ngày user quyết) → chặn (biên <=)", len(pl.orders) == 0)
++pl, blk = run([("VVS", "LAG", "buy")], asof="2020-01-01")
++check("BANNED không phụ thuộc asof (chặn cả ở asof rất cũ)", len(pl.orders) == 0)
++
++# asof mặc định = plan.plan_date (không đọc đồng hồ máy)
++pl, blk = run([("IVS", "LAG", "buy")], plan_date="2026-07-20")
++check("asof mặc định lấy từ plan.plan_date, KHÔNG từ đồng hồ hệ thống",
++      len(pl.orders) == 1 and not blk)
++
++# --- 5. Fail-mode ---
++_real_deps = plan_mod._governance_gate_deps
++
++
++def _boom_deps():
++    raise RuntimeError("import lag_forensic_filter failed")
++
++
++plan_mod._governance_gate_deps = _boom_deps
++pl, blk = run([("IVS", "LAG", "buy"), ("POW", "LAG", "buy")])
++check("gate không chạy được → fail-OPEN (giữ lệnh) + bản ghi FAIL_OPEN báo động",
++      len(pl.orders) == 2 and len(blk) == 1 and blk[0]["action"] == "FAIL_OPEN"
++      and "CẦN NGƯỜI KIỂM TRA" in blk[0]["reason"])
++plan_mod._governance_gate_deps = _real_deps
++pl, blk = run([("IVS", "LAG", "buy")])
++check("phục hồi deps thật → chặn lại bình thường (monkeypatch không rò)",
++      len(pl.orders) == 0)
++
++
++def _no_csv_deps():
++    """CSV forensic hỏng: 2 hằng số VẪN áp, cờ forensic thì không → FAIL_OPEN_FORENSIC."""
++    real = _real_deps()
++
++    def _wrapped(cand, asof, workdir=None, csv_path=None):
++        return real(cand, asof, csv_path="/nonexistent/forensic.csv")
++    return _wrapped
++
++
++plan_mod._governance_gate_deps = _no_csv_deps
++pl, blk = run([("IVS", "LAG", "buy"), ("VVS", "LAG", "buy"), ("POW", "LAG", "buy")])
++_kinds = {b["kind"] for b in blk if b["action"] == "BLOCKED"}
++check("CSV forensic hỏng → user_exclude + BANNED VẪN chặn (fail-closed tuyệt đối)",
++      [o.ticker for o in pl.orders] == ["POW"] and _kinds == {"user_exclude", "banned"},
++      f"orders={[o.ticker for o in pl.orders]} kinds={_kinds}")
++check("CSV forensic hỏng → có bản ghi FAIL_OPEN_FORENSIC để báo to",
++      any(b["action"] == "FAIL_OPEN_FORENSIC" for b in blk))
++pl, blk = run([("BFC", "LAG", "buy")])
++check("CSV forensic hỏng → BFC (chỉ có cờ forensic) KHÔNG bị chặn = fail-open đúng nguồn",
++      len(pl.orders) == 1)
++plan_mod._governance_gate_deps = _real_deps
++
++# --- 6. Biên ---
++pl, blk = run([])
++check("plan rỗng → no-op", len(pl.orders) == 0 and not blk)
++pl, blk = run([("IVS", "LAG", "buy"), ("IVS", "LAG", "buy")])
++check("2 lệnh cùng mã bị loại → chặn CẢ HAI (không chỉ lệnh đầu)",
++      len(pl.orders) == 0 and len(blk) == 2)
++_p = mk_plan([("POW", "LAG", "buy")])
++_n_before = len(_p.orders)
++filter_lag_governance_orders(_p)
++check("lệnh sạch: plan.orders không bị đổi", len(_p.orders) == _n_before)
++
++# --- 7. Guard nối dây: bot_execute.py có thật sự gọi gate này không ---
++_be = open(os.path.join(WORKDIR, "bot_execute.py"), encoding="utf-8").read()
++check("bot_execute.py import filter_lag_governance_orders",
++      "filter_lag_governance_orders" in _be.split("def ")[0] or
++      "filter_lag_governance_orders," in _be)
++check("bot_execute.py GỌI filter_lag_governance_orders(plan) trong cascade",
++      "plan, gov_blocked = filter_lag_governance_orders(plan)" in _be)
++check("bot_execute.py in ra CẢ 2 nhánh fail-open (không im lặng)",
++      'FAIL_OPEN_FORENSIC' in _be and 'gate quản trị KHÔNG ĐẦY ĐỦ' in _be)
++_i_rating = _be.find("plan, rating_blocked = filter_lag_rating_orders(plan)")
++_i_gov = _be.find("plan, gov_blocked = filter_lag_governance_orders(plan)")
++_i_appr = _be.find("apply_capit_lever(plan")
++check("thứ tự cascade: rating → governance → lever",
++      0 < _i_rating < _i_gov < _i_appr, f"{_i_rating}/{_i_gov}/{_i_appr}")
++
++# --- 8. Không nhân bản nguồn: hàm phải DÙNG LẠI gate tầng tín hiệu ---
++_pl_src = open(os.path.join(WORKDIR, "trading_bot", "plan.py"), encoding="utf-8").read()
++_fn = _pl_src.split("def filter_lag_governance_orders")[1].split("\n# ──")[0]
++# Chỉ xét THÂN HÀM (sau docstring) — docstring CÓ quyền nhắc IVS vì nó kể lại ca sự cố 07-23;
++# điều phải cấm là một danh sách mã khai LẠI trong code (nguồn thứ hai sẽ trôi lệch âm thầm).
++_body = _fn.split('"""')[2] if _fn.count('"""') >= 2 else _fn
++# … và bỏ luôn mọi CHUỖI trong thân hàm: nhắc tên nguồn trong thông điệp log là ĐÚNG (người đọc
++# log cần biết nguồn nào vẫn áp khi CSV hỏng), chỉ khai lại DỮ LIỆU mới là lỗi.
++_code = re.sub(r'(?s)f?"(?:[^"\\]|\\.)*"|f?\'(?:[^\'\\]|\\.)*\'', '""', _body)
++check("THÂN HÀM (bỏ chuỗi) KHÔNG khai lại danh sách BANNED/IVS/TMG (dùng lại nguồn tầng tín hiệu)",
++      not any(t in _code for t in ("IVS", "TMG", "frozenset", "LAG_USER_EXCLUDED", "BANNED")),
++      f"thân hàm {len(_body)} ký tự, sau khi bỏ chuỗi {len(_code)}")
++check("_governance_gate_deps import từ lag_forensic_filter (một nguồn duy nhất)",
++      "from lag_forensic_filter import lag_filter_forensic_banned" in _pl_src)
++
++# --- 9. (--live) REPLAY plan THẬT ---
++# ⚠️ KHÔNG assert "gate chặn được IVS trên plan thật": ĐO ĐƯỢC 2026-08-04 rằng KHÔNG plan nào
++# trên đĩa còn chứa lệnh IVS/TMG. `plan_SpaceX_2026-07-23.json` — chính artifact của sự cố — đã
++# bị GHI LẠI (`regenerated_note`, `orders: []`); IVS chỉ còn sống trong `lag_upcoming_notes`
++# (`effective_buy_vnd: 18000000`, ref 6.200đ). Đây đúng hiện tượng re-plan-ghi-đè mà việc A2 đã
++# nêu. ⇒ Ca sự cố được replay bằng đơn hàng DỰNG LẠI từ chính các field note đó (phần 9b), còn
++# phần 9a chỉ dùng plan thật cho việc nó CHỨNG MINH ĐƯỢC: gate không đổi lệnh nào đang chạy tốt.
++if "--live" in sys.argv:
++    print("--- live: replay plan THẬT ---")
++    import glob
++    import json
++
++    n_plan = n_ivs_blocked = n_other_changed = 0
++    _pat = os.path.join(WORKDIR, "data", "trade_plans", "plan_*_2026-0[78]-*.json")
++    _files = sorted(glob.glob(_pat))
++    # Nếu glob không khớp file nào thì mọi assert dưới sẽ "pass vì không tìm thấy gì" — đúng
++    # cái bẫy mà skill verify-before-done nêu. Chặn ngay tại đây.
++    check(f"tìm được file plan THẬT để replay ({len(_files)} file)", len(_files) >= 10,
++          f"pattern={_pat}")
++    for fp in _files:
++        try:
++            raw = json.load(open(fp, encoding="utf-8"))
++        except Exception:
++            continue
++        specs = [(o.get("ticker"), o.get("book") or "", o.get("side") or "")
++                 for o in (raw.get("orders") or [])]
++        if not specs:
++            continue
++        n_plan += 1
++        pdate = str(raw.get("plan_date") or "")[:10] or ASOF
++        pl, blk = run(specs, plan_date=pdate)
++        for b in blk:
++            if b["action"] != "BLOCKED":
++                continue
++            if b["ticker"] in LAG_USER_EXCLUDED:
++                n_ivs_blocked += 1
++                print(f"    {os.path.basename(fp)}: CHẶN {b['ticker']} "
++                      f"({b['qty_before']:,} cp, {b['kind']})")
++            else:
++                n_other_changed += 1
++                print(f"    {os.path.basename(fp)}: chặn mã KHÁC {b['ticker']} ({b['kind']})")
++    # Bằng chứng hồi quy CHÍNH của phần live: gate KHÔNG đổi một lệnh nào trên plan thật đang
++    # chạy tốt (cùng mẫu bằng chứng mà gate rating P1 đã dùng: "0 lệnh khác đổi trên 21 plan").
++    check(f"replay {n_plan} plan THẬT có lệnh: 0 lệnh bị đổi ngoài ý muốn",
++          n_other_changed == 0 and n_ivs_blocked == 0,
++          f"n_ivs_blocked={n_ivs_blocked} n_other_changed={n_other_changed}")
++    print(f"    ({n_plan} plan có lệnh; 0 lệnh bị chặn — đúng kỳ vọng: không plan nào trên đĩa "
++          f"còn chứa lệnh IVS/TMG/BANNED/forensic)")
++
++    # --- 9b. Dựng lại ĐÚNG đơn hàng của sự cố 07-23 từ chính field note của plan thật ---
++    _fp23 = os.path.join(WORKDIR, "data", "trade_plans", "plan_SpaceX_2026-07-23.json")
++    _r23 = json.load(open(_fp23, encoding="utf-8"))
++    _note = ((_r23.get("lag_upcoming_notes") or {}).get("entry_07_24") or {}).get("IVS") or {}
++    check("plan 07-23 thật: xác nhận artifact đã bị ghi lại (orders rỗng, IVS chỉ còn trong note)",
++          not (_r23.get("orders") or []) and _note.get("type") == "LAG_HI"
++          and "regenerated_note" in _r23,
++          f"note={_note}")
++    # qty dựng từ số tiền + giá tham chiếu THẬT trong note (18.000.000đ @ 6.200đ ≈ 2.903cp);
++    # KHÔNG bịa số — nếu note đổi thì con số này đổi theo.
++    _buy_vnd = float(_note.get("effective_buy_vnd") or 0)
++    check("note 07-23 có effective_buy_vnd của IVS (số tiền THẬT định mua)", _buy_vnd > 0,
++          f"effective_buy_vnd={_buy_vnd}")
++    _qty = int(_buy_vnd // 6200)
++    _p23 = mk_plan([("IVS", "LAG", "buy")], plan_date="2026-07-24")
++    _p23.orders[0].qty = _qty
++    _p23, _b23 = filter_lag_governance_orders(_p23)
++    check(f"REPLAY sự cố: lệnh MUA IVS {_qty:,}cp (≈{_buy_vnd/1e6:.0f}M) ngày 07-24 bị CHẶN",
++          len(_p23.orders) == 0 and len(_b23) == 1
++          and _b23[0]["kind"] == "user_exclude" and _b23[0]["qty_before"] == _qty,
++          f"blk={_b23}")
++    # Hai account như sự cố ghi lại (SpaceX 1800cp + ZaloPay 2750cp) — nguồn:
++    # mike/kb/context_planning_mini.md §"LAG entry EXCLUDE list".
++    for _acct, _q in (("SpaceX", 1800), ("ZaloPay", 2750)):
++        _pp = mk_plan([("IVS", "LAG", "buy")], plan_date="2026-07-24")
++        _pp.orders[0].qty = _q
++        _pp.account = _acct
++        _pp, _bb = filter_lag_governance_orders(_pp)
++        check(f"REPLAY sự cố {_acct}: IVS {_q:,}cp bị CHẶN",
++              len(_pp.orders) == 0 and _bb[0]["kind"] == "user_exclude")
++
++print(f"\n=== {PASS} PASS / {FAIL} FAIL ===")
++sys.exit(1 if FAIL else 0)
+diff --git a/WorkingClaude/trading_bot/plan.py b/WorkingClaude/trading_bot/plan.py
+index ab189c0..ec2512d 100644
+--- a/WorkingClaude/trading_bot/plan.py
++++ b/WorkingClaude/trading_bot/plan.py
+@@ -613,6 +613,100 @@ def filter_lag_rating_orders(plan, asof=None):
+     return plan, blocked
+ 
+ 
++def _governance_gate_deps():
++    """Nguồn cho gate quản trị LAG. Tách riêng để self-check monkeypatch được (như _rating_gate_deps).
++
++    Trả `lag_filter_forensic_banned` — DÙNG LẠI nguyên hàm gate của tầng tín hiệu (BANNED +
++    LAG_USER_EXCLUDED + cờ forensic), không viết lại ba nguồn ở đây. KHÔNG cần `bq`: cả ba
++    nguồn đều cục bộ (2 hằng số trong code + 1 CSV).
++    """
++    import sys
++    from .config import WORKDIR
++    if WORKDIR not in sys.path:
++        sys.path.insert(0, WORKDIR)
++    from lag_forensic_filter import lag_filter_forensic_banned
++    return lag_filter_forensic_banned
++
++
++def filter_lag_governance_orders(plan, asof=None):
++    """GATE QUẢN TRỊ (BANNED + user-loại + cờ forensic) cho lệnh MUA book LAG — TẦNG ORDER.
++
++    VÌ SAO: `lag_forensic_filter.lag_filter_forensic_banned` (tầng SINH ứng viên, live từ
++    2026-08-03) tự ghi trong docstring rằng lưới tương ứng ở TẦNG LỆNH **CHƯA có** — và đó
++    chính là tầng mà sự cố thật đã xảy ra: **2026-07-23 DollarBill đưa IVS vào plan LAG CẢ HAI
++    account** (SpaceX 1800cp + ZaloPay 2750cp) dù user đã loại tường minh 07-21. Gate tầng tín
++    hiệu chặn được việc IVS TRỞ THÀNH ứng viên; nó KHÔNG chặn được một dòng
++    `{"ticker":"IVS","book":"LAG","side":"buy"}` viết thẳng vào plan JSON (LLM hoặc người sửa
++    tay). Trước hàm này, lớp phòng thủ duy nhất cho ca đó là TRÍ NHỚ của người lập plan — đúng
++    khuôn thất bại mà `filter_lag_rating_orders` (P1) đã được xây để vá cho gate rating.
++
++    KHÔNG phải chính sách mới: cả ba nguồn, ngữ nghĩa ngày hiệu lực (`date <= asof`) và fail-mode
++    đều dùng lại NGUYÊN `lag_filter_forensic_banned` — thay đổi duy nhất là NƠI GỌI.
++
++    FAIL-MODE — đồng bộ ĐÚNG hành vi gate tầng tín hiệu (không tự sáng tác hành vi khác):
++      · Mã thuộc `BANNED` / `LAG_USER_EXCLUDED` → LOẠI lệnh (fail-closed tuyệt đối: hằng số
++        trong code, không thể hỏng).
++      · Mã có cờ forensic `exclude` đã hiệu lực tới `asof` → LOẠI lệnh.
++      · `data/forensic_flags.csv` hỏng → hàm dưới vẫn áp 2 hằng số + trả `src_err`; ta GIỮ các
++        lệnh còn lại (fail-open cho riêng nguồn CSV) + 1 bản ghi action="FAIL_OPEN_FORENSIC"
++        để caller báo LOUD. Chặn sạch book LAG vì một file lỗi thì thiệt hại lớn hơn rủi ro.
++      · Cả gate không import/chạy được → GIỮ NGUYÊN plan (fail-OPEN) + action="FAIL_OPEN".
++
++    Vị trí trong cascade (bot_execute.py): filter_excluded → net → cap_capit → cap_lag →
++    rating → **governance** → lever → approval. Đặt sau `rating` (cùng nhóm LAG); thứ tự giữa
++    hai gate này KHÔNG đổi kết quả (cả hai loại hẳn lệnh, không đổi qty) — chỉ đổi việc log nào
++    in ra trước cho một lệnh trúng cả hai điều kiện.
++
++    Trả (plan đã lọc, list dict). Mỗi dict: {"ticker", "order_id", "kind"
++    ("banned"|"user_exclude"|"forensic"|None), "flag_date", "action", "qty_before", "reason"}.
++    """
++    def _is_lag_buy(o):
++        return (o.book or "").upper() == "LAG" and (o.side or "").lower() == "buy"
++
++    lag_buys = [o for o in plan.orders if _is_lag_buy(o)]
++    if not lag_buys:
++        return plan, []
++
++    asof = str(asof or plan.plan_date)[:10]
++    tickers = sorted({o.ticker for o in lag_buys})
++    try:
++        import pandas as pd
++        from .config import WORKDIR
++        lag_filter_forensic_banned = _governance_gate_deps()
++        cand = pd.DataFrame({"ticker": tickers})
++        _, dropped, src_err = lag_filter_forensic_banned(cand, asof, workdir=WORKDIR)
++    except Exception as ex:
++        # Gate KHÔNG chạy được (import lỗi/pandas lỗi) → fail-open + báo động, giống
++        # filter_lag_rating_orders. KHÔNG âm thầm bỏ qua.
++        return plan, [{"ticker": None, "order_id": None, "kind": None, "flag_date": None,
++                       "action": "FAIL_OPEN", "qty_before": None,
++                       "reason": f"KHÔNG chạy được gate quản trị LAG cho {tickers} "
++                                 f"({type(ex).__name__}: {ex}) — GIỮ NGUYÊN lệnh (fail-open). "
++                                 f"CẦN NGƯỜI KIỂM TRA BANNED/user-loại/forensic trước khi tin "
++                                 f"phiên này."}]
++
++    bad = {d["ticker"]: d for d in dropped}
++    blocked, keep = [], []
++    for o in plan.orders:
++        d = bad.get(o.ticker) if _is_lag_buy(o) else None
++        if d is None:
++            keep.append(o)
++            continue
++        blocked.append({"ticker": o.ticker, "order_id": o.id, "kind": d.get("kind"),
++                        "flag_date": d.get("flag_date"), "action": "BLOCKED",
++                        "qty_before": o.qty, "reason": d.get("reason")})
++    plan.orders = keep
++    if src_err:
++        # Hai hằng số VẪN được áp (mọi lệnh bị chặn ở trên vẫn có hiệu lực); chỉ riêng nguồn
++        # CSV forensic là không đọc được ⇒ nói to, đứng SAU các bản ghi BLOCKED.
++        blocked.append({"ticker": None, "order_id": None, "kind": None, "flag_date": None,
++                        "action": "FAIL_OPEN_FORENSIC", "qty_before": None,
++                        "reason": f"KHÔNG đọc được cờ forensic ({src_err}) — BANNED + "
++                                  f"LAG_USER_EXCLUDED VẪN áp, nhưng cờ forensic KHÔNG được "
++                                  f"kiểm cho {tickers}. CẦN NGƯỜI KIỂM TRA."})
++    return plan, blocked
++
++
+ # ── PHẠM VI USER DUYỆT cho đòn bẩy CAPIT (2026-08-03) — NGUỒN CHUẨN TẮC DUY NHẤT ──────────
+ # Ghim ở ĐÂY, tầng thực thi, chứ không phải chỉ ở tầng sinh tín hiệu. Lý do (arch-reviewer
+ # 2026-08-03, phát hiện F2): CẢ HAI file mà runtime đọc — `data/trading_rules.json` VÀ

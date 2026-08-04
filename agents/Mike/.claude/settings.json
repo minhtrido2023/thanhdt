@@ -36,7 +36,13 @@
   "permissions": {
     "allow": [
       "Bash(git push --force*)",
-      "Bash(crontab*)"
+      "Bash(crontab*)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(bin/jobs.sh status *)",
+      "Bash(bin/jobs.sh list *)",
+      "Bash(bin/jobs.sh wait *)"
     ]
   }
 }

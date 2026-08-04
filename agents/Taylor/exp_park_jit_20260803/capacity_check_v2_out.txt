@@ -1,0 +1,48 @@
+[rổ] custom30V rebal=2026-05-05  n=30
+[engine] ADV rổ 60 phiên = 6,684.9 tỷ/phiên  →  _etf_day_cap = 1,337.0 tỷ/phiên
+
+====================================================================================================
+A. NHU CẦU TRIM HÔM NAY, ĐO TRỰC TIẾP ở TỪNG target (không ngoại suy)
+====================================================================================================
+Cấu hình             acct      park_mv(tr)   cash(tr)  target(tr)  cần trim(tr)   max %ADV     dư địa
+Conservative 0.70    SpaceX          642.5        4.8       453.1         189.4     0.016%       638×
+Conservative 0.70    ZaloPay         297.6        5.8       212.4          85.2     0.006%     1,585×
+F1  0.80             SpaceX          642.5        4.8       517.8         124.6     0.010%       969×
+F1  0.80             ZaloPay         297.6        5.8       242.8          54.9     0.004%     2,461×
+F2  0.85             SpaceX          642.5        4.8       550.2          92.3     0.008%     1,309×
+F2  0.85             ZaloPay         297.6        5.8       257.9          39.7     0.003%     3,401×
+
+====================================================================================================
+B. STRESS — THOÁT SỔ PARK Ở QUY MÔ RIÊNG CỦA TỪNG CẤU HÌNH
+   (regime rời NEUTRAL ⇒ target→0; park_mv = park%NAV của CHÍNH cấu hình đó × NAV live)
+====================================================================================================
+
+--- SpaceX — NAV=959.6tr · park hiện tại=642.5tr (66.9% NAV) · T_bind=120.8 tỷ (LPB) · engine cap=1,337.0 tỷ ⇒ tốc độ ràng buộc=120.8 tỷ/phiên
+    cấu hình              park%NAV  park_mv(tr)  phiên để thoát  max %ADV/phiên
+    Conservative 0.70 [TB]     24.8%        238.0           0.00           0.020%
+    Conservative 0.70 [p95]     64.2%        616.1           0.01           0.051%
+    Conservative 0.70 [max]     66.8%        641.0           0.01           0.053%
+    F1  0.80 [TB]            28.6%        274.4           0.00           0.023%
+    F1  0.80 [p95]           73.5%        705.3           0.01           0.058%
+    F1  0.80 [max]           76.5%        734.1           0.01           0.061%
+    F2  0.85 [TB]            30.4%        291.7           0.00           0.024%
+    F2  0.85 [p95]           78.4%        752.3           0.01           0.062%
+    F2  0.85 [max]           81.0%        777.3           0.01           0.064%
+
+--- ZaloPay — NAV=902.0tr · park hiện tại=297.6tr (33.0% NAV) · T_bind=135.0 tỷ (BID) · engine cap=1,337.0 tỷ ⇒ tốc độ ràng buộc=135.0 tỷ/phiên
+    cấu hình              park%NAV  park_mv(tr)  phiên để thoát  max %ADV/phiên
+    Conservative 0.70 [TB]     24.8%        223.7           0.00           0.017%
+    Conservative 0.70 [p95]     64.2%        579.1           0.00           0.043%
+    Conservative 0.70 [max]     66.8%        602.5           0.00           0.045%
+    F1  0.80 [TB]            28.6%        258.0           0.00           0.019%
+    F1  0.80 [p95]           73.5%        663.0           0.00           0.049%
+    F1  0.80 [max]           76.5%        690.0           0.01           0.051%
+    F2  0.85 [TB]            30.4%        274.2           0.00           0.020%
+    F2  0.85 [p95]           78.4%        707.2           0.01           0.052%
+    F2  0.85 [max]           81.0%        730.6           0.01           0.054%
+
+====================================================================================================
+C. NGƯỠNG THẬT SỰ BINDING — park_mv phải LỚN CỠ NÀO thì mới cần >1 phiên để thoát?
+====================================================================================================
+  SpaceX: thoát trong 1 phiên an toàn tới park_mv = 120.8 tỷ = 12,587% NAV hiện tại ⇒ NAV phải gấp 161× hiện tại thì mức p95 của F2 mới chạm ngưỡng
+  ZaloPay: thoát trong 1 phiên an toàn tới park_mv = 135.0 tỷ = 14,969% NAV hiện tại ⇒ NAV phải gấp 191× hiện tại thì mức p95 của F2 mới chạm ngưỡng

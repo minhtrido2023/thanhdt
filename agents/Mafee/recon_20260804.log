@@ -1,0 +1,584 @@
+[dnse] kết nối OK [SpaceX_probe1840] tiểu khoản 0002023347
+
+[recon] has_trading_token = True
+[recon] client.loan_package_id (default account) = 1841
+
+===== positions (parsed) =====
+{
+  "ACB": {
+    "total": 1500,
+    "sellable": 1500
+  },
+  "BID": {
+    "total": 1900,
+    "sellable": 1900
+  },
+  "CTG": {
+    "total": 2300,
+    "sellable": 2300
+  },
+  "HDB": {
+    "total": 1500,
+    "sellable": 1500
+  },
+  "LPB": {
+    "total": 900,
+    "sellable": 900
+  },
+  "MBB": {
+    "total": 2400,
+    "sellable": 2400
+  },
+  "NCT": {
+    "total": 500,
+    "sellable": 500
+  },
+  "PVT": {
+    "total": 3500,
+    "sellable": 3500
+  },
+  "SAB": {
+    "total": 1100,
+    "sellable": 1100
+  },
+  "SHB": {
+    "total": 1500,
+    "sellable": 1500
+  },
+  "SHS": {
+    "total": 200,
+    "sellable": 200
+  },
+  "SIP": {
+    "total": 1700,
+    "sellable": 1700
+  },
+  "TCB": {
+    "total": 2000,
+    "sellable": 2000
+  },
+  "TPB": {
+    "total": 800,
+    "sellable": 800
+  },
+  "TV1": {
+    "total": 400,
+    "sellable": 400
+  },
+  "VCB": {
+    "total": 1300,
+    "sellable": 1300
+  },
+  "VHM": {
+    "total": 500,
+    "sellable": 500
+  },
+  "VIX": {
+    "total": 700,
+    "sellable": 700
+  },
+  "VND": {
+    "total": 300,
+    "sellable": 300
+  },
+  "VNM": {
+    "total": 900,
+    "sellable": 900
+  },
+  "VPB": {
+    "total": 2300,
+    "sellable": 2300
+  }
+}
+
+===== positions (RAW) =====
+{
+  "positions": [
+    {
+      "id": 2671989,
+      "marketType": "STOCK",
+      "symbol": "ACB",
+      "accountNo": "0002023347",
+      "status": "OPEN",
+      "loanPackageId": 1841,
+      "side": "NB",
+      "accumulateQuantity": 1800,
+      "tradeQuantity": 1500,
+      "closedQuantity": 300,
+      "openQuantity": 1500,
+      "costPrice": 22650,
+      "marketPrice": 22550,
+      "breakEvenPrice": 22717.0232,
+      "averageClosePrice": 22650,
+      "createdDate": "2026-07-01T03:01:52.075535Z",
+      "modifiedDate": "2026-08-03T11:23:39.84885Z"
+    },
+    {
+      "id": 2674358,
+      "marketType": "STOCK",
+      "symbol": "BID",
+      "accountNo": "0002023347",
+      "status": "OPEN",
+      "loanPackageId": 1841,
+      "side": "NB",
+      "accumulateQuantity": 4600,
+      "tradeQuantity": 1900,
+      "closedQuantity": 2700,
+      "openQuantity": 1900,
+      "costPrice": 42541.3043,
+      "marketPrice": 38250,
+      "breakEvenPrice": 42710.5298,
+      "averageClosePrice": 42150,
+      "createdDate": "2026-07-02T02:15:13.550211Z",
+      "modifiedDate": "2026-08-03T11:23:04.762663Z"
+    },
+    {
+      "id": 2674326,
+      "marketType": "STOCK",
+      "symbol": "CTG",
+      "accountNo": "0002023347",
+      "status": "OPEN",
+      "loanPackageId": 1841,
+      "side": "NB",
+      "accumulateQuantity": 5600,
+      "tradeQuantity": 2300,
+      "closedQuantity": 3300,
+      "openQuantity": 2300,
+      "costPrice": 34026.7857,
+      "marketPrice": 31800,
+      "breakEvenPrice": 34162.2553,
+      "averageClosePrice": 34350,
+      "createdDate": "2026-07-02T02:15:12.132339Z",
+      "modifiedDate": "2026-08-03T11:23:38.57239Z"
+    },
+    {
+      "id": 2674329,
+      "marketType": "STOCK",
+      "symbol": "HDB",
+      "accountNo": "0002023347",
+      "status": "OPEN",
+      "loanPackageId": 1841,
+      "side": "NB",
+      "accumulateQuantity": 3600,
+      "tradeQuantity": 1500,
+      "closedQuantity": 2100,
+      "openQuantity": 1500,
+      "costPrice": 26675,
+      "marketPrice": 26000,
+      "breakEvenPrice": 26766.2675,
+      "averageClosePrice": 26850,
+      "createdDate": "2026-07-02T02:15:12.483438Z",
+      "modifiedDate": "2026-08-03T11:23:37.611948Z"
+    },
+    {
+      "id": 2704429,
+      "marketType": "STOCK",
+      "symbol": "LPB",
+      "accountNo": "0002023347",
+      "status": "OPEN",
+      "loanPackageId": 1841,
+      "side": "NB",
+      "accumulateQuantity": 900,
+      "tradeQuantity": 900,
+      "closedQuantity": 0,
+      "openQuantity": 900,
+      "costPrice": 51466.6667,
+      "marketPrice": 53000,
+      "breakEvenPrice": 51618.5786,
+      "averageClosePrice": 0,
+      "createdDate": "2026-07-15T02:15:36.111555Z",
+      "modifiedDate": "2026-08-03T11:23:04.08681Z"
+    },
+    {
+      "id": 2674328,
+      "marketType": "STOCK",
+      "symbol": "MBB",
+      "accountNo": "0002023347",
+      "status": "OPEN",
+      "loanPackageId": 1841,
+      "side": "NB",
+      "accumulateQuantity": 5800,
+      "tradeQuantity": 2400,
+      "closedQuantity": 3400,
+      "openQuantity": 2400,
+      "costPrice": 24850,
+      "marketPrice": 24000,
+      "breakEvenPrice": 24950.2963,
+      "averageClosePrice": 25650,
+      "createdDate": "2026-07-02T02:15:12.372253Z",
+      "modifiedDate": "2026-08-03T11:23:33.056207Z"
+    },
+    {
+      "id": 2718791,
+      "marketType": "STOCK",
+      "symbol": "NCT",
+      "accountNo": "0002023347",
+      "status": "OPEN",
+      "loanPackageId": 1841,
+      "side": "NB",
+      "accumulateQuantity": 500,
+      "tradeQuantity": 500,
+      "closedQuantity": 0,
+      "openQuantity": 500,
+      "costPrice": 86360,
+      "marketPrice": 83400,
+      "breakEvenPrice": 86622.4763,
+      "averageClosePrice": 0,
+      "createdDate": "2026-07-21T06:00:08.652866Z",
+      "modifiedDate": "2026-08-03T11:23:11.587349Z"
+    },
+    {
+      "id": 2717699,
+      "marketType": "STOCK",
+      "symbol": "PVT",
+      "accountNo": "0002023347",
+      "status": "OPEN",
+      "loanPackageId": 1841,
+      "side": "NB",
+      "accumulateQuantity": 3500,
+      "tradeQuantity": 3500,
+      "closedQuantity": 0,
+      "openQuantity": 3500,
+      "costPrice": 17100,
+      "marketPrice": 18600,
+      "breakEvenPrice": 17150.674,
+      "averageClosePrice": 0,
+      "createdDate": "2026-07-21T02:30:02.418196Z",
+      "modifiedDate": "2026-08-03T11:23:03.715682Z"
+    },
+    {
+      "id": 2717700,
+      "marketType": "STOCK",
+      "symbol": "SAB",
+      "accountNo": "0002023347",
+      "status": "OPEN",
+      "loanPackageId": 1841,
+      "side": "NB",
+      "accumulateQuantity": 1100,
+      "tradeQuantity": 1100,
+      "closedQuantity": 0,
+      "openQuantity": 1100,
+      "costPrice": 44368.1818,
+      "marketPrice": 44800,
+      "breakEvenPrice": 44502.1,
+      "averageClosePrice": 0,
+      "createdDate": "2026-07-21T02:30:02.48176Z",
+      "modifiedDate": "2026-08-03T11:23:07.306499Z"
+    },
+    {
+      "id": 2671990,
+      "marketType": "STOCK",
+      "symbol": "SHB",
+      "accountNo": "0002023347",
+      "status": "OPEN",
+      "loanPackageId": 1841,
+      "side": "NB",
+      "accumulateQuantity": 1800,
+      "tradeQuantity": 1500,
+      "closedQuantity": 300,
+      "openQuantity": 1500,
+      "costPrice": 13550,
+      "marketPrice": 11900,
+      "breakEvenPrice": 13590.2167,
+      "averageClosePrice": 13600,
+      "createdDate": "2026-07-01T03:01:52.219187Z",
+      "modifiedDate": "2026-08-03T11:24:18.947274Z"
+    },
+    {
+      "id": 2674347,
+      "marketType": "STOCK",
+      "symbol": "SHS",
+      "accountNo": "0002023347",
+      "status": "OPEN",
+      "loanPackageId": 1841,
+      "side": "NB",
+      "accumulateQuantity": 600,
+      "tradeQuantity": 200,
+      "closedQuantity": 400,
+      "openQuantity": 200,
+      "costPrice": 18900,
+      "marketPrice": 15600,
+      "breakEvenPrice": 18955.9783,
+      "averageClosePrice": 19100,
+      "createdDate": "2026-07-02T02:15:13.199908Z",
+      "modifiedDate": "2026-08-03T11:23:39.20641Z"
+    },
+    {
+      "id": 2717901,
+      "marketType": "STOCK",
+      "symbol": "SIP",
+      "accountNo": "0002023347",
+      "status": "OPEN",
+      "loanPackageId": 1841,
+      "side": "NB",
+      "accumulateQuantity": 1700,
+      "tradeQuantity": 1700,
+      "closedQuantity": 0,
+      "openQuantity": 1700,
+      "costPrice": 47058.8235,
+      "marketPrice": 49650,
+      "breakEvenPrice": 47197.7501,
+      "averageClosePrice": 0,
+      "createdDate": "2026-07-21T02:51:15.897532Z",
+      "modifiedDate": "2026-08-03T11:23:04.72643Z"
+    },
+    {
+      "id": 2671986,
+      "marketType": "STOCK",
+      "symbol": "TCB",
+      "accountNo": "0002023347",
+      "status": "OPEN",
+      "loanPackageId": 1841,
+      "side": "NB",
+      "accumulateQuantity": 2400,
+      "tradeQuantity": 2000,
+      "closedQuantity": 400,
+      "openQuantity": 2000,
+      "costPrice": 33900,
+      "marketPrice": 29950,
+      "breakEvenPrice": 34000.1633,
+      "averageClosePrice": 33600,
+      "createdDate": "2026-07-01T03:01:50.97896Z",
+      "modifiedDate": "2026-08-03T11:23:37.673585Z"
+    },
+    {
+      "id": 2674331,
+      "marketType": "STOCK",
+      "symbol": "TPB",
+      "accountNo": "0002023347",
+      "status": "OPEN",
+      "loanPackageId": 1841,
+      "side": "NB",
+      "accumulateQuantity": 1800,
+      "tradeQuantity": 800,
+      "closedQuantity": 1000,
+      "openQuantity": 800,
+      "costPrice": 16800,
+      "marketPrice": 14400,
+      "breakEvenPrice": 16849.7903,
+      "averageClosePrice": 16450,
+      "createdDate": "2026-07-02T02:15:12.712223Z",
+      "modifiedDate": "2026-08-03T11:23:41.84353Z"
+    },
+    {
+      "id": 2734747,
+      "marketType": "STOCK",
+      "symbol": "TV1",
+      "accountNo": "0002023347",
+      "status": "OPEN",
+      "loanPackageId": 1122,
+      "side": "NB",
+      "accumulateQuantity": 400,
+      "tradeQuantity": 400,
+      "closedQuantity": 0,
+      "openQuantity": 400,
+      "costPrice": 19600,
+      "marketPrice": 19500,
+      "breakEvenPrice": 19654.5005,
+      "averageClosePrice": 0,
+      "createdDate": "2026-07-28T07:13:12.618718Z",
+      "modifiedDate": "2026-08-03T11:23:01.991027Z"
+    },
+    {
+      "id": 2671984,
+      "marketType": "STOCK",
+      "symbol": "VCB",
+      "accountNo": "0002023347",
+      "status": "OPEN",
+      "loanPackageId": 1841,
+      "side": "NB",
+      "accumulateQuantity": 1600,
+      "tradeQuantity": 1300,
+      "closedQuantity": 300,
+      "openQuantity": 1300,
+      "costPrice": 61850,
+      "marketPrice": 60800,
+      "breakEvenPrice": 62096.1124,
+      "averageClosePrice": 62066.6667,
+      "createdDate": "2026-07-01T03:01:50.534701Z",
+      "modifiedDate": "2026-08-03T11:23:29.977357Z"
+    },
+    {
+      "id": 2671985,
+      "marketType": "STOCK",
+      "symbol": "VHM",
+      "accountNo": "0002023347",
+      "status": "OPEN",
+      "loanPackageId": 1841,
+      "side": "NB",
+      "accumulateQuantity": 600,
+      "tradeQuantity": 500,
+      "closedQuantity": 100,
+      "openQuantity": 500,
+      "costPrice": 149800,
+      "marketPrice": 148000,
+      "breakEvenPrice": 150241.5819,
+      "averageClosePrice": 157700,
+      "createdDate": "2026-07-01T03:01:50.598843Z",
+      "modifiedDate": "2026-08-03T11:23:20.753743Z"
+    },
+    {
+      "id": 2671991,
+      "marketType": "STOCK",
+      "symbol": "VIX",
+      "accountNo": "0002023347",
+      "status": "OPEN",
+      "loanPackageId": 1841,
+      "side": "NB",
+      "accumulateQuantity": 800,
+      "tradeQuantity": 700,
+      "closedQuantity": 100,
+      "openQuantity": 700,
+      "costPrice": 17000,
+      "marketPrice": 13400,
+      "breakEvenPrice": 17050.3792,
+      "averageClosePrice": 17100,
+      "createdDate": "2026-07-01T03:01:52.428698Z",
+      "modifiedDate": "2026-08-03T11:23:39.294632Z"
+    },
+    {
+      "id": 2671992,
+      "marketType": "STOCK",
+      "symbol": "VND",
+      "accountNo": "0002023347",
+      "status": "OPEN",
+      "loanPackageId": 1841,
+      "side": "NB",
+      "accumulateQuantity": 400,
+      "tradeQuantity": 300,
+      "closedQuantity": 100,
+      "openQuantity": 300,
+      "costPrice": 17800,
+      "marketPrice": 16850,
+      "breakEvenPrice": 17852.7332,
+      "averageClosePrice": 18400,
+      "createdDate": "2026-07-01T03:01:52.564Z",
+      "modifiedDate": "2026-08-03T11:23:30.004558Z"
+    },
+    {
+      "id": 2717701,
+      "marketType": "STOCK",
+      "symbol": "VNM",
+      "accountNo": "0002023347",
+      "status": "OPEN",
+      "loanPackageId": 1841,
+      "side": "NB",
+      "accumulateQuantity": 900,
+      "tradeQuantity": 900,
+      "closedQuantity": 0,
+      "openQuantity": 900,
+      "costPrice": 58600,
+      "marketPrice": 60300,
+      "breakEvenPrice": 58772.9227,
+      "averageClosePrice": 0,
+      "createdDate": "2026-07-21T02:30:02.542816Z",
+      "modifiedDate": "2026-08-03T11:23:01.908843Z"
+    },
+    {
+      "id": 2674327,
+      "marketType": "STOCK",
+      "symbol": "VPB",
+      "accountNo": "0002023347",
+      "status": "OPEN",
+      "loanPackageId": 1841,
+      "side": "NB",
+      "accumulateQuantity": 5600,
+      "tradeQuantity": 2300,
+      "closedQuantity": 3300,
+      "openQuantity": 2300,
+      "costPrice": 27914.2857,
+      "marketPrice": 25500,
+      "breakEvenPrice": 28019.0149,
+      "averageClosePrice": 27750,
+      "createdDate": "2026-07-02T02:15:12.250477Z",
+      "modifiedDate": "2026-08-03T11:23:35.642702Z"
+    }
+  ]
+}
+
+===== balances (RAW) =====
+{
+  "stock": {
+    "totalCash": 14596244,
+    "availableCash": 4821143,
+    "depositInterest": 101,
+    "totalDebt": 0,
+    "depositFeeAmount": 762,
+    "secureAmount": 0,
+    "orderSecured": 0,
+    "withdrawableCash": 4820381,
+    "cashDividendReceiving": 9775000
+  },
+  "derivative": {
+    "pendingDepositWithdraw": 0,
+    "remainSecure": 0,
+    "usedSecure": 0,
+    "pendingSecure": 0,
+    "holdTaxAndFee": 0,
+    "totalLoanDebt": 0
+  }
+}
+
+===== quote MBB (RAW mapped) =====
+{
+  "symbol": "MBB",
+  "marketId": "STO",
+  "boardId": "G1",
+  "isin": "VN000000MBB5",
+  "productGrpId": "STO",
+  "securityGroupId": "ST",
+  "basicPrice": 24,
+  "ceilingPrice": 25.65,
+  "floorPrice": 22.35,
+  "securityStatus": "NO_HALT",
+  "symbolAdminStatusCode": "NRM",
+  "symbolTradingMethodStatusCode": "NRM",
+  "symbolTradingSanctionStatusCode": "NRM",
+  "finalTradeDate": null,
+  "listingDate": "2011-11-01T00:00:00Z",
+  "time": "2026-08-03 14:45:03.015",
+  "matchPrice": 24,
+  "matchQtty": 30,
+  "side": "BUY",
+  "avgPrice": 23.631,
+  "totalVolumeTraded": 2273510,
+  "grossTradeAmount": 537.26187,
+  "highestPrice": 24.05,
+  "lowestPrice": 22.75,
+  "openPrice": 22.75,
+  "bidPrice1": 24.1,
+  "offerPrice1": 24.15,
+  "totalOfferQtty": 0,
+  "totalBidQtty": 0
+}
+[recon] Quote.last=24000.0 bid=24100.0 ask=24150.0 ref=24000.0 ceil=25650.0 floor=22350.0
+
+===== loan_packages MBB (RAW) =====
+{
+  "symbol": "MBB",
+  "marketType": "STOCK",
+  "loanPackages": [
+    {
+      "id": 1841,
+      "name": "GD Tiền mặt",
+      "initialRate": 1.0,
+      "interestRate": 0.125,
+      "liquidRate": 0.3,
+      "maintenanceRate": 0.4,
+      "type": "M",
+      "brokerFirmBuyingFeeRate": 0.0007,
+      "brokerFirmSellingFeeRate": 0.0007
+    },
+    {
+      "id": 1840,
+      "name": "RocketX",
+      "initialRate": 0.5,
+      "interestRate": 0.125,
+      "liquidRate": 0.3,
+      "maintenanceRate": 0.4,
+      "type": "M",
+      "brokerFirmBuyingFeeRate": 0.0007,
+      "brokerFirmSellingFeeRate": 0.0007
+    }
+  ]
+}
