@@ -1,0 +1,230 @@
+# -*- coding: utf-8 -*-
+"""Cấu hình bot — đọc/ghi data/trading_bot_config.json (tạo mặc định nếu chưa có)."""
+
+import json
+import os
+
+WORKDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_DIR = os.path.join(WORKDIR, "data")
+PLAN_DIR = os.path.join(DATA_DIR, "trade_plans")
+EXEC_DIR = os.path.join(DATA_DIR, "execution_logs")
+CONFIG_FILE = os.path.join(os.path.dirname(DATA_DIR), "secrets", "trading_bot_config.json")
+ACCOUNTS_FILE = os.path.join(os.path.dirname(DATA_DIR), "secrets", "trading_bot_accounts.json")
+STOP_FILE = os.path.join(DATA_DIR, "BOT_STOP")          # tạo file này → bot dừng + hủy lệnh treo
+
+DEFAULTS = {
+    # --- chung ---
+    "mode": "paper",                  # "paper" | "live"
+    "broker": "phs",                  # "phs" | "dnse" (per-account override được)
+    "strategy": "v23",                # key trong strategies.REGISTRY
+    "account_id": None,               # None → tiểu khoản đầu tiên từ PHS
+    "etf_symbol": "E1VFVN30",
+    "include_etf_park": True,         # mirror cả phần park ETF của paper book
+
+    # --- sizing / mirror ---
+    "paper_init_cash": 1_000_000_000, # tiền ảo khởi tạo cho PaperBroker (VND)
+    "min_order_value": 5_000_000,     # bỏ qua lệnh < 5M VND (dust)
+    "qty_tolerance_pct": 0.05,        # |lệch| < 5% target → không phát lệnh sync
+
+    # --- slicing / execution ---
+    "max_child_value": 200_000_000,   # VND tối đa mỗi lệnh con
+    "max_participation": 0.10,        # mua/bán ≤ 10% KL khớp lũy kế trong ngày của mã
+    "capit_realized_participation_ceiling": 0.30,  # áp cho lệnh ADV20-paced (CAPIT +
+                                      #   DISCRETIONARY_SPECIAL, mở rộng job Taylor_20260727_072910;
+                                      #   job gốc Taylor_20260721_053659): sau khi đổi cơ sở pacing
+                                      #   sang ADV20 causal, trần phụ này chặn fleet vượt 30% KL
+                                      #   khớp lũy kế THẬT của phiên → không bao giờ thành đa số
+                                      #   một phiên mỏng. Chọn cận trên dải 25-30% mà market-impact
+                                      #   test (Taylor_20260721_050720) khuyến nghị: đủ lỏng để KHÔNG
+                                      #   tái lập zero-block NCT 2026-07-21 (cần <10% realized mới
+                                      #   sập) nhưng vẫn bắt đuôi >30% tape. Non-CAPIT KHÔNG dùng.
+    "slice_interval_min": 8,          # phút giữa 2 lệnh con cùng một parent
+    "poll_interval_sec": 20,          # chu kỳ poll sổ lệnh + quote
+    "chase_ticks": 1,                 # mua: đặt bid + n tick (passive); 0 = đặt ngay bid
+    "buy_cross_spread": True,          # True: mua đặt thẳng giá ask (marketable)
+    "cross_mode": "adaptive",         # "adaptive" (default, user+Taylor 2026-06-26): DIP khi
+                                      #   order_value/ADV < adaptive_cross_adv_threshold, else
+                                      #   TWAP. @1B hầu hết lệnh <0.1% ADV → DIP tự nhiên;
+                                      #   khi NAV lớn shift TWAP không cần reconfig.
+                                      # "always": TWAP — cross mọi slice (archived; Taylor
+                                      #   backtest: fill-rate hơn dip 3.5bps nhưng variance 2×).
+                                      # "dip": S2 mean-reversion (archived — beat by adaptive).
+    "adaptive_cross_adv_threshold": 0.01,  # 1% ADV: dưới ngưỡng → DIP; trên → TWAP.
+                                           # Taylor backtest: DIP fill 0.90→0.38 khi >1% ADV.
+    "dip_window_min": 15,             # cửa sổ return quyết định cross/passive
+    "px_sample_sec": 60,              # chu kỳ ghi giá vào px_hist (tính r15)
+    "max_chase_pct_buy": 0.015,       # trần đuổi giá mua = ref_plan × (1+1.5%)
+    "max_chase_pct_sell": 0.03,       # sàn đuổi giá bán = ref_plan × (1−3%)
+    "atc_remainder_sell": True,       # phần bán còn sót → quét ATC
+    "atc_remainder_buy": False,       # phần mua còn sót → mặc định bỏ (mai plan mới tự sync)
+    "paper_fee_rate": 0.0015,         # phí mô phỏng paper (0.15% mỗi chiều)
+
+    # --- fill-timing (Layer-3 WHEN-to-fill, đặt trên adaptive cross_mode) ---
+    # Taylor backtest 16 names 9670 ticker-days: Open là giờ TỆ nhất mua (+18.7bps),
+    # 11:15 là đáy intraday (+1.1bps). SELL: Open là TỐT nhất (+18.7bps morning premium).
+    # Lợi ~17.6bps/lệnh mua vs Open, ~5-6bps vs uniform/VWAP (edge trung bình, std cao).
+    "fill_timing_enabled": True,      # True: side-aware schedule; False: uniform (tắt hẳn)
+    "fill_timing_live_gate": True,    # True: chỉ paper; live cần user tắt thủ công (real money)
+    "buy_window_start": "10:45",      # BUY: đầu cửa sổ tập trung (ICT)
+    "buy_window_end": "11:15",        # BUY: cuối cửa sổ (đáy intraday)
+    "sell_window_start": "09:15",     # SELL: tập trung ở Open (đỉnh morning premium)
+    "sell_window_end": "09:45",       # SELL: cuối cửa sổ Open
+    "fill_timing_outside_mult": 4.0,  # interval × mult ngoài cửa sổ (8min → 32min mặc định)
+
+    # --- gap-adaptive fill (Layer-3 extension, PAPER only until user approves LIVE) ---
+    "gap_adaptive_enabled": False,    # DEFAULT OFF; set True only for paper. LIVE needs user approval.
+    "gap_floor_band": 0.07,           # fallback floor band when broker doesn't expose floor price (HOSE default).
+
+    # --- vol-scaled buy chase-cap (patch#3, Taylor 2026-07-01, backtest CONFIRMED tail-insurance) ---
+    # Widen ONLY the buy chase ceiling on high-vol names so a static 1.5% cap doesn't 0-fill a whole
+    # basket on correlated gap-up mornings (the go-live failure: 2025-04-10 static missed 12/12 names).
+    #   cap_pct = clamp(k * rvol_20d, floor=max_chase_pct_buy, ceil=chase_cap_vol_ceil)
+    # Monotone-safe (floor == static cap → only widens, never tightens); fail-safe to the static cap
+    # when rvol_20d is missing/<=0. Independent of allocator/selection (touches only _limit_price buy).
+    # Backtest (chase_cap_backtest.py, quant-skeptic CONFIRMED): fill 97.5→99.3%, +6.6bps common-case
+    # entry cost, tail-catch trades +5.9% fwd20 / win 68%; NET ~0 on avg → INSURANCE, not return-enhancer.
+    # LIVE since 2026-08-04 (user sign-off "phương án A"; quant-skeptic CONFIRMED high, job
+    # Taylor_20260804_124404). Paper gates 1-3 PASS on 80 real BUY orders / 13 executor sessions;
+    # gate 4 (real-fill vs min(open,L) proxy at 50B NAV) was RE-SCOPED, not passed — PaperBroker
+    # fills exactly at the placed price by construction, so paper can never yield real-fill data.
+    # ACCEPTED OPEN RISK: size-impact at 50B NAV untested; live NAV today (~0.97B/0.91B ≈ 1.9% of
+    # that target) is the same order of magnitude as the paper-tested regime. REOPEN gate 4 as NAV
+    # grows toward 50B, and re-verify the resolved flag before enabling any new live account.
+    "chase_cap_vol_scale_enabled": True,   # LIVE 2026-08-04 (was False = paper-only).
+    "chase_cap_vol_k": 2.0,                # k in clamp(k*rvol_20d, static, ceil).
+    "chase_cap_vol_ceil": 0.04,            # hard ceiling on the widened buy cap (never chase beyond +4%).
+
+    # --- EXTREME-regime execution gate (Taylor 2026-07-01, backtest-validated tail-insurance) ---
+    # Always-on risk gate that only trips in confirmed abnormal DOWN moves. SELL → sell-to-floor
+    # (chase down to the daily floor instead of stranding at the −3% cap); BUY → pause (T+1 re-sync).
+    # Backtest (data/extreme_regime_backtest.md, quant-skeptic CONFIRMED): compresses the sell tail
+    # (worst −13.4%→−6.9%, dispersion 3.8→0.3pp, same-day fill 0→100%) for ~1pp mean cost — insurance,
+    # NOT a return-enhancer. DEFAULT OFF; LIVE enable needs explicit user sign-off after paper-trading.
+    "extreme_regime_enabled": False,  # DEFAULT OFF — deliberate activation only.
+    "extreme_band": 0.03,             # SELL/BUY trip when last within 3% of the daily floor (near limit-down).
+    "extreme_move_z": 3.0,            # …or when r15 down-move exceeds z × 20d realised vol.
+    "extreme_slice_mult": 0.25,       # shorten cancel/reprice cadence ×0.25 (~2min) to chase the falling book.
+    "extreme_cooldown_min": 15,       # once tripped, stay active this long (debounce flicker).
+
+    # --- DC-book NEUTRAL idle-cash WATERFALL (Taylor 2026-07-06, user-approved paper trial) ---
+    # When DT5G=NEUTRAL and BAL/LAG have no qualifying deal, fill idle cash in priority:
+    #   BAL/LAG (unchanged) → DC book (ConvergePort double-confirm, 8L≤2 ∧ sector-lens BUY,
+    #   ex-DHG, cap 0.20/name) → custom30V. Reverse-unwind (custom30V first, DC book second)
+    #   when BAL/LAG get a deal back. Research: job Taylor_20260706_125540 (DC-below-BAL/LAG
+    #   CONFIRMED, +~1pp/yr full-V2.4, insurance-grade DSR 0.775). This flag ONLY gates the
+    #   self-contained PAPER sleeve (dc_book_waterfall_paper.py) — it touches NO production
+    #   plan builder / executor. DEFAULT OFF; ON only on paper account `main`.
+    "dc_book_waterfall_enabled": False,  # DEFAULT OFF — paper only.
+
+    # --- an toàn ---
+    "max_orders_per_day": 60,         # tổng số parent order tối đa trong 1 plan
+    "max_daily_gross_value": 20_000_000_000,  # tổng GTGD tối đa 1 ngày (VND)
+}
+
+
+ACCOUNT_DEFAULTS = {
+    "label": "main",            # tên định danh — namespace mọi file plan/state/journal
+    "enabled": True,
+    "mode": None,               # None → dùng mode chung trong trading_bot_config.json
+    "broker": None,             # None → broker chung; "phs" | "dnse"
+    "credentials_file": None,   # None → creds mặc định theo broker
+    "account_id": None,         # None → tiểu khoản đầu tiên của login/key đó
+    "note": "",
+    "overrides": {},            # override bất kỳ khóa nào của config chung cho riêng account
+    "excluded_tickers": [],     # mã KHÔNG BAO GIỜ tự động mua/bán (legacy/special-situation
+                                # holding nằm ngoài rebalancing V2.4 — vd DGC trong tài khoản
+                                # ZaloPay, đang hạn chế giao dịch HOSE). Enforce cứng ở
+                                # bot_execute.py (lọc plan.orders) — không phụ thuộc vào việc
+                                # plan generator có nhớ loại trừ đúng hay không. Dùng
+                                # `bin/compute_active_nav.py` để tính NAV thực sự khả dụng cho
+                                # chiến lược (= account_nav − giá trị thị trường các mã này) khi
+                                # lên plan/backtest/báo cáo cho account có field này khác rỗng.
+    "manual_offbook_assets_vnd": 0,      # tài sản off-book KHÔNG lộ qua DNSE OpenAPI (vd "Trứng
+                                # vàng" — sản phẩm tiền gửi tự động của DNSE; xác nhận 2026-07-16
+                                # sau khi cạn 19 endpoint pattern + SDK chính thức: KHÔNG có field
+                                # nào trả về số dư này, balances() chỉ phủ tiểu khoản giao dịch).
+                                # User TỰ báo số dư mỗi lần nạp/rút — Mike cập nhật 3 field này
+                                # NGAY khi nhận thông báo. Cộng vào TRUE NAV ở
+                                # daily_nav_snapshot.py/compute_active_nav.py — KHÔNG cộng vào
+                                # 'cash': cash vẫn phải phản ánh đúng sức mua THỰC SỰ khả dụng
+                                # trong tài khoản môi giới (user phải rút tay từ Trứng vàng trước
+                                # khi bot mua được — xem kb/current_ops.md mục Trứng vàng).
+    "manual_offbook_assets_asof": None,  # ngày user báo số dư này (YYYY-MM-DD)
+    "manual_offbook_assets_note": None,  # vd "Trứng vàng DNSE"
+}
+
+
+def load_accounts(cfg, path=ACCOUNTS_FILE):
+    """Đọc danh sách account profile; chưa có file → tạo template 1 profile 'main'.
+
+    Trả về list profile đã chuẩn hóa, mỗi profile có thêm khóa "cfg" = config
+    hiệu lực (config chung + overrides + mode/account_id của profile).
+    """
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as f:
+            raw = json.load(f).get("accounts", [])
+    else:
+        raw = [{"label": "main", "mode": cfg["mode"],
+                "account_id": cfg.get("account_id"),
+                "note": "profile mặc định — thêm account mới vào danh sách này"}]
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump({"accounts": raw}, f, indent=2, ensure_ascii=False)
+        print(f"[config] tạo file account profile mặc định: {path}")
+
+    profiles, seen = [], set()
+    for r in raw:
+        p = dict(ACCOUNT_DEFAULTS)
+        p.update(r)
+        if p["label"] in seen:
+            raise ValueError(f"trùng label account '{p['label']}' trong {path}")
+        seen.add(p["label"])
+        eff = dict(cfg)
+        eff.update(p.get("overrides") or {})
+        eff["mode"] = p["mode"] or cfg["mode"]
+        eff["account_id"] = p["account_id"]
+        p["cfg"] = eff
+        profiles.append(p)
+    return profiles
+
+
+def pick_accounts(profiles, labels=None):
+    """Lọc profile theo --account labels; mặc định = mọi profile enabled."""
+    if labels:
+        by = {p["label"]: p for p in profiles}
+        missing = [l for l in labels if l not in by]
+        if missing:
+            raise KeyError(f"không có account {missing} — có: {sorted(by)}")
+        return [by[l] for l in labels]
+    return [p for p in profiles if p["enabled"]]
+
+
+def live_dnse_labels(path=ACCOUNTS_FILE):
+    """Danh sách label các account THẬT đang chạy tự động hàng ngày (enabled=True,
+    mode="live", broker="dnse") — dùng bởi mọi script cron dùng-chung (preflight,
+    ops_health_check, send_plan_report, eod_trading_report, bq_freshness_check) để lặp
+    qua TẤT CẢ account live thay vì hardcode 1 tên. Thêm account mới vào
+    trading_bot_accounts.json với enabled=true/mode=live/broker=dnse là tự động được các
+    script này nhận, KHÔNG cần sửa code/cron riêng (xem kb/account_onboarding_runbook.md).
+    """
+    cfg = load_config()
+    profiles = load_accounts(cfg, path=path)
+    return [p["label"] for p in profiles
+            if p["enabled"] and p["cfg"]["mode"] == "live" and p["broker"] == "dnse"]
+
+
+def load_config(path=CONFIG_FILE):
+    cfg = dict(DEFAULTS)
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as f:
+            user = json.load(f)
+        unknown = sorted(set(user) - set(DEFAULTS))
+        if unknown:
+            print(f"[config] ⚠ khóa lạ trong {os.path.basename(path)}: {unknown}")
+        cfg.update(user)
+    else:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(DEFAULTS, f, indent=2, ensure_ascii=False)
+        print(f"[config] tạo file cấu hình mặc định: {path}")
+    return cfg

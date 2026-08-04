@@ -1,0 +1,115 @@
+--- a/trading_bot/config.py
++++ b/trading_bot/config.py
+@@ -83,8 +83,14 @@
+     # when rvol_20d is missing/<=0. Independent of allocator/selection (touches only _limit_price buy).
+     # Backtest (chase_cap_backtest.py, quant-skeptic CONFIRMED): fill 97.5→99.3%, +6.6bps common-case
+     # entry cost, tail-catch trades +5.9% fwd20 / win 68%; NET ~0 on avg → INSURANCE, not return-enhancer.
+-    # DEFAULT OFF; LIVE enable needs explicit user sign-off after paper-trading.
+-    "chase_cap_vol_scale_enabled": False,  # DEFAULT OFF — paper only until user approves LIVE.
++    # LIVE since 2026-08-04 (user sign-off "phương án A"; quant-skeptic CONFIRMED high, job
++    # Taylor_20260804_124404). Paper gates 1-3 PASS on 80 real BUY orders / 13 executor sessions;
++    # gate 4 (real-fill vs min(open,L) proxy at 50B NAV) was RE-SCOPED, not passed — PaperBroker
++    # fills exactly at the placed price by construction, so paper can never yield real-fill data.
++    # ACCEPTED OPEN RISK: size-impact at 50B NAV untested; live NAV today (~0.97B/0.91B ≈ 1.9% of
++    # that target) is the same order of magnitude as the paper-tested regime. REOPEN gate 4 as NAV
++    # grows toward 50B, and re-verify the resolved flag before enabling any new live account.
++    "chase_cap_vol_scale_enabled": True,   # LIVE 2026-08-04 (was False = paper-only).
+     "chase_cap_vol_k": 2.0,                # k in clamp(k*rvol_20d, static, ceil).
+     "chase_cap_vol_ceil": 0.04,            # hard ceiling on the widened buy cap (never chase beyond +4%).
+ 
+--- a/dc_book_waterfall_selfcheck.py
++++ b/dc_book_waterfall_selfcheck.py
+@@ -221,9 +221,12 @@
+ # the real gating lives in trading_bot.config, unpatched)
+ from trading_bot.config import DEFAULTS, load_config, load_accounts, pick_accounts
+ ok("D1 DEFAULTS flag present & False", DEFAULTS.get("dc_book_waterfall_enabled") is False)
+-ok("D1 prior paper flags untouched (default False)",
+-   DEFAULTS.get("extreme_regime_enabled") is False
+-   and DEFAULTS.get("chase_cap_vol_scale_enabled") is False)
++ok("D1 extreme_regime still paper-only (default False)",
++   DEFAULTS.get("extreme_regime_enabled") is False)
++# chase_cap_vol_scale went LIVE 2026-08-04 (user sign-off + quant-skeptic CONFIRMED,
++# job Taylor_20260804_124404) — its global default is now True BY DESIGN, not a leak.
++ok("D1 chase_cap_vol_scale is LIVE (default True since 2026-08-04)",
++   DEFAULTS.get("chase_cap_vol_scale_enabled") is True)
+ 
+ profiles = {p["label"]: p for p in load_accounts(load_config())}
+ ok("D2 main resolves flag ON", profiles["main"]["cfg"].get("dc_book_waterfall_enabled") is True)
+--- a/mike/agents/Taylor/stress_vol_scale_chase_cap.py
++++ b/mike/agents/Taylor/stress_vol_scale_chase_cap.py
+@@ -3,12 +3,13 @@
+ 
+ Drives the REAL executor path (trading_bot.executor.Executor._buy_chase_pct + _limit_price)
+ through the genuine load_config()/load_accounts() resolution, and asserts:
+-  0. WIRING       — paper(main) flag True, live(SpaceX) + global DEFAULT False.
++  0. WIRING       — flag True on paper(main), live(SpaceX) AND global DEFAULT (LIVE 2026-08-04).
+   1. WIDEN        — paper, high rvol → cap widens to clamp(k*rvol, static, ceil), capped at ceil.
+   2. MONOTONE     — paper, low rvol (k*rvol < static) → never below static cap.
+   3. FAIL-SAFE    — paper, rvol absent / <=0 → static cap.
+   4. LIMIT PRICE  — paper limit sits HIGHER than the static-cap price on the same high-rvol quote.
+-  5. NEG CONTROL  — live(SpaceX) cfg on the SAME high-rvol quote → static cap (flag off).
++  5. NEG CONTROL  — same live cfg with the flag forced OFF, SAME high-rvol quote → static cap
++                    (proves the widening comes from the FLAG, not from the quote/rvol).
+ 
+ No secrets are printed. Throwaway plan label — never touches real main/SpaceX exec logs.
+ """
+@@ -75,8 +76,11 @@
+ K = paper_cfg["chase_cap_vol_k"]                  # 2.0
+ CEIL = paper_cfg["chase_cap_vol_ceil"]            # 0.04
+ check("paper(main) chase_cap_vol_scale_enabled == True", paper_cfg["chase_cap_vol_scale_enabled"] is True)
+-check("live(SpaceX) chase_cap_vol_scale_enabled == False", live_cfg["chase_cap_vol_scale_enabled"] is False)
+-check("global DEFAULT stays False", load_config()["chase_cap_vol_scale_enabled"] is False)
++# LIVE since 2026-08-04 (user sign-off + quant-skeptic CONFIRMED, job Taylor_20260804_124404):
++# the flag is now ON at the global default, so it resolves ON for the live accounts too.
++check("live(SpaceX) chase_cap_vol_scale_enabled == True (LIVE 2026-08-04)",
++      live_cfg["chase_cap_vol_scale_enabled"] is True)
++check("global DEFAULT == True (LIVE 2026-08-04)", load_config()["chase_cap_vol_scale_enabled"] is True)
+ check("paper params match approved (k=2.0, ceil=0.04, static=0.015)",
+       K == 2.0 and CEIL == 0.04 and STATIC == 0.015)
+ 
+@@ -117,19 +121,21 @@
+ check("paper limit ~ ref*(1+ceil) = 20800", abs(px_paper - 20000 * (1 + CEIL)) <= 50)
+ check("paper limit strictly ABOVE static-cap price (20300)", px_paper > static_cap_px)
+ 
+-# ---- 5. NEG CONTROL: live(SpaceX) cfg → static on identical setup ------------
+-print("\n== 5. NEG CONTROL — live(SpaceX) effective cfg → static (flag off) ==")
++# ---- 5. NEG CONTROL: flag forced OFF → static on identical setup ------------
++print("\n== 5. NEG CONTROL — live cfg with flag forced OFF → static ==")
++off_cfg = dict(live_cfg); off_cfg["chase_cap_vol_scale_enabled"] = False
+ brk_l = FakeBroker({"VOL": raw_quote("VOL", last=20000, ref=20000, floor=18600, ceil=21400,
+                                      bid=20000, ask=25000)})
+-ex_l = Executor(make_plan([buy]), brk_l, dict(live_cfg))
++ex_l = Executor(make_plan([buy]), brk_l, off_cfg)
+ ex_l._gap_ref["VOL"] = {"prior_close": 20000, "rvol_20d": 0.05}   # SAME high rvol
+-check("live ignores rvol → static cap", abs(ex_l._buy_chase_pct("VOL") - STATIC) < 1e-12)
++check("flag OFF ignores rvol → static cap", abs(ex_l._buy_chase_pct("VOL") - STATIC) < 1e-12)
+ px_live = ex_l._limit_price(buy, brk_l.get_quote("VOL"), cross=True)
+-check("live limit == static-cap price (20300), below paper", abs(px_live - static_cap_px) <= 50 and px_live < px_paper)
++check("flag-OFF limit == static-cap price (20300), below paper",
++      abs(px_live - static_cap_px) <= 50 and px_live < px_paper)
+ 
+ # ---- verdict ----------------------------------------------------------------
+ print("\n" + "=" * 60)
+ if FAILS:
+     print(f"RESULT: FAIL — {len(FAILS)} check(s): {FAILS}")
+     sys.exit(1)
+-print("RESULT: PASS — vol-scale buy chase-cap active on PAPER only, live/global untouched.")
++print("RESULT: PASS — vol-scale buy chase-cap LIVE (paper+live+global), widening gated by the flag.")
+--- a/mike/agents/Taylor/chase_cap_selfcheck.py
++++ b/mike/agents/Taylor/chase_cap_selfcheck.py
+@@ -28,10 +28,11 @@
+     ceil = base.get("chase_cap_vol_ceil", 0.04)
+     ok = True
+ 
+-    # 0) shipped default must be OFF
+-    off_default = (base.get("chase_cap_vol_scale_enabled", False) is False)
+-    print(f"0) shipped default OFF: {'PASS' if off_default else 'FAIL'}")
+-    ok &= off_default
++    # 0) shipped default — LIVE (True) since 2026-08-04 (user sign-off + quant-skeptic
++    #    CONFIRMED, job Taylor_20260804_124404). Was False/paper-only before that date.
++    on_default = (base.get("chase_cap_vol_scale_enabled", False) is True)
++    print(f"0) shipped default ON (LIVE 2026-08-04): {'PASS' if on_default else 'FAIL'}")
++    ok &= on_default
+ 
+     # 1) OFF => static exactly, regardless of any rvol present
+     cfg_off = copy.deepcopy(base); cfg_off["chase_cap_vol_scale_enabled"] = False
