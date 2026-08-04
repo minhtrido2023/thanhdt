@@ -150,3 +150,81 @@ viên có ADV<2 tỷ hút **28% tổng vốn triển khai LAG** (4.539B/16.099B)
 thế `LAG_HI` ≈3,25B, fill trong `max_fill_days=5` ở mức live đã xác nhận 3,86%ADV/phiên ⇒ cần
 **ADV ≳ ~17 tỷ/phiên**. Tức **2 tỷ vẫn lỏng hơn ~8 lần** so với yêu cầu vận hành — chọn 2 tỷ vì nó
 là ngưỡng đã dùng ở rổ CAPIT, KHÔNG phải vì backtest.
+
+---
+
+## 2026-08-04 (cùng ngày, MUỘN HƠN) — Đã THỬ chính "lập luận còn sống" của mục trên: gate ĐỘNG theo năng lực fill → vẫn KHÔNG WIRE vì lợi nhuận, nhưng **đính chính con số 17 tỷ**
+
+**Job `Taylor_20260804_085248`, quant-skeptic CONFIRMED cao.** Báo cáo:
+`mike/agents/Taylor/research/lag_dynamic_adv_gate_executability_20260804.md`.
+Đăng ký đầy đủ 12 chân + DSR/PBO: `data/results_registry.md` mục **"2026-08-04 — GATE ĐỘNG THEO NĂNG
+LỰC FILL (executability)"**.
+
+### 🔴 ĐÍNH CHÍNH 2 con số của mục ngay trên (đọc trước khi trích lại)
+Mục trên viết: *"ở NAV 50B … một vị thế `LAG_HI` ≈3,25B … ⇒ cần **ADV ≳ ~17 tỷ/phiên**. Tức 2 tỷ vẫn
+lỏng hơn ~8 lần"*. **Cả hai con số đều phải sửa cách đọc:**
+1. **Slot engine sai cơ sở.** 3,25B dùng trọng số allocator `w_LAG=0,65`, nhưng engine mô phỏng sổ LAG
+   trên sổ cái tham chiếu riêng `LAG_NAV = TOTAL_NAV/2 = 25B` (`pt_v23_audit_2014.py:57`). Slot engine
+   tại t=0 là **2,5B**.
+2. **"17 tỷ" và "2 tỷ lỏng hơn 8 lần" CHỈ ĐÚNG cho một tài khoản 50 tỷ** — mà tài khoản đang chạy
+   **không phải** 50 tỷ (SpaceX `active_nav` ~950 triệu). Ở NAV THẬT, executability chỉ đòi:
+   ```
+   slot_live    = 0,95 tỷ × 0,65 × 0,10 = 61,7 triệu
+   required_ADV = 61,7tr / (3,86% × 5)  = 0,32 tỷ/phiên
+   ```
+   ⇒ **ngược dấu hoàn toàn**: gate tĩnh 2 tỷ **CHẶT HƠN 6,3×** nhu cầu thật, và **17 tỷ chặt hơn 53×**.
+   **Ai áp "17 tỷ" vào tài khoản đang chạy là sai hai bậc độ lớn.**
+
+### Kết quả của chính phép thử (`required_ADV = K × slot`, `K = 1/(f × N)`)
+- **Việc luật hứa thì nó làm được, bằng SỐ HỌC:** vị thế kẹt-không-fill-nổi **35,0% → 0,0%** @NAV thật
+  (và 56,6% → 0,0% @50B). Cơ chế định danh: K=5,18 ⇒ fill phiên đầu = `0,20 × 5,18 × slot = 1,04 × slot
+  > 0,95` ⇒ không thể bỏ dở. Khớp ở **cả hai thang NAV**, không cần p-value.
+- **Nhưng KHÔNG có edge lợi nhuận bền:** Δ vs L1 @NAV thật = +1,62pp CAGR nhưng **đổi dấu −0,22pp khi
+  bỏ 2020+2021**, sign test **8/13 (p=0,291)** — cùng chữ ký reshuffle-luck như gate tĩnh.
+- **Khác gate tĩnh ở một điểm thật:** thang liều **có dose-response đơn điệu** (gate tĩnh thì **phẳng**,
+  biên độ 0,21pp) ⇒ luật này **có nội dung kinh tế riêng**; PBO **0,30** (vs 0,916 của gate tĩnh) — đọc
+  đúng là "thứ hạng cấu hình ổn định", **không** phải "edge có thật".
+
+### 2 dữ kiện MỚI trực tiếp phục vụ câu hỏi treo của DỰ ÁN NÀY
+**(1) `LIQ_ZERO_BLOCK` LÀM TỆ ĐI hồ sơ thi hành — chi tiết chưa từng đo.** Chân L1 bỏ dở **nhiều hơn**
+chân control (69,6% vs 56,6% @50B; 35,0% vs 25,2% @1B) và vốn kẹt tăng **×3** (773,7B → 2.305,9B). Cơ
+chế: chặn nhóm ADV≤0 (vốn fill TRỌN trong 1 phiên vì **không bị trần**) làm vốn dồn sang nhóm **đo được
+ADV nhưng mỏng**, và chính nhóm này mới bị bóp 20%/phiên rồi bỏ dở. ⇒ thêm lý do **độc lập** để không
+đọc +3,85pp/+4,11pp của L1 như "cải thiện".
+
+**(2) Trục tách MỚI cho câu hỏi "edge thật hay hiện vật sức chứa" — lần đầu PHÂN BIỆT được.**
+Thu nhỏ sổ LAG **50 lần** (25B → 0,5B) làm áp lực sức chứa giảm đo được (bỏ dở của control 56,6% →
+25,2%). Giả thuyết "thuần hiện vật" dự báo Δ phải **co lại**. Thực đo:
+
+| | Δ CAGR của L1 vs control | %bỏ dở của control |
+|---|---|---|
+| Sổ LAG 25B (`NAV_TOTAL_B=50`) | **+3,85pp** | 56,6% |
+| Sổ LAG 0,5B (`NAV_TOTAL_B=1`) | **+6,23pp** | 25,2% |
+
+**Δ KHÔNG co lại — LỚN HƠN 1,6 lần ở sổ nhỏ hơn 50 lần** ⇒ chứng cứ **nghịch chiều** giả thuyết hiện vật.
+⚠️ **KHÔNG đóng được câu hỏi treo, và không được dùng để nới ràng buộc nào bên dưới:** (a) đây là
+**hậu-kiểm**, N=2 điểm thang NAV, 2 chân này chạy cho mục đích khác; (b) cơ chế sinh hiện vật (mã
+`liq≤0` không bị trần nên fill trọn tức thì) **không tắt** khi thu nhỏ NAV, chỉ giảm tương đối ⇒ trục
+**làm nhạt**, không phải trục **tắt hẳn**; (c) dữ kiện (1) ở trên lại **thuận chiều** giả thuyết hiện vật.
+
+### Việc kế BỔ SUNG vào mục "Tới mốc thì làm gì" (rẻ, tái dùng đúng harness `exp_lag_dyngate_20260804/`)
+4. **Phép thử ĐĂNG KÝ TRƯỚC để đóng hẳn câu hỏi treo** — quét `NAV_TOTAL_B ∈ {1, 5, 10, 25, 50, 100}`
+   × {có/không `LIQ_ZERO_BLOCK`} = **12 chân**. Hai giả thuyết dự báo **độ dốc khác dấu** nên tách được:
+   "hiện vật sức chứa" ⇒ Δ **tăng đơn điệu theo NAV**; "edge thật" ⇒ Δ **phẳng hoặc giảm**. Đây là phép
+   thử đầu tiên có sức phân xử mà **không cần chờ dữ liệu fill live** ⇒ **chạy được NGAY, không bị chặn
+   bởi 2 mốc cứng** (khác hẳn việc 1 và 2, vốn phải chờ sổ tích luỹ).
+5. **Sửa cách ghi sổ `lag_liq_ledger.py`:** mức fill cần theo dõi **không phải một con số %ADV**, mà là
+   **`size_ratio` so với slot ĐƯƠNG THỜI**, và **phải ghi kèm NAV của phiên đó** — vì mọi ngưỡng
+   executability tỉ lệ với NAV, một con số %ADV trần trụi sẽ không diễn giải lại được về sau.
+
+### Ràng buộc — KHÔNG nới
+Mọi số của job này **thừa hưởng nguyên vẹn** 2 mốc cứng **2026-12-15 / 2027-03-31**. Chân so sánh chính
+của nó (**L1 = 32,71% / 32,13%**) chính là con số mà `results_registry.md` cấm trích làm cơ sở kỳ vọng
+⇒ **không trích 32,71% / 32,13% / 33,75%**. Không tạo khoảng thay thế cho `[~27,2%; 31,3%]`, không
+re-pin, engine giữ `LIQ_ZERO_BLOCK=""` (opt-in). Production **không bị đụng** (bản sao engine, no-op khi
+`LAG_EXEC_GATE_K=0`).
+
+### Điểm user phải chốt (backtest không chốt thay được)
+Neo `%ADV/phiên` nào: **3,86%** (suy rộng liên-sổ **từ rổ CAPIT**, ca NCT 07-21 ⇒ ngưỡng hôm nay
+**0,32 tỷ**) hay **0,45%** (**chỉ-sổ-LAG**, nhưng **N=2 sự kiện** ⇒ ngưỡng **2,7 tỷ**, và khi đó gate
+tĩnh 2 tỷ **lại gần đúng**). Chênh nhau **8,4 lần**. Nguồn: `research/lag_fidelity_decomp_20260803/T4_RESULTS.md` §2.
