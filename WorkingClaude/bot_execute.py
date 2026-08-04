@@ -36,6 +36,7 @@ from trading_bot.brokers import make_broker, get_quote_source, get_dnse_client
 from trading_bot.plan import (load_plan, filter_excluded_tickers, net_offsetting_orders,
                               cap_capit_orders, cap_lag_orders, filter_lag_rating_orders,
                               apply_capit_lever, lever_live_preflight, approval_block_reason)
+from trading_bot.plan_funding_gate import check_plan_funding
 from trading_bot.netting_recon import (reconcile_netted_fills, get_net_fill_from_journal,
                                        write_recon_log)
 from trading_bot.executor import Executor, run_session, _publish_bot_event
@@ -61,6 +62,41 @@ def _alert_approval_block(label, plan_date, reason):
     print(msg)
     _publish_bot_event("error", "APPROVAL_GATE_BLOCK", {
         "account": label, "plan_date": plan_date, "reason": reason,
+    })
+    notify_thread = os.path.join(_WC_ROOT, "mike", "bin", "notify_thread.sh")
+    if os.path.isfile(notify_thread):
+        try:
+            subprocess.Popen([notify_thread, msg, _TRADING_DAILY_THREAD],
+                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                             close_fds=True)
+        except Exception:
+            pass
+    try:
+        with open(os.path.join(_WC_ROOT, "secrets", "telegram_config.json"),
+                  encoding="utf-8") as f:
+            tg = json.load(f)
+        from telegram_recommend import send_telegram_text
+        send_telegram_text(tg["bot_token"], tg["chat_id"], msg, parse_mode="")
+    except Exception:
+        pass
+
+
+def _alert_funding_block(label, plan_date, verdict):
+    """Alert khi FUNDING GATE chặn plan (Σ lệnh MUA > sức mua thật) — cùng khuôn, cùng kênh
+    fail-safe với _alert_approval_block ngay trên (stdout + bus + Discord + Telegram)."""
+    msg = (f"⛔ FUNDING GATE — account {label}: plan {plan_date} bị TỪ CHỐI thực thi, "
+           f"KHÔNG lệnh nào được đặt.\n"
+           f"{verdict['reason']}\n"
+           f"Xử lý: sửa plan cho Σ orders[] ≤ sức mua thật — phần thiếu tiền chuyển sang "
+           f"deferred_orders[] (ưu tiên giữ: LAG deadline T+1/T+2 > CAPIT top-up > "
+           f"discretionary), rồi user duyệt lại và chạy "
+           f"bin/run_bot.sh --account {label} --auto-otp.")
+    print(msg)
+    _publish_bot_event("error", "PLAN_FUNDING_GATE_BLOCK", {
+        "account": label, "plan_date": plan_date, "reason": verdict["reason"],
+        "need_vnd": verdict["need_vnd"], "buying_power_vnd": verdict["buying_power_vnd"],
+        "utilization": verdict["utilization"],
+        "fallback_bound_vnd": verdict["fallback_bound_vnd"], "groups": verdict["groups"],
     })
     notify_thread = os.path.join(_WC_ROOT, "mike", "bin", "notify_thread.sh")
     if os.path.isfile(notify_thread):
@@ -353,6 +389,7 @@ def main():
 
     executors = []
     approval_blocked = []                        # account bị approval gate từ chối
+    funding_blocked = []                         # account bị funding gate từ chối
     for p in profiles:
         cfg = dict(p["cfg"])
         if args.mode:
@@ -476,9 +513,34 @@ def main():
         # và chưa lệnh nào được đặt (run_session chạy sau). Đặt sau connect() vì sức mua phải
         # đọc từ broker SỐNG (§6), không suy từ cash tĩnh/BQ.
         _log_plan_buying_power_shadow(p["label"], plan, broker, cfg["mode"])
+        # GATE CỨNG cấp PLAN — Σ lệnh MUA (đã gồm phí) ≤ SỨC MUA THẬT `ppse.pp0Buy` đo SỐNG
+        # tại ĐÚNG thời điểm thực thi (sau khi injector đêm trước đã trừ tiền xong; KHÔNG dùng
+        # bất kỳ số cash nào trong plan JSON). Vá lỗ hổng khiến luật "Σ orders[] ≤ cash thực,
+        # tự SHRINK" tái phạm 3 lần/15 ngày trong khi tầng duy nhất enforce nó là shadow log
+        # WARN_ONLY ngay trên. Vượt ⇒ KHÔNG đặt BẤT KỲ lệnh nào của account này (thực thi một
+        # phần chính là hành vi "list-rồi-đợi-tiền" mà luật cấm), báo to, exit ≠ 0. Đặt CUỐI
+        # cascade: mọi bộ lọc/trần/đòn bẩy đã chốt nên Σ ở đây là tập lệnh THẬT SỰ sắp đặt.
+        fund = check_plan_funding(plan, broker, cfg["mode"])
+        if fund["action"] == "BLOCK":
+            _alert_funding_block(p["label"], plan_date, fund)
+            funding_blocked.append(p["label"])
+            continue
+        if fund["action"] == "UNVERIFIED":
+            # Không đo được sức mua nhưng Σ nằm trong cận ngoài → KHÔNG chặn (ca TV1 07-29
+            # chứng minh đo-không-được xảy ra trên plan hợp lệ), nhưng phải nói to.
+            print(f"[{p['label']}] ⚠️ FUNDING GATE CHƯA XÁC MINH ĐƯỢC: {fund['reason']}")
+            _publish_bot_event("status", "PLAN_FUNDING_GATE_UNVERIFIED", {
+                "account": p["label"], "plan_date": plan_date, "reason": fund["reason"],
+                "need_vnd": fund["need_vnd"], "groups": fund["groups"]})
+        elif fund["action"] == "OK":
+            print(f"[{p['label']}] ✅ FUNDING GATE: {fund['reason']}")
         executors.append(Executor(plan, broker, cfg, shared=shared_fills))
 
     if not executors:
+        if funding_blocked:
+            print(f"⛔ {len(funding_blocked)} account bị FUNDING gate chặn "
+                  f"({', '.join(funding_blocked)}), không account nào chạy — exit 3.")
+            return 3
         if approval_blocked:
             print(f"⛔ {len(approval_blocked)} account bị approval gate chặn "
                   f"({', '.join(approval_blocked)}), không account nào chạy — exit 2.")
@@ -501,6 +563,10 @@ def main():
         print(f"⛔ lưu ý: {len(approval_blocked)} account đã bị approval gate chặn đầu "
               f"phiên ({', '.join(approval_blocked)}) — exit 2 để giám sát bắt được.")
         return 2
+    if funding_blocked:
+        print(f"⛔ lưu ý: {len(funding_blocked)} account đã bị FUNDING gate chặn đầu "
+              f"phiên ({', '.join(funding_blocked)}) — exit 3 để giám sát bắt được.")
+        return 3
     return 0
 
 
