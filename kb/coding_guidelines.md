@@ -571,3 +571,18 @@ Chi tiết cơ chế, 4 cái bẫy cụ thể và cách kiểm chứng 3 nguồn
 **`mike/kb/data_registry/price-volume/ticker_close_vs_price_dividend_adj.md`**. Bổ sung cho §6
 (provenance số liệu báo cáo), không thay thế: §6 lo "số này lấy từ nguồn có thẩm quyền chưa", §21 lo
 "công thức có bỏ sót cấu phần lợi nhuận nào không".
+
+## 22. Một Quy Tắc Sống Trong Văn Xuôi Mà LLM Cứ Áp Sai Khác Nhau Mỗi Lần — Chuyển Thành Code, Theo `.claude/skills/deterministic-decision-gate/`
+
+Khi 2 phiên LLM khác nhau (hoặc cùng 1 phiên ở 2 lần dispatch) áp cùng một luật từ `context_*.md`
+ra 2 kết quả khác nhau trên cùng dữ liệu — đó là dấu hiệu luật đó thuộc loại **suy dẫn thuần tuý
+từ dữ liệu có sẵn** (tính offset ngày, đọc field rồi lọc, tra bảng, so số với hằng số) và nên là
+CODE, không phải văn xuôi để LLM tự nhớ lại mỗi lần. Trước khi build/áp patch loại này, theo
+`.claude/skills/deterministic-decision-gate/SKILL.md` — đúc kết từ chuỗi A1-A4 (2026-08-04, audit
+`Taylor_20260804_125048`) đóng 4 lỗ hổng cùng dạng cùng ngày: kiểm kê có bằng chứng file:dòng,
+trích giá trị đã tính sẵn thay vì viết lại logic, tái dùng gate có sẵn thay vì suy lại toán, chọn
+nguồn không thể bị làm rỗng âm thầm, selfcheck chạy thật theo `verify-before-done`, quant-skeptic
+verify (kể cả khi phần lớn 7-attack N/A — reproducibility + arithmetic/mechanism mới là 2 mục tải
+trọng), `git apply` báo exit 0 KHÔNG PHẢI bằng chứng đã ghi file (dùng `patch` thay thế + verify
+độc lập sau mỗi lần áp), và tách rõ quyết định CHÍNH SÁCH (cần hỏi user) khỏi quyết định KỸ THUẬT
+(quant-skeptic CONFIRMED là đủ).
