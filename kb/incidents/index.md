@@ -4,7 +4,7 @@ title: Incidents — Mike fleet (sổ postmortem, cấu trúc OKF)
 owner: Mike fleet (mọi agent ghi; daily_retro.sh ghi entry RETRO hằng đêm)
 format: OKF (Open Knowledge Format) — markdown + YAML frontmatter, 1 sự cố = 1 file
 migrated_from: kb/INCIDENTS.md (single-file 408KB, migrate → OKF 2026-07-30 job Winston_20260730_144031)
-entries: 89 file (65 sự cố + 23 RETRO + 1 mục open-items chung)
+entries: 90 file (66 sự cố + 23 RETRO + 1 mục open-items chung)
 ---
 
 # Incidents — Mike fleet
@@ -77,6 +77,8 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Sự cố | status |
 |---|---|---|
+| 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
+| 2026-08-04 | [2026-08/2026-08-04-crontab-wipe-cross-call-pid-tmpfile.md](2026-08/2026-08-04-crontab-wipe-cross-call-pid-tmpfile.md) | fixed |
 | 2026-08-03 | [2026-08-03: check #5 dispatch LẶP wags_autofix cho câu hỏi đã triage là "chỉ NGƯỜI quyết được" — ranh giới WARN-ONLY bám TUỔI 48h thay vì TRẠNG THÁI triage; thêm ACK `triaged-needs-human:`](2026-08/2026-08-03-coord-question-redispatch-triaged-ack.md) | fixed |
 | 2026-08-02 | [daily_nav_snapshot.py đếm 2 lần cổ tức tiền mặt vào tối ngày chốt quyền (last-cum-date) — NAV lịch sử SpaceX/ZaloPay sai 6 dòng trên 5 phiên, tự triệt tiêu nên sống sót mọi đối soát](2026-08/2026-08-02-nav-cum-dividend-double-count.md) | fixed |
 | 2026-08-02 | [2026-08/2026-08-02-lag-liquidity-fidelity-two-fixes.md](2026-08/2026-08-02-lag-liquidity-fidelity-two-fixes.md) | ? |
