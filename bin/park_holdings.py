@@ -49,6 +49,9 @@ import re
 import sys
 from zoneinfo import ZoneInfo
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from corp_actions import load_corp_actions, validate as validate_action   # noqa: E402
+
 ICT = ZoneInfo("Asia/Ho_Chi_Minh")          # §16: neo TZ tường minh, không tin TZ của process
 WC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 EXEC_DIR = os.path.join(WC_ROOT, "data", "execution_logs")
@@ -239,6 +242,50 @@ class LotBook:
                                  f"lô đang có trong sổ book='{book or 'KHÔNG TAG'}' → {ticker} UNVERIFIED")
         return remain
 
+    def corp_action_split(self, ticker, multiplier, ex_date, effective_ts, source,
+                          event_id=""):
+        """Sự kiện doanh nghiệp làm ĐỔI SỐ LƯỢNG (chia tách / thưởng / cổ tức cổ phiếu).
+
+        Nhân `qty` và chia `price` của các lô ĐƯỢC HƯỞNG QUYỀN ⇒ tổng giá vốn (qty×price) BẤT
+        BIẾN. Đây đúng cơ chế broker đã làm (đo 2026-08-05: SpaceX VHM 500@149.800 → 1000@74.900,
+        ZaloPay 300@148.633 → 600@74.317).
+
+        ĐƯỢC HƯỞNG QUYỀN = lô có `entry_date < ex_date`. Lô mua TỪ ex_date trở đi không hưởng
+        quyền ⇒ KHÔNG nhân. Đây là lý do `ex_date` phải tách khỏi `effective_ts` (ngày broker
+        thật sự đổi số dư) — ca VHM 2026-08 hai ngày này lệch nhau đúng một phiên.
+
+        FAIL-CLOSED VỚI LÔ LẺ: nếu bất kỳ lô nào cho ra số không nguyên (vd tỉ lệ 1,5 trên lô
+        151cp), KHÔNG áp gì cả cho mã đó + gắn cờ UNVERIFIED. Làm tròn từng lô rồi cộng lại KHÁC
+        làm tròn ở mức vị thế (chỗ broker làm tròn và trả tiền phần lẻ), nên "đoán rồi gộp" ở đây
+        sẽ đẻ ra lệch 1-2cp không ai truy được — thà chặn và để người xử lý (§5).
+        """
+        pool = [l for l in self.lots if l["ticker"] == ticker]
+        if not pool:
+            return 0                                   # không giữ mã này — no-op, không phải lỗi
+        entitled = [l for l in pool if l["entry_date"] < ex_date]
+        if not entitled:
+            self.warnings.append(
+                f"{effective_ts[:10]} corp action {event_id or ticker} ×{multiplier}: đang giữ "
+                f"{ticker} nhưng KHÔNG lô nào có entry_date < ex_date {ex_date} ⇒ không hưởng "
+                f"quyền, sổ giữ nguyên")
+            return 0
+        bad = [l for l in entitled if abs(l["qty"] * multiplier - round(l["qty"] * multiplier)) > 1e-9]
+        if bad:
+            self.unverified.add(ticker)
+            self.warnings.append(
+                f"{effective_ts[:10]} corp action {event_id or ticker} ×{multiplier} sinh lô LẺ "
+                f"({[l['qty'] for l in bad]}) ⇒ KHÔNG áp dụng, {ticker} gắn cờ UNVERIFIED — "
+                f"tỉ lệ lẻ cần người xử lý phần cổ phiếu lẻ trước")
+            return 0
+        for l in entitled:
+            l["qty"] = int(round(l["qty"] * multiplier))
+            l["price"] = float(l["price"]) / multiplier
+            l["corp_actions"] = l.get("corp_actions", []) + [event_id or f"{ticker}×{multiplier}"]
+        self.warnings.append(
+            f"{effective_ts[:10]} corp action {event_id or ticker} ×{multiplier} (ex {ex_date}, "
+            f"{source}): {len(entitled)} lô {ticker} nhân qty / chia giá vốn — tổng giá vốn không đổi")
+        return len(entitled)
+
     def by_ticker_qty(self):
         out = {}
         for l in self.lots:
@@ -279,10 +326,12 @@ def _fill_deltas(path):
 
 
 def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR,
-                  broker=None):
+                  broker=None, corp_actions=None):
     """Vị thế theo book tại `asof` (mặc định hôm nay ICT).
 
     `broker` = (positions, cash, meta) truyền sẵn — chỉ dùng cho selfcheck; production để None.
+    `corp_actions` = danh sách record truyền sẵn — cũng chỉ cho selfcheck; production để None
+    (đọc `data/corp_actions.json`, và CHỈ record đã `CONFIRMED` — xem `mike/bin/corp_actions.py`).
     """
     asof = asof or today_ict()
     prof = account_profile(account_label)
@@ -304,24 +353,54 @@ def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR
             book.unverified.add(p["ticker"])
 
     # Replay: journal từ ngày 0 trở đi, và CHỈ các dòng FILL sau thời điểm chụp snapshot
-    # (chống đếm trùng phần đã nằm trong bootstrap).
-    applied = []
-    for path in journal_files(account_label, day0, asof, exec_dir):
-        for ev in _fill_deltas(path):
-            if snap_ts and ev["ts"] and ev["ts"] <= snap_ts:
-                continue
-            src = f"{os.path.basename(path)}:{ev['parent_id']}"
-            if ev["side"] == "buy":
-                book.buy(ev["ticker"], ev["book"], ev["qty"], ev["price"], ev["ts"][:10], src,
-                         ev["play_type"])
-            elif ev["side"] == "sell":
-                book.sell(ev["ticker"], ev["book"], ev["qty"], ev["ts"][:10], src)
-            else:
-                book.unverified.add(ev["ticker"])
-                book.warnings.append(f"{ev['ts'][:10]} side='{ev['side']}' lạ ({src}) → "
-                                     f"{ev['ticker']} UNVERIFIED")
-                continue
-            applied.append(ev)
+    # (chống đếm trùng phần đã nằm trong bootstrap). Corp action đi CHUNG một dòng thời gian với
+    # fill — một lô chỉ được nhân nếu nó đã tồn tại trong sổ tại thời điểm sự kiện, nên thứ tự
+    # thời gian là bắt buộc, không phải "chạy hai vòng cho gọn".
+    acts = load_corp_actions() if corp_actions is None else [validate_action(a) for a in corp_actions]
+    acts = [a for a in acts
+            if (not snap_ts or a["broker_effective_ts"] > snap_ts)   # đã nằm trong bootstrap rồi
+            and a["broker_effective_ts"][:10] <= asof]               # chưa tới thì chưa áp
+    # khoá sắp xếp: (ts, 0)=fill trước, (ts, 1)=corp action sau ⇒ lô khớp CÙNG thời điểm vẫn kịp
+    # vào sổ để được hưởng quyền.
+    timeline = [(ev["ts"], 0, ev, os.path.basename(path))
+                for path in journal_files(account_label, day0, asof, exec_dir)
+                for ev in _fill_deltas(path)
+                if not (snap_ts and ev["ts"] and ev["ts"] <= snap_ts)]
+    timeline += [(a["broker_effective_ts"], 1, a, "corp_actions.json") for a in acts]
+    timeline.sort(key=lambda x: (x[0], x[1]))
+
+    applied, applied_acts = [], []
+    for _ts, kind, ev, fname in timeline:
+        if kind == 1:
+            n = book.corp_action_split(ev["ticker"], ev["qty_multiplier"], ev["ex_date"],
+                                       ev["broker_effective_ts"], fname, ev["id"])
+            applied_acts.append(dict(ev, lots_adjusted=n))
+            continue
+        src = f"{fname}:{ev['parent_id']}"
+        if ev["side"] == "buy":
+            book.buy(ev["ticker"], ev["book"], ev["qty"], ev["price"], ev["ts"][:10], src,
+                     ev["play_type"])
+        elif ev["side"] == "sell":
+            book.sell(ev["ticker"], ev["book"], ev["qty"], ev["ts"][:10], src)
+        else:
+            book.unverified.add(ev["ticker"])
+            book.warnings.append(f"{ev['ts'][:10]} side='{ev['side']}' lạ ({src}) → "
+                                 f"{ev['ticker']} UNVERIFIED")
+            continue
+        applied.append(ev)
+
+    # Cửa sổ xám: mua SAU khi broker đã credit nhưng TRƯỚC ex_date. Lô đó vẫn được hưởng quyền
+    # (entry_date < ex_date) nhưng broker sẽ credit nó ở một nhịp khác mà ta không quan sát được
+    # ⇒ không tự đoán, gắn cờ để cổng UNVERIFIED chặn sinh lệnh.
+    for a in applied_acts:
+        gray = [ev for ev in applied if ev["ticker"] == a["ticker"] and ev["side"] == "buy"
+                and ev["ts"] >= a["broker_effective_ts"] and ev["ts"][:10] < a["ex_date"]]
+        if gray:
+            book.unverified.add(a["ticker"])
+            book.warnings.append(
+                f"{a['ticker']} có {len(gray)} lệnh MUA khớp sau lúc broker credit "
+                f"({a['broker_effective_ts']}) nhưng trước ex_date {a['ex_date']} — phần quyền của "
+                f"các lô này credit ở nhịp khác, KHÔNG tự suy ⇒ UNVERIFIED")
 
     positions, cash, bmeta = broker if broker else read_broker_snapshot(
         account_label, account_no, asof, exec_dir)
@@ -372,6 +451,10 @@ def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR
         "cash_available_vnd": cash,
         "unverified_tickers": sorted(book.unverified), "warnings": book.warnings,
         "n_fills_applied": len(applied), "reconcile": reconcile,
+        "corp_actions_applied": [{"id": a["id"], "ticker": a["ticker"],
+                                  "qty_multiplier": a["qty_multiplier"], "ex_date": a["ex_date"],
+                                  "broker_effective_ts": a["broker_effective_ts"],
+                                  "lots_adjusted": a["lots_adjusted"]} for a in applied_acts],
     }
 
 
