@@ -37,3 +37,4 @@
   vol_scale_chase_cap gate 4 (real-fill vs proxy) không thể đóng bằng paper — 3 lựa chọn
   A(re-scope+đóng)/B(live pilot nhỏ ZaloPay)/C(park). Chưa quyết, production không đổi.
 
+- [2026-08-05T01:24:27Z] 2026-08-04: Chuỗi 4 việc deterministic-plan-decisions (A1-A4, audit Taylor_20260804_125048) ĐÃ XONG hết + LIVE production. A1 funding gate (bb8583c), A2 TV1 cash-race + A3 CAPIT topup-warn (mike 9dc4c53a), A4 LAG governance IVS/TMG exclude (WorkingClaude c8edc92). Cả 4 quant-skeptic CONFIRMED. Policy A2: V2.4 ưu tiên mặc định, TV1 nhường (user chốt 08-04). Bonus fix: verify_finding.sh log-collision + max-turns 30→50 (d206034f).
