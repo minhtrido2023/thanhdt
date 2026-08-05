@@ -312,8 +312,8 @@ if vhm:
           a["broker_effective_ts"][:10] < a["ex_date"], a["broker_effective_ts"])
     check("  đã CONFIRMED ⇒ đang áp vào sổ live", a["_status"].upper().startswith("CONFIRMED"))
     check("  có ≥2 nguồn bằng chứng độc lập", len(a["evidence"]) >= 2, len(a["evidence"]))
-    check("  ghi rõ decided_by (§20 — không giả vờ là user ký)",
-          json.load(open(CA.REGISTRY, encoding="utf-8"))["actions"][0].get("decided_by") == "agent")
+    check("  ghi rõ decided_by (§20 — user đã ký duyệt chính thức 2026-08-05, xem _status)",
+          json.load(open(CA.REGISTRY, encoding="utf-8"))["actions"][0].get("decided_by") == "user")
 
 print(f"\n{'=' * 70}\nKẾT QUẢ: {len(PASS)} PASS / {len(FAIL)} FAIL")
 if FAIL:

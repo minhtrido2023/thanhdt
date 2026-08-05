@@ -33,6 +33,30 @@ WC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file
 EXEC_DIR = os.path.join(WC_ROOT, "data", "execution_logs")
 BQ_PATH_PREFIX = "/home/trido/google-cloud-sdk/bin"
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from corp_actions import load_corp_actions  # noqa: E402
+
+
+def corp_action_multiplier(ticker, fill_date, asof, actions):
+    """Hệ số nhân KL cho 1 fill ngày `fill_date`, dùng để cộng dồn đúng vào raw_agg/journal_agg.
+
+    Cùng quy tắc thời điểm với LotBook.corp_action_split (park_holdings.py) — lô mua TRƯỚC
+    ex_date thì được hưởng quyền (nhân KL) NHƯNG chỉ áp dụng từ ngày báo cáo `asof` đã tới/qua
+    ex_date (giá BQ/close_price chỉ phản ánh split TỪ ex_date trở đi — trước đó KL và giá đều
+    phải giữ nguyên trạng thái CHƯA chia, khớp đúng giá thị trường thật của ngày đó, xem bug
+    2026-08-05 VHM: broker credit KL sớm 1 phiên trước ex_date, nhưng giá BQ/close_price ngày
+    đó CHƯA chia — áp multiplier sớm sẽ tạo ra đúng loại lệch mà bug gốc đã gây ra).
+
+    Script này gộp fill theo NGÀY (không giữ lot rời như LotBook) nên không xử lý được ca bán
+    xen giữa các lô có ex_date khác nhau của CÙNG mã — chưa gặp thực tế, nếu xảy ra sẽ cần
+    nâng cấp lên lot-based giống park_holdings.py.
+    """
+    mult = 1.0
+    for a in actions:
+        if a["ticker"] == ticker and fill_date < a["ex_date"] <= asof:
+            mult *= a["qty_multiplier"]
+    return mult
+
 
 def true_fills_from_dnse_raw(account_no, date):
     """Trả về {ticker: (net_qty, buy_qty, buy_value)} từ log thô broker cho 1 ngày.
@@ -235,6 +259,8 @@ def main():
     dates = [d.strip() for d in args.dates.split(",") if d.strip()]
     warnings = []
 
+    corp_actions = load_corp_actions()
+
     raw_agg = defaultdict(lambda: [0.0, 0.0, 0.0])      # ticker -> [net_qty, buy_qty, buy_value]
     journal_agg = defaultdict(lambda: [0.0, 0.0, 0.0])
     for date in dates:
@@ -243,17 +269,19 @@ def main():
             warnings.append(f"FATAL: {err} — không có nguồn broker thật cho {date}")
             continue
         for tk, (nq, bq, bv) in raw.items():
-            raw_agg[tk][0] += nq
-            raw_agg[tk][1] += bq
-            raw_agg[tk][2] += bv
+            m = corp_action_multiplier(tk, date, args.asof, corp_actions)
+            raw_agg[tk][0] += nq * m
+            raw_agg[tk][1] += bq * m
+            raw_agg[tk][2] += bv   # tổng giá trị đã mua KHÔNG đổi khi nhân KL/chia giá vốn
 
         jr, jerr = true_fills_from_journal(args.account, date)
         if jr is None:
             warnings.append(f"WARN: {jerr} — bỏ qua cross-check journal cho {date}")
         else:
             for tk, (nq, bq, bv) in jr.items():
-                journal_agg[tk][0] += nq
-                journal_agg[tk][1] += bq
+                m = corp_action_multiplier(tk, date, args.asof, corp_actions)
+                journal_agg[tk][0] += nq * m
+                journal_agg[tk][1] += bq * m
                 journal_agg[tk][2] += bv
 
     if any(w.startswith("FATAL") for w in warnings):
