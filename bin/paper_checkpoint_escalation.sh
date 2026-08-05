@@ -112,6 +112,18 @@ for a in json.load(sys.stdin):
   "$ROOT/bin/append_event.sh" Mike question "paper-checkpoint-overdue-${PID}" \
     "{\"program\":\"${PID}\",\"reason\":\"${REASON}\",\"pending_gates\":${PCOUNT},\"question\":\"Checkpoint paper-program qua han, da auto-dispatch Taylor kiem tra. Xac nhan/theo doi.\"}" \
     2>/dev/null || true
+  # …kèm ack `triaged-needs-human:` NGAY LẬP TỨC (ACK_PREFIX của ops_health_check.sh check #5).
+  # Câu hỏi này theo THIẾT KẾ đã tự triage xong: chính vòng lặp này dispatch ${OWNER} đi kiểm tra
+  # (ngay dưới) và chỉ còn chờ NGƯỜI xác nhận/theo dõi — không có fix tooling nào để Wags làm.
+  # Không ack thì nó nằm mãi trong pending_q (script này KHÔNG BAO GIỜ phát answer/decision cùng
+  # topic, cũng không có ai khác phát) → COORD_WARN dispatch wags_autofix 2 lần/ngày suốt 48h cho
+  # việc ĐÃ được giao (sự cố thật coord-2026-08-05: 2/3 câu hỏi "tồn đọng" chính là 2 event này,
+  # Taylor đã chạy xong job _091700/_091703 từ hôm trước). Ack CHỈ tắt auto-dispatch — câu hỏi vẫn
+  # hiện đầy đủ ở dòng "ĐÃ TRIAGE, chờ NGƯỜI quyết" cho tới khi có answer/decision thật, nên
+  # KHÔNG tạo im lặng mới (bài học 2026-08-04 monitoring-fix-creates-silence).
+  "$ROOT/bin/append_event.sh" Mike status "triaged-needs-human:Mike/paper-checkpoint-overdue-${PID}" \
+    "{\"program\":\"${PID}\",\"note\":\"auto-triaged: da dispatch ${OWNER} kiem tra, chi cho nguoi xac nhan — khong co fix tooling\"}" \
+    2>/dev/null || true
 
   PROMPT="Checkpoint paper-program '${NAME}' (id=${PID}) trong mike/kb/paper_programs_registry.json đã tới hạn theo dữ liệu thật nhưng ${PCOUNT}/${TCOUNT} tiêu chí gate vẫn 'pending' — chưa ai thực sự đi kiểm tra. Đọc charter mike/kb/paper_programs_charter/${PID}.md + registry entry đầy đủ (data_sources, probe) trước khi làm. Với MỖI tiêu chí pending, kiểm tra bằng dữ liệu thật (journal paper main, execution_quality_review.py, hoặc nguồn được khai trong registry) — đừng suy đoán. Cập nhật status từng gate_criteria trong registry (pass/fail/pending kèm lý do) và review_short nếu cần. Nếu ĐỦ điều kiện chuyển bước tiếp (quant-skeptic rerun / user sign-off) thì CHUẨN BỊ đề xuất rõ ràng cho user quyết — KHÔNG tự bật live. Nếu CHƯA đủ, nói rõ còn thiếu gì + ước thời gian cần thêm. Ghi bus finding khi xong: program id, kết luận từng gate, khuyến nghị bước kế tiếp."
   "$ROOT/bin/dispatch.sh" Taylor "$PROMPT" --thread "$TRADING_REPORT_THREAD" --bg --model opus --effort high --timeout 2400 2>&1 | tail -5
