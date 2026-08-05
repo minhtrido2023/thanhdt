@@ -20,7 +20,7 @@ import tempfile
 import pandas as pd
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from lag_forensic_filter import (BANNED, FORENSIC_CSV,  # noqa: E402
+from lag_forensic_filter import (BANNED, FORENSIC_CSV, LAG_USER_EXCLUDED,  # noqa: E402
                                  lag_filter_forensic_banned)
 
 WORKDIR = os.path.dirname(os.path.abspath(__file__))
@@ -165,6 +165,67 @@ _ff = pd.read_csv(real)
 _min_excl = pd.to_datetime(_ff[_ff["severity"].str.strip() == "exclude"]["date"]).min()
 check("mọi cờ exclude đều có ngày > AUDIT_END 2026-06-19 (⇒ 0 event trong cửa sổ pin)",
       _min_excl > pd.Timestamp("2026-06-19"), f"min={_min_excl}")
+
+# --- 8b. LAG_USER_EXCLUDED (nguồn 1b, thêm 2026-08-04 job Taylor_20260804_155443) ---
+# Bối cảnh đo được ngày 2026-08-04: IVS VÀ TMG ĐỀU là ứng viên LAG trở lại (nằm trong
+# lag_rating_excluded / lag_liq_excluded của golive_v23_status.json), tức "cửa sổ đã đóng" là
+# SAI. Hiện mỗi mã chỉ bị chặn bởi ĐÚNG MỘT cổng KHÔNG mang quyết định của user (IVS: rating
+# 8L=5; TMG: ADV=0) — các ca dưới kiểm chính cơ chế mang quyết định đó.
+check("IVS + TMG có trong LAG_USER_EXCLUDED", set(LAG_USER_EXCLUDED) >= {"IVS", "TMG"})
+
+kept, dropped, err = lag_filter_forensic_banned(
+    cand_df([("IVS", "2026-08-03"), ("TMG", "2026-08-03"), ("POW", "2026-08-03")]), ASOF,
+    csv_path=p)
+check("IVS+TMG bị loại vì user-exclude, POW giữ",
+      list(kept["ticker"]) == ["POW"] and len(dropped) == 2
+      and all(d["kind"] == "user_exclude" for d in dropped))
+check("dropped ghi ngày quyết định + lý do (audit trail đọc được)",
+      all(d["flag_date"] == "2026-07-21" and "LAG_USER_EXCLUDED" in d["reason"]
+          and len(d["reason"]) > 60 for d in dropped))
+
+# Không hồi tố: replay một ngày TRƯỚC khi user quyết (07-21) phải KHÔNG chặn — nếu không,
+# mọi backtest/replay lịch sử sẽ mang hindsight của quyết định 07-21.
+kept, dropped, _ = lag_filter_forensic_banned(
+    cand_df([("IVS", "2026-05-04")]), pd.Timestamp("2026-07-20"), csv_path=p)
+check("asof TRƯỚC ngày user quyết → KHÔNG hồi tố (giữ IVS)",
+      list(kept["ticker"]) == ["IVS"] and not dropped)
+kept, dropped, _ = lag_filter_forensic_banned(
+    cand_df([("IVS", "2026-05-04")]), pd.Timestamp("2026-07-21"), csv_path=p)
+check("asof ĐÚNG ngày user quyết → chặn (biên <=)", len(kept) == 0 and len(dropped) == 1)
+
+# Fail-closed: hằng số trong CODE nên KHÔNG phụ thuộc file nào — CSV forensic hỏng vẫn chặn.
+kept, dropped, err = lag_filter_forensic_banned(
+    cand_df([("IVS", "2026-08-03")]), ASOF, csv_path="/nonexistent/forensic.csv")
+check("CSV forensic hỏng nhưng user-exclude VẪN chặn (fail-closed tuyệt đối)",
+      len(kept) == 0 and len(dropped) == 1 and err is not None)
+kept, dropped, _ = lag_filter_forensic_banned(cand_df([("IVS", "2026-08-03")]), pd.NaT,
+                                              csv_path=p)
+check("asof = NaT → user-exclude fail-closed (chặn)", len(kept) == 0 and len(dropped) == 1)
+
+# Ưu tiên nguồn: BANNED thắng trước user-exclude (thông điệp mạnh hơn), và một mã user-exclude
+# KHÔNG được lẫn vào BANNED (khác phạm vi: BANNED chạm toàn hệ qua universe_pit_quality).
+check("IVS/TMG KHÔNG nằm trong BANNED (phạm vi CHỈ LAG, không nới hộ toàn hệ)",
+      not (set(LAG_USER_EXCLUDED) & set(BANNED)))
+_ff_all = set(pd.read_csv(real)["ticker"].astype(str).str.strip())
+check("IVS/TMG KHÔNG nằm trong forensic_flags.csv (tránh đổi bảng 8L + số pin R3)",
+      not (set(LAG_USER_EXCLUDED) & _ff_all))
+
+# Bất biến với số pin R3: mọi mục user-exclude phải có ngày > AUDIT_END, nếu không nó sẽ drop
+# event TRONG cửa sổ backtest và số pin không còn tái lập được.
+_min_ux = min(pd.Timestamp(d) for d, _ in LAG_USER_EXCLUDED.values())
+check("mọi mục LAG_USER_EXCLUDED có ngày > AUDIT_END 2026-06-19 (⇒ 0 event trong cửa sổ pin)",
+      _min_ux > pd.Timestamp("2026-06-19"), f"min={_min_ux}")
+
+# Đối chiếu CƠ HỌC với nguồn văn xuôi: mọi mã trong file văn xuôi phải có trong hằng số này.
+# Đây là lý do §A4 tồn tại — trước đó danh sách CHỈ sống ở văn xuôi.
+_pm = open("/home/trido/thanhdt/WorkingClaude/mike/kb/context_planning_mini.md",
+           encoding="utf-8").read()
+_prose_sec = _pm.split("## LAG entry EXCLUDE list")[1].split("\n## ")[0] if \
+    "## LAG entry EXCLUDE list" in _pm else ""
+_prose_tk = set(re.findall(r"\*\*([A-Z0-9]{3})\*\*", _prose_sec))
+check("mọi mã trong văn xuôi context_planning_mini.md đều có trong LAG_USER_EXCLUDED",
+      _prose_tk and _prose_tk <= set(LAG_USER_EXCLUDED),
+      f"văn xuôi={sorted(_prose_tk)} hằng số={sorted(LAG_USER_EXCLUDED)}")
 
 # --- 9. Guard nối dây: golive_recommend_v23.py có thật sự gọi gate này không ---
 _gl = open(os.path.join(WORKDIR, "deploy_golive_dt5g_v4", "golive_recommend_v23.py"),

@@ -35,6 +35,7 @@ from trading_bot.config import load_config, load_accounts, pick_accounts, EXEC_D
 from trading_bot.brokers import make_broker, get_quote_source, get_dnse_client
 from trading_bot.plan import (load_plan, filter_excluded_tickers, net_offsetting_orders,
                               cap_capit_orders, cap_lag_orders, filter_lag_rating_orders,
+                              filter_lag_governance_orders,
                               apply_capit_lever, lever_live_preflight, approval_block_reason)
 from trading_bot.plan_funding_gate import check_plan_funding
 from trading_bot.netting_recon import (reconcile_netted_fills, get_net_fill_from_journal,
@@ -445,6 +446,18 @@ def main():
             else:
                 print(f"[{p['label']}] ⛔ LAG BỎ lệnh {a['ticker']} ({a['qty_before']:,} cp, "
                       f"8L rating={a['rating']}) — {a['reason']}")
+        # GATE QUẢN TRỊ book LAG: BANNED vĩnh viễn + mã user LOẠI TƯỜNG MINH (LAG_USER_EXCLUDED)
+        # + cờ forensic severity=exclude. LƯỚI AN TOÀN tầng order cho gate vốn chỉ sống ở tầng
+        # sinh ứng viên (lag_forensic_filter.py tự ghi là thiếu lưới executor) — chính tầng mà
+        # sự cố 2026-07-23 xảy ra (IVS vào plan CẢ 2 account dù user đã loại 07-21).
+        # Fail-closed cho 2 hằng số trong code; fail-OPEN + báo to khi CSV forensic hỏng.
+        plan, gov_blocked = filter_lag_governance_orders(plan)
+        for a in gov_blocked:
+            if a["action"] in ("FAIL_OPEN", "FAIL_OPEN_FORENSIC"):
+                print(f"[{p['label']}] ⚠⚠ LAG gate quản trị KHÔNG ĐẦY ĐỦ — {a['reason']}")
+            else:
+                print(f"[{p['label']}] ⛔ LAG BỎ lệnh {a['ticker']} ({a['qty_before']:,} cp, "
+                      f"{a['kind']}) — {a['reason']}")
         # ĐÒN BẨY MARGIN sleeve CAPIT (chính sách 2026-08-03, data/trading_rules.json →
         # capit_margin_lever, MẶC ĐỊNH enabled=false). Cấp cờ vay CHỈ cho lệnh mua CAPIT khi
         # artifact golive nói active=true; đồng thời GỠ mọi cờ vay lạ mà plan tự viết vào —

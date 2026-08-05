@@ -613,6 +613,100 @@ def filter_lag_rating_orders(plan, asof=None):
     return plan, blocked
 
 
+def _governance_gate_deps():
+    """Nguồn cho gate quản trị LAG. Tách riêng để self-check monkeypatch được (như _rating_gate_deps).
+
+    Trả `lag_filter_forensic_banned` — DÙNG LẠI nguyên hàm gate của tầng tín hiệu (BANNED +
+    LAG_USER_EXCLUDED + cờ forensic), không viết lại ba nguồn ở đây. KHÔNG cần `bq`: cả ba
+    nguồn đều cục bộ (2 hằng số trong code + 1 CSV).
+    """
+    import sys
+    from .config import WORKDIR
+    if WORKDIR not in sys.path:
+        sys.path.insert(0, WORKDIR)
+    from lag_forensic_filter import lag_filter_forensic_banned
+    return lag_filter_forensic_banned
+
+
+def filter_lag_governance_orders(plan, asof=None):
+    """GATE QUẢN TRỊ (BANNED + user-loại + cờ forensic) cho lệnh MUA book LAG — TẦNG ORDER.
+
+    VÌ SAO: `lag_forensic_filter.lag_filter_forensic_banned` (tầng SINH ứng viên, live từ
+    2026-08-03) tự ghi trong docstring rằng lưới tương ứng ở TẦNG LỆNH **CHƯA có** — và đó
+    chính là tầng mà sự cố thật đã xảy ra: **2026-07-23 DollarBill đưa IVS vào plan LAG CẢ HAI
+    account** (SpaceX 1800cp + ZaloPay 2750cp) dù user đã loại tường minh 07-21. Gate tầng tín
+    hiệu chặn được việc IVS TRỞ THÀNH ứng viên; nó KHÔNG chặn được một dòng
+    `{"ticker":"IVS","book":"LAG","side":"buy"}` viết thẳng vào plan JSON (LLM hoặc người sửa
+    tay). Trước hàm này, lớp phòng thủ duy nhất cho ca đó là TRÍ NHỚ của người lập plan — đúng
+    khuôn thất bại mà `filter_lag_rating_orders` (P1) đã được xây để vá cho gate rating.
+
+    KHÔNG phải chính sách mới: cả ba nguồn, ngữ nghĩa ngày hiệu lực (`date <= asof`) và fail-mode
+    đều dùng lại NGUYÊN `lag_filter_forensic_banned` — thay đổi duy nhất là NƠI GỌI.
+
+    FAIL-MODE — đồng bộ ĐÚNG hành vi gate tầng tín hiệu (không tự sáng tác hành vi khác):
+      · Mã thuộc `BANNED` / `LAG_USER_EXCLUDED` → LOẠI lệnh (fail-closed tuyệt đối: hằng số
+        trong code, không thể hỏng).
+      · Mã có cờ forensic `exclude` đã hiệu lực tới `asof` → LOẠI lệnh.
+      · `data/forensic_flags.csv` hỏng → hàm dưới vẫn áp 2 hằng số + trả `src_err`; ta GIỮ các
+        lệnh còn lại (fail-open cho riêng nguồn CSV) + 1 bản ghi action="FAIL_OPEN_FORENSIC"
+        để caller báo LOUD. Chặn sạch book LAG vì một file lỗi thì thiệt hại lớn hơn rủi ro.
+      · Cả gate không import/chạy được → GIỮ NGUYÊN plan (fail-OPEN) + action="FAIL_OPEN".
+
+    Vị trí trong cascade (bot_execute.py): filter_excluded → net → cap_capit → cap_lag →
+    rating → **governance** → lever → approval. Đặt sau `rating` (cùng nhóm LAG); thứ tự giữa
+    hai gate này KHÔNG đổi kết quả (cả hai loại hẳn lệnh, không đổi qty) — chỉ đổi việc log nào
+    in ra trước cho một lệnh trúng cả hai điều kiện.
+
+    Trả (plan đã lọc, list dict). Mỗi dict: {"ticker", "order_id", "kind"
+    ("banned"|"user_exclude"|"forensic"|None), "flag_date", "action", "qty_before", "reason"}.
+    """
+    def _is_lag_buy(o):
+        return (o.book or "").upper() == "LAG" and (o.side or "").lower() == "buy"
+
+    lag_buys = [o for o in plan.orders if _is_lag_buy(o)]
+    if not lag_buys:
+        return plan, []
+
+    asof = str(asof or plan.plan_date)[:10]
+    tickers = sorted({o.ticker for o in lag_buys})
+    try:
+        import pandas as pd
+        from .config import WORKDIR
+        lag_filter_forensic_banned = _governance_gate_deps()
+        cand = pd.DataFrame({"ticker": tickers})
+        _, dropped, src_err = lag_filter_forensic_banned(cand, asof, workdir=WORKDIR)
+    except Exception as ex:
+        # Gate KHÔNG chạy được (import lỗi/pandas lỗi) → fail-open + báo động, giống
+        # filter_lag_rating_orders. KHÔNG âm thầm bỏ qua.
+        return plan, [{"ticker": None, "order_id": None, "kind": None, "flag_date": None,
+                       "action": "FAIL_OPEN", "qty_before": None,
+                       "reason": f"KHÔNG chạy được gate quản trị LAG cho {tickers} "
+                                 f"({type(ex).__name__}: {ex}) — GIỮ NGUYÊN lệnh (fail-open). "
+                                 f"CẦN NGƯỜI KIỂM TRA BANNED/user-loại/forensic trước khi tin "
+                                 f"phiên này."}]
+
+    bad = {d["ticker"]: d for d in dropped}
+    blocked, keep = [], []
+    for o in plan.orders:
+        d = bad.get(o.ticker) if _is_lag_buy(o) else None
+        if d is None:
+            keep.append(o)
+            continue
+        blocked.append({"ticker": o.ticker, "order_id": o.id, "kind": d.get("kind"),
+                        "flag_date": d.get("flag_date"), "action": "BLOCKED",
+                        "qty_before": o.qty, "reason": d.get("reason")})
+    plan.orders = keep
+    if src_err:
+        # Hai hằng số VẪN được áp (mọi lệnh bị chặn ở trên vẫn có hiệu lực); chỉ riêng nguồn
+        # CSV forensic là không đọc được ⇒ nói to, đứng SAU các bản ghi BLOCKED.
+        blocked.append({"ticker": None, "order_id": None, "kind": None, "flag_date": None,
+                        "action": "FAIL_OPEN_FORENSIC", "qty_before": None,
+                        "reason": f"KHÔNG đọc được cờ forensic ({src_err}) — BANNED + "
+                                  f"LAG_USER_EXCLUDED VẪN áp, nhưng cờ forensic KHÔNG được "
+                                  f"kiểm cho {tickers}. CẦN NGƯỜI KIỂM TRA."})
+    return plan, blocked
+
+
 # ── PHẠM VI USER DUYỆT cho đòn bẩy CAPIT (2026-08-03) — NGUỒN CHUẨN TẮC DUY NHẤT ──────────
 # Ghim ở ĐÂY, tầng thực thi, chứ không phải chỉ ở tầng sinh tín hiệu. Lý do (arch-reviewer
 # 2026-08-03, phát hiện F2): CẢ HAI file mà runtime đọc — `data/trading_rules.json` VÀ
