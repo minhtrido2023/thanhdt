@@ -476,8 +476,14 @@ class DNSEBroker(BrokerBase):
             sellable = int(_fnum(qget(p, "tradequantity", "availablequantity",
                                       "sellablequantity", "availableqty",
                                       default=total)) or total)
+            # marketPrice: giá tham chiếu riêng của khối vị thế (KHÁC giá ATC của
+            # close_price() — xem docstring dnse_close_prices trong verify_account_snapshot.py)
+            # nhưng tự động phản ánh corporate action đã được broker ghi nhận vào vị thế
+            # (vd chia tách/thưởng cổ phiếu) NGAY khi qty được cập nhật — dùng để đối chiếu
+            # chéo, không thay thế close_price làm nguồn giá chính (bug VHM 2026-08-05).
+            market_price = _fnum(qget(p, "marketprice", default=None))
             if sym and total > 0:
-                out[sym] = {"total": total, "sellable": sellable}
+                out[sym] = {"total": total, "sellable": sellable, "marketPrice": market_price}
         return out
 
     @staticmethod

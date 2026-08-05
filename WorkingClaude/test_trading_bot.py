@@ -205,7 +205,7 @@ assert (q.ceiling, q.floor, q.day_volume) == (24900, 21700, 5343800), q
 ups = db.poll_orders()
 assert ups["123"].filled_qty == 700 and not ups["123"].is_dead, \
     "PartiallyFilled phải còn SỐNG"
-assert db.get_positions() == {"HPG": {"total": 1000, "sellable": 800}}
+assert db.get_positions() == {"HPG": {"total": 1000, "sellable": 800, "marketPrice": None}}
 assert db.get_cash() == 123_000_000
 
 print("\n✅ TEST PASS — plan + slicing + fill + multi-account + fleet quota "
