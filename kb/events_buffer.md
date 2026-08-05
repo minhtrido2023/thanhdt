@@ -908,3 +908,16 @@
 
 ## Consolidation 2026-08-05T06:00:06Z
 - [2026-08-05T06:00:06Z] Mafee/status — bot-done: {"account": "SpaceX", "plan_date": "2026-08-05", "elapsed_s": 1, "rc": 0}
+
+## Consolidation 2026-08-05T12:07:02Z
+- [2026-08-05T12:04:39Z] DollarBill/heartbeat — DollarBill_20260805_120345: {"status": "in_progress", "note": "Đã đọc DT5G state + plan 08-05 cũ, đang chạy compute_active_nav + các script deterministic cho plan 08-06"}
+- [2026-08-05T12:04:44Z] DollarBill/heartbeat — DollarBill_20260805_120343: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260805_120343", "source": "watcher"}
+- [2026-08-05T12:04:45Z] DollarBill/heartbeat — DollarBill_20260805_120345: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260805_120345", "source": "watcher"}
+- [2026-08-05T12:05:45Z] DollarBill/heartbeat — DollarBill_20260805_120343: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20260805_120343", "source": "watcher"}
+- [2026-08-05T12:05:46Z] DollarBill/heartbeat — DollarBill_20260805_120345: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20260805_120345", "source": "watcher"}
+- [2026-08-05T12:06:46Z] DollarBill/heartbeat — DollarBill_20260805_120343: {"status": "still_running", "elapsed_min": 3, "job_id": "DollarBill_20260805_120343", "source": "watcher"}
+- [2026-08-05T12:06:47Z] DollarBill/heartbeat — DollarBill_20260805_120345: {"status": "still_running", "elapsed_min": 3, "job_id": "DollarBill_20260805_120345", "source": "watcher"}
+- [2026-08-05T11:11:19Z] Winston/finding — new-listings-daily: {"date": "2026-08-05", "lookback_days": 90, "total_new": 1, "needs_manual_rating": 0, "fresh_ipo": 0, "research_queue": [], "snapshot": "/home/trido/thanhdt/WorkingClaude/data/new_listings.csv", "note": "0 mã mới < 20Q lịch sử → cần 8L manual rating. Taylor flag để đọc bản cáo bạch + tạo override documented reason+expiry."}
+- [2026-08-05T11:30:07Z] Winston/finding — dt5g-live-writer-la: {"tier": "WARN", "label": "pre-publish-1830", "table": "tav2_bq.vnindex_5state_dt5g_live", "lastmod_ict": "2026-08-05 16:25:27", "writer_class": "OTHER", "n_state_diff": 0, "state_diff_dates": [], "n_raw_diff": 0, "n_dup_time": 0, "n_null_asof": 9, "n_null_sealed": 0, "detail": ["bảng được ghi lúc 2026-08-05 16:25 ICT — NGOÀI cả cửa sổ publisher của ta (18:25–19:20) lẫn cửa sổ EOD đã biết của kaffa_v2 (16:30–18:00) ⇒ writer LẠ hoặc kaffa chạy lệch giờ"]}
+- [2026-08-05T11:35:05Z] Winston/finding — rubber ALERT: cao su GIẢM 2.60 USD/kg: {"tier": "ALERT", "direction": "GIẢM", "rss3_usdkg": 2.596, "date": "2026-08-04", "reasons": ["phá biên 52 tuần (đáy mới)"], "audience": ["Taylor", "DollarBill"], "wow_pct": -6.6, "cum4wk_pct": -7.4, "cum3mo_pct": -3.5, "stocks": ["GVR", "PHR", "DPR", "DRI", "TRC", "HRC"], "action": "Taylor rà mô hình/dự báo nhóm cao su; Bill cân nhắc kế hoạch hành động vị thế"}
+- [2026-08-05T11:40:07Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}
