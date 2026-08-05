@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background:#eef1f4;">
+<div style="max-width:760px;margin:0 auto;background:#ffffff;
+            font-family:Arial,Helvetica,sans-serif;">
+  <div style="background:#0d1b2a;padding:20px 28px;">
+    <div style="color:#9fb0c3;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;">
+      Báo cáo hiệu suất &amp; vận hành</div>
+    <div style="color:#ffffff;font-size:20px;font-weight:600;margin-top:4px;
+                font-family:Georgia,'Times New Roman',serif;">TỔNG QUAN CHIẾN LƯỢC PRODUCTION — V2.4</div>
+  </div>
+  <div style="padding:22px 28px;">
+<h1 style="font-size:22px;color:#0d1b2a;margin:20px 0 8px 0;font-family:Georgia,'Times New Roman',serif;">TỔNG QUAN CHIẾN LƯỢC PRODUCTION — V2.4</h1>
+<h2 style="font-size:18px;color:#13293d;margin:20px 0 8px 0;font-family:Georgia,'Times New Roman',serif;">Bản tóm lược để đối soát ý định (không phải báo cáo hiệu suất tuần/tháng)</h2>
+<p style="margin:8px 0;line-height:1.6;color:#26333f;"><strong>Chiến lược đang chạy:</strong> V2.4 · <strong>Live từ:</strong> 01/07/2026 (SpaceX), 06/07/2026 (ZaloPay) <strong>Ngày lập:</strong> 04/08/2026 · <strong>Người lập:</strong> Mike (điều phối) — số liệu dẫn từ `data/results_registry.md` <strong>Mục đích:</strong> giúp anh đối chiếu xem cách hệ thống đang vận hành có đúng ý anh chưa, không phải báo cáo lãi/lỗ</p>
+<hr style="border:none;border-top:1px solid #d5d9de;margin:22px 0;">
+<h2 style="font-size:18px;color:#13293d;margin:20px 0 8px 0;font-family:Georgia,'Times New Roman',serif;">1. Số liệu đã pin, đã kiểm chứng — đọc trước tiên</h2>
+<table style="border-collapse:collapse;width:100%;margin:14px 0;font-size:13.5px;">
+<thead><tr>
+<th style="text-align:left;padding:6px 10px;background:#1c2b3a;color:#f2f4f6;border:1px solid #1c2b3a;font-weight:600;">Chỉ tiêu</th>
+<th style="text-align:left;padding:6px 10px;background:#1c2b3a;color:#f2f4f6;border:1px solid #1c2b3a;font-weight:600;">Giá trị pin chính thức</th>
+<th style="text-align:left;padding:6px 10px;background:#1c2b3a;color:#f2f4f6;border:1px solid #1c2b3a;font-weight:600;">Ghi chú</th>
+</tr></thead><tbody>
+<tr style="background:#ffffff;">
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;"><strong>CAGR</strong></td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;"><strong>28,86%</strong></td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">Full-period 12,3 năm (2014–2026)</td>
+</tr>
+<tr style="background:#f7f8fa;">
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;"><strong>Sharpe</strong></td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;"><strong>1,90</strong></td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;"></td>
+</tr>
+<tr style="background:#ffffff;">
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;"><strong>MaxDD</strong></td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;"><strong>−17,8%</strong></td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">⚠️ xem Mục 6 — đây là cận dưới, không phải mức tệ nhất có thể</td>
+</tr>
+<tr style="background:#f7f8fa;">
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;"><strong>Calmar</strong></td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;"><strong>1,62</strong></td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">CAGR/MaxDD</td>
+</tr>
+<tr style="background:#ffffff;">
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;"><strong>IS (2014–2019)</strong></td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">27,09%</td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">walk-forward in-sample</td>
+</tr>
+<tr style="background:#f7f8fa;">
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;"><strong>OOS (2020–nay)</strong></td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">30,48%</td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">walk-forward out-of-sample — <strong>không tệ hơn IS</strong>, không có dấu hiệu overfit</td>
+</tr>
+<tr style="background:#ffffff;">
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;"><strong>DSR (Deflated Sharpe)</strong></td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;"><strong>≈ 1,0000</strong></td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">xác suất Sharpe thật &gt; 0 sau khi trừ hao vì đã thử nhiều cấu hình — 1,0 là mức an toàn nhất</td>
+</tr>
+<tr style="background:#f7f8fa;">
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;"><strong>PBO (xác suất overfit)</strong></td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;"><strong>0,198</strong></td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">dưới ngưỡng 0,5 — cấu hình <em>không</em> bị overfit theo tổ hợp</td>
+</tr>
+<tr style="background:#ffffff;">
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;"><strong>Số cấu hình đã thử trước khi chọn</strong></td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">71 (thực đo) đến 200 (thận trọng)</td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">công khai để tránh cấy nghi ngờ "chọn số đẹp"</td>
+</tr>
+</tbody></table>
+<p style="margin:8px 0;line-height:1.6;color:#26333f;"><strong>Pin hiện hành:</strong> 2026-08-03 (job `Taylor_20260803_035250`, xác nhận bằng A/B 1 biến trên đúng code production, self-check 0 đồng sai lệch). <strong>DSR/PBO:</strong> job `Taylor_20260705_075644` (meta-analysis riêng, không đụng backtest sống). Cả 2 đã qua kiểm chứng bởi reviewer độc lập (quant-skeptic).</p>
+<hr style="border:none;border-top:1px solid #d5d9de;margin:22px 0;">
+<h2 style="font-size:18px;color:#13293d;margin:20px 0 8px 0;font-family:Georgia,'Times New Roman',serif;">2. Chiến lược gồm những gì</h2>
+<p style="margin:8px 0;line-height:1.6;color:#26333f;">V2.4 chia vốn thành <strong>4 phần</strong>, mỗi phần một vai trò khác nhau — không phải 1 công thức duy nhất:</p>
+<table style="border-collapse:collapse;width:100%;margin:14px 0;font-size:13.5px;">
+<thead><tr>
+<th style="text-align:left;padding:6px 10px;background:#1c2b3a;color:#f2f4f6;border:1px solid #1c2b3a;font-weight:600;">Phần</th>
+<th style="text-align:left;padding:6px 10px;background:#1c2b3a;color:#f2f4f6;border:1px solid #1c2b3a;font-weight:600;">Tên gọi</th>
+<th style="text-align:left;padding:6px 10px;background:#1c2b3a;color:#f2f4f6;border:1px solid #1c2b3a;font-weight:600;">Cơ chế chọn mã</th>
+<th style="text-align:left;padding:6px 10px;background:#1c2b3a;color:#f2f4f6;border:1px solid #1c2b3a;font-weight:600;">Vai trò</th>
+</tr></thead><tbody>
+<tr style="background:#ffffff;">
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;"><strong>Sổ 1</strong></td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">BAL (momentum)</td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">Điểm số động lượng SIGNAL_V11 kết hợp định giá rẻ (1/PE + 1/PCF)</td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">Nguồn lợi nhuận chính, phản ứng nhanh theo xu hướng giá</td>
+</tr>
+<tr style="background:#f7f8fa;">
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;"><strong>Sổ 2</strong></td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">LAG (PEAD)</td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">Mã vừa công bố lợi nhuận tốt bất ngờ (earnings surprise), giữ 25 phiên</td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">Bắt hiệu ứng "trôi giá sau tin tốt" đã được kiểm chứng học thuật</td>
+</tr>
+<tr style="background:#ffffff;">
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;"><strong>Sổ 3</strong></td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">CAPIT (bear-washout)</td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">Kích hoạt khi thị trường bán tháo cực đoan (breadth oversold), lọc theo FSCORE≥6</td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">Tranh thủ mua rẻ đúng lúc hoảng loạn — vốn lấy từ sổ LAG</td>
+</tr>
+<tr style="background:#f7f8fa;">
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;"><strong>Rổ đệm</strong></td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">custom30V (parking)</td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">30 mã chất lượng cao, xếp hạng theo giá rẻ (1/PE)</td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">Giữ tiền nhàn rỗi sinh lời thay vì để tiền mặt chết, khi ở trạng thái NEUTRAL</td>
+</tr>
+</tbody></table>
+<p style="margin:8px 0;line-height:1.6;color:#26333f;">Tỷ trọng sổ LAG (w_LAG) thay đổi theo trạng thái thị trường (không cố định):</p>
+<table style="border-collapse:collapse;width:100%;margin:14px 0;font-size:13.5px;">
+<thead><tr>
+<th style="text-align:left;padding:6px 10px;background:#1c2b3a;color:#f2f4f6;border:1px solid #1c2b3a;font-weight:600;">Trạng thái thị trường</th>
+<th style="text-align:left;padding:6px 10px;background:#1c2b3a;color:#f2f4f6;border:1px solid #1c2b3a;font-weight:600;">w_LAG</th>
+</tr></thead><tbody>
+<tr style="background:#ffffff;">
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">KHỦNG HOẢNG (CRISIS)</td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">50%</td>
+</tr>
+<tr style="background:#f7f8fa;">
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">GẤU (BEAR)</td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">0%</td>
+</tr>
+<tr style="background:#ffffff;">
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">BÌNH THƯỜNG → TĂNG MẠNH (NEUTRAL/BULL/EX-BULL)</td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">65%</td>
+</tr>
+</tbody></table>
+<hr style="border:none;border-top:1px solid #d5d9de;margin:22px 0;">
+<h2 style="font-size:18px;color:#13293d;margin:20px 0 8px 0;font-family:Georgia,'Times New Roman',serif;">3. Cổng an toàn — "biết khi nào nên phòng thủ"</h2>
+<p style="margin:8px 0;line-height:1.6;color:#26333f;">Hệ thống dùng <strong>DT5G</strong> — một mô hình 5 trạng thái thị trường (KHỦNG HOẢNG 0% → GẤU 20% → BÌNH THƯỜNG 70% → TĂNG 100% → TĂNG MẠNH 130%) để tự động hạ tỷ trọng cổ phiếu khi thị trường xấu đi, và giữ nguyên/tăng khi thị trường tốt. Đây là lớp bảo hiểm rủi ro, không phải công cụ tăng lợi nhuận — kiểm chứng cho thấy nó chỉ can thiệp ở ~49 lần chuyển trạng thái trong 12 năm (so với mô hình gốc chưa lọc là ~153 lần), tức rất ít khi "hoảng loạn giả", nhưng khi thị trường thật sự sập thì phản ứng.</p>
+<p style="margin:8px 0;line-height:1.6;color:#26333f;">Mỗi mã cổ phiếu trước khi vào sổ LAG còn phải qua <strong>cổng chất lượng 8L</strong> — xếp hạng tổng hợp gồm định giá rẻ (trọng số cao nhất, 1/PE), tăng trưởng lợi nhuận, dòng tiền, đòn bẩy. Mã xếp hạng kém (≥4/5) bị loại tự động, không có ngoại lệ thủ công.</p>
+<hr style="border:none;border-top:1px solid #d5d9de;margin:22px 0;">
+<h2 style="font-size:18px;color:#13293d;margin:20px 0 8px 0;font-family:Georgia,'Times New Roman',serif;">4. Cách kiểm chứng trước khi tin số liệu</h2>
+<p style="margin:8px 0;line-height:1.6;color:#26333f;">Mọi con số ở Mục 1 đều đi qua quy trình bắt buộc trước khi được ghi nhận là "chính thức":</p>
+<ol style="margin:8px 0;padding-left:22px;">
+<li style="margin:4px 0;line-height:1.55;"><strong>Walk-forward</strong>: chia lịch sử thành 2 giai đoạn tách biệt (huấn luyện 2014–2019, kiểm định 2020–nay) — chiến lược phải hoạt động tốt ở CẢ HAI, không chỉ giai đoạn đã "nhìn thấy" khi thiết kế.</li>
+<li style="margin:4px 0;line-height:1.55;"><strong>Self-check 0 đồng sai lệch</strong>: mọi phiên backtest phải khớp chính xác dòng tiền vào/ra, không có "tiền biến mất" hay "tiền tự sinh ra" trong mô phỏng.</li>
+<li style="margin:4px 0;line-height:1.55;"><strong>DSR/PBO</strong>: kiểm tra xem kết quả tốt có phải chỉ vì đã thử quá nhiều phương án rồi chọn cái đẹp nhất hay không (multiple-testing bias) — cả 2 chỉ số đều đạt ngưỡng an toàn (Mục 1).</li>
+<li style="margin:4px 0;line-height:1.55;"><strong>Phản biện độc lập (quant-skeptic)</strong>: một vai trò AI riêng biệt, nhiệm vụ DUY NHẤT là tìm lỗi và bác bỏ kết quả (tìm look-ahead bias, dữ liệu rò rỉ tương lai, panel bị chọn lọc có lợi...) — chỉ khi vượt qua được vai trò này mới được đưa vào production.</li>
+</ol>
+<hr style="border:none;border-top:1px solid #d5d9de;margin:22px 0;">
+<h2 style="font-size:18px;color:#13293d;margin:20px 0 8px 0;font-family:Georgia,'Times New Roman',serif;">5. Cập nhật gần nhất (04/08/2026)</h2>
+<p style="margin:8px 0;line-height:1.6;color:#26333f;">Patch bảo hiểm khớp lệnh (chase-cap) — chính thức LIVE từ hôm nay. Khi giá biến động mạnh, hệ thống được phép nới giá đặt mua thêm tối đa 4% để tăng khả năng khớp lệnh (thay vì đặt cứng một mức giá dễ bị trượt). Đây <strong>không phải công cụ tăng lợi nhuận</strong> — bản chất là bảo hiểm chất lượng khớp lệnh, chi phí trung bình gần như bằng 0. Đã qua đủ điều kiện: 80 lệnh mua thật/13 phiên không có sự cố, phản biện độc lập xác nhận độ tin cậy cao, và anh đã duyệt trực tiếp.</p>
+<hr style="border:none;border-top:1px solid #d5d9de;margin:22px 0;">
+<h2 style="font-size:18px;color:#13293d;margin:20px 0 8px 0;font-family:Georgia,'Times New Roman',serif;">6. Giới hạn cần biết thẳng thắn (không tô hồng)</h2>
+<ul style="margin:8px 0;padding-left:22px;">
+<li style="margin:4px 0;line-height:1.55;"><strong>MaxDD −17,8% là CẬN DƯỚI, không phải mức tệ nhất có thể xảy ra.</strong> Vì một lỗi kỹ thuật nhỏ trong cách tính thanh khoản vẫn đang mở (chưa ảnh hưởng hoạt động sống), mức sụt giảm tệ nhất theo mô phỏng thống kê (bootstrap) thực ra neo quanh <strong>−28% đến −30%</strong> trong kịch bản xấu. Đừng dùng con số −17,8% để tưởng tượng "tệ nhất chỉ vậy".</li>
+<li style="margin:4px 0;line-height:1.55;"><strong>28,86% là ước lượng có điều kiện, không phải cận trên hay cận dưới chắc chắn</strong> — phụ thuộc một tham số mô hình khớp lệnh (giả định 20% khối lượng/phiên) chưa được neo hoàn toàn vào dữ liệu khớp lệnh thật; nghiên cứu gần nhất (04/08) cho thấy 2 sai lệch giấu trong tham số này gần như triệt tiêu lẫn nhau — nhưng "gần như" không phải "chắc chắn bằng 0".</li>
+<li style="margin:4px 0;line-height:1.55;"><strong>Sổ CAPIT còn ít dữ liệu thật</strong> (mới vài lần kích hoạt) nên chưa đủ để kiểm chứng độc lập bằng thống kê — vẫn nằm trong nhóm được coi là hợp lý về logic nhưng chưa "đã chứng minh" như 2 sổ BAL/LAG.</li>
+</ul>
+<hr style="border:none;border-top:1px solid #d5d9de;margin:22px 0;">
+<h2 style="font-size:18px;color:#13293d;margin:20px 0 8px 0;font-family:Georgia,'Times New Roman',serif;">7. Đang chạy trên tài khoản nào</h2>
+<table style="border-collapse:collapse;width:100%;margin:14px 0;font-size:13.5px;">
+<thead><tr>
+<th style="text-align:left;padding:6px 10px;background:#1c2b3a;color:#f2f4f6;border:1px solid #1c2b3a;font-weight:600;">Tài khoản</th>
+<th style="text-align:left;padding:6px 10px;background:#1c2b3a;color:#f2f4f6;border:1px solid #1c2b3a;font-weight:600;">Sàn</th>
+<th style="text-align:left;padding:6px 10px;background:#1c2b3a;color:#f2f4f6;border:1px solid #1c2b3a;font-weight:600;">Vốn ban đầu</th>
+<th style="text-align:left;padding:6px 10px;background:#1c2b3a;color:#f2f4f6;border:1px solid #1c2b3a;font-weight:600;">Đặc điểm</th>
+</tr></thead><tbody>
+<tr style="background:#ffffff;">
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;"><strong>SpaceX</strong></td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">DNSE 0002023347</td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">Có margin</td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">Live từ 01/07/2026</td>
+</tr>
+<tr style="background:#f7f8fa;">
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;"><strong>ZaloPay</strong></td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">DNSE 0001743768</td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">Cash-only, không margin</td>
+<td style="text-align:left;padding:6px 10px;border:1px solid #dfe3e8;color:#1c2b3a;">Live từ 06/07/2026; có 1 mã cũ (DGC) bị loại khỏi tái cân bằng vì hạn chế giao dịch từ HOSE</td>
+</tr>
+</tbody></table>
+<hr style="border:none;border-top:1px solid #d5d9de;margin:22px 0;">
+<p style="margin:8px 0;line-height:1.6;color:#26333f;"><em>Báo cáo mang tính tổng quan chiến lược, không phải tư vấn đầu tư. Hiệu suất quá khứ (kể cả đã qua kiểm chứng thống kê) không đảm bảo hiệu suất tương lai. Mọi số liệu dẫn nguồn từ hồ sơ backtest nội bộ (`data/results_registry.md`), có thể tra soát lại bất kỳ lúc nào.</em></p>
+
+<div style="margin-top:32px;padding-top:16px;border-top:2px solid #1c2b3a;
+            font-size:11px;color:#6b7680;line-height:1.6;">
+  <p style="margin:4px 0;"><strong>Miễn trừ trách nhiệm:</strong> Tài liệu này chỉ nhằm mục đích
+  thông tin nội bộ, không phải lời khuyên đầu tư hay đề nghị mua/bán bất kỳ chứng khoán nào
+  (for informational purposes only; not investment advice or an offer to buy or sell any
+  security).</p>
+  <p style="margin:4px 0;">Hiệu suất quá khứ không đảm bảo hoặc dự báo hiệu suất tương lai
+  (past performance is not indicative of future results). Số liệu hiệu suất trong giai đoạn ngắn
+  (dưới 12 tháng) có ý nghĩa thống kê hạn chế và không nên ngoại suy.</p>
+  <p style="margin:4px 0;">Phương pháp tính toán, nguồn dữ liệu và các khoảng trống/giới hạn số
+  liệu đã biết được công bố đầy đủ trong phần phụ lục của báo cáo này.</p>
+</div>
+
+  </div>
+</div>
+</body></html>
