@@ -32,6 +32,8 @@ WC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file
 sys.path.insert(0, WC_ROOT)
 
 from trading_bot.discretionary_accumulation import compute_session_order, validate_state, BOOK
+from trading_bot.config import live_dnse_labels
+from trading_bot.plan_cash_commitment import gate_injected_order, replan_dropped_injection
 from trading_bot.vn_market import session_phase, now_ict
 
 # Phiên đang giao dịch (09:00–14:45 T2-T6) → day_volume của DNSE là KL DỞ DANG. Cơ chế
@@ -150,6 +152,7 @@ def process_account(account, plan_date, dry_run):
     plan.setdefault("orders", [])
 
     now_iso = dt.datetime.now().astimezone().isoformat(timespec="seconds")
+    account_mode = "live" if account in live_dnse_labels() else "paper"
     n_injected = 0
     broker = None
 
@@ -162,9 +165,16 @@ def process_account(account, plan_date, dry_run):
         if existing:
             print(f"  [skip] đã có order {BOOK} cho {ticker} trong plan (id={existing}) — không chèn trùng.")
             continue
-        # dedup 2: ledger đã ghi plan_date này
+        # dedup 2: ledger đã ghi plan_date này — TRỪ KHI plan đã bị GHI LẠI sau lần chèn đó
+        # (re-plan 21:3x/22:1x ghi đè toàn bộ orders[]). Ledger có bản ghi mà plan KHÔNG còn
+        # order tương ứng ⇒ dedup theo ledger nuốt IM LẶNG tranche của phiên. An toàn để chèn
+        # lại: filled_qty luôn đọc từ broker (không từ ledger) và id order là tất định nên
+        # dedup-1 ở trên vẫn chặn trùng trong cùng một plan.
         ledger = state.setdefault("ledger", [])
-        if any(e.get("plan_date") == plan_date for e in ledger):
+        if replan_dropped_injection(plan.get("orders"), ledger, plan_date, ticker, BOOK):
+            print(f"  [RE-INJECT] ledger đã ghi {plan_date} nhưng plan KHÔNG còn order "
+                  f"{BOOK}/{ticker} — plan bị ghi lại sau lần chèn trước. Chèn LẠI.")
+        elif any(e.get("plan_date") == plan_date for e in ledger):
             print(f"  [skip] ledger đã có bản ghi cho {plan_date} — không chèn trùng.")
             continue
 
@@ -200,13 +210,41 @@ def process_account(account, plan_date, dry_run):
                                                 if not k.startswith("_")})
             continue
 
+        # ── GATE TIỀN (A2): trừ phần plan V2.4 (~19:0x) đã dự chi TRƯỚC khi chèn ─────────
+        # Hai bộ sinh lệnh cùng tiêu MỘT túi tiền và không bộ nào cộng phần của bộ kia. Vì
+        # injector chạy sau (nó no-op khi chưa có file plan) nên đây là bên phải nhường.
+        # Sự cố thật 2026-07-24 SpaceX: V2.4 45,9M + tranche TV1 3,98M = 49,9M > cash 49,1M.
+        order, gate = gate_injected_order(order, plan, broker, account_mode,
+                                          int(state["lot_size"]))
+        print(f"  cash-gate: {gate['action']} — {gate['reason']}")
+        if order is None:
+            state.setdefault("history_noninject", []).append(
+                {"plan_date": plan_date, "action": "skip_cash_gate",
+                 "reason": gate.get("human_note") or gate["reason"],
+                 "headroom_vnd": gate.get("headroom_vnd"),
+                 "committed_vnd": gate.get("committed_vnd"), "at": now_iso})
+            # Ghi vào PLAN để báo cáo 21:00 hiện lý do — race tiền im lặng biến thành một
+            # quyết định người đọc được (muốn ưu tiên tranche hơn V2.4 thì user re-plan).
+            plan.setdefault("cash_gate_notes", []).append(
+                {"at": now_iso, "ticker": ticker, "action": gate["action"],
+                 "note": gate.get("human_note") or gate["reason"]})
+            if not dry_run:
+                _atomic_write_json(state_path, {k: v for k, v in state.items()
+                                                if not k.startswith("_")})
+                _atomic_write_json(plan_path, plan)
+            continue
+        if gate["action"] == "SHRINK":
+            order["note"] = order.get("note", "") + f" [CASH-GATE] {gate['human_note']}"
+
         # chèn order + ghi ledger (audit — KHÔNG dùng để đếm filled)
         plan["orders"].append(order)
         ledger.append({
             "plan_date": plan_date, "injected_qty": order["qty"],
             "limit_price_vnd": order["limit_price_vnd"], "order_id": order["id"],
             "filled_before": decision.get("filled_qty"),
-            "opportunistic": decision.get("opportunistic"), "at": now_iso})
+            "opportunistic": decision.get("opportunistic"), "at": now_iso,
+            "cash_gate": {k: gate.get(k) for k in
+                          ("action", "headroom_vnd", "committed_vnd", "basis")}})
         n_injected += 1
         print(f"  [INJECT] {ticker} {order['qty']}cp @ ≤{order['limit_price_vnd']:,} "
               f"(filled {decision['filled_qty']}/{decision.get('target')}, "
