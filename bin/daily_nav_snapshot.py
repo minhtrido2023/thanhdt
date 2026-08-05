@@ -63,13 +63,18 @@ def today_sell_value(account, date):
 
 
 def broker_positions(account_label, account_no):
-    """Vị thế THẬT từ API broker (source of truth) → {sym: total_qty}.
+    """Vị thế THẬT từ API broker (source of truth) → {sym: {"qty": ..., "marketPrice": ...}}.
 
     Bug 2026-07-07 (kb/INCIDENTS.md): NAV từng lấy mtm_stock từ verify_account_snapshot.py
     — tái dựng vị thế TỪ LỊCH SỬ FILL journal. Đúng cho account clean-slate (SpaceX), nhưng
     account có vị thế legacy không có fill history (ZaloPay: DGC/VPB/VIB/VHC/TCM/TLG ~976tr)
     bị BỎ SÓT toàn bộ → EOD report đăng NAV 17,5tr (-98%) lên Trading report. Nguyên tắc:
     NAV đo TÀI SẢN THẬT → hỏi broker; journal chỉ dùng cho cost-basis/P&L attribution.
+
+    marketPrice đi kèm để main() đối chiếu chéo với dnse_close_prices() (bug 2026-08-05: VHM
+    chia thưởng cổ phiếu 1:1, vị thế broker cập nhật qty/marketPrice đúng ngay trong ngày
+    nhưng close_price() G1 trả giá CŨ trước sự kiện — mtm_stock bị thổi phồng đúng bằng giá
+    trị 1 vị thế, cả 2 tài khoản SpaceX/ZaloPay).
     """
     sys.path.insert(0, WC_ROOT)
     from trading_bot.brokers import DNSEBroker
@@ -84,7 +89,8 @@ def broker_positions(account_label, account_no):
             b.get_cash()
         except Exception:
             pass
-        return {sym: p["total"] for sym, p in pos.items() if p.get("total", 0) > 0}
+        return {sym: {"qty": p["total"], "marketPrice": p.get("marketPrice")}
+                for sym, p in pos.items() if p.get("total", 0) > 0}
     except Exception as e:
         print(f"⚠️ Không đọc được positions broker ({account_label}): {e}", file=sys.stderr)
         return None
@@ -366,7 +372,8 @@ def main():
     from verify_account_snapshot import dnse_close_prices, bq_close_prices
     import datetime as _dt
     tickers = sorted(positions)
-    if args.date == _dt.date.today().isoformat():
+    is_today = args.date == _dt.date.today().isoformat()
+    if is_today:
         prices = dnse_close_prices(tickers)
     else:
         prices, _perr = bq_close_prices(tickers, args.date)
@@ -376,7 +383,36 @@ def main():
         print(f"❌ [{args.date}] Thiếu giá đóng cửa verified cho {missing} — KHÔNG tính NAV "
               f"(không đoán giá).", file=sys.stderr)
         return 2
-    mtm_stock = sum(qty * prices[t] for t, qty in positions.items())
+
+    # ── Đối chiếu chéo close_price(G1) vs marketPrice của CHÍNH vị thế broker (bug
+    # 2026-08-05: VHM chia thưởng cổ phiếu 1:1, qty/marketPrice của vị thế cập nhật đúng
+    # ngay trong ngày nhưng close_price() G1 vẫn trả giá TRƯỚC sự kiện — mtm_stock bị thổi
+    # phồng đúng bằng giá trị 1 vị thế, cả SpaceX lẫn ZaloPay). Chỉ đối chiếu được khi
+    # is_today (marketPrice của vị thế broker luôn là ảnh chụp HIỆN TẠI, vô nghĩa với
+    # --date lịch sử). Lệch >PRICE_XCHECK_TOLERANCE_PCT gần như chắc chắn là corporate
+    # action broker chưa đồng bộ hết mọi nguồn giá — fail-safe từ chối, không đoán giá nào
+    # đúng hơn (đúng nguyên tắc "không tự sửa, escalate" đã dùng xuyên suốt script này).
+    PRICE_XCHECK_TOLERANCE_PCT = 5.0
+    if is_today:
+        mismatched = []
+        for t in tickers:
+            mp = (positions[t] or {}).get("marketPrice")
+            cp = prices.get(t)
+            if not mp or not cp:
+                continue
+            diff_pct = abs(cp - mp) / mp * 100
+            if diff_pct > PRICE_XCHECK_TOLERANCE_PCT:
+                mismatched.append((t, cp, mp, diff_pct))
+        if mismatched:
+            detail = "; ".join(f"{t}: close_price={cp:,.0f} vs vị thế broker marketPrice={mp:,.0f} "
+                               f"(lệch {d:.1f}%)" for t, cp, mp, d in mismatched)
+            print(f"❌ [{args.date}] Giá close_price(G1) và marketPrice của vị thế broker LỆCH "
+                  f">{PRICE_XCHECK_TOLERANCE_PCT:.0f}% cho {len(mismatched)} mã — KHÔNG tính NAV "
+                  f"(nghi corporate action broker chưa đồng bộ hết nguồn giá, xem VHM 2026-08-05): "
+                  f"{detail}. Kiểm tra thủ công trước khi chạy lại.", file=sys.stderr)
+            return 2
+
+    mtm_stock = sum(pos["qty"] * prices[t] for t, pos in positions.items())
 
     raw_path = os.path.join(EXEC_DIR, f"dnse_raw_{args.date}.jsonl")
     try:
