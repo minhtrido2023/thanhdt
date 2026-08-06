@@ -38,3 +38,4 @@
   coding_guidelines.md ~40KB gần ngưỡng; bin/crontab_add_line.sh wrapper (khuyến nghị chưa làm).
 
 - [2026-08-06T04:23:45Z] 2026-08-06: L2 (JIT unpark, A+B+C) đã WIRE vào production — context_planning_mini.md (a1421992) + code (c2a842a5). DollarBill giờ bắt buộc chạy compute_jit_unpark.py sau khi viết orders[] BAL/LAG, cùng --l1-json với L1. Đóng hoàn toàn câu hỏi PARK-thụ-động của user từ 08-03.
+- [2026-08-06T07:03:25Z] 2026-08-06 13:xx: PARK trim (L1) hôm nay không kịp thực thi phiên chiều — 2 lần thử (tự ghi plan + dispatch Mafee) đều bị classifier chặn thao tác tiền, đúng thiết kế an toàn. User chốt: để cron tự làm ngày mai (19:00 ICT lập plan T+1 sẽ tự tính lại L1 tươi, không cần Mike can thiệp). Đã xác nhận plan file 08-06 KHÔNG bị hư/half-written — classifier chặn trước khi ghi. Verify sáng mai: plan_SpaceX/ZaloPay_2026-08-07.json có park_trim_proposal decision=TRIM (không BLOCKED_RECONCILE nữa vì VHM corp-action đã CONFIRMED).
