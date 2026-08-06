@@ -232,9 +232,62 @@ lệnh cần 171,1tr. Đây KHÔNG phải rule mới — là **live đang vi ph�
 - Tiền thu từ trim là dry powder cho LAG/BAL — nhưng nó **không tạo quyền mua**: mọi lệnh mua vẫn
   đi qua gate hiện có (DD, 8L rating≤3, `cap_lag_orders` %ADV, `filter_lag_rating_orders`).
 
-**L2 (JIT unpark — bán PARK để cấp vốn cho một lệnh mua cụ thể đang thiếu tiền) CHƯA làm.** Khi
-thiếu tiền cho lệnh LAG/BAL, giữ nguyên hành vi hiện tại (defer lệnh) — đừng tự chế đường bán PARK
-tại chỗ trong plan.
+## L2 JIT-unpark — MỖI LẦN lập plan có lệnh BAL/LAG phải chạy `compute_jit_unpark.py` trước khi defer (thêm 2026-08-06, ĐÃ BẬT)
+
+> **TRẠNG THÁI: BẬT từ 2026-08-06.** Chuỗi build A(port công thức engine)+B(gross-up phí ma sát
+> 0,15%)+C(làm tròn LÊN 1 lô khi chắc chắn đủ tiền) đều quant-skeptic CONFIRMED cao cùng ngày
+> (`Taylor_20260806_015739`/`_025613`/`_033014`). User chốt chính sách 2 điểm: (1) chọn Phương án
+> B thay vì A gốc (A một mình để hụt tới 12,5% lệnh mua do làm tròn phí); (2) chọn thêm Phương án
+> C trên nền B (B một mình vẫn để 5/6 ca hụt nguyên do làm tròn LÔ — C đưa về 6/6 hết hụt, đo thật
+> trên dữ liệu 2026-08-05).
+
+**Vấn đề nó vá**: L1 chỉ trim PARK theo TRẦN TUÂN THỦ (vượt 80% pool thì trim), không liên quan gì
+đến việc có lệnh BAL/LAG cụ thể đang thiếu tiền hay không. Trước 08-06, hệ **defer nguyên lệnh**
+khi thiếu tiền dù PARK còn dư dả — đây chính là hành vi thụ động user chỉ ra 08-03 (PARK 579M/61%
+NAV trong khi LAG chỉ cần 171M). Cơ chế backtest thật (đã pin 28,86%) dùng đúng bước "bán PARK
+NGAY LÚC mua BAL/LAG" — xem `mike/agents/Taylor/research/book_attribution_funding_order_20260805.md`
+Q1 (0 lệnh bị bỏ trong bản pin, PARK bị bán 8.789,4 tỷ để nuôi deal suốt 12,46 năm).
+
+**Quy trình bắt buộc mỗi lần lập plan (khi đã bật):**
+1. **Chạy L1 TRƯỚC** (mục trên) — dù `NO_TRIM` cũng phải chạy để có file `--out` dùng cho bước 2.
+2. Viết đầy đủ `orders[]` BAL/LAG (mọi lệnh mua dự kiến trong plan) như bình thường. Sau đó chạy
+   ĐÚNG 1 LẦN cho CẢ plan (script tự quét mọi lệnh mua book BAL/LAG bên trong, không phải gọi riêng
+   từng mã) — **luôn truyền `--l1-json` trỏ đúng file L1 vừa xuất** để tránh 2 lớp đề xuất bán
+   trùng cùng cổ phiếu:
+   ```bash
+   python3 mike/bin/compute_jit_unpark.py --account <SpaceX|ZaloPay> \
+       --plan data/trade_plans/plan_<account>_<plan_date>.json \
+       --l1-json data/trade_plans/park_trim_<account>_<plan_date>.json \
+       --out data/trade_plans/jit_unpark_<account>_<plan_date>.json
+   ```
+   `--margin-room` KHÔNG truyền (mặc định 0 = đúng cấu hình R3 đã pin, V2.5 DISABLED) — đổi khác
+   là thay đổi chính sách, cần user duyệt riêng.
+3. `decision == "NO_JIT_NEEDED"` (mọi lệnh đã đủ cash) → không làm gì thêm, không thêm field nào.
+   `decision == "NO_SELL_POSSIBLE"` hoặc `"BLOCKED_ALL_NAMES"` → giữ nguyên hành vi cũ (lệnh mua bị
+   co/defer theo sức mua hiện có, đọc rõ lý do trong `notes`), không tự chế đường bán nào khác.
+4. `decision == "JIT"` → đưa nguyên `orders[]` (đề xuất bán PARK) VÀ `buy_amendments[]` (chi tiết
+   từng lệnh mua: `status` FUNDED_BY_JIT/SHRINK/DROP, `needed_vnd`, `jit_sell_vnd`,
+   `jit_proceeds_net_vnd`, `qty_final`) vào plan JSON dưới key riêng **`jit_unpark_proposal`**
+   (KHÔNG trộn `orders[]` của L2 vào `orders[]` của V2.4/`park_trim_proposal` của L1 — nguồn khác
+   nhau, cơ chế duyệt phải phân biệt được đề xuất tài trợ với tín hiệu mua/bán book hay trim tuân
+   thủ). Copy nguyên cấu trúc JSON script `--out` sinh ra, đừng viết tay lại.
+5. `decision` bắt đầu bằng `BLOCKED_` (RECONCILE/NO_PLAN/DAYCAP/SHARE/BOOK_INVARIANT) →
+   **KHÔNG tự sửa, KHÔNG tự bỏ qua**: ghi nguyên `decision` + `notes` vào plan dưới
+   `jit_unpark_proposal` và báo lên bus. `BLOCKED_RECONCILE` nghĩa là sổ lô lệch sổ broker.
+
+**Ranh giới CỨNG — giống hệt L1, không được nới trong bất kỳ plan nào:**
+- Lệnh trong `jit_unpark_proposal` **vẫn phải qua đúng cơ chế duyệt như mọi lệnh khác**: user duyệt
+  plan → Mafee plan-bound. Script CHỈ ĐỌC, tự nó không đặt gì.
+- **Chỉ sleeve PARK.** CAPIT (stop_exempt/slot_exempt), LAG, BAL, DISCRETIONARY_SPECIAL và
+  `excluded_tickers` (DGC ở ZaloPay) KHÔNG BAO GIỜ nằm trong đề xuất này.
+- **Bán dư tối đa đúng 1 lô/lệnh mua** (đặc tính Phương án C, đã duyệt) — không phải "bán tuỳ ý cho
+  chắc". Nếu 1 plan có nhiều lệnh BAL/LAG cùng thiếu tiền, mỗi lệnh có thể dư tối đa 1 lô riêng —
+  chưa có ca thật đo tổng dư nhiều lệnh cùng lúc, để ý khi gặp.
+- Tiền thu là để tài trợ ĐÚNG lệnh đang thiếu — không tạo quyền mua mới: lệnh vẫn qua mọi gate hiện
+  có (DD, 8L rating≤3, `cap_lag_orders` %ADV, `filter_lag_rating_orders`, funding gate A1).
+
+Chi tiết cơ chế + số đo đầy đủ: `mike/agents/Taylor/research/jit_unpark_L2_build_20260806.md` (A),
+`jit_unpark_grossup_20260806.md` (B), `jit_unpark_roundup_c_20260806.md` (C).
 
 ## "FLOOR_FAIL" KHÔNG phải gate cứng cho LAG — TRÍCH lăng kính ngành có sẵn, đừng đọc dở CSV (thêm 2026-08-04, đính chính + chuyển code cùng ngày)
 `FLOOR_FAIL` là chữ DollarBill tự viết để mô tả 1 mã trượt "golden floor" (ROE_Min3Y≥0 ∧ CF_OA_3Y>0)
