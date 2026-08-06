@@ -91,7 +91,12 @@ ICT = ZoneInfo("Asia/Ho_Chi_Minh")
 # Cửa sổ writer (giờ ICT, [start, end)) — đo thật từ log: daily_refresh START 18:30,
 # step [9] backup 18:35:47, DONE 18:38:42; bq_freshness [pipeline-1] ~19:01:08.
 OURS_WINDOW = (dt.time(18, 25), dt.time(19, 20))
-KAFFA_WINDOW = (dt.time(16, 30), dt.time(18, 0))   # đo thật 2026-07-29: 17:12:05 ICT
+KAFFA_WINDOW = (dt.time(15, 30), dt.time(18, 0))   # nới 2026-08-06 (job Winston_20260806_012753):
+# giờ ghi = giờ pipeline kaffa_v2 KẾT THÚC (trôi theo thời lượng chạy), KHÔNG cố định — cận
+# dưới cũ 16:30 hiệu chuẩn từ 1 lần chạy duy nhất (07-29, kết thúc 17:12) nên 3 ngày 08-03..05
+# (kết thúc 16:21-16:26, pipeline luôn BẮT ĐẦU đúng 08:30:0x UTC=15:30 ICT) bị lọt dưới cận,
+# classify() trả OTHER → WARN giả. Cận dưới mới = giờ pipeline BẮT ĐẦU (ổn định hơn giờ kết
+# thúc). Không đổi cảnh báo giá trị thật (state_diff/dup_time/null_sealed) — chỉ đổi nhãn writer.
 SEAL_TAIL_SESSIONS = 25   # = seal_n của state_publish_immutable (đuôi chưa chốt)
 
 
