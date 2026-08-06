@@ -138,6 +138,18 @@ Chống bão: cùng cooldown 1h/label với bảng trên (`state/autofix/`, chun
   quyết`. Fail-closed: không ack (hoặc ack sai topic/sai thứ tự thời gian) → dispatch như cũ.
   Không cần hạn dùng: quá 48h câu hỏi tự sang nhánh TREO LÂU (cũng WARN-ONLY). Khoá bằng
   regression ca 12–13 trong `bin/ops_health_check_selfcheck.py` (2 mutation độc lập đều đỏ).
+  - **Ngoại lệ "self-ack tại nguồn" — ĐIỀU KIỆN NGẶT** (Wags 2026-08-06, arch-reviewer
+    NEEDS_CHANGES high coord-2026-08-05): một script alert được phép TỰ ack câu hỏi nó tự
+    phát **chỉ khi** (a) chính nó dispatch owner đi xử lý, VÀ (b) dispatch trả về **thành
+    công** (bắt exit code thật — `| tail -n` nuốt mất exit code, script không `set -e`).
+    Dispatch hỏng ⇒ **KHÔNG ack, KHÔNG ghi cooldown**, phát thêm event `error`, để câu hỏi
+    ở lại `pending_q` routable. Nếu không giữ điều kiện này, `ACK_PREFIX` quay về nghĩa gốc
+    "đã có agent triage" và ack trở thành lời khẳng định SAI: dispatch hỏng + ack + cooldown
+    = điểm mù đúng bằng thời gian cooldown, gỡ mất chính detector chủ động duy nhất.
+    Tiền lệ nguy hiểm: nếu mọi nguồn alert đều tự ack thì `pending_q` routable rỗng vĩnh
+    viễn và `wags_autofix` không còn gì để triage. Mẫu tham chiếu +
+    regression: `bin/paper_checkpoint_escalation.sh` + `bin/paper_checkpoint_escalation_selfcheck.py`
+    (13 assertion, chứng minh ĐỎ 5/5 trên bản code trước fix).
 - **Question TREO LÂU >48h** (thêm Wags 2026-07-30): checker có dòng WARN riêng
   `⚠️ Câu hỏi TREO LÂU (>48h, chưa ai quyết)` cho question quá cửa sổ 48h mà vẫn chưa có
   answer/decision (KHÔNG có horizon thời gian — chỉ cắt theo ĐỘ DÀI DÒNG IN; nguồn quét =

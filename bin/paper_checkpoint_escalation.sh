@@ -112,21 +112,43 @@ for a in json.load(sys.stdin):
   "$ROOT/bin/append_event.sh" Mike question "paper-checkpoint-overdue-${PID}" \
     "{\"program\":\"${PID}\",\"reason\":\"${REASON}\",\"pending_gates\":${PCOUNT},\"question\":\"Checkpoint paper-program qua han, da auto-dispatch Taylor kiem tra. Xac nhan/theo doi.\"}" \
     2>/dev/null || true
-  # …kèm ack `triaged-needs-human:` NGAY LẬP TỨC (ACK_PREFIX của ops_health_check.sh check #5).
-  # Câu hỏi này theo THIẾT KẾ đã tự triage xong: chính vòng lặp này dispatch ${OWNER} đi kiểm tra
-  # (ngay dưới) và chỉ còn chờ NGƯỜI xác nhận/theo dõi — không có fix tooling nào để Wags làm.
-  # Không ack thì nó nằm mãi trong pending_q (script này KHÔNG BAO GIỜ phát answer/decision cùng
-  # topic, cũng không có ai khác phát) → COORD_WARN dispatch wags_autofix 2 lần/ngày suốt 48h cho
-  # việc ĐÃ được giao (sự cố thật coord-2026-08-05: 2/3 câu hỏi "tồn đọng" chính là 2 event này,
-  # Taylor đã chạy xong job _091700/_091703 từ hôm trước). Ack CHỈ tắt auto-dispatch — câu hỏi vẫn
-  # hiện đầy đủ ở dòng "ĐÃ TRIAGE, chờ NGƯỜI quyết" cho tới khi có answer/decision thật, nên
-  # KHÔNG tạo im lặng mới (bài học 2026-08-04 monitoring-fix-creates-silence).
-  "$ROOT/bin/append_event.sh" Mike status "triaged-needs-human:Mike/paper-checkpoint-overdue-${PID}" \
-    "{\"program\":\"${PID}\",\"note\":\"auto-triaged: da dispatch ${OWNER} kiem tra, chi cho nguoi xac nhan — khong co fix tooling\"}" \
-    2>/dev/null || true
-
   PROMPT="Checkpoint paper-program '${NAME}' (id=${PID}) trong mike/kb/paper_programs_registry.json đã tới hạn theo dữ liệu thật nhưng ${PCOUNT}/${TCOUNT} tiêu chí gate vẫn 'pending' — chưa ai thực sự đi kiểm tra. Đọc charter mike/kb/paper_programs_charter/${PID}.md + registry entry đầy đủ (data_sources, probe) trước khi làm. Với MỖI tiêu chí pending, kiểm tra bằng dữ liệu thật (journal paper main, execution_quality_review.py, hoặc nguồn được khai trong registry) — đừng suy đoán. Cập nhật status từng gate_criteria trong registry (pass/fail/pending kèm lý do) và review_short nếu cần. Nếu ĐỦ điều kiện chuyển bước tiếp (quant-skeptic rerun / user sign-off) thì CHUẨN BỊ đề xuất rõ ràng cho user quyết — KHÔNG tự bật live. Nếu CHƯA đủ, nói rõ còn thiếu gì + ước thời gian cần thêm. Ghi bus finding khi xong: program id, kết luận từng gate, khuyến nghị bước kế tiếp."
-  "$ROOT/bin/dispatch.sh" Taylor "$PROMPT" --thread "$TRADING_REPORT_THREAD" --bg --model opus --effort high --timeout 2400 2>&1 | tail -5
+  # DISPATCH TRƯỚC, ack/cooldown SAU — và chỉ khi dispatch THẬT SỰ thành công.
+  # Thứ tự cũ (ack ở trên, dispatch ở dưới, exit code bị `| tail -5` nuốt, cooldown ghi vô
+  # điều kiện) biến 1 dispatch hỏng thành ĐIỂM MÙ 7 NGÀY: bus khẳng định "đã dispatch
+  # ${OWNER}", question bị hạ xuống WARN-ONLY nên không wags_autofix nào đi triage, và
+  # cooldown chặn escalate lại — đúng cái detector mà chính commit này vừa gỡ đi
+  # (arch-reviewer NEEDS_CHANGES high, coord-2026-08-05; pattern monitoring-fix-creates-silence).
+  DISPATCH_OUT="$("$ROOT/bin/dispatch.sh" Taylor "$PROMPT" --thread "$TRADING_REPORT_THREAD" --bg --model opus --effort high --timeout 2400 2>&1)"
+  DRC=$?
+  printf '%s\n' "$DISPATCH_OUT" | tail -5
+
+  if [ "$DRC" -ne 0 ]; then
+    # FAIL-CLOSED: circuit breaker OPEN, model/provider sai, dispatch.sh lỗi… → KHÔNG ack
+    # (question ở lại pending_q routable để wags_autofix đi triage), KHÔNG ghi cooldown
+    # (lần chạy sau tự thử lại), và phát event `error` để có dấu vết chủ động.
+    "$ROOT/bin/append_event.sh" Wags error "paper-checkpoint-dispatch-failed-${PID}" \
+      "{\"program\":\"${PID}\",\"rc\":${DRC},\"owner\":\"${OWNER}\",\"note\":\"dispatch owner THAT BAI — khong ack, khong ghi cooldown, question giu nguyen routable\",\"dispatch_tail\":$(printf '%s' "$DISPATCH_OUT" | tail -3 | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}" \
+      2>/dev/null || true
+    WARN="⚠️ **Dispatch ${OWNER} THẤT BẠI** cho checkpoint quá hạn \`${PID}\` (rc=${DRC}). Không ack, không đặt cooldown — sẽ escalate lại lần chạy sau; câu hỏi \`paper-checkpoint-overdue-${PID}\` vẫn ở diện Wags triage."
+    echo "$WARN"
+    "$ROOT/bin/notify_thread.sh" "$WARN" "$TRADING_REPORT_THREAD" 2>/dev/null || true
+    continue
+  fi
+
+  # Ack `triaged-needs-human:` (ACK_PREFIX của ops_health_check.sh check #5) — CHỈ hợp lệ vì
+  # dispatch owner ở trên đã thành công: câu hỏi này thật sự đã được giao, chỉ còn chờ NGƯỜI
+  # xác nhận/theo dõi, không có fix tooling nào để Wags làm. Không ack thì nó nằm mãi trong
+  # pending_q (script này KHÔNG BAO GIỜ phát answer/decision cùng topic) → COORD_WARN dispatch
+  # wags_autofix 2 lần/ngày suốt 48h cho việc ĐÃ được giao (sự cố thật coord-2026-08-05).
+  # Ack CHỈ tắt auto-dispatch — câu hỏi vẫn hiện đầy đủ ở dòng "ĐÃ TRIAGE, chờ NGƯỜI quyết"
+  # cho tới khi có answer/decision thật, nên KHÔNG tạo im lặng mới.
+  # agent_id = Wags (không phải Mike): tác giả thật của ack là cơ chế điều phối này, ghi Mike
+  # làm audit trail nói dối là Mike đã triage. `_acked()` gom ack toàn cục nên đổi id không
+  # ảnh hưởng matching — phần "Mike/" trong TOPIC là khoá trỏ tới câu hỏi, phải giữ.
+  "$ROOT/bin/append_event.sh" Wags status "triaged-needs-human:Mike/paper-checkpoint-overdue-${PID}" \
+    "{\"program\":\"${PID}\",\"note\":\"auto-triaged: da dispatch ${OWNER} kiem tra (dispatch rc=0), chi cho nguoi xac nhan — khong co fix tooling\"}" \
+    2>/dev/null || true
 
   python3 -c "
 import json

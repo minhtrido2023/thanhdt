@@ -53,3 +53,39 @@ Chạy thật `OPS_HEALTH_DRY_RUN=1 bin/ops_health_check.sh --account ZaloPay`: 
 **Lesson.** Khi một nhánh WARN-ONLY đã tồn tại với lý do "chỉ người quyết được", kiểm tra xem
 ranh giới của nó là TRẠNG THÁI hay chỉ là một proxy dễ code (ở đây: tuổi 48h). Proxy sai làm
 đúng lớp lãng phí mà nhánh đó sinh ra để chặn vẫn xảy ra, chỉ là trong cửa sổ hẹp hơn.
+
+---
+
+## Bổ sung 2026-08-06 — ngoại lệ "self-ack tại nguồn" chỉ hợp lệ khi dispatch THÀNH CÔNG
+
+Bản áp dụng đầu tiên của cơ chế trên vào một NGUỒN ALERT (`bin/paper_checkpoint_escalation.sh`,
+commit `c7d2a213` coord-2026-08-05) đã đi quá: script phát ack **trước** khi dispatch owner, exit
+status của `dispatch.sh` bị `| tail -5` nuốt (script chỉ `set -uo pipefail`, không `set -e`), và
+state cooldown 7 ngày vẫn ghi vô điều kiện. Hệ quả khi dispatch hỏng (vd circuit breaker OPEN cho
+Taylor): **không có job nào chạy**, bus lại khẳng định "đã dispatch Taylor kiểm tra", câu hỏi tụt
+xuống `[WARN-ONLY]` nên không `wags_autofix` nào đi triage, và cooldown chặn escalate lại 7 ngày —
+tự tay gỡ đúng detector chủ động duy nhất của chính lỗi đó. arch-reviewer: NEEDS_CHANGES,
+confidence high, 2026-08-05T01:29:37Z (`fail_silent` + `blast_radius` fail).
+
+**Round-2 (2026-08-06, coord-2026-08-06):**
+1. Đảo thứ tự — dispatch TRƯỚC, bắt `DRC=$?` vào biến (bỏ pipe che exit code), **chỉ** ack +
+   ghi cooldown khi `DRC=0`. `DRC≠0` ⇒ event `error` topic `paper-checkpoint-dispatch-failed-<pid>`
+   + cảnh báo Discord + `continue` (không ack, không cooldown → lần chạy sau tự thử lại).
+2. `bin/paper_checkpoint_escalation_selfcheck.py` — chạy CHÍNH script thật trong sandbox tmpdir
+   (stub dispatch/append_event/notify) rồi đưa bus nó vừa ghi qua **khối check #5 THẬT** (trích
+   marker, tái dùng `ops_health_check_selfcheck.py`). 13 assertion: rc=0 ⇒ needs-human + không
+   routable + không bị ẩn; rc≠0 ⇒ không ack, có `error`, không cooldown, **vẫn routable**;
+   2 mutation (đổi `ACK_PREFIX`, đổi agent phát question) đều ĐỎ được.
+   Đối chứng: chạy selfcheck với `PAPER_CKPT_SRC=<bản HEAD trước fix>` → **5 FAIL** đúng ngay
+   điểm mù — test này SẼ bắt được bug hôm qua.
+3. Ack đổi `agent_id` `Mike` → `Wags` (tác giả thật là cơ chế điều phối; audit trail trước đó ghi
+   Mike đã triage trong khi Mike không làm gì). Phần `Mike/` trong TOPIC là khoá trỏ tới câu hỏi,
+   giữ nguyên — `_acked()` gom ack toàn cục nên đổi id không ảnh hưởng matching.
+4. `kb/ops_runbook.md`: ghi thành quy tắc — self-ack tại nguồn hợp lệ **chỉ khi** emitter tự
+   dispatch owner VÀ dispatch trả về thành công; nêu rõ tiền lệ nguy hiểm (mọi nguồn alert tự ack
+   ⇒ `pending_q` routable rỗng vĩnh viễn).
+
+**Lesson (bổ sung).** Một cơ chế "tắt cảnh báo dư" là an toàn khi điều kiện tắt được VERIFY bằng
+artifact (dispatch rc), và nguy hiểm ngay khi nó chỉ dựa vào Ý ĐỊNH ("chỗ này lát nữa sẽ dispatch").
+Thứ tự lệnh trong script chính là điều kiện: ack phát trước hành động nó khẳng định = lời nói dối
+có điều kiện, và điều kiện đó không được kiểm bao giờ.
