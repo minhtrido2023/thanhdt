@@ -1373,3 +1373,7 @@
 - [2026-08-06T17:32:52Z] Taylor/heartbeat — Taylor_20260806_172148: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260806_172148", "source": "watcher"}
 - [2026-08-06T17:33:52Z] Taylor/heartbeat — Taylor_20260806_172148: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260806_172148", "source": "watcher"}
 - [2026-08-06T17:34:52Z] Taylor/heartbeat — Taylor_20260806_172148: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260806_172148", "source": "watcher"}
+
+## Consolidation 2026-08-06T17:36:03Z
+- [2026-08-06T17:35:50Z] Mike/finding — daily-retro-draft-2026-08-06: {"status": "DRAFT_WRITTEN", "file": "state/retro_draft_2026-08-06.md", "incidents_found": 8, "patterns": 4, "patterns_closed_from_yesterday_escalation": 2, "new_patterns_no_escalate_yet": 2, "wakeup_miss_pct": "10% (1/10, cai thien tu 25% hom qua)", "open_carryover": ["verify doc lap fix VHM", "lag-sizing-basis-lech-2-account can Taylor/Mike xac nhan", "aborted-job-khong-kill-tien-trinh-con can Wags/Mike xu ly", "closure-event-cung-topic quy tac chua dua vao ops_runbook.md"]}
+- [2026-08-06T17:35:52Z] Taylor/heartbeat — Taylor_20260806_172148: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260806_172148", "source": "watcher"}
