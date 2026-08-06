@@ -52,10 +52,14 @@ kaffa_v2 wire auto-sync từ commit `c794dd1` (2026-06-08) vì họ tưởng b�
 động ("the table is manually maintained and is stale"); họ **không biết** ta có publisher.
 Truy vết đầy đủ: `mike/agents/Winston/dt5g_live_second_writer_20260729.md`.
 
-**QUYẾT ĐỊNH CỦA USER (2026-07-31, phương án B — job `Winston_20260731_014953`):** team dữ liệu
-tự quản writer của họ theo cách của họ. Ta **KHÔNG** yêu cầu họ đổi bảng đích, **KHÔNG** sửa gì
-trong hệ thống của họ, **KHÔNG** tự tắt job của họ. Ta chỉ **ĐỌC/DÙNG bảng + kiểm tra kết quả +
-BÁO team dữ liệu khi có sự cố**.
+**QUYẾT ĐỊNH CỦA USER (2026-07-31, phương án B — job `Winston_20260731_014953`; XÁC NHẬN VĨNH VIỄN
+2026-08-06):** team dữ liệu tự quản writer của họ theo cách của họ. Ta **KHÔNG** yêu cầu họ đổi
+bảng đích, **KHÔNG** sửa gì trong hệ thống của họ, **KHÔNG** tự tắt job của họ. Ta chỉ **ĐỌC/DÙNG
+bảng + kiểm tra kết quả + BÁO team dữ liệu khi có sự cố**. 2026-08-06: team dữ liệu đã CHÍNH THỨC
+từ chối đề xuất tách bảng riêng (`MARKET_STATE_BQ_TABLE=vnindex_5state_dt5g_kaffa`, nêu ra
+07-29/08-06) — lý do: tự tính lại 1 bảng song song "vừa dễ sai vừa tốn tiền". User chốt: kiến trúc
+2-writer là **VĨNH VIỄN**, không phải tạm chờ họ đổi. Fleet chỉ đọc bảng chung; phát hiện sai sót
+thì raise lên (2 cơ chế đã có, KHÔNG cần xây thêm gì mới — xem "Hệ quả kỹ thuật" + "Giám sát" dưới).
 
 Hệ quả kỹ thuật phải nhớ:
 1. **MAX(time) của bảng KHÔNG chứng minh publisher của ta còn sống.** kaffa đẩy
