@@ -30,6 +30,12 @@ weekly 1sigma ~4%, monthly |chg| p75 8.9%/p90 13%, 3mo p75 18%/p90 28%):
             before the loud channel (Telegram/Bill) opens — both hardened after the
             2026-08-04 false "52w low" ALERT (rubber_weekly_selfcheck.py).
 
+A SECOND, INDEPENDENT tier rides along (rubber_trend_break.py): TREND_BREAK/TREND_OK,
+a MONTHLY long-horizon regime confirmation on the WB series. It is deliberately NOT part
+of the WATCH/ALERT ladder above — different question, different horizon (6-24 months vs
+1 week), different cadence (~1 fire / 18.7 months vs weekly). It is a REGIME CONFIRMATION,
+never a sell signal or a forecast; see that module's docstring for the evidence.
+
 Outputs:
   data/rubber_weekly.csv        price series (appendable, deduped by date)
   data/rubber_watch.md          living dated assessment
@@ -39,6 +45,11 @@ import os, re, ssl, sys, json, subprocess
 from datetime import datetime, timedelta
 import urllib.request, urllib.parse
 import pandas as pd
+
+_HERE = os.path.dirname(os.path.abspath(__file__))
+if _HERE not in sys.path:            # the selfcheck imports this file by path, not by name
+    sys.path.insert(0, _HERE)
+import rubber_trend_break as rtb     # sibling module: the monthly TREND_BREAK tier
 try: sys.stdout.reconfigure(encoding="utf-8")
 except Exception: pass
 
@@ -423,8 +434,97 @@ def fire(tier, reasons, m, confirmed=False):
     record_fire(tier, m, confirmed)
 
 
+# -------------------------------------------------------- TREND_BREAK tier ------
+def trend_break_check():
+    """Evaluate the INDEPENDENT monthly regime tier and fire only on a STATE FLIP.
+
+    Why a flip and not a level: the tier is a state (UPTREND/DOWNTREND) that holds for
+    ~18.7 months on average, so firing on "currently below the line" would page the team
+    every single day of a downtrend. The last confirmed state lives in the same state
+    file as the WATCH/ALERT dedupe, under its own keys.
+
+    Three behaviours worth stating explicitly:
+      * FIRST run ever (no stored state) = baseline initialisation, silent. Otherwise
+        wiring the tier would itself look like a signal. The baseline adopted is the
+        PUBLISHED-ONLY state (`state_firm`), never the one that leans on the running
+        month's estimate: an unpublished figure written into the state file is permanent
+        and unflagged, and would manufacture a fake flip later when WB publishes the real
+        number. (Found by quant-skeptic on the first wiring attempt, 2026-08-06.)
+      * PROVISIONAL flip (the state depends on the still-running month, estimated from
+        the daily feed) -> bus notice to Taylor, flagged, deduped by month, and the
+        stored state is NOT advanced. It only becomes final when WB publishes the month.
+        No Telegram: an unpublished figure must not page anyone.
+      * Any message carries the regime-confirmation wording from rubber_trend_break.py.
+        This tier is NOT a sell signal and NOT a forecast (see that module's docstring).
+    Returns the evaluation dict (state UNKNOWN if the monthly series is unusable) so the
+    note can render it; never raises into the caller."""
+    try:
+        r = rtb.evaluate(MONTHLY, CSV)
+    except Exception as e:
+        print(f"  [warn] TREND_BREAK không tính được ({e}) — bỏ qua tầng này")
+        return {"state": rtb.UNKNOWN, "note": f"lỗi đọc dữ liệu: {e}"}
+    if r["state"] == rtb.UNKNOWN:
+        return r
+
+    st = _load_state()
+    prev = st.get("trend_state")
+    r["prev_state"] = prev
+    since = f"{r['since']:%Y-%m}"
+
+    if prev is None:                                  # first run: adopt, stay silent
+        base = r["state_firm"]                        # published months ONLY — see docstring
+        base_since = f"{r['since_firm']:%Y-%m}" if r.get("since_firm") is not None else None
+        _save_state({"trend_state": base, "trend_since": base_since,
+                     "trend_prov_notice": None})
+        print(f"  TREND_BREAK: khởi tạo trạng thái nền = {base} (từ {base_since}) — không bắn"
+              + (f"  [tháng {r['prov_month']} chưa công bố, KHÔNG dùng để khởi tạo; "
+                 f"ước lượng hiện chỉ sang {r['state']}]" if r["provisional"] else ""))
+        return r
+
+    if r["state"] == prev:
+        if st.get("trend_prov_notice"):               # a provisional flip that reverted
+            _save_state({"trend_prov_notice": None})
+        return r
+
+    signal = rtb.SIGNAL_OF[r["state"]]
+    payload = {"signal": signal, "tier": "TREND_BREAK", "state": r["state"],
+               "prev_state": prev, "provisional": r["provisional"],
+               "provisional_month": r["prov_month"], "since": since,
+               "rss3_usdkg": round(r["price"], 3), "ma200eq": round(r["ma"], 3),
+               "dist_pct": round(r["dist_pct"], 1), "confirm_months": rtb.CONFIRM,
+               "source": "World Bank Pink Sheet monthly RSS3",
+               "reading": ("XÁC NHẬN CHẾ ĐỘ (regime-confirmation) — KHÔNG PHẢI tín hiệu bán, "
+                           "KHÔNG PHẢI dự báo giảm tiếp. P(giảm thêm >=15%/6th sau tín hiệu) = "
+                           f"{rtb.BT['p_further_drop']}% ~ base {rtb.BT['p_further_drop_base']}%; "
+                           f"rổ CP cao su fwd-12m sau tín hiệu +{rtb.BT['stock_fwd12m']}% vs base "
+                           f"+{rtb.BT['stock_fwd12m_base']}% -> KHÔNG dùng để bán GVR/PHR/DPR/DRI."),
+               "independent_of": "WATCH/ALERT (nhịp tuần, chân trời 1 tuần)",
+               "stocks": STOCKS,
+               "action": ("Taylor cập nhật BỐI CẢNH chế độ dài hạn cho mô hình nhóm cao su; "
+                          "KHÔNG phải lệnh hành động vị thế")}
+
+    if r["provisional"]:
+        if st.get("trend_prov_notice") == r["prov_month"]:
+            return r                                  # already announced for this month
+        payload["audience"] = ["Taylor"]
+        bus("finding", f"rubber {signal} (TẠM TÍNH, chờ WB công bố {r['prov_month']}): "
+                       f"cao su {r['price']:.2f} USD/kg", payload)
+        _save_state({"trend_prov_notice": r["prov_month"]})
+        print(f"\n⏳ {signal} TẠM TÍNH (chỉ bus → Taylor; tháng {r['prov_month']} chưa đóng)")
+        print(rtb.message(r, prev))
+        return r
+
+    payload["audience"] = ["Taylor", "DollarBill"]
+    bus("finding", f"rubber {signal}: chế độ xu thế dài hạn đổi {prev} → {r['state']} "
+                   f"({r['price']:.2f} USD/kg)", payload)
+    telegram(rtb.message(r, prev, html=True))
+    _save_state({"trend_state": r["state"], "trend_since": since, "trend_prov_notice": None})
+    print(f"\n{'='*60}\n{rtb.message(r, prev)}\n{'='*60}")
+    return r
+
+
 # ------------------------------------------------------------------ note --------
-def render_note(m, tier, reasons, today):
+def render_note(m, tier, reasons, today, tb=None):
     def pct(v, ref): return "—" if v is None else f"{v:+.1f}% (vs {ref.date()})"
     badge = {"ALERT": "🔴 ALERT", "WATCH": "🟡 WATCH", "INFO": "🟢 INFO"}[tier]
     s = m["series"]
@@ -448,8 +548,8 @@ def render_note(m, tier, reasons, today):
          "| Tuần (giá đóng) | RSS3 USD/kg |", "|---|---|"]
     for _, r in wk.iterrows():
         L.append(f"| {r['date'].date()} | {r['p']:.2f} |")
-    L += ["",
-          "## Ngưỡng cảnh báo (đã duyệt)",
+    L += [""] + (rtb.note_lines(tb) if tb else [])
+    L += ["## Ngưỡng cảnh báo (đã duyệt)",
           f"- 🟡 **WATCH → Taylor**: |WoW| ≥ {WATCH_WOW:.0f}% hoặc |4 tuần| ≥ {WATCH_4WK:.0f}% — rà mô hình/dự báo nhóm cao su.",
           f"- 🟡 **WATCH 3-tháng → Taylor**: |3 tháng| ≥ {WATCH_3MO:.0f}% (xu hướng trườn) → **chạy lại mô hình 8L** xem có đổi đánh giá nhóm cao su không.",
           f"- 🔴 **ALERT → Bill + Taylor** (+Telegram): |WoW| ≥ {ALERT_WOW:.0f}% hoặc |3 tháng| ≥ {ALERT_3MO:.0f}% hoặc phá biên 52 tuần — Bill quyết kế hoạch vị thế.",
@@ -484,12 +584,22 @@ def main():
     m = trend(df)
     tier, reasons = classify(m)
     confirmed = confirm_alert(tier, m)
+    tb = trend_break_check()               # independent monthly tier; fires only on a flip
     today = str(m["latest_dt"].date())
-    render_note(m, tier, reasons, today)
+    render_note(m, tier, reasons, today, tb)
     print(f"RSS3 {m['latest']:.2f} USD/kg  WoW={m['wow'] and round(m['wow'],1)}  "
           f"4wk={m['c4w'] and round(m['c4w'],1)}  3mo={m['c3m'] and round(m['c3m'],1)}  "
           f"band={m['band'] or '—'} [{m['band_note']}]  -> {tier}"
           + ("" if tier != "ALERT" else (" (đã xác nhận)" if confirmed else " (chờ xác nhận)")))
+
+    # heartbeat: this tier is silent for months by design — silence must not be
+    # indistinguishable from a dead pipeline (fleet heartbeat convention).
+    if tb["state"] != rtb.UNKNOWN:
+        print(f"TREND_BREAK: {rtb.SIGNAL_OF[tb['state']]} ({tb['state']}, từ {tb['since']:%Y-%m}), "
+              f"giá {tb['price']:.2f} vs MA200-eq {tb['ma']:.2f} = {tb['dist_pct']:+.1f}%"
+              + (f"  [tạm tính theo tháng {tb['prov_month']}]" if tb["provisional"] else ""))
+    else:
+        print(f"TREND_BREAK: chưa tính được ({tb.get('note', '')})")
 
     if should_fire(tier, m, confirmed):
         fire(tier, reasons, m, confirmed)

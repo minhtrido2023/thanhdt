@@ -316,6 +316,315 @@ with tempfile.TemporaryDirectory() as tmp:
     check("C: Bill, who was paged, is told it closed", ev and "DollarBill" in ev[0]["audience"])
     check("C: no extra Telegram on close-out", len(sent) == 1, f"{len(sent)} sent")
 
+# ------------------------------------------------- 8. TREND_BREAK (monthly regime tier)
+# Independent tier (rubber_trend_break.py), wired 2026-08-06 from the approved design
+# mike/agents/Taylor/research/rubber_trend_break_design_20260806.md. It is a STATE
+# (UPTREND/DOWNTREND) on the WB MONTHLY series, MA10 (= MA200-daily equivalent),
+# confirmed 2 consecutive months. Fires only on a state FLIP, ~1x / 18.7 months.
+print("\n[8] TREND_BREAK — monthly regime tier")
+import rubber_trend_break as rtb
+
+
+def write_monthly(path, prices, start="2020-01"):
+    """Synthetic WB monthly file: consecutive months from `start`."""
+    idx = pd.period_range(start, periods=len(prices), freq="M")
+    pd.DataFrame({"month": [str(p) for p in idx], "price": prices}).to_csv(path, index=False)
+    return idx
+
+
+def write_daily(path, rows):
+    """Synthetic daily feed (date, rss3_usdkg, src) — the provisional-month input."""
+    pd.DataFrame(rows, columns=["date", "rss3_usdkg", "src"]).to_csv(path, index=False)
+
+
+def tb_box(tmp, monthly_prices, daily_rows=None, start="2020-01", reset_state=True):
+    rw = load_module(data_dir=tmp, reset_state=reset_state)
+    rw.MONTHLY = os.path.join(tmp, "rubber_monthly.csv")
+    rw.CSV = os.path.join(tmp, "rubber_weekly.csv")
+    write_monthly(rw.MONTHLY, monthly_prices, start)
+    write_daily(rw.CSV, daily_rows or [])
+    rw.sent, rw.bused = [], []
+    rw.telegram = lambda text: rw.sent.append(text) or True
+    rw.bus = lambda et, topic, payload: rw.bused.append((et, topic, payload))
+    return rw
+
+
+# 8a. parameters are the approved ones, not re-derived
+check("MA window is 10 months (= MA200 daily equivalent)", rtb.MA_WIN == 10, str(rtb.MA_WIN))
+check("confirmation is 2 consecutive months", rtb.CONFIRM == 2, str(rtb.CONFIRM))
+
+# 8b. FIRES: two consecutive months below the line flip the state and page the team
+print("  -- a genuine break")
+with tempfile.TemporaryDirectory() as tmp:
+    rw = tb_box(tmp, [3.0] * 24 + [2.0, 2.0])
+    rw._save_state({"trend_state": "UPTREND", "trend_since": "2020-10"})   # established state
+    r = rw.trend_break_check()
+    check("2 months below -> state flips to DOWNTREND", r["state"] == "DOWNTREND", r["state"])
+    check("...bus event carries signal TREND_BREAK",
+          any(p.get("signal") == "TREND_BREAK" for _, _, p in rw.bused),
+          str([t for _, t, _ in rw.bused]))
+    check("...Telegram fires (confirmed, not provisional)", len(rw.sent) == 1, f"{len(rw.sent)} sent")
+    check("...stored state advanced to DOWNTREND",
+          json.load(open(rw.STATEF))["trend_state"] == "DOWNTREND")
+    check("...second run same day does NOT re-fire (state tier, not a daily ping)",
+          rw.trend_break_check() and len(rw.sent) == 1 and len(rw.bused) == 1,
+          f"telegram={len(rw.sent)} bus={len(rw.bused)}")
+    pl = rw.bused[0][2]
+    check("...payload names the reading: regime-confirmation, NOT a sell signal",
+          "KHÔNG PHẢI tín hiệu bán" in pl["reading"] and "KHÔNG PHẢI dự báo" in pl["reading"],
+          pl["reading"][:60])
+    check("...payload cites the negative result (31% vs base 32%)",
+          "31%" in pl["reading"] and "32%" in pl["reading"])
+    check("...payload cites the stock evidence pointing the other way (+26.5% vs +12.5%)",
+          "26.5%" in pl["reading"] and "12.5%" in pl["reading"])
+    check("...payload marked not provisional", pl["provisional"] is False)
+    txt = rw.sent[0]
+    check("Telegram text carries the mandatory regime-confirmation warning",
+          "XÁC NHẬN CHẾ ĐỘ" in txt and "KHÔNG PHẢI TÍN HIỆU BÁN" in txt, txt[:60])
+    check("Telegram text says explicitly it is not a reason to sell the rubber names",
+          "KHÔNG phải cớ bán cổ phiếu cao su" in txt)
+    check("Telegram text does not tell anyone to act on positions",
+          "không phải lệnh hành động" in txt)
+
+# 8c. DOES NOT FIRE: one month below is noise, the 2-period confirmation swallows it
+print("  -- a single month below (must NOT fire)")
+with tempfile.TemporaryDirectory() as tmp:
+    rw = tb_box(tmp, [3.0] * 24 + [3.0, 2.0])
+    rw._save_state({"trend_state": "UPTREND", "trend_since": "2020-10"})
+    r = rw.trend_break_check()
+    check("1 month below -> state stays UPTREND (confirm=2 works)", r["state"] == "UPTREND", r["state"])
+    check("...no bus event, no Telegram", len(rw.bused) == 0 and len(rw.sent) == 0)
+    check("...stored state untouched", json.load(open(rw.STATEF))["trend_state"] == "UPTREND")
+    # ...and the very next month below DOES flip it (the gate delays, it does not mute)
+    rw2 = tb_box(tmp, [3.0] * 24 + [3.0, 2.0, 2.0], reset_state=False)
+    check("next month below -> now it flips (delayed, not suppressed)",
+          rw2.trend_break_check()["state"] == "DOWNTREND" and len(rw2.sent) == 1)
+
+# 8d. PROVISIONAL: the flip depends on the still-running month estimated from the daily feed
+print("  -- PROVISIONAL: flip depends on the unpublished current month")
+with tempfile.TemporaryDirectory() as tmp:
+    # WB published through 2022-01 (one month below); the daily feed supplies 2022-02,
+    # whose estimate is what completes the 2-month confirmation.
+    prices = [3.0] * 24 + [2.0]                       # 2020-01 .. 2022-01
+    daily = [("2022-02-03", 2.0, "regionalert"), ("2022-02-10", 2.0, "regionalert")]
+    rw = tb_box(tmp, prices, daily)
+    rw._save_state({"trend_state": "UPTREND", "trend_since": "2020-10"})
+    r = rw.trend_break_check()
+    check("provisional month detected from the daily feed", r["prov_month"] == "2022-02", str(r["prov_month"]))
+    check("state would be DOWNTREND...", r["state"] == "DOWNTREND", r["state"])
+    check("...but it is flagged PROVISIONAL (state differs without the estimate)",
+          r["provisional"] is True and r.get("state_firm") == "UPTREND", str(r.get("state_firm")))
+    check("PROVISIONAL -> bus notice to Taylor only", len(rw.bused) == 1
+          and rw.bused[0][2]["audience"] == ["Taylor"], str(rw.bused))
+    check("PROVISIONAL -> NO Telegram (an unpublished figure must not page anyone)",
+          len(rw.sent) == 0, f"{len(rw.sent)} sent")
+    check("PROVISIONAL -> stored state NOT advanced (only WB publication finalises it)",
+          json.load(open(rw.STATEF))["trend_state"] == "UPTREND")
+    check("PROVISIONAL notice is deduped by month (daily cron must not repeat it)",
+          rw.trend_break_check() and len(rw.bused) == 1, f"{len(rw.bused)} events")
+    check("PROVISIONAL bus topic says TẠM TÍNH", "TẠM TÍNH" in rw.bused[0][1], rw.bused[0][1])
+
+    # WB then publishes 2022-02 -> the same flip becomes final and DOES page
+    rw2 = tb_box(tmp, prices + [2.0], daily, reset_state=False)
+    r2 = rw2.trend_break_check()
+    check("once WB publishes the month -> no longer provisional", r2["provisional"] is False)
+    check("...now Telegram fires and the state is finalised",
+          len(rw2.sent) == 1 and json.load(open(rw2.STATEF))["trend_state"] == "DOWNTREND")
+
+    # a provisional flip that reverts must clear its dedupe marker, not linger
+    rw3 = tb_box(tmp, [3.0] * 24 + [2.0], [("2022-02-03", 3.5, "regionalert")], reset_state=False)
+    rw3._save_state({"trend_state": "UPTREND", "trend_prov_notice": "2022-02"})
+    rw3.trend_break_check()
+    check("reverted provisional clears its dedupe marker",
+          json.load(open(rw3.STATEF)).get("trend_prov_notice") is None)
+
+# 8e. first run ever = baseline adoption, silent (wiring the tier is not itself a signal)
+print("  -- first run / fail-closed")
+with tempfile.TemporaryDirectory() as tmp:
+    rw = tb_box(tmp, [3.0] * 24 + [2.0, 2.0])
+    r = rw.trend_break_check()
+    check("first run adopts the state silently", len(rw.sent) == 0 and len(rw.bused) == 0
+          and json.load(open(rw.STATEF))["trend_state"] == "DOWNTREND", str(rw.bused))
+
+# 8e-bis. REGRESSION (quant-skeptic, 2026-08-06, first wiring attempt): the baseline path
+# read `state` instead of `state_firm`, so a first run landing while the flip depends on the
+# UNPUBLISHED running month wrote that provisional state into the state file permanently and
+# unflagged — and when WB later published a different number the tier would have manufactured
+# a flip that never happened. The baseline must come from published months only.
+print("  -- REGRESSION: first run while the state depends on an unpublished month")
+with tempfile.TemporaryDirectory() as tmp:
+    prices = [3.0] * 24 + [2.0]                                  # published: 1 month below
+    daily = [("2022-02-03", 2.0, "regionalert")]                 # estimate completes confirm=2
+    rw = tb_box(tmp, prices, daily)                              # NO stored state at all
+    r = rw.trend_break_check()
+    check("first run: reading IS provisional (would-be DOWNTREND)",
+          r["provisional"] is True and r["state"] == "DOWNTREND" and r["state_firm"] == "UPTREND",
+          f"{r['state']} / firm {r['state_firm']}")
+    st = json.load(open(rw.STATEF))
+    check("first run stores the PUBLISHED-only state, not the provisional one",
+          st["trend_state"] == "UPTREND", str(st.get("trend_state")))
+    check("first run stays silent (no Telegram, no bus)", not rw.sent and not rw.bused)
+    check("first run does NOT pre-consume the provisional dedupe marker",
+          st.get("trend_prov_notice") is None, str(st.get("trend_prov_notice")))
+    # ...and the next run then reports the provisional divergence properly (bus, no Telegram)
+    rw2 = tb_box(tmp, prices, daily, reset_state=False)
+    rw2.trend_break_check()
+    check("next run reports the provisional flip to Taylor, still no Telegram",
+          len(rw2.bused) == 1 and rw2.bused[0][2]["provisional"] is True and not rw2.sent,
+          f"bus={len(rw2.bused)} tg={len(rw2.sent)}")
+    # ...and if WB's real number contradicts the estimate, NOTHING was ever committed
+    rw3 = tb_box(tmp, prices + [3.1], daily, reset_state=False)  # WB publishes 2022-02 = 3.1
+    r3 = rw3.trend_break_check()
+    check("WB publishes a contradicting month -> no flip was ever committed, no alert",
+          r3["state"] == "UPTREND" and not rw3.sent
+          and json.load(open(rw3.STATEF))["trend_state"] == "UPTREND", r3["state"])
+
+# 8e-ter. the estimate can only ADD a flip, never cancel one (confirm=2 needs both of the
+# last two months on the new side, so one appended month cannot undo a committed flip).
+# Worst case is therefore a signal one month late, never a signal lost.
+with tempfile.TemporaryDirectory() as tmp:
+    rw = tb_box(tmp, [3.0] * 24 + [2.0, 2.0], [("2022-03-03", 3.9, "regionalert")])
+    r = rw.trend_break_check()
+    check("a high estimate cannot cancel a flip the published months already made",
+          r["state"] == "DOWNTREND" and r["state_firm"] == "DOWNTREND"
+          and r["provisional"] is False, f"{r['state']} / firm {r['state_firm']}")
+
+# 8f. fail-closed: unusable monthly data -> UNKNOWN, never a signal
+with tempfile.TemporaryDirectory() as tmp:
+    rw = tb_box(tmp, [3.0] * 24)
+    rw.MONTHLY = os.path.join(tmp, "__no_such_file__.csv")
+    r = rw.trend_break_check()
+    check("missing monthly file -> UNKNOWN, no fire", r["state"] == "UNKNOWN"
+          and not rw.sent and not rw.bused, r["state"])
+    rw2 = tb_box(tmp, [3.0] * 5)              # shorter than the MA window
+    r2 = rw2.trend_break_check()
+    check("series shorter than MA10 -> UNKNOWN, no fire", r2["state"] == "UNKNOWN"
+          and not rw2.sent and not rw2.bused, r2["state"])
+
+# 8g. the wb_seed rows must never feed the provisional estimate (they ARE WB monthly
+# points copied into the daily file — folding them back in would be circular)
+with tempfile.TemporaryDirectory() as tmp:
+    rw = tb_box(tmp, [3.0] * 24 + [2.0],
+                [("2022-02-03", 9.99, "wb_seed"), ("2022-02-10", 2.0, "regionalert")])
+    s, prov = rtb.monthly_with_current(rw.MONTHLY, rw.CSV)
+    check("provisional estimate ignores wb_seed rows",
+          abs(float(s.loc["2022-02-15"]) - 2.0) < 1e-9, f"{float(s.loc['2022-02-15'])}")
+
+# 8h. causality: the state at month t must not change when later months arrive
+print("  -- causality + backtest reproduction on the REAL WB series")
+real, _ = rtb.monthly_with_current(os.path.join(HERE, "data", "rubber_monthly.csv"))
+full = rtb.trend_state(real)["states"]
+for cut in (120, 180, 220):
+    part = rtb.trend_state(real.iloc[:cut])["states"].dropna()
+    check(f"no look-ahead at cut={cut}", (part == full.loc[part.index]).all())
+
+# 8i. reproduce the pinned backtest of the approved design (§3a): 5 down-cycles found by
+# a 25% zigzag, every one of them caught. Cycle detection is copied from the design's T3
+# so this is a reproduction, not a re-derivation.
+def zigzag(v, thr=0.25):
+    piv, mode, last_i = [], None, 0
+    for i in range(1, len(v)):
+        if mode in (None, "up"):
+            if v[i] > v[last_i]:
+                last_i = i
+            elif v[i] / v[last_i] - 1 <= -thr:
+                piv.append(("P", last_i)); mode, last_i = "down", i
+                continue
+        if mode in (None, "down"):
+            if v[i] < v[last_i]:
+                last_i = i
+            elif v[i] / v[last_i] - 1 >= thr:
+                piv.append(("T", last_i)); mode, last_i = "up", i
+    return piv
+
+
+# The design measured 2006-04 .. 2026-07. The window is FROZEN to that sample so the pinned
+# figures stay reproducible as WB publishes new months — a drifting sample would turn a real
+# regression into "the numbers moved" noise, and vice versa.
+BT_END = "2026-07-15"
+bt = real[real.index <= BT_END]
+check("backtest sample is the design's 2006-04..2026-07 (244 months)", len(bt) == 244, f"{len(bt)}")
+px = bt.values
+_piv = zigzag(px)
+cycles = [(i1, i2) for (k1, i1), (k2, i2) in zip(_piv, _piv[1:]) if k1 == "P" and k2 == "T"]
+check("zigzag finds the 5 documented down-cycles", len(cycles) == 5,
+      str([(f"{bt.index[a]:%Y-%m}", f"{bt.index[b]:%Y-%m}") for a, b in cycles]))
+
+# events = start of a 2-consecutive-months-below run (the design's T3 definition, the one
+# the 5/5 and 85% figures are measured on), built from the PRODUCTION module's constants
+ma = bt.rolling(rtb.MA_WIN).mean()
+below = (bt < ma) & ma.notna()
+run = below & below.shift(1, fill_value=False)
+ev = [i for i, x in enumerate((run & ~run.shift(1, fill_value=False)).values) if x]
+in_cyc = set()
+for a, b in cycles:
+    in_cyc.update(range(a, b + 1))
+hits = sum(1 for a, b in cycles if any(a <= e <= b for e in ev))
+check("BACKTEST: recall 5/5 down-cycles caught", hits == len(cycles) == 5, f"{hits}/{len(cycles)}")
+check("BACKTEST: 13 events, 11 inside a real down-cycle -> precision 85%",
+      len(ev) == 13 and sum(1 for e in ev if e in in_cyc) == 11,
+      f"{sum(1 for e in ev if e in in_cyc)}/{len(ev)}")
+check("BACKTEST: the 2 false positives are the documented 2023-07 and 2025-04",
+      [f"{bt.index[e]:%Y-%m}" for e in ev if e not in in_cyc] == ["2023-07", "2025-04"],
+      str([f"{bt.index[e]:%Y-%m}" for e in ev if e not in in_cyc]))
+check("BACKTEST: fire frequency ~1 / 18.7 months as documented",
+      abs(len(bt) / len(ev) - rtb.BT["freq_months"]) < 1.0, f"{len(bt)/len(ev):.1f} months")
+# every documented cycle-entry month must appear as a state flip too (the wired object)
+st_bt = rtb.trend_state(bt)["states"].dropna()
+flips = [f"{st_bt.index[i]:%Y-%m}" for i in range(1, len(st_bt))
+         if st_bt.iloc[i] == "DOWNTREND" and st_bt.iloc[i - 1] != "DOWNTREND"]
+check("BACKTEST: the wired STATE machine flips on all 5 documented cycle entries",
+      all(m in flips for m in ["2008-10", "2011-07", "2017-07", "2019-09", "2021-07"]), str(flips))
+
+# 8j. the live reading on the real files. The pinned half uses the PUBLISHED history only
+# (<= 2026-07): the with-provisional figure moves with every new daily print, so pinning it
+# would make this selfcheck fail on ordinary data arrival rather than on a regression.
+pin = rtb.trend_state(bt)
+check("pinned (published-only) reading: 2.78 vs MA10 2.372 = +17.2%, UPTREND",
+      pin["state"] == "UPTREND" and abs(pin["price"] - 2.78) < 5e-3
+      and abs(pin["ma"] - 2.372) < 5e-3 and abs(pin["dist_pct"] - 17.2) < 0.05,
+      f"{pin['price']:.2f} vs {pin['ma']:.3f} = {pin['dist_pct']:+.1f}%")
+live = rtb.evaluate(os.path.join(HERE, "data", "rubber_monthly.csv"),
+                    os.path.join(HERE, "data", "rubber_weekly.csv"))
+check("live evaluation returns a real state (not UNKNOWN)", live["state"] in ("UPTREND", "DOWNTREND"),
+      f"{live['state']} {live['dist_pct']:+.1f}%")
+check("live dist_pct is internally consistent with price/MA",
+      abs(live["dist_pct"] - (live["price"] / live["ma"] - 1) * 100) < 1e-9)
+check("live state is UPTREND (design report §0, and unchanged since)",
+      live["state"] == "UPTREND", f"{live['state']} {live['dist_pct']:+.1f}%")
+
+# 8k. end-to-end through main(): the note must carry the tier AND its reading, and the
+# tier must not disturb the WATCH/ALERT ladder it runs beside.
+with tempfile.TemporaryDirectory() as tmp:
+    sent8, bused8 = [], []
+    rw = load_module(data_dir=tmp)
+    rw.CSV = os.path.join(tmp, "rubber_weekly.csv")
+    rw.NOTE = os.path.join(tmp, "rubber_watch.md")
+    rw.MONTHLY = os.path.join(HERE, "data", "rubber_monthly.csv")
+    df_asof(None, "2026-08-04").to_csv(rw.CSV, index=False)
+    rw.fetch_regionalert = lambda: {"date": "2026-08-04", "src": "regionalert", "rss3_usdkg": 2.596}
+    rw.fetch_sunsirs = lambda: (_ for _ in ()).throw(RuntimeError("stubbed off"))
+    rw.telegram = lambda t: sent8.append(t) or True
+    rw.bus = lambda et, t, p: bused8.append((et, t, p))
+    rw.main()
+    note8 = open(rw.NOTE, encoding="utf-8").read()
+    check("E2E: note renders the TREND_BREAK section", "TREND_BREAK" in note8
+          and "MA200-eq" in note8, note8[-400:][:80])
+    check("E2E: note states the reading (regime confirmation, not a sell/forecast signal)",
+          "KHÔNG phải tín hiệu bán/dự báo" in note8)
+    check("E2E: note keeps WATCH/ALERT and TREND_BREAK as separate sections",
+          "## Ngưỡng cảnh báo (đã duyệt)" in note8 and "## Xu thế dài hạn" in note8)
+    check("E2E: first run initialises the tier silently (no Telegram, no bus)",
+          len(sent8) == 0 and not any("TREND" in t for _, t, _ in bused8), str(bused8))
+    check("E2E: the 2026-08-04 WATCH/ALERT verdict is unchanged by the new tier",
+          "🟢 INFO" in note8, note8.split("Trạng thái:")[1][:24].strip())
+
+# 8l. the tier stays independent of WATCH/ALERT — no shared thresholds, no shared state key
+check("TREND_BREAK does not reuse any WATCH/ALERT threshold",
+      "WATCH_WOW" not in open(os.path.join(HERE, "rubber_trend_break.py"), encoding="utf-8").read())
+check("TREND_BREAK state keys are separate from the ALERT dedupe keys",
+      "trend_state" in src and "last_tier" in src and "trend_state" != "last_tier")
+
 # --------------------------------------------- 7. the selfcheck must be side-effect free
 print("\n[7] selfcheck side-effects: the live bus and production state must be untouched")
 LIVE_BUS = "/home/trido/thanhdt/WorkingClaude/mike/bus/inbox/Winston.jsonl"
