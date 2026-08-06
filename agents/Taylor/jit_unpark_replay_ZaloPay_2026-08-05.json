@@ -1,0 +1,297 @@
+{
+ "layer": "L2_JIT_UNPARK",
+ "account_label": "ZaloPay",
+ "asof": "2026-08-05",
+ "park_mv_vnd": 280308950.0,
+ "cash_available_vnd": 5818854.0,
+ "reconcile_ok": true,
+ "unverified_tickers": [],
+ "excluded_tickers": [
+  "DGC"
+ ],
+ "margin_room_vnd": 0.0,
+ "friction": 0.0015,
+ "orders": [
+  {
+   "ticker": "BID",
+   "side": "sell",
+   "qty": 200,
+   "ref_price": 38000.0,
+   "value_vnd": 7600000.0,
+   "book": "PARK",
+   "play_type": "JIT_UNPARK",
+   "for_order_id": "BUY-FPT-REPLAY",
+   "for_ticker": "FPT",
+   "weight_in_park": 0.1220082341288068,
+   "adv_cap_remaining_vnd": 14984405100.0,
+   "adv_vnd": 149844051000.0,
+   "adv_data_date": "2026-08-05",
+   "sellable": 900,
+   "fifo_lots": [
+    {
+     "entry_date": "2026-07-13",
+     "qty": 200,
+     "cost_price": 40766.67,
+     "source": "bootstrap"
+    }
+   ],
+   "reason": "L2 JIT: tài trợ BUY-FPT-REPLAY (FPT) — cần 74.3tr, bán pro-rata PARK w=12.2%"
+  },
+  {
+   "ticker": "CTG",
+   "side": "sell",
+   "qty": 300,
+   "ref_price": 31850.0,
+   "value_vnd": 9555000.0,
+   "book": "PARK",
+   "play_type": "JIT_UNPARK",
+   "for_order_id": "BUY-FPT-REPLAY",
+   "for_ticker": "FPT",
+   "weight_in_park": 0.11930585876762051,
+   "adv_cap_remaining_vnd": 23690125550.0,
+   "adv_vnd": 236901255500.0,
+   "adv_data_date": "2026-08-05",
+   "sellable": 1050,
+   "fifo_lots": [
+    {
+     "entry_date": "2026-07-15",
+     "qty": 300,
+     "cost_price": 32685.29,
+     "source": "bootstrap"
+    }
+   ],
+   "reason": "L2 JIT: tài trợ BUY-FPT-REPLAY (FPT) — cần 74.3tr, bán pro-rata PARK w=11.9%"
+  },
+  {
+   "ticker": "HDB",
+   "side": "sell",
+   "qty": 100,
+   "ref_price": 26550.0,
+   "value_vnd": 2655000.0,
+   "book": "PARK",
+   "play_type": "JIT_UNPARK",
+   "for_order_id": "BUY-FPT-REPLAY",
+   "for_ticker": "FPT",
+   "weight_in_park": 0.062418449357396544,
+   "adv_cap_remaining_vnd": 25750579500.0,
+   "adv_vnd": 257505795000.0,
+   "adv_data_date": "2026-08-05",
+   "sellable": 659,
+   "fifo_lots": [
+    {
+     "entry_date": "2026-07-23",
+     "qty": 100,
+     "cost_price": 25891.05,
+     "source": "bootstrap"
+    }
+   ],
+   "reason": "L2 JIT: tài trợ BUY-FPT-REPLAY (FPT) — cần 74.3tr, bán pro-rata PARK w=6.2%"
+  },
+  {
+   "ticker": "LPB",
+   "side": "sell",
+   "qty": 100,
+   "ref_price": 53000.0,
+   "value_vnd": 5300000.0,
+   "book": "PARK",
+   "play_type": "JIT_UNPARK",
+   "for_order_id": "BUY-FPT-REPLAY",
+   "for_ticker": "FPT",
+   "weight_in_park": 0.06655513496804151,
+   "adv_cap_remaining_vnd": 8967865000.0,
+   "adv_vnd": 89678650000.0,
+   "adv_data_date": "2026-08-05",
+   "sellable": 352,
+   "fifo_lots": [
+    {
+     "entry_date": "2026-07-22",
+     "qty": 100,
+     "cost_price": 54843.18,
+     "source": "bootstrap"
+    }
+   ],
+   "reason": "L2 JIT: tài trợ BUY-FPT-REPLAY (FPT) — cần 74.3tr, bán pro-rata PARK w=6.7%"
+  },
+  {
+   "ticker": "MBB",
+   "side": "sell",
+   "qty": 400,
+   "ref_price": 24300.0,
+   "value_vnd": 9720000.0,
+   "book": "PARK",
+   "play_type": "JIT_UNPARK",
+   "for_order_id": "BUY-FPT-REPLAY",
+   "for_ticker": "FPT",
+   "weight_in_park": 0.09553244732285572,
+   "adv_cap_remaining_vnd": 30858911415.0,
+   "adv_vnd": 308589114150.0,
+   "adv_data_date": "2026-08-05",
+   "sellable": 1102,
+   "fifo_lots": [
+    {
+     "entry_date": "2026-07-10",
+     "qty": 400,
+     "cost_price": 24700.0,
+     "source": "bootstrap"
+    }
+   ],
+   "reason": "L2 JIT: tài trợ BUY-FPT-REPLAY (FPT) — cần 74.3tr, bán pro-rata PARK w=9.6%"
+  },
+  {
+   "ticker": "TCB",
+   "side": "sell",
+   "qty": 200,
+   "ref_price": 29650.0,
+   "value_vnd": 5930000.0,
+   "book": "PARK",
+   "play_type": "JIT_UNPARK",
+   "for_order_id": "BUY-FPT-REPLAY",
+   "for_ticker": "FPT",
+   "weight_in_park": 0.10112199414253452,
+   "adv_cap_remaining_vnd": 31697925500.0,
+   "adv_vnd": 316979255000.0,
+   "adv_data_date": "2026-08-05",
+   "sellable": 956,
+   "fifo_lots": [
+    {
+     "entry_date": "2026-07-17",
+     "qty": 200,
+     "cost_price": 31850.0,
+     "source": "bootstrap"
+    }
+   ],
+   "reason": "L2 JIT: tài trợ BUY-FPT-REPLAY (FPT) — cần 74.3tr, bán pro-rata PARK w=10.1%"
+  },
+  {
+   "ticker": "VCB",
+   "side": "sell",
+   "qty": 200,
+   "ref_price": 59300.0,
+   "value_vnd": 11860000.0,
+   "book": "PARK",
+   "play_type": "JIT_UNPARK",
+   "for_order_id": "BUY-FPT-REPLAY",
+   "for_ticker": "FPT",
+   "weight_in_park": 0.1692418312008946,
+   "adv_cap_remaining_vnd": 25019058415.0,
+   "adv_vnd": 250190584150.0,
+   "adv_data_date": "2026-08-05",
+   "sellable": 800,
+   "fifo_lots": [
+    {
+     "entry_date": "2026-07-07",
+     "qty": 100,
+     "cost_price": 61100.0,
+     "source": "bootstrap"
+    },
+    {
+     "entry_date": "2026-07-09",
+     "qty": 100,
+     "cost_price": 61400.0,
+     "source": "bootstrap"
+    }
+   ],
+   "reason": "L2 JIT: tài trợ BUY-FPT-REPLAY (FPT) — cần 74.3tr, bán pro-rata PARK w=16.9%"
+  },
+  {
+   "ticker": "VHM",
+   "side": "sell",
+   "qty": 200,
+   "ref_price": 76500.0,
+   "value_vnd": 15300000.0,
+   "book": "PARK",
+   "play_type": "JIT_UNPARK",
+   "for_order_id": "BUY-FPT-REPLAY",
+   "for_ticker": "FPT",
+   "weight_in_park": 0.16374789317287228,
+   "adv_cap_remaining_vnd": 70150408200.0,
+   "adv_vnd": 701504082000.0,
+   "adv_data_date": "2026-08-05",
+   "sellable": 300,
+   "fifo_lots": [
+    {
+     "entry_date": "2026-07-08",
+     "qty": 200,
+     "cost_price": 74950.0,
+     "source": "bootstrap"
+    }
+   ],
+   "reason": "L2 JIT: tài trợ BUY-FPT-REPLAY (FPT) — cần 74.3tr, bán pro-rata PARK w=16.4%"
+  },
+  {
+   "ticker": "VPB",
+   "side": "sell",
+   "qty": 300,
+   "ref_price": 25500.0,
+   "value_vnd": 7650000.0,
+   "book": "PARK",
+   "play_type": "JIT_UNPARK",
+   "for_order_id": "BUY-FPT-REPLAY",
+   "for_ticker": "FPT",
+   "weight_in_park": 0.10006815693897751,
+   "adv_cap_remaining_vnd": 32456782500.0,
+   "adv_vnd": 324567825000.0,
+   "adv_data_date": "2026-08-05",
+   "sellable": 1800,
+   "fifo_lots": [
+    {
+     "entry_date": "2025-11-20",
+     "qty": 300,
+     "cost_price": 27886.7,
+     "source": "bootstrap"
+    }
+   ],
+   "reason": "L2 JIT: tài trợ BUY-FPT-REPLAY (FPT) — cần 74.3tr, bán pro-rata PARK w=10.0%"
+  }
+ ],
+ "buy_amendments": [
+  {
+   "order_id": "BUY-FPT-REPLAY",
+   "ticker": "FPT",
+   "book": "LAG",
+   "play_type": "LAG_HI",
+   "qty_plan": 800,
+   "ref_price": 100000.0,
+   "target_value_vnd": 80000000.0,
+   "cash_before_vnd": 5818854.0,
+   "jit_sell_vnd": 75570000.0,
+   "jit_proceeds_net_vnd": 75456645.0,
+   "needed_vnd": 74292584.87731597,
+   "day_cap_remaining_before_vnd": 1322437121717.6667,
+   "jit_shortfall_vnd": 0.0,
+   "day_cap_binding": false,
+   "buying_power_vnd": 81275499.0,
+   "status": "FUNDED_BY_JIT",
+   "reason": "bán PARK 75.6tr (thu ròng 75.5tr sau friction 0.15%) ⇒ đủ tiền mua nguyên lệnh",
+   "qty_final": 800,
+   "target_value_final_vnd": 80000000.0,
+   "cash_after_vnd": 1275499.0
+  }
+ ],
+ "blocked": [],
+ "notes": [],
+ "n_buy_orders_bal_lag": 1,
+ "cash_start_vnd": 5818854.0,
+ "etf_day_cap_vnd": 1322437121717.6667,
+ "etf_day_cap_remaining_start_vnd": 1322437121717.6667,
+ "adv_share": 0.5,
+ "live_labels": [
+  "ZaloPay",
+  "SpaceX"
+ ],
+ "cash_end_vnd": 1275499.0,
+ "etf_day_cap_remaining_end_vnd": 1322361551717.6667,
+ "jit_sell_total_vnd": 75570000.0,
+ "sells_by_ticker": {
+  "BID": 200,
+  "CTG": 300,
+  "HDB": 100,
+  "LPB": 100,
+  "MBB": 400,
+  "TCB": 200,
+  "VCB": 200,
+  "VHM": 200,
+  "VPB": 300
+ },
+ "decision": "JIT"
+}
