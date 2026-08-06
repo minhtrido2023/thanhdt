@@ -308,3 +308,36 @@ Output trả về đúng 1 trong: `CHEAP` (mua bình thường), `RICH` (skip, c
 muốn override), `SKIP_CO_CAN_CU` (skip có bằng chứng, vd ngoài universe_pit), `CAN_NGUOI_QUYET`
 (không đủ dữ liệu áp lăng kính, escalate). Áp dụng NHẤT QUÁN cho CẢ 2 account — cùng CSV phải cho
 ra cùng kết luận, khác nhau là dấu hiệu 1 bên dùng sai tham số.
+
+## WATCH — luận điểm PEAD ngành cao su (GVR/PHR/DPR/DRI/TRC/HRC), ngưỡng RSS3 (thêm 2026-08-06, user duyệt)
+Đây là **ghi chú theo dõi, KHÔNG phải gate cứng** — không có trong `trading_rules.json`, không chặn
+lệnh nào một cách cơ học. Mục đích: khi ngưỡng dưới đây chạm, phải DỪNG LẠI đánh giá lại luận điểm
+ngành trước khi cấp thêm vốn LAG cho nhóm này, thay vì cứ cấp vốn theo tín hiệu PEAD như thường lệ.
+
+**Ngưỡng kích hoạt xét lại: RSS3 thủng 2,26 USD/kg.**
+- Chạm ngưỡng → đánh giá lại luận điểm PEAD ngành cao su cho CẢ nhóm **GVR / PHR / DPR / DRI / TRC /
+  HRC** TRƯỚC khi đưa thêm bất kỳ mã nào trong nhóm vào `orders[]` LAG (mã đang giữ thì đánh giá
+  trước khi top-up). Không tự động loại — chỉ bắt buộc xét lại có chủ đích và ghi rõ kết luận vào
+  `notes` của plan.
+- **Nguồn đối chiếu ngưỡng: `data/rubber_monthly.csv` (World Bank monthly), đọc TAY.** KHÔNG dùng
+  lại nhãn "phá đáy 52 tuần" của `rubber_weekly.py` — nhãn đó đã được xác nhận là BUG đo lường
+  (2026-08-06, Taylor `Taylor_20260806_081258` + DollarBill `DollarBill_20260806_081312` tìm ra độc
+  lập): band 52 tuần chỉ tính trên dòng `src != "wb_seed"` (bắt đầu 2026-06-19) nên cửa sổ thật chỉ
+  ~6,6 tuần, mọi giá dưới ~2,61 đều bị gắn nhãn "đáy 52 tuần mới" sai. Chừng nào `rubber_weekly.py`
+  chưa sửa, mọi nhãn "52 tuần" từ feed đó là **chưa đáng tin**.
+- **Gốc con số 2,26 (kiểm chứng 2026-08-06, để lần sau khỏi suy lại):** 2,26 = giá tháng **2026-02**,
+  cũng là **min của TOÀN BỘ `data/rubber_weekly.csv`** (file chỉ bắt đầu 2026-02-15 → đây là đáy của
+  chuỗi weekly hiện có, không phải đáy 12 tháng). **Đáy 12 tháng THẬT của chuỗi monthly WB là 2,00**
+  (2025-10; 2025-11 = 2,03, 2025-12 = 2,06). Ngưỡng chốt là **2,26** (cao hơn 2,00) → cố ý kích hoạt
+  SỚM và thận trọng hơn đáy thật, không phải nhầm lẫn. Tham chiếu lúc chốt: spot 2026-08-04 = **2,596**
+  (−9,2% từ đỉnh 2026-06 là 2,86; vẫn +29,8% trên 2,00 và +14,9% trên 2,26).
+- Bằng chứng đầy đủ: `mike/agents/Taylor/research/rubber_alert_20260806.md`.
+
+**Nhắc lại cơ chế ĐÃ CÓ, không cần cơ chế mới:** nếu regime chuyển **BEAR** thì allocator tự đặt
+`w_LAG=0` — toàn bộ vị thế LAG nhóm này bị bán theo cơ chế sẵn có (xem mục "LAG entry mới trong giai
+đoạn thị trường dễ vỡ"). Ghi chú WATCH này CHỈ bổ sung cho trường hợp **regime KHÔNG đổi (vẫn
+NEUTRAL/BULL) nhưng giá hàng hoá đảo chiều thật** — chỗ mà allocator không nhìn thấy gì cả.
+
+**Bối cảnh lúc lập note (2026-08-06):** 0 vị thế cao su ở cả 2 account; DRI giữ nguyên trong hàng đợi
+LAG bình thường (DCF CHEAP MoS +36,3%, PE 4,30, qua 8L gate), KHÔNG hạ ưu tiên — vì lý do từng được
+viện dẫn để hạ ("phá đáy 52 tuần") là artifact. GVR/PHR đã bị gate DCF RICH tự chặn.
