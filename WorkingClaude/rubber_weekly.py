@@ -24,7 +24,11 @@ Alert tiers (thresholds approved by user; grounded in 20yr RSS3 vol:
 weekly 1sigma ~4%, monthly |chg| p75 8.9%/p90 13%, 3mo p75 18%/p90 28%):
   WATCH  -> ping Taylor : |WoW| >= 7%  OR |4wk cum| >= 15%
   ALERT  -> ping Bill+Taylor (+Telegram +user): |WoW| >= 12% OR |3mo cum| >= 25%
-            OR new 52-week cycle-band high/low (once real history accrued)
+            OR new 52-week cycle-band high/low. The band needs a window that COVERS
+            ~52 weeks of calendar time (WB monthly spliced under the short daily
+            feed), and an ALERT must repeat on 2 consecutive observation dates
+            before the loud channel (Telegram/Bill) opens — both hardened after the
+            2026-08-04 false "52w low" ALERT (rubber_weekly_selfcheck.py).
 
 Outputs:
   data/rubber_weekly.csv        price series (appendable, deduped by date)
@@ -55,6 +59,14 @@ UA      = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120 Safari/537.36"
 WATCH_WOW, WATCH_4WK, WATCH_3MO = 7.0, 15.0, 18.0   # 3mo p75 hist = slow-trend catch
 ALERT_WOW, ALERT_3MO = 12.0, 25.0
 STOCKS = ["GVR", "PHR", "DPR", "DRI", "TRC", "HRC"]
+
+# --- 52-week cycle band ---------------------------------------------------------
+# The band gate is a CALENDAR-COVERAGE test, not a row count. The daily feed only
+# started 2026-06-19; a row count opens after ~30 prints (~6 weeks) and then calls
+# every dip a "52-week low" (real false ALERT, 2026-08-04 — see selfcheck).
+BAND_DAYS     = 365    # look-back window
+BAND_MIN_SPAN = 330    # window must genuinely span >= this many days to be a "52w" band
+BAND_MAX_GAP  = 45     # no hole bigger than this inside the window (monthly step ~31d)
 
 
 # ------------------------------------------------------------------ fetchers ----
@@ -104,6 +116,21 @@ def seed_from_monthly():
     m = m.rename(columns={"price": "rss3_usdkg"})
     m["src"] = "wb_seed"
     return m[["date", "rss3_usdkg", "src"]]
+
+
+def monthly_series():
+    """Full WB Pink Sheet monthly RSS3 (USD/kg) as a dated series, mid-month anchor.
+    Same anchor convention as seed_from_monthly(); used to back-fill the 52w band
+    window for the stretch the daily feed does not reach."""
+    empty = pd.Series(dtype=float, index=pd.DatetimeIndex([]))   # must stay date-indexed:
+    try:                                                         # a RangeIndex here crashes
+        m = pd.read_csv(MONTHLY)                                 # band_52w's date compare
+        s = pd.Series(m["price"].astype(float).values,
+                      index=pd.to_datetime(m["month"].astype(str) + "-15"))
+    except Exception as e:
+        print(f"  [warn] WB monthly seed unreadable ({e}) — 52w band will fail closed")
+        return empty
+    return s[s.notna()].sort_index()
 
 
 def update_csv(rows):
@@ -159,14 +186,63 @@ def trend(df):
     c4w, c4w_ref = _nearest(s, latest_dt, 28, 12)
     c3m, c3m_ref = _nearest(s, latest_dt, 91, 21)
 
-    # 52-week cycle band — only once we have real (non-seed) history
-    band = None
-    if len(real) >= 30:
-        win = real[real.index >= latest_dt - timedelta(days=365)]["rss3_usdkg"].astype(float)
-        if latest >= win.max():   band = "high"
-        elif latest <= win.min(): band = "low"
+    band, bd = band_52w(real, latest, latest_dt)
     return dict(latest=latest, latest_dt=latest_dt, wow=wow, wow_ref=wow_ref,
-                c4w=c4w, c4w_ref=c4w_ref, c3m=c3m, c3m_ref=c3m_ref, band=band, series=s)
+                c4w=c4w, c4w_ref=c4w_ref, c3m=c3m, c3m_ref=c3m_ref, band=band,
+                band_lo=bd["lo"], band_hi=bd["hi"], band_span=bd["span"],
+                band_ok=bd["ok"], band_soft=bd["soft"], band_note=bd["note"], series=s)
+
+
+def band_52w(real, latest, latest_dt):
+    """52-week cycle band. Judged ONLY when the window genuinely covers ~52 weeks
+    of CALENDAR time (>= BAND_MIN_SPAN days, no hole > BAND_MAX_GAP) — the daily
+    feed alone cannot, so the WB monthly series is spliced in ahead of the daily
+    series' first print. Returns (band|None, detail dict) — detail always populated
+    so the note/payload can show the band actually compared against."""
+    bd = {"lo": None, "hi": None, "span": 0, "ok": False, "soft": False, "note": ""}
+    if not len(real) or real.index[-1] != latest_dt:
+        bd["note"] = "chưa có giá thật ở phiên mới nhất"     # latest print is a seed
+        return None, bd
+
+    win_start = latest_dt - timedelta(days=BAND_DAYS)
+    parts = [real[real.index >= win_start]["rss3_usdkg"].astype(float)]
+    mo = monthly_series()
+    mo = mo[(mo.index >= win_start) & (mo.index < real.index[0])]
+    if len(mo):
+        parts.insert(0, mo)
+    win = pd.concat(parts).sort_index()
+    win = win[~win.index.duplicated(keep="last")]
+
+    bd["span"] = (latest_dt - win.index[0]).days
+    gap = max((b - a).days for a, b in zip(win.index[:-1], win.index[1:])) if len(win) > 1 else 10**6
+    if bd["span"] < BAND_MIN_SPAN:
+        bd["note"] = f"chuỗi mới phủ {bd['span']}/{BAND_MIN_SPAN} ngày — chưa đủ 52 tuần"
+        return None, bd
+    if gap > BAND_MAX_GAP:
+        bd["note"] = f"chuỗi thủng {gap} ngày (> {BAND_MAX_GAP}) — biên không đáng tin"
+        return None, bd
+
+    bd["lo"], bd["hi"], bd["ok"] = float(win.min()), float(win.max()), True
+    bd["note"] = (f"biên {bd['lo']:.2f}–{bd['hi']:.2f} USD/kg, phủ {bd['span']}d "
+                  f"({len(mo)} điểm WB monthly + {len(parts[-1])} phiên thật)")
+    if latest >= bd["hi"]:  band = "high"
+    elif latest <= bd["lo"]: band = "low"
+    else: return None, bd
+
+    # A WB monthly point is a monthly AVERAGE: it sits strictly inside that month's true
+    # daily range, so the spliced stretch hides its own daily extremes and the band comes
+    # out NARROWER than reality on BOTH sides — measured on the months where we hold both
+    # (monthly means 2.69-2.81 vs true daily 2.60-2.92). A break test against a compressed
+    # band OVER-fires: exactly the false-ALERT class this fix exists to kill. So while the
+    # window still leans on monthly points at all, a break is "soft" — real enough to
+    # report, never enough to prove a 52-week record on its own. It hardens by itself on
+    # 2027-06-16, the first day the 365d window clears the last monthly anchor before the
+    # daily feed began (2026-06-15) — verified by simulation, not estimated.
+    bd["soft"] = bool(len(mo))
+    if bd["soft"]:
+        bd["note"] += (f" · biên MỀM: {len(mo)} điểm là TRUNG BÌNH THÁNG (WB), cực trị ngày "
+                       f"thật của giai đoạn đó không quan sát được — chưa đủ khẳng định kỷ lục")
+    return band, bd
 
 
 def classify(m):
@@ -177,10 +253,16 @@ def classify(m):
         reasons.append(f"WoW {wow:+.1f}% (>= ±{ALERT_WOW:.0f}%)")
     if c3m is not None and abs(c3m) >= ALERT_3MO:
         reasons.append(f"3 tháng {c3m:+.1f}% (>= ±{ALERT_3MO:.0f}%)")
-    if m["band"]:
-        reasons.append(f"phá biên 52 tuần ({'đỉnh' if m['band']=='high' else 'đáy'} mới)")
+    edge = "đỉnh" if m["band"] == "high" else "đáy"
+    if m["band"] and not m["band_soft"]:
+        reasons.append(f"phá biên 52 tuần ({edge} mới; "
+                       f"biên {m['band_lo']:.2f}–{m['band_hi']:.2f}, phủ {m['band_span']}d)")
     if reasons:
         return "ALERT", reasons
+    if m["band"] and m["band_soft"]:          # soft edge: report, but never ALERT alone
+        reasons.append(f"chạm {edge} biên 52 tuần {m['band_lo']:.2f}–{m['band_hi']:.2f} "
+                       f"nhưng cực trị lấy từ WB monthly (trung bình tháng, bị nén) "
+                       f"— chưa đủ khẳng định kỷ lục, cần chuỗi ngày thật dài hơn")
     if wow is not None and abs(wow) >= WATCH_WOW:
         reasons.append(f"WoW {wow:+.1f}% (>= ±{WATCH_WOW:.0f}%)")
     if c4w is not None and abs(c4w) >= WATCH_4WK:
@@ -200,12 +282,59 @@ def _load_state():
         return {}
 
 
-def _save_state(st):
+def _save_state(patch):
+    """Merge-write: pending_alert must survive a record_fire() and vice versa."""
+    st = _load_state(); st.update(patch)
     os.makedirs(DATA, exist_ok=True)
-    with open(STATEF, "w") as f: json.dump(st, f, indent=2)
+    tmp = STATEF + ".tmp"
+    with open(tmp, "w") as f: json.dump(st, f, indent=2)
+    os.replace(tmp, STATEF)                      # atomic (coding_guidelines §5)
+    return st
 
 
-def should_fire(tier, m):
+def confirm_alert(tier, m):
+    """An ALERT must repeat on TWO CONSECUTIVE observation dates before it escalates
+    to Telegram + Bill — one anomalous print is not an alert (2026-08-04: RSS3 -6.95%
+    in a day while China spot printed +1.52%, data quality unresolved). The bus event
+    still goes out immediately so Taylor sees it; only the loud channel waits.
+    Returns True once the same ALERT has been seen on a second, later date."""
+    cur = str(m["latest_dt"].date())
+    if tier != "ALERT":
+        st = _load_state()
+        dropped = st.get("pending_alert")
+        # Did this streak already escalate? record_fire() sets last_alert_confirmed when a
+        # CONFIRMED ALERT actually went out, so "streak ended" and "streak fizzled before
+        # anyone was paged" are different events and must not share a message.
+        escalated = bool(st.get("last_alert_confirmed"))
+        _save_state({"pending_alert": None, "last_alert_confirmed": False})
+        if dropped and dropped != cur:
+            if escalated:
+                topic = "rubber: đợt ALERT đã kết thúc (giá không còn vượt ngưỡng)"
+                note = ("Đợt ALERT bắt đầu {d} ĐÃ được xác nhận và ĐÃ gửi Telegram/Bill trước đó; "
+                        "nay giá không còn vượt ngưỡng nào — coi như đóng đợt.").format(d=dropped)
+            else:
+                topic = "rubber: ALERT chờ xác nhận đã tự huỷ (phiên sau không lặp lại)"
+                note = ("1 phiên vượt ngưỡng rồi đảo lại, CHƯA từng gửi Telegram/Bill — đúng thiết kế "
+                        "của lớp xác nhận 2 phiên. Trễ tối đa là 1 phiên chạy (cron T2-T6 18:35 ICT), "
+                        "tức tối đa ~3 ngày lịch nếu phiên đầu rơi vào thứ Sáu. Nếu đây là sụt giảm "
+                        "hình chữ V thật, Taylor đã nhận event ALERT của phiên đầu.")
+            # event_type MUST stay in the set mike_json.py:cmd_delta_append forwards
+            # ("finding","answer","decision","verification") — a "status" event never reaches
+            # the auto-injected RECENT block, i.e. Taylor would not actually see this.
+            bus("finding", topic,
+                {"pending_since": dropped, "resolved_on": cur, "tier_now": tier,
+                 "escalated_before": escalated, "rss3_usdkg": round(m["latest"], 3),
+                 "audience": ["Taylor"] + (["DollarBill"] if escalated else []),
+                 "note": note})
+        return False
+    first = _load_state().get("pending_alert")
+    if not first:
+        _save_state({"pending_alert": cur})      # first sighting
+        return False
+    return first != cur                          # re-run on the SAME date confirms nothing
+
+
+def should_fire(tier, m, confirmed=False):
     """Dedupe: fire WATCH/ALERT once per ISO-week, but ALWAYS on escalation."""
     if tier == "INFO":
         return False
@@ -215,15 +344,18 @@ def should_fire(tier, m):
     last_tier, last_wk = st.get("last_tier", "INFO"), st.get("last_week", "")
     if rank[tier] > rank.get(last_tier, 0):     # escalation -> always
         return True
+    if tier == "ALERT" and confirmed and not st.get("last_alert_confirmed", False):
+        return True                              # unconfirmed -> confirmed is an escalation too
     if cur_wk != last_wk:                        # new week -> re-affirm
         return True
     return False                                 # same week, same/lower tier -> mute
 
 
-def record_fire(tier, m):
+def record_fire(tier, m, confirmed=False):
     _save_state({"last_tier": tier,
                  "last_week": "%d-W%02d" % m["latest_dt"].isocalendar()[:2],
-                 "last_date": str(m["latest_dt"].date())})
+                 "last_date": str(m["latest_dt"].date()),
+                 "last_alert_confirmed": bool(tier == "ALERT" and confirmed)})
 
 
 def bus(event_type, topic, payload):
@@ -249,9 +381,10 @@ def telegram(text):
         return False
 
 
-def fire(tier, reasons, m):
+def fire(tier, reasons, m, confirmed=False):
     direction = "TĂNG" if (m["wow"] or m["c3m"] or m["c4w"] or 0) > 0 else "GIẢM"
-    audience = ["Taylor", "DollarBill"] if tier == "ALERT" else ["Taylor"]
+    loud = tier == "ALERT" and confirmed          # Telegram + Bill only once confirmed
+    audience = ["Taylor", "DollarBill"] if loud else ["Taylor"]
     is_3mo_watch = any("3 tháng" in r for r in reasons)
     if tier == "ALERT":
         action = "Taylor rà mô hình/dự báo nhóm cao su; Bill cân nhắc kế hoạch hành động vị thế"
@@ -260,15 +393,19 @@ def fire(tier, reasons, m):
                   "(xu hướng 3 tháng vượt ±18%)")
     else:
         action = "Taylor rà xem input giá đã lệch giả định mô hình chưa (nhóm cao su)"
-    payload = {"tier": tier, "direction": direction, "rss3_usdkg": round(m["latest"], 3),
+    payload = {"tier": tier, "confirmed": confirmed if tier == "ALERT" else None,
+               "direction": direction, "rss3_usdkg": round(m["latest"], 3),
                "date": str(m["latest_dt"].date()), "reasons": reasons, "audience": audience,
+               "band_52w": None if not m["band_ok"] else [round(m["band_lo"], 3), round(m["band_hi"], 3)],
+               "band_note": m["band_note"],
                "wow_pct": None if m["wow"] is None else round(m["wow"], 1),
                "cum4wk_pct": None if m["c4w"] is None else round(m["c4w"], 1),
                "cum3mo_pct": None if m["c3m"] is None else round(m["c3m"], 1),
                "stocks": STOCKS, "action": action}
-    bus("finding", f"rubber {tier}: cao su {direction} {m['latest']:.2f} USD/kg", payload)
+    topic_tier = tier if loud else (f"{tier} (chờ xác nhận)" if tier == "ALERT" else tier)
+    bus("finding", f"rubber {topic_tier}: cao su {direction} {m['latest']:.2f} USD/kg", payload)
 
-    if tier == "ALERT":
+    if loud:
         emoji = "🔴"
         msg = (f"{emoji} <b>CAO SU — {tier} ({direction})</b>\n"
                f"RSS3 <b>{m['latest']:.2f} USD/kg</b> ({m['latest_dt'].date()})\n"
@@ -278,9 +415,12 @@ def fire(tier, reasons, m):
                f"CP: {', '.join(STOCKS)}")
         telegram(msg)
         print(f"\n{'='*60}\n🔴 ALERT (gửi Telegram + bus → Taylor & Bill)\n{msg}\n{'='*60}")
+    elif tier == "ALERT":
+        print(f"\n🟠 ALERT CHỜ XÁC NHẬN (chỉ bus → Taylor, chưa gửi Telegram/Bill; "
+              f"cần lặp lại ở phiên kế tiếp): {' · '.join(reasons)}")
     else:
         print(f"\n🟡 WATCH (bus → Taylor): {' · '.join(reasons)}")
-    record_fire(tier, m)
+    record_fire(tier, m, confirmed)
 
 
 # ------------------------------------------------------------------ note --------
@@ -299,6 +439,11 @@ def render_note(m, tier, reasons, today):
          f"- **Mới nhất:** {m['latest']:.2f} USD/kg ({m['latest_dt'].date()})",
          f"- **vs tuần trước (WoW):** {pct(m['wow'], m['wow_ref']) if m['wow'] is not None else '— (chưa đủ chuỗi ngày)'}",
          f"- **4 tuần:** {pct(m['c4w'], m['c4w_ref'])}  ·  **3 tháng:** {pct(m['c3m'], m['c3m_ref'])}",
+         f"- **Biên 52 tuần:** " + (f"{m['band_lo']:.2f}–{m['band_hi']:.2f} USD/kg "
+             f"(WB monthly ghép chuỗi ngày, phủ {m['band_span']}d) — "
+             + {"high": "**giá đang phá ĐỈNH biên**", "low": "**giá đang phá ĐÁY biên**"}.get(
+                 m["band"], f"giá nằm trong biên")
+             if m["band_ok"] else f"— chưa tính được ({m['band_note']})"),
          "",
          "| Tuần (giá đóng) | RSS3 USD/kg |", "|---|---|"]
     for _, r in wk.iterrows():
@@ -308,6 +453,8 @@ def render_note(m, tier, reasons, today):
           f"- 🟡 **WATCH → Taylor**: |WoW| ≥ {WATCH_WOW:.0f}% hoặc |4 tuần| ≥ {WATCH_4WK:.0f}% — rà mô hình/dự báo nhóm cao su.",
           f"- 🟡 **WATCH 3-tháng → Taylor**: |3 tháng| ≥ {WATCH_3MO:.0f}% (xu hướng trườn) → **chạy lại mô hình 8L** xem có đổi đánh giá nhóm cao su không.",
           f"- 🔴 **ALERT → Bill + Taylor** (+Telegram): |WoW| ≥ {ALERT_WOW:.0f}% hoặc |3 tháng| ≥ {ALERT_3MO:.0f}% hoặc phá biên 52 tuần — Bill quyết kế hoạch vị thế.",
+          f"  - Biên 52 tuần chỉ được tính khi chuỗi PHỦ ĐỦ ≥ {BAND_MIN_SPAN} ngày lịch (ghép WB monthly vào phần chuỗi ngày chưa với tới), không phải khi đủ số dòng.",
+          "  - ALERT phải lặp lại ở **2 phiên đo liên tiếp** mới gửi Telegram/Bill; lần đầu chỉ báo bus cho Taylor.",
           f"- CP cao su theo dõi: {', '.join(STOCKS)}",
           "- Lưu ý: truyền dẫn giá mủ → lợi nhuận trễ ~1 quý; GVR còn chịu chi phối câu chuyện chuyển đổi đất. Giá biến động là điều kiện cần, Taylor phán materiality.", ""]
     with open(NOTE, "w", encoding="utf-8") as f:
@@ -336,13 +483,16 @@ def main():
 
     m = trend(df)
     tier, reasons = classify(m)
+    confirmed = confirm_alert(tier, m)
     today = str(m["latest_dt"].date())
     render_note(m, tier, reasons, today)
     print(f"RSS3 {m['latest']:.2f} USD/kg  WoW={m['wow'] and round(m['wow'],1)}  "
-          f"4wk={m['c4w'] and round(m['c4w'],1)}  3mo={m['c3m'] and round(m['c3m'],1)}  -> {tier}")
+          f"4wk={m['c4w'] and round(m['c4w'],1)}  3mo={m['c3m'] and round(m['c3m'],1)}  "
+          f"band={m['band'] or '—'} [{m['band_note']}]  -> {tier}"
+          + ("" if tier != "ALERT" else (" (đã xác nhận)" if confirmed else " (chờ xác nhận)")))
 
-    if should_fire(tier, m):
-        fire(tier, reasons, m)
+    if should_fire(tier, m, confirmed):
+        fire(tier, reasons, m, confirmed)
     else:
         print(f"  ({tier}: không bắn — đã cảnh báo tuần này hoặc dưới ngưỡng)")
     print(f"-> {CSV} ({len(df)} rows)\n-> {NOTE}")
