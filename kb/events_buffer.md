@@ -1221,3 +1221,13 @@
 - [2026-08-06T12:06:46Z] DollarBill/heartbeat — DollarBill_20260806_120344: {"status": "still_running", "elapsed_min": 3, "job_id": "DollarBill_20260806_120344", "source": "watcher"}
 - [2026-08-06T12:06:47Z] DollarBill/heartbeat — DollarBill_20260806_120345: {"status": "still_running", "elapsed_min": 3, "job_id": "DollarBill_20260806_120345", "source": "watcher"}
 - [2026-08-06T12:06:59Z] DollarBill/heartbeat — DollarBill_20260806_120345: {"status": "in_progress", "note": "LAG due_today=6 (script), qua lens: chỉ SSI CHEAP+sạch (BUY candidate); PHR/TVN RICH, PGS/VNF/VSI thanh khoản chết+ngoài universe (SKIP). n_bal=0. CAPIT episode giữ nguyên 5 mã. Tiếp: chạy L1 park_trim + L2 jit_unpark, xem cấu trúc plan cũ."}
+
+## Consolidation 2026-08-06T12:10:00Z
+- [2026-08-06T12:07:46Z] DollarBill/heartbeat — DollarBill_20260806_120344: {"status": "still_running", "elapsed_min": 4, "job_id": "DollarBill_20260806_120344", "source": "watcher"}
+- [2026-08-06T12:07:47Z] DollarBill/heartbeat — DollarBill_20260806_120345: {"status": "still_running", "elapsed_min": 4, "job_id": "DollarBill_20260806_120345", "source": "watcher"}
+- [2026-08-06T12:08:46Z] DollarBill/heartbeat — DollarBill_20260806_120344: {"status": "still_running", "elapsed_min": 5, "job_id": "DollarBill_20260806_120344", "source": "watcher"}
+- [2026-08-06T12:08:47Z] DollarBill/heartbeat — DollarBill_20260806_120345: {"status": "still_running", "elapsed_min": 5, "job_id": "DollarBill_20260806_120345", "source": "watcher"}
+- [2026-08-06T12:09:11Z] DollarBill/decision — plan-2026-08-07-ZaloPay: {"account": "ZaloPay", "plan_date": "2026-08-07", "state": "NEUTRAL(3)", "orders": [{"ticker": "SSI", "side": "buy", "qty": 800, "ref_price": 24300, "book": "LAG", "play_type": "LAG_LO"}], "funding": "FUNDED_BY_JIT qua compute_jit_unpark.py — ban 300cp PARK (MBB100+VCB100+VHM100)=16.01tr rong 15.99tr, du tai tro slot 19.44tr, khong shrink", "park_trim_proposal": "TRIM 36.15tr de xuat (8 ma, cho user duyet)", "capit": "episode CAPIT-2026-07-20 phien 13, HOLD nguyen, khong lenh moi", "skipped_lag": ["PGS", "VNF", "VSI (thanh khoan chet+ngoai universe)", "PHR", "TVN (DCF RICH)"], "file": "data/trade_plans/plan_ZaloPay_2026-08-07.json"}
+- [2026-08-06T12:09:46Z] DollarBill/heartbeat — DollarBill_20260806_120344: {"status": "still_running", "elapsed_min": 6, "job_id": "DollarBill_20260806_120344", "source": "watcher"}
+- [2026-08-06T12:09:47Z] DollarBill/heartbeat — DollarBill_20260806_120345: {"status": "still_running", "elapsed_min": 6, "job_id": "DollarBill_20260806_120345", "source": "watcher"}
+- [2026-08-06T12:09:48Z] DollarBill/heartbeat — DollarBill_20260806_120344: {"status": "done", "note": "Plan ZaloPay 2026-08-07 ghi xong, gui report vao Discord plan thread, cho user duyet"}
