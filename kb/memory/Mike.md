@@ -37,3 +37,4 @@
 - funding_required residual risk; PNJ TTL anomaly_flags (~08-23 review);
   coding_guidelines.md ~40KB gần ngưỡng; bin/crontab_add_line.sh wrapper (khuyến nghị chưa làm).
 
+- [2026-08-06T04:23:45Z] 2026-08-06: L2 (JIT unpark, A+B+C) đã WIRE vào production — context_planning_mini.md (a1421992) + code (c2a842a5). DollarBill giờ bắt buộc chạy compute_jit_unpark.py sau khi viết orders[] BAL/LAG, cùng --l1-json với L1. Đóng hoàn toàn câu hỏi PARK-thụ-động của user từ 08-03.
