@@ -5,7 +5,7 @@ source: tav2_bq.vnindex_5state_dt5g_live
 group: market-state
 aka: DT5G production
 writer: macro_state_live.py → publish_gated_state.py → state_publish_immutable.py (daily_refresh_v34b_linux.sh, cron 18:30 ICT)
-writer_2: pipeline kaffa_v2 của TEAM DỮ LIỆU (~17:12 ICT) — writer ĐỘC LẬP, KHÔNG phải của ta, KHÔNG can thiệp
+writer_2: pipeline kaffa_v2 của TEAM DỮ LIỆU (16:2x–17:1x ICT, giờ TRÔI theo thời lượng pipeline) — writer ĐỘC LẬP, KHÔNG phải của ta, KHÔNG can thiệp
 write_contract: APPEND-ONLY + recompute đuôi 25 phiên (BẤT BIẾN, từ 2026-07-30)
 columns: time, state, state_raw, asof_date
 monitor: mike/bin/dt5g_writer_watch.py (2 mẫu/ngày: daily_refresh [0-pre] 18:30 + bq_freshness_check 19:00)
@@ -46,7 +46,7 @@ Bảng này **không do một mình ta ghi**:
 | Writer | Là ai | Khi nào | Ghi gì |
 |---|---|---|---|
 | **Của ta** | `publish_gated_state.py` → `state_publish_immutable.py` | ~18:35 (daily_refresh step [12]) **và** ~19:01 (bq_freshness [pipeline-1]) | MERGE bất biến: append phiên mới + recompute đuôi 25 phiên |
-| **kaffa_v2** (TEAM DỮ LIỆU) | `/workspace/kaffa_v2/worker/tasks/market_state_tasks.py`, task `update_market_regime_state` | ~17:12 ICT trong EOD pipeline của họ | DELETE `time >= min_time` + APPEND **5 phiên gần nhất**, tính bằng **implementation DT5G RIÊNG của họ** |
+| **kaffa_v2** (TEAM DỮ LIỆU) | `/workspace/kaffa_v2/worker/tasks/market_state_tasks.py`, task `update_market_regime_state` | **BƯỚC CUỐI** của EOD pipeline của họ ⇒ giờ ghi = giờ pipeline KẾT THÚC, TRÔI theo thời lượng chạy (đo thật: 07-29 17:12 khi chạy ~1h42; 08-03..08-05 16:21–16:26 khi chạy 51–56'). Pipeline luôn BẮT ĐẦU 08:30:0x UTC = 15:30 ICT ⇒ `KAFFA_WINDOW` neo cận dưới ở giờ BẮT ĐẦU (15:30–18:00), **đừng neo vào giờ kết thúc quan sát 1 lần** | DELETE `time >= min_time` + APPEND **5 phiên gần nhất**, tính bằng **implementation DT5G RIÊNG của họ** |
 
 kaffa_v2 wire auto-sync từ commit `c794dd1` (2026-06-08) vì họ tưởng bảng không có owner tự
 động ("the table is manually maintained and is stale"); họ **không biết** ta có publisher.
