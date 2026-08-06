@@ -423,6 +423,77 @@ except Exception as _e:          # fail-open: không chặn plan vì một dòng
     margin_note = [f"⚠️ ĐÒN BẨY: không kiểm được trạng thái duyệt margin "
                    f"({type(_e).__name__}: {_e}) — nếu plan có lệnh CAPIT, kiểm tay trước 09:05."]
 
+# ── PARK L1 (trim) + L2 (JIT unpark): HIỆN RÕ, KHÔNG GIẤU (user John chốt 2026-08-06) ───
+# Lỗ hổng đã lặp 2 lần: cả `park_trim_proposal` (L1) lẫn `jit_unpark_proposal` (L2) đều LIVE,
+# sinh lệnh BÁN THẬT và quyết định cỡ lệnh MUA thật, nhưng report duyệt plan không hề nhắc
+# tới ⇒ (1) 08-05 lệnh trim PARK không ai duyệt vì user không biết nó tồn tại; (2) plan
+# 08-07 hiện "MUA SSI 3100cp = 75,3tr" trong khi cash chỉ 4,8tr — đọc riêng lệnh mua thì
+# tưởng DollarBill mua liều/thiếu tiền, trong khi thực tế L2 bán 12 mã PARK bù đủ và lệnh
+# khớp NGUYÊN (status=FUNDED_BY_JIT).
+# Khối này CHỈ ĐỌC artifact có sẵn trong plan — compute_park_trim.py / compute_jit_unpark.py
+# vẫn là nguồn số DUY NHẤT, không tính lại gì ở đây (§6 provenance).
+def _as_dict(x):
+    return x if isinstance(x, dict) else {}
+
+def _num(x):
+    return float(x) if isinstance(x, (int, float)) else 0.0
+
+def _tr(v):
+    return f"{v/1e6:,.1f}tr"
+
+def _o_val(o):
+    """VND của 1 lệnh đề xuất. plan ZaloPay KHÔNG ghi `value_vnd` trong park_trim/jit orders
+    (SpaceX có) ⇒ fallback qty × ref_price, cùng chuỗi fallback renderer dùng cho orders[]."""
+    v = _num(o.get("value_vnd") or o.get("est_value_vnd"))
+    if v:
+        return v
+    return (_num(o.get("qty") or o.get("quantity"))
+            * _num(o.get("ref_price") or o.get("mtm_price_ref") or o.get("price")))
+
+park_trim  = _as_dict(plan.get("park_trim_proposal"))
+jit_prop   = _as_dict(plan.get("jit_unpark_proposal"))
+pt_dec     = str(park_trim.get("decision") or "")
+jit_dec    = str(jit_prop.get("decision") or "")
+pt_orders  = [o for o in (park_trim.get("orders") or []) if isinstance(o, dict)]
+jit_orders = [o for o in (jit_prop.get("orders") or []) if isinstance(o, dict)]
+jit_amends = [a for a in (jit_prop.get("buy_amendments") or []) if isinstance(a, dict)]
+
+def _amend_for(o):
+    """Khớp 1 lệnh trong orders[] với buy_amendments. Plan THẬT (cả SpaceX lẫn ZaloPay
+    2026-08-07) KHÔNG ghi `order_id` vào orders[] trong khi amendment CÓ (`BUY-SSI-LAG-01`)
+    ⇒ khớp order_id trước, rồi mới rơi về ticker."""
+    oid = str(o.get("order_id") or "")
+    tk  = str(o.get("ticker") or "").upper()
+    if oid:
+        for a in jit_amends:
+            if str(a.get("order_id") or "") == oid:
+                return a
+    if tk:
+        for a in jit_amends:
+            if str(a.get("ticker") or "").upper() == tk:
+                return a
+    return None
+
+def _sells_for(a):
+    """Các lệnh bán PARK tài trợ cho đúng lệnh mua này (for_order_id, fallback for_ticker)."""
+    oid = str(a.get("order_id") or "")
+    tk  = str(a.get("ticker") or "").upper()
+    sel = [o for o in jit_orders if oid and str(o.get("for_order_id") or "") == oid]
+    if not sel and tk:
+        sel = [o for o in jit_orders if str(o.get("for_ticker") or "").upper() == tk]
+    return sel
+
+def _fund_phrase(sells):
+    if not sells:
+        return "KHÔNG bán được mã PARK nào"
+    n_tk = len({str(s.get("ticker") or "").upper() for s in sells})
+    return f"bán {n_tk} mã PARK tổng {_tr(sum(_o_val(s) for s in sells))}"
+
+def _tickers_line(os_):
+    return " · ".join(
+        f"{str(o.get('ticker') or '?')} {int(_num(o.get('qty') or o.get('quantity'))):,}cp "
+        f"({_tr(_o_val(o))})" for o in os_)
+
 lines = [f"📋 **Kế hoạch giao dịch ngày mai {date} — Account {acct}**"]
 for _m in margin_note:
     lines.append(_m)
@@ -461,6 +532,10 @@ if orders:
     buys  = [o for o in orders if str(o.get("side","")).lower() in ("buy","mua","b")]
     sells = [o for o in orders if str(o.get("side","")).lower() in ("sell","ban","s")]
     lines.append(f"🎯 Hành động: **{len(orders)} lệnh** ({len(sells)} bán, {len(buys)} mua):")
+    if pt_orders or jit_orders:
+        lines.append(f"   ➕ Ngoài {len(orders)} lệnh trên, plan còn **{len(pt_orders) + len(jit_orders)} "
+                     f"lệnh BÁN PARK đề xuất** (L1 trim {len(pt_orders)} + L2 JIT {len(jit_orders)}) — "
+                     f"xem 2 mục riêng ở cuối, CẦN DUYỆT.")
     if price_verify_note:
         lines.append(f"   {price_verify_note}")
     if capit_note:
@@ -477,6 +552,35 @@ if orders:
         note = o.get("note", "")
         note_s = f" — {note[:90]}" if note else ""
         lines.append(f"  • {side_vn} {ticker} {qty}cp @ {px}{val_s}{note_s}")
+        # Funding note NGAY CẠNH lệnh mua — user đọc lệnh mua riêng lẻ không được phép hoảng
+        # vì tưởng thiếu tiền (SSI 75,3tr vs cash 4,8tr, plan 08-07).
+        if is_buy:
+            _a = _amend_for(o)
+            if _a:
+                _st = str(_a.get("status") or "")
+                _fp = _fund_phrase(_sells_for(_a))
+                _net = _num(_a.get("jit_proceeds_net_vnd"))
+                _net_s = f" (thu ròng {_tr(_net)})" if _net else ""
+                _rs = str(_a.get("reason") or "")[:150]
+                if _st == "FUNDED_BY_JIT":
+                    lines.append(
+                        f"      ↳ 💧 **Tiền đâu ra:** lệnh này được tài trợ bằng cách {_fp}"
+                        f"{_net_s} ⇒ mua NGUYÊN lệnh {_a.get('qty_final')}cp "
+                        f"(tiền mặt {_tr(_num(_a.get('cash_before_vnd')))} → "
+                        f"{_tr(_num(_a.get('cash_after_vnd')))}). Chi tiết ở mục L2 bên dưới — "
+                        f"các lệnh bán PARK đó CẦN DUYỆT cùng lệnh mua này.")
+                elif _st == "FUNDED_BY_CASH":
+                    lines.append(f"      ↳ 💧 Tiền đâu ra: đủ tiền mặt sẵn có, KHÔNG cần bán PARK.")
+                elif _st == "SHRINK":
+                    lines.append(
+                        f"      ↳ ⚠️ **Lệnh bị CO** {_a.get('qty_plan')}cp → {_a.get('qty_final')}cp "
+                        f"dù đã {_fp}{_net_s} — {_rs}")
+                elif _st == "DROP":
+                    lines.append(
+                        f"      ↳ ⛔ **Lệnh bị BỎ** (kế hoạch {_a.get('qty_plan')}cp) dù đã cố "
+                        f"bán PARK — {_rs}")
+                elif _st:
+                    lines.append(f"      ↳ ⚠️ JIT status={_st} — {_rs}")
         if format_dcf_check:
             dcf = o.get("dcf_check")
             if not dcf and is_buy and _dcf_check_for_order and isinstance(price, (int, float)):
@@ -517,6 +621,89 @@ if orders:
         lines.append(f"ℹ️ _{DD_DISCLAIMER}_")
 else:
     lines.append(f"🎯 Hành động: **GIỮ NGUYÊN (HOLD)** — không có lệnh nào ngày mai.")
+
+# ── MỤC RIÊNG 1: L1 park_trim_proposal ──────────────────────────────────────────────────
+# Ngang hàng với orders[], KHÔNG phải câu phụ trong đoạn văn: đây là lệnh BÁN THẬT cần user
+# duyệt riêng (chúng KHÔNG nằm trong orders[] mà bot đọc lúc 09:05).
+try:
+    if pt_dec == "TRIM" and pt_orders:
+        _pt_sum = sum(_o_val(o) for o in pt_orders)
+        _pt_eng = _num(park_trim.get("trim_proposed_vnd"))
+        _tgt = park_trim.get("target_park")
+        _tgt_s = f"{float(_tgt)*100:.0f}%" if isinstance(_tgt, (int, float)) else "?"
+        lines.append(f"🅿️ **ĐỀ XUẤT TRIM PARK (L1) — {len(pt_orders)} lệnh BÁN, "
+                     f"Σ {_tr(_pt_eng or _pt_sum)} — CẦN DUYỆT RIÊNG**")
+        lines.append(f"   Mục tiêu: đưa PARK về trần {_tgt_s} của pool — PARK hiện "
+                     f"{_tr(_num(park_trim.get('park_mv_vnd')))} / pool "
+                     f"{_tr(_num(park_trim.get('pool_vnd')))} ⇒ cần trim "
+                     f"{_tr(_num(park_trim.get('trim_total_vnd')))}, phiên này đề xuất "
+                     f"{_tr(_pt_eng or _pt_sum)}"
+                     + (f", còn thiếu {_tr(_num(park_trim.get('trim_shortfall_vnd')))} để phiên sau"
+                        if _num(park_trim.get("trim_shortfall_vnd")) else "") + ".")
+        lines.append(f"   BÁN: {_tickers_line(pt_orders)}")
+        # Σ engine vs Σ lệnh liệt kê: lệch = plan chép thiếu mã (§6 — không tin 1 con số tự khai)
+        if _pt_eng and abs(_pt_sum - _pt_eng) > max(1e5, 0.01 * _pt_eng):
+            lines.append(f"   ⚠️ Σ lệnh liệt kê {_tr(_pt_sum)} ≠ số engine {_tr(_pt_eng)} — "
+                         f"plan có thể chép thiếu/thừa mã, kiểm trước khi duyệt.")
+        _pt_bl = [b for b in (park_trim.get("blocked") or []) if isinstance(b, dict)]
+        if _pt_bl:
+            lines.append("   ⛔ Không trim được: " + "; ".join(
+                f"{b.get('ticker','?')} ({str(b.get('reason') or '')[:120]})" for b in _pt_bl[:6]))
+        for _n in (park_trim.get("notes") or [])[:2]:
+            lines.append(f"   · {str(_n)[:300]}")
+        lines.append("   ⚠️ Các lệnh BÁN này KHÔNG nằm trong danh sách lệnh chính ở trên — "
+                     "duyệt riêng thì Mike/Bill mới đưa vào plan thực thi.")
+    elif pt_dec.startswith("BLOCKED_") or pt_dec in ("NO_SELL_POSSIBLE",):
+        lines.append(f"🅿️ **TRIM PARK (L1) BỊ CHẶN — {pt_dec}**: "
+                     + ("; ".join(str(n)[:200] for n in (park_trim.get("notes") or [])[:2])
+                        or "không có lý do kèm theo — kiểm compute_park_trim.py."))
+    elif pt_dec:
+        lines.append(f"🅿️ L1 trim PARK: {pt_dec}"
+                     + (f" — {str((park_trim.get('notes') or [''])[0])[:180]}"
+                        if park_trim.get("notes") else ""))
+except Exception as _e:      # fail-open: một khối báo cáo không được chặn plan
+    lines.append(f"⚠️ Không render được khối L1 park_trim ({type(_e).__name__}: {_e}) — "
+                 f"đọc thẳng `park_trim_proposal` trong file plan trước khi duyệt.")
+
+# ── MỤC RIÊNG 2: L2 jit_unpark_proposal ─────────────────────────────────────────────────
+try:
+    if jit_dec == "JIT" and (jit_orders or jit_amends):
+        _jit_sum = sum(_o_val(o) for o in jit_orders)
+        _for = sorted({str(o.get("for_ticker") or o.get("for_order_id") or "?")
+                       for o in jit_orders})
+        lines.append(f"💧 **ĐỀ XUẤT BÁN PARK TÀI TRỢ LỆNH MUA (L2/JIT) — {len(jit_orders)} lệnh "
+                     f"BÁN, Σ {_tr(_jit_sum)} — CẦN DUYỆT RIÊNG**")
+        if jit_orders:
+            lines.append(f"   Tài trợ cho: {', '.join(_for)}")
+            lines.append(f"   BÁN: {_tickers_line(jit_orders)}")
+        for _a in jit_amends:
+            _st = str(_a.get("status") or "?")
+            _icon = {"FUNDED_BY_JIT": "✅", "FUNDED_BY_CASH": "✅",
+                     "SHRINK": "⚠️", "DROP": "⛔"}.get(_st, "⚠️")
+            lines.append(f"   {_icon} MUA {_a.get('ticker','?')}: {_st} — kế hoạch "
+                         f"{_a.get('qty_plan')}cp → cuối cùng {_a.get('qty_final')}cp "
+                         f"({_tr(_num(_a.get('target_value_final_vnd')))}); "
+                         f"{str(_a.get('reason') or '')[:150]}")
+        _jt_bl = [b for b in (jit_prop.get("blocked") or []) if isinstance(b, dict)]
+        if _jt_bl:
+            lines.append("   ⛔ Không bán được: " + "; ".join(
+                f"{b.get('ticker','?')} ({str(b.get('reason') or '')[:120]})" for b in _jt_bl[:6]))
+        for _n in (jit_prop.get("notes") or [])[:2]:
+            lines.append(f"   · {str(_n)[:300]}")
+        lines.append("   ⚠️ Duyệt lệnh MUA ở trên = duyệt luôn các lệnh BÁN PARK này (không bán "
+                     "thì không đủ tiền mua) — nếu KHÔNG muốn bán PARK, phải bỏ/co lệnh mua.")
+    elif jit_dec.startswith("BLOCKED_") or jit_dec in ("NO_SELL_POSSIBLE",):
+        lines.append(f"💧 **BÁN PARK TÀI TRỢ (L2/JIT) BỊ CHẶN — {jit_dec}**: "
+                     + ("; ".join(str(n)[:200] for n in (jit_prop.get("notes") or [])[:2])
+                        or "không có lý do kèm theo — kiểm compute_jit_unpark.py.")
+                     + " ⇒ lệnh mua có thể THIẾU TIỀN lúc 09:05 (triệu chứng WAIT_CASH).")
+    elif jit_dec:
+        lines.append(f"💧 L2 JIT unpark: {jit_dec}"
+                     + (f" — {str((jit_prop.get('notes') or [''])[0])[:180]}"
+                        if jit_prop.get("notes") else ""))
+except Exception as _e:      # fail-open
+    lines.append(f"⚠️ Không render được khối L2 jit_unpark ({type(_e).__name__}: {_e}) — "
+                 f"đọc thẳng `jit_unpark_proposal` trong file plan trước khi duyệt.")
 
 if reasons:
     lines.append("💡 Vì sao:")
