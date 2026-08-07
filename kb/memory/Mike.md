@@ -2,7 +2,28 @@
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
 
 # Working memory — Mike
-> Cập nhật lần cuối: 2026-08-06 (dọn cuối ngày, sau daily retro bước 3/3)
+> Cập nhật lần cuối: 2026-08-07 21:5x ICT (2 fix funding gate xong + verify)
+
+## Tối 08-07 — 2 sự cố funding gate ĐÃ VÁ + quant-skeptic CONFIRMED, đóng hẳn
+User duyệt đề xuất Winston (Winston_20260807_065124) tối nay, dispatch song song Mafee+Taylor:
+- **fix_1+2 (UPCOM routing)**: Mafee, commit `c22bd1c` — luôn giải gói vay theo MÃ (tái dùng
+  `_resolve_loan_package_id`) thay vì rơi về gói mainboard default khi lệnh không cash_only/không
+  đòn bẩy. Vá WAIT_CASH vô hạn ca DRI. 18/18+51/51 selfcheck, Mike tự verify diff khớp yêu cầu.
+- **fix_3 (funding cash-flow / JIT-unpark credit)**: Taylor, commit `087a3d0` + doc fix Mike
+  `00ffd2e` — nhánh (1) của `check_plan_funding` nay cộng tín dụng lệnh BÁN cùng plan chạy trước
+  (priority thấp hơn) theo TỈ LỆ NHU CẦU từng nhóm gói vay (Taylor tự bác đề xuất plan-wide của
+  Mike bằng phản ví dụ P6 — đúng). Vá ca ZaloPay 08-07 bị chặn sạch 0/9 lệnh dù plan tự cấp vốn đủ.
+  73/73 selfcheck + 81-plan replay, **quant-skeptic CONFIRMED cao** (independent recompute khớp
+  hệt, kể cả số "21/50 plan tự cấp vốn hoàn toàn"). Rủi ro tồn dư đã disclose (sell chỉ đảm bảo
+  ĐƯỢC THỬ trước, không đảm bảo KHỚP trước) — có backstop layer-3 WAIT_CASH không đổi, theo dõi
+  bằng fill data thật (chưa có ledger riêng, cân nhắc thêm nếu tái diễn).
+- **Bài học quy trình**: dispatch 2 agent sửa CÙNG file không cách ly (không worktree) trong 1
+  phút → commit của agent A cuốn theo staged-work-chưa-commit của agent B (may mắn không đụng độ
+  hàm, cả 2 tự công bố minh bạch). Lần sau: tách file theo agent, hoặc chạy tuần tự khi biết trước
+  sẽ chạm cùng file. Đã ghi vào `kb/current_ops.md` §Domain-constraint layer P0.
+- Domain-constraint P0 (`plan_funding_gate.py`) đã ACTIVE (hard block) từ 08-04 (`bb8583c`) —
+  KHÔNG còn WARN_ONLY như tài liệu thiết kế gốc mô tả; cập nhật `kb/current_ops.md`. Xác nhận
+  live thật còn treo tới phiên 08-10 (SpaceX pp0Buy margin case chưa từng có bản ghi thật).
 
 ## Trạng thái cuối ngày 08-06
 - Daily retro 08-06 XONG: 8 sự cố + 4 pattern. 2 pattern escalate từ 08-05 (paper_checkpoint_

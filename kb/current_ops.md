@@ -61,11 +61,32 @@ universe-pit-migration.md`.
 - **P1 (ACTIVE, LIVE)**: `filter_lag_rating_orders()` — lưới an toàn tầng ORDER cho gate 8L
   rating≤3 của LAG, vá lỗ hổng gate cũ chỉ sống ở tầng sinh tín hiệu. Verify: 14/14 + 22/22
   selfcheck, replay case TRC/MST bị chặn, 0 lệnh khác đổi trên 21 plan thật.
-- **P0 (WARN_ONLY, chỉ log)**: `data/plan_buying_power_shadow_log.csv` — Σ lệnh mua vs sức mua
-  broker sống, KHÔNG chặn gì. ⚠️ SpaceX (margin) chưa từng có bản ghi `pp0Buy` thật — số liệu
-  replay dùng PROXY (`availableCash`), là cận dưới. Việc còn treo: theo dõi log ≥10 phiên thật
-  rồi mới xét P0 → ACTIVE (không tự động promote). Thiết kế đầy đủ:
-  `mike/agents/Taylor/research/ontology_constraint_layer_design_20260729.md`.
+- **P0 — ĐÃ LÊN ACTIVE (HARD BLOCK), không còn WARN_ONLY** (từ 2026-08-04, commit `bb8583c`,
+  `trading_bot/plan_funding_gate.py` `check_plan_funding()` gọi tại `bot_execute.py:536`; vượt ⇒
+  KHÔNG đặt bất kỳ lệnh nào của account đó). `data/plan_buying_power_shadow_log.csv` vẫn ghi song
+  song (audit trail), không còn là cơ chế chặn duy nhất. **2 bug thật phát sinh + đã vá tối
+  2026-08-07** (Mike điều phối Mafee + Taylor song song, quant-skeptic CONFIRMED cao):
+  1. UPCOM (DRI) đi ra `loan_package_id=None` ⇒ rơi về gói mainboard-only của account ⇒ ppse
+     precheck lẫn `place_order` đều reject ⇒ WAIT_CASH vô hạn dù thừa tiền (trông y hệt thiếu
+     tiền thật). Fix: `brokers.py`/`plan_funding_gate.py`/`executor.py` luôn giải gói vay theo MÃ
+     (tái dùng `_resolve_loan_package_id`), commit `c22bd1c`.
+  2. Nhánh (1) của gate không cộng tiền lệnh BÁN cùng plan chạy trước (cơ chế L2 JIT-unpark, LIVE
+     từ 08-06) ⇒ chặn oan plan TỰ CẤP VỐN ĐỦ — ca thật: ZaloPay 08-07 bị chặn sạch 0/9 lệnh dù 8
+     lệnh bán PARK (98,68tr) thừa nuôi 1 lệnh mua DRI (23,60tr). Fix: thêm tín dụng JIT theo tỉ lệ
+     nhu cầu từng nhóm gói vay, chỉ tính lệnh bán priority < min priority mọi lệnh mua (tránh
+     double-count + tái lập đúng bug "list lệnh rồi đợi tiền"), commit `087a3d0` + doc fix `00ffd2e`.
+     quant-skeptic CONFIRMED cao (independent recompute khớp chính xác, kể cả case-71 "phòng vệ" là
+     lệnh bán chỉ đảm bảo được THỬ trước, không đảm bảo KHỚP trước — rủi ro tồn dư, đã disclose, có
+     backstop layer-3 WAIT_CASH không đổi).
+  ⚠️ SpaceX (margin) chưa từng có bản ghi `pp0Buy` thật — số liệu replay dùng PROXY
+  (`availableCash`), là cận dưới. Xác nhận sống cần chờ phiên thật (kỳ vọng 08-10, UPCOM buy nên
+  ra `loan_packages_resolve … resolved=1122` trong `dnse_raw`, không WAIT_CASH giả). Thiết kế gốc:
+  `mike/agents/Taylor/research/ontology_constraint_layer_design_20260729.md` (mô tả P0 lúc còn
+  WARN_ONLY — đã lệch thực tế từ 08-04, đọc kèm ghi chú này).
+  ⚠️ **Rủi ro quy trình phát hiện cùng tối**: dispatch Mafee + Taylor sửa CÙNG file
+  `plan_funding_gate.py` trong vòng 1 phút không cách ly (không worktree) — commit của Mafee vô
+  tình cuốn theo phần việc CHƯA COMMIT của Taylor (dead code lúc đó, cả 2 bên tự công bố minh
+  bạch, không mất việc). Lần sau nên tách file hoặc chạy tuần tự khi 2 dispatch cùng chạm 1 file.
 
 ## Due-diligence MẶC ĐỊNH cho mọi ứng cử viên mua — ĐÃ SHIP, ổn định (2026-07-21)
 `trading_bot/due_diligence.py` — thuần thông tin (không chặn/đổi sizing), 5 trục (thanh khoản/
