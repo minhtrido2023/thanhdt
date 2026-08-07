@@ -77,6 +77,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Sự cố | status |
 |---|---|---|
+| 2026-08-07 | [2026-08-07: script sửa plan sau khi user đã duyệt LÀM MẤT `approved_by` → bot chặn cả 2 account giữa phiên chiều; lộ lỗ hổng chiều ngược lại (sửa `orders[]` mà giữ duyệt) hiện KHÔNG có gate nào bắt](2026-08/2026-08-07-plan-rewrite-drops-user-approval.md) | escalated (cần user duyệt lại); đề xuất `approved_orders_hash` CHƯA vá |
 | 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
 | 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
 | 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
