@@ -198,8 +198,13 @@ else:
 # CHECK5_BEGIN — marker ỔN ĐỊNH: bin/ops_health_check_selfcheck.py trích ĐÚNG khối giữa
 # CHECK5_BEGIN/CHECK5_END rồi chạy nó trên bus giả để khoá hồi quy (kb_nightly Phase 0).
 # Đổi/xoá 2 marker này → selfcheck FAIL ngay, không im lặng. Khối chỉ được phép dùng:
-# glob/gzip/json/os/re + biến wc_root + hàm W()/OK() (selfcheck cung cấp đúng bấy nhiêu).
+# glob/gzip/json/os/re + biến wc_root + hàm W()/OK() (selfcheck cung cấp đúng bấy nhiêu)
+# — MỌI thứ ngoài danh sách đó khối PHẢI tự import TẠI ĐÂY, không dựa vào import ở đầu
+# heredoc (nằm NGOÀI marker, selfcheck không trích). Sự cố 2026-08-07: commit f0946444
+# dùng defaultdict mà chỉ có import ở dòng 48 → production vẫn chạy, nhưng selfcheck
+# (và qua đó cả paper_checkpoint_escalation_selfcheck) NameError → gác hồi quy chết im.
 import datetime as dt
+from collections import defaultdict
 _now = dt.datetime.now(dt.timezone.utc)
 cutoff = _now - dt.timedelta(hours=48)
 # Backlog TREO LÂU: câu hỏi >48h mà chưa có answer/decision trước đây RƠI KHỎI radar hoàn
