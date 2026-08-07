@@ -413,23 +413,62 @@ if os.path.isdir(inbox_dir):
           f"{ {k: v for k, v in sorted(read_errors.items())} }")
 if pending_q:
     W(f"Có {len(pending_q)} câu hỏi (question) trong 48h qua CHƯA thấy answer tương ứng: {pending_q}")
-    # Dòng HINT: câu hỏi nào có sự kiện CÙNG TÁC GIẢ, đăng SAU nó, topic dùng chung tiền tố
-    # dài (≥ STEM_MIN ký tự) — dấu hiệu đã xử lý xong nhưng ghi bus sai quy ước (đăng
-    # `finding`/đổi topic thay vì `answer`/`decision` GIỮ NGUYÊN topic gốc). Chỉ GỢI Ý:
-    # không đóng, không loại khỏi pending_q, không đổi routing của dòng WARN ở trên.
+    # Dòng HINT: câu hỏi nào có sự kiện đăng SAU nó trông như đã xử lý xong nhưng ghi bus
+    # sai quy ước (đăng `finding`/đổi topic thay vì `answer`/`decision` GIỮ NGUYÊN topic
+    # gốc). Chỉ GỢI Ý: không đóng, không loại khỏi pending_q, không đổi routing dòng WARN.
+    # HAI tín hiệu (OR):
+    #   (a) STEM  — topic dùng chung tiền tố dài (≥ STEM_MIN ký tự), BẤT KỲ tác giả nào.
+    #   (b) TOKEN — chia sẻ ≥1 "từ hiếm" (≥ TOKEN_MIN ký tự, df ≤ DF_MAX topic trên toàn
+    #       bus, không nằm trong STOPWORDS) VÀ đăng trong vòng WIN_H giờ sau câu hỏi.
+    # Vì sao BỎ ràng buộc "cùng tác giả" của bản cũ: người đóng câu hỏi THƯỜNG là agent
+    # KHÁC người hỏi (chính DollarBill đề xuất Winston là người phụ trách). Đây đúng lớp
+    # root cause của sự cố 2026-07-10 (matcher per-file làm answer chéo-agent không bao
+    # giờ khớp) — bản HINT thêm 2026-08-03 vô tình tái lập ràng buộc same-author đó, nên
+    # ca thật `DollarBill/rubber-alert-52w-label-sai` (Winston sửa xong sau 3h42, đăng
+    # `finding` topic khác) không được gợi ý và đốt 1 job Wags ngày 2026-08-07.
+    # Vì sao TOKEN cần df/stoplist/cửa sổ thời gian: đo trên toàn bus (1820 topic ứng viên,
+    # 63 câu hỏi) — token-overlap TRẦN (không lọc) gợi ý 61/63 câu hỏi = vô nghĩa, và tệ
+    # hơn là gán nhầm alert tiền thật `plan-t1-not-ready-SpaceX` cho 1 finding LAG-rating
+    # không liên quan. Lọc df ≤ 15 loại tên account dùng chung khắp nơi (zalopay df=76,
+    # spacex df=67) nhưng giữ danh từ miền (rubber df=12); + cửa sổ 48h + stoplist từ
+    # chung chung → còn 9 gợi ý, ~5 đúng thật (rubber, fill_timing, mafee-stamp,
+    # retro-backlog, và dnse-phs-margin-thresholds do Mafee đóng chéo-agent).
     STEM_MIN = 16
+    TOKEN_MIN = 5     # bỏ từ ngắn/chức năng
+    DF_MAX = 15       # "hiếm" = xuất hiện ở ≤ 15 topic trên toàn bus (xem đo lường trên)
+    WIN_H = 48        # người đóng câu hỏi thường đăng trong vòng 2 ngày
+    # Từ nghiệp vụ CHUNG CHUNG: đủ hiếm để lọt df nhưng không nói lên chủ đề nào cả —
+    # đo được là nguồn của 4/9 gợi ý sai (ready/watch/context/chase/phien).
+    STOPWORDS = {"ready", "watch", "context", "chase", "phien", "trong", "khong", "duoc"}
+    def _rare_toks(s, df=None):
+        ws = {w for w in re.split(r"[^0-9a-z]+", s.lower())
+              if len(w) >= TOKEN_MIN and w not in STOPWORDS}
+        return ws if df is None else {w for w in ws if df[w] <= DF_MAX}
+    topic_df = defaultdict(int)
+    for _, c_topic, _ in closure_cands:
+        for w in _rare_toks(c_topic):
+            topic_df[w] += 1
     hints = []
     for q_agent, q_topic, q_ts in pending_q_meta:
+        q_rare = _rare_toks(q_topic, topic_df)
         for c_agent, c_topic, c_ts in closure_cands:
-            if c_agent != q_agent or c_topic == q_topic or c_ts < q_ts:
+            if c_topic == q_topic or c_ts < q_ts:
                 continue
+            why = None
             if len(os.path.commonprefix([q_topic, c_topic])) >= STEM_MIN:
-                hints.append(f"{q_agent}/{q_topic} ~ {c_topic}")
+                why = "cùng tiền tố"
+            elif q_rare & _rare_toks(c_topic) and \
+                    (c_ts - q_ts).total_seconds() <= WIN_H * 3600:
+                why = "chung từ hiếm " + ",".join(sorted(q_rare & _rare_toks(c_topic)))
+            if why:
+                who = "cùng tác giả" if c_agent == q_agent else f"tác giả khác: {c_agent}"
+                hints.append(f"{q_agent}/{q_topic} ~ [{who}; {why}] {c_topic}")
                 break
     if hints:
         W(f"{WARN_ONLY} {len(hints)}/{len(pending_q)} câu hỏi trên CÓ THỂ đã xử lý xong "
-          f"nhưng ghi bus SAI QUY ƯỚC (sự kiện cùng tác giả, đăng sau, topic cùng tiền tố "
-          f"— quy ước đóng: `answer`/`decision` GIỮ NGUYÊN topic câu hỏi): {hints}")
+          f"nhưng ghi bus SAI QUY ƯỚC (có sự kiện đăng sau, cùng tiền tố topic HOẶC chung "
+          f"từ hiếm trong {WIN_H}h — GỢI Ý thôi, phải tự kiểm chứng; quy ước đóng: "
+          f"`answer`/`decision` GIỮ NGUYÊN topic câu hỏi): {hints}")
 elif not pending_q_wagsfix and not pending_q_needs_human:
     OK("Không có câu hỏi (question) nào đang chờ xử lý trong 48h qua.")
 if pending_q_needs_human:
