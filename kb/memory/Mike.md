@@ -42,3 +42,4 @@ có sẵn nhưng chưa ai nhận việc sửa).
 - Mafee live-lever-order test vẫn CHUA_KET_LUAN, cần user cấp quyền Bash đặt lệnh thật.
 - PNJ TTL anomaly_flags (~08-23 review); coding_guidelines.md gần ngưỡng dung lượng.
 
+- [2026-08-07T20:52:50Z] weekly-ops-audit 08-08 XONG: 2 bug that da sua (c1b12d60 CHECK5 defaultdict, df24e978 gac §12 so 0-voi-0). Con treo tu audit: (a) anomaly_gate B1 PNJ khong con bi loai — chua co rui ro tien that (capit_fired=False, basket=0) nhung phai lam ro TRUOC dot CAPIT ke tiep; (b) send_plan_report_park_jit selfcheck ghim vao plan LIVE, can dong bang fixture; (c) capit_lever selfcheck loi CUNG LOP voi CHECK5 (harness trich-roi-exec thieu ten); (d) coding_guidelines.md 42,1KB vuot nguong 40KB, can user quyet cat gi.
