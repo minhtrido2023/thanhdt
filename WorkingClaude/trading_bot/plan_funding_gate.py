@@ -53,14 +53,19 @@ CHẶN OAN TOÀN BỘ plan SpaceX vì một hiện vật đo đạc. Vì vậy m
 ngược nhau: nhánh `cash_only` lệch ⇒ chặn OAN (ca TV1), nhánh đòn bẩy lệch ⇒ đo THỪA sức mua gấp
 đôi ⇒ BỎ LỌT đúng thứ gate sinh ra để chặn (quant-skeptic vòng 1, 2026-08-04).
 
-CÔNG THỨC
-─────────
+CÔNG THỨC (cập nhật 2026-08-07, commit 087a3d0 — thêm tín dụng JIT-unpark)
+─────────────────────────────────────────────────────────────────────────
   need_g  = Σ_(lệnh mua thuộc nhóm g) qty × ref_price × (1 + FEE_RATE)
-  U       = Σ_g  need_g / pp0Buy_g              ("tỉ lệ sức mua bị tiêu thụ")
+  JIT     = Σ_(lệnh BÁN cùng plan, priority < min priority MỌI lệnh mua)
+              qty × ref_price × (1 − FEE_RATE)      (xem _jit_sell_credit)
+  U       = Σ_g  need_g / (pp0Buy_g + JIT × need_g/Σneed)   ("tỉ lệ sức mua bị tiêu thụ")
   CHẶN khi U > 1.0  (đúng `≤`, hoà đúng bằng sức mua thì KHÔNG chặn)
-Nhóm đơn (mọi phiên thường lệ, tất cả lệnh dùng gói default) → rút gọn về đúng `Σ need ≤ pp0Buy`.
-Nhiều nhóm: các gói vay chia nhau CÙNG một hũ tiền với hệ số vay khác nhau, nên cộng phân số tiêu
-thụ là xấp xỉ tuyến tính đúng khi các gói cùng initialRate và hợp lý khi khác.
+Nhóm đơn (mọi phiên thường lệ, tất cả lệnh dùng gói default), plan không có lệnh bán chạy trước
+(JIT=0) → rút gọn về đúng `Σ need ≤ pp0Buy` như cũ. JIT chia THEO TỈ LỆ NHU CẦU của từng nhóm,
+KHÔNG cộng gộp plan-wide — giữ tính chất chống-che-giấu vốn (một nhóm vượt sức mua vẫn CHẶN dù
+nhóm khác thừa, xem docstring `_jit_sell_credit`). Nhiều nhóm: các gói vay chia nhau CÙNG một hũ
+tiền với hệ số vay khác nhau, nên cộng phân số tiêu thụ là xấp xỉ tuyến tính đúng khi các gói
+cùng initialRate và hợp lý khi khác.
 
 KHI KHÔNG ĐO ĐƯỢC `pp0Buy` (None hoặc ≤0) — KHÔNG chặn theo phản xạ, mà dùng CẬN NGOÀI
 ────────────────────────────────────────────────────────────────────────────────────────
