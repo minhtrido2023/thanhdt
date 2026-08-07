@@ -70,6 +70,38 @@ def _find_shared_date():
     return None
 
 
+def _fill_dates(upto_date, max_days=90):
+    """Các ngày dnse_raw CÓ record khớp lệnh (fill), <= upto_date, mới nhất trước.
+
+    `verify_account_snapshot.py --dates` KHÔNG phải "ngày cần xem" mà là CỬA SỔ LỊCH SỬ
+    KHỚP LỆNH dùng để dựng giá vốn (help của nó ghi rõ "trading dates with fills").
+    Truyền đúng 1 ngày chỉ-có-balances (cái mà _find_shared_date trả về) thì MỌI vị thế
+    rơi vào nhánh "legacy — no fill history" và total_mtm_value = 0.0 cho CẢ 2 account —
+    tức phép so "2 account phải khác nhau" của §12 bị suy biến ở mốc 0, báo nhầm thành
+    lẫn account (sự cố weekly-ops-audit 2026-08-08). Trả về danh sách để nối bằng dấu phẩy.
+    """
+    out = []
+    for path in sorted(glob.glob(os.path.join(EXEC_DIR, "dnse_raw_*.jsonl")), reverse=True):
+        date = os.path.basename(path)[len("dnse_raw_"):-len(".jsonl")]
+        if date > upto_date:
+            continue
+        try:
+            with open(path, encoding="utf-8") as f:
+                for line in f:
+                    try:
+                        rec = json.loads(line)
+                    except Exception:
+                        continue
+                    if rec.get("kind") in ("place_order", "orders"):
+                        out.append(date)
+                        break
+        except Exception:
+            continue
+        if len(out) >= max_days:
+            break
+    return sorted(out)
+
+
 def _run(cmd, cwd=WC_ROOT):
     p = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=180)
     return p.returncode, p.stdout, p.stderr
@@ -102,6 +134,10 @@ def main():
               f"{EXEC_DIR}/dnse_raw_*.jsonl — không thể chạy selfcheck.")
         return 1
     print(f"Selfcheck 2-account interleaved — ngày dùng: {date}")
+    _fd = _fill_dates(date)
+    fill_dates_arg = ",".join(_fd) if _fd else date
+    print(f"  cửa sổ fill cho verify_account_snapshot: {len(_fd)} ngày "
+          f"({_fd[0] if _fd else 'n/a'} → {_fd[-1] if _fd else 'n/a'})")
 
     balance_raw = os.path.join(EXEC_DIR, f"dnse_raw_{date}.jsonl")
     if not os.path.isfile(balance_raw):
@@ -128,7 +164,7 @@ def main():
             out_path = os.path.join(tmpdir, f"verify_{account}.json")
             rc, stdout, stderr = _run([
                 sys.executable, os.path.join(MIKE_BIN, "verify_account_snapshot.py"),
-                "--account", account, "--dates", date, "--asof", date, "--out", out_path,
+                "--account", account, "--dates", fill_dates_arg, "--asof", date, "--out", out_path,
             ])
             r["verify_rc"] = rc
             if rc != 0 or not os.path.isfile(out_path):
@@ -173,9 +209,19 @@ def main():
         sx, zp = results.get("SpaceX", {}), results.get("ZaloPay", {})
         if sx.get("verify_mtm") is not None and zp.get("verify_mtm") is not None:
             if sx["verify_mtm"] == zp["verify_mtm"]:
-                failures.append(
-                    f"verify_account_snapshot.py: SpaceX và ZaloPay ra CÙNG total_mtm_value ({sx['verify_mtm']}) "
-                    f"ngày {date} — gần như chắc chắn đang đọc chung dnse_raw không lọc account.")
+                if not sx["verify_mtm"]:
+                    # Bằng nhau ở mốc 0 KHÔNG phải bằng chứng lẫn account: nghĩa là cửa sổ
+                    # fill không dựng được giá vốn cho mã nào (mọi vị thế rơi vào nhánh
+                    # "legacy — no fill history"), nên phép so bị suy biến, không kết luận
+                    # được theo chiều nào. Nói rõ là KHÔNG KẾT LUẬN ĐƯỢC, đừng vu cho §12.
+                    failures.append(
+                        f"verify_account_snapshot.py: CẢ 2 account ra total_mtm_value = 0 ngày {date} "
+                        f"(cửa sổ fill {len(_fd)} ngày) — phép so §12 SUY BIẾN, KHÔNG kết luận được "
+                        f"có lẫn account hay không. Kiểm tra cửa sổ fill trước khi nghi ngờ code.")
+                else:
+                    failures.append(
+                        f"verify_account_snapshot.py: SpaceX và ZaloPay ra CÙNG total_mtm_value ({sx['verify_mtm']}) "
+                        f"ngày {date} — gần như chắc chắn đang đọc chung dnse_raw không lọc account.")
         if sx.get("reconcile_stdout") and zp.get("reconcile_stdout"):
             if sx["reconcile_stdout"].strip() == zp["reconcile_stdout"].strip():
                 failures.append(
