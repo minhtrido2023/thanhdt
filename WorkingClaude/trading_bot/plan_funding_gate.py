@@ -222,6 +222,8 @@ def check_plan_funding(plan, broker, account_mode):
 
     total_need = sum(g["need"] for g in groups.values())
 
+    jit_credit, n_jit_sells, min_buy_prio = _jit_sell_credit(plan, buys)
+
     # ── đo pp0Buy từng nhóm, bằng ĐÚNG gói vay của nhóm đó ────────────────────────────────
     measured_util = 0.0
     unmeasured = []
@@ -234,12 +236,24 @@ def check_plan_funding(plan, broker, account_mode):
                                          loan_package_id=g["lp"])
         except Exception as ex:
             err = type(ex).__name__
+        # Chia tín dụng JIT theo TỈ LỆ NHU CẦU của nhóm, KHÔNG cộng gộp plan-wide. Cộng gộp
+        # (so `total_need` với `Σbp + jit_credit`) sẽ phá tính chất chống-che-giấu vốn có của
+        # dạng "tổng các phân số": vì mọi số hạng ≥ 0, hôm nay MỘT nhóm vượt sức mua là tổng
+        # tự động > 1 ⇒ CHẶN, dù nhóm khác còn thừa. Ví dụ cộng gộp làm hỏng: nhóm A need 100tr
+        # /bp 10tr (util 10,0) + nhóm B need 1tr/bp 1.000tr (util 0,001) → tổng 10,001 CHẶN
+        # đúng; nhưng cộng gộp cho 101tr ≤ 1.010tr ⇒ OK OAN, tức sức mua thừa của B "gánh" cho
+        # A trong khi hai gói vay KHÔNG chuyển sức mua cho nhau. Chia theo tỉ lệ giữ nguyên
+        # tính chất: mỗi nhóm chỉ được cứu bằng phần tín dụng tương ứng nhu cầu CỦA CHÍNH NÓ.
+        # Nhóm không đo được vẫn nhận phần chia (rồi bỏ không dùng) ⇒ nhóm đo được nhận ÍT hơn
+        # = lệch về phía thận trọng. Cộng 1:1, KHÔNG nhân đòn bẩy: tiền bán về là tiền mặt, quy
+        # ra sức mua của gói vay còn ≥ 1× nữa, nên 1× là cận dưới an toàn.
+        share = jit_credit * (g["need"] / total_need) if total_need > 0 else 0.0
         rec = {"loan_package_id": g["lp"], "package_source": g["src"],
                "n_orders": len(g["orders"]), "need_vnd": g["need"],
                "probe_ticker": probe.ticker, "probe_price": probe.ref_price,
-               "buying_power_vnd": bp, "error": err}
+               "buying_power_vnd": bp, "jit_credit_vnd": share, "error": err}
         if bp is not None and bp > 0:
-            rec["utilization"] = g["need"] / bp
+            rec["utilization"] = g["need"] / (bp + share)
             measured_util += rec["utilization"]
         else:
             rec["utilization"] = None
@@ -249,15 +263,20 @@ def check_plan_funding(plan, broker, account_mode):
     measured_bp = sum(r["buying_power_vnd"] for r in out_groups
                       if r["buying_power_vnd"] is not None and r["buying_power_vnd"] > 0)
 
+    jit_note = ("" if jit_credit <= 0 else
+                f" + tín dụng JIT {jit_credit:,.0f}đ từ {n_jit_sells} lệnh BÁN cùng plan chạy "
+                f"trước (priority < {min_buy_prio}, đã trừ phí {FEE_RATE*100:g}%)")
+
     # ── (1) nhóm đo được đã vượt sức mua → CHẶN, không cần xét gì thêm ────────────────────
     if measured_util > 1.0 + _EPS:
         return {"action": "BLOCK", "groups": out_groups, "need_vnd": total_need,
                 "buying_power_vnd": measured_bp, "utilization": measured_util,
-                "fallback_bound_vnd": None,
+                "fallback_bound_vnd": None, "jit_sell_credit_vnd": jit_credit,
+                "jit_sell_orders": n_jit_sells, "min_buy_priority": min_buy_prio,
                 "reason": (f"Σ lệnh MUA {total_need:,.0f}đ VƯỢT sức mua thật của broker "
                            f"{measured_bp:,.0f}đ (pp0Buy, đã gồm hạn mức vay + tiền bán chờ về "
-                           f"T+0) — tiêu thụ {measured_util*100:.1f}% sức mua. Plan đang chứa "
-                           f"lệnh dựa trên vốn CHƯA TỒN TẠI; theo luật "
+                           f"T+0){jit_note} — tiêu thụ {measured_util*100:.1f}% sức mua. Plan "
+                           f"đang chứa lệnh dựa trên vốn CHƯA TỒN TẠI; theo luật "
                            f"context_planning_mini.md phần thiếu phải nằm ở deferred_orders[], "
                            f"KHÔNG phải orders[].")}
 
@@ -265,9 +284,10 @@ def check_plan_funding(plan, broker, account_mode):
     if not unmeasured:
         return {"action": "OK", "groups": out_groups, "need_vnd": total_need,
                 "buying_power_vnd": measured_bp, "utilization": measured_util,
-                "fallback_bound_vnd": None,
-                "reason": (f"Σ lệnh MUA {total_need:,.0f}đ ≤ sức mua {measured_bp:,.0f}đ "
-                           f"({measured_util*100:.1f}%)")}
+                "fallback_bound_vnd": None, "jit_sell_credit_vnd": jit_credit,
+                "jit_sell_orders": n_jit_sells, "min_buy_priority": min_buy_prio,
+                "reason": (f"Σ lệnh MUA {total_need:,.0f}đ ≤ sức mua {measured_bp:,.0f}đ"
+                           f"{jit_note} ({measured_util*100:.1f}%)")}
 
     # ── (3) có nhóm không đo được → cận ngoài, chỉ chặn mức "vốn không tồn tại" ───────────
     try:

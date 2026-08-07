@@ -46,10 +46,13 @@ def check(name, cond, detail=""):
 
 
 # ── stub tối thiểu: đúng những thuộc tính gate đọc, không hơn ─────────────────────────────
-def order(ticker, qty, price, side="buy", cash_only=False, loan_package_id=None):
+def order(ticker, qty, price, side="buy", cash_only=False, loan_package_id=None, priority=5):
     o = types.SimpleNamespace()
     o.ticker, o.qty, o.ref_price, o.side = ticker, qty, price, side
     o.cash_only, o.loan_package_id = cash_only, loan_package_id
+    # priority=5 = ĐÚNG default của dataclass Order (plan.py:26). Giữ nguyên cho mọi ca cũ ⇒
+    # mua lẫn bán đều =5 ⇒ điều kiện `<` NGHIÊM NGẶT sai ⇒ 0 tín dụng JIT ⇒ hành vi y hệt trước.
+    o.priority = priority
     return o
 
 
@@ -303,6 +306,107 @@ check("tách ĐÚNG 2 nhóm gói vay (1840 + 1841)", len(v["groups"]) == 2,
 check("FPT đo bằng 1840", ("FPT", 100_000, LEVER) in b.calls, b.calls)
 check("SAB đo bằng 1841", ("SAB", 40_000, DEFLT) in b.calls, b.calls)
 check("utilization ≈ 1,10", abs(v["utilization"] - 1.1010) < 1e-3, v["utilization"])
+
+# ── P. TÍN DỤNG JIT: lệnh BÁN cùng plan chạy TRƯỚC cấp vốn cho lệnh mua (2026-08-07) ──────
+# Lỗ hổng thật: cơ chế L2 JIT-unpark (LIVE 2026-08-06) bán PARK ĐỂ tự cấp vốn cho lệnh mua cùng
+# plan, nhưng nhánh (1) chỉ đo pp0Buy lúc gate chạy (chưa lệnh bán nào khớp) ⇒ CHẶN OAN sạch plan.
+BUY = order("FPT", 1000, 100_000)                       # need = 100.075.000đ (đã gồm phí)
+NEED_FPT = 1000 * 100_000 * (1 + FEE_RATE)
+SELL_NET = 700 * 60_000 * (1 - FEE_RATE)                # 41.968.500đ net phí
+
+print("\n[P1] ★ (a) mua 100,075tr / sức mua 60tr — THIẾU nếu không tính lệnh bán;")
+print("     bán VNM 42tr (priority 1) chạy TRƯỚC mua (priority 5) ⇒ ĐỦ ⇒ phải KHÔNG chặn")
+v = check_plan_funding(plan([order("VNM", 700, 60_000, side="sell", priority=1),
+                             order("FPT", 1000, 100_000, priority=5)]),
+                       StubBroker({None: 60_000_000}, cash=60_000_000), "live")
+check("action == OK (trước fix: BLOCK)", v["action"] == "OK", f"{v['action']}: {v['reason']}")
+check("tín dụng JIT = net phí 41.968.500đ", abs(v["jit_sell_credit_vnd"] - SELL_NET) < 1,
+      v["jit_sell_credit_vnd"])
+check("đếm đúng 1 lệnh bán đủ điều kiện", v["jit_sell_orders"] == 1, v["jit_sell_orders"])
+check("utilization = need/(bp+credit) ≈ 0,9814",
+      abs(v["utilization"] - NEED_FPT / (60_000_000 + SELL_NET)) < 1e-9, v["utilization"])
+check("reason nêu rõ có tín dụng JIT", "tín dụng JIT" in v["reason"], v["reason"])
+
+print("\n[P2] ★★ (b) REGRESSION GUARD — CÙNG SỐ TIỀN nhưng lệnh bán priority 7 > mua 5")
+print("      (bán chạy SAU mua ⇒ lúc mua chưa có đồng nào) ⇒ PHẢI VẪN CHẶN")
+v = check_plan_funding(plan([order("VNM", 700, 60_000, side="sell", priority=7),
+                             order("FPT", 1000, 100_000, priority=5)]),
+                       StubBroker({None: 60_000_000}, cash=60_000_000), "live")
+check("action == BLOCK (KHÔNG được nới)", v["action"] == "BLOCK", f"{v['action']}: {v['reason']}")
+check("tín dụng JIT = 0", v["jit_sell_credit_vnd"] == 0, v["jit_sell_credit_vnd"])
+
+print("\n[P3] ★★ BIÊN: bán priority 5 BẰNG mua 5 (cùng lượt, chưa khớp) ⇒ PHẢI VẪN CHẶN")
+print("      (luật là `<` NGHIÊM NGẶT, không phải `≤`)")
+v = check_plan_funding(plan([order("VNM", 700, 60_000, side="sell", priority=5),
+                             order("FPT", 1000, 100_000, priority=5)]),
+                       StubBroker({None: 60_000_000}, cash=60_000_000), "live")
+check("action == BLOCK", v["action"] == "BLOCK", f"{v['action']}: {v['reason']}")
+check("tín dụng JIT = 0", v["jit_sell_credit_vnd"] == 0, v["jit_sell_credit_vnd"])
+
+print("\n[P4] ★ (c) VƯỢT THẬT kể cả sau khi cộng TOÀN BỘ tiền bán ⇒ PHẢI VẪN CHẶN")
+print("      mua 100,075tr / sức mua 20tr + bán 18tr (net 17,99tr) = 37,99tr")
+v = check_plan_funding(plan([order("VNM", 300, 60_000, side="sell", priority=1),
+                             order("FPT", 1000, 100_000, priority=5)]),
+                       StubBroker({None: 20_000_000}, cash=20_000_000), "live")
+check("action == BLOCK", v["action"] == "BLOCK", f"{v['action']}: {v['reason']}")
+check("có cộng tín dụng nhưng vẫn không đủ",
+      v["jit_sell_credit_vnd"] > 0 and v["utilization"] > 1.0,
+      (v["jit_sell_credit_vnd"], v["utilization"]))
+
+print("\n[P5] ★ REPLAY PLAN THẬT bị chặn oan — ZaloPay 2026-08-07 (8 bán PARK prio 0 + DRI prio 1)")
+ZP_SELLS = [("BID", 300, 37_900.0), ("CTG", 300, 31_350.0), ("HDB", 200, 26_550.0),
+            ("MBB", 400, 23_900.0), ("TCB", 300, 29_200.0), ("VCB", 400, 59_000.0),
+            ("VHM", 300, 77_100.0), ("VPB", 300, 25_150.0)]
+zp = plan([order(t, q, px, side="sell", priority=0) for t, q, px in ZP_SELLS]
+          + [order("DRI", 1800, 13_100.0, priority=1)], account="ZaloPay")
+ZP_GROSS = sum(q * px for _, q, px in ZP_SELLS)                      # 98.680.000đ
+v = check_plan_funding(zp, StubBroker({None: 5_000_000}, cash=5_000_000), "live")
+check("Σ tiền bán gộp = 98.680.000đ", abs(ZP_GROSS - 98_680_000) < 1, ZP_GROSS)
+check("tín dụng JIT = 98.680.000 × (1−0,075%)",
+      abs(v["jit_sell_credit_vnd"] - ZP_GROSS * (1 - FEE_RATE)) < 1, v["jit_sell_credit_vnd"])
+check("đếm đủ 8 lệnh bán", v["jit_sell_orders"] == 8, v["jit_sell_orders"])
+check("action == OK — plan TỰ CẤP VỐN không còn bị chặn oan", v["action"] == "OK",
+      f"{v['action']}: {v['reason']}")
+print(f"      → sức mua 5,00tr + JIT {v['jit_sell_credit_vnd']/1e6:.2f}tr "
+      f"vs Σ mua {v['need_vnd']/1e6:.2f}tr ⇒ util {v['utilization']*100:.1f}%")
+v0 = check_plan_funding(plan([order("DRI", 1800, 13_100.0, priority=1)], account="ZaloPay"),
+                        StubBroker({None: 5_000_000}, cash=5_000_000), "live")
+check("KHÔNG có lệnh bán thì VẪN chặn (đúng — lúc đó tiền thật sự không tồn tại)",
+      v0["action"] == "BLOCK", f"{v0['action']}: {v0['reason']}")
+
+print("\n[P6] ★★ CHỐNG CHE GIẤU: chia tín dụng theo TỈ LỆ NHU CẦU, KHÔNG cộng gộp plan-wide.")
+print("      nhóm A (1841) need 100,075tr / bp 10tr  ← vượt THẬT")
+print("      nhóm B (1840) need 1,00tr   / bp 1.000tr ← thừa mứa")
+print("      Cộng gộp plan-wide sẽ cho OK OAN (101tr ≤ 1.010tr+50tr); chia tỉ lệ phải CHẶN.")
+# resolve SAB→1841: từ 2026-08-07 `_effective_loan_package` giải gói theo MÃ cho MỌI lệnh không
+# có đòn bẩy chỉ định (không còn chỉ `cash_only`), nên stub phải khai ánh xạ để nhóm ra 1841.
+b = StubBroker({DEFLT: 10_000_000, LEVER: 1_000_000_000}, cash=10_000_000,
+               resolve={"SAB": DEFLT}, lever_valid={"FPT": {LEVER}}, account_default=DEFLT)
+v = check_plan_funding(plan([order("VNM", 1000, 50_000, side="sell", priority=0),
+                             order("SAB", 1000, 100_000, priority=5),
+                             order("FPT", 10, 100_000, loan_package_id=LEVER, priority=5)]),
+                       b, "live")
+check("action == BLOCK (nhóm A vượt, B KHÔNG gánh hộ được)", v["action"] == "BLOCK",
+      f"{v['action']}: {v['reason']}")
+gA = [g for g in v["groups"] if g["loan_package_id"] == DEFLT][0]
+gB = [g for g in v["groups"] if g["loan_package_id"] == LEVER][0]
+check("nhóm A vẫn util > 1 sau khi nhận phần chia", gA["utilization"] > 1.0, gA["utilization"])
+check("phần chia tỉ lệ theo need (A nhận ~99%)",
+      abs(gA["jit_credit_vnd"] / v["jit_sell_credit_vnd"] - gA["need_vnd"] / v["need_vnd"]) < 1e-9,
+      (gA["jit_credit_vnd"], gB["jit_credit_vnd"]))
+check("Σ phần chia == tổng tín dụng (không tạo/mất tiền)",
+      abs(sum(g["jit_credit_vnd"] for g in v["groups"]) - v["jit_sell_credit_vnd"]) < 1e-6,
+      [g["jit_credit_vnd"] for g in v["groups"]])
+
+print("\n[P7] ★ FAIL-SAFE: lệnh KHÔNG có field `priority` (object cũ) ⇒ mặc định 5 cả hai bên")
+print("      ⇒ 5 < 5 sai ⇒ 0 tín dụng ⇒ hành vi Y HỆT trước khi có patch")
+o_sell = order("VNM", 700, 60_000, side="sell"); del o_sell.priority
+o_buy = order("FPT", 1000, 100_000); del o_buy.priority
+v = check_plan_funding(plan([o_sell, o_buy]),
+                       StubBroker({None: 60_000_000}, cash=60_000_000), "live")
+check("action == BLOCK (không tự nới khi thiếu thông tin thứ tự)", v["action"] == "BLOCK",
+      f"{v['action']}: {v['reason']}")
+check("tín dụng JIT = 0", v["jit_sell_credit_vnd"] == 0, v["jit_sell_credit_vnd"])
 
 print("\n" + "=" * 78)
 print(f"KẾT QUẢ: {PASS} PASS / {FAIL} FAIL")
