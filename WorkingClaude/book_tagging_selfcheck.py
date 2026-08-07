@@ -274,6 +274,18 @@ print("\nC. compute_park_trim — L1, các cổng phải CHẶN đúng chỗ")
 ADV_BIG = (5_000_000_000.0, "2026-08-05", None)     # ADV thừa sức, không bao giờ binding
 DAYCAP = 500_000_000_000.0
 
+# Rổ MỤC TIÊU + giá bơm TAY (2026-08-07, công thức đổi sang `order_i = mv_i − tgt_i`).
+# Trước đây khối C không cần rổ; nay `compute_trim` suy target từ rổ custom30V ⇒ nếu không bơm,
+# test sẽ phụ thuộc CSV rổ thật + quote LIVE (đúng bẫy `verify-before-done`: kết quả đổi theo
+# ngày chạy và theo mạng). Rổ dưới đây cho ACB/BID target BẰNG NHAU ⇒ mọi khẳng định về đối
+# xứng/không-dồn-phần-dư kiểm được bằng tay.
+C_BASKET = {"ACB": 0.30, "BID": 0.30, "VCB": 0.40}
+C_PX = {"ACB": 20_000, "BID": 40_000, "VCB": 60_000}
+
+
+def c_price_fn(tk):
+    return (C_PX.get(tk), None) if tk in C_PX else (None, "không có giá test")
+
 
 def adv_ok(tk, asof):
     return ADV_BIG
@@ -297,9 +309,13 @@ def fake_holdings(park, cash, books=None, unver=(), excluded=(), ok=True, sellab
             "reconcile": {"ok": ok, "mismatches": [] if ok else [{"ticker": "ACB", "diff": -200}]}}
 
 
-def trim(h, target=0.80):
-    return compute_trim("SpaceX", "2026-08-05", target, holdings=h, share_override=0.5,
-                        adv_fn=adv_ok, day_cap_override=DAYCAP)
+def trim(h, target=0.80, **kw):
+    kw.setdefault("share_override", 0.5)
+    kw.setdefault("adv_fn", adv_ok)
+    kw.setdefault("day_cap_override", DAYCAP)
+    kw.setdefault("basket_override", C_BASKET)
+    kw.setdefault("price_fn", c_price_fn)
+    return compute_trim("SpaceX", "2026-08-05", target, holdings=h, **kw)
 
 # C1. reconcile LỆCH → không đề xuất gì (fail-closed)
 r = trim(fake_holdings({"ACB": (1000, 22000)}, 5_000_000, ok=False))
@@ -317,13 +333,28 @@ h = fake_holdings({"ACB": (10000, 20000), "BID": (5000, 40000)}, 10_000_000,
                   books={"SAB": (1000, 50000, "CAPIT"), "DGC": (10000, 39400, "EXCLUDED")})
 r = trim(h)
 sold = {o["ticker"] for o in r["orders"]}
-check("C3 vượt trần → TRIM pro-rata trên ĐÚNG mã PARK; CAPIT/EXCLUDED không có trong lệnh",
+check("C3 vượt trần → TRIM trên ĐÚNG mã PARK; CAPIT/EXCLUDED không có trong lệnh",
       r["decision"] == "TRIM" and sold == {"ACB", "BID"}, f"{r['decision']} {sorted(sold)}")
 tot = sum(o["value_vnd"] for o in r["orders"])
-check("C3b Σ trim ≤ mức vượt trần và tỷ lệ giữa 2 mã ≈ trọng số hiện tại",
-      tot <= -r["delta_vnd"] + 1 and abs(
-          next(o["weight_in_park"] for o in r["orders"] if o["ticker"] == "BID") - 0.5) < 1e-9,
-      f"Σ={tot:,.0f} vs vượt {-r['delta_vnd']:,.0f}")
+# 2026-08-07: công thức đổi sang `mv_i − tgt_i`. Bất biến MỚI (thay cho "Σ ≤ mức vượt trần" và
+# "tỷ lệ theo trọng số SỐNG" — hai khẳng định đó mô tả công thức pro-rata ĐÃ BỊ THAY):
+#   · mỗi lệnh ≤ khoảng cách tới target của CHÍNH mã đó (không mã nào gánh phần của mã khác);
+#   · ACB/BID có trọng số mục tiêu BẰNG NHAU (0,30) ⇒ want bằng nhau ⇒ đối xứng;
+#   · Σ ≤ tổng lệch cấu trúc, và LỚN HƠN mức vượt trần 72tr — đúng thiết kế P1 sell-only
+#     (phần chênh là trọng số của VCB, mã trong rổ mà ta CHƯA MUA).
+w_acb = next(o for o in r["orders"] if o["ticker"] == "ACB")
+w_bid = next(o for o in r["orders"] if o["ticker"] == "BID")
+check("C3b mỗi lệnh ≤ (mv − tgt) của chính mã đó; ACB/BID cùng w' ⇒ want bằng nhau",
+      all(o["value_vnd"] <= o["mv_vnd"] - o["target_vnd"] + 1 for o in r["orders"])
+      and abs(w_acb["want_vnd"] - w_bid["want_vnd"]) < 1
+      and abs(w_acb["weight_target"] - 0.30) < 1e-12,
+      f"want ACB={w_acb['want_vnd']:,.0f} BID={w_bid['want_vnd']:,.0f}")
+check("C3b2 Σ lệnh ≤ lệch cấu trúc, và > mức vượt trần (P1 sell-only ⇒ cảnh báo DƯỚI target)",
+      tot <= r["structural_excess_vnd"] + 1 and tot > -r["delta_vnd"]
+      and r["underpark_after_vnd"] > 0
+      and any("DƯỚI target" in n for n in r["notes"]),
+      f"Σ={tot:,.0f} lệch cấu trúc={r['structural_excess_vnd']:,.0f} "
+      f"vượt trần={-r['delta_vnd']:,.0f}")
 
 # C3c. excluded_tickers LỌT vào sổ PARK (sai bất biến) → mã đó vẫn KHÔNG được trim
 h = fake_holdings({"ACB": (10000, 20000), "DGC": (5000, 40000)}, 10_000_000, excluded=("DGC",))
@@ -343,20 +374,16 @@ check("C4 mã UNVERIFIED bị loại khỏi lệnh trim",
 for label, advret in [("lỗi đọc", (0.0, None, "cache lỗi")),
                       ("ADV=0", (0.0, "2026-08-05", None)),
                       ("ADV cũ 60 ngày", (5e9, "2026-06-06", None))]:
-    r = compute_trim("SpaceX", "2026-08-05", 0.80,
-                     holdings=fake_holdings({"ACB": (10000, 20000)}, 10_000_000),
-                     share_override=0.5, adv_fn=lambda t, a, _r=advret: _r,
-                     day_cap_override=DAYCAP)
+    r = trim(fake_holdings({"ACB": (10000, 20000)}, 10_000_000),
+             adv_fn=lambda t, a, _r=advret: _r)
     check(f"C5 ADV {label} → fail-closed, không trim mã đó",
           not r["orders"] and r["blocked"], f"{r['decision']} {r['blocked']}")
 
 # C6. trần per-name (= gate LAG live) phải CẮT khi ADV mỏng, phần dư KHÔNG dồn sang mã khác
 h = fake_holdings({"ACB": (10000, 20000), "BID": (5000, 40000)}, 10_000_000)
 r = trim(h)                     # chân đối chứng: cùng holdings, ADV thừa sức cho CẢ HAI mã
-r_thin = compute_trim("SpaceX", "2026-08-05", 0.80, holdings=h, share_override=0.5,
-                      adv_fn=lambda t, a: ((10_000_000.0 if t == "ACB" else 5e9),
-                                           "2026-08-05", None),
-                      day_cap_override=DAYCAP)
+r_thin = trim(h, adv_fn=lambda t, a: ((10_000_000.0 if t == "ACB" else 5e9),
+                                      "2026-08-05", None))
 acb = [o for o in r_thin["orders"] if o["ticker"] == "ACB"]
 bid_thin = [o for o in r_thin["orders"] if o["ticker"] == "BID"]
 bid_full = [o for o in r["orders"] if o["ticker"] == "BID"]
@@ -364,6 +391,32 @@ check("C6 ADV mỏng → ACB bị trần per-name cắt (hoặc chặn hẳn), B
       (not acb or acb[0]["adv_capped"]) and bid_thin and bid_full
       and bid_thin[0]["qty"] == bid_full[0]["qty"],
       f"ACB={acb} BID {bid_thin[0]['qty'] if bid_thin else None} vs {bid_full[0]['qty'] if bid_full else None}")
+
+# C6b-C6d. Rổ MỤC TIÊU: mã rớt rổ bán sạch, BANNED bị loại, chuẩn hoá theo tập khả thi.
+#   (Bộ đầy đủ 39 ca ở `mike/bin/compute_park_trim_selfcheck.py`; 3 ca dưới giữ ở đây để khối C
+#   vẫn tự đứng được như một cổng hồi quy của chính file này.)
+h_out = fake_holdings({"ACB": (10000, 20000), "SHS": (200, 15700)}, 10_000_000)
+r_out = trim(h_out, price_fn=lambda tk: ((15_700, None) if tk == "SHS" else c_price_fn(tk)))
+o_shs = [o for o in r_out["orders"] if o["ticker"] == "SHS"]
+check("C6b mã RỚT RỔ (SHS, ngoài rổ mục tiêu) → target 0 → bán SẠCH 200cp",
+      o_shs and o_shs[0]["qty"] == 200 and o_shs[0]["target_vnd"] == 0
+      and o_shs[0]["in_basket"] is False, str(o_shs))
+r_ban = trim(fake_holdings({"ACB": (10000, 20000), "BID": (5000, 40000)}, 10_000_000),
+             basket_override={"ACB": 0.30, "BID": 0.30, "PC1": 0.40},
+             price_fn=lambda tk: ((30_000, None) if tk == "PC1" else c_price_fn(tk)))
+check("C6c PC1 (BANNED) trong rổ mục tiêu → bị loại, trọng số chuẩn hoá sang ACB/BID (0,5/0,5)",
+      "PC1" not in r_ban["target_weights"]
+      and abs(r_ban["target_weights"]["ACB"] - 0.5) < 1e-12
+      and any(d["ticker"] == "PC1" and "BANNED" in d["reason"]
+              for d in r_ban["basket_dropped"]), str(r_ban["target_weights"]))
+r_lot = trim(fake_holdings({"ACB": (10000, 20000), "BID": (5000, 40000)}, 10_000_000),
+             basket_override={"ACB": 0.30, "BID": 0.30, "TIN": 0.40},
+             price_fn=lambda tk: ((5_000_000, None) if tk == "TIN" else c_price_fn(tk)))
+check("C6d mã có target < 1 lô bị loại + trọng số chuẩn hoá lại (no silent cap: có ghi lý do)",
+      "TIN" not in r_lot["target_weights"]
+      and abs(r_lot["target_weights"]["BID"] - 0.5) < 1e-12
+      and any(d["ticker"] == "TIN" and "1 lô" in d["reason"] for d in r_lot["basket_dropped"]),
+      str(r_lot["basket_dropped"]))
 
 # C7. CP chưa về T+2 → không đề xuất bán quá phần sellable
 h = fake_holdings({"ACB": (10000, 20000), "BID": (5000, 40000)}, 10_000_000,
@@ -374,23 +427,17 @@ check("C7 không bán quá số CP đã về (sellable) — ràng buộc T+2",
       (not acb) or acb[0]["qty"] <= 200, str(acb))
 
 # C8. trần TỔNG/phiên (engine _etf_day_cap) chặn khi mức vượt lớn hơn trần
-r = compute_trim("SpaceX", "2026-08-05", 0.80,
-                 holdings=fake_holdings({"ACB": (10000, 20000), "BID": (5000, 40000)},
-                                        10_000_000),
-                 share_override=0.5, adv_fn=adv_ok, day_cap_override=1_000_000.0)
+r = trim(fake_holdings({"ACB": (10000, 20000), "BID": (5000, 40000)}, 10_000_000),
+         day_cap_override=1_000_000.0)
 check("C8 trần TỔNG/phiên binding → trim_total bị kẹp về trần",
       r["trim_total_vnd"] == 1_000_000.0 and r.get("day_cap_binding"),
       f"trim_total={r['trim_total_vnd']:,.0f}")
-r = compute_trim("SpaceX", "2026-08-05", 0.80,
-                 holdings=fake_holdings({"ACB": (10000, 20000)}, 10_000_000),
-                 share_override=0.5, adv_fn=adv_ok, day_cap_override=0.0)
+r = trim(fake_holdings({"ACB": (10000, 20000)}, 10_000_000), day_cap_override=0.0)
 check("C8b không đo được trần TỔNG (=0) → BLOCKED_DAYCAP, không trim",
       r["decision"] == "BLOCKED_DAYCAP" and not r["orders"], r["decision"])
 
 # C9. không dựng được danh sách account live → fail-closed
-r = compute_trim("SpaceX", "2026-08-05", 0.80,
-                 holdings=fake_holdings({"ACB": (10000, 20000)}, 10_000_000),
-                 share_override=None, adv_fn=adv_ok, day_cap_override=DAYCAP)
+r = trim(fake_holdings({"ACB": (10000, 20000)}, 10_000_000), share_override=None)
 check("C9 share tính được từ config thật (hoặc fail-closed nếu không) — không bao giờ mặc định 1.0",
       (r["decision"] != "TRIM") or (0 < r["adv_share"] <= 1.0),
       f"{r['decision']} share={r.get('adv_share')}")
