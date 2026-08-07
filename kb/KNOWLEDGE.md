@@ -92,16 +92,23 @@ giả thuyết/phản biện tinh vi/chạm production chưa có template → **
 như ladder cũ 07-06. Chi tiết đầy đủ + `--effort` per-dispatch: `MIKE.md §Model routing`. Native
 subagent dùng tham số `model` sẵn có.
 
-**Opus-drift check (item 5c KB editorial, thêm 2026-08-01, đo lần đầu 2026-08-03):** opus%
-(opus_jobs/tổng job có model) đi từ 14,3% (07-17) lên **74,2% (08-02)**, sustained ≥60% liên tục
-11 ngày (từ 07-22) — vượt ngưỡng flag của item 5c. Lấy mẫu 8 dispatch opus gần nhất (bus/jobs):
-đa số là saga kiến trúc Discord-routing 6 vòng của Wags (Q2/Q3 chính đáng — sửa cơ chế dùng
-chung toàn fleet) + R&D LAG-fidelity của Taylor (Q2 chính đáng) + `ops_autofix.sh`'s hardcoded
-`--model opus` (quyết định cấu trúc 07-17, không phải phản xạ per-dispatch) — **KHÔNG giống sự
-cố fable-drift 07-17** (lúc đó là lạm dụng thật cho việc cơ học). Kết luận: opus% cao hiện tại có
-lý do chính đáng (giai đoạn bất thường phức tạp), không phải thói quen sai — nhưng NÊN giảm về
-gần baseline sau khi saga Discord-routing đóng (round 6 xong 2026-08-02); nếu tuần tới opus% vẫn
-≥60% mà KHÔNG có 1 sự kiện lớn tương đương giải thích, đó mới là dấu hiệu thật của thói quen lệch.
+**Opus-drift check (item 5c KB editorial, thêm 2026-08-01, đo lần đầu 2026-08-03, tái đo
+2026-08-08):** opus% đi từ 14,3% (07-17) → **74,2% (08-02)** → sustained **70-76% MỖI TUẦN liên
+tục 08-02→08-07** (spend_history.csv, `opus_jobs/(sonnet+opus+fable+default)`), tuần mới nhất
+08-07 = 73,7%. Saga Discord-routing (nguyên nhân chính viện dẫn 08-03) đã đóng round 6 từ 08-02
+— nhưng opus% **KHÔNG giảm về baseline như kỳ vọng ban đầu**. Lấy mẫu 20 dispatch opus gần nhất
+(bus/jobs, tuần 08-05→08-07): thành phần chủ yếu là (a) **sự cố production thật cần fix nhanh**
+(funding-gate JIT-credit + UPCOM loan-package 08-07, khẩn cấp thị trường đang mở), (b) saga
+`coord-YYYY-MM-DD` hàng ngày của Wags (điều phối agent, đã thành thói quen lặp lại hàng ngày —
+KHÔNG còn là "sự kiện lớn bất thường" như lý giải 08-03, mà là 1 pattern MỚI: Wags coord-saga
+chạy Opus mỗi ngày kể cả khi việc chỉ là ACK/triage đơn giản), (c) R&D Taylor hợp lệ (fear-buy
+scan, rubber trend design), (d) DollarBill approval overrides theo yêu cầu user trực tiếp. Kết
+luận cập nhật: KHÔNG phải lạm dụng kiểu fable-drift 07-17 (không có việc cơ học/lookup đơn giản
+bị gắn Opus oan), nhưng **mục (b) là ứng viên downgrade thật** — nhiều dispatch Wags coord-saga
+chỉ ACK/ghi nhận trạng thái (Q1, không phải Q2/Q3) đang mặc định chạy Opus theo thói quen thừa kế
+từ giai đoạn saga phức tạp trước đó. Đề xuất cho user/Mike: xét hạ `wags_autofix.sh`'s default
+model xuống Sonnet cho nhánh ACK/triage-only, giữ Opus cho nhánh thực sự sửa code — CHƯA tự sửa
+(đây là quyết định thói quen dispatch, theo đúng nguyên tắc item 5c "không tự sửa thói quen").
 **Model mặc định của chính Mike:** đổi sang Fable 5 (2026-07-06) rồi **ĐẢO NGƯỢC LẠI Sonnet 5** (2026-07-07, user yêu cầu). Phát hiện **3 tầng config** trong bridge Discord (`ccdb-mike`): thread override (DB) > global (DB) > `.env` fallback — sửa `.env` vô tác dụng nếu DB đã có row cũ. Dọn 4 dòng rác sai format (`"Sonnet 5"`/`"sonnet 5"` có dấu cách — CLI từ chối) từng gây lỗi `/model` ở 1 thread. Đã đồng bộ cả 3 nơi.
 
 **Routing guards (2026-06-27):**
@@ -143,6 +150,18 @@ gần baseline sau khi saga Discord-routing đóng (round 6 xong 2026-08-02); n�
 - **DNSE cash account T+0 buying power (fixed `10d98e9`):** tiền bán settle T+2 nhưng `ppse` cộng vào sức mua ngay sáng cùng ngày — `availableCash` KHÔNG phản ánh; bot phải check `ppse` trước khi kết luận thiếu tiền.
 - **T+2 chỉ sellable từ phiên CHIỀU** (không phải đầu phiên sáng) — plan bán mã mới mua phải né lịch sáng đúng ngày T+2.
 - **`_publish_bot_event()`:** fire-and-forget lên Mike bus khi STEP_FAIL hoặc fill_lagging.
+
+**Domain-constraint layer — P1 (order-tier) + P0 (plan-tier funding gate), cả 2 LIVE (từ 07-29 /
+08-04):** P1 `filter_lag_rating_orders()` chặn LAG rating≥4 ở tầng ĐẶT LỆNH (vá gap gate cũ chỉ
+sống ở tầng sinh tín hiệu). P0 `check_plan_funding()` (`trading_bot/plan_funding_gate.py`, gọi
+trong `bot_execute.py` ngay trước `Executor(...)`) chặn CẢ PLAN nếu `Σ lệnh mua > sức mua thật đo
+sống` — **ACTIVE HARD BLOCK từ 2026-08-04** (không còn WARN-only shadow). **2 bug thật phát hiện
++ vá cùng tối 2026-08-07** (Mafee + Taylor dispatch song song, quant-skeptic CONFIRMED cả 2): (1)
+UPCOM (vd DRI) đi ra `loan_package_id=None` → rơi về gói mainboard-only → WAIT_CASH giả vô hạn dù
+thừa tiền, fix bằng resolve gói vay theo MÃ (commit `c22bd1c`); (2) gate không cộng tiền lệnh BÁN
+cùng plan chạy trước (cơ chế L2 JIT-unpark) → chặn oan plan tự cấp vốn đủ (ca thật: ZaloPay 08-07
+chặn sạch 0/9 lệnh dù 8 lệnh bán PARK thừa nuôi 1 lệnh mua), fix bằng tín dụng JIT theo tỉ lệ nhu
+cầu (commit `087a3d0`). Chi tiết đầy đủ: `kb/current_ops.md` §Domain-constraint layer.
 
 **`excluded_tickers` — cơ chế tổng quát cho account có vị thế legacy (2026-07-06):** khai báo trong config (`secrets/trading_bot_accounts.json`), enforce ở MỘT chỗ duy nhất (`trading_bot.plan.filter_excluded_tickers()`, gọi ngay sau `load_plan()` — không phụ thuộc plan generator nhớ đúng). Size strategy theo `active_nav` (= total NAV − market_value(excluded)), tính bằng `bin/compute_active_nav.py --account <label>` (đọc broker live, không phụ thuộc journal nội bộ). Dùng cho ZaloPay/DGC — xem §5.
 
@@ -257,6 +276,7 @@ gần baseline sau khi saga Discord-routing đóng (round 6 xong 2026-08-02); n�
 | 2026-07-09 | T+1 plan giá lệch dùng BQ stale | BQ chỉ sync qua đêm, script chạy trước đó đọc "hôm nay" = hôm qua | Bright-line: same-day PHẢI dùng DNSE API | coding_guidelines.md §6 — cấu trúc, không phải thỉnh thoảng |
 | 2026-07-10 | DollarBill tính sai ngày T+1 (thứ Bảy thay vì thứ Hai) | Giao phép tính lịch tất định cho LLM tự suy luận giữa task khác | Fix commit e3001fa, dùng `next_trading_day()` có sẵn | Giá trị tính tất định được → tính bằng code, truyền literal, không giao LLM |
 | 2026-07-10 | DT5G BULL-commit giả (EW-leg stale, xem §2) | Reorg 06-21 path writer/reader lệch, không freshness-check nội bộ chain | Fix commit 498c3a6, publish chờ cron/manual | Chain nhiều bước cần post-chain mtime assertion generic, không phải 1-1 patch |
+| 2026-08-07 | P0 funding-gate chặn oan plan ZaloPay (0/9 lệnh dù thừa tiền) | UPCOM DRI loan_package_id=None + gate không cộng tín dụng lệnh bán JIT cùng plan | commit `c22bd1c` (Mafee) + `087a3d0` (Taylor), quant-skeptic CONFIRMED cả 2 | 2 dispatch sửa CÙNG file không cách ly (không worktree) trong 1 phút — nên tách file/chạy tuần tự khi trùng |
 
 **Pattern đang mở (chưa đóng hẳn):** "code âm thầm đọc/dùng dữ liệu chưa sẵn sàng, che giấu bởi tolerance/giả định lịch trình rộng" — đã vá 1 lát cắt hẹp (BQ-vs-DNSE, 07-09) và 1 lát cắt khác lộ ra ngay sau đó dưới dạng khác (DT5G cron-order + chain freshness, 07-10). Bus question `retro-pattern-recurring-dataprovenance-2` đề xuất tổng quát hoá quy tắc freshness-check cho MỌI cặp pipeline producer→consumer nội bộ — **vẫn chờ user/Mike xác nhận hướng**, chưa tới ngưỡng escalate mức cao hơn.
 

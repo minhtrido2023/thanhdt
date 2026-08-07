@@ -59,6 +59,16 @@ nhánh này là báo động giả, mà chặn oan có phí thật (lỡ deadlin
 Selfcheck: `plan_funding_gate_selfcheck.py`. Thiết kế + 3 replay sự cố thật:
 `agents/Taylor/research/plan_funding_gate_20260804.md`.
 
+**2 bug thật đã vá 2026-08-07 (đọc trước khi đụng lại `plan_funding_gate.py`/`executor.py`):**
+(a) UPCOM (vd DRI) ra `loan_package_id=None` → rơi về gói mainboard-only → cả precheck lẫn
+`place_order` reject → `WAIT_CASH` giả vô hạn dù thừa tiền, trông y hệt thiếu tiền thật. Fix:
+luôn giải gói vay theo MÃ (tái dùng `_resolve_loan_package_id`), commit `c22bd1c`. (b) Gate không
+cộng tiền lệnh BÁN cùng plan chạy trước (L2 JIT-unpark) → chặn oan plan tự cấp vốn đủ (ca thật
+08-07: ZaloPay bị chặn sạch 0/9 lệnh dù 8 lệnh bán PARK 98,68tr thừa nuôi 1 lệnh mua 23,60tr).
+Fix: cộng tín dụng JIT theo tỉ lệ nhu cầu từng nhóm gói vay, chỉ tính lệnh bán priority < min
+priority mọi lệnh mua, commit `087a3d0`. Cả 2 quant-skeptic CONFIRMED. ⚠️ 2 dispatch (Mafee+Taylor)
+sửa CÙNG file trong 1 phút không cách ly — lần sau tách file/chạy tuần tự khi trùng.
+
 ## excluded_tickers — enforcement
 `trading_bot.plan.filter_excluded_tickers()`, gọi NGAY sau `load_plan()` trong `bot_execute.py`
 — áp dụng bất kể plan generator có nhớ loại trừ hay không. Đọc từ
