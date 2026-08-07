@@ -1,0 +1,1598 @@
+{
+  "plan_date": "2026-08-07",
+  "account": "SpaceX",
+  "broker": "dnse",
+  "account_no": "0002023347",
+  "mode": "live",
+  "strategy": "V2.4",
+  "strategy_version": "2.4",
+  "state": 3,
+  "state_name": "NEUTRAL",
+  "state_source": "deploy_golive_dt5g_v4/golive_state_today.json (tav2_bq.vnindex_5state_dt5g_live qua get_gated_state)",
+  "state_note": "DT5G=3 NEUTRAL, as_of 2026-08-06, source=DT5G_macro, bq_publish_ok=true, published_at 2026-08-06T19:01:16.",
+  "dt4_gate_line": "base_state_dt4=3 == macro_state_dt5g=3 — macro cap KHÔNG binding.",
+  "requires_user_approval": true,
+  "approved_by": "user (John) Discord, duyet mua DRI + ban PARK JIT tai tro",
+  "approved_at": "2026-08-07T12:36:42+07:00",
+  "signal_date": "2026-08-06",
+  "recommendations_file": "deploy_golive_dt5g_v4/out/golive_v23_recommendations_2026-08-06.csv",
+  "regeneration_note": "Bản 2026-08-07 ~12:2x ICT — THAY lệnh MUA SSI bằng MUA DRI (discretionary override của user John qua Mike) VÀ MERGE 3-trong-1 vào orders[] thật (L1 park_trim + L2 jit_unpark + lệnh mua). Job DollarBill_20260807_050844. L2 đã tính lại cho giá trị lệnh DRI. approved_by để None — chờ user duyệt.",
+  "nav_basis": {
+    "source": "DNSE API live 2026-08-07 ~11:5x ICT — bin/compute_active_nav.py (positions + balances live, KHÔNG dùng BQ)",
+    "nav_date": "2026-08-07",
+    "available_cash_vnd": 4821143.0,
+    "total_stock_value_vnd": 936275000.0,
+    "excluded_value_vnd": 0.0,
+    "total_nav_vnd": 941096143.0,
+    "active_nav_vnd": 951711143.0,
+    "active_nav_vnd_script_raw": 941096143.0,
+    "active_nav_price_note": "⚠️ compute_active_nav.py chạy GIỮA PHIÊN (~11:5x ICT) định giá vị thế bằng giá BQ T-1 (price_source='bq_close_stale') vì đường giá DNSE của nó dùng close_price(), endpoint này trả closePrice=0 khi phiên chưa đóng. Theo luật bright-line §6 (same-day PHẢI đọc DNSE), active_nav dùng để sizing ở đây được TÍNH LẠI bằng DNSE latest_trade: cổ phiếu (không tính excluded) 936,275,000đ (BQ) → 946,890,000đ (live), lệch +10,615,000đ (+1.13%). Số lượng cổ phiếu và cash giữ NGUYÊN từ script.",
+    "offbook_assets_vnd": 0,
+    "active_nav_note": "SpaceX không có excluded_tickers. Trứng vàng off-book = 0 (đã rút hết vĩnh viễn)."
+  },
+  "lag_analysis": {
+    "signal_date": "2026-08-06",
+    "source_script": "mike/bin/filter_lag_entry_window.py --account SpaceX --plan-date 2026-08-07 --signal-date 2026-08-06 (chạy trực tiếp cho plan này, KHÔNG tự lọc bằng mắt)",
+    "calendar_check": {
+      "ok": true,
+      "signal_date": "2026-08-06",
+      "plan_date": "2026-08-07",
+      "expected_plan_date": "2026-08-07",
+      "reason": null
+    },
+    "due_today_count": 6,
+    "due_today": [
+      {
+        "ticker": "PGS",
+        "play_type": "LAG_HI",
+        "entry_window_date": "2026-08-07",
+        "weight_pct": "10.0",
+        "floor_fail": false,
+        "dd_red_flags": [
+          "THANH_KHOAN_CHET",
+          "NGOAI_UNIVERSE"
+        ],
+        "due_diligence_raw": "DD PGS [LAG] (data 2026-08-05): 🔴 thanh khoản ~0 (ADV3T 6 tr/phiên) — NGOÀI mô hình backtest · 🔴 NGOÀI universe_pit · nền YoY dương (surprise không phồng do nền âm) | FA: ROE5Y 10.4% · ROE_Min3Y 10.5% · FSCORE 9 · D/E 1.66 · PE 23.73 | 🟢 DCF: CHEAP (giá trị hợp lý ~71,594đ vs giá 64,500đ, MoS +9.9%, không robust) | 🔴 DD cờ đỏ: THANH_KHOAN_CHET, NGOAI_UNIVERSE ⚠ cần dd_override_reason",
+        "decision": "SKIP",
+        "decision_why": "DD cờ đỏ THANH_KHOAN_CHET (ADV3T 6 tr/phiên) + NGOAI_UNIVERSE — cần dd_override_reason, KHÔNG có. Cùng loại với IVS/TMG đã bị user loại 07-21."
+      },
+      {
+        "ticker": "PHR",
+        "play_type": "LAG_HI",
+        "entry_window_date": "2026-08-07",
+        "weight_pct": "10.0",
+        "floor_fail": false,
+        "dd_red_flags": [],
+        "due_diligence_raw": "DD PHR [LAG] (data 2026-08-05): thanh khoản OK (ADV3T 18.77 tỷ/phiên) · nền YoY dương (surprise không phồng do nền âm) | FA: ROE5Y 17.9% · ROE_Min3Y 12.3% · FSCORE 5 · D/E 0.43 · PE 8.43 | 🔴 DCF: RICH (giá trị hợp lý ~47,948đ vs giá 58,200đ, MoS -21.4%, robust) ⚠ cần dcf_override_reason",
+        "decision": "SKIP",
+        "decision_why": "DCF RICH (hợp lý ~47,948đ vs giá 58,200đ, MoS -21.4%, robust) — cần dcf_override_reason, KHÔNG có. Thêm: PHR thuộc nhóm cao su đang trong WATCH ngưỡng RSS3 2,26 USD/kg."
+      },
+      {
+        "ticker": "SSI",
+        "play_type": "LAG_LO",
+        "entry_window_date": "2026-08-07",
+        "weight_pct": "8.0",
+        "floor_fail": true,
+        "dd_red_flags": [],
+        "due_diligence_raw": "DD SSI [LAG] (data 2026-08-05): thanh khoản OK (ADV3T 371.72 tỷ/phiên) · ⚠ cờ chất lượng FLOOR_FAIL · nền YoY dương (surprise không phồng do nền âm) | FA: ROE5Y 13.0% · ROE_Min3Y 10.1% · FSCORE 5 · D/E 1.37 · PE 12.71 | DCF: NOT_COMPUTED (financial_sector_excluded) → thay thế: 🟢 P/B band + ROE (chứng khoán): P/B 1.50 (band cheap <1.8), ROE_TTM 13.5% (cần >8%) — CHEAP [framework (screen gate, KHÔNG phải giá trị hợp lý)]",
+        "decision": "BUY",
+        "decision_why": "sector_valuation_lens: KHONG_SKIP_VI_FLOOR_FAIL — P/B band + ROE (chứng khoán) CHEAP (P/B 1.50 < band 1.8, ROE_TTM 13.5% > 8%). FLOOR_FAIL một mình KHÔNG phải gate cứng cho LAG. Thanh khoản rất tốt (ADV3T 371.72 tỷ)."
+      },
+      {
+        "ticker": "TVN",
+        "play_type": "LAG_HI",
+        "entry_window_date": "2026-08-07",
+        "weight_pct": "10.0",
+        "floor_fail": true,
+        "dd_red_flags": [],
+        "due_diligence_raw": "DD TVN [LAG] (data 2026-08-05): thanh khoản OK (ADV3T 5.79 tỷ/phiên) · ⚠ cờ chất lượng FLOOR_FAIL · nền YoY dương (surprise không phồng do nền âm) | FA: ROE5Y 1.4% · ROE_Min3Y -4.1% · FSCORE 6 · D/E 1.67 · PE 7.84 | 🔴 DCF: RICH (giá trị hợp lý ~1,764đ vs giá 9,100đ, MoS -415.8%, robust) ⚠ cần dcf_override_reason",
+        "decision": "SKIP",
+        "decision_why": "sector_valuation_lens: SKIP_CO_CAN_CU — DCF RICH (hợp lý ~1,764đ vs giá 9,100đ, MoS -415.8%, robust). ROE5Y 1.4%, ROE_Min3Y -4.1%."
+      },
+      {
+        "ticker": "VNF",
+        "play_type": "LAG_HI",
+        "entry_window_date": "2026-08-07",
+        "weight_pct": "10.0",
+        "floor_fail": false,
+        "dd_red_flags": [
+          "THANH_KHOAN_CHET",
+          "NGOAI_UNIVERSE"
+        ],
+        "due_diligence_raw": "DD VNF [LAG] (data 2026-08-05): 🔴 thanh khoản ~0 (ADV3T 23 tr/phiên) — NGOÀI mô hình backtest · 🔴 NGOÀI universe_pit · nền YoY dương (surprise không phồng do nền âm) | FA: ROE5Y 7.1% · ROE_Min3Y 1.0% · FSCORE 6 · D/E 0.36 · PE 6.20 | 🟢 DCF: CHEAP (giá trị hợp lý ~38,656đ vs giá 13,000đ, MoS +66.4%, robust) | 🔴 DD cờ đỏ: THANH_KHOAN_CHET, NGOAI_UNIVERSE ⚠ cần dd_override_reason",
+        "decision": "SKIP",
+        "decision_why": "DD cờ đỏ THANH_KHOAN_CHET (ADV3T 23 tr/phiên) + NGOAI_UNIVERSE — cần dd_override_reason, KHÔNG có."
+      },
+      {
+        "ticker": "VSI",
+        "play_type": "LAG_LO",
+        "entry_window_date": "2026-08-07",
+        "weight_pct": "8.0",
+        "floor_fail": false,
+        "dd_red_flags": [
+          "THANH_KHOAN_CHET",
+          "NGOAI_UNIVERSE"
+        ],
+        "due_diligence_raw": "DD VSI [LAG] (data 2026-08-05): 🔴 thanh khoản ~0 (ADV3T 6 tr/phiên) — NGOÀI mô hình backtest · 🔴 NGOÀI universe_pit · nền YoY dương (surprise không phồng do nền âm) | FA: ROE5Y 14.4% · ROE_Min3Y 13.2% · FSCORE 7 · D/E 1.17 · PE 5.08 | 🟢 DCF: CHEAP (giá trị hợp lý ~103,146đ vs giá 17,150đ, MoS +83.4%, robust) | 🔴 DD cờ đỏ: THANH_KHOAN_CHET, NGOAI_UNIVERSE ⚠ cần dd_override_reason",
+        "decision": "SKIP",
+        "decision_why": "DD cờ đỏ THANH_KHOAN_CHET (ADV3T 6 tr/phiên) + NGOAI_UNIVERSE — cần dd_override_reason, KHÔNG có."
+      }
+    ],
+    "upcoming_next_plans": [],
+    "window_passed_count": 18,
+    "window_passed_note": "18 mã đã QUA cửa sổ entry tính tới plan_date 08-07 (gồm DRI entry 08-06, POW, SCL, APF, DCM, GVR, BSR, ...) — KHÔNG đưa vào plan. Đây chính là lý do plan này không có DRI: cửa sổ của nó đã đóng, không phải do bị loại vì chất lượng.",
+    "sector_lens": {
+      "source_script": "mike/bin/sector_valuation_lens.py --floor-fail-only --json",
+      "results": [
+        {
+          "ticker": "SSI",
+          "book": "LAG",
+          "status": "UPCOMING T+1 phiên tới",
+          "floor_fail": true,
+          "valuation_axis_used": "alt_lens",
+          "lens": "P/B band + ROE (chứng khoán)",
+          "verdict": "CHEAP",
+          "detail": "P/B 1.50 (band cheap <1.8), ROE_TTM 13.5% (cần >8%)",
+          "confidence": "framework (screen gate, KHÔNG phải giá trị hợp lý)",
+          "dcf": {
+            "verdict": "NOT_COMPUTED",
+            "reason": "financial_sector_excluded"
+          },
+          "decision": "KHONG_SKIP_VI_FLOOR_FAIL",
+          "decision_why": "lăng kính ngành ỦNG HỘ — FLOOR_FAIL một mình KHÔNG đủ để loại mã LAG",
+          "source": "csv:deploy_golive_dt5g_v4/out/golive_v23_recommendations_2026-08-06.csv"
+        },
+        {
+          "ticker": "TVN",
+          "book": "LAG",
+          "status": "UPCOMING T+1 phiên tới",
+          "floor_fail": true,
+          "valuation_axis_used": "DCF",
+          "lens": "DCF (dcf_valuation)",
+          "verdict": "RICH",
+          "detail": "giá trị hợp lý ~1,764đ vs giá 9,100đ, MoS -415.8%, robust",
+          "confidence": "DCF chính quy",
+          "dcf": {
+            "verdict": "RICH",
+            "reason": "giá trị hợp lý ~1,764đ vs giá 9,100đ, MoS -415.8%, robust"
+          },
+          "decision": "SKIP_CO_CAN_CU",
+          "decision_why": "DCF chạy được (RICH) — dùng thẳng DCF, không cần lăng kính thay thế",
+          "source": "csv:deploy_golive_dt5g_v4/out/golive_v23_recommendations_2026-08-06.csv"
+        }
+      ]
+    }
+  },
+  "bal_analysis": {
+    "note": "Không có ứng viên BAL mới trong CSV recommend signal_date 2026-08-06 (book BAL rỗng; CSV chỉ có LAG + PARK_ADVISORY). 0 lệnh BAL."
+  },
+  "capit_sizing": {
+    "note": "golive_v23_status.json: capit_signal_today=false. Vị thế CAPIT đang giữ (SpaceX: PVT 3.500cp; episode CAPIT-2026-07-20) là stop-exempt + slot-exempt — KHÔNG sinh lệnh bán, KHÔNG tính vào slot BAL/LAG, KHÔNG nằm trong L1/L2 (chỉ sleeve PARK)."
+  },
+  "park_trim_proposal": {
+    "source": "mike/bin/compute_park_trim.py (công thức MỚI §D1, user John duyệt 2026-08-07, job Taylor_20260807_020402; selfcheck 39/39 PASS chạy lại trong job này)",
+    "asof": "2026-08-07",
+    "decision": "TRIM",
+    "target_park": 0.8,
+    "park_mv_vnd": 638410000.0,
+    "pool_vnd": 643231143.0,
+    "target_park_vnd": 514584914.40000004,
+    "delta_vnd": -123825085.59999996,
+    "structural_excess_vnd": 194992791.43588552,
+    "trim_total_vnd": 194992791.43588552,
+    "trim_proposed_vnd": 175890000.0,
+    "trim_shortfall_vnd": 19102791.43588552,
+    "park_mv_after_vnd": 462520000.0,
+    "park_pct_after": 0.7190572238819599,
+    "underpark_after_vnd": 52064914.400000036,
+    "basket_rebal_date": "2026-08-05",
+    "basket_feasible_n": 20,
+    "basket_n": 30,
+    "risk_dial_override": null,
+    "orders": [
+      {
+        "ticker": "ACB",
+        "side": "sell",
+        "qty": 300,
+        "ref_price": 22150.0,
+        "value_vnd": 6645000.0,
+        "book": "PARK",
+        "play_type": "PARK_TRIM",
+        "weight_target": 0.04974773470229371,
+        "weight_in_park": 0.05204335771682774,
+        "mv_vnd": 33225000.0,
+        "target_vnd": 25599433.80337372,
+        "in_basket": true,
+        "want_vnd": 7625566.1966262795,
+        "adv_cap_vnd": 34537024240.0,
+        "adv_capped": false,
+        "adv_vnd": 345370242400.0,
+        "adv_data_date": "2026-08-06",
+        "sellable": 1500,
+        "fifo_lots": [
+          {
+            "entry_date": "2026-07-01",
+            "qty": 300,
+            "cost_price": 22650.0,
+            "source": "bootstrap"
+          }
+        ],
+        "reason": "L1 park-sync (rổ 2026-08-05): đang 33.2tr vs target 25.6tr (w' 4.97% × park-target 514.6tr)"
+      },
+      {
+        "ticker": "BID",
+        "side": "sell",
+        "qty": 400,
+        "ref_price": 37900.0,
+        "value_vnd": 15160000.0,
+        "book": "PARK",
+        "play_type": "PARK_TRIM",
+        "weight_target": 0.10387700132027669,
+        "weight_in_park": 0.1127958521952977,
+        "mv_vnd": 72010000.0,
+        "target_vnd": 53453537.83252327,
+        "in_basket": true,
+        "want_vnd": 18556462.16747673,
+        "adv_cap_vnd": 14802726175.0,
+        "adv_capped": false,
+        "adv_vnd": 148027261750.0,
+        "adv_data_date": "2026-08-06",
+        "sellable": 1900,
+        "fifo_lots": [
+          {
+            "entry_date": "2026-07-02",
+            "qty": 400,
+            "cost_price": 42991.3,
+            "source": "bootstrap"
+          }
+        ],
+        "reason": "L1 park-sync (rổ 2026-08-05): đang 72.0tr vs target 53.5tr (w' 10.39% × park-target 514.6tr)"
+      },
+      {
+        "ticker": "CTG",
+        "side": "sell",
+        "qty": 700,
+        "ref_price": 31350.0,
+        "value_vnd": 21945000.0,
+        "book": "PARK",
+        "play_type": "PARK_TRIM",
+        "weight_target": 0.09444081452034275,
+        "weight_in_park": 0.11294465938816747,
+        "mv_vnd": 72105000.0,
+        "target_vnd": 48597818.45581686,
+        "in_basket": true,
+        "want_vnd": 23507181.544183142,
+        "adv_cap_vnd": 22881618870.0,
+        "adv_capped": false,
+        "adv_vnd": 228816188700.0,
+        "adv_data_date": "2026-08-06",
+        "sellable": 2300,
+        "fifo_lots": [
+          {
+            "entry_date": "2026-07-02",
+            "qty": 700,
+            "cost_price": 34476.79,
+            "source": "bootstrap"
+          }
+        ],
+        "reason": "L1 park-sync (rổ 2026-08-05): đang 72.1tr vs target 48.6tr (w' 9.44% × park-target 514.6tr)"
+      },
+      {
+        "ticker": "HDB",
+        "side": "sell",
+        "qty": 500,
+        "ref_price": 26550.0,
+        "value_vnd": 13275000.0,
+        "book": "PARK",
+        "play_type": "PARK_TRIM",
+        "weight_target": 0.05073352744482314,
+        "weight_in_park": 0.06238154164251813,
+        "mv_vnd": 39825000.0,
+        "target_vnd": 26106707.877404366,
+        "in_basket": true,
+        "want_vnd": 13718292.122595634,
+        "adv_cap_vnd": 25380207000.0,
+        "adv_capped": false,
+        "adv_vnd": 253802070000.0,
+        "adv_data_date": "2026-08-06",
+        "sellable": 1500,
+        "fifo_lots": [
+          {
+            "entry_date": "2026-07-02",
+            "qty": 500,
+            "cost_price": 26675.0,
+            "source": "bootstrap"
+          }
+        ],
+        "reason": "L1 park-sync (rổ 2026-08-05): đang 39.8tr vs target 26.1tr (w' 5.07% × park-target 514.6tr)"
+      },
+      {
+        "ticker": "LPB",
+        "side": "sell",
+        "qty": 300,
+        "ref_price": 52000.0,
+        "value_vnd": 15600000.0,
+        "book": "PARK",
+        "play_type": "PARK_TRIM",
+        "weight_target": 0.06044394952824259,
+        "weight_in_park": 0.0733071223821682,
+        "mv_vnd": 46800000.0,
+        "target_vnd": 31103544.59398864,
+        "in_basket": true,
+        "want_vnd": 15696455.406011362,
+        "adv_cap_vnd": 8894340000.0,
+        "adv_capped": false,
+        "adv_vnd": 88943400000.0,
+        "adv_data_date": "2026-08-06",
+        "sellable": 900,
+        "fifo_lots": [
+          {
+            "entry_date": "2026-07-15",
+            "qty": 300,
+            "cost_price": 51466.67,
+            "source": "bootstrap"
+          }
+        ],
+        "reason": "L1 park-sync (rổ 2026-08-05): đang 46.8tr vs target 31.1tr (w' 6.04% × park-target 514.6tr)"
+      },
+      {
+        "ticker": "MBB",
+        "side": "sell",
+        "qty": 700,
+        "ref_price": 23900.0,
+        "value_vnd": 16730000.0,
+        "book": "PARK",
+        "play_type": "PARK_TRIM",
+        "weight_target": 0.07472599843976745,
+        "weight_in_park": 0.08984821666327282,
+        "mv_vnd": 57360000.0,
+        "target_vnd": 38452871.51058227,
+        "in_basket": true,
+        "want_vnd": 18907128.48941773,
+        "adv_cap_vnd": 30181298815.0,
+        "adv_capped": false,
+        "adv_vnd": 301812988150.0,
+        "adv_data_date": "2026-08-06",
+        "sellable": 2400,
+        "fifo_lots": [
+          {
+            "entry_date": "2026-07-02",
+            "qty": 700,
+            "cost_price": 25850.0,
+            "source": "bootstrap"
+          }
+        ],
+        "reason": "L1 park-sync (rổ 2026-08-05): đang 57.4tr vs target 38.5tr (w' 7.47% × park-target 514.6tr)"
+      },
+      {
+        "ticker": "SHB",
+        "side": "sell",
+        "qty": 400,
+        "ref_price": 11800.0,
+        "value_vnd": 4720000.0,
+        "book": "PARK",
+        "play_type": "PARK_TRIM",
+        "weight_target": 0.02407245628596092,
+        "weight_in_park": 0.02772512961889695,
+        "mv_vnd": 17700000.0,
+        "target_vnd": 12387322.857308943,
+        "in_basket": true,
+        "want_vnd": 5312677.142691057,
+        "adv_cap_vnd": 54938676000.0,
+        "adv_capped": false,
+        "adv_vnd": 549386760000.0,
+        "adv_data_date": "2026-08-06",
+        "sellable": 1500,
+        "fifo_lots": [
+          {
+            "entry_date": "2026-07-01",
+            "qty": 400,
+            "cost_price": 13550.0,
+            "source": "bootstrap"
+          }
+        ],
+        "reason": "L1 park-sync (rổ 2026-08-05): đang 17.7tr vs target 12.4tr (w' 2.41% × park-target 514.6tr)"
+      },
+      {
+        "ticker": "SHS",
+        "side": "sell",
+        "qty": 200,
+        "ref_price": 15700.0,
+        "value_vnd": 3140000.0,
+        "book": "PARK",
+        "play_type": "PARK_TRIM",
+        "weight_target": 0.0,
+        "weight_in_park": 0.004918469322222396,
+        "mv_vnd": 3140000.0,
+        "target_vnd": 0.0,
+        "in_basket": false,
+        "want_vnd": 3140000.0,
+        "adv_cap_vnd": 19196861000.0,
+        "adv_capped": false,
+        "adv_vnd": 191968610000.0,
+        "adv_data_date": "2026-08-06",
+        "sellable": 200,
+        "fifo_lots": [
+          {
+            "entry_date": "2026-07-02",
+            "qty": 200,
+            "cost_price": 18900.0,
+            "source": "bootstrap"
+          }
+        ],
+        "reason": "L1 park-sync (rổ 2026-08-05): đang 3.1tr vs target 0.0tr (NGOÀI rổ khả thi ⇒ target 0, bán sạch)"
+      },
+      {
+        "ticker": "TCB",
+        "side": "sell",
+        "qty": 500,
+        "ref_price": 29200.0,
+        "value_vnd": 14600000.0,
+        "book": "PARK",
+        "play_type": "PARK_TRIM",
+        "weight_target": 0.08021278164950445,
+        "weight_in_park": 0.091477263827321,
+        "mv_vnd": 58400000.0,
+        "target_vnd": 41276287.37889614,
+        "in_basket": true,
+        "want_vnd": 17123712.62110386,
+        "adv_cap_vnd": 31491032000.0,
+        "adv_capped": false,
+        "adv_vnd": 314910320000.0,
+        "adv_data_date": "2026-08-06",
+        "sellable": 2000,
+        "fifo_lots": [
+          {
+            "entry_date": "2026-07-01",
+            "qty": 500,
+            "cost_price": 33900.0,
+            "source": "bootstrap"
+          }
+        ],
+        "reason": "L1 park-sync (rổ 2026-08-05): đang 58.4tr vs target 41.3tr (w' 8.02% × park-target 514.6tr)"
+      },
+      {
+        "ticker": "TPB",
+        "side": "sell",
+        "qty": 200,
+        "ref_price": 14500.0,
+        "value_vnd": 2900000.0,
+        "book": "PARK",
+        "play_type": "PARK_TRIM",
+        "weight_target": 0.015621023458543208,
+        "weight_in_park": 0.0181701414451528,
+        "mv_vnd": 11600000.0,
+        "target_vnd": 8038343.019254849,
+        "in_basket": true,
+        "want_vnd": 3561656.9807451507,
+        "adv_cap_vnd": 11749930000.0,
+        "adv_capped": false,
+        "adv_vnd": 117499300000.0,
+        "adv_data_date": "2026-08-06",
+        "sellable": 800,
+        "fifo_lots": [
+          {
+            "entry_date": "2026-07-02",
+            "qty": 200,
+            "cost_price": 16800.0,
+            "source": "bootstrap"
+          }
+        ],
+        "reason": "L1 park-sync (rổ 2026-08-05): đang 11.6tr vs target 8.0tr (w' 1.56% × park-target 514.6tr)"
+      },
+      {
+        "ticker": "VCB",
+        "side": "sell",
+        "qty": 300,
+        "ref_price": 59000.0,
+        "value_vnd": 17700000.0,
+        "book": "PARK",
+        "play_type": "PARK_TRIM",
+        "weight_target": 0.10387700132027669,
+        "weight_in_park": 0.12014222834855344,
+        "mv_vnd": 76700000.0,
+        "target_vnd": 53453537.83252327,
+        "in_basket": true,
+        "want_vnd": 23246462.16747673,
+        "adv_cap_vnd": 24724808450.0,
+        "adv_capped": false,
+        "adv_vnd": 247248084500.0,
+        "adv_data_date": "2026-08-06",
+        "sellable": 1300,
+        "fifo_lots": [
+          {
+            "entry_date": "2026-07-01",
+            "qty": 300,
+            "cost_price": 62300.0,
+            "source": "bootstrap"
+          }
+        ],
+        "reason": "L1 park-sync (rổ 2026-08-05): đang 76.7tr vs target 53.5tr (w' 10.39% × park-target 514.6tr)"
+      },
+      {
+        "ticker": "VHM",
+        "side": "sell",
+        "qty": 300,
+        "ref_price": 77100.0,
+        "value_vnd": 23130000.0,
+        "book": "PARK",
+        "play_type": "PARK_TRIM",
+        "weight_target": 0.10387700132027669,
+        "weight_in_park": 0.12076878495011042,
+        "mv_vnd": 77100000.0,
+        "target_vnd": 53453537.83252327,
+        "in_basket": true,
+        "want_vnd": 23646462.16747673,
+        "adv_cap_vnd": 35426042925.0,
+        "adv_capped": false,
+        "adv_vnd": 354260429250.0,
+        "adv_data_date": "2026-08-06",
+        "sellable": 500,
+        "fifo_lots": [
+          {
+            "entry_date": "2026-07-01",
+            "qty": 300,
+            "cost_price": 74900.0,
+            "source": "bootstrap"
+          }
+        ],
+        "reason": "L1 park-sync (rổ 2026-08-05): đang 77.1tr vs target 53.5tr (w' 10.39% × park-target 514.6tr)"
+      },
+      {
+        "ticker": "VIX",
+        "side": "sell",
+        "qty": 200,
+        "ref_price": 13700.0,
+        "value_vnd": 2740000.0,
+        "book": "PARK",
+        "play_type": "PARK_TRIM",
+        "weight_target": 0.013095773556447282,
+        "weight_in_park": 0.015021694522328911,
+        "mv_vnd": 9590000.0,
+        "target_vnd": 6738887.514546209,
+        "in_basket": true,
+        "want_vnd": 2851112.485453791,
+        "adv_cap_vnd": 47787723500.0,
+        "adv_capped": false,
+        "adv_vnd": 477877235000.0,
+        "adv_data_date": "2026-08-06",
+        "sellable": 700,
+        "fifo_lots": [
+          {
+            "entry_date": "2026-07-01",
+            "qty": 200,
+            "cost_price": 17000.0,
+            "source": "bootstrap"
+          }
+        ],
+        "reason": "L1 park-sync (rổ 2026-08-05): đang 9.6tr vs target 6.7tr (w' 1.31% × park-target 514.6tr)"
+      },
+      {
+        "ticker": "VPB",
+        "side": "sell",
+        "qty": 700,
+        "ref_price": 25150.0,
+        "value_vnd": 17605000.0,
+        "book": "PARK",
+        "play_type": "PARK_TRIM",
+        "weight_target": 0.07723774433169174,
+        "weight_in_park": 0.09060791654266068,
+        "mv_vnd": 57845000.0,
+        "target_vnd": 39745378.055372685,
+        "in_basket": true,
+        "want_vnd": 18099621.944627315,
+        "adv_cap_vnd": 32011297250.0,
+        "adv_capped": false,
+        "adv_vnd": 320112972500.0,
+        "adv_data_date": "2026-08-06",
+        "sellable": 2300,
+        "fifo_lots": [
+          {
+            "entry_date": "2026-07-02",
+            "qty": 700,
+            "cost_price": 27914.29,
+            "source": "bootstrap"
+          }
+        ],
+        "reason": "L1 park-sync (rổ 2026-08-05): đang 57.8tr vs target 39.7tr (w' 7.72% × park-target 514.6tr)"
+      }
+    ],
+    "blocked": [],
+    "notes": [
+      "rổ mục tiêu kỳ 2026-08-05: 20/30 mã khả thi, bỏ 10 mã (Σ 3.73% trọng số) — trọng số đã CHUẨN HOÁ LẠI trên tập khả thi: DCM 0.61% (target 3,123,530đ < 1 lô (100cp × 31,700đ)); DDV 0.10% (target 530,537đ < 1 lô (100cp × 19,100đ)); DGC 0.57% (target 2,912,551đ < 1 lô (100cp × 44,050đ)); HAH 0.32% (target 1,639,982đ < 1 lô (100cp × 46,450đ)); IDC 0.51% (target 2,605,343đ < 1 lô (100cp × 33,600đ)); PNJ 0.71% (target 3,667,961đ < 1 lô (100cp × 36,800đ)); PVT 0.35% (target 1,789,212đ < 1 lô (100cp × 18,300đ)); TCM 0.07% (target 373,589đ < 1 lô (100cp × 16,650đ)); TNG 0.09% (target 443,058đ < 1 lô (100cp × 17,100đ)); VHC 0.41% (target 2,119,061đ < 1 lô (100cp × 53,000đ))",
+      "⚠️ SAU KHI BÁN, PARK = 462.5tr = 71.9% pool, DƯỚI target 80% (514.6tr) 52.1tr. Đúng thiết kế P1 (sell-only): phần thiếu là trọng số của các mã trong rổ mà ta CHƯA MUA — nó chỉ đóng lại khi đường MUA chạy (P2 chưa có code; hiện là hàng PARK_ADVISORY do người quyết định). CHÉP dòng này vào notes plan."
+    ],
+    "timing_note": "Plan tạo bù giữa phiên — các lệnh bán này thực thi phiên chiều 13:00–14:45 hôm nay.",
+    "_merged_into_orders": "✅ ĐÃ MERGE vào orders[] của plan này (priority 0). Giữ key này làm NGUỒN KIỂM TOÁN — KHÔNG thực thi riêng, sẽ bán 2 lần."
+  },
+  "cash_planning": {
+    "available_cash_vnd": 4821143.0,
+    "discipline_check": "Câu hỏi bắt buộc: tổng orders[] MUA có ≤ sức mua thực KHÔNG giả định gì thêm? MUA = 45,884,388đ. Nguồn tiền = cash 4,821,143đ + tiền BÁN PARK ròng 217,726,583đ (lệnh bán nằm NGAY TRONG orders[] này, priority 0, chạy trước) = 222,547,726đ ≥ 45,884,388đ ✅. KHÔNG có field funding_required, KHÔNG có giả định user nạp thêm tiền — 100% nguồn là bán tài sản ĐANG CÓ.",
+    "funding_source": "Bán PARK trong cùng plan (L1 tuân thủ trần + L2 tài trợ), đã merge vào orders[] priority 0.",
+    "cash_end_after_all_vnd": 176663338.0
+  },
+  "orders": [
+    {
+      "id": "SELL-ACB-PARK-01",
+      "ticker": "ACB",
+      "side": "sell",
+      "qty": 400,
+      "ref_price": 22150.0,
+      "ref_price_source": "giá BQ T-1 (2026-08-06) do compute_park_trim/compute_jit_unpark chạy GIỮA PHIÊN — xem risk_notes cảnh báo lệch giá. Executor định giá lại từ ref_price + urgency lúc đặt lệnh.",
+      "order_type": "LO",
+      "estimated_proceeds_vnd": 8860000,
+      "fee_est_vnd": 6645,
+      "book": "PARK",
+      "play_type": "PARK_TRIM+JIT_UNPARK",
+      "priority": 0,
+      "urgency": "normal",
+      "timing": "SELL@13:05",
+      "merged_from": {
+        "L1_park_trim_qty": 300,
+        "L2_jit_unpark_qty": 100,
+        "sellable_at_calc": 1500
+      },
+      "note": "BÁN PARK gộp: 300cp L1 park_trim (tuân thủ trần PARK 80%) + 100cp L2 jit_unpark (tài trợ lệnh mua DRI). Tổng 400cp × 22,150đ = 8,860,000đ.",
+      "reason": "Gộp 2 nguồn ĐỀ XUẤT BÁN cùng mã thành 1 lệnh (chỉ thị user 2026-08-07) — KHÔNG bán trùng lô: compute_jit_unpark.py chạy với --l1-json nên phần lô L1 đã reserve bị trừ ra trước khi L2 đề xuất thêm.",
+      "stop_exempt": false,
+      "slot_exempt": false
+    },
+    {
+      "id": "SELL-BID-PARK-02",
+      "ticker": "BID",
+      "side": "sell",
+      "qty": 500,
+      "ref_price": 37900.0,
+      "ref_price_source": "giá BQ T-1 (2026-08-06) do compute_park_trim/compute_jit_unpark chạy GIỮA PHIÊN — xem risk_notes cảnh báo lệch giá. Executor định giá lại từ ref_price + urgency lúc đặt lệnh.",
+      "order_type": "LO",
+      "estimated_proceeds_vnd": 18950000,
+      "fee_est_vnd": 14212,
+      "book": "PARK",
+      "play_type": "PARK_TRIM+JIT_UNPARK",
+      "priority": 0,
+      "urgency": "normal",
+      "timing": "SELL@13:05",
+      "merged_from": {
+        "L1_park_trim_qty": 400,
+        "L2_jit_unpark_qty": 100,
+        "sellable_at_calc": 1900
+      },
+      "note": "BÁN PARK gộp: 400cp L1 park_trim (tuân thủ trần PARK 80%) + 100cp L2 jit_unpark (tài trợ lệnh mua DRI). Tổng 500cp × 37,900đ = 18,950,000đ.",
+      "reason": "Gộp 2 nguồn ĐỀ XUẤT BÁN cùng mã thành 1 lệnh (chỉ thị user 2026-08-07) — KHÔNG bán trùng lô: compute_jit_unpark.py chạy với --l1-json nên phần lô L1 đã reserve bị trừ ra trước khi L2 đề xuất thêm.",
+      "stop_exempt": false,
+      "slot_exempt": false
+    },
+    {
+      "id": "SELL-CTG-PARK-03",
+      "ticker": "CTG",
+      "side": "sell",
+      "qty": 800,
+      "ref_price": 31350.0,
+      "ref_price_source": "giá BQ T-1 (2026-08-06) do compute_park_trim/compute_jit_unpark chạy GIỮA PHIÊN — xem risk_notes cảnh báo lệch giá. Executor định giá lại từ ref_price + urgency lúc đặt lệnh.",
+      "order_type": "LO",
+      "estimated_proceeds_vnd": 25080000,
+      "fee_est_vnd": 18810,
+      "book": "PARK",
+      "play_type": "PARK_TRIM+JIT_UNPARK",
+      "priority": 0,
+      "urgency": "normal",
+      "timing": "SELL@13:05",
+      "merged_from": {
+        "L1_park_trim_qty": 700,
+        "L2_jit_unpark_qty": 100,
+        "sellable_at_calc": 2300
+      },
+      "note": "BÁN PARK gộp: 700cp L1 park_trim (tuân thủ trần PARK 80%) + 100cp L2 jit_unpark (tài trợ lệnh mua DRI). Tổng 800cp × 31,350đ = 25,080,000đ.",
+      "reason": "Gộp 2 nguồn ĐỀ XUẤT BÁN cùng mã thành 1 lệnh (chỉ thị user 2026-08-07) — KHÔNG bán trùng lô: compute_jit_unpark.py chạy với --l1-json nên phần lô L1 đã reserve bị trừ ra trước khi L2 đề xuất thêm.",
+      "stop_exempt": false,
+      "slot_exempt": false
+    },
+    {
+      "id": "SELL-HDB-PARK-04",
+      "ticker": "HDB",
+      "side": "sell",
+      "qty": 600,
+      "ref_price": 26550.0,
+      "ref_price_source": "giá BQ T-1 (2026-08-06) do compute_park_trim/compute_jit_unpark chạy GIỮA PHIÊN — xem risk_notes cảnh báo lệch giá. Executor định giá lại từ ref_price + urgency lúc đặt lệnh.",
+      "order_type": "LO",
+      "estimated_proceeds_vnd": 15930000,
+      "fee_est_vnd": 11948,
+      "book": "PARK",
+      "play_type": "PARK_TRIM+JIT_UNPARK",
+      "priority": 0,
+      "urgency": "normal",
+      "timing": "SELL@13:05",
+      "merged_from": {
+        "L1_park_trim_qty": 500,
+        "L2_jit_unpark_qty": 100,
+        "sellable_at_calc": 1500
+      },
+      "note": "BÁN PARK gộp: 500cp L1 park_trim (tuân thủ trần PARK 80%) + 100cp L2 jit_unpark (tài trợ lệnh mua DRI). Tổng 600cp × 26,550đ = 15,930,000đ.",
+      "reason": "Gộp 2 nguồn ĐỀ XUẤT BÁN cùng mã thành 1 lệnh (chỉ thị user 2026-08-07) — KHÔNG bán trùng lô: compute_jit_unpark.py chạy với --l1-json nên phần lô L1 đã reserve bị trừ ra trước khi L2 đề xuất thêm.",
+      "stop_exempt": false,
+      "slot_exempt": false
+    },
+    {
+      "id": "SELL-LPB-PARK-05",
+      "ticker": "LPB",
+      "side": "sell",
+      "qty": 400,
+      "ref_price": 52000.0,
+      "ref_price_source": "giá BQ T-1 (2026-08-06) do compute_park_trim/compute_jit_unpark chạy GIỮA PHIÊN — xem risk_notes cảnh báo lệch giá. Executor định giá lại từ ref_price + urgency lúc đặt lệnh.",
+      "order_type": "LO",
+      "estimated_proceeds_vnd": 20800000,
+      "fee_est_vnd": 15600,
+      "book": "PARK",
+      "play_type": "PARK_TRIM+JIT_UNPARK",
+      "priority": 0,
+      "urgency": "normal",
+      "timing": "SELL@13:05",
+      "merged_from": {
+        "L1_park_trim_qty": 300,
+        "L2_jit_unpark_qty": 100,
+        "sellable_at_calc": 900
+      },
+      "note": "BÁN PARK gộp: 300cp L1 park_trim (tuân thủ trần PARK 80%) + 100cp L2 jit_unpark (tài trợ lệnh mua DRI). Tổng 400cp × 52,000đ = 20,800,000đ.",
+      "reason": "Gộp 2 nguồn ĐỀ XUẤT BÁN cùng mã thành 1 lệnh (chỉ thị user 2026-08-07) — KHÔNG bán trùng lô: compute_jit_unpark.py chạy với --l1-json nên phần lô L1 đã reserve bị trừ ra trước khi L2 đề xuất thêm.",
+      "stop_exempt": false,
+      "slot_exempt": false
+    },
+    {
+      "id": "SELL-MBB-PARK-06",
+      "ticker": "MBB",
+      "side": "sell",
+      "qty": 900,
+      "ref_price": 23900.0,
+      "ref_price_source": "giá BQ T-1 (2026-08-06) do compute_park_trim/compute_jit_unpark chạy GIỮA PHIÊN — xem risk_notes cảnh báo lệch giá. Executor định giá lại từ ref_price + urgency lúc đặt lệnh.",
+      "order_type": "LO",
+      "estimated_proceeds_vnd": 21510000,
+      "fee_est_vnd": 16132,
+      "book": "PARK",
+      "play_type": "PARK_TRIM+JIT_UNPARK",
+      "priority": 0,
+      "urgency": "normal",
+      "timing": "SELL@13:05",
+      "merged_from": {
+        "L1_park_trim_qty": 700,
+        "L2_jit_unpark_qty": 200,
+        "sellable_at_calc": 2400
+      },
+      "note": "BÁN PARK gộp: 700cp L1 park_trim (tuân thủ trần PARK 80%) + 200cp L2 jit_unpark (tài trợ lệnh mua DRI). Tổng 900cp × 23,900đ = 21,510,000đ.",
+      "reason": "Gộp 2 nguồn ĐỀ XUẤT BÁN cùng mã thành 1 lệnh (chỉ thị user 2026-08-07) — KHÔNG bán trùng lô: compute_jit_unpark.py chạy với --l1-json nên phần lô L1 đã reserve bị trừ ra trước khi L2 đề xuất thêm.",
+      "stop_exempt": false,
+      "slot_exempt": false
+    },
+    {
+      "id": "SELL-SHB-PARK-07",
+      "ticker": "SHB",
+      "side": "sell",
+      "qty": 500,
+      "ref_price": 11800.0,
+      "ref_price_source": "giá BQ T-1 (2026-08-06) do compute_park_trim/compute_jit_unpark chạy GIỮA PHIÊN — xem risk_notes cảnh báo lệch giá. Executor định giá lại từ ref_price + urgency lúc đặt lệnh.",
+      "order_type": "LO",
+      "estimated_proceeds_vnd": 5900000,
+      "fee_est_vnd": 4425,
+      "book": "PARK",
+      "play_type": "PARK_TRIM+JIT_UNPARK",
+      "priority": 0,
+      "urgency": "normal",
+      "timing": "SELL@13:05",
+      "merged_from": {
+        "L1_park_trim_qty": 400,
+        "L2_jit_unpark_qty": 100,
+        "sellable_at_calc": 1500
+      },
+      "note": "BÁN PARK gộp: 400cp L1 park_trim (tuân thủ trần PARK 80%) + 100cp L2 jit_unpark (tài trợ lệnh mua DRI). Tổng 500cp × 11,800đ = 5,900,000đ.",
+      "reason": "Gộp 2 nguồn ĐỀ XUẤT BÁN cùng mã thành 1 lệnh (chỉ thị user 2026-08-07) — KHÔNG bán trùng lô: compute_jit_unpark.py chạy với --l1-json nên phần lô L1 đã reserve bị trừ ra trước khi L2 đề xuất thêm.",
+      "stop_exempt": false,
+      "slot_exempt": false
+    },
+    {
+      "id": "SELL-SHS-PARK-08",
+      "ticker": "SHS",
+      "side": "sell",
+      "qty": 200,
+      "ref_price": 15700.0,
+      "ref_price_source": "giá BQ T-1 (2026-08-06) do compute_park_trim/compute_jit_unpark chạy GIỮA PHIÊN — xem risk_notes cảnh báo lệch giá. Executor định giá lại từ ref_price + urgency lúc đặt lệnh.",
+      "order_type": "LO",
+      "estimated_proceeds_vnd": 3140000,
+      "fee_est_vnd": 2355,
+      "book": "PARK",
+      "play_type": "PARK_TRIM",
+      "priority": 0,
+      "urgency": "normal",
+      "timing": "SELL@13:05",
+      "merged_from": {
+        "L1_park_trim_qty": 200,
+        "L2_jit_unpark_qty": 0,
+        "sellable_at_calc": 200
+      },
+      "note": "BÁN PARK gộp: 200cp L1 park_trim (tuân thủ trần PARK 80%). Tổng 200cp × 15,700đ = 3,140,000đ.",
+      "reason": "L1 park_trim — đưa tỷ trọng PARK về trần 80% pool (SELL-ONLY).",
+      "stop_exempt": false,
+      "slot_exempt": false
+    },
+    {
+      "id": "SELL-TCB-PARK-09",
+      "ticker": "TCB",
+      "side": "sell",
+      "qty": 600,
+      "ref_price": 29200.0,
+      "ref_price_source": "giá BQ T-1 (2026-08-06) do compute_park_trim/compute_jit_unpark chạy GIỮA PHIÊN — xem risk_notes cảnh báo lệch giá. Executor định giá lại từ ref_price + urgency lúc đặt lệnh.",
+      "order_type": "LO",
+      "estimated_proceeds_vnd": 17520000,
+      "fee_est_vnd": 13140,
+      "book": "PARK",
+      "play_type": "PARK_TRIM+JIT_UNPARK",
+      "priority": 0,
+      "urgency": "normal",
+      "timing": "SELL@13:05",
+      "merged_from": {
+        "L1_park_trim_qty": 500,
+        "L2_jit_unpark_qty": 100,
+        "sellable_at_calc": 2000
+      },
+      "note": "BÁN PARK gộp: 500cp L1 park_trim (tuân thủ trần PARK 80%) + 100cp L2 jit_unpark (tài trợ lệnh mua DRI). Tổng 600cp × 29,200đ = 17,520,000đ.",
+      "reason": "Gộp 2 nguồn ĐỀ XUẤT BÁN cùng mã thành 1 lệnh (chỉ thị user 2026-08-07) — KHÔNG bán trùng lô: compute_jit_unpark.py chạy với --l1-json nên phần lô L1 đã reserve bị trừ ra trước khi L2 đề xuất thêm.",
+      "stop_exempt": false,
+      "slot_exempt": false
+    },
+    {
+      "id": "SELL-TPB-PARK-10",
+      "ticker": "TPB",
+      "side": "sell",
+      "qty": 200,
+      "ref_price": 14500.0,
+      "ref_price_source": "giá BQ T-1 (2026-08-06) do compute_park_trim/compute_jit_unpark chạy GIỮA PHIÊN — xem risk_notes cảnh báo lệch giá. Executor định giá lại từ ref_price + urgency lúc đặt lệnh.",
+      "order_type": "LO",
+      "estimated_proceeds_vnd": 2900000,
+      "fee_est_vnd": 2175,
+      "book": "PARK",
+      "play_type": "PARK_TRIM",
+      "priority": 0,
+      "urgency": "normal",
+      "timing": "SELL@13:05",
+      "merged_from": {
+        "L1_park_trim_qty": 200,
+        "L2_jit_unpark_qty": 0,
+        "sellable_at_calc": 800
+      },
+      "note": "BÁN PARK gộp: 200cp L1 park_trim (tuân thủ trần PARK 80%). Tổng 200cp × 14,500đ = 2,900,000đ.",
+      "reason": "L1 park_trim — đưa tỷ trọng PARK về trần 80% pool (SELL-ONLY).",
+      "stop_exempt": false,
+      "slot_exempt": false
+    },
+    {
+      "id": "SELL-VCB-PARK-11",
+      "ticker": "VCB",
+      "side": "sell",
+      "qty": 400,
+      "ref_price": 59000.0,
+      "ref_price_source": "giá BQ T-1 (2026-08-06) do compute_park_trim/compute_jit_unpark chạy GIỮA PHIÊN — xem risk_notes cảnh báo lệch giá. Executor định giá lại từ ref_price + urgency lúc đặt lệnh.",
+      "order_type": "LO",
+      "estimated_proceeds_vnd": 23600000,
+      "fee_est_vnd": 17700,
+      "book": "PARK",
+      "play_type": "PARK_TRIM+JIT_UNPARK",
+      "priority": 0,
+      "urgency": "normal",
+      "timing": "SELL@13:05",
+      "merged_from": {
+        "L1_park_trim_qty": 300,
+        "L2_jit_unpark_qty": 100,
+        "sellable_at_calc": 1300
+      },
+      "note": "BÁN PARK gộp: 300cp L1 park_trim (tuân thủ trần PARK 80%) + 100cp L2 jit_unpark (tài trợ lệnh mua DRI). Tổng 400cp × 59,000đ = 23,600,000đ.",
+      "reason": "Gộp 2 nguồn ĐỀ XUẤT BÁN cùng mã thành 1 lệnh (chỉ thị user 2026-08-07) — KHÔNG bán trùng lô: compute_jit_unpark.py chạy với --l1-json nên phần lô L1 đã reserve bị trừ ra trước khi L2 đề xuất thêm.",
+      "stop_exempt": false,
+      "slot_exempt": false
+    },
+    {
+      "id": "SELL-VHM-PARK-12",
+      "ticker": "VHM",
+      "side": "sell",
+      "qty": 400,
+      "ref_price": 77100.0,
+      "ref_price_source": "giá BQ T-1 (2026-08-06) do compute_park_trim/compute_jit_unpark chạy GIỮA PHIÊN — xem risk_notes cảnh báo lệch giá. Executor định giá lại từ ref_price + urgency lúc đặt lệnh.",
+      "order_type": "LO",
+      "estimated_proceeds_vnd": 30840000,
+      "fee_est_vnd": 23130,
+      "book": "PARK",
+      "play_type": "PARK_TRIM+JIT_UNPARK",
+      "priority": 0,
+      "urgency": "normal",
+      "timing": "SELL@13:05",
+      "merged_from": {
+        "L1_park_trim_qty": 300,
+        "L2_jit_unpark_qty": 100,
+        "sellable_at_calc": 500
+      },
+      "note": "BÁN PARK gộp: 300cp L1 park_trim (tuân thủ trần PARK 80%) + 100cp L2 jit_unpark (tài trợ lệnh mua DRI). Tổng 400cp × 77,100đ = 30,840,000đ.",
+      "reason": "Gộp 2 nguồn ĐỀ XUẤT BÁN cùng mã thành 1 lệnh (chỉ thị user 2026-08-07) — KHÔNG bán trùng lô: compute_jit_unpark.py chạy với --l1-json nên phần lô L1 đã reserve bị trừ ra trước khi L2 đề xuất thêm.",
+      "stop_exempt": false,
+      "slot_exempt": false
+    },
+    {
+      "id": "SELL-VIX-PARK-13",
+      "ticker": "VIX",
+      "side": "sell",
+      "qty": 200,
+      "ref_price": 13700.0,
+      "ref_price_source": "giá BQ T-1 (2026-08-06) do compute_park_trim/compute_jit_unpark chạy GIỮA PHIÊN — xem risk_notes cảnh báo lệch giá. Executor định giá lại từ ref_price + urgency lúc đặt lệnh.",
+      "order_type": "LO",
+      "estimated_proceeds_vnd": 2740000,
+      "fee_est_vnd": 2055,
+      "book": "PARK",
+      "play_type": "PARK_TRIM",
+      "priority": 0,
+      "urgency": "normal",
+      "timing": "SELL@13:05",
+      "merged_from": {
+        "L1_park_trim_qty": 200,
+        "L2_jit_unpark_qty": 0,
+        "sellable_at_calc": 700
+      },
+      "note": "BÁN PARK gộp: 200cp L1 park_trim (tuân thủ trần PARK 80%). Tổng 200cp × 13,700đ = 2,740,000đ.",
+      "reason": "L1 park_trim — đưa tỷ trọng PARK về trần 80% pool (SELL-ONLY).",
+      "stop_exempt": false,
+      "slot_exempt": false
+    },
+    {
+      "id": "SELL-VPB-PARK-14",
+      "ticker": "VPB",
+      "side": "sell",
+      "qty": 800,
+      "ref_price": 25150.0,
+      "ref_price_source": "giá BQ T-1 (2026-08-06) do compute_park_trim/compute_jit_unpark chạy GIỮA PHIÊN — xem risk_notes cảnh báo lệch giá. Executor định giá lại từ ref_price + urgency lúc đặt lệnh.",
+      "order_type": "LO",
+      "estimated_proceeds_vnd": 20120000,
+      "fee_est_vnd": 15090,
+      "book": "PARK",
+      "play_type": "PARK_TRIM+JIT_UNPARK",
+      "priority": 0,
+      "urgency": "normal",
+      "timing": "SELL@13:05",
+      "merged_from": {
+        "L1_park_trim_qty": 700,
+        "L2_jit_unpark_qty": 100,
+        "sellable_at_calc": 2300
+      },
+      "note": "BÁN PARK gộp: 700cp L1 park_trim (tuân thủ trần PARK 80%) + 100cp L2 jit_unpark (tài trợ lệnh mua DRI). Tổng 800cp × 25,150đ = 20,120,000đ.",
+      "reason": "Gộp 2 nguồn ĐỀ XUẤT BÁN cùng mã thành 1 lệnh (chỉ thị user 2026-08-07) — KHÔNG bán trùng lô: compute_jit_unpark.py chạy với --l1-json nên phần lô L1 đã reserve bị trừ ra trước khi L2 đề xuất thêm.",
+      "stop_exempt": false,
+      "slot_exempt": false
+    },
+    {
+      "id": "BUY-DRI-LAG-01",
+      "ticker": "DRI",
+      "side": "buy",
+      "qty": 3500,
+      "ref_price": 13100.0,
+      "ref_price_source": "DNSE latest_trade G1 2026-08-07 ~12:15 ICT (matchPrice 13.10, ref 12.90, bid1 13.00 / offer1 13.10, trần 14.80 / sàn 11.00) — giá LIVE trong phiên, KHÔNG dùng BQ. Plan cũ ghi 12,900đ (= giá THAM CHIẾU, không phải giá khớp); giá khớp live đã +1.55% so với mức đó nên ref_price dùng 13,100đ.",
+      "order_type": "LO",
+      "limit_price_vnd": 13100,
+      "estimated_cost_vnd": 45850000,
+      "fee_est_vnd": 34388,
+      "total_with_fee_vnd": 45884388,
+      "book": "LAG",
+      "play_type": "LAG_HI",
+      "priority": 1,
+      "urgency": "normal",
+      "timing": "BUY@13:15",
+      "timing_note": "Phiên chiều 13:00–14:45 là cửa sổ thực thi còn lại của ngày 2026-08-07. DRI KHÔNG bị ràng buộc cửa sổ entry T+1 tự động (status CSV = WINDOW_PASSED 2026-08-06) — đây là lệnh discretionary override của user, nên nếu không khớp chiều nay thì user quyết định có carry sang phiên sau hay không, KHÔNG tự động đóng.",
+      "hold_periods": 25,
+      "stop_exempt": false,
+      "slot_exempt": false,
+      "dd_note": "DD DRI [LAG] (data 2026-08-05): thanh khoản OK (ADV3T 5.46 tỷ/phiên) · nền YoY dương (surprise không phồng do nền âm) | FA: ROE5Y 15.8% · ROE_Min3Y 13.5% · FSCORE 6 · D/E 0.28 · PE 4.21 | 🟢 DCF: CHEAP (giá trị hợp lý ~20,885đ vs giá 13,000đ, MoS +37.8%, robust)",
+      "sizing_note": "Qty 3,500cp do USER CHỈ ĐỊNH (discretionary override qua Mike, giữ nguyên số lượng đã chốt hôm qua), KHÔNG phải do allocator sizing lại. 3,500cp × 13,100đ = 45,850,000đ + phí 0.075% (34,388đ) = 45,884,388đ. Đối chiếu slot lý thuyết: LAG_HI 10.0% × active_nav 951,711,143 = 95,171,114đ ⇒ lệnh này (45,850,000đ) NẰM DƯỚI slot, không vượt. %ADV: 45,850,000đ / ADV3T 5,460,000,000đ = 0.84% ⇒ cap_lag_orders KHÔNG binding.",
+      "funding_note": "Lệnh này PHỤ THUỘC nguồn tài trợ L2 JIT-unpark trong CÙNG plan (bán PARK đang có, KHÔNG phải tiền nạp thêm). Nếu user KHÔNG duyệt phần L2, lệnh phải bị co/bỏ theo sức mua thật.",
+      "gates_passed": [
+        "8L rating = 2 (≤3) — truy vấn point-in-time tav2_bq.fa_ratings_8l, time=2026-07-30 ≤ asof 2026-08-06, ĐÚNG SQL của lag_filter_low_rating(). PASS gate cứng LAG.",
+        "Golden floor — ROE_Min3Y 13.5% ≥ 0 (đã encode trong rating 8L v3).",
+        "DCF — CHEAP, giá trị hợp lý ~20,885đ vs giá 13,000đ, MoS +37.8%, robust ⇒ KHÔNG cần dcf_override_reason.",
+        "DD cờ đỏ — dd_red_flags rỗng trong CSV nguồn; thanh khoản ADV3T 5.46 tỷ/phiên (trên sàn 2 tỷ), nền YoY dương.",
+        "excluded_tickers — DRI không nằm trong danh sách của account này.",
+        "LAG EXCLUDE list (IVS/TMG) — DRI không thuộc danh sách user đã loại tường minh.",
+        "%ADV cap — cap_lag_orders() áp lúc thực thi, không binding (xem sizing_note)."
+      ],
+      "override_note": "⚠️ ĐÂY LÀ LỆNH DISCRETIONARY OVERRIDE CỦA USER (John) qua Mike, job DollarBill_20260807_050844 — KHÔNG phải tín hiệu tự động. Bằng chứng: golive_v23_recommendations_2026-08-06.csv ghi DRI status = 'WINDOW_PASSED 2026-08-06', tức DRI ĐÃ QUA cửa sổ entry T+1 chuẩn và KHÔNG nằm trong 6 mã due_today của filter_lag_entry_window.py (PGS/PHR/SSI/TVN/VNF/VSI). Lệnh này thay cho lệnh MUA SSI mà plan bản trước đề xuất.",
+      "watch_note": "🟡 WATCH cao su (context_planning_mini, user duyệt 2026-08-06): DRI thuộc nhóm GVR/PHR/DPR/DRI/TRC/HRC. Ngưỡng xét lại luận điểm PEAD ngành = RSS3 thủng 2.26 USD/kg. ĐÃ KIỂM TRA HÔM NAY: data/rubber_monthly.csv mới nhất 2026-07 = 2.78; data/rubber_weekly.csv mới nhất có giá 2026-08-05 = 2.654. Cả hai ĐỀU TRÊN 2.26 (+17.4% so ngưỡng) ⇒ WATCH CHƯA kích hoạt, không phải xét lại luận điểm. (KHÔNG dùng nhãn 'phá đáy 52 tuần' của rubber_weekly.py — nhãn đó là bug đo lường đã xác nhận 2026-08-06.)",
+      "bear_risk_note": "⚠️ Nếu regime DT5G chuyển BEAR, vị thế này sẽ bị BÁN theo allocator (w_LAG=0 khi BEAR). Đây là cơ chế sẵn có, công khai để user biết trước khi duyệt.",
+      "dcf_check": {
+        "status": "CHEAP",
+        "fair_value_vnd": 20885,
+        "price_at_dcf_vnd": 13000,
+        "margin_of_safety": 0.378,
+        "robust": true,
+        "as_of": "2026-08-06",
+        "data_date": "2026-08-05",
+        "note": "DCF CHEAP + robust ⇒ KHÔNG cần dcf_override_reason. Lưu ý giá dùng trong DCF là 13,000đ (T-1); giá live hôm nay 13,100đ ⇒ MoS thực tế ~37.3%, vẫn CHEAP rộng rãi."
+      },
+      "dcf_override_reason": "",
+      "dd_check": {
+        "has_red_flag": false,
+        "red_flags": [],
+        "as_of": "2026-08-06",
+        "data_date": "2026-08-05",
+        "evidence": "CSV nguồn golive_v23_recommendations_2026-08-06.csv: due_diligence của DRI không có cờ đỏ nào (không THANH_KHOAN_CHET, không NGOAI_UNIVERSE, không FLOOR_FAIL). ADV3T 5.46 tỷ/phiên."
+      },
+      "dd_override_reason": "",
+      "limit_price_note": "limit_price_vnd là THÔNG TIN cho người đọc — PlannedOrder không có field này, load_plan() lọc bỏ. Executor định giá từ ref_price (13,100đ, DNSE live) + urgency.",
+      "jit_status": "FUNDED_BY_JIT",
+      "qty_final": 3500,
+      "jit_note": "L2 JIT-unpark (tính LẠI cho DRI, không phải số của SSI): FUNDED_BY_JIT — bán PARK 42,000,000đ (thu ròng 41,937,000đ sau friction 0.15%) ⇒ đủ tiền mua nguyên lệnh. qty giữ NGUYÊN 3,500cp, KHÔNG shrink, KHÔNG drop. Cash sau khi thực hiện = 908,143đ."
+    },
+    {
+      "id": "SELL-JIT-PARK-ACB-01",
+      "ticker": "ACB",
+      "side": "sell",
+      "qty": 100,
+      "ref_price": 22150.0,
+      "book": "PARK",
+      "play_type": "JIT_UNPARK",
+      "priority": 0,
+      "note": "L2 JIT: tài trợ BUY-DRI-LAG-01 (DRI) — cần 41.1tr, bán pro-rata PARK w=5.2%"
+    },
+    {
+      "id": "SELL-JIT-PARK-BID-01",
+      "ticker": "BID",
+      "side": "sell",
+      "qty": 100,
+      "ref_price": 37900.0,
+      "book": "PARK",
+      "play_type": "JIT_UNPARK",
+      "priority": 0,
+      "note": "L2 JIT: tài trợ BUY-DRI-LAG-01 (DRI) — cần 41.1tr, bán pro-rata PARK w=11.3%"
+    },
+    {
+      "id": "SELL-JIT-PARK-CTG-01",
+      "ticker": "CTG",
+      "side": "sell",
+      "qty": 100,
+      "ref_price": 31350.0,
+      "book": "PARK",
+      "play_type": "JIT_UNPARK",
+      "priority": 0,
+      "note": "L2 JIT: tài trợ BUY-DRI-LAG-01 (DRI) — cần 41.1tr, bán pro-rata PARK w=11.4%"
+    },
+    {
+      "id": "SELL-JIT-PARK-HDB-01",
+      "ticker": "HDB",
+      "side": "sell",
+      "qty": 100,
+      "ref_price": 26550.0,
+      "book": "PARK",
+      "play_type": "JIT_UNPARK",
+      "priority": 0,
+      "note": "L2 JIT: tài trợ BUY-DRI-LAG-01 (DRI) — cần 41.1tr, bán pro-rata PARK w=6.3%"
+    },
+    {
+      "id": "SELL-JIT-PARK-LPB-01",
+      "ticker": "LPB",
+      "side": "sell",
+      "qty": 100,
+      "ref_price": 52000.0,
+      "book": "PARK",
+      "play_type": "JIT_UNPARK",
+      "priority": 0,
+      "note": "L2 JIT: tài trợ BUY-DRI-LAG-01 (DRI) — cần 41.1tr, bán pro-rata PARK w=7.4%"
+    },
+    {
+      "id": "SELL-JIT-PARK-MBB-01",
+      "ticker": "MBB",
+      "side": "sell",
+      "qty": 200,
+      "ref_price": 23900.0,
+      "book": "PARK",
+      "play_type": "JIT_UNPARK",
+      "priority": 0,
+      "note": "L2 JIT: tài trợ BUY-DRI-LAG-01 (DRI) — cần 41.1tr, bán pro-rata PARK w=9.0%"
+    },
+    {
+      "id": "SELL-JIT-PARK-SHB-01",
+      "ticker": "SHB",
+      "side": "sell",
+      "qty": 100,
+      "ref_price": 11800.0,
+      "book": "PARK",
+      "play_type": "JIT_UNPARK",
+      "priority": 0,
+      "note": "L2 JIT: tài trợ BUY-DRI-LAG-01 (DRI) — cần 41.1tr, bán pro-rata PARK w=2.8%"
+    },
+    {
+      "id": "SELL-JIT-PARK-TCB-01",
+      "ticker": "TCB",
+      "side": "sell",
+      "qty": 100,
+      "ref_price": 29200.0,
+      "book": "PARK",
+      "play_type": "JIT_UNPARK",
+      "priority": 0,
+      "note": "L2 JIT: tài trợ BUY-DRI-LAG-01 (DRI) — cần 41.1tr, bán pro-rata PARK w=9.2%"
+    },
+    {
+      "id": "SELL-JIT-PARK-VCB-01",
+      "ticker": "VCB",
+      "side": "sell",
+      "qty": 100,
+      "ref_price": 59000.0,
+      "book": "PARK",
+      "play_type": "JIT_UNPARK",
+      "priority": 0,
+      "note": "L2 JIT: tài trợ BUY-DRI-LAG-01 (DRI) — cần 41.1tr, bán pro-rata PARK w=12.1%"
+    },
+    {
+      "id": "SELL-JIT-PARK-VHM-01",
+      "ticker": "VHM",
+      "side": "sell",
+      "qty": 100,
+      "ref_price": 77100.0,
+      "book": "PARK",
+      "play_type": "JIT_UNPARK",
+      "priority": 0,
+      "note": "L2 JIT: tài trợ BUY-DRI-LAG-01 (DRI) — cần 41.1tr, bán pro-rata PARK w=12.1%"
+    },
+    {
+      "id": "SELL-JIT-PARK-VPB-01",
+      "ticker": "VPB",
+      "side": "sell",
+      "qty": 100,
+      "ref_price": 25150.0,
+      "book": "PARK",
+      "play_type": "JIT_UNPARK",
+      "priority": 0,
+      "note": "L2 JIT: tài trợ BUY-DRI-LAG-01 (DRI) — cần 41.1tr, bán pro-rata PARK w=9.1%"
+    }
+  ],
+  "orders_summary": {
+    "total_orders": 15,
+    "total_sell_orders": 14,
+    "total_buy_orders": 1,
+    "merge_note": "✅ ĐÃ MERGE 3-TRONG-1 VÀO orders[] THẬT (chỉ thị user 2026-08-07, job DollarBill_20260807_050844): (1) 1 lệnh MUA DRI + (2) L1 park_trim + (3) L2 jit_unpark. Duyệt 1 lần là bot chạy được cả gói — KHÔNG còn tình trạng plan approved nhưng bot không thấy lệnh bán nên thiếu tiền.",
+    "sell_gross_vnd": 217890000,
+    "sell_fee_est_vnd": 163417,
+    "sell_net_proceeds_vnd": 217726583,
+    "buy_gross_vnd": 45850000,
+    "buy_fee_est_vnd": 34388,
+    "buy_total_with_fee_vnd": 45884388,
+    "net_cash_change_vnd": 171842195,
+    "available_cash_before_vnd": 4821143.0,
+    "cash_after_all_orders_vnd": 176663338.0,
+    "funding_check_sell_ge_buy": true,
+    "orders_within_cash": true,
+    "execution_order_note": "priority 0 (BÁN) chạy TRƯỚC priority 1 (MUA) — executor sắp xếp `sorted(orders, key=priority)` tăng dần (executor.py:996). Tiền bán về mới đủ mua.",
+    "sell_split_note": "Trong 14 lệnh bán: L1 park_trim 5,700cp / 175,890,000đ; L2 jit_unpark 1,200cp / 42,000,000đ. 11 mã có mặt ở CẢ 2 nguồn ⇒ đã gộp thành 1 lệnh/mã."
+  },
+  "deferred_orders": [
+    {
+      "ticker": "PGS",
+      "side": "buy",
+      "book": "LAG",
+      "status": "SKIPPED_BY_GATE",
+      "qty": 0,
+      "deferred_reason": "AUTO-EXCLUDED bởi gate — DD cờ đỏ THANH_KHOAN_CHET (ADV3T 6 tr/phiên) + NGOAI_UNIVERSE — cần dd_override_reason, KHÔNG có. Cùng loại với IVS/TMG đã bị user loại 07-21."
+    },
+    {
+      "ticker": "PHR",
+      "side": "buy",
+      "book": "LAG",
+      "status": "SKIPPED_BY_GATE",
+      "qty": 0,
+      "deferred_reason": "AUTO-EXCLUDED bởi gate — DCF RICH (hợp lý ~47,948đ vs giá 58,200đ, MoS -21.4%, robust) — cần dcf_override_reason, KHÔNG có. Thêm: PHR thuộc nhóm cao su đang trong WATCH ngưỡng RSS3 2,26 USD/kg."
+    },
+    {
+      "ticker": "TVN",
+      "side": "buy",
+      "book": "LAG",
+      "status": "SKIPPED_BY_GATE",
+      "qty": 0,
+      "deferred_reason": "AUTO-EXCLUDED bởi gate — sector_valuation_lens: SKIP_CO_CAN_CU — DCF RICH (hợp lý ~1,764đ vs giá 9,100đ, MoS -415.8%, robust). ROE5Y 1.4%, ROE_Min3Y -4.1%."
+    },
+    {
+      "ticker": "VNF",
+      "side": "buy",
+      "book": "LAG",
+      "status": "SKIPPED_BY_GATE",
+      "qty": 0,
+      "deferred_reason": "AUTO-EXCLUDED bởi gate — DD cờ đỏ THANH_KHOAN_CHET (ADV3T 23 tr/phiên) + NGOAI_UNIVERSE — cần dd_override_reason, KHÔNG có."
+    },
+    {
+      "ticker": "VSI",
+      "side": "buy",
+      "book": "LAG",
+      "status": "SKIPPED_BY_GATE",
+      "qty": 0,
+      "deferred_reason": "AUTO-EXCLUDED bởi gate — DD cờ đỏ THANH_KHOAN_CHET (ADV3T 6 tr/phiên) + NGOAI_UNIVERSE — cần dd_override_reason, KHÔNG có."
+    }
+  ],
+  "risk_notes": [
+    "📦 GÓI 3-TRONG-1 CHỜ DUYỆT 1 LẦN (chỉ thị user John 2026-08-07, job DollarBill_20260807_050844). orders[] đã MERGE THẬT cả 3 thành phần: 14 lệnh BÁN PARK (priority 0) + 1 lệnh MUA DRI (priority 1). LÝ DO PHẢI MERGE: lần trước plan được approve nhưng L1/L2 để ở key riêng, `load_plan()` chỉ đọc `orders[]` nên bot KHÔNG bán PARK ⇒ không có tiền ⇒ lệnh mua không chạy được. Lần này duyệt 1 lần là chạy được cả gói.",
+    "🔁 THAY LỆNH: plan bản trước đề xuất MUA SSI (tín hiệu T+1 tự động). User đã chỉ đạo THAY bằng MUA DRI. DRI là DISCRETIONARY OVERRIDE — golive_v23_recommendations_2026-08-06.csv ghi DRI status = 'WINDOW_PASSED 2026-08-06', DRI KHÔNG nằm trong 6 mã due_today của filter_lag_entry_window.py. Ghi rõ để kiểm toán về sau không nhầm đây là tín hiệu máy.",
+    "💰 GIÁ DRI DÙNG LÀ GIÁ LIVE, KHÔNG COPY SỐ CŨ: DNSE latest_trade G1 lúc ~12:15 ICT 2026-08-07 → matchPrice 13,100đ (ref 12,900đ, bid1 13,000 / offer1 13,100). Con số 12,900đ trong chỉ đạo là giá THAM CHIẾU; giá khớp thật đã cao hơn 1.55% nên ref_price dùng 13,100đ. Qty giữ NGUYÊN theo chỉ định của user (SpaceX 3,500cp / ZaloPay 1,800cp).",
+    "✅ DD DRI ĐÃ CHẠY LẠI, KHÔNG CHÉP MÙ: 8L rating = 2 (truy vấn point-in-time tav2_bq.fa_ratings_8l, time 2026-07-30 ≤ asof 2026-08-06, đúng SQL của lag_filter_low_rating) ⇒ PASS gate cứng ≤3. DCF CHEAP, giá trị hợp lý ~20,885đ vs giá 13,000đ, MoS +37.8%, robust. FA: ROE5Y 15.8% · ROE_Min3Y 13.5% (golden floor OK) · FSCORE 6 · D/E 0.28 · PE 4.21. Thanh khoản ADV3T 5.46 tỷ/phiên, không cờ đỏ DD.",
+    "🟡 WATCH cao su — CHƯA kích hoạt: DRI thuộc nhóm GVR/PHR/DPR/DRI/TRC/HRC. Ngưỡng xét lại luận điểm PEAD = RSS3 thủng 2.26 USD/kg. Đã đọc TAY data/rubber_monthly.csv (2026-07 = 2.78) và data/rubber_weekly.csv (2026-08-05 = 2.654) — cả hai TRÊN ngưỡng (+17.4%) ⇒ không phải xét lại. KHÔNG dùng nhãn 'phá đáy 52 tuần' của rubber_weekly.py (đã xác nhận là bug đo lường 2026-08-06).",
+    "⚠️ Nếu regime DT5G chuyển BEAR, vị thế DRI sẽ bị BÁN theo allocator (w_LAG=0 khi BEAR) — cơ chế sẵn có, công khai để user biết trước khi duyệt.",
+    "⚠️ GIÁ THAM CHIẾU CỦA CÁC LỆNH BÁN LÀ GIÁ BQ T-1, KHÔNG PHẢI GIÁ LIVE. compute_park_trim.py / compute_jit_unpark.py lấy giá qua DNSE close_price(), endpoint này trả closePrice=0 khi phiên CHƯA ĐÓNG nên rơi về giá BQ 2026-08-06. Hệ quả của việc chạy script GIỮA PHIÊN (khung chuẩn ~19:00 sau đóng cửa), KHÔNG phải bug logic. Đo lệch thật lúc 11:5x ICT: VNM +5.93%, VHM -3.76%, BID +3.03%, CTG +2.39%, VCB +2.20%, VPB -1.59%; tổng cổ phiếu lệch +1.13%. Quyết định TRIM/JIT KHÔNG đổi, nhưng qty từng mã có thể lệch vài %. KHÔNG tự sửa qty của script (ranh giới cứng L1/L2).",
+    "🔒 KHÔNG BÁN TRÙNG LÔ: compute_jit_unpark.py đã chạy với --l1-json trỏ đúng file L1 cùng phiên, nên phần lô L1 đã reserve bị TRỪ RA trước khi L2 đề xuất thêm (bằng chứng: L2 log 'đã trừ L1', và SpaceX/SHS bị L2 bỏ qua vì hết dư địa sau L1). Mã có mặt ở cả 2 nguồn đã được GỘP thành 1 lệnh duy nhất, qty cộng dồn — script merge tự kiểm tra lại tổng qty ≤ sellable của từng mã trước khi ghi (assert, không ghi nếu vượt).",
+    "📉 P1 là SELL-ONLY: sau khi bán, PARK sẽ nằm DƯỚI target 80% cho tới khi đường MUA chạy. Đường MUA (P2) CHƯA có code — hiện là hàng PARK_ADVISORY do NGƯỜI quyết định. Đúng thiết kế, không phải lỗi.",
+    "⚠️ Engine mua vẫn publish etf_park_frac=0.70 trong khi chính sách target = 0.80 (neutral_parking.pending_engine_consistency) — hệ đang ở trạng thái LAI: MUA tới 70%, chỉ TRIM khi vượt 80%. Dòng 'CỔNG CHƯA MỞ' mà compute_park_trim.py tự in nói về việc đường MUA của engine chưa đồng bộ, KHÔNG phải cổng chính sách (cổng chính sách đã mở 2026-08-04).",
+    "L1 lần này dùng CÔNG THỨC MỚI (§D1 park_membership_sync_L0_design_20260806.md, user John duyệt sáng 2026-08-07, job Taylor_20260807_020402): bán theo trọng số MỤC TIÊU của rổ custom30V (tgt_i − mv_i) thay vì pro-rata theo trọng số ĐANG CÓ. Hệ quả: mã đã rớt rổ bị bán SẠCH, và tổng bán LỚN HƠN mức vượt trần vì gồm cả phần trọng số của các mã trong rổ mà ta chưa mua.",
+    "⏰ Cửa sổ thực thi còn lại: phiên chiều 13:00–14:45 ngày 2026-08-07 (plan hoàn tất trong giờ nghỉ trưa). Cần user duyệt TRƯỚC 13:00 để kịp."
+  ],
+  "jit_unpark_proposal": {
+    "layer": "L2_JIT_UNPARK",
+    "account_label": "SpaceX",
+    "asof": "2026-08-07",
+    "park_mv_vnd": 638410000.0,
+    "cash_available_vnd": 4821143.0,
+    "reconcile_ok": true,
+    "unverified_tickers": [],
+    "excluded_tickers": [],
+    "margin_room_vnd": 0.0,
+    "friction": 0.0015,
+    "orders": [
+      {
+        "ticker": "ACB",
+        "side": "sell",
+        "qty": 100,
+        "ref_price": 22150.0,
+        "value_vnd": 2215000.0,
+        "book": "PARK",
+        "play_type": "JIT_UNPARK",
+        "for_order_id": "BUY-DRI-LAG-01",
+        "for_ticker": "DRI",
+        "weight_in_park": 0.052300596596722655,
+        "adv_cap_remaining_vnd": 34530379240.0,
+        "adv_vnd": 345370242400.0,
+        "adv_data_date": "2026-08-06",
+        "sellable": 1500,
+        "fifo_lots": [
+          {
+            "entry_date": "2026-07-01",
+            "qty": 100,
+            "cost_price": 22650.0,
+            "source": "bootstrap"
+          }
+        ],
+        "reason": "L2 JIT: tài trợ BUY-DRI-LAG-01 (DRI) — cần 41.1tr, bán pro-rata PARK w=5.2%"
+      },
+      {
+        "ticker": "BID",
+        "side": "sell",
+        "qty": 100,
+        "ref_price": 37900.0,
+        "value_vnd": 3790000.0,
+        "book": "PARK",
+        "play_type": "JIT_UNPARK",
+        "for_order_id": "BUY-DRI-LAG-01",
+        "for_ticker": "DRI",
+        "weight_in_park": 0.1133533773041384,
+        "adv_cap_remaining_vnd": 14787566175.0,
+        "adv_vnd": 148027261750.0,
+        "adv_data_date": "2026-08-06",
+        "sellable": 1900,
+        "fifo_lots": [
+          {
+            "entry_date": "2026-07-02",
+            "qty": 100,
+            "cost_price": 42991.3,
+            "source": "bootstrap"
+          }
+        ],
+        "reason": "L2 JIT: tài trợ BUY-DRI-LAG-01 (DRI) — cần 41.1tr, bán pro-rata PARK w=11.3%"
+      },
+      {
+        "ticker": "CTG",
+        "side": "sell",
+        "qty": 100,
+        "ref_price": 31350.0,
+        "value_vnd": 3135000.0,
+        "book": "PARK",
+        "play_type": "JIT_UNPARK",
+        "for_order_id": "BUY-DRI-LAG-01",
+        "for_ticker": "DRI",
+        "weight_in_park": 0.11350292001825996,
+        "adv_cap_remaining_vnd": 22859673870.0,
+        "adv_vnd": 228816188700.0,
+        "adv_data_date": "2026-08-06",
+        "sellable": 2300,
+        "fifo_lots": [
+          {
+            "entry_date": "2026-07-02",
+            "qty": 100,
+            "cost_price": 34476.79,
+            "source": "bootstrap"
+          }
+        ],
+        "reason": "L2 JIT: tài trợ BUY-DRI-LAG-01 (DRI) — cần 41.1tr, bán pro-rata PARK w=11.4%"
+      },
+      {
+        "ticker": "HDB",
+        "side": "sell",
+        "qty": 100,
+        "ref_price": 26550.0,
+        "value_vnd": 2655000.0,
+        "book": "PARK",
+        "play_type": "JIT_UNPARK",
+        "for_order_id": "BUY-DRI-LAG-01",
+        "for_ticker": "DRI",
+        "weight_in_park": 0.06268987989358855,
+        "adv_cap_remaining_vnd": 25366932000.0,
+        "adv_vnd": 253802070000.0,
+        "adv_data_date": "2026-08-06",
+        "sellable": 1500,
+        "fifo_lots": [
+          {
+            "entry_date": "2026-07-02",
+            "qty": 100,
+            "cost_price": 26675.0,
+            "source": "bootstrap"
+          }
+        ],
+        "reason": "L2 JIT: tài trợ BUY-DRI-LAG-01 (DRI) — cần 41.1tr, bán pro-rata PARK w=6.3%"
+      },
+      {
+        "ticker": "LPB",
+        "side": "sell",
+        "qty": 100,
+        "ref_price": 52000.0,
+        "value_vnd": 5200000.0,
+        "book": "PARK",
+        "play_type": "JIT_UNPARK",
+        "for_order_id": "BUY-DRI-LAG-01",
+        "for_ticker": "DRI",
+        "weight_in_park": 0.07366946337777638,
+        "adv_cap_remaining_vnd": 8878740000.0,
+        "adv_vnd": 88943400000.0,
+        "adv_data_date": "2026-08-06",
+        "sellable": 900,
+        "fifo_lots": [
+          {
+            "entry_date": "2026-07-15",
+            "qty": 100,
+            "cost_price": 51466.67,
+            "source": "bootstrap"
+          }
+        ],
+        "reason": "L2 JIT: tài trợ BUY-DRI-LAG-01 (DRI) — cần 41.1tr, bán pro-rata PARK w=7.4%"
+      },
+      {
+        "ticker": "MBB",
+        "side": "sell",
+        "qty": 200,
+        "ref_price": 23900.0,
+        "value_vnd": 4780000.0,
+        "book": "PARK",
+        "play_type": "JIT_UNPARK",
+        "for_order_id": "BUY-DRI-LAG-01",
+        "for_ticker": "DRI",
+        "weight_in_park": 0.09029231665276181,
+        "adv_cap_remaining_vnd": 30164568815.0,
+        "adv_vnd": 301812988150.0,
+        "adv_data_date": "2026-08-06",
+        "sellable": 2400,
+        "fifo_lots": [
+          {
+            "entry_date": "2026-07-02",
+            "qty": 200,
+            "cost_price": 25850.0,
+            "source": "bootstrap"
+          }
+        ],
+        "reason": "L2 JIT: tài trợ BUY-DRI-LAG-01 (DRI) — cần 41.1tr, bán pro-rata PARK w=9.0%"
+      },
+      {
+        "ticker": "SHB",
+        "side": "sell",
+        "qty": 100,
+        "ref_price": 11800.0,
+        "value_vnd": 1180000.0,
+        "book": "PARK",
+        "play_type": "JIT_UNPARK",
+        "for_order_id": "BUY-DRI-LAG-01",
+        "for_ticker": "DRI",
+        "weight_in_park": 0.02786216884159491,
+        "adv_cap_remaining_vnd": 54933956000.0,
+        "adv_vnd": 549386760000.0,
+        "adv_data_date": "2026-08-06",
+        "sellable": 1500,
+        "fifo_lots": [
+          {
+            "entry_date": "2026-07-01",
+            "qty": 100,
+            "cost_price": 13550.0,
+            "source": "bootstrap"
+          }
+        ],
+        "reason": "L2 JIT: tài trợ BUY-DRI-LAG-01 (DRI) — cần 41.1tr, bán pro-rata PARK w=2.8%"
+      },
+      {
+        "ticker": "TCB",
+        "side": "sell",
+        "qty": 100,
+        "ref_price": 29200.0,
+        "value_vnd": 2920000.0,
+        "book": "PARK",
+        "play_type": "JIT_UNPARK",
+        "for_order_id": "BUY-DRI-LAG-01",
+        "for_ticker": "DRI",
+        "weight_in_park": 0.09192941583893463,
+        "adv_cap_remaining_vnd": 31476432000.0,
+        "adv_vnd": 314910320000.0,
+        "adv_data_date": "2026-08-06",
+        "sellable": 2000,
+        "fifo_lots": [
+          {
+            "entry_date": "2026-07-01",
+            "qty": 100,
+            "cost_price": 33900.0,
+            "source": "bootstrap"
+          }
+        ],
+        "reason": "L2 JIT: tài trợ BUY-DRI-LAG-01 (DRI) — cần 41.1tr, bán pro-rata PARK w=9.2%"
+      },
+      {
+        "ticker": "VCB",
+        "side": "sell",
+        "qty": 100,
+        "ref_price": 59000.0,
+        "value_vnd": 5900000.0,
+        "book": "PARK",
+        "play_type": "JIT_UNPARK",
+        "for_order_id": "BUY-DRI-LAG-01",
+        "for_ticker": "DRI",
+        "weight_in_park": 0.12073606498024463,
+        "adv_cap_remaining_vnd": 24707108450.0,
+        "adv_vnd": 247248084500.0,
+        "adv_data_date": "2026-08-06",
+        "sellable": 1300,
+        "fifo_lots": [
+          {
+            "entry_date": "2026-07-01",
+            "qty": 100,
+            "cost_price": 62300.0,
+            "source": "bootstrap"
+          }
+        ],
+        "reason": "L2 JIT: tài trợ BUY-DRI-LAG-01 (DRI) — cần 41.1tr, bán pro-rata PARK w=12.1%"
+      },
+      {
+        "ticker": "VHM",
+        "side": "sell",
+        "qty": 100,
+        "ref_price": 77100.0,
+        "value_vnd": 7710000.0,
+        "book": "PARK",
+        "play_type": "JIT_UNPARK",
+        "for_order_id": "BUY-DRI-LAG-01",
+        "for_ticker": "DRI",
+        "weight_in_park": 0.12136571851338801,
+        "adv_cap_remaining_vnd": 35402912925.0,
+        "adv_vnd": 354260429250.0,
+        "adv_data_date": "2026-08-06",
+        "sellable": 500,
+        "fifo_lots": [
+          {
+            "entry_date": "2026-07-01",
+            "qty": 100,
+            "cost_price": 74900.0,
+            "source": "bootstrap"
+          }
+        ],
+        "reason": "L2 JIT: tài trợ BUY-DRI-LAG-01 (DRI) — cần 41.1tr, bán pro-rata PARK w=12.1%"
+      },
+      {
+        "ticker": "VPB",
+        "side": "sell",
+        "qty": 100,
+        "ref_price": 25150.0,
+        "value_vnd": 2515000.0,
+        "book": "PARK",
+        "play_type": "JIT_UNPARK",
+        "for_order_id": "BUY-DRI-LAG-01",
+        "for_ticker": "DRI",
+        "weight_in_park": 0.09105577156169818,
+        "adv_cap_remaining_vnd": 31993692250.0,
+        "adv_vnd": 320112972500.0,
+        "adv_data_date": "2026-08-06",
+        "sellable": 2300,
+        "fifo_lots": [
+          {
+            "entry_date": "2026-07-02",
+            "qty": 100,
+            "cost_price": 27914.29,
+            "source": "bootstrap"
+          }
+        ],
+        "reason": "L2 JIT: tài trợ BUY-DRI-LAG-01 (DRI) — cần 41.1tr, bán pro-rata PARK w=9.1%"
+      }
+    ],
+    "buy_amendments": [
+      {
+        "order_id": "BUY-DRI-LAG-01",
+        "ticker": "DRI",
+        "book": "LAG",
+        "play_type": "LAG_HI",
+        "qty_plan": 3500,
+        "ref_price": 13100.0,
+        "target_value_vnd": 45850000.0,
+        "cash_before_vnd": 4821143.0,
+        "jit_sell_vnd": 42000000.0,
+        "jit_proceeds_net_vnd": 41937000.0,
+        "needed_vnd": 41090492.73910866,
+        "day_cap_remaining_before_vnd": 1364817275597.5,
+        "jit_shortfall_vnd": 0.0,
+        "day_cap_binding": false,
+        "buying_power_vnd": 46758143.0,
+        "status": "FUNDED_BY_JIT",
+        "reason": "bán PARK 42.0tr (thu ròng 41.9tr sau friction 0.15%) ⇒ đủ tiền mua nguyên lệnh",
+        "qty_final": 3500,
+        "target_value_final_vnd": 45850000.0,
+        "cash_after_vnd": 908143.0
+      }
+    ],
+    "blocked": [
+      {
+        "ticker": "SHS",
+        "reason": "hết dư địa sau phần L1 đã đề xuất (trần còn 19,193,721,000đ, còn bán được 0cp)"
+      }
+    ],
+    "notes": [],
+    "plan_path": "plan_SpaceX_2026-08-07.json",
+    "n_buy_orders_bal_lag": 1,
+    "cash_start_vnd": 4821143.0,
+    "l1_reserved_vnd": 175890000.0,
+    "l1_reserved_tickers": [
+      "ACB",
+      "BID",
+      "CTG",
+      "HDB",
+      "LPB",
+      "MBB",
+      "SHB",
+      "SHS",
+      "TCB",
+      "TPB",
+      "VCB",
+      "VHM",
+      "VIX",
+      "VPB"
+    ],
+    "etf_day_cap_vnd": 1364993165597.5,
+    "etf_day_cap_remaining_start_vnd": 1364817275597.5,
+    "adv_share": 0.5,
+    "live_labels": [
+      "ZaloPay",
+      "SpaceX"
+    ],
+    "cash_end_vnd": 908143.0,
+    "etf_day_cap_remaining_end_vnd": 1364775275597.5,
+    "jit_sell_total_vnd": 42000000.0,
+    "sells_by_ticker": {
+      "ACB": 100,
+      "BID": 100,
+      "CTG": 100,
+      "HDB": 100,
+      "LPB": 100,
+      "MBB": 200,
+      "SHB": 100,
+      "TCB": 100,
+      "VCB": 100,
+      "VHM": 100,
+      "VPB": 100
+    },
+    "decision": "JIT",
+    "_merged_into_orders": "✅ ĐÃ MERGE vào orders[] của plan này (priority 0). Giữ key này làm NGUỒN KIỂM TOÁN — KHÔNG thực thi riêng.",
+    "_recomputed_for": "Tính LẠI cho lệnh mua DRI (45.85tr SpaceX / 23.58tr ZaloPay), KHÔNG phải số cũ của SSI (75.80tr / 39.12tr)."
+  },
+  "approval_required": {
+    "requires_user_approval": true,
+    "why": [
+      "Mọi plan V2.4 đều cần user duyệt trước khi Mafee thực thi LIVE (human-in-the-loop).",
+      "GÓI 3-TRONG-1: duyệt plan này = duyệt CẢ 14 lệnh BÁN PARK (217,890,000đ) LẪN lệnh MUA DRI (45,884,388đ). Không còn duyệt tách 3 lần.",
+      "⚠️ Lệnh MUA DRI là DISCRETIONARY OVERRIDE của user (DRI đã qua cửa sổ entry T+1 chuẩn — CSV ghi WINDOW_PASSED 2026-08-06), KHÔNG phải tín hiệu tự động.",
+      "⚠️ ref_price của các lệnh BÁN là giá BQ T-1 (script L1/L2 chạy giữa phiên) — xem risk_notes."
+    ],
+    "approved_by": null
+  }
+}

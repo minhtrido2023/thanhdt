@@ -1,0 +1,370 @@
+{
+ "account_label": "SpaceX",
+ "asof": "2026-08-07",
+ "target_park": 0.8,
+ "trim_band": 0.005,
+ "orders": [
+  {
+   "ticker": "ACB",
+   "side": "sell",
+   "qty": 200,
+   "ref_price": 22150.0,
+   "value_vnd": 4430000.0,
+   "book": "PARK",
+   "play_type": "PARK_TRIM",
+   "weight_in_park": 0.05204335771682774,
+   "want_vnd": 6444273.224197614,
+   "adv_cap_vnd": 34537024240.0,
+   "adv_capped": false,
+   "adv_vnd": 345370242400.0,
+   "adv_data_date": "2026-08-06",
+   "sellable": 1500,
+   "fifo_lots": [
+    {
+     "entry_date": "2026-07-01",
+     "qty": 200,
+     "cost_price": 22650.0,
+     "source": "bootstrap"
+    }
+   ],
+   "reason": "L1 park-target: PARK 638.4tr > target 514.6tr (80% × pool 643.2tr); trim tổng 123.8tr pro-rata w=5.2%"
+  },
+  {
+   "ticker": "BID",
+   "side": "sell",
+   "qty": 300,
+   "ref_price": 37900.0,
+   "value_vnd": 11370000.0,
+   "book": "PARK",
+   "play_type": "PARK_TRIM",
+   "weight_in_park": 0.1127958521952977,
+   "want_vnd": 13966956.053407682,
+   "adv_cap_vnd": 14802726175.0,
+   "adv_capped": false,
+   "adv_vnd": 148027261750.0,
+   "adv_data_date": "2026-08-06",
+   "sellable": 1900,
+   "fifo_lots": [
+    {
+     "entry_date": "2026-07-02",
+     "qty": 300,
+     "cost_price": 42991.3,
+     "source": "bootstrap"
+    }
+   ],
+   "reason": "L1 park-target: PARK 638.4tr > target 514.6tr (80% × pool 643.2tr); trim tổng 123.8tr pro-rata w=11.3%"
+  },
+  {
+   "ticker": "CTG",
+   "side": "sell",
+   "qty": 400,
+   "ref_price": 31350.0,
+   "value_vnd": 12540000.0,
+   "book": "PARK",
+   "play_type": "PARK_TRIM",
+   "weight_in_park": 0.11294465938816747,
+   "want_vnd": 13985382.116802678,
+   "adv_cap_vnd": 22881618870.0,
+   "adv_capped": false,
+   "adv_vnd": 228816188700.0,
+   "adv_data_date": "2026-08-06",
+   "sellable": 2300,
+   "fifo_lots": [
+    {
+     "entry_date": "2026-07-02",
+     "qty": 400,
+     "cost_price": 34476.79,
+     "source": "bootstrap"
+    }
+   ],
+   "reason": "L1 park-target: PARK 638.4tr > target 514.6tr (80% × pool 643.2tr); trim tổng 123.8tr pro-rata w=11.3%"
+  },
+  {
+   "ticker": "HDB",
+   "side": "sell",
+   "qty": 200,
+   "ref_price": 26550.0,
+   "value_vnd": 5310000.0,
+   "book": "PARK",
+   "play_type": "PARK_TRIM",
+   "weight_in_park": 0.06238154164251813,
+   "want_vnd": 7724399.733744769,
+   "adv_cap_vnd": 25380207000.0,
+   "adv_capped": false,
+   "adv_vnd": 253802070000.0,
+   "adv_data_date": "2026-08-06",
+   "sellable": 1500,
+   "fifo_lots": [
+    {
+     "entry_date": "2026-07-02",
+     "qty": 200,
+     "cost_price": 26675.0,
+     "source": "bootstrap"
+    }
+   ],
+   "reason": "L1 park-target: PARK 638.4tr > target 514.6tr (80% × pool 643.2tr); trim tổng 123.8tr pro-rata w=6.2%"
+  },
+  {
+   "ticker": "LPB",
+   "side": "sell",
+   "qty": 100,
+   "ref_price": 52000.0,
+   "value_vnd": 5200000.0,
+   "book": "PARK",
+   "play_type": "PARK_TRIM",
+   "weight_in_park": 0.0733071223821682,
+   "want_vnd": 9077260.704061652,
+   "adv_cap_vnd": 8894340000.0,
+   "adv_capped": false,
+   "adv_vnd": 88943400000.0,
+   "adv_data_date": "2026-08-06",
+   "sellable": 900,
+   "fifo_lots": [
+    {
+     "entry_date": "2026-07-15",
+     "qty": 100,
+     "cost_price": 51466.67,
+     "source": "bootstrap"
+    }
+   ],
+   "reason": "L1 park-target: PARK 638.4tr > target 514.6tr (80% × pool 643.2tr); trim tổng 123.8tr pro-rata w=7.3%"
+  },
+  {
+   "ticker": "MBB",
+   "side": "sell",
+   "qty": 400,
+   "ref_price": 23900.0,
+   "value_vnd": 9560000.0,
+   "book": "PARK",
+   "play_type": "PARK_TRIM",
+   "weight_in_park": 0.08984821666327282,
+   "want_vnd": 11125463.1193371,
+   "adv_cap_vnd": 30181298815.0,
+   "adv_capped": false,
+   "adv_vnd": 301812988150.0,
+   "adv_data_date": "2026-08-06",
+   "sellable": 2400,
+   "fifo_lots": [
+    {
+     "entry_date": "2026-07-02",
+     "qty": 400,
+     "cost_price": 25850.0,
+     "source": "bootstrap"
+    }
+   ],
+   "reason": "L1 park-target: PARK 638.4tr > target 514.6tr (80% × pool 643.2tr); trim tổng 123.8tr pro-rata w=9.0%"
+  },
+  {
+   "ticker": "SHB",
+   "side": "sell",
+   "qty": 200,
+   "ref_price": 11800.0,
+   "value_vnd": 2360000.0,
+   "book": "PARK",
+   "play_type": "PARK_TRIM",
+   "weight_in_park": 0.02772512961889695,
+   "want_vnd": 3433066.548331009,
+   "adv_cap_vnd": 54938676000.0,
+   "adv_capped": false,
+   "adv_vnd": 549386760000.0,
+   "adv_data_date": "2026-08-06",
+   "sellable": 1500,
+   "fifo_lots": [
+    {
+     "entry_date": "2026-07-01",
+     "qty": 200,
+     "cost_price": 13550.0,
+     "source": "bootstrap"
+    }
+   ],
+   "reason": "L1 park-target: PARK 638.4tr > target 514.6tr (80% × pool 643.2tr); trim tổng 123.8tr pro-rata w=2.8%"
+  },
+  {
+   "ticker": "TCB",
+   "side": "sell",
+   "qty": 300,
+   "ref_price": 29200.0,
+   "value_vnd": 8760000.0,
+   "book": "PARK",
+   "play_type": "PARK_TRIM",
+   "weight_in_park": 0.091477263827321,
+   "want_vnd": 11327180.023871804,
+   "adv_cap_vnd": 31491032000.0,
+   "adv_capped": false,
+   "adv_vnd": 314910320000.0,
+   "adv_data_date": "2026-08-06",
+   "sellable": 2000,
+   "fifo_lots": [
+    {
+     "entry_date": "2026-07-01",
+     "qty": 300,
+     "cost_price": 33900.0,
+     "source": "bootstrap"
+    }
+   ],
+   "reason": "L1 park-target: PARK 638.4tr > target 514.6tr (80% × pool 643.2tr); trim tổng 123.8tr pro-rata w=9.1%"
+  },
+  {
+   "ticker": "TPB",
+   "side": "sell",
+   "qty": 100,
+   "ref_price": 14500.0,
+   "value_vnd": 1450000.0,
+   "book": "PARK",
+   "play_type": "PARK_TRIM",
+   "weight_in_park": 0.0181701414451528,
+   "want_vnd": 2249919.3198101525,
+   "adv_cap_vnd": 11749930000.0,
+   "adv_capped": false,
+   "adv_vnd": 117499300000.0,
+   "adv_data_date": "2026-08-06",
+   "sellable": 800,
+   "fifo_lots": [
+    {
+     "entry_date": "2026-07-02",
+     "qty": 100,
+     "cost_price": 16800.0,
+     "source": "bootstrap"
+    }
+   ],
+   "reason": "L1 park-target: PARK 638.4tr > target 514.6tr (80% × pool 643.2tr); trim tổng 123.8tr pro-rata w=1.8%"
+  },
+  {
+   "ticker": "VCB",
+   "side": "sell",
+   "qty": 200,
+   "ref_price": 59000.0,
+   "value_vnd": 11800000.0,
+   "book": "PARK",
+   "play_type": "PARK_TRIM",
+   "weight_in_park": 0.12014222834855344,
+   "want_vnd": 14876621.709434371,
+   "adv_cap_vnd": 24724808450.0,
+   "adv_capped": false,
+   "adv_vnd": 247248084500.0,
+   "adv_data_date": "2026-08-06",
+   "sellable": 1300,
+   "fifo_lots": [
+    {
+     "entry_date": "2026-07-01",
+     "qty": 200,
+     "cost_price": 62300.0,
+     "source": "bootstrap"
+    }
+   ],
+   "reason": "L1 park-target: PARK 638.4tr > target 514.6tr (80% × pool 643.2tr); trim tổng 123.8tr pro-rata w=12.0%"
+  },
+  {
+   "ticker": "VHM",
+   "side": "sell",
+   "qty": 100,
+   "ref_price": 77100.0,
+   "value_vnd": 7710000.0,
+   "book": "PARK",
+   "play_type": "PARK_TRIM",
+   "weight_in_park": 0.12076878495011042,
+   "want_vnd": 14954205.134255411,
+   "adv_cap_vnd": 35426042925.0,
+   "adv_capped": false,
+   "adv_vnd": 354260429250.0,
+   "adv_data_date": "2026-08-06",
+   "sellable": 500,
+   "fifo_lots": [
+    {
+     "entry_date": "2026-07-01",
+     "qty": 100,
+     "cost_price": 74900.0,
+     "source": "bootstrap"
+    }
+   ],
+   "reason": "L1 park-target: PARK 638.4tr > target 514.6tr (80% × pool 643.2tr); trim tổng 123.8tr pro-rata w=12.1%"
+  },
+  {
+   "ticker": "VIX",
+   "side": "sell",
+   "qty": 100,
+   "ref_price": 13700.0,
+   "value_vnd": 1370000.0,
+   "book": "PARK",
+   "play_type": "PARK_TRIM",
+   "weight_in_park": 0.015021694522328911,
+   "want_vnd": 1860062.610084428,
+   "adv_cap_vnd": 47787723500.0,
+   "adv_capped": false,
+   "adv_vnd": 477877235000.0,
+   "adv_data_date": "2026-08-06",
+   "sellable": 700,
+   "fifo_lots": [
+    {
+     "entry_date": "2026-07-01",
+     "qty": 100,
+     "cost_price": 17000.0,
+     "source": "bootstrap"
+    }
+   ],
+   "reason": "L1 park-target: PARK 638.4tr > target 514.6tr (80% × pool 643.2tr); trim tổng 123.8tr pro-rata w=1.5%"
+  },
+  {
+   "ticker": "VPB",
+   "side": "sell",
+   "qty": 400,
+   "ref_price": 25150.0,
+   "value_vnd": 10060000.0,
+   "book": "PARK",
+   "play_type": "PARK_TRIM",
+   "weight_in_park": 0.09060791654266068,
+   "want_vnd": 11219533.021932611,
+   "adv_cap_vnd": 32011297250.0,
+   "adv_capped": false,
+   "adv_vnd": 320112972500.0,
+   "adv_data_date": "2026-08-06",
+   "sellable": 2300,
+   "fifo_lots": [
+    {
+     "entry_date": "2026-07-02",
+     "qty": 400,
+     "cost_price": 27914.29,
+     "source": "bootstrap"
+    }
+   ],
+   "reason": "L1 park-target: PARK 638.4tr > target 514.6tr (80% × pool 643.2tr); trim tổng 123.8tr pro-rata w=9.1%"
+  }
+ ],
+ "blocked": [
+  {
+   "ticker": "SHS",
+   "reason": "trần/khả năng bán < 1 lô (muốn 609,030đ, trần ADV 19,196,861,000đ, sellable 200cp)"
+  },
+  {
+   "ticker": "VND",
+   "reason": "trần/khả năng bán < 1 lô (muốn 971,732đ, trần ADV 24,911,810,840đ, sellable 300cp)"
+  }
+ ],
+ "notes": [],
+ "park_mv_vnd": 638410000.0,
+ "cash_available_vnd": 4821143.0,
+ "reconcile_ok": true,
+ "unverified_tickers": [],
+ "excluded_tickers": [],
+ "state": {
+  "state": 3,
+  "state_name": "NEUTRAL",
+  "date": "2026-08-06",
+  "etf_park_frac_live": 0.8
+ },
+ "pool_vnd": 643231143.0,
+ "target_park_vnd": 514584914.40000004,
+ "delta_vnd": -123825085.59999996,
+ "threshold_vnd": 3216155.715,
+ "etf_day_cap_vnd": 1364993165597.5,
+ "trim_total_vnd": 123825085.59999996,
+ "day_cap_binding": false,
+ "adv_share": 0.5,
+ "live_labels": [
+  "ZaloPay",
+  "SpaceX"
+ ],
+ "decision": "TRIM",
+ "trim_proposed_vnd": 91920000.0,
+ "trim_shortfall_vnd": 31905085.599999964
+}

@@ -1061,3 +1061,108 @@ bất thường tháng 8 (ban lãnh đạo mới) + verify tỷ lệ sở hữu 
 
 **Tổng kết tuần**: 245 mã quét cơ học + 5 truy vấn tin tức · **0 QUALIFY mới** · 1 AMBIGUOUS mới (TV4,
 cổng 30/08) · 1 WATCH (CSV) · 5 NON (cụm CTCK 27/07) · 1 loại thẳng (PAT — không có nỗi sợ để mua).
+
+### 2026-08-07 (job `Taylor_20260807_011001`) — 0 QUALIFY mới · 0 case mới đáng nâng · 4 read-through · 1 khuyết tật cơ chế phát hiện được
+
+**Phần 1 — anomaly_scan** (`anomaly_scan.py`, cache BQ refresh 06/08 23:45, phiên cuối **2026-08-06**,
+universe 252 mã = 23 holding + 243 watchlist rating≤2; chạy `--backfill-days 9 --no-flags`).
+Cờ trong 9 phiên (29/07→06/08): **4**, trong đó **chỉ 1 cờ GIẢM mới**:
+
+| Mã | Ngày | Cờ | ret | idio | Đọc |
+|---|---|---|---|---|---|
+| **DNA** | 04/08 | FLOOR2 | −14,2% | −15,0% | **MỚI** — xem Phần 1b |
+| PNJ | 04/08 + 05/08 | CEIL2 | +6,9% ×2 | +6,1/+7,0% | TĂNG — read-through §7, Phần 4 |
+| VRE | 30/07 | CEIL2 | +6,8% | +4,5% | TĂNG — đã ghi tuần trước |
+
+**Phần 1b — DNA (Điện Nước An Giang, POWACO — UPCoM): KHÔNG phải case fear-buy.** Ba lý do độc lập:
+(a) **không có sự kiện khủng hoảng** — WebSearch không ra tin pháp lý/khởi tố/sự cố nào; (b) **doanh
+nghiệp đang khoẻ**, không có nỗi sợ để mua: Q2/2026 NP 68,6 tỷ (Q1 32,9 · Q2/25 50,0), doanh thu 841
+tỷ, **CF_OA_P0 +83,2 tỷ > NP** ✓, CF_OA_3Y +759 tỷ, ROE_Trailing 19,3% · ROE_Min3Y 15,3% · FSCORE 7 ·
+Debt_Eq 1,01 · CR 1,18 · DY 8,6% — hồ sơ chất lượng, không phải hàng sập; (c) **thanh khoản không thể
+giao dịch**: KL bình thường **100–5.100 cp/phiên** (≈2–100 triệu VND/ngày), riêng phiên 04/08 có 81.000
+cp (1,4 tỷ) — chính khối lệnh đó tạo ra cú −14,2% trong sổ mỏng. Giá đã bật lại 17.500 → **20.100
+(06/08, chỉ 500 cp)**. Ràng buộc thanh khoản §12#5 binding gấp ~17× so với TV4 (vốn đã bị coi là chặn).
+> ⚠️ **Nhiễu biên độ sàn — nguồn dương tính giả mới, đáng ghi**: ngưỡng FLOOR2/IDIOCRASH của
+> `anomaly_scan.py` (−6,5% / −6,0%) hiệu chỉnh theo biên độ **HOSE ±7%**. Trên **UPCoM (±15%)** và
+> **HNX (±10%)** một phiên biến động bình thường cũng trip cờ. DNA (−14,2%) và TOS (−15,3%, Phần 2b)
+> đều là UPCoM. Đọc cờ của mã UPCoM/HNX phải quy về **số lần chạm sàn**, không đọc theo % tuyệt đối.
+
+**Phần 2 — quét RỘNG hơn universe của anomaly_scan (MỚI tuần này, đóng đúng điểm mù mandate nêu).**
+`anomaly_scan` chỉ nhìn 252 mã (holding + rating≤2) → mã ngoài watchlist sập vì khủng hoảng là **vô
+hình**. Quét cơ học toàn bộ `bq_cache/ticker` 2026: **1.024 mã có dữ liệu, 297 mã đạt sàn thanh khoản
+≥1 tỷ/phiên**, tiêu chí IDIOCRASH giống hệt (ret≤−6% ∧ idio≤−5%), cửa sổ 9 phiên → **9 sự kiện / 8 mã**.
+Chấm theo §2/§2.5 + red-flag §10.10 — **cả 8 đều NON, 0 QUALIFY, và không mã nào có sự kiện khủng hoảng**:
+
+| Mã | Ngày | ret/idio | Số chặn (bằng chứng BQ, Q2/2026) | Kết luận |
+|---|---|---|---|---|
+| **TOS** | 29/07 | −15,3% / −16,7% | **BANNED vĩnh viễn** (KB) + PB 2,41 → không có sàn định giá (§2#5). Đã hồi 88.000→96.000 | Loại thẳng, xem 2b |
+| **DCL** (Dược Cửu Long) | 06/08 | −6,9% / −6,3% | ROE_Trailing **−0,11%**, ROE_Min3Y 1,3% (lợi nhuận ≈0), **CF_OA_P0 −51,5 tỷ**, PB 1,97 → hỏng cả #3 lẫn #5. Thêm: pharma = buy-and-hold, timing phá alpha (KB) | NON |
+| **ASP** (An Pha Petrol) | 04/08 | −6,1% / −6,9% | **CR 0,86 (<1)** + Debt_Eq 2,71 → hỏng #4 solvency. NP 66,6 tỷ nhưng **CF_OA −1,8 tỷ** = đúng chữ ký §10.10 (LN sổ sách không có tiền). ROE_Min3Y −9,7% | NON |
+| **ACC** | 31/07 + 03/08 | −6,8/−6,9% | PB **0,32** hấp dẫn NHƯNG **CF_OA_3Y −234,8 tỷ** (âm cấu trúc 3 năm), Q2 CF_OA −230 tỷ, LtDebt 517→857 tỷ. §10.10 | NON dù rẻ |
+| **SHN** | 03/08 | −8,0% / −9,5% | PE −134 (lỗ), Debt_Eq 2,99, ROE_Min3Y −0,1% | NON |
+| **HID** | 05/08 | −7,0% / −6,9% | PE −4,9 (lỗ), penny 3.480 | NON |
+| **DST** | 31/07 | −7,0% / −6,5% | **Doanh thu = 0** (vỏ), PE 78 | NON |
+| **SBS** | 31/07 | −6,3% / −5,7% | PB 2,44 → không có sàn định giá | NON |
+
+**Phần 2b — TOS: đã kiểm tra là sập THẬT, không phải hiện vật điều chỉnh giá.** `Close/Price` reset
+về 1,0 ngày 23/07 (hành động doanh nghiệp, BVPS Q2 63.866→39.794 = pha loãng), nhưng cú −15,3% ngày
+29/07 xảy ra SAU đó trên 449.824 cp (39,6 tỷ ≈ 17× KL thường) — biến động giá thật. Không đào thêm:
+**TOS nằm trong danh sách BANNED vĩnh viễn**, và PB 2,41 hỏng §2#5 — hai lý do độc lập cùng loại.
+
+**Phần 3 — WebSearch tin khởi tố/bắt giữ (cửa sổ 24/07→07/08, bù điểm mù của scan giá/KL): 0 case mới.**
+5 truy vấn. Mọi tên xuất hiện trong cửa sổ đều **đã có kết luận từ trước**: PAT (khởi tố CT Lưu Bách Đạt
+22/07 — đã loại tuần trước), DGC, PNJ, TV4 (11/06), PC1 (**BANNED**), BCG (huỷ niêm yết bắt buộc 15/07
+do chậm nộp BCTC >6 tháng — NON kinh điển, tin cũ). Bối cảnh: tuần 03–07/08 thị trường thận trọng,
+nhóm ngân hàng mất ~200.000 tỷ vốn hoá trong tháng 7 — **yếu tố vĩ mô/beta, không phải khủng hoảng
+riêng lẻ**, ngoài phạm vi sleeve này.
+
+**Phần 4 — read-through case đang theo dõi (có 2 tin MỚI đáng kể, không làm lại từ đầu)**
+
+- **PNJ** (§7, AMBIGUOUS): ⚠️ **hai tin mới ngược chiều nhau.**
+  *(xấu, định lượng được)* Vietstock 06/08 công bố cơ chế thiệt hại: **giá trị hàng hoá phải mua lại
+  5.900 tỷ trong 20 ngày đầu tháng 7 = 3,7× doanh thu bán hàng** cùng kỳ ("rút tiền hàng loạt" sau vụ
+  chứng thư kim cương). **Q2/2026 đã LỖ** (doanh thu 8.484 tỷ, +12% YoY); luỹ kế 6T vẫn lãi 1.185 tỷ
+  nhờ Q1. → phần lớn thiệt hại rơi vào **Q3**, đúng như cổng xác nhận đã đặt.
+  *(tốt, dòng tiền thật)* Khối ngoại **mua ròng 5 phiên liên tiếp ~335 tỷ** (riêng 03/08: 82 tỷ). Giá
+  **30.750 (24/07, đáy ~6 năm) → 37.900 (05/08) → 36.450 (06/08), +18,5% từ đáy**, 2 phiên trần liên tiếp.
+  → **Không đổi phân loại AMBIGUOUS. Cổng xác nhận vẫn là BCTC Q3/2026 (~cuối 10/2026)** — nay có SỐ
+  cụ thể để kiểm: nghĩa vụ mua lại 5.900 tỷ có phản ánh hết vào Q3 không, và CF_OA Q3 có âm không.
+  **Điểm hành động đã hẹp lại**: mức chiết khấu đáy 24/07 không còn (+18,5%), tức nếu trước đây do dự
+  thì cửa sổ đó đã đóng phần lớn — nhất quán với bài học "đừng đuổi sau khi đã hồi".
+- **DGC** (§6, AMBIGUOUS-nghiêng-constructive): ⚠️ tin mới **chạm lõi**, nhưng **cửa sổ mua đã đóng cơ học**.
+  Vietstock 06/08: DGC **bị dừng khai thác mỏ quặng**, phải **nhập toàn bộ nguyên liệu**, biên lợi nhuận
+  **34,9% → 23%**, LN 6 tháng **−50%**. Đây là thiệt hại *vận hành cấu trúc*, không phải rủi ro quản trị
+  thuần — nghiêng về gạch ❌ §2 ("lõi tự hỏng"), làm yếu luận điểm RE-DO 23/07.
+  NHƯNG giá đã **hồi trọn vẹn**: đáy 36.000 (27/07) → **43.350 (06/08), +20,4%**, tức **cao hơn cả mức
+  43.000 trước cú sập 20/07**; PB 0,84 → **1,01**. → **Không còn dislocation nào để mua** ⇒ tranh luận
+  QUALIFY/NON trở nên vô nghĩa cho mục đích *vào lệnh*. Ghi nhận để lần sau tái xuất hiện thì đọc lại
+  từ dữ kiện "mỏ bị dừng", đừng đọc lại từ khung 23/07.
+- **TV1** (§4): **không có tin mới**. Giá đi ngang 19.400–20.000 suốt 3 tuần (06/08: 19.500), PB 1,03
+  (BVPS đã cập nhật sau Q2). **Cổng gần: lấy ý kiến chọn đơn vị kiểm toán 10/08 — còn 3 ngày**, nên
+  đây là mục đáng theo dõi nhất trong watchlist tuần tới. Cổng phụ (ngày ĐKCC cổ tức 15%) chưa công bố.
+- **TV4** (§13 tuần trước, AMBIGUOUS): **không có tin mới**. Giá đứng im **12.900** (PB 0,97), KL
+  400–7.200 cp/phiên — xác nhận lại ràng buộc thanh khoản. **Cổng xác nhận nhị phân giữ nguyên: ý kiến
+  kiểm toán BCTC bán niên soát xét 2026, hạn ~30/08.** (TV2 tiếp tục re-rate: 25.350 → 26.300.)
+
+**Phần 5 — khuyết tật cơ chế phát hiện được trong lúc quét (BÁO CÁO, không tự sửa — chạm production)**
+
+`anomaly_scan.write_flags()` cập nhật `last_alert = max(...)` **không phân biệt `reasons`**, còn
+`anomaly_gate.anomaly_excluded()` chỉ đọc `last_alert` **không đọc `reasons`** ⇒ **một cờ CEIL2 (giá
+TĂNG trần 2 phiên) gia hạn TTL 30 ngày của cổng loại-trừ y hệt một cờ khủng hoảng.** Hiện trạng
+07/08: **10 mã đang bị loại, trong đó 2 mã bị loại vì ĐI LÊN** — `VRE` (CEIL2 30/07, +6,8% → hết hạn
+**29/08**) và `PNJ` (CEIL2 04–05/08, +6,9% → hết hạn **04/09**).
+Hệ quả hai chiều, cần người quyết định chứ không tự sửa:
+- *Tình cờ có lợi*: `current_ops.md` đang lo "cờ PNJ TTL 30 ngày hết hạn ~23/08, gate mở TRƯỚC cổng xác
+  nhận thật tháng 10". Thực tế cờ đã tự gia hạn tới **04/09** — nhưng **vì một lý do sai** (giá tăng),
+  nên KHÔNG được coi là đã xử lý xong; nhu cầu gia hạn có chủ đích trước cổng Q3 vẫn còn nguyên.
+- *Bất lợi*: VRE bị loại khỏi bước chọn mã cơ học 30 ngày chỉ vì tăng trần 2 phiên — hoàn toàn ngoài ý
+  đồ "đừng mua đúng lúc doanh nghiệp đang khủng hoảng".
+Sửa tối thiểu khả dĩ (chưa đề xuất wire, chưa qua quant-skeptic): `anomaly_excluded` bỏ qua cờ mà
+`reasons` chỉ gồm tín hiệu TĂNG (`CEIL2`), hoặc `write_flags` giữ `last_alert` riêng cho cờ giảm.
+Chạm 1 sổ production + 3 sổ paper (xem docstring `insider_sell_flagged`) ⇒ cần gate đầy đủ.
+
+**Tổng kết tuần**: **252 mã** (anomaly_scan) **+ 297 mã** (quét rộng, thanh khoản ≥1 tỷ/phiên, mới tuần
+này) **+ 5 truy vấn tin tức** · **0 QUALIFY mới** · **0 case mới đáng nâng thành mục riêng** · 9 NON
+(DNA + 8 mã quét rộng) · 4 read-through (PNJ, DGC — cả hai có tin mới; TV1, TV4 — không tin mới) ·
+1 khuyết tật cơ chế báo lên fleet. **Mốc gần nhất phải theo: TV1 10/08 (3 ngày) → TV4 30/08 → PNJ Q3
+cuối 10/2026.**
