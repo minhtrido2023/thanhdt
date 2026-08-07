@@ -69,6 +69,29 @@ rc        = d.get("risk_checks", {})
 rc_ok     = all("PASS" in str(v) or "CLEAR" in str(v) or "HEALTHY" in str(v) or "VALID" in str(v) or "N/A" in str(v)
                 for v in rc.values()) if rc else None
 flags = []
+
+# ── Bất biến lệnh (thêm 2026-08-07, sự cố plan 08-07 bán trùng lô JIT_UNPARK) ──
+# a) MERGE_STALE_SRC: lệnh mang `merged_from` nghĩa là bước gộp đã cộng MỌI lệnh cùng
+#    (side,ticker) vào nó. Còn sót lệnh nguồn cùng (side,ticker) = bước gộp thêm lệnh gộp
+#    nhưng quên xoá lệnh gốc → gửi 2 lần. Ngày 08-07 lỗi này để lọt 1.200cp (SpaceX) +
+#    400cp (ZaloPay) bán thừa, không tầng nào chặn.
+# b) SELL_GT_SELLABLE: tổng qty BÁN 1 mã vượt `sellable_at_calc` mà chính plan ghi ra.
+_orders = d.get("orders", [])
+def _q(o): return o.get("qty", o.get("quantity")) or 0
+_by_key = {}
+for _o in _orders:
+    _by_key.setdefault((_o.get("side"), _o.get("ticker")), []).append(_o)
+_stale = sorted({k[1] for k, v in _by_key.items()
+                 if len(v) > 1 and any(o.get("merged_from") for o in v)})
+if _stale: flags.append("MERGE_STALE_SRC:" + ",".join(_stale))
+_over = []
+for (_side, _tk), _os in _by_key.items():
+    if _side != "sell": continue
+    _cap = max((o.get("merged_from", {}).get("sellable_at_calc") or 0) for o in _os)
+    if _cap and sum(_q(o) for o in _os) > _cap:
+        _over.append(f"{_tk}({sum(_q(o) for o in _os)}>{_cap})")
+if _over: flags.append("SELL_GT_SELLABLE:" + ",".join(sorted(_over)))
+
 # Plan HOLD (0 lệnh) không có gì để thực thi — approval chỉ bắt buộc khi có lệnh thật.
 # mafee_authorized KHÔNG còn là fail-flag: không có code path nào ghi field này (INCIDENTS
 # 2026-07-06), gate thực thi thật (trading_bot/plan.py approval_block_reason) chỉ đọc
