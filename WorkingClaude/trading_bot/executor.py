@@ -30,6 +30,7 @@ import subprocess
 import time
 
 from .config import EXEC_DIR, STOP_FILE
+from .plan_funding_gate import _effective_loan_package
 
 # Root of the Mike fleet (two levels up from trading_bot/).
 _MIKE_ROOT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
@@ -1077,8 +1078,12 @@ class Executor:
                     # default trong khi đặt bằng 1840 sẽ báo thiếu tiền ở đúng nửa phần vay
                     # (arch-reviewer 2026-08-03 #2) — và WAIT_CASH đó không phân biệt được
                     # với thiếu tiền thật.
-                    qmax = self.broker.get_max_buy_qty(
-                        o.ticker, px, loan_package_id=getattr(o, "loan_package_id", None))
+                    # Gói vay HIỆU LỰC (đúng cách place_order giải: đòn bẩy chỉ định phải
+                    # validate được, còn lại giải gói hợp lệ theo MÃ) — đo bằng gói thô của
+                    # lệnh là bug DRI/UPCOM 2026-08-07: lp=None ⇒ ppse hỏi gói default 1841
+                    # (mainboard-only) ⇒ reject ⇒ WAIT_CASH vô hạn dù thừa tiền.
+                    _eff_lp, _ = _effective_loan_package(o, self.broker)
+                    qmax = self.broker.get_max_buy_qty(o.ticker, px, loan_package_id=_eff_lp)
                     if qmax is None or qmax < qty:
                         self._journal("WAIT_CASH", o, qty=qty, price=px,
                                       note="thiếu tiền — chờ lệnh bán khớp"

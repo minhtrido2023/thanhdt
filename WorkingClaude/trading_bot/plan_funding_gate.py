@@ -1,7 +1,8 @@
 """GATE CỨNG tầng PLAN — Σ giá trị lệnh MUA phải ≤ SỨC MUA THẬT của broker.
 
-⚠️ CHƯA WIRE VÀO PRODUCTION. Module này chưa được `bot_execute.py` gọi; patch chờ Mike review
-+ quant-skeptic duyệt (`mike/agents/Taylor/research/plan_funding_gate_bot_execute.patch`).
+✅ ĐÃ WIRE VÀO PRODUCTION 2026-08-04 (commit bb8583c). `bot_execute.py:536` gọi
+`check_plan_funding()` và `action == "BLOCK"` ⇒ `continue`, tức KHÔNG đặt bất kỳ lệnh nào của
+account đó. Mọi thay đổi trong file này chạm TIỀN THẬT — cần quant-skeptic trước khi tin.
 
 VÌ SAO CẦN GATE CƠ HỌC (không phải thêm 1 dòng văn xuôi nữa)
 ────────────────────────────────────────────────────────────
@@ -114,7 +115,8 @@ def _effective_loan_package(order, broker):
         account, tức KHÔNG có đòn bẩy. Gói 1840 có initialRate 0,5 ⇒ sức mua GẤP ĐÔI gói 1841:
         đo bằng gói khai báo trong khi lệnh khớp bằng gói nhỏ hơn = đo THỪA sức mua đúng gấp
         đôi ⇒ gate bỏ lọt chính hành vi "list-rồi-đợi-tiền" nó sinh ra để ngăn.
-      • `cash_only` — `_resolve_loan_package_id(ticker)` (ca TV1/UPCOM).
+      • KHÔNG có đòn bẩy chỉ định — `_resolve_loan_package_id(ticker)` (ca TV1/DRI trên UPCOM;
+        từ 2026-08-07 áp cho MỌI lệnh, không chỉ `cash_only` — đúng như `place_order` nay giải).
     Cả hai hàm broker đều cache theo (symbol[, want]) trong phiên ⇒ giá trị gate đo và giá trị
     `place_order` dùng KHÔNG THỂ lệch nhau.
     """
@@ -132,15 +134,62 @@ def _effective_loan_package(order, broker):
         # giả định đòn bẩy áp được: đo bằng gói default cho sức mua NHỎ HƠN — cùng chiều
         # fail-safe với chính `place_order` (thà chặn/under-deploy còn hơn vay vượt mức).
         return _account_default_package(broker), "lever:unvalidated→account_default"
-    if getattr(order, "cash_only", False):
-        fn = getattr(broker, "_resolve_loan_package_id", None)
-        if callable(fn):
-            try:
-                # Cùng hàm, cùng cache theo symbol trong phiên → không thể lệch với place_order.
-                return fn(order.ticker), "resolved:cash_only"
-            except Exception:
-                pass
+    fn = getattr(broker, "_resolve_loan_package_id", None)
+    if callable(fn):
+        try:
+            # Cùng hàm, cùng cache theo symbol trong phiên → không thể lệch với place_order.
+            # KHÔNG còn điều kiện `cash_only` (sửa 2026-08-07, ca DRI/UPCOM): `place_order`
+            # nay giải gói theo MÃ cho MỌI lệnh không có đòn bẩy chỉ định, nên gate phải giải
+            # y hệt — lệch chính là nguồn false positive mà docstring module cảnh báo.
+            return fn(order.ticker), "resolved:symbol"
+        except Exception:
+            pass
     return None, "account_default"
+
+
+def _order_priority(o):
+    """`Order.priority` (trading_bot/plan.py:26 — NHỎ = làm trước, sell=1, buy theo weight).
+
+    Mặc định 5 = ĐÚNG default của dataclass `Order`. Hệ quả cố ý: lệnh KHÔNG khai priority thì
+    mua lẫn bán đều =5, mà điều kiện tín dụng là `<` NGHIÊM NGẶT ⇒ 5 < 5 sai ⇒ KHÔNG cấp tín
+    dụng. Tức plan không khai thứ tự giữ NGUYÊN hành vi cũ (fail-safe), không tự nới.
+    """
+    try:
+        return int(getattr(o, "priority", 5))
+    except (TypeError, ValueError):
+        return 5
+
+
+def _jit_sell_credit(plan, buys):
+    """Tiền lệnh BÁN CÙNG PLAN chắc chắn được giải phóng TRƯỚC mọi lệnh mua (net phí).
+
+    VÌ SAO CẦN (lỗ hổng thật, ZaloPay 2026-08-07): cơ chế L2 JIT-unpark (LIVE từ 2026-08-06)
+    cho DollarBill tính lệnh BÁN PARK ĐỂ tự cấp vốn cho lệnh mua trong CÙNG plan. Nhánh (1) chỉ
+    đo `pp0Buy` TẠI thời điểm gate chạy — chưa lệnh bán nào khớp ⇒ plan TỰ CẤP VỐN ĐỦ vẫn bị
+    CHẶN sạch. Thực tế 2026-08-07: 8 lệnh bán PARK (priority 0, Σ 98,68tr) + 1 lệnh mua DRI
+    (priority 1, 23,60tr) → BLOCK, 0 lệnh được đặt cả ngày.
+
+    ĐIỀU KIỆN THỨ TỰ LÀ CỨNG — chỉ tính lệnh bán có priority NHỎ HƠN NGHIÊM NGẶT priority NHỎ
+    NHẤT trong TOÀN BỘ lệnh mua của plan. `executor._place_slices` duyệt
+    `sorted(plan.orders, key=priority)` nên bán priority thấp hơn thật sự đi trước MỌI lệnh mua.
+    Lấy `min` trên toàn plan (không phải per-group/per-order) là chủ ý: bảo đảm mỗi đồng tín
+    dụng đi trước MỌI lệnh mua sẽ tiêu nó, và mỗi lệnh bán chỉ được đếm ĐÚNG MỘT LẦN vào một
+    hũ chung — tính per-group sẽ đếm cùng một lệnh bán cho nhiều nhóm (double-count tiền thật).
+    Bán priority BẰNG hoặc LỚN HƠN ⇒ chưa giải phóng gì lúc lệnh mua chạy ⇒ cộng vào chính là
+    tái lập bug "list lệnh rồi đợi tiền" mà module này sinh ra để chặn (3 sự cố/15 ngày).
+
+    NET PHÍ, KHÔNG haircut thêm: `(1 - FEE_RATE)` là số học chắc chắn (phí bán 0,075% chắc chắn
+    bị trừ), không phải đệm rủi ro. KHÔNG thêm haircut cho rủi ro khớp lệnh vì (a) không có dữ
+    liệu neo hệ số ⇒ sẽ là tham số bịa, (b) lệnh bán không khớp KHÔNG gây thấu chi: tầng 3
+    (`executor.py` `get_cash() < need` → `WAIT_CASH`, retry chu kỳ sau) vẫn nguyên vẹn, hậu quả
+    là lệnh mua chờ chứ không phải mua bằng tiền không có. Chặt hơn nhánh (3) đang chấp nhận
+    (nhánh (3) cộng 100% GỘP), nên không nới lỏng gì so với mức rủi ro module đã chấp nhận.
+    """
+    min_buy_prio = min(_order_priority(o) for o in buys)
+    sells = [o for o in plan.orders
+             if str(o.side or "").lower() == "sell" and _order_priority(o) < min_buy_prio]
+    gross = sum(o.qty * o.ref_price for o in sells)
+    return gross * (1.0 - FEE_RATE), len(sells), min_buy_prio
 
 
 def check_plan_funding(plan, broker, account_mode):

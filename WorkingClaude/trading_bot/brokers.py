@@ -641,10 +641,14 @@ class DNSEBroker(BrokerBase):
             if not lever_ok:
                 print(f"[dnse] ⚠ ĐÒN BẨY KHÔNG ÁP ĐƯỢC cho {symbol}: {lever_note} → dùng gói "
                       f"default {lp} (lệnh này KHÔNG có đòn bẩy — fail-safe, KHÔNG chặn lệnh)")
-        elif cash_only:
-            lp = self._resolve_loan_package_id(symbol)
         else:
-            lp = None
+            # KHÔNG có gói chỉ định → giải gói hợp lệ cho MÃ, bất kể cash_only (sửa
+            # 2026-08-07, ca DRI/UPCOM: lệnh thường trên UPCOM đi ra bằng lp=None ⇒
+            # dnse_api rơi về gói default account 1841 = mainboard-only ⇒ DNSE reject
+            # cả ppse lẫn place_order, biểu hiện y hệt "thiếu tiền" WAIT_CASH vô hạn).
+            # An toàn gọi vô điều kiện: _resolve_loan_package_id GIỮ NGUYÊN gói default
+            # khi default hợp lệ cho mã → no-op với mọi lệnh mainboard BAL/LAG/CAPIT.
+            lp = self._resolve_loan_package_id(symbol)
         r = self.client.place_order(self.account_id, symbol, qty=int(qty),
                                     side=side, order_type=order_type, price=price,
                                     loan_package_id=lp)

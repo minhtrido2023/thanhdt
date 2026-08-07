@@ -161,14 +161,17 @@ b.place_order("TV1", 400, "buy", price=19900, cash_only=True)
 check(cl.last_place["loan_package_id"] == 1841,
       "empty list → forwarded account default 1841 (fail-safe)")
 
-print("=== L2 (c3) cash_only=False → NO resolve, NO loan_packages query ===")
+print("=== L2 (c3) cash_only=False → resolve theo MÃ (sửa 2026-08-07, ca DRI/UPCOM) ===")
+# Hợp đồng CŨ ở đây là "lệnh thường forward lp=None, không query" — chính nó là BUG DRI:
+# None ⇒ dnse_api rơi về gói default 1841 (mainboard-only) ⇒ DNSE reject cả ppse lẫn
+# place_order với mã UPCOM ⇒ WAIT_CASH vô hạn trông y hệt thiếu tiền.
 cl = FakeClient(1841, PKG_MAP)
 b = make_broker(cl)
 b.place_order("VNM", 100, "buy", price=60000)  # cash_only defaults False
-check(cl.last_place["loan_package_id"] is None,
-      "normal order: loan_package_id=None forwarded (client applies default itself)")
-check(cl.calls.get("VNM", 0) == 0,
-      "normal order does NOT query loan_packages (no new API cost on BAL/LAG/CAPIT path)")
+check(cl.last_place["loan_package_id"] == 1841,
+      "normal order (default hợp lệ): forward ĐÚNG gói default 1841 — lệnh đi ra y hệt cũ")
+check(cl.calls.get("VNM", 0) == 1,
+      "normal order query loan_packages 1 lần/mã/phiên (chi phí thêm: 1 GET, cache theo mã)")
 
 print("=== L2 (d) cache: 2nd resolve of same symbol does NOT re-query ===")
 cl = FakeClient(1841, PKG_MAP)
