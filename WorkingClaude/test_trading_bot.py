@@ -15,6 +15,9 @@ import shutil
 import sys
 import tempfile
 
+# Test-mode: KHÔNG cho Executor._publish_bot_event ghi event GIẢ vào bus production
+# (retro-2026-08-07 Pattern 1 — 4 lần tái diễn 08-03/04/05/07). Xem coding_guidelines §5.
+os.environ.setdefault("MIKE_BOT_TEST_MODE", "1")
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 

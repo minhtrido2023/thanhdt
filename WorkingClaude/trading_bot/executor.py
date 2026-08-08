@@ -44,7 +44,28 @@ def _publish_bot_event(event_type: str, topic: str, payload: dict) -> None:
     event_type: "error" | "status" | "finding"
     topic: short slug, e.g. "STEP_FAIL" or "fill_lagging"
     payload: dict serialised to JSON
+
+    TEST-MODE GUARD (2026-08-08): selfcheck/pytest runs constructing an Executor
+    reach these call sites and used to write FAKE events onto the production bus
+    labelled `agent_id=Mafee` (232 events counted on the bus across 08-03/04/05/07:
+    149 LEVER_PACKAGE_UNAUTHORIZED + 83 dd-redflag-fill — retro-2026-08-07
+    Pattern 1). Existing fields (account label, plan_date sentinel,
+    strategy) are NOT reliable test signals (inconsistent across selfcheck files),
+    so the gate is an explicit env var: selfchecks set MIKE_BOT_TEST_MODE=1;
+    pytest sets PYTEST_CURRENT_TEST by itself.
+    MIKE_BOT_TEST_EVENT_SINK (optional) = path to append the suppressed events to,
+    so a test can still assert an event WOULD have fired.
     """
+    if os.environ.get("MIKE_BOT_TEST_MODE") == "1" or os.environ.get("PYTEST_CURRENT_TEST"):
+        sink = os.environ.get("MIKE_BOT_TEST_EVENT_SINK")
+        if sink:
+            try:
+                with open(sink, "a", encoding="utf-8") as fh:
+                    fh.write(json.dumps({"event_type": event_type, "topic": topic,
+                                         "payload": payload}, ensure_ascii=False) + "\n")
+            except Exception:
+                pass
+        return
     if not os.path.isfile(_APPEND_EVENT):
         return
     try:

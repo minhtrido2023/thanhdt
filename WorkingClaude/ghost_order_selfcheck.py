@@ -31,6 +31,9 @@ import glob
 import os
 import sys
 
+# Test-mode: KHÔNG cho Executor._publish_bot_event ghi event GIẢ vào bus production
+# (retro-2026-08-07 Pattern 1 — 4 lần tái diễn 08-03/04/05/07). Xem coding_guidelines §5.
+os.environ.setdefault("MIKE_BOT_TEST_MODE", "1")
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from trading_bot.brokers import OrderUpdate  # noqa: E402
 from trading_bot.plan import PlannedOrder, TradePlan  # noqa: E402
