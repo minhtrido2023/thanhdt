@@ -1,0 +1,25 @@
+# Pre-commit config — OUTER repo (/home/trido/thanhdt), tức repo chứa WorkingClaude/.
+#
+# Đây là .pre-commit-config.yaml ĐẦU TIÊN của repo này (thêm 2026-08-08). Repo lồng
+# WorkingClaude/mike/ có config RIÊNG của nó (mike/.pre-commit-config.yaml, wiring
+# bin/shellcheck_gate.sh + bin/discord_id_gate.sh) — hai repo, hai hook độc lập, không thay
+# thế nhau.
+#
+# Setup (một lần cho mỗi clone/worktree, chạy từ /home/trido/thanhdt):
+#     pip install --user pre-commit && pre-commit install
+# Chạy tay:  pre-commit run --all-files
+#
+repos:
+  - repo: local
+    hooks:
+      # Kiểm kê 2026-08-08 (job Taylor_20260808_035850): 165 file khớp test_*.py / *_test.py ở
+      # gốc WorkingClaude/, KHÔNG file nào có `def test_` — toàn bộ là script backtest/R&D đặt
+      # tên theo thói quen lịch sử. kb/coding_guidelines.md §23 hệ luận 2 đã chốt quy ước
+      # (test_* dành cho test thật; R&D dùng exp_*/probe_*/stress_*); hook này biến nó thành
+      # điều kiện cơ học để commit, thay vì một đoạn văn phải nhớ. Chỉ chặn file MỚI —
+      # xem header test_naming_gate.sh để biết vì sao phạm vi hẹp như vậy.
+      - id: test-naming-gate
+        name: test_*.py phải là test thật (xem WorkingClaude/test_naming_gate.sh)
+        entry: WorkingClaude/test_naming_gate.sh
+        language: system
+        files: '^WorkingClaude/[^/]+\.py$'
