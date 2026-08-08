@@ -515,19 +515,10 @@ Mọi module khác (`lag_*.py`, `dcf_*.py`, `custom_basket.py`, `anomaly_gate.py
 `trading_bot/{due_diligence,netting_recon,plan_cash_commitment,discretionary_accumulation}.py`, …)
 có **1–6** selfcheck phụ thuộc → chạy đúng những file đó.
 
-**Tra bản đồ ngược bằng LỆNH, đừng chép bảng vào đây** (bảng chép tay sẽ mốc; lệnh thì không):
-
-```bash
-cd /home/trido/thanhdt/WorkingClaude && python - <<'PY'
-import re, glob, collections
-m = collections.defaultdict(set)
-for f in sorted(glob.glob("*selfcheck*.py")):
-    src = open(f, encoding="utf-8", errors="replace").read()
-    for a, b in re.findall(r'from\s+(trading_bot[\w.]*)\s+import|import\s+(trading_bot[\w.]*)', src):
-        m[a or b].add(f)
-for k in sorted(m): print(f"{k:38s} <- {', '.join(sorted(m[k]))}")
-PY
-```
+**Tra bản đồ ngược bằng LỆNH, đừng chép bảng vào đây** (bảng chép tay sẽ mốc; lệnh thì không) —
+`bin/selfcheck_scope_map.sh` (không tham số = toàn bộ bản đồ; `bin/selfcheck_scope_map.sh
+trading_bot/plan.py` = chỉ file đó). Bảng trên chỉ là mốc tham chiếu đo ngày 2026-08-08; nguồn
+chuẩn tắc là output của script.
 
 **Hệ luận — 2 quy ước để bộ test không mốc tiếp:**
 1. **Selfcheck KHÔNG được assert lên trạng thái SỐNG.** Chép cứng một rổ mã, một số đếm đo tại một
