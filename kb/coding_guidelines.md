@@ -91,6 +91,29 @@ apply the same reasoning to every new script that calls an external system with 
 - Writes to shared state files must be atomic (`tmp` + `os.replace`/`os.rename`), never a direct
   overwrite — a kill mid-write must never leave a half-written file for the next run to trust.
 
+**§5b. Selfcheck chạm `Executor` PHẢI đặt `MIKE_BOT_TEST_MODE=1` — cùng lớp "side effect ra hệ
+thống ngoài", nhưng kênh ngoài ở đây là BUS.** Root cause (4 lần tái diễn 2026-08-03/04/05/07,
+formal hoá retro 08-05, escalate retro 08-07): `trading_bot/executor.py::_publish_bot_event()` gọi
+THẲNG `mike/bin/append_event.sh Mafee ...` từ 6 chỗ (`GHOST_ORDER_DETECTED`,
+`LEVER_PACKAGE_UNAUTHORIZED`, `dcf-rich-fill`, `dd-redflag-fill`, `STEP_FAIL`, `fill_lagging`) mà
+KHÔNG có guard môi trường → mọi selfcheck dựng `Executor` rồi chạy qua các nhánh đó ghi event GIẢ
+vào bus production, gắn `agent_id` THẬT `Mafee`, làm nhiễu `consolidate.sh`/KB/retro hằng ngày
+(đo được **232 event giả** trong 4 ngày: 149 `LEVER_PACKAGE_UNAUTHORIZED` + 83 `dd-redflag-fill`).
+- Guard sống ở `_publish_bot_event()` (sửa 2026-08-08): thoát sớm khi `MIKE_BOT_TEST_MODE == "1"`
+  **hoặc** `PYTEST_CURRENT_TEST` (pytest tự đặt). `MIKE_BOT_TEST_EVENT_SINK=<path>` (tuỳ chọn) ghi
+  event bị chặn ra file để test vẫn assert được "lẽ ra đã bắn event".
+- **Selfcheck MỚI nào import `Executor`** → thêm 1 dòng ngay đầu file, TRƯỚC mọi lần dựng
+  `Executor`: `os.environ.setdefault("MIKE_BOT_TEST_MODE", "1")`. Đây là phòng ngừa DUY NHẤT chống
+  lần tái diễn thứ 5 — tác giả selfcheck mới không có cách nào tự biết.
+- **KHÔNG suy "đây là test" từ field sẵn có** (`account` label, `plan_date` sentinel 2099-*,
+  `strategy="selfcheck"`): đã kiểm kê, cả 3 đều KHÔNG nhất quán giữa các file selfcheck
+  (`capit_lever_selfcheck.py` CỐ Ý dùng label THẬT `SpaceX`/`ZaloPay` để cổng duyệt khớp production;
+  `paper_main_window_selfcheck.py` dùng `plan_date=TODAY` thật). Chính sự không nhất quán này là
+  LÝ DO bug tái diễn qua các file viết độc lập — nên gate phải là biến môi trường TƯỜNG MINH.
+- **`PYTEST_CURRENT_TEST` KHÔNG phủ được `test_trading_bot.py`**: file này chạy dạng script
+  (`python test_trading_bot.py`, không có `def test_*`) → vẫn cần dòng env tường minh. Đừng giả
+  định "tên là test_ thì pytest lo".
+
 ## 6. Verify Report Data Provenance (client-facing numbers)
 
 **A field's name and a plausible-looking value are not verification.** Root cause (2026-07-03,
