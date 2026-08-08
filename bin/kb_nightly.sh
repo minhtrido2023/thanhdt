@@ -884,6 +884,31 @@ if [ "$DOW" -eq 5 ]; then
         STALE_SECTIONS_WARN="
 9. **\`kb/current_ops.md\` — cờ mục IM LẶNG >14 ngày (phát hiện theo TUỔI, Wags 2026-07-28)** — các mục dưới đây có NGÀY GẦN NHẤT trong nội dung cách hôm nay hơn 14 ngày. Đây là danh sách CỜ tự động (chỉ phát hiện, KHÔNG tự archive — bổ sung cho mục 7 theo size). Với TỪNG mục, trả lời TƯỜNG MINH ngay trong review này — **không bỏ trống mục nào** (đoán sai = giấu mất quyết định thật đang treo, tệ hơn phình file): hoặc **'ĐÃ ĐÓNG → archive theo đúng mẫu \`kb/projects/<slug>.md\` + cập nhật \`kb/projects/INDEX.md\`, xoá section khỏi current_ops.md'**, hoặc **'VẪN MỞ → giữ nguyên, không đổi gì'** (mục evergreen/tham chiếu vận hành thường xuyên như workflow/onboarding thường thuộc loại này):${STALE_SECTIONS_WARN}"
     fi
+    # ── Selfcheck weekly full-suite + baseline diff (2026-08-08, coding_guidelines §23) ──
+    # "9 đỏ là bình thường" (trước khi vá 2026-08-08) là chính lỗ hổng khiến regression thật
+    # lẫn vào nhiễu — bin/selfcheck_weekly_baseline_check.sh chạy TOÀN BỘ 51 selfcheck 1
+    # lần/tuần (đúng nhịp Friday, KHÔNG chạy hàng đêm — giữ đúng nguyên tắc §23 "không chạy
+    # cả bộ theo phản xạ") và so với kb/selfcheck_baseline.json. Đỏ MỚI không có trong
+    # baseline mới đáng báo; đỏ đã biết (vd IAM) không gây nhiễu. Tự cập nhật baseline khi
+    # 1 mục ĐỎ->XANH (không cần người sửa tay). Script tự lo đúng $DNA_PYEXE/env — KHÔNG
+    # dùng system python3 (đã đo thật 2026-08-08: sai interpreter tự tạo 4 FAIL/TIMEOUT giả).
+    SELFCHECK_WEEKLY_WARN=""
+    if [ -x "$ROOT/bin/selfcheck_weekly_baseline_check.sh" ]; then
+        log "Weekly selfcheck full-suite run (Friday, §23)..."
+        if ! "$ROOT/bin/selfcheck_weekly_baseline_check.sh" >> "$LOG" 2>&1; then
+            log "SELFCHECK-WEEKLY WARNING: phát hiện đỏ MỚI không có trong kb/selfcheck_baseline.json"
+            SELFCHECK_WEEKLY_WARN="
+10. **Selfcheck hàng tuần phát hiện ĐỎ MỚI (bin/selfcheck_weekly_baseline_check.sh, §23)** — có
+    selfcheck FAIL/TIMEOUT không nằm trong \`kb/selfcheck_baseline.json\`'s known_red. Đây là tín
+    hiệu regression thật (baseline chỉ chứa đỏ đã biết/đã chấp nhận có lý do). Xem file kết quả
+    mới nhất \`mike/logs/selfcheck_weekly_*.json\`, đưa RÕ vào review — không tự sửa code production
+    trong dispatch này, chỉ nêu rõ để escalate."
+        else
+            log "Weekly selfcheck: OK (không có đỏ mới; baseline tự cập nhật nếu có mục ĐỎ->XANH)"
+        fi
+    else
+        log "SELFCHECK-WEEKLY: script chưa tồn tại ($ROOT/bin/selfcheck_weekly_baseline_check.sh), bỏ qua"
+    fi
     # DISPATCH_FROM=user required: dispatch.sh blocks any non-user caller from targeting
     # Mike (agents must escalate via a question event instead) AND blocks self-dispatch
     # (from==id). This cron job's default $from is "Mike" (dispatch.sh's own default),
@@ -967,7 +992,7 @@ superseded), số CÒN LẠI kèm tuổi từng câu — post báo cáo này (kh
 channel qua \`bash $ROOT/bin/notify_thread.sh \"<báo cáo>\" architecture\`. Đây LÀ cơ chế
 \"cuối tuần kiểm tra báo cáo lại đã hoàn thành chưa\" user yêu cầu — KHÔNG được bỏ qua mục này dù
 các mục 1-10 đã chiếm nhiều thời gian.
-KHÔNG xóa archive. Không cần hỏi user cho việc 1-6, 10-11 — đây là routine maintenance đã được user uỷ quyền. Sau khi xong: notify Telegram, VÀ BẮT BUỘC (hợp đồng đầu ra máy đọc được — dispatch này chạy nền, không ai chờ trực tiếp, kb_nightly.sh thứ Bảy tự kiểm event này để phát hiện lạc đề/chết im, đúng NGUYÊN VĂN topic sau, không viết biến thể khác dù có vẻ tương đương): append_event.sh Mike decision 'kb-weekly-editorial' \"<JSON tóm tắt thay đổi>\".${CTX_BLOAT_WARN}${STALE_SECTIONS_WARN}" \
+KHÔNG xóa archive. Không cần hỏi user cho việc 1-6, 10-11 — đây là routine maintenance đã được user uỷ quyền. Sau khi xong: notify Telegram, VÀ BẮT BUỘC (hợp đồng đầu ra máy đọc được — dispatch này chạy nền, không ai chờ trực tiếp, kb_nightly.sh thứ Bảy tự kiểm event này để phát hiện lạc đề/chết im, đúng NGUYÊN VĂN topic sau, không viết biến thể khác dù có vẻ tương đương): append_event.sh Mike decision 'kb-weekly-editorial' \"<JSON tóm tắt thay đổi>\".${CTX_BLOAT_WARN}${STALE_SECTIONS_WARN}${SELFCHECK_WEEKLY_WARN}" \
         --timeout 900 >> "$LOG" 2>&1 &
     log "Editorial dispatch launched (background)."
 fi
