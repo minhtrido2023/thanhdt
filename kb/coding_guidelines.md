@@ -609,3 +609,55 @@ verify (kể cả khi phần lớn 7-attack N/A — reproducibility + arithmetic
 trọng), `git apply` báo exit 0 KHÔNG PHẢI bằng chứng đã ghi file (dùng `patch` thay thế + verify
 độc lập sau mỗi lần áp), và tách rõ quyết định CHÍNH SÁCH (cần hỏi user) khỏi quyết định KỸ THUẬT
 (quant-skeptic CONFIRMED là đủ).
+
+## 23. Chạy Selfcheck THEO PHẠM VI Cái Vừa Sửa — Không Chạy Cả Bộ Theo Phản Xạ
+
+**Vì sao (kiểm kê 2026-08-08, job `Taylor_20260808_035850` — đã CHẠY THẬT 51/51 selfcheck root,
+báo cáo `agents/Taylor/research/test_suite_inventory_20260808.md`):** bộ selfcheck root nay là
+**51 file**, chạy hết mất ~5 phút *cộng* 3 lần timeout BQ 150s, và trả về **9 FAIL** trong đó
+**0 là regression code thật** (6 ca assert lên trạng thái SỐNG đã đổi — rổ due-diligence, số đếm
+`universe_pit`, file plan production; 2 ca harness tự gãy; 1 ca môi trường). Chạy cả bộ cho một
+sửa đổi 3 dòng vừa tốn kém vừa **vô ích**: 9 đèn đỏ nền làm regression thật lẫn vào nhiễu.
+
+**Nguyên tắc:** chạy selfcheck **liên quan tới file mình vừa đụng**, không chạy cả bộ mặc định —
+TRỪ KHI đụng vào **module lõi dùng chung**, lúc đó quét rộng là bắt buộc và **phải nói rõ trong
+báo cáo vì sao** (biến phán đoán đó thành hành động có chủ đích, không phải phản xạ).
+
+**Module lõi dùng chung — sửa là PHẢI quét rộng** (số đo bằng máy từ import thật):
+
+| Sửa | Số selfcheck phụ thuộc |
+|---|---:|
+| `trading_bot/plan.py` | 21 |
+| `trading_bot/config.py` | 15 |
+| `trading_bot/executor.py` | 11 |
+| `trading_bot/brokers.py` | 7 |
+| `trading_bot/plan_funding_gate.py` | 2 import trực tiếp, **nhưng ca 08-07 cho thấy phụ thuộc thật rộng hơn** (gate chạy trong luồng của 6+ selfcheck khác) — coi như lõi |
+
+Mọi module khác (`lag_*.py`, `dcf_*.py`, `custom_basket.py`, `anomaly_gate.py`,
+`trading_bot/{due_diligence,netting_recon,plan_cash_commitment,discretionary_accumulation}.py`, …)
+có **1–6** selfcheck phụ thuộc → chạy đúng những file đó.
+
+**Tra bản đồ ngược bằng LỆNH, đừng chép bảng vào đây** (bảng chép tay sẽ mốc; lệnh thì không):
+
+```bash
+cd /home/trido/thanhdt/WorkingClaude && python - <<'PY'
+import re, glob, collections
+m = collections.defaultdict(set)
+for f in sorted(glob.glob("*selfcheck*.py")):
+    src = open(f, encoding="utf-8", errors="replace").read()
+    for a, b in re.findall(r'from\s+(trading_bot[\w.]*)\s+import|import\s+(trading_bot[\w.]*)', src):
+        m[a or b].add(f)
+for k in sorted(m): print(f"{k:38s} <- {', '.join(sorted(m[k]))}")
+PY
+```
+
+**Hệ luận — 2 quy ước để bộ test không mốc tiếp:**
+1. **Selfcheck KHÔNG được assert lên trạng thái SỐNG.** Chép cứng một rổ mã, một số đếm đo tại một
+   ngày, hay đọc thẳng file production (`data/trade_plans/…`, `anomaly_flags.json`,
+   `universe_pit`) làm assertion ⇒ test **tự vô hiệu theo thời gian** và trở thành nhiễu nền. Đóng
+   băng fixture, hoặc assert lên *bất biến* (quan hệ, dấu, fail-safe) thay vì lên *giá trị*.
+   6/9 ca đỏ ngày 08-08 đều là vi phạm này.
+2. **`test_*.py` ở repo root KHÔNG PHẢI test** — 165 file, là script backtest/R&D (đặt tên theo
+   lịch sử), 154/165 không đụng từ 2026-06-21. **Không archive** (artifact nghiên cứu, §10 mục 4)
+   nhưng **KHÔNG bao giờ gộp vào "chạy bộ test"**. Script R&D MỚI đặt tên `exp_*` / `probe_*` /
+   `stress_*` — đừng thêm vào không gian tên `test_`.
