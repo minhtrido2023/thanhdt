@@ -1,0 +1,32 @@
+{
+  "_comment": "Baseline trạng thái bộ 51 selfcheck ở gốc WorkingClaude/. Dùng bởi bin/selfcheck_weekly_baseline_check.sh (Friday, kb_nightly.sh Phase 5). Đỏ NẰM TRONG known_red -> không báo động. Đỏ MỚI không có ở đây -> regression thật, báo ngay. Baseline nào giờ XANH -> script tự cập nhật (xoá khỏi known_red), coi là tín hiệu tốt.",
+  "built_from": {
+    "job": "Taylor_20260808_075933 (fix) + Mike (verify+commit fec3bb4, full re-run)",
+    "date": "2026-08-08",
+    "total_files": 51,
+    "note": "Ban đầu 9 đỏ (job Taylor_20260808_035850 kiểm kê) -> vá xuống còn 1 đỏ đã biết (IAM, không phải code)."
+  },
+  "required_env": {
+    "_comment": "BẮT BUỘC — chạy sai môi trường này tự tạo ra 4 FAIL/TIMEOUT giả (đã gặp thật tối 2026-08-08 khi Mike verify: route_selector/rubber_weekly/lag_live_schedule cần DNA_PYEXE đúng phiên bản Python+pandas, basket_price_basis cần timeout dài hơn, due_diligence cần GOOGLE_APPLICATION_CREDENTIALS).",
+    "interpreter": "$DNA_PYEXE (= /home/trido/thanhdt/wc_venv/bin/python, Python 3.12 + pandas 3) — KHÔNG dùng system python3 (coding_guidelines.md §8 đã cảnh báo, tối nay tái xác nhận thêm 3 ca mới)",
+    "GOOGLE_APPLICATION_CREDENTIALS": "/home/trido/thanhdt/gcloud_dtienthanh/application_default_credentials.json",
+    "PATH_prefix": "/home/trido/google-cloud-sdk/bin",
+    "MIKE_BOT_TEST_MODE": "1",
+    "default_timeout_s": 150,
+    "slow_files": {
+      "_comment": "Đo thật 2026-08-08 (DNA_PYEXE): eyrisk ~343-360s, v4final ~403-432s (dao động theo tải BQ, KHÔNG cố định) — 420s đã tự bắt oan v4final 1 lần trong lần chạy full-suite đầu tiên. Trần dưới đây có margin thật, không phải 'vừa đủ'.",
+      "eyrisk_selector_selfcheck.py": 600,
+      "v4final_selector_selfcheck.py": 600,
+      "basket_price_basis_selfcheck.py": 300,
+      "immutable_publish_selfcheck.py": 60
+    }
+  },
+  "known_red": {
+    "immutable_publish_selfcheck.py": {
+      "reason": "IAM: bq CLI dùng service account bq-reader-8l@lithe-record-440915-m9.iam.gserviceaccount.com (chỉ đọc), thiếu quyền bigquery.tables.create trên dataset tav2_bq -> selfcheck cần tạo bảng sandbox _ipsc_* để test, bị Access Denied. KHÔNG phải lỗi code (đã đọc diff, C2 assertion đã sửa đúng — tính kỳ vọng động từ dữ liệu thay vì ghim drift=0).",
+      "since": "2026-08-08",
+      "fix_needed": "Cấp quyền bigquery.tables.create trên tav2_bq cho đúng service account, hoặc dùng service account khác có quyền ghi cho riêng luồng dispatch chạy selfcheck. Ngoài phạm vi Mike tự quyết (IAM/billing-adjacent) — cần user/project-owner xác nhận.",
+      "verified_by": "Mike, 2026-08-08, job Taylor_20260808_075933 follow-up"
+    }
+  }
+}
