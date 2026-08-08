@@ -14,7 +14,7 @@ rationale file — **cut narrative, never cut a fact**.
 **Enforcement policy (2026-08-01, user mandate — "đẩy bài học cũ ra công cụ/linter thay vì văn
 xuôi"):** any lesson expressible as a MECHANICAL pattern in code → make it an automated check that
 blocks the commit, not another paragraph; always test a new rule against real files before turning
-it on (a noisy rule erodes trust in the whole gate faster than no rule). Live mechanism, verified by
+it on. Live mechanism, verified by
 a real `git commit`: **`bin/shellcheck_gate.sh`** (pre-commit hook, ShellCheck — caught all 4 real
 quoting incidents 2026-07-17→08-01, see §15 +
 `kb/incidents/2026-08/2026-08-01-shellcheck-precommit-gate.md`). One-time setup per repo (hook shared
@@ -94,9 +94,7 @@ write a shared file, call a non-idempotent API):
 - Writes to shared state files must be atomic (`tmp` + `os.replace`/`os.rename`), never a direct
   overwrite — a kill mid-write must never leave a half-written file for the next run to trust.
 
-*Why: 2026-07-02 double-buy — a lock only stops two runs overlapping, not one run dying between the
-external call and the local write. →
-`kb/incidents/2026-07/2026-07-02-double-buy-concurrent-bot-execute.md`.*
+*→ `kb/incidents/2026-07/2026-07-02-double-buy-concurrent-bot-execute.md`.*
 
 **§5b. Selfcheck chạm `Executor` PHẢI đặt `MIKE_BOT_TEST_MODE=1`** — same class of "side effect to
 an external system", but the external channel here is the BUS:
@@ -116,8 +114,7 @@ from 6 sites (`GHOST_ORDER_DETECTED`, `LEVER_PACKAGE_UNAUTHORIZED`, `dcf-rich-fi
   env var.
 - **`PYTEST_CURRENT_TEST` does NOT cover `test_trading_bot.py`** (runs as a script, no `def test_*`).
 
-*Why: 4 recurrences through 2026-08-03, 232 fake events in 4 days under the REAL `agent_id` `Mafee`,
-polluting `consolidate.sh`/KB/retro. → rationale §5b.*
+*→ rationale §5b.*
 
 ## 6. Verify Report Data Provenance (client-facing numbers)
 
@@ -161,9 +158,7 @@ tables, next-week plan, methodology appendix). **Monthly** = institutional conve
 (MTD/QTD/YTD, benchmark comparison, attribution, risk metrics, fee/expense summary, compliance
 disclosures, outlook).
 
-*Why: 2026-07-03 a report read `"source": "ref_px_approx"` as real cost basis
-(`kb/incidents/2026-07/2026-07-03-weekly-report-estimated-cost-basis.md`); 2026-07-09 a plan priced
-2/4 orders off a stale BQ close, +5.7% off (rationale §6 — `kb/INCIDENTS.md` is now a STUB REDIRECT).*
+*→ rationale §6.*
 
 ## 7. Onboarding a New Account With Legacy/Excluded Holdings
 
@@ -194,8 +189,7 @@ general mechanism; more accounts of this shape are expected:
 tmpdir. Every selfcheck driving `Executor` needs a unique account tag AND module-load-time cleanup
 of any stale default-path fixture — see `ghost_order_selfcheck.py`'s `TAG` comment.
 
-*Why: the originating case is ZaloPay's pre-existing DGC position under a HOSE trading restriction.
-→ rationale §7 (old pointer `kb/INCIDENTS.md` is a STUB REDIRECT).*
+*→ rationale §7.*
 
 ## 8. Never Write Experiment Output to a Canonical / Registry-Pinned Filename
 
@@ -214,9 +208,7 @@ Rules when a script's output feeds `data/results_registry.md` or any pinned base
 - Cite the registry **by section title** (e.g. `## KẾT QUẢ THAM CHIẾU phiên 2026-06-19`), never by
   line number — refs drift as entries get inserted.
 
-*Why: 2026-07-06 an output filename built from only a SUBSET of env knobs (`BASKET_SELECT` had no
-suffix) let a legitimate experiment clobber the pinned production baseline; a lock would not have
-helped. → rationale §8.*
+*→ rationale §8 (+ §8b).*
 
 **§8b. `data/bq_cache_asof*` snapshot retention (chốt 2026-07-30, audit job `Wags_20260730_112912`).**
 Each snapshot is ~2,0GB and NOT reproducible (BQ time-travel off, `ticker`/`ticker_prune`
@@ -252,9 +244,7 @@ the Friday KB editorial review (`kb_nightly.sh`), not a separate cron job.
 DollarBill's DNSE-vs-BQ rule (§6). A generic "verify your data" reminder doesn't stop an LLM
 reaching for the closest-sounding name; naming the registry file does.
 
-*Why: 2026-07-11 SIGNAL_V11 base-leak — 4 production consumers read a TRAP table (flagged in
-`CLAUDE.md`, but nothing forced a check) and a live paper book entered 6 tickers on a fake signal.
-→ rationale §9 (old pointer `kb/INCIDENTS.md` is a STUB REDIRECT).*
+*→ rationale §9.*
 
 ## 10. When a File Becomes Canonical, Archive Its Superseded Variants in the Same Pass
 
@@ -279,9 +269,7 @@ table, a cron is installed pointing at it, a migration names it the production s
 repo-root files with a name similar to an already-CANONICAL registry entry that are NOT yet under
 `archive/` — surfaced in the Friday KB editorial review for a human/Winston decision, not auto-moved.
 
-*Why: 2026-07-11 fa_ratings — confirming which file is canonical is only half the fix; the
-near-identical variants left in the repo root are what makes the next agent grep and pick wrong.
-→ `kb/incidents/2026-07/2026-07-11-fa-ratings-8l-silent-write-failure.md`.*
+*→ `kb/incidents/2026-07/2026-07-11-fa-ratings-8l-silent-write-failure.md`.*
 
 ## 11. Check `mike/kb/cron_registry.md` Before Adding or Changing a Cron Schedule
 
@@ -302,9 +290,7 @@ env** — if the import chain can reach `BQ_LOCAL_CACHE`/`bq_local_cache`, unset
 (`os.environ.pop(...)`) before the first query, process-locally (never edit `wc_env.sh` itself,
 which would break every OTHER script that legitimately wants the cache).
 
-*Why: 2026-07-12 C1 CRITICAL — a publish script silently read a process-inherited T-1 cache env var
-for ~2.5 weeks despite its own comment naming live BQ as the source.
-→ `kb/incidents/2026-07/2026-07-12-audit-cron-order-publish-cache-t1.md`.*
+*→ `kb/incidents/2026-07/2026-07-12-audit-cron-order-publish-cache-t1.md`.*
 
 ## 12. Shared Multi-Account Data Files: Filter by `account_no` at Every Read
 
@@ -331,8 +317,7 @@ xem record có bị lọc account trước phép tính không (audit 2026-07-22:
 đúng; `execution_quality_review.py` chỉ lọc KHI truyền `--account`, mặc định gộp cả 2 account — chấp
 nhận được cho công cụ review ad-hoc, KHÔNG được dùng làm nguồn số báo cáo).
 
-*Why: pattern "cross-account contamination" 3 lần trong 15 ngày, cùng 1 root cause (đọc theo NGÀY
-rồi tính NAV/fill/P&L mà quên lọc account). → 3 entry trong `kb/incidents/index.md`.*
+*→ 3 entry trong `kb/incidents/index.md` + rationale §12.*
 
 ## 13. Sửa 1 file `kb/` cần Mike duyệt trước khi live → ghi ra `<file>.proposed`, KHÔNG sửa tại chỗ
 
@@ -353,10 +338,7 @@ cần state file/TTL/lock — `.proposed` mồ côi vô hại (`kb_nightly.sh` g
 `.proposed`, đừng chỉ nói "để uncommitted" — mối nguy thật không nằm ở thao tác git của agent mà ở
 các sweeper chạy nền.
 
-*Why: 2026-07-30, twice in one day, `bin/consolidate.sh`'s blanket `git add kb/` swept a
-work-in-progress edit into a routine commit before Mike could read it. The "hold-list" alternative
-(`state/kb_pending_review.txt` + TTL) was rejected by arch-reviewer — 32,8% of dispatch jobs land
-inside the TTL window. → rationale §13.*
+*→ rationale §13.*
 
 ## 14. Every Internal Producer→Consumer Pipeline Pair Needs a Real Freshness Check, Not Just a Loose Tolerance
 
@@ -379,9 +361,7 @@ producer finishing), don't trust "producer already ran by the time I run" on sch
 **Not a mandate to retrofit every existing pair at once** — apply going forward on every new/changed
 cron pair (§11); a periodic sweep of *existing* pairs is Friday KB editorial review material.
 
-*Why: 2026-07-10 DT5G cron-order — the producer computed at 23:15 while the consumer read at 17:30,
-6 hours early, so it silently read yesterday's value every day, hidden for weeks by
-`MAX_STATE_LAG=2`. → rationale §14.*
+*→ rationale §14.*
 
 ## 15. Bash Strings Doubling as LLM Prompts: Escape `"`/`` ` ``, Then Verify by Running, Not Reading
 
@@ -422,10 +402,7 @@ to hit "fires twice at 100% accuracy"). → rationale §15.*
 
 Shipped alongside: a `TZ=Asia/Ho_Chi_Minh` crontab export (closes the ambient-env gap).
 
-*Why: 2026-07-31 `bin/dt5g_writer_watch.py` labeled a 19:01 ICT write "12:01" (off 7h) via
-`datetime.fromtimestamp()` + a false "process TZ = ICT" comment; latent because production callers
-`source wc_env.sh`. Evaluated and NOT shipped: a static lint for `datetime.now()` without `tz=` —
-**243 matches**, 0 live bugs. → rationale §16.*
+*→ rationale §16.*
 
 ## 17. A Reader Reporting "Still Open" State Must Scan Every Retention Tier a Mover Can Reach
 
@@ -439,10 +416,7 @@ has already failed twice without a test enforcing it.
 **Boundary:** hot-only readers showing "recent activity" (`context_pack.md`'s "MỚI NHẤT") are
 correctly hot-only by design — don't change them.
 
-*Why: 2026-08-01 `mike_json.py` globbed only hot `bus/inbox/*.jsonl`, so archived data (`kb_nightly.sh`
-Phase 1b2 = 30d; `fleet_housekeeping.sh` Phase 1b3) read as "not found" — same shape as the
-2026-07-31 `ops_health_check.sh` check-#5 bug (fixed via `ops_health_check_selfcheck.py`), different
-fix. Evaluated and NOT shipped: a generic `conservation_check.py` (wrong layer). → rationale §17.*
+*→ rationale §17.*
 
 ## 18. Any Quant R&D Task (Backtest, IC Test, Gate/Selector Change) — Follow `.claude/skills/quant-research/`
 
@@ -470,9 +444,7 @@ self-report, before relaying a conclusion.
 - Cùng tinh thần §6/§9/§14: đây là bằng chứng **điều hướng cấu trúc**, không phải bằng chứng runtime
   — giữ nguyên dòng `confidence:`/`caveat:` công cụ tự in khi trích dẫn kết luận.
 
-*Why: số liệu + script tái lập ở `kb/projects/srcwalk-benchmark-20260803.md` ·
-`agents/Mike/srcwalk_bench/`. Bản §18b đầu tiên khai N=1, bị benchmark N=200/N=150 bác nửa kết luận
-— kỷ luật "khai N + CI" áp cho cả quyết định về CÔNG CỤ. → rationale §18b.*
+*→ rationale §18b.*
 
 ## 19. Any Task With a Selfcheck/Test — Follow `~/.claude/skills/verify-before-done/`
 
@@ -495,10 +467,7 @@ counting/reporting can separate "confirmed by a person" from "judged, not confir
 for the last N days (`--provenance-days`, default 14), always shown, feeding weekly review. A report,
 not a gate — high unmarked-agent-closure counts prompt spot-review, not wrongdoing.
 
-*Why: 2026-08-01 a self-fix loop used "the aged-question pool has a 0% natural drain rate" as the bug
-it was fixing, then used "pool went to 0" as proof the fix worked — an unrelated cleanup had closed
-~15 stale questions. Not shipped: enforcing this at `append_event.sh` (touches every fleet-wide
-caller for a field only meaningful on closures) — same tier as §7/§10/§11/§13. → rationale §20.*
+*→ rationale §20.*
 
 ## 21. Tỉ suất Lợi Nhuận Per-Position Trong Báo Cáo: BẮT BUỘC Cộng Lại Cổ Tức Tiền Mặt
 
@@ -513,10 +482,7 @@ Chi tiết cơ chế, 4 cái bẫy cụ thể và cách kiểm chứng 3 nguồn
 thay thế: §6 lo "số này lấy từ nguồn có thẩm quyền chưa", §21 lo "công thức có bỏ sót cấu phần lợi
 nhuận nào không".
 
-*Why: 2026-08-02, 3 client-facing reports — the price-only formula reported false losses on
-high-dividend names (NCT **−11,6% → −3,1%**, SAB **−8,1% → −1,7%**) and **flipped an attribution
-conclusion** (CAPIT basket described as carrying "2,6% mức lỗ" was actually **+5,66tr**). Total NAV
-stayed correct (dividends sit in `totalCash`) so every NAV reconciliation PASSED. → rationale §21.*
+*→ rationale §21.*
 
 ## 22. Một Quy Tắc Sống Trong Văn Xuôi Mà LLM Cứ Áp Sai Khác Nhau Mỗi Lần — Chuyển Thành Code, Theo `.claude/skills/deterministic-decision-gate/`
 
@@ -572,7 +538,4 @@ PY
    sử), 154/165 không đụng từ 2026-06-21. **Không archive** (artifact nghiên cứu, §10 mục 4) nhưng
    **KHÔNG bao giờ gộp vào "chạy bộ test"**. Script R&D MỚI đặt tên `exp_*` / `probe_*` / `stress_*`.
 
-*Why: job `Taylor_20260808_035850` ran all 51/51 root selfchecks for real (2026-08-08): ~5 min + 3×
-BQ timeout 150s, **9 FAIL** but **0 real code regressions** (6 asserting on changed live state — a
-violation of corollary 1; 2 broken harnesses; 1 environment). 9 background red lights bury a real
-regression. → `agents/Taylor/research/test_suite_inventory_20260808.md` + rationale §23.*
+*→ rationale §23.*
