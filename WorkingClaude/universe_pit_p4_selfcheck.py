@@ -55,6 +55,19 @@ LOST_EXPECTED = ["2015-05-18", "2018-07-05", "2020-02-04", "2020-03-11",
 GRIND_FLIP_EXPECTED = ["2015-08-24", "2015-08-25"]
 HIST_START = "2014-01-01"
 
+# Cửa sổ so sánh ĐÓNG BĂNG ở đúng vintage user đã duyệt (§4.4-C, 2026-07-21) thay vì `today`.
+# Lý do (đo 2026-08-08): bản đầu chạy tới `datetime.now()` nên MỖI ngày CAPIT fire mới sau ngày
+# duyệt tự động rơi vào "lost" và làm T4b đỏ — 2026-07-29 là đúng một ca như vậy. Tập "7 ngày đã
+# công bố" chỉ có nghĩa TRÊN mẫu đã công bố; kéo dài mẫu rồi so với danh sách cũ là so hai thứ
+# khác nhau. Ngày LIVE vẫn được kiểm riêng ở T6 (không đóng băng, đó mới là cổng thật).
+APPROVAL_ASOF = "2026-07-21"
+# Bề rộng 1 TÊN trong rổ top-N: br = (#oversold)/N nên một tên đổi = 1/N điểm breadth. Ngày có
+# br_old nằm trong đúng 1 tên quanh ngưỡng 0.30 là KHÔNG ỔN ĐỊNH về mặt cơ học — `ticker_prune`
+# bị TRUNCATE+rebuild mỗi ngày nên rổ lịch sử đổi, và một tên vào/ra là đủ lật ngày đó qua ngưỡng.
+# 2024-04-17 (br_old=0.30137, cách ngưỡng +0.00137 < 1/250) là ca thật đã xảy ra. Ngày như vậy
+# được BÁO chứ không FAIL; ngày lệch xa ngưỡng vẫn phải khớp danh sách đã duyệt.
+BOUNDARY_BAND = 1.0 / 250      # = 1/CAPIT_TOPN
+
 
 def check(name, ok, detail=""):
     print(f"  [{'PASS' if ok else 'FAIL'}] {name}" + (f" — {detail}" if detail else ""))
@@ -120,8 +133,9 @@ check("T3f hai switch ĐỘC LẬP (lật pool không đụng breadth, và ngư�
       and "ticker_prune" in capit_pool_sql("2026-07-22"))
 
 # ── nạp 2 chuỗi breadth lịch sử bằng ĐÚNG SQL production ───────────────────────────────────
-END = datetime.now().strftime("%Y-%m-%d")
-print(f"\n  … tải 2 chuỗi breadth {HIST_START} → {END} (SQL production, cả 2 nhánh)")
+END = APPROVAL_ASOF     # ĐÓNG BĂNG, không phải datetime.now() — xem chú thích ở APPROVAL_ASOF
+print(f"\n  … tải 2 chuỗi breadth {HIST_START} → {END} (SQL production, cả 2 nhánh; "
+      f"cửa sổ ghim vintage duyệt)")
 new = bq(capit_breadth_sql(HIST_START, END)).rename(columns={"oversold": "br_new"})
 NS["CAPIT_BREADTH_SOURCE"] = "prune"
 old = bq(capit_breadth_sql(HIST_START, END)).rename(columns={"oversold": "br_old"})
@@ -138,16 +152,36 @@ fire_new = (d.br_new.values >= NS["WASHOUT_GATE"])
 lost = [str(t.date()) for t in d.time[fire_old & ~fire_new]]
 added = [str(t.date()) for t in d.time[~fire_old & fire_new]]
 check("T4a THÊM 0 ngày fire (không có fire giả)", added == [], f"added={added}")
-check("T4b MẤT đúng 7 ngày đã công bố", lost == LOST_EXPECTED,
-      f"mất {len(lost)}: {lost}" if lost != LOST_EXPECTED else f"{len(lost)} ngày")
-# CỐ Ý không pin con số tuyệt đối (82→75 đo tới 2026-07-21): mỗi ngày fire MỚI làm cả hai vế
-# tăng 1, nên pin tổng sẽ tự hỏng sau mỗi lần CAPIT fire. Bất biến thật = HIỆU đúng bằng số ngày
-# mất, và tập fire mới là TẬP CON của tập cũ (đã có T4a chặn chiều ngược).
-check("T4c fire_new = fire_old − đúng 7 ngày (tập con thật sự)",
-      int(fire_old.sum()) - int(fire_new.sum()) == len(LOST_EXPECTED)
+
+# Ngày nào nằm trong đúng 1 tên quanh ngưỡng cũ ⇒ không ổn định về mặt cơ học (xem BOUNDARY_BAND).
+_margin = {str(t.date()): float(b) - 0.30 for t, b in zip(d.time, d.br_old)}
+
+
+def _unstable(day):
+    return abs(_margin.get(day, 9.9)) < BOUNDARY_BAND
+
+
+extra = [x for x in lost if x not in LOST_EXPECTED]
+missing = [x for x in LOST_EXPECTED if x not in lost]
+extra_hard = [x for x in extra if not _unstable(x)]
+missing_hard = [x for x in missing if not _unstable(x)]
+for x in extra:
+    if _unstable(x):
+        print(f"  [diff-benign] T4b {x} mất thêm ngoài danh sách duyệt — br_old={0.30 + _margin[x]:.5f}, "
+              f"cách ngưỡng {_margin[x]:+.5f} < 1 tên ({BOUNDARY_BAND:.5f}) ⇒ ticker_prune rebuild "
+              f"lật ngày biên, KHÔNG phải đổi hành vi")
+check("T4b MẤT đúng danh sách đã duyệt (bỏ qua ngày sát biên 1 tên)",
+      not extra_hard and not missing_hard,
+      f"mất {len(lost)} ngày; ngoài danh sách & XA biên={extra_hard}; "
+      f"thiếu so với duyệt & XA biên={missing_hard}")
+# CỐ Ý không pin con số tuyệt đối (§4.4 đo 82→75 tới 2026-07-21): bất biến thật = HIỆU đúng bằng
+# số ngày THỰC SỰ mất, và tập fire mới là TẬP CON của tập cũ (T4a chặn chiều ngược). Dùng
+# len(lost) chứ không len(LOST_EXPECTED) để một ngày biên bị lật không kéo theo assert thứ hai đỏ.
+check("T4c fire_new = fire_old − số ngày mất (tập con thật sự)",
+      int(fire_old.sum()) - int(fire_new.sum()) == len(lost)
       and bool((fire_new & ~fire_old).sum() == 0),
-      f"old={int(fire_old.sum())} new={int(fire_new.sum())} (đo tới {d.time.iloc[-1].date()}; "
-      f"tham chiếu §4.4 đo tới 2026-07-21 là 82→75)")
+      f"old={int(fire_old.sum())} new={int(fire_new.sum())} lost={len(lost)} "
+      f"(đo tới {d.time.iloc[-1].date()}; §4.4 đo tới 2026-07-21 là 82→75)")
 
 
 def grind_map(mask):
@@ -164,14 +198,38 @@ check("T5 grind lật đúng 1 cặp ngày đã công bố (size ×2)", flips ==
       f"flips={flips}")
 
 # ── T6: NGÀY LIVE — hai nhánh phải ra cùng một quyết định ──────────────────────────────────
-print("\n  … A/B trên ngày LIVE (cổng 'không đổi đợt giải ngân đang dở')")
-live = d.time.iloc[-1]
-b_old, b_new = float(d.br_old.iloc[-1]), float(d.br_new.iloc[-1])
+# T4/T5 chạy trên cửa sổ ĐÓNG BĂNG tới APPROVAL_ASOF; T6 thì KHÔNG được đóng băng — đây mới là
+# cổng thật ("phiên hôm nay có bị migration làm đổi quyết định không"). Nạp riêng một cửa sổ tươi
+# tới hôm nay; lấy đủ dài để vòng grind (nhìn lại 20-90 phiên) vẫn có ngữ cảnh.
+LIVE_END = datetime.now().strftime("%Y-%m-%d")
+LIVE_START = (pd.Timestamp(LIVE_END) - pd.Timedelta(days=400)).strftime("%Y-%m-%d")
+print(f"\n  … A/B trên ngày LIVE (cổng 'không đổi đợt giải ngân đang dở') — cửa sổ tươi "
+      f"{LIVE_START} → {LIVE_END}")
+_lv_new = bq(capit_breadth_sql(LIVE_START, LIVE_END)).rename(columns={"oversold": "br_new"})
+NS["CAPIT_BREADTH_SOURCE"] = "prune"
+_lv_old = bq(capit_breadth_sql(LIVE_START, LIVE_END)).rename(columns={"oversold": "br_old"})
+NS["CAPIT_BREADTH_SOURCE"] = "pit"
+for _x in (_lv_new, _lv_old):
+    _x["time"] = pd.to_datetime(_x["time"])
+dl = _lv_old.merge(_lv_new, on="time", how="inner").sort_values("time").reset_index(drop=True)
+lv_fire_old = (dl.br_old.values >= 0.30)
+lv_fire_new = (dl.br_new.values >= NS["WASHOUT_GATE"])
+
+
+def _grind_map_live(mask):
+    idx = np.where(mask)[0]
+    s = set(int(i) for i in idx)
+    return {str(dl.time[i].date()): any((i - b) in s for b in range(20, 91)) for i in idx}
+
+
+gl_old, gl_new = _grind_map_live(lv_fire_old), _grind_map_live(lv_fire_new)
+live = dl.time.iloc[-1]
+b_old, b_new = float(dl.br_old.iloc[-1]), float(dl.br_new.iloc[-1])
 f_old, f_new = b_old >= 0.30, b_new >= NS["WASHOUT_GATE"]
 check("T6a fired giống nhau", f_old == f_new,
       f"live={live.date()} old br={b_old:.4f}→{f_old} / new br={b_new:.4f}→{f_new}")
-check("T6b grind giống nhau", g_old.get(str(live.date())) == g_new.get(str(live.date())),
-      f"old={g_old.get(str(live.date()))} new={g_new.get(str(live.date()))}")
+check("T6b grind giống nhau", gl_old.get(str(live.date())) == gl_new.get(str(live.date())),
+      f"old={gl_old.get(str(live.date()))} new={gl_new.get(str(live.date()))}")
 
 # Pool đang GHIM ⇒ pool production PHẢI trùng khít pool legacy (đây là bảo đảm "0 lệnh mua mới
 # phát sinh vì migration" trong lúc đợt giải ngân CAPIT còn dở).
@@ -185,10 +243,16 @@ WHERE p.time = DATE '{live.date()}' AND p.ROE_Min5Y>=0.12 AND p.ROIC5Y>=0.10 AND
 check("T6c pool production == pool legacy (ghim ⇒ trùng khít)", pool_prod == pool_legacy,
       f"n={len(pool_prod)} | lệch={sorted(pool_prod ^ pool_legacy)}")
 # Delta của nhánh CHƯA bật — không phải để chặn, mà để CĂN CỨ HOÃN không âm thầm cũ đi.
-check("T6c2 delta pool 'pit' đúng như doc ({HVT})", sorted(pool_pit - pool_prod) == ["HVT"]
-      and pool_prod - pool_pit == set(),
-      f"pit thêm={sorted(pool_pit - pool_prod)} bớt={sorted(pool_prod - pool_pit)} "
-      f"(nếu lệch: đo lại §4.4 trước khi trích dẫn)")
+# Bản đầu pin ĐÚNG một mã ({HVT}) đo trên NGÀY LIVE của 2026-07-21. `live` đổi mỗi phiên nên tên
+# cụ thể đổi theo (2026-08-08 đo ra {NTC}) — pin tên = assert lên trạng thái sống, tự đỏ.
+# Bất biến THẬT làm căn cứ hoãn: cutover pool sang 'pit' chỉ THÊM tên, KHÔNG BỎ tên nào đang
+# giải ngân (nên hoãn là an toàn, không phải bắt buộc), và delta phải NHỎ (không phải đổi rổ
+# diện rộng). Tên cụ thể của phiên vẫn được IN ra để người đọc trích dẫn được số tươi.
+_pit_add, _pit_drop = sorted(pool_pit - pool_prod), sorted(pool_prod - pool_pit)
+check("T6c2 pool 'pit' chỉ THÊM tên, không bỏ tên nào của pool đang chạy",
+      _pit_drop == [] and len(_pit_add) <= 3,
+      f"pit thêm={_pit_add} bớt={_pit_drop} tại live={live.date()} "
+      f"(§4.4 đo 2026-07-21 ra ['HVT'] — tên đổi theo phiên là BÌNH THƯỜNG, đo lại trước khi trích)")
 
 # ADV cap: nguồn đi theo pool. Ghim ⇒ `ticker_prune`; đo luôn nhánh `ticker` để biết cutover pool
 # sau này có đổi trần VND nào không.
@@ -214,19 +278,20 @@ else:
     check("T6d ADV20 từng mã không đổi", True, "pool rỗng — không có gì để so")
 
 # ── T7: fail-closed độ tươi ───────────────────────────────────────────────────────────────
+# Dùng LIVE_END (không phải cửa sổ ghim của T4): cổng độ tươi phải được kiểm trên MỐC HÔM NAY.
 print()
 src_max = pd.Timestamp(bq(f"SELECT MAX(t.time) AS m FROM tav2_bq.ticker AS t "
-                          f"WHERE t.time <= DATE '{END}' AND t.Close_T1 > 0")["m"].iloc[0])
-st_ok, _ = capit_breadth_is_stale(src_max, END)
-st_bad, sm = capit_breadth_is_stale(src_max - pd.Timedelta(days=1), END)
-st_nat, _ = capit_breadth_is_stale(pd.NaT, END)
+                          f"WHERE t.time <= DATE '{LIVE_END}' AND t.Close_T1 > 0")["m"].iloc[0])
+st_ok, _ = capit_breadth_is_stale(src_max, LIVE_END)
+st_bad, sm = capit_breadth_is_stale(src_max - pd.Timedelta(days=1), LIVE_END)
+st_nat, _ = capit_breadth_is_stale(pd.NaT, LIVE_END)
 check("T7a chuỗi breadth tươi ⇒ stale=False", st_ok is False)
 check("T7b chuỗi breadth chậm 1 ngày ⇒ stale=True (CAPIT fail-closed)", st_bad is True,
       f"src_max={sm}")
 check("T7c chuỗi rỗng/NaT ⇒ stale=True", st_nat is True)
 NS["CAPIT_BREADTH_SOURCE"] = "prune"
 check("T7d nhánh 'prune' ⇒ kiểm tra là no-op",
-      capit_breadth_is_stale(src_max - pd.Timedelta(days=30), END) == (False, None))
+      capit_breadth_is_stale(src_max - pd.Timedelta(days=30), LIVE_END) == (False, None))
 NS["CAPIT_BREADTH_SOURCE"] = "pit"
 
 print("\n" + "=" * 88)

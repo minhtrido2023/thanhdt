@@ -2,6 +2,12 @@
 """eyrisk_selector_selfcheck.py — guards for BASKET_SELECT=eyrisk (risk-adjusted earnings yield).
 Job Taylor_20260715_025346. Research-only; asserts, writes nothing production reads.
 
+RUNTIME BUDGET: ~178s (measured solo, 2026-08-08) — run it with `timeout 400`, NOT the suite's
+default 150s, or it reports a false TIMEOUT (it did, in the 2026-08-08 inventory). The cost is real
+BQ round-trips against the live feature panel, and that is the point: every guard below is an
+identity/negative-control on the REAL panel, so a mocked BQ would assert against the mock instead of
+the selector. Slow-but-honest beats fast-but-vacuous here; do not "fix" this by stubbing BQ.
+
   [1] OFF is BYTE-IDENTICAL — eyonly (and yieldcombo) membership from the edited module equals the
       PRE-EDIT module (`git show HEAD:custom_basket.py`), so the eyrisk branches are inert when off.
   [2] FAIL-OPEN identity — eyrisk(all) on a doctored panel whose ROE_Min5Y is ALL NaN must pick

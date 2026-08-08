@@ -197,13 +197,21 @@ def run_sync(script, cache_dir, *args, extra=False, hold=0.0):
 
 tmp_root = tempfile.mkdtemp(prefix="sync_selfcheck_")
 try:
-    # Bản "cũ" (trước fix) lấy từ git HEAD để so sánh hành vi — không phụ thuộc file tạm.
+    # Bản "cũ" (trước fix) lấy từ một REVISION GHIM, không phải HEAD.
+    # Ban đầu file này đọc `HEAD:./sync_bq_cache.py`; điều đó đúng đúng một lần — trước khi fix
+    # khoá được commit. Ngay khi 9de2870 vào HEAD thì "cũ" == "mới", C2/C3 so set() với set() và
+    # trở thành vacuous-pass; 2026-08-08 nó bắt đầu FAIL vì `.sync.lock` có mặt ở CẢ HAI bên nên
+    # hiệu tập rỗng. Ghim vào cha của commit fix = fixture đóng băng (coding_guidelines §23).
+    LEGACY_REV = "9de2870^"     # 9de2870 = "fix(sync_bq_cache): flock + atomic parquet/manifest"
     legacy = os.path.join(tmp_root, "legacy_sync_bq_cache.py")
+    legacy_src = subprocess.run(["git", "-C", HERE, "show", f"{LEGACY_REV}:./sync_bq_cache.py"],
+                                capture_output=True, text=True, check=True).stdout
     with open(legacy, "w") as f:
-        # "HEAD:./x" = đường dẫn tương đối so với cwd — repo root nằm TRÊN thư mục này
-        # (/home/trido/thanhdt), nên "HEAD:sync_bq_cache.py" (tính từ root) không tồn tại.
-        f.write(subprocess.run(["git", "-C", HERE, "show", "HEAD:./sync_bq_cache.py"],
-                               capture_output=True, text=True, check=True).stdout)
+        f.write(legacy_src)
+    # Cổng chống-vacuous: nếu bản "cũ" đã có khoá thì toàn bộ so sánh C2/C3 vô nghĩa.
+    check("C0 bản 'cũ' (rev ghim) thật sự CHƯA có fix — A/B không vacuous",
+          "acquire_sync_lock" not in legacy_src and "atomic_to_parquet" not in legacy_src,
+          f"rev={LEGACY_REV}")
 
     # ── C. Không xung đột → kết quả GIỐNG HẾT bản trước khi sửa ──────────────
     print("C. Chạy bình thường (không xung đột): mới vs cũ (git HEAD)")

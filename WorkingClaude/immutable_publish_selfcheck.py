@@ -2,6 +2,12 @@
 """
 immutable_publish_selfcheck.py — self-check cho `state_publish_immutable.py`.
 
+NGÂN SÁCH THỜI GIAN: ~366s (đo riêng lẻ, 2026-08-08) — chạy với `timeout 720`, KHÔNG dùng mức
+mặc định 150s của bộ test, nếu không nó báo TIMEOUT GIẢ (đúng như bản kiểm kê 2026-08-08). Chi phí
+là các vòng CREATE/INSERT/SELECT sandbox THẬT trên BQ — và đó chính là nội dung cần kiểm: hợp đồng
+bất biến chỉ có nghĩa khi đo trên bảng thật với chuỗi đã công bố thật. Stub BQ ở đây = test tự nói
+chuyện với mock, mất sạch giá trị. KHÔNG "tối ưu" bằng cách bỏ round-trip.
+
 CHẠY HOÀN TOÀN TRÊN BẢNG SANDBOX (`tav2_bq._ipsc_*`), KHÔNG BAO GIỜ chạm bảng production.
 Sandbox được tạo bằng cách CLONE bảng production thật (`vnindex_5state`,
 `vnindex_5state_dt5g_live`) nên test chạy trên đúng dữ liệu/hình dạng thật.
@@ -115,8 +121,22 @@ def run_case(label, src_table, sandbox, new_csv):
           pre_forge.equals(post_forge) and st3["sealed_immutable"],
           f"bảng không đổi 1 dòng nào; publisher ĐẾM ĐÚNG {st3['n_sealed_diff']} phiên bị chặn "
           f"(kỳ vọng {len(hit)})")
+    # C2 — telemetry đếm ĐÚNG "số phiên đã chốt mà chuỗi vào KHÁC bảng đã công bố". Bản đầu so
+    # thẳng với `len(hit)`, tức ngầm giả định phân kỳ TỰ NHIÊN của vùng đã chốt luôn = 0. Giả
+    # định đó chỉ đúng với một nhãn: đo 2026-08-08, DT5G live drift tự nhiên 0 (⇒ 101, PASS) còn
+    # BASE v3.4b drift 28 phiên (⇒ 127, FAIL) — upstream (PE/corp-action/universe) thật sự có
+    # restate lịch sử, đó chính là thứ publisher sinh ra để CHẶN, không phải lỗi. Assert kiểu đó
+    # tự vô hiệu theo dữ liệu sống (§23 hệ luận 1). Tính KỲ VỌNG THẲNG TỪ DỮ LIỆU thay vì ghim
+    # số: telemetry phải khớp đúng số phiên đã chốt mà `forged` khác bảng — bất biến này đúng với
+    # mọi mức drift, và CHẶT HƠN bản cũ (bản cũ chỉ đúng khi drift=0).
+    _pub = pre_forge[pre_forge["time"] <= cutoff][["time", "state", "state_raw"]]
+    _fg = forged[forged["time"] <= cutoff][["time", "state", "state_raw"]]
+    _m = _pub.merge(_fg, on="time", suffixes=("_p", "_f"))
+    _expect = int(((_m.state_p != _m.state_f) | (_m.state_raw_p != _m.state_raw_f)).sum())
     check(f"C2 · {label} · telemetry đếm đúng số phiên upstream muốn viết lại",
-          st3["n_sealed_diff"] == len(hit), f"n_sealed_diff={st3['n_sealed_diff']} == {len(hit)}")
+          st3["n_sealed_diff"] == _expect and _expect > 0,
+          f"n_sealed_diff={st3['n_sealed_diff']} == {_expect} (= {len(hit)} phiên giả mạo hoà "
+          f"với {st['n_sealed_diff']} phiên upstream restate THẬT, trừ phần trùng giá trị)")
     os.unlink(fpath)
 
     # ── E/F. append 30 phiên mới -> phiên cũ CHỐT dần, không đổi được nữa ───────────────

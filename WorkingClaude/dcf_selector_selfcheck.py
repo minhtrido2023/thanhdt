@@ -135,8 +135,32 @@ src = open(f"{WORKDIR}/custom_basket.py").read()
 check('os.environ.get("BASKET_DCF_MODE", "")' in src, "BASKET_DCF_MODE defaults to '' (OFF)")
 check("if DCF_MODE:" in src and "dcf_at = None" in src,
       "cache/price load and dcf_at are gated behind DCF_MODE (OFF -> no work, no behaviour change)")
-check(src.count("if dcf_at is not None and DCF_MODE ==") == 2,
-      "both overlay call-sites guard on `dcf_at is not None` (OFF -> untouched yieldcombo path)")
+# The invariant is "every use of dcf_at is dominated by an `dcf_at is not None` guard", NOT a
+# literal-string count: an earlier version asserted `src.count("if dcf_at is not None and DCF_MODE
+# ==") == 2` and went red on 2026-08-08 purely because the placebo modes turned one `== "..."` into
+# `in ("...", "...")` — three correctly-guarded call-sites, zero behaviour change. Check the
+# structure with `ast` so a refactor that keeps the guard keeps the test green.
+import ast as _ast
+
+_tree = _ast.parse(src)
+_guarded = []      # line ranges of `if dcf_at is not None ...:` bodies
+_uses = []         # linenos of every `dcf_at(...)` call
+for _n in _ast.walk(_tree):
+    if isinstance(_n, _ast.If):
+        for _t in _ast.walk(_n.test):
+            if (isinstance(_t, _ast.Compare) and isinstance(_t.left, _ast.Name)
+                    and _t.left.id == "dcf_at"
+                    and any(isinstance(o, _ast.IsNot) for o in _t.ops)
+                    and any(isinstance(c, _ast.Constant) and c.value is None for c in _t.comparators)):
+                _guarded.append((_n.body[0].lineno, max(_ast.walk(_n.body[-1]),
+                                                       key=lambda x: getattr(x, "lineno", 0)).lineno))
+                break
+    if isinstance(_n, _ast.Call) and isinstance(_n.func, _ast.Name) and _n.func.id == "dcf_at":
+        _uses.append(_n.lineno)
+_unguarded = [ln for ln in _uses if not any(a <= ln <= b for a, b in _guarded)]
+check(len(_uses) >= 2 and not _unguarded,
+      f"all {len(_uses)} dcf_at(...) call-sites sit inside an `dcf_at is not None` guard "
+      f"({len(_guarded)} guards; unguarded lines={_unguarded}) -> OFF leaves yieldcombo untouched")
 
 print("\n" + ("SELFCHECK PASS" if not FAILS else f"SELFCHECK FAIL ({len(FAILS)}): {FAILS}"))
 sys.exit(1 if FAILS else 0)

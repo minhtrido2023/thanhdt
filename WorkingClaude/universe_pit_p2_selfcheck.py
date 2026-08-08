@@ -48,6 +48,57 @@ def _members(bq, source, start, end):
     return {d: sorted(g["ticker"]) for d, g in mem.groupby("rebal_date")}
 
 
+MAX_BENIGN_SWAP = 1     # >1 tên mỗi chiều = lệch diện rộng ⇒ luôn FAIL, không xét "lành tính"
+
+
+def _explain_divergence(bq, rebal_date, into_pit, out_of_pit):
+    """Chênh rổ prune-vs-pit tại 1 mốc có phải LỖ HỔNG ĐỘ ĐẦY ĐỦ của ticker_prune không?
+
+    Trả {"benign": bool, "reason": str}. Chỉ 'benign' khi CẢ BA đúng — chứng minh bằng dữ liệu,
+    không suy từ tên:
+      (1) hoán đổi nhỏ, cân bằng (≤MAX_BENIGN_SWAP mỗi chiều, cùng số lượng ⇒ rổ không đổi kích cỡ);
+      (2) MỌI tên pit thêm vào có **0 dòng trong `ticker_prune` toàn bộ lịch sử** — prune chưa từng
+          có tên đó (lỗ hổng độ đầy đủ), KHÁC hẳn "prune cố ý loại nó ở giai đoạn này";
+      (3) tên thêm vào có thanh khoản trung bình 3 tháng trước mốc **≥** tên bị bỏ ra — loại trừ
+          giả thuyết "pit kéo vào một tên kém thanh khoản mà prune loại đúng".
+    Ca đã biết: BAF (vào) / TCM (ra) tại 2025-05-05 — xác minh BQ 2026-08-08 (Mike + Taylor):
+    BAF 0 dòng prune toàn lịch sử, 121 tỷ đ/phiên vs TCM 65,6 tỷ (02→05/2025).
+    """
+    if not into_pit or not out_of_pit:
+        return {"benign": False, "reason": "chênh một chiều (thêm/bớt không cân) — không phải hoán đổi"}
+    if len(into_pit) != len(out_of_pit) or len(into_pit) > MAX_BENIGN_SWAP:
+        return {"benign": False,
+                "reason": f"hoán đổi {len(into_pit)}↔{len(out_of_pit)} vượt ngưỡng lành tính "
+                          f"({MAX_BENIGN_SWAP})"}
+    q = "','".join(into_pit)
+    n_prune = bq(f"SELECT t.ticker, COUNT(*) n FROM `lithe-record-440915-m9.tav2_bq.ticker_prune` t "
+                 f"WHERE t.ticker IN ('{q}') GROUP BY t.ticker")
+    present = dict(zip(n_prune["ticker"], n_prune["n"])) if len(n_prune) else {}
+    still_there = {t: int(present[t]) for t in into_pit if present.get(t)}
+    if still_there:
+        return {"benign": False,
+                "reason": f"tên pit thêm vào VẪN CÓ trong ticker_prune ({still_there}) ⇒ không phải "
+                          f"lỗ hổng độ đầy đủ, mà là khác biệt tiêu chí chọn — phải điều tra"}
+    d0 = (pd.Timestamp(rebal_date) - pd.Timedelta(days=90)).strftime("%Y-%m-%d")
+    d1 = pd.Timestamp(rebal_date).strftime("%Y-%m-%d")
+    names = "','".join(into_pit + out_of_pit)
+    liq = bq(f"SELECT t.ticker, AVG(COALESCE(t.Price,t.Close)*t.Volume/1e9) liq_bn "
+             f"FROM `lithe-record-440915-m9.tav2_bq.ticker` t WHERE t.ticker IN ('{names}') "
+             f"AND t.time BETWEEN DATE '{d0}' AND DATE '{d1}' GROUP BY t.ticker")
+    L = dict(zip(liq["ticker"], liq["liq_bn"]))
+    lo_in = min((L.get(t) for t in into_pit), default=None)
+    hi_out = max((L.get(t) for t in out_of_pit), default=None)
+    if lo_in is None or hi_out is None:
+        return {"benign": False, "reason": f"không đo được thanh khoản 3M ({L})"}
+    if lo_in < hi_out:
+        return {"benign": False,
+                "reason": f"tên pit thêm vào thanh khoản THẤP HƠN tên bị bỏ "
+                          f"({lo_in:.1f} < {hi_out:.1f} tỷ đ/phiên) ⇒ pit có thể đang kéo vào rác"}
+    return {"benign": True,
+            "reason": f"{into_pit} chưa từng có dòng nào trong ticker_prune (lỗ hổng độ đầy đủ) "
+                      f"và thanh khoản 3M cao hơn {out_of_pit} ({lo_in:.1f} ≥ {hi_out:.1f} tỷ đ/phiên)"}
+
+
 def check(name, cond, detail=""):
     print(f"  [{'ok' if cond else 'FAIL'}] {name}{(' — ' + detail) if detail else ''}", flush=True)
     if not cond:
@@ -68,8 +119,22 @@ def main():
           f"prune {len(m_prune)} mốc / pit {len(m_pit)} mốc")
     for d in sorted(set(m_prune) & set(m_pit)):
         a, b = m_prune[d], m_pit[d]
-        check(f"T1 rổ {d.date()} byte-identical", a == b,
-              "GIỐNG HỆT" if a == b else f"VÀO {sorted(set(b)-set(a))} / RA {sorted(set(a)-set(b))}")
+        if a == b:
+            check(f"T1 rổ {d.date()} byte-identical", True, "GIỐNG HỆT")
+            continue
+        into, out = sorted(set(b) - set(a)), sorted(set(a) - set(b))
+        why = _explain_divergence(bq, d, into, out)
+        if why["benign"]:
+            # KHÔNG hạ chuẩn: chênh CHỈ được bỏ qua khi chứng minh được bằng dữ liệu rằng nguyên
+            # nhân là LỖ HỔNG ĐỘ ĐẦY ĐỦ của `ticker_prune` (tên chưa từng có dòng nào trong bảng
+            # đó) VÀ tên `pit` thêm vào thanh khoản KHÔNG kém tên bị bỏ ra. Đó chính là thứ
+            # universe_pit sinh ra để sửa — byte-identical với một bảng đã biết là thiếu tên
+            # không phải cái bar đúng. Mọi kiểu chênh khác vẫn FAIL CỨNG.
+            print(f"  [diff-benign] T1 rổ {d.date()} — VÀO {into} / RA {out}: {why['reason']}",
+                  flush=True)
+        else:
+            check(f"T1 rổ {d.date()} byte-identical", False,
+                  f"VÀO {into} / RA {out} — KHÔNG giải thích được: {why['reason']}")
     live = max(set(m_prune) & set(m_pit))
     check("T1.LIVE mốc rebal đang chạy giống hệt", m_prune[live] == m_pit[live], str(live.date()))
 

@@ -33,6 +33,7 @@ dòng ENV ở cuối output.
 Run: python capit_lever_selfcheck.py     (exit 0 = all pass)
 """
 import ast
+import builtins
 import copy
 import dataclasses
 import datetime as _dt
@@ -999,10 +1000,31 @@ with tempfile.TemporaryDirectory() as TMP:
           "(bug TV1 07-28: thiếu trường = HTTP 400)",
           b.client.calls[-1]["loan_package_id"] == 1841, detail=str(b.client.calls[-1]))
 
+    # D6 — HỢP ĐỒNG MỚI (commit c22bd1c, 2026-08-07, ca DRI/UPCOM). Bản cũ khẳng định lệnh
+    # THƯỜNG forward `loan_package_id=None`; chính hợp đồng ĐÓ là bug: None ⇒ dnse_api rơi về
+    # gói default account (SpaceX 1841 = mainboard-only) ⇒ DNSE từ chối CẢ ppse LẪN place_order
+    # với mã UPCOM, biểu hiện y hệt "thiếu tiền" ⇒ WAIT_CASH vô hạn. `c22bd1c` đã sửa 2 assert
+    # cùng loại ở cash_only_loan_package_selfcheck.py nhưng BỎ SÓT D6 ở đây — vì file này lúc đó
+    # chết `NameError` ở mục H trước khi in bảng tổng kết, nên D6 đỏ mà không ai thấy (đúng cái
+    # giá của một harness hỏng: nó che mất một assert mốc thật).
+    # Assert theo BẤT BIẾN, không theo giá trị: trường LUÔN được gửi, và no-op khi default hợp lệ.
     b = mkbroker()
     b.place_order("FPT", 1000, "buy", price=20000)
-    check("D6 lệnh THƯỜNG (không đòn bẩy, không cash_only) → loan_package_id=None, "
-          "hành vi cũ nguyên vẹn", b.client.calls[-1]["loan_package_id"] is None)
+    check("D6a lệnh THƯỜNG mainboard: default 1841 hợp lệ cho mã → GIỮ NGUYÊN default "
+          "(BAL/LAG/CAPIT không đổi hành vi)",
+          b.client.calls[-1]["loan_package_id"] == 1841, detail=str(b.client.calls[-1]))
+
+    b = mkbroker(pkgs=(1122,))
+    b.place_order("DRI", 1000, "buy", price=20000)
+    check("D6b lệnh THƯỜNG mã UPCOM: default KHÔNG hợp lệ → giải sang gói hợp lệ của MÃ "
+          "(đây là bản vá WAIT_CASH vô hạn ca DRI 08-07)",
+          b.client.calls[-1]["loan_package_id"] == 1122, detail=str(b.client.calls[-1]))
+
+    b = mkbroker(boom=True)
+    b.place_order("FPT", 1000, "buy", price=20000)
+    check("D6c query gói lỗi → fail-safe về default, TUYỆT ĐỐI không bỏ trắng trường "
+          "(thiếu loanPackageId = HTTP 400, bug TV1 07-28)",
+          b.client.calls[-1]["loan_package_id"] == 1841, detail=str(b.client.calls[-1]))
 
     # ─────────────────── E. Lưới an toàn runtime ───────────────────
     section("E. Lưới an toàn runtime (executor.py :: _lever_package_audit)")
@@ -1216,11 +1238,56 @@ with tempfile.TemporaryDirectory() as TMP:
     SPR = os.path.join(HERE, "mike", "bin", "send_plan_report.sh")
     with open(SPR, encoding="utf-8") as f:
         _spr = f.read()
-    _beg = "# ── CAPIT: Σ lệnh mua thật vs VND mục tiêu đã publish"
-    _end = 'lines = [f"📋'
-    check("H0 trích được đoạn đối chiếu CAPIT từ send_plan_report.sh production",
-          _spr.count(_beg) == 1 and _spr.count(_end) == 1)
-    CAPIT_NOTE_SRC = _spr.split(_beg, 1)[1].split(_end, 1)[0]
+
+    def _extract_exec_block(marker, n_stmts, expect_last, ns_keys, tag):
+        """Trích một khối python của heredoc production theo CẤU TRÚC (ast), KHÔNG theo mốc-cuối chuỗi.
+
+        Bản đầu (cả H lẫn L) cắt từ mốc-đầu tới `lines = [f"📋` — mốc-cuối cách vùng cần trích
+        ~235 dòng, nên MỌI thứ chèn vào giữa đều bị cuốn theo. Khối "ĐÒN BẨY MARGIN" thêm ngày
+        2026-08-03 lọt vào đoạn trích của H và `exec` chết `NameError: name 'plan' is not
+        defined` (102 assert trước đó vẫn PASS ⇒ đỏ vì HARNESS, không phải production sai);
+        chính khối đó rồi cũng cuốn tiếp phần sau nó vào L. Cùng họ bug CHECK5 (§17).
+
+        Sửa bằng đúng thứ `ast` biết mà chuỗi không biết: khối cần trích là `n_stmts` statement
+        TOP-LEVEL đầu tiên sau mốc, kết thúc đúng ở `end_lineno` của statement cuối. Chèn thêm
+        bao nhiêu code phía sau cũng không với tới được. `expect_last` khoá lại HÌNH DẠNG của
+        statement cuối, nên nếu ai chèn code vào GIỮA khối thì test đỏ NGAY ở tag-b kèm lý do,
+        thay vì âm thầm trích nhầm.
+        """
+        check(f"{tag}a trích được khối từ send_plan_report.sh production",
+              _spr.count(marker) == 1, detail=f"n_marker={_spr.count(marker)}")
+        # thân heredoc python kết thúc ở dòng terminator `PY`; sau đó là bash, ast không parse được
+        body = marker + _spr.split(marker, 1)[1].split("\nPY\n", 1)[0]
+        tops = ast.parse(body).body[:n_stmts]
+        ok_shape = len(tops) == n_stmts and expect_last(tops[-1])
+        check(f"{tag}b khối = {n_stmts} statement top-level đầu, dạng statement cuối đúng như ghim",
+              ok_shape, detail=f"dạng={[type(n).__name__ for n in tops]}")
+        if not ok_shape:
+            return ""
+        blk = "\n".join(body.splitlines()[:tops[-1].end_lineno])
+
+        # Cổng chống-trôi: khối chỉ được dùng những tên harness thật sự cấp. Thiếu một tên ⇒ báo
+        # NGAY ở đây kèm tên còn thiếu, thay vì `NameError` khô khốc giữa một lần chạy sau.
+        bound, used = set(), set()
+        for n in ast.walk(ast.parse(blk)):
+            if isinstance(n, ast.Name):
+                (bound if isinstance(n.ctx, ast.Store) else used).add(n.id)
+            elif isinstance(n, ast.ExceptHandler) and n.name:
+                bound.add(n.name)
+            elif isinstance(n, (ast.Import, ast.ImportFrom)):
+                bound.update((a.asname or a.name).split(".")[0] for a in n.names)
+        free = sorted(used - bound - set(dir(builtins)))
+        check(f"{tag}c khối khép kín trên namespace harness cấp (không cuốn theo khối lân cận)",
+              set(free) <= ns_keys,
+              detail=f"tên tự do={free}; thiếu={sorted(set(free) - ns_keys)}")
+        return blk
+
+    # Khối CAPIT = `capit_note = ""` · `_capit_buys = [...]` · `if _capit_buys:` (3 statement).
+    CAPIT_NOTE_SRC = _extract_exec_block(
+        "# ── CAPIT: Σ lệnh mua thật vs VND mục tiêu đã publish", 3,
+        lambda n: isinstance(n, ast.If) and isinstance(n.test, ast.Name)
+        and n.test.id == "_capit_buys",
+        {"json", "os", "acct", "orders", "_order_price"}, "H0")
 
     def run_note(art_blob, orders_vnd, acct="SpaceX"):
         """Chạy đoạn production thật trong tmpdir có data/golive_v23_status.json giả lập."""
@@ -1237,7 +1304,7 @@ with tempfile.TemporaryDirectory() as TMP:
                                                                  o.get("price")))}
         try:
             os.chdir(d)
-            exec(_beg + CAPIT_NOTE_SRC, ns)
+            exec(CAPIT_NOTE_SRC, ns)
         finally:
             os.chdir(cwd0)
         return ns["capit_note"]
@@ -1888,11 +1955,11 @@ with tempfile.TemporaryDirectory() as TMP:
     # đúng số tiền vay — không lẫn vào dòng duyệt plan thường lệ.
     section("L. Khối cảnh báo MARGIN trong báo cáo duyệt plan")
 
-    _mbeg = "# ── ĐÒN BẨY MARGIN: nêu BẬT LOẠT"
-    _mend = 'lines = [f"📋'
-    check("L0 trích được khối margin từ send_plan_report.sh production",
-          _spr.count(_mbeg) == 1 and _spr.count(_mend) == 1)
-    MARGIN_SRC = _mbeg + _spr.split(_mbeg, 1)[1].split(_mend, 1)[0]
+    # Khối MARGIN = `margin_note = []` · `try: … except` (2 statement) — cùng cách cắt theo cấu
+    # trúc như H0 (xem docstring `_extract_exec_block`); mốc-cuối chuỗi cũ cuốn theo cả phần sau.
+    MARGIN_SRC = _extract_exec_block(
+        "# ── ĐÒN BẨY MARGIN: nêu BẬT LOẠT", 2, lambda n: isinstance(n, ast.Try),
+        {"acct", "date"}, "L0")
 
     def run_margin(pv, rec, aerr=""):
         """exec khối production với preview/duyệt giả lập (vá ở tầng MODULE vì khối tự

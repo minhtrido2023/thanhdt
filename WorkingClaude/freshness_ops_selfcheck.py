@@ -30,6 +30,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from datetime import datetime, timedelta
 from pathlib import Path
 
 WC = Path("/home/trido/thanhdt/WorkingClaude")
@@ -71,6 +72,20 @@ BLOCK_TABLES = {  # key: (max_lag, unit-string in trong output)
 }
 WARN_TABLE_RR = ("risk_rating", 135)   # WARN-only (orphan)
 LASTMOD_MAX = 4                        # _check_lastmod custom30v_8l / custom30_8l
+FA_LASTMOD_MAX = 9                     # MAX_R8L_MOD_AGE / MAX_FA_MOD_AGE (fa_ratings*)
+
+
+def _lastmod(**over):
+    """Tuổi last-modified cho MỌI bảng writer-alive script thật đang kiểm.
+
+    Bỏ sót một bảng ⇒ stub trả None ⇒ script fail-safe age=999 ⇒ WARN GIẢ, và mọi assert đếm
+    WARN đổ theo. `fa_ratings_8l`/`fa_ratings` được thêm vào script sau khi selfcheck này ra
+    đời — đó chính là 2 WARN giả làm S1/S3 đỏ ngày 2026-08-08.
+    """
+    base = {"custom30v_8l": LASTMOD_MAX, "custom30_8l": LASTMOD_MAX,
+            "fa_ratings_8l": FA_LASTMOD_MAX, "fa_ratings": FA_LASTMOD_MAX}
+    base.update(over)
+    return base
 
 
 BQ_STUB = r'''#!/usr/bin/env python3
@@ -87,16 +102,34 @@ if args and args[0] == "show":
         print(json.dumps({"lastModifiedTime": str(ms)}))
     sys.exit(0)
 q = " ".join(args)
+# --- probe queries KHÔNG phải lag-check: phải khớp TRƯỚC vòng lặp bảng, vì cùng nhắc tên bảng.
+# (thêm 2026-08-08 — script thật đã mọc thêm 3 probe này; sandbox thiếu stub nên chúng rơi vào
+#  nhánh "gap_days" và sinh alert CHẶN giả, xem docstring §sandbox-drift.)
+if "COUNT(DISTINCT t.ticker)" in q and "ticker_prune" in q:
+    print("f0_"); print(conf.get("prune_names", 250)); sys.exit(0)      # depth check
+if "AS n_cur" in q:                                                     # fin-breadth cohort
+    print("n_cur,n_prev"); print("%d,%d" % tuple(conf.get("fin_breadth", [240, 250]))); sys.exit(0)
+if "MAX(t.Release_Date)" in q:                                          # lag-pkl BQ reference
+    print("f0_"); print(conf.get("bq_release_max", "2026-08-06")); sys.exit(0)
 order = ["vnindex_5state_dt5g_live", "shares_outstanding_live", "ticker_financial",
-         "ticker_prune", "ticker_1m", "custom30v_8l", "custom30_8l", "risk_rating"]
+         "ticker_prune", "ticker_1m", "custom30v_8l", "custom30_8l", "risk_rating",
+         "fa_ratings_8l", "fa_ratings"]
 for t in order:
     if "tav2_bq." + t in q:
-        print("gap_days"); print(conf["lag"][t]); sys.exit(0)
+        print("gap_days"); print(conf["lag"].get(t, 0)); sys.exit(0)
 print("gap_days"); print(999)
 '''
 
+DT5G_WATCH_STUB = "#!/usr/bin/env python3\nimport sys; sys.exit(0)\n"
+
 FAKE_PY = r'''#!/usr/bin/env bash
 # stub cho DNA_PYEXE: pipeline step "chay ok"; FAKE_PY_TOUCH=1 = gia lap step ghi artifact.
+# `-c` = probe earnings_surprise_data.pkl doc bang $DNA_PYEXE (khong phai buoc pipeline) ->
+# tra ve mot ngay hop le, neu khong probe se bao WARN "khong doc duoc pkl".
+if [ "${1:-}" = "-c" ]; then
+  echo "${FAKE_PKL_RELEASE_MAX:-2026-08-06}"
+  exit 0
+fi
 if [ "${FAKE_PY_TOUCH:-0}" = "1" ]; then
   mkdir -p "$WORKDIR_8L/deploy_golive_dt5g_v4/out"
   touch "$WORKDIR_8L/deploy_golive_dt5g_v4/golive_state_today.json"
@@ -132,9 +165,13 @@ def build_sandbox(tmp: Path) -> dict:
     w(root / "bin" / "dispatch.sh",
       '#!/usr/bin/env bash\necho "$*" >> "$FAKE_LOG_DIR/dispatch.log"\n')
 
+    w(root / "bin" / "dt5g_writer_watch.py", DT5G_WATCH_STUB)
+
     (workdir / "trading_bot" / "__init__.py").write_text("")
     (workdir / "trading_bot" / "vn_market.py").write_text(
         "import datetime as dt\n"
+        "def is_holiday(d):\n"          # cổng DT5G publisher-evidence import hàm này
+        "    return False\n"
         "def next_trading_day(d):\n"
         "    n = d + dt.timedelta(days=1)\n"
         "    while n.weekday() >= 5:\n"
@@ -144,13 +181,46 @@ def build_sandbox(tmp: Path) -> dict:
         "def live_dnse_labels():\n    return ['TestAcct']\n"
         "def load_config():\n    return {}\n"
         "def load_accounts(cfg):\n    return [{'label': 'TestAcct'}]\n")
+
+    # --- file phụ trợ mà bản THẬT của script đọc; thiếu là sinh alert giả (xem docstring) ----
+    (workdir / "data").mkdir(parents=True, exist_ok=True)
+    (workdir / "data" / "vnindex_5state_dt5g_live.csv").write_text("time,state\n")
+    (workdir / "data" / "lag_edge_health.csv").write_text("date,edge\n")
+    # corp-action scanner: script đọc $WC_ROOT/data/... = thư mục CHA của $ROOT trong sandbox
+    (root.parent / "data").mkdir(parents=True, exist_ok=True)
+    (root.parent / "data" / "corp_action_backlog.json").write_text(
+        json.dumps({"checked_at": datetime.now().isoformat()}))
     return {"root": root, "fakebin": fakebin, "logs": logs, "workdir": workdir}
+
+
+def _write_dt5g_evidence(workdir: Path):
+    """Bằng chứng publisher CỦA TA (cổng DT5G, 2026-07-31). Ghi TRƯỚC khi chạy script nên mtime
+    < PIPELINE_START_EPOCH: cổng DT5G (chỉ đòi mtime cùng NGÀY) PASS, còn cổng artifact-fresh
+    (đòi mtime ≥ lúc gate bắt đầu) chỉ PASS khi bước pipeline giả thật sự touch lại — đúng
+    kịch bản S1 vs S4."""
+    d = datetime.now().date()
+    while d.weekday() >= 5:
+        d -= timedelta(days=1)
+    out = workdir / "deploy_golive_dt5g_v4" / "out"
+    out.mkdir(parents=True, exist_ok=True)
+    sj = workdir / "deploy_golive_dt5g_v4" / "golive_state_today.json"
+    cs = out / "golive_v23_recommendations_20990101.csv"
+    sj.write_text(json.dumps({"as_of": str(d), "bq_publish_ok": True}))
+    cs.write_text("ticker\n")
+    # Lùi mtime 30s: sandbox (bq bị stub) chạy xong trong chưa tới 1 giây, mà
+    # `_assert_fresh_artifact` so `stat -c %Y` (nguyên giây) với PIPELINE_START_EPOCH. Ghi ở
+    # "now" thì mtime == gate-start ⇒ `-lt` sai ⇒ kịch bản S4 (artifact KHÔNG được ghi lại)
+    # lọt thành PASS. Lùi vài giây làm thứ tự thời gian rõ ràng, không phụ thuộc tốc độ máy.
+    old = datetime.now().timestamp() - 30
+    for p in (sj, cs):
+        os.utime(p, (old, old))
 
 
 def run_gate(sb: dict, lag: dict, lastmod: dict, py_touch: bool):
     """Chạy bản sandbox của bq_freshness_check.sh với stub-config cho trước."""
     for f in sb["logs"].glob("*.log"):
         f.unlink()
+    _write_dt5g_evidence(sb["workdir"])
     conf = sb["logs"] / "fake_bq_conf.json"
     conf.write_text(json.dumps({"lag": lag, "lastmod": lastmod}))
     env = dict(os.environ,
@@ -177,8 +247,7 @@ def part_a():
 
         # --- S1: mọi bảng đúng tại boundary (lag == max) → ALL FRESH, dispatch chạy ---
         rc, out, ntf, thr, dsp = run_gate(
-            sb, at_max, {"custom30v_8l": LASTMOD_MAX, "custom30_8l": LASTMOD_MAX},
-            py_touch=True)
+            sb, at_max, _lastmod(), py_touch=True)
         for t, (mx, unit) in BLOCK_TABLES.items():
             check(f"S1 boundary-PASS {t} (lag={mx}{unit}d ≤ {mx})",
                   bool(re.search(rf"OK   [^\n]*lag={mx}{unit}d \(≤{mx}\)", out))
@@ -197,8 +266,7 @@ def part_a():
         over = {t: mx + 1 for t, (mx, _) in BLOCK_TABLES.items()}
         over[WARN_TABLE_RR[0]] = WARN_TABLE_RR[1] + 1
         rc, out, ntf, thr, dsp = run_gate(
-            sb, over, {"custom30v_8l": LASTMOD_MAX + 1, "custom30_8l": None},
-            py_touch=True)
+            sb, over, _lastmod(custom30v_8l=LASTMOD_MAX + 1, custom30_8l=None), py_touch=True)
         for t, (mx, unit) in BLOCK_TABLES.items():
             check(f"S2 boundary-FAIL {t} (lag={mx+1}{unit}d > {mx})",
                   bool(re.search(rf"FAIL [^\n]*lag={mx+1}{unit}d \(>{mx}\)", out)), out[:1200])
@@ -219,8 +287,7 @@ def part_a():
         warn_only = dict(at_max)
         warn_only[WARN_TABLE_RR[0]] = WARN_TABLE_RR[1] + 1
         rc, out, ntf, thr, dsp = run_gate(
-            sb, warn_only, {"custom30v_8l": LASTMOD_MAX + 1, "custom30_8l": None},
-            py_touch=True)
+            sb, warn_only, _lastmod(custom30v_8l=LASTMOD_MAX + 1, custom30_8l=None), py_touch=True)
         check("S3 WARN-only → pipeline vẫn chạy, dispatch vẫn đi, rc=0",
               rc == 0 and "ALL FRESH" in out and "TestAcct" in dsp
               and "NOTE: 3 WARN non-blocking" in out, f"rc={rc}\n{out[-800:]}")
@@ -230,8 +297,7 @@ def part_a():
         # --- S4: all fresh nhưng pipeline step KHÔNG ghi artifact → chặn dispatch (F5) ---
         shutil.rmtree(sb["workdir"] / "deploy_golive_dt5g_v4", ignore_errors=True)
         rc, out, ntf, thr, dsp = run_gate(
-            sb, at_max, {"custom30v_8l": LASTMOD_MAX, "custom30_8l": LASTMOD_MAX},
-            py_touch=False)
+            sb, at_max, _lastmod(), py_touch=False)
         check("S4 artifact stale → rc=1, ARTIFACT STALE alert, KHÔNG dispatch",
               rc == 1 and "ARTIFACT STALE" in thr and dsp == ""
               and "KHÔNG được dispatch" in out, f"rc={rc} dsp={dsp!r}\n{out[-600:]}")

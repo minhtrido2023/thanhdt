@@ -2,6 +2,11 @@
 """v4final_selector_selfcheck.py — guards for the v4final custom30V family.
 Job Taylor_20260714_140127. Research-only; asserts, writes nothing production reads.
 
+RUNTIME BUDGET: ~203s (measured solo, 2026-08-08) — run it with `timeout 400`, NOT the suite's
+default 150s, or it reports a false TIMEOUT (it did, in the 2026-08-08 inventory). Same reasoning as
+eyrisk_selector_selfcheck.py: the guards are corrupt-the-panel negative controls on the REAL BQ
+panel; stubbing BQ would make [2]/[3] prove nothing. Do not trade the round-trip for speed.
+
 Covers exactly what the dispatch demands proof of:
   [1] OFF is BYTE-IDENTICAL — production (yieldcombo + namecap) is bit-for-bit what the PRE-EDIT
       module produced. Proven against `git show HEAD:custom_basket.py`, not against a stored CSV

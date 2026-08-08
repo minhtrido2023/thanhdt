@@ -210,8 +210,14 @@ for cls in subclasses:
 print("=== discretionary engine stamps cash_only=True on injected order ===")
 from trading_bot.discretionary_accumulation import compute_session_order
 import json
-state = json.load(open(os.path.join(
-    WC_ROOT, "data/trade_plans/discretionary/state_TV1_SpaceX.json")))
+# FIXTURE ĐÓNG BĂNG, KHÔNG đọc file production sống. Bản đầu đọc thẳng
+# data/trade_plans/discretionary/state_TV1_SpaceX.json; khi chương trình gom TV1 kết thúc,
+# production ghi status=completed → engine trả (None, action='inactive') và assert đỏ dù engine
+# hoàn toàn đúng. Fixture giữ đúng ảnh chụp lúc sleeve còn active (coding_guidelines §23 hệ luận 1).
+STATE_FIXTURE = os.path.join(WC_ROOT, "data/fixtures/state_TV1_SpaceX_active_20260728.json")
+state = json.load(open(STATE_FIXTURE, encoding="utf-8"))
+check(state.get("status") == "active" and state.get("cash_only") is True,
+      "fixture TV1 ở trạng thái active + cash_only (kịch bản có nghĩa)")
 order, decision = compute_session_order(
     state, 0, 2_000_000_000, 19900.0, "2026-07-28", "2026-07-28T20:30:00+07:00")
 check(order is not None and order.get("cash_only") is True,
