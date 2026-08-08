@@ -7,7 +7,7 @@ metadata:
   originSessionId: fef38ec9-be6a-47e0-ac13-1222be8cba59
 ---
 
-User is backing up `/home/trido/thanhdt` to a **private** GitHub repo (`github.com/minhtrido2023/thanhdt`) so work can resume when the server is off. Goal structure:
+User is backing up `/home/trido/thanhdt` to a **private** GitHub repo (`github.com/minhtrido2023/thanhdt`) so work can [REDACTED] when the server is off. Goal structure:
 
 - **code + docs + context** → committed to git
 - **data** (csv/pkl/xlsx, regenerable from BigQuery) → `data/` folder, gitignored

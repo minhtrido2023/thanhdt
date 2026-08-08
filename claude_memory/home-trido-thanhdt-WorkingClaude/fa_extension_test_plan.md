@@ -41,7 +41,7 @@ originSessionId: 762b6179-ddcb-41b7-ac2b-ee8d2f143ccc
 - [ ] Test 6 Industry modifier
 - [ ] Consolidated v5 recommendation
 
-## How to resume / remind user
+## How to [REDACTED] / remind user
 If conversation drops or user asks "where were we with FA extensions" / "FA testing" / "trục mới cho FA":
 1. Read this file
 2. Check todo list status

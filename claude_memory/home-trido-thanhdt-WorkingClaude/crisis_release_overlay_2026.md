@@ -15,7 +15,7 @@ User concern ([REDACTED]02): DT5G held CRISIS 14/05→30/08/2024 (78 sessions @ 
 - 2024-05-14→2024-08-30 (78d, +3.3%, −4.4%)
 vs REAL crises (deep DD): 2018 −19.6%, COVID −11.9%, 2022 −21.3%. Clean separation: false-pos <6.5% DD, real >11%. NOT a DT smoothing artifact — ALL 4 family variants (canonical TinhTe, DT_10_25_25, v3.4b, DT5G state_raw) agree CRISIS the whole 2024 window. Root cause = r_score momentum-heavy/lagging (P3M 30%): a sharp-brief dip (Apr-2024) tanks rank <0.10 and min_stay locks it for months while price recovers. BULL→CRISIS skip (4 levels in 1 session) is itself a red flag.
 
-**FIX built + backtested** (`crisis_release.py` + `test_crisis_release_nav.py`, pure state→VNINDEX-alloc NAV, canonical mechanics T+1/ramp3/TC0.1%/dep6%/bor10%/TARGET_W{1:0,2:.2,3:.7,4:1,5:1.3}). Rule: inside raw-CRISIS, downgrade→NEUTRAL when (d≥K sessions) AND (Close≥entry_px·(1+margin) held `hold` sessions) AND no macro. Daily-symmetric: if price falls back, CRISIS resumes.
+**FIX built + backtested** (`crisis_release.py` + `test_crisis_release_nav.py`, pure state→VNINDEX-alloc NAV, canonical mechanics T+1/ramp3/TC0.1%/dep6%/bor10%/TARGET_W{1:0,2:.2,3:.7,4:1,5:1.3}). Rule: inside raw-CRISIS, downgrade→NEUTRAL when (d≥K sessions) AND (Close≥entry_px·(1+margin) held `hold` sessions) AND no macro. Daily-symmetric: if price falls back, CRISIS [REDACTED]s.
 
 **KEY SURPRISE — naive version HURTS:**
 - **margin=0% (release when price reclaims entry): −0.6 to −2.7pp CAGR ALL variants.** Mechanism: re-enters 70% right into the volatility CRISIS was dodging (2024 released Jun→ate Aug-5 yen-carry −8.6% crash). The "false positives" provided REAL DD protection — not purely false.
