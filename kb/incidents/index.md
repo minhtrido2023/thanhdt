@@ -161,6 +161,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Tóm tắt (nguyên văn tiêu đề) | status |
 |---|---|---|
+| 2026-08-09 | [RETRO — 2026-08-09: 7 sự cố, 4 pattern xuyên suốt (2 ĐẠT NGƯỠNG ESCALATE — 1 tiếp tục theo mục 6, 1 mới nhưng đủ nghiêm trọng để nêu bật ngay dù chưa đạt ngưỡng cứng)](retro/retro-2026-08-09.md) | logged |
 | 2026-08-08 | [RETRO — 2026-08-08: 1 sự cố mới, 1 đóng thành công (Pattern 1 test-bus-pollution FIXED_VERIFIED cùng ngày), 1 pattern quy trình MỚI formal hoá (backlog ghi file kb/incidents/ — 4 retro liên tiếp chưa từng có Prevention)](retro/retro-2026-08-08.md) | logged |
 | 2026-08-07 | [RETRO — 2026-08-07: 11 sự cố, 4 pattern xuyên suốt (1 ESCALATE — test-code-pollutes-bus tái diễn sau khi đã formal hoá + đề xuất Prevention ở retro 08-05 mà chưa triển khai)](retro/retro-2026-08-07.md) | logged |
 | 2026-08-06 | [RETRO — 2026-08-06: 8 sự cố, 4 pattern xuyên suốt (2 pattern đóng đúng nhờ escalate hôm qua, 0 escalate mới)](retro/retro-2026-08-06.md) | logged |
