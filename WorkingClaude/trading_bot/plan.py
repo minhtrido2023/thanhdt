@@ -53,6 +53,19 @@ class PlannedOrder:
     # nguyên vẹn (gói default account, không đòn bẩy) cho mọi lệnh BAL/LAG/CAPIT/ETF.
     lever_f: float = None
     loan_package_id: int = None
+    # ── TRẦN GIÁ MUA TUYỆT ĐỐI (VND) — "bám giá thị trường nhưng KHÔNG BAO GIỜ vượt" ────────
+    # Chỉ có hiệu lực với side="buy". Executor._limit_price() lấy min(trần đuổi %, trần này);
+    # nếu ngay cả giá SÀN phiên cũng đã > trần này thì KHÔNG đặt lệnh (trả None) thay vì bị
+    # `max(px, q.floor)` đẩy vượt. Nhờ đó plan KHÔNG còn phải neo ref_price thấp giả tạo
+    # (kiểu anchor/1,04) để "trần đuổi % vô tình chạm đúng anchor" — cách đó khiến giá đặt
+    # nằm xa giá đang khớp và gần như không khớp. Đặt ref_price = giá tham chiếu THẬT của thị
+    # trường và trần này = anchor ⇒ lệnh bám q.ask sống (re-price mỗi slice_interval_min qua
+    # _cancel_stale) mà vẫn bị chặn cứng ở anchor ở MỌI bước.
+    # Tên field trùng với key `hard_no_chase_ceiling_vnd` mà discretionary_accumulation.py đã
+    # sinh ra sẵn từ trước (trước đây bị load_plan() lọc mất vì không nằm trong dataclass) —
+    # cùng khái niệm "no-chase ceiling", không tạo tên thứ hai cho cùng một thứ.
+    # Default None = mọi lệnh cũ giữ nguyên hành vi (chỉ có trần đuổi % như trước).
+    hard_no_chase_ceiling_vnd: float = None
 
     @property
     def value(self):

@@ -435,11 +435,31 @@ class Executor:
         ceil = self.cfg.get("chase_cap_vol_ceil", 0.04)
         return min(max(k * rvol, static), ceil)
 
+    @staticmethod
+    def _hard_buy_ceiling(o):
+        """Trần giá MUA tuyệt đối (VND) của lệnh, hoặc None nếu không đặt trần.
+
+        Chỉ áp cho side="buy" — lệnh BÁN không có khái niệm "mua đuổi". Giá trị rác
+        (không parse được, ≤0) → None = hành vi cũ, KHÔNG bao giờ nới trần vì lỗi parse."""
+        if o.side != "buy":
+            return None
+        try:
+            v = float(getattr(o, "hard_no_chase_ceiling_vnd", None) or 0)
+        except (TypeError, ValueError):
+            return None
+        return v if v > 0 else None
+
     def _limit_price(self, o, q, cross=True, extreme=False):
         """Giá LO cho lệnh con; None = không đặt được (thiếu quote).
 
         extreme=True (EXTREME-regime SELL only): nới sàn đuổi từ ref×(1−3%) xuống thẳng
         q.floor để bán tới sàn (thoát dứt điểm) thay vì nằm kẹt tại −3% khi giá gap thủng.
+
+        BUY có `o.hard_no_chase_ceiling_vnd` (VND tuyệt đối, vd anchor entry-window LAG):
+        trần đó là BẤT BIẾN — min() với trần đuổi %, và nếu kết quả cuối vẫn > trần (chỉ xảy
+        ra khi chính giá SÀN phiên đã trên trần) thì trả None = KHÔNG đặt lệnh. Nhờ trần
+        tuyệt đối này, `desired = q.ask` (giá đang chào THẬT, đọc lại mỗi chu kỳ) mới là thứ
+        quyết định giá đặt — bám thị trường mà không bao giờ vượt trần.
         """
         ex = self.state.get("exchange_override", {}).get(o.ticker) or q.exchange or "HOSE"
         last = q.last or q.ref or o.ref_price
@@ -448,12 +468,19 @@ class Executor:
             cap = o.ref_price * (1 + self._buy_chase_pct(o.ticker))
             if q.ceiling:
                 cap = min(cap, q.ceiling)
+            hard = self._hard_buy_ceiling(o)
+            if hard:
+                cap = min(cap, hard)
             desired = (q.ask if (cross and q.ask) else
                        (q.bid + self.cfg["chase_ticks"] * tick) if q.bid else last)
             px = min(desired, cap)
             px = round_price(px, o.ticker, ex, "down")
             if q.floor:
                 px = max(px, q.floor)
+            if hard and px > hard:
+                # giá sàn phiên đã > trần tuyệt đối → không tồn tại giá hợp lệ nào ≤ trần.
+                # KHÔNG đặt lệnh (thà lỡ phiên còn hơn mua trên anchor).
+                return None
         else:
             floor_cap = o.ref_price * (1 - self.cfg["max_chase_pct_sell"])
             if q.floor:
@@ -1054,6 +1081,12 @@ class Executor:
                 cross, dip_note = True, "EXTREME_DOWN sell-to-floor"
             px = self._limit_price(o, q, cross, extreme=extreme_down)
             if px is None:
+                hard = self._hard_buy_ceiling(o)
+                if hard:
+                    # Phân biệt rõ với NO_QUOTE/WAIT_CASH: lỡ phiên vì TRẦN, không phải vì lỗi.
+                    self._journal("HARD_CEILING_BLOCK", o, price=hard, note=(
+                        f"giá thấp nhất đặt được (sàn {q.floor:,.0f}) > trần {hard:,.0f}đ "
+                        f"— KHÔNG đặt lệnh mua, thử lại chu kỳ sau"))
                 continue
             qty = self._child_qty(o, ps, q, px)
             if qty <= 0:
@@ -1151,6 +1184,15 @@ class Executor:
             flag = (self.cfg["atc_remainder_sell"] if o.side == "sell"
                     else self.cfg["atc_remainder_buy"])
             if not flag:
+                continue
+            if self._hard_buy_ceiling(o):
+                # ATC khớp ở GIÁ ĐÓNG CỬA phiên xác định lúc ATC — không đặt được giá,
+                # nên KHÔNG có cách nào đảm bảo ≤ trần. Lệnh có trần tuyệt đối chỉ đi
+                # đường LO. (atc_remainder_buy mặc định False; guard này để lúc ai đó bật
+                # lên thì trần vẫn còn hiệu lực ở MỌI bước, không hở đúng bước cuối phiên.)
+                self._journal("HARD_CEILING_SKIP_ATC", o,
+                              price=self._hard_buy_ceiling(o),
+                              note="lệnh có trần giá tuyệt đối — ATC không đặt được giá, bỏ quét ATC")
                 continue
             c = self._open_child(ps)
             if c:
