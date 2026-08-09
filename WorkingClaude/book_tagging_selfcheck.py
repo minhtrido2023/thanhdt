@@ -304,7 +304,13 @@ def fake_holdings(park, cash, books=None, unver=(), excluded=(), ok=True, sellab
     return {"account_label": "SpaceX", "asof": "2026-08-05",
             "park_mv_vnd": sum(l["mv_vnd"] for l in lots),
             "park_mv_verified_vnd": sum(l["mv_vnd"] for l in lots),
-            "cash_available_vnd": cash, "park_lots": lots, "broker_positions": positions,
+            "cash_available_vnd": cash,
+            # mẫu số pool L1 = totalCash (sửa 2026-08-09); ca ở file này không kiểm phần đó nên
+            # để bằng cash — giữ nguyên ý nghĩa cũ của mọi ca. Kiểm riêng: T18* trong
+            # mike/bin/compute_park_trim_selfcheck.py.
+            "cash_total_vnd": cash, "cash_dividend_receiving_vnd": 0.0,
+            "cash_debt_vnd": 0.0, "cash_basis": "total_cash",
+            "park_lots": lots, "broker_positions": positions,
             "excluded_tickers": list(excluded), "unverified_tickers": list(unver),
             "reconcile": {"ok": ok, "mismatches": [] if ok else [{"ticker": "ACB", "diff": -200}]}}
 
