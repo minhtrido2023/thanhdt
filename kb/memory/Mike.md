@@ -2,32 +2,39 @@
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
 
 # Working memory — Mike
-> Cập nhật lần cuối: 2026-08-08 (cuối ngày, sau daily retro bước 3/3)
+> Cập nhật lần cuối: 2026-08-09 (cuối ngày, sau daily retro bước 3/3)
 
-## Daily retro 08-08 — XONG
-1 sự cố mới (`selfcheck-weekly-new-red` báo động giả do chạy tay sai interpreter, cùng họ lỗi
-07-31), 1 pattern ĐÓNG (test-bus-pollution — Taylor vá `_publish_bot_event()` guard
-`MIKE_BOT_TEST_MODE`, escalate→fix→verify trong ~11h, mẫu tốt), 1 pattern quy trình MỚI formal
-hoá: backlog "chưa ghi file kb/incidents/" đã lặp 4 retro liên tiếp (08-05→08-08) mà chưa ai đề
-xuất Prevention — 2 hướng nêu ra (stub tự động vs chấp nhận retro-là-đủ), CẦN USER QUYẾT hướng
-nào, chưa tự chọn. Wags verify: GAPS FOUND (đếm sai "2 sự cố mới" trong tiêu đề, đã sửa) → file
-`kb/incidents/retro/retro-2026-08-08.md`, commit `0ebe1699`.
+## Daily retro 08-09 — XONG
+7 sự cố, 4 pattern. Wags verify GAPS FOUND → đã sửa (commit gán sai row #3 aa0afea→319e1b2; row #4
+đã chốt fail-closed cùng ngày, không còn "treo"; bổ sung 2 sự cố bị bỏ sót #6/#7 từ finding
+DollarBill). File: `kb/incidents/retro/retro-2026-08-09.md`, commit `a7863c1c`.
 
-## Việc treo sang 08-09 (ưu tiên)
-1. **Pattern 2 (backlog ghi file kb/incidents/) cần USER quyết** — hướng (a) stub tự động mỗi
-   khi finding/error event vượt ngưỡng, hay (b) chấp nhận retro backfill là đủ, sửa quy tắc thay
-   vì sửa quy trình. Nêu rõ khi có dịp nói chuyện với user.
-2. **9 sự cố 08-07 vẫn 0/9 có file `kb/incidents/` riêng** (đặc biệt funding-gate saga #3 đã fix
-   + quant-skeptic CONFIRMED, chỉ thiếu file ghi) — nếu retro 08-09/08-10 vẫn = 0 thì ĐẠT ngưỡng
-   escalate cho Pattern 2 theo mục 6.
-3. **`selfcheck_weekly_baseline_check.sh`** — 2 việc kỹ thuật nhỏ: (a) thêm run-id vào tên
-   `RESULT_JSON` (chống ghi đè bằng chứng lần chạy sai); (b) guard cứng chặn interpreter sai
-   `$DNA_PYEXE` (fail loud thay vì chạy sai âm thầm).
-4. **`plan_state_source_mismatch`** (`bin/send_plan_report.sh` ~168-176) — so sai chuỗi mô tả
-   thay vì giá trị `state` thật, CHƯA sửa, sẽ lộ lại tối nay khi gửi plan T+1.
-5. **SpaceX/DRI ghost order 07-07 07:06:49Z** — vẫn CHƯA ai xác nhận liên hệ bug funding-gate
-   #3(a) (Taylor/Mafee cần đối chiếu timeline).
-6. Theo dõi: wakeup compliance 08-08 = 0% MISS (n=4, mẫu nhỏ) — tín hiệu tốt, chưa kết luận xu hướng.
+**Pattern 1 (CAO) — `availableCash` dùng nhầm làm "tiền mặt thật"**: 2 lần độc lập cùng ngày
+(`compute_active_nav.py` — Winston, CHƯA VÁ; pool L1 park-trim — Taylor, đã vá commit `df7d92b4`).
+Đề xuất Prevention: hàm chung `get_true_cash()` trong `brokers.py` + audit grep toàn repo.
+
+**Pattern 2 (CAO NHẤT) — Mike tự dispatch trùng lặp cùng file, 3 lần (07-08→2 lần hôm nay)**. Lần
+gần nhất do tin `jobs.sh status=failed` giả (watchdog timeout ≠ process chết), chạm `executor.py`.
+Đề xuất kỹ thuật của Taylor: `dispatch.sh`/watchdog kiểm `kill -0 <pid>` trước khi đánh dấu failed.
+CHƯA tự sửa (đây là draft-only), cần quyết hành động thật sớm, không chờ thêm 1 retro.
+
+**Pattern 3 — ESCALATED**: backlog "chưa ghi file kb/incidents/" 2 retro liên tiếp không giảm
+(9→16 sự cố tồn đọng). Bus question `retro-pattern-recurring-2-days` đã gửi, chờ user/Mike chọn
+hướng Prevention (stub tự động vs chấp nhận retro-là-đủ).
+
+## Việc treo sang 08-10 (ưu tiên, KHẨN)
+1. **KHẨN NHẤT**: bus question `spacex-plan-0810-thieu-216524d-sau-khi-go-L1` (Taylor, 16:55:59Z
+   08-09) CHƯA có answer — deadline "trước 09:05 ICT" đã/sắp qua (hôm nay 2026-08-10). Xử lý TRƯỚC
+   TIÊN khi vào phiên tiếp theo.
+2. Sự cố #1 `compute_active_nav.py` availableCash bug — verify lại trạng thái thật trước khi dùng
+   `active_nav` cho báo cáo/sizing (đừng tin memory, có thể đã đổi).
+3. ZaloPay park-trim display-only (câu hỏi `Q2-zalopay-park-trim` của DollarBill) + plan ZaloPay
+   08-07 0 fill — cả 2 chưa ai điều tra, cần dispatch Mafee/Winston.
+4. Pattern 2 (dispatch collision) — cân nhắc áp fix `kill -0` cho `dispatch.sh`/watchdog sớm.
+5. 16 sự cố tồn đọng (9 từ 08-07 + 7 hôm nay) cần file `kb/incidents/` riêng, ưu tiên #2b/#3 (chạm
+   executor.py/tiền thật).
+6. `selfcheck_weekly_baseline_check.sh` — run-id chống ghi đè + guard interpreter sai (nhỏ, không khẩn).
+7. `plan_state_source_mismatch` (`send_plan_report.sh` ~168-176) — chưa sửa.
 
 ## Kế thừa lâu hơn (theo dõi định kỳ, không cần hành động ngay)
 - Verify độc lập fix VHM (NAV-report + LotBook corp-action) — vẫn chưa có ai verify ngoài Taylor.
