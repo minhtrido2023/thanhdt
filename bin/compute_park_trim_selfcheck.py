@@ -27,6 +27,7 @@ WC = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, WC)
 
 import compute_park_trim as cpt                                  # noqa: E402
+import park_holdings as PH                                       # noqa: E402
 from trading_bot.vn_market import LOT                            # noqa: E402
 
 PASS, FAIL = [], []
@@ -63,8 +64,29 @@ def adv_fn_ok(adv=1e12):
     return lambda tk, asof: (adv, asof, None)
 
 
-def holdings(lots, cash=0.0, excluded=(), unver=(), reconcile_ok=True, sellable=None):
-    """lots = [(ticker, qty, entry_date, source)] — mv tính từ PX."""
+FIXTURE_DEBT = 50e6     # xem `holdings()` — chỉ để sổ mặc định KHÔNG trùng chữ ký lỗi feed
+
+
+def holdings(lots, cash=0.0, excluded=(), unver=(), reconcile_ok=True, sellable=None,
+             total_cash="net_zero", div_recv=0.0, debt="net_zero"):
+    """lots = [(ticker, qty, entry_date, source)] — mv tính từ PX.
+
+    `total_cash` = mẫu số pool L1 (totalCash DNSE). `None` = DNSE thiếu field ⇒ phải fail-closed.
+
+    Mặc định `total_cash`/`debt` = "net_zero": tài khoản margin có ĐÚNG `FIXTURE_DEBT` đồng tiền
+    và `FIXTURE_DEBT` đồng nợ ⇒ vốn chủ sở hữu nhàn rỗi = totalCash − totalDebt = 0 ⇒ pool =
+    park_mv, GIỮ NGUYÊN mọi con số kỳ vọng của T1-T17 (chúng viết trên giả định pool = 1.000tr).
+
+    VÌ SAO không để thẳng cả ba field tiền = 0 cho gọn (bản trước làm vậy): "totalCash = totalDebt
+    = availableCash = 0 mà sổ PARK > 0" CHÍNH LÀ chữ ký lỗi feed DNSE 2026-07-27 và code CHẶN nó
+    (fail-closed, T18k). Một sổ test hợp lệ không được trùng chữ ký lỗi — nếu trùng thì mọi ca
+    T1-T17 sẽ trả BLOCKED_CASH_BASIS và selfcheck sập, đúng như đã xảy ra khi thêm guard.
+    """
+    if total_cash == "net_zero" and debt == "net_zero":
+        total_cash, debt = cash + FIXTURE_DEBT, FIXTURE_DEBT     # net = cash (thường 0)
+    else:                       # ca T18* khai tường minh ⇒ giữ đúng số nó khai, không tự chèn nợ
+        total_cash = cash if total_cash == "net_zero" else total_cash
+        debt = 0.0 if debt == "net_zero" else debt
     park_lots = [{"ticker": t, "qty": q, "market_price": PX[t], "mv_vnd": q * PX[t],
                   "price": PX[t], "entry_date": d, "source": s, "book": "PARK"}
                  for (t, q, d, s) in lots]
@@ -77,6 +99,10 @@ def holdings(lots, cash=0.0, excluded=(), unver=(), reconcile_ok=True, sellable=
             "park_lots": park_lots, "broker_positions": bpos,
             "park_mv_vnd": sum(l["mv_vnd"] for l in park_lots),
             "cash_available_vnd": cash,
+            "cash_total_vnd": total_cash,
+            "cash_dividend_receiving_vnd": div_recv,
+            "cash_debt_vnd": debt,
+            "cash_basis": "total_cash",
             "reconcile": {"ok": reconcile_ok,
                           "mismatches": [] if reconcile_ok else [{"ticker": "AAA", "diff": 100}]},
             "unverified_tickers": list(unver), "excluded_tickers": list(excluded)}
@@ -287,6 +313,174 @@ _held = {t: sum(l["qty"] for l in holdings(BASE_LOTS)["park_lots"] if l["ticker"
          for t in {l[0] for l in BASE_LOTS}}
 check("T17b không lệnh nào bán quá số đang giữ / quá sellable",
       all(o["qty"] <= _held[o["ticker"]] and o["qty"] <= o["sellable"] for o in r4["orders"]))
+
+# ── T18: MẪU SỐ POOL = totalCash, KHÔNG availableCash (bug 2026-08-09) ──────
+# Mọi ca "chặn được" đều kèm CA CHỨNG MINH NGƯỢC: bỏ phần sửa ⇒ THẬT SỰ hỏng (§24).
+# Kịch bản tái dựng ca thật SpaceX 08-07: PARK 1.000tr, vừa bán 400tr (chưa settle), tiền đã
+# settle chỉ 20tr. totalCash = 20 + 400 = 420tr.
+H_SETTLED, H_UNSETTLED = 20e6, 400e6
+r18 = run(holdings(BASE_LOTS, cash=H_SETTLED, total_cash=H_SETTLED + H_UNSETTLED))
+check("T18 pool dùng totalCash: 1.000tr PARK + 420tr = 1.420tr ⇒ target 1.136tr > PARK ⇒ NO_TRIM",
+      r18["decision"] == "NO_TRIM" and close(r18["pool_vnd"], 1_420e6, 1),
+      f"{r18['decision']} pool={r18.get('pool_vnd')}")
+r18_bad = run(holdings(BASE_LOTS, cash=H_SETTLED, total_cash=H_SETTLED))
+check("T18b CHỨNG MINH NGƯỢC — cùng sổ mà mẫu số bỏ tiền bán chưa settle ⇒ TRIM oan 180tr",
+      r18_bad["decision"] == "TRIM" and close(r18_bad["pool_vnd"], 1_020e6, 1)
+      and r18_bad["trim_total_vnd"] > 150e6,
+      f"{r18_bad['decision']} pool={r18_bad.get('pool_vnd')} "
+      f"trim={r18_bad.get('trim_total_vnd')}")
+
+# Vòng lặp tự kích: bán X ⇒ park_mv−X, và cash ĐO ĐƯỢC không tăng (tiền chưa settle).
+# Với mẫu số ĐÚNG tỷ lệ phải giảm; với availableCash tỷ lệ gần như đứng yên.
+def _ratio(park_mv, settled, unsettled, use_total):
+    pool = (settled + unsettled if use_total else settled) + park_mv
+    return park_mv / pool
+
+
+_before = _ratio(1_000e6, 20e6, 0, True)
+_after_ok = _ratio(600e6, 20e6, 400e6, True)      # bán 400tr, mẫu số đúng
+_after_bug = _ratio(600e6, 20e6, 400e6, False)    # bán 400tr, mẫu số cũ
+check("T18c bán 400tr ⇒ mẫu số đúng hạ tỷ lệ 98,0%→58,8% (giảm thật)",
+      close(_before, 0.98039, 1e-4) and close(_after_ok, 0.58824, 1e-4))
+check("T18d CHỨNG MINH NGƯỢC — mẫu số cũ chỉ hạ 98,0%→96,8%: bán 400tr gần như vô hiệu "
+      "⇒ phiên sau lại đòi trim (vòng lặp tự kích)",
+      close(_after_bug, 0.96774, 1e-4) and (_before - _after_bug) < 0.02)
+
+check("T18e DNSE thiếu totalCash ⇒ BLOCKED_CASH_BASIS, KHÔNG âm thầm rơi về availableCash",
+      run(holdings(BASE_LOTS, cash=H_SETTLED, total_cash=None))["decision"]
+      == "BLOCKED_CASH_BASIS")
+check("T18f cổ tức chờ nhận NẰM TRONG totalCash ⇒ không cộng thêm lần nữa (pool = totalCash+PARK)",
+      close(run(holdings(BASE_LOTS, cash=H_SETTLED, total_cash=100e6,
+                         div_recv=30e6))["pool_vnd"], 1_100e6, 1))
+# L2 (compute_jit_unpark) PHẢI vẫn dùng availableCash — hai ngữ nghĩa khác nhau, đừng gộp.
+_ju = open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                        "compute_jit_unpark.py"), encoding="utf-8").read()
+check("T18g L2 jit_unpark vẫn sizing theo cash_available_vnd (tiền tiêu được), KHÔNG đổi sang total",
+      'h["cash_available_vnd"]' in _ju and 'h["cash_total_vnd"]' not in _ju)
+
+# ── T18h: nợ margin PHẢI bị trừ khỏi mẫu số (phản biện quant-skeptic 2026-08-09) ──
+# Tái dựng quy mô nợ THẬT của SpaceX ngày 2026-07-03 (409,9tr) trên cùng sổ PARK 1.000tr.
+DEBT = 409.9e6
+r18h = run(holdings(BASE_LOTS, cash=20e6, total_cash=500e6, debt=DEBT))
+check("T18h pool trừ nợ margin: (500 − 409,9) + 1.000 = 1.090,1tr",
+      close(r18h["pool_vnd"], 1_090.1e6, 1), f"pool={r18h.get('pool_vnd')}")
+r18h_bad = run(holdings(BASE_LOTS, cash=20e6, total_cash=500e6, debt=0.0))
+check("T18i CHỨNG MINH NGƯỢC — bỏ qua nợ ⇒ pool phồng 1.500tr, trần PARK 1.200tr > PARK 1.000tr "
+      "⇒ NO_TRIM hoàn toàn, trong khi trừ nợ đúng thì PHẢI trim 127,9tr (under-trim)",
+      close(r18h_bad["pool_vnd"], 1_500e6, 1)
+      and r18h_bad["decision"] == "NO_TRIM" and r18h["decision"] == "TRIM"
+      # mức VƯỢT TRẦN = −delta = 1.000 − 80%×1.090,1 = 127,92tr. (KHÔNG so với trim_total_vnd:
+      # đó là tổng SELL-ONLY Σ max(0, mv−tgt), theo thiết kế LỚN HƠN mức vượt trần — §HỆ QUẢ.)
+      and close(-r18h["delta_vnd"], 127.92e6, 1e4),
+      f"trừ nợ={r18h['decision']}/vượt {-r18h['delta_vnd']:,.0f} vs bỏ nợ={r18h_bad['decision']}")
+check("T18j DNSE thiếu totalDebt ⇒ BLOCKED_CASH_BASIS (không âm thầm coi nợ = 0)",
+      run(holdings(BASE_LOTS, cash=20e6, total_cash=500e6,
+                   debt=None))["decision"] == "BLOCKED_CASH_BASIS")
+
+# ── T18k-T18m: lỗi feed DNSE "số 0" (sự cố THẬT 2026-07-27) ────────────────
+# quant-skeptic REFUTED vòng 2: bản vá trước chỉ chặn field THIẾU (None), không chặn field CÓ
+# MÀ BẰNG 0 — mà 0 mới là hình dạng của sự cố đã xảy ra. Đây là ca ĐẮT NHẤT: pool = park_mv
+# ⇒ PARK "chiếm 100% pool" ⇒ bán gần sạch sổ.
+#
+# Phát hiện nằm Ở NGUỒN (`park_holdings`, nơi duy nhất thấy block `stock` thô), KHÔNG lặp ở
+# consumer — nên T18k/T18l kiểm qua ĐƯỜNG THẬT `read_broker_snapshot` (dưới, sau `_raw_snapshot`),
+# còn ở đây chỉ kiểm hai vị từ phát hiện như đơn vị.
+check("T18m1 _stock_block_all_zero: block toàn 0 ⇒ True; có 1 field khác 0 ⇒ False",
+      PH._stock_block_all_zero({"totalCash": 0, "totalDebt": 0, "availableCash": 0})
+      and not PH._stock_block_all_zero({"totalCash": 0, "totalDebt": 0, "depositInterest": 318}))
+# Đây là khe hở mà _stock_block_all_zero KHÔNG bịt được: depositInterest cộng dồn liên tục nên
+# hiếm khi đúng 0, chỉ cần nó khác 0 là "toàn block bằng 0" trả False trong khi mẫu số pool vẫn
+# hỏng đúng kiểu tệ nhất.
+check("T18m2 _cash_fields_all_zero: 3 field tiền = 0 (dù depositInterest≠0) ⇒ True",
+      PH._cash_fields_all_zero({"totalCash": 0, "totalDebt": 0, "availableCash": 0,
+                                "depositInterest": 318}))
+check("T18m3 CHỨNG MINH NGƯỢC — chỉ cần 1 trong 3 field tiền khác 0 ⇒ False (không chặn nhầm "
+      "tài khoản hết tiền tiêu nhưng còn tiền bán chưa settle)",
+      not PH._cash_fields_all_zero({"totalCash": 500e6, "totalDebt": 0, "availableCash": 0}))
+check("T18m4 thiếu field ⇒ False (để `_f_or_none`→None lo, không nhập nhèm hai chế độ hỏng)",
+      not PH._cash_fields_all_zero({"totalCash": 0, "totalDebt": 0}))
+# T18n — ĐƯỜNG THẬT: dựng file dnse_raw có bản ghi balances toàn-0 rồi gọi chính
+# read_broker_snapshot() (không phải fixture bơm tay). Đây mới là đường production đi qua;
+# lỗ hổng vòng 2 chính là "selfcheck xanh nhưng code path thật vẫn TRIM".
+def _raw_snapshot(stock_block):
+    with tempfile.TemporaryDirectory() as td:
+        acc, day = "0009999999", "2026-08-07"
+        with open(os.path.join(td, f"dnse_raw_{day}.jsonl"), "w", encoding="utf-8") as f:
+            f.write(json.dumps({"account_no": acc, "kind": "positions", "ts": f"{day}T19:00:00",
+                                "payload": {"positions": [{"accountNo": acc, "symbol": "AAA",
+                                                           "openQuantity": 100,
+                                                           "marketPrice": 10000,
+                                                           "tradeQuantity": 100}]}}) + "\n")
+            f.write(json.dumps({"account_no": acc, "kind": "balances", "ts": f"{day}T19:01:00",
+                                "payload": {"stock": stock_block}}) + "\n")
+        return PH.read_broker_snapshot("TEST", acc, day, exec_dir=td)
+
+
+_, _, m_zero = _raw_snapshot({"totalCash": 0, "totalDebt": 0, "availableCash": 0,
+                              "depositInterest": 0, "cashDividendReceiving": 0})
+_, _, m_ok = _raw_snapshot({"totalCash": 500e6, "totalDebt": 0, "availableCash": 20e6,
+                            "depositInterest": 318, "cashDividendReceiving": 0})
+check("T18n read_broker_snapshot (đường THẬT): balances toàn-0 ⇒ total_cash/total_debt = None",
+      m_zero["total_cash_vnd"] is None and m_zero["total_debt_vnd"] is None
+      and m_zero["balance_all_zero"] is True,
+      f"{m_zero['total_cash_vnd']} / {m_zero['total_debt_vnd']}")
+check("T18o CHỨNG MINH NGƯỢC — cùng đường đó với số hợp lệ (nợ=0 thật) VẪN đọc ra số, "
+      "không chặn nhầm mọi tài khoản không nợ",
+      m_ok["total_cash_vnd"] == 500e6 and m_ok["total_debt_vnd"] == 0.0
+      and m_ok["balance_all_zero"] is False,
+      f"{m_ok['total_cash_vnd']} / {m_ok['total_debt_vnd']}")
+
+# T18k — ca quant-skeptic vòng 2 đòi, chạy TRỌN chuỗi thật: dnse_raw có totalCash=0 VÀ
+# totalDebt=0 (đúng hình dạng lỗi 07-27) nhưng depositInterest≠0 để `_stock_block_all_zero`
+# KHÔNG bắt được ⇒ chỉ `_cash_fields_all_zero` cứu. Yêu cầu: PHẢI ra BLOCKED_CASH_BASIS.
+_, _, m_cash0 = _raw_snapshot({"totalCash": 0, "totalDebt": 0, "availableCash": 0,
+                               "depositInterest": 318, "cashDividendReceiving": 0})
+_h_cash0 = holdings(BASE_LOTS, cash=0.0, total_cash=m_cash0["total_cash_vnd"],
+                    debt=m_cash0["total_debt_vnd"])
+r18k = run(_h_cash0)
+check("T18k ĐƯỜNG THẬT: dnse_raw totalCash=0 VÀ totalDebt=0 (sổ PARK 1.000tr) ⇒ "
+      "BLOCKED_CASH_BASIS, 0 lệnh — KHÔNG bán sạch sổ",
+      r18k["decision"] == "BLOCKED_CASH_BASIS" and not r18k["orders"],
+      f"{r18k['decision']} n_orders={len(r18k['orders'])}")
+# CHỨNG MINH NGƯỢC: chính sổ đó, nếu mẫu số tin con số hỏng thay vì fail-closed ⇒ thảm hoạ thật.
+# Dùng totalCash = 1đ (KHÔNG phải 0) để lách đúng cái guard vừa dựng — mục đích ở đây là đo HẬU
+# QUẢ của một mẫu số gần-như-chỉ-còn-park_mv, không phải kiểm lại guard (T18k đã kiểm).
+r18k_bad = run(holdings(BASE_LOTS, cash=0.0, total_cash=1.0, debt=0.0))
+_sold = sum(o["qty"] * PX[o["ticker"]] for o in r18k_bad["orders"])
+check("T18l CHỨNG MINH NGƯỢC — nếu tin mẫu số 0 thì PARK = 100% pool ⇒ TRIM bán ≥190tr "
+      "(≈ gần sạch phần vượt trần); đó chính là thứ T18k chặn",
+      r18k_bad["decision"] == "TRIM" and _sold >= 190e6,
+      f"{r18k_bad['decision']} bán {_sold:,.0f}")
+
+# ── T18p-T18t: khe hở quant-skeptic vòng 3 — lỗi feed chỉ ăn HAI trong ba field ────
+# Guard "cả ba field = 0" KHÔNG bắt được ca này: totalCash=0, totalDebt=0 (hỏng) nhưng
+# availableCash còn sống ⇒ pool = 0 + park_mv ⇒ TRIM BÁN SẠCH 100% sổ PARK. Reviewer dựng lại
+# được bằng cách gọi thẳng compute_trim(). Bịt bằng BẤT BIẾN totalCash ⊇ availableCash.
+r18p = run(holdings(BASE_LOTS, cash=5e6, total_cash=0.0, debt=0.0))
+check("T18p ca vòng 3: totalCash=0 & totalDebt=0 nhưng availableCash=5tr (feed ăn 2/3 field) "
+      "⇒ BLOCKED_CASH_BASIS, 0 lệnh — KHÔNG bán sạch sổ",
+      r18p["decision"] == "BLOCKED_CASH_BASIS" and not r18p["orders"],
+      f"{r18p['decision']} n_orders={len(r18p['orders'])}")
+check("T18q CHỨNG MINH NGƯỢC — bỏ bất biến đi thì chính sổ đó cho pool = park_mv (PARK 100%) "
+      "⇒ mức bán = toàn bộ phần vượt trần 200tr",
+      close(1_000e6 - 0.80 * (0.0 + 1_000e6), 200e6, 1))
+check("T18r bất biến KHÔNG chặn nhầm ca thường: totalCash 420tr > availableCash 20tr ⇒ chạy bình "
+      "thường (đây là hình dạng SpaceX 08-07 thật)",
+      run(holdings(BASE_LOTS, cash=20e6, total_cash=420e6))["decision"] in ("TRIM", "NO_TRIM"))
+check("T18s bất biến CHO PHÉP totalCash == availableCash (tài khoản không có gì chưa settle)",
+      run(holdings(BASE_LOTS, cash=100e6, total_cash=100e6))["decision"] in ("TRIM", "NO_TRIM"))
+check("T18t _cash_fields_inconsistent: tc<ac ⇒ True; tc≥ac ⇒ False; thiếu field ⇒ False",
+      PH._cash_fields_inconsistent({"totalCash": 0, "availableCash": 5e6})
+      and not PH._cash_fields_inconsistent({"totalCash": 420e6, "availableCash": 20e6})
+      and not PH._cash_fields_inconsistent({"totalCash": 100e6, "availableCash": 100e6})
+      and not PH._cash_fields_inconsistent({"totalDebt": 0}))
+# ĐƯỜNG THẬT cho cùng khe hở đó (dnse_raw → read_broker_snapshot → compute_trim).
+_, _, m_partial = _raw_snapshot({"totalCash": 0, "totalDebt": 0, "availableCash": 5e6,
+                                 "depositInterest": 318, "cashDividendReceiving": 0})
+check("T18u ĐƯỜNG THẬT: dnse_raw ăn 2/3 field ⇒ read_broker_snapshot trả total_cash=None "
+      "⇒ consumer fail-closed",
+      m_partial["total_cash_vnd"] is None and m_partial["balance_all_zero"] is True,
+      f"{m_partial['total_cash_vnd']} / {m_partial['balance_all_zero']}")
 
 print(f"\n=== {len(PASS)} PASS / {len(FAIL)} FAIL ===")
 if FAIL:

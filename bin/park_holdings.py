@@ -130,6 +130,71 @@ def journal_files(label, since_date, until_date, exec_dir=EXEC_DIR):
     return [p for _, p in sorted(out)]
 
 
+def _stock_block_all_zero(st):
+    """DNSE thỉnh thoảng trả block `stock` TOÀN SỐ 0 (lỗi API tạm thời, KHÔNG phải tiền về 0).
+
+    Sự cố THẬT 2026-07-27: cả 2 bản đọc 19:04:59 và 19:10:20 đều toàn 0, `daily_nav_snapshot.py`
+    ghi NAV thiếu 32.011.420đ (−3,83%). Nó đã được vá; chỗ này KHÔNG — và với mẫu số pool thì
+    hậu quả nặng hơn NAV sai: totalCash=0 ⇒ pool = park_mv ⇒ PARK "chiếm 100% pool" ⇒ L1 đề xuất
+    BÁN GẦN SẠCH sổ PARK. Nên fail-closed. (quant-skeptic REFUTED vòng 2, 2026-08-09 — bản vá
+    trước chỉ chặn field THIẾU (None), không chặn field CÓ MÀ BẰNG 0.)
+
+    Điều kiện giống hệt `daily_nav_snapshot.py:439` — nếu sửa một nơi, sửa cả hai (đã lệch 1 lần).
+    """
+    numeric = [v for v in st.values()
+               if isinstance(v, (int, float)) and not isinstance(v, bool)]
+    return bool(numeric) and not any(numeric)
+
+
+def _cash_fields_all_zero(st):
+    """CHỈ ba field tiền (`totalCash`/`totalDebt`/`availableCash`) đều CÓ MẶT và đều bằng 0.
+
+    Vì sao cần THÊM `_stock_block_all_zero`: lỗi feed có thể chỉ ăn phần tiền mà vẫn để một
+    field khác khác 0 (`depositInterest` cộng dồn liên tục nên hiếm khi đúng 0) — lúc đó test
+    "toàn block bằng 0" trả False mà mẫu số pool vẫn hỏng đúng kiểu tệ nhất: pool = park_mv
+    ⇒ PARK chiếm 100% pool ⇒ L1 đề xuất bán gần sạch sổ.
+
+    CỐ Ý fail-closed cả trên trạng thái THẬT "đã đầu tư hết, không còn đồng nào": không phân
+    biệt được nó với lỗi feed, và hướng sai của việc chặn (không bán gì) rẻ hơn nhiều so với
+    hướng sai của việc tin (bán gần sạch sổ PARK). Thiếu field ⇒ trả False, vì `_f_or_none`
+    đã cho None và consumer chặn theo None rồi.
+    """
+    keys = ("totalCash", "totalDebt", "availableCash")
+    vals = [st.get(k) for k in keys]
+    if any(v is None for v in vals):
+        return False
+    return all(float(v) == 0 for v in vals)
+
+
+def _cash_fields_inconsistent(st):
+    """`totalCash` < `availableCash` — BẤT BIẾN kế toán bị vi phạm ⇒ block tiền không đáng tin.
+
+    totalCash = availableCash + tiền bán chưa settle + cổ tức chờ + lãi tiền gửi, nên nó KHÔNG
+    BAO GIỜ nhỏ hơn availableCash. Kiểm hằng đẳng thức ZaloPay 2026-08-07: 5.818.854 +
+    6.453.500 (cổ tức) + 318 (lãi) = 12.272.672 = totalCash, khớp tuyệt đối; SpaceX cùng ngày
+    203.656.265 ≥ 4.821.143.
+
+    VÌ SAO cần THÊM `_cash_fields_all_zero` (quant-skeptic vòng 3, 2026-08-09): hai phép thử kia
+    đòi CẢ BA field cùng = 0, nên một lỗi feed chỉ ăn HAI trong ba (totalCash=0, totalDebt=0
+    nhưng availableCash còn sống) lọt qua nguyên vẹn — reviewer dựng lại được và nó cho TRIM
+    BÁN SẠCH 100% sổ PARK, đúng thảm hoạ ban đầu bằng một đường khác. Bất biến này bắt đúng ca
+    đó (0 < 5.000.000) mà KHÔNG phụ thuộc field nào bằng 0.
+
+    Cả hai số đọc từ CÙNG một bản ghi `balances` nên không có lệch do đọc hai thời điểm.
+    Thiếu field ⇒ False (để `_f_or_none`→None lo, không nhập nhèm hai chế độ hỏng).
+    """
+    tc, ac = st.get("totalCash"), st.get("availableCash")
+    if tc is None or ac is None:
+        return False
+    return float(tc) < float(ac)
+
+
+def _f_or_none(v):
+    """float(v) hoặc None — KHÔNG rơi về 0: 0 và 'không đo được' phải phân biệt được, vì
+    consumer fail-closed dựa vào None (0 đ tiền mặt là trạng thái hợp lệ, thiếu field thì không)."""
+    return None if v is None else float(v)
+
+
 def read_broker_snapshot(label, account_no, asof, exec_dir=EXEC_DIR):
     """Vị thế + tiền của broker tại `asof`.
 
@@ -139,6 +204,16 @@ def read_broker_snapshot(label, account_no, asof, exec_dir=EXEC_DIR):
                         dòng đầu (§12 — file này DÙNG CHUNG cho mọi account).
 
     Trả (positions {tk: {qty, market_price}}, cash_available, meta).
+
+    `meta` LUÔN mang thêm `total_cash_vnd` + `dividend_receiving_vnd` (None nếu DNSE không trả
+    field đó). VÌ SAO tách khỏi `cash_available` thay vì đổi tại chỗ (bug 2026-08-09, job
+    Taylor_20260809_150316): HAI consumer cần HAI ngữ nghĩa KHÁC nhau —
+      · L1 `compute_park_trim` cần MẪU SỐ "toàn bộ vốn nhàn rỗi tôi sở hữu"  → totalCash.
+      · L2 `compute_jit_unpark` cần "tiền tôi TIÊU được ngay phiên tới"      → availableCash.
+    `availableCash` KHÔNG gồm tiền bán chưa settle: đo thật 2026-08-07 SpaceX, bán 189,4tr lúc
+    trong phiên mà availableCash 11:25 và 19:10 GIỐNG HỆT nhau (4.821.143đ), toàn bộ 189,06tr
+    chỉ hiện ở totalCash. Dùng nó làm mẫu số ⇒ pool co lại ĐÚNG BẰNG lượng vừa bán ⇒ tỷ lệ
+    PARK/pool gần như không giảm ⇒ vòng lặp tự kích (xem `compute_park_trim` §pool).
     """
     if asof == today_ict():
         sys.path.insert(0, WC_ROOT)
@@ -160,13 +235,22 @@ def read_broker_snapshot(label, account_no, asof, exec_dir=EXEC_DIR):
                                     "sellable": int(p.get("tradeQuantity") or 0)}
         st = (bal[0] if isinstance(bal, list) and bal else bal) or {}
         st = st.get("stock", st) if isinstance(st, dict) else {}
-        cash = float(st.get("availableCash") or 0)   # KHÔNG totalCash (§B5: gồm cổ tức chưa về)
-        return pos, cash, {"source": "dnse_live", "asof": asof, "ts": dt.datetime.now(ICT).isoformat(timespec="seconds")}
+        cash = float(st.get("availableCash") or 0)   # tiền TIÊU ĐƯỢC ngay (L2 dùng)
+        _zero = (_stock_block_all_zero(st) or _cash_fields_all_zero(st)
+                 or _cash_fields_inconsistent(st))
+        return pos, cash, {"source": "dnse_live", "asof": asof,
+                           "total_cash_vnd": None if _zero else _f_or_none(st.get("totalCash")),
+                           "dividend_receiving_vnd": _f_or_none(st.get("cashDividendReceiving")),
+                           "total_debt_vnd": None if _zero else _f_or_none(st.get("totalDebt")),
+                           "balance_all_zero": _zero,
+                           "ts": dt.datetime.now(ICT).isoformat(timespec="seconds")}
 
     path = os.path.join(exec_dir, f"dnse_raw_{asof}.jsonl")
     if not os.path.exists(path):
         raise SystemExit(f"[park_holdings] không có {path} để đối soát tại asof={asof}")
     pos, cash, ts_pos, ts_bal = {}, None, None, None
+    total_cash = div_recv = total_debt = None
+    all_zero = False
     for line in open(path, encoding="utf-8"):
         try:
             rec = json.loads(line)
@@ -192,10 +276,17 @@ def read_broker_snapshot(label, account_no, asof, exec_dir=EXEC_DIR):
             st = payload.get("stock", payload) if isinstance(payload, dict) else {}
             if "availableCash" in st and (ts_bal is None or rec.get("ts", "") >= ts_bal):
                 cash, ts_bal = float(st.get("availableCash") or 0), rec.get("ts", "")
+                all_zero = (_stock_block_all_zero(st) or _cash_fields_all_zero(st)
+                            or _cash_fields_inconsistent(st))
+                total_cash = None if all_zero else _f_or_none(st.get("totalCash"))
+                div_recv = _f_or_none(st.get("cashDividendReceiving"))
+                total_debt = None if all_zero else _f_or_none(st.get("totalDebt"))
     if not pos:
         raise SystemExit(f"[park_holdings] {path} không có bản ghi positions nào của account "
                          f"{account_no} — không đối soát được")
     return pos, cash, {"source": os.path.basename(path), "asof": asof,
+                       "total_cash_vnd": total_cash, "dividend_receiving_vnd": div_recv,
+                       "total_debt_vnd": total_debt, "balance_all_zero": all_zero,
                        "ts_positions": ts_pos, "ts_balances": ts_bal}
 
 
@@ -449,6 +540,17 @@ def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR
         "broker_positions": positions,
         "park_mv_vnd": park_mv, "park_mv_verified_vnd": park_mv_verified,
         "cash_available_vnd": cash,
+        # `broker=` bơm tay (selfcheck) không có key ⇒ rơi về availableCash + đánh dấu basis, để
+        # ca test không phải khai thêm field; production LUÔN có key (read_broker_snapshot đặt
+        # tường minh, kể cả None) ⇒ None = DNSE thiếu field thật ⇒ consumer fail-closed.
+        "cash_total_vnd": bmeta["total_cash_vnd"] if "total_cash_vnd" in bmeta else cash,
+        "cash_dividend_receiving_vnd": bmeta.get("dividend_receiving_vnd"),
+        # Nợ margin: pool phải là VỐN CHỦ SỞ HỮU nhàn rỗi, không gồm tiền đi vay (cùng quy ước
+        # NAV = totalCash − totalDebt của daily_nav_snapshot.py/reconcile_equity.py). SpaceX là
+        # tài khoản margin và ĐÃ từng nợ thật 409,9tr (sự cố 2026-07-03) ⇒ không phải giả định.
+        "cash_debt_vnd": bmeta["total_debt_vnd"] if "total_debt_vnd" in bmeta else 0.0,
+        "balance_all_zero": bool(bmeta.get("balance_all_zero")),
+        "cash_basis": "total_cash" if "total_cash_vnd" in bmeta else "available_fallback",
         "unverified_tickers": sorted(book.unverified), "warnings": book.warnings,
         "n_fills_applied": len(applied), "reconcile": reconcile,
         "corp_actions_applied": [{"id": a["id"], "ticker": a["ticker"],
@@ -480,7 +582,13 @@ def main():
               f"{'...' if len(v['tickers']) > 8 else ''}")
     print(f"  PARK MV = {h['park_mv_vnd']/1e6:,.2f} tr  "
           f"(đã đối soát: {h['park_mv_verified_vnd']/1e6:,.2f} tr)")
-    print(f"  availableCash = {(h['cash_available_vnd'] or 0)/1e6:,.2f} tr")
+    print(f"  availableCash = {(h['cash_available_vnd'] or 0)/1e6:,.2f} tr  (tiêu được ngay — L2)")
+    _tc = h["cash_total_vnd"]
+    _dv = h["cash_dividend_receiving_vnd"]
+    _tc_s = "KHÔNG ĐO ĐƯỢC" if _tc is None else f"{_tc/1e6:,.2f} tr"
+    _dv_s = "?" if _dv is None else f"{_dv/1e6:,.2f} tr"
+    print(f"  totalCash     = {_tc_s}  (gồm tiền bán chưa settle + cổ tức chờ nhận {_dv_s}) "
+          f"— mẫu số pool L1 [basis={h['cash_basis']}]")
     r = h["reconcile"]
     print(f"đối soát broker: {'✅ KHỚP' if r['ok'] else '❌ LỆCH'} ({r['n_tickers']} mã)")
     for m in r["mismatches"]:

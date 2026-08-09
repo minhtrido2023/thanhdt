@@ -14,7 +14,7 @@ về đúng thiết kế; nó KHÔNG phụ thuộc bất kỳ tín hiệu mua n�
 CÔNG THỨC (§D1 `park_membership_sync_L0_design_20260806.md` — user John duyệt 2026-08-07,
 job Taylor_20260807_020402. Mọi hằng số vẫn PORT từ engine/gate đã chạy, KHÔNG tham số mới):
 
-    pool        = availableCash (DNSE) + park_mv (sổ book, §park_holdings)
+    pool        = (totalCash − totalDebt) + park_mv (sổ book, §park_holdings)  # ← §pool, sửa 08-09
     target_park = pool × PARK_TARGET
     delta       = target_park − park_mv
     if delta < −pool × 0.005:                          # ngưỡng 0,005 = engine dòng 918 (GIỮ NGUYÊN)
@@ -54,8 +54,41 @@ RANH GIỚI CỨNG (§B5 + §D4):
     người quyết định). LAG/BAL/DISCRETIONARY_SPECIAL/LEGACY_ORPHAN cũng không đụng tới.
   · Ticker `UNVERIFIED` (sổ chưa đối soát được) — KHÔNG sinh lệnh (§21).
   · Đối soát sổ-vs-broker LỆCH ⇒ KHÔNG đề xuất gì cả (fail-closed, §5).
-  · Giá/tiền đọc từ DNSE, không từ BQ (§6). `availableCash` chứ không `totalCash` — totalCash
-    gồm cổ tức chưa về (đo 08-03: SpaceX 14,60tr totalCash gồm 9,78tr chưa về).
+  · Giá/tiền đọc từ DNSE, không từ BQ (§6).
+
+§pool — VÌ SAO MẪU SỐ LÀ `totalCash`, KHÔNG `availableCash` (bug sửa 2026-08-09, job
+Taylor_20260809_150316). Công thức gốc dùng `availableCash` với lý do "totalCash gồm cổ tức chưa
+về (đo 08-03: SpaceX 14,60tr gồm 9,78tr)". Phép đo đó ĐÚNG nhưng lấy vào NGÀY KHÔNG CÓ LỆNH BÁN
+NÀO, nên nó khái quát nhầm: khoảng cách totalCash−availableCash không chỉ là cổ tức, mà CHỦ YẾU là
+**tiền bán chưa settle (T+2)**. Bằng chứng SpaceX 2026-08-07 (cùng ngày, cùng account):
+
+    11:25 (trước khớp):  availableCash 4.821.143   totalCash  14.596.323
+    19:10 (sau khi bán 13 mã PARK, 189,4tr): availableCash 4.821.143 (Y HỆT)  totalCash 203.656.265
+
+⇒ tiền bán KHÔNG BAO GIỜ vào `availableCash` trong ngày bán. Hệ quả là một VÒNG LẶP TỰ KÍCH: bán
+X đồng PARK làm park_mv giảm X, nhưng cash đo được không tăng ⇒ pool cũng giảm X ⇒
+tỷ lệ (P−X)/(C+P−X) > P/(C+P) — tỷ lệ KHÔNG giảm theo mức đáng lẽ phải giảm, nên phiên sau lại
+đòi trim tiếp. Đo thật: bán 189,4tr chỉ hạ tỷ lệ 99,25% → 98,94% (0,31pp), và L1 lập tức đề xuất
+bán thêm 110,1tr cho phiên 08-10 trong khi PARK thật đã ở **69,0%** — tức DƯỚI trần 80%, đáng lẽ
+KHÔNG trim đồng nào. Với mẫu số đúng, tiền bán chưa settle vẫn nằm trong pool nên tỷ lệ giảm đúng
+bằng lượng đã bán và vòng lặp biến mất.
+
+Cổ tức chờ nhận (`cashDividendReceiving`) CÓ nằm trong totalCash — kiểm hằng đẳng thức ZaloPay
+2026-08-07: 5.818.854 + 6.453.500 + 318 (depositInterest) = 12.272.672 = totalCash, khớp tuyệt
+đối. Ta CỐ Ý giữ nó trong mẫu số: đây là tiền đã thuộc về mình, và engine backtest chỉ có MỘT số
+dư tiền (không có khái niệm chưa-settle/chưa-về) nên "toàn bộ tiền" mới là port trung thành. Ảnh
+hưởng nhỏ và về phía AN TOÀN (mẫu số lớn hơn ⇒ trần PARK lớn hơn ⇒ bán ÍT hơn): SpaceX 68,97% vs
+70,05%, ZaloPay 95,79% vs 97,96% — không đổi quyết định ở cả hai account.
+
+NỢ MARGIN bị TRỪ (`− totalDebt`, thêm cùng ngày sau phản biện quant-skeptic). Mẫu số phải là VỐN
+CHỦ SỞ HỮU nhàn rỗi; không trừ thì nó phồng lên đúng bằng tiền đi vay ⇒ trần PARK cao giả ⇒
+UNDER-trim — chế độ hỏng NGƯỢC LẠI với bug vừa sửa, cùng một gốc "quên net một field bảng cân
+đối". KHÔNG phải rủi ro giả định: SpaceX là tài khoản margin và đã nợ thật 409,9tr ngày
+2026-07-03 (`kb/incidents/2026-07/`). Ngày 08-07 totalDebt=0 ở cả 2 account nên mọi số dẫn ở trên
+không đổi. Cùng quy ước NAV = totalCash − totalDebt của `daily_nav_snapshot.py`/`reconcile_equity.py`.
+
+⚠️ `compute_jit_unpark.py` (L2) CỐ Ý vẫn dùng `availableCash`: nó hỏi "tiền tôi TIÊU được ngay
+phiên tới", không phải "vốn tôi sở hữu". Đừng đồng bộ hai chỗ này thành một field.
 
 FAIL-CLOSED per-name (sao chép nguyên `cap_lag_orders._block`): không đo được ADV / ADV cũ
 hơn LAG_ADV_MAX_STALE_DAYS / ADV ≤ 0 / không dựng được danh sách account live ⇒ KHÔNG trim mã
@@ -211,6 +244,7 @@ def compute_trim(account_label, asof=None, target=PARK_TARGET_F1, holdings=None,
            "trim_band": TRIM_BAND, "orders": [], "blocked": [], "notes": [],
            "at_or_below_target": [],
            "park_mv_vnd": h["park_mv_vnd"], "cash_available_vnd": h["cash_available_vnd"],
+           "cash_total_vnd": h.get("cash_total_vnd"),
            "reconcile_ok": h["reconcile"]["ok"],
            "unverified_tickers": h["unverified_tickers"],
            "excluded_tickers": h["excluded_tickers"]}
@@ -245,7 +279,53 @@ def compute_trim(account_label, asof=None, target=PARK_TARGET_F1, holdings=None,
         return out
 
     park_mv = float(h["park_mv_vnd"])
-    cash = float(h["cash_available_vnd"] or 0)
+    # MẪU SỐ = totalCash, KHÔNG availableCash (sửa bug 2026-08-09, job Taylor_20260809_150316 —
+    # xem §pool ở docstring). None = DNSE không trả totalCash ⇒ fail-closed, KHÔNG âm thầm rơi về
+    # availableCash (rơi về = tái lập đúng vòng lặp tự kích vừa sửa).
+    if h.get("cash_total_vnd") is None or h.get("cash_debt_vnd") is None:
+        out["decision"] = "BLOCKED_CASH_BASIS"
+        out["notes"].append(
+            "không đọc được `totalCash`/`totalDebt` từ DNSE"
+            + (" (block `stock` TOÀN SỐ 0 — lỗi API đã từng xảy ra 2026-07-27)"
+               if h.get("balance_all_zero") else "")
+            + " ⇒ không dựng được mẫu số pool ⇒ fail-closed, không trim (availableCash KHÔNG "
+              "phải phương án thay thế: nó bỏ sót tiền bán chưa settle ⇒ over-trim dây chuyền)")
+        return out
+    # Chữ ký lỗi feed DNSE "số 0" (sự cố THẬT 2026-07-27) được bắt ở HAI tầng, cố ý:
+    #   · Ở NGUỒN — `park_holdings.read_broker_snapshot` (`_stock_block_all_zero` +
+    #     `_cash_fields_all_zero`), nơi DUY NHẤT thấy block `stock` thô ⇒ biểu hiện ra đây là
+    #     `cash_total_vnd is None` và đã bị nhánh ngay trên chặn. Đó là tầng NHIỀU THÔNG TIN nhất.
+    #   · Ở ĐÂY — phòng khi holdings tới từ đường KHÁC park_holdings (script dựng tay, caller
+    #     tương lai). Chỉ còn ba số đã dẫn xuất nên phép thử thô hơn, nhưng hướng sai của nó rẻ:
+    #     "tài khoản có PARK mà vốn nhàn rỗi = 0 tuyệt đối" thì KHÔNG bán vẫn đúng hơn là bán
+    #     gần sạch sổ. quant-skeptic vòng 2 tái hiện lỗi bằng ĐÚNG cách gọi thẳng compute_trim()
+    #     ⇒ chặn ở nguồn thôi là chưa đủ.
+    if (park_mv > 0 and float(h["cash_total_vnd"]) == 0 and float(h["cash_debt_vnd"]) == 0
+            and float(h.get("cash_available_vnd") or 0) == 0):
+        out["decision"] = "BLOCKED_CASH_BASIS"
+        out["notes"].append("mọi field tiền (totalCash/totalDebt/availableCash) = 0 trong khi "
+                            "sổ PARK > 0 ⇒ chữ ký lỗi feed DNSE toàn-0 (sự cố 2026-07-27) ⇒ "
+                            "fail-closed, KHÔNG trim")
+        return out
+    # BẤT BIẾN kế toán: totalCash ⊇ availableCash (total = settled + bán chưa settle + cổ tức +
+    # lãi) ⇒ totalCash < availableCash là KHÔNG THỂ nếu dữ liệu đúng. Bắt được lớp hỏng mà hai
+    # phép thử "bằng 0" ở trên KHÔNG bắt: lỗi feed chỉ ăn HAI trong ba field (totalCash=0,
+    # totalDebt=0, còn availableCash sống) — quant-skeptic vòng 3 dựng lại được và nó cho TRIM
+    # BÁN SẠCH 100% sổ PARK. Bất biến không phụ thuộc field nào bằng 0 nên không có khe tương tự.
+    if float(h["cash_total_vnd"]) < float(h.get("cash_available_vnd") or 0):
+        out["decision"] = "BLOCKED_CASH_BASIS"
+        out["notes"].append(
+            f"totalCash {float(h['cash_total_vnd']):,.0f}đ < availableCash "
+            f"{float(h.get('cash_available_vnd') or 0):,.0f}đ — vi phạm bất biến kế toán "
+            f"(totalCash luôn CHỨA availableCash) ⇒ block tiền không đáng tin ⇒ fail-closed")
+        return out
+    # Nợ margin bị TRỪ khỏi mẫu số: pool là vốn CHỦ SỞ HỮU nhàn rỗi. Không trừ ⇒ mẫu số phồng
+    # lên đúng bằng tiền đi vay ⇒ trần PARK cao giả ⇒ UNDER-trim — đúng chế độ hỏng NGƯỢC LẠI với
+    # bug vừa sửa (quant-skeptic 2026-08-09 nêu; SpaceX từng nợ 409,9tr ngày 2026-07-03).
+    cash = float(h["cash_total_vnd"]) - float(h["cash_debt_vnd"])
+    out["cash_basis"] = h.get("cash_basis")
+    out["cash_dividend_receiving_vnd"] = h.get("cash_dividend_receiving_vnd")
+    out["cash_debt_vnd"] = h.get("cash_debt_vnd")
     pool = cash + park_mv
     target_value = pool * target
     delta = target_value - park_mv
@@ -491,7 +571,13 @@ def main():
     print(f"=== L1 PARK-TRIM (ĐỀ XUẤT, chưa vào plan nào) — {r['account_label']} "
           f"asof={r['asof']} — {r['decision']} ===")
     if "pool_vnd" in r:
-        print(f"  pool = cash {r['cash_available_vnd']/1e6:,.2f}tr + PARK "
+        _unset = (r["cash_total_vnd"] or 0) - (r["cash_available_vnd"] or 0) \
+            - (r.get("cash_dividend_receiving_vnd") or 0)
+        _debt = r.get("cash_debt_vnd") or 0
+        print(f"  pool = cash {((r['cash_total_vnd'] or 0) - _debt)/1e6:,.2f}tr (totalCash: settled "
+              f"{(r['cash_available_vnd'] or 0)/1e6:,.2f} + bán chưa settle {_unset/1e6:,.2f} "
+              f"+ cổ tức chờ {(r.get('cash_dividend_receiving_vnd') or 0)/1e6:,.2f} "
+              f"− nợ margin {_debt/1e6:,.2f}) + PARK "
               f"{r['park_mv_vnd']/1e6:,.2f}tr = {r['pool_vnd']/1e6:,.2f}tr")
         print(f"  target {r['target_park']:.0%} = {r['target_park_vnd']/1e6:,.2f}tr  →  "
               f"vượt {max(0, -r['delta_vnd'])/1e6:,.2f}tr "
