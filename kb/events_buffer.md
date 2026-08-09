@@ -566,3 +566,6 @@
 ## Consolidation 2026-08-09T03:32:24Z
 - [2026-08-09T03:31:59Z] Wags/heartbeat — Wags_20260809_033143: {"status": "in_progress", "note": "review telemetry schema, chuẩn bị ghi finding"}
 - [2026-08-09T03:32:14Z] Wags/finding — telemetry-schema-review: {"result":"OK","rating":8,"missing":[{"field":"enqueued_at","why":"tach duoc thoi gian queued vs execution; latency end-to-end SLO can latency xu ly, khong do duoc congestion"},{"field":"fail_reason","why":"status=1 chi cho biet lỗi, khong phan loai timeout/limitation/tool-error/nghi de debug SLO"},{"field":"deadline_at_or_slo_seconds_per_task","why":"dashboard khong the tinh tre vs SLO neu khong co target theo task_class"},{"field":"heartbeat_at","why":"khong phan biet duoc run dang
+
+## Consolidation 2026-08-09T06:07:01Z
+- [2026-08-09T06:01:05Z] DollarBill/decision — PEAD V2.4 — DRI vẫn là entry bình thường trong ngày 2 của entry window: {"ticker": "DRI", "decision": "EXECUTE_NORMAL_IF_LIVE_PRICE_NOT_ABOVE_DAY1_ANCHOR", "window": "scheduled entry day + 2 following sessions", "current_window_day": 2, "instruction": "Không gắn nhãn WINDOW_PASSED/trễ chỉ vì qua ngày entry chuẩn. Nếu lệnh ngày 1 khớp một phần thì chỉ mua residual; giữ nguyên sizing target, trần ADV và mọi gate 8L/DD/governance. Nếu giá live vượt anchor ngày 1 thì không đuổi giá."}
