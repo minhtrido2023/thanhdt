@@ -530,3 +530,39 @@ chuẩn tắc là output của script.
    **KHÔNG bao giờ gộp vào "chạy bộ test"**. Script R&D MỚI đặt tên `exp_*` / `probe_*` / `stress_*`.
 
 *→ rationale §23.*
+
+## 24. Ràng Buộc Giá/Hạn Mức Của Plan Phải Là FIELD RIÊNG Được Cưỡng Chế Bằng CODE — Không Bẻ Cong Một Field Khác Để "Vô Tình" Ra Đúng Số
+
+**Luật:** khi một luật giao dịch nói "không bao giờ được X quá ngưỡng N" (trần giá entry-window,
+trần %ADV, hạn mức vị thế), ngưỡng N phải (a) là **field riêng trong `PlannedOrder`**, (b) được
+**suy ra/cưỡng chế ở MỘT chỗ tại ranh giới nạp plan** (`load_plan()`, cùng tinh thần
+`filter_excluded_tickers()` §7), (c) có **guard cuối** sau mọi phép biến đổi giá. TUYỆT ĐỐI không
+neo ngược một field khác (`ref_price`) để công thức sẵn có "vô tình" cho ra đúng ngưỡng.
+
+**Vì sao — 3 cách mẹo neo ngược hỏng, đều là ca thật 2026-08-09 (DRI, anchor 13.000đ):**
+1. **Hằng số giả định sai và ĐỔI THEO NGÀY.** Mẹo `ref_price = anchor/1,04` giả định trần đuổi
+   luôn 4%; thực tế `chase = clamp(2×rvol_20d, 1,5%, 4%)` — đo thật DRI rvol=0,0153 ⇒ **3,06%**
+   ⇒ trần thực chỉ 12.800đ khi thị trường 13.100–13.200đ ⇒ **gần như chắc không khớp**, và con số
+   đổi mỗi ngày theo rvol.
+2. **Phép biến đổi PHÍA SAU có thể đẩy vượt.** `_limit_price` kết thúc bằng `px = max(px, q.floor)`
+   — sàn phiên > anchor thì giá đặt bị đẩy **lên trên** anchor, trần % không biết anchor nên không
+   chặn được. Cần guard cuối: `if hard and px > hard: return None`.
+3. **Đường đi khác không qua chỗ tính giá.** `_atc_sweep` đặt ATC `price=None` (khớp giá đóng cửa,
+   không đặt được giá) ⇒ phải bỏ qua hẳn lệnh có trần, không lách được.
+
+**Hệ quả kèm theo — field mà `load_plan()` lọc mất là im lặng.** `load_plan()` chỉ giữ key nằm
+trong `dataclasses.fields(PlannedOrder)`. `entry_anchor_price` (từ 74a5d338) và
+`hard_no_chase_ceiling_vnd` (do `discretionary_accumulation.py` sinh ra) **đều đã có trong plan JSON
+từ trước mà executor không bao giờ thấy** — không lỗi, không cảnh báo. Thêm field vào plan generator
+mà quên thêm vào dataclass = ràng buộc không tồn tại. Kiểm bằng `load_plan()` thật, đừng đọc JSON.
+
+**Cơ chế LIVE hiện tại** (commit `a29ab4f`/`319e1b2`/`aa0afea`, quant-skeptic CONFIRMED 2 vòng):
+`PlannedOrder.hard_no_chase_ceiling_vnd` (VND tuyệt đối, chỉ `side="buy"`); `load_plan()` tự suy
+`= entry_anchor_price` (giữ giá trị CHẶT HƠN nếu generator ghi sẵn; giá trị **rác chỉ được rơi về
+anchor, không bao giờ vô hiệu hoá trần**); `_limit_price` clamp `min(ref×(1+chase%), q.ceiling,
+hard)` + guard cuối; journal `HARD_CEILING_BLOCK`. Nhờ có trần độc lập, `ref_price` trả về đúng
+nghĩa giá tham chiếu thật ⇒ lệnh **bám `q.ask` sống** (re-price mỗi `slice_interval_min`) mà vẫn
+không bao giờ vượt trần. Selfcheck: `hard_no_chase_ceiling_selfcheck.py` (50 ca) — mọi ca "chặn
+được" đều có **ca chứng minh ngược** (bỏ trần ⇒ thật sự vượt), không chỉ khẳng định suông.
+
+*→ job `Taylor_20260809_123917`.*
