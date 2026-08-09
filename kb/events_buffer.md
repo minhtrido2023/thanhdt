@@ -562,3 +562,7 @@
 
 ## Consolidation 2026-08-08T17:44:16Z
 - [2026-08-08T17:44:10Z] Mike/finding — daily-retro-finalize-2026-08-08: {"status": "logged", "file": "kb/incidents/retro/retro-2026-08-08.md", "commit": "0ebe1699", "wags_verify": "GAPS_FOUND_and_fixed", "gap": "tieu de/H1 dem sai 2 su co moi, chi 1 dong thuc su moi (dong 2 la dong pattern da escalate hom qua), da sua", "new_incidents": 1, "pattern_closed": "test-bus-pollution guard MIKE_BOT_TEST_MODE (Taylor, ~11h tu escalate den fix+verify)", "pattern_new": "backlog-ghi-file-kb-incidents (4 retro lien tiep chua co Prevention, can user quyet huong a/b)", "memory_updated": true, "consolidate_run": true, "draft_deleted": true, "posted_to": "trading_daily"}
+
+## Consolidation 2026-08-09T03:32:24Z
+- [2026-08-09T03:31:59Z] Wags/heartbeat — Wags_20260809_033143: {"status": "in_progress", "note": "review telemetry schema, chuẩn bị ghi finding"}
+- [2026-08-09T03:32:14Z] Wags/finding — telemetry-schema-review: {"result":"OK","rating":8,"missing":[{"field":"enqueued_at","why":"tach duoc thoi gian queued vs execution; latency end-to-end SLO can latency xu ly, khong do duoc congestion"},{"field":"fail_reason","why":"status=1 chi cho biet lỗi, khong phan loai timeout/limitation/tool-error/nghi de debug SLO"},{"field":"deadline_at_or_slo_seconds_per_task","why":"dashboard khong the tinh tre vs SLO neu khong co target theo task_class"},{"field":"heartbeat_at","why":"khong phan biet duoc run dang
