@@ -153,6 +153,21 @@ def load_plan(plan_date, account="main"):
                 raise ValueError(f"order {filtered.get('id')} thiếu ref_price/mtm_price_ref — "
                                   f"không có cơ sở giá tham chiếu để đặt lệnh.")
             filtered["ref_price"] = ref
+        # Luật entry-window LAG V2.4 (user duyệt 2026-08-09): lệnh mua có `entry_anchor_price`
+        # thì KHÔNG BAO GIỜ được khớp trên giá đó. Suy thẳng ra trần cứng ngay tại ranh giới
+        # nạp plan — cùng tinh thần filter_excluded_tickers(): enforce Ở MỘT CHỖ, không phụ
+        # thuộc việc plan generator (LLM/người sửa tay) có nhớ ghi thêm field thứ hai hay
+        # không. Generator ghi sẵn trần cứng thì tôn trọng giá trị CHẶT HƠN (min), không nới.
+        anchor = o.get("entry_anchor_price")
+        if filtered.get("side") == "buy" and anchor:
+            try:
+                anchor = float(anchor)
+            except (TypeError, ValueError):
+                anchor = None
+            if anchor and anchor > 0:
+                cur = filtered.get("hard_no_chase_ceiling_vnd")
+                filtered["hard_no_chase_ceiling_vnd"] = (
+                    min(float(cur), anchor) if cur else anchor)
         orders.append(PlannedOrder(**filtered))
     d["orders"] = orders
     # preflight_check.sh chấp nhận cả tên field thay thế approved_by_user — gate phải

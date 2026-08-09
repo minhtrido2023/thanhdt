@@ -249,11 +249,81 @@ for bad in (0, -5, None, "", "abc"):
     px_bad = make_exec([o_bad], q_up)._limit_price(o_bad, q_up, cross=True)
     check(f"H4 trần rác {bad!r} → giá y hệt hành vi cũ", px_bad == px_a, f"px={px_bad}")
 
-# ───────────────────────────────────── I. load_plan giữ được field (không bị lọc mất)
-print("I. load_plan() giữ field (trước đây key này bị lọc mất)")
+# ───────────────────────────────────── I. load_plan: giữ field + tự suy từ entry_anchor_price
+print("I. load_plan() giữ field và TỰ SUY trần từ entry_anchor_price")
 import dataclasses  # noqa: E402
+import json         # noqa: E402
+from trading_bot.config import PLAN_DIR  # noqa: E402
+from trading_bot.plan import load_plan   # noqa: E402
+
 check("I1 hard_no_chase_ceiling_vnd nằm trong dataclasses.fields(PlannedOrder)",
       "hard_no_chase_ceiling_vnd" in {f.name for f in dataclasses.fields(PlannedOrder)})
+
+
+def _mk_plan_file(orders):
+    """Ghi 1 plan tạm để kiểm ĐÚNG đường load_plan() thật (không giả lập)."""
+    path = os.path.join(PLAN_DIR, f"plan_{TAG}_2099-01-02.json")
+    json.dump({"plan_date": "2099-01-02", "signal_date": "2099-01-01", "strategy": "tst",
+               "strategy_version": "0", "state": 3, "state_name": "NEUTRAL",
+               "nav_basis": {}, "account": TAG, "orders": orders},
+              open(path, "w", encoding="utf-8"), ensure_ascii=False)
+    return path
+
+
+_p = _mk_plan_file([
+    # (a) generator CHỈ ghi entry_anchor_price (đúng hiện trạng plan 08-10) → phải tự suy ra trần
+    {"id": "BUY-A", "ticker": "DRI", "side": "buy", "qty": 3000, "ref_price": 13000.0,
+     "entry_anchor_price": 13000.0},
+    # (b) generator ghi trần CHẶT HƠN anchor → giữ cái chặt hơn, không được nới lên anchor
+    {"id": "BUY-B", "ticker": "POW", "side": "buy", "qty": 1000, "ref_price": 13400.0,
+     "entry_anchor_price": 13400.0, "hard_no_chase_ceiling_vnd": 13000.0},
+    # (c) lệnh BÁN có anchor (vô nghĩa) → không được sinh trần
+    {"id": "SELL-C", "ticker": "SCL", "side": "sell", "qty": 500, "ref_price": 24200.0,
+     "entry_anchor_price": 24200.0},
+    # (d) anchor rác → fail-safe, không trần, không crash
+    {"id": "BUY-D", "ticker": "SSI", "side": "buy", "qty": 100, "ref_price": 24450.0,
+     "entry_anchor_price": "n/a"},
+])
+_loaded = {x.id: x for x in load_plan("2099-01-02", account=TAG).orders}
+check("I2 (a) chỉ có entry_anchor_price → tự suy trần = anchor",
+      _loaded["BUY-A"].hard_no_chase_ceiling_vnd == 13_000.0,
+      str(_loaded["BUY-A"].hard_no_chase_ceiling_vnd))
+check("I3 (b) trần generator CHẶT HƠN anchor → giữ chặt hơn (không nới)",
+      _loaded["BUY-B"].hard_no_chase_ceiling_vnd == 13_000.0,
+      str(_loaded["BUY-B"].hard_no_chase_ceiling_vnd))
+check("I4 (c) lệnh BÁN không sinh trần",
+      _loaded["SELL-C"].hard_no_chase_ceiling_vnd is None)
+check("I5 (d) anchor rác → None, không crash",
+      _loaded["BUY-D"].hard_no_chase_ceiling_vnd is None)
+os.remove(_p)
+
+# I6 — BẤT BIẾN trên MỌI plan thật đang có trong repo: lệnh mua nào mang
+# entry_anchor_price thì sau load_plan() PHẢI có trần cứng ≤ anchor. Assert lên quan hệ,
+# KHÔNG lên rổ mã/số đếm của một ngày cụ thể (§23 hệ luận 1) — plan đổi mỗi ngày mà test
+# vẫn đúng. Không có plan nào mang anchor → bỏ qua, không phải FAIL.
+import re  # noqa: E402
+_checked = 0
+for _f in sorted(glob.glob(os.path.join(PLAN_DIR, "plan_*.json"))):
+    _m = re.match(r"plan_(.+)_(\d{4}-\d{2}-\d{2})\.json$", os.path.basename(_f))
+    if not _m:
+        continue
+    try:
+        _raw = json.load(open(_f, encoding="utf-8"))
+        _anch = {o["ticker"]: float(o["entry_anchor_price"]) for o in _raw.get("orders", [])
+                 if o.get("side") == "buy" and isinstance(o.get("entry_anchor_price"), (int, float))}
+        if not _anch:
+            continue
+        _pl = load_plan(_m.group(2), account=_m.group(1))
+        for _o in _pl.orders:
+            if _o.side != "buy" or _o.ticker not in _anch:
+                continue
+            _checked += 1
+            check(f"I6 {os.path.basename(_f)} {_o.ticker}: trần cứng ≤ anchor {_anch[_o.ticker]:,.0f}",
+                  bool(_o.hard_no_chase_ceiling_vnd) and _o.hard_no_chase_ceiling_vnd <= _anch[_o.ticker],
+                  f"trần={_o.hard_no_chase_ceiling_vnd}")
+    except Exception as _e:      # plan cũ schema khác → không phải lỗi của cơ chế này
+        print(f"  [skip] {os.path.basename(_f)}: {_e}")
+print(f"  (I6 đã kiểm {_checked} lệnh mua mang anchor trên plan thật)")
 
 for _f in glob.glob(os.path.join(EXEC_DIR, f"exec_{TAG}_*")):
     os.remove(_f)
