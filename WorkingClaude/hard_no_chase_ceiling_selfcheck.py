@@ -283,6 +283,13 @@ _p = _mk_plan_file([
     # (d) anchor rác → fail-safe, không trần, không crash
     {"id": "BUY-D", "ticker": "SSI", "side": "buy", "qty": 100, "ref_price": 24450.0,
      "entry_anchor_price": "n/a"},
+    # (e) generator ghi trần RÁC (âm) kèm anchor hợp lệ → phải rơi về anchor, TUYỆT ĐỐI
+    #     không giữ giá trị âm (giữ lại thì _hard_buy_ceiling thấy v<=0 sẽ TẮT HẲN trần —
+    #     quant-skeptic 2026-08-09 bắt được ca này).
+    {"id": "BUY-E", "ticker": "DRI", "side": "buy", "qty": 100, "ref_price": 13000.0,
+     "entry_anchor_price": 13000.0, "hard_no_chase_ceiling_vnd": -1},
+    {"id": "BUY-F", "ticker": "DRI", "side": "buy", "qty": 100, "ref_price": 13000.0,
+     "entry_anchor_price": 13000.0, "hard_no_chase_ceiling_vnd": "rác"},
 ])
 _loaded = {x.id: x for x in load_plan("2099-01-02", account=TAG).orders}
 check("I2 (a) chỉ có entry_anchor_price → tự suy trần = anchor",
@@ -295,6 +302,13 @@ check("I4 (c) lệnh BÁN không sinh trần",
       _loaded["SELL-C"].hard_no_chase_ceiling_vnd is None)
 check("I5 (d) anchor rác → None, không crash",
       _loaded["BUY-D"].hard_no_chase_ceiling_vnd is None)
+for _id, _lbl in (("BUY-E", "âm"), ("BUY-F", "không parse được")):
+    _v = _loaded[_id].hard_no_chase_ceiling_vnd
+    check(f"I5b (e) trần generator RÁC ({_lbl}) + anchor hợp lệ → rơi về anchor",
+          _v == 13_000.0, f"trần={_v}")
+    # chốt hạ: trần rác KHÔNG được làm _hard_buy_ceiling trả None (= tắt hẳn trần)
+    check(f"I5c (e) và trần vẫn CÒN HIỆU LỰC ở executor ({_lbl})",
+          Executor._hard_buy_ceiling(_loaded[_id]) == 13_000.0)
 os.remove(_p)
 
 # I6 — BẤT BIẾN trên MỌI plan thật đang có trong repo: lệnh mua nào mang

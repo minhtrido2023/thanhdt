@@ -165,9 +165,16 @@ def load_plan(plan_date, account="main"):
             except (TypeError, ValueError):
                 anchor = None
             if anchor and anchor > 0:
-                cur = filtered.get("hard_no_chase_ceiling_vnd")
+                # `cur` chỉ được thu hẹp trần, không bao giờ vô hiệu hoá nó: giá trị rác
+                # (âm/0/không parse được) phải rơi về anchor, KHÔNG được giữ lại — giữ lại
+                # thì _hard_buy_ceiling() thấy v<=0 sẽ tắt hẳn trần (quant-skeptic
+                # 2026-08-09 bắt được; chưa mã nào sinh ra ca này nhưng đây là lỗi thật).
+                try:
+                    cur = float(filtered.get("hard_no_chase_ceiling_vnd") or 0)
+                except (TypeError, ValueError):
+                    cur = 0.0
                 filtered["hard_no_chase_ceiling_vnd"] = (
-                    min(float(cur), anchor) if cur else anchor)
+                    min(cur, anchor) if cur > 0 else anchor)
         orders.append(PlannedOrder(**filtered))
     d["orders"] = orders
     # preflight_check.sh chấp nhận cả tên field thay thế approved_by_user — gate phải
