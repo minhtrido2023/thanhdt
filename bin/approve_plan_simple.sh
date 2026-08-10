@@ -45,11 +45,33 @@ if not orders:
     print("⚠ orders[] rỗng — không có gì để duyệt.", file=sys.stderr)
     sys.exit(2)
 
-tickers = [o.get("ticker") for o in orders]
-if len(tickers) != len(set(tickers)):
-    dups = {t for t in tickers if tickers.count(t) > 1}
-    print(f"❌ TRÙNG TICKER trong orders[]: {dups} — có thể đã merge 2 lần. DỪNG LẠI, "
-          f"không duyệt.", file=sys.stderr)
+# Kiểm "đã merge 2 lần" — THU HẸP 2026-08-11 (job Taylor_20260810_185646), cùng lớp báo động
+# giả vừa vá ở `preflight_check.sh` nhánh (a):
+#   · so theo **(side, ticker)**, không theo mình `ticker`: 1 lệnh MUA + 1 lệnh BÁN cùng mã
+#     không phải dấu hiệu merge 2 lần;
+#   · và chỉ tính lệnh **thuộc miền bước gộp**: `mike/bin/merge_park_orders.py` CỐ Ý giữ lệnh
+#     bán của writer khác cùng mã (bất biến I5) ⇒ sau merge, một mã hợp lệ có thể có 2 lệnh
+#     bán. Cổng cũ chặn CỨNG ca đó ⇒ từ chối duyệt một plan hoàn toàn đúng (fail-closed nên
+#     không mất tiền, nhưng chặn người duyệt và dạy họ bỏ qua cảnh báo).
+# Chữ ký thật của "merge 2 lần" vẫn bị bắt: 2 lệnh CÙNG thuộc miền, cùng (side,ticker).
+_MERGE_PLAYS = {"PARK_TRIM", "JIT_UNPARK", "PARK_TRIM+JIT_UNPARK"}
+
+
+def _merge_domain(o):
+    return (o.get("merge_owner") == "park_merge_v1"
+            or bool(o.get("merged_from"))
+            or str(o.get("play_type", "")).upper() in _MERGE_PLAYS)
+
+
+_groups = {}
+for _o in orders:
+    _groups.setdefault((_o.get("side"), _o.get("ticker")), []).append(_o)
+dups = {tk for (sd, tk), v in _groups.items()
+        if sum(1 for o in v if _merge_domain(o)) > 1}
+if dups:
+    print(f"❌ TRÙNG LỆNH BÁN PARK trong orders[]: {dups} — ≥2 lệnh cùng (side,ticker) đều "
+          f"thuộc miền bước gộp ⇒ nhiều khả năng đã merge 2 lần. DỪNG LẠI, không duyệt.",
+          file=sys.stderr)
     sys.exit(2)
 
 buy = [o for o in orders if o.get("side") == "buy"]

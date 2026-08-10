@@ -474,6 +474,44 @@ def merge_park_orders(plan, l1=None, l2=None, *, allow_approved=False):
     report["generated"] = [{"id": o["id"], "ticker": o["ticker"], "qty": o["qty"],
                             "play_type": o["play_type"]} for o in generated]
 
+    # ── 4b. CỔNG "ARTIFACT VẮNG MẶT KHÔNG ĐƯỢC LÀM MẤT LỆNH" ─────────────────────────
+    # Khuyết tật này CHỈ tồn tại khi cơ chế thành BƯỚC PIPELINE, nên 10 vòng quant-skeptic
+    # trước (verify script ĐỨNG RIÊNG) không thể thấy: `main()` đọc artifact bằng
+    # `_read_json()`, file THIẾU ⇒ `None` ⇒ `_layer_state` trả "bỏ qua tầng này (không phải
+    # lỗi)" ⇒ bước 1 vẫn XOÁ sạch vùng sở hữu (kể cả lệnh NHẬN NUÔI của writer khác) ⇒
+    # `status=OK` ⇒ `--write` GHI ĐÈ. Đo thật trước khi vá: plan 1.300cp bán PARK + 1 lệnh
+    # mua DRI ⇒ sau merge còn ĐÚNG lệnh mua, 0 lệnh bán, status OK. Đó là đúng hình dạng
+    # mất-phiên 08-06 (lệnh mua không còn nguồn tài trợ), và nguy hiểm hơn vì L1/L2 hiện
+    # KHÔNG có cron ⇒ artifact vắng mặt là trạng thái THƯỜNG, không phải ngoại lệ.
+    #
+    # Người chạy tay đọc báo cáo thì thấy dòng "L1: không có artifact"; một bước cron thì
+    # KHÔNG AI đọc — cùng một hành vi, hai mức độ nguy hiểm khác hẳn nhau.
+    #
+    # Phân biệt DỨT KHOÁT hai thứ mà bản cũ gộp làm một:
+    #   · artifact CÓ MẶT và nói "không bán" (decision=NO_JIT/BLOCKED_RECONCILE, 0 lệnh) —
+    #     phát biểu CÓ THẨM QUYỀN ⇒ xoá là ĐÚNG, không chặn;
+    #   · artifact VẮNG MẶT — ta KHÔNG BIẾT gì cả ⇒ không được suy ra "không bán".
+    # Chỉ chặn khi sự vắng mặt đó THỰC SỰ làm mất lệnh: so qty TRƯỚC/SAU theo TỪNG MÃ.
+    # Nhờ so theo lượng (không phải "có drop hay không"), chạy lại lần 2 với cùng artifact
+    # vẫn dựng lại đúng lượng cũ ⇒ KHÔNG mất ⇒ vẫn idempotent (ca A6c).
+    absent = [nm for nm, art in (("L1 park_trim", l1), ("L2 jit_unpark", l2)) if art is None]
+    if absent:
+        before_by_tk = {}
+        for dp in report["dropped_owned"]:
+            before_by_tk[dp["ticker"]] = before_by_tk.get(dp["ticker"], 0) + _i(dp["qty"])
+        after_by_tk = {o["ticker"]: _i(o["qty"]) for o in generated}
+        lost = {tk: (b, after_by_tk.get(tk, 0)) for tk, b in before_by_tk.items()
+                if after_by_tk.get(tk, 0) < b}
+        if lost:
+            return refuse(
+                "ARTIFACT VẮNG MẶT (" + ", ".join(absent) + ") mà việc dựng lại làm MẤT lệnh "
+                "bán đã có: " + ", ".join(f"{tk} {b}cp→{a}cp" for tk, (b, a) in sorted(lost.items()))
+                + ". Vắng mặt ≠ 'không cần bán' — không có artifact thì KHÔNG BIẾT, và đoán "
+                "theo hướng xoá sẽ bỏ đói lệnh mua đang được tài trợ (hình dạng 08-06). "
+                "Cách xử lý ĐÚNG: chạy lại L1/L2 để có artifact thật cho phiên này (kể cả khi "
+                "kết quả là decision=NO_JIT/BLOCKED_RECONCILE — artifact CÓ MẶT nói 'không "
+                "bán' thì merge chấp nhận xoá). KHÔNG ghi gì.")
+
     p["orders"] = generated + foreign
 
     # ── 5. chú thích lệnh MUA từ buy_amendments (KHÔNG đổi qty) ──────────────────────

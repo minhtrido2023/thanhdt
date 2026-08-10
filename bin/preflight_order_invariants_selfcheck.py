@@ -129,6 +129,40 @@ out = run_block(block, plan([merged("ACB", 400, 300, 100, 1500), jit("ACB", 100)
 check("#9 dòng kết quả vẫn có ≥8 trường '|' (IFS read của caller còn đọc đúng)",
       len(out.split("|")) >= 8, f"{len(out.split('|'))} trường")
 
+# ── #10-#12: thu hẹp nhánh (a) sau khi mike/bin/merge_park_orders.py lên pipeline ────────
+# (job Taylor_20260810_185646). #10 và #11 là CẶP VI SAI: hai plan chỉ khác nhau ở ĐÚNG một
+# thuộc tính của lệnh thứ hai (`play_type`/`book`). #10 phải im, #11 phải kêu — nếu bộ phân
+# biệt hỏng theo bất kỳ hướng nào thì đúng một trong hai đỏ, không thể xanh cả hai.
+
+
+def pm(tk, qty, l1, l2, sellable):
+    """Lệnh do merge_park_orders.py sinh ra — mang cả `merge_owner` lẫn `merged_from`."""
+    o = merged(tk, qty, l1, l2, sellable)
+    o.update({"id": f"PARKMERGE-SELL-{tk}", "merge_owner": "park_merge_v1",
+              "book": "PARK", "play_type": "PARK_TRIM+JIT_UNPARK"})
+    return o
+
+
+def foreign_sell(tk, qty):
+    """Lệnh bán của writer KHÁC, ngoài miền merge (book khác) — merge cố ý giữ lại (I5)."""
+    return {"id": f"SELL-LAG-{tk}-01", "side": "sell", "ticker": tk, "qty": qty,
+            "book": "LAG", "play_type": "LAG_EXIT"}
+
+
+out = run_block(block, plan([pm("VHM", 300, 200, 100, 2000), foreign_sell("VHM", 500)]))
+check("#10 lệnh merge + lệnh bán NGOÀI miền cùng mã KHÔNG còn báo động giả (ca S3)",
+      "MERGE_STALE_SRC" not in out, out)
+
+out = run_block(block, plan([pm("VHM", 300, 200, 100, 2000), jit("VHM", 100)]))
+check("#11 lệnh merge + lệnh nguồn PARK/JIT còn sót VẪN bị bắt (độ phủ 08-07 giữ nguyên)",
+      "MERGE_STALE_SRC" in out and "VHM" in out, out)
+
+# Nhánh (b) không đổi: trần tiền vẫn chặn lệnh do merge sinh ra. Không có ca này thì #10
+# đọc thành "đã tắt lưới an toàn cho lệnh merge" — nó chỉ tắt heuristic cấu trúc.
+out = run_block(block, plan([pm("VHM", 400, 300, 100, 300), foreign_sell("VHM", 100)]))
+check("#12 SELL_GT_SELLABLE VẪN chặn lệnh merge vượt trần (nhánh (b) không bị thu hẹp)",
+      "SELL_GT_SELLABLE" in out and "VHM(500>300)" in out, out)
+
 print()
 if fails:
     print(f"❌ FAIL {len(fails)}/{len(fails)+len(oks)}")

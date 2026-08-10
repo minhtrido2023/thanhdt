@@ -177,7 +177,10 @@ check("I4 lần 2 báo đã xoá đúng 3 lệnh của lần 1 (có dấu sở h
 
 # ── I5: chạy lại với artifact MỚI ⇒ ra số MỚI, không phải cũ+mới ─────────────────────
 L1_new = l1_art([s("BID", 500, 37900, 900)])
-p_new, _ = merge_park_orders(copy.deepcopy(p1), L1_new, None)
+# L2 phải CÓ MẶT (rỗng, decision=NO_JIT): ca này cố ý làm VHM/VCB biến mất, mà "biến mất khi
+# artifact VẮNG MẶT" nay bị cổng 4b chặn. `NO_JIT` = phát biểu CÓ THẨM QUYỀN "không bán" ⇒
+# đúng thứ ca này muốn nói (artifact ĐỔI ⇒ kết quả THAY THẾ), không phải "file bị thiếu".
+p_new, _ = merge_park_orders(copy.deepcopy(p1), L1_new, l2_art([], decision="NO_JIT"))
 check("I5 artifact đổi ⇒ kết quả THAY THẾ, không chồng lên",
       sell_qty(p_new, "BID") == 500 and sell_qty(p_new, "VHM") == 0,
       f"BID={sell_qty(p_new, 'BID')} VHM={sell_qty(p_new, 'VHM')}")
@@ -328,7 +331,11 @@ check("S5b chạy lại KHÔNG cắt ⇒ jit_underfunded biến mất (không k�
       and rs8["per_ticker"]["VHM"]["cut_L2"] == 0,
       str({k: run3_buy.get(k) for k in JIT_KEYS}))
 # (d) cả hai tầng đều không sinh lệnh ⇒ vẫn phải xoá sạch nhãn (không có tầng nào dựng lại).
-ps9, rs9 = merge_park_orders(copy.deepcopy(ps6), None, L2_rejected)
+# L1 CÓ MẶT nhưng bị từ chối (BLOCKED_RECONCILE) thay vì vắng mặt: cùng nhánh `l1_ok=False`
+# ở mọi bước sau, nên tính chất đang đo (nhãn bị xoá sạch) không đổi — chỉ tránh cổng 4b,
+# thứ nói về sự VẮNG MẶT của artifact chứ không nói về tầng bị từ chối.
+ps9, rs9 = merge_park_orders(copy.deepcopy(ps6),
+                             l1_art([], decision="BLOCKED_RECONCILE"), L2_rejected)
 run4_buy = [o for o in ps9["orders"] if o["side"] == "buy"][0]
 check("S5b không tầng nào được nhận ⇒ nhãn jit_* vẫn bị xoá sạch (vắng mặt, không sót)",
       rs9["status"] == "OK" and not any(k in run4_buy for k in JIT_KEYS)
@@ -348,7 +355,13 @@ check("S5b REFUSED ⇒ plan trả về NGUYÊN VẸN, nhãn jit_* cũ GIỮ NGUY
 # Khuyết tật #6 (quant-skeptic vòng 4, 2026-08-10) — CÙNG LỚP với #5, ở tầng cao hơn:
 # `p["jit_unpark_proposal"]` chỉ được ghi lại KHI có artifact ⇒ chạy 1 có L2 (dán "✅ ĐÃ
 # MERGE") rồi chạy 2 mất file artifact ⇒ khối đó Y NGUYÊN trong khi orders[] chỉ còn L1.
-ps12, _ = merge_park_orders(plan(), L1_roomy, L2_roomy)
+# Chạy 1 dùng L2 ĐƯỢC NHẬN nhưng 0 lệnh: đủ để khối `jit_unpark_proposal` ("✅ ĐÃ MERGE")
+# tồn tại — thứ ca này đo — mà KHÔNG đưa lượng bán nào của L2 vào orders[]. Nhờ vậy chạy 2
+# (L2 VẮNG MẶT) dựng lại từ L1 ĐỦ lượng cũ ⇒ không mất lệnh ⇒ cổng 4b không kích hoạt và ca
+# vẫn đo đúng nhánh `art is None` của bước 6. Ở đây KHÔNG thay được bằng "present-rejected":
+# bước 6 phân biệt hai thứ đó có chủ đích, và chính chỗ phân biệt ấy là nội dung ca S5c.
+L2_roomy_empty = l2_art([], decision="JIT")
+ps12, _ = merge_park_orders(plan(), L1_roomy, L2_roomy_empty)
 check("S5c tiền đề: chạy 1 có L2 ⇒ có khối jit_unpark_proposal dán 'ĐÃ MERGE'",
       "✅" in ps12["jit_unpark_proposal"]["_merged_into_orders"])
 ps13, rs13 = merge_park_orders(copy.deepcopy(ps12), L1_roomy, None)
@@ -446,7 +459,11 @@ check("S5e tiền đề của (b): tầng L2 đúng là bị từ chối ở l�
 
 # (c) KHÔNG có artifact L2 nào ⇒ vẫn xoá, và cảnh báo VẮNG MẶT của bản vá #6 KHÔNG được
 #     mất (bước 0b xoá trước nên `p.pop()` ở bước 6 luôn trả None — bẫy tự bắn vào chân).
-p_both = copy.deepcopy(pe1)                      # có sẵn khối jit_unpark_proposal "ĐÃ MERGE"
+#     Nền của ca này KHÔNG dùng lại `pe1` (nó mang 400cp do L2 sinh; chạy lại khi L2 vắng mặt
+#     sẽ MẤT đúng 400cp đó ⇒ cổng 4b chặn, và ca sẽ đo cổng 4b thay vì đo namespace). Dựng nền
+#     bằng L2 ĐƯỢC NHẬN nhưng 0 lệnh: vẫn có khối sở hữu `jit_unpark_proposal` để mà xoá.
+pe1c, _ = merge_park_orders(copy.deepcopy(p_note), L1_roomy, l2_art([], decision="JIT"))
+p_both = copy.deepcopy(pe1c)                     # có sẵn khối jit_unpark_proposal "ĐÃ MERGE"
 p_both["jit_unpark_note"] = REAL_NOTE            # + khoá của writer khác quay lại
 pe3, re3 = merge_park_orders(p_both, L1_roomy, None)
 check("S5e không có artifact L2 ⇒ CẢ khối sở hữu LẪN khoá writer khác đều vắng mặt",
@@ -734,7 +751,11 @@ check("V12 có cảnh báo nêu rõ đã làm tròn",
 odd_foreign = {"id": "SELL-ODD-PARK-01", "ticker": "ODD", "side": "sell", "qty": 150,
                "ref_price": 1000.0, "book": "PARK", "play_type": "PARK_TRIM", "priority": 0,
                "merge_owner": OWNER}
-pv12b, rv12b = merge_park_orders(plan([odd_foreign, buy_order()]), L1_0807, None)
+# L2 phải CÓ MẶT (dù rỗng): ca này xoá lệnh "ODD" mà không artifact nào dựng lại, nên với
+# L2=None nó rơi vào cổng 4b (artifact vắng mặt ⇒ REFUSED) và không còn đo được I4 nữa.
+# Đổi fixture chứ KHÔNG nới cổng — `decision="NO_JIT"` là phát biểu CÓ THẨM QUYỀN "không bán".
+pv12b, rv12b = merge_park_orders(plan([odd_foreign, buy_order()]), L1_0807,
+                                 l2_art([], decision="NO_JIT"))
 i4 = [c for c in rv12b["invariants"] if c["name"].startswith("I4")][0]
 check("V12b chứng minh ngược: I4 vẫn PHÁT HIỆN được qty lẻ, chỉ là không chặn nữa",
       rv12b["status"] == "OK" and i4["ok"] is True,
@@ -755,6 +776,71 @@ check("V11 chứng minh ngược: lệnh đó ở priority 0 ⇒ I3b sạch",
       [c for c in merge_park_orders(
           plan([dict(late, priority=0), buy_order()]), L1_0807, None)[1]["invariants"]
        if c["name"].startswith("I3b")][0]["ok"] is True)
+
+
+# ══════════════════════════════════════════════════════════════════════════════════════
+# A6 — ARTIFACT VẮNG MẶT không được làm MẤT lệnh bán đã có (bước 4b)
+#      Khuyết tật chỉ lộ ra khi cơ chế thành BƯỚC PIPELINE: file L1/L2 thiếu ⇒ `_read_json`
+#      trả None ⇒ tầng bị bỏ qua "không phải lỗi" ⇒ vùng sở hữu bị xoá sạch mà không có gì
+#      thay thế ⇒ status OK ⇒ ghi đè. (job Taylor_20260810_185646)
+# ══════════════════════════════════════════════════════════════════════════════════════
+print("\n[A6] Artifact VẮNG MẶT ⇒ không được xoá lệnh bán đã có")
+
+# lệnh bán PARK đã nằm sẵn trong orders[] (do lần merge trước, hoặc writer one-off cũ)
+_a6_sells = [
+    {"id": "PARKMERGE-SELL-VHM", "ticker": "VHM", "side": "sell", "qty": 300,
+     "ref_price": 76500.0, "book": "PARK", "play_type": "PARK_TRIM+JIT_UNPARK",
+     "priority": 0, "merge_owner": "park_merge_v1"},
+    {"id": "SELL-JIT-PARK-BID-01", "ticker": "BID", "side": "sell", "qty": 1000,
+     "ref_price": 37900.0, "book": "PARK", "play_type": "JIT_UNPARK", "priority": 0},
+]
+
+pa6, ra6 = merge_park_orders(plan(_a6_sells + [buy_order()]), None, None)
+check("A6a cả hai artifact vắng mặt ⇒ REFUSED (không phải OK)", ra6["status"] == "REFUSED",
+      str(ra6["status"]))
+check("A6b plan trả về NGUYÊN VẸN — 1.300cp bán còn nguyên, KHÔNG bị xoá",
+      sell_qty(pa6, "VHM") == 300 and sell_qty(pa6, "BID") == 1000,
+      f"VHM={sell_qty(pa6, 'VHM')} BID={sell_qty(pa6, 'BID')}")
+check("A6c thông báo nêu ĐÍCH DANH mã bị mất và lượng mất",
+      any("VHM 300cp→0cp" in e and "BID 1000cp→0cp" in e for e in ra6["errors"]),
+      str(ra6["errors"]))
+
+# CHỨNG MINH NGƯỢC — cùng plan đó, artifact CÓ MẶT và nói "không bán": phải cho xoá.
+# Đây là ranh giới thật của bản vá: chặn sự VẮNG MẶT, không chặn phát biểu CÓ THẨM QUYỀN.
+pa6d, ra6d = merge_park_orders(plan(_a6_sells + [buy_order()]),
+                               l1_art([], decision="BLOCKED_RECONCILE"),
+                               l2_art([], decision="NO_JIT"))
+check("A6d chứng minh ngược: artifact CÓ MẶT nói 'không bán' ⇒ OK và xoá đúng",
+      ra6d["status"] == "OK" and sell_qty(pa6d, "VHM") == 0 and sell_qty(pa6d, "BID") == 0,
+      f"{ra6d['status']} VHM={sell_qty(pa6d, 'VHM')} BID={sell_qty(pa6d, 'BID')}")
+
+# Vắng mặt MỘT tầng nhưng tầng kia dựng lại ĐỦ lượng ⇒ không mất gì ⇒ vẫn chạy.
+# Đây là ca giữ tính IDEMPOTENT: lần chạy 2 với đúng bộ artifact của lần 1.
+pa6e, ra6e = merge_park_orders(
+    plan([{"id": "PARKMERGE-SELL-VHM", "ticker": "VHM", "side": "sell", "qty": 200,
+           "ref_price": 76500.0, "book": "PARK", "play_type": "PARK_TRIM",
+           "priority": 0, "merge_owner": "park_merge_v1"}, buy_order()]),
+    l1_art([s("VHM", 200, 76500, 300)]), None)
+check("A6e L2 vắng mặt nhưng L1 dựng lại ĐỦ 200cp ⇒ không mất ⇒ OK (idempotent còn nguyên)",
+      ra6e["status"] == "OK" and sell_qty(pa6e, "VHM") == 200,
+      f"{ra6e['status']} VHM={sell_qty(pa6e, 'VHM')}")
+
+# Vắng mặt một tầng và tầng kia dựng lại ÍT HƠN ⇒ mất ⇒ chặn (ca hiểm nhất: không phải
+# xoá sạch, chỉ hụt một phần — đúng phần mà tầng vắng mặt đáng lẽ đóng góp).
+pa6f, ra6f = merge_park_orders(
+    plan([{"id": "PARKMERGE-SELL-VHM", "ticker": "VHM", "side": "sell", "qty": 300,
+           "ref_price": 76500.0, "book": "PARK", "play_type": "PARK_TRIM+JIT_UNPARK",
+           "priority": 0, "merge_owner": "park_merge_v1"}, buy_order()]),
+    l1_art([s("VHM", 200, 76500, 300)]), None)
+check("A6f L2 vắng mặt và L1 chỉ dựng lại 200/300cp ⇒ REFUSED (hụt một phần cũng chặn)",
+      ra6f["status"] == "REFUSED" and sell_qty(pa6f, "VHM") == 300,
+      f"{ra6f['status']} VHM={sell_qty(pa6f, 'VHM')}")
+
+# Không có lệnh bán nào từ trước ⇒ artifact vắng mặt KHÔNG được biến thành lỗi (nếu không,
+# mọi plan chỉ-mua sẽ bị chặn oan = lại đúng hình dạng mất-phiên 08-06).
+pa6g, ra6g = merge_park_orders(plan([buy_order()]), None, None)
+check("A6g plan chưa có lệnh bán nào + artifact vắng mặt ⇒ OK (không chặn oan)",
+      ra6g["status"] == "OK", str(ra6g["status"]))
 
 
 # ══════════════════════════════════════════════════════════════════════════════════════

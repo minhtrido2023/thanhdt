@@ -1,3 +1,9 @@
+> ⚠️ **ĐÃ WIRE 2026-08-11** (job `Taylor_20260810_185646`). Code KHÔNG còn ở thư mục này —
+> `merge_park_orders.py` + selfcheck nay ở **`mike/bin/`** (`git mv`, giữ lịch sử). File này
+> giữ lại làm **hồ sơ duyệt** của 10 vòng quant-skeptic trước khi lắp; trạng thái sau khi lắp
+> (2 khuyết tật chỉ lộ ra ở tầng tích hợp + vòng verify thứ 11) ở
+> **`agents/Taylor/research/park_merge_wire_20260811.md`**.
+
 # PENDING — `merge_park_orders.py`: gộp L1 park_trim + L2 jit_unpark vào `orders[]`, chạy lặp được
 
 **Job** `Taylor_20260810_131833` → `_142416` → **`_172111`** (mở rộng phạm vi cấp plan) · 2026-08-10 · Taylor

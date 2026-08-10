@@ -76,13 +76,37 @@ flags = []
 #    nhưng quên xoá lệnh gốc → gửi 2 lần. Ngày 08-07 lỗi này để lọt 1.200cp (SpaceX) +
 #    400cp (ZaloPay) bán thừa, không tầng nào chặn.
 # b) SELL_GT_SELLABLE: tổng qty BÁN 1 mã vượt `sellable_at_calc` mà chính plan ghi ra.
+#
+# THU HẸP nhánh (a) 2026-08-11 (job Taylor_20260810_185646) — báo động giả thật:
+#   `mike/bin/merge_park_orders.py` CỐ Ý giữ nguyên lệnh bán của writer khác cùng mã (bất
+#   biến I5 "không đánh rơi lệnh ngoài vùng sở hữu"; ca S3 của selfcheck merge). Sau merge,
+#   một mã hợp lệ có 2 lệnh bán — lệnh merge (mang `merged_from`) + lệnh ngoài vùng — và
+#   nhánh (a) nguyên bản đọc thành "còn sót lệnh nguồn" ⇒ preflight ĐỎ dù MỌI bất biến
+#   merge đều PASS. Đỏ giả lặp lại = tầng dưới học cách bỏ qua nó, đúng cách một lưới an
+#   toàn chết trong im lặng.
+#
+# Điều kiện mới: chỉ báo khi CÓ ≥2 lệnh **thuộc miền của bước gộp** trong cùng (side,ticker)
+# — đó mới là chữ ký "gộp rồi nhưng quên xoá nguồn". Lệnh của writer khác (book khác, không
+# mang nhãn PARK/JIT) đứng cạnh lệnh merge KHÔNG còn bị tính.
+#   · Giữ nguyên độ phủ sự cố 08-07: lệnh sót ngày đó là `SELL-JIT-PARK-<mã>-01`
+#     (`play_type=JIT_UNPARK`) ⇒ vẫn nằm trong miền ⇒ vẫn bị bắt (selfcheck #1/#3/#8/#11).
+#   · Nhánh (b) SELL_GT_SELLABLE KHÔNG đổi một chữ. Đó mới là nhánh chặn RỦI RO TIỀN (bán
+#     vượt lô sở hữu) và nó vẫn chạy trên MỌI lệnh, kể cả lệnh do merge sinh ra — lý do
+#     chính khiến thu hẹp (a) là an toàn: (a) là heuristic cấu trúc, (b) là trần thật.
 _orders = d.get("orders", [])
 def _q(o): return o.get("qty", o.get("quantity")) or 0
+_MERGE_PLAYS = {"PARK_TRIM", "JIT_UNPARK", "PARK_TRIM+JIT_UNPARK"}
+def _merge_domain(o):
+    """Lệnh này có thuộc miền bước gộp L1/L2 không (⇒ đáng lẽ đã bị gộp/xoá)?"""
+    return (o.get("merge_owner") == "park_merge_v1"
+            or bool(o.get("merged_from"))
+            or str(o.get("play_type", "")).upper() in _MERGE_PLAYS)
 _by_key = {}
 for _o in _orders:
     _by_key.setdefault((_o.get("side"), _o.get("ticker")), []).append(_o)
 _stale = sorted({k[1] for k, v in _by_key.items()
-                 if len(v) > 1 and any(o.get("merged_from") for o in v)})
+                 if len(v) > 1 and any(o.get("merged_from") for o in v)
+                 and sum(1 for o in v if _merge_domain(o)) > 1})
 if _stale: flags.append("MERGE_STALE_SRC:" + ",".join(_stale))
 _over = []
 for (_side, _tk), _os in _by_key.items():
