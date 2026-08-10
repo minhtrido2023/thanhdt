@@ -1479,3 +1479,7 @@
 
 ## Consolidation 2026-08-10T09:32:40Z
 - [2026-08-10T09:32:35Z] Taylor/finding — test-2plus2: 4
+
+## Consolidation 2026-08-10T09:36:35Z
+- [2026-08-10T09:36:16Z] Taylor/finding — codex-sandbox-test: kiem tra quyen ghi bus tu codex
+- [2026-08-10T09:36:25Z] Taylor/finding — codex-sandbox-test-result: {"bus_event": "THANH_CONG", "outside_workspace_probe": "BI_CHAN", "target": "/home/trido/thanhdt/WorkingClaude/codex_sandbox_probe2_20260810.txt", "reason": "sandbox rejected writing outside project"}
