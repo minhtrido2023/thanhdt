@@ -16,6 +16,11 @@ Nguồn sự thật (ưu tiên theo thứ tự):
      KHÔNG âm thầm chọn một bên.
   3. BigQuery tav2_bq.ticker — giá đóng cửa thị trường mới nhất, dùng để mark-to-market.
 
+Quy ước giá vốn: bình quân gia quyền THEO LÔ ĐANG SỐNG (`CostBook`) — bán bớt rút cơ sở giá
+vốn theo tỉ lệ (giá bình quân không đổi), vị thế về 0 thì cơ sở về 0 và lô mua lại sau đó
+tính riêng. Khớp đúng quy ước `costPrice` của DNSE (đã đối chiếu 21 mã SpaceX + 15 mã
+ZaloPay ngày 2026-08-10). Bug LPB 2026-08-10: xem docstring `CostBook`.
+
 Fail-safe: nếu số lượng cổ phiếu tính từ dnse_raw không khớp broker-audited quantities
 (khi có file eod_account_{date}.json để đối chiếu), hoặc không tìm thấy dữ liệu nguồn,
 script THOÁT với exit != 0 và in cảnh báo rõ ràng — không tự đoán số liệu để báo cáo tiếp.
@@ -58,14 +63,85 @@ def corp_action_multiplier(ticker, fill_date, asof, actions):
     return mult
 
 
-def true_fills_from_dnse_raw(account_no, date):
-    """Trả về {ticker: (net_qty, buy_qty, buy_value)} từ log thô broker cho 1 ngày.
+class CostBook:
+    """Giá vốn bình quân gia quyền CỦA LÔ ĐANG SỐNG — reset khi vị thế về 0.
 
-    net_qty = buy_qty - sell_qty (KL thật đang nắm giữ, để đối chiếu snapshot broker).
-    buy_qty/buy_value CHỈ tính từ lệnh MUA — giá vốn bình quân gia quyền không đổi khi
-    bán bớt (weighted-average costing chuẩn kế toán), nên KHÔNG được trộn giá bán vào.
-    Bug 2026-07-06 (kb/INCIDENTS.md): bản cũ cộng dồn fillQuantity bất kể side, nên ngày
-    có lệnh BÁN (trim 07-06) bị CỘNG thêm thay vì TRỪ, gây báo lệch số lượng giả.
+    Quy ước kế toán chuẩn (và đúng quy ước `costPrice` của DNSE): lệnh BÁN rút cơ sở giá
+    vốn theo TỈ LỆ tại đúng giá bình quân hiện hành (nên bán bớt KHÔNG làm đổi giá bình
+    quân), và khi vị thế về 0 thì cơ sở giá vốn cũng về 0 — lô ĐÃ TẤT TOÁN không được
+    trộn vào lô mua lại sau đó.
+
+    Bug 2026-08-10 (LPB/SpaceX, job Taylor_20260810_044215): bản cũ cộng dồn buy_qty/
+    buy_value qua MỌI ngày rồi chia một lần (buy_value/buy_qty), không hề biết vị thế đã
+    về 0 giữa chừng. LPB mua 900 (01/07) → bán SẠCH 900 (06/07) → mua lại 900 (15/07) ra
+    52.583,33 thay vì 51.466,67 (= đúng costPrice broker). Sai cả giá vốn lẫn P&L% của mã.
+    """
+
+    def __init__(self):
+        self.qty = 0.0      # KL ròng đang nắm giữ (đã nhân hệ số corp-action)
+        self.basis = 0.0    # tổng tiền vốn CÒN LẠI của lô đang giữ (VND)
+        self.resets = 0     # số lần vị thế về 0 (mỗi lần = 1 lô tất toán, cơ sở về 0)
+
+    def buy(self, qty, value):
+        self.qty += qty
+        self.basis += value
+
+    def sell(self, qty):
+        if self.qty > 0:
+            self.basis -= self.basis * min(qty, self.qty) / self.qty
+        self.qty -= qty
+        if abs(self.qty) <= 1e-9:       # vị thế về 0 -> lô tất toán, cơ sở giá vốn về 0
+            self.qty, self.basis = 0.0, 0.0
+            self.resets += 1
+        elif self.qty < 0:              # bán quá KL trace được (vị thế legacy mua trước bot)
+            self.basis = 0.0
+
+    @property
+    def avg_cost(self):
+        return self.basis / self.qty if self.qty > 0 else 0.0
+
+
+def build_cost_books(events_by_date, asof, corp_actions):
+    """{ticker: CostBook} từ các fill ĐÃ SẮP THEO THỜI GIAN.
+
+    Thứ tự thời gian là BẮT BUỘC (không phải chi tiết trang trí): reset-khi-về-0 chỉ đúng
+    khi lệnh được áp đúng trình tự thật — cả giữa các ngày lẫn trong cùng một ngày.
+    """
+    books = defaultdict(CostBook)
+    for date in sorted(events_by_date):
+        for _ts, _key, tk, side, qty, price in events_by_date[date]:
+            m = corp_action_multiplier(tk, date, asof, corp_actions)
+            if side == "sell":
+                books[tk].sell(qty * m)
+            else:
+                books[tk].buy(qty * m, qty * price)
+    return books
+
+
+def aggregate_events(events):
+    """{ticker: (net_qty, buy_qty, buy_value)} — gộp cả ngày, KHÔNG theo lô."""
+    agg = defaultdict(lambda: [0.0, 0.0, 0.0])
+    for _ts, _key, tk, side, qty, price in events:
+        if side == "sell":
+            agg[tk][0] -= qty
+        else:
+            agg[tk][0] += qty
+            agg[tk][1] += qty
+            agg[tk][2] += qty * price
+    return {tk: tuple(v) for tk, v in agg.items()}
+
+
+def dnse_fill_events(account_no, date):
+    """Trả về ([(ts, order_id, ticker, side, qty, price)], err) — ĐÃ SẮP THEO THỜI GIAN.
+
+    Nguồn sự thật của giá vốn: `averagePrice`/`fillQuantity` do chính DNSE trả về, dedupe
+    theo order id (giữ bản ghi mới nhất). Giữ TỪNG fill rời (thay vì gộp sẵn theo ngày như
+    trước) để CostBook áp được đúng trình tự mua/bán — điều kiện cần để phát hiện vị thế
+    về 0 giữa ngày, không chỉ giữa các ngày.
+
+    `ts` = `modifiedDate` (thời điểm bản ghi order mới nhất), KHÔNG phải dấu thời gian khớp
+    từng phần — nên thứ tự TRONG ngày là xấp xỉ (đủ tốt: order bán/mua cùng mã trong 1 ngày
+    tách nhau hàng phút). Thứ tự GIỮA các ngày luôn chính xác vì tách theo file ngày.
     """
     path = os.path.join(EXEC_DIR, f"dnse_raw_{date}.jsonl")
     if not os.path.exists(path):
@@ -95,34 +171,45 @@ def true_fills_from_dnse_raw(account_no, date):
                     continue
                 latest_by_id[oid] = o  # ghi đè -> bản ghi mới nhất mỗi order id
 
-    agg = defaultdict(lambda: [0.0, 0.0, 0.0])  # ticker -> [net_qty, buy_qty, buy_value]
-    for o in latest_by_id.values():
+    events = []
+    for oid, o in latest_by_id.items():
         fq = o.get("fillQuantity") or 0
         if fq <= 0:
             continue
-        sym = o.get("symbol")
-        px = o.get("averagePrice") or o.get("price") or 0
-        side = str(o.get("side") or "").upper()
-        if side.startswith("NS") or side == "SELL":
-            agg[sym][0] -= fq
-        else:  # NB (Normal Buy) hoặc side khác chưa gặp -> mặc định coi là mua
-            agg[sym][0] += fq
-            agg[sym][1] += fq
-            agg[sym][2] += fq * px
-    return {tk: tuple(v) for tk, v in agg.items()}, None
+        raw_side = str(o.get("side") or "").upper()
+        # NS (Normal Sell) = bán; NB (Normal Buy) hoặc side khác chưa gặp -> coi là mua
+        side = "sell" if (raw_side.startswith("NS") or raw_side == "SELL") else "buy"
+        ts = o.get("modifiedDate") or o.get("createdDate") or ""
+        events.append((ts, oid, o.get("symbol"), side, float(fq),
+                       float(o.get("averagePrice") or o.get("price") or 0)))
+    events.sort(key=lambda e: (e[0], str(e[1])))
+    return events, None
 
 
-def true_fills_from_journal(account, date):
-    """Cross-check độc lập từ journal CSV nội bộ (event=FILL). Cùng nguyên tắc net_qty
-    (buy trừ sell) + cost basis chỉ từ buy như true_fills_from_dnse_raw() ở trên.
+def true_fills_from_dnse_raw(account_no, date):
+    """Trả về {ticker: (net_qty, buy_qty, buy_value)} từ log thô broker cho 1 ngày.
 
-    QUAN TRỌNG: Executor._sync_fills ghi `qty` = c["filled"] LŨY KẾ của child order tại
-    thời điểm đó (executor.py dòng ~386), KHÔNG PHẢI phần fill tăng thêm — 1 child có thể
-    xuất hiện nhiều dòng FILL khi khớp từng phần (vd 600 rồi 2100 lũy kế, không phải 600+2100).
-    Cộng dồn hết mọi dòng sẽ đếm trùng. Bug 2026-07-06 (kb/INCIDENTS.md): HDB báo lệch vì
-    cộng cả dòng lũy kế trung gian lẫn dòng cuối. Fix: chỉ giữ dòng CUỐI (theo ts) mỗi
-    child_oid, rồi mới cộng qua các child_oid khác nhau — giống hệt cách
-    true_fills_from_dnse_raw() dùng latest_by_id cho cùng lý do.
+    net_qty = buy_qty - sell_qty (KL thật đang nắm giữ, để đối chiếu snapshot broker).
+    buy_qty/buy_value CHỈ tính từ lệnh MUA — giá vốn bình quân gia quyền không đổi khi
+    bán bớt (weighted-average costing chuẩn kế toán), nên KHÔNG được trộn giá bán vào.
+    Bug 2026-07-06 (kb/INCIDENTS.md): bản cũ cộng dồn fillQuantity bất kể side, nên ngày
+    có lệnh BÁN (trim 07-06) bị CỘNG thêm thay vì TRỪ, gây báo lệch số lượng giả.
+
+    ⚠️ buy_qty/buy_value ở đây là TỔNG CẢ ĐỜI, KHÔNG theo lô — chia ra được giá vốn ĐÚNG
+    chỉ khi vị thế chưa từng về 0. Giá vốn dùng cho báo cáo lấy từ `CostBook`/
+    `build_cost_books()` (reset khi vị thế về 0), không lấy từ đây (bug LPB 2026-08-10).
+    """
+    events, err = dnse_fill_events(account_no, date)
+    if events is None:
+        return None, err
+    return aggregate_events(events), None
+
+
+def journal_fill_events(account, date):
+    """Trả về ([(ts, child_oid, ticker, side, qty, price)], err) — ĐÃ SẮP THEO THỜI GIAN.
+
+    Bản event-level của `true_fills_from_journal()` (xem docstring dưới về việc `qty` là
+    LŨY KẾ theo child_oid nên chỉ được giữ dòng CUỐI mỗi child).
     """
     path = os.path.join(EXEC_DIR, f"exec_{account}_{date}_journal.csv")
     if not os.path.exists(path):
@@ -140,16 +227,31 @@ def true_fills_from_journal(account, date):
                 latest_by_child[child_oid] = (
                     ts, row.get("ticker"), str(row.get("side") or "").lower(),
                     float(row.get("qty") or 0), float(row.get("price") or 0))
+    events = [(ts, oid, tk, "sell" if side == "sell" else "buy", qty, price)
+              for oid, (ts, tk, side, qty, price) in latest_by_child.items()]
+    events.sort(key=lambda e: (e[0], str(e[1])))
+    return events, None
 
-    agg = defaultdict(lambda: [0.0, 0.0, 0.0])  # ticker -> [net_qty, buy_qty, buy_value]
-    for _, tk, side, qty, price in latest_by_child.values():
-        if side == "sell":
-            agg[tk][0] -= qty
-        else:
-            agg[tk][0] += qty
-            agg[tk][1] += qty
-            agg[tk][2] += qty * price
-    return {tk: tuple(v) for tk, v in agg.items()}, None
+
+def true_fills_from_journal(account, date):
+    """Cross-check độc lập từ journal CSV nội bộ (event=FILL). Cùng nguyên tắc net_qty
+    (buy trừ sell) + cost basis chỉ từ buy như true_fills_from_dnse_raw() ở trên.
+
+    QUAN TRỌNG: Executor._sync_fills ghi `qty` = c["filled"] LŨY KẾ của child order tại
+    thời điểm đó (executor.py dòng ~386), KHÔNG PHẢI phần fill tăng thêm — 1 child có thể
+    xuất hiện nhiều dòng FILL khi khớp từng phần (vd 600 rồi 2100 lũy kế, không phải 600+2100).
+    Cộng dồn hết mọi dòng sẽ đếm trùng. Bug 2026-07-06 (kb/INCIDENTS.md): HDB báo lệch vì
+    cộng cả dòng lũy kế trung gian lẫn dòng cuối. Fix: chỉ giữ dòng CUỐI (theo ts) mỗi
+    child_oid, rồi mới cộng qua các child_oid khác nhau — giống hệt cách
+    true_fills_from_dnse_raw() dùng latest_by_id cho cùng lý do.
+
+    ⚠️ Cùng giới hạn với true_fills_from_dnse_raw(): buy_qty/buy_value là TỔNG CẢ ĐỜI,
+    không theo lô — giá vốn dùng cho báo cáo lấy từ `build_cost_books()`.
+    """
+    events, err = journal_fill_events(account, date)
+    if events is None:
+        return None, err
+    return aggregate_events(events), None
 
 
 def bq_close_prices(tickers, as_of_date):
@@ -256,33 +358,43 @@ def main():
                   f"(nguy cơ trộn fill account khác).", file=sys.stderr)
             sys.exit(4)
 
-    dates = [d.strip() for d in args.dates.split(",") if d.strip()]
+    # sắp theo thứ tự thời gian: CostBook chạy theo trình tự mua/bán thật, truyền --dates
+    # lộn xộn mà không sắp sẽ cho giá vốn sai (reset-khi-về-0 phụ thuộc trình tự).
+    dates = sorted({d.strip() for d in args.dates.split(",") if d.strip()})
     warnings = []
 
     corp_actions = load_corp_actions()
 
     raw_agg = defaultdict(lambda: [0.0, 0.0, 0.0])      # ticker -> [net_qty, buy_qty, buy_value]
     journal_agg = defaultdict(lambda: [0.0, 0.0, 0.0])
+    raw_events, journal_events = {}, {}
     for date in dates:
-        raw, err = true_fills_from_dnse_raw(args.account_no, date)
-        if raw is None:
+        rev, err = dnse_fill_events(args.account_no, date)
+        if rev is None:
             warnings.append(f"FATAL: {err} — không có nguồn broker thật cho {date}")
             continue
-        for tk, (nq, bq, bv) in raw.items():
+        raw_events[date] = rev
+        for tk, (nq, bq, bv) in aggregate_events(rev).items():
             m = corp_action_multiplier(tk, date, args.asof, corp_actions)
             raw_agg[tk][0] += nq * m
             raw_agg[tk][1] += bq * m
             raw_agg[tk][2] += bv   # tổng giá trị đã mua KHÔNG đổi khi nhân KL/chia giá vốn
 
-        jr, jerr = true_fills_from_journal(args.account, date)
-        if jr is None:
+        jev, jerr = journal_fill_events(args.account, date)
+        if jev is None:
             warnings.append(f"WARN: {jerr} — bỏ qua cross-check journal cho {date}")
         else:
-            for tk, (nq, bq, bv) in jr.items():
+            journal_events[date] = jev
+            for tk, (nq, bq, bv) in aggregate_events(jev).items():
                 m = corp_action_multiplier(tk, date, args.asof, corp_actions)
                 journal_agg[tk][0] += nq * m
                 journal_agg[tk][1] += bq * m
                 journal_agg[tk][2] += bv
+
+    # Giá vốn CHÍNH THỨC: bình quân gia quyền theo LÔ ĐANG SỐNG (reset khi vị thế về 0).
+    # KHÔNG dùng raw_agg[buy_value]/raw_agg[buy_qty] — xem CostBook (bug LPB 2026-08-10).
+    raw_books = build_cost_books(raw_events, args.asof, corp_actions)
+    journal_books = build_cost_books(journal_events, args.asof, corp_actions)
 
     if any(w.startswith("FATAL") for w in warnings):
         print("XÁC MINH THẤT BẠI — không đủ dữ liệu nguồn broker thật:", file=sys.stderr)
@@ -292,14 +404,16 @@ def main():
 
     # cross-check dnse_raw vs journal (2 nguồn độc lập) — so KL NET (mua-bán), giá vốn chỉ từ mua
     for tk in set(raw_agg) | set(journal_agg):
-        rq, rbq, rbv = raw_agg.get(tk, (0, 0, 0))
-        jq, jbq, jbv = journal_agg.get(tk, (0, 0, 0))
+        rq = raw_agg.get(tk, (0, 0, 0))[0]
+        jq = journal_agg.get(tk, (0, 0, 0))[0]
         if rq == 0 and jq == 0:
             continue
         if abs(rq - jq) > 1e-6:
             warnings.append(f"WARN qty mismatch {tk}: dnse_raw={rq:.0f} journal={jq:.0f}")
-        r_avg = rbv / rbq if rbq else 0
-        j_avg = jbv / jbq if jbq else 0
+        # so giá vốn theo cùng quy ước lô-đang-sống ở CẢ 2 nguồn (so 2 quy ước khác nhau
+        # sẽ đẻ ra cảnh báo giả ở đúng những mã đã tất toán rồi mua lại, vd LPB)
+        r_avg = raw_books[tk].avg_cost if tk in raw_books else 0
+        j_avg = journal_books[tk].avg_cost if tk in journal_books else 0
         if r_avg and j_avg:
             diff_pct = abs(r_avg - j_avg) / r_avg * 100
             if diff_pct > args.tolerance_pct:
@@ -340,10 +454,15 @@ def main():
     positions = []
     total_cost = total_mtm = 0.0
     for tk in tickers:
-        qty, buy_qty, buy_val = raw_agg[tk]
+        qty = raw_agg[tk][0]
         if qty <= 0:
             continue  # đã bán hết (net_qty<=0) -> không còn nắm giữ, bỏ khỏi báo cáo vị thế
-        cost = buy_val / buy_qty if buy_qty else 0  # giá vốn bình quân CHỈ từ lệnh mua
+        book = raw_books[tk]
+        cost = book.avg_cost  # bình quân gia quyền của LÔ ĐANG SỐNG (reset khi về 0)
+        if book.resets:
+            warnings.append(
+                f"INFO {tk}: vị thế đã về 0 {book.resets} lần rồi mua lại — giá vốn tính "
+                f"lại từ lô mới ({cost:,.2f}), KHÔNG trộn lô đã tất toán")
         px = prices.get(tk)
         if px is None:
             warnings.append(f"WARN no BQ price for {tk} as of {args.asof}")
@@ -352,6 +471,7 @@ def main():
         total_cost += cv
         total_mtm += mv
         positions.append({"ticker": tk, "qty": qty, "true_avg_cost": round(cost, 1),
+                           "cost_basis_lot_resets": book.resets,
                            "mtm_price": px, "mtm_price_source": price_source.get(tk, "bq_close"),
                            "cost_value": cv, "mtm_value": mv,
                            "unrealized_pnl": mv - cv,

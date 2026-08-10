@@ -724,8 +724,12 @@ cùng bậc ở cả mã CÓ cổ tức (MBB, NCT) lẫn mã KHÔNG có (PVT), t
 2. **Bình quân gia quyền không reset (LPB).** `verify_account_snapshot.py` cộng dồn toàn bộ lệnh MUA
    trong mọi lịch sử và không đặt lại khi vị thế về 0. LPB mua 900cp ngày 01/07 rồi **bán sạch**
    06/07, mua lại 900cp ngày 15/07 → lô đã tất toán vẫn bị trộn vào giá vốn của lô mới. Chỉ LPB
-   (SpaceX) dính; 19 mã còn lại và toàn bộ ZaloPay khớp broker tuyệt đối. *Việc cần làm — Taylor,
-   chưa chốt hạn: sửa `verify_account_snapshot.py` reset cơ sở giá vốn khi vị thế về 0.*
+   (SpaceX) dính; 19 mã còn lại và toàn bộ ZaloPay khớp broker tuyệt đối. *Cập nhật 10/08 — **đã vá
+   tận gốc** (job `Taylor_20260810_044215`): `verify_account_snapshot.py` nay tính giá vốn theo lô
+   đang sống (`CostBook`), rút cơ sở giá vốn theo tỉ lệ khi bán bớt và **đặt về 0 khi vị thế về 0**.
+   Chạy lại toàn bộ 21 mã SpaceX + 15 mã ZaloPay (mốc 07/08 và 10/08): chỉ LPB đổi số, ra đúng
+   51.466,67 khớp `costPrice` broker; mọi mã khác không đổi một đồng. Số trong báo cáo này KHÔNG
+   phải sửa lại — đã dùng số đúng ngay từ bản đính chính.*
 
 ### 11.4 Cơ chế chống tái diễn — `mike/bin/report_return_gate.py` (ĐÃ LIVE)
 

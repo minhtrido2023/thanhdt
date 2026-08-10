@@ -1,0 +1,190 @@
+{
+  "account": "ZaloPay",
+  "dates_included": [
+    "2026-07-07",
+    "2026-07-08",
+    "2026-07-09",
+    "2026-07-10",
+    "2026-07-13",
+    "2026-07-15",
+    "2026-07-16",
+    "2026-07-17",
+    "2026-07-20",
+    "2026-07-21",
+    "2026-07-22",
+    "2026-07-23",
+    "2026-07-27",
+    "2026-07-28"
+  ],
+  "asof": "2026-08-07",
+  "source": "dnse_raw (broker-native averagePrice/fillQuantity), cross-checked vs journal FILL events",
+  "verified": true,
+  "pnl_coverage_complete": false,
+  "legacy_positions_excluded_from_pnl": [
+    "DGC",
+    "VPB"
+  ],
+  "warnings": [
+    "WARN position DGC excluded from P&L — no fill history (legacy); tổng P&L bên dưới KHÔNG bao gồm mã này",
+    "WARN position VPB excluded from P&L — no fill history (legacy); tổng P&L bên dưới KHÔNG bao gồm mã này"
+  ],
+  "positions": [
+    {
+      "ticker": "SIP",
+      "qty": 749.0,
+      "true_avg_cost": 47140.1,
+      "mtm_price": 50900.0,
+      "mtm_price_source": "bq_close",
+      "cost_value": 35307900.0,
+      "mtm_value": 38124100.0,
+      "unrealized_pnl": 2816200.0,
+      "unrealized_pnl_pct": 7.976118658996994
+    },
+    {
+      "ticker": "PVT",
+      "qty": 2071.0,
+      "true_avg_cost": 17248.3,
+      "mtm_price": 18350.0,
+      "mtm_price_source": "bq_close",
+      "cost_value": 35721250.0,
+      "mtm_value": 38002850.0,
+      "unrealized_pnl": 2281600.0,
+      "unrealized_pnl_pct": 6.387234489274592
+    },
+    {
+      "ticker": "CSV",
+      "qty": 1000.0,
+      "true_avg_cost": 19750.0,
+      "mtm_price": 22000.0,
+      "mtm_price_source": "bq_close",
+      "cost_value": 19750000.0,
+      "mtm_value": 22000000.0,
+      "unrealized_pnl": 2250000.0,
+      "unrealized_pnl_pct": 11.39240506329114
+    },
+    {
+      "ticker": "VNM",
+      "qty": 601.0,
+      "true_avg_cost": 58699.8,
+      "mtm_price": 62000.0,
+      "mtm_price_source": "bq_close",
+      "cost_value": 35278600.0,
+      "mtm_value": 37262000.0,
+      "unrealized_pnl": 1983400.0,
+      "unrealized_pnl_pct": 5.622105185579927
+    },
+    {
+      "ticker": "HDB",
+      "qty": 659.0,
+      "true_avg_cost": 25891.0,
+      "mtm_price": 26550.0,
+      "mtm_price_source": "bq_close",
+      "cost_value": 17062200.0,
+      "mtm_value": 17496450.0,
+      "unrealized_pnl": 434250.0,
+      "unrealized_pnl_pct": 2.545099694060555
+    },
+    {
+      "ticker": "CTG",
+      "qty": 1050.0,
+      "true_avg_cost": 32583.3,
+      "mtm_price": 32500.0,
+      "mtm_price_source": "bq_close",
+      "cost_value": 34212500.0,
+      "mtm_value": 34125000.0,
+      "unrealized_pnl": -87500.0,
+      "unrealized_pnl_pct": -0.2557544757033248
+    },
+    {
+      "ticker": "MBB",
+      "qty": 1102.0,
+      "true_avg_cost": 24597.9,
+      "mtm_price": 24150.0,
+      "mtm_price_source": "bq_close",
+      "cost_value": 27106899.999999996,
+      "mtm_value": 26613300.0,
+      "unrealized_pnl": -493599.9999999963,
+      "unrealized_pnl_pct": -1.8209385802138804
+    },
+    {
+      "ticker": "LPB",
+      "qty": 352.0,
+      "true_avg_cost": 54843.2,
+      "mtm_price": 52900.0,
+      "mtm_price_source": "bq_close",
+      "cost_value": 19304800.0,
+      "mtm_value": 18620800.0,
+      "unrealized_pnl": -684000.0,
+      "unrealized_pnl_pct": -3.543160250300444
+    },
+    {
+      "ticker": "VHM",
+      "qty": 600.0,
+      "true_avg_cost": 74316.7,
+      "mtm_price": 73000.0,
+      "mtm_price_source": "bq_close",
+      "cost_value": 44590000.0,
+      "mtm_value": 43800000.0,
+      "unrealized_pnl": -790000.0,
+      "unrealized_pnl_pct": -1.771697690065037
+    },
+    {
+      "ticker": "VCB",
+      "qty": 800.0,
+      "true_avg_cost": 61362.5,
+      "mtm_price": 59700.0,
+      "mtm_price_source": "bq_close",
+      "cost_value": 49090000.0,
+      "mtm_value": 47760000.0,
+      "unrealized_pnl": -1330000.0,
+      "unrealized_pnl_pct": -2.7093094316561417
+    },
+    {
+      "ticker": "BID",
+      "qty": 900.0,
+      "true_avg_cost": 40766.7,
+      "mtm_price": 39050.0,
+      "mtm_price_source": "bq_close",
+      "cost_value": 36690000.0,
+      "mtm_value": 35145000.0,
+      "unrealized_pnl": -1545000.0,
+      "unrealized_pnl_pct": -4.210956663941128
+    },
+    {
+      "ticker": "TCB",
+      "qty": 956.0,
+      "true_avg_cost": 31610.9,
+      "mtm_price": 29700.0,
+      "mtm_price_source": "bq_close",
+      "cost_value": 30220000.0,
+      "mtm_value": 28393200.0,
+      "unrealized_pnl": -1826800.0,
+      "unrealized_pnl_pct": -6.045003309066843
+    },
+    {
+      "ticker": "SAB",
+      "qty": 744.0,
+      "true_avg_cost": 47450.2,
+      "mtm_price": 44750.0,
+      "mtm_price_source": "bq_close",
+      "cost_value": 35302950.0,
+      "mtm_value": 33294000.0,
+      "unrealized_pnl": -2008950.0,
+      "unrealized_pnl_pct": -5.6906009271179885
+    },
+    {
+      "ticker": "NCT",
+      "qty": 373.0,
+      "true_avg_cost": 94400.0,
+      "mtm_price": 82600.0,
+      "mtm_price_source": "bq_close",
+      "cost_value": 35211200.0,
+      "mtm_value": 30809800.0,
+      "unrealized_pnl": -4401400.0,
+      "unrealized_pnl_pct": -12.5
+    }
+  ],
+  "total_cost_value": 454848300.0,
+  "total_mtm_value": 451446500.0,
+  "total_unrealized_pnl": -3401800.0
+}
