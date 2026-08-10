@@ -1295,10 +1295,29 @@ else
     # VERIFY, đừng chỉ giết rồi tin. Cùng hợp đồng với `jobs.sh cancel` (exit 5): còn tiến
     # trình nào của job sống sót thì KHÔNG ghi trạng thái kết thúc — để record ở running và
     # nói ra sự thật. Giết-mà-không-kiểm chính là nửa đầu của sự cố 08-09; nửa sau là đóng
-    # dấu dựa trên niềm tin đó. Ví dụ có thật: worker spawn một tiến trình con detached
-    # (đúng thứ _detached_spawn làm cho dispatch --bg lồng nhau) — nó sống qua cú giết group.
-    if _alive="$(python3 "$ROOT/bin/mike_json.py" job-live-pids "$JOBS_DIR" "$job_id" 2>/dev/null)" \
-       && [ -n "$_alive" ]; then
+    # dấu dựa trên niềm tin đó.
+    # Giới hạn ĐÃ ĐO của kiểm tra này (đừng để comment hứa nhiều hơn cơ chế làm được —
+    # arch-reviewer round 4, N2): nó tìm theo pid+con cháu+ai đang giữ logfile của job. Một
+    # tiến trình do _detached_spawn tạo ra có fd1/fd2 trỏ /dev/null và record đồng bộ không có
+    # pid ⇒ job-live-pids KHÔNG thấy nó. Ở đây vẫn hữu ích vì worker đồng bộ THẬT giữ
+    # "$logfile.err", nhưng nó không phải bằng chứng "không còn gì sống trên máy".
+    # FAIL CLOSED: rc≠0 nghĩa là KHÔNG kiểm được (thiếu python3, record không đọc nổi → rc=4),
+    # mà không kiểm được thì không được phép đóng dấu. Bản trước dùng
+    # `if _alive="$(... 2>/dev/null)" && [ -n "$_alive" ]` nên MỌI rc≠0 rơi vào nhánh ghi —
+    # đúng cái "giết rồi tin" mà nó sinh ra để chặn (arch-reviewer round 4, K3).
+    # Hai chi tiết vỏ bọc, cả hai đều đã đo, đừng "gọn hoá" mất:
+    #   * `|| _lrc=$?` (không phải gán trần): dưới `set -e` một command-substitution lỗi trong
+    #     phép gán làm ABORT cả trap ⇒ mất luôn nhánh xử lý rc≠0 vừa thêm.
+    #   * stderr KHÔNG gộp `2>&1` vào $_alive: gộp thì một dòng cảnh báo bất kỳ của python sẽ
+    #     bị đọc thành "còn pid sống". Để stderr chảy ra stderr của dispatch.sh — lý do vẫn
+    #     hiện ra, mà stdout vẫn sạch.
+    _lrc=0
+    _alive="$(python3 "$ROOT/bin/mike_json.py" job-live-pids "$JOBS_DIR" "$job_id")" || _lrc=$?
+    if [ "$_lrc" -ne 0 ]; then
+      echo "WARNING: dispatch.sh sync bị kill và KHÔNG kiểm tra được job $job_id còn sống hay không (job-live-pids rc=$_lrc; lý do ở stderr phía trên)" >&2
+      echo "         => record GIỮ NGUYÊN status=running. Không kiểm được thì không đóng dấu — đoán 'đã dừng' chính là sự cố 08-09." >&2
+      echo "         Kiểm tay rồi đóng: $ROOT/bin/jobs.sh status $job_id  /  $ROOT/bin/jobs.sh cancel $job_id" >&2
+    elif [ -n "$_alive" ]; then
       echo "WARNING: dispatch.sh sync bị kill, đã giết worker nhưng CÒN tiến trình sống của job $job_id: $_alive" >&2
       echo "         => record GIỮ NGUYÊN status=running (không bao giờ báo 'đã dừng' cho một writer còn sống)." >&2
       echo "         Đóng nốt bằng: $ROOT/bin/jobs.sh cancel $job_id" >&2

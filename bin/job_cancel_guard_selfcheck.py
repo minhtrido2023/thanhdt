@@ -252,7 +252,7 @@ def build_sandbox(tmp):
     return mk, stub
 
 
-def run_sync_kill_trap(tmp):
+def run_sync_kill_trap(tmp, break_verifier=False):
     """END-TO-END on the real bin/dispatch.sh: start a SYNC dispatch, let the worker come
     up, then SIGTERM dispatch.sh's whole process group — exactly what the caller's Bash tool
     does on its 2-minute timeout (incident 2026-07-09, DollarBill_20260709_125326).
@@ -261,8 +261,29 @@ def run_sync_kill_trap(tmp):
     before writing the record: a `failed` stamp over a worker that is still editing the repo
     is the 2026-08-09 lie, just reached by a different door.
 
-    Returns (dispatcher_rc, worker_pid, final_status)."""
+    `break_verifier` swaps bin/mike_json.py for a shim that fails ONLY `job-live-pids` (rc=4,
+    the real command's "record unreadable" code) and delegates every other subcommand to the
+    real module — so the record is still created normally and the ONLY thing broken is the
+    trap's ability to check. That is the fail-open test: a verification that cannot run must
+    not be read as "verified dead" (round 4, K3).
+
+    Returns (dispatcher_rc, worker_pid, final_status, dispatcher_stderr)."""
     mk, stub = build_sandbox(tmp)
+    if break_verifier:
+        shim = os.path.join(mk, "bin", "mike_json.py")
+        os.remove(shim)                    # drop the symlink; NEVER write through it
+        assert not os.path.exists(shim) and not os.path.islink(shim), shim
+        with open(shim, "w", encoding="utf-8") as f:
+            f.write("#!/usr/bin/env python3\n"
+                    "import sys, runpy\n"
+                    "REAL = %s\n"
+                    "if len(sys.argv) > 1 and sys.argv[1] == 'job-live-pids':\n"
+                    "    sys.stderr.write('selfcheck: verifier deliberately broken\\n')\n"
+                    "    sys.exit(4)\n"
+                    "sys.argv[0] = REAL\n"
+                    "runpy.run_path(REAL, run_name='__main__')\n" % repr(MJ))
+        os.chmod(shim, 0o755)
+        assert os.path.getsize(MJ) > 200, "SHIM LEAKED INTO %s — git checkout it NOW" % MJ
     env = dict(os.environ)
     env.update({"DISPATCH_CLAUDE_BIN": stub, "DISPATCH_KILL_GRACE_S": "3",
                 "DISPATCH_FROM": "Mike", "MIKE_ROOT": mk})
@@ -289,7 +310,8 @@ def run_sync_kill_trap(tmp):
             break
         time.sleep(0.1)
     if worker is None:
-        return p.poll(), None, "dispatch never reached the CLI: %s" % (p.stderr.read()[:400],)
+        return (p.poll(), None,
+                "dispatch never reached the CLI: %s" % (p.stderr.read()[:400],), "")
     time.sleep(0.3)
     os.killpg(os.getpgid(p.pid), 15)           # the caller's process-group SIGTERM
     try:
@@ -298,15 +320,51 @@ def run_sync_kill_trap(tmp):
         pass
     time.sleep(0.5)
     try:
+        derr = p.stderr.read()
+    except Exception:
+        derr = ""
+    try:
         with open(rec, encoding="utf-8") as f:
             status = json.load(f).get("status")
     except Exception:
         status = None
-    return p.returncode, worker, status
+    return p.returncode, worker, status, derr
+
+
+def fd_links_of(pid):
+    """The raw /proc/<pid>/fd/{1,2} readlink strings — used to ASSERT that the kernel really
+    did rewrite them ('(deleted)', or the new name after a rename). Without this the R-series
+    would be testing a scenario that may not even be reproducible on this kernel."""
+    out = []
+    for fd in ("1", "2"):
+        try:
+            out.append(os.readlink("/proc/%d/fd/%s" % (int(pid), fd)))
+        except Exception:
+            continue
+    return out
+
+
+def run_sync_kill_trap_verifier_broken(tmp):
+    """K3: same E2E as run_sync_kill_trap, but the trap's `job-live-pids` check cannot run.
+    Returns (dispatcher_rc, final_status, dispatcher_stderr)."""
+    sub = os.path.join(tmp, "r5")
+    os.makedirs(sub, exist_ok=True)
+    rc, _worker, status, derr = run_sync_kill_trap(sub, break_verifier=True)
+    return rc, status, derr
 
 
 def make_job(jobs_dir, job_id, pid, logfile, prompt="do the thing", to="Taylor",
-             dispatcher_pid=""):
+             dispatcher_pid="", create_log=True):
+    # A real dispatch's logfile EXISTS while the job runs, so the fixture must create it:
+    # since round 4 an absent logfile means "liveness evidence gone -> UNKNOWN -> guard ON"
+    # (_logfile_evidence_missing), and a fixture that skipped it would be testing the blind
+    # path everywhere by accident. `create_log=False` is for the cases that test blindness
+    # ON PURPOSE.
+    if create_log and logfile:
+        try:
+            open(logfile, "a").close()
+        except Exception:
+            pass
     rc, _, err = jset(jobs_dir, job_id, "job_id=" + job_id, "from=Mike", "to=" + to,
                       "status=running", "attempt=1", "max_attempts=2",
                       "started_at=1000", "deadline=1600", "logfile=" + logfile,
@@ -506,15 +564,19 @@ def main():
     # write this guard exists to prevent (round 3, O3). The new contract is narrower and
     # honest — "no pid" is not the question, "is anything of this job alive" is. Nothing
     # alive: close it and SAY that is why. Something alive: kill, verify, then close (P4).
+    # And "nothing alive" itself has a precondition (round 4, K2): the logfile must still BE
+    # there, because with it gone the query returns empty regardless. So this case creates the
+    # logfile — a sync record whose log is missing is the R-series case below, and it refuses.
     log_i = os.path.join(tmp, "i.log")
+    open(log_i, "w").close()
     make_job(jobs, "J_I", "", log_i)          # sync dispatch — no pid recorded
     rc, out, err = run([sys.executable, MJ, "job-cancel", jobs, "J_I"])
-    check("no pid + nothing alive -> closes the record (exit 0)", rc == 0,
+    check("no pid + logfile present + nothing alive -> closes the record (exit 0)", rc == 0,
           "rc=%d %s" % (rc, (out + err)[:220]))
     check("no pid -> status=cancelled", read_job(jobs, "J_I")["status"] == "cancelled",
           read_job(jobs, "J_I")["status"])
     check("no pid -> the summary says it closed a DEAD job, not a killed one",
-          "no live process" in (read_job(jobs, "J_I").get("result_summary") or ""),
+          "no process holding it" in (read_job(jobs, "J_I").get("result_summary") or ""),
           read_job(jobs, "J_I").get("result_summary"))
     # ...and it must NOT claim that on a record whose worker is still alive: same shape, one
     # live process, and the close has to go through kill+verify instead (asserted in P4).
@@ -887,13 +949,113 @@ def main():
           "rc=%s %s" % (rc, (out + err)[:220]))
     check("record still running", read_job(jobs, "J_N")["status"] == "running")
 
+    # ------------------------------------- R (round 4): the premises that are NOT record fields
+    # Rounds 2-4 kept hardening FIELDS, and the audit kept finding the answer somewhere else.
+    # `_job_live_pids` rests on two things no field allowlist can reach: the logfile's presence
+    # on disk, and the record file's parseability. Each was a one-command bypass, and neither
+    # command is a job-set — so the guard never even saw it happen.
+    print("\nR. liveness evidence that lives OUTSIDE the record (round 4 killers)")
+
+    # R1 (K1) — rm the logfile. /proc/<pid>/fd/2 then reads "<path> (deleted)", the old exact
+    # string compare missed it, live==[] and the next stamp landed rc=0 over a live worker.
+    log_r1 = os.path.join(tmp, "r1.log")
+    disp_r1, work_r1 = spawn_sync_worker(log_r1, jobs, "J_R1")
+    make_job(jobs, "J_R1", "", log_r1, dispatcher_pid=disp_r1)
+    check("sync worker alive and holding its .err", alive(work_r1)
+          and work_r1 in holders_of(log_r1 + ".err"), "worker=%s" % work_r1)
+    check("baseline: stamp refused while the log exists", jset(jobs, "J_R1", "status=failed")[0] == 3)
+    for f in (log_r1 + ".err", log_r1):                   # not a job-set: guard never sees it
+        if os.path.exists(f):
+            os.remove(f)
+    check("the fd now reads '(deleted)', i.e. the exact-string match is defeated",
+          any(l.startswith(log_r1 + ".err") and l.endswith("(deleted)")
+              for l in fd_links_of(work_r1)),
+          "worker=%s links=%s" % (work_r1, fd_links_of(work_r1)))
+    check("worker still alive after the unlink", alive(work_r1), "worker=%s" % work_r1)
+    rc, out, err = jset(jobs, "J_R1", "status=failed")
+    check("unlinked logfile -> stamp STILL REFUSED (inode match survives rm)", rc == 3,
+          "rc=%d %s" % (rc, (out + err)[:260]))
+    check("record still running", read_job(jobs, "J_R1")["status"] == "running")
+    check("...and cancel will not blind-close it either",
+          run([sys.executable, MJ, "job-cancel", jobs, "J_R1", "2"])[0] == 3)
+    check("still running after the cancel attempt",
+          read_job(jobs, "J_R1")["status"] == "running")
+
+    # R2 (K1, the half rm does not cover) — RENAME. The old name is gone, so there is no inode
+    # left to compare against: _pids_holding genuinely cannot answer. That is the case the
+    # "logfile absent -> UNKNOWN, not dead" term exists for.
+    log_r2 = os.path.join(tmp, "r2.log")
+    disp_r2, work_r2 = spawn_sync_worker(log_r2, jobs, "J_R2")
+    make_job(jobs, "J_R2", "", log_r2, dispatcher_pid=disp_r2)
+    check("second sync worker alive", alive(work_r2), "worker=%s" % work_r2)
+    os.rename(log_r2 + ".err", os.path.join(tmp, "moved_away.err"))
+    if os.path.exists(log_r2):
+        os.rename(log_r2, os.path.join(tmp, "moved_away.log"))
+    # State the premise the way _pids_holding asks it, not by pinning one pid's fd order: after
+    # the rename NOTHING resolves the recorded name any more — no inode to compare (the name is
+    # gone) and no string to match (the fd reads the new name). That is what makes this the
+    # half `rm` does not cover, and it is why the UNKNOWN term has to exist at all.
+    check("after the rename, nothing resolves the RECORDED logfile name any more",
+          not holders_of(log_r2 + ".err") and not holders_of(log_r2),
+          "worker=%s links=%s holders=%s" % (work_r2, fd_links_of(work_r2),
+                                             holders_of(log_r2 + ".err")))
+    check("renamed logfile -> job-live-pids reports nothing",
+          run([sys.executable, MJ, "job-live-pids", jobs, "J_R2"])[1].strip() == "",
+          run([sys.executable, MJ, "job-live-pids", jobs, "J_R2"])[1])
+    rc, out, err = jset(jobs, "J_R2", "status=failed")
+    check("...yet the stamp is REFUSED, because empty-because-blind is not dead", rc == 3,
+          "rc=%d %s" % (rc, (out + err)[:260]))
+    check("the refusal says it CANNOT DETERMINE, it does not claim the job is alive",
+          "CANNOT BE DETERMINED" in err, err[:260])
+    check("record still running", read_job(jobs, "J_R2")["status"] == "running")
+    check("worker was never touched", alive(work_r2), "worker=%s" % work_r2)
+    # ...but the board must not leak either: reap can still close it once the agent's own
+    # heartbeat is cold, which is an independent proof of death the guard cannot see.
+    rc, out, err = run([sys.executable, MJ, "job-reap", jobs, "0"])
+    check("reap CAN still close a blind record (no permanent board leak)",
+          read_job(jobs, "J_R2")["status"] == "orphaned", read_job(jobs, "J_R2")["status"])
+    check("and it records WHY it was allowed to",
+          "logfile gone" in (read_job(jobs, "J_R2").get("result_summary") or ""),
+          read_job(jobs, "J_R2").get("result_summary"))
+
+    # R3 (N1) — corrupt the record itself. `except Exception: obj = {}` made the guard read a
+    # blank record: no status meant the live-status precondition failed, no fields meant nothing
+    # looked like an evidence rewrite. One `printf` disabled the entire guard.
+    log_r3 = os.path.join(tmp, "r3.log")
+    wrap_r3, work_r3 = spawn_wrapper(log_r3)
+    time.sleep(0.4)
+    make_job(jobs, "J_R3", wrap_r3, log_r3)
+    with open(os.path.join(jobs, "J_R3.json"), "w", encoding="utf-8") as f:
+        f.write("x")                                      # partial write / truncated record
+    rc, out, err = jset(jobs, "J_R3", "status=failed")
+    check("unparseable record -> REFUSED (was rc=0, guard fully off)", rc == 3,
+          "rc=%d %s" % (rc, (out + err)[:260]))
+    check("the corrupt bytes were NOT overwritten with a fake terminal record",
+          open(os.path.join(jobs, "J_R3.json"), encoding="utf-8").read() == "x")
+    check("worker still alive", alive(work_r3), "worker=%s" % work_r3)
+    check("--force still lets a human proceed deliberately",
+          jset(jobs, "J_R3", "status=failed", "--force")[0] == 0)
+    # A record file that simply does not exist is the normal create path and must stay open.
+    rc, _, err = jset(jobs, "J_R4_new", "status=running", "to=Wags")
+    check("a MISSING record is still created normally (missing != corrupt)", rc == 0, err[:200])
+
+    # R5 (K3) — dispatch.sh's verification must fail CLOSED. Exercised on the real script
+    # shape: point the trap's verifier at a job-live-pids that exits non-zero and confirm no
+    # terminal status is written.
+    print("\nR5. dispatch.sh's kill-verification fails CLOSED, not open")
+    rc_r5, status_r5, err_r5 = run_sync_kill_trap_verifier_broken(tmp)
+    check("verifier rc!=0 -> record deliberately LEFT at running", status_r5 == "running",
+          "status=%s" % status_r5)
+    check("...and it says why instead of silently stamping",
+          "KHÔNG kiểm tra được" in err_r5, err_r5[-300:])
+
     # ------------------------------------------------- O: the sync KILL trap (E2E, real script)
     # dispatch.sh's sync path traps TERM so a killed dispatcher does not leave the record at
     # running forever (incident 2026-07-09). But the worker is setsid'd: it SURVIVES the
     # caller's process-group kill. Stamping failed while it keeps editing the repo is exactly
     # the record that made the board lie on 08-09 — so the trap must STOP it, then stamp.
     print("\nO. dispatch.sh sync trap kills the worker BEFORE it closes the record")
-    rc_o, worker_o, status_o = run_sync_kill_trap(tmp)
+    rc_o, worker_o, status_o, _err_o = run_sync_kill_trap(tmp)
     check("trap fired and closed the record", status_o in ("failed", None) and status_o == "failed",
           "status=%s" % status_o)
     check("the setsid'd worker is DEAD, not orphaned into the repo", worker_o is not None

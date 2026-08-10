@@ -146,6 +146,29 @@ jobid_of() {
 has_job_record() {
   [ -f "$ROOT/bus/jobs/$1.json" ] || [ -f "$ROOT/bus/jobs/archive/$1.json" ]
 }
+# 0 = job CHƯA kết thúc (record hot, status không nằm trong terminal set) ⇒ TUYỆT ĐỐI không
+# được xoá log/err của nó. Lý do không phải "cho gọn": logfile của job là BẰNG CHỨNG LIVENESS
+# duy nhất của nhánh dispatch ĐỒNG BỘ — mike_json._pids_holding tìm worker qua ai đang giữ
+# "$logfile.err", vì record đồng bộ không ghi pid nào cả. Xoá nó đi thì `job-live-pids` trả
+# rỗng trên một job còn sống, và cú `job-set status=failed` ngay sau đó lọt guard: đúng lời
+# nói dối của sự cố 2026-08-09, do chính cron hàng tuần gây ra (arch-reviewer round 4, K1).
+# Nhánh `dispatchlog` (§6) đã có guard này từ trước; `empty` và `errnoise` thì chưa — mà .err
+# của một job đồng bộ đang chạy thường ĐÚNG là "0 byte" hoặc "chỉ có warning stdin", tức là
+# nằm gọn trong tiêu chí xoá của cả hai.
+job_not_terminal() {
+  local jf="$ROOT/bus/jobs/$1.json" st term
+  [ -f "$jf" ] || return 1        # không có record hot ⇒ không phải job đang chạy
+  st="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1])).get("status",""))' \
+        "$jf" 2>/dev/null || echo '')"
+  # Record không đọc nổi ⇒ coi như CHƯA kết thúc (giữ log). Không đọc được trạng thái thì
+  # không được suy ra "đã xong".
+  [ -n "$st" ] || return 0
+  term="|$(python3 "$ROOT/bin/mike_json.py" terminal-statuses 2>/dev/null | tr '\n' '|')"
+  case "$term" in
+    *"|$st|"*) return 1 ;;        # đã terminal ⇒ xoá được
+    *) return 0 ;;
+  esac
+}
 
 # ── 1. pid — 0 reader trong toàn repo (báo cáo §2.1) ─────────────────────────
 # `-mtime +1` cho nhất quán với empty/errnoise: file .pid là bản ghi DUY NHẤT của OS-pid một
@@ -182,6 +205,10 @@ if want empty; then
       say "  GIỮ (0 byte NHƯNG không có job record hot lẫn archive — artifact DUY NHẤT): $f"
       continue
     fi
+    if jid="$(jobid_of "$f")" && job_not_terminal "$jid"; then
+      say "  GIỮ (job CHƯA kết thúc — logfile là bằng chứng liveness duy nhất của sync dispatch): $f"
+      continue
+    fi
     do_delete "$f" "0 byte, job record còn tra được"
   done < <(find "$ROOT/logs" -maxdepth 1 -type f \( -name '*.log' -o -name '*.err' \) -size 0 -mtime +1 2>/dev/null)
 fi
@@ -200,6 +227,10 @@ if want errnoise; then
     # còn dòng non-blank nào KHÔNG phải warning ⇒ có nội dung thật ⇒ giữ
     if grep -v '^[[:space:]]*$' "$f" | grep -qv 'no stdin data received'; then
       say "  GIỮ (có dòng khác ngoài warning): $f"; continue
+    fi
+    if jid="$(jobid_of "$f")" && job_not_terminal "$jid"; then
+      say "  GIỮ (job CHƯA kết thúc — .err là handle liveness duy nhất của sync dispatch): $f"
+      continue
     fi
     do_delete "$f" "chỉ có warning stdin, không phải lỗi"
   done < <(find "$ROOT/logs" -maxdepth 1 -type f -name '*.err' ! -size 0 -mtime +1 2>/dev/null)
