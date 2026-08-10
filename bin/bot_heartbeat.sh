@@ -77,7 +77,7 @@ with open(journal, encoding="utf-8") as f:
             c = children[oid]
             c["filled"] = max(c["filled"], float(row["qty"] or 0))  # journal ghi lũy kế/child
             c["fill_px"] = float(row["price"] or 0) or c["fill_px"]
-        elif ev in ("CANCEL", "CANCELLED") and oid in children:
+        elif ev in ("CANCEL", "CANCELLED", "CANCEL_STALE") and oid in children:
             children[oid]["cancelled"] = True
         elif ev == "DONE":
             parent_done[pid] = row.get("note") or "khớp đủ"
