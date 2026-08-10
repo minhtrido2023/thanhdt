@@ -1127,3 +1127,50 @@
 - [2026-08-10T06:36:25Z] Wags/heartbeat — Wags_20260810_063448: {"status": "in_progress", "note": "Đã đọc dispatch.sh/watchdog.sh/mike_json.py + job record thật của ca 08-09; đang xác định chính xác writer của status=failed giả"}
 - [2026-08-10T06:36:49Z] Wags/heartbeat — Wags_20260810_063448: {"status": "still_running", "elapsed_min": 2, "job_id": "Wags_20260810_063448", "source": "watcher"}
 - [2026-08-10T06:37:50Z] Wags/heartbeat — Wags_20260810_063448: {"status": "still_running", "elapsed_min": 3, "job_id": "Wags_20260810_063448", "source": "watcher"}
+
+## Consolidation 2026-08-10T07:07:01Z
+- [2026-08-10T06:58:21Z] Taylor/heartbeat — Taylor_20260810_065757: {"status": "in_progress", "note": "doc executor.py _limit_price + xac nhan gap tran duoi"}
+- [2026-08-10T06:58:58Z] Taylor/heartbeat — Taylor_20260810_065757: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260810_065757", "source": "watcher"}
+- [2026-08-10T06:59:38Z] Taylor/heartbeat — Taylor_20260810_065757: {"status": "in_progress", "note": "gap XAC NHAN: extreme_regime OFF tren live + trigger la r15/limit-down, khong bat truot dan; sang khao sat bien dong"}
+- [2026-08-10T06:59:58Z] Taylor/heartbeat — Taylor_20260810_065757: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260810_065757", "source": "watcher"}
+- [2026-08-10T07:00:59Z] Taylor/heartbeat — Taylor_20260810_065757: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260810_065757", "source": "watcher"}
+- [2026-08-10T07:01:57Z] Taylor/heartbeat — Taylor_20260810_065757: {"status": "in_progress", "note": "khao sat bien dong xong (67 LAG names, 43k ticker-day). Sang dose-response forward return."}
+- [2026-08-10T07:01:59Z] Taylor/heartbeat — Taylor_20260810_065757: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260810_065757", "source": "watcher"}
+- [2026-08-10T07:02:59Z] Taylor/heartbeat — Taylor_20260810_065757: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260810_065757", "source": "watcher"}
+- [2026-08-10T07:03:59Z] Taylor/heartbeat — Taylor_20260810_065757: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260810_065757", "source": "watcher"}
+- [2026-08-10T07:04:59Z] Taylor/heartbeat — Taylor_20260810_065757: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260810_065757", "source": "watcher"}
+- [2026-08-10T07:06:00Z] Taylor/heartbeat — Taylor_20260810_065757: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260810_065757", "source": "watcher"}
+- [2026-08-10T07:06:22Z] Taylor/heartbeat — Taylor_20260810_065757: {"status": "in_progress", "note": "dose-response XONG: tranche bi breaker bo qua lai la tranche TOT NHAT (+8-9% vs +6.4% uncond, IS+OOS cung dau). Dang kiem tail + doi chieu voi gate EXTREME san co."}
+- [2026-08-10T07:07:00Z] Taylor/heartbeat — Taylor_20260810_065757: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260810_065757", "source": "watcher"}
+- [2026-08-10T06:38:50Z] Wags/heartbeat — Wags_20260810_063448: {"status": "still_running", "elapsed_min": 4, "job_id": "Wags_20260810_063448", "source": "watcher"}
+- [2026-08-10T06:39:48Z] Wags/heartbeat — Wags_20260810_063448: {"status": "in_progress", "note": "ROOT CAUSE xac dinh tu transcript that: KHONG phai watchdog. Mike tu chay kill <pid> + job-set status=failed luc T+22s (deadline 600s chua het). kill giet WRAPPER, claude con setsid song tiep 33 phut va van ghi file. Dang code fix: guard job-set + jobs.sh cancel that su."}
+- [2026-08-10T06:39:50Z] Wags/heartbeat — Wags_20260810_063448: {"status": "still_running", "elapsed_min": 5, "job_id": "Wags_20260810_063448", "source": "watcher"}
+- [2026-08-10T06:40:50Z] Wags/heartbeat — Wags_20260810_063448: {"status": "still_running", "elapsed_min": 6, "job_id": "Wags_20260810_063448", "source": "watcher"}
+- [2026-08-10T06:41:50Z] Wags/heartbeat — Wags_20260810_063448: {"status": "still_running", "elapsed_min": 7, "job_id": "Wags_20260810_063448", "source": "watcher"}
+- [2026-08-10T06:42:50Z] Wags/heartbeat — Wags_20260810_063448: {"status": "still_running", "elapsed_min": 8, "job_id": "Wags_20260810_063448", "source": "watcher"}
+- [2026-08-10T06:43:50Z] Wags/heartbeat — Wags_20260810_063448: {"status": "still_running", "elapsed_min": 9, "job_id": "Wags_20260810_063448", "source": "watcher"}
+- [2026-08-10T06:44:50Z] Wags/heartbeat — Wags_20260810_063448: {"status": "still_running", "elapsed_min": 10, "job_id": "Wags_20260810_063448", "source": "watcher"}
+- [2026-08-10T06:45:51Z] Wags/heartbeat — Wags_20260810_063448: {"status": "still_running", "elapsed_min": 11, "job_id": "Wags_20260810_063448", "source": "watcher"}
+- [2026-08-10T06:46:51Z] Wags/heartbeat — Wags_20260810_063448: {"status": "still_running", "elapsed_min": 12, "job_id": "Wags_20260810_063448", "source": "watcher"}
+- [2026-08-10T06:47:51Z] Wags/heartbeat — Wags_20260810_063448: {"status": "still_running", "elapsed_min": 13, "job_id": "Wags_20260810_063448", "source": "watcher"}
+- [2026-08-10T06:48:51Z] Wags/heartbeat — Wags_20260810_063448: {"status": "still_running", "elapsed_min": 14, "job_id": "Wags_20260810_063448", "source": "watcher"}
+- [2026-08-10T06:49:51Z] Wags/heartbeat — Wags_20260810_063448: {"status": "still_running", "elapsed_min": 15, "job_id": "Wags_20260810_063448", "source": "watcher"}
+- [2026-08-10T06:49:52Z] Wags/heartbeat — Wags_20260810_063448: {"status": "in_progress", "note": "Fix xong: guard job-set + jobs.sh cancel + job-find-dup + zombie-aware _pid_alive. Selfcheck moi 56/56 PASS. Dang chay lai duoi TZ khac + chuan bi arch-reviewer."}
+- [2026-08-10T06:50:51Z] Wags/heartbeat — Wags_20260810_063448: {"status": "still_running", "elapsed_min": 16, "job_id": "Wags_20260810_063448", "source": "watcher"}
+- [2026-08-10T06:51:51Z] Wags/heartbeat — Wags_20260810_063448: {"status": "still_running", "elapsed_min": 17, "job_id": "Wags_20260810_063448", "source": "watcher"}
+- [2026-08-10T06:52:51Z] Wags/heartbeat — Wags_20260810_063448: {"status": "still_running", "elapsed_min": 18, "job_id": "Wags_20260810_063448", "source": "watcher"}
+- [2026-08-10T06:53:51Z] Wags/heartbeat — Wags_20260810_063448: {"status": "still_running", "elapsed_min": 19, "job_id": "Wags_20260810_063448", "source": "watcher"}
+- [2026-08-10T06:54:52Z] Wags/heartbeat — Wags_20260810_063448: {"status": "still_running", "elapsed_min": 20, "job_id": "Wags_20260810_063448", "source": "watcher"}
+- [2026-08-10T06:55:52Z] Wags/heartbeat — Wags_20260810_063448: {"status": "still_running", "elapsed_min": 21, "job_id": "Wags_20260810_063448", "source": "watcher"}
+- [2026-08-10T06:56:52Z] Wags/heartbeat — Wags_20260810_063448: {"status": "still_running", "elapsed_min": 22, "job_id": "Wags_20260810_063448", "source": "watcher"}
+- [2026-08-10T06:57:52Z] Wags/heartbeat — Wags_20260810_063448: {"status": "still_running", "elapsed_min": 23, "job_id": "Wags_20260810_063448", "source": "watcher"}
+- [2026-08-10T06:58:52Z] Wags/heartbeat — Wags_20260810_063448: {"status": "still_running", "elapsed_min": 24, "job_id": "Wags_20260810_063448", "source": "watcher"}
+- [2026-08-10T06:59:52Z] Wags/heartbeat — Wags_20260810_063448: {"status": "still_running", "elapsed_min": 25, "job_id": "Wags_20260810_063448", "source": "watcher"}
+- [2026-08-10T07:00:52Z] Wags/heartbeat — Wags_20260810_063448: {"status": "still_running", "elapsed_min": 26, "job_id": "Wags_20260810_063448", "source": "watcher"}
+- [2026-08-10T07:01:52Z] Wags/heartbeat — Wags_20260810_063448: {"status": "still_running", "elapsed_min": 27, "job_id": "Wags_20260810_063448", "source": "watcher"}
+- [2026-08-10T07:02:52Z] Wags/heartbeat — Wags_20260810_063448: {"status": "still_running", "elapsed_min": 28, "job_id": "Wags_20260810_063448", "source": "watcher"}
+- [2026-08-10T07:03:52Z] Wags/heartbeat — Wags_20260810_063448: {"status": "still_running", "elapsed_min": 29, "job_id": "Wags_20260810_063448", "source": "watcher"}
+- [2026-08-10T07:04:52Z] Wags/heartbeat — Wags_20260810_063448: {"status": "still_running", "elapsed_min": 30, "job_id": "Wags_20260810_063448", "source": "watcher"}
+- [2026-08-10T07:05:17Z] Wags/heartbeat — Wags_20260810_063448: {"status": "in_progress", "note": "arch-reviewer NEEDS_CHANGES: (1) denylist bi bypass boi status=aborted/superseded (Mike da dung 4 lan that tren board), (2) pid<=0 bien cancel thanh kill toan may. Dang sua ca 6 required_changes."}
+- [2026-08-10T07:05:53Z] Wags/heartbeat — Wags_20260810_063448: {"status": "still_running", "elapsed_min": 31, "job_id": "Wags_20260810_063448", "source": "watcher"}
+- [2026-08-10T07:06:54Z] Wags/heartbeat — Wags_20260810_063448: {"status": "still_running", "elapsed_min": 32, "job_id": "Wags_20260810_063448", "source": "watcher"}
