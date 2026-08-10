@@ -178,6 +178,15 @@ def main():
     ok &= check("place_order vẫn resolve gói hợp lệ cho lệnh MUA", sent == UPCOM_PKG,
                 f"sent={sent}")
 
+    # ── 10. Lệnh BÁN đòn bẩy CHỈ ĐỊNH (CAPIT lever sell) — nhánh explicit vẫn ưu tiên ───
+    print("[10] Lệnh BÁN có loan_package_id CHỈ ĐỊNH — nhánh explicit chạy TRƯỚC nhánh side")
+    b = make_broker([ACCOUNT_DEFAULT, LEVER_PKG])
+    b.place_order("VIX", 100, "sell", price=20000, cash_only=False,
+                  loan_package_id=LEVER_PKG)
+    sent = b.client.sent[-1][1]
+    ok &= check("BÁN + gói chỉ định hợp lệ ⇒ vẫn gửi đúng gói chỉ định (không rơi về None)",
+                sent == LEVER_PKG, f"sent={sent}")
+
     print("\n" + ("ALL PASS" if ok else "FAILED"))
     return 0 if ok else 1
 
