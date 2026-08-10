@@ -816,3 +816,20 @@
 
 ## Consolidation 2026-08-10T03:31:50Z
 - [2026-08-10T03:31:30Z] Taylor/heartbeat — Taylor_20260810_024323: {"status": "still_running", "elapsed_min": 48, "job_id": "Taylor_20260810_024323", "source": "watcher"}
+
+## Consolidation 2026-08-10T03:36:28Z
+- [2026-08-10T03:32:02Z] Taylor/heartbeat — Taylor_20260810_030558: {"status": "still_running", "elapsed_min": 26, "job_id": "Taylor_20260810_030558", "source": "watcher"}
+- [2026-08-10T03:32:30Z] Taylor/heartbeat — Taylor_20260810_024323: {"status": "still_running", "elapsed_min": 49, "job_id": "Taylor_20260810_024323", "source": "watcher"}
+- [2026-08-10T03:32:52Z] Taylor/heartbeat — Taylor_20260810_033152: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260810_033152", "source": "watcher"}
+- [2026-08-10T03:33:02Z] Taylor/heartbeat — Taylor_20260810_030558: {"status": "still_running", "elapsed_min": 27, "job_id": "Taylor_20260810_030558", "source": "watcher"}
+- [2026-08-10T03:33:30Z] Taylor/heartbeat — Taylor_20260810_024323: {"status": "still_running", "elapsed_min": 50, "job_id": "Taylor_20260810_024323", "source": "watcher"}
+- [2026-08-10T03:33:53Z] Taylor/heartbeat — Taylor_20260810_033152: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260810_033152", "source": "watcher"}
+- [2026-08-10T03:34:02Z] Taylor/heartbeat — Taylor_20260810_030558: {"status": "still_running", "elapsed_min": 28, "job_id": "Taylor_20260810_030558", "source": "watcher"}
+- [2026-08-10T03:34:30Z] Taylor/heartbeat — Taylor_20260810_024323: {"status": "still_running", "elapsed_min": 51, "job_id": "Taylor_20260810_024323", "source": "watcher"}
+- [2026-08-10T03:34:46Z] Taylor/heartbeat — Taylor_20260810_024323: {"status": "in_progress", "note": "da dung bot cu (code brokers.py cu trong RAM); classifier chan Taylor tu khoi dong lai -> cho cron bot_heartbeat.sh autoheal (moi 5 phut) khoi dong lai voi code moi"}
+- [2026-08-10T03:34:54Z] Taylor/heartbeat — Taylor_20260810_033152: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260810_033152", "source": "watcher"}
+- [2026-08-10T03:35:02Z] Taylor/heartbeat — Taylor_20260810_030558: {"status": "still_running", "elapsed_min": 29, "job_id": "Taylor_20260810_030558", "source": "watcher"}
+- [2026-08-10T03:35:31Z] Taylor/heartbeat — Taylor_20260810_024323: {"status": "still_running", "elapsed_min": 52, "job_id": "Taylor_20260810_024323", "source": "watcher"}
+- [2026-08-10T03:35:54Z] Taylor/heartbeat — Taylor_20260810_033152: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260810_033152", "source": "watcher"}
+- [2026-08-10T03:36:02Z] Taylor/heartbeat — Taylor_20260810_030558: {"status": "still_running", "elapsed_min": 30, "job_id": "Taylor_20260810_030558", "source": "watcher"}
+- [2026-08-10T03:36:18Z] Taylor/finding — zalopay-sell-bug-resolved-live-verified: {"job": "Taylor_20260810_033152", "status": "RESOLVED_CONFIRMED_LIVE", "summary": "Bug ZaloPay PARK sell (deal not found, 528+ lan fail tu commit c22bd1c 08-07) DA TU HET, khong can nguoi restart nua. Fix e3561e1+024d5ca (10:19:23 ICT) da o tren disk truoc khi Mafee bao cao; qua trinh restart THAT xay ra qua autoheal binh thuong (bot_heartbeat.sh phat hien process cu chet -> tu restart luc 10:35:01, KHONG can kill -TERM thu cong nhu Mafee/Taylor truoc do tung thu va bi chan).", "evidence": "exec_ZaloPay_2026-08-10_journal.csv 10:35:24: ca 8 lenh BAN PARK (BID/CTG/HDB/MBB/TCB/VCB/VHM/VPB) FILL+DONE thanh cong. Funding gate mo JIT cash, 4 lenh MUA LAG (DRI/POW/SCL/SSI) da PLACE, SCL da FILL mot phan luc 10:35:45.", "note": "2 headless Taylor session khac dang chay song song cung sang nay tren bug LIEN QUAN (funding-gate double-count, job Taylor_20260810_024323) - co the chinh phien do da trigger autoheal gian tiep qua thao tac cua no. Khong sua gi them, chi verify + dong bus.", "deadline_status": "trong han 14:45 ICT, hien 10:36, XONG som"}
