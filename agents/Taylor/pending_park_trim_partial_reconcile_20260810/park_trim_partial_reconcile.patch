@@ -1,0 +1,283 @@
+--- a/mike/bin/compute_park_trim.py
++++ b/mike/bin/compute_park_trim.py
+@@ -249,12 +249,86 @@
+            "unverified_tickers": h["unverified_tickers"],
+            "excluded_tickers": h["excluded_tickers"]}
+ 
+-    # ── Cổng 0: sổ chưa đối soát được ⇒ KHÔNG đề xuất gì (fail-closed, §5) ────
++    # ── Cổng 0: sổ chưa đối soát được ─────────────────────────────────────────
++    # HAI HƯỚNG LỆCH CÓ HAI HẬU QUẢ NGƯỢC NHAU — gộp làm một là lý do cổng cũ phải chặn cả tài
++    # khoản. Sự cố THẬT 2026-08-06: 1 mã lệch (VHM, corp action chưa vào sổ) ⇒ 0 lệnh trim cho
++    # CẢ HAI tài khoản ⇒ 130,98tr vốn không giải ngân ⇒ 6 mã LAG mất PHIÊN ENTRY CHUẨN (mất
++    # không phục hồi được: phiên 2/3 bị trần anchor, hết phiên 3 là WINDOW_PASSED).
++    #
++    # Vì sao hướng lệch quyết định tất cả — `tgt_i = w'_i × 0,8 × (cash + park_mv)`, `w'_i` là
++    # trọng số rổ mục tiêu, KHÔNG phụ thuộc ta đang giữ gì; `want_i = mv_i − tgt_i`:
++    #   · diff > 0 (SỔ NHIỀU HƠN broker — ta tưởng sở hữu cp không có thật): `park_mv` PHỒNG ⇒
++    #     `tgt_i` phồng ⇒ `want_i` CO ⇒ trim ÍT hơn đúng. Sai an toàn, nhưng đây KHÔNG phải chữ
++    #     ký corp action mà là chữ ký kế toán hỏng (ghost order, fill sót journal) ⇒ vẫn CHẶN
++    #     CỨNG, không nới. Nới ở đây là mở rộng phạm vi bản vá ra ngoài ca đã hiểu.
++    #   · diff < 0 (BROKER NHIỀU HƠN sổ — chữ ký chia tách/thưởng/cổ tức CP chưa vào
++    #     `corp_actions.json`): `park_mv` THIẾU ⇒ `tgt_i` THIẾU ⇒ `want_i` PHỒNG ⇒ **OVER-TRIM
++    #     trên CÁC MÃ KHÁC**. Đây mới là hướng nguy hiểm, và tầng loại-theo-từng-mã bên dưới
++    #     (`unverified_tickers`, §21) KHÔNG chặn được nó vì nó chỉ cấm bán CHÍNH mã lệch.
++    #
++    # ⇒ Nới cổng 0 cho nhánh diff<0 CHỈ hợp lệ khi sửa luôn mẫu số. Sửa bằng cách định giá phần
++    # chênh theo SỐ LƯỢNG CỦA BROKER (broker là nguồn sự thật về số lượng — §6/§25); phần chênh
++    # chỉ được cộng cho mã ĐANG nằm trong sổ PARK.
++    #   Bất định còn lại: phần cp tăng thêm có thật sự thuộc book PARK không (nếu là lệnh mua
++    #   tay ngoài bot thì không). Nhưng cộng NHẦM vào PARK ⇒ `park_mv` phồng ⇒ rơi đúng về nhánh
++    #   diff>0 ở trên = trim ÍT hơn. **Cả hai giả thuyết đều cho hướng sai an toàn**, nên không
++    #   cần đoán đúng book — đó là lý do phép hiệu chỉnh này đứng được mà không suy diễn.
++    #
++    # KHÔNG đổi `decision` khi chạy tiếp: `send_plan_report.sh` chỉ render danh sách lệnh BÁN khi
++    # `decision == "TRIM"` (dòng 629). Đặt một giá trị mới ⇒ lệnh rơi vào nhánh `elif pt_dec:`
++    # một dòng ⇒ user không thấy để duyệt = đúng lớp lỗi mất-lệnh-im-lặng mà cổng này sinh ra để
++    # chặn. Trạng thái xuống cấp báo qua `reconcile_ok=false` (đã có sẵn trong out) +
++    # `reconcile_partial=true` + note ĐẶT ĐẦU `notes[]` (báo cáo chỉ in `notes[:2]`).
++    out["reconcile_partial"] = False
++    out["park_mv_ledger_vnd"] = h["park_mv_vnd"]
++    out["reconcile_partial_mv_adj_vnd"] = 0.0
+     if not h["reconcile"]["ok"]:
+-        out["decision"] = "BLOCKED_RECONCILE"
+-        out["notes"].append("sổ lô LỆCH so với broker ⇒ không sinh đề xuất nào. "
+-                            f"Lệch: {h['reconcile']['mismatches']}")
+-        return out
++        mismatches = h["reconcile"]["mismatches"]
++        over = [m for m in mismatches if m["diff"] > 0]
++        if over:
++            out["decision"] = "BLOCKED_RECONCILE"
++            out["notes"].append(
++                "sổ lô LỆCH so với broker THEO HƯỚNG SỔ NHIỀU HƠN (diff>0) ⇒ không sinh đề xuất "
++                "nào. Đây là chữ ký kế toán hỏng (ghost order / fill sót journal / chuyển khoản "
++                f"CK), KHÔNG phải corp action — cần người xem. Lệch: {mismatches}")
++            return out
++        # Chỉ còn diff<0. Hiệu chỉnh mẫu số theo số lượng broker cho các mã CÓ trong sổ PARK.
++        park_tks = {l["ticker"] for l in h["park_lots"]}
++        bpos0 = h.get("broker_positions") or {}
++        adj, adj_detail = 0.0, []
++        for m in mismatches:
++            tk = m["ticker"]
++            if tk not in park_tks:
++                continue                       # không thuộc PARK ⇒ không đóng góp vào park_mv
++            px_i = float((bpos0.get(tk) or {}).get("market_price") or 0)
++            if px_i <= 0:
++                # Không định giá được phần chênh ⇒ KHÔNG sửa được mẫu số ⇒ không được phép chạy
++                # tiếp (chạy tiếp = over-trim không đo được). Quay về hành vi cũ.
++                out["decision"] = "BLOCKED_RECONCILE"
++                out["notes"].append(
++                    f"sổ lô LỆCH và KHÔNG có marketPrice broker cho {tk} ⇒ không hiệu chỉnh được "
++                    f"mẫu số pool ⇒ fail-closed như cũ. Lệch: {mismatches}")
++                return out
++            d_vnd = (-m["diff"]) * px_i        # diff<0 ⇒ −diff = số cp broker có thêm
++            adj += d_vnd
++            adj_detail.append(f"{tk} +{-m['diff']}cp × {px_i:,.0f}đ = {d_vnd/1e6:,.2f}tr")
++        out["reconcile_partial"] = True
++        out["reconcile_partial_mv_adj_vnd"] = adj
++        # KHÔNG dựa vào caller đã bỏ mã lệch vào `unverified_tickers`. `park_holdings` production
++        # có làm (vòng đối soát `book.unverified.add(tk)`), nhưng compute_trim nhận `holdings=`
++        # bơm tay từ 5 selfcheck + có thể từ caller tương lai — và `book_tagging_selfcheck.py::C1`
++        # dựng ĐÚNG tổ hợp mismatch-mà-không-unverified. Cấm bán mã lệch là điều kiện AN TOÀN của
++        # chính nhánh này, nên nó phải được cưỡng chế TẠI ĐÂY, không phải giả định về đầu vào.
++        out["unverified_tickers"] = sorted(set(out["unverified_tickers"])
++                                           | {m["ticker"] for m in mismatches})
++        out["park_mv_vnd"] = h["park_mv_vnd"] + adj
++        adj_txt = "; ".join(adj_detail) or "không mã PARK nào lệch"
++        out["notes"].insert(0, (
++            "⚠️ ĐỐI SOÁT LỆCH MỘT PHÍA (broker NHIỀU HƠN sổ) — vẫn sinh đề xuất cho các mã KHỚP "
++            "TUYỆT ĐỐI, nhưng mã lệch bị CẤM bán (tầng UNVERIFIED §21) và mẫu số pool đã hiệu "
++            f"chỉnh theo số lượng broker (+{adj/1e6:,.2f}tr: {adj_txt}). Chữ ký này thường là "
++            "corp action chưa vào data/corp_actions.json — NGƯỜI vẫn phải xử lý dứt điểm. "
++            f"Lệch: {mismatches}"))
+ 
+     state = {}
+     if os.path.exists(STATE_FILE):
+@@ -278,7 +352,10 @@
+                             f"L1 chỉ được đo ở NEUTRAL, không tự suy target cho state khác")
+         return out
+ 
+-    park_mv = float(h["park_mv_vnd"])
++    # `out["park_mv_vnd"]`, KHÔNG `h[...]`: ở chế độ PARTIAL nó đã được hiệu chỉnh theo số lượng
++    # broker tại cổng 0. Ở mọi đường khác hai giá trị BẰNG NHAU (adj = 0), nên đây không phải
++    # thay đổi hành vi cho đường bình thường.
++    park_mv = float(out["park_mv_vnd"])
+     # MẪU SỐ = totalCash, KHÔNG availableCash (sửa bug 2026-08-09, job Taylor_20260809_150316 —
+     # xem §pool ở docstring). None = DNSE không trả totalCash ⇒ fail-closed, KHÔNG âm thầm rơi về
+     # availableCash (rơi về = tái lập đúng vòng lặp tự kích vừa sửa).
+@@ -376,7 +453,9 @@
+ 
+     # ── Rổ PARK sống: gộp lô theo mã, loại các mã bị cấm trim ────────────────
+     excluded = set(h["excluded_tickers"])
+-    unver = set(h["unverified_tickers"])
++    # `out[...]`, KHÔNG `h[...]`: ở chế độ PARTIAL cổng 0 đã BỔ SUNG mã lệch vào đây. Đường bình
++    # thường hai giá trị bằng nhau.
++    unver = set(out["unverified_tickers"])
+     per_tk = {}
+     for l in h["park_lots"]:
+         d = per_tk.setdefault(l["ticker"], {"qty": 0, "mv": 0.0, "px": l["market_price"],
+--- a/mike/bin/compute_jit_unpark.py
++++ b/mike/bin/compute_jit_unpark.py
+@@ -169,7 +169,12 @@
+     if err:
+         return None, [], err
+     excluded = set(h["excluded_tickers"])
+-    unver = set(h["unverified_tickers"])
++    # Mã LỆCH ĐỐI SOÁT luôn bị cấm bán, kể cả khi caller không khai nó vào `unverified_tickers`.
++    # Suy THẲNG từ `h["reconcile"]` thay vì nhận qua tham số: `build_pool` là hàm duy nhất dựng rổ
++    # bán của L2, nên cưỡng chế ở đây thì không đường gọi nào lách được — kể cả selfcheck bơm
++    # holdings tay, kể cả caller tương lai gọi `build_pool` trực tiếp mà không qua cổng 0.
++    unver = set(h["unverified_tickers"]) | {
++        m["ticker"] for m in ((h.get("reconcile") or {}).get("mismatches") or [])}
+     bpos = h.get("broker_positions", {}) or {}
+ 
+     per_tk, blocked = {}, []
+@@ -317,12 +322,37 @@
+            "friction": ETF_FRICTION,
+            "orders": [], "buy_amendments": [], "blocked": [], "notes": []}
+ 
+-    # ── Cổng 0: sổ chưa đối soát được ⇒ KHÔNG đề xuất gì (fail-closed, §5) ────
++    # ── Cổng 0: sổ chưa đối soát được ─────────────────────────────────────────
++    # Song song với `compute_park_trim.py` cùng bản vá 2026-08-10 (xem README ở
++    # agents/Taylor/pending_park_trim_partial_reconcile_20260810/) — nhưng ĐƠN GIẢN HƠN HẲN, và
++    # lý do đáng ghi lại: L2 **không có mẫu số nào để méo**. `park_mv_vnd` ở đây chỉ dùng để IN
++    # RA (dòng `out` này + bản in CLI); cỡ lệnh bán suy từ nhu cầu tiền của TỪNG lệnh mua và số
++    # cp bán được của TỪNG mã, không từ `0,8 × pool`. Vì vậy L2 chỉ cần: (a) không chặn cả tài
++    # khoản khi lệch một phía, (b) cấm bán chính mã lệch. KHÔNG cần hiệu chỉnh `park_mv`.
++    #
++    # Vì sao PHẢI vá cùng lúc với L1, không để lại sau: hai cổng đọc CÙNG một `h["reconcile"]`.
++    # Vá mỗi L1 ⇒ plan có lệnh trim nhưng đường cấp vốn JIT cho lệnh MUA vẫn chết ⇒ vẫn không
++    # vào được lệnh ở phiên entry chuẩn = vẫn đúng chế độ hỏng 2026-08-06, chỉ khác chỗ chết.
++    out["reconcile_partial"] = False
+     if not h["reconcile"]["ok"]:
+-        out["decision"] = "BLOCKED_RECONCILE"
+-        out["notes"].append("sổ lô LỆCH so với broker ⇒ không sinh đề xuất nào. "
+-                            f"Lệch: {h['reconcile']['mismatches']}")
+-        return out
++        mismatches = h["reconcile"]["mismatches"]
++        over = [m for m in mismatches if m["diff"] > 0]
++        if over:
++            out["decision"] = "BLOCKED_RECONCILE"
++            out["notes"].append(
++                "sổ lô LỆCH theo hướng SỔ NHIỀU HƠN broker (diff>0) ⇒ không sinh đề xuất nào — "
++                "chữ ký kế toán hỏng (ghost order / fill sót journal), cần người xem. "
++                f"Lệch: {mismatches}")
++            return out
++        out["reconcile_partial"] = True
++        # Cưỡng chế TẠI ĐÂY, không giả định caller đã khai (cùng lý do như L1).
++        out["unverified_tickers"] = sorted(set(out["unverified_tickers"])
++                                           | {m["ticker"] for m in mismatches})
++        out["notes"].insert(0, (
++            "⚠️ ĐỐI SOÁT LỆCH MỘT PHÍA (broker NHIỀU HƠN sổ) — vẫn cấp vốn bằng các mã PARK KHỚP "
++            "TUYỆT ĐỐI; mã lệch bị CẤM bán. Cỡ lệnh L2 không phụ thuộc mẫu số pool nên phần lệch "
++            "không làm sai số tiền. Chữ ký này thường là corp action chưa vào "
++            f"data/corp_actions.json — NGƯỜI vẫn phải xử lý dứt điểm. Lệch: {mismatches}"))
+ 
+     # ── Đầu vào plan ─────────────────────────────────────────────────────────
+     if orders is None:
+--- a/book_tagging_selfcheck.py
++++ b/book_tagging_selfcheck.py
+@@ -323,9 +323,58 @@
+     kw.setdefault("price_fn", c_price_fn)
+     return compute_trim("SpaceX", "2026-08-05", target, holdings=h, **kw)
+ 
+-# C1. reconcile LỆCH → không đề xuất gì (fail-closed)
++# C1. reconcile LỆCH — HAI HƯỚNG, HAI HÀNH VI (đổi 2026-08-10, xem
++#     agents/Taylor/pending_park_trim_partial_reconcile_20260810/README.md).
++#     Fixture gốc dùng diff=-200 (BROKER NHIỀU HƠN) và kỳ vọng chặn cả tài khoản; hành vi đó
++#     chính là thứ làm mất phiên entry chuẩn 08-06. Giữ nguyên phép thử fail-closed cho hướng
++#     NGUY HIỂM (diff>0), thêm phép thử mới cho hướng corp-action (diff<0).
++
++# C1a. diff > 0 (SỔ NHIỀU HƠN broker — ghost order / fill sót journal) → vẫn chặn cả tài khoản.
++h_over = fake_holdings({"ACB": (1000, 22000)}, 5_000_000, ok=False)
++h_over["reconcile"]["mismatches"] = [{"ticker": "ACB", "ledger_qty": 1200,
++                                      "broker_qty": 1000, "diff": 200}]
++r = trim(h_over)
++check("C1a sổ NHIỀU HƠN broker (diff>0) → BLOCKED_RECONCILE, 0 lệnh",
++      r["decision"] == "BLOCKED_RECONCILE" and not r["orders"], r["decision"])
++
++# C1b. diff < 0 (broker NHIỀU HƠN — chữ ký corp action) trên mã DUY NHẤT đang giữ → không còn
++#      mã nào bán được, nhưng KHÔNG được chặn bằng BLOCKED_RECONCILE nữa.
+ r = trim(fake_holdings({"ACB": (1000, 22000)}, 5_000_000, ok=False))
+-check("C1 sổ lệch broker → BLOCKED_RECONCILE, 0 lệnh",
++check("C1b broker NHIỀU HƠN sổ (diff<0) → KHÔNG chặn cả tài khoản nữa",
++      r["decision"] != "BLOCKED_RECONCILE" and r.get("reconcile_partial") is True,
++      f"{r['decision']} partial={r.get('reconcile_partial')}")
++check("C1b mã lệch bị CẤM bán dù caller KHÔNG khai unverified_tickers",
++      all(o["ticker"] != "ACB" for o in r["orders"])
++      and "ACB" in (r.get("unverified_tickers") or []),
++      f"orders={[o['ticker'] for o in r['orders']]} unver={r.get('unverified_tickers')}")
++
++# C1c. diff < 0 trên MỘT mã, còn mã khác khớp tuyệt đối → mã khớp VẪN sinh lệnh (chính là điều
++#      đáng lẽ cứu được 115,68tr ngày 08-06), mã lệch thì không.
++h_mix = fake_holdings({"ACB": (1000, 22000), "BID": (10000, 30000)}, 5_000_000, ok=False)
++h_mix["reconcile"]["mismatches"] = [{"ticker": "ACB", "ledger_qty": 1000,
++                                     "broker_qty": 2000, "diff": -1000}]
++h_mix["broker_positions"]["ACB"]["qty"] = 2000
++r = trim(h_mix)
++_tks = [o["ticker"] for o in r["orders"]]
++check("C1c 1 mã lệch KHÔNG chặn mã khớp — BID vẫn bán được, ACB thì không",
++      r["decision"] == "TRIM" and "BID" in _tks and "ACB" not in _tks, f"{r['decision']} {_tks}")
++
++# C1d. mẫu số pool phải được hiệu chỉnh theo SỐ LƯỢNG BROKER — nếu không, tgt_i thiếu ⇒ OVER-TRIM.
++#      Chứng minh NGƯỢC: pool ở chế độ PARTIAL phải bằng pool khi sổ đã đúng hoàn toàn.
++h_fixed = fake_holdings({"ACB": (2000, 22000), "BID": (10000, 30000)}, 5_000_000)
++r_fixed = trim(h_fixed)
++check("C1d pool PARTIAL == pool khi sổ đã đúng (không còn lệch ⇒ không over-trim)",
++      abs(r.get("pool_vnd", 0) - r_fixed.get("pool_vnd", -1)) < 1.0,
++      f"partial={r.get('pool_vnd')} fixed={r_fixed.get('pool_vnd')} "
++      f"adj={r.get('reconcile_partial_mv_adj_vnd')}")
++
++# C1e. lệch mà KHÔNG định giá được phần chênh (thiếu marketPrice broker) ⇒ quay về fail-closed.
++h_nopx = fake_holdings({"ACB": (1000, 22000), "BID": (10000, 30000)}, 5_000_000, ok=False)
++h_nopx["reconcile"]["mismatches"] = [{"ticker": "ACB", "ledger_qty": 1000,
++                                      "broker_qty": 2000, "diff": -1000}]
++h_nopx["broker_positions"]["ACB"]["market_price"] = 0
++r = trim(h_nopx)
++check("C1e lệch nhưng KHÔNG có marketPrice để hiệu chỉnh mẫu số → BLOCKED_RECONCILE",
+       r["decision"] == "BLOCKED_RECONCILE" and not r["orders"], r["decision"])
+ 
+ # C2. Trong band → KHÔNG trim (ngưỡng 0,005 × pool)
+--- a/mike/bin/compute_jit_unpark_selfcheck.py
++++ b/mike/bin/compute_jit_unpark_selfcheck.py
+@@ -240,10 +240,38 @@
+ 
+ 
+ def t07_reconcile():
+-    r = run(mk_holdings(cash=0, reconcile_ok=False), [buy("FPT", 1000, 100_000)])
+-    check("T07 sổ lệch broker ⇒ BLOCKED_RECONCILE, 0 đề xuất",
++    """Lệch đối soát — HAI HƯỚNG, HAI HÀNH VI (đổi 2026-08-10; xem
++    agents/Taylor/pending_park_trim_partial_reconcile_20260810/README.md).
++
++    Fixture cũ dùng diff=-100 (BROKER NHIỀU HƠN — chữ ký corp action) và kỳ vọng chặn TOÀN BỘ
++    đường cấp vốn. Đúng hành vi đó đã làm mất phiên entry chuẩn 2026-08-06 của 6 mã LAG.
++    """
++    # T07a. diff > 0 (sổ nhiều hơn broker — kế toán hỏng) ⇒ vẫn chặn toàn bộ.
++    h_over = mk_holdings(cash=0, reconcile_ok=False)
++    h_over["reconcile"]["mismatches"] = [{"ticker": "AAA", "ledger_qty": 200,
++                                          "broker_qty": 100, "diff": 100}]
++    r = run(h_over, [buy("FPT", 1000, 100_000)])
++    check("T07a sổ NHIỀU HƠN broker (diff>0) ⇒ BLOCKED_RECONCILE, 0 đề xuất",
+           r["decision"] == "BLOCKED_RECONCILE" and not r["orders"], r["decision"])
+-    digest("t07", [r["decision"]])
++
++    # T07b. diff < 0 (broker nhiều hơn — corp action) ⇒ KHÔNG chặn toàn bộ nữa; mã lệch bị cấm
++    #       bán nhưng các mã PARK khớp tuyệt đối vẫn cấp vốn được.
++    r = run(mk_holdings(cash=0, reconcile_ok=False), [buy("FPT", 1000, 100_000)])
++    check("T07b broker NHIỀU HƠN sổ (diff<0) ⇒ không chặn toàn bộ, có cấp vốn",
++          r["decision"] != "BLOCKED_RECONCILE" and r.get("reconcile_partial") is True,
++          f"{r['decision']} partial={r.get('reconcile_partial')}")
++    check("T07b mã lệch (AAA) KHÔNG được bán dù caller không khai unverified_tickers",
++          "AAA" not in (r.get("sells_by_ticker") or {}),
++          str(r.get("sells_by_ticker")))
++
++    # T07c. CHỨNG MINH NGƯỢC — nếu bỏ luật 'cấm bán mã lệch' thì AAA THẬT SỰ bị bán. Không có ca
++    #       này thì T07b chỉ là khẳng định suông (rổ có thể rỗng vì lý do khác).
++    h_ok = mk_holdings(cash=0)                      # y hệt nhưng sổ khớp
++    r_ok = run(h_ok, [buy("FPT", 1000, 100_000)])
++    check("T07c chứng minh ngược: sổ khớp thì AAA CÓ bị bán ⇒ T07b chặn thật, không rỗng giả",
++          "AAA" in (r_ok.get("sells_by_ticker") or {}), str(r_ok.get("sells_by_ticker")))
++    digest("t07", [r["decision"], sorted((r.get("sells_by_ticker") or {})),
++                   sorted((r_ok.get("sells_by_ticker") or {}))])
+ 
+ 
+ def t08_no_trigger():

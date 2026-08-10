@@ -1,0 +1,99 @@
+--- a/trading_bot/plan.py	2026-08-10 17:56:01.187739863 +0700
++++ b/trading_bot/plan.py	2026-08-10 17:56:01.211740373 +0700
+@@ -72,6 +72,16 @@
+         return self.qty * self.ref_price
+ 
+ 
++# ── Trần no-chase của cửa sổ entry LAG phiên 2/3 (đề xuất Taylor_20260810_101717) ──────
++# `entry_anchor_price` CHỈ được `mike/bin/filter_lag_entry_window.py::_apply_anchor_gate()`
++# gắn cho ứng viên LAG **phiên 2/3** (phiên 1 không có anchor — chính nó ĐẶT RA anchor), nên
++# hằng số này chạm đúng và chỉ đúng nhóm đó. CAPIT/discretionary ghi thẳng
++# `hard_no_chase_ceiling_vnd` và KHÔNG mang `entry_anchor_price` ⇒ không bị ảnh hưởng
++# (khối dưới bỏ qua chúng hoàn toàn). BAL không có trần cứng.
++# 1.0 = hành vi cũ (trần = đúng anchor).
++LAG_ANCHOR_CEILING_MULT = 1.03
++
++
+ @dataclasses.dataclass
+ class TradePlan:
+     plan_date: str           # ngày thực thi YYYY-MM-DD
+@@ -154,7 +164,8 @@
+                                   f"không có cơ sở giá tham chiếu để đặt lệnh.")
+             filtered["ref_price"] = ref
+         # Luật entry-window LAG V2.4 (user duyệt 2026-08-09): lệnh mua có `entry_anchor_price`
+-        # thì KHÔNG BAO GIỜ được khớp trên giá đó. Suy thẳng ra trần cứng ngay tại ranh giới
++        # thì KHÔNG BAO GIỜ được khớp trên anchor × LAG_ANCHOR_CEILING_MULT. Suy thẳng ra trần
++        # cứng ngay tại ranh giới
+         # nạp plan — cùng tinh thần filter_excluded_tickers(): enforce Ở MỘT CHỖ, không phụ
+         # thuộc việc plan generator (LLM/người sửa tay) có nhớ ghi thêm field thứ hai hay
+         # không. Generator ghi sẵn trần cứng thì tôn trọng giá trị CHẶT HƠN (min), không nới.
+@@ -173,8 +184,9 @@
+                     cur = float(filtered.get("hard_no_chase_ceiling_vnd") or 0)
+                 except (TypeError, ValueError):
+                     cur = 0.0
++                ceiling = anchor * LAG_ANCHOR_CEILING_MULT
+                 filtered["hard_no_chase_ceiling_vnd"] = (
+-                    min(cur, anchor) if cur > 0 else anchor)
++                    min(cur, ceiling) if cur > 0 else ceiling)
+         orders.append(PlannedOrder(**filtered))
+     d["orders"] = orders
+     # preflight_check.sh chấp nhận cả tên field thay thế approved_by_user — gate phải
+--- a/hard_no_chase_ceiling_selfcheck.py	2026-08-10 17:56:01.191739948 +0700
++++ b/hard_no_chase_ceiling_selfcheck.py	2026-08-10 17:56:01.211740373 +0700
+@@ -254,7 +254,7 @@
+ import dataclasses  # noqa: E402
+ import json         # noqa: E402
+ from trading_bot.config import PLAN_DIR  # noqa: E402
+-from trading_bot.plan import load_plan   # noqa: E402
++from trading_bot.plan import load_plan, LAG_ANCHOR_CEILING_MULT   # noqa: E402
+ 
+ check("I1 hard_no_chase_ceiling_vnd nằm trong dataclasses.fields(PlannedOrder)",
+       "hard_no_chase_ceiling_vnd" in {f.name for f in dataclasses.fields(PlannedOrder)})
+@@ -292,10 +292,17 @@
+      "entry_anchor_price": 13000.0, "hard_no_chase_ceiling_vnd": "rác"},
+ ])
+ _loaded = {x.id: x for x in load_plan("2099-01-02", account=TAG).orders}
+-check("I2 (a) chỉ có entry_anchor_price → tự suy trần = anchor",
+-      _loaded["BUY-A"].hard_no_chase_ceiling_vnd == 13_000.0,
++# Ngưỡng cập nhật 2026-08-10 (job Taylor_20260810_101717): trần = anchor ×
++# LAG_ANCHOR_CEILING_MULT, KHÔNG phải đúng anchor. Assert lên CÔNG THỨC (đọc hằng số từ
++# module) chứ không chép cứng 13.390 — đổi hằng số thì test đi theo, không mốc (§23).
++_EXP_CEIL_A = 13_000.0 * LAG_ANCHOR_CEILING_MULT
++check("I2 (a) chỉ có entry_anchor_price → tự suy trần = anchor × MULT",
++      _loaded["BUY-A"].hard_no_chase_ceiling_vnd == _EXP_CEIL_A,
+       str(_loaded["BUY-A"].hard_no_chase_ceiling_vnd))
+-check("I3 (b) trần generator CHẶT HƠN anchor → giữ chặt hơn (không nới)",
++check("I2b (a) MULT > 1 thì trần PHẢI cao hơn anchor (chứng minh ngược: đổi thật sự có hiệu lực)",
++      (LAG_ANCHOR_CEILING_MULT == 1.0)
++      or _loaded["BUY-A"].hard_no_chase_ceiling_vnd > 13_000.0)
++check("I3 (b) trần generator CHẶT HƠN anchor×MULT → giữ chặt hơn (không nới)",
+       _loaded["BUY-B"].hard_no_chase_ceiling_vnd == 13_000.0,
+       str(_loaded["BUY-B"].hard_no_chase_ceiling_vnd))
+ check("I4 (c) lệnh BÁN không sinh trần",
+@@ -304,11 +311,11 @@
+       _loaded["BUY-D"].hard_no_chase_ceiling_vnd is None)
+ for _id, _lbl in (("BUY-E", "âm"), ("BUY-F", "không parse được")):
+     _v = _loaded[_id].hard_no_chase_ceiling_vnd
+-    check(f"I5b (e) trần generator RÁC ({_lbl}) + anchor hợp lệ → rơi về anchor",
+-          _v == 13_000.0, f"trần={_v}")
++    check(f"I5b (e) trần generator RÁC ({_lbl}) + anchor hợp lệ → rơi về anchor×MULT",
++          _v == _EXP_CEIL_A, f"trần={_v}")
+     # chốt hạ: trần rác KHÔNG được làm _hard_buy_ceiling trả None (= tắt hẳn trần)
+     check(f"I5c (e) và trần vẫn CÒN HIỆU LỰC ở executor ({_lbl})",
+-          Executor._hard_buy_ceiling(_loaded[_id]) == 13_000.0)
++          Executor._hard_buy_ceiling(_loaded[_id]) == _EXP_CEIL_A)
+ os.remove(_p)
+ 
+ # I6 — BẤT BIẾN trên MỌI plan thật đang có trong repo: lệnh mua nào mang
+@@ -332,8 +339,9 @@
+             if _o.side != "buy" or _o.ticker not in _anch:
+                 continue
+             _checked += 1
+-            check(f"I6 {os.path.basename(_f)} {_o.ticker}: trần cứng ≤ anchor {_anch[_o.ticker]:,.0f}",
+-                  bool(_o.hard_no_chase_ceiling_vnd) and _o.hard_no_chase_ceiling_vnd <= _anch[_o.ticker],
++            _lim = _anch[_o.ticker] * LAG_ANCHOR_CEILING_MULT
++            check(f"I6 {os.path.basename(_f)} {_o.ticker}: trần cứng ≤ anchor×MULT {_lim:,.0f}",
++                  bool(_o.hard_no_chase_ceiling_vnd) and _o.hard_no_chase_ceiling_vnd <= _lim,
+                   f"trần={_o.hard_no_chase_ceiling_vnd}")
+     except Exception as _e:      # plan cũ schema khác → không phải lỗi của cơ chế này
+         print(f"  [skip] {os.path.basename(_f)}: {_e}")

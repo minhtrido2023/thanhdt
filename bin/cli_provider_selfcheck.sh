@@ -52,9 +52,13 @@ _stub append_event.sh    '#!/usr/bin/env bash'$'\n''exit 0'
 _stub discord_channel.sh '#!/usr/bin/env bash'$'\n''exit 1'
 
 # Stub CLI: dump argv NUL-separated => so sanh byte-for-byte, khong qua tach tu cua shell.
+# Ghi CA stdin (2026-08-10): tu khi codex nhan prompt qua `codex exec -` (bat buoc — profile
+# prompt-inline vuot tran MAX_ARG_STRLEN 128KiB neu de trong argv), khoi identity KHONG con
+# nam trong argv. Test chi soi argv se bao "mat identity" trong khi thuc te van du.
 cat > "$SB/cli_stub.sh" <<EOF
 #!/usr/bin/env bash
 for a in "\$@"; do printf '%s\0' "\$a"; done > "$SB/argv.bin"
+cat > "$SB/stdin.bin" 2>/dev/null || : > "$SB/stdin.bin"
 echo "STUB-OK"
 exit 0
 EOF
@@ -71,7 +75,7 @@ fi
 
 # run <dispatch args...> — chay dong bo, roi doc argv.bin
 run() {
-  rm -f "$SB/argv.bin"
+  rm -f "$SB/argv.bin" "$SB/stdin.bin"
   ( cd "$MK" && env DISPATCH_CGROUP_DETACH=0 \
       DISPATCH_CLAUDE_BIN="$SB/cli_stub.sh" DISPATCH_OPENCODE_BIN="$SB/cli_stub.sh" \
       DISPATCH_FROM=Mike \
@@ -157,9 +161,19 @@ run Mafee "viec test" --provider opencode; _rc=$?
 chk "exit code khac 0" "$([ "$_rc" -ne 0 ] && echo yes || echo no)" "yes"
 chk "CLI KHONG duoc goi" "$([ -f "$SB/argv.bin" ] && echo goi || echo khong-goi)" "khong-goi"
 
-echo "== CA 9: provider dang tat (codex) ⇒ HUY, khong am tham roi ve claude"
+echo "== CA 9: provider dang tat ⇒ HUY, khong am tham roi ve claude"
+# TAT TUONG MINH trong registry sandbox (sua 2026-08-10). Truoc day ca nay muon codex dang
+# enabled=false o registry THAT — mot anh chup cau hinh, khong phai tien de. Khi user bat codex
+# (2026-08-10) ca nay khong con test "provider tat" nua, va te hon: bin cua codex luc do la
+# `codex` THAT chu khong phai stub, nen selfcheck GOI CLI THAT. Giờ tự dựng điều kiện rồi khôi phục.
 rm -f "$SB/argv.bin"
+cp "$MK/kb/cli_providers.json" "$SB/reg_before_ca9.json"
+python3 -c 'import json,sys
+p=sys.argv[1]; r=json.load(open(p,encoding="utf-8"))
+r["providers"]["codex"]["enabled"]=False
+json.dump(r,open(p,"w",encoding="utf-8"),ensure_ascii=False,indent=2)' "$MK/kb/cli_providers.json"
 run Taylor "viec test" --provider codex; _rc=$?
+cp "$SB/reg_before_ca9.json" "$MK/kb/cli_providers.json"
 chk "exit code khac 0" "$([ "$_rc" -ne 0 ] && echo yes || echo no)" "yes"
 chk "CLI KHONG duoc goi" "$([ -f "$SB/argv.bin" ] && echo goi || echo khong-goi)" "khong-goi"
 
@@ -192,16 +206,21 @@ json.dump(reg, open(p, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
 PY
 printf '# Taylor test\n@%s/kb/context_ops_mini.md\n' "$REAL" > "$MK/agents/Taylor/CLAUDE.md"
 run Taylor "viec test" --provider codex
+# Prompt co the o ARGV (claude/opencode/agy) hoac STDIN (codex). Ghep ca hai roi moi soi —
+# dung cho ca hai duong van chuyen, khong phai sua test moi lan doi provider.
 _pin="$(python3 -c '
-import sys
+import sys, os
 raw = open(sys.argv[1],"rb").read().split(b"\0")[:-1]
 args=[a.decode("utf-8","replace") for a in raw]
+sin = sys.argv[2]
+if os.path.exists(sin):
+    args.append(open(sin,"rb").read().decode("utf-8","replace"))
 hits=[a for a in args if "[DISPATCH" in a]
 p = hits[0] if hits else ""
 print("yes" if "BOI CANH THUONG TRUC" in p else "no")
 print("yes" if "Taylor test" in p else "no")
 print("yes" if "ROOT" in p and "context ops-mini" in p else "no")
-' "$SB/argv.bin" 2>/dev/null)"
+' "$SB/argv.bin" "$SB/stdin.bin" 2>/dev/null)"
 chk "prompt co khoi identity"       "$(echo "$_pin"|sed -n 1p)" "yes"
 chk "prompt co CLAUDE.md cua agent"  "$(echo "$_pin"|sed -n 2p)" "yes"
 chk "prompt co @import DA EXPAND"    "$(echo "$_pin"|sed -n 3p)" "yes"

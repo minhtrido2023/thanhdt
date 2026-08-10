@@ -544,7 +544,11 @@ PYEOF
 # open work + standing rules stay hot. This also rescues entries from remember.sh's silent
 # 40-bullet cap (which DROPS overflow) by relocating them before the cap is reached. Guarded
 # so a failure can't abort the nightly commit/backup.
-MEM_ARCHIVE_DAYS="${KB_MEM_ARCHIVE_DAYS:-14}"
+# 14 ngày là quá rộng cho agent chạy nhiều: Taylor ghi ~6 entry/ngày ⇒ cửa sổ 14 ngày = ~84
+# entry, vượt xa cap của remember.sh, nên thực tế phần cũ bị cap XOÁ trước khi cron kịp
+# archive (đo 2026-08-10: Taylor đứng đúng 40/40, mất dòng cũ mỗi lần ghi). Cap giờ đã archive
+# thay vì xoá, nhưng cửa sổ vẫn nên khớp nhịp làm việc thật: 5 ngày.
+MEM_ARCHIVE_DAYS="${KB_MEM_ARCHIVE_DAYS:-5}"
 MEM_ARCHIVE_KEEP="${KB_MEM_ARCHIVE_KEEP:-6}"
 log "Archiving closed working-memory entries (>${MEM_ARCHIVE_DAYS}d, done-marked, keep last ${MEM_ARCHIVE_KEEP})..."
 for f in "$ROOT/kb/memory/"*.md; do

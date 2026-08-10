@@ -1,0 +1,60 @@
+phan bo vi the theo bang:
+band
+A. <=0,1 ty (live DA chan)          615
+E. >=2 ty (giu lai)                 569
+D. 0,1-2 ty (gate 2 ty THEM vao)    348
+U. ADV KHONG DO DUOC                 19
+
+kiem NaN: 588 vi the bi chan co adv_vnd = NaN
+
+=== kiem chung goc cua NaN (skeptic rerun #3) ===
+chan_doan
+Volume_3M_P50 NaN    19
+ticker    entry_d         chan_doan  v50
+   PTM 2014-10-28 Volume_3M_P50 NaN None
+   HEV 2015-10-22 Volume_3M_P50 NaN None
+   NDX 2015-10-22 Volume_3M_P50 NaN None
+   VTX 2015-10-26 Volume_3M_P50 NaN None
+   CVT 2015-10-27 Volume_3M_P50 NaN None
+   HHG 2015-10-27 Volume_3M_P50 NaN None
+   DXP 2015-10-28 Volume_3M_P50 NaN None
+   PIV 2015-10-28 Volume_3M_P50 NaN None
+   SDN 2016-01-21 Volume_3M_P50 NaN None
+   V12 2016-01-27 Volume_3M_P50 NaN None
+   QHD 2016-01-28 Volume_3M_P50 NaN None
+   DHT 2016-01-28 Volume_3M_P50 NaN None
+   BXH 2016-01-28 Volume_3M_P50 NaN None
+   DNC 2016-04-29 Volume_3M_P50 NaN None
+   LIX 2016-07-26 Volume_3M_P50 NaN None
+   BED 2016-07-26 Volume_3M_P50 NaN None
+   SFN 2016-07-27 Volume_3M_P50 NaN None
+   MAC 2016-07-28 Volume_3M_P50 NaN None
+   DHM 2016-07-28 Volume_3M_P50 NaN None
+
+=== BANG 1 (v2): thang lieu theo bang ADV ===
+                            bang   n bo_do  von_B pct_von  PnL_B  n_deal     TB trung_vi winrate lo_gt20
+      A. <=0,1 ty (live DA chan) 615 56.1% 4599.8   44.5%  66.24     270 +2.09%   -0.60%   44.4%    5.6%
+            U. ADV KHONG DO DUOC  19  0.0%   81.5    0.8%   5.78      19 +2.99%   +2.45%   57.9%    5.3%
+D. 0,1-2 ty (gate 2 ty THEM vao) 348 93.4%  166.5    1.6%   0.02      23 +0.78%   -1.86%   39.1%    0.0%
+             E. >=2 ty (giu lai) 569 32.2% 5491.0   53.1% 339.59     386 +8.93%   +6.34%   65.5%    2.1%
+
+=== BANG 2 (v2): D vs E theo cua so thoi gian ===
+TOAN KY 2014-2026  n_D= 23 TB_D   +0.78% tv  -1.86% wr 39.1% | n_E=386 TB_E  +8.93% | D-E   -8.16pp CI95 [-11.87;-4.16] KHAC 0
+IS 2014-19         n_D= 15 TB_D   -0.35% tv  -2.10% wr 33.3% | n_E=155 TB_E  +7.65% | D-E   -8.00pp CI95 [-12.42;-3.54] KHAC 0
+OOS 2020+          n_D=  8 TB_D   +2.88% tv  +1.22% wr 50.0% | n_E=231 TB_E  +9.79% | D-E   -6.91pp CI95 [-14.07;+1.00] CHUA 0
+2019+              n_D= 10 TB_D   +2.56% tv  +1.22% wr 50.0% | n_E=257 TB_E  +9.17% | D-E   -6.61pp CI95 [-12.65;-0.01] KHAC 0
+
+=== BANG 3 (v2): ho so chat luong + nhom 'giong SCL' ===
+                            bang   n rating_tv FSCORE_tv pct_rating_le3 pct_FSCORE_ge7  n_giong_SCL
+      A. <=0,1 ty (live DA chan) 615       3.0       6.0          67.7%          38.4%          193
+            U. ADV KHONG DO DUOC  19       3.0       6.0          68.4%          31.6%            5
+D. 0,1-2 ty (gate 2 ty THEM vao) 348       3.0       6.0          54.4%          35.6%           90
+             E. >=2 ty (giu lai) 569       3.0       6.0          69.9%          29.3%          145
+
+[giong SCL] D. 0,1-2 ty (gate 2 ty THEM vao): n=90 vi the, bo do 95.6%, n_deal=4, TB -2.03%, trung vi -2.32%, winrate 25.0%
+    HDG@2015-02=-7%, LIX@2015-05=-0%, PTB@2015-10=-4%, VSH@2023-05=+4%
+
+[giong SCL] U. ADV KHONG DO DUOC: n=5 vi the, bo do 0.0%, n_deal=5, TB +1.97%, trung vi -4.47%, winrate 40.0%
+    HEV@2015-10=-4%, DXP@2015-10=-8%, SDN@2016-01=+27%, BED@2016-07=-7%, SFN@2016-07=+3%
+
+[giong SCL] E. >=2 ty (giu lai): n=145 vi the, bo do 36.6%, n_deal=92, TB +9.15%, trung vi +5.73%, winrate 66.3%

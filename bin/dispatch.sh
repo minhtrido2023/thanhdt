@@ -91,6 +91,9 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# WC_ROOT = cay du an (WorkingClaude), CHA cua mike/. Dung lam writable root cua sandbox codex
+# — xem _build_argv nhanh `codex`. Tach bien rieng de khong rai "$ROOT/.." khap noi.
+WC_ROOT="$(cd "$ROOT/.." && pwd)"
 # Shared usage-limit phrase list (single source of truth, also used by daily_retro.sh).
 source "$ROOT/bin/usage_limit_phrases.sh"
 # Override only for tests; production always uses the real CLI.
@@ -750,10 +753,14 @@ _hb_aware_timeout() {
   # grandchildren alive — and in the sync path an orphan holding the inherited stdout
   # keeps the `| tee` pipe open, blocking dispatch.sh long past the kill (found in the
   # 2026-07-09 verification run: hung-job test blocked ~300s on exactly this).
+  # stdin: PHAI dat O DAY, khong phai o cho goi ham. Lenh chay nen (`&`) duoc bash noi stdin
+  # vao /dev/null theo POSIX, nen mot redirect dat tren loi goi _hb_aware_timeout se bi nuot
+  # im lang (do that 2026-08-10: codex bao "No prompt provided via stdin"). Mac dinh
+  # /dev/null = DUNG hanh vi cu cua claude/opencode; chi codex dat CLI_STDIN_FILE.
   if command -v setsid >/dev/null 2>&1; then
-    setsid "$@" &
+    setsid "$@" < "${CLI_STDIN_FILE:-/dev/null}" &
   else
-    "$@" &
+    "$@" < "${CLI_STDIN_FILE:-/dev/null}" &
   fi
   pid=$!
   # Publish the child through a FILE, not a variable. In the sync path this function is the
@@ -798,7 +805,24 @@ _hb_aware_timeout() {
   return "$_rc"
 }
 
+# _emit_full_prompt <prompt_text> — in ra stdout: profile prompt-inline (neu co) + prompt.
+# MOT cho duy nhat dinh nghia "profile dung truoc prompt". Truoc day codex va antigravity moi
+# thang tu noi mot kieu; hai ban sao cua CUNG mot quy tac la duong de chung lech nhau (mot ben
+# doi thu tu / bo dau xuong dong thi agent do mat identity mot cach am tham).
+# Provider claude/opencode KHONG goi ham nay: chung tu nap CLAUDE.md, PROFILE_PROMPT_FILE rong.
+_emit_full_prompt() {
+  if [ -n "${PROFILE_PROMPT_FILE:-}" ] && [ -f "$PROFILE_PROMPT_FILE" ]; then
+    cat "$PROFILE_PROMPT_FILE" || return 1
+  fi
+  printf '%s\n' "$1"
+}
+
 # _build_argv <prompt_text> — dung mang CLI_ARGV cho $PROVIDER hien tai.
+#
+# ⚠️ HAM NAY CO TAC DUNG PHU: voi codex no TAO FILE TAM va tra duong dan qua CLI_STDIN_FILE.
+# HOP DONG: nguoi goi PHAI `rm -f "$CLI_STDIN_FILE"` sau khi CLI chay xong — KE CA khi
+# _build_argv tra ve loi (mktemp co the da thanh cong truoc khi buoc sau fail). Ca hai nhanh
+# goi (bg + sync) deu lam; them nhanh goi moi thi phai lam theo.
 #
 # ⚠️ PHAI goi BEN TRONG _bg_wrapper (hoac nhanh sync), KHONG BAO GIO dung san roi van chuyen
 # mang nay qua ranh gioi tien trinh. Ly do da do thuc nghiem (arch-reviewer 2026-08-03):
@@ -810,6 +834,10 @@ _hb_aware_timeout() {
 # => registry CHI tra FIELD; argv dung tai cho, bang bash thuan, khong quote thu cong.
 _build_argv() {
   local _p="$1"
+  # CLI_STDIN_FILE: file de NOI VAO STDIN cua CLI. Rong = khong dong stdin (giu nguyen hanh vi
+  # cu cua claude/opencode/agy). Chi codex dung, de prompt KHONG BAO GIO nam trong argv (tran
+  # MAX_ARG_STRLEN 128KiB — xem chu thich khoi prompt-inline o duoi).
+  CLI_STDIN_FILE=""
   case "$PROVIDER" in
     claude)
       # Phai BYTE-FOR-BYTE bang chuoi cu:
@@ -830,19 +858,49 @@ _build_argv() {
       ;;
     codex)
       # -s workspace-write (KHONG dung --dangerously-bypass-approvals-and-sandbox —
-      # arch-reviewer required_change #6c). Chua wire that: enabled=false toi khi user login.
-      CLI_ARGV=( "$CLI_BIN" exec --skip-git-repo-check -C "$AGENT_DIR" -s workspace-write )
+      # arch-reviewer required_change #6c).
+      # PROMPT DI QUA STDIN, KHONG QUA ARGV: `codex exec -` doc prompt tu stdin (ghi trong
+      # `codex exec --help`: "If not provided as an argument (or if `-` is used), instructions
+      # are read from stdin"). Bat buoc, khong phai tuy chon — profile prompt-inline cua Taylor
+      # 149KB > tran MAX_ARG_STRLEN 128KiB/chuoi argv => de trong argv thi execvp fail
+      # "Argument list too long" (do that 2026-08-10).
+      CLI_STDIN_FILE="$(mktemp "${TMPDIR:-/tmp}/mike-codex-prompt.XXXXXX")" || return 1
+      _emit_full_prompt "$_p" > "$CLI_STDIN_FILE" || return 1
+      # --add-dir "$WC_ROOT" = QUYEN GHI TOAN CAY DU AN (user chot 2026-08-10, sau khi duoc
+      # trinh bay ro danh doi). Ly do phai cap ca cay chu khong loc mun hon:
+      #   - workspace-write mac dinh chi cho ghi workdir (agents/<id>) + /tmp => KHONG ghi noi
+      #     bus/inbox (hop dong ket thuc cua fleet) va KHONG sua noi file production. Do that
+      #     2026-08-10: "Lenh ghi ket qua len bus bi chan: Read-only file system" => job done
+      #     ma bus TRONG, dung kieu that-bai-im-lang.
+      #   - sandbox codex CHI CO writable_roots (theo THU MUC). KHONG co deny theo file, khong
+      #     the "cap cay roi tru data/ + secrets/" (da kiem: --add-dir $WC_ROOT thi
+      #     secrets/dnse_credentials.json ghi duoc). Ma WorkingClaude/ co 970 file .py o ROOT,
+      #     gom ca file Taylor so huu (macro_state_live.py, rating_8l.py) => cap hep hon thi
+      #     codex khong lam duoc viec.
+      # ⚠️ HE QUA PHAI BIET: 5 duong chan cua opencode (trading_rules/bot_execute/secrets/
+      #    crontab/BOT_STOP) KHONG AP DUNG CHO CODEX. Job codex doc/ghi duoc secrets/ va
+      #    data/trading_rules.json. Cuong che con lai = allow_agents (Mafee/DollarBill KHONG
+      #    duoc chay codex) + quy trinh user duyet. Muon parity thi phai wire hook PreToolUse
+      #    cua codex (co ton tai: permissionDecision=deny) — CHUA LAM.
+      # VAN KHONG dung --dangerously-bypass-approvals-and-sandbox (arch-reviewer #6c): sandbox
+      # van bat, chi la writable root rong ra; he thong ngoai du an (~/.ssh, /etc) van duoc chan.
+      CLI_ARGV=( "$CLI_BIN" exec --skip-git-repo-check -C "$AGENT_DIR" -s workspace-write --add-dir "$WC_ROOT" )
       if [ -n "$MODEL" ]; then CLI_ARGV+=( -m "$MODEL" ); fi
       if [ -n "$EFFORT" ]; then CLI_ARGV+=( -c "model_reasoning_effort=\"$EFFORT\"" ); fi
-      CLI_ARGV+=( "$_p" )
+      CLI_ARGV+=( - )
       ;;
     antigravity)
       # `agy -p` = headless print mode (giong `claude -p`). Contract lay tu src/adapter.rs
       # :611-634 cua agy-acp.zip — nguon co tham quyen, khong doan.
       # KHONG di qua agy-acp (ACP adapter): xem notes trong kb/cli_providers.json.
+      # agy KHONG co duong stdin nao duoc xac nhan tu nguon co tham quyen => van noi profile
+      # vao `-p` nhu truoc. Chua kiem chung duoc (agy CHUA CAI, enabled=false): neu profile cua
+      # agent >128KiB thi execvp se fail LON TIENG y het codex truoc khi sua — khong am tham
+      # mat identity. Khi nao cai agy that: do lai va chuyen sang stdin neu no ho tro.
+      local _agy_p; _agy_p="$(_emit_full_prompt "$_p")" || return 1
       CLI_ARGV=( "$CLI_BIN" --add-dir "$AGENT_DIR" )
       if [ -n "$MODEL" ]; then CLI_ARGV+=( --model "$MODEL" ); fi
-      CLI_ARGV+=( -p "$_p" )
+      CLI_ARGV+=( -p "$_agy_p" )
       ;;
     *)
       echo "dispatch: provider '$PROVIDER' chua co bo dung argv trong _build_argv()." >&2
@@ -868,6 +926,16 @@ Heartbeat (bắt buộc): mỗi 4-5 tool call, ghi tiến độ để caller bi�
 # agent chay nhu mot model trang tron, khong biet minh la Taylor hay Wendy.
 # claude-native / opencode-json KHONG di qua day (claude tu nap CLAUDE.md + @import;
 # opencode doc CLAUDE.md tu --dir + `instructions` trong agents/<id>/opencode.json).
+#
+# ⚠️ PROFILE DI QUA FILE, KHONG NOI THANG VAO $dispatch_prompt (sua 2026-08-10).
+# Ly do da do thuc nghiem: kernel gioi han MAX_ARG_STRLEN = 128KiB cho MOI chuoi argv/envp
+# (khac ARG_MAX=2MiB tong). Profile flatten cua Taylor = 149.571 byte > 128KiB, ma
+# $dispatch_prompt vua duoc `export` qua ranh gioi tien trinh (envp) vua di vao argv cua CLI
+# => `setsid: Argument list too long`, job CHET NGAY, 0 dong log. Do that 2026-08-10:
+#   Taylor 149.571 (VUOT) · Winston 108.805 · Wags 62.348 · Spyros 40.688 · Wendy 36.982
+# Winston sat tran va context_pack.md phinh moi ngay => day KHONG phai ca biet cua Taylor.
+# => Ghi ra file, chi export DUONG DAN; _build_argv nap lai trong tien trinh con (codex qua
+# STDIN nen argv khong bao gio phinh; agy van noi vao -p, xem chu thich trong _build_argv).
 if [ "$CLI_PROFILE" = "prompt-inline" ]; then
   _profile_txt="$("$ROOT/bin/render_profile_prompt.sh" "$id" 2>/dev/null)"
   if [ -z "$_profile_txt" ]; then
@@ -877,8 +945,21 @@ if [ "$CLI_PROFILE" = "prompt-inline" ]; then
     echo "  render_profile_prompt.sh '$id' khong tra ve gi. Khong chay agent thieu identity." >&2
     exit 1
   fi
-  dispatch_prompt="$_profile_txt
-$dispatch_prompt"
+  # 1 file / agent (khong phai / job): profile la ham thuan tuy cua cac file CLAUDE.md nen 2
+  # dispatch song song ghi cung noi dung. Ghi ATOMIC (tmp + mv, §5 coding_guidelines) de
+  # dispatch dang doc khong bao gio thay file viet do dang.
+  mkdir -p "$ROOT/state/prompt_inline"
+  PROFILE_PROMPT_FILE="$ROOT/state/prompt_inline/$id.profile.txt"
+  _pp_tmp="$(mktemp "$ROOT/state/prompt_inline/.$id.XXXXXX")"
+  if ! { printf '%s\n' "$_profile_txt" > "$_pp_tmp" && mv -f "$_pp_tmp" "$PROFILE_PROMPT_FILE"; }; then
+    # Cung ly do fail-loud nhu nhanh profile rong o tren. Khong co `|| exit` thi `set -e` van
+    # dung script nhung IM LANG (0 dong log) va bo lai file tam .<id>.XXXXXX trong state/.
+    rm -f "$_pp_tmp"
+    echo "ERROR: HUY dispatch — khong ghi duoc profile prompt-inline vao" >&2
+    echo "  $PROFILE_PROMPT_FILE (het dia? sai quyen?). Khong chay agent thieu identity." >&2
+    exit 1
+  fi
+  export PROFILE_PROMPT_FILE
 fi
 
 # Source wc_env.sh so google-cloud-sdk/bin is in PATH (needed by bq CLI + sync_bq_cache verify)
@@ -1058,8 +1139,15 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
       set +e
       # argv dung TAI DAY (trong tien trinh con), khong phai o tien trinh cha — xem _build_argv.
       CLI_ARGV=()
-      _build_argv "$run_prompt" && _hb_aware_timeout "${CLI_ARGV[@]}" > "$logfile" 2>&1
-      rc=$?
+      # stdin cua CLI do _hb_aware_timeout tu noi (CLI_STDIN_FILE, mac dinh /dev/null) —
+      # dat o day se bi nuot vi lenh chay nen. Xem chu thich trong _hb_aware_timeout.
+      if _build_argv "$run_prompt"; then
+        _hb_aware_timeout "${CLI_ARGV[@]}" > "$logfile" 2>&1
+        rc=$?
+      else
+        rc=78   # loi CAU HINH provider, khong phai loi agent
+      fi
+      [ -n "${CLI_STDIN_FILE:-}" ] && rm -f "$CLI_STDIN_FILE"
       set -e
       if [ "$rc" -eq 0 ]; then
         JSET status=done ended_at="$(date +%s)" exit_code=0 result_summary="$(SUMMARY)"
@@ -1203,12 +1291,13 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
             _maybe_schedule_usage_resume _looks_like_usage_limit _parse_reset_epoch \
             _current_resume_count _job_thread_id _hb_aware_timeout \
             _maybe_schedule_maxturns_resume _looks_like_max_turns _bumped_max_turns \
-            _current_maxturns_resume_count _build_argv
+            _current_maxturns_resume_count _build_argv _emit_full_prompt
   # Chi export SCALAR (bash khong export duoc array — do la ly do _build_argv chay trong con).
-  export ROOT JOBS_DIR job_id from id ts TIMEOUT RETRIES CLAUDE dispatch_prompt logfile prompt \
+  export ROOT WC_ROOT JOBS_DIR job_id from id ts TIMEOUT RETRIES CLAUDE dispatch_prompt logfile prompt \
          CIRCUIT_DIR CIRCUIT_THRESHOLD CIRCUIT_COOLDOWN MODEL_FLAG EFFORT_FLAG MAX_EXT HB_FRESH_S \
          MAX_TURNS MAXTURNS_CEILING MODEL EFFORT \
-         PROVIDER CLI_BIN AGENT_DIR CLI_SUPPORTS_TURNS CLI_USAGE_PROBE CLI_MAXTURNS_PAT CIRCUIT_KEY CLI_PROFILE
+         PROVIDER CLI_BIN AGENT_DIR CLI_SUPPORTS_TURNS CLI_USAGE_PROBE CLI_MAXTURNS_PAT CIRCUIT_KEY CLI_PROFILE \
+         PROFILE_PROMPT_FILE
   # systemd-run --user needs the user manager socket; cron strips XDG_RUNTIME_DIR.
   export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
   _detach_ok=0
@@ -1365,11 +1454,13 @@ else
   set +e
   CLI_ARGV=()
   if _build_argv "$dispatch_prompt"; then
+    # stdin cua CLI do _hb_aware_timeout tu noi (CLI_STDIN_FILE) — xem chu thich trong ham do.
     _hb_aware_timeout "${CLI_ARGV[@]}" 2>"$logfile.err" | tee "$logfile"
     rc=${PIPESTATUS[0]}
   else
     rc=78   # loi CAU HINH provider, khong phai loi agent
   fi
+  [ -n "${CLI_STDIN_FILE:-}" ] && rm -f "$CLI_STDIN_FILE"
   set -e
   trap - TERM INT HUP  # claude finished — normal finalize below owns the record now
   kill "$_wpid" 2>/dev/null || true  # watcher no longer needed

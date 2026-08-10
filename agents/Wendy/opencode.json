@@ -5,10 +5,20 @@
 //   (WorkingClaude/CLAUDE.md: BQ schema, DT5G, filter.json) — Claude Code tu nap khi di len
 //   cay thu muc, opencode thi KHONG, va no cung khong hieu cu phap @import (arch-reviewer F7).
 //
-// permission = gate NANG LUC, cuong che luc chay. ⚠️ KHONG PHAI SANDBOX BAO MAT: pattern khop
-//   tren CHUOI LENH nen lenh trong allowlist van co the kem chuyen huong (`grep x y > z`) de
-//   ghi file. Giam be mat TAI NAN, khong chan duoc chu dich. Vi vay allowlist CO Y khong chua
-//   echo/tee/python/sh/bash/cp/mv/rm/sed/awk.
+// permission — QUYEN TOI DA (user chot 2026-08-10): doc/sua file, bash, python deu MO.
+//   Truoc do la deny-by-default + allowlist hep; da doi vi no chan ca viec R&D that
+//   (python3/sed/awk/cp deu bi chan => agent chay tren opencode gan nhu chi doc duoc).
+//
+// ⚠️ CON LAI DUNG 5 DUONG BI CHAN — CHAM TIEN THAT, user chot GIU:
+//   trading_rules / bot_execute / secrets / crontab / BOT_STOP.
+//   Chan o CA HAI tang: `bash` (chuoi lenh) VA `edit` (duong dan file). Thieu tang `edit` thi
+//   guard chi la ao — agent dung thang cong cu edit la ghi duoc trading_rules.json (da kiem
+//   chung 2026-08-10 truoc khi them).
+//
+// ⚠️ VAN KHONG PHAI SANDBOX BAO MAT: pattern khop tren CHUOI LENH, nen lenh khong khop van co
+//   the cham file bi cam bang duong vong (bien moi truong, symlink, python doc duong dan dong).
+//   Day la luoi giam TAI NAN, khong chan duoc chu dich. Cuong che that voi tien that nam o
+//   allow_agents (Mafee/DollarBill KHONG duoc chay tren provider phu) + quy trinh user duyet.
 // LUU Y: opencode validate schema NGHIEM — khoa la dung `//` (JSONC), KHONG duoc them khoa la
 //   nhu "_README" (da do: "Configuration is invalid ↳ Unrecognized key").
 {
@@ -20,29 +30,18 @@
   ],
 
   "permission": {
-    "edit": { "*": "deny" },
+    "edit": {
+      "*": "allow",
+
+      "**/trading_rules*": "deny",
+      "**/secrets/**": "deny",
+      "**/bot_execute*": "deny",
+      "**/crontab*": "deny",
+      "**/BOT_STOP*": "deny"
+    },
     "webfetch": "allow",
     "bash": {
-      "*": "deny",
-
-      "/home/trido/thanhdt/WorkingClaude/mike/bin/append_event.sh *": "allow",
-      "/home/trido/thanhdt/WorkingClaude/mike/bin/heartbeat.sh *": "allow",
-      "/home/trido/thanhdt/WorkingClaude/mike/bin/jobs.sh *": "allow",
-
-      "ls *": "allow",
-      "cat *": "allow",
-      "head *": "allow",
-      "tail *": "allow",
-      "wc *": "allow",
-      "grep *": "allow",
-      "rg *": "allow",
-      "srcwalk *": "allow",
-      "find *": "allow",
-      "stat *": "allow",
-      "git status*": "allow",
-      "git log*": "allow",
-      "git diff*": "allow",
-      "git show*": "allow",
+      "*": "allow",
 
       "*trading_rules*": "deny",
       "*bot_execute*": "deny",

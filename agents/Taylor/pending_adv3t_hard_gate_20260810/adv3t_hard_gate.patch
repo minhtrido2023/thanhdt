@@ -1,0 +1,520 @@
+diff --git a/deploy_golive_dt5g_v4/golive_recommend_v23.py b/deploy_golive_dt5g_v4/golive_recommend_v23.py
+index 985c175..74fff85 100644
+--- a/deploy_golive_dt5g_v4/golive_recommend_v23.py
++++ b/deploy_golive_dt5g_v4/golive_recommend_v23.py
+@@ -76,7 +76,7 @@ from simulate_holistic_nav import bq
+ from signal_v11_sql import SIGNAL_V11
+ from anomaly_gate import anomaly_excluded as _anomaly_excluded_shared
+ from anomaly_gate import anomaly_flags_freshness as _anomaly_flags_freshness
+-from lag_liquidity_filter import lag_filter_illiquid
++from lag_liquidity_filter import lag_filter_illiquid, bal_filter_thin, ADV_MIN_VND
+ from lag_rating_filter import lag_filter_low_rating
+ from lag_forensic_filter import lag_filter_forensic_banned
+ 
+@@ -662,6 +662,21 @@ today["weak"] = today["rating8l"].fillna(0).astype(float) >= 4
+ half_in_state = state_today in (1, 2)
+ today["weight"] = np.where(today["weak"] & half_in_state, WEAK_PCT, POS_PCT)
+ 
++# GATE CỨNG sàn thanh khoản ADV3T ≥ 2 tỷ/phiên cho BAL (user chốt 2026-08-10, job
++# Taylor_20260810_081207) — LOẠI TRƯỚC `select_book` để slot bị bỏ trống được ứng viên
++# XẾP SAU lấp vào (đo 365 ngày: 26/47 phiên có >12 dòng eligible ⇒ hàng đợi thường dài hơn
++# MAX_POS, nên phần lớn phiên sẽ có mã lấp chỗ). Trọng số/slot KHÔNG đổi (vẫn POS_PCT) —
++# gate này KHÔNG dồn vốn vào mã to hơn, xem báo cáo §2. SIGNAL_V11 đã chặn sẵn `liq >= 1e9`
++# nên phần THÊM của sàn 2 tỷ = băng [1e9, 2e9) ≈ 11,1% số dòng eligible (16 tên/365 ngày).
++today, bal_liq_dropped, bal_liq_error = bal_filter_thin(today)
++if bal_liq_dropped:
++    print(f"  [bal-liq] loại {len(bal_liq_dropped)} dòng BAL dưới sàn ADV3T "
++          f"{ADV_MIN_VND/1e9:.0f} tỷ: "
++          + ", ".join(f"{d['ticker']} ({(d['adv_vnd'] or 0)/1e9:.2f} tỷ)" for d in bal_liq_dropped))
++if bal_liq_error:
++    print(f"  WARNING: sàn ADV BAL KHÔNG áp được ({bal_liq_error}) — giữ nguyên danh sách "
++          f"(SIGNAL_V11 vẫn chặn liq >= 1e9 trong SQL)")
++
+ def select_book(cand):
+     c = cand.sort_values(["prio", "ta"], ascending=[True, False])
+     picked, fin_re = [], 0
+@@ -1085,6 +1100,13 @@ status = {
+     "lag_forensic_excluded": lag_forensic_dropped,
+     "n_lag_forensic_excluded": len(lag_forensic_dropped),
+     "lag_forensic_filter_error": lag_forensic_error,
++    # Dòng tín hiệu BAL bị loại vì SÀN THANH KHOẢN ADV3T < 2 tỷ/phiên (user chốt 2026-08-10).
++    # `bal_liq_filter_error` != None ⇒ sàn KHÔNG áp được (fail-open); nền `liq >= 1e9` của
++    # SIGNAL_V11 vẫn còn vì nó nằm trong chính SQL sinh tín hiệu.
++    "adv_min_vnd": ADV_MIN_VND,
++    "bal_liq_excluded": bal_liq_dropped,
++    "n_bal_liq_excluded": len(bal_liq_dropped),
++    "bal_liq_filter_error": bal_liq_error,
+     "n_capit_basket": len(basket),
+     # Sổ episode (§6b) — TRẠNG THÁI ĐANG GIỮ, khác hẳn capit_signal_today (điều kiện của ngày
+     # chạy). Mọi gate báo cáo phải nhìn `capit_signal_today OR capit_episode_open`.
+@@ -1267,6 +1289,10 @@ if dd_map:
+         L.append(f"\n_{_DDD}_")
+ L.append(f"\n## Notes\n- Sizing: %/slot tính trên VỐN CỦA BOOK (BAL book = {(1-w_tgt)*100:.0f}% NAV, LAG book = {w_tgt*100:.0f}% NAV theo allocator).")
+ L.append(f"- BAL: max {MAX_POS} pos, hold 45d, stop -20%, Fin/RE (sector 8) cap 4 (RE_BACKLOG exempt); mã 8L rating≥4 half-size CHỈ trong BEAR/CRISIS.")
++L.append(f"- **Sàn thanh khoản CỨNG cả 2 book hệ thống: ADV3T ≥ {ADV_MIN_VND/1e9:.0f} tỷ/phiên** "
++         f"(user chốt 2026-08-10 — *hiệu quả vốn*, KHÔNG phải edge: backtest đo phần gia tăng là "
++         f"−0,26pp CAGR / PBO 0,916). Phiên này loại {len(bal_liq_dropped)} dòng BAL + "
++         f"{sum(1 for d in lag_liq_dropped if 'ADV3T' in d.get('reason', ''))} ứng viên LAG vì dưới sàn.")
+ L.append(f"- LAG: KHÔNG ensemble switch (always-on), KHÔNG stop — quản trị bằng allocator (BEAR=0).")
+ L.append(f"- State là chuỗi gated fail-safe; nếu macro feed lỗi, source = 'DT4_only'.")
+ L.append(f"- CSV: `out/golive_v23_recommendations_{END}.csv` | status: `data/golive_v23_status.json`")
+diff --git a/lag_liq_ledger.py b/lag_liq_ledger.py
+index 7bf3a5e..3485bae 100644
+--- a/lag_liq_ledger.py
++++ b/lag_liq_ledger.py
+@@ -65,19 +65,33 @@ GATES = {
+ 
+ _RE_STALE = re.compile(r"ADV cũ (\d+) ngày")
+ _RE_VOL = re.compile(r"Volume_3M_P50=([0-9.eE+-]+)")
++# Sàn 2 tỷ (user chốt 2026-08-10) — template do `lag_liquidity_filter._thin_reason()` sinh ra.
++# PHẢI thử TRƯỚC _RE_VOL: hai template khác nhau nhưng cùng nói về ADV, và nhánh này là nhánh
++# DUY NHẤT loại một mã VẪN MUA ĐƯỢC ⇒ trộn nó vào `adv_zero` sẽ làm hỏng đúng phép tách mà sổ
++# này sinh ra để làm (`kb/projects/lag-adv-filter-tracking.md`, mốc 2026-12-15 / 2027-03-31).
++_RE_THIN = re.compile(r"ADV3T ([0-9.,]+|n/a) tỷ/phiên < sàn")
+ 
+ 
+ def parse_liq_reason(reason):
+     """Tách chuỗi reason của lag_filter_illiquid() thành (kind, metric).
+ 
+     CỐ Ý parse chuỗi thay vì sửa `lag_liquidity_filter.py` cho nó trả thêm field: file đó là
+-    code production đang chạy live, một sổ theo dõi KHÔNG đáng để chạm vào. Ba template dưới
+-    đây khớp nguyên văn 3 nhánh `dropped.append` của hàm đó; template đổi thì rơi về
++    code production đang chạy live, một sổ theo dõi KHÔNG đáng để chạm vào. Bốn template dưới
++    đây khớp nguyên văn 4 nhánh `dropped.append` của hàm đó; template đổi thì rơi về
+     kind='other' (giữ nguyên `reason` thô) chứ không mất dòng.
++
++    kind='adv_thin' (thêm 2026-08-10) = mã ĐO ĐƯỢC và MUA ĐƯỢC nhưng dưới sàn 2 tỷ — phải tách
++    khỏi 'adv_zero'; metric = ADV3T bằng VND (3 kind kia giữ nguyên đơn vị cũ: ngày / số CP).
++    Sổ này CHỈ ghi book LAG (`GATES`); dòng BAL bị sàn loại nằm ở `bal_liq_excluded` của
++    status.json, chưa đưa vào ledger (khác book, khác đơn vị thống kê).
+     """
+     m = _RE_STALE.search(reason)
+     if m:
+         return "stale_adv", float(m.group(1))
++    m = _RE_THIN.search(reason)
++    if m:
++        g = m.group(1)
++        return "adv_thin", ("" if g == "n/a" else float(g.replace(",", "")) * 1e9)
+     m = _RE_VOL.search(reason)
+     if m:
+         return "adv_zero", float(m.group(1))
+diff --git a/lag_liq_signal_filter_selfcheck.py b/lag_liq_signal_filter_selfcheck.py
+index cac9399..9ca14f2 100644
+--- a/lag_liq_signal_filter_selfcheck.py
++++ b/lag_liq_signal_filter_selfcheck.py
+@@ -1,18 +1,30 @@
+ # -*- coding: utf-8 -*-
+-"""lag_liq_signal_filter_selfcheck.py — self-check cho lag_liquidity_filter.lag_filter_illiquid.
++"""lag_liq_signal_filter_selfcheck.py — self-check cho lag_liquidity_filter (LAG + BAL).
+ 
+ Chạy:  $DNA_PYEXE lag_liq_signal_filter_selfcheck.py            (unit, bq giả lập — offline)
+-       $DNA_PYEXE lag_liq_signal_filter_selfcheck.py --live     (thêm 4 case chạm BQ thật)
++       $DNA_PYEXE lag_liq_signal_filter_selfcheck.py --live     (thêm case chạm BQ thật)
+ 
+ Unit dùng bq giả lập nên KHÔNG phụ thuộc mạng/vintage dữ liệu; phần --live xác nhận đúng rổ
+-ứng viên LAG hiện tại (TMG bị loại, mã ADV bình thường không bị đụng, các book khác sạch).
++ứng viên LAG hiện tại (TMG bị loại, các book khác sạch).
++
++CẤU TRÚC (đổi 2026-08-10 khi thêm sàn ADV 2 tỷ):
++  · Khối A = 3 nhánh "KHÔNG đo được/không mua được" (ADV≤0, thiếu dòng giá, stale). Chạy với
++    `min_adv_vnd=0` — vừa giữ nguyên ý nghĩa gốc của từng case, vừa là CHÂN CONTROL chứng minh
++    `min_adv_vnd=0` tái lập ĐÚNG hành vi trước 2026-08-10.
++  · Khối B = sàn ADV 2 tỷ (mặc định production). MỌI case "chặn được" đều có CA CHỨNG MINH
++    NGƯỢC: cùng dữ liệu, bỏ sàn ⇒ mã đó THẬT SỰ lọt qua. Khẳng định suông không tính.
++  · Khối C = `bal_filter_thin` (BAL, thuần pandas).
++  · Khối D = chuỗi lý do phải parse được bởi `lag_liq_ledger.parse_liq_reason` — sổ theo dõi
++    tách 'adv_thin' (mua được, dưới sàn) khỏi 'adv_zero' (không mua được) là toàn bộ lý do sổ
++    đó tồn tại (kb/projects/lag-adv-filter-tracking.md).
+ """
+ import os, sys
+ import pandas as pd
+ 
+ WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
+ os.chdir(WORKDIR); sys.path.insert(0, WORKDIR)
+-from lag_liquidity_filter import lag_filter_illiquid, LAG_ADV_MAX_STALE_DAYS
++from lag_liquidity_filter import (lag_filter_illiquid, bal_filter_thin,
++                                  LAG_ADV_MAX_STALE_DAYS, ADV_MIN_VND)
+ 
+ ASOF = pd.Timestamp("2026-07-21")
+ PASS = FAIL = 0
+@@ -47,61 +59,200 @@ def fake_bq(rows):
+     return _bq
+ 
+ 
+-print("=" * 78); print("  UNIT (bq giả lập)"); print("=" * 78)
++print("=" * 78); print("  KHỐI A — UNIT nhánh 'không đo được' (control leg: min_adv_vnd=0)"); print("=" * 78)
+ 
+ # 1. mã ADV bình thường: KHÔNG bị đụng
+ b = fake_bq({"TRC": (0, 18350.0, 76100.0), "VHC": (0, 240800.0, 54500.0)})
+-kept, dropped, err = lag_filter_illiquid(b, cand_df(["TRC", "VHC"]), ASOF)
++kept, dropped, err = lag_filter_illiquid(b, cand_df(["TRC", "VHC"]), ASOF, min_adv_vnd=0)
+ check("ADV bình thường → giữ nguyên", len(kept) == 2 and not dropped and err is None, f"{dropped}")
+ 
+ # 2. Volume_3M_P50 == 0 (case TMG) → loại, mã khác trong CÙNG rổ vẫn còn
+ b = fake_bq({"TMG": (0, 0.0, 64000.0), "TRC": (0, 18350.0, 76100.0)})
+-kept, dropped, err = lag_filter_illiquid(b, cand_df(["TMG", "TRC"]), ASOF)
++kept, dropped, err = lag_filter_illiquid(b, cand_df(["TMG", "TRC"]), ASOF, min_adv_vnd=0)
+ check("Volume_3M_P50=0 → loại", [d["ticker"] for d in dropped] == ["TMG"], f"{dropped}")
+ check("… mã còn lại KHÔNG bị loại lây", list(kept["ticker"]) == ["TRC"], f"{list(kept['ticker'])}")
+ 
+ # 3. Volume_3M_P50 NULL → loại (không đo được ≠ đo được và bằng 0, cùng hành vi)
+ b = fake_bq({"XXX": (0, None, 10000.0)})
+-kept, dropped, err = lag_filter_illiquid(b, cand_df(["XXX"]), ASOF)
++kept, dropped, err = lag_filter_illiquid(b, cand_df(["XXX"]), ASOF, min_adv_vnd=0)
+ check("Volume_3M_P50 NULL → loại", len(kept) == 0 and len(dropped) == 1, f"{dropped}")
+ 
+ # 4. không có dòng giá nào trong cửa sổ → loại
+ b = fake_bq({})
+-kept, dropped, err = lag_filter_illiquid(b, cand_df(["GONE"]), ASOF)
++kept, dropped, err = lag_filter_illiquid(b, cand_df(["GONE"]), ASOF, min_adv_vnd=0)
+ check("không có dòng giá → loại", len(kept) == 0 and "không có dòng giá" in dropped[0]["reason"], f"{dropped}")
+ 
+ # 5. stale: đúng ngưỡng thì GIỮ, vượt ngưỡng thì LOẠI (biên)
+ b = fake_bq({"A": (LAG_ADV_MAX_STALE_DAYS, 1000.0, 10000.0)})
+-kept, dropped, _ = lag_filter_illiquid(b, cand_df(["A"]), ASOF)
++kept, dropped, _ = lag_filter_illiquid(b, cand_df(["A"]), ASOF, min_adv_vnd=0)
+ check(f"stale == {LAG_ADV_MAX_STALE_DAYS} ngày → GIỮ", len(kept) == 1 and not dropped, f"{dropped}")
+ b = fake_bq({"A": (LAG_ADV_MAX_STALE_DAYS + 1, 1000.0, 10000.0)})
+-kept, dropped, _ = lag_filter_illiquid(b, cand_df(["A"]), ASOF)
++kept, dropped, _ = lag_filter_illiquid(b, cand_df(["A"]), ASOF, min_adv_vnd=0)
+ check(f"stale == {LAG_ADV_MAX_STALE_DAYS + 1} ngày → LOẠI", len(kept) == 0 and len(dropped) == 1, f"{dropped}")
+ 
+ # 6. ADV âm (dữ liệu bẩn) → loại
+ b = fake_bq({"NEG": (0, -5.0, 10000.0)})
+-kept, dropped, _ = lag_filter_illiquid(b, cand_df(["NEG"]), ASOF)
++kept, dropped, _ = lag_filter_illiquid(b, cand_df(["NEG"]), ASOF, min_adv_vnd=0)
+ check("ADV âm → loại", len(kept) == 0 and len(dropped) == 1, f"{dropped}")
+ 
+ # 7. FAIL-OPEN khi cả truy vấn hỏng: giữ nguyên + báo lỗi (executor vẫn fail-closed)
+ def _boom(sql):
+     raise RuntimeError("BQ down")
+-kept, dropped, err = lag_filter_illiquid(_boom, cand_df(["TMG", "TRC"]), ASOF)
++kept, dropped, err = lag_filter_illiquid(_boom, cand_df(["TMG", "TRC"]), ASOF, min_adv_vnd=0)
+ check("BQ lỗi → fail-OPEN, giữ nguyên", len(kept) == 2 and not dropped, f"{dropped}")
+ check("… và báo lỗi qua lag_liq_filter_error", err is not None and "BQ down" in err, f"{err}")
+ 
+ # 8. rổ rỗng / None → no-op, không nổ
+-kept, dropped, err = lag_filter_illiquid(fake_bq({}), cand_df([]), ASOF)
++kept, dropped, err = lag_filter_illiquid(fake_bq({}), cand_df([]), ASOF, min_adv_vnd=0)
+ check("rổ rỗng → no-op", len(kept) == 0 and not dropped and err is None)
+-kept, dropped, err = lag_filter_illiquid(fake_bq({}), None, ASOF)
++kept, dropped, err = lag_filter_illiquid(fake_bq({}), None, ASOF, min_adv_vnd=0)
+ check("cand=None → no-op", kept is None and not dropped and err is None)
+ 
+ # 9. không đụng cột khác / không đổi thứ tự các dòng còn lại
+ b = fake_bq({"A": (0, 1.0, 1.0), "B": (0, 0.0, 1.0), "C": (0, 2.0, 1.0)})
+ src = cand_df(["A", "B", "C"])
+-kept, dropped, _ = lag_filter_illiquid(b, src, ASOF)
++kept, dropped, _ = lag_filter_illiquid(b, src, ASOF, min_adv_vnd=0)
+ check("giữ nguyên thứ tự + cột", list(kept["ticker"]) == ["A", "C"] and list(kept.columns) == list(src.columns))
+ 
++print("=" * 78)
++print(f"  KHỐI B — SÀN ADV {ADV_MIN_VND/1e9:.0f} TỶ trên book LAG (mặc định production)")
++print("=" * 78)
++
++check("hằng số sàn = 2 tỷ (đổi ⇒ phải đổi trading_bot/due_diligence.ADV_THIN_VND)",
++      ADV_MIN_VND == 2e9, f"{ADV_MIN_VND}")
++
++# B1. TRC — SỐ THẬT đo trên BQ 2026-08-07 (Volume_3M_P50=19.186,5 × px=74.900 = 1,437 tỷ).
++#     Đây chính là mã user duyệt mua ngày 07-24 (phương án C, job Taylor_20260721_172103) ⇒ ca
++#     đắt nhất của sàn mới, phải có test đóng đinh chứ không để phát hiện trên plan thật.
++TRC = (0, 19186.5, 74900.0)          # 1,4370 tỷ  < sàn
++VHC = (0, 213400.0, 51400.0)         # 10,969 tỷ  > sàn
++b = fake_bq({"TRC": TRC, "VHC": VHC})
++kept, dropped, err = lag_filter_illiquid(b, cand_df(["TRC", "VHC"]), ASOF)
++check("B1 TRC (ADV 1,44 tỷ) BỊ LOẠI, VHC (10,97 tỷ) giữ",
++      [d["ticker"] for d in dropped] == ["TRC"] and list(kept["ticker"]) == ["VHC"], f"{dropped}")
++#     CA CHỨNG MINH NGƯỢC: cùng dữ liệu, bỏ sàn ⇒ TRC THẬT SỰ lọt (nếu không, B1 vô nghĩa).
++kept0, dropped0, _ = lag_filter_illiquid(b, cand_df(["TRC", "VHC"]), ASOF, min_adv_vnd=0)
++check("B1' bỏ sàn ⇒ TRC LỌT QUA (chứng minh B1 do sàn chặn, không do nhánh khác)",
++      not dropped0 and list(kept0["ticker"]) == ["TRC", "VHC"], f"{dropped0}")
++
++# B2. BIÊN: `<` chứ không `<=` — đúng sàn thì GIỮ, dưới 1 đồng thì LOẠI.
++b = fake_bq({"EQ": (0, 2e9, 1.0)})
++kept, dropped, _ = lag_filter_illiquid(b, cand_df(["EQ"]), ASOF)
++check("B2 ADV == đúng 2,000 tỷ → GIỮ", len(kept) == 1 and not dropped, f"{dropped}")
++b = fake_bq({"LO": (0, 2e9 - 1, 1.0)})
++kept, dropped, _ = lag_filter_illiquid(b, cand_df(["LO"]), ASOF)
++check("B2' ADV == 2 tỷ − 1đ → LOẠI", len(kept) == 0 and len(dropped) == 1, f"{dropped}")
++
++# B3. Sàn KHÔNG được nuốt 3 nhánh cũ: ADV=0 phải giữ nguyên lý do 'không mua được', vì sổ
++#     lag_liq_ledger phân biệt hai nhóm này (mua được vs không mua được).
++b = fake_bq({"Z": (0, 0.0, 64000.0)})
++_, dropped, _ = lag_filter_illiquid(b, cand_df(["Z"]), ASOF)
++check("B3 ADV=0 vẫn báo lý do 'ADV ≤ 0', KHÔNG phải lý do sàn",
++      "ADV ≤ 0" in dropped[0]["reason"] and "< sàn" not in dropped[0]["reason"], f"{dropped}")
++
++# B4. stale ĐI TRƯỚC sàn: mã cũ + ADV to vẫn bị loại vì stale (thứ tự nhánh không đảo).
++b = fake_bq({"OLD": (LAG_ADV_MAX_STALE_DAYS + 1, 1e6, 1e5)})   # ADV 100 tỷ nhưng cũ
++_, dropped, _ = lag_filter_illiquid(b, cand_df(["OLD"]), ASOF)
++check("B4 stale + ADV to → loại vì STALE (không phải vì sàn)",
++      "ADV cũ" in dropped[0]["reason"], f"{dropped}")
++
++# B5. dropped của nhánh sàn PHẢI kèm adv_vnd (số) để báo cáo/ledger không phải parse chuỗi.
++b = fake_bq({"TRC": TRC})
++_, dropped, _ = lag_filter_illiquid(b, cand_df(["TRC"]), ASOF)
++check("B5 dropped kèm field adv_vnd số",
++      abs(dropped[0].get("adv_vnd", 0) - 19186.5 * 74900.0) < 1.0, f"{dropped}")
++
++# B6. BQ lỗi vẫn fail-OPEN kể cả khi sàn bật (sàn không được biến lỗi mạng thành chặn sạch).
++kept, dropped, err = lag_filter_illiquid(_boom, cand_df(["TRC", "VHC"]), ASOF)
++check("B6 BQ lỗi + sàn bật → vẫn fail-OPEN giữ nguyên", len(kept) == 2 and not dropped, f"{err}")
++
++print("=" * 78); print("  KHỐI C — bal_filter_thin (BAL, thuần pandas)"); print("=" * 78)
++
++
++def bal_df(pairs):
++    """pairs: [(ticker, liq_vnd)] — mô phỏng dòng SIGNAL_V11 đã lọc TIER_BAL."""
++    return pd.DataFrame({"ticker": [t for t, _ in pairs],
++                         "play_type": ["MOMENTUM"] * len(pairs),
++                         "ta": [300.0] * len(pairs),
++                         "liq": [v for _, v in pairs]})
++
++
++# C1. dưới sàn → loại; trên sàn → giữ. Số lấy từ tên THẬT trong băng [1e9, 2e9) đo 365 ngày.
++src = bal_df([("SJS", 1.5e9), ("FPT", 80e9), ("TCI", 1.05e9)])
++kept, dropped, err = bal_filter_thin(src)
++check("C1 SJS/TCI (<2 tỷ) loại, FPT giữ",
++      [d["ticker"] for d in dropped] == ["SJS", "TCI"] and list(kept["ticker"]) == ["FPT"], f"{dropped}")
++check("C1a err=None khi cột liq đầy đủ", err is None, f"{err}")
++#     CA CHỨNG MINH NGƯỢC
++kept0, dropped0, _ = bal_filter_thin(src, min_adv_vnd=0)
++check("C1' bỏ sàn ⇒ cả 3 LỌT QUA", not dropped0 and len(kept0) == 3, f"{dropped0}")
++
++# C2. BIÊN `<`: đúng 2 tỷ giữ, thiếu 1 đồng loại.
++kept, dropped, _ = bal_filter_thin(bal_df([("EQ", 2e9), ("LO", 2e9 - 1)]))
++check("C2 biên: EQ giữ, LO loại",
++      list(kept["ticker"]) == ["EQ"] and [d["ticker"] for d in dropped] == ["LO"], f"{dropped}")
++
++# C3. NaN ở TỪNG DÒNG → loại (fail-closed), khác hẳn thiếu CẢ CỘT → fail-open.
++kept, dropped, err = bal_filter_thin(bal_df([("NAN", float("nan")), ("OK", 5e9)]))
++check("C3 liq=NaN → LOẠI (fail-closed từng dòng)",
++      [d["ticker"] for d in dropped] == ["NAN"] and err is None, f"{dropped}")
++check("C3a dropped của NaN có adv_vnd=None + lý do đọc được",
++      dropped[0]["adv_vnd"] is None and "n/a" in dropped[0]["reason"], f"{dropped}")
++
++# C4. thiếu CẢ cột liq (SQL đổi schema) → FAIL-OPEN + cờ lỗi, KHÔNG chặn sạch book BAL.
++no_liq = bal_df([("A", 5e9)]).drop(columns=["liq"])
++kept, dropped, err = bal_filter_thin(no_liq)
++check("C4 thiếu cột liq → fail-OPEN giữ nguyên + báo lỗi",
++      len(kept) == 1 and not dropped and err is not None and "liq" in err, f"{err}")
++
++# C5. liq dạng chuỗi (CSV/BQ trả object) vẫn so sánh đúng, không nổ.
++s = bal_df([("S1", 0), ("S2", 0)]); s["liq"] = ["1500000000", "9000000000"]
++kept, dropped, err = bal_filter_thin(s)
++check("C5 liq kiểu chuỗi → ép số, S1 loại S2 giữ",
++      [d["ticker"] for d in dropped] == ["S1"] and list(kept["ticker"]) == ["S2"], f"{dropped}/{err}")
++
++# C6. rỗng/None → no-op; cột + thứ tự giữ nguyên.
++kept, dropped, err = bal_filter_thin(bal_df([]))
++check("C6 rỗng → no-op", len(kept) == 0 and not dropped and err is None)
++kept, dropped, err = bal_filter_thin(None)
++check("C6a None → no-op", kept is None and not dropped and err is None)
++src = bal_df([("A", 9e9), ("B", 1e9), ("C", 8e9)])
++kept, _, _ = bal_filter_thin(src)
++check("C6b giữ nguyên thứ tự + cột",
++      list(kept["ticker"]) == ["A", "C"] and list(kept.columns) == list(src.columns))
++
++# C7. KHÔNG sửa bảng gốc tại chỗ (golive dùng lại `today` sau đó).
++before = len(src)
++bal_filter_thin(src)
++check("C7 không mutate bảng đầu vào", len(src) == before)
++
++print("=" * 78); print("  KHỐI D — chuỗi lý do phải parse được bởi lag_liq_ledger"); print("=" * 78)
++
++from lag_liq_ledger import parse_liq_reason
++
++b = fake_bq({"TRC": TRC})
++_, dropped, _ = lag_filter_illiquid(b, cand_df(["TRC"]), ASOF)
++kind, metric = parse_liq_reason(dropped[0]["reason"])
++check("D1 lý do sàn → kind='adv_thin' (KHÔNG lẫn sang 'adv_zero')", kind == "adv_thin", f"{kind}")
++check("D1a metric = ADV theo VND, khớp số đo (sai số làm tròn 2 chữ số)",
++      isinstance(metric, float) and abs(metric - 19186.5 * 74900.0) < 1e7, f"{metric}")
++
++_, dz, _ = lag_filter_illiquid(fake_bq({"Z": (0, 0.0, 64000.0)}), cand_df(["Z"]), ASOF)
++check("D2 ADV=0 vẫn ra kind='adv_zero' (thứ tự regex không nuốt nhánh cũ)",
++      parse_liq_reason(dz[0]["reason"])[0] == "adv_zero", f"{parse_liq_reason(dz[0]['reason'])}")
++
++_, ds, _ = lag_filter_illiquid(fake_bq({"O": (LAG_ADV_MAX_STALE_DAYS + 1, 1e6, 1e5)}),
++                               cand_df(["O"]), ASOF)
++check("D3 stale vẫn ra kind='stale_adv'", parse_liq_reason(ds[0]["reason"])[0] == "stale_adv")
++
++_, dn, _ = lag_filter_illiquid(fake_bq({}), cand_df(["GONE"]), ASOF)
++check("D4 thiếu dòng giá vẫn ra kind='no_price_row'",
++      parse_liq_reason(dn[0]["reason"])[0] == "no_price_row")
++
++_, dbal, _ = bal_filter_thin(bal_df([("NAN", float("nan"))]))
++check("D5 lý do BAL (adv=n/a) cũng ra 'adv_thin', metric rỗng — không nổ regex",
++      parse_liq_reason(dbal[0]["reason"]) == ("adv_thin", ""), f"{parse_liq_reason(dbal[0]['reason'])}")
++
+ if "--live" in sys.argv:
+     print("=" * 78); print("  LIVE (BQ thật — rổ ứng viên LAG hiện tại)"); print("=" * 78)
+     os.environ.pop("BQ_LOCAL_CACHE", None)
+@@ -119,9 +270,19 @@ if "--live" in sys.argv:
+     print(f"  asof={asof.date()}  ứng viên {q['ticker'].nunique()} mã → loại {len(names)}: {names}")
+     check("live: không lỗi truy vấn", err is None, f"{err}")
+     check("live: TMG (Volume_3M_P50=0) BỊ LOẠI", "TMG" in names)
+-    check("live: TRC (ADV ~1,4 tỷ) KHÔNG bị loại", "TRC" not in names and "TRC" in set(kept["ticker"]))
+-    check("live: mọi mã giữ lại đều có ADV > 0",
+-          not set(kept["ticker"]) & set(names))
++    # ĐỔI 2026-08-10: trước đây case này khẳng định TRC (ADV ~1,4 tỷ) KHÔNG bị loại. Sàn 2 tỷ
++    # đảo đúng câu đó — giữ lại dưới dạng ngược để lần sau ai đọc log thấy ngay là CÓ CHỦ Ý.
++    check("live: TRC (ADV ~1,44 tỷ < sàn 2 tỷ) BỊ LOẠI", "TRC" in names)
++    kept_bad = [t for t in kept["ticker"] if t in set(names)]
++    check("live: không mã nào vừa giữ vừa loại", not kept_bad, f"{kept_bad}")
++    # bất biến thật của rổ giữ lại: mọi mã đều ≥ sàn (đo lại độc lập, không tin danh sách dropped)
++    if len(kept):
++        tl_k = ",".join(f"'{t}'" for t in sorted(set(kept["ticker"])))
++        chk = bq(f"""SELECT MIN(t.Volume_3M_P50*COALESCE(t.Price,t.Close)) AS mn FROM (
++  SELECT t.* FROM tav2_bq.ticker AS t WHERE t.ticker IN ({tl_k}) AND t.time <= DATE '{asof.date()}'
++  QUALIFY ROW_NUMBER() OVER (PARTITION BY t.ticker ORDER BY t.time DESC) = 1) AS t""")["mn"].iloc[0]
++        check(f"live: min ADV của rổ giữ lại ≥ sàn ({float(chk)/1e9:.2f} tỷ)",
++              float(chk) >= ADV_MIN_VND, f"min={chk}")
+ 
+     # phạm vi: 3 book còn lại không có mã ADV≤0 (lý do KHÔNG áp filter cho chúng)
+     capit = bq("""SELECT COUNTIF(p.Volume_3M_P50 IS NULL OR p.Volume_3M_P50<=0) AS nbad
+diff --git a/lag_liquidity_filter.py b/lag_liquidity_filter.py
+index c646857..e69f9e5 100644
+--- a/lag_liquidity_filter.py
++++ b/lag_liquidity_filter.py
+@@ -3,7 +3,7 @@
+ 
+ Module riêng (thay vì hàm nội trong golive_recommend_v23.py) để self-check được mà không
+ phải chạy cả script recommender; `bq` truyền vào như tham số — cùng mẫu với custom30.current.
+-Consumer: deploy_golive_dt5g_v4/golive_recommend_v23.py.
++Consumer: deploy_golive_dt5g_v4/golive_recommend_v23.py (cả hai hàm: LAG và BAL).
+ Self-check: lag_liq_signal_filter_selfcheck.py
+ """
+ import pandas as pd
+@@ -11,9 +11,68 @@ import pandas as pd
+ LAG_ADV_MAX_STALE_DAYS = 30   # = trading_bot/plan.py::LAG_ADV_MAX_STALE_DAYS (giữ 2 tầng cùng ngưỡng)
+ LOOKBACK_DAYS = 90            # cửa sổ quét dòng giá gần nhất (>> ngưỡng stale, chỉ để chặn full-scan)
+ 
++# ── SÀN THANH KHOẢN HỆ THỐNG (user chốt 2026-08-10, job Taylor_20260810_081207) ─────────────
++# Quyết định của user là **HIỆU QUẢ VỐN**, KHÔNG phải edge — và điều đó phải ghi ở đây vì con số
++# backtest nói NGƯỢC LẠI, người đọc sau sẽ tưởng là lỗi:
++#   · job Taylor_20260804_080547 (quant-skeptic CONFIRMED cao): phần GIA TĂNG của sàn 2 tỷ đặt
++#     trên nền gate `ADV>0` = **−0,26pp CAGR / −0,02 Sharpe / −0,92pp OOS**; thang liều PHẲNG
++#     0,5→5 tỷ; Δ đổi dấu khi bỏ 2017+2020+2021; **PBO = 0,916**.
++#   · job Taylor_20260810_073541 (CONFIRMED): băng ADV 0,1–2 tỷ chỉ chiếm **1,6% vốn** lịch sử,
++#     **93,4% ứng viên bỏ dở** (không vào nổi hàng), và ở OOS chênh lệch **hết ý nghĩa** (n=8,
++#     CI95 [−14,07; +1,00] chứa 0).
++# ⇒ Lý do wire: nhóm mỏng tiêu chi phí quản lý/theo dõi mà không mang được vốn; user chọn dồn
++#    lực sang deal thanh khoản cao. **KHÔNG được trích hằng số này như một edge đã kiểm chứng**,
++#    và khi ai đó tái tối ưu ngưỡng thì phải biết là thang liều phẳng + PBO 0,916 ⇒ mọi "điểm
++#    tối ưu" tìm được trên lịch sử là nhiễu.
++# CƠ SỞ SỐ: ADV3T = `Volume_3M_P50 × COALESCE(Price, Close)` — ĐÚNG một công thức ở cả 3 nơi
++# (hàm này, `signal_v11_sql.py:95` cột `liq`, `trading_bot/due_diligence.py::adv_vnd`).
++ADV_MIN_VND = 2e9
+ 
+-def lag_filter_illiquid(bq, cand, asof, max_stale_days=LAG_ADV_MAX_STALE_DAYS):
+-    """Loại ứng viên LAG KHÔNG ĐO ĐƯỢC THANH KHOẢN (Volume_3M_P50 ≤ 0 / thiếu / quá cũ).
++# BAL: `signal_v11_sql.py:143` đã có `WHERE liq >= 1e9` CỨNG trong SQL. Sàn mới KHÔNG sửa vào đó
++# — file ấy là SQL DÙNG CHUNG với engine backtest đã pin (`pt_v23_audit_2014.py:48` import thẳng
++# `SIGNAL_V11`), sửa 1e9→2e9 ở đó sẽ LẶNG LẼ đổi nền R3 đã pin. Sàn BAL vì vậy áp ở TẦNG LIVE,
++# trên cột `liq` có sẵn của mỗi dòng tín hiệu (cùng công thức, cùng ngày, không thêm truy vấn).
++
++
++def bal_filter_thin(today, min_adv_vnd=ADV_MIN_VND, liq_col="liq"):
++    """Loại dòng tín hiệu BAL có ADV3T dưới sàn. Thuần pandas — KHÔNG chạm BQ.
++
++    `today` = các dòng SIGNAL_V11 của phiên mới nhất đã lọc TIER_BAL (golive_recommend_v23.py §3),
++    cột `liq` = `Volume_3M_P50 × COALESCE(Price, Close)` tính ngay tại dòng đó ⇒ point-in-time
++    theo đúng ngày tín hiệu, không cần join lại.
++
++    FAIL-OPEN CÓ CHỦ Ý, khác chiều nhánh LAG: thiếu cột `liq` (SQL đổi schema) → GIỮ NGUYÊN +
++    trả cờ lỗi, vì SIGNAL_V11 đã tự chặn `liq >= 1e9` nên không có mã "không đo được thanh khoản"
++    nào lọt tới đây; chặn sạch book BAL vì một lần đổi tên cột là thiệt hại lớn hơn nhiều.
++    NaN Ở TỪNG DÒNG thì LOẠI (fail-closed) — cùng chiều nhánh LAG.
++
++    Trả (today đã lọc, list dict mô tả dòng bị loại, lỗi-nguồn|None).
++    """
++    if today is None or not len(today):
++        return today, [], None
++    if liq_col not in today.columns:
++        return today, [], f"KeyError: thiếu cột '{liq_col}' trong bảng tín hiệu BAL"
++    liq = pd.to_numeric(today[liq_col], errors="coerce")
++    bad = ~(liq >= float(min_adv_vnd))          # NaN → True → loại (fail-closed từng dòng)
++    dropped = [{"ticker": r.ticker, "play_type": r.play_type,
++                "adv_vnd": (None if pd.isna(v) else float(v)),
++                "reason": _thin_reason(v, min_adv_vnd)}
++               for r, v in zip(today[bad].itertuples(), liq[bad])]
++    return today[~bad].copy(), dropped, None
++
++
++def _thin_reason(adv, min_adv_vnd):
++    """Chuỗi lý do CHUNG cho cả 2 book — `lag_liq_ledger.parse_liq_reason` bắt template này
++    (nhánh `adv_thin`). Đổi câu chữ ⇒ phải đổi regex bên đó, nếu không sổ rơi về kind='other'."""
++    shown = "n/a" if adv is None or pd.isna(adv) else f"{float(adv) / 1e9:,.2f}"
++    return (f"ADV3T {shown} tỷ/phiên < sàn {min_adv_vnd / 1e9:.0f} tỷ — dưới sàn thanh khoản "
++            f"hệ thống (user chốt 2026-08-10, hiệu quả vốn)")
++
++
++def lag_filter_illiquid(bq, cand, asof, max_stale_days=LAG_ADV_MAX_STALE_DAYS,
++                        min_adv_vnd=ADV_MIN_VND):
++    """Loại ứng viên LAG KHÔNG ĐO ĐƯỢC THANH KHOẢN (Volume_3M_P50 ≤ 0 / thiếu / quá cũ)
++    HOẶC đo được nhưng DƯỚI SÀN `min_adv_vnd` (sàn 2 tỷ, user chốt 2026-08-10 — xem ADV_MIN_VND).
+ 
+     VÌ SAO Ở TẦNG TÍN HIỆU, KHÔNG CHỈ Ở EXECUTOR (user quyết 2026-07-21, job
+     Taylor_20260721_172103): gate `cap_lag_orders` (trading_bot/plan.py) chặn ĐÚNG các mã này
+@@ -140,6 +199,10 @@ def lag_filter_illiquid(bq, cand, asof, max_stale_days=LAG_ADV_MAX_STALE_DAYS):
+     FAIL-SAFE HAI CHIỀU, CÓ CHỦ Ý:
+       · TỪNG MÃ đo được mà ADV ≤ 0 / dòng quá cũ (> max_stale_days) → LOẠI (fail-closed,
+         cùng chiều `cap_lag_orders`).
++      · TỪNG MÃ đo được mà 0 < ADV < `min_adv_vnd` → LOẠI (sàn 2 tỷ). ĐÂY LÀ NHÁNH DUY NHẤT
++        loại một mã VẪN MUA ĐƯỢC — 3 nhánh còn lại loại mã không đo được/không mua được. Vì vậy
++        nó là nhánh DUY NHẤT có thể "loại oan", và cũng là nhánh duy nhất tắt được bằng tham số
++        (`min_adv_vnd=0` ⇒ trở lại hành vi trước 2026-08-10, bit-for-bit).
+       · CẢ TRUY VẤN hỏng (BQ lỗi) → GIỮ NGUYÊN danh sách + WARNING (fail-open). Chặn sạch book
+         LAG vì một lỗi mạng là thiệt hại lớn hơn nhiều, và lưới an toàn thật sự vẫn còn nguyên:
+         `cap_lag_orders` ở executor fail-CLOSED nên không mã nào lọt thành lệnh mà ta không đo
+@@ -179,6 +242,10 @@ QUALIFY ROW_NUMBER() OVER (PARTITION BY t.ticker ORDER BY t.time DESC) = 1""")
+         if not (pd.notna(r.adv_vnd) and float(r.adv_vnd) > 0):
+             dropped.append({"ticker": tk, "reason": f"Volume_3M_P50={r.Volume_3M_P50} → ADV ≤ 0, "
+                             f"không mua được (mirror liquidity_require_positive)"})
++            continue
++        if float(r.adv_vnd) < float(min_adv_vnd):
++            dropped.append({"ticker": tk, "adv_vnd": float(r.adv_vnd),
++                            "reason": _thin_reason(float(r.adv_vnd), min_adv_vnd)})
+     if dropped:
+         bad = {d["ticker"] for d in dropped}
+         cand = cand[~cand["ticker"].isin(bad)].copy()
+diff --git a/trading_bot/due_diligence.py b/trading_bot/due_diligence.py
+index 5a7e70a..7fb88c6 100644
+--- a/trading_bot/due_diligence.py
++++ b/trading_bot/due_diligence.py
+@@ -39,9 +39,20 @@ from .config import WORKDIR, DATA_DIR
+ 
+ _log = logging.getLogger(__name__)
+ 
+-# Ngưỡng CẢNH BÁO hiển thị (không phải gate). ADV_THIN neo theo sàn thanh khoản 2 tỷ/phiên mà
+-# rổ CAPIT trong golive_recommend_v23.py đã dùng (`Price*Volume/1e9 >= 2`) — giữ 1 con số chung
+-# cho cả fleet thay vì đẻ ngưỡng mới.
++# Ngưỡng CẢNH BÁO hiển thị TRONG FILE NÀY (file này vẫn thuần thông tin, không chặn lệnh).
++# ADV_THIN neo theo sàn thanh khoản 2 tỷ/phiên mà rổ CAPIT trong golive_recommend_v23.py đã dùng
++# (`Price*Volume/1e9 >= 2`) — giữ 1 con số chung cho cả fleet thay vì đẻ ngưỡng mới.
++#
++# ⚠️ TỪ 2026-08-10 CÙNG CON SỐ NÀY LÀ **GATE CỨNG** Ở TẦNG CHỌN MÃ cho 2 book hệ thống
++# (user chốt, job Taylor_20260810_081207): `lag_liquidity_filter.ADV_MIN_VND` loại thẳng ứng
++# viên LAG và dòng tín hiệu BAL có ADV3T < 2 tỷ TRƯỚC khi vào plan. Ở ĐÂY vẫn là CẢNH BÁO,
++# và điều đó KHÔNG phải code chết — mọi lệnh MUA trong plan đều chạy qua đây
++# (`send_plan_report.sh:611`), gồm cả những đường KHÔNG đi qua 2 gate kia:
++#   · sleeve discretionary/fear-buy (`discretionary_accumulation.py` — không import file này,
++#     cũng không qua lag/bal filter) — đây là ca mà cảnh báo mỏng còn nguyên giá trị;
++#   · vị thế legacy/exclude và mọi book khác (CAPIT/PARK) có gate thanh khoản RIÊNG.
++# Với mã book LAG/BAL thì đúng là cảnh báo này gần như không còn cơ hội in ra — đó là hệ quả
++# MONG MUỐN của gate, không phải dấu hiệu ngưỡng sai. Đổi 1 trong 2 con số ⇒ phải đổi con kia.
+ ADV_THIN_VND = 2e9
+ ADV_DEAD_VND = 1e8          # gần như không có giao dịch thật
+ ORDER_ADV_WARN = 0.10       # lệnh > 10% ADV → cảnh báo impact
+@@ -229,7 +240,9 @@ def _liquidity_part(row, in_universe, universe_last, est_value_vnd, quality_flag
+         bits.append(f"🔴 thanh khoản ~0 (ADV3T {_fmt_vnd(adv)}/phiên) — NGOÀI mô hình backtest")
+         red.append("THANH_KHOAN_CHET")
+     elif adv < ADV_THIN_VND:
+-        bits.append(f"⚠ thanh khoản mỏng (ADV3T {_fmt_vnd(adv)}/phiên < sàn {ADV_THIN_VND/1e9:.0f} tỷ)")
++        bits.append(f"⚠ thanh khoản mỏng (ADV3T {_fmt_vnd(adv)}/phiên < sàn {ADV_THIN_VND/1e9:.0f} tỷ "
++                    f"— sàn CỨNG của book LAG/BAL từ 2026-08-10; lệnh này tới được đây nghĩa là "
++                    f"nó KHÔNG đi qua gate đó)")
+     else:
+         bits.append(f"thanh khoản OK (ADV3T {_fmt_vnd(adv)}/phiên)")
+     src = "ticker_prune" if UNIVERSE_SOURCE == "prune" else "universe_pit"

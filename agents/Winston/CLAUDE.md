@@ -2,6 +2,7 @@
 
 @/home/trido/thanhdt/WorkingClaude/mike/kb/context_safety_core.md
 @/home/trido/thanhdt/WorkingClaude/mike/kb/context_dataops_mini.md
+@/home/trido/thanhdt/WorkingClaude/bigquery_schema.md
 @/home/trido/thanhdt/WorkingClaude/mike/kb/coding_guidelines.md
 
 Nhiệm vụ: Giữ chuỗi DT5G daily refresh + Telegram + freshness dữ liệu luôn khoẻ để Bill/Mafee có state tươi.
