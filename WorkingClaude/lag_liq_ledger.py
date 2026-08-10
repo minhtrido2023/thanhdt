@@ -65,19 +65,33 @@ GATES = {
 
 _RE_STALE = re.compile(r"ADV cũ (\d+) ngày")
 _RE_VOL = re.compile(r"Volume_3M_P50=([0-9.eE+-]+)")
+# Sàn 2 tỷ (user chốt 2026-08-10) — template do `lag_liquidity_filter._thin_reason()` sinh ra.
+# PHẢI thử TRƯỚC _RE_VOL: hai template khác nhau nhưng cùng nói về ADV, và nhánh này là nhánh
+# DUY NHẤT loại một mã VẪN MUA ĐƯỢC ⇒ trộn nó vào `adv_zero` sẽ làm hỏng đúng phép tách mà sổ
+# này sinh ra để làm (`kb/projects/lag-adv-filter-tracking.md`, mốc 2026-12-15 / 2027-03-31).
+_RE_THIN = re.compile(r"ADV3T ([0-9.,]+|n/a) tỷ/phiên < sàn")
 
 
 def parse_liq_reason(reason):
     """Tách chuỗi reason của lag_filter_illiquid() thành (kind, metric).
 
     CỐ Ý parse chuỗi thay vì sửa `lag_liquidity_filter.py` cho nó trả thêm field: file đó là
-    code production đang chạy live, một sổ theo dõi KHÔNG đáng để chạm vào. Ba template dưới
-    đây khớp nguyên văn 3 nhánh `dropped.append` của hàm đó; template đổi thì rơi về
+    code production đang chạy live, một sổ theo dõi KHÔNG đáng để chạm vào. Bốn template dưới
+    đây khớp nguyên văn 4 nhánh `dropped.append` của hàm đó; template đổi thì rơi về
     kind='other' (giữ nguyên `reason` thô) chứ không mất dòng.
+
+    kind='adv_thin' (thêm 2026-08-10) = mã ĐO ĐƯỢC và MUA ĐƯỢC nhưng dưới sàn 2 tỷ — phải tách
+    khỏi 'adv_zero'; metric = ADV3T bằng VND (3 kind kia giữ nguyên đơn vị cũ: ngày / số CP).
+    Sổ này CHỈ ghi book LAG (`GATES`); dòng BAL bị sàn loại nằm ở `bal_liq_excluded` của
+    status.json, chưa đưa vào ledger (khác book, khác đơn vị thống kê).
     """
     m = _RE_STALE.search(reason)
     if m:
         return "stale_adv", float(m.group(1))
+    m = _RE_THIN.search(reason)
+    if m:
+        g = m.group(1)
+        return "adv_thin", ("" if g == "n/a" else float(g.replace(",", "")) * 1e9)
     m = _RE_VOL.search(reason)
     if m:
         return "adv_zero", float(m.group(1))

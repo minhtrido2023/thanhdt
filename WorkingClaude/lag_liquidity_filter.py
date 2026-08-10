@@ -3,7 +3,7 @@
 
 Module riêng (thay vì hàm nội trong golive_recommend_v23.py) để self-check được mà không
 phải chạy cả script recommender; `bq` truyền vào như tham số — cùng mẫu với custom30.current.
-Consumer: deploy_golive_dt5g_v4/golive_recommend_v23.py.
+Consumer: deploy_golive_dt5g_v4/golive_recommend_v23.py (cả hai hàm: LAG và BAL).
 Self-check: lag_liq_signal_filter_selfcheck.py
 """
 import pandas as pd
@@ -11,9 +11,68 @@ import pandas as pd
 LAG_ADV_MAX_STALE_DAYS = 30   # = trading_bot/plan.py::LAG_ADV_MAX_STALE_DAYS (giữ 2 tầng cùng ngưỡng)
 LOOKBACK_DAYS = 90            # cửa sổ quét dòng giá gần nhất (>> ngưỡng stale, chỉ để chặn full-scan)
 
+# ── SÀN THANH KHOẢN HỆ THỐNG (user chốt 2026-08-10, job Taylor_20260810_081207) ─────────────
+# Quyết định của user là **HIỆU QUẢ VỐN**, KHÔNG phải edge — và điều đó phải ghi ở đây vì con số
+# backtest nói NGƯỢC LẠI, người đọc sau sẽ tưởng là lỗi:
+#   · job Taylor_20260804_080547 (quant-skeptic CONFIRMED cao): phần GIA TĂNG của sàn 2 tỷ đặt
+#     trên nền gate `ADV>0` = **−0,26pp CAGR / −0,02 Sharpe / −0,92pp OOS**; thang liều PHẲNG
+#     0,5→5 tỷ; Δ đổi dấu khi bỏ 2017+2020+2021; **PBO = 0,916**.
+#   · job Taylor_20260810_073541 (CONFIRMED): băng ADV 0,1–2 tỷ chỉ chiếm **1,6% vốn** lịch sử,
+#     **93,4% ứng viên bỏ dở** (không vào nổi hàng), và ở OOS chênh lệch **hết ý nghĩa** (n=8,
+#     CI95 [−14,07; +1,00] chứa 0).
+# ⇒ Lý do wire: nhóm mỏng tiêu chi phí quản lý/theo dõi mà không mang được vốn; user chọn dồn
+#    lực sang deal thanh khoản cao. **KHÔNG được trích hằng số này như một edge đã kiểm chứng**,
+#    và khi ai đó tái tối ưu ngưỡng thì phải biết là thang liều phẳng + PBO 0,916 ⇒ mọi "điểm
+#    tối ưu" tìm được trên lịch sử là nhiễu.
+# CƠ SỞ SỐ: ADV3T = `Volume_3M_P50 × COALESCE(Price, Close)` — ĐÚNG một công thức ở cả 3 nơi
+# (hàm này, `signal_v11_sql.py:95` cột `liq`, `trading_bot/due_diligence.py::adv_vnd`).
+ADV_MIN_VND = 2e9
 
-def lag_filter_illiquid(bq, cand, asof, max_stale_days=LAG_ADV_MAX_STALE_DAYS):
-    """Loại ứng viên LAG KHÔNG ĐO ĐƯỢC THANH KHOẢN (Volume_3M_P50 ≤ 0 / thiếu / quá cũ).
+# BAL: `signal_v11_sql.py:143` đã có `WHERE liq >= 1e9` CỨNG trong SQL. Sàn mới KHÔNG sửa vào đó
+# — file ấy là SQL DÙNG CHUNG với engine backtest đã pin (`pt_v23_audit_2014.py:48` import thẳng
+# `SIGNAL_V11`), sửa 1e9→2e9 ở đó sẽ LẶNG LẼ đổi nền R3 đã pin. Sàn BAL vì vậy áp ở TẦNG LIVE,
+# trên cột `liq` có sẵn của mỗi dòng tín hiệu (cùng công thức, cùng ngày, không thêm truy vấn).
+
+
+def bal_filter_thin(today, min_adv_vnd=ADV_MIN_VND, liq_col="liq"):
+    """Loại dòng tín hiệu BAL có ADV3T dưới sàn. Thuần pandas — KHÔNG chạm BQ.
+
+    `today` = các dòng SIGNAL_V11 của phiên mới nhất đã lọc TIER_BAL (golive_recommend_v23.py §3),
+    cột `liq` = `Volume_3M_P50 × COALESCE(Price, Close)` tính ngay tại dòng đó ⇒ point-in-time
+    theo đúng ngày tín hiệu, không cần join lại.
+
+    FAIL-OPEN CÓ CHỦ Ý, khác chiều nhánh LAG: thiếu cột `liq` (SQL đổi schema) → GIỮ NGUYÊN +
+    trả cờ lỗi, vì SIGNAL_V11 đã tự chặn `liq >= 1e9` nên không có mã "không đo được thanh khoản"
+    nào lọt tới đây; chặn sạch book BAL vì một lần đổi tên cột là thiệt hại lớn hơn nhiều.
+    NaN Ở TỪNG DÒNG thì LOẠI (fail-closed) — cùng chiều nhánh LAG.
+
+    Trả (today đã lọc, list dict mô tả dòng bị loại, lỗi-nguồn|None).
+    """
+    if today is None or not len(today):
+        return today, [], None
+    if liq_col not in today.columns:
+        return today, [], f"KeyError: thiếu cột '{liq_col}' trong bảng tín hiệu BAL"
+    liq = pd.to_numeric(today[liq_col], errors="coerce")
+    bad = ~(liq >= float(min_adv_vnd))          # NaN → True → loại (fail-closed từng dòng)
+    dropped = [{"ticker": r.ticker, "play_type": r.play_type,
+                "adv_vnd": (None if pd.isna(v) else float(v)),
+                "reason": _thin_reason(v, min_adv_vnd)}
+               for r, v in zip(today[bad].itertuples(), liq[bad])]
+    return today[~bad].copy(), dropped, None
+
+
+def _thin_reason(adv, min_adv_vnd):
+    """Chuỗi lý do CHUNG cho cả 2 book — `lag_liq_ledger.parse_liq_reason` bắt template này
+    (nhánh `adv_thin`). Đổi câu chữ ⇒ phải đổi regex bên đó, nếu không sổ rơi về kind='other'."""
+    shown = "n/a" if adv is None or pd.isna(adv) else f"{float(adv) / 1e9:,.2f}"
+    return (f"ADV3T {shown} tỷ/phiên < sàn {min_adv_vnd / 1e9:.0f} tỷ — dưới sàn thanh khoản "
+            f"hệ thống (user chốt 2026-08-10, hiệu quả vốn)")
+
+
+def lag_filter_illiquid(bq, cand, asof, max_stale_days=LAG_ADV_MAX_STALE_DAYS,
+                        min_adv_vnd=ADV_MIN_VND):
+    """Loại ứng viên LAG KHÔNG ĐO ĐƯỢC THANH KHOẢN (Volume_3M_P50 ≤ 0 / thiếu / quá cũ)
+    HOẶC đo được nhưng DƯỚI SÀN `min_adv_vnd` (sàn 2 tỷ, user chốt 2026-08-10 — xem ADV_MIN_VND).
 
     VÌ SAO Ở TẦNG TÍN HIỆU, KHÔNG CHỈ Ở EXECUTOR (user quyết 2026-07-21, job
     Taylor_20260721_172103): gate `cap_lag_orders` (trading_bot/plan.py) chặn ĐÚNG các mã này
@@ -140,6 +199,10 @@ def lag_filter_illiquid(bq, cand, asof, max_stale_days=LAG_ADV_MAX_STALE_DAYS):
     FAIL-SAFE HAI CHIỀU, CÓ CHỦ Ý:
       · TỪNG MÃ đo được mà ADV ≤ 0 / dòng quá cũ (> max_stale_days) → LOẠI (fail-closed,
         cùng chiều `cap_lag_orders`).
+      · TỪNG MÃ đo được mà 0 < ADV < `min_adv_vnd` → LOẠI (sàn 2 tỷ). ĐÂY LÀ NHÁNH DUY NHẤT
+        loại một mã VẪN MUA ĐƯỢC — 3 nhánh còn lại loại mã không đo được/không mua được. Vì vậy
+        nó là nhánh DUY NHẤT có thể "loại oan", và cũng là nhánh duy nhất tắt được bằng tham số
+        (`min_adv_vnd=0` ⇒ trở lại hành vi trước 2026-08-10, bit-for-bit).
       · CẢ TRUY VẤN hỏng (BQ lỗi) → GIỮ NGUYÊN danh sách + WARNING (fail-open). Chặn sạch book
         LAG vì một lỗi mạng là thiệt hại lớn hơn nhiều, và lưới an toàn thật sự vẫn còn nguyên:
         `cap_lag_orders` ở executor fail-CLOSED nên không mã nào lọt thành lệnh mà ta không đo
@@ -179,6 +242,10 @@ QUALIFY ROW_NUMBER() OVER (PARTITION BY t.ticker ORDER BY t.time DESC) = 1""")
         if not (pd.notna(r.adv_vnd) and float(r.adv_vnd) > 0):
             dropped.append({"ticker": tk, "reason": f"Volume_3M_P50={r.Volume_3M_P50} → ADV ≤ 0, "
                             f"không mua được (mirror liquidity_require_positive)"})
+            continue
+        if float(r.adv_vnd) < float(min_adv_vnd):
+            dropped.append({"ticker": tk, "adv_vnd": float(r.adv_vnd),
+                            "reason": _thin_reason(float(r.adv_vnd), min_adv_vnd)})
     if dropped:
         bad = {d["ticker"] for d in dropped}
         cand = cand[~cand["ticker"].isin(bad)].copy()

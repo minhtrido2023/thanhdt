@@ -76,7 +76,7 @@ from simulate_holistic_nav import bq
 from signal_v11_sql import SIGNAL_V11
 from anomaly_gate import anomaly_excluded as _anomaly_excluded_shared
 from anomaly_gate import anomaly_flags_freshness as _anomaly_flags_freshness
-from lag_liquidity_filter import lag_filter_illiquid
+from lag_liquidity_filter import lag_filter_illiquid, bal_filter_thin, ADV_MIN_VND
 from lag_rating_filter import lag_filter_low_rating
 from lag_forensic_filter import lag_filter_forensic_banned
 
@@ -662,6 +662,21 @@ today["weak"] = today["rating8l"].fillna(0).astype(float) >= 4
 half_in_state = state_today in (1, 2)
 today["weight"] = np.where(today["weak"] & half_in_state, WEAK_PCT, POS_PCT)
 
+# GATE CỨNG sàn thanh khoản ADV3T ≥ 2 tỷ/phiên cho BAL (user chốt 2026-08-10, job
+# Taylor_20260810_081207) — LOẠI TRƯỚC `select_book` để slot bị bỏ trống được ứng viên
+# XẾP SAU lấp vào (đo 365 ngày: 26/47 phiên có >12 dòng eligible ⇒ hàng đợi thường dài hơn
+# MAX_POS, nên phần lớn phiên sẽ có mã lấp chỗ). Trọng số/slot KHÔNG đổi (vẫn POS_PCT) —
+# gate này KHÔNG dồn vốn vào mã to hơn, xem báo cáo §2. SIGNAL_V11 đã chặn sẵn `liq >= 1e9`
+# nên phần THÊM của sàn 2 tỷ = băng [1e9, 2e9) ≈ 11,1% số dòng eligible (16 tên/365 ngày).
+today, bal_liq_dropped, bal_liq_error = bal_filter_thin(today)
+if bal_liq_dropped:
+    print(f"  [bal-liq] loại {len(bal_liq_dropped)} dòng BAL dưới sàn ADV3T "
+          f"{ADV_MIN_VND/1e9:.0f} tỷ: "
+          + ", ".join(f"{d['ticker']} ({(d['adv_vnd'] or 0)/1e9:.2f} tỷ)" for d in bal_liq_dropped))
+if bal_liq_error:
+    print(f"  WARNING: sàn ADV BAL KHÔNG áp được ({bal_liq_error}) — giữ nguyên danh sách "
+          f"(SIGNAL_V11 vẫn chặn liq >= 1e9 trong SQL)")
+
 def select_book(cand):
     c = cand.sort_values(["prio", "ta"], ascending=[True, False])
     picked, fin_re = [], 0
@@ -1085,6 +1100,13 @@ status = {
     "lag_forensic_excluded": lag_forensic_dropped,
     "n_lag_forensic_excluded": len(lag_forensic_dropped),
     "lag_forensic_filter_error": lag_forensic_error,
+    # Dòng tín hiệu BAL bị loại vì SÀN THANH KHOẢN ADV3T < 2 tỷ/phiên (user chốt 2026-08-10).
+    # `bal_liq_filter_error` != None ⇒ sàn KHÔNG áp được (fail-open); nền `liq >= 1e9` của
+    # SIGNAL_V11 vẫn còn vì nó nằm trong chính SQL sinh tín hiệu.
+    "adv_min_vnd": ADV_MIN_VND,
+    "bal_liq_excluded": bal_liq_dropped,
+    "n_bal_liq_excluded": len(bal_liq_dropped),
+    "bal_liq_filter_error": bal_liq_error,
     "n_capit_basket": len(basket),
     # Sổ episode (§6b) — TRẠNG THÁI ĐANG GIỮ, khác hẳn capit_signal_today (điều kiện của ngày
     # chạy). Mọi gate báo cáo phải nhìn `capit_signal_today OR capit_episode_open`.
@@ -1267,6 +1289,10 @@ if dd_map:
         L.append(f"\n_{_DDD}_")
 L.append(f"\n## Notes\n- Sizing: %/slot tính trên VỐN CỦA BOOK (BAL book = {(1-w_tgt)*100:.0f}% NAV, LAG book = {w_tgt*100:.0f}% NAV theo allocator).")
 L.append(f"- BAL: max {MAX_POS} pos, hold 45d, stop -20%, Fin/RE (sector 8) cap 4 (RE_BACKLOG exempt); mã 8L rating≥4 half-size CHỈ trong BEAR/CRISIS.")
+L.append(f"- **Sàn thanh khoản CỨNG cả 2 book hệ thống: ADV3T ≥ {ADV_MIN_VND/1e9:.0f} tỷ/phiên** "
+         f"(user chốt 2026-08-10 — *hiệu quả vốn*, KHÔNG phải edge: backtest đo phần gia tăng là "
+         f"−0,26pp CAGR / PBO 0,916). Phiên này loại {len(bal_liq_dropped)} dòng BAL + "
+         f"{sum(1 for d in lag_liq_dropped if 'ADV3T' in d.get('reason', ''))} ứng viên LAG vì dưới sàn.")
 L.append(f"- LAG: KHÔNG ensemble switch (always-on), KHÔNG stop — quản trị bằng allocator (BEAR=0).")
 L.append(f"- State là chuỗi gated fail-safe; nếu macro feed lỗi, source = 'DT4_only'.")
 L.append(f"- CSV: `out/golive_v23_recommendations_{END}.csv` | status: `data/golive_v23_status.json`")

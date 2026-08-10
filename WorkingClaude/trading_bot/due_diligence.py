@@ -39,9 +39,20 @@ from .config import WORKDIR, DATA_DIR
 
 _log = logging.getLogger(__name__)
 
-# Ngưỡng CẢNH BÁO hiển thị (không phải gate). ADV_THIN neo theo sàn thanh khoản 2 tỷ/phiên mà
-# rổ CAPIT trong golive_recommend_v23.py đã dùng (`Price*Volume/1e9 >= 2`) — giữ 1 con số chung
-# cho cả fleet thay vì đẻ ngưỡng mới.
+# Ngưỡng CẢNH BÁO hiển thị TRONG FILE NÀY (file này vẫn thuần thông tin, không chặn lệnh).
+# ADV_THIN neo theo sàn thanh khoản 2 tỷ/phiên mà rổ CAPIT trong golive_recommend_v23.py đã dùng
+# (`Price*Volume/1e9 >= 2`) — giữ 1 con số chung cho cả fleet thay vì đẻ ngưỡng mới.
+#
+# ⚠️ TỪ 2026-08-10 CÙNG CON SỐ NÀY LÀ **GATE CỨNG** Ở TẦNG CHỌN MÃ cho 2 book hệ thống
+# (user chốt, job Taylor_20260810_081207): `lag_liquidity_filter.ADV_MIN_VND` loại thẳng ứng
+# viên LAG và dòng tín hiệu BAL có ADV3T < 2 tỷ TRƯỚC khi vào plan. Ở ĐÂY vẫn là CẢNH BÁO,
+# và điều đó KHÔNG phải code chết — mọi lệnh MUA trong plan đều chạy qua đây
+# (`send_plan_report.sh:611`), gồm cả những đường KHÔNG đi qua 2 gate kia:
+#   · sleeve discretionary/fear-buy (`discretionary_accumulation.py` — không import file này,
+#     cũng không qua lag/bal filter) — đây là ca mà cảnh báo mỏng còn nguyên giá trị;
+#   · vị thế legacy/exclude và mọi book khác (CAPIT/PARK) có gate thanh khoản RIÊNG.
+# Với mã book LAG/BAL thì đúng là cảnh báo này gần như không còn cơ hội in ra — đó là hệ quả
+# MONG MUỐN của gate, không phải dấu hiệu ngưỡng sai. Đổi 1 trong 2 con số ⇒ phải đổi con kia.
 ADV_THIN_VND = 2e9
 ADV_DEAD_VND = 1e8          # gần như không có giao dịch thật
 ORDER_ADV_WARN = 0.10       # lệnh > 10% ADV → cảnh báo impact
@@ -229,7 +240,9 @@ def _liquidity_part(row, in_universe, universe_last, est_value_vnd, quality_flag
         bits.append(f"🔴 thanh khoản ~0 (ADV3T {_fmt_vnd(adv)}/phiên) — NGOÀI mô hình backtest")
         red.append("THANH_KHOAN_CHET")
     elif adv < ADV_THIN_VND:
-        bits.append(f"⚠ thanh khoản mỏng (ADV3T {_fmt_vnd(adv)}/phiên < sàn {ADV_THIN_VND/1e9:.0f} tỷ)")
+        bits.append(f"⚠ thanh khoản mỏng (ADV3T {_fmt_vnd(adv)}/phiên < sàn {ADV_THIN_VND/1e9:.0f} tỷ "
+                    f"— sàn CỨNG của book LAG/BAL từ 2026-08-10; lệnh này tới được đây nghĩa là "
+                    f"nó KHÔNG đi qua gate đó)")
     else:
         bits.append(f"thanh khoản OK (ADV3T {_fmt_vnd(adv)}/phiên)")
     src = "ticker_prune" if UNIVERSE_SOURCE == "prune" else "universe_pit"
