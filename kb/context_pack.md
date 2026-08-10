@@ -1,16 +1,16 @@
-# Mike fleet — context pack (v1991)
+# Mike fleet — context pack (v1992)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-08-10T10:15:04] Wendy/finding — phép tính đơn giản: {"question": "3+3 bang may?", "answer": "6"}
-- [2026-08-10T10:16:23] Spyros/finding — opencode-perm-check: {"command": "python3 -c \"print('opencode-perm-ok')\"", "result": "SUCCESS", "output": "opencode-perm-ok", "job": "Spyros_20260810_101524"}
 - [2026-08-10T10:26:49] Taylor/finding — refactor-codex: REFACTOR-CODEX-OK
 - [2026-08-10T10:27:28] Wendy/finding — refactor-opencode-ack: {"ack": "REFACTOR-OPENCODE-OK", "job": "Wendy_20260810_102645", "note": "dong trinh xac nhan da duoc trich loat len bus"}
 - [2026-08-10T11:07:17] Taylor/finding — lag-anchor-widen-NAV-backtest-KHONG-UNG-HO: {"ket_luan": "NO-GO vi loi nhuan. Noi tran entry LAG phien 2/3 tu anchor len anchor x1.03 cho +0.08pp CAGR o muc NAV (29.01->29.09), block-bootstrap 95% CI [-0. …
 - [2026-08-10T11:11:34] Winston/finding — new-listings-daily: {"date": "2026-08-10", "lookback_days": 90, "total_new": 1, "needs_manual_rating": 0, "fresh_ipo": 0, "research_queue": [], "snapshot": "/home/trido/thanhdt/Wor …
 - [2026-08-10T11:13:40] quant-skeptic/verification — ⚠️ INCONCLUSIVE VERIFY: lag-anchor-widen-NAV-backtest-KHONG-UNG-HO: {"finding_topic": "lag-anchor-widen-NAV-backtest-KHONG-UNG-HO", "verdict": "INCONCLUSIVE", "confidence": "low", "summary": "VERDICT_JSON present but unparseable …
 - [2026-08-10T11:20:23] Taylor/finding — lag-anchor-widen: quant-skeptic CONFIRMED cao (bus truoc bao INCONCLUSIVE do BUG PARSER): {"correction_of": "2026-08-10T11:13 quant-skeptic event bao INCONCLUSIVE/low cho finding lag-anchor-widen-NAV-backtest-KHONG-UNG-HO", "verdict_that": "CONFIRMED …
+- [2026-08-10T11:58:50] Taylor/finding — park-trim 1-ma-lech-chan-ca-tai-khoan: root cause + patch CHO DUYET (thu hoi 88,3% suc mua 08-06): {"job": "Taylor_20260810_113500", "phan_A_root_cause": "Fix 08-05 (commit 15c4bc84, LotBook.corp_action_split) DONG DUOC gap ve CO CHE — replay park_holdings as …
+- [2026-08-10T11:40:09] Winston/finding — corp-action MỚI: VHM ex-date 2026-08-07: {"ticker": "VHM", "ex_date": "2026-08-07", "adj_drop_pct": -5.32, "raw_chg_pct": 0.0, "est_div_vnd_per_share": 4100.0, "est_div_pct_par": 41.0, "detection_v2":  …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
