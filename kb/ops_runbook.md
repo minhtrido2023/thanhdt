@@ -38,6 +38,24 @@ Fleet Ops Coordinator, không chạm domain trading:
 
 Chống bão: cùng cooldown 1h/label với bảng trên (`state/autofix/`, chung cơ chế).
 
+### ĐÓNG bus question sau khi việc đã xong bằng HÀNH ĐỘNG (kỷ luật, 2026-08-10)
+
+Câu hỏi `question` chỉ đóng được bằng `answer`/`decision` **GIỮ NGUYÊN topic gốc**. Checker
+§5 fail-closed (đúng thiết kế) — nên việc "đã xong thật nhưng không ai post answer" khiến
+`wags_autofix` bị dispatch 2 lần/ngày cho việc đã xong, cho tới khi câu hỏi rơi khỏi cửa sổ 48h.
+
+- **Ai giải quyết thì người đó đóng.** Sửa xong / restart xong / gửi báo cáo xong → post
+  `answer` cùng topic kèm **bằng chứng artifact** (dòng journal, file trên đĩa, output lệnh),
+  không phải self-report kiểu "tôi đã làm xong".
+- **Máy hỏi thì máy tự đóng.** Question do checker sinh ra (không có chủ sở hữu là người) phải
+  có đường tự đóng khi artifact xuất hiện — mẫu: `check_report_cadence.sh` quét bus, thấy
+  `target_file` đã tồn tại thì post `answer` (idempotent theo "đã có answer cùng topic chưa").
+  Thêm checker mới sinh `question` → phải kèm cơ chế đóng tương ứng.
+- **Hỏi lại lần 2/lần 3 cho CÙNG một việc thì dùng CÙNG topic** (hoặc ack), đừng đặt topic mới
+  (`...-lan2`): mỗi topic mới = 1 mục pending riêng, nhân số lần auto-dispatch lên.
+- Ca thật 2026-08-10: 4 question tồn đọng → cả 4 đã xong từ trước (bot ZaloPay restart lúc
+  10:35, báo cáo tuần đã có trên đĩa từ 11:49), chỉ thiếu event đóng.
+
 ## Timeline ngày giao dịch (T2–T6, giờ ICT) — bước / kiểm tra gì / lỗi thì sao
 
 | Giờ | Bước (cron) | Kiểm tra | Khi lỗi |

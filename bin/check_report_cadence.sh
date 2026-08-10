@@ -59,6 +59,62 @@ json.dump(state, open('$EMAILED_STATE', 'w'), indent=2, ensure_ascii=False)
   fi
 done
 
+# --- Auto-close các bus question `report-cadence-overdue-*` mà báo cáo ĐÃ có trên đĩa.
+#     Đây là question do CHÍNH script này sinh ra (máy hỏi, không có chủ sở hữu là người) —
+#     khi Taylor soạn xong file thì việc đã xong THẬT, nhưng không ai post `answer` giữ nguyên
+#     topic, nên ops_health_check §5 (fail-closed, đúng) cứ báo pending mãi → COORD_WARN
+#     dispatch wags_autofix 2 lần/ngày cho việc đã xong (ca thật 2026-08-10:
+#     report-cadence-overdue-weekly_2026-08-03_2026-08-07 pending trong khi file 59KB đã nằm
+#     trên đĩa từ 11:49 ICT). Máy hỏi thì máy tự đóng — bằng chứng đóng là ARTIFACT tồn tại,
+#     không phải self-report của agent nào.
+#     Idempotent: chỉ post khi CHƯA có answer cùng topic trên bus (không cần state file).
+CLOSABLE_Q="$(python3 - "$ROOT" "$WC_ROOT" << 'PYEOF'
+import glob, json, os, sys
+
+root, wc_root = sys.argv[1], sys.argv[2]
+PREFIX = "report-cadence-overdue-"
+questions, answered = {}, set()
+for path in sorted(glob.glob(os.path.join(root, "bus", "inbox", "*.jsonl"))):
+    try:
+        fh = open(path, encoding="utf-8")
+    except OSError:
+        continue
+    with fh:
+        for line in fh:
+            try:
+                rec = json.loads(line)
+            except Exception:
+                continue
+            topic = str(rec.get("topic") or "")
+            if not topic.startswith(PREFIX):
+                continue
+            etype = rec.get("event_type")
+            if etype == "question":
+                payload = rec.get("payload")
+                if isinstance(payload, dict) and payload.get("target_file"):
+                    questions[topic] = payload["target_file"]
+            elif etype in ("answer", "decision"):
+                answered.add(topic)
+
+for topic, tfile in sorted(questions.items()):
+    if topic in answered:
+        continue
+    # target_file lưu dạng "mike/reports/..." tương đối WorkingClaude
+    if os.path.exists(os.path.join(wc_root, tfile)):
+        print(f"{topic}\t{tfile}")
+PYEOF
+)"
+
+if [ -n "$CLOSABLE_Q" ]; then
+  printf '%s\n' "$CLOSABLE_Q" | while IFS=$'\t' read -r TOPIC TFILE; do
+    [ -n "$TOPIC" ] || continue
+    "$ROOT/bin/append_event.sh" Mike answer "$TOPIC" \
+      "{\"closed_by\":\"check_report_cadence.sh (auto)\",\"evidence\":\"target_file da ton tai tren dia\",\"target_file\":\"${TFILE}\"}" \
+      >/dev/null 2>&1 || true
+    echo "check_report_cadence: auto-closed bus question '${TOPIC}' (báo cáo đã có: ${TFILE})."
+  done
+fi
+
 PLAN="$(python3 - "$WC_ROOT" "$TODAY" "$STATE" << 'PYEOF'
 import glob, json, os, re, sys
 from datetime import date, timedelta
