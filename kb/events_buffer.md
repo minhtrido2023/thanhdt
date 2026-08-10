@@ -1456,3 +1456,20 @@
 - [2026-08-10T09:04:59Z] Wags/heartbeat — Wags_20260810_080351: {"status": "still_running", "elapsed_min": 61, "job_id": "Wags_20260810_080351", "source": "watcher"}
 - [2026-08-10T09:06:00Z] Wags/heartbeat — Wags_20260810_080351: {"status": "still_running", "elapsed_min": 62, "job_id": "Wags_20260810_080351", "source": "watcher"}
 - [2026-08-10T09:07:00Z] Wags/heartbeat — Wags_20260810_080351: {"status": "still_running", "elapsed_min": 63, "job_id": "Wags_20260810_080351", "source": "watcher"}
+
+## Consolidation 2026-08-10T09:21:29Z
+- [2026-08-10T09:08:00Z] Wags/heartbeat — Wags_20260810_080351: {"status": "still_running", "elapsed_min": 64, "job_id": "Wags_20260810_080351", "source": "watcher"}
+- [2026-08-10T09:09:00Z] Wags/heartbeat — Wags_20260810_080351: {"status": "still_running", "elapsed_min": 65, "job_id": "Wags_20260810_080351", "source": "watcher"}
+- [2026-08-10T09:10:00Z] Wags/heartbeat — Wags_20260810_080351: {"status": "still_running", "elapsed_min": 66, "job_id": "Wags_20260810_080351", "source": "watcher"}
+- [2026-08-10T09:11:00Z] Wags/heartbeat — Wags_20260810_080351: {"status": "still_running", "elapsed_min": 67, "job_id": "Wags_20260810_080351", "source": "watcher"}
+- [2026-08-10T09:12:00Z] Wags/heartbeat — Wags_20260810_080351: {"status": "still_running", "elapsed_min": 68, "job_id": "Wags_20260810_080351", "source": "watcher"}
+- [2026-08-10T09:13:00Z] Wags/heartbeat — Wags_20260810_080351: {"status": "still_running", "elapsed_min": 69, "job_id": "Wags_20260810_080351", "source": "watcher"}
+- [2026-08-10T09:14:00Z] Wags/heartbeat — Wags_20260810_080351: {"status": "still_running", "elapsed_min": 70, "job_id": "Wags_20260810_080351", "source": "watcher"}
+- [2026-08-10T09:15:00Z] Wags/heartbeat — Wags_20260810_080351: {"status": "still_running", "elapsed_min": 71, "job_id": "Wags_20260810_080351", "source": "watcher"}
+- [2026-08-10T09:16:01Z] Wags/heartbeat — Wags_20260810_080351: {"status": "still_running", "elapsed_min": 72, "job_id": "Wags_20260810_080351", "source": "watcher"}
+- [2026-08-10T09:17:01Z] Wags/heartbeat — Wags_20260810_080351: {"status": "still_running", "elapsed_min": 73, "job_id": "Wags_20260810_080351", "source": "watcher"}
+- [2026-08-10T09:18:01Z] Wags/heartbeat — Wags_20260810_080351: {"status": "still_running", "elapsed_min": 74, "job_id": "Wags_20260810_080351", "source": "watcher"}
+- [2026-08-10T09:19:01Z] Wags/heartbeat — Wags_20260810_080351: {"status": "still_running", "elapsed_min": 75, "job_id": "Wags_20260810_080351", "source": "watcher"}
+- [2026-08-10T09:20:01Z] Wags/heartbeat — Wags_20260810_080351: {"status": "still_running", "elapsed_min": 76, "job_id": "Wags_20260810_080351", "source": "watcher"}
+- [2026-08-10T09:20:50Z] Wags/heartbeat — Wags_20260810_080351: {"status": "in_progress", "note": "arch-reviewer round4 NEEDS_CHANGES tren abafb0bc: 2 KILLER. K1=_pids_holding so sanh readlink dang STRING => rm/mv logfile lam live=[] => bypass song lai tren CA 2 mode (+cron fleet_housekeeping tu unlink!). K2=REGRESSION CHINH TOI GAY RA: nhanh sync-cancel moi dong dau cancelled len worker con song, thieu term heartbeat cua reap. K3 dispatch.sh fail OPEN. N1 record corrupt => guard tat han. Dang sua ca 7 required_changes."}
+- [2026-08-10T09:21:01Z] Wags/heartbeat — Wags_20260810_080351: {"status": "still_running", "elapsed_min": 77, "job_id": "Wags_20260810_080351", "source": "watcher"}

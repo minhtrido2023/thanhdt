@@ -129,20 +129,26 @@
     },
     "codex": {
       "label": "OpenAI Codex CLI",
-      "enabled": false,
+      "enabled": true,
       "bin": "/home/trido/.nvm/versions/node/v22.23.0/bin/codex",
       "bin_env_override": "DISPATCH_CODEX_BIN",
       "env": {
         "PATH": "/home/trido/.nvm/versions/node/v22.23.0/bin:${PATH}"
       },
       "models": [
-        "gpt-5.1-codex",
-        "gpt-5.1-codex-mini"
+        "gpt-5.6-terra",
+        "gpt-5.6-luna",
+        "gpt-5.5",
+        "gpt-5.4-mini",
+        "codex-auto-review"
       ],
+      "default_model": null,
       "efforts": [
         "low",
         "medium",
-        "high"
+        "high",
+        "xhigh",
+        "max"
       ],
       "effort_caps": {},
       "supports_turns": false,
@@ -157,12 +163,22 @@
         "Wags"
       ],
       "notes": [
-        "enabled=false cho toi khi user chay `codex login` (da kiem 2026-08-03: Not logged in).",
+        "enabled=true tu 2026-08-10. KHONG dung ChatGPT OAuth (`codex login status` van bao",
+        "'Not logged in' — dung dung). Auth that = custom model_provider `cliproxyapi` trong",
+        "~/.codex/config.toml (base_url noi bo) + CLIPROXY_API_KEY. Key nam o",
+        "secrets/cliproxy_api_key.txt (gitignored, NGOAI repo mike) + export trong wc_env.sh",
+        "(dispatch.sh source file nay o moi lan chay, ca cron) — KHONG hardcode key vao file",
+        "track git nao (kb/cli_providers.json va wc_env.sh deu track git).",
+        "models = do tu ~/.codex/models_cache.json cua chinh proxy nay (2026-08-10), KHONG phai",
+        "model OpenAI chinh thuc — doi proxy/relogin thi doc lai cache va cap nhat danh sach nay.",
+        "default_model=null: KHONG truyen --model khi caller bo qua => codex tu dung default cua",
+        "~/.codex/config.toml (hien: gpt-5.6-terra). An toan hon ep 1 model co the sai voi proxy.",
         "env.PATH BAT BUOC: codex la shim `#!/usr/bin/env node`, engines>=16, ma /usr/bin/node",
         "la v12.22.9 => duoi PATH crontab no chet SyntaxError. Da do ca 2 chieu:",
-        "  co nvm bin trong PATH -> 'codex-cli 0.146.0' rc=0 ; khong co -> SyntaxError.",
-        "profile=prompt-inline: codex doc AGENTS.md chu khong doc CLAUDE.md, va fleet khong co",
-        "AGENTS.md nao => context phai prepend vao prompt. CHUA WIRE, lam khi user login xong.",
+        "  co nvm bin trong PATH -> 'codex-cli 0.146.1' rc=0 ; khong co -> SyntaxError.",
+        "profile=prompt-inline: codex doc AGENTS.md chu khong doc CLAUDE.md — dispatch.sh:858",
+        "(nhanh chung cho moi provider prompt-inline) da prepend render_profile_prompt.sh, KHONG",
+        "can code rieng cho codex.",
         "Sandbox: dung -s read-only / workspace-write, KHONG dung",
         "--dangerously-bypass-approvals-and-sandbox (arch-reviewer required_change #6c)."
       ]
