@@ -179,6 +179,19 @@ if [ "$MODEL" = "fable" ]; then
   echo "  Opus), không phải audit/fix routine. Không chắc → dùng opus (MIKE.md §Model routing)." >&2
 fi
 
+# Soft nudge (2026-08-10, token-usage audit): dispatch full headless opus/fable session cho
+# smoke-test/ping/connectivity-check là lãng phí — 6 job thật kiểu này trong 14 ngày (vd "ping
+# test", "echo test") đều chạy opus+high. Không block (đôi khi cố ý test đúng agent/model đó),
+# chỉ nhắc dùng probe nhẹ hơn (vd bin/cli_provider.sh check) khi không cần LLM thật trả lời.
+if [ "$MODEL" = "opus" ] || [ "$MODEL" = "fable" ]; then
+  _plen=${#prompt}
+  if [ "$_plen" -lt 80 ] && printf '%s' "$prompt" | grep -qiE 'ping test|echo test|smoke test|connectivity'; then
+    echo "NOTE: prompt ngắn kiểu smoke-test/ping dùng --model $MODEL — nếu chỉ cần kiểm tra kết" >&2
+    echo "  nối/routing (không cần LLM trả lời thật), cân nhắc bin/cli_provider.sh check thay vì" >&2
+    echo "  tốn 1 dispatch $MODEL đầy đủ." >&2
+  fi
+fi
+
 # --- Effort policy (2026-07-14, user) ------------------------------------------
 # Reasoning-effort per dispatch. Mặc định 'medium' (task thường lệ). Task phức tạp:
 # truyền --effort high. Chính sách CỨNG của user: model 'fable' chỉ được tối đa 'high'
