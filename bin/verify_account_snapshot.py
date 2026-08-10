@@ -295,18 +295,32 @@ def dnse_close_prices(tickers, with_source=False):
     giá 10.000đ): G1 close 24.250 (phiên 08-10) vs giá tham chiếu thật hôm nay 20.200 ⇒
     SpaceX +5.013.250đ ≈ +0,5% NAV, user bắt được bằng ảnh chụp app.
 
-    Vì vậy: nếu giá G1 KHÔNG PHẢI của phiên hôm nay, lấy `secdef.basicPrice` — GIÁ THAM
-    CHIẾU CHÍNH THỨC CỦA SÀN cho phiên hiện tại, đã bao gồm mọi điều chỉnh corp action, và
-    là con số app DNSE hiển thị. Đây là lời giải TỔNG QUÁT: nó không cần biết mã nào có sự
+    Vì vậy: nếu giá G1 KHÔNG PHẢI của phiên hôm nay, giải giá THUỘC PHIÊN HÔM NAY qua
+    `_today_session_price()`. Đây là lời giải TỔNG QUÁT: nó không cần biết mã nào có sự
     kiện gì, chỉ cần biết "giá đang cầm thuộc phiên nào". Nó cũng vá luôn UPCOM, nơi giá
     tham chiếu = giá BÌNH QUÂN phiên trước chứ không phải giá đóng cửa (TV1 08-11: close
     19.800 nhưng basicPrice 19.700 — app DNSE hiện 19.700).
+
+    ⚠️ HAI CỬA SỔ, KHÔNG PHẢI MỘT (quant-skeptic phá được phạm vi bản vá đầu, vá nốt cùng
+    job). `close_price()` hỏng theo HAI kiểu khác nhau tuỳ giờ chạy:
+      · TIỀN PHIÊN (00:00–09:00): G1 trả `closePrice` phiên TRƯỚC, khác 0 ⇒ bắt bằng cách so
+        `time` của chính entry G1 với hôm nay.
+      · GIỮA PHIÊN (09:00–14:45): G1 trả `closePrice=0` ở MỌI board (phiên chưa đóng) ⇒
+        entry G1 rơi khỏi bộ lọc, mã BIẾN MẤT khỏi kết quả, và caller
+        (`compute_active_nav.resolve_prices`) rơi về BQ T-1 CHƯA điều chỉnh × qty ĐÃ điều
+        chỉnh = TÁI LẬP NGUYÊN VẸN cùng khoản thổi phồng, chỉ khác nhãn `bq_close_stale`.
+        Đây đúng là khung DollarBill hay chạy (sự cố 2026-08-07 11:5x, `retro-2026-08-07`
+        §6 — gốc lỗi đã biết từ 08-07 mà chưa ai vá) và ex-date làm nó nặng gấp bội: 08-07
+        lệch 1,13% NAV, MBB hôm nay lệch 20,0% trên một mã.
+    Cả hai cửa sổ giờ đi chung một đường: G1 không thuộc phiên hôm nay (thiếu HOẶC cũ) ⇒
+    `_today_session_price()`.
 
     KHÔNG đổi hành vi ở đường chạy chính EOD (17:30) / báo cáo 15:00: lúc đó G1 close ĐÃ
     thuộc phiên hôm nay ⇒ nhánh mới không kích hoạt, giá vẫn là giá ATC thật như cũ.
 
     `with_source=True` ⇒ trả (prices, sources) với sources[tk] ∈ {'dnse_g1_today',
-    'dnse_secdef_basic'} để consumer ghi provenance trung thực thay vì khai khống 'dnse_g1'.
+    'dnse_trade_today', 'dnse_secdef_basic'} để consumer ghi provenance trung thực thay vì
+    khai khống 'dnse_g1'.
     """
     sys.path.insert(0, WC_ROOT)
     from trading_bot.brokers import get_dnse_client
@@ -322,24 +336,62 @@ def dnse_close_prices(tickers, with_source=False):
         entries = (r or {}).get("prices") or []
         g1 = next((e for e in entries
                    if e.get("boardId") == "G1" and e.get("closePrice")), None)
-        if not g1:
-            continue
-        px, src = float(g1["closePrice"]) * 1000, "dnse_g1_today"
+        px, src = ((float(g1["closePrice"]) * 1000, "dnse_g1_today") if g1 else (None, None))
         # `time` dạng "2026-08-10 14:45:03.261" (giờ ICT của sàn). Thiếu/không parse được ⇒
         # GIỮ giá G1 (fail-safe về hành vi cũ, đã chạy đúng suốt), không đoán sang nhánh mới.
-        g1_day = str(g1.get("time") or "")[:10].replace("/", "-")
-        if g1_day and g1_day < today:
-            basic = _secdef_basic_price(client, tk)
-            if basic and basic > 0:
-                if abs(basic - px) > 0.5:
-                    substituted.append(f"{tk} {px:,.0f}→{basic:,.0f} (G1 close phiên {g1_day})")
-                px, src = basic, "dnse_secdef_basic"
+        g1_day = str((g1 or {}).get("time") or "")[:10].replace("/", "-")
+        # g1 THIẾU = giữa phiên (closePrice=0 mọi board); g1_day < today = tiền phiên.
+        if g1 is None or (g1_day and g1_day < today):
+            alt_px, alt_src = _today_session_price(client, tk, today)
+            if alt_px:
+                if px is not None and abs(alt_px - px) > 0.5:
+                    substituted.append(f"{tk} {px:,.0f}→{alt_px:,.0f} "
+                                       f"(G1 close phiên {g1_day}, thay bằng {alt_src})")
+                px, src = alt_px, alt_src
+        # Không giải được giá phiên hôm nay VÀ không có G1 nào để giữ ⇒ bỏ qua, caller tự
+        # rơi về BQ và gắn nhãn `bq_close_stale` (trung thực về provenance, như cũ).
+        if px is None:
+            continue
         prices[tk], sources[tk] = px, src
     if substituted:
-        print(f"ℹ️ giá tham chiếu phiên HÔM NAY (secdef.basicPrice) thay cho giá đóng cửa phiên "
-              f"trước — thường là mã đang giao dịch không hưởng quyền: {'; '.join(substituted)}",
-              file=sys.stderr)
+        print(f"ℹ️ giá thuộc phiên HÔM NAY thay cho giá đóng cửa phiên trước — thường là mã "
+              f"đang giao dịch không hưởng quyền: {'; '.join(substituted)}", file=sys.stderr)
     return (prices, sources) if with_source else prices
+
+
+def _today_session_price(client, ticker, today):
+    """Giá THUỘC PHIÊN `today` của một mã → (px_vnd, source) hoặc (None, None).
+
+    Thứ tự ưu tiên, và LÝ DO của thứ tự đó:
+      1. `latest_trade` G1 `matchPrice` — mark SỐNG, cùng vintage với `openQuantity`, đúng
+         bright-line §6 (same-day: DNSE, never BQ). Đây cũng chính là hướng DollarBill đề
+         xuất cho Taylor trong finding 2026-08-07 ("nên fallback sang latest_trade, KHÔNG
+         phải BQ").
+      2. `secdef.basicPrice` — giá tham chiếu CHÍNH THỨC của sàn cho phiên hiện tại, đã gồm
+         mọi điều chỉnh corp action. Dùng khi mã CHƯA khớp lệnh nào trong phiên (đầu phiên,
+         mã kém thanh khoản) và cả trước giờ mở cửa, lúc (1) về mặt định nghĩa không tồn tại.
+
+    ⚠️ CỔNG VINTAGE TRÊN `latest_trade` LÀ BẮT BUỘC, KHÔNG PHẢI PHÒNG XA: ngoài giờ giao
+    dịch endpoint này trả khớp lệnh của PHIÊN TRƯỚC, tức giá CHƯA điều chỉnh — đo thật lúc
+    02:2x ICT 2026-08-11, MBB trả `matchPrice=24,25 / time=2026-08-10 14:45:03.260` đúng
+    bằng con số sai mà cả bản vá này sinh ra để loại bỏ. Bỏ cổng `time == today` là tự tay
+    dựng lại bug qua một cửa khác.
+
+    Mọi lỗi mạng/thiếu trường ⇒ (None, None) để caller giữ hành vi cũ; hàm này chỉ được phép
+    LÀM TỐT HƠN, không được phép làm hỏng đường đang chạy."""
+    try:
+        r = client.latest_trade(ticker)
+    except Exception:
+        r = None
+    trades = (r or {}).get("trades") or []
+    t = next((e for e in trades
+              if e.get("boardId") == "G1" and (e.get("matchPrice") or 0) > 0), None)
+    if t and str(t.get("time") or "")[:10].replace("/", "-") == today:
+        return float(t["matchPrice"]) * 1000, "dnse_trade_today"
+    basic = _secdef_basic_price(client, ticker)
+    if basic and basic > 0:
+        return basic, "dnse_secdef_basic"
+    return None, None
 
 
 def _secdef_basic_price(client, ticker):

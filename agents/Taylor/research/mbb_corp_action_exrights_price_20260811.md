@@ -111,11 +111,25 @@ Cái fail-closed thật sự bảo vệ ta là (a) cổng `_status: CONFIRMED` +
 
 ## 3. Vấn đề 2 — giá: LỚP BUG TỔNG QUÁT, không phải chuyện của MBB
 
-### Cơ chế
+### Cơ chế — HAI cửa sổ hỏng theo HAI kiểu, không phải một
 `dnse_close_prices()` đọc `close_price` boardId=G1 — **giá đóng cửa của PHIÊN GẦN NHẤT ĐÃ XONG**.
-Chạy hàm này TRƯỚC khi phiên hôm nay đóng (tiền phiên 01:30, hay giữa phiên 10:00) thì giá đó thuộc
-phiên **TRƯỚC**. Với một mã đang GDKHQ hôm nay, giá phiên trước là giá **chưa điều chỉnh**, trong
-khi `openQuantity` của broker thì **đã điều chỉnh**. Nhân giá cũ × số lượng mới = thổi phồng NAV.
+
+| Khung giờ | `close_price` G1 trả gì | Hậu quả trước khi vá |
+|---|---|---|
+| **Tiền phiên** 00:00–09:00 | `closePrice` phiên TRƯỚC, **khác 0** | giá cũ × qty mới ⇒ thổi phồng NAV |
+| **Giữa phiên** 09:00–14:45 | **`closePrice=0` ở MỌI board** | entry G1 rớt khỏi bộ lọc ⇒ mã **biến mất** ⇒ caller rơi về **BQ T-1** (chưa điều chỉnh) × qty mới ⇒ **cùng khoản thổi phồng**, chỉ khác nhãn `bq_close_stale` |
+| **EOD** ≥14:45 | `closePrice` phiên HÔM NAY | đúng, không đụng tới |
+
+Với một mã đang GDKHQ hôm nay, giá phiên trước là giá **chưa điều chỉnh**, trong khi `openQuantity`
+của broker thì **đã điều chỉnh**. Nhân giá cũ × số lượng mới = thổi phồng NAV.
+
+> ⚠️ **Bản vá ĐẦU của job này chỉ phủ cửa sổ TIỀN PHIÊN** và docstring lại tuyên bố phủ cả
+> "giữa phiên 10:00" — **quant-skeptic phá được đúng chỗ đó** và chạy thật để chứng minh: với
+> `closePrice=0`, nhánh mới không bao giờ kích hoạt (`secdef_calls == []`), mã rớt khỏi kết quả,
+> `compute_active_nav` rơi về BQ T-1 và **tái lập nguyên vẹn +5.123.250**. Đã vá nốt trong cùng
+> job (§3b). Gốc lỗi giữa phiên KHÔNG do job này tạo ra — DollarBill đã đo và báo từ **2026-08-07**
+> (`retro-2026-08-07` §6, lệch 1,13% NAV lúc 11:5x) kèm đề xuất "fallback sang `latest_trade`,
+> KHÔNG phải BQ"; chưa ai vá. Ex-date làm nó nặng gấp bội: 1,13% → **20,0% trên một mã**.
 
 Đây là **cái bẫy thứ hai, ngược chiều cái bẫy 2026-07-06**. Lần đó: BQ sync đêm nên đọc BQ lúc
 15:00 ra giá hôm qua ⇒ đã sửa bằng cách chuyển sang `close_price` G1. Lần này: chính `close_price`
@@ -134,6 +148,26 @@ này (`secdef_calls == []`).
 
 **Fail-safe:** `secdef` lỗi mạng / trả rỗng / `time` thiếu ⇒ giữ nguyên giá G1 (hành vi cũ). Nhánh
 mới chỉ được phép LÀM TỐT HƠN, không được phép làm hỏng đường đang chạy.
+
+### 3b. Vá nốt cửa sổ GIỮA PHIÊN (sau killer-objection của quant-skeptic)
+Điều kiện kích hoạt đổi từ *"G1 cũ"* thành *"G1 **không thuộc phiên hôm nay** — thiếu HOẶC cũ"*,
+nên cả hai cửa sổ đi chung một đường. Giá phiên hôm nay giải bằng `_today_session_price()`:
+
+1. **`latest_trade` G1 `matchPrice`** — mark **sống**, cùng vintage với `openQuantity`, đúng
+   bright-line §6 (same-day: DNSE, never BQ). Chính là hướng DollarBill đề xuất 08-07.
+2. **`secdef.basicPrice`** — giá tham chiếu chính thức phiên hiện tại, khi mã **chưa khớp lệnh
+   nào** (đầu phiên, mã kém thanh khoản) và cả trước giờ mở cửa, lúc (1) theo định nghĩa không tồn tại.
+3. Cả hai hỏng ⇒ **rớt có kiểm soát** ⇒ caller gắn nhãn `bq_close_stale` trung thực. Không bịa giá.
+
+> ⚠️ **Cổng vintage trên `latest_trade` là BẮT BUỘC, không phải phòng xa.** Ngoài giờ giao dịch
+> endpoint này trả khớp lệnh **phiên trước** — đo thật lúc 02:2x ICT 08-11, MBB trả
+> `matchPrice=24,25 / time=2026-08-10 14:45:03.260`, **đúng bằng con số sai** mà cả bản vá này
+> sinh ra để loại bỏ. Bỏ cổng `time == today` là tự tay dựng lại bug qua một cửa khác. Có ca test
+> riêng cho đúng tình huống đó.
+
+`exrights_price_basis_selfcheck.py` **29 → 38 ca** (+9), gồm ca **chứng minh ngược** (bộ lọc bản cũ
+trả rỗng trên chính fixture giữa phiên ⇒ `(24.250−20.200)×1.265 = 5.123.250`), ca cổng vintage, và
+ca khẳng định **đường EOD không đổi** (`trade_calls == [] and secdef_calls == []`).
 
 ### Nó vá nhiều hơn MBB
 Chạy thật sáng 08-11 trên danh mục SpaceX, hàm thay **3** mã chứ không phải 1:
@@ -202,11 +236,11 @@ sinh lệnh bán vượt phần bán được. Không cần vá gì thêm.
 
 ## 6. Kiểm chứng
 
-**12/12 file selfcheck PASS trên 3 môi trường TZ** (`Asia/Ho_Chi_Minh` / `env -u TZ` /
-`America/New_York`) — §16 + skill `verify-before-done`:
+**12/12 file selfcheck PASS trên 4 môi trường TZ** (`Asia/Ho_Chi_Minh` / `env -u TZ` /
+`America/New_York` / `UTC`) — §16 + skill `verify-before-done`:
 
-`corp_action_selfcheck` 70/70 (từ 56, +14 ca mới) · `exrights_price_basis_selfcheck` **29/29
-(MỚI)** · `verify_account_snapshot_corp_action` 12/12 · `compute_active_nav` ALL PASS ·
+`corp_action_selfcheck` 70/70 (từ 56, +14 ca mới) · `exrights_price_basis_selfcheck` **38/38
+(MỚI, 29 + 9 ca cửa sổ giữa phiên)** · `verify_account_snapshot_corp_action` 12/12 · `compute_active_nav` ALL PASS ·
 `compute_park_trim` 63/63 · `compute_jit_unpark` ALL PASS (ma trận TZ) · `nav_scripts_2account`
 PASS · `nav_cum_dividend` 38/38 · `money_path_freshness` ALL PASS ·
 `verify_account_snapshot_lot_reset` 25/25 · `preflight_order_invariants` 9/9 ·
@@ -233,7 +267,11 @@ Fixture đóng băng từ bản đọc thật 08-11, **không assert lên trạn
 
 2. **Quyền mua 10:1 @10.000đ — QUYẾT ĐỊNH VỐN, cần user.** Không thuộc `corp_actions.json` (file
    đó chỉ mô tả sự kiện TỰ ĐỘNG tăng số lượng). Thời gian chuyển nhượng quyền **18–26/08/2026**.
-   Quy mô: SpaceX ~126 quyền ≈ **1,26tr đồng**, ZaloPay ~23 quyền ≈ **0,23tr đồng** — nhỏ, nhưng
+   Quy mô: SpaceX **110 quyền ≈ 1,10tr đồng**, ZaloPay **20 quyền ≈ 0,20tr đồng** — tính trên số
+   cổ phiếu **TRƯỚC chia** (1.100/10 và 202/10, làm tròn xuống): quyền mua tính trên lượng nắm giữ
+   tại ngày ĐKCC, **cùng mốc** với cổ tức CP, không cộng dồn lên nhau — và đúng bằng `r_quyền=0,10`
+   mà chính công thức giá ở §1 đã dùng. *(Bản đầu ghi 126/23 vì lỡ tính trên số SAU chia —
+   quant-skeptic bắt được mâu thuẫn ~160k đ, đã sửa cả ở đây lẫn `corp_actions.json`.)* Nhỏ, nhưng
    không thực hiện thì bị pha loãng. **Cần user quyết trước 26/08.**
 
 3. **`_status` mới `CONFIRMED` bởi agent, CHƯA có chữ ký user** (`decided_by: "agent"`, §20) — khác

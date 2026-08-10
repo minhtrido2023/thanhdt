@@ -207,7 +207,82 @@ src_txt = open(os.path.join(MIKE_BIN, "daily_nav_snapshot.py"), encoding="utf-8"
 check("cổng 5% vẫn còn nguyên trong daily_nav_snapshot.py (bản vá KHÔNG gỡ lưới an toàn)",
       "PRICE_XCHECK_TOLERANCE_PCT = 5.0" in src_txt)
 
-print("\n[10] §16 — neo TZ tường minh: kết quả KHÔNG đổi theo TZ của tiến trình gọi")
+print("\n[10] CỬA SỔ GIỮA PHIÊN (09:00–14:45): closePrice=0 mọi board — nửa đồng hồ quant-skeptic")
+# Bản vá ĐẦU chỉ phủ tiền phiên. Giữa phiên DNSE trả closePrice=0 ở MỌI board (retro-2026-08-07
+# §6, DollarBill đo thật 11:5x) ⇒ entry G1 rớt khỏi bộ lọc ⇒ mã BIẾN MẤT khỏi kết quả ⇒
+# compute_active_nav rơi về BQ T-1 CHƯA điều chỉnh × qty ĐÃ điều chỉnh = tái lập nguyên vẹn
+# khoản thổi phồng. Ba ca dưới: (a) không rớt nữa, (b) chứng minh ngược, (c) cổng vintage.
+
+
+class MidSessionClient(FakeClient):
+    """Giữa phiên: close_price trả 0 mọi board. `lt` = (matchPrice, ngày) của latest_trade."""
+
+    def __init__(self, table, lt=None, **kw):
+        super().__init__(table, **kw)
+        self.lt, self.trade_calls = lt, []
+
+    def close_price(self, tk):
+        if tk not in self.table:
+            raise KeyError(tk)
+        return {"prices": [{"boardId": b, "symbol": tk, "closePrice": 0,
+                            "time": f"{TODAY} 09:00:00.122"} for b in ("G7", "G1", "T4")]}
+
+    def latest_trade(self, tk):
+        self.trade_calls.append(tk)
+        if self.lt is None:
+            return {"trades": []}
+        px, day = self.lt
+        return {"trades": [{"boardId": "G1", "symbol": tk, "matchPrice": px,
+                            "time": f"{day} 11:52:07.100"}]}
+
+
+# (a) mã đang GDKHQ, giữa phiên, chưa khớp lệnh nào ⇒ phải ra basicPrice, KHÔNG được rớt
+c = MidSessionClient(REAL)
+(prices, src), _ = call(c, ["MBB"], with_source=True)
+check("giữa phiên + chưa có khớp lệnh ⇒ secdef.basicPrice 20.200 (KHÔNG rớt khỏi kết quả)",
+      prices.get("MBB") == 20200.0 and src.get("MBB") == "dnse_secdef_basic", (prices, src))
+
+# (b) CHỨNG MINH NGƯỢC: bộ lọc G1-có-closePrice của bản CŨ trả rỗng trên chính fixture này
+_old_g1 = next((e for e in c.close_price("MBB")["prices"]
+                if e.get("boardId") == "G1" and e.get("closePrice")), None)
+check("BẢN CŨ trên cùng fixture: không tìm được entry G1 ⇒ mã rớt ⇒ rơi về BQ T-1 (bug thật)",
+      _old_g1 is None, _old_g1)
+check("và BQ T-1 chưa điều chỉnh × qty đã điều chỉnh = +5.123.250 đúng như trước khi vá",
+      round((24250.0 - 20200.0) * 1265) == 5123250, (24250.0 - 20200.0) * 1265)
+
+# (c) CỔNG VINTAGE — ca nguy hiểm nhất: latest_trade trả khớp lệnh PHIÊN TRƯỚC (chưa điều
+#     chỉnh). Đo THẬT lúc 02:2x ICT 08-11: MBB matchPrice=24,25 time=2026-08-10 14:45:03.260.
+c = MidSessionClient(REAL, lt=(24.25, PREV))
+(prices, src), _ = call(c, ["MBB"], with_source=True)
+check("latest_trade thuộc PHIÊN TRƯỚC ⇒ BỊ TỪ CHỐI, rơi về basicPrice (không tái lập bug)",
+      prices.get("MBB") == 20200.0 and src.get("MBB") == "dnse_secdef_basic", (prices, src))
+check("  ↳ bỏ cổng vintage thì sẽ ra đúng 24.250 sai — cổng là thứ duy nhất chặn",
+      c.trade_calls == ["MBB"], c.trade_calls)
+
+# (d) latest_trade ĐÚNG phiên hôm nay ⇒ dùng mark sống (đúng bright-line §6, hơn basicPrice)
+c = MidSessionClient(REAL, lt=(20.55, TODAY))
+(prices, src), _ = call(c, ["MBB"], with_source=True)
+check("latest_trade thuộc phiên HÔM NAY ⇒ dùng mark sống 20.550, nguồn 'dnse_trade_today'",
+      prices.get("MBB") == 20550.0 and src.get("MBB") == "dnse_trade_today", (prices, src))
+check("  ↳ có mark sống rồi thì KHÔNG gọi secdef nữa", c.secdef_calls == [], c.secdef_calls)
+
+# (e) FAIL-SAFE: giữa phiên mà cả latest_trade lẫn secdef đều hỏng ⇒ rớt có kiểm soát để
+#     caller gắn nhãn `bq_close_stale` trung thực, KHÔNG bịa giá.
+c = MidSessionClient(REAL, secdef_raises=True)
+(prices, src), _ = call(c, ["MBB"], with_source=True)
+check("cả hai nguồn hỏng ⇒ mã vắng khỏi kết quả (fail-safe, caller khai bq_close_stale)",
+      "MBB" not in prices, prices)
+
+# (f) ĐƯỜNG EOD 17:30 KHÔNG ĐỔI: G1 close thuộc hôm nay ⇒ không gọi latest_trade lẫn secdef
+c = MidSessionClient(REAL, lt=(99.9, TODAY))
+c.close_price = FakeClient(REAL, close_day=TODAY).close_price
+(prices, src), _ = call(c, ["MBB"], with_source=True)
+check("EOD: G1 close hôm nay ⇒ giữ 24.250, KHÔNG gọi latest_trade/secdef (đường chạy chính)",
+      prices.get("MBB") == 24250.0 and src.get("MBB") == "dnse_g1_today"
+      and c.trade_calls == [] and c.secdef_calls == [],
+      (prices, src, c.trade_calls, c.secdef_calls))
+
+print("\n[11] §16 — neo TZ tường minh: kết quả KHÔNG đổi theo TZ của tiến trình gọi")
 # Ngày 'hôm nay' quyết định nhánh nào chạy. Máy đặt TZ=America/New_York lúc 01:30 ICT vẫn đang
 # là 'hôm qua' theo giờ Mỹ ⇒ nếu hàm dùng date.today() trần thì nhánh chọn sai.
 probe = r'''
