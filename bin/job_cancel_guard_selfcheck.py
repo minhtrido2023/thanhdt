@@ -1386,6 +1386,7 @@ def main():
           str(read_job(jobs, "J_S8").get("pin_failed")))
     check("S8 worker untouched", alive(work_s8), "worker=%s" % work_s8)
 
+
     # S7 — EVIDENCE_GRACE_S had no discriminating coverage at all: setting it to 1e11 and
     # deleting the blind term produced identical results. It is the window killer S1 walked
     # through, and it has to be tested in BOTH directions — too small hangs every new job at

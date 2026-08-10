@@ -660,6 +660,15 @@ def cmd_job_set(a, internal=False, stale_proven=False):
     #   repid   — rewrite pid= to something dead, which was the 2-command way around the
     #             first version of this guard: `job-set pid=999999` then `job-set
     #             status=failed`, both rc=0 with the worker still alive (arch-reviewer S3).
+    # KNOWN GAP, deliberately still open (round 6, NICE 6): a status change WITHIN the live
+    # set is not treated as a claim, so `job-set <id> status=usage_limited` on a running job
+    # succeeds and the board then reads PENDING-RESUME about a job nobody paused. Closing it
+    # means making live->live transitions ownership-checked, and every production writer of
+    # those statuses (dispatch.sh:392/489/1209/1218, all via JSET) does carry the credentials
+    # — but that is a code-reading argument, not a demonstration, and the L2 allowlist above
+    # it was a deliberate round-S4 decision. Getting it wrong hangs the fleet's retry path,
+    # which is the failure this guard must never become, so it wants its own change with its
+    # own E2E rather than a ride-along at the end of round 6.
     closing = new_status is not None and new_status not in LIVE_STATUSES
     # Only a REWRITE of an existing pid is suspicious. dispatch.sh:981 stamps pid= onto a
     # record that has none yet (`JSET pid="$BASHPID"`, the very first thing the wrapper does)
@@ -1892,7 +1901,8 @@ def cmd_job_list(a):
     jobs_dir = a[0]
     limit = _as_int(a[1], 20) if len(a) > 1 else 20
     n = now_epoch()
-    rows = _load_jobs(jobs_dir)[:limit]
+    all_jobs = _load_jobs(jobs_dir)
+    rows = all_jobs[:limit]
     print("%-26s %-18s %-9s %6s %7s %7s %4s" % ("JOB_ID", "FROM->TO", "STATUS", "AGE", "LOG_AGE", "HB_AGE", "ATT"))
     for o in rows:
         age = n - _as_int(o.get("started_at"), n)
@@ -1909,7 +1919,10 @@ def cmd_job_list(a):
     # Round 6, K2: the whole board was running unpinned — the guard silently in its weaker,
     # pre-round-5 mode on every record — and nothing anywhere would ever have said so. An
     # unpinned live job is not broken, it just cannot be proven dead; say it out loud.
-    unpinned = [o for o in rows if o.get("status") in LIVE_STATUSES
+    # Over EVERY live record, not just the `limit` rows printed above: a job stuck live since
+    # last month is exactly the one that scrolls off the default view, and "unpinned" is a
+    # property of the board, not of the page being looked at.
+    unpinned = [o for o in all_jobs if o.get("status") in LIVE_STATUSES
                 and not _record_is_pinned(o)]
     if unpinned:
         print("\n%d live job(s) with NO pinned logfile identity — cannot be proven dead, so "
