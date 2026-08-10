@@ -45,3 +45,6 @@
 - [2026-07-29T12:07:57Z] Plan SpaceX 07-30: HOLD (0 lệnh). TV1 disc DONE (400cp). CAPIT deferred 3 lệnh 142M (PVT/SIP/VNM) chờ nạp vốn. Cash 4.53M. DT5G NEUTRAL. CHỜ USER DUYỆT plan_SpaceX_2026-07-30.json.
 - [2026-07-29T12:12:27Z] plan_ZaloPay_2026-07-30.json ĐÃ XONG: HOLD (0 lệnh). CAPIT signal tắt 07-29. LAG upcoming: DHD/MAC/TV3 cửa sổ mở từ 08-01+. NEXT: chờ user approve plan + lập plan SpaceX T+1 nếu có dispatch.
 - [2026-07-30T12:13:56Z] Plan 07-31 SpaceX: HOLD ALL (0 lệnh, cash 4.53M thiếu). BAL AGG deferred 45.66M. CAPIT deferred PVT/SIP/VNM 147.34M. LAG source error (pickle mismatch) — cần fix trước 08-03 tối. Deferred tổng 193M. Đang chờ user duyệt + nạp vốn mới. NEXT: (1) user duyệt plan 07-31, (2) Winston fix LAG pickle error, (3) khi user nạp vốn → re-dispatch để kích hoạt deferred theo priority PVT→SIP→VNM→AGG
+
+## Archived 2026-08-10 (keep=12 days=0 require_done=False)
+- [2026-07-30T12:14:23Z] Plan ZaloPay 2026-07-31 DONE — HOLD, orders[]=empty. BAL AGG deferred (cash 5.78M < slot 24.45M, cần bán PARK ~19M + user approve). DHD LAG cửa sổ 08-01, MAC/TV3 08-04. Chờ user duyệt trước 08:45 ICT 07-31. NEXT: user approve/reject plan + quyết định AGG rebalance.
