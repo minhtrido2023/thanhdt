@@ -1746,3 +1746,7 @@
 - [2026-08-10T12:11:17Z] Mafee/status — eod-trading-report: {"account": "ZaloPay", "plan_date": "2026-08-10", "delivered_via": "trading_report_thread"}
 - [2026-08-10T12:12:35Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-08-10", "delivered_via": "trading_report_thread"}
 - [2026-08-10T12:14:22Z] quant-skeptic/verification — ⚠️ INCONCLUSIVE VERIFY: park-trim 1-ma-lech-chan-ca-tai-khoan: root cause + patch CHO DUYET (thu hoi 88,3% suc mua 08-06): {"finding_topic": "park-trim 1-ma-lech-chan-ca-tai-khoan: root cause + patch CHO DUYET (thu hoi 88,3% suc mua 08-06)", "verdict": "INCONCLUSIVE", "confidence": "low", "summary": "VERDICT_JSON present but unparseable: Expecting property name enclosed in double quotes: line 13 column 3 (char 3186)", "checks": {}}
+
+## Consolidation 2026-08-10T12:24:52Z
+- [2026-08-10T12:17:13Z] Wags/heartbeat — Wags_20260810_101322: {"status": "in_progress", "note": "round8 NEEDS_CHANGES: grant stale_proven cho cancel LA bypass do TOI tao — _kill_tree tra 0 survivor tren record unpinned = danh sach pid do attacker chon (path-match). Doi 1 bat nhat lanh tinh lay dung shape 08-09. Sua: pre-flight verdict TRUOC khi giet + exemption chi khi identity-backed."}
+- [2026-08-10T12:22:34Z] Wags/heartbeat — Wags_20260810_101322: {"status": "in_progress", "note": "Commit fff626eb (round8). selfcheck 253/253 PASS ca tren worktree SACH. RED tai 029fee26 = 245/253 dung exploit S8d (board ghi cancelled trong khi worker THAT con song). Dang dispatch round 9."}
