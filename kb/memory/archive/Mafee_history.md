@@ -15,3 +15,6 @@
 - [2026-06-27T05:24:54Z] FUND-READY CONFIRMED 2026-06-27: 0002023347 (SpaceX V2.5) balance=1B avail, 0002023348=0 (transfer xong). Margin RocketX 1840 ACTIVE (ppse 2x OK). Positions trống. enabled=false chờ V2.5 activation. NEXT: chờ Taylor/user flip enabled=true + loan_package_id=1840 khi approve V2.5.
 - [2026-06-27T10:59:45Z] LAST: Account snapshot done (2026-06-27) for DollarBill Monday plan | SpaceX 0002023347=1B cash, 0 positions, fund-ready | NEUTRAL state, 0 BAL/VN30 signals, ETF park 70% recommended | NEXT: wait for DollarBill to build plan_0002023347_20260630.json
 - [2026-06-27T11:17:37Z] PENDING EXECUTION: plan_SpaceX_20260630.json (paper, account SpaceX 0002023347) | 23 BUY custom30V NEUTRAL orders, 937.95M/93.80% NAV | EXECUTE: Monday 2026-06-30 market open (09:15 ICT) | NEXT: check BOT_STOP absent, run paper execution at open, write EOD snapshot after close
+
+## Archived 2026-08-10 (keep=6 days=5 require_done=True)
+- [2026-07-16T17:14:40Z] Job Mafee_20260716_170856 XONG: Trứng vàng KHÔNG có trên DNSE OpenAPI (probe 22 pattern 404 + docs + SDK chính thức đều không có; balances() khớp từng đồng 4/5 mục app, chỉ thiếu Trứng vàng — tiền nằm ngoài tiểu khoản giao dịch). Đề xuất manual_assets config cho daily_nav_snapshot đã ghi bus, CHỜ duyệt. Không có việc dở.
