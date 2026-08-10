@@ -1,50 +1,51 @@
-# Fleet status — 2026-08-10T12:07:02 UTC
+# Fleet status — 2026-08-10T12:10:02 UTC
 
 | agent | title (desktop) | kind | status | last_heartbeat | age(min) | current_task |
 |---|---|---|---|---|---|---|
-| DollarBill | DollarBill | child | dead | 2026-08-10T00:54:03Z | 672 |  |
-| Mafee | Mafee | child | dead | 2026-08-10T08:56:53Z | 190 |  |
-| Mafee_2531509 | mafee-35 | child | dead | 2026-08-10T03:20:01Z | 527 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mafee |
-| Mike | Mike | child | working | 2026-08-10T11:53:04Z | 13 |  |
-| Mike_2025029 | mike-da | child | dead | 2026-08-09T08:20:01Z | 1667 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Mike_2700627 | mike-80 | child | dead | 2026-08-10T05:30:01Z | 397 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Mike_2898035 | mike-28 | child | dead | 2026-08-10T09:00:01Z | 187 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Taylor | Taylor | child | working | 2026-08-10T11:59:44Z | 7 |  |
-| Taylor_2031229 | taylor-be | child | dead | 2026-08-09T08:30:01Z | 1657 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Taylor_2137525 | taylor-32 | child | dead | 2026-08-09T13:10:01Z | 1377 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Taylor_2509183 | taylor-5a | child | dead | 2026-08-10T03:30:01Z | 517 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Taylor_2522936 | taylor-2a | child | dead | 2026-08-10T03:40:01Z | 507 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Taylor_2583332 | taylor-96 | child | dead | 2026-08-10T04:10:01Z | 477 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Taylor_2636305 | taylor-ad | child | dead | 2026-08-10T04:40:01Z | 447 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Taylor_2844478 | taylor-ac | child | dead | 2026-08-10T08:30:01Z | 217 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Wags | wags-06 | child | running | 2026-08-10T12:00:01Z | 7 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Wags |
-| Wendy | Wendy | child | dead | 2026-08-10T10:15:05Z | 111 |  |
-| Winston | Winston | child | dead | 2026-08-10T05:50:18Z | 376 |  |
-| _home_trido__claude_projects_-workspace-claude-code-discord-bridge_1f6d8f66-14f1-4474-a42d-9f99f02d0f14_jsonl | Kiểm tra quyền ghi session Codex | external | dead | 2026-08-08T18:00:01Z | 2527 | resume · cwd=/workspace/claude-code-discord-bridge |
-| claude-code-discord-bridge-7b | claude-code-discord-bridge-7b | external | dead | 2026-08-08T18:00:01Z | 2527 | interactive · cwd=/workspace/claude-code-discord-bridge |
-| e6b2b2fe | e6b2b2fe | external | dead | 2026-08-08T19:00:01Z | 2467 | bg · cwd=/workspace/claude-code-discord-bridge |
-| e6c82a6b | e6c82a6b | external | dead | 2026-08-08T14:20:01Z | 2747 | bg · cwd=/workspace/claude-code-discord-bridge |
-| mike-34 | mike-34 | external | shell | 2026-08-10T12:00:01Z | 7 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike |
-| workingclaude-09 | workingclaude-09 | child | dead | 2026-08-10T11:13:39Z | 53 |  |
-| workingclaude-29 | workingclaude-29 | child | dead | 2026-08-10T08:35:16Z | 211 |  |
-| workingclaude-2a | workingclaude-2a | child | dead | 2026-08-10T06:02:04Z | 364 |  |
-| workingclaude-3b | workingclaude-3b | child | dead | 2026-08-09T12:52:30Z | 1394 |  |
-| workingclaude-46 | workingclaude-46 | child | dead | 2026-08-09T16:37:58Z | 1169 |  |
-| workingclaude-4b | workingclaude-4b | child | dead | 2026-08-09T08:38:17Z | 1648 |  |
-| workingclaude-54 | workingclaude-54 | child | dead | 2026-08-10T04:11:48Z | 475 |  |
-| workingclaude-55 | workingclaude-55 | child | dead | 2026-08-09T15:35:42Z | 1231 |  |
-| workingclaude-5e | workingclaude-5e | child | dead | 2026-08-10T07:56:37Z | 250 |  |
-| workingclaude-79 | workingclaude-79 | child | dead | 2026-08-10T04:27:52Z | 459 |  |
-| workingclaude-86 | workingclaude-86 | child | dead | 2026-08-10T03:18:50Z | 528 |  |
-| workingclaude-91 | workingclaude-91 | child | dead | 2026-08-10T03:16:57Z | 530 |  |
-| workingclaude-a0 | workingclaude-a0 | child | dead | 2026-08-10T01:30:13Z | 636 |  |
-| workingclaude-a4 | workingclaude-a4 | child | dead | 2026-08-10T04:46:14Z | 440 |  |
-| workingclaude-a5 | workingclaude-a5 | child | dead | 2026-08-09T13:08:09Z | 1378 |  |
-| workingclaude-a9 | workingclaude-a9 | child | dead | 2026-08-09T15:23:32Z | 1243 |  |
-| workingclaude-b6 | workingclaude-b6 | child | dead | 2026-08-10T05:17:43Z | 409 |  |
-| workingclaude-c5 | workingclaude-c5 | child | dead | 2026-08-10T00:58:31Z | 668 |  |
-| workingclaude-d6 | workingclaude-d6 | child | dead | 2026-08-10T05:27:36Z | 399 |  |
-| workingclaude-dd | workingclaude-dd | child | dead | 2026-08-10T07:17:47Z | 289 |  |
-| workingclaude-ea | workingclaude-ea | child | dead | 2026-08-09T16:48:57Z | 1158 |  |
-| workingclaude-ef | workingclaude-ef | child | dead | 2026-08-10T04:38:56Z | 448 |  |
-| workingclaude-f5 | workingclaude-f5 | child | dead | 2026-08-10T03:00:46Z | 546 |  |
+| DollarBill | DollarBill | child | working | 2026-08-10T12:09:55Z | 0 |  |
+| Mafee | Mafee | child | dead | 2026-08-10T08:56:53Z | 193 |  |
+| Mafee_2531509 | mafee-35 | child | dead | 2026-08-10T03:20:01Z | 530 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mafee |
+| Mike | Mike | child | working | 2026-08-10T12:09:08Z | 0 |  |
+| Mike_2025029 | mike-da | child | dead | 2026-08-09T08:20:01Z | 1670 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Mike_2700627 | mike-80 | child | dead | 2026-08-10T05:30:01Z | 400 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Mike_2898035 | mike-28 | child | dead | 2026-08-10T09:00:01Z | 190 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Taylor | Taylor | child | working | 2026-08-10T11:59:44Z | 10 |  |
+| Taylor_2031229 | taylor-be | child | dead | 2026-08-09T08:30:01Z | 1660 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
+| Taylor_2137525 | taylor-32 | child | dead | 2026-08-09T13:10:01Z | 1380 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
+| Taylor_2509183 | taylor-5a | child | dead | 2026-08-10T03:30:01Z | 520 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
+| Taylor_2522936 | taylor-2a | child | dead | 2026-08-10T03:40:01Z | 510 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
+| Taylor_2583332 | taylor-96 | child | dead | 2026-08-10T04:10:01Z | 480 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
+| Taylor_2636305 | taylor-ad | child | dead | 2026-08-10T04:40:01Z | 450 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
+| Taylor_2844478 | taylor-ac | child | dead | 2026-08-10T08:30:01Z | 220 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
+| Wags | wags-06 | child | running | 2026-08-10T12:10:01Z | 0 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Wags |
+| Wendy | Wendy | child | dead | 2026-08-10T10:15:05Z | 114 |  |
+| Winston | Winston | child | dead | 2026-08-10T05:50:18Z | 379 |  |
+| _home_trido__claude_projects_-workspace-claude-code-discord-bridge_1f6d8f66-14f1-4474-a42d-9f99f02d0f14_jsonl | Kiểm tra quyền ghi session Codex | external | dead | 2026-08-08T18:00:01Z | 2530 | resume · cwd=/workspace/claude-code-discord-bridge |
+| claude-code-discord-bridge-7b | claude-code-discord-bridge-7b | external | dead | 2026-08-08T18:00:01Z | 2530 | interactive · cwd=/workspace/claude-code-discord-bridge |
+| e6b2b2fe | e6b2b2fe | external | dead | 2026-08-08T19:00:01Z | 2470 | bg · cwd=/workspace/claude-code-discord-bridge |
+| e6c82a6b | e6c82a6b | external | dead | 2026-08-08T14:20:01Z | 2750 | bg · cwd=/workspace/claude-code-discord-bridge |
+| mike-34 | mike-34 | external | busy | 2026-08-10T12:10:01Z | 0 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike |
+| workingclaude-09 | workingclaude-09 | child | dead | 2026-08-10T11:13:39Z | 56 |  |
+| workingclaude-29 | workingclaude-29 | child | dead | 2026-08-10T08:35:16Z | 214 |  |
+| workingclaude-2a | workingclaude-2a | child | dead | 2026-08-10T06:02:04Z | 367 |  |
+| workingclaude-3b | workingclaude-3b | child | dead | 2026-08-09T12:52:30Z | 1397 |  |
+| workingclaude-46 | workingclaude-46 | child | dead | 2026-08-09T16:37:58Z | 1172 |  |
+| workingclaude-4b | workingclaude-4b | child | dead | 2026-08-09T08:38:17Z | 1651 |  |
+| workingclaude-54 | workingclaude-54 | child | dead | 2026-08-10T04:11:48Z | 478 |  |
+| workingclaude-55 | workingclaude-55 | child | dead | 2026-08-09T15:35:42Z | 1234 |  |
+| workingclaude-5e | workingclaude-5e | child | dead | 2026-08-10T07:56:37Z | 253 |  |
+| workingclaude-79 | workingclaude-79 | child | dead | 2026-08-10T04:27:52Z | 462 |  |
+| workingclaude-86 | workingclaude-86 | child | dead | 2026-08-10T03:18:50Z | 531 |  |
+| workingclaude-8d | workingclaude-8d | external | running | 2026-08-10T12:10:01Z | 0 | interactive · cwd=/home/trido/thanhdt/WorkingClaude |
+| workingclaude-91 | workingclaude-91 | child | dead | 2026-08-10T03:16:57Z | 533 |  |
+| workingclaude-a0 | workingclaude-a0 | child | dead | 2026-08-10T01:30:13Z | 639 |  |
+| workingclaude-a4 | workingclaude-a4 | child | dead | 2026-08-10T04:46:14Z | 443 |  |
+| workingclaude-a5 | workingclaude-a5 | child | dead | 2026-08-09T13:08:09Z | 1381 |  |
+| workingclaude-a9 | workingclaude-a9 | child | dead | 2026-08-09T15:23:32Z | 1246 |  |
+| workingclaude-b6 | workingclaude-b6 | child | dead | 2026-08-10T05:17:43Z | 412 |  |
+| workingclaude-c5 | workingclaude-c5 | child | dead | 2026-08-10T00:58:31Z | 671 |  |
+| workingclaude-d6 | workingclaude-d6 | child | dead | 2026-08-10T05:27:36Z | 402 |  |
+| workingclaude-dd | workingclaude-dd | child | dead | 2026-08-10T07:17:47Z | 292 |  |
+| workingclaude-ea | workingclaude-ea | child | dead | 2026-08-09T16:48:57Z | 1161 |  |
+| workingclaude-ef | workingclaude-ef | child | dead | 2026-08-10T04:38:56Z | 451 |  |
+| workingclaude-f5 | workingclaude-f5 | child | dead | 2026-08-10T03:00:46Z | 549 |  |
