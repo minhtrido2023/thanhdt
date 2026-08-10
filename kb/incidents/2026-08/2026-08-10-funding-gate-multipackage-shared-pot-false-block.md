@@ -122,3 +122,29 @@ thứ 2** (bot đang chạy tự retry ~20s nên code mới trên đĩa sẽ đ�
 được áp cho *cả hai chiều* mà không có case nào phủ chiều còn lại — y hệt cách stub `[F]` cho mỗi
 gói một hũ riêng đã che mất giả định tài nguyên suốt 6 ngày. Cả hai đều là **giả định phạm vi
 không được viết ra thành test**.
+
+---
+
+## Đuôi thứ ba — checker báo động sự cố ĐÃ PHỤC HỒI suốt phần còn lại của ngày
+
+**Triệu chứng.** `ops_health_check.sh` lúc 12:45 vẫn báo `⚠️ Journal hôm nay có lỗi lặp lại bất
+thường: {'PLACE_FAIL (không phải T+2)': 944}` — trong khi lỗi đã dứt hẳn lúc **10:32:00** và bot
+restart 10:35:01 đã bán trọn 8/8 lệnh PARK lúc **10:35:24**. Nghĩa là một sự cố đã đóng vẫn kích
+hoạt dispatch ops-autofix mới (`Winston_20260810_054508`) và sẽ còn kêu tới hết phiên.
+
+**Root cause.** Mục 3 của checker đếm **tích luỹ cả ngày** theo `event`, không có khái niệm thời
+điểm: `counts[ev] > 20` là toàn bộ điều kiện. Một sự cố sửa xong lúc 10:35 không có cách nào làm
+con số 944 nhỏ lại.
+
+**Fix** (`mike` commit `b64611b1`, `bin/ops_health_check.sh` mục 3): ghi thêm `last_ts` mỗi loại
+event và `last_success_ts` (`PLACE`/`FILL`/`DONE`). Có lệnh đi ra/khớp **thành công sau lần lỗi
+cuối** ⇒ hạ `⚠️` xuống `ℹ️` kèm mốc giờ ("944 lượt … ĐÃ DỨT — lần cuối 10:32:00, sau đó có
+PLACE/FILL thành công lúc 11:23:55"). Chưa phục hồi thì vẫn `⚠️` y như cũ.
+
+**Verify hai chiều trên chính journal thật** (không chỉ khẳng định chiều đúng): giữ nguyên dữ liệu
+⇒ `OK` + dòng resolved; **bỏ mọi sự kiện thành công sau lần lỗi cuối** ⇒ vẫn `WARN`. Chạy lại
+checker live: ZaloPay từ 5 điểm chú ý còn 3.
+
+**Vì sao "có thành công sau lỗi cuối" mới là điều kiện đúng** (thay vì "lỗi cũ hơn N phút"): giờ
+nghỉ trưa 11:30–13:00 không có event nào cả, nên tiêu chí thuần thời gian sẽ im lặng cho cả một sự
+cố CHƯA phục hồi. Bằng chứng phải là một lệnh thật đi ra được sau đó.
