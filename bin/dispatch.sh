@@ -998,6 +998,16 @@ JSET job_id="$job_id" from="$from" to="$id" status=running attempt=1 dispatcher_
      provider="$PROVIDER" turn_cap="$([ "$CLI_SUPPORTS_TURNS" = "true" ] && echo "$MAX_TURNS" || echo unsupported)" \
      prompt_summary="$_psum"
 
+# GHIM BẰNG CHỨNG: tạo sẵn $logfile + $logfile.err và ghi (dev, inode) của chúng lên record,
+# NGAY sau khi record ra đời và TRƯỚC khi có worker nào chạy. Mọi câu hỏi "job này còn sống
+# không?" sau đó hỏi về ĐÚNG 2 inode này thay vì stat lại đường dẫn — thứ mà người ghi record
+# điều khiển được. Không ghim thì `mv <logfile> x; : > <logfile>` dựng file mồi đúng đường dẫn:
+# guard tưởng đã nhìn thấy log của job và không ai giữ ⇒ kết luận CHẾT trên worker còn sống
+# (arch-reviewer round 5, N5). Pipeline phía sau (`> "$logfile"`, `2>"$logfile.err"`,
+# `| tee "$logfile"`) chỉ TRUNCATE đúng inode này, không tạo inode mới.
+# `|| true`: ghim là lớp phòng thủ, hỏng ghim không bao giờ được phép chặn 1 dispatch.
+python3 "$ROOT/bin/mike_json.py" job-pin-log "$JOBS_DIR" "$job_id" >/dev/null 2>&1 || true
+
 if [ "$bg" = "--bg" ]; then
   # Background wrapper: run agent (with timeout + retry) → consolidate → notify
   _bg_wrapper() {

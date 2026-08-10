@@ -519,11 +519,41 @@ TERMINAL_STATUSES = ("done", "failed", "timeout", "orphaned", "cancelled",
 LIVE_STATUSES = ("running", "retrying", "usage_limited", "provider_fallback",
                  "maxturns_pending")
 
-# The record fields _job_live_pids reads to decide whether a job is still running. Editing
-# any of them edits the evidence, so cmd_job_set demands the same proof for changing one as
-# for closing the record. Keep this list and _job_live_pids in lockstep: adding a new
-# liveness signal without adding it here silently reopens the bypass.
-EVIDENCE_FIELDS = ("pid", "dispatcher_pid", "logfile")
+# Every record field that feeds a liveness or death decision. Editing one edits the evidence,
+# so cmd_job_set demands the same proof for changing one as for closing the record.
+#
+# Keep this list in lockstep with _death_evidence and everything it calls. Four rounds of
+# audit have now found the bypass in the SAME place every time — a field that had quietly
+# become evidence without being named here — so the entry below records what each one decides:
+#   pid, dispatcher_pid, logfile, logfile_ino, logfile_err_ino  -> _job_live_pids: which
+#       processes are this job's, and whether the file we are looking at is still the file
+#       the job opened (rounds 2/3/4, and the decoy in round 5, N5).
+#   started_at  -> gates EVIDENCE_GRACE_S. Round 5, K1: it was the one field left that could
+#       turn `blind` OFF, so `mv <logfile> x; job-set started_at=<now>; job-set status=failed`
+#       reproduced the 2026-08-09 lie verbatim, rc=0, on a provably live worker.
+#   to, job_id  -> locate bus/inbox/<to>.jsonl in _hb_age, i.e. the heartbeat that round 4
+#       promoted to the independent proof of death. Round 5, K2: `job-set to=Nobody` points it
+#       at a file that does not exist, every heartbeat becomes "never seen", and job-cancel
+#       then closed a live worker while asserting in result_summary that the agent had gone
+#       silent — the guard stating as fact the very thing it had just been blinded to.
+#   deadline  -> the reap precondition. `job-set deadline=1` made any record instantly
+#       reap-eligible (round 5, N4).
+EVIDENCE_FIELDS = ("pid", "dispatcher_pid", "logfile", "logfile_ino", "logfile_err_ino",
+                   "started_at", "to", "job_id", "deadline")
+
+
+def _is_evidence_change(field, new, old):
+    """Is writing `new` over `old` a change to this job's liveness evidence?
+
+    `deadline` is the one field where the answer depends on the DIRECTION. Only shrinking it
+    is evidence: a smaller deadline is what makes a record reap-eligible on demand
+    (`job-set <id> deadline=1`, round 5, N4). Growing it is dispatch.sh's own heartbeat-aware
+    extension (dispatch.sh:760, `JSET deadline=... hb_extensions=...`), which fires on jobs
+    that are BY DEFINITION alive and busy — guarding that direction would refuse the fleet's
+    most routine write on exactly the jobs it is meant to protect."""
+    if field == "deadline":
+        return _as_int(new, 0) < _as_int(old, 0)
+    return str(new) != str(old or "")
 
 
 def _ppid_of(pid):
@@ -647,7 +677,7 @@ def cmd_job_set(a, internal=False, stale_proven=False):
     # asserted over a running worker. An attacker's first write always races a live one.
     exists = obj.get("status") is not None
     changed_evidence = [k for k in EVIDENCE_FIELDS
-                        if k in fields and str(fields[k]) != str(obj.get(k) or "")]
+                        if k in fields and _is_evidence_change(k, fields[k], obj.get(k))]
     repid = exists and bool(changed_evidence)
     live = []
     guarded = False
@@ -656,9 +686,10 @@ def cmd_job_set(a, internal=False, stale_proven=False):
     # unprotected (arch-reviewer S4). The process discovery below walks /proc, so it runs
     # ONLY on a close/repid attempt — never on the ordinary field update — and the cheap
     # ancestry test short-circuits the wrapper finalising its own record before that.
+    why = ""
     if (closing or repid) and obj.get("status") in LIVE_STATUSES \
             and not _is_self_or_ancestor(obj.get("pid")):
-        live = _job_live_pids(obj)
+        verdict, live, why, _hbs = _death_evidence(obj)
         # UNKNOWN is not DEAD. An empty `live` on a record whose logfile has been deleted or
         # renamed away means the evidence is gone, not that the worker is — and a rename
         # defeats even the inode match, so `_pids_holding` genuinely cannot tell. Treat it as
@@ -668,12 +699,19 @@ def cmd_job_set(a, internal=False, stale_proven=False):
         # cmd_job_reap, which carries an independent proof of death (past deadline + grace AND
         # the agent's own bus heartbeat gone cold) and would otherwise be unable to ever close
         # such a record, turning an anti-lying guard into a permanent board leak.
-        blind = (not live) and not stale_proven and _logfile_evidence_missing(obj)
+        blind = verdict == UNKNOWN
+        # Only a DEAD verdict — we looked at the job's own logfile and nothing held it — lets
+        # an outside writer close the record. ALIVE with an EMPTY pid list is a real case now
+        # (evidence gone, agent still heartbeating), so this asks the verdict rather than
+        # whether `live` came back non-empty. `stale_proven` remains the ONE exemption, and
+        # only over UNKNOWN: see cmd_job_reap, which carries an independent proof the guard
+        # cannot see and would otherwise be unable to ever close such a record.
+        suspect = verdict != DEAD and not (blind and stale_proven)
         # Three ways to be a legitimate writer, cheapest first: the recorded pid is me or my
         # ancestor (--bg wrapper, tested above), I am one of the job's live processes or a
         # child of one (agent writing its own record), or I am the dispatcher that spawned
         # them (sync dispatch, which records no pid — MIKE_JOB_OWNER, /proc-verified).
-        guarded = ((bool(live) or blind) and not _writer_belongs_to_job(live)
+        guarded = (suspect and not _writer_belongs_to_job(live)
                    and not _writer_is_job_dispatcher(job_id, obj))
     if guarded and internal:
         # cmd_job_reap calls this in-process; a sys.exit(3) here would abort the whole reap
@@ -697,21 +735,25 @@ def cmd_job_set(a, internal=False, stale_proven=False):
             "process above was found by the job's own logfile. Writing a pid onto the "
             "record does not make the worker stop — it only makes the board agree with "
             "you, which is the failure being prevented.\n")
-        # Say WHICH of the two refusals this is. Reporting "0 process(es) are ALIVE" for the
-        # blind case would be the guard itself stating something it does not know.
-        if blind:
+        # Say WHICH refusal this is, and never claim more than the verdict supports.
+        # Reporting "0 process(es) are ALIVE" would be the guard itself stating something it
+        # does not know — and stating the unknown as fact is the failure being prevented.
+        if not live:
+            # ALIVE with no pid list (evidence gone, agent still heartbeating) is a DIFFERENT
+            # statement from UNKNOWN, and saying the wrong one is the failure being prevented.
             sys.stderr.write(
-                "REFUSED: job %s still claims status=%s and its logfile is GONE (%s) — so "
-                "whether anything of it is still running CANNOT BE DETERMINED, and refusing "
-                "to %s is the only answer that is not a guess.\n"
-                "  An absent logfile is not proof of death: a deleted file keeps running "
-                "while its holder lives, and a RENAMED one cannot be matched at all — both "
-                "make the live-process query come back empty on a job that is still "
-                "writing (arch-reviewer round 4).\n"
+                ("REFUSED: job %s still claims status=%s and %s — %srefusing to %s is the "
+                 "only answer that is not a guess.\n"
+                 % (job_id, obj.get("status"), why,
+                    "so whether anything of it is still running CANNOT BE DETERMINED, and "
+                    if blind else "so ", what)) +
+                "  An absent logfile is not proof of death: a deleted file keeps being "
+                "written while its holder lives, and a file that merely occupies the path is "
+                "not the job's logfile at all (arch-reviewer rounds 4-5).\n"
                 "  Find out first:  bin/trace.sh %s   /   ls -l logs/*%s*\n"
                 "  If you have established it really is dead, say so explicitly with "
                 "--force and the evidence will be recorded on the record.\n"
-                % (job_id, obj.get("status"), obj.get("logfile"), what, job_id, job_id))
+                % (job_id, job_id))
             sys.exit(3)
         sys.stderr.write(
             "REFUSED: job %s is still %s and %d process(es) of it are ALIVE right now: %s "
@@ -925,21 +967,28 @@ def cmd_job_reap(a):
         dl = _as_int(o.get("deadline"), 0)
         if not dl or n <= dl + grace:
             continue
-        # Same job-level liveness the guard uses: a job whose wrapper died but whose worker
-        # is still holding the logfile is NOT orphaned, it is running unattended — stamping
-        # it 'orphaned' would be the board lying in the other direction.
-        if _job_live_pids(o):
+        # Exactly the liveness the guard uses — one implementation, see _death_evidence. A job
+        # whose wrapper died but whose worker still holds the logfile is NOT orphaned, it is
+        # running unattended, and stamping it 'orphaned' is the board lying in the other
+        # direction. The heartbeat threshold is floored at HB_COLD_S instead of taking the
+        # caller's `grace`: `jobs.sh reap 0` used to pass 0 all the way down and reap a record
+        # whose agent had heartbeated that same second (round 5, N4).
+        hb_floor = max(int(grace), HB_COLD_S)
+        verdict, _live, _why, hbs = _death_evidence(o, n, hb_cold_s=hb_floor)
+        if verdict == ALIVE:
             continue
-        # Only --bg dispatches record a pid; a sync dispatch has none, so fall back to the
-        # agent's own heartbeat — a job still writing bus events is alive, never reap it.
-        # The same fallback is required when the logfile is GONE, whatever the mode: with no
-        # file left to hold, `_job_live_pids` returning empty proves nothing, so the heartbeat
-        # is the only independent evidence left (arch-reviewer round 4, K1).
-        blind = _logfile_evidence_missing(o)
-        if not o.get("pid") or blind:
-            hb = _hb_age(o, n, agent_only=True)
-            if hb != "-" and _as_int(hb, 10 ** 9) < grace:
-                continue
+        blind = verdict == UNKNOWN
+        # Only --bg dispatches record a pid; for a sync record keep the extra caution of not
+        # reaping while its agent is still writing bus events, even when the logfile is there.
+        if not o.get("pid") and hbs[0] == "fresh":
+            continue
+        # NEVER heartbeated + evidence gone = no evidence of anything. Round 4 closed these at
+        # deadline+grace, i.e. watchdog.sh's hourly automatic call stamped 'orphaned' on jobs
+        # it knew nothing about. Wait a full day and then say on the record that the closure
+        # is unverified — late and honest beats early and wrong, and still no permanent leak.
+        unverified = blind and hbs[0] == "never"
+        if unverified and n <= dl + max(grace, REAP_UNVERIFIED_S):
+            continue
         job_id = o.get("job_id")
         if not job_id:
             continue      # no id -> can't address the record safely; leave it alone
@@ -953,8 +1002,9 @@ def cmd_job_reap(a):
                         continue
             except Exception:
                 continue
-        print("orphaned %-26s %s->%s  %.1fh past deadline" % (
-            job_id, o.get("from", "?"), o.get("to", "?"), over_h))
+        print("orphaned %-26s %s->%s  %.1fh past deadline%s" % (
+            job_id, o.get("from", "?"), o.get("to", "?"), over_h,
+            "  UNVERIFIED (no evidence either way)" if unverified else ""))
         reaped += 1
         if not dry:
             # internal=True: the guard must not sys.exit() out of this loop and leave every
@@ -966,11 +1016,19 @@ def cmd_job_reap(a):
             # cold (checked above for exactly this case). Without the exemption a record whose
             # log was deleted could never be closed by ANY command, which is the permanent
             # board leak this guard is supposed to prevent, not cause.
+            if blind and unverified:
+                why_closed = (", logfile gone and NOT ONE heartbeat was ever written for this "
+                              "job — CLOSED UNVERIFIED after %.0fh, nothing here proved it "
+                              "stopped" % ((n - dl) / 3600.0))
+            elif blind:
+                why_closed = (", logfile gone — death inferred from the agent's own heartbeat "
+                              "having been silent for %ss" % hbs[1])
+            else:
+                why_closed = ""
             if cmd_job_set([jobs_dir, job_id, "status=orphaned", "ended_at=%d" % n,
                             "result_summary=reaped by jobs.sh reap: dispatcher died without "
                             "writing a terminal status (%.1fh past deadline, pid dead/absent%s)"
-                            % (over_h, ", logfile gone — death proven by cold heartbeat"
-                               if blind else "")],
+                            % (over_h, why_closed)],
                            internal=True, stale_proven=blind) is False:
                 continue
             # watchdog's per-job debounce marker is dead weight once the record is closed
@@ -1065,8 +1123,17 @@ def _descendants(pid):
     return out
 
 
-def _pids_holding(path):
-    """Pids whose stdout/stderr is `path`, found by reading /proc/<pid>/fd.
+def _parse_pin(pin):
+    """'<dev>:<ino>' as written by cmd_job_pin_log -> (dev, ino), or None."""
+    try:
+        dev, ino = str(pin).split(":", 1)
+        return (int(dev), int(ino))
+    except Exception:
+        return None
+
+
+def _pids_holding(path, pin=None):
+    """Pids whose stdout/stderr is `path` (or, better, the PINNED inode), from /proc/<pid>/fd.
 
     The SECOND way to find a job's worker, and the one that still works after the wrapper
     is gone. dispatch.sh's _bg_wrapper redirects the claude process's stdout+stderr to the
@@ -1086,20 +1153,30 @@ def _pids_holding(path):
     very next `job-set status=failed` was then waved through — the 2026-08-09 lie reachable
     again in one unguarded command that is not even a job-set. `st_dev/st_ino` survives the
     rename (same file, new name) and the unlink (the fd still pins the inode), so it answers
-    the question actually being asked: is some process holding THIS FILE."""
-    if not path:
+    the question actually being asked: is some process holding THIS FILE.
+
+    `pin` is that same identity taken from the RECORD (cmd_job_pin_log stamps it when the job
+    starts), and it is strictly better than stat()ing the path now, because the path is the
+    part an outside writer controls. With a pin, `mv <logfile> elsewhere` no longer hides the
+    worker at all — the fd still points at the pinned inode, so the holder is found and the
+    answer is a definite ALIVE instead of round 4's UNKNOWN. Without it, `mv <logfile> x;
+    : > <logfile>` put a decoy at the same path: stat() returned the decoy's fresh inode,
+    matched nothing, and "no holder + file present" reads as PROVEN DEAD — rc=0 on a live
+    worker through the ordinary close path (round 5, N5)."""
+    if not path and pin is None:
         return []
     out = []
     try:
         entries = os.listdir("/proc")
     except Exception:
         return []
-    target = None
-    try:
-        st = os.stat(path)
-        target = (st.st_dev, st.st_ino)
-    except Exception:
-        target = None       # unlinked or renamed away: fall back to the string forms below
+    target = _parse_pin(pin)
+    if target is None:
+        try:
+            st = os.stat(path)
+            target = (st.st_dev, st.st_ino)
+        except Exception:
+            target = None   # unlinked or renamed away: fall back to the string forms below
     me = os.getpid()
     for entry in entries:
         if not entry.isdigit():
@@ -1140,6 +1217,70 @@ def _pids_holding(path):
 EVIDENCE_GRACE_S = 120
 
 
+def _path_is_pinned_file(path, pin):
+    """True if `path` still IS the file the job opened. Without a pin (legacy records) the
+    question degrades to mere existence, which is the best such a record can support."""
+    if not path:
+        return False
+    target = _parse_pin(pin)
+    if target is None:
+        return os.path.exists(path)
+    try:
+        st = os.stat(path)
+    except Exception:
+        return False
+    return (st.st_dev, st.st_ino) == target
+
+
+def cmd_job_pin_log(a):
+    """job-pin-log <jobs_dir> <job_id> — create the job's logfile+.err if absent and record
+    their (dev, inode) on the record. Called once by dispatch.sh right after the record is
+    created; exit 0 always, it must never be able to break a dispatch.
+
+    The point is to fix the job's evidence to an IDENTITY at a moment when nothing has yet
+    had a chance to interfere with it, instead of re-deriving it later from a path that any
+    writer can repoint. Creating the files eagerly is what makes that possible — the pipeline
+    that follows (`> "$logfile"`, `2>"$logfile.err"`, `| tee "$logfile"`) truncates these very
+    inodes rather than making new ones — and it also removes the startup window in which an
+    absent logfile is normal, i.e. the window EVIDENCE_GRACE_S exists to tolerate.
+
+    Refuses to REPLACE an existing pin. A re-pin would be the decoy attack with an official
+    command in front of it: point the record at a fresh file, then have the guard agree that
+    the fresh file is the evidence."""
+    jobs_dir, job_id = a[0], a[1]
+    fp = _job_path(jobs_dir, job_id)
+    try:
+        with open(fp, encoding="utf-8") as f:
+            obj = json.load(f)
+        if not isinstance(obj, dict):
+            return
+    except Exception:
+        return
+    logfile = obj.get("logfile") or ""
+    if not logfile or obj.get("logfile_ino") or obj.get("logfile_err_ino"):
+        return                                   # nothing to pin, or already pinned
+    pins = {}
+    for path, field in ((logfile, "logfile_ino"), (logfile + ".err", "logfile_err_ino")):
+        try:
+            os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+            with open(path, "a", encoding="utf-8"):
+                pass                             # create-if-absent, never truncate
+            st = os.stat(path)
+            pins[field] = "%d:%d" % (st.st_dev, st.st_ino)
+        except Exception:
+            continue
+    if not pins:
+        return
+    # Written in-process, not through cmd_job_set: this is the FIRST write of these fields on
+    # a record that has no live worker yet, and routing it through the guard would only ask
+    # the guard to approve the creation of the very evidence it reads.
+    obj.update(pins)
+    tmp = fp + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(obj, f, ensure_ascii=False)
+    os.replace(tmp, fp)
+
+
 def _logfile_evidence_missing(obj, now=None):
     """True when the record names a logfile but NEITHER it nor its `.err` sibling is on disk,
     and the job is past the startup window in which that is simply normal.
@@ -1148,11 +1289,19 @@ def _logfile_evidence_missing(obj, now=None):
     have anything to look at" — and those two must never collapse into the same verdict. A
     rename defeats even the inode match in `_pids_holding` (the old name is gone, so there is
     no inode to compare against), so this is the term that keeps the guard ON when its
-    evidence has been removed rather than letting absence read as death (round 4, K1)."""
+    evidence has been removed rather than letting absence read as death (round 4, K1).
+
+    Presence is judged by IDENTITY when the record carries a pin: a file that merely occupies
+    the path is not the job's logfile. `mv <logfile> x; : > <logfile>` restored "evidence
+    present" while nothing on disk related to the job any more, which is all it took to make
+    the close paths believe they had looked and seen nothing (round 5, N5). Records written
+    before pinning existed keep the old path test — for them nothing is lost, the pin only
+    ever adds a way to say "missing"."""
     logfile = obj.get("logfile") or ""
     if not logfile:
         return False        # nothing was ever claimed; the pid/descendant terms stand alone
-    if os.path.exists(logfile) or os.path.exists(logfile + ".err"):
+    if _path_is_pinned_file(logfile, obj.get("logfile_ino")) or \
+            _path_is_pinned_file(logfile + ".err", obj.get("logfile_err_ino")):
         return False
     started = _as_int(obj.get("started_at"), 0)
     if started and (now_epoch() if now is None else now) - started < EVIDENCE_GRACE_S:
@@ -1160,11 +1309,11 @@ def _logfile_evidence_missing(obj, now=None):
     return True
 
 
-def _job_pids(pid, logfile):
+def _job_pids(pid, logfile, pin=None):
     """Every live process belonging to this job: the wrapper, its descendants, and any
     process still holding the job's logfile (orphans the tree walk cannot see)."""
     seen, out = set(), []
-    cands = _descendants(pid) + _pids_holding(logfile)
+    cands = _descendants(pid) + _pids_holding(logfile, pin)
     if _pid_alive(pid) is True:
         cands.insert(0, int(pid))
     for p in cands:
@@ -1186,18 +1335,94 @@ def _job_live_pids(obj):
     pid is asking about the one process the improvisation already killed, and waves the
     stamp through while the worker keeps editing the repo (arch-reviewer round 2, K1)."""
     logfile = obj.get("logfile", "")
-    pids = _job_pids(obj.get("pid"), logfile)
+    pids = _job_pids(obj.get("pid"), logfile, obj.get("logfile_ino"))
     if logfile:
         # A SYNC dispatch pipes the worker's stdout (`... 2>"$logfile.err" | tee "$logfile"`,
         # dispatch.sh:1266), so its fd1 is a PIPE and only fd2 points at a real file. Looking
         # at logfile alone finds nothing for the fleet's DEFAULT dispatch mode (arch-reviewer
         # round 3, N2).
         seen = set(pids)
-        for p in _pids_holding(logfile + ".err"):
+        for p in _pids_holding(logfile + ".err", obj.get("logfile_err_ino")):
             if p not in seen and p > 1 and _pid_alive(p) is True:
                 seen.add(p)
                 pids.append(p)
     return pids
+
+
+# How long the agent's own bus heartbeat must have been SILENT before silence is allowed to
+# count as evidence at all. It used to be whatever `grace` the caller of `jobs.sh reap`
+# happened to pass, which meant the documented `jobs.sh reap 0` — "close the stale records
+# now" — silently set the liveness threshold to zero and closed a record whose agent had
+# written a heartbeat that same second (round 5, N4). Agents heartbeat about once a minute,
+# so 15 minutes of silence is well outside normal working behaviour and far inside the hour
+# that reap's own deadline+grace already requires.
+HB_COLD_S = 900
+
+# How long past its deadline a record must sit before reap may close it with NO liveness
+# evidence at all — logfile gone AND not one heartbeat ever written. Round 4 let reap close
+# these at deadline+grace (1h by default, from watchdog.sh's automatic call), which made the
+# fleet's own cron stamp `orphaned` — read as exit 1 = FAILED by every poller, the 2026-08-09
+# re-dispatch trigger — onto jobs it had no evidence about; 23 of the last 200 real records
+# carry no agent-written bus event, so this was ordinary, not contrived (round 5, K3).
+# Closing such a record eventually is still required (a record no command can close is the
+# permanent board leak this guard exists to prevent), so the answer is not "never" but "late,
+# and said out loud on the record": see the UNVERIFIED wording in cmd_job_reap.
+REAP_UNVERIFIED_S = 86400
+
+ALIVE, DEAD, UNKNOWN = "alive", "dead", "unknown"
+
+
+def _hb_state(obj, now, cold_s=HB_COLD_S):
+    """('fresh'|'cold'|'never', age_or_None) from the agent's own bus heartbeats.
+
+    'never' is NOT 'cold'. Round 4 promoted the heartbeat to the independent proof of death
+    without noticing that its absence has two completely different causes — an agent that
+    fell silent, and an agent that was never observed at all (a job whose agent does not
+    heartbeat, a renamed inbox, a record whose `to` was rewritten). Collapsing them made
+    "I have never seen this job" argue for closing it."""
+    hb = _hb_age(obj, now, agent_only=True)
+    if hb == "-":
+        return ("never", None)
+    age = _as_int(hb, 10 ** 9)
+    return ("fresh" if age < cold_s else "cold", age)
+
+
+def _death_evidence(obj, now=None, hb_cold_s=HB_COLD_S):
+    """Is this job still running? -> (verdict, live_pids, why, hb_state)
+
+    ONE answer for job-set, job-cancel and job-reap. They used to each carry their own
+    version of it — three thresholds, three orderings, three opinions about what an absent
+    heartbeat meant — and every killer objection of round 5 lived in the gaps between them:
+    the heartbeat floor existed in cancel but not in reap, and 'never heartbeated' was
+    UNKNOWN to neither. Divergence, not any single line, was the bug.
+
+    Three verdicts, and the middle one is the whole point:
+      ALIVE   - something of this job is provably running (holders/descendants), or its agent
+                is still writing bus events.
+      DEAD    - we could look at the job's own logfile and nothing is holding it.
+      UNKNOWN - the evidence itself is gone, so no answer can be given. Callers must NOT
+                treat this as DEAD; "I could not check" is not permission to say "stopped".
+    """
+    n = now_epoch() if now is None else now
+    live = _job_live_pids(obj)
+    if live:
+        return (ALIVE, live, "%d process(es) of the job are alive right now: %s"
+                % (len(live), live), ("n/a", None))
+    hbs = _hb_state(obj, n, hb_cold_s)
+    if not _logfile_evidence_missing(obj, n):
+        return (DEAD, [], "the job's own logfile is still on disk and no process is holding "
+                          "it", hbs)
+    if hbs[0] == "fresh":
+        return (ALIVE, [], "the job's logfile is gone, but its agent wrote a bus heartbeat "
+                           "%ss ago — it is still working" % hbs[1], hbs)
+    if hbs[0] == "never":
+        return (UNKNOWN, [], "the job's logfile is GONE (%s) and its agent has never written "
+                             "a single heartbeat for it — nothing here can tell a finished "
+                             "job from one that is still running"
+                             % (obj.get("logfile") or "?"), hbs)
+    return (UNKNOWN, [], "the job's logfile is GONE (%s); its agent last wrote a heartbeat "
+                         "%ss ago, which is evidence but not proof"
+                         % (obj.get("logfile") or "?", hbs[1]), hbs)
 
 
 def _writer_belongs_to_job(pids):
@@ -1321,7 +1546,7 @@ def _pid_owned_by_job(pid, obj):
     Ownership is accepted on ANY of three signals, cheapest first, and the check FAILS OPEN
     when it cannot see enough to disprove ownership (a refusal that blocks a real cancel is
     also a failure mode)."""
-    holders = set(_pids_holding(obj.get("logfile", "")))
+    holders = set(_pids_holding(obj.get("logfile", ""), obj.get("logfile_ino")))
     try:
         pid_i = int(pid)
     except Exception:
@@ -1420,30 +1645,49 @@ def cmd_job_cancel(a):
             # fresh, so cancel was the WEAKER of the two paths to the same write.
             # Both terms are required before an unverified close: the evidence must still
             # exist, and the agent must have stopped heartbeating.
-            hb = _hb_age(o, now_epoch(), agent_only=True)
-            hb_fresh = hb != "-" and _as_int(hb, 10 ** 9) < max(int(grace), 180)
-            if _logfile_evidence_missing(o) or hb_fresh:
+            # Same three-way verdict as job-set and reap (_death_evidence), with cancel's own
+            # extra term on top: closing here also requires that the agent be OBSERVED silent.
+            # 'never heartbeated' is not silence, it is absence of observation, and round 4
+            # spent it as if it were proof — cancel stamped `cancelled` on a live worker while
+            # asserting in result_summary that the heartbeat had gone cold (round 5, K3).
+            verdict, _l, why, hbs = _death_evidence(o, now_epoch(),
+                                                    hb_cold_s=max(int(grace), HB_COLD_S))
+            # The heartbeat is a VETO here, not a requirement. A DEAD verdict already means we
+            # looked at the job's own logfile — identified by the inode pinned when it was
+            # created, so a decoy at the same path does not qualify — and found nobody holding
+            # it, which is proof enough for a human asking to close this record. Demanding a
+            # heartbeat on top would refuse the 11.5% of real records whose agent never wrote
+            # one and push the operator to --force, which is worse than what it prevents.
+            if verdict != DEAD or hbs[0] == "fresh":
                 sys.stderr.write(
                     "REFUSED: job %s records no pid (sync dispatch) and nothing of it was "
                     "found running — but that is NOT proof it stopped, so this command will "
                     "not stamp one.\n"
-                    "  logfile: %s%s\n"
-                    "  agent heartbeat age: %s s%s\n"
+                    "  evidence: %s\n"
+                    "  agent heartbeat: %s\n"
                     "  Nothing here can be killed and nothing here can be verified dead. "
                     "Establish which it is (bin/trace.sh %s), then close it deliberately:\n"
                     "    bin/jobs.sh reap        (closes it as 'orphaned' once the heartbeat "
                     "has gone cold — the honest status for a dispatcher that died)\n"
                     "    job-set %s status=... --force   (if you have other evidence; it will "
                     "be recorded on the record)\n"
-                    % (job_id, o.get("logfile"),
-                       " (GONE — cannot look for holders)"
-                       if _logfile_evidence_missing(o) else "",
-                       hb, " (FRESH — the agent is still writing bus events)"
-                       if hb_fresh else " (cold)", job_id, job_id))
+                    % (job_id, why,
+                       {"never": "NEVER observed — this job has no heartbeat at all, so its "
+                                 "silence says nothing",
+                        "fresh": "FRESH (%ss) — the agent is still writing bus events" % hbs[1],
+                        "cold": "cold (%ss)" % hbs[1],
+                        "n/a": "not consulted"}[hbs[0]],
+                       job_id, job_id))
                 sys.exit(3)
-            note = ("cancelled by operator: no pid recorded (sync dispatch), logfile still "
-                    "present with no process holding it, and the agent's heartbeat has gone "
-                    "cold — the dispatcher died without writing a terminal status")
+            # Says what was actually observed. Round 4's fixed wording claimed "the agent's
+            # heartbeat has gone cold" even when no heartbeat had ever been seen — the record
+            # asserting as fact the one thing nobody had checked (round 5, K3).
+            note = ("cancelled by operator: no pid recorded (sync dispatch), the job's own "
+                    "logfile is still present with no process holding it, and %s — the "
+                    "dispatcher died without writing a terminal status"
+                    % ("the agent's heartbeat has been silent for %ss" % hbs[1]
+                       if hbs[0] == "cold" else
+                       "this job never wrote a heartbeat, so the logfile is the only evidence"))
             print(note)
             cmd_job_set([jobs_dir, job_id, "status=cancelled", "ended_at=%d" % now_epoch(),
                          "exit_code=130", "result_summary=" + note])
@@ -1867,7 +2111,7 @@ CMDS = {"event": cmd_event, "heartbeat": cmd_heartbeat, "recent": cmd_recent,
         "cursor-advance": cmd_cursor_advance,
         "job-set": cmd_job_set, "job-list": cmd_job_list, "job-get": cmd_job_get,
         "job-reap": cmd_job_reap, "job-cancel": cmd_job_cancel,
-        "job-live-pids": cmd_job_live_pids,
+        "job-live-pids": cmd_job_live_pids, "job-pin-log": cmd_job_pin_log,
         "job-find-dup": cmd_job_find_dup, "terminal-statuses": cmd_terminal_statuses,
         "job-field": cmd_job_field, "job-hb-age": cmd_job_hb_age,
         "circuit-check": cmd_circuit_check, "circuit-record": cmd_circuit_record,

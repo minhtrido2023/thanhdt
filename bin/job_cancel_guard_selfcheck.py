@@ -43,6 +43,9 @@ JOBS_SH = os.path.join(ROOT, "bin", "jobs.sh")
 PASS = 0
 FAIL = 0
 SPAWNED = []
+# The job record left behind by the last real-dispatch.sh E2E, so a case can assert on what
+# the REAL script wrote (the evidence pin) instead of on a hand-built fixture.
+LAST_E2E_RECORD = {}
 
 
 def check(name, cond, detail=""):
@@ -325,9 +328,12 @@ def run_sync_kill_trap(tmp, break_verifier=False):
         derr = ""
     try:
         with open(rec, encoding="utf-8") as f:
-            status = json.load(f).get("status")
+            final = json.load(f)
+        status = final.get("status")
     except Exception:
-        status = None
+        status, final = None, {}
+    LAST_E2E_RECORD.clear()
+    LAST_E2E_RECORD.update(final)
     return p.returncode, worker, status, derr
 
 
@@ -371,6 +377,47 @@ def make_job(jobs_dir, job_id, pid, logfile, prompt="do the thing", to="Taylor",
                       "prompt_summary=" + prompt, "pid=%s" % pid,
                       "dispatcher_pid=%s" % dispatcher_pid)
     assert rc == 0, err
+    return job_id
+
+
+def hb_sandbox(tmp):
+    """A throwaway ROOT whose `bus/inbox` the guard will actually read.
+
+    _hb_age derives the inbox from mike_json.py's own location, so pointing it at a sandbox
+    is done by INVOKING it through a symlink inside one (abspath does not resolve symlinks).
+    Deliberately not an env override: a var that redirects where the heartbeat is looked for
+    would be K2 with a nicer name — anyone could turn a fresh heartbeat into 'never seen'.
+
+    Returns (root, mike_json_path, jobs_dir)."""
+    r = os.path.join(tmp, "hbroot")
+    for d in ("bin", "bus/inbox", "bus/jobs"):
+        os.makedirs(os.path.join(r, d), exist_ok=True)
+    link = os.path.join(r, "bin", "mike_json.py")
+    if not os.path.exists(link):
+        os.symlink(MJ, link)
+    return r, link, os.path.join(r, "bus", "jobs")
+
+
+def write_hb(root, agent, job_id, age_s):
+    """Append one AGENT-written heartbeat for `job_id`, `age_s` seconds old. The payload shape
+    matters: _hb_age(agent_only=True) skips the watcher's own still_running pings."""
+    ts = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(time.time() - age_s))
+    with open(os.path.join(root, "bus", "inbox", agent + ".jsonl"), "a",
+              encoding="utf-8") as f:
+        f.write(json.dumps({"ts": ts, "agent_id": agent, "event_type": "heartbeat",
+                            "topic": job_id, "trace_id": job_id,
+                            "payload": {"status": "in_progress", "note": "selfcheck"}}) + "\n")
+
+
+def put_record(jobs_dir, job_id, **fields):
+    """Write a job record DIRECTLY, bypassing job-set. Needed because the round-5 fixtures set
+    `deadline` and `started_at` to specific ages, and those are guarded fields now — the guard
+    would (correctly) refuse the setup itself."""
+    obj = {"job_id": job_id, "from": "Mike", "to": "Taylor", "status": "running",
+           "attempt": "1", "max_attempts": "2", "prompt_summary": "do the thing"}
+    obj.update({k: str(v) for k, v in fields.items()})
+    with open(os.path.join(jobs_dir, job_id + ".json"), "w", encoding="utf-8") as f:
+        json.dump(obj, f)
     return job_id
 
 
@@ -1049,6 +1096,191 @@ def main():
     check("...and it says why instead of silently stamping",
           "KHÔNG kiểm tra được" in err_r5, err_r5[-300:])
 
+    # ------------------------- S (round 5): the premises round 4 CREATED and left unguarded
+    # Round 4 answered "the logfile can be destroyed" by promoting two new things to evidence:
+    # the startup grace window (`started_at`) and the agent's bus heartbeat (`to` + `job_id`
+    # locate it). Neither was added to EVIDENCE_FIELDS, so each was a one-command bypass of
+    # the guard that had just been built on it — the same shape as rounds 2/3/4, one level up.
+    print("\nS. round 5 — the evidence round 4 introduced is now evidence too")
+    hbroot, MJ_HB, jobs_hb = hb_sandbox(tmp)
+    now = int(time.time())
+
+    def mj(*args):
+        return run([sys.executable, MJ_HB] + list(args))
+
+    # S1 (K1) — `started_at` gates EVIDENCE_GRACE_S, so rewriting it to 'now' says "this job is
+    # too young to have a logfile yet" about a job that has been running for an hour. That
+    # turned the blind term OFF and the 2026-08-09 write went through: mv, started_at, failed.
+    log_s1 = os.path.join(tmp, "s1.log")
+    disp_s1, work_s1 = spawn_sync_worker(log_s1, jobs, "J_S1")
+    make_job(jobs, "J_S1", "", log_s1, dispatcher_pid=disp_s1)
+    for f in (log_s1 + ".err", log_s1):
+        if os.path.exists(f):
+            os.rename(f, f + ".moved")
+    check("S1 baseline: with the logfile moved away, the stamp is refused",
+          jset(jobs, "J_S1", "status=failed")[0] == 3)
+    rc, out, err = jset(jobs, "J_S1", "started_at=%d" % now)
+    check("S1 rewriting started_at is REFUSED (it is the grace window's own input)", rc == 3,
+          "rc=%d %s" % (rc, (out + err)[:200]))
+    check("S1 the recorded started_at was not moved",
+          read_job(jobs, "J_S1").get("started_at") == "1000",
+          read_job(jobs, "J_S1").get("started_at"))
+    rc2, _, _ = jset(jobs, "J_S1", "status=failed")
+    check("S1 ...so the follow-up stamp stays refused too", rc2 == 3, "rc=%d" % rc2)
+    check("S1 record still running", read_job(jobs, "J_S1")["status"] == "running")
+    check("S1 worker never touched", alive(work_s1), "worker=%s" % work_s1)
+
+    # S2 (K2) — `to` is what points _hb_age at bus/inbox/<agent>.jsonl. Rewriting it makes
+    # every heartbeat unobservable, and round 4 spent "no heartbeat" as proof of death.
+    log_s2 = os.path.join(tmp, "s2.log")
+    disp_s2, work_s2 = spawn_sync_worker(log_s2, jobs, "J_S2")
+    make_job(jobs, "J_S2", "", log_s2, dispatcher_pid=disp_s2)
+    rc, out, err = jset(jobs, "J_S2", "to=Nobody")
+    check("S2 rewriting `to` is REFUSED (it addresses the heartbeat evidence)", rc == 3,
+          "rc=%d %s" % (rc, (out + err)[:200]))
+    check("S2 the recorded `to` is unchanged", read_job(jobs, "J_S2").get("to") == "Taylor")
+    check("S2 worker still alive", alive(work_s2), "worker=%s" % work_s2)
+
+    # S2b — and the heartbeat, once it cannot be redirected, must still VETO a blind cancel.
+    log_s2b = os.path.join(tmp, "s2b.log")
+    open(log_s2b, "a").close()
+    put_record(jobs_hb, "J_S2B", to="HBAgent", logfile=log_s2b,
+               started_at=now - 9000, deadline=now - 7200)
+    write_hb(hbroot, "HBAgent", "J_S2B", 5)
+    rc, out, err = mj("job-cancel", jobs_hb, "J_S2B", "2")
+    check("S2b cancel REFUSES while the agent is still writing heartbeats", rc == 3,
+          "rc=%d %s" % (rc, (out + err)[:200]))
+    check("S2b and it says the heartbeat is FRESH, not that the job is dead",
+          "FRESH" in err, err[:200])
+
+    # S2c (K3, cancel's half) — a job that NEVER heartbeated may still be cancelled (its
+    # logfile is the evidence), but the record must not claim a coldness nobody observed.
+    log_s2c = os.path.join(tmp, "s2c.log")
+    open(log_s2c, "a").close()
+    put_record(jobs_hb, "J_S2C", to="SilentAgent", logfile=log_s2c,
+               started_at=now - 9000, deadline=now - 7200)
+    rc, out, err = mj("job-cancel", jobs_hb, "J_S2C", "2")
+    summ = read_job(jobs_hb, "J_S2C").get("result_summary", "")
+    check("S2c a never-heartbeating job is still closable (no board leak)", rc == 0,
+          "rc=%d %s" % (rc, (out + err)[:200]))
+    check("S2c the record does NOT claim the heartbeat 'has gone cold'",
+          "gone cold" not in summ and "never wrote a heartbeat" in summ, summ[:240])
+
+    # S3 (K3, reap's half) — reap ran from watchdog.sh every hour and closed records it had no
+    # evidence about at ALL: logfile gone AND not one heartbeat ever written. 'orphaned' reads
+    # as exit 1 = failed to every poller, i.e. the 2026-08-09 re-dispatch trigger, generated by
+    # the fleet's own cron. Closing them eventually is still required — late and marked.
+    put_record(jobs_hb, "J_S3_SOON", to="SilentAgent",
+               logfile=os.path.join(tmp, "s3_never_existed.log"),
+               started_at=now - 9000, deadline=now - 7200)
+    mj("job-reap", jobs_hb, "3600")
+    check("S3 no evidence either way -> reap does NOT close it 2h past deadline",
+          read_job(jobs_hb, "J_S3_SOON")["status"] == "running",
+          read_job(jobs_hb, "J_S3_SOON")["status"])
+    put_record(jobs_hb, "J_S3_OLD", to="SilentAgent",
+               logfile=os.path.join(tmp, "s3_never_existed2.log"),
+               started_at=now - 200000, deadline=now - 100000)
+    mj("job-reap", jobs_hb, "3600")
+    rec_s3 = read_job(jobs_hb, "J_S3_OLD")
+    check("S3 ...but a day later it IS closed (no permanent board leak)",
+          rec_s3["status"] == "orphaned", rec_s3["status"])
+    check("S3 and the record says the closure was UNVERIFIED",
+          "UNVERIFIED" in (rec_s3.get("result_summary") or ""),
+          (rec_s3.get("result_summary") or "")[:240])
+
+    # S4 (N4) — reap used the caller's `grace` as the heartbeat threshold, so the documented
+    # `jobs.sh reap 0` set it to zero and reaped a job whose agent had heartbeated that second.
+    log_s4 = os.path.join(tmp, "s4.log")
+    open(log_s4, "a").close()
+    put_record(jobs_hb, "J_S4", to="HBAgent", logfile=log_s4,
+               started_at=now - 9000, deadline=now - 7200)
+    write_hb(hbroot, "HBAgent", "J_S4", 5)
+    mj("job-reap", jobs_hb, "0")
+    check("S4 `reap 0` does NOT close a job whose agent heartbeated 5s ago",
+          read_job(jobs_hb, "J_S4")["status"] == "running",
+          read_job(jobs_hb, "J_S4")["status"])
+    log_s4b = os.path.join(tmp, "s4b.log")
+    open(log_s4b, "a").close()
+    put_record(jobs_hb, "J_S4B", to="HBAgent", logfile=log_s4b,
+               started_at=now - 9000, deadline=now - 7200)
+    write_hb(hbroot, "HBAgent", "J_S4B", 5000)
+    mj("job-reap", jobs_hb, "3600")
+    check("S4 a genuinely cold job is still reaped (the floor did not break reap)",
+          read_job(jobs_hb, "J_S4B")["status"] == "orphaned",
+          read_job(jobs_hb, "J_S4B")["status"])
+
+    # S4c — `deadline` is guarded by DIRECTION: shrinking it is how a record is made instantly
+    # reap-eligible; growing it is dispatch.sh's own heartbeat-aware extension on a job that is
+    # by definition alive. Guarding both would refuse the fleet's most routine write.
+    log_s4c = os.path.join(tmp, "s4c.log")
+    disp_s4c, work_s4c = spawn_sync_worker(log_s4c, jobs, "J_S4C")
+    make_job(jobs, "J_S4C", "", log_s4c, dispatcher_pid=disp_s4c)
+    check("S4c shrinking the deadline on a live job is REFUSED",
+          jset(jobs, "J_S4C", "deadline=1")[0] == 3)
+    check("S4c EXTENDING it (hb-aware extension) is still allowed",
+          jset(jobs, "J_S4C", "deadline=99999", "hb_extensions=1")[0] == 0)
+    check("S4c worker untouched", alive(work_s4c), "worker=%s" % work_s4c)
+
+    # S5 (N5) — a file that merely occupies the path is not the job's logfile. `mv log x;
+    # : > log` restored "evidence present" while nothing on disk related to the job any more,
+    # and "present but nobody holding it" is read as PROVEN DEAD. With the inode pinned at
+    # dispatch time the move does not even blind the guard: the holder is found by identity.
+    log_s5 = os.path.join(tmp, "s5.log")
+    put_record(jobs, "J_S5", to="Taylor", logfile=log_s5,
+               started_at=1000, deadline=1600, dispatcher_pid="")
+    rc, _, err = mj("job-pin-log", jobs, "J_S5")
+    pinned = read_job(jobs, "J_S5")
+    check("S5 job-pin-log records the logfile identity", bool(pinned.get("logfile_ino")),
+          str(pinned)[:200])
+    disp_s5, work_s5 = spawn_sync_worker(log_s5, jobs, "J_S5")
+    jset(jobs, "J_S5", "dispatcher_pid=%s" % disp_s5)
+    for f in (log_s5 + ".err", log_s5):
+        if os.path.exists(f):
+            os.rename(f, f + ".hidden")
+            open(f, "a").close()                      # the decoy, at the very same path
+    live_out = mj("job-live-pids", jobs, "J_S5")[1]
+    check("S5 the decoy does not hide the worker (found by pinned inode)",
+          str(work_s5) in live_out.split(), "worker=%s out=%r" % (work_s5, live_out))
+    rc, out, err = jset(jobs, "J_S5", "status=failed")
+    check("S5 ...so the stamp is REFUSED over the decoy", rc == 3,
+          "rc=%d %s" % (rc, (out + err)[:200]))
+    check("S5 record still running", read_job(jobs, "J_S5")["status"] == "running")
+    check("S5 re-pinning onto the decoy is refused (idempotent pin)",
+          read_job(jobs, "J_S5").get("logfile_ino") == pinned.get("logfile_ino")
+          and mj("job-pin-log", jobs, "J_S5")[0] == 0
+          and read_job(jobs, "J_S5").get("logfile_ino") == pinned.get("logfile_ino"))
+
+    # S6 — DISCRIMINATING test for the round-4 K1 mechanism. R1 asserts only that the stamp is
+    # refused, which the blind term satisfies on its own: deleting the '(deleted)' fallback
+    # left the suite fully green while job-live-pids went empty on a live worker. Assert the
+    # mechanism itself — after the unlink the holder must still be LISTED, not merely doubted.
+    log_s6 = os.path.join(tmp, "s6.log")
+    disp_s6, work_s6 = spawn_sync_worker(log_s6, jobs, "J_S6")
+    make_job(jobs, "J_S6", "", log_s6, dispatcher_pid=disp_s6)   # unpinned: legacy record
+    for f in (log_s6 + ".err", log_s6):
+        if os.path.exists(f):
+            os.remove(f)
+    out_s6 = mj("job-live-pids", jobs, "J_S6")[1]
+    check("S6 after rm, job-live-pids still LISTS the worker (not just 'refuses')",
+          str(work_s6) in out_s6.split(), "worker=%s out=%r" % (work_s6, out_s6))
+
+    # S7 — EVIDENCE_GRACE_S had no discriminating coverage at all: setting it to 1e11 and
+    # deleting the blind term produced identical results. It is the window killer S1 walked
+    # through, and it has to be tested in BOTH directions — too small hangs every new job at
+    # running (a fleet outage), too large is the bypass.
+    put_record(jobs_hb, "J_S7_YOUNG", to="SilentAgent",
+               logfile=os.path.join(tmp, "s7_not_open_yet.log"),
+               started_at=now, deadline=now + 600)
+    check("S7 a job younger than the grace may be closed (no logfile yet is NORMAL)",
+          run([sys.executable, MJ_HB, "job-set", jobs_hb, "J_S7_YOUNG",
+               "status=failed"])[0] == 0)
+    put_record(jobs_hb, "J_S7_OLD", to="SilentAgent",
+               logfile=os.path.join(tmp, "s7_gone.log"),
+               started_at=now - 3600, deadline=now + 600)
+    check("S7 past the grace the same shape is REFUSED (absent logfile = UNKNOWN)",
+          run([sys.executable, MJ_HB, "job-set", jobs_hb, "J_S7_OLD",
+               "status=failed"])[0] == 3)
+
     # ------------------------------------------------- O: the sync KILL trap (E2E, real script)
     # dispatch.sh's sync path traps TERM so a killed dispatcher does not leave the record at
     # running forever (incident 2026-07-09). But the worker is setsid'd: it SURVIVES the
@@ -1060,6 +1292,18 @@ def main():
           "status=%s" % status_o)
     check("the setsid'd worker is DEAD, not orphaned into the repo", worker_o is not None
           and not alive(worker_o), "worker=%s" % worker_o)
+    # ...and the REAL script pinned the evidence. Asserted on the record dispatch.sh itself
+    # wrote, not on a fixture: the pin is only worth anything if the production path sets it,
+    # and it must be the same encoding mike_json.py compares against (dev:ino, not %i alone).
+    _pin = LAST_E2E_RECORD.get("logfile_ino")
+    _lf = LAST_E2E_RECORD.get("logfile") or ""
+    try:
+        _st = os.stat(_lf)
+        _want = "%d:%d" % (_st.st_dev, _st.st_ino)
+    except Exception:
+        _want = None
+    check("a real dispatch pins its logfile identity onto the record",
+          bool(_pin) and _pin == _want, "pin=%s want=%s logfile=%s" % (_pin, _want, _lf))
 
     # ------------------------------------------------- K: real dispatch.sh syntax intact
     print("\nK. touched scripts still parse")
