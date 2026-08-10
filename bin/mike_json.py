@@ -538,8 +538,12 @@ LIVE_STATUSES = ("running", "retrying", "usage_limited", "provider_fallback",
 #       silent — the guard stating as fact the very thing it had just been blinded to.
 #   deadline  -> the reap precondition. `job-set deadline=1` made any record instantly
 #       reap-eligible (round 5, N4).
+#   pin_source  -> the provenance sentence _death_evidence speaks about its own evidence.
+#       Round 8, NICE 5: `job-set <id> pin_source=backfill` returned rc=0 and rewrote what the
+#       guard says about where its proof came from — a forged attestation, which is the exact
+#       class of defect K4 exists to remove.
 EVIDENCE_FIELDS = ("pid", "dispatcher_pid", "logfile", "logfile_ino", "logfile_err_ino",
-                   "started_at", "to", "job_id", "deadline")
+                   "started_at", "to", "job_id", "deadline", "pin_source")
 
 
 def _is_evidence_change(field, new, old):
@@ -1270,6 +1274,12 @@ def _live_holder_identity(obj):
     except Exception:
         return {}
     out = {}
+    if not _pid_owned_by_job(root, obj):
+        # The NUMBER is on the record; the PROCESS may not be the one it named. cmd_job_cancel
+        # already refuses to signal a recycled pid for this reason, and backfill must not be the
+        # softer door: with a recycled pid an attacker's own children become "the job's tree"
+        # and hand over the inode of their choosing (round 8, NICE 6).
+        return {}
     candidates = [root] + _descendants(root)
     for p in candidates:
         for fd in ("1", "2"):
@@ -1506,7 +1516,7 @@ def _hb_state(obj, now, cold_s=HB_COLD_S):
     return ("fresh" if age < cold_s else "cold", age)
 
 
-def _death_evidence(obj, now=None, hb_cold_s=HB_COLD_S):
+def _death_evidence(obj, now=None, hb_cold_s=HB_COLD_S, live=None):
     """Is this job still running? -> (verdict, live_pids, why, hb_state)
 
     ONE answer for job-set, job-cancel and job-reap. They used to each carry their own
@@ -1523,7 +1533,13 @@ def _death_evidence(obj, now=None, hb_cold_s=HB_COLD_S):
                 treat this as DEAD; "I could not check" is not permission to say "stopped".
     """
     n = now_epoch() if now is None else now
-    live = _job_live_pids(obj)
+    # `live=[]` is how cmd_job_cancel asks the PRE-FLIGHT question: "once my kill has left
+    # nothing of this job alive, will the guard let me write the status?" It has to be the same
+    # function — round 5's lesson was that divergence between two copies of this reasoning, not
+    # any single line, was the bug — so the caller overrides the input rather than reimplementing
+    # the tail (round 8, K2).
+    if live is None:
+        live = _job_live_pids(obj)
     if live:
         return (ALIVE, live, "%d process(es) of the job are alive right now: %s"
                 % (len(live), live), ("n/a", None))
@@ -1544,9 +1560,11 @@ def _death_evidence(obj, now=None, hb_cold_s=HB_COLD_S):
         # own evidence, which is the same failure as overstating the verdict (round 7, K4).
         return (DEAD, [], "the job's own logfile — the exact inode %s — is still on disk and "
                           "no process is holding it"
-                          % ("pinned when the job was created"
-                             if obj.get("pin_source") != "backfill" else
-                             "pinned later from the running worker's own file descriptor"),
+                          % {"create": "pinned when the job was created",
+                              "backfill": "pinned later from the running worker's own file "
+                                          "descriptor"}.get(
+                                  obj.get("pin_source"),
+                                  "on this record (pinned before this field recorded how)"),
                 hbs)
     # Two different ways to have no usable logfile evidence, and the guard must say WHICH:
     # claiming the file is GONE when a file is sitting right there is the same species of lie
@@ -1566,6 +1584,51 @@ def _death_evidence(obj, now=None, hb_cold_s=HB_COLD_S):
                              "running" % situation, hbs)
     return (UNKNOWN, [], "%s; its agent last wrote a heartbeat %ss ago, which is evidence but "
                          "not proof" % (situation, hbs[1]), hbs)
+
+
+def _kill_targets_are_identity_backed(obj, targets):
+    """Were `targets` identified as this job's processes by IDENTITY, or merely by path?
+
+    This is the question round 8 was decided on. `_kill_tree` returning "no survivors" proves
+    only that the pids it happened to enumerate are dead — and on an UNPINNED record those pids
+    come from `_pids_holding(path, pin=None)`, i.e. from stat()ing a path an outside writer
+    controls. So `mv <logfile> x; sh -c 'exec sleep' > <logfile>; jobs.sh cancel` made cancel
+    kill the squatter, report "1 process killed and verified dead", and stamp `cancelled` while
+    the real worker kept running: the 2026-08-09 lie, rebuilt out of sanctioned commands, by the
+    exemption that was meant to fix the opposite problem.
+
+    A pinned record answers by inode, which no outside write can steer. Failing that, the
+    recorded `pid` and its tree are guarded evidence in their own right. Anything else is a
+    path match, and a path match must never buy the right to close a record."""
+    if _record_is_pinned(obj):
+        return True
+    root = obj.get("pid")
+    if root in (None, "", 0, "0"):
+        return False                     # sync dispatch: no independent route exists
+    try:
+        root = int(str(root).strip())
+    except Exception:
+        return False
+    if not _pid_owned_by_job(root, obj):
+        return False                     # recycled pid: the number is not the process
+    tree = set([root] + _descendants(root))
+    return bool(targets) and set(int(t) for t in targets) <= tree
+
+
+def _cancel_may_close(obj, targets):
+    """(may_close, why) — would the guard accept the status write once the kill is done?
+
+    Asked BEFORE anything is killed. Cancel used to do the destructive half and only then
+    discover that the bookkeeping half was refused, which left processes dead and the board
+    still saying `running` (round 7, K2) — and the fix for THAT handed out a blanket exemption
+    that let a decoy close a live job (round 8, K1). Both disappear if the order is simply
+    right: find out whether you are allowed to say it, then act."""
+    verdict, _l, why, _hbs = _death_evidence(obj, live=[])
+    if verdict == DEAD:
+        return (True, why)               # provable by the job's own pinned logfile
+    if verdict == ALIVE:
+        return (False, why)              # its agent is still writing events — nothing to claim
+    return (_kill_targets_are_identity_backed(obj, targets), why)
 
 
 def _writer_belongs_to_job(pids):
@@ -1843,6 +1906,23 @@ def cmd_job_cancel(a):
                 "REFUSED: you are running INSIDE job %s — cancelling it would kill this "
                 "very command.\n" % job_id)
             sys.exit(3)
+        may, why_pre = _cancel_may_close(o, sync_live)
+        if not may:
+            sys.stderr.write(
+                "REFUSED — and NOTHING has been killed: cancelling job %s would leave this "
+                "command unable to say so on the record, so it does not start.\n"
+                "  evidence: %s\n"
+                "  These %d process(es) were found only by the PATH %s, and this record "
+                "carries no pinned identity — so killing them would prove nothing about the "
+                "job, and stamping 'cancelled' afterwards would be the board asserting a "
+                "death nobody established (arch-reviewer round 8).\n"
+                "  If the job really is finished, let the honest path close it:\n"
+                "    bin/jobs.sh reap        (closes a running record as 'orphaned', marked "
+                "UNVERIFIED when nothing proved it stopped)\n"
+                "  If you must stop it now, kill it yourself and record what you did:\n"
+                "    job-set %s status=cancelled --force ended_at=... result_summary=...\n"
+                % (job_id, why_pre, len(sync_live), o.get("logfile") or "?", job_id))
+            sys.exit(3)
         print("killing %s: %d live process(es) %s (found via the job's logfile — sync "
               "dispatch records no pid)" % (job_id, len(sync_live), sync_live))
         survivors = _kill_tree(o, grace)
@@ -1900,6 +1980,20 @@ def cmd_job_cancel(a):
                _fmt_ts(_as_int(o.get("started_at"), 0)), jobs_dir, job_id))
         sys.exit(3)
     targets = _job_live_pids(o)
+    may, why_pre = _cancel_may_close(o, targets)
+    if not may:
+        # Same pre-flight as the sync branch. Ordering IS the fix: ask whether the truth can be
+        # recorded before making it true (round 8, K1/K2).
+        sys.stderr.write(
+            "REFUSED — and NOTHING has been killed: cancelling job %s would leave this command "
+            "unable to say so on the record, so it does not start.\n"
+            "  evidence: %s\n"
+            "  Either its agent is still writing bus events, or the %d process(es) found are "
+            "identified only by a path this record cannot vouch for — killing them would prove "
+            "nothing about the job.\n"
+            "  bin/jobs.sh reap   closes a running record honestly; job-set --force records a "
+            "death you established yourself.\n" % (job_id, why_pre, len(targets)))
+        sys.exit(3)
     if targets:
         print("killing %s: %d live process(es) %s" % (job_id, len(targets), targets))
         survivors = _kill_tree(o, grace)

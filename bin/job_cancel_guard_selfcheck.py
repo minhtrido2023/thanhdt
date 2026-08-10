@@ -1441,11 +1441,63 @@ def main():
     make_job(jobs, "J_S8C", "", log_s8c, dispatcher_pid=disp_s8c, pin=False)
     rc, out, err = run([sys.executable, MJ, "job-cancel", jobs, "J_S8C", "5"])
     time.sleep(0.4)
-    check("S8c cancel on an UNPINNED live job exits 0", rc == 0, "rc=%d %s" % (rc, (out + err)[:200]))
-    check("S8c the worker really is dead", not alive(work_s8c), "worker=%s" % work_s8c)
-    check("S8c and the board says so — never 'dead process, record still running'",
-          read_job(jobs, "J_S8C")["status"] == "cancelled",
+    check("S8c cancel REFUSES an unpinned record BEFORE killing anything", rc == 3,
+          "rc=%d %s" % (rc, (out + err)[:200]))
+    check("S8c nothing was killed — the destructive half never ran", alive(work_s8c),
+          "worker=%s" % work_s8c)
+    check("S8c the refusal says so out loud", "NOTHING has been killed" in err, err[:200])
+    check("S8c record untouched", read_job(jobs, "J_S8C")["status"] == "running",
           read_job(jobs, "J_S8C")["status"])
+    check("S8c stdout did not announce a kill it did not do", "killing" not in out, out[:120])
+
+    # S8d (round 8, K1) — the exploit the round-7 exemption opened. `_kill_tree` returning "no
+    # survivors" proves only that the pids it enumerated are dead, and on an unpinned record
+    # those come from stat()ing the path. Hide the real logfile, park a squatter on the path,
+    # and cancel would kill the squatter, report "1 process killed and verified dead", and stamp
+    # `cancelled` while the real worker ran on — the 2026-08-09 lie rebuilt out of sanctioned
+    # commands. A path match must never buy the right to close a record.
+    log_s8d = os.path.join(tmp, "s8d.log")
+    disp_s8d, work_s8d = spawn_sync_worker(log_s8d, jobs, "J_S8D")
+    make_job(jobs, "J_S8D", "", log_s8d, dispatcher_pid=disp_s8d, pin=False)
+    for f in (log_s8d + ".err", log_s8d):
+        if os.path.exists(f):
+            os.rename(f, f + ".hidden")
+    squat_d = subprocess.Popen(["sh", "-c", "exec sleep 60"],
+                               stdout=open(log_s8d, "a"), stderr=open(log_s8d + ".err", "a"))
+    SPAWNED.append(squat_d.pid)
+    time.sleep(0.3)
+    rc, out, err = run([sys.executable, MJ, "job-cancel", jobs, "J_S8D", "5"])
+    time.sleep(0.4)
+    check("S8d a squatter on the path does not buy a cancel", rc == 3,
+          "rc=%d %s" % (rc, (out + err)[:200]))
+    check("S8d the REAL worker is untouched", alive(work_s8d), "worker=%s" % work_s8d)
+    check("S8d the board never says 'cancelled' about a job still running",
+          read_job(jobs, "J_S8D")["status"] == "running",
+          read_job(jobs, "J_S8D")["status"])
+    for sig in (15, 9):
+        try:
+            os.kill(squat_d.pid, sig)
+        except Exception:
+            pass
+
+    # S8e (round 8, K2) — the branch S8c could not reach. S8c's fixture has no bus/inbox at all,
+    # so its heartbeat reads 'never' and it only ever exercised the UNKNOWN path. With a FRESH
+    # heartbeat the verdict is ALIVE, which no exemption may override: the agent is still
+    # writing events, so there is nothing to claim and nothing to kill on the strength of.
+    log_s8e = os.path.join(tmp, "s8e.log")
+    disp_s8e, work_s8e = spawn_sync_worker(log_s8e, jobs_hb, "J_S8E")
+    make_job(jobs_hb, "J_S8E", "", log_s8e, to="HBAgent", dispatcher_pid=disp_s8e)
+    write_hb(hbroot, "HBAgent", "J_S8E", 30)
+    for f in (log_s8e + ".err", log_s8e):        # evidence gone, but the agent is alive
+        if os.path.exists(f):
+            os.remove(f)
+    rc, out, err = run([sys.executable, MJ_HB, "job-cancel", jobs_hb, "J_S8E", "5"])
+    time.sleep(0.4)
+    check("S8e a FRESH heartbeat stops cancel before the kill", rc == 3,
+          "rc=%d %s" % (rc, (out + err)[:200]))
+    check("S8e the worker is untouched", alive(work_s8e), "worker=%s" % work_s8e)
+    check("S8e record still running", read_job(jobs_hb, "J_S8E")["status"] == "running",
+          read_job(jobs_hb, "J_S8E")["status"])
 
 
     # S7 — EVIDENCE_GRACE_S had no discriminating coverage at all: setting it to 1e11 and
