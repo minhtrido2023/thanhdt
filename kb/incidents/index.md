@@ -4,7 +4,7 @@ title: Incidents — Mike fleet (sổ postmortem, cấu trúc OKF)
 owner: Mike fleet (mọi agent ghi; daily_retro.sh ghi entry RETRO hằng đêm)
 format: OKF (Open Knowledge Format) — markdown + YAML frontmatter, 1 sự cố = 1 file
 migrated_from: kb/INCIDENTS.md (single-file 408KB, migrate → OKF 2026-07-30 job Winston_20260730_144031)
-entries: 93 file (66 sự cố + 26 RETRO + 1 mục open-items chung)
+entries: 97 file (68 sự cố + 28 RETRO + 1 mục open-items chung)
 ---
 
 # Incidents — Mike fleet
@@ -77,6 +77,9 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Sự cố | status |
 |---|---|---|
+| 2026-08-07 | [2026-08/2026-08-07-plan-rewrite-drops-user-approval.md](2026-08/2026-08-07-plan-rewrite-drops-user-approval.md) | ? |
+| 2026-08-07 | [2026-08/2026-08-07-plan-merge-left-stale-jit-orders-double-sell.md](2026-08/2026-08-07-plan-merge-left-stale-jit-orders-double-sell.md) | ? |
+| 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
 | 2026-08-07 | [2026-08-07: script sửa plan sau khi user đã duyệt LÀM MẤT `approved_by` → bot chặn cả 2 account giữa phiên chiều; lộ lỗ hổng chiều ngược lại (sửa `orders[]` mà giữ duyệt) hiện KHÔNG có gate nào bắt](2026-08/2026-08-07-plan-rewrite-drops-user-approval.md) | escalated (cần user duyệt lại); đề xuất `approved_orders_hash` CHƯA vá |
 | 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
 | 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
