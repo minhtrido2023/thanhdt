@@ -600,8 +600,20 @@ def cmd_job_set(a, internal=False):
     # record that has none yet (`JSET pid="$BASHPID"`, the very first thing the wrapper does)
     # — guarding that would refuse every --bg job its own pid and hang the whole fleet at
     # status=running. There is nothing to protect when no pid is recorded.
+    # `dispatcher_pid` is guarded alongside `pid` — it is an input to the ownership decision
+    # below, so if it could be written on a live job the guard would be a 2-command bypass
+    # again (point it at your own shell, then stamp).
+    # But it is guarded MORE STRICTLY than `pid`, and the difference is the whole point:
+    # `pid` legitimately arrives late (the wrapper stamps its own on a record that has none,
+    # dispatch.sh:988), so only a REWRITE is suspicious there. `dispatcher_pid` is written
+    # exactly once, by dispatch.sh, in the same job-set call that creates the record — there
+    # is no legitimate later first-write. Allowing one would have handed the bypass to every
+    # record already on the board, none of which carries the field yet.
     repid = ("pid" in fields and obj.get("pid") not in (None, "")
              and str(fields["pid"]) != str(obj.get("pid")))
+    if ("dispatcher_pid" in fields and obj.get("status") is not None
+            and str(fields["dispatcher_pid"]) != str(obj.get("dispatcher_pid"))):
+        repid = True
     live = []
     guarded = False
     # Precondition is "the record still claims to be live", not "== running": a record in
@@ -612,13 +624,23 @@ def cmd_job_set(a, internal=False):
     if (closing or repid) and obj.get("status") in LIVE_STATUSES \
             and not _is_self_or_ancestor(obj.get("pid")):
         live = _job_live_pids(obj)
-        guarded = bool(live) and not _writer_belongs_to_job(live)
+        # Three ways to be a legitimate writer, cheapest first: the recorded pid is me or my
+        # ancestor (--bg wrapper, tested above), I am one of the job's live processes or a
+        # child of one (agent writing its own record), or I am the dispatcher that spawned
+        # them (sync dispatch, which records no pid — MIKE_JOB_OWNER, /proc-verified).
+        guarded = (bool(live) and not _writer_belongs_to_job(live)
+                   and not _writer_is_job_dispatcher(job_id, obj))
     if guarded and internal:
         # cmd_job_reap calls this in-process; a sys.exit(3) here would abort the whole reap
         # loop and leave every later record unexamined. The caller checks the return value.
         return False
     if guarded and not force:
-        what = ("stamp status=%s" % new_status) if closing else ("rewrite pid=%s" % fields.get("pid"))
+        if closing:
+            what = "stamp status=%s" % new_status
+        else:
+            what = "rewrite " + ", ".join(
+                "%s=%s" % (k, fields[k]) for k in ("pid", "dispatcher_pid")
+                if k in fields and str(fields[k]) != str(obj.get(k)))
         sys.stderr.write(
             "REFUSED: job %s is still %s and %d process(es) of it are ALIVE right now: %s "
             "— refusing to %s (that is how the board starts lying; incident 2026-08-09).\n"
@@ -1021,7 +1043,19 @@ def _job_live_pids(obj):
     `kill <pid>` FIRST, then stamped status=failed — so a guard that reads only the recorded
     pid is asking about the one process the improvisation already killed, and waves the
     stamp through while the worker keeps editing the repo (arch-reviewer round 2, K1)."""
-    return _job_pids(obj.get("pid"), obj.get("logfile", ""))
+    logfile = obj.get("logfile", "")
+    pids = _job_pids(obj.get("pid"), logfile)
+    if logfile:
+        # A SYNC dispatch pipes the worker's stdout (`... 2>"$logfile.err" | tee "$logfile"`,
+        # dispatch.sh:1266), so its fd1 is a PIPE and only fd2 points at a real file. Looking
+        # at logfile alone finds nothing for the fleet's DEFAULT dispatch mode (arch-reviewer
+        # round 3, N2).
+        seen = set(pids)
+        for p in _pids_holding(logfile + ".err"):
+            if p not in seen and p > 1 and _pid_alive(p) is True:
+                seen.add(p)
+                pids.append(p)
+    return pids
 
 
 def _writer_belongs_to_job(pids):
@@ -1043,6 +1077,38 @@ def _writer_belongs_to_job(pids):
             return False
         cur = nxt
     return False
+
+
+def _writer_is_job_dispatcher(job_id, obj):
+    """True if THIS process is running INSIDE the dispatch.sh that owns `job_id` — the one
+    writer besides the worker itself that is entitled to close the record.
+
+    Why it is needed at all: the fleet's DEFAULT dispatch mode is SYNCHRONOUS, and a sync
+    dispatch records NO pid (`JSET pid=$BASHPID` lives in _bg_wrapper only). So
+    `_is_self_or_ancestor(obj["pid"])` has nothing to test; and the worker is a SIBLING of
+    this job-set process (dispatch.sh spawns both), which `_writer_belongs_to_job` cannot
+    see because it only walks UPWARD. Once _job_live_pids learned to find the sync worker
+    through `$logfile.err`, every sync job would have been refused its own final
+    status=done/timeout and left stuck at running forever.
+
+    Both halves are required, and NEITHER is taken on trust:
+      * `dispatcher_pid` comes off the RECORD, written by dispatch.sh when it created the
+        job — before any later writer exists to influence it — and is protected from being
+        rewritten on a live job by the same rule that protects `pid` (see `repid` below).
+        `_is_self_or_ancestor` then proves against /proc that the caller really is inside
+        that process tree. An improvised `job-set` typed into a separate Bash tool call is
+        NOT a descendant of that dispatch.sh, so the 2026-08-09 write stays refused.
+      * MIKE_JOB_OWNER (env, set at dispatch.sh's JSET call site) must name THIS job. It is
+        deliberately NOT evidence on its own — an env var is free to forge, and believing it
+        would delete the guard. It is the narrowing term: being somewhere inside a
+        dispatcher tree must not become a skeleton key for whatever other live record that
+        tree happens to be an ancestor of (nested dispatches make that reachable)."""
+    if not job_id or os.environ.get("MIKE_JOB_OWNER") != job_id:
+        return False
+    dp = obj.get("dispatcher_pid")
+    if dp in (None, ""):
+        return False
+    return _is_self_or_ancestor(dp)
 
 
 def _boot_epoch():

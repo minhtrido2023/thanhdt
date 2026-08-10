@@ -701,7 +701,15 @@ if [ "$id" = "Mike" ] && [ "$from" != "user" ]; then
 fi
 
 # JSET: merge fields into this job's record (all JSON handling stays in mike_json.py).
-JSET() { python3 "$ROOT/bin/mike_json.py" job-set "$JOBS_DIR" "$job_id" "$@"; }
+# MIKE_JOB_OWNER: "lệnh ghi này là dispatch.sh đang finalize ĐÚNG job của mình", không phải
+# một lệnh ứng biến gõ tay từ bên ngoài. Đây là chỗ DUY NHẤT cần đánh dấu vì mọi ghi hợp lệ
+# của dispatch.sh đều đi qua JSET.
+# ⚠️ Biến môi trường KHÔNG phải bằng chứng — ai cũng export được, tin nó là xoá sổ guard. Nó
+# chỉ là VẾ HẸP: bằng chứng thật là `dispatcher_pid` trên record (xem chỗ tạo record bên
+# dưới), và mike_json._writer_is_job_dispatcher đối chiếu nó với /proc — người ghi phải thật
+# sự nằm trong cây tiến trình của dispatch.sh đó. Ứng biến kiểu 08-09 (Bash tool call KHÁC)
+# không phải hậu duệ của cây đó nên vẫn bị TỪ CHỐI dù có set biến này.
+JSET() { MIKE_JOB_OWNER="$job_id" python3 "$ROOT/bin/mike_json.py" job-set "$JOBS_DIR" "$job_id" "$@"; }
 SUMMARY() { head -c 200 "$logfile" 2>/dev/null | tr '\n\t' '  '; }
 
 # _hb_aware_timeout <cmd...> — drop-in replacement for `timeout ${TIMEOUT}s <cmd...>`
@@ -735,6 +743,12 @@ _hb_aware_timeout() {
     "$@" &
   fi
   pid=$!
+  # Publish the child through a FILE, not a variable. In the sync path this function is the
+  # left side of a pipeline (`... | tee "$logfile"`), so bash runs it in a SUBSHELL and any
+  # variable set here dies with it — _sync_killed_guard, which runs in the main shell, would
+  # never see it. The pid matters because the child is a setsid'd session leader: once this
+  # subshell is gone it is reparented to init and a PPid walk can no longer find it.
+  printf '%s' "$pid" > "$logfile.workerpid" 2>/dev/null || true
   deadline=$(( $(date +%s) + TIMEOUT ))
   while kill -0 "$pid" 2>/dev/null; do
     now="$(date +%s)"
@@ -760,11 +774,15 @@ _hb_aware_timeout() {
       done
       kill -KILL -- "-$pid" 2>/dev/null || kill -KILL "$pid" 2>/dev/null || true
       wait "$pid" 2>/dev/null
+      rm -f "$logfile.workerpid" 2>/dev/null || true
       return 124
     fi
     sleep 5
   done
   wait "$pid"
+  local _rc=$?
+  rm -f "$logfile.workerpid" 2>/dev/null || true
+  return "$_rc"
 }
 
 # _build_argv <prompt_text> — dung mang CLI_ARGV cho $PROVIDER hien tai.
@@ -966,7 +984,14 @@ if [ -n "${_dup:-}" ]; then
   echo "   Muốn THAY job cũ: $ROOT/bin/jobs.sh cancel <job_id> — đừng dispatch chồng lên nó." >&2
 fi
 
-JSET job_id="$job_id" from="$from" to="$id" status=running attempt=1 \
+# dispatcher_pid: pid CỦA CHÍNH dispatch.sh này (bash giữ nguyên `$$` trong mọi subshell, kể
+# cả nhánh trái của pipeline `... | tee`). Ghi NGAY lúc tạo record, trước khi có người ghi nào
+# khác tồn tại. job-set dùng nó để nhận ra "người ghi đang nằm TRONG cây tiến trình của
+# dispatcher job này" — bằng chứng sống DUY NHẤT cho nhánh ĐỒNG BỘ, vốn không ghi `pid` nào
+# (JSET pid=$BASHPID chỉ có trong _bg_wrapper) và có worker là ANH EM chứ không phải con của
+# tiến trình job-set (arch-reviewer round 3, N2). Ghi đè field này trên job còn sống bị CHẶN
+# y như ghi đè `pid` — nếu không thì lại thành đường vòng 2 lệnh.
+JSET job_id="$job_id" from="$from" to="$id" status=running attempt=1 dispatcher_pid="$$" \
      max_attempts=$((RETRIES + 1)) started_at="$_start_ts" \
      deadline=$((_start_ts + TIMEOUT)) logfile="$logfile" discord_thread_id="$_dtid0" \
      model="${MODEL:-default}" effort="$EFFORT" \
@@ -1249,8 +1274,25 @@ else
   # at status=running forever. Best-effort: a straight SIGKILL cannot be trapped.
   _sync_killed_guard() {
     trap - TERM INT HUP
+    # STOP THE WORKER FIRST, then close the record — never the other way round. The caller's
+    # SIGTERM hits this shell's process group, but the worker was put in its OWN session by
+    # _hb_aware_timeout, so it SURVIVES and keeps editing the repo with nobody left to report
+    # its outcome. Writing status=failed while it runs is the exact record that made the
+    # board lie on 2026-08-09 (Mike read "failed", re-dispatched, two runs collided on
+    # executor.py). Same order as `jobs.sh cancel`: kill the tree, give it a grace period,
+    # SIGKILL the remainder, and only then stamp.
+    _wp="$(cat "$logfile.workerpid" 2>/dev/null || true)"
+    if [ -n "$_wp" ]; then
+      kill -TERM -- "-$_wp" 2>/dev/null || kill -TERM "$_wp" 2>/dev/null || true
+      _w=0
+      while [ "$_w" -lt "${DISPATCH_KILL_GRACE_S:-10}" ] && kill -0 "$_wp" 2>/dev/null; do
+        sleep 1; _w=$((_w + 1))
+      done
+      kill -KILL -- "-$_wp" 2>/dev/null || kill -KILL "$_wp" 2>/dev/null || true
+      rm -f "$logfile.workerpid" 2>/dev/null || true
+    fi
     JSET status=failed ended_at="$(date +%s)" exit_code=143 \
-         result_summary="KILLED: dispatch.sh sync bị kill giữa chừng (caller chết/Bash-tool timeout?) — job record finalize bởi trap, không phải agent tự kết thúc" \
+         result_summary="KILLED: dispatch.sh sync bị kill giữa chừng (caller chết/Bash-tool timeout?) — trap đã DỪNG worker rồi mới finalize record, không phải agent tự kết thúc" \
          2>/dev/null || true
     kill "$_wpid" 2>/dev/null || true
     exit 143

@@ -111,11 +111,197 @@ def spawn_wrapper(logfile):
     return p.pid, worker
 
 
-def make_job(jobs_dir, job_id, pid, logfile, prompt="do the thing", to="Taylor"):
+def holders_of(path):
+    """Pids whose fd1 or fd2 IS `path` — the same question mike_json._pids_holding asks,
+    reimplemented here so the assertions do not inherit the bug they are checking for."""
+    out = []
+    for entry in os.listdir("/proc"):
+        if not entry.isdigit():
+            continue
+        for fd in ("1", "2"):
+            try:
+                if os.readlink("/proc/%s/fd/%s" % (entry, fd)) == path:
+                    out.append(int(entry))
+                    break
+            except Exception:
+                continue
+    return out
+
+
+def owner_env(claim_job_id):
+    """The environment dispatch.sh's JSET sets — forged here by a process that is NOT in the
+    dispatcher's tree, which is the whole point of these cases."""
+    e = dict(os.environ)
+    e["MIKE_JOB_OWNER"] = str(claim_job_id)
+    return e
+
+
+def spawn_sync_worker(logfile, jobs_dir, job_id):
+    """Reproduce dispatch.sh's SYNCHRONOUS process shape, which is the fleet's default and
+    has none of the handles the --bg shape has:
+
+        _hb_aware_timeout "${CLI_ARGV[@]}" 2>"$logfile.err" | tee "$logfile"
+
+    bash runs the left side of a pipeline in a SUBSHELL, so the worker's parent is that
+    subshell (not the script), its stdout is a PIPE into tee, and only its stderr is a real
+    file. Nothing is written to the record's `pid` field at all. Returns (dispatcher_pid,
+    worker_pid) where dispatcher_pid is `$$` — what dispatch.sh stores as dispatcher_pid.
+
+    The dispatcher then sits in a command loop so that a later case can make it close its
+    own record from INSIDE its own process tree (see sync_self_close)."""
+    pidf, cmdf, rcf, outf = (logfile + s for s in (".workerpid", ".cmd", ".setrc", ".setout"))
+    script = """
+{ setsid sleep 300 2>%(err)s & echo $! > %(pidf)s; sleep 300; } | tee %(log)s >/dev/null &
+while :; do
+  if [ -s %(cmdf)s ]; then
+    _claim="$(head -1 %(cmdf)s)"; _args="$(tail -1 %(cmdf)s)"; rm -f %(cmdf)s
+    MIKE_JOB_OWNER="$_claim" python3 %(mj)s job-set %(jobs)s %(job)s $_args >%(outf)s 2>&1
+    echo $? > %(rcf)s
+  fi
+  sleep 0.1
+done
+""" % dict(err=shlex.quote(logfile + ".err"), pidf=shlex.quote(pidf),
+           log=shlex.quote(logfile), cmdf=shlex.quote(cmdf), rcf=shlex.quote(rcf),
+           outf=shlex.quote(outf), mj=shlex.quote(MJ), jobs=shlex.quote(jobs_dir),
+           job=shlex.quote(job_id))
+    p = subprocess.Popen(["bash", "-c", script],
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    SPAWNED.append(p.pid)
+    worker = None
+    for _ in range(60):
+        try:
+            with open(pidf, encoding="utf-8") as f:
+                worker = int(f.read().strip())
+            break
+        except Exception:
+            time.sleep(0.1)
+    if worker:
+        SPAWNED.append(worker)
+    time.sleep(0.3)
+    return p.pid, worker
+
+
+def sync_self_close(jobs_dir, job_id, logfile, status, claim=None):
+    """Ask the dispatcher spawned by spawn_sync_worker to close its own record — the write
+    then really does come from inside that dispatch.sh's process tree, which is the only
+    thing that makes it legitimate. `claim` forges MIKE_JOB_OWNER when it is not job_id."""
+    rcf, outf = logfile + ".setrc", logfile + ".setout"
+    for f in (rcf, outf):
+        try:
+            os.remove(f)
+        except Exception:
+            pass
+    with open(logfile + ".cmd", "w", encoding="utf-8") as f:
+        f.write("%s\nstatus=%s\n" % (claim or job_id, status))
+    for _ in range(80):
+        try:
+            with open(rcf, encoding="utf-8") as f:
+                rc = int(f.read().strip())
+            with open(outf, encoding="utf-8") as f:
+                return rc, "", f.read()
+        except Exception:
+            time.sleep(0.1)
+    return None, "", "dispatcher never answered"
+
+
+SANDBOX_STUBS = ("notify.sh", "notify_thread.sh", "append_event.sh", "consolidate.sh")
+
+
+def build_sandbox(tmp):
+    """A throwaway ROOT that runs the REAL bin/dispatch.sh against a stub CLI.
+
+    Same recipe as bin/dispatch_discord_topic_selfcheck.sh, including its hard-won rule:
+    the stubs must `rm -f` the symlink FIRST. Writing through a symlink into bin/ truncated
+    four live fleet scripts on 2026-08-02."""
+    mk = os.path.join(tmp, "mk")
+    for d in ("bin", "kb", "bus/jobs", "logs", "state/circuit", "agents/Taylor", "agents/Mike"):
+        os.makedirs(os.path.join(mk, d), exist_ok=True)
+    for name in os.listdir(os.path.join(ROOT, "bin")):
+        src = os.path.join(ROOT, "bin", name)
+        if os.path.isfile(src):
+            os.symlink(src, os.path.join(mk, "bin", name))
+    with open(os.path.join(ROOT, "kb", "cli_providers.json"), encoding="utf-8") as f:
+        reg = f.read()
+    with open(os.path.join(mk, "kb", "cli_providers.json"), "w", encoding="utf-8") as f:
+        f.write(reg)
+    for name in SANDBOX_STUBS:
+        p = os.path.join(mk, "bin", name)
+        os.remove(p)                       # drop the symlink; NEVER write through it
+        assert not os.path.exists(p) and not os.path.islink(p), p
+        with open(p, "w", encoding="utf-8") as f:
+            f.write("#!/usr/bin/env bash\nexit 0\n")
+        os.chmod(p, 0o755)
+    # Last fence: the real scripts must be untouched (this is the 08-02 failure mode).
+    for name in SANDBOX_STUBS:
+        real = os.path.join(ROOT, "bin", name)
+        assert os.path.getsize(real) > 200, "STUB LEAKED INTO %s — git checkout it NOW" % real
+    stub = os.path.join(tmp, "claude_stub.sh")
+    with open(stub, "w", encoding="utf-8") as f:
+        f.write("#!/usr/bin/env bash\necho '[claude-stub] working'\nexec sleep 300\n")
+    os.chmod(stub, 0o755)
+    return mk, stub
+
+
+def run_sync_kill_trap(tmp):
+    """END-TO-END on the real bin/dispatch.sh: start a SYNC dispatch, let the worker come
+    up, then SIGTERM dispatch.sh's whole process group — exactly what the caller's Bash tool
+    does on its 2-minute timeout (incident 2026-07-09, DollarBill_20260709_125326).
+
+    The worker is setsid'd, so it SURVIVES that group kill. _sync_killed_guard must stop it
+    before writing the record: a `failed` stamp over a worker that is still editing the repo
+    is the 2026-08-09 lie, just reached by a different door.
+
+    Returns (dispatcher_rc, worker_pid, final_status)."""
+    mk, stub = build_sandbox(tmp)
+    env = dict(os.environ)
+    env.update({"DISPATCH_CLAUDE_BIN": stub, "DISPATCH_KILL_GRACE_S": "3",
+                "DISPATCH_FROM": "Mike", "MIKE_ROOT": mk})
+    p = subprocess.Popen(["bash", os.path.join(mk, "bin", "dispatch.sh"), "Taylor", "hello"],
+                         cwd=mk, env=env, stdout=subprocess.DEVNULL,
+                         stderr=subprocess.PIPE, text=True, start_new_session=True)
+    SPAWNED.append(p.pid)
+    jobs_dir = os.path.join(mk, "bus", "jobs")
+    worker, rec = None, None
+    for _ in range(400):                       # up to 40s for the CLI to be spawned
+        recs = [f for f in os.listdir(jobs_dir) if f.endswith(".json")]
+        if recs:
+            rec = os.path.join(jobs_dir, recs[0])
+            try:
+                with open(rec, encoding="utf-8") as f:
+                    lf = json.load(f).get("logfile", "")
+                with open(lf + ".workerpid", encoding="utf-8") as f:
+                    worker = int(f.read().strip())
+                SPAWNED.append(worker)
+                break
+            except Exception:
+                pass
+        if p.poll() is not None:
+            break
+        time.sleep(0.1)
+    if worker is None:
+        return p.poll(), None, "dispatch never reached the CLI: %s" % (p.stderr.read()[:400],)
+    time.sleep(0.3)
+    os.killpg(os.getpgid(p.pid), 15)           # the caller's process-group SIGTERM
+    try:
+        p.wait(timeout=40)
+    except Exception:
+        pass
+    time.sleep(0.5)
+    try:
+        with open(rec, encoding="utf-8") as f:
+            status = json.load(f).get("status")
+    except Exception:
+        status = None
+    return p.returncode, worker, status
+
+
+def make_job(jobs_dir, job_id, pid, logfile, prompt="do the thing", to="Taylor",
+             dispatcher_pid=""):
     rc, _, err = jset(jobs_dir, job_id, "job_id=" + job_id, "from=Mike", "to=" + to,
                       "status=running", "attempt=1", "max_attempts=2",
                       "started_at=1000", "deadline=1600", "logfile=" + logfile,
-                      "prompt_summary=" + prompt, "pid=%s" % pid)
+                      "prompt_summary=" + prompt, "pid=%s" % pid,
+                      "dispatcher_pid=%s" % dispatcher_pid)
     assert rc == 0, err
     return job_id
 
@@ -489,6 +675,118 @@ def main():
     check("record left running (cancel never stamps what it cannot back up)",
           read_job(jobs, "J_L3")["status"] == "running")
     check("refusal points at the --force escape", "--force" in err, err[:250])
+
+    # ------------------------------------------------- M: the SYNC dispatch shape (K1/N2)
+    # Everything above models `dispatch.sh --bg`: a record with a pid, a worker whose stdout
+    # IS the logfile. The fleet's DEFAULT is the sync path, which has NEITHER:
+    #     _hb_aware_timeout "${CLI_ARGV[@]}" 2>"$logfile.err" | tee "$logfile"
+    # fd1 of the worker is a PIPE (tee owns the logfile), only fd2 is a real file — and the
+    # record carries no pid at all, because `JSET pid=$BASHPID` lives in _bg_wrapper only.
+    # So on a sync job the guard had nothing whatsoever to hold on to: no recorded pid to
+    # test ancestry against, and _pids_holding(logfile) finding nobody.
+    print("\nM. sync dispatch: a job with NO recorded pid is still seen to be alive")
+    log_m = os.path.join(tmp, "m.log")
+    disp_m, work_m = spawn_sync_worker(log_m, jobs, "J_M")
+    make_job(jobs, "J_M", "", log_m, dispatcher_pid=disp_m)   # sync record: pid EMPTY
+    check("worker is alive", alive(work_m), "worker=%s" % work_m)
+    check("its stdout is a PIPE — nobody's fd1/fd2 is the logfile itself",
+          work_m not in holders_of(log_m), "holders=%s" % holders_of(log_m))
+    check("but its stderr IS logfile.err — the only handle the guard has",
+          work_m in holders_of(log_m + ".err"), "holders=%s" % holders_of(log_m + ".err"))
+    rc, out, err = jset(jobs, "J_M", "status=failed")
+    check("outsider stamping failed on a live SYNC job -> REFUSED (exit 3)", rc == 3,
+          "rc=%d %s" % (rc, (out + err)[:200]))
+    check("record left running", read_job(jobs, "J_M")["status"] == "running")
+
+    # N2: the dispatcher of a sync job must still close its OWN record. It has no pid on the
+    # record, and the worker is its SIBLING (dispatch.sh spawns both), so neither
+    # _is_self_or_ancestor nor _writer_belongs_to_job (which only walks UP) sees the kinship.
+    # dispatcher_pid + MIKE_JOB_OWNER is that missing evidence — and it is evidence, not a
+    # password: every case below forges the env var and still gets refused.
+    print("\nN. dispatcher_pid is proof; MIKE_JOB_OWNER only narrows it (never a password)")
+    rc, out, err = sync_self_close(jobs, "J_M", log_m, "timeout")
+    check("the real dispatcher CAN close its own record from inside its tree", rc == 0,
+          "rc=%s %s" % (rc, (out + err)[:250]))
+    check("record closed as timeout", read_job(jobs, "J_M")["status"] == "timeout")
+
+    # ADVERSARIAL 1 — a stranger forges MIKE_JOB_OWNER for a job it does not own. The env
+    # var is satisfied; /proc is not: the stranger is not inside that dispatch.sh's tree.
+    # This is the 2026-08-09 improvisation, typed in a separate Bash tool call.
+    log_n = os.path.join(tmp, "n.log")
+    disp_n, work_n = spawn_sync_worker(log_n, jobs, "J_N")
+    make_job(jobs, "J_N", "", log_n, dispatcher_pid=disp_n)
+    rc, out, err = run([sys.executable, MJ, "job-set", jobs, "J_N", "status=failed"],
+                       env=owner_env("J_N"))
+    check("forged MIKE_JOB_OWNER from outside the dispatcher tree -> REFUSED", rc == 3,
+          "rc=%d %s" % (rc, (out + err)[:250]))
+    check("record still running after the forgery", read_job(jobs, "J_N")["status"] == "running")
+    check("the worker it lied about is still alive", alive(work_n), "worker=%s" % work_n)
+
+    # ADVERSARIAL 2 — the 2-command bypass: point dispatcher_pid at your own shell first,
+    # then stamp. Rewriting it on a live job is refused for the same reason `pid` is.
+    rc, out, err = run([sys.executable, MJ, "job-set", jobs, "J_N",
+                        "dispatcher_pid=%d" % os.getpid()], env=owner_env("J_N"))
+    check("rewriting dispatcher_pid on a live job -> REFUSED", rc == 3,
+          "rc=%d %s" % (rc, (out + err)[:250]))
+    check("dispatcher_pid unchanged", str(read_job(jobs, "J_N")["dispatcher_pid"]) == str(disp_n),
+          read_job(jobs, "J_N").get("dispatcher_pid"))
+    rc, out, err = run([sys.executable, MJ, "job-set", jobs, "J_N", "status=failed"],
+                       env=owner_env("J_N"))
+    check("...so the follow-up stamp is still REFUSED", rc == 3,
+          "rc=%d %s" % (rc, (out + err)[:250]))
+
+    # ADVERSARIAL 3 — right tree, WRONG job id: a dispatcher may close only the record it
+    # was given, not any live record its tree happens to be an ancestor of.
+    rc, out, err = sync_self_close(jobs, "J_N", log_n, "failed", claim="J_SOMETHING_ELSE")
+    check("owner env naming a DIFFERENT job -> REFUSED", rc == 3,
+          "rc=%s %s" % (rc, (out + err)[:250]))
+    check("record still running", read_job(jobs, "J_N")["status"] == "running")
+
+    # ADVERSARIAL 4 — the LEGACY-RECORD bypass, and the reason dispatcher_pid is guarded
+    # more strictly than pid. Every job record already on the board predates this field, so
+    # if a FIRST write of dispatcher_pid were allowed on a live record, the guard would ship
+    # with a 2-command hole on exactly the records it exists to protect: claim the record as
+    # yours, then stamp. (This case was written expecting a refusal and FAILED — rc=0 — on
+    # the first run; the strict rule is its fix, not a rationalisation of it.)
+    log_n2 = os.path.join(tmp, "n2.log")
+    wrap_n2, work_n2 = spawn_wrapper(log_n2)
+    time.sleep(0.4)
+    make_job(jobs, "J_N2", wrap_n2, log_n2)               # legacy shape: NO dispatcher_pid
+    check("legacy record really has no dispatcher_pid",
+          not read_job(jobs, "J_N2").get("dispatcher_pid"),
+          read_job(jobs, "J_N2").get("dispatcher_pid"))
+    os.kill(wrap_n2, 9)                                   # exactly Mike's `kill <pid>`
+    time.sleep(0.5)
+    check("orphaned worker survived the kill", alive(work_n2), "worker=%s" % work_n2)
+    rc, out, err = run([sys.executable, MJ, "job-set", jobs, "J_N2",
+                        "dispatcher_pid=%d" % os.getpid()], env=owner_env("J_N2"))
+    check("claiming an unowned live record as your own -> REFUSED", rc == 3,
+          "rc=%d %s" % (rc, (out + err)[:250]))
+    check("no dispatcher_pid was written", not read_job(jobs, "J_N2").get("dispatcher_pid"),
+          read_job(jobs, "J_N2").get("dispatcher_pid"))
+    rc, out, err = run([sys.executable, MJ, "job-set", jobs, "J_N2", "status=failed"],
+                       env=owner_env("J_N2"))
+    check("08-09 replay on a legacy record, forged env -> still REFUSED", rc == 3,
+          "rc=%d %s" % (rc, (out + err)[:250]))
+    check("record still running", read_job(jobs, "J_N2")["status"] == "running")
+
+    # Regression: the env var must not disturb ordinary, unguarded writes.
+    rc, _, err = run([sys.executable, MJ, "job-set", jobs, "J_N", "note=progress"],
+                     env=owner_env("J_N"))
+    check("non-closing field update on a live job still allowed", rc == 0, err[:200])
+    check("and it actually landed", read_job(jobs, "J_N").get("note") == "progress")
+
+    # ------------------------------------------------- O: the sync KILL trap (E2E, real script)
+    # dispatch.sh's sync path traps TERM so a killed dispatcher does not leave the record at
+    # running forever (incident 2026-07-09). But the worker is setsid'd: it SURVIVES the
+    # caller's process-group kill. Stamping failed while it keeps editing the repo is exactly
+    # the record that made the board lie on 08-09 — so the trap must STOP it, then stamp.
+    print("\nO. dispatch.sh sync trap kills the worker BEFORE it closes the record")
+    rc_o, worker_o, status_o = run_sync_kill_trap(tmp)
+    check("trap fired and closed the record", status_o in ("failed", None) and status_o == "failed",
+          "status=%s" % status_o)
+    check("the setsid'd worker is DEAD, not orphaned into the repo", worker_o is not None
+          and not alive(worker_o), "worker=%s" % worker_o)
 
     # ------------------------------------------------- K: real dispatch.sh syntax intact
     print("\nK. touched scripts still parse")
