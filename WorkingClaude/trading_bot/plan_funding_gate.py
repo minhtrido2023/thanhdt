@@ -53,19 +53,43 @@ CHẶN OAN TOÀN BỘ plan SpaceX vì một hiện vật đo đạc. Vì vậy m
 ngược nhau: nhánh `cash_only` lệch ⇒ chặn OAN (ca TV1), nhánh đòn bẩy lệch ⇒ đo THỪA sức mua gấp
 đôi ⇒ BỎ LỌT đúng thứ gate sinh ra để chặn (quant-skeptic vòng 1, 2026-08-04).
 
-CÔNG THỨC (cập nhật 2026-08-07, commit 087a3d0 — thêm tín dụng JIT-unpark)
-─────────────────────────────────────────────────────────────────────────
+CÔNG THỨC (cập nhật 2026-08-10 — sửa chỗ tín dụng JIT bị chia loãng theo SỐ NHÓM)
+────────────────────────────────────────────────────────────────────────────────
   need_g  = Σ_(lệnh mua thuộc nhóm g) qty × ref_price × (1 + FEE_RATE)
   JIT     = Σ_(lệnh BÁN cùng plan, priority < min priority MỌI lệnh mua)
               qty × ref_price × (1 − FEE_RATE)      (xem _jit_sell_credit)
-  U       = Σ_g  need_g / (pp0Buy_g + JIT × need_g/Σneed)   ("tỉ lệ sức mua bị tiêu thụ")
+  U_raw   = Σ_g  need_g / pp0Buy_g          ("phần HŨ TIỀN CHUNG bị tiêu thụ")
+  POT     = min_g pp0Buy_g                  (hũ chung quy về đơn vị gói ÍT đòn bẩy nhất)
+  H       = 1 + JIT_hiệu_lực / POT          ("trần" sau khi tiền bán chạy trước đổ về)
+  U       = U_raw / H                       (chuẩn hoá: 1,0 = tiêu thụ ĐÚNG 100%)
   CHẶN khi U > 1.0  (đúng `≤`, hoà đúng bằng sức mua thì KHÔNG chặn)
-Nhóm đơn (mọi phiên thường lệ, tất cả lệnh dùng gói default), plan không có lệnh bán chạy trước
-(JIT=0) → rút gọn về đúng `Σ need ≤ pp0Buy` như cũ. JIT chia THEO TỈ LỆ NHU CẦU của từng nhóm,
-KHÔNG cộng gộp plan-wide — giữ tính chất chống-che-giấu vốn (một nhóm vượt sức mua vẫn CHẶN dù
-nhóm khác thừa, xem docstring `_jit_sell_credit`). Nhiều nhóm: các gói vay chia nhau CÙNG một hũ
-tiền với hệ số vay khác nhau, nên cộng phân số tiêu thụ là xấp xỉ tuyến tính đúng khi các gói
-cùng initialRate và hợp lý khi khác.
+
+VÌ SAO `Σ` (không phải `max`) — và vì sao HŨ CHUNG chỉ được đếm MỘT LẦN
+  Các gói vay KHÔNG có hũ tiền riêng: `pp0Buy_g = POT × λ_g` với λ_g = 1/initialRate của gói
+  (cash-only ⇒ λ=1 ⇒ mọi gói cùng một số). Một lệnh mua need_g tiêu của hũ chung đúng
+  `need_g/λ_g`, nên ràng buộc thật là `Σ_g need_g/λ_g ≤ POT + JIT`, tức `Σ_g need_g/pp0Buy_g
+  ≤ 1 + JIT/POT`. Đó CHÍNH LÀ công thức trên. `Σ` giữ nguyên tính chất chống-che-giấu-vốn
+  (nhóm A vượt sức mua vẫn CHẶN dù nhóm B thừa — xem selfcheck [F], [P6]); đổi sang `max` sẽ
+  MỞ một lỗ hổng thật: hai nhóm mỗi nhóm 60% cùng một hũ ⇒ max=0,60 "OK" trong khi plan cần
+  120% số tiền đang có.
+
+BUG ĐÃ SỬA (sự cố THẬT ZaloPay 2026-08-10, `kb/incidents/2026-08/2026-08-10-funding-gate-
+multipackage-shared-pot-false-block.md`): bản 08-07 đặt hũ chung ĐẦY ĐỦ vào MẪU SỐ của TỪNG
+nhóm rồi mới chia JIT theo tỉ lệ — `U = Σ need_g/(POT + JIT×need_g/Σneed)`. Với k nhóm nhu cầu
+cân nhau, phép đó làm tín dụng JIT bị chia loãng ĐÚNG k lần (đặt POT=0 sẽ thấy ngay:
+`Σ = k×Σneed/JIT` thay vì `Σneed/JIT`), đồng thời `buying_power_vnd` báo ra `Σ pp0Buy_g` =
+đếm cùng một hũ k lần. Ca thật: 4 lệnh mua ZaloPay (cash-only) tách 2 nhóm gói vay CÙNG
+pp0Buy 5.818.854đ; tỉ lệ tiêu thụ THẬT 92.649.435/(5.818.854+163.862.011) = 54,6% nhưng gate
+tính ra 105,6% ⇒ CHẶN OAN sạch plan đã được user duyệt, mất cửa sổ vào lệnh LAG ngày 3/3.
+Không lộ trước 08-10 vì mọi phiên trước chỉ có MỘT nhóm (khi đó Σ ≡ max ≡ công thức đúng).
+
+Nhóm đơn (mọi phiên thường lệ) → U = need/(pp0Buy + JIT), đồng nhất TUYỆT ĐỐI với bản cũ
+(chứng minh: U_raw/H = (need/bp)/((bp+JIT)/bp) = need/(bp+JIT)). JIT = 0 → U = Σ need_g/pp0Buy_g,
+cũng đồng nhất bản cũ. Tức thay đổi 08-10 chỉ chạm ĐÚNG hình dạng "nhiều nhóm VÀ có tín dụng JIT".
+
+POT lấy `min` là CẬN THẬN TRỌNG chứ không phải xấp xỉ tuỳ tiện: pp0Buy ≥ tiền mặt luôn đúng
+(λ_g ≥ 1), nên hũ tiền thật ≤ min pp0Buy ⇒ H tính ra ≤ H thật ⇒ gate CHẶT hơn sự thật, không
+bao giờ lỏng hơn.
 
 KHI KHÔNG ĐO ĐƯỢC `pp0Buy` (None hoặc ≤0) — KHÔNG chặn theo phản xạ, mà dùng CẬN NGOÀI
 ────────────────────────────────────────────────────────────────────────────────────────
@@ -230,7 +254,9 @@ def check_plan_funding(plan, broker, account_mode):
     jit_credit, n_jit_sells, min_buy_prio = _jit_sell_credit(plan, buys)
 
     # ── đo pp0Buy từng nhóm, bằng ĐÚNG gói vay của nhóm đó ────────────────────────────────
-    measured_util = 0.0
+    raw_util = 0.0          # Σ_g need_g/pp0Buy_g = phần HŨ CHUNG bị tiêu thụ (chưa tính JIT)
+    measured_need = 0.0     # Σ need của các nhóm ĐO ĐƯỢC (dùng để chiết khấu JIT, xem dưới)
+    pots = []               # pp0Buy của các nhóm đo được → POT = min
     unmeasured = []
     out_groups = []
     for key, g in sorted(groups.items()):
@@ -241,42 +267,53 @@ def check_plan_funding(plan, broker, account_mode):
                                          loan_package_id=g["lp"])
         except Exception as ex:
             err = type(ex).__name__
-        # Chia tín dụng JIT theo TỈ LỆ NHU CẦU của nhóm, KHÔNG cộng gộp plan-wide. Cộng gộp
-        # (so `total_need` với `Σbp + jit_credit`) sẽ phá tính chất chống-che-giấu vốn có của
-        # dạng "tổng các phân số": vì mọi số hạng ≥ 0, hôm nay MỘT nhóm vượt sức mua là tổng
-        # tự động > 1 ⇒ CHẶN, dù nhóm khác còn thừa. Ví dụ cộng gộp làm hỏng: nhóm A need 100tr
-        # /bp 10tr (util 10,0) + nhóm B need 1tr/bp 1.000tr (util 0,001) → tổng 10,001 CHẶN
-        # đúng; nhưng cộng gộp cho 101tr ≤ 1.010tr ⇒ OK OAN, tức sức mua thừa của B "gánh" cho
-        # A trong khi hai gói vay KHÔNG chuyển sức mua cho nhau. Chia theo tỉ lệ giữ nguyên
-        # tính chất: mỗi nhóm chỉ được cứu bằng phần tín dụng tương ứng nhu cầu CỦA CHÍNH NÓ.
-        # Nhóm không đo được vẫn nhận phần chia (rồi bỏ không dùng) ⇒ nhóm đo được nhận ÍT hơn
-        # = lệch về phía thận trọng. Cộng 1:1, KHÔNG nhân đòn bẩy: tiền bán về là tiền mặt, quy
-        # ra sức mua của gói vay còn ≥ 1× nữa, nên 1× là cận dưới an toàn.
-        share = jit_credit * (g["need"] / total_need) if total_need > 0 else 0.0
         rec = {"loan_package_id": g["lp"], "package_source": g["src"],
                "n_orders": len(g["orders"]), "need_vnd": g["need"],
                "probe_ticker": probe.ticker, "probe_price": probe.ref_price,
-               "buying_power_vnd": bp, "jit_credit_vnd": share, "error": err}
+               "buying_power_vnd": bp, "error": err}
         if bp is not None and bp > 0:
-            rec["utilization"] = g["need"] / (bp + share)
-            measured_util += rec["utilization"]
+            # Tỉ lệ tiêu thụ HŨ CHUNG của riêng nhóm này. Cộng lại (KHÔNG lấy max) giữ nguyên
+            # tính chất chống-che-giấu-vốn: nhóm A need 100tr/bp 10tr (10,0) + nhóm B need 1tr/
+            # bp 1.000tr (0,001) → Σ 10,001 ⇒ CHẶN, sức mua thừa của B KHÔNG gánh hộ A.
+            rec["utilization"] = g["need"] / bp
+            raw_util += rec["utilization"]
+            measured_need += g["need"]
+            pots.append(bp)
         else:
             rec["utilization"] = None
             unmeasured.append(rec)
         out_groups.append(rec)
 
-    measured_bp = sum(r["buying_power_vnd"] for r in out_groups
-                      if r["buying_power_vnd"] is not None and r["buying_power_vnd"] > 0)
+    # HŨ CHUNG chỉ được đếm MỘT LẦN (bug 2026-08-10: `Σ pp0Buy_g` đếm cùng một hũ k lần —
+    # ZaloPay cash-only báo ra 11.637.708đ = 5.818.854 × 2). `min` là cận thận trọng: pp0Buy ≥
+    # tiền mặt luôn đúng, nên hũ thật ≤ min pp0Buy ⇒ H tính ra ≤ H thật ⇒ không bao giờ lỏng hơn.
+    shared_pot = min(pots) if pots else None
+    measured_bp = shared_pot if shared_pot else 0.0
 
-    jit_note = ("" if jit_credit <= 0 else
-                f" + tín dụng JIT {jit_credit:,.0f}đ từ {n_jit_sells} lệnh BÁN cùng plan chạy "
-                f"trước (priority < {min_buy_prio}, đã trừ phí {FEE_RATE*100:g}%)")
+    # JIT chỉ được quy đổi cho phần nhu cầu ĐO ĐƯỢC. Nhóm không đo được không nằm trong
+    # `raw_util`, nên nếu cấp toàn bộ JIT cho phần đo được thì gate sẽ lỏng đúng phần đó ⇒
+    # chiết khấu theo tỉ trọng nhu cầu đo được (mọi nhóm đo được ⇒ hệ số = 1,0, không đổi gì).
+    # Cộng 1:1, KHÔNG nhân đòn bẩy: tiền bán về là tiền mặt, quy ra sức mua của gói vay còn
+    # ≥ 1× nữa, nên 1× là cận dưới an toàn (giữ nguyên lập luận bản 08-07).
+    jit_effective = jit_credit * (measured_need / total_need) if total_need > 0 else 0.0
+    headroom = 1.0 + (jit_effective / shared_pot) if shared_pot else 1.0
+    measured_util = raw_util / headroom if pots else 0.0
+
+    pot_note = ("" if len(pots) <= 1 else
+                f" [hũ chung {shared_pot:,.0f}đ = min pp0Buy của {len(pots)} nhóm gói vay: "
+                + ", ".join(f"{r['loan_package_id']}={r['buying_power_vnd']:,.0f}"
+                            for r in out_groups if r["buying_power_vnd"]) + "]")
+    jit_note = ("" if jit_effective <= 0 else
+                f" + tín dụng JIT {jit_effective:,.0f}đ từ {n_jit_sells} lệnh BÁN cùng plan chạy "
+                f"trước (priority < {min_buy_prio}, đã trừ phí {FEE_RATE*100:g}%)") + pot_note
 
     # ── (1) nhóm đo được đã vượt sức mua → CHẶN, không cần xét gì thêm ────────────────────
     if measured_util > 1.0 + _EPS:
         return {"action": "BLOCK", "groups": out_groups, "need_vnd": total_need,
                 "buying_power_vnd": measured_bp, "utilization": measured_util,
                 "fallback_bound_vnd": None, "jit_sell_credit_vnd": jit_credit,
+                "jit_credit_effective_vnd": jit_effective, "shared_pot_vnd": shared_pot,
+                "raw_utilization": raw_util, "headroom_ratio": headroom,
                 "jit_sell_orders": n_jit_sells, "min_buy_priority": min_buy_prio,
                 "reason": (f"Σ lệnh MUA {total_need:,.0f}đ VƯỢT sức mua thật của broker "
                            f"{measured_bp:,.0f}đ (pp0Buy, đã gồm hạn mức vay + tiền bán chờ về "
@@ -290,6 +327,8 @@ def check_plan_funding(plan, broker, account_mode):
         return {"action": "OK", "groups": out_groups, "need_vnd": total_need,
                 "buying_power_vnd": measured_bp, "utilization": measured_util,
                 "fallback_bound_vnd": None, "jit_sell_credit_vnd": jit_credit,
+                "jit_credit_effective_vnd": jit_effective, "shared_pot_vnd": shared_pot,
+                "raw_utilization": raw_util, "headroom_ratio": headroom,
                 "jit_sell_orders": n_jit_sells, "min_buy_priority": min_buy_prio,
                 "reason": (f"Σ lệnh MUA {total_need:,.0f}đ ≤ sức mua {measured_bp:,.0f}đ"
                            f"{jit_note} ({measured_util*100:.1f}%)")}
@@ -310,12 +349,20 @@ def check_plan_funding(plan, broker, account_mode):
         return {"action": "BLOCK", "groups": out_groups, "need_vnd": total_need,
                 "buying_power_vnd": measured_bp if measured_bp else None,
                 "utilization": measured_util, "fallback_bound_vnd": bound,
+                "jit_sell_credit_vnd": jit_credit, "jit_credit_effective_vnd": jit_effective,
+                "shared_pot_vnd": shared_pot, "raw_utilization": raw_util,
+                "headroom_ratio": headroom, "jit_sell_orders": n_jit_sells,
+                "min_buy_priority": min_buy_prio,
                 "reason": (f"Σ lệnh MUA {total_need:,.0f}đ VƯỢT cả cận ngoài — {common}. "
                            f"Đòn bẩy tối đa 2× không giải thích được mức này ⇒ plan chứa lệnh "
                            f"dựa trên vốn CHƯA TỒN TẠI.")}
     return {"action": "UNVERIFIED", "groups": out_groups, "need_vnd": total_need,
             "buying_power_vnd": measured_bp if measured_bp else None,
             "utilization": measured_util, "fallback_bound_vnd": bound,
+            "jit_sell_credit_vnd": jit_credit, "jit_credit_effective_vnd": jit_effective,
+            "shared_pot_vnd": shared_pot, "raw_utilization": raw_util,
+            "headroom_ratio": headroom, "jit_sell_orders": n_jit_sells,
+            "min_buy_priority": min_buy_prio,
             "reason": (f"Σ lệnh MUA {total_need:,.0f}đ nằm trong cận ngoài nhưng CHƯA xác minh "
                        f"được bằng sức mua thật — {common}. KHÔNG chặn (ca TV1 2026-07-29 chứng "
                        f"minh đo-không-được xảy ra trên plan hợp lệ), nhưng cần người xem.")}

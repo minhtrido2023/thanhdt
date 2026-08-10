@@ -374,10 +374,10 @@ v0 = check_plan_funding(plan([order("DRI", 1800, 13_100.0, priority=1)], account
 check("KHÔNG có lệnh bán thì VẪN chặn (đúng — lúc đó tiền thật sự không tồn tại)",
       v0["action"] == "BLOCK", f"{v0['action']}: {v0['reason']}")
 
-print("\n[P6] ★★ CHỐNG CHE GIẤU: chia tín dụng theo TỈ LỆ NHU CẦU, KHÔNG cộng gộp plan-wide.")
+print("\n[P6] ★★ CHỐNG CHE GIẤU: cộng TỈ LỆ TIÊU THỤ (Σ), KHÔNG phải max, KHÔNG cộng gộp tiền.")
 print("      nhóm A (1841) need 100,075tr / bp 10tr  ← vượt THẬT")
 print("      nhóm B (1840) need 1,00tr   / bp 1.000tr ← thừa mứa")
-print("      Cộng gộp plan-wide sẽ cho OK OAN (101tr ≤ 1.010tr+50tr); chia tỉ lệ phải CHẶN.")
+print("      Cộng gộp plan-wide sẽ cho OK OAN (101tr ≤ 1.010tr+50tr); Σ tỉ lệ phải CHẶN.")
 # resolve SAB→1841: từ 2026-08-07 `_effective_loan_package` giải gói theo MÃ cho MỌI lệnh không
 # có đòn bẩy chỉ định (không còn chỉ `cash_only`), nên stub phải khai ánh xạ để nhóm ra 1841.
 b = StubBroker({DEFLT: 10_000_000, LEVER: 1_000_000_000}, cash=10_000_000,
@@ -390,13 +390,16 @@ check("action == BLOCK (nhóm A vượt, B KHÔNG gánh hộ được)", v["acti
       f"{v['action']}: {v['reason']}")
 gA = [g for g in v["groups"] if g["loan_package_id"] == DEFLT][0]
 gB = [g for g in v["groups"] if g["loan_package_id"] == LEVER][0]
-check("nhóm A vẫn util > 1 sau khi nhận phần chia", gA["utilization"] > 1.0, gA["utilization"])
-check("phần chia tỉ lệ theo need (A nhận ~99%)",
-      abs(gA["jit_credit_vnd"] / v["jit_sell_credit_vnd"] - gA["need_vnd"] / v["need_vnd"]) < 1e-9,
-      (gA["jit_credit_vnd"], gB["jit_credit_vnd"]))
-check("Σ phần chia == tổng tín dụng (không tạo/mất tiền)",
-      abs(sum(g["jit_credit_vnd"] for g in v["groups"]) - v["jit_sell_credit_vnd"]) < 1e-6,
-      [g["jit_credit_vnd"] for g in v["groups"]])
+check("nhóm A vẫn util(thô) > 1 — tiêu quá cả hũ chung", gA["utilization"] > 1.0,
+      gA["utilization"])
+check("nhóm B util(thô) ≈ 0 nhưng KHÔNG gánh hộ được cho A", gB["utilization"] < 0.01,
+      gB["utilization"])
+check("hũ chung = min pp0Buy = 10tr (KHÔNG phải 10tr + 1.000tr)",
+      v["shared_pot_vnd"] == 10_000_000, v["shared_pot_vnd"])
+check("Σ tỉ lệ thô ≈ 10,0085 (A 10,0075 + B 0,001)", abs(v["raw_utilization"] - 10.0085) < 1e-3,
+      v["raw_utilization"])
+check("kể cả sau khi cộng TOÀN BỘ tín dụng JIT vào trần vẫn CHẶN",
+      v["utilization"] > 1.0, (v["utilization"], v["headroom_ratio"]))
 
 print("\n[P7] ★ FAIL-SAFE: lệnh KHÔNG có field `priority` (object cũ) ⇒ mặc định 5 cả hai bên")
 print("      ⇒ 5 < 5 sai ⇒ 0 tín dụng ⇒ hành vi Y HỆT trước khi có patch")
@@ -407,6 +410,129 @@ v = check_plan_funding(plan([o_sell, o_buy]),
 check("action == BLOCK (không tự nới khi thiếu thông tin thứ tự)", v["action"] == "BLOCK",
       f"{v['action']}: {v['reason']}")
 check("tín dụng JIT = 0", v["jit_sell_credit_vnd"] == 0, v["jit_sell_credit_vnd"])
+
+# ── Q. HŨ TIỀN CHUNG: nhiều nhóm gói vay KHÔNG có tiền riêng (bug thật 2026-08-10) ───────
+# Sự cố: ZaloPay cash-only, 4 lệnh mua tách 2 nhóm gói vay, CẢ HAI nhóm trả về CÙNG pp0Buy
+# 5.818.854đ (một hũ tiền, hai cách nhìn). Bản 08-07 đặt hũ ĐẦY ĐỦ vào mẫu số TỪNG nhóm rồi
+# mới chia JIT theo tỉ lệ ⇒ tín dụng JIT bị chia loãng đúng số nhóm ⇒ util 105,6% ⇒ CHẶN OAN
+# plan đã duyệt (tỉ lệ THẬT 54,6%). Nhóm Q khoá cả hai chiều: không chặn oan, và không nới.
+print("\n" + "=" * 78)
+print("[Q] HŨ TIỀN CHUNG giữa các nhóm gói vay (sự cố thật ZaloPay 2026-08-10)")
+print("=" * 78)
+
+ZP10_SELLS = [("BID", 600, 39_050.0), ("CTG", 600, 32_500.0), ("HDB", 200, 26_550.0),
+              ("MBB", 900, 24_150.0), ("TCB", 600, 29_700.0), ("VCB", 700, 59_700.0),
+              ("VHM", 300, 73_000.0), ("VPB", 500, 25_000.0)]
+ZP10_BUYS = [("DRI", 1900, 13_000.0), ("POW", 1800, 13_400.0),
+             ("SCL", 1000, 24_200.0), ("SSI", 800, 24_450.0)]
+PP0 = 5_818_854.0                      # pp0Buy ĐO THẬT trên broker sống, GIỐNG HỆT ở cả 2 nhóm
+ZP10_RESOLVE = {"DRI": 1258, "SCL": 1258, "POW": 1826, "SSI": 1826}   # đúng nhóm đo được 09:1x
+ZP10_JIT = sum(q * px for _, q, px in ZP10_SELLS) * (1 - FEE_RATE)
+ZP10_NEED = sum(q * px for _, q, px in ZP10_BUYS) * (1 + FEE_RATE)
+
+
+def zp10_plan(with_sells=True, buys=ZP10_BUYS):
+    os_ = [order(t, q, px, side="sell", priority=0) for t, q, px in ZP10_SELLS] if with_sells else []
+    return plan(os_ + [order(t, q, px, priority=1) for t, q, px in buys], account="ZaloPay")
+
+
+def zp10_broker():
+    return StubBroker({1258: PP0, 1826: PP0}, cash=PP0, resolve=dict(ZP10_RESOLVE))
+
+
+print("\n[Q1] ★★ REPLAY THẬT — 4 lệnh mua tách 2 nhóm (1258/1826) CÙNG pp0Buy 5.818.854đ,")
+print("     8 lệnh bán PARK prio 0 cấp 163,86tr ⇒ tiêu thụ THẬT 54,6% ⇒ PHẢI KHÔNG CHẶN")
+v = check_plan_funding(zp10_plan(), zp10_broker(), "live")
+check("Σ need = 92.649.435đ", abs(v["need_vnd"] - 92_649_435) < 1, v["need_vnd"])
+check("tín dụng JIT = 163.862.011đ", abs(v["jit_sell_credit_vnd"] - 163_862_011.25) < 1,
+      v["jit_sell_credit_vnd"])
+check("tách đúng 2 nhóm gói vay", len(v["groups"]) == 2,
+      [(g["loan_package_id"], g["need_vnd"]) for g in v["groups"]])
+check("nhóm 1258 need 48.936.675đ (DRI+SCL)",
+      abs([g for g in v["groups"] if g["loan_package_id"] == 1258][0]["need_vnd"] - 48_936_675) < 1)
+check("nhóm 1826 need 43.712.760đ (POW+SSI)",
+      abs([g for g in v["groups"] if g["loan_package_id"] == 1826][0]["need_vnd"] - 43_712_760) < 1)
+check("★ action == OK (bản 08-07: BLOCK OAN)", v["action"] == "OK", f"{v['action']}: {v['reason']}")
+check("★ util == tỉ lệ THẬT cấp plan 54,6% (bản 08-07 ra 105,6%)",
+      abs(v["utilization"] - ZP10_NEED / (PP0 + ZP10_JIT)) < 1e-12
+      and abs(v["utilization"] - 0.546) < 1e-3, v["utilization"])
+check("★ hũ chung đếm MỘT lần: 5.818.854đ (bản 08-07 báo 11.637.708đ = ×2)",
+      v["shared_pot_vnd"] == PP0 and v["buying_power_vnd"] == PP0,
+      (v["shared_pot_vnd"], v["buying_power_vnd"]))
+check("reason KHÔNG chứa con số đếm đôi 11.637.708", "11,637,708" not in v["reason"], v["reason"])
+print(f"      → hũ {PP0/1e6:.2f}tr + JIT {ZP10_JIT/1e6:.2f}tr vs Σ mua {v['need_vnd']/1e6:.2f}tr "
+      f"⇒ util {v['utilization']*100:.1f}%")
+
+print("\n[Q1b] ★★ CHỨNG MINH NGƯỢC — công thức CŨ (hũ lặp ở mọi mẫu số + JIT chia tỉ lệ) trên")
+print("      CHÍNH dữ liệu này ra 1,0556 > 1 ⇒ ca [Q1] thật sự khoá được bug, không phải khẳng định suông")
+old_u = sum(g["need_vnd"] / (PP0 + ZP10_JIT * g["need_vnd"] / v["need_vnd"]) for g in v["groups"])
+check("công thức cũ ra ≈ 1,0556 (đã CHẶN OAN)", abs(old_u - 1.0556) < 1e-3, old_u)
+check("công thức mới ra < 1 trên cùng dữ liệu", v["utilization"] < 1.0, v["utilization"])
+
+print("\n[Q2] ★★ REGRESSION — CÙNG 2 nhóm cùng hũ nhưng BỎ HẾT lệnh bán (JIT=0):")
+print("      92,65tr > hũ 5,82tr ⇒ PHẢI VẪN CHẶN (tiền thật sự không tồn tại)")
+v2 = check_plan_funding(zp10_plan(with_sells=False), zp10_broker(), "live")
+check("action == BLOCK", v2["action"] == "BLOCK", f"{v2['action']}: {v2['reason']}")
+check("tín dụng JIT = 0", v2["jit_sell_credit_vnd"] == 0, v2["jit_sell_credit_vnd"])
+
+print("\n[Q3] ★★★ LỖ HỔNG mà phương án `max` sẽ mở ra — 2 nhóm CÙNG hũ 100tr, mỗi nhóm tiêu")
+print("      60tr (60% hũ). max(0,60; 0,60) = 0,60 ⇒ 'OK' OAN dù plan cần 120% số tiền đang có.")
+print("      Σ tỉ lệ = 1,20 ⇒ PHẢI CHẶN. Đây là lý do giữ Σ, chỉ sửa chỗ đếm đôi hũ + JIT.")
+SHARED = 100_000_000.0
+b = StubBroker({1258: SHARED, 1826: SHARED}, cash=SHARED,
+               resolve={"DRI": 1258, "POW": 1826})
+gross60 = 60_000_000 / (1 + FEE_RATE)
+v3 = check_plan_funding(plan([order("DRI", 1, gross60, priority=1),
+                              order("POW", 1, gross60, priority=1)], account="ZaloPay"),
+                        b, "live")
+check("MỖI nhóm riêng lẻ đều DƯỚI 1 (max sẽ cho OK)",
+      all(g["utilization"] < 1.0 for g in v3["groups"]),
+      [g["utilization"] for g in v3["groups"]])
+check("★ action == BLOCK (Σ = 1,20)", v3["action"] == "BLOCK", f"{v3['action']}: {v3['reason']}")
+check("util ≈ 1,20", abs(v3["utilization"] - 1.2) < 1e-6, v3["utilization"])
+
+print("\n[Q4] BIÊN `≤` trên hũ chung: Σ mua ĐÚNG BẰNG hũ + JIT → OK; thiếu 1đ nữa → BLOCK")
+POT4, JIT4_GROSS = 20_000_000.0, 80_000_000.0
+jit4 = JIT4_GROSS * (1 - FEE_RATE)
+exact_gross = (POT4 + jit4) / (1 + FEE_RATE)          # chia đôi cho 2 nhóm
+b4 = StubBroker({1258: POT4, 1826: POT4}, cash=POT4, resolve={"DRI": 1258, "POW": 1826})
+v4 = check_plan_funding(plan([order("VNM", 1, JIT4_GROSS, side="sell", priority=0),
+                              order("DRI", 1, exact_gross / 2, priority=1),
+                              order("POW", 1, exact_gross / 2, priority=1)],
+                             account="ZaloPay"), b4, "live")
+check("hoà ĐÚNG BẰNG → OK", v4["action"] == "OK", f"{v4['action']} u={v4['utilization']!r}")
+b4b = StubBroker({1258: POT4 - 1, 1826: POT4 - 1}, cash=POT4,
+                 resolve={"DRI": 1258, "POW": 1826})
+v4b = check_plan_funding(plan([order("VNM", 1, JIT4_GROSS, side="sell", priority=0),
+                               order("DRI", 1, exact_gross / 2, priority=1),
+                               order("POW", 1, exact_gross / 2, priority=1)],
+                              account="ZaloPay"), b4b, "live")
+check("hũ thiếu 1đ → BLOCK", v4b["action"] == "BLOCK", f"{v4b['action']} u={v4b['utilization']!r}")
+
+print("\n[Q5] HŨ KHÁC NHAU (margin, gói 1840 đòn bẩy 2× gói 1841): hũ chung = min = 80tr,")
+print("      JIT quy đổi 1:1 trên hũ ít đòn bẩy nhất = CẬN THẬN TRỌNG, không bao giờ nới")
+b5 = StubBroker({LEVER: 200_000_000, DEFLT: 80_000_000}, cash=20_000_000,
+                lever_valid={"FPT": {LEVER}}, account_default=DEFLT, resolve={"SAB": DEFLT})
+v5 = check_plan_funding(plan([order("FPT", 1000, 100_000, loan_package_id=LEVER, priority=5),
+                              order("SAB", 1200, 40_000, priority=5)]), b5, "live")
+check("hũ chung = 80tr (min), KHÔNG phải 280tr (Σ)", v5["shared_pot_vnd"] == 80_000_000,
+      v5["shared_pot_vnd"])
+check("không có lệnh bán ⇒ trần = 1,0 ⇒ hành vi Y HỆT [O5] (BLOCK, util 1,101)",
+      v5["action"] == "BLOCK" and abs(v5["utilization"] - 1.1010) < 1e-3,
+      (v5["action"], v5["utilization"]))
+
+print("\n[Q6] NHÓM KHÔNG ĐO ĐƯỢC lẫn nhóm đo được: JIT bị CHIẾT KHẤU theo tỉ trọng nhu cầu đo")
+print("      được (nhóm không đo không nằm trong Σ tỉ lệ ⇒ không được hưởng phần tín dụng của nó)")
+b6 = StubBroker({1258: 10_000_000}, cash=10_000_000, resolve={"DRI": 1258, "POW": 1826})
+v6 = check_plan_funding(plan([order("VNM", 1, 100_000_000, side="sell", priority=0),
+                              order("DRI", 1, 10_000_000, priority=1),
+                              order("POW", 1, 10_000_000, priority=1)],
+                             account="ZaloPay"), b6, "live")
+check("có 1 nhóm không đo được ⇒ đi nhánh cận ngoài", v6["action"] in ("UNVERIFIED", "BLOCK"),
+      v6["action"])
+check("JIT hiệu lực = 50% JIT gộp (1/2 nhu cầu đo được)",
+      abs(v6["jit_credit_effective_vnd"] - v6["jit_sell_credit_vnd"] * 0.5) < 1,
+      (v6["jit_credit_effective_vnd"], v6["jit_sell_credit_vnd"]))
 
 print("\n" + "=" * 78)
 print(f"KẾT QUẢ: {PASS} PASS / {FAIL} FAIL")
