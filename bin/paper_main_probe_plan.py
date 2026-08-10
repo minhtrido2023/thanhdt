@@ -49,11 +49,17 @@ BUY_VALUE_VND = 30_000_000  # mỗi mã; 6 mã ~180M trên NAV paper 1B
 
 # Hệ số giá trị mua theo THỨ (0=T2 … 4=T6) — xem cảnh báo NETTING ở docstring.
 # 5 giá trị ĐÔI MỘT KHÁC NHAU ⇒ hai phiên giao dịch liên tiếp (kể cả T6→T2, kể cả sau nghỉ
-# lễ lệch thứ) luôn có giá trị mục tiêu lệch ≥0,15×30M = 4,5M/mã ⇒ net qty ≥1 lô. Chuỗi
-# chọn sao cho có 3 ngày net BUY (T2/T4/T6) + 2 ngày net SELL (T3/T5) mỗi tuần: buy-path
-# (chase-cap, EXTREME buy-pause) và sell-path đều có cửa sổ đều đặn. Dải 21–30M/mã ⇒ giữ
-# nguyên bậc ~30M/mã như thiết kế gốc.
-BUY_VALUE_FACTOR = {0: 1.00, 1: 0.75, 2: 0.90, 3: 0.70, 4: 0.85}
+# lễ lệch thứ) luôn có giá trị mục tiêu lệch ≥0,15×30M = 4,5M/mã ⇒ net qty ≥1 lô. Dải
+# 21–30M/mã ⇒ giữ nguyên bậc ~30M/mã như thiết kế gốc.
+# Chuỗi chọn sao cho up-day = T2/T3/T5 (net BUY) + T4/T6 (net SELL) mỗi tuần — ĐÃ SỬA
+# 2026-08-10 (job Taylor_20260810_032034, xác nhận độc lập bởi Mike): bản gốc xếp up-day
+# T2/T4/T6, nhưng cron bằng chứng cửa sổ mua (`46 3 * * 2,4` = T3/T5 10:46 ICT, xem
+# crontab) lại trúng đúng 2 ngày net-SELL của bản gốc ⇒ P(có lệnh mua trong cron đó)=0
+# TUYỆT ĐỐI, không phải thấp — gate 1 của chương trình paper fill_timing đứng im 07-23→
+# 08-10 (18 ngày) vì lý do này, không phải "chưa đủ mẫu". Xoay đúng 1 ngày để T3/T5 rơi
+# vào up-day, T4/T6 vẫn net SELL (giữ nguyên bằng chứng cho sell-path/gate 2). Chi tiết:
+# mike/agents/Taylor/research/fill_timing_eta_investigation_20260810.md.
+BUY_VALUE_FACTOR = {0: 0.85, 1: 1.00, 2: 0.75, 3: 0.90, 4: 0.70}
 
 
 def latest_closes(tickers):
