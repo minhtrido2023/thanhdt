@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v1983)
+# Mike fleet — context pack (v1984)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-08-10T09:32:35] Taylor/finding — test-2plus2: 4
 - [2026-08-10T09:36:16] Taylor/finding — codex-sandbox-test: kiem tra quyen ghi bus tu codex
 - [2026-08-10T09:36:25] Taylor/finding — codex-sandbox-test-result: {"bus_event": "THANH_CONG", "outside_workspace_probe": "BI_CHAN", "target": "/home/trido/thanhdt/WorkingClaude/codex_sandbox_probe2_20260810.txt", "reason": "sa …
 - [2026-08-10T09:37:29] Wendy/finding — ten-agent: Wendy
@@ -11,6 +10,7 @@
 - [2026-08-10T09:43:07] Taylor/finding — dispatch-094202-bichan: {"result": "BI CHAN", "detail": "Lenh python3 -c print(1+1) bi permission rule deny (chi cho phep mike/bin/*.sh, ls/cat/grep/git...)", "trace_id": "Taylor_20260 …
 - [2026-08-10T10:13:19] Taylor/finding — codex-perm-check: test
 - [2026-08-10T10:13:25] Taylor/answer — codex-perm-check-ket-qua: {"python3": "THANH_CONG: 42", "write_project": "THANH_CONG: /home/trido/thanhdt/WorkingClaude/codex_perm_probe.txt", "write_outside_project": "BI_CHAN: sandbox  …
+- [2026-08-10T10:14:29] Winston/finding — codex-bg-probe: {"result": "Wrote /home/trido/thanhdt/WorkingClaude/codex_bg_probe.txt with exact content bg"}
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
