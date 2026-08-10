@@ -212,6 +212,18 @@ merge.
 | `mike/bin/preflight_check.sh` | `8eb2631ea13cfc2b1bb7374e6c3098e0` |
 | `mike/bin/preflight_order_invariants_selfcheck.py` | `4646b41334c77a3abbcd5a3a229f67f8` |
 
+⚠️ **Bảng trên là mốc VERIFY, KHÔNG phải mốc COMMIT.** Hai vá sau verdict (§10 mục 1+2) đụng
+`approve_plan_with_jit.sh` (+selfcheck) ⇒ 2 dòng đó KHÔNG còn khớp file đã commit. md5 của
+trạng thái **đã commit `2633eb44`** (đo lại độc lập ở attempt 2, §11):
+
+| file | md5 đã commit |
+|---|---|
+| `mike/bin/approve_plan_with_jit.sh` | `f1bac532e99e8de9f07b593dd185a035` |
+| `mike/bin/approve_plan_with_jit_selfcheck.py` | `481cf0b141c338f4771b78ce94356e08` |
+
+4 file còn lại khớp bảng trên. Chuỗi vá→chạy lại→commit đúng thứ tự (khối "Chạy lại sau khi
+vá" ở §10 đo trên bản đã vá); chỉ **bảng md5 bị bỏ quên không cập nhật**.
+
 ## 9. Giới hạn — cái này KHÔNG giải quyết
 
 - **Chưa chạy trên dữ liệu SỐNG.** A/B đứng trên 08-07 lịch sử. Lần gọi thật đầu tiên (sau
@@ -282,3 +294,37 @@ shellcheck: 3/3 gate exit 0
 A/B 08-07 : cổng trước rc=2 không ký · chân A+B merge THẬT SỰ chạy, 6900/6900 + 2500/2500 ·
             cổng sau rc=0 ký được, Σ bán không đổi
 ```
+
+---
+
+## 11. Attempt 2 — tái lập ĐỘC LẬP trạng thái ĐÃ COMMIT (không tin báo cáo attempt 1)
+
+Attempt 1 hết turn budget ngay SAU khi commit `2633eb44` (commit 02:29:56, attempt 2 bắt đầu
+02:30:31 ICT) ⇒ phần code/verify đã xong, nhưng **chưa escalate mục còn treo lên bus**. Attempt 2
+KHÔNG viết lại gì; chỉ (a) đo lại từ đầu trên đúng cây đã commit, (b) đóng nốt phần còn thiếu.
+
+**Đo lại (worktree sạch, `git status bin/` rỗng ⇒ đúng bằng nội dung commit):**
+
+| Kiểm | Kết quả attempt 2 | Khớp attempt 1? |
+|---|---|---|
+| `preflight_order_invariants_selfcheck.py` | 12/12, exit 0 | ✅ |
+| `merge_park_orders_selfcheck.py` | 120/120, exit 0 | ✅ |
+| `approve_plan_with_jit_selfcheck.py` | 27/27, exit 0 | ✅ (đúng 27, không phải 21/22) |
+| A/B tích hợp 08-07 (`exp_park_merge_wire_20260811/ab_integrated_0807.sh`) | cổng trước rc=2 không ký · chân A+B **6900 SpaceX / 2500 ZaloPay** cả hai · cổng sau rc=0, Σ bán không đổi | ✅ khớp tuyệt đối |
+| Approval gate | `merge_park_orders.py:544` `requires_user_approval=True` **vô điều kiện**; `_APPROVAL_KEYS` chặn CẢ `approved_by` lẫn `approved_by_user`; plan đã duyệt ⇒ REFUSED trừ khi `--force-clear-approval` (mà cờ đó XOÁ chữ ký) | ✅ không có đường tắt |
+| Đường merge cũ còn caller không? | `grep` toàn repo: **0 caller** của `merge_three_in_one_20260807.py`; `crontab -l` không có dòng merge/park_trim/jit_unpark nào | ✅ |
+
+**Sai lệch DUY NHẤT tìm được** = bảng md5 §8 chưa cập nhật sau 2 vá hậu-verdict (đã sửa ở §8).
+Không phải lỗi cơ chế; nhưng đúng loại "neo bằng số đo cũ" mà chính chuỗi này đã vấp 3 lần.
+
+### Rủi ro tồn dư attempt 2 phát hiện — script one-off CŨ vẫn nằm trong namespace
+
+`agents/DollarBill/merge_three_in_one_20260807.py` (**đang tracked**, chính là script gây sự cố
+bán trùng 1.600cp ngày 08-07) **vẫn còn** ở thư mục DollarBill. Không script/cron nào gọi nó, và
+cổng mới CỐ Ý không tin dấu `_merged_into_orders` của nó ⇒ **không phải lỗ hổng đang hở**. Nhưng
+theo `coding_guidelines.md` §10 (file thành canonical ⇒ archive biến thể bị thay thế **cùng lượt**),
+nó nên vào `agents/DollarBill/archive/`.
+
+**Tôi KHÔNG tự move** — file thuộc thư mục agent khác (ranh giới "không sửa file của con khác").
+Giảm nhẹ sẵn có: script hardcode `plan 2026-08-07`, chạy hôm nay chỉ đụng plan cũ đã hết hiệu lực.
+⇒ Đề xuất Mike giao DollarBill archive, KHÔNG chặn việc wire.
