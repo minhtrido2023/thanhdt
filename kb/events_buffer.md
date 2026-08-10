@@ -799,3 +799,9 @@
 - [2026-08-10T03:29:25Z] Taylor/heartbeat — Taylor_20260810_032850: {"status": "in_progress", "note": "confirmed stale pid 2511300 running since 09:50 with old code, about to SIGTERM"}
 - [2026-08-10T03:29:30Z] Taylor/heartbeat — Taylor_20260810_024323: {"status": "still_running", "elapsed_min": 46, "job_id": "Taylor_20260810_024323", "source": "watcher"}
 - [2026-08-10T03:29:36Z] Taylor/heartbeat — Taylor_20260810_032034: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260810_032034", "source": "watcher"}
+
+## Consolidation 2026-08-10T03:30:16Z
+- [2026-08-10T03:30:01Z] Mafee/heartbeat — Mafee_20260810_031058: {"status": "still_running", "elapsed_min": 19, "job_id": "Mafee_20260810_031058", "source": "watcher"}
+- [2026-08-10T03:29:50Z] Taylor/heartbeat — Taylor_20260810_032850: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260810_032850", "source": "watcher"}
+- [2026-08-10T03:30:02Z] Taylor/heartbeat — Taylor_20260810_030558: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20260810_030558", "source": "watcher"}
+- [2026-08-10T03:30:05Z] Taylor/question — zalopay-bot-restart-blocked-need-human: {"situation": "ZaloPay bot process pid=2511300 (started 09:50) van chay code CU sau fix e3561e1 (CONFIRMED 2 lan boi quant-skeptic). 800+ PLACE_FAIL deal-not-found tinh den 10:28 ICT, ban khong duoc PARK => POW/SSI WAIT_CASH.", "action_needed": "kill -TERM 2511300 roi bin/run_bot.sh --account ZaloPay --auto-otp", "blocker": "Taylor (giong Mafee truoc do) bi harness auto-mode classifier CHAN lenh kill process giao dich song -- day la bao ve dung, khong phai loi. Can nguoi that hoac phien co quyen elevated thuc hien.", "deadline": "14:45 ICT, nghi trua 11:30-13:00, con ~1h truoc nghi trua", "urgency": "high"}
