@@ -1,308 +1,165 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Chỉ dẫn LUÔN được nạp cho mọi phiên và mọi agent trong repo này. Vì vậy nó chỉ chứa **LUẬT** —
+thứ đổi việc bạn làm lần sau. Diễn giải, số liệu benchmark, changelog và schema chi tiết nằm ở
+file được trỏ tới: đọc khi cần, không nạp mặc định.
 
-## Code navigation — `srcwalk` to READ, `grep` to SEARCH
+## Code navigation — `srcwalk` để ĐỌC, `grep` để TÌM
 
-Split by task, not by preference. This split is measured, not assumed: benchmark of 2026-08-03,
-N=200 symbols + N=150 files, ground truth built independently with Python's `ast` (import-resolved
-call sites), bootstrap 95% CIs. Report: `mike/kb/projects/srcwalk-benchmark-20260803.md`.
-Reproduce: `mike/agents/Mike/srcwalk_bench/`.
+Chia theo VIỆC, không theo sở thích. Đã đo, không phải phỏng đoán (N=200 symbol + N=150 file,
+ground truth dựng độc lập bằng `ast`, bootstrap 95% CI). Số liệu đầy đủ + cách tái lập:
+`mike/kb/projects/srcwalk-benchmark-20260803.md`.
 
-| Task | Tool | Measured basis |
-| --- | --- | --- |
-| Read / understand a file | **`srcwalk <path>`** | −88.8% tokens CI[86.5,90.7]; 0/150 files where it cost more |
-| Read one range or one symbol | **`srcwalk <path>:120-160`**, `--section <sym>` | same mechanism |
-| Orient in an unknown dir | **`srcwalk overview --scope <dir>`** | outline, not a file dump |
-| **Find a definition** | **`grep -rnE "^\s*(def\|class) NAME\b"`** | grep F1 **+0.052** CI[+0.015,+0.093]; 19 tok vs 472, 6× faster |
-| **Find call sites** | **`grep -rnE "\bNAME\s*\("`** | grep F1 **+0.062** CI[+0.010,+0.115]; **0% silent misses vs srcwalk's 8–10%** |
-| Find a *very common* name (`main`, `run`, `load`) | **`srcwalk discover NAME --scope <dir>`** | for names appearing in >10 files: srcwalk precision 0.844 vs grep 0.459, 200 tok vs 740 |
+| Việc | Dùng |
+| --- | --- |
+| Đọc / hiểu một file | `srcwalk <path>` — trả outline thay vì bytes, −89% token |
+| Đọc một đoạn hoặc một symbol | `srcwalk <path>:120-160`, `--section <sym>` |
+| Định hướng trong thư mục lạ | `srcwalk overview --scope <dir>` |
+| **Tìm định nghĩa** | `grep -rnE "^\s*(def\|class) NAME\b"` |
+| **Tìm call site** | `grep -rnE "\bNAME\s*\("` |
+| Tìm tên RẤT phổ biến (`main`, `run`, `load`) | `srcwalk discover NAME --scope <dir>` |
 
-**`srcwalk` (v1.3.0, `~/.local/bin`, skill `~/.claude/skills/srcwalk/`) is the default way to READ
-a file** — it returns an outline (symbols + line ranges) instead of bytes, saving ~89% of tokens
-while keeping 95.7% of top-level symbols (94% of files keep 100%). Run `srcwalk guide` once per
-session before non-trivial use. Structural languages: Python, TS/JS, Go, Rust, Java, C/C++, C#,
-Ruby, PHP, Swift, Markdown.
+`srcwalk` v1.3.0 ở `~/.local/bin`, skill `~/.claude/skills/srcwalk/`. Chạy `srcwalk guide` một
+lần mỗi phiên trước khi dùng nghiêm túc. Ngôn ngữ có cấu trúc: Python, TS/JS, Go, Rust, Java,
+C/C++, C#, Ruby, PHP, Swift, Markdown.
 
-**`grep` remains the default way to SEARCH.** It won both search tasks with non-overlapping CIs,
-costs 3–25× fewer tokens, and — the reason that matters most — **never silently returned nothing**.
+**grep vẫn là mặc định để TÌM.** Nó thắng cả hai tác vụ tìm kiếm với CI không chồng lấn, rẻ hơn
+3-25× token, và — lý do quan trọng nhất — **chưa bao giờ trả rỗng một cách im lặng**.
 
-### The three traps, all measured on this repo
+**Ba cái bẫy, đều đo trên chính repo này:**
+1. **Luôn `--scope` đúng thư mục chứa code. Đừng bao giờ tin `--scope .`** — `.gitignore:107`
+   ẩn `WorkingClaude/mike/` (nested repo) = **44% file `.py` của repo, gồm TOÀN BỘ fleet**.
+   Trên symbol nằm trong `mike/`: `--scope .` cho F1 **0,065**; `--scope mike` cho **0,978**.
+   Đọc file tường minh (`srcwalk mike/foo.py`) không bị ảnh hưởng — chỉ lệnh discovery bị.
+2. **Đừng bao giờ kết luận "không ai gọi hàm này" chỉ từ srcwalk.** Nó trả "no call sites" SAI
+   cho **8,2%** symbol có caller thật (grep: 0%). Trả lời sai thì phát hiện được; trả lời rỗng
+   thì không. Xác nhận sự vắng mặt bằng `grep`.
+3. **`trace callers --depth 1` thôi**, bỏ qua khối "impact (2nd hop)" — từ hop 2 nó khớp theo
+   TÊN chứ không resolve (`subprocess.run` bị tính là caller của `run`; một truy vấn trả 500
+   cạnh / 121 file). Blast radius phải verify bằng `grep`.
 
-1. **`.gitignore` blindness — the biggest one.** srcwalk's discovery commands respect ignore files.
-   `.gitignore:107` ignores `WorkingClaude/mike/` (it is a nested repo), which hides **44% of the
-   repo's `.py` files, including the entire fleet**. `srcwalk overview --scope .` does not even list
-   `mike/`. On symbols inside `mike/`, `--scope .` scores **F1 0.065**; `--scope mike` scores 0.978.
-   → **Always `--scope` the directory that contains the code. Never rely on `--scope .`.**
-   Explicit file reads (`srcwalk mike/foo.py`) are unaffected — only discovery is.
-2. **Silent zero results.** Even with correct scoping, srcwalk answered "no call sites found" for
-   **8.2%** CI[4.4,12.6] of symbols that provably had callers (e.g. `build_obs`, called on the very
-   next screen of the same file). grep: 0%. A wrong answer is detectable; an empty one is not.
-   → Never conclude "nothing calls this" from srcwalk alone. Confirm absence with `grep`.
-3. **Call-graph beyond hop 1 is name-matched, not resolved.** `trace callers X --depth 2` on
-   `filter_lag_rating_orders` returned **500 edges across 121 files** — every `main()`, every
-   `run(...)`, including `subprocess.run(...)` counted as a caller of `run`. Depth 1 is accurate.
-   → `--depth 1` only; ignore the "impact (2nd hop)" block; verify blast radius with `grep`.
+**Không áp dụng cho:** bash (không hỗ trợ cấu trúc — `mike/bin/` có **63 `.sh` vs 46 `.py`**),
+`.json`, `.sql`, `.csv`, `.md` ngắn → dùng `Read`. `srcwalk review` bỏ sót hàm MỚI THÊM (nó gán
+hunk cho symbol chỉ khi hunk nằm GỌN trong symbol đó) → `git diff` mới là nguồn thay đổi chuẩn.
 
-### Where srcwalk does not apply
-
-- **Bash — no structural support.** `srcwalk bin/dispatch.sh` (1244 lines) prints only the header
-  comment; `discover` never returns a bash function. `mike/bin/` is **63 `.sh` vs 46 `.py`**.
-- **`srcwalk review`** omits newly-added functions: it attributes a hunk to a symbol only when the
-  hunk is *contained* in it, so a hunk that adds top-level functions spans symbol boundaries and
-  falls back to `file-level`. Use `git diff` as the authoritative change set.
-- `.json` (parser fails on `filter.json`), `.sql` (single-line files), `.csv` (columns + row count
-  only) → `Read`. Long `.md` outlines well; short `.md` is cheaper to `Read`.
-
-Its output is *structural navigation* evidence, not runtime proof — carry any `confidence:` /
-`caveat:` line it prints into what you report.
+Output của srcwalk là bằng chứng **điều hướng cấu trúc**, không phải bằng chứng runtime — mang
+theo dòng `confidence:` / `caveat:` nó in ra vào những gì bạn báo cáo.
 
 ## BigQuery (Google Cloud)
 
-- **Project ID**: `lithe-record-440915-m9`
-- **Dataset**: `tav2_bq` (location: `asia-southeast1`)
-- **CLI**: `bq` — Google Cloud SDK installed at `C:\Users\hotro\AppData\Local\Google\Cloud SDK\google-cloud-sdk\bin\`. Must be on PATH before use (see invocation pattern below). Authenticated as `dtienthanh@gmail.com`. Always use `--use_legacy_sql=false` for standard SQL.
-- **Column dictionary**: `bigquery_dictionary.json` — full semantic descriptions for every column (ranges, formulas, meaning). Always consult it before writing filters or queries.
-
-### Tables
-
-#### `tav2_bq.ticker`
-Daily OHLCV + derived indicator data per ticker. Main feature table for ML training and evaluation.
-- **Rows**: ~15.2M | **Size**: ~16.3 GB
-- **Partitioned**: by `time` (DATE, DAY) | **Clustered**: by `ticker`
-- **Date range**: 2000-07-28 → 2026-06-15 (backfilled to 2000; VNINDEX also from 2000-07-28. ~648 tickers exist pre-2014-06, but the market was thin pre-2007 — see ticker_prune note) | **Tickers**: ~1,272
-- **Column groups**:
-  - Price/volume: `time`, `ticker`, `Open`, `High`, `Low`, `Close` (adj), `Price` (unadjusted), `Volume`, `Close_T1`, `Close_T1W`
-  - Moving averages: `MA10/20/50/200` and `_T1` variants (prior-day MA)
-  - RSI: `D_RSI` (0–1 daily), `D_RSI_T1/T1W`, `D_RSI_Max1W/3M` + `_Close/_MACD` at that peak, `D_RSI_Min1W/3M` + `_Close`, `D_RSI_MinT3`
-  - CMF/MACD: `D_CMF` (0–1), `D_MACDdiff` (MACD − MACDsign)
-  - CMB: `D_CMB` (−1..2 index), `D_CMB_XFast` (periods since CMB crossed fast line, 0=strong), `D_CMB_Peak_T1` (−1/0/1 weekly CMB top/bottom)
-  - Price ratios: `C_L1W` (Close/Lowest 1W, 0–1), `C_L1M` (Close/Lowest 1M)
-  - Volume analytics: `Volume_1M` (mean daily 1M), `Volume_3M_P50/P90`, `Volume_Max1Y_High/ID`, `Volume_Max5Y_High`, `Volume_MaxTop5_2Y_Close/ID`
-  - VAP (volume-at-price): `VAP1W/1M/3M` — close in the largest trading area
-  - Support/resistance: `Res_1Y`, `Sup_1Y` (lookback 1 year)
-  - VAP crossdown indices: `ID_XVAP1M_Down_P2`, `ID_XVAP3M_Down_P0`
-  - Price extremes: `HI_3M_T1`, `LO_3M_T1`, `ID_HI_3Y`, `ID_LO_3Y`
-  - VNINDEX mirror: `VNINDEX`, `VNINDEX_RSI`, `VNINDEX_CMF`, `VNINDEX_MACDdiff`, `VNINDEX_RSI_MinT3`, `VNINDEX_RSI_Max1W/3M` + `_Close/_MACD`
-  - Financial (joined from `ticker_financial`): `PE`, `PB`, `PS`, `PCF`, `EVEB`, `EPS`, `DY`, `PEG`, `BVPS`, `ROE5Y`, `ROIC5Y`, `ROIC3Y`, `ROIC_Min3Y/5Y`, `ROE_Min3Y/5Y`, `FSCORE`, `Debt_Eq_P0`, `NP_P0–P4`, `CF_OA_P0–P3`, `CF_Invest_P0–P3`, `NPM_P0`, `IntCov_P0`, `PE_MA5Y/1Y/3M`, `PE_SD5Y/1Y/3M`, `PB_MA5Y/1Y/3M`, `PB_SD5Y/1Y/3M`, `EVEB_MA5Y/1Y/3M`, `EVEB_SD5Y/1Y/3M`, `ROIC_Trailing`, `CF_OA_5Y`, `CF_Invest_5Y`
-  - ML targets (**forward-looking — training only, never use for live filtering**): `profit_2W` (T+10), `profit_1M` (T+20), `profit_2M` (T+40), `profit_3M` (T+60) + centered smoothed variants (`profit_*_center_3/5/7/10/11/15/20`)
-  - Meta: `Risk_Rating` (composite Beta+Dev score), `ICB_Code` (CT/NH/BH/CK industry), `ID_Release`, `ID_Current`, `Inflation_7` (7% annual inflation constant)
-
-#### `tav2_bq.ticker_financial`
-Quarterly fundamental financial data per ticker. Source of all financial ratios; joined into `ticker` by `(ticker, time)`.
-- **Rows**: ~63.6K | **Size**: ~54 MB | **Clustered**: by `ticker`
-- **Date range**: 2000-07-31 → 2026-04-03 | **Tickers**: ~1,255
-- **Column groups**:
-  - Identity: `ticker`, `time` (DATE), `quarter` (e.g. `"2025Q3"`), `Release_Date`, `ID_Release`
-  - Net profit: `NP_R` (YoY ratio = NP_P4/NP_P0−1), `NP_P0–P7` (quarterly, 0=current), `NP_Q_Min5Y`
-  - Revenue: `Revenue_P0–P7`, `Revenue_YoY_P0` (P0/P4−1), `Revenue_YoY_P4` (P4/P8−1)
-  - Gross margin: `GPM_P0–P7` (%)
-  - Margins: `NPM_P0/P4` (Net Profit Margin %), `EBITM_P0/P4` (EBIT Margin %), `ROA_P0/P4`
-  - Liquidity: `CR_P0/P4` (Current Ratio), `QuickR_P0/P4`, `CashR_P0/P4`
-  - Efficiency: `AssetTurn_P0/P4`, `FAssetTurn_P0/P4`, `InvTurn_P0/P4`, `DSO_P0/P4`, `DIO_P0/P4`, `DPO_P0/P4`, `CashCycle_P0/P4`
-  - Leverage: `Debt_Eq_P0/P4`, `STLTDebt_Eq_P0/P4` (ST+LT debt/equity), `FinLev_P0/P4`, `FAsset_Eq_P0/P4`, `OwnEq_Cap_P0/P4`, `IntCov_P0/P4`
-  - Balance sheet: `totalAsset_P0`, `StLiab_P0`, `LtLiab_P0`, `StDebt_P0`, `LtDebt_P0`, `AR_P0`, `EBITDA_P0`, `LtInvest_P0`, `Inventory_P0`, `Cash_P0` (cash + ST investments)
-  - Valuation: `PE`, `PB`, `PS`, `PCF`, `EVEB` (EV/EBITDA), `EPS`, `EPS_P0` (VND/share), `BVPS`, `OShares`, `DY`, `PEG` (PE/growth where growth=(NP_P0/NP_P4−1)×100)
-  - Valuation history: `PE_MA5Y/1Y/3M`, `PE_SD5Y/1Y/3M`, `PB_MA5Y/1Y/3M`, `PB_SD5Y/1Y/3M`, `EVEB_MA5Y/1Y/3M`, `EVEB_SD5Y/1Y/3M`
-  - Quality (multi-year): `ROE3Y/5Y/10Y` (avg), `ROE_Min3Y/5Y/10Y`, `ROIC3Y/5Y/10Y` (avg), `ROIC_Min3Y/5Y/10Y`, `ROE_Trailing` (sum last 4Q), `ROIC_Trailing` (self-calc), `ROIC_Trailing_v1` (report-sourced)
-  - Cash flow: `CF_OA_P0–P4` (operating/assets), `CF_OA_3Y/5Y` (sum), `CF_Invest_P0–P4` (capex), `CF_Invest_3Y/5Y` (sum)
-  - Dividend: `DY`, `Dividend_Min3Y`, `Dividend_1Y`, `Dividend_3Y`
-  - Piotroski: `FSCORE` (0–9, current), `FSCORE_P1` (prior quarter)
-
-#### `tav2_bq.risk_rating`
-Quarterly risk ratings per ticker.
-- **Rows**: ~252K | **Size**: ~5.7 MB | **Clustered**: by `ticker`
-- **Key columns**: `quarter` (STRING), `ticker`, `Beta`, `D_Beta`, `Dev`, `D_Dev`, `Risk_Rating` (composite Beta+Dev bins)
-
-#### `tav2_bq.ticker_1m`
-Rolling ~1-month snapshot — used for live screening and daily evaluation.
-- **Rows**: ~26K | **Size**: ~28 MB | **Partitioned**: by `time` (DATE, DAY) | **Clustered**: by `ticker`
-- **Schema**: Same as `ticker` plus extended columns:
-  - Trading value: `Trading_Value`, `Trading_Value_1M_P50`, `Trading_Value_Total_1W`, `Trading_Value_Total_1W_Max6M`
-  - Price change: `PC_6M`, `PC1W/2W/3W/1M/2M`, `Open_1D`, `Close_2Y_P90`
-  - Outcome stats: `O1W`, `O2W`, `O3W`, `O1M`, `O2M`, `O3M`, `O6M`, `O1Y`, `O2Y`
-  - Pattern stats (3Y lookback): `Pattern_Median_Profit_3Y`, `Pattern_Deal_Count_3Y`, `Pattern_Winrate_3Y`
-  - Technical extras: `D_MACD`, `D_MACD_T1W`, `D_MFI`, `D_MFI_T1W`, `Volume_Max1Y`, `Volume_1M_P50`
-  - Session/risk: `Trading_Session`, `Risk_Rating`
-
-#### `tav2_bq.ticker_prune`
-High-quality ticker subset. Backfilled to **2000-12-15** but the VN market was thin early — distinct names per year: 2000≈2, 2006≈19, **2007≈74, 2008≈105** (crosses ~100), 2014≈203. So breadth/universe signals are only meaningful from ~2008 (pre-2008 too few names; pre-2007 effectively un-investable).
-- **Rows**: ~711K | **Size**: ~902 MB | **Partitioned**: by `time` (DATE, DAY) | **Clustered**: by `ticker`
-- **Date range**: 2000-12-15 → 2026-06-15
-- **Schema**: Same as `ticker_1m` (all extended columns included)
-- **Use for**: ML training and backtesting on a quality-filtered universe
-
-### Naming conventions
-- `_P0` = current quarter, `_P1` = 1 quarter ago, …, `_P4` = 4 quarters ago (≈1 year), `_P7` = 7 quarters ago
-- `_R` suffix = reported raw value (e.g. `NP_R` = YoY ratio)
-- `_T1` = 1 trading day ago, `_T1W` = 1 week ago, `_MinT3` = min over last 3 days
-- `_Min3Y/5Y/10Y` = minimum over N years (quality floor)
-- `_Trailing` = sum of last 4 quarters (TTM approximation)
-- `_MA1Y/3M` = moving average; `_SD` = standard deviation; `_P50/P90` = percentile
-
-### Invoking bq on Windows
-
-The SDK `bin` and bundled Python are configured in `~/.bashrc` — `bq` works directly from bash:
+- **Project**: `lithe-record-440915-m9` · **Dataset**: `tav2_bq` (location `asia-southeast1`)
+- **Auth**: `dtienthanh@gmail.com` (read-WRITE). Env nằm ở **`wc_env.sh`** — `source` nó, đừng
+  tự đoán đường dẫn SDK.
+- Luôn dùng `--use_legacy_sql=false`.
 
 ```bash
-bq query --use_legacy_sql=false --project_id=lithe-record-440915-m9 "YOUR SQL HERE"
+source /home/trido/thanhdt/WorkingClaude/wc_env.sh
+bq query --use_legacy_sql=false --project_id=lithe-record-440915-m9 'SELECT ...'
+bq query --use_legacy_sql=false --dry_run --project_id=lithe-record-440915-m9 'SQL'   # ước phí trước khi chạy nặng
 ```
 
-If for any reason the env vars are missing, they are:
-```bash
-export PATH="$PATH:/c/Users/hotro/AppData/Local/Google/Cloud SDK/google-cloud-sdk/bin"
-export CLOUDSDK_PYTHON="/c/Users/hotro/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/bundledpython/python.exe"
-```
+**Bảng** (schema cột đầy đủ: `bigquery_schema.md`; ngữ nghĩa từng cột: `bigquery_dictionary.json`
+— luôn tra file này TRƯỚC khi viết filter):
 
-**Critical gotcha — table/column name collision**: Tables named `risk_rating`, `ticker`, etc. share names with columns. BigQuery will resolve an unqualified reference (e.g. `GROUP BY Risk_Rating`) to the *table* (returning a STRUCT) instead of the column. Always alias tables and qualify column references:
+| Bảng | Nội dung | Phân vùng / cluster |
+| --- | --- | --- |
+| `ticker` | OHLCV ngày + chỉ báo phái sinh, ~15,2M dòng, 2000-07-28→2026-06-15, ~1.272 mã | part `time` / cluster `ticker` |
+| `ticker_financial` | Tài chính theo QUÝ, ~63,6K dòng, ~1.255 mã | cluster `ticker` |
+| `risk_rating` | Risk rating theo quý (Beta + Dev) | cluster `ticker` |
+| `ticker_1m` | Ảnh chụp ~1 tháng gần nhất — screening/eval hằng ngày | part `time` / cluster `ticker` |
+| `ticker_prune` | Universe đã lọc chất lượng — training + backtest | part `time` / cluster `ticker` |
 
-```sql
--- WRONG: GROUP BY Risk_Rating resolves to the row struct
-SELECT Risk_Rating, COUNT(*) FROM tav2_bq.risk_rating GROUP BY Risk_Rating
+**Quy ước tên cột**: `_P0` quý hiện tại → `_P7` 7 quý trước (`_P4` ≈ 1 năm) · `_T1` 1 phiên
+trước, `_T1W` 1 tuần · `_Min3Y/5Y/10Y` sàn chất lượng · `_Trailing` tổng 4 quý gần nhất ·
+`_MA/_SD/_P50/_P90` trung bình / độ lệch / phân vị.
 
--- CORRECT: alias the table and qualify columns
-SELECT t.Risk_Rating, COUNT(*) FROM tav2_bq.risk_rating AS t GROUP BY t.Risk_Rating
-```
+**Bốn cái bẫy, đều đã cắn thật:**
+1. **Cột forward-looking (`profit_2W/1M/2M/3M` + biến thể `_center_*`) CHỈ dùng để train. TUYỆT
+   ĐỐI không dùng làm filter live** — đó là nhìn trộm tương lai.
+2. **Tên bảng trùng tên cột.** `GROUP BY Risk_Rating` sẽ resolve vào *bảng* `risk_rating` và trả
+   về STRUCT. Luôn đặt alias cho bảng và qualify cột: `FROM tav2_bq.risk_rating AS t ... t.Risk_Rating`.
+3. **`risk_rating` có dòng TRÙNG** (cùng ticker + quarter xuất hiện 2 lần) → `GROUP BY` hoặc
+   `SELECT DISTINCT` khi tổng hợp.
+4. **`ticker_prune` backfill tới 2000 nhưng thị trường VN mỏng thời kỳ đầu** (2006≈19 mã,
+   2008≈105, 2014≈203) → tín hiệu breadth/universe chỉ có nghĩa từ ~2008; trước 2007 gần như
+   không đầu tư được.
 
-### Example queries
+## Kiến trúc codebase
 
-```bash
-# Preview ticker data for a stock
-bq query --use_legacy_sql=false --project_id=lithe-record-440915-m9 'SELECT * FROM tav2_bq.ticker AS t WHERE t.ticker="VNM" ORDER BY time DESC LIMIT 5'
+Đây là workspace phân tích chứng khoán VN, không phải project phần mềm truyền thống: không build
+system, không test suite, không package. Mọi thứ chạy như script Python độc lập.
 
-# Get latest quarterly financials for a ticker
-bq query --use_legacy_sql=false --project_id=lithe-record-440915-m9 'SELECT t.ticker, t.quarter, t.NP_P0, t.PE, t.ROIC5Y, t.FSCORE FROM tav2_bq.ticker_financial AS t WHERE t.ticker="VNM" ORDER BY time DESC LIMIT 8'
+**`filter.json` — nguồn sự thật duy nhất cho logic tín hiệu vào/ra.** Quy ước khoá:
+`_TenChienLuoc` = filter mua · `~TenTinHieu` = tín hiệu bán · `$TenChienLuoc` = danh sách tín
+hiệu bán áp cho chiến lược đó · `Init` = khoảng ngày nền, chèn vào mọi filter mua qua placeholder
+`{Init}` · `MARKET_DICT_FILTER` = filter cấp thị trường (VNINDEX). Biểu thức dùng thẳng tên cột
+BQ; `Inflation_7` là hằng số lạm phát 7%/năm để quy giá trị giao dịch về VND thực.
 
-# Dry-run cost estimate before large queries
-bq query --use_legacy_sql=false --dry_run --project_id=lithe-record-440915-m9 'YOUR SQL'
-```
+**`gen_sql.py`** đọc `filter.json`, đổi cú pháp Python→WHERE của BigQuery, ghi cặp `.sql`+`.csv`
+vào `sql_queries/`. Nó tự expand `{Init}` và tự loại điều kiện chứa cột không có trong
+`ticker_1m`/`ticker_prune`.
 
-### Known data quality notes
-- `risk_rating` table contains **duplicate rows** (same ticker + quarter appears twice). Use `GROUP BY` or `SELECT DISTINCT` when aggregating.
-- Forward-looking target columns (`profit_2W`, `profit_1M`, etc.) in `tav2_bq.ticker` must **never** be used as live filters — training use only.
+**File dữ liệu local**: `VNINDEX.csv` (lịch sử VNINDEX đầy đủ + chỉ báo + PE, cho phân tích
+offline không cần chạm BQ) · `bigquery_dictionary.json` · `filter.json` · `sql_queries/*.csv`.
 
-## Codebase Architecture
+**Nhóm script**: `backtest_*` (backtest chiến lược) · `analyze_*` (chất lượng tín hiệu, pattern,
+market phase) · `market_*` (timing, state machine, allocation) · `score_live_signals.py` /
+`universe_scan.py` (chấm tín hiệu live) · `extract_deals.py`. Tất cả cùng một khuôn: nạp dữ liệu
+từ BQ hoặc CSV local → tính bằng pandas/numpy → xuất `.png`/`.csv`.
 
-This is a Vietnamese stock market analysis workspace — not a traditional software project. There is no build system, test suite, or package structure. Everything runs as standalone Python scripts.
+⚠️ Một số script cũ hardcode `WORKDIR` theo đường dẫn Windows (`C:\Users\hotro\...`) — di sản từ
+máy cũ, còn 11 file. Máy hiện tại là Linux; đừng chép lại mẫu đó vào script mới.
 
-### Strategy definition: `filter.json`
+## VNINDEX 5-State — PRODUCTION = **DT5G** (`macro_state_live.py`)
 
-The single source of truth for all entry/exit signal logic. Keys use a naming convention:
-- `_StrategyName` — buy entry filter expression (Python/pandas-style boolean syntax referencing `ticker` table columns)
-- `~SignalName` — sell/exit signal expression
-- `$StrategyName` — comma-separated list of sell signals that apply to that strategy
-- `Init` — base date range guard applied to all buy filters via `{Init}` placeholder
-- `MARKET_DICT_FILTER` — market-level VNINDEX filters (separate dict in the same file)
+**5 trạng thái**: CRISIS(0%), BEAR(20%), NEUTRAL(70%), BULL(100%), EX-BULL(130%).
 
-Filter expressions use column names directly (e.g., `Volume_3M_P50`, `PE`, `ROE_Min5Y`). `Inflation_7` is a 7% annual inflation constant used to normalize trading value to real VND.
+**Đọc trạng thái qua `get_gated_state()`, không đọc bảng thẳng.** Đó là wrapper fail-safe: chỉ
+trả DT5G khi `data/macro_health.json` còn tươi (<1440 phút) và báo feed đáng tin; ngược lại
+fail CLOSED về **DT4** (base + DT 4-gate, không có macro cap). Dùng cột `state`.
 
-### SQL generation: `gen_sql.py`
+> ⚠️ **BẪY NGHIÊN CỨU — nhãn bảng.** Bảng không hậu tố `tav2_bq.vnindex_5state` **KHÔNG PHẢI
+> DT5G**. Nó là **v3.4b BASE** (~153 transition, không DT-gate, không macro cap) và giống hệt
+> từng byte `vnindex_5state_tam_quan_v34b_clean`. DT5G thật (49 transition) chỉ nằm ở
+> **`tav2_bq.vnindex_5state_dt5g_live`**. Nhiều script nghiên cứu đọc bảng trống hậu tố và
+> tưởng là DT5G — đây là lỗi đã xảy ra thật, không phải giả định.
 
-Reads `filter.json`, converts filter expressions from Python syntax to BigQuery SQL WHERE clauses, and writes `.sql` + `.csv` pair files to `sql_queries/`. The script handles:
-- `{Init}` placeholder expansion
-- Columns missing from `ticker_1m`/`ticker_prune` are stripped from conditions
-- Output goes to `sql_queries/buy_StrategyName.sql` and `sell_SignalName.sql`
+**Kiến trúc, 4 tầng** (đừng đổi nếu không có chỉ đạo rõ ràng):
+1. **Base** = v3.4b "Định Tâm", đọc từ BQ, warm-up từ 2014.
+2. **DT 4-gate** (`DT_10_25_25`) — bộ làm mượt chính. Cam kết bất đối xứng: cần 25 phiên để VÀO
+   CRISIS/EX-BULL, chỉ 10 phiên để RA. Chậm hoảng loạn, chậm hưng phấn.
+3. **Macro gate** — hợp 3 họ luật thành MỘT trần causal: tiền tệ trong nước (SBV refi 6m) + hoảng
+   loạn Mỹ (VIX/SPX drawdown) + bypass khi VN đang bull xác nhận. Hành động phòng thủ duy nhất là
+   **CAP** trần trạng thái; **re-risk thuần theo GIÁ** qua base (floor nới lỏng tiền tệ đã tắt).
+4. **Breadth-decoupling guard** trên trụ Mỹ — chỉ chặn cap khi breadth VN thực sự khoẻ. Fail-safe:
+   breadth yếu/thiếu/universe nhỏ → KHÔNG chặn. Nguồn breadth = `tav2_mike.universe_pit`
+   (point-in-time), hằng số `BREADTH_SOURCE="pit"`; đổi thành `"prune"` là rollback một từ.
 
-Run queries via the generated bash script or directly with `bq query`.
+**Kết luận phải nhớ: DT5G là CHỐT RỦI RO FAIL-SAFE (bảo hiểm), không phải công cụ tăng lợi
+nhuận.** Toàn bộ edge ròng đến từ một lần siết 2023; năm bull 2025 nó làm TỐN −0,89pp. Deploy qua
+`get_gated_state()`, **đừng re-tune theo lịch sử** (tham số đang ở vùng bình ổn).
 
-### Local data files
+Kiến trúc chi tiết, số liệu audit, changelog, và lineage các bản cũ (Cổ Điển → Tinh Tế → v3.4b →
+DT5G): **`vnindex_5state_registry.md`**.
 
-- **`VNINDEX.csv`** — full VNINDEX daily history including technical indicators and PE data; used by all market analysis scripts for offline analysis without hitting BigQuery
-- **`bigquery_dictionary.json`** — column semantic dictionary; consult before writing filters
-- **`filter.json`** — strategy/signal definitions (see above)
-- **`sql_queries/*.csv`** — cached query results from last run
+⚠️ `state_transition_logic.py` giải thích pipeline **Cổ Điển đã archive**, KHÔNG phải chuỗi DT5G
+đang chạy. Giữ làm tư liệu lịch sử; muốn hiểu trạng thái production thì đọc `macro_state_live.py`.
 
-### Analysis scripts pattern
+## Backtest
 
-All scripts follow the same structure: load data from either BigQuery (via `bq` CLI subprocess or `google-cloud-bigquery` SDK) or local CSVs, compute signals/metrics with pandas/numpy, optionally output to `.png` (matplotlib) or `.csv`. Scripts are self-contained — `WORKDIR` is hardcoded as `C:\Users\hotro\OneDrive\Pictures\Documents\WorkingClaude`.
+`backtest_workflow.py` là explainer tự chứa — chạy nó để xem đầy đủ cơ chế NAV và 7 chiều đánh
+giá; không chép lại ở đây. Ba điều cần nhớ khi đọc bất kỳ con số backtest nào:
 
-Key script groups:
-- `backtest_*.py` — strategy backtests (trailing stops, TP/SL, combined systems)
-- `analyze_*.py` — signal quality analysis, pattern stats, market phase analysis
-- `market_*.py` — market timing systems, state machines, allocation frameworks
-- `score_live_signals.py` / `universe_scan.py` — live signal scoring and screening
-- `extract_deals.py` — extracts deal records from portfolio data for analysis
+- NAV đơn luồng, vốn 1 tỷ, **thực thi trễ T+1** (không nhìn trước), ramp 3 phiên tới tỷ trọng đích.
+- **Quy ước chi phí dùng chung** (`backtest_fundamental_rating.py`, `simulate_holistic_nav.py`…
+  trích dẫn thẳng "per CLAUDE.md" — đổi ở đây là đổi giả định của chúng): TC **0,1%** mỗi chiều
+  trên phần vốn thực giao dịch · lãi tiền gửi nhàn rỗi **0%/năm** · lãi vay margin **10%/năm**.
+- Metric tính trên **thời gian lịch**, không phải số phiên (VN có giai đoạn tuần 3 phiên trước 2007).
+- **Quy đổi thực tế: CAGR thật ≈ CAGR backtest − 1,5%** (phí + slippage + thuế). Backtest không
+  mô hình hoá slippage lẫn thuế, và dùng VNINDEX làm proxy chứ không phải danh mục thật.
 
-### VNINDEX 5-State Market System — PRODUCTION = **DT5G** (`macro_state_live.py`)
+## Tài liệu tham chiếu
 
-**5 states** (shared by all versions): CRISIS(0%), BEAR(20%), NEUTRAL(70%), BULL(100%), EX-BULL(130%).
-
-The LIVE production market-regime source as of 2026-06-02 is **DT5G**, computed by `macro_state_live.py` and published to BQ table **`tav2_bq.vnindex_5state_dt5g_live`**. Production consumers read DT5G via `get_gated_state()` (e.g. `golive_recommend`, `pt_v4_dt5g`, `dna_report.py`, `recommend_tomorrow.py`).
-
-> ⚠️ **Table-label correction (verified by BQ, 2026-06-03):** the no-suffix table `tav2_bq.vnindex_5state` is **NOT DT5G**. It is byte-identical to `tav2_bq.vnindex_5state_tam_quan_v34b_clean` (0 diffs / 6291 rows) = the **v3.4b BASE** (TQ34b, ~153 transitions, **no DT-gate, no macro cap**, only light base smoothing). Real DT5G (49 transitions, DT-gate + macro) lives **only** in `vnindex_5state_dt5g_live`. Distribution gap (2014+): `vnindex_5state` has EX-BULL 194 / CRISIS 748 days; `dt5g_live` has EX-BULL 59 / CRISIS 525 (the DT-gate clamps the extremes hard). Many research scripts read bare `vnindex_5state` assuming it is DT5G — **it is the base only**; this is a known research trap. (An earlier note claimed the 2026-06-02 swap put DT5G into `vnindex_5state` — that was wrong; the no-suffix table still serves the v3.4b base. Archives `vnindex_5state_archive_pre_dt5g_20260602` / `vnindex_5state_archive_tinh_te_20260602_*` exist from that episode.)
-
-**DT5G architecture** (do not change without explicit instruction — source: `macro_state_live.py`):
-1. **Base state** = v3.4b ("Định Tâm"), read from BQ `tav2_bq.vnindex_5state_tam_quan_v34b_clean` (== the no-suffix `vnindex_5state` table), warmed up from 2014. (v3.4b itself = the ew_v1 → dual_v3 → v3.1 → v3.4b chain — the `dual_v3` stage carries the v2g **BearDvg gate, `min_dur=30`**; plus bull-aware US-override bypass + RSI/concentration gates.) This base alone runs ~153 transitions.
-2. **DT 4-gate** (`_dt_4gate`, = `DT_10_25_25`) — **the primary smoother now** (replaces the Cổ Điển `mode(15) → min_stay_filter(7)` pipeline). Asymmetric causal commitment: a new state must persist `enC=25` sessions to commit INTO CRISIS and `enX=25` INTO EX-BULL (slow to panic / slow to euphoria), but only `exC=10`/`exX=10` to leave them, `default=10` for NEUTRAL/BEAR/BULL moves. Cuts whipsaw from the ~155 base transitions down to ~49–53.
-3. **Macro gate** (fuses three rule families into ONE causal cap, no rule-sprawl):
-   - **Pillar A — domestic money**: SBV refi-rate 6m momentum (`SBV_REFI_EVENTS` from `sbv_macro_overlay`), lagged 5d. Rising-rate → cap. (The cut-from-peak easing FLOOR is still *computed* but **no longer applied** — see `EASING_FLOOR_ENABLED=False`, changelog 2026-06-03.)
-   - **Pillar B — US panic**: VIX + SPX 1y drawdown (`us_market_history.csv`, aligned to VN T-1). Thresholds: VIX>35 / SPX-DD<-25% → CRISIS cap, etc.
-   - **v3.4b bull-aware bypass**: in a confirmed VN bull (6m return >15% AND Close>MA200), ignore Pillar B, keep Pillar A.
-   - **Defensive action = CAP** the state ceiling on stress (the only active macro action). **Re-risk is now PURELY price-based** via the DT base (slow, price-confirmed) — the macro overlay no longer floors the state back up on a monetary-easing signal (asymmetry; easing FLOOR disabled 2026-06-03, was dormant in the live era since 2014-06 anyway).
-   - `cap_commit=7`: a defensive cap must persist 7 sessions before committing (debounces VIX flicker).
-4. **Breadth-decoupling guard** on Pillar B (added 2026-05-29, free insurance): suppress the US-panic cap ONLY when VN breadth is broadly healthy while the US panics (genuine US-VN decoupling, e.g. 2025 VIC-led). Fail-safe: weak/missing/small-universe breadth → NO suppression → US cap fires as usual. Breadth = % of the breadth universe above MA200, causal (T-1), needs ≥100 names. **Breadth universe = `tav2_mike.universe_pit` (point-in-time, per-day membership) since 2026-07-29** — module constant `BREADTH_SOURCE="pit"` in `macro_state_live.py`; setting it to `"prune"` restores the legacy `ticker_prune` universe exactly (one-word rollback).
-
-**Production state source = `get_gated_state()`** (fail-safe wrapper): returns the DT5G macro state ONLY when `data/macro_health.json` is fresh (<1440 min) and says feeds are trustworthy (`recommended_state_source == "DT5G_macro"`); otherwise fails CLOSED to **DT4-only** (base + DT 4-gate, no macro cap). Consume the `state` column. `state_dt4` = base-without-macro is retained for ablation.
-
-**BQ tables** (labels corrected 2026-06-03 — see ⚠️ note above):
-- `tav2_bq.vnindex_5state_dt5g_live` — **DT5G production** (DT-gate + macro, 49 transitions). Read by `get_gated_state` consumers: `golive_recommend`, `pt_v4_dt5g`, `dna_report.py`, `recommend_tomorrow.py`.
-- `tav2_bq.vnindex_5state` — **v3.4b BASE, NOT DT5G** (light base smoothing, ~153 transitions). Byte-identical to `vnindex_5state_tam_quan_v34b_clean`. Bare reads of this table get the base, not the production gated state.
-- `tav2_bq.vnindex_5state_tam_quan_v34b_clean` — v3.4b base spec (== `vnindex_5state`; daily-refreshed; DT5G reads this as its base input).
-
-**DT5G performance** (event-level audit, 2014→2026-05; source `data/audit_dt5g_events.md`): DT5G == DT4 in benign windows; it deviates on only **49 sessions / 4 de-risk episodes (1.6%)**, 0 re-risk. Integrated prod-spec ablation (DT4 vs DT5G, 50B): **V5 (Kelly) +0.43pp Full** (DT4 23.23% → DT5G 23.67%), **V4 (V121_ENS) +0.27pp Full**; **IS 2014-19 = +0.00pp exactly** (overlay dormant in-sample → walk-forward IS/OOS is the wrong tool here); OOS 2020-now V5 +0.88pp / V4 +0.54pp. Per-year LOO: the entire net edge = the single 2023 tightening (+5pp/yr V5); the 2025 bull COSTS −0.89pp. **Verdict: DT5G is a FAIL-SAFE RISK GATE (insurance), not a return-enhancer** — deploy via `get_gated_state`, do not re-tune to history (params are a robust plateau).
-
-**Changelog**:
-- **2026-07-29** — `macro_state_live.py`: breadth-decoupling guard (§4) switched from `ticker_prune` → `universe_pit` (`BREADTH_SOURCE="pit"`, `_breadth_sql()`). Reason: the old SQL joined `IN (SELECT DISTINCT ticker FROM ticker_prune)` with **no time condition** — a name admitted today was counted on every historical breadth date (look-ahead), and the 2026-07-29 `ticker_prune` TRUNCATE+rebuild silently dropped 58 names from the whole series (Winston_20260729_132257). Measured A/B 2014-01-02→2026-07-29 (3135 sessions): breadth series differs on 3132 days, guard flips 229 (7,3%), macro cap differs 13 (2016-01-26→02-18, pit side MORE conservative, non-binding), **final DT5G state differs on 0**, DT4 base 0, today unchanged NEUTRAL(3). Thresholds unchanged (data-source migration, not a re-tune). quant-skeptic CONFIRMED (high); post-merge self-check 6/6 PASS on the merged module. Job `Taylor_20260729_152031` / merge `Taylor_20260729_160020`, report `mike/agents/Taylor/research/dt5g_breadth_guard_universe_pit_20260729.md`.
-- **2026-06-03** — `macro_state_live.py`: set `EASING_FLOOR_ENABLED=False` — disabled the monetary-easing recovery floor (asymmetry: re-risk only via the price-based DT base, never on rate cuts alone). Dormant in the discrete live state since 2014-06 → zero live-behavior change; full-history backtest improved marginally (Full CAGR 19.93→20.05%, Sharpe 1.36→1.37, same MaxDD). `vnindex_5state_dt5g_live` re-published.
-- **2026-06-03** — repointed `dna_report.py` (Telegram bot NOW-regime block) and `recommend_tomorrow.py` from bare `vnindex_5state` → `vnindex_5state_dt5g_live` so they report the true DT5G production regime instead of the v3.4b base.
-- **2026-06-03** — doc fix: corrected the table labels above (`vnindex_5state` is the v3.4b base, not DT5G).
-
-> **Cổ Điển (archived, NOT live)** — `vnindex_5state_system.py` is the original baseline ("Cổ Điển"), kept for historical reference only. Its smoothing pipeline was **EMA(0.40) → mode(15) → min_stay_filter(7)** over 7 expanding-percentile factors with BearDvg/BullDvg gates. It was superseded by Tinh Te (v2g_pe3c_s3), then v3.4b, then DT5G. The "EMA(0.40) → mode(15) → min_stay_filter(7)" pipeline and its ~16.1%/-62.3% full-period numbers describe this archived version, **not** current production. See [vnindex_5state_registry.md](vnindex_5state_registry.md) for the full lineage.
-
-### Decision Logic — `state_transition_logic.py`
-
-**File**: `state_transition_logic.py` | Self-contained explainer script, no output files. ⚠️ **Explains the archived Cổ Điển pipeline** (mode(15)/min_stay_filter/BearDvg gate), NOT the live DT5G chain. Kept as a historical walk-through of the original factor model; for current production state reasoning use `macro_state_live.py` (DT 4-gate + macro gate).
-
-Explains step-by-step **why** the (Cổ Điển) system is in a given state on any date. Run directly to see:
-1. All 7 factor raw values + expanding rank + contribution to composite score
-2. EMA smoothing effect on r_score
-3. Which classification threshold was crossed (raw state)
-4. Which risk overrides fired (PE, DD, Vol)
-5. BearDvg gate open/closed + reason
-6. Rolling mode window (15 sessions): which state dominated
-7. min_stay_filter: how long the current segment has been stable
-8. Final state + conditions needed to transition to next state
-
-Also prints last 25 transitions with root cause + full BearDvg gate history.
-
-Use `explain_day("YYYY-MM-DD")` to analyze any specific date.
-
-### Backtest Methodology — `backtest_workflow.py`
-
-**File**: `backtest_workflow.py` | Self-contained explainer, no output files.
-
-Documents the full backtest pipeline and all evaluation methods:
-
-**NAV Simulation mechanics:**
-- Single-path NAV, start 1B VND, T+1 execution delay (no look-ahead)
-- Ramp 3 sessions to reach target weight (unless diff < 3% → snap immediately)
-- Costs per session: TC=0.1% on traded portion, deposit=0%/yr on idle cash (default), borrow=10%/yr on margin (default)
-- Formula: `pv[t] = pv[t-1] × (1 + w×r_market + max(0,1-w)×deposit - max(0,w-1)×borrow - |Δw|×TC)`
-
-**7 evaluation dimensions (in order of importance):**
-1. **Core metrics**: CAGR, Sharpe, Sortino, MaxDD, Calmar, DDdur — computed on calendar time (not session count), SPY = actual sessions/year (≠252 fixed, accounts for pre-2007 3-day weeks)
-2. **Walk-forward IS/OOS** — IS: 2011–2019, OOS: 2020–present; OOS Calmar=1.09 > IS 0.52 → no overfit
-3. **State-conditional returns** — forward T+5/T+20/T+60 VNINDEX returns per state; validates predictive ordering BULL>NEUTRAL>CRISIS>BEAR
-4. **Annual breakdown** — per-year sys vs B&H; win rate 41% is expected (system protects in bear years, lags in strong bull years)
-5. **TC analysis** — TC drag ~0.32%/yr at TC=0.1%; at realistic TC=0.3% → ~0.97%/yr
-6. **Sensitivity** — EMA_ALPHA (0.25–0.50) and MIN_STAY (3–20) grid; confirm ms=7, α=0.40 are robust
-7. **Known limitations** — no slippage model, no tax, VNINDEX proxy (not actual portfolio), 1B NAV may not scale
-
-**Real-world adjustment**: CAGR_actual ≈ CAGR_backtest − 1.5% (TC + slippage + tax)  
-→ 12.1% backtest → ~10.6% realistic, still beats B&H (~9.2%)
-
-### Documentation files
-
-- `market_timing_final_system.md` — backtest results for VNINDEX timing systems (MACD trend, MA200 cross, 5-state machine); important reference for market regime logic
-- `market_rule.md` — rules for `MarketEvaluation` class in `webui/utils.py` (external codebase)
-- `market_overheat.md` — explains overbuy/oversell detection logic in `webui/utils.py`
+`market_timing_final_system.md` (backtest các hệ timing VNINDEX) · `market_rule.md` (luật cho
+`MarketEvaluation` trong `webui/utils.py`, codebase ngoài) · `market_overheat.md` (logic
+overbuy/oversell).

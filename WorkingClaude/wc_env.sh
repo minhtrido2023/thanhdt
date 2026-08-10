@@ -5,5 +5,8 @@ export CLOUDSDK_CONFIG=/home/trido/thanhdt/gcloud_dtienthanh   # dtienthanh@gmai
 export DNA_PYEXE=/home/trido/thanhdt/wc_venv/bin/python
 export TZ=Asia/Ho_Chi_Minh
 export BQ_LOCAL_CACHE=data/bq_cache
+# codex CLI provider (kb/cli_providers.json) dùng cliproxyapi qua ~/.codex/config.toml — key
+# đọc từ secrets/ (gitignored), KHÔNG hardcode ở đây vì file này track git.
+[ -f "$WORKDIR_8L/secrets/cliproxy_api_key.txt" ] && export CLIPROXY_API_KEY="$(cat "$WORKDIR_8L/secrets/cliproxy_api_key.txt")"
 VENV_PY=/home/trido/thanhdt/wc_venv/bin/python
 cd "$WORKDIR_8L"
