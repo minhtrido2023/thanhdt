@@ -259,9 +259,14 @@ if want dispatchlog; then
     if jid="$(jobid_of "$f")" && [ -f "$ROOT/bus/jobs/$jid.json" ]; then
       st="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1])).get("status",""))' \
              "$ROOT/bus/jobs/$jid.json" 2>/dev/null || echo '')"
-      case "$st" in
-        done|failed|timeout|'') ;;
-        *) say "  GIỮ (job record còn hot, status=$st — trace.sh --log đang dùng được): $f"; continue ;;
+      # Terminal set lấy từ MỘT nguồn (mike_json.py terminal-statuses). Bản hardcode cũ ở
+      # đây là {done,failed,timeout} — lệch với kb_nightly.sh và với chính mike_json.py, nên
+      # log của job 'orphaned' (26 bản ghi) bị giữ hot vĩnh viễn (2026-08-10, arch-reviewer).
+      # Rỗng = không có record ⇒ vẫn archive như cũ.
+      _term="|$(python3 "$ROOT/bin/mike_json.py" terminal-statuses 2>/dev/null | tr '\n' '|')"
+      case "$_term" in
+        *"|$st|"*) ;;
+        *) [ -n "$st" ] && { say "  GIỮ (job record còn hot, status=$st — trace.sh --log đang dùng được): $f"; continue; } ;;
       esac
     fi
     do_archive "$f" "$ROOT/logs/archive"

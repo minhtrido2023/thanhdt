@@ -147,16 +147,35 @@ def main():
     check("record UNCHANGED — still running", read_job(jobs, "J_A")["status"] == "running",
           read_job(jobs, "J_A")["status"])
     check("no ended_at written", "ended_at" not in read_job(jobs, "J_A"))
-    # every terminal status, not just 'failed'
+    # Every known death word...
     for st in ("done", "timeout", "orphaned", "cancelled"):
         rc, _, _ = jset(jobs, "J_A", "status=" + st)
         check("also refuses status=%s" % st, rc == 3, "rc=%d" % rc)
+    # ...AND every word nobody thought of. The first version of this guard was a denylist of
+    # the 5 known death words; arch-reviewer broke it in one try with status=aborted, which
+    # cmd_job_get maps to exit 1 ("failed") for every poller — the same signal that caused
+    # the 08-09 re-dispatch. The board already holds 6 hand-stamped records using 'aborted'
+    # (×3), 'superseded' and 'cancelled', three of them MORE RECENT than that incident. So
+    # the invariant under test is the allowlist, not a list of forbidden words.
+    for st in ("aborted", "superseded", "killed", "stopped", "zzz_made_up", ""):
+        rc, _, _ = jset(jobs, "J_A", "status=" + st)
+        check("refuses invented status=%r (allowlist, not denylist)" % st, rc == 3,
+              "rc=%d — record is now %s" % (rc, read_job(jobs, "J_A")["status"]))
+    check("record still running after every attempt",
+          read_job(jobs, "J_A")["status"] == "running", read_job(jobs, "J_A")["status"])
 
     # ---------------------------------------------------------------- B: escape hatch
-    print("\nB. --force still works (stale record whose pid was recycled)")
+    print("\nB. --force is available but must carry its evidence")
     rc, _, err = jset(jobs, "J_A", "status=failed", "--force")
-    check("exit 0 with --force", rc == 0, err[:200])
+    check("--force alone is REFUSED (would recreate the no-ended_at shape)", rc == 3,
+          "rc=%d" % rc)
+    check("says what is missing", "ended_at" in err and "result_summary" in err, err[:200])
+    check("record untouched", read_job(jobs, "J_A")["status"] == "running")
+    rc, _, err = jset(jobs, "J_A", "status=failed", "ended_at=1786000000",
+                      "result_summary=pid recycled, record stale", "--force")
+    check("--force WITH ended_at + reason succeeds", rc == 0, err[:200])
     check("status written", read_job(jobs, "J_A")["status"] == "failed")
+    check("forced close carries ended_at", read_job(jobs, "J_A").get("ended_at") == "1786000000")
     check("--force is not stored as a field", "--force" not in read_job(jobs, "J_A"))
 
     # ---------------------------------------------------- C: regression — dead pid path
@@ -198,6 +217,30 @@ def main():
     rc, out, err = run(["bash", "-c", script])
     check("owner's terminal write allowed (exit 0)", rc == 0, err[:250])
     check("status=done landed", read_job(jobs, "J_E")["status"] == "done")
+
+    # ...and under the THREE spawn modes dispatch.sh actually uses. Production takes the
+    # systemd-run --scope path (LIFETIME DETACH, dispatch.sh ~1130); if a scope re-parented
+    # the wrapper out of mike_json's ancestor chain, EVERY --bg job would be refused its own
+    # finalize and hang at status=running forever. That is the highest-risk failure mode of
+    # this guard, so it is tested against the real spawner, not just plain `bash -c`.
+    scope_ok = run(["systemd-run", "--user", "--scope", "--quiet", "--collect",
+                    "/bin/true"])[0] == 0
+    modes = [("plain &", []), ("setsid", ["setsid"])]
+    if scope_ok:
+        modes.append(("systemd-run --user --scope",
+                      ["systemd-run", "--user", "--scope", "--quiet", "--collect"]))
+    for label, prefix in modes:
+        jid = "J_E_" + label.split()[0].strip("-")
+        make_job(jobs, jid, 999999, log_e)
+        owner = ("%s %s job-set %s %s pid=$$ && %s %s job-set %s %s status=done ended_at=3"
+                 % (shlex.quote(sys.executable), shlex.quote(MJ), shlex.quote(jobs), jid,
+                    shlex.quote(sys.executable), shlex.quote(MJ), shlex.quote(jobs), jid))
+        rc, _, err = run(prefix + ["bash", "-c", owner])
+        check("owner finalize works under %s" % label,
+              read_job(jobs, jid)["status"] == "done",
+              "status=%s rc=%d %s" % (read_job(jobs, jid)["status"], rc, err[:150]))
+    check("systemd-run scope path was actually exercised", scope_ok,
+          "systemd-run --user --scope unavailable here — production path UNTESTED on this host")
 
     # ----------------------------------------------------- F: prove the ORIGINAL bug real
     print("\nF. PROVE-THE-BUG — `kill <recorded pid>` does NOT stop the worker "
@@ -279,7 +322,51 @@ def main():
           read_job(jobs, "J_G")["status"] == "cancelled")
 
     rc, _, _ = run([sys.executable, MJ, "job-cancel", jobs, "does_not_exist"])
-    check("unknown job -> exit 4", rc == 4, "rc=%d" % rc)
+    check("unknown job -> exit 4 (distinct from 'survived the kill' = 5)", rc == 4, "rc=%d" % rc)
+
+    # BLAST RADIUS. os.kill(0, sig) signals THIS PROCESS GROUP and os.kill(-1, sig) signals
+    # every process the user may signal — so a record carrying pid 0 or -1 would have turned
+    # `jobs.sh cancel` into a machine-wide SIGKILL (arch-reviewer measured _job_pids("0") =
+    # 146 pids including init). Nothing in dispatch.sh writes such a pid, but job-set takes
+    # pid= from any caller and this command exists for stressed operators improvising.
+    print("\nI2. cancel refuses nonsensical pids instead of mass-signalling")
+    canary = subprocess.Popen(["sleep", "60"], stdout=subprocess.DEVNULL)
+    SPAWNED.append(canary.pid)
+    for bad in ("0", "-1", "1", "abc"):
+        make_job(jobs, "J_BAD", bad, os.path.join(tmp, "bad.log"))
+        rc, out, err = run([sys.executable, MJ, "job-cancel", jobs, "J_BAD"])
+        check("pid=%r -> refused (exit 3), no kill attempted" % bad, rc == 3,
+              "rc=%d out=%s" % (rc, (out + err)[:140]))
+        check("pid=%r -> record untouched" % bad,
+              read_job(jobs, "J_BAD")["status"] == "running")
+    check("innocent bystander process survived every bad-pid cancel", alive(canary.pid),
+          "canary %s was killed — cancel mass-signalled" % canary.pid)
+    check("this selfcheck itself survived", True)
+
+    # job-reap must still be able to close a genuinely dead job THROUGH the new guard, and
+    # must still refuse to touch a live one — reap calls cmd_job_set internally.
+    print("\nI3. job-reap end-to-end through the guard")
+    log_r = os.path.join(tmp, "r.log")
+    wpid_r, _ = spawn_wrapper(log_r)
+    make_job(jobs, "J_R", wpid_r, log_r)
+    jset(jobs, "J_R", "deadline=1")                     # long past deadline, but ALIVE
+    rc, out, _ = run([sys.executable, MJ, "job-reap", jobs, "0"])
+    check("reap leaves a live past-deadline job alone", "J_R" not in out, out[:160])
+    check("still running", read_job(jobs, "J_R")["status"] == "running")
+    os.kill(wpid_r, 9)
+    time.sleep(0.8)
+    rc, out, _ = run([sys.executable, MJ, "job-reap", jobs, "0"])
+    check("reap closes it once the pid is dead", read_job(jobs, "J_R")["status"] == "orphaned",
+          read_job(jobs, "J_R")["status"])
+
+    print("\nI4. terminal-statuses is the fleet's single definition")
+    rc, out, _ = run([sys.executable, MJ, "terminal-statuses"])
+    terms = out.split()
+    check("exit 0 and non-empty", rc == 0 and terms, out[:80])
+    for st in ("done", "failed", "timeout", "orphaned", "cancelled"):
+        check("includes %s" % st, st in terms, out[:80])
+    check("includes the words the fleet actually improvised (aborted/superseded)",
+          "aborted" in terms and "superseded" in terms, out[:80])
 
     # ------------------------------------------------- J: duplicate-dispatch warning
     print("\nJ. job-find-dup — the observable signature of a duplicate dispatch")
@@ -304,7 +391,7 @@ def main():
     # ------------------------------------------------- K: real dispatch.sh syntax intact
     print("\nK. touched scripts still parse")
     for f in ("bin/dispatch.sh", "bin/jobs.sh", "bin/watchdog.sh", "hooks/session_start.sh",
-              "bin/kb_nightly.sh"):
+              "bin/kb_nightly.sh", "bin/fleet_housekeeping.sh"):
         rc, _, err = run(["bash", "-n", os.path.join(ROOT, f)])
         check("bash -n %s" % f, rc == 0, err[:200])
     rc, _, err = run([sys.executable, "-c",

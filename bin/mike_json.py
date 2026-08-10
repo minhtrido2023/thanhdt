@@ -496,9 +496,28 @@ def _job_path(jobs_dir, job_id):
     return os.path.join(jobs_dir, job_id + ".json")
 
 
-# Statuses that mean "this run is over". Stamping one of these while the job's process is
-# still alive is what makes the board LIE (incident 2026-08-09, see cmd_job_set guard).
-TERMINAL_STATUSES = ("done", "failed", "timeout", "orphaned", "cancelled")
+# Statuses that mean "this run is over" — used for ARCHIVAL classification only (see the
+# terminal-statuses subcommand, which kb_nightly.sh and fleet_housekeeping.sh both read so
+# the fleet keeps ONE definition instead of three divergent hardcoded lists).
+TERMINAL_STATUSES = ("done", "failed", "timeout", "orphaned", "cancelled",
+                     "aborted", "superseded")
+
+# The ONLY statuses an outside writer may set on a job that is still running with a live
+# process. Everything else is treated as "you are declaring this run over" and refused.
+#
+# This is an ALLOWLIST on purpose. The first version of this guard was a denylist of the
+# 5 known death words, and arch-reviewer broke it in one try: `status=aborted` sailed
+# straight through while the worker was still alive, and cmd_job_get maps every unknown
+# word to exit 1 = "failed" to any poller — the exact signal that caused the 2026-08-09
+# re-dispatch. That is not hypothetical; the live board already holds 6 hand-stamped
+# records of that shape written with words no denylist anticipated: 'aborted' ×3
+# (Taylor_20260804_024618, Taylor_20260804_012751, Taylor_20260806_025532), 'superseded'
+# (Taylor_20260729_104438), 'cancelled' ×2 (Taylor_20260729_154952, Taylor_20260801_073402).
+# Three are MORE RECENT than the incident this guard was written for. The operator's actual
+# habit is inventing a status word, so the guard has to bound what is ALLOWED, not guess
+# what will be invented.
+LIVE_STATUSES = ("running", "retrying", "usage_limited", "provider_fallback",
+                 "maxturns_pending")
 
 
 def _ppid_of(pid):
@@ -569,21 +588,36 @@ def cmd_job_set(a):
         k, v = kv.split("=", 1)
         # Sanitize: head -c may cut a multibyte sequence, producing surrogates.
         pairs.append((k, v.encode("utf-8", errors="replace").decode("utf-8")))
-    new_status = dict(pairs).get("status")
-    if (not force and new_status in TERMINAL_STATUSES
-            and obj.get("status") == "running"
-            and _pid_alive(obj.get("pid")) is True
-            and not _is_self_or_ancestor(obj.get("pid"))):
+    fields = dict(pairs)
+    new_status = fields.get("status")
+    guarded = (new_status is not None and new_status not in LIVE_STATUSES
+               and obj.get("status") == "running"
+               and _pid_alive(obj.get("pid")) is True
+               and not _is_self_or_ancestor(obj.get("pid")))
+    if guarded and not force:
         sys.stderr.write(
             "REFUSED: job %s is still running and its pid %s is ALIVE — refusing to stamp "
             "status=%s (that is how the board starts lying; incident 2026-08-09).\n"
-            "  Stop it properly:  bin/jobs.sh cancel %s      (kills the tree, verifies, "
-            "then stamps cancelled)\n"
-            "  Check it is alive: bin/jobs.sh status %s      (HB_AGE = the real liveness "
-            "signal, not LOG_AGE)\n"
-            "  Override (stale record / recycled pid): add --force\n"
+            "  Stop it properly:  bin/jobs.sh cancel %s   (kills the whole tree, VERIFIES "
+            "it is dead, then closes the record)\n"
+            "  Just checking:     bin/jobs.sh status %s   (HB_AGE is the real liveness "
+            "signal — LOG_AGE is useless while a job runs)\n"
             % (job_id, obj.get("pid"), new_status, job_id, job_id))
         sys.exit(3)
+    if guarded and force:
+        # --force exists for a genuinely stale record whose pid the OS handed to an
+        # unrelated process. It must not be the cheap way to reproduce the very shape this
+        # guard exists to stop, so a forced close has to carry the evidence a normal close
+        # carries: all 6 anomalous records on the board are terminal-status-with-no-ended_at.
+        if not fields.get("ended_at") or not fields.get("result_summary"):
+            sys.stderr.write(
+                "REFUSED: --force on a live job must also set ended_at= and result_summary= "
+                "(say WHY you are overriding). Without them this writes exactly the "
+                "terminal-status-without-ended_at record that made the board unreadable.\n"
+                "  Example: job-set %s %s status=%s ended_at=$(date +%%s) "
+                "result_summary='pid recycled, record stale since <when>' --force\n"
+                % (jobs_dir, job_id, new_status))
+            sys.exit(3)
     for k, v in pairs:
         obj[k] = v
     tmp = fp + ".tmp"
@@ -720,10 +754,21 @@ def _pid_alive(pid):
     can write nothing. Found by this module's own selfcheck (case G) — without this, a
     wrapper whose parent is slow to wait() would look alive forever and `jobs.sh cancel`
     would refuse to close a job that had genuinely stopped."""
-    if not pid:
+    if pid in (None, ""):
         return None
     try:
-        os.kill(int(pid), 0)
+        pid = int(pid)
+    except Exception:
+        return None
+    # pid<=0 is never a job: os.kill(0,...) signals THIS PROCESS GROUP and os.kill(-1,...)
+    # signals every process the user may signal. Treat as dead so nothing downstream ever
+    # takes such a value into a kill (arch-reviewer, 2026-08-10: _job_pids("0") resolved to
+    # 146 pids including init, _job_pids("-1") to [-1] — `jobs.sh cancel` on a record with a
+    # bad pid would have SIGKILLed the operator's whole session).
+    if pid <= 0:
+        return False
+    try:
+        os.kill(pid, 0)
     except ProcessLookupError:
         return False
     except PermissionError:
@@ -797,6 +842,18 @@ def cmd_job_reap(a):
     print("%d orphaned job record(s)%s" % (reaped, " (dry-run, not written)" if dry else " closed"))
 
 
+def cmd_terminal_statuses(a):
+    """terminal-statuses — print the job statuses that mean "this run is over", one per line.
+
+    ONE definition for the whole fleet. Before 2026-08-10 there were three hardcoded and
+    divergent copies (kb_nightly.sh archival, fleet_housekeeping.sh log retention, this
+    module), so a status the fleet actually writes — 'orphaned', 26 records on the board —
+    was terminal to one consumer and non-terminal to another, and those records were never
+    archived. Consumers read this instead of hardcoding a list."""
+    for s in TERMINAL_STATUSES:
+        print(s)
+
+
 def cmd_job_find_dup(a):
     """job-find-dup <jobs_dir> <to_agent> <prompt_summary> — print job_ids of jobs to the
     SAME agent that are still status=running WITH A LIVE PID and carry an identical prompt
@@ -832,6 +889,12 @@ def _descendants(pid):
     under `setsid` (its own session + process group). So neither `kill <pid>` nor
     `kill -- -<pid>` from outside reaches the actual worker — killing the wrapper alone
     ORPHANS a claude that keeps editing the repo (incident 2026-08-09)."""
+    try:
+        pid = int(pid)
+    except Exception:
+        return []
+    if pid <= 1:
+        return []          # see _pid_alive: pid<=0 is a signal-group wildcard, 1 is init
     kids = {}
     try:
         entries = os.listdir("/proc")
@@ -898,7 +961,7 @@ def _job_pids(pid, logfile):
     if _pid_alive(pid) is True:
         cands.insert(0, int(pid))
     for p in cands:
-        if p in seen or _pid_alive(p) is not True:
+        if p in seen or p <= 1 or _pid_alive(p) is not True:
             continue
         seen.add(p)
         out.append(p)
@@ -944,10 +1007,12 @@ def cmd_job_cancel(a):
     still editing executor.py), and the status stamp made the board claim a failure that
     never happened, which triggered the re-dispatch that collided with the still-live run.
 
-    Never stamps a status it cannot back up:
-      - no pid recorded (sync dispatch) -> exit 3, nothing written. Kill it where it runs.
-      - tree still alive after SIGTERM+SIGKILL -> exit 4, nothing written.
-    Idempotent: a job already in a terminal status is reported and left alone (exit 0)."""
+    Never stamps a status it cannot back up. Exit codes are distinct so a caller can tell a
+    typo from a live writer that refused to die:
+      0 - cancelled (or already terminal — idempotent)
+      3 - cannot act: no pid recorded (sync dispatch), pid<=1, or cancelling own job
+      4 - job record not found
+      5 - process(es) SURVIVED SIGTERM+SIGKILL; record deliberately left at running"""
     jobs_dir, job_id = a[0], a[1]
     grace = _as_int(a[2], 15) if len(a) > 2 else 15
     fp = _job_path(jobs_dir, job_id)
@@ -969,6 +1034,19 @@ def cmd_job_cancel(a):
             "  Kill it in the shell that is running it, then: bin/jobs.sh status %s\n"
             % (job_id, job_id))
         sys.exit(3)
+    try:
+        _pid_int = int(pid)
+    except Exception:
+        _pid_int = 0
+    if _pid_int <= 1:
+        sys.stderr.write(
+            "REFUSED: job %s has a nonsensical pid (%r). Refusing to run process discovery "
+            "on it — pid 0 means 'this process group', a negative pid means 'every process "
+            "I may signal', and 1 is init.\n"
+            "  Fix the record instead: bin/mike_json.py job-set %s %s status=orphaned "
+            "ended_at=$(date +%%s) result_summary='<why>' --force\n"
+            % (job_id, pid, jobs_dir, job_id))
+        sys.exit(3)
     if _is_self_or_ancestor(pid):
         sys.stderr.write(
             "REFUSED: you are running INSIDE job %s (pid %s is this process or an ancestor) "
@@ -984,7 +1062,7 @@ def cmd_job_cancel(a):
                 "REFUSED to stamp cancelled: %d process(es) SURVIVED SIGTERM+SIGKILL: %s.\n"
                 "  The job record is left at status=running ON PURPOSE — a live writer must "
                 "never be reported as stopped.\n" % (len(survivors), survivors))
-            sys.exit(4)
+            sys.exit(5)
         note = "cancelled by operator: %d process(es) killed and verified dead" % len(targets)
     else:
         note = ("cancelled by operator: no live process found (recorded pid %s dead, nothing "
@@ -1316,7 +1394,7 @@ CMDS = {"event": cmd_event, "heartbeat": cmd_heartbeat, "recent": cmd_recent,
         "cursor-advance": cmd_cursor_advance,
         "job-set": cmd_job_set, "job-list": cmd_job_list, "job-get": cmd_job_get,
         "job-reap": cmd_job_reap, "job-cancel": cmd_job_cancel,
-        "job-find-dup": cmd_job_find_dup,
+        "job-find-dup": cmd_job_find_dup, "terminal-statuses": cmd_terminal_statuses,
         "job-field": cmd_job_field, "job-hb-age": cmd_job_hb_age,
         "circuit-check": cmd_circuit_check, "circuit-record": cmd_circuit_record,
         "pending-resume-set": cmd_pending_resume_set,

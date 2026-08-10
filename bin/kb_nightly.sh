@@ -497,12 +497,19 @@ fi           # end BUFFER_LOCK guard (Phase 1a + 1 + 1b + 1b2)
 # mechanism for when they age. Guarded non-fatal.
 JOB_KEEP_DAYS="${KB_JOB_KEEP_DAYS:-30}"
 log "Archiving terminal job records older than ${JOB_KEEP_DAYS}d → bus/jobs/archive/..."
-python3 - "$JOB_KEEP_DAYS" "$ROOT/bus/jobs" <<'PYEOF' 2>&1 | tee -a "$LOG" || log "job-archive: python error (non-fatal, board untouched)"
-import sys, os, json, glob, datetime
+python3 - "$JOB_KEEP_DAYS" "$ROOT/bus/jobs" "$ROOT/bin/mike_json.py" <<'PYEOF' 2>&1 | tee -a "$LOG" || log "job-archive: python error (non-fatal, board untouched)"
+import sys, os, json, glob, datetime, subprocess
 keep_days = int(sys.argv[1]); jobs_dir = sys.argv[2]
 cutoff = datetime.datetime.utcnow().timestamp() - keep_days * 86400
 arch_dir = os.path.join(jobs_dir, "archive")
-TERMINAL = {"done", "failed", "timeout", "cancelled"}
+# ONE fleet-wide definition (mike_json.py TERMINAL_STATUSES) instead of a hardcoded copy.
+# The copy that used to live here said {done,failed,timeout}, so the 26 'orphaned' records
+# the fleet's own reaper writes were never archived. Fallback keeps this non-fatal.
+try:
+    TERMINAL = set(subprocess.run([sys.executable, sys.argv[3], "terminal-statuses"],
+                                  capture_output=True, text=True, check=True).stdout.split())
+except Exception:
+    TERMINAL = {"done", "failed", "timeout", "orphaned", "cancelled", "aborted", "superseded"}
 moved = 0
 for fp in glob.glob(os.path.join(jobs_dir, "*.json")):   # non-recursive; archive/ not matched
     try:
