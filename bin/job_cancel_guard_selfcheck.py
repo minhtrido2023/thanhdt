@@ -347,17 +347,40 @@ def main():
     # must still refuse to touch a live one — reap calls cmd_job_set internally.
     print("\nI3. job-reap end-to-end through the guard")
     log_r = os.path.join(tmp, "r.log")
-    wpid_r, _ = spawn_wrapper(log_r)
+    wpid_r, worker_r = spawn_wrapper(log_r)
     make_job(jobs, "J_R", wpid_r, log_r)
     jset(jobs, "J_R", "deadline=1")                     # long past deadline, but ALIVE
     rc, out, _ = run([sys.executable, MJ, "job-reap", jobs, "0"])
     check("reap leaves a live past-deadline job alone", "J_R" not in out, out[:160])
     check("still running", read_job(jobs, "J_R")["status"] == "running")
+    # The wrapper dies but the worker keeps going: 'orphaned' would be the board lying in
+    # the OTHER direction — the job is not abandoned, it is running unattended. Before the
+    # round-2 fix reap read the recorded pid only and closed the record here.
     os.kill(wpid_r, 9)
     time.sleep(0.8)
+    check("setup: wrapper dead, worker alive", not alive(wpid_r) and alive(worker_r))
     rc, out, _ = run([sys.executable, MJ, "job-reap", jobs, "0"])
-    check("reap closes it once the pid is dead", read_job(jobs, "J_R")["status"] == "orphaned",
-          read_job(jobs, "J_R")["status"])
+    check("reap does NOT orphan a job whose worker still lives",
+          read_job(jobs, "J_R")["status"] == "running", read_job(jobs, "J_R")["status"])
+    os.kill(worker_r, 9)
+    time.sleep(0.8)
+    rc, out, _ = run([sys.executable, MJ, "job-reap", jobs, "0"])
+    check("reap closes it once the whole job is dead",
+          read_job(jobs, "J_R")["status"] == "orphaned", read_job(jobs, "J_R")["status"])
+    # The reap loop must survive a guarded record: a second job that IS alive must not stop
+    # reap from examining and closing a dead one later in the same pass (internal=True).
+    log_r2 = os.path.join(tmp, "r2.log")
+    wpid_r2, _ = spawn_wrapper(log_r2)
+    make_job(jobs, "J_R_LIVE", wpid_r2, log_r2)
+    jset(jobs, "J_R_LIVE", "deadline=1")
+    make_job(jobs, "J_R_DEAD", 999999, os.path.join(tmp, "r3.log"))
+    jset(jobs, "J_R_DEAD", "deadline=1")
+    rc, out, _ = run([sys.executable, MJ, "job-reap", jobs, "0"])
+    check("a live record does not abort the reap pass",
+          read_job(jobs, "J_R_DEAD")["status"] == "orphaned",
+          read_job(jobs, "J_R_DEAD")["status"])
+    check("...and the live one is still untouched",
+          read_job(jobs, "J_R_LIVE")["status"] == "running")
 
     print("\nI4. terminal-statuses is the fleet's single definition")
     rc, out, _ = run([sys.executable, MJ, "terminal-statuses"])
@@ -382,11 +405,90 @@ def main():
     rc, _, _ = run([sys.executable, MJ, "job-find-dup", jobs, "Winston",
                     "build the ceiling mechanism"])
     check("different agent -> exit 1", rc == 1, "rc=%d" % rc)
+    # The wrapper dies but the setsid'd worker keeps the logfile — the 08-09 state. The
+    # collision is at its MOST dangerous here (a live writer nobody is pointing at), so this
+    # is exactly when the warning must still fire. Keying on the recorded pid alone made it
+    # go silent (arch-reviewer round 2, finding K1b).
     os.kill(wpid_j, 9)
+    time.sleep(0.6)
+    worker_j = int(open(log_j + ".workerpid").read().strip())
+    check("setup: wrapper dead, worker still holding the logfile",
+          not alive(wpid_j) and alive(worker_j))
+    rc, out, _ = run([sys.executable, MJ, "job-find-dup", jobs, "Taylor",
+                      "build the ceiling mechanism"])
+    check("wrapper killed but worker ALIVE -> still exit 0 and names the job",
+          rc == 0 and "J_J" in out, "rc=%d out=%s" % (rc, out[:120]))
+    os.kill(worker_j, 9)
     time.sleep(0.6)
     rc, _, _ = run([sys.executable, MJ, "job-find-dup", jobs, "Taylor",
                     "build the ceiling mechanism"])
-    check("dead pid -> exit 1 (a finished job is not a collision)", rc == 1, "rc=%d" % rc)
+    check("whole job dead -> exit 1 (a finished job is not a collision)", rc == 1, "rc=%d" % rc)
+
+    # ------------------------------------------------------ L: the incident, COMPOSED
+    # Cases A and F each passed while the bug was still live, because they were never
+    # composed: A stamps while the wrapper is alive, F proves the worker survives the kill.
+    # The incident IS the composition — Mike killed first, THEN stamped — and replaying it
+    # against the round-1 fix still succeeded (arch-reviewer round 2, killer objection K1).
+    print("\nL. COMPOSED REPLAY — the literal 2026-08-09 order: kill wrapper, THEN stamp")
+    log_l = os.path.join(tmp, "l.log")
+    wpid_l, worker_l = spawn_wrapper(log_l)
+    make_job(jobs, "J_L", wpid_l, log_l, prompt="fix executor.py")
+    os.kill(wpid_l, 15)                        # step 1: `kill <pid>` (hits only the wrapper)
+    time.sleep(1.0)
+    check("setup: recorded pid dead, worker ALIVE and still editing",
+          not alive(wpid_l) and alive(worker_l))
+    rc, out, err = run([sys.executable, MJ, "job-set", jobs, "J_L", "status=failed"])
+    check("step 2: job-set status=failed -> REFUSED (exit 3)", rc == 3,
+          "rc=%d — the board would be lying again; %s" % (rc, (out + err)[:200]))
+    check("record still says running", read_job(jobs, "J_L")["status"] == "running",
+          read_job(jobs, "J_L")["status"])
+    check("refusal names the live worker, not the dead recorded pid",
+          str(worker_l) in err, err[:250])
+    for word in ("aborted", "superseded", "killed", "done"):
+        rc, _, _ = run([sys.executable, MJ, "job-set", jobs, "J_L", "status=" + word])
+        check("improvised status=%s also refused in this state" % word, rc == 3, "rc=%d" % rc)
+    # S3: the two-command bypass — "the guard says the pid is alive, so I'll fix the pid".
+    rc, out, err = run([sys.executable, MJ, "job-set", jobs, "J_L", "pid=999999"])
+    check("rewriting pid= on a live job -> REFUSED", rc == 3, "rc=%d %s" % (rc, (out + err)[:180]))
+    check("pid unchanged", str(read_job(jobs, "J_L")["pid"]) == str(wpid_l))
+    # cancel is the supported way out of this state, and it must still work.
+    rc, out, err = run([sys.executable, MJ, "job-cancel", jobs, "J_L", "5"])
+    check("jobs.sh cancel still closes it properly (exit 0)", rc == 0, (out + err)[:200])
+    time.sleep(0.3)
+    check("orphaned worker killed", not alive(worker_l))
+    check("status=cancelled", read_job(jobs, "J_L")["status"] == "cancelled")
+
+    # S4: the guard's precondition was `status == "running"`, so a record sitting in one of
+    # the OTHER live statuses the fix itself blesses was unprotected.
+    print("\nL2. the guard covers every LIVE status, not just 'running'")
+    log_l2 = os.path.join(tmp, "l2.log")
+    wpid_l2, _ = spawn_wrapper(log_l2)
+    make_job(jobs, "J_L2", wpid_l2, log_l2)
+    rc, _, _ = jset(jobs, "J_L2", "status=retrying")
+    check("a live job may move to retrying (allowlist)", rc == 0, "rc=%d" % rc)
+    rc, out, err = run([sys.executable, MJ, "job-set", jobs, "J_L2", "status=failed"])
+    check("outsider cannot then stamp failed over 'retrying'", rc == 3,
+          "rc=%d %s" % (rc, (out + err)[:180]))
+    check("record still retrying", read_job(jobs, "J_L2")["status"] == "retrying",
+          read_job(jobs, "J_L2")["status"])
+
+    # S2: pid recycling. cancel signalled whatever now owns the recorded pid, with no check
+    # that it is this job's process (arch-reviewer measured an unrelated canary SIGKILLed).
+    print("\nL3. cancel proves the recorded pid BELONGS to the job before signalling it")
+    canary2 = subprocess.Popen(["sleep", "300"], stdout=subprocess.DEVNULL)
+    SPAWNED.append(canary2.pid)
+    time.sleep(0.3)
+    log_l3 = os.path.join(tmp, "l3.log")          # canary holds no job logfile, no job kinship
+    make_job(jobs, "J_L3", canary2.pid, log_l3)
+    jset(jobs, "J_L3", "started_at=%d" % (int(time.time()) - 86400))   # stale record, day old
+    rc, out, err = run([sys.executable, MJ, "job-cancel", jobs, "J_L3", "5"])
+    check("recycled pid -> REFUSED (exit 3), nothing signalled", rc == 3,
+          "rc=%d %s" % (rc, (out + err)[:200]))
+    check("the unrelated process is ALIVE", alive(canary2.pid),
+          "canary %s was killed by a cancel that could not prove ownership" % canary2.pid)
+    check("record left running (cancel never stamps what it cannot back up)",
+          read_job(jobs, "J_L3")["status"] == "running")
+    check("refusal points at the --force escape", "--force" in err, err[:250])
 
     # ------------------------------------------------- K: real dispatch.sh syntax intact
     print("\nK. touched scripts still parse")

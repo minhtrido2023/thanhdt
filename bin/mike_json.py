@@ -556,7 +556,7 @@ def _is_self_or_ancestor(pid):
     return False
 
 
-def cmd_job_set(a):
+def cmd_job_set(a, internal=False):
     """job-set <jobs_dir> <job_id> key=val [key=val ...] [--force] — merge fields, atomic write.
     Values kept as strings; numeric fields are coerced on read.
 
@@ -590,19 +590,47 @@ def cmd_job_set(a):
         pairs.append((k, v.encode("utf-8", errors="replace").decode("utf-8")))
     fields = dict(pairs)
     new_status = fields.get("status")
-    guarded = (new_status is not None and new_status not in LIVE_STATUSES
-               and obj.get("status") == "running"
-               and _pid_alive(obj.get("pid")) is True
-               and not _is_self_or_ancestor(obj.get("pid")))
+    # Two ways to make the board lie about a job that is still working:
+    #   closing — stamp a status that means "this run is over" (the 2026-08-09 write), or
+    #   repid   — rewrite pid= to something dead, which was the 2-command way around the
+    #             first version of this guard: `job-set pid=999999` then `job-set
+    #             status=failed`, both rc=0 with the worker still alive (arch-reviewer S3).
+    closing = new_status is not None and new_status not in LIVE_STATUSES
+    # Only a REWRITE of an existing pid is suspicious. dispatch.sh:981 stamps pid= onto a
+    # record that has none yet (`JSET pid="$BASHPID"`, the very first thing the wrapper does)
+    # — guarding that would refuse every --bg job its own pid and hang the whole fleet at
+    # status=running. There is nothing to protect when no pid is recorded.
+    repid = ("pid" in fields and obj.get("pid") not in (None, "")
+             and str(fields["pid"]) != str(obj.get("pid")))
+    live = []
+    guarded = False
+    # Precondition is "the record still claims to be live", not "== running": a record in
+    # retrying/usage_limited is just as live, and keying on 'running' alone left those
+    # unprotected (arch-reviewer S4). The process discovery below walks /proc, so it runs
+    # ONLY on a close/repid attempt — never on the ordinary field update — and the cheap
+    # ancestry test short-circuits the wrapper finalising its own record before that.
+    if (closing or repid) and obj.get("status") in LIVE_STATUSES \
+            and not _is_self_or_ancestor(obj.get("pid")):
+        live = _job_live_pids(obj)
+        guarded = bool(live) and not _writer_belongs_to_job(live)
+    if guarded and internal:
+        # cmd_job_reap calls this in-process; a sys.exit(3) here would abort the whole reap
+        # loop and leave every later record unexamined. The caller checks the return value.
+        return False
     if guarded and not force:
+        what = ("stamp status=%s" % new_status) if closing else ("rewrite pid=%s" % fields.get("pid"))
         sys.stderr.write(
-            "REFUSED: job %s is still running and its pid %s is ALIVE — refusing to stamp "
-            "status=%s (that is how the board starts lying; incident 2026-08-09).\n"
+            "REFUSED: job %s is still %s and %d process(es) of it are ALIVE right now: %s "
+            "— refusing to %s (that is how the board starts lying; incident 2026-08-09).\n"
+            "  NOTE the recorded pid %s is the _bg_wrapper. Killing it does NOT stop the "
+            "worker: the worker runs under setsid, gets reparented to init, and keeps "
+            "editing the repo — on 2026-08-09 it did so for 33 more minutes.\n"
             "  Stop it properly:  bin/jobs.sh cancel %s   (kills the whole tree, VERIFIES "
             "it is dead, then closes the record)\n"
             "  Just checking:     bin/jobs.sh status %s   (HB_AGE is the real liveness "
             "signal — LOG_AGE is useless while a job runs)\n"
-            % (job_id, obj.get("pid"), new_status, job_id, job_id))
+            % (job_id, obj.get("status"), len(live), live, what, obj.get("pid"),
+               job_id, job_id))
         sys.exit(3)
     if guarded and force:
         # --force exists for a genuinely stale record whose pid the OS handed to an
@@ -616,7 +644,7 @@ def cmd_job_set(a):
                 "terminal-status-without-ended_at record that made the board unreadable.\n"
                 "  Example: job-set %s %s status=%s ended_at=$(date +%%s) "
                 "result_summary='pid recycled, record stale since <when>' --force\n"
-                % (jobs_dir, job_id, new_status))
+                % (jobs_dir, job_id, new_status or obj.get("status", "?")))
             sys.exit(3)
     for k, v in pairs:
         obj[k] = v
@@ -624,6 +652,7 @@ def cmd_job_set(a):
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(obj, f, ensure_ascii=False)
     os.replace(tmp, fp)
+    return True
 
 
 # Trang thai CHO TIEP TUC: lan chay nay da ket thuc, NHUNG viec chua chet — dispatch.sh da ghi
@@ -804,7 +833,10 @@ def cmd_job_reap(a):
         dl = _as_int(o.get("deadline"), 0)
         if not dl or n <= dl + grace:
             continue
-        if _pid_alive(o.get("pid")) is True:
+        # Same job-level liveness the guard uses: a job whose wrapper died but whose worker
+        # is still holding the logfile is NOT orphaned, it is running unattended — stamping
+        # it 'orphaned' would be the board lying in the other direction.
+        if _job_live_pids(o):
             continue
         # Only --bg dispatches record a pid; a sync dispatch has none, so fall back to the
         # agent's own heartbeat — a job still writing bus events is alive, never reap it.
@@ -829,10 +861,14 @@ def cmd_job_reap(a):
             job_id, o.get("from", "?"), o.get("to", "?"), over_h))
         reaped += 1
         if not dry:
-            cmd_job_set([jobs_dir, job_id, "status=orphaned", "ended_at=%d" % n,
-                         "result_summary=reaped by jobs.sh reap: dispatcher died without "
-                         "writing a terminal status (%.1fh past deadline, pid dead/absent)"
-                         % over_h])
+            # internal=True: the guard must not sys.exit() out of this loop and leave every
+            # later record unexamined. A False return means a process appeared between the
+            # check above and this write — then the job is alive and must not be reaped.
+            if cmd_job_set([jobs_dir, job_id, "status=orphaned", "ended_at=%d" % n,
+                            "result_summary=reaped by jobs.sh reap: dispatcher died without "
+                            "writing a terminal status (%.1fh past deadline, pid dead/absent)"
+                            % over_h], internal=True) is False:
+                continue
             # watchdog's per-job debounce marker is dead weight once the record is closed
             om = os.path.join(os.path.dirname(jobs_dir.rstrip("/")), "..", "state", "overdue", job_id)
             try:
@@ -869,11 +905,18 @@ def cmd_job_find_dup(a):
     n = now_epoch()
     found = 0
     for o in _load_jobs(jobs_dir):
-        if o.get("status") != "running" or o.get("to") != to_agent:
+        if o.get("status") not in LIVE_STATUSES or o.get("to") != to_agent:
             continue
-        if _pid_alive(o.get("pid")) is not True:
-            continue
+        # Prompt match FIRST: it is a string compare, while the liveness test below walks
+        # /proc. This keeps the expensive scan to the handful of records that could actually
+        # be a collision, instead of every running job on the board.
         if " ".join(str(o.get("prompt_summary", "")).split()).lower() != want:
+            continue
+        # Job-level liveness, not the recorded pid: after `kill <wrapper>` the worker is
+        # still there and the collision is at its most dangerous (a live writer nobody is
+        # pointing at) — reading the recorded pid alone made the warning go silent in
+        # exactly that state (arch-reviewer round 2, K1b).
+        if not _job_live_pids(o):
             continue
         print("%s (dispatched %ds ago by %s, hb_age=%ss)" % (
             o.get("job_id", "?"), n - _as_int(o.get("started_at"), n),
@@ -968,6 +1011,109 @@ def _job_pids(pid, logfile):
     return out
 
 
+def _job_live_pids(obj):
+    """Every live process belonging to this job RECORD (recorded pid + its descendants +
+    anything still holding the job's logfile).
+
+    The liveness question has to be asked about the JOB, not about the recorded pid. The
+    recorded pid is dispatch.sh's _bg_wrapper; the worker runs under `setsid` and outlives
+    it. The 2026-08-09 incident is precisely the composition of those two facts — Mike ran
+    `kill <pid>` FIRST, then stamped status=failed — so a guard that reads only the recorded
+    pid is asking about the one process the improvisation already killed, and waves the
+    stamp through while the worker keeps editing the repo (arch-reviewer round 2, K1)."""
+    return _job_pids(obj.get("pid"), obj.get("logfile", ""))
+
+
+def _writer_belongs_to_job(pids):
+    """True if THIS process is one of `pids` or a descendant of one — i.e. the job writing
+    its own record, which is always legitimate. Complements _is_self_or_ancestor (which only
+    knows the recorded pid) for the case where the wrapper is gone but the worker is not."""
+    try:
+        want = set(int(p) for p in pids)
+    except Exception:
+        return False
+    cur = os.getpid()
+    for _ in range(64):
+        if cur in want:
+            return True
+        if cur <= 1:
+            return False
+        nxt = _ppid_of(cur)
+        if nxt is None or nxt == cur:
+            return False
+        cur = nxt
+    return False
+
+
+def _boot_epoch():
+    """Wall-clock epoch of the last boot, from /proc/stat btime."""
+    try:
+        with open("/proc/stat", encoding="utf-8") as f:
+            for line in f:
+                if line.startswith("btime "):
+                    return int(line.split()[1])
+    except Exception:
+        return None
+    return None
+
+
+def _proc_start_epoch(pid):
+    """Wall-clock epoch at which `pid` started (field 22 of /proc/<pid>/stat + btime), or
+    None if unreadable. comm (field 2) may contain spaces AND ')' so the tail is split from
+    the LAST ')' — field 22 is then index 19."""
+    b = _boot_epoch()
+    if b is None:
+        return None
+    try:
+        with open("/proc/%d/stat" % int(pid), encoding="utf-8") as f:
+            data = f.read()
+        tail = data[data.rindex(")") + 2:].split()
+        return b + int(tail[19]) / float(os.sysconf("SC_CLK_TCK") or 100)
+    except Exception:
+        return None
+
+
+def _fmt_ts(ts):
+    """UTC 'YYYY-MM-DD HH:MM:SSZ' for an operator-facing message, or '?'. UTC on purpose:
+    the fleet's crons run under several TZs and the same record must read identically."""
+    try:
+        return time.strftime("%Y-%m-%d %H:%M:%SZ", time.gmtime(float(ts)))
+    except Exception:
+        return "?"
+
+
+# How far a job's process may have started from the job's own started_at and still be
+# believed to be that job's process. dispatch.sh forks the wrapper within a second or two of
+# writing started_at; 5 minutes is slack for a loaded host, not a real ambiguity.
+PID_OWNERSHIP_SLACK = 300
+
+
+def _pid_owned_by_job(pid, obj):
+    """True if `pid` plausibly IS this job's process rather than an unrelated process the
+    kernel handed the same number to after the job died.
+
+    Pid recycling is not hypothetical — it is the stated reason `--force` exists. Without
+    this check `jobs.sh cancel` signals whatever currently owns the number: arch-reviewer
+    measured an unrelated `sleep` SIGKILLed by a cancel on a stale record, and on this host
+    that could as easily have been run_bot.sh or the Discord bridge.
+
+    Ownership is accepted on ANY of three signals, cheapest first, and the check FAILS OPEN
+    when it cannot see enough to disprove ownership (a refusal that blocks a real cancel is
+    also a failure mode)."""
+    holders = set(_pids_holding(obj.get("logfile", "")))
+    try:
+        pid_i = int(pid)
+    except Exception:
+        return False
+    if holders and (pid_i in holders or holders & set(_descendants(pid_i))):
+        return True          # holds the job's own logfile, or fathers something that does
+    started = _as_int(obj.get("started_at"), 0)
+    st = _proc_start_epoch(pid_i)
+    if st is None or not started:
+        return True          # cannot disprove -> do not block the operator
+    return abs(st - started) <= PID_OWNERSHIP_SLACK
+
+
 def _kill_tree(pid, logfile, grace):
     """SIGTERM everything belonging to the job, wait up to `grace`, SIGKILL what survives.
     Returns the pids STILL alive afterwards (empty == fully dead).
@@ -1051,6 +1197,23 @@ def cmd_job_cancel(a):
         sys.stderr.write(
             "REFUSED: you are running INSIDE job %s (pid %s is this process or an ancestor) "
             "— cancelling it would kill this very command.\n" % (job_id, pid))
+        sys.exit(3)
+    # OWNERSHIP, before the first signal and before _descendants() enumerates anything: the
+    # kernel recycles pids, and a stale record's number may now belong to an unrelated live
+    # process — arch-reviewer measured an innocent process SIGKILLed here, and its children
+    # would have gone with it. Only checked when the recorded pid is alive; a dead recorded
+    # pid cannot be mistaken for anything, and orphans are found by logfile fd, which IS
+    # proof of ownership.
+    if _pid_alive(pid) is True and not _pid_owned_by_job(pid, o):
+        sys.stderr.write(
+            "REFUSED: pid %s is alive but does NOT look like job %s's process — it holds "
+            "none of the job's logfile and it started %s, while the job started %s. The "
+            "kernel recycles pids; killing this would hit an unrelated process.\n"
+            "  If the record really is stale, close it without killing anything:\n"
+            "    bin/mike_json.py job-set %s %s status=orphaned ended_at=$(date +%%s) "
+            "result_summary='pid recycled, record stale' --force\n"
+            % (pid, job_id, _fmt_ts(_proc_start_epoch(pid)),
+               _fmt_ts(_as_int(o.get("started_at"), 0)), jobs_dir, job_id))
         sys.exit(3)
     logfile = o.get("logfile", "")
     targets = _job_pids(pid, logfile)
@@ -1246,7 +1409,12 @@ def cmd_job_get(a):
     # cong viec. Do la lop loi "im lang khong phan biet duoc voi that bai".
     if st in PENDING_RESUME_STATES:
         sys.exit(5)
-    sys.exit(1)  # failed / timeout / unknown
+    # 'cancelled' and 'orphaned' land here too, on purpose — no new exit code. Both are only
+    # ever written AFTER it has been proven that no process of the job is alive (job-cancel
+    # verifies the kill; job-reap refuses a job with live pids), so "1 = did not finish, safe
+    # to run again" is true of them. What made 2026-08-09 dangerous was not the code 1, it was
+    # a code 1 on a job whose worker was still running — and that is now refused at the write.
+    sys.exit(1)  # failed / timeout / cancelled / orphaned / unknown
 
 
 def cmd_job_field(a):

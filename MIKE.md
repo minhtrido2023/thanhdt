@@ -394,6 +394,24 @@ logout → `claude login`; zombie dai dẳng → mở agent trong app Claude đ�
   Mike phải escalate bằng event `question`, không spawn Mike lạnh).
 - **`bin/jobs.sh {list | status <job_id> | wait <job_id>}`** — poll job board (read-only).
   `status` exit-code: `0=done 2=running 3=overdue 5=pending-resume(tự chạy lại) 1=failed/timeout 4=not-found`.
+  `cancelled` và `orphaned` cũng trả **1** — cố ý, KHÔNG thêm mã mới: cả hai chỉ được ghi sau
+  khi đã CHỨNG MINH không còn tiến trình nào sống, nên "1 = chưa xong, an toàn để chạy lại"
+  đúng với chúng. Cái nguy hiểm ngày 08-09 không phải mã 1, mà là mã 1 trên một job worker
+  VẪN ĐANG chạy — điều đó giờ bị chặn ở tầng ghi (xem `cancel` ngay dưới).
+- **`bin/jobs.sh cancel <job_id> [grace]`** — cách DUY NHẤT đúng để dừng 1 job. Giết cả cây
+  tiến trình (kể cả worker `setsid` đã mồ côi, tìm qua `/proc/<pid>/fd` trỏ tới logfile),
+  XÁC MINH đã chết, RỒI mới ghi `status=cancelled`. Exit: `0=đã huỷ (idempotent)
+  3=không thể hành động (không có pid / pid vô nghĩa / pid không thuộc job này / đang ở trong
+  chính job đó) 4=không thấy record 5=còn tiến trình SỐNG SÓT sau SIGTERM+SIGKILL (record cố ý
+  giữ nguyên `running` — không bao giờ báo đã dừng một writer còn sống)`.
+  ⚠️ **ĐỪNG BAO GIỜ tự ứng biến `kill <pid>` + `job-set status=failed`** — pid trong record là
+  `_bg_wrapper`, giết nó KHÔNG chạm tới worker (worker chạy dưới `setsid`, bị reparent về init
+  và tiếp tục sửa repo; ngày 2026-08-09 nó chạy thêm 33 phút và gây dispatch trùng lên
+  `executor.py`). `job-set` nay TỪ CHỐI (exit 3) mọi status kết thúc — kể cả từ tự nghĩ ra như
+  `aborted`/`superseded` — khi job còn tiến trình sống thật.
+- **`bin/jobs.sh reap [grace]`** — đóng record mồ côi (dispatcher chết giữa chừng, không ai ghi
+  status kết thúc). Chỉ đóng khi quá hạn + **không còn tiến trình nào của job còn sống**; job
+  quá hạn mà worker vẫn chạy thì KHÔNG bị đụng (quá hạn ≠ chết).
 - **`bin/trace.sh <job_id> [--log]`** — gộp job record + mọi bus event cùng `trace_id` (=job_id)
   thành 1 timeline, thay vì grep tay nhiều file.
 - **`bin/verification_audit.sh <agent_id> [days]`** — báo cáo (KHÔNG phải gate) coverage kiểm
