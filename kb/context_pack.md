@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v1984)
+# Mike fleet — context pack (v1985)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-08-10T09:36:16] Taylor/finding — codex-sandbox-test: kiem tra quyen ghi bus tu codex
 - [2026-08-10T09:36:25] Taylor/finding — codex-sandbox-test-result: {"bus_event": "THANH_CONG", "outside_workspace_probe": "BI_CHAN", "target": "/home/trido/thanhdt/WorkingClaude/codex_sandbox_probe2_20260810.txt", "reason": "sa …
 - [2026-08-10T09:37:29] Wendy/finding — ten-agent: Wendy
 - [2026-08-10T09:40:22] Taylor/finding — permission-test-dispatch-093823: {"result": "BI_CHAN", "command": "python3 -c \"print(1+1)\"", "note": "opencode permission rules deny arbitrary bash (only allowlist: append_event, heartbeat, j …
@@ -11,6 +10,7 @@
 - [2026-08-10T10:13:19] Taylor/finding — codex-perm-check: test
 - [2026-08-10T10:13:25] Taylor/answer — codex-perm-check-ket-qua: {"python3": "THANH_CONG: 42", "write_project": "THANH_CONG: /home/trido/thanhdt/WorkingClaude/codex_perm_probe.txt", "write_outside_project": "BI_CHAN: sandbox  …
 - [2026-08-10T10:14:29] Winston/finding — codex-bg-probe: {"result": "Wrote /home/trido/thanhdt/WorkingClaude/codex_bg_probe.txt with exact content bg"}
+- [2026-08-10T10:15:04] Wendy/finding — phép tính đơn giản: {"question": "3+3 bang may?", "answer": "6"}
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
