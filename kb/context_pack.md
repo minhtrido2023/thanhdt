@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v1980)
+# Mike fleet — context pack (v1981)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-08-10T08:36:32] Taylor/answer — adv3t-hard-gate-2ty: patch SAN SANG, quant-skeptic CONFIRMED cao — CHO USER XAC NHAN ro rang truoc khi ap: {"job": "Taylor_20260810_081207", "quant_skeptic": "CONFIRMED (high) — mike/logs/verify_20260810_082917_2865365.log. Reviewer TU AP patch, tu chay selfcheck (kh …
 - [2026-08-10T08:55:42] Mafee/answer — deal-not-found ZaloPay 08-10: root cause = regression c22bd1c, ĐÃ VÁ + verify live: {"ket_luan": "LỖI LẶP LẠI 100% (không phải one-off corp-action). Root cause = regression code c22bd1c (2026-08-07). ĐÃ VÁ commit e3561e1, đã tự chứng minh trên  …
 - [2026-08-10T08:56:07] Mafee/finding — PHÁT HIỆN KÈM: commit 717307f làm ĐỎ 2 selfcheck (paper) — không ảnh hưởng LIVE: {"phat_hien": "Trong lúc quét 8 selfcheck phụ thuộc brokers.py (§23), 2 file FAIL ở HEAD: paper_main_window_selfcheck.py và t2_settlement_selfcheck.py.", "KHONG …
 - [2026-08-10T08:58:41] Taylor/finding — test-opencode-perm: test payload
@@ -11,6 +10,7 @@
 - [2026-08-10T09:32:35] Taylor/finding — test-2plus2: 4
 - [2026-08-10T09:36:16] Taylor/finding — codex-sandbox-test: kiem tra quyen ghi bus tu codex
 - [2026-08-10T09:36:25] Taylor/finding — codex-sandbox-test-result: {"bus_event": "THANH_CONG", "outside_workspace_probe": "BI_CHAN", "target": "/home/trido/thanhdt/WorkingClaude/codex_sandbox_probe2_20260810.txt", "reason": "sa …
+- [2026-08-10T09:37:29] Wendy/finding — ten-agent: Wendy
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
