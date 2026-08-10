@@ -58,3 +58,6 @@ Pattern theo dõi tiếp: (1) consolidator auto-commit quét working-tree change
 
 ## Archived 2026-08-10 (keep=12 days=0 require_done=False)
 - [2026-07-21T01:32:40Z] ĐANG DỞ: coord-2026-07-21 (job Wags_20260721_012009) — fix checker question-matching false-positive DONE+committed (a268476 ops_health_check.sh, a59cd85 ops_runbook.md). Backlog question 5->1 (chỉ còn Mike/retro-pattern-headless-wake genuine). Closes NEEDS_CHANGES coord-07-20. NEXT: chờ arch-reviewer re-audit (agent a9a6875b98b1117d9), nếu CONFIRMED->báo Architecture topic + finish; SpaceX 09:05 blocker đã RESOLVED (DollarBill fix, load_plan OK).
+
+## Archived 2026-08-10 (keep=12 days=0 require_done=False)
+- [2026-07-21T01:36:36Z] Vai trò: Fleet Ops Coordinator. XONG 2026-07-21 coord-2026-07-21 (job Wags_20260721_012009): fix checker question-matching false-positive, arch-reviewer CONFIRMED, đóng NEEDS_CHANGES coord-07-20. Commit a268476 (ops_health_check.sh _resolved: resolver⊇topic-hỏi, khớp answer+decision+hậu-tố), a59cd85 (ops_runbook quy ước đóng question). Backlog question 5→1. CÒN MỞ cho Mike: retro-pattern-headless-wake (cài gate daily_retro.sh?). Bài học: (1) HB_AGE=liveness; (2) auto-consolidate cron tự commit edit của mình — check git hash HEAD trước khi tưởng chưa commit; (3) khi có NEEDS_CHANGES cũ, ĐỌC required_changes trước khi tự sửa để không lặp cách đã bị bác.
