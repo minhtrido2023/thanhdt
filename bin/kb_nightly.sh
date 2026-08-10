@@ -502,7 +502,7 @@ import sys, os, json, glob, datetime
 keep_days = int(sys.argv[1]); jobs_dir = sys.argv[2]
 cutoff = datetime.datetime.utcnow().timestamp() - keep_days * 86400
 arch_dir = os.path.join(jobs_dir, "archive")
-TERMINAL = {"done", "failed", "timeout"}
+TERMINAL = {"done", "failed", "timeout", "cancelled"}
 moved = 0
 for fp in glob.glob(os.path.join(jobs_dir, "*.json")):   # non-recursive; archive/ not matched
     try:

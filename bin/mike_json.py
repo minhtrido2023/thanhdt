@@ -31,6 +31,10 @@ Centralizes all JSON building/reading so the shell scripts depend only on python
          "usage_limit" when omitted (back-compat with the original 6-arg call); the
          max-turns auto-continuation (2026-08-02) passes kind="max_turns" plus the
          model/effort to preserve on resume and the bumped max_turns to resume with.
+  job-cancel <jobs_dir> <job_id> [grace_sec]
+      -> stop a running job for real: kill its whole process tree, VERIFY it is dead, then
+         stamp status=cancelled. Never stamps a status it cannot back up (no pid / survivors
+         -> refuses, writes nothing). Front door: bin/jobs.sh cancel <job_id>
   job-field <jobs_dir> <job_id> <field_name>
       -> print one field's raw value (exit 1 if job/field missing) — e.g. discord_thread_id
   job-hb-age <jobs_dir> <job_id>
@@ -42,7 +46,7 @@ Centralizes all JSON building/reading so the shell scripts depend only on python
          post-condition/"output contract" check for background-dispatch pipelines —
          see mike/kb/dispatch_output_contract.md.
 """
-import sys, os, json, uuid, glob, datetime, hashlib, gzip, re
+import sys, os, json, uuid, glob, datetime, hashlib, gzip, re, signal, time
 
 TS_FMT = "%Y-%m-%dT%H:%M:%SZ"
 
@@ -492,9 +496,64 @@ def _job_path(jobs_dir, job_id):
     return os.path.join(jobs_dir, job_id + ".json")
 
 
+# Statuses that mean "this run is over". Stamping one of these while the job's process is
+# still alive is what makes the board LIE (incident 2026-08-09, see cmd_job_set guard).
+TERMINAL_STATUSES = ("done", "failed", "timeout", "orphaned", "cancelled")
+
+
+def _ppid_of(pid):
+    """Parent pid from /proc/<pid>/status, or None if unreadable/gone."""
+    try:
+        with open("/proc/%d/status" % int(pid), encoding="utf-8") as f:
+            for line in f:
+                if line.startswith("PPid:"):
+                    return int(line.split()[1])
+    except Exception:
+        return None
+    return None
+
+
+def _is_self_or_ancestor(pid):
+    """True if `pid` is THIS process or one of its ancestors.
+
+    Distinguishes the job finalising its OWN record (dispatch.sh's _bg_wrapper runs as
+    the recorded pid and JSETs status=done/failed from inside it — mike_json.py is then a
+    descendant of that pid) from an OUTSIDE writer stamping a terminal status onto a job
+    that is still running. Bounded walk; /proc chains are short."""
+    try:
+        pid = int(pid)
+    except Exception:
+        return False
+    cur = os.getpid()
+    for _ in range(64):
+        if cur == pid:
+            return True
+        if cur <= 1:
+            return False
+        nxt = _ppid_of(cur)
+        if nxt is None or nxt == cur:
+            return False
+        cur = nxt
+    return False
+
+
 def cmd_job_set(a):
-    """job-set <jobs_dir> <job_id> key=val [key=val ...] — merge fields, atomic write.
-    Values kept as strings; numeric fields are coerced on read."""
+    """job-set <jobs_dir> <job_id> key=val [key=val ...] [--force] — merge fields, atomic write.
+    Values kept as strings; numeric fields are coerced on read.
+
+    REFUSES (exit 3) to stamp a TERMINAL status on a job that is still status=running while
+    its recorded pid is provably ALIVE and the caller is not that process. Root cause of
+    incident 2026-08-09 (Taylor_20260809_123917, 3rd duplicate-dispatch collision, the last
+    one touching executor.py): Mike ran `kill <pid>` — which killed only the _bg_wrapper and
+    left the setsid'd claude subtree orphaned but ALIVE — then `job-set status=failed`. The
+    board said failed 22s into a 600s budget while the agent kept editing files for another
+    33 minutes; Mike read "failed", re-dispatched the same prompt, and the two runs collided
+    on the same files. Same anomalous record shape appears 5× in the board's history
+    (2026-07-21 ×2, 07-31, 08-09 ×2): terminal status with no ended_at/exit_code.
+    The correct way to stop a running job is `bin/jobs.sh cancel <job_id>` (kills the whole
+    tree, VERIFIES it is dead, then stamps status=cancelled). --force keeps the escape hatch
+    for a genuinely stale record whose pid has been recycled by an unrelated process."""
+    force = "--force" in a[2:]
     jobs_dir, job_id = a[0], a[1]
     os.makedirs(jobs_dir, exist_ok=True)
     fp = _job_path(jobs_dir, job_id)
@@ -503,12 +562,30 @@ def cmd_job_set(a):
             obj = json.load(f)
     except Exception:
         obj = {}
+    pairs = []
     for kv in a[2:]:
-        if "=" not in kv:
+        if kv == "--force" or "=" not in kv:
             continue
         k, v = kv.split("=", 1)
         # Sanitize: head -c may cut a multibyte sequence, producing surrogates.
-        obj[k] = v.encode("utf-8", errors="replace").decode("utf-8")
+        pairs.append((k, v.encode("utf-8", errors="replace").decode("utf-8")))
+    new_status = dict(pairs).get("status")
+    if (not force and new_status in TERMINAL_STATUSES
+            and obj.get("status") == "running"
+            and _pid_alive(obj.get("pid")) is True
+            and not _is_self_or_ancestor(obj.get("pid"))):
+        sys.stderr.write(
+            "REFUSED: job %s is still running and its pid %s is ALIVE — refusing to stamp "
+            "status=%s (that is how the board starts lying; incident 2026-08-09).\n"
+            "  Stop it properly:  bin/jobs.sh cancel %s      (kills the tree, verifies, "
+            "then stamps cancelled)\n"
+            "  Check it is alive: bin/jobs.sh status %s      (HB_AGE = the real liveness "
+            "signal, not LOG_AGE)\n"
+            "  Override (stale record / recycled pid): add --force\n"
+            % (job_id, obj.get("pid"), new_status, job_id, job_id))
+        sys.exit(3)
+    for k, v in pairs:
+        obj[k] = v
     tmp = fp + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(obj, f, ensure_ascii=False)
@@ -622,20 +699,38 @@ def _load_jobs(jobs_dir):
     return rows
 
 
+def _proc_state(pid):
+    """Single-letter state from /proc/<pid>/status ('R','S','D','Z','T'...), or None."""
+    try:
+        with open("/proc/%d/status" % int(pid), encoding="utf-8") as f:
+            for line in f:
+                if line.startswith("State:"):
+                    return line.split()[1]
+    except Exception:
+        return None
+    return None
+
+
 def _pid_alive(pid):
     """True if the pid is still a live process, False if provably dead, None if unknown
-    (no pid recorded — old records predating the pid field)."""
+    (no pid recorded — old records predating the pid field).
+
+    A ZOMBIE counts as DEAD. `kill -0` succeeds on a zombie because the pid entry lingers
+    until the parent reaps it, but the process has already exited: it holds no files and
+    can write nothing. Found by this module's own selfcheck (case G) — without this, a
+    wrapper whose parent is slow to wait() would look alive forever and `jobs.sh cancel`
+    would refuse to close a job that had genuinely stopped."""
     if not pid:
         return None
     try:
         os.kill(int(pid), 0)
-        return True
     except ProcessLookupError:
         return False
     except PermissionError:
         return True          # exists, owned by someone else
     except Exception:
         return None
+    return _proc_state(pid) != "Z"
 
 
 def cmd_job_reap(a):
@@ -700,6 +795,209 @@ def cmd_job_reap(a):
             except Exception:
                 pass
     print("%d orphaned job record(s)%s" % (reaped, " (dry-run, not written)" if dry else " closed"))
+
+
+def cmd_job_find_dup(a):
+    """job-find-dup <jobs_dir> <to_agent> <prompt_summary> — print job_ids of jobs to the
+    SAME agent that are still status=running WITH A LIVE PID and carry an identical prompt
+    summary. Exit 0 if any were printed, 1 if none.
+
+    Advisory only — dispatch.sh warns and continues. This is the cheap, observable signature
+    of the duplicate-dispatch pattern: 2 of its 3 collisions (2026-08-09 morning
+    filter_lag_entry_window.py, afternoon executor.py) were the SAME prompt dispatched twice
+    77s / 59s apart. Matching is exact on the normalized summary, not fuzzy, so a deliberate
+    re-run with any edited wording stays silent rather than crying wolf."""
+    jobs_dir, to_agent, summary = a[0], a[1], a[2]
+    want = " ".join(summary.split()).lower()
+    n = now_epoch()
+    found = 0
+    for o in _load_jobs(jobs_dir):
+        if o.get("status") != "running" or o.get("to") != to_agent:
+            continue
+        if _pid_alive(o.get("pid")) is not True:
+            continue
+        if " ".join(str(o.get("prompt_summary", "")).split()).lower() != want:
+            continue
+        print("%s (dispatched %ds ago by %s, hb_age=%ss)" % (
+            o.get("job_id", "?"), n - _as_int(o.get("started_at"), n),
+            o.get("from", "?"), _hb_age(o, n, agent_only=True)))
+        found += 1
+    sys.exit(0 if found else 1)
+
+
+def _descendants(pid):
+    """Every live descendant pid of `pid`, read from /proc (one pass, then a BFS over the
+    parent map). Needed because dispatch.sh's child tree is deliberately detached: the
+    _bg_wrapper runs in its own systemd transient scope and _hb_aware_timeout spawns claude
+    under `setsid` (its own session + process group). So neither `kill <pid>` nor
+    `kill -- -<pid>` from outside reaches the actual worker — killing the wrapper alone
+    ORPHANS a claude that keeps editing the repo (incident 2026-08-09)."""
+    kids = {}
+    try:
+        entries = os.listdir("/proc")
+    except Exception:
+        return []
+    for entry in entries:
+        if not entry.isdigit():
+            continue
+        p = int(entry)
+        pp = _ppid_of(p)
+        if pp is not None:
+            kids.setdefault(pp, []).append(p)
+    out, seen, stack = [], set(), [int(pid)]
+    while stack:
+        for k in kids.get(stack.pop(), []):
+            if k in seen:
+                continue
+            seen.add(k)
+            out.append(k)
+            stack.append(k)
+    return out
+
+
+def _pids_holding(path):
+    """Pids whose stdout/stderr is `path`, found by reading /proc/<pid>/fd.
+
+    The SECOND way to find a job's worker, and the one that still works after the wrapper
+    is gone. dispatch.sh's _bg_wrapper redirects the claude process's stdout+stderr to the
+    job's own logfile (`_hb_aware_timeout ... > "$logfile" 2>&1`), so that fd is a reliable
+    per-job fingerprint. It matters because the PPid tree is NOT enough on its own: once the
+    wrapper dies, its setsid'd claude child is reparented to init and becomes invisible to
+    _descendants — which is exactly the state Mike's improvised `kill <pid>` left behind on
+    2026-08-09, an orphan that went on editing the repo for 33 minutes with nothing pointing
+    at it."""
+    if not path:
+        return []
+    out = []
+    try:
+        entries = os.listdir("/proc")
+    except Exception:
+        return []
+    me = os.getpid()
+    for entry in entries:
+        if not entry.isdigit():
+            continue
+        p = int(entry)
+        if p == me:
+            continue
+        for fd in ("1", "2"):
+            try:
+                if os.readlink("/proc/%d/fd/%s" % (p, fd)) == path:
+                    out.append(p)
+                    break
+            except Exception:
+                continue
+    return out
+
+
+def _job_pids(pid, logfile):
+    """Every live process belonging to this job: the wrapper, its descendants, and any
+    process still holding the job's logfile (orphans the tree walk cannot see)."""
+    seen, out = set(), []
+    cands = _descendants(pid) + _pids_holding(logfile)
+    if _pid_alive(pid) is True:
+        cands.insert(0, int(pid))
+    for p in cands:
+        if p in seen or _pid_alive(p) is not True:
+            continue
+        seen.add(p)
+        out.append(p)
+    return out
+
+
+def _kill_tree(pid, logfile, grace):
+    """SIGTERM everything belonging to the job, wait up to `grace`, SIGKILL what survives.
+    Returns the pids STILL alive afterwards (empty == fully dead).
+
+    Re-collects before every signal pass: a process spawned between listing and signalling
+    would be missed by a single pass, and this must not leave a live writer behind — the
+    whole point of the command is that the status stamped afterwards is TRUE."""
+    still = []
+    for sig in (signal.SIGTERM, signal.SIGKILL):
+        for _round in (1, 2):
+            for p in reversed(_job_pids(pid, logfile)):   # children first, don't orphan mid-kill
+                try:
+                    os.kill(p, sig)
+                except Exception:
+                    pass
+        waited = 0.0
+        step = 0.5 if sig == signal.SIGKILL else 1.0
+        limit = 2.0 if sig == signal.SIGKILL else float(grace)
+        while True:
+            still = _job_pids(pid, logfile)
+            if not still:
+                return []
+            if waited >= limit:
+                break
+            time.sleep(step)
+            waited += step
+    return still
+
+
+def cmd_job_cancel(a):
+    """job-cancel <jobs_dir> <job_id> [grace_sec] — stop a running job FOR REAL.
+
+    Kills the job's whole process tree, VERIFIES every pid is dead, and only then stamps
+    status=cancelled. This exists because there was no cancel primitive at all: on
+    2026-08-09 Mike improvised `kill <pid>` + `job-set status=failed`, and both halves were
+    wrong — the kill hit only the wrapper (the setsid'd claude survived 33 more minutes,
+    still editing executor.py), and the status stamp made the board claim a failure that
+    never happened, which triggered the re-dispatch that collided with the still-live run.
+
+    Never stamps a status it cannot back up:
+      - no pid recorded (sync dispatch) -> exit 3, nothing written. Kill it where it runs.
+      - tree still alive after SIGTERM+SIGKILL -> exit 4, nothing written.
+    Idempotent: a job already in a terminal status is reported and left alone (exit 0)."""
+    jobs_dir, job_id = a[0], a[1]
+    grace = _as_int(a[2], 15) if len(a) > 2 else 15
+    fp = _job_path(jobs_dir, job_id)
+    try:
+        with open(fp, encoding="utf-8") as f:
+            o = json.load(f)
+    except Exception:
+        print("not-found: %s" % job_id)
+        sys.exit(4)
+    st = o.get("status", "?")
+    if st != "running":
+        print("job %s is already %s — nothing to cancel" % (job_id, st))
+        sys.exit(0)
+    pid = o.get("pid")
+    if not pid:
+        sys.stderr.write(
+            "REFUSED: job %s has no recorded pid (sync dispatch — only --bg records one), "
+            "so this command cannot prove it killed anything.\n"
+            "  Kill it in the shell that is running it, then: bin/jobs.sh status %s\n"
+            % (job_id, job_id))
+        sys.exit(3)
+    if _is_self_or_ancestor(pid):
+        sys.stderr.write(
+            "REFUSED: you are running INSIDE job %s (pid %s is this process or an ancestor) "
+            "— cancelling it would kill this very command.\n" % (job_id, pid))
+        sys.exit(3)
+    logfile = o.get("logfile", "")
+    targets = _job_pids(pid, logfile)
+    if targets:
+        print("killing %s: %d live process(es) %s" % (job_id, len(targets), targets))
+        survivors = _kill_tree(pid, logfile, grace)
+        if survivors:
+            sys.stderr.write(
+                "REFUSED to stamp cancelled: %d process(es) SURVIVED SIGTERM+SIGKILL: %s.\n"
+                "  The job record is left at status=running ON PURPOSE — a live writer must "
+                "never be reported as stopped.\n" % (len(survivors), survivors))
+            sys.exit(4)
+        note = "cancelled by operator: %d process(es) killed and verified dead" % len(targets)
+    else:
+        note = ("cancelled by operator: no live process found (recorded pid %s dead, nothing "
+                "holding the job's logfile) — dispatcher died without a terminal status" % pid)
+    print(note)
+    cmd_job_set([jobs_dir, job_id, "status=cancelled", "ended_at=%d" % now_epoch(),
+                 "exit_code=130", "result_summary=" + note])
+    # watchdog's per-job OVERDUE debounce marker is dead weight once the record is closed
+    om = os.path.join(os.path.dirname(jobs_dir.rstrip("/")), "..", "state", "overdue", job_id)
+    try:
+        os.remove(os.path.normpath(om))
+    except Exception:
+        pass
 
 
 def cmd_job_list(a):
@@ -1017,7 +1315,8 @@ CMDS = {"event": cmd_event, "heartbeat": cmd_heartbeat, "recent": cmd_recent,
         "format-events": cmd_format_events, "fleet-status": cmd_fleet_status,
         "cursor-advance": cmd_cursor_advance,
         "job-set": cmd_job_set, "job-list": cmd_job_list, "job-get": cmd_job_get,
-        "job-reap": cmd_job_reap,
+        "job-reap": cmd_job_reap, "job-cancel": cmd_job_cancel,
+        "job-find-dup": cmd_job_find_dup,
         "job-field": cmd_job_field, "job-hb-age": cmd_job_hb_age,
         "circuit-check": cmd_circuit_check, "circuit-record": cmd_circuit_record,
         "pending-resume-set": cmd_pending_resume_set,

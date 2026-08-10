@@ -13,6 +13,14 @@
 #   jobs.sh reap [grace_sec] [--dry-run]   close records stuck at status=running whose
 #                                     dispatcher died (deadline + grace passed AND pid
 #                                     dead/absent) -> status=orphaned. Default grace 3600s.
+#   jobs.sh cancel <job_id> [grace_sec]    STOP a running job for real: kill its whole
+#                                     process tree, VERIFY it is dead, then stamp
+#                                     status=cancelled. Use this instead of
+#                                     `kill <pid>` + `job-set status=failed` — that
+#                                     improvisation killed only the wrapper and left the
+#                                     agent editing files while the board said "failed"
+#                                     (incident 2026-08-09, 3rd duplicate-dispatch
+#                                     collision, that one on executor.py).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -27,6 +35,13 @@ case "$cmd" in
   reap)
     # Close records left status=running by a dispatcher that died (see job-reap docstring).
     MJ job-reap "$JOBS_DIR" "${2:-3600}" ${3:-}
+    ;;
+  cancel)
+    # The missing primitive (added 2026-08-10). Everything that makes it safe — tree kill,
+    # death verification, refusing to stamp a status it cannot back up — lives in
+    # mike_json.py job-cancel; this is just the front door.
+    job_id="${2:?usage: jobs.sh cancel <job_id> [grace_sec]}"
+    MJ job-cancel "$JOBS_DIR" "$job_id" ${3:-}
     ;;
   status)
     job_id="${2:?usage: jobs.sh status <job_id>}"
@@ -56,7 +71,7 @@ case "$cmd" in
     done
     ;;
   *)
-    echo "usage: jobs.sh {list [limit] | status <job_id> | wait <job_id> [--timeout SEC] | reap [grace_sec] [--dry-run]}" >&2
+    echo "usage: jobs.sh {list [limit] | status <job_id> | wait <job_id> [--timeout SEC] | cancel <job_id> [grace_sec] | reap [grace_sec] [--dry-run]}" >&2
     exit 2
     ;;
 esac

@@ -163,7 +163,11 @@ print(d.get('status','?'), d.get('deadline',0), d.get('to','?'),
     echo ""
     echo "[CẢNH BÁO — JOB BOARD CÓ TÁC VỤ QUÁ HẠN (thuộc ĐÚNG topic này) — xử lý trước khi nhận việc mới:]"
     printf '%b' "$overdue_out"
-    echo "Kiểm tra: bin/jobs.sh list | Đánh xong: python3 bin/mike_json.py job-set bus/jobs <id> status=done"
+    # "Quá hạn" KHÔNG có nghĩa là chết — deadline hết ≠ process chết. Xem HB_AGE trước
+    # (bin/jobs.sh status), và nếu muốn DỪNG thì dùng `cancel` (giết cả cây tiến trình rồi
+    # mới đóng record) chứ ĐỪNG stamp status bằng tay: đúng thói quen đó gây sự cố
+    # 2026-08-09 (board báo failed trong khi agent vẫn đang sửa executor.py 33 phút nữa).
+    echo "Xem đã: bin/jobs.sh status <id> (cột HB_AGE = tín hiệu sống thật) | Dừng hẳn: bin/jobs.sh cancel <id> | Đã xong thật: bin/mike_json.py job-set bus/jobs <id> status=done"
   fi
   if [ "$other_n" -gt 0 ]; then
     echo ""

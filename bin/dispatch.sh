@@ -949,12 +949,29 @@ fi
 # (`notify_thread.sh "<msg>"` không đối số 2) lại rơi vào topic Mike đang chat — đúng lớp lỗi
 # 07-22b (record và env của agent bất đồng). Pin rỗng phải rỗng ở CẢ HAI phía.
 if [ -n "$_dtid0" ]; then export DISCORD_THREAD_ID="$_dtid0"; else export DISCORD_THREAD_ID=""; fi
+_psum="$(printf '%s' "$prompt" | head -c 160 | tr '\n\t' '  ')"
+
+# Cảnh báo TRÙNG DISPATCH (2026-08-10) — CHỈ cảnh báo, KHÔNG chặn.
+# Dấu hiệu quan sát được của pattern "2 dispatch cùng sửa 1 file": 2/3 lần va chạm
+# (08-09 sáng filter_lag_entry_window.py, 08-09 chiều executor.py) là cùng agent + prompt
+# NGUYÊN VĂN, cách nhau 77s/59s. job-find-dup chỉ khớp khi job cũ còn status=running VÀ pid
+# CÒN SỐNG THẬT — không phải chỉ đọc cờ trạng thái, vì chính cái cờ đó mới là thứ nói dối
+# hôm 08-09. Không chặn: chạy lại có chủ đích là hợp lệ; khoá cứng theo file bất khả thi ở
+# đây (đường dẫn agent sẽ sửa chưa tồn tại lúc dispatch). Tuyệt đối non-fatal.
+_dup="$(python3 "$ROOT/bin/mike_json.py" job-find-dup "$JOBS_DIR" "$id" "$_psum" 2>/dev/null || true)"
+if [ -n "${_dup:-}" ]; then
+  echo "⚠️ TRÙNG DISPATCH? $id đang chạy THẬT (pid còn sống) một job có prompt y hệt:" >&2
+  printf '     %s\n' "$_dup" >&2
+  echo "   Kiểm tra trước: $ROOT/bin/jobs.sh status <job_id> (cột HB_AGE = tín hiệu sống đúng)." >&2
+  echo "   Muốn THAY job cũ: $ROOT/bin/jobs.sh cancel <job_id> — đừng dispatch chồng lên nó." >&2
+fi
+
 JSET job_id="$job_id" from="$from" to="$id" status=running attempt=1 \
      max_attempts=$((RETRIES + 1)) started_at="$_start_ts" \
      deadline=$((_start_ts + TIMEOUT)) logfile="$logfile" discord_thread_id="$_dtid0" \
      model="${MODEL:-default}" effort="$EFFORT" \
      provider="$PROVIDER" turn_cap="$([ "$CLI_SUPPORTS_TURNS" = "true" ] && echo "$MAX_TURNS" || echo unsupported)" \
-     prompt_summary="$(printf '%s' "$prompt" | head -c 160 | tr '\n\t' '  ')"
+     prompt_summary="$_psum"
 
 if [ "$bg" = "--bg" ]; then
   # Background wrapper: run agent (with timeout + retry) → consolidate → notify
