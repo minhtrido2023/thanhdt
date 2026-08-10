@@ -293,7 +293,9 @@ def dnse_close_prices(tickers, with_source=False):
     CHƯA điều chỉnh, trong khi `openQuantity` của broker thì ĐÃ điều chỉnh. Nhân giá cũ với
     số lượng mới = thổi phồng NAV. Ca thật MBB 2026-08-11 (cổ tức CP 15% + quyền mua 10:1
     giá 10.000đ): G1 close 24.250 (phiên 08-10) vs giá tham chiếu thật hôm nay 20.200 ⇒
-    SpaceX +5.013.250đ ≈ +0,5% NAV, user bắt được bằng ảnh chụp app.
+    riêng MBB thổi phồng (24.250−20.200) × 1.265 = **+5.123.250đ**; cộng SCL (+150.000) và
+    TV1 (−40.000) ra khoảng lệch TỔNG **+5.013.250đ** ≈ +0,5% NAV mà user bắt được bằng ảnh
+    chụp app. (Hai con số khác nhau và đều đúng — đừng lẫn: 5.123.250 là của riêng MBB.)
 
     Vì vậy: nếu giá G1 KHÔNG PHẢI của phiên hôm nay, giải giá THUỘC PHIÊN HÔM NAY qua
     `_today_session_price()`. Đây là lời giải TỔNG QUÁT: nó không cần biết mã nào có sự
