@@ -189,8 +189,10 @@ def resolve_prices(tickers, asof):
     if asof is None or asof == today:
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         from verify_account_snapshot import dnse_close_prices
-        prices = dnse_close_prices(tickers)
-        price_source = {tk: "dnse_g1" for tk in prices}
+        # with_source=True: mã đang GDKHQ được lấy giá tham chiếu phiên hôm nay
+        # (secdef.basicPrice) thay vì giá đóng cửa phiên trước — provenance phải nói đúng
+        # nguồn nào, đừng khai tất cả là 'dnse_g1' (xem docstring dnse_close_prices).
+        prices, price_source = dnse_close_prices(tickers, with_source=True)
         missing = [t for t in tickers if t not in prices]
         if missing:
             bq_px, err = bq_close_prices(missing)

@@ -87,15 +87,53 @@ check("lô mua 08-05 (trước ex) ×2", b.lots[0]["qty"] == 200, b.lots[0]["qty
 check("lô mua ĐÚNG ngày ex 08-06 KHÔNG nhân", b.lots[1]["qty"] == 100, b.lots[1]["qty"])
 check("lô mua sau ex 08-07 KHÔNG nhân", b.lots[2]["qty"] == 100, b.lots[2]["qty"])
 
-# ── 3. Fail-closed với lô lẻ — thà chặn còn hơn làm tròn rồi lệch 1-2cp không truy được ─────
-print("\n[3] lô lẻ ⇒ KHÔNG áp gì + UNVERIFIED (§5 fail-safe)")
-b = book_with([("ABC", "PARK", 151, 10000.0, "2026-01-01"),
-               ("ABC", "PARK", 100, 10000.0, "2026-01-02")])
-n = b.corp_action_split("ABC", 1.5, "2026-08-06", "2026-08-05T12:00:00", "test", "T-ABC")
-check("trả 0 lô điều chỉnh", n == 0, n)
-check("KHÔNG lô nào bị đổi (kể cả lô chia chẵn được)",
-      [l["qty"] for l in b.lots] == [151, 100], [l["qty"] for l in b.lots])
-check("ticker bị gắn cờ UNVERIFIED", "ABC" in b.unverified, b.unverified)
+# ── 3. Tỉ lệ KHÔNG chia hết ⇒ làm tròn Ở MỨC VỊ THẾ (đúng chỗ broker làm tròn) ──────────────
+# Đổi hành vi 2026-08-11 (job Taylor_20260810_183618): bản cũ fail-closed mọi lô lẻ. Ca THẬT
+# MBB cổ tức CP 15% cho thấy fail-closed ở đây là SAI CHỖ — broker không làm tròn từng lô, nó
+# làm tròn XUỐNG một lần trên tổng vị thế. Cái fail-closed thật sự bảo vệ ta là cổng
+# `_status: CONFIRMED` + cổng đối soát Σ lô == openQuantity, không phải phép chia.
+print("\n[3] tỉ lệ không chia hết ⇒ làm tròn XUỐNG ở MỨC VỊ THẾ + Hamilton chia phần dôi")
+b = book_with([("MBB", "PARK", 100, 24700.0, "2026-07-10"),
+               ("MBB", "PARK", 102, 23597.06, "2026-07-20")])
+cost_before = sum(l["qty"] * l["price"] for l in b.lots)
+n = b.corp_action_split("MBB", 1.15, "2026-08-11", "2026-08-10T19:32:49", "test", "T-MBB")
+qtys = [l["qty"] for l in b.lots]
+check("ca THẬT ZaloPay 100+102 ×1,15: cả 2 lô được điều chỉnh", n == 2, n)
+check("tổng 202 → 232 = floor(232,3) — KHỚP openQuantity broker thật",
+      sum(qtys) == 232, f"{qtys} = {sum(qtys)}")
+check("chia lô: 100→115 (quyền 15,0 chẵn), 102→117 (quyền 15,3 làm tròn xuống)",
+      qtys == [115, 117], qtys)
+check("tổng giá vốn bất biến dù hệ số hiệu dụng 232/202 ≠ 1,15",
+      abs(cost_before - sum(l["qty"] * l["price"] for l in b.lots)) < 1e-6,
+      f"{cost_before} → {sum(l['qty'] * l['price'] for l in b.lots)}")
+check("KHÔNG gắn UNVERIFIED (làm tròn đúng chỗ ≠ nghi vấn)", not b.unverified, b.unverified)
+check("mọi qty vẫn là int", all(isinstance(l["qty"], int) for l in b.lots), qtys)
+
+# Ca SpaceX cùng sự kiện, chia hết — phải ra đúng số broker 1.265 và không đụng Hamilton.
+b = book_with([("MBB", "PARK", 1100, 25850.0, "2026-07-02")])
+b.corp_action_split("MBB", 1.15, "2026-08-11", "2026-08-10T19:32:49", "test", "T-MBB")
+check("ca THẬT SpaceX 1.100 ×1,15 → 1.265 (float 1265,0000000000002 KHÔNG được floor thành 1264)",
+      b.lots[0]["qty"] == 1265, b.lots[0]["qty"])
+
+# Hamilton phải chia phần dôi, không phải bỏ rơi: 3 lô 101cp ×1,5 ⇒ tổng 303→454 (floor 454,5),
+# quyền chính xác mỗi lô 50,5 ⇒ mỗi lô +50, còn dôi 1cp về lô đầu tiên (tie → thứ tự sổ).
+b = book_with([("ABC", "PARK", 101, 10000.0, "2026-01-01"),
+               ("ABC", "PARK", 101, 10000.0, "2026-01-02"),
+               ("ABC", "PARK", 101, 10000.0, "2026-01-03")])
+b.corp_action_split("ABC", 1.5, "2026-08-06", "2026-08-05T12:00:00", "test", "T-ABC")
+qtys = [l["qty"] for l in b.lots]
+check("Hamilton: tổng 303 → 454 = floor(454,5)", sum(qtys) == 454, f"{qtys} = {sum(qtys)}")
+check("Hamilton: phần dôi 1cp về lô ĐẦU (tie-break tất định theo thứ tự sổ)",
+      qtys == [152, 151, 151], qtys)
+
+# Quyền làm tròn xuống còn 0 ⇒ no-op có cảnh báo, KHÔNG phải UNVERIFIED (vị thế quá nhỏ là
+# chuyện bình thường, không phải dấu hiệu kế toán sai).
+b = book_with([("ABC", "PARK", 3, 10000.0, "2026-01-01")])
+n = b.corp_action_split("ABC", 1.15, "2026-08-06", "2026-08-05T12:00:00", "test", "T-ABC")
+check("vị thế 3cp ×1,15 → quyền 0,45 làm tròn xuống 0 ⇒ no-op",
+      n == 0 and b.lots[0]["qty"] == 3, (n, b.lots[0]["qty"]))
+check("  …có cảnh báo, KHÔNG gắn UNVERIFIED",
+      len(b.warnings) == 1 and not b.unverified, (b.warnings, b.unverified))
 
 # ── 4. Không giữ mã / không lô nào hưởng quyền ──────────────────────────────────────────────
 print("\n[4] no-op an toàn")
@@ -302,6 +340,15 @@ finally:
 # ── 10. Sổ THẬT đang chạy production ────────────────────────────────────────────────────────
 print("\n[10] data/corp_actions.json thật")
 real = CA.load_all()
+
+
+def _raw_by_id():
+    """Record THÔ theo id — `validate()` không giữ `decided_by` nên phải đọc lại file gốc.
+    Tra theo ID chứ không theo chỉ số mảng: thêm record mới ở đầu file sẽ làm lệch chỉ số."""
+    blob = json.load(open(CA.REGISTRY, encoding="utf-8"))
+    return {r.get("id"): r for r in (blob.get("actions") or [])}
+
+
 check("mọi record thật hợp lệ (validate không ném)", True)
 vhm = [a for a in real if a["ticker"] == "VHM" and a["ex_date"] == "2026-08-06"]
 check("có đúng 1 record VHM ex 2026-08-06", len(vhm) == 1, len(vhm))
@@ -313,7 +360,19 @@ if vhm:
     check("  đã CONFIRMED ⇒ đang áp vào sổ live", a["_status"].upper().startswith("CONFIRMED"))
     check("  có ≥2 nguồn bằng chứng độc lập", len(a["evidence"]) >= 2, len(a["evidence"]))
     check("  ghi rõ decided_by (§20 — user đã ký duyệt chính thức 2026-08-05, xem _status)",
-          json.load(open(CA.REGISTRY, encoding="utf-8"))["actions"][0].get("decided_by") == "user")
+          _raw_by_id().get("VHM-2026-08-06-STOCK-DIVIDEND", {}).get("decided_by") == "user")
+
+# Bất biến áp cho MỌI record đang ÁP VÀO SỔ LIVE — viết theo bất biến chứ không theo danh sách
+# mã cụ thể (§23 hệ luận 1: assert lên giá trị sống thì test tự mốc). Thêm record mới mà thiếu
+# bằng chứng/ghi công là fail ngay tại đây, không cần ai nhớ sửa test.
+for a in CA.load_corp_actions():
+    raw = _raw_by_id().get(a["id"], {})
+    check(f"  [{a['id']}] có ≥2 nguồn bằng chứng độc lập", len(a["evidence"]) >= 2,
+          len(a["evidence"]))
+    check(f"  [{a['id']}] khai decided_by (§20: 'user' chỉ khi user THẬT ký, không thì 'agent')",
+          raw.get("decided_by") in ("user", "agent"), raw.get("decided_by"))
+    check(f"  [{a['id']}] hệ số > 1 và ≤ 10 (chặn lỗi gõ nhầm thang, vd 15 thay vì 1,15)",
+          1.0 < a["qty_multiplier"] <= 10.0, a["qty_multiplier"])
 
 print(f"\n{'=' * 70}\nKẾT QUẢ: {len(PASS)} PASS / {len(FAIL)} FAIL")
 if FAIL:

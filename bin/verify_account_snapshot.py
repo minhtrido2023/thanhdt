@@ -275,8 +275,8 @@ def bq_close_prices(tickers, as_of_date):
     return {r["ticker"]: float(r["Close"]) for r in rows}, None
 
 
-def dnse_close_prices(tickers):
-    """Giá khớp ATC thật trong ngày qua API DNSE (boardId=G1, đơn vị nghìn đồng).
+def dnse_close_prices(tickers, with_source=False):
+    """Giá tham chiếu ĐÚNG PHIÊN của từng mã qua API DNSE (đơn vị nghìn đồng → VND).
 
     Chỉ dùng khi --asof LÀ HÔM NAY: BQ tav2_bq.ticker chỉ sync đêm (23:45 ICT) nên
     khi eod_trading_report.sh chạy 15:00 ICT cùng ngày, BQ CHƯA CÓ giá đóng cửa hôm
@@ -285,11 +285,35 @@ def dnse_close_prices(tickers):
     khi user đối chiếu bảng giá với app thật — field positions().marketPrice CŨNG sai
     (không phải giá ATC) nên không dùng; verify_finding: close_price()/latest_trade()
     boardId=G1 khớp 100% với nhau và khớp chính xác tới đồng với ảnh chụp app DNSE.
+
+    ⚠️ CÁI BẪY THỨ HAI, NGƯỢC CHIỀU CÁI TRÊN (vá 2026-08-11, job Taylor_20260810_183618):
+    `close_price` G1 là giá đóng cửa của PHIÊN GẦN NHẤT ĐÃ XONG. Khi hàm này chạy TRƯỚC
+    khi phiên hôm nay đóng (tiền phiên 01:30, hay trong phiên 10:00), giá đó thuộc phiên
+    TRƯỚC — và với một mã đang GIAO DỊCH KHÔNG HƯỞNG QUYỀN hôm nay, giá phiên trước là giá
+    CHƯA điều chỉnh, trong khi `openQuantity` của broker thì ĐÃ điều chỉnh. Nhân giá cũ với
+    số lượng mới = thổi phồng NAV. Ca thật MBB 2026-08-11 (cổ tức CP 15% + quyền mua 10:1
+    giá 10.000đ): G1 close 24.250 (phiên 08-10) vs giá tham chiếu thật hôm nay 20.200 ⇒
+    SpaceX +5.013.250đ ≈ +0,5% NAV, user bắt được bằng ảnh chụp app.
+
+    Vì vậy: nếu giá G1 KHÔNG PHẢI của phiên hôm nay, lấy `secdef.basicPrice` — GIÁ THAM
+    CHIẾU CHÍNH THỨC CỦA SÀN cho phiên hiện tại, đã bao gồm mọi điều chỉnh corp action, và
+    là con số app DNSE hiển thị. Đây là lời giải TỔNG QUÁT: nó không cần biết mã nào có sự
+    kiện gì, chỉ cần biết "giá đang cầm thuộc phiên nào". Nó cũng vá luôn UPCOM, nơi giá
+    tham chiếu = giá BÌNH QUÂN phiên trước chứ không phải giá đóng cửa (TV1 08-11: close
+    19.800 nhưng basicPrice 19.700 — app DNSE hiện 19.700).
+
+    KHÔNG đổi hành vi ở đường chạy chính EOD (17:30) / báo cáo 15:00: lúc đó G1 close ĐÃ
+    thuộc phiên hôm nay ⇒ nhánh mới không kích hoạt, giá vẫn là giá ATC thật như cũ.
+
+    `with_source=True` ⇒ trả (prices, sources) với sources[tk] ∈ {'dnse_g1_today',
+    'dnse_secdef_basic'} để consumer ghi provenance trung thực thay vì khai khống 'dnse_g1'.
     """
     sys.path.insert(0, WC_ROOT)
     from trading_bot.brokers import get_dnse_client
     client = get_dnse_client()
-    prices = {}
+    from zoneinfo import ZoneInfo
+    today = _dt.datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).date().isoformat()   # §16
+    prices, sources, substituted = {}, {}, []
     for tk in tickers:
         try:
             r = client.close_price(tk)
@@ -298,9 +322,40 @@ def dnse_close_prices(tickers):
         entries = (r or {}).get("prices") or []
         g1 = next((e for e in entries
                    if e.get("boardId") == "G1" and e.get("closePrice")), None)
-        if g1:
-            prices[tk] = float(g1["closePrice"]) * 1000
-    return prices
+        if not g1:
+            continue
+        px, src = float(g1["closePrice"]) * 1000, "dnse_g1_today"
+        # `time` dạng "2026-08-10 14:45:03.261" (giờ ICT của sàn). Thiếu/không parse được ⇒
+        # GIỮ giá G1 (fail-safe về hành vi cũ, đã chạy đúng suốt), không đoán sang nhánh mới.
+        g1_day = str(g1.get("time") or "")[:10].replace("/", "-")
+        if g1_day and g1_day < today:
+            basic = _secdef_basic_price(client, tk)
+            if basic and basic > 0:
+                if abs(basic - px) > 0.5:
+                    substituted.append(f"{tk} {px:,.0f}→{basic:,.0f} (G1 close phiên {g1_day})")
+                px, src = basic, "dnse_secdef_basic"
+        prices[tk], sources[tk] = px, src
+    if substituted:
+        print(f"ℹ️ giá tham chiếu phiên HÔM NAY (secdef.basicPrice) thay cho giá đóng cửa phiên "
+              f"trước — thường là mã đang giao dịch không hưởng quyền: {'; '.join(substituted)}",
+              file=sys.stderr)
+    return (prices, sources) if with_source else prices
+
+
+def _secdef_basic_price(client, ticker):
+    """`basicPrice` (nghìn đồng → VND) từ secdef — giá tham chiếu sàn công bố cho phiên hiện
+    tại. Mọi boardId trả CÙNG một giá trị (kiểm 2026-08-11: MBB 7/7 board đều 20,2) nên ưu
+    tiên G1 rồi lấy bất kỳ entry nào có số dương. Lỗi mạng/thiếu trường ⇒ None để caller giữ
+    giá G1 cũ; hàm này chỉ được phép LÀM TỐT HƠN, không được phép làm hỏng đường đang chạy."""
+    try:
+        sd = client.secdef(ticker)
+    except Exception:
+        return None
+    entries = [e for e in (sd or []) if isinstance(e, dict) and (e.get("basicPrice") or 0) > 0]
+    if not entries:
+        return None
+    g1 = next((e for e in entries if e.get("boardId") == "G1"), entries[0])
+    return float(g1["basicPrice"]) * 1000
 
 
 def pnl_coverage_warnings(covered_tickers, live_positions):

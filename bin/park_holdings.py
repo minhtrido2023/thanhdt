@@ -44,6 +44,7 @@ import csv
 import datetime as dt
 import glob
 import json
+import math
 import os
 import re
 import sys
@@ -345,10 +346,21 @@ class LotBook:
         quyền ⇒ KHÔNG nhân. Đây là lý do `ex_date` phải tách khỏi `effective_ts` (ngày broker
         thật sự đổi số dư) — ca VHM 2026-08 hai ngày này lệch nhau đúng một phiên.
 
-        FAIL-CLOSED VỚI LÔ LẺ: nếu bất kỳ lô nào cho ra số không nguyên (vd tỉ lệ 1,5 trên lô
-        151cp), KHÔNG áp gì cả cho mã đó + gắn cờ UNVERIFIED. Làm tròn từng lô rồi cộng lại KHÁC
-        làm tròn ở mức vị thế (chỗ broker làm tròn và trả tiền phần lẻ), nên "đoán rồi gộp" ở đây
-        sẽ đẻ ra lệch 1-2cp không ai truy được — thà chặn và để người xử lý (§5).
+        LÀM TRÒN Ở MỨC VỊ THẾ, KHÔNG PHẢI MỨC LÔ. Tỉ lệ hiếm khi chia hết cho từng lô: ca MBB
+        2026-08-11 (cổ tức CP 15%) ZaloPay giữ 202cp qua 2 lô 100+102 — 100×1,15=115 nguyên
+        nhưng 102×1,15=117,3 thì không. Broker KHÔNG làm tròn từng lô: nó tính quyền trên TỔNG
+        vị thế rồi làm tròn XUỐNG một lần (202×1,15=232,3 → 232), phần lẻ trả tiền/bỏ. Vì vậy
+        ở đây cũng làm tròn đúng một lần trên tổng, rồi chia phần dôi về từng lô bằng
+        largest-remainder (Hamilton) — tie-break theo thứ tự lô trong sổ nên hoàn toàn tất định.
+        Giá vốn mỗi lô đặt lại = (tổng giá vốn CŨ của lô) / (qty MỚI của lô) ⇒ tổng giá vốn bất
+        biến ở CẢ mức lô lẫn mức vị thế, kể cả khi hệ số hiệu dụng ≠ multiplier khai báo (MBB
+        ZaloPay: 232/202 = 1,14851 chứ không phải 1,15 — và broker cũng hạ costPrice theo đúng
+        1,14851, đã đối chiếu khớp tới đồng).
+
+        ĐÂY KHÔNG PHẢI "ĐOÁN RỒI GỘP" (§5): quy tắc làm tròn nằm sai chỗ sẽ lộ ra NGAY ở cổng
+        đối soát bên dưới (Σ lô phải bằng `openQuantity` broker) — sai thì BLOCKED chứ không
+        lặng lẽ trôi. Cái phải fail-closed là "sự kiện có thật không" (cổng `_status: CONFIRMED`
+        + ≥2 nguồn độc lập trong `corp_actions.json`), không phải phép chia.
         """
         pool = [l for l in self.lots if l["ticker"] == ticker]
         if not pool:
@@ -360,21 +372,44 @@ class LotBook:
                 f"{ticker} nhưng KHÔNG lô nào có entry_date < ex_date {ex_date} ⇒ không hưởng "
                 f"quyền, sổ giữ nguyên")
             return 0
-        bad = [l for l in entitled if abs(l["qty"] * multiplier - round(l["qty"] * multiplier)) > 1e-9]
-        if bad:
+
+        old_total = sum(l["qty"] for l in entitled)
+        # +1e-9 chống hụt một đơn vị do sai số nhị phân (1100×1,15 ra 1265,0000000000002 nhưng
+        # 202×1,15 ra 232,29999999999998 — không cộng epsilon thì có ca floor xuống 1264).
+        new_total = int(math.floor(old_total * multiplier + 1e-9))
+        extra = new_total - old_total
+        if extra <= 0:
+            self.warnings.append(
+                f"{effective_ts[:10]} corp action {event_id or ticker} ×{multiplier}: vị thế "
+                f"{old_total}cp quá nhỏ, quyền làm tròn xuống còn 0cp ⇒ sổ giữ nguyên")
+            return 0
+
+        # Hamilton: mỗi lô nhận phần nguyên của quyền chính xác, phần dôi do làm tròn xuống ở
+        # mức vị thế chia tiếp cho các lô có phần lẻ lớn nhất.
+        raw = [l["qty"] * (multiplier - 1.0) for l in entitled]
+        add = [int(math.floor(r + 1e-9)) for r in raw]
+        rem = extra - sum(add)
+        if rem < 0 or rem > len(entitled):
             self.unverified.add(ticker)
             self.warnings.append(
-                f"{effective_ts[:10]} corp action {event_id or ticker} ×{multiplier} sinh lô LẺ "
-                f"({[l['qty'] for l in bad]}) ⇒ KHÔNG áp dụng, {ticker} gắn cờ UNVERIFIED — "
-                f"tỉ lệ lẻ cần người xử lý phần cổ phiếu lẻ trước")
+                f"{effective_ts[:10]} corp action {event_id or ticker} ×{multiplier}: chia phần "
+                f"dôi ra số vô lý (rem={rem}, {len(entitled)} lô) ⇒ KHÔNG áp dụng, {ticker} "
+                f"UNVERIFIED — cần người xử lý")
             return 0
-        for l in entitled:
-            l["qty"] = int(round(l["qty"] * multiplier))
-            l["price"] = float(l["price"]) / multiplier
+        order = sorted(range(len(entitled)), key=lambda i: (-(raw[i] - add[i]), i))
+        for i in order[:rem]:
+            add[i] += 1
+
+        for l, a in zip(entitled, add):
+            cost = l["qty"] * float(l["price"])         # tổng giá vốn lô — BẤT BIẾN qua sự kiện
+            l["qty"] = l["qty"] + a
+            l["price"] = cost / l["qty"] if l["qty"] else 0.0
             l["corp_actions"] = l.get("corp_actions", []) + [event_id or f"{ticker}×{multiplier}"]
+        eff = new_total / old_total
         self.warnings.append(
             f"{effective_ts[:10]} corp action {event_id or ticker} ×{multiplier} (ex {ex_date}, "
-            f"{source}): {len(entitled)} lô {ticker} nhân qty / chia giá vốn — tổng giá vốn không đổi")
+            f"{source}): {len(entitled)} lô {ticker} {old_total}→{new_total}cp (hệ số hiệu dụng "
+            f"{eff:.6f} sau làm tròn mức vị thế) — tổng giá vốn không đổi")
         return len(entitled)
 
     def by_ticker_qty(self):
