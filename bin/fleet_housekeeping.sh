@@ -154,6 +154,13 @@ if want pid; then
   hdr "pid — logs/.dispatch_*.pid >1d (0 reader: chỉ dispatch.sh:753 GHI, không ai ĐỌC)"
   while IFS= read -r f; do do_delete "$f" "pid không ai đọc"; done \
     < <(find "$ROOT/logs" -maxdepth 1 -name '.dispatch_*.pid' -type f -mtime +1 2>/dev/null)
+  # *.workerpid: _hb_aware_timeout ghi pid của worker để _sync_killed_guard giết được nó
+  # trước khi đóng record. Nó TỰ xoá ở cả hai đường thoát bình thường, nên file còn sót >1d
+  # nghĩa là dispatch.sh bị SIGKILL (không trap được) — rác, và là rác NGUY HIỂM nếu để lâu
+  # vì pid trong đó có thể đã được kernel cấp lại cho tiến trình khác.
+  hdr "workerpid — logs/*.workerpid >1d (chỉ sót khi dispatch.sh bị SIGKILL)"
+  while IFS= read -r f; do do_delete "$f" "workerpid mồ côi (pid có thể đã bị cấp lại)"; done \
+    < <(find "$ROOT/logs" -maxdepth 1 -name '*.workerpid' -type f -mtime +1 2>/dev/null)
 fi
 
 # ── 2. empty — file 0 byte, CÓ GUARD BẰNG-CHỨNG-DUY-NHẤT ─────────────────────

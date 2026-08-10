@@ -150,20 +150,30 @@ def spawn_sync_worker(logfile, jobs_dir, job_id):
     The dispatcher then sits in a command loop so that a later case can make it close its
     own record from INSIDE its own process tree (see sync_self_close)."""
     pidf, cmdf, rcf, outf = (logfile + s for s in (".workerpid", ".cmd", ".setrc", ".setout"))
+    # `nest` forks one extra real process per level (no `exec` — that would reuse the pid and
+    # add no depth), so a case can ask how far inside the dispatcher tree the grant reaches.
+    nestf = logfile + ".nest"
+    with open(nestf, "w", encoding="utf-8") as f:
+        f.write("#!/usr/bin/env bash\n"
+                "d=\"$1\"; shift\n"
+                "if [ \"$d\" -le 0 ]; then python3 %s job-set %s %s \"$@\"; exit $?; fi\n"
+                "bash %s $((d - 1)) \"$@\"\n"
+                % (shlex.quote(MJ), shlex.quote(jobs_dir), shlex.quote(job_id),
+                   shlex.quote(nestf)))
     script = """
 { setsid sleep 300 2>%(err)s & echo $! > %(pidf)s; sleep 300; } | tee %(log)s >/dev/null &
 while :; do
   if [ -s %(cmdf)s ]; then
-    _claim="$(head -1 %(cmdf)s)"; _args="$(tail -1 %(cmdf)s)"; rm -f %(cmdf)s
-    MIKE_JOB_OWNER="$_claim" python3 %(mj)s job-set %(jobs)s %(job)s $_args >%(outf)s 2>&1
+    _claim="$(sed -n 1p %(cmdf)s)"; _args="$(sed -n 2p %(cmdf)s)"
+    _nest="$(sed -n 3p %(cmdf)s)"; rm -f %(cmdf)s
+    MIKE_JOB_OWNER="$_claim" bash %(nestf)s "$_nest" $_args >%(outf)s 2>&1
     echo $? > %(rcf)s
   fi
   sleep 0.1
 done
 """ % dict(err=shlex.quote(logfile + ".err"), pidf=shlex.quote(pidf),
            log=shlex.quote(logfile), cmdf=shlex.quote(cmdf), rcf=shlex.quote(rcf),
-           outf=shlex.quote(outf), mj=shlex.quote(MJ), jobs=shlex.quote(jobs_dir),
-           job=shlex.quote(job_id))
+           outf=shlex.quote(outf), nestf=shlex.quote(nestf))
     p = subprocess.Popen(["bash", "-c", script],
                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     SPAWNED.append(p.pid)
@@ -181,7 +191,7 @@ done
     return p.pid, worker
 
 
-def sync_self_close(jobs_dir, job_id, logfile, status, claim=None):
+def sync_self_close(jobs_dir, job_id, logfile, status, claim=None, nest=0):
     """Ask the dispatcher spawned by spawn_sync_worker to close its own record — the write
     then really does come from inside that dispatch.sh's process tree, which is the only
     thing that makes it legitimate. `claim` forges MIKE_JOB_OWNER when it is not job_id."""
@@ -192,7 +202,7 @@ def sync_self_close(jobs_dir, job_id, logfile, status, claim=None):
         except Exception:
             pass
     with open(logfile + ".cmd", "w", encoding="utf-8") as f:
-        f.write("%s\nstatus=%s\n" % (claim or job_id, status))
+        f.write("%s\nstatus=%s\n%d\n" % (claim or job_id, status, nest))
     for _ in range(80):
         try:
             with open(rcf, encoding="utf-8") as f:
@@ -490,12 +500,36 @@ def main():
 
     # ------------------------------------------------- I: cancel never overstates itself
     print("\nI. cancel refuses to stamp anything it cannot back up")
+    # A pid-less SYNC record with nothing of it alive USED to be refused here ("cannot prove
+    # it killed anything"), and that refusal was itself the bug: reap skipped the record as
+    # live and job-set refused to close it, so nothing could ever close it except the --force
+    # write this guard exists to prevent (round 3, O3). The new contract is narrower and
+    # honest — "no pid" is not the question, "is anything of this job alive" is. Nothing
+    # alive: close it and SAY that is why. Something alive: kill, verify, then close (P4).
     log_i = os.path.join(tmp, "i.log")
     make_job(jobs, "J_I", "", log_i)          # sync dispatch — no pid recorded
     rc, out, err = run([sys.executable, MJ, "job-cancel", jobs, "J_I"])
-    check("no pid -> exit 3", rc == 3, "rc=%d" % rc)
-    check("no pid -> record untouched", read_job(jobs, "J_I")["status"] == "running")
-    check("no pid -> says why", "cannot prove" in err, err[:200])
+    check("no pid + nothing alive -> closes the record (exit 0)", rc == 0,
+          "rc=%d %s" % (rc, (out + err)[:220]))
+    check("no pid -> status=cancelled", read_job(jobs, "J_I")["status"] == "cancelled",
+          read_job(jobs, "J_I")["status"])
+    check("no pid -> the summary says it closed a DEAD job, not a killed one",
+          "no live process" in (read_job(jobs, "J_I").get("result_summary") or ""),
+          read_job(jobs, "J_I").get("result_summary"))
+    # ...and it must NOT claim that on a record whose worker is still alive: same shape, one
+    # live process, and the close has to go through kill+verify instead (asserted in P4).
+    log_i0 = os.path.join(tmp, "i0.log")
+    _, work_i0 = spawn_wrapper(log_i0)
+    time.sleep(0.4)
+    make_job(jobs, "J_I0", "", log_i0)        # sync-shaped: no pid, but a live logfile holder
+    check("live sync worker is running", alive(work_i0), "worker=%s" % work_i0)
+    rc, out, err = run([sys.executable, MJ, "job-cancel", jobs, "J_I0", "5"])
+    check("no pid + something ALIVE -> killed and verified, not silently closed", rc == 0,
+          "rc=%d %s" % (rc, (out + err)[:220]))
+    check("that worker is dead", not alive(work_i0), "worker=%s" % work_i0)
+    check("and the summary says it KILLED something",
+          "killed and verified dead" in (read_job(jobs, "J_I0").get("result_summary") or ""),
+          read_job(jobs, "J_I0").get("result_summary"))
 
     make_job(jobs, "J_I2", os.getpid(), log_i)
     rc, out, err = run([sys.executable, MJ, "job-cancel", jobs, "J_I2"])
@@ -775,6 +809,83 @@ def main():
                      env=owner_env("J_N"))
     check("non-closing field update on a live job still allowed", rc == 0, err[:200])
     check("and it actually landed", read_job(jobs, "J_N").get("note") == "progress")
+
+    # ---------------------------------------- P: the EVIDENCE is guarded, not just `status`
+    # Round 3's audit walked past the round-2 fix twice, both times in two commands, both
+    # times rc=0 with the worker alive. Neither needed --force, and neither touched a field
+    # anyone thought of as protected. The guard reads pid/dispatcher_pid/logfile to decide
+    # whether a job is alive; whoever can edit those can decide the answer.
+    print("\nP. editing the liveness EVIDENCE needs the same proof as closing the record")
+
+    # P1 (round 3, O1) — logfile= is the only evidence left once the wrapper is dead, and it
+    # was writable. Point it somewhere empty and the job looks finished.
+    log_p1 = os.path.join(tmp, "p1.log")
+    wrap_p1, work_p1 = spawn_wrapper(log_p1)
+    time.sleep(0.4)
+    make_job(jobs, "J_P1", wrap_p1, log_p1)
+    os.kill(wrap_p1, 9)                                   # the 08-09 `kill <pid>`
+    time.sleep(0.5)
+    check("orphan alive, so a plain stamp is refused", alive(work_p1)
+          and jset(jobs, "J_P1", "status=failed")[0] == 3, "worker=%s" % work_p1)
+    rc, out, err = jset(jobs, "J_P1", "logfile=" + os.path.join(tmp, "nowhere.log"))
+    check("repointing logfile= at an empty path -> REFUSED", rc == 3,
+          "rc=%d %s" % (rc, (out + err)[:220]))
+    check("logfile unchanged", read_job(jobs, "J_P1")["logfile"] == log_p1)
+    rc, _, _ = jset(jobs, "J_P1", "status=failed")
+    check("...so the follow-up stamp is still REFUSED", rc == 3, "rc=%d" % rc)
+    check("record still running", read_job(jobs, "J_P1")["status"] == "running")
+
+    # P2 (round 3, O2) — the same hole on the DEFAULT dispatch mode, and worse: a sync record
+    # has no pid to rewrite, so a plain FIRST write of pid= handed the attacker the guard's
+    # own `_is_self_or_ancestor` short-circuit. This is the live-worker twin of case E, whose
+    # absence was the reason nobody noticed (E runs on a job with no live process at all, so
+    # the guard never engages there).
+    log_p2 = os.path.join(tmp, "p2.log")
+    disp_p2, work_p2 = spawn_sync_worker(log_p2, jobs, "J_P2")
+    make_job(jobs, "J_P2", "", log_p2, dispatcher_pid=disp_p2)
+    check("sync record really has no pid", not read_job(jobs, "J_P2").get("pid"),
+          read_job(jobs, "J_P2").get("pid"))
+    rc, out, err = jset(jobs, "J_P2", "pid=%d" % os.getpid())
+    check("writing your OWN pid onto a live sync record -> REFUSED", rc == 3,
+          "rc=%d %s" % (rc, (out + err)[:220]))
+    check("no pid was written", not read_job(jobs, "J_P2").get("pid"),
+          read_job(jobs, "J_P2").get("pid"))
+    rc, _, _ = jset(jobs, "J_P2", "status=failed")
+    check("...so the follow-up stamp is still REFUSED", rc == 3, "rc=%d" % rc)
+    check("the refusal no longer invites you to supply a pid",
+          "_bg_wrapper" not in jset(jobs, "J_P2", "status=failed")[2], "")
+
+    # P3 — the legitimate late pid= write must survive all of the above: _bg_wrapper stamps
+    # its own pid onto a record that has none, BEFORE it spawns anything. Nothing is alive
+    # yet, so nothing is being asserted over a running worker.
+    log_p3 = os.path.join(tmp, "p3.log")
+    make_job(jobs, "J_P3", "", log_p3, dispatcher_pid=os.getpid())
+    rc, _, err = jset(jobs, "J_P3", "pid=%d" % os.getpid())
+    check("wrapper's late pid= on a record with NO live process still allowed", rc == 0,
+          err[:200])
+    check("and it landed", str(read_job(jobs, "J_P3")["pid"]) == str(os.getpid()))
+
+    # P4 (round 3, O3) — K1 taught job-set to see the sync worker; cancel had to learn it
+    # too, or such a record becomes unclosable by ANY command (cancel refused "no pid", reap
+    # skipped it as live, job-set refused) and the only exit left was the --force write this
+    # guard exists to prevent.
+    print("\nP4. a SYNC job still has a supported kill+verify+close path")
+    rc, out, err = run([sys.executable, MJ, "job-reap", jobs, "0"])
+    check("reap leaves the live sync job alone",
+          read_job(jobs, "J_P2")["status"] == "running", read_job(jobs, "J_P2")["status"])
+    rc, out, err = run([sys.executable, MJ, "job-cancel", jobs, "J_P2", "5"])
+    check("jobs.sh cancel closes a sync job (exit 0)", rc == 0,
+          "rc=%d %s" % (rc, (out + err)[:220]))
+    check("its worker is dead", not alive(work_p2), "worker=%s" % work_p2)
+    check("record cancelled", read_job(jobs, "J_P2")["status"] == "cancelled")
+
+    # P5 (round 3, O5) — the dispatcher grant must not leak DOWNWARD through nested
+    # dispatches. Peer dispatch is routine, so agent B runs inside agent A's dispatcher tree;
+    # B must not be able to close A's live job just by being deep in that tree.
+    rc, out, err = sync_self_close(jobs, "J_N", log_n, "failed", nest=3)
+    check("a process buried deeper in the dispatcher tree -> REFUSED", rc == 3,
+          "rc=%s %s" % (rc, (out + err)[:220]))
+    check("record still running", read_job(jobs, "J_N")["status"] == "running")
 
     # ------------------------------------------------- O: the sync KILL trap (E2E, real script)
     # dispatch.sh's sync path traps TERM so a killed dispatcher does not leave the record at

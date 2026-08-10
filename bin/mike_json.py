@@ -519,6 +519,12 @@ TERMINAL_STATUSES = ("done", "failed", "timeout", "orphaned", "cancelled",
 LIVE_STATUSES = ("running", "retrying", "usage_limited", "provider_fallback",
                  "maxturns_pending")
 
+# The record fields _job_live_pids reads to decide whether a job is still running. Editing
+# any of them edits the evidence, so cmd_job_set demands the same proof for changing one as
+# for closing the record. Keep this list and _job_live_pids in lockstep: adding a new
+# liveness signal without adding it here silently reopens the bypass.
+EVIDENCE_FIELDS = ("pid", "dispatcher_pid", "logfile")
+
 
 def _ppid_of(pid):
     """Parent pid from /proc/<pid>/status, or None if unreadable/gone."""
@@ -532,8 +538,8 @@ def _ppid_of(pid):
     return None
 
 
-def _is_self_or_ancestor(pid):
-    """True if `pid` is THIS process or one of its ancestors.
+def _is_self_or_ancestor(pid, limit=64):
+    """True if `pid` is THIS process or one of its ancestors, within `limit` hops.
 
     Distinguishes the job finalising its OWN record (dispatch.sh's _bg_wrapper runs as
     the recorded pid and JSETs status=done/failed from inside it — mike_json.py is then a
@@ -544,7 +550,7 @@ def _is_self_or_ancestor(pid):
     except Exception:
         return False
     cur = os.getpid()
-    for _ in range(64):
+    for _ in range(limit + 1):
         if cur == pid:
             return True
         if cur <= 1:
@@ -600,20 +606,25 @@ def cmd_job_set(a, internal=False):
     # record that has none yet (`JSET pid="$BASHPID"`, the very first thing the wrapper does)
     # — guarding that would refuse every --bg job its own pid and hang the whole fleet at
     # status=running. There is nothing to protect when no pid is recorded.
-    # `dispatcher_pid` is guarded alongside `pid` — it is an input to the ownership decision
-    # below, so if it could be written on a live job the guard would be a 2-command bypass
-    # again (point it at your own shell, then stamp).
-    # But it is guarded MORE STRICTLY than `pid`, and the difference is the whole point:
-    # `pid` legitimately arrives late (the wrapper stamps its own on a record that has none,
-    # dispatch.sh:988), so only a REWRITE is suspicious there. `dispatcher_pid` is written
-    # exactly once, by dispatch.sh, in the same job-set call that creates the record — there
-    # is no legitimate later first-write. Allowing one would have handed the bypass to every
-    # record already on the board, none of which carries the field yet.
-    repid = ("pid" in fields and obj.get("pid") not in (None, "")
-             and str(fields["pid"]) != str(obj.get("pid")))
-    if ("dispatcher_pid" in fields and obj.get("status") is not None
-            and str(fields["dispatcher_pid"]) != str(obj.get("dispatcher_pid"))):
-        repid = True
+    # EVIDENCE. Every field _job_live_pids reads is evidence, and evidence must not be
+    # editable by the writer whose claim it is about. This is stated over the GROUP, not
+    # over field names, because naming them one at a time is how the same hole kept
+    # reopening: round 2 hardened `pid` (rewrite only), round 3 hardened `dispatcher_pid`,
+    # and round 3's audit then walked through the two that were still unguarded — on the
+    # exact 08-09 record shape, worker alive, both pairs rc=0:
+    #     job-set <id> logfile=/tmp/nowhere.log ; job-set <id> status=failed
+    #     job-set <id> pid=<my own>            ; job-set <id> status=failed
+    # The second one mattered most: it needs no rewrite at all, because a SYNC record never
+    # has a pid to rewrite (JSET pid=$BASHPID lives only in _bg_wrapper) — and sync is the
+    # fleet's DEFAULT mode, 85 of the last 400 records on the live board.
+    # Note this deliberately covers a FIRST write too. dispatch.sh's own late `pid=` stamp
+    # stays legal for the reason that makes it honest: the wrapper writes it before spawning
+    # anything, when the job has no live process yet, so `live` is empty and nothing is being
+    # asserted over a running worker. An attacker's first write always races a live one.
+    exists = obj.get("status") is not None
+    changed_evidence = [k for k in EVIDENCE_FIELDS
+                        if k in fields and str(fields[k]) != str(obj.get(k) or "")]
+    repid = exists and bool(changed_evidence)
     live = []
     guarded = False
     # Precondition is "the record still claims to be live", not "== running": a record in
@@ -638,20 +649,29 @@ def cmd_job_set(a, internal=False):
         if closing:
             what = "stamp status=%s" % new_status
         else:
-            what = "rewrite " + ", ".join(
-                "%s=%s" % (k, fields[k]) for k in ("pid", "dispatcher_pid")
-                if k in fields and str(fields[k]) != str(obj.get(k)))
-        sys.stderr.write(
-            "REFUSED: job %s is still %s and %d process(es) of it are ALIVE right now: %s "
-            "— refusing to %s (that is how the board starts lying; incident 2026-08-09).\n"
+            what = "change the liveness evidence (" + ", ".join(
+                "%s=%s" % (k, fields[k]) for k in changed_evidence) + ")"
+        # The pid note must not point at a pid that is not there: on a SYNC record it used
+        # to read "the recorded pid None is the _bg_wrapper", which reads as an invitation
+        # to supply one — and supplying one WAS the bypass (round 3, O2).
+        pidnote = (
             "  NOTE the recorded pid %s is the _bg_wrapper. Killing it does NOT stop the "
             "worker: the worker runs under setsid, gets reparented to init, and keeps "
             "editing the repo — on 2026-08-09 it did so for 33 more minutes.\n"
+            % obj.get("pid")) if obj.get("pid") else (
+            "  NOTE this record has no pid because it is a SYNC dispatch; the live "
+            "process above was found by the job's own logfile. Writing a pid onto the "
+            "record does not make the worker stop — it only makes the board agree with "
+            "you, which is the failure being prevented.\n")
+        sys.stderr.write(
+            "REFUSED: job %s is still %s and %d process(es) of it are ALIVE right now: %s "
+            "— refusing to %s (that is how the board starts lying; incident 2026-08-09).\n"
+            "%s"
             "  Stop it properly:  bin/jobs.sh cancel %s   (kills the whole tree, VERIFIES "
             "it is dead, then closes the record)\n"
             "  Just checking:     bin/jobs.sh status %s   (HB_AGE is the real liveness "
             "signal — LOG_AGE is useless while a job runs)\n"
-            % (job_id, obj.get("status"), len(live), live, what, obj.get("pid"),
+            % (job_id, obj.get("status"), len(live), live, what, pidnote,
                job_id, job_id))
         sys.exit(3)
     if guarded and force:
@@ -1108,7 +1128,20 @@ def _writer_is_job_dispatcher(job_id, obj):
     dp = obj.get("dispatcher_pid")
     if dp in (None, ""):
         return False
-    return _is_self_or_ancestor(dp)
+    return _is_self_or_ancestor(dp, limit=DISPATCHER_HOP_LIMIT)
+
+
+# How far above the writer dispatch.sh may sit and still be believed to be "me finalising my
+# own dispatch". JSET runs python as a DIRECT child of dispatch.sh (1 hop); inside
+# _hb_aware_timeout it is one hop further because bash runs the left side of the `| tee`
+# pipeline in a subshell (2 hops). 4 is slack for that, not room for a stranger.
+# The bound is what stops the grant from leaking DOWNWARD through nested dispatches: peer
+# dispatch is routine here, so agent B — sync-dispatched by agent A — runs inside A's
+# dispatcher tree and would otherwise be able to stamp A's OWN job failed while A is still
+# working (round 3, O5). From B the walk to dispatch.sh(A) is 5+ hops (B's python, B's
+# shell, B's claude, A's dispatch.sh...), so the bound refuses it while every real
+# dispatch.sh self-write stays inside 2.
+DISPATCHER_HOP_LIMIT = 4
 
 
 def _boot_epoch():
@@ -1180,9 +1213,14 @@ def _pid_owned_by_job(pid, obj):
     return abs(st - started) <= PID_OWNERSHIP_SLACK
 
 
-def _kill_tree(pid, logfile, grace):
-    """SIGTERM everything belonging to the job, wait up to `grace`, SIGKILL what survives.
-    Returns the pids STILL alive afterwards (empty == fully dead).
+def _kill_tree(obj, grace):
+    """SIGTERM everything belonging to the job RECORD, wait up to `grace`, SIGKILL what
+    survives. Returns the pids STILL alive afterwards (empty == fully dead).
+
+    Takes the record, not (pid, logfile), so it uses the SAME liveness definition as the
+    guard — including the `$logfile.err` fd that is the only handle on a sync worker. With
+    the old (pid, logfile) form a sync job could be found alive by job-set and yet be
+    untouchable by cancel, which left it unclosable by any command at all (round 3, O3).
 
     Re-collects before every signal pass: a process spawned between listing and signalling
     would be missed by a single pass, and this must not leave a live writer behind — the
@@ -1190,7 +1228,7 @@ def _kill_tree(pid, logfile, grace):
     still = []
     for sig in (signal.SIGTERM, signal.SIGKILL):
         for _round in (1, 2):
-            for p in reversed(_job_pids(pid, logfile)):   # children first, don't orphan mid-kill
+            for p in reversed(_job_live_pids(obj)):   # children first, don't orphan mid-kill
                 try:
                     os.kill(p, sig)
                 except Exception:
@@ -1199,7 +1237,7 @@ def _kill_tree(pid, logfile, grace):
         step = 0.5 if sig == signal.SIGKILL else 1.0
         limit = 2.0 if sig == signal.SIGKILL else float(grace)
         while True:
-            still = _job_pids(pid, logfile)
+            still = _job_live_pids(obj)
             if not still:
                 return []
             if waited >= limit:
@@ -1222,7 +1260,8 @@ def cmd_job_cancel(a):
     Never stamps a status it cannot back up. Exit codes are distinct so a caller can tell a
     typo from a live writer that refused to die:
       0 - cancelled (or already terminal — idempotent)
-      3 - cannot act: no pid recorded (sync dispatch), pid<=1, or cancelling own job
+      3 - cannot act: pid<=1, pid not provably this job's, or cancelling own job
+          (a sync record with no pid is NOT in this list any more — see below)
       4 - job record not found
       5 - process(es) SURVIVED SIGTERM+SIGKILL; record deliberately left at running"""
     jobs_dir, job_id = a[0], a[1]
@@ -1240,12 +1279,42 @@ def cmd_job_cancel(a):
         sys.exit(0)
     pid = o.get("pid")
     if not pid:
-        sys.stderr.write(
-            "REFUSED: job %s has no recorded pid (sync dispatch — only --bg records one), "
-            "so this command cannot prove it killed anything.\n"
-            "  Kill it in the shell that is running it, then: bin/jobs.sh status %s\n"
-            % (job_id, job_id))
-        sys.exit(3)
+        # A SYNC record carries no pid, but that no longer means there is nothing to act on:
+        # _job_live_pids finds the worker through the job's own `$logfile.err`, and holding
+        # this job's logfile IS proof of ownership (no pid-recycling ambiguity to resolve —
+        # that is the only thing the recorded pid was needed for). Before this, such a record
+        # could be seen alive by job-set yet refused by cancel and skipped by reap: no
+        # command could close it, and the only way out was the --force write this guard
+        # exists to prevent (round 3, O3).
+        sync_live = _job_live_pids(o)
+        if not sync_live:
+            note = ("cancelled by operator: no pid recorded (sync dispatch) and no live "
+                    "process holding the job's logfile — the dispatcher died without "
+                    "writing a terminal status")
+            print(note)
+            cmd_job_set([jobs_dir, job_id, "status=cancelled", "ended_at=%d" % now_epoch(),
+                         "exit_code=130", "result_summary=" + note])
+            sys.exit(0)
+        if _writer_belongs_to_job(sync_live):
+            sys.stderr.write(
+                "REFUSED: you are running INSIDE job %s — cancelling it would kill this "
+                "very command.\n" % job_id)
+            sys.exit(3)
+        print("killing %s: %d live process(es) %s (found via the job's logfile — sync "
+              "dispatch records no pid)" % (job_id, len(sync_live), sync_live))
+        survivors = _kill_tree(o, grace)
+        if survivors:
+            sys.stderr.write(
+                "REFUSED to stamp cancelled: %d process(es) SURVIVED SIGTERM+SIGKILL: %s.\n"
+                "  The job record is left at status=running ON PURPOSE — a live writer must "
+                "never be reported as stopped.\n" % (len(survivors), survivors))
+            sys.exit(5)
+        note = ("cancelled by operator: %d process(es) killed and verified dead (sync "
+                "dispatch, found by logfile)" % len(sync_live))
+        print(note)
+        cmd_job_set([jobs_dir, job_id, "status=cancelled", "ended_at=%d" % now_epoch(),
+                     "exit_code=130", "result_summary=" + note])
+        sys.exit(0)
     try:
         _pid_int = int(pid)
     except Exception:
@@ -1281,11 +1350,10 @@ def cmd_job_cancel(a):
             % (pid, job_id, _fmt_ts(_proc_start_epoch(pid)),
                _fmt_ts(_as_int(o.get("started_at"), 0)), jobs_dir, job_id))
         sys.exit(3)
-    logfile = o.get("logfile", "")
-    targets = _job_pids(pid, logfile)
+    targets = _job_live_pids(o)
     if targets:
         print("killing %s: %d live process(es) %s" % (job_id, len(targets), targets))
-        survivors = _kill_tree(pid, logfile, grace)
+        survivors = _kill_tree(o, grace)
         if survivors:
             sys.stderr.write(
                 "REFUSED to stamp cancelled: %d process(es) SURVIVED SIGTERM+SIGKILL: %s.\n"
@@ -1305,6 +1373,24 @@ def cmd_job_cancel(a):
         os.remove(os.path.normpath(om))
     except Exception:
         pass
+
+
+def cmd_job_live_pids(a):
+    """job-live-pids <jobs_dir> <job_id> — print the job's live pids, one line, space
+    separated (empty output = nothing of this job is running).
+
+    Exposes the guard's own liveness definition to shell callers so they stop reinventing a
+    weaker one. dispatch.sh's sync TERM trap uses it to VERIFY the worker really died before
+    it stamps a terminal status — `kill` followed by an unverified stamp is exactly the
+    2026-08-09 shape."""
+    try:
+        with open(_job_path(a[0], a[1]), encoding="utf-8") as f:
+            obj = json.load(f)
+    except Exception:
+        sys.exit(4)
+    pids = _job_live_pids(obj)
+    if pids:
+        print(" ".join(str(p) for p in pids))
 
 
 def cmd_job_list(a):
@@ -1628,6 +1714,7 @@ CMDS = {"event": cmd_event, "heartbeat": cmd_heartbeat, "recent": cmd_recent,
         "cursor-advance": cmd_cursor_advance,
         "job-set": cmd_job_set, "job-list": cmd_job_list, "job-get": cmd_job_get,
         "job-reap": cmd_job_reap, "job-cancel": cmd_job_cancel,
+        "job-live-pids": cmd_job_live_pids,
         "job-find-dup": cmd_job_find_dup, "terminal-statuses": cmd_terminal_statuses,
         "job-field": cmd_job_field, "job-hb-age": cmd_job_hb_age,
         "circuit-check": cmd_circuit_check, "circuit-record": cmd_circuit_record,

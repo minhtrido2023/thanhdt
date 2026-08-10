@@ -1289,11 +1289,26 @@ else
         sleep 1; _w=$((_w + 1))
       done
       kill -KILL -- "-$_wp" 2>/dev/null || kill -KILL "$_wp" 2>/dev/null || true
+      sleep 1
       rm -f "$logfile.workerpid" 2>/dev/null || true
     fi
-    JSET status=failed ended_at="$(date +%s)" exit_code=143 \
-         result_summary="KILLED: dispatch.sh sync bị kill giữa chừng (caller chết/Bash-tool timeout?) — trap đã DỪNG worker rồi mới finalize record, không phải agent tự kết thúc" \
-         2>/dev/null || true
+    # VERIFY, đừng chỉ giết rồi tin. Cùng hợp đồng với `jobs.sh cancel` (exit 5): còn tiến
+    # trình nào của job sống sót thì KHÔNG ghi trạng thái kết thúc — để record ở running và
+    # nói ra sự thật. Giết-mà-không-kiểm chính là nửa đầu của sự cố 08-09; nửa sau là đóng
+    # dấu dựa trên niềm tin đó. Ví dụ có thật: worker spawn một tiến trình con detached
+    # (đúng thứ _detached_spawn làm cho dispatch --bg lồng nhau) — nó sống qua cú giết group.
+    if _alive="$(python3 "$ROOT/bin/mike_json.py" job-live-pids "$JOBS_DIR" "$job_id" 2>/dev/null)" \
+       && [ -n "$_alive" ]; then
+      echo "WARNING: dispatch.sh sync bị kill, đã giết worker nhưng CÒN tiến trình sống của job $job_id: $_alive" >&2
+      echo "         => record GIỮ NGUYÊN status=running (không bao giờ báo 'đã dừng' cho một writer còn sống)." >&2
+      echo "         Đóng nốt bằng: $ROOT/bin/jobs.sh cancel $job_id" >&2
+    else
+      # KHÔNG nuốt rc: nếu guard từ chối lệnh ghi này thì đó là tín hiệu cần thấy, không
+      # phải thứ để `2>/dev/null || true` giấu đi.
+      JSET status=failed ended_at="$(date +%s)" exit_code=143 \
+           result_summary="KILLED: dispatch.sh sync bị kill giữa chừng (caller chết/Bash-tool timeout?) — trap đã DỪNG worker, XÁC MINH đã chết, rồi mới finalize record" \
+        || echo "WARNING: không finalize được record $job_id (job-set rc=$?) — xem $ROOT/bin/jobs.sh status $job_id" >&2
+    fi
     kill "$_wpid" 2>/dev/null || true
     exit 143
   }
