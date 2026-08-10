@@ -90,6 +90,7 @@ def _model_key(rec):
 
 def _scan_jobs(since_ts):
     buckets = {}  # category -> {"jobs", "log_bytes", "duration_s", "agents": {}, "models": {}}
+    agent_effort = {}  # agent -> {effort_level: count} — drift watch, xem canh bao o main()
     for path in glob.glob(os.path.join(ROOT, "bus", "jobs", "*.json")):
         try:
             with open(path, encoding="utf-8") as f:
@@ -112,17 +113,28 @@ def _scan_jobs(since_ts):
         b["agents"][agent] = b["agents"].get(agent, 0) + 1
         mk = _model_key(rec)
         b["models"][mk] = b["models"].get(mk, 0) + 1
+        effort = rec.get("effort") or "medium"
+        ae = agent_effort.setdefault(agent, {})
+        ae[effort] = ae.get(effort, 0) + 1
         logfile = rec.get("logfile")
         if logfile and os.path.isfile(logfile):
             b["log_bytes"] += os.path.getsize(logfile)
-        ended = rec.get("ended_at")
+        # status=orphaned: ended_at la thoi diem `jobs.sh reap` QUET DEP record (co the
+        # nhieu ngay sau deadline that), KHONG phai thoi diem job that su ngung chay —
+        # pid da duoc xac nhan CHET truoc do (mike_json.py cmd_job_reap). Dung nguyen
+        # ended_at o day tung thoi phong compute_h len ~140h/tuan gia tao quanh
+        # 2026-07-22 (mot dot mass-reap don le). Deadline la can tren hop ly hon cho
+        # "job co the da chay that su lau nhat".
+        end_ref = rec.get("ended_at")
+        if rec.get("status") == "orphaned" and rec.get("deadline"):
+            end_ref = rec.get("deadline")
         try:
-            dur = int(ended) - started
+            dur = int(end_ref) - started
         except (TypeError, ValueError):
             dur = 0
         if dur > 0:
             b["duration_s"] += dur
-    return buckets
+    return buckets, agent_effort
 
 
 def _scan_commits(days):
@@ -154,7 +166,7 @@ def main():
     days, csv_path = _parse_args(sys.argv[1:])
     since_ts = int(time.time()) - days * 86400
 
-    job_buckets = _scan_jobs(since_ts)
+    job_buckets, agent_effort = _scan_jobs(since_ts)
     commit_counts, commit_total = _scan_commits(days)
 
     empty = {"jobs": 0, "log_bytes": 0, "duration_s": 0, "agents": {}, "models": {}}
@@ -205,6 +217,29 @@ def main():
                 f"    ⚠ fable = {fable_pct:.0f}% of CLAUDE dispatches — ladder policy "
                 f"(MIKE.md §Model routing) says fable should be rare, reserved for "
                 f"genuinely exceptional complexity, not routine audit/fix work."
+            )
+    print()
+    # Effort-tier drift watch (2026-08-10) — same mechanism as the fable_pct check above,
+    # applied to the effort axis: MIKE.md §Model routing says --effort default should be
+    # medium, high only for genuinely complex tasks. Nothing watched this before; audit
+    # 2026-08-10 found Taylor at 95% high with zero monitoring, the exact drift shape the
+    # 2026-07-17 fable incident already taught us to catch early.
+    EFFORT_WARN_PCT = 70
+    EFFORT_WARN_MIN_JOBS = 10
+    print("Effort-tier mix by agent (drift watch):")
+    for agent in sorted(agent_effort, key=lambda a: -sum(agent_effort[a].values())):
+        efforts = agent_effort[agent]
+        n = sum(efforts.values())
+        mix_str = ", ".join(
+            f"{e}={100*c/n:.0f}%" for e, c in sorted(efforts.items(), key=lambda kv: -kv[1])
+        )
+        print(f"  {agent:12s} n={n:4d}  {mix_str}")
+        high_pct = 100 * efforts.get("high", 0) / n if n else 0
+        if n >= EFFORT_WARN_MIN_JOBS and high_pct >= EFFORT_WARN_PCT:
+            print(
+                f"    ⚠ effort=high = {high_pct:.0f}% of {agent}'s dispatches (n={n}) — "
+                f"MIKE.md §Model routing says default should be medium, high only for "
+                f"genuinely complex tasks."
             )
     print()
     print(f"Commits by type ({commit_total} total):")
