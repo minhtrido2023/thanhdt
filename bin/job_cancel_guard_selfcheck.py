@@ -35,6 +35,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -1498,6 +1499,118 @@ def main():
     check("S8e the worker is untouched", alive(work_s8e), "worker=%s" % work_s8e)
     check("S8e record still running", read_job(jobs_hb, "J_S8E")["status"] == "running",
           read_job(jobs_hb, "J_S8E")["status"])
+
+    # S9a (round 9, K1) — the exemption was granted in the very state where the guard had just
+    # declared itself blind. "targets ⊆ the recorded pid's tree" was accepted as identity, but
+    # _descendants cannot see an orphan, and orphans are the entire reason _pids_holding exists;
+    # meanwhile the exemption is only reachable with the verdict at UNKNOWN, i.e. right after
+    # the OTHER lookup came back empty. Real --bg shape: recorded pid = wrapper, the true worker
+    # setsid'd out of that tree onto the SAME logfile, then the logfile renamed away (the same
+    # in-scope attacker/housekeeping action rounds 4-8 accept). Killing the tree is legitimate —
+    # those really are the job's processes. Writing "verified dead" afterwards is not.
+    log_s9a = os.path.join(tmp, "s9a.log")
+    open(log_s9a, "a").close()
+    wrap_a = subprocess.Popen(["bash", "-c", "exec sleep 900"],
+                              stdout=open(log_s9a, "a"), stderr=subprocess.STDOUT)
+    work_a = subprocess.Popen(["setsid", "bash", "-c", "exec sleep 900"],
+                              stdout=open(log_s9a, "a"), stderr=subprocess.STDOUT)
+    SPAWNED.extend([wrap_a.pid, work_a.pid])
+    time.sleep(0.4)
+    # started_at must be a REAL age, not the round-5 fixtures' epoch 1000: past EVIDENCE_GRACE_S
+    # (120) so a vanished logfile counts as evidence gone, yet inside PID_OWNERSHIP_SLACK (300)
+    # of the wrapper's own start so the ownership check does not reject the fixture before the
+    # branch under test is reached. With started_at=1000 this test passed against the BROKEN
+    # code for the wrong reason — the same vacuous-fixture trap that hid round 7's K2.
+    _t0 = int(time.time()) - 200
+    put_record(jobs, "J_S9A", to="Taylor", status="running", pin=False,
+               prompt_summary="round nine kay one", logfile=log_s9a, pid=str(wrap_a.pid),
+               started_at=str(_t0), deadline=str(_t0 + 3600), dispatcher_pid="")
+    os.rename(log_s9a, log_s9a + ".hidden")
+    rc, out, err = run([sys.executable, MJ, "job-cancel", jobs, "J_S9A", "3"])
+    time.sleep(0.5)
+    rec_a = read_job(jobs, "J_S9A")
+    sum_a = rec_a.get("result_summary") or ""
+    check("S9a the job's real worker, outside the recorded pid tree, is still alive",
+          alive(work_a.pid), "worker=%d" % work_a.pid)
+    check("S9a the record NEVER claims verified death while that worker runs",
+          "verified dead" not in sum_a, sum_a[:200])
+    check("S9a an unverified close is MARKED for machines, not just worded for humans",
+          rec_a.get("status") != "cancelled" or str(rec_a.get("death_verified")) == "0",
+          "status=%s death_verified=%r" % (rec_a.get("status"), rec_a.get("death_verified")))
+    check("S9a and it says which lookup went blind, so the operator can check by hand",
+          rec_a.get("status") != "cancelled" or "NOT VERIFIED" in sum_a, sum_a[:200])
+    for p in (wrap_a.pid, work_a.pid):
+        try:
+            os.kill(p, 9)
+        except Exception:
+            pass
+
+    # S9b (round 9, K2) — the pre-flight bounded the DECISION but not the KILL SET. _kill_tree
+    # re-collects _job_live_pids on every pass, which on an unpinned record is a PATH match, so
+    # a process that opened the logfile after the verdict was signalled anyway: an innocent
+    # bystander SIGKILLed, and then counted in "N process(es) killed". On this host that
+    # collateral could have been run_bot.sh or the Discord bridge.
+    log_s9b = os.path.join(tmp, "s9b.log")
+    open(log_s9b, "a").close()
+    wrap_b = subprocess.Popen(["bash", "-c", 'trap "" TERM; while :; do sleep 1; done'],
+                              stdout=open(log_s9b, "a"), stderr=subprocess.STDOUT)
+    SPAWNED.append(wrap_b.pid)
+    time.sleep(0.3)
+    make_job(jobs, "J_S9B", wrap_b.pid, log_s9b, prompt="round nine kay two", pin=False)
+    late = {}
+
+    def _late_squatter():
+        time.sleep(2.0)                      # after the verdict, inside _kill_tree's grace
+        p = subprocess.Popen(["bash", "-c", "exec sleep 900"],
+                             stdout=open(log_s9b, "a"), stderr=subprocess.STDOUT)
+        late["p"] = p
+        SPAWNED.append(p.pid)
+
+    th = threading.Thread(target=_late_squatter)
+    th.start()
+    rc, out, err = run([sys.executable, MJ, "job-cancel", jobs, "J_S9B", "6"])
+    th.join()
+    time.sleep(0.5)
+    byst = late.get("p")
+    check("S9b a bystander that touched the path AFTER the verdict is not killed",
+          byst is not None and alive(byst.pid),
+          "bystander=%s rc=%d %s" % (byst and byst.pid, rc, (out + err)[:200]))
+    check("S9b and with it still holding the path, cancel refuses to stamp anything",
+          rc == 5 and read_job(jobs, "J_S9B")["status"] == "running",
+          "rc=%d status=%s" % (rc, read_job(jobs, "J_S9B")["status"]))
+    for p in (wrap_b.pid, byst.pid if byst else 0):
+        try:
+            os.kill(p, 9)
+        except Exception:
+            pass
+
+    # S9c (round 9, K1 second half) — a record closed WITHOUT verified death must not become
+    # invisible to the duplicate-dispatch check. Terminal status is permission to stop waiting,
+    # not evidence that nothing is running, and the collision it would otherwise produce is
+    # exactly the 2026-08-09 one: board reads terminal, someone re-dispatches, new run meets the
+    # old one that never stopped.
+    log_s9c = os.path.join(tmp, "s9c.log")
+    disp_s9c, work_s9c = spawn_sync_worker(log_s9c, jobs, "J_S9C")
+    put_record(jobs, "J_S9C", to="Taylor", status="cancelled",
+               prompt_summary="round nine dup scan", logfile=log_s9c, pid=str(work_s9c),
+               death_verified="0", started_at="1000", deadline="1600")
+    rc, out, err = run([sys.executable, MJ, "job-find-dup", jobs, "Taylor",
+                        "round nine dup scan"])
+    check("S9c an unverified close still shows up as a duplicate-dispatch collision",
+          rc == 0 and "J_S9C" in out, "rc=%d out=%s" % (rc, out[:160]))
+
+    # S9d (round 9, contract) — NICE5 of round 8 shipped with no test at all: deleting
+    # pin_source from EVIDENCE_FIELDS left the suite fully green. It is an ATTESTATION about
+    # where the guard's evidence came from, so forging it is forging the guard's own testimony.
+    log_s9d = os.path.join(tmp, "s9d.log")
+    disp_s9d, work_s9d = spawn_sync_worker(log_s9d, jobs, "J_S9D")
+    make_job(jobs, "J_S9D", "", log_s9d, dispatcher_pid=disp_s9d)
+    rc, _o, err = jset(jobs, "J_S9D", "pin_source=backfill")
+    check("S9d pin_source cannot be hand-written onto a live record", rc != 0,
+          "rc=%d %s" % (rc, err[:160]))
+    check("S9d and the record's own attestation is unchanged",
+          read_job(jobs, "J_S9D").get("pin_source") != "backfill",
+          repr(read_job(jobs, "J_S9D").get("pin_source")))
 
 
     # S7 — EVIDENCE_GRACE_S had no discriminating coverage at all: setting it to 1e11 and

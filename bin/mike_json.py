@@ -1088,7 +1088,13 @@ def cmd_job_find_dup(a):
     n = now_epoch()
     found = 0
     for o in _load_jobs(jobs_dir):
-        if o.get("status") not in LIVE_STATUSES or o.get("to") != to_agent:
+        # A record closed WITHOUT verified death still counts here (round 9, K1). The whole
+        # danger of an unverified close is a worker that outlives its record, and the shape it
+        # produces is precisely the 2026-08-09 one: the board reads terminal, someone
+        # re-dispatches, and the new run collides with the old one that never stopped. Terminal
+        # status is only permission to stop WAITING, not evidence that nothing is running.
+        live_enough = o.get("status") in LIVE_STATUSES or str(o.get("death_verified", "")) == "0"
+        if not live_enough or o.get("to") != to_agent:
             continue
         # Prompt match FIRST: it is a string compare, while the liveness test below walks
         # /proc. This keeps the expensive scan to the handful of records that could actually
@@ -1599,36 +1605,58 @@ def _kill_targets_are_identity_backed(obj, targets):
 
     A pinned record answers by inode, which no outside write can steer. Failing that, the
     recorded `pid` and its tree are guarded evidence in their own right. Anything else is a
-    path match, and a path match must never buy the right to close a record."""
+    path match, and a path match must never buy the right to close a record.
+
+    Returns the GRADE, not a yes/no (round 9, K1 — the previous version returned True for both
+    of the first two and they are not interchangeable):
+      "pinned" — identity by inode. The lookup is COMPLETE: _pids_holding finds every process
+                 on that inode, orphans included. "Nothing is alive" is then a fact about the
+                 job, and "verified dead" is a sentence this command has earned.
+      "tree"   — targets are inside the recorded pid's own tree, ownership checked. Enough to
+                 justify the KILL: these really are the job's processes. NOT enough to justify
+                 the CLAIM: _descendants is blind to exactly the orphans this guard exists for
+                 (see _descendants, and _live_holder_identity's note on the same gap), and this
+                 branch is only ever reached with the verdict at UNKNOWN — i.e. just after the
+                 other lookup declared itself blind. A job process that left the tree is
+                 invisible to BOTH, so "no survivors" is a statement about what was looked at.
+      ""       — path match only. No authority at all."""
     if _record_is_pinned(obj):
-        return True
+        return "pinned"
     root = obj.get("pid")
     if root in (None, "", 0, "0"):
-        return False                     # sync dispatch: no independent route exists
+        return ""                        # sync dispatch: no independent route exists
     try:
         root = int(str(root).strip())
     except Exception:
-        return False
+        return ""
     if not _pid_owned_by_job(root, obj):
-        return False                     # recycled pid: the number is not the process
+        return ""                        # recycled pid: the number is not the process
     tree = set([root] + _descendants(root))
-    return bool(targets) and set(int(t) for t in targets) <= tree
+    return "tree" if (targets and set(int(t) for t in targets) <= tree) else ""
 
 
 def _cancel_may_close(obj, targets):
-    """(may_close, why) — would the guard accept the status write once the kill is done?
+    """(may_close, why, verified) — would the guard accept the status write once the kill is
+    done, and would the record be allowed to call that death VERIFIED?
 
     Asked BEFORE anything is killed. Cancel used to do the destructive half and only then
     discover that the bookkeeping half was refused, which left processes dead and the board
     still saying `running` (round 7, K2) — and the fix for THAT handed out a blanket exemption
     that let a decoy close a live job (round 8, K1). Both disappear if the order is simply
-    right: find out whether you are allowed to say it, then act."""
+    right: find out whether you are allowed to say it, then act.
+
+    `verified` is the round-9 half. Refusing every UNKNOWN outright would refuse ~9 of every 11
+    live records on this board (they carry pin_failed=1) and push operators to --force, which
+    is no guard at all; so an identity-backed kill may still CLOSE the record — it just may not
+    describe the result as verified. Permission to act and permission to assert are different
+    permissions, and conflating them is how round 7 became round 8."""
     verdict, _l, why, _hbs = _death_evidence(obj, live=[])
     if verdict == DEAD:
-        return (True, why)               # provable by the job's own pinned logfile
+        return (True, why, True)         # provable by the job's own pinned logfile
     if verdict == ALIVE:
-        return (False, why)              # its agent is still writing events — nothing to claim
-    return (_kill_targets_are_identity_backed(obj, targets), why)
+        return (False, why, False)       # its agent is still writing events — nothing to claim
+    grade = _kill_targets_are_identity_backed(obj, targets)
+    return (grade != "", why, grade == "pinned")
 
 
 def _writer_belongs_to_job(pids):
@@ -1766,9 +1794,38 @@ def _pid_owned_by_job(pid, obj):
     return abs(st - started) <= PID_OWNERSHIP_SLACK
 
 
-def _kill_tree(obj, grace):
+def _within_kill_scope(pid, want):
+    """Is `pid` one of the approved pids, or descended from one? A process the worker forks
+    during the grace window is the job's and must die with it; a process that merely opened the
+    logfile PATH after the pre-flight verdict is not, and was never approved for anything."""
+    if want is None:
+        return True
+    cur = pid
+    for _ in range(64):                  # same bounded walk as _writer_belongs_to_job
+        if cur in want:
+            return True
+        if cur <= 1:
+            return False
+        nxt = _ppid_of(cur)
+        if nxt is None or nxt == cur:
+            return False
+        cur = nxt
+    return False
+
+
+def _kill_tree(obj, grace, allowed=None):
     """SIGTERM everything belonging to the job RECORD, wait up to `grace`, SIGKILL what
-    survives. Returns the pids STILL alive afterwards (empty == fully dead).
+    survives. Returns (still_alive, signalled) — `still_alive` empty == fully dead.
+
+    `allowed` bounds WHO may be signalled to the pid set the caller's pre-flight approved, plus
+    anything descended from it. Round 9, K2: the pre-flight bounded the DECISION but not the
+    KILL SET. Every pass re-collects `_job_live_pids`, which on an unpinned record is a path
+    match — so an unrelated process that opened the logfile two seconds AFTER the verdict was
+    SIGTERMed and then SIGKILLed inside the grace window, and the record went on to report it
+    as one of "N killed". On this host the collateral could have been run_bot.sh or the Discord
+    bridge. Survivors are still counted from the FULL enumeration: anything holding the job's
+    logfile at the end blocks the stamp whether or not this command was allowed to signal it.
+    Fail-closed in both directions — refuse to say it, never kill wider to make it true.
 
     Takes the record, not (pid, logfile), so it uses the SAME liveness definition as the
     guard — including the `$logfile.err` fd that is the only handle on a sync worker. With
@@ -1778,12 +1835,22 @@ def _kill_tree(obj, grace):
     Re-collects before every signal pass: a process spawned between listing and signalling
     would be missed by a single pass, and this must not leave a live writer behind — the
     whole point of the command is that the status stamped afterwards is TRUE."""
+    want = None
+    if allowed is not None:
+        try:
+            want = set(int(x) for x in allowed)
+        except Exception:
+            want = set()
+    signalled = set()
     still = []
     for sig in (signal.SIGTERM, signal.SIGKILL):
         for _round in (1, 2):
             for p in reversed(_job_live_pids(obj)):   # children first, don't orphan mid-kill
+                if not _within_kill_scope(p, want):
+                    continue
                 try:
                     os.kill(p, sig)
+                    signalled.add(p)
                 except Exception:
                     pass
         waited = 0.0
@@ -1792,12 +1859,12 @@ def _kill_tree(obj, grace):
         while True:
             still = _job_live_pids(obj)
             if not still:
-                return []
+                return ([], signalled)
             if waited >= limit:
                 break
             time.sleep(step)
             waited += step
-    return still
+    return (still, signalled)
 
 
 def cmd_job_cancel(a):
@@ -1906,7 +1973,7 @@ def cmd_job_cancel(a):
                 "REFUSED: you are running INSIDE job %s — cancelling it would kill this "
                 "very command.\n" % job_id)
             sys.exit(3)
-        may, why_pre = _cancel_may_close(o, sync_live)
+        may, why_pre, verified = _cancel_may_close(o, sync_live)
         if not may:
             sys.stderr.write(
                 "REFUSED — and NOTHING has been killed: cancelling job %s would leave this "
@@ -1925,15 +1992,26 @@ def cmd_job_cancel(a):
             sys.exit(3)
         print("killing %s: %d live process(es) %s (found via the job's logfile — sync "
               "dispatch records no pid)" % (job_id, len(sync_live), sync_live))
-        survivors = _kill_tree(o, grace)
+        survivors, signalled = _kill_tree(o, grace, allowed=sync_live)
         if survivors:
+            outside = [p for p in survivors if p not in signalled]
             sys.stderr.write(
                 "REFUSED to stamp cancelled: %d process(es) SURVIVED SIGTERM+SIGKILL: %s.\n"
                 "  The job record is left at status=running ON PURPOSE — a live writer must "
                 "never be reported as stopped.\n" % (len(survivors), survivors))
+            if outside:
+                sys.stderr.write(
+                    "  %d of them were never signalled by this command: %s appeared on the "
+                    "logfile path after the pre-flight verdict (round 9, K2).\n"
+                    % (len(outside), outside))
             sys.exit(5)
-        note = ("cancelled by operator: %d process(es) killed and verified dead (sync "
-                "dispatch, found by logfile)" % len(sync_live))
+        # A sync record carries no pid, so the only way past the pre-flight is a pinned inode
+        # (or a DEAD verdict) — `verified` is therefore true here by construction. It is read
+        # from the same variable anyway: round 5's lesson is that a second copy of the argument
+        # is what drifts, not the argument itself.
+        note = ("cancelled by operator: %d process(es) killed and %s (sync dispatch, found by "
+                "logfile)" % (len(signalled),
+                              "verified dead" if verified else "death NOT VERIFIED"))
         # stale_proven: we did not INFER death here, we caused it and then verified it — proof
         # strictly stronger than the one reap is trusted with. Without passing it, an unpinned
         # record went UNKNOWN and the guard refused the status write AFTER the kill had already
@@ -1980,7 +2058,7 @@ def cmd_job_cancel(a):
                _fmt_ts(_as_int(o.get("started_at"), 0)), jobs_dir, job_id))
         sys.exit(3)
     targets = _job_live_pids(o)
-    may, why_pre = _cancel_may_close(o, targets)
+    may, why_pre, verified = _cancel_may_close(o, targets)
     if not may:
         # Same pre-flight as the sync branch. Ordering IS the fix: ask whether the truth can be
         # recorded before making it true (round 8, K1/K2).
@@ -1994,16 +2072,39 @@ def cmd_job_cancel(a):
             "  bin/jobs.sh reap   closes a running record honestly; job-set --force records a "
             "death you established yourself.\n" % (job_id, why_pre, len(targets)))
         sys.exit(3)
+    extra = []
     if targets:
         print("killing %s: %d live process(es) %s" % (job_id, len(targets), targets))
-        survivors = _kill_tree(o, grace)
+        survivors, signalled = _kill_tree(o, grace, allowed=targets)
         if survivors:
+            outside = [p for p in survivors if p not in signalled]
             sys.stderr.write(
                 "REFUSED to stamp cancelled: %d process(es) SURVIVED SIGTERM+SIGKILL: %s.\n"
                 "  The job record is left at status=running ON PURPOSE — a live writer must "
                 "never be reported as stopped.\n" % (len(survivors), survivors))
+            if outside:
+                sys.stderr.write(
+                    "  %d of them were never signalled by this command: %s appeared on the "
+                    "logfile path after the pre-flight verdict, so this record cannot vouch "
+                    "for them and killing them would prove nothing (round 9, K2).\n"
+                    % (len(outside), outside))
             sys.exit(5)
-        note = "cancelled by operator: %d process(es) killed and verified dead" % len(targets)
+        # Count what was actually signalled, not what the pre-flight listed: the two differ
+        # whenever the worker forks during the grace window, and the record should say what
+        # this command DID (round 9, NICE).
+        if verified:
+            note = ("cancelled by operator: %d process(es) killed and verified dead"
+                    % len(signalled))
+        else:
+            # Round 9, K1: the kill was identity-backed (these are the job's own processes),
+            # but the record carries no pinned inode, so the lookup that says "nothing is left"
+            # is the same one that just came back blind. Close it — leaving it open would only
+            # push operators to --force — and say plainly that nobody verified anything.
+            note = ("cancelled by operator: %d process(es) killed, death NOT VERIFIED — %s; "
+                    "this record has no pinned logfile identity, so a process of this job "
+                    "outside the recorded pid's tree would be invisible to this check"
+                    % (len(signalled), why_pre))
+            extra = ["death_verified=0"]
         killed = True
     else:
         # Round 7, K4: this branch was never given the round-6 treatment. It asserted "nothing
@@ -2015,8 +2116,21 @@ def cmd_job_cancel(a):
                 "terminal status was ever written for this job" % (pid, why))
         killed = False
     # Same reasoning as the sync branch: a verified kill is proof we made, not proof we guessed.
-    cmd_job_set([jobs_dir, job_id, "status=cancelled", "ended_at=%d" % now_epoch(),
-                 "exit_code=130", "result_summary=" + note], stale_proven=killed)
+    try:
+        cmd_job_set([jobs_dir, job_id, "status=cancelled", "ended_at=%d" % now_epoch(),
+                     "exit_code=130", "result_summary=" + note] + extra, stale_proven=killed)
+    except SystemExit:
+        # The pre-flight said this write would be accepted; if the guard refuses anyway, the
+        # state changed under us mid-kill. Say the loud half out loud — the refusal BEFORE the
+        # kill announces "NOTHING has been killed", so its twin must not stay silent about the
+        # opposite (round 9, NICE).
+        if killed:
+            sys.stderr.write(
+                "  NOTE: the kill ALREADY RAN — %d process(es) of job %s were signalled and "
+                "are gone, but the record could not be stamped, so it still says running. "
+                "Close it with `bin/jobs.sh reap` or job-set --force; do NOT re-dispatch on "
+                "the strength of the record alone.\n" % (len(targets), job_id))
+        raise
     print(note)                                  # only after the write actually landed
     # watchdog's per-job OVERDUE debounce marker is dead weight once the record is closed
     om = os.path.join(os.path.dirname(jobs_dir.rstrip("/")), "..", "state", "overdue", job_id)
