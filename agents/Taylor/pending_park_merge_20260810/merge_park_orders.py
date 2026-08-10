@@ -112,6 +112,12 @@ ID_PREFIX = "PARKMERGE-SELL"
 # khuyết tật #5, nên nếu cần thì mở rộng bước 0 chứ đừng ghi lồng.
 _JIT_PREFIX = "jit_"
 
+# Mọi tên field mang CHỮ KÝ DUYỆT mà tầng dưới công nhận. Cổng duyệt phải đọc ĐỦ tập này, nếu
+# không nó fail-OPEN đúng chỗ nó sinh ra để fail-closed. Nguồn (đã đọc tận nơi, không suy đoán):
+#   `trading_bot/plan.py:182-183`  ·  `mike/bin/preflight_check.sh:60`
+# Thêm alias mới ở hai nơi đó ⇒ PHẢI thêm vào đây; ca `A5` trong selfcheck canh từng tên.
+_APPROVAL_KEYS = ("approved_by", "approved_by_user")
+
 DEFAULT_PLAN_DIR = "/home/trido/thanhdt/WorkingClaude/data/trade_plans"
 
 
@@ -214,14 +220,43 @@ def merge_park_orders(plan, l1=None, l2=None, *, allow_approved=False):
     #   đánh rơi dữ liệu của người khác (qty của lệnh mua không bị đụng: xem I5 + bước 5).
     #   Hệ quả CÓ CHỦ Ý và phải khai báo: **merge sở hữu toàn bộ không gian tên `jit_*` trên
     #   `orders[]`** — writer nào muốn giữ nhãn của mình qua merge thì đừng đặt tên `jit_*`.
-    #   Phạm vi dừng ở KHOÁ CỦA LỆNH. Ở CẤP PLAN, merge sở hữu ĐÚNG MỘT khoá `jit_*` —
-    #   `jit_unpark_proposal` (bước 6 dựng lại, hoặc XOÁ khi vắng artifact). Khoá `jit_*` cấp
-    #   plan của writer khác (`jit_unpark_note` — có thật trong `plan_SpaceX_2026-08-10.json`)
-    #   KHÔNG thuộc quyền merge và KHÔNG bị đụng. Xem README §phạm vi.
     for o in (p.get("orders") or []):
         if isinstance(o, dict):
             for k in [k for k in o if str(k).startswith(_JIT_PREFIX)]:
                 o.pop(k, None)
+
+    # ── 0b. CÙNG NGUYÊN TẮC ĐÓ Ở **CẤP PLAN** (mở rộng phạm vi 2026-08-10, user DUYỆT) ──
+    # Trước bản này merge chỉ sở hữu ĐÚNG MỘT khoá cấp plan (`jit_unpark_proposal`) và cố ý
+    # để mọi khoá `jit_*` cấp plan khác cho writer gốc. Ca THẬT chứng minh ranh giới đó sai:
+    # `plan_SpaceX_2026-08-10.json` mang `jit_unpark_note` = "L2 KHÔNG chạy cho plan này …
+    # không có gì cần JIT tài trợ" — do writer lập plan ghi. Chạy merge với artifact L2 THẬT
+    # sẽ sinh lệnh bán JIT vào `orders[]` **trong khi câu đó vẫn nằm nguyên trong plan**, và
+    # người duyệt — cơ chế an toàn DUY NHẤT của thiết kế này — đọc một câu khẳng định ngược
+    # hẳn với lệnh thật. Đúng LỚP khuyết tật #5/#6 ("nhãn không bao giờ hết hạn"), chỉ khác
+    # tầng: #5 ở nhãn của lệnh, #6 ở khối đề xuất, đây ở khoá tự do cấp plan.
+    #
+    # Xoá theo KHÔNG GIAN TÊN, **không** theo danh sách tên literal — bài học vòng 5 (REFUTED):
+    # liệt kê tên là QUY ƯỚC, không phải bất biến; writer sau đặt `jit_note_v2` là thoát ngay.
+    # Ghi lại tập đã xoá để bước 6 còn phân biệt "khối cũ CÓ tồn tại" với "chưa từng có"
+    # (pop lần hai luôn trả None ⇒ mất cảnh báo VẮNG MẶT của bản vá #6).
+    #
+    # ⇒ Phạm vi đầy đủ sau bản này: **merge sở hữu toàn bộ không gian tên `jit_*` ở CẢ hai
+    #   tầng — khoá cấp một của mỗi lệnh, và khoá cấp một của plan.** Merge dựng lại đúng
+    #   `jit_unpark_proposal` (bước 6); mọi khoá `jit_*` cấp plan khác VẮNG MẶT sau merge.
+    #   Writer nào cần ghi chú sống qua merge thì đặt tên NGOÀI `jit_` (ví dụ có thật đang
+    #   chạy: `duplicate_jit_fix_note` — có trong CẢ `plan_SpaceX_2026-08-07.json` LẪN
+    #   `plan_ZaloPay_2026-08-07.json`; có chữ "jit" nhưng KHÔNG mang tiền tố `jit_` ⇒ ngoài
+    #   phạm vi, không bị đụng. Đã chạy merge trên đúng 2 plan đó để ĐO, không phải suy luận).
+    #
+    # ⚠️ PHẠM VI THỜI GIAN của bản mở rộng này — nói thẳng vì nó là giới hạn thật:
+    #   bước 0b chạy TRƯỚC cổng duyệt, nhưng cổng duyệt trả về `copy.deepcopy(plan)` NGUYÊN
+    #   VẸN ⇒ trên plan ĐÃ CÓ `approved_by`, merge REFUSED và khoá `jit_*` cũ **SỐNG SÓT**.
+    #   Đó là fail-closed đúng (ca S5e(f) canh), nhưng hệ quả phải khai: cơ chế này bảo vệ
+    #   **cửa sổ TRƯỚC khi duyệt**, không dọn được plan đã duyệt trừ khi chạy lại với
+    #   `--force-clear-approval` (và cờ đó xoá chữ ký, buộc duyệt lại).
+    plan_jit_removed = sorted(k for k in p if str(k).startswith(_JIT_PREFIX))
+    for k in plan_jit_removed:
+        p.pop(k, None)
 
     def refuse(msg):
         report["status"] = "REFUSED"
@@ -229,16 +264,34 @@ def merge_park_orders(plan, l1=None, l2=None, *, allow_approved=False):
         return copy.deepcopy(plan), report
 
     # ── cổng duyệt ────────────────────────────────────────────────────────────────────
-    approved = p.get("approved_by")
-    if approved not in (None, "") and not allow_approved:
+    # Đọc CẢ HAI tên field, đúng tập mà tầng dưới công nhận (quant-skeptic vòng 8 — lỗ
+    # FAIL-OPEN thật, trên chính cái cổng có mục đích duy nhất là fail-closed):
+    #   · `trading_bot/plan.py:182-183` — `if not d["approved_by"] and d["approved_by_user"]:
+    #     d["approved_by"] = d["approved_by_user"]` ⇒ plan CHỈ có `approved_by_user` vẫn được
+    #     `load_plan()` HỒI SINH thành đã-duyệt lúc thực thi;
+    #   · `mike/bin/preflight_check.sh:60` — `d.get("approved_by") or d.get("approved_by_user")`.
+    # Cổng cũ chỉ đọc `approved_by` ⇒ plan duyệt bằng tên thay thế sẽ KHÔNG bị từ chối, orders[]
+    # bị dựng lại, rồi `load_plan()` gắn lại chữ ký ⇒ **lệnh mới chạy dưới chữ ký duyệt của bộ
+    # lệnh CŨ**. Hôm nay 0/84 plan mang field đó (đã đo) nên là lỗ TIỀM ẨN, không phải đang chảy
+    # máu — nhưng "hôm nay chưa ai dùng" là sự thật CÓ HẠN SỬ DỤNG, đúng lớp nhãn hết hạn mà cả
+    # bản vá này đi chữa.
+    approved_key = next((k for k in _APPROVAL_KEYS if p.get(k) not in (None, "")), None)
+    approved = p.get(approved_key) if approved_key else None
+    if approved_key and not allow_approved:
         return refuse(
-            f"plan ĐÃ CÓ approved_by={approved!r} — từ chối sửa orders[]. Sửa lệnh sau khi "
+            f"plan ĐÃ CÓ {approved_key}={approved!r} — từ chối sửa orders[]. Sửa lệnh sau khi "
             f"duyệt là vô hiệu hoá chữ ký duyệt. Muốn sửa thật: chạy lại với "
-            f"--force-clear-approval (cờ đó XOÁ approved_by, bắt buộc duyệt lại).")
-    if approved not in (None, "") and allow_approved:
+            f"--force-clear-approval (cờ đó gỡ chữ ký ở MỌI tên field, bắt buộc duyệt lại).")
+    if approved_key and allow_approved:
+        # Đặt None, KHÔNG `del` — giữ đúng hình dạng file mà consumer đang quen. Cả 2 tầng dưới
+        # kiểm bằng GIÁ TRỊ (`not d.get(...)` / `or`), không kiểm sự hiện diện của khoá, nên
+        # None là đủ; đã đọc tận nơi để khẳng định, không suy đoán.
         report["warnings"].append(
-            f"XOÁ approved_by={approved!r} vì orders[] bị dựng lại — PHẢI duyệt lại.")
-        p["approved_by"] = None
+            f"GỠ chữ ký duyệt ({approved_key}={approved!r} → None, và mọi tên field thay thế) "
+            f"vì orders[] bị dựng lại — PHẢI duyệt lại.")
+        for k in _APPROVAL_KEYS:
+            if k in p:
+                p[k] = None
         p["approved_at"] = None
 
     # ── cổng từng tầng ────────────────────────────────────────────────────────────────
@@ -460,7 +513,13 @@ def merge_park_orders(plan, l1=None, l2=None, *, allow_approved=False):
             # chạy 2 mất file artifact ⇒ `continue` để khối đó Y NGUYÊN trong khi orders[]
             # chỉ còn phần L1 ⇒ người duyệt đọc một khối kiểm toán KHÔNG khớp lệnh thật.
             # Cùng quy tắc với vùng bán và với 3 nhãn: DỰNG-LẠI-HOẶC-VẮNG-MẶT.
-            if p.pop(key, None) is not None:
+            # Khoá thuộc namespace `jit_` đã bị bước 0b xoá rồi ⇒ HỎI BẢN GHI của bước đó.
+            # `p.pop()` lần hai luôn trả None ⇒ cảnh báo VẮNG MẶT (chính bản vá #6) sẽ lặng
+            # lẽ biến mất — bản mở rộng phạm vi tự bắn vào chân bản vá trước nếu không có
+            # nhánh này. `park_trim_proposal` nằm NGOÀI namespace nên vẫn tự xoá tại đây.
+            had_old = (key in plan_jit_removed if str(key).startswith(_JIT_PREFIX)
+                       else p.pop(key, None) is not None)
+            if had_old:
                 report["warnings"].append(
                     f"{key}: artifact VẮNG MẶT lần chạy này — đã XOÁ khối kiểm toán cũ khỏi "
                     f"plan (khối cũ mô tả một lần chạy KHÁC, giữ lại là gây hiểu nhầm).")
@@ -470,6 +529,17 @@ def merge_park_orders(plan, l1=None, l2=None, *, allow_approved=False):
             "✅ ĐÃ MERGE vào orders[] (merge_owner=park_merge_v1). Giữ làm NGUỒN KIỂM TOÁN — "
             "KHÔNG thực thi riêng." if ok else f"⛔ KHÔNG merge vào orders[] — {why}")
         p[key] = c
+
+    # Khoá `jit_*` cấp plan của writer KHÁC (bước 0b đã xoá): khai ra tên từng khoá, đừng xoá
+    # im lặng. Merge KHÔNG dựng lại chúng — đó chính là nội dung của "dựng-lại-HOẶC-VẮNG-MẶT"
+    # áp cho một khoá merge không sinh ra: nó vắng mặt.
+    for k in plan_jit_removed:
+        if k == "jit_unpark_proposal":
+            continue
+        report["warnings"].append(
+            f"{k}: khoá `jit_*` CẤP PLAN do writer khác ghi — đã XOÁ (merge sở hữu toàn bộ "
+            f"không gian tên `jit_*`; nội dung cũ mô tả một lần chạy L2 KHÁC). Muốn ghi chú "
+            f"sống qua merge thì đặt tên KHÔNG bắt đầu bằng `jit_`.")
 
     # ── 7. BẤT BIẾN HẬU KIỂM trên TOÀN BỘ orders[] ───────────────────────────────────
     inv = _check_invariants(p["orders"], agg, orig_orders)

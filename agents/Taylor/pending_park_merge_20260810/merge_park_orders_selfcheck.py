@@ -12,12 +12,14 @@ import copy
 import io
 import json
 import os
+import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from merge_park_orders import (  # noqa: E402
     OWNER, is_owned, merge_park_orders, print_report,
 )
+from merge_park_orders import _APPROVAL_KEYS as mpo_APPROVAL_KEYS  # noqa: E402
 
 FAILS = []
 
@@ -408,6 +410,105 @@ check("S5d nhãn lạ cũng bị xoá ở nhánh L2 ĐƯỢC NHẬN (chỉ còn 
       set(k for k in buy_d2 if k.startswith("jit_")) == {"jit_status", "jit_note"},
       str(sorted(k for k in buy_d2 if k.startswith("jit_"))))
 
+# ── S5e: CÙNG nguyên tắc namespace ở **CẤP PLAN** (mở rộng phạm vi 2026-08-10) ───────
+# Ca THẬT làm ra bản vá: `plan_SpaceX_2026-08-10.json` mang khoá cấp plan `jit_unpark_note`
+# = "L2 KHÔNG chạy cho plan này … không có gì cần JIT tài trợ", do writer lập plan ghi. Chạy
+# merge với artifact L2 THẬT ⇒ sinh lệnh bán JIT vào orders[] trong khi câu đó vẫn nằm đó ⇒
+# người duyệt đọc một câu khẳng định NGƯỢC HẲN với lệnh thật. Đúng lớp #5/#6, tầng cấp plan.
+print("\n[S5e] namespace `jit_*` CẤP PLAN — dựng-lại-hoặc-vắng-mặt")
+
+# Câu chữ chép từ plan thật (rút gọn), để ca này không phải giả định vô căn cứ.
+REAL_NOTE = ("L2 (compute_jit_unpark.py) KHÔNG chạy cho plan này — plan này có 0 lệnh mua "
+             "BAL/LAG. Không có gì cần JIT tài trợ.")
+p_note = plan(jit_unpark_note=REAL_NOTE)
+check("S5e tiền đề: khoá jit_unpark_note CÓ trong plan đầu vào (câu chữ từ plan thật)",
+      p_note["jit_unpark_note"] == REAL_NOTE)
+
+# (a) L2 ĐƯỢC NHẬN ⇒ có lệnh bán JIT thật ⇒ câu "không có gì cần JIT" phải BIẾN MẤT.
+pe1, re1 = merge_park_orders(copy.deepcopy(p_note), L1_roomy, L2_roomy)
+check("S5e L2 được nhận ⇒ khoá jit_* cấp plan của writer khác bị XOÁ",
+      "jit_unpark_note" not in pe1, str(pe1.get("jit_unpark_note"))[:90])
+check("S5e tiền đề của (a): lần chạy đó THẬT SỰ sinh lệnh bán (nếu không, ca vô nghĩa)",
+      any(o["side"] == "sell" for o in pe1["orders"]))
+check("S5e có cảnh báo nêu ĐÍCH DANH khoá đã xoá (không xoá im lặng)",
+      any("jit_unpark_note" in w and "CẤP PLAN" in w for w in re1["warnings"]),
+      str(re1["warnings"]))
+check("S5e khoá merge SỞ HỮU vẫn được dựng lại ở cùng lần chạy đó",
+      "✅" in pe1["jit_unpark_proposal"]["_merged_into_orders"])
+
+# (b) L2 BỊ TỪ CHỐI ⇒ vẫn không sống sót. Đây là nửa quan trọng của "dựng-lại-HOẶC-VẮNG-MẶT":
+#     xoá phải xảy ra ĐỘC LẬP với việc tầng L2 có được nhận hay không.
+pe2, _ = merge_park_orders(copy.deepcopy(p_note), L1_roomy, L2_rejected)
+check("S5e L2 BỊ TỪ CHỐI ⇒ khoá jit_* cấp plan vẫn KHÔNG sống sót",
+      "jit_unpark_note" not in pe2, str(pe2.get("jit_unpark_note"))[:90])
+check("S5e tiền đề của (b): tầng L2 đúng là bị từ chối ở lần chạy đó",
+      "⛔" in pe2["jit_unpark_proposal"]["_merged_into_orders"])
+
+# (c) KHÔNG có artifact L2 nào ⇒ vẫn xoá, và cảnh báo VẮNG MẶT của bản vá #6 KHÔNG được
+#     mất (bước 0b xoá trước nên `p.pop()` ở bước 6 luôn trả None — bẫy tự bắn vào chân).
+p_both = copy.deepcopy(pe1)                      # có sẵn khối jit_unpark_proposal "ĐÃ MERGE"
+p_both["jit_unpark_note"] = REAL_NOTE            # + khoá của writer khác quay lại
+pe3, re3 = merge_park_orders(p_both, L1_roomy, None)
+check("S5e không có artifact L2 ⇒ CẢ khối sở hữu LẪN khoá writer khác đều vắng mặt",
+      "jit_unpark_proposal" not in pe3 and "jit_unpark_note" not in pe3,
+      str([k for k in pe3 if k.startswith("jit_")]))
+check("S5e cảnh báo VẮNG MẶT (bản vá #6) KHÔNG bị bước 0b nuốt mất",
+      any("VẮNG MẶT" in w and "jit_unpark_proposal" in w for w in re3["warnings"]),
+      str(re3["warnings"]))
+
+# (d) CHỨNG MINH NGƯỢC — biên của phạm vi xoá. Khoá cấp plan KHÔNG mang tiền tố `jit_` phải
+#     còn NGUYÊN. Hai ca thật: `duplicate_jit_fix_note` (có chữ "jit", không có tiền tố) và
+#     `park_trim_proposal` (tầng L1, do bước 6 tự quản theo luật riêng của nó).
+FIX_NOTE = "SUA LOI 2026-08-07 … da xoa 15 lenh JIT goc khoi orders[]"
+p_bound = plan(jit_unpark_note=REAL_NOTE, duplicate_jit_fix_note=FIX_NOTE,
+               plan_note="khoa cua mot tinh nang hoan toan khac", jitter_budget_vnd=1_000_000)
+pe4, _ = merge_park_orders(p_bound, L1_roomy, L2_roomy)
+check("S5e chứng minh ngược: khoá cấp plan NGOÀI namespace `jit_` KHÔNG bị đụng",
+      pe4.get("duplicate_jit_fix_note") == FIX_NOTE
+      and pe4.get("plan_note") == "khoa cua mot tinh nang hoan toan khac"
+      and pe4.get("jitter_budget_vnd") == 1_000_000
+      and pe4.get("account") == "ZaloPay" and pe4.get("plan_date") == "2026-08-11",
+      str({k: pe4.get(k) for k in ("duplicate_jit_fix_note", "plan_note",
+                                   "jitter_budget_vnd")})[:200])
+check("S5e chứng minh ngược: khoá trong namespace ở CÙNG plan đó thì có bị xoá thật "
+      "(nếu không, ca (d) xanh vì merge chẳng xoá gì cả)",
+      "jit_unpark_note" not in pe4)
+check("S5e chứng minh ngược: khối L1 park_trim_proposal vẫn được dựng lại như cũ",
+      "✅" in pe4["park_trim_proposal"]["_merged_into_orders"])
+# `jitter_budget_vnd` là ca RANH GIỚI CHỮ: "jit" + "ter" — chỉ khoá bắt đầu bằng `jit_` mới
+# thuộc namespace, `jitter_` thì không. Nếu ai đó đổi sang `k.startswith("jit")` (thiếu gạch
+# dưới) ca trên sẽ ĐỎ.
+
+# (e) IDEMPOTENT trên chính ca này: chạy 2 lần liên tiếp cùng input ⇒ plan giống hệt.
+#     Lưu ý ĐÃ ĐO, không phải khẳng định suông: `warnings` KHÁC nhau (lần 2 không còn khoá
+#     writer khác để mà báo đã xoá) — đó là quan sát VỀ ĐẦU VÀO, không phải trạng thái plan.
+pe5a, re5a = merge_park_orders(copy.deepcopy(p_note), L1_roomy, L2_roomy)
+pe5b, re5b = merge_park_orders(copy.deepcopy(pe5a), L1_roomy, L2_roomy)
+check("S5e idempotent: lần 2 == lần 1 trên MỌI field trừ khối nhật ký", _blob(pe5a) == _blob(pe5b))
+check("S5e idempotent: orders[] byte-identical",
+      json.dumps(pe5a["orders"], sort_keys=True, ensure_ascii=False) ==
+      json.dumps(pe5b["orders"], sort_keys=True, ensure_ascii=False))
+check("S5e idempotent: 0 khoá jit_* lạ ở CẢ hai lần",
+      [k for k in pe5a if k.startswith("jit_")] == ["jit_unpark_proposal"]
+      and [k for k in pe5b if k.startswith("jit_")] == ["jit_unpark_proposal"],
+      str([sorted(k for k in pe5a if k.startswith("jit_")),
+           sorted(k for k in pe5b if k.startswith("jit_"))]))
+check("S5e idempotent: chênh lệch DUY NHẤT là cảnh báo về đầu vào (nêu tên, không giấu)",
+      any("jit_unpark_note" in w for w in re5a["warnings"])
+      and not any("jit_unpark_note" in w for w in re5b["warnings"]),
+      str(re5b["warnings"]))
+
+# (f) REFUSED ⇒ plan NGUYÊN VẸN, kể cả khoá cấp plan. Cùng bất biến S5b/S6 canh: fail-closed
+#     không được sửa gì trên đĩa.
+p_ref = copy.deepcopy(p_note)
+p_ref["approved_by"] = "user (John) Discord"
+pe6, re6 = merge_park_orders(copy.deepcopy(p_ref), L1_roomy, L2_roomy)
+check("S5e REFUSED ⇒ khoá jit_* cấp plan GIỮ NGUYÊN (cố ý — caller không ghi file)",
+      re6["status"] == "REFUSED"
+      and json.dumps(pe6, sort_keys=True) == json.dumps(p_ref, sort_keys=True),
+      str(re6["errors"]))
+
+
 # ── S6: lệnh ngoài vùng sở hữu ĐÃ vượt trần ⇒ REFUSED, plan không đổi ────────────────
 huge_foreign = {"id": "SELL-VHM-BAL-01", "ticker": "VHM", "side": "sell", "qty": 400,
                 "ref_price": 76500.0, "book": "BAL", "play_type": "EXIT", "priority": 0,
@@ -432,6 +533,73 @@ pa2, ra2 = merge_park_orders(plan(approved_by="user (John) Discord"), L1_0807, L
                              allow_approved=True)
 check("A2 --force-clear-approval ⇒ chạy được NHƯNG xoá approved_by (buộc duyệt lại)",
       ra2["status"] == "OK" and pa2["approved_by"] is None)
+# ── A5: cổng duyệt phải đọc ĐỦ tập tên field mà tầng dưới công nhận ─────────────────
+# quant-skeptic vòng 8 — lỗ FAIL-OPEN thật, trên chính cái cổng sinh ra để fail-closed:
+# `trading_bot/plan.py:182-183` hồi sinh `approved_by` từ `approved_by_user`, và
+# `preflight_check.sh:60` cũng công nhận tên đó. Cổng cũ chỉ đọc `approved_by` ⇒ plan duyệt
+# bằng tên thay thế KHÔNG bị từ chối, orders[] bị dựng lại, rồi `load_plan()` gắn lại chữ ký
+# ⇒ lệnh MỚI chạy dưới chữ ký duyệt của bộ lệnh CŨ. Hôm nay 0/84 plan mang field đó — lỗ TIỀM
+# ẨN, và "hôm nay chưa ai dùng" là sự thật CÓ HẠN SỬ DỤNG.
+p_alias = plan()
+p_alias.pop("approved_by", None)
+p_alias["approved_by_user"] = "user (John) Discord"
+pa5, ra5 = merge_park_orders(copy.deepcopy(p_alias), L1_0807, L2_0807)
+check("A5 plan duyệt bằng TÊN THAY THẾ `approved_by_user` ⇒ vẫn REFUSED (không fail-open)",
+      ra5["status"] == "REFUSED" and "approved_by_user" in ra5["errors"][0],
+      f"status={ra5['status']} errors={ra5['errors']}")
+check("A5 REFUSED ⇒ plan trả về NGUYÊN VẸN (orders[] không bị dựng lại)",
+      json.dumps(pa5, sort_keys=True) == json.dumps(p_alias, sort_keys=True))
+# chứng minh ngược 1: bỏ chữ ký ra thì merge CHẠY THẬT — ca trên không xanh vì lý do khác
+p_noalias = copy.deepcopy(p_alias)
+p_noalias["approved_by_user"] = None
+pa5b, ra5b = merge_park_orders(p_noalias, L1_0807, L2_0807)
+check("A5 chứng minh ngược: cùng plan nhưng KHÔNG có chữ ký ⇒ chạy được, có sinh lệnh",
+      ra5b["status"] == "OK" and any(o["side"] == "sell" for o in pa5b["orders"]),
+      f"status={ra5b['status']}")
+# chứng minh ngược 2: --force-clear-approval phải gỡ chữ ký ở MỌI tên field, nếu không
+# `load_plan()` sẽ hồi sinh nó và lệnh mới chạy dưới chữ ký cũ.
+pa5c, ra5c = merge_park_orders(copy.deepcopy(p_alias), L1_0807, L2_0807, allow_approved=True)
+check("A5 --force-clear-approval gỡ chữ ký ở MỌI tên field (không sót alias)",
+      ra5c["status"] == "OK"
+      and not any(pa5c.get(k) for k in ("approved_by", "approved_by_user")),
+      str({k: pa5c.get(k) for k in ("approved_by", "approved_by_user")}))
+check("A5 mô phỏng `plan.py:182-183`: sau khi gỡ, KHÔNG hồi sinh được chữ ký nào",
+      not (pa5c.get("approved_by") or pa5c.get("approved_by_user")))
+check("A5 tiền đề: mô phỏng đó THẬT SỰ hồi sinh được nếu còn sót alias (ca không vô căn cứ)",
+      (lambda d: bool(d.get("approved_by") or d.get("approved_by_user")))(
+          dict(pa5c, approved_by_user="user (John) Discord")))
+check("A5 cả 2 tên field đều nằm trong hằng số cổng duyệt (thêm alias mới phải sửa 1 chỗ)",
+      set(mpo_APPROVAL_KEYS) == {"approved_by", "approved_by_user"},
+      str(mpo_APPROVAL_KEYS))
+
+# ── A5b: TỰ PHÁT HIỆN alias, không chốt danh sách literal ────────────────────────────
+# quant-skeptic vòng 9: ca A5 trên chỉ ghim ĐÚNG 2 tên ĐANG CÓ ⇒ một alias thứ 3 thêm ở tầng
+# dưới sau này sẽ **lặng lẽ mở lại lỗ fail-open** với selfcheck vẫn xanh. Đó chính xác là khuyết
+# tật #6b (bản neo bằng danh sách literal) mà vòng 5 đã REFUTED một lần rồi — tôi vừa tái phạm
+# ở một tầng khác. Ca này QUÉT mã nguồn 2 tầng dưới để suy ra tập alias THẬT, rồi so với hằng số.
+# Nó biến "một lần grep tay của người" thành CỔNG THƯỜNG TRỰC.
+_WC = "/home/trido/thanhdt/WorkingClaude"
+_LOWER_LAYERS = [f"{_WC}/trading_bot/plan.py", f"{_WC}/mike/bin/preflight_check.sh"]
+_discovered, _readable = set(), []
+for _p in _LOWER_LAYERS:
+    try:
+        _src = open(_p, encoding="utf-8").read()
+    except OSError:
+        continue
+    _readable.append(_p)
+    # bắt mọi tên field dạng `approved_by*` được ĐỌC ra khỏi dict plan
+    for _m in re.finditer(r'["\'](approved_by\w*)["\']', _src):
+        _discovered.add(_m.group(1))
+check("A5b tiền đề: đọc được CẢ 2 file tầng dưới (bộ lọc rỗng ⇒ ca vô căn cứ)",
+      len(_readable) == 2, f"đọc được: {_readable}")
+check("A5b tập alias TỰ PHÁT HIỆN ở tầng dưới == hằng số cổng duyệt (alias mới ⇒ ca này ĐỎ)",
+      _discovered == set(mpo_APPROVAL_KEYS),
+      f"phát hiện={sorted(_discovered)} vs hằng số={sorted(mpo_APPROVAL_KEYS)} — "
+      f"nếu tầng dưới vừa thêm alias, THÊM VÀO _APPROVAL_KEYS chứ đừng nới ca này")
+check("A5b chứng minh ngược: thêm một alias giả vào tập phát hiện ⇒ phép so PHẢI gãy "
+      "(nếu không, ca trên xanh vì so hai tập rỗng)",
+      (_discovered | {"approved_by_ceo"}) != set(mpo_APPROVAL_KEYS) and len(_discovered) >= 2)
+
 check("A3 merge KHÔNG BAO GIỜ tự ghi approved_by",
       p1.get("approved_by") is None and p1["requires_user_approval"] is True)
 # A4 — mọi nhánh trả về (kể cả REFUSED SỚM ở cổng duyệt) phải có report ĐỦ KHOÁ cho caller.

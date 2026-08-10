@@ -1,10 +1,57 @@
 # PENDING — `merge_park_orders.py`: gộp L1 park_trim + L2 jit_unpark vào `orders[]`, chạy lặp được
 
-**Job** `Taylor_20260810_131833` · 2026-08-10 · Taylor
-**Trạng thái: CHỜ DUYỆT. 0 dòng production bị sửa** — đây là **FILE MỚI**, không phải patch lên
-file đang chạy.
+**Job** `Taylor_20260810_131833` → `_142416` → **`_172111`** (mở rộng phạm vi cấp plan) · 2026-08-10 · Taylor
+**Trạng thái: CHỜ DUYỆT. 0 dòng production bị sửa** — mọi thứ nằm gọn trong thư mục prototype này,
+không patch lên file nào đang chạy.
 
-> ⚠️ **Bằng chứng "0 dòng production" phải chạy đúng repo.** Bản nháp đầu dẫn
+> ⚠️ **Đính chính nhãn "UNTRACKED, file mới"** (quant-skeptic vòng 7). Câu đó ĐÚNG lúc viết
+> (job `_131833`), **sai từ 17:00 ICT 2026-08-10**: `fleet_backup.sh` đã commit cả 3 file trong
+> `ae3aaab1`, nên nay chúng là **tracked + modified**, không phải untracked:
+>
+> ```
+> $ git -C mike status --short -- agents/Taylor/pending_park_merge_20260810/
+>  M agents/Taylor/pending_park_merge_20260810/README.md
+>  M agents/Taylor/pending_park_merge_20260810/merge_park_orders.py
+>  M agents/Taylor/pending_park_merge_20260810/merge_park_orders_selfcheck.py
+> ```
+>
+> Điều KHÔNG đổi và mới là điều đáng khẳng định: **không dòng production nào bị sửa**. Đúng lớp
+> bài học ngay dưới đây (nhãn mô tả trạng thái thì hết hạn theo thời gian) — cùng lớp với khuyết
+> tật #5/#6/cấp-plan mà chính bản vá này đi chữa. Nhãn nào cũng phải dựng-lại-hoặc-vắng-mặt, kể
+> cả nhãn trong README.
+
+> ⚠️ **`data/trade_plans/` KHÔNG được git theo dõi — đừng dùng `git status` làm bằng chứng ở đó**
+> (quant-skeptic vòng 8, khuyết tật 8b: tôi vừa chẩn đoán lỗi rổ-rỗng ở 7a rồi để nguyên một thể
+> hiện khác của chính nó cách vài dòng). `.gitignore:12` là `*.json` ⇒ `git ls-files
+> data/trade_plans/` = **0 file**; lệnh `git status -- data/trade_plans/` **không bao giờ in gì**,
+> kể cả khi mọi plan bị ghi đè. **Bằng chứng KHÔNG rỗng cho 3 plan đã dùng trong tài liệu này:**
+>
+> ```
+> plan_SpaceX_2026-08-10.json    md5=aabbce0e2b13   mtime=2026-08-10 08:00
+> plan_SpaceX_2026-08-07.json    md5=ed4a074a6171   mtime=2026-08-07 13:31
+> plan_ZaloPay_2026-08-07.json   md5=073fb5488780   mtime=2026-08-07 13:32
+> ```
+>
+> mtime của 2 plan 08-07 vẫn là **13:31/13:32 ngày 2026-08-07** — mọi lần chạy thử ở đây đều trên
+> `copy.deepcopy` trong bộ nhớ, không chạm đĩa.
+>
+> **LUẬT CHUNG, rút ra sau BA lần vấp cùng một lớp lỗi trong cùng tài liệu này** (7a → 8b → 9a,
+> lần cuối do quant-skeptic vòng 9 bắt được ngay trong câu tôi viết để sửa 8b): **mọi bằng chứng
+> dựa trên `git` ở fleet này PHẢI nói rõ ĐANG CHẠY Ở REPO NÀO.** Có hai repo lồng nhau và mỗi cái
+> mù một vùng khác nhau:
+>
+> | Đường | Repo theo dõi nó | Lệnh ĐÚNG | Chạy sai repo thì |
+> |---|---|---|---|
+> | `trading_bot/` | ngoài (`/home/trido/thanhdt`) | `git status -- trading_bot/` | — |
+> | `mike/bin/` | **trong** (`mike/`) | **`git -C mike status -- bin/`** | repo ngoài `.gitignore:107` giấu `WorkingClaude/mike/` ⇒ **rỗng-do-cấu-tạo** |
+> | `data/trade_plans/` | **KHÔNG repo nào** | `md5sum` / `mtime` | `.gitignore:12` (`*.json`) ⇒ **rỗng-do-cấu-tạo** |
+>
+> Cả 2 chân git ở đây đều đã chạy đúng repo và đều RỖNG (= sạch): `git status -- trading_bot/` và
+> `git -C mike status --short -- bin/` (repo trong theo dõi 136 file dưới `bin/`, báo sạch).
+
+> ⚠️ **Bằng chứng "0 dòng production" phải chạy đúng repo** *(khối này chụp lúc job `_131833`;
+> dòng `??` trong đó nay đã hết hạn — xem đính chính ngay trên. Giữ lại vì **bài học về CÁCH lấy
+> bằng chứng vẫn nguyên giá trị**, chỉ trạng thái file là cũ).* Bản nháp đầu dẫn
 > `git status -- trading_bot/ mike/bin/ data/trade_plans/` trả rỗng — **bằng chứng RỖNG**:
 > `.gitignore` giấu `mike/` (repo lồng), `git ls-files mike/bin/ | wc -l` = **0**, nên lệnh đó
 > không bao giờ báo gì về `mike/bin/` dù có sửa hay không. Đúng cùng lớp lỗi "bộ lọc rỗng ⇒
@@ -18,8 +65,10 @@ file đang chạy.
 >  M bin/kb_nightly.sh
 >  M bin/remember.sh
 > ?? agents/Taylor/pending_park_merge_20260810/   ← toàn bộ việc của tôi: UNTRACKED, file mới
-> $ git status --short -- trading_bot/ data/trade_plans/     # 2 đường này repo NGOÀI có theo dõi thật
+> $ git status --short -- trading_bot/     # đường này repo NGOÀI có theo dõi thật
 > (rỗng)
+> #  ⚠️ bản gốc khối này còn kèm `data/trade_plans/` và gọi đó là "có theo dõi thật" — SAI,
+> #     `.gitignore:12` là `*.json` nên chân đó RỖNG. Xem đính chính md5/mtime ở trên (8b).
 > ```
 
 ## Vấn đề cần giải
@@ -115,6 +164,64 @@ không để P0 phát hiện hộ lúc 09:05. Làm tròn **xuống** bội 100.
 Chênh chân B đúng bằng con số sự cố đã ghi nhận: **+1.200cp SpaceX, +400cp ZaloPay**.
 Tái lập: xem `research/park_merge_mechanism_20260810.md` §Tái lập.
 
+## quant-skeptic vòng 8 — CONFIRMED (`high`), và nó tìm ra **một lỗi CODE thật**
+
+Vòng 8 xác nhận cả 4 khuyết tật bằng chứng của vòng 7 **đã sửa bằng chạy lại, không phải sửa câu
+chữ** (nó tự load JSON để kiểm `duplicate_jit_fix_note` là khoá CÓ SẴN chứ không phải tiêm vào).
+Nhưng nó phá thêm được 2 chỗ — và chỗ thứ nhất là **lỗi code**, không phải lỗi tài liệu:
+
+| # | Khuyết tật | Sửa |
+|---|---|---|
+| 8a | **FAIL-OPEN `approved_by_user` — trên chính cổng sinh ra để fail-closed.** Cổng duyệt chỉ đọc `approved_by`. Nhưng `trading_bot/plan.py:182-183` **hồi sinh** `approved_by` từ `approved_by_user`, và `preflight_check.sh:60` cũng công nhận tên đó. ⇒ plan duyệt bằng tên thay thế **KHÔNG bị từ chối**, `orders[]` bị dựng lại, rồi `load_plan()` gắn lại chữ ký ⇒ **lệnh MỚI chạy dưới chữ ký duyệt của bộ lệnh CŨ**. Hôm nay **0/84** plan mang field đó (đã đo) ⇒ tiềm ẩn, chưa chảy máu | **ĐÃ SỬA**: hằng số `_APPROVAL_KEYS = ("approved_by", "approved_by_user")`, cổng đọc đủ tập, `--force-clear-approval` gỡ chữ ký ở **mọi** tên. Nhóm ca `A5` (7 ca) |
+| 8b | **Lặp lại đúng lỗi RỔ RỖNG của 7a, ở một đường khác của chính README này.** Khối bằng chứng "0 dòng production" dẫn `git status -- data/trade_plans/` như bằng chứng thật — nhưng `.gitignore:12` là `*.json` ⇒ `git ls-files data/trade_plans/` = **0**, lệnh đó **không bao giờ in gì** kể cả khi mọi plan bị ghi đè | **ĐÃ SỬA**: thay bằng md5 + mtime (bảng ở đầu tài liệu), và nói thẳng `data/trade_plans/` **bị git bỏ qua**, không phải được theo dõi |
+
+Bài học 8b đáng ghi hơn bản vá: tôi vừa chẩn đoán lỗi rổ-rỗng ở 7a, viết hẳn một mục về nó, **rồi
+để nguyên một thể hiện khác của cùng lỗi đó cách vài dòng**. Sửa một thể hiện không phải sửa lớp lỗi.
+
+**Và vòng 9 tìm ra thể hiện thứ BA** — lần này nằm ngay trong câu tôi viết để sửa 8b: `git status
+-- mike/bin/` chạy từ thư mục làm việc cũng **rỗng-do-cấu-tạo** (repo ngoài `.gitignore:107` giấu
+`WorkingClaude/mike/`), phải là `git -C mike status -- bin/`. Ba lần cùng một lớp lỗi trong cùng
+một tài liệu ⇒ lần này viết thành **LUẬT CHUNG + bảng 3 đường** ở đầu tài liệu, không sửa thêm một
+câu nữa. Sự thật nền không đổi (repo trong theo dõi 136 file dưới `bin/`, báo sạch) — đây là lỗ
+hổng CÁCH DẪN BẰNG CHỨNG, không phải tuyên bố sai.
+
+**Khuyến nghị vòng 9 đã áp — nhóm `A5b`.** Ca `A5` chỉ ghim ĐÚNG 2 tên đang có ⇒ alias thứ 3 thêm
+ở tầng dưới sau này sẽ **lặng lẽ mở lại lỗ fail-open với selfcheck vẫn xanh** — đúng khuyết tật
+**#6b** (neo bằng danh sách literal) mà vòng 5 đã REFUTED một lần rồi; tôi vừa tái phạm ở tầng
+khác. `A5b` **quét mã nguồn `plan.py` + `preflight_check.sh`** để suy ra tập alias THẬT rồi so với
+hằng số ⇒ biến "một lần grep tay của người" thành **cổng thường trực**. Đã chạy âm bản: trỏ sang
+bản sao `plan.py` có thêm `approved_by_ceo` ⇒ ca ĐỎ, in ra đúng tên alias lạ.
+
+> ⚠️ **Đánh đổi CÓ CHỦ Ý, khai để không ai tưởng là sơ ý:** `A5b` đọc file production — nhìn thì
+> giống thứ `coding_guidelines §23` cấm ("selfcheck không assert lên trạng thái SỐNG"). Khác biệt:
+> nó assert lên **mã nguồn của chính cái hợp đồng đang được canh**, không phải lên dữ liệu thị
+> trường hay một rổ mã đo tại một ngày. Khi nó đỏ, hành động đúng là **thêm tên vào
+> `_APPROVAL_KEYS`**, không phải nới ca test — thông điệp lỗi nói thẳng câu đó. Nếu 2 file kia
+> biến mất, ca "tiền đề" đỏ trước (chống bộ-lọc-rỗng).
+
+Một khuyến nghị nữa đã áp: câu "cờ đó **xoá** `approved_by`" là sai mô tả — code đặt `None`, không
+`del`. Đã sửa câu chữ cho khớp hành vi (và đã đọc tận nơi để xác nhận cả 2 tầng dưới kiểm bằng GIÁ
+TRỊ, không kiểm sự hiện diện của khoá, nên `None` là đủ).
+
+## quant-skeptic vòng 7 — CONFIRMED (medium), nhưng phá được **4 chỗ trong BẰNG CHỨNG**
+
+Vòng 7 không phá được cơ chế (*"could not break the mechanism"*, tự tái lập âm bản 7-ca-đỏ và con
+số 103 bằng 2 phương pháp độc lập với profiler hook của tôi). Nó phá được **thứ người duyệt thật
+sự đọc** — và bài học đáng giữ: *"neither is a code bug, but both sit in exactly the evidence an
+approver would read, and the approver is the only safety mechanism this design has."*
+
+| # | Khuyết tật (BẰNG CHỨNG, không phải code) | Sửa |
+|---|---|---|
+| 7a | **Chứng minh ngược `duplicate_jit_fix_note` là khẳng định trên RỔ RỖNG.** Khoá đó KHÔNG có trong `plan_SpaceX_2026-08-10.json`; bản chạy đầu tự **tiêm** vào rồi trình bày trong bảng ghi rõ "đã đo, không phải fixture". Đúng lớp lỗi mà chính README này chẩn đoán ở khuyết tật #1 | **ĐÃ SỬA bằng CHẠY LẠI**, không phải sửa câu chữ: đo trên `plan_SpaceX_2026-08-07.json` + `plan_ZaloPay_2026-08-07.json` — 2 plan CÓ SẴN khoá đó (bảng ở mục phạm vi) |
+| 7b | **Con số "14 lệnh" cần `--force-clear-approval`, không khai.** Plan thật đã duyệt ⇒ chạy nguyên trạng là REFUSED, 0 lệnh, và `jit_unpark_note` **sống sót** | **ĐÃ SỬA**: khai rõ cả 2 chân (nguyên trạng vs cờ) trong bảng, + ghi thẳng vào comment code: bản mở rộng bảo vệ **cửa sổ TRƯỚC KHI DUYỆT** |
+| 7c | **Nhãn "FILE MỚI, UNTRACKED" đã hết hạn** — `fleet_backup.sh` commit 3 file lúc 17:00 (`ae3aaab1`) ⇒ nay tracked+modified | **ĐÃ SỬA** ở đầu README. Trớ trêu đúng lúc: một cái nhãn không hết hạn, trong tài liệu của bản vá đi chữa nhãn không hết hạn |
+| 7d | Comment code ghi `duplicate_jit_fix_note` chỉ ở ZaloPay — thực tế **cả SpaceX lẫn ZaloPay** 08-07 | **ĐÃ SỬA** |
+
+Hai mục còn lại nhận và đã áp: 5 biến thể `TZ` **nhãn lại là phép thử khói** (không phải bằng
+chứng — module không đọc `datetime`/env nên chúng không phân biệt được gì); và **hợp đồng namespace
+phải ghi ở chỗ writer khác đọc** ⇒ thành việc số 6 trong checklist trước khi wire, kèm số đo bán
+kính ảnh hưởng hôm nay = **0 consumer**.
+
 ## quant-skeptic — 5 vòng; vòng 5 **REFUTED** (đúng), đã sửa lại; 6 khuyết tật + 1 bản neo hỏng
 
 **Vòng 5 — REFUTED (confidence `high`), và nó ĐÚNG.** Nó tách đôi tuyên bố của tôi: bản vá **#6
@@ -156,8 +263,85 @@ vá #6 mô tả cách đó vài dòng):
 | Tầng | merge có sở hữu không? | Cụ thể |
 |---|---|---|
 | Khoá **cấp một của LỆNH** khớp `jit_*` | **CÓ, toàn bộ không gian tên** | bước 0 xoá sạch, bước 5 dựng lại ⇒ writer nào muốn nhãn sống qua merge thì **đừng đặt tên `jit_*`** |
-| Khoá **cấp plan** `jit_unpark_proposal` | **CÓ — đúng một khoá** | bước 6 dựng lại, hoặc **XOÁ** khi vắng artifact (chính bản vá #6) |
-| Mọi khoá `jit_*` **cấp plan** khác | **KHÔNG** | `jit_unpark_note` (có thật trong `plan_SpaceX_2026-08-10.json`) **không bị đụng**. Cố ý để ngoài phạm vi thay vì âm thầm mở rộng quyền sang khoá của writer khác — **cần quyết định riêng khi wire** |
+| Khoá **cấp một của PLAN** khớp `jit_*` | **CÓ, toàn bộ không gian tên** (mở rộng 2026-08-10, **user DUYỆT** — xem mục dưới) | bước **0b** xoá sạch; bước 6 dựng lại đúng `jit_unpark_proposal`; **mọi khoá `jit_*` cấp plan khác VẮNG MẶT sau merge**, kèm cảnh báo nêu đích danh |
+| Khoá cấp plan **không** mang tiền tố `jit_` | **KHÔNG** | `duplicate_jit_fix_note` (có thật trong **CẢ** `plan_SpaceX_2026-08-07.json` **lẫn** `plan_ZaloPay_2026-08-07.json`) — có chữ "jit" nhưng không có tiền tố ⇒ **không bị đụng**. `park_trim_proposal` cũng ngoài namespace, bước 6 tự quản theo luật riêng của nó |
+
+### Mở rộng phạm vi sang CẤP PLAN — quyết định chính sách, **user đã DUYỆT 2026-08-10**
+
+Bản trước cố ý dừng ở "đúng một khoá cấp plan" và ghi rõ *"cần quyết định riêng khi wire"*. User
+quyết: **DỌN LUÔN**. Đây là ca THẬT làm ra quyết định đó, không phải giả thuyết:
+
+`plan_SpaceX_2026-08-10.json` mang khoá cấp plan `jit_unpark_note` do writer lập plan ghi:
+
+> "L2 (`compute_jit_unpark.py`) **KHÔNG chạy** cho plan này — … plan này có **0 lệnh mua BAL/LAG**
+> … **Không có gì cần JIT tài trợ**."
+
+Chạy merge trên chính plan đó với artifact L1/L2 THẬT (`park_trim_SpaceX_2026-08-07.json` +
+`jit_unpark_SpaceX_2026-08-07.json`):
+
+> ⚠️ **Đây là tổ hợp CHÉO NGÀY có chủ ý — đọc kỹ trước khi tự tái lập.** Plan lấy ngày **08-10**
+> (vì chỉ plan đó mang khoá `jit_unpark_note` cần chứng minh), artifact lấy ngày **08-07** (vì
+> artifact 08-10 mỏng hơn). Số lệnh bán phụ thuộc ARTIFACT, không phụ thuộc plan:
+>
+> | plan | artifact | lệnh bán |
+> |---|---|---|
+> | `plan_SpaceX_2026-08-10.json` | **08-07** ← tổ hợp dùng ở bảng trên | **14** |
+> | `plan_SpaceX_2026-08-10.json` | 08-10 | 13 |
+> | `plan_SpaceX_2026-08-07.json` | 08-07 | 14 |
+>
+> Ghép plan 08-10 với artifact 08-10 ra **13**, không phải 14 — một người đọc cẩn thận (chính
+> quant-skeptic vòng 10) đã tái lập nhầm đúng ô này rồi báo README sai số. README **không** sai;
+> bảng trên tồn tại để lần sau không ai mất công đi đường đó nữa. Cả 3 tổ hợp đo lại 2026-08-10,
+> md5 plan production KHÔNG đổi trước/sau (mọi lần chạy đều trên `deepcopy` trong bộ nhớ).
+
+| | trước bản vá | sau bản vá |
+|---|---|---|
+| lệnh bán sinh vào `orders[]` | 14 | 14 |
+| `jit_unpark_note` sau merge | **vẫn còn nguyên** — plan khẳng định "không có gì cần JIT" trong khi `orders[]` có 14 lệnh bán JIT/TRIM | **vắng mặt** ✅ + cảnh báo nêu đích danh khoá đã xoá |
+| bất biến hậu kiểm | PASS | PASS |
+| chạy 2 lần cùng input | — | plan **giống hệt** (trừ khối nhật ký) ✅ |
+
+> ⚠️ **PHẢI đọc kèm bảng trên — hai điều kiện mà bản đầu mục này đã giấu** (quant-skeptic vòng 7
+> bắt được, **nó đúng cả hai**):
+>
+> **(1) Con số 14 lệnh chỉ có khi chạy với `--force-clear-approval`.** `plan_SpaceX_2026-08-10.json`
+> mang `approved_by` thật. Chạy NGUYÊN TRẠNG ⇒ merge **REFUSED, 0 lệnh, và `jit_unpark_note` SỐNG
+> SÓT**. Đó là fail-closed ĐÚNG (ca `S5e (f)` canh chính xác điều đó) — nhưng hệ quả phải nói
+> thẳng: **bản mở rộng này bảo vệ CỬA SỔ TRƯỚC KHI DUYỆT.** Nó không dọn được một plan đã duyệt,
+> trừ khi chạy lại với cờ xoá chữ ký và duyệt lại.
+>
+> **(2) Chứng minh ngược `duplicate_jit_fix_note` đã bị đưa nhầm vào bảng này.** Khoá đó **KHÔNG
+> có** trong `plan_SpaceX_2026-08-10.json` — bản chạy đầu tự **tiêm** nó vào rồi trình bày như đo
+> được trên dữ liệu thật. Đó đúng là **khẳng định trên rổ rỗng**, thứ chính tài liệu này chẩn đoán
+> ở khuyết tật #1. Đã **chạy lại trên 2 plan CÓ SẴN khoá đó** (bảng dưới) thay vì sửa câu chữ.
+
+**Chứng minh ngược — đo lại trên plan NATIVE có `duplicate_jit_fix_note`** (`plan_SpaceX_2026-08-07.json`
++ `plan_ZaloPay_2026-08-07.json`, artifact L1/L2 cùng phiên; cả hai đều mang `approved_by` thật):
+
+| Account | nguyên trạng (đã duyệt) | với `--force-clear-approval` | `duplicate_jit_fix_note` |
+|---|---|---|---|
+| SpaceX 08-07 | **REFUSED**, khoá cũ sống sót (fail-closed) | OK, **14** lệnh bán, `jit_*` cấp plan còn đúng `['jit_unpark_proposal']` | **CÒN NGUYÊN** ✅ (có sẵn, không tiêm) |
+| ZaloPay 08-07 | **REFUSED**, khoá cũ sống sót | OK, **8** lệnh bán, cùng kết quả | **CÒN NGUYÊN** ✅ |
+
+Bất biến hậu kiểm PASS cả hai. `approved_by` bị xoá đúng như hợp đồng của cờ.
+
+Đây đúng **LỚP khuyết tật #5/#6** ("nhãn không bao giờ hết hạn"), chỉ khác tầng: #5 ở nhãn của
+lệnh, #6 ở khối đề xuất nhúng, cái này ở **khoá ghi chú tự do cấp plan**. Và nó nguy hiểm hơn cả
+hai: người duyệt — cơ chế an toàn DUY NHẤT của thiết kế này — đọc một câu **khẳng định ngược hẳn**
+với lệnh thật, bằng văn xuôi tiếng Việt trông rất thuyết phục.
+
+**Xoá theo KHÔNG GIAN TÊN, không theo danh sách tên** — áp đúng bài học vòng 5 (REFUTED): liệt kê
+tên là **quy ước**, không phải bất biến; writer sau đặt `jit_note_v2` là thoát ngay. Ranh giới chữ
+đã ghim bằng test: `jitter_budget_vnd` (có "jit" + "ter") **không** thuộc namespace — ai đổi sang
+`startswith("jit")` thiếu gạch dưới sẽ làm ca đó ĐỎ.
+
+**Cái bẫy bản mở rộng này suýt tự gây ra** (đã vá + có test canh): bước 0b xoá trước ⇒ `p.pop(key)`
+ở bước 6 luôn trả `None` ⇒ cảnh báo "VẮNG MẶT" của **chính bản vá #6** sẽ lặng lẽ biến mất. Bước 6
+nay hỏi **bản ghi** `plan_jit_removed` thay vì pop lần hai; ca `S5e` (c) canh đúng điều đó.
+
+**Hợp đồng cho writer khác** (phải nói ra, vì đây là mở rộng quyền sang khoá của người khác): muốn
+một ghi chú sống qua merge thì **đặt tên KHÔNG bắt đầu bằng `jit_`**. Merge không xoá im lặng —
+mỗi khoá bị xoá đều có một dòng cảnh báo nêu đích danh tên khoá trong report.
 
 **Ranh giới thứ hai — quét CẤP MỘT, không đệ quy.** Khoá `jit_` **lồng** trong dict con
 (`o["meta"]["jit_x"]`) **không** bị bước 0 quét. Hôm nay vô hại (bước 5 chỉ ghi khoá cấp một, đã
@@ -257,7 +441,7 @@ của `check()`** — đúng phương pháp quant-skeptic vòng 3 dùng để b�
 đếm lại, khớp **76**). Sau bản vá thứ 6 (nhóm `S5c` + `S5d`): **84**. Sau khi thay bản neo hỏng bằng xoá-theo-tiền-tố
 (`S5d` viết lại): **85**. Sau 2 mục dư của vòng 6 (ranh giới quét cấp một): **86**.
 
-## Selfcheck — 86/86 PASS
+## Selfcheck — 113/113 PASS
 
 `merge_park_orders_selfcheck.py`. Mọi ca "chặn được" **đều có ca chứng minh NGƯỢC** (§24):
 
@@ -268,10 +452,26 @@ của `check()`** — đúng phương pháp quant-skeptic vòng 3 dùng để b�
 | **P** | PARTIAL (`reconcile_ok=false` + `reconcile_partial=true`) vẫn merge | `P2` bỏ cờ partial ⇒ tầng đó **thật sự** bị từ chối |
 | **S** | trần sellable cắt tại merge, cắt L1 trước | `S2` sellable rộng ⇒ **không** cắt; `S5` ngược lại của `S1` |
 | **A** | không tự duyệt; plan đã duyệt ⇒ REFUSED | `A2` `--force-clear-approval` chạy được nhưng **xoá** approved_by |
+| **A5b** | **cổng THƯỜNG TRỰC**: quét mã nguồn 2 tầng dưới (`plan.py`, `preflight_check.sh`) để TỰ PHÁT HIỆN tập alias `approved_by*`, so với hằng số (3 ca) | thêm 1 alias giả vào tập phát hiện ⇒ phép so **phải gãy** (chống so-hai-tập-rỗng); + đã chạy âm bản thật: trỏ sang bản sao `plan.py` có thêm `approved_by_ceo` ⇒ ca **ĐỎ** đúng như thiết kế |
+| **A5** | cổng duyệt đọc ĐỦ tập tên field mang chữ ký (`approved_by` **và** `approved_by_user`) — bản vá fail-open vòng 8 (7 ca) | `A5` bỏ chữ ký ra ⇒ merge **chạy thật, có sinh lệnh** (ca kia không xanh vì lý do khác); + ca **mô phỏng `plan.py:182-183`** chứng minh nó THẬT SỰ hồi sinh được chữ ký nếu còn sót alias |
+| **S5e** | namespace `jit_*` **CẤP PLAN** dựng-lại-hoặc-vắng-mặt (17 ca): xoá độc lập với L2 được nhận / bị từ chối / vắng artifact; cảnh báo nêu đích danh; idempotent | `S5e (d)` khoá cấp plan **ngoài** `jit_` (`duplicate_jit_fix_note`, `plan_note`, `jitter_budget_vnd`, `account`, `plan_date`) **còn nguyên**, đi kèm ca xác nhận merge ĐÚNG LÀ có xoá thật ở cùng plan đó (nếu không, ca chứng minh ngược xanh vì merge chẳng làm gì) |
 | **V** | 6 bất biến + biên (ref_price lệch, amendment mồ côi, artifact rác, plan rỗng, mua ở priority 0) | `V1b` khôi phục clamp cũ ⇒ FAIL 3/3; `V11` I3b sạch khi thứ tự đúng; `V10` plan đầu vào không bị mutate |
 
-**Độc lập môi trường** (skill `verify-before-done`): bằng chứng THẬT là **module không có phụ
-thuộc môi trường nào để mà hỏng** — chỉ `argparse, copy, json, os, sys`, không `datetime`, không
+**Đếm bằng phương pháp TRỰC TIẾP** (profiler hook trên code object của `check()`, KHÔNG grep
+output — bài học đã rút 2 lần trong chuỗi này): **113 lần gọi `check()` thật, 0 FAIL**, khớp đúng
+số dấu ✔ in ra. Trước bản mở rộng cấp plan là 86 ⇒ **+17 ca `S5e`**, rồi **+7 ca `A5`** (bản vá fail-open vòng 8) **+3 ca `A5b`** (cổng thường trực vòng 9) = **113**.
+
+**Chứng minh ngược Ở CẤP CƠ CHẾ** (không chỉ ở cấp ca): gỡ đúng 2 dòng thực thi của bước 0b ra rồi
+chạy lại ⇒ **7 ca ĐỎ** (6 ca `S5e` + `S5c` — `S5c` đỏ vì bản vá #6 và bước 0b nay là một cặp coupled,
+đúng như comment ghi). Bản vá không phải "thêm test cho hành vi đã có sẵn".
+
+Bản vá fail-open vòng 8 có âm bản riêng: quay `_APPROVAL_KEYS` về `("approved_by",)` (cổng cũ) ⇒
+**5 ca `A5` đỏ**, ca đầu trả đúng `status=OK` trên plan duyệt bằng `approved_by_user` — tức là
+**tái lập được chính lỗ fail-open**, không phải chỉ "test chuyển đỏ".
+
+**Độc lập môi trường** (skill `verify-before-done`) — **5 biến thể `TZ` là PHÉP THỬ KHÓI, KHÔNG
+phải bằng chứng** (quant-skeptic nêu vòng 5, nhắc lại vòng 7 vì tôi vẫn liệt kê nó như bằng chứng
+trong payload bus): bằng chứng THẬT là **module không có phụ thuộc môi trường nào để mà hỏng** — chỉ `argparse, copy, json, os, sys`, không `datetime`, không
 `TZ`, không env var, không mạng, không giờ. quant-skeptic vòng 5 nói đúng: chạy dưới nhiều `TZ`
 với module này là bằng chứng **rỗng** — giữ lại như phép thử khói rẻ tiền, KHÔNG tính là bằng
 chứng. Selfcheck PASS dưới **5 biến thể liệt kê tường minh** (không nói tổng, nói tên — quant-skeptic
@@ -310,7 +510,7 @@ Chạy qua `for_each_live_account.sh` để account mới tự có. **Chưa đ�
 Thiết kế hiện tại chọn **giữ nguyên approval gate**, cụ thể:
 - luôn đặt `requires_user_approval=true`, **không bao giờ** ghi `approved_by`;
 - plan **đã có** `approved_by` ⇒ **TỪ CHỐI** sửa (sửa lệnh sau khi duyệt = vô hiệu hoá chữ ký);
-  muốn sửa thật phải `--force-clear-approval`, và cờ đó **xoá** `approved_by` để buộc duyệt lại.
+  muốn sửa thật phải `--force-clear-approval`, và cờ đó **đặt `None`** (không `del`) cho **mọi tên field mang chữ ký** — `approved_by` **và** `approved_by_user` — để buộc duyệt lại. Cả 2 tầng dưới kiểm bằng GIÁ TRỊ (`not d.get(...)` / `or`), không kiểm sự hiện diện của khoá, nên `None` là đủ; đã đọc tận nơi để khẳng định.
 
 Khuyến nghị của tôi: **giữ nguyên** — merge chỉ chuyển đề xuất từ key phụ vào `orders[]`, nó
 không làm cho đề xuất đó đúng hơn, và đây là đường sinh lệnh bán/mua tiền thật của cả 2 account.
@@ -341,7 +541,15 @@ Nhưng đây là **quyết định chính sách**, không phải kỹ thuật �
    tự bảo đảm 1 lệnh/`(sell,ticker)` trong vùng của nó; hoặc (b) cho merge phát ra một field để
    preflight phân biệt. Không quyết ⇒ một plan hợp lệ có lệnh bán cùng mã của writer khác sẽ làm
    preflight ĐỎ. Đây là **sửa file của người khác** ⇒ cần dispatch riêng, không gộp vào bản này.
-6. **Ghi HỢP ĐỒNG nhánh REFUSED tại CHỖ GỌI, không chỉ trong docstring** (quant-skeptic vòng 4).
+6. **Ghi HỢP ĐỒNG namespace `jit_*` ở NƠI WRITER KHÁC SẼ ĐỌC, không phải trong README này**
+   (quant-skeptic vòng 7). Merge nay sở hữu toàn bộ `jit_*` ở CẢ hai tầng ⇒ script lập plan nào
+   muốn một ghi chú sống qua merge thì **đừng đặt tên `jit_*`**. Chỗ đúng để ghi là chính các
+   script sinh plan, không phải tài liệu của tôi. **Bán kính ảnh hưởng hôm nay = 0, đã ĐO** (ghi
+   lại đây để writer sau khỏi phải suy lại): khoá `jit_*` cấp plan do writer khác ghi hiện chỉ có
+   `jit_unpark_note`, và `grep` toàn repo cho **0 consumer** — không script nào đọc nó. Nó thuần
+   là văn xuôi cho NGƯỜI DUYỆT đọc, và đó chính là lý do nó nguy hiểm chứ không phải lý do nó vô hại.
+
+7. **Ghi HỢP ĐỒNG nhánh REFUSED tại CHỖ GỌI, không chỉ trong docstring** (quant-skeptic vòng 4).
    `merge_park_orders()` trả về plan **NGUYÊN VẸN** khi REFUSED — kể cả nhãn `jit_*` cũ. CLI hiện
    tại đúng (`main()` chỉ ghi khi `status == "OK"`), nhưng một caller lập trình tương lai ghi file
    trên trạng thái khác OK sẽ **mở lại khuyết tật #5 bằng cửa sau**. Khi wire vào pipeline, chặn
@@ -353,7 +561,7 @@ Nhưng đây là **quyết định chính sách**, không phải kỹ thuật �
 cd /home/trido/thanhdt/WorkingClaude
 cp mike/agents/Taylor/pending_park_merge_20260810/merge_park_orders.py mike/bin/
 cp mike/agents/Taylor/pending_park_merge_20260810/merge_park_orders_selfcheck.py mike/bin/
-python3 mike/bin/merge_park_orders_selfcheck.py          # kỳ vọng: PASS (86 ca)
+python3 mike/bin/merge_park_orders_selfcheck.py          # kỳ vọng: PASS (113 ca)
 # dry-run trên plan thật, KHÔNG ghi (mặc định là dry-run):
 python3 mike/bin/merge_park_orders.py --account SpaceX --plan-date <YYYY-MM-DD>
 ```
@@ -373,13 +581,41 @@ báo cáo, không đụng plan.
 | 1e | quant-skeptic vòng 5 (sau bản vá #6 + `_annotate_buy`) | ⚠️ **REFUTED (high)** — #6 đứng vững, bản neo #6b hỏng (quy ước ≠ bất biến). Đã thay bằng xoá-theo-tiền-tố |
 | 1f | quant-skeptic vòng 6 (sau xoá-theo-tiền-tố) | ✅ **CONFIRMED (high)** — tự chạy lại probe vòng 5: nhãn thứ 4 KHÔNG còn sống sót, selfcheck ĐỎ đúng chỗ. 2 mục dư (câu phạm vi sai + ranh giới cấp một chưa có test) **đã sửa nốt sau verdict**, selfcheck 86/86 |
 | 2 | User/Mike duyệt — chạm đường sinh lệnh LIVE cả 2 account | ⛔ chưa |
+| 1g | **Mở rộng phạm vi sang khoá `jit_*` CẤP PLAN** (job `Taylor_20260810_172111`) | ✅ **user DUYỆT chính sách 2026-08-10** ("dọn luôn"); selfcheck 103/103 (đếm bằng profiler hook), chứng minh ngược ở cấp cơ chế: gỡ 2 dòng bước 0b ⇒ **đúng 7 ca đỏ** |
+| 1h | quant-skeptic vòng 7 (trên bản mở rộng cấp plan) | ✅ **CONFIRMED (medium)** — *"could not break the mechanism"*; tự tái lập 103 bằng **2 phương pháp độc lập** (AST 99 call-site + vòng lặp A4 5 nhánh = 103; đếm runtime 103), tái lập âm bản 7-ca-đỏ từ đầu, tái lập chạy thật 14 lệnh. **Nhưng phá được 4 chỗ trong BẰNG CHỨNG (không phải trong code)** — xem dưới, cả 4 ĐÃ SỬA |
+| 1j | quant-skeptic vòng 9 (sau bản vá fail-open) | ✅ **CONFIRMED (`high`)** — tự chạy **mutation kill** xác nhận test khớp CƠ CHẾ chứ không phải 'sửa cho xanh'; 2 đòn tấn công thêm đều trượt (không có alias thứ 3; `--force-clear-approval` không thể để plan chạy mà không cần duyệt vì `requires_user_approval=True` đặt vô điều kiện). **Còn 1 dư: lần thứ BA của lỗi rổ-rỗng** (`git status -- mike/bin/` không nói rõ repo) ⇒ đã sửa thành LUẬT CHUNG + bảng 3 đường; và khuyến nghị biến grep-tay thành cổng thường trực ⇒ nhóm `A5b` |
+| 1i | quant-skeptic vòng 8 (sau khi sửa 4 khuyết tật bằng chứng) | ✅ **CONFIRMED (`high`)** — xác nhận cả 4 đã sửa **bằng chạy lại chứ không phải sửa câu chữ**; tự tái lập mọi con số tới từng đơn vị (103, 14, 8, REFUSED-0-lệnh, idempotent, md5/mtime production). **Phá thêm 2 chỗ**: (a) lỗ **FAIL-OPEN `approved_by_user`** — lỗi CODE thật; (b) lặp lại đúng lỗi rổ-rỗng ở một đường khác của chính README. Cả 2 ĐÃ SỬA ⇒ selfcheck 110/110 |
+| 1k | quant-skeptic vòng 10 (attempt 2 — xác minh ĐỘC LẬP, **0 dòng code đổi**) | ✅ **CONFIRMED (`high`)** — lý do phải chạy: mtime cả 3 file là **18:00:12Z**, SAU mốc verify vòng 9 (17:55:41Z) ⇒ không được giả định "artifact đã verify == artifact hiện tại". Tự chạy lại: **113/113** (profiler), **4/4 mutation kill** (M1a=7 · M1b=10 · M2=6 · M3=1), 5/5 biến thể môi trường. **1 khuyến nghị của reviewer BỊ BÁC** — xem ô md5 dưới |
 | 3 | Quyết định chính sách: giữ hay bỏ approval gate sau merge | ⛔ chưa (user quyết) |
-| 4 | 5 việc "phải làm trước khi wire" ở trên | ⛔ chưa |
+| 4 | 7 việc "phải làm trước khi wire" ở trên | ⛔ chưa |
 | 5 | ≥1 phiên shadow (chạy dry-run, đối chiếu với plan người duyệt) | ⛔ chưa |
+
+### Mốc verify vòng 10 — md5 của ĐÚNG bytes đã được kiểm
+
+**Nguyên nhân gốc của cả vòng 10**: 3 file bị ghi lại lúc `18:00:12Z`, sau mốc verify vòng 9
+(`17:55:41Z`), mà không có md5/commit nào chụp lại ⇒ không cách nào chứng minh từ git rằng bản đã
+verify chính là bản đang nằm đây. Phải chạy lại TOÀN BỘ chỉ để trả lời một câu đáng lẽ tra 1 giây.
+Từ nay **ghi md5 ngay tại mốc verify**:
+
+| file | md5 (mốc vòng 10, 2026-08-10) |
+|---|---|
+| `merge_park_orders.py` | `4559edd41926e1eb0440dd02fa6faae2` |
+| `merge_park_orders_selfcheck.py` | `57d2367e8da1fd23e3596e66efe59d23` |
+
+Đây là 2 file mà 113 ca selfcheck + 4 mutation kill của vòng 10 CHẠY TRÊN. README không có md5 (nó
+đang tự sửa chính nó ở đây) — neo của README là **commit của job này**, không phải mtime.
+
+> **Một khuyến nghị của quant-skeptic vòng 10 BỊ BÁC — có số đo.** Reviewer báo README sai khi gán
+> con số 14 lệnh cho `plan_SpaceX_2026-08-10.json` ("thực tế ra 13"). Đo lại cả 3 tổ hợp: plan 08-10
+> **+ artifact 08-07** (đúng tổ hợp README ghi ở dòng ngay trên bảng) ⇒ **14**; plan 08-10 + artifact
+> 08-10 ⇒ 13; plan 08-07 + artifact 08-07 ⇒ 14. README **đúng**; reviewer đã ghép nhầm artifact cùng
+> ngày. Không sửa số — đã thêm bảng 3 tổ hợp ở mục phạm vi để lần sau không ai đi lại đường đó.
+> (3 khuyến nghị còn lại: 1 đã có sẵn trong README từ trước — nhãn "phép thử khói" cho 5 biến thể
+> môi trường; 1 đã áp — chính ô md5 này; 1 là việc #5 `MERGE_STALE_SRC` vẫn treo, cần dispatch riêng.)
 
 **Đây là sửa CƠ CHẾ AN TOÀN, không phải chiến lược** — không tham số nào tune theo lịch sử, không
 backtest NAV nào đứng sau ⇒ không áp chuẩn DSR/PBO. Bằng chứng = A/B trên đúng dữ liệu 2 tài khoản
-phiên 2026-08-07 + 86 ca selfcheck có chứng minh ngược.
+phiên 2026-08-07 + 113 ca selfcheck có chứng minh ngược.
 
 **n=1 ngày.** A/B đứng trên đúng một phiên (2 account). Không có ý nghĩa thống kê và cũng không cần
 — đây là bất biến cơ chế, không phải edge. Nhưng nó cũng có nghĩa: **chưa từng có ngày PARTIAL thật
