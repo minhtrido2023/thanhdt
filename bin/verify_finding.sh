@@ -118,9 +118,17 @@ raw=m.group(1).strip()
 try:
     obj=json.loads(raw)
 except Exception as e:
-    print(json.dumps({"finding_topic":topic,"verdict":"INCONCLUSIVE","confidence":"low",
-        "summary":"VERDICT_JSON present but unparseable: %s"%e,"checks":{}}))
-    sys.exit(0)
+    # Reviewer models routinely leave a trailing comma before a closing `}`/`]`
+    # (valid in JS/Python literals, invalid JSON) — strip it and retry once
+    # before giving up. Recurred 3x same-day 2026-08-10, silently downgrading
+    # real CONFIRMED/high verdicts to INCONCLUSIVE/low on the bus.
+    repaired = re.sub(r",(\s*[}\]])", r"\1", raw)
+    try:
+        obj=json.loads(repaired)
+    except Exception:
+        print(json.dumps({"finding_topic":topic,"verdict":"INCONCLUSIVE","confidence":"low",
+            "summary":"VERDICT_JSON present but unparseable: %s"%e,"checks":{}}))
+        sys.exit(0)
 obj.setdefault("finding_topic", topic)
 print(json.dumps(obj, ensure_ascii=False))
 PY
