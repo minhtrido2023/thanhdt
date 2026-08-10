@@ -48,3 +48,6 @@
 
 ## Archived 2026-08-10 (keep=12 days=0 require_done=False)
 - [2026-07-30T12:14:23Z] Plan ZaloPay 2026-07-31 DONE — HOLD, orders[]=empty. BAL AGG deferred (cash 5.78M < slot 24.45M, cần bán PARK ~19M + user approve). DHD LAG cửa sổ 08-01, MAC/TV3 08-04. Chờ user duyệt trước 08:45 ICT 07-31. NEXT: user approve/reject plan + quyết định AGG rebalance.
+
+## Archived 2026-08-10 (keep=12 days=0 require_done=False)
+- [2026-07-31T12:13:26Z] plan_SpaceX_2026-08-03.json DONE (HOLD ALL, 0 lệnh). Cash 4.55M. Deferred 4 lệnh 191.8M (PVT+SIP+VNM CAPIT topup + AGG BAL). DHD skip (ngoài model). TV2 LAG cửa sổ 08-04 cần cash. DCM LAG cửa sổ 08-05. | NEXT: user duyệt plan 08-03 trước 08:45 sáng 08-03.
