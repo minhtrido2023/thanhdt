@@ -162,6 +162,22 @@ def main():
                 "loan_package_id=_eff_lp" in qmax_call
                 and 'getattr(o, "loan_package_id"' not in qmax_call, qmax_call.strip())
 
+    # ── 8. Lệnh BÁN không cash_only ⇒ place_order KHÔNG resolve theo mã (bug 08-10) ──────
+    print("[8] Lệnh BÁN (không cash_only, không đòn bẩy) — place_order phải gửi lp=None")
+    b = make_broker([UPCOM_PKG])
+    b.place_order("BID", 600, "sell", price=18000, cash_only=False, loan_package_id=None)
+    sent = b.client.sent[-1][1]
+    ok &= check("place_order gửi lp=None cho lệnh BÁN (DNSE tự chọn deal)", sent is None,
+                f"sent={sent}")
+
+    # ── 9. Lệnh MUA vẫn resolve theo mã như [1]/[2] (không hồi quy khi vá #8) ───────────
+    print("[9] Lệnh MUA UPCOM sau khi vá #8 — vẫn resolve như trước (không hồi quy)")
+    b = make_broker([UPCOM_PKG])
+    b.place_order("DRI", 100, "buy", price=12000, cash_only=False, loan_package_id=None)
+    sent = b.client.sent[-1][1]
+    ok &= check("place_order vẫn resolve gói hợp lệ cho lệnh MUA", sent == UPCOM_PKG,
+                f"sent={sent}")
+
     print("\n" + ("ALL PASS" if ok else "FAILED"))
     return 0 if ok else 1
 

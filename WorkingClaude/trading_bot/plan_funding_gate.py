@@ -163,13 +163,20 @@ def _effective_loan_package(order, broker):
         # giả định đòn bẩy áp được: đo bằng gói default cho sức mua NHỎ HƠN — cùng chiều
         # fail-safe với chính `place_order` (thà chặn/under-deploy còn hơn vay vượt mức).
         return _account_default_package(broker), "lever:unvalidated→account_default"
+    # side=="sell" (không đòn bẩy chỉ định) — `place_order` KHÔNG resolve theo mã cho lệnh
+    # bán (vá 2026-08-10, ca ZaloPay PARK: resolve theo mã ép DNSE tìm deal đúng gói vay,
+    # deal PARK/vị thế cũ không nằm trong gói đó → HTTP 400 "deal not found"). Gate phải
+    # giải y hệt place_order, kể cả khi hiện tại mọi caller đã lọc buy-only trước khi tới
+    # đây — nếu sau này có caller mới đưa lệnh bán vào, guard này chặn nó lặp lại đúng bug.
+    if getattr(order, "side", None) != "buy":
+        return None, "sell:no-resolve"
     fn = getattr(broker, "_resolve_loan_package_id", None)
     if callable(fn):
         try:
             # Cùng hàm, cùng cache theo symbol trong phiên → không thể lệch với place_order.
             # KHÔNG còn điều kiện `cash_only` (sửa 2026-08-07, ca DRI/UPCOM): `place_order`
-            # nay giải gói theo MÃ cho MỌI lệnh không có đòn bẩy chỉ định, nên gate phải giải
-            # y hệt — lệch chính là nguồn false positive mà docstring module cảnh báo.
+            # nay giải gói theo MÃ cho MỌI lệnh MUA không có đòn bẩy chỉ định, nên gate phải
+            # giải y hệt — lệch chính là nguồn false positive mà docstring module cảnh báo.
             return fn(order.ticker), "resolved:symbol"
         except Exception:
             pass
