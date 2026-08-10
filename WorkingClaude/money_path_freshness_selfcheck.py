@@ -77,9 +77,13 @@ calls = {"dnse": 0, "bq": 0}
 DNSE_PX = {"DGC": 51.0, "VPB": 22.5}
 
 
-def fake_dnse_close_prices(tickers):
+def fake_dnse_close_prices(tickers, with_source=False):
+    """`with_source` thêm 2026-08-11 (job Taylor_20260810_183618): mã đang GDKHQ lấy giá tham
+    chiếu phiên hôm nay (secdef.basicPrice) thay giá đóng cửa phiên trước, nên provenance phải
+    phân biệt được hai nguồn. Fake phải nhận kwarg này, nếu không nó chỉ đang test chữ ký cũ."""
     calls["dnse"] += 1
-    return {t: DNSE_PX[t] for t in tickers if t in DNSE_PX}
+    px = {t: DNSE_PX[t] for t in tickers if t in DNSE_PX}
+    return (px, {t: "dnse_g1_today" for t in px}) if with_source else px
 
 
 def fake_bq_close_prices(tickers, as_of_date=None):
@@ -100,13 +104,13 @@ calls.update(dnse=0, bq=0)
 px, src, err = can.resolve_prices(["DGC", "VPB"], None)
 check("A1 asof=None → DNSE-live branch, BQ untouched",
       calls == {"dnse": 1, "bq": 0} and px == DNSE_PX
-      and set(src.values()) == {"dnse_g1"} and err is None,
+      and set(src.values()) == {"dnse_g1_today"} and err is None,
       f"calls={calls} src={src}")
 
 calls.update(dnse=0, bq=0)
 px, src, err = can.resolve_prices(["DGC"], today)
 check("A2 asof=today → DNSE-live branch, BQ untouched",
-      calls == {"dnse": 1, "bq": 0} and src == {"DGC": "dnse_g1"},
+      calls == {"dnse": 1, "bq": 0} and src == {"DGC": "dnse_g1_today"},
       f"calls={calls}")
 
 calls.update(dnse=0, bq=0)
@@ -124,7 +128,7 @@ finally:
     sys.stderr = _stderr
 check("A4 DNSE misses a ticker → per-ticker BQ fallback MARKED bq_close_stale + loud warning",
       px == {"DGC": 51.0, "XXX": 99.9}
-      and src == {"DGC": "dnse_g1", "XXX": "bq_close_stale"}
+      and src == {"DGC": "dnse_g1_today", "XXX": "bq_close_stale"}
       and "XXX" in warn_txt and "23:45" in warn_txt,
       f"src={src}")
 
