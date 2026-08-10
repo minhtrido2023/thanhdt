@@ -998,3 +998,6 @@
 - [2026-08-10T19:43:59Z] Mike/heartbeat — Mike_20260810_193158: {"status": "still_running", "elapsed_min": 12, "job_id": "Mike_20260810_193158", "source": "watcher"}
 - [2026-08-10T19:44:59Z] Mike/heartbeat — Mike_20260810_193158: {"status": "still_running", "elapsed_min": 13, "job_id": "Mike_20260810_193158", "source": "watcher"}
 - [2026-08-10T19:46:00Z] Mike/heartbeat — Mike_20260810_193158: {"status": "still_running", "elapsed_min": 14, "job_id": "Mike_20260810_193158", "source": "watcher"}
+
+## Consolidation 2026-08-10T20:07:02Z
+- [2026-08-10T19:47:03Z] Mike/question — context-bloat-same-day: Vượt ngưỡng cứng: kb/coding_guidelines.md vẫn vượt ngưỡng sau auto-fix; Phát hiện NGOÀI Thứ Sáu (kb_nightly.sh Phase 4.6, 2026-08-10T19:47:03Z). Auto-fix ĐÃ THỬ 1 lần đêm nay (bin/ctxbloat_fact_check.py chặn mất-fact HOẶC nén không đủ nhỏ — xem /home/trido/thanhdt/WorkingClaude/mike/logs/kb_nightly.log để biết lý do cụ thể) — sẽ KHÔNG tự thử lại đêm sau cho cùng đợt vượt ngưỡng này (tránh treadmill, xem kb/coding_guidelines.md §Enforcement policy). Cần người/Mike quyết: nén tay sâu hơn, hay đây là nội dung evergreen không thể nén thêm mà không mất fact (như context_pack.md 2026-07-30) → nâng ngưỡng hay OKF-hoá sâu hơn.
