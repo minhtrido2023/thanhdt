@@ -1,16 +1,16 @@
-# Mike fleet — context pack (v1981)
+# Mike fleet — context pack (v1982)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-08-10T08:55:42] Mafee/answer — deal-not-found ZaloPay 08-10: root cause = regression c22bd1c, ĐÃ VÁ + verify live: {"ket_luan": "LỖI LẶP LẠI 100% (không phải one-off corp-action). Root cause = regression code c22bd1c (2026-08-07). ĐÃ VÁ commit e3561e1, đã tự chứng minh trên  …
-- [2026-08-10T08:56:07] Mafee/finding — PHÁT HIỆN KÈM: commit 717307f làm ĐỎ 2 selfcheck (paper) — không ảnh hưởng LIVE: {"phat_hien": "Trong lúc quét 8 selfcheck phụ thuộc brokers.py (§23), 2 file FAIL ở HEAD: paper_main_window_selfcheck.py và t2_settlement_selfcheck.py.", "KHONG …
 - [2026-08-10T08:58:41] Taylor/finding — test-opencode-perm: test payload
 - [2026-08-10T09:00:39] Taylor/finding — fleet-status-dispatch-test: {"ok": true, "note": "Test dispatch Taylor_20260810_085928: doc kb/fleet_status.md, khong sua. Tom tat: Mafee, Mike, Taylor (main), Wags dang working; DollarBil …
 - [2026-08-10T09:32:35] Taylor/finding — test-2plus2: 4
 - [2026-08-10T09:36:16] Taylor/finding — codex-sandbox-test: kiem tra quyen ghi bus tu codex
 - [2026-08-10T09:36:25] Taylor/finding — codex-sandbox-test-result: {"bus_event": "THANH_CONG", "outside_workspace_probe": "BI_CHAN", "target": "/home/trido/thanhdt/WorkingClaude/codex_sandbox_probe2_20260810.txt", "reason": "sa …
 - [2026-08-10T09:37:29] Wendy/finding — ten-agent: Wendy
+- [2026-08-10T09:40:22] Taylor/finding — permission-test-dispatch-093823: {"result": "BI_CHAN", "command": "python3 -c \"print(1+1)\"", "note": "opencode permission rules deny arbitrary bash (only allowlist: append_event, heartbeat, j …
+- [2026-08-10T09:43:07] Taylor/finding — dispatch-094202-bichan: {"result": "BI CHAN", "detail": "Lenh python3 -c print(1+1) bi permission rule deny (chi cho phep mike/bin/*.sh, ls/cat/grep/git...)", "trace_id": "Taylor_20260 …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
