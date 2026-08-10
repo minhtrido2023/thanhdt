@@ -64,13 +64,25 @@ print(f"orders[]: {len(orders)} lệnh ({len(buy)} mua, {len(sell)} bán)")
 for o in buy:
     print(f"  MUA {o['ticker']:6s} {o.get('qty'):>6} cp @ {o.get('ref_price',0):>10,.0f}đ  "
           f"priority={o.get('priority')}")
+cash_before = (plan.get("nav_basis") or {}).get("available_cash_before_vnd")
+cash_src = "nav_basis.available_cash_before_vnd"
+if cash_before is None:
+    cash_before = (plan.get("orders_summary") or {}).get("available_cash_before_vnd")
+    cash_src = "orders_summary.available_cash_before_vnd (fallback)"
+if cash_before is None:
+    cash_before = 0
+    cash_src = "KHÔNG CÓ trong plan — fallback 0 (không đoán số)"
+funding_total = cash_before + sell_net
+
 print(f"  Σ MUA (+phí) = {buy_total:,.0f} VND")
 print(f"  Σ BÁN ròng (−phí) = {sell_net:,.0f} VND ({len(sell)} lệnh)")
-if sell_net < buy_total:
-    print(f"❌ Σ BÁN ({sell_net:,.0f}) < Σ MUA ({buy_total:,.0f}) — KHÔNG đủ tiền tài trợ. "
-          f"DỪNG LẠI, không duyệt.", file=sys.stderr)
+print(f"  Tiền mặt sẵn có = {cash_before:,.0f} VND  [{cash_src}]")
+print(f"  Σ NGUỒN TÀI TRỢ (tiền mặt + bán ròng) = {funding_total:,.0f} VND")
+if funding_total < buy_total:
+    print(f"❌ NGUỒN TÀI TRỢ ({funding_total:,.0f}) < Σ MUA ({buy_total:,.0f}) — KHÔNG đủ tiền "
+          f"tài trợ. DỪNG LẠI, không duyệt.", file=sys.stderr)
     sys.exit(2)
-print(f"  ✅ Σ BÁN >= Σ MUA (chênh lệch +{sell_net-buy_total:,.0f} VND)")
+print(f"  ✅ NGUỒN TÀI TRỢ >= Σ MUA (chênh lệch +{funding_total-buy_total:,.0f} VND)")
 
 if plan.get("approved_by") not in (None, ""):
     print(f"❌ plan ĐÃ CÓ approved_by={plan.get('approved_by')!r} — không ghi đè.",
