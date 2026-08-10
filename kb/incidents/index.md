@@ -165,6 +165,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Tóm tắt (nguyên văn tiêu đề) | status |
 |---|---|---|
+| 2026-08-10 | [RETRO — 2026-08-10: 7 sự cố, 3 pattern xuyên suốt (1 pattern ĐÃ ESCALATE ngày trước, VẪN chưa có quyết định sau retro thứ 3 liên tiếp — 1 pattern MỚI khẩn: SpaceX T+1 mất tích, tái diễn hình dạng sự cố ngày trước)](retro/retro-2026-08-10.md) | logged |
 | 2026-08-09 | [RETRO — 2026-08-09: 7 sự cố, 4 pattern xuyên suốt (2 ĐẠT NGƯỠNG ESCALATE — 1 tiếp tục theo mục 6, 1 mới nhưng đủ nghiêm trọng để nêu bật ngay dù chưa đạt ngưỡng cứng)](retro/retro-2026-08-09.md) | logged |
 | 2026-08-08 | [RETRO — 2026-08-08: 1 sự cố mới, 1 đóng thành công (Pattern 1 test-bus-pollution FIXED_VERIFIED cùng ngày), 1 pattern quy trình MỚI formal hoá (backlog ghi file kb/incidents/ — 4 retro liên tiếp chưa từng có Prevention)](retro/retro-2026-08-08.md) | logged |
 | 2026-08-07 | [RETRO — 2026-08-07: 11 sự cố, 4 pattern xuyên suốt (1 ESCALATE — test-code-pollutes-bus tái diễn sau khi đã formal hoá + đề xuất Prevention ở retro 08-05 mà chưa triển khai)](retro/retro-2026-08-07.md) | logged |
