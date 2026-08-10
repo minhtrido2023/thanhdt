@@ -88,7 +88,10 @@ DEFAULTS = {
     # LAG/BAL; (3) cache `intraday_full.pkl` STALE, hết 2026-05-12 (2026 chỉ 84 phiên);
     # (4) giá thực thi là XẤP XỈ `(H+L+C)/3` của block, KHÔNG phải fill thật; (5) bỏ ATC 14:45.
     # DEFAULT OFF + fill_timing_live_gate ⇒ paper-only; bật LIVE cần user duyệt riêng.
-    "fill_timing_hybrid_enabled": False,   # DEFAULT OFF — cần fill_timing_enabled=True mới có hiệu lực
+    # BẬT TRÊN PAPER 2026-08-10 (job Taylor_20260810_034544, quant-skeptic CONFIRMED). VẪN LÀ
+    # PAPER-ONLY: `fill_timing_live_gate=True` chặn mọi account mode="live" — muốn chạy LIVE phải
+    # TẮT `fill_timing_live_gate` (quyết định RIÊNG, ảnh hưởng cả layer fill-timing, CHƯA duyệt).
+    "fill_timing_hybrid_enabled": True,    # PAPER 2026-08-10 (was False) — cần fill_timing_enabled=True
     # Nhãn block = ĐÚNG các nến 15' đã đo (trung bình của chúng tái lập chính xác −6,94/+8,89 bps
     # trong §6 báo cáo) — KHÔNG phải "chia đều N điểm trong khoảng", vì khoảng 11:00-13:45 có
     # nghỉ trưa HOSE 11:30-13:00 (chia đều theo đồng hồ sẽ rơi vào lúc thị trường đóng).

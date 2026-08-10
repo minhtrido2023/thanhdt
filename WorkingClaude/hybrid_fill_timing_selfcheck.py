@@ -134,7 +134,11 @@ BLK = DEFAULTS["hybrid_block_min"] / DEFAULTS["slice_interval_min"]   # 15/8 = 1
 
 # ───────────────────────────── A. Regression: cờ TẮT ⇒ hành vi CŨ nguyên vẹn
 print("\nA. Regression — fill_timing_hybrid_enabled=False (mặc định)")
-check("mặc định trong DEFAULTS là TẮT", DEFAULTS["fill_timing_hybrid_enabled"] is False)
+# PAPER 2026-08-10 (job Taylor_20260810_034544, quant-skeptic CONFIRMED vòng 5, user duyệt):
+# DEFAULTS nay là True (bật trên paper). fill_timing_live_gate vẫn True nên KHÔNG account
+# live nào bị ảnh hưởng — mọi test bên dưới dùng hybrid=False TƯỜNG MINH (không dựa DEFAULTS)
+# nên hành vi "cờ tắt" vẫn được test đủ dù DEFAULTS đã đổi.
+check("mặc định trong DEFAULTS là BẬT (PAPER 2026-08-10)", DEFAULTS["fill_timing_hybrid_enabled"] is True)
 ob, os_ = order("buy"), order("sell")
 ex_off = mk([ob, os_], hybrid=False)
 old = {(s, h, m): mk([ob, os_], hybrid=False)._fill_timing_mult(ob if s == "buy" else os_, T(h, m))
