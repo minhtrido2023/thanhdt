@@ -1005,8 +1005,15 @@ JSET job_id="$job_id" from="$from" to="$id" status=running attempt=1 dispatcher_
 # guard tưởng đã nhìn thấy log của job và không ai giữ ⇒ kết luận CHẾT trên worker còn sống
 # (arch-reviewer round 5, N5). Pipeline phía sau (`> "$logfile"`, `2>"$logfile.err"`,
 # `| tee "$logfile"`) chỉ TRUNCATE đúng inode này, không tạo inode mới.
-# `|| true`: ghim là lớp phòng thủ, hỏng ghim không bao giờ được phép chặn 1 dispatch.
-python3 "$ROOT/bin/mike_json.py" job-pin-log "$JOBS_DIR" "$job_id" >/dev/null 2>&1 || true
+# `|| true`: ghim là lớp phòng thủ, hỏng ghim không bao giờ được phép chặn 1 dispatch — nhưng
+# hỏng thì job-pin-log tự ghi `pin_failed=1` lên record để chế độ guard yếu hơn KHÔNG vô hình
+# (round 6, K2/NICE5: cả 751 record trên board đều chưa ghim mà không ai từng thấy).
+# MIKE_JOB_OWNER: y hệt JSET — job-pin-log chỉ cho phép TẠO ghim khi người gọi chứng minh được
+# mình là dispatch.sh sở hữu đúng job này VÀ record vừa mới sinh (< EVIDENCE_GRACE_S). Gọi muộn
+# hơn hoặc từ tiến trình khác chỉ được phép ghim theo inode mà worker CÒN SỐNG đang giữ, không
+# bao giờ theo đường dẫn (round 6, K3: chính lệnh này từng biến UNKNOWN thành DEAD trong 1 nốt).
+MIKE_JOB_OWNER="$job_id" python3 "$ROOT/bin/mike_json.py" job-pin-log "$JOBS_DIR" "$job_id" \
+  >/dev/null 2>&1 || true
 
 if [ "$bg" = "--bg" ]; then
   # Background wrapper: run agent (with timeout + retry) → consolidate → notify

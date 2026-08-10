@@ -31,6 +31,7 @@ No network, no BQ, no clock/TZ dependence — safe to run anywhere, any time.
 import json
 import os
 import shlex
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -43,6 +44,8 @@ JOBS_SH = os.path.join(ROOT, "bin", "jobs.sh")
 PASS = 0
 FAIL = 0
 SPAWNED = []
+# Sandboxes this run created, removed by cleanup() once the workers are dead (round 6, NICE 9).
+TMPDIRS = []
 # The job record left behind by the last real-dispatch.sh E2E, so a case can assert on what
 # the REAL script wrote (the evidence pin) instead of on a hand-built fixture.
 LAST_E2E_RECORD = {}
@@ -359,8 +362,33 @@ def run_sync_kill_trap_verifier_broken(tmp):
     return rc, status, derr
 
 
+def _record_pin_of(obj):
+    """The pin fields as the guard reads them — empty when the record carries no identity."""
+    return {k: obj.get(k) for k in ("logfile_ino", "logfile_err_ino") if obj.get(k)}
+
+
+def pin_pairs(logfile, create=True):
+    """The (dev,ino) pins dispatch.sh stamps on every record it creates, as job-set pairs.
+
+    Fixtures must carry them for the same reason `create_log=True` exists above: since round 6
+    a record with NO pin cannot support a DEAD verdict at all (an unidentified file at the
+    path may be a decoy), so a fixture without a pin silently tests the UNKNOWN path
+    everywhere. Real records are pinned by dispatch.sh before any worker exists — `pin=False`
+    is for the cases that test an UNPINNED record on purpose (legacy records, round 6 K1)."""
+    out = []
+    for path, field in ((logfile, "logfile_ino"), (logfile + ".err", "logfile_err_ino")):
+        try:
+            if create:
+                open(path, "a").close()
+            st = os.stat(path)
+        except Exception:
+            continue
+        out.append("%s=%d:%d" % (field, st.st_dev, st.st_ino))
+    return out
+
+
 def make_job(jobs_dir, job_id, pid, logfile, prompt="do the thing", to="Taylor",
-             dispatcher_pid="", create_log=True):
+             dispatcher_pid="", create_log=True, pin=True):
     # A real dispatch's logfile EXISTS while the job runs, so the fixture must create it:
     # since round 4 an absent logfile means "liveness evidence gone -> UNKNOWN -> guard ON"
     # (_logfile_evidence_missing), and a fixture that skipped it would be testing the blind
@@ -375,7 +403,8 @@ def make_job(jobs_dir, job_id, pid, logfile, prompt="do the thing", to="Taylor",
                       "status=running", "attempt=1", "max_attempts=2",
                       "started_at=1000", "deadline=1600", "logfile=" + logfile,
                       "prompt_summary=" + prompt, "pid=%s" % pid,
-                      "dispatcher_pid=%s" % dispatcher_pid)
+                      "dispatcher_pid=%s" % dispatcher_pid,
+                      *(pin_pairs(logfile, create=create_log) if pin and logfile else []))
     assert rc == 0, err
     return job_id
 
@@ -415,7 +444,12 @@ def put_record(jobs_dir, job_id, **fields):
     would (correctly) refuse the setup itself."""
     obj = {"job_id": job_id, "from": "Mike", "to": "Taylor", "status": "running",
            "attempt": "1", "max_attempts": "2", "prompt_summary": "do the thing"}
+    pin = fields.pop("pin", True)
     obj.update({k: str(v) for k, v in fields.items()})
+    # Same faithfulness rule as make_job: a real record carries dispatch.sh's pin. Pin only
+    # what is already on disk — these fixtures create (or deliberately omit) their own files.
+    if pin and obj.get("logfile"):
+        obj.update(dict(p.split("=", 1) for p in pin_pairs(obj["logfile"], create=False)))
     with open(os.path.join(jobs_dir, job_id + ".json"), "w", encoding="utf-8") as f:
         json.dump(obj, f)
     return job_id
@@ -428,10 +462,17 @@ def cleanup():
                 os.kill(pid, sig)
             except Exception:
                 pass
+    # And the sandbox itself. Killing the workers but leaving the tmpdir behind had quietly
+    # accumulated 110 `/tmp/jobguard_*` dirs / 57MB by round 6 — every run of a check that
+    # exists to keep the fleet honest leaking a little more disk (round 6, NICE 9). Removed
+    # only AFTER the workers are dead, so nothing is still writing into it.
+    for d in TMPDIRS:
+        shutil.rmtree(d, ignore_errors=True)
 
 
 def main():
     tmp = tempfile.mkdtemp(prefix="jobguard_")
+    TMPDIRS.append(tmp)
     jobs = os.path.join(tmp, "jobs")
     os.makedirs(jobs, exist_ok=True)
 
@@ -623,7 +664,7 @@ def main():
     check("no pid -> status=cancelled", read_job(jobs, "J_I")["status"] == "cancelled",
           read_job(jobs, "J_I")["status"])
     check("no pid -> the summary says it closed a DEAD job, not a killed one",
-          "no process holding it" in (read_job(jobs, "J_I").get("result_summary") or ""),
+          "no process is holding it" in (read_job(jobs, "J_I").get("result_summary") or ""),
           read_job(jobs, "J_I").get("result_summary"))
     # ...and it must NOT claim that on a record whose worker is still alive: same shape, one
     # live process, and the close has to go through kill+verify instead (asserted in P4).
@@ -1046,24 +1087,49 @@ def main():
           not holders_of(log_r2 + ".err") and not holders_of(log_r2),
           "worker=%s links=%s holders=%s" % (work_r2, fd_links_of(work_r2),
                                              holders_of(log_r2 + ".err")))
-    check("renamed logfile -> job-live-pids reports nothing",
-          run([sys.executable, MJ, "job-live-pids", jobs, "J_R2"])[1].strip() == "",
+    # On a PINNED record — which is now every record dispatch.sh creates — the rename does not
+    # blind anything: the worker's fd still holds the pinned inode, so the answer is a definite
+    # ALIVE instead of round 4's UNKNOWN. Strictly better, and it must be asserted as such.
+    check("renamed logfile -> a PINNED record still LISTS the worker (found by inode)",
+          str(work_r2) in run([sys.executable, MJ, "job-live-pids", jobs, "J_R2"])[1].split(),
           run([sys.executable, MJ, "job-live-pids", jobs, "J_R2"])[1])
     rc, out, err = jset(jobs, "J_R2", "status=failed")
-    check("...yet the stamp is REFUSED, because empty-because-blind is not dead", rc == 3,
-          "rc=%d %s" % (rc, (out + err)[:260]))
-    check("the refusal says it CANNOT DETERMINE, it does not claim the job is alive",
-          "CANNOT BE DETERMINED" in err, err[:260])
+    check("...and the stamp is REFUSED", rc == 3, "rc=%d %s" % (rc, (out + err)[:260]))
+    check("the refusal names the live processes it actually found",
+          "are ALIVE right now" in err, err[:260])
     check("record still running", read_job(jobs, "J_R2")["status"] == "running")
     check("worker was never touched", alive(work_r2), "worker=%s" % work_r2)
-    # ...but the board must not leak either: reap can still close it once the agent's own
-    # heartbeat is cold, which is an independent proof of death the guard cannot see.
     rc, out, err = run([sys.executable, MJ, "job-reap", jobs, "0"])
-    check("reap CAN still close a blind record (no permanent board leak)",
-          read_job(jobs, "J_R2")["status"] == "orphaned", read_job(jobs, "J_R2")["status"])
-    check("and it records WHY it was allowed to",
-          "logfile gone" in (read_job(jobs, "J_R2").get("result_summary") or ""),
-          read_job(jobs, "J_R2").get("result_summary"))
+    check("reap does NOT close it either — it is alive, not blind",
+          read_job(jobs, "J_R2")["status"] == "running", read_job(jobs, "J_R2")["status"])
+
+    # R2b — the SAME rename on an UNPINNED (legacy, pre-round-5) record: nothing resolves the
+    # recorded name any more, so the guard genuinely cannot answer. This is the case the
+    # "absent evidence -> UNKNOWN, not dead" term exists for, and the board must not leak:
+    # reap still closes it, saying on the record that the closure was not verified.
+    log_r2b = os.path.join(tmp, "r2b.log")
+    disp_r2b, work_r2b = spawn_sync_worker(log_r2b, jobs, "J_R2B")
+    make_job(jobs, "J_R2B", "", log_r2b, dispatcher_pid=disp_r2b, pin=False)
+    check("R2b legacy worker alive", alive(work_r2b), "worker=%s" % work_r2b)
+    os.rename(log_r2b + ".err", os.path.join(tmp, "moved_away_b.err"))
+    if os.path.exists(log_r2b):
+        os.rename(log_r2b, os.path.join(tmp, "moved_away_b.log"))
+    check("R2b unpinned + renamed -> job-live-pids reports nothing",
+          run([sys.executable, MJ, "job-live-pids", jobs, "J_R2B"])[1].strip() == "",
+          run([sys.executable, MJ, "job-live-pids", jobs, "J_R2B"])[1])
+    rc, out, err = jset(jobs, "J_R2B", "status=failed")
+    check("R2b ...yet the stamp is REFUSED, because empty-because-blind is not dead", rc == 3,
+          "rc=%d %s" % (rc, (out + err)[:260]))
+    check("R2b the refusal says it CANNOT DETERMINE, it does not claim the job is alive",
+          "CANNOT BE DETERMINED" in err, err[:260])
+    check("R2b worker was never touched", alive(work_r2b), "worker=%s" % work_r2b)
+    rc, out, err = run([sys.executable, MJ, "job-reap", jobs, "0"])
+    check("R2b reap CAN still close a blind record (no permanent board leak)",
+          read_job(jobs, "J_R2B")["status"] == "orphaned",
+          read_job(jobs, "J_R2B")["status"])
+    check("R2b and it records WHY it was allowed to",
+          "GONE" in (read_job(jobs, "J_R2B").get("result_summary") or ""),
+          read_job(jobs, "J_R2B").get("result_summary"))
 
     # R3 (N1) — corrupt the record itself. `except Exception: obj = {}` made the guard read a
     # blank record: no status meant the live-status precondition failed, no fields meant nothing
@@ -1225,10 +1291,15 @@ def main():
     # : > log` restored "evidence present" while nothing on disk related to the job any more,
     # and "present but nobody holding it" is read as PROVEN DEAD. With the inode pinned at
     # dispatch time the move does not even blind the guard: the holder is found by identity.
+    # The pin is CREATED only by the owning dispatcher, and only while the record is younger
+    # than EVIDENCE_GRACE_S — the window in which no worker exists yet and the path therefore
+    # still means what the record says (round 6, K3). This is dispatch.sh's own call shape.
     log_s5 = os.path.join(tmp, "s5.log")
-    put_record(jobs, "J_S5", to="Taylor", logfile=log_s5,
-               started_at=1000, deadline=1600, dispatcher_pid="")
-    rc, _, err = mj("job-pin-log", jobs, "J_S5")
+    put_record(jobs, "J_S5", to="Taylor", logfile=log_s5, pin=False,
+               started_at=int(time.time()), deadline=int(time.time()) + 600,
+               dispatcher_pid=os.getpid())
+    rc, _, err = run([sys.executable, MJ, "job-pin-log", jobs, "J_S5"],
+                     env=owner_env("J_S5"))
     pinned = read_job(jobs, "J_S5")
     check("S5 job-pin-log records the logfile identity", bool(pinned.get("logfile_ino")),
           str(pinned)[:200])
@@ -1264,19 +1335,81 @@ def main():
     check("S6 after rm, job-live-pids still LISTS the worker (not just 'refuses')",
           str(work_s6) in out_s6.split(), "worker=%s out=%r" % (work_s6, out_s6))
 
+    # S5b (round 6, K1) — the SAME decoy on a record with NO pin. Round 5 pinned the inode and
+    # called N5 closed; every one of the 751 records on the live board was in fact unpinned, so
+    # the decoy still walked straight through the ordinary close path. Unpinned + a file at the
+    # path must be UNKNOWN, never DEAD: nothing ties that file to this job.
+    log_s5b = os.path.join(tmp, "s5b.log")
+    disp_s5b, work_s5b = spawn_sync_worker(log_s5b, jobs, "J_S5B")
+    make_job(jobs, "J_S5B", "", log_s5b, dispatcher_pid=disp_s5b, pin=False)
+    check("S5b legacy worker alive", alive(work_s5b), "worker=%s" % work_s5b)
+    for f in (log_s5b + ".err", log_s5b):
+        if os.path.exists(f):
+            os.rename(f, f + ".hidden")
+            open(f, "a").close()                      # the decoy, at the very same path
+    rc, out, err = jset(jobs, "J_S5B", "status=failed")
+    check("S5b decoy on an UNPINNED record -> the stamp is REFUSED", rc == 3,
+          "rc=%d %s" % (rc, (out + err)[:220]))
+    check("S5b the refusal says WHY: no pinned identity, so the file proves nothing",
+          "NO pinned logfile identity" in err, err[:260])
+    check("S5b record still running", read_job(jobs, "J_S5B")["status"] == "running")
+    check("S5b worker untouched", alive(work_s5b), "worker=%s" % work_s5b)
+    # ...and reap must not paper over it either. Moved to just-past-deadline (a GROWTH, the one
+    # direction that stays unguarded) so the case being asserted is the REAP_UNVERIFIED_S wait
+    # rather than this fixture's epoch-1970 deadline, which is already a day past everything.
+    jset(jobs, "J_S5B", "deadline=%d" % (int(time.time()) - 60))
+    rc, out, err = run([sys.executable, MJ, "job-reap", jobs, "0"])
+    check("S5b reap does not close it early either (the unverified wait applies)",
+          read_job(jobs, "J_S5B")["status"] == "running",
+          read_job(jobs, "J_S5B")["status"])
+
+    # S8 (round 6, K3) — job-pin-log is itself a writer of the evidence, so it must not be
+    # usable as the attack it was added to prevent. On an already-running record it may pin
+    # ONLY what a live process of the job is really holding; hiding the log and asking it to
+    # pin must not create files and call them evidence, which turned UNKNOWN into DEAD in one
+    # official command.
+    log_s8 = os.path.join(tmp, "s8.log")
+    disp_s8, work_s8 = spawn_sync_worker(log_s8, jobs, "J_S8")
+    make_job(jobs, "J_S8", "", log_s8, dispatcher_pid=disp_s8, pin=False)
+    for f in (log_s8 + ".err", log_s8):
+        if os.path.exists(f):
+            os.rename(f, os.path.join(tmp, os.path.basename(f) + ".gone"))
+    rc, _, _ = run([sys.executable, MJ, "job-pin-log", jobs, "J_S8"], env=owner_env("J_S8"))
+    check("S8 job-pin-log does not pin a file it made up on a running record",
+          not _record_pin_of(read_job(jobs, "J_S8")),
+          str(read_job(jobs, "J_S8"))[:200])
+    check("S8 and it did not create the files either",
+          not os.path.exists(log_s8) and not os.path.exists(log_s8 + ".err"))
+    check("S8 ...so the close stays REFUSED", jset(jobs, "J_S8", "status=failed")[0] == 3)
+    check("S8 the failure is recorded on the record, not swallowed",
+          str(read_job(jobs, "J_S8").get("pin_failed")) == "1",
+          str(read_job(jobs, "J_S8").get("pin_failed")))
+    check("S8 worker untouched", alive(work_s8), "worker=%s" % work_s8)
+
     # S7 — EVIDENCE_GRACE_S had no discriminating coverage at all: setting it to 1e11 and
     # deleting the blind term produced identical results. It is the window killer S1 walked
     # through, and it has to be tested in BOTH directions — too small hangs every new job at
     # running (a fleet outage), too large is the bypass.
-    put_record(jobs_hb, "J_S7_YOUNG", to="SilentAgent",
-               logfile=os.path.join(tmp, "s7_not_open_yet.log"),
+    # Both fixtures are PINNED and then have their files removed — that is what isolates the
+    # grace: the identity is on the record either way, so the only thing left that can differ
+    # between the two is how old the record is (round 6 made a pin a precondition of DEAD, so
+    # an unpinned fixture would read UNKNOWN in both directions and test nothing).
+    s7_young = os.path.join(tmp, "s7_not_open_yet.log")
+    s7_old = os.path.join(tmp, "s7_gone.log")
+    for p in (s7_young, s7_old):
+        open(p, "a").close()
+        open(p + ".err", "a").close()
+    put_record(jobs_hb, "J_S7_YOUNG", to="SilentAgent", logfile=s7_young,
                started_at=now, deadline=now + 600)
+    for p in (s7_young, s7_young + ".err"):
+        os.remove(p)
     check("S7 a job younger than the grace may be closed (no logfile yet is NORMAL)",
           run([sys.executable, MJ_HB, "job-set", jobs_hb, "J_S7_YOUNG",
                "status=failed"])[0] == 0)
-    put_record(jobs_hb, "J_S7_OLD", to="SilentAgent",
-               logfile=os.path.join(tmp, "s7_gone.log"),
+    put_record(jobs_hb, "J_S7_OLD", to="SilentAgent", logfile=s7_old,
                started_at=now - 3600, deadline=now + 600)
+    for p in (s7_old, s7_old + ".err"):
+        os.remove(p)
     check("S7 past the grace the same shape is REFUSED (absent logfile = UNKNOWN)",
           run([sys.executable, MJ_HB, "job-set", jobs_hb, "J_S7_OLD",
                "status=failed"])[0] == 3)

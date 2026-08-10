@@ -552,6 +552,11 @@ def _is_evidence_change(field, new, old):
     that are BY DEFINITION alive and busy — guarding that direction would refuse the fleet's
     most routine write on exactly the jobs it is meant to protect."""
     if field == "deadline":
+        # A record with NO deadline has no reap precondition at all, so writing the first one
+        # CREATES it — that is not "growth", it is manufacturing the thing being guarded
+        # (round 6, NICE 7). Only a genuine extension of an existing deadline is exempt.
+        if _as_int(old, 0) <= 0:
+            return True
         return _as_int(new, 0) < _as_int(old, 0)
     return str(new) != str(old or "")
 
@@ -974,7 +979,7 @@ def cmd_job_reap(a):
         # caller's `grace`: `jobs.sh reap 0` used to pass 0 all the way down and reap a record
         # whose agent had heartbeated that same second (round 5, N4).
         hb_floor = max(int(grace), HB_COLD_S)
-        verdict, _live, _why, hbs = _death_evidence(o, n, hb_cold_s=hb_floor)
+        verdict, _live, why, hbs = _death_evidence(o, n, hb_cold_s=hb_floor)
         if verdict == ALIVE:
             continue
         blind = verdict == UNKNOWN
@@ -1016,19 +1021,22 @@ def cmd_job_reap(a):
             # cold (checked above for exactly this case). Without the exemption a record whose
             # log was deleted could never be closed by ANY command, which is the permanent
             # board leak this guard is supposed to prevent, not cause.
+            # Quote the verdict's OWN words for why, instead of a hand-written sentence that
+            # has to be kept true separately. Round 6, K4: this line said "logfile gone" for a
+            # record whose logfile was sitting right there merely unpinned, and "dispatcher
+            # died without writing a terminal status" — a causal claim about an event nobody
+            # observed — while `ps` showed the worker running.
             if blind and unverified:
-                why_closed = (", logfile gone and NOT ONE heartbeat was ever written for this "
-                              "job — CLOSED UNVERIFIED after %.0fh, nothing here proved it "
-                              "stopped" % ((n - dl) / 3600.0))
+                why_closed = ("; %s — CLOSED UNVERIFIED after %.0fh, nothing here proved it "
+                              "stopped" % (why, (n - dl) / 3600.0))
             elif blind:
-                why_closed = (", logfile gone — death inferred from the agent's own heartbeat "
-                              "having been silent for %ss" % hbs[1])
+                why_closed = "; %s — death inferred from that silence, not observed" % why
             else:
-                why_closed = ""
+                why_closed = "; " + why
             if cmd_job_set([jobs_dir, job_id, "status=orphaned", "ended_at=%d" % n,
-                            "result_summary=reaped by jobs.sh reap: dispatcher died without "
-                            "writing a terminal status (%.1fh past deadline, pid dead/absent%s)"
-                            % (over_h, why_closed)],
+                            "result_summary=reaped by jobs.sh reap: no terminal status was "
+                            "ever written for this job (%.1fh past deadline, no live process "
+                            "found%s)" % (over_h, why_closed)],
                            internal=True, stale_proven=blind) is False:
                 continue
             # watchdog's per-job debounce marker is dead weight once the record is closed
@@ -1217,6 +1225,50 @@ def _pids_holding(path, pin=None):
 EVIDENCE_GRACE_S = 120
 
 
+def _record_is_pinned(obj):
+    """Does this record carry a usable logfile identity? Only a pinned record can support a
+    DEAD verdict — see _death_evidence (round 6, K1)."""
+    return _parse_pin(obj.get("logfile_ino")) is not None or \
+        _parse_pin(obj.get("logfile_err_ino")) is not None
+
+
+def _live_holder_identity(obj):
+    """The (dev, ino) that a LIVE process of this job is actually writing to, as {field: pin}.
+
+    This is the only honest way to pin a record that is already running. At dispatch time the
+    path is trustworthy because the record was created a moment ago and no worker exists yet;
+    afterwards it is not, so a pin taken from the path would just launder whatever an outside
+    writer put there — which is round 6's K3, the fix's own command being usable as the attack.
+    Asking the WORKER instead inverts that: we read /proc/<pid>/fd of processes independently
+    established to belong to this job, and pin the inode they hold. Nobody else's write can
+    influence that, and if no live process holds the path, nothing is pinned and the record
+    stays honestly UNKNOWN."""
+    logfile = obj.get("logfile") or ""
+    if not logfile:
+        return {}
+    out = {}
+    for p in _job_live_pids(obj):
+        for fd in ("1", "2"):
+            fdp = "/proc/%d/fd/%s" % (p, fd)
+            try:
+                link = os.readlink(fdp)
+            except Exception:
+                continue
+            for path, field in ((logfile, "logfile_ino"), (logfile + ".err",
+                                                           "logfile_err_ino")):
+                # Only the EXACT recorded name counts. A "(deleted)" or renamed link tells us
+                # the worker's file is no longer reachable at that path, so there is no
+                # identity we could pin that a later reader would find again.
+                if field in out or link != path:
+                    continue
+                try:
+                    st = os.stat(fdp)           # follows the fd to the file it pins
+                except Exception:
+                    continue
+                out[field] = "%d:%d" % (st.st_dev, st.st_ino)
+    return out
+
+
 def _path_is_pinned_file(path, pin):
     """True if `path` still IS the file the job opened. Without a pin (legacy records) the
     question degrades to mere existence, which is the best such a record can support."""
@@ -1246,7 +1298,18 @@ def cmd_job_pin_log(a):
 
     Refuses to REPLACE an existing pin. A re-pin would be the decoy attack with an official
     command in front of it: point the record at a fresh file, then have the guard agree that
-    the fresh file is the evidence."""
+    the fresh file is the evidence.
+
+    TWO modes, because a pin is only evidence if nothing could have interfered with it yet:
+      * CREATE (dispatch time) — allowed only to the dispatcher that owns this record, and
+        only inside EVIDENCE_GRACE_S of `started_at`, i.e. while no worker exists and the
+        path still means what the record says. This is dispatch.sh's call.
+      * BACKFILL (anything later, incl. records created before pinning existed) — takes the
+        identity from a LIVE process of the job (_live_holder_identity), never from the path,
+        and creates nothing. If nothing live holds the path there is no pin to be had and the
+        record honestly stays UNKNOWN.
+    Round 6, K3: without this split the command created the files itself and pinned them, so
+    one official invocation turned the guard's honest UNKNOWN into DEAD on a live worker."""
     jobs_dir, job_id = a[0], a[1]
     fp = _job_path(jobs_dir, job_id)
     try:
@@ -1257,20 +1320,34 @@ def cmd_job_pin_log(a):
     except Exception:
         return
     logfile = obj.get("logfile") or ""
-    if not logfile or obj.get("logfile_ino") or obj.get("logfile_err_ino"):
+    if not logfile or _record_is_pinned(obj):
         return                                   # nothing to pin, or already pinned
-    pins = {}
-    for path, field in ((logfile, "logfile_ino"), (logfile + ".err", "logfile_err_ino")):
-        try:
-            os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
-            with open(path, "a", encoding="utf-8"):
-                pass                             # create-if-absent, never truncate
-            st = os.stat(path)
-            pins[field] = "%d:%d" % (st.st_dev, st.st_ino)
-        except Exception:
-            continue
+    fresh_record = (now_epoch() - _as_int(obj.get("started_at"), 0)) <= EVIDENCE_GRACE_S
+    if fresh_record and _writer_is_job_dispatcher(job_id, obj):
+        pins = {}
+        for path, field in ((logfile, "logfile_ino"), (logfile + ".err", "logfile_err_ino")):
+            try:
+                os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+                with open(path, "a", encoding="utf-8"):
+                    pass                         # create-if-absent, never truncate
+                st = os.stat(path)
+                pins[field] = "%d:%d" % (st.st_dev, st.st_ino)
+            except Exception:
+                continue
+    else:
+        pins = _live_holder_identity(obj)
     if not pins:
+        # Say so ON THE RECORD. A pin that silently never happened downgrades the guard to its
+        # pre-round-5 strength on that job, and round 6 found the whole board in exactly that
+        # state with nothing anywhere reporting it (K2 / NICE 5).
+        if obj.get("status") in LIVE_STATUSES and not obj.get("pin_failed"):
+            obj["pin_failed"] = 1
+            tmp = fp + ".tmp"
+            with open(tmp, "w", encoding="utf-8") as f:
+                json.dump(obj, f, ensure_ascii=False)
+            os.replace(tmp, fp)
         return
+    obj.pop("pin_failed", None)
     # Written in-process, not through cmd_job_set: this is the FIRST write of these fields on
     # a record that has no live worker yet, and routing it through the guard would only ask
     # the guard to approve the creation of the very evidence it reads.
@@ -1409,20 +1486,37 @@ def _death_evidence(obj, now=None, hb_cold_s=HB_COLD_S):
         return (ALIVE, live, "%d process(es) of the job are alive right now: %s"
                 % (len(live), live), ("n/a", None))
     hbs = _hb_state(obj, n, hb_cold_s)
-    if not _logfile_evidence_missing(obj, n):
-        return (DEAD, [], "the job's own logfile is still on disk and no process is holding "
-                          "it", hbs)
+    # DEAD requires the file we looked at to be provably THIS JOB'S file, i.e. a pin.
+    # Round 5 fixed the decoy (`mv <logfile> x; : > <logfile>`) by pinning the inode, but left
+    # unpinned records falling back to plain path existence — and round 6 measured the cost of
+    # that fallback: 0 of 751 records on the live board carried a pin, so the "fixed" attack
+    # still closed and reaped a provably live worker with rc=0 on EVERY record that existed.
+    # Without a pin, "a file sits at that path and nobody holds it" says nothing about the
+    # job: the file may be a decoy planted one second ago. That is UNKNOWN, and the callers
+    # already know how to drain UNKNOWN honestly (cold heartbeat -> reap as orphaned; never
+    # heartbeated -> REAP_UNVERIFIED_S then closed and MARKED unverified), so refusing to
+    # call it DEAD costs no record its eventual closure (round 6, K1).
+    if not _logfile_evidence_missing(obj, n) and _record_is_pinned(obj):
+        return (DEAD, [], "the job's own logfile — the exact inode pinned when the job was "
+                          "created — is still on disk and no process is holding it", hbs)
+    # Two different ways to have no usable logfile evidence, and the guard must say WHICH:
+    # claiming the file is GONE when a file is sitting right there is the same species of lie
+    # as claiming a heartbeat went cold when none was ever written (round 5, K2 / round 6, K4).
+    if _logfile_evidence_missing(obj, n):
+        situation = "the job's logfile is GONE (%s)" % (obj.get("logfile") or "?")
+    else:
+        situation = ("a file occupies %s, but this record carries NO pinned logfile identity, "
+                     "so nothing ties that file to this job — it may be a decoy put there "
+                     "after the fact" % (obj.get("logfile") or "?"))
     if hbs[0] == "fresh":
-        return (ALIVE, [], "the job's logfile is gone, but its agent wrote a bus heartbeat "
-                           "%ss ago — it is still working" % hbs[1], hbs)
+        return (ALIVE, [], "%s — but its agent wrote a bus heartbeat %ss ago, it is still "
+                           "working" % (situation, hbs[1]), hbs)
     if hbs[0] == "never":
-        return (UNKNOWN, [], "the job's logfile is GONE (%s) and its agent has never written "
-                             "a single heartbeat for it — nothing here can tell a finished "
-                             "job from one that is still running"
-                             % (obj.get("logfile") or "?"), hbs)
-    return (UNKNOWN, [], "the job's logfile is GONE (%s); its agent last wrote a heartbeat "
-                         "%ss ago, which is evidence but not proof"
-                         % (obj.get("logfile") or "?", hbs[1]), hbs)
+        return (UNKNOWN, [], "%s, and its agent has never written a single heartbeat for it "
+                             "— nothing here can tell a finished job from one that is still "
+                             "running" % situation, hbs)
+    return (UNKNOWN, [], "%s; its agent last wrote a heartbeat %ss ago, which is evidence but "
+                         "not proof" % (situation, hbs[1]), hbs)
 
 
 def _writer_belongs_to_job(pids):
@@ -1682,10 +1776,13 @@ def cmd_job_cancel(a):
             # Says what was actually observed. Round 4's fixed wording claimed "the agent's
             # heartbeat has gone cold" even when no heartbeat had ever been seen — the record
             # asserting as fact the one thing nobody had checked (round 5, K3).
-            note = ("cancelled by operator: no pid recorded (sync dispatch), the job's own "
-                    "logfile is still present with no process holding it, and %s — the "
-                    "dispatcher died without writing a terminal status"
-                    % ("the agent's heartbeat has been silent for %ss" % hbs[1]
+            # Round 6, K4: quote the verdict rather than re-describing it, and drop "the
+            # dispatcher died" — nobody watched it die; what is known is that no terminal
+            # status was ever written.
+            note = ("cancelled by operator: no pid recorded (sync dispatch), %s, and %s — no "
+                    "terminal status was ever written for this job"
+                    % (why,
+                       "the agent's heartbeat has been silent for %ss" % hbs[1]
                        if hbs[0] == "cold" else
                        "this job never wrote a heartbeat, so the logfile is the only evidence"))
             print(note)
@@ -1808,6 +1905,17 @@ def cmd_job_list(a):
             age, _log_age(o, n), hb,
             o.get("attempt", "?"), o.get("max_attempts", "?"),
         ))
+    # Pin coverage, as a FOOTER (adding a column would break every parser of the table above).
+    # Round 6, K2: the whole board was running unpinned — the guard silently in its weaker,
+    # pre-round-5 mode on every record — and nothing anywhere would ever have said so. An
+    # unpinned live job is not broken, it just cannot be proven dead; say it out loud.
+    unpinned = [o for o in rows if o.get("status") in LIVE_STATUSES
+                and not _record_is_pinned(o)]
+    if unpinned:
+        print("\n%d live job(s) with NO pinned logfile identity — cannot be proven dead, so "
+              "close paths answer UNKNOWN and leave them to `jobs.sh reap`: %s"
+              % (len(unpinned), ", ".join(o.get("job_id", "?") for o in unpinned[:5])
+                 + (" …" if len(unpinned) > 5 else "")))
 
 
 def cmd_trace(a):
