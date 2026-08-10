@@ -104,6 +104,14 @@ class Executor:
         self._gap_ref = {}      # ticker -> {prior_close, rvol_20d}; loaded once at startup
         self._gap_z_cache = {}  # ticker -> gap_z or None (None = fail-safe, no override)
         self._last_gap_override = {}  # ticker -> gap_z; populated when override fires this tick
+        self._hybrid_deferred = set()  # order id đã ghi journal HYBRID_DEFER (1 lần/parent mỗi
+                                       # lần chạy process — không bền qua restart, cố ý: chỉ là
+                                       # dòng quan sát, không phải state điều khiển)
+        self._extreme_defer_poll = {}  # ticker -> `now` của lần poll EXTREME **THÀNH CÔNG** gần
+                                       # nhất TRONG LÚC HOÃN (lần quote lỗi KHÔNG đóng dấu — nếu
+                                       # không, 1 quote lỗi tiêu trọn cửa sổ throttle mà bộ đếm
+                                       # 2-poll không nhích; chỉ dùng cho throttle, không phải
+                                       # state điều khiển) — xem `extreme_defer_poll_sec`
         self._extreme_state = {}      # ticker -> {"n": confirm-count, "until": iso}; EXTREME-regime gate
         self._extreme_cache = {}      # (ticker, now) -> bool; memoise _extreme_regime_raw so a
                                        # cycle where BOTH _cancel_stale (via _would_be_unchanged)
@@ -538,8 +546,13 @@ class Executor:
                       note=f"'{ex_used}' tick sai ({err}) → thử '{ex_alt}' OK, cache lại cho {o.ticker}")
         return oid, px_alt
 
-    def _child_qty(self, o, ps, q, px, exclude_reserved=0):
-        """`exclude_reserved` (>0, chỉ `_would_be_unchanged` dùng): KL của CHÍNH lệnh con sắp bị
+    def _child_qty(self, o, ps, q, px, now=None, exclude_reserved=0):
+        """`now=None` (mặc định) ⇒ KHÔNG áp trần HYBRID — hành vi byte-identical với trước.
+        Hai call-site thật (`_place_slices`, `_would_be_unchanged`) đều truyền `now` để hai
+        đường đi tính ra CÙNG một KL: nếu chỉ một bên áp trần, `_would_be_unchanged` sẽ luôn
+        thấy 'khác' và huỷ+đặt lại mỗi chu kỳ (mất ưu tiên FIFO vô ích).
+
+        `exclude_reserved` (>0, chỉ `_would_be_unchanged` dùng): KL của CHÍNH lệnh con sắp bị
         huỷ, đang còn nằm trong `self.shared` dưới dạng reservation. `_would_be_unchanged` hỏi
         "huỷ RỒI đặt lại thì có ra đúng KL cũ không" — mà huỷ thật sẽ `_release_child()` trước,
         tức nhả phần reservation này ra. Không trừ ⇒ đường KIỂM TRA đếm chính lệnh của mình
@@ -592,10 +605,15 @@ class Executor:
             if allowance < LOT:
                 return 0
             qty = min(qty, allowance)
+        hyb_cap = self._hybrid_block_cap(o, ps, now) if now is not None else None
+        if hyb_cap is not None:      # HYBRID: trải phần còn lại đều trên các block còn lại
+            qty = min(qty, hyb_cap)
         qty = round_lot(qty)
         # mảnh cuối < 1 lô sau làm tròn nhưng remaining ≥ 1 lô → đẩy hết remaining nếu nhỏ
         if qty < LOT <= remaining and remaining * (px or 0) <= self.cfg["max_child_value"]:
-            qty = round_lot(remaining)
+            # …nhưng KHÔNG được vượt trần HYBRID: nhánh này tồn tại để không kẹt mảnh lẻ,
+            # không phải để bỏ qua lịch trải (hết cửa sổ thì hyb_cap=None, mảnh đi trọn).
+            qty = round_lot(remaining if hyb_cap is None else min(remaining, hyb_cap))
         return qty
 
     # ------------------------------------------------------------ child lifecycle
@@ -826,7 +844,7 @@ class Executor:
             # đúng thứ tự đó, nếu không đường kiểm tra tự đếm mình là quota người khác
             # (xem `_child_qty(exclude_reserved=…)`).
             reserved = 0 if c.get("released") else c["qty"] - c.get("filled", 0)
-            qty = self._child_qty(o, ps, q, px, exclude_reserved=max(0, reserved))
+            qty = self._child_qty(o, ps, q, px, now, exclude_reserved=max(0, reserved))
             if qty < LOT:
                 return False
             return px == c["price"] and abs(qty - c["qty"]) < LOT
@@ -932,11 +950,152 @@ class Executor:
             return
         self._gap_z_cache[ticker] = gap_raw / rvol_20d
 
+    # ---------------------------------------------------------- HYBRID fill-timing
+    # Lịch HYBRID = trải TWAP BÊN TRONG cửa sổ thuận lợi (thay vì gom 1 điểm). Nguồn số:
+    # `mike/agents/Taylor/research/twap_vs_window_execution_20260804.md` §6 — 663 phiên độc
+    # lập, nến 15'. BUY 5 block 11:00-13:45: −6,94 bps vs day-VWAP (t=−6,80), sd 26,3 so với
+    # 35,5 khi gom @11:15. SELL 4 block 09:15-10:15: +8,89 bps (t=4,64), sd 49,4 so với 59,3
+    # khi gom @09:15 — và gom-tại-mở-cửa KHÔNG có edge thực thi, chỉ là cược hướng phiên
+    # (±150-168 bps). Vòng khứ hồi giữ 95% edge, cắt 14% độ phân tán.
+    # Quy mô ~0,1-0,3%/năm ⇒ VỆ SINH CHI PHÍ, không phải alpha: cơ chế cố ý giữ tối thiểu.
+    # CAVEAT mang theo (§8 báo cáo): không đo được impact của chính lệnh ta; KHÔNG có điều
+    # kiện tín hiệu (mẫu là mọi ngày của 33 mã, không riêng ngày có tín hiệu LAG/BAL); cache
+    # `intraday_full.pkl` stale sau 2026-05-12; giá thực thi là xấp xỉ (H+L+C)/3 của block,
+    # KHÔNG phải fill thật; ATC 14:45 bị loại khỏi phép đo (nên `_atc_sweep` giữ nguyên).
+
+    def _hybrid_active(self, o):
+        """True khi lịch HYBRID áp cho lệnh này. Cùng bộ cổng của fill-timing:
+        HYBRID là một CHẾ ĐỘ CỦA layer fill-timing, không phải layer thứ hai —
+        `fill_timing_enabled=False` ⇒ uniform hoàn toàn, cờ hybrid bị bỏ qua (fail-safe:
+        tắt master = về hành vi gốc, không có đường nào lọt)."""
+        return bool(self.cfg.get("fill_timing_enabled", True)
+                    and self.cfg.get("fill_timing_hybrid_enabled", False)
+                    and o.urgency != "high"
+                    and not (self.cfg.get("fill_timing_live_gate", True)
+                             and self.cfg.get("mode") != "paper"))
+
+    def _gap_override_active(self, o, now):
+        """Điều kiện override gap-adaptive (down-gap bất thường ở mở cửa) — hàm THUẦN, tính
+        thẳng từ `_gap_z_cache` + giờ, KHÔNG đọc `_last_gap_override`.
+
+        Vì sao không đọc dict đó: `_last_gap_override` CHỈ được làm mới trong `_place_slices`,
+        mà `_cancel_stale` chạy TRƯỚC `_place_slices` trong cùng một `step()` ⇒ đọc từ nhánh
+        `_would_be_unchanged` sẽ trễ đúng 1 tick. quant-skeptic 2026-08-10 tái lập được: ở
+        tick chuyển trạng thái, hai đường tính ra hai KL khác nhau ⇒ huỷ+đặt lại thừa 1 lần.
+        Dict vẫn giữ nguyên vai trò cũ: nguồn cho ghi chú journal `GAP_OPEN_OVERRIDE`."""
+        if o.side != "buy" or not self.cfg.get("gap_adaptive_enabled", False):
+            return False
+        gap_z = self._gap_z_cache.get(o.ticker)
+        return bool(gap_z is not None and gap_z < _GAP_Z_DOWN_THRESHOLD
+                    and dt.time(9, 15) <= now.time() < dt.time(9, 45))
+
+    def _hybrid_bypass(self, o, now):
+        """True = TẠM NGƯNG lịch HYBRID cho lệnh này vì một tầng RỦI RO ưu tiên cao hơn đang
+        điều khiển tốc độ. HYBRID là tối ưu CHI PHÍ (~0,1-0,3%/năm); mọi tầng rủi ro đều
+        thắng nó, không có ngoại lệ.
+
+          • gap-adaptive down-gap ở mở cửa — tốc độ đã được quyết ở tầng trên.
+          • EXTREME_DOWN đã armed — lệnh BÁN phải xả theo sổ đang tụt. Thiếu bypass này là
+            LỖI THẬT quant-skeptic tái lập 2026-08-10: lệnh bán khẩn trong cửa sổ BÁN
+            09:15-10:15 bị chậm nhịp 1,875× và bị trần KL cắt còn ~1/3 phần dư — chậm hơn cả
+            hành vi TRƯỚC khi có HYBRID. (Chiều MUA khi EXTREME vốn đã `EXTREME_PAUSE` nên
+            bypass không nới thêm gì.)"""
+        return self._gap_override_active(o, now) or self._extreme_armed(o, now)
+
+    def _hybrid_sched(self, o, now):
+        """(in_block, blocks_left) của lịch HYBRID cho chiều của lệnh `o`.
+
+        in_block    = `now` nằm trong 1 block đã lên lịch [start, start+hybrid_block_min).
+        blocks_left = số block CHƯA KẾT THÚC tính từ `now` (kể cả block đang chạy).
+                      Trước cửa sổ = toàn bộ; sau cửa sổ = 0.
+        Nhãn giờ hỏng → bỏ qua đúng block đó (fail-safe: cấu hình sai chỉ làm lịch thưa hơn,
+        không ném lỗi giữa phiên)."""
+        blocks = (self.cfg.get("hybrid_buy_blocks") if o.side == "buy"
+                  else self.cfg.get("hybrid_sell_blocks")) or []
+        width = dt.timedelta(minutes=int(self.cfg.get("hybrid_block_min", 15)))
+        t = now.time()
+        in_block, left = False, 0
+        for s in blocks:
+            try:
+                bs = _parse_hhmm(s)
+            except Exception:
+                continue
+            be = (dt.datetime.combine(dt.date(2000, 1, 1), bs) + width).time()
+            if bs <= t < be:
+                in_block = True
+            if t < be:
+                left += 1
+        return in_block, left
+
+    def _hybrid_mult(self, o, now):
+        """Interval multiplier của chế độ HYBRID.
+        Trong block: nhịp = ĐÚNG 1 slice / block (block_min / slice_interval_min) thay vì
+        8 phút mặc định — nếu không, 1 block 15' có thể nuốt 2 slice và lịch trải hỏng.
+        Clamp ≥1.0: HYBRID không bao giờ được đặt NHANH hơn cấu hình gốc.
+        Ngoài block: dùng lại đúng `fill_timing_outside_mult` của layer (không thêm knob).
+        Tầng rủi ro đang điều khiển (`_hybrid_bypass`) ⇒ 1.0, HYBRID không được làm chậm."""
+        if self._hybrid_bypass(o, now):
+            return 1.0
+        in_block, _ = self._hybrid_sched(o, now)
+        if not in_block:
+            return self.cfg.get("fill_timing_outside_mult", 4.0)
+        return max(1.0, int(self.cfg.get("hybrid_block_min", 15))
+                   / max(1, int(self.cfg.get("slice_interval_min", 8))))
+
+    def _hybrid_defer(self, o, now):
+        """True = HOÃN đặt slice: đang NGOÀI block đã lên lịch mà cửa sổ VẪN CÒN block phía trước.
+
+        Vì sao cần cổng này chứ không chỉ trần KL: diễn tập paper 2026-08-10
+        (`exp_hybrid_fill_20260810/paper_rehearsal_hybrid.py`, bản chỉ-có-trần) cho thấy
+        `fill_timing_outside_mult` chỉ LÀM CHẬM chứ không DỪNG — lệnh vẫn rỉ ra 09:00/09:32/
+        10:04/10:36 và **58% KL lệnh MUA đã đi trước khi cửa sổ 11:00 bắt đầu**, đúng vào
+        khung sáng ĐẮT NHẤT (+9 bps, §2 báo cáo); chân BÁN thì lại gom về mở cửa — chính là
+        thứ nghiên cứu bác bỏ. Trần KL một mình KHÔNG thực thi được lịch.
+
+        TỰ KẾT THÚC, không bao giờ kẹt hàng: chỉ hoãn khi `blocks_left > 0`. Hết cửa sổ
+        (BUY sau 13:45 / SELL sau 10:15) ⇒ luôn False ⇒ phần dư chạy bình thường suốt phần
+        còn lại của phiên + `_atc_sweep` cuối phiên (không đổi). Trần hoãn tối đa: BUY ~09:15→
+        11:00, SELL ~09:00→09:15.
+        Tầng rủi ro đang điều khiển (`_hybrid_bypass`: gap-adaptive HOẶC EXTREME đã armed) ⇒
+        KHÔNG hoãn."""
+        if not self._hybrid_active(o) or self._hybrid_bypass(o, now):
+            return False
+        in_blk, left = self._hybrid_sched(o, now)
+        return (not in_blk) and left > 0
+
+    def _hybrid_block_cap(self, o, ps, now):
+        """Trần KL cho slice này khi HYBRID bật; None = KHÔNG giới hạn (hành vi cũ y nguyên).
+
+        Vì sao phải có trần KL chứ không chỉ đổi interval: checkpoint paper 2026-08-04 (job
+        Taylor_20260804_091703) đo được 151/153 lệnh khớp TRỌN trong 1 slice — với lệnh trung
+        vị 24,5tr và `max_child_value` 200tr, đổi riêng interval là NO-OP, lệnh vẫn đi hết
+        trong 1 lần và không hề được trải. Trần = trải phần CÒN LẠI đều trên số block chưa
+        kết thúc: cap = ceil(remaining / blocks_left).
+
+        Ba tính chất cố ý:
+          • Tự sửa sai — block nào lỡ (thiếu quote / WAIT_CASH / không ai bán) thì phần dư tự
+            dồn sang các block sau; block cuối blocks_left=1 ⇒ hết trần, đi nốt.
+          • KHÔNG BAO GIỜ kẹt hàng vì lịch — hết cửa sổ (blocks_left=0) ⇒ None ⇒ phần dư chạy
+            tiếp theo nhịp thường (chỉ chậm hơn qua `fill_timing_outside_mult`, như layer gốc).
+          • Sàn 1 lô — lệnh nhỏ chia ra dưới 1 lô/block thì trần bằng 1 lô, không tạo lệnh 0.
+        Tầng rủi ro đang điều khiển (`_hybrid_bypass`) ⇒ None: KHÔNG cắt KL của lệnh khẩn."""
+        if not self._hybrid_active(o) or self._hybrid_bypass(o, now):
+            return None
+        _, left = self._hybrid_sched(o, now)
+        if left <= 1:
+            return None
+        remaining = o.qty - ps["filled"]
+        if remaining <= 0:
+            return None
+        return max(LOT, -(-remaining // left))   # ceil chia nguyên, tối thiểu 1 lô
+
     def _fill_timing_mult(self, o, now):
         """Fill-Timing Layer (Layer-3): trả interval multiplier theo cửa sổ tối ưu.
         1.0 = tốc độ bình thường (trong cửa sổ); N = interval × N (ngoài cửa sổ).
         BUY: tập trung 10:45-11:15 (đáy intraday); sáng sớm = slow; chiều = normal.
         SELL: tập trung Open 09:15-09:45 (morning premium); còn lại = slow.
+        Khi `fill_timing_hybrid_enabled` bật, hai quy tắc gom-cửa-sổ trên được THAY bằng lịch
+        HYBRID trải block (xem `_hybrid_mult`); mọi cổng/hành vi khác giữ nguyên.
         """
         if not self.cfg.get("fill_timing_enabled", True):
             return 1.0
@@ -948,14 +1107,18 @@ class Executor:
         mult = self.cfg.get("fill_timing_outside_mult", 4.0)
         if o.side == "buy":
             # Gap-adaptive override: abnormal DOWN-gap → full speed at open 09:15-09:45
+            # Điều kiện override tách ra `_gap_override_active` (hàm thuần) để nhánh
+            # `_cancel_stale → _would_be_unchanged` đánh giá được CÙNG một điều kiện mà không
+            # phụ thuộc thứ tự gọi trong step(); dict dưới đây chỉ còn nuôi ghi chú journal.
+            # Ngoài 09:15-09:45: rơi xuống quy tắc thường như cũ.
             self._last_gap_override.pop(o.ticker, None)
-            if self.cfg.get("gap_adaptive_enabled", False):
-                gap_z = self._gap_z_cache.get(o.ticker)
-                if gap_z is not None and gap_z < _GAP_Z_DOWN_THRESHOLD:
-                    if dt.time(9, 15) <= t < dt.time(9, 45):
-                        self._last_gap_override[o.ticker] = gap_z
-                        return 1.0
-                    # After 09:45: fall through to normal rule
+            if self._gap_override_active(o, now):
+                self._last_gap_override[o.ticker] = self._gap_z_cache.get(o.ticker)
+                return 1.0
+            if self._hybrid_active(o):
+                # HYBRID thay quy tắc gom-cửa-sổ bên dưới; đặt SAU gap-adaptive để override
+                # down-gap (ưu tiên rủi ro) vẫn thắng như trước.
+                return self._hybrid_mult(o, now)
             # Phiên chiều (13:00+): morning premium không còn → tốc độ bình thường
             if t >= dt.time(13, 0):
                 return 1.0
@@ -963,6 +1126,8 @@ class Executor:
             we = _parse_hhmm(self.cfg.get("buy_window_end", "11:15"))
             return 1.0 if ws <= t < we else mult
         else:  # sell: tập trung ở Open
+            if self._hybrid_active(o):
+                return self._hybrid_mult(o, now)
             ws = _parse_hhmm(self.cfg.get("sell_window_start", "09:15"))
             we = _parse_hhmm(self.cfg.get("sell_window_end", "09:45"))
             return 1.0 if ws <= t < we else mult
@@ -1043,15 +1208,24 @@ class Executor:
         except Exception:
             return False
 
+    def _extreme_armed(self, o, now):
+        """EXTREME đã kích và còn trong cooldown. Đọc STATE đã armed, KHÔNG gọi quote lại —
+        gọi được từ mọi chỗ, kể cả trước khi có quote. Nguồn duy nhất cho cả
+        `_extreme_slice_mult` lẫn cổng bypass của HYBRID (`_hybrid_bypass`)."""
+        if not self.cfg.get("extreme_regime_enabled", False):
+            return False
+        st = self._extreme_state.get(o.ticker)
+        try:
+            return bool(st and st.get("until")
+                        and now < dt.datetime.fromisoformat(st["until"]))
+        except Exception:
+            return False   # state rác → coi như bình thường (fail-safe, không đổi nhịp)
+
     def _extreme_slice_mult(self, o, now):
         """1.0 bình thường; extreme_slice_mult khi mã đang active EXTREME (rút ngắn nhịp
         cancel/reprice để đuổi kịp sổ lệnh tụt). Đọc state đã armed, KHÔNG gọi quote lại."""
-        if not self.cfg.get("extreme_regime_enabled", False):
-            return 1.0
-        st = self._extreme_state.get(o.ticker)
-        if st and st.get("until") and now < dt.datetime.fromisoformat(st["until"]):
-            return self.cfg.get("extreme_slice_mult", 0.25)
-        return 1.0
+        return (self.cfg.get("extreme_slice_mult", 0.25)
+                if self._extreme_armed(o, now) else 1.0)
 
     def _place_slices(self, now, phase, ghost_tickers=(), positions=None):
         base_interval = self.cfg["slice_interval_min"] * 60
@@ -1069,6 +1243,67 @@ class Executor:
                 if q_pre and q_pre.ok():
                     self._cache_gap_z(o.ticker, q_pre)
             interval = base_interval * self._fill_timing_mult(o, now)
+            if self._hybrid_defer(o, now):
+                # ─── NẠP EXTREME TRƯỚC KHI HOÃN (chống deadlock khởi động) ───────────────
+                # `continue` bên dưới chặn luôn đường DUY NHẤT nạp `_extreme_state` (lời gọi
+                # `_extreme_regime` ở phía dưới hàm này) — mà `_cancel_stale` chỉ poll lại cho
+                # lệnh ĐÃ có con đang mở, thứ mà lệnh bị hoãn không bao giờ có. Hệ quả: bộ đếm
+                # 2-poll-confirm không bao giờ tăng ⇒ `_extreme_armed` mãi False ⇒ cổng
+                # `_hybrid_bypass` (sinh ra để cứu chính tình huống này) KHÔNG BAO GIỜ mở được
+                # trong đúng khoảng hoãn (BÁN 09:00-09:15, MUA 09:00-11:00).
+                # quant-skeptic vòng 2 (2026-08-10) tái lập bằng code thật: lệnh BÁN cắm sàn từ
+                # mở cửa đặt **0 lệnh** suốt 09:00-09:15 khi bật HYBRID, trong khi bản TRƯỚC
+                # HYBRID xả trọn 8000 ngay 09:00 — tức HYBRID làm TỆ HƠN nền cũ đúng vào cửa sổ
+                # nguy hiểm nhất (gap-down ở mở cửa). Vòng 1 vá "armed mà không bypass"; lỗ này
+                # là "không bao giờ armed được", nặng hơn.
+                # An toàn khỏi đếm-đôi: `_extreme_regime` memoize theo (ticker, now) nên poll ở
+                # đây và lời gọi ở dưới trong CÙNG chu kỳ chỉ tính 1 lần.
+                # THROTTLE (đo thật, không phỏng đoán): không throttle thì mỗi lệnh MUA bị hoãn
+                # gọi `get_quote` MỖI chu kỳ 20s suốt 09:15-11:00 — đo được **+359 lời gọi/lệnh**
+                # (kế hoạch 10 lệnh: +3.590/phiên) so với 1 lời gọi ở nền trước HYBRID, vì
+                # `PHSBroker.get_quote` chỉ cache TTL 3s < `poll_interval_sec`=20. Đây là chi phí
+                # THẬT và rơi NGAY khi bật cờ trên paper `main` (account đó đã bật sẵn
+                # `extreme_regime_enabled` + `gap_adaptive_enabled` trong `overrides`).
+                # Bộ đếm 2-poll-confirm KHÔNG cần độ phân giải 20s: throttle theo TICKER (không
+                # theo lệnh — nhiều lệnh cùng mã trong 1 chu kỳ nay chỉ tốn 1 quote) xuống
+                # `extreme_defer_poll_sec`=60 ⇒ arm chậm nhất ~2 phút KHI QUOTE CHẠY ĐƯỢC (xem
+                # đoạn kế), số lời gọi giảm ~6× (10 lệnh: 3.590 → ~120). Đánh đổi đã cân: trễ ≤2'
+                # để phát hiện sập, đổi lấy tải API về đúng bậc độ lớn cũ. Đặt 0 ⇒ tắt throttle.
+                # ĐÓNG DẤU THỜI GIAN **CHỈ KHI POLL THÀNH CÔNG** (vá quant-skeptic REFUTED vòng 4,
+                # 2026-08-10): `PHSBroker.get_quote` `return None` khi có exception (brokers.py:297
+                # — hành vi ĐÃ CÓ SẴN, không phải giả thuyết). Bản trước đóng dấu TRƯỚC khi biết
+                # quote có ok không ⇒ 1 lần quote lỗi "tiêu" trọn 60s throttle mà bộ đếm
+                # 2-poll-confirm không nhích ⇒ dưới chuỗi lỗi lặp đúng nhịp 60s, lệnh BÁN khẩn kẹt
+                # SẠCH cả cửa sổ hoãn — đúng deadlock vòng 2, chỉ khác lối vào. Reviewer tái lập
+                # trên code thật: quote lỗi suốt 09:00-09:15 ⇒ 0 lệnh đặt.
+                # Vì sao KHÔNG chọn "backoff ngắn hơn (5-10s) cho lần lỗi": `_place_slices` chỉ
+                # được gọi mỗi `poll_interval_sec`=20s, nên MỌI backoff <20s cho ra đúng một hành
+                # vi "thử lại chu kỳ sau" — chỉ khác là thêm 1 knob làm người đọc tưởng có thể
+                # tinh chỉnh. Đóng dấu-khi-thành-công đạt cùng kết quả, ít code hơn, và nói đúng
+                # ngữ nghĩa: throttle giãn nhịp POLL ĐÃ ĐO ĐƯỢC GIÁ, không giãn nhịp THỬ.
+                # Trần chi phí không đổi: lỗi quote liên tục ⇒ thử lại mỗi chu kỳ = ĐÚNG nhịp nền
+                # trước khi có throttle (không tệ hơn), và khi ấy đường đặt lệnh thường cũng đang
+                # `NO_QUOTE` — không có tình huống "HYBRID kẹt còn nền chạy được".
+                if self.cfg.get("extreme_regime_enabled", False):
+                    _gap = self.cfg.get("extreme_defer_poll_sec", 60)
+                    _prev = self._extreme_defer_poll.get(o.ticker)
+                    if _prev is None or (now - _prev).total_seconds() >= _gap:
+                        q_ext = self.broker.get_quote(o.ticker)
+                        if q_ext is not None and q_ext.ok():
+                            self._extreme_defer_poll[o.ticker] = now
+                            self._extreme_regime(o, q_ext, now)
+            # Hỏi LẠI: nếu poll trên vừa arm EXTREME thì `_hybrid_bypass` đã mở ⇒ KHÔNG hoãn nữa,
+            # rơi xuống đặt lệnh bình thường như thời chưa có HYBRID.
+            if self._hybrid_defer(o, now):
+                # Ghi journal ĐÚNG 1 LẦN/parent (poll 20s × N lệnh sẽ ngập file nếu ghi mỗi
+                # vòng) — đủ để người trực biết vì sao chưa có lệnh nào, không phải im lặng.
+                if o.id not in self._hybrid_deferred:
+                    self._hybrid_deferred.add(o.id)
+                    _in, _left = self._hybrid_sched(o, now)
+                    self._journal("HYBRID_DEFER", o, note=(
+                        f"lịch HYBRID: ngoài block, còn {_left} block phía trước — chờ block "
+                        f"kế tiếp (hết cửa sổ sẽ tự đặt bình thường)"))
+                continue
             if ps["last_slice_ts"]:
                 since = (now - dt.datetime.fromisoformat(ps["last_slice_ts"])).total_seconds()
                 if since < interval and ps["children"]:
@@ -1101,7 +1336,7 @@ class Executor:
                         f"giá thấp nhất đặt được (sàn {q.floor:,.0f}) > trần {hard:,.0f}đ "
                         f"— KHÔNG đặt lệnh mua, thử lại chu kỳ sau"))
                 continue
-            qty = self._child_qty(o, ps, q, px)
+            qty = self._child_qty(o, ps, q, px, now)
             if qty <= 0:
                 self._journal("WAIT_QUOTA", o, note="hết quota participation/đợi KL")
                 continue
@@ -1175,9 +1410,17 @@ class Executor:
             ft_mult = self._fill_timing_mult(o, now)
             gap_note = (f"GAP_OPEN_OVERRIDE gap_z={self._last_gap_override[o.ticker]:.2f}"
                         if o.ticker in self._last_gap_override else "")
-            ft_note = (f"ft:in-window" if ft_mult == 1.0 and self.cfg.get("fill_timing_enabled")
-                       else f"ft:out×{ft_mult:.0f}" if self.cfg.get("fill_timing_enabled")
-                       else "")
+            if not self.cfg.get("fill_timing_enabled"):
+                ft_note = ""
+            elif self._hybrid_active(o):
+                # Giữ nguyên chuỗi "ft:in-window" để bộ đếm adherence sẵn có
+                # (execution_quality_review.py: contains "ft:" ∧ "in-window") vẫn đọc được
+                # phiên HYBRID; phần "hyb:blk" thêm chi tiết trải block để kiểm lịch.
+                _in_blk, _blk_left = self._hybrid_sched(o, now)
+                ft_note = (f"ft:in-window hyb:blk left={_blk_left}" if _in_blk
+                           else f"ft:out×{ft_mult:.0f} hyb")
+            else:
+                ft_note = ("ft:in-window" if ft_mult == 1.0 else f"ft:out×{ft_mult:.0f}")
             notes = [n for n in (dip_note,
                                  "nằm chờ tại trần đuổi" if capped else "",
                                  gap_note, ft_note) if n]

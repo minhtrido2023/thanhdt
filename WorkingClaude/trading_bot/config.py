@@ -71,6 +71,31 @@ DEFAULTS = {
     "sell_window_end": "09:45",       # SELL: cuối cửa sổ Open
     "fill_timing_outside_mult": 4.0,  # interval × mult ngoài cửa sổ (8min → 32min mặc định)
 
+    # --- fill-timing HYBRID (trải TWAP BÊN TRONG cửa sổ thuận lợi) — PAPER-ONLY ---
+    # Taylor 2026-08-10 (job Taylor_20260810_034544), triển khai từ nghiên cứu đã CONFIRMED
+    # `mike/agents/Taylor/research/twap_vs_window_execution_20260804.md` §6/§10 — 663 phiên
+    # độc lập, nến 15', 33 mã ta thật sự giao dịch, 2023-09-11 → 2026-05-12.
+    #   BUY  trải 5 block 11:00-13:45: −6,94 bps vs day-VWAP (t=−6,80), sd 26,3 (gom-1-điểm
+    #        @11:15: −7,37 bps, sd 35,5) — giữ 94% edge, cắt 26% độ phân tán.
+    #   SELL trải 4 block 09:15-10:15: +8,89 bps (t=4,64), sd 49,4 (gom @09:15: +9,27, sd 59,3).
+    #        KHÔNG gom tại mở cửa: "edge" +9,3 bps của gom-mở-cửa là ĐẶT CƯỢC HƯỚNG PHIÊN
+    #        (ngày tăng >2% −168 bps / ngày giảm >2% +151 bps), không phải edge thực thi.
+    #   Vòng khứ hồi: gom +16,65 bps (sd 62,0) → HYBRID +15,83 bps (sd 53,5), t 6,91 → 7,62.
+    # QUY MÔ KINH TẾ NHỎ (~0,1-0,3%/năm ở vòng quay ~3×NAV/năm): đây là VỆ SINH CHI PHÍ,
+    # KHÔNG phải đòn bẩy alpha — đừng đánh đổi rủi ro/độ phức tạp để lấy.
+    # CAVEAT (§8 báo cáo, mang theo khi trích dẫn): (1) KHÔNG đo được impact của chính lệnh ta;
+    # (2) KHÔNG có điều kiện tín hiệu — mẫu là MỌI ngày của 33 mã, không riêng ngày có tín hiệu
+    # LAG/BAL; (3) cache `intraday_full.pkl` STALE, hết 2026-05-12 (2026 chỉ 84 phiên);
+    # (4) giá thực thi là XẤP XỈ `(H+L+C)/3` của block, KHÔNG phải fill thật; (5) bỏ ATC 14:45.
+    # DEFAULT OFF + fill_timing_live_gate ⇒ paper-only; bật LIVE cần user duyệt riêng.
+    "fill_timing_hybrid_enabled": False,   # DEFAULT OFF — cần fill_timing_enabled=True mới có hiệu lực
+    # Nhãn block = ĐÚNG các nến 15' đã đo (trung bình của chúng tái lập chính xác −6,94/+8,89 bps
+    # trong §6 báo cáo) — KHÔNG phải "chia đều N điểm trong khoảng", vì khoảng 11:00-13:45 có
+    # nghỉ trưa HOSE 11:30-13:00 (chia đều theo đồng hồ sẽ rơi vào lúc thị trường đóng).
+    "hybrid_buy_blocks": ["11:00", "11:15", "13:00", "13:15", "13:30"],
+    "hybrid_sell_blocks": ["09:15", "09:30", "09:45", "10:00"],
+    "hybrid_block_min": 15,                # bề rộng 1 block (phút) — đúng lưới nến của nghiên cứu
+
     # --- gap-adaptive fill (Layer-3 extension, PAPER only until user approves LIVE) ---
     "gap_adaptive_enabled": False,    # DEFAULT OFF; set True only for paper. LIVE needs user approval.
     "gap_floor_band": 0.07,           # fallback floor band when broker doesn't expose floor price (HOSE default).
@@ -105,6 +130,15 @@ DEFAULTS = {
     "extreme_move_z": 3.0,            # …or when r15 down-move exceeds z × 20d realised vol.
     "extreme_slice_mult": 0.25,       # shorten cancel/reprice cadence ×0.25 (~2min) to chase the falling book.
     "extreme_cooldown_min": 15,       # once tripped, stay active this long (debounce flicker).
+    # Giãn nhịp poll EXTREME khi lệnh đang bị lịch HYBRID HOÃN (chỉ nhánh đó; đường đặt lệnh bình
+    # thường không đổi). Cần vì lệnh bị hoãn phải tiếp tục poll để bộ đếm 2-poll-confirm chạy —
+    # nếu không sẽ deadlock (không bao giờ arm được ⇒ lệnh bán khẩn kẹt; xem executor.py). Đo
+    # thật: không throttle = +359 lời gọi get_quote/lệnh/phiên (PHS cache TTL 3s < poll 20s).
+    # 60s ⇒ arm chậm nhất ~2' KỂ TỪ LẦN QUOTE CHẠY ĐƯỢC ĐẦU TIÊN, tải API về đúng bậc cũ.
+    # 0 = tắt throttle (poll mỗi chu kỳ). Throttle chỉ tính từ lần poll THÀNH CÔNG: quote lỗi
+    # (PHSBroker trả None khi exception) được thử lại ngay chu kỳ sau, không tiêu cửa sổ 60s —
+    # nếu không, chuỗi quote lỗi đúng nhịp 60s sẽ khoá EXTREME cả cửa sổ hoãn (REFUTED vòng 4).
+    "extreme_defer_poll_sec": 60,
 
     # --- DC-book NEUTRAL idle-cash WATERFALL (Taylor 2026-07-06, user-approved paper trial) ---
     # When DT5G=NEUTRAL and BAL/LAG have no qualifying deal, fill idle cash in priority:
