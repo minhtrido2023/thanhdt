@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v1985)
+# Mike fleet — context pack (v1986)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-08-10T09:36:25] Taylor/finding — codex-sandbox-test-result: {"bus_event": "THANH_CONG", "outside_workspace_probe": "BI_CHAN", "target": "/home/trido/thanhdt/WorkingClaude/codex_sandbox_probe2_20260810.txt", "reason": "sa …
 - [2026-08-10T09:37:29] Wendy/finding — ten-agent: Wendy
 - [2026-08-10T09:40:22] Taylor/finding — permission-test-dispatch-093823: {"result": "BI_CHAN", "command": "python3 -c \"print(1+1)\"", "note": "opencode permission rules deny arbitrary bash (only allowlist: append_event, heartbeat, j …
 - [2026-08-10T09:43:07] Taylor/finding — dispatch-094202-bichan: {"result": "BI CHAN", "detail": "Lenh python3 -c print(1+1) bi permission rule deny (chi cho phep mike/bin/*.sh, ls/cat/grep/git...)", "trace_id": "Taylor_20260 …
@@ -11,6 +10,7 @@
 - [2026-08-10T10:13:25] Taylor/answer — codex-perm-check-ket-qua: {"python3": "THANH_CONG: 42", "write_project": "THANH_CONG: /home/trido/thanhdt/WorkingClaude/codex_perm_probe.txt", "write_outside_project": "BI_CHAN: sandbox  …
 - [2026-08-10T10:14:29] Winston/finding — codex-bg-probe: {"result": "Wrote /home/trido/thanhdt/WorkingClaude/codex_bg_probe.txt with exact content bg"}
 - [2026-08-10T10:15:04] Wendy/finding — phép tính đơn giản: {"question": "3+3 bang may?", "answer": "6"}
+- [2026-08-10T10:16:23] Spyros/finding — opencode-perm-check: {"command": "python3 -c \"print('opencode-perm-ok')\"", "result": "SUCCESS", "output": "opencode-perm-ok", "job": "Spyros_20260810_101524"}
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -108,6 +108,20 @@ universe-pit-migration.md`.
 valuation/PEAD-surprise/anomaly/FA thô), wire ở 4 choke-point: `golive_recommend_v23.py`,
 `send_plan_report.sh`, `eod_trading_report.sh`, `dc_book_waterfall_paper.py`. Trần %ADV LAG =
 gate CỨNG live riêng (`cap_lag_orders`, fail-closed từ 07-22) — KHÁC domain-constraint P1 trên.
+
+**Sàn thanh khoản ADV3T 2 tỷ/phiên — GATE CỨNG mới ở tầng CHỌN MÃ (LIVE từ 2026-08-10, commit
+`c4ca90f`).** Trước đó ADV3T<2 tỷ chỉ hiện cảnh báo (SCL ADV3T 1,30 tỷ vẫn mua đủ ngày 08-10).
+`lag_liquidity_filter.py` (LAG) + `bal_filter_thin()` trong `golive_recommend_v23.py` (BAL) giờ
+loại thẳng ứng viên <2 tỷ TRƯỚC due-diligence/plan — KHÔNG đụng `executor.py`/`plan.py`/
+`signal_v11_sql.py` (nền backtest pin R3), KHÔNG đụng sleeve discretionary (TV1/DGC).
+**Quyết định vì hiệu quả vốn (user chốt), KHÔNG phải edge** — backtest vẫn nói ngược (−0,26pp
+CAGR/−0,92pp OOS/PBO 0,916, ghi trong comment code). ⚠️ Vốn dôi ra KHÔNG tự dồn sang deal LAG/BAL
+lớn hơn (LAG không có hàng đợi; BAL có hàng đợi trần 12 nhưng chỉ lấp 55% phiên) — rơi về cash rồi
+vào parking custom30V, user đã biết và chấp nhận trước khi duyệt. Cái giá: rổ LAG hôm nay 176→58
+ứng viên (−67%), loại cả TRC (ADV 1,44 tỷ, mã đã duyệt mua 07-24). quant-skeptic CONFIRMED cao.
+Rollback 1 chữ: `ADV_MIN_VND = 0` trong `lag_liquidity_filter.py`. Chi tiết:
+`mike/agents/Taylor/research/adv3t_hard_gate_wire_20260810.md` +
+`mike/agents/Taylor/research/adv_hard_gate_impact_20260810.md`.
 
 ## R&D pipeline (mọi mục PAPER-ONLY trừ khi ghi rõ LIVE)
 Backlog đầy đủ (checkpoint, điều kiện GO/NO-GO, bug đã biết): `kb/projects/
