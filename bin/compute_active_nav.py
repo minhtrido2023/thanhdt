@@ -12,7 +12,7 @@ có vị thế mua từ TRƯỚC khi bot quản lý (không có trong journal n�
 
 Nguồn số liệu:
   - Vị thế + cash/nợ margin: đọc trực tiếp balances/positions THẬT qua DNSEBroker
-    (real-time, không phải file trung gian).
+    (real-time, không phải file trung gian). Cấu phần tiền: xem §cash.
   - Giá thị trường: nếu --asof là HÔM NAY (hoặc bỏ trống) → giá DNSE live
     (close_price boardId=G1, cùng nguồn verify_account_snapshot.dnse_close_prices);
     BQ tav2_bq.ticker Close CHỈ dùng cho ngày quá khứ. Bright-line rule 2026-07-09
@@ -26,6 +26,54 @@ không sẽ tính sai quy mô lệnh, cố gắng deploy vốn không thực s�
 cáo tách riêng phần NAV "chiến lược V2.4" khỏi phần legacy khi so sánh hiệu suất
 giữa các account (vd SpaceX vs ZaloPay) — số báo cáo không bị lẫn biến động của
 mã đang giữ ngoài chiến lược.
+
+§cash — CẤU PHẦN TIỀN = `totalCash − totalDebt`, KHÔNG phải `availableCash`
+(bug sửa 2026-08-10, job Taylor_20260810_004252; cùng LOẠI bug với mẫu số pool của
+`compute_park_trim.py` sửa 2026-08-09, job Taylor_20260809_150316 — lần thứ hai trong
+hai ngày, xem kb/coding_guidelines.md §25).
+
+  Trước:  cash = DNSEBroker.get_cash() → `availableCash` (field đầu tiên của qget).
+  Sau:    cash = totalCash − totalDebt (đọc THẲNG từ block `stock` của balances).
+
+VÌ SAO. `availableCash` là "tiền TIÊU ĐƯỢC NGAY", KHÔNG phải "vốn tôi SỞ HỮU": nó không
+gồm tiền bán chưa settle T+2, cổ tức phải thu, lãi tiền gửi. Đo thật SpaceX 2026-08-09:
+
+    11:25 (trước khớp):                      availableCash 4.821.143   totalCash  14.596.323
+    19:10 (sau khi bán 13 mã PARK, 189,4tr): availableCash 4.821.143   totalCash 203.656.265
+
+⇒ toàn bộ 189,06tr tiền bán chỉ hiện ở `totalCash`. Với active_nav, hệ quả là NAV bị
+KHAI THIẾU đúng bằng lượng tiền đang trên đường về: SpaceX 08-09 cho active_nav
+762.476.143đ trong khi NAV thật ~961.311.265đ (−20,7%). Vì active_nav là MẪU của mọi
+phép sizing (`LAG_book = active_nav × w_lag`, slot CAPIT, trần chia %ADV giữa 2 account),
+khai thiếu = under-deploy vốn có thật, và nặng nhất đúng vào phiên sau một đợt bán lớn.
+
+TRỪ `totalDebt`: NAV = Tiền + Cổ phiếu − Nợ, cùng quy ước với `daily_nav_snapshot.py:449`
+và `reconcile_equity.py`. Bản cũ không trừ nợ margin ⇒ với account có vay, active_nav
+KHAI THỪA phần nợ (gap đã được nêu trong `research/margin_kelly_production_wiring_20260803.md`
+mục cuối). Hai sai lệch NGƯỢC CHIỀU nhau nên KHÔNG triệt tiêu ổn định — phải sửa cả hai.
+
+RANH GIỚI — chỗ nào VẪN phải dùng `availableCash`, đừng "thống nhất" nhầm:
+  · `DNSEBroker.get_cash()` (trading_bot/brokers.py) — GIỮ NGUYÊN `availableCash`.
+    `check_plan_funding()`/executor hỏi "đặt lệnh NGAY được bao nhiêu", đó là sức mua thật,
+    không phải NAV báo cáo. Sửa nó = nới lỏng gate tiền, hướng sai nguy hiểm.
+  · `compute_jit_unpark.py` (L2) — CỐ Ý `availableCash`, cùng lý do.
+  Ranh giới: cơ sở TÍNH TỶ TRỌNG mục tiêu → totalCash−totalDebt; sức mua THỰC THI → ppse/
+  availableCash. Đúng tinh thần đã áp cho `manual_offbook_assets_vnd` (vào NAV, không vào
+  sức mua).
+
+FAIL-CLOSED. Ba guard (tái dùng NGUYÊN VẸN từ `park_holdings.py`, không viết lại —
+`_stock_block_all_zero` / `_cash_fields_all_zero` / `_cash_fields_inconsistent`) bắt lỗi
+feed DNSE trả block `stock` toàn 0 hoặc chỉ ăn 2/3 field tiền (sự cố thật 2026-07-27).
+Bất kỳ guard nào nổ, hoặc thiếu `totalCash`/`totalDebt` ⇒ THOÁT mã 4, KHÔNG ghi file, và
+TUYỆT ĐỐI không âm thầm rơi về `availableCash` (rơi về = tái lập đúng bug vừa sửa). File
+active_nav cũ ở lại nguyên vẹn; consumer `golive_recommend_v23._account_nav_basis()` tự
+hết hạn theo `computed_at` sau 5 ngày rồi lùi về `nav_history` — đường lùi đã có sẵn.
+
+Cổ tức phải thu (`cashDividendReceiving`) NẰM TRONG `totalCash` trước ngày ex ⇒ có thể
+đếm 2 lần với giá cổ phiếu chưa rơi quyền, tối đa 1-2 phiên rồi tự triệt tiêu
+(`daily_nav_snapshot.cum_dividend_double_count`). Script này KHÔNG hiệu chỉnh (cần lịch sử
+dnse_raw + ex-date từ BQ, ngoài phạm vi bản vá này) mà CÔNG BỐ: in cảnh báo + ghi
+`cash_dividend_receiving_vnd` vào JSON khi khoản đó vượt 0,5% NAV.
 """
 import argparse
 import json
@@ -46,15 +94,63 @@ def get_account_profile(label):
     return None
 
 
+def cash_basis(bal):
+    """`totalCash − totalDebt` từ payload `balances` thô (§cash). → (VND|None, chi_tiết).
+
+    None = KHÔNG dựng được cơ sở tiền đáng tin ⇒ caller PHẢI fail-closed. Ba guard tái dùng
+    nguyên vẹn từ `park_holdings.py` (nơi chúng đã qua 3 vòng quant-skeptic 2026-08-09) —
+    import chứ không chép lại, để sửa một chỗ là cả hai đường cùng đổi.
+
+    `chi_tiết` luôn mang đủ cả ba field tiền thô + `reason` (khi None) để provenance trong
+    JSON đầu ra không nói dối về việc số này đến từ đâu.
+    """
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from park_holdings import (_cash_fields_all_zero, _cash_fields_inconsistent,
+                               _f_or_none, _stock_block_all_zero)
+
+    row = bal[0] if isinstance(bal, list) and bal else bal
+    if isinstance(row, dict) and isinstance(row.get("stock"), dict):
+        row = row["stock"]                      # balances thật: {"stock": {...}, "derivative": {...}}
+    st = row if isinstance(row, dict) else {}
+    detail = {"cash_total_vnd": _f_or_none(st.get("totalCash")),
+              "cash_debt_vnd": _f_or_none(st.get("totalDebt")),
+              "cash_available_vnd": _f_or_none(st.get("availableCash")),
+              "cash_dividend_receiving_vnd": _f_or_none(st.get("cashDividendReceiving")),
+              "cash_basis": "totalCash-totalDebt", "reason": None}
+
+    if _stock_block_all_zero(st):
+        detail["reason"] = ("block `stock` của balances TOÀN SỐ 0 — lỗi feed DNSE tạm thời "
+                            "(sự cố thật 2026-07-27), KHÔNG phải tiền mặt thật về 0")
+    elif _cash_fields_all_zero(st):
+        detail["reason"] = ("cả totalCash/totalDebt/availableCash đều = 0 trong khi field khác "
+                            "vẫn sống — lỗi feed chỉ ăn phần tiền")
+    elif _cash_fields_inconsistent(st):
+        detail["reason"] = (f"totalCash {float(st['totalCash']):,.0f}đ < availableCash "
+                            f"{float(st['availableCash']):,.0f}đ — vi phạm bất biến kế toán "
+                            f"(totalCash luôn CHỨA availableCash) ⇒ block tiền không đáng tin")
+    elif detail["cash_total_vnd"] is None or detail["cash_debt_vnd"] is None:
+        detail["reason"] = "DNSE không trả `totalCash`/`totalDebt` trong block `stock`"
+    if detail["reason"]:
+        return None, detail
+    return detail["cash_total_vnd"] - detail["cash_debt_vnd"], detail
+
+
 def live_balance_and_positions(account_id, label):
-    """Gọi trực tiếp DNSEBroker — real-time, không qua file trung gian."""
+    """Gọi trực tiếp DNSEBroker — real-time, không qua file trung gian.
+
+    KHÔNG dùng `b.get_cash()`: hàm đó trả `availableCash` = sức mua tức thời, đúng cho
+    executor/funding-gate nhưng SAI cho cơ sở NAV (§cash). Đọc thẳng payload `balances` thô
+    để lấy được cả hai field `totalCash`/`totalDebt` mà `get_cash()` đã bóp về một số.
+    """
     sys.path.insert(0, WC_ROOT)
     from trading_bot.brokers import DNSEBroker
     b = DNSEBroker(account_id=account_id, credentials_file=None, label=label)
     b.connect()
-    cash = b.get_cash()
+    bal = b.client.balances(account_id)
+    b._log_raw("balances", bal)                 # cùng dấu vết audit như get_cash() vẫn ghi
+    cash, cash_detail = cash_basis(bal)
     positions = b.get_positions()
-    return cash, positions
+    return cash, positions, cash_detail
 
 
 def bq_close_prices(tickers, as_of_date=None):
@@ -149,12 +245,21 @@ def main():
         except ValueError:
             pass
 
-    cash, positions = live_balance_and_positions(account_id, args.account)
+    cash, positions, cash_detail = live_balance_and_positions(account_id, args.account)
+    if cash is None:
+        # FAIL-CLOSED (§cash): không ghi đè file active_nav cũ bằng một con số sai. Consumer
+        # (`golive_recommend_v23._account_nav_basis`) tự thấy file quá hạn theo `computed_at`
+        # rồi lùi về nav_history — đường lùi có sẵn, không cần đoán số ở đây.
+        print(f"❌ Không dựng được cơ sở tiền cho {args.account}: {cash_detail['reason']} "
+              f"⇒ KHÔNG ghi active_nav (giữ nguyên file cũ). Chạy lại để lấy bản đọc balance "
+              f"tươi; TUYỆT ĐỐI không thay bằng `availableCash` (xem §cash trong docstring).",
+              file=sys.stderr)
+        sys.exit(4)
     tickers = list(positions.keys())
     if not tickers:
         print(f"⚠️ Account {args.account} không có vị thế nào — "
               f"active_nav = cash + offbook = {cash + offbook:,.0f} "
-              f"(cash {cash:,.0f} + offbook {offbook:,.0f})")
+              f"(cash {cash:,.0f} = totalCash − totalDebt + offbook {offbook:,.0f})")
         return
 
     prices, price_source, err = resolve_prices(tickers, args.asof)
@@ -188,7 +293,12 @@ def main():
         flag = "🔒 EXCLUDED" if is_excl else ""
         print(f"{tk:6s} {qty:>10,.0f} {px:>10,.0f} {mv:>16,.0f}  {flag}")
     print()
-    print(f"Tiền mặt:                 {cash:>16,.0f}")
+    print(f"Tiền mặt (totalCash − totalDebt): {cash:>16,.0f}")
+    print(f"  · totalCash:            {cash_detail['cash_total_vnd']:>16,.0f}  "
+          f"(gồm tiền bán chưa settle T+2, cổ tức phải thu, lãi tiền gửi)")
+    print(f"  · − totalDebt:          {cash_detail['cash_debt_vnd']:>16,.0f}")
+    print(f"  · availableCash:        {(cash_detail['cash_available_vnd'] or 0):>16,.0f}  "
+          f"(sức mua TỨC THÌ — KHÔNG dùng làm cơ sở NAV, chỉ để đối chiếu)")
     print(f"Tổng giá trị cổ phiếu:    {total_mv:>16,.0f}")
     print(f"  trong đó excluded:      {excluded_mv:>16,.0f}  ({', '.join(sorted(excluded)) or '(none)'})")
     if offbook:
@@ -201,6 +311,17 @@ def main():
               f"off-book cần user rút tay trước khi bot đặt lệnh được.")
     if offbook_stale_warning:
         print(f"⚠️ {offbook_stale_warning}")
+    # Cổ tức phải thu đã nằm trong totalCash nhưng giá cổ phiếu có thể chưa rơi ex-date ⇒
+    # đếm 2 lần, tối đa 1-2 phiên rồi tự triệt tiêu (§cash). Chỉ CÔNG BỐ khi đủ lớn để đổi
+    # quy mô lệnh; không tự hiệu chỉnh (cần ex-date từ BQ, ngoài phạm vi script này).
+    div_recv = cash_detail.get("cash_dividend_receiving_vnd") or 0
+    div_warning = None
+    if div_recv > 0.005 * active_nav:
+        div_warning = (
+            f"cổ tức phải thu {div_recv:,.0f}đ ({div_recv / active_nav:.2%} active_nav) đã nằm "
+            f"trong totalCash — nếu cổ phiếu CHƯA qua ex-date thì NAV đang đếm 2 lần khoản này "
+            f"(tự triệt tiêu sau 1-2 phiên; xem daily_nav_snapshot.cum_dividend_double_count).")
+        print(f"⚠️ {div_warning}")
 
     result = {
         "account": args.account, "account_id": account_id,
@@ -209,7 +330,16 @@ def main():
         # (mtime tươi/nội dung cũ là bẫy đã gặp thật, sự cố lag_edge_health 2026-07-12).
         # Consumer: golive_recommend_v23._account_nav_basis() (chia trần %ADV cho CAPIT).
         "computed_at": __import__("datetime").date.today().isoformat(),
-        "cash": cash, "total_stock_value": total_mv, "excluded_value": excluded_mv,
+        # `cash` = totalCash − totalDebt kể từ 2026-08-10 (trước đó là `availableCash`, §cash).
+        # Ba field thô đi kèm để consumer/audit tái lập được con số mà không phải gọi lại API.
+        "cash": cash,
+        "cash_total_vnd": cash_detail["cash_total_vnd"],
+        "cash_debt_vnd": cash_detail["cash_debt_vnd"],
+        "cash_available_vnd": cash_detail["cash_available_vnd"],
+        "cash_dividend_receiving_vnd": cash_detail["cash_dividend_receiving_vnd"],
+        "cash_basis": cash_detail["cash_basis"],
+        "cash_dividend_double_count_warning": div_warning,
+        "total_stock_value": total_mv, "excluded_value": excluded_mv,
         "offbook_assets": offbook, "offbook_assets_asof": offbook_asof,
         "offbook_stale_warning": offbook_stale_warning,
         "excluded_tickers": sorted(excluded), "total_nav": total_nav, "active_nav": active_nav,
