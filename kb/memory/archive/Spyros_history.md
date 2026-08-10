@@ -8,3 +8,6 @@
 - [2026-06-27T03:50:30Z] DONE: S4 episode-drawdown breaker implemented (risk_monitor.py + trading_rules v1.8). MGE=1.5, threshold=-15%, state=data/recovery_episode_state.json. Tests PASS. | NEXT: chờ Taylor B3+B4 xong để verify Config D hoàn chỉnh trước go-live 2026-07-01.
 - [2026-07-02T05:54:35Z] AUDIT DONE: eod-mismatch-SpaceX-07-02 — CONFIRMED double-buy (2x concurrent bot), 4 name-cap breaches, 140.8% NAV. Bug fixed 503aa2f. Trim plan 07-06 user-approved. OPEN: Mafee confirm -404.9M float vs loan. Monitor 07-06 trim execution.
 - [2026-07-02T08:05:01Z] XONG: Reaudit SpaceX 07-02 double-buy (job Spyros_20260702_080003, dispatch từ Mafee). Verdict: CONFIRMED REAL, root cause 2 concurrent bot processes, bug fixed 503aa2f. Risk flags đã biết, trim plan 07-06 approved. Không có action mới. NEXT: Monitor trim execution 07-06.
+
+## Archived 2026-08-10 (keep=4 days=2 require_done=False)
+- [2026-07-21T01:30:42Z] DONE: SHS IDIOCRASH 2026-07-20 final verdict — HOLD, không halt. Root cause: Q2 earnings shock (NP -80% YoY), không có criminal/governance. FVTPL -825B có thể MTM. Vị thế 0.47% NAV, không vi phạm ngưỡng nào. Monitor: (1) SHS price 07-21 có floor không; (2) Taylor xác nhận FVTPL realized/MTM; (3) rebal 08-05 SHS dự kiến bị loại. BACKLOG: risk monitor realtime, EOD->BQ, recon fill<->ticker.

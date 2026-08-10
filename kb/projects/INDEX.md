@@ -1,28 +1,31 @@
-## Dự án đã đóng — chi tiết theo yêu cầu (đọc khi cần: `cat kb/projects/<file>.md`)
-- 2026-07-31 **CAPIT sizing bug 07-21 (thiếu 87,1tr SpaceX)** → `kb/projects/capit-sizing-bug-0721.md` — ĐÓNG — root cause (nhân capit_size 2 lần) đã fix (commit 53cb117/d3aa3f05) + gate WARN-only mới ở send_plan_report.sh; user chốt KHÔNG bù phần thiếu (4 căn cứ cụ thể).
-- 2026-07-28 **DGC + TV1 fear-buy discretionary due-diligence** → `kb/projects/dgc-tv1-fearbuy-discretionary.md` — XONG (research) — cả 2 QUALIFIED YES, đã chuyển sang theo dõi discretionary riêng ngoài current_ops.md (TV1: context_planning_mini.md + plan file; DGC: excluded_tickers + finding Taylor).
-- 2026-07-21 **LAG 07-24 (IVS/TMG/TRC)** → `kb/projects/lag-0724-ivs-tmg-trc.md` — XONG — user chốt phương án C (chỉ mua TRC), gate %ADV LIVE wired, lọc thanh khoản LAG tầng tín hiệu wired, trần vị thế LAG=12 xác nhận là hệ quả tiền chứ không phải tham số riêng — quyết định bound tới phiên 07-24 đã qua.
-- 2026-07-20 **Deposit-rate auto-crosscheck automation** → `kb/projects/deposit-rate-autocheck.md` — DONE — refresh_deposit_rate_vn.sh tự dispatch Winston xác nhận + ghi (không cần người), 10 vòng quant-skeptic REFUTED→fix→re-review (mỗi vòng 1 lỗi thật, khác nhau) rồi CONFIRMED — kể cả 1 bug thật trong `deposit_rate_vn.current_deposit_rate()` (consumer, không phải chỉ writer).
-- 2026-07-17 **DCF upgrade (earning-power · GDP terminal-g · refresh-gate)** → `kb/projects/dcf-earning-power-upgrade.md` — TRIỂN KHAI XONG — Việc1 earning-power NO-GO (giữ FCFE); Việc3 `cap_rf` = default hiển thị `dcf_valuation.py` (level fix, không alpha, DCF non-decisional); Việc2 refresh-gate cron LIVE ngày 11. quant-skeptic CONFIRMED.
-- 2026-07-13 **World Cup + rổ lãi suất huy động (Pillar A′)** → `kb/projects/wc-deposit-rate-gate.md` — ĐÓNG cả 2 hướng — N quá mỏng / 0-4 GO, không wire production.
-- 2026-07-13 **Plan-approval gate (second-chance cron + code-gate)** → `kb/projects/plan-approval-gate.md` — XONG — second-chance re-send 23:00 + code-gate bot_execute.py, hiệu lực 09:05 07-14 (commits 4216295/27e1282/54d488c).
-- 2026-07-13 **Plan ZaloPay transition day 5/5 (FINAL)** → `kb/projects/zalopay-transition-0713.md` — XONG — bán VIB + mua BID, ngày cuối chuỗi transition 07-07→07-13.
-- 2026-07-13 **DT5G BULL-giả bug → audit freshness toàn hệ thống** → `kb/projects/dt5g-bull-fake-freshness-audit.md` — KHÉP KÍN — EW-leg path fix + CRITICAL custom30V basket fix + F3 re-pin; live không sai.
-- 2026-07-13 **Báo cáo tuần 07-06→07-10 + chống tái diễn** → `kb/projects/weekly-report-mechanism.md` — XONG — đã gửi + WARN check báo cáo tuần/tháng quá hạn (commit 7147ac3).
-- 2026-07-13 **Audit dữ liệu 8L (mùa BCTC Q2)** → `kb/projects/8l-data-audit.md` — XONG — 8L đầy đủ; 3 fix cache/cadence/doc dispatch (Winston_20260713_103213).
-- 2026-07-12 **lag_edge_health.csv staleness** → `kb/projects/lag-edge-health-staleness.md` — KHÔNG phải bug — mtime-tươi/content-cũ đọc nhầm; falsifiable check ~08-25.
-- 2026-07-12 **fa_ratings/8L re-tune + rebuild builder** → `kb/projects/fa-ratings-rebuild.md` — Re-tune 8L NO-GO (16/16); rebuild fa_ratings builder HOÀN TẤT, BQ-write-identity fixed.
-- 2026-07-12 **V2.5 leverage verification** → `kb/projects/v2.5-leverage-nogo.md` — NO-GO, giữ DISABLED — edge là IS-artifact (OOS âm), DSR<0.95.
-- 2026-07-12 **LAG-weight (tăng tỷ trọng PEAD)** → `kb/projects/lag-weight.md` — ĐÓNG — chấp nhận kết luận mô tả, không tăng trần w_LAG.
-- 2026-07-12 **Dự án momentum-deals (đóng kênh MOM_N/MOM_S)** → `kb/projects/momentum-deals.md` — KHÉP KÍN — production LIVE, re-pin R3 27.84%/1.84/-18.2/1.53 (commit 4fbd492+9df396d).
-- 2026-07-12 **Dự án Q-sleeve (rổ nhỏ chất lượng cao)** → `kb/projects/q-sleeve.md` — NO-GO cả 2 trục, quant-skeptic CONFIRMED.
-- 2026-07-12 **Audit sẵn sàng mùa BCTC Q2/2026** → `kb/projects/bctc-q2-readiness-audit.md` — KHÉP KÍN — fix CRITICAL LAG-blind + MEDIUM freshness + 3 mục nhỏ, đều verified.
-- 2026-07-03 **Usage-limit auto-resume** → `kb/projects/usage-limit-auto-resume.md` — XONG — dispatch.sh phát hiện usage-limit → pending_resumes → resume_pending.py cron.
-- 2026-07-02 **Reliability hardening (4 việc AgentOps)** → `kb/projects/reliability-hardening.md` — XONG — circuit breaker + idempotency guard + trace_id + INCIDENTS.md (commit e1d9b7c).
+## Dự án đã đóng — 1 dòng/dự án, chi tiết `cat kb/projects/<file>.md`
+<!-- Rút gọn 2026-08-10: mỗi dòng trước đây là 2-4 câu kể lại diễn biến. File này bơm vào MỌI
+     dispatch có context_pack ⇒ tường thuật của việc ĐÃ ĐÓNG là chi phí trả lại mỗi phiên.
+     Giữ đúng phần còn quyết định được hành vi sau này: TÊN · FILE · PHÁN QUYẾT (nhất là NO-GO,
+     để không ai đề xuất lại). Diễn biến vẫn nguyên trong file chi tiết. -->
+- 2026-07-31 CAPIT sizing bug 07-21 → `capit-sizing-bug-0721.md` — ĐÓNG, đã fix; user chốt KHÔNG bù phần thiếu
+- 2026-07-28 DGC + TV1 fear-buy due-diligence → `dgc-tv1-fearbuy-discretionary.md` — XONG, cả 2 QUALIFIED, theo dõi discretionary riêng
+- 2026-07-21 LAG 07-24 (IVS/TMG/TRC) → `lag-0724-ivs-tmg-trc.md` — XONG, gate %ADV + lọc thanh khoản LAG đã wire
+- 2026-07-20 Deposit-rate auto-crosscheck → `deposit-rate-autocheck.md` — XONG, tự động, không cần người
+- 2026-07-17 DCF upgrade → `dcf-earning-power-upgrade.md` — earning-power **NO-GO** (giữ FCFE); refresh-gate cron LIVE
+- 2026-07-13 World Cup + rổ lãi suất huy động → `wc-deposit-rate-gate.md` — **NO-GO** cả 2 hướng, N quá mỏng
+- 2026-07-13 Plan-approval gate → `plan-approval-gate.md` — XONG, re-send 23:00 + code-gate `bot_execute.py`
+- 2026-07-13 Plan ZaloPay transition 5/5 → `zalopay-transition-0713.md` — XONG
+- 2026-07-13 DT5G BULL-giả → audit freshness → `dt5g-bull-fake-freshness-audit.md` — KHÉP KÍN, live không sai
+- 2026-07-13 Báo cáo tuần 07-06→07-10 → `weekly-report-mechanism.md` — XONG, có WARN quá hạn
+- 2026-07-13 Audit dữ liệu 8L (BCTC Q2) → `8l-data-audit.md` — XONG
+- 2026-07-12 lag_edge_health.csv staleness → `lag-edge-health-staleness.md` — KHÔNG phải bug; check lại ~08-25
+- 2026-07-12 fa_ratings/8L → `fa-ratings-rebuild.md` — re-tune 8L **NO-GO**; rebuild builder XONG
+- 2026-07-12 V2.5 leverage → `v2.5-leverage-nogo.md` — **NO-GO**, giữ DISABLED (edge là IS-artifact)
+- 2026-07-12 LAG-weight (tăng tỷ trọng PEAD) → `lag-weight.md` — ĐÓNG, KHÔNG tăng trần w_LAG
+- 2026-07-12 Momentum-deals (MOM_N/MOM_S) → `momentum-deals.md` — KHÉP KÍN, production LIVE
+- 2026-07-12 Q-sleeve → `q-sleeve.md` — **NO-GO** cả 2 trục
+- 2026-07-12 Audit sẵn sàng BCTC Q2/2026 → `bctc-q2-readiness-audit.md` — KHÉP KÍN
+- 2026-07-03 Usage-limit auto-resume → `usage-limit-auto-resume.md` — XONG
+- 2026-07-02 Reliability hardening (AgentOps) → `reliability-hardening.md` — XONG
 
-## Dự án ĐANG MỞ nhưng chi tiết tách riêng (KHÔNG inline `current_ops.md`, thêm 2026-08-01)
-Khác nhóm trên (đã ĐÓNG) — 2 mục dưới đây vẫn đang chạy, nhưng chi tiết ngày-qua-ngày không cần
-đọc mỗi phiên. `current_ops.md` giữ 1 đoạn tóm tắt + pointer; đọc file khi cần theo dõi tiến độ.
-- **R&D pipeline (mọi thử nghiệm paper-only)** → `kb/projects/rnd-pipeline-tracker.md`
-- **Migration `ticker_prune` → `universe_pit` (checklist G5-G9)** → `kb/projects/universe-pit-migration.md`
-- **LAG ADV>0 filter — tích luỹ dữ liệu phân rã edge vs hiện vật fill** → `kb/projects/lag-adv-filter-tracking.md` — mở 2026-08-03, chủ Taylor. `lag_liq_ledger.py` ghi sổ append-only từ mỗi phiên EOD (khe hổng: `golive_v23_status.json` bị ghi đè, 0 lịch sử). **KHÔNG kết luận gì** cho tới 2 mốc CỨNG: checkpoint **2026-12-15** (kiểm sổ có tích luỹ được không) và rà soát đầy đủ **2027-03-31** (Q3+Q4/2026 xong 25 phiên). Tới đó mới tách được +4,11pp (quant-skeptic INCONCLUSIVE 3 lần).
+## Dự án ĐANG MỞ, chi tiết tách riêng (không inline `current_ops.md`)
+- R&D pipeline (mọi thử nghiệm paper-only) → `rnd-pipeline-tracker.md`
+- Migration `ticker_prune` → `universe_pit` (G5-G9) → `universe-pit-migration.md`
+- LAG ADV>0 filter — đo edge vs hiện vật fill → `lag-adv-filter-tracking.md` — chủ Taylor, mở 2026-08-03.
+  **KHÔNG kết luận gì** trước 2 mốc cứng: checkpoint **2026-12-15**, rà soát đầy đủ **2027-03-31**.
