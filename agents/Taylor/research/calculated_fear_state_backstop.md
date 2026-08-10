@@ -1166,3 +1166,53 @@ này) **+ 5 truy vấn tin tức** · **0 QUALIFY mới** · **0 case mới đá
 (DNA + 8 mã quét rộng) · 4 read-through (PNJ, DGC — cả hai có tin mới; TV1, TV4 — không tin mới) ·
 1 khuyết tật cơ chế báo lên fleet. **Mốc gần nhất phải theo: TV1 10/08 (3 ngày) → TV4 30/08 → PNJ Q3
 cuối 10/2026.**
+
+---
+
+## 14. TV1 — cập nhật 2026-08-10 (Mike, due-diligence trực tiếp theo yêu cầu user, đúng ngày cổng T3)
+
+**Q2/2026 nay là số THẬT, không còn stale carry-forward.** Check 08-04 từng gắn cờ nghi ngờ dòng
+"2026Q2" trong `ticker_financial` là Q1 lặp lại. Xác nhận lại hôm nay: `Release_Date`=2026-08-03
+(khác Q1's 2026-05-04), NP_P0=31,33 tỷ ≠ NP Q1 32,23 tỷ (không byte-identical) → filing thật.
+
+**KQKD Q2/2026**: NP 31,33 tỷ (+7,96% YoY so NP cùng kỳ 29,02 tỷ), Doanh thu 134,0 tỷ (+4,13% YoY),
+NPM 20,66% (~ổn định QoQ), ROE_Trailing 30,58%. Giảm QoQ so Q1 (NP −2,8%, DT −7,4%) khớp mùa vụ
+thủy điện đã thấy ở 2025 (Q2/2025 cũng thấp hơn Q1/2025) — không phải tín hiệu xấu. FSCORE giảm
+6→5 (đáng ghi nhận, không đáng báo động). CF_OA quý này (24,31 tỷ) < NP quý này lần đầu sau nhiều
+quý, NHƯNG **CF_OA/NP TTM (4 quý gần nhất) = 220,13/154,17 = 1,43x** — vẫn đúng mẫu "TV1 luôn
+≥1x" trong router, đọc theo TTM chứ không theo 1 quý (đúng luật Step 3) → không đổi kết luận lõi
+sạch.
+
+**Cổng T3 (chọn đơn vị kiểm toán) — HÔM NAY 10/08 chính là ngày lấy ý kiến bằng văn bản.**
+WebSearch xác nhận lịch (stockbiz/cafef/dantri, đưa tin từ 01/07 và 20/07) nhưng **CHƯA có bài nào
+đăng kết quả** — hợp lý vì kết quả lấy ý kiến bằng văn bản thường công bố sau vài ngày, không phải
+tức thời trong ngày bỏ phiếu. **Cần tra lại 1-2 ngày tới**, đừng coi "chưa thấy tin xấu" là đã qua
+cổng.
+
+**Cổng phụ (cổ tức 15%) — CÓ TIN MỚI, ngày trả đã công bố.** Nguồn dnse.com.vn/baodauthau.vn:
+ngày thanh toán cổ tức tiền mặt 15% (1.500đ/cp) = **14/08/2026** (còn 4 ngày). ⚠️ Chỉ 1 nguồn tổng
+hợp xác nhận ngày trả, **chưa tìm được ngày ĐKCC (record date) từ thông báo HOSE/HNX gốc** — nêu rõ
+độ tin cậy trung bình, verify lại nếu dùng để tính toán chính xác ngày giao dịch không hưởng quyền.
+
+**Giá/kỹ thuật 10/08**: 19.800đ (đi ngang biên 19.400-20.000 hơn 3 tuần, khớp ghi nhận 06/08).
+Dưới MA50 (21.598) và MA200 (25.535) — downtrend kỹ thuật dài hạn CHƯA đảo chiều dù đã có 3 tuần
+đi ngang. PE 3,43x (PE_MA5Y 11,62±7,81 → −1,05SD), PB 1,05x (PB_MA5Y 1,32±0,29 → −0,92SD).
+
+**DCF cập nhật (router Tier 3, illiquid — beta đo 0,24/R²=1,8% loại bỏ theo đúng cảnh báo router
+§1.2b dùng TV1 làm ví dụ, ADV~0,7-0,8 tỷ/ngày < 2 tỷ → premium +4-6pp, CoE 16,3-19,3%, Rf 6,8%
+12/06/2026-6.8% xác nhận 20/07, ERP 6,5%)**:
+- Full-FCF DCF (perpetuity, FCF TTM 214,45 tỷ, g 1-3%): ~44.300 – 62.200đ/cp
+- DDM (chỉ tính cổ tức thực trả, D1 1.000-1.500đ, g 0-4%): ~5.200 – 12.700đ/cp
+- Khoảng cách 2 phương pháp = đúng câu hỏi "công ty có thực sự trả lại FCF cho cổ đông không" —
+  cổ tức trả 14/08 tới là phép thử thực tế đầu tiên kể từ khi nâng tỷ lệ 6%→15%.
+- SOTP trước đó (§10.2, bottom-up từng tài sản Sông Bung 5): ~33.100đ/cp — coi là điểm neo đáng
+  tin hơn đầu trên của FCF-DCF top-down (DCF perpetuity dễ overstate giá trị 1 tài sản đơn lẻ).
+
+**Kết luận**: giữ nguyên QUALIFY, lõi vẫn sạch và Q2 thật xác nhận thêm 1 quý không gián đoạn vận
+hành. Không đổi sizing đã duyệt (0,5-1,0% NAV, giới hạn bởi thanh khoản). Hai cổng va nhau đúng
+tuần này (kết quả kiểm toán ~vài ngày tới + trả cổ tức 14/08) — theo dõi sát, KHÔNG phải tín hiệu
+mua thêm chỉ vì tới hạn, cần cổng THẬT xác nhận trước.
+
+Sources: [stockbiz.vn](https://stockbiz.vn/tin-tuc/tv1-mot-cong-ty-con-cua-evn-bi-ca-4-cong-ty-big4-tu-choi-kiem-toan-sau-khi-chu-tich-hdqt-bi-khoi-to/40702174) ·
+[dantri.com.vn](https://dantri.com.vn/kinh-doanh/chu-tich-vua-bi-bat-cong-ty-dien-bi-ca-4-ben-big-4-tu-choi-kiem-toan-20260701145835409.htm) ·
+[baodauthau.vn](https://baodauthau.vn/dhcd-pecc1-manh-tay-chia-co-tuc-tham-gia-loat-du-an-thuy-dien-mo-rong-luoi-dien-dien-hat-nhan-post198014.html)
