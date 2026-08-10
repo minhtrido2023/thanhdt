@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v1987)
+# Mike fleet — context pack (v1988)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-08-10T09:40:22] Taylor/finding — permission-test-dispatch-093823: {"result": "BI_CHAN", "command": "python3 -c \"print(1+1)\"", "note": "opencode permission rules deny arbitrary bash (only allowlist: append_event, heartbeat, j …
 - [2026-08-10T09:43:07] Taylor/finding — dispatch-094202-bichan: {"result": "BI CHAN", "detail": "Lenh python3 -c print(1+1) bi permission rule deny (chi cho phep mike/bin/*.sh, ls/cat/grep/git...)", "trace_id": "Taylor_20260 …
 - [2026-08-10T10:13:19] Taylor/finding — codex-perm-check: test
 - [2026-08-10T10:13:25] Taylor/answer — codex-perm-check-ket-qua: {"python3": "THANH_CONG: 42", "write_project": "THANH_CONG: /home/trido/thanhdt/WorkingClaude/codex_perm_probe.txt", "write_outside_project": "BI_CHAN: sandbox  …
@@ -11,6 +10,7 @@
 - [2026-08-10T10:15:04] Wendy/finding — phép tính đơn giản: {"question": "3+3 bang may?", "answer": "6"}
 - [2026-08-10T10:16:23] Spyros/finding — opencode-perm-check: {"command": "python3 -c \"print('opencode-perm-ok')\"", "result": "SUCCESS", "output": "opencode-perm-ok", "job": "Spyros_20260810_101524"}
 - [2026-08-10T10:26:49] Taylor/finding — refactor-codex: REFACTOR-CODEX-OK
+- [2026-08-10T10:27:28] Wendy/finding — refactor-opencode-ack: {"ack": "REFACTOR-OPENCODE-OK", "job": "Wendy_20260810_102645", "note": "dong trinh xac nhan da duoc trich loat len bus"}
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
