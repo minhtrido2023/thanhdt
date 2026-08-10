@@ -1064,10 +1064,20 @@ def main():
     check("unlinked logfile -> stamp STILL REFUSED (inode match survives rm)", rc == 3,
           "rc=%d %s" % (rc, (out + err)[:260]))
     check("record still running", read_job(jobs, "J_R1")["status"] == "running")
-    check("...and cancel will not blind-close it either",
-          run([sys.executable, MJ, "job-cancel", jobs, "J_R1", "2"])[0] == 3)
-    check("still running after the cancel attempt",
-          read_job(jobs, "J_R1")["status"] == "running")
+    # ...and cancel, which FINDS the worker here (the inode match survives rm), must do both
+    # halves of its job. This case used to assert rc=3 + 'still running' — enshrining round 7's
+    # K2: cancel killed the tree and was then refused the status write, leaving the board
+    # claiming `running` about a process it had just killed. Killing is not the hard part;
+    # telling the truth about it afterwards is.
+    rc_r1, out_r1, err_r1 = run([sys.executable, MJ, "job-cancel", jobs, "J_R1", "2"])
+    time.sleep(0.4)
+    check("cancel FINDS the worker through the deleted logfile and closes properly",
+          rc_r1 == 0, "rc=%d %s" % (rc_r1, (out_r1 + err_r1)[:200]))
+    check("the worker it reported killing really is dead", not alive(work_r1),
+          "worker=%s" % work_r1)
+    check("and the record says cancelled — never 'dead process, board says running'",
+          read_job(jobs, "J_R1")["status"] == "cancelled",
+          read_job(jobs, "J_R1")["status"])
 
     # R2 (K1, the half rm does not cover) — RENAME. The old name is gone, so there is no inode
     # left to compare against: _pids_holding genuinely cannot answer. That is the case the
@@ -1385,6 +1395,57 @@ def main():
           str(read_job(jobs, "J_S8").get("pin_failed")) == "1",
           str(read_job(jobs, "J_S8").get("pin_failed")))
     check("S8 worker untouched", alive(work_s8), "worker=%s" % work_s8)
+
+    # S8b (round 7, K1) — the variant S8 misses: the decoy is not just planted, it is HELD OPEN
+    # by a live process. The first backfill asked _job_live_pids for its candidates, and on an
+    # unpinned record that matches processes by stat()ing the PATH — so the decoy's holder WAS
+    # "the job", and its inode became the record's permanent identity. One unprivileged
+    # job-pin-log then made job-set/reap/cancel all close a provably live worker with rc=0,
+    # citing the pin. Candidates must come from the recorded pid's tree, never from the path.
+    log_s8b = os.path.join(tmp, "s8b.log")
+    disp_s8b, work_s8b = spawn_sync_worker(log_s8b, jobs, "J_S8B")
+    make_job(jobs, "J_S8B", "", log_s8b, dispatcher_pid=disp_s8b, pin=False)
+    real_ino = os.stat(log_s8b + ".err").st_ino
+    for f in (log_s8b + ".err", log_s8b):
+        if os.path.exists(f):
+            os.rename(f, f + ".hidden")
+    squatter = subprocess.Popen(["sh", "-c", "exec sleep 60"],
+                                stdout=open(log_s8b, "a"), stderr=open(log_s8b + ".err", "a"))
+    SPAWNED.append(squatter.pid)
+    time.sleep(0.3)
+    run([sys.executable, MJ, "job-pin-log", jobs, "J_S8B"])
+    rec_s8b = read_job(jobs, "J_S8B")
+    check("S8b a HELD decoy is not laundered into the record as the job's identity",
+          not _record_pin_of(rec_s8b), str(_record_pin_of(rec_s8b)))
+    check("S8b ...and certainly not the squatter's inode",
+          str(os.stat(log_s8b).st_ino) not in str(_record_pin_of(rec_s8b))
+          and str(real_ino) not in str(_record_pin_of(rec_s8b)))
+    check("S8b so job-set still REFUSES", jset(jobs, "J_S8B", "status=failed")[0] == 3)
+    rc, out, err = run([sys.executable, MJ, "job-reap", jobs, "0"])
+    check("S8b and reap does not close it either",
+          read_job(jobs, "J_S8B")["status"] == "running",
+          read_job(jobs, "J_S8B")["status"])
+    check("S8b worker untouched", alive(work_s8b), "worker=%s" % work_s8b)
+    for sig in (15, 9):
+        try:
+            os.kill(squatter.pid, sig)
+        except Exception:
+            pass
+
+    # S8c (round 7, K2) — cancel must not do the destructive half and then refuse the
+    # bookkeeping. On an UNPINNED record the verdict is UNKNOWN, so the status write was
+    # refused AFTER the kill: processes dead, board still 'running', record drifting to
+    # 'orphaned' hours later — which every poller reads as a failure worth re-dispatching.
+    log_s8c = os.path.join(tmp, "s8c.log")
+    disp_s8c, work_s8c = spawn_sync_worker(log_s8c, jobs, "J_S8C")
+    make_job(jobs, "J_S8C", "", log_s8c, dispatcher_pid=disp_s8c, pin=False)
+    rc, out, err = run([sys.executable, MJ, "job-cancel", jobs, "J_S8C", "5"])
+    time.sleep(0.4)
+    check("S8c cancel on an UNPINNED live job exits 0", rc == 0, "rc=%d %s" % (rc, (out + err)[:200]))
+    check("S8c the worker really is dead", not alive(work_s8c), "worker=%s" % work_s8c)
+    check("S8c and the board says so — never 'dead process, record still running'",
+          read_job(jobs, "J_S8C")["status"] == "cancelled",
+          read_job(jobs, "J_S8C")["status"])
 
 
     # S7 — EVIDENCE_GRACE_S had no discriminating coverage at all: setting it to 1e11 and

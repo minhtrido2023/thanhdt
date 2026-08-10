@@ -1244,19 +1244,34 @@ def _record_is_pinned(obj):
 def _live_holder_identity(obj):
     """The (dev, ino) that a LIVE process of this job is actually writing to, as {field: pin}.
 
-    This is the only honest way to pin a record that is already running. At dispatch time the
-    path is trustworthy because the record was created a moment ago and no worker exists yet;
-    afterwards it is not, so a pin taken from the path would just launder whatever an outside
-    writer put there — which is round 6's K3, the fix's own command being usable as the attack.
-    Asking the WORKER instead inverts that: we read /proc/<pid>/fd of processes independently
-    established to belong to this job, and pin the inode they hold. Nobody else's write can
-    influence that, and if no live process holds the path, nothing is pinned and the record
-    stays honestly UNKNOWN."""
+    At dispatch time the path is trustworthy because the record was created a moment ago and
+    no worker exists yet; afterwards it is not, so a pin taken from the path would just launder
+    whatever an outside writer put there — round 6's K3, the fix's own command as the attack.
+
+    The candidate processes therefore come from the RECORDED pid and its descendants ONLY.
+    Round 7 (K1) got in through exactly the gap that leaves: the first version asked
+    `_job_live_pids`, which on an UNPINNED record — the whole population backfill exists for —
+    identifies "the job's processes" by stat()ing the PATH. So whoever held the path was the
+    job, and one process holding a decoy for a second got its inode written onto the record as
+    the job's permanent identity, after which job-set/reap/cancel all closed a live worker with
+    rc=0 while citing the pin. Circular: the pin was derived from the very evidence it exists
+    to replace.
+
+    `pid` and its process tree are guarded evidence in their own right (EVIDENCE_FIELDS), so
+    they are the one route that does not depend on the path. A SYNC record records no pid and
+    therefore CANNOT be backfilled at all — that is the honest answer, not a defect: it stays
+    UNKNOWN and drains through reap."""
     logfile = obj.get("logfile") or ""
-    if not logfile:
+    root = obj.get("pid")
+    if not logfile or root in (None, "", 0, "0"):
+        return {}
+    try:
+        root = int(str(root).strip())
+    except Exception:
         return {}
     out = {}
-    for p in _job_live_pids(obj):
+    candidates = [root] + _descendants(root)
+    for p in candidates:
         for fd in ("1", "2"):
             fdp = "/proc/%d/fd/%s" % (p, fd)
             try:
@@ -1343,8 +1358,12 @@ def cmd_job_pin_log(a):
                 pins[field] = "%d:%d" % (st.st_dev, st.st_ino)
             except Exception:
                 continue
+        source = "create"
     else:
         pins = _live_holder_identity(obj)
+        source = "backfill"
+    if pins:
+        pins["pin_source"] = source
     if not pins:
         # Say so ON THE RECORD. A pin that silently never happened downgrades the guard to its
         # pre-round-5 strength on that job, and round 6 found the whole board in exactly that
@@ -1357,6 +1376,20 @@ def cmd_job_pin_log(a):
             os.replace(tmp, fp)
         return
     obj.pop("pin_failed", None)
+    # Compare-and-set: the /proc walk above takes ~40ms, and a worker finishing inside that
+    # window would have its terminal write silently reverted by the stale copy read before it
+    # (round 7, NICE). Re-read and abort if anything moved — a missed pin costs nothing, an
+    # un-finishing job costs the board its truth.
+    try:
+        with open(fp, encoding="utf-8") as f:
+            fresh = json.load(f)
+        if not isinstance(fresh, dict) or fresh.get("status") != obj.get("status") \
+                or _record_is_pinned(fresh):
+            return
+        fresh.pop("pin_failed", None)
+        obj = fresh
+    except Exception:
+        return
     # Written in-process, not through cmd_job_set: this is the FIRST write of these fields on
     # a record that has no live worker yet, and routing it through the guard would only ask
     # the guard to approve the creation of the very evidence it reads.
@@ -1506,8 +1539,15 @@ def _death_evidence(obj, now=None, hb_cold_s=HB_COLD_S):
     # heartbeated -> REAP_UNVERIFIED_S then closed and MARKED unverified), so refusing to
     # call it DEAD costs no record its eventual closure (round 6, K1).
     if not _logfile_evidence_missing(obj, n) and _record_is_pinned(obj):
-        return (DEAD, [], "the job's own logfile — the exact inode pinned when the job was "
-                          "created — is still on disk and no process is holding it", hbs)
+        # Say HOW the identity was obtained. "pinned when the job was created" was hardcoded,
+        # and false for every backfilled record — the guard overstating the provenance of its
+        # own evidence, which is the same failure as overstating the verdict (round 7, K4).
+        return (DEAD, [], "the job's own logfile — the exact inode %s — is still on disk and "
+                          "no process is holding it"
+                          % ("pinned when the job was created"
+                             if obj.get("pin_source") != "backfill" else
+                             "pinned later from the running worker's own file descriptor"),
+                hbs)
     # Two different ways to have no usable logfile evidence, and the guard must say WHICH:
     # claiming the file is GONE when a file is sitting right there is the same species of lie
     # as claiming a heartbeat went cold when none was ever written (round 5, K2 / round 6, K4).
@@ -1814,9 +1854,15 @@ def cmd_job_cancel(a):
             sys.exit(5)
         note = ("cancelled by operator: %d process(es) killed and verified dead (sync "
                 "dispatch, found by logfile)" % len(sync_live))
-        print(note)
+        # stale_proven: we did not INFER death here, we caused it and then verified it — proof
+        # strictly stronger than the one reap is trusted with. Without passing it, an unpinned
+        # record went UNKNOWN and the guard refused the status write AFTER the kill had already
+        # happened: processes dead, board still saying `running`, and the record then drifting
+        # to `orphaned` hours later, which every poller reads as a failure worth re-dispatching
+        # — the very outcome this guard exists to prevent (round 7, K2).
         cmd_job_set([jobs_dir, job_id, "status=cancelled", "ended_at=%d" % now_epoch(),
-                     "exit_code=130", "result_summary=" + note])
+                     "exit_code=130", "result_summary=" + note], stale_proven=True)
+        print(note)                              # only after the write actually landed
         sys.exit(0)
     try:
         _pid_int = int(pid)
@@ -1864,12 +1910,20 @@ def cmd_job_cancel(a):
                 "never be reported as stopped.\n" % (len(survivors), survivors))
             sys.exit(5)
         note = "cancelled by operator: %d process(es) killed and verified dead" % len(targets)
+        killed = True
     else:
-        note = ("cancelled by operator: no live process found (recorded pid %s dead, nothing "
-                "holding the job's logfile) — dispatcher died without a terminal status" % pid)
-    print(note)
+        # Round 7, K4: this branch was never given the round-6 treatment. It asserted "nothing
+        # holding the job's logfile" without consulting the verdict (true even when the logfile
+        # never existed) and "dispatcher died without a terminal status" — a causal claim about
+        # an event nobody watched. Quote the verdict, state only what was checked.
+        _v, _l, why, _hbs = _death_evidence(o)
+        note = ("cancelled by operator: no live process found (recorded pid %s dead); %s — no "
+                "terminal status was ever written for this job" % (pid, why))
+        killed = False
+    # Same reasoning as the sync branch: a verified kill is proof we made, not proof we guessed.
     cmd_job_set([jobs_dir, job_id, "status=cancelled", "ended_at=%d" % now_epoch(),
-                 "exit_code=130", "result_summary=" + note])
+                 "exit_code=130", "result_summary=" + note], stale_proven=killed)
+    print(note)                                  # only after the write actually landed
     # watchdog's per-job OVERDUE debounce marker is dead weight once the record is closed
     om = os.path.join(os.path.dirname(jobs_dir.rstrip("/")), "..", "state", "overdue", job_id)
     try:
@@ -1925,10 +1979,23 @@ def cmd_job_list(a):
     unpinned = [o for o in all_jobs if o.get("status") in LIVE_STATUSES
                 and not _record_is_pinned(o)]
     if unpinned:
+        # Name the command that ACTUALLY applies. Pointing at `jobs.sh reap` was wrong for
+        # every record it listed: reap only touches status=running, and these were all
+        # usage_limited/maxturns_pending, which reap skips and cancel declines — the footer
+        # sending the operator somewhere that does nothing (round 7, NICE).
+        reapable = [o for o in unpinned if o.get("status") == "running"]
+        stuck = [o for o in unpinned if o.get("status") != "running"]
         print("\n%d live job(s) with NO pinned logfile identity — cannot be proven dead, so "
-              "close paths answer UNKNOWN and leave them to `jobs.sh reap`: %s"
+              "close paths answer UNKNOWN: %s"
               % (len(unpinned), ", ".join(o.get("job_id", "?") for o in unpinned[:5])
                  + (" …" if len(unpinned) > 5 else "")))
+        if reapable:
+            print("  %d of them are status=running -> `bin/jobs.sh reap` closes those."
+                  % len(reapable))
+        if stuck:
+            print("  %d are %s — reap SKIPS these (it only handles 'running') and cancel "
+                  "declines them; they need --force or the status-classification fix."
+                  % (len(stuck), "/".join(sorted({o.get("status", "?") for o in stuck}))))
 
 
 def cmd_trace(a):
