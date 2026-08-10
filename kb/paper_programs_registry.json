@@ -227,7 +227,7 @@
         "execution_quality_review.py",
         "data/execution_logs/exec_*_journal.csv (ft-notes)"
       ],
-      "notes": "Mechanics (window adherence) đo được sớm; EDGE bps cần nhiều tuần — không gate sớm trên bps.",
+      "notes": "Mechanics (window adherence) đo được sớm; EDGE bps cần nhiều tuần — không gate sớm trên bps. FIX 2026-08-10 (job Taylor_20260810_032034, xác nhận độc lập Mike): gate 1 (BUY-window adherence) đứng im 4/5 từ 2026-07-23 (18 ngày) vì cron bằng chứng (T3/T5 10:46 ICT) trúng đúng 2 ngày net-SELL của BUY_VALUE_FACTOR gốc — P(có lệnh mua)=0 tuyệt đối, không phải mẫu chưa đủ. Đã xoay BUY_VALUE_FACTOR 1 ngày trong mike/bin/paper_main_probe_plan.py (up-day T2/T3/T5), verify selfcheck 6/6 PASS. ETA dự kiến: phiên thứ 5 khả năng cao 2026-08-11, chắc chắn tới 2026-08-13 → quant-skeptic + user sign-off ~2026-08-14, chậm nhất 2026-08-17. Chi tiết: mike/agents/Taylor/research/fill_timing_eta_investigation_20260810.md.",
       "review_short": "≥5 phiên có BUY fill trong cửa sổ + 0 reject → quant-skeptic → user sign-off",
       "headline": {
         "regex": "journal ft-notes:\\s*(.+)$",
