@@ -51,3 +51,6 @@
 
 ## Archived 2026-08-10 (keep=12 days=0 require_done=False)
 - [2026-07-31T12:13:26Z] plan_SpaceX_2026-08-03.json DONE (HOLD ALL, 0 lệnh). Cash 4.55M. Deferred 4 lệnh 191.8M (PVT+SIP+VNM CAPIT topup + AGG BAL). DHD skip (ngoài model). TV2 LAG cửa sổ 08-04 cần cash. DCM LAG cửa sổ 08-05. | NEXT: user duyệt plan 08-03 trước 08:45 sáng 08-03.
+
+## Archived 2026-08-10 (keep=12 days=0 require_done=False)
+- [2026-08-04T12:14:18Z] Plan SpaceX 08-05 DONE (job DollarBill_20260804_120345): HOLD ALL, 0 orders (cash 4.82M quá nhỏ), 4 deferred (VIC/TV2/APF/DCM ~347.6M), park_trim_proposal L1 mới BẬT (TRIM 85.31M/12 mã PARK, chờ duyệt riêng). PVT LAG window mở nhưng trùng CAPIT holding → escalate cho user quyết định, chưa đưa vào orders/deferred. Đã gửi report Discord plan_thread_id. NEXT: chờ user duyệt trước 08:45 08-05, đặc biệt quyết định PVT + park_trim_proposal.
