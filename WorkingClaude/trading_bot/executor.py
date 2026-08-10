@@ -538,7 +538,16 @@ class Executor:
                       note=f"'{ex_used}' tick sai ({err}) → thử '{ex_alt}' OK, cache lại cho {o.ticker}")
         return oid, px_alt
 
-    def _child_qty(self, o, ps, q, px):
+    def _child_qty(self, o, ps, q, px, exclude_reserved=0):
+        """`exclude_reserved` (>0, chỉ `_would_be_unchanged` dùng): KL của CHÍNH lệnh con sắp bị
+        huỷ, đang còn nằm trong `self.shared` dưới dạng reservation. `_would_be_unchanged` hỏi
+        "huỷ RỒI đặt lại thì có ra đúng KL cũ không" — mà huỷ thật sẽ `_release_child()` trước,
+        tức nhả phần reservation này ra. Không trừ ⇒ đường KIỂM TRA đếm chính lệnh của mình
+        như quota của người khác ⇒ khi trần participation là ràng buộc BINDING thì allowance
+        tụt đúng bằng KL lệnh đang treo, gần như luôn < 1 lô ⇒ trả 0 ⇒ REFRESH_SKIP KHÔNG BAO
+        GIỜ kích được (ca thật DRI 2026-08-10: 15/15 chu kỳ CANCEL_STALE rồi đặt lại y hệt
+        giá+KL, mất ưu tiên FIFO vô ích). `0` (mặc định) = hành vi cũ nguyên vẹn cho
+        `_place_slices` (lúc nó chạy, lệnh cũ ĐÃ được release thật rồi)."""
         remaining = o.qty - ps["filled"]
         if 0 < remaining < LOT:
             # Cổ phiếu lẻ (<1 lô, vd 10cp dư sau khi bán hết các lô chẵn) — DNSE nhận
@@ -563,7 +572,7 @@ class Executor:
             # THẬT (dùng chung cho cả 2 book — cùng ngữ nghĩa "không thành đa số một phiên
             # mỏng", không có lý do tách): fleet không bao giờ thành đa số. allowance =
             # min(hai guard) → bị chặn bởi CẢ thanh khoản 20 phiên LẪN tape thật (fleet-level).
-            fleet_filled = self.shared.get(o.ticker, 0)
+            fleet_filled = self.shared.get(o.ticker, 0) - exclude_reserved
             floor_allow = int(self.cfg["max_participation"] * adv20_vnd / px) - fleet_filled
             if q.day_volume:
                 ceil_allow = int(self.cfg["capit_realized_participation_ceiling"]
@@ -578,7 +587,7 @@ class Executor:
             qty = min(qty, allowance)
         elif q.day_volume:   # non-CAPIT (hoặc CAPIT thiếu ADV20 → fail-safe guard cũ):
                              # tổng đã khớp MỌI account ≤ p% KL ngày của mã. GIỮ NGUYÊN.
-            fleet_filled = self.shared.get(o.ticker, 0)
+            fleet_filled = self.shared.get(o.ticker, 0) - exclude_reserved
             allowance = int(self.cfg["max_participation"] * q.day_volume) - fleet_filled
             if allowance < LOT:
                 return 0
@@ -813,7 +822,11 @@ class Executor:
             px = self._limit_price(o, q, cross, extreme=extreme_down)
             if px is None:
                 return False
-            qty = self._child_qty(o, ps, q, px)
+            # Huỷ thật sẽ `_release_child()` TRƯỚC khi `_place_slices` tính KL mới → mô phỏng
+            # đúng thứ tự đó, nếu không đường kiểm tra tự đếm mình là quota người khác
+            # (xem `_child_qty(exclude_reserved=…)`).
+            reserved = 0 if c.get("released") else c["qty"] - c.get("filled", 0)
+            qty = self._child_qty(o, ps, q, px, exclude_reserved=max(0, reserved))
             if qty < LOT:
                 return False
             return px == c["price"] and abs(qty - c["qty"]) < LOT
