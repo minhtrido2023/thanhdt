@@ -8,18 +8,18 @@ Behavioral guidelines to reduce common LLM coding mistakes.
 every number/threshold/path a rule depends on. The originating incident story and the
 considered-then-rejected alternatives live in **`kb/coding_guidelines_rationale.md`** (not
 auto-injected; read it when you need WHY, or before changing/removing a rule) or in the
-`kb/incidents/` entry each section points to. New lesson: narrative goes straight to the rationale
-file — **cut narrative, never cut a fact**.
+`kb/incidents/` entry each section points to. New lesson: narrative goes to the rationale file —
+**cut narrative, never cut a fact**.
 
 **Enforcement policy (2026-08-01, user mandate — "đẩy bài học cũ ra công cụ/linter thay vì văn
 xuôi"):** any lesson expressible as a MECHANICAL pattern in code → an automated check that blocks
 the commit, not another paragraph; always test a new rule against real files before turning it on.
 Live mechanism, verified by a real `git commit`: **`bin/shellcheck_gate.sh`** (pre-commit hook,
 ShellCheck — caught all 4 real quoting incidents 2026-07-17→08-01, see §15 +
-`kb/incidents/2026-08/2026-08-01-shellcheck-precommit-gate.md`). One-time setup per repo (hook shared
-by all worktrees): `pip install --user pre-commit shellcheck-py && pre-commit install`.
-§7, §10, §11, §13 are process/judgment calls with no clean syntactic pattern to lint — prose is the
-right form for them, not an oversight.
+`kb/incidents/2026-08/2026-08-01-shellcheck-precommit-gate.md`). Setup per repo (hook shared by all
+worktrees): `pip install --user pre-commit shellcheck-py && pre-commit install`. §7, §10, §11, §13
+are process/judgment calls with no clean syntactic pattern to lint — prose is the right form for
+them, not an oversight.
 
 ## 1. Think Before Coding
 
@@ -27,9 +27,9 @@ right form for them, not an oversight.
 
 Before implementing:
 - State your assumptions explicitly. If uncertain, ask.
-- If multiple interpretations exist, present them - don't pick silently.
-- If a simpler approach exists, say so. Push back when warranted.
-- If something is unclear, stop. Name what's confusing. Ask.
+- Multiple interpretations exist → present them, don't pick silently.
+- A simpler approach exists → say so. Push back when warranted.
+- Something unclear → stop. Name what's confusing. Ask.
 
 ## 2. Simplicity First
 
@@ -49,15 +49,15 @@ Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, sim
 
 When editing existing code:
 - Don't "improve" adjacent code, comments, or formatting.
-- Don't refactor things that aren't broken.
+- Don't refactor what isn't broken.
 - Match existing style, even if you'd do it differently.
-- If you notice unrelated dead code, mention it - don't delete it.
+- Unrelated dead code: mention it, don't delete it.
 
 When your changes create orphans:
 - Remove imports/variables/functions that YOUR changes made unused.
 - Don't remove pre-existing dead code unless asked.
 
-The test: Every changed line should trace directly to the user's request.
+The test: every changed line traces directly to the user's request.
 
 ## 4. Goal-Driven Execution
 
@@ -83,8 +83,8 @@ Strong success criteria let you loop independently; weak criteria ("make it work
 `trading_bot/executor.py` (`_ghost_tickers` + atomic `_save_state`); apply to every new script
 calling an external system with a side effect (place an order, send a message, write a shared file,
 call a non-idempotent API):
-- Ask: "killed right after the external call succeeds but before local state is saved — what does
-  the next run do?" Answer "repeats the action" = a bug, not an edge case.
+- Ask: killed right after the external call succeeds but before local state is saved — does the
+  next run repeat the action? Yes = a bug, not an edge case.
 - Prefer the external system's own source of truth (broker's live order book, the sent-messages
   log) over local state — local state can lag reality.
 - Can't tell whether an action already happened → **fail-safe pause and flag for a human**; don't
@@ -95,21 +95,20 @@ call a non-idempotent API):
 
 *→ `kb/incidents/2026-07/2026-07-02-double-buy-concurrent-bot-execute.md`.*
 
-**§5b. Selfcheck chạm `Executor` PHẢI đặt `MIKE_BOT_TEST_MODE=1`** — same class of side effect, but
-the external channel here is the BUS: `trading_bot/executor.py::_publish_bot_event()` calls
+**§5b. Selfcheck chạm `Executor` PHẢI đặt `MIKE_BOT_TEST_MODE=1`** — same class of side effect, the
+external channel being the BUS: `trading_bot/executor.py::_publish_bot_event()` calls
 `mike/bin/append_event.sh Mafee ...` directly from 6 sites (`GHOST_ORDER_DETECTED`,
 `LEVER_PACKAGE_UNAUTHORIZED`, `dcf-rich-fill`, `dd-redflag-fill`, `STEP_FAIL`, `fill_lagging`).
-- Guard lives in `_publish_bot_event()` (fixed 2026-08-08): return early when
-  `MIKE_BOT_TEST_MODE == "1"` **or** `PYTEST_CURRENT_TEST` is set. `MIKE_BOT_TEST_EVENT_SINK=<path>`
-  (optional) writes blocked events to a file so tests can still assert "this should have fired".
+- Guard in `_publish_bot_event()` (fixed 2026-08-08): return early when `MIKE_BOT_TEST_MODE == "1"`
+  **or** `PYTEST_CURRENT_TEST` is set. `MIKE_BOT_TEST_EVENT_SINK=<path>` (optional) writes blocked
+  events to a file so tests can still assert "this should have fired".
 - **Any NEW selfcheck importing `Executor`** → one line at the top of the file, BEFORE any
-  `Executor` is constructed: `os.environ.setdefault("MIKE_BOT_TEST_MODE", "1")`. This is the ONLY
+  `Executor` is constructed: `os.environ.setdefault("MIKE_BOT_TEST_MODE", "1")` — the ONLY
   prevention against a 5th recurrence.
 - **Never infer "this is a test" from an existing field** (`account` label, `plan_date` sentinel
-  2099-*, `strategy="selfcheck"`): all 3 were inventoried and all 3 are inconsistent across
-  selfcheck files (`capit_lever_selfcheck.py` deliberately uses the REAL labels;
-  `paper_main_window_selfcheck.py` uses a real `plan_date=TODAY`). The gate must be an EXPLICIT
-  env var.
+  2099-*, `strategy="selfcheck"`): all 3 inventoried, all 3 inconsistent across selfcheck files
+  (`capit_lever_selfcheck.py` deliberately uses the REAL labels; `paper_main_window_selfcheck.py`
+  uses a real `plan_date=TODAY`). The gate must be an EXPLICIT env var.
 - **`PYTEST_CURRENT_TEST` does NOT cover `test_trading_bot.py`** (runs as a script, no `def test_*`).
 
 *→ rationale §5b.*
@@ -146,8 +145,8 @@ report (daily/weekly/monthly, or any client-facing artifact):
   (`dnse_api.py` secdef/latest_trade/positions/balances) — never BQ, regardless of hour.
 - BQ OK only for: (a) historical/backtest queries, (b) same-day queries AFTER BQ's sync has
   demonstrably completed (verify via `bq_freshness_check.sh`'s gate, don't assume by clock time).
-- In dispatch prompts (DollarBill etc.): state as unconditional MUST with a concrete wrong-vs-right
-  example (see `bq_freshness_check.sh`'s DollarBill prompt).
+- In dispatch prompts (DollarBill etc.): unconditional MUST with a concrete wrong-vs-right example
+  (see `bq_freshness_check.sh`'s DollarBill prompt).
 
 **Cadence-specific scope** (depth differs; the pipeline above does not): **Daily** = trades today,
 NAV + day-over-day change, margin/risk flag if any. **Weekly** = full narrative, template
@@ -250,14 +249,14 @@ reaching for the closest-sounding name; naming the registry file does.
 table, a cron is installed pointing at it, a migration names it the production source) — in the
 **same commit/session**:
 1. **Identify superseded variants** — files with a similar name/purpose that are NOT the canonical
-   one, and grep the whole repo (scripts + crontab) to confirm zero active callers reference them.
+   one; grep the whole repo (scripts + crontab) to confirm zero active callers reference them.
    Never archive on a name-similarity guess alone; verify with a real grep.
 2. **`git mv` them into an `archive/` subdirectory** (preserving git history, not `rm`) —
    reversible, and it removes the file from the root namespace where a casual `ls`/glob would
    surface it as a live candidate.
-3. **Update the source's file in `mike/kb/data_registry/`** to reflect the new archive path and mark
-   the entry `DEPRECATED` with a pointer to the canonical replacement (per §5's obsolete-marking
-   rule if this is a data-source migration, or a plain note if it's just script hygiene).
+3. **Update the source's file in `mike/kb/data_registry/`** to the new archive path and mark the
+   entry `DEPRECATED` with a pointer to the canonical replacement (per §5's obsolete-marking rule
+   for a data-source migration, or a plain note for script hygiene).
 4. **Do NOT apply this to genuine audit-trail artifacts** — rejected-hypothesis backtest CSVs,
    dry-run logs proving a mechanism works, anything already namespaced into an experiment directory
    per §8 (`data/*_exp/`, `agents/<id>/probe_*/`). Those are inert evidence, not scripts that could
@@ -272,7 +271,7 @@ repo-root files with a name similar to an already-CANONICAL registry entry that 
 ## 11. Check `mike/kb/cron_registry.md` Before Adding or Changing a Cron Schedule
 
 **Mandatory rule**: before adding a new cron entry or changing an existing one's schedule, read
-`mike/kb/cron_registry.md` first (the bảng chính) — it answers, per job: what it reads (source +
+`mike/kb/cron_registry.md` first (the bảng chính) — per job it answers: what it reads (source +
 vintage T/T-1), what it writes, who consumes it, what buffer/verify-artifact exists downstream.
 Answer its "4 câu hỏi bắt buộc" (đọc gì+vintage / nguồn tươi lúc nào — đo thật, không tin comment /
 cần T hay T-1 / ai tiêu thụ + deadline), documented in
@@ -302,8 +301,8 @@ if str(rec.get("accountNo")) != str(account_no):
     continue
 ```
 
-Không có account_no trong scope → dấu hiệu hàm đang thiếu tham số, KHÔNG phải lý do bỏ lọc. Nếu chủ
-đích là gộp toàn bộ account (báo cáo fleet-wide), phải viết rõ trong docstring.
+Không có account_no trong scope → dấu hiệu hàm thiếu tham số, KHÔNG phải lý do bỏ lọc. Chủ đích gộp
+toàn bộ account (báo cáo fleet-wide) phải viết rõ trong docstring.
 
 **Self-check trước khi commit** bất kỳ script nào đọc file dùng chung: chạy cho CẢ 2 account
 (`SpaceX` và `ZaloPay`) cùng 1 ngày có giao dịch, xác nhận 2 kết quả KHÁC nhau. Giống hệt nhau = gần
@@ -344,8 +343,7 @@ các sweeper chạy nền.
 producer finishing), don't trust "producer already ran by the time I run" on schedule alone:
 - Add a **real freshness precheck** in the consumer: read the producer's own timestamp/marker (a
   `_asof`/`_generated_at` field, file mtime, a `*_ok` flag) and confirm it's from *today's* run —
-  not just "a file exists" or "cron order says it should be done by now." Schedule assumptions
-  drift; a precheck is the only thing that catches it.
+  not just "a file exists" or "cron order says it should be done by now."
 - Set the tolerance **as tight as the real risk allows** — wide enough for normal jitter (a job
   finishing 5 minutes late), tight enough that a full day's staleness (or a full skipped run) trips
   it. `MAX_STATE_LAG=2` days is the concrete anti-pattern.
@@ -496,7 +494,7 @@ hỏi user) khỏi quyết định KỸ THUẬT** (quant-skeptic CONFIRMED là �
 
 **Nguyên tắc:** chạy selfcheck **liên quan tới file mình vừa đụng**, không chạy cả bộ mặc định —
 TRỪ KHI đụng vào **module lõi dùng chung**, lúc đó quét rộng là bắt buộc và **phải nói rõ trong báo
-cáo vì sao**.
+cáo vì sao** (hành động có chủ đích, không phải phản xạ).
 
 **Module lõi dùng chung — sửa là PHẢI quét rộng** (số đo bằng máy từ import thật):
 
