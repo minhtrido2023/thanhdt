@@ -40,11 +40,34 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("report_path")
     ap.add_argument("--subject")
+    ap.add_argument("--skip-return-gate", metavar="LÝ_DO",
+                    help="BỎ QUA cổng tỉ suất (coding_guidelines §21) — chỉ dùng khi đã hiểu vì sao "
+                         "cổng báo lệch; lý do được in ra và ghi vào email log")
     args = ap.parse_args()
 
     if not os.path.exists(args.report_path):
         print(f"❌ Không tìm thấy file báo cáo: {args.report_path}", file=sys.stderr)
         sys.exit(1)
+
+    # CỔNG CHẶN CỨNG — tỉ suất per-position phải đã cộng cổ tức (§21). Hai lần lỗi thật trên báo
+    # cáo ĐÃ GỬI nhà đầu tư (2026-08-02, 2026-08-10) đều lọt vì §21 chỉ là văn xuôi; §22 yêu cầu
+    # chuyển thành code chặn. Fail-closed: cổng lỗi/thiếu dữ liệu ⇒ KHÔNG gửi.
+    if args.skip_return_gate:
+        print(f"⚠️  BỎ QUA cổng tỉ suất theo yêu cầu — lý do: {args.skip_return_gate}",
+              file=sys.stderr)
+    else:
+        import report_return_gate
+        try:
+            rc = report_return_gate.run_gate(args.report_path, out=sys.stderr)
+        except Exception as exc:
+            print(f"❌ Cổng tỉ suất KHÔNG chạy được ({exc}) — KHÔNG gửi báo cáo (fail-closed). "
+                  f"Sửa nguyên nhân, hoặc chạy lại với --skip-return-gate '<lý do>'.",
+                  file=sys.stderr)
+            sys.exit(3)
+        if rc != 0:
+            print("❌ Cổng tỉ suất CHẶN — báo cáo có tỉ suất per-position chưa cộng cổ tức hoặc "
+                  "sai cơ sở giá vốn. KHÔNG gửi. Sửa số rồi chạy lại.", file=sys.stderr)
+            sys.exit(3)
 
     if not os.path.exists(SECRETS_PATH):
         print(f"❌ Thiếu credential {SECRETS_PATH} — chưa thiết lập gửi email. "

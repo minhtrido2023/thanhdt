@@ -198,8 +198,33 @@ phải thu) ⇒ **cộng hai lần**, tự triệt tiêu phiên sau. Ảnh hư�
 (SpaceX 16/07, 24/07, 27/07; ZaloPay 16/07, 24/07) và tỉ suất TUẦN của 2 tuần cuối tháng; **không**
 ảnh hưởng tỉ suất tháng. Chưa sửa chuỗi lịch sử — việc cần làm 5b, báo cáo tháng 7 Mục 8.5.
 
+## Bẫy (6) — `cum_dividend_excl` = 0 KHÔNG có nghĩa "không cần điều chỉnh cổ tức"
+
+*(thêm 2026-08-10, job `Taylor_20260810_030558` — **LẦN THỨ HAI** cùng loại lỗi, trên báo cáo ĐÃ GỬI)*
+
+`cum_dividend_excl` (cột của `daily_nav_snapshot.py`) đo **cổ tức phải thu chưa settle PHÁT SINH
+TRONG cửa sổ báo cáo** — đúng cho kế toán NAV/tiền của tuần đó. Nó **KHÔNG** trả lời được câu hỏi
+cần cho tỉ suất per-position: *"giá vốn của vị thế ĐANG GIỮ đã trừ cổ tức nhận từ các kỳ TRƯỚC
+chưa?"* — đó là câu hỏi về **lịch sử vị thế**, không phải về tuần.
+
+Ca thật: báo cáo tuần 03–07/08 thấy `cum_dividend_excl`=0 mọi ngày ⇒ kết luận "không cần điều
+chỉnh". Nhưng **6 sự kiện ex-date TRƯỚC kỳ** (MBB 09/07 · BID 17/07 · CTG+VCB 23/07 · NCT 27/07 ·
+SAB 28/07) vẫn nằm nguyên trong giá vốn vị thế còn giữ ⇒ SpaceX công bố −3,28% thay vì −1,94%;
+SAB −5,53% thay vì +0,49% (**đảo dấu**); ZaloPay −0,75% thay vì +0,60% (**đảo dấu**).
+
+**Tín hiệu ĐÚNG không phải "kỳ này có cổ tức không", mà là "giá vốn đang dùng có khớp `costPrice`
+broker không"** — DNSE tự trừ cổ tức GỘP khỏi giá vốn, nên `costPrice` là nhân chứng độc lập cho
+CẢ hai lớp lỗi (thiếu cổ tức, và sai giá vốn vì lý do khác — ca LPB: bình quân gia quyền không
+reset khi vị thế về 0).
+
+⇒ **Đã chuyển thành CODE CHẶN** (§22, vì §21 dạng văn xuôi đã thất bại 2 lần):
+**`mike/bin/report_return_gate.py`**, chạy fail-closed trong `send_report_email.py`, lệch > 0,15pp
+⇒ không gửi. Chi tiết + kiểm chứng ngược:
+`mike/agents/Taylor/research/dividend_scope_gap_20260810.md`.
+
 ## Nguồn
 
+- Job `Taylor_20260810_030558` (2026-08-10) — **lần 2**, Bẫy (6) + cổng chặn cứng.
 - Job `Taylor_20260802_060243` (2026-08-02) — phát hiện + sửa 3 báo cáo.
 - Job `Taylor_20260802_082124` (2026-08-02) — phản biện của user: đổi vai trò `Close/Price` thành
   **chỉ phát hiện**, số chính thức lấy từ tiền broker qua hệ phương trình. Bằng chứng + đối soát đủ
