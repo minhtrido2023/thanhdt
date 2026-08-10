@@ -112,10 +112,17 @@ jpath = os.path.join(wc_root, "data", "execution_logs", f"exec_{account}_{today}
 if os.path.exists(jpath):
     counts = defaultdict(int)
     place_fail_notes = defaultdict(int)
+    last_ts = {}          # event -> ts cuối cùng gặp
+    last_success_ts = ""  # ts cuối của 1 lệnh đi ra/khớp THÀNH CÔNG
     with open(jpath, encoding="utf-8") as f:
         for row in csv.DictReader(f):
             ev = row.get("event", "?")
+            ts = row.get("ts", "") or ""
             counts[ev] += 1
+            if ts:
+                last_ts[ev] = max(last_ts.get(ev, ""), ts)
+                if ev in ("PLACE", "FILL", "DONE"):
+                    last_success_ts = max(last_success_ts, ts)
             if ev == "PLACE_FAIL":
                 place_fail_notes[row.get("note", "")] += 1
     total_place_fail = counts.get("PLACE_FAIL", 0)
@@ -125,11 +132,23 @@ if os.path.exists(jpath):
                   if k in ("POLL_FAIL", "POSITIONS_FAIL", "GHOST_ORDER", "CANCEL_FAIL") and v > 20}
     if other_place_fail > 20:
         concerning["PLACE_FAIL (không phải T+2)"] = other_place_fail
+    # Đếm CẢ NGÀY thì 1 sự cố đã sửa xong vẫn kêu tới hết phiên (ca thật ZaloPay 2026-08-10:
+    # 944 PLACE_FAIL dứt hẳn 10:32, restart 10:35 → 8/8 lệnh bán khớp, checker 12:45 vẫn báo ⚠️).
+    # Có PLACE/FILL/DONE thành công SAU lần lỗi cuối = bằng chứng đã phục hồi thật → hạ xuống ℹ️.
+    resolved = {}
+    for k in list(concerning):
+        ev_key = "PLACE_FAIL" if k.startswith("PLACE_FAIL") else k
+        lt = last_ts.get(ev_key, "")
+        if lt and last_success_ts > lt:
+            resolved[k] = (concerning.pop(k), lt)
     if concerning:
         W(f"Journal hôm nay có lỗi lặp lại bất thường: {concerning} — kiểm tra "
           f"exec_{account}_{today}_journal.csv.")
     else:
         OK("Journal hôm nay không có lỗi lặp lại bất thường ngoài các trường hợp đã biết rõ nguyên nhân.")
+    for k, (n, lt) in resolved.items():
+        lines.append(f"ℹ️ {n} lượt {k} hôm nay nhưng ĐÃ DỨT — lần cuối {lt[11:19]}, sau đó có "
+                     f"PLACE/FILL thành công lúc {last_success_ts[11:19]} (đã phục hồi, không cần xử lý).")
     if t2_signature > 20:
         lines.append(f"ℹ️ {t2_signature} lượt PLACE_FAIL 'Trade quantity not enough' (mẫu T+2 đã biết, "
                      f"xem kb/incidents/2026-07/, các file 2026-07-06-*) — sẽ tự giảm sau khi bot dùng code mới (fix "
