@@ -1735,3 +1735,9 @@
 - [2026-08-10T12:05:26Z] DollarBill/heartbeat — DollarBill_20260810_120325: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20260810_120325", "source": "watcher"}
 - [2026-08-10T12:06:27Z] DollarBill/heartbeat — DollarBill_20260810_120325: {"status": "still_running", "elapsed_min": 3, "job_id": "DollarBill_20260810_120325", "source": "watcher"}
 - [2026-08-10T12:06:39Z] DollarBill/heartbeat — DollarBill_20260810_120325: {"status": "in_progress", "note": "L1 NO_TRIM; LAG due_today PHR(DCF RICH skip)+SSI(buying_power=0, live ask 25100>anchor 24450, không mua đuổi được) → 0 lệnh mua mới. Đang kiểm CAPIT + soạn plan HOLD."}
+
+## Consolidation 2026-08-10T12:10:01Z
+- [2026-08-10T12:07:27Z] DollarBill/heartbeat — DollarBill_20260810_120325: {"status": "still_running", "elapsed_min": 4, "job_id": "DollarBill_20260810_120325", "source": "watcher"}
+- [2026-08-10T12:08:27Z] DollarBill/heartbeat — DollarBill_20260810_120325: {"status": "still_running", "elapsed_min": 5, "job_id": "DollarBill_20260810_120325", "source": "watcher"}
+- [2026-08-10T12:09:27Z] DollarBill/decision — plan-2026-08-11-ZaloPay: {"account": "ZaloPay", "plan_date": "2026-08-11", "action": "HOLD", "orders": 0, "dt5g_state": "NEUTRAL", "active_nav_vnd": 513892932, "available_cash_vnd": 1, "reason": "LAG due_today=[PHR,SSI]: PHR skip DCF RICH (MoS -22.2%, no override); SSI eligible qua sector lens CHEAP nhung live ask 25100 > entry_anchor 24450 (khong duoc mua duoi, phien cuoi cua so day3) VA buying_power=0d (verified qua get_buying_power) => 0 lenh mua. BAL n_bal=0. L1 park_trim=NO_TRIM (PARK 115.5tr duoi target 214.4tr). L2 khong can chay vi 0 lenh mua. CAPIT episode giu nguyen, khong dung toi. availableCash gan 0 do 163.8tr ban PARK 08-10 dang settle T+2 (kha dung ~08-12)."}
+- [2026-08-10T12:09:27Z] DollarBill/heartbeat — DollarBill_20260810_120325: {"status": "still_running", "elapsed_min": 6, "job_id": "DollarBill_20260810_120325", "source": "watcher"}
