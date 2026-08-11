@@ -221,19 +221,15 @@ def read_broker_snapshot(label, account_no, asof, exec_dir=EXEC_DIR):
         from trading_bot.brokers import DNSEBroker
         b = DNSEBroker(account_id=account_no, credentials_file=None, label=label)
         b.connect()
-        raw = b.client.positions(account_no)
+        # DNSE trả một dòng cho MỖI loan package cùng mã (y hệt bug ZaloPay 2026-08-11
+        # BID/MBB/VCB đã vá ở DNSEBroker.get_positions(), commit 36846b8) — dùng LẠI hàm đã
+        # dedupe/aggregate đó thay vì tự parse client.positions() lần nữa (từng lặp lại đúng
+        # bug bằng dict-overwrite ở đây, gây BLOCKED_RECONCILE giả cho L1 park-trim).
+        raw_pos = b.get_positions()
         bal = b.client.balances(account_no)
-        rows = (raw.get("positions") or raw.get("data") or []) if isinstance(raw, dict) else (raw or [])
-        pos = {}
-        for p in rows:
-            if str(p.get("accountNo") or account_no) != str(account_no):   # §12
-                continue
-            if str(p.get("status", "OPEN")).upper() == "CLOSED":
-                continue
-            q = int(p.get("openQuantity") or 0)      # KHÔNG dùng accumulateQuantity (§D4)
-            if q > 0 and p.get("symbol"):
-                pos[p["symbol"]] = {"qty": q, "market_price": float(p.get("marketPrice") or 0),
-                                    "sellable": int(p.get("tradeQuantity") or 0)}
+        pos = {sym: {"qty": p["total"], "market_price": float(p.get("marketPrice") or 0),
+                     "sellable": p.get("sellable", p["total"])}
+               for sym, p in raw_pos.items() if p.get("total", 0) > 0}
         st = (bal[0] if isinstance(bal, list) and bal else bal) or {}
         st = st.get("stock", st) if isinstance(st, dict) else {}
         cash = float(st.get("availableCash") or 0)   # tiền TIÊU ĐƯỢC ngay (L2 dùng)
@@ -269,8 +265,19 @@ def read_broker_snapshot(label, account_no, asof, exec_dir=EXEC_DIR):
                     continue
                 q = int(p.get("openQuantity") or 0)
                 if q > 0 and p.get("symbol"):
-                    cur[p["symbol"]] = {"qty": q, "market_price": float(p.get("marketPrice") or 0),
-                                        "sellable": int(p.get("tradeQuantity") or 0)}
+                    sym = p["symbol"]
+                    mp = float(p.get("marketPrice") or 0) or None
+                    sellable = int(p.get("tradeQuantity") or 0)
+                    # cùng bug loan-package-per-dòng như nhánh "hôm nay" ở trên — cộng gộp
+                    # thay vì ghi đè (nhánh này còn đọc TRỰC TIẾP jsonl, không qua
+                    # DNSEBroker.get_positions() được, nên phải tự lặp lại đúng logic dedupe).
+                    prev = cur.get(sym)
+                    if prev:
+                        q += prev["qty"]
+                        sellable += prev["sellable"]
+                        if mp is None:
+                            mp = prev.get("market_price")
+                    cur[sym] = {"qty": q, "market_price": mp or 0.0, "sellable": sellable}
             if cur and (ts_pos is None or rec.get("ts", "") >= ts_pos):
                 pos, ts_pos = cur, rec.get("ts", "")          # bản ghi MỚI NHẤT trong ngày
         elif rec.get("kind") == "balances":
