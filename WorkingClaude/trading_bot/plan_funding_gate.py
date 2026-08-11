@@ -111,6 +111,8 @@ TÁC ĐỘNG KHI CHẶN: caller KHÔNG được đặt BẤT KỲ lệnh nào c�
 Gate này READ-ONLY (mỗi nhóm gói vay 1 lần gọi `ppse`), không side-effect, an toàn với §5.
 """
 
+import math
+
 # Phí giao dịch thật của SpaceX/ZaloPay tại DNSE = 0,075% (KHÔNG phải 0,1% — xác nhận 2026-07-03,
 # dùng thống nhất với bin/reconcile_equity.py). Đây là phần "fee_est_vnd" trong Σ.
 FEE_RATE = 0.00075
@@ -196,7 +198,7 @@ def _order_priority(o):
         return 5
 
 
-def _jit_sell_credit(plan, buys):
+def _jit_sell_credit(plan, buys, remaining_qty=None):
     """Tiền lệnh BÁN CÙNG PLAN chắc chắn được giải phóng TRƯỚC mọi lệnh mua (net phí).
 
     VÌ SAO CẦN (lỗ hổng thật, ZaloPay 2026-08-07): cơ chế L2 JIT-unpark (LIVE từ 2026-08-06)
@@ -224,11 +226,39 @@ def _jit_sell_credit(plan, buys):
     min_buy_prio = min(_order_priority(o) for o in buys)
     sells = [o for o in plan.orders
              if str(o.side or "").lower() == "sell" and _order_priority(o) < min_buy_prio]
-    gross = sum(o.qty * o.ref_price for o in sells)
+    # Khi resume, pp0Buy đã gồm tiền từ SELL đã khớp. Chỉ SELL còn lại mới là tín dụng T+0
+    # chưa phản ánh trong số broker trả về; cộng lại phần đã khớp sẽ nới gate hai lần.
+    gross = sum((remaining_qty or {}).get(str(o.id), o.qty) * o.ref_price for o in sells)
     return gross * (1.0 - FEE_RATE), len(sells), min_buy_prio
 
 
-def check_plan_funding(plan, broker, account_mode):
+def _remaining_quantities(plan, execution_state):
+    """Trả qty còn lại chỉ khi state chứng minh được đầy đủ cùng phiên.
+
+    State hỏng, sai ngày, thiếu parent, hoặc filled ngoài biên đều quay về qty gốc. Đây là
+    chiều fail-closed: không state nào có thể làm gate lỏng nếu không kiểm được.
+    """
+    original = {str(o.id): o.qty for o in plan.orders}
+    if not isinstance(execution_state, dict):
+        return original, False, "không có state hợp lệ"
+    if execution_state.get("plan_date") != plan.plan_date:
+        return original, False, "state khác ngày plan"
+    parents = execution_state.get("parents")
+    if not isinstance(parents, dict):
+        return original, False, "state thiếu parents"
+    remaining = {}
+    for o in plan.orders:
+        parent = parents.get(str(o.id))
+        filled = parent.get("filled") if isinstance(parent, dict) else None
+        if isinstance(filled, bool) or not isinstance(filled, (int, float)):
+            return original, False, f"state filled không hợp lệ ở {o.id}"
+        if not (math.isfinite(filled) and 0 <= filled <= o.qty):
+            return original, False, f"state filled ngoài biên ở {o.id}"
+        remaining[str(o.id)] = o.qty - filled
+    return remaining, True, "state cùng phiên, filled đã kiểm"
+
+
+def check_plan_funding(plan, broker, account_mode, execution_state=None):
     """Verdict cấp PLAN. KHÔNG tự chặn gì — caller đọc `action` và quyết định.
 
     Trả dict:
@@ -242,23 +272,28 @@ def check_plan_funding(plan, broker, account_mode):
                 "need_vnd": 0.0, "buying_power_vnd": None, "utilization": None,
                 "groups": [], "fallback_bound_vnd": None}
 
-    buys = [o for o in plan.orders if str(o.side or "").lower() == "buy"]
+    remaining_qty, state_used, state_note = _remaining_quantities(plan, execution_state)
+    buys = [o for o in plan.orders
+            if str(o.side or "").lower() == "buy" and remaining_qty[str(o.id)] > 0]
     if not buys:
         return {"action": "SKIPPED", "reason": "plan không có lệnh MUA — không có gì để cấp vốn",
                 "need_vnd": 0.0, "buying_power_vnd": None, "utilization": None,
-                "groups": [], "fallback_bound_vnd": None}
+                "groups": [], "fallback_bound_vnd": None, "state_used": state_used,
+                "state_note": state_note}
 
     # ── gom lệnh mua theo gói vay hiệu lực ────────────────────────────────────────────────
     groups = {}
+    original_need = 0.0
     for o in buys:
         lp, src = _effective_loan_package(o, broker)
         g = groups.setdefault(str(lp), {"lp": lp, "src": src, "orders": [], "need": 0.0})
         g["orders"].append(o)
-        g["need"] += o.qty * o.ref_price * (1.0 + FEE_RATE)
+        g["need"] += remaining_qty[str(o.id)] * o.ref_price * (1.0 + FEE_RATE)
+        original_need += o.qty * o.ref_price * (1.0 + FEE_RATE)
 
     total_need = sum(g["need"] for g in groups.values())
 
-    jit_credit, n_jit_sells, min_buy_prio = _jit_sell_credit(plan, buys)
+    jit_credit, n_jit_sells, min_buy_prio = _jit_sell_credit(plan, buys, remaining_qty)
 
     # ── đo pp0Buy từng nhóm, bằng ĐÚNG gói vay của nhóm đó ────────────────────────────────
     raw_util = 0.0          # Σ_g need_g/pp0Buy_g = phần HŨ CHUNG bị tiêu thụ (chưa tính JIT)
@@ -322,7 +357,8 @@ def check_plan_funding(plan, broker, account_mode):
                 "jit_credit_effective_vnd": jit_effective, "shared_pot_vnd": shared_pot,
                 "raw_utilization": raw_util, "headroom_ratio": headroom,
                 "jit_sell_orders": n_jit_sells, "min_buy_priority": min_buy_prio,
-                "reason": (f"Σ lệnh MUA {total_need:,.0f}đ VƯỢT sức mua thật của broker "
+                "state_used": state_used, "state_note": state_note,
+                "reason": (f"Σ lệnh MUA còn lại {total_need:,.0f}đ VƯỢT sức mua thật của broker "
                            f"{measured_bp:,.0f}đ (pp0Buy, đã gồm hạn mức vay + tiền bán chờ về "
                            f"T+0){jit_note} — tiêu thụ {measured_util*100:.1f}% sức mua. Plan "
                            f"đang chứa lệnh dựa trên vốn CHƯA TỒN TẠI; theo luật "
@@ -337,7 +373,8 @@ def check_plan_funding(plan, broker, account_mode):
                 "jit_credit_effective_vnd": jit_effective, "shared_pot_vnd": shared_pot,
                 "raw_utilization": raw_util, "headroom_ratio": headroom,
                 "jit_sell_orders": n_jit_sells, "min_buy_priority": min_buy_prio,
-                "reason": (f"Σ lệnh MUA {total_need:,.0f}đ ≤ sức mua {measured_bp:,.0f}đ"
+                "state_used": state_used, "state_note": state_note,
+                "reason": (f"Σ lệnh MUA còn lại {total_need:,.0f}đ ≤ sức mua {measured_bp:,.0f}đ"
                            f"{jit_note} ({measured_util*100:.1f}%)")}
 
     # ── (3) có nhóm không đo được → cận ngoài, chỉ chặn mức "vốn không tồn tại" ───────────
@@ -360,7 +397,8 @@ def check_plan_funding(plan, broker, account_mode):
                 "shared_pot_vnd": shared_pot, "raw_utilization": raw_util,
                 "headroom_ratio": headroom, "jit_sell_orders": n_jit_sells,
                 "min_buy_priority": min_buy_prio,
-                "reason": (f"Σ lệnh MUA {total_need:,.0f}đ VƯỢT cả cận ngoài — {common}. "
+                "state_used": state_used, "state_note": state_note,
+                "reason": (f"Σ lệnh MUA còn lại {total_need:,.0f}đ VƯỢT cả cận ngoài — {common}. "
                            f"Đòn bẩy tối đa 2× không giải thích được mức này ⇒ plan chứa lệnh "
                            f"dựa trên vốn CHƯA TỒN TẠI.")}
     return {"action": "UNVERIFIED", "groups": out_groups, "need_vnd": total_need,
@@ -370,7 +408,8 @@ def check_plan_funding(plan, broker, account_mode):
             "shared_pot_vnd": shared_pot, "raw_utilization": raw_util,
             "headroom_ratio": headroom, "jit_sell_orders": n_jit_sells,
             "min_buy_priority": min_buy_prio,
-            "reason": (f"Σ lệnh MUA {total_need:,.0f}đ nằm trong cận ngoài nhưng CHƯA xác minh "
+            "state_used": state_used, "state_note": state_note,
+            "reason": (f"Σ lệnh MUA còn lại {total_need:,.0f}đ nằm trong cận ngoài nhưng CHƯA xác minh "
                        f"được bằng sức mua thật — {common}. KHÔNG chặn (ca TV1 2026-07-29 chứng "
                        f"minh đo-không-được xảy ra trên plan hợp lệ), nhưng cần người xem.")}
 

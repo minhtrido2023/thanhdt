@@ -49,6 +49,7 @@ def check(name, cond, detail=""):
 def order(ticker, qty, price, side="buy", cash_only=False, loan_package_id=None, priority=5):
     o = types.SimpleNamespace()
     o.ticker, o.qty, o.ref_price, o.side = ticker, qty, price, side
+    o.id = f"{side}-{ticker}"
     o.cash_only, o.loan_package_id = cash_only, loan_package_id
     # priority=5 = ĐÚNG default của dataclass Order (plan.py:26). Giữ nguyên cho mọi ca cũ ⇒
     # mua lẫn bán đều =5 ⇒ điều kiện `<` NGHIÊM NGẶT sai ⇒ 0 tín dụng JIT ⇒ hành vi y hệt trước.
@@ -60,6 +61,11 @@ def plan(orders, account="SpaceX", plan_date="2026-08-05"):
     p = types.SimpleNamespace()
     p.orders, p.account, p.plan_date = orders, account, plan_date
     return p
+
+
+def state_for(p, fills, plan_date=None):
+    return {"plan_date": plan_date or p.plan_date,
+            "parents": {o.id: {"filled": fills.get(o.id, 0)} for o in p.orders}}
 
 
 class StubBroker:
@@ -168,6 +174,24 @@ b2 = StubBroker({None: 100_000_000, 1122: 50_000_000}, cash=50_000_000, resolve=
 v = check_plan_funding(plan([order("FPT", 400, 100_000),
                             order("TV1", 1000, 20_000, cash_only=True)]), b2, "live")
 check("action == OK", v["action"] == "OK", f"{v['action']} U={v.get('utilization')}")
+
+print("[F3] RESUME: chỉ tính BUY còn lại; SELL đã fill không được cộng JIT lần hai")
+p = plan([order("AAA", 1000, 100_000, priority=1),
+          order("BBB", 1000, 100_000, priority=1),
+          order("CCC", 1000, 100_000, side="sell", priority=0)])
+st = state_for(p, {"buy-AAA": 900, "buy-BBB": 1000, "sell-CCC": 1000})
+v = check_plan_funding(p, StubBroker({None: 20_000_000}, cash=20_000_000), "live", st)
+check("resume dùng state đầy đủ", v["action"] == "OK", v["reason"])
+check("state được đánh dấu đã dùng", v["state_used"] is True, v.get("state_note"))
+check("chỉ tính BUY còn 100cp + phí", abs(v["need_vnd"] - 10_007_500) < 1e-6, v["need_vnd"])
+check("SELL đã fill không được cộng JIT lần hai", v["jit_sell_credit_vnd"] == 0, v["jit_sell_credit_vnd"])
+bad = {"plan_date": p.plan_date, "parents": {"buy-AAA": {"filled": 900}}}
+v = check_plan_funding(p, StubBroker({None: 20_000_000}, cash=20_000_000), "live", bad)
+check("state thiếu parent giữ nguyên need và BLOCK", v["action"] == "BLOCK" and v["need_vnd"] > 200_000_000,
+      (v["action"], v["need_vnd"]))
+v = check_plan_funding(p, StubBroker({None: 20_000_000}, cash=20_000_000), "live",
+                       state_for(p, {}, plan_date="2026-08-04"))
+check("state khác ngày giữ nguyên need và BLOCK", v["action"] == "BLOCK", v["reason"])
 
 # ── G. ca THẬT TV1 2026-07-29 (false positive của shadow log) ─────────────────────────────
 print("\n[G] REPLAY THẬT 2026-07-29 SpaceX/TV1 — dòng DUY NHẤT trong shadow log, would_block=true")

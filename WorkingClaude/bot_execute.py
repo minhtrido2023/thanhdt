@@ -533,7 +533,15 @@ def main():
         # WARN_ONLY ngay trên. Vượt ⇒ KHÔNG đặt BẤT KỲ lệnh nào của account này (thực thi một
         # phần chính là hành vi "list-rồi-đợi-tiền" mà luật cấm), báo to, exit ≠ 0. Đặt CUỐI
         # cascade: mọi bộ lọc/trần/đòn bẩy đã chốt nên Σ ở đây là tập lệnh THẬT SỰ sắp đặt.
-        fund = check_plan_funding(plan, broker, cfg["mode"])
+        # Resume phải tính phần chưa khớp. Module funding chỉ dùng state khi đủ cùng phiên;
+        # đọc lỗi/hỏng giữ nguyên qty gốc (fail-closed), không thể nới gate từ state mù.
+        state_path = os.path.join(EXEC_DIR, f"exec_{p['label']}_{plan_date}_state.json")
+        try:
+            with open(state_path, encoding="utf-8") as sf:
+                execution_state = json.load(sf)
+        except Exception:
+            execution_state = None
+        fund = check_plan_funding(plan, broker, cfg["mode"], execution_state=execution_state)
         if fund["action"] == "BLOCK":
             _alert_funding_block(p["label"], plan_date, fund)
             funding_blocked.append(p["label"])
