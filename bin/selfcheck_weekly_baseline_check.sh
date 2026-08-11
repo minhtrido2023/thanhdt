@@ -70,6 +70,7 @@ RESULT_JSON="$ROOT/logs/selfcheck_weekly_$(date -u +%Y%m%d).json"
 JSONL="$ROOT/logs/.selfcheck_weekly_raw_$$.jsonl"
 mkdir -p "$ROOT/logs"
 : > "$JSONL"
+trap 'rm -f "$JSONL" /tmp/wk_sc_"$$"_*.log' EXIT HUP INT TERM
 
 # Phạm vi = production HEAD của 2 repo sống. Glob thật mỗi lần chạy, KHÔNG danh sách chép tay
 # (§23). CỐ Ý KHÔNG có `test_*.py`: 165 file đó ở gốc là script backtest/R&D đặt tên theo lịch
@@ -102,7 +103,6 @@ done
 # và nó chính là chỗ bug L2 (không ghi known_red ⇒ báo lại mỗi lần) sống 4 ngày.
 python3 "$ROOT/bin/selfcheck_baseline_diff.py" "$BASELINE" "$RESULT_JSON" "$JSONL"
 rc=$?
-rm -f "$JSONL"
 
 # rc=1 (có đỏ MỚI) và rc=2 (quét hỏng/rỗng) là HAI sự việc khác nhau và phải nói khác nhau —
 # gộp chúng vào một thông điệp "phát hiện đỏ mới" là đúng lỗi close-the-loop bug B cảnh báo
