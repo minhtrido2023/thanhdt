@@ -2,45 +2,40 @@
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
 
 # Working memory — Mike
-> Cập nhật lần cuối: 2026-08-10 (cuối ngày, sau daily retro bước 3/3)
+> Cập nhật lần cuối: 2026-08-11 (cuối ngày, sau daily retro bước 3/3)
 
-## Daily retro 08-10 — XONG
-7 sự cố, 3 pattern. Wags verify GAPS FOUND → đã sửa (bổ sung sự cố #7
-`approve_plan_simple.sh` false-block SHB-PARK SpaceX, commit `52190a1d`, tự sửa cùng ca; đính
-chính mtime `plan_ZaloPay_2026-08-11.json` 19:08 ICT → 12:08:51 UTC, TRƯỚC 2 escalation không phải
-SAU — chẩn đoán gốc check `plan_state_source_mismatch` không đổi). File:
-`kb/incidents/retro/retro-2026-08-10.md`, commit `05ce4c9f`.
+## Daily retro 08-11 — XONG
+5 sự cố, 2 pattern. Wags verify GAPS FOUND → đã sửa (commit 19e788f không tồn tại — bug
+funding-gate hũ-chung 08-10 chỉ được chẩn đoán+escalate, CHƯA vá code, đúng ra 770ff08e/97a80058;
+mismatch "3 gap ở #3-#5" → đúng là #1/#4/#5; bỏ tên agent cụ thể khỏi cột blameless). File:
+`kb/incidents/retro/retro-2026-08-11.md`, commit `f33c979c`.
 
-**Pattern 1 — "việc đã xong nhưng thiếu event đóng trên bus"**: 2 ca cùng ngày (#5 ZaloPay plan,
-#6 coord-2026-08-10 saga) — không phải sự cố nghiêm trọng, chỉ nhắc kỷ luật đóng `question` bằng
-`answer` event ngay khi xác nhận xong.
+**Pattern 1 (KHẨN, đã escalate 2 retro liên tiếp 08-09→08-10) — GÂY THIỆT HẠI THẬT trước khi vá**:
+`plan_state_source_mismatch` (checker so CHUỖI MÔ TẢ thay vì giá trị `state` int) chặn oan
+escalation `plan-t1-not-ready-SpaceX` tối 08-10 → **30 lệnh lỡ phiên sáng 08-11** (SpaceX 17 +
+ZaloPay 13) vì plan không được gửi duyệt kịp. Wags tự root-cause + fix rạng sáng 08-11 (commit
+`e6ae5551`, selfcheck 5/5 PASS) — NHƯNG SAU KHI thiệt hại đã xảy ra. Bài học: "ghi lesson vào file
+incident" (như 07-15) không đủ ngăn tái diễn ở field khác cùng họ; đề xuất prevention mạnh hơn
+(auto-dispatch khi retro đã formal hoá đề xuất rõ ràng, không chờ carryover) — CHƯA duyệt, chờ
+Wags/Taylor/user.
 
-**Pattern 2 (KHẨN NHẤT) — SpaceX T+1 mất tích 2 ngày liên tiếp**: cùng hình dạng lỗi 08-09→08-10,
-lần này (cho 08-11) VẪN CHƯA xử lý tới cuối ngày (đã qua cả 2 deadline 21:00/23:00 ICT).
+**Pattern 2** — `load_plan()` chỉ validate field lạ/thiếu (§7/§24), CHƯA validate SAI KIỂU
+(`dd_check` ghi chuỗi thay vì dict → `executor.py` AttributeError mỗi FILL, 22+27 POLL_FAIL). Đề
+xuất: coi field sai kiểu như `None` + cảnh báo ồn ào — chờ Taylor/Wags/user duyệt (chạm vùng cấm
+Winston).
 
-**Pattern 3 — ESCALATED, sang retro thứ 3 vẫn treo**: backlog "chưa ghi file kb/incidents/" không
-giảm (16→20, dù đóng thêm 2 file). Wags đã triage đầy đủ + khuyến nghị (nghiêng về "chấp nhận retro
-backfill là đủ, sửa quy tắc 1-sự-cố-1-file") nhưng bus question `retro-pattern-recurring-2-days`
-VẪN CHƯA có answer — đủ dữ kiện để CHỐT ngay, chỉ thiếu người quyết.
-
-## Việc treo sang 08-11 (ưu tiên, KHẨN)
-1. **KHẨN NHẤT**: SpaceX T+1 (2026-08-11) hoàn toàn KHÔNG có plan — 2 lần escalation
-   `plan-t1-not-ready-SpaceX` không có answer, đã qua cả 2 deadline. Dispatch DollarBill sinh plan
-   NGAY khi vào phiên tiếp theo, TRƯỚC 09:05 ICT (giờ bot chạy).
-2. `retro-pattern-recurring-2-days` — Wags đã đưa khuyến nghị đầy đủ, cần user chọn (a) auto-stub
-   file kb/incidents/ hay (b) chấp nhận retro backfill đủ + sửa quy tắc. Đưa cho user quyết dứt
-   điểm, đừng escalate lại.
-3. `verify_finding.sh` JSON trailing-comma bug — TÁI PHÁT LẦN 2, fix nhỏ đã biết (strip trailing
-   comma trước json.loads), chưa ai vá — làm được ngay, không cần quyết chính sách.
-4. `plan_state_source_mismatch` check (`send_plan_report.sh` ~168-176) — carryover 2 ngày, chưa
-   sửa (so giá trị `state` thay vì chuỗi mô tả).
-5. Park-trim patch (Taylor, job `Taylor_20260810_113500`) — chờ user/Taylor + quant-skeptic duyệt
-   trước khi wire, KHÔNG tự áp.
-6. 20 sự cố tồn đọng (7 từ 08-07 + 7 từ 08-09 + 6 từ 08-10) cần file `kb/incidents/` riêng — không
-   khẩn nếu (2) chốt hướng (b).
+## Việc treo sang 08-12 (ưu tiên)
+1. Ghi file `kb/incidents/` cho 3 fix của Wags hôm nay (#1 state_source, #4 close-the-loop
+   has-event-prefix, #5 triaged-needs-human suppress_days) — đủ bằng chứng, làm ngay.
+2. Đưa user quyết dứt điểm 2 câu hỏi treo cùng lúc: (a) prevention mạnh hơn cho Pattern 1 ở trên,
+   (b) `retro-pattern-recurring-2-days` cũ (backlog ~23 sự cố chưa có file — Wags đã khuyến nghị,
+   chỉ thiếu quyết định).
+3. `plan_funding_gate.py` (#2 hôm nay, ZaloPay chặn oan phiên chiều — KHÁC bug hũ-chung 08-10, VẪN
+   CHƯA vá cả hai): đề xuất tính `need` trên qty còn lại — chờ Taylor/quant-skeptic.
+4. `executor.py`/`load_plan()` type-validation (Pattern 2) — chờ Taylor/Wags/user.
 
 ## Kế thừa lâu hơn (theo dõi định kỳ, không cần hành động ngay)
-- Sự cố #1 `compute_active_nav.py` availableCash bug — verify lại trạng thái thật trước khi dùng.
+- Sự cố `compute_active_nav.py` availableCash bug — verify lại trạng thái thật trước khi dùng.
 - ZaloPay park-trim display-only + plan ZaloPay 08-07 0 fill — chưa ai điều tra.
 - Job cancel guard round 9 (commit `9e20bbf0`) — fail-closed an toàn nhưng chưa CONFIRMED tuyệt đối.
 - Verify độc lập fix VHM (NAV-report + LotBook corp-action) — vẫn chưa có ai verify ngoài Taylor.
@@ -48,11 +43,11 @@ VẪN CHƯA có answer — đủ dữ kiện để CHỐT ngay, chỉ thiếu ng
 - Mafee live-lever-order test vẫn CHUA_KET_LUAN, cần user cấp quyền Bash đặt lệnh thật.
 - PNJ TTL anomaly_flags (~08-23 review).
 - coord-2026-08-07 saga bị arch-reviewer bounce 2 vòng, im lặng từ đó.
-- BACKLOG kiến trúc (Wags): pin-theo-inode không hoạt động thật trong production (9/11 job
-  pin_failed=1) — đề xuất bắt buộc pin lúc dispatch.sh tạo job, bỏ tree-match cũ. Quyết định thiết
-  kế, chưa dispatch.
+- write-isolation (job_workspace.py) BOUNCE 2 vòng arch-reviewer 08-11 — DỪNG tự vá, chờ user chọn
+  hướng (tiếp tục vá hay đơn giản hoá kiến trúc, tái dùng worktree theo agent/thread). Local only,
+  chưa push GitHub.
+- Máy fleet 98% đĩa (129G/138G, ~3.3GB free 08-11) — /workspace/kaffa_v2 (45G, không liên quan
+  fleet) là consumer lớn nhất; ~2.6GB rác /tmp từ test cũ. Cần báo user/data-ops dọn.
+- BACKLOG kiến trúc (Wags): pin-theo-inode không hoạt động thật trong production — quyết định
+  thiết kế, chưa dispatch.
 
-- [2026-08-11T03:01:05Z] 2026-08-10: Áp dụng #4+#5 của đề xuất effort-drift (theo yêu cầu user, #2+#3 hoãn chờ báo sau). #5: thêm mục 5d vào Friday editorial review (bin/kb_nightly.sh, commit eca755bb) — check %effort=high per-agent qua spend_report.py sống, mirror 5b/5c fable/opus-drift. #4: ghi kỷ luật 'mặc định effort=medium cho dispatch tương tác' thành luật cụ thể vào MIKE.md (commit b00171f6), tự nhận lỗi đã phạm trong saga Wags cùng ngày.
-- [2026-08-11T03:13:28Z] 2026-08-10: Hoàn tất #2+#3 của đề xuất effort-drift. #2: nudge động trong dispatch.sh (commit 0159582a) — chỉ nổi khi 10 dispatch gần nhất của 1 agent ≥70% high VÀ lần này cũng high, tránh lờn cảnh báo (đã verify bắn đúng '7/10' cho Taylor thật, im lặng khi medium). #3: rà 6 script tự động dispatch opus/high (ops_autofix/wags_autofix/fearbuy/paper_checkpoint/weekly_ops_audit/kb_nightly-ctxbloat) — 5/6 ĐÃ scoped đúng, chỉ 1 lệch thật (check_report_cadence.sh nhánh tuần: hạ model sonnet 08-04 nhưng quên effort vẫn high) → đã tách EFFORT theo nhánh, commit 3f8a74c4. Kết luận: vấn đề 'tùy tiện opus+high' nằm ở dispatch TƯƠNG TÁC (Taylor R&D qua Mike), không phải script tự động — #2+#4 đã target đúng chỗ.
-- [2026-08-11T05:19:50Z] 2026-08-11: arch-reviewer NEEDS_CHANGES/high trên write-isolation fix (job_workspace.py, worktree wt-1536246356098814022, commit 460df6ed+af03a4ee) — 2 bug tôi tự vá (cherry-pick tip-only mất commit, conflict để lại cây chung dở dang) ĐÚNG nhưng còn killer objection: abort chỉ vá nhánh conflict, lỗi khác (vd index.lock của chính consolidate.sh) làm abort cũng fail, để lại .git/sequencer trong repo CHUNG, làm job lành kế tiếp bị gắn conflict giả kẹt vĩnh viễn. Thêm F1 meaningful_dirty lọc nhầm tầng (check ?? state//bus/ đã gitignore = dead code, rác thật là file TRACKED như kb/fleet_status.md). F3 cách ly KHÔNG cưỡng chế được với provider claude (chỉ cd + prompt). F7 235MB/job không dọn, tạo TRƯỚC 3 guard abort dispatch = rác mồ côi. 0 caller --write-scope. CHƯA PUSH GitHub, giữ nguyên local trong worktree, chờ quyết định: tiếp tục vá theo required_changes hay đơn giản hoá kiến trúc (tái dùng worktree theo agent/thread có sẵn thay vì per-job).
-- [2026-08-11T06:03:55Z] 2026-08-11: write-isolation fix (job_workspace.py) BOUNCE LẦN 2 — thiết kế lại thành pool cố định N slot (commit 6fe5c066, worktree wt-1536246356098814022) sửa đúng F7/F8 vòng 1 nhưng arch-reviewer tìm ra killer objection MỚI: prepare-slot chỉ check os.path.isdir(slot), không verify slot đó THẬT SỰ là worktree đã đăng ký — nếu thư mục tồn tại nhưng không phải worktree hợp lệ (hết đĩa giữa git worktree add, hoặc state/ bị dọn ngoài ý muốn) thì mọi lệnh git cwd=slot resolve NHẦM vào repo CHUNG, reset --hard + clean -fd XOÁ SẠCH việc chưa commit của cây production — tái hiện được thật trong sandbox. Thêm 2 lỗi high khác: F2 cd vào AGENT_DIR xảy ra TRƯỚC acquire nên cách ly = 0% cho provider claude (bug MỚI, v1 không có); F3 integrate gate chặn vĩnh viễn vì kb/fleet_status.md do consolidate.sh ghi liên tục là trạng thái ỔN ĐỊNH chứ không tạm thời. Đây đúng pattern 9-vòng-không-hội-tụ mà chính Wags cảnh báo trước đó (job cancel guard round 9) — ĐÃ DỪNG vòng tự vá, KHÔNG tự làm round 3, để user quyết hướng. CHƯA push GitHub, giữ local. THÊM: phát hiện phụ ngoài lề — máy chạy fleet đang 98% đĩa (129G/138G, chỉ còn 3.3GB free), /workspace/kaffa_v2 (45G, không liên quan fleet này) là consumer lớn nhất, /tmp có ~2.6GB rác từ các phiên arch-reviewer/Wags test cũ (ar7, wags_r9_red, r8_2768...) — CẦN báo user + có thể cần data-ops/Wags dọn, không tự ý xoá /workspace vì không rõ ai sở hữu.
