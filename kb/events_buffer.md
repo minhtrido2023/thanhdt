@@ -1320,3 +1320,6 @@
 ## Consolidation 2026-08-11T17:40:12Z
 - [2026-08-11T17:38:48Z] Mike/heartbeat — Mike_20260811_173747: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20260811_173747", "source": "watcher"}
 - [2026-08-11T17:39:48Z] Mike/heartbeat — Mike_20260811_173747: {"status": "still_running", "elapsed_min": 2, "job_id": "Mike_20260811_173747", "source": "watcher"}
+
+## Consolidation 2026-08-11T17:40:48Z
+- [2026-08-11T17:40:41Z] Mike/finding — daily-retro-2026-08-11-finalized: {"file": "kb/incidents/retro/retro-2026-08-11.md", "commit": "f33c979c", "n_incidents": 5, "n_patterns": 2, "wags_verdict": "GAPS_FOUND_fixed", "gaps_fixed": ["commit 19e788f fabricated -> corrected to 770ff08e/97a80058 (diagnosed only, not fixed)", "internal mismatch 3-gap list #3-#5 -> corrected to #1/#4/#5", "removed named-agent blame in row #3 origin column"], "headline": "plan_state_source_mismatch pattern escalated 2 prior retros, fixed today AFTER causing 30 missed orders (SpaceX 17 + ZaloPay 13)", "posted_to": "trading_daily", "memory_updated": true, "consolidate_ran": true}
