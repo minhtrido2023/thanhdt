@@ -42,13 +42,46 @@ if [ "$EMAIL" = "1" ]; then
     fi
   done
   REPORT_FILE="$ROOT/reports/paper_programs_daily_report_${REPORT_DATE}.md"
+  EMAIL_STATE="$ROOT/state/paper_programs_report_emailed.json"
   tmp="$(mktemp "$ROOT/reports/.paper_programs_daily_report_${REPORT_DATE}.XXXXXX")"
   printf '%s\n' "$report" > "$tmp"
   mv "$tmp" "$REPORT_FILE"
+
+  mkdir -p "$ROOT/state"
+  EMAIL_ALREADY="$(EMAIL_STATE="$EMAIL_STATE" REPORT_DATE="$REPORT_DATE" python3 - <<'PY'
+import json, os
+path = os.environ['EMAIL_STATE']
+try:
+    with open(path, encoding='utf-8') as f:
+        state = json.load(f)
+except (OSError, ValueError):
+    state = {}
+print('yes' if state.get(os.environ['REPORT_DATE']) else 'no')
+PY
+)"
+  if [ "$EMAIL_ALREADY" = "yes" ]; then
+    echo "ℹ️ Email paper-program report ${REPORT_DATE} đã gửi trước đó — bỏ qua bản trùng."
+    exit 0
+  fi
 
   # Cổng tỉ suất chỉ áp dụng báo cáo NAV/vị thế broker. Paper report không công bố các tỉ suất
   # đó; bỏ qua có nêu lý do tường minh để email không bị chặn oan.
   "$ROOT/bin/send_report_email.py" "$REPORT_FILE" \
     --subject "[Paper Trading] Daily Report — ${REPORT_DATE}" \
     --skip-return-gate "Paper-program report khong cong bo ty suat vi the broker"
+  EMAIL_STATE="$EMAIL_STATE" REPORT_DATE="$REPORT_DATE" python3 - <<'PY'
+import json, os, tempfile
+path = os.environ['EMAIL_STATE']
+try:
+    with open(path, encoding='utf-8') as f:
+        state = json.load(f)
+except (OSError, ValueError):
+    state = {}
+state[os.environ['REPORT_DATE']] = 'sent'
+fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path), prefix='.paper_programs_report_emailed.')
+with os.fdopen(fd, 'w', encoding='utf-8') as f:
+    json.dump(state, f, indent=2, ensure_ascii=False)
+    f.write('\n')
+os.replace(tmp, path)
+PY
 fi
