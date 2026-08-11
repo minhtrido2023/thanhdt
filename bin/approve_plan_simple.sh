@@ -74,9 +74,22 @@ if dups:
           file=sys.stderr)
     sys.exit(2)
 
+def _buy_cost(o):
+    v = o.get("total_with_fee_vnd") or o.get("value_vnd")
+    if v:
+        return v
+    # P2 park-add / discretionary buy orders dùng estimated_cost_vnd + fee_est_vnd
+    # (khác quy ước total_with_fee_vnd của orders[] cũ) — không cộng thì Σ MUA
+    # âm thầm ra 0 và gate coi như luôn đủ tiền, dù thiếu bao nhiêu cũng "pass".
+    cost = o.get("estimated_cost_vnd")
+    if cost:
+        return cost + (o.get("fee_est_vnd") or 0)
+    return 0
+
+
 buy = [o for o in orders if o.get("side") == "buy"]
 sell = [o for o in orders if o.get("side") == "sell"]
-buy_total = sum((o.get("total_with_fee_vnd") or o.get("value_vnd") or 0) for o in buy)
+buy_total = sum(_buy_cost(o) for o in buy)
 sell_gross = sum((o.get("estimated_proceeds_vnd") or o.get("value_vnd") or 0) for o in sell)
 sell_fee = sum((o.get("fee_est_vnd") or 0) for o in sell)
 sell_net = sell_gross - sell_fee
@@ -86,11 +99,20 @@ print(f"orders[]: {len(orders)} lệnh ({len(buy)} mua, {len(sell)} bán)")
 for o in buy:
     print(f"  MUA {o['ticker']:6s} {o.get('qty'):>6} cp @ {o.get('ref_price',0):>10,.0f}đ  "
           f"priority={o.get('priority')}")
-cash_before = (plan.get("nav_basis") or {}).get("available_cash_before_vnd")
+nb = plan.get("nav_basis") or {}
+cash_before = nb.get("available_cash_before_vnd")
 cash_src = "nav_basis.available_cash_before_vnd"
 if cash_before is None:
     cash_before = (plan.get("orders_summary") or {}).get("available_cash_before_vnd")
     cash_src = "orders_summary.available_cash_before_vnd (fallback)"
+if cash_before is None:
+    # Quy ước §25 CLAUDE.md (compute_active_nav.py sau fix 68a27680): cơ sở tiền THẬT là
+    # totalCash-totalDebt, trừ thêm cổ tức chờ về (chưa phải tiền tiêu được) nếu có ghi rõ.
+    tcmd = nb.get("total_cash_minus_debt_vnd")
+    if tcmd is not None:
+        div_pending = nb.get("cash_dividend_receiving_vnd") or 0
+        cash_before = tcmd - div_pending
+        cash_src = "nav_basis.total_cash_minus_debt_vnd − cash_dividend_receiving_vnd (§25 fallback)"
 if cash_before is None:
     cash_before = 0
     cash_src = "KHÔNG CÓ trong plan — fallback 0 (không đoán số)"
