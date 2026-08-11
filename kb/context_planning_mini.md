@@ -64,6 +64,31 @@ cho SpaceX ngày nào trùng lịch tranche TV1, PHẢI trừ trước số ti�
 — nếu không, tổng nhu cầu 2 nguồn có thể vượt cash thực (sự cố thật 07-24: V2.4 45,9M + TV1
 3,98M = 49,9M > cash 49,1M, thiếu ~0,78M). Luôn check file discretionary trước khi chốt size.
 
+## DRI + TV1 discretionary — target 5% NAV/mã MỖI account, khung giá rải bậc (chốt 2026-08-10/11)
+User chốt 2026-08-10 tối: nâng size DRI + TV1 (PECC1) từ 1,5% → **5% NAV/mã, cho CẢ 2 account**
+(SpaceX + ZaloPay), discretionary ngoài book V2.4. Đã thực thi trong plan 2026-08-11 (play_type
+`DISCRETIONARY_ADD`): SpaceX TV1 400→2400cp (≈47,68tr/974,28tr NAV ≈4,90%), SpaceX DRI 0→3700cp
+(≈48,84tr ≈5,01%); ZaloPay TV1 0→1300cp (≈25,87tr/513,89tr active_nav ≈5,03%), ZaloPay DRI
+0→1900cp (≈25,08tr ≈4,88%) — lệch ~0,1pp là do lot-size tròn 100cp, KHÔNG cần rải thêm để chỉnh
+cho khớp tuyệt đối 5,00%. **Coi như ĐÃ ĐẠT mục tiêu 5%** tính tới 2026-08-11; kiểm tra lại % NAV
+thật (dùng active_nav đúng account, không dùng total NAV cho ZaloPay vì có DGC excluded) trước khi
+quyết định có rải thêm ở lần lập plan sau không — chỉ rải thêm nếu vị thế rơi RÕ RỆT dưới 5% (vd
+do NAV tăng hoặc bán bớt), không rải thêm chỉ vì lệch do lot-size.
+
+**Khung giá rải bậc (user cung cấp 2026-08-11, discretionary reference — chưa qua DSR/PBO, N=1
+mã, không phải khuyến nghị cứng):**
+
+| Mã | Vùng MUA (rải bậc) | Vùng BÁN/chốt lời (rải bậc) | Ghi chú |
+|---|---|---|---|
+| **DRI** (UPCOM, giá ref 13.200đ 2026-08-10) | T1 12.800–13.200 · T2 (nếu về hỗ trợ) 11.900–12.300 · ngừng mua nếu thủng <11.900 | T1 (kỹ thuật) 14.000–14.200 · T2 (target chính, PE reversion) 15.500–17.000 · T3 (stretch, cần EPS fwd FY2026 xác nhận 4.000-4.300đ) 17.500–18.000 | PE_MA5Y (9,44x) KHÔNG dùng làm target (méo bởi chu kỳ cao su cũ); thanh khoản UPCOM mỏng (200k-1,6M cp/phiên) → rải lệnh |
+| **TV1/PECC1** (giá ref ~19.900-20.200đ 2026-08-10) | T1 (40%) 19.800–20.200 · T2 (35%) 18.300–19.400 · T3 (25%, dự phòng, chỉ mua nếu không có tin xấu mới) 16.500–17.500 | T1 (30%) 24.500–26.000 · T2 (40%) 29.000–32.000 · T3 (30%) 35.000–37.700 (KHÔNG target lại đỉnh đầu cơ 39.400 — spike bất thường) | PE_MA5Y (11,54x) KHÔNG dùng làm neo (méo bởi khủng hoảng LN 2019-2021); thanh khoản ~0,634 tỷ/ngày → chia lệnh nhỏ |
+
+**Dùng khi nào**: (a) nếu vị thế hiện tại CHƯA đạt 5% NAV/mã (rơi vào tình huống hiếm — xem đoạn
+trên, hiện đã đạt) → DollarBill rải mua tiếp theo tranche T1 trước, chỉ xuống T2/T3 nếu giá thật
+sự điều chỉnh về vùng đó; (b) khi giá chạm vùng BÁN/chốt lời → đưa vào cân nhắc trim (discretionary,
+không tự động, cần user duyệt riêng như mọi lệnh bán ngoài V2.4); (c) không tự nội suy khung giá
+khác — hết giá trị tham chiếu (giá thị trường vượt xa dải trên/dưới) thì hỏi lại user, đừng tự chế.
+
 ## LAG entry — GATE CỨNG rating≤3, TỰ ĐỘNG LOẠI rating≥4, KHÔNG escalate nữa (CHỐT 2026-07-27)
 User đã CHỐT LUẬT (2026-07-27, sau 2 case liên tiếp TRC rồi MST cùng rating≥4): mọi ứng viên LAG
 PHẢI có 8L rating ≤3 mới được đưa vào orders[]. Rating≥4 (RATING_FAIL) → TỰ ĐỘNG loại khỏi plan,
