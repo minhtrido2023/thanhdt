@@ -63,3 +63,6 @@
 
 ## Archived 2026-08-11 (keep=12 days=0 require_done=False)
 - [2026-08-06T17:35:00Z] [2026-08-07T00:35 ICT] XONG job DollarBill_20260806_172217: plan_SpaceX/ZaloPay_2026-08-07.json da thay SSI bang DRI+TV2 (override user), L2 JIT tinh lai FUNDED_BY_JIT ca 2, report da gui Discord plan thread. CHO USER DUYET truoc 08:45 ICT hom nay. | 2 VIEC MO CAN NGUOI: (1) finding 'lag-sizing-basis-lech-2-account' — SpaceX size LAG tren active_nav (gap ~2x) vs ZaloPay tren LAG_book (dung engine); tu 08-07 toi dung LAG_book cho CA 2, can Taylor/Mike xac nhan + soat lai phien truoc. (2) finding 'send-plan-report-khong-dung-duoc-sau-nua-dem' — send_plan_report.sh ban canh bao SAI khi job hoan tat sau 00:00 ICT, da gui report thu cong qua notify_thread.sh.
+
+## Archived 2026-08-11 (keep=12 days=0 require_done=False)
+- [2026-08-06T17:51:38Z] Plan 2026-08-07 (CẢ 2 account) = BẢN CHỐT job DollarBill_20260806_174551: CHỈ 1 lệnh MUA DRI (SpaceX 3500cp / ZaloPay 1800cp @LO 12.900), TV2 đã BỎ theo user, SSI đã gỡ từ job trước. L2 JIT đã tính lại (SpaceX bán PARK 40,79tr / ZaloPay 19,79tr, cả 2 FUNDED_BY_JIT). L1 giữ nguyên. ĐANG CHỜ USER DUYỆT (approved_by=null) — báo cáo đã gửi thread 1521183164364754974 lúc 00:50 ICT 08-07 bằng notify_thread.sh (send_plan_report.sh có bug ranh giới nửa đêm). NEXT: chờ user duyệt trước 08:45 preflight.
