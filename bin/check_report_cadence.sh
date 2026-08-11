@@ -223,16 +223,22 @@ for a in json.load(sys.stdin):
 
   if [ "$KIND" = "weekly" ]; then
     MODEL="sonnet"
+    EFFORT="medium"
     PROMPT="Soạn và GỬI báo cáo TUẦN trading cho 2 tài khoản SpaceX + ZaloPay, kỳ ${DESC} (thứ Hai-thứ Sáu, dữ liệu đã đầy đủ). File: ${TFILE}. Đây là auto-dispatch từ check_report_cadence.sh (báo cáo tuần bị bỏ sót, phát hiện tự động). Dùng đúng pipeline mike/kb/coding_guidelines.md §6 (verify_account_snapshot.py --account-no cho CẢ 2 account, đối chiếu nav_history_{account}.csv thật, không tự bịa số). Format/văn phong theo mẫu mike/reports/SpaceX_ZaloPay_weekly_report_2026-07-13_to_2026-07-17.md. Có gap/lỗi/residual chưa giải thích được thì NÓI RÕ trong báo cáo, đừng làm tròn. Gửi vào Discord Trading report topic (channel ${TRADING_REPORT_THREAD}). ${EMAIL_STEP} ${DELEGATE_STEP} Ghi bus finding khi xong: file path, NAV cuối kỳ 2 account, % biến động, gap/lỗi nếu có."
   else
     MODEL="opus"
+    EFFORT="high"
     PROMPT="Soạn và GỬI báo cáo THÁNG trading cho 2 tài khoản SpaceX + ZaloPay, kỳ ${DESC} (cả tháng). File: ${TFILE}. Đây là auto-dispatch từ check_report_cadence.sh (báo cáo tháng bị bỏ sót, phát hiện tự động). Áp dụng chuẩn mực báo cáo THÁNG theo mike/kb/coding_guidelines.md §6 (MTD/QTD/YTD, so với VNINDEX, attribution sector/mã, risk metrics DD/vol, phí/chi phí, outlook) — không chỉ lặp báo cáo tuần. Dùng đúng pipeline verify_account_snapshot.py --account-no + nav_history_{account}.csv thật. Có gap/lỗi/residual chưa giải thích được thì NÓI RÕ, đừng làm tròn. Gửi vào Discord Trading report topic (channel ${TRADING_REPORT_THREAD}). ${EMAIL_STEP} ${DELEGATE_STEP} Ghi bus finding khi xong."
   fi
   # `--thread "$TRADING_REPORT_THREAD"` tường minh — xem chú thích cùng ngày trong
   # daily_retro.sh (B1). Đúng topic mà chính PROMPT đã yêu cầu gửi báo cáo vào.
   # MODEL: tuần=sonnet (templated, không cần Opus), tháng=opus (attribution/outlook phức tạp
   # hơn) — chốt 2026-08-04 theo yêu cầu user tiết kiệm chi phí, xem thảo luận Discord cùng ngày.
-  "$ROOT/bin/dispatch.sh" Taylor "$PROMPT" --thread "$TRADING_REPORT_THREAD" --bg --model "$MODEL" --effort high --timeout 3600 2>&1 | tail -5
+  # EFFORT (thêm 2026-08-10, token-usage audit item #3): tách theo nhánh — trước đây cả 2 nhánh
+  # cùng --effort high dù comment ngay trên nói rõ nhánh tuần "templated, không cần Opus" (hạ
+  # model rồi nhưng quên xét lại effort, cùng dạng lệch đã tìm thấy ở Taylor interactive
+  # dispatch). Tuần=medium (templated), tháng=high (attribution/outlook thật sự phức tạp hơn).
+  "$ROOT/bin/dispatch.sh" Taylor "$PROMPT" --thread "$TRADING_REPORT_THREAD" --bg --model "$MODEL" --effort "$EFFORT" --timeout 3600 2>&1 | tail -5
 
   python3 -c "
 import json
