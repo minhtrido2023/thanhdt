@@ -209,6 +209,37 @@ if ! _eff_clamped="$("$ROOT/bin/cli_provider.sh" validate "$PROVIDER" "$id" "$MO
 fi
 [ -n "$_eff_clamped" ] && EFFORT="$_eff_clamped"
 EFFORT_FLAG="--effort $EFFORT"
+
+# Soft nudge, ĐỘNG theo lịch sử (2026-08-10, token-usage audit item #2). Khác nudge fable/
+# smoke-test (tĩnh, in mỗi lần) — nudge tĩnh cho effort=high sẽ bị lờn vì nhiều agent (Taylor)
+# CẦN high thường xuyên theo đúng vai trò (R&D). Chỉ nổi lên khi 10 dispatch gần nhất của
+# CHÍNH agent này đã ≥70% high VÀ lần này cũng high — cùng ngưỡng bin/spend_report.py's
+# "Effort-tier mix by agent" dùng để cảnh báo (giữ 1 con số duy nhất, không lệch 2 nơi).
+if [ "$EFFORT" = "high" ]; then
+  _eff_hist="$(python3 -c "
+import glob, json, os
+files = glob.glob('$ROOT/bus/jobs/${id}_*.json')
+rows = []
+for f in files:
+    try:
+        d = json.load(open(f))
+        rows.append((int(d.get('started_at', 0)), d.get('effort')))
+    except Exception:
+        continue
+rows.sort(key=lambda r: r[0], reverse=True)
+recent = rows[:10]
+n = len(recent)
+high = sum(1 for _, e in recent if e == 'high')
+if n >= 8 and high / n >= 0.7:
+    print(f'{high}/{n}')
+" 2>/dev/null)"
+  if [ -n "$_eff_hist" ]; then
+    echo "NOTE: '$id' đã --effort high trong $_eff_hist lần dispatch gần nhất — task NÀY thật sự" >&2
+    echo "  cần agent tự suy luận/lập kế hoạch nhiều bước MỚI, hay chỉ tiếp nối/xác nhận việc đã" >&2
+    echo "  rõ hướng (medium đủ)? Không chắc → medium (MIKE.md §Reasoning-effort per dispatch)." >&2
+  fi
+fi
+
 # Binary + env cua provider. `bin` da ap dung bin_env_override (DISPATCH_CLAUDE_BIN...) nen
 # bin/dispatch_discord_topic_selfcheck.sh van lai duoc dispatch qua stub (F11 arch-reviewer).
 CLI_BIN="$("$ROOT/bin/cli_provider.sh" bin "$PROVIDER")" || { echo "ERROR: khong phan giai duoc binary cua provider '$PROVIDER'." >&2; exit 1; }
