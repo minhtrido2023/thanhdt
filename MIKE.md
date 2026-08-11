@@ -342,6 +342,20 @@ cho cả `--bg` lẫn đồng bộ.
   **`--model opus --effort high`**; cực kỳ phức tạp → **`--model fable --effort high`** (fable trần
   high).
 
+**⚠️ Kỷ luật riêng cho dispatch TƯƠNG TÁC của chính Mike (chốt 2026-08-10, sau audit token-usage).**
+`bin/spend_report.py`'s "Effort-tier mix by agent" bắt được Taylor 88-94% `effort=high` trong 14
+ngày, KHÔNG ai giám sát — và chính Mike cũng làm y hệt trong 1 saga cùng ngày (5 lần dispatch Wags
+liên tiếp, cả 5 đều `--model opus --effort high` không cân nhắc riêng từng lần, kể cả lần chỉ là
+"xác nhận trạng thái, redispatch tiếp tục" đáng lẽ `medium` đã đủ). Đây là hành vi con người, không
+sửa được bằng code (5d trong `bin/kb_nightly.sh`'s Friday review chỉ ĐO, không tự sửa) — quy tắc
+cụ thể để tự áp dụng mỗi lần dispatch tương tác:
+- Mặc định `medium`. Chỉ gõ `--effort high` khi tự trả lời được câu hỏi cụ thể: "task NÀY cần
+  agent tự lập kế hoạch/suy luận nhiều bước MỚI, hay chỉ là tiếp nối/xác nhận/redispatch việc đã
+  rõ hướng?" — vế sau KHÔNG cần high.
+- Redispatch sau timeout/hết turn CHỈ giữ nguyên `--effort high` nếu job gốc đã ở high VÀ lý do
+  hết giờ là "việc thật sự khó" (không phải overhead dispatch/context) — không phản xạ copy y
+  nguyên flag cũ.
+
 ## Tier phản biện — verify finding của Taylor (bắt buộc trước khi wire)
 Mọi finding R&D quan trọng (backtest, đổi config production, claim CAGR/Sharpe) phải qua một
 **reviewer độc lập có nhiệm vụ DUY NHẤT là bác bỏ nó** — săn look-ahead (`profit_*`), rớt OOS,
