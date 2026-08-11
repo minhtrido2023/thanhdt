@@ -60,3 +60,6 @@
 
 ## Archived 2026-08-11 (keep=12 days=0 require_done=False)
 - [2026-08-06T11:11:02Z] [2026-08-06T11:1x] XONG job DollarBill_20260806_110843: da them muc WATCH nganh cao su vao kb/context_planning_mini.md (dong 312-343, +33 dong, khong dung phan nao khac). Nguong: RSS3 thung 2,26 USD/kg -> phai danh gia lai luan diem PEAD nhom GVR/PHR/DPR/DRI/TRC/HRC truoc khi cap them von LAG. Doi chieu TAY tu data/rubber_monthly.csv, KHONG dung nhan '52 tuan' cua rubber_weekly.py (bug do luong chua sua). DRI GIU NGUYEN trong hang doi LAG. LUU Y plan 08-07: PHR (LAG_HI) toi han, DCF RICH MoS -24.7% -> nhieu kha nang SKIP_NEEDS_OVERRIDE.
+
+## Archived 2026-08-11 (keep=12 days=0 require_done=False)
+- [2026-08-06T17:35:00Z] [2026-08-07T00:35 ICT] XONG job DollarBill_20260806_172217: plan_SpaceX/ZaloPay_2026-08-07.json da thay SSI bang DRI+TV2 (override user), L2 JIT tinh lai FUNDED_BY_JIT ca 2, report da gui Discord plan thread. CHO USER DUYET truoc 08:45 ICT hom nay. | 2 VIEC MO CAN NGUOI: (1) finding 'lag-sizing-basis-lech-2-account' — SpaceX size LAG tren active_nav (gap ~2x) vs ZaloPay tren LAG_book (dung engine); tu 08-07 toi dung LAG_book cho CA 2, can Taylor/Mike xac nhan + soat lai phien truoc. (2) finding 'send-plan-report-khong-dung-duoc-sau-nua-dem' — send_plan_report.sh ban canh bao SAI khi job hoan tat sau 00:00 ICT, da gui report thu cong qua notify_thread.sh.
