@@ -140,6 +140,16 @@ report (daily/weekly/monthly, or any client-facing artifact):
    (`--margin-rate-annual`, 12.5%/yr per user, unverified against DNSE's contract) before calling
    it "unexplained."
 4. Can't trace a number through this pipeline → don't put it in the report, say what's missing.
+5. **Gửi email — BẮT BUỘC cho MỌI cadence (daily/weekly/monthly), không chỉ weekly/monthly**
+   (mở rộng 2026-08-11, user yêu cầu sau vụ NAV ZaloPay/park-trim — email là cách user tự đối
+   soát để phát hiện + báo lỗi kịp thời, không chỉ dựa vào Discord đã có sẵn): sau khi post
+   Discord xong, chạy `python3 mike/bin/send_report_email.py <report.md>` cho ĐÚNG file vừa gửi.
+   Script tự fail-closed nếu cổng tỉ suất §21 chưa PASS hoặc thiếu credential — đừng `--skip-
+   return-gate` trừ khi đã hiểu rõ vì sao gate lệch. Backstop nếu agent quên bước này:
+   `check_report_cadence.sh` (cron 08:30 ICT) quét lại MỌI report `*_daily_report_*.md` /
+   `*_weekly_report_*.md` / `*_monthly_report_*.md` chưa từng gửi qua `state/report_emailed.json`
+   và tự gửi bù — nhưng đó là lưới AN TOÀN trễ tới hôm sau, không thay được việc gửi ngay lúc
+   soạn xong report.
 
 **Bright-line rule — same-day data: DNSE API, never BigQuery (user directive, 2026-07-09).** BQ
 (`tav2_bq.ticker`/`ticker_1m`) syncs overnight only (`sync_bq_cache_daily.sh`, 23:45 ICT) — a
