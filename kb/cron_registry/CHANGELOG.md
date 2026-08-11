@@ -21,6 +21,11 @@ preserve_verbatim: >
 
 # Log thay đổi Cron Registry
 
+- 2026-08-11 (Mike, user mandate): cron 16:00 ICT `paper_programs_daily_report.sh` thêm cờ
+  `--email`, vẫn giữ `--post` để Discord và email dùng cùng một lần render. Wrapper lưu artifact
+  `reports/paper_programs_daily_report_YYYY-MM-DD.md`, gửi HTML + file Markdown đính kèm qua
+  Gmail SMTP hiện có. Không thêm cron, không ảnh hưởng papertrade pipeline hay giao dịch.
+
 - 2026-08-01 (Mike, việc #3 đã duyệt trong review kiến trúc fleet — nghiên cứu Paseo + phản biện
   Fable-plan/Opus-critique, 2026-07-31→08-01): thêm dòng `TZ=Asia/Ho_Chi_Minh` làm biến môi trường
   TOÀN CỤC ở đầu crontab (sau dòng `PATH=`, trước mọi job) — 4 câu hỏi §11: (1) đọc gì+vintage —

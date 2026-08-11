@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# paper_programs_daily_report.sh [--post] [--date YYYY-MM-DD]
+# paper_programs_daily_report.sh [--post] [--email] [--date YYYY-MM-DD]
 # Báo cáo paper-trading hợp nhất hàng ngày (registry-driven, xem paper_programs_daily_report.py).
 # Mặc định in ra stdout. --post = gửi vào Discord topic "Trading report" (tên registry: trading_report)
-# qua notify_thread.sh (tự chunk <2000 chars).
+# qua notify_thread.sh (tự chunk <2000 chars). --email lưu đúng artifact Markdown đã render
+# vào reports/ rồi gửi nó qua Gmail SMTP (HTML body + .md attachment).
 # Luôn exit 0 khi render được report (kể cả có sleeve lỗi) — chỉ exit ≠0 khi python chết hẳn.
 set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -10,9 +11,14 @@ export TZ="Asia/Ho_Chi_Minh"
 
 TRADING_REPORT_TOPIC="trading_report"
 POST=0
+EMAIL=0
 ARGS=()
 for a in "$@"; do
-  if [ "$a" = "--post" ]; then POST=1; else ARGS+=("$a"); fi
+  case "$a" in
+    --post) POST=1 ;;
+    --email) EMAIL=1 ;;
+    *) ARGS+=("$a") ;;
+  esac
 done
 
 report="$(python3 "$ROOT/bin/paper_programs_daily_report.py" ${ARGS[@]+"${ARGS[@]}"} 2>&1)" || {
@@ -26,4 +32,23 @@ ${report:0:800}
 echo "$report"
 if [ "$POST" = "1" ]; then
   "$ROOT/bin/notify_thread.sh" "$report" "$TRADING_REPORT_TOPIC"
+fi
+
+if [ "$EMAIL" = "1" ]; then
+  REPORT_DATE="$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)"
+  for ((i=0; i<${#ARGS[@]}; i++)); do
+    if [ "${ARGS[i]}" = "--date" ] && [ $((i + 1)) -lt ${#ARGS[@]} ]; then
+      REPORT_DATE="${ARGS[i + 1]}"
+    fi
+  done
+  REPORT_FILE="$ROOT/reports/paper_programs_daily_report_${REPORT_DATE}.md"
+  tmp="$(mktemp "$ROOT/reports/.paper_programs_daily_report_${REPORT_DATE}.XXXXXX")"
+  printf '%s\n' "$report" > "$tmp"
+  mv "$tmp" "$REPORT_FILE"
+
+  # Cổng tỉ suất chỉ áp dụng báo cáo NAV/vị thế broker. Paper report không công bố các tỉ suất
+  # đó; bỏ qua có nêu lý do tường minh để email không bị chặn oan.
+  "$ROOT/bin/send_report_email.py" "$REPORT_FILE" \
+    --subject "[Paper Trading] Daily Report — ${REPORT_DATE}" \
+    --skip-return-gate "Paper-program report khong cong bo ty suat vi the broker"
 fi
