@@ -611,3 +611,19 @@ một dòng vào bảng, đó là cách rule này không mốc.
 
 *→ `agents/Taylor/research/active_nav_cash_basis_fix_20260810.md` (bản vá + 26 selfcheck + đối
 soát độc lập khớp từng đồng, quant-skeptic CONFIRMED cao vòng 1).*
+
+## 26. Đóng Câu Hỏi Trên Bus NGAY Khi Xử Lý Xong — Theo `~/.claude/skills/close-the-loop/`
+
+Khi hành động của bạn giải quyết một `question` trên bus (fix xong, quyết định xong, điều tra ra
+kết luận) — post event đóng (`answer`/`decision`/`finding` phù hợp) **NGAY**, đúng topic string,
+kèm bằng chứng artifact (commit hash, giá trị config đọc lại, output selfcheck thật) — không đợi
+cuối phiên. Đọc `~/.claude/skills/close-the-loop/SKILL.md` trước khi sửa/vận hành bất kỳ
+checker/pipeline escalation nào (autofix, health-check, weekly audit). 2 lỗi khác nhau cho cùng
+1 triệu chứng "báo động treo nhiều ngày dù việc đã xong": (A) người xử lý quên đóng — kỷ luật, có
+backstop là auto-close-bằng-artifact trước khi escalate; (B) chính pipeline verify tra topic
+SAI cách (match tuyệt đối trong khi producer luôn thêm hậu tố tự do vào topic) → "không tìm
+thấy" bị lẫn vào cùng nhánh code với "tìm thấy và cần sửa", sinh `NEEDS_CHANGES` giả mỗi ngày.
+Case thật + cách phân biệt A/B/review-thật: xem skill. Bug B cụ thể đã xác định trong
+`bin/wags_autofix.sh` (`has-event ... "finding:wags-fix: $LABEL"` khớp tuyệt đối, trong khi Wags
+luôn ghi topic có hậu tố tự do) — vá theo hướng dẫn của Wags, chưa merge tại thời điểm ghi dòng
+này.
