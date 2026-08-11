@@ -508,6 +508,62 @@ def case_triaged_only_no_false_ok():
         shutil.rmtree(root, ignore_errors=True)
 
 
+# ── Ca 14 (Wags coord-2026-08-11): ack kèm `suppress_days` phủ CẢ lần cron phát lại cùng
+#    topic; mọi đường lỗi/hết hạn phải rơi về hành vi cũ (vẫn routable = fail-closed).
+def case_ack_suppress_days_window():
+    root, inbox = mkbus()
+    try:
+        # 4 câu hỏi CÙNG phát lại 3h trước, mỗi cái 1 kiểu ack đăng TRƯỚC đó.
+        write_events(os.path.join(inbox, "Mike.jsonl"),
+                     [ev("Mike", "question", "tai-phat-co-window", ago(0, 3)),
+                      ev("Mike", "question", "tai-phat-khong-window", ago(0, 3)),
+                      ev("Mike", "question", "tai-phat-window-het-han", ago(0, 3)),
+                      ev("Mike", "question", "tai-phat-window-rac", ago(0, 3))])
+        def ack(topic, ago_ts, payload):
+            e = ev("Wags", "status", f"triaged-needs-human: {topic}", ago_ts)
+            e["payload"] = payload
+            return e
+        write_events(os.path.join(inbox, "Wags.jsonl"),
+                     [ack("tai-phat-co-window", ago(2), {"suppress_days": 7}),
+                      ack("tai-phat-khong-window", ago(2), {}),
+                      ack("tai-phat-window-het-han", ago(5), {"suppress_days": 1}),
+                      ack("tai-phat-window-rac", ago(2), {"suppress_days": "bay-ngay"})])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        human = joined([ln for ln in lines if "ĐÃ TRIAGE, chờ NGƯỜI quyết" in ln])
+        pending = joined([ln for ln in lines if "trong 48h qua CHƯA thấy answer" in ln])
+        check("suppress_days=7: câu hỏi cron phát lại SAU ack vẫn được tắt dispatch",
+              "tai-phat-co-window" in human and "tai-phat-co-window" not in pending, out)
+        check("suppress_days=7: câu hỏi VẪN hiện trong báo cáo (không đóng/giấu)",
+              "tai-phat-co-window" in out, out)
+        check("không khai suppress_days: giữ nguyên hành vi cũ (vẫn routable)",
+              "tai-phat-khong-window" in pending, out)
+        check("suppress_days đã hết hạn: quay lại routable, ack không vĩnh viễn",
+              "tai-phat-window-het-han" in pending, out)
+        check("suppress_days không phải số: fail-closed về cửa sổ 0 (vẫn routable)",
+              "tai-phat-window-rac" in pending, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 15: trần ACK_MAX_SUPPRESS_DAYS — ack không được tắt dispatch quá hạn trần.
+def case_ack_suppress_days_capped():
+    root, inbox = mkbus()
+    try:
+        write_events(os.path.join(inbox, "Mike.jsonl"),
+                     [ev("Mike", "question", "window-vo-han", ago(0, 3))])
+        e = ev("Wags", "status", "triaged-needs-human: window-vo-han", ago(20))
+        e["payload"] = {"suppress_days": 9999}
+        write_events(os.path.join(inbox, "Wags.jsonl"), [e])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        pending = joined([ln for ln in lines if "trong 48h qua CHƯA thấy answer" in ln])
+        check("suppress_days khổng lồ bị cắt trần: ack 20 ngày trước KHÔNG còn tắt dispatch",
+              "window-vo-han" in pending, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
 def main():
     print("ops_health_check_selfcheck: check #5 (backlog question) + check #10 (notify_thread) "
           "+ khối DELIVER (Discord→Telegram) regression")
@@ -518,6 +574,7 @@ def main():
                case_fresh_question_is_pending,
                case_wagsfix_not_confirmed_is_warn_only, case_wagsfix_only_no_false_ok,
                case_triaged_needs_human_ack, case_triaged_only_no_false_ok,
+               case_ack_suppress_days_window, case_ack_suppress_days_capped,
                case_c10_no_file_is_ok, case_c10_fresh_log_warns,
                case_c10_fresh_log_without_timestamp_line, case_c10_old_log_is_ok,
                case_deliver_discord_ok_no_telegram,

@@ -271,7 +271,18 @@ WARN_ONLY = "[WARN-ONLY]"
 # CHỈ tắt auto-dispatch, KHÔNG đóng câu hỏi (không đụng resolvers/_resolved), KHÔNG giấu khỏi
 # báo cáo — chỉ chuyển dòng WARN sang [WARN-ONLY] để người vẫn thấy. Fail-closed: không có ack
 # → hành vi y hệt trước. Không cần hạn dùng: quá 48h câu hỏi tự sang aged_q (cũng WARN_ONLY).
+# Bổ sung 2026-08-11 (Wags coord-2026-08-11) — ack CÓ CỬA SỔ cho topic TÁI PHÁT:
+# ack mặc định chỉ ăn cho ĐÚNG instance câu hỏi đã có lúc triage (a_ts >= q_ts). Với topic do
+# CRON tự sinh lại y nguyên mỗi đêm (ca thật: Mike/context-bloat-same-day — kb_nightly Phase
+# 4.6 phát lại 08-01, 08-05, 08-10 cho CÙNG một quyết định người chưa trả lời; Wags đã triage
+# 08-06 kết luận "cần user chọn A/B"), mỗi lần phát lại sinh 1 câu hỏi ts MỚI hơn ack ⇒ ack
+# hết tác dụng ⇒ đốt thêm 1 job wags_autofix để kết luận lại y hệt. Ack có thể khai
+# `"suppress_days": N` trong payload để phủ CẢ các lần phát lại CÙNG TOPIC trong N ngày.
+# Ràng buộc giữ nguyên tinh thần cũ: (a) chỉ tắt auto-dispatch, câu hỏi VẪN in [WARN-ONLY];
+# (b) fail-closed — payload không đọc được / N không phải số / N<=0 ⇒ cửa sổ 0 = hành vi cũ;
+# (c) cắt trần ACK_MAX_SUPPRESS_DAYS để không có ack nào tắt dispatch vĩnh viễn.
 ACK_PREFIX = "triaged-needs-human:"
+ACK_MAX_SUPPRESS_DAYS = 14
 inbox_dir = os.path.join(wc_root, "mike", "bus", "inbox")
 pending_q = []
 pending_q_wagsfix = []   # xem chú thích ở khối "if pending_q_wagsfix" phía dưới
@@ -339,7 +350,7 @@ if os.path.isdir(inbox_dir):
     # sẵn sàng của account tiền thật biến mất khỏi check #5. Fix: required_change #1 của
     # arch-reviewer, NEEDS_CHANGES coord-2026-07-30.
     resolvers = []
-    acks = []                # (topic_câu_hỏi_được_ack, ts) — xem ACK_PREFIX
+    acks = []                # (topic_câu_hỏi_được_ack, hạn_ack) — xem ACK_PREFIX
     # HINT-ONLY (Wags coord-2026-08-03): ngoài resolver ĐÚNG quy ước, gom thêm MỌI
     # finding/answer/decision (kèm agent + ts) để GỢI Ý "có thể đã đóng nhưng sai quy ước".
     # KHÔNG dùng để đóng câu hỏi — chỉ in thêm 1 dòng [WARN-ONLY] cho người/Wags triage
@@ -358,7 +369,23 @@ if os.path.isdir(inbox_dir):
                     a_ts = dt.datetime.fromisoformat(rec.get("ts", "").replace("Z", "+00:00"))
                 except Exception:
                     continue   # fail-closed: ack không đọc được ts thì KHÔNG tắt dispatch
-                acks.append((rec["topic"][len(ACK_PREFIX):].strip(), a_ts))
+                # Cửa sổ phủ các lần CRON phát lại cùng topic (xem ACK_MAX_SUPPRESS_DAYS).
+                # Mọi đường lỗi đều rơi về 0 ngày = hành vi cũ (chỉ phủ instance đã có).
+                _pl = rec.get("payload")
+                if isinstance(_pl, str):
+                    try:
+                        _pl = json.loads(_pl)
+                    except Exception:
+                        _pl = {}
+                _sd = 0
+                if isinstance(_pl, dict):
+                    try:
+                        _sd = int(_pl.get("suppress_days") or 0)
+                    except Exception:
+                        _sd = 0
+                _sd = max(0, min(_sd, ACK_MAX_SUPPRESS_DAYS))
+                acks.append((rec["topic"][len(ACK_PREFIX):].strip(),
+                             a_ts + dt.timedelta(days=_sd)))
                 continue
             if etype in ("answer", "decision", "finding"):
                 t = rec.get("topic")
@@ -387,8 +414,10 @@ if os.path.isdir(inbox_dir):
         # (đúng chuỗi checker in ra) để người copy thẳng từ báo cáo.
         if not q_topic:
             return False
+        # `a_until` = ts ack + suppress_days (mặc định 0 ⇒ đúng điều kiện cũ "ack đăng SAU
+        # câu hỏi"); >0 phủ thêm các lần cron phát lại CÙNG topic trong cửa sổ đó.
         want = (q_topic, f"{q_agent}/{q_topic}")
-        return any(a in want and a_ts >= q_ts for a, a_ts in acks)
+        return any(a in want and a_until >= q_ts for a, a_until in acks)
     seen_q = set()
     for p in files:
         agent = _agent_of(p)
