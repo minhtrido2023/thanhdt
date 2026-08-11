@@ -639,3 +639,29 @@ luôn ghi topic có hậu tố tự do) — **ĐÃ VÁ 2026-08-11**: `mike_json.
 mới, `has-event` giữ nguyên semantics tuyệt đối cho 3 caller cũ) + tách `INCONCLUSIVE` khỏi
 `NEEDS_CHANGES` thành 2 question khác nhau + `bin/wags_bus_verdict.py` lấy verdict từ artifact bus
 thay vì stdout. Luật cho người viết checker: `kb/ops_runbook.md` § "Checker TRA CỨU sai".
+
+## 27. "Lệnh Đã Đặt" ≠ "Lệnh Đã Khớp" — Đối Soát Fill Thật Trước Khi Báo "Đã Đạt Target", Theo `~/.claude/skills/dnse-fill-reconciliation/`
+
+Trước khi khẳng định 1 lệnh/plan "đã thực thi", "đã mua đủ", "đã đạt X% NAV" — đọc
+`~/.claude/skills/dnse-fill-reconciliation/SKILL.md`. Đọc số lượng trong `orders[]` của plan rồi
+nhân giá để suy ra tỷ trọng là **suy luận trên Ý ĐỊNH, không phải KẾT QUẢ** — với mã thanh khoản
+mỏng (UPCOM, ADV vài tỷ/ngày trở xuống), khoảng cách giữa 2 số có thể là toàn bộ lệnh.
+
+**Case thật (2026-08-11)**: Mike báo "TV1 đã đạt ~5% NAV cả 2 account" dựa trên số lượng ĐẶT trong
+plan đã duyệt. Đối soát bằng email "Báo cáo giao dịch khớp lệnh" DNSE tự gửi (~16:30 ICT, broker-
+issued, độc lập hoàn toàn với `dnse_raw_*.jsonl`) lộ ra: DRI khớp đủ đúng kế hoạch cả 2 account,
+nhưng TV1 chỉ khớp **100/2.000cp (SpaceX)** và **0/1.300cp (ZaloPay)** — do ADV quá mỏng
+(~0,6 tỷ/ngày) không hấp thụ hết lô trong 1 phiên. Không phải bug (giá/trần đều đúng) — thị trường
+đơn giản không đủ đối ứng.
+
+**Công cụ**: `fetch_dnse_khoplenh_email.py` (root WorkingClaude, dùng chung Gmail OAuth readonly
+có sẵn cho auto-OTP) tải + parse email này thành CSV khớp lệnh sạch theo từng account/mã. Nguồn
+ghi ở `kb/data_registry/trading-bot/dnse_khoplenh_broker_email.md`. Email chỉ có sau ~16:30 ICT —
+báo cáo trong-phiên/cùng ngày trước giờ đó vẫn phải đọc `positions` mới nhất trong
+`dnse_raw_<date>.jsonl` (không đợi được email).
+
+**KHÔNG thay thế pipeline §6 đã chốt** (`verify_account_snapshot.py`/`daily_nav_snapshot.py`/
+`reconcile_equity.py` vẫn CANONICAL cho cost-basis) — đây là lớp đối soát ĐỘC LẬP thêm vào, giá trị
+chính là nó đi qua đường dữ liệu khác (backend DNSE tự phát hành, không phải API client của mình)
+nên bắt được lỗi ở CẢ HAI phía. Fold vào pipeline sinh report tự động là thay đổi lớn hơn — qua
+Taylor + quant-skeptic review trước khi coi là đã wire, như mọi thay đổi khác chạm pipeline §6.
