@@ -1648,7 +1648,7 @@ def main():
     # the record that made the board lie on 08-09 — so the trap must STOP it, then stamp.
     print("\nO. dispatch.sh sync trap kills the worker BEFORE it closes the record")
     rc_o, worker_o, status_o, _err_o = run_sync_kill_trap(tmp)
-    check("trap fired and closed the record", status_o in ("failed", None) and status_o == "failed",
+    check("trap delegates to safe cancel and closes the record", status_o == "cancelled",
           "status=%s" % status_o)
     check("the setsid'd worker is DEAD, not orphaned into the repo", worker_o is not None
           and not alive(worker_o), "worker=%s" % worker_o)
