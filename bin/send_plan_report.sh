@@ -163,15 +163,38 @@ if plan_account and plan_account != acct:
              f"{acct!r} — plan có thể bị lẫn giữa 2 account.")
     sys.exit(0)
 
+# So TRẠNG THÁI (số nguyên 0-4), KHÔNG so `state_source` (Wags 2026-08-11).
+# `state_source` là prose TỰ DO do bên sinh plan viết — cùng một nguồn được ghi ít nhất 2
+# cách khác nhau ('DT5G_macro' và 'deploy_golive_dt5g_v4/golive_state_today.json (…qua
+# get_gated_state)'), và bản chú thêm provenance ('DT5G_macro (…, published_at …)') so bằng
+# `!=` với 'DT5G_macro' luôn ra LỆCH. Kết quả: gate báo động giả, CHẶN việc gửi plan, nên
+# user không nhận được plan để duyệt → sáng hôm sau bot từ chối chạy (đã cắn 08-07 và
+# 08-10/11: 30 lệnh lỡ phiên). Cùng lớp lỗi với 2026-07-15 MAFEE_NOT_AUTH — check fail cứng
+# trên field không có schema thì mọi lần đúng đều thành RED giả; fix đúng là sửa CHECKER cho
+# khớp tín hiệu THẬT. `state` là int có nghĩa xác định, đúng thứ "plan sinh từ state cũ"
+# muốn bắt: plan dựng trên regime khác regime DT5G hôm nay. Chặt hơn bản cũ chứ không lỏng
+# hơn — bản cũ so nhãn nên KHÔNG BAO GIỜ bắt được lệch state thật.
+def _as_state_int(v):
+    if isinstance(v, bool):
+        return None
+    if isinstance(v, int):
+        return v
+    if isinstance(v, str) and v.strip().lstrip("-").isdigit():
+        return int(v.strip())
+    return None
+
 try:
     with open("deploy_golive_dt5g_v4/golive_state_today.json") as f:
         golive = json.load(f)
-    plan_src = plan.get("state_source")
-    golive_src = golive.get("source")
-    if plan_src and golive_src and plan_src != golive_src:
-        escalate("plan_state_source_mismatch",
-                 f"{plan_file}: state_source={plan_src!r} nhưng golive_state_today.json (nguồn "
-                 f"DT5G thật hôm nay) nói {golive_src!r} — plan có thể được sinh từ state cũ.")
+    plan_state = _as_state_int(plan.get("state"))
+    golive_state = _as_state_int(golive.get("state"))
+    # Thiếu/không phải số ở bất kỳ vế nào → BỎ QUA assert, không chặn (fail-open có chủ đích:
+    # đây là gate phụ, gate approval ở executor mới là lớp chặn tiền thật).
+    if plan_state is not None and golive_state is not None and plan_state != golive_state:
+        escalate("plan_state_mismatch",
+                 f"{plan_file}: state={plan_state} nhưng golive_state_today.json (nguồn DT5G "
+                 f"thật hôm nay, as_of={golive.get('as_of')!r}) nói state={golive_state} — plan "
+                 f"có thể được sinh từ state cũ.")
         sys.exit(0)
 except FileNotFoundError:
     pass  # không phải nguồn bắt buộc; thiếu file thì bỏ qua assert này, không chặn plan
