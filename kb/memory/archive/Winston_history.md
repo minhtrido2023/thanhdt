@@ -55,3 +55,6 @@
 
 ## Archived 2026-08-11 (keep=12 days=0 require_done=False)
 - [2026-07-30T14:18:16Z] OKF canonical.md (job Winston_20260730_141312): BUOC 1 XONG — ket luan KHONG tach (canonical.md la digest cua KNOWLEDGE.md, tach = tang thu 3; da co bang chung troi so). Bao cao: mike/agents/Winston/okf_canonical_assessment_20260730.md. CHO Mike tra loi Q1/Q2/Q3 (co duyet phuong an B trim tai cho ~2KB khong). Chua sua file production nao.
+
+## Archived 2026-08-11 (keep=12 days=0 require_done=False)
+- [2026-08-01T08:18:29Z] Xong ops-autofix 08-01 15:2x (job Winston_20260801_081056): sua bug gate _draft_valid trong daily_retro.sh (^## -> ^#{1,2}, commit 68757b7e) — gate chua tung chay prod, dem nay 00:30 la lan dau. NEXT: sang 08-02 kiem kb/incidents/retro/retro-2026-08-01.md co duoc tao khong = xac nhan ca 2 fix (77cfe4ab quoting + 68757b7e gate) that su thong pipeline. CON TREO can user: backfill RETRO 07-30 + 07-31.
