@@ -4,7 +4,7 @@ title: Incidents — Mike fleet (sổ postmortem, cấu trúc OKF)
 owner: Mike fleet (mọi agent ghi; daily_retro.sh ghi entry RETRO hằng đêm)
 format: OKF (Open Knowledge Format) — markdown + YAML frontmatter, 1 sự cố = 1 file
 migrated_from: kb/INCIDENTS.md (single-file 408KB, migrate → OKF 2026-07-30 job Winston_20260730_144031)
-entries: 97 file (68 sự cố + 28 RETRO + 1 mục open-items chung)
+entries: 99 file (69 sự cố + 29 RETRO + 1 mục open-items chung)
 ---
 
 # Incidents — Mike fleet
@@ -77,6 +77,8 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Sự cố | status |
 |---|---|---|
+| 2026-08-10 | [2026-08/2026-08-10-funding-gate-multipackage-shared-pot-false-block.md](2026-08/2026-08-10-funding-gate-multipackage-shared-pot-false-block.md) | ? |
+| 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
 | 2026-08-10 | [2026-08-10: FUNDING gate chặn oan plan ZaloPay đã duyệt — cộng tỉ lệ tiêu thụ của 2 gói vay DÙNG CHUNG một hũ tiền (cash-only) ⇒ báo 105,6% trong khi thật là 54,6%; mất cửa sổ LAG ngày 3/3 của DRI/POW/SCL](2026-08/2026-08-10-funding-gate-multipackage-shared-pot-false-block.md) | escalated (chưa vá — nới gate tiền thật, cần user/Taylor + quant-skeptic) |
 | 2026-08-07 | [2026-08/2026-08-07-plan-rewrite-drops-user-approval.md](2026-08/2026-08-07-plan-rewrite-drops-user-approval.md) | ? |
 | 2026-08-07 | [2026-08/2026-08-07-plan-merge-left-stale-jit-orders-double-sell.md](2026-08/2026-08-07-plan-merge-left-stale-jit-orders-double-sell.md) | ? |
