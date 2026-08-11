@@ -525,6 +525,18 @@ src_vn = " (nguồn DT5G đầy đủ)" if src == "DT5G_macro" else (f" (nguồn
 nav_str = f"{nav:,.0f}đ" if isinstance(nav, (int, float)) else "n/a"
 lines.append(f"🧭 Thị trường: {state}{src_vn} · NAV cơ sở: {nav_str}")
 
+# DT4-gate candidate streak clock — đã wire vào eod_trading_report.sh (2026-07-10) nhưng
+# CHƯA vào plan T+1 report này (khoảng trống user phát hiện 2026-08-11). Tái dùng
+# build_dt_gate_line() của dna_report.py (KHÔNG re-implement, §2/§3) — cùng 1 hàm, cùng
+# cache 5', chỉ khác điểm gọi. Fail-safe: lỗi BQ/import → bỏ dòng, không chặn report.
+try:
+    from dna_report import build_dt_gate_line
+    _dt_line = build_dt_gate_line(html=False)
+    if _dt_line:
+        lines.append("🛰️ " + _dt_line)
+except Exception:
+    pass
+
 # Transition context nếu có (ZaloPay Option A)
 tsched = plan.get("transition_schedule") or []
 tday = next((t for t in tsched if t.get("date") == date), None)
