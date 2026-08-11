@@ -121,66 +121,6 @@
       }
     },
     {
-      "id": "vol_scale_chase_cap",
-      "name": "Vol-scale buy chase-cap (patch#3)",
-      "owner": "Taylor",
-      "reporting": false,
-      "reporting_reason": "ĐÃ KẾT THÚC PAPER (2026-08-04): mọi gate có thể quyết trên paper đã chốt, user sign-off + quant-skeptic đã có. Việc còn lại là thao tác interactive để bật live; theo dõi ở handoff, không lặp trong báo cáo paper hằng ngày.",
-      "objective": "Nới trần đuổi mua theo realised vol 20d (clamp(k·rvol, static, ceil), k=2.0/ceil=0.04, monotone-safe, fail-safe về static) có wiring đúng trên quote thật không? (executor-path stress đã PASS 15/15)",
-      "start": "2026-07-01",
-      "end": null,
-      "end_or_trigger": "10 phiên EVIDENCE (executor chạy thật trên paper main) từ phiên thật đầu tiên 2026-07-07 → ước ~2026-07-20. Mốc cũ 2026-07-14 bỏ — 07-01→07-06 flag bật nhưng 0 phiên executor = 0 evidence, không đếm.",
-      "progress": {
-        "mode": "evidence_sessions",
-        "account": "main",
-        "target_sessions": 10,
-        "count_from": "2026-07-07"
-      },
-      "gate_criteria": [
-        {
-          "text": "Executor-path stress 15/15 PASS (wiring · WIDEN clamp-to-ceil · MONOTONE · fail-safe rvol absent/0/<0 · NEG-control)",
-          "status": "pass",
-          "note": "stress_vol_scale_chase_cap.py — CHẠY LẠI 2026-08-04 trên code hiện tại: RESULT PASS (14 assert: config wiring 4, WIDEN 2, MONOTONE 1, FAIL-SAFE 3, LIMIT-PRICE 2, NEG-control live 2). Lần chạy này đi THẬT qua nhánh fail-safe ('no chunks → fail-safe')."
-        },
-        {
-          "text": "Paper sạch: wiring đúng trên quote thật + fail-safe khi thiếu rvol cache",
-          "status": "pass",
-          "note": "Đo 2026-08-04 trên 80 lệnh BUY THẬT / 13 phiên executor paper main (07-07→07-27). rvol_20d nạp thành công 80/80 (0 lần rơi fail-safe) → wiring sống trên quote thật; trần nới luôn nằm trong [static 1,5%; ceil 4,0%], max chase quan sát +1,95% < ceil. Trần THỰC SỰ chạm 3/80 lệnh (2 lệnh bị clip đúng vol-cap, 1 lệnh cross ở ask nằm giữa static-cap và vol-cap). CAVEAT: nhánh fail-safe khi THIẾU rvol cache chưa từng xảy ra trên paper (cache luôn đủ) — bằng chứng đến từ stress harness chạy qua Executor thật, không phải từ 1 phiên paper."
-        },
-        {
-          "text": "Không can thiệp NORMAL-path ngày non-gap",
-          "status": "pass",
-          "note": "Cô lập code: `_buy_chase_pct` chỉ có ĐÚNG 1 call-site (executor.py:426, nhánh BUY của _limit_price) — sell-path/dip-cross/gap-adaptive không chạm. Đo thực nghiệm: 77/80 lệnh (96,3%) giá đặt GIỐNG HỆT chân static; 3 lệnh lệch: MBB 07-07 +50đ (+0,19% vs giá static), HDB 07-07 +50đ (+0,18%), ACB 07-16 +150đ (+0,64%). Cả 3 rơi vào phiên mã chạy +1,77%..+2,81% TRONG PHIÊN (gap mở cửa +0,37%/−0,37%/−0,65% → không phải ngày gap-up mở cửa). Không có ca nào lệch trong ngày giá nằm gọn trong ±1,5%. ⚠️ Đọc chữ 'ngày non-gap' theo NGHĨA ĐEN thì 3 ca này là lệch — chờ user phân xử ở cổng sign-off."
-        },
-        {
-          "text": "Skeptic rerun REAL-fill vs min(open,L) proxy trên correlated gap-up @NAV target — RE-SCOPED 2026-08-04 (user PHƯƠNG ÁN A)",
-          "status": "re-scoped",
-          "note": "RE-SCOPED, KHÔNG phải pass. User (John) chốt 2026-08-04 phương án A: chấp nhận KHÔNG đo được real-fill-vs-proxy bằng paper. Nguyên văn: 'Vol-scale vì là bước bảo hiểm rẻ tiền, tôi đồng ý chọn A cho go-live.' | LÝ DO KHÔNG ĐO ĐƯỢC (đo 2026-08-04, job Taylor_20260804_091700): (1) PaperBroker mô phỏng fill ĐÚNG BẰNG giá limit đã đặt (80/80 lệnh, sai lệch 0/80) → paper KHÔNG BAO GIỜ sinh ra fill thật để so với proxy min(open,L), đây là sai công cụ đo chứ không phải thiếu thời gian; (2) quy mô probe paper gross ~343tr/phiên vs NAV target 50 tỷ ≈ 0,7% → không kiểm được size-impact (đúng chỗ quant-skeptic gọi killer objection); (3) base-rate sáng gap-up TƯƠNG QUAN RỘNG (≥50% rổ 6 mã open > prev_close×1,015) = 10/642 phiên 2024-01→2026-08 = 1,56% (~1 lần/64 phiên ≈ 3 tháng), cửa sổ 20 phiên evidence có 0 lần. | RỦI RO CÒN TREO ĐƯỢC CHẤP NHẬN TƯỜNG MINH: size-impact ở quy mô NAV 50 tỷ chưa từng được kiểm. Giảm nhẹ (không xoá): NAV live thực tế 2026-08-04 = SpaceX 965tr + ZaloPay 907tr ≈ 1,9% NAV target 50 tỷ, tức quy mô lệnh live hiện tại CÙNG BẬC với quy mô paper đã đo (paper_init_cash 1 tỷ) — regime chưa kiểm (50 tỷ) KHÔNG phải regime đang deploy hôm nay. Nếu NAV tiến gần 50 tỷ thì phải mở lại câu hỏi này."
-        },
-        {
-          "text": "User sign-off trước khi bật live",
-          "status": "pass",
-          "note": "2026-08-04 (job Taylor_20260804_124404): user John sign-off phương án A cho go-live ('Vol-scale vì là bước bảo hiểm rẻ tiền, tôi đồng ý chọn A cho go-live'). quant-skeptic verify quyết định re-scope gate 4 + đề xuất flip live: **CONFIRMED / confidence high** (log mike/logs/verify_20260804_124744.log) — independent recompute khớp: base-rate gap-up 10/642=1,5576%, NAV live SpaceX/ZaloPay ~1,8-1,9% NAV target 50B, 5 script chạy lại ALL-PASS, và skeptic tự xác minh trong brokers.py::_try_fill rằng PaperBroker khớp đúng giá đặt (⇒ gate 4 đúng là RE-SCOPE, không phải PASS). 3 recommended_reruns đã ghi nhận: (i) mở lại gate 4 khi NAV live tiến gần 50B / gross lệnh vượt ~343tr/phiên, (ii) verify lại cờ hiệu lực của account RocketX (enabled=false) TRƯỚC khi cho nó giao dịch, (iii) xử lý netting nội bộ probe harness."
-        }
-      ],
-      "probe": {
-        "type": "journal_scan",
-        "account": "main",
-        "markers": []
-      },
-      "data_sources": [
-        "data/execution_logs/exec_main_*_journal.csv",
-        "secrets/trading_bot_accounts.json (chase_cap_vol_scale_enabled=true, chỉ paper main)",
-        "stress_vol_scale_chase_cap.py"
-      ],
-      "notes": "Cap-widen KHÔNG có marker riêng trong journal (áp silent trong _buy_chase_pct) — đo qua stress script + so limit price ngày gap-up; cần phiên executor paper + ngày gap mới có evidence tự động. Từ 2026-07-07: probe harness chạy paper main mỗi ngày (6 BUY/phiên trên quote thật — xem entry extreme_regime cho cron). | 2026-08-04 (job Taylor_20260804_091700): kiểm checkpoint bằng dữ liệu thật — báo cáo mike/agents/Taylor/research/vol_scale_chase_cap_checkpoint_20260804.md. Từ 2026-07-28 probe harness netting nội bộ (INTERNAL_ONLY/NETTED) nên 0 lệnh BUY tới executor → luồng evidence dừng. | 2026-08-04 (job Taylor_20260804_124404): user chốt phương án A → gate 4 re-scoped, chương trình paper ĐÓNG (luồng evidence paper main đã chết từ 07-28 do netting nội bộ, và kể cả sống lại cũng không đóng được gate 4). Bước kế: quant-skeptic verify rồi mới flip chase_cap_vol_scale_enabled ở live.",
-      "review_short": "2026-08-04 (job Taylor_20260804_124404): ĐỦ ĐIỀU KIỆN GO-LIVE — user sign-off phương án A + quant-skeptic CONFIRMED high. Gate 4 RE-SCOPED (paper không sinh được fill thật), rủi ro size-impact @50B chấp nhận treo (NAV live ~1,9% mức đó). ⚠️ CỜ LIVE CHƯA ĐƯỢC BẬT: thao tác sửa trading_bot/config.py bị auto-mode classifier chặn trong phiên headless (đúng thiết kế). Patch 4 file đã dựng sẵn + verify PASS dưới flip mô phỏng: mike/agents/Taylor/pending_live_flip_chase_cap_20260804/ — cần 1 phiên interactive `git apply`.",
-      "today_activity": {
-        "mode": "journal",
-        "account": "main"
-      }
-    },
-    {
       "id": "fill_timing",
       "name": "Fill-timing window (BUY 10:45-11:15 / SELL 09:15-09:45)",
       "owner": "Taylor",
@@ -251,6 +191,116 @@
           "note": "431 sự kiện lỗi này TOÀN BỘ thuộc 1 ngày 2026-07-30 (sự cố A: PaperBroker.place_order thiếu tham số cash_only → mọi lệnh paper-main crash), đã fix + verify cùng ngày; 0 lỗi trong journal 2026-07-31. Đây là số LŨY KẾ từ 2026-06-26 nên còn hiện cho tới khi cửa sổ trượt qua. Chi tiết: mike/kb/incidents/2026-07/2026-07-30-paper-trading-report-3-root-causes.md"
         }
       ]
+    },
+    {
+      "id": "vol_scale_chase_cap",
+      "name": "Vol-scale buy chase-cap (patch#3)",
+      "owner": "Taylor",
+      "reporting": false,
+      "reporting_reason": "ĐÃ KẾT THÚC PAPER (2026-08-04): mọi gate có thể quyết trên paper đã chốt, user sign-off + quant-skeptic đã có. Việc còn lại là thao tác interactive để bật live; theo dõi ở handoff, không lặp trong báo cáo paper hằng ngày.",
+      "objective": "Nới trần đuổi mua theo realised vol 20d (clamp(k·rvol, static, ceil), k=2.0/ceil=0.04, monotone-safe, fail-safe về static) có wiring đúng trên quote thật không? (executor-path stress đã PASS 15/15)",
+      "start": "2026-07-01",
+      "end": null,
+      "end_or_trigger": "10 phiên EVIDENCE (executor chạy thật trên paper main) từ phiên thật đầu tiên 2026-07-07 → ước ~2026-07-20. Mốc cũ 2026-07-14 bỏ — 07-01→07-06 flag bật nhưng 0 phiên executor = 0 evidence, không đếm.",
+      "progress": {
+        "mode": "evidence_sessions",
+        "account": "main",
+        "target_sessions": 10,
+        "count_from": "2026-07-07"
+      },
+      "gate_criteria": [
+        {
+          "text": "Executor-path stress 15/15 PASS (wiring · WIDEN clamp-to-ceil · MONOTONE · fail-safe rvol absent/0/<0 · NEG-control)",
+          "status": "pass",
+          "note": "stress_vol_scale_chase_cap.py — CHẠY LẠI 2026-08-04 trên code hiện tại: RESULT PASS (14 assert: config wiring 4, WIDEN 2, MONOTONE 1, FAIL-SAFE 3, LIMIT-PRICE 2, NEG-control live 2). Lần chạy này đi THẬT qua nhánh fail-safe ('no chunks → fail-safe')."
+        },
+        {
+          "text": "Paper sạch: wiring đúng trên quote thật + fail-safe khi thiếu rvol cache",
+          "status": "pass",
+          "note": "Đo 2026-08-04 trên 80 lệnh BUY THẬT / 13 phiên executor paper main (07-07→07-27). rvol_20d nạp thành công 80/80 (0 lần rơi fail-safe) → wiring sống trên quote thật; trần nới luôn nằm trong [static 1,5%; ceil 4,0%], max chase quan sát +1,95% < ceil. Trần THỰC SỰ chạm 3/80 lệnh (2 lệnh bị clip đúng vol-cap, 1 lệnh cross ở ask nằm giữa static-cap và vol-cap). CAVEAT: nhánh fail-safe khi THIẾU rvol cache chưa từng xảy ra trên paper (cache luôn đủ) — bằng chứng đến từ stress harness chạy qua Executor thật, không phải từ 1 phiên paper."
+        },
+        {
+          "text": "Không can thiệp NORMAL-path ngày non-gap",
+          "status": "pass",
+          "note": "Cô lập code: `_buy_chase_pct` chỉ có ĐÚNG 1 call-site (executor.py:426, nhánh BUY của _limit_price) — sell-path/dip-cross/gap-adaptive không chạm. Đo thực nghiệm: 77/80 lệnh (96,3%) giá đặt GIỐNG HỆT chân static; 3 lệnh lệch: MBB 07-07 +50đ (+0,19% vs giá static), HDB 07-07 +50đ (+0,18%), ACB 07-16 +150đ (+0,64%). Cả 3 rơi vào phiên mã chạy +1,77%..+2,81% TRONG PHIÊN (gap mở cửa +0,37%/−0,37%/−0,65% → không phải ngày gap-up mở cửa). Không có ca nào lệch trong ngày giá nằm gọn trong ±1,5%. ⚠️ Đọc chữ 'ngày non-gap' theo NGHĨA ĐEN thì 3 ca này là lệch — chờ user phân xử ở cổng sign-off."
+        },
+        {
+          "text": "Skeptic rerun REAL-fill vs min(open,L) proxy trên correlated gap-up @NAV target — RE-SCOPED 2026-08-04 (user PHƯƠNG ÁN A)",
+          "status": "re-scoped",
+          "note": "RE-SCOPED, KHÔNG phải pass. User (John) chốt 2026-08-04 phương án A: chấp nhận KHÔNG đo được real-fill-vs-proxy bằng paper. Nguyên văn: 'Vol-scale vì là bước bảo hiểm rẻ tiền, tôi đồng ý chọn A cho go-live.' | LÝ DO KHÔNG ĐO ĐƯỢC (đo 2026-08-04, job Taylor_20260804_091700): (1) PaperBroker mô phỏng fill ĐÚNG BẰNG giá limit đã đặt (80/80 lệnh, sai lệch 0/80) → paper KHÔNG BAO GIỜ sinh ra fill thật để so với proxy min(open,L), đây là sai công cụ đo chứ không phải thiếu thời gian; (2) quy mô probe paper gross ~343tr/phiên vs NAV target 50 tỷ ≈ 0,7% → không kiểm được size-impact (đúng chỗ quant-skeptic gọi killer objection); (3) base-rate sáng gap-up TƯƠNG QUAN RỘNG (≥50% rổ 6 mã open > prev_close×1,015) = 10/642 phiên 2024-01→2026-08 = 1,56% (~1 lần/64 phiên ≈ 3 tháng), cửa sổ 20 phiên evidence có 0 lần. | RỦI RO CÒN TREO ĐƯỢC CHẤP NHẬN TƯỜNG MINH: size-impact ở quy mô NAV 50 tỷ chưa từng được kiểm. Giảm nhẹ (không xoá): NAV live thực tế 2026-08-04 = SpaceX 965tr + ZaloPay 907tr ≈ 1,9% NAV target 50 tỷ, tức quy mô lệnh live hiện tại CÙNG BẬC với quy mô paper đã đo (paper_init_cash 1 tỷ) — regime chưa kiểm (50 tỷ) KHÔNG phải regime đang deploy hôm nay. Nếu NAV tiến gần 50 tỷ thì phải mở lại câu hỏi này."
+        },
+        {
+          "text": "User sign-off trước khi bật live",
+          "status": "pass",
+          "note": "2026-08-04 (job Taylor_20260804_124404): user John sign-off phương án A cho go-live ('Vol-scale vì là bước bảo hiểm rẻ tiền, tôi đồng ý chọn A cho go-live'). quant-skeptic verify quyết định re-scope gate 4 + đề xuất flip live: **CONFIRMED / confidence high** (log mike/logs/verify_20260804_124744.log) — independent recompute khớp: base-rate gap-up 10/642=1,5576%, NAV live SpaceX/ZaloPay ~1,8-1,9% NAV target 50B, 5 script chạy lại ALL-PASS, và skeptic tự xác minh trong brokers.py::_try_fill rằng PaperBroker khớp đúng giá đặt (⇒ gate 4 đúng là RE-SCOPE, không phải PASS). 3 recommended_reruns đã ghi nhận: (i) mở lại gate 4 khi NAV live tiến gần 50B / gross lệnh vượt ~343tr/phiên, (ii) verify lại cờ hiệu lực của account RocketX (enabled=false) TRƯỚC khi cho nó giao dịch, (iii) xử lý netting nội bộ probe harness."
+        }
+      ],
+      "probe": {
+        "type": "journal_scan",
+        "account": "main",
+        "markers": []
+      },
+      "data_sources": [
+        "data/execution_logs/exec_main_*_journal.csv",
+        "secrets/trading_bot_accounts.json (chase_cap_vol_scale_enabled=true, chỉ paper main)",
+        "stress_vol_scale_chase_cap.py"
+      ],
+      "notes": "Cap-widen KHÔNG có marker riêng trong journal (áp silent trong _buy_chase_pct) — đo qua stress script + so limit price ngày gap-up; cần phiên executor paper + ngày gap mới có evidence tự động. Từ 2026-07-07: probe harness chạy paper main mỗi ngày (6 BUY/phiên trên quote thật — xem entry extreme_regime cho cron). | 2026-08-04 (job Taylor_20260804_091700): kiểm checkpoint bằng dữ liệu thật — báo cáo mike/agents/Taylor/research/vol_scale_chase_cap_checkpoint_20260804.md. Từ 2026-07-28 probe harness netting nội bộ (INTERNAL_ONLY/NETTED) nên 0 lệnh BUY tới executor → luồng evidence dừng. | 2026-08-04 (job Taylor_20260804_124404): user chốt phương án A → gate 4 re-scoped, chương trình paper ĐÓNG (luồng evidence paper main đã chết từ 07-28 do netting nội bộ, và kể cả sống lại cũng không đóng được gate 4). Bước kế: quant-skeptic verify rồi mới flip chase_cap_vol_scale_enabled ở live.",
+      "review_short": "2026-08-04 (job Taylor_20260804_124404): ĐỦ ĐIỀU KIỆN GO-LIVE — user sign-off phương án A + quant-skeptic CONFIRMED high. Gate 4 RE-SCOPED (paper không sinh được fill thật), rủi ro size-impact @50B chấp nhận treo (NAV live ~1,9% mức đó). ⚠️ CỜ LIVE CHƯA ĐƯỢC BẬT: thao tác sửa trading_bot/config.py bị auto-mode classifier chặn trong phiên headless (đúng thiết kế). Patch 4 file đã dựng sẵn + verify PASS dưới flip mô phỏng: mike/agents/Taylor/pending_live_flip_chase_cap_20260804/ — cần 1 phiên interactive `git apply`.",
+      "today_activity": {
+        "mode": "journal",
+        "account": "main"
+      }
+    },
+    {
+      "id": "capitulation_shadow",
+      "name": "Capitulation-sleeve shadow (DT5G × 8L washout)",
+      "owner": "Taylor",
+      "objective": "Sleeve dự trữ 50B nằm CASH, deploy vào rổ 8L quality+golden khi có tín hiệu washout (rule v2 2026-06-10, crisis_playbook.md §0b/§1), giữ 60 phiên rồi về cash — forward NAV là bằng chứng OOS cho overlay khi có khủng hoảng thật. Point-in-time: basket FREEZE tại ngày signal, không hindsight.",
+      "start": "2026-06-10",
+      "end": null,
+      "end_or_trigger": "EVENT-DRIVEN — đánh giá sau sự kiện washout THẬT đầu tiên (đến nay chưa có: mode CASH liên tục). Không có deadline lịch; sleeve rẻ, chạy chờ event.",
+      "gate_criteria": [
+        {
+          "text": "Sự kiện washout đầu tiên được xử lý đúng point-in-time (basket freeze tại signal date, entry price log đủ)",
+          "status": "pending"
+        },
+        {
+          "text": "Fwd NAV sleeve qua trọn chu kỳ deploy→60 phiên→cash beat cash (kỳ vọng nghiên cứu: fwd60 +7%/81% winrate vùng WASHED-OUT)",
+          "status": "pending"
+        },
+        {
+          "text": "Audit độc lập sau event trước khi cân nhắc wire overlay live",
+          "status": "pending"
+        }
+      ],
+      "probe": {
+        "type": "command",
+        "cmd": [
+          "python3",
+          "-c",
+          "import json; s=json.load(open('data/pt_capitulation_state.json')); print(f\"asof {s['last_date']} | mode {s['mode']} | NAV {s['nav']/1e9:.2f}B | tier {s['tier']} | entry {s['entry_date']} | basket {len(s['basket'])} mã\")"
+        ],
+        "timeout": 30,
+        "max_chars": 400
+      },
+      "data_sources": [
+        "data/pt_capitulation_state.json",
+        "data/pt_capitulation_logs.csv + baskets.csv (pt_capitulation_shadow.py, papertrade_daily.sh)"
+      ],
+      "notes": "crisis_alert_push.py (cùng pipeline 15:30) là CÒI Telegram của cùng signal — chỉ kêu khi WATCH/STRONG, im lặng ngày thường → là alert vận hành, KHÔNG phải report trùng, giữ nguyên. VINTAGE: pt_capitulation_shadow.py query BQ LIVE (ticker_prune + dt5g_live), mà BQ chưa có close phiên T lúc 15:30 → last_date LUÔN = T-1. Đây là SÀN CẤU TRÚC, không phải stale: muốn asof=T phải chờ ingest ~17:30 / sync 23:45, tức dời report sang tối hoặc sáng hôm sau.",
+      "review_short": "EVENT-DRIVEN: sau sự kiện washout THẬT đầu tiên (chưa có deadline lịch)",
+      "today_activity": {
+        "mode": "csv_row",
+        "path": "data/pt_capitulation_logs.csv",
+        "date_col": "date",
+        "zero_when": {
+          "col": "n_holdings",
+          "unchanged_vs_prev": true
+        },
+        "template": "mode {mode} · {n_holdings:.0f} mã · {note}",
+        "lag_days": 1
+      }
     },
     {
       "id": "alphalens",
@@ -344,61 +394,9 @@
       }
     },
     {
-      "id": "capitulation_shadow",
-      "name": "Capitulation-sleeve shadow (DT5G × 8L washout)",
-      "owner": "Taylor",
-      "objective": "Sleeve dự trữ 50B nằm CASH, deploy vào rổ 8L quality+golden khi có tín hiệu washout (rule v2 2026-06-10, crisis_playbook.md §0b/§1), giữ 60 phiên rồi về cash — forward NAV là bằng chứng OOS cho overlay khi có khủng hoảng thật. Point-in-time: basket FREEZE tại ngày signal, không hindsight.",
-      "start": "2026-06-10",
-      "end": null,
-      "end_or_trigger": "EVENT-DRIVEN — đánh giá sau sự kiện washout THẬT đầu tiên (đến nay chưa có: mode CASH liên tục). Không có deadline lịch; sleeve rẻ, chạy chờ event.",
-      "gate_criteria": [
-        {
-          "text": "Sự kiện washout đầu tiên được xử lý đúng point-in-time (basket freeze tại signal date, entry price log đủ)",
-          "status": "pending"
-        },
-        {
-          "text": "Fwd NAV sleeve qua trọn chu kỳ deploy→60 phiên→cash beat cash (kỳ vọng nghiên cứu: fwd60 +7%/81% winrate vùng WASHED-OUT)",
-          "status": "pending"
-        },
-        {
-          "text": "Audit độc lập sau event trước khi cân nhắc wire overlay live",
-          "status": "pending"
-        }
-      ],
-      "probe": {
-        "type": "command",
-        "cmd": [
-          "python3",
-          "-c",
-          "import json; s=json.load(open('data/pt_capitulation_state.json')); print(f\"asof {s['last_date']} | mode {s['mode']} | NAV {s['nav']/1e9:.2f}B | tier {s['tier']} | entry {s['entry_date']} | basket {len(s['basket'])} mã\")"
-        ],
-        "timeout": 30,
-        "max_chars": 400
-      },
-      "data_sources": [
-        "data/pt_capitulation_state.json",
-        "data/pt_capitulation_logs.csv + baskets.csv (pt_capitulation_shadow.py, papertrade_daily.sh)"
-      ],
-      "notes": "crisis_alert_push.py (cùng pipeline 15:30) là CÒI Telegram của cùng signal — chỉ kêu khi WATCH/STRONG, im lặng ngày thường → là alert vận hành, KHÔNG phải report trùng, giữ nguyên. VINTAGE: pt_capitulation_shadow.py query BQ LIVE (ticker_prune + dt5g_live), mà BQ chưa có close phiên T lúc 15:30 → last_date LUÔN = T-1. Đây là SÀN CẤU TRÚC, không phải stale: muốn asof=T phải chờ ingest ~17:30 / sync 23:45, tức dời report sang tối hoặc sáng hôm sau.",
-      "review_short": "EVENT-DRIVEN: sau sự kiện washout THẬT đầu tiên (chưa có deadline lịch)",
-      "today_activity": {
-        "mode": "csv_row",
-        "path": "data/pt_capitulation_logs.csv",
-        "date_col": "date",
-        "zero_when": {
-          "col": "n_holdings",
-          "unchanged_vs_prev": true
-        },
-        "template": "mode {mode} · {n_holdings:.0f} mã · {note}",
-        "lag_days": 1
-      }
-    },
-    {
       "id": "engine_room_oos",
       "name": "Engine-room OOS panel (V11/V12/V4 vs V2.3-book vs VNINDEX)",
       "owner": "Taylor",
-      "reporting": false,
-      "reporting_reason": "TÁI PHÂN LOẠI (2026-08-11): đây là panel validation/ops cho V2.3 production signal book, không phải paper-trial có giao dịch và gate ngắn hạn. Vẫn chạy và được review 2026-12-01; không đưa vào báo cáo paper-trading hằng ngày.",
       "objective": "V2.3-book (NGUỒN TÍN HIỆU của live V2.4 — trading_bot/strategies.py đọc pt_v22_dt5g_open_positions.csv để build plan thật) có tiếp tục thắng các kiến trúc BỊ LOẠI (V11 Song Sinh, V12 Âm Dương, V4 switched-allocator) trên OOS forward không? = validation liên tục của lựa chọn V2.4. Nếu một hệ bị loại dominate BỀN risk-adjusted → mở lại câu hỏi rotation (qua quant-skeptic + DSR/PBO, không tự wire).",
       "start": "2026-06-11",
       "end": null,
