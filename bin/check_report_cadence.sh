@@ -35,11 +35,17 @@ EMAILED_STATE="$ROOT/state/report_emailed.json"
 [ -f "$EMAILED_STATE" ] || echo '{}' > "$EMAILED_STATE"
 
 # --- Catch-up email sweep: gửi MỌI report chưa từng gửi qua email, bất kể vừa tạo lần này
-#     hay đã có từ trước (backfill). Idempotent qua $EMAILED_STATE, không phụ thuộc Taylor
-#     có nhớ gọi bước gửi email trong prompt của lần dispatch hay không.
-for f in "$ROOT"/reports/*_weekly_report_*.md "$ROOT"/reports/*_monthly_report_*.md; do
+#     hay đã có từ trước (backfill). Idempotent qua $EMAILED_STATE, không phụ thuộc Taylor/
+#     DollarBill có nhớ gọi bước gửi email trong prompt của lần dispatch hay không.
+#     Mở rộng *_daily_report_*.md 2026-08-11 (coding_guidelines.md §6 mục 5, user yêu cầu):
+#     trước đó chỉ quét weekly/monthly — daily report (vd SpaceX_ZaloPay_daily_report_*.md) hoàn
+#     toàn không có lưới an toàn nào, chỉ tin dispatch prompt nhớ gọi send_report_email.py.
+for f in "$ROOT"/reports/*_daily_report_*.md "$ROOT"/reports/*_weekly_report_*.md "$ROOT"/reports/*_monthly_report_*.md; do
   [ -e "$f" ] || continue
   FNAME="$(basename "$f")"
+  # paper_programs_daily_report_*.md đã có cron+state EMAIL riêng (paper_programs_daily_report.sh
+  # --email, state/paper_programs_report_emailed.json) — bỏ qua ở đây để KHÔNG gửi trùng 2 email.
+  case "$FNAME" in paper_programs_daily_report_*.md) continue ;; esac
   ALREADY="$(python3 -c "
 import json
 state = json.load(open('$EMAILED_STATE'))
