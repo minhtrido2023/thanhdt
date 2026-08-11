@@ -57,3 +57,6 @@
 
 ## Archived 2026-08-10 (keep=12 days=0 require_done=False)
 - [2026-08-06T08:19:35Z] Da xong review canh bao cao su (job DollarBill_20260806_081312): 0 vi the cao su ca 2 account; DRI defer vi thieu cash; GVR bi gate DCF chan; PHR toi han 08-07 (plan mai se gap). Canh bao '52w low' la ARTIFACT (chuoi thuc chi 6.6 tuan) — da bao bus, de xuat GIU NGUYEN DRI. CHO: Taylor base-rate RSS3 + quyet dinh user ve WATCH note. LUU Y khi lap plan 08-07: PHR (LAG_HI, DCF RICH MoS -24.7%) toi han.
+
+## Archived 2026-08-11 (keep=12 days=0 require_done=False)
+- [2026-08-06T11:11:02Z] [2026-08-06T11:1x] XONG job DollarBill_20260806_110843: da them muc WATCH nganh cao su vao kb/context_planning_mini.md (dong 312-343, +33 dong, khong dung phan nao khac). Nguong: RSS3 thung 2,26 USD/kg -> phai danh gia lai luan diem PEAD nhom GVR/PHR/DPR/DRI/TRC/HRC truoc khi cap them von LAG. Doi chieu TAY tu data/rubber_monthly.csv, KHONG dung nhan '52 tuan' cua rubber_weekly.py (bug do luong chua sua). DRI GIU NGUYEN trong hang doi LAG. LUU Y plan 08-07: PHR (LAG_HI) toi han, DCF RICH MoS -24.7% -> nhieu kha nang SKIP_NEEDS_OVERRIDE.
