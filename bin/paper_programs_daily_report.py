@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Paper Programs Daily Report — báo cáo hợp nhất MỌI chương trình paper-trading active.
+"""Paper Programs Daily Report — báo cáo hợp nhất các paper-trial đang cần theo dõi.
 
-Registry-driven: danh sách chương trình ở mike/kb/paper_programs_registry.json — thêm sleeve
-mới = thêm entry, không sửa code này.
+Registry-driven: danh sách chương trình ở mike/kb/paper_programs_registry.json. Entry có
+`reporting: false` vẫn được lưu để audit/vận hành, nhưng không lặp lại trong báo cáo ngày.
 
 Cấu trúc báo cáo (redesign 2026-07-31, chuẩn báo cáo đầu tư: executive summary → chi tiết →
 methodology tách riêng):
@@ -663,12 +663,16 @@ def main():
     write_state = (args.date is None or args.force_state) and not args.no_state
 
     state = load_state()
-    sections, reg_version, programs = [], "?", []
+    sections, reg_version, programs, excluded = [], "?", [], []
     err = None
     try:
         with open(args.registry, encoding="utf-8") as f:
             reg = json.load(f)
-        programs = reg.get("programs", [])
+        all_programs = reg.get("programs", [])
+        # Không xóa entry đã hoàn tất hoặc đã tái phân loại: registry vẫn là audit trail.
+        # Chỉ các paper-trial còn cần quan sát hằng ngày mới vào báo cáo này.
+        programs = [p for p in all_programs if p.get("reporting", True)]
+        excluded = [p for p in all_programs if not p.get("reporting", True)]
         reg_version = reg.get("version", "?")
         if not programs:
             err = "⚠️ Registry đọc được nhưng không có chương trình nào (`programs` rỗng)."
@@ -690,8 +694,12 @@ def main():
     reds = [(i, s) for i, s in enumerate(sections, 1) if s["badge"] == "red"]
     watches = [(i, s) for i, s in enumerate(sections, 1) if s["badge"] == "watch"]
     out = [f"📋 **Paper Programs Daily Report — {today}**",
-           f"Render {now.strftime('%H:%M')} ICT · registry v{reg_version} · {len(sections)} chương "
-           f"trình · *vintage dữ liệu xem `asof`/nguồn từng mục (BQ chưa có close phiên T lúc 16:00)*"]
+           f"Render {now.strftime('%H:%M')} ICT · registry v{reg_version} · {len(sections)} paper-trial đang theo dõi "
+           f"· *vintage dữ liệu xem `asof`/nguồn từng mục (BQ chưa có close phiên T lúc 16:00)*"]
+    if excluded:
+        out.append("ℹ️ **Đã chuyển khỏi báo cáo ngày**: "
+                   + " · ".join(p.get("name", p.get("id", "?")) for p in excluded)
+                   + ". Dữ liệu/cron không bị xóa; xem registry để biết lý do và mốc review.")
     if reds:
         out.append("🔴 **CẦN CHÚ Ý NGAY** (" + str(len(reds)) + "): "
                    + " · ".join(f"#{i} {s['name']}" for i, s in reds))
@@ -703,7 +711,7 @@ def main():
     if err:
         out.append(err)
     if sections:
-        out += ["", "**TỔNG QUAN** — badge · chương trình · số hôm nay · giao dịch hôm nay:"]
+        out += ["", "**TỔNG QUAN** — trạng thái · paper-trial · chỉ số mới nhất · giao dịch hôm nay:"]
         out += [_one_liner(i, s) for i, s in enumerate(sections, 1)]
     for s in sections:
         out += ["", s["text"]]
@@ -712,7 +720,8 @@ def main():
             "📎 *Badge: 🔴 RED = probe lỗi / cảnh báo chưa được giải thích / có gate FAIL · "
             "⏳ WATCH = có cảnh báo đã giải thích hoặc thiếu khai báo giao dịch · ✅ GREEN = còn lại. "
             f"Mục đích + phương pháp + tiêu chí nghiệm thu đầy đủ: `{CHARTER_REL}/<id>.md` "
-            "(tự sinh từ registry). Gate chỉ in đầy đủ khi có thay đổi — trạng thái so sánh lưu ở "
+            "(tự sinh từ registry). Mục hoàn tất hoặc thuộc vận hành được giữ trong registry nhưng không lặp ở đây. "
+            "Gate chỉ in đầy đủ khi có thay đổi — trạng thái so sánh lưu ở "
             "`data/paper_report_state.json`.*",
             "⚠️ *PAPER TRADING — không phải tiền thật; toàn bộ số liệu là mô phỏng/quan sát, "
             "không phải khuyến nghị đầu tư. Số không trace được về file nguồn = n/a.*"]

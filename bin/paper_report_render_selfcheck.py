@@ -150,6 +150,19 @@ def main():
     check("phiên lỗi toàn tập → badge RED", "🔴 RED" in sec["outage"], sec["outage"][:120])
     check("header liệt kê chương trình RED", "**CẦN CHÚ Ý NGAY**" in out and "outage" in out.split("\n")[2])
 
+    print("== A2. Phạm vi báo cáo ==")
+    reg_scope = {"version": "t", "programs": [
+        prog("shown"),
+        prog("completed", name="completed trial", reporting=False,
+             reporting_reason="đã hoàn tất"),
+    ]}
+    out, _ = run_report(m, root, reg_scope, D, ["--no-state"])
+    check("entry reporting=false không render section hoặc tổng quan",
+          "**1) shown**" in out and "**2) completed trial**" not in out
+          and "**completed trial** —" not in out, out[:900])
+    check("entry reporting=false được công khai là đã chuyển khỏi báo cáo",
+          "Đã chuyển khỏi báo cáo ngày" in out and "completed trial" in out, out[:500])
+
     print("== B. Cảnh báo có ngữ cảnh mức độ ==")
     warn_cmd = ["python3", "-c", "print('journal FAIL/ERROR events: 431')"]
     reg = {"version": "t", "programs": [
