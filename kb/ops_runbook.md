@@ -185,6 +185,18 @@ kiểm lại thì cả 2 đều là `NEEDS_CHANGES` có bằng chứng — vẫn
   quyết`. Fail-closed: không ack (hoặc ack sai topic/sai thứ tự thời gian) → dispatch như cũ.
   Không cần hạn dùng: quá 48h câu hỏi tự sang nhánh TREO LÂU (cũng WARN-ONLY). Khoá bằng
   regression ca 12–13 trong `bin/ops_health_check_selfcheck.py` (2 mutation độc lập đều đỏ).
+  - **`suppress_days` cho topic TÁI PHÁT** (Wags 2026-08-11): ack mặc định chỉ phủ ĐÚNG
+    instance câu hỏi đang có. Topic do CRON tự phát lại y nguyên mỗi đêm sinh câu hỏi ts MỚI
+    hơn ack ⇒ ack hết tác dụng ⇒ đốt thêm 1 job `wags_autofix` để kết luận lại y hệt (ca thật:
+    `Mike/context-bloat-same-day` phát lại 08-01 → 08-05 → 08-10 cho CÙNG một quyết định A/B
+    Wags đã triage 08-06 mà người chưa trả lời). Khai `{"suppress_days": N}` trong payload ack
+    để phủ cả các lần phát lại CÙNG topic trong N ngày:
+    `append_event.sh Wags status "triaged-needs-human:<topic>" '{"suppress_days":7,"note":"..."}'`.
+    Trần cứng `ACK_MAX_SUPPRESS_DAYS = 14` (không ack nào tắt dispatch vĩnh viễn); payload
+    hỏng / N không phải số / N≤0 / hết cửa sổ → rơi về cửa sổ 0 = hành vi cũ (fail-closed).
+    Vẫn **chỉ tắt auto-dispatch**, câu hỏi vẫn in `[WARN-ONLY]`. Khoá bằng ca 14–15 selfcheck.
+    `bin/bus_question_audit.py` (báo cáo TUẦN) CỐ Ý không biết tới ack — nó liệt kê mọi câu hỏi
+    chưa có resolver, nên ack không làm backlog biến mất khỏi kênh audit.
   - **Ngoại lệ "self-ack tại nguồn" — ĐIỀU KIỆN NGẶT** (Wags 2026-08-06, arch-reviewer
     NEEDS_CHANGES high coord-2026-08-05): một script alert được phép TỰ ack câu hỏi nó tự
     phát **chỉ khi** (a) chính nó dispatch owner đi xử lý, VÀ (b) dispatch trả về **thành
