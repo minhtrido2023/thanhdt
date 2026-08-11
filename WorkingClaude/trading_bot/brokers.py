@@ -483,6 +483,17 @@ class DNSEBroker(BrokerBase):
             # chéo, không thay thế close_price làm nguồn giá chính (bug VHM 2026-08-05).
             market_price = _fnum(qget(p, "marketprice", default=None))
             if sym and total > 0:
+                # DNSE trả một dòng cho MỖI deal/loan package, nên cùng mã có thể xuất hiện
+                # nhiều lần. Ghi đè dòng trước làm mất đúng giá trị các deal cũ khi tính NAV
+                # (ZaloPay 2026-08-11: BID/MBB/VCB thiếu 24,01tr). API public của broker là
+                # vị thế TỔNG theo mã, vì vậy phải cộng gộp quantity và sellable; marketPrice
+                # là giá mark chung, giữ giá mới nhất khác-None để caller vẫn cross-check CA.
+                prev = out.get(sym)
+                if prev:
+                    total += prev["total"]
+                    sellable += prev["sellable"]
+                    if market_price is None:
+                        market_price = prev.get("marketPrice")
                 out[sym] = {"total": total, "sellable": sellable, "marketPrice": market_price}
         return out
 

@@ -302,6 +302,14 @@ def build_dt_gate_line(html=True):
     cn = STATE_MAP.get(c["cand"], ("?",))[0]
     comm = STATE_MAP.get(c["committed"], ("?",))[0]
     left = c["need"] - c["k"]
+    progress = c["k"] / c["need"] if c["need"] else 0.0
+    # Chỉ là cảnh báo tiến độ confirm, không phải dự báo hay lệnh front-run.
+    if progress >= 0.85:
+        badge, level = "🔴", "CHÚ Ý CAO"
+    elif progress >= 0.70:
+        badge, level = "🟡", "THEO DÕI"
+    else:
+        badge, level = "🟢", "BÌNH THƯỜNG"
     base = ""
     if c["p"] is not None:
         base = f" · P(commit|k={c['k']})≈{c['p']*100:.0f}%"
@@ -309,7 +317,8 @@ def build_dt_gate_line(html=True):
             ntxt = f", n={c['n']}" if c["n"] is not None else ""
             base += f" [{c['lo']*100:.0f}–{c['hi']*100:.0f}%{ntxt}]"
     thin = " ⚠ mẫu mỏng, tham khảo" if c["thin"] else ""
-    return (f"Gate DT4: ⏳ candidate {B(cn)} {c['k']}/{c['need']} (còn {left} phiên để commit, "
+    return (f"Gate DT4: {badge} {level} · candidate {B(cn)} {c['k']}/{c['need']} "
+            f"({progress:.0%}, còn {left} phiên để commit, "
             f"base giữ từ {c['start']}, committed {comm}){base}{thin}  {asof}")
 
 
