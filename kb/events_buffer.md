@@ -1223,3 +1223,25 @@
 - [2026-08-11T13:01:52Z] DollarBill/heartbeat — DollarBill_20260811_124702: {"status": "in_progress", "note": "chay reconcile_equity.py 2 account"}
 - [2026-08-11T12:13:08Z] Mafee/status — eod-trading-report: {"account": "ZaloPay", "plan_date": "2026-08-11", "delivered_via": "trading_report_thread"}
 - [2026-08-11T12:17:05Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-08-11", "delivered_via": "trading_report_thread"}
+
+## Consolidation 2026-08-11T14:07:01Z
+- [2026-08-11T13:49:28Z] DollarBill/heartbeat — DollarBill_20260811_134911: {"status": "in_progress", "note": "resuming session, checking current state of pipeline outputs"}
+- [2026-08-11T13:50:12Z] DollarBill/heartbeat — DollarBill_20260811_134911: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260811_134911", "source": "watcher"}
+- [2026-08-11T13:51:12Z] DollarBill/heartbeat — DollarBill_20260811_134911: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20260811_134911", "source": "watcher"}
+- [2026-08-11T13:52:13Z] DollarBill/heartbeat — DollarBill_20260811_134911: {"status": "still_running", "elapsed_min": 3, "job_id": "DollarBill_20260811_134911", "source": "watcher"}
+- [2026-08-11T13:52:29Z] DollarBill/heartbeat — DollarBill_20260811_134911: {"status": "in_progress", "note": "nav/verify/reconcile already computed this session; now resolving dividend-adjusted per-position returns via report_return_gate helpers for both accounts (this is the BQ step that took ~20min and killed the prior run)"}
+- [2026-08-11T13:53:13Z] DollarBill/heartbeat — DollarBill_20260811_134911: {"status": "still_running", "elapsed_min": 4, "job_id": "DollarBill_20260811_134911", "source": "watcher"}
+- [2026-08-11T13:53:57Z] DollarBill/heartbeat — DollarBill_20260811_134911: {"status": "in_progress", "note": "dividend resolution job running in background (pid 4192583, ~20min expected); gathered trades-today for both accounts from journal while waiting"}
+- [2026-08-11T13:54:13Z] DollarBill/heartbeat — DollarBill_20260811_134911: {"status": "still_running", "elapsed_min": 5, "job_id": "DollarBill_20260811_134911", "source": "watcher"}
+- [2026-08-11T13:55:13Z] DollarBill/heartbeat — DollarBill_20260811_134911: {"status": "still_running", "elapsed_min": 6, "job_id": "DollarBill_20260811_134911", "source": "watcher"}
+- [2026-08-11T13:56:14Z] DollarBill/heartbeat — DollarBill_20260811_134911: {"status": "still_running", "elapsed_min": 7, "job_id": "DollarBill_20260811_134911", "source": "watcher"}
+- [2026-08-11T13:57:14Z] DollarBill/heartbeat — DollarBill_20260811_134911: {"status": "still_running", "elapsed_min": 8, "job_id": "DollarBill_20260811_134911", "source": "watcher"}
+- [2026-08-11T13:58:14Z] DollarBill/heartbeat — DollarBill_20260811_134911: {"status": "still_running", "elapsed_min": 9, "job_id": "DollarBill_20260811_134911", "source": "watcher"}
+- [2026-08-11T13:59:14Z] DollarBill/heartbeat — DollarBill_20260811_134911: {"status": "still_running", "elapsed_min": 10, "job_id": "DollarBill_20260811_134911", "source": "watcher"}
+- [2026-08-11T14:00:15Z] DollarBill/heartbeat — DollarBill_20260811_134911: {"status": "still_running", "elapsed_min": 11, "job_id": "DollarBill_20260811_134911", "source": "watcher"}
+- [2026-08-11T14:01:15Z] DollarBill/heartbeat — DollarBill_20260811_134911: {"status": "still_running", "elapsed_min": 12, "job_id": "DollarBill_20260811_134911", "source": "watcher"}
+- [2026-08-11T14:02:15Z] DollarBill/heartbeat — DollarBill_20260811_134911: {"status": "still_running", "elapsed_min": 13, "job_id": "DollarBill_20260811_134911", "source": "watcher"}
+- [2026-08-11T14:03:15Z] DollarBill/heartbeat — DollarBill_20260811_134911: {"status": "still_running", "elapsed_min": 14, "job_id": "DollarBill_20260811_134911", "source": "watcher"}
+- [2026-08-11T14:04:15Z] DollarBill/heartbeat — DollarBill_20260811_134911: {"status": "still_running", "elapsed_min": 15, "job_id": "DollarBill_20260811_134911", "source": "watcher"}
+- [2026-08-11T14:05:15Z] DollarBill/heartbeat — DollarBill_20260811_134911: {"status": "still_running", "elapsed_min": 16, "job_id": "DollarBill_20260811_134911", "source": "watcher"}
+- [2026-08-11T14:06:15Z] DollarBill/heartbeat — DollarBill_20260811_134911: {"status": "still_running", "elapsed_min": 17, "job_id": "DollarBill_20260811_134911", "source": "watcher"}
