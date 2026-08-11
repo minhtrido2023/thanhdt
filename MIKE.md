@@ -400,7 +400,13 @@ dẳng → mở agent trong app Claude để re-pair.
   `--bg` trả `job_id` tức thì, tự retry 1 lần khi fail/timeout rồi Telegram notify. **Đừng ngồi
   chờ** — fan-out `--bg` nhiều con, theo dõi bằng `bin/jobs.sh`, dùng `ScheduleWakeup`. Guards:
   self-dispatch (`from==id`) bị chặn; target Mike chỉ cho `DISPATCH_FROM=user` (agent tới Mike
-  phải escalate bằng event `question`).
+  phải escalate bằng event `question`). **`--write-scope "path1,path2"`** (2026-08-11, thay thế
+  thiết kế worktree-pool bị arch-reviewer bounce 2 vòng): khai khi CALLER biết trước job này sẽ
+  sửa file nào — có job khác đang LIVE khai scope trùng ⇒ **HỦY dispatch (exit 6)**, không tạo
+  job record. Thuần so sánh JSON (`mike_json.py job-write-scope-conflict`), không đụng git. Opt-in
+  — chỉ dùng khi biết rõ file đích (vd core file dùng chung như `plan_funding_gate.py`,
+  `dispatch.sh`), không đoán từ prompt. Không thay thế cảnh báo mềm `job-find-dup` (khớp
+  prompt-y-hệt-cùng-agent) — 2 cơ chế bắt 2 dạng va chạm khác nhau.
 - **`bin/jobs.sh {list | status <job_id> | wait <job_id>}`** — poll job board (read-only).
   `status` exit-code: `0=done 2=running 3=overdue 5=pending-resume(tự chạy lại) 1=failed/timeout 4=not-found`.
   `cancelled` và `orphaned` cũng trả **1** — cố ý, KHÔNG thêm mã mới: cả hai chỉ được ghi sau khi

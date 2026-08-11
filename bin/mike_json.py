@@ -1076,6 +1076,44 @@ def cmd_terminal_statuses(a):
         print(s)
 
 
+def cmd_job_write_scope_conflict(a):
+    """job-write-scope-conflict <jobs_dir> <scope_csv> — print job_ids of LIVE jobs (any
+    agent/prompt) whose OWN declared write_scope shares at least one path with `scope_csv`.
+    Exit 0 if any were printed (conflict — caller should refuse to dispatch), 1 if none.
+
+    Opt-in only: write_scope is set by the CALLER via dispatch.sh's --write-scope, never
+    inferred from the prompt — job-find-dup's own comment on why file-scope can't be guessed
+    at dispatch time (the target file often doesn't exist yet) still holds for the general
+    case. This only fires when TWO dispatches BOTH explicitly declared overlapping scope,
+    which is exactly the shape job-find-dup's exact-prompt-match cannot see: different
+    agents, different prompts, same file (coord-2026-08-07 — Mafee + Taylor both editing
+    trading_bot/plan_funding_gate.py within a minute, one commit clobbering the other's
+    uncommitted work)."""
+    jobs_dir, scope_csv = a[0], a[1]
+    want = set(p.strip() for p in scope_csv.split(",") if p.strip())
+    if not want:
+        sys.exit(1)
+    n = now_epoch()
+    found = 0
+    for o in _load_jobs(jobs_dir):
+        # Same liveness definition as job-find-dup (round 9, K1): a record closed without
+        # verified death still counts as live_enough, then _job_live_pids confirms for real.
+        live_enough = o.get("status") in LIVE_STATUSES or str(o.get("death_verified", "")) == "0"
+        if not live_enough:
+            continue
+        other = set(p.strip() for p in str(o.get("write_scope", "")).split(",") if p.strip())
+        overlap = want & other
+        if not overlap:
+            continue
+        if not _job_live_pids(o):
+            continue
+        print("%s (to=%s, dispatched %ds ago by %s, hb_age=%ss, scope=%s)" % (
+            o.get("job_id", "?"), o.get("to", "?"), n - _as_int(o.get("started_at"), n),
+            o.get("from", "?"), _hb_age(o, n, agent_only=True), ",".join(sorted(overlap))))
+        found += 1
+    sys.exit(0 if found else 1)
+
+
 def cmd_job_find_dup(a):
     """job-find-dup <jobs_dir> <to_agent> <prompt_summary> — print job_ids of jobs to the
     SAME agent that are still status=running WITH A LIVE PID and carry an identical prompt
@@ -2551,7 +2589,9 @@ CMDS = {"event": cmd_event, "heartbeat": cmd_heartbeat, "recent": cmd_recent,
         "job-set": cmd_job_set, "job-list": cmd_job_list, "job-get": cmd_job_get,
         "job-reap": cmd_job_reap, "job-cancel": cmd_job_cancel,
         "job-live-pids": cmd_job_live_pids, "job-pin-log": cmd_job_pin_log,
-        "job-find-dup": cmd_job_find_dup, "terminal-statuses": cmd_terminal_statuses,
+        "job-find-dup": cmd_job_find_dup,
+        "job-write-scope-conflict": cmd_job_write_scope_conflict,
+        "terminal-statuses": cmd_terminal_statuses,
         "job-field": cmd_job_field, "job-hb-age": cmd_job_hb_age,
         "circuit-check": cmd_circuit_check, "circuit-record": cmd_circuit_record,
         "pending-resume-set": cmd_pending_resume_set,

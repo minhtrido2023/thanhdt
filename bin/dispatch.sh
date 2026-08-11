@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# dispatch.sh <agent_id> "prompt" [--bg] [--timeout SEC] [--retries N] [--model NAME] [--effort LEVEL] [--max-turns N]
+# dispatch.sh <agent_id> "prompt" [--bg] [--timeout SEC] [--retries N] [--model NAME] [--effort LEVEL] [--max-turns N] [--write-scope SCOPE]
 #
 # Run a HEADLESS Claude session as the specified agent. The session inherits the
 # agent's CLAUDE.md + hooks (KB context injection, bus writes, heartbeat).
@@ -61,6 +61,15 @@
 #                  hết attempt — xem _maybe_schedule_maxturns_resume), không cần làm gì thêm;
 #                  chỉ cân nhắc tự tăng --max-turns thủ công khi ĐÃ THẤY job đó tự-resume mà
 #                  vẫn không đủ (DISPATCH_MAX_TURNS_RESUMES mặc định 2 lần rồi dừng).
+#   --write-scope SCOPE  file/path (phân tách bởi dấu phẩy) mà CALLER (Mike/DollarBill/...)
+#                  BIẾT TRƯỚC job này sẽ sửa — chỉ khai khi biết rõ, KHÔNG đoán (2026-08-11,
+#                  thay cho thiết kế worktree-pool bị arch-reviewer bounce 2 vòng vì tự tạo
+#                  rủi ro xoá nhầm cây production — xem kb/incidents/). Cơ chế: pre-flight CHẶN
+#                  CỨNG (exit 6) nếu có job khác đang LIVE khai --write-scope trùng ít nhất 1
+#                  path — bắt đúng hình dạng sự cố coord-2026-08-07 (2 agent khác nhau, prompt
+#                  khác nhau, cùng sửa 1 file trong 1 phút) mà job-find-dup (chỉ khớp prompt y
+#                  hệt) không thấy được. Opt-in — bỏ cờ này thì không bị chặn, không cách ly gì
+#                  cả (agent vẫn ghi trực tiếp vào shared tree như trước giờ).
 # Context injection tier is fixed per AGENT IDENTITY, not per dispatch: each agent's
 # own agents/<id>/CLAUDE.md statically imports its role-scoped default — see MIKE.md
 # §"Context theo vai trò (role-scoped)" for the full table (Mike/Taylor -> full
@@ -111,6 +120,7 @@ EFFORT=""
 FORCE_TID=""
 MAX_TURNS=""
 PROVIDER=""
+WRITE_SCOPE=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --bg) bg="--bg" ;;
@@ -141,6 +151,9 @@ while [ $# -gt 0 ]; do
     --model=*) MODEL="${1#*=}" ;;
     --effort) EFFORT="${2:?--effort needs a value}"; shift ;;
     --effort=*) EFFORT="${1#*=}" ;;
+    --write-scope) WRITE_SCOPE="${2:?--write-scope needs a value}"; shift ;;
+    --write-scope=*) WRITE_SCOPE="${1#*=}"
+                     [ -n "$WRITE_SCOPE" ] || { echo "ERROR: --write-scope= rỗng (biến chưa set?)" >&2; exit 1; } ;;
     *) echo "ERROR: unknown argument '$1'" >&2; exit 1 ;;
   esac
   shift
@@ -1109,6 +1122,23 @@ if [ -n "${_dup:-}" ]; then
   echo "   Muốn THAY job cũ: $ROOT/bin/jobs.sh cancel <job_id> — đừng dispatch chồng lên nó." >&2
 fi
 
+# Chặn CỨNG khi TRÙNG WRITE-SCOPE (2026-08-11) — khác cảnh báo job-find-dup ở trên (đó chỉ
+# khớp prompt-y-hệt-cùng-agent). Đây là declaration CÓ CHỦ Ý của caller (--write-scope), không
+# suy đoán từ prompt, nên an toàn để CHẶN CỨNG khi 2 dispatch cùng khai chồng lấn — đúng hình
+# dạng sự cố coord-2026-08-07 (Mafee + Taylor cùng sửa trading_bot/plan_funding_gate.py trong
+# 1 phút, 2 agent khác nhau + prompt khác nhau, job-find-dup không thấy được). Thay cho thiết
+# kế worktree-pool (bị arch-reviewer bounce 2 vòng vì tự tạo rủi ro reset --hard/clean -fd
+# nhầm vào cây production) — đây thuần là so sánh JSON, không chạm git nào cả.
+if [ -n "$WRITE_SCOPE" ]; then
+  _wsc="$(python3 "$ROOT/bin/mike_json.py" job-write-scope-conflict "$JOBS_DIR" "$WRITE_SCOPE" 2>/dev/null || true)"
+  if [ -n "${_wsc:-}" ]; then
+    echo "ERROR: HỦY dispatch — write-scope '$WRITE_SCOPE' đang trùng job còn sống:" >&2
+    printf '     %s\n' "$_wsc" >&2
+    echo "   Đợi job đó xong ($ROOT/bin/jobs.sh status <job_id>) rồi dispatch lại, hoặc tách scope." >&2
+    exit 6
+  fi
+fi
+
 # dispatcher_pid: pid CỦA CHÍNH dispatch.sh này (bash giữ nguyên `$$` trong mọi subshell, kể
 # cả nhánh trái của pipeline `... | tee`). Ghi NGAY lúc tạo record, trước khi có người ghi nào
 # khác tồn tại. job-set dùng nó để nhận ra "người ghi đang nằm TRONG cây tiến trình của
@@ -1121,7 +1151,7 @@ JSET job_id="$job_id" from="$from" to="$id" status=running attempt=1 dispatcher_
      deadline=$((_start_ts + TIMEOUT)) logfile="$logfile" discord_thread_id="$_dtid0" \
      model="${MODEL:-default}" effort="$EFFORT" \
      provider="$PROVIDER" turn_cap="$([ "$CLI_SUPPORTS_TURNS" = "true" ] && echo "$MAX_TURNS" || echo unsupported)" \
-     prompt_summary="$_psum"
+     prompt_summary="$_psum" write_scope="$WRITE_SCOPE"
 
 # GHIM BẰNG CHỨNG: tạo sẵn $logfile + $logfile.err và ghi (dev, inode) của chúng lên record,
 # NGAY sau khi record ra đời và TRƯỚC khi có worker nào chạy. Mọi câu hỏi "job này còn sống
