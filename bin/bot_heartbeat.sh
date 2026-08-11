@@ -91,7 +91,7 @@ def px(v):        # 32500 -> "32.50" như app
     return f"{v/1000:,.2f}" if v else "?"
 
 lines = []
-for oid, c in reversed(children.items()):   # mới nhất lên đầu, giống app
+for oid, c in children.items():   # cũ nhất lên đầu, mới nhất ở cuối — dễ theo dõi trên Discord
     side = "BÁN" if c["side"] == "sell" else "MUA"
     if c["cancelled"]:
         status = "Hủy"
