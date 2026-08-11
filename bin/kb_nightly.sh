@@ -960,6 +960,16 @@ quan trọng\"? Ghi nhận tỷ lệ lệch vào KNOWLEDGE.md nếu có — cùn
 vi con người (thói quen dispatch của Mike), không tự sửa thói quen, chỉ đo + báo cáo minh bạch
 để Mike tự điều chỉnh. KHÔNG cần ngưỡng cảnh báo riêng cho sonnet/default (2 tầng đó rẻ nhất,
 không phải nguồn drift chi phí).
+5d. **Effort-drift check (thêm 2026-08-10, token-usage audit)**: chạy '$ROOT/bin/spend_report.py
+--days 7' TRỰC TIẾP (KHÔNG đọc từ spend_history.csv — cột effort chưa được thêm vào CSV, chỉ có
+trong output sống của script). Đọc mục \"Effort-tier mix by agent\" ở cuối report — nếu bất kỳ
+dòng nào có dấu ⚠ (n≥10 job trong 7 ngày VÀ %high≥70%), đó là drift thật (audit 08-10 tìm thấy
+Taylor 88-94% high không ai giám sát, cùng dạng lỗi %fable drift 07-17 nhưng ở trục effort thay
+vì model). Lấy mẫu 5-8 dispatch high gần nhất của agent đó (bus/jobs/*.json field
+prompt_summary), tự hỏi đúng câu MIKE.md §Model routing đặt ra — task genuinely phức tạp
+(medium không đủ), hay việc thường lệ/tiếp nối/xác nhận trạng thái bị chọn high theo phản xạ?
+Cùng nguyên tắc 5b/5c: hành vi con người, không tự sửa thói quen dispatch, chỉ ghi nhận vào
+KNOWLEDGE.md nếu lệch để Mike tự điều chỉnh.
 6. Role-scoped context drift check (MIKE.md §Context theo vai trò, 2026-07-17): đọc
 '$ROOT/kb/context_safety_core.md', 'context_execution_mini.md', 'context_planning_mini.md',
 'context_dataops_mini.md' — đối chiếu với KNOWLEDGE.md/current_ops.md mới nhất. Fact nào đã
