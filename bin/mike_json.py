@@ -44,7 +44,10 @@ Centralizes all JSON building/reading so the shell scripts depend only on python
       -> exit 0 + print match if agent's inbox (hot+archive) has any of the given
          (event_type, topic) pairs since since_iso; exit 1 otherwise. Generic
          post-condition/"output contract" check for background-dispatch pipelines —
-         see mike/kb/dispatch_output_contract.md.
+         see mike/kb/dispatch_output_contract.md. EXACT topic match.
+  has-event-prefix <bus_dir> <agent_id> <since_iso> <event_type:topic_prefix> [...]
+      -> same, but topic matched by PREFIX — for producers told to write a topic
+         "starting with X" and free to append their own description (Wags findings).
 """
 import sys, os, json, uuid, glob, datetime, hashlib, gzip, re, signal, time
 
@@ -2314,6 +2317,46 @@ def cmd_has_event(a):
     sys.exit(1)
 
 
+def cmd_has_event_prefix(a):
+    """has-event-prefix <bus_dir> <agent_id> <since_iso> <event_type:topic_prefix> [...]
+
+    Same contract as has-event, EXCEPT the topic is matched by PREFIX instead of exact
+    equality. Use this — not has-event — whenever the producing agent is instructed to
+    write "topic starting with X" and is free to append its own description after X.
+
+    Why it exists (incident 2026-08-04→2026-08-11, kb/coding_guidelines.md §26):
+    wags_autofix.sh asks Wags for a topic *beginning with* "wags-fix: <label>", Wags always
+    appends a short human-readable summary ("wags-fix: coord-2026-08-11 — gate state_source
+    ..."), and the post-condition check used exact has-event — so it NEVER matched, and the
+    pipeline reported a perfectly good fix as not-confirmed once a day for a week. Exact
+    match is still right for the callers whose producer emits a fixed topic string
+    (weekly_ops_audit.sh, fearbuy_weekly_scan.sh, eod_trading_report.sh) — hence a separate
+    subcommand rather than loosening cmd_has_event under them.
+
+    Same since_iso discipline as has-event: pass the real dispatch start time, never a
+    relative "N hours ago" (a prefix match is BROADER than exact, so a stale event from an
+    earlier run with the same label would false-positive even more easily).
+    """
+    bus_dir, agent_id, since_iso = a[0], a[1], a[2]
+    pairs = []
+    for spec in a[3:]:
+        if ":" not in spec:
+            sys.stderr.write("has-event-prefix: bad spec '%s', expected event_type:topic_prefix\n" % spec)
+            sys.exit(2)
+        etype, topic = spec.split(":", 1)
+        pairs.append((etype, topic))
+    for e in load_jsonl(_agent_files(bus_dir, agent_id)):
+        if e.get("ts", "") < since_iso:
+            continue
+        for etype, prefix in pairs:
+            if e.get("event_type") == etype and e.get("topic", "").startswith(prefix):
+                print("MATCH %s %s/%s at %s" % (agent_id, etype, e.get("topic", ""), e.get("ts", "")))
+                sys.exit(0)
+    print("no match: %s has no event with topic starting with %s since %s (đã quét cả archive)" %
+          (agent_id, ["%s:%s" % p for p in pairs], since_iso))
+    sys.exit(1)
+
+
 def cmd_job_get(a):
     """job-get <jobs_dir> <job_id> — print one job; exit code reflects state.
     0=done 2=running 3=overdue 5=pending-resume (usage limit/max turns — se tu chay lai)
@@ -2513,7 +2556,8 @@ CMDS = {"event": cmd_event, "heartbeat": cmd_heartbeat, "recent": cmd_recent,
         "circuit-check": cmd_circuit_check, "circuit-record": cmd_circuit_record,
         "pending-resume-set": cmd_pending_resume_set,
         "settings": cmd_settings, "trace": cmd_trace,
-        "verify-coverage": cmd_verify_coverage, "has-event": cmd_has_event}
+        "verify-coverage": cmd_verify_coverage, "has-event": cmd_has_event,
+        "has-event-prefix": cmd_has_event_prefix}
 
 
 def main():

@@ -625,5 +625,7 @@ SAI cách (match tuyệt đối trong khi producer luôn thêm hậu tố tự d
 thấy" bị lẫn vào cùng nhánh code với "tìm thấy và cần sửa", sinh `NEEDS_CHANGES` giả mỗi ngày.
 Case thật + cách phân biệt A/B/review-thật: xem skill. Bug B cụ thể đã xác định trong
 `bin/wags_autofix.sh` (`has-event ... "finding:wags-fix: $LABEL"` khớp tuyệt đối, trong khi Wags
-luôn ghi topic có hậu tố tự do) — vá theo hướng dẫn của Wags, chưa merge tại thời điểm ghi dòng
-này.
+luôn ghi topic có hậu tố tự do) — **ĐÃ VÁ 2026-08-11**: `mike_json.py has-event-prefix` (subcommand
+mới, `has-event` giữ nguyên semantics tuyệt đối cho 3 caller cũ) + tách `INCONCLUSIVE` khỏi
+`NEEDS_CHANGES` thành 2 question khác nhau + `bin/wags_bus_verdict.py` lấy verdict từ artifact bus
+thay vì stdout. Luật cho người viết checker: `kb/ops_runbook.md` § "Checker TRA CỨU sai".

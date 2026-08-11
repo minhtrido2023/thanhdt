@@ -42,6 +42,12 @@ if ! python3 "$ROOT/bin/mike_json.py" has-event "$ROOT/bus" <agent> "$SINCE_ISO"
 fi
 ```
 
+⚠️ **`has-event` khớp topic TUYỆT ĐỐI.** Nếu prompt của bạn bảo agent ghi topic *bắt đầu bằng*
+X (và agent nối mô tả tự do phía sau — Wags luôn làm thế), dùng **`has-event-prefix`** cùng cú
+pháp. Sai chỗ này thì post-condition check KHÔNG BAO GIỜ khớp và pipeline báo "agent chết im"
+mỗi ngày dù event nằm ngay trên bus — bug thật 08-04→08-11 ở chính `wags_autofix.sh`, xem
+kb/ops_runbook.md § "Checker TRA CỨU sai".
+
 `has-event` tự quét cả `bus/inbox/*.jsonl` (hot) lẫn `bus/inbox/archive/*.jsonl.gz`
 (§17 coding_guidelines) — không cần tự viết glob. **Luôn truyền `SINCE_ISO` = thời điểm THẬT
 dispatch bắt đầu**, không phải "N giờ trước" — một cutoff tương đối sẽ khớp nhầm event CŨ từ

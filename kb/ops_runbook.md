@@ -56,6 +56,35 @@ Câu hỏi `question` chỉ đóng được bằng `answer`/`decision` **GIỮ N
 - Ca thật 2026-08-10: 4 question tồn đọng → cả 4 đã xong từ trước (bot ZaloPay restart lúc
   10:35, báo cáo tuần đã có trên đĩa từ 11:49), chỉ thiếu event đóng.
 
+### Checker TRA CỨU sai cũng ra đúng triệu chứng đó (2026-08-11) — 3 luật cho người viết checker
+
+Cùng triệu chứng "báo động treo nhiều ngày dù việc đã xong", nhưng root cause nằm trong CHÍNH
+checker: nó tra không ra bằng chứng rồi báo như thể việc chưa xong. Ba luật, mỗi luật là 1 ca thật:
+
+- **Producer nối chữ tự do vào topic → tra bằng PREFIX, đừng tra tuyệt đối.** `mike_json.py
+  has-event` khớp topic TUYỆT ĐỐI (cố ý — 3 caller khác có producer ghi topic cố định:
+  `weekly_ops_audit.sh`, `fearbuy_weekly_scan.sh`, `eod_trading_report.sh`). Nhưng prompt của
+  `wags_autofix.sh` yêu cầu topic *bắt đầu bằng* `wags-fix: <label>` và Wags LUÔN nối mô tả phía
+  sau ⇒ không bao giờ khớp ⇒ mỗi lần chạy lại báo 🟡 "Wags KHÔNG ghi finding" dù finding nằm ngay
+  trên bus (08-04→08-11). Dùng **`has-event-prefix`** cho loại producer này (đã có sẵn từ 08-11).
+- **"Tra không ra" ≠ "tra ra và kết luận xấu" — phải là 2 tín hiệu KHÁC NHAU.** Gộp 2 thứ vào
+  một đường báo động thì người đọc mặc định hiểu là kết luận xấu, và lỗi tooling chạy ẩn hàng
+  tuần. `wags_autofix.sh` giờ tách: `NEEDS_CHANGES`/`REFUTED` (arch-reviewer ĐỌC rồi bác) →
+  question `wags-fix-not-confirmed:` như cũ; `INCONCLUSIVE`/rỗng (chuỗi kiểm chứng không ra phán
+  quyết) → question **`wags-arch-review-inconclusive:`** + nói thẳng "KHÔNG phải arch-reviewer bác
+  fix", kèm bằng chứng finding của Wags có trên bus hay không.
+- **Verdict lấy từ ARTIFACT (bus), đừng lấy từ stdout của pipe.** stdout đã nhiễu thật 2 lần
+  (2026-07-08 `notify_thread.sh` in `{"status":"sent"}` → 2 question giả; 2026-07-22T05:55Z
+  INCONCLUSIVE, 8 ngày sau đóng lại là FALSE_ALARM). `bin/wags_bus_verdict.py` đọc verification
+  arch-reviewer ghi deterministic trên bus; chỉ dùng để NÂNG lên CONFIRMED khi stdout hỏng, không
+  bao giờ dùng để hạ (bus im lặng = thiếu bằng chứng, giữ nguyên đường báo động).
+
+⚠️ Trước khi kết luận "báo động lặp = tooling hỏng": **đọc log/verdict thật của lần escalate đó**.
+Verdict có chẩn đoán cụ thể (trích đúng dòng code, tái lập được lỗi) là review THẬT — phải sửa,
+không được đóng bằng lý do "false alarm do bug tra cứu". Ca thật: 2 question
+`wags-fix-not-confirmed: coord-2026-08-10 / coord-2026-08-11` từng bị nghi là do bug prefix ở trên,
+kiểm lại thì cả 2 đều là `NEEDS_CHANGES` có bằng chứng — vẫn đang mở, cần round-2.
+
 ## Timeline ngày giao dịch (T2–T6, giờ ICT) — bước / kiểm tra gì / lỗi thì sao
 
 | Giờ | Bước (cron) | Kiểm tra | Khi lỗi |

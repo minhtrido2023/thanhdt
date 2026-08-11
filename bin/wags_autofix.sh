@@ -179,7 +179,12 @@ Quy trình: (1) chẩn đoán từ artifact thật (jobs.sh list cột HB_AGE, t
   #      thực tế nhỏ hơn khảo sát ban đầu nêu — nhưng check tường minh ở đây làm hợp đồng RÕ
   #      RÀNG thay vì dựa ngầm vào fail-safe của 1 script khác, và báo sớm hơn (ngay bước
   #      này) thay vì đợi hết cả chuỗi risk-tier + arch-review mới lộ ra là INCONCLUSIVE.
-  if ! python3 "$ROOT/bin/mike_json.py" has-event "$ROOT/bus" Wags "$DISPATCH_START_ISO" \
+  #      PHẢI dùng has-event-PREFIX: prompt bước 1 yêu cầu topic "BẮT ĐẦU BẰNG wags-fix:
+  #      $LABEL" và Wags luôn nối thêm mô tả tự do phía sau ("... — gate state_source báo
+  #      động giả..."), nên has-event khớp TUYỆT ĐỐI không bao giờ trúng — bug thật, làm
+  #      pipeline báo "Wags KHÔNG ghi finding" mỗi ngày suốt 08-04→08-11 dù finding có thật
+  #      trên bus (kb/coding_guidelines.md §26).
+  if ! python3 "$ROOT/bin/mike_json.py" has-event-prefix "$ROOT/bus" Wags "$DISPATCH_START_ISO" \
        "finding:wags-fix: $LABEL" >>"'"$PIPELOG"'" 2>&1; then
     _notify_arch "🟡 [wags-autofix] Wags KHÔNG ghi finding '"'"'wags-fix: $LABEL'"'"' sau dispatch — có thể đã lạc đề/chết im. Tiếp tục qua bước phân loại rủi ro (fail-safe mặc định high nếu không tìm thấy)."
   fi
@@ -215,13 +220,41 @@ except Exception: print(\"?\")")"
 try: print(json.load(sys.stdin).get(\"summary\",\"\"))
 except Exception: print(\"\")")"
 
+  # 2b) BẰNG CHỨNG TRƯỚC KHI BÁO ĐỘNG (2026-08-11, skill close-the-loop): verdict ở trên đọc
+  #     từ STDOUT của pipe — kênh đã bị nhiễu thật 2 lần (2026-07-08 notify in {"status":
+  #     "sent"} vào stdout -> 2 question wags-fix-not-confirmed GIẢ; 2026-07-22T05:55Z
+  #     INCONCLUSIVE, 8 ngày sau đóng lại là FALSE_ALARM khi đọc log arch_review thật).
+  #     _arch_review ghi verdict lên bus deterministic (ngoài agent) — đó mới là ARTIFACT.
+  #     Chỉ dùng bus để NÂNG lên CONFIRMED khi stdout hỏng; không bao giờ dùng để hạ xuống
+  #     (bus im lặng = không có bằng chứng, giữ nguyên đường báo động).
+  verdict_stdout="$verdict"
+  bus_verdict="$("$ROOT/bin/wags_bus_verdict.py" "$ROOT/bus/inbox/arch-reviewer.jsonl" \
+      "ARCH-REVIEW: wags-fix: $LABEL" "$DISPATCH_START_ISO" 2>>"'"$PIPELOG"'" || true)"
+  if [ "$verdict" != "CONFIRMED" ] && [ "$bus_verdict" = "CONFIRMED" ]; then
+    echo "[wags-autofix] verdict stdout=$verdict_stdout NHUNG bus verification=CONFIRMED -> theo bus (artifact)" >> "'"$PIPELOG"'"
+    verdict="CONFIRMED"
+    summary="$summary [verdict lay tu bus verification arch-reviewer; stdout pipeline cho: $verdict_stdout]"
+  fi
+
   # 3) báo cáo hoàn tất vào topic architecture (user yêu cầu: báo khi issue hoàn tất)
   if [ "$verdict" = "CONFIRMED" ]; then
     _notify_arch "✅ **[wags-autofix] HOÀN TẤT issue '"'"'$LABEL'"'"'** — Wags đã sửa, arch-reviewer audit: **CONFIRMED** ($summary). Chi tiết: bus finding '"'"'wags-fix: $LABEL'"'"' + verification cùng trace; log pipeline: '"$PIPELOG"'"
-  else
+  elif [ "$verdict" = "NEEDS_CHANGES" ] || [ "$verdict" = "REFUTED" ]; then
     _notify_arch "⚠️ **[wags-autofix] Issue '"'"'$LABEL'"'"' CẦN NGƯỜI XEM** — arch-reviewer verdict: **$verdict** ($summary). Fix của Wags KHÔNG được tự coi là xong; xem bus verification + log '"$PIPELOG"'."
     "$ROOT/bin/append_event.sh" Wags question "wags-fix-not-confirmed: $LABEL" \
       "{\"verdict\":\"$verdict\",\"pipelog\":\"'"$PIPELOG"'\"}" >/dev/null 2>&1 || true
+  else
+    # "Không tra ra phán quyết" ≠ "phán quyết là bác fix" — 2 việc KHÁC HẲN nhau, phải ra 2
+    # tín hiệu khác nhau (skill close-the-loop root-cause-B #2). Gộp chung chính là thứ làm
+    # cả tuần 08-04→08-11 ai đọc cũng tưởng fix bị bác trong khi chuỗi kiểm chứng chỉ đơn
+    # giản là không chạy được. Kèm luôn bằng chứng rẻ nhất phân biệt được 2 nhánh: finding
+    # của Wags có thật trên bus hay không.
+    _fnd="CÓ finding của Wags trên bus"
+    python3 "$ROOT/bin/mike_json.py" has-event-prefix "$ROOT/bus" Wags "$DISPATCH_START_ISO" \
+      "finding:wags-fix: $LABEL" >/dev/null 2>&1 || _fnd="KHÔNG tìm thấy finding của Wags"
+    _notify_arch "🟠 **[wags-autofix] Issue '"'"'$LABEL'"'"': chuỗi KIỂM CHỨNG không ra phán quyết** (verdict=$verdict — **KHÔNG phải arch-reviewer bác fix**). $_fnd. Đây là lỗi tooling của chính pipeline, không phải kết luận về bản vá: $summary. Log: '"$PIPELOG"'"
+    "$ROOT/bin/append_event.sh" Wags question "wags-arch-review-inconclusive: $LABEL" \
+      "{\"verdict\":\"$verdict\",\"verdict_stdout\":\"$verdict_stdout\",\"bus_verdict\":\"$bus_verdict\",\"wags_finding\":\"$_fnd\",\"note\":\"chuoi kiem chung KHONG ra phan quyet — KHONG phai arch-reviewer bac fix\",\"pipelog\":\"'"$PIPELOG"'\"}" >/dev/null 2>&1 || true
   fi
   fi
 ' >> "$PIPELOG" 2>&1 < /dev/null &
