@@ -119,6 +119,15 @@ VIỆC CẦN LÀM (mỗi mục xong ghi 1-2 câu kết luận, đừng chỉ nó
    sửa hết trong 1 lần nếu nhiều — ưu tiên FAIL nào có khả năng chạm surface tiền thật/dữ liệu
    client-facing trước.
 
+8b. SELFCHECK ĐỎ TỒN ĐỌNG (thêm 2026-08-12, job Wags_20260812_112724). Từ 2026-08-12 việc PHÁT
+   HIỆN đỏ đã tự động hoá HÀNG NGÀY (cron 04:30 ICT, bin/selfcheck_weekly_baseline_check.sh →
+   bus question 'selfcheck-red: <file>' 1-lần-1-ca). Việc CÒN LẠI cho bạn ở đây là chống MỤC
+   RỮA: đọc kb/selfcheck_baseline.json, liệt kê mọi entry có "auto": true (= tự phát hiện, CHƯA
+   AI TRIAGE) kèm số ngày kể từ "since". Entry nào quá 7 ngày mà chưa ai đụng thì nêu ĐÍCH DANH
+   trong báo cáo + nói rõ ai là chủ sở hữu file. KHÔNG tự sửa selfcheck giao dịch (assertion lỗi
+   thời vs production hỏng là quyết định của Taylor/DollarBill/user, không phải của bạn) — việc
+   của mục này chỉ là không để một ca đỏ nằm im trong baseline vĩnh viễn dưới danh nghĩa "đã biết".
+
 BÁO CÁO CUỐI (bắt buộc, dù mọi mục đều sạch — quiet-heartbeat: "không có gì mới" vẫn phải nói rõ
 ràng, im lặng hoàn toàn không phân biệt được với job chết): tổng hợp ngắn gọn 7 mục trên, bug nào
 tìm thấy + đã tự sửa (kèm commit hash) hay đang escalate, số PENDING bus question, %fable/%opus,

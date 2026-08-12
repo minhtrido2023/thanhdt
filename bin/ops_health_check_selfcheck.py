@@ -20,6 +20,7 @@ Chạy: python3 bin/ops_health_check_selfcheck.py   (exit 0 = PASS, 1 = FAIL)
 Được cắm vào kb_nightly.sh Phase 0 (alert-only, không gate prune).
 """
 import datetime as dt
+import glob
 import gzip
 import json
 import os
@@ -50,6 +51,7 @@ def extract_block(tag):
 
 CHECK5_SRC = extract_block("CHECK5")
 CHECK10_SRC = extract_block("CHECK10")
+CHECK11_SRC = extract_block("CHECK11")
 
 
 def run_check5(wc_root):
@@ -618,9 +620,151 @@ def case_ack_suppress_days_capped():
         shutil.rmtree(root, ignore_errors=True)
 
 
+# ── Check #11 (quét selfcheck production: freshness + ca đỏ) ──────────────────────────────
+# Thêm 2026-08-12 (job Wags_20260812_112724). Check #11 KHÔNG chạy lại 92 selfcheck, nó chỉ đọc
+# artifact — nên toàn bộ giá trị nằm ở 5 nhánh phân loại. Cả 5 chạy THẬT trên artifact giả ở
+# đây, gồm 2 nhánh im-lặng-nguy-hiểm (thiếu artifact / artifact hỏng).
+def run_check11(wc_root):
+    lines, warn = [], []
+
+    def W(msg):
+        warn.append(msg)
+        lines.append(f"⚠️ {msg}")
+
+    def OK(msg):
+        lines.append(f"✅ {msg}")
+
+    ns = {"os": os, "re": re, "json": json, "dt": dt, "glob": glob, "wc_root": wc_root,
+          "W": W, "OK": OK, "lines": lines, "WARN_ONLY": "[WARN-ONLY]"}
+    exec(compile(CHECK11_SRC, SRC + ":CHECK11", "exec"), ns)
+    return lines, warn
+
+
+def _mkscan(result=None, baseline=None):
+    """wc_root giả: mike/logs/selfcheck_weekly_<d>.json + mike/kb/selfcheck_baseline.json.
+    Tham số = None ⇒ KHÔNG tạo file đó (mô phỏng thiếu artifact)."""
+    d = tempfile.mkdtemp(prefix="ops_health_check11_")
+    if result is not None:
+        os.makedirs(os.path.join(d, "mike", "logs"), exist_ok=True)
+        with open(os.path.join(d, "mike", "logs", "selfcheck_weekly_20260812.json"),
+                  "w", encoding="utf-8") as f:
+            f.write(result if isinstance(result, str) else json.dumps(result, ensure_ascii=False))
+    if baseline is not None:
+        os.makedirs(os.path.join(d, "mike", "kb"), exist_ok=True)
+        with open(os.path.join(d, "mike", "kb", "selfcheck_baseline.json"),
+                  "w", encoding="utf-8") as f:
+            f.write(baseline if isinstance(baseline, str)
+                    else json.dumps(baseline, ensure_ascii=False))
+    return d
+
+
+def _res(hours_ago, total=92, passed=92):
+    return {"ts": (dt.datetime.now(dt.timezone.utc)
+                   - dt.timedelta(hours=hours_ago)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "total": total, "pass": passed}
+
+
+def case_c11_fresh_all_green():
+    d = _mkscan(_res(3), {"known_red": {}})
+    try:
+        lines, warn = run_check11(d)
+        check("check11: quét tươi + 0 đỏ ⇒ OK, không WARN", not warn and "✅" in joined(lines),
+              joined(lines))
+        check("check11: OK nêu số file đã quét (không phải câu chữ rỗng)",
+              "92" in joined(lines), joined(lines))
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+def case_c11_red_is_warn_only():
+    d = _mkscan(_res(3, 92, 88), {"known_red": {
+        "extreme_regime_selfcheck.py": {"auto": True, "since": "2026-08-12"},
+        "t2_settlement_selfcheck.py": {"auto": True, "since": "2026-08-12"},
+        "immutable_publish_selfcheck.py": {"reason": "IAM", "verified_by": "Mike"}}})
+    try:
+        lines, warn = run_check11(d)
+        out = joined(lines)
+        check("check11: có ca đỏ chưa triage ⇒ CÓ cảnh báo cho người thấy", len(warn) == 1, out)
+        check("check11: mang [WARN-ONLY] (bộ quét đã escalate rồi — không dispatch lại)",
+              "[WARN-ONLY]" in out, out)
+        check("check11: liệt kê tên file đỏ để triage ngay trong báo cáo",
+              "extreme_regime_selfcheck.py" in out, out)
+        check("check11: TÁCH đỏ-chưa-triage (2) khỏi đỏ-đã-chấp-nhận (1) — không gộp để việc nợ "
+              "chìm vào cái đã chấp nhận",
+              "2 selfcheck" in out and "1 ca đỏ đã chấp nhận" in out, out)
+        check("check11 CONTROL: bộ lọc routing THẬT (grep -vF) loại đúng dòng này",
+              not [l for l in lines if "⚠️" in l and "[WARN-ONLY]" not in l], out)
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+    # chỉ còn đỏ ĐÃ CHẤP NHẬN ⇒ không WARN, nhưng vẫn phải NÓI RA số đó
+    d = _mkscan(_res(3, 92, 91), {"known_red": {
+        "immutable_publish_selfcheck.py": {"reason": "IAM", "verified_by": "Mike"}}})
+    try:
+        lines, warn = run_check11(d)
+        check("check11: chỉ còn đỏ đã chấp nhận ⇒ không WARN nhưng vẫn nêu ra",
+              not warn and "1 đỏ đã chấp nhận" in joined(lines), joined(lines))
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+def case_c11_stale_is_routable():
+    d = _mkscan(_res(40), {"known_red": {}})
+    try:
+        lines, warn = run_check11(d)
+        out = joined(lines)
+        check("check11: quét ôi >36h ⇒ WARN", len(warn) == 1, out)
+        check("check11: WARN ôi KHÔNG mang [WARN-ONLY] (cron chết là lỗi SỬA ĐƯỢC, phải route)",
+              "[WARN-ONLY]" not in out, out)
+        check("check11: nói rõ ÔI + nghi cron chết, không lẫn với 'có ca đỏ'",
+              "ÔI" in out and "cron" in out, out)
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+    d2 = _mkscan(_res(30), {"known_red": {}})
+    try:
+        _, warn2 = run_check11(d2)
+        check("check11: 30h (lỡ đúng 1 lần chạy) CHƯA kêu ôi", not warn2)
+    finally:
+        shutil.rmtree(d2, ignore_errors=True)
+    # ÔI phải thắng cả khi đang có ca đỏ: số liệu cũ 40h không được trình bày như tình trạng hiện tại
+    d3 = _mkscan(_res(40), {"known_red": {"a_selfcheck.py": {"auto": True}}})
+    try:
+        lines3, warn3 = run_check11(d3)
+        check("check11: ÔI + có đỏ ⇒ báo ÔI (routable), KHÔNG rơi vào nhánh [WARN-ONLY]",
+              len(warn3) == 1 and "[WARN-ONLY]" not in joined(lines3), joined(lines3))
+    finally:
+        shutil.rmtree(d3, ignore_errors=True)
+
+
+def case_c11_missing_and_corrupt_never_silent():
+    d = _mkscan(None, {"known_red": {}})
+    try:
+        lines, warn = run_check11(d)
+        check("check11: KHÔNG có file kết quả ⇒ WARN 'chưa từng chạy', không im lặng",
+              len(warn) == 1 and "CHƯA TỪNG CHẠY" in joined(lines), joined(lines))
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+    d = _mkscan(_res(3), None)
+    try:
+        lines, warn = run_check11(d)
+        check("check11: có kết quả nhưng THIẾU baseline ⇒ vẫn WARN (không báo '0 đỏ')",
+              len(warn) == 1 and "✅" not in joined(lines), joined(lines))
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+    d = _mkscan("{ day khong phai json", {"known_red": {}})
+    try:
+        lines, warn = run_check11(d)
+        out = joined(lines)
+        check("check11: artifact HỎNG ⇒ WARN, không rơi về nhánh '0 đỏ'", len(warn) == 1, out)
+        check("check11: câu chữ nói rõ KHÔNG kết luận được (khác hẳn 'không có ca đỏ')",
+              "không kết luận được" in out, out)
+        check("check11 CONTROL: nhánh hỏng KHÔNG in dòng ✅ nào", "✅" not in out, out)
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
 def main():
     print("ops_health_check_selfcheck: check #5 (backlog question) + check #10 (notify_thread) "
-          "+ khối DELIVER (Discord→Telegram) regression")
+          "+ check #11 (selfcheck_red_sweep freshness) + khối DELIVER (Discord→Telegram) regression")
     for fn in (case_archived_question_visible, case_cross_layer_resolve,
                case_resolver_must_be_after, case_dedupe_hot_and_archive,
                case_no_crowd_out, case_small_pool_prints_all,
@@ -632,6 +776,8 @@ def main():
                case_ack_suppress_days_window, case_ack_suppress_days_capped,
                case_c10_no_file_is_ok, case_c10_fresh_log_warns,
                case_c10_fresh_log_without_timestamp_line, case_c10_old_log_is_ok,
+               case_c11_fresh_all_green, case_c11_red_is_warn_only,
+               case_c11_stale_is_routable, case_c11_missing_and_corrupt_never_silent,
                case_deliver_discord_ok_no_telegram,
                case_deliver_discord_fails_falls_back_to_telegram,
                case_deliver_both_fail_logs_for_check10):

@@ -686,6 +686,63 @@ else:
     OK("notify_thread.sh: không có lỗi gửi Discord trong 24h qua.")
 # CHECK10_END
 
+# 11. Quét selfcheck production: đã chạy gần đây chưa + đang có ca ĐỎ nào (thêm 2026-08-12,
+#     job Wags_20260812_112724 — sự cố 4 selfcheck đỏ 2 ngày không ai biết).
+#     ĐỌC ARTIFACT, KHÔNG chạy lại 92 selfcheck: bộ quét mất ~15-25' và đã chạy 1 lần/ngày bằng
+#     cron riêng (bin/selfcheck_weekly_baseline_check.sh, 04:30 ICT). Nhét nó vào đường nóng
+#     08:20 — 25' trước preflight — là biến một checker rẻ thành thứ tranh CPU với phiên sáng.
+#     PHÂN TẦNG ROUTING có chủ đích:
+#       · bộ quét CHẾT/ôi → WARN thường (routable → ops_autofix): cron hỏng là lỗi SỬA ĐƯỢC, và
+#         im lặng ở đây biến chính cơ chế phát hiện thành thứ nó sinh ra để chống.
+#       · CÓ ca đỏ        → [WARN-ONLY]: bộ quét ĐÃ escalate từng ca (bus question + Discord).
+#         Để routable nữa thì mỗi ngày 4 job autofix cho việc đã báo — đúng vòng lặp mà check #10
+#         và ACK_PREFIX ở trên đã phải bịt 2 lần.
+# CHECK11_BEGIN — marker ỔN ĐỊNH (giống CHECK5/CHECK10): selfcheck trích đúng khối này rồi chạy
+# trên artifact giả. Đổi/xoá marker ⇒ bin/ops_health_check_selfcheck.py FAIL ngay.
+_scb = os.path.join(wc_root, "mike", "kb", "selfcheck_baseline.json")
+_scl = sorted(glob.glob(os.path.join(wc_root, "mike", "logs", "selfcheck_weekly_*.json")))
+_SC_STALE_H = 36     # cron 1 lần/ngày → 36h cho phép lỡ đúng 1 lần rồi mới kêu
+try:
+    if not _scl:
+        raise FileNotFoundError("chưa có file kết quả selfcheck_weekly_*.json nào")
+    with open(_scl[-1], encoding="utf-8") as _f:
+        _scr = json.load(_f)
+    _sc_ts = dt.datetime.fromisoformat(str(_scr.get("ts")).replace("Z", "+00:00"))
+    _sc_age_h = (dt.datetime.now(dt.timezone.utc) - _sc_ts).total_seconds() / 3600.0
+    with open(_scb, encoding="utf-8") as _f:
+        _sc_red = (json.load(_f) or {}).get("known_red") or {}
+    if _sc_age_h > _SC_STALE_H:
+        W(f"Quét selfcheck ÔI: lần cuối {_scr.get('ts')} ({_sc_age_h:.0f}h trước, ngưỡng "
+          f"{_SC_STALE_H}h) — nghi cron 04:30 ICT chết. Chạy tay: "
+          f"bash mike/bin/selfcheck_weekly_baseline_check.sh")
+    elif _sc_red:
+        # Tách 2 loại: `auto` = tự phát hiện, CHƯA AI TRIAGE (việc còn nợ); còn lại là đỏ người
+        # đã xem và chấp nhận có lý do (vd IAM) — gộp chung thì việc nợ chìm vào cái đã chấp nhận,
+        # đúng lớp nhiễu đang sửa.
+        _sc_new = sorted(k for k, v in _sc_red.items() if isinstance(v, dict) and v.get("auto"))
+        _sc_ack = sorted(k for k, v in _sc_red.items() if not (isinstance(v, dict) and v.get("auto")))
+        if _sc_new:
+            W(f"{WARN_ONLY} {len(_sc_new)} selfcheck production ĐỎ CHƯA AI TRIAGE (mỗi ca đã có "
+              f"bus question 'selfcheck-red: <file>', KHÔNG dispatch lại ở đây): "
+              f"{_sc_new[:8]}{' …' if len(_sc_new) > 8 else ''}"
+              + (f" · {len(_sc_ack)} ca đỏ đã chấp nhận có lý do." if _sc_ack else "")
+              + f" Quét {_sc_age_h:.0f}h trước, {_scr.get('pass')}/{_scr.get('total')} PASS.")
+        else:
+            OK(f"Quét selfcheck: {_scr.get('pass')}/{_scr.get('total')} PASS, 0 ca đỏ chưa triage "
+               f"({len(_sc_ack)} đỏ đã chấp nhận có lý do; quét {_sc_age_h:.0f}h trước).")
+    else:
+        OK(f"Quét selfcheck: {_scr.get('pass')}/{_scr.get('total')} PASS, 0 ĐỎ "
+           f"(quét {_sc_age_h:.0f}h trước).")
+except FileNotFoundError as _e:
+    W(f"Quét selfcheck CHƯA TỪNG CHẠY / thiếu artifact ({_e}) — cron 04:30 ICT chưa cài hoặc "
+      f"chưa tới lần chạy đầu.")
+except Exception as _e:
+    # Fail LOUD: artifact hỏng KHÔNG được rơi về im lặng — im lặng ở đây nghĩa là "không biết
+    # selfcheck nào đang đỏ" mà lại trông y hệt "không có ca đỏ nào".
+    W(f"Quét selfcheck: KHÔNG đọc được artifact ({type(_e).__name__}) — không kết luận được có "
+      f"selfcheck nào đỏ hay không.")
+# CHECK11_END
+
 print("\n".join(lines))
 print(f"__WARN_COUNT__={warn}")
 PYEOF
