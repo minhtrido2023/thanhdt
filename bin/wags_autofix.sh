@@ -84,27 +84,12 @@ log/bus event), chạy đủ 7 hướng tấn công, rồi in ĐÚNG khối VERD
       --permission-mode auto --allowedTools "Bash Read Grep Glob" \
       --model opus --max-turns 40 > "$log" 2>"$log.err" ) || true
 
-  verdict_json="$(python3 - "$log" "$topic" <<'PY'
-import json, re, sys
-log, topic = sys.argv[1], sys.argv[2]
-try:
-    txt = open(log, encoding="utf-8", errors="replace").read()
-except Exception:
-    txt = ""
-m = re.search(r"<<<VERDICT_JSON>>>(.*?)<<<END_VERDICT>>>", txt, re.S)
-if not m:
-    print(json.dumps({"finding_topic": topic, "verdict": "INCONCLUSIVE", "confidence": "low",
-                      "summary": "arch-reviewer không in được khối VERDICT_JSON — xem log"}))
-    sys.exit(0)
-try:
-    obj = json.loads(m.group(1).strip())
-except Exception as e:
-    obj = {"finding_topic": topic, "verdict": "INCONCLUSIVE", "confidence": "low",
-           "summary": "VERDICT_JSON không parse được: %s" % e}
-obj.setdefault("finding_topic", topic)
-print(json.dumps(obj, ensure_ascii=False))
-PY
-)"
+  # Parser tách ra file riêng (2026-08-12) để CÓ selfcheck: bin/wags_verdict_parse_selfcheck.py.
+  # Nó vá được khối JSON thiếu dấu đóng ở cuối — sự cố thật 08-11: arch-reviewer kết luận
+  # CONFIRMED/high nhưng in JSON thiếu đúng 1 dấu `}` ⇒ verdict bị vứt về INCONCLUSIVE ⇒
+  # question `wags-arch-review-inconclusive` GIẢ. Phép vá chỉ THÊM dấu đóng vào cuối nên
+  # không thể nâng verdict; hỏng nặng vẫn rơi về INCONCLUSIVE (xem docstring parser).
+  verdict_json="$(python3 "$ROOT/bin/wags_verdict_parse.py" "$log" "$topic")"
   # ghi verdict lên bus (deterministic, ngoài agent) — cùng trace với finding gốc
   "$ROOT/bin/append_event.sh" arch-reviewer verification "ARCH-REVIEW: $topic" "$verdict_json" "$trace_id" >/dev/null 2>&1 || true
   printf '%s\n' "$verdict_json"
