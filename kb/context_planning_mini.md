@@ -56,13 +56,32 @@ không thấy bản mới, chạy nhầm bản cũ — sự cố thật 2026-07-
 sẵn sàng trước deadline → **escalate thật** (Telegram + Discord + bus event `question`
 `plan-t1-not-ready`), KHÔNG tự retry/re-dispatch — quyết định bước tiếp theo là của người.
 
-## TV1 discretionary (SpaceX) — PHẢI trừ cash trước khi tính plan V2.4 hàng ngày (thêm 2026-07-23)
-SpaceX có 1 chương trình gom TV1/PECC1 riêng (`data/trade_plans/discretionary/plan_TV1_SpaceX_discretionary_20260723.json`, book=DISCRETIONARY_SPECIAL, ngoài V2.4, đã user duyệt) — tranche
-07-24 (200cp≈3,98M) + 07-27 (200cp≈3,98M). File này KHÔNG tự động trừ vào `cash_vnd` khi lập
-plan V2.4 hàng ngày vì nó tách file cố ý (không bị EOD clobber). TRƯỚC khi tính size lệnh V2.4
-cho SpaceX ngày nào trùng lịch tranche TV1, PHẢI trừ trước số tiền tranche đó khỏi cash khả dụng
-— nếu không, tổng nhu cầu 2 nguồn có thể vượt cash thực (sự cố thật 07-24: V2.4 45,9M + TV1
-3,98M = 49,9M > cash 49,1M, thiếu ~0,78M). Luôn check file discretionary trước khi chốt size.
+## TV1 — KHÔNG tự viết lệnh nữa, injector sở hữu (ĐỔI 2026-08-12, job Taylor_20260812_161457)
+**TV1 là mã DUY NHẤT hiện có cơ chế tự động.** Từ 2026-08-12, lệnh mua TV1 của CẢ HAI account do
+`mike/bin/discretionary_accumulation_inject.py` (cron 20:30 ICT, SAU khi bạn ghi plan ~19:0x) tự
+sinh từ state file `data/trade_plans/discretionary/state_TV1_{SpaceX,ZaloPay}.json`.
+
+**Bạn PHẢI:**
+1. **KHÔNG đưa lệnh TV1 nào vào `orders[]`** — không qty, không `ref_price`, và tuyệt đối không
+   `hard_no_chase_ceiling_vnd` gõ tay. Trần giá nay là TRẦN ĐỘNG tính lại mỗi phiên
+   (`mean(giá đóng 5 phiên) × 1,03`, kẹp ≤25.000đ user duyệt); mọi con số bạn nhớ được đều đã cũ.
+   Bạn viết một lệnh TV1 vào plan = injector thấy trùng và **im lặng bỏ qua** (dedup theo
+   ticker+book) ⇒ trần cũ 20.000đ quay lại và lệnh lại không khớp.
+2. **Trừ trước ngân sách TV1 khỏi cash khả dụng** trước khi size lệnh V2.4, đúng như luật cũ
+   (sự cố thật 07-24: V2.4 45,9M + TV1 3,98M = 49,9M > cash 49,1M). Ước lượng ngân sách =
+   `5% × active_nav − giá_trị_thị_trường(TV1 đang giữ)`, sàn 0. Không trừ ⇒ gate tiền của
+   injector tự SHRINK/bỏ lệnh TV1 (nó chạy sau nên nó là bên nhường) và chương trình đứng hình.
+3. **Ghi 1 dòng trong `notes`** nói rõ đã trừ bao nhiêu cho TV1 và rằng lệnh do injector chèn —
+   để người duyệt lúc 21:00 biết lệnh TV1 sẽ xuất hiện, không tưởng là thiếu.
+
+**Nếu plan 21:00 KHÔNG có lệnh TV1** mà tỷ trọng đang dưới 5%: đọc `discretionary_inject_notes`
+trong chính file plan (injector ghi lý do fail-safe vào đó) — nguyên nhân hay gặp nhất là
+`data/execution_logs/active_nav_<account>.json` không phải của HÔM NAY. Chạy
+`python3 mike/bin/compute_active_nav.py --account <acct>` rồi
+`python3 mike/bin/discretionary_accumulation_inject.py --account <acct>`. ĐỪNG tự gõ lệnh bù.
+
+**DRI thì NGƯỢC LẠI: vẫn do bạn viết tay** (chưa có state file) — mục dưới vẫn áp dụng đầy đủ cho
+DRI. Đừng suy rộng luật TV1 sang DRI rồi bỏ sót DRI khỏi plan.
 
 ## DRI + TV1 discretionary — target 5% NAV/mã MỖI account, khung giá rải bậc (chốt 2026-08-10/11)
 User chốt 2026-08-10 tối: nâng size DRI + TV1 (PECC1) từ 1,5% → **5% NAV/mã, cho CẢ 2 account**
@@ -70,10 +89,17 @@ User chốt 2026-08-10 tối: nâng size DRI + TV1 (PECC1) từ 1,5% → **5% NA
 `DISCRETIONARY_ADD`): SpaceX TV1 400→2400cp (≈47,68tr/974,28tr NAV ≈4,90%), SpaceX DRI 0→3700cp
 (≈48,84tr ≈5,01%); ZaloPay TV1 0→1300cp (≈25,87tr/513,89tr active_nav ≈5,03%), ZaloPay DRI
 0→1900cp (≈25,08tr ≈4,88%) — lệch ~0,1pp là do lot-size tròn 100cp, KHÔNG cần rải thêm để chỉnh
-cho khớp tuyệt đối 5,00%. **Coi như ĐÃ ĐẠT mục tiêu 5%** tính tới 2026-08-11; kiểm tra lại % NAV
-thật (dùng active_nav đúng account, không dùng total NAV cho ZaloPay vì có DGC excluded) trước khi
-quyết định có rải thêm ở lần lập plan sau không — chỉ rải thêm nếu vị thế rơi RÕ RỆT dưới 5% (vd
-do NAV tăng hoặc bán bớt), không rải thêm chỉ vì lệch do lot-size.
+cho khớp tuyệt đối 5,00%.
+
+⚠️ **ĐÍNH CHÍNH 2026-08-12 — "đã đạt 5%" chỉ ĐÚNG với DRI.** Câu "coi như ĐÃ ĐẠT mục tiêu 5%"
+trước đây đọc số lượng ĐẶT trong plan, không phải số KHỚP (§27 coding_guidelines). Đối soát thật:
+**DRI khớp đủ cả 2 account**, nhưng **TV1 gần như không khớp gì** — SpaceX 500cp (1,04% NAV, chứ
+không phải 2.400cp), ZaloPay **0cp**. Nguyên nhân: trần `hard_no_chase_ceiling_vnd=20.000đ` gõ tay
+trong khi thị trường 20.200–20.300 suốt 2 phiên. Đã xử lý bằng trần động + state file (mục TV1 ở
+trên); **DRI vẫn do bạn viết tay và vẫn coi là đã đạt**. Kiểm tra tỷ trọng bằng vị thế THẬT
+(`compute_active_nav.py` / `positions` trong `dnse_raw_<date>.jsonl`), không bao giờ bằng qty
+trong plan; dùng active_nav đúng account (ZaloPay có DGC excluded ⇒ active_nav 516tr ≠ NAV 954tr).
+Chỉ rải thêm nếu vị thế rơi RÕ RỆT dưới 5%, không rải thêm chỉ vì lệch do lot-size.
 
 **Khung giá rải bậc (user cung cấp 2026-08-11, discretionary reference — chưa qua DSR/PBO, N=1
 mã, không phải khuyến nghị cứng):**
@@ -83,9 +109,10 @@ mã, không phải khuyến nghị cứng):**
 | **DRI** (UPCOM, giá ref 13.200đ 2026-08-10) | T1 12.800–13.200 · T2 (nếu về hỗ trợ) 11.900–12.300 · ngừng mua nếu thủng <11.900 | T1 (kỹ thuật) 14.000–14.200 · T2 (target chính, PE reversion) 15.500–17.000 · T3 (stretch, cần EPS fwd FY2026 xác nhận 4.000-4.300đ) 17.500–18.000 | PE_MA5Y (9,44x) KHÔNG dùng làm target (méo bởi chu kỳ cao su cũ); thanh khoản UPCOM mỏng (200k-1,6M cp/phiên) → rải lệnh |
 | **TV1/PECC1** (giá ref ~19.900-20.200đ 2026-08-10) | T1 (40%) 19.800–20.200 · T2 (35%) 18.300–19.400 · T3 (25%, dự phòng, chỉ mua nếu không có tin xấu mới) 16.500–17.500 | T1 (30%) 24.500–26.000 · T2 (40%) 29.000–32.000 · T3 (30%) 35.000–37.700 (KHÔNG target lại đỉnh đầu cơ 39.400 — spike bất thường) | PE_MA5Y (11,54x) KHÔNG dùng làm neo (méo bởi khủng hoảng LN 2019-2021); thanh khoản ~0,634 tỷ/ngày → chia lệnh nhỏ |
 
-**Dùng khi nào**: (a) nếu vị thế hiện tại CHƯA đạt 5% NAV/mã (rơi vào tình huống hiếm — xem đoạn
-trên, hiện đã đạt) → DollarBill rải mua tiếp theo tranche T1 trước, chỉ xuống T2/T3 nếu giá thật
-sự điều chỉnh về vùng đó; (b) khi giá chạm vùng BÁN/chốt lời → đưa vào cân nhắc trim (discretionary,
+**Dùng khi nào**: (a) **cho DRI** — nếu vị thế chưa đạt 5% NAV/mã thì rải mua theo tranche T1
+trước, chỉ xuống T2/T3 nếu giá thật sự điều chỉnh về vùng đó (với **TV1 khung giá này chỉ còn là
+THAM CHIẾU ĐỌC**: giá đặt do trần động của injector quyết, bạn không viết lệnh TV1);
+(b) khi giá chạm vùng BÁN/chốt lời → đưa vào cân nhắc trim (discretionary,
 không tự động, cần user duyệt riêng như mọi lệnh bán ngoài V2.4); (c) không tự nội suy khung giá
 khác — hết giá trị tham chiếu (giá thị trường vượt xa dải trên/dưới) thì hỏi lại user, đừng tự chế.
 
