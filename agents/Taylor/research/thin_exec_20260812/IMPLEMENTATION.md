@@ -15,7 +15,7 @@
 
 | | Việc | File sửa | Cờ bật | Mặc định | Selfcheck |
 |---|---|---|---|---|---|
-| **P1** | Trần no-chase động `anchor×(1+τ)`, τ=3%, anchor = TB 5 phiên | `trading_bot/discretionary_accumulation.py`, `mike/bin/discretionary_accumulation_inject.py` | `state["dynamic_ceiling"]["enabled"]` **VÀ** `price_band.max_no_chase_ceiling` | **TẮT** (thiếu 1 trong 2 ⇒ trần cố định) | `dynamic_no_chase_ceiling_selfcheck.py` — **49/49** |
+| **P1** | Trần no-chase động `anchor×(1+τ)`, τ=3%, anchor = TB 5 phiên | `trading_bot/discretionary_accumulation.py`, `mike/bin/discretionary_accumulation_inject.py` | `state["dynamic_ceiling"]["enabled"]` **VÀ** `price_band.max_no_chase_ceiling` | **TẮT** (thiếu 1 trong 2 ⇒ trần cố định) | `dynamic_no_chase_ceiling_selfcheck.py` — **77/77** (49 cũ + 28 ca khối G, xem §1b) |
 | **P2** | Mẫu số pacing `max(cum_vol, ADV20×f(t))` + clamp ≤50% tape | `trading_bot/executor.py`, `trading_bot/config.py` | `expected_volume_pacing_enabled` | **`False`** | `expected_volume_pacing_selfcheck.py` — **39/39** |
 | **P5** | Ghi 10 mức giá chờ vào `dnse_raw_<date>.jsonl` | `trading_bot/brokers.py` | không có cờ (logging thuần) | bật, throttle 60s/mã | `quote_l2_logging_selfcheck.py` — **44/44** |
 
@@ -36,6 +36,55 @@ thí nghiệm, không phải phỏng đoán — xem §4. Đó là một phát hi
 `kb/data_registry/price-volume/ticker_close_vs_price_dividend_adj.md`).
 
 Khi trần động ăn: `ceiling = min(mean(5 phiên)×(1+τ), max_no_chase_ceiling)`.
+
+### 1b. VÁ 2026-08-12 chiều — nến hôm nay chưa đóng lọt vào anchor (job `Taylor_20260812_112700`)
+
+**Lỗi (quant-skeptic bắt, log `mike/logs/verify_20260812_104435_640589.log`):** docstring hứa
+"N phiên **ĐÃ HOÀN TẤT**" nhưng code đặt `to_ts = now` rồi lấy `closes[-n:]` **không lọc theo
+mảng `t`**. Đã xác nhận bằng **probe LIVE** (18:28 ICT 12/08): DNSE trả **có** bar mang ngày hôm
+nay cho cả TV1 lẫn DGC (`t` = 09:00 ICT của ngày giao dịch). ⇒ chạy giữa phiên thì 1/5 anchor là
+**giá LIVE**, trần "không đuổi giá" tự đuổi theo chính cái giá nó phải chặn. 49 ca cũ **không
+thể** bắt được vì chúng bơm tay `anchor_prices` (đã qua bước tính).
+
+**Vá:** hàm mới `bar_is_completed_session(bar_ts, now)` + lọc từng bar theo `t` trước khi cắt
+`n` phần tử cuối. Quy tắc **không** phải "bỏ mọi bar mang ngày hôm nay" mà là *bar hôm nay chỉ
+tính là hoàn tất khi hôm nay là NGÀY GIAO DỊCH thật và phiên đã đóng (≥14:45)*:
+
+| Lúc đọc | Bar hôm nay | Vì sao |
+|---|---|---|
+| Cron thật 20:30 ICT | **DÙNG** | phiên đã đóng ⇒ đúng nghĩa "hoàn tất"; bỏ đi chỉ làm anchor già thêm 1 phiên mà không an toàn hơn |
+| Dry-run giữa phiên / ATO / ATC | **LOẠI** | `c` là giá live đang chạy |
+| PRE 00:00–09:00 | **LOẠI** | feed có thể trả bar stub |
+| T7/CN/lễ mà vẫn có bar mang ngày đó | **LOẠI** | rác feed (`session_phase` trả CLOSED cả cuối tuần ⇒ phải kiểm lịch riêng) |
+| Bar mang ngày tương lai | **LOẠI** | rác feed |
+
+Fail-safe **thêm** (không có đường fail-open): thiếu mảng `t` hoặc `len(t) ≠ len(c)` hoặc
+timestamp không parse được ⇒ `None` ⇒ trần **cố định**. Không đoán bừa theo vị trí mảng.
+Kèm §16: `to_ts` nay gắn TZ ICT tường minh trước `.timestamp()` (`now_ict()` trả datetime NAIVE
+nên `.timestamp()` trần trụi diễn giải theo TZ của process).
+
+**Selfcheck:** thêm khối **G — 28 ca** bơm **payload DNSE dạng THÔ** (mảng `t`+`c`, đơn vị nghìn
+đồng đúng như feed thật) và neo `now` tường minh ⇒ đi qua đúng `anchor_prices_for()`. Có ca
+**chứng minh ngược** (G16): trên cùng payload, code CŨ cho trần **21.815** vs code MỚI **20.764**
+— lỗi có hậu quả số học thật, không phải lý thuyết. Tổng **77/77 PASS**, `rc=0`, tái lập giống
+hệt dưới `env -u TZ`, `TZ=America/New_York`, `TZ=Pacific/Kiritimati`.
+
+**Dry-run LIVE (điều kiện tiên quyết quant-skeptic đặt ra — ĐÃ LÀM, 18:33 ICT 12/08)**, script
+`mike/agents/Taylor/research/probe_p1_anchor_live_20260812.py` (không ghi file, không bật cờ ở
+state thật, state dựng trong bộ nhớ):
+
+- TV1 anchor live = `[19.500, 19.700, 19.800, 20.200, 20.300]` → `mode=dynamic`, ceiling
+  **20.497**, resting 20.394 (giá live 20.300).
+- DGC anchor live = `[43.350, 44.200, 43.600, 44.100, 43.800]` → đường gọi chạy sạch (số band in
+  ra là **hình dạng**, không phải band thật: DGC chưa có state/`max_no_chase_ceiling` riêng).
+- Cùng payload live, ép `now` = 11:00 ⇒ bar 08-12 **bị loại thật** ở cả 2 mã, cửa sổ lùi 1 phiên.
+- **4 nhánh `[FAILSAFE]` in đúng trên đường live**: mã không tồn tại (`HTTP 400: invalid symbol`),
+  `sessions=99` (`còn 82 phiên ĐÃ HOÀN TẤT < 99`), broker không có client, cờ tắt (⇒ `None`,
+  **0 lời gọi API**). Guard sanity cũng bắt bằng **dữ liệu live thật**: anchor DGC (43.800) áp
+  lên giá TV1 (20.300) ⇒ `fixed_failsafe`; anchor chia 1000 (sai đơn vị) ⇒ `fixed_failsafe`.
+
+⇒ Điều kiện "đường gọi live phải được chạy thử trước khi bật paper" **đã đóng**. Cái còn thiếu để
+bật P1 vẫn **chỉ là** `max_no_chase_ceiling` (số VND) — quyết định **chính sách của user**.
 
 ### Hai điều KHÔNG hiển nhiên, đã xử lý
 
@@ -231,9 +280,10 @@ bằng cách nào**. Ba việc đã làm khác đi:
   ở `kb/projects/lag-adv-filter-tracking.md`. ⇒ paper trial ≥4 tuần trước khi nghĩ tới production.
 - **P5 chưa trả lời được câu hỏi nào cả** — nó chỉ **bắt đầu tích luỹ** dữ liệu. Mọi con số
   depth-aware sizing trước 4–6 tuần nữa vẫn là bịa, y như README đã kết luận.
-- **`anchor_prices_for()` gọi DNSE ohlc — chưa chạy trên API thật** (cờ tắt nên chưa có đường
-  gọi live). Ba lớp fail-safe che (exception → `None`; thiếu phiên → `None`; sai đơn vị → guard
-  sanity), nhưng lần bật paper đầu tiên **phải xem log** `[FAILSAFE]` để xác nhận đường này sống.
+- ~~**`anchor_prices_for()` gọi DNSE ohlc — chưa chạy trên API thật**~~ → **ĐÃ ĐÓNG 12/08 chiều**
+  (§1b): dry-run live TV1+DGC chạy sạch, 4 nhánh `[FAILSAFE]` in đúng, guard sanity bắt bằng dữ
+  liệu live thật. Cùng lượt đó phát hiện + vá lỗi **nến hôm nay chưa đóng lọt vào anchor**.
+  Vẫn nên xem log `[FAILSAFE]`/`[anchor] loại N bar` ở lần bật paper đầu tiên.
 
 ---
 
@@ -242,11 +292,12 @@ bằng cách nào**. Ba việc đã làm khác đi:
 | File | Repo | Nội dung |
 |---|---|---|
 | `trading_bot/discretionary_accumulation.py` | WorkingClaude | P1 — `resolve_price_band()` + hằng số + fail-safe |
-| `mike/bin/discretionary_accumulation_inject.py` | mike | P1 — `anchor_prices_for()` lấy 5 phiên từ DNSE ohlc |
+| `mike/bin/discretionary_accumulation_inject.py` | mike | P1 — `anchor_prices_for()` lấy 5 phiên từ DNSE ohlc **+ `bar_is_completed_session()` lọc nến chưa đóng (vá 12/08 chiều, §1b)** |
+| `mike/agents/Taylor/research/probe_p1_anchor_live_20260812.py` | mike | mới — dry-run đường gọi LIVE + 4 nhánh `[FAILSAFE]` (§1b) |
 | `trading_bot/executor.py` | WorkingClaude | P2 — `_expected_vol_frac()`, `_expected_vol_basis()`, sửa `_child_qty` |
 | `trading_bot/config.py` | WorkingClaude | P2 — 3 khoá cấu hình (cờ + clamp + đường cong `f(t)`) |
 | `trading_bot/brokers.py` | WorkingClaude | P5 — `_l2_levels()`, `_log_l2()`, 1 dòng gọi trong `get_quote` |
-| `dynamic_no_chase_ceiling_selfcheck.py` | WorkingClaude | mới — 49 ca |
+| `dynamic_no_chase_ceiling_selfcheck.py` | WorkingClaude | mới — 49 ca + **khối G 28 ca payload DNSE thô (§1b)** = 77 |
 | `expected_volume_pacing_selfcheck.py` | WorkingClaude | mới — 39 ca |
 | `quote_l2_logging_selfcheck.py` | WorkingClaude | mới — 44 ca |
 
@@ -269,8 +320,13 @@ phải gỡ 1 dòng gọi `_log_l2` trong `get_quote`; cố ý để vậy vì n
 
 ## 7. Bước kế tiếp (đề xuất, không tự làm)
 
-1. **quant-skeptic verify** cả 3 phần — trước khi bật bất cứ gì (thứ tự HYBRID: verify TRƯỚC).
+1. ~~**quant-skeptic verify** cả 3 phần~~ → **XONG 12/08**: CONFIRMED, confidence **cao**
+   (`mike/logs/verify_20260812_104435_640589.log`). Hai khiếm khuyết nó bắt: (a) nến-hôm-nay ở P1
+   → **đã vá + đã dry-run live**, §1b; (b) công thức clamp P2 khi ship ≠ công thức đã đo → **CÒN
+   MỞ**, phải chạy lại `exp_expected_floor.py` theo clamp ship và **định cỡ paper trial theo
+   fill 0,829 (gain +4,6pp), KHÔNG phải 0,860 (+7,7pp)**.
 2. **P5 bật ngay được sau verify** — nó chỉ là log, và mỗi ngày chờ là một ngày mất dữ liệu.
 3. **P1 cần user chốt `max_no_chase_ceiling`** (số VND) — đây là quyết định **chính sách**, §22.
+   Đây giờ là **rào cản DUY NHẤT** còn lại của P1 (rào cản kỹ thuật đã đóng ở §1b).
 4. **P2 paper trial ≥4 tuần** theo đúng mẫu HYBRID, rồi mới bàn production.
 5. **Riêng: 4 selfcheck đỏ từ 08-10** — một lượt riêng, đừng gộp vào việc này.

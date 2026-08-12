@@ -27,6 +27,7 @@ import glob
 import json
 import os
 import sys
+from zoneinfo import ZoneInfo
 
 WC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, WC_ROOT)
@@ -35,7 +36,10 @@ from trading_bot.discretionary_accumulation import (
     compute_session_order, validate_state, BOOK, DYNAMIC_CEILING_SESSIONS_DEFAULT)
 from trading_bot.config import live_dnse_labels
 from trading_bot.plan_cash_commitment import gate_injected_order, replan_dropped_injection
-from trading_bot.vn_market import session_phase, now_ict, normalize_price_vnd
+from trading_bot.vn_market import (
+    session_phase, now_ict, normalize_price_vnd, is_holiday)
+
+_ICT_TZ = ZoneInfo("Asia/Ho_Chi_Minh")   # §16: neo TZ tường minh, không tin TZ của process
 
 # Phiên đang giao dịch (09:00–14:45 T2-T6) → day_volume của DNSE là KL DỞ DANG. Cơ chế
 # opportunistic (compute_session_order) giả định day_volume là KHỐI LƯỢNG CẢ PHIÊN đã chốt để
@@ -117,7 +121,38 @@ def prev_session_market(broker, ticker):
     return float(vol) * float(price), float(price)
 
 
-def anchor_prices_for(broker, state, ticker):
+def bar_is_completed_session(bar_ts, now=None):
+    """Bar 1D của DNSE (timestamp `t` = 09:00 ICT của NGÀY GIAO DỊCH đó) đã là phiên HOÀN TẤT chưa?
+
+    True = phiên đã đóng ⇒ giá đóng cửa dùng được làm anchor.
+    False = bar CHƯA hoàn tất (nến hôm nay đang chạy, hoặc bar ngày tương lai) ⇒ phải LOẠI.
+    None = timestamp không parse được ⇒ caller fail-safe (bỏ trần động).
+
+    Vì sao KHÔNG loại thẳng mọi bar mang ngày hôm nay: cron thật chạy 20:30 ICT, lúc đó phiên
+    hôm nay ĐÃ đóng (14:45) nên giá đóng cửa hôm nay LÀ một phiên hoàn tất — bỏ nó đi làm anchor
+    già thêm 1 phiên mà không tăng độ an toàn. Cái phải chặn là bar đọc GIỮA phiên (dry-run
+    11:00) hoặc TRƯỚC phiên (PRE, 00:00–09:00, DNSE có thể trả bar stub), vì lúc đó `c` là giá
+    LIVE đang chạy ⇒ trần "không đuổi giá" bị nhiễm chính cái giá nó đang đuổi.
+    """
+    now = now or now_ict()
+    try:
+        bar_date = dt.datetime.fromtimestamp(int(bar_ts), _ICT_TZ).date()
+    except (TypeError, ValueError, OSError, OverflowError):
+        return None
+    today = now.date()
+    if bar_date < today:
+        return True
+    if bar_date > today:
+        return False                      # bar ngày tương lai = rác feed
+    # Bar HÔM NAY: chỉ hoàn tất khi hôm nay là NGÀY GIAO DỊCH thật và phiên đã đóng (≥14:45).
+    # Cuối tuần/lễ mà vẫn có bar mang ngày hôm nay ⇒ rác, loại (session_phase trả CLOSED cho cả
+    # T7/CN nên phải kiểm lịch riêng, không dựa mỗi tên phiên).
+    if now.weekday() >= 5 or is_holiday(today):
+        return False
+    return session_phase(now)[0] == "CLOSED"
+
+
+def anchor_prices_for(broker, state, ticker, now=None):
     """Giá đóng cửa N phiên ĐÃ HOÀN TẤT gần nhất (cũ→mới) cho luật trần động P1, hoặc None.
 
     CHỈ gọi khi state bật `dynamic_ceiling.enabled` — mặc định (cờ tắt) hàm này không chạy,
@@ -128,6 +163,12 @@ def anchor_prices_for(broker, state, ticker):
     kb/data_registry/price-volume/ticker_close_vs_price_dividend_adj.md). Đây là dữ liệu LỊCH
     SỬ (phiên đã đóng) nên không phạm luật same-day §6, nhưng dùng DNSE vẫn là lựa chọn đúng
     hơn: một feed, một cơ sở giá.
+
+    ⚠️ DNSE TRẢ CẢ NẾN HÔM NAY (xác nhận bằng probe live 2026-08-12 18:28 ICT: TV1/DGC đều có
+    bar `t`=09:00 ICT ngày 08-12). Vì vậy PHẢI lọc theo mảng `t`, không được lấy `c[-n:]` trần
+    trụi — đọc giữa phiên thì `c` cuối là giá LIVE, làm trần "không đuổi giá" nhiễm đúng cái
+    giá nó đang đuổi (lỗi quant-skeptic bắt được ở log verify_20260812_104435_640589).
+    `now` = neo thời gian để test tất định; None → now_ict().
 
     None ⇒ engine tự fail-safe về trần CỐ ĐỊNH (không chèn lệnh sai, không crash).
     """
@@ -142,19 +183,44 @@ def anchor_prices_for(broker, state, ticker):
             return None
         # Lấy dư (n+10 phiên lịch, ~2 tuần) rồi cắt n phần tử cuối: DNSE trả theo phiên GIAO
         # DỊCH nên nghỉ lễ/cuối tuần không tạo lỗ hổng, nhưng lấy dư vẫn rẻ và chống hụt.
-        to_ts = int(now_ict().timestamp())
+        # §16: gắn TZ ICT tường minh trước khi .timestamp() — now_ict() trả datetime NAIVE nên
+        # .timestamp() trần trụi sẽ diễn giải theo TZ của process (sai khi cron/test không có TZ).
+        now_eff = now or now_ict()
+        to_ts = int(now_eff.replace(tzinfo=_ICT_TZ).timestamp())
         from_ts = to_ts - (n + 20) * 86400
         raw = client.ohlc(ticker, resolution="1D", **{"from": from_ts, "to": to_ts})
     except Exception as exc:
         print(f"  [FAILSAFE] {ticker}: DNSE ohlc lỗi ({exc}) → trần động không kích hoạt")
         return None
     closes = raw.get("c") if isinstance(raw, dict) else None
-    if not isinstance(closes, list) or len(closes) < n:
-        print(f"  [FAILSAFE] {ticker}: ohlc trả {len(closes) if isinstance(closes, list) else 'n/a'} "
-              f"phiên < {n} → trần động không kích hoạt")
+    stamps = raw.get("t") if isinstance(raw, dict) else None
+    # `t` BẮT BUỘC phải có và khớp độ dài `c`: không có nó thì KHÔNG biết bar nào là phiên hoàn
+    # tất ⇒ không giữ được lời hứa của docstring ⇒ fail-safe (KHÔNG đoán bừa theo vị trí mảng).
+    if (not isinstance(closes, list) or not isinstance(stamps, list)
+            or len(stamps) != len(closes) or not closes):
+        print(f"  [FAILSAFE] {ticker}: ohlc thiếu/lệch mảng t↔c "
+              f"(t={len(stamps) if isinstance(stamps, list) else 'n/a'}, "
+              f"c={len(closes) if isinstance(closes, list) else 'n/a'}) → trần động không kích hoạt")
+        return None
+    completed, n_dropped = [], 0
+    for ts, v in zip(stamps, closes):
+        ok = bar_is_completed_session(ts, now)
+        if ok is None:
+            print(f"  [FAILSAFE] {ticker}: timestamp bar không parse được ({ts!r}) → bỏ trần động")
+            return None
+        if ok:
+            completed.append(v)
+        else:
+            n_dropped += 1
+    if n_dropped:
+        print(f"  [anchor] {ticker}: loại {n_dropped} bar CHƯA hoàn tất (nến hôm nay đang chạy / "
+              f"bar tương lai) — anchor chỉ dùng phiên đã đóng")
+    if len(completed) < n:
+        print(f"  [FAILSAFE] {ticker}: ohlc còn {len(completed)} phiên ĐÃ HOÀN TẤT < {n} "
+              f"→ trần động không kích hoạt")
         return None
     out = []
-    for v in closes[-n:]:
+    for v in completed[-n:]:
         try:
             # Cùng chuẩn hoá đơn vị với Quote (một số feed DNSE trả giá đơn vị NGHÌN). Kể cả
             # nếu hàm này sai, guard sanity trong resolve_price_band vẫn bắt được (anchor lệch
