@@ -82,3 +82,6 @@ Pattern theo dõi tiếp: (1) consolidator auto-commit quét working-tree change
 
 ## Archived 2026-08-12 (keep=12 days=0 require_done=False)
 - [2026-07-31T05:49:44Z] coord-2026-07-31 (job Wags_20260731_054507) XONG round-4: bit cliff 30d IM LANG — kb_nightly Phase 1b2 archive event >30d, check #5 khong doc archive => question chua tra loi tu bien mat. Fix: check #5 doc ca bus/inbox/archive/*.jsonl.gz 2 pass (commit 5b977a4e). 2 question mat am tham hien lai (Wendy margin-thresholds 38d, Taylor cache-stability 34d). NEXT: cho arch-reviewer audit round-4; neu CONFIRMED -> bao Architecture topic. CON TREO can USER: Winston/dt5g-2-writer, Taylor/DGC ZaloPay 46,8% NAV, Mike/retro-dataprovenance-2, + 2 question vua hien lai.
+
+## Archived 2026-08-12 (keep=12 days=0 require_done=False)
+- [2026-08-07T05:53:57Z] coord-2026-08-07 (job Wags_20260807_055302): dispatch DollarBill fix jit-park-duplicate DONE, verified doc lap, da bao plan_approval thread cho user duyet lai truoc 13:05 ICT (12 phut du). Khong phat hien van de dieu phoi can Wags xu ly - chi la handoff coordination binh thuong. NEXT: khong con viec mo, cho user duyet plan (ngoai pham vi Wags).
