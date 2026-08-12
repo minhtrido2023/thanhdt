@@ -136,6 +136,30 @@ mới nêu hai phiên. Hai chỗ bị bác đúng, đã sửa trong lượt này
    ĐO LẠI từ ca chạy được — rơi nhanh **7,39% NAV** (I1) → 5,49% khi có trần (I2); sai đơn vị
    **51,26% NAV** (I6) → 5,31% (I7); và **I8** chứng minh mặt kia của bờ: ở lệnh hợp lệ thật
    (1.800cp) trần này KHÔNG bind — nếu nó bind ở ca thật thì nó là núm sizing lén, không phải lưới.
+
+## 6c. Vòng quant-skeptic 2 — CONFIRMED, và một ĐÍNH CHÍNH bắt buộc tôi phải nhận
+
+Verdict CONFIRMED (`mike/logs/verify_20260812_171207_919655.log`); reviewer tái lập độc lập 93/93
+× 4 điều kiện TZ, hồi quy 4/4, và khớp từng số (I2 5,49% · I7 5,31% · I8 1.800cp/36.709.200đ ·
+ZaloPay 1.200cp/24.472.800đ/4,74%). Nhưng **một tuyên bố của tôi bị bác đúng**:
+
+- ❌ **"Trần ngân sách là lớp DUY NHẤT đứng giữa feed sai đơn vị và lệnh phình 100×" — SAI thứ tự
+  lớp.** `cap_vnd = per_session_cap_pct_adv × adv_ref_vnd` (72,0tr) là bờ tính bằng **TIỀN**, nên
+  nó **miễn nhiễm với lỗi đơn vị GIÁ**. Con số 51,26% chỉ đạt được vì harness thổi `adv_ref` lên
+  5 tỷ (~7× thật) để **cô lập** lớp — đúng cho việc đo riêng, nhưng tôi đã bê nó vào comment
+  production mà không mang theo điều kiện đó, khiến bán kính vụ nổ đọc ra **nặng gấp ~7 lần thực
+  tế**. Đã sửa: thêm cặp ca ở `adv_ref` THẬT — **I10/I11** (bờ NGOÀI một mình giữ ở **7,35% NAV**,
+  và neo bất biến `worst_cost ≤ cap_vnd` để ai nới `per_session_cap_pct_adv`/`adv_ref_vnd` sau này
+  không lặng lẽ gỡ mất lưới còn lại) và **I12** (bờ TRONG siết tiếp **7,35% → 5,31%**). Comment
+  trong `discretionary_accumulation.py` nay nói rõ **hai bờ và thứ tự của chúng**. Số reviewer
+  đưa ra tôi tái lập khớp tuyệt đối. **96/96 PASS.**
+- ✏️ **"12 lần liên tiếp `status=completed`" — thiếu chính xác, đã sửa.** Trong log có **9** dòng
+  `status=completed` (SpaceX) và 22 dòng no-op; phần ZaloPay là **no-op vì CHƯA CÓ state**, không
+  phải `completed`. Chẩn đoán không đổi, nhưng hai cách hỏng khác nhau thì không được gộp số.
+- ✅ **Reviewer sai một điểm, tôi giữ nguyên:** `data/execution_logs/exec_SpaceX_2026-08-12_report.md`
+  **CÓ tồn tại** (351 byte, 14:45 ngày 08-12; dòng `BUY-TV1-DISC-01 | TV1 | buy | 1,900 | 0 | 0%`).
+  Reviewer báo không có và trích journal thay thế — kết luận trùng nhau nên không đổi gì về nội
+  dung, nhưng trích dẫn của tôi đúng và giữ nguyên.
 3. **Vi phạm §23 quy ước 1** (20 assertion đè lên state file SỐNG): đã tách — file thật chỉ kiểm
    **bất biến** (validate, account/ticker khớp tên file, trần ≤ 25.000, anchor 99.000 vẫn bị kẹp),
    còn **giá trị** cấu hình đã duyệt kiểm trên fixture đóng băng
@@ -149,8 +173,9 @@ mới nêu hai phiên. Hai chỗ bị bác đúng, đã sửa trong lượt này
    thì cơ chế vô hiệu vì injector thấy trùng lệnh" **CHỈ ĐÚNG CHO SpaceX** — plan SpaceX có sẵn
    order `book=DISCRETIONARY_SPECIAL` nên `already_injected()` khớp tuyệt đối. **ZaloPay KHÔNG có
    lá chắn đó** (plan 08-13 có 0 lệnh). Cron `20:30 ICT T2-T6` vẫn sống, và cả hai state nay
-   `status=active` ⇒ **lần chạy 20:30 ngày 2026-08-13 SẼ chèn ~1.200cp (~24,47tr, ~4,74%
-   active_nav) vào plan ZaloPay 08-14**, dù KB chưa promote.
+   `status=active` ⇒ **lần chạy 20:30 ngày 2026-08-13 sẽ chèn ~1.200cp (~24,47tr, ~4,74%
+   active_nav) vào plan ZaloPay 08-14** — **CÓ ĐIỀU KIỆN**, xem mục 1b ngay dưới — dù KB chưa
+   promote.
    - Đó **đúng là kết cục dispatch yêu cầu** ("lần kế tiếp DollarBill lập plan sẽ tự đọc đúng
      nguồn"), cổng duyệt người lúc 21:00 còn nguyên, và cash-gate vẫn trừ phần V2.4 đã dự chi —
      nên đây là **thiếu sót CÔNG BỐ, không phải tiền tự đi**. Nhưng nó rơi đúng vào account đang
@@ -160,6 +185,20 @@ mới nêu hai phiên. Hai chỗ bị bác đúng, đã sửa trong lượt này
      khi ZaloPay chạy trần động đúng. Cùng một luận điểm, hai account thực thi lệch nhau. Khuyến
      nghị: **promote KB** (gỡ bất đối xứng theo chiều đúng) thay vì hạ `status` ZaloPay — hạ
      ZaloPay chỉ kéo dài đúng cái hỏng mà job này sinh ra để sửa. Đã ghi `question` lên bus.
+1b. **`compute_active_nav.py` KHÔNG CÓ CRON** — phát hiện của quant-skeptic vòng 2, tôi đã tự
+   kiểm (`crontab -l | grep -c compute_active_nav` = **0**). Đây là §14 đúng nghĩa: cổng tươi
+   `computed_at == hôm nay` của injector treo vào một producer **chạy tay/ad-hoc trong chuỗi lập
+   plan ~19:0x**, không ai giám sát.
+   - **Hệ quả TỨC THÌ, làm dịu mục 1**: ngay lúc này cả hai file đọc `computed_at=2026-08-12`
+     trong khi hôm nay đã là **2026-08-13** ⇒ nếu không ai chạy lại producer trong chuỗi lập plan
+     chiều nay thì **20:30 hôm nay injector FAIL-CLOSED (không chèn gì)**, chỉ ghi note vào plan.
+     Tức câu "SẼ chèn" phải đọc là **"sẽ chèn NẾU chuỗi lập plan chạy producer như thường lệ"** —
+     hỏng an toàn theo chiều tốt, nhưng đó là may mắn của thiết kế fail-closed chứ không phải một
+     bảo đảm ai đó đã cân nhắc.
+   - **Việc thật cần làm** (chưa làm, ngoài phạm vi dispatch này): hoặc cron hoá producer, hoặc
+     cho injector **ESCALATE** (không chỉ ghi note) khi fail-closed **hai ngày liên tiếp** — vì
+     hiện tại một chương trình gom có thể im lặng đứng hình nhiều phiên mà chỉ để lại note trong
+     plan, đúng lớp lỗi mà job này sinh ra để chấm dứt.
 2. **Bug đơn vị turnover** (riêng, chưa sửa): `latest_trade.totalVolumeTraded` ở đơn vị **10 CP**
    — đo 2026-08-12: TV1 trả 3.950 khi KL thật 39.500; DRI 101.160 vs 1.011.600; đối chiếu
    `grossTradeAmount` 0,8044 (tỷ) khớp `39.500 × 20.300`. ⇒ `prev_session_market()` khai thiếu
