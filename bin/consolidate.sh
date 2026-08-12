@@ -150,9 +150,13 @@ if [ -s "$NEW" ]; then
     *)
       echo "$(date -u +%FT%TZ) ⛔ KB v$kbver KHÔNG ĐƯỢC COMMIT ($cstate) — kb/ đã ghi ra đĩa nhưng còn dirty:" >&2
       echo "$cerr" >&2
-      # Debounced on the REASON, same shape as the cursor-repair warning above and for the same
-      # reason: this runs ~50x/day, so a block that can't self-clear would make the alarm itself
-      # the event storm. A different reason still alerts immediately; success clears the mark.
+      # Debounced on $cstate — the FAILURE CLASS (add-failed | commit-refused), NOT the gate's
+      # detailed reason (arch-review round 3 corrected the round-2 description of this). Same
+      # shape as the cursor-repair warning above and for the same reason: this runs ~50x/day, so
+      # a block that can't self-clear would make the alarm itself the event storm. Consequence
+      # of keying on the class: a DIFFERENT gate reason under the SAME class stays silent until
+      # a success clears the mark — accepted, the full reason is on stderr/$LOG every run.
+      # Switching class (or any success) alerts/clears immediately.
       if [ "$cstate" != "$(cat "$CMARK" 2>/dev/null || true)" ]; then
         printf '%s' "$cstate" > "$CMARK"
         "$ROOT/bin/notify.sh" "⛔ consolidate.sh KHÔNG commit được KB v$kbver ($cstate) — kb/ còn dirty, KHÔNG có commit nào:

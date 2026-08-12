@@ -261,6 +261,28 @@ def main():
         check("25 CALLER: with no live foreign job, consolidate.sh DOES commit and DOES say so",
               cons.get("clear_commits") is True and cons.get("clear_says_success") is True,
               str(cons))
+
+        # Cases 22-25 cover consolidate.sh's own log line. kb_nightly.sh Phase 4.6 needed the
+        # SAME question asked one level up (arch-review round 3, 2026-08-12): round 2 fixed the
+        # log line INSIDE _ctxbloat_autofix_one but left it returning 0 on both branches, so the
+        # CALLER still Discord-announced "đã tự nén xong ... đã commit — không cần người can
+        # thiệp" on a refused commit and deleted the episode stamp. A log line nobody reads was
+        # right while the human-facing channel kept the false success.
+        kbn = _kb_nightly_caller()
+        check("26 CALLER: kb_nightly Phase 4.6 does NOT tell a human \"đã commit\" when refused",
+              kbn.get("blocked_no_false_success") is True, str(kbn))
+        check("27 CALLER: refused run says the compression is on disk but NOT committed",
+              kbn.get("blocked_says_uncommitted") is True, str(kbn))
+        check("28 CALLER: refused run really produced no commit, and the file IS compressed",
+              kbn.get("blocked_no_commit") is True and kbn.get("blocked_file_shrunk") is True,
+              str(kbn))
+        check("29 CALLER: refused run keeps the episode stamp (episode is NOT closed)",
+              kbn.get("blocked_stamp_kept") is True, str(kbn))
+        # Control — without it, a Phase 4.6 that never reports success would pass 26-29.
+        check("30 CALLER: with no live foreign job, Phase 4.6 DOES commit, says ✅ đã commit, "
+              "and clears the stamp",
+              kbn.get("clear_commits") is True and kbn.get("clear_says_success") is True
+              and kbn.get("clear_stamp_removed") is True, str(kbn))
     finally:
         for p in _procs:
             try:
@@ -456,6 +478,143 @@ def _consolidate_caller():
         r2 = consolidate()
         res["clear_commits"] = head_count() == n1 + 1
         res["clear_says_success"] = SUCCESS in r2.stdout
+    except Exception as exc:
+        res["error"] = repr(exc)
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+    return res
+
+
+def _ctxbloat_block():
+    """The REAL Phase 4.6 body of bin/kb_nightly.sh, sliced out by content markers (not by line
+    number, and never re-typed): a test against a hand-copied paraphrase proves nothing about
+    the script cron runs. Raises if either marker moves — a fixture that silently tests an empty
+    string would be worse than no fixture."""
+    with open(os.path.join(ROOT, "bin", "kb_nightly.sh"), encoding="utf-8") as f:
+        lines = f.read().splitlines(True)
+    starts = [i for i, l in enumerate(lines) if l.startswith("_ctx_kb_or_missing() {")]
+    ends = [i for i, l in enumerate(lines)
+            if l.strip() == 'log "Context-bloat episode cleared."']
+    if len(starts) != 1 or len(ends) != 1 or ends[0] <= starts[0]:
+        raise RuntimeError("kb_nightly.sh Phase 4.6 markers moved: starts=%s ends=%s"
+                           % (starts, ends))
+    return "".join(lines[starts[0]:ends[0] + 2])   # +2 = the log line and its closing `fi`
+
+
+def _kb_nightly_caller():
+    """Run the REAL kb_nightly.sh Phase 4.6 block in a throwaway repo with the real gate
+    installed as .git/hooks/pre-commit and a real live foreign Wags job that declared
+    --write-scope over the very file being compressed. Only the outward calls are stubbed —
+    dispatch.sh (stands in for the compressing agent) and every notifier, because a selfcheck
+    must never reach Discord. The fact-check, the mv, the git add/commit, the return-code
+    routing and the caller's message/stamp handling are all the shipped code.
+
+    Asserts the refused commit is reported AS refused on the human channel, then — the control
+    that keeps this from being tautological — that the same block really does commit, say
+    "đã commit", and close the episode once the foreign job is gone."""
+    res = {}
+    tmp = tempfile.mkdtemp(prefix="ccgate_kbn_")
+    try:
+        repo = os.path.join(tmp, "mike")
+        shutil.copytree(os.path.join(ROOT, "bin"), os.path.join(repo, "bin"))
+        for d in ("kb", "bus/inbox", "bus/jobs", "state", "logs"):
+            os.makedirs(os.path.join(repo, *d.split("/")), exist_ok=True)
+        notify_log = os.path.join(repo, "logs", "notify_stub.log")
+        for s in ("notify.sh", "notify_thread.sh", "notify_discord.sh", "notify_telegram.sh",
+                  "append_event.sh"):
+            p = os.path.join(repo, "bin", s)
+            with open(p, "w", encoding="utf-8") as f:
+                f.write('#!/usr/bin/env bash\nprintf "%s\\n" "$*" '
+                        '>> "$(dirname "$0")/../logs/notify_stub.log"\nexit 0\n')
+            os.chmod(p, 0o755)
+
+        # Facts the mechanical fact-check must find intact on both sides; filler is the only
+        # thing the stub "agent" drops (no date/%/KB/sha/job-id/filename tokens in it).
+        FACTS = ("# context pack\nFACT 2026-08-12: nguong 45KB, giam 12,5% — commit 0ffda43e,"
+                 " job Wags_20260812_052131, file bin/kb_nightly.sh.\n")
+        FILLER = "cau van dien giai lap lai, khong mang du lieu moi.\n"
+        big = FACTS + FILLER * 1200          # > 45KB
+        small = FACTS + FILLER * 200         # < 45KB, every fact kept
+        cp = os.path.join(repo, "kb", "context_pack.md")
+
+        def reset_file():
+            with open(cp, "w", encoding="utf-8") as f:
+                f.write(big)
+        reset_file()
+        for name, body in (("MIKE.md", "# mike\n"),
+                           (os.path.join("kb", "coding_guidelines.md"), "# guidelines\n")):
+            with open(os.path.join(repo, name), "w", encoding="utf-8") as f:
+                f.write(body)
+
+        # dispatch.sh stub = the compressing agent: writes the .proposed sibling and stops,
+        # exactly what the real prompt demands. The caller still runs ctxbloat_fact_check.py
+        # on it for real.
+        with open(os.path.join(repo, "bin", "dispatch.sh"), "w", encoding="utf-8") as f:
+            f.write('#!/usr/bin/env bash\ncat > "$(dirname "$0")/../kb/context_pack.md.proposed"'
+                    " <<'EOF'\n" + small + "EOF\nexit 0\n")
+        os.chmod(os.path.join(repo, "bin", "dispatch.sh"), 0o755)
+
+        env = dict(os.environ)
+        env.pop("JOB_ID", None)
+        for c in (["git", "init", "-q", "."], ["git", "config", "user.email", "t@t"],
+                  ["git", "config", "user.name", "t"], ["git", "add", "-A"],
+                  ["git", "commit", "-q", "-m", "init"]):
+            subprocess.run(c, cwd=repo, capture_output=True, env=env)
+        hook = os.path.join(repo, ".git", "hooks", "pre-commit")
+        shutil.copy(GATE, hook)
+        os.chmod(hook, 0o755)
+
+        runner = os.path.join(repo, "run_phase46.sh")
+        with open(runner, "w", encoding="utf-8") as f:
+            f.write('#!/usr/bin/env bash\nset -euo pipefail\n'
+                    'ROOT="%s"\ncd "$ROOT"\nLOG="$ROOT/logs/kb_nightly.log"\n'
+                    'log() { echo "[selfcheck] $*" | tee -a "$LOG"; }\n\n' % repo
+                    + _ctxbloat_block())
+        stamp = os.path.join(repo, "state", "ctxbloat_episode.txt")
+
+        def run_phase():
+            for p in (stamp, os.path.join(repo, "state", "ctxbloat_autofix_attempted.txt")):
+                if os.path.exists(p):
+                    os.remove(p)
+            open(notify_log, "w").close()
+            return subprocess.run(["bash", runner], cwd=repo, capture_output=True, text=True,
+                                  env=env)
+
+        def head_count():
+            r = subprocess.run(["git", "rev-list", "--count", "HEAD"], cwd=repo,
+                               capture_output=True, text=True, env=env)
+            return int(r.stdout.strip() or 0)
+
+        def notified():
+            with open(notify_log, encoding="utf-8") as f:
+                return f.read()
+
+        # --- BLOCKED: a live Wags job declared it is writing the very file we compress ---
+        write_job(os.path.join(repo, "bus", "jobs"), "Wags_ctx", pid=sleeper(), to="Wags",
+                  write_scope="kb/context_pack.md")
+        n0 = head_count()
+        r = run_phase()
+        msg = notified()
+        res["blocked_rc"] = r.returncode
+        res["blocked_no_false_success"] = "đã commit" not in msg and "✅" not in msg
+        res["blocked_says_uncommitted"] = "CHƯA COMMIT" in msg and "COMMIT TAY" in msg
+        res["blocked_no_commit"] = head_count() == n0
+        res["blocked_file_shrunk"] = os.path.getsize(cp) == len(small.encode("utf-8"))
+        res["blocked_stamp_kept"] = os.path.exists(stamp)
+        res["blocked_notify"] = msg.strip()[:200]
+
+        # --- CONTROL: same block, same breach, no foreign job → must really commit ---
+        os.remove(os.path.join(repo, "bus", "jobs", "Wags_ctx.json"))
+        reset_file()
+        subprocess.run(["git", "reset", "-q", "HEAD", "--", "."], cwd=repo,
+                       capture_output=True, env=env)
+        n1 = head_count()
+        r2 = run_phase()
+        msg2 = notified()
+        res["clear_rc"] = r2.returncode
+        res["clear_commits"] = head_count() == n1 + 1
+        res["clear_says_success"] = "✅" in msg2 and "đã commit" in msg2
+        res["clear_stamp_removed"] = not os.path.exists(stamp)
     except Exception as exc:
         res["error"] = repr(exc)
     finally:
