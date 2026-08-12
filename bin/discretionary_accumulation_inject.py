@@ -31,10 +31,11 @@ import sys
 WC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, WC_ROOT)
 
-from trading_bot.discretionary_accumulation import compute_session_order, validate_state, BOOK
+from trading_bot.discretionary_accumulation import (
+    compute_session_order, validate_state, BOOK, DYNAMIC_CEILING_SESSIONS_DEFAULT)
 from trading_bot.config import live_dnse_labels
 from trading_bot.plan_cash_commitment import gate_injected_order, replan_dropped_injection
-from trading_bot.vn_market import session_phase, now_ict
+from trading_bot.vn_market import session_phase, now_ict, normalize_price_vnd
 
 # Phiên đang giao dịch (09:00–14:45 T2-T6) → day_volume của DNSE là KL DỞ DANG. Cơ chế
 # opportunistic (compute_session_order) giả định day_volume là KHỐI LƯỢNG CẢ PHIÊN đã chốt để
@@ -116,6 +117,55 @@ def prev_session_market(broker, ticker):
     return float(vol) * float(price), float(price)
 
 
+def anchor_prices_for(broker, state, ticker):
+    """Giá đóng cửa N phiên ĐÃ HOÀN TẤT gần nhất (cũ→mới) cho luật trần động P1, hoặc None.
+
+    CHỈ gọi khi state bật `dynamic_ceiling.enabled` — mặc định (cờ tắt) hàm này không chạy,
+    không thêm một lời gọi API nào so với trước.
+
+    Nguồn = DNSE `/price/ohlc` resolution=1D — CÙNG feed với giá live đang dùng để đặt lệnh,
+    nên không có rủi ro lệch cơ sở giá (adjusted `Close` của BQ ≠ giá thị trường thật, xem
+    kb/data_registry/price-volume/ticker_close_vs_price_dividend_adj.md). Đây là dữ liệu LỊCH
+    SỬ (phiên đã đóng) nên không phạm luật same-day §6, nhưng dùng DNSE vẫn là lựa chọn đúng
+    hơn: một feed, một cơ sở giá.
+
+    None ⇒ engine tự fail-safe về trần CỐ ĐỊNH (không chèn lệnh sai, không crash).
+    """
+    cfg = state.get("dynamic_ceiling") or {}
+    if cfg.get("enabled") is not True:
+        return None
+    n = int(cfg.get("sessions", DYNAMIC_CEILING_SESSIONS_DEFAULT) or DYNAMIC_CEILING_SESSIONS_DEFAULT)
+    try:
+        client = getattr(broker, "client", None)
+        if client is None:
+            print(f"  [FAILSAFE] {ticker}: broker chưa có client DNSE → không lấy được anchor")
+            return None
+        # Lấy dư (n+10 phiên lịch, ~2 tuần) rồi cắt n phần tử cuối: DNSE trả theo phiên GIAO
+        # DỊCH nên nghỉ lễ/cuối tuần không tạo lỗ hổng, nhưng lấy dư vẫn rẻ và chống hụt.
+        to_ts = int(now_ict().timestamp())
+        from_ts = to_ts - (n + 20) * 86400
+        raw = client.ohlc(ticker, resolution="1D", **{"from": from_ts, "to": to_ts})
+    except Exception as exc:
+        print(f"  [FAILSAFE] {ticker}: DNSE ohlc lỗi ({exc}) → trần động không kích hoạt")
+        return None
+    closes = raw.get("c") if isinstance(raw, dict) else None
+    if not isinstance(closes, list) or len(closes) < n:
+        print(f"  [FAILSAFE] {ticker}: ohlc trả {len(closes) if isinstance(closes, list) else 'n/a'} "
+              f"phiên < {n} → trần động không kích hoạt")
+        return None
+    out = []
+    for v in closes[-n:]:
+        try:
+            # Cùng chuẩn hoá đơn vị với Quote (một số feed DNSE trả giá đơn vị NGHÌN). Kể cả
+            # nếu hàm này sai, guard sanity trong resolve_price_band vẫn bắt được (anchor lệch
+            # >2× giá mới nhất ⇒ fail-safe) — hai lớp, vì lỗi đơn vị đã cắn thật một lần rồi.
+            out.append(float(normalize_price_vnd(float(v))))
+        except (TypeError, ValueError):
+            print(f"  [FAILSAFE] {ticker}: giá ohlc không parse được ({v!r}) → bỏ trần động")
+            return None
+    return out
+
+
 def already_injected(plan, ticker):
     """Dedup: đã có order DISCRETIONARY_SPECIAL cho ticker này trong plan chưa?
     (bắt cả tranche chèn tay lẫn lần chạy trước — chống chèn trùng bất kể id scheme.)"""
@@ -180,12 +230,14 @@ def process_account(account, plan_date, dry_run):
 
         baseline = int(state.get("baseline_qty_before_program", 0) or 0)
         filled, broker = broker_filled_qty(account, account_id, ticker, baseline)
-        prev_turnover = prev_price = None
+        prev_turnover = prev_price = anchors = None
         if filled is not None and broker is not None:
             prev_turnover, prev_price = prev_session_market(broker, ticker)
+            anchors = anchor_prices_for(broker, state, ticker)   # None khi cờ P1 tắt (mặc định)
 
         order, decision = compute_session_order(
-            state, filled, prev_turnover, prev_price, plan_date, now_iso)
+            state, filled, prev_turnover, prev_price, plan_date, now_iso,
+            anchor_prices=anchors)
         print(f"  decision: {decision['action']} — {decision['reason']}")
 
         # đánh dấu completed vào state nếu engine báo (rule e: không mua quá)
