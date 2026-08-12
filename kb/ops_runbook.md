@@ -73,11 +73,22 @@ checker: nó tra không ra bằng chứng rồi báo như thể việc chưa xon
   question `wags-fix-not-confirmed:` như cũ; `INCONCLUSIVE`/rỗng (chuỗi kiểm chứng không ra phán
   quyết) → question **`wags-arch-review-inconclusive:`** + nói thẳng "KHÔNG phải arch-reviewer bác
   fix", kèm bằng chứng finding của Wags có trên bus hay không.
+  ⚠️ **Tách nhánh question mới thì PHẢI thêm tiền tố đó vào `WAGS_SELF_Q_PREFIXES`**
+  (`bin/ops_health_check.sh`) **CÙNG LÚC.** Chính bản tách 08-11 đã quên bước này: question
+  `wags-arch-review-inconclusive:` rơi vào `pending_q` → COORD_WARN → tự dispatch `wags_autofix`
+  mỗi chu kỳ checker cho ĐÚNG issue vừa không ra phán quyết, và job đó lại đẻ question cùng loại —
+  đúng vòng tự nuôi audit §14 (2026-07-31) tưởng đã đóng. Câu hỏi do CHÍNH pipeline sinh ra là
+  OUTPUT của vòng lặp; đưa lại vào INPUT là phản hồi dương. Selfcheck ca 11b
+  (`ops_health_check_selfcheck.py`) so danh sách này với bản thật, quên là FAIL.
 - **Verdict lấy từ ARTIFACT (bus), đừng lấy từ stdout của pipe.** stdout đã nhiễu thật 2 lần
   (2026-07-08 `notify_thread.sh` in `{"status":"sent"}` → 2 question giả; 2026-07-22T05:55Z
   INCONCLUSIVE, 8 ngày sau đóng lại là FALSE_ALARM). `bin/wags_bus_verdict.py` đọc verification
   arch-reviewer ghi deterministic trên bus; chỉ dùng để NÂNG lên CONFIRMED khi stdout hỏng, không
   bao giờ dùng để hạ (bus im lặng = thiếu bằng chứng, giữ nguyên đường báo động).
+  **Nhưng luật một chiều thì phải canh cả chiều còn lại**: stdout=CONFIRMED mà bus nói KHÁC
+  (2 nguồn lẽ ra cùng một `verdict_json`) trước 08-12 đi thẳng vào ✅ HOÀN TẤT trong im lặng. Nay
+  vẫn KHÔNG tự hạ verdict, nhưng đổi ✅→🟠 + ghi pipelog để người đối chiếu. Nguyên tắc chung: mỗi
+  lần thêm một luật "chỉ X, không Y", hỏi ngay ca Y xảy ra thì ai thấy.
 
 ⚠️ Trước khi kết luận "báo động lặp = tooling hỏng": **đọc log/verdict thật của lần escalate đó**.
 Verdict có chẩn đoán cụ thể (trích đúng dòng code, tái lập được lỗi) là review THẬT — phải sửa,

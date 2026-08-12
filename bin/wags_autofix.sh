@@ -205,6 +205,9 @@ except Exception: print(\"?\")")"
 try: print(json.load(sys.stdin).get(\"summary\",\"\"))
 except Exception: print(\"\")")"
 
+  # WAGS_VERDICT_RECONCILE_BEGIN  (marker cho bin/wags_bus_verdict_selfcheck.py — nó TRÍCH đúng
+  # khối này ra chạy trên bus giả, KHÔNG copy lại thuật toán. Đổi/xoá marker ⇒ selfcheck FAIL
+  # ngay chứ không im lặng bỏ qua bất biến "chỉ nâng, không hạ".)
   # 2b) BẰNG CHỨNG TRƯỚC KHI BÁO ĐỘNG (2026-08-11, skill close-the-loop): verdict ở trên đọc
   #     từ STDOUT của pipe — kênh đã bị nhiễu thật 2 lần (2026-07-08 notify in {"status":
   #     "sent"} vào stdout -> 2 question wags-fix-not-confirmed GIẢ; 2026-07-22T05:55Z
@@ -221,8 +224,27 @@ except Exception: print(\"\")")"
     summary="$summary [verdict lay tu bus verification arch-reviewer; stdout pipeline cho: $verdict_stdout]"
   fi
 
+  # 2c) CHIỀU NGƯỢC LẠI — stdout=CONFIRMED nhưng bus verification nói KHÁC (2026-08-12,
+  #     arch-reviewer required_change #3). Luật "chỉ nâng, không hạ" ở 2b cố ý canh MỘT chiều,
+  #     nên trước bản này ca đó rơi thẳng vào nhánh CONFIRMED và báo ✅ HOÀN TẤT trong IM LẶNG
+  #     — vứt mất tín hiệu duy nhất cho thấy 2 nguồn lệch nhau. Lệch là BẤT THƯỜNG THẬT chứ
+  #     không phải nhiễu bình thường: _arch_review() ghi CÙNG một $verdict_json ra stdout LẪN
+  #     bus, nên 2 giá trị khác nhau chỉ có thể do (a) stdout bị nhiễu ở downstream, hoặc
+  #     (b) bus dính verification của một review KHÁC khớp cùng tiền tố "ARCH-REVIEW: wags-fix:
+  #     $LABEL" (wags_bus_verdict lấy latest-wins, tiền tố không phải khớp tuyệt đối).
+  #     KHÔNG tự hạ verdict (giữ nguyên bất biến 2b — bus không được dùng để bác fix), nhưng
+  #     PHẢI nói ra: đổi ✅ thành 🟠 + gắn cảnh báo vào chính tin báo, và ghi pipelog.
+  verdict_disagree=""
+  if [ "$verdict_stdout" = "CONFIRMED" ] && [ -n "$bus_verdict" ] && [ "$bus_verdict" != "CONFIRMED" ]; then
+    echo "[wags-autofix] BAT DONG 2 NGUON: stdout=CONFIRMED nhung bus verification=$bus_verdict -> KHONG tu ha verdict, nhung canh bao de nguoi doi chieu" >> "'"$PIPELOG"'"
+    verdict_disagree=" ⚠️ **2 NGUỒN BẤT ĐỒNG — ĐỪNG coi là đã xong khi chưa đối chiếu**: stdout pipeline=CONFIRMED nhưng bus verification=**$bus_verdict**. Cả hai lẽ ra cùng một verdict_json; lệch nghĩa là stdout bị nhiễu HOẶC bus khớp nhầm verification của review khác. Đọc bus verification '"'"'ARCH-REVIEW: wags-fix: $LABEL'"'"' + log trước khi tin."
+  fi
+  # WAGS_VERDICT_RECONCILE_END
+
   # 3) báo cáo hoàn tất vào topic architecture (user yêu cầu: báo khi issue hoàn tất)
-  if [ "$verdict" = "CONFIRMED" ]; then
+  if [ "$verdict" = "CONFIRMED" ] && [ -n "$verdict_disagree" ]; then
+    _notify_arch "🟠 **[wags-autofix] Issue '"'"'$LABEL'"'"': CONFIRMED nhưng 2 nguồn LỆCH NHAU** — Wags đã sửa, verdict đọc được: **CONFIRMED** ($summary).$verdict_disagree Log pipeline: '"$PIPELOG"'"
+  elif [ "$verdict" = "CONFIRMED" ]; then
     _notify_arch "✅ **[wags-autofix] HOÀN TẤT issue '"'"'$LABEL'"'"'** — Wags đã sửa, arch-reviewer audit: **CONFIRMED** ($summary). Chi tiết: bus finding '"'"'wags-fix: $LABEL'"'"' + verification cùng trace; log pipeline: '"$PIPELOG"'"
   elif [ "$verdict" = "NEEDS_CHANGES" ] || [ "$verdict" = "REFUTED" ]; then
     _notify_arch "⚠️ **[wags-autofix] Issue '"'"'$LABEL'"'"' CẦN NGƯỜI XEM** — arch-reviewer verdict: **$verdict** ($summary). Fix của Wags KHÔNG được tự coi là xong; xem bus verification + log '"$PIPELOG"'."

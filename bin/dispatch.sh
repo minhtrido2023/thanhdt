@@ -658,11 +658,12 @@ _ambient_thread() {
 
 # _job_watcher: runs in background alongside a dispatch job.
 # Two distinct alert tracks:
-#   ANOMALY track (fires immediately, no cap): empty log after 60s, stale log >120s with no update.
+#   ANOMALY track (fires immediately, no cap): unusually-slow vs this bucket's history
+#   (see threshold comment below — NOT a flat 60s/120s anymore, 2026-08-12).
 #   PROGRESS track (milestone only, max 2): 10m and 30m "still running" messages.
 # Bus heartbeat fires every 60s poll regardless (internal, not sent to Discord).
 _job_watcher() {
-  local jid="$1" caller="$2" target="$3" logfile_path="$4"
+  local jid="$1" caller="$2" target="$3" logfile_path="$4" wmodel="$5" weffort="$6"
   local poll=60
   local elapsed=0 discord_notified=0
   local log_stale_alerted=0 log_empty_alerted=0
@@ -675,9 +676,37 @@ _job_watcher() {
   # Discord 127.0.0.1:8199 — xem chú thích tại nhánh "registry hỏng" bên dưới.)
   local milestones="600 1800"  # 10 min, 30 min; max 2 Discord progress messages total
 
+  # Ngưỡng "chạy lâu bất thường" theo bucket lịch sử (agent|model|effort), THAY flat
+  # 60s/120s cũ (2026-08-12, phát hiện khi audit "báo động giả mỗi ngày" — user report):
+  # `claude -p` mặc định --output-format=text KHÔNG stream, log file THẬT SỰ 0 byte cho
+  # tới khi tiến trình thoát (verify thật trên 3 job Wags: birth==start, ghi đĩa DUY NHẤT
+  # lúc kết thúc, không có ghi trung gian) — nên "log trống" ở 60s/120s từng đúng gần
+  # 100% cho MỌI job >120s, kể cả job hoàn toàn khỏe (bucket Wags|opus|high median lịch
+  # sử ~776s). Job crash NHANH thật đã được bắt RIÊNG bởi `[ "$jrc" -eq 2 ] || break` ở
+  # trên (job record chuyển trạng thái failed trước lần poll kế) — 2 mốc dưới đây chỉ còn
+  # nghĩa "chậm hơn lịch sử bucket này", không còn nghĩa "có thể crash". Thiếu/hỏng
+  # wakeup_profile.json hoặc bucket lạ -> global_fallback rồi hằng số cứng, KHÔNG BAO GIỜ
+  # chặn watcher dù lỗi gì (cùng nguyên tắc với gợi ý ScheduleWakeup ở cuối dispatch --bg).
+  local _wkey="${target}|${wmodel:-default}|${weffort:-?}"
+  local _th slow_t1 slow_t2
+  _th="$(python3 "$ROOT/bin/watcher_slow_threshold.py" "$_wkey" "$ROOT/state/wakeup_profile.json" 2>/dev/null)"
+  read -r slow_t1 slow_t2 <<<"${_th:-180 420}"
+
   _discord() {
     [ -n "$discord_thread_id" ] \
       && "$ROOT/bin/notify_thread.sh" "$1" "$discord_thread_id" 2>/dev/null || true
+  }
+
+  _log_state() {
+    local sz mtime age
+    sz="$(stat -c '%s' "${logfile_path:-/dev/null}" 2>/dev/null || echo 0)"
+    mtime="$(stat -c '%Y' "${logfile_path:-/dev/null}" 2>/dev/null || echo 0)"
+    age=$(( $(date +%s) - mtime ))
+    if [ "$sz" -eq 0 ]; then
+      printf 'log trống %ss (bình thường ở chế độ text mặc định — claude -p không stream tới khi xong)' "$age"
+    else
+      printf 'log %s byte, không cập nhật %ss' "$sz" "$age"
+    fi
   }
 
   while true; do
@@ -708,26 +737,18 @@ _job_watcher() {
     "$ROOT/bin/append_event.sh" "$target" heartbeat "$jid" \
       "{\"status\":\"still_running\",\"elapsed_min\":${elapsed_min},\"job_id\":\"$jid\",\"source\":\"watcher\"}" "$jid" 2>/dev/null || true
 
-    # --- ANOMALY track: fast-fail detection ---
-    # 1) Log empty at 60s → claude likely never started (auth/quota/crash on init)
-    if [ "$elapsed" -eq 60 ] && [ "$log_empty_alerted" -eq 0 ]; then
-      if [ ! -s "${logfile_path:-/dev/null}" ]; then
-        log_empty_alerted=1
-        _discord "⚠️ **$target** job \`$jid\`: log trống sau 60s — claude có thể không start được (auth/quota/crash). Kiểm tra: \`tail $logfile_path\`"
-      fi
+    # --- ANOMALY track: unusually-slow-vs-history detection (xem comment ngưỡng ở trên) ---
+    # 1) Qua mốc trung vị lịch sử bucket — CHỈ để tham khảo (~nửa số job cùng bucket đã
+    #    xong ở mốc này), không kèm hàm ý crash/lỗi.
+    if [ -n "${logfile_path:-}" ] && [ "$elapsed" -ge "$slow_t1" ] && [ "$log_empty_alerted" -eq 0 ]; then
+      log_empty_alerted=1
+      _discord "ℹ️ **$target** job \`$jid\`: đã chạy ${elapsed}s, qua trung vị lịch sử bucket \`$_wkey\` (~${slow_t1}s). $(_log_state) — không phải dấu hiệu lỗi, chỉ để tham khảo: \`jobs.sh status $jid\`"
     fi
-    # 2) Log no output after 120s — covers both: empty log (never got output) or stale log
-    #    (got some output then froze). The -s check was wrong: empty file is the worst case.
-    if [ "$log_stale_alerted" -eq 0 ] && [ "$elapsed" -ge 120 ] && [ -n "${logfile_path:-}" ]; then
-      local log_mtime log_age_s
-      log_mtime="$(stat -c '%Y' "$logfile_path" 2>/dev/null || echo 0)"
-      log_age_s="$(( $(date +%s) - log_mtime ))"
-      if [ "$log_age_s" -ge 120 ]; then
-        log_stale_alerted=1
-        local _why="log không cập nhật ${log_age_s}s"
-        [ ! -s "${logfile_path}" ] && _why="log trống ${log_age_s}s (claude start được nhưng chưa ra output)"
-        _discord "⚠️ **$target** job \`$jid\`: $_why — có thể bị stuck. Kiểm tra: \`tail $logfile_path\`"
-      fi
+    # 2) Qua mốc p75 lịch sử bucket — chậm hơn phần lớn lần chạy trước, đáng xem qua
+    #    (vẫn không chắc là lỗi — job thật sự có thể chỉ đang khó hơn bình thường).
+    if [ -n "${logfile_path:-}" ] && [ "$elapsed" -ge "$slow_t2" ] && [ "$log_stale_alerted" -eq 0 ]; then
+      log_stale_alerted=1
+      _discord "⚠️ **$target** job \`$jid\`: đã chạy ${elapsed}s, vượt mốc p75 lịch sử bucket \`$_wkey\` (~${slow_t2}s) — chậm hơn phần lớn lần chạy trước. $(_log_state). Đáng xem qua: \`jobs.sh status $jid\`"
     fi
 
     # --- PROGRESS track: milestone only, max 2 ---
@@ -1384,7 +1405,7 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
   # same way — if it stayed in the bridge cgroup it would die on bridge restart while
   # the job lives on, silencing the bus heartbeats that jobs.sh HB_AGE triage relies
   # on (job would look TREO while actually running).
-  _detached_spawn '_job_watcher "$job_id" "$from" "$id" "$logfile"' "mike-dispatch-watcher $job_id"
+  _detached_spawn '_job_watcher "$job_id" "$from" "$id" "$logfile" "$MODEL" "$EFFORT"' "mike-dispatch-watcher $job_id"
   disown 2>/dev/null || true
   echo "DISPATCHED $id (job=$job_id pid=$pid) → log: $logfile"
   echo "Theo dõi: $ROOT/bin/jobs.sh status $job_id | Khi xong: auto consolidate + notify #mikefleet."
@@ -1446,7 +1467,7 @@ except Exception:
 else
   # Synchronous: caller gets stdout directly (bounded by --timeout, no auto-retry)
   # Watcher runs in background: milestone progress + anomaly detection (empty/stale log).
-  _job_watcher "$job_id" "$from" "$id" "$logfile" </dev/null >/dev/null 2>&1 &
+  _job_watcher "$job_id" "$from" "$id" "$logfile" "$MODEL" "$EFFORT" </dev/null >/dev/null 2>&1 &
   _wpid=$!
   # If dispatch.sh itself is killed mid-run (e.g. the caller's Bash tool 2-minute
   # timeout SIGTERMs the whole process group — incident 2026-07-09,

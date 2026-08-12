@@ -283,6 +283,19 @@ WARN_ONLY = "[WARN-ONLY]"
 # (c) cắt trần ACK_MAX_SUPPRESS_DAYS để không có ack nào tắt dispatch vĩnh viễn.
 ACK_PREFIX = "triaged-needs-human:"
 ACK_MAX_SUPPRESS_DAYS = 14
+# Mọi tiền tố question do CHÍNH pipeline wags_autofix sinh ra ở CUỐI một vòng fix+arch-review
+# (xem bin/wags_autofix.sh bước 3). Tất cả đều là OUTPUT của vòng lặp; đưa lại vào INPUT
+# (pending_q → COORD_WARN → dispatch wags_autofix) là vòng phản hồi dương tự nuôi.
+# ⚠️ THÊM 2026-08-12 — "wags-arch-review-inconclusive:" thiếu ở đây là REGRESSION THẬT, không
+# phải phòng xa: nhánh đó được TÁCH RA khỏi "wags-fix-not-confirmed:" hôm 08-11 (commit
+# 35625a6f) nhưng danh sách miễn trừ này không được cập nhật theo ⇒ question
+# "wags-arch-review-inconclusive: coord-2026-08-11" (08-11T05:57:50Z) rơi vào pending_q, kéo
+# COORD_WARN dispatch coord-2026-08-12 (logs/wags_pipeline_20260812_012009.log), job đó CŨNG
+# INCONCLUSIVE và đẻ tiếp question coord-2026-08-12 — đúng vòng lặp audit §14 (2026-07-31) đã
+# đóng cho tiền tố cũ.
+# ⇒ LUẬT: thêm bất kỳ nhánh `append_event.sh Wags question` MỚI nào vào wags_autofix.sh thì
+# PHẢI thêm tiền tố đó vào tuple này CÙNG LÚC (và pin bằng selfcheck ca 10/11).
+WAGS_SELF_Q_PREFIXES = ("wags-fix-not-confirmed:", "wags-arch-review-inconclusive:")
 inbox_dir = os.path.join(wc_root, "mike", "bus", "inbox")
 pending_q = []
 pending_q_wagsfix = []   # xem chú thích ở khối "if pending_q_wagsfix" phía dưới
@@ -437,8 +450,9 @@ if os.path.isdir(inbox_dir):
                 continue
             seen_q.add(key)
             if ts_dt >= cutoff:
-                # wags-fix-not-confirmed:* là câu hỏi TỰ chính pipeline wags_autofix sinh ra khi
-                # arch-reviewer verdict != CONFIRMED (xem bin/wags_autofix.sh). Đưa nó vào
+                # WAGS_SELF_Q_PREFIXES là câu hỏi TỰ chính pipeline wags_autofix sinh ra khi
+                # arch-reviewer verdict != CONFIRMED, hoặc khi chuỗi kiểm chứng không ra được
+                # phán quyết (INCONCLUSIVE — xem bin/wags_autofix.sh). Đưa nó vào
                 # pending_q (routable) như mọi câu hỏi khác từng khiến COORD_WARN dispatch LẠI
                 # wags_autofix cho ĐÚNG issue vừa NEEDS_CHANGES — vòng phản hồi dương tự nuôi
                 # (audit §14 kiến trúc fleet 2026-07-31, Fable plan + Opus critique: "output
@@ -447,7 +461,7 @@ if os.path.isdir(inbox_dir):
                 # nhưng nhánh dispatch ở dưới (COORD_WARN) không tôn trọng ý định đó cho đúng
                 # loại câu hỏi này. Tách riêng + gắn WARN_ONLY: vẫn hiện trong báo cáo cho
                 # người thấy, KHÔNG tự re-trigger — người/Mike quyết vòng kế tiếp tường minh.
-                if str(rec.get("topic") or "").startswith("wags-fix-not-confirmed:"):
+                if str(rec.get("topic") or "").startswith(WAGS_SELF_Q_PREFIXES):
                     pending_q_wagsfix.append(f"{agent}/{rec.get('topic')}")
                 elif _acked(agent, str(rec.get("topic") or ""), ts_dt):
                     pending_q_needs_human.append(f"{agent}/{rec.get('topic')}")
@@ -529,10 +543,11 @@ if pending_q_needs_human:
       f"có fix tooling — KHÔNG tự dispatch lại, vẫn hiện ở đây cho tới khi có "
       f"answer/decision thật): {pending_q_needs_human}")
 if pending_q_wagsfix:
-    W(f"{WARN_ONLY} {len(pending_q_wagsfix)} vòng wags-fix CHƯA CONFIRMED trong 48h qua — KHÔNG tự "
-      f"re-trigger (đã qua ít nhất 1 vòng fix+arch-review, lặp tự động là vòng lặp tự nuôi vô "
-      f"nghĩa — người/Mike quyết vòng kế tiếp tường minh, hoặc chờ cooldown hôm sau tự thử lại): "
-      f"{pending_q_wagsfix}")
+    W(f"{WARN_ONLY} {len(pending_q_wagsfix)} vòng wags-fix CHƯA CONFIRMED trong 48h qua (gồm cả "
+      f"NEEDS_CHANGES/REFUTED lẫn INCONCLUSIVE — 'không tra ra phán quyết' KHÁC 'fix bị bác', "
+      f"đọc topic để phân biệt) — KHÔNG tự re-trigger (đã qua ít nhất 1 vòng fix+arch-review, lặp "
+      f"tự động là vòng lặp tự nuôi vô nghĩa — người/Mike quyết vòng kế tiếp tường minh, hoặc chờ "
+      f"cooldown hôm sau tự thử lại): {pending_q_wagsfix}")
 if aged_q:
     aged_q.sort(key=lambda x: -x[0])   # cũ nhất trước
     if len(aged_q) <= AGED_SHOW_ALL_UPTO:

@@ -272,51 +272,105 @@ def case_fresh_question_is_pending():
         shutil.rmtree(root, ignore_errors=True)
 
 
-# ── Ca 10 (2026-07-31, audit kiến trúc fleet #14): câu hỏi wags-fix-not-confirmed:*
-#    <48h KHÔNG được re-trigger COORD_WARN — đây chính là input của vòng lặp Wags
-#    coord-fix tự nuôi quan sát được thật hôm 07-31 (arch-reviewer NEEDS_CHANGES → question
-#    → question đó tự nó lại là "câu hỏi tồn đọng" khiến ops_health_check dispatch LẠI
-#    wags_autofix cho ĐÚNG issue vừa NEEDS_CHANGES). Câu hỏi KHÁC (không phải wags-fix) vẫn
-#    phải routable như cũ — ca 9 ở trên đã khoá phần đó, ca này chỉ khoá phần MỚI.
+# ── Ca 10 (2026-07-31, audit kiến trúc fleet #14): câu hỏi do CHÍNH pipeline wags_autofix
+#    sinh ra ở cuối vòng fix+arch-review, <48h, KHÔNG được re-trigger COORD_WARN — đây chính
+#    là input của vòng lặp Wags coord-fix tự nuôi quan sát được thật hôm 07-31 (arch-reviewer
+#    NEEDS_CHANGES → question → question đó tự nó lại là "câu hỏi tồn đọng" khiến
+#    ops_health_check dispatch LẠI wags_autofix cho ĐÚNG issue vừa NEEDS_CHANGES). Câu hỏi
+#    KHÁC (không phải của pipeline) vẫn phải routable như cũ — ca 9 ở trên đã khoá phần đó.
+#
+#    ⚠️ CHẠY CHO MỌI TIỀN TỐ trong WAGS_SELF_Q_PREFIXES, không chỉ tiền tố đầu tiên: bản
+#    2026-07-31 chỉ pin "wags-fix-not-confirmed:" nên khi wags_autofix.sh tách thêm nhánh
+#    "wags-arch-review-inconclusive:" (08-11, commit 35625a6f) mà quên cập nhật ops_health_check,
+#    selfcheck VẪN xanh trong lúc production đã lặp vòng thật (question 08-11T05:57:50Z →
+#    dispatch coord-2026-08-12 → INCONCLUSIVE → question coord-2026-08-12). Selfcheck chỉ pin
+#    một mẫu đại diện thì không bắt được lớp lỗi "quên mở rộng danh sách".
+WAGS_SELF_Q_PREFIXES = ("wags-fix-not-confirmed:", "wags-arch-review-inconclusive:")
+
+
 def case_wagsfix_not_confirmed_is_warn_only():
-    root, inbox = mkbus()
-    try:
-        write_events(os.path.join(inbox, "Wags.jsonl"),
-                     [ev("Wags", "question", "wags-fix-not-confirmed: coord-2026-07-31", ago(0, 3)),
-                      ev("Wags", "question", "coord-that-su-moi", ago(0, 1))])
-        lines, _ = run_check5(root)
-        out = joined(lines)
-        wagsfix_lines = [ln for ln in lines if "vòng wags-fix CHƯA CONFIRMED" in ln]
-        pending_lines = [ln for ln in lines if "trong 48h qua CHƯA thấy answer" in ln]
-        check("wags-fix-not-confirmed <48h: có dòng riêng, mang [WARN-ONLY]",
-              len(wagsfix_lines) == 1 and "[WARN-ONLY]" in wagsfix_lines[0]
-              and "wags-fix-not-confirmed: coord-2026-07-31" in wagsfix_lines[0], out)
-        check("wags-fix-not-confirmed <48h: KHÔNG lẫn vào dòng pending routable",
-              not any("wags-fix-not-confirmed" in ln for ln in pending_lines), out)
-        check("câu hỏi coordination KHÁC (không phải wags-fix) vẫn ở dòng pending routable",
-              len(pending_lines) == 1 and "coord-that-su-moi" in pending_lines[0], out)
-        check("câu hỏi coordination khác đó KHÔNG mang [WARN-ONLY]",
-              not any("[WARN-ONLY]" in ln for ln in pending_lines), out)
-    finally:
-        shutil.rmtree(root, ignore_errors=True)
+    for prefix in WAGS_SELF_Q_PREFIXES:
+        topic = f"{prefix} coord-2026-07-31"
+        root, inbox = mkbus()
+        try:
+            write_events(os.path.join(inbox, "Wags.jsonl"),
+                         [ev("Wags", "question", topic, ago(0, 3)),
+                          ev("Wags", "question", "coord-that-su-moi", ago(0, 1))])
+            lines, _ = run_check5(root)
+            out = joined(lines)
+            wagsfix_lines = [ln for ln in lines if "vòng wags-fix CHƯA CONFIRMED" in ln]
+            pending_lines = [ln for ln in lines if "trong 48h qua CHƯA thấy answer" in ln]
+            check(f"{prefix} <48h: có dòng riêng, mang [WARN-ONLY]",
+                  len(wagsfix_lines) == 1 and "[WARN-ONLY]" in wagsfix_lines[0]
+                  and topic in wagsfix_lines[0], out)
+            check(f"{prefix} <48h: KHÔNG lẫn vào dòng pending routable",
+                  not any(prefix in ln for ln in pending_lines), out)
+            check(f"{prefix}: câu hỏi coordination KHÁC vẫn ở dòng pending routable",
+                  len(pending_lines) == 1 and "coord-that-su-moi" in pending_lines[0], out)
+            check(f"{prefix}: câu hỏi coordination khác đó KHÔNG mang [WARN-ONLY]",
+                  not any("[WARN-ONLY]" in ln for ln in pending_lines), out)
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
 
 
-# ── Ca 11: chỉ có wags-fix-not-confirmed (không có câu hỏi routable nào khác) — dòng
+# ── Ca 10b (đối chứng ÂM, 2026-08-12): miễn trừ phải khớp TIỀN TỐ, không phải substring.
+#    Một câu hỏi thật của người mà tình cờ NHẮC ĐẾN tiền tố ở GIỮA topic vẫn phải routable —
+#    nếu không, ai đặt tên topic hơi giống là tự tắt mất đường escalate của mình.
+def case_wagsfix_prefix_not_substring():
+    for prefix in WAGS_SELF_Q_PREFIXES:
+        topic = f"ai-đang-nợ {prefix} coord-2026-07-31 — cần người xem"
+        root, inbox = mkbus()
+        try:
+            write_events(os.path.join(inbox, "Wags.jsonl"),
+                         [ev("Wags", "question", topic, ago(0, 3))])
+            lines, _ = run_check5(root)
+            out = joined(lines)
+            pending_lines = [ln for ln in lines if "trong 48h qua CHƯA thấy answer" in ln]
+            wagsfix_lines = [ln for ln in lines if "vòng wags-fix CHƯA CONFIRMED" in ln]
+            check(f"substring-ở-giữa '{prefix}': VẪN routable (không bị miễn trừ nhầm)",
+                  len(pending_lines) == 1 and topic in pending_lines[0], out)
+            check(f"substring-ở-giữa '{prefix}': KHÔNG rơi vào dòng WARN-ONLY wags-fix",
+                  not wagsfix_lines, out)
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 11: chỉ có câu hỏi tự-sinh của pipeline (không có câu hỏi routable nào khác) — dòng
 #    "Không có câu hỏi nào đang chờ" KHÔNG được in (sẽ nói dối — vẫn có 1 mục đang chờ,
 #    chỉ là WARN-ONLY).
 def case_wagsfix_only_no_false_ok():
-    root, inbox = mkbus()
-    try:
-        write_events(os.path.join(inbox, "Wags.jsonl"),
-                     [ev("Wags", "question", "wags-fix-not-confirmed: coord-2026-07-31", ago(0, 3))])
-        lines, _ = run_check5(root)
-        out = joined(lines)
-        check("chỉ có wags-fix: KHÔNG in 'Không có câu hỏi nào đang chờ' (sẽ nói dối)",
-              "Không có câu hỏi (question) nào đang chờ xử lý" not in out, out)
-        check("chỉ có wags-fix: vẫn có dòng WARN-ONLY nêu rõ",
-              "vòng wags-fix CHƯA CONFIRMED" in out, out)
-    finally:
-        shutil.rmtree(root, ignore_errors=True)
+    for prefix in WAGS_SELF_Q_PREFIXES:
+        root, inbox = mkbus()
+        try:
+            write_events(os.path.join(inbox, "Wags.jsonl"),
+                         [ev("Wags", "question", f"{prefix} coord-2026-07-31", ago(0, 3))])
+            lines, _ = run_check5(root)
+            out = joined(lines)
+            check(f"chỉ có {prefix}: KHÔNG in 'Không có câu hỏi nào đang chờ' (sẽ nói dối)",
+                  "Không có câu hỏi (question) nào đang chờ xử lý" not in out, out)
+            check(f"chỉ có {prefix}: vẫn có dòng WARN-ONLY nêu rõ",
+                  "vòng wags-fix CHƯA CONFIRMED" in out, out)
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 11b (2026-08-12): danh sách miễn trừ trong selfcheck phải KHỚP danh sách thật trong
+#    bin/ops_health_check.sh. Đây là chốt chặn cuối cho lớp lỗi đã xảy ra: thêm nhánh question
+#    mới vào wags_autofix.sh + ops_health_check.sh nhưng quên selfcheck (hoặc ngược lại) thì
+#    ca 10/11 ở trên lặng lẽ kiểm thiếu. So sánh bằng cách đọc chính dòng khai báo.
+def case_wagsfix_prefix_list_in_sync():
+    with open(SRC, encoding="utf-8") as f:
+        src = f.read()
+    m = re.search(r"^WAGS_SELF_Q_PREFIXES = \(([^)]*)\)", src, re.M)
+    check("ops_health_check.sh: tìm thấy khai báo WAGS_SELF_Q_PREFIXES", bool(m),
+          "không thấy dòng WAGS_SELF_Q_PREFIXES = (...) — đã đổi tên biến?")
+    if not m:
+        return
+    real = tuple(re.findall(r'"([^"]+)"', m.group(1)))
+    check("danh sách tiền tố miễn trừ: selfcheck KHỚP ops_health_check.sh",
+          real == WAGS_SELF_Q_PREFIXES,
+          f"ops_health_check.sh={real} vs selfcheck={WAGS_SELF_Q_PREFIXES} — thêm tiền tố mới "
+          f"phải cập nhật CẢ HAI")
 
 
 # ── Check #10 (notify_thread.sh nuốt tin nhắn) ────────────────────────────────────────────
@@ -572,7 +626,8 @@ def main():
                case_no_crowd_out, case_small_pool_prints_all,
                case_corrupt_gz_warns, case_empty_archive_warns,
                case_fresh_question_is_pending,
-               case_wagsfix_not_confirmed_is_warn_only, case_wagsfix_only_no_false_ok,
+               case_wagsfix_not_confirmed_is_warn_only, case_wagsfix_prefix_not_substring,
+               case_wagsfix_only_no_false_ok, case_wagsfix_prefix_list_in_sync,
                case_triaged_needs_human_ack, case_triaged_only_no_false_ok,
                case_ack_suppress_days_window, case_ack_suppress_days_capped,
                case_c10_no_file_is_ok, case_c10_fresh_log_warns,
