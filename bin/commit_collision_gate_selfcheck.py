@@ -16,6 +16,7 @@ Usage: bin/commit_collision_gate_selfcheck.py     (exit 0 = all pass)
 """
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -308,6 +309,43 @@ def main():
         check("34 CALLER: with no live foreign job, Phase 3 DOES commit and DOES say so",
               p3.get("clear_commits") is True and p3.get("clear_says_success") is True,
               str(p3))
+
+        # Fourth caller, found by SCANNING every `git commit` in every .sh of both repos
+        # instead of waiting for a fifth review to name it (arch-review round 5, 2026-08-12):
+        # cron_health_check_daily.sh's incidents/index.md auto-sync carried BOTH halves of the
+        # pattern — `commit ... 2>/dev/null || true` AND an unconditional Discord line saying
+        # "tự sửa drift + commit" — plus no pathspec, so it committed the whole shared index.
+        # Reached via the gate's TIER 1 (a live job declaring --write-scope kb/incidents/),
+        # not tier 2: kb/incidents/index.md is not shared tooling.
+        inc = _cron_health_incidents()
+        check("35 CALLER: cron_health_check incidents-sync does NOT tell a human \"ĐÃ COMMIT\" "
+              "when the commit is refused",
+              inc.get("blocked_no_false_success") is True, str(inc))
+        check("36 CALLER: refused run says BỊ TỪ CHỐI / CẦN COMMIT TAY on BOTH channels a human "
+              "reads — Discord and the cron log (stdout)",
+              inc.get("blocked_says_refused") is True and inc.get("blocked_on_cron_log") is True,
+              str(inc))
+        check("37 CALLER: refused run really produced no commit, left index.md fixed-on-disk but "
+              "dirty (nothing lost), and did not kill the cron slot",
+              inc.get("blocked_no_commit") is True and inc.get("blocked_idx_still_dirty") is True
+              and inc.get("blocked_rc") == 0, str(inc))
+        # Control — without it, a block that never reports success would pass 35-37.
+        check("38 CALLER: with no live foreign job, incidents-sync DOES commit and DOES say "
+              "ĐÃ COMMIT",
+              inc.get("clear_commits") is True and inc.get("clear_says_success") is True
+              and inc.get("clear_idx_clean") is True, str(inc))
+        check("38b incidents-sync's commit carries a pathspec: a file another session left "
+              "staged does NOT ride along",
+              inc.get("clear_no_foreign_swept") is True, str(inc))
+
+        # Round-5 sweep, recorded as a test so it cannot quietly rot: every real `git commit`
+        # invocation in every .sh of both repos must sit inside a construct that reads its exit
+        # code. Four review rounds each found exactly one more caller by hand; this fails on the
+        # fifth the moment someone adds it.
+        sw = _sweep_unchecked_commits()
+        check("39 SWEEP: no live .sh anywhere in mike/ or WorkingClaude/ still swallows a "
+              "`git commit` exit code",
+              sw == [], "unchecked: " + "; ".join(sw))
     finally:
         for p in _procs:
             try:
@@ -539,6 +577,252 @@ def _phase3_block():
         raise RuntimeError("kb_nightly.sh Phase 3 markers moved: starts=%s ends=%s"
                            % (starts, ends))
     return "".join(lines[starts[0]:ends[0] + 2])   # +2 = the log line and its closing `fi`
+
+
+# Every real `git commit` invocation in a LIVE .sh of either repo, as of the round-5 sweep.
+# Not a whitelist — a floor. If the scan below stops finding these, the scan itself broke and
+# case 39 would pass on zero coverage, which is the silent-empty-result failure this fleet has
+# been bitten by before. `wt-*` session worktrees are excluded on purpose: they are frozen
+# checkouts of older commits, nothing in crontab runs them, and they inherit the fix on merge.
+_KNOWN_COMMIT_SITES = {
+    "mike/bin/consolidate.sh", "mike/bin/fleet_backup.sh", "mike/bin/kb_nightly.sh",
+    "mike/bin/cron_health_check_daily.sh",
+}
+_COMMIT_RE = re.compile(r"(?:^|[;&|)(]|\bif\s|\belif\s|\bthen\s|\bdo\s|\!\s*)\s*"
+                        r"(?:/usr/bin/)?git(?:\s+-C\s+\S+)?\s+commit\b")
+
+
+def _logical_statement(lines, i):
+    """The whole shell statement containing line i: walk back over continuations, then forward
+    until quotes balance and the line does not end in a continuation operator. Needed because
+    every one of these commits carries a MULTI-LINE -m message, so the `|| true` that swallows
+    its exit code can sit three lines below the word `commit`."""
+    def unbalanced(s):
+        n, k, esc = 0, 0, False
+        for c in s:
+            if esc:
+                esc = False
+                continue
+            if c == "\\":
+                esc = True
+            elif c == '"' and k % 2 == 0:
+                n += 1
+            elif c == "'" and n % 2 == 0:
+                k += 1
+        return n % 2 == 1 or k % 2 == 1
+
+    start = i
+    while start > 0 and lines[start - 1].rstrip().endswith(("\\", "&&", "||")):
+        start -= 1
+    end = i
+    while end < len(lines) - 1 and (unbalanced("\n".join(lines[start:end + 1]))
+                                    or lines[end].rstrip().endswith(("\\", "&&", "||"))):
+        end += 1
+    return "\n".join(lines[start:end + 1])
+
+
+def _sweep_unchecked_commits():
+    """Scan EVERY live .sh in both repos for `git commit` invocations whose exit code is
+    swallowed. A site is OK only if its statement is a condition (`if`/`elif`/`while`/`until`,
+    which is how all four earlier rounds were fixed) and does not end in `|| true` / `|| :`.
+
+    Returns a list of problem strings; empty means clean. A broken scan reports itself rather
+    than returning [] — finding fewer sites than the known floor is a failure, not a pass."""
+    roots = ["/home/trido/thanhdt/WorkingClaude"]
+    problems, seen = [], set()
+    for root in roots:
+        for dirpath, dirnames, filenames in os.walk(root):
+            dirnames[:] = [d for d in dirnames
+                           if not d.startswith("wt-") and d not in (".git", "node_modules")]
+            for fn in filenames:
+                if not fn.endswith(".sh"):
+                    continue
+                fp = os.path.join(dirpath, fn)
+                rel = os.path.relpath(fp, root)
+                try:
+                    with open(fp, encoding="utf-8", errors="replace") as f:
+                        lines = f.read().splitlines()
+                except OSError:
+                    continue
+                for i, line in enumerate(lines):
+                    s = line.strip()
+                    if s.startswith("#") or "`git" in line or not _COMMIT_RE.search(line):
+                        continue
+                    seen.add(rel)
+                    stmt = _logical_statement(lines, i)
+                    head = stmt.lstrip()
+                    guarded = head.startswith(("if ", "elif ", "while ", "until ", "if(", "!"))
+                    swallowed = stmt.rstrip().endswith(("|| true", "|| :")) \
+                        or "|| true\n" in stmt or "|| true;" in stmt
+                    if not guarded or swallowed:
+                        problems.append("%s:%d %s" % (rel, i + 1, s[:90]))
+    missing = _KNOWN_COMMIT_SITES - seen
+    if missing:
+        problems.append("SCAN BROKE — known commit sites not even found: %s" % sorted(missing))
+    return problems
+
+
+def _incidents_sync_block():
+    """The REAL incidents/index.md sync block of bin/cron_health_check_daily.sh, sliced by
+    content markers — same contract as _phase3_block() (never re-typed, raises if a marker
+    moves)."""
+    with open(os.path.join(ROOT, "bin", "cron_health_check_daily.sh"), encoding="utf-8") as f:
+        lines = f.read().splitlines(True)
+    starts = [i for i, l in enumerate(lines) if l.startswith("# incidents/index.md sync")]
+    ends = [i for i, l in enumerate(lines)
+            if l.strip() == "rm -f /tmp/incidents_sync_check.$$"]
+    if len(starts) != 1 or len(ends) != 1 or ends[0] <= starts[0]:
+        raise RuntimeError("cron_health_check_daily.sh incidents-sync markers moved: "
+                           "starts=%s ends=%s" % (starts, ends))
+    return "".join(lines[starts[0]:ends[0] + 1])
+
+
+# A minimal but REAL incidents tree: index.md listing one incident, plus a second incident
+# file that is missing from it. That is the exact drift incidents_index_sync.py --check
+# reports and --fix repairs, so the block under test takes its commit branch for real.
+_IDX_FIXTURE = """---
+kind: incident-index
+title: Incidents — selfcheck fixture
+entries: 1 file (1 sự cố)
+---
+
+# Incidents
+
+Newest first.
+
+### 2026-08
+
+| Ngày | Sự cố | status |
+|---|---|---|
+| 2026-08-01 | [2026-08-01: cũ](2026-08/2026-08-01-cu.md) | fixed |
+"""
+
+
+def _cron_health_incidents():
+    """Run the REAL incidents-sync block of bin/cron_health_check_daily.sh in a throwaway repo
+    with the real gate installed as .git/hooks/pre-commit and a real live foreign job that
+    DECLARED --write-scope kb/incidents/ — the gate's TIER-1 path, which is the one that
+    reaches this block in production (kb/incidents/index.md is not a SHARED_TOOLING_PATH, so
+    tier 2 never fires on it; a live job writing an incident file and declaring that scope
+    does).
+
+    Only notify.sh is stubbed (a selfcheck must never reach Discord). incidents_index_sync.py
+    --check/--fix, the staging, the commit, the exit-code capture and both report branches are
+    the shipped code.
+
+    Asserts the refused commit is reported AS refused on BOTH channels a human reads (the cron
+    log on stdout and Discord), then — the control that keeps this from being tautological —
+    that the same block really does commit and really does say so once the foreign job is
+    gone, and that its commit carries a pathspec."""
+    res = {}
+    tmp = tempfile.mkdtemp(prefix="ccgate_inc_")
+    try:
+        repo = os.path.join(tmp, "mike")
+        shutil.copytree(os.path.join(ROOT, "bin"), os.path.join(repo, "bin"))
+        for d in ("kb/incidents/2026-08", "bus/jobs", "logs"):
+            os.makedirs(os.path.join(repo, *d.split("/")), exist_ok=True)
+        notify_log = os.path.join(repo, "logs", "notify_stub.log")
+        p = os.path.join(repo, "bin", "notify.sh")
+        with open(p, "w", encoding="utf-8") as f:
+            f.write('#!/usr/bin/env bash\nprintf "%s\\n" "$*" '
+                    '>> "$(dirname "$0")/../logs/notify_stub.log"\nexit 0\n')
+        os.chmod(p, 0o755)
+
+        idx = os.path.join(repo, "kb", "incidents", "index.md")
+        old = os.path.join(repo, "kb", "incidents", "2026-08", "2026-08-01-cu.md")
+        new = os.path.join(repo, "kb", "incidents", "2026-08", "2026-08-11-moi.md")
+        for fp, body in ((idx, _IDX_FIXTURE),
+                         (old, "---\ndate: 2026-08-01\nstatus: fixed\n"
+                               "title: 2026-08-01: cũ\n---\nbody\n")):
+            with open(fp, "w", encoding="utf-8") as f:
+                f.write(body)
+
+        env = dict(os.environ)
+        env.pop("JOB_ID", None)
+        for c in (["git", "init", "-q", "."], ["git", "config", "user.email", "t@t"],
+                  ["git", "config", "user.name", "t"], ["git", "add", "-A"],
+                  ["git", "commit", "-q", "-m", "init"]):
+            subprocess.run(c, cwd=repo, capture_output=True, env=env)
+        hook = os.path.join(repo, ".git", "hooks", "pre-commit")
+        shutil.copy(GATE, hook)
+        os.chmod(hook, 0o755)
+
+        runner = os.path.join(repo, "run_incsync.sh")
+        with open(runner, "w", encoding="utf-8") as f:
+            f.write('#!/usr/bin/env bash\nset -uo pipefail\n'      # same as the real script
+                    'ROOT="%s"\ncd "$ROOT"\n\n' % repo + _incidents_sync_block())
+
+        def drift():
+            """Re-create the missing-from-index incident so --check has something to report."""
+            with open(new, "w", encoding="utf-8") as f:
+                f.write("---\ndate: 2026-08-11\nstatus: fixed\n"
+                        "title: 2026-08-11: sự cố mới chưa có trong index\n---\nbody\n")
+
+        def run_block():
+            open(notify_log, "w").close()
+            return subprocess.run(["bash", runner], cwd=repo, capture_output=True, text=True,
+                                  env=env)
+
+        def head_count():
+            r = subprocess.run(["git", "rev-list", "--count", "HEAD"], cwd=repo,
+                               capture_output=True, text=True, env=env)
+            return int(r.stdout.strip() or 0)
+
+        def idx_dirty():
+            r = subprocess.run(["git", "status", "--porcelain", "kb/incidents/index.md"],
+                               cwd=repo, capture_output=True, text=True, env=env)
+            return bool(r.stdout.strip())
+
+        # --- BLOCKED: a live foreign job declared it is writing kb/incidents/ ---
+        write_job(os.path.join(repo, "bus", "jobs"), "Winston_inc", pid=sleeper(), to="Winston",
+                  write_scope="kb/incidents/")
+        drift()
+        n0 = head_count()
+        r = run_block()
+        msg = open(notify_log, encoding="utf-8").read()
+        res["blocked_rc"] = r.returncode
+        res["blocked_no_false_success"] = "ĐÃ COMMIT" not in msg and "🩺" not in msg
+        res["blocked_says_refused"] = ("BỊ TỪ CHỐI" in msg and "KHÔNG có commit" in msg
+                                       and "CẦN COMMIT TAY" in msg)
+        res["blocked_on_cron_log"] = "BỊ TỪ CHỐI" in r.stdout and "CẦN COMMIT TAY" in r.stdout
+        res["blocked_no_commit"] = head_count() == n0
+        res["blocked_idx_still_dirty"] = idx_dirty() is True
+        res["blocked_notify"] = msg.strip()[:200]
+
+        # --- CONTROL: same block, same drift, no foreign job → must really commit ---
+        os.remove(os.path.join(repo, "bus", "jobs", "Winston_inc.json"))
+        subprocess.run(["git", "reset", "-q", "HEAD", "--", "."], cwd=repo,
+                       capture_output=True, env=env)
+        # Rewind index.md to the PRE-drift fixture. The blocked run left the repaired file in
+        # the worktree (that is the point — nothing was lost), so without this the control run
+        # finds no drift at all, never reaches the commit branch, and 38/38b would fail for a
+        # reason that has nothing to do with the code under test.
+        with open(idx, "w", encoding="utf-8") as f:
+            f.write(_IDX_FIXTURE)
+        # Something another in-flight session left staged, to prove the commit carries a
+        # pathspec: without `-- kb/incidents/index.md` this rides along in the auto-sync commit.
+        foreign = os.path.join(repo, "bin", "foreign_session_wip.sh")
+        with open(foreign, "w", encoding="utf-8") as f:
+            f.write("#!/usr/bin/env bash\n# half-finished work by another session\n")
+        subprocess.run(["git", "add", "bin/foreign_session_wip.sh"], cwd=repo,
+                       capture_output=True, env=env)
+        drift()
+        n1 = head_count()
+        r2 = run_block()
+        msg2 = open(notify_log, encoding="utf-8").read()
+        res["clear_rc"] = r2.returncode
+        res["clear_commits"] = head_count() == n1 + 1
+        res["clear_says_success"] = "ĐÃ COMMIT" in msg2
+        res["clear_idx_clean"] = idx_dirty() is False
+        swept = subprocess.run(["git", "show", "--pretty=", "--name-only", "HEAD"], cwd=repo,
+                               capture_output=True, text=True, env=env).stdout.split()
+        res["clear_no_foreign_swept"] = swept == ["kb/incidents/index.md"]
+        res["clear_swept"] = swept
+    except Exception as exc:
+        res["error"] = repr(exc)
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+    return res
 
 
 def _kb_nightly_phase3():
