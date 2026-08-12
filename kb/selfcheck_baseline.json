@@ -108,6 +108,16 @@
       "topic": "selfcheck-red: t2_settlement_selfcheck.py",
       "escalated_utc": "2026-08-12T12:08:56Z",
       "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
+    },
+    "mike/bin/job_cancel_guard_selfcheck.py": {
+      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
+      "since": "2026-08-12T21:51:48Z",
+      "status": "FAIL",
+      "auto": true,
+      "topic": "selfcheck-red: mike/bin/job_cancel_guard_selfcheck.py",
+      "escalated_utc": "2026-08-12T21:51:48Z",
+      "ack_pending": false,
+      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
     }
   }
 }
