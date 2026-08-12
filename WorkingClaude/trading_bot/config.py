@@ -38,6 +38,36 @@ DEFAULTS = {
                                       #   test (Taylor_20260721_050720) khuyến nghị: đủ lỏng để KHÔNG
                                       #   tái lập zero-block NCT 2026-07-21 (cần <10% realized mới
                                       #   sập) nhưng vẫn bắt đuôi >30% tape. Non-CAPIT KHÔNG dùng.
+    # --- P2: mẫu số pacing = KL KỲ VỌNG tới giờ này (paper-gated, MẶC ĐỊNH TẮT) ---
+    # BỆNH: `ceil_allow = 30% × KL ĐÃ khớp trong ngày` lấy làm mẫu số một đại lượng phản ánh
+    # thị trường KHÔNG CÓ TA. Lúc 09:15 nó ≈0 ⇒ ta chỉ được HIỆN vài lô; người bán duy nhất
+    # của một phiên mỏng xuất hiện lúc 09:40 chỉ nhìn thấy 100cp. Ca thật TV1 2026-08-11:
+    # 12.400cp có sẵn ở giá ≤ trần, bot khớp 100cp; lệnh con đi 100→200→300cp — đúng chữ ký
+    # "bám 30% KL luỹ kế". Đo trên N=1.840 phiên-mã (job Taylor_20260812_091343): trong
+    # 1.538 phiên THỊ TRƯỜNG CÓ ĐỦ HÀNG, cơ chế hiện tại khớp 0,804 còn bỏ trần này khớp
+    # 0,910 — **10,6pp là do ta tự bóp**, không do thị trường.
+    # SỬA: mẫu số = max(KL đã khớp, ADV20_cp × f(t)). KL HIỂN THỊ không cần neo vào tape đã
+    # xảy ra (hiện lệnh KHÔNG tiêu thụ thanh khoản của ai); chỉ KL ĐÃ KHỚP mới cần — và đó
+    # là việc của `expected_volume_tape_clamp` bên dưới.
+    "expected_volume_pacing_enabled": False,   # DEFAULT OFF — bật paper cần user/Mike duyệt
+    # Trần đuôi neo vào TAPE THẬT: fill luỹ kế của fleet ≤ 50% KL khớp thật của phiên.
+    # Suy ra allowance: đặt F=fleet đã khớp, V=KL phiên (V ĐÃ gồm F). Fill thêm X vẫn giữ
+    # F+X ≤ c(V+X) ⇒ X ≤ (cV−F)/(1−c); với c=0,5 ⇒ **X ≤ V − 2F**. KHÔNG dùng dạng lỏng tay
+    # `cV−F` (bỏ quên việc chính fill của ta cũng làm V tăng) lẫn dạng chặt tay hơn mức cần.
+    # Vì sao cần: bỏ HẲN trần 30% cho ta chiếm >50% tape ở 6,9% số phiên (>80% ở 3,5%) — do
+    # floor_allow neo vào ADV20 chứ không vào KL THẬT hôm nay, mà 12,7% số phiên có KL
+    # <30% ADV20. Clamp này bịt đúng nhóm đó mà không bóp đầu phiên.
+    "expected_volume_tape_clamp": 0.50,
+    # f(t) = tỷ trọng KL luỹ kế TRUNG VỊ tới phút t (phút tính từ 00:00 ICT), đo trên rổ 23 mã
+    # mỏng × 120 phiên (out/cum_volume_profile.csv, đã ép đơn điệu không giảm). Nội suy tuyến
+    # tính giữa 2 mốc; trước mốc đầu = 0 (⇒ P2 KHÔNG ăn, hành vi cũ); sau mốc cuối = 1,0.
+    # Lưu ý ngược trực giác đã đo: 14:45+ (ATC) chỉ ~5% KL trung vị — "dồn vào ATC cho chắc
+    # khớp" KHÔNG đúng với nhóm mã này.
+    "expected_volume_curve": [[555, 0.045], [570, 0.082], [585, 0.145], [600, 0.198],
+                              [615, 0.246], [630, 0.318], [645, 0.351], [660, 0.411],
+                              [675, 0.444], [690, 0.488], [780, 0.499], [795, 0.568],
+                              [810, 0.637], [825, 0.721], [840, 0.784], [855, 0.853],
+                              [870, 0.958], [885, 1.000]],
     "slice_interval_min": 8,          # phút giữa 2 lệnh con cùng một parent
     "poll_interval_sec": 20,          # chu kỳ poll sổ lệnh + quote
     "chase_ticks": 1,                 # mua: đặt bid + n tick (passive); 0 = đặt ngay bid

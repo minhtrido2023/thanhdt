@@ -104,6 +104,10 @@ class Executor:
         self._gap_ref = {}      # ticker -> {prior_close, rvol_20d}; loaded once at startup
         self._gap_z_cache = {}  # ticker -> gap_z or None (None = fail-safe, no override)
         self._last_gap_override = {}  # ticker -> gap_z; populated when override fires this tick
+        self._expvol_logged = set()   # (order id, ngày) đã ghi journal EXPVOL_PACING — 1 lần/
+                                      # parent/phiên. `_child_qty` chạy từ CẢ `_place_slices`
+                                      # LẪN `_would_be_unchanged` mỗi chu kỳ 20s ⇒ không chặn
+                                      # thì journal ngập vô ích (cùng lý do `_hybrid_deferred`).
         self._hybrid_deferred = set()  # order id đã ghi journal HYBRID_DEFER (1 lần/parent mỗi
                                        # lần chạy process — không bền qua restart, cố ý: chỉ là
                                        # dòng quan sát, không phải state điều khiển)
@@ -546,6 +550,82 @@ class Executor:
                       note=f"'{ex_used}' tick sai ({err}) → thử '{ex_alt}' OK, cache lại cho {o.ticker}")
         return oid, px_alt
 
+    # ------------------------------------------------- P2: pacing theo KL KỲ VỌNG (mặc định TẮT)
+
+    def _expected_vol_frac(self, now):
+        """f(t) ∈ [0,1] — tỷ trọng KL luỹ kế KỲ VỌNG tới thời điểm `now` (giờ ICT), nội suy
+        tuyến tính trên `expected_volume_curve`. None = KHÔNG dùng được (cấu hình rác) ⇒
+        caller fail-safe về hành vi cũ.
+
+        Trước mốc đầu tiên trả 0,0 (KHÔNG phải None): 0 là giá trị ĐÚNG về mặt ngữ nghĩa
+        (chưa mở cửa thì KL kỳ vọng bằng 0) và làm `max(cum_vol, expected)` rơi đúng về
+        `cum_vol` — tức hành vi cũ, không phải một nhánh lỗi.
+        """
+        curve = self.cfg.get("expected_volume_curve") or []
+        pts = []
+        for it in curve:
+            try:
+                m, f = int(it[0]), float(it[1])
+            except (TypeError, ValueError, IndexError):
+                return None
+            if not (0 <= m <= 24 * 60) or not (0.0 <= f <= 1.0):
+                return None
+            pts.append((m, f))
+        if len(pts) < 2:
+            return None
+        pts.sort()
+        if any(pts[i][1] < pts[i - 1][1] for i in range(1, len(pts))):
+            return None      # curve phải đơn điệu không giảm — KL luỹ kế không thể tụt
+        t = now.hour * 60 + now.minute
+        if t < pts[0][0]:
+            # `<` chứ KHÔNG phải `<=`: tại ĐÚNG mốc đầu (09:15 — thời điểm P2 có giá trị nhất)
+            # phải trả f của mốc đó, không phải 0. Bug thật, selfcheck C1 bắt được ngay lần chạy
+            # đầu; với `<=` thì P2 vô hiệu đúng phút mở cửa liên tục.
+            return 0.0
+        if t >= pts[-1][0]:
+            return pts[-1][1]
+        for i in range(1, len(pts)):
+            m1, f1 = pts[i]
+            if t <= m1:
+                m0, f0 = pts[i - 1]
+                return f0 if m1 == m0 else f0 + (f1 - f0) * (t - m0) / (m1 - m0)
+        return pts[-1][1]
+
+    def _expected_vol_basis(self, o, adv20_vnd, px, now):
+        """KL (cổ phiếu) KỲ VỌNG đã khớp tới `now` = ADV20_cp × f(t). None = P2 KHÔNG áp
+        dụng ⇒ mọi thứ giữ nguyên như trước (byte-identical).
+
+        None khi: cờ tắt (MẶC ĐỊNH) · `now=None` (đường gọi không có thời gian — cùng quy
+        ước với HYBRID) · thiếu ADV20/giá · cấu hình clamp ngoài (0,1) · đường cong hỏng.
+        Cấu hình clamp được kiểm TẠI ĐÂY dù nó dùng ở `_child_qty`: nới mẫu số mà không có
+        trần đuôi là đúng cái mà nghiên cứu bác bỏ (chiếm >50% tape ở 6,9% số phiên) —
+        hai vế phải cùng bật hoặc cùng tắt, không được tách.
+        """
+        if now is None or not self.cfg.get("expected_volume_pacing_enabled", False):
+            return None
+        if not adv20_vnd or not px or adv20_vnd <= 0 or px <= 0:
+            return None
+        try:
+            c = float(self.cfg["expected_volume_tape_clamp"])
+        except (KeyError, TypeError, ValueError):
+            return None
+        if not (0.0 < c < 1.0):
+            return None
+        frac = self._expected_vol_frac(now)
+        if frac is None:
+            return None
+        basis = (adv20_vnd / px) * frac
+        if basis <= 0:
+            return None      # trước giờ mở cửa: max(cum_vol, 0) = cum_vol ⇒ trả None cho gọn
+        key = (o.id, now.date().isoformat())
+        if key not in self._expvol_logged:
+            self._expvol_logged.add(key)
+            self._journal("EXPVOL_PACING", o, "", int(basis), px,
+                          note=(f"P2 ON: mẫu số pacing = max(KL thật, ADV20_cp×f(t)); "
+                                f"f({now:%H:%M})={frac:.3f} → KL kỳ vọng {int(basis):,}cp; "
+                                f"clamp đuôi {c:.0%} tape thật"))
+        return basis
+
     def _child_qty(self, o, ps, q, px, now=None, exclude_reserved=0):
         """`now=None` (mặc định) ⇒ KHÔNG áp trần HYBRID — hành vi byte-identical với trước.
         Hai call-site thật (`_place_slices`, `_would_be_unchanged`) đều truyền `now` để hai
@@ -588,9 +668,20 @@ class Executor:
             fleet_filled = self.shared.get(o.ticker, 0) - exclude_reserved
             floor_allow = int(self.cfg["max_participation"] * adv20_vnd / px) - fleet_filled
             if q.day_volume:
+                # P2 (mặc định TẮT ⇒ exp_basis=None ⇒ byte-identical): mẫu số trần phụ đổi từ
+                # "KL ĐÃ khớp" sang max(KL đã khớp, KL KỲ VỌNG tới giờ này). Xem
+                # _expected_vol_basis() + config expected_volume_*.
+                exp_basis = self._expected_vol_basis(o, adv20_vnd, px, now)
+                basis = q.day_volume if exp_basis is None else max(q.day_volume, exp_basis)
                 ceil_allow = int(self.cfg["capit_realized_participation_ceiling"]
-                                 * q.day_volume) - fleet_filled
+                                 * basis) - fleet_filled
                 allowance = min(floor_allow, ceil_allow)
+                if exp_basis is not None:
+                    # Trần đuôi TAPE THẬT — chỉ tồn tại khi P2 bật (nó là điều kiện đi kèm của
+                    # việc nới mẫu số, không phải một guard độc lập). c=0,5 ⇒ X ≤ V − 2F.
+                    c = float(self.cfg["expected_volume_tape_clamp"])
+                    clamp_allow = int((c * q.day_volume - fleet_filled) / (1.0 - c))
+                    allowance = min(allowance, clamp_allow)
             else:
                 # halt / chưa có tape (Volume=0): chỉ còn ADV20-floor; khan người bán tự
                 # giới hạn fill thực (không ai bán → lệnh treo, không đẩy giá — memo Result 2).

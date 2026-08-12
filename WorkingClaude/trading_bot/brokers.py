@@ -375,6 +375,7 @@ class DNSEBroker(BrokerBase):
         self._loan_pkg_cache = {}   # symbol -> loanPackageId đã giải (cash_only, theo phiên)
         self._lever_pkg_cache = {}  # (symbol, gói CHỈ ĐỊNH) -> (id dùng, ok, note) — đòn bẩy CAPIT
         self._quote_ttl = 3.0
+        self._l2_log_last = {}      # symbol -> time.time() lần ghi L2 gần nhất (throttle, xem _log_l2)
         self._raw_log = os.path.join(
             EXEC_DIR, f"dnse_raw_{today_ict():%Y-%m-%d}.jsonl")
 
@@ -510,6 +511,71 @@ class DNSEBroker(BrokerBase):
         rows = g1 or [r for r in rows if isinstance(r, dict)]
         return rows[0] if rows else {}
 
+    # P5 — GHI LẠI 10 mức giá chờ (job Taylor_20260812_095213). DNSE G1 THẬT SỰ trả về
+    # `quotes[].bid/offer` = list 10 mức {price, quantity}, nhưng `Quote` chỉ giữ mức 1
+    # (`bidPrice1`/`offerPrice1`) và dòng `raw.update(... not isinstance(v,(list,dict)))` bên
+    # dưới vứt bỏ toàn bộ mảng. Hệ quả đo được (research/thin_exec_20260812 §P5): KHÔNG tồn
+    # tại order-book lịch sử cho mã VN ở bất kỳ nguồn nào ta có (vnstock `price_depth()` =
+    # NotImplementedError; `intraday()` chỉ có phiên hôm nay) ⇒ mọi chữ "depth" trong nghiên
+    # cứu đó phải thay bằng KL ĐÃ KHỚP, tức CẬN DƯỚI của thanh khoản khả dụng.
+    #
+    # Đây là LOGGING THUẦN: không đổi `Quote`, không đổi giá/KL đặt lệnh, không thêm một lời
+    # gọi API nào (ghi lại chính payload đã lấy về). Mục đích duy nhất: tích luỹ 4-6 tuần dữ
+    # liệu để trả lời "KL CHỜ thật ở dưới trần là bao nhiêu" — câu hỏi hiện KHÔNG backtest
+    # được, và không có nó thì mọi con số cho hướng depth-aware sizing đều là bịa.
+    _L2_MAX_LEVELS = 10
+
+    def _l2_levels(self, arr):
+        """[{price, quantity}] × ≤10 mức, giá đã chuẩn hoá VND. [] nếu payload không đúng dạng."""
+        out = []
+        if not isinstance(arr, list):
+            return out
+        for lv in arr[:self._L2_MAX_LEVELS]:
+            if not isinstance(lv, dict):
+                continue
+            p = normalize_price_vnd(_fnum(qget(lv, "price", "p")))
+            v = _fnum(qget(lv, "quantity", "qtty", "volume", "qty", "q"))
+            if p is None and v is None:
+                continue
+            out.append({"price": p, "quantity": v})
+        return out
+
+    def _log_l2(self, symbol, qt, raw):
+        """Ghi 1 bản ghi `kind="quote_l2"` vào dnse_raw_<date>.jsonl. KHÔNG BAO GIỜ raise —
+        lỗi ghi log tuyệt đối không được làm hỏng đường lấy quote (nó nằm trên đường đặt lệnh).
+
+        THROTTLE mặc định 60s/mã (`DNSE_L2_LOG_SEC`, 0 = ghi mọi lần fetch). Vì sao không ghi
+        mọi lần: `dnse_raw_*.jsonl` là file KẾ TOÁN dùng chung (15+ consumer quét toàn file —
+        daily_nav_snapshot, verify_account_snapshot, park_holdings…). Cache quote TTL 3s +
+        poll 20s ⇒ ~3 lần fetch/phút/mã ⇒ ghi mọi lần sẽ thêm ~16k bản ghi/ngày (~24MB, gấp
+        đôi file hiện tại 17-31MB) để đổi lấy độ phân giải mà nghiên cứu KHÔNG cần: bucket
+        phân tích là 30 phút, và TV1 chỉ ~40k cp khớp CẢ NGÀY. 60s cho 30 mẫu/bucket.
+        """
+        try:
+            import time as _t
+            gap = float(os.environ.get("DNSE_L2_LOG_SEC", "60"))
+            last = self._l2_log_last.get(symbol)
+            nowt = _t.time()
+            if gap > 0 and last is not None and nowt - last < gap:
+                return
+            bids = self._l2_levels(qget(qt, "bid", "bids"))
+            offers = self._l2_levels(qget(qt, "offer", "offers", "asks"))
+            if not bids and not offers:
+                return          # không có gì để ghi — đừng làm nhiễu file
+            self._l2_log_last[symbol] = nowt
+            # Tên field CỐ Ý tránh `resp`/`orders`: execution_quality_review.py là consumer DUY
+            # NHẤT không lọc theo `kind` — nó đọc `payload["resp"]` (dict) và `payload["orders"]`
+            # (list) trên MỌI bản ghi. Không có 2 key đó ⇒ nó bỏ qua bản ghi này, không vỡ.
+            self._log_raw("quote_l2", {
+                "symbol": symbol, "bids": bids, "offers": offers,
+                "n_bid": len(bids), "n_offer": len(offers),
+                "last": qget(raw, "matchPrice", "lastPrice"),
+                "day_volume": qget(raw, "totalVolumeTraded", "totalTrading"),
+                "note": "P5 depth logging — logging thuần, KHÔNG đổi hành vi đặt lệnh",
+            })
+        except Exception:
+            pass
+
     def get_quote(self, symbol):
         import time as _t
         hit = self._quote_cache.get(symbol)
@@ -545,6 +611,7 @@ class DNSEBroker(BrokerBase):
             if isinstance(qt, dict):
                 raw.update({k: v for k, v in qt.items()
                             if not isinstance(v, (list, dict)) and k not in raw})
+                self._log_l2(symbol, qt, raw)   # P5: giữ lại 10 mức trước khi chúng bị vứt
         except Exception as e:
             print(f"[dnse] ⚠ quote {symbol} lỗi: {e}")
         q = Quote(raw)
