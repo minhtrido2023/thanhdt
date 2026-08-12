@@ -283,6 +283,31 @@ def main():
               "and clears the stamp",
               kbn.get("clear_commits") is True and kbn.get("clear_says_success") is True
               and kbn.get("clear_stamp_removed") is True, str(kbn))
+        check("30b Phase 4.6's commit carries a pathspec: a file another session left staged "
+              "does NOT ride along in the auto-compress commit",
+              kbn.get("clear_no_foreign_swept") is True, str(kbn))
+
+        # Same question a third time, for the OTHER commit in the same file: kb_nightly.sh
+        # Phase 3 (`git add kb/` + `commit ... || true` + unconditional `log "Git committed."`).
+        # Rounds 2-3 fixed consolidate.sh, fleet_backup.sh and Phase 4.6 while this one — 150
+        # lines ABOVE the round-3 edit, in the very same file — kept the swallowed exit code
+        # (arch-review round 4, 2026-08-12). It is reachable, not theoretical: `add kb/` stages
+        # kb/coding_guidelines.md, a SHARED_TOOLING_PATH, so any live Wags job blocks it tier-2.
+        p3 = _kb_nightly_phase3()
+        check("31 CALLER: kb_nightly Phase 3 does NOT log \"Git committed.\" when refused",
+              p3.get("blocked_no_false_success") is True, str(p3))
+        check("32 CALLER: refused Phase 3 says kb/ is still dirty with NO commit, on the log "
+              "AND on the human channel",
+              p3.get("blocked_says_refused") is True and p3.get("blocked_notified") is True,
+              str(p3))
+        check("33 CALLER: refused Phase 3 really produced no commit and left kb/ dirty "
+              "(nothing lost), and did not kill the nightly",
+              p3.get("blocked_no_commit") is True and p3.get("blocked_kb_still_dirty") is True
+              and p3.get("blocked_rc") == 0, str(p3))
+        # Control — without it, a Phase 3 that never commits at all would pass 31-33.
+        check("34 CALLER: with no live foreign job, Phase 3 DOES commit and DOES say so",
+              p3.get("clear_commits") is True and p3.get("clear_says_success") is True,
+              str(p3))
     finally:
         for p in _procs:
             try:
@@ -501,6 +526,113 @@ def _ctxbloat_block():
     return "".join(lines[starts[0]:ends[0] + 2])   # +2 = the log line and its closing `fi`
 
 
+def _phase3_block():
+    """The REAL Phase 3 body of bin/kb_nightly.sh, sliced by content markers — same contract as
+    _ctxbloat_block() (never re-typed, raises if a marker moves). Phase 3 is a different shape
+    from 4.6 (plain `git add kb/` + commit, no fact-check/stamp/return-code routing), so it gets
+    its own cutter rather than a parameter on that one."""
+    with open(os.path.join(ROOT, "bin", "kb_nightly.sh"), encoding="utf-8") as f:
+        lines = f.read().splitlines(True)
+    starts = [i for i, l in enumerate(lines) if l.startswith("# ── Phase 3: commit if changed")]
+    ends = [i for i, l in enumerate(lines) if l.strip() == 'log "No KB changes to commit."']
+    if len(starts) != 1 or len(ends) != 1 or ends[0] <= starts[0]:
+        raise RuntimeError("kb_nightly.sh Phase 3 markers moved: starts=%s ends=%s"
+                           % (starts, ends))
+    return "".join(lines[starts[0]:ends[0] + 2])   # +2 = the log line and its closing `fi`
+
+
+def _kb_nightly_phase3():
+    """Run the REAL kb_nightly.sh Phase 3 block in a throwaway repo with the real gate installed
+    as .git/hooks/pre-commit and a real live foreign Wags job. The job declares NO write-scope:
+    the block is reached through the gate's TIER-2 path (live Wags job + shared-tooling path),
+    which is exactly how it fires in production — `git add kb/` stages kb/coding_guidelines.md.
+
+    Only notify.sh is stubbed (a selfcheck must never reach Discord). The staging, the commit,
+    the exit-code capture and both log branches are the shipped code."""
+    res = {}
+    tmp = tempfile.mkdtemp(prefix="ccgate_kbn3_")
+    try:
+        repo = os.path.join(tmp, "mike")
+        shutil.copytree(os.path.join(ROOT, "bin"), os.path.join(repo, "bin"))
+        for d in ("kb", "bus/jobs", "state", "logs"):
+            os.makedirs(os.path.join(repo, *d.split("/")), exist_ok=True)
+        notify_log = os.path.join(repo, "logs", "notify_stub.log")
+        p = os.path.join(repo, "bin", "notify.sh")
+        with open(p, "w", encoding="utf-8") as f:
+            f.write('#!/usr/bin/env bash\nprintf "%s\\n" "$*" '
+                    '>> "$(dirname "$0")/../logs/notify_stub.log"\nexit 0\n')
+        os.chmod(p, 0o755)
+
+        guidelines = os.path.join(repo, "kb", "coding_guidelines.md")
+        with open(guidelines, "w", encoding="utf-8") as f:
+            f.write("# guidelines\n")
+
+        env = dict(os.environ)
+        env.pop("JOB_ID", None)
+        for c in (["git", "init", "-q", "."], ["git", "config", "user.email", "t@t"],
+                  ["git", "config", "user.name", "t"], ["git", "add", "-A"],
+                  ["git", "commit", "-q", "-m", "init"]):
+            subprocess.run(c, cwd=repo, capture_output=True, env=env)
+        hook = os.path.join(repo, ".git", "hooks", "pre-commit")
+        shutil.copy(GATE, hook)
+        os.chmod(hook, 0o755)
+
+        runner = os.path.join(repo, "run_phase3.sh")
+        with open(runner, "w", encoding="utf-8") as f:
+            f.write('#!/usr/bin/env bash\nset -euo pipefail\n'
+                    'ROOT="%s"\ncd "$ROOT"\nLOG="$ROOT/logs/kb_nightly.log"\n'
+                    'log() { echo "[selfcheck] $*" | tee -a "$LOG"; }\n\n' % repo
+                    + _phase3_block())
+
+        def dirty_kb():
+            with open(guidelines, "a", encoding="utf-8") as f:
+                f.write("edit by the nightly cleanup\n")
+
+        def run_phase():
+            open(notify_log, "w").close()
+            return subprocess.run(["bash", runner], cwd=repo, capture_output=True, text=True,
+                                  env=env)
+
+        def head_count():
+            r = subprocess.run(["git", "rev-list", "--count", "HEAD"], cwd=repo,
+                               capture_output=True, text=True, env=env)
+            return int(r.stdout.strip() or 0)
+
+        def kb_dirty():
+            r = subprocess.run(["git", "status", "--porcelain", "kb/"], cwd=repo,
+                               capture_output=True, text=True, env=env)
+            return bool(r.stdout.strip())
+
+        # --- BLOCKED: a live Wags job (no declared scope) + a staged shared-tooling path ---
+        write_job(os.path.join(repo, "bus", "jobs"), "Wags_p3", pid=sleeper(), to="Wags")
+        dirty_kb()
+        n0 = head_count()
+        r = run_phase()
+        msg = open(notify_log, encoding="utf-8").read()
+        res["blocked_rc"] = r.returncode
+        res["blocked_no_false_success"] = "Git committed." not in r.stdout
+        res["blocked_says_refused"] = ("BỊ TỪ CHỐI" in r.stdout and "KHÔNG có commit" in r.stdout
+                                       and "CẦN COMMIT TAY" in r.stdout)
+        res["blocked_notified"] = "CẦN COMMIT TAY" in msg
+        res["blocked_no_commit"] = head_count() == n0
+        res["blocked_kb_still_dirty"] = kb_dirty() is True
+        res["blocked_stdout"] = r.stdout.strip()[:200]
+
+        # --- CONTROL: same block, same dirty kb/, no foreign job → must really commit ---
+        os.remove(os.path.join(repo, "bus", "jobs", "Wags_p3.json"))
+        n1 = head_count()
+        r2 = run_phase()
+        res["clear_rc"] = r2.returncode
+        res["clear_commits"] = head_count() == n1 + 1
+        res["clear_says_success"] = "Git committed." in r2.stdout
+        res["clear_kb_clean"] = kb_dirty() is False
+    except Exception as exc:
+        res["error"] = repr(exc)
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+    return res
+
+
 def _kb_nightly_caller():
     """Run the REAL kb_nightly.sh Phase 4.6 block in a throwaway repo with the real gate
     installed as .git/hooks/pre-commit and a real live foreign Wags job that declared
@@ -608,6 +740,14 @@ def _kb_nightly_caller():
         reset_file()
         subprocess.run(["git", "reset", "-q", "HEAD", "--", "."], cwd=repo,
                        capture_output=True, env=env)
+        # Something another in-flight session left staged, to prove the commit carries a
+        # pathspec (round 4): without `-- "$file"` this rides along inside a commit whose
+        # message names exactly one auto-compressed file.
+        foreign = os.path.join(repo, "state", "foreign_staged.txt")
+        with open(foreign, "w", encoding="utf-8") as f:
+            f.write("staged by somebody else\n")
+        subprocess.run(["git", "add", "state/foreign_staged.txt"], cwd=repo,
+                       capture_output=True, env=env)
         n1 = head_count()
         r2 = run_phase()
         msg2 = notified()
@@ -615,6 +755,10 @@ def _kb_nightly_caller():
         res["clear_commits"] = head_count() == n1 + 1
         res["clear_says_success"] = "✅" in msg2 and "đã commit" in msg2
         res["clear_stamp_removed"] = not os.path.exists(stamp)
+        shown = subprocess.run(["git", "show", "--stat", "--name-only", "--format=", "HEAD"],
+                               cwd=repo, capture_output=True, text=True, env=env).stdout
+        res["clear_no_foreign_swept"] = "foreign_staged" not in shown
+        res["clear_committed_files"] = shown.split()
     except Exception as exc:
         res["error"] = repr(exc)
     finally:

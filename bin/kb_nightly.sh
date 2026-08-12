@@ -599,9 +599,20 @@ if [ "$CHANGED" -gt 0 ]; then
     # index, so a file staged (or partially staged) by another in-flight session at the wrong
     # moment would still ride along. Lower-risk here (02:00 ICT, not hourly/post-dispatch),
     # but kept consistent so this isn't miscited as the safe pattern to copy elsewhere.
-    git -C "$ROOT" commit -m "kb: nightly cleanup $(date -u +%Y-%m-%d) — archive+trim" \
-        --author="Mike <mike@fleet>" -- kb/ || true
-    log "Git committed."
+    # `|| true` + an unconditional "Git committed." (arch-review round 4, 2026-08-12): the same
+    # false-success shape already killed in consolidate.sh / fleet_backup.sh / Phase 4.6 was
+    # still alive HERE. Reachable for real, not theoretical: `add kb/` stages
+    # kb/coding_guidelines.md, which is a SHARED_TOOLING_PATH (mike_json.py:1122), so ANY live
+    # Wags job makes the commit-collision gate BLOCK at tier-2 while the log said "committed".
+    # Nothing downstream is deleted on the refused branch (no stamp/state assumes the commit
+    # happened) — kb/ simply stays dirty and staged for a hand commit.
+    if git -C "$ROOT" commit -m "kb: nightly cleanup $(date -u +%Y-%m-%d) — archive+trim" \
+            --author="Mike <mike@fleet>" -- kb/ >> "$LOG" 2>&1; then
+        log "Git committed."
+    else
+        log "Git commit BỊ TỪ CHỐI (commit-collision gate?) — kb/ còn dirty, KHÔNG có commit nào xảy ra. CẦN COMMIT TAY. Chi tiết: $LOG"
+        "$ROOT/bin/notify.sh" "⚠️ [kb_nightly] Phase 3: git commit kb/ BỊ TỪ CHỐI (commit-collision gate?) — dọn dẹp KB đã ghi lên đĩa nhưng CHƯA COMMIT, kb/ còn dirty. CẦN COMMIT TAY, xem $LOG" >/dev/null 2>&1 || true
+    fi
 else
     log "No KB changes to commit."
 fi
@@ -750,7 +761,11 @@ không tự quyết định việc này." \
     # — không cần người can thiệp" on the refused branch, i.e. the same false-success claim, on
     # the channel a human actually reads. 0 = compressed AND committed · 2 = compressed on disk
     # but NOT committed (needs a hand commit; the episode is NOT closed) · 1 = not compressed.
-    if (cd "$ROOT" && git add "$file" && git commit -q -m "kb: auto-compress $label ${old_kb}KB→${new_kb}KB (ctxbloat_autofix, mechanical fact-check PASS, kb_nightly.sh Phase 4.6)") >> "$LOG" 2>&1; then
+    # `-- "$file"` pathspec (arch-review round 4, 2026-08-12), same reason as Phase 3 above:
+    # `git add "$file"` only controls what THIS function stages — a commit with no pathspec
+    # commits the whole index, so anything another in-flight session left staged rides along
+    # inside a commit whose message claims it is one auto-compressed file.
+    if (cd "$ROOT" && git add "$file" && git commit -q -m "kb: auto-compress $label ${old_kb}KB→${new_kb}KB (ctxbloat_autofix, mechanical fact-check PASS, kb_nightly.sh Phase 4.6)" -- "$file") >> "$LOG" 2>&1; then
         log "AUTO-FIX APPLIED: $label ${old_kb}KB → ${new_kb}KB, committed."
         return 0
     fi
