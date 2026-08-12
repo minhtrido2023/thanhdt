@@ -248,6 +248,164 @@ px_far = ex2._limit_price(o2, Q(last=25000, bid=24900, ask=25000, ceiling=27000,
 check("F5 thị trường vượt CẢ trần động ⇒ vẫn KHÔNG đặt (thà lỡ phiên còn hơn mua trên trần)",
       px_far is None, f"px={px_far}")
 
+# ------------------------------------------------- G. anchor_prices_for() trên PAYLOAD DNSE THÔ
+# Vì sao cần khối này: 49 ca A-F ở trên BƠM TAY `anchor_prices` (đã qua bước tính) nên KHÔNG
+# ca nào chạm `anchor_prices_for()` — chính chỗ quant-skeptic bắt lỗi thật (log
+# mike/logs/verify_20260812_104435_640589.log): hàm đó lấy `c[-n:]` không lọc theo `t`, mà DNSE
+# CÓ trả nến hôm nay (probe live 2026-08-12 18:28 ICT: TV1/DGC đều có bar ngày 08-12) ⇒ giữa
+# phiên thì 1/5 anchor là GIÁ LIVE, trần no-chase tự đuổi theo cái giá nó đang đuổi.
+# Khối này bơm payload DNSE dạng THÔ (mảng t + c, đơn vị NGHÌN đúng như feed thật) và neo `now`
+# tường minh nên kết quả tất định, không phụ thuộc TZ/ngày chạy (§16).
+import importlib.util  # noqa: E402
+
+_INJ_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                         "mike", "bin", "discretionary_accumulation_inject.py")
+_spec = importlib.util.spec_from_file_location("_disc_inject_for_selfcheck", _INJ_PATH)
+inj = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(inj)
+
+import datetime as _dt  # noqa: E402
+from zoneinfo import ZoneInfo as _ZI  # noqa: E402
+
+_ICT = _ZI("Asia/Ho_Chi_Minh")
+
+
+def _bar_ts(y, m, d):
+    """DNSE 1D: timestamp = 09:00 ICT của ngày giao dịch (đúng như payload live đã đo)."""
+    return int(_dt.datetime(y, m, d, 9, 0, tzinfo=_ICT).timestamp())
+
+
+def _now(y, m, d, hh, mm):
+    return _dt.datetime(y, m, d, hh, mm)          # naive ICT, giống now_ict()
+
+
+# 6 bar: 5 phiên đã đóng (08-05→08-11) + nến HÔM NAY 08-12 đang chạy, giá vọt 25.0 (nghìn đồng)
+# để nhiễm-hay-không nhìn thấy được ngay bằng số.
+RAW = {"t": [_bar_ts(2026, 8, 5), _bar_ts(2026, 8, 6), _bar_ts(2026, 8, 7),
+             _bar_ts(2026, 8, 10), _bar_ts(2026, 8, 11), _bar_ts(2026, 8, 12)],
+       "c": [19.9, 20.0, 20.1, 20.3, 20.5, 25.0],
+       "o": [0] * 6, "h": [0] * 6, "l": [0] * 6, "v": [0] * 6}
+COMPLETED_5 = [19900.0, 20000.0, 20100.0, 20300.0, 20500.0]   # == ANCHORS
+WITH_TODAY_5 = [20000.0, 20100.0, 20300.0, 20500.0, 25000.0]
+
+
+class _FakeClient:
+    def __init__(self, payload):
+        self.payload, self.calls, self.last_query = payload, 0, None
+
+    def ohlc(self, symbol, resolution="1D", **query):
+        self.calls += 1
+        self.last_query = query
+        return self.payload
+
+
+class _FakeBrokerOHLC:
+    def __init__(self, payload):
+        self.client = _FakeClient(payload)
+
+
+G_ON = {"enabled": True, "tau": 0.03, "sessions": 5}
+G_STATE = st(dynamic_ceiling=G_ON, price_band={"max_no_chase_ceiling": 22000})
+
+
+def anchors_from(payload, now, state=None):
+    b = _FakeBrokerOHLC(payload)
+    return inj.anchor_prices_for(b, state or G_STATE, "TV1", now=now), b
+
+
+# --- G1-G4: nến hôm nay bị LOẠI ở mọi thời điểm phiên CHƯA đóng ------------------------------
+for nm, now_at in [("G1 GIỮA phiên 11:00 (MORNING)", _now(2026, 8, 12, 11, 0)),
+                   ("G2 TRƯỚC phiên 07:00 (PRE — DNSE có thể trả bar stub)", _now(2026, 8, 12, 7, 0)),
+                   ("G3 ATC 14:40 (chưa chốt)", _now(2026, 8, 12, 14, 40)),
+                   ("G4 ATO 09:05", _now(2026, 8, 12, 9, 5))]:
+    a, _ = anchors_from(RAW, now_at)
+    check(f"{nm} ⇒ nến hôm nay bị LOẠI, anchor = 5 phiên đã đóng", a == COMPLETED_5, f"{a}")
+
+# --- G5: sau 14:45 của NGÀY GIAO DỊCH thì nến hôm nay LÀ phiên hoàn tất → được dùng ----------
+a, _ = anchors_from(RAW, _now(2026, 8, 12, 20, 30))   # đúng giờ cron thật
+check("G5 20:30 (giờ cron thật, phiên đã đóng) ⇒ nến hôm nay HỢP LỆ, vào anchor",
+      a == WITH_TODAY_5, f"{a}")
+a, _ = anchors_from(RAW, _now(2026, 8, 12, 14, 46))
+check("G5b 14:46 (ngay sau ATC) ⇒ đã hoàn tất", a == WITH_TODAY_5, f"{a}")
+
+# --- G6: bar mang ngày TƯƠNG LAI luôn bị loại ------------------------------------------------
+a, _ = anchors_from(RAW, _now(2026, 8, 11, 20, 30))
+check("G6 chạy ngày 08-11: bar 08-12 là TƯƠNG LAI ⇒ loại, anchor = 5 phiên tới 08-11",
+      a == COMPLETED_5, f"{a}")
+
+# --- G7: cuối tuần/lễ mà feed vẫn trả bar mang ngày đó ⇒ rác, loại ---------------------------
+RAW_SAT = {"t": RAW["t"][:5] + [_bar_ts(2026, 8, 15)], "c": RAW["c"],
+           "o": [0] * 6, "h": [0] * 6, "l": [0] * 6, "v": [0] * 6}
+a, _ = anchors_from(RAW_SAT, _now(2026, 8, 15, 20, 0))     # 15/08/2026 = thứ Bảy
+check("G7 T7 20:00 + bar mang ngày T7 ⇒ rác, loại (không dựa mỗi tên phiên CLOSED)",
+      a == COMPLETED_5, f"{a}")
+
+# --- G8-G11: mọi payload hỏng ⇒ None (fail-safe về trần cố định, KHÔNG fail-open) ------------
+for nm, payload in [
+        ("G8 thiếu mảng `t` (không biết bar nào hoàn tất)", {"c": RAW["c"]}),
+        ("G9 len(t) ≠ len(c)", {"t": RAW["t"][:3], "c": RAW["c"]}),
+        ("G10 timestamp rác (chuỗi)", {"t": ["abc"] + RAW["t"][1:], "c": RAW["c"]}),
+        ("G11 payload rỗng", {"t": [], "c": []}),
+        ("G11b raw không phải dict", None)]:
+    a, _ = anchors_from(payload, _now(2026, 8, 12, 11, 0))
+    check(f"{nm} ⇒ None (fail-safe)", a is None, f"{a}")
+
+# thiếu phiên HOÀN TẤT sau khi lọc (5 bar, bar cuối là hôm nay đang chạy → còn 4 < 5)
+RAW_SHORT = {"t": RAW["t"][1:], "c": RAW["c"][1:],
+             "o": [0] * 5, "h": [0] * 5, "l": [0] * 5, "v": [0] * 5}
+a, _ = anchors_from(RAW_SHORT, _now(2026, 8, 12, 11, 0))
+check("G12 lọc xong còn 4 phiên hoàn tất < sessions=5 ⇒ None (KHÔNG bù bằng nến dở dang)",
+      a is None, f"{a}")
+a, _ = anchors_from(RAW_SHORT, _now(2026, 8, 12, 20, 30))
+check("G12b cùng payload nhưng phiên đã đóng ⇒ đủ 5, chạy bình thường",
+      a == WITH_TODAY_5, f"{a}")
+
+# --- G13: cờ TẮT ⇒ không gọi API nào (bất biến 'mặc định không thêm 1 lời gọi') --------------
+b_off = _FakeBrokerOHLC(RAW)
+a_off = inj.anchor_prices_for(b_off, BASE, "TV1", now=_now(2026, 8, 12, 11, 0))
+check("G13 cờ TẮT ⇒ None và KHÔNG gọi client.ohlc lần nào",
+      a_off is None and b_off.client.calls == 0, f"{a_off}/calls={b_off.client.calls}")
+
+# --- G14: đơn vị — feed trả NGHÌN đồng, anchor ra VND ----------------------------------------
+a, _ = anchors_from(RAW, _now(2026, 8, 12, 11, 0))
+check("G14 chuẩn hoá đơn vị: feed 19.9 (nghìn) ⇒ anchor 19.900 VND",
+      a[0] == 19900.0 and all(v > 1000 for v in a), f"{a}")
+
+# --- G15: cửa sổ hỏi API neo TZ ICT tường minh (§16), không lệ thuộc TZ process ---------------
+_, b15 = anchors_from(RAW, _now(2026, 8, 12, 11, 0))
+check("G15 query DNSE có from<to và to = đúng mốc ICT của `now` (neo TZ tường minh)",
+      b15.client.last_query["to"] == int(_dt.datetime(2026, 8, 12, 11, 0, tzinfo=_ICT).timestamp())
+      and b15.client.last_query["from"] < b15.client.last_query["to"],
+      f"{b15.client.last_query}")
+
+# --- G16: [CHỨNG MINH NGƯỢC] lỗi cũ THẬT SỰ đổi trần, không phải lo hão ----------------------
+# Tái dựng đúng code cũ (`c[-n:]` không lọc) trên CÙNG payload, CÙNG thời điểm giữa phiên.
+buggy = [float(inj.normalize_price_vnd(float(v))) for v in RAW["c"][-5:]]
+fixed_anchor, _ = anchors_from(RAW, _now(2026, 8, 12, 11, 0))
+c_bug, _, i_bug = resolve_price_band(G_STATE, buggy, 25000.0)
+c_fix, _, i_fix = resolve_price_band(G_STATE, fixed_anchor, 25000.0)
+check("G16 code CŨ (không lọc) cho trần CAO HƠN — lỗi có hậu quả thật, không phải lý thuyết",
+      c_bug > c_fix, f"cũ {c_bug} vs mới {c_fix}")
+check("G16b trần mới = mean(5 phiên ĐÃ ĐÓNG)×1,03, KHÔNG chứa giá live hôm nay",
+      c_fix == int(MEAN * 1.03) and i_fix["anchor_vnd"] == round(MEAN, 2), f"{c_fix}/{i_fix}")
+check("G16c giá LIVE 25.000 của hôm nay KHÔNG lọt vào anchor sau khi vá",
+      25000.0 not in (fixed_anchor or []), f"{fixed_anchor}")
+
+# --- G17: bar_is_completed_session — bảng chân trị trực tiếp ----------------------------------
+_bts = _bar_ts(2026, 8, 12)
+for nm, now_at, want in [
+        ("G17a hôm qua, giữa phiên hôm nay", _now(2026, 8, 13, 11, 0), True),
+        ("G17b hôm nay, 20:30", _now(2026, 8, 12, 20, 30), True),
+        ("G17c hôm nay, 11:00", _now(2026, 8, 12, 11, 0), False),
+        ("G17d hôm nay, 00:30 (PRE)", _now(2026, 8, 12, 0, 30), False),
+        ("G17e ngày mai (bar tương lai)", _now(2026, 8, 11, 20, 30), False)]:
+    got = inj.bar_is_completed_session(_bts, now_at)
+    check(f"{nm} ⇒ {want}", got is want, f"got={got}")
+check("G17f timestamp không parse được ⇒ None (caller fail-safe)",
+      inj.bar_is_completed_session("xx", _now(2026, 8, 12, 20, 30)) is None)
+check("G17g lễ 02/09 dù sau 14:45 ⇒ bar mang ngày lễ vẫn là rác",
+      inj.bar_is_completed_session(_bar_ts(2026, 9, 2), _now(2026, 9, 2, 20, 0)) is False)
+
 print()
 if fails:
     print(f"❌ {len(fails)} FAIL: {fails}")
