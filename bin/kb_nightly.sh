@@ -621,12 +621,30 @@ fi
 # — file đó CHƯA TỪNG tồn tại kể từ khi dòng này được thêm 2026-06-30 (commit 044c63ca9), silent
 # "No such file or directory" mỗi đêm suốt hơn 1 tháng vì có `|| true`. Đích đúng là script backup
 # top-level WorkingClaude (nhận message argument), không phải mike/bin/.
-"$ROOT/../../backup.sh" "kb_nightly $(date -u +%Y-%m-%d)" >> "$LOG" 2>&1 || true
+#
+# 2026-08-12: cái `|| true` cũ nuốt luôn exit THẬT của backup.sh, nên hết đĩa / git push bị từ
+# chối / credential hỏng đều chìm vào log trong khi Phase 4 vẫn bắn "🌙 KB nightly done" ra
+# Discord + topic architecture. Cùng họ false-success với chuỗi commit-collision-gate.
+# QUYẾT ĐỊNH: backup fail KHÔNG chặn dòng "done" — nén/archive KB và backup là hai việc độc
+# lập, KB nén xong thật; chặn cả dòng done sẽ nuốt luôn cảnh báo OVERSIZE/PRUNE_WARN và biến
+# "im lặng" thành không phân biệt được với cron chết. Nó đi kèm dòng done như một cảnh báo
+# NÓI RÕ backup hỏng, để người đọc không tưởng cả đêm ổn.
+BACKUP_WARN=""
+if _bk_out="$("$ROOT/../../backup.sh" "kb_nightly $(date -u +%Y-%m-%d)" 2>&1)"; then
+    printf '%s\n' "$_bk_out" >> "$LOG"
+else
+    _bk_rc=$?
+    printf '%s\n' "$_bk_out" >> "$LOG"
+    printf '%s\n' "$_bk_out" >&2
+    BACKUP_WARN="BACKUP THẤT BẠI (exit $_bk_rc) — KB đã nén xong nhưng KHÔNG có backup đêm nay, xem $LOG"
+    log "Backup THẤT BẠI (exit $_bk_rc) — xem $LOG"
+fi
 
 # ── Phase 4: notify ──────────────────────────────────────────────────────────
 MSG="🌙 KB nightly done ($(date -u +%Y-%m-%d))"
 [ -n "${OVERSIZE:-}" ] && MSG="$MSG — ⚠️ oversized memories:$OVERSIZE"
 [ -n "${PRUNE_WARN:-}" ] && MSG="$MSG — ⚠️ $PRUNE_WARN"
+[ -n "${BACKUP_WARN:-}" ] && MSG="$MSG — ⚠️ $BACKUP_WARN"
 "$ROOT/bin/notify.sh" "$MSG" 2>/dev/null || true
 # Topic CỐ ĐỊNH (Architecture) — trước 2026-07-22 đọc con trỏ global
 # state/ccdb_thread_id = "topic Mike mở phiên gần nhất", nên tin bảo trì KB đêm nào cũng
