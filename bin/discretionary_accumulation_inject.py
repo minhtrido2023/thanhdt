@@ -50,6 +50,7 @@ _SESSION_OPEN_PHASES = {"ATO", "MORNING", "LUNCH", "AFTERNOON", "ATC"}
 
 DISC_DIR = os.path.join(WC_ROOT, "data", "trade_plans", "discretionary")
 PLAN_DIR = os.path.join(WC_ROOT, "data", "trade_plans")
+ACTIVE_NAV_DIR = os.path.join(WC_ROOT, "data", "execution_logs")
 
 
 def _atomic_write_json(path, obj):
@@ -66,28 +67,44 @@ def next_trading_day_str():
 
 
 def load_active_states(account):
-    """Đọc mọi state_*_<account>.json status=active. Trả list (path, state)."""
-    out = []
+    """Đọc mọi state_*_<account>.json status=active. Trả (list (path, state), list bị bỏ qua).
+
+    Danh sách BỊ BỎ QUA trả kèm là có chủ đích: chính một state `status="completed"` nằm im
+    (TV1, 07-29 → 08-12) là thứ khiến toàn bộ cơ chế trần động không chạm được chương trình
+    đang chạy, mà KHÔNG một artifact nào người duyệt plan đọc được nhắc tới. Caller ghi nó vào
+    plan để lần sau nhìn thấy được thay vì phải suy ra.
+    """
+    out, skipped = [], []
     for path in sorted(glob.glob(os.path.join(DISC_DIR, f"state_*_{account}.json"))):
         try:
             state = json.load(open(path, encoding="utf-8"))
         except Exception as exc:
             print(f"  [WARN] state file lỗi đọc, bỏ qua: {path}: {exc}")
+            skipped.append({"state_file": os.path.relpath(path, WC_ROOT), "ticker": None,
+                            "why": f"file lỗi đọc: {exc}"})
             continue
-        state["_state_file"] = os.path.relpath(path, WC_ROOT)
+        rel = os.path.relpath(path, WC_ROOT)
+        state["_state_file"] = rel
         if state.get("account") != account:
             print(f"  [WARN] {path}: account={state.get('account')} ≠ {account}, bỏ qua")
+            skipped.append({"state_file": rel, "ticker": state.get("ticker"),
+                            "why": f"account={state.get('account')} ≠ {account}"})
             continue
         if state.get("status") != "active":
             print(f"  [skip] {os.path.basename(path)}: status={state.get('status')}")
+            skipped.append({"state_file": rel, "ticker": state.get("ticker"),
+                            "why": f"status={state.get('status')} (≠ active) — chương trình "
+                                   f"KHÔNG sinh lệnh; đúng ý thì bỏ qua, không thì bật lại state"})
             continue
         try:
             validate_state(state)
         except ValueError as exc:
             print(f"  [WARN] {path}: state không hợp lệ ({exc}) — bỏ qua, KHÔNG chèn")
+            skipped.append({"state_file": rel, "ticker": state.get("ticker"),
+                            "why": f"state không hợp lệ: {exc}"})
             continue
         out.append((path, state))
-    return out
+    return out, skipped
 
 
 def broker_filled_qty(account, account_id, ticker, baseline):
@@ -232,6 +249,53 @@ def anchor_prices_for(broker, state, ticker, now=None):
     return out
 
 
+def load_active_nav(account, now=None):
+    """active_nav mới nhất của account, hoặc None (fail-safe) → (nav_vnd|None, info).
+
+    Nguồn = `data/execution_logs/active_nav_<account>.json` do `mike/bin/compute_active_nav.py`
+    ghi. Chọn nguồn này chứ KHÔNG tự tính lại vì script đó là nơi chuẩn tắc cho cơ sở tiền
+    `totalCash − totalDebt` (§25 coding_guidelines — hai bug cùng loại trong hai ngày liên tiếp
+    vì mỗi consumer tự lấy field tiền), đã fail-closed sẵn (guard nổ ⇒ KHÔNG ghi file, bản cũ ở
+    lại nguyên), và nó chạy NGAY TRONG chuỗi lập plan (~19:0x) — tức đúng cơ sở NAV mà phần còn
+    lại của plan hôm đó đã dùng.
+
+    Vì file ghi AD-HOC (không cron riêng), mtime tươi KHÔNG chứng minh nội dung tươi (bẫy thật
+    lag_edge_health 07-12) ⇒ cổng tươi đọc `computed_at` TRONG NỘI DUNG và đòi ĐÚNG ngày hôm
+    nay (ICT, §16). Dung sai chặt là cố ý (§14): injector chạy 20:30 cùng ngày với producer
+    19:0x, nên trễ tới một ngày đã là dấu hiệu chuỗi lập plan hỏng — lúc đó KHÔNG đặt lệnh còn
+    hơn đặt theo NAV hôm qua.
+    """
+    path = os.path.join(ACTIVE_NAV_DIR, f"active_nav_{account}.json")
+    rel = os.path.relpath(path, WC_ROOT)
+    if not os.path.exists(path):
+        return None, {"source": rel, "reason": f"chưa có file {rel}"}
+    try:
+        d = json.load(open(path, encoding="utf-8"))
+    except Exception as exc:
+        return None, {"source": rel, "reason": f"{rel} lỗi đọc: {exc}"}
+    today = (now or now_ict()).date().isoformat()
+    computed_at = str(d.get("computed_at"))
+    nav = d.get("active_nav")
+    info = {"source": rel, "computed_at": computed_at, "expected_date": today,
+            "active_nav_vnd": nav, "cash_basis": d.get("cash_basis")}
+    # §12: file dữ liệu mang nhãn account thì phải KIỂM nhãn, không tin tên file. Tên file đúng
+    # mà nội dung của account khác = sizing account này bằng NAV account kia (tiền lệ thật
+    # 2026-07-19, cross-account contamination). Rẻ, và bắt được cả lỗi copy file thủ công.
+    if d.get("account") not in (None, account):
+        info["reason"] = (f"{rel} có account={d.get('account')!r} ≠ {account} — nhiễm chéo "
+                          f"account, KHÔNG dùng (§12)")
+        return None, info
+    if computed_at != today:
+        info["reason"] = (f"{rel} computed_at={computed_at} ≠ hôm nay {today} — CŨ. "
+                          f"Chạy `mike/bin/compute_active_nav.py --account {account}` rồi lặp lại.")
+        return None, info
+    if not isinstance(nav, (int, float)) or isinstance(nav, bool) or nav <= 0:
+        info["reason"] = f"{rel} active_nav={nav!r} không phải số dương"
+        return None, info
+    info["reason"] = f"active_nav {float(nav):,.0f}đ (computed_at {computed_at})"
+    return float(nav), info
+
+
 def already_injected(plan, ticker):
     """Dedup: đã có order DISCRETIONARY_SPECIAL cho ticker này trong plan chưa?
     (bắt cả tranche chèn tay lẫn lần chạy trước — chống chèn trùng bất kể id scheme.)"""
@@ -250,10 +314,13 @@ def process_account(account, plan_date, dry_run):
         return 1
     account_id = profile.get("account_id")  # key CHUẨN trong secrets (KHÔNG phải account_no)
 
-    states = load_active_states(account)
-    if not states:
-        print(f"[inject] {account} {plan_date}: KHÔNG có state active — no-op.")
+    states, skipped_states = load_active_states(account)
+    if not states and not skipped_states:
+        print(f"[inject] {account} {plan_date}: KHÔNG có state discretionary nào — no-op.")
         return 0
+    # CÓ state nhưng không state nào active vẫn đi tiếp: mục đích là ghi được lý do vào plan
+    # (xem khối discretionary_inject_notes bên dưới). Vòng lặp chạy trên `states` rỗng ⇒ không
+    # lệnh nào được sinh — đúng ý, chỉ khác ở chỗ nay nó nói ra tại sao.
 
     plan_path = os.path.join(PLAN_DIR, f"plan_{account}_{plan_date}.json")
     if not os.path.exists(plan_path):
@@ -269,6 +336,32 @@ def process_account(account, plan_date, dry_run):
 
     now_iso = dt.datetime.now().astimezone().isoformat(timespec="seconds")
     account_mode = "live" if account in live_dnse_labels() else "paper"
+
+    # active_nav CHỈ đọc khi có state khai target theo tỷ trọng — state target cố định không
+    # phụ thuộc NAV, không được để nó chết lây vì một file NAV cũ.
+    active_nav_vnd, nav_info = None, None
+    if any(s.get("target_pct_active_nav") is not None for _, s in states):
+        active_nav_vnd, nav_info = load_active_nav(account)
+        tag = "active_nav" if active_nav_vnd else "FAILSAFE active_nav"
+        print(f"  [{tag}] {nav_info['reason']}")
+
+    # State BỊ BỎ QUA (completed/inactive/hỏng/sai account) ⇒ ghi vào plan. Đây chính là lỗ
+    # hổng đã gây ra job này: state TV1 nằm im ở status="completed" từ 07-29, injector bỏ qua
+    # đúng luật và IM LẶNG, nên không artifact nào người duyệt plan đọc được nhắc rằng có một
+    # chương trình gom đang không sinh lệnh. Dedup theo (state_file, why) để lần chạy lại
+    # (retry khi plan chưa kịp ghi) không nhân bản ghi chú.
+    if skipped_states:
+        notes = plan.setdefault("discretionary_inject_notes", [])
+        seen = {(n.get("state_file"), n.get("note")) for n in notes}
+        for sk in skipped_states:
+            if (sk["state_file"], sk["why"]) in seen:
+                continue
+            notes.append({"at": now_iso, "ticker": sk["ticker"], "action": "state_skipped",
+                          "state_file": sk["state_file"], "note": sk["why"]})
+            print(f"  [note→plan] {sk['state_file']}: {sk['why']}")
+        if not dry_run:
+            _atomic_write_json(plan_path, plan)
+
     n_injected = 0
     broker = None
 
@@ -303,7 +396,7 @@ def process_account(account, plan_date, dry_run):
 
         order, decision = compute_session_order(
             state, filled, prev_turnover, prev_price, plan_date, now_iso,
-            anchor_prices=anchors)
+            anchor_prices=anchors, active_nav_vnd=active_nav_vnd)
         print(f"  decision: {decision['action']} — {decision['reason']}")
 
         # đánh dấu completed vào state nếu engine báo (rule e: không mua quá)
@@ -323,6 +416,16 @@ def process_account(account, plan_date, dry_run):
             state.setdefault("history_noninject", []).append(
                 {"plan_date": plan_date, "action": decision["action"],
                  "reason": decision["reason"], "at": now_iso})
+            # Từ khi injector là CHỦ SỞ HỮU DUY NHẤT của lệnh gom này (DollarBill không còn gõ
+            # tay — xem kb/context_planning_mini.md), một lần fail-safe/halt im lặng = lệnh biến
+            # mất khỏi plan mà không ai thấy. Ghi lý do THẲNG vào plan để nó nằm trong artifact
+            # user duyệt lúc 21:00, không chỉ trong log của cron.
+            if decision["action"] in ("failsafe", "halted"):
+                plan.setdefault("discretionary_inject_notes", []).append(
+                    {"at": now_iso, "ticker": ticker, "action": decision["action"],
+                     "state_file": state.get("_state_file"), "note": decision["reason"]})
+                if not dry_run:
+                    _atomic_write_json(plan_path, plan)
             if not dry_run:
                 _atomic_write_json(state_path, {k: v for k, v in state.items()
                                                 if not k.startswith("_")})
