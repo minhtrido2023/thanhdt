@@ -242,6 +242,25 @@ def main():
               e2e.get("override_ok") is True, str(e2e))
         check("21 E2E: a gate that cannot find its helper SAYS SO instead of passing silently",
               e2e.get("orphan_warns") is True, str(e2e))
+
+        # ---------- G. the AUTOMATIC CALLERS: is the refusal reported or swallowed? ----------
+        # Cases 19-21 drive `git commit` directly and stop at the gate's own exit code. They
+        # cannot see what the callers DO with a refusal — and all three automatic ones swallowed
+        # it (`2>/dev/null || true`) and printed their success line anyway (arch-review round 2,
+        # 2026-08-12). consolidate.sh is the one that matters: ~50 runs/day vs a handful of hand
+        # commits, and `git add kb/` with kb/coding_guidelines.md dirty is a shared-tooling path.
+        cons = _consolidate_caller()
+        check("22 CALLER: consolidate.sh does NOT print its success line when the gate refuses",
+              cons.get("blocked_no_false_success") is True, str(cons))
+        check("23 CALLER: consolidate.sh reports WHY it could not commit (reason + gate output)",
+              cons.get("blocked_says_why") is True and cons.get("blocked_notified") is True,
+              str(cons))
+        check("24 CALLER: refused run really produced no commit (kb/ left dirty, not lost)",
+              cons.get("blocked_no_commit") is True, str(cons))
+        # Control — without it, a consolidate.sh that never reports success would pass 22-24.
+        check("25 CALLER: with no live foreign job, consolidate.sh DOES commit and DOES say so",
+              cons.get("clear_commits") is True and cons.get("clear_says_success") is True,
+              str(cons))
     finally:
         for p in _procs:
             try:
@@ -355,6 +374,88 @@ def _e2e():
         r = subprocess.run(["bash", os.path.join(bare, "repo_commit_gate.sh")], cwd=bare,
                            capture_output=True, text=True, env=env)
         res["orphan_warns"] = r.returncode == 0 and "INACTIVE" in r.stderr
+    except Exception as exc:
+        res["error"] = repr(exc)
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+    return res
+
+
+def _consolidate_caller():
+    """Run the REAL bin/consolidate.sh in a throwaway repo, in the exact shape it runs in
+    production: `git add kb/` while kb/coding_guidelines.md (a SHARED_TOOLING_PATH) is dirty,
+    with a foreign live Wags job outside. Asserts the refusal is REPORTED, then — the control
+    that keeps this from being tautological — that the same script really does commit and say
+    so once the foreign job is gone. Every outbound notifier is stubbed: a selfcheck must never
+    reach Discord."""
+    res = {}
+    tmp = tempfile.mkdtemp(prefix="ccgate_cons_")
+    try:
+        repo = os.path.join(tmp, "mike")
+        shutil.copytree(os.path.join(ROOT, "bin"), os.path.join(repo, "bin"))
+        for d in ("kb", "bus/inbox", "bus/jobs", "state/offsets", "locks", "logs"):
+            os.makedirs(os.path.join(repo, *d.split("/")), exist_ok=True)
+        for s in ("notify.sh", "notify_discord.sh", "notify_telegram.sh", "notify_thread.sh"):
+            p = os.path.join(repo, "bin", s)
+            with open(p, "w", encoding="utf-8") as f:
+                f.write('#!/usr/bin/env bash\nprintf "%s\\n" "$*" '
+                        '>> "$(dirname "$0")/../logs/notify_stub.log"\nexit 0\n')
+            os.chmod(p, 0o755)
+        with open(os.path.join(repo, "kb", "version.txt"), "w", encoding="utf-8") as f:
+            f.write("2000\n")
+        with open(os.path.join(repo, "kb", "coding_guidelines.md"), "w", encoding="utf-8") as f:
+            f.write("# guidelines\n")
+
+        def add_event(n):
+            with open(os.path.join(repo, "bus", "inbox", "Taylor.jsonl"), "a",
+                      encoding="utf-8") as f:
+                f.write(json.dumps({"event_id": "e%d" % n, "ts": "2026-08-12T05:0%d:00Z" % n,
+                                    "agent_id": "Taylor", "event_type": "finding",
+                                    "topic": "t%d" % n, "payload": "p"}) + "\n")
+
+        env = dict(os.environ)
+        env.pop("JOB_ID", None)
+        for c in (["git", "init", "-q", "."], ["git", "config", "user.email", "t@t"],
+                  ["git", "config", "user.name", "t"], ["git", "add", "-A"],
+                  ["git", "commit", "-q", "-m", "init"]):
+            subprocess.run(c, cwd=repo, capture_output=True, env=env)
+        hook = os.path.join(repo, ".git", "hooks", "pre-commit")
+        shutil.copy(GATE, hook)
+        os.chmod(hook, 0o755)
+
+        def consolidate():
+            return subprocess.run(["bash", os.path.join(repo, "bin", "consolidate.sh")],
+                                  cwd=repo, capture_output=True, text=True, env=env)
+
+        def head_count():
+            r = subprocess.run(["git", "rev-list", "--count", "HEAD"], cwd=repo,
+                               capture_output=True, text=True, env=env)
+            return int(r.stdout.strip() or 0)
+
+        SUCCESS = "consolidated new events"
+        with open(os.path.join(repo, "kb", "coding_guidelines.md"), "a", encoding="utf-8") as f:
+            f.write("edited by another session, uncommitted\n")
+        write_job(os.path.join(repo, "bus", "jobs"), "Wags_cons", pid=sleeper(), to="Wags")
+        add_event(1)
+        n0 = head_count()
+        r = consolidate()
+        out = r.stdout + r.stderr
+        res["blocked_no_false_success"] = SUCCESS not in r.stdout
+        res["blocked_no_commit"] = head_count() == n0
+        res["blocked_says_why"] = "KHÔNG ĐƯỢC COMMIT" in out and "commit-collision" in out
+        try:
+            with open(os.path.join(repo, "logs", "notify_stub.log"), encoding="utf-8") as f:
+                res["blocked_notified"] = "consolidate.sh" in f.read()
+        except OSError:
+            res["blocked_notified"] = False
+        res["blocked_stdout"] = r.stdout.strip()[:160]
+
+        os.remove(os.path.join(repo, "bus", "jobs", "Wags_cons.json"))
+        add_event(2)
+        n1 = head_count()
+        r2 = consolidate()
+        res["clear_commits"] = head_count() == n1 + 1
+        res["clear_says_success"] = SUCCESS in r2.stdout
     except Exception as exc:
         res["error"] = repr(exc)
     finally:

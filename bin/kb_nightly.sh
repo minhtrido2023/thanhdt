@@ -742,8 +742,15 @@ không tự quyết định việc này." \
         return 1
     fi
     mv "$proposed" "$file"
-    (cd "$ROOT" && git add "$file" && git commit -q -m "kb: auto-compress $label ${old_kb}KB→${new_kb}KB (ctxbloat_autofix, mechanical fact-check PASS, kb_nightly.sh Phase 4.6)") >> "$LOG" 2>&1 || true
-    log "AUTO-FIX APPLIED: $label ${old_kb}KB → ${new_kb}KB, committed."
+    # `|| true` + an unconditional "committed." line (arch-review round 2, 2026-08-12): the
+    # pre-commit collision gate (bin/repo_commit_gate.sh) can REFUSE this commit, and swallowed
+    # that way the log claimed a commit that never happened. The compression itself already
+    # landed (the mv above), so this still returns 0 — only the CLAIM about committing changes.
+    if (cd "$ROOT" && git add "$file" && git commit -q -m "kb: auto-compress $label ${old_kb}KB→${new_kb}KB (ctxbloat_autofix, mechanical fact-check PASS, kb_nightly.sh Phase 4.6)") >> "$LOG" 2>&1; then
+        log "AUTO-FIX APPLIED: $label ${old_kb}KB → ${new_kb}KB, committed."
+    else
+        log "AUTO-FIX APPLIED NHƯNG CHƯA COMMIT: $label ${old_kb}KB → ${new_kb}KB — file ĐÃ đổi trên đĩa, git add/commit bị từ chối (commit-collision gate?) hoặc lỗi. Chi tiết: $LOG. Cần commit tay."
+    fi
     return 0
 }
 

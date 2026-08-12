@@ -20,8 +20,17 @@ echo "==> Fleet repo -> github:mike-fleet"
 git -C "$MIKE" add -A
 if git -C "$MIKE" diff --cached --quiet; then
   echo "   (no fleet changes to commit)"
+elif commit_err="$(git -C "$MIKE" commit -q -m "fleet backup $ts" 2>&1)"; then
+  echo "   committed: $(git -C "$MIKE" rev-parse --short HEAD)"
 else
-  git -C "$MIKE" commit -q -m "fleet backup $ts" || true
+  # `|| true` here (arch-review round 2, 2026-08-12): the pre-commit collision gate
+  # (bin/repo_commit_gate.sh) can REFUSE this commit — and this one stages the WHOLE index
+  # (`git add -A` above), so it is the most likely of the three automatic callers to hit it.
+  # Swallowed, the push below still printed "OK fleet pushed: <sha>" — of the OLD head, with
+  # today's work left uncommitted and unbacked-up. The push is deliberately still attempted:
+  # backing up what IS committed beats skipping the backup entirely.
+  echo "   FAIL fleet commit — hôm nay KHÔNG vào backup, push dưới đây chỉ đẩy HEAD CŨ:"
+  echo "$commit_err" | sed 's/^/     /'
 fi
 if git -C "$MIKE" push -q github HEAD:mike-fleet 2>/dev/null; then
   echo "   OK fleet pushed: $(git -C "$MIKE" rev-parse --short HEAD)"

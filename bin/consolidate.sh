@@ -109,15 +109,57 @@ if [ -s "$NEW" ]; then
   # inside kb/ (context_pack.md, events_buffer.md, version.txt, recent_delta.jsonl,
   # fleet_status.md via publish_context.sh + the fleet-status step below) — nothing it does
   # legitimately touches bin/ or the repo root.
-  git -C "$ROOT" add kb/ 2>/dev/null || true
   # `-- kb/` on commit too (arch-review round 2, 2026-07-28): `git add kb/` only controls what
   # gets STAGED here — `git commit` with no pathspec commits the WHOLE INDEX. If some other
   # in-flight session had already run `git add bin/foo.sh` (or staged one hunk of it) a moment
   # before this runs, that staged-but-uncommitted file still rides along into "consolidate KB
   # vNNNN" without the pathspec. Reproduced in review; verified this pathspec leaves any such
   # staged file exactly as staged (not committed, not unstaged) afterward.
-  git -C "$ROOT" commit -q -m "consolidate $(date -u +%FT%TZ) (KB v$(cat "$KB/version.txt"))" -- kb/ 2>/dev/null || true
-  echo "$(date -u +%FT%TZ) consolidated new events → KB v$(cat "$KB/version.txt")"
+  #
+  # THE RESULT OF BOTH GIT STEPS IS CHECKED — arch-review round 2, 2026-08-12. Both used to end
+  # in `2>/dev/null || true` with the success line printing unconditionally underneath. Since
+  # the pre-commit collision gate (bin/repo_commit_gate.sh) exists, this commit can be REFUSED
+  # for a good reason, and a refusal swallowed that way printed "consolidated ... KB vNNNN"
+  # with NOTHING committed — the exact "the commit didn't run but the report says it did"
+  # symptom that gate was built to kill, re-created inside the pipeline that runs far more
+  # often (every 30 min + after every dispatch) than any hand commit.
+  # Known over-block, accepted: the gate reads the WHOLE index while this commit is pathspec'd
+  # to kb/, so a foreign file staged by someone else can block us even though we would not have
+  # committed it. Safe direction — the kb/ files are already written to disk; the next run
+  # commits them once the other job ends.
+  kbver="$(cat "$KB/version.txt")"
+  cstate=ok; cerr=""
+  if ! cerr="$(git -C "$ROOT" add kb/ 2>&1)"; then
+    cstate=add-failed
+  elif git -C "$ROOT" diff --cached --quiet -- kb/; then
+    cstate=nothing-staged        # kb/ identical to HEAD — benign, but NOT "committed"
+  elif ! cerr="$(git -C "$ROOT" commit -q -m "consolidate $(date -u +%FT%TZ) (KB v$kbver)" -- kb/ 2>&1)"; then
+    cstate=commit-refused
+  fi
+
+  CMARK="$ROOT/state/kbcommitwarn"
+  case "$cstate" in
+    ok)
+      rm -f "$CMARK"
+      echo "$(date -u +%FT%TZ) consolidated new events → KB v$kbver"
+      ;;
+    nothing-staged)
+      rm -f "$CMARK"
+      echo "$(date -u +%FT%TZ) consolidated new events → KB v$kbver (kb/ không đổi so với HEAD, không commit)"
+      ;;
+    *)
+      echo "$(date -u +%FT%TZ) ⛔ KB v$kbver KHÔNG ĐƯỢC COMMIT ($cstate) — kb/ đã ghi ra đĩa nhưng còn dirty:" >&2
+      echo "$cerr" >&2
+      # Debounced on the REASON, same shape as the cursor-repair warning above and for the same
+      # reason: this runs ~50x/day, so a block that can't self-clear would make the alarm itself
+      # the event storm. A different reason still alerts immediately; success clears the mark.
+      if [ "$cstate" != "$(cat "$CMARK" 2>/dev/null || true)" ]; then
+        printf '%s' "$cstate" > "$CMARK"
+        "$ROOT/bin/notify.sh" "⛔ consolidate.sh KHÔNG commit được KB v$kbver ($cstate) — kb/ còn dirty, KHÔNG có commit nào:
+\`$(echo "$cerr" | head -n 4)\`" >/dev/null 2>&1 || true
+      fi
+      ;;
+  esac
 
   # --- 2b. push new events to Discord #mike channel ---
   discord_summary="$(python3 "$PY" format-events "$NEW" 2>/dev/null | head -n 8 || true)"
