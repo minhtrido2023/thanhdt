@@ -4,7 +4,7 @@ title: Incidents — Mike fleet (sổ postmortem, cấu trúc OKF)
 owner: Mike fleet (mọi agent ghi; daily_retro.sh ghi entry RETRO hằng đêm)
 format: OKF (Open Knowledge Format) — markdown + YAML frontmatter, 1 sự cố = 1 file
 migrated_from: kb/INCIDENTS.md (single-file 408KB, migrate → OKF 2026-07-30 job Winston_20260730_144031)
-entries: 99 file (69 sự cố + 29 RETRO + 1 mục open-items chung)
+entries: 102 file (71 sự cố + 30 RETRO + 1 mục open-items chung)
 ---
 
 # Incidents — Mike fleet
@@ -77,6 +77,9 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Sự cố | status |
 |---|---|---|
+| 2026-08-11 | [2026-08/2026-08-11-plan-dd-check-string-poll-fail.md](2026-08/2026-08-11-plan-dd-check-string-poll-fail.md) | ? |
+| 2026-08-11 | [2026-08/2026-08-11-funding-gate-chan-oan-khi-restart-phien-chieu.md](2026-08/2026-08-11-funding-gate-chan-oan-khi-restart-phien-chieu.md) | ? |
+| 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
 | 2026-08-11 | [2026-08-11: FUNDING gate chặn OAN ZaloPay khi restart phiên chiều (rc=3) — gate cộng Σ mua trên TOÀN BỘ `orders[]` (108,2tr) thay vì phần CÒN LẠI sau fills buổi sáng (27,2tr vs pp0Buy 60,5tr); bot ZaloPay không chạy cả phiên chiều, TV1 200cp còn open](2026-08/2026-08-11-funding-gate-chan-oan-khi-restart-phien-chieu.md) | escalated (chưa vá — gate tiền thật, vùng cấm Winston) |
 | 2026-08-11 | [2026-08-11: plan ghi `dd_check` dạng CHUỖI (08-07/08-10 là dict) ⇒ `_sync_fills` ném `'str' object has no attribute 'get'` sau MỖI fill — 22 POLL_FAIL ZaloPay + 27 SpaceX, chặn đặt lệnh 1 chu kỳ/lần fill; fail-safe hoạt động đúng, không mất tiền](2026-08/2026-08-11-plan-dd-check-string-poll-fail.md) | escalated (chưa vá — điểm vá nằm ở `load_plan()`/executor, vùng cấm Winston) |
 | 2026-08-10 | [2026-08/2026-08-10-funding-gate-multipackage-shared-pot-false-block.md](2026-08/2026-08-10-funding-gate-multipackage-shared-pot-false-block.md) | ? |
