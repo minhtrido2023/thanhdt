@@ -76,6 +76,44 @@ def discord(msg):
     return _run([cmd, msg, DISCORD_CHANNEL])
 
 
+def post_ack(topic):
+    """Ack "chờ NGƯỜI" cho 1 topic câu hỏi. Trả True nếu ĐĂNG ĐƯỢC.
+
+    Vì sao phải kiểm kết quả (không phải fire-and-forget): câu hỏi này thuộc chủ sở hữu file
+    (Taylor/DollarBill/Winston) hoặc cần user quyết — `wags_autofix` bị CẤM sửa logic giao dịch.
+    Ack là thứ DUY NHẤT ngăn ops_health_check thấy question treo ⇒ COORD_WARN ⇒ dispatch job Wags
+    ~2 lần/ngày, MÃI MÃI, cho một việc Wags không được phép làm (đúng ca thật 2026-08-03).
+    Bản đầu bỏ qua giá trị trả về: ack hỏng mà question thành công vẫn ghi `known_red` ⇒ không
+    bao giờ có lượt thử lại ⇒ vòng lặp báo động giả vĩnh viễn. Nay hỏng thì ghi `ack_pending`
+    và lượt sau retry (idempotent — bus dedup theo topic, đăng lại không sinh ca mới).
+    """
+    return bus("status", ACK_PREFIX + topic,
+               {"reason": "selfcheck đỏ cần chủ sở hữu file hoặc user quyết; Wags chỉ phát hiện",
+                "suppress_days": 14})
+
+
+def retry_pending_acks(baseline, baseline_path):
+    """Đăng lại ack cho các ca đã escalate nhưng ack thất bại ở lượt trước.
+
+    KHÔNG đăng lại câu hỏi (nó đã lên bus rồi) — chỉ vá đúng phần còn thiếu, nên không sinh
+    câu hỏi trùng. Đây là nửa còn lại của F2: có cờ mà không ai xoá cờ thì cờ vô dụng.
+    """
+    fixed = []
+    for f, entry in sorted(baseline.get("known_red", {}).items()):
+        if not (isinstance(entry, dict) and entry.get("ack_pending") and entry.get("topic")):
+            continue
+        if post_ack(entry["topic"]):
+            entry["ack_pending"] = False
+            entry["ack_retried_utc"] = iso()
+            fixed.append(f)
+            save_baseline(baseline_path, baseline)
+        else:
+            print("⚠️ ack vẫn thất bại cho %s — sẽ thử lại lượt sau" % f)
+    if fixed:
+        print("↻ đăng lại được ack còn nợ: %s" % fixed)
+    return fixed
+
+
 def save_baseline(path, baseline):
     """Ghi nguyên tử: kill giữa chừng không để lại baseline cụt (mất known_red = escalate lại
     TOÀN BỘ lần sau)."""
@@ -113,6 +151,7 @@ def diff_and_escalate(baseline_path, result_path, jsonl_path, min_files=60):
     with open(baseline_path, encoding="utf-8") as f:
         baseline = json.load(f)
     known_red = baseline.setdefault("known_red", {})
+    retry_pending_acks(baseline, baseline_path)
 
     new_red = {k: v for k, v in results.items() if v != "PASS" and k not in known_red}
     now_green = [k for k in known_red if results.get(k) == "PASS"]
@@ -137,17 +176,13 @@ def diff_and_escalate(baseline_path, result_path, jsonl_path, min_files=60):
         })
         if not ok:
             continue   # đăng hỏng ⇒ KHÔNG ghi known_red ⇒ lần sau thử lại, không nuốt cảnh báo
-        # Ack "chờ NGƯỜI": câu hỏi này thuộc chủ sở hữu file (Taylor/DollarBill/Winston) hoặc cần
-        # user quyết — wags_autofix KHÔNG sửa được logic giao dịch. Không ack thì mỗi ngày
-        # ops_health_check dispatch 2-4 job Wags cho việc đã báo (đúng ca thật 2026-08-03).
-        bus("status", ACK_PREFIX + topic,
-            {"reason": "selfcheck đỏ cần chủ sở hữu file hoặc user quyết; Wags chỉ phát hiện",
-             "suppress_days": 14})
+        ack_ok = post_ack(topic)
         known_red[f] = {"reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. "
                                   "Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo "
                                   "động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
                         "since": iso(), "status": status, "auto": True,
                         "topic": topic, "escalated_utc": iso(),
+                        "ack_pending": not ack_ok,   # ack hỏng ⇒ lượt sau thử lại (xem retry ở trên)
                         "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"}
         save_baseline(baseline_path, baseline)
         escalated.append(f)

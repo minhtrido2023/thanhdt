@@ -11,6 +11,7 @@ XANH trên code HỎNG): assertion chưa từng chạy trên bản đỏ là ass
 dụng gì.
 """
 import datetime as dt
+import fcntl
 import importlib.util
 import json
 import os
@@ -309,14 +310,32 @@ print("\n[8] Khoá chống 2 lần quét chồng nhau — chạy thật script b
 SWEEP = os.path.join(HERE, "selfcheck_weekly_baseline_check.sh")
 check("8.1 script quét vẫn tồn tại đúng chỗ", os.path.exists(SWEEP))
 
-# 8.2-8.4 — khoá ĐANG BỊ GIỮ ⇒ bỏ lượt, và tuyệt đối KHÔNG được quét (quét = đã vào vùng tranh chấp)
-lockfile = os.path.join(os.path.dirname(HERE), "logs", ".selfcheck_sweep.lock")
-holder = subprocess.Popen(["flock", "-x", lockfile, "-c", "sleep 20"])
-time.sleep(1)
+# 8.2-8.4 — khoá ĐANG BỊ GIỮ ⇒ bỏ lượt, và tuyệt đối KHÔNG được quét (quét = đã vào vùng tranh chấp).
+#
+# HERMETIC BẮT BUỘC, KHÔNG PHẢI CHO SẠCH SẼ — chính file selfcheck NÀY nằm trong phạm vi quét của
+# bộ quét (glob `mike/bin/*_selfcheck.py`, file #65/93). Bản đầu giữ khoá PRODUCTION rồi gọi runner
+# thật; khi bộ quét chạy nó, bộ quét ĐANG giữ fd 9 trên đúng lockfile đó suốt ~20' ⇒ `flock` ở đây
+# block vô hạn ⇒ `finally: holder.wait()` block mãi ⇒ DEADLOCK. Tái lập thật 2026-08-12: rc=124
+# sau 40s. Hậu quả: bộ quét ghi TIMEOUT cho chính selfcheck của mình ⇒ escalate một ca đỏ VĨNH VIỄN
+# (chỉ PASS khi chạy standalone, nên không bao giờ tự xanh) + để lại flock mồ côi.
+# ⇒ Mọi tài nguyên toàn cục (khoá, logs, baseline) phải nằm trong tmpdir RIÊNG, y như 8.5-8.7.
+lr = tempfile.mkdtemp(prefix="sc_lockheld_")
+holder = None
 try:
+    os.makedirs(os.path.join(lr, "bin")); os.makedirs(os.path.join(lr, "logs"))
+    os.makedirs(os.path.join(lr, "kb"))      # để trống: nếu KHÔNG bỏ lượt thì FATAL thiếu baseline
+    shutil.copy(SWEEP, os.path.join(lr, "bin"))
+    lockfile = os.path.join(lr, "logs", ".selfcheck_sweep.lock")
+    # GIỮ KHOÁ NGAY TRONG TIẾN TRÌNH NÀY, không đẻ tiến trình phụ: `flock -c "sleep N"` để lại
+    # tiến trình mồ côi nếu bị giết đúng lúc chưa fork xong — mỗi ngày một cái, và chính "flock mồ
+    # côi" là một phần tác hại của bug F1. fcntl không có cửa đó, cũng không cần chờ-tới-khi-cầm-được.
+    # Con cháu KHÔNG kế thừa fd này (close_fds mặc định True) ⇒ runner con thấy khoá đang bị giữ THẬT.
+    holder = open(lockfile, "a")
+    fcntl.flock(holder, fcntl.LOCK_EX)
     env = dict(os.environ, SC_LOCK_WAIT_S="3")
     t0 = time.time()
-    p = subprocess.run(["bash", SWEEP], capture_output=True, text=True, timeout=90, env=env)
+    p = subprocess.run(["bash", os.path.join(lr, "bin", os.path.basename(SWEEP))],
+                       capture_output=True, text=True, timeout=90, env=env)
     dur = time.time() - t0
     out = p.stdout + p.stderr
     check("8.2 khoá bị giữ ⇒ BỎ LƯỢT (exit 0, không coi là lỗi)", p.returncode == 0 and "BỎ LƯỢT" in out,
@@ -324,7 +343,54 @@ try:
     check("8.3 bỏ lượt ⇒ KHÔNG hề bắt đầu quét (không có dòng 'Phạm vi')", "Phạm vi" not in out)
     check("8.4 bỏ lượt nhanh theo SC_LOCK_WAIT_S, không treo tới hết 300s", dur < 30, "%.0fs" % dur)
 finally:
-    holder.wait()
+    if holder is not None:
+        fcntl.flock(holder, fcntl.LOCK_UN)
+        holder.close()
+    shutil.rmtree(lr, ignore_errors=True)
+
+# 8.8 — CHỐNG TÁI PHÁT, E2E ĐÚNG ĐƯỜNG PRODUCTION CHẠY.
+# Bài học 2026-08-12 (gate commit-collision): classifier XANH + wrapper XANH vẫn không bằng E2E.
+# Ở đây cũng vậy — 8.2-8.4 XANH y hệt nhau dù chạy standalone hay đang deadlock-under-sweep, nên
+# hành vi đúng của chúng KHÔNG tự bảo vệ được chính chúng. Ca duy nhất bắt được lỗi là chạy CHÍNH
+# file này trong đúng điều kiện bộ quét chạy nó: khoá production ĐANG BỊ GIỮ.
+# Chống đệ quy vô hạn bằng SC_SELF_UNDER_LOCK: tiến trình con chạy mọi mục KHÁC (gồm 8.2-8.4 — chỗ
+# deadlock) nhưng bỏ chính ca 8.8.
+if os.environ.get("SC_SELF_UNDER_LOCK") == "1":
+    print("  [skip] 8.8 (đang là tiến trình con của chính ca 8.8)")
+else:
+    _prod_lock = os.path.join(os.path.dirname(HERE), "logs", ".selfcheck_sweep.lock")
+    # Mở "a" chứ KHÔNG "w": "w" sẽ TRUNCATE file khoá production. Giữ bằng fcntl trong chính tiến
+    # trình này (không đẻ tiến trình phụ ⇒ không thể để lại flock mồ côi).
+    # LOCK_NB = KHÔNG xếp hàng: mượn được ⇒ không có bộ quét thật nào đang chạy ⇒ an toàn để thử.
+    # Tiến trình con KHÔNG kế thừa fd (close_fds mặc định True) ⇒ nó thấy khoá bị giữ THẬT.
+    _probe = open(_prod_lock, "a")
+    try:
+        fcntl.flock(_probe, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        _got = True
+    except OSError:
+        _got = False
+    if not _got:
+        # Không mượn được khoá = bộ quét THẬT đang chạy. Nói TO là đã bỏ ca, không im lặng xanh.
+        _probe.close()
+        check("8.8 [BỎ QUA] không mượn được khoá production — bộ quét thật đang chạy, không thử E2E",
+              True, "chạy lại lúc rảnh để có bằng chứng E2E")
+    else:
+        try:
+            _t0 = time.time()
+            _child = subprocess.run([sys.executable, os.path.abspath(__file__)],
+                                    capture_output=True, text=True, timeout=150,
+                                    env=dict(os.environ, SC_SELF_UNDER_LOCK="1"))
+            _cd = time.time() - _t0
+            check("8.8 chạy CHÍNH file này khi khoá production ĐANG BỊ GIỮ ⇒ vẫn xong, không "
+                  "deadlock (bộ quét chạy nó trong đúng điều kiện này)",
+                  _child.returncode == 0, "rc=%d %.0fs" % (_child.returncode, _cd))
+        except subprocess.TimeoutExpired:
+            check("8.8 chạy CHÍNH file này khi khoá production ĐANG BỊ GIỮ ⇒ vẫn xong, không "
+                  "deadlock (bộ quét chạy nó trong đúng điều kiện này)", False,
+                  "TREO >150s = đúng bug F1 đã tái phát")
+        finally:
+            fcntl.flock(_probe, fcntl.LOCK_UN)
+            _probe.close()
 
 # 8.5-8.7 — KHÔNG mở nổi file khoá: phải KÊU TO + CHẠY TIẾP, tuyệt đối không im lặng bỏ lượt.
 # Đây là bug THẬT bản đầu mắc phải (gộp 2 nhánh) — fd hỏng làm cả bộ quét im lặng exit 0, cron
@@ -345,6 +411,61 @@ try:
 finally:
     os.chmod(os.path.join(fr, "logs"), 0o700)
     shutil.rmtree(fr, ignore_errors=True)
+
+
+# ────────────────────────────────────────────── [9] ACK hỏng phải THỬ LẠI (F2)
+# Vì sao: ack là thứ DUY NHẤT ngăn ops_health_check thấy question treo ⇒ COORD_WARN ⇒ dispatch
+# job Wags ~2 lần/ngày MÃI MÃI cho việc Wags bị CẤM làm (sửa logic giao dịch). Bản đầu bỏ qua giá
+# trị trả về của ack: question OK + ack hỏng ⇒ vẫn ghi known_red ⇒ KHÔNG BAO GIỜ có lượt thử lại.
+# Đây là lỗi IM LẶNG — không có dòng log nào, chỉ có một vòng lặp báo động giả không hồi kết.
+print("\n[9] ACK thất bại ⇒ ghi nợ + THỬ LẠI lượt sau (không nuốt, không lặp báo động giả)")
+with tempfile.TemporaryDirectory() as td:
+    h = H(td, json.loads(json.dumps(EMPTY_BASE)), {"a_selfcheck.py": "FAIL"})
+
+    def q_ok_ack_fail(et, tp, pl):
+        if et == "status" and tp.startswith(M.ACK_PREFIX):
+            return False              # ack hỏng, câu hỏi thành công — đúng tổ hợp bản đầu bỏ lọt
+        h.events.append((et, tp, pl))
+        return True
+
+    M.bus = q_ok_ack_fail
+    M.discord = lambda m: h.discords.append(m)
+    M.diff_and_escalate(h.baseline_path, h.result_path, h.jsonl, min_files=0)
+    e = h.baseline()["known_red"].get("a_selfcheck.py", {})
+    check("9.1 câu hỏi ĐÃ đăng ⇒ vẫn ghi known_red (không đăng lại câu hỏi trùng)", bool(e))
+    check("9.2 ack hỏng ⇒ ghi nợ ack_pending=True (bản đầu: mất dấu vĩnh viễn)",
+          e.get("ack_pending") is True, "ack_pending=%r" % e.get("ack_pending"))
+
+    # lượt sau: bus lành lại ⇒ phải TỰ đăng lại ack, và KHÔNG đăng lại câu hỏi
+    h.events.clear()
+    M.bus = lambda et, tp, pl: (h.events.append((et, tp, pl)), True)[1]
+    M.diff_and_escalate(h.baseline_path, h.result_path, h.jsonl, min_files=0)
+    e2 = h.baseline()["known_red"]["a_selfcheck.py"]
+    acks = [t for et, t, _ in h.events if et == "status" and t.startswith(M.ACK_PREFIX)]
+    check("9.3 lượt sau TỰ đăng lại ack còn nợ", len(acks) == 1, str(acks))
+    check("9.4 ack đăng lại ĐÚNG topic đã lưu (không dựng lại chuỗi — bug B close-the-loop)",
+          acks == [M.ACK_PREFIX + e2["topic"]] if acks else False)
+    check("9.5 xoá nợ sau khi đăng được (không retry mãi)", e2.get("ack_pending") is False)
+    check("9.6 KHÔNG đăng lại câu hỏi trùng ở lượt retry",
+          not [t for et, t, _ in h.events if et == "question"],
+          str([t for et, t, _ in h.events if et == "question"]))
+
+with tempfile.TemporaryDirectory() as td:
+    # CONTROL NGƯỢC: ack hỏng LIÊN TỤC thì nợ phải CÒN NGUYÊN (không tự xoá vì "đã thử rồi").
+    h = H(td, json.loads(json.dumps(EMPTY_BASE)), {"a_selfcheck.py": "FAIL"})
+    M.bus = lambda et, tp, pl: not (et == "status" and tp.startswith(M.ACK_PREFIX))
+    M.discord = lambda m: None
+    M.diff_and_escalate(h.baseline_path, h.result_path, h.jsonl, min_files=0)
+    M.diff_and_escalate(h.baseline_path, h.result_path, h.jsonl, min_files=0)
+    check("9.7 CONTROL: ack hỏng mãi ⇒ nợ VẪN còn (không im lặng bỏ cuộc)",
+          h.baseline()["known_red"]["a_selfcheck.py"].get("ack_pending") is True)
+
+with tempfile.TemporaryDirectory() as td:
+    # Đường XANH bình thường: ack chạy ngon thì không để lại nợ nào.
+    h = H(td, json.loads(json.dumps(EMPTY_BASE)), {"a_selfcheck.py": "FAIL"})
+    h.run()
+    check("9.8 ack thành công ⇒ ack_pending=False, không sinh việc thừa cho lượt sau",
+          h.baseline()["known_red"]["a_selfcheck.py"].get("ack_pending") is False)
 
 
 # ────────────────────────────────────────────── tổng kết

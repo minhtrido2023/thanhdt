@@ -724,7 +724,10 @@ try:
         if _sc_new:
             W(f"{WARN_ONLY} {len(_sc_new)} selfcheck production ĐỎ CHƯA AI TRIAGE (mỗi ca đã có "
               f"bus question 'selfcheck-red: <file>', KHÔNG dispatch lại ở đây): "
-              f"{_sc_new[:8]}{' …' if len(_sc_new) > 8 else ''}"
+              # KHÔNG cắt danh sách: verify thật 2026-08-12 cho thấy `[:8]` giấu mất
+              # t2_settlement_selfcheck.py (guard settlement) khỏi báo cáo hằng ngày. Việc nợ bị
+              # cắt khỏi báo cáo = việc không tồn tại; dài vài dòng rẻ hơn nhiều so với mù.
+              f"{_sc_new}"
               + (f" · {len(_sc_ack)} ca đỏ đã chấp nhận có lý do." if _sc_ack else "")
               + f" Quét {_sc_age_h:.0f}h trước, {_scr.get('pass')}/{_scr.get('total')} PASS.")
         else:

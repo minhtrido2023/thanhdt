@@ -676,6 +676,29 @@ def case_c11_fresh_all_green():
         shutil.rmtree(d, ignore_errors=True)
 
 
+def case_c11_lists_every_red_no_truncation():
+    """Danh sách đỏ KHÔNG được cắt ngắn.
+
+    Bản đầu in `_sc_new[:8]`. Đo thật 2026-08-12: đúng 9 ca đỏ chưa triage, và ca thứ 9 theo thứ
+    tự alphabet là `t2_settlement_selfcheck.py` — guard settlement, thứ chạm tiền thật — bị cắt
+    khỏi báo cáo hằng ngày. Việc nợ bị cắt khỏi báo cáo là việc không tồn tại: người đọc thấy
+    "8 ca" và không có cách nào biết ca thứ 9 là ca nguy hiểm nhất.
+    """
+    names = ["a%d_selfcheck.py" % i for i in range(1, 9)] + ["t2_settlement_selfcheck.py"]
+    d = _mkscan(_res(3, 93, 84), {"known_red": {n: {"auto": True, "since": "2026-08-12"}
+                                                for n in names}})
+    try:
+        lines, warn = run_check11(d)
+        out = joined(lines)
+        missing = [n for n in names if n not in out]
+        check("check11: liệt kê ĐỦ cả 9 ca đỏ, không cắt (ca thứ 9 = guard settlement)",
+              not missing, "THIẾU: %s | %s" % (missing, out))
+        check("check11: không còn dấu cắt '…' trong danh sách đỏ", "…" not in out, out)
+        check("check11: số đếm khớp danh sách in ra (9 ca)", "9 selfcheck" in out, out)
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
 def case_c11_red_is_warn_only():
     d = _mkscan(_res(3, 92, 88), {"known_red": {
         "extreme_regime_selfcheck.py": {"auto": True, "since": "2026-08-12"},
@@ -777,6 +800,7 @@ def main():
                case_c10_no_file_is_ok, case_c10_fresh_log_warns,
                case_c10_fresh_log_without_timestamp_line, case_c10_old_log_is_ok,
                case_c11_fresh_all_green, case_c11_red_is_warn_only,
+               case_c11_lists_every_red_no_truncation,
                case_c11_stale_is_routable, case_c11_missing_and_corrupt_never_silent,
                case_deliver_discord_ok_no_telegram,
                case_deliver_discord_fails_falls_back_to_telegram,
