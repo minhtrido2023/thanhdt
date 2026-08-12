@@ -51,3 +51,4 @@ Winston).
 - BACKLOG kiến trúc (Wags): pin-theo-inode không hoạt động thật trong production — quyết định
   thiết kế, chưa dispatch.
 
+- [2026-08-11T21:37:53Z] 2026-08-11 23:xx: User chốt Option 1 cho broker-statement leg3 (đối soát khớp lệnh DNSE trong eod_trading_report.sh) — CHẤP NHẬN đã live (đã vô tình auto-commit qua fleet-backup, quant-skeptic CONFIRMED cao), KHÔNG thêm flag chặn. Điều kiện: 'cần kiểm tra lại mới dùng' — PHẢI tự verify output leg3 lần chạy live ĐẦU TIÊN (cron 19:10 ICT 2026-08-12) trước khi tin dùng cho các báo cáo sau. Việc cần làm 08-12 tối: đọc report EOD sau 19:10 ICT, xác nhận leg3 in đúng số khớp thật (so tay với dnse_raw positions), không có escalation giả.
