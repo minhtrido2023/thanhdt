@@ -4,7 +4,7 @@ title: Incidents — Mike fleet (sổ postmortem, cấu trúc OKF)
 owner: Mike fleet (mọi agent ghi; daily_retro.sh ghi entry RETRO hằng đêm)
 format: OKF (Open Knowledge Format) — markdown + YAML frontmatter, 1 sự cố = 1 file
 migrated_from: kb/INCIDENTS.md (single-file 408KB, migrate → OKF 2026-07-30 job Winston_20260730_144031)
-entries: 102 file (71 sự cố + 30 RETRO + 1 mục open-items chung)
+entries: 103 file (71 sự cố + 31 RETRO + 1 mục open-items chung)
 ---
 
 # Incidents — Mike fleet
@@ -173,6 +173,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Tóm tắt (nguyên văn tiêu đề) | status |
 |---|---|---|
+| 2026-08-12 | [RETRO — 2026-08-12: 9 sự cố, 3 pattern xuyên suốt (1 pattern-họ đã đặt tên "Pattern-B" tái diễn NGÀY THỨ 4 dưới 3 hình dạng MỚI cùng một ngày; 2 câu hỏi backlog VẪN CHƯA được user quyết sau nhiều ngày escalate)](retro/retro-2026-08-12.md) | logged |
 | 2026-08-11 | [RETRO — 2026-08-11: 5 sự cố, 2 pattern xuyên suốt (state_source escalated 2 retro liên tiếp, hôm nay fix THẬT nhưng SAU khi đã gây 30 lệnh lỡ phiên)](retro/retro-2026-08-11.md) | logged |
 | 2026-08-10 | [RETRO — 2026-08-10: 7 sự cố, 3 pattern xuyên suốt (1 pattern ĐÃ ESCALATE ngày trước, VẪN chưa có quyết định sau retro thứ 3 liên tiếp — 1 pattern MỚI khẩn: SpaceX T+1 mất tích, tái diễn hình dạng sự cố ngày trước)](retro/retro-2026-08-10.md) | logged |
 | 2026-08-09 | [RETRO — 2026-08-09: 7 sự cố, 4 pattern xuyên suốt (2 ĐẠT NGƯỠNG ESCALATE — 1 tiếp tục theo mục 6, 1 mới nhưng đủ nghiêm trọng để nêu bật ngay dù chưa đạt ngưỡng cứng)](retro/retro-2026-08-09.md) | logged |
