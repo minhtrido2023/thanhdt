@@ -66,3 +66,9 @@
 
 ## Archived 2026-08-11 (keep=12 days=0 require_done=False)
 - [2026-08-06T17:51:38Z] Plan 2026-08-07 (CẢ 2 account) = BẢN CHỐT job DollarBill_20260806_174551: CHỈ 1 lệnh MUA DRI (SpaceX 3500cp / ZaloPay 1800cp @LO 12.900), TV2 đã BỎ theo user, SSI đã gỡ từ job trước. L2 JIT đã tính lại (SpaceX bán PARK 40,79tr / ZaloPay 19,79tr, cả 2 FUNDED_BY_JIT). L1 giữ nguyên. ĐANG CHỜ USER DUYỆT (approved_by=null) — báo cáo đã gửi thread 1521183164364754974 lúc 00:50 ICT 08-07 bằng notify_thread.sh (send_plan_report.sh có bug ranh giới nửa đêm). NEXT: chờ user duyệt trước 08:45 preflight.
+
+## Archived 2026-08-12 (keep=12 days=0 require_done=False)
+- [2026-08-07T04:57:41Z] [2026-08-07T05:1x] Plan 08-07 TAO LAI TU DAU cho ca 3 acct (job DollarBill_20260807_044558) sau khi user xoa ban cu. SpaceX+ZaloPay: 1 lenh BUY SSI (LAG_LO) + L1 park_trim + L2 jit_unpark tach rieng — TAT CA CHO USER DUYET, chua duyet. main = probe plan 12 lenh. DRI KHONG tai tao (window 08-06 da passed). CHO: user duyet truoc phien chieu 13:00-14:45 hom nay, neu khong khop thi window SSI dong. FINDING da ghi bus: L1/L2/compute_active_nav dung gia BQ T-1 khi chay giua phien (close_price() tra 0) — de xuat Taylor sua fallback sang latest_trade.
+
+## Archived 2026-08-12 (keep=12 days=0 require_done=False)
+- [2026-08-07T05:18:59Z] [2026-08-07 ~12:30] plan 08-07 CA 2 ACCOUNT da MERGE 3-trong-1 vao orders[] that (SpaceX 15 lenh: 14 ban+1 mua DRI 3500cp@13100; ZaloPay 9 lenh: 8 ban+1 mua DRI 1800cp@13100). Thay SSI->DRI theo override cua user. approved_by=None. DANG CHO USER DUYET truoc 13:00 de kip phien chieu. Da gui plan thread + bus (job DollarBill_20260807_050844). BAI HOC: L1/L2 PHAI merge vao orders[] that, de key rieng thi load_plan() khong thay -> bot thieu tien.
