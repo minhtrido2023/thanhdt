@@ -1114,6 +1114,138 @@ def cmd_job_write_scope_conflict(a):
     sys.exit(0 if found else 1)
 
 
+# Paths that belong to NO single job: the fleet's shared coordination surface. A commit
+# touching one of these while a coordination job is live is the exact shape that has now
+# recurred three times (2026-07-31, 2026-08-02, 2026-08-12) — someone commits from outside
+# the running job and the shared git index sweeps that job's staged-but-uncommitted files
+# into a commit with the wrong author and the wrong message.
+SHARED_TOOLING_PATHS = ("bin/", "hooks/", ".pre-commit-config.yaml", "MIKE.md",
+                        "kb/coding_guidelines.md")
+
+# Agents whose charter IS the shared tooling above, so a live job of theirs is presumed to
+# be writing there even when it declared no --write-scope. Deliberately narrow: measured on
+# 14 days of real history, "any live job" covers 56% of hand-authored commits (blocking on
+# that would be the permanent-block failure mode that got the worktree pool bounced), while
+# "live Wags job + shared-tooling path" covers 13% — and after self-exclusion nearly all of
+# that 13% is Wags committing its own work from inside its own job.
+SHARED_TOOLING_AGENTS = ("Wags",)
+
+
+def _ancestor_pids(pid, limit=64):
+    """This pid plus every ancestor up to init. Used to answer "is that live job MY OWN
+    job?" without trusting an environment variable (dispatch.sh:788 — anyone can export
+    one). Verified from inside a real dispatch: the tool-call shell's chain reaches the
+    job record's own `pid` (the _bg_wrapper) before hitting systemd, even though the
+    worker is setsid'd."""
+    out, seen, p = [], set(), _as_int(pid, 0)
+    while p > 1 and p not in seen and len(out) < limit:
+        seen.add(p)
+        out.append(p)
+        try:
+            with open("/proc/%d/stat" % p, encoding="utf-8") as f:
+                st = f.read()
+            # comm may contain spaces and parens -> parse after the LAST ')': state, ppid
+            p = int(st[st.rindex(")") + 2:].split()[1])
+        except Exception:
+            break
+    return out
+
+
+def _self_job_ids(self_pid, jobs):
+    """Job ids that are THIS callsite. A job that commits its own work at the end of its
+    run (Wags does, every time) must never gate itself — measured on real history, without
+    this the gate would fire on essentially every Wags fix commit."""
+    anc = set(_ancestor_pids(self_pid))
+    ids = set()
+    env_id = os.environ.get("JOB_ID", "").strip()
+    if env_id:
+        # Weaker signal than ancestry (spoofable), kept as a fallback for the case where the
+        # wrapper already exited and this process was reparented off the job's chain. Only
+        # ever WIDENS self-exclusion, i.e. the worst a spoof buys is a missing warning —
+        # which `--no-verify` already buys for free.
+        ids.add(env_id)
+    for o in jobs:
+        jid = o.get("job_id")
+        if not jid:
+            continue
+        if _as_int(o.get("pid"), 0) in anc or _as_int(o.get("dispatcher_pid"), 0) in anc:
+            ids.add(jid)
+    return ids
+
+
+def _path_overlaps(a, b):
+    """Same file, or one is a directory containing the other. Segment-aware on purpose:
+    plain startswith would make 'bin/jobs.sh' overlap 'bin/jobs.sh.bak'."""
+    a, b = a.strip().strip("/"), b.strip().strip("/")
+    if not a or not b:
+        return False
+    return a == b or a.startswith(b + "/") or b.startswith(a + "/")
+
+
+def cmd_commit_collision_gate(a):
+    """commit-collision-gate <jobs_dir> [--self-pid N] <staged_path>... — for every LIVE job
+    that is NOT this callsite, print one classified line:
+
+        <BLOCK|WARN>|<job_id>|<to>|<from>|<age_s>|<why>|<comma-separated overlapping paths>
+
+    Always exits 0 (the CALLER decides what a BLOCK costs — bin/repo_commit_gate.sh does,
+    and its override lives in one readable place). Reads job records + /proc only: no git
+    state, no new lock file, same principle as job-write-scope-conflict.
+
+    Why this exists next to job-write-scope-conflict rather than inside it: that one is
+    OPT-IN (both sides must pass --write-scope to dispatch.sh) and fires at DISPATCH time.
+    The 2026-08-12 collision passed straight through it because neither side declared a
+    scope and the colliding write was a bare `git commit` by Mike, which never goes near
+    dispatch.sh at all. This gate asks the question at the only moment every writer has in
+    common — the commit itself — and needs nobody to remember to declare anything.
+
+    Two tiers, because "block whenever any job is live" is unusable here (56% of the last
+    14 days of hand-authored commits, measured):
+      BLOCK — another live job DECLARED a write_scope overlapping a staged path (hard
+              evidence), or a staged path is shared fleet tooling and a live job belongs to
+              an agent whose charter is that tooling (SHARED_TOOLING_AGENTS).
+      WARN  — some other job is live but nothing points at these paths. Printed, not fatal.
+    """
+    if not a:
+        sys.stderr.write("usage: commit-collision-gate <jobs_dir> [--self-pid N] <path>...\n")
+        sys.exit(2)
+    jobs_dir, self_pid, paths, i = a[0], os.getpid(), [], 1
+    while i < len(a):
+        if a[i] == "--self-pid" and i + 1 < len(a):
+            self_pid = _as_int(a[i + 1], self_pid)
+            i += 2
+            continue
+        if a[i].strip():
+            paths.append(a[i].strip())
+        i += 1
+    if not paths:
+        sys.exit(0)
+    # Same liveness definition as job-write-scope-conflict / job-find-dup (round 9, K1):
+    # a record closed without verified death still counts as a candidate, then the /proc
+    # check decides for real.
+    cands = [o for o in _load_jobs(jobs_dir)
+             if o.get("status") in LIVE_STATUSES or str(o.get("death_verified", "")) == "0"]
+    mine = _self_job_ids(self_pid, cands)
+    n = now_epoch()
+    for o in cands:
+        jid = o.get("job_id", "?")
+        if jid in mine or not _job_live_pids(o):
+            continue
+        scope = [p.strip() for p in str(o.get("write_scope", "")).split(",") if p.strip()]
+        hits = sorted({s for s in paths for d in scope if _path_overlaps(s, d)})
+        why = "job declared --write-scope covering these paths"
+        if not hits and o.get("to") in SHARED_TOOLING_AGENTS:
+            hits = sorted(s for s in paths
+                          if s.startswith(SHARED_TOOLING_PATHS) or s in SHARED_TOOLING_PATHS)
+            why = "shared fleet tooling + live %s job (charter owner, no scope declared)" % o.get("to")
+        print("%s|%s|%s|%s|%d|%s|%s" % (
+            "BLOCK" if hits else "WARN", jid, o.get("to", "?"), o.get("from", "?"),
+            n - _as_int(o.get("started_at"), n),
+            why if hits else "live job, no declared or presumed overlap with staged paths",
+            ",".join(hits[:8])))
+    sys.exit(0)
+
+
 def cmd_job_find_dup(a):
     """job-find-dup <jobs_dir> <to_agent> <prompt_summary> — print job_ids of jobs to the
     SAME agent that are still status=running WITH A LIVE PID and carry an identical prompt
@@ -2591,6 +2723,7 @@ CMDS = {"event": cmd_event, "heartbeat": cmd_heartbeat, "recent": cmd_recent,
         "job-live-pids": cmd_job_live_pids, "job-pin-log": cmd_job_pin_log,
         "job-find-dup": cmd_job_find_dup,
         "job-write-scope-conflict": cmd_job_write_scope_conflict,
+        "commit-collision-gate": cmd_commit_collision_gate,
         "terminal-statuses": cmd_terminal_statuses,
         "job-field": cmd_job_field, "job-hb-age": cmd_job_hb_age,
         "circuit-check": cmd_circuit_check, "circuit-record": cmd_circuit_record,

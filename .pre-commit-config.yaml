@@ -27,6 +27,18 @@ repos:
       # vá trước (2026-07-01, 07-06, 07-22, 07-22b) đều sửa đúng chỗ hỏng rồi vẫn tái phát
       # dưới dạng MỚI, vì cả 4 lần đều dựa vào CON NGƯỜI NHỚ dùng đúng biến/hàm có sẵn. Gate
       # này biến "dùng tên trong kb/discord_channels.json" thành điều kiện CƠ HỌC để commit.
+      # Thêm 2026-08-12, sau lần thứ 3 cùng một hình dạng sự cố (07-31, 08-02, 08-12): một
+      # commit từ NGOÀI job đang chạy cuốn theo file mà job đó đã `git add` nhưng chưa kịp
+      # commit. `always_run` + `pass_filenames: false` là CỐ Ý: gate phải chạy trên MỌI commit
+      # (kể cả commit chỉ có .md) và tự đọc TOÀN BỘ index, chứ không chỉ những file khớp một
+      # pattern — đúng cái "không cần ai nhớ khai" mà --write-scope (opt-in) không làm được.
+      - id: repo-commit-gate
+        name: Commit-collision (job khác đang LIVE trong cùng repo — xem bin/repo_commit_gate.sh)
+        entry: bin/repo_commit_gate.sh
+        language: system
+        always_run: true
+        pass_filenames: false
+
       - id: discord-id-gate
         name: Discord ID trần (dùng tên trong kb/discord_channels.json — xem bin/discord_id_gate.sh)
         entry: bin/discord_id_gate.sh
