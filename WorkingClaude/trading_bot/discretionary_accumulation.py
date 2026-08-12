@@ -392,13 +392,20 @@ def compute_session_order(state, filled_qty, prev_turnover_vnd, prev_price_vnd,
     # 7b) TRẦN CHI PHÍ MỘT PHIÊN (chỉ chế độ tỷ trọng) — bất biến bằng TIỀN, không bằng số cp:
     #     chi phí xấu nhất của MỘT lệnh (`qty × giá đặt`) ≤ (1+slack) × toàn bộ ngân sách mục
     #     tiêu. Đây là thứ biến "5% NAV" từ một ý định thành một BỜ CHẶN kiểm chứng được.
-    #     Vì sao cần (2 lỗ hổng quant-skeptic bắt được 2026-08-12, đều là ca thật của cùng một
-    #     gốc: SỐ LƯỢNG suy từ giá A trong khi TIỀN trả theo giá B):
+    #     Vì sao cần (2 lỗ hổng cùng một gốc: SỐ LƯỢNG suy từ giá A trong khi TIỀN trả theo
+    #     giá B). Mọi con số dưới đây ĐO ĐƯỢC LẠI bằng ca chạy trong
+    #     `discretionary_target_pct_selfcheck.py` khối [I] — đừng trích số ở đây mà không chạy
+    #     ca tương ứng; bản trước của comment này nêu 2 magnitude không truy được về ca nào và
+    #     quant-skeptic đã bác đúng chỗ đó (vòng 1, 2026-08-12):
     #       · trần động neo TRUNG BÌNH 5 phiên còn target neo giá phiên CUỐI ⇒ thị trường rơi
-    #         nhanh thì tỉ số hai giá vượt xa (1+τ). Đo được 8,40% NAV trên mục tiêu 5%.
-    #       · `prev_price` sai ĐƠN VỊ (feed trả giá ÷100) ⇒ target nở 100× ⇒ lệnh 14,78% NAV,
-    #         mà guard sanity đơn vị chỉ tồn tại ở nhánh TRẦN (resolve_price_band), không ở
-    #         nhánh TARGET. Trần theo TIỀN chặn cả hai mà không cần đoán dải giá hợp lệ.
+    #         nhanh thì tỉ số hai giá vượt xa (1+τ). Ca I1/I2 (anchor 24k→14k): bỏ trần ⇒
+    #         **7,39% NAV** trên mục tiêu 5%; có trần ⇒ 5,49%.
+    #       · `prev_price` sai ĐƠN VỊ (feed trả giá ÷100) ⇒ target nở đúng 100× (ca I5:
+    #         2.300cp → 239.900cp), mà guard sanity đơn vị chỉ tồn tại ở nhánh TRẦN
+    #         (resolve_price_band), KHÔNG ở nhánh TARGET. Ca I6/I7: bỏ trần ⇒ **51,26% NAV**;
+    #         có trần ⇒ 5,31%. Trần theo TIỀN chặn cả hai mà không cần đoán dải giá hợp lệ.
+    #       · Ca I8 là mặt kia của bờ: ở lệnh HỢP LỆ thật (SpaceX 08-13, 1.800cp) trần này
+    #         KHÔNG bind — nếu nó bind ở ca thật thì nó là một núm sizing lén, không phải lưới.
     #     Hành vi: CO lệnh về vừa trần (không huỷ) — ca hợp lệ vẫn chạy; co xuống dưới 1 lô thì
     #     bỏ phiên. Luôn ghi lại thành số để người đọc plan thấy, không co lén.
     budget_shrink = None

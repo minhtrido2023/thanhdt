@@ -1,0 +1,80 @@
+{
+  "schema": "low_liquidity_discretionary_accumulation_state_v2",
+  "artifact_type": "DISCRETIONARY_ACCUMULATION_STATE",
+  "not_canonical_daily_plan": true,
+  "ticker": "TV1",
+  "company": "PECC1 — CTCP Tư vấn Xây dựng Điện 1 (UPCOM)",
+  "account": "ZaloPay",
+  "account_no": "0001743768",
+  "book": "DISCRETIONARY_SPECIAL",
+  "cash_only": true,
+  "cash_only_note": "ZaloPay là account CASH-ONLY (không margin) nên cash_only=true vừa đúng bản chất account vừa đúng thiết kế book discretionary. Nó cũng là thứ giữ executor giải gói vay theo MÃ cho UPCOM (bug TV1 07-28 / DRI 08-07).",
+  "status": "active",
+  "created_at": "2026-08-12T20:45:00+07:00",
+  "created_by": "Taylor",
+  "created_job": "Taylor_20260812_161457",
+  "created_reason": "Leg ZaloPay của chương trình TV1 CHƯA TỪNG có state file — DollarBill gõ tay qty + hard_no_chase_ceiling_vnd=20000 vào plan mỗi ngày, và trần gõ tay đó đã chặn sạch phiên 08-11 (0/1300cp khớp) lẫn 08-12. File này đưa leg ZaloPay về cùng cơ chế state-driven như SpaceX.",
+  "approved_by": "user",
+  "approved_note": "Target 5% active_nav/mã cho CẢ 2 account: user chốt 2026-08-10 tối. Trần no-chase tuyệt đối 25.000đ + trần động τ=3%: user duyệt 2026-08-12 (qua Mike, thread 1521735922066919515). Luận điểm đầu tư dùng CHUNG với leg SpaceX — cùng một thesis, khác account.",
+  "source_plan": "data/trade_plans/discretionary/plan_TV1_SpaceX_discretionary_20260723.json",
+  "thesis_source": "mike/agents/Taylor/research/tv1_pecc1_sotp_20260723.md",
+  "playbook": "mike/agents/Taylor/research/lowliq_execution_playbook_20260724.md",
+
+  "target_basis": "pct_active_nav",
+  "target_pct_active_nav": 0.05,
+  "target_note": "5% ACTIVE_NAV — với ZaloPay đây KHÔNG phải tổng NAV: DGC nằm trong excluded_tickers (bị HOSE hạn chế giao dịch) nên active_nav 516,0tr ≪ tổng NAV 954,0tr (đo 2026-08-12). Sizing trên tổng NAV sẽ mua GẤP ~1,85 lần mức đã duyệt (§7 coding_guidelines). Số cp mục tiêu suy lại MỖI PHIÊN = 0,05 × active_nav ÷ giá phiên hoàn tất gần nhất, làm tròn XUỐNG lô. Nguồn: data/execution_logs/active_nav_ZaloPay.json (compute_active_nav.py, cơ sở totalCash−totalDebt §25); injector đòi computed_at = ĐÚNG hôm nay, cũ hơn ⇒ KHÔNG chèn lệnh.",
+  "target_semantics_warning": "Mục tiêu DUY TRÌ TỶ TRỌNG, KHÔNG phải hạn mức chi phí tích luỹ — giá giảm ⇒ số cp mục tiêu TĂNG ⇒ mua thêm để giữ 5%, tổng tiền đã chi có thể vượt 5% NAV. Chặn đà chỉ có hard_expiry (catalyst phi-giá) + max_no_chase_ceiling; KHÔNG có cắt lỗ theo giá.",
+  "topup_min_gap_pct_active_nav": 0.005,
+  "topup_min_gap_note": "Deadband: chỉ mua bù khi khoảng cách tới mục tiêu ≥ 0,5% active_nav (~2,6tr ≈ 127cp ở active_nav 516tr) — mã hoá chỉ đạo user 'không rải thêm chỉ vì lệch lot-size' (§22).",
+  "baseline_qty_before_program": 0,
+  "baseline_note": "ZaloPay CHƯA từng khớp TV1 cổ nào (xác nhận 2026-08-12: active_nav_ZaloPay.json không có dòng TV1; broker positions rỗng cho mã này) ⇒ baseline 0, filled_qty = broker_total(TV1) đọc live mỗi phiên.",
+  "min_acceptable_qty": null,
+  "lot_size": 100,
+  "priority": 5,
+
+  "price_band": {
+    "resting_limit": 19900,
+    "no_chase_ceiling": 20000,
+    "max_no_chase_ceiling": 25000,
+    "floor": null,
+    "floor_note": "Không có sàn cắt-lỗ theo giá: downside che bởi tài sản hydro (Sông Bung 5) dưới giá M&A. Rẻ hơn = tốt hơn, trừ khi vi phạm hard_expiry phi-giá.",
+    "band_note": "Cùng band gốc với leg SpaceX (tỉ lệ resting/ceiling = 0,995) — cùng một mã, cùng một luận điểm giá, không có lý do để 2 account trả giá khác nhau. Band cố định nay chỉ còn vai trò fail-safe khi trần động không kích hoạt được. max_no_chase_ceiling = 25.000đ là trần TUYỆT ĐỐI user duyệt 2026-08-12."
+  },
+  "dynamic_ceiling": {
+    "enabled": true,
+    "tau": 0.03,
+    "sessions": 5,
+    "note": "P1 (commit ec0120c): trần = min(mean(giá đóng 5 phiên ĐÃ HOÀN TẤT) × (1+τ), max_no_chase_ceiling), resting kéo theo cùng tỉ lệ. τ=3% từ nghiên cứu Taylor_20260812_091343. Anchor chỉ lấy phiên đã đóng. Thiếu/rác ⇒ fail-safe về band cố định."
+  },
+
+  "ref_price_source": "DNSE_G1_latest (LIVE same-day; KHÔNG dùng BQ close — coding_guidelines §6)",
+  "adv_ref_vnd": 720000000,
+  "adv_ref_note": "ADV20 trung bình 720tr VND/phiên (DNSE ohlc 1D, đo 2026-08-12) — thanh khoản là thuộc tính của MÃ nên dùng chung số với leg SpaceX. ⚠️ Trần participation ở đây tính RIÊNG từng account: 2 leg cùng mua TV1 trong cùng phiên thì tổng %ADV thật là TỔNG hai bên (10%+10%=20% nếu cả hai đụng trần). Ở size mục tiêu hiện tại (48,7tr + 25,8tr trên ADV 720tr) trần không bind nên chưa thành vấn đề; nếu về sau nâng size, phải chia trần giữa 2 account như cách golive_recommend_v23._account_nav_basis() làm cho CAPIT.",
+  "per_session_cap_pct_adv": 0.1,
+  "per_session_cap_note": "10% × 720tr ≈ 72tr ≈ 3.500cp/phiên — cao hơn nhu cầu cả chương trình (~1.270cp) ⇒ KHÔNG bind.",
+  "opportunistic": {
+    "k": 2.0,
+    "m": 2.0,
+    "note": "⚠️ HIỆN INERT vì bug đơn vị turnover (DNSE latest_trade.totalVolumeTraded ở đơn vị 10 CP — đo 2026-08-12: TV1 3.950 vs KL thật 39.500; DRI 101.160 vs 1.011.600) ⇒ turnover khai thiếu 10× ⇒ boost ×2 không bao giờ kích hoạt. An toàn một chiều (mua ÍT hơn), và trần cap vốn không bind nên không đổi lệnh nào. Bug riêng, ghi bus job Taylor_20260812_161457."
+  },
+  "soft_window_sessions": null,
+  "soft_window_start_date": null,
+  "soft_window_note": "Chương trình duy trì tỷ trọng KHÔNG có cửa sổ gom — sống tới khi hard_expiry kích hoạt.",
+  "hard_expiry": {
+    "manual_only": true,
+    "halted": false,
+    "halted_reason": null,
+    "conditions": [
+      "Kiểm toán FY2026 ra ý kiến NGOẠI TRỪ / TỪ CHỐI (disclaimer) / TRÁI NGƯỢC (adverse).",
+      "TV1 bị ĐÌNH CHỈ hoặc HẠN CHẾ giao dịch (tiền lệ DGC)."
+    ],
+    "automatable": "KHÔNG — người xác nhận rồi set halted=true + halted_reason. ⚠️ ĐIỀU KIỆN LÀ CỦA MÃ, KHÔNG PHẢI CỦA ACCOUNT: khi kích hoạt phải set halted=true ở CẢ HAI file state_TV1_SpaceX.json và state_TV1_ZaloPay.json — halt một bên là để hở đúng một lối. ĐÂY LÀ CÔNG TẮC DỪNG DUY NHẤT của chương trình tỷ trọng.",
+    "twin_state_file": "data/trade_plans/discretionary/state_TV1_SpaceX.json"
+  },
+  "no_chase": true,
+  "accept_underfill": true,
+  "no_price_stop_loss": true,
+  "hold_horizon": "2-3 năm buy-and-hold (SOTP asset-backed). No price stop; exit chỉ theo hard_expiry phi-giá.",
+  "ledger": [],
+  "ledger_note": "Bản ghi AUDIT các lệnh đã auto-chèn. KHÔNG dùng để đếm filled — filled luôn tính lại từ broker positions."
+}

@@ -1,0 +1,92 @@
+{
+  "schema": "low_liquidity_discretionary_accumulation_state_v2",
+  "artifact_type": "DISCRETIONARY_ACCUMULATION_STATE",
+  "not_canonical_daily_plan": true,
+  "ticker": "TV1",
+  "company": "PECC1 — CTCP Tư vấn Xây dựng Điện 1 (UPCOM)",
+  "account": "SpaceX",
+  "account_no": "0002023347",
+  "book": "DISCRETIONARY_SPECIAL",
+  "cash_only": true,
+  "cash_only_note": "Lệnh tiền mặt thuần — engine gắn cash_only=true vào mọi order chèn ra → executor KHÔNG gắn gói vay 1841 (bug TV1 07-28, DNSE reject UPCOM dưới gói này). Fix Taylor_20260728_033332.",
+  "status": "active",
+  "created_at": "2026-07-24T02:45:00+07:00",
+  "created_by": "Taylor",
+  "created_job": "Taylor_20260724_024201",
+  "approved_by": "user",
+  "approved_note": "User duyệt (2026-07-24) cơ chế resting-bid state-driven. Chương trình GỐC (target 400cp cố định) đã hoàn tất 2026-07-29. Chương trình HIỆN TẠI (target theo tỷ trọng) do user chốt 2026-08-10 tối: 5% active_nav/mã cho CẢ 2 account; trần no-chase tuyệt đối 25.000đ + trần động τ=3% do user duyệt 2026-08-12 (qua Mike, thread 1521735922066919515).",
+  "reactivated_at": "2026-08-12T20:45:00+07:00",
+  "reactivated_by": "Taylor",
+  "reactivated_job": "Taylor_20260812_161457",
+  "reactivated_reason": "Chương trình MỚI (5% active_nav) đang chạy nhưng KHÔNG có state file → DollarBill phải gõ TAY qty + hard_no_chase_ceiling_vnd=20000 vào plan JSON mỗi ngày, và trần gõ tay đó đã chặn sạch 2 phiên liên tiếp (08-11: 0/2000cp SpaceX; 08-12 giá 20.300 > trần 20.000). Reconcile: state file này trở lại là NGUỒN DUY NHẤT của target + trần, injector 20:30 sinh lệnh.",
+  "source_plan": "data/trade_plans/discretionary/plan_TV1_SpaceX_discretionary_20260723.json",
+  "thesis_source": "mike/agents/Taylor/research/tv1_pecc1_sotp_20260723.md",
+  "playbook": "mike/agents/Taylor/research/lowliq_execution_playbook_20260724.md",
+
+  "target_basis": "pct_active_nav",
+  "target_pct_active_nav": 0.05,
+  "target_note": "5% ACTIVE_NAV (không phải tổng NAV — §7 coding_guidelines: account có excluded_tickers phải sizing trên active_nav). Số cổ phiếu mục tiêu được SUY LẠI MỖI PHIÊN = 0,05 × active_nav ÷ giá phiên hoàn tất gần nhất, làm tròn XUỐNG lô — KHÔNG chốt cứng ở đây, vì active_nav đổi hằng ngày. Nguồn active_nav: data/execution_logs/active_nav_SpaceX.json (mike/bin/compute_active_nav.py, cơ sở tiền totalCash−totalDebt §25), injector đòi computed_at = ĐÚNG hôm nay, cũ hơn ⇒ KHÔNG chèn lệnh.",
+  "target_semantics_warning": "Đây là mục tiêu DUY TRÌ TỶ TRỌNG, KHÔNG phải hạn mức chi phí tích luỹ. Giá giảm ⇒ số cp mục tiêu TĂNG ⇒ chương trình mua thêm để giữ 5%; TỔNG TIỀN đã chi có thể vượt 5% NAV (bình quân giá xuống). Đó đúng là việc DollarBill đang làm tay từ 2026-08-11 (size theo GAP tới 5% mỗi ngày) nên KHÔNG phải hành vi mới — nhưng là một quyết định CHÍNH SÁCH: chặn đà chỉ có hard_expiry (catalyst phi-giá) + max_no_chase_ceiling, không có cắt lỗ theo giá.",
+  "topup_min_gap_pct_active_nav": 0.005,
+  "topup_min_gap_note": "Deadband: chỉ mua bù khi khoảng cách tới mục tiêu ≥ 0,5% active_nav (~4,9tr ≈ 240cp ở NAV 974tr). Mã hoá đúng chỉ đạo user 2026-08-10/11 'không rải thêm chỉ vì lệch do lot-size, chỉ rải thêm nếu vị thế rơi RÕ RỆT dưới 5%' (§22: luật suy dẫn thuần từ dữ liệu ⇒ phải là code, không phải văn xuôi cho LLM tự nhớ).",
+  "legacy_program": {
+    "note": "Chương trình GỐC đã hoàn tất — giữ lại để truy vết, KHÔNG còn hiệu lực.",
+    "target_qty": 400,
+    "min_acceptable_qty": 200,
+    "completed_at": "2026-07-29T20:30:01+07:00",
+    "completed_reason": "đã gom đủ: filled 400 ≥ target 400",
+    "soft_window_sessions": 20,
+    "soft_window_start_date": "2026-07-27"
+  },
+  "baseline_qty_before_program": 0,
+  "baseline_note": "GIỮ 0 (không đổi). Mục tiêu 5% active_nav là mục tiêu TỔNG vị thế TV1, nên 400cp của chương trình gốc PHẢI được tính vào — baseline ≠ 0 sẽ mua chồng thêm 400cp ngoài tỷ trọng đã duyệt. filled_qty = broker_total(TV1) − 0, đọc live mỗi phiên (không dùng ledger).",
+  "min_acceptable_qty": null,
+  "lot_size": 100,
+  "priority": 5,
+
+  "price_band": {
+    "resting_limit": 19900,
+    "no_chase_ceiling": 20000,
+    "max_no_chase_ceiling": 25000,
+    "floor": null,
+    "floor_note": "Không có sàn cắt-lỗ theo giá: downside che bởi tài sản hydro (Sông Bung 5) dưới giá M&A. Rẻ hơn = tốt hơn, trừ khi vi phạm hard_expiry phi-giá.",
+    "band_note": "resting_limit/no_chase_ceiling là band CỐ ĐỊNH gốc (duyệt 2026-07-23) — nay chỉ còn vai trò (a) fail-safe khi trần động không kích hoạt được, (b) giữ TỈ LỆ resting/ceiling = 0,995 để trần động kéo resting theo. max_no_chase_ceiling = 25.000đ là trần TUYỆT ĐỐI user duyệt 2026-08-12 (vùng chấp nhận 23.000–25.000đ, chọn cận trên để có dư địa); trần động KHÔNG BAO GIỜ vượt số này."
+  },
+  "dynamic_ceiling": {
+    "enabled": true,
+    "tau": 0.03,
+    "sessions": 5,
+    "note": "P1 (commit ec0120c): trần = min(mean(giá đóng 5 phiên ĐÃ HOÀN TẤT) × (1+τ), max_no_chase_ceiling), resting kéo theo cùng tỉ lệ. τ=3% từ nghiên cứu Taylor_20260812_091343 (N=1.840 phiên-mã, rổ 23 mã ADV20 200-2.500tr): fill 0,627→0,783, %phiên trắng tay 22,4%→6,1%, giá trả thêm +0,77pp. Anchor chỉ lấy phiên đã đóng (loại nến hôm nay đang chạy). Mọi điều kiện thiếu/rác ⇒ fail-safe về band cố định, không có đường fail-OPEN."
+  },
+
+  "ref_price_source": "DNSE_G1_latest (LIVE same-day; KHÔNG dùng BQ close — coding_guidelines §6)",
+  "adv_ref_vnd": 720000000,
+  "adv_ref_note": "ADV20 trung bình 720tr VND/phiên, đo lại 2026-08-12 từ DNSE ohlc 1D (median 770tr; giá trị cũ 701tr đo 2026-07-23). Ở size mục tiêu ~48tr, trần participation 10%×720tr=72tr/phiên KHÔNG bind.",
+  "per_session_cap_pct_adv": 0.1,
+  "per_session_cap_note": "10% × 720tr ≈ 72tr ≈ 3.500cp/phiên — cao hơn nhu cầu cả chương trình ⇒ gần như KHÔNG chạm; chỉ là bảo hiểm cho tên/size lớn hơn.",
+  "opportunistic": {
+    "k": 2.0,
+    "m": 2.0,
+    "note": "⚠️ HIỆN INERT, KHÔNG PHẢI DO CẤU HÌNH: injector đo turnover phiên qua DNSE latest_trade.totalVolumeTraded, field này ở đơn vị 10 CP (đo 2026-08-12: TV1 trả 3.950 trong khi KL thật 39.500; DRI 101.160 vs 1.011.600 — đúng 10× ở cả hai) ⇒ turnover bị khai THIẾU 10× ⇒ điều kiện turnover ≥ k×adv_ref gần như không bao giờ đúng. Hệ quả CHỈ là mất phần boost ×2 (an toàn một chiều: mua ÍT hơn, không bao giờ nhiều hơn) và với TV1 thì trần cap vốn không bind nên KHÔNG đổi lệnh nào. Bug riêng, đã ghi bus job Taylor_20260812_161457, sửa cần tự xác minh đơn vị + quant-skeptic riêng."
+  },
+  "soft_window_sessions": null,
+  "soft_window_start_date": null,
+  "soft_window_note": "Chương trình duy trì tỷ trọng KHÔNG có cửa sổ gom — nó sống tới khi hard_expiry kích hoạt. Trường giữ lại (null) cho tương thích schema.",
+  "hard_expiry": {
+    "manual_only": true,
+    "halted": false,
+    "halted_reason": null,
+    "conditions": [
+      "Kiểm toán FY2026 ra ý kiến NGOẠI TRỪ / TỪ CHỐI (disclaimer) / TRÁI NGƯỢC (adverse).",
+      "TV1 bị ĐÌNH CHỈ hoặc HẠN CHẾ giao dịch (tiền lệ DGC)."
+    ],
+    "automatable": "KHÔNG — cả 2 điều kiện là tin pháp lý/kiểm toán tương lai, không đọc được tự động đáng tin. NGƯỜI xác nhận rồi set halted=true + halted_reason. Winston theo dõi corp-action/tin; khi kích hoạt → cập nhật state này (engine tự dừng gom ngay phiên kế). ĐÂY LÀ CÔNG TẮC DỪNG DUY NHẤT của chương trình tỷ trọng — nó không tự đóng khi đủ hàng."
+  },
+  "no_chase": true,
+  "accept_underfill": true,
+  "no_price_stop_loss": true,
+  "hold_horizon": "2-3 năm buy-and-hold (SOTP asset-backed). No price stop; exit chỉ theo hard_expiry phi-giá.",
+  "ledger": [],
+  "ledger_note": "Bản ghi AUDIT các lệnh đã auto-chèn (plan_date, qty, limit, order_id). KHÔNG dùng để đếm filled — filled luôn tính lại từ broker positions (chống đếm 2 lần).",
+  "manual_tranche_note": "LỊCH SỬ: tranche 1 (200cp, 07-24) chèn TAY vào plan_SpaceX_2026-07-24.json trước khi cơ chế tự động chạy. Từ 2026-08-11 tới 08-12, chương trình 5% cũng được DollarBill chèn TAY (BUY-TV1-DISC-01, trần hardcode 20.000đ) vì state này còn ở status=completed — đó chính là thứ job Taylor_20260812_161457 gỡ bỏ. Từ nay: injector là nguồn DUY NHẤT của lệnh TV1; DollarBill KHÔNG gõ tay nữa (xem kb/context_planning_mini.md)."
+}

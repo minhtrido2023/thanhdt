@@ -408,36 +408,181 @@ def test_e2e():
         brokers_mod.DNSEBroker = o_broker
 
 
+# ───────────── I. TRẦN NGÂN SÁCH PHIÊN — bất biến bằng TIỀN (có ca chứng minh ngược) ─────────────
+# Vì sao khối này tồn tại: vòng quant-skeptic 1 (2026-08-12) bác đúng một chỗ — trần ngân sách
+# được rao là 1 trong 4 trụ thiết kế VÀ là lớp DUY NHẤT đứng giữa một feed sai đơn vị và một lệnh
+# phình 100×, nhưng lúc đó KHÔNG có ca test nào trong toàn repo, và 2 con số minh hoạ chỉ sống
+# trong comment mã nguồn. Ở đây chúng được đo LẠI bằng ca chạy được, và comment trong
+# `discretionary_accumulation.py` nay trỏ về đúng tên ca dưới đây thay vì một con số mồ côi.
+def test_session_budget_cap():
+    print("[I] trần ngân sách phiên (bất biến bằng TIỀN)")
+    import trading_bot.discretionary_accumulation as da
+
+    DYN = {"enabled": True, "tau": 0.03, "sessions": 5}
+    BIG_ADV = 5_000_000_000          # để trần %ADV KHÔNG bind — cô lập đúng trần ngân sách
+
+    def measure(state, filled, price, nav, anchors, slack=None):
+        """Chạy 1 phiên, trả (order, decision, chi phí xấu nhất / nav). `slack=None` ⇒ dùng
+        trần thật; truyền số lớn ⇒ VÔ HIỆU trần (ca chứng minh ngược)."""
+        old = da.SESSION_BUDGET_CAP_SLACK
+        if slack is not None:
+            da.SESSION_BUDGET_CAP_SLACK = slack
+        try:
+            o, d = compute_session_order(state, filled, BENIGN_TURN, price, PLAN_DATE, NOW_ISO,
+                                         anchor_prices=anchors, active_nav_vnd=nav)
+        finally:
+            da.SESSION_BUDGET_CAP_SLACK = old
+        cost = (o["qty"] * o["limit_price_vnd"]) if o else 0
+        return o, d, cost / nav
+
+    # ── I-a. THỊ TRƯỜNG RƠI NHANH: trần động neo TRUNG BÌNH 5 phiên, target neo giá phiên CUỐI.
+    # Hai mốc giá lệch pha ⇒ số lượng suy từ giá thấp mà tiền trả theo giá cao.
+    NAV = 1_000_000_000.0
+    FALL = [24_000.0, 23_000.0, 22_000.0, 20_000.0, 14_000.0]   # anchor cũ→mới
+    LAST = 14_000.0                                             # giá phiên cuối (mẫu số target)
+    st = pct_state(adv_ref_vnd=BIG_ADV, dynamic_ceiling=DYN,
+                   price_band={"resting_limit": 19900, "no_chase_ceiling": 20000,
+                               "max_no_chase_ceiling": 25000, "floor": None})
+
+    o_off, d_off, pct_off = measure(st, 0, LAST, NAV, FALL, slack=1e9)   # CHỨNG MINH NGƯỢC
+    check("I1 CHỨNG MINH NGƯỢC: bỏ trần ngân sách ⇒ lệnh THẬT SỰ vượt mục tiêu "
+          f"(đo được {pct_off:.2%} NAV trên mục tiêu 5%)",
+          o_off is not None and pct_off > 0.06, f"{pct_off:.4%}")
+
+    o_on, d_on, pct_on = measure(st, 0, LAST, NAV, FALL)
+    shrink = d_on.get("session_budget_shrink")
+    check(f"I2 CÓ trần ⇒ chi phí ≤ 1,03 × mục tiêu (đo được {pct_on:.2%} NAV)",
+          o_on is not None and pct_on <= 0.05 * (1 + da.SESSION_BUDGET_CAP_SLACK) + 1e-9,
+          f"{pct_on:.4%}")
+    check("I3 lệnh bị CO chứ không bị huỷ, và việc co được ghi lại thành số",
+          o_on is not None and shrink is not None
+          and shrink["to_qty"] < shrink["from_qty"] == o_off["qty"],
+          str(shrink))
+    check("I4 trần ngân sách CHẶT HƠN trần %ADV trong ca này (đúng lớp đang được đo)",
+          o_on["qty"] < d_on["cap_qty"], f"{o_on['qty']} vs cap_qty={d_on['cap_qty']}")
+
+    # ── I-b. FEED SAI ĐƠN VỊ: giá về ÷100 ⇒ target nở 100×. Guard sanity đơn vị chỉ tồn tại ở
+    # nhánh TRẦN (resolve_price_band ⇒ fail-safe về band cố định), KHÔNG ở nhánh TARGET — nên
+    # nếu trần ngân sách không đứng đây thì không còn gì đứng cả.
+    NAV2 = 974_337_205.0
+    GOOD = [19_500.0, 19_700.0, 19_800.0, 20_200.0, 20_300.0]
+    BAD_PX = 203.0                                              # đúng 20.300 ÷ 100
+    st2 = pct_state(adv_ref_vnd=BIG_ADV, dynamic_ceiling=DYN,
+                    price_band={"resting_limit": 19900, "no_chase_ceiling": 20000,
+                                "max_no_chase_ceiling": 25000, "floor": None})
+    q_bad, _ = resolve_target_qty(st2, NAV2, BAD_PX)
+    q_ok, _ = resolve_target_qty(st2, NAV2, 20_300.0)
+    check(f"I5 sai đơn vị làm target nở đúng ~100× ({q_ok:,}cp → {q_bad:,}cp)",
+          q_bad >= 90 * q_ok, f"{q_ok} → {q_bad}")
+
+    o_off2, _, pct_off2 = measure(st2, 0, BAD_PX, NAV2, GOOD, slack=1e9)
+    check("I6 CHỨNG MINH NGƯỢC: bỏ trần ngân sách ⇒ lệnh sai-đơn-vị phình tới "
+          f"{pct_off2:.2%} NAV", o_off2 is not None and pct_off2 > 0.10, f"{pct_off2:.4%}")
+
+    o_on2, d_on2, pct_on2 = measure(st2, 0, BAD_PX, NAV2, GOOD)
+    check(f"I7 CÓ trần ⇒ kéo về ≤ 1,03 × mục tiêu (đo được {pct_on2:.2%} NAV)",
+          pct_on2 <= 0.05 * (1 + da.SESSION_BUDGET_CAP_SLACK) + 1e-9, f"{pct_on2:.4%}")
+
+    # ── I-c. Trần KHÔNG được đụng vào lệnh hợp lệ. Nếu nó bind ở ca thật thì nó là một núm
+    # sizing lén, không phải lưới an toàn — đây là ca phân biệt hai thứ đó.
+    o_ok, d_ok, pct_ok = measure(pct_state(dynamic_ceiling=DYN,
+                                           price_band={"resting_limit": 19900,
+                                                       "no_chase_ceiling": 20000,
+                                                       "max_no_chase_ceiling": 25000,
+                                                       "floor": None}),
+                                 500, 20_300.0, 974_337_205.0, GOOD)
+    check("I8 ca THẬT (SpaceX 08-13: giữ 500, target 2300) ⇒ 1800cp, trần ngân sách KHÔNG bind",
+          o_ok is not None and o_ok["qty"] == 1800
+          and d_ok.get("session_budget_shrink") is None,
+          f"{o_ok and o_ok.get('qty')} shrink={d_ok.get('session_budget_shrink')}")
+
+    # ── I-d. Co xuống dưới 1 lô ⇒ BỎ phiên, không đặt lệnh rác.
+    tiny = pct_state(adv_ref_vnd=BIG_ADV, dynamic_ceiling=DYN, lot_size=1000,
+                     price_band={"resting_limit": 19900, "no_chase_ceiling": 20000,
+                                 "max_no_chase_ceiling": 25000, "floor": None})
+    o_t, d_t, _ = measure(tiny, 0, 203.0, 30_000_000.0, GOOD)
+    check("I9 co xuống dưới 1 lô ⇒ skip có lý do, KHÔNG ra lệnh",
+          o_t is None and d_t["action"] == "skip" and "ngân sách" in d_t["reason"],
+          f"{d_t['action']}: {d_t['reason'][:80]}")
+
+
+# ───────────── J. hồi quy CHỮ KÝ load_active_states (bug đã giết injector 2026-08-12) ─────────────
+def test_loader_signature():
+    print("[J] chữ ký load_active_states — hồi quy bug (b)")
+    # Bug thật: hàm đổi sang trả (out, skipped) mà caller giữ nguyên `states = load_...` ⇒
+    # `if not states` luôn sai (tuple luôn truthy) rồi `for _, s in states` ném ValueError ⇒
+    # injector CHẾT NGAY LỐI VÀO cho mọi account. Ca này neo cả hai đầu của hợp đồng để một
+    # lần đổi chữ ký sau này không thể lặng lẽ giết lại injector.
+    import inspect
+    with tempfile.TemporaryDirectory() as td:
+        old_dir = inj.DISC_DIR
+        inj.DISC_DIR = td
+        try:
+            ret = inj.load_active_states("NOBODY")
+        finally:
+            inj.DISC_DIR = old_dir
+    check("J1 trả TUPLE 2 phần tử (active, skipped)",
+          isinstance(ret, tuple) and len(ret) == 2, str(type(ret)))
+    check("J2 cả hai phần tử là list", all(isinstance(x, list) for x in ret), str(ret))
+    src = inspect.getsource(inj.process_account)
+    check("J3 caller UNPACK 2 biến (không nhận nguyên tuple)",
+          "states, skipped_states = load_active_states(" in src,
+          "process_account không unpack — injector sẽ ném ValueError ở vòng lặp đầu")
+
+
 # ───────────────────────── H. state THẬT đang dùng cho tiền thật ─────────────────────────
 def test_real_state_files():
-    print("[H] state file THẬT (SpaceX/ZaloPay)")
-    for acct, nav_hint in (("SpaceX", 974_337_205.0), ("ZaloPay", 516_017_365.0)):
+    """§23 quy ước 1: selfcheck KHÔNG assert lên TRẠNG THÁI SỐNG.
+
+    Chia làm hai. Trên file THẬT chỉ kiểm BẤT BIẾN — thứ phải đúng dù chương trình đang chạy,
+    đã dừng, hay bị `halted` bởi một catalyst pháp lý thật. Trên FIXTURE ĐÓNG BĂNG mới kiểm
+    GIÁ TRỊ cấu hình đã duyệt. Bản cũ (vòng 1) kiểm `status=="active"` / `halted is False`
+    thẳng trên file production ⇒ một lần `halted=true` HỢP LỆ (đúng thiết kế: người xác nhận
+    tin kiểm toán rồi dừng chương trình) sẽ làm bộ test đỏ và biến nó thành nhiễu nền.
+    """
+    print("[H] state file THẬT — chỉ BẤT BIẾN (§23)")
+    from trading_bot.discretionary_accumulation import resolve_price_band
+    for acct in ("SpaceX", "ZaloPay"):
         p = os.path.join(WC_ROOT, "data", "trade_plans", "discretionary",
                          f"state_TV1_{acct}.json")
         st = json.load(open(p, encoding="utf-8"))
         check(f"H {acct}: validate_state PASS", validate_state(st) is True)
-        check(f"H {acct}: status=active", st["status"] == "active", st.get("status"))
-        check(f"H {acct}: target 5% active_nav", st["target_pct_active_nav"] == 0.05,
-              str(st.get("target_pct_active_nav")))
-        check(f"H {acct}: trần tuyệt đối = 25.000đ (user duyệt 08-12)",
-              st["price_band"]["max_no_chase_ceiling"] == 25000,
+        check(f"H {acct}: account khớp tên file", st["account"] == acct, st.get("account"))
+        check(f"H {acct}: ticker khớp tên file", st.get("ticker") == "TV1", st.get("ticker"))
+        # Trần tuyệt đối là quyết định CHÍNH SÁCH của user — nới nó phải là một hành động có
+        # chủ đích của người, nên "không vượt 25.000đ" là bất biến, còn "đúng bằng" thì không.
+        check(f"H {acct}: trần tuyệt đối ≤ 25.000đ (mức user duyệt 08-12)",
+              float(st["price_band"]["max_no_chase_ceiling"]) <= 25000,
               str(st["price_band"].get("max_no_chase_ceiling")))
-        check(f"H {acct}: trần động BẬT, tau=3%, 5 phiên",
+        ceil, rest, info = resolve_price_band(st, [99_000.0] * 5, 99_000.0)
+        check(f"H {acct}: anchor 99.000 vẫn bị kẹp ≤ trần tuyệt đối (hoặc fail-safe band cố định)",
+              ceil <= float(st["price_band"]["max_no_chase_ceiling"]) and rest <= ceil,
+              f"{ceil}/{rest} {info.get('mode')}")
+        if st.get("target_pct_active_nav") is not None:
+            # NAV thăm dò CỐ ĐỊNH (không phải NAV thật của account này) — ta đang kiểm bất biến
+            # "ra bội số của lô", không phải giá trị target hôm nay.
+            q, _ = resolve_target_qty(st, 1_000_000_000.0, 20_300.0)
+            check(f"H {acct}: mode tỷ trọng ⇒ target ra bội số của lô ({q}cp @NAV thăm dò 1 tỷ)",
+                  q and q > 0 and q % st["lot_size"] == 0, str(q))
+
+    print("[H2] FIXTURE đóng băng — giá trị cấu hình đã duyệt 2026-08-12")
+    for acct in ("SpaceX", "ZaloPay"):
+        fx = os.path.join(WC_ROOT, "data", "fixtures", f"state_TV1_{acct}_pct_20260812.json")
+        st = json.load(open(fx, encoding="utf-8"))
+        check(f"H2 {acct}: status=active", st["status"] == "active", st.get("status"))
+        check(f"H2 {acct}: target 5% active_nav", st["target_pct_active_nav"] == 0.05,
+              str(st.get("target_pct_active_nav")))
+        check(f"H2 {acct}: trần tuyệt đối = 25.000đ", st["price_band"]["max_no_chase_ceiling"] == 25000,
+              str(st["price_band"].get("max_no_chase_ceiling")))
+        check(f"H2 {acct}: trần động BẬT, tau=3%, 5 phiên",
               st["dynamic_ceiling"]["enabled"] is True and st["dynamic_ceiling"]["tau"] == 0.03
               and st["dynamic_ceiling"]["sessions"] == 5, str(st.get("dynamic_ceiling")))
-        check(f"H {acct}: baseline=0 (400cp chương trình cũ TÍNH vào 5%)",
+        check(f"H2 {acct}: baseline=0 (400cp chương trình cũ TÍNH vào 5%)",
               st["baseline_qty_before_program"] == 0, str(st.get("baseline_qty_before_program")))
-        check(f"H {acct}: account khớp tên file", st["account"] == acct, st.get("account"))
-        check(f"H {acct}: chưa halted", st["hard_expiry"]["halted"] is False)
-        # trần động không bao giờ được vượt trần tuyệt đối, kể cả khi anchor bay lên trời
-        from trading_bot.discretionary_accumulation import resolve_price_band
-        ceil, rest, info = resolve_price_band(st, [99_000.0] * 5, 99_000.0)
-        check(f"H {acct}: anchor 99.000 vẫn bị kẹp ≤ 25.000 (hoặc fail-safe về band cố định)",
-              ceil <= 25000 and rest <= ceil, f"{ceil}/{rest} {info.get('mode')}")
-        # số cp mục tiêu với NAV thật hôm nay phải ra một lệnh có nghĩa
-        q, _ = resolve_target_qty(st, nav_hint, 20_300.0)
-        check(f"H {acct}: target với active_nav thật = {q}cp (>0, chia hết lô)",
-              q and q > 0 and q % st["lot_size"] == 0, str(q))
+        check(f"H2 {acct}: chưa halted", st["hard_expiry"]["halted"] is False)
+        check(f"H2 {acct}: deadband 0,5% active_nav",
+              st["topup_min_gap_pct_active_nav"] == 0.005,
+              str(st.get("topup_min_gap_pct_active_nav")))
 
 
 if __name__ == "__main__":
@@ -448,6 +593,8 @@ if __name__ == "__main__":
     test_deadband()
     test_freshness_gate()
     test_e2e()
+    test_session_budget_cap()
+    test_loader_signature()
     test_real_state_files()
     print(f"\n=== SELFCHECK: {PASS} passed, {FAIL} failed ===")
     sys.exit(1 if FAIL else 0)
