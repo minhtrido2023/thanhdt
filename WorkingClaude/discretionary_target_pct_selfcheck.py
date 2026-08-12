@@ -483,6 +483,30 @@ def test_session_budget_cap():
     check(f"I7 CÓ trần ⇒ kéo về ≤ 1,03 × mục tiêu (đo được {pct_on2:.2%} NAV)",
           pct_on2 <= 0.05 * (1 + da.SESSION_BUDGET_CAP_SLACK) + 1e-9, f"{pct_on2:.4%}")
 
+    # ── I-b2. CÙNG ca sai đơn vị nhưng ở adv_ref THẬT (720tr) — tức bán kính vụ nổ THẬT.
+    # Vì sao phải có cặp này bên cạnh I6/I7: I6 cố ý thổi ADV lên 5 tỷ để CÔ LẬP trần ngân
+    # sách, nên 51,26% là số của một giàn thí nghiệm, KHÔNG phải của cấu hình production.
+    # `cap_vnd = per_session_cap_pct_adv × adv_ref_vnd` là một bờ tính bằng TIỀN nên nó MIỄN
+    # NHIỄM với lỗi đơn vị giá ⇒ trần %ADV mới là bờ NGOÀI, trần ngân sách là bờ TRONG chặt
+    # hơn. Nói "lớp duy nhất" là sai thứ tự lớp (quant-skeptic vòng 2 bác đúng chỗ này).
+    st3 = pct_state(dynamic_ceiling=DYN,
+                    price_band={"resting_limit": 19900, "no_chase_ceiling": 20000,
+                                "max_no_chase_ceiling": 25000, "floor": None})   # adv_ref THẬT
+    o_r_off, d_r_off, pct_r_off = measure(st3, 0, BAD_PX, NAV2, GOOD, slack=1e9)
+    cap_vnd_real = st3["per_session_cap_pct_adv"] * st3["adv_ref_vnd"]
+    check("I10 BỜ NGOÀI: bỏ trần ngân sách ở adv_ref THẬT ⇒ trần %ADV vẫn giữ chi phí "
+          f"≤ cap_vnd {cap_vnd_real:,.0f}đ (đo được {pct_r_off:.2%} NAV)",
+          o_r_off is not None and o_r_off["qty"] * o_r_off["limit_price_vnd"] <= cap_vnd_real,
+          f"{pct_r_off:.4%}")
+    check("I11 trần %ADV MIỄN NHIỄM lỗi đơn vị giá (nó là bờ bằng TIỀN, không bằng số cp)",
+          pct_r_off < 0.10, f"{pct_r_off:.4%} — nếu ≥10% thì bờ ngoài đã thủng")
+
+    o_r_on, d_r_on, pct_r_on = measure(st3, 0, BAD_PX, NAV2, GOOD)
+    check(f"I12 BỜ TRONG: trần ngân sách siết tiếp {pct_r_off:.2%} → {pct_r_on:.2%} NAV",
+          pct_r_on < pct_r_off
+          and pct_r_on <= 0.05 * (1 + da.SESSION_BUDGET_CAP_SLACK) + 1e-9,
+          f"{pct_r_off:.4%} → {pct_r_on:.4%}")
+
     # ── I-c. Trần KHÔNG được đụng vào lệnh hợp lệ. Nếu nó bind ở ca thật thì nó là một núm
     # sizing lén, không phải lưới an toàn — đây là ca phân biệt hai thứ đó.
     o_ok, d_ok, pct_ok = measure(pct_state(dynamic_ceiling=DYN,

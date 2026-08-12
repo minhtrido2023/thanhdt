@@ -402,8 +402,19 @@ def compute_session_order(state, filled_qty, prev_turnover_vnd, prev_price_vnd,
     #         **7,39% NAV** trên mục tiêu 5%; có trần ⇒ 5,49%.
     #       · `prev_price` sai ĐƠN VỊ (feed trả giá ÷100) ⇒ target nở đúng 100× (ca I5:
     #         2.300cp → 239.900cp), mà guard sanity đơn vị chỉ tồn tại ở nhánh TRẦN
-    #         (resolve_price_band), KHÔNG ở nhánh TARGET. Ca I6/I7: bỏ trần ⇒ **51,26% NAV**;
-    #         có trần ⇒ 5,31%. Trần theo TIỀN chặn cả hai mà không cần đoán dải giá hợp lệ.
+    #         (resolve_price_band), KHÔNG ở nhánh TARGET. Trần theo TIỀN chặn cả hai mà không
+    #         cần đoán dải giá hợp lệ.
+    #     ⚠️ THỨ TỰ LỚP — đây KHÔNG phải lớp duy nhất (quant-skeptic vòng 2 bác đúng chỗ này;
+    #     bản trước của comment nói "duy nhất" và trích 51,26% là SAI khung cảnh):
+    #       · BỜ NGOÀI = trần %ADV, `cap_vnd = per_session_cap_pct_adv × adv_ref_vnd`. Nó tính
+    #         bằng TIỀN nên MIỄN NHIỄM lỗi đơn vị giá. Ở cấu hình thật của TV1 (adv_ref 720tr)
+    #         nó một mình giữ ca sai đơn vị ở **7,35% NAV** (ca I10/I11).
+    #       · BỜ TRONG = trần ngân sách này, siết tiếp 7,35% → **5,31%** (ca I12).
+    #       · Con số **51,26%** (ca I6) chỉ đạt được khi CÔ LẬP lớp: harness thổi adv_ref lên
+    #         5 tỷ (~7× thật) để tắt bờ ngoài. Đúng cho việc đo riêng một lớp, KHÔNG phải bán
+    #         kính vụ nổ ở production — đừng trích nó ra khỏi ngữ cảnh đó.
+    #     ⇒ Ai chỉnh `per_session_cap_pct_adv`/`adv_ref_vnd` là đang nới BỜ NGOÀI; ca I10 neo
+    #     bất biến `worst_cost ≤ cap_vnd` để việc nới đó không lặng lẽ gỡ mất lưới còn lại.
     #       · Ca I8 là mặt kia của bờ: ở lệnh HỢP LỆ thật (SpaceX 08-13, 1.800cp) trần này
     #         KHÔNG bind — nếu nó bind ở ca thật thì nó là một núm sizing lén, không phải lưới.
     #     Hành vi: CO lệnh về vừa trần (không huỷ) — ca hợp lệ vẫn chạy; co xuống dưới 1 lô thì
