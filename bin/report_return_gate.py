@@ -59,7 +59,15 @@ DEFAULT_TOL_PP = 0.15        # điểm %; nới hơn sai số làm tròn giá v�
 
 # chân SỔ PAPER (thêm 2026-08-13). Nhận diện theo NỘI DUNG, không theo tên file: mục paper đi vào
 # báo cáo "New deals" — tên file KHÔNG chứa nhãn tài khoản nào, nên chân broker ở trên tự bỏ qua.
-PAPER_MARKERS = ("AlphaLens Paper Portfolio", "DC Book (double-confirm)")
+#
+# Cả 2 marker PHẢI neo vào heading mà newdeals_daily_report.py TỰ KIỂM SOÁT ("## AlphaLens Paper
+# Portfolio" / "## DC Book Paper Portfolio" — parts[] trong build_message()), KHÔNG neo vào text
+# nội bộ của converge_report.py/alphalens_report.py (thư viện khác, đổi độc lập không ai báo).
+# quant-skeptic vòng 3 (Taylor_20260813_073404): marker cũ "DC Book (double-confirm)" chỉ tình cờ
+# khớp một dòng "### 🔗 DC Book (double-confirm) — Paper Portfolio" bên TRONG converge_md — không
+# khớp heading thật mà newdeals_daily_report.py tự in ra; đổi tên heading nội bộ đó (không ai
+# review vì nó không đụng gate) sẽ âm thầm vô hiệu hoá gate.
+PAPER_MARKERS = ("AlphaLens Paper Portfolio", "DC Book Paper Portfolio")
 
 
 # ---------------------------------------------------------------- nguồn (1): broker
@@ -636,9 +644,71 @@ def _selfcheck() -> int:
     check("báo cáo KHÔNG có mục paper ⇒ chân paper không áp dụng, không chặn", (applied, f_),
           (False, []))
     os.unlink(p_no)
-    check("marker nhận diện đúng 2 mục paper thật",
-          all(m in ("AlphaLens Paper Portfolio", "DC Book (double-confirm)")
-              for m in PAPER_MARKERS) and len(PAPER_MARKERS) == 2, True)
+
+    # 27: coupling test THẬT với newdeals_daily_report.build_message() — thay ca cũ ("marker nhận
+    # diện đúng 2 mục paper thật") vốn so PAPER_MARKERS với một bản copy cứng của CHÍNH NÓ (tautology,
+    # không bao giờ fail được dù ai đổi tiêu đề thật). quant-skeptic vòng 3, Taylor_20260813_073404.
+    # Stub 3 nguồn dữ liệu build_message() cần (sector_lens_monitor/alphalens_report/converge_report
+    # — đều chạm BQ/cache thật) qua sys.modules; phần build header "## AlphaLens Paper Portfolio" /
+    # "## DC Book Paper Portfolio" chạy CODE THẬT của newdeals_daily_report.py, không phải giả lập.
+    import pandas as _pd
+    import types as _types
+
+    def _fake_compute_status():
+        df = _pd.DataFrame([{"ticker": "FPT", "status": "BUY", "buy_mode": "ACCUMULATE"}])
+        return {"df": df, "transitions": ["FPT BUY"], "prior": {}, "state": "BULL",
+                "spread_yoy": 0.0, "feed_ok": True, "feed_asof": "2026-08-13"}
+
+    _fake_slm = _types.ModuleType("sector_lens_monitor")
+    _fake_slm.compute_status = _fake_compute_status
+    _fake_slm.load_ratings = lambda: {"FPT": 1}
+    _fake_slm.build_telegram_message = lambda *a, **k: "<b>sector stub</b>"
+    _fake_alphalens = _types.ModuleType("alphalens_report")
+    _fake_alphalens.generate_section = lambda as_of_date=None: "alphalens stub"
+    _fake_converge = _types.ModuleType("converge_report")
+    _fake_converge.generate_section = lambda as_of_date=None, live_set=None: "converge stub"
+
+    _stub_names = ("sector_lens_monitor", "alphalens_report", "converge_report")
+    _saved_mods = {n: sys.modules.get(n) for n in _stub_names}
+    sys.modules["sector_lens_monitor"] = _fake_slm
+    sys.modules["alphalens_report"] = _fake_alphalens
+    sys.modules["converge_report"] = _fake_converge
+    sys.path.insert(0, ROOT)
+    sys.path.insert(0, os.path.join(ROOT, "mike", "bin"))
+    try:
+        import newdeals_daily_report as _ndr
+        msg, changed = _ndr.build_message()
+    finally:
+        for n in _stub_names:
+            if _saved_mods[n] is None:
+                sys.modules.pop(n, None)
+            else:
+                sys.modules[n] = _saved_mods[n]
+
+    check("coupling THẬT: build_message() nhánh có-thay-đổi → changed=True", changed, True)
+    # all(), KHÔNG any(): production chỉ cần any() để KÍCH gate (đủ 1 marker khớp), nhưng
+    # selfcheck phải bắt được CẢ HAI marker trôi độc lập — any() sẽ vẫn PASS nếu marker[0]
+    # ("AlphaLens Paper Portfolio") còn đúng trong khi marker[1] đã trôi, y hệt lỗ hổng vừa vá
+    # (reverse-proof đã chạy tay: any() không bắt được khi marker[1] bị đổi lại về giá trị cũ sai).
+    check("coupling THẬT: CẢ HAI marker khớp heading thật (fail nếu bất kỳ heading nào trôi)",
+          all(m in msg for m in PAPER_MARKERS), True)
+
+    # 28: ngày KHÔNG có gì mới — đường chạy hàng ngày thật, trước bản vá này chưa có test nào phủ.
+    # one-liner "vẫn giám sát bình thường" không được chứa marker paper nào (không kích T1/BQ oan),
+    # và run_gate() trên đúng nội dung đó phải PASS (rc=0) vì nó không mang mục paper nào cả.
+    quiet_msg = ("🆕 **NEW DEALS — 2026-08-13** — Không có deal mới / thay đổi thứ hạng đáng chú ý "
+                 "trong AlphaLens, Golden/Strong Watchlist, DC Book hôm nay. Hệ thống vẫn giám "
+                 "sát bình thường.")
+    check("ngày không đổi gì: one-liner KHÔNG chứa marker paper nào",
+          any(m in quiet_msg for m in PAPER_MARKERS), False)
+    with tempfile.NamedTemporaryFile("w", suffix="_2026-08-13.md", delete=False,
+                                      encoding="utf-8") as fh:
+        fh.write(quiet_msg)
+        p_quiet = fh.name
+    rc_quiet = run_gate(p_quiet, out=open(os.devnull, "w"))
+    os.unlink(p_quiet)
+    check("ngày không đổi gì: run_gate() PASS (rc=0, không có tài khoản/mục paper nào để chặn)",
+          rc_quiet, 0)
 
     print(f"SELFCHECK: {'PASS' if ok else 'FAIL'} ({len(ran)}/{len(ran)} ca)")
     return 0 if ok else 1
