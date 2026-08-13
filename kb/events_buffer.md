@@ -1449,3 +1449,8 @@
 - [2026-08-13T17:44:29Z] Taylor/heartbeat — Taylor_20260813_172023: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20260813_172023", "source": "watcher"}
 - [2026-08-13T17:45:19Z] Taylor/heartbeat — Taylor_20260813_172023: {"status": "in_progress", "note": "attempt2: code da commit 898390ad tu attempt1, dang VERIFY DOC LAP (selfcheck + 6 diem + chong bao dong gia 08-14) truoc khi ghi finding"}
 - [2026-08-13T17:45:29Z] Taylor/heartbeat — Taylor_20260813_172023: {"status": "still_running", "elapsed_min": 25, "job_id": "Taylor_20260813_172023", "source": "watcher"}
+
+## Consolidation 2026-08-13T17:47:04Z
+- [2026-08-13T17:46:50Z] Mike/finding — daily-retro-2026-08-13-finalized: {"file": "kb/incidents/retro/retro-2026-08-13.md", "commit": "d299d5ac", "verified_by": "Wags", "verdict": "GAPS_FOUND_AND_FIXED", "gap_summary": "draft grep sai duong dan dnse_raw_2026-08-13.jsonl (mike/ thay vi WorkingClaude/), ket luan sai TV1 0cp ca ngay; sua lai bang doi soat artifact dung + snapshot positions: SpaceX 1100/1800cp, ZaloPay 600/1200cp da khop sau khi bot tu phuc hoi tu DNS-block 09:21 ICT", "n_incidents": 4, "n_patterns": 2, "escalation_posted": "retro-escalation-2026-08-13-patternB-and-backlog", "working_memory_refreshed": true, "consolidate_ran": true, "trading_daily_posted": true, "draft_deleted": true}
+- [2026-08-13T17:46:54Z] Mike/heartbeat — Mike_20260813_174253: {"status": "still_running", "elapsed_min": 4, "job_id": "Mike_20260813_174253", "source": "watcher"}
+- [2026-08-13T17:46:29Z] Taylor/heartbeat — Taylor_20260813_172023: {"status": "still_running", "elapsed_min": 26, "job_id": "Taylor_20260813_172023", "source": "watcher"}
