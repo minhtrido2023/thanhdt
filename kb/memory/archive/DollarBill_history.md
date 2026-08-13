@@ -72,3 +72,6 @@
 
 ## Archived 2026-08-12 (keep=12 days=0 require_done=False)
 - [2026-08-07T05:18:59Z] [2026-08-07 ~12:30] plan 08-07 CA 2 ACCOUNT da MERGE 3-trong-1 vao orders[] that (SpaceX 15 lenh: 14 ban+1 mua DRI 3500cp@13100; ZaloPay 9 lenh: 8 ban+1 mua DRI 1800cp@13100). Thay SSI->DRI theo override cua user. approved_by=None. DANG CHO USER DUYET truoc 13:00 de kip phien chieu. Da gui plan thread + bus (job DollarBill_20260807_050844). BAI HOC: L1/L2 PHAI merge vao orders[] that, de key rieng thi load_plan() khong thay -> bot thieu tien.
+
+## Archived 2026-08-13 (keep=12 days=0 require_done=False)
+- [2026-08-09T08:07:11Z] Đã rà soát plan 08-10 (job DollarBill_20260809_075604): số liệu ĐÚNG (NAV/DT5G/park_trim rerun khớp 100%). CHỜ USER QUYẾT 2 việc: (Q1) luật cửa sổ entry LAG — filter_lag_entry_window.py bị sửa uncommitted 08-09 13:07 nới T+1→3 phiên, due_today 0→14 (gồm DRI); em KHÔNG áp vì là đổi chính sách chưa có decided_by=user/backtest. (Q2) ZaloPay 8 lệnh park_trim 85tr kẹt ở key display-only sẽ không thực thi, trong khi SpaceX cùng ngày merge 12 lệnh vào orders[] — bất đối xứng. ĐÃ BÁO: ZaloPay plan 08-07 duyệt nhưng 0 fill (bot không chạy, chỉ có lock rỗng) → chờ Mafee/Winston. Plan chỉ THÊM khối review_2026-08-09, không đổi lệnh nào, approved_by vẫn null.
