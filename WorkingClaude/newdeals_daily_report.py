@@ -34,8 +34,10 @@ sys.path.insert(0, os.path.join(ROOT, "mike", "bin"))
 os.environ.setdefault("WORKDIR", ROOT)
 os.environ.setdefault("WORKDIR_8L", ROOT)
 
-THREAD_ID = "1523612826260734112"                 # Discord "New deals" topic
-TRADING_DAILY_THREAD = "1521470705563340910"       # ops-alert topic (return-gate BLOCKED alert)
+from discord_channels import resolve as _resolve_channel
+
+THREAD_ID = _resolve_channel("new_deals")                 # Discord "New deals" topic
+TRADING_DAILY_THREAD = _resolve_channel("trading_daily")  # ops-alert topic (return-gate BLOCKED alert)
 NOTIFY = os.path.join(ROOT, "mike", "bin", "notify_thread.sh")
 
 
@@ -147,24 +149,30 @@ def _check_return_gate(message: str) -> bool:
         with os.fdopen(fd, "w", encoding="utf-8") as f:
             f.write(message)
         rc = rrg.run_gate(tmp_path, out=sys.stderr)
-        if rc != 0:
-            _alert_gate_blocked()
         return rc == 0
     finally:
         os.unlink(tmp_path)
 
 
-def _alert_gate_blocked() -> None:
+def _alert_gate_blocked(kind: str, detail: str = "") -> None:
     """rc=3 (CHẶN) trước bản vá này chỉ có 1 dòng stderr không ai đọc — 1 ngày bị chặn không
     phân biệt được với 1 ngày yên ả bình thường (quant-skeptic vòng 3, Taylor_20260813_073404).
+
+    `kind`: "blocked" khi run_gate() TRẢ VỀ rc!=0 thật (chặn do corp-action/cổ tức chưa khớp) vs
+    "crash" khi CHÍNH _check_return_gate() ném exception (import lỗi, hoặc gate chạm parquet
+    cache đang ghi dở lúc overnight sync 06:00 ICT) — quant-skeptic vòng 4 chỉ ra nhánh crash
+    trước bản vá này vẫn im lặng vì alert cũ nằm TRONG _check_return_gate(), không bọc except ở
+    main(). Hai nội dung khác nhau để người đọc phân biệt được 2 nguyên nhân rc=3.
     Best-effort: lỗi ở đây không được che mất việc CHẶN (đã _log + return 3 ở caller)."""
+    if kind == "crash":
+        msg = ("⚠️ newdeals_daily_report: cổng tỉ suất (report_return_gate) TỰ CRASH khi kiểm "
+               f"tra — KHÔNG gửi Discord New deals hôm nay ({detail}). Xem stderr/log của job "
+               "để biết chi tiết.")
+    else:
+        msg = ("⚠️ newdeals_daily_report: report BLOCKED by return gate (report_return_gate) — "
+               "KHÔNG gửi Discord New deals hôm nay. Xem stderr/log của job để biết mã/vấn đề cụ thể.")
     try:
-        subprocess.run(
-            [NOTIFY,
-             "⚠️ newdeals_daily_report: report BLOCKED by return gate (report_return_gate) — "
-             "KHÔNG gửi Discord New deals hôm nay. Xem stderr/log của job để biết mã/vấn đề cụ thể.",
-             TRADING_DAILY_THREAD],
-            check=False, timeout=30)
+        subprocess.run([NOTIFY, msg, TRADING_DAILY_THREAD], check=False, timeout=30)
     except Exception:
         pass
 
@@ -181,10 +189,12 @@ def main() -> int:
     except Exception as e:
         _log(f"FATAL — cổng tỉ suất (report_return_gate) KHÔNG chạy được ({e}) — CHẶN "
              f"(fail-closed). NOT sending.")
+        _alert_gate_blocked("crash", detail=str(e))
         return 3
     if not gate_ok:
         _log("FATAL — cổng tỉ suất (report_return_gate) CHẶN: tỉ suất sổ paper chưa khớp "
              "corporate_action / cổ tức. NOT sending. Xem stderr phía trên để biết chi tiết.")
+        _alert_gate_blocked("blocked")
         return 3
 
     try:
