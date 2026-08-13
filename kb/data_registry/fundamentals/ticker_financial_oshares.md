@@ -54,8 +54,16 @@ trung đúng vào nhóm **không** phát sinh quyền cho cổ đông hiện h�
 
 `oshares_live.py` (repo `WorkingClaude`) — neo chính là `AIS.shares_total_after`, chỉ nhận dòng
 `ticker_financial` khi nó **tự giải thích được**, và trả `value=None` (`UNKNOWN_RATIO`) khi có
-`ISS` không xác định được cỡ. **⚠️ Chưa WIRE** tính tới 2026-08-13 — đang chờ quant-skeptic vòng
-2; chưa có consumer nào được đọc.
+`ISS` không xác định được cỡ. **WIRE** từ 2026-08-13 (3 consumer:
+`custom30_core_select_audit.py`, `rating_8l.py::_reconcile_oshares`, `mike/bin/corp_action_daily.py`).
+
+**Neo `AIS` cũng có cổng, từ 2026-08-13 vòng 4** (`Taylor_20260813_154112`): feed vendor có dòng
+`AIS` SAI (IDC 2020-05-28 ghi 3.000.000.000 khi AIS liền trước là 300.000.000), nên
+`AIS.shares_total_after` chỉ được phục vụ khi **đối chiếu được với AIS liền trước** — qua
+`roll(prev, ISS ở giữa)` HOẶC `prev + shares_delta`, khớp 1 trong 2 là đủ. Không đối chiếu được ⇒
+`value=None`, nhãn **`AIS_UNCERTIFIED`**, số bị từ chối giữ ở `uncertified_value` để ghi log.
+Cổng nằm TRONG `oshares_live` (trước đó ở `oshares_pit`, nên gọi thẳng `oshares_at()` vẫn ăn số
+sai) ⇒ **mọi đường gọi đều bị chặn, kể cả gọi thẳng**.
 
 Nhãn `ANCHOR_UNVERIFIED` (mã chưa từng có `AIS` nào, vd DHG) = số vẫn trả nhưng **chưa kiểm
 chứng được** — consumer cần số đã kiểm phải coi như miss.
