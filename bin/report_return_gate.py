@@ -508,11 +508,15 @@ def _selfcheck() -> int:
     ok = True
     ran = []                 # counted, never typed — a hand-written "N ca" drifts silently
 
+    pass_count = 0
+
     def check(name, got, want):
-        nonlocal ok
+        nonlocal ok, pass_count
         ran.append(name)
         good = (abs(got - want) < 1e-6) if isinstance(want, float) else (got == want)
-        if not good:
+        if good:
+            pass_count += 1
+        else:
             ok = False
         print(f"  {'PASS' if good else 'FAIL'}  {name}: got={got!r} want={want!r}")
 
@@ -710,7 +714,58 @@ def _selfcheck() -> int:
     check("ngày không đổi gì: run_gate() PASS (rc=0, không có tài khoản/mục paper nào để chặn)",
           rc_quiet, 0)
 
-    print(f"SELFCHECK: {'PASS' if ok else 'FAIL'} ({len(ran)}/{len(ran)} ca)")
+    # 29: nhánh CRASH của _check_return_gate() (import lỗi / run_gate() tự ném exception, ca
+    # thật: gate chạm parquet cache đang ghi dở lúc overnight sync 06:00 ICT) — quant-skeptic
+    # vòng 4, Taylor_20260813_075454. Trước bản vá này alert chỉ nằm bên trong
+    # _check_return_gate() (nhánh `if rc != 0`), nên khi CHÍNH nó ném exception, main() bắt ở
+    # `except Exception` và return 3 mà KHÔNG post gì — 1 ngày gate crash không phân biệt được
+    # với 1 ngày yên ả. Stub sector_lens_monitor/alphalens_report/converge_report (build_message
+    # cần) + report_return_gate.run_gate() ném lỗi + notify_thread.sh (subprocess.run) để bắt
+    # đúng 1 lần gọi, đúng loại "crash" (không lẫn với "blocked").
+    _fake_slm2 = _types.ModuleType("sector_lens_monitor")
+    _fake_slm2.compute_status = _fake_compute_status
+    _fake_slm2.load_ratings = lambda: {"FPT": 1}
+    _fake_slm2.build_telegram_message = lambda *a, **k: "<b>sector stub</b>"
+    _fake_alphalens2 = _types.ModuleType("alphalens_report")
+    _fake_alphalens2.generate_section = lambda as_of_date=None: "alphalens stub"
+    _fake_converge2 = _types.ModuleType("converge_report")
+    _fake_converge2.generate_section = lambda as_of_date=None, live_set=None: "converge stub"
+
+    class _CrashingGate:
+        @staticmethod
+        def run_gate(*a, **k):
+            raise RuntimeError("parquet cache đang ghi dở (mô phỏng đúng overnight sync)")
+
+    _saved_mods2 = {n: sys.modules.get(n) for n in _stub_names}
+    _saved_rrg = sys.modules.get("report_return_gate")
+    sys.modules["sector_lens_monitor"] = _fake_slm2
+    sys.modules["alphalens_report"] = _fake_alphalens2
+    sys.modules["converge_report"] = _fake_converge2
+    sys.modules["report_return_gate"] = _CrashingGate
+    notify_calls = []
+    _saved_subprocess_run = _ndr.subprocess.run
+    _ndr.subprocess.run = lambda cmd, **k: notify_calls.append(cmd)
+    try:
+        rc_crash = _ndr.main()
+    finally:
+        _ndr.subprocess.run = _saved_subprocess_run
+        for n in _stub_names:
+            if _saved_mods2[n] is None:
+                sys.modules.pop(n, None)
+            else:
+                sys.modules[n] = _saved_mods2[n]
+        if _saved_rrg is None:
+            sys.modules.pop("report_return_gate", None)
+        else:
+            sys.modules["report_return_gate"] = _saved_rrg
+
+    check("nhánh CRASH: main() trả về rc=3", rc_crash, 3)
+    check("nhánh CRASH: đúng 1 alert được post", len(notify_calls), 1)
+    crash_msg = notify_calls[0][1] if notify_calls else ""
+    check("nhánh CRASH: nội dung alert đúng loại 'crash' (không lẫn 'blocked')",
+          ("TỰ CRASH" in crash_msg) and ("BLOCKED by return gate" not in crash_msg), True)
+
+    print(f"SELFCHECK: {'PASS' if ok else 'FAIL'} ({pass_count}/{len(ran)} ca)")
     return 0 if ok else 1
 
 
