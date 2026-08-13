@@ -35,6 +35,7 @@ os.environ.setdefault("WORKDIR", ROOT)
 os.environ.setdefault("WORKDIR_8L", ROOT)
 
 THREAD_ID = "1523612826260734112"                 # Discord "New deals" topic
+TRADING_DAILY_THREAD = "1521470705563340910"       # ops-alert topic (return-gate BLOCKED alert)
 NOTIFY = os.path.join(ROOT, "mike", "bin", "notify_thread.sh")
 
 
@@ -129,7 +130,7 @@ def _check_return_gate(message: str) -> bool:
     """CỔNG CHẶN CỨNG (coding_guidelines §21/§22, T1 corp-action crosscheck) — trước khi post,
     chạy `report_return_gate.run_gate()` trên đúng nội dung sắp lên Discord.
 
-    Đây là kênh duy nhất đăng "AlphaLens Paper Portfolio" / "DC Book (double-confirm)" mà
+    Đây là kênh duy nhất đăng "AlphaLens Paper Portfolio" / "DC Book Paper Portfolio" mà
     KHÔNG BAO GIỜ ghi ra file .md — `run_gate()` chỉ có 1 caller (`send_report_email.py`), nên
     trước bản vá này cổng không hề chạy trên message thật user đọc mỗi sáng. Không ghi vĩnh
     viễn ra `mike/reports/`: chỉ cần 1 file tạm mang TÊN có ngày (`accounts_asof_from_name()`
@@ -146,9 +147,26 @@ def _check_return_gate(message: str) -> bool:
         with os.fdopen(fd, "w", encoding="utf-8") as f:
             f.write(message)
         rc = rrg.run_gate(tmp_path, out=sys.stderr)
+        if rc != 0:
+            _alert_gate_blocked()
         return rc == 0
     finally:
         os.unlink(tmp_path)
+
+
+def _alert_gate_blocked() -> None:
+    """rc=3 (CHẶN) trước bản vá này chỉ có 1 dòng stderr không ai đọc — 1 ngày bị chặn không
+    phân biệt được với 1 ngày yên ả bình thường (quant-skeptic vòng 3, Taylor_20260813_073404).
+    Best-effort: lỗi ở đây không được che mất việc CHẶN (đã _log + return 3 ở caller)."""
+    try:
+        subprocess.run(
+            [NOTIFY,
+             "⚠️ newdeals_daily_report: report BLOCKED by return gate (report_return_gate) — "
+             "KHÔNG gửi Discord New deals hôm nay. Xem stderr/log của job để biết mã/vấn đề cụ thể.",
+             TRADING_DAILY_THREAD],
+            check=False, timeout=30)
+    except Exception:
+        pass
 
 
 def main() -> int:
