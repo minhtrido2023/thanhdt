@@ -168,12 +168,25 @@ class Adjustment:
     source: str = "unresolved"      # unresolved | broker_solved | bq_corp_action
     fin_check: str = "unavailable"  # TẦNG 3: match | mismatch | unavailable
     fin_note: str = ""
+    # --- nguồn VENDOR per-event (tav2_bq.corporate_action, thêm 2026-08-13) ---
+    vendor_cash: float = 0.0        # DIV.value_per_share (GỘP, đồng/cp) — 0 nếu không có
+    vendor_stock: float = 0.0       # tổng ISS.exercise_ratio cùng ex-date — 0 nếu không có
+    vendor_check: str = "unavailable"   # match | mismatch | vendor_only | broker_only | unavailable
+    vendor_note: str = ""
 
     @property
     def cash_per_share(self) -> float:
         """Số đồng/cp ĐƯỢC PHÉP cộng vào tỉ suất. 0 nếu chưa xác minh — KHÔNG suy diễn từ tỉ số.
 
         Mọi consumer làm báo cáo phải đọc trường này, KHÔNG đọc thẳng `per_share`.
+
+        CHỈ `CASH_CONFIRMED` (giải ra từ TIỀN BROKER THẬT) được qua cổng. `CASH_VENDOR` — số lấy
+        từ `tav2_bq.corporate_action` khi broker không giải được — CỐ Ý bị chặn ở đây: nguồn vendor
+        chưa từng được kiểm chứng độ chính xác/độ trễ so với tiền thật về tài khoản, và §21 nói
+        báo cáo gửi nhà đầu tư chỉ nhận số đã đối soát được với sổ broker. Số vendor vẫn hiện ra ở
+        `vendor_cash`/`per_share` để người đọc thấy và để quant-skeptic đánh giá — **mở cổng cho
+        `CASH_VENDOR` là quyết định CHÍNH SÁCH của user, không phải quyết định kỹ thuật của code
+        này** (coding_guidelines §22: tách chính sách khỏi kỹ thuật).
         """
         return self.per_share if self.kind == "CASH_CONFIRMED" else 0.0
 
@@ -344,13 +357,56 @@ def _broker_records(kind: str, account_no: str):
 # ======================================================================================
 
 def bq_corp_action(ticker: str, ex_date: str):
-    """Ưu tiên 1: bảng corp-action BQ — hiếm khi có, nhưng đã phân loại sẵn tiền/cổ phiếu."""
-    rows = _bq(f"""
-        SELECT s.cash_div_per_share AS cash, s.stock_div_ratio AS stock
-        FROM `{BQ_PROJECT}.tav2_bq.shares_outstanding_live` AS s
-        WHERE s.ticker = '{ticker}' AND s.ex_date = DATE '{ex_date}'
-    """)
-    return rows[0] if rows else None
+    """Nguồn VENDOR per-event: `tav2_bq.corporate_action` — {cash, stock, titles} tại (mã, ex-date).
+
+    Đây là "cột raw per-event" mà `ticker_close_vs_price_dividend_adj.md` (viết 2026-08-02) kết
+    luận là KHÔNG tồn tại trên BQ — bảng chỉ được tạo 2026-08-12. Nó giải Bẫy (4): `Close/Price`
+    không phân biệt được cổ tức TIỀN MẶT với cổ tức CỔ PHIẾU, còn ở đây `event_code` nói thẳng
+    (`DIV` = tiền, `ISS` = cổ phiếu) và `value_per_share` cho luôn đồng/cp.
+
+    Ba cái bẫy của bảng, xử lý ngay tại đây:
+      * `event_status` — chỉ lấy `executed`; loại `not_executed` (đã huỷ) và `announced` (mới công
+        bố, chưa chắc xảy ra, ngày có thể đổi).
+      * dòng TRÙNG `(ticker, exright_date, event_code)` — có thể là nhiều đợt THẬT chốt cùng ngày
+        (MBB 2026-08-11: quyền mua 10% VÀ cổ tức CP 15%) hoặc bản đính chính của cùng một sự kiện.
+        Dedup theo `(event_code, issue_method_name_vi, value_per_share, exercise_ratio)` rồi mới
+        SUM: hai đợt khác loại/khác tỉ lệ đều sống, hai dòng y hệt nhau gộp làm một.
+      * `category` LUÔN NULL — đừng đọc, dùng `event_code`.
+
+    Trả None khi không có sự kiện nào. KHÔNG ném exception khi BQ lỗi — người gọi vẫn phải chạy
+    được đường broker (nguồn chuẩn tắc), bảng này chỉ là lớp bổ sung.
+    """
+    try:
+        rows = _bq(f"""
+            SELECT event_code, value_per_share, exercise_ratio,
+                   issue_method_name_vi, event_title_vi
+            FROM `{BQ_PROJECT}.tav2_bq.corporate_action`
+            WHERE ticker = '{ticker}' AND exright_date = DATE '{ex_date}'
+              AND event_status = 'executed'
+              AND event_code IN ('DIV', 'ISS')
+        """)
+    except Exception:
+        return None
+    if not rows:
+        return None
+
+    seen, cash, stock, titles = set(), 0.0, 0.0, []
+    for r in rows:
+        key = (r["event_code"], r.get("issue_method_name_vi"),
+               str(r.get("value_per_share")), str(r.get("exercise_ratio")))
+        if key in seen:
+            continue
+        seen.add(key)
+        titles.append((r.get("event_title_vi") or "")[:60])
+        if r["event_code"] == "DIV" and r.get("value_per_share") is not None:
+            cash += float(r["value_per_share"])
+        elif r["event_code"] == "ISS" and r.get("exercise_ratio") is not None:
+            stock += float(r["exercise_ratio"])
+
+    return {"cash": cash if cash > 0 else None,
+            "stock": stock if stock > 0 else None,
+            "titles": "; ".join(titles),
+            "n_rows": len(rows), "n_dedup": len(seen)}
 
 
 def broker_cash_deltas(account_no: str) -> dict:
@@ -574,17 +630,48 @@ def resolve_dividends(tickers, start: str, end: str, accounts: dict = None,
     for tk in tickers:
         adjs.extend(detect_adjustments(tk, start, end))
 
-    for adj in adjs:                              # ưu tiên 1: bảng corp-action BQ (nếu tình cờ có)
-        row = bq_corp_action(adj.ticker, adj.ex_date)
-        if row and row.get("cash") is not None:
-            adj.per_share = float(row["cash"])
-            adj.source = "bq_corp_action"
-            adj.kind = "CASH_CONFIRMED" if adj.per_share > 0 else "STOCK_SUSPECTED"
-            adj.note = f"tav2_bq.shares_outstanding_live (stock_div_ratio={row.get('stock')})"
-
+    # TIỀN BROKER THẬT VẪN LÀ NGUỒN SỐ (tầng 2). Bảng vendor `corporate_action` chạy SAU, làm 3
+    # việc khác nhau — cố ý KHÔNG cho nó ghi đè một nghiệm đã giải ra từ tiền thật:
+    #   1. PHÂN LOẠI sự kiện (DIV/ISS) — thay cho phép suy yếu từ biến động `openQuantity`, vốn
+    #      vừa bỏ sót thưởng CP vừa dương tính giả khi có lệnh khớp trùng cửa sổ ex-date (Bẫy 4).
+    #   2. ĐỐI SOÁT CHÉO nghiệm broker — hai nguồn độc lập lệch nhau là tín hiệu phải điều tra.
+    #   3. LẤP chỗ broker không giải được (hệ vô định / ngoài cửa sổ dnse_raw từ 06/07/2026),
+    #      nhưng gắn nhãn RIÊNG `CASH_VENDOR` — xem `cash_per_share`: KHÔNG tự động vào báo cáo.
     todo = [a for a in adjs if a.source == "unresolved"]
     if todo:
         solve_from_broker(todo, accounts)
+
+    for adj in adjs:
+        row = bq_corp_action(adj.ticker, adj.ex_date)
+        if not row:
+            adj.vendor_check = "unavailable"
+            adj.vendor_note = "không có sự kiện executed nào ở (mã, ex-date) trong corporate_action"
+            continue
+        adj.vendor_cash = float(row.get("cash") or 0.0)
+        adj.vendor_stock = float(row.get("stock") or 0.0)
+        adj.vendor_note = row.get("titles", "")
+
+        if adj.kind == "CASH_CONFIRMED":
+            # broker đã cho số chính thức — vendor chỉ được phép XÁC NHẬN hoặc BÁO ĐỘNG
+            if adj.vendor_cash <= 0:
+                adj.vendor_check = "broker_only"
+            elif abs(adj.vendor_cash - adj.per_share) <= max(1.0, 0.01 * adj.per_share):
+                adj.vendor_check = "match"
+            else:
+                adj.vendor_check = "mismatch"
+                adj.vendor_note = (f"vendor {adj.vendor_cash:,.0f}đ/cp ≠ tiền broker "
+                                   f"{adj.per_share:,.0f}đ/cp — ĐIỀU TRA trước khi dùng số nào")
+        elif adj.vendor_cash > 0 and adj.vendor_stock <= 0:
+            # thuần tiền mặt theo vendor, broker chưa giải được ⇒ có SỐ nhưng chưa có BẰNG CHỨNG TIỀN
+            adj.per_share, adj.source, adj.kind = adj.vendor_cash, "bq_corp_action", "CASH_VENDOR"
+            adj.vendor_check = "vendor_only"
+        elif adj.vendor_stock > 0:
+            # phân loại chắc chắn: có phát hành CP ⇒ không được cộng như tiền mặt
+            adj.kind = "STOCK_CONFIRMED"
+            adj.vendor_check = "vendor_only"
+            adj.note = (f"corporate_action: ISS tỉ lệ {adj.vendor_stock:.4f}"
+                        + (f" + DIV {adj.vendor_cash:,.0f}đ/cp" if adj.vendor_cash > 0 else ""))
+
     if with_crosscheck:
         crosscheck_dividend_1y(adjs)
     return adjs
