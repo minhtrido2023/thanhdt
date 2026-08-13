@@ -1,6 +1,6 @@
 ---
 kind: project
-status: DONG (voi 1 muc mo)
+status: DONG (crontab da cai, dang burn-in alert-only + 1 muc mo Viec B)
 date: 2026-08-13
 ---
 
@@ -116,17 +116,25 @@ bằng thời gian (không phải code): `FEED_DEAD_DAYS=5` + tầng cảnh báo
 và đường backfill trên ngày lỡ THẬT — cả hai đúng là lý do đợt burn-in alert-only 5-10 phiên tồn
 tại. **Chờ user duyệt giờ chạy cài crontab.**
 
+## Crontab ĐÃ CÀI (2026-08-13, user duyệt)
+
+`30 0 * * 1-5` (07:30 ICT T2-T6) → `mike/bin/corp_action_daily.sh`. Backup crontab trước khi sửa:
+`/tmp/crontab_backup_before_corp_action.txt`, diff xác nhận chỉ THÊM 3 dòng, không mất gì cũ.
+`kb/cron_registry.md` cập nhật cùng commit (§11), phản ánh đúng vòng 4 (selfcheck 134/134, LỚP 7
+backfill) thay vì mô tả cũ vòng 1.
+
+⚠️ **ĐANG Ở ĐỢT ALERT-ONLY 5-10 phiên đầu** (từ 2026-08-13) — chưa quan sát được lần chuyển lô
+vendor thật hay ngày cron tự lỡ thật nào. KHÔNG tin tuyệt đối tầng `FEED_DEAD_DAYS=5`/backfill cho
+tới khi thấy ít nhất 1 lần trong dữ liệu sống. Verify `MAX(ingested_at)` mỗi phiên.
+
 ## Việc còn mở
 
-1. **Cài crontab 07:30 ICT** — sẵn sàng kỹ thuật, chờ user bấm nút. Chạy alert-only 5-10 phiên đầu
-   theo đúng khuyến nghị (log `MAX(ingested_at)` mỗi lượt, không tin tầng freshness cho tới khi
-   thấy ít nhất 1 lần chuyển lô vendor thật).
-2. Việc B (Oshares) — consumer MÁY (backtest point-in-time / report-rating live) vẫn chưa chọn,
+1. Việc B (Oshares) — consumer MÁY (backtest point-in-time / report-rating live) vẫn chưa chọn,
    snapshot của Việc E hiện chỉ phục vụ consumer NGƯỜI (đọc cờ `usable`).
-3. Vòng 6 cũ (rc=1 + import-time KeyError của Việc D) — **CHỦ ĐỘNG BỎ QUA** (quyết định user
+2. Vòng 6 cũ (rc=1 + import-time KeyError của Việc D) — **CHỦ ĐỘNG BỎ QUA** (quyết định user
    2026-08-13, xác suất thấp + đã có backstop `cron_health_check_daily.sh`).
-4. `corporate_action` freshness — user xác nhận refresh hàng ngày từ 08-13, nhưng bảng vẫn đang ở
-   1 ngày ingest (08-12) tính tới lúc kiểm — cần verify lại 08-14 (chính là mục burn-in ở trên).
+3. `corporate_action` freshness — user xác nhận refresh hàng ngày từ 08-13, nhưng bảng vẫn đang ở
+   1 ngày ingest (08-12) tính tới lúc kiểm — theo dõi qua đợt burn-in ở trên, không việc riêng.
 
 ## Commit chính
 `WorkingClaude@2037e5c`, `mike@91434457` (vòng 1) · `WorkingClaude@abd7cd6`, `mike@60085443`
