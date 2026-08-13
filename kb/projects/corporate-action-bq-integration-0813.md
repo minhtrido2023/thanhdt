@@ -94,23 +94,45 @@ ngoài phạm vi 3 việc được giao vòng 3): **missed-run/backfill gap** �
 một ngày nào đó (crash/lỗi hạ tầng), sự kiện exright ngày đó không bao giờ được ghi và không có
 đường quay lại bù — `prev_asof` cách `asof` hơn 1 phiên phải tự phát hiện + backfill, hiện chưa có.
 
-## Việc còn mở — CẦN USER QUYẾT trước khi cài crontab
+## Vòng 4 của Việc E (2026-08-13, job `Taylor_20260813_115210`) — vá missed-run/backfill, quant-skeptic CONFIRMED
 
-1. **Cài crontab 07:30 ICT ngay** (chấp nhận rủi ro missed-run gap, bù bằng burn-in alert-only
-   5-10 phiên đã lên kế hoạch — vốn cũng cần thiết để kiểm chứng `FEED_DEAD_DAYS=5` vì bảng mới chỉ
-   có 1 ngày ingest, chưa từng thấy 1 lần chuyển lô thật) — **HAY**
-2. **Vá nốt missed-run/backfill gap trước** (vòng 4) rồi mới cài.
-3. Việc B (Oshares) — consumer MÁY (backtest point-in-time / report-rating live) vẫn chưa chọn,
+User chọn hướng 2 (vá trước khi cài). Thêm LỚP 7 (3 hàm mới, nối vào bộ máy vòng 3 không nhánh
+riêng): phát hiện phiên bị lỡ bằng mốc `prior_snapshot` (KHÔNG dùng `state.last_run` — mốc này ghi
+TRƯỚC cả nhánh feed DEAD nên sẽ nhảy qua ngày chạy-hỏng vĩnh viễn), đếm theo lịch giao dịch VN,
+backfill lại đúng truy vấn sự kiện-trong-ngày cho từng ngày bị lỡ, trần 10 phiên/lượt không cap
+im lặng (hàng hoãn tự rút dần). Idempotent — tái dùng khoá duy nhất vòng 3, không phát minh lại.
+Commit `WorkingClaude@5fe35e2f`. **CONFIRMED cao**, không có gap blocking mới — quant-skeptic tự
+dựng 5 kịch bản đối kháng riêng (kể cả outage 32 phiên, rút hết trong 4 vòng, 0 trùng lặp), cơ chế
+là "control-flow certainty" (đọc code xác nhận được, không phải suy luận từ mẫu nhỏ). Điểm duy
+nhất còn treo: bằng chứng BQ thật test trên ngày mô phỏng ở TƯƠNG LAI (chưa có ngày lỡ THẬT trong
+quá khứ để quan sát vendor chuyển announced→executed qua đường backfill) — không phải lỗi thiết
+kế, chỉ là cần thời gian trôi qua, sẽ tự xác nhận trong đợt burn-in alert-only đã lên kế hoạch.
+
+Taylor cũng tự bắt + tự vá 1 lỗi trong CHÍNH bộ test mutation của mình (harness chấm nhầm do cache
+`.pyc` trùng byte-size/giây khiến 2 mutation khác nhau trông cùng kết quả) — minh bạch báo cáo.
+
+**KHÉP KÍN — không còn gap nào cần vá thêm trước khi cài crontab.** Còn 2 điều CHỈ kiểm chứng được
+bằng thời gian (không phải code): `FEED_DEAD_DAYS=5` + tầng cảnh báo (bảng chỉ có 1 ngày ingest),
+và đường backfill trên ngày lỡ THẬT — cả hai đúng là lý do đợt burn-in alert-only 5-10 phiên tồn
+tại. **Chờ user duyệt giờ chạy cài crontab.**
+
+## Việc còn mở
+
+1. **Cài crontab 07:30 ICT** — sẵn sàng kỹ thuật, chờ user bấm nút. Chạy alert-only 5-10 phiên đầu
+   theo đúng khuyến nghị (log `MAX(ingested_at)` mỗi lượt, không tin tầng freshness cho tới khi
+   thấy ít nhất 1 lần chuyển lô vendor thật).
+2. Việc B (Oshares) — consumer MÁY (backtest point-in-time / report-rating live) vẫn chưa chọn,
    snapshot của Việc E hiện chỉ phục vụ consumer NGƯỜI (đọc cờ `usable`).
-4. Vòng 6 cũ (rc=1 + import-time KeyError của Việc D) — **CHỦ ĐỘNG BỎ QUA** (quyết định user
+3. Vòng 6 cũ (rc=1 + import-time KeyError của Việc D) — **CHỦ ĐỘNG BỎ QUA** (quyết định user
    2026-08-13, xác suất thấp + đã có backstop `cron_health_check_daily.sh`).
-5. `corporate_action` freshness — user xác nhận refresh hàng ngày từ 08-13, nhưng bảng vẫn đang ở
-   1 ngày ingest (08-12) tính tới lúc kiểm — cần verify lại 08-14.
+4. `corporate_action` freshness — user xác nhận refresh hàng ngày từ 08-13, nhưng bảng vẫn đang ở
+   1 ngày ingest (08-12) tính tới lúc kiểm — cần verify lại 08-14 (chính là mục burn-in ở trên).
 
 ## Commit chính
 `WorkingClaude@2037e5c`, `mike@91434457` (vòng 1) · `WorkingClaude@abd7cd6`, `mike@60085443`
 (vòng 3 Việc D) · `WorkingClaude@7790fd6`, `mike@17d0c749` (vòng 4 Việc D) ·
 `WorkingClaude@e0ff1fb`, `mike@066df954` (vòng 5 Việc D) · `WorkingClaude@129f2779` (Việc E build) ·
-`WorkingClaude@f844b800` (Việc E vòng 3 — vá khoá trùng).
+`WorkingClaude@f844b800` (Việc E vòng 3 — vá khoá trùng) · `WorkingClaude@5fe35e2f` (Việc E vòng 4
+— vá missed-run/backfill).
 
 ↩ [Về index dự án](INDEX.md)
