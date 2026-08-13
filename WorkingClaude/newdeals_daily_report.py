@@ -25,10 +25,12 @@ Job Taylor_20260706_091624.
 import os
 import sys
 import subprocess
+import tempfile
 import datetime as dt
 
 ROOT = os.environ.get("WORKDIR", "/home/trido/thanhdt/WorkingClaude")
 sys.path.insert(0, ROOT)
+sys.path.insert(0, os.path.join(ROOT, "mike", "bin"))
 os.environ.setdefault("WORKDIR", ROOT)
 os.environ.setdefault("WORKDIR_8L", ROOT)
 
@@ -123,12 +125,49 @@ def send(message: str) -> None:
     subprocess.run([NOTIFY, message, THREAD_ID], check=True)
 
 
+def _check_return_gate(message: str) -> bool:
+    """CỔNG CHẶN CỨNG (coding_guidelines §21/§22, T1 corp-action crosscheck) — trước khi post,
+    chạy `report_return_gate.run_gate()` trên đúng nội dung sắp lên Discord.
+
+    Đây là kênh duy nhất đăng "AlphaLens Paper Portfolio" / "DC Book (double-confirm)" mà
+    KHÔNG BAO GIỜ ghi ra file .md — `run_gate()` chỉ có 1 caller (`send_report_email.py`), nên
+    trước bản vá này cổng không hề chạy trên message thật user đọc mỗi sáng. Không ghi vĩnh
+    viễn ra `mike/reports/`: chỉ cần 1 file tạm mang TÊN có ngày (`accounts_asof_from_name()`
+    suy ngày chốt từ regex `\\d{4}-\\d{2}-\\d{2}` trong tên file, không đọc nội dung để suy ngày).
+
+    Fail-closed: gate lỗi/import lỗi/CHẶN ⇒ trả False, KHÔNG post gì (giống hệt cách
+    `send_report_email.py` chặn toàn bộ email khi gate fail — ít xâm lấn nhất, không cần tách
+    mục paper ra khỏi phần còn lại của message).
+    """
+    import report_return_gate as rrg
+    today = dt.date.today().isoformat()
+    fd, tmp_path = tempfile.mkstemp(prefix="newdeals_gate_", suffix=f"_{today}.md")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(message)
+        rc = rrg.run_gate(tmp_path, out=sys.stderr)
+        return rc == 0
+    finally:
+        os.unlink(tmp_path)
+
+
 def main() -> int:
     try:
         message, changed = build_message()
     except Exception as e:
         _log(f"FATAL — could not build report (BQ cache not ready?): {e}. NOT sending.")
         return 1
+
+    try:
+        gate_ok = _check_return_gate(message)
+    except Exception as e:
+        _log(f"FATAL — cổng tỉ suất (report_return_gate) KHÔNG chạy được ({e}) — CHẶN "
+             f"(fail-closed). NOT sending.")
+        return 3
+    if not gate_ok:
+        _log("FATAL — cổng tỉ suất (report_return_gate) CHẶN: tỉ suất sổ paper chưa khớp "
+             "corporate_action / cổ tức. NOT sending. Xem stderr phía trên để biết chi tiết.")
+        return 3
 
     try:
         send(message)
