@@ -236,3 +236,89 @@ chứng, **không được trích như finding**. §1a là **[GAP]** đã tuyên
 
 **KHÔNG chạm production. KHÔNG đề xuất đổi config live. Không cần quant-skeptic** (đúng ranh giới
 dispatch). Nếu bất kỳ mục nào ở §5 tiến tới đề xuất wire, khi đó mới bắt buộc qua gate đầy đủ.
+
+---
+
+# ADDENDUM 2026-08-14 — user xác nhận NGÀY tài liệu + đóng một phần [GAP] §1a
+
+job `Taylor_20260813_172358` · bổ sung, **không viết lại** phần trên.
+
+## A. Ngày tài liệu = **2026-08-13** (chính hôm đó, chiều thứ Năm) — user xác nhận
+
+Việc §5 mục 1 ("xác nhận ngày tài liệu") **ĐÓNG**. Hệ quả tới cách đọc phần trên:
+
+- Cảnh báo ở đầu báo cáo ("nếu tài liệu cũ hơn, ví dụ kỳ 2025, thì §3/§4 đổi nghĩa đáng kể")
+  **KHÔNG còn áp dụng**. Tài liệu là **mới phát sinh**, không phải ghi chú lịch sử.
+- **§3 (tỷ giá ↔ DT5G) và §4 (funding gap → deposit tilt) đọc là HIỆN TRẠNG LIVE.** Ba con số nền
+  (LDR hệ thống 107,7% · chênh tín dụng−huy động 2 triệu tỷ · vốn TDH 16% nguồn tài trợ 48,5% dư
+  nợ) là mô tả trạng thái **hôm nay**, không phải trạng thái một kỳ đã qua.
+- **Mức ưu tiên theo dõi TĂNG, không giảm dần theo tuổi tài liệu.** Cụ thể: §3b (điểm mù của
+  Pillar A trước thắt chặt *lượng*) và §4b (rổ ngân hàng 67% book không có kênh phản ứng lãi suất
+  nào ở tầng rating) chuyển từ "quan sát cơ chế" sang **rủi ro đang mở**.
+
+**KHÔNG đổi kết luận nào ở trên.** Cụ thể vẫn giữ nguyên: không đề xuất sửa DT5G (§3b), không mở
+rộng `deposit-rate-autocheck` (§2), không wire gì vào filter live. Ngày mới hơn làm tăng *độ ưu
+tiên theo dõi*, **không** tạo ra edge mới và **không** hạ bất kỳ chuẩn gate nào.
+
+## B. [GAP] §1a — đóng được chân LDR, chân CASA vẫn hở
+
+Đã build nguồn dữ liệu mới (§5 mục 2). Chi tiết đầy đủ + mọi cạm bẫy:
+`kb/data_registry/fundamentals/bank_casa_ldr.md`. Script:
+`agents/Taylor/build_bank_casa_ldr.py` → `data/bank_casa_ldr_20260814.csv`.
+
+**Sửa một khẳng định ở §1a.** §1a viết "CASA, LDR … đều KHÔNG đo được bằng hạ tầng dữ liệu hiện
+tại". Đúng với **BigQuery**, nhưng **quá rộng**: **LDR đo được** từ bảng cân đối ngân hàng qua
+vnstock/VCI (thư viện đã cài sẵn và repo đã dùng ở chỗ khác), không cần thuyết minh BCTC. Chỉ
+**CASA** mới thật sự cần thuyết minh.
+
+### LDR rổ 13 mã tại 2026-Q2 [VERIFIED]
+
+`LDR_thuần = cho vay khách hàng (gộp) / tiền gửi khách hàng`. **KHÔNG phải LDR quy định** (TT
+22/2019, trần 85%) — mọi số >100% ở đây là bình thường, không đọc là vi phạm trần.
+
+| Mã | LDR% | CASA% | Mã | LDR% | CASA% |
+|---|---:|---:|---|---:|---:|
+| VPB | **158,5** | — | TPB | 117,2 | 21,0 |
+| ACB | 129,3 | 20,5 | MSB | 112,6 | 22,8 |
+| TCB | 127,9 | 35,0 | CTG | 110,7 | 23,2 |
+| MBB | 127,4 | 34,4 | BID | 110,6 | 20,4 |
+| VIB | 125,1 | 11,9 | SHB | 105,7 | — |
+| LPB | 121,5 | **6,4** | VCB | 101,7 | 32,8 |
+| | | | HDB | 97,8 | — |
+
+Hai self-check PASS: bất biến kế toán `gộp = ròng + dự phòng` **52/52 kỳ**; đối soát chéo với số
+đã công bố trên báo (đường dữ liệu KHÔNG qua VCI) **5/5, lệch ≤0,13%** (CTG tiền gửi/dư nợ, MBB,
+TCB, VPB). Chuỗi 4 quý 2025Q3→2026Q2 có trong CSV.
+
+⚠️ **Cột CASA là [UNVERIFIED], KHÔNG cùng hạng với cột LDR** — chép từ báo chí tổng hợp, hai bài
+khớp số nhưng **định nghĩa mâu thuẫn nhau** (có/không cộng tiền ký quỹ), chỉ 1 kỳ, thiếu HDB/SHB/
+VPB. Thuyết minh gốc CTG là **PDF scan 61 trang, trích được 0 ký tự**, máy không có OCR. **Không
+dùng cột CASA làm cơ sở quyết định** cho tới khi đối soát được thuyết minh.
+
+### Quan sát đáng chú ý [HYPOTHESIS]
+
+Ghép hai trục lại (LDR cao = cần huy động thêm; CASA thấp = huy động đó đắt), nhóm chịu áp lực
+funding nặng nhất trong rổ **không phải** nhóm mà §1b nêu:
+
+- **LPB (LDR 121,5% · CASA 6,4%)** và **VIB (125,1% · 11,9%)** — vừa cần vốn nhất vừa có nền vốn
+  rẻ mỏng nhất. LPB CASA 6,4% là thấp bất thường so với rổ.
+- **TCB/MBB** LDR cũng cao (127,9/127,4) nhưng **CASA 35,0/34,4** — cùng mức LDR, chi phí vốn
+  biên khác hẳn. Đây đúng là điều **§1d đã cảnh báo bảng §1b không phân biệt được**: công thức
+  `L×Asset/NP` bản chất là `1/ROA`, đo đệm lợi nhuận, **không** đo cơ cấu vốn.
+- **VPB LDR 158,5%** cao nhất rổ và **thiếu CASA** — mã có trọng số lớn nhất ZaloPay (26,72%).
+  Đây là ô trống đáng đóng trước nhất.
+
+Là **[HYPOTHESIS]**: chưa backtest, chưa qua quant-skeptic, một phần đầu vào (CASA) UNVERIFIED.
+**Không đề xuất đổi sizing, filter hay rating.** Giá trị hiện tại là giám sát, cadence quý.
+
+## C. Việc mở còn lại (cập nhật §5)
+
+| # | Việc | Trạng thái |
+|---|---|---|
+| 1 | Xác nhận ngày tài liệu | ✅ **ĐÓNG** — 2026-08-13 |
+| 2 | Nguồn CASA/LDR | 🟡 **MỘT NỬA** — LDR xong+verify; CASA cần OCR thuyết minh (HDB/SHB/VPB còn trống) |
+| 3 | Theo dõi tăng trưởng tài sản YoY theo quý | vẫn chờ user duyệt cadence |
+| 4 | Kiểm dải §1b bằng NIM công bố Q3/2026 | chờ ~cuối 10/2026 |
+| 5 | Pillar A′ theo lãi suất huy động | vẫn **chặn dữ liệu** (PIT n=1) |
+
+**Không chạm production, không đổi config live, không cần quant-skeptic** (đúng ranh giới dispatch).
