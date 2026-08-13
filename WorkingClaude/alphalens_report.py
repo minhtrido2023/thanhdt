@@ -155,6 +155,14 @@ def generate_section(as_of_date: str = None) -> str:
                 # say it out loud: a reader comparing against the JSON's entry_price must be able
                 # to see WHY the denominator is not that number
                 line += f" *[giá vào {a.entry_price:,.0f}→{a.entry_adj:,.0f} do quyền]*"
+                if a.rights_events:
+                    # the convention is a real fork in the number, not a footnote: state it on the
+                    # line that carries the number, and show what the other convention would say
+                    terp_pct = (current - a.entry_price * a.factor_terp) / (
+                        a.entry_price * a.factor_terp) * 100
+                    line += (f" *[quyền mua {', '.join(a.rights_events)} KHÔNG tính vào tỉ suất — "
+                             f"sổ paper không có tài khoản tiền để thực hiện quyền; nếu giả định "
+                             f"đã mua/bán quyền theo giá lý thuyết thì {terp_pct:+.1f}%]*")
 
             # DCF check (informational only — never gates this report). ACB/MBB/HDB are
             # financials -> dcf_line() auto-degrades to N/A via the same gate as Pha 2 production.

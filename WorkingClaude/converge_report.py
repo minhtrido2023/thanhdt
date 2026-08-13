@@ -139,6 +139,12 @@ def generate_section(as_of_date=None, live_set=None):
             rebase = ""
             if a is not None and a.is_adjusted:
                 rebase = f" *[giá vào {a.entry_price:,.0f}→{a.entry_adj:,.0f} do quyền]*"
+                if a.rights_events:
+                    # convention stated on the line carrying the number, not in a footnote
+                    terp_adj = a.entry_price * a.factor_terp
+                    rebase += (f" *[quyền mua {', '.join(a.rights_events)} KHÔNG tính vào tỉ suất "
+                               f"— sổ paper không có tài khoản tiền; nếu giả định đã mua/bán quyền "
+                               f"theo giá lý thuyết thì {(cur - terp_adj) / terp_adj * 100:+.1f}%]*")
             elif a is not None and a.degraded:
                 rebase = " ⚠️*[chưa quy đổi được giá vào — % tính trên giá THÔ]*"
             lines.append(f"- **{tk}** ({pos.get('sector','')}): {cur:,.0f}đ ({sign}{pct:.1f}%){rebase} · {mode}")
