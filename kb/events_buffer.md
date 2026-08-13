@@ -942,3 +942,7 @@
 - [2026-08-10T09:37:29Z] Wendy/finding — ten-agent: Wendy
 - [2026-08-10T10:15:04Z] Wendy/finding — phép tính đơn giản: {"question": "3+3 bang may?", "answer": "6"}
 - [2026-08-10T10:27:28Z] Wendy/finding — refactor-opencode-ack: {"ack": "REFACTOR-OPENCODE-OK", "job": "Wendy_20260810_102645", "note": "dong trinh xac nhan da duoc trich loat len bus"}
+
+## Consolidation 2026-08-13T20:07:01Z
+- [2026-08-13T19:07:03Z] Mike/error — consolidate-cursor-repair: {"detail": "CURSOR-REPAIR Spyros.jsonl resync-ts prev=10 total=10 resume_from=0 recovered=10", "note": "cursor state/offsets lech so voi bus/inbox — da tu chua; prev cu nam trong detail de doi chieu neu can khoi phuc tay"}
+- [2026-08-13T19:07:04Z] Mike/error — consolidate-cursor-repair: {"detail": "CURSOR-REPAIR Wendy.jsonl resync-ts prev=10 total=10 resume_from=0 recovered=10", "note": "cursor state/offsets lech so voi bus/inbox — da tu chua; prev cu nam trong detail de doi chieu neu can khoi phuc tay"}
