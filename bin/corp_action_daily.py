@@ -115,6 +115,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import glob
+import hashlib
 import json
 import os
 import subprocess
@@ -234,16 +235,52 @@ def bus(kind, topic, payload, trace=None):
 
 # ───────────────────────────────────────────────────────────── LỚP 3 · cổng selfcheck
 
+def _model_files():
+    """(tên, đường dẫn) của các module ĐỊNH NGHĨA con số — dùng cho cả selfcheck lẫn chữ ký."""
+    return [("corp_action_lib", os.path.join(WC_ROOT, "corp_action_lib.py")),
+            ("oshares_live", os.path.join(WC_ROOT, "oshares_live.py"))]
+
+
+def model_version():
+    """Chữ ký NỘI DUNG của mô hình sinh số (sha256 rút gọn của `_model_files()`).
+
+    Vì sao cần: hai snapshot liền nhau có thể do HAI BẢN MÃ khác nhau sinh ra, và khi đó "hôm nay
+    nhiều mã bị từ chối hơn hôm qua" KHÔNG chứng minh feed hỏng — rất có thể chính mô hình vừa
+    siết chặt. Ca thật, đo ngày 2026-08-14: mốc 08-13 được ghi lúc 17:07 ICT, còn hai commit
+    `ffe4b39` (22:15) + `8908640` (23:08) mới nâng cổng chứng nhận neo AIS. Gọi lại `oshares_at`
+    ở ĐÚNG `asof=2026-08-13` bằng mã hôm nay cho EVF/SHB ra `AIS_UNCERTIFIED` (từ chối) trong khi
+    snapshot 08-13 vẫn đang mang `AIS_EXACT`/`ISS_ESTIMATE` có số. Feed không đổi gì (BQ xác nhận
+    không có dòng AIS/ISS mới nào của EVF/SHB, lần nạp gần nhất 2026-08-12) — chỉ mã đổi.
+
+    Dùng nội dung file chứ không dùng git hash: file sửa mà chưa commit vẫn phải đổi chữ ký, và
+    `git` có thể không có ở môi trường chạy cron.
+    """
+    h = hashlib.sha256()
+    for name, path in _model_files():
+        h.update(name.encode())
+        try:
+            with open(path, "rb") as fh:
+                h.update(fh.read())
+        except OSError:
+            # KHÔNG nuốt: đọc không được thì chữ ký phải KHÁC mọi chữ ký hợp lệ, không được
+            # trùng tình cờ với bản trước rồi tuyên bố "cùng mô hình".
+            h.update(b"<unreadable>")
+    return h.hexdigest()[:12]
+
+
 def gate_selfcheck(runner=None):
     """Chạy LẠI bộ hồi quy của 2 module nền TRƯỚC khi publish. Trả (ok, chi tiết).
+
+    Danh sách module lấy từ `_model_files()` — CÙNG một danh sách với `model_version()`, cố ý:
+    "cái gì được kiểm trước khi publish" và "cái gì định nghĩa phiên bản mô hình" phải là một
+    tập, nếu không sẽ có file đổi mà chữ ký không đổi.
 
     Vì sao chạy như tiến trình con chứ không import hàm `_selfcheck`: bộ hồi quy đó truy vấn BQ
     thật. Chạy nó ở đây biến "BQ trả lời đúng như hôm nghiệm thu" thành ĐIỀU KIỆN để publish —
     một thay đổi lược đồ/dữ liệu phía vendor sẽ làm cổng đỏ, thay vì âm thầm chảy vào snapshot.
     `runner` chỉ để selfcheck của chính file này bơm kết quả giả vào; production để None.
     """
-    targets = [("corp_action_lib", os.path.join(WC_ROOT, "corp_action_lib.py")),
-               ("oshares_live", os.path.join(WC_ROOT, "oshares_live.py"))]
+    targets = _model_files()
     run = runner or (lambda path: subprocess.run(
         [sys.executable, path, "--selfcheck"], capture_output=True, text=True,
         timeout=900, cwd=WC_ROOT))
@@ -949,6 +986,22 @@ def _fmt_event(e, holders):
     return "• " + " · ".join(bits) + (f"\n    đang giữ: {who}" if who else "")
 
 
+def refused(d):
+    """MỘT vị ngữ "bản ghi `crosscheck()` này là một lời TỪ CHỐI trả số" — dùng cho MỌI tầng.
+
+    Bản đầu đếm theo `kind` nhưng render theo `oshares_live is None`; một bản ghi thiếu `kind`
+    liền được đếm là "1 mã LỆCH" trong khi thân dòng nói "TỪ CHỐI trả số". Hai vị ngữ cho cùng
+    một câu hỏi là cách một dòng cảnh báo tự mâu thuẫn với chính nó.
+
+    Ở MỨC MODULE chứ không lồng trong `_fmt_divergence` — vì `run()` cũng đếm lại con số này cho
+    dòng log `[gate-4 đối soát]` và cho trường bus `n_crosscheck_no_model_value`. Bản nháp vòng 5
+    vá vị ngữ ở thân dòng Discord nhưng để `run()` giữ vị ngữ chỉ-theo-`kind`, tức là đúng khiếm
+    khuyết R8 dời sang một tầng khác: log/bus có thể nói "0 mã không đối soát được" trong khi
+    chuỗi Discord ngay dưới nói "1 mã". quant-skeptic vòng 5 chỉ ra; ca `R10` khoá lại.
+    """
+    return d.get("kind") == "NO_MODEL_VALUE" or d.get("oshares_live") is None
+
+
 def _fmt_divergence(diverge, limit=8):
     """Dòng Discord cho kết quả `crosscheck()`. Trả `None` khi không có gì để báo.
 
@@ -976,15 +1029,6 @@ def _fmt_divergence(diverge, limit=8):
     if not diverge:
         return None
 
-    def refused(d):
-        """MỘT vị ngữ dùng cho CẢ đầu dòng lẫn thân dòng — cố ý.
-
-        Bản đầu của hàm này đếm theo `kind` nhưng render theo `oshares_live is None`; một bản ghi
-        thiếu `kind` liền được đếm là "1 mã LỆCH" trong khi thân dòng nói "TỪ CHỐI trả số". Hai
-        vị ngữ cho cùng một câu hỏi là cách một dòng cảnh báo tự mâu thuẫn với chính nó.
-        """
-        return d.get("kind") == "NO_MODEL_VALUE" or d.get("oshares_live") is None
-
     n_none = sum(1 for d in diverge if refused(d))
     n_div = len(diverge) - n_none
     head = []
@@ -998,16 +1042,21 @@ def _fmt_divergence(diverge, limit=8):
             return (f"{d['ticker']}@{d['at']} mô hình TỪ CHỐI trả số "
                     f"({d.get('method') or 'không rõ nhãn'}) — KHÔNG đối soát được với bq_admin "
                     f"{d['ticker_financial']:,.0f}")
+        # `.get` chứ KHÔNG `[...]`: một bản ghi DIVERGENT méo (thiếu trường sai số) mà làm nổ
+        # `KeyError` sẽ giết CẢ dòng cảnh báo hàng ngày — mất luôn phần tin lành lặn của các mã
+        # khác vì một bản ghi hỏng. Thiếu thì nói thẳng "không rõ sai số", KHÔNG bịa `0` (đúng
+        # cái `or 0` đã đẻ ra bug TCB "0,00% ⇒ trông như khớp hoàn hảo").
+        err = d.get("err_pct_vs_ticker_financial")
+        err_txt = "không rõ sai số" if err is None else f"{err:.2f}%"
         return (f"{d['ticker']}@{d['at']} corp-action {d['oshares_live']:,.0f} vs bq_admin "
-                f"{d['ticker_financial']:,.0f} "
-                f"({d['err_pct_vs_ticker_financial']:.2f}%)")
+                f"{d['ticker_financial']:,.0f} ({err_txt})")
 
     more = f" … và {len(diverge) - limit} mã nữa" if len(diverge) > limit else ""
     return (f"⚠️ **Đối soát nguồn Oshares** ({' + '.join(head)}, script KHÔNG tự chọn số): "
             + "; ".join(one(d) for d in diverge[:limit]) + more)
 
 
-def none_value_watch(cur, prev_snap):
+def none_value_watch(cur, prev_snap, mv=None):
     """Lưới giám sát DIỄN BIẾN của fail-closed: hôm nay có bao nhiêu mã bị TỪ CHỐI trả số?
 
     Fail-closed cấp mã (`value is None`) an toàn theo thiết kế, nhưng nếu không ai theo dõi con
@@ -1018,17 +1067,68 @@ def none_value_watch(cur, prev_snap):
     giữ nguyên (giảm là feed lành lại; giữ nguyên là hiện trạng đã biết). Cũng liệt kê mã MỚI
     rơi vào diện từ chối kể cả khi tổng không tăng — một mã lành lại che một mã hỏng đi thì tổng
     đứng yên, mà đó vẫn là chuyện phải biết.
+
+    §CHỈ SO TRÊN TẬP SO ĐƯỢC (sửa vòng 6). `track = held ∪ ex_today ∪ ais_today` XOAY VÒNG mỗi
+    ngày theo lịch sự kiện, nên hai snapshot liền nhau nói về HAI TẬP MÃ khác nhau. Bản trước so
+    thẳng `set(now)` với `set(before)` trên hai tập đó ⇒ một mã rơi khỏi track set trông y hệt
+    "lành lại", một mã mới vào trông y hệt "vừa hỏng". quant-skeptic vòng 5 đo thật ở
+    `asof=2026-08-14`: tập từ chối `{EVF, HRB, SHB, VPB}` so với `{DHN, EVF, SHB, VPB}` hôm
+    trước — CÙNG SỐ LƯỢNG, khác thành viên, chỉ vì DHN hết ex-right và HRB vào AIS. Luật cũ bắn
+    🔇 ngay lần chạy đầu có mốc mà feed không hỏng gì cả.
+
+    Nên: mọi phép SO SÁNH (`delta`, `newly_none`, `recovered`, `alert`) chạy trên
+    `comparable = set(cur) ∩ set(prev)`; mã vào/ra được kể riêng ở `entered_none`/`left_none` và
+    KHÔNG kích cảnh báo — đúng kỷ luật `has_baseline`, chỉ áp ở cấp TỪNG MÃ: không có mốc cho mã
+    đó thì không có kết luận về mã đó. `n_none`/`n_none_prev` vẫn là TỔNG (hiện trạng thật của
+    ngày), không bị cắt xén — chỉ các trường `*_cmp` mới là cơ sở của cảnh báo.
+
+    §HAI NGUYÊN NHÂN, KHÔNG TRỘN LỜI KHUYÊN (sửa vòng 6). Hàm này chạy SAU `withhold_suspect()`
+    nên `value is None` gộp hai chuyện khác hẳn nhau: (a) mô hình từ chối trả số tại nguồn
+    (`NO_ANCHOR`/`AIS_UNCERTIFIED`/`UNKNOWN_RATIO`…) ⇒ đi kiểm feed; (b) `INVARIANT_SUSPECT` —
+    có số nhưng bị GIẤU vì vi phạm bất biến ⇒ đọc dòng 🚨, kiểm feed là đi sai hướng.
+    ĐÃ CÂN NHẮC VÀ BỎ phương án "loại `INVARIANT_SUSPECT` khỏi `n_none`": cổng systemic chỉ nổ
+    khi vi phạm DIỆN RỘNG, nên vi phạm lẻ tẻ dưới ngưỡng sẽ biến mất khỏi mọi bộ đếm — tạo đúng
+    một điểm mù mới ở chỗ ta vừa xây lưới để bịt. Giữ trọn con số (nó là câu trả lời đúng cho
+    "hôm nay bao nhiêu mã KHÔNG có số dùng được"), tách NGUYÊN NHÂN ra để lời cảnh báo chỉ đúng
+    hướng: `by_method` + `n_none_invariant`, và văn bản 🔇 rẽ nhánh theo đó.
+
+    §NGUYÊN NHÂN THỨ BA — MÔ HÌNH ĐỔI, KHÔNG PHẢI FEED ĐỔI (thêm vòng 6). Xem `model_version()`.
+    Mốc do một bản mã khác sinh ra thì phép trừ hai con số đang so hai ĐỊNH NGHĨA khác nhau của
+    "trả được số". KHÔNG chặn cảnh báo vì mất số vẫn là mất số — người đọc phải biết; nhưng phải
+    nói thẳng nghi phạm số một là chính bản vá của mình, để không ai đi lục feed cả buổi sáng.
+    `model_changed=None` ⇒ mốc CŨ chưa ghi chữ ký (mọi snapshot trước 2026-08-14) ⇒ KHÔNG loại
+    trừ được — nói "không rõ", không tự nhận là "cùng mô hình".
     """
-    now = {tk: r.get("method") for tk, r in (cur or {}).items() if r.get("value") is None}
+    cur = cur or {}
     prev_tk = (prev_snap or {}).get("tickers") or {}
-    before = {tk for tk, r in prev_tk.items() if r.get("value") is None}
-    return {"n_none": len(now), "n_none_prev": len(before) if prev_snap else None,
-            "n_total": len(cur or {}),
+    now_all = {tk: r.get("method") for tk, r in cur.items() if r.get("value") is None}
+    before_all = {tk for tk, r in prev_tk.items() if r.get("value") is None}
+
+    comparable = set(cur) & set(prev_tk)
+    now = {tk: m for tk, m in now_all.items() if tk in comparable}
+    before = before_all & comparable
+
+    return {"n_none": len(now_all), "n_none_prev": len(before_all) if prev_snap else None,
+            "n_total": len(cur),
+            # cơ sở THẬT của cảnh báo — chỉ mã có mặt ở cả hai snapshot
+            "n_comparable": len(comparable) if prev_snap else None,
+            "n_none_cmp": len(now) if prev_snap else None,
+            "n_none_prev_cmp": len(before) if prev_snap else None,
             "delta": (len(now) - len(before)) if prev_snap else None,
             "newly_none": {tk: m for tk, m in sorted(now.items()) if tk not in before},
             "recovered": sorted(before - set(now)),
-            "by_method": {m: sorted(t for t, mm in now.items() if mm == m)
-                          for m in sorted({m for m in now.values()})},
+            # xoay vòng track set — kể ra để KHÔNG vô hình, nhưng không phải diễn biến của feed
+            "entered_none": {tk: m for tk, m in sorted(now_all.items()) if tk not in prev_tk},
+            "left_none": sorted(before_all - set(cur)),
+            "n_none_invariant": sum(1 for m in now_all.values() if m == "INVARIANT_SUSPECT"),
+            # None = mốc không ghi chữ ký ⇒ CHƯA ĐÁNH GIÁ ĐƯỢC, không phải "không đổi"
+            "model_version": mv,
+            "model_version_prev": (prev_snap or {}).get("model_version"),
+            "model_changed": (None if not prev_snap or not mv
+                              or not (prev_snap or {}).get("model_version")
+                              else (prev_snap or {}).get("model_version") != mv),
+            "by_method": {m: sorted(t for t, mm in now_all.items() if mm == m)
+                          for m in sorted({m for m in now_all.values()})},
             # `has_baseline=False` ⇒ CHƯA ĐÁNH GIÁ ĐƯỢC, không phải "không tăng". Cùng kỷ luật
             # với `invariant_evaluated`: không có mốc thì không có kết luận.
             "has_baseline": bool(prev_snap),
@@ -1042,12 +1142,18 @@ def run(asof=None, dry_run=False, alert=True, lookahead=LOOKAHEAD_DAYS, trace=No
     started = dt.datetime.now(ICT).isoformat(timespec="seconds")
     print(f"== corp_action_daily asof={asof} (bắt đầu {started}) ==")
 
+    # chữ ký mô hình: ghi vào MỌI snapshot (kể cả bản _FAILED) để lượt sau luôn biết mốc của nó
+    # do bản mã nào sinh ra — xem `model_version()`.
+    mv = model_version()
+    print(f"[model] chữ ký mô hình {mv}")
+
     # ── LỚP 3 · cổng selfcheck TRƯỚC mọi thứ khác
     ok, sc = gate_selfcheck()
     print(f"[gate-1 selfcheck] {'PASS' if ok else 'FAIL'} — {sc}")
     if not ok:
         snap = {"asof": asof, "status": "FAILED", "usable": False,
-                "failed_gate": "selfcheck", "selfcheck": sc, "generated_at": started}
+                "failed_gate": "selfcheck", "selfcheck": sc, "generated_at": started,
+                "model_version": mv}
         if not dry_run:
             _atomic_write_json(snapshot_path(asof, failed=True), snap)
         notify(f"🛑 corp_action_daily {asof}: **KHÔNG PUBLISH** — bộ hồi quy nền FAIL "
@@ -1069,7 +1175,8 @@ def run(asof=None, dry_run=False, alert=True, lookahead=LOOKAHEAD_DAYS, trace=No
     print(f"[gate-2 freshness] {status} — {fresh} (chuỗi im lặng {streak})")
     if status == "DEAD":
         snap = {"asof": asof, "status": "FAILED", "usable": False, "failed_gate": "feed_dead",
-                "feed": fresh, "selfcheck": sc, "generated_at": started}
+                "feed": fresh, "selfcheck": sc, "generated_at": started,
+                "model_version": mv}
         if not dry_run:
             _atomic_write_json(snapshot_path(asof, failed=True), snap)
         notify(f"🛑 corp_action_daily {asof}: **KHÔNG PUBLISH** — `corporate_action` không còn "
@@ -1111,7 +1218,8 @@ def run(asof=None, dry_run=False, alert=True, lookahead=LOOKAHEAD_DAYS, trace=No
     if systemic:
         snap = {"asof": asof, "status": "FAILED", "usable": False,
                 "failed_gate": "invariants_systemic", "violations": viol,
-                "n_compared": n_cmp, "feed": fresh, "selfcheck": sc, "generated_at": started}
+                "n_compared": n_cmp, "feed": fresh, "selfcheck": sc,
+                "generated_at": started, "model_version": mv}
         if not dry_run:
             _atomic_write_json(snapshot_path(asof, failed=True), snap)
         notify(f"🛑 corp_action_daily {asof}: **KHÔNG PUBLISH** — {len(viol)}/{n_cmp} mã vi phạm "
@@ -1127,16 +1235,27 @@ def run(asof=None, dry_run=False, alert=True, lookahead=LOOKAHEAD_DAYS, trace=No
 
     # ── LỚP 2 · đối soát chéo hai nguồn
     diverge = crosscheck(asof, track, cache) if track else []
-    n_nomodel = sum(1 for d in diverge if d.get("kind") == "NO_MODEL_VALUE")
+    # DÙNG CHUNG `refused()` với `_fmt_divergence` — không viết lại vị ngữ ở đây. Con số này đi
+    # ra CẢ dòng log, CẢ trường bus `n_crosscheck_no_model_value`, trong khi chuỗi Discord đếm
+    # bằng `refused()`; hai vị ngữ khác nhau = ba kênh có thể nói ba con số khác nhau. (Ca R10.)
+    n_nomodel = sum(1 for d in diverge if refused(d))
     print(f"[gate-4 đối soát] {len(diverge) - n_nomodel} mã LỆCH + {n_nomodel} mã KHÔNG đối soát "
           f"được (mô hình từ chối trả số) giữa corp-action và ticker_financial")
 
     # ── LỚP 4b · diễn biến của fail-closed (xem `none_value_watch`)
-    none_watch = none_value_watch(cur, prev_snap)
+    none_watch = none_value_watch(cur, prev_snap, mv=mv)
     print(f"[gate-4b im lặng] {none_watch['n_none']}/{none_watch['n_total']} mã bị TỪ CHỐI trả số"
-          + (f" (mốc {prev_asof}: {none_watch['n_none_prev']}, Δ{none_watch['delta']:+d})"
+          + (f" (trong đó {none_watch['n_none_invariant']} do BẤT BIẾN bị giấu, không phải feed)"
+             if none_watch["n_none_invariant"] else "")
+          + (f" — so được {none_watch['n_none_prev_cmp']}→{none_watch['n_none_cmp']} trên "
+             f"{none_watch['n_comparable']} mã chung với mốc {prev_asof}, Δ{none_watch['delta']:+d}"
              if none_watch["has_baseline"] else " — CHƯA ĐÁNH GIÁ ĐƯỢC diễn biến (chưa có mốc)")
-          + (f" MỚI: {sorted(none_watch['newly_none'])}" if none_watch["newly_none"] else ""))
+          + (f" MỚI: {sorted(none_watch['newly_none'])}" if none_watch["newly_none"] else "")
+          # xoay vòng track set: in ra để nhìn thấy, nhưng KHÔNG tính là diễn biến của feed
+          + (f" [vào track set, chưa có mốc riêng: {sorted(none_watch['entered_none'])}]"
+             if none_watch["entered_none"] else "")
+          + (f" [rời track set: {none_watch['left_none']}]"
+             if none_watch["left_none"] else ""))
 
     # ── cổ tức tiền mặt rơi đúng hôm nay (GỘP, nguồn vendor — CHƯA đối soát tiền broker)
     # `include_announced=True` là BẮT BUỘC ở đây, không phải nới lỏng: vào 07:30 ngày ex-right,
@@ -1198,6 +1317,9 @@ def run(asof=None, dry_run=False, alert=True, lookahead=LOOKAHEAD_DAYS, trace=No
 
     snap = {
         "asof": asof, "status": "OK", "usable": True,
+        # chữ ký mô hình ở CẤP CAO NHẤT (không chỉ nằm trong `none_value_watch`) — lượt sau đọc
+        # `prev_snap["model_version"]` để biết mốc của nó do bản mã nào sinh ra.
+        "model_version": mv,
         "feed_fresh_today": status == "FRESH", "feed_status": status, "feed": fresh,
         "feed_stale_streak": streak,
         "generated_at": started, "generator": "mike/bin/corp_action_daily.py",
@@ -1277,15 +1399,42 @@ def run(asof=None, dry_run=False, alert=True, lookahead=LOOKAHEAD_DAYS, trace=No
     if diverge:
         lines.append(_fmt_divergence(diverge))
     if none_watch["alert"]:
+        # rẽ nhánh LỜI KHUYÊN theo nguyên nhân của chính những mã MỚI hỏng: "kiểm feed" là chỉ
+        # dẫn SAI khi thủ phạm là bất biến bị vi phạm (số có nhưng bị giấu ở lớp 4).
+        newly = none_watch["newly_none"]
+        inv_new = sorted(tk for tk, m in newly.items() if m == "INVARIANT_SUSPECT")
+        if inv_new and len(inv_new) == len(newly):
+            tail = ("Nguyên nhân KHÔNG phải feed im lặng mà là BẤT BIẾN số CP bị vi phạm — số đã "
+                    "được tính nhưng bị GIẤU ở lớp 4 (fail-closed cấp mã). Đọc dòng 🚨 bên dưới, "
+                    "đừng đi kiểm freshness feed.")
+        elif inv_new:
+            tail = (f"TRỘN hai nguyên nhân: {inv_new} bị GIẤU do vi phạm bất biến (đọc dòng 🚨), "
+                    f"phần còn lại là mô hình từ chối trả số tại nguồn ⇒ mới cần kiểm feed.")
+        else:
+            tail = ("Fail-closed nên KHÔNG có số sai nào được công bố — nhưng số mã không xác "
+                    "minh được đang nhiều lên, kiểm feed trước khi tin phần còn lại.")
+        # nghi phạm thứ ba: chính bản vá của mình. Mốc do bản mã KHÁC sinh ra thì "hôm nay nhiều
+        # hơn hôm qua" đang so hai định nghĩa khác nhau của "trả được số" — nói ra, đừng để
+        # người đọc lục feed cả buổi sáng cho một thay đổi mà ta tự gây ra.
+        if none_watch["model_changed"]:
+            tail += (f" ⚠️ MỐC {prev_asof} do bản mô hình KHÁC sinh ra "
+                     f"({none_watch['model_version_prev']} → {none_watch['model_version']}) — "
+                     f"nghi phạm số một là chính bản vá đó siết chặt, không phải feed. Đối chiếu "
+                     f"lại bằng cách gọi `oshares_at` ở ĐÚNG {prev_asof} bằng mã hôm nay trước "
+                     f"khi kết luận.")
+        elif none_watch["model_changed"] is None:
+            tail += (f" ⚠️ Mốc {prev_asof} KHÔNG ghi chữ ký mô hình ⇒ CHƯA LOẠI TRỪ ĐƯỢC khả năng "
+                     f"thay đổi này đến từ bản vá của chính mình chứ không phải feed.")
         lines.append(
-            f"🔇 **Số mã bị TỪ CHỐI trả số CP tăng**: {none_watch['n_none_prev']} → "
-            f"{none_watch['n_none']}/{none_watch['n_total']} mã (so mốc {prev_asof})"
-            + (f"; MỚI: " + ", ".join(f"{tk} ({m})"
-                                      for tk, m in none_watch["newly_none"].items())
-               if none_watch["newly_none"] else "")
+            f"🔇 **Số mã bị TỪ CHỐI trả số CP tăng**: {none_watch['n_none_prev_cmp']} → "
+            f"{none_watch['n_none_cmp']} trên {none_watch['n_comparable']} mã SO ĐƯỢC với mốc "
+            f"{prev_asof} (tổng hôm nay {none_watch['n_none']}/{none_watch['n_total']})"
+            + ("; MỚI: " + ", ".join(f"{tk} ({m})" for tk, m in newly.items()) if newly else "")
             + (f"; lành lại: {none_watch['recovered']}" if none_watch["recovered"] else "")
-            + ". Fail-closed nên KHÔNG có số sai nào được công bố — nhưng số mã không xác minh "
-              "được đang nhiều lên, kiểm feed trước khi tin phần còn lại.")
+            # nói rõ phần xoay vòng track set để người đọc không tự quy nó vào diễn biến feed
+            + (f"; (mã MỚI VÀO track set hôm nay, chưa có mốc riêng nên KHÔNG tính vào đây: "
+               f"{sorted(none_watch['entered_none'])})" if none_watch["entered_none"] else "")
+            + ". " + tail)
     if viol:
         lines.append(f"🚨 **Bất biến số CP vi phạm** ({len(viol)} mã — số đã bị GIẤU, không "
                      f"publish giá trị): " + "; ".join(
@@ -1336,6 +1485,13 @@ def run(asof=None, dry_run=False, alert=True, lookahead=LOOKAHEAD_DAYS, trace=No
          "n_crosscheck_divergent": len(diverge) - n_nomodel,
          "n_crosscheck_no_model_value": n_nomodel,
          "n_none_value": none_watch["n_none"], "none_value_alert": none_watch["alert"],
+         # `n_none_value` là TỔNG (hiện trạng); cảnh báo đứng trên tập SO ĐƯỢC — bus phải mang cả
+         # hai, nếu không người đọc lại suy diễn cảnh báo từ tổng và gặp đúng ca xoay track set.
+         "n_none_value_cmp": none_watch["n_none_cmp"],
+         "n_none_value_prev_cmp": none_watch["n_none_prev_cmp"],
+         "n_none_value_comparable": none_watch["n_comparable"],
+         "n_none_value_invariant": none_watch["n_none_invariant"],
+         "model_version": mv, "model_version_changed": none_watch["model_changed"],
          "n_invariant_violations": len(viol),
          # `n_invariant_violations: 0` một mình là mơ hồ — kèm luôn cờ "có so được gì không"
          # để người đọc bus không phải mở snapshot mới biết con số 0 đó có nghĩa hay không.

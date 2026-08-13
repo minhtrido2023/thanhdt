@@ -34,8 +34,28 @@ riêng thì khác biệt quan sát được sẽ lẫn giữa "cổng làm đổ
 quant-skeptic nói. Báo cáo vòng 4 ghi "2/33" là **đo thiếu**, không phải sai số học.
 
 TCB lọt lưới vì `crosscheck` hỏi tại **2026-07-21** (ngày dòng quý), còn `publish` hỏi tại
-**2026-08-13**. Tại 08-13 neo của TCB đã là `ticker_financial` nên cổng AIS không đụng tới; tại
-07-21 neo là AIS 2025-12-01 và cổng chặn. Một điểm đo không thể suy ra điểm kia.
+**2026-08-13** — hai câu hỏi khác ngày ⇒ hai neo khác nhau ⇒ **một điểm đo không suy ra được
+điểm kia**. Kết luận đó đứng vững; nhưng NGUYÊN NHÂN thì bản đầu ghi SAI, đã sửa dưới đây.
+
+> ⚠️ **ĐÍNH CHÍNH (vòng 6, theo quant-skeptic vòng 5 — `arithmetic_mechanism: fail`).** Bản đầu
+> viết *"Tại 08-13 neo của TCB đã là `ticker_financial` nên cổng AIS không đụng tới"*. **SAI.**
+> Neo TCB tại 08-13 vẫn là `corporate_action.AIS`, không phải `ticker_financial`. Đo lại trên
+> snapshot thật `data/corp_action_daily/corp_action_daily_2026-08-13.json`:
+>
+> ```
+> TCB @2026-07-21: value=None          method=AIS_UNCERTIFIED anchor=2025-12-01 src=corporate_action.AIS
+> TCB @2026-08-13: value=7,086,240,414 method=AIS_EXACT       anchor=2026-08-05 src=corporate_action.AIS
+> ```
+>
+> Lý do thật: có một **dòng AIS MỚI HƠN, hiệu lực 2026-08-05**, mang `shares_total_after =
+> 7.086.240.414` — **bằng đúng** `ticker_financial` — nên nó **QUA được cổng chứng nhận**. Cổng
+> AIS có đụng tới TCB tại 08-13; nó *cho qua*, chứ không phải *không xét*. Tại 07-21 neo là AIS
+> 2025-12-01 (7.064.851.739) và cổng chặn. Sự trùng khớp với `ticker_financial` là **hệ quả** của
+> dòng AIS mới, không phải nguồn neo.
+>
+> Vì sao phải sửa dù không đổi một con số nào: đội này đã dính đúng kiểu lỗi "gán sai nguyên nhân
+> rồi lưu thành tri thức chung" (vụ bảng trống hậu tố `vnindex_5state` bị đọc là DT5G). Một câu
+> giải thích sai được archive sẽ được trích lại nguyên văn ở vòng sau.
 
 ⚠️ `check_retro` **CHƯA kích hoạt trong lượt chạy thật hôm nay** — mới có đúng một snapshot đã
 publish nên `prior_snapshot()` trả `None`. Số ở trên đo bằng phiên giao dịch liền trước

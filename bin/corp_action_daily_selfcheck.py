@@ -23,6 +23,7 @@ Usage: python3 mike/bin/corp_action_daily_selfcheck.py [--no-subprocess]
 from __future__ import annotations
 
 import datetime as dt
+import inspect
 import json
 import os
 import subprocess
@@ -336,8 +337,12 @@ def t_render_divergence():
     check("R4. hai loại ĐẾM RIÊNG ở đầu dòng — '1 mã LỆCH + 1 mã KHÔNG đối soát được', không "
           "gộp thành '2 mã lệch'",
           "1 mã LỆCH" in s2 and "1 mã KHÔNG đối soát được" in s2 and "2 mã LỆCH" not in s2, s2)
-    check("R5. chỉ có NO_MODEL_VALUE ⇒ đầu dòng KHÔNG được nói 'LỆCH' (không có mã nào lệch)",
-          "LỆCH" not in cad._fmt_divergence([tcb]), s)
+    # so KHÔNG PHÂN BIỆT HOA/THƯỜNG: bản trước grep đúng chữ "LỆCH" viết hoa nên tiêu đề cũ
+    # "**Lệch nguồn Oshares**" lọt qua PASS oan — ca này tự nó chẳng chứng minh gì.
+    # (quant-skeptic vòng 5, mục residual 3.)
+    check("R5. chỉ có NO_MODEL_VALUE ⇒ đầu dòng KHÔNG được nói 'lệch' ở BẤT KỲ kiểu chữ nào "
+          "(không có mã nào lệch)",
+          "lệch" not in cad._fmt_divergence([tcb]).lower(), s)
     check("R6. rỗng ⇒ None (không đẻ dòng trống)", cad._fmt_divergence([]) is None)
     check("R7. quá `limit` ⇒ nói rõ còn bao nhiêu mã nữa, không im lặng cắt cụt (§'no silent "
           "caps')", "… và 2 mã nữa" in cad._fmt_divergence([evf] * 5, limit=3),
@@ -353,6 +358,30 @@ def t_render_divergence():
           "thuẫn ở bản nháp)",
           "TỪ CHỐI trả số" in (b := cad._fmt_divergence([bare])) and "corp-action 0" not in b
           and "1 mã KHÔNG đối soát được" in b and "LỆCH" not in b, b)
+
+    # R10 mở rộng đúng fixture `bare` của R8 sang tầng LOG/BUS. R8 chỉ khoá được chuỗi Discord;
+    # `run()` lại đếm `n_crosscheck_no_model_value` bằng vị ngữ chỉ-theo-`kind` của riêng nó, tức
+    # khiếm khuyết R8 dời sang tầng khác — bus có thể nói "0 mã không đối soát được" trong khi
+    # dòng Discord ngay dưới nói "1 mã". (quant-skeptic vòng 5, killer_objection.)
+    n_bus = sum(1 for d in [bare] if cad.refused(d))     # đúng biểu thức `run()` dùng
+    src = inspect.getsource(cad)
+    check("R10. bản ghi THIẾU `kind`: đếm ở ĐẦU DÒNG == đếm ở BUS/LOG == nội dung THÂN DÒNG — và "
+          "vị ngữ chỉ được VIẾT MỘT LẦN trong cả module (`refused`), không ai được cài lại bản "
+          "chỉ-theo-`kind` ở tầng log/bus",
+          n_bus == 1 and "1 mã KHÔNG đối soát được" in b and "TỪ CHỐI trả số" in b
+          and src.count('== "NO_MODEL_VALUE"') == 1,
+          f"n_bus={n_bus}, số bản sao vị ngữ={src.count('== ' + chr(34) + 'NO_MODEL_VALUE' + chr(34))}, "
+          f"đầu dòng={b[:60]}")
+
+    # R11: bản ghi DIVERGENT MÉO (thiếu trường sai số). Bản trước dùng `d[...]` ⇒ `KeyError` nổ
+    # giữa luồng cảnh báo hàng ngày và giết luôn phần tin lành lặn của mọi mã khác trong cùng
+    # dòng. Không được bịa `0` (đúng cái `or 0` đẻ ra bug TCB) — phải nói "không rõ sai số".
+    malformed = {"ticker": "YYY", "at": "2026-07-21", "ticker_financial": 1_000.0,
+                 "oshares_live": 900.0, "kind": "DIVERGENT"}
+    m = cad._fmt_divergence([evf, malformed])
+    check("R11. DIVERGENT thiếu `err_pct_vs_ticker_financial` ⇒ KHÔNG nổ KeyError, KHÔNG in "
+          "'0.00%', nói thẳng 'không rõ sai số', và các mã LÀNH cùng dòng vẫn in đủ",
+          "không rõ sai số" in m and "0.00%" not in m and "704,248,289" in m and "7.40%" in m, m)
 
     # ĐẦU-CUỐI: chạy thẳng `crosscheck()` trên fixture CCC (fail-closed thật) rồi render — chứng
     # minh hai đầu KHỚP NHAU, chứ không phải mỗi bên đúng với một hình dạng dict khác nhau.
@@ -408,6 +437,92 @@ def t_none_value_watch():
           cad.none_value_watch(cur_up, prev)["by_method"]
           == {"AIS_UNCERTIFIED": ["CCC"], "UNKNOWN_RATIO": ["BBB"]},
           str(cad.none_value_watch(cur_up, prev)["by_method"]))
+
+    # ── xoay vòng track set (`held ∪ ex_today ∪ ais_today` đổi thành viên mỗi ngày)
+    # Tái dựng ĐÚNG ca quant-skeptic đo được ở `asof=2026-08-14`: tập từ chối đổi từ
+    # {DHN,EVF,SHB,VPB} sang {EVF,HRB,SHB,VPB} — CÙNG SỐ LƯỢNG, khác thành viên, chỉ vì DHN hết
+    # ex-right (rời track set) và HRB vào AIS (mới vào track set). Feed không hỏng gì.
+    prev_real = {"tickers": {tk: {"value": None} for tk in ("DHN", "EVF", "SHB", "VPB")}}
+    prev_real["tickers"].update({tk: {"value": 1.0} for tk in ("FPT", "MBB")})
+    cur_real = {tk: {"value": None, "method": "AIS_UNCERTIFIED"}
+                for tk in ("EVF", "HRB", "SHB", "VPB")}
+    cur_real.update({tk: {"value": 1.0, "method": "AIS_EXACT"} for tk in ("FPT", "MBB")})
+    w = cad.none_value_watch(cur_real, prev_real)
+    check("NW7. CA THẬT 08-14 — track set xoay vòng (DHN ra, HRB vào) KHÔNG được bắn cảnh báo: "
+          "mã mới vào chưa có mốc riêng thì không kết luận được nó 'vừa hỏng', mã rời đi cũng "
+          "không phải 'lành lại'",
+          w["alert"] is False and w["delta"] == 0 and w["newly_none"] == {}
+          and w["recovered"] == [] and sorted(w["entered_none"]) == ["HRB"]
+          and w["left_none"] == ["DHN"], str(w))
+    check("NW8. …nhưng KHÔNG được vô hình: tổng vẫn nói đúng 4 mã bị từ chối hôm nay, và cơ sở "
+          "so sánh (5 mã chung) được công bố tách khỏi tổng",
+          w["n_none"] == 4 and w["n_total"] == 6 and w["n_comparable"] == 5
+          and w["n_none_cmp"] == 3 and w["n_none_prev_cmp"] == 3, str(w))
+
+    # CA CHỨNG MINH NGƯỢC cho NW7: cùng kiểu xoay vòng, nhưng có MỘT mã CÓ MỐC thật sự hỏng đi.
+    # Nếu bộ lọc "tập so được" nuốt luôn ca này thì nó đã che mất chính thứ lưới được dựng để bắt.
+    cur_real_bad = dict(cur_real, FPT={"value": None, "method": "NO_ANCHOR"})
+    w2 = cad.none_value_watch(cur_real_bad, prev_real)
+    check("NW9. CA CHỨNG MINH NGƯỢC — vẫn xoay vòng track set, nhưng FPT (có mốc, hôm qua có số) "
+          "mất số ⇒ PHẢI báo, và chỉ nêu đích danh FPT, không nêu HRB",
+          w2["alert"] is True and w2["delta"] == 1
+          and w2["newly_none"] == {"FPT": "NO_ANCHOR"} and "HRB" not in w2["newly_none"], str(w2))
+
+    # ── hai nguyên nhân của `value is None` không được trộn lời khuyên
+    prev_inv = snap({"AAA": 1.0, "BBB": 2.0})
+    cur_inv = {"AAA": {"value": None, "method": "INVARIANT_SUSPECT"},
+               "BBB": {"value": 2.0, "method": "AIS_EXACT"}}
+    w3 = cad.none_value_watch(cur_inv, prev_inv)
+    check("NW10. mã bị GIẤU do vi phạm bất biến vẫn ĐƯỢC ĐẾM (không tạo điểm mù dưới ngưỡng "
+          "systemic) nhưng được TÁCH NGUYÊN NHÂN ra để lời cảnh báo không chỉ sai hướng 'kiểm "
+          "feed'",
+          w3["alert"] is True and w3["n_none"] == 1 and w3["n_none_invariant"] == 1
+          and w3["by_method"] == {"INVARIANT_SUSPECT": ["AAA"]}, str(w3))
+
+    # ── nguyên nhân thứ BA: mô hình đổi, không phải feed đổi
+    # Ca thật 2026-08-14: mốc 08-13 ghi lúc 17:07 ICT, hai commit nâng cổng chứng nhận neo AIS
+    # lên lúc 22:15 + 23:08 cùng ngày ⇒ EVF/SHB "mới mất số" hoàn toàn do MÃ đổi (BQ xác nhận
+    # không có dòng AIS/ISS mới nào của hai mã đó). Alert vẫn phải bắn (mất số là mất số), nhưng
+    # chữ ký phải cho người đọc biết nghi phạm số một là bản vá của chính mình.
+    prev_v1 = dict(snap({"AAA": 1.0, "BBB": 2.0}), model_version="aaaa11112222")
+    cur_v = {"AAA": {"value": None, "method": "AIS_UNCERTIFIED"},
+             "BBB": {"value": 2.0, "method": "AIS_EXACT"}}
+    w4 = cad.none_value_watch(cur_v, prev_v1, mv="bbbb33334444")
+    check("NW11. mốc do bản mô hình KHÁC sinh ra ⇒ vẫn BÁO (mất số là mất số) nhưng `model_"
+          "changed=True` để văn bản chỉ đúng nghi phạm, không đổ cho feed",
+          w4["alert"] is True and w4["model_changed"] is True
+          and w4["model_version_prev"] == "aaaa11112222", str(w4))
+    w5 = cad.none_value_watch(cur_v, prev_v1, mv="aaaa11112222")
+    check("NW12. CA CHỨNG MINH NGƯỢC — CÙNG chữ ký mô hình ⇒ `model_changed=False`: lúc đó tăng "
+          "số mã bị từ chối MỚI thật sự trỏ về feed/dữ liệu",
+          w5["alert"] is True and w5["model_changed"] is False, str(w5))
+    w6 = cad.none_value_watch(cur_v, snap({"AAA": 1.0, "BBB": 2.0}), mv="bbbb33334444")
+    check("NW13. mốc CŨ chưa ghi chữ ký (mọi snapshot trước 2026-08-14) ⇒ `model_changed=None` = "
+          "CHƯA LOẠI TRỪ ĐƯỢC, KHÔNG được tự nhận là 'cùng mô hình'",
+          w6["model_changed"] is None and w6["alert"] is True, str(w6))
+
+    # chữ ký phải ĐỔI khi nội dung file mô hình đổi, và ỔN ĐỊNH khi không đổi — nếu không thì
+    # `model_changed` chỉ là trang trí.
+    v1 = cad.model_version()
+    check("NW14. `model_version()` ổn định giữa hai lần gọi liên tiếp (cùng file ⇒ cùng chữ ký)",
+          v1 == cad.model_version() and len(v1) == 12, v1)
+    import tempfile as _tf
+    with _tf.TemporaryDirectory() as td:
+        real = cad._model_files()
+        fake = os.path.join(td, "oshares_live.py")
+        with open(real[-1][1], "rb") as fh:
+            body = fh.read()
+        with open(fake, "wb") as fh:
+            fh.write(body + "\n# một dòng đổi\n".encode())
+        orig = cad._model_files
+        cad._model_files = lambda: real[:-1] + [("oshares_live", fake)]
+        try:
+            v2 = cad.model_version()
+        finally:
+            cad._model_files = orig
+    check("NW15. đổi NỘI DUNG file mô hình (dù chỉ 1 dòng, chưa commit) ⇒ chữ ký ĐỔI — chữ ký "
+          "theo nội dung chứ không theo git, vì bản sửa chưa commit vẫn sinh ra số khác",
+          v2 != v1 and cad.model_version() == v1, f"{v1} vs {v2}")
 
 
 # ─────────────────────────────────────── lịch trigger + LỚP 6 · cảnh báo proactive
