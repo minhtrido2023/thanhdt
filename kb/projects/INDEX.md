@@ -3,6 +3,7 @@
      dispatch có context_pack ⇒ tường thuật của việc ĐÃ ĐÓNG là chi phí trả lại mỗi phiên.
      Giữ đúng phần còn quyết định được hành vi sau này: TÊN · FILE · PHÁN QUYẾT (nhất là NO-GO,
      để không ai đề xuất lại). Diễn biến vẫn nguyên trong file chi tiết. -->
+- 2026-08-13 corporate_action BQ integration + paper-report bug fix → `corporate-action-bq-integration-0813.md` — XONG (6 vòng), Việc B chưa wire (chờ user chọn consumer), vòng 6 rc=1/KeyError chủ động bỏ qua (xác suất thấp)
 - 2026-07-31 CAPIT sizing bug 07-21 → `capit-sizing-bug-0721.md` — ĐÓNG, đã fix; user chốt KHÔNG bù phần thiếu
 - 2026-07-28 DGC + TV1 fear-buy due-diligence → `dgc-tv1-fearbuy-discretionary.md` — XONG, cả 2 QUALIFIED, theo dõi discretionary riêng
 - 2026-07-21 LAG 07-24 (IVS/TMG/TRC) → `lag-0724-ivs-tmg-trc.md` — XONG, gate %ADV + lọc thanh khoản LAG đã wire
