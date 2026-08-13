@@ -2,42 +2,46 @@
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
 
 # Working memory — Mike
-> Cập nhật lần cuối: 2026-08-12 (cuối ngày, sau daily retro bước 3/3)
+> Cập nhật lần cuối: 2026-08-13 (cuối ngày, sau daily retro bước 3/3)
 
-## Daily retro 08-12 — XONG
-9 sự cố, 3 pattern. Wags verify GAPS FOUND → đã sửa (bổ sung sự cố #9
-`DollarBill/zalopay-tv1-ceiling-vs-t1-band`, account ZaloPay, hoàn toàn vắng mặt trong draft gốc;
-sửa số đếm bus sweep 34→36). File: `kb/incidents/retro/retro-2026-08-12.md`, commit `687a1a0b`.
+## Daily retro 08-13 — XONG
+4 sự cố, 2 pattern. Wags verify GAPS FOUND → đã sửa (draft gốc grep sai đường dẫn
+dnse_raw_2026-08-13.jsonl, kết luận sai "TV1 0cp cả ngày" — thực tế SpaceX 1.100/1.800cp,
+ZaloPay 600/1.200cp đã khớp sau khi bot tự phục hồi từ sự cố DNS-block 09:21 ICT). File:
+`kb/incidents/retro/retro-2026-08-13.md`, commit `d299d5ac`.
 
-**Pattern 1 (mới đặt tên hôm nay, tái diễn 6 lần trong ngày)** — gate/mechanism mới build ĐÚNG
-nhưng caller tự động hiện có (`consolidate.sh`, `fleet_backup.sh`, `kb_nightly.sh` ×2,
-`cron_health_check_daily.sh`, `backup.sh`) nuốt exit code rồi báo "done" vô điều kiện. Đã cạn
-site (scan pattern-lệnh toàn 1473 file `.sh`), arch-reviewer CONFIRMED. Lesson: khi build gate
-mới cho hành động có N caller sẵn, quét toàn repo theo PATTERN LỆNH ngay từ round 1, không đợi
-tới round 5.
+**Pattern-B (ngày thứ 4 liên tiếp, 08-10→08-13)** — hệ thống tin BIỂU DIỄN của sự thật thay vì
+xác nhận sự thật. Hôm nay 3 hình dạng: (1) `append_event.sh` word-split nuốt payload có dấu `'`
+— ĐÃ VÁ HOÀN CHỈNH commit `94b01dbb`; (2) checker tin "bus không có `answer`" = "chưa quyết" dù
+quyết định đã hành động qua code+injector (ceiling TV1 20.497); (3) chính draft retro hôm nay
+grep sai đường dẫn → Wags bắt lại. Prevention đề xuất (coding_guidelines: chuẩn hoá giá trị
+trước khi so 2 nguồn) VẪN CHƯA được user duyệt — câu hỏi
+`retro-pattern-recurring-patternB-checker-wrong-representation` mở 08-12, nay Day 2 chưa đóng.
 
-**Pattern 2 (Pattern-B, lần đặt tên thứ 3, sinh 3 instance MỚI trong ngày)** — checker/verify so
-sánh SAI BIỂU DIỄN của cùng 1 sự thật (chuỗi mô tả vs giá trị, bus vs dispatch-prompt, prefix
-có/không hậu tố) → báo động giả. Đề xuất PREVENTION MẠNH HƠN: thêm mục mới vào
-`coding_guidelines.md` ("mọi so sánh 2-nguồn phải chuẩn hoá giá trị trước khi so") — CHƯA duyệt,
-chờ user OK hướng đi (Mike có thể tự soạn `.proposed` theo §13).
+**Pattern backlog (KHÔNG MỚI, treo sang NGÀY THỨ 5, mở 08-09)** — `Mike/retro-pattern-recurring-2-days`
+chưa có `answer`/`decision` 5 ngày liên tục dù đã triage GENUINE từ 08-10.
 
-**Pattern 3 (KHÔNG MỚI, vẫn TREO — nay 2 câu hỏi cùng họ)** — backlog ghi file `kb/incidents/`
-không giảm (7/9 sự cố hôm nay chưa có file trước khi retro chạy). 2 quyết định CẦN USER CHỌN
-đang chờ:
-1. `Mike/retro-pattern-recurring-2-days` (mở 08-09, khuyến nghị (b) từ Wags 08-10) — treo >3 ngày.
-2. `DollarBill/zalopay-tv1-ceiling-vs-t1-band` (mở 08-11, tái khẳng định 08-12) — giữ ceiling
-   20.000 (chấp nhận rủi ro trượt) hay nới lên 20.200 khớp băng T1 mới (chốt 08-10)? Giá EOD
-   08-12=20.300 đã vượt cả 2 mốc, ZaloPay vẫn 0cp TV1, mức nghiêm trọng ĐANG TĂNG mỗi ngày.
+**Escalation mới sẽ post lên bus ngay sau bước này** — cả 2 pattern trên, mức nghiêm trọng tăng
+(2+ retro liên tiếp không ai đóng).
 
-## Việc treo sang 08-13 (ưu tiên)
-1. Đưa user quyết dứt điểm 3 việc CÙNG LÚC (Pattern 2 prevention + 2 câu hỏi Pattern 3 ở trên).
-2. Ghi file `kb/incidents/2026-08/` cho 6 sự cố còn thiếu (retro liệt kê đủ #1,#2,#3,#5,#6,#9).
-3. TV1 ZaloPay: KHÔNG đặt lệnh mới 08-13 cho tới khi có quyết định ceiling (đã dừng theo đúng
-   khuyến nghị Wags, tránh churn vô ích).
+## Việc treo sang 08-14 (ưu tiên)
+1. User cần quyết 3 việc: (a) prevention Pattern-B (coding_guidelines mới), (b) hướng xử lý
+   `retro-pattern-recurring-2-days` (khuyến nghị Wags có sẵn từ 08-10), (c) ceiling TV1 — tuy đã
+   hành động (20.497), câu hỏi bus gốc `zalopay-tv1-ceiling-vs-t1-band` vẫn cần 1 event `answer`
+   đóng chính thức.
+2. Ghi file `kb/incidents/2026-08/` cho 3 sự cố còn thiếu: TV1 DNS-block đầu phiên (#2), SMTP
+   DNS-block email P0 (#3), ceiling decision-via-action (#4).
+3. TV1 mới đạt 61%(SpaceX)/50%(ZaloPay) kế hoạch 08-13 — quyết mua nốt 08-14 hay coi đã đóng
+   phiên (ADV mỏng, tương tự §27 fill-reconciliation).
+4. Điều tra root cause DNS-block hạ tầng job `_codex_` headless (09:14-09:21 ICT hôm 08-13) —
+   chưa rõ có tái diễn không, chưa có cơ chế retry/backoff riêng cho lớp job này.
 
-- [2026-08-13T00:06:58Z] 2026-08-13 07:xx: TV1 XONG cho hôm nay. Phát hiện+sửa thêm 1 bug TZ thật trong compute_active_nav.py (date.today() trần thay vì today_ict(), khiến computed_at sai trước ~07:00 ICT — đúng họ lỗi §16). Xoá lệnh TV1 cũ (trần 20.000 cứng) khỏi plan SpaceX 08-13 (chưa duyệt), chạy injector thật cho cả 2 account: SpaceX 1.800cp + ZaloPay 1.200cp, cả 2 @ trần động 20.497đ. Cả 2 plan sẵn sàng chờ user duyệt bình thường. Việc thêm cron compute_active_nav.py trước 20:30 ICT (câu hỏi cũ) VẪN CHƯA LÀM — cần quyết riêng, không chặn hôm nay vì đã chạy tay xong.
-- [2026-08-13T00:41:17Z] 2026-08-13 08:xx: Cron compute_active_nav_all.sh XONG (crontab 20:15 ICT T2-T6, commit mike@470d9f5b, kb/cron_registry.md cập nhật đúng §11). Permission Edit/Write data/trade_plans/** XONG (commit mike@ab794cf3, settings.json project — Edit/Write tool only, KHÔNG mở Bash blanket theo đúng ý user). Lưu ý: quyền mới có hiệu lực từ phiên/lượt tiếp theo, không retroactive cho phiên đang chạy. TV1 hôm nay đã xong hoàn toàn (P1 reconcile + plan đã sẵn sàng chờ duyệt) — mạch việc TV1 tạm đóng.
-- [2026-08-13T04:03:55Z] 2026-08-13 08:xx: Nghiên cứu xong bảng BQ mới tav2_bq.corporate_action theo yêu cầu user — DIV/ISS/AIS event-level, đúng 'raw per-event' mà ticker_close_vs_price_dividend_adj.md từng nói thiếu. Đã ghi kb/data_registry/price-volume/corporate_action_bq.md (status TRAP: 1-lần-nạp, chưa có writer/cron, AIS lag ~7 tuần so exright_date). CHƯA wire vào pipeline nào — cần xác nhận refresh cadence + Taylor/quant-skeptic review trước khi đổi report §21 gate hoặc Oshares live.
-- [2026-08-13T08:47:25Z] 2026-08-13: Chuỗi corporate_action/paper-report XONG (6 vòng, kb/projects/corporate-action-bq-integration-0813.md). Việc còn mở: Việc B (oshares_live.py) chờ user chọn consumer đầu tiên trước khi wire; vòng 6 (rc=1+KeyError) user quyết bỏ qua. Freshness corporate_action cần verify lại 08-14.
-- [2026-08-13T12:47:17Z] 2026-08-13: Đã cài crontab corp_action_daily.py (07:30 ICT T2-T6), user duyệt sau 4 vòng quant-skeptic CONFIRMED. Chạy alert-only 5-10 phiên đầu, verify MAX(ingested_at) mỗi phiên trước khi tin tầng freshness/backfill. Chuỗi corporate_action/paper-report (Việc A-E) khép lại — chỉ còn Việc B (Oshares) chờ chọn consumer máy.
+## Bối cảnh còn hiệu lực (không đổi từ trước)
+- Cron `compute_active_nav_all.sh` (20:15 ICT T2-T6) + permission Edit/Write `data/trade_plans/**`
+  đã XONG (08-13 sáng).
+- `tav2_bq.corporate_action` (DIV/ISS/AIS event-level) đã research xong, ghi
+  `kb/data_registry/price-volume/corporate_action_bq.md` (status TRAP, chưa có writer/cron) —
+  CHƯA wire vào pipeline nào.
+- Chuỗi corporate_action/paper-report (Việc A-E) khép lại 08-13; còn Việc B (Oshares) chờ user
+  chọn consumer đầu tiên. Crontab `corp_action_daily.py` (07:30 ICT T2-T6) đã cài, alert-only.
+
