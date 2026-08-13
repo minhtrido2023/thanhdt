@@ -45,3 +45,4 @@ chưa có `answer`/`decision` 5 ngày liên tục dù đã triage GENUINE từ 0
 - Chuỗi corporate_action/paper-report (Việc A-E) khép lại 08-13; còn Việc B (Oshares) chờ user
   chọn consumer đầu tiên. Crontab `corp_action_daily.py` (07:30 ICT T2-T6) đã cài, alert-only.
 
+- [2026-08-13T18:29:45Z] 2026-08-13 tối: Chuỗi Oshares/corp-action HOÀN TẤT (12 vòng quant-skeptic tổng cộng cả ngày, 3 lần REFUTED thật đều đã vá). Việc A/B đã wire an toàn. 1 quyết định chính sách còn treo cho user: mở SANITY_FACTOR cho corp_action_daily.py không (ẩn số 34 mã lịch sử gồm VHM/VND đang giữ). 08-14 07:30 ICT sẽ có 1 cảnh báo THẬT (EVF/SHB, do mô hình siết chặt) — đã biết trước, không phải sự cố.
