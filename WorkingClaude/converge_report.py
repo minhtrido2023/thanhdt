@@ -106,6 +106,14 @@ def generate_section(as_of_date=None, live_set=None):
 
     price, vni, data_date, err = _latest_prices(tickers)
 
+    # Same reference-frame fix as alphalens_report: `entry_price` is a frozen RAW snapshot (asof
+    # meta.entry_price_asof) while `price` above is today's ADJUSTED Close. Rebase the entry or
+    # every post-entry corporate action is charged to the position as a loss. Affected today:
+    # MBB (ex-rights 08-11), CTR (08-07... 07-09 cash+stock div), HAH (07-14 cash div).
+    from paper_entry_adjust import adjust_entries
+    entry_asof = meta.get("entry_price_asof") or meta.get("start_date")
+    adj = adjust_entries([(p["ticker"], entry_asof, p["entry_price"]) for p in seed])
+
     lines = ["### 🔗 DC Book (double-confirm) — Paper Portfolio"]
     if as_of_date:
         lines[0] += f" ({as_of_date})"
@@ -123,11 +131,17 @@ def generate_section(as_of_date=None, live_set=None):
             cur = price.get(tk)
             if cur is None:
                 lines.append(f"- **{tk}**: N/A"); continue
-            pct = (cur - entry) / entry * 100
+            a = adj.get((tk, entry_asof))
+            pct = a.pct_vs(cur) if a is not None else (cur - entry) / entry * 100
             pnl_w += w * pct; wsum += w
             sign = "+" if pct >= 0 else ""
             mode = pos.get("buy_mode", "")
-            lines.append(f"- **{tk}** ({pos.get('sector','')}): {cur:,.0f}đ ({sign}{pct:.1f}%) · {mode}")
+            rebase = ""
+            if a is not None and a.is_adjusted:
+                rebase = f" *[giá vào {a.entry_price:,.0f}→{a.entry_adj:,.0f} do quyền]*"
+            elif a is not None and a.degraded:
+                rebase = " ⚠️*[chưa quy đổi được giá vào — % tính trên giá THÔ]*"
+            lines.append(f"- **{tk}** ({pos.get('sector','')}): {cur:,.0f}đ ({sign}{pct:.1f}%){rebase} · {mode}")
 
         if wsum > 0:
             port = pnl_w / wsum

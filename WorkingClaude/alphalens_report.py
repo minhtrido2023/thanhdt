@@ -92,6 +92,16 @@ def generate_section(as_of_date: str = None) -> str:
     benchmark_entry = meta.get("benchmark_entry", 1860.01)
     tickers = [p["ticker"] for p in positions]
 
+    # `entry_price` is a FROZEN raw price; `Close` below is retroactively dividend/split-adjusted
+    # from today's vintage. Comparing them directly charges every post-entry corporate action to
+    # the position as a price loss (Bẫy 2 of kb/data_registry/price-volume/
+    # ticker_close_vs_price_dividend_adj.md) — MBB's 2026-08-11 ex-rights made this report show
+    # -18,8% against a true +1,3%. Rebase the entry onto the adjusted scale first. Names with no
+    # corporate action get factor 1,0 and are left bit-for-bit unchanged.
+    from paper_entry_adjust import adjust_entries
+    entry_asof = {p["ticker"]: (meta.get("entry_price_asof") or p.get("entry_date")) for p in positions}
+    adj = adjust_entries([(p["ticker"], entry_asof[p["ticker"]], p["entry_price"]) for p in positions])
+
     prices_df, err = query_latest_prices(tickers)
     pe_ma1y_map = query_pe_ma1y(tickers)
     vni_current = query_vnindex_latest()
@@ -122,7 +132,17 @@ def generate_section(as_of_date: str = None) -> str:
 
             row = price_map[ticker]
             current = float(row['Close'])
-            pct = (current - entry) / entry * 100
+            a = adj.get((ticker, entry_asof[ticker]))
+            if a is None:                      # cannot happen; degrade rather than crash the report
+                pct = (current - entry) / entry * 100
+            else:
+                pct = a.pct_vs(current)
+                if a.degraded:
+                    alert_lines.append(f"⚠️ **{ticker}**: chưa quy đổi được giá vào về hệ điều chỉnh "
+                                       f"({a.note}) — % dưới đây tính trên giá vào THÔ, có thể sai "
+                                       f"nếu mã có sự kiện quyền sau ngày vào.")
+                elif a.note:
+                    alert_lines.append(f"⚠️ **{ticker}**: {a.note}")
             pnl_list.append(pct)
 
             pe_now = float(row['PE']) if row['PE'] else None
@@ -131,6 +151,10 @@ def generate_section(as_of_date: str = None) -> str:
 
             sign = "+" if pct >= 0 else ""
             line = f"- **{ticker}**: {current:,.0f}đ ({sign}{pct:.1f}%)"
+            if a is not None and a.is_adjusted:
+                # say it out loud: a reader comparing against the JSON's entry_price must be able
+                # to see WHY the denominator is not that number
+                line += f" *[giá vào {a.entry_price:,.0f}→{a.entry_adj:,.0f} do quyền]*"
 
             # DCF check (informational only — never gates this report). ACB/MBB/HDB are
             # financials -> dcf_line() auto-degrades to N/A via the same gate as Pha 2 production.
