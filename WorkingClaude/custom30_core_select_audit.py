@@ -112,6 +112,8 @@ cls = {t:dict(zip(g.time,g.Close.astype(float))) for t,g in px.groupby("ticker")
 #   date reorder that date's weights (`OShares` is a raw count; pairing it with an adjusted price
 #   mixes reference frames). Unlike the two concentration scripts this one is HISTORICAL, so the
 #   impact is real rather than nil: 48 quarterly rebals over 2014-2026, all pre-dating today.
+pxw_d = {t:dict(zip(g.time,g.pxw.astype(float))) for t,g in px.groupby("ticker")}
+osh_d = {t:dict(zip(g.time,g.OShares.astype(float))) for t,g in px.groupby("ticker")}
 mcap = {t:dict(zip(g.time,(g.pxw*g.OShares).astype(float))) for t,g in px.groupby("ticker")}
 dates = sorted(px.time.unique())
 
@@ -120,6 +122,46 @@ rebal_exec = {}
 for d in rebal_dates:
     c = [x for x in dates if x >= np.datetime64(d)]
     if c: rebal_exec[c[0]] = d
+
+# SHARE-COUNT BASIS (fix 2026-08-13, job Taylor_20260813_125526) — the QUANTITY half of the very
+# look-ahead the PRICE BASIS note above only half-closed. That fix moved the price leg to the raw
+# PIT price precisely because "a corporate action AFTER the exec date must not reorder that date's
+# weights" — but it left `t.OShares` alone, and `t.OShares` is joined straight off
+# `ticker_financial`, which is RESTATED, not point-in-time: measured 2026-08-13, 2.667 quarterly
+# rows across 576 tickers already carry a count that an AIS only made effective LATER (up to 2.693
+# days later). So the exact failure the price note describes still ran, on the other factor of the
+# same product. HAH's row dated 2026-02-02 carries 185.840.401 — a count created by a 2026-03-12
+# conversion and a 2026-04-17 ESOP. Weighting 2026-02 by it is reading two months ahead.
+#
+# `oshares_pit` prefers the corp-action reconstruction and falls back to exactly this `t.OShares`
+# wherever the feed cannot support a checked number (33% of names in 2014, 2,8% today) — so every
+# row that falls back is byte-identical to the run above, and the delta below is purely look-ahead
+# removed. Only the 48 exec dates matter: `mcap` is read nowhere else.
+from oshares_pit import fetch_cache, oshares_pit, summarize                   # noqa: E402
+print("[2b] point-in-time share counts for the 48 rebal exec dates...")
+_cache = fetch_cache(union, "2026-06-16")
+_src = {"oshares_live":0, "ticker_financial":0, "none":0}; _moved = []; _bad = set(); _insane = 0
+for _ed in rebal_exec:
+    _ds = str(np.datetime64(_ed,'D'))
+    _live = [t for t in union if _ed in osh_d.get(t,{})]
+    _rec = oshares_pit(_live, _ds, {t: osh_d[t][_ed] for t in _live}, cache=_cache)
+    _s = summarize(_rec); _insane += _s["n_fallback_implausible"]
+    _bad |= {x for x in _s["implausible_tickers"].split(",") if x}
+    for t, r in _rec.items():
+        _src[r["source"]] += 1
+        if r["value"] is None: continue
+        _old = mcap[t][_ed]; mcap[t][_ed] = pxw_d[t][_ed] * r["value"]
+        if _old > 0 and abs(mcap[t][_ed]-_old)/_old > 1e-9:
+            _moved.append((_ds, t, mcap[t][_ed]/_old-1))
+_tot = sum(_src.values())
+print(f"    {_tot} (mã,ngày) tại exec date: live={_src['oshares_live']} "
+      f"({_src['oshares_live']/max(_tot,1)*100:.1f}%) fallback={_src['ticker_financial']} "
+      f"none={_src['none']} | mcap ĐỔI ở {len(_moved)} ô "
+      f"({len(_moved)/max(_tot,1)*100:.1f}%)")
+print(f"    cổng hợp lý chặn {_insane} ô (lỗi dữ liệu vendor nghi ngờ): {sorted(_bad) or 'không có'}")
+if _moved:
+    _w = sorted(_moved, key=lambda x: -abs(x[2]))[:5]
+    print("    lệch lớn nhất: " + ", ".join(f"{d} {t} {v*100:+.1f}%" for d,t,v in _w))
 
 def weights(tickers, exec_d):
     tk = [t for t in tickers if exec_d in opn.get(t,{}) and mcap.get(t,{}).get(exec_d,0)>0]

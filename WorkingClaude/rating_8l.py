@@ -439,11 +439,63 @@ def rate_power(r):
         return (5 if (pd.notna(cfo) and cfo<0) else 4), "DEBT_STRESS"
     return 3, "power-other"
 
+def _reconcile_oshares(df):
+    """ĐỐI SOÁT `OShares` với nguồn corp-action, FAIL-SAFE về đúng số đang dùng (2026-08-13).
+
+    `OShares` ở đây chỉ nuôi MỘT thứ: `out["ps"] = Price × OShares / doanh thu TTM` → `sales_yield`
+    = 1/PS, một trong các trục của composite value v3. Nó là số CP theo QUÝ, nên đứng im tới ~3
+    tháng: một đợt cổ tức CP 15% đã ex làm mẫu số sai 15% cho tới khi quý sau công bố.
+
+    `oshares_pit.oshares_reconciled` gọi thêm `oshares_live` (dựng số CP point-in-time từ
+    `tav2_bq.corporate_action`) và **chỉ lấy số mới khi HAI NGUỒN KHỚP trong 0,1%**. Lệch, thiếu,
+    hay lỗi ⇒ giữ nguyên số của bq_admin mà file này vẫn dùng. Đây là một wrapper AN TOÀN, KHÔNG
+    phải một cải tiến: `corp_action_daily.py` mới lên cron HÔM NAY (2026-08-13) và chưa chạy qua
+    một lượt vendor đổi lô hay một lần backfill thật nào trong sản xuất, nên nguồn tươi chưa được
+    quyền đè lên số đang dùng để chấm rating. Cái nó đem lại lúc này là **đếm được mỗi ngày** hai
+    nguồn lệch nhau bao nhiêu mã và mã nào (`data/oshares_reconcile_log.csv`) — cơ sở để user
+    quyết có lật nhánh "lệch thì ưu tiên số mới" sau đợt burn-in hay không.
+
+    Bất biến: hàm này KHÔNG BAO GIỜ được làm hỏng/ngưng phiên chấm rating. Mọi lỗi ⇒ trả `df`
+    nguyên vẹn. Mọi mã không lấy được số mới ⇒ giữ nguyên giá trị cũ, từng đồng.
+    """
+    if os.environ.get("OSHARES_RECONCILE", "1") != "1":
+        print("  [oshares] TẮT qua OSHARES_RECONCILE=0 -> dùng thẳng OShares của bq_admin "
+              "(đây cũng là đường rollback một biến môi trường)")
+        return df
+    try:
+        from oshares_pit import append_log, oshares_reconciled, summarize
+        asof = str(bq("SELECT CAST(MAX(time) AS STRING) AS asof FROM tav2_bq.ticker_1m")
+                   ["asof"].iloc[0])[:10]
+    except Exception as e:
+        print(f"  [oshares] bỏ qua đối soát ({type(e).__name__}: {e}) -> giữ OShares của bq_admin")
+        return df
+    try:
+        fb = {t: v for t, v in zip(df["ticker"], df["OShares"])}
+        rec = oshares_reconciled(list(fb), asof, fb)
+        df["OShares"] = df["ticker"].map({t: r["value"] for t, r in rec.items()})
+        s = summarize(rec)
+        print(f"  [oshares] asof={asof} n={s['n']} khớp(dùng live)={s['n_live']} "
+              f"lệch->giữ số cũ={s['n_fallback_diverge']} "
+              f"nghi lỗi DL->giữ số cũ={s['n_fallback_implausible']} "
+              f"live từ chối={s['n_fallback_declined']} thiếu={s['n_no_value']}"
+              + (f" | lệch nhất {s['worst_ticker']} {s['worst_rel_diff']*100:.2f}%"
+                 if s["worst_ticker"] else ""))
+        if s["diverged_tickers"]:
+            print(f"  [oshares] lệch (giữ số bq_admin): {s['diverged_tickers']}")
+        if s["implausible_tickers"]:
+            print(f"  [oshares] nghi lỗi dữ liệu vendor: {s['implausible_tickers']}")
+        append_log("rating_8l", asof, s)
+    except Exception as e:
+        print(f"  [oshares] đối soát LỖI giữa chừng ({type(e).__name__}: {e}) -> "
+              f"KHÔNG đổi OShares")
+    return df
+
+
 def main():
     # Kiểm độ tươi DT5G NGAY ĐẦU run: dòng WARN này nằm trong log pt_8l_daily và là thứ
     # eod_trading_report/telegram_run_daily soi để chèn cảnh báo vào báo cáo người đọc.
     dt5g_freshness_flag()
-    df = bq(MAIN_SQL)
+    df = _reconcile_oshares(bq(MAIN_SQL))
     try:
         fin = bq(FIN_SQL); df = df.merge(fin, on="ticker", how="left")
     except Exception as e:
