@@ -57,6 +57,10 @@ EXEC_DIR = os.path.join(ROOT, "data", "execution_logs")
 LOOKBACK_DAYS = 120          # đủ phủ mọi ex-date còn nằm trong giá vốn của vị thế đang giữ
 DEFAULT_TOL_PP = 0.15        # điểm %; nới hơn sai số làm tròn giá vốn 2 chữ số, chặt hơn mọi cổ tức thật
 
+# chân SỔ PAPER (thêm 2026-08-13). Nhận diện theo NỘI DUNG, không theo tên file: mục paper đi vào
+# báo cáo "New deals" — tên file KHÔNG chứa nhãn tài khoản nào, nên chân broker ở trên tự bỏ qua.
+PAPER_MARKERS = ("AlphaLens Paper Portfolio", "DC Book (double-confirm)")
+
 
 # ---------------------------------------------------------------- nguồn (1): broker
 def broker_positions(account_no: str, asof: str) -> dict:
@@ -256,10 +260,138 @@ def accounts_asof_from_name(path: str) -> tuple:
     raise ValueError(f"không suy được ngày chốt từ tên file: {name}")
 
 
+# ---------------------------------------------------------------- chân SỔ PAPER (T1)
+def paper_t1_verdict(book: str, ticker: str, asof: str, adj, price_adjusting_events) -> list:
+    """Phán quyết T1 cho MỘT vị thế paper — thuần logic, không I/O (để selfcheck chạy offline).
+
+    `adj` = một `AdjustedEntry`; chỉ đọc `factor_terp`, `factor`, `status`, `degraded`, `note`.
+    """
+    fails = []
+    moved = adj.factor_terp is not None and adj.factor_terp < 1.0 - 1e-6
+    has_event = bool(price_adjusting_events)
+    if has_event != moved:
+        detail = ", ".join(f"{e['event_code']} {e['exright_date']}"
+                           for e in price_adjusting_events) or "—"
+        fails.append(
+            f"{book}/{ticker}: Close/Price {'ĐÃ' if moved else 'KHÔNG'} điều chỉnh sau {asof} "
+            f"nhưng corporate_action nói {'KHÔNG có' if moved else 'CÓ'} sự kiện ({detail}) "
+            f"— một trong hai nguồn sai, không được công bố tỉ suất khi chưa biết là nguồn nào")
+    if adj.degraded:
+        fails.append(f"{book}/{ticker}: trạng thái {adj.status} — tỉ suất đang tính trên giá "
+                     f"THÔ: {adj.note}")
+    return fails
+
+
+def paper_entry_gate(report_path: str, out=sys.stdout) -> tuple:
+    """(applied, fails) — kiểm giá VÀO của sổ paper bằng nguồn ĐỘC LẬP với chuỗi giá.
+
+    Vì sao cần một chân riêng: chân broker ở trên đối chiếu tỉ suất với `costPrice` — sổ paper
+    không có tài khoản broker nào để đối chiếu. Giá vào của nó được quy về hệ điều chỉnh bằng
+    `Close/Price` (`paper_entry_adjust.py`), và cách hỏng ÂM THẦM của cơ chế đó là factor = 1,0:
+    cache giá cũ/lệch vintage cho ra ĐÚNG con số mà "mã này không có sự kiện gì" cũng cho ra.
+    Không phân biệt được hai thứ đó = phục hồi nguyên vẹn bug 2026-08-13 (MBB báo −18,8% thay vì
+    −2,9%) mà không ai thấy. Nên phép kiểm phải hỏi một nguồn KHÁC: `tav2_bq.corporate_action`.
+
+        T1:  factor_terp < 1  ⟺  tồn tại DIV/ISS executed điều-chỉnh-giá trong (asof, hôm nay]
+
+    T1 neo vào `factor_terp` (Close/Price thô) chứ KHÔNG phải factor được dùng để báo cáo: T1 hỏi
+    "chuỗi giá có điều chỉnh không", đó là câu hỏi về chuỗi giá. Quy ước accrue-only (loại quyền
+    mua) là lựa chọn của TA ở tầng trên; một sự kiện quyền-mua-đơn-thuần sẽ cho factor accrue-only
+    = 1,0 một cách hoàn toàn đúng đắn, và neo T1 vào nó sẽ sinh báo động giả.
+
+    Mọi trạng thái `degraded` (`RIGHTS_UNRESOLVED`, `VINTAGE_STALE`, `BAD_FACTOR`, `NO_DATA`) đều
+    CHẶN: báo cáo đang in tỉ suất tính trên giá THÔ, tức là con số sai kiểu cũ.
+
+    Fail-closed: không tra được `corporate_action` ⇒ CHẶN. Cổng này tồn tại đúng để bắt ca "không
+    biết mà tưởng biết"; trả PASS khi không kiểm được là tự vô hiệu hoá mình.
+    """
+    try:
+        with open(report_path, encoding="utf-8") as f:
+            text = f.read()
+    except OSError as e:
+        return False, [f"không đọc được báo cáo: {e}"]
+    if not any(m in text for m in PAPER_MARKERS):
+        return False, []
+
+    sys.path.insert(0, ROOT)
+    try:
+        from corp_action_lib import is_price_adjusting
+        from paper_entry_adjust import adjust_entries, stale_years
+        from paper_entry_corpaction_crosscheck import _bq, load_books
+    except Exception as e:
+        return True, [f"sổ paper: không nạp được công cụ đối chiếu ({e}) — CHẶN (fail-closed)"]
+
+    books = load_books()
+    if not books:
+        return True, ["báo cáo có mục sổ paper nhưng không đọc được file paper nào — CHẶN"]
+
+    fails = []
+    # KHÔNG chặn theo "có file năm nào cũ không" — đo thật 2026-08-13: 13/14 file năm (2013-2025)
+    # cũ hơn 2026.parquet ~14 ngày, đó là trạng thái BÌNH THƯỜNG của cache (sync đêm chỉ ghi lại
+    # năm hiện tại). Chặn theo đó = báo động giả trên MỌI báo cáo, và một cổng kêu mỗi ngày là
+    # một cổng bị bỏ qua. Việc chặn thuộc về `adjust_entries`, nó gắn VINTAGE_STALE cho ĐÚNG vị
+    # thế nào có `asof` rơi vào một năm cũ — và VINTAGE_STALE là `degraded` nên bị chặn bên dưới.
+    stale = stale_years()
+    used_years = sorted({a[:4] for _, _, a, _ in books})
+    if stale:
+        print(f"\nℹ️  bq_cache/ticker: {len(stale)} file năm cũ hơn phần còn lại "
+              f"({', '.join(sorted(stale))}); sổ paper đang dùng năm {', '.join(used_years)} "
+              f"⇒ {'CÓ giao nhau, xem trạng thái VINTAGE_STALE bên dưới' if set(stale) & set(used_years) else 'không giao nhau, không ảnh hưởng'}",
+              file=out)
+
+    try:
+        adj = adjust_entries([(t, a, p) for _, t, a, p in books])
+        tk_sql = ",".join(f'"{t}"' for t in sorted({t for _, t, _, _ in books}))
+        asof_min = min(a for _, _, a, _ in books)
+        events = _bq(f"""
+            SELECT ticker, event_code, CAST(exright_date AS STRING) exright_date,
+                   value_per_share, exercise_ratio, issue_method_name_vi
+            FROM `lithe-record-440915-m9.tav2_bq.corporate_action`
+            WHERE ticker IN ({tk_sql}) AND event_code IN ("DIV", "ISS")
+              AND event_status = "executed"
+              AND exright_date > DATE "{asof_min}" AND exright_date <= CURRENT_DATE()
+        """)
+    except Exception as e:
+        return True, [f"sổ paper: không đối chiếu được với corporate_action ({str(e)[:150]}) "
+                      f"— CHẶN (fail-closed)"]
+
+    by_ticker = {}
+    for e in events:
+        by_ticker.setdefault(e["ticker"], []).append(e)
+
+    print(f"\nCHÂN SỔ PAPER (T1 — đối chiếu corporate_action, độc lập với chuỗi giá): "
+          f"{len(books)} vị thế", file=out)
+    for book, ticker, asof, entry_price in books:
+        a = adj[(ticker, asof)]
+        evs = [e for e in by_ticker.get(ticker, [])
+               if e["exright_date"] > asof and is_price_adjusting(e)]
+        detail = ", ".join(f"{e['event_code']} {e['exright_date']}" for e in evs) or "—"
+        bad = paper_t1_verdict(book, ticker, asof, a, evs)
+        print(f"   {'CHẶN' if bad else 'OK  '} {book:9s} {ticker:4s} "
+              f"asof={asof} terp={a.factor_terp if a.factor_terp is not None else float('nan'):.6f} "
+              f"dùng={a.factor if a.factor is not None else float('nan'):.6f} "
+              f"[{a.status}] | {detail}", file=out)
+        fails.extend(bad)
+    return True, fails
+
+
 # ---------------------------------------------------------------- cổng
 def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -> int:
+    # chân sổ paper chạy TRƯỚC và độc lập với chân broker: báo cáo "New deals" mang mục paper
+    # nhưng không mang nhãn tài khoản nào, nên nhánh thoát sớm dưới đây sẽ bỏ qua nó.
+    paper_applied, paper_fails = paper_entry_gate(report_path, out=out)
+
     labels, asof = accounts_asof_from_name(report_path)
     if not labels:
+        if paper_applied:
+            if paper_fails:
+                print(f"\n❌ CHẶN — {len(paper_fails)} vấn đề ở sổ paper:", file=out)
+                for f_ in paper_fails:
+                    print(f"   • {f_}", file=out)
+                return 1
+            print("\n✅ PASS — chân sổ paper khớp corporate_action (chân broker không áp dụng: "
+                  "tên file không mang nhãn tài khoản nào).", file=out)
+            return 0
         print(f"⚠️  {os.path.basename(report_path)}: không nhận ra tài khoản nào trong tên file "
               f"→ cổng KHÔNG áp dụng (không chặn).", file=out)
         return 0
@@ -286,7 +418,7 @@ def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -
             expected[key] = (lb, pct, pl, raw, cp, gross.get(tk, 0.0))
         agg[lb] = (tot_pl, tot_cost, tot_pl / tot_cost * 100.0 if tot_cost else 0.0)
 
-    fails, checked, unmatched = [], 0, 0
+    fails, checked, unmatched = list(paper_fails), 0, 0
     print(f"\n{'ma':5}{'KL':>7}{'TK':>9}{'% cong bo':>11}{'% ky vong':>11}{'lech pp':>9}"
           f"{'co tuc GOP':>11}  ket qua", file=out)
     for tk, qty, pct in rows:
@@ -462,6 +594,49 @@ def _selfcheck() -> int:
         check("thiếu dnse_raw ⇒ fail-closed", "không ném lỗi", "FileNotFoundError")
     except FileNotFoundError:
         check("thiếu dnse_raw ⇒ fail-closed", True, True)
+
+    # 17-24: chân SỔ PAPER (T1). Logic thuần, chạy offline — không chạm BQ, không chạm cache.
+    class _A:                                   # thế thân AdjustedEntry, chỉ các trường T1 đọc
+        def __init__(self, terp, factor, status, note=None):
+            self.factor_terp, self.factor, self.status, self.note = terp, factor, status, note
+
+        @property
+        def degraded(self):
+            return self.status in ("NO_DATA", "BAD_FACTOR", "RIGHTS_UNRESOLVED", "VINTAGE_STALE")
+
+    DIV = [{"event_code": "DIV", "exright_date": "2026-07-09"}]
+    v = lambda a, evs: paper_t1_verdict("alphalens", "MBB", "2026-06-30", a, evs)  # noqa: E731
+
+    check("paper T1: có sự kiện + factor ĐÃ điều chỉnh ⇒ qua",
+          v(_A(0.800794, 0.836, "ADJUSTED"), DIV), [])
+    # ĐÂY là ca cổng sinh ra để bắt: cache cũ ⇒ factor 1,0 ⇒ status UNCHANGED, trông y hệt
+    # "mã này không có sự kiện gì". Bug 2026-08-13 (MBB −18,8%) quay lại qua đúng cửa này.
+    check("paper T1: CÓ sự kiện nhưng factor = 1,0 (cache cũ) ⇒ CHẶN",
+          len(v(_A(1.0, 1.0, "UNCHANGED"), DIV)), 1)
+    check("paper T1: KHÔNG sự kiện nhưng factor < 1 (chuỗi giá điều chỉnh vu vơ) ⇒ CHẶN",
+          len(v(_A(0.95, 0.95, "ADJUSTED"), [])), 1)
+    check("paper T1: không sự kiện + không điều chỉnh ⇒ qua (không báo động giả)",
+          v(_A(1.0, 1.0, "UNCHANGED"), []), [])
+    # quy ước accrue-only: quyền mua ĐƠN THUẦN cho factor dùng-để-báo-cáo = 1,0 một cách ĐÚNG
+    # ĐẮN. T1 neo vào factor_terp nên không được coi đó là lỗi.
+    check("paper T1: quyền mua đơn thuần (accrue-only = 1,0, terp < 1) ⇒ KHÔNG báo động giả",
+          v(_A(0.90, 1.0, "UNCHANGED"), [{"event_code": "ISS", "exright_date": "2026-08-11"}]), [])
+    for st in ("VINTAGE_STALE", "RIGHTS_UNRESOLVED", "BAD_FACTOR", "NO_DATA"):
+        check(f"paper T1: trạng thái {st} ⇒ CHẶN (đang in tỉ suất trên giá THÔ)",
+              len(v(_A(0.800794, None, st, "…"), DIV)) >= 1, True)
+
+    # 25-26: nhận diện theo NỘI DUNG — báo cáo không có mục paper thì chân này không chạy
+    import tempfile as _tf
+    with _tf.NamedTemporaryFile("w", suffix=".md", delete=False, encoding="utf-8") as fh:
+        fh.write("# báo cáo không có sổ paper\n\n| mã | % |\n|---|---|\n| FPT | +1,0% |\n")
+        p_no = fh.name
+    applied, f_ = paper_entry_gate(p_no, out=open(os.devnull, "w"))
+    check("báo cáo KHÔNG có mục paper ⇒ chân paper không áp dụng, không chặn", (applied, f_),
+          (False, []))
+    os.unlink(p_no)
+    check("marker nhận diện đúng 2 mục paper thật",
+          all(m in ("AlphaLens Paper Portfolio", "DC Book (double-confirm)")
+              for m in PAPER_MARKERS) and len(PAPER_MARKERS) == 2, True)
 
     print("SELFCHECK:", "PASS" if ok else "FAIL")
     return 0 if ok else 1

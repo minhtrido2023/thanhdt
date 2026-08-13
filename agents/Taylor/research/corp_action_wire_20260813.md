@@ -49,6 +49,12 @@ MBB: cổ tức tiền 1.000đ (ex 2026-07-09) + quyền mua 10% + cổ tức CP
 ⚠️ Dòng cuối đáng chú ý nhất: kết luận "DC book THUA production" là **hiện vật của bug**, không
 phải kết quả. Đừng trích số cũ.
 
+> **⚠️ CỘT "sau (ĐÚNG)" Ở BẢNG NÀY ĐÃ BỊ THAY THẾ — xem §VÒNG 2/C1 ở cuối file.** Nó theo quy ước
+> **TERP** (ngầm giả định holder đã thực hiện hoặc bán quyền mua), mà sổ paper không có tài khoản
+> tiền nên không làm được. Số đang chạy hôm nay theo quy ước **accrue-only**: MBB alphalens
+> **−2,9%** (không phải +1,3%), portfolio **+0,90%**, converge **−1,24%**. **Mọi đảo dấu ở cột
+> "lệch" vẫn đúng** — đổi quy ước, không rút lui.
+
 ### Cách sửa — và vì sao chọn hướng này
 `paper_entry_adjust.py`: `factor = Close(asof)/Price(asof)` (vintage hôm nay), `entry_adj =
 entry_price × factor`, `pct = Close_now/entry_adj − 1`.
@@ -115,7 +121,9 @@ Chuỗi tăng dần rồi khớp `shares_total_after` đúng yêu cầu. Một b
 | Cổ tức CP / thưởng CP / quyền mua cổ đông hiện hữu | CÓ | **CÓ** |
 | ESOP / riêng lẻ / chuyển đổi TP / đấu giá / sáp nhập | CÓ | **KHÔNG** |
 
-Đo thật: HAH ESOP 1,86% ex 2025-07-28 → tỉ số `Close/Price` **1,000000 → 1,000000** (không nhảy).
+Đo thật: HAH ESOP 1,858% ex **2026-07-28** → tỉ số `Close/Price` **1,000000 → 1,000000** (không
+nhảy). *(Đính chính 2026-08-13: bản đầu ghi nhầm ex-date là 2025-07-28 — quant-skeptic bắt. HAH
+không có ISS nào vào 2025-07-28; đợt gần nhất trước đó là cổ tức CP 30% ex 2025-08-07.)*
 FPT 2 đợt ESOP 2025-05-07 y hệt. ⇒ Oshares phải đếm **MỌI** ISS; rebase giá chỉ được kỳ vọng ở
 nhóm trên. Kiểm chứng: lăn qua 2 đợt ESOP của FPT cho 1.481.338.158 vs AIS thật 1.481.330.122 —
 **lệch 0,0005%**.
@@ -179,9 +187,9 @@ tôi *tưởng* là control. **Giả định control sai lại là thứ có gi�
 
 | File | Vai trò | Selfcheck |
 |---|---|---|
-| `paper_entry_adjust.py` | MỚI — rebase giá vào (Việc C) | **11/11 PASS** |
+| `paper_entry_adjust.py` | MỚI — rebase giá vào (Việc C) | **21/21 PASS** |
 | `corp_action_lib.py` | MỚI — reader + taxonomy accrue/dilute | **7/7 PASS** |
-| `oshares_live.py` | MỚI — Oshares tại ngày bất kỳ (Việc B) | **11/11 PASS** |
+| `oshares_live.py` | MỚI — Oshares tại ngày bất kỳ (Việc B) | **22/22 PASS** |
 | `paper_entry_corpaction_crosscheck.py` | MỚI — đối soát độc lập | T1 13/13 · T2 4/4 |
 | `alphalens_report.py` | SỬA — dùng rebase | qua A/B thật |
 | `converge_report.py` | SỬA — cùng lỗi | qua A/B thật |
@@ -206,3 +214,120 @@ PASS. `daily_nav_snapshot.py` và `corp_actions.py` gọi `detect_adjustments_ba
 4. **Chưa wire `oshares_live.py`** vào bất kỳ consumer nào (`rating_8l`, market-cap, EPS). Cần
    quyết định riêng + đối soát rộng hơn 1 mã trước khi thay `OShares` ở đường sản xuất.
 5. Đề xuất `coding_guidelines`: wrapper `bq` phải đặt `--max_rows` + raise khi chạm trần.
+
+---
+
+# VÒNG 2 — sửa theo quant-skeptic (job `Taylor_20260813_050945`, 2026-08-13)
+
+Vòng 1: Việc B **REFUTED**, Việc C **CONFIRMED** kèm 1 sub-claim overstate + 2 rủi ro fail-silent.
+
+## B. `oshares_live.py` — hai lỗi đã đo, đã vá. **VẪN CHƯA WIRE.**
+
+**B1 — neo "mới nhất giữa hai nguồn" là look-ahead.** `ticker_financial.OShares` bị RESTATE. Đo
+lại độc lập hôm nay (dòng quý trùng khít <1cp với `shares_total_after` của một AIS *executed* có
+hiệu lực SAU đó): **2.667 dòng / 576 mã**, sớm nhất **2.693 ngày**; lát cắt từ 2024-01-01 là
+**626 dòng / 247 mã**, sớm nhất **819 ngày**, trong đó **145 dòng / 75 mã** là look-ahead CỨNG
+(có `ISS` đi ex SAU dòng quý). Khớp con số quant-skeptic báo (631/247, 819, ~146) trong sai số
+định nghĩa.
+
+Vá: **AIS là neo chính**; dòng quý chỉ được nhận khi **tự giải thích được** — lăn AIS gần nhất
+TRƯỚC nó qua các ISS ở giữa, khớp trong `EXPLAIN_TOL=0,1%`. Ngưỡng chọn từ số đo: gap thật lớn
+nhất là FPT **0,0013%** (làm tròn cổ phiếu lẻ trên thưởng 15%), còn HAH lệch **+10,06%**.
+
+Không phải "cổng chặn hết cho an toàn" — ca **5b** chứng minh ngược: dòng quý FPT **2025-07-22**
+(số sau thưởng, một ngày sau ex-right, 7 tuần trước AIS) **vẫn được nhận**, `rejected_anchors=[]`.
+Dữ liệu sớm thật đi qua, restatement bị loại.
+
+**B2 — roll-forward bằng `exercise_ratio` là no-op trên nhóm không-accrue.** `shares_delta` **NULL
+100%** trên ISS (0/9.297) nên không cứu được. Vá: ưu tiên `shares_delta` khi có (nhánh chết hôm
+nay, giữ vì thứ tự ưu tiên chính là phát biểu về tính đúng), `ratio ∈ {0, NULL}` mà không delta ⇒
+**fail CLOSED**: `value=None`, `method="UNKNOWN_RATIO"`, liệt kê `blocking_events`.
+
+**B3 — ca hồi quy có sự kiện thật** (chân đối chứng cũ DHG/PVT/TCB/ACB/HDB không có sự kiện nào ⇒
+không bao giờ fail được):
+
+| Ca | Kỳ vọng | Kết quả |
+|---|---|---|
+| H1/H2 HAH 2026-03-01 | KHÔNG ra 185.840.401; ra 168.861.212 | PASS — loại anchor quý 2026-02-02, lệch +10,06% |
+| H3 | lý do loại được NÊU RA | PASS |
+| H4 HAH 2025-03-25 & 2026-03-13 | chuyển đổi TP ratio 0,0 ⇒ `UNKNOWN_RATIO`, `value=None` | PASS cả hai |
+| P0/P1 NAF 2026-01-06 | "Phát hành riêng lẻ" ex 2026-01-05 ⇒ `UNKNOWN_RATIO` | PASS (mã tự dò từ BQ, không chép cứng) |
+| 8d DHG | không có AIS nào ⇒ `ANCHOR_UNVERIFIED`, không giả vờ đã kiểm | PASS |
+| 10 | bất biến `value is None ⟺ method ∈ {UNKNOWN_RATIO, NO_ANCHOR}` | PASS |
+
+`oshares_live.py --selfcheck` = **22/22 PASS** (số do máy đếm, xem B4).
+
+**B4 — hai lỗi nhỏ.** (a) HAH ESOP: ex-date đúng là **2026-07-28** (ratio 0,01858), không phải
+2025-07-28 — HAH không có ISS nào ngày đó; đã đính chính tại chỗ ở §4. (b) Cả hai selfcheck từng
+in tổng số **gõ tay** ("11/11") trong khi thực chạy 12 ca; nay `check()` tự đếm `len(ran)` nên con
+số không thể lệch nữa.
+
+**B5 — entry TRAP** (`coding_guidelines` §9, phải có TRƯỚC khi code mới đọc cột này):
+`mike/kb/data_registry/fundamentals/ticker_financial_oshares.md` + link từ `index.md` và
+`ticker_financial.md`.
+
+**Giới hạn công bố thẳng**: cổng giải thích chỉ loại được restatement khi nó mâu thuẫn với sự kiện
+feed ĐÃ CÓ. Dòng bị restate về con số mà AIS hậu thuẫn chưa ingest thì cổng mù — điểm mù chung của
+mọi tái dựng point-in-time.
+
+## C. Báo cáo paper — quy ước quyền mua + hai lưới chặn fail-silent
+
+**C1 — sub-claim "MBB thật +1,3%" đã sửa.** `Close/Price` theo quy ước **TERP** (giả định holder
+đã mua quyền hoặc bán quyền theo giá lý thuyết). Kiểm bằng nghịch đảo chính bậc nhảy MBB
+2026-08-11 (quyền mua 10% @10.000đ + cổ tức CP 15% cùng ngày):
+
+    (24.250 + 0,10×10.000) / (24.250 × 1,25) = 0,832990   — khớp bậc nhảy quan sát tới 6 chữ số
+
+Sổ paper **không có tài khoản tiền**, không thực hiện được quyền ⇒ quy ước đúng là **accrue-only**
+(chỉ cổ tức tiền + cổ tức CP/thưởng; quyền mua bị LOẠI, coi như để mất). Đó nay là số headline;
+`factor_terp` vẫn được báo kèm ngay trên dòng mang số, không giấu xuống chân trang.
+
+| | trước (TERP) | sau (accrue-only) |
+|---|---:|---:|
+| MBB alphalens | +1,3% | **−2,9%** |
+| alphalens portfolio | +1,96% | **+0,90%** (alpha +4,49pp) |
+| converge portfolio | −0,76% | **−1,24%** (alpha vs VNINDEX +2,96pp, vs production +0,81pp) |
+
+Khớp con số quant-skeptic tự tính lại (+0,95% / −1,22% / +4,55 / +2,98 / +0,83pp) trong sai số
+ngày giá. **Mọi đảo dấu của bản vá gốc vẫn giữ nguyên** — đây là sửa quy ước, không phải rút lui.
+
+Phần quyền được tách ra như **phần dư** của bậc nhảy ex-date sau khi chia hết mọi sự kiện cùng
+ngày (feed không mang giá thực hiện quyền: `value_per_share` NULL trên dòng rights). Không tách
+được ⇒ `RIGHTS_UNRESOLVED`, **không** âm thầm rơi về TERP (ca 17).
+
+**C2 — vintage cache.** `stale_years()` + status `VINTAGE_STALE`: `asof` rơi vào một file năm cũ
+hơn phần còn lại >2 ngày ⇒ **không rebase**, không under-adjust im lặng.
+
+⚠️ Điều chỉnh so với đề bài: **không** chặn theo "có file năm nào cũ không". Đo thật: **13/14 file
+năm (2013-2025) cũ hơn `2026.parquet` ~14 ngày** — đó là trạng thái BÌNH THƯỜNG (sync đêm chỉ ghi
+lại năm hiện tại). Chặn theo đó = báo động giả trên MỌI báo cáo, và cổng kêu mỗi ngày là cổng bị
+bỏ qua. Việc chặn thuộc về `adjust_entries`, nó gắn cờ đúng vị thế có `asof` rơi vào năm cũ; cổng
+chỉ IN ra giao/không-giao giữa "năm cũ" và "năm sổ paper đang dùng".
+
+**C3 — T1 đã WIRE vào `mike/bin/report_return_gate.py`** (`paper_entry_gate()`, chạy TRƯỚC chân
+broker vì báo cáo "New deals" mang mục paper nhưng **không** mang nhãn tài khoản nào trong tên
+file ⇒ nhánh thoát sớm cũ bỏ qua nó hoàn toàn). Nhận diện theo NỘI DUNG (`PAPER_MARKERS`).
+
+    T1:  factor_terp < 1  ⟺  có DIV/ISS executed điều-chỉnh-giá trong (asof, hôm nay]
+
+T1 neo vào `factor_terp` chứ **không** phải factor dùng để báo cáo — T1 hỏi "chuỗi giá có điều
+chỉnh không", đó là câu hỏi về chuỗi giá. Neo vào factor accrue-only sẽ báo động giả ở ca quyền-
+mua-đơn-thuần (accrue-only = 1,0 hoàn toàn đúng đắn). Mọi status `degraded` cũng CHẶN. Không tra
+được `corporate_action` ⇒ CHẶN (fail-closed).
+
+**Kiểm chứng, hai chiều:**
+
+| | Kết quả |
+|---|---|
+| `report_return_gate.py --selfcheck` | PASS, **+12 ca mới** (đủ 4 hình dạng T1 + 4 status degraded + no-op) |
+| Chạy THẬT trên báo cáo có mục paper (13 vị thế) | **PASS 13/13**, exit 0 |
+| **Chứng minh ngược** — cache vintage trước sự kiện (`Close := Price`) | **CHẶN 6 lỗi / 4 vị thế** có sự kiện (MBB×2, HAH, CTR); **9/9 vị thế không sự kiện KHÔNG bị đụng** |
+
+Ca chứng minh ngược là điểm mấu chốt: cắt cụt cache theo NGÀY **không** tái lập được lỗi (giá trị
+`Close` đã restate nằm sẵn TRONG dòng, không suy từ dòng sau) — phải dựng lại đúng vintage
+`Close = Price`. Ghi lại vì lần sau dễ dựng nhầm ca thử rồi tưởng đã chứng minh.
+
+## Việc còn treo sau vòng 2
+1. **quant-skeptic vòng 2** — bắt buộc. Tôi KHÔNG tự nhận đã đóng.
+2. `oshares_live.py` vẫn **NOT WIRED** (đã ghi thẳng vào docstring). Wire cần quyết định riêng.
+3. Mục 2-5 của §6 ở trên không đổi.
