@@ -57,6 +57,13 @@ nào dựa vào tính "hôm nay có dữ liệu hôm nay", kiểm tra thật `MA
 mỗi lần đọc, đúng khuôn `kb/cron_registry.md` §11 (freshness check thật, không suy từ lịch). Ngày
 đầu tiên nên xác nhận lại: 2026-08-14 kiểm `MAX(public_date)` đã nhích qua 2026-08-12/13 chưa.
 
+**CỬA SỔ NẠP ĐO ĐƯỢC (bổ sung 2026-08-13, job `Taylor_20260813_091128`)**: `15:22:57 → 15:48:52
+UTC` = **22:22 → 22:48 ICT**. Đây là mốc quan trọng khi đặt lịch consumer: một cron chạy CHIỀU
+cùng ngày sẽ luôn đọc dữ liệu của HÔM TRƯỚC. `corp_action_daily.py` vì thế chạy 07:30 ICT sáng hôm
+sau và phân loại freshness theo **phiên giao dịch liền trước**, không theo "hôm nay" (mốc "hôm nay"
+sẽ báo động giả mỗi sáng, mốc "ngày lịch trước" sẽ báo động giả mỗi thứ Hai). ⚠️ n=1 quan sát —
+đừng biến nó thành giả định; script tự đo `MAX(ingested_at)` mỗi lần chạy.
+
 ## Bẫy (3) — trùng `(ticker, exright_date, event_code)` — cần GROUP BY/dedup có chủ đích
 
 `id` là unique key thật (36.149 distinct = đúng số dòng) nhưng nhiều dòng CÓ THỂ trùng
@@ -78,6 +85,19 @@ nhiều đợt phát hành khác nhau chốt cùng ngày (SUM đúng) hoặc ame
    gộp toàn tài khoản nữa (Tầng 2 trong file đó), và phân biệt được DIV/ISS rõ ràng (giải Bẫy 4 của
    `Close/Price`). **Vẫn nên đối soát chéo với broker** (Tầng 2 cũ) trước khi thay hẳn — chưa kiểm
    chứng độ chính xác/độ trễ công bố của nguồn vendor đằng sau bảng này so với tiền thật về tài khoản.
+
+## Consumer đã có (2026-08-13)
+
+| Script | Đọc gì | Ghi gì | Trạng thái |
+|---|---|---|---|
+| `corp_action_lib.py` | reader + taxonomy dùng chung (`is_price_adjusting` / `dilutes_share_count` / `feed_freshness`) | — | LIVE, 7 ca hồi quy |
+| `oshares_live.py` | AIS + ISS → số CP lưu hành point-in-time | — (thư viện) | CONFIRMED vòng 2, 22 ca hồi quy |
+| `dividend_adjusted_return.py::bq_corp_action()` | DIV/ISS tại (mã, ex-date) | — | LIVE (tầng bổ sung; tiền broker vẫn là nguồn số chính thức §21) |
+| `mike/bin/corp_action_daily.py` | cả 3 cái trên + `active_nav_<label>.json` | `data/corp_action_daily/corp_action_daily_<date>.json` + Discord `trading_daily` | cron **CHƯA CÀI**, chờ quant-skeptic (job `Taylor_20260813_091128`) |
+
+**Bẫy 2 nay đã được CƠ GIỚI HOÁ**, không còn là lời nhắc văn xuôi: `corp_action_daily.py` phân loại
+`FRESH / STALE / DEAD` mỗi lần chạy và **không publish** khi DEAD. Nhưng lời nhắc vẫn đúng cho MỌI
+consumer khác — ai đọc bảng này ngoài cron đó thì vẫn phải tự gọi `feed_freshness()`.
 
 ## Việc còn treo trước khi wire vào report pipeline
 

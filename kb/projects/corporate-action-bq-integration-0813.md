@@ -31,10 +31,21 @@ hàng ngày từ 08-13). Duyệt (a) dùng làm nguồn đo cổ tức/ex-rights
    residual risk (marker tautology, dual rc=3 producer, banner đếm sai, hardcode thread ID).
    **CONFIRMED** vòng 5.
 
+6. **Việc E** (vòng 7, job `Taylor_20260813_091128`) — **cron hàng ngày** `mike/bin/corp_action_daily.py`
+   + `.sh` + `corp_action_daily_selfcheck.py` (61 ca, hermetic). Đây là điểm wire ĐẦU TIÊN của Việc B:
+   mỗi mã được cập nhật vào ĐÚNG ngày sự kiện của nó (`exright_date` cho DIV/ISS; `AIS.effective_date`
+   cho lúc số CP chính thức đổi, trễ tới ~7 tuần), 4 cổng chặn (selfcheck nền / freshness feed / bất
+   biến số CP / đối soát 2 nguồn) + cảnh báo proactive ≤10 ngày cho mã ĐANG GIỮ. Không có bước LLM
+   nào ở runtime. **Crontab CHƯA CÀI** — chờ quant-skeptic + user duyệt. Chi tiết:
+   `agents/Taylor/research/corp_action_daily_cron_20260813.md`.
+
 ## Việc còn mở
 
-- **Việc B chưa wire** — cần user/Mike chọn consumer đầu tiên (backtest vs live report) trước khi
-  dispatch thiết kế điểm wire.
+- **Việc B đã wire lần đầu** qua Việc E (snapshot hàng ngày, consumer = NGƯỜI). Consumer MÁY
+  (backtest point-in-time / report-rating live) vẫn chưa chọn — snapshot đã sẵn để dùng, phải đọc
+  cờ `usable`.
+- **Cài crontab dòng 07:30 ICT** sau khi quant-skeptic CONFIRMED (dòng đã ghi sẵn trong
+  `kb/cron_registry.md`, đánh dấu ⏸ CHƯA CÀI).
 - **Vòng 6 (rc=1 build_message failure + import-time KeyError registry) — CHỦ ĐỘNG BỎ QUA**
   (quyết định user 2026-08-13): xác suất thấp, đã có `cron_health_check_daily.sh` (08:25 ICT) bắt
   một phần `rc=1`; KeyError registry chỉ xảy ra do lỗi thao tác con người và sẽ crash ồn ào chứ
