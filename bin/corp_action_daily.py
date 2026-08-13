@@ -949,6 +949,92 @@ def _fmt_event(e, holders):
     return "• " + " · ".join(bits) + (f"\n    đang giữ: {who}" if who else "")
 
 
+def _fmt_divergence(diverge, limit=8):
+    """Dòng Discord cho kết quả `crosscheck()`. Trả `None` khi không có gì để báo.
+
+    `crosscheck()` trả HAI loại bản ghi khác hẳn nhau về NGHĨA, và tới 2026-08-13 dòng này in
+    chung một khuôn:
+      * `DIVERGENT`      — hai nguồn CÙNG trả số, và hai số đó khác nhau. Có `oshares_live` (số)
+                           và `err_pct_vs_ticker_financial`.
+      * `NO_MODEL_VALUE` — mô hình TỪ CHỐI trả số (fail-closed). `oshares_live` là `None` và
+                           KHÔNG có trường sai số, vì không có sai số nào để tính.
+
+    Khuôn chung viết `(d['oshares_live'] or 0)` với `err_pct` mặc định `0`, nên ca thứ hai in ra
+    **"TCB@2026-07-21 corp-action 0 vs bq_admin 7.086.240.414 (0,00%)"** — đọc y hệt "khớp hoàn
+    hảo" trong khi sự thật là "KHÔNG xác minh được". `or 0` ở đây KHÔNG phải một mặc định lành
+    tính: nó biến một lời TỪ CHỐI TRẢ LỜI thành một con số, và con số đó tình cờ làm sai số bằng
+    đúng 0 — hướng sai lệch tệ nhất có thể, vì nó trấn an người đọc thay vì cảnh báo họ.
+
+    Lỗi có sẵn từ khi viết `crosscheck()`, nhưng ngày 2026-08-13 mới lần đầu kích hoạt trên mã
+    ĐANG GIỮ THẬT (TCB, cả SpaceX lẫn ZaloPay) — cổng chứng nhận neo AIS vòng 4 đẩy TCB từ
+    `DIVERGENT` sang `NO_MODEL_VALUE`. quant-skeptic vòng 4 tìm ra; xem `research/
+    oshares_gate_move_20260813/`.
+
+    Hai loại được ĐẾM RIÊNG ở đầu dòng, không gộp thành một con số: "3 mã lệch" và "2 mã lệch +
+    1 mã không đối soát được" là hai tình trạng khác nhau của hệ thống.
+    """
+    if not diverge:
+        return None
+
+    def refused(d):
+        """MỘT vị ngữ dùng cho CẢ đầu dòng lẫn thân dòng — cố ý.
+
+        Bản đầu của hàm này đếm theo `kind` nhưng render theo `oshares_live is None`; một bản ghi
+        thiếu `kind` liền được đếm là "1 mã LỆCH" trong khi thân dòng nói "TỪ CHỐI trả số". Hai
+        vị ngữ cho cùng một câu hỏi là cách một dòng cảnh báo tự mâu thuẫn với chính nó.
+        """
+        return d.get("kind") == "NO_MODEL_VALUE" or d.get("oshares_live") is None
+
+    n_none = sum(1 for d in diverge if refused(d))
+    n_div = len(diverge) - n_none
+    head = []
+    if n_div:
+        head.append(f"{n_div} mã LỆCH")
+    if n_none:
+        head.append(f"{n_none} mã KHÔNG đối soát được")
+
+    def one(d):
+        if refused(d):
+            return (f"{d['ticker']}@{d['at']} mô hình TỪ CHỐI trả số "
+                    f"({d.get('method') or 'không rõ nhãn'}) — KHÔNG đối soát được với bq_admin "
+                    f"{d['ticker_financial']:,.0f}")
+        return (f"{d['ticker']}@{d['at']} corp-action {d['oshares_live']:,.0f} vs bq_admin "
+                f"{d['ticker_financial']:,.0f} "
+                f"({d['err_pct_vs_ticker_financial']:.2f}%)")
+
+    more = f" … và {len(diverge) - limit} mã nữa" if len(diverge) > limit else ""
+    return (f"⚠️ **Đối soát nguồn Oshares** ({' + '.join(head)}, script KHÔNG tự chọn số): "
+            + "; ".join(one(d) for d in diverge[:limit]) + more)
+
+
+def none_value_watch(cur, prev_snap):
+    """Lưới giám sát DIỄN BIẾN của fail-closed: hôm nay có bao nhiêu mã bị TỪ CHỐI trả số?
+
+    Fail-closed cấp mã (`value is None`) an toàn theo thiết kế, nhưng nếu không ai theo dõi con
+    số đó thì một feed hỏng dần chỉ biểu hiện thành "im lặng ngày càng nhiều" — không cổng nào
+    đỏ, không ai biết. quant-skeptic vòng 4 gọi đúng tên: "im lặng vĩnh viễn không giám sát".
+
+    Báo khi số mã bị từ chối TĂNG so với snapshot đã publish gần nhất. KHÔNG báo khi giảm hay
+    giữ nguyên (giảm là feed lành lại; giữ nguyên là hiện trạng đã biết). Cũng liệt kê mã MỚI
+    rơi vào diện từ chối kể cả khi tổng không tăng — một mã lành lại che một mã hỏng đi thì tổng
+    đứng yên, mà đó vẫn là chuyện phải biết.
+    """
+    now = {tk: r.get("method") for tk, r in (cur or {}).items() if r.get("value") is None}
+    prev_tk = (prev_snap or {}).get("tickers") or {}
+    before = {tk for tk, r in prev_tk.items() if r.get("value") is None}
+    return {"n_none": len(now), "n_none_prev": len(before) if prev_snap else None,
+            "n_total": len(cur or {}),
+            "delta": (len(now) - len(before)) if prev_snap else None,
+            "newly_none": {tk: m for tk, m in sorted(now.items()) if tk not in before},
+            "recovered": sorted(before - set(now)),
+            "by_method": {m: sorted(t for t, mm in now.items() if mm == m)
+                          for m in sorted({m for m in now.values()})},
+            # `has_baseline=False` ⇒ CHƯA ĐÁNH GIÁ ĐƯỢC, không phải "không tăng". Cùng kỷ luật
+            # với `invariant_evaluated`: không có mốc thì không có kết luận.
+            "has_baseline": bool(prev_snap),
+            "alert": bool(prev_snap) and (len(now) > len(before) or bool(set(now) - before))}
+
+
 # ───────────────────────────────────────────────────────────── điều phối
 
 def run(asof=None, dry_run=False, alert=True, lookahead=LOOKAHEAD_DAYS, trace=None):
@@ -1041,7 +1127,16 @@ def run(asof=None, dry_run=False, alert=True, lookahead=LOOKAHEAD_DAYS, trace=No
 
     # ── LỚP 2 · đối soát chéo hai nguồn
     diverge = crosscheck(asof, track, cache) if track else []
-    print(f"[gate-4 đối soát] {len(diverge)} mã lệch giữa corp-action và ticker_financial")
+    n_nomodel = sum(1 for d in diverge if d.get("kind") == "NO_MODEL_VALUE")
+    print(f"[gate-4 đối soát] {len(diverge) - n_nomodel} mã LỆCH + {n_nomodel} mã KHÔNG đối soát "
+          f"được (mô hình từ chối trả số) giữa corp-action và ticker_financial")
+
+    # ── LỚP 4b · diễn biến của fail-closed (xem `none_value_watch`)
+    none_watch = none_value_watch(cur, prev_snap)
+    print(f"[gate-4b im lặng] {none_watch['n_none']}/{none_watch['n_total']} mã bị TỪ CHỐI trả số"
+          + (f" (mốc {prev_asof}: {none_watch['n_none_prev']}, Δ{none_watch['delta']:+d})"
+             if none_watch["has_baseline"] else " — CHƯA ĐÁNH GIÁ ĐƯỢC diễn biến (chưa có mốc)")
+          + (f" MỚI: {sorted(none_watch['newly_none'])}" if none_watch["newly_none"] else ""))
 
     # ── cổ tức tiền mặt rơi đúng hôm nay (GỘP, nguồn vendor — CHƯA đối soát tiền broker)
     # `include_announced=True` là BẮT BUỘC ở đây, không phải nới lỏng: vào 07:30 ngày ex-right,
@@ -1115,6 +1210,9 @@ def run(asof=None, dry_run=False, alert=True, lookahead=LOOKAHEAD_DAYS, trace=No
         "tickers": cur,
         "cash_dividend_today": div_today,
         "crosscheck_divergent": diverge,
+        # diễn biến fail-closed — publish RA snapshot để lượt sau có mốc so, và để người đọc lại
+        # file này thấy được xu hướng mà không phải tự dựng lại từ `tickers`.
+        "none_value_watch": none_watch,
         "invariant_violations": viol, "n_compared": n_cmp, "prev_snapshot_asof": prev_asof,
         # `0 vi phạm` với `n_compared == 0` KHÔNG phải PASS — không có gì để so. Ghi cờ ra
         # snapshot để người đọc (và mọi script đọc lại file này) không trích nhầm nó là kết quả.
@@ -1177,12 +1275,17 @@ def run(asof=None, dry_run=False, alert=True, lookahead=LOOKAHEAD_DAYS, trace=No
     if ais_today:
         lines.append(f"🧾 **AIS hiệu lực hôm nay** (số CP chính thức đổi): {sorted(ais_today)}")
     if diverge:
-        lines.append(f"⚠️ **Lệch nguồn Oshares** ({len(diverge)} mã, script KHÔNG tự chọn số): " +
-                     "; ".join(f"{d['ticker']}@{d['at']} corp-action "
-                               f"{(d['oshares_live'] or 0):,.0f} vs bq_admin "
-                               f"{d['ticker_financial']:,.0f}"
-                               f" ({d.get('err_pct_vs_ticker_financial', 0):.2f}%)"
-                               for d in diverge[:8]))
+        lines.append(_fmt_divergence(diverge))
+    if none_watch["alert"]:
+        lines.append(
+            f"🔇 **Số mã bị TỪ CHỐI trả số CP tăng**: {none_watch['n_none_prev']} → "
+            f"{none_watch['n_none']}/{none_watch['n_total']} mã (so mốc {prev_asof})"
+            + (f"; MỚI: " + ", ".join(f"{tk} ({m})"
+                                      for tk, m in none_watch["newly_none"].items())
+               if none_watch["newly_none"] else "")
+            + (f"; lành lại: {none_watch['recovered']}" if none_watch["recovered"] else "")
+            + ". Fail-closed nên KHÔNG có số sai nào được công bố — nhưng số mã không xác minh "
+              "được đang nhiều lên, kiểm feed trước khi tin phần còn lại.")
     if viol:
         lines.append(f"🚨 **Bất biến số CP vi phạm** ({len(viol)} mã — số đã bị GIẤU, không "
                      f"publish giá trị): " + "; ".join(
@@ -1217,13 +1320,23 @@ def run(asof=None, dry_run=False, alert=True, lookahead=LOOKAHEAD_DAYS, trace=No
                telegram=(bool(viol) or bool(cancelled) or bool(bf["days_missed"]) or streak >= 5))
     elif not lines:
         print("[quiet] không có sự kiện/lệch/vi phạm nào — không ping Discord")
+    if lines and not alert:
+        # `--no-alert` phải cho xem ĐƯỢC cái sẽ gửi. Không in ra thì cách duy nhất để kiểm chuỗi
+        # thật là để nó ping người thật — và đúng lỗi hiển thị TCB 2026-08-13 đã sống qua nhiều
+        # vòng review vì không ai đọc chuỗi cuối cùng, chỉ đọc dict.
+        print("[dry] tin nhắn SẼ gửi:\n" + "\n".join(lines))
 
     bus("finding" if not viol else "error",
         f"corp-action-daily {asof} {'OK' if not viol else 'CÓ VI PHẠM BẤT BIẾN'}",
         {"asof": asof, "feed_status": status, "n_track": len(track), "n_held": len(held),
          "exright_today": sorted(ex_today), "ais_today": sorted(ais_today),
          "cash_dividend_today": sorted(div_today), "n_upcoming_held": len(upcoming),
-         "n_crosscheck_divergent": len(diverge), "n_invariant_violations": len(viol),
+         # tách HAI loại: "hai nguồn nói khác nhau" và "mô hình từ chối trả số" là hai tình trạng
+         # khác hẳn nhau; gộp thành một con số là đúng cái nhầm lẫn dòng Discord từng mắc.
+         "n_crosscheck_divergent": len(diverge) - n_nomodel,
+         "n_crosscheck_no_model_value": n_nomodel,
+         "n_none_value": none_watch["n_none"], "none_value_alert": none_watch["alert"],
+         "n_invariant_violations": len(viol),
          # `n_invariant_violations: 0` một mình là mơ hồ — kèm luôn cờ "có so được gì không"
          # để người đọc bus không phải mở snapshot mới biết con số 0 đó có nghĩa hay không.
          "invariant_evaluated": inv_evaluated, "n_compared": n_cmp,

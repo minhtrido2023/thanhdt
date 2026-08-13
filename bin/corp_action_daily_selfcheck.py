@@ -302,6 +302,114 @@ def t_crosscheck():
     check("X5. mã không có dòng quý nào ⇒ bỏ qua im lặng, không dựng lệch giả", d == [], str(d))
 
 
+# ──────────────────────────── LỚP 2b · CHUỖI HIỂN THỊ thật của dòng cảnh báo Discord
+
+def t_render_divergence():
+    """Kiểm CHUỖI người đọc thật sự nhìn thấy, không phải trường trong dict.
+
+    Vì sao tách riêng khỏi `t_crosscheck`: ca X4 đã kiểm `oshares_live is None` và PASS trong khi
+    dòng Discord vẫn in "corp-action 0 … (0,00%)". Một `None` đúng trong dict KHÔNG chứng minh
+    gì về chuỗi render — giữa hai cái có một `or 0`. Bug thật (TCB, 2026-08-13, mã đang giữ ở cả
+    hai tài khoản) sống đúng trong khoảng hở đó suốt các vòng trước.
+    """
+    print("== LỚP 2b · chuỗi hiển thị Discord cho đối soát Oshares ==")
+    tcb = {"ticker": "TCB", "at": "2026-07-21", "ticker_financial": 7_086_240_414.0,
+           "oshares_live": None, "kind": "NO_MODEL_VALUE", "method": "AIS_UNCERTIFIED",
+           "note": "..."}
+    evf = {"ticker": "EVF", "at": "2026-07-21", "ticker_financial": 760_565_802.0,
+           "oshares_live": 704_248_289.0, "err_pct_vs_ticker_financial": 7.404686,
+           "kind": "DIVERGENT", "model_method": "AIS_EXACT"}
+
+    # dấu phân cách là DẤU PHẨY (`:,.0f`) — quy ước sẵn có của cả file này, không đổi ở đây (§3).
+    s = cad._fmt_divergence([tcb])
+    check("R1. NO_MODEL_VALUE KHÔNG BAO GIỜ in ra một con số cho corp-action — chuỗi phải nói "
+          "TỪ CHỐI + nêu nhãn phương pháp + vẫn nêu số bq_admin để người đọc biết đang thiếu gì",
+          "TỪ CHỐI trả số" in s and "AIS_UNCERTIFIED" in s and "7,086,240,414" in s, s)
+    check("R2. CA CHỨNG MINH NGƯỢC — chính là bug đã ship: chuỗi KHÔNG được chứa 'corp-action 0' "
+          "lẫn '(0,00%)' (khuôn cũ in đúng hai mảnh đó cho TCB)",
+          "corp-action 0" not in s and "0,00%" not in s and "0.00%" not in s, s)
+    check("R3. DIVERGENT vẫn in ĐỦ hai số + sai số đúng mẫu số (không hồi quy phần đang chạy)",
+          "704,248,289" in (t := cad._fmt_divergence([evf])) and "760,565,802" in t
+          and "7.40%" in t, t)
+
+    s2 = cad._fmt_divergence([evf, tcb])
+    check("R4. hai loại ĐẾM RIÊNG ở đầu dòng — '1 mã LỆCH + 1 mã KHÔNG đối soát được', không "
+          "gộp thành '2 mã lệch'",
+          "1 mã LỆCH" in s2 and "1 mã KHÔNG đối soát được" in s2 and "2 mã LỆCH" not in s2, s2)
+    check("R5. chỉ có NO_MODEL_VALUE ⇒ đầu dòng KHÔNG được nói 'LỆCH' (không có mã nào lệch)",
+          "LỆCH" not in cad._fmt_divergence([tcb]), s)
+    check("R6. rỗng ⇒ None (không đẻ dòng trống)", cad._fmt_divergence([]) is None)
+    check("R7. quá `limit` ⇒ nói rõ còn bao nhiêu mã nữa, không im lặng cắt cụt (§'no silent "
+          "caps')", "… và 2 mã nữa" in cad._fmt_divergence([evf] * 5, limit=3),
+          cad._fmt_divergence([evf] * 5, limit=3)[-40:])
+
+    # phòng thủ: bản ghi thiếu `kind` nhưng `oshares_live` là None vẫn phải đi nhánh TỪ CHỐI —
+    # không được rơi về khuôn số rồi nổ `TypeError` hay in "0".
+    bare = {"ticker": "XXX", "at": "2026-07-21", "ticker_financial": 1_000.0,
+            "oshares_live": None}
+    check("R8. thiếu `kind` mà `oshares_live` None ⇒ vẫn đi nhánh TỪ CHỐI, không nổ, không in 0 "
+          "— VÀ đầu dòng đếm nó là 'KHÔNG đối soát được', không phải 'LỆCH' (một vị ngữ dùng "
+          "chung cho cả đầu dòng lẫn thân dòng; hai vị ngữ khác nhau đã cho một dòng tự mâu "
+          "thuẫn ở bản nháp)",
+          "TỪ CHỐI trả số" in (b := cad._fmt_divergence([bare])) and "corp-action 0" not in b
+          and "1 mã KHÔNG đối soát được" in b and "LỆCH" not in b, b)
+
+    # ĐẦU-CUỐI: chạy thẳng `crosscheck()` trên fixture CCC (fail-closed thật) rồi render — chứng
+    # minh hai đầu KHỚP NHAU, chứ không phải mỗi bên đúng với một hình dạng dict khác nhau.
+    real = cad.crosscheck("2026-08-13", {"CCC"}, CACHE)
+    check("R9. ĐẦU-CUỐI: bản ghi do chính `crosscheck()` sinh ra, render ra chuỗi TỪ CHỐI (hai "
+          "đầu khớp hình dạng dict, không phải fixture tự bịa)",
+          real and "TỪ CHỐI trả số" in (r := cad._fmt_divergence(real))
+          and "corp-action 0" not in r, str(real))
+
+
+# ────────────────────────────── LỚP 4b · giám sát DIỄN BIẾN của fail-closed (im lặng)
+
+def t_none_value_watch():
+    print("== LỚP 4b · lưới giám sát số mã bị TỪ CHỐI trả số ==")
+    def snap(d):
+        return {"tickers": {tk: {"value": v} for tk, v in d.items()}}
+
+    prev = snap({"AAA": 1.0, "BBB": None, "CCC": 2.0})
+    cur_same = {"AAA": {"value": 1.0, "method": "AIS_EXACT"},
+                "BBB": {"value": None, "method": "UNKNOWN_RATIO"},
+                "CCC": {"value": 2.0, "method": "AIS_EXACT"}}
+    w = cad.none_value_watch(cur_same, prev)
+    check("NW1. đứng yên (1→1, cùng mã) ⇒ KHÔNG báo — lưới này báo DIỄN BIẾN, không báo hiện "
+          "trạng đã biết", w["alert"] is False and w["delta"] == 0, str(w["delta"]))
+
+    cur_up = dict(cur_same, CCC={"value": None, "method": "AIS_UNCERTIFIED"})
+    w = cad.none_value_watch(cur_up, prev)
+    check("NW2. TĂNG 1→2 ⇒ BÁO, nêu đích danh mã MỚI + nhãn phương pháp của nó",
+          w["alert"] and w["delta"] == 1 and w["newly_none"] == {"CCC": "AIS_UNCERTIFIED"},
+          str(w["newly_none"]))
+
+    cur_down = dict(cur_same, BBB={"value": 3.0, "method": "AIS_EXACT"})
+    w = cad.none_value_watch(cur_down, prev)
+    check("NW3. CA CHỨNG MINH NGƯỢC — GIẢM 1→0 ⇒ KHÔNG báo (feed lành lại không phải sự cố), "
+          "nhưng vẫn ghi lại `recovered`",
+          w["alert"] is False and w["delta"] == -1 and w["recovered"] == ["BBB"], str(w))
+
+    swap = {"AAA": {"value": None, "method": "NO_ANCHOR"},
+            "BBB": {"value": 1.0, "method": "AIS_EXACT"},
+            "CCC": {"value": 2.0, "method": "AIS_EXACT"}}
+    w = cad.none_value_watch(swap, prev)
+    check("NW4. TỔNG ĐỨNG YÊN nhưng ĐỔI MÃ (BBB lành, AAA hỏng) ⇒ VẪN BÁO — đếm tổng một mình "
+          "sẽ nuốt mất ca này",
+          w["alert"] and w["delta"] == 0 and w["newly_none"] == {"AAA": "NO_ANCHOR"}, str(w))
+
+    w = cad.none_value_watch(cur_up, None)
+    check("NW5. chưa có mốc ⇒ CHƯA ĐÁNH GIÁ ĐƯỢC, KHÔNG báo và KHÔNG gọi là 'không tăng' "
+          "(cùng kỷ luật với `invariant_evaluated`)",
+          w["has_baseline"] is False and w["alert"] is False and w["delta"] is None
+          and w["n_none"] == 2, str(w))
+
+    check("NW6. gộp theo nhãn phương pháp để đọc được nguyên nhân, không chỉ con số",
+          cad.none_value_watch(cur_up, prev)["by_method"]
+          == {"AIS_UNCERTIFIED": ["CCC"], "UNKNOWN_RATIO": ["BBB"]},
+          str(cad.none_value_watch(cur_up, prev)["by_method"]))
+
+
 # ─────────────────────────────────────── lịch trigger + LỚP 6 · cảnh báo proactive
 
 def t_triggers_and_alerts():
@@ -1062,6 +1170,8 @@ def main():
     t_freshness()
     t_invariants()
     t_crosscheck()
+    t_render_divergence()
+    t_none_value_watch()
     t_triggers_and_alerts()
     t_query_shape()
     t_confirm_unique_key()
