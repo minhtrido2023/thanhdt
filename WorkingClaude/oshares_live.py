@@ -1,20 +1,30 @@
 #!/usr/bin/env python3
 """oshares_live.py — shares outstanding at ANY date, without waiting for the next quarterly report.
 
-STATUS: WIRED (2026-08-13) — but ONLY through `oshares_pit.py`, never directly.
+STATUS: WIRED (2026-08-13) through `oshares_pit.py`, and SAFE to call directly since the AIS
+certification gate moved in here (round 4, job `Taylor_20260813_154112`).
 Round 1 REFUTED this module on 2026-08-13 for the two defects rewritten below; round 2 CONFIRMED
 the rewrite (bus, 2026-08-13T06:06:49Z) and two consumers went live the same day:
 `custom30_core_select_audit.py` (historical) and `rating_8l.py::_reconcile_oshares` (live).
 
-⚠️ A NEW CONSUMER MUST CALL `oshares_pit.oshares_pit()` / `oshares_reconciled()`, NOT `oshares_at()`.
-`oshares_at` accepts `AIS.shares_total_after` UNCONDITIONALLY, and the vendor feed contains wrong
-AIS rows — measured 2026-08-13 across the whole table, 220 of 2.505 AIS transitions (135 tickers)
-carry a `shares_total_after` that cannot be reconciled with the row before it. Called directly,
-this module still answers 3.000.000.000 for IDC across 2020-05-28 → 2022-09-05 (~10× too high for
-two years) and 461.723.054 for FPT on 2020-05-05 (−32,3%). The certification gate that refuses
-those lives in `oshares_pit._ais_verdicts`, at the CONSUMER layer. Moving it inside this module is
-the right long-term fix and needs its own quant-skeptic round; until then the adapter is the only
-supported entry point.
+WHERE THE AIS GATE LIVES — HERE, NOT IN THE ADAPTER (changed 2026-08-13, round 4)
+---------------------------------------------------------------------------------
+Until round 4 this module accepted `AIS.shares_total_after` UNCONDITIONALLY and the certification
+gate lived in `oshares_pit._ais_verdicts`, at the CONSUMER layer — so `oshares_at()` called
+directly still answered 3.000.000.000 for IDC across 2020-05-28 → 2022-09-05 (~10× too high for
+two years) and 461.723.054 for FPT on 2020-05-05 (−32,3%), with only a docstring warning between a
+new consumer and those numbers. A docstring is not a gate. `_ais_verdicts` + the serve policy now
+live BELOW, and `oshares_at` refuses an uncertified AIS anchor itself: `value=None`,
+`method="AIS_UNCERTIFIED"`, whatever it declined to serve preserved in `uncertified_value` so a
+caller can log it. No caller can route around it, and there is exactly one copy of the logic —
+`oshares_pit` imports this one rather than keeping a second.
+
+⚠️ THIS IS NOT THE SAME AS "SAFE TO SUBSTITUTE FOR YOUR CURRENT NUMBER". `oshares_at` DECLINES far
+more often the further back you look (33,3% of a 108-name universe at 2014-07-01), so a naked
+substitution trades look-ahead for a bigger availability bias. A consumer still needs a fallback
+policy, and that is what `oshares_pit` / `oshares_reconciled` are for — plus the coarse
+`SANITY_FACTOR` magnitude gate, which is deliberately a CONSUMER-layer decision and stayed there
+(measured 2026-08-13: it still catches ~27 gross-error cells this certification gate does not).
 
 Replaces the manual path (`update_shares_live.py`, run by hand into the 4-row
 `tav2_bq.shares_outstanding_live`) with a computed answer from two sources that already exist:
@@ -80,8 +90,11 @@ forward through both gives 1.481.340.xxx against the 2025-06-19 AIS ground truth
 
 ACCURACY, STATED HONESTLY
 -------------------------
-`AIS_EXACT`      — the anchor is an AIS and nothing ratio-derived happened since: the registry's
-                   own number.
+`AIS_EXACT`      — the anchor is an AIS that PASSED the certification gate below and nothing
+                   ratio-derived happened since: the registry's own number, checked.
+`AIS_UNCERTIFIED` — the anchor is an AIS that could NOT be reconciled with the AIS before it.
+                   **`value is None`**; the refused number is kept in `uncertified_value` for the
+                   caller's log, never as an answer.
 `ANCHOR_ONLY`    — the anchor is a quarterly row that PASSED the explanation gate, nothing since.
 `ANCHOR_UNVERIFIED` — the anchor is a quarterly row for a ticker with no AIS before it, so the
                    gate had nothing to check it against (DHG). The number is returned because
@@ -230,13 +243,137 @@ def _explain_quarterly(q, ais, iss):
     return True, True, ""
 
 
+# Verdict nào của một neo AIS thì ĐƯỢC PHỤC VỤ. Đây là dòng CHÍNH SÁCH của cổng — mọi thứ khác
+# chỉ là cách tính verdict. Đo 2026-08-13 (job Taylor_20260813_142812), xem `_ais_verdicts`:
+#   "OK"        — đối chiếu được với AIS liền trước và KHỚP.
+#   "NO_PRIOR"  — là AIS ĐẦU TIÊN có `shares_total_after` của mã: KHÔNG CÓ GÌ để đối chiếu, khác
+#                 hẳn "dựng được kỳ vọng và nó SAI". Phục vụ, đúng như `_explain_quarterly` xử lý
+#                 dòng quý không có AIS nào trước nó (nhận, nhưng không coi là đã kiểm) — và ở
+#                 tầng consumer neo này vẫn còn cổng biên độ `oshares_pit._sane` đứng sau.
+#                 ĐO ĐƯỢC (rổ 171 mã × 48 ngày rebal = 7.610 ô):
+#                   phục vụ NO_PRIOR (đang chạy) : live 6.603 (86,8%) · liq CAGR 12,44%
+#                   loại NO_PRIOR  (biến thể chặt): live 6.290 (82,7%) · liq CAGR 12,46%
+#                 ⇒ chặt hơn đẩy thêm 313 ô (4,1pp phủ) về lại số quý RESTATE — tức đổi look-ahead
+#                 lấy look-ahead — để mua 0,02pp CAGR, nằm trong nhiễu. Không có ca hại nào đo
+#                 được ở nhánh này: FPT 2017-07-03 (AIS đầu tiên, 530.961.105) đối chiếu ĐÚNG với
+#                 dòng quý 2017-08-01 (530.878.729, lệch 0,015%).
+#                 Đây là điểm PHÁN ĐOÁN duy nhất còn lại của cổng; đổi chính sách = sửa 1 dòng này.
+#   "UNVERIFIED"— mọi trường hợp còn lại (dựng được kỳ vọng nhưng lệch, HOẶC không dựng nổi kỳ
+#                 vọng nào). KHÔNG phục vụ.
+_SERVE_AIS_VERDICTS = ("OK", "NO_PRIOR")
+
+
+def _ais_verdicts(corp, ticker, asof):
+    """{effective_date: "OK" | "NO_PRIOR" | "UNVERIFIED"} cho MỌI AIS của mã, tại `asof`.
+
+    ⚠️ DỜI VÀO ĐÂY 2026-08-13 (vòng 4, job Taylor_20260813_154112). Trước đó hàm này sống ở
+    `oshares_pit`, tức cổng chỉ chặn được người đi qua lớp bọc; `oshares_at()` gọi thẳng vẫn trả
+    3.000.000.000 cho IDC và 461.723.054 cho FPT. Không đổi một luật nào khi dời — chỉ đổi CHỖ,
+    và `oshares_pit` nay import lại hàm này thay vì giữ bản thứ hai.
+
+    ⚠️ ĐỔI NGHĨA 2026-08-13 (quant-skeptic REFUTED bản trước, job Taylor_20260813_142812).
+    Bản trước là `_suspect_ais` — một bộ **BẮT LỖI**: trả về tập AIS *chứng minh được là sai*, và
+    mọi dòng còn lại được phục vụ ở nhãn tin cậy cao nhất `AIS_EXACT`. Đó là thế giới MỞ: "chưa
+    bắt được" bị đọc thành "đã kiểm". Hàm này là bộ **CHỨNG NHẬN**: nó chỉ nói dòng nào đối chiếu
+    ĐƯỢC và KHỚP; chỉ những dòng đó được phục vụ (`_SERVE_AIS_VERDICTS`).
+
+    Vì sao phải đổi, chứ không phải vá thêm một luật: quant-skeptic chỉ ra tập cờ cũ không phải
+    "lỗi vendor" mà là "transition NẰM CẠNH một bất thường" — IDC 2022-09-05 (dòng ĐÚNG) bị gắn cờ
+    chỉ vì đứng sau dòng 3 tỷ hỏng, trong khi FPT 2020-04-06 (dòng SAI) lọt lưới. Một bộ bắt lỗi
+    không thể sửa được bằng cách bắt giỏi hơn; phải thôi tuyên bố "đây là lỗi" và chỉ tuyên bố
+    "đây là dòng tôi kiểm được".
+
+    Bất biến kiểm được, chỉ dùng dữ liệu của riêng feed corp-action (không mượn số quý). Có HAI
+    cách hợp lệ để tới `shares_total_after[i]`, và một dòng đúng chỉ cần khớp MỘT trong hai:
+
+        (a) roll(shares_total_after[i-1], ISS ở giữa)     — sự kiện ISS đã cộng phần tăng rồi,
+                                                             AIS chỉ là lần đăng ký niêm yết của
+                                                             CHÍNH số CP đó
+        (b) shares_total_after[i-1] + shares_delta[i]      — không có bản ghi ISS nào tương ứng,
+                                                             `shares_delta` là nguồn duy nhất
+
+    ⚠️ Cộng cả hai (`roll(...) + delta`) là ĐẾM HAI LẦN và đó là lỗi bản đầu của hàm này: nó gắn
+    cờ 12/12 AIS của FPT, kể cả 2025-09-12 = 1.703.507.121 mà `_selfcheck` bên dưới đã chứng minh
+    là ĐÚNG. Dùng lại `_roll` nên phần lăn sự kiện là CÙNG một hàm với phần tính số, không phải
+    bản chép tay thứ hai.
+
+    Chỉ xét AIS có `effective_date <= asof`: quyết định LOẠI cũng phải point-in-time, nếu không
+    một AIS năm 2026 lại đang bác một câu trả lời của năm 2019.
+
+    ⚠️ MỘT ISS CHẮN ĐƯỜNG CHỈ GIẾT ỨNG VIÊN (a), KHÔNG GIẾT (b). Đây chính là lỗ hổng đã bị bác:
+    bản trước `continue` ngay khi `_roll` trả blocker, vứt bỏ luôn ứng viên (b) — dù (b) =
+    `prev + shares_delta` không cần lăn qua ISS nào cả. Quét toàn bảng 2026-08-13: **213/2.505
+    transition (129 mã)** có đúng hình dạng "blocker chắn đường NHƯNG (b) dựng được và MÂU THUẪN"
+    — tức 213 dòng vendor sai đang được phục vụ ở nhãn `AIS_EXACT` mà không ai kiểm. Ca FPT
+    2020-05-05 (461.723.054 thay vì 681.668.102, −32,3%) là một trong số đó. Thêm 7 ca
+    (6 mã) không dựng được ứng viên NÀO ⇒ nay là "UNVERIFIED", trước là phục vụ im lặng.
+
+    Chi phí của chiều ngược lại đã cân nhắc và CHẤP NHẬN: khi có ISS thật xen giữa, (b) thiếu
+    phần cổ phiếu do ISS sinh ra nên có thể báo UNVERIFIED oan. Hậu quả của báo oan là **rơi về
+    đúng số caller đang dùng hôm nay** — không mất gì; hậu quả của bỏ lọt là thay một số đúng
+    bằng một số sai −32%. Hai chiều KHÔNG đối xứng, nên cổng cố ý lệch về phía báo oan.
+
+    HAI CA THẬT nó bắt được, cả hai đã kiểm tay bằng ba nguồn độc lập:
+      IDC 2020-05-28  delta 108.000.000, total_after 3.000.000.000, AIS trước 300.000.000
+                      ⇒ kỳ vọng 408.000.000, lệch ~7,4×. (8 quý sau đó vẫn 300tr; AIS kế 329.999.929.)
+      AAA 2019-06-03  delta 1.700.000, total_after 58.664.988, AIS trước 171.199.976
+                      ⇒ kỳ vọng 172.899.976. Ca này LỌT qua cổng biên độ thô ×3 của `oshares_pit`
+                      (58,66/171,20 = 0,343, hụt biên 1/3 = 0,333) — đó là lý do phải có cổng theo
+                      bất biến, không chỉ cổng theo biên độ.
+    """
+    rows = sorted((c for c in corp
+                   if c["ticker"] == ticker and c["event_code"] == "AIS"
+                   and c["effective_date"] and c["effective_date"] <= asof
+                   and c["shares_total_after"]),
+                  key=lambda r: r["effective_date"])
+    iss = [c for c in corp if c["ticker"] == ticker and c["event_code"] == "ISS"
+           and c["exright_date"] and c["exright_date"] <= asof]
+    verdicts = {}
+    if rows:
+        verdicts[rows[0]["effective_date"]] = "NO_PRIOR"
+    for prev, cur in zip(rows, rows[1:]):
+        if cur["effective_date"] == prev["effective_date"]:
+            continue                                        # cùng ngày: không suy ra thứ tự được
+        base_prev = float(prev["shares_total_after"])
+        actual = float(cur["shares_total_after"])
+        cands = []
+        between = _dedup_iss([e for e in iss
+                              if prev["effective_date"] < e["exright_date"]
+                              <= cur["effective_date"]])
+        rolled, _applied, blockers = _roll(base_prev, between)
+        if not blockers:
+            cands.append(rolled)                             # (a) — chỉ khi lăn được HẾT ISS
+        delta = cur.get("shares_delta")
+        if delta is not None and float(delta) > 0:
+            cands.append(base_prev + float(delta))           # (b) — không phụ thuộc ISS
+        # `cands` RỖNG (blocker chắn (a) VÀ không có delta cho (b)) ⇒ không dựng được kỳ vọng nào
+        # ⇒ UNVERIFIED. Đây là chỗ `all([]) == True` từng làm nghĩa của hàm đảo ngược nếu viết
+        # gọn, nên điều kiện được viết TƯỜNG MINH.
+        ok = bool(cands) and any(e > 0 and abs(actual - e) / e <= EXPLAIN_TOL for e in cands)
+        verdicts[cur["effective_date"]] = "OK" if ok else "UNVERIFIED"
+    return verdicts
+
+
+def _ais_certified(corp, ticker, asof, anchor_date):
+    """Neo AIS `anchor_date` có được chứng nhận không? FAIL-CLOSED.
+
+    Verdict lạ, thiếu ngày trong bảng, hay bản thân `_ais_verdicts` ném lỗi ⇒ CHƯA chứng nhận.
+    Đây là cùng một kỷ luật "không kiểm được thì KHÔNG cho qua" mà quant-skeptic đã bác một bản
+    trước vì làm ngược (`oshares_pit._anchor_unverified` cũ trả "được phục vụ" ở cả ba nhánh đó).
+    """
+    try:
+        return _ais_verdicts(corp, ticker, asof).get(anchor_date) in _SERVE_AIS_VERDICTS
+    except Exception:                                       # noqa: BLE001 — fail-closed by design
+        return False
+
+
 def oshares_at(tickers, asof, _cache=None):
     """{ticker: dict} — shares outstanding at `asof`, with the derivation shown.
 
     Each value carries `value`, `method`, `anchor_date`, `anchor_value`, `anchor_source` and the
     list of ISS events applied, so any number can be re-derived by hand from the output alone.
-    `value is None` whenever the method is `UNKNOWN_RATIO` or `NO_ANCHOR` — callers MUST handle
-    that; there is no "best effort" number behind it.
+    `value is None` whenever the method is `UNKNOWN_RATIO`, `NO_ANCHOR` or `AIS_UNCERTIFIED` —
+    callers MUST handle that; there is no "best effort" number behind it.
     """
     if isinstance(tickers, str):
         tickers = [tickers]
@@ -301,6 +438,25 @@ def oshares_at(tickers, asof, _cache=None):
             method = "AIS_EXACT"           # applied deltas, if any, are exact registry counts
         else:
             method = "ANCHOR_ONLY" if anchor_verified else "ANCHOR_UNVERIFIED"
+
+        # ── CỔNG CHỨNG NHẬN NEO AIS ─────────────────────────────────────────────────────────
+        # Neo dòng quý đã có cổng riêng (`_explain_quarterly`) ngay lúc nhận; neo AIS trước vòng 4
+        # KHÔNG có cổng nào — nhãn tin cậy cao nhất lại là nhánh duy nhất không ai kiểm.
+        # Đặt SAU khi tính xong, không phải lúc chọn neo, và đó là CỐ Ý:
+        #   * nhánh `blockers` ở trên đã từ chối trả lời rồi ⇒ giữ nguyên nhãn UNKNOWN_RATIO (lý
+        #     do ĐẦU TIÊN chặn mới là lý do đúng để báo);
+        #   * KHÔNG tụt xuống một neo cũ hơn hay sang neo dòng quý khi neo AIS trượt cổng. Làm thế
+        #     là ĐỔI SỐ, không còn là dời cổng — và số thay thế đó chưa ai đo. Ở đây từ chối trả
+        #     lời; consumer rơi về đúng số nó đang dùng hôm nay (`oshares_pit`).
+        if anchor_src == "corporate_action.AIS" \
+                and not _ais_certified(corp, tk, asof, anchor_date):
+            out[tk] = {**base, "value": None, "method": "AIS_UNCERTIFIED",
+                       "uncertified_value": value, "uncertified_method": method,
+                       "events_applied": [_event_dict(e, h, s) for e, h, s in applied],
+                       "note": f"neo AIS {anchor_date} ({anchor_value:,.0f}) không đối chiếu được "
+                               f"với AIS liền trước ⇒ KHÔNG phục vụ {value:,.0f} (fail-closed); "
+                               f"số bị từ chối giữ ở `uncertified_value` để ghi log"}
+            continue
 
         out[tk] = {**base, "value": value, "method": method,
                    "events_applied": [_event_dict(e, h, s) for e, h, s in applied]}
@@ -479,11 +635,95 @@ def _selfcheck() -> int:
           sorted(e["applied_size"] for e in m.get("events_applied", [])
                  if e["exright_date"] == "2026-08-11") == [0.1, 0.15])
 
-    print("== Bất biến chung: value is None ⟺ method ∈ {UNKNOWN_RATIO, NO_ANCHOR} ==")
-    every = [h, m, *ctrl.values(), *series.values()]
+    # ── VÒNG 4: cổng chứng nhận neo AIS nay nằm TRONG module này ────────────────────────────
+    # Trước vòng 4 cổng chỉ có ở `oshares_pit`, nên đúng hai lệnh dưới đây trả về số sai. Đây là
+    # lý do tồn tại của cả vòng này: gọi thẳng phải an toàn, không chỉ gọi qua lớp bọc.
+    print("== VÒNG 4: gọi THẲNG oshares_at cũng không được trả neo AIS chưa chứng nhận ==")
+    idc = oshares_at(["IDC"], "2021-02-05")["IDC"]
+    print(f"  IDC 2021-02-05: {fmt(idc['value'])} [{idc['method']}] "
+          f"bị từ chối={fmt(idc.get('uncertified_value'))}")
+    check("N1. IDC 2021-02-05 KHÔNG còn trả 3.000.000.000 khi gọi thẳng",
+          idc["value"] is None and idc["method"] == "AIS_UNCERTIFIED",
+          f"value={fmt(idc['value'])} method={idc['method']}")
+    check("N1b. …và số bị từ chối ĐÚNG là 3.000.000.000, giữ lại để ghi log chứ không phục vụ",
+          idc["uncertified_value"] == 3_000_000_000.0, fmt(idc.get("uncertified_value")))
+    fpt5 = oshares_at(["FPT"], "2020-05-05")["FPT"]
+    check("N2. FPT 2020-05-05 KHÔNG còn trả 461.723.054 khi gọi thẳng (ca REFUTED vòng 2)",
+          fpt5["value"] is None and fpt5["method"] == "AIS_UNCERTIFIED"
+          and fpt5["uncertified_value"] == 461_723_054.0,
+          f"value={fmt(fpt5['value'])} bị từ chối={fmt(fpt5.get('uncertified_value'))}")
+    # CHỨNG MINH NGƯỢC — nếu không có ca test này thì N1/N2 có thể PASS chỉ vì mã đó rỗng dữ liệu.
+    # Sửa `globals()` chứ không `import oshares_live`: chạy bằng `python oshares_live.py` thì
+    # module này là `__main__`, một lệnh import sẽ nạp BẢN THỨ HAI và vá nhầm chỗ.
+    _keep_serve = _SERVE_AIS_VERDICTS
+    globals()["_SERVE_AIS_VERDICTS"] = ("OK", "NO_PRIOR", "UNVERIFIED")
+    try:
+        idc_no = oshares_at(["IDC"], "2021-02-05")["IDC"]
+        fpt_no = oshares_at(["FPT"], "2020-05-05")["FPT"]
+    finally:
+        globals()["_SERVE_AIS_VERDICTS"] = _keep_serve
+    check("N3. CHỨNG MINH NGƯỢC: mở cổng ⇒ CẢ HAI số sai THẬT SỰ quay lại (cổng đang chặn thật)",
+          idc_no["value"] == 3_000_000_000.0 and idc_no["method"] == "AIS_EXACT"
+          and fpt_no["value"] == 461_723_054.0,
+          f"IDC {fmt(idc_no['value'])} · FPT {fmt(fpt_no['value'])}")
+    # FAIL-CLOSED: hàm chứng nhận hỏng ⇒ KHÔNG phục vụ (không phải "không kiểm được thì cho qua")
+    _keep_v = _ais_verdicts
+
+    def _boom_verdicts(*_a, **_k):
+        raise RuntimeError("cổng chứng nhận sập giả lập")
+
+    globals()["_ais_verdicts"] = _boom_verdicts
+    try:
+        tcb_boom = oshares_at(["TCB"], "2026-08-12")["TCB"]
+    finally:
+        globals()["_ais_verdicts"] = _keep_v
+    check("N4. FAIL-CLOSED: `_ais_verdicts` NÉM LỖI ⇒ neo AIS coi như CHƯA chứng nhận",
+          tcb_boom["value"] is None and tcb_boom["method"] == "AIS_UNCERTIFIED",
+          f"{fmt(tcb_boom['value'])} [{tcb_boom['method']}]")
+    # …và cổng không được nuốt sạch: mã sạch vẫn phải ra AIS_EXACT, nếu không N1/N2 chỉ chứng minh
+    # "chặn tất cả", một cổng vô dụng cũng PASS được.
+    check("N5. ĐỐI CHỨNG: TCB 2026-08-12 (neo AIS chứng nhận được) VẪN phục vụ AIS_EXACT",
+          ctrl["TCB"]["value"] is not None and ctrl["TCB"]["method"] == "AIS_EXACT",
+          f"{fmt(ctrl['TCB']['value'])} [{ctrl['TCB']['method']}]")
+    check("N6. neo dòng quý KHÔNG bị cổng AIS đụng tới (đã có cổng RESTATE riêng)",
+          all(ctrl[t]["value"] is not None
+              and ctrl[t]["method"] in ("ANCHOR_ONLY", "ANCHOR_UNVERIFIED")
+              for t in ("ACB", "DHG", "HDB", "PVT")),
+          str({t: ctrl[t]["method"] for t in ("ACB", "DHG", "HDB", "PVT")}))
+    # NO_PRIOR = AIS đầu tiên của mã: được phục vụ có chủ đích (xem `_SERVE_AIS_VERDICTS`)
+    fcache = _fetch(["FPT"], "2026-08-13")
+    check("N7. verdict NO_PRIOR (FPT 2017-07-03, AIS đầu tiên) ⇒ được phục vụ",
+          _ais_verdicts(fcache[1], "FPT", "2017-08-01").get("2017-07-03") == "NO_PRIOR"
+          and oshares_at(["FPT"], "2017-07-03", _cache=fcache)["FPT"]["value"] == 530_961_105,
+          str(oshares_at(["FPT"], "2017-07-03", _cache=fcache)["FPT"]["method"]))
+    # POINT-IN-TIME: một AIS của tương lai không được bác câu trả lời của quá khứ
+    icache = _fetch(["IDC"], "2026-08-13")
+    check("N8. PIT: xét tại 2020-01-01 thì AIS 2022-09-05 chưa tồn tại ⇒ không có verdict",
+          "2022-09-05" not in _ais_verdicts(icache[1], "IDC", "2020-01-01"),
+          str(sorted(_ais_verdicts(icache[1], "IDC", "2020-01-01"))))
+
+    print("== Bất biến chung: value is None ⟺ method ∈ {UNKNOWN_RATIO, NO_ANCHOR, AIS_UNCERTIFIED} ==")
+    every = [h, m, idc, fpt5, tcb_boom, *ctrl.values(), *series.values()]
     check("10. không bao giờ trả số kèm nhãn 'không biết', và ngược lại",
-          all((r["value"] is None) == (r["method"] in ("UNKNOWN_RATIO", "NO_ANCHOR"))
+          all((r["value"] is None)
+              == (r["method"] in ("UNKNOWN_RATIO", "NO_ANCHOR", "AIS_UNCERTIFIED"))
               for r in every))
+    served_ais = [r for r in every
+                  if r["value"] is not None and r.get("anchor_source") == "corporate_action.AIS"]
+    _corp_memo = {}
+
+    def _corp_of(tk):
+        if tk not in _corp_memo:
+            _corp_memo[tk] = _fetch([tk], "2026-08-13")[1]
+        return _corp_memo[tk]
+
+    check("10b. mọi câu trả lời neo AIS ĐƯỢC PHỤC VỤ đều có verdict trong _SERVE_AIS_VERDICTS "
+          "(bất biến trên rổ, không chỉ trên 2 ca đã biết)",
+          bool(served_ais) and all(
+              _ais_certified(_corp_of(r["ticker"]), r["ticker"], r["asof"], r["anchor_date"])
+              for r in served_ais),
+          f"{len(served_ais)} ca neo AIS được phục vụ: "
+          + str(sorted({f"{r['ticker']}@{r['anchor_date']}" for r in served_ais})))
 
     print()
     if fails:
