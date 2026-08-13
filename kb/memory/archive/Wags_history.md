@@ -103,3 +103,6 @@ Pattern theo dõi tiếp: (1) consolidator auto-commit quét working-tree change
 
 ## Archived 2026-08-12 (keep=12 days=0 require_done=False)
 - [2026-08-11T02:28:29Z] CON TREO (round-2, KHONG phai bug tra cuu): 2 question wags-fix-not-confirmed coord-2026-08-10 (check_report_cadence.sh: 3+1 required_changes — auto-close kiem file khac detector, answered set phi thoi gian lech _resolved r_ts>=q_ts, append nuot loi van echo auto-closed, thieu selfcheck) va coord-2026-08-11 (send_plan_report.sh: gate moi fail-open IM LANG + 17/30 lenh gan sai nguyen nhan). Ca 2 la NEEDS_CHANGES THAT co chan doan cu the (da doc verdict tren bus) — DUNG dong bang ly do 'false alarm do bug prefix'. Ngoai ranh gioi job 021605, can job rieng.
+
+## Archived 2026-08-13 (keep=12 days=0 require_done=False)
+- [2026-08-11T05:51:49Z] [2026-08-11] coord-2026-08-11 XONG (commit bdfedc8a): ack triaged-needs-human ho tro suppress_days (tran 14d) de topic do CRON phat lai khong dot lai job Wags. CHO USER 2 quyet dinh (ack 7d, se hien lai sau 08-18 neu khong ai tra loi): (a) coding_guidelines.md 43,5KB > nguong 40KB — tach section ra file kb rieng hay nang nguong; (b) buoc gop park-merge chua co cron — cai cron hay giu chay tay. Bai hoc: truoc khi ket luan question con treo, DOC ARTIFACT (file plan tren dia) — 1/3 question dot nay da duoc user duyet ma khong ai post closing event.
