@@ -640,6 +640,255 @@ def t_carry_forward():
               rows_by_date={})] == ["VANISHED"])
 
 
+# ───────────────────────────────────────────── phiên cron BỊ LỠ: phát hiện + backfill
+
+def _ev(tk, d, status="announced", code="DIV", ev_id=None):
+    """Một dòng sự kiện như `_events_on_sql` trả về (ex-right rơi đúng ngày `d`)."""
+    return {"id": ev_id or f"id-{tk}-{d}", "ticker": tk, "event_code": code,
+            "exright_date": d, "effective_date": None, "event_status": status,
+            "value_per_share": 1000.0, "exercise_ratio": None, "issue_method_name_vi": None,
+            "event_title_vi": f"{tk} {code} {d}"}
+
+
+def _counting_fetch(by_date):
+    """fetch giả + sổ ghi ngày đã hỏi — để đếm được ĐÚNG bao nhiêu ngày bị truy vấn (không thừa,
+    không thiếu). Ngày không có trong `by_date` trả rỗng, KHÔNG nổ."""
+    calls = []
+
+    def fetch(d):
+        calls.append(d)
+        return list(by_date.get(d, []))
+    return fetch, calls
+
+
+def t_missed_runs():
+    """Cron LỠ một phiên ⇒ sự kiện ngày đó phải được moi lại, không mất vĩnh viễn.
+
+    Lỗ hổng (quant-skeptic khuyến nghị #5, vòng 2, nhắc lại vòng 3 như "the real remaining
+    exposure"): `triggered_today` chỉ hỏi BQ cho ĐÚNG ngày hôm nay, và vòng xác nhận chỉ theo
+    cái ĐÃ ghi — nên một lượt cron không chạy được làm sự kiện của ngày đó biến mất khỏi hệ mà
+    không để lại dấu vết nào. Ca M0 dưới đây là bằng chứng lỗ hổng CÓ THẬT (chứng minh ngược),
+    phần còn lại là bằng chứng nó đã được bịt.
+    """
+    print("== phiên cron BỊ LỠ: phát hiện theo LỊCH GIAO DỊCH + backfill ==")
+
+    md, bfm = cad.missed_trading_days, cad.backfill_missed
+
+    # ── (a) không lỡ phiên nào ⇒ HÀNH VI Y HỆT HIỆN TẠI
+    check("M1. (ca a) lượt trước là đúng phiên liền trước ⇒ 0 phiên lỡ, không có gì đổi",
+          md("2026-08-12", "2026-08-13") == [], str(md("2026-08-12", "2026-08-13")))
+    check("M2. (ca a) T2 sau snapshot T6 ⇒ 0 phiên lỡ dù cách 3 NGÀY LỊCH — đếm bằng số ngày "
+          "lịch sẽ báo động giả mỗi sáng thứ Hai",
+          md("2026-08-14", "2026-08-17") == [], str(md("2026-08-14", "2026-08-17")))
+    check("M3. (ca a) qua NGÀY LỄ (02/09) cũng 0 phiên lỡ — lịch lễ dùng chung "
+          "`trading_bot.vn_market`, không tự khai bản thứ hai",
+          md("2026-09-01", "2026-09-03") == [], str(md("2026-09-01", "2026-09-03")))
+    check("M4. CHỨNG MINH NGƯỢC cho M3: cùng khoảng đó nhưng lùi mốc thêm 1 phiên thì 09-01 PHẢI "
+          "hiện ra (cổng không phải lúc nào cũng trả rỗng)",
+          md("2026-08-31", "2026-09-03") == ["2026-09-01"], str(md("2026-08-31", "2026-09-03")))
+
+    # ── (b) lỡ đúng 1 phiên
+    check("M5. (ca b) lỡ đúng 1 phiên ⇒ đúng 1 ngày", md("2026-08-11", "2026-08-13")
+          == ["2026-08-12"], str(md("2026-08-11", "2026-08-13")))
+
+    # ── (c) lỡ nhiều phiên liên tiếp
+    check("M6. (ca c) cron chết 3 phiên ⇒ đủ 3 ngày, không thiếu ngày nào",
+          md("2026-08-07", "2026-08-13") == ["2026-08-10", "2026-08-11", "2026-08-12"],
+          str(md("2026-08-07", "2026-08-13")))
+    check("M7. (ca c) khoảng lỡ VẮT QUA cuối tuần ⇒ chỉ đếm phiên giao dịch, T7/CN không phải "
+          "phiên bị lỡ",
+          md("2026-08-12", "2026-08-18") == ["2026-08-13", "2026-08-14", "2026-08-17"],
+          str(md("2026-08-12", "2026-08-18")))
+
+    check("M8. chưa từng có snapshot nào (`prev_asof=None`) ⇒ RỖNG — không có mốc thì không có "
+          "khái niệm 'đã lỡ', và một lượt cron không được tự quyết backfill cả lịch sử",
+          md(None, "2026-08-13") == [])
+    check("M9. ngày HOÃN từ lượt trước được gộp vào, kể cả khi đã cũ hơn `prev_asof`; ngày ≥ hôm "
+          "nay thì KHÔNG (chưa lỡ)",
+          md("2026-08-12", "2026-08-13", deferred=["2026-07-20", "2026-08-13", "2026-08-99"])
+          == ["2026-07-20"],
+          str(md("2026-08-12", "2026-08-13", deferred=["2026-07-20", "2026-08-13"])))
+
+    # ── backfill: truy vấn ĐÚNG ngày bị lỡ, không phải hôm nay
+    f0, c0 = _counting_fetch({})
+    b0 = bfm([], fetch=f0)
+    check("M10. 0 phiên lỡ ⇒ KHÔNG một truy vấn nào (ca a không được tốn thêm gì)",
+          c0 == [] and b0["events"] == [] and b0["ok"] is True, str(b0))
+
+    rows = {"2026-08-10": [_ev("AAA", "2026-08-10", "executed")],
+            "2026-08-11": [_ev("BBB", "2026-08-11"), _ev("CCC", "2026-08-11", "executed")],
+            "2026-08-12": [_ev("DDD", "2026-08-12")]}
+    f1, c1 = _counting_fetch(rows)
+    b1 = bfm(["2026-08-12"], fetch=f1)
+    check("M11. (ca b) lỡ 1 phiên ⇒ hỏi ĐÚNG ngày đó (không phải hôm nay), 1 sự kiện, có nhãn "
+          "`backfilled` + `event_date` của chính ngày đó",
+          c1 == ["2026-08-12"] and b1["n_events"] == 1
+          and b1["events"][0]["ticker"] == "DDD"
+          and b1["events"][0]["event_date"] == "2026-08-12"
+          and b1["events"][0]["backfilled"] is True, str(b1))
+
+    f2, c2 = _counting_fetch(rows)
+    b2 = bfm(["2026-08-10", "2026-08-11", "2026-08-12"], fetch=f2)
+    check("M12. (ca c) lỡ 3 phiên ⇒ hỏi ĐỦ 3 ngày, MỖI ngày ĐÚNG MỘT lần (không sót, không thừa)",
+          c2 == ["2026-08-10", "2026-08-11", "2026-08-12"] and b2["n_events"] == 4
+          and b2["days_backfilled"] == c2 and b2["deferred_days"] == [], str(b2))
+    check("M13. (ca c) mỗi sự kiện mang ĐÚNG ngày sự kiện của nó — không bị dồn hết vào ngày mới "
+          "nhất (nếu dồn thì vòng xác nhận sau đó sẽ hỏi sai ngày và báo VANISHED hàng loạt)",
+          sorted((e["ticker"], e["event_date"]) for e in b2["events"])
+          == [("AAA", "2026-08-10"), ("BBB", "2026-08-11"), ("CCC", "2026-08-11"),
+              ("DDD", "2026-08-12")], str([(e["ticker"], e["event_date"]) for e in b2["events"]]))
+    check("M14. gọi LẠI với cùng đầu vào cho kết quả GIỐNG HỆT (hàm thuần, không tích luỹ trạng "
+          "thái ẩn giữa hai lần chạy)",
+          bfm(["2026-08-10", "2026-08-11", "2026-08-12"], fetch=_counting_fetch(rows)[0])
+          == b2)
+
+    # ── trần + hoãn: không có cap im lặng
+    many = [f"2026-06-{d:02d}" for d in range(1, 13)]              # 12 ngày (không cần là phiên)
+    f3, c3 = _counting_fetch({})
+    b3 = bfm(many, fetch=f3, max_days=10)
+    check("M15. quá trần ⇒ backfill 10 ngày GẦN NHẤT, 2 ngày cũ nhất HOÃN (được ghi ra, không "
+          "biến mất im lặng) và `ok=False`",
+          c3 == many[2:] and b3["deferred_days"] == many[:2] and b3["ok"] is False, str(b3))
+    check("M16. hàng HOÃN tự rút: lượt sau (không lỡ thêm phiên nào) nhặt đúng 2 ngày đó ra "
+          "backfill ⇒ hàng đợi cạn, không có ngày nào kẹt lại vĩnh viễn",
+          bfm(md("2026-08-12", "2026-08-13", deferred=b3["deferred_days"]),
+              fetch=_counting_fetch({})[0], max_days=10)["days_backfilled"] == many[:2],
+          str(md("2026-08-12", "2026-08-13", deferred=b3["deferred_days"])))
+
+    # ── lỗi truy vấn: không nuốt, không làm hỏng cả lượt chạy
+    def boom(d):
+        if d == "2026-08-11":
+            raise RuntimeError("BQ 503")
+        return list(rows.get(d, []))
+
+    b4 = bfm(["2026-08-10", "2026-08-11", "2026-08-12"], fetch=boom)
+    check("M17. một ngày truy vấn LỖI ⇒ ngày đó vào `deferred_days` + `errors` (thử lại lượt "
+          "sau), 2 ngày kia VẪN backfill xong, và hàm KHÔNG ném lỗi ra ngoài (mất snapshot hôm "
+          "nay vì một ngày quá khứ là cái giá sai)",
+          b4["days_backfilled"] == ["2026-08-10", "2026-08-12"]
+          and b4["deferred_days"] == ["2026-08-11"] and len(b4["errors"]) == 1
+          and "BQ 503" in b4["errors"][0]["error"] and b4["ok"] is False, str(b4))
+
+    # ── nối vào vòng xác nhận: sự kiện backfill đi ĐÚNG đường của sự kiện ghi đúng ngày
+    ex = "2026-08-12"
+    conf = cad.confirm_prior_triggers(
+        "2026-08-11", {"events_today": [], "pending_confirmations": []},
+        backfilled=[dict(_ev("DDD", ex), event_date=ex, backfilled=True),
+                    dict(_ev("EEE", ex, "executed"), event_date=ex, backfilled=True)],
+        asof="2026-08-13",
+        rows_by_date={ex: [_ev("DDD", ex), _ev("EEE", ex, "executed")]})
+    check("M18. sự kiện backfill chảy vào ĐÚNG vòng xác nhận: cái `executed` ⇒ CONFIRMED, cái còn "
+          "`announced` ⇒ STILL_ANNOUNCED",
+          {(c["ticker"], c["kind"]) for c in conf}
+          == {("DDD", "STILL_ANNOUNCED"), ("EEE", "CONFIRMED")}, str(conf))
+    fwd = cad.carry_forward(conf)
+    check("M19. cái còn `announced` được MANG SANG lượt sau, và giữ nhãn `backfilled` để người "
+          "đọc snapshot phân biệt được 'ghi đúng ngày' với 'moi lại sau'",
+          len(fwd) == 1 and fwd[0]["ticker"] == "DDD" and fwd[0]["backfilled"] is True, str(fwd))
+    check("M20. `first_seen_asof` = NGÀY CHẠY chứ không phải ngày sự kiện — đồng hồ "
+          f"`PENDING_MAX_CHECKS`={cad.PENDING_MAX_CHECKS} đếm số LƯỢT ĐÃ KIỂM; lấy ngày sự kiện "
+          "làm mốc thì món backfill của 6 phiên trước hết hạn ngay lượt đầu",
+          _f(conf, "first_seen_asof") == "2026-08-13" and _f(conf, "n_checks") == 1, str(conf))
+
+    check("M0. CHỨNG MINH NGƯỢC — LỖ HỔNG CÓ THẬT: cùng snapshot đó nhưng KHÔNG có backfill "
+          "(`backfilled=None`, tức bản trước bản này), sự kiện của phiên bị lỡ cho ĐÚNG 0 dòng — "
+          "không ai biết nó từng tồn tại",
+          cad.confirm_prior_triggers(
+              "2026-08-11", {"events_today": [], "pending_confirmations": []},
+              asof="2026-08-13", rows_by_date={ex: [_ev("DDD", ex)]}) == [])
+
+    # ── (d) chạy lại cron 2 lần: không ghi trùng
+    snap_run1 = {"events_today": [], "pending_confirmations": fwd}
+    conf2 = cad.confirm_prior_triggers(
+        "2026-08-13", snap_run1,
+        backfilled=[dict(_ev("DDD", ex), event_date=ex, backfilled=True)],
+        asof="2026-08-14", rows_by_date={ex: [_ev("DDD", ex)]})
+    check("M21. (ca d) lượt sau backfill LẠI đúng ngày đó (vd ngày HOÃN được thử lại) trong khi "
+          "món của chính ngày đó đang nằm trong hàng treo ⇒ MỘT dòng, không nhân đôi",
+          len(conf2) == 1, str(conf2))
+    check("M22. (ca d) và dòng thắng là dòng HÀNG TREO — giữ `n_checks` THẬT (2), không bị dòng "
+          "backfill n_checks=0 reset đồng hồ; nếu bị reset thì món treo không bao giờ chạm ngưỡng "
+          "escalate",
+          _f(conf2, "n_checks") == 2 and _f(conf2, "first_seen_asof") == "2026-08-13", str(conf2))
+    check("M23. (ca d) chạy y hệt lần thứ ba cho kết quả GIỐNG HỆT lần thứ hai — idempotent (§5)",
+          cad.confirm_prior_triggers(
+              "2026-08-13", snap_run1,
+              backfilled=[dict(_ev("DDD", ex), event_date=ex, backfilled=True)],
+              asof="2026-08-14", rows_by_date={ex: [_ev("DDD", ex)]}) == conf2)
+
+    # ── hai lượt chạy nối tiếp thật sự: snapshot lượt 1 làm đầu vào lượt 2
+    def one_run(prev_asof, prev_snap, asof, by_date, deferred_fetch=None):
+        """Mô phỏng ĐÚNG chuỗi gọi của `run()`: dò phiên lỡ → backfill → xác nhận → snapshot."""
+        bf = bfm(md(prev_asof, asof, (prev_snap or {}).get("backfill_deferred_days") or []),
+                 fetch=deferred_fetch or (lambda d: list(by_date.get(d, []))))
+        c = cad.confirm_prior_triggers(prev_asof, prev_snap, backfilled=bf["events"], asof=asof,
+                                       rows_by_date=by_date)
+        return {"events_today": [], "pending_confirmations": cad.carry_forward(c),
+                "backfill_deferred_days": bf["deferred_days"], "_conf": c, "_bf": bf}
+
+    by = {d: list(v) for d, v in rows.items()}
+    s1 = one_run("2026-08-07", {}, "2026-08-13", by)          # cron chết 3 phiên
+    check("M24. (ca c, đầu-cuối) một lượt chạy sau khi cron chết 3 phiên: 4 sự kiện của 3 ngày "
+          "đều được ghi nhận, 2 cái còn `announced` mang sang lượt sau",
+          s1["_bf"]["days_backfilled"] == ["2026-08-10", "2026-08-11", "2026-08-12"]
+          and {(c["ticker"], c["kind"]) for c in s1["_conf"]}
+          == {("AAA", "CONFIRMED"), ("BBB", "STILL_ANNOUNCED"), ("CCC", "CONFIRMED"),
+              ("DDD", "STILL_ANNOUNCED")}
+          and {p["ticker"] for p in s1["pending_confirmations"]} == {"BBB", "DDD"}, str(s1))
+    s2 = one_run("2026-08-13", s1, "2026-08-13", by)           # CHẠY LẠI ĐÚNG NGÀY ĐÓ
+    check("M25. (ca d) chạy lại cron NGAY trong cùng phiên: `prev_asof` giờ là hôm nay ⇒ 0 phiên "
+          "lỡ, 0 truy vấn backfill, và hàng treo vẫn đúng 2 món — không nhân đôi",
+          s2["_bf"]["days_missed"] == []
+          and {p["ticker"] for p in s2["pending_confirmations"]} == {"BBB", "DDD"}
+          and [p["n_checks"] for p in sorted(s2["_conf"], key=lambda c: c["ticker"])] == [2, 2],
+          str(s2["_conf"]))
+    by2 = {**by, "2026-08-11": [_ev("BBB", "2026-08-11", "executed")],
+           "2026-08-12": [_ev("DDD", "2026-08-12", "not_executed")]}
+    s3 = one_run("2026-08-13", s2, "2026-08-14", by2)
+    check("M26. lượt kế: món backfill được theo TỚI KHI NGÃ NGŨ — BBB xác nhận, DDD lộ ra ĐÃ HUỶ "
+          "(đây chính là cái mà một phiên bị lỡ trước đây giấu đi vĩnh viễn)",
+          {(c["ticker"], c["kind"]) for c in s3["_conf"]}
+          == {("BBB", "CONFIRMED"), ("DDD", "CANCELLED")}
+          and s3["pending_confirmations"] == [], str(s3["_conf"]))
+
+    # deferred sống qua lượt chạy
+    s4 = one_run("2026-08-07", {}, "2026-08-13", by, deferred_fetch=boom)
+    check("M27. ngày backfill LỖI được ghi vào `backfill_deferred_days` của snapshot — đây là "
+          "đường DUY NHẤT tìm lại nó, vì lượt sau `prev_asof` đã nhảy qua nó rồi",
+          s4["backfill_deferred_days"] == ["2026-08-11"], str(s4["backfill_deferred_days"]))
+    s5 = one_run("2026-08-13", s4, "2026-08-14", by)
+    check("M28. và lượt sau NHẶT LẠI đúng ngày đó (dù 08-11 đã nằm ngoài khoảng "
+          "`prev_asof`→`asof`), backfill xong thì hàng hoãn RỖNG",
+          s5["_bf"]["days_backfilled"] == ["2026-08-11"]
+          and s5["backfill_deferred_days"] == []
+          and {c["ticker"] for c in s5["_conf"] if c["event_date"] == "2026-08-11"}
+          == {"BBB", "CCC"}, str(s5["_bf"]))
+
+    # ── mốc "lượt chạy gần nhất" phải là ARTIFACT ĐÃ PUBLISH, không phải state file
+    with tempfile.TemporaryDirectory() as tmp:
+        old_out, old_state = cad.OUT_DIR, cad.STATE_PATH
+        try:
+            cad.OUT_DIR = os.path.join(tmp, "out")
+            cad._atomic_write_json(cad.snapshot_path("2026-08-11"), {"asof": "2026-08-11"})
+            cad._atomic_write_json(cad.snapshot_path("2026-08-12", True), {"status": "FAILED"})
+            # `stale_streak` ghi `last_run` NGAY sau cổng freshness, tức TRƯỚC cả nhánh feed DEAD
+            # ⇒ state file nhận ngày của một lượt chạy KHÔNG publish gì cả.
+            cad.STATE_PATH = os.path.join(tmp, "state.json")
+            cad.stale_streak("2026-08-12", "DEAD", "sig")
+            st = json.load(open(cad.STATE_PATH, encoding="utf-8"))
+            pa, _ps = cad.prior_snapshot("2026-08-13")
+            check("M29. mốc dò phiên lỡ = SNAPSHOT ĐÃ PUBLISH gần nhất, KHÔNG phải `last_run` "
+                  "của state file: lượt 08-12 hỏng (feed DEAD) vẫn ghi `last_run=2026-08-12` mà "
+                  "không publish gì — lấy state làm mốc thì 08-12 bị NHẢY QUA vĩnh viễn, đúng "
+                  "cái lỗ hổng đang vá. Lấy artifact làm mốc thì nó ĐƯỢC tính là phiên bị lỡ.",
+                  st["last_run"] == "2026-08-12" and pa == "2026-08-11"
+                  and md(pa, "2026-08-13") == ["2026-08-12"],
+                  f"state.last_run={st['last_run']} prev_asof={pa} "
+                  f"missed={md(pa, '2026-08-13')}")
+        finally:
+            cad.OUT_DIR, cad.STATE_PATH = old_out, old_state
+
+
 def t_query_shape_live():
     """Tầng --live: chạy CHÍNH mệnh đề WHERE đó qua BigQuery thật.
 
@@ -817,6 +1066,7 @@ def main():
     t_query_shape()
     t_confirm_unique_key()
     t_carry_forward()
+    t_missed_runs()
     t_positions_and_snapshot()
     t_notify()
     t_tz_hostile()

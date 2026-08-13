@@ -31,7 +31,7 @@ Nói cách khác: một sự kiện chạm hệ thống này HAI lần — lúc 
 và lúc AIS hiệu lực (số chính thức, `AIS_EXACT`). Cả hai lần đều được ghi lại, nên khoảng giữa
 hai lần đó — đúng cái khoảng mà `ticker_financial.OShares` sai — là khoảng có số.
 
-SÁU LỚP, KHÔNG LỚP NÀO ĐƯỢC BỎ
+BẢY LỚP, KHÔNG LỚP NÀO ĐƯỢC BỎ
 -------------------------------
 1. **Cron Python thuần** — output là snapshot CÓ NGÀY TRONG TÊN
    (`data/corp_action_daily/corp_action_daily_<asof>.json`), ghi atomic. Không bao giờ ghi đè một
@@ -50,6 +50,13 @@ SÁU LỚP, KHÔNG LỚP NÀO ĐƯỢC BỎ
    không coi là dữ liệu mới, cảnh báo phân tầng theo chuỗi ngày im lặng (chống alert-fatigue).
 6. **Cảnh báo PROACTIVE** cho mã ĐANG GIỮ THẬT có sự kiện trong ≤10 ngày tới — post TRƯỚC khi
    sự kiện xảy ra, vào kênh tra qua `kb/discord_channels.json` (không hardcode ID).
+7. **Phát hiện phiên BỊ LỠ + backfill** — vì trigger ở lớp trên chỉ hỏi BQ cho ĐÚNG ngày hôm
+   nay, một lượt cron không chạy được (crash, timeout, máy tắt) làm sự kiện của ngày đó biến
+   mất VĨNH VIỄN khỏi hệ: vòng xác nhận không cứu được (nó chỉ theo cái ĐÃ ghi), và không có
+   đường nào quay lại. Lớp này so `prev_asof` với `asof` theo LỊCH GIAO DỊCH, chạy lại đúng
+   truy vấn ngày-sự-kiện cho từng phiên đã lỡ, rồi thả kết quả vào chính vòng xác nhận trên.
+   Ngày backfill hỏng/vượt trần đi vào `backfill_deferred_days` của snapshot và được lượt sau
+   lấy lại — hàng đợi tự rút, không có cái cap im lặng nào. Xem `missed_trading_days`.
 
 ĐỐI SOÁT — vì sao không so thẳng hai số hôm nay
 -----------------------------------------------
@@ -405,6 +412,86 @@ def _all_events_on(asof):
     return bq(_events_on_sql(asof))
 
 
+# ─────────────────────────────────────────── LỚP 7 · phiên BỊ LỠ (phát hiện + backfill)
+
+# Trần số phiên được backfill trong MỘT lượt chạy. Không phải "đủ dùng" — là chặn một lượt chạy
+# duy nhất bắn ra hàng trăm truy vấn khi cron chết dài ngày (hoặc khi ai đó chạy `--asof` của một
+# ngày xa trong quá khứ). Chọn 10 = 2 tuần giao dịch: dài hơn mọi kỳ nghỉ lễ VN (Tết ~9 ngày
+# lịch ≈ 5-6 phiên) nên một kỳ nghỉ KHÔNG BAO GIỜ chạm trần, mà cron chết quá 2 tuần thì đó là
+# sự cố cần người, không phải cái để một lượt chạy lặng lẽ đuổi kịp.
+# Ngày vượt trần KHÔNG bị vứt: nó vào `deferred_days`, được ghi ra snapshot và lượt sau lấy lại
+# (10 phiên/lượt) — nên hàng đợi tự rút, không có cái cap im lặng nào.
+BACKFILL_MAX_DAYS = 10
+
+
+def missed_trading_days(prev_asof, asof, deferred=()):
+    """Các phiên GIAO DỊCH cron đã LỠ = ngày giao dịch nằm HẲN giữa `prev_asof` và `asof`.
+
+    Đếm theo LỊCH GIAO DỊCH (`prev_trading_day`, tức lịch lễ của `trading_bot.vn_market`), không
+    theo số ngày lịch: sáng thứ Hai luôn cách snapshot thứ Sáu 3 ngày lịch nhưng KHÔNG lỡ phiên
+    nào; ngược lại một phiên bị lỡ ngay trước kỳ nghỉ chỉ cách 1 ngày lịch mà vẫn là lỡ thật.
+
+    `prev_asof=None` (chưa từng có snapshot nào) ⇒ RỖNG, cố ý: lần chạy đầu tiên không có mốc để
+    nói ngày nào là "đã lỡ", và backfill toàn bộ lịch sử lúc cài cron là việc khác hẳn — nếu cần
+    thì chạy tay `--asof` từng ngày, không để một lượt cron tự quyết.
+
+    `deferred` = ngày lượt trước ĐỊNH backfill mà chưa xong (lỗi truy vấn, hoặc vượt trần). Gộp
+    vào đây là toàn bộ cơ chế "không mất ngày nào": chúng được ghi ra snapshot nên còn sống qua
+    lượt chạy, và vì `prev_asof` sau đó đã nhảy lên ngày mới, không có đường nào khác tìm lại.
+    """
+    out = set()
+    if prev_asof:
+        d_prev = dt.date.fromisoformat(prev_asof)
+        d = prev_trading_day(dt.date.fromisoformat(asof))
+        while d > d_prev:
+            out.add(d.isoformat())
+            d = prev_trading_day(d)
+    out |= {d for d in (deferred or []) if d and d < asof}
+    return sorted(out)
+
+
+def backfill_missed(days, fetch=None, max_days=BACKFILL_MAX_DAYS):
+    """Chạy LẠI truy vấn sự kiện-trong-ngày cho từng phiên bị lỡ, như thể cron đã chạy đúng ngày đó.
+
+    Dùng ĐÚNG `_events_on_sql` của đường chính (qua `_all_events_on`) chứ không viết một truy vấn
+    thứ hai: một biến thể SQL riêng cho backfill là thứ sẽ trôi khỏi bản production rồi ta test
+    cái không còn tồn tại — đúng lý do `_events_on_sql` được tách ra ở vòng trước.
+
+    `include_cancelled=False` (mặc định của `_all_events_on`) là CÓ CHỦ ĐÍCH: sự kiện đã HUỶ
+    trong khoảng bị lỡ thì không có gì để ghi — ta chưa từng công bố nó nên không có snapshot nào
+    sai để đính chính. Đây là chỗ backfill TỐT HƠN một lượt chạy đúng ngày (lượt đúng ngày sẽ ghi
+    bản `announced` rồi hôm sau phải rút lại); khác biệt duy nhất, và nó nghiêng về phía an toàn.
+
+    ⚠️ GIỚI HẠN CÓ CHỦ ĐÍCH — backfill KHÔNG dựng lại `cash_dividend_today` cho ngày đã lỡ.
+    Khối đó mang `holders_qty`/`accrual_gross_vnd` theo vị thế, mà `read_positions` chỉ đọc được
+    artifact MỚI NHẤT: dựng accrual của một ngày quá khứ bằng vị thế HÔM NAY là gán tiền cho một
+    danh mục không phải danh mục lúc chốt quyền — sai lặng lẽ, và tệ hơn là không có. Cái được
+    ghi lại là SỰ KIỆN (đủ để `dividend_adjusted_return.py` — nguồn chuẩn tắc §21 — tính đúng
+    sau), cộng một dòng cảnh báo liệt kê mã ĐANG GIỮ có dính sự kiện trong khoảng bị lỡ.
+
+    Trả về một khối tự mô tả — `days_backfilled` (đã xong), `deferred_days` (chưa, sẽ thử lại),
+    `errors` (vì sao). Lỗi truy vấn KHÔNG làm hỏng lượt chạy: ngày đó rơi vào `deferred_days` và
+    lượt sau lấy lại. Ném lỗi ra ngoài ở đây = mất luôn cả snapshot hôm nay vì một ngày quá khứ.
+    """
+    fetch = fetch or _all_events_on
+    days = sorted(set(days))
+    over = days[:-max_days] if max_days and len(days) > max_days else []
+    events, done, errors, deferred = [], [], [], list(over)
+    for d in days[len(over):]:                    # phiên GẦN NHẤT trước — sát vị thế đang giữ nhất
+        try:
+            rows = fetch(d)
+        except Exception as exc:                                    # noqa: BLE001
+            errors.append({"date": d, "error": f"{type(exc).__name__}: {exc}"})
+            deferred.append(d)
+            continue
+        for r in rows or []:
+            events.append({**r, "event_date": d, "backfilled": True})
+        done.append(d)
+    return {"days_missed": days, "days_backfilled": done, "events": events,
+            "n_events": len(events), "deferred_days": sorted(set(deferred)), "errors": errors,
+            "ok": not deferred}
+
+
 def _num_tag(x):
     """Số → chuỗi ổn định qua vòng JSON. `3000`, `3000.0`, `"3000"`, `Decimal("3000")` phải cho
     CÙNG một khoá, nếu không thì sự kiện tự-không-khớp-chính-mình sau khi đọc lại snapshot."""
@@ -501,23 +588,37 @@ PENDING_MAX_CHECKS = 5
 # các trường phải mang theo để lượt sau dựng lại được khoá + kể lại được lịch sử món treo
 PENDING_FIELDS = ("id", "ticker", "event_code", "exright_date", "effective_date",
                   "value_per_share", "exercise_ratio", "issue_method_name_vi",
-                  "event_title_vi", "status_then", "event_date", "first_seen_asof", "n_checks")
+                  "event_title_vi", "status_then", "event_date", "first_seen_asof", "n_checks",
+                  "backfilled")
 
 
-def pending_items(prev_asof, prev_snap):
-    """Danh sách sự kiện CẦN kiểm ở lượt này = MỚI ghi hôm trước ∪ CÒN TREO từ các lượt trước.
+def pending_items(prev_asof, prev_snap, backfilled=None, asof=None):
+    """Danh sách sự kiện CẦN kiểm ở lượt này = MỚI ghi hôm trước ∪ CÒN TREO từ các lượt trước
+    ∪ VỪA BACKFILL từ các phiên bị lỡ.
 
     ⚠️ Bản trước dựng `recorded` CHỈ từ `events_today` của snapshot liền trước, nên một sự kiện
     trả `STILL_ANNOUNCED` ở D+1 KHÔNG BAO GIỜ được kiểm lại ở D+2 — vòng xác nhận chỉ bắn một
     phát rồi thôi (quant-skeptic vòng 2). Mà lượt chạy sống DUY NHẤT của vòng này cho 4/4
     `STILL_ANNOUNCED`, tức đúng cái nhánh bị rơi lại là nhánh xảy ra thật.
+
+    Sự kiện backfill đi vào ĐÚNG danh sách này, không có nhánh riêng: nhờ vậy nó thừa hưởng
+    nguyên bộ máy đã qua quant-skeptic (ghép theo `id` → khoá nội dung, phân loại CONFIRMED /
+    CANCELLED / STILL_ANNOUNCED, đồng hồ `n_checks`, `carry_forward`) mà không thêm một cách
+    phân loại thứ hai — hai cách phân loại cho cùng một khái niệm là cách sinh ra hai kết luận
+    trái nhau trên cùng dữ liệu.
+
+    Khoá chống trùng `(ngày sự kiện, id, khoá nội dung)` là thứ làm backfill IDEMPOTENT (§5):
+    chạy lại cron cùng ngày, hoặc một ngày `deferred` được thử lại trong khi món của chính ngày
+    đó đang nằm trong hàng treo, đều cho MỘT dòng. Và vì hàng treo được nạp TRƯỚC, dòng thắng là
+    dòng giữ `n_checks`/`first_seen_asof` THẬT — không phải dòng backfill vừa dựng với n_checks=0.
     """
     items, seen = [], set()
 
-    def _add(src, event_date, first_seen, n_checks):
+    def _add(src, event_date, first_seen, n_checks, backfill=False):
         it = {k: src.get(k) for k in PENDING_FIELDS}
         it["status_then"] = src.get("status_then") or src.get("event_status")
         it["event_date"], it["first_seen_asof"], it["n_checks"] = event_date, first_seen, n_checks
+        it["backfilled"] = bool(src.get("backfilled") or backfill)
         k = (event_date, str(src.get("id") or ""), _event_key(src))
         if k in seen:
             return
@@ -532,11 +633,17 @@ def pending_items(prev_asof, prev_snap):
     if prev_asof:
         for r in (prev_snap or {}).get("events_today") or []:
             _add(r, prev_asof, prev_asof, 0)
+    for r in backfilled or []:
+        # `first_seen_asof` = HÔM NAY, không phải ngày sự kiện: đồng hồ `PENDING_MAX_CHECKS` đếm
+        # số LƯỢT CHẠY đã kiểm, mà món này mới được nhìn lần đầu hôm nay. Lấy ngày sự kiện làm
+        # mốc sẽ khiến một món backfill của 6 phiên trước hết hạn ngay lượt đầu và không bao giờ
+        # được theo tới lúc ngã ngũ.
+        _add(r, r.get("event_date") or asof or prev_asof, asof or prev_asof, 0, backfill=True)
     return items
 
 
 def confirm_prior_triggers(prev_asof, prev_snap, rows=None, rows_by_date=None,
-                           max_checks=PENDING_MAX_CHECKS):
+                           max_checks=PENDING_MAX_CHECKS, backfilled=None, asof=None):
     """Sự kiện đã ghi trước đó GIỜ ra sao — vòng xác nhận cho các dòng lúc đó còn `announced`.
 
     Vì trigger ngày-sự-kiện buộc phải chạy trên `announced` (xem `_events_on_sql`), snapshot của
@@ -551,10 +658,16 @@ def confirm_prior_triggers(prev_asof, prev_snap, rows=None, rows_by_date=None,
       * `UNRESOLVED_TIMEOUT` — vẫn `announced` sau `max_checks` lượt. Thôi mang tiếp, báo người.
       * `VANISHED`   — dòng biến mất khỏi bảng. Bất thường, báo người.
 
+    `backfilled=` là các sự kiện vừa moi lại từ những phiên cron bị LỠ (xem `backfill_missed`).
+    Chúng được hỏi lại NGAY trong lượt này bằng chính truy vấn xác nhận (`include_cancelled=True`,
+    tức một truy vấn thứ hai cho cùng ngày). Dư một truy vấn nhỏ — chỉ ở đúng cái nhánh hiếm là
+    "cron vừa lỡ phiên" — và đổi lại: đường đi của sự kiện backfill giống hệt từng bước đường đi
+    của sự kiện ghi đúng ngày, nên không có nhánh nào chỉ backfill mới chạy qua và không ai test.
+
     `rows=` (một ngày, chính là `prev_asof`) và `rows_by_date=` (nhiều ngày) là điểm bơm cho bộ
     hồi quy hermetic — không có chúng thì hàm tự truy vấn BQ.
     """
-    items = pending_items(prev_asof, prev_snap)
+    items = pending_items(prev_asof, prev_snap, backfilled=backfilled, asof=asof)
     if not items:
         return []
     by_date = {}
@@ -952,8 +1065,22 @@ def run(asof=None, dry_run=False, alert=True, lookahead=LOOKAHEAD_DAYS, trace=No
                      + (" ⚠️ event_status=announced: DỰ KIẾN, chưa xác nhận — lượt chạy hôm sau "
                         "sẽ xác nhận lại." if ev_status.get(tk) != "executed" else "")}
 
+    # ── LỚP 7 · phiên BỊ LỠ: phát hiện + backfill
+    # Đặt SAU các cổng chặn có chủ đích: nếu selfcheck/feed/bất biến đỏ thì lượt này ghi
+    # `*_FAILED.json`, mà `prior_snapshot` bỏ qua bản _FAILED ⇒ `prev_asof` KHÔNG nhích, nên ngày
+    # hôm nay tự động trở thành "phiên bị lỡ" của lượt sau. Không cần cờ riêng cho ca đó.
+    bf = backfill_missed(missed_trading_days(
+        prev_asof, asof, (prev_snap or {}).get("backfill_deferred_days") or []))
+    if bf["days_missed"]:
+        print(f"[gate-5 phiên lỡ] {len(bf['days_missed'])} phiên lỡ {bf['days_missed']} — "
+              f"backfill {len(bf['days_backfilled'])} ngày / {bf['n_events']} sự kiện; "
+              f"hoãn lại {bf['deferred_days']}; lỗi {bf['errors']}")
+    else:
+        print("[gate-5 phiên lỡ] 0 — lượt chạy gần nhất là đúng phiên giao dịch liền trước")
+
     # ── vòng XÁC NHẬN: sự kiện đã ghi hôm trước giờ ra sao (huỷ? đã xác nhận? vẫn dự kiến?)
-    confirmations = confirm_prior_triggers(prev_asof, prev_snap)
+    confirmations = confirm_prior_triggers(prev_asof, prev_snap,
+                                           backfilled=bf["events"], asof=asof)
     cancelled = [c for c in confirmations if c["kind"] in ("CANCELLED", "VANISHED")]
     timed_out = [c for c in confirmations if c["kind"] == "UNRESOLVED_TIMEOUT"]
     pending_next = carry_forward(confirmations)
@@ -993,6 +1120,16 @@ def run(asof=None, dry_run=False, alert=True, lookahead=LOOKAHEAD_DAYS, trace=No
         # snapshot để người đọc (và mọi script đọc lại file này) không trích nhầm nó là kết quả.
         "invariant_evaluated": inv_evaluated,
         "prior_trigger_confirmations": confirmations,
+        # phiên cron BỊ LỠ + kết quả backfill. `backfill_deferred_days` là hàng đợi sống: lượt
+        # sau đọc lại đúng field này nên một ngày lỡ mà truy vấn hỏng KHÔNG mất — dù `prev_asof`
+        # lúc đó đã nhảy qua nó.
+        "missed_runs": {"prev_snapshot_asof": prev_asof, "days_missed": bf["days_missed"],
+                        "days_backfilled": bf["days_backfilled"],
+                        "n_events_backfilled": bf["n_events"],
+                        "deferred_days": bf["deferred_days"], "errors": bf["errors"],
+                        "backfill_ok": bf["ok"], "max_days_per_run": BACKFILL_MAX_DAYS},
+        "backfill_deferred_days": bf["deferred_days"],
+        "backfilled_events": bf["events"],
         # hàng CÒN TREO mang sang lượt sau — thứ biến vòng xác nhận từ một-phát-rồi-thôi thành
         # theo tới khi ngã ngũ. Lượt sau đọc lại đúng field này (`pending_items`).
         "pending_confirmations": pending_next,
@@ -1007,6 +1144,21 @@ def run(asof=None, dry_run=False, alert=True, lookahead=LOOKAHEAD_DAYS, trace=No
     # ── báo người: chỉ khi CÓ CHUYỆN. Im lặng hoàn toàn thì không phân biệt được với chết,
     # nên tình trạng "sạch" vẫn đi bus (quiet), chỉ không ping Discord.
     lines = []
+    if bf["days_missed"]:
+        # CẢNH BÁO RIÊNG, không gộp vào cảnh báo freshness (🕒): hai chuyện khác hẳn nhau — kia
+        # là "bảng nguồn không có gì mới", đây là "CHÍNH TA đã không chạy". Gộp lại thì một sự cố
+        # hạ tầng của mình đọc ra như một ngày yên ả của vendor.
+        hit = sorted({r["ticker"] for r in bf["events"]} & set(held))
+        lines.append(
+            f"⏭️ **CRON BỊ LỠ {len(bf['days_missed'])} PHIÊN** (snapshot gần nhất {prev_asof} → "
+            f"nay {asof}): {', '.join(bf['days_missed'])}. Đã backfill "
+            f"{len(bf['days_backfilled'])}/{len(bf['days_missed'])} ngày, {bf['n_events']} sự "
+            f"kiện" + (f"; mã ĐANG GIỮ dính: {hit}" if hit else "; không mã nào đang giữ dính")
+            + (f". 🛑 backfill LỖI {[e['date'] for e in bf['errors']]}: "
+               f"{bf['errors'][0]['error'][:120]}" if bf["errors"] else "")
+            + (f". ⏸️ HOÃN sang lượt sau (trần {BACKFILL_MAX_DAYS} phiên/lượt): "
+               f"{bf['deferred_days']}" if bf["deferred_days"] else "")
+            + ". Kiểm vì sao cron không chạy trước khi tin số của khoảng này.")
     if upcoming:
         lines.append(f"📅 **Sự kiện quyền ≤{lookahead} ngày tới trên mã ĐANG GIỮ** ({asof}):")
         lines += [_fmt_event(e, holders_map) for e in upcoming[:15]]
@@ -1059,7 +1211,10 @@ def run(asof=None, dry_run=False, alert=True, lookahead=LOOKAHEAD_DAYS, trace=No
                      f"có thể thiếu mã mới mua.")
 
     if lines and alert:
-        notify("\n".join(lines), telegram=(bool(viol) or bool(cancelled) or streak >= 5))
+        # phiên bị lỡ ⇒ Telegram: đây là sự cố HẠ TẦNG của chính mình (cron chết/timeout), loại
+        # việc mà nếu chỉ nằm trong Discord thì có thể trôi qua đúng những ngày không ai đọc.
+        notify("\n".join(lines),
+               telegram=(bool(viol) or bool(cancelled) or bool(bf["days_missed"]) or streak >= 5))
     elif not lines:
         print("[quiet] không có sự kiện/lệch/vi phạm nào — không ping Discord")
 
@@ -1074,6 +1229,8 @@ def run(asof=None, dry_run=False, alert=True, lookahead=LOOKAHEAD_DAYS, trace=No
          "invariant_evaluated": inv_evaluated, "n_compared": n_cmp,
          "n_prior_cancelled": len(cancelled), "n_pending_confirmations": len(pending_next),
          "n_unresolved_timeout": len(timed_out),
+         "missed_sessions": bf["days_missed"], "n_backfilled_events": bf["n_events"],
+         "backfill_ok": bf["ok"], "backfill_deferred_days": bf["deferred_days"],
          "snapshot": os.path.relpath(snapshot_path(asof), WC_ROOT)}, trace)
     return 0, snap
 
