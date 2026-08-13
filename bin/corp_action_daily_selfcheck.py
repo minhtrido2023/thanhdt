@@ -365,6 +365,118 @@ def t_triggers_and_alerts():
           cad.upcoming_events(asof, set(), days=10) == [])
 
 
+# ────────────────────────── HÌNH DẠNG TRUY VẤN của trigger ngày-sự-kiện + vòng xác nhận
+
+def t_query_shape():
+    """Ca hồi quy cho ĐÚNG lỗ hổng quant-skeptic đã chọc thủng vòng 1 (2026-08-13).
+
+    Bug: `_all_events_on` ép `event_status = "executed"`, nên trigger ngày-sự-kiện trả RỖNG mỗi
+    ngày (vendor chỉ đổi `announced → executed` trong lần reload ~22:2x ICT CỦA CHÍNH ngày đó,
+    tức sau khi cron 07:30 đã chạy). Vì sao bộ hồi quy cũ mù: T1/T2 bơm `rows=` vào
+    `triggered_today`, tức là đi VÒNG QUA mệnh đề WHERE — chúng kiểm bộ lọc SAU truy vấn, còn
+    bug nằm TRONG truy vấn. Nên các ca dưới đây soi thẳng chuỗi SQL, và tầng `--live` chạy nó
+    thật.
+    """
+    print("== hình dạng truy vấn (ca mà bộ cũ đi vòng qua) + vòng xác nhận T-1 ==")
+    sql = cad._events_on_sql("2026-08-13")
+    norm = " ".join(sql.split())
+
+    check('Q1. KHÔNG được lọc `event_status = "executed"` — đây là chuỗi ký tự của chính bug '
+          "vòng 1, giữ nguyên văn để lần sau ai gõ lại là đỏ ngay",
+          'event_status = "executed"' not in norm, norm)
+    check("Q2. nhưng sự kiện ĐÃ HUỶ vẫn phải bị loại (nới lỏng ≠ bỏ cổng)",
+          'event_status != "not_executed"' in norm, norm)
+    check("Q3. CHỨNG MINH NGƯỢC cho Q2: `include_cancelled=True` (vòng xác nhận) KHÔNG được lọc "
+          "trạng thái nào — chính cái đã huỷ mới là thứ nó đi tìm; lọc mất thì CANCELLED sẽ bị "
+          "báo nhầm thành VANISHED",
+          "event_status" not in " ".join(
+              cad._events_on_sql("2026-08-13", include_cancelled=True).split()
+          ).split("WHERE")[1].split("AND")[0])
+    check("Q4. hỏi CẢ HAI cột ngày bằng OR (ex-right và AIS-effective là hai lần chạm khác nhau; "
+          "AND sẽ trả rỗng vì không dòng nào có cả hai)",
+          'exright_date = DATE "2026-08-13" OR effective_date = DATE "2026-08-13"' in norm, norm)
+    check("Q5. tham số `table=` thật sự đổi FROM — nếu không, ca --live dưới đây sẽ âm thầm đo "
+          "bảng production thay vì bảng dựng tay và luôn xanh",
+          "FROM `X_FAKE`" in " ".join(cad._events_on_sql("2026-08-13", table="X_FAKE").split()))
+
+    # ── vòng xác nhận T-1: cái giá phải trả cho việc ghi trên `announced`
+    def r(tk, status, ex="2026-08-12", code="DIV"):
+        return {"ticker": tk, "event_code": code, "exright_date": ex, "effective_date": None,
+                "event_status": status}
+
+    prev = {"events_today": [r("AAA", "announced"), r("BBB", "announced"),
+                             r("CCC", "announced"), r("DDD", "announced")]}
+    now = [r("AAA", "executed"), r("BBB", "not_executed"), r("CCC", "announced")]  # DDD biến mất
+    got = {c["ticker"]: c["kind"] for c in
+           cad.confirm_prior_triggers("2026-08-12", prev, rows=now)}
+    check("C1. `announced → executed` ⇒ CONFIRMED (đường bình thường phải LỌT, không phải chỉ "
+          "cổng bắt được cái xấu)", got.get("AAA") == "CONFIRMED", str(got))
+    check("C2. `announced → not_executed` ⇒ CANCELLED — khoản đã ghi hôm qua nay bị huỷ, đây là "
+          "SAI SỐ THẬT phải tới tay người", got.get("BBB") == "CANCELLED", str(got))
+    check("C3. vendor chưa đổi trạng thái ⇒ STILL_ANNOUNCED (chưa sai, nhưng chưa chắc — không "
+          "được gộp vào CONFIRMED)", got.get("CCC") == "STILL_ANNOUNCED", str(got))
+    check("C4. dòng BIẾN MẤT khỏi bảng ⇒ VANISHED, không phải im lặng bỏ qua",
+          got.get("DDD") == "VANISHED", str(got))
+    check("C5. khoá so khớp gồm CẢ NGÀY: cùng mã + cùng loại nhưng khác ex-date là sự kiện KHÁC, "
+          "không được nhận nhầm là đã xác nhận",
+          cad.confirm_prior_triggers(
+              "2026-08-12", {"events_today": [r("AAA", "announced", ex="2026-08-12")]},
+              rows=[r("AAA", "executed", ex="2026-07-01")])[0]["kind"] == "VANISHED")
+    check("C6. chưa có snapshot hôm trước ⇒ rỗng, không nổ và không dựng cảnh báo giả",
+          cad.confirm_prior_triggers(None, None) == []
+          and cad.confirm_prior_triggers("2026-08-12", {"events_today": []}) == [])
+
+
+def t_query_shape_live():
+    """Tầng --live: chạy CHÍNH mệnh đề WHERE đó qua BigQuery thật.
+
+    Ca hermetic ở trên là so chuỗi — nó bắt được bug vòng 1 nhưng không chứng minh được BQ hiểu
+    mệnh đề đúng như ta nghĩ. Ở đây `table=` được thay bằng một bảng dựng tay inline, nên máy SQL
+    THẬT chấm điểm, mà không đụng bảng production và không quét byte nào.
+    """
+    print("== --live: mệnh đề WHERE chạy thật trên BigQuery ==")
+    from corp_action_lib import bq
+    fake = """(SELECT * FROM UNNEST([
+        STRUCT('AAA' AS ticker, 'DIV' AS event_code, DATE '2026-08-13' AS exright_date,
+               CAST(NULL AS DATE) AS effective_date, 'announced' AS event_status,
+               1500.0 AS value_per_share, CAST(NULL AS FLOAT64) AS exercise_ratio,
+               CAST(NULL AS STRING) AS issue_method_name_vi,
+               CAST(NULL AS FLOAT64) AS shares_delta, CAST(NULL AS FLOAT64) AS shares_total_after,
+               'AAA announced hom nay' AS event_title_vi),
+        STRUCT('BBB', 'DIV', DATE '2026-08-13', CAST(NULL AS DATE), 'executed',
+               800.0, CAST(NULL AS FLOAT64), CAST(NULL AS STRING), CAST(NULL AS FLOAT64),
+               CAST(NULL AS FLOAT64), 'BBB executed hom nay'),
+        STRUCT('CCC', 'DIV', DATE '2026-08-13', CAST(NULL AS DATE), 'not_executed',
+               900.0, CAST(NULL AS FLOAT64), CAST(NULL AS STRING), CAST(NULL AS FLOAT64),
+               CAST(NULL AS FLOAT64), 'CCC da huy'),
+        STRUCT('DDD', 'AIS', CAST(NULL AS DATE), DATE '2026-08-13', 'announced',
+               CAST(NULL AS FLOAT64), CAST(NULL AS FLOAT64), CAST(NULL AS STRING),
+               CAST(NULL AS FLOAT64), 123.0, 'DDD AIS hieu luc hom nay'),
+        STRUCT('EEE', 'DIV', DATE '2026-08-14', CAST(NULL AS DATE), 'announced',
+               700.0, CAST(NULL AS FLOAT64), CAST(NULL AS STRING), CAST(NULL AS FLOAT64),
+               CAST(NULL AS FLOAT64), 'EEE ngay mai')]))"""
+    got = {r["ticker"] for r in bq(cad._events_on_sql("2026-08-13", table=fake))}
+    check("L1. máy SQL THẬT: dòng `announced` rơi đúng hôm nay ĐƯỢC lấy (AAA) — đây là ca mà "
+          "bản vòng 1 trả rỗng", "AAA" in got, str(got))
+    check("L2. `executed` vẫn lấy bình thường (BBB)", "BBB" in got, str(got))
+    check("L3. `not_executed` bị loại (CCC), ngày mai bị loại (EEE)",
+          "CCC" not in got and "EEE" not in got, str(got))
+    check("L4. AIS vào theo `effective_date` qua nhánh OR (DDD)", "DDD" in got, str(got))
+    everything = {r["ticker"] for r in
+                  bq(cad._events_on_sql("2026-08-13", table=fake, include_cancelled=True))}
+    check("L5. vòng xác nhận (`include_cancelled=True`) THẤY được dòng đã huỷ — nếu không, "
+          "CANCELLED sẽ vĩnh viễn bị báo nhầm là VANISHED", "CCC" in everything, str(everything))
+
+    # ── và trên BẢNG THẬT: chính con số quant-skeptic dùng để bác bỏ vòng 1
+    real = cad._all_events_on("2026-08-13")
+    check("L6. BẢNG THẬT ngày 2026-08-13 trả ≥1 dòng (quant-skeptic đo bản cũ: 0 dòng, trong khi "
+          "có 4 sự kiện thật DHN/HGM/SAC DIV + BCF ISS)", len(real) >= 1,
+          f"{len(real)} dòng: {sorted({r['ticker'] for r in real})}")
+    check("L7. và chúng đúng là các mã đó (không phải lấy nhầm ngày khác)",
+          {"DHN", "HGM", "SAC", "BCF"} <= {r["ticker"] for r in real},
+          str(sorted({r["ticker"] for r in real})))
+
+
 # ──────────────────────────────────────────────── vị thế thật + ghi snapshot
 
 def t_positions_and_snapshot():
@@ -480,15 +592,22 @@ def t_tz_hostile():
 
 
 def main():
-    print(f"== corp_action_daily_selfcheck (hermetic — không BQ/Discord) ==\n")
+    live = "--live" in sys.argv
+    print(f"== corp_action_daily_selfcheck (hermetic — không BQ/Discord"
+          f"{'; + tầng --live CÓ chạm BQ' if live else ''}) ==\n")
     t_gate_selfcheck()
     t_freshness()
     t_invariants()
     t_crosscheck()
     t_triggers_and_alerts()
+    t_query_shape()
     t_positions_and_snapshot()
     t_notify()
     t_tz_hostile()
+    # tách tầng vì cron gọi bộ này ở chế độ hermetic: một hôm BQ hỏng KHÔNG được biến thành
+    # "code sai". Ca --live là bằng chứng nghiệm thu, chạy tay, không phải cổng chặn hằng ngày.
+    if live:
+        t_query_shape_live()
     print()
     if FAILS:
         print(f"FAILED {len(FAILS)}/{len(RAN)}: {FAILS}")

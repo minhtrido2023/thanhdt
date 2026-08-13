@@ -39,6 +39,43 @@ hàng ngày từ 08-13). Duyệt (a) dùng làm nguồn đo cổ tức/ex-rights
    nào ở runtime. **Crontab CHƯA CÀI** — chờ quant-skeptic + user duyệt. Chi tiết:
    `agents/Taylor/research/corp_action_daily_cron_20260813.md`.
 
+## Vòng 7 (2026-08-13 chiều) — quant-skeptic **REFUTED** vòng 1 của Việc E, đã vá
+
+**Killer objection (đúng, và là bug thật):** `_all_events_on` lọc `event_status = "executed"`, mà
+vendor chỉ đổi `announced → executed` trong lô reload rơi ~22:2x ICT **của chính ngày sự kiện** —
+tức ~15 tiếng SAU khi cron 07:30 của ngày đó đã chạy xong trên lô tối hôm trước. ⇒ trigger
+ngày-sự-kiện trả **0 dòng MỖI NGÀY**, không có lượt nào quay lại ngày đã lỡ, và **im lặng** (trông
+y hệt "hôm nay không có sự kiện"). Toàn bộ nửa cổ-tức của job coi như chết: 11 ex-date cổ tức tiền
+mặt trên mã đang giữ trong 3 tháng qua (VHM 6.000đ, NCT 8.000đ, SAB 3.000đ, VNM 1.850đ…) lẽ ra
+được ghi 0 lần. Bộ hồi quy cũ mù vì `T1`/`T2` bơm `rows=` vào `triggered_today` — **đi vòng qua
+mệnh đề WHERE**, tức kiểm bộ lọc SAU truy vấn trong khi bug nằm TRONG truy vấn.
+
+**Đã vá:**
+- `_events_on_sql()` tách khỏi hàm chạy (kiểm được hình dạng truy vấn), lọc `!= "not_executed"`
+  (chỉ loại đã huỷ) và **mang `event_status` theo từng dòng**.
+- `confirm_prior_triggers()` — vòng xác nhận D+1 đọc lại ngày D với MỌI trạng thái:
+  `CONFIRMED` / `STILL_ANNOUNCED` / **`CANCELLED`** / **`VANISHED`** (2 loại sau đẩy Telegram).
+  Đây là cái giá phải trả cho việc ghi trên `announced`, không phải tuỳ chọn.
+- Số cổ tức ngày D mang nhãn ***(dự kiến)*** ngay cạnh từng mã, không phải một chú thích chung.
+- `bq_corp_action(..., include_announced=False)` — **mặc định KHÔNG đổi**, §21 (đo lợi nhuận trên
+  sự kiện ĐÃ XẢY RA) giữ nguyên `executed`; cờ chỉ mở cho câu hỏi "hôm nay có gì chốt quyền".
+- 2 mục `_secondary`: `stale_streak` nhận chữ ký `max_ingested_utc or max_ingested` (nhánh DEAD
+  parse-lỗi trả tên khoá khác ⇒ chữ ký lặng lẽ thành None đúng lúc feed hỏng); cờ
+  `invariant_evaluated` ra snapshot + bus để `0 vi phạm` khi `n_compared=0` không bị trích là PASS.
+
+**Bằng chứng (không phải tự nhận):** selfcheck **79/79** (72 hermetic + 7 `--live`).
+`L6`/`L7` chạy CHÍNH hàm production trên bảng thật ngày 2026-08-13 ⇒ **4 dòng BCF/DHN/HGM/SAC**,
+đúng chỗ quant-skeptic đo bản cũ ra 0. **Mutation test**: khôi phục `= "executed"` ⇒ 6 ca đỏ
+(`Q1 Q2 L1 L4 L6 L7`), `L6` tái lập chính xác con số 0-dòng. Dry-run lịch sử: **SAB 2026-07-28
+3.000đ/cp** → SpaceX 1.100cp = 3.300.000đ, ZaloPay 744cp = 2.232.000đ (khớp tay). Vòng xác nhận
+chạy thật trên mốc 08-13 → 4 × `STILL_ANNOUNCED` (feed chưa nạp lô mới, đúng như mong đợi).
+
+⚠️ **Rủi ro tồn dư đã công bố, KHÔNG tự nhận là đã đóng**: `FEED_DEAD_DAYS=5` và phân tầng
+QUIET/WARN/Telegram (1 / 2-4 / ≥5) vẫn **chưa được kiểm chứng** bằng phiên thật — cần 5-10 phiên.
+Giả định lịch nạp vendor vẫn là **n=1 quan sát**; script tự đo `MAX(ingested_at)` mỗi lần chạy nên
+không neo cứng vào giả định đó, nhưng nhãn *(dự kiến)* chỉ đúng chừng nào vòng D+1 thật sự chạy —
+tức nó phụ thuộc vào cron chạy ĐỀU, không phải chạy một lần.
+
 ## Việc còn mở
 
 - **Việc B đã wire lần đầu** qua Việc E (snapshot hàng ngày, consumer = NGƯỜI). Consumer MÁY

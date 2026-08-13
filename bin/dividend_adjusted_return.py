@@ -356,7 +356,7 @@ def _broker_records(kind: str, account_no: str):
 # TẦNG 2 · ĐO LƯỜNG — số đồng/cp CHÍNH THỨC, giải ra từ TIỀN BROKER THẬT
 # ======================================================================================
 
-def bq_corp_action(ticker: str, ex_date: str):
+def bq_corp_action(ticker: str, ex_date: str, include_announced: bool = False):
     """Nguồn VENDOR per-event: `tav2_bq.corporate_action` — {cash, stock, titles} tại (mã, ex-date).
 
     Đây là "cột raw per-event" mà `ticker_close_vs_price_dividend_adj.md` (viết 2026-08-02) kết
@@ -365,8 +365,16 @@ def bq_corp_action(ticker: str, ex_date: str):
     (`DIV` = tiền, `ISS` = cổ phiếu) và `value_per_share` cho luôn đồng/cp.
 
     Ba cái bẫy của bảng, xử lý ngay tại đây:
-      * `event_status` — chỉ lấy `executed`; loại `not_executed` (đã huỷ) và `announced` (mới công
-        bố, chưa chắc xảy ra, ngày có thể đổi).
+      * `event_status` — mặc định chỉ lấy `executed`; loại `not_executed` (đã huỷ) và `announced`
+        (mới công bố, chưa chắc xảy ra, ngày có thể đổi). **Mặc định này ĐÚNG cho §21** (đo lợi
+        nhuận trên sự kiện ĐÃ XẢY RA) và KHÔNG đổi.
+        `include_announced=True` mở thêm `announced` — chỉ dành cho người hỏi "HÔM NAY có gì chốt
+        quyền", vì vendor chỉ đổi `announced → executed` trong lần reload rơi vào ~22:2x ICT CỦA
+        CHÍNH NGÀY ĐÓ (đo thật 2026-08-13: exright 08-13 là DHN/HGM/SAC/BCF, cả 4 đều
+        `announced`; exright 08-11 đã `executed`). Hỏi ngày hôm nay bằng bộ lọc mặc định ⇒ 0 dòng
+        MỖI NGÀY. Người gọi bật cờ này PHẢI mang nhãn "dự kiến, chưa xác nhận" theo con số.
+        Thêm 2026-08-13 (quant-skeptic REFUTED vòng 1 của `corp_action_daily`); mặc định giữ
+        nguyên nên mọi caller cũ không đổi hành vi một chút nào.
       * dòng TRÙNG `(ticker, exright_date, event_code)` — có thể là nhiều đợt THẬT chốt cùng ngày
         (MBB 2026-08-11: quyền mua 10% VÀ cổ tức CP 15%) hoặc bản đính chính của cùng một sự kiện.
         Dedup theo `(event_code, issue_method_name_vi, value_per_share, exercise_ratio)` rồi mới
@@ -382,7 +390,8 @@ def bq_corp_action(ticker: str, ex_date: str):
                    issue_method_name_vi, event_title_vi
             FROM `{BQ_PROJECT}.tav2_bq.corporate_action`
             WHERE ticker = '{ticker}' AND exright_date = DATE '{ex_date}'
-              AND event_status = 'executed'
+              AND event_status IN {"('executed', 'announced')" if include_announced
+                                   else "('executed')"}
               AND event_code IN ('DIV', 'ISS')
         """)
     except Exception:

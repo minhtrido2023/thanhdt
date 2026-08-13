@@ -165,3 +165,22 @@ không đụng module lõi dùng chung nào (`plan.py`/`config.py`/`executor.py`
    hôm sau. Có cờ `positions_stale` khi artifact cũ > 5 ngày, nhưng độ trễ 1 ngày là thiết kế.
 5. **Snapshot chưa có consumer máy** ⇒ cờ `usable` chưa được cưỡng chế bởi code nào. Consumer đầu
    tiên phải kiểm cờ đó, và nên có selfcheck riêng chứng minh nó fail-closed.
+
+---
+
+## VÒNG 7 (2026-08-13 chiều) — quant-skeptic **REFUTED** bản trên, đã vá
+
+Bản mô tả ở trên nói trigger ngày-sự-kiện chạy trên sự kiện `executed`. **Điều đó SAI và làm
+trigger không bao giờ nổ** — đọc `kb/projects/corporate-action-bq-integration-0813.md` §"Vòng 7"
+trước khi tin bất kỳ đoạn nào ở trên về `event_status`.
+
+Tóm tắt: vendor chỉ đổi `announced → executed` trong lô reload ~22:2x ICT **của chính ngày sự
+kiện**, sau lượt cron 07:30 của ngày đó ~15 tiếng. Lọc `executed` cho `asof = hôm nay` ⇒ 0 dòng
+mỗi ngày, im lặng. Nay lọc `!= "not_executed"`, số ngày D mang nhãn *(dự kiến)*, và
+`confirm_prior_triggers()` ở lượt D+1 báo `CANCELLED`/`VANISHED` (Telegram) nếu khoản đã ghi bị
+huỷ. Bằng chứng: 79/79 (72 hermetic + 7 `--live`), mutation test giết 6 ca, `L6` chạy hàm
+production trên bảng thật 2026-08-13 ra đúng 4 dòng BCF/DHN/HGM/SAC nơi bản cũ ra 0.
+
+**Điểm 2 của "rủi ro tồn dư" ở trên (nhãn "dự kiến") không còn là suy đoán mà là cơ chế bắt
+buộc** — nó là cái giá của việc phải đọc `announced`, và vòng D+1 là thứ trả giá đó. Điểm 1, 3,
+4, 5 giữ nguyên hiệu lực.
