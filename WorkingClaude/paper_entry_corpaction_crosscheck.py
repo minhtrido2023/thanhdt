@@ -143,7 +143,11 @@ def main(as_json=False):
         # an ESOP/placement dilutes the count without an ex-right, so it must not be expected here
         adj_evs = [e for e in evs if is_price_adjusting(e)]
         has_event = bool(adj_evs)
-        factor_moved = a.is_adjusted
+        # neo vào factor_terp (Close/Price thô), KHÔNG vào factor dùng để báo cáo: T1 hỏi "chuỗi
+        # giá có điều chỉnh không" — câu hỏi về chuỗi giá. Quy ước accrue-only loại quyền mua, nên
+        # một sự kiện quyền-mua-đơn-thuần cho factor = 1,0 hoàn toàn đúng đắn và sẽ sinh báo động
+        # giả nếu neo vào nó. Cùng lý lẽ với report_return_gate.paper_t1_verdict().
+        factor_moved = a.factor_terp is not None and a.factor_terp < 1.0 - 1e-6
 
         t1 = (has_event == factor_moved)
         if not t1:
