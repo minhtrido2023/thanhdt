@@ -21,9 +21,18 @@ harder to see. Every consumer needs a fallback, and the two consumers wired on 2
 DIFFERENT fallbacks because they are exposed to different risks:
 
   `oshares_pit()`         — HISTORICAL / point-in-time work. Look-ahead is the whole defect being
-                            fixed, so prefer `oshares_live` whenever it answers; fall back to the
-                            quarterly number only where it declines. Strictly better than status
-                            quo: every row that falls back is byte-identical to today.
+                            fixed, so prefer `oshares_live` where it answers AND the anchor it
+                            answered from can be CERTIFIED; fall back to the quarterly number
+                            everywhere else (it declines, or the anchor cannot be certified).
+
+⚠️ IT IS NOT "STRICTLY BETTER THAN STATUS QUO", AND THE VERSION THAT SAID SO WAS REFUTED WITH A
+REPRODUCIBLE COUNTEREXAMPLE (quant-skeptic, 2026-08-13). The vendor feed contains WRONG rows, so
+serving one unchecked replaces a correct number with a wrong one — at FPT's real 2020-05-05
+rebalance the first wire returned 461.723.054 against a true 681.668.102 (−32,3%), at the
+highest-confidence label `AIS_EXACT`. What this module removes is MOST of the look-ahead, not all
+of it, and it guarantees exactly one thing: **a row that falls back is byte-identical to what the
+caller does today**. Rows that are SERVED carry the residual risk of a bad vendor row that the
+certification gate below happened to certify. That is a smaller risk than before, not zero.
 
   `oshares_reconciled()`  — LIVE numbers in use right now. `corp_action_daily.py` went on cron
                             only today (2026-08-13) and has not seen one real vendor batch roll or
@@ -93,7 +102,26 @@ _DECLINED = ("UNKNOWN_RATIO", "NO_ANCHOR")
 # ×3 đã là cực hiếm ở VN, và mọi ca vượt cổng đều được in ra để soi tay). Nó KHÔNG sửa
 # `oshares_live` — chỗ đúng để vá là cổng nhận neo AIS trong module đó, cần một vòng
 # quant-skeptic riêng; xem khuyến nghị trong báo cáo job Taylor_20260813_125526.
-SANITY_FACTOR = 3.0
+#
+# ── SWEEP `SANITY_FACTOR` (quant-skeptic yêu cầu vòng 2: "một ngưỡng gánh ~0,95pp không được ở
+# lại dạng lập luận"). Đo 2026-08-13 sau khi cổng CHỨNG NHẬN được vá, `custom30_core_select_audit`
+# chạy đủ, mỗi chân SELF-CHECK PASS + SPOTCHECK PASS:
+#
+#   ×      1,5    2,0    2,5    3,0    4,0    5,0    7,5   10,0   12,0 | 15,0   30,0  100,0 |  tắt
+#   liq  12,43  12,44  12,44  12,44  12,44  12,44  12,44  12,44  12,44 | 12,51  12,51  12,51 | 13,12
+#   chặn   515    503    502    500    500    500    500    500    499 |   472    472    470 |   457
+#
+# ⇒ HAI kết luận tách bạch, đừng gộp:
+#   (1) NGƯỠNG không còn gánh gì: [1,5 … 12] là một BÌNH NGUYÊN THẬT — 0,01pp biên độ trên dải
+#       rộng 8×, và 3,0 nằm giữa. Đây là số ĐO, không còn là lập luận. (Trước khi vá cổng chứng
+#       nhận, ngưỡng này gánh ~0,95pp; giờ cổng chứng nhận bắt trước phần lớn.)
+#   (2) BẢN THÂN CỔNG thì VẪN gánh: tắt hẳn ⇒ 13,12% (+0,68pp giả). Bậc thang ở ~13-14× (12,44 →
+#       12,51) là 27 ô lỗi thô mà cổng chứng nhận KHÔNG bắt được. Nên giữ cổng, và giữ nó thô.
+# Tái lập: `OSHARES_SANITY_FACTOR=<x> python custom30_core_select_audit.py`.
+#
+# Đọc từ env để SWEEP tái lập được bằng lệnh, không phải bằng cách sửa file rồi sửa lại.
+# Mặc định 3,0 = giá trị production.
+SANITY_FACTOR = float(os.environ.get("OSHARES_SANITY_FACTOR", "3.0"))
 
 
 def fetch_cache(tickers, until):
@@ -127,14 +155,42 @@ def _live(tickers, asof, cache):
         return {}, cache
 
 
-def _anchor_is_suspect(cache, tk, asof, rec):
-    """Câu trả lời này có đang neo vào một AIS tự mâu thuẫn không? Xem `_suspect_ais`."""
-    if not cache or rec.get("anchor_source") != "corporate_action.AIS":
-        return False
+# Verdict nào của một neo AIS thì ĐƯỢC PHỤC VỤ. Đây là dòng CHÍNH SÁCH của cả module — mọi thứ
+# khác chỉ là cách tính verdict. Đo 2026-08-13 (job Taylor_20260813_142812), xem § CỔNG:
+#   "OK"        — đối chiếu được với AIS liền trước và KHỚP.
+#   "NO_PRIOR"  — là AIS ĐẦU TIÊN có `shares_total_after` của mã: KHÔNG CÓ GÌ để đối chiếu, khác
+#                 hẳn "dựng được kỳ vọng và nó SAI". Phục vụ, đúng như
+#                 `oshares_live._explain_quarterly` xử lý dòng quý không có AIS nào trước nó (nhận,
+#                 nhưng không coi là đã kiểm) — và neo này vẫn còn cổng biên độ `_sane` đứng sau.
+#                 ĐO ĐƯỢC (rổ 171 mã × 48 ngày rebal = 7.610 ô):
+#                   phục vụ NO_PRIOR (đang chạy) : live 6.603 (86,8%) · liq CAGR 12,44%
+#                   loại NO_PRIOR  (biến thể chặt): live 6.290 (82,7%) · liq CAGR 12,46%
+#                 ⇒ chặt hơn đẩy thêm 313 ô (4,1pp phủ) về lại số quý RESTATE — tức đổi look-ahead
+#                 lấy look-ahead — để mua 0,02pp CAGR, nằm trong nhiễu. Không có ca hại nào đo
+#                 được ở nhánh này: FPT 2017-07-03 (AIS đầu tiên, 530.961.105) đối chiếu ĐÚNG với
+#                 dòng quý 2017-08-01 (530.878.729, lệch 0,015%).
+#                 Đây là điểm PHÁN ĐOÁN duy nhất còn lại của cổng; đổi chính sách = sửa 1 dòng này.
+#   "UNVERIFIED"— mọi trường hợp còn lại (dựng được kỳ vọng nhưng lệch, HOẶC không dựng nổi kỳ
+#                 vọng nào). KHÔNG phục vụ.
+_SERVE_AIS_VERDICTS = ("OK", "NO_PRIOR")
+
+
+def _anchor_unverified(cache, tk, asof, rec):
+    """Neo AIS của câu trả lời này có được CHỨNG NHẬN không? Xem `_ais_verdicts`.
+
+    FAIL-CLOSED: thiếu cache, verdict lạ, hay bản thân hàm chứng nhận ném lỗi ⇒ coi như CHƯA
+    chứng nhận. Bản trước trả `False` (= phục vụ) ở cả ba nhánh đó — cùng một lỗi "không kiểm
+    được thì cho qua" mà quant-skeptic bác ở `_suspect_ais`, chỉ nằm ở một tầng khác.
+    """
+    if rec.get("anchor_source") != "corporate_action.AIS":
+        return False                    # neo dòng quý: đã có cổng riêng trong `oshares_live`
+    if not cache:
+        return True
     try:
-        return rec.get("anchor_date") in _suspect_ais(cache[1], tk, asof)
+        return _ais_verdicts(cache[1], tk, asof).get(rec.get("anchor_date")) \
+            not in _SERVE_AIS_VERDICTS
     except Exception:                                       # noqa: BLE001 — total by contract
-        return False
+        return True
 
 
 def _rec(ticker, value, source, reason, method=None, rel_diff=None, live_value=None):
@@ -142,8 +198,20 @@ def _rec(ticker, value, source, reason, method=None, rel_diff=None, live_value=N
             "method": method, "rel_diff": rel_diff, "live_value": live_value}
 
 
-def _suspect_ais(corp, ticker, asof):
-    """{effective_date} của những AIS mà `shares_total_after` MÂU THUẪN với chính nó.
+def _ais_verdicts(corp, ticker, asof):
+    """{effective_date: "OK" | "NO_PRIOR" | "UNVERIFIED"} cho MỌI AIS của mã, tại `asof`.
+
+    ⚠️ ĐỔI NGHĨA 2026-08-13 (quant-skeptic REFUTED bản trước, job Taylor_20260813_142812).
+    Bản trước là `_suspect_ais` — một bộ **BẮT LỖI**: trả về tập AIS *chứng minh được là sai*, và
+    mọi dòng còn lại được phục vụ ở nhãn tin cậy cao nhất `AIS_EXACT`. Đó là thế giới MỞ: "chưa
+    bắt được" bị đọc thành "đã kiểm". Hàm này là bộ **CHỨNG NHẬN**: nó chỉ nói dòng nào đối chiếu
+    ĐƯỢC và KHỚP; consumer chỉ phục vụ những dòng đó (`_SERVE_AIS_VERDICTS`).
+
+    Vì sao phải đổi, chứ không phải vá thêm một luật: quant-skeptic chỉ ra tập cờ cũ không phải
+    "lỗi vendor" mà là "transition NẰM CẠNH một bất thường" — IDC 2022-09-05 (dòng ĐÚNG) bị gắn cờ
+    chỉ vì đứng sau dòng 3 tỷ hỏng, trong khi FPT 2020-04-06 (dòng SAI) lọt lưới. Một bộ bắt lỗi
+    không thể sửa được bằng cách bắt giỏi hơn; phải thôi tuyên bố "đây là lỗi" và chỉ tuyên bố
+    "đây là dòng tôi kiểm được".
 
     Bất biến kiểm được, chỉ dùng dữ liệu của riêng feed corp-action (không mượn số quý). Có HAI
     cách hợp lệ để tới `shares_total_after[i]`, và một dòng đúng chỉ cần khớp MỘT trong hai:
@@ -162,9 +230,18 @@ def _suspect_ais(corp, ticker, asof):
     Chỉ xét AIS có `effective_date <= asof`: quyết định LOẠI cũng phải point-in-time, nếu không
     một AIS năm 2026 lại đang bác một câu trả lời của năm 2019.
 
-    Không dựng được kỳ vọng (thiếu `shares_delta`, ISS chắn đường không có tỉ lệ, không có AIS
-    liền trước) ⇒ KHÔNG gắn cờ. Cùng nguyên tắc `oshares_live` dùng cho dòng quý: không kiểm
-    chứng được thì khác với đã bác bỏ.
+    ⚠️ MỘT ISS CHẮN ĐƯỜNG CHỈ GIẾT ỨNG VIÊN (a), KHÔNG GIẾT (b). Đây chính là lỗ hổng đã bị bác:
+    bản trước `continue` ngay khi `_roll` trả blocker, vứt bỏ luôn ứng viên (b) — dù (b) =
+    `prev + shares_delta` không cần lăn qua ISS nào cả. Quét toàn bảng 2026-08-13: **213/2.505
+    transition (129 mã)** có đúng hình dạng "blocker chắn đường NHƯNG (b) dựng được và MÂU THUẪN"
+    — tức 213 dòng vendor sai đang được phục vụ ở nhãn `AIS_EXACT` mà không ai kiểm. Ca FPT
+    2020-05-05 (461.723.054 thay vì 681.668.102, −32,3%) là một trong số đó. Thêm 7 ca
+    (6 mã) không dựng được ứng viên NÀO ⇒ nay là "UNVERIFIED", trước là phục vụ im lặng.
+
+    Chi phí của chiều ngược lại đã cân nhắc và CHẤP NHẬN: khi có ISS thật xen giữa, (b) thiếu
+    phần cổ phiếu do ISS sinh ra nên có thể báo UNVERIFIED oan. Hậu quả của báo oan là **rơi về
+    đúng số caller đang dùng hôm nay** — không mất gì; hậu quả của bỏ lọt là thay một số đúng
+    bằng một số sai −32%. Hai chiều KHÔNG đối xứng, nên cổng cố ý lệch về phía báo oan.
 
     HAI CA THẬT nó bắt được, cả hai đã kiểm tay bằng ba nguồn độc lập:
       IDC 2020-05-28  delta 108.000.000, total_after 3.000.000.000, AIS trước 300.000.000
@@ -181,7 +258,9 @@ def _suspect_ais(corp, ticker, asof):
                   key=lambda r: r["effective_date"])
     iss = [c for c in corp if c["ticker"] == ticker and c["event_code"] == "ISS"
            and c["exright_date"] and c["exright_date"] <= asof]
-    bad = set()
+    verdicts = {}
+    if rows:
+        verdicts[rows[0]["effective_date"]] = "NO_PRIOR"
     for prev, cur in zip(rows, rows[1:]):
         if cur["effective_date"] == prev["effective_date"]:
             continue                                        # cùng ngày: không suy ra thứ tự được
@@ -192,15 +271,17 @@ def _suspect_ais(corp, ticker, asof):
                               if prev["effective_date"] < e["exright_date"]
                               <= cur["effective_date"]])
         rolled, _applied, blockers = _roll(base_prev, between)
-        if blockers:
-            continue                                        # không kiểm chứng được ≠ đã bác bỏ
-        cands.append(rolled)                                 # (a)
+        if not blockers:
+            cands.append(rolled)                             # (a) — chỉ khi lăn được HẾT ISS
         delta = cur.get("shares_delta")
         if delta is not None and float(delta) > 0:
-            cands.append(base_prev + float(delta))           # (b)
-        if all(e > 0 and abs(actual - e) / e > EXPLAIN_TOL for e in cands):
-            bad.add(cur["effective_date"])
-    return bad
+            cands.append(base_prev + float(delta))           # (b) — không phụ thuộc ISS
+        # `cands` RỖNG (blocker chắn (a) VÀ không có delta cho (b)) ⇒ không dựng được kỳ vọng nào
+        # ⇒ UNVERIFIED. Đây là chỗ `all([]) == True` từng làm nghĩa của hàm đảo ngược nếu viết
+        # gọn, nên điều kiện được viết TƯỜNG MINH.
+        ok = bool(cands) and any(e > 0 and abs(actual - e) / e <= EXPLAIN_TOL for e in cands)
+        verdicts[cur["effective_date"]] = "OK" if ok else "UNVERIFIED"
+    return verdicts
 
 
 def _sane(live_value, fallback_value):
@@ -230,8 +311,11 @@ def oshares_pit(tickers, asof, fallback, cache=None):
     record has `value` (may be None only when the fallback is missing too), `source`
     ("oshares_live" | "ticker_financial" | "none") and a `reason` string that survives into logs.
 
-    Rows that fall back are IDENTICAL to the caller's current behaviour, so the net effect can only
-    be to remove look-ahead, never to introduce a new gap.
+    Rows that fall back are IDENTICAL to the caller's current behaviour. Rows that are SERVED are
+    not guaranteed better: `oshares_live` can carry a wrong vendor row, so the net effect is
+    "most of the look-ahead removed, minus whatever bad vendor rows the certification gate below
+    let through" — NOT "can only remove look-ahead" (that claim shipped here, was false, and was
+    refuted at FPT 2020-05-05; see the module docstring).
     """
     live, cache = _live(tickers, asof, cache)
     out = {}
@@ -239,10 +323,10 @@ def oshares_pit(tickers, asof, fallback, cache=None):
         fb = _fallback_value(fallback, tk)
         r = live.get(tk)
         lv = None if r is None or r.get("value") is None else float(r["value"])
-        if lv is not None and _anchor_is_suspect(cache, tk, asof, r):
+        if lv is not None and _anchor_unverified(cache, tk, asof, r):
             out[tk] = _rec(tk, fb, "ticker_financial" if fb is not None else "none",
-                           f"KHÔNG HỢP LÝ: neo vào AIS {r['anchor_date']} tự mâu thuẫn "
-                           f"(total_after ≠ AIS trước + shares_delta) ⇒ bỏ live {lv:,.0f}",
+                           f"KHÔNG XÁC MINH ĐƯỢC: neo vào AIS {r['anchor_date']} không đối chiếu "
+                           f"được với AIS liền trước ⇒ bỏ live {lv:,.0f}",
                            r.get("method"), None if fb is None else abs(lv - fb) / fb, lv)
         elif lv is not None and fb is not None and not _sane(lv, fb):
             out[tk] = _rec(tk, fb, "ticker_financial",
@@ -281,10 +365,10 @@ def oshares_reconciled(tickers, asof, fallback, cache=None):
         r = live.get(tk)
         lv = None if r is None or r.get("value") is None else float(r["value"])
         method = (r or {}).get("method")
-        if lv is not None and _anchor_is_suspect(cache, tk, asof, r):
+        if lv is not None and _anchor_unverified(cache, tk, asof, r):
             out[tk] = _rec(tk, fb, "ticker_financial" if fb is not None else "none",
-                           f"KHÔNG HỢP LÝ: neo vào AIS {r['anchor_date']} tự mâu thuẫn "
-                           f"⇒ bỏ live {lv:,.0f}, giữ số cũ (bq_admin)",
+                           f"KHÔNG XÁC MINH ĐƯỢC: neo vào AIS {r['anchor_date']} không đối chiếu "
+                           f"được ⇒ bỏ live {lv:,.0f}, giữ số cũ (bq_admin)",
                            method, None if fb is None else abs(lv - fb) / fb, lv)
         elif fb is None:
             out[tk] = _rec(tk, None, "none",
@@ -312,13 +396,21 @@ def oshares_reconciled(tickers, asof, fallback, cache=None):
     return out
 
 
+# Hai lý do BỊ CHẶN, gộp vào cùng một ô đếm `n_fallback_implausible`: "KHÔNG HỢP LÝ" = cổng biên
+# độ ×SANITY_FACTOR (gần như chắc chắn lỗi vendor), "KHÔNG XÁC MINH ĐƯỢC" = cổng chứng nhận AIS
+# (không kết luận đúng/sai, chỉ là không kiểm được). Cố ý KHÔNG tách thành cột mới: `append_log`
+# đang ghi vào `data/oshares_reconcile_log.csv` đã có dữ liệu burn-in của Việc B, thêm cột giữa
+# chừng làm hỏng file đang đếm. Phân biệt vẫn còn nguyên trong chuỗi `reason` của từng bản ghi.
+_BLOCKED_PREFIXES = ("KHÔNG HỢP LÝ", "KHÔNG XÁC MINH ĐƯỢC")
+
+
 def summarize(records):
     """Counts + the worst divergence, for one printed line and one log row."""
     vals = list(records.values())
     diverged = [r for r in vals if r["source"] == "ticker_financial"
                 and r["reason"].startswith("LỆCH")]
     insane = [r for r in vals if r["source"] == "ticker_financial"
-              and r["reason"].startswith("KHÔNG HỢP LÝ")]
+              and r["reason"].startswith(_BLOCKED_PREFIXES)]
     worst = max(diverged + insane, key=lambda r: r["rel_diff"], default=None)
     return {
         "n": len(vals),
@@ -329,7 +421,7 @@ def summarize(records):
         "n_fallback_declined": sum(1 for r in vals if r["source"] == "ticker_financial"
                                    and r["method"] in _DECLINED),
         "n_fallback_other": sum(1 for r in vals if r["source"] == "ticker_financial"
-                                and not r["reason"].startswith(("LỆCH", "KHÔNG HỢP LÝ"))
+                                and not r["reason"].startswith(("LỆCH",) + _BLOCKED_PREFIXES)
                                 and r["method"] not in _DECLINED),
         "n_no_value": sum(1 for r in vals if r["value"] is None),
         "n_live_only": sum(1 for r in vals if r["value"] is None and r["live_value"] is not None),
@@ -576,38 +668,113 @@ def _selfcheck() -> int:                                    # noqa: C901 — a f
               and idc["IDC"]["source"] == "ticker_financial"
               and idc["IDC"]["live_value"] == 3_000_000_000.0, idc["IDC"]["reason"])
 
-        print("== Cổng BẤT BIẾN AIS trên dữ liệu THẬT ==")
+        print("== Cổng CHỨNG NHẬN neo AIS trên dữ liệu THẬT ==")
         cc = fetch_cache(["IDC", "AAA", "FPT", "VNM"], "2026-06-16")
-        sus = {t: _suspect_ais(cc[1], t, "2026-06-16") for t in ("IDC", "AAA", "FPT", "VNM")}
-        check("A1. IDC 2020-05-28 bị gắn cờ (ca đã kiểm tay 3 nguồn)",
-              "2020-05-28" in sus["IDC"], str(sorted(sus["IDC"])))
-        check("A2. AAA 2019-06-03 bị gắn cờ — CA MÀ CỔNG THÔ ×3 BỎ LỌT",
-              "2019-06-03" in sus["AAA"]
+        vd = {t: _ais_verdicts(cc[1], t, "2026-06-16") for t in ("IDC", "AAA", "FPT", "VNM")}
+
+        def _served(t, d):
+            return vd[t].get(d) in _SERVE_AIS_VERDICTS
+
+        check("A1. IDC 2020-05-28 KHÔNG được chứng nhận (ca đã kiểm tay 3 nguồn)",
+              not _served("IDC", "2020-05-28"), f"verdict={vd['IDC'].get('2020-05-28')}")
+        check("A2. AAA 2019-06-03 KHÔNG được chứng nhận — CA MÀ CỔNG THÔ ×3 BỎ LỌT",
+              not _served("AAA", "2019-06-03")
               and _sane(58_664_988.0, 171_199_976.0),      # 0,343 > 1/3 ⇒ cổng thô cho qua
-              f"suspects={sorted(sus['AAA'])}; _sane(58,66tr/171,20tr)="
+              f"verdict={vd['AAA'].get('2019-06-03')}; _sane(58,66tr/171,20tr)="
               f"{_sane(58_664_988.0, 171_199_976.0)}")
-        # HỒI QUY: bản đầu của `_suspect_ais` cộng cả roll() LẪN delta ⇒ đếm hai lần ⇒ gắn cờ
-        # 12/12 AIS của FPT, kể cả dòng mà oshares_live._selfcheck đã chứng minh là ĐÚNG.
-        check("A3. HỒI QUY: FPT 2025-09-12 (= 1.703.507.121, đã chứng minh đúng) KHÔNG bị gắn cờ",
-              "2025-09-12" not in sus["FPT"], str(sorted(sus["FPT"])))
-        check("A4. ĐỐI CHỨNG: có mã KHÔNG có AIS nào bị gắn cờ (cổng không bắt bừa tất cả)",
-              len(sus["VNM"]) == 0, f"VNM={sorted(sus['VNM'])}")
-        # POINT-IN-TIME: quyết định LOẠI cũng không được dùng dòng của tương lai
-        check("A5. PIT: xét tại 2020-01-01 thì AIS 2022-09-05 chưa tồn tại ⇒ không nằm trong tập cờ",
-              "2022-09-05" not in _suspect_ais(cc[1], "IDC", "2020-01-01"),
-              str(sorted(_suspect_ais(cc[1], "IDC", "2020-01-01"))))
-        # BẰNG CHỨNG NGƯỢC: không có cổng bất biến thì AAA THẬT SỰ lọt
+        # HỒI QUY: bản đầu cộng cả roll() LẪN delta ⇒ đếm hai lần ⇒ loại 12/12 AIS của FPT, kể cả
+        # dòng mà oshares_live._selfcheck đã chứng minh là ĐÚNG. Cổng phải VẪN chứng nhận dòng đó.
+        check("A3. HỒI QUY: FPT 2025-09-12 (= 1.703.507.121, đã chứng minh đúng) VẪN được chứng nhận",
+              vd["FPT"].get("2025-09-12") == "OK", f"verdict={vd['FPT'].get('2025-09-12')}")
+        check("A4. ĐỐI CHỨNG: mã sạch vẫn được chứng nhận PHẦN LỚN, kể cả neo mới nhất "
+              "(cổng không loại bừa tất cả)",
+              sum(1 for v in vd["VNM"].values() if v in _SERVE_AIS_VERDICTS) >= 4
+              and vd["VNM"][max(vd["VNM"])] == "OK", f"VNM={vd['VNM']}")
+        # GIÁ PHẢI TRẢ, ĐO ĐƯỢC — ghi thành ca test để nó không biến mất khỏi trí nhớ: khi một ISS
+        # THẬT xen giữa mà feed không mô tả nổi (ESOP 2016-07-11 tỉ lệ 0,0), ứng viên (a) chết vì
+        # blocker và (b) = prev+delta thiếu đúng phần ESOP đó ⇒ VNM 2016-09-20 bị coi là KHÔNG xác
+        # minh được dù nó ĐÚNG (1.451.453.429 vs dòng quý 2016-11-01 = 1.451.426.329, lệch 0,002%).
+        # Đây là chiều sai AN TOÀN: rơi về đúng số caller đang dùng, ở đây lệch 0,002%.
+        check("A4b. GIÁ PHẢI TRẢ: VNM 2016-09-20 (dòng ĐÚNG) bị UNVERIFIED vì ESOP tỉ lệ 0 xen "
+              "giữa — chi phí là rơi về số quý lệch 0,002%, KHÔNG phải mất số",
+              vd["VNM"].get("2016-09-20") == "UNVERIFIED"
+              and abs(1_451_453_429 - 1_451_426_329) / 1_451_426_329 < 0.0001,
+              f"verdict={vd['VNM'].get('2016-09-20')}")
+        # POINT-IN-TIME: quyết định cũng không được dùng dòng của tương lai
+        check("A5. PIT: xét tại 2020-01-01 thì AIS 2022-09-05 chưa tồn tại ⇒ không có verdict",
+              "2022-09-05" not in _ais_verdicts(cc[1], "IDC", "2020-01-01"),
+              str(sorted(_ais_verdicts(cc[1], "IDC", "2020-01-01"))))
+        # BẰNG CHỨNG NGƯỢC: không có cổng chứng nhận thì AAA THẬT SỰ lọt
         _k = M.SANITY_FACTOR
-        _sa = M._suspect_ais
-        M._suspect_ais = lambda *_a, **_k2: set()
+        _sa = M._ais_verdicts
+        M._ais_verdicts = lambda *_a, **_k2: {}
         try:
+            M._SERVE_AIS_VERDICTS = (None,)                  # {}.get(d) is None ⇒ "được phục vụ"
             aaa_nogate = M.oshares_pit(["AAA"], "2019-08-05", {"AAA": 171_199_976.0}, cache=cc)
         finally:
-            M._suspect_ais, M.SANITY_FACTOR = _sa, _k
-        check("A6. CHỨNG MINH NGƯỢC: tắt cổng bất biến ⇒ AAA nhận 58.664.988 (sai −65,7%)",
+            M._ais_verdicts, M.SANITY_FACTOR = _sa, _k
+            M._SERVE_AIS_VERDICTS = ("OK", "NO_PRIOR")
+        check("A6. CHỨNG MINH NGƯỢC: tắt cổng chứng nhận ⇒ AAA nhận 58.664.988 (sai −65,7%)",
               aaa_nogate["AAA"]["value"] == 58_664_988.0
               and aaa_nogate["AAA"]["source"] == "oshares_live",
               f"{aaa_nogate['AAA']['value']:,.0f} từ {aaa_nogate['AAA']['source']}")
+
+        # ── HỒI QUY VÒNG 3 — ca quant-skeptic dùng để BÁC BỎ bản trước (job Taylor_20260813_142812)
+        print("== HỒI QUY: ca REFUTED của quant-skeptic (FPT chuỗi AIS đan xen) ==")
+        fcc = fetch_cache(["FPT"], "2026-06-16")
+        # FPT 2020-05-05: bản trước trả 461.723.054 ở nhãn AIS_EXACT vì ESOP 2020-03-26 (tỉ lệ 0)
+        # là _roll blocker ⇒ `continue` ⇒ dòng đi qua KHÔNG kiểm chứng. Sự thật = 681.668.102, xác
+        # nhận độc lập 2 nguồn (2 quý liên tiếp ticker_financial; AIS kế 783.987.486 = ×1,15 sau
+        # cổ tức CP 15% ngày 2020-05-13, khớp 0,0088%).
+        f1 = oshares_pit(["FPT"], "2020-05-05", {"FPT": 681_668_102.0}, cache=fcc)["FPT"]
+        check("A7. FPT 2020-05-05 KHÔNG trả 461.723.054 nữa (ca REFUTED vòng 2)",
+              f1["value"] != 461_723_054.0, f"{f1['value']:,.0f} từ {f1['source']}")
+        check("A8. …và rơi về ĐÚNG số nền 681.668.102, không bịa số thứ ba",
+              f1["value"] == 681_668_102.0 and f1["source"] == "ticker_financial"
+              and f1["live_value"] == 461_723_054.0, f"{f1['reason']}")
+        check("A9. verdict của chính neo đó là UNVERIFIED (chặn ĐÚNG lý do, không phải trùng hợp)",
+              _ais_verdicts(fcc[1], "FPT", "2020-05-05").get("2020-04-06") == "UNVERIFIED",
+              str(_ais_verdicts(fcc[1], "FPT", "2020-05-05")))
+        # ca thứ hai quant-skeptic nêu: đã bị chặn từ trước (chuỗi đứt KHÔNG có blocker) — giữ làm
+        # hồi quy để một lần nới cổng sau này không mở lại nó.
+        f2 = oshares_pit(["FPT"], "2023-04-10", {"FPT": 1_097_026_572.0}, cache=fcc)["FPT"]
+        check("A10. FPT 2023-04-10 KHÔNG trả 681.780.478 (dòng cùng chuỗi sai, −37,9%)",
+              f2["value"] == 1_097_026_572.0 and f2["source"] == "ticker_financial",
+              f"{f2['value']:,.0f} từ {f2['source']}")
+        # BẰNG CHỨNG NGƯỢC cho A7/A8: đúng ca đó, bỏ cổng ra thì số sai THẬT SỰ lọt vào.
+        M._ais_verdicts = lambda *_a, **_k2: {}
+        try:
+            M._SERVE_AIS_VERDICTS = (None,)
+            f1_nogate = M.oshares_pit(["FPT"], "2020-05-05", {"FPT": 681_668_102.0}, cache=fcc)
+        finally:
+            M._ais_verdicts = _sa
+            M._SERVE_AIS_VERDICTS = ("OK", "NO_PRIOR")
+        check("A11. CHỨNG MINH NGƯỢC: tắt cổng ⇒ FPT 2020-05-05 THẬT SỰ trả 461.723.054 (−32,3%)",
+              f1_nogate["FPT"]["value"] == 461_723_054.0
+              and f1_nogate["FPT"]["source"] == "oshares_live",
+              f"{f1_nogate['FPT']['value']:,.0f} từ {f1_nogate['FPT']['source']}")
+        # CA GƯƠNG (quant-skeptic): IDC 2022-09-05 là dòng ĐÚNG bị gắn cờ chỉ vì đứng sau dòng
+        # hỏng. Bản mới KHÔNG còn tuyên bố "đây là lỗi vendor" — nó chỉ nói "không chứng nhận
+        # được" và rơi về số cũ. Hành động an toàn, nhãn trung thực.
+        idc2 = oshares_pit(["IDC"], "2022-10-03", {"IDC": 330_000_000.0}, cache=cc)["IDC"]
+        check("A12. CA GƯƠNG IDC 2022-09-05 (dòng ĐÚNG): rơi về số nền, lý do là KHÔNG XÁC MINH "
+              "ĐƯỢC chứ không phải quy kết lỗi vendor",
+              idc2["source"] == "ticker_financial"
+              and idc2["value"] == 330_000_000.0
+              and idc2["reason"].startswith("KHÔNG XÁC MINH ĐƯỢC"), idc2["reason"])
+        # FAIL-CLOSED ở tầng gọi: thiếu cache ⇒ không kiểm được ⇒ không phục vụ (bản trước cho qua)
+        check("A13. FAIL-CLOSED: cache rỗng/None ⇒ neo AIS coi như CHƯA chứng nhận",
+              _anchor_unverified(None, "FPT", "2020-05-05",
+                                 {"anchor_source": "corporate_action.AIS",
+                                  "anchor_date": "2020-04-06"}))
+        check("A14. FAIL-CLOSED: hàm chứng nhận NÉM LỖI ⇒ vẫn coi như CHƯA chứng nhận",
+              _anchor_unverified(("boom",), "FPT", "2020-05-05",
+                                 {"anchor_source": "corporate_action.AIS",
+                                  "anchor_date": "2020-04-06"}))
+        check("A15. neo KHÔNG phải AIS (dòng quý) ⇒ cổng này không can thiệp (đã có cổng riêng)",
+              not _anchor_unverified(cc, "FPT", "2020-05-05",
+                                     {"anchor_source": "ticker_financial",
+                                      "anchor_date": "2020-03-31"}))
     except Exception as e:                                  # noqa: BLE001
         check("L1-L3. gọi được BQ", False, f"{type(e).__name__}: {e}")
 

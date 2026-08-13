@@ -1,8 +1,20 @@
 #!/usr/bin/env python3
 """oshares_live.py — shares outstanding at ANY date, without waiting for the next quarterly report.
 
-STATUS: NOT WIRED. No consumer may read this module until a second quant-skeptic pass clears it
-(round 1 REFUTED it on 2026-08-13 for the two defects rewritten below).
+STATUS: WIRED (2026-08-13) — but ONLY through `oshares_pit.py`, never directly.
+Round 1 REFUTED this module on 2026-08-13 for the two defects rewritten below; round 2 CONFIRMED
+the rewrite (bus, 2026-08-13T06:06:49Z) and two consumers went live the same day:
+`custom30_core_select_audit.py` (historical) and `rating_8l.py::_reconcile_oshares` (live).
+
+⚠️ A NEW CONSUMER MUST CALL `oshares_pit.oshares_pit()` / `oshares_reconciled()`, NOT `oshares_at()`.
+`oshares_at` accepts `AIS.shares_total_after` UNCONDITIONALLY, and the vendor feed contains wrong
+AIS rows — measured 2026-08-13 across the whole table, 220 of 2.505 AIS transitions (135 tickers)
+carry a `shares_total_after` that cannot be reconciled with the row before it. Called directly,
+this module still answers 3.000.000.000 for IDC across 2020-05-28 → 2022-09-05 (~10× too high for
+two years) and 461.723.054 for FPT on 2020-05-05 (−32,3%). The certification gate that refuses
+those lives in `oshares_pit._ais_verdicts`, at the CONSUMER layer. Moving it inside this module is
+the right long-term fix and needs its own quant-skeptic round; until then the adapter is the only
+supported entry point.
 
 Replaces the manual path (`update_shares_live.py`, run by hand into the 4-row
 `tav2_bq.shares_outstanding_live`) with a computed answer from two sources that already exist:
