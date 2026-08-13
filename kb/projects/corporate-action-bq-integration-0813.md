@@ -76,23 +76,41 @@ Giả định lịch nạp vendor vẫn là **n=1 quan sát**; script tự đo `
 không neo cứng vào giả định đó, nhưng nhãn *(dự kiến)* chỉ đúng chừng nào vòng D+1 thật sự chạy —
 tức nó phụ thuộc vào cron chạy ĐỀU, không phải chạy một lần.
 
-## Việc còn mở
+## Vòng 3 của Việc E (2026-08-13, job `Taylor_20260813_104511`) — vá lỗi khoá trùng, quant-skeptic CONFIRMED
 
-- **Việc B đã wire lần đầu** qua Việc E (snapshot hàng ngày, consumer = NGƯỜI). Consumer MÁY
-  (backtest point-in-time / report-rating live) vẫn chưa chọn — snapshot đã sẵn để dùng, phải đọc
-  cờ `usable`.
-- **Cài crontab dòng 07:30 ICT** sau khi quant-skeptic CONFIRMED (dòng đã ghi sẵn trong
-  `kb/cron_registry.md`, đánh dấu ⏸ CHƯA CÀI).
-- **Vòng 6 (rc=1 build_message failure + import-time KeyError registry) — CHỦ ĐỘNG BỎ QUA**
-  (quyết định user 2026-08-13): xác suất thấp, đã có `cron_health_check_daily.sh` (08:25 ICT) bắt
-  một phần `rc=1`; KeyError registry chỉ xảy ra do lỗi thao tác con người và sẽ crash ồn ào chứ
-  không âm thầm sai. Chấp nhận làm residual risk đã biết, không dispatch thêm.
-- **`corporate_action` freshness**: user xác nhận refresh hàng ngày từ 08-13 nhưng job vòng 1
-  (Taylor_20260813_041648) đo `MAX(ingested_at)` vẫn là batch nạp 08-12 — cần verify lại 08-14.
+`confirm_prior_triggers()` dùng khóa không duy nhất (ticker, event_code, exright_date,
+effective_date) — case thật MBB 2026-08-11 (2 sự kiện: quyền mua 10% + cổ tức CP 15%) gộp nhầm,
+kết quả CONFIRMED/CANCELLED phụ thuộc thứ tự dòng BQ trả về. Vá bằng khoá 2 lớp (vendor `id` +
+khoá nội dung 8-field) + tệ-nhất-trước (`_KIND_RANK`) để huỷ không bao giờ bị nuốt. Thêm
+carry-forward (`pending_confirmations`, N=5 lượt mới timeout). Commit `WorkingClaude@f844b800`.
+quant-skeptic **CONFIRMED cao** — đo được bug cũ NẶNG HƠN báo cáo (2.164 lần trùng toàn bảng, 250
+nhóm có status khác nhau thật sự phụ thuộc thứ tự BQ, không phải lý thuyết). 2 điểm sửa nhỏ: đếm
+selfcheck đúng là 104/104 (không phải 103/103); khoá mới vẫn còn 460 nhóm trùng dư (49 khác
+status) nhưng an toàn 1 chiều (chỉ lệch về CANCELLED giả, không nuốt CANCELLED thật) nhờ
+`_KIND_RANK` — không phủ định kết luận.
+
+**Rủi ro còn lại DUY NHẤT quant-skeptic nói rõ, CHƯA vá** (khuyến nghị #5 từ vòng 2, Taylor cố ý để
+ngoài phạm vi 3 việc được giao vòng 3): **missed-run/backfill gap** — nếu cron tự nó KHÔNG chạy
+một ngày nào đó (crash/lỗi hạ tầng), sự kiện exright ngày đó không bao giờ được ghi và không có
+đường quay lại bù — `prev_asof` cách `asof` hơn 1 phiên phải tự phát hiện + backfill, hiện chưa có.
+
+## Việc còn mở — CẦN USER QUYẾT trước khi cài crontab
+
+1. **Cài crontab 07:30 ICT ngay** (chấp nhận rủi ro missed-run gap, bù bằng burn-in alert-only
+   5-10 phiên đã lên kế hoạch — vốn cũng cần thiết để kiểm chứng `FEED_DEAD_DAYS=5` vì bảng mới chỉ
+   có 1 ngày ingest, chưa từng thấy 1 lần chuyển lô thật) — **HAY**
+2. **Vá nốt missed-run/backfill gap trước** (vòng 4) rồi mới cài.
+3. Việc B (Oshares) — consumer MÁY (backtest point-in-time / report-rating live) vẫn chưa chọn,
+   snapshot của Việc E hiện chỉ phục vụ consumer NGƯỜI (đọc cờ `usable`).
+4. Vòng 6 cũ (rc=1 + import-time KeyError của Việc D) — **CHỦ ĐỘNG BỎ QUA** (quyết định user
+   2026-08-13, xác suất thấp + đã có backstop `cron_health_check_daily.sh`).
+5. `corporate_action` freshness — user xác nhận refresh hàng ngày từ 08-13, nhưng bảng vẫn đang ở
+   1 ngày ingest (08-12) tính tới lúc kiểm — cần verify lại 08-14.
 
 ## Commit chính
 `WorkingClaude@2037e5c`, `mike@91434457` (vòng 1) · `WorkingClaude@abd7cd6`, `mike@60085443`
-(vòng 3) · `WorkingClaude@7790fd6`, `mike@17d0c749` (vòng 4) · `WorkingClaude@e0ff1fb`,
-`mike@066df954` (vòng 5).
+(vòng 3 Việc D) · `WorkingClaude@7790fd6`, `mike@17d0c749` (vòng 4 Việc D) ·
+`WorkingClaude@e0ff1fb`, `mike@066df954` (vòng 5 Việc D) · `WorkingClaude@129f2779` (Việc E build) ·
+`WorkingClaude@f844b800` (Việc E vòng 3 — vá khoá trùng).
 
 ↩ [Về index dự án](INDEX.md)
