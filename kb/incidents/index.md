@@ -175,6 +175,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Tóm tắt (nguyên văn tiêu đề) | status |
 |---|---|---|
+| 2026-08-13 | [RETRO — 2026-08-13: 4 sự cố (1 fixed hoàn chỉnh, 1 hở bug hạ tầng vẫn treo dù bot tự phục hồi khớp lệnh một phần, 2 là câu hỏi bus chưa đóng), 2 pattern xuyên suốt (Pattern-B ngày thứ 4 liên tiếp, Pattern backlog ngày thứ 5)](retro/retro-2026-08-13.md) | logged |
 | 2026-08-12 | [RETRO — 2026-08-12: 9 sự cố, 3 pattern xuyên suốt (1 pattern-họ đã đặt tên "Pattern-B" tái diễn NGÀY THỨ 4 dưới 3 hình dạng MỚI cùng một ngày; 2 câu hỏi backlog VẪN CHƯA được user quyết sau nhiều ngày escalate)](retro/retro-2026-08-12.md) | logged |
 | 2026-08-11 | [RETRO — 2026-08-11: 5 sự cố, 2 pattern xuyên suốt (state_source escalated 2 retro liên tiếp, hôm nay fix THẬT nhưng SAU khi đã gây 30 lệnh lỡ phiên)](retro/retro-2026-08-11.md) | logged |
 | 2026-08-10 | [RETRO — 2026-08-10: 7 sự cố, 3 pattern xuyên suốt (1 pattern ĐÃ ESCALATE ngày trước, VẪN chưa có quyết định sau retro thứ 3 liên tiếp — 1 pattern MỚI khẩn: SpaceX T+1 mất tích, tái diễn hình dạng sự cố ngày trước)](retro/retro-2026-08-10.md) | logged |
