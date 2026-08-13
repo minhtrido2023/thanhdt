@@ -103,3 +103,6 @@
 
 ## Archived 2026-08-13 (keep=12 days=0 require_done=False)
 - [2026-08-11T09:19:15Z] fill_timing checkpoint XONG (job Taylor_20260811_091002, commit b02b7649): gate 1-4 PASS do bang journal that, gate 5 pending CO CHU DICH — cho 4 phien BUY hybrid nua (08-13/18/20/25) roi quant-skeptic ~08-26 -> user sign-off. CHO USER QUYET giua A (cho hybrid) va B (sign-off ngay tuan nay). fill_timing_live_gate VAN True.
+
+## Archived 2026-08-13 (keep=12 days=0 require_done=False)
+- [2026-08-11T16:45:36Z] CHO QUANT-SKEPTIC: patch leg-3 doi soat fill (statement email DNSE) vao eod_trading_report.sh - job Taylor_20260811_162828, chua commit chua ap production. File: mike/bin/broker_fill_confirm.py + _selfcheck.py (51/51 PASS) + eod_trading_report.sh (+49/-2) + registry .proposed. Bao cao: agents/Taylor/research/broker_statement_leg3_wire_20260811.md. | KHUYEN NGHI KHONG wire vao send_plan_report.sh (DollarBill da suy lai muc tieu tu vi the that, tot hon replay shortfall - bang chung ZaloPay 1200 != thieu 1300). | VIEC RIENG CHUA XU LY: phi giao dich THAT do tu statement = 0,094% (so 0,027/0,018% + DNSE 0,070%) nhung reconcile_equity.py dong 73 mac dinh 0,075% => khai thieu ~25% tuong doi, day chenh sang residual. Cham pipeline §6, can Mike quyet, nen do them phien co BAN truoc khi chot con so.
