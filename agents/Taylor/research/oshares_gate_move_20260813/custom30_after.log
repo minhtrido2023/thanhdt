@@ -1,0 +1,42 @@
+[1] pull selection inputs (liquidity / ratings / cfo by quarter)...
+    rebals=48 union_tickers=171
+[2] pull prices (Open/Close/OShares) for union...
+[2b] point-in-time share counts for the 48 rebal exec dates...
+    7610 (mã,ngày) tại exec date: live=6603 (86.8%) fallback=1004 none=3 | mcap ĐỔI ở 1044 ô (13.7%)
+    cổng hợp lý chặn 500 ô (lỗi dữ liệu vendor nghi ngờ): ['AAA', 'BCG', 'BID', 'BSR', 'BVH', 'CTD', 'DCL', 'DGW', 'DHC', 'DIG', 'DXG', 'EVF', 'FCN', 'FIT', 'FPT', 'GMD', 'GVR', 'HAG', 'HAH', 'HBC', 'HCM', 'HDB', 'HID', 'HPG', 'HQC', 'HSG', 'IDC', 'KBC', 'KDH', 'KSB', 'LCG', 'LDG', 'LPB', 'MBB', 'MBG', 'MBS', 'MHC', 'MSN', 'MWG', 'NKG', 'NLG', 'NVL', 'PAN', 'PC1', 'PDR', 'PET', 'PNJ', 'QCG', 'SHB', 'SSI', 'TCB', 'TIG', 'TNG', 'TVC', 'VCI', 'VGC', 'VHM', 'VIC', 'VND', 'VPB', 'VSC']
+    lệch lớn nhất: 2015-05-05 NDN +100.0%, 2023-08-07 CEO +98.0%, 2017-02-06 SHB +82.2%, 2016-11-07 SHN -64.0%, 2023-08-07 HUT -60.9%
+
+variant   |    CAGR  Sharpe   MaxDD Calmar |   ΔCAGR    ΔSh     ΔDD
+------------------------------------------------------------------------------
+liq       |  12.44%    0.65  -46.6%   0.27 |  +0.00pp  +0.00   +0.0pp
+core0.5   |  12.11%    0.63  -45.2%   0.27 |  -0.33pp  -0.02   +1.4pp
+core1.0   |  14.48%    0.72  -45.3%   0.32 |  +2.05pp  +0.06   +1.2pp
+
+membership overlap liq vs core0.5: 88% (avg names shared / 30)
+
+--- by-year: liq vs core0.5 ---
+  2014: liq  -12.5%  core  -12.7%  Δ  -0.2pp
+  2015: liq   +6.5%  core   +1.8%  Δ  -4.7pp
+  2016: liq  +19.6%  core  +18.1%  Δ  -1.5pp
+  2017: liq  +55.7%  core  +50.4%  Δ  -5.2pp
+  2018: liq   -6.7%  core   -6.2%  Δ  +0.5pp
+  2019: liq  +20.8%  core  +16.8%  Δ  -3.9pp
+  2020: liq  +17.4%  core  +15.8%  Δ  -1.7pp
+  2021: liq  +36.6%  core  +45.4%  Δ  +8.8pp
+  2022: liq  -35.5%  core  -33.0%  Δ  +2.5pp
+  2023: liq  +14.0%  core  +14.0%  Δ  -0.1pp
+  2024: liq  +19.4%  core  +19.8%  Δ  +0.4pp
+  2025: liq  +30.4%  core  +32.0%  Δ  +1.6pp
+  2026: liq   +1.3%  core   +0.9%  Δ  -0.4pp
+  core beats liq 5/13 years
+
+--- self-check + spotcheck ---
+  liq      : nav_recon_err=0.00 VND  max_rebal_w=0.1000
+  core0.5  : nav_recon_err=0.00 VND  max_rebal_w=0.1000
+  core1.0  : nav_recon_err=0.00 VND  max_rebal_w=0.1000
+  DGC 2025-02-05: script=107120.0 bq=107120.0 OK
+  MSB 2022-05-05: script=11300.0 bq=11300.0 OK
+  TCB 2022-08-05: script=17770.0 bq=17770.0 OK
+  HCM 2016-08-05: script=3480.0 bq=3480.0 OK
+  MWG 2021-02-05: script=40470.0 bq=40470.0 OK
+  SELF-CHECK PASS | SPOTCHECK PASS

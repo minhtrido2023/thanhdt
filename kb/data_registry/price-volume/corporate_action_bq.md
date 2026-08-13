@@ -91,7 +91,7 @@ nhiều đợt phát hành khác nhau chốt cùng ngày (SUM đúng) hoặc ame
 | Script | Đọc gì | Ghi gì | Trạng thái |
 |---|---|---|---|
 | `corp_action_lib.py` | reader + taxonomy dùng chung (`is_price_adjusting` / `dilutes_share_count` / `feed_freshness`) | — | LIVE, 7 ca hồi quy |
-| `oshares_live.py` | AIS + ISS → số CP lưu hành point-in-time | — (thư viện) | CONFIRMED vòng 2, 22 ca hồi quy |
+| `oshares_live.py` | AIS + ISS → số CP lưu hành point-in-time | — (thư viện) | vòng 4: cổng chứng nhận neo AIS nằm TRONG module (`AIS_UNCERTIFIED` ⇒ `value=None`), 32 ca hồi quy — an toàn khi gọi thẳng `oshares_at()` |
 | `dividend_adjusted_return.py::bq_corp_action()` | DIV/ISS tại (mã, ex-date) | — | LIVE (tầng bổ sung; tiền broker vẫn là nguồn số chính thức §21) |
 | `mike/bin/corp_action_daily.py` | cả 3 cái trên + `active_nav_<label>.json` | `data/corp_action_daily/corp_action_daily_<date>.json` + Discord `trading_daily` | cron **CHƯA CÀI**, chờ quant-skeptic (job `Taylor_20260813_091128`) |
 
