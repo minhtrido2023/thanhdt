@@ -44,15 +44,18 @@ làm ngược sẽ hỏng lại. Cách đúng: **ước tính ngay tại `exrigh
 `AIS.shares_total_after` khi nó xuất hiện (ground truth chính xác, có thể lệch nhẹ do CP quỹ/làm
 tròn) — KHÔNG chờ AIS mới cập nhật.
 
-## Bẫy (2) — CHƯA CÓ WRITER/CRON, đây là NẠP MỘT LẦN
+## Bẫy (2) — CHƯA CÓ WRITER/CRON trong repo Mike biết, nạp lần đầu là MỘT LẦN
 
-`ingested_at` toàn bộ 36.149 dòng nằm trong khoảng **2026-08-12 15:22:57 → 15:48:52** (một batch,
-~26 phút) — không phải chuỗi lịch sử tích luỹ. Grep sạch repo: không script `.py`/`.sh` nào ghi bảng
-này, không có dòng crontab, không bus event nào nhắc `corporate_action`. **Không có gì đảm bảo bảng
-này sẽ tự cập nhật ngày mai.** `max(public_date)=2026-08-11` — tại thời điểm nạp là tươi, nhưng
-trước khi coi là nguồn "kịp thời" sống, PHẢI xác nhận có pipeline refresh (ai/cron nào, tần suất gì)
-— hỏi người tạo bảng, đừng suy đoán. Nếu không refresh, đây chỉ là snapshot lịch sử một lần, hữu ích
-cho backfill nhưng KHÔNG thay được vai trò real-time.
+`ingested_at` toàn bộ 36.149 dòng nạp đầu nằm trong khoảng **2026-08-12 15:22:57 → 15:48:52** (một
+batch, ~26 phút) — không phải chuỗi lịch sử tích luỹ. Grep sạch repo Mike: không script `.py`/`.sh`
+nào ghi bảng này, không có dòng crontab, không bus event nào nhắc `corporate_action`.
+
+**2026-08-13, user xác nhận: bảng sẽ được refresh HÀNG NGÀY từ hôm nay** (writer thuộc quy trình
+NGOÀI repo Mike quản, không phải fleet tự dựng). ⇒ Coi là nguồn sống có chủ đích, nhưng **verify
+artifact, đừng tin lời hứa refresh** (nguyên tắc chuẩn — MIKE.md mục 2): trước khi bất kỳ pipeline
+nào dựa vào tính "hôm nay có dữ liệu hôm nay", kiểm tra thật `MAX(ingested_at)`/`MAX(public_date)`
+mỗi lần đọc, đúng khuôn `kb/cron_registry.md` §11 (freshness check thật, không suy từ lịch). Ngày
+đầu tiên nên xác nhận lại: 2026-08-14 kiểm `MAX(public_date)` đã nhích qua 2026-08-12/13 chưa.
 
 ## Bẫy (3) — trùng `(ticker, exright_date, event_code)` — cần GROUP BY/dedup có chủ đích
 
