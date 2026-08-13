@@ -127,20 +127,61 @@ backfill) thay vì mô tả cũ vòng 1.
 vendor thật hay ngày cron tự lỡ thật nào. KHÔNG tin tuyệt đối tầng `FEED_DEAD_DAYS=5`/backfill cho
 tới khi thấy ít nhất 1 lần trong dữ liệu sống. Verify `MAX(ingested_at)` mỗi phiên.
 
-## Việc còn mở
+## Việc A+B wire (2026-08-13 chiều-tối, job Taylor_20260813_125526 → 6 vòng quant-skeptic) — ĐÃ XONG
 
-1. Việc B (Oshares) — consumer MÁY (backtest point-in-time / report-rating live) vẫn chưa chọn,
-   snapshot của Việc E hiện chỉ phục vụ consumer NGƯỜI (đọc cờ `usable`).
-2. Vòng 6 cũ (rc=1 + import-time KeyError của Việc D) — **CHỦ ĐỘNG BỎ QUA** (quyết định user
+User duyệt wire Oshares vào 2 consumer: **A** = backtest point-in-time (`custom30_core_select_audit.py`,
+bản sao tự chứa, KHÔNG đụng `custom_basket.py` production), **B** = rating live (`rating_8l.py`, qua
+wrapper đối chiếu bq_admin, chỉ dùng số mới khi khớp ≤0,1% — tự rơi về số cũ khi lệch).
+
+- **Vòng 1**: REFUTED — lỗi vendor thật (AIS `shares_total_after` sai 10× ở IDC), Taylor tự phát hiện.
+- **Vòng 2 (thiết kế lại cẩn thận theo yêu cầu user)**: REFUTED lần 2 — case FPT 2020-05-05 (vendor có
+  2 chuỗi AIS đan xen, gate cũ cho qua số sai −32,3% ở nhãn tin cậy cao nhất). Vá bằng đổi triết lý từ
+  "bộ dò lỗi" (phục vụ trừ khi chứng minh sai) sang "bộ chứng nhận" (chỉ phục vụ khi đối chiếu được) —
+  quét toàn bảng: 220/2.505 giao dịch AIS bị lỗi hình dạng này, không phải 2 ca cá biệt.
+- **Vòng 3**: CONFIRMED.
+- **Vòng 4**: dời cổng chứng nhận vào NGAY BÊN TRONG `oshares_live.py` (trước đó chỉ ở lớp bọc
+  `oshares_pit.py`, ai gọi thẳng vẫn nhận số sai) — CONFIRMED, nhưng phát hiện ảnh hưởng tới
+  `corp_action_daily.py` (cron LIVE) mất phủ 2/33 mã (EVF đúng, SHB báo oan).
+- **Vòng 5**: sửa gấp lỗi hiển thị Discord (4 mã đang giữ EVF/SHB/TCB/VPB bị hiện "0,00% khớp" giả khi
+  thực ra là "từ chối trả lời" — lỗi có từ trước, không phải do các vòng trên). Phát hiện thêm:
+  **SANITY_FACTOR CẦN THIẾT** — 279 ô/34 mã lọt cổng chứng nhận mà cổng biên độ ×3 chặn được, gồm
+  **VHM** (lỗi vendor ×1000, phục vụ ở tin cậy cao nhất suốt 13 quý) và VND đang giữ thật. KHÔNG tự
+  wire cổng biên độ vào (sẽ đổi số lịch sử đã công bố — để user quyết theo §22). CONFIRMED.
+- **Vòng 6 (khép chuỗi)**: sửa lời giải thích sai (TCB "thoát" vì neo bq_admin — SAI, thực ra neo 1
+  dòng AIS MỚI đã chứng nhận), hợp nhất vị ngữ `refused()`, phòng báo động giả 08-14 do đổi thành viên
+  track-set. **CONFIRMED** — 1 câu bằng chứng sai nhỏ trong báo cáo (đọc nhầm `max(public_date)` thành
+  ngày nạp — không đổi kết luận, quant-skeptic tự chứng minh lại bằng A/B code cũ-vs-mới) + 1 khoảng
+  hở thiết kế cho TƯƠNG LAI (`model_version()` chưa phủ logic bất biến của `corp_action_daily.py`
+  chính nó — không ảnh hưởng gì hôm nay, chỉ cần nhớ khi sửa file đó sau này).
+
+**Kết quả cuối:** Việc A/B đã wire, an toàn, đã qua 6 vòng phản biện độc lập. `oshares_live.py`/
+`oshares_pit.py`/`corp_action_lib.py` không đổi gì từ vòng 4. Không số đặt lệnh/NAV nào bị ảnh hưởng.
+
+⚠️ **07:30 ICT 2026-08-14 sẽ có 1 cảnh báo 🔇 THẬT (không phải lỗi)** cho EVF/SHB — do chính bản vá
+hôm nay siết chặt mô hình, không phải feed hỏng. Đã chứng minh bằng A/B (code cũ chạy trên feed hôm
+nay vẫn tái lập đúng số cũ; code mới từ chối) — tự hết từ 08-15 khi baseline có `model_version`.
+
+## Việc còn mở (rất nhẹ, không khẩn)
+
+1. Việc B — consumer MÁY thứ 2/3 nếu muốn mở rộng thêm (đã có A=backtest, B=rating; còn use case
+   khác nếu phát sinh) — không phải việc treo, chỉ là chưa có yêu cầu mới.
+2. `SANITY_FACTOR` cho `corp_action_daily.py` (gọi trực tiếp, không qua `oshares_pit`) — **cần user
+   quyết định chính sách**: có mở cổng biên độ ×3 không (sẽ ẩn số ở 34 mã lịch sử, gồm VHM/VND đang
+   giữ, để an toàn hơn)? Hiện chỉ có WARN, không tự chặn.
+3. Vòng 6 cũ (rc=1 + import-time KeyError của Việc D) — **CHỦ ĐỘNG BỎ QUA** (quyết định user
    2026-08-13, xác suất thấp + đã có backstop `cron_health_check_daily.sh`).
-3. `corporate_action` freshness — user xác nhận refresh hàng ngày từ 08-13, nhưng bảng vẫn đang ở
-   1 ngày ingest (08-12) tính tới lúc kiểm — theo dõi qua đợt burn-in ở trên, không việc riêng.
+4. `corporate_action` freshness — verify tiếp qua đợt burn-in 5-10 phiên đang chạy.
+5. `model_version()` chưa phủ logic bất biến riêng của `corp_action_daily.py` — chỉ cần nhớ khi
+   sửa file đó lần sau (không phải bug, không hành động ngay).
 
 ## Commit chính
 `WorkingClaude@2037e5c`, `mike@91434457` (vòng 1) · `WorkingClaude@abd7cd6`, `mike@60085443`
 (vòng 3 Việc D) · `WorkingClaude@7790fd6`, `mike@17d0c749` (vòng 4 Việc D) ·
 `WorkingClaude@e0ff1fb`, `mike@066df954` (vòng 5 Việc D) · `WorkingClaude@129f2779` (Việc E build) ·
 `WorkingClaude@f844b800` (Việc E vòng 3 — vá khoá trùng) · `WorkingClaude@5fe35e2f` (Việc E vòng 4
-— vá missed-run/backfill).
+— vá missed-run/backfill) · `WorkingClaude@1e35fba` (Việc A/B wire vòng 1) ·
+`WorkingClaude@8908640` (vòng 3 — chứng nhận AIS trong `oshares_pit`) · `mike@e5a408d4`
+(vòng 4 — dời cổng vào `oshares_live`) · `mike@9d5b9e24` (vòng 5 — sửa hiển thị Discord) ·
+`mike@898390ad` (vòng 6 — khép chuỗi).
 
 ↩ [Về index dự án](INDEX.md)
