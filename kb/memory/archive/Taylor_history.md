@@ -112,3 +112,6 @@
 
 ## Archived 2026-08-13 (keep=12 days=0 require_done=False)
 - [2026-08-12T10:23:33Z] XONG job Taylor_20260812_095213 (P1 tran dong + P2 pacing + P5 log L2). Code UNCOMMITTED, ca 3 MAC DINH TAT/logging-thuan; report agents/Taylor/research/thin_exec_20260812/IMPLEMENTATION.md. CHO: quant-skeptic verify -> Mike/user quyet bat (P1 can user chot max_no_chase_ceiling VND = quyet dinh chinh sach). PHAT HIEN PHU CAN LUOT RIENG: 4 selfcheck (extreme_regime, hard_no_chase_ceiling, paper_main_window, t2_settlement) DO SAN tren production tu 08-10 do HYBRID hoan MUA ngoai hybrid_buy_blocks — assertion cu moc, KHONG phai bug; da chung minh bang control + tat HYBRID => ca 4 xanh.
+
+## Archived 2026-08-13 (keep=12 days=0 require_done=False)
+- [2026-08-12T11:40:33Z] P1 tran dong TV1: rao can KY THUAT da dong het (loi nen-hom-nay da va + dry-run live TV1/DGC OK, 77/77 selfcheck, commit ec0120c/cb6fb94a). Con lai DUY NHAT: user chot max_no_chase_ceiling (so VND) => moi bat duoc dynamic_ceiling.enabled. CHUA LAM (khiem khuyet P2 quant-skeptic bat): clamp KHI SHIP != clamp DA DO => phai chay lai exp_expected_floor.py theo clamp ship, dinh co paper trial theo fill 0.829/+4.6pp chu KHONG phai 0.860/+7.7pp.
