@@ -1,0 +1,88 @@
+---
+kind: bigquery-table
+status: TRAP
+source: lithe-record-440915-m9.tav2_bq.corporate_action
+group: price-volume
+scope: ex-rights price adjustment, O/shares (outstanding shares) update, dividend/split event lookup
+writer: UNKNOWN — không có script/cron nào trong repo ghi bảng này (grep sạch, 2026-08-13)
+---
+
+# `tav2_bq.corporate_action`
+
+**Status: TRAP** — dữ liệu chất lượng tốt và đúng thứ đang thiếu (xem
+[`ticker_close_vs_price_dividend_adj.md`](ticker_close_vs_price_dividend_adj.md) §"BigQuery KHÔNG có
+cột raw per-event"), nhưng **chỉ là 1 lần nạp**, chưa có cơ chế refresh — đừng coi là live feed.
+
+## Là gì
+
+Bảng corp-action per-EVENT (không phải per-ngày như `ticker`), 36.149 dòng, 1.792 mã, phủ
+2000-2026, cluster theo `ticker`, partition theo `public_date` (MONTH). Kiểm tra thật 2026-08-13
+(bq CLI, `lithe-record-440915-m9`).
+
+**`event_code`** (cột `category` LUÔN NULL — bỏ qua, dùng `event_code`):
+
+| `event_code` | n | Ý nghĩa | Field quan trọng |
+|---|---:|---|---|
+| `DIV` | 17.058 | Cổ tức **TIỀN MẶT** — `value_per_share` = VND/cp GỘP (100% non-null), `exright_date`/`record_date`/`payout_date` | `value_per_share`, `exright_date` |
+| `ISS` | 11.719 | Phát hành CP (chia tách/thưởng/ESOP/quyền mua/riêng lẻ) — `issue_method_name_vi` phân loại, `exercise_ratio` = tỉ lệ CP mới/CP cũ | `exercise_ratio`, `issue_method_name_vi`, `exright_date` |
+| `AIS` | 4.878 | **Niêm yết bổ sung** — ngày CP mới CHÍNH THỨC vào lưu hành. `shares_delta` + `shares_total_after` **chỉ populate ở đây** | `shares_delta`, `shares_total_after`, `effective_date` |
+| `NLIS` | 1.368 | Niêm yết mới / chuyển sàn lên | `effective_date` |
+| `SUSP` | 678 | Huỷ đăng ký giao dịch / delist | `effective_date` |
+| `MOVE` | 431 | Chuyển sàn (HOSE↔UPCOM...) | `effective_date` |
+| `MA` | 17 | M&A | — |
+
+`event_status`/`issue_status_vi`: `announced`("Thông báo")/`executed`("Đã thực hiện")/
+`not_executed`(huỷ, 77 dòng kể từ 2025 riêng ISS — LỌC BỎ trước khi dùng).
+
+## Bẫy (1) — `exright_date` (giá đã đổi) và `AIS.effective_date` (Oshares chính thức đổi) **LỆCH XA**
+
+Đo thật FPT thưởng CP 15% 2025: `ISS.exright_date = 2025-07-21` (giá đã pha loãng ngay hôm đó) nhưng
+`AIS.effective_date = 2025-09-12` (**~7 tuần sau**) mới thấy `shares_total_after` cập nhật. Nếu chỉ
+JOIN theo `AIS` để lấy Oshares "kịp thời" thì **trễ hàng tuần** — đúng vấn đề user muốn giải nhưng
+làm ngược sẽ hỏng lại. Cách đúng: **ước tính ngay tại `exright_date`** bằng
+`shares_new = shares_old × (1 + exercise_ratio)` (từ `ISS`), rồi **đối soát lại** bằng
+`AIS.shares_total_after` khi nó xuất hiện (ground truth chính xác, có thể lệch nhẹ do CP quỹ/làm
+tròn) — KHÔNG chờ AIS mới cập nhật.
+
+## Bẫy (2) — CHƯA CÓ WRITER/CRON, đây là NẠP MỘT LẦN
+
+`ingested_at` toàn bộ 36.149 dòng nằm trong khoảng **2026-08-12 15:22:57 → 15:48:52** (một batch,
+~26 phút) — không phải chuỗi lịch sử tích luỹ. Grep sạch repo: không script `.py`/`.sh` nào ghi bảng
+này, không có dòng crontab, không bus event nào nhắc `corporate_action`. **Không có gì đảm bảo bảng
+này sẽ tự cập nhật ngày mai.** `max(public_date)=2026-08-11` — tại thời điểm nạp là tươi, nhưng
+trước khi coi là nguồn "kịp thời" sống, PHẢI xác nhận có pipeline refresh (ai/cron nào, tần suất gì)
+— hỏi người tạo bảng, đừng suy đoán. Nếu không refresh, đây chỉ là snapshot lịch sử một lần, hữu ích
+cho backfill nhưng KHÔNG thay được vai trò real-time.
+
+## Bẫy (3) — trùng `(ticker, exright_date, event_code)` — cần GROUP BY/dedup có chủ đích
+
+`id` là unique key thật (36.149 distinct = đúng số dòng) nhưng nhiều dòng CÓ THỂ trùng
+`(ticker, exright_date, event_code)` (vd `ING` 2007-12-31 có 7 dòng `ISS` cùng ngày) — có thể là
+nhiều đợt phát hành khác nhau chốt cùng ngày (SUM đúng) hoặc amendment/revision của cùng 1 sự kiện
+(lấy dòng `public_date` mới nhất). Đừng SUM mù `exercise_ratio`/`value_per_share` khi JOIN — kiểm
+`event_title_vi` từng dòng trước.
+
+## Cách dùng hiệu quả — 2 nâng cấp cụ thể so với cơ chế hiện có
+
+1. **O/shares (`ticker_financial.OShares` trễ theo quý, `shares_outstanding_live` chỉ 4 dòng tay)**:
+   build view `oshares_live` = Oshares quý gần nhất × cumulative product `(1+exercise_ratio)` của mọi
+   `ISS.exright_date` sau ngày báo cáo quý đó, override bằng `AIS.shares_total_after` khi có (chính
+   xác hơn). Thay thế cách làm thủ công của Winston (`update_shares_live.py`).
+2. **Ex-rights price / dividend measurement** — bảng này là đúng "cột raw per-event" mà
+   [`ticker_close_vs_price_dividend_adj.md`](ticker_close_vs_price_dividend_adj.md) nói KHÔNG tồn
+   tại trên BQ (viết 2026-08-02, TRƯỚC khi bảng này được tạo 2026-08-12): `DIV.value_per_share` cho
+   trực tiếp đồng/cp GỘP theo mã+ngày — không cần giải hệ phương trình từ `cashDividendReceiving`
+   gộp toàn tài khoản nữa (Tầng 2 trong file đó), và phân biệt được DIV/ISS rõ ràng (giải Bẫy 4 của
+   `Close/Price`). **Vẫn nên đối soát chéo với broker** (Tầng 2 cũ) trước khi thay hẳn — chưa kiểm
+   chứng độ chính xác/độ trễ công bố của nguồn vendor đằng sau bảng này so với tiền thật về tài khoản.
+
+## Việc còn treo trước khi wire vào report pipeline
+
+- Xác nhận nguồn/refresh cadence của bảng (ai tạo, có cron nào update tiếp không).
+- Nếu wire vào `dividend_adjusted_return.py`/report §21 gate: qua Taylor + quant-skeptic review
+  (đổi công thức đo lợi nhuận per-position, thuộc diện §21/§22 coding_guidelines).
+
+## Nguồn
+Kiểm tra trực tiếp bằng `bq` CLI 2026-08-13 (Mike, theo yêu cầu user tra cứu bảng mới).
+
+↩ [Về index nhóm](index.md)
