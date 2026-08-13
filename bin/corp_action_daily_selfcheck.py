@@ -427,6 +427,219 @@ def t_query_shape():
           and cad.confirm_prior_triggers("2026-08-12", {"events_today": []}) == [])
 
 
+# ─────────────────── khoá DUY NHẤT theo sự kiện + hàng treo (quant-skeptic vòng 2, 2026-08-13)
+
+# Ca MBB 2026-08-11 — KHÔNG phải ca dựng: hai sự kiện này có thật trong `corporate_action` và
+# chính docstring của `bq_corp_action` đã ghi chúng ra. Cùng ticker, cùng `event_code` (ISS),
+# cùng `exright_date`; chỉ khác `exercise_ratio`/`issue_method_name_vi`.
+_MBB_MUA = dict(ratio=0.1, method="Quyền mua CP cho Cổ đông hiện hữu",
+                title="Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 10.0%")
+_MBB_CTCP = dict(ratio=0.15, method="Trả Cổ tức bằng Cổ phiếu",
+                 title="Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 15.0%")
+
+
+def _mbb(spec, status, ev_id=None):
+    return {"id": ev_id, "ticker": "MBB", "event_code": "ISS", "exright_date": "2026-08-11",
+            "effective_date": None, "value_per_share": None, "exercise_ratio": spec["ratio"],
+            "issue_method_name_vi": spec["method"], "event_title_vi": spec["title"],
+            "event_status": status}
+
+
+def _kinds_by_ratio(prev, now):
+    return {(c["exercise_ratio"], c["kind"]) for c in
+            cad.confirm_prior_triggers("2026-08-11", prev, rows=now)}
+
+
+def t_confirm_unique_key():
+    """Ca hồi quy cho lỗ hổng quant-skeptic chọc thủng VÒNG 2 (2026-08-13).
+
+    Bug: khoá gộp `(ticker, event_code, exright_date, effective_date)` KHÔNG duy nhất. Hai sự
+    kiện MBB cùng ngày rơi vào một khoá ⇒ một dòng đè dòng kia ⇒ khi một cái bị HUỶ còn một cái
+    được xác nhận, kết quả CONFIRMED hay CANCELLED phụ thuộc THỨ TỰ DÒNG BigQuery trả về (không
+    xác định trước). Nghĩa là một khoản đã huỷ có thể được báo là đã xác nhận, và vòng xác nhận
+    — thứ DUY NHẤT biện minh cho việc ghi số trên `announced` — im lặng đúng lúc cần nó nhất.
+
+    Mọi ca dưới đây chạy CẢ HAI thứ tự dòng và đòi KẾT QUẢ GIỐNG HỆT NHAU.
+    """
+    print("== khoá duy nhất theo TỪNG sự kiện (ca MBB 2 sự kiện cùng ngày) ==")
+    want = {(0.1, "CANCELLED"), (0.15, "CONFIRMED")}
+
+    # (a) KHÔNG có `id` — đúng hình dạng snapshot cũ đã ghi ra đĩa trước bản vá này.
+    prev = {"events_today": [_mbb(_MBB_MUA, "announced"), _mbb(_MBB_CTCP, "announced")]}
+    fwd = [_mbb(_MBB_MUA, "not_executed"), _mbb(_MBB_CTCP, "executed")]
+    check("K1. 2 sự kiện MBB vào ⇒ 2 dòng xác nhận ra (bản cũ: 2 vào, 1 ra — một cái biến mất)",
+          len(cad.confirm_prior_triggers("2026-08-11", prev, rows=fwd)) == 2)
+    check("K2. quyền mua 10% bị HUỶ ⇒ CANCELLED, cổ tức CP 15% ⇒ CONFIRMED (không có `id`, khớp "
+          "bằng khoá nội dung)", _kinds_by_ratio(prev, fwd) == want, str(_kinds_by_ratio(prev, fwd)))
+    check("K3. ĐẢO THỨ TỰ DÒNG BQ trả về ⇒ KẾT QUẢ Y HỆT. Đây là chính ca quant-skeptic dựng: "
+          "bản cũ lật giữa CONFIRMED và CANCELLED chỉ vì đổi thứ tự",
+          _kinds_by_ratio(prev, list(reversed(fwd))) == want,
+          str(_kinds_by_ratio(prev, list(reversed(fwd)))))
+    check("K4. đảo cả thứ tự BẢN GHI hôm trước cũng không đổi kết luận",
+          _kinds_by_ratio({"events_today": list(reversed(prev["events_today"]))}, fwd) == want)
+
+    # (b) CÓ `id` vendor (36.149/36.149 duy nhất, 0 NULL — đã kiểm trên bảng thật)
+    pid = {"events_today": [_mbb(_MBB_MUA, "announced", "aaa1"),
+                            _mbb(_MBB_CTCP, "announced", "bbb2")]}
+    nid = [_mbb(_MBB_CTCP, "executed", "bbb2"), _mbb(_MBB_MUA, "not_executed", "aaa1")]
+    check("K5. có `id` ⇒ khớp thẳng từng dòng, thứ tự đảo vẫn đúng",
+          _kinds_by_ratio(pid, nid) == want, str(_kinds_by_ratio(pid, nid)))
+    check("K6. `id` ĐỔI HẾT (giả lập vendor sinh id mới mỗi lần nạp lại — KHÔNG kiểm chứng được "
+          "vì cả bảng chỉ có 1 ngày `ingested_at`) ⇒ vẫn khớp bằng nội dung, KHÔNG bắn một trận "
+          "VANISHED giả",
+          _kinds_by_ratio(pid, [_mbb(_MBB_MUA, "not_executed", "zzz9"),
+                                _mbb(_MBB_CTCP, "executed", "yyy8")]) == want)
+    # Ca DUY NHẤT mà lớp `id` làm được còn khoá nội dung thì không: vendor ĐÍNH CHÍNH nội dung của
+    # CHÍNH sự kiện đó (đổi tỉ lệ/số tiền) rồi huỷ nó. Khoá nội dung sẽ thấy "sự kiện cũ biến mất
+    # + một sự kiện lạ xuất hiện" ⇒ báo VANISHED, sai bản chất: nó không biến mất, nó BỊ HUỶ.
+    edited = cad.confirm_prior_triggers(
+        "2026-08-11", {"events_today": [_mbb(_MBB_MUA, "announced", "aaa1")]},
+        rows=[dict(_mbb(_MBB_MUA, "not_executed", "aaa1"), exercise_ratio=0.12,
+                   event_title_vi="… đính chính tỉ lệ 12.0%")])
+    check("K7. vendor ĐÍNH CHÍNH nội dung rồi HUỶ ⇒ vẫn là CANCELLED nhờ khớp theo `id` (chỉ có "
+          "khoá nội dung thì ra VANISHED — báo sai bản chất, và bỏ lọt một vụ huỷ thật)",
+          [c["kind"] for c in edited] == ["CANCELLED"], str(edited))
+
+    # (c) ca bệnh lý: hai dòng GIỐNG NHAU tới từng ký tự và không `id`. Chúng KHÔNG phân biệt
+    # được, và quy ước sẵn có của `bq_corp_action` đã coi hai dòng y hệt nhau là MỘT sự kiện
+    # (bản đính chính), nên gộp làm một là đúng — dùng lại quy ước đó, không dựng quy ước thứ hai.
+    # Cái phải chứng minh ở đây là: khi trạng thái MÂU THUẪN, kết quả vẫn phải THẬN TRỌNG và
+    # KHÔNG phụ thuộc thứ tự — tức luôn ra CANCELLED, không bao giờ ra CONFIRMED.
+    same = {"events_today": [_mbb(_MBB_MUA, "announced"), _mbb(_MBB_MUA, "announced")]}
+    for order in ([_mbb(_MBB_MUA, "executed"), _mbb(_MBB_MUA, "not_executed")],
+                  [_mbb(_MBB_MUA, "not_executed"), _mbb(_MBB_MUA, "executed")]):
+        got = sorted(c["kind"] for c in cad.confirm_prior_triggers("2026-08-11", same, rows=order))
+        check(f"K8. hai dòng KHÔNG phân biệt được, thứ tự {[r['event_status'][:4] for r in order]}"
+              " ⇒ luôn CANCELLED (gán TỆ NHẤT TRƯỚC: không phân biệt được thì không được đoán về "
+              "phía 'đã xác nhận')", got == ["CANCELLED"], str(got))
+    check("K9. CHỨNG MINH NGƯỢC cho K8: không có dòng nào `not_executed` thì KHÔNG được tự dựng "
+          "CANCELLED", all(c["kind"] == "CONFIRMED" for c in cad.confirm_prior_triggers(
+              "2026-08-11", same, rows=[_mbb(_MBB_MUA, "executed"), _mbb(_MBB_MUA, "executed")])))
+
+    # (d) nhãn *(dự kiến)* của số cổ tức GỘP — cùng lỗi gộp khoá, cùng cách sửa
+    def _div(tk, status, vps, title):
+        return {"id": None, "ticker": tk, "event_code": "DIV", "exright_date": "2026-08-13",
+                "effective_date": None, "value_per_share": vps, "exercise_ratio": None,
+                "issue_method_name_vi": None, "event_title_vi": title, "event_status": status}
+
+    mixed = [_div("XXX", "executed", 1000, "đợt 1"), _div("XXX", "announced", 500, "đợt 2")]
+    check("K10. mã có 2 đợt cổ tức cùng ngày, 1 chưa xác nhận ⇒ nhãn của SỐ GỘP không được là "
+          "`executed`; và đảo thứ tự cho kết quả Y HỆT (bản cũ: dòng cuối thắng)",
+          cad.dividend_event_status(mixed, "2026-08-13")["XXX"] != "executed"
+          and cad.dividend_event_status(mixed, "2026-08-13")
+          == cad.dividend_event_status(list(reversed(mixed)), "2026-08-13"),
+          str(cad.dividend_event_status(mixed, "2026-08-13")))
+    check("K11. CHỨNG MINH NGƯỢC cho K10: mọi đợt đều `executed` ⇒ nhãn `executed`, không dán "
+          "'dự kiến' bừa lên số đã chắc",
+          cad.dividend_event_status(
+              [_div("XXX", "executed", 1000, "đợt 1"), _div("XXX", "executed", 500, "đợt 2")],
+              "2026-08-13") == {"XXX": "executed"})
+    check("K12. sự kiện của NGÀY KHÁC không được lọt vào nhãn hôm nay",
+          cad.dividend_event_status(
+              [dict(_div("YYY", "announced", 700, "hôm khác"), exright_date="2026-08-12")],
+              "2026-08-13") == {})
+
+
+def _f(lst, key):
+    """Đọc trường của phần tử đầu — RỖNG thì trả None thay vì IndexError. Khi một mutation làm
+    hàm trả rỗng, ca phải hiện ĐỎ chứ không được làm cả bộ chết giữa chừng."""
+    return lst[0].get(key) if lst else None
+
+
+def t_carry_forward():
+    """Hàng CÒN TREO phải được kiểm lại ở D+2, D+3… — không phải một phát rồi thôi.
+
+    Bug vòng 2: `recorded` dựng CHỈ từ `events_today` của snapshot liền trước, nên món trả
+    `STILL_ANNOUNCED` ở D+1 không bao giờ được nhìn lại. Mà lượt chạy sống DUY NHẤT của vòng xác
+    nhận cho 4/4 `STILL_ANNOUNCED` — đúng cái nhánh bị rơi lại là nhánh xảy ra thật.
+    """
+    print("== hàng treo mang qua nhiều lượt chạy (carry-forward) ==")
+
+    def r(tk, status, ex="2026-08-12"):
+        return {"id": f"id-{tk}", "ticker": tk, "event_code": "DIV", "exright_date": ex,
+                "effective_date": None, "value_per_share": 1000.0, "exercise_ratio": None,
+                "issue_method_name_vi": None, "event_title_vi": f"{tk} DIV",
+                "event_status": status}
+
+    d = "2026-08-12"
+    # lượt 1 (D+1): vendor chưa đổi trạng thái
+    c1 = cad.confirm_prior_triggers(d, {"events_today": [r("AAA", "announced")]},
+                                    rows_by_date={d: [r("AAA", "announced")]})
+    p1 = cad.carry_forward(c1)
+    check("P1. lượt đầu còn `announced` ⇒ STILL_ANNOUNCED, n_checks=1, và ĐƯỢC mang sang lượt sau",
+          [c["kind"] for c in c1] == ["STILL_ANNOUNCED"] and _f(c1, "n_checks") == 1
+          and len(p1) == 1, str(c1))
+    check("P2. món mang sang giữ đủ trường để lượt sau dựng lại khoá + ngày sự kiện",
+          _f(p1, "event_date") == d and _f(p1, "first_seen_asof") == d
+          and _f(p1, "status_then") == "announced" and _f(p1, "id") == "id-AAA", str(p1))
+
+    # lượt 2 (D+2): `events_today` của snapshot liền trước RỖNG — chỉ hàng treo giữ được nó
+    snap2 = {"events_today": [], "pending_confirmations": p1}
+    c2 = cad.confirm_prior_triggers("2026-08-13", snap2,
+                                    rows_by_date={d: [r("AAA", "announced")]})
+    check("P3. D+2 VẪN kiểm lại đúng NGÀY SỰ KIỆN gốc dù `events_today` hôm qua rỗng — đây là ca "
+          "bản trước trả rỗng (một phát rồi thôi)",
+          len(c2) == 1 and _f(c2, "event_date") == d and _f(c2, "n_checks") == 2, str(c2))
+    check("P4. đồng hồ `first_seen_asof` KHÔNG bị reset khi mang qua lượt",
+          _f(c2, "first_seen_asof") == d, str(c2))
+    check("P5. CHỨNG MINH NGƯỢC cho P3: không `events_today`, không hàng treo ⇒ RỖNG (hàm không "
+          "tự bịa ra việc để làm)",
+          cad.confirm_prior_triggers("2026-08-13", {"events_today": []}) == [])
+
+    # ngã ngũ ⇒ thôi mang
+    c3 = cad.confirm_prior_triggers("2026-08-14", {"events_today": [], "pending_confirmations": p1},
+                                    rows_by_date={d: [r("AAA", "executed")]})
+    check("P6. khi vendor đổi trạng thái ⇒ CONFIRMED và KHÔNG mang tiếp (hàng treo phải rút được, "
+          "không thì nó chỉ dài ra mãi)",
+          [c["kind"] for c in c3] == ["CONFIRMED"] and cad.carry_forward(c3) == [], str(c3))
+    c4 = cad.confirm_prior_triggers("2026-08-14", {"events_today": [], "pending_confirmations": p1},
+                                    rows_by_date={d: [r("AAA", "not_executed")]})
+    check("P7. huỷ ở lượt SAU D+1 vẫn bắt được — bản cũ mù hoàn toàn với ca này",
+          [c["kind"] for c in c4] == ["CANCELLED"] and cad.carry_forward(c4) == [], str(c4))
+
+    # hết hạn kiểm
+    old = [dict(p1[0], n_checks=cad.PENDING_MAX_CHECKS - 1)]
+    c5 = cad.confirm_prior_triggers("2026-08-20", {"events_today": [], "pending_confirmations": old},
+                                    rows_by_date={d: [r("AAA", "announced")]})
+    check(f"P8. còn `announced` sau {cad.PENDING_MAX_CHECKS} lượt ⇒ UNRESOLVED_TIMEOUT và THÔI "
+          "mang tiếp — báo người một lần rồi rút, không lặp cảnh báo tới khi hết ai đọc",
+          [c["kind"] for c in c5] == ["UNRESOLVED_TIMEOUT"] and cad.carry_forward(c5) == [],
+          str(c5))
+    check("P9. CHỨNG MINH NGƯỢC cho P8: đúng một lượt TRƯỚC ngưỡng thì vẫn còn là STILL_ANNOUNCED "
+          "và vẫn được mang tiếp (ngưỡng thật sự nằm ở đúng chỗ, không lệch một)",
+          [c["kind"] for c in cad.confirm_prior_triggers(
+              "2026-08-19",
+              {"events_today": [], "pending_confirmations":
+                  [dict(p1[0], n_checks=cad.PENDING_MAX_CHECKS - 2)]},
+              rows_by_date={d: [r("AAA", "announced")]})] == ["STILL_ANNOUNCED"])
+
+    # trùng giữa hàng treo và events_today
+    dup = {"events_today": [r("AAA", "announced")],
+           "pending_confirmations": [dict(p1[0], n_checks=3)]}
+    c6 = cad.confirm_prior_triggers(d, dup, rows_by_date={d: [r("AAA", "announced")]})
+    check("P10. cùng một sự kiện vừa nằm trong hàng treo vừa nằm trong `events_today` ⇒ MỘT dòng, "
+          "và giữ n_checks THẬT (4) chứ không bị dòng mới reset về 1 — nếu không thì món treo tự "
+          "làm mới đồng hồ mỗi ngày và KHÔNG BAO GIỜ chạm ngưỡng escalate",
+          len(c6) == 1 and _f(c6, "n_checks") == 4, str(c6))
+
+    # nhiều NGÀY sự kiện cùng lúc: món treo từ 08-12 + món mới ghi hôm 08-14
+    c7 = cad.confirm_prior_triggers(
+        "2026-08-14",
+        {"events_today": [r("CCC", "announced", ex="2026-08-14")],
+         "pending_confirmations": [dict(p1[0], n_checks=1)]},
+        rows_by_date={d: [r("AAA", "not_executed")],
+                      "2026-08-14": [r("CCC", "executed", ex="2026-08-14")]})
+    check("P11. hàng treo NHIỀU NGÀY sự kiện khác nhau ⇒ mỗi ngày được hỏi bằng truy vấn của "
+          "CHÍNH ngày đó, không dồn hết vào ngày mới nhất",
+          {(c["ticker"], c["event_date"], c["kind"]) for c in c7}
+          == {("AAA", d, "CANCELLED"), ("CCC", "2026-08-14", "CONFIRMED")}, str(c7))
+    check("P12. điểm bơm `rows_by_date` KÍN: thiếu một ngày thì KHÔNG được lặng lẽ đi hỏi BQ "
+          "(bộ này hermetic theo thiết kế) — ngày thiếu cho VANISHED, một kết quả NHÌN THẤY ĐƯỢC",
+          [c["kind"] for c in cad.confirm_prior_triggers(
+              "2026-08-14", {"events_today": [], "pending_confirmations": p1},
+              rows_by_date={})] == ["VANISHED"])
+
+
 def t_query_shape_live():
     """Tầng --live: chạy CHÍNH mệnh đề WHERE đó qua BigQuery thật.
 
@@ -437,22 +650,23 @@ def t_query_shape_live():
     print("== --live: mệnh đề WHERE chạy thật trên BigQuery ==")
     from corp_action_lib import bq
     fake = """(SELECT * FROM UNNEST([
-        STRUCT('AAA' AS ticker, 'DIV' AS event_code, DATE '2026-08-13' AS exright_date,
+        STRUCT('ev-aaa' AS id, 'AAA' AS ticker, 'DIV' AS event_code,
+               DATE '2026-08-13' AS exright_date,
                CAST(NULL AS DATE) AS effective_date, 'announced' AS event_status,
                1500.0 AS value_per_share, CAST(NULL AS FLOAT64) AS exercise_ratio,
                CAST(NULL AS STRING) AS issue_method_name_vi,
                CAST(NULL AS FLOAT64) AS shares_delta, CAST(NULL AS FLOAT64) AS shares_total_after,
                'AAA announced hom nay' AS event_title_vi),
-        STRUCT('BBB', 'DIV', DATE '2026-08-13', CAST(NULL AS DATE), 'executed',
+        STRUCT('ev-bbb', 'BBB', 'DIV', DATE '2026-08-13', CAST(NULL AS DATE), 'executed',
                800.0, CAST(NULL AS FLOAT64), CAST(NULL AS STRING), CAST(NULL AS FLOAT64),
                CAST(NULL AS FLOAT64), 'BBB executed hom nay'),
-        STRUCT('CCC', 'DIV', DATE '2026-08-13', CAST(NULL AS DATE), 'not_executed',
+        STRUCT('ev-ccc', 'CCC', 'DIV', DATE '2026-08-13', CAST(NULL AS DATE), 'not_executed',
                900.0, CAST(NULL AS FLOAT64), CAST(NULL AS STRING), CAST(NULL AS FLOAT64),
                CAST(NULL AS FLOAT64), 'CCC da huy'),
-        STRUCT('DDD', 'AIS', CAST(NULL AS DATE), DATE '2026-08-13', 'announced',
+        STRUCT('ev-ddd', 'DDD', 'AIS', CAST(NULL AS DATE), DATE '2026-08-13', 'announced',
                CAST(NULL AS FLOAT64), CAST(NULL AS FLOAT64), CAST(NULL AS STRING),
                CAST(NULL AS FLOAT64), 123.0, 'DDD AIS hieu luc hom nay'),
-        STRUCT('EEE', 'DIV', DATE '2026-08-14', CAST(NULL AS DATE), 'announced',
+        STRUCT('ev-eee', 'EEE', 'DIV', DATE '2026-08-14', CAST(NULL AS DATE), 'announced',
                700.0, CAST(NULL AS FLOAT64), CAST(NULL AS STRING), CAST(NULL AS FLOAT64),
                CAST(NULL AS FLOAT64), 'EEE ngay mai')]))"""
     got = {r["ticker"] for r in bq(cad._events_on_sql("2026-08-13", table=fake))}
@@ -601,6 +815,8 @@ def main():
     t_crosscheck()
     t_triggers_and_alerts()
     t_query_shape()
+    t_confirm_unique_key()
+    t_carry_forward()
     t_positions_and_snapshot()
     t_notify()
     t_tz_hostile()

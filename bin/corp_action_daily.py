@@ -389,7 +389,7 @@ def _events_on_sql(asof, table=None, include_cancelled=False):
     src = table or TABLE
     src = src if src.lstrip().startswith("(") else f"`{src}`"
     return f"""
-        SELECT ticker, event_code, CAST(exright_date AS STRING) exright_date,
+        SELECT id, ticker, event_code, CAST(exright_date AS STRING) exright_date,
                CAST(effective_date AS STRING) effective_date, event_status,
                value_per_share, exercise_ratio, issue_method_name_vi,
                shares_delta, shares_total_after, SUBSTR(event_title_vi, 1, 90) event_title_vi
@@ -405,44 +405,220 @@ def _all_events_on(asof):
     return bq(_events_on_sql(asof))
 
 
-def confirm_prior_triggers(prev_asof, prev_snap, rows=None):
-    """Sự kiện đã ghi hôm trước GIỜ ra sao — vòng xác nhận cho các dòng lúc đó còn `announced`.
+def _num_tag(x):
+    """Số → chuỗi ổn định qua vòng JSON. `3000`, `3000.0`, `"3000"`, `Decimal("3000")` phải cho
+    CÙNG một khoá, nếu không thì sự kiện tự-không-khớp-chính-mình sau khi đọc lại snapshot."""
+    if x is None or x == "":
+        return ""
+    try:
+        return f"{float(x):.6f}"
+    except (TypeError, ValueError):
+        return str(x)
+
+
+def _event_key(r):
+    """Khoá NỘI DUNG của MỘT sự kiện — dùng khi không có `id`, hoặc `id` không khớp được.
+
+    ⚠️ Bản trước chỉ có 4 trường đầu và quant-skeptic vòng 2 (2026-08-13) đã chọc thủng bằng ca
+    CÓ THẬT ghi ngay trong docstring của `bq_corp_action`: MBB 2026-08-11 có HAI sự kiện cùng
+    ticker + cùng `event_code` (ISS) + cùng `exright_date` (quyền mua 10% và cổ tức CP 15%, khác
+    nhau ở `issue_method_name_vi`/`exercise_ratio`). Hai sự kiện gộp về một khoá ⇒ một dòng ghi
+    đè dòng kia ⇒ nếu một cái bị HUỶ và một cái được xác nhận, kết quả CONFIRMED hay CANCELLED
+    phụ thuộc THỨ TỰ DÒNG BigQuery trả về, tức là một khoản đã huỷ có thể được báo là đã xác
+    nhận. Thêm ratio/method/title/value làm khoá phân biệt hai đợt đó tách hẳn nhau.
+    """
+    return (r.get("ticker") or "", r.get("event_code") or "",
+            r.get("exright_date") or "", r.get("effective_date") or "",
+            _num_tag(r.get("value_per_share")), _num_tag(r.get("exercise_ratio")),
+            r.get("issue_method_name_vi") or "", r.get("event_title_vi") or "")
+
+
+def _kind_of(status):
+    if status == "__MISSING__":
+        return "VANISHED"
+    if status == "not_executed":
+        return "CANCELLED"
+    if status == "executed":
+        return "CONFIRMED"
+    return "STILL_ANNOUNCED"
+
+
+# thứ tự "TỆ NHẤT TRƯỚC". Dùng khi phải gán nhiều trạng thái vào nhiều sự kiện cùng khoá nội dung:
+# gán tệ trước ⇒ một vụ HUỶ luôn được báo ra, bất kể BigQuery trả dòng theo thứ tự nào.
+_KIND_RANK = {"CANCELLED": 0, "VANISHED": 1, "STILL_ANNOUNCED": 2, "CONFIRMED": 3}
+
+
+def _match_events(recorded, now_rows):
+    """Ghép TỪNG sự kiện đã ghi với dòng hiện tại → [(bản ghi, trạng thái nay)].
+
+    Hai lượt, cố ý theo thứ tự này:
+      1. **`id` của vendor** (`corporate_action.id`, đã kiểm: 36.149/36.149 duy nhất, 0 NULL) —
+         khoá thật, chính xác từng dòng.
+      2. **khoá nội dung** cho phần còn lại. KHÔNG bỏ được lượt này: cả bảng chỉ có MỘT ngày
+         `ingested_at` nên KHÔNG kiểm chứng được `id` có bền qua lần vendor nạp lại hay không.
+         Nếu vendor sinh `id` mới mỗi lần reload thì lượt 1 trượt sạch, và không có lượt 2 thì
+         mọi sự kiện sẽ bị báo `VANISHED` hàng loạt ngay lần reload đầu tiên — một cảnh báo giả
+         diện rộng còn tệ hơn cái nó định phòng.
+
+    Trong lượt 2, nếu vẫn còn nhiều sự kiện chung một khoá nội dung (hai đợt y hệt nhau tới từng
+    ký tự), trạng thái được gán TỆ NHẤT TRƯỚC ⇒ kết quả không phụ thuộc thứ tự dòng BQ trả về.
+    """
+    used = [False] * len(now_rows)
+    by_id = {}
+    for i, r in enumerate(now_rows):
+        if r.get("id"):
+            by_id.setdefault(str(r["id"]), i)
+    out, left = [], []
+    for rec in recorded:
+        rid = str(rec.get("id") or "")
+        i = by_id.get(rid, -1) if rid else -1
+        if i >= 0 and not used[i]:
+            used[i] = True
+            out.append((rec, now_rows[i].get("event_status")))
+        else:
+            left.append(rec)
+    pool = {}
+    for i, r in enumerate(now_rows):
+        if not used[i]:
+            pool.setdefault(_event_key(r), []).append(r.get("event_status"))
+    for sts in pool.values():
+        sts.sort(key=lambda s: _KIND_RANK[_kind_of(s)])
+    for rec in sorted(left, key=lambda r: str(_event_key(r))):
+        sts = pool.get(_event_key(rec)) or []
+        out.append((rec, sts.pop(0) if sts else "__MISSING__"))
+    return out
+
+
+# Sự kiện còn `announced` được kiểm lại tối đa ngần này LƯỢT CHẠY rồi mới escalate. Chọn 5 vì:
+# (a) đo thật trên 90 ngày ex-right, mọi ngày cách hôm nay ≥2 phiên đều 100% `executed` ⇒ còn
+# `announced` sang tới lượt thứ 5 là bất thường rõ ràng, không phải nhịp bình thường của vendor;
+# (b) bằng đúng `FEED_DEAD_DAYS` — một feed đứng im nhưng chưa CHẾT đã có cảnh báo riêng của nó,
+# đặt N nhỏ hơn sẽ sinh cảnh báo thứ hai nói cùng một chuyện; đặt lớn hơn thì có ngày feed đã bị
+# tuyên CHẾT mà hàng treo vẫn im lặng. (c) Đây là ngưỡng CẢNH BÁO, không phải ngưỡng tiền — sai
+# một phiên chỉ đổi thời điểm một dòng Discord.
+PENDING_MAX_CHECKS = 5
+
+# các trường phải mang theo để lượt sau dựng lại được khoá + kể lại được lịch sử món treo
+PENDING_FIELDS = ("id", "ticker", "event_code", "exright_date", "effective_date",
+                  "value_per_share", "exercise_ratio", "issue_method_name_vi",
+                  "event_title_vi", "status_then", "event_date", "first_seen_asof", "n_checks")
+
+
+def pending_items(prev_asof, prev_snap):
+    """Danh sách sự kiện CẦN kiểm ở lượt này = MỚI ghi hôm trước ∪ CÒN TREO từ các lượt trước.
+
+    ⚠️ Bản trước dựng `recorded` CHỈ từ `events_today` của snapshot liền trước, nên một sự kiện
+    trả `STILL_ANNOUNCED` ở D+1 KHÔNG BAO GIỜ được kiểm lại ở D+2 — vòng xác nhận chỉ bắn một
+    phát rồi thôi (quant-skeptic vòng 2). Mà lượt chạy sống DUY NHẤT của vòng này cho 4/4
+    `STILL_ANNOUNCED`, tức đúng cái nhánh bị rơi lại là nhánh xảy ra thật.
+    """
+    items, seen = [], set()
+
+    def _add(src, event_date, first_seen, n_checks):
+        it = {k: src.get(k) for k in PENDING_FIELDS}
+        it["status_then"] = src.get("status_then") or src.get("event_status")
+        it["event_date"], it["first_seen_asof"], it["n_checks"] = event_date, first_seen, n_checks
+        k = (event_date, str(src.get("id") or ""), _event_key(src))
+        if k in seen:
+            return
+        seen.add(k)
+        items.append(it)
+
+    # hàng treo TRƯỚC hàng mới: món treo giữ được `first_seen_asof`/`n_checks` thật của nó, không
+    # bị một dòng cùng khoá của ngày hôm trước reset đồng hồ về 0.
+    for p in (prev_snap or {}).get("pending_confirmations") or []:
+        _add(p, p.get("event_date") or prev_asof, p.get("first_seen_asof") or prev_asof,
+             int(p.get("n_checks") or 0))
+    if prev_asof:
+        for r in (prev_snap or {}).get("events_today") or []:
+            _add(r, prev_asof, prev_asof, 0)
+    return items
+
+
+def confirm_prior_triggers(prev_asof, prev_snap, rows=None, rows_by_date=None,
+                           max_checks=PENDING_MAX_CHECKS):
+    """Sự kiện đã ghi trước đó GIỜ ra sao — vòng xác nhận cho các dòng lúc đó còn `announced`.
 
     Vì trigger ngày-sự-kiện buộc phải chạy trên `announced` (xem `_events_on_sql`), snapshot của
     ngày D có thể ghi một khoản cổ tức mà sau đó bị HUỶ. Không có vòng này thì snapshot D sai
-    vĩnh viễn và không ai biết. Lượt chạy D+1 đọc lại đúng ngày D với MỌI trạng thái và trả:
+    vĩnh viễn và không ai biết. Mỗi lượt chạy đọc lại NGÀY SỰ KIỆN của từng món đang chờ, với
+    MỌI trạng thái, và trả:
 
       * `CANCELLED`  — đã ghi, nay `not_executed`. Sai số thật, phải báo người.
       * `CONFIRMED`  — `announced` → `executed`. Bình thường, chỉ ghi vào snapshot.
-      * `STILL_ANNOUNCED` — vendor chưa đổi trạng thái. Chưa sai, nhưng chưa chắc.
+      * `STILL_ANNOUNCED` — vendor chưa đổi trạng thái. Chưa sai, nhưng chưa chắc ⇒ MANG SANG
+        lượt sau (`carry_forward`), kiểm lại tới khi ngã ngũ.
+      * `UNRESOLVED_TIMEOUT` — vẫn `announced` sau `max_checks` lượt. Thôi mang tiếp, báo người.
       * `VANISHED`   — dòng biến mất khỏi bảng. Bất thường, báo người.
+
+    `rows=` (một ngày, chính là `prev_asof`) và `rows_by_date=` (nhiều ngày) là điểm bơm cho bộ
+    hồi quy hermetic — không có chúng thì hàm tự truy vấn BQ.
     """
-    if not prev_snap or not prev_asof:
+    items = pending_items(prev_asof, prev_snap)
+    if not items:
         return []
-    recorded = {(r["ticker"], r["event_code"], r.get("exright_date"), r.get("effective_date")):
-                r.get("event_status") for r in (prev_snap.get("events_today") or [])}
-    if not recorded:
-        return []
-    if rows is None:
-        from corp_action_lib import bq
-        # include_cancelled=True: chính CÁI ĐÃ HUỶ mới là thứ vòng này đi tìm.
-        rows = bq(_events_on_sql(prev_asof, include_cancelled=True))
-    now = {(r["ticker"], r["event_code"], r.get("exright_date"), r.get("effective_date")):
-           r.get("event_status") for r in rows}
+    by_date = {}
+    for it in items:
+        by_date.setdefault(it["event_date"], []).append(it)
     out = []
-    for key, was in sorted(recorded.items(), key=lambda kv: str(kv[0])):
-        is_ = now.get(key, "__MISSING__")
-        if is_ == "__MISSING__":
-            kind = "VANISHED"
-        elif is_ == "not_executed":
-            kind = "CANCELLED"
-        elif is_ == "executed":
-            kind = "CONFIRMED"
+    for d in sorted(by_date):
+        if rows_by_date is not None:
+            # `.get(d, [])` chứ KHÔNG rơi về BQ khi thiếu ngày: điểm bơm phải KÍN, không thì một
+            # ca hermetic thiếu một ngày sẽ lặng lẽ đi hỏi bảng thật và bộ này hết hermetic.
+            now_rows = rows_by_date.get(d, [])
+        elif rows is not None and d == prev_asof:
+            now_rows = rows
         else:
-            kind = "STILL_ANNOUNCED"
-        out.append({"ticker": key[0], "event_code": key[1], "exright_date": key[2],
-                    "effective_date": key[3], "status_then": was, "status_now": is_,
-                    "kind": kind, "prev_asof": prev_asof})
+            from corp_action_lib import bq
+            # include_cancelled=True: chính CÁI ĐÃ HUỶ mới là thứ vòng này đi tìm.
+            now_rows = bq(_events_on_sql(d, include_cancelled=True))
+        recorded = sorted(by_date[d], key=lambda r: str(_event_key(r)))
+        for rec, is_ in _match_events(recorded, now_rows):
+            kind = _kind_of(is_)
+            n = int(rec.get("n_checks") or 0) + 1
+            if kind == "STILL_ANNOUNCED" and n >= max_checks:
+                kind = "UNRESOLVED_TIMEOUT"
+            c = {k: rec.get(k) for k in PENDING_FIELDS}
+            c.update({"status_now": is_, "kind": kind, "n_checks": n,
+                      # giữ tên cũ `prev_asof` = ngày sự kiện của CHÍNH món này (không còn luôn
+                      # bằng snapshot liền trước, vì hàng treo có thể cũ hơn thế).
+                      "prev_asof": rec.get("event_date")})
+            out.append(c)
+    return out
+
+
+def carry_forward(confirmations):
+    """Món MANG SANG lượt sau — chỉ những cái còn `announced` mà chưa hết hạn kiểm.
+
+    `UNRESOLVED_TIMEOUT` cố ý KHÔNG nằm ở đây: đã báo người một lần rồi thì thôi mang tiếp, nếu
+    không danh sách chờ chỉ dài ra mãi và cảnh báo lặp lại mỗi ngày cho tới khi hết ai đọc.
+    """
+    return [{k: c.get(k) for k in PENDING_FIELDS}
+            for c in confirmations if c["kind"] == "STILL_ANNOUNCED"]
+
+
+def dividend_event_status(ev_rows, asof):
+    """Nhãn trạng thái cho SỐ CỔ TỨC GỘP của từng mã — gộp có chủ đích, và gộp về phía THẬN TRỌNG.
+
+    `bq_corp_action` trả TỔNG tiền của mọi sự kiện `DIV` cùng ngày của một mã, nên nhãn đi kèm
+    buộc phải ở cấp MÃ. Bản trước dựng `{ticker: status}` bằng một comprehension ⇒ dòng CUỐI
+    thắng, mà thứ tự dòng BQ trả về không xác định ⇒ nhãn *(dự kiến)* có thể biến mất chỉ vì đổi
+    thứ tự dòng (cùng một lỗi gộp khoá như `confirm_prior_triggers`, quant-skeptic vòng 2).
+
+    Nay gộp theo TỪNG SỰ KIỆN rồi mới hạ về mã bằng luật **`executed` CHỈ KHI mọi sự kiện đều
+    `executed`** — kết quả không phụ thuộc thứ tự, và sai thì sai về phía dán thêm nhãn "dự
+    kiến", không phải phía bỏ nhãn đi.
+    """
+    per_event = {}
+    for r in ev_rows:
+        if r.get("event_code") == "DIV" and r.get("exright_date") == asof:
+            per_event[(str(r.get("id") or ""), _event_key(r))] = r.get("event_status")
+    out = {}
+    for (_rid, key), st in per_event.items():
+        tk = key[0]
+        cur = out.get(tk)
+        if cur is None or _KIND_RANK[_kind_of(st)] < _KIND_RANK[_kind_of(cur)]:
+            out[tk] = st
     return out
 
 
@@ -760,8 +936,7 @@ def run(asof=None, dry_run=False, alert=True, lookahead=LOOKAHEAD_DAYS, trace=No
     # từng mã, và lượt chạy hôm sau xác nhận lại qua `confirm_prior_triggers()`.
     div_today = {}
     from dividend_adjusted_return import bq_corp_action
-    ev_status = {r["ticker"]: r.get("event_status") for r in ev_rows
-                 if r["event_code"] == "DIV" and r.get("exright_date") == asof}
+    ev_status = dividend_event_status(ev_rows, asof)
     for tk in sorted(ex_today):
         ca = bq_corp_action(tk, asof, include_announced=True)
         if not ca or not ca.get("cash"):
@@ -780,9 +955,13 @@ def run(asof=None, dry_run=False, alert=True, lookahead=LOOKAHEAD_DAYS, trace=No
     # ── vòng XÁC NHẬN: sự kiện đã ghi hôm trước giờ ra sao (huỷ? đã xác nhận? vẫn dự kiến?)
     confirmations = confirm_prior_triggers(prev_asof, prev_snap)
     cancelled = [c for c in confirmations if c["kind"] in ("CANCELLED", "VANISHED")]
-    print(f"[xác nhận T-1] {len(confirmations)} sự kiện đã ghi {prev_asof or '—'}: "
+    timed_out = [c for c in confirmations if c["kind"] == "UNRESOLVED_TIMEOUT"]
+    pending_next = carry_forward(confirmations)
+    print(f"[xác nhận] {len(confirmations)} sự kiện đang theo dõi "
+          f"(ngày sự kiện {sorted({c['event_date'] for c in confirmations}) or '—'}): "
           f"{len([c for c in confirmations if c['kind'] == 'CONFIRMED'])} CONFIRMED, "
-          f"{len([c for c in confirmations if c['kind'] == 'STILL_ANNOUNCED'])} còn dự kiến, "
+          f"{len(pending_next)} còn dự kiến → mang sang lượt sau, "
+          f"{len(timed_out)} quá {PENDING_MAX_CHECKS} lượt chưa ngã ngũ, "
           f"{len(cancelled)} HUỶ/BIẾN MẤT")
 
     # ── LỚP 6 · sự kiện sắp tới của mã ĐANG GIỮ
@@ -814,6 +993,9 @@ def run(asof=None, dry_run=False, alert=True, lookahead=LOOKAHEAD_DAYS, trace=No
         # snapshot để người đọc (và mọi script đọc lại file này) không trích nhầm nó là kết quả.
         "invariant_evaluated": inv_evaluated,
         "prior_trigger_confirmations": confirmations,
+        # hàng CÒN TREO mang sang lượt sau — thứ biến vòng xác nhận từ một-phát-rồi-thôi thành
+        # theo tới khi ngã ngũ. Lượt sau đọc lại đúng field này (`pending_items`).
+        "pending_confirmations": pending_next,
         "upcoming_events_held": upcoming, "lookahead_days": lookahead,
         "positions_stale": stale_pos,
         "n_track": len(track), "n_held": len(held),
@@ -857,10 +1039,17 @@ def run(asof=None, dry_run=False, alert=True, lookahead=LOOKAHEAD_DAYS, trace=No
     if cancelled:
         # Đây là cái giá PHẢI trả cho việc ghi trên `announced`: một khoản đã ghi hôm trước có
         # thể bị huỷ. Không báo = snapshot hôm qua sai vĩnh viễn và không ai biết.
-        lines.append(f"🔁 **Sự kiện ghi ngày {prev_asof} nay ĐÃ HUỶ/BIẾN MẤT** "
-                     f"({len(cancelled)} — snapshot hôm đó SAI, đọc lại trước khi dùng): " +
-                     "; ".join(f"{c['ticker']} {c['event_code']} "
+        lines.append(f"🔁 **Sự kiện đã ghi nay ĐÃ HUỶ/BIẾN MẤT** "
+                     f"({len(cancelled)} — snapshot ngày đó SAI, đọc lại trước khi dùng): " +
+                     "; ".join(f"{c['ticker']} {c['event_code']} @{c['event_date']} "
                                f"{c['status_then']}→{c['status_now']}" for c in cancelled[:8]))
+    if timed_out:
+        # KHÔNG gộp vào `cancelled`: chưa có bằng chứng sai, chỉ là vendor im quá lâu. Nhưng cũng
+        # KHÔNG được im — đây là lúc thôi mang tiếp, nên không báo bây giờ thì không bao giờ báo.
+        lines.append(f"⏳ **Còn `announced` sau {PENDING_MAX_CHECKS} lượt kiểm — thôi theo dõi, "
+                     f"cần người xem** ({len(timed_out)}): " +
+                     "; ".join(f"{c['ticker']} {c['event_code']} @{c['event_date']} "
+                               f"(từ {c['first_seen_asof']})" for c in timed_out[:8]))
     if status == "STALE" and streak >= 2:
         lines.append(f"🕒 `corporate_action` không nạp thêm gì {streak} ngày liên tiếp "
                      f"(gần nhất {fresh.get('max_ingested_ict')}) — sự kiện MỚI công bố hôm nay "
@@ -883,7 +1072,8 @@ def run(asof=None, dry_run=False, alert=True, lookahead=LOOKAHEAD_DAYS, trace=No
          # `n_invariant_violations: 0` một mình là mơ hồ — kèm luôn cờ "có so được gì không"
          # để người đọc bus không phải mở snapshot mới biết con số 0 đó có nghĩa hay không.
          "invariant_evaluated": inv_evaluated, "n_compared": n_cmp,
-         "n_prior_cancelled": len(cancelled),
+         "n_prior_cancelled": len(cancelled), "n_pending_confirmations": len(pending_next),
+         "n_unresolved_timeout": len(timed_out),
          "snapshot": os.path.relpath(snapshot_path(asof), WC_ROOT)}, trace)
     return 0, snap
 
