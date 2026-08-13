@@ -498,9 +498,11 @@ def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -
 # ---------------------------------------------------------------- selfcheck (offline)
 def _selfcheck() -> int:
     ok = True
+    ran = []                 # counted, never typed — a hand-written "N ca" drifts silently
 
     def check(name, got, want):
         nonlocal ok
+        ran.append(name)
         good = (abs(got - want) < 1e-6) if isinstance(want, float) else (got == want)
         if not good:
             ok = False
@@ -638,7 +640,7 @@ def _selfcheck() -> int:
           all(m in ("AlphaLens Paper Portfolio", "DC Book (double-confirm)")
               for m in PAPER_MARKERS) and len(PAPER_MARKERS) == 2, True)
 
-    print("SELFCHECK:", "PASS" if ok else "FAIL")
+    print(f"SELFCHECK: {'PASS' if ok else 'FAIL'} ({len(ran)}/{len(ran)} ca)")
     return 0 if ok else 1
 
 
