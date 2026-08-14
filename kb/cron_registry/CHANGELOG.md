@@ -59,6 +59,17 @@ preserve_verbatim: >
   Rollback 1 lệnh: `crontab -l | grep -v park_trim_daily.sh | grep -v jit_unpark_daily.sh | grep -v
   merge_park_daily.sh | crontab -`; bản crontab trước khi đổi lưu ở
   `agents/Taylor/research/crontab_backup_20260814_before_park_chain.txt`.
+  📌 **Quy chiếu commit — CÙNG JOB nhưng ĐÚNG RA LÀ HAI COMMIT LIỀN KỀ, không phải một**
+  (quant-skeptic bắt được 2026-08-14, đính chính ngay tại đây): 3 wrapper `.sh` + bản sao lưu
+  crontab nằm ở **`f44b5e23`** (21:38:30 +0700); 2 file tài liệu này (`kb/cron_registry.md` +
+  `kb/cron_registry/CHANGELOG.md`) thực tế đã bị **`3a807740`** (21:38:16 +0700, commit
+  `consolidate` KB v2192) gom mất **14 giây trước** — `consolidate.sh` chạy tự động ngay sau
+  `append_event.sh` và commit TOÀN BỘ `kb/`, nên tới lượt commit của job thì 2 path đó không còn
+  gì để stage. Nội dung khớp đúng ý định §11 (cùng job, cùng phút, đều trên `master`) nhưng ai
+  truy vết bằng một hash duy nhất sẽ hụt. **Bài học cho cron/registry sau này**: ở repo `mike`,
+  hễ job có `append_event.sh` chạy trước `git commit` thì file `kb/` gần như chắc chắn đi theo
+  commit của consolidator — muốn "cùng commit" theo nghĩa đen phải commit `kb/` TRƯỚC khi ghi bus,
+  còn không thì khai báo cả hai hash như dòng này.
 
 - 2026-08-11 (Mike, user mandate): cron 16:00 ICT `paper_programs_daily_report.sh` thêm cờ
   `--email`, vẫn giữ `--post` để Discord và email dùng cùng một lần render. Wrapper lưu artifact
