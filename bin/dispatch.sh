@@ -1468,7 +1468,14 @@ except Exception:
   # Discord 127.0.0.1:8199 — xem chú thích tại nhánh "registry hỏng" bên dưới.)
     if [ -n "${_dtid:-}" ]; then
       _dp="$(printf '%s' "$prompt" | head -c 120 | tr '\n\t' '  ')"
-      "$ROOT/bin/notify_thread.sh" "🚀 **$id** nhận việc (job \`$job_id\`): $_dp… Sẽ notify khi xong." "$_dtid" 2>/dev/null || true
+      # Do not make the user infer whether Mike has scheduled a return.  The same
+      # profile-derived delay printed above is the first-poll target, so expose it
+      # in the initial notification with an absolute timestamp.  This is an ETA for
+      # Mike's check, not a claim that the child itself will complete then.
+      _wake_delay="${_wsugg:-240}"
+      _wake_at="$(date -u -d "+${_wake_delay} seconds" '+%H:%M UTC' 2>/dev/null || true)"
+      [ -n "$_wake_at" ] || _wake_at="sau ~${_wake_delay}s"
+      "$ROOT/bin/notify_thread.sh" "🚀 **$id** nhận việc (job \`$job_id\`): $_dp… Tôi sẽ tự kiểm tra lại lúc **$_wake_at** (~${_wake_delay}s); nếu xong sớm hệ thống sẽ báo ngay." "$_dtid" 2>/dev/null || true
     fi; } &
 else
   # Synchronous: caller gets stdout directly (bounded by --timeout, no auto-retry)
