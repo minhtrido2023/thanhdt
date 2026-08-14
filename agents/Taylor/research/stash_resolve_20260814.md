@@ -120,8 +120,9 @@ hại THẬT, không phải lỗi cosmetic của test.
 3. `_would_be_unchanged` truyền KL chưa khớp của lệnh sắp huỷ:
    `reserved = 0 if c.get("released") else c["qty"] - c.get("filled", 0)`.
 
-`refresh_skip_participation_selfcheck.py` **ALL PASS (31/31)** trên HEAD, và cũng PASS trên nội
-dung stash — tức phần REFRESH_SKIP là chỗ DUY NHẤT stash và HEAD tương đương. Không có gì để cứu.
+`refresh_skip_participation_selfcheck.py` **ALL PASS (35 dòng PASS, rc=0)** trên HEAD — bộ này đã
+được bồi thêm ca từ 31 hồi 08-10 — và cũng PASS trên nội dung stash. Tức phần REFRESH_SKIP là chỗ
+DUY NHẤT stash và HEAD tương đương. Không có gì để cứu.
 
 ## 6. Ranh giới LIVE — kiểm bằng số, không bằng đọc code
 
@@ -137,8 +138,9 @@ SpaceX     enabled=True  mode='live'   live_gate=True  ft=True  hybrid_flag=True
 RocketX    enabled=False mode='live'   live_gate=True  ft=True  hybrid_flag=True  => HYBRID_EFFECTIVE=False
 ```
 
-Cổng: `executor.py:1077` + `:1207` — `fill_timing_live_gate=True` AND `mode != "paper"` ⇒ trả 1.0 /
-bypass HYBRID. **LIVE sạch.** Tôi không đổi gì ở đây; đây là trạng thái đã landed từ `717307f`.
+Cổng: `_hybrid_active()` (`executor.py:1069`, thân ở `:1074-1078`) + `_fill_timing_mult()`
+(`:1207`) — `fill_timing_live_gate=True` AND `mode != "paper"` ⇒ trả 1.0 / bypass HYBRID.
+**LIVE sạch.** Tôi không đổi gì ở đây; đây là trạng thái đã landed từ `717307f`.
 
 ⚠️ **Một điểm cần Mike/user biết (không phải lỗi, là khác biệt so với chữ trong dispatch)**:
 HYBRID áp cho **MỌI account paper** (`main`, `ab_cross`, `ab_dip`), không riêng `main`. Cơ chế là
@@ -195,3 +197,29 @@ của chính 2 file đó). Kiểm 30 giây đủ phân biệt:
 
 ---
 *Selfcheck log lệnh + thư mục thăm dò `/tmp/stash_probe_20260814` giữ nguyên để quant-skeptic tái lập.*
+
+## 10. quant-skeptic — **CONFIRMED (confidence: high)**
+
+Job verify: log `mike/logs/verify_20260814_142952_2548970.log`. Reviewer **tái lập độc lập từ đầu**,
+không đọc lại số của báo cáo này:
+
+- Tự tính lại diff-membership từ `git diff <base> <stash>` thô + `grep -qxF` trên file HEAD sống:
+  **292 dòng thêm / 9 vắng mặt (2 config + 7 executor) — khớp chính xác**.
+- Tự chạy lại 17 selfcheck scope-map trên HEAD: **17/17 rc=0 — khớp**.
+- **Tự dựng lại thí nghiệm probe** bằng nội dung stash rồi khôi phục: tái lập đúng tỉ lệ 3 đỏ / 2
+  xanh với **cùng chuỗi lỗi** (9 FAIL của `hybrid_fill_timing`, `AttributeError _expected_vol_frac`).
+- Đọc thẳng `executor.py:1390-1397` xác nhận cơ chế arm-on-success vs arm-on-attempt — verify trên
+  CODE THẬT, không phải tin lời khẳng định.
+- Đối chiếu bảng `HYBRID_EFFECTIVE` per-account thẳng với `secrets/trading_bot_accounts.json` — khớp.
+
+> *killer_objection*: "biết đâu có logic trong stash là tính năng KHÁC chưa bị vượt mặt, không phải
+> bản sao tệ hơn" — **bị bác** bằng chính phép kiểm membership từng dòng: 283/292 dòng có nguyên
+> văn trong HEAD, 9 dòng còn lại chỉ 1 là code thật, và đọc tại chỗ xác nhận bản HEAD là bản VÁ có
+> chủ đích, không phải regression.
+>
+> *"Dropping the stash instead of applying it was the correct call."*
+
+**2 sai sót cosmetic reviewer bắt được, đã sửa trong chính báo cáo này**: (a) §6 ghi nhầm tên hàm
+`_hybrid_applies` → đúng là **`_hybrid_active`** (`executor.py:1069`); (b) §5 ghi 31/31 PASS →
+`refresh_skip_participation_selfcheck.py` nay có **35 dòng PASS** (bộ test được bồi thêm ca sau
+08-10), vẫn ALL PASS rc=0. Không chạm bản chất kết luận.
