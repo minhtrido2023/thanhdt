@@ -152,3 +152,6 @@
 
 ## Archived 2026-08-14 (keep=12 days=0 require_done=False)
 - [2026-08-13T17:39:18Z] XONG job Taylor_20260813_172358 (nguon CASA/LDR ro 13 NH, commit mike@39d01ca9). CON HO: chan CASA UNVERIFIED — thieu HDB/SHB/VPB, dinh nghia mau thuan (co/khong cong tien ky quy), chi 1 ky; chan LDR da verify 5/5 dung duoc. CHAN KY THUAT: thuyet minh BCTC la PDF SCAN, may KHONG co pdftotext/tesseract => muon dong CASA phai cai OCR hoac tim bank phat hanh PDF text-based. BAY MOI: vnstock finance.ratio() tra CASA/LDR nam 2018 chu khong phai ky moi (community cap) — bank_lens_v2/v3.py doc dung cot do, dang crash o lengthReport, VA ngay tho se TAO RA bug.
+
+## Archived 2026-08-14 (keep=12 days=0 require_done=False)
+- [2026-08-13T17:52:56Z] CHO quant-skeptic vong CUOI: job Taylor_20260813_172023 (oshares vong 6, commit mike@898390ad). Code do attempt1 lam, attempt2 da verify doc lap xong (153/153 x4 TZ, mutation M3 tu chay lai, live dry-run 08-14 khop). SAU 07:30 ICT 08-14 phai xac nhan LIVE 3 thu moi chi chay dry-run: (a) chuoi 🔇 gui dung, (b) check_retro kich hoat voi prior_snapshot that, (c) snapshot 08-14 co model_version. LUU Y: canh bao 🔇 SANG 08-14 la THAT (EVF/SHB do MO HINH siet, da chung minh bang BQ) chu khong phai bug - dung di luc feed. Cron 30 0 = 00:30 UTC = 07:30 ICT (lich cron theo UTC, bien TZ= khong vao scheduler) - KHONG phai loi.
