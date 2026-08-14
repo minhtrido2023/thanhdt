@@ -87,6 +87,12 @@ NGƯỠNG — hai con số, và vì sao đúng chúng
   phần còn lại vẫn publish. Nhiều mã vi phạm CÙNG NGÀY thì cái sai gần như chắc chắn nằm ở
   nguồn, không ở mã ⇒ không publish gì cả. Sàn tuyệt đối 3 mã để một track-set nhỏ (5 mã) không
   bị 1 vi phạm đơn lẻ đẩy thành "feed hỏng" chỉ vì 1/5 = 20% > 5%.
+* **`oshares_pit.SANITY_FACTOR = 3,0`** (import, KHÔNG chép số) = cổng BIÊN ĐỘ, và ở file này nó
+  là **WARN — đánh dấu, KHÔNG ẩn số** (phương án C, user chốt 2026-08-14; xem `sanity_flag`).
+  Nó trả lời một câu KHÁC hai ngưỡng trên: không phải "hai số có bằng nhau không" (0,1%) hay
+  "nhiều mã cùng sai không" (systemic), mà "con số này có sai BẬC ĐỘ LỚN so với dòng quý không"
+  — loại lỗi ĐƠN VỊ của vendor mà lớp bất biến §4 mù hẳn, vì §4 chỉ bắt CHUYỂN TIẾP (sai ngay
+  từ ô đầu, hay sai rồi tự nhất quán với chính nó, đều không sinh vi phạm nào).
 
 BA LỚP DỮ LIỆU, BA VINTAGE KHÁC NHAU — công bố hết, đừng để người đọc tự đoán
 -----------------------------------------------------------------------------
@@ -134,6 +140,14 @@ os.environ.pop("BQ_LOCAL_CACHE", None)
 
 from corp_action_lib import events as ca_events, feed_freshness, is_price_adjusting  # noqa: E402
 from oshares_live import EXPLAIN_TOL, _dedup_iss, _fetch, _roll, oshares_at  # noqa: E402
+# MODULE chứ không `from oshares_pit import SANITY_FACTOR`: bản `from` đóng băng giá trị lúc
+# import ⇒ mọi phép monkeypatch của selfcheck sẽ im lặng không có tác dụng ở file này trong khi
+# vẫn có tác dụng ở `oshares_pit`. Đúng loại chỗ hở "hai phần của fleet đọc hai giá trị của cùng
+# một ngưỡng". ĐÃ CÂN NHẮC VÀ BỎ phương án hằng số riêng (`CORP_ACTION_SANITY_FACTOR`): lập luận
+# ủng hộ nó là "sweep `OSHARES_SANITY_FACTOR=<x>` khi audit custom30 sẽ lặng lẽ đổi độ nhạy cảnh
+# báo hàng ngày" — nhưng sweep chạy trong TIẾN TRÌNH KHÁC, không chạm tiến trình cron này, nên
+# rủi ro đó bằng 0 trên thực tế, còn rủi ro hai hằng số trôi khỏi nhau thì có thật.
+import oshares_pit as _pit  # noqa: E402
 
 ICT = ZoneInfo("Asia/Ho_Chi_Minh")
 OUT_DIR = os.path.join(WC_ROOT, "data", "corp_action_daily")
@@ -866,12 +880,165 @@ def withhold_suspect(cur, viol):
     return cur
 
 
-def check_retro(asof, prev_asof, prev_snap, cache, tickers):
-    """`RETRO_CHANGE` — feed hôm nay kể một câu chuyện khác về ngày hôm trước."""
+# ───────────────────────── LỚP 4c · cổng BIÊN ĐỘ (WARN — đánh dấu, TUYỆT ĐỐI KHÔNG ẩn số)
+
+def _quarterly_at(quarters, tk, at):
+    """`(ngày, số CP)` của dòng quý `ticker_financial` gần nhất ≤ `at`, hoặc None.
+
+    ĐÚNG "số nền của caller" mà cổng biên độ trong `oshares_pit` so với (tham số `fallback`), và
+    đúng hàm `fallback_at` mà `research/oshares_gate_move_20260813/probe_sanity_direct_call.py`
+    đã dùng để đo ra 279 ô / 34 mã. Một bản chép tay thứ hai ở đây là cách con số ĐO ĐƯỢC và con
+    số CHẠY THẬT lặng lẽ tách nhau — nên `crosscheck()` cũng gọi lại chính hàm này.
+    """
+    qs = [q for q in quarters if q["ticker"] == tk and q["time"] <= at]
+    if not qs:
+        return None
+    q = max(qs, key=lambda r: r["time"])
+    return q["time"], float(q["OShares"])
+
+
+def sanity_flag(live_value, quarterly_value):
+    """`{quarterly, ratio, factor}` khi `live/quý` ra ngoài `[1/F, F]`; None khi hợp lý HOẶC
+    không so được (thiếu một trong hai số).
+
+    §WARN, KHÔNG SUPPRESS — **phương án C, user chốt 2026-08-14**, sau số đo vòng 5. Wire NGUYÊN
+    cổng biên độ kiểu `oshares_pit` (thay số live bằng dòng quý) sẽ **ẨN** số ở **279 ô / 34 mã**
+    lịch sử, trong đó **2 mã ĐANG GIỮ THẬT (VHM, VND)** — bằng chứng:
+    `research/oshares_gate_move_20260813/sanity_direct_call.json`. Lý do user chọn C, nguyên văn:
+    *"C mới phát hiện được vấn đề thay vì im lặng từ chối trả lời như A"*. File này là kênh
+    GIÁM SÁT/HIỂN THỊ, không đụng sizing/đặt lệnh (xem §CÁI FILE NÀY KHÔNG LÀM), nên mất khả năng
+    NHÌN THẤY số đắt hơn là thấy một số nghi ngờ CÓ GẮN CỜ: người điều tra sau này còn số để tự
+    đánh giá. Ở `oshares_pit` cổng vẫn SUPPRESS và đó vẫn đúng — nó nuôi thẳng việc chọn mã.
+
+    Ca thật cổng này bắt được: **VHM, AIS 2021-10-12** mang `shares_total_after = 4.354.367`
+    trong khi số thật là **4.354.367.488** — sai ×1000, gần như chắc chắn lỗi đơn vị của vendor,
+    và `oshares_at` phục vụ nó ở nhãn TIN CẬY NHẤT `AIS_EXACT` suốt **13 ô quý** (2021-12-31 →
+    2024-12-31). Lớp bất biến §4 mù với ca này: nó chỉ bắt CHUYỂN TIẾP, nên "sai ngay từ ô đầu
+    tiên" (chưa có mốc) và "sai rồi tự nhất quán với chính nó" đều sinh 0 vi phạm — đo thật ở
+    `ROUND5.md` §Việc 4. Cổng biên độ bịt đúng hai lỗ đó vì nó so với một nguồn ĐỘC LẬP
+    (`ticker_financial`), không so với chính mình hôm qua.
+
+    BIÊN LÀ `>F`, KHÔNG PHẢI `>=F`: gọi thẳng `_pit._sane` nên `ratio == 3,0` chẵn là HỢP LỆ,
+    không cảnh báo — cùng một vị ngữ với con số 279 ô / 34 mã đã đo ở ROUND5 (nó cũng đo bằng
+    `_sane`). Chép tay một bất đẳng thức thứ hai ở đây là cách con số báo cáo và con số chạy
+    thật lệch nhau đúng ở nhóm mã nằm sát biên.
+
+    MỘT vị ngữ cho MỌI tầng — cả ba điểm gọi `oshares_at`, dòng log, dòng Discord, payload bus.
+    Cùng kỷ luật với `refused()`: hai vị ngữ cho một câu hỏi là cách ba kênh nói ba con số khác
+    nhau (ca R8/R10). Ngưỡng đọc qua `_pit.SANITY_FACTOR` tại LÚC GỌI, không đóng băng lúc import.
+    """
+    if live_value is None or quarterly_value is None or float(quarterly_value) <= 0:
+        return None                      # không có gì để so ⇒ không phải chỗ để cảnh báo
+    live_value, quarterly_value = float(live_value), float(quarterly_value)
+    if _pit._sane(live_value, quarterly_value):
+        return None
+    return {"quarterly": quarterly_value, "ratio": live_value / quarterly_value,
+            "factor": _pit.SANITY_FACTOR}
+
+
+def sanity_warns(rows, at, quarters, where):
+    """Cờ biên độ cho MỘT điểm gọi `oshares_at`: đánh dấu bản ghi TẠI CHỖ + trả danh sách để báo.
+
+    `rows` = `{ticker: bản ghi oshares_at}`. Bản ghi được gắn thêm field `sanity_warn` và **giữ
+    NGUYÊN `value`** — người đọc snapshot thấy số kèm cờ, không phải một chỗ trống. Đây là toàn
+    bộ khác biệt giữa WARN và SUPPRESS, và nó phải đúng ở CẢ hai chỗ (dict lẫn chuỗi Discord).
+
+    `value is None` ⇒ bỏ qua: mã đã fail-closed (mô hình từ chối, hoặc bị lớp 4 giấu) thì không
+    có con số nào được công bố để mà nghi ngờ. Gắn cờ ở đó chỉ làm loãng dòng cảnh báo bằng một
+    mối lo không tồn tại — và đúng những mã đó ĐÃ có lưới riêng (`none_value_watch`), nên gắn cờ
+    sẽ đếm CÙNG MỘT mã ở hai dòng cảnh báo khác nhau như hai vấn đề.
+    """
+    out = []
+    for tk, r in sorted((rows or {}).items()):
+        if r.get("value") is None:
+            continue
+        q = _quarterly_at(quarters, tk, at)
+        if q is None:
+            continue                     # không có dòng quý nào ≤ ngày đó ⇒ không dựng lệch giả
+        flag = sanity_flag(r["value"], q[1])
+        if not flag:
+            continue
+        r["sanity_warn"] = flag          # ĐÁNH DẤU — `value` không đổi một chữ
+        out.append({"ticker": tk, "where": where, "at": at, "value": float(r["value"]),
+                    "quarterly_at": q[0], "method": r.get("method"),
+                    "anchor_date": r.get("anchor_date"),
+                    "anchor_source": r.get("anchor_source"), **flag})
+    return out
+
+
+def sanity_warns_from_crosscheck(diverge):
+    """Cờ biên độ cho điểm gọi thứ ba — TÁI DÙNG bản ghi `crosscheck()`, không truy vấn lại.
+
+    `crosscheck()` đã lấy đúng dòng quý ≤ `asof` cho từng mã và đã gọi `oshares_at` TẠI NGÀY
+    DÒNG QUÝ đó; hai con số cần để so đã nằm sẵn trong bản ghi (`oshares_live`,
+    `ticker_financial`). Gọi lại `oshares_at` ở đây sẽ là hai lời trả lời cho cùng một câu hỏi.
+
+    Bản ghi `NO_MODEL_VALUE` (`oshares_live is None`) bị `sanity_flag` trả None nên tự bỏ qua —
+    cùng lý do với `sanity_warns`: không có số công bố thì không có gì để nghi ngờ.
+    """
+    out = []
+    for d in diverge or []:
+        flag = sanity_flag(d.get("oshares_live"), d.get("ticker_financial"))
+        if not flag:
+            continue
+        d["sanity_warn"] = flag
+        out.append({"ticker": d["ticker"], "where": "crosscheck", "at": d["at"],
+                    "value": float(d["oshares_live"]), "quarterly_at": d["at"],
+                    "method": d.get("model_method"), "anchor_date": d.get("model_anchor"),
+                    "anchor_source": d.get("model_anchor_source"), **flag})
+    return out
+
+
+def _fmt_magnitude(warns, held, limit=8):
+    """Dòng Discord cho cổng biên độ. Trả `None` khi không có gì để báo.
+
+    HAI điều phải nằm NGAY TRONG TIÊU ĐỀ, không phải cuối dòng:
+      1. **SỐ VẪN ĐƯỢC CÔNG BỐ NGUYÊN VẸN** — khác biệt quan trọng nhất so với dòng 🚨 ngay cạnh
+         (ở đó số ĐÃ BỊ GIẤU). Ba loại cảnh báo cùng nói về "số CP đáng ngờ" nằm cạnh nhau trong
+         một tin nhắn: 🚨 (bất biến ⇒ đã giấu), ⚠️ (hai nguồn nói khác nhau tại ngày dòng quý),
+         📏 (sai bậc độ lớn ⇒ CHỈ đánh dấu). Không phân biệt được ba dòng đó thì người đọc không
+         biết số nào còn dùng được.
+      2. **Mã ĐANG GIỮ tách riêng** — 2/34 mã lọt ở ROUND5 là VHM và VND, đang giữ thật. Đó mới
+         là nhóm chạm tiền; chôn nó giữa 32 mã lịch sử là cách nó bị đọc lướt qua.
+    """
+    if not warns:
+        return None
+    held = set(held or ())
+    hit_held = [w for w in warns if w["ticker"] in held]
+    hit_other = [w for w in warns if w["ticker"] not in held]
+
+    def one(w):
+        return (f"{w['ticker']}@{w['at']} [{w['where']}] {w['value']:,.0f} vs dòng quý "
+                f"{w['quarterly_at']} {w['quarterly']:,.0f} (×{w['ratio']:.4g}, ngưỡng "
+                f"×{w['factor']:g}, nhãn {w.get('method') or 'không rõ'})")
+
+    parts = []
+    if hit_held:
+        parts.append("**ĐANG GIỮ** — " + "; ".join(one(w) for w in hit_held[:limit])
+                     + (f" … và {len(hit_held) - limit} mã nữa" if len(hit_held) > limit else ""))
+    if hit_other:
+        parts.append("không giữ — " + "; ".join(one(w) for w in hit_other[:limit])
+                     + (f" … và {len(hit_other) - limit} mã nữa"
+                        if len(hit_other) > limit else ""))
+    n_tk = len({w["ticker"] for w in warns})
+    return (f"📏 **Số CP lệch BẬC ĐỘ LỚN so với `ticker_financial`** ({n_tk} mã"
+            + (f", {len({w['ticker'] for w in hit_held})} ĐANG GIỮ" if hit_held else "")
+            + " — ⚠️ SỐ VẪN ĐƯỢC CÔNG BỐ NGUYÊN VẸN, đây CHỈ là dấu hỏi, KHÁC dòng 🚨 nơi số đã "
+              "bị GIẤU): " + " · ".join(parts))
+
+
+def check_retro(asof, prev_asof, prev_snap, cache, tickers, back=None):
+    """`RETRO_CHANGE` — feed hôm nay kể một câu chuyện khác về ngày hôm trước.
+
+    `back` = kết quả `oshares_at(..., prev_asof)` tính sẵn. `run()` truyền vào vì nó cần CHÍNH
+    bộ số đó cho cờ biên độ (`sanity_warns`); gọi `oshares_at` lần thứ hai ở đây sẽ là hai lời
+    trả lời cho cùng một câu hỏi — rẻ, nhưng đúng loại chỗ hở đã đẻ ra R8/R10. Mặc định `None`
+    ⇒ tự tính, nên mọi caller cũ (và selfcheck) không đổi một chữ.
+    """
     out = []
     if not prev_snap or not tickers:
         return out
-    back = oshares_at(sorted(tickers), prev_asof, _cache=cache)
+    back = oshares_at(sorted(tickers), prev_asof, _cache=cache) if back is None else back
     prev_tk = prev_snap.get("tickers") or {}
     for tk, r in sorted(back.items()):
         p = prev_tk.get(tk)
@@ -901,11 +1068,13 @@ def crosscheck(asof, tickers, cache):
     quarters, _corp = cache
     out = []
     for tk in sorted(tickers):
-        qs = [q for q in quarters if q["ticker"] == tk and q["time"] <= asof]
-        if not qs:
+        # qua `_quarterly_at` — CÙNG một định nghĩa "dòng quý gần nhất ≤ ngày" với cổng biên độ
+        # (lớp 4c). Hai bản chép tay của cùng phép chọn dòng là cách hai lớp lặng lẽ so với hai
+        # dòng quý khác nhau cho cùng một mã.
+        q = _quarterly_at(quarters, tk, asof)
+        if q is None:
             continue
-        q = max(qs, key=lambda r: r["time"])
-        qv, qd = float(q["OShares"]), q["time"]
+        qd, qv = q
         mine = oshares_at([tk], qd, _cache=cache)[tk]
         if mine.get("value") is None:
             out.append({"ticker": tk, "at": qd, "ticker_financial": qv, "oshares_live": None,
@@ -1203,7 +1372,11 @@ def run(asof=None, dry_run=False, alert=True, lookahead=LOOKAHEAD_DAYS, trace=No
     # ── LỚP 4 · bất biến, so với snapshot ĐÃ PUBLISH gần nhất
     prev_asof, prev_snap = prior_snapshot(asof)
     viol = check_invariants(asof, cur, prev_asof, prev_snap) if prev_snap else []
-    viol += check_retro(asof, prev_asof, prev_snap, cache, set(cur)) if prev_snap else []
+    # `back` tính MỘT LẦN ở đây rồi dùng cho CẢ `check_retro` lẫn cờ biên độ điểm gọi #2 — xem
+    # tham số `back` của `check_retro`.
+    back = (oshares_at(sorted(set(cur)), prev_asof, _cache=cache)
+            if prev_snap and cur else {})
+    viol += check_retro(asof, prev_asof, prev_snap, cache, set(cur), back=back) if prev_snap else []
     n_cmp = len(set(cur) & set((prev_snap or {}).get("tickers") or {}))
     # đếm theo MÃ, không theo số dòng vi phạm: một mã có thể sinh 2 vi phạm (JUMP + RETRO) nên
     # đếm dòng sẽ gọi 2 mã hỏng là "diện rộng" ở ngưỡng 3. Câu hỏi là "bao nhiêu MÃ sai".
@@ -1241,6 +1414,19 @@ def run(asof=None, dry_run=False, alert=True, lookahead=LOOKAHEAD_DAYS, trace=No
     n_nomodel = sum(1 for d in diverge if refused(d))
     print(f"[gate-4 đối soát] {len(diverge) - n_nomodel} mã LỆCH + {n_nomodel} mã KHÔNG đối soát "
           f"được (mô hình từ chối trả số) giữa corp-action và ticker_financial")
+
+    # ── LỚP 4c · cổng BIÊN ĐỘ, CẢ BA điểm gọi `oshares_at` (WARN — không đổi số nào)
+    # Đặt SAU `withhold_suspect` là CỐ Ý: mã vừa bị lớp 4 giấu số có `value=None` nên tự rơi ra
+    # khỏi đây, không bị đếm hai lần ở hai dòng cảnh báo khác nhau như hai vấn đề riêng.
+    quarters = cache[0]
+    mag = (sanity_warns(cur, asof, quarters, "publish")
+           + sanity_warns(back, prev_asof, quarters, "retro")
+           + sanity_warns_from_crosscheck(diverge))
+    mag_tk = sorted({w["ticker"] for w in mag})
+    mag_held = sorted({w["ticker"] for w in mag} & set(held))
+    print(f"[gate-4c biên độ] {len(mag_tk)} mã lệch >×{_pit.SANITY_FACTOR:g} so với dòng quý "
+          f"({len(mag)} ô / 3 điểm gọi) — CẢNH BÁO, số vẫn publish nguyên vẹn"
+          + (f"; ĐANG GIỮ: {mag_held}" if mag_held else "; không mã nào đang giữ"))
 
     # ── LỚP 4b · diễn biến của fail-closed (xem `none_value_watch`)
     none_watch = none_value_watch(cur, prev_snap, mv=mv)
@@ -1332,6 +1518,14 @@ def run(asof=None, dry_run=False, alert=True, lookahead=LOOKAHEAD_DAYS, trace=No
         "tickers": cur,
         "cash_dividend_today": div_today,
         "crosscheck_divergent": diverge,
+        # cổng BIÊN ĐỘ — danh sách CẢNH BÁO, không phải danh sách số bị bỏ. Mọi `value` trong
+        # `tickers` ở trên vẫn là số gốc; mã dính chỉ được gắn thêm field `sanity_warn`.
+        "magnitude_warns": mag, "magnitude_suspect": mag_tk,
+        "magnitude_suspect_held": mag_held,
+        "magnitude_factor": _pit.SANITY_FACTOR,
+        "magnitude_policy": "WARN — đánh dấu, KHÔNG ẩn/không đổi số công bố (phương án C, user "
+                            "chốt 2026-08-14). Cổng SUPPRESS vẫn sống ở oshares_pit cho consumer "
+                            "chọn mã; file này là kênh giám sát nên giữ số để người điều tra.",
         # diễn biến fail-closed — publish RA snapshot để lượt sau có mốc so, và để người đọc lại
         # file này thấy được xu hướng mà không phải tự dựng lại từ `tickers`.
         "none_value_watch": none_watch,
@@ -1398,6 +1592,8 @@ def run(asof=None, dry_run=False, alert=True, lookahead=LOOKAHEAD_DAYS, trace=No
         lines.append(f"🧾 **AIS hiệu lực hôm nay** (số CP chính thức đổi): {sorted(ais_today)}")
     if diverge:
         lines.append(_fmt_divergence(diverge))
+    if mag:
+        lines.append(_fmt_magnitude(mag, held))
     if none_watch["alert"]:
         # rẽ nhánh LỜI KHUYÊN theo nguyên nhân của chính những mã MỚI hỏng: "kiểm feed" là chỉ
         # dẫn SAI khi thủ phạm là bất biến bị vi phạm (số có nhưng bị giấu ở lớp 4).
@@ -1484,6 +1680,12 @@ def run(asof=None, dry_run=False, alert=True, lookahead=LOOKAHEAD_DAYS, trace=No
          # khác hẳn nhau; gộp thành một con số là đúng cái nhầm lẫn dòng Discord từng mắc.
          "n_crosscheck_divergent": len(diverge) - n_nomodel,
          "n_crosscheck_no_model_value": n_nomodel,
+         # cổng biên độ: tách hẳn khỏi hai bộ đếm trên. `n_crosscheck_*` nói "hai nguồn khác
+         # nhau", `n_invariant_violations` nói "số đã bị GIẤU"; hai field dưới nói "số VẪN được
+         # publish nhưng đáng ngờ về bậc độ lớn" — trộn vào bộ đếm nào cũng sai nghĩa.
+         "n_magnitude_suspect": len(mag_tk), "magnitude_suspect": mag_tk,
+         "n_magnitude_suspect_held": len(mag_held), "magnitude_suspect_held": mag_held,
+         "magnitude_suppressed_any_value": False,   # bất biến của phương án C, ghi ra để đọc được
          "n_none_value": none_watch["n_none"], "none_value_alert": none_watch["alert"],
          # `n_none_value` là TỔNG (hiện trạng); cảnh báo đứng trên tập SO ĐƯỢC — bus phải mang cả
          # hai, nếu không người đọc lại suy diễn cảnh báo từ tổng và gặp đúng ca xoay track set.

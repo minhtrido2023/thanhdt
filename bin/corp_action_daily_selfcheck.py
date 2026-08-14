@@ -525,6 +525,171 @@ def t_none_value_watch():
           v2 != v1 and cad.model_version() == v1, f"{v1} vs {v2}")
 
 
+# ───────────── LỚP 4c · cổng BIÊN ĐỘ ×3 (WARN — đánh dấu, TUYỆT ĐỐI KHÔNG ẩn số)
+
+# Fixture VHM tái lập ĐÚNG hình dạng ca thật, không phải một ca ×1000 bịa ra: bản ghi rò rỉ thật
+# đo được ở `research/oshares_gate_move_20260813/sanity_direct_call.json` là
+#   {ticker VHM, date 2021-12-31, live 4.354.367, quarterly 4.354.367.488,
+#    ratio 0,000999999887928614, method AIS_EXACT, anchor_date 2021-10-12}
+# và fixture dưới đây cho `oshares_at` trả về ĐÚNG bốn trường đó (M1 assert từng cái).
+#
+# HAI dòng AIS cùng mang số ×1000 là điểm mấu chốt, không phải chi tiết thừa: một dòng AIS sai
+# ĐƠN ĐỘC bị cổng chứng nhận vòng 4-6 chặn (`AIS_UNCERTIFIED`, value=None) ⇒ không có số nào được
+# công bố ⇒ không có gì cho cổng biên độ làm. Vendor sai ĐƠN VỊ thì sai cả một chuỗi, nên số sai
+# TỰ NHẤT QUÁN với chính nó, qua được cổng chứng nhận, và §4 (chỉ bắt CHUYỂN TIẾP) mù hoàn toàn.
+# Đó chính xác là lỗ hổng mà lớp 4c bịt — fixture phải nằm trong lỗ hổng đó mới chứng minh gì.
+VHM_CACHE = (
+    [_q("VHM", "2021-06-30", 4_354_367_488), _q("VHM", "2021-12-31", 4_354_367_488)],
+    [_ais("VHM", "2021-03-05", 4_354_367), _ais("VHM", "2021-10-12", 4_354_367)],
+)
+
+
+def t_magnitude_gate():
+    print("== LỚP 4c · cổng biên độ ×3 — CẢNH BÁO, không được đổi/ẩn số công bố ==")
+    from oshares_live import oshares_at
+
+    # ── M1-M2: ca THẬT, chạy qua chính `oshares_at`, không phải dict tự bịa
+    rows = oshares_at(["VHM"], "2021-12-31", _cache=VHM_CACHE)
+    before = float(rows["VHM"]["value"])
+    check("MG1. ca THẬT VHM 2021-10-12 (vendor ×1000): fixture tái lập ĐÚNG bản ghi rò rỉ đã đo "
+          "(live 4.354.367 / quý 4.354.367.488 / AIS_EXACT / neo 2021-10-12) — nếu không thì mọi "
+          "ca dưới đây đang kiểm một ca bịa",
+          before == 4_354_367.0 and rows["VHM"]["method"] == "AIS_EXACT"
+          and rows["VHM"]["anchor_date"] == "2021-10-12",
+          f"{before:,.0f} {rows['VHM']['method']}")
+
+    w = cad.sanity_warns(rows, "2021-12-31", VHM_CACHE[0], "publish")
+    check("MG1b. và cổng biên độ KÍCH đúng trên ca đó, với tỉ số khớp số đã đo "
+          "(0,000999999887928614)",
+          len(w) == 1 and w[0]["ticker"] == "VHM" and abs(w[0]["ratio"] - 0.000999999887928614)
+          < 1e-15 and w[0]["quarterly"] == 4_354_367_488.0 and w[0]["where"] == "publish",
+          str(w))
+
+    check("MG2. BẤT BIẾN MẠNH NHẤT của phương án C — `value` sau khi gắn cờ Y HỆT trước đó, và "
+          "KHÔNG có `value_withheld`/`INVARIANT_SUSPECT` nào được sinh ra (đó là hành vi của lớp "
+          "4, không phải lớp này)",
+          rows["VHM"]["value"] == before and "value_withheld" not in rows["VHM"]
+          and rows["VHM"]["method"] == "AIS_EXACT"
+          and rows["VHM"]["sanity_warn"]["quarterly"] == 4_354_367_488.0,
+          str({k: rows["VHM"][k] for k in ("value", "method")}))
+
+    # ── M3-M5: BIÊN. `_sane` là `1/F <= ratio <= F` ⇒ đúng ×3,0 chẵn là HỢP LỆ (luật `>F`), cùng
+    # vị ngữ với con số 279 ô/34 mã của ROUND5 (nó cũng đo bằng `_sane`).
+    def flag(live, q):
+        return cad.sanity_flag(live, q)
+
+    check("MG3. CA CHỨNG MINH NGƯỢC — số bình thường (lệch 0%) KHÔNG kích; cổng luôn-kích cũng "
+          "'bắt được' ca M1 nên ca này mới làm M1 có nghĩa", flag(1_000.0, 1_000.0) is None)
+    check("MG3b. lệch 2,999× (dưới ngưỡng) KHÔNG kích", flag(2_999.0, 1_000.0) is None)
+    check("MG4. BIÊN ĐÚNG ×3,0 CHẴN ⇒ KHÔNG kích (luật là `>3`, không phải `>=3` — cùng vị ngữ "
+          "`_pit._sane` với phép đo 279 ô/34 mã ở ROUND5)", flag(3_000.0, 1_000.0) is None)
+    check("MG4b. và ngay trên biên (3,001×) thì KÍCH — chứng minh M4 không PASS vì cổng chết",
+          flag(3_001.0, 1_000.0) is not None, str(flag(3_001.0, 1_000.0)))
+    check("MG5. phía NGHỊCH ĐẢO đối xứng: đúng 1/3 KHÔNG kích, dưới 1/3 thì KÍCH (ca VHM nằm ở "
+          "phía này — ×0,001 — nên một cổng chỉ kiểm `ratio > F` sẽ mù hoàn toàn với nó)",
+          flag(1_000.0, 3_000.0) is None and flag(1_000.0, 3_001.0) is not None)
+
+    # ── M6-M7: hai lối bỏ qua có chủ đích
+    none_rows = {"XXX": {"value": None, "method": "AIS_UNCERTIFIED"}}
+    # ⚠️ CÔNG BỐ GIỚI HẠN: ca này KHÔNG GIẾT ĐƯỢC mutation nào — đã thử bỏ hẳn dòng
+    # `if r.get("value") is None: continue` trong `sanity_warns` và bộ này vẫn 178/178, vì
+    # `sanity_flag(None, …)` tự trả None nên hành vi không đổi. Dòng guard đó là phòng thủ chồng
+    # lớp, không phải chỗ duy nhất giữ tính chất. Ghi ra đây thay vì để ca này trông như một
+    # bằng chứng bao phủ mà nó không phải.
+    check("MG6. `value is None` (mô hình từ chối / lớp 4 đã giấu) ⇒ BỎ QUA — không có số công bố "
+          "thì không có gì để nghi ngờ, và mã đó đã được đếm ở dòng 🔇 (`none_value_watch`); gắn "
+          "cờ ở đây là đếm CÙNG một mã ở hai dòng cảnh báo như hai vấn đề",
+          cad.sanity_warns(none_rows, "2021-12-31", VHM_CACHE[0], "publish") == []
+          and "sanity_warn" not in none_rows["XXX"])
+    check("MG7. mã KHÔNG có dòng quý nào ≤ ngày đó ⇒ bỏ qua im lặng, không dựng lệch giả",
+          cad.sanity_warns({"ZZZ": {"value": 1.0}}, "2021-12-31", VHM_CACHE[0], "publish") == [])
+
+    # ── M8: điểm gọi thứ ba — TÁI DÙNG bản ghi `crosscheck()` thật, không truy vấn lại
+    cc = cad.crosscheck("2021-12-31", {"VHM"}, VHM_CACHE)
+    mag_cc = cad.sanity_warns_from_crosscheck(cc)
+    check("MG8. ĐẦU-CUỐI qua `crosscheck()` THẬT: bản ghi DIVERGENT do chính nó sinh ra được gắn "
+          "cờ biên độ, `oshares_live` GIỮ NGUYÊN số, và `where='crosscheck'`",
+          len(mag_cc) == 1 and mag_cc[0]["where"] == "crosscheck"
+          and cc[0]["oshares_live"] == 4_354_367.0
+          and cc[0]["sanity_warn"]["quarterly"] == 4_354_367_488.0, str(mag_cc))
+    check("MG8b. bản ghi NO_MODEL_VALUE (mô hình từ chối) tự rơi ra khỏi cổng biên độ, không nổ "
+          "TypeError trên `None`",
+          cad.sanity_warns_from_crosscheck(
+              cad.crosscheck("2026-08-13", {"CCC"}, CACHE)) == [])
+
+    # ── M9-M11: CHUỖI người thật đọc (verify-before-done: assert trên OUTPUT, không trên hàm)
+    s = cad._fmt_magnitude(w, held={"VHM"})
+    check("MG9. tiêu đề nói THẲNG 'SỐ VẪN ĐƯỢC CÔNG BỐ NGUYÊN VẸN' — khác biệt quan trọng nhất so "
+          "với dòng 🚨 ngay cạnh (ở đó số ĐÃ BỊ GIẤU), và nó phải ở TIÊU ĐỀ chứ không phải cuối "
+          "dòng", "SỐ VẪN ĐƯỢC CÔNG BỐ NGUYÊN VẸN" in s and s.index("NGUYÊN VẸN") < 200, s)
+    # BẢN ĐẦU CỦA CA NÀY SAI và tự nó bắt được: nó grep `"đã bị GIẤU):"` nên đỏ vì chính câu
+    # ĐỐI CHIẾU trong tiêu đề ("KHÁC dòng 🚨 nơi số đã bị GIẤU") — tức là phạt đúng cái phải có.
+    # Vị ngữ đúng: chuỗi 📏 không được mang câu KHẲNG ĐỊNH của dòng 🚨 về CHÍNH những mã của nó.
+    check("MG9b. chuỗi KHÔNG mang câu khẳng định 'số đã bị giấu/không publish' của dòng 🚨 (grep "
+          "đúng cụm mà `run()` in ở dòng 🚨), trong khi VẪN được phép nhắc tới 🚨 để đối chiếu",
+          "không publish giá trị" not in s and "KHÔNG PUBLISH" not in s
+          and "số đã bị GIẤU, không" not in s and "KHÁC dòng 🚨" in s, s)
+    check("MG9c. chuỗi in ĐỦ hai số + tỉ số + ngưỡng + nhãn phương pháp (người đọc tự đánh giá "
+          "được mà không phải mở snapshot)",
+          "4,354,367" in s and "4,354,367,488" in s and "×3" in s and "AIS_EXACT" in s, s)
+    check("MG10. mã ĐANG GIỮ tách RIÊNG và nêu trong tiêu đề — 2/34 mã lọt ở ROUND5 (VHM, VND) là "
+          "mã đang giữ thật, đó mới là nhóm chạm tiền",
+          "**ĐANG GIỮ**" in s and "1 ĐANG GIỮ" in s, s[:160])
+    s_not_held = cad._fmt_magnitude(w, held=set())
+    check("MG10b. cùng cảnh báo đó mà KHÔNG giữ mã ⇒ không có mục ĐANG GIỮ (chứng minh ngược: M10 "
+          "không PASS vì chuỗi luôn in nhãn đó)",
+          "**ĐANG GIỮ**" not in s_not_held and "không giữ —" in s_not_held, s_not_held[:160])
+
+    check("MG11. BA loại cảnh báo về 'số CP đáng ngờ' PHÂN BIỆT ĐƯỢC trong cùng một tin nhắn: 📏 "
+          "(biên độ, số còn nguyên) ≠ 🚨 (bất biến, số đã giấu) ≠ ⚠️ (hai nguồn khác nhau)",
+          s.startswith("📏") and not s.startswith("🚨") and "⚠️ SỐ VẪN" in s
+          and cad._fmt_divergence([{"ticker": "EVF", "at": "x", "ticker_financial": 1.0,
+                                    "oshares_live": 2.0, "kind": "DIVERGENT",
+                                    "err_pct_vs_ticker_financial": 1.0}]).startswith("⚠️"), s[:8])
+    check("MG12. rỗng ⇒ None (không đẻ dòng trống)", cad._fmt_magnitude([], held={"VHM"}) is None)
+    check("MG13. quá `limit` ⇒ nói rõ còn bao nhiêu mã nữa, không im lặng cắt cụt (§'no silent "
+          "caps')", "… và 2 mã nữa" in cad._fmt_magnitude(w * 5, held=set(), limit=3),
+          cad._fmt_magnitude(w * 5, held=set(), limit=3)[-40:])
+
+    # ── M14: ngưỡng đọc TẠI LÚC GỌI, không đóng băng lúc import
+    keep = cad._pit.SANITY_FACTOR
+    try:
+        cad._pit.SANITY_FACTOR = 1e9
+        check("MG14. `_pit.SANITY_FACTOR` đọc tại LÚC GỌI: nới ngưỡng lên 1e9 ⇒ ca VHM thôi kích. "
+              "Bản `from oshares_pit import SANITY_FACTOR` sẽ đóng băng giá trị lúc import và ca "
+              "này PASS oan (cổng vẫn kích) — đúng chỗ hở 'hai phần fleet đọc hai giá trị'",
+              cad.sanity_flag(4_354_367.0, 4_354_367_488.0) is None)
+    finally:
+        cad._pit.SANITY_FACTOR = keep
+    check("MG14b. khôi phục ngưỡng ⇒ kích lại (chứng minh M14 không PASS vì cổng chết hẳn)",
+          cad.sanity_flag(4_354_367.0, 4_354_367_488.0) is not None)
+
+    # ── M15: một vị ngữ, và KHÔNG có đường nào trong lớp này chạm tới `value`
+    src = inspect.getsource(cad)
+    mag_src = "".join(inspect.getsource(getattr(cad, f)) for f in
+                      ("sanity_flag", "sanity_warns", "sanity_warns_from_crosscheck",
+                       "_fmt_magnitude"))
+    # đếm ĐIỂM GỌI (`_pit._sane(`), không đếm mọi lần chuỗi xuất hiện: bản đầu đếm cái sau nên
+    # đỏ vì một dòng DOCSTRING nhắc tên hàm — phạt đúng phần tài liệu đang làm việc tốt.
+    check("MG15. vị ngữ biên độ được GỌI MỘT LẦN trong cả module (`_pit._sane(`) — không ai chép "
+          "lại bất đẳng thức ×3 ở tầng log/Discord/bus (cùng kỷ luật `refused()`, ca R10)",
+          src.count("_pit._sane(") == 1 and "SANITY_FACTOR <=" not in src
+          and "<= _pit.SANITY_FACTOR" not in src, str(src.count("_pit._sane(")))
+    check("MG15b. CHỐT PHƯƠNG ÁN C Ở TẦNG MÃ NGUỒN: toàn bộ lớp 4c KHÔNG có một phép gán nào lên "
+          "`value`, không `None`-hoá, không gọi `withhold` — một bản vá sau này biến WARN thành "
+          "SUPPRESS sẽ làm đỏ ca này",
+          '["value"] =' not in mag_src and "['value'] =" not in mag_src
+          and "withhold" not in mag_src and "value_withheld" not in mag_src)
+
+    # ── M16: `check_retro(back=...)` tương thích ngược — mọi caller cũ không đổi một chữ
+    prev_snap = {"tickers": {"VHM": {"value": 4_354_367.0}}}
+    a = cad.check_retro("2021-12-31", "2021-12-30", prev_snap, VHM_CACHE, {"VHM"})
+    b = cad.check_retro("2021-12-31", "2021-12-30", prev_snap, VHM_CACHE, {"VHM"},
+                        back=oshares_at(["VHM"], "2021-12-30", _cache=VHM_CACHE))
+    check("MG16. `check_retro` với `back=` truyền sẵn cho KẾT QUẢ Y HỆT bản tự tính — tham số mới "
+          "chỉ để dùng lại phép tính, không đổi hành vi", a == b, f"{a} vs {b}")
+
+
 # ─────────────────────────────────────── lịch trigger + LỚP 6 · cảnh báo proactive
 
 def t_triggers_and_alerts():
@@ -1287,6 +1452,7 @@ def main():
     t_crosscheck()
     t_render_divergence()
     t_none_value_watch()
+    t_magnitude_gate()
     t_triggers_and_alerts()
     t_query_shape()
     t_confirm_unique_key()
