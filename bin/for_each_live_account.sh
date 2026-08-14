@@ -19,7 +19,16 @@ if [ $# -lt 1 ]; then
 fi
 SCRIPT="$1"; shift
 
-LABELS="$(cd "$WC_ROOT" && python3 -c "from trading_bot.config import live_dnse_labels; print(' '.join(live_dnse_labels()))")"
+# FAIL-CLOSED: một lỗi import (vd conflict marker trong trading_bot/config.py, sự cố
+# 2026-08-14) phải KÊU, không được lặng lẽ biến thành "không có account nào" rồi exit 0 —
+# hôm đó preflight/ops_health/EOD của CẢ 2 account bị bỏ qua im lặng, cron thấy rc=0.
+# "python lỗi" (rc≠0) khác hẳn "chạy được nhưng danh sách rỗng" (cấu hình thật sự trống).
+if ! LABELS="$(cd "$WC_ROOT" && python3 -c "from trading_bot.config import live_dnse_labels; print(' '.join(live_dnse_labels()))")"; then
+  MSG="[for_each_live_account] KHÔNG đọc được danh sách account (trading_bot.config lỗi) — BỎ QUA $SCRIPT cho MỌI account. Kiểm tra ngay: cd $WC_ROOT && python3 -c 'import trading_bot.config'"
+  echo "$MSG" >&2
+  [ -x "$ROOT/bin/notify.sh" ] && "$ROOT/bin/notify.sh" "$MSG" >/dev/null 2>&1
+  exit 1
+fi
 if [ -z "$LABELS" ]; then
   echo "[for_each_live_account] KHÔNG có account nào enabled=true/mode=live/broker=dnse — không chạy gì." >&2
   exit 0

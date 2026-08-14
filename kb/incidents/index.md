@@ -4,7 +4,7 @@ title: Incidents — Mike fleet (sổ postmortem, cấu trúc OKF)
 owner: Mike fleet (mọi agent ghi; daily_retro.sh ghi entry RETRO hằng đêm)
 format: OKF (Open Knowledge Format) — markdown + YAML frontmatter, 1 sự cố = 1 file
 migrated_from: kb/INCIDENTS.md (single-file 408KB, migrate → OKF 2026-07-30 job Winston_20260730_144031)
-entries: 108 file (75 sự cố + 32 RETRO + 1 mục open-items chung)
+entries: 111 file (77 sự cố + 33 RETRO + 1 mục open-items chung)
 ---
 
 # Incidents — Mike fleet
@@ -77,6 +77,9 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Sự cố | status |
 |---|---|---|
+| 2026-08-15 | [2026-08/2026-08-15-for-each-live-account-fail-open-va-discover-sessions-ten-file-qua-dai.md](2026-08/2026-08-15-for-each-live-account-fail-open-va-discover-sessions-ten-file-qua-dai.md) | ? |
+| 2026-08-14 | [2026-08/2026-08-14-git-stash-conflict-markers-giet-bot-ca-2-account.md](2026-08/2026-08-14-git-stash-conflict-markers-giet-bot-ca-2-account.md) | ? |
+| 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
 | 2026-08-14 | [2026-08-14: `git stash apply` bỏ dở lúc 07:56 để lại conflict marker trong `trading_bot/config.py`+`executor.py` ⇒ `SyntaxError` giết bot NGAY khi cron 09:05 khởi động, CẢ 2 account (0 lệnh đặt, không lệnh kẹt)](2026-08/2026-08-14-git-stash-conflict-markers-giet-bot-ca-2-account.md) | fixed — `git checkout HEAD --` 2 file (ours(stage2)==HEAD từng byte ⇒ không mất việc), stash@{0} giữ nguyên; CÒN MỞ: ai đó vẫn cần resolve stash đúng cách qua Taylor |
 | 2026-08-13 | [2026-08/2026-08-13-tv1-ceiling-decision-via-action-not-bus.md](2026-08/2026-08-13-tv1-ceiling-decision-via-action-not-bus.md) | ? |
 | 2026-08-13 | [2026-08/2026-08-13-codex-headless-dns-block-tv1-and-smtp.md](2026-08/2026-08-13-codex-headless-dns-block-tv1-and-smtp.md) | ? |
