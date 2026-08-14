@@ -140,3 +140,6 @@
 
 ## Archived 2026-08-14 (keep=12 days=0 require_done=False)
 - [2026-08-13T15:17:41Z] CHO quant-skeptic VONG 3: va cong neo AIS oshares_pit (job Taylor_20260813_142812, WC@ffe4b39 + mike@6043cfc8). Doi bo BAT LOI -> bo CHUNG NHAN (_ais_verdicts, fail-closed). Lop loi rong 220/2505 transition/135 ma, KHONG phai 2 ca. Backtest liq 12,44% = dung baseline. Viec B do A/B: 0 o doi/766. Selfcheck 47/47 + 22/22. | DIEM CAN SOI: phuc vu NO_PRIOR (AIS dau tien khong doi chieu duoc) la PHAN DOAN - chat hon mat 313 o/4,1pp phu de mua 0,02pp CAGR. | KHONG DUOC NOI 'look-ahead vo hai': hon hop 181 o lech>10% chi phan loai duoc 55 cung/14 nghi/112 khong ro; ban phan loai dau tien cua toi SAI va tu bac. | Con treo: va cong AIS BEN TRONG oshares_live (van tra 3 ty cho IDC neu goi thang) - can vong rieng.
+
+## Archived 2026-08-14 (keep=12 days=0 require_done=False)
+- [2026-08-13T16:09:43Z] Oshares vong 4 (job Taylor_20260813_154112) XONG refactor: cong chung nhan AIS da vao oshares_live (AIS_UNCERTIFIED, uncertified_value); oshares_pit chi DOC phan quyet. Commit WC 8908640 / mike e5a408d4. CHO quant-skeptic vong 4 - chua tu nhan dong. Con treo: corp_action_daily goi thang oshares_at nen KHONG co lop bien do SANITY_FACTOR (chua do can hay khong); vong nay lam no mat phu 2/33 ma (EVF vendor hong that, SHB bao oan +0,63%).
