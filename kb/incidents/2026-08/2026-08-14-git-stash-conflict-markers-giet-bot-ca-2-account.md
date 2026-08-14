@@ -38,6 +38,19 @@ nguyên cho người muốn apply hoàn tất. Verify: `python3 -m py_compile` P
 (+283 dòng). Ai đó ĐANG muốn đưa 2 thứ này vào. Resolve đúng cách = việc của Taylor +
 quant-skeptic (chạm logic đặt lệnh), không phải khôi phục vội trong giờ giao dịch.
 
+**Addendum (2026-08-14, phát hiện khi user hỏi "paper-main không có plan"):** casualty thứ 3
+không nằm trong lần rà soát gốc — cron `paper_main_probe_plan.py` (08:52 ICT, TRƯỚC giờ bot
+live 09:05) cũng chết vì đúng conflict marker này, nên **không có `plan_main_2026-08-14.json`**.
+Khác 2 account live: paper-main **không có cơ chế autoheal/retry** (đó là `bot_heartbeat.sh`,
+chỉ theo dõi account live) nên không tự phục hồi dù `config.py` đã được Winston sửa lúc 09:06
+ICT. Cả 2 cron thực thi trong ngày của "main" (09:10 SELL-window, 13:05 afternoon) chạy sau đó
+đều thấy "không có plan" và thoát êm (không phải lỗi theo logic `bot_execute.py`, chỉ là ngày
+không có lệnh). Đã chạy tay `paper_main_probe_plan.py` lúc 13:40 ICT để plan tồn tại cho hồ sơ,
+nhưng **evidence hôm nay coi như mất** — cửa sổ SELL (09:15-09:45)/BUY (10:45-11:15) đã qua,
+chạy muộn sẽ tạo dữ liệu fill ngoài cửa sổ, làm nhiễu tập evidence cho EXTREME gate/vol-scale
+chase-cap. Không sửa gì thêm — đây là harness nghiên cứu paper-only, mất 1 ngày dữ liệu không
+ảnh hưởng tiền thật; mai (T2) cron 08:52 sẽ chạy bình thường trên `config.py` đã sạch.
+
 **Bài học:**
 1. Một `git stash apply` bỏ dở **giết toàn bộ fleet giao dịch** ở lần cron kế tiếp — file
    Python vỡ cú pháp không có fallback nào cả. Đụng `trading_bot/*` bằng thao tác git có thể
