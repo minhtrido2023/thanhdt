@@ -32,6 +32,42 @@ MIKE_BIN = os.path.dirname(os.path.abspath(__file__))
 HISTORY_FILE_TMPL = os.path.join(EXEC_DIR, "nav_history_{account}.csv")
 
 
+def early_corp_action_price(close_price, market_price, events, ticker):
+    """Return an adjusted close for a *known* imminent stock event, else None.
+
+    DNSE can credit bonus shares and rebase ``positions.marketPrice`` after the
+    last cum-rights close, one session before the exchange's ex-rights date
+    (VHM 2026-08-05; BID 2026-08-14).  This is safe to accept only when the
+    announced event's ratio independently explains the two prices.
+    """
+    if not close_price or not market_price:
+        return None
+    for ev in events or []:
+        if (ev.get("ticker") != ticker or not ev.get("price_adjusting")
+                or ev.get("event_code") != "ISS"):
+            continue
+        try:
+            ratio = float(ev.get("exercise_ratio"))
+        except (TypeError, ValueError):
+            continue
+        if ratio <= 0:
+            continue
+        expected = float(close_price) / (1.0 + ratio)
+        if abs(expected - float(market_price)) / float(market_price) <= 0.02:
+            return expected
+    return None
+
+
+def upcoming_corp_events(date):
+    """Read the already-published daily CA snapshot; never query BQ on NAV path."""
+    path = os.path.join(WC_ROOT, "data", "corp_action_daily", f"corp_action_daily_{date}.json")
+    try:
+        with open(path, encoding="utf-8") as f:
+            return json.load(f).get("upcoming_events_held") or []
+    except (OSError, ValueError, AttributeError):
+        return []
+
+
 def trading_dates_with_fills(account, upto_date):
     dates = []
     for path in sorted(glob.glob(os.path.join(EXEC_DIR, f"exec_{account}_*_journal.csv"))):
@@ -395,6 +431,7 @@ def main():
     PRICE_XCHECK_TOLERANCE_PCT = 5.0
     if is_today:
         mismatched = []
+        early_events = upcoming_corp_events(args.date)
         for t in tickers:
             mp = (positions[t] or {}).get("marketPrice")
             cp = prices.get(t)
@@ -402,7 +439,14 @@ def main():
                 continue
             diff_pct = abs(cp - mp) / mp * 100
             if diff_pct > PRICE_XCHECK_TOLERANCE_PCT:
-                mismatched.append((t, cp, mp, diff_pct))
+                adjusted = early_corp_action_price(cp, mp, early_events, t)
+                if adjusted is not None:
+                    prices[t] = adjusted
+                    print(f"ℹ️ [{args.date}] {t}: dùng close đã điều chỉnh {adjusted:,.0f} "
+                          f"cho sự kiện corp-action đã công bố; DNSE broker cập nhật sớm.",
+                          file=sys.stderr)
+                else:
+                    mismatched.append((t, cp, mp, diff_pct))
         if mismatched:
             detail = "; ".join(f"{t}: close_price={cp:,.0f} vs vị thế broker marketPrice={mp:,.0f} "
                                f"(lệch {d:.1f}%)" for t, cp, mp, d in mismatched)
