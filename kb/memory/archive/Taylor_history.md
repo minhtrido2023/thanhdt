@@ -131,3 +131,6 @@
 
 ## Archived 2026-08-14 (keep=12 days=0 require_done=False)
 - [2026-08-13T11:03:09Z] CHO quant-skeptic vong 3: corp_action_daily khoa xac nhan duy nhat/carry-forward (job Taylor_20260813_104511, commit f844b800, 97 hermetic/103 live, 6 mutation do). Khi Mike cai crontab: BAT BUOC alert-only 5-10 phien + log MAX(ingested_at) — tang freshness FEED_DEAD_DAYS=5 chua tung kiem chung duoc (bang chi co 1 ngay ingested_at). CON HO: missed-run detector (quant-skeptic rec #5) chua lam.
+
+## Archived 2026-08-14 (keep=12 days=0 require_done=False)
+- [2026-08-13T12:18:29Z] CHO quant-skeptic VONG 4: corp_action_daily missed-run detector + backfill (job Taylor_20260813_115210, commit 5fe35e2f, 127 hermetic/134 live, 8/8 mutation, BQ that moi lai 6 su kien 08-14, 2 luot run() idempotent). CRONTAB VAN CHUA CAI — day la vong CUOI truoc khi trinh Mike. RUI RO TON DU da cong bo: backfill KHONG dung lai cash_dividend_today ngay lo (can vi the point-in-time); FEED_DEAD_DAYS=5 chua kiem chung; BACKFILL_MAX_DAYS=10 theo lap luan. BAI HOC MOI: harness mutation co the cham diem NHAM mutation truoc do — 2 mutation cho file bang nhau tung byte ghi cung 1 giay => pyc cu duoc dung lai; inspect.getsource() KHONG bat duoc (doc file nguon, khong phai code dang chay). Luon don __pycache__ + PYTHONDONTWRITEBYTECODE=1.
