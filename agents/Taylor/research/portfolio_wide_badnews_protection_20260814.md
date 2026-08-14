@@ -198,50 +198,79 @@ Hai khoảng trống, khác nhau về bản chất:
 
 ### C.2 Khoảng trống này có THẬT không? — đo trên 10 năm dữ liệu
 
-Đếm **episode sập riêng lẻ đầu tiên** (`ret ≤ −6%` **và** `idio ≤ −5%`, mã thanh khoản ≥3 tỷ, hợp
-nhất các phiên cách nhau ≤7 ngày thành 1 episode), 2016→2026-08, cache BQ local:
+> **Cập nhật 2026-08-14 (vòng verify quant-skeptic)** — phép đo dưới đây nay có script + CSV
+> kiểm lại được: **`weekday_idiocrash_stats_20260814.py`** cùng thư mục (`_weekday.csv`,
+> `_forward.csv`, `_episodes.csv`). Số trong bảng là bản chạy lại 2026-08-14 trên cache tới
+> phiên 08-13, nên lệch vài đơn vị so với bản viết tay ban đầu (5.497→5.496) — kết luận không đổi.
+> **Bộ lọc thanh khoản phải nói rõ**: `liq=both` = `val1m_bn ≥ 3` **VÀ** `val_bn ≥ 3` (đúng
+> nhánh tier-W của `anomaly_scan.compute_signals`, là biến thể dùng cho bảng này); `liq=adv` =
+> chỉ `val1m_bn ≥ 3` ⇒ N=**5.738**. Không khai biến thể chính là nguồn của mọi chênh N (§F.7).
+>
+> ⚠️ **Bẫy thứ hai, phát hiện khi verify chính script này (2026-08-14) — số ĐÃ ĐỔI vì bẫy này.**
+> Bản chạy đầu dùng `python3` hệ thống (pandas **2.3.3**), bản này dùng `$DNA_PYEXE`
+> (`wc_venv`, pandas **3.0.2**). CÙNG script + CÙNG dữ liệu ra **số khác nhau**: N episode
+> market/`none` 71.749 (pandas 2) vs 71.637 (pandas 3). Gốc: `pct_change()` mặc định
+> `fill_method='pad'` ở pandas 2 nhưng `None` ở pandas 3 — cột mirror `VNINDEX` NULL đúng **5
+> phiên** (2016-01-04, 2020-01-02, 2020-01-03, 2025-05-04, 2025-05-11), pandas 2 pad giá trị
+> phiên trước ⇒ **bịa ra "phiên đó thị trường đi ngang 0%"** ⇒ `idio` có giá trị ở nơi lẽ ra
+> phải khuyết ⇒ đếm dôi episode. Đã vá tận gốc: script khai `fill_method=None` tường minh (+ lọc
+> `Close > 0`, vì 2.419 dòng giá ≤0 làm `fwd*` ra `inf`). **Sau khi vá, hai interpreter cho
+> output khớp TUYỆT ĐỐI từng byte** — số dưới đây là bản đã ổn định, không còn phụ thuộc máy ai
+> chạy. Đây đúng nhóm bẫy §8 coding_guidelines (dùng sai interpreter so với bản pin).
 
-| Thứ | Số episode | Tỉ lệ/phiên | Kỳ vọng nếu đều |
+Đếm **episode sập riêng lẻ đầu tiên** (`ret ≤ −6%` **và** `idio ≤ −5%`, `liq=both`, hợp
+nhất các phiên cách nhau ≤7 ngày thành 1 episode), 2016-01→2026-08-13, cache BQ local:
+
+| Thứ | Số episode | Số phiên | Episode/phiên |
 |---|---:|---:|---:|
-| **Hai** | **1.401** | **2,705** | 1.074 |
-| Ba | 1.175 | 2,205 | 1.105 |
-| Tư | 1.067 | 1,998 | 1.107 |
-| Năm | 836 | 1,566 | 1.107 |
-| Sáu | 1.018 | 1,914 | 1.103 |
+| **Hai** | **1.401** | 518 | **2,705** |
+| Ba | 1.174 | 533 | 2,203 |
+| Tư | 1.066 | 534 | 1,996 |
+| Năm | 837 | 534 | 1,567 |
+| Sáu | 1.018 | 532 | 1,914 |
 
-**Thứ Hai = 1,408× tỉ lệ trung bình T3-T6**, χ²=178,4, **p=1,6e-37**, N=5.497.
+**Thứ Hai = 1,409× tỉ lệ trung bình T3-T6**, χ²=177,9, **p=2,1e-37**, N=5.496.
+(`liq=adv`: 1,414×, χ²=189,4, p=7,3e-40, N=5.738 — cùng kết luận.)
 
 **Kiểm chứng đối xứng (bắt buộc, nếu không thì đây chỉ là hiệu ứng phương sai cuối tuần):** làm lại
-y hệt cho cú **TĂNG** riêng lẻ (`ret ≥ +6%`, `idio ≥ +5%`), N=10.918 → thứ Hai chỉ **1,114×**.
+y hệt cho cú **TĂNG** riêng lẻ (`ret ≥ +6%`, `idio ≥ +5%`), N=10.921 → thứ Hai chỉ **1,115×**.
 
 | | Tỉ trọng thứ Hai | |
 |---|---:|---|
 | Sập riêng lẻ | **25,5%** | |
 | Tăng riêng lẻ (đối chứng) | 21,3% | |
-| Chênh | +4,2pp | **z = 6,05, p < 0,001** |
+| Chênh | +4,2pp | **z = 6,05, p = 1,4e-09** |
 
 ⇒ Thứ Hai dồn biến động **không đối xứng**, nghiêng hẳn về **tin XẤU**. Đây không phải hiện vật
 "cuối tuần tích luỹ thông tin nên thứ Hai biến động mạnh hai chiều" — nếu vậy chiều tăng phải lệch
-tương đương, mà nó chỉ lệch 1,114×. **Khoảng trống cuối tuần là thật, và đo được.**
+tương đương, mà nó chỉ lệch 1,115×. **Khoảng trống cuối tuần là thật, và đo được.**
 
 ### C.3 NHƯNG — giá trị của nó KHÔNG nằm ở phía bán
 
-Đo tiếp lợi suất **sau** phiên sập, theo thứ trong tuần (cùng tập N=5.497):
+Đo tiếp lợi suất **sau** phiên sập, theo thứ trong tuần (cùng tập N=5.496, `liq=both`; cột CI là
+bootstrap 2.000 lần trên trung bình fwd1):
 
-| Thứ của cú sập | Sập ngày đó | +1 phiên | +2 phiên | +3 phiên | P(phiên kế tiếp âm) |
-|---|---:|---:|---:|---:|---:|
-| **Hai** | −7,97% | **+0,02%** | +0,38% | +0,02% | **42,3%** |
-| Ba | −7,51% | −0,62% | −0,47% | −1,03% | 47,1% |
-| Tư | −7,34% | −0,50% | −0,39% | −1,63% | 49,3% |
-| Năm | −7,79% | −0,64% | −2,53% | −2,79% | 50,1% |
-| **Sáu** | −7,57% | **−3,09%** | −3,29% | −2,44% | **65,6%** |
+| Thứ của cú sập | Sập ngày đó | +1 phiên | CI 95% của +1 phiên | +2 phiên | +3 phiên | P(phiên kế tiếp âm) |
+|---|---:|---:|---:|---:|---:|---:|
+| **Hai** | −7,97% | **~0%** | **[−0,23% ; +0,29%] — chứa 0** | +0,38% | +0,03% | **42,3%** |
+| Ba | −7,51% | −0,62% | [−0,89% ; −0,35%] | −0,47% | −1,03% | 47,1% |
+| Tư | −7,33% | −0,50% | [−0,82% ; −0,19%] | −0,39% | −1,64% | 49,3% |
+| Năm | −7,80% | −0,65% | [−0,97% ; −0,30%] | −2,53% | −2,80% | 50,2% |
+| **Sáu** | −7,57% | **−3,10%** | **[−3,40% ; −2,77%] — không chứa 0** | −3,28% | −2,43% | **65,6%** |
+
+⚠️ **Ô "~0%" cố ý KHÔNG in số thập phân** (sửa 2026-08-14 theo verdict quant-skeptic). Bản đầu ghi
+`+0,02%`; vòng tái lập độc lập ra `−0,04%`. **Sau khi vá bẫy interpreter (§C.2) thì rõ: cả hai
+đều đúng, chỉ khác BIẾN THỂ LỌC** — `liq=both` (nhánh tier-W production) cho **+0,02%**, `liq=adv`
+cho **−0,05%**; con số bản đầu tái lập lại được chính xác. Chính việc **dấu của nó đổi theo một
+lựa chọn lọc vô thưởng vô phạt** là bằng chứng mạnh nhất rằng đại lượng này không khác 0; in 2
+chữ số thập phân là gán độ chính xác giả cho một số mà ngay cả DẤU cũng không xác định.
 
 Đọc thẳng:
 
-- **Sập thứ Hai = tin đã vào giá xong ngay trong phiên đó.** Không có đà giảm tiếp (+0,02%), xác
+- **Sập thứ Hai = tin đã vào giá xong ngay trong phiên đó.** Không có đà giảm tiếp (CI chứa 0), xác
   suất phiên sau âm chỉ 42,3% — thấp hơn tung đồng xu. Biết trước lúc 08:00 thứ Hai **không cứu
   được cú gap mở cửa** (không giao dịch được trước 09:00), và sau gap thì không còn gì để tránh.
-- **Sập thứ Sáu mới là cú còn rơi tiếp** (−3,09%, P(âm)=65,6%) — vì tin có nguyên cuối tuần để lan
+- **Sập thứ Sáu mới là cú còn rơi tiếp** (−3,10%, CI không chứa 0, P(âm)=65,6%) — vì tin có nguyên cuối tuần để lan
   và để margin call chín. Và ca này **đã được phủ** bởi lượt 08:20 thứ Hai hiện có.
 
 ⇒ **Sửa lại lý do của lượt quét thứ Hai.** Nó không phải để "bán kịp trước khi sập" — số liệu nói
@@ -358,20 +387,60 @@ CÁ NHÂN?* — đúng trục đã tách đúng PNJ-2015 (QUALIFY) khỏi PNJ-20
 
 1. **N=2 cho câu hỏi "cơ chế bắt kịp không"** (DGC, PNJ) — và hai case cho hai kết luận ngược nhau
    về lead time của kênh tin (§A.2). Không đủ để nói kênh nào tốt hơn.
-2. **Hiệu ứng thứ Hai (1,408×, p=1,6e-37) là thống kê TOÀN THỊ TRƯỜNG**, không phải của 29 mã đang
-   giữ. Trên chính 29 mã, tỉ trọng thứ Hai chỉ **22,3%** (IDIOCRASH, N=376) / **28,9%** (FLOOR2,
-   N=415) — vẫn nghiêng thứ Hai nhưng N nhỏ, khoảng tin cậy rộng. Số 1,408× **không được trích như
-   "rủi ro thứ Hai của danh mục mình"**.
+2. **Hiệu ứng thứ Hai (1,409×, p=2,1e-37) là thống kê TOÀN THỊ TRƯỜNG**, không phải của 29 mã đang
+   giữ. Trên chính 29 mã (bản chạy lại 2026-08-14, `_weekday.csv` scope=`hold29`):
+
+   | Luật | biến thể lọc | N episode | Tỉ trọng T2 | p |
+   |---|---|---:|---:|---:|
+   | IDIOCRASH | `none` (= đúng nhánh `is_hold` của production) | 391 | 22,5% | 0,058 |
+   | IDIOCRASH | `adv` | 184 | 29,4% | 0,00096 |
+   | FLOOR1 (ngày 1) | `none` | 432 | 29,4% | 8,5e-07 |
+   | FLOOR2 (2 phiên liên tiếp) | `none` | 59 | 28,8% | 0,061 |
+
+   Vẫn nghiêng thứ Hai nhưng N nhỏ, khoảng tin cậy rộng. Số 1,409× **không được trích như "rủi ro
+   thứ Hai của danh mục mình"**.
+   ⚠️ Bản đầu ghi `N=376` (IDIOCRASH) / `N=415` (nhãn "FLOOR2"). Tỉ trọng tái lập được gần đúng
+   (22,3%→22,5%; 28,9%→29,4%) và **nhãn thì đã truy ra**: "FLOOR2" của bản đầu thực ra là luật
+   **FLOOR ngày 1** (432), không phải luật 2-phiên-liên-tiếp (59) — nay script chạy CẢ HAI dưới
+   tên `FLOOR1`/`FLOOR2` để không ai phải đoán lại. **Phần dư ~4% thì vẫn KHÔNG truy được**, và
+   đây là điều đã **kiểm rồi mới nói**: giả thuyết "bản đầu chạy trên cửa sổ ngắn hơn" đã được
+   **thử và BÁC BỎ** — quét mọi ngày kết thúc từ 2026-02-01→04-15, **không có ngày nào** cho
+   đồng thời 376 và 415 (376 chỉ ứng với end=2026-03-09; 415 ứng với end=2026-03-02/03). Vì phép
+   đo gốc chỉ tồn tại dưới dạng văn xuôi, nguyên nhân dừng ở "không tái lập được";
+   **số dùng từ nay là bảng trên**.
 3. **Không đo được thứ quan trọng nhất**: trong 1.401 cú sập thứ Hai, bao nhiêu cái **phát hiện
    được bằng tin cuối tuần**? Không có cách đo hồi tố (không có kho tin lịch sử có timestamp). Toàn
    bộ lập luận E3 đứng trên suy diễn *"lệch bất đối xứng về chiều xấu ⇒ tin xấu cuối tuần"*, hợp lý
    nhưng **chưa được chứng minh trực tiếp**.
-4. **`+0,02%` sau cú sập thứ Hai là trung bình.** Phân phối rất rộng; nó bác bỏ "trung bình còn rơi
-   tiếp", **không** bác bỏ "case cá biệt còn rơi tiếp rất sâu" (PNJ chính là một case như vậy).
-5. **Chưa kiểm E1/E2/E3 chạy thật** — đây là thiết kế, chưa có dòng code nào được sửa. Mọi con số
-   về hành vi cơ chế mới là ước lượng.
+4. **`~0%` sau cú sập thứ Hai là TRUNG BÌNH, và bản thân nó không khác 0.** Phân phối rất rộng; nó
+   bác bỏ "trung bình còn rơi tiếp", **không** bác bỏ "case cá biệt còn rơi tiếp rất sâu" (PNJ
+   chính là một case như vậy). Đừng trích lại nó dưới dạng số thập phân — xem ô cảnh báo §C.3.
+5. ~~**Chưa kiểm E1/E2/E3 chạy thật**~~ — **hết hiệu lực 2026-08-14**: E1/E2/E3 đã wire thật
+   (commit `mike@2ce53d7a`, job `Taylor_20260814_041116`), quant-skeptic CONFIRMED độ tin cậy cao.
+   Con số duy nhất còn là ước lượng: tần suất cảnh báo §C.4 (≈1/2 tuần) — chờ vận hành thật.
 6. **Chưa che**: rủi ro gánh nặng bên nhận chuyển giao 0 đồng (VCB/MBB/VPB/HDB) — nêu từ vòng
    trước, vẫn là job riêng.
+7. **BỘ LỌC THANH KHOẢN PHẢI ĐƯỢC KHAI, KHÔNG ĐƯỢC NGẦM ĐỊNH** (bài học rút ra ở vòng verify
+   2026-08-14, gốc của CẢ HAI lần chênh N). Luật `IDIOCRASH` production KHÔNG có một bộ lọc duy
+   nhất — nó rẽ nhánh theo `is_hold`: mã **đang giữ** không qua cổng thanh khoản nào, mã **không
+   giữ** phải qua `val1m_bn ≥ 3` **VÀ** `val_bn ≥ 3`. Vì vậy câu "N của phép đo này là bao nhiêu"
+   **không có đáp án đơn trị** nếu không nói rõ biến thể:
+
+   | Chênh đã xảy ra | Nguyên nhân thật |
+   |---|---|
+   | 5.741 (tái lập) vs 5.497 (bản đầu) | `liq=adv` vs `liq=both` — bản đầu dùng đúng nhánh tier-W production, chỉ quên khai. (Cả hai số nay dịch nhẹ còn 5.738 / 5.496 sau khi vá bẫy interpreter §C.2.) |
+   | 184 (tái lập) vs 415 (bản đầu) | **hai** khác biệt chồng nhau: khác **LUẬT** (IDIOCRASH vs FLOOR ngày 1 = `FLOOR1`, 432) *và* khác **biến thể lọc** (`adv` vs `none`) — cộng thêm ~4% dư đã thử-và-bác-bỏ giả thuyết cửa sổ ngắn (mục 2) |
+
+   ⇒ Từ nay mọi bảng số trong file này đều ghi kèm `liq=` và tên luật; script
+   `weekday_idiocrash_stats_20260814.py` cố ý chạy **cả ba** biến thể × **bốn** luật để không ai
+   phải đoán lại.
+
+8. **Số của file này chỉ tái lập được bằng ĐÚNG interpreter đã pin** (`$DNA_PYEXE` =
+   `/home/trido/thanhdt/wc_venv/bin/python`) — xem bẫy pandas 2 vs 3 ở §C.2. Script nay đã tự
+   miễn nhiễm (khai `fill_method=None` tường minh, đã verify hai interpreter cho output khớp
+   từng byte), nhưng **bài học chung thì rộng hơn script này**: mọi phép đo dùng `pct_change()`
+   trên dữ liệu có ô khuyết đều dính, và nó **hỏng ÂM THẦM** — không exception, không cảnh báo,
+   chỉ là vài trăm episode dôi ra từ những phiên lẽ ra không có `idio`.
 
 ---
 

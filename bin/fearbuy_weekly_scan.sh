@@ -12,8 +12,10 @@
 #   --mode monday              cron 08:00 ICT thứ HAI. Cửa sổ tin 3 ngày (sau phiên T6 → CN).
 #       ⚠️ MỤC ĐÍCH LÀ BẢO VỆ PHÍA MUA, KHÔNG PHẢI "BÁN KỊP" — đừng đọc nhầm về sau.
 #       Lý do định lượng (§C.3 research/portfolio_wide_badnews_protection_20260814.md, đo
-#       10 năm): sau một cú sập riêng lẻ vào thứ HAI, lợi suất phiên kế tiếp trung bình là
-#       +0,02% — bán lúc đó KHÔNG cứu được gì. Sau cú sập thứ SÁU mới là −3,09%. Giá trị của
+#       10 năm; script tái lập: research/weekday_idiocrash_stats_20260814.py): sau một cú sập
+#       riêng lẻ vào thứ HAI, lợi suất phiên kế tiếp trung bình ~0% — KHÔNG khác 0 có ý nghĩa
+#       thống kê (bootstrap 95% CI chứa 0), P(phiên sau âm) ~42-43%. Bán lúc đó KHÔNG cứu được
+#       gì. Sau cú sập thứ SÁU mới là −3,10% (CI không chứa 0). Giá trị của
 #       lượt quét sáng thứ Hai nằm ở chỗ khác: bot 09:05 thứ Hai đặt lệnh theo plan đã duyệt
 #       CUỐI TUẦN, tức trước khi tin cuối tuần tồn tại. Lượt này để người duyệt biết luận
 #       điểm của một mã sắp mua vừa gãy trong lúc mình ngủ — RÚT lệnh mua, không phải bán tháo.
@@ -29,8 +31,25 @@ WORKDIR="/home/trido/thanhdt/WorkingClaude"
 MIKEDIR="$WORKDIR/mike"
 TODAY=$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)
 
+# Phân tích tham số: mọi thứ KHÔNG nhận ra đều phải rc=2, không được âm thầm rơi về weekly.
+# Bản cũ (`[ "${1:-}" = "--mode" ] && ...`) khiến `fearbuy_weekly_scan.sh monday` — thiếu cờ —
+# chạy chế độ WEEKLY với rc=0 và không một dòng cảnh báo: cron/người gõ nhầm sẽ tưởng lượt thứ
+# Hai đang chạy trong khi nó chưa từng chạy. Cùng nhóm lỗi §28 (một kênh im lặng bị đọc thành
+# "ổn"). `--mode tuesday` đã bị reject rc=2 sẵn ở case dưới — chỗ này chỉ áp nhất quán.
 MODE="weekly"
-if [ "${1:-}" = "--mode" ] && [ -n "${2:-}" ]; then MODE="$2"; fi
+case "${1:-}" in
+  "") ;;
+  --mode)
+    [ -n "${2:-}" ] || { echo "fearbuy_weekly_scan.sh: --mode thiếu giá trị (weekly|monday)" >&2; exit 2; }
+    MODE="$2"; shift 2
+    [ "$#" -eq 0 ] || { echo "fearbuy_weekly_scan.sh: tham số thừa sau --mode $MODE: $*" >&2; exit 2; }
+    ;;
+  *)
+    echo "fearbuy_weekly_scan.sh: tham số lạ '$1' — chỉ nhận '--mode weekly' hoặc '--mode monday'." >&2
+    echo "  (gõ thiếu cờ --mode từng âm thầm chạy chế độ weekly với rc=0; nay là lỗi cứng.)" >&2
+    exit 2
+    ;;
+esac
 
 case "$MODE" in
   weekly)
