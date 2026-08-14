@@ -1475,3 +1475,6 @@
 - [2026-08-14T08:52:37Z] Taylor/heartbeat — Taylor_20260814_080528: {"status": "still_running", "elapsed_min": 47, "job_id": "Taylor_20260814_080528", "source": "watcher"}
 - [2026-08-14T08:53:37Z] Taylor/heartbeat — Taylor_20260814_080528: {"status": "still_running", "elapsed_min": 48, "job_id": "Taylor_20260814_080528", "source": "watcher"}
 - [2026-08-14T08:54:38Z] Taylor/heartbeat — Taylor_20260814_080528: {"status": "still_running", "elapsed_min": 49, "job_id": "Taylor_20260814_080528", "source": "watcher"}
+
+## Consolidation 2026-08-14T09:07:02Z
+- [2026-08-14T09:00:48Z] Mike/finding — 10-selfcheck-do-buoc-3-XONG-va-XAC-NHAN: {"trang_thai": "XONG, xac nhan boi Mike - khong chi tin heartbeat", "tom_tat": "9/9 file goc + 1 file bonus (refresh_skip_participation) fix qua 2 commit WorkingClaude (9a9dbb1 dd_check, 6952ed0 5 bo PAPER-HYBRID) + 1 commit mike (78f9453f 3 bo gia-tri-song). Job bi kill timeout truoc buoc don kb/selfcheck_baseline.json nen Mike tu chay lai ca 10 file (dung dung $DNA_PYEXE cho lag_live_schedule) - TAT CA PASS THAT, roi xoa 10 entry known_red (11->1, con lai immutable_publish_selfcheck.py IAM ngoai pham vi).", "phat_hien_them": "extreme_regime_selfcheck false-PASS vi ly do SAI da duoc va (khong con nham EXTREME_PAUSE voi HYBRID_DEFER)", "commit_mike": "b4bf6b06"}
