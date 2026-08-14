@@ -108,6 +108,19 @@ def make_executor(tmpdir, orders, cfg_over=None, broker=None):
     return ex
 
 
+def _events(ex):
+    """Tập tên sự kiện trong journal của 1 executor (rỗng nếu chưa ghi dòng nào).
+
+    Journal là cách nhận DẠNG NGUYÊN NHÂN: "broker không bị chạm" là kết quả CHUNG của nhiều
+    chốt khác hẳn nhau (lưới ghost, cờ cfg, chờ T+2, trần giá) — chỉ tên sự kiện mới phân biệt
+    được chúng. Dùng ở cả nhóm G và nhóm K."""
+    import csv as _csv
+    if not os.path.exists(ex.journal_file):
+        return set()
+    with open(ex.journal_file, encoding="utf-8") as f:
+        return {row[1] for row in _csv.reader(f) if len(row) > 1}
+
+
 import tempfile
 
 with tempfile.TemporaryDirectory() as tmp:
@@ -167,14 +180,123 @@ with tempfile.TemporaryDirectory() as tmp:
         check("F1 _place_slices skips ALL ghosted tickers without calling broker",
               False, detail=str(e))
 
-    # G. Integration: _atc_sweep must also skip a ghosted ticker.
-    ex.state["parents"]["BUY-01"]["children"] = []  # reset from test A's mutation
-    try:
-        ex._atc_sweep(ghost_tickers={"GHOST1", "CLEAN1"})
-        check("G1 _atc_sweep skips ALL ghosted tickers without calling broker", True)
-    except AssertionError as e:
-        check("G1 _atc_sweep skips ALL ghosted tickers without calling broker", False,
-              detail=str(e))
+    # ────── G. _atc_sweep × lưới ghost — bù lỗ hổng ĐO ĐƯỢC (0 dòng production đổi) ──────
+    # Bản cũ của G1 gọi `_atc_sweep(ghost_tickers={...})` trên `_NullBroker` rồi bắt
+    # AssertionError. Assertion đó VÔ NGHĨA: có HAI lớp che ĐỘC LẬP, gỡ một lớp vẫn còn lớp
+    # kia. Cả hai đều ĐO THẬT (không suy luận), 2026-08-14:
+    #   (1) `executor.py:1543-1546` đọc `cfg["atc_remainder_buy"]` — mặc định **False**
+    #       (`config.py:89`) — và `continue` NGAY SAU chốt ghost (1541). Cả 2 lệnh fixture đều
+    #       side="buy", nên kể cả gỡ SẠCH chốt ghost thì broker vẫn không bị chạm.
+    #       Đo: ghosts={GHOST1,CLEAN1} và ghosts=set() cho kết quả Y HỆT (place_order=[],
+    #       journal rỗng). Ca chân-không đó GIỮ LẠI làm cảm biến, xem G3.
+    #   (2) `place_order` nằm trong `try/except Exception` (`executor.py:1587-1599`) ⇒
+    #       AssertionError của `_NullBroker` bị NUỐT thành journal `ATC_FAIL`, không bao giờ
+    #       nổi lên tới `except AssertionError` của selfcheck. Đo: gỡ che (1), giữ
+    #       `_NullBroker`, bỏ cờ ghost ⇒ `_atc_sweep` KHÔNG raise, journal có 2 dòng
+    #       `ATC_FAIL` ⇒ bản cũ PASS **kể cả khi broker BỊ gọi thật**. Vá riêng cờ cfg là
+    #       chưa đủ.
+    # Vì (2), bản này bỏ hẳn cơ chế "ném exception": nó GHI LẠI lời gọi (`_RecordingBroker`)
+    # và đọc JOURNAL — cả hai miễn nhiễm với except-block rộng ở tầng dưới. Chống chốt-im-lặng
+    # MỚI trong tương lai: mỗi ca khẳng định đều có ca CHỨNG MINH NGƯỢC ghép cặp, khác đúng
+    # MỘT biến (G1↔G2 nhánh mua, G4↔G6 nhánh bán) — bất kỳ chốt mới nào chèn vào cũng làm ca
+    # ngược im lặng theo và FAIL. Khuôn giống nhóm K: mỗi ca 1 thư mục riêng, journal không lẫn.
+
+    # Cờ ATC ghim THAM SỐ ngay tại chỗ dựng cfg (cfg_over vẫn đè lại được — G3 dùng để tái
+    # hiện đúng mặc định production). KHÔNG đụng `config.py`. §23 hệ luận 1: đừng để assertion
+    # treo vào một cờ config toàn cục đang trôi.
+    ATC_BUY_ON = {"atc_remainder_buy": True}
+    ATC_SELL_ON = {"atc_remainder_sell": True}
+    # Mọi sự kiện journal mà nhánh ATC có thể sinh ra — "không có cái nào" là bằng chứng luồng
+    # bị chặn TRƯỚC nhánh ATC (đúng vị trí chốt ghost), không phải bị nuốt ở đâu đó bên trong.
+    ATC_EVENTS = {"ATC", "ATC_FAIL", "HARD_CEILING_SKIP_ATC", "ODD_LOT_SKIP_ATC",
+                  "WAIT_T2_SETTLEMENT"}
+
+    class _RecordingBroker(_NullBroker):
+        """GHI LẠI lời gọi place_order thay vì ném AssertionError (xem lý do (2) ở trên).
+        `get_quote` vẫn kế thừa bản ném lỗi của `_NullBroker`: `_atc_sweep` không được phép
+        cần quote (lệnh ATC đặt price=None) — nếu ngày nào đó nó cần, ATC_FAIL sẽ lộ ra."""
+
+        def __init__(self):
+            self.placed = []
+
+        def place_order(self, ticker, qty, side, **k):
+            self.placed.append((ticker, qty, side, k.get("order_type")))
+            return f"OID-{len(self.placed)}"
+
+    def _mk_g(tag_dir, orders, ghosted, cfg_over, positions=None):
+        """1 ca G = 1 thư mục + 1 executor riêng ⇒ state/journal không lẫn giữa các ca."""
+        d = os.path.join(tmp, tag_dir)
+        os.makedirs(d, exist_ok=True)
+        br = _RecordingBroker()
+        exg = make_executor(d, orders, cfg_over=cfg_over, broker=br)
+        exg._atc_sweep(ghost_tickers=ghosted, positions=positions)
+        return exg, br
+
+    def _buy_orders():
+        return [PlannedOrder(id="BUY-01", ticker="GHOST1", side="buy", qty=1000,
+                             ref_price=20000),
+                PlannedOrder(id="BUY-02", ticker="CLEAN1", side="buy", qty=1000,
+                             ref_price=20000)]
+
+    def _sell_orders():
+        return [PlannedOrder(id="SELL-01", ticker="SELLG1", side="sell", qty=1000,
+                             ref_price=20000)]
+
+    # G1 — khẳng định thật (đã GỠ CHE): mã bị ghost thì `_atc_sweep` bỏ qua, broker không bị
+    # chạm VÀ journal không có sự kiện nhánh ATC nào (chặn trước nhánh, không phải nuốt lỗi).
+    ex_g1, br_g1 = _mk_g("g1", _buy_orders(), {"GHOST1", "CLEAN1"}, cfg_over=ATC_BUY_ON)
+    ev_g1 = _events(ex_g1)
+    check("G1 _atc_sweep bỏ qua MỌI mã bị ghost, broker không bị chạm (cfg đã gỡ che: "
+          "atc_remainder_buy=True)",
+          br_g1.placed == [] and not (ev_g1 & ATC_EVENTS),
+          detail=f"placed={br_g1.placed} events={sorted(ev_g1)}")
+
+    # G2 — CHỨNG MINH NGƯỢC cho G1: cùng fixture, cùng cfg, đổi ĐÚNG MỘT biến (bỏ cờ ghost).
+    # Nếu G1 chỉ phản ánh "thứ gì đó nuốt lệnh" thì ca này cũng phải im — nó không im.
+    ex_g2, br_g2 = _mk_g("g2", _buy_orders(), set(), cfg_over=ATC_BUY_ON)
+    check("G2 CHỨNG MINH NGƯỢC: bỏ cờ ghost ⇒ CẢ HAI mã tới broker bằng lệnh ATC "
+          "(lưới ghost mới là thứ chặn G1)",
+          [c[0] for c in br_g2.placed] == ["GHOST1", "CLEAN1"]
+          and {c[3] for c in br_g2.placed} == {"ATC"} and "ATC" in _events(ex_g2),
+          detail=f"placed={br_g2.placed} events={sorted(_events(ex_g2))}")
+
+    # G3 — CẢM BIẾN CHỐNG CHE LẠI, và ghi lại đúng cơ chế đã làm G1 vô nghĩa: giữ nguyên ca
+    # G2 (không ghost) nhưng trả cờ về mặc định production ⇒ broker im dù chẳng có ghost nào.
+    # Ca này FAIL nếu ai đó đổi mặc định `atc_remainder_buy` → buộc đọc lại cả nhóm G.
+    ex_g3, br_g3 = _mk_g("g3", _buy_orders(), set(), cfg_over={"atc_remainder_buy": False})
+    check("G3 CẢM BIẾN: với atc_remainder_buy=False (mặc định production, config.py:89) thì "
+          "KHÔNG có ghost broker vẫn im ⇒ 'không chạm broker' là VÔ NGHĨA ở cfg đó",
+          br_g3.placed == [] and not (_events(ex_g3) & ATC_EVENTS),
+          detail=f"placed={br_g3.placed} events={sorted(_events(ex_g3))}")
+
+    # G4 — nhánh BÁN (trước bản này hoàn toàn không được phủ: cả 2 lệnh fixture đều là mua).
+    # Chốt ghost (1541) nằm TRƯỚC nhánh chờ T+2 (1578), nên mã bị ghost phải im mà KHÔNG ghi
+    # WAIT_T2_SETTLEMENT — journal là thứ phân biệt ca này với G5.
+    ex_g4, br_g4 = _mk_g("g4", _sell_orders(), {"SELLG1"}, cfg_over=ATC_SELL_ON,
+                         positions={"SELLG1": {"sellable": 0}})
+    ev_g4 = _events(ex_g4)
+    check("G4 nhánh BÁN: mã bị ghost bị chặn ngay ở chốt ghost — không đặt lệnh và KHÔNG có "
+          "WAIT_T2_SETTLEMENT (chặn trước nhánh T+2)",
+          br_g4.placed == [] and not (ev_g4 & ATC_EVENTS),
+          detail=f"placed={br_g4.placed} events={sorted(ev_g4)}")
+
+    # G5 — cùng fixture bán, bỏ cờ ghost, sellable=0: cũng "không đặt lệnh" nhưng LÝ DO khác
+    # hẳn G4. Đây là phần WAIT_T2_SETTLEMENT được phủ lần đầu.
+    ex_g5, br_g5 = _mk_g("g5", _sell_orders(), set(), cfg_over=ATC_SELL_ON,
+                         positions={"SELLG1": {"sellable": 0}})
+    check("G5 nhánh BÁN không ghost, sellable=0 ⇒ WAIT_T2_SETTLEMENT (chờ T+2), không đặt "
+          "lệnh — cùng 'broker im' nhưng nguyên nhân khác G4",
+          br_g5.placed == [] and "WAIT_T2_SETTLEMENT" in _events(ex_g5),
+          detail=f"placed={br_g5.placed} events={sorted(_events(ex_g5))}")
+
+    # G6 — CHỨNG MINH NGƯỢC cho nhánh bán: đủ hàng sellable ⇒ luồng đi hết tới broker, và
+    # khối lượng bị chặn trần bởi `sellable` (500) chứ không phải qty của lệnh (1000).
+    ex_g6, br_g6 = _mk_g("g6", _sell_orders(), set(), cfg_over=ATC_SELL_ON,
+                         positions={"SELLG1": {"sellable": 500}})
+    check("G6 CHỨNG MINH NGƯỢC nhánh BÁN: đủ sellable ⇒ đặt ATC đúng phần bán được (500, "
+          "không phải 1000)",
+          br_g6.placed == [("SELLG1", 500, "sell", "ATC")],
+          detail=f"placed={br_g6.placed} events={sorted(_events(ex_g6))}")
 
     # H. quant-skeptic killer objection (verify_finding.sh 2026-07-02): if poll_orders()
     #    itself raises, step() must fail-safe-pause EVERY plan ticker this cycle, not
@@ -279,13 +401,6 @@ with tempfile.TemporaryDirectory() as tmp:
         def get_quote(self, ticker, *a, **k):
             self.quote_calls.append(ticker)
             return None
-
-    def _events(ex):
-        import csv as _csv
-        if not os.path.exists(ex.journal_file):
-            return set()
-        with open(ex.journal_file, encoding="utf-8") as f:
-            return {row[1] for row in _csv.reader(f) if len(row) > 1}
 
     def _mk_k(tag_dir, ghosted, now, cfg_over=HYB_ON):
         """1 ca K = 1 thư mục riêng ⇒ journal/state không lẫn giữa các ca."""
