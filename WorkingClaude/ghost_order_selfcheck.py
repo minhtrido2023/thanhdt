@@ -81,14 +81,28 @@ class _NullBroker:
         return {}
 
 
-def make_executor(tmpdir, orders):
+def make_executor(tmpdir, orders, cfg_over=None, broker=None):
     plan = TradePlan(plan_date="2099-01-01", signal_date="2099-01-01", strategy="selfcheck",
                      strategy_version="0", state=3, state_name="NEUTRAL",
                      nav_basis={"account_nav": 1e9, "scale": 1.0}, orders=orders,
                      account=TAG, created_at="2099-01-01T00:00:00")
     cfg = load_config()
+    # HYBRID fill-timing GHIM TẮT làm nền (cfg_over vẫn bật lại được — nhóm K dùng).
+    # Vì sao: bộ này đo LƯỚI GHOST (idempotency, chống mua đúp), mà từ 2026-08-10
+    # `fill_timing_hybrid_enabled` mặc định True (bật trên paper, commit 717307f). F1/G1
+    # chạy mode="paper" ở NOW=09:20 — NGOÀI block MUA của HYBRID (11:00-13:45) ⇒ lệnh MUA
+    # bị hoãn theo LỊCH trước khi tới chỗ kiểm lưới ghost.
+    # ĐO THẬT (không suy luận), mutation gỡ `if o.ticker in ghost_tickers: continue` ở
+    # `_place_slices` rồi A/B đúng MỘT cờ: hybrid=True ⇒ broker KHÔNG bị gọi ⇒ F1 VẪN PASS;
+    # hybrid=False ⇒ get_quote bị gọi ⇒ F1 FAIL đúng như phải thế. Nghĩa là trước bản vá này
+    # F1 PASS KỂ CẢ KHI lưới ghost bị gỡ sạch — nó không đo được gì nữa. Nguy hiểm hơn màu
+    # đỏ: "không gọi broker" không phân biệt được lưới AN TOÀN (ghost, chống mua đúp thật)
+    # với lịch CHI PHÍ (HYBRID_DEFER, chỉ hoãn). §23 hệ luận 1: selfcheck không assert lên
+    # trạng thái SỐNG (ở đây là một cờ config toàn cục đang trôi). Ca KẾT HỢP đo ở nhóm K.
+    cfg["fill_timing_hybrid_enabled"] = False
+    cfg.update(cfg_over or {})
     cfg["mode"] = "paper"
-    ex = Executor(plan, _NullBroker(), cfg, shared={})
+    ex = Executor(plan, broker or _NullBroker(), cfg, shared={})
     ex.state_file = os.path.join(tmpdir, "state.json")
     ex.journal_file = os.path.join(tmpdir, "journal.csv")
     return ex
@@ -240,6 +254,77 @@ with tempfile.TemporaryDirectory() as tmp:
           detail=str(paper_updates["P000001"].raw))
     check("J2 untracked paper order is correctly detected as a ghost",
           ghosts == {"PAPERGHOST"}, detail=str(ghosts))
+
+    # ─────────── K. LƯỚI GHOST × HYBRID (đúng cấu hình paper THẬT từ 2026-08-10) ───────────
+    # Vì sao nhóm này phải tồn tại: nhóm A-J cố ý ghim HYBRID tắt để cô lập lưới ghost. Nếu
+    # chỉ ghim mà không bù, bộ test sẽ mô tả một cấu hình KHÔNG ai chạy (paper thật đang bật
+    # HYBRID) và lần đổi cờ tiếp theo lại đi qua không ai thấy. Điểm mấu chốt: khi HYBRID bật,
+    # "broker không bị gọi" có HAI nguyên nhân khác hẳn nhau — lưới GHOST (an toàn, chặn mua
+    # đúp một vị thế đã tồn tại thật ở broker) và HYBRID_DEFER (lịch chi phí, chỉ hoãn). Đếm
+    # số lệnh KHÔNG phân biệt được chúng, nên phân biệt bằng JOURNAL + một ca CHỨNG MINH
+    # NGƯỢC: tên sự kiện và việc broker CÓ bị chạm tới mới là bằng chứng nguyên nhân.
+    print()
+    NOW_K = _dt.datetime(2099, 1, 1, 11, 5)    # TRONG block MUA đầu tiên (11:00-11:15)
+    NOW_K_OUT = _dt.datetime(2099, 1, 1, 9, 20)  # NGOÀI block MUA — đúng giờ F1 đang dùng
+    HYB_ON = {"fill_timing_hybrid_enabled": True}
+
+    class _ReachedBroker(_NullBroker):
+        """Ghi lại việc luồng ĐI TỚI được tầng broker, thay vì ném AssertionError. Trả quote
+        None ⇒ `_place_slices` ghi NO_QUOTE rồi `continue`: quan sát được mà không đặt lệnh
+        thật, không cần nguồn giá sống."""
+
+        def __init__(self):
+            self.quote_calls = []
+
+        def get_quote(self, ticker, *a, **k):
+            self.quote_calls.append(ticker)
+            return None
+
+    def _events(ex):
+        import csv as _csv
+        if not os.path.exists(ex.journal_file):
+            return set()
+        with open(ex.journal_file, encoding="utf-8") as f:
+            return {row[1] for row in _csv.reader(f) if len(row) > 1}
+
+    def _mk_k(tag_dir, ghosted, now, cfg_over=HYB_ON):
+        """1 ca K = 1 thư mục riêng ⇒ journal/state không lẫn giữa các ca."""
+        d = os.path.join(tmp, tag_dir)
+        os.makedirs(d, exist_ok=True)
+        br = _ReachedBroker()
+        exk = make_executor(d, [PlannedOrder(id="BUY-K", ticker="GHOSTK", side="buy",
+                                             qty=1000, ref_price=20000)],
+                            cfg_over=cfg_over, broker=br)
+        exk.state_file = os.path.join(d, "state.json")
+        exk.journal_file = os.path.join(d, "journal.csv")
+        exk._place_slices(now, "MORNING", ghost_tickers=({"GHOSTK"} if ghosted else set()))
+        return exk, br
+
+    # K1 — TRONG block MUA nên HYBRID KHÔNG hoãn; mã bị ghost ⇒ thứ duy nhất còn có thể chặn
+    # là lưới ghost. Lưới ghost `continue` LẶNG (không ghi journal), nên bằng chứng "không
+    # phải HYBRID" là: journal KHÔNG có HYBRID_DEFER, và broker chưa hề bị chạm.
+    ex_k1, br_k1 = _mk_k("k1", ghosted=True, now=NOW_K)
+    ev_k1 = _events(ex_k1)
+    check("K1 HYBRID bật, TRONG block MUA, mã bị GHOST ⇒ chặn bởi lưới ghost, KHÔNG phải "
+          "HYBRID_DEFER (broker chưa bị chạm)",
+          "HYBRID_DEFER" not in ev_k1 and br_k1.quote_calls == [],
+          detail=f"events={sorted(ev_k1)} quote_calls={br_k1.quote_calls}")
+
+    # K2 — CHỨNG MINH NGƯỢC cho K1: cùng cấu hình HYBRID, cùng giờ trong block, đổi ĐÚNG MỘT
+    # biến (bỏ cờ ghost). Nếu K1 chỉ phản ánh "thứ gì đó nuốt lệnh" thì ca này cũng phải im.
+    ex_k2, br_k2 = _mk_k("k2", ghosted=False, now=NOW_K)
+    check("K2 CHỨNG MINH NGƯỢC: cùng cấu hình/giờ, BỎ cờ ghost ⇒ luồng ĐI TỚI broker "
+          "(lưới ghost mới là thứ chặn K1)",
+          br_k2.quote_calls == ["GHOSTK"] and "NO_QUOTE" in _events(ex_k2),
+          detail=f"quote_calls={br_k2.quote_calls} events={sorted(_events(ex_k2))}")
+
+    # K3 — chốt rằng ghim TẮT ở nhóm A-J là cần thiết chứ không tuỳ tiện, và ghi lại ĐÚNG cơ
+    # chế đã che mất F1: cùng lệnh KHÔNG bị ghost, chỉ dời ra ngoài block (09:20 = giờ F1).
+    ex_k3, br_k3 = _mk_k("k3", ghosted=False, now=NOW_K_OUT)
+    check("K3 HYBRID bật, NGOÀI block ⇒ HYBRID_DEFER và broker KHÔNG bị chạm (đây chính là "
+          "thứ làm F1 pass kể cả khi lưới ghost bị gỡ sạch)",
+          "HYBRID_DEFER" in _events(ex_k3) and br_k3.quote_calls == [],
+          detail=f"events={sorted(_events(ex_k3))} quote_calls={br_k3.quote_calls}")
 
 print()
 if fails:

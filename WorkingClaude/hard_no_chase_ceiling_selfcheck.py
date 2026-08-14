@@ -88,7 +88,7 @@ class FakeBroker:
 def make_exec(orders, quote, cfg_over=None):
     # HYBRID fill-timing GHIM TẮT làm nền (cfg_over vẫn bật lại được — nhóm J dùng).
     # Vì sao: bộ này đo TẦNG TRẦN GIÁ, mà từ 2026-08-10 `fill_timing_hybrid_enabled` mặc
-    # định True (bật trên paper, commit 717303b). Mọi ca ở đây chạy mode="paper" và
+    # định True (bật trên paper, commit 717307f). Mọi ca ở đây chạy mode="paper" và
     # NOW=09:30 — NGOÀI block MUA của HYBRID (11:00-13:45) ⇒ lệnh MUA bị hoãn theo LỊCH
     # trước khi tới chỗ kiểm trần. Đã đo A/B bằng đúng 1 cờ: hybrid=True ⇒ journal chỉ có
     # HYBRID_DEFER, không có HARD_CEILING_BLOCK (E4 FAIL). Nguy hiểm hơn màu đỏ: E3
