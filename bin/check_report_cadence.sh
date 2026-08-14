@@ -22,6 +22,13 @@
 #      chữa lành nếu Taylor quên gọi bước gửi email trong prompt (cùng bài học attempt-1-crash
 #      của check_report_cadence chính nó: đừng chỉ tin 1 agent nhớ làm đủ bước, có lớp quét lại).
 set -uo pipefail
+SCHEDULED_KIND=""
+case "${1:-}" in
+  "") ;;
+  --scheduled-weekly) SCHEDULED_KIND="weekly" ;;
+  --scheduled-monthly) SCHEDULED_KIND="monthly" ;;
+  *) echo "Usage: $0 [--scheduled-weekly|--scheduled-monthly]" >&2; exit 2 ;;
+esac
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WC_ROOT="$(cd "$ROOT/.." && pwd)"
 TRADING_REPORT_THREAD="trading_report"
@@ -103,6 +110,7 @@ for q in d.get("pending", []):
 ')"
 export RC_PENDING_TOPICS
 
+export REPORT_SCHEDULED_KIND="$SCHEDULED_KIND"
 PLAN="$(python3 - "$WC_ROOT" "$TODAY" "$STATE" << 'PYEOF'
 import glob, json, os, re, sys
 from datetime import date, timedelta
@@ -111,6 +119,7 @@ wc_root, today_s, state_path = sys.argv[1], sys.argv[2], sys.argv[3]
 today = date.fromisoformat(today_s)
 reports_dir = os.path.join(wc_root, "mike", "reports")
 state = json.load(open(state_path))
+scheduled_kind = os.environ.get("REPORT_SCHEDULED_KIND", "")
 
 def dates_from(fname):
     return [date.fromisoformat(m) for m in re.findall(r"\d{4}-\d{2}-\d{2}", os.path.basename(fname))]
@@ -127,6 +136,12 @@ weekly_dates = [max(dates_from(f)) for f in weekly_files if dates_from(f)]
 most_recent_weekly = max(weekly_dates) if weekly_dates else None
 
 this_monday = today - timedelta(days=today.weekday())
+if scheduled_kind == "weekly":
+    # Lượt chính thức 09:00 thứ Bảy: tuần T2→T6 vừa đóng, không chờ ngưỡng
+    # "quá hạn" +3 ngày của watchdog.
+    candidate_mondays = [this_monday]
+else:
+    candidate_mondays = []
 if most_recent_weekly is None:
     # chưa từng có báo cáo tuần nào — chỉ backfill 1 tuần gần nhất (tránh dispatch runaway lịch sử)
     start_monday = this_monday - timedelta(days=7)
@@ -136,14 +151,14 @@ else:
 # Liệt kê MỌI tuần đã ĐÓNG ĐỦ (qua hết thứ Sáu + buffer 3 ngày) kể từ start_monday — KHÔNG
 # giới hạn bởi "tuần hiện tại" theo weekday(), vì hôm nay có thể là T7/CN và tuần T2-T6 vừa
 # rồi đã đóng xong dù cùng "tuần lịch" với hôm nay theo cách tính weekday-anchor.
-candidate_mondays = []
-m = start_monday
-while len(candidate_mondays) < 8:
-    last_friday = m + timedelta(days=4)
-    if (today - last_friday).days < 3:
-        break  # tuần này (và mọi tuần sau) chưa đóng đủ — dừng, không cần xét tiếp
-    candidate_mondays.append(m)
-    m += timedelta(days=7)
+if scheduled_kind != "weekly":
+    m = start_monday
+    while len(candidate_mondays) < 8:
+        last_friday = m + timedelta(days=4)
+        if (today - last_friday).days < 3:
+            break  # tuần này (và mọi tuần sau) chưa đóng đủ — dừng, không cần xét tiếp
+        candidate_mondays.append(m)
+        m += timedelta(days=7)
 
 for last_monday in candidate_mondays:
     last_friday = last_monday + timedelta(days=4)
@@ -159,12 +174,12 @@ for last_monday in candidate_mondays:
 # --- Monthly: từ ngày 5, tháng trước phải có báo cáo (bỏ qua trước go-live 2026-07) ---
 GO_LIVE_MONTH = (2026, 7)
 monthly_files = glob.glob(os.path.join(reports_dir, "*_monthly_report_*.md"))
-if today.day >= 5:
+if today.day >= 5 or scheduled_kind == "monthly":
     if today.month == 1:
         lm_year, lm_num = today.year - 1, 12
     else:
         lm_year, lm_num = today.year, today.month - 1
-    if (lm_year, lm_num) >= GO_LIVE_MONTH:
+    if (lm_year, lm_num) >= GO_LIVE_MONTH and scheduled_kind != "weekly":
         last_month_str = f"{lm_year}-{lm_num:02d}"
         has_last_month = any(last_month_str in os.path.basename(f) for f in monthly_files)
         if not has_last_month:
@@ -261,11 +276,11 @@ for a in json.load(sys.stdin)['actions']:
   if [ "$KIND" = "weekly" ]; then
     MODEL="sonnet"
     EFFORT="medium"
-    PROMPT="Soạn và GỬI báo cáo TUẦN trading cho 2 tài khoản SpaceX + ZaloPay, kỳ ${DESC} (thứ Hai-thứ Sáu, dữ liệu đã đầy đủ). File: ${TFILE}. Đây là auto-dispatch từ check_report_cadence.sh (báo cáo tuần bị bỏ sót, phát hiện tự động). Dùng đúng pipeline mike/kb/coding_guidelines.md §6 (verify_account_snapshot.py --account-no cho CẢ 2 account, đối chiếu nav_history_{account}.csv thật, không tự bịa số). Format/văn phong theo mẫu mike/reports/SpaceX_ZaloPay_weekly_report_2026-07-13_to_2026-07-17.md. Có gap/lỗi/residual chưa giải thích được thì NÓI RÕ trong báo cáo, đừng làm tròn. Gửi vào Discord Trading report topic (channel ${TRADING_REPORT_THREAD}). ${EMAIL_STEP} ${DELEGATE_STEP} Ghi bus finding khi xong: file path, NAV cuối kỳ 2 account, % biến động, gap/lỗi nếu có."
+    PROMPT="Soạn và GỬI báo cáo TUẦN investor-grade cho 2 tài khoản SpaceX + ZaloPay, kỳ ${DESC} (thứ Hai-thứ Sáu đã đóng). File: ${TFILE}. Dùng đúng pipeline mike/kb/coding_guidelines.md §6: verify_account_snapshot.py --account-no cho CẢ 2 account, đối chiếu nav_history_{account}.csv thật; tuyệt đối không tự bịa số. Văn phong cô đọng, chuyên nghiệp theo thông lệ thư nhà đầu tư của các nhà quản lý tài sản lớn (rõ luận điểm, dữ liệu, rủi ro và giới hạn), không sao chép hoặc gán nhận định cho BlackRock/Bill Ackman. BẮT BUỘC: (1) Executive summary; (2) ngay đầu báo cáo có 'Toàn cảnh thị trường' tách rõ Technical (VNINDEX: xu hướng, hỗ trợ/kháng cự, breadth/thanh khoản/momentum nếu dữ liệu chứng minh được) và Fundamental (định giá, tăng trưởng lợi nhuận, lãi suất/vĩ mô, dòng tiền — nêu as-of/nguồn); (3) hiệu quả, attribution, exposure/risk của hai account; (4) ít nhất một biểu đồ PNG tạo từ dữ liệu thật, có tiêu đề, đơn vị, kỳ dữ liệu và nguồn, lưu cạnh report rồi nhúng Markdown; không có dữ liệu đáng tin thì nêu rõ thay vì vẽ; (5) kết luận 'Outlook kỳ tới' tách Technical/Fundamental, dạng kịch bản xác suất/điều kiện làm sai, không phải khuyến nghị chắc chắn. Có gap/lỗi/residual chưa giải thích thì NÓI RÕ. Gửi Discord Trading report (${TRADING_REPORT_THREAD}) và email. ${EMAIL_STEP} ${DELEGATE_STEP} Ghi bus finding: file path, NAV cuối kỳ, % biến động, kết luận market outlook, gap/lỗi."
   else
     MODEL="opus"
     EFFORT="high"
-    PROMPT="Soạn và GỬI báo cáo THÁNG trading cho 2 tài khoản SpaceX + ZaloPay, kỳ ${DESC} (cả tháng). File: ${TFILE}. Đây là auto-dispatch từ check_report_cadence.sh (báo cáo tháng bị bỏ sót, phát hiện tự động). Áp dụng chuẩn mực báo cáo THÁNG theo mike/kb/coding_guidelines.md §6 (MTD/QTD/YTD, so với VNINDEX, attribution sector/mã, risk metrics DD/vol, phí/chi phí, outlook) — không chỉ lặp báo cáo tuần. BẮT BUỘC thêm mục 'Paper signals chạy nền — kiểm tra suy giảm theo tháng' cho extreme_regime và fill_timing (hai mục không còn in daily): đọc mike/kb/paper_programs_registry.json, journal data/execution_logs/exec_main_*_journal.csv và output probe/charter liên quan; so sánh tháng này với tháng trước về số phiên evidence/lệnh, marker hoặc false-trigger, reject/fail, adherence cửa sổ và fill-vs-open khi đo được, cùng trạng thái gate. Kết luận chỉ là ổn định / chưa đủ dữ liệu / có dấu hiệu suy giảm cần điều tra, nêu số liệu và giới hạn; TUYỆT ĐỐI không coi ít quan sát hay không có trigger là bằng chứng alpha. Dùng đúng pipeline verify_account_snapshot.py --account-no + nav_history_{account}.csv thật. Có gap/lỗi/residual chưa giải thích được thì NÓI RÕ, đừng làm tròn. Gửi vào Discord Trading report topic (channel ${TRADING_REPORT_THREAD}). ${EMAIL_STEP} ${DELEGATE_STEP} Ghi bus finding khi xong, gồm kết luận monthly review của 2 paper signal."
+    PROMPT="Soạn và GỬI báo cáo THÁNG investor-grade cho 2 tài khoản SpaceX + ZaloPay, kỳ ${DESC}. File: ${TFILE}. Dùng mike/kb/coding_guidelines.md §6: MTD/QTD/YTD, benchmark VNINDEX, attribution sector/mã, DD/vol/fees và verify_account_snapshot.py --account-no + nav_history thật. Văn phong theo thông lệ thư nhà đầu tư chuyên nghiệp: luận điểm trước, bằng chứng sau, nêu rủi ro/giới hạn; không sao chép hay gán nhận định cho BlackRock/Bill Ackman. BẮT BUỘC ngay đầu: 'Toàn cảnh thị trường' tách Technical (xu hướng, hỗ trợ/kháng cự, breadth/thanh khoản/momentum) và Fundamental (định giá, earnings, lãi suất/vĩ mô/dòng tiền), mọi số có as-of/nguồn. Tạo tối thiểu một biểu đồ PNG từ dữ liệu thật, tiêu đề/đơn vị/kỳ/nguồn đầy đủ, nhúng Markdown; thiếu dữ liệu thì nói rõ. Kết thúc bằng 'Outlook tháng tới' tách Technical/Fundamental, trình bày kịch bản, điều kiện xác nhận/bác bỏ và rủi ro, không khẳng định chắc chắn. BẮT BUỘC thêm 'Paper signals chạy nền — kiểm tra suy giảm theo tháng' cho extreme_regime/fill_timing: đọc registry+journal+probe, so tháng này với tháng trước; không coi ít quan sát/0 trigger là bằng chứng alpha. Nêu rõ mọi gap/lỗi/residual. Gửi Discord Trading report (${TRADING_REPORT_THREAD}) và email. ${EMAIL_STEP} ${DELEGATE_STEP} Ghi bus finding gồm file, NAV, %, market outlook và kết luận 2 paper signal."
   fi
   # `--thread "$TRADING_REPORT_THREAD"` tường minh — xem chú thích cùng ngày trong
   # daily_retro.sh (B1). Đúng topic mà chính PROMPT đã yêu cầu gửi báo cáo vào.
