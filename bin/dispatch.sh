@@ -1452,6 +1452,12 @@ except Exception:
   fi
   echo "  2) CHỈ nếu schema tool phiên này THẬT SỰ có tham số nền (run_in_background trên Agent/Bash) mới thêm wrapper bọc '$ROOT/bin/jobs.sh wait $job_id --timeout $_ww'. isolation:worktree KHÔNG phải background — cấm dùng thay thế." >&2
   echo "  3) SELF-CHECK: trước khi nói với user bất kỳ điều gì về trạng thái job này (đang chờ/xong/chết), chạy '$ROOT/bin/jobs.sh status $job_id' trong CÙNG turn — không nói từ trí nhớ." >&2
+  # 4) Nhắc đóng vòng bus (Wags 2026-08-14, root-cause-A): user quyết qua Discord → Mike
+  #    dispatch thẳng → quyết định nằm trong PROMPT, bus không có answer/decision → checker §5
+  #    vẫn thấy treo → đốt một job wags_autofix cho việc đã xong. Đã tái diễn ≥3 lần và tới giờ
+  #    chỉ được chặn bằng việc Mike NHỚ làm tay. Chỉ IN RA, không tự đóng (đóng theo suy đoán
+  #    văn bản = đóng oan escalation tiền thật). Im lặng khi không khớp; fail-open mọi đường lỗi.
+  printf '%s' "$prompt" | timeout 25 python3 "$ROOT/bin/dispatch_question_hint.py" --to "$id" >&2 || true
   echo "$pid" > "$ROOT/logs/.dispatch_${id}_${ts}.pid"
   # Immediate Discord notify so user sees task is in flight (don't wait for watcher heartbeat)
   { _dtid="$(_job_thread_id "$job_id")"
@@ -1551,6 +1557,10 @@ else
   if [ "$rc" -eq 0 ]; then
     JSET status=done ended_at="$(date +%s)" exit_code=0 result_summary="$(SUMMARY)"
     _circuit_record "$CIRCUIT_KEY" success
+    # Nhắc đóng vòng bus — cùng lý do và cùng ràng buộc như nhánh --bg ở trên (root-cause-A
+    # xảy ra ở CẢ HAI nhánh; vá một nhánh là bỏ lọt nửa còn lại). Chỉ in ở đường THÀNH CÔNG:
+    # nhánh lỗi đã có thông điệp riêng và đang cần sự chú ý cho việc khác.
+    printf '%s' "$prompt" | timeout 25 python3 "$ROOT/bin/dispatch_question_hint.py" --to "$id" >&2 || true
   else
     if _maybe_fallback_provider_on_usage_limit "$logfile" "$logfile.err"; then
       echo "NOTE: dispatch $id (job $job_id) provider '$PROVIDER' hết usage/rate limit — đã fallback NGAY sang claude (job mới chạy nền, không chờ reset)." >&2

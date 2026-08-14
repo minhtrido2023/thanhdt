@@ -254,6 +254,20 @@ cutoff = _now - dt.timedelta(hours=48)
 AGED_SHOW_ALL_UPTO = 10   # ≤10 mục: in HẾT, không cắt
 AGED_OLDEST = 5           # >10 mục: 5 mục cũ nhất …
 AGED_NEWEST = 3           # … + 3 mục mới nhất
+# MIỄN CẮT cho lớp WAGS_SELF_Q_PREFIXES (vòng fix+arch-review chưa CONFIRMED). Lý do: lớp
+# này KHÔNG bao giờ tự đóng — nó đã bị loại khỏi auto-dispatch (pending_q_wagsfix, đúng: lặp
+# tự động là vòng tự nuôi), nên dòng báo cáo này là kênh DUY NHẤT đưa nó tới người; mà nó lại
+# lão hoá theo NGÀY, tức càng treo lâu càng trôi về giữa danh sách = đúng chỗ bị cắt. Kết
+# cục: cơ chế duy nhất để thoát bị chính cơ chế báo cáo giấu đi.
+# ⚠️ Trạng thái thực tế khi thêm (2026-08-14): nhánh cắt giữa CHƯA TỪNG chạy trong
+# production (grep "mục giữa" logs/ops_health.log = 0; max từng thấy 9 mục ≤ 10) — 4 mục
+# wags-fix-not-confirmed treo lâu hôm nay ĐỀU đã được in đủ, cắt-giữa KHÔNG phải nguyên nhân
+# chúng bị bỏ quên. Đây là bịt lỗ TRƯỚC KHI nó cắn, và nó sắp cắn: 20 câu hỏi đang pending,
+# 12 trong số đó (10 selfcheck-red + 2 wags-*) qua mốc 48h trong vòng 1 ngày ⇒ aged_q vượt 10.
+# Cắt GIỮA vẫn giữ nguyên cho mọi loại câu hỏi khác.
+# Trần cứng để chính lớp miễn trừ không thành đường crowd-out mới (nếu vượt: nói RÕ đã cắt
+# bao nhiêu — không bao giờ cắt im lặng).
+AGED_WAGS_MAX = 20
 # Marker ỔN ĐỊNH để nhánh dispatch dưới (bash grep) nhận ra "dòng này chỉ để NGƯỜI đọc,
 # không spawn agent". Trước đây routing dựa vào CHỮ HOA/câu chữ tiếng Việt của chính dòng
 # WARN ("Câu hỏi TREO LÂU" vs "câu hỏi (question)") → đổi câu chữ là routing thay đổi im
@@ -420,6 +434,38 @@ if os.path.isdir(inbox_dir):
         if not q_topic:
             return False
         return any((r == q_topic or q_topic in r) and r_ts >= q_ts for r, r_ts in resolvers)
+    def _rollup_resolved(rec, q_ts):
+        # Câu hỏi TỔNG (escalation gom nhiều câu hỏi con đã mở sẵn) — ca thật
+        # `Mike/retro-escalation-2026-08-13-patternB-and-backlog` (08-13T17:46): user quyết
+        # 08-14T00:31, Mike đăng `decision` đóng CẢ 2 câu hỏi con trong cùng 1 giây, nhưng
+        # topic TỔNG không có event đóng riêng ⇒ check #5 vẫn báo pending và đốt nguyên 1 job
+        # wags_autofix (coord-2026-08-14) chỉ để kết luận "đã quyết rồi". Resolver khớp theo
+        # topic-string nên không có cách nào biết topic tổng ⊃ 2 topic con.
+        # Cơ chế: câu hỏi tổng KHAI TƯỜNG MINH `"rollup_of": ["topic-con-1", ...]` trong
+        # payload; đóng khi MỌI topic con có resolver đăng SAU câu hỏi tổng (dùng lại
+        # _resolved, giữ nguyên ràng buộc thời gian — không pre-resolve lần escalate sau).
+        # OPT-IN + fail-closed ở MỌI đường lỗi (thiếu field / không phải list / rỗng / payload
+        # không parse được ⇒ False = hành vi cũ). KHÔNG suy diễn topic con từ văn bản payload:
+        # đó đúng thứ §28 coding_guidelines cấm (so chuỗi mô tả tự do) và đóng oan 1
+        # escalation tiền thật đắt hơn nhiều so với 1 job thừa.
+        pl = rec.get("payload")
+        if isinstance(pl, str):
+            try:
+                pl = json.loads(pl)
+            except Exception:
+                return False
+        if not isinstance(pl, dict):
+            return False
+        raw = pl.get("rollup_of")
+        if not isinstance(raw, list):
+            return False
+        subs = [str(s).strip() for s in raw if str(s).strip()]
+        if not subs:
+            return False
+        # Chấp nhận cả dạng "Agent/topic" (đúng chuỗi checker in ra, người hay copy thẳng):
+        # thử cả nguyên chuỗi lẫn phần sau dấu "/" đầu tiên.
+        return all(_resolved(s, q_ts) or ("/" in s and _resolved(s.split("/", 1)[1], q_ts))
+                   for s in subs)
     def _acked(q_agent, q_topic, q_ts):
         # Khớp CHÍNH XÁC (không substring như _resolved): ack chỉ tắt auto-dispatch nên sai
         # sót về phía "vẫn dispatch" là an toàn; nới lỏng match ở đây thì 1 ack topic ngắn
@@ -441,7 +487,7 @@ if os.path.isdir(inbox_dir):
                 ts_dt = dt.datetime.fromisoformat(rec.get("ts", "").replace("Z", "+00:00"))
             except Exception:
                 continue
-            if _resolved(rec.get("topic"), ts_dt):
+            if _resolved(rec.get("topic"), ts_dt) or _rollup_resolved(rec, ts_dt):
                 continue
             # Chống đếm đôi nếu 1 event vừa còn ở hot inbox vừa đã sang archive (kb_nightly
             # bị kill giữa chừng): khoá theo (agent, topic, ts).
@@ -470,7 +516,11 @@ if os.path.isdir(inbox_dir):
                     pending_q_meta.append((agent, str(rec.get("topic") or ""), ts_dt))
             else:
                 age_d = (_now - ts_dt).days
-                aged_q.append((age_d, f"{agent}/{rec.get('topic')} ({age_d}d)"))
+                # Cờ thứ 3: câu hỏi này có thuộc lớp vòng-wags-fix (miễn cắt) không —
+                # phân loại tại NGUỒN bằng ĐÚNG tuple WAGS_SELF_Q_PREFIXES mà nhánh <48h
+                # dùng, để hai bên không trôi ra khỏi nhau khi thêm tiền tố mới.
+                _is_wags = str(rec.get("topic") or "").startswith(WAGS_SELF_Q_PREFIXES)
+                aged_q.append((age_d, f"{agent}/{rec.get('topic')} ({age_d}d)", _is_wags))
     if read_errors:
         # KHÔNG gắn [WARN-ONLY]: đây là lỗi TOOLING sửa được (khác với backlog chờ user).
         # Câu chữ cố ý chứa "câu hỏi (question)" để nhánh routing dưới đưa về COORD_WARN
@@ -551,17 +601,38 @@ if pending_q_wagsfix:
 if aged_q:
     aged_q.sort(key=lambda x: -x[0])   # cũ nhất trước
     if len(aged_q) <= AGED_SHOW_ALL_UPTO:
-        shown = [lbl for _, lbl in aged_q]
+        shown = [lbl for _, lbl, _w in aged_q]
         W(f"{WARN_ONLY} Câu hỏi TREO LÂU (>48h, chưa ai quyết) — {len(aged_q)} mục, cần "
           f"USER quyết (in đủ): {shown}")
+    elif any(w for _, _, w in aged_q):
+        # MIỄN CẮT lớp vòng-wags-fix (xem AGED_WAGS_MAX ở trên): in ĐỦ nhóm này, rồi mới
+        # áp cắt-giữa lên PHẦN CÒN LẠI. Không đổi hành vi khi backlog ≤ 10 và không đổi gì
+        # cho các loại câu hỏi khác.
+        wags_all = [lbl for _, lbl, w in aged_q if w]
+        wags = wags_all[:AGED_WAGS_MAX]
+        wags_cut = len(wags_all) - len(wags)
+        rest_pairs = [(a, lbl) for a, lbl, w in aged_q if not w]
+        if len(rest_pairs) <= AGED_OLDEST + AGED_NEWEST:
+            rest_txt = f"{len(rest_pairs)} mục còn lại (in đủ): {[lbl for _, lbl in rest_pairs]}"
+        else:
+            oldest = [lbl for _, lbl in rest_pairs[:AGED_OLDEST]]
+            tail = rest_pairs[AGED_OLDEST:]
+            newest = [lbl for _, lbl in (tail[-AGED_NEWEST:] if AGED_NEWEST > 0 else [])]
+            rest_txt = (f"{len(rest_pairs)} mục còn lại — {len(oldest)} cũ nhất: {oldest} "
+                        f"…và {len(tail) - len(newest)} mục giữa… {len(newest)} mới nhất: {newest}")
+        W(f"{WARN_ONLY} Câu hỏi TREO LÂU (>48h, chưa ai quyết) — {len(aged_q)} mục, cần USER "
+          f"quyết. VÒNG WAGS-FIX chưa đóng ({len(wags)} mục, MIỄN CẮT vì đã tắt auto-dispatch, "
+          f"dòng này là kênh duy nhất tới người)"
+          f"{f' — CẢNH BÁO đã cắt {wags_cut} mục wags vượt trần {AGED_WAGS_MAX}' if wags_cut else ''}"
+          f": {wags}. {rest_txt}. Danh sách ĐẦY ĐỦ: bin/bus_question_audit.py")
     else:
         # Cắt GIỮA: giữ cả mục treo lâu nhất LẪN mục mới nhất — zombie cũ không được phép
         # chèn escalation mới ra khỏi màn hình (xem chú thích AGED_SHOW_ALL_UPTO ở trên).
         # Cắt trên phần CÒN LẠI (không dùng aged_q[-N:]) — với N=0 thì aged_q[-0:] trả về
         # NGUYÊN danh sách, in trùng toàn bộ. Bẫy này bị mutation-test bắt được.
-        oldest = [lbl for _, lbl in aged_q[:AGED_OLDEST]]
+        oldest = [lbl for _, lbl, _w in aged_q[:AGED_OLDEST]]
         rest = aged_q[AGED_OLDEST:]
-        newest = [lbl for _, lbl in (rest[-AGED_NEWEST:] if AGED_NEWEST > 0 else [])]
+        newest = [lbl for _, lbl, _w in (rest[-AGED_NEWEST:] if AGED_NEWEST > 0 else [])]
         more = len(rest) - len(newest)
         W(f"{WARN_ONLY} Câu hỏi TREO LÂU (>48h, chưa ai quyết) — {len(aged_q)} mục, cần "
           f"USER quyết; {len(oldest)} cũ nhất: {oldest} …và {more} mục giữa… "
