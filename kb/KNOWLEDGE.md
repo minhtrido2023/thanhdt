@@ -93,22 +93,20 @@ như ladder cũ 07-06. Chi tiết đầy đủ + `--effort` per-dispatch: `MIKE.
 subagent dùng tham số `model` sẵn có.
 
 **Opus-drift check (item 5c KB editorial, thêm 2026-08-01, đo lần đầu 2026-08-03, tái đo
-2026-08-08):** opus% đi từ 14,3% (07-17) → **74,2% (08-02)** → sustained **70-76% MỖI TUẦN liên
-tục 08-02→08-07** (spend_history.csv, `opus_jobs/(sonnet+opus+fable+default)`), tuần mới nhất
-08-07 = 73,7%. Saga Discord-routing (nguyên nhân chính viện dẫn 08-03) đã đóng round 6 từ 08-02
-— nhưng opus% **KHÔNG giảm về baseline như kỳ vọng ban đầu**. Lấy mẫu 20 dispatch opus gần nhất
-(bus/jobs, tuần 08-05→08-07): thành phần chủ yếu là (a) **sự cố production thật cần fix nhanh**
-(funding-gate JIT-credit + UPCOM loan-package 08-07, khẩn cấp thị trường đang mở), (b) saga
-`coord-YYYY-MM-DD` hàng ngày của Wags (điều phối agent, đã thành thói quen lặp lại hàng ngày —
-KHÔNG còn là "sự kiện lớn bất thường" như lý giải 08-03, mà là 1 pattern MỚI: Wags coord-saga
-chạy Opus mỗi ngày kể cả khi việc chỉ là ACK/triage đơn giản), (c) R&D Taylor hợp lệ (fear-buy
-scan, rubber trend design), (d) DollarBill approval overrides theo yêu cầu user trực tiếp. Kết
-luận cập nhật: KHÔNG phải lạm dụng kiểu fable-drift 07-17 (không có việc cơ học/lookup đơn giản
-bị gắn Opus oan), nhưng **mục (b) là ứng viên downgrade thật** — nhiều dispatch Wags coord-saga
-chỉ ACK/ghi nhận trạng thái (Q1, không phải Q2/Q3) đang mặc định chạy Opus theo thói quen thừa kế
-từ giai đoạn saga phức tạp trước đó. Đề xuất cho user/Mike: xét hạ `wags_autofix.sh`'s default
-model xuống Sonnet cho nhánh ACK/triage-only, giữ Opus cho nhánh thực sự sửa code — CHƯA tự sửa
-(đây là quyết định thói quen dispatch, theo đúng nguyên tắc item 5c "không tự sửa thói quen").
+2026-08-08, 2026-08-14):** opus% đi từ 14,3% (07-17) → **74,2% (08-02)** → sustained **65-80% MỖI
+TUẦN liên tục 08-02→08-14** (spend_history.csv, `opus_jobs/(sonnet+opus+fable+default)`), đỉnh
+79,6% (08-04), tuần mới nhất 08-14 = **67,8%** — dao động quanh mốc cũ, KHÔNG có xu hướng giảm
+rõ ràng sau 6 tuần. fable% đã về gần 0% ổn định (0,0-0,8%/tuần từ 07-29), nên đây thuần là drift
+Opus, không lẫn fable. Vẫn đúng kết luận 08-08: KHÔNG phải lạm dụng kiểu fable-drift 07-17 (không
+có việc cơ học/lookup đơn giản bị gắn Opus oan hàng loạt) — nguồn chính vẫn là (a) sự cố production
+cần fix nhanh, (b) saga `coord-YYYY-MM-DD` hàng ngày của Wags mặc định Opus kể cả ACK/triage đơn
+giản, (c) R&D Taylor hợp lệ, (d) DollarBill approval overrides. **Mục (b) vẫn là ứng viên downgrade
+thật, CHƯA ai sửa** sau 2 tuần ghi nhận (08-08→08-14) — đề xuất hạ default model `wags_autofix.sh`
+xuống Sonnet cho nhánh ACK/triage-only vẫn treo, chưa tự sửa (nguyên tắc item 5c). Effort-tier mix
+(item 5d, đo lần đầu 08-10 bằng `spend_report.py`, tái đo 08-14): Taylor 88-94% high (08-10) → **69%
+high/31% medium (08-14, n=98)** — dưới ngưỡng cảnh báo ⚠ (n≥10 và %high≥70%) lần đầu tiên kể từ khi
+đo, cải thiện thật nhưng vẫn sát ngưỡng, theo dõi tiếp tuần sau. Không agent nào khác vượt ngưỡng
+5d tuần này (Wags 46% high/n=35, DollarBill 38% high/n=24, còn lại ≤25%).
 **Model mặc định của chính Mike:** đổi sang Fable 5 (2026-07-06) rồi **ĐẢO NGƯỢC LẠI Sonnet 5** (2026-07-07, user yêu cầu). Phát hiện **3 tầng config** trong bridge Discord (`ccdb-mike`): thread override (DB) > global (DB) > `.env` fallback — sửa `.env` vô tác dụng nếu DB đã có row cũ. Dọn 4 dòng rác sai format (`"Sonnet 5"`/`"sonnet 5"` có dấu cách — CLI từ chối) từng gây lỗi `/model` ở 1 thread. Đã đồng bộ cả 3 nơi.
 
 **Routing guards (2026-06-27):**
@@ -188,10 +186,9 @@ cầu (commit `087a3d0`). Chi tiết đầy đủ: `kb/current_ops.md` §Domain-
 | Go-live | 2026-07-01 | 2026-07-06 |
 | Loại | margin (cash=1841, margin_rocketx=1840) | **cash-only** (package "ZaloPay" id=1258, không margin) |
 | enabled | true | true |
-| NAV (xác nhận API) | ~983M VND (07-06), tiếp tục theo dõi daily qua `daily_nav_snapshot.py` | active_nav 534.470.378đ (loại DGC), tổng NAV 1.011.470.378đ (07-06) |
-| Đặc thù | Trim 07-06 hoàn tất (23/23 lệnh, 710.5tr/710.1tr kế hoạch, khớp broker 100%), nợ margin ~409.86tr chờ giảm dần theo settle T+2 | **DGC (47.2% NAV) EXCLUDED** khỏi rebalancing (`excluded_tickers`, xem §4) — HOSE hạn chế GD (QĐ 448) + cảnh báo (QĐ 544) do lãnh đạo bị khởi tố hình sự 17/03/2026; ước gỡ ~11-12/2026. 7 vị thế legacy khác (MSH/TCM/TLG/VHC/VIB/VPB + DGC). Đang transition sang custom30V theo Option A (bán dần, đã chọn hướng, dispatch DollarBill soạn plan) |
-| Cron thực thi thật | run_bot.sh sáng/chiều, bot_heartbeat.sh, lunch-pkill | Thêm cùng bộ cron 2026-07-06 tối — tự động y hệt SpaceX |
-| Plan 2026-07-13 | HOLD, 0 lệnh, `approved_by=auto` | 2 lệnh (SELL VIB + 1), `approved_by=None` — **cần user duyệt tay trước preflight 08:45 07-13** |
+| NAV (xác nhận API) | Nguồn SỐNG: `nav_history_SpaceX.csv` / `daily_nav_snapshot.py` — KHÔNG chép số điểm-thời-gian vào đây, số go-live gốc ~983M (07-06) chỉ để tham chiếu lịch sử | Nguồn SỐNG: `nav_history_ZaloPay.csv` — số go-live gốc active_nav 534.470.378đ / tổng NAV 1.011.470.378đ (07-06) chỉ để tham chiếu lịch sử |
+| Đặc thù | Trim 07-06 hoàn tất (23/23 lệnh khớp broker 100%) — trạng thái mở/vận hành ngày-qua-ngày xem `kb/current_ops.md` | **DGC (legacy) EXCLUDED** khỏi rebalancing (`excluded_tickers`, xem §4) — HOSE hạn chế GD (QĐ 448) + cảnh báo (QĐ 544) do lãnh đạo bị khởi tố hình sự 17/03/2026; ước gỡ ~11-12/2026. Transition sang custom30V (bán dần) — trạng thái hiện tại xem `kb/current_ops.md` |
+| Cron thực thi thật | run_bot.sh sáng/chiều, bot_heartbeat.sh, lunch-pkill | Cùng bộ cron từ 2026-07-06 — tự động y hệt SpaceX |
 
 **Neutral parking:** cả 2 account cùng dùng `trading_rules.json` `neutral_parking` default 0.70 (xem §1) — không có override riêng account nào tại thời điểm này.
 
@@ -310,10 +307,19 @@ cầu (commit `087a3d0`). Chi tiết đầy đủ: `kb/current_ops.md` §Domain-
 - 08:20 & 12:45 T2-T6: `ops_health_check.sh` — tự kiểm vận hành, post Trading Daily.
 - 08:45 T2-T6: `preflight_check.sh`.
 - 09:05 & 13:00 (sau nghỉ trưa) T2-T6: `run_bot.sh --auto-otp`.
+- 20:30 T2-T6: `inject_discretionary_orders.sh` (chèn lệnh gom DISCRETIONARY_SPECIAL, thêm 2026-07-24).
 - 19:10 T2-T6: `eod_trading_report.sh` (+ `daily_nav_snapshot.py`) → Trading report *(đổi từ 15:00, 2026-07-15, user duyệt — chạy sau publish DT5G 19:01 để "tình trạng thị trường" là regime HÔM NAY)*.
+- 20:05 T2-T6: `paper_late_feeds.sh` (crisis_alert_push + fetch_bdi_daily, tách khỏi papertrade_daily, thêm 2026-07-29).
+- 23:00 T2-T6: `send_plan_report.sh --second-chance` (re-send idempotent, thêm 2026-07-13).
 - 23:45 T2-T6: `sync_bq_cache_daily.sh`.
 - 00:30 daily: `daily_retro.sh` (đổi từ 22:00, 2026-07-10).
-- 00:00 daily: `backup.sh` → GitHub.
+- 02:00 daily: `kb_nightly.sh` (archive+trim; Fri → weekly editorial review đầy đủ).
+- 03:30 ICT Sat: `weekly_ops_audit.sh` (deep ops audit, thêm 2026-08-01).
+- 04:30 daily: `selfcheck_weekly_baseline_check.sh` (quét 93+ selfcheck production, diff `kb/selfcheck_baseline.json`, escalate đỏ mới — thêm 2026-08-12).
+- 08:25 T2-T6: `cron_health_check_daily.sh` (audit toàn bộ crontab, thêm 2026-08-01).
+- 08:30 T2-T6: `check_report_cadence.sh` (báo cáo tuần/tháng quá hạn → tự dispatch soạn+gửi, thêm 2026-08-01).
+- 00:00 daily: `fleet_backup.sh` → GitHub.
+- *(Nguồn đầy đủ nhất, luôn tra khi nghi ngờ: `kb/cron_registry.md` + `crontab -l` — bảng trên chỉ tóm các cron chạm tiền thật/vận hành sống, không liệt kê paper-trading `main` account.)*
 
 ---
 
