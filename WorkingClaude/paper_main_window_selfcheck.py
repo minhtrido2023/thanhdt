@@ -59,7 +59,7 @@ TODAY = dt.date.today().isoformat()
 YESTERDAY = (dt.date.today() - dt.timedelta(days=1)).isoformat()
 
 
-def make_env(tmp, sub):
+def make_env(tmp, sub, hybrid=False):
     broker = PaperBroker(label=TAG)
     broker.state_file = os.path.join(tmp, f"paper_{sub}.json")
     broker.connect()
@@ -77,6 +77,12 @@ def make_env(tmp, sub):
                      account=TAG, created_at=f"{TODAY}T00:00:00")
     cfg = load_config()
     cfg["mode"] = "paper"
+    # Nhóm A-E đo TẦNG NỀN fill-timing (cửa sổ MUA 10:45-11:15, BÁN 09:15-09:45) nên ghim
+    # HYBRID TẮT: từ 2026-08-10 cờ này bật trên paper và lịch HYBRID THAY cửa sổ nền bằng
+    # block 11:00-13:45 (MUA) — C1/C2/D2 vì thế FAIL dù tầng nền không hỏng. Ghim TẮT để
+    # mỗi bộ đo đúng một tầng (§23 hệ luận 1). Nhóm F bên dưới bật lại `hybrid=True` để
+    # bộ này VẪN mô tả đúng hành vi paper THẬT — không đánh đổi độ phủ lấy màu xanh.
+    cfg["fill_timing_hybrid_enabled"] = bool(hybrid)
     ex = Executor(plan, broker, cfg, shared={})
     ex.state_file = os.path.join(tmp, f"state_{sub}.json")
     ex.journal_file = os.path.join(tmp, f"journal_{sub}.csv")
@@ -144,6 +150,23 @@ with tempfile.TemporaryDirectory() as tmp:
           sells and "ft:in-window" in sells[0]["note"], detail=sells[0]["note"] if sells else "")
     check("D2 BUY places immediately at 09:16 (first slice ignores window) tagged ft:out",
           buys and "ft:out" in buys[0]["note"], detail=buys[0]["note"] if buys else "")
+
+    # ---- F. paper THẬT hôm nay: HYBRID bật (fill_timing_hybrid_enabled=True từ 2026-08-10) ----
+    # Nhóm A-E cố ý ghim HYBRID tắt để đo tầng nền. Nhóm này đo cái account paper `main`
+    # THẬT SỰ làm: lịch HYBRID THAY cửa sổ nền — 10:46 không còn là giờ mua (block MUA đầu
+    # tiên là 11:00), 11:00 mới là. Thiếu nhóm này thì bộ test mô tả một cấu hình không ai
+    # chạy, và lần đổi cờ tiếp theo sẽ lại đi qua mà không ai thấy.
+    broker, ex = make_env(tmp, "f1", hybrid=True)
+    ex.step(dt.datetime.combine(dt.date.today(), dt.time(10, 46, 30)), "MORNING", True)
+    buys_f1 = [r for r in journal_places(ex.journal_file) if r["side"] == "buy"]
+    check("F1 HYBRID bật ⇒ 10:46 KHÔNG còn đặt mua (ngoài block, block đầu là 11:00)",
+          len(buys_f1) == 0, detail=f"{len(buys_f1)} buy PLACE")
+
+    broker, ex = make_env(tmp, "f2", hybrid=True)
+    ex.step(dt.datetime.combine(dt.date.today(), dt.time(11, 0, 30)), "MORNING", True)
+    buys_f2 = [r for r in journal_places(ex.journal_file) if r["side"] == "buy"]
+    check("F2 …và 11:00 (đầu block MUA) thì đặt mua bình thường — CHỨNG MINH NGƯỢC cho F1",
+          len(buys_f2) == 1, detail=f"{len(buys_f2)} buy PLACE")
 
     # ---- E. TZ mechanism (what the crontab fix relies on) ----
     r = subprocess.run(

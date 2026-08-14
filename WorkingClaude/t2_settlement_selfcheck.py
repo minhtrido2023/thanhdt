@@ -105,6 +105,13 @@ def make_executor(tmpdir, orders, positions, forbidden_tickers=()):
                      account=TAG, created_at="2099-01-01T00:00:00")
     cfg = load_config()
     cfg["mode"] = "paper"
+    # HYBRID fill-timing GHIM TẮT: bộ này đo TRẦN KL BÁN theo T+2, không đo lịch thực thi.
+    # Từ 2026-08-10 `fill_timing_hybrid_enabled` bật trên paper, mà NOW=09:20 nằm ngoài block
+    # MUA (11:00-13:45) ⇒ lệnh MUA bị hoãn theo lịch và ca E1 ("BUY không bị ảnh hưởng bởi
+    # positions map") FAIL vì lý do chẳng liên quan gì tới T+2; C1 cũng lệch KL vì trần block.
+    # Ghim TẮT để mỗi bộ đo đúng một tầng (§23 hệ luận 1) — lịch HYBRID có bộ riêng
+    # (hybrid_fill_timing_selfcheck.py) và ca kết hợp nằm ở extreme_regime_selfcheck.py nhóm D.
+    cfg["fill_timing_hybrid_enabled"] = False
     broker = _RecordingBroker(positions, forbidden_tickers)
     ex = Executor(plan, broker, cfg, shared={})
     ex.state_file = os.path.join(tmpdir, "state.json")

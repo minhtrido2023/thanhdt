@@ -86,7 +86,17 @@ class FakeBroker:
 
 
 def make_exec(orders, quote, cfg_over=None):
-    cfg = dict(DEFAULTS); cfg.update(cfg_over or {}); cfg["mode"] = "paper"
+    # HYBRID fill-timing GHIM TẮT làm nền (cfg_over vẫn bật lại được — nhóm J dùng).
+    # Vì sao: bộ này đo TẦNG TRẦN GIÁ, mà từ 2026-08-10 `fill_timing_hybrid_enabled` mặc
+    # định True (bật trên paper, commit 717303b). Mọi ca ở đây chạy mode="paper" và
+    # NOW=09:30 — NGOÀI block MUA của HYBRID (11:00-13:45) ⇒ lệnh MUA bị hoãn theo LỊCH
+    # trước khi tới chỗ kiểm trần. Đã đo A/B bằng đúng 1 cờ: hybrid=True ⇒ journal chỉ có
+    # HYBRID_DEFER, không có HARD_CEILING_BLOCK (E4 FAIL). Nguy hiểm hơn màu đỏ: E3
+    # ("không đặt lệnh nào") PASS VÌ LÝ DO SAI — nó pass kể cả khi trần cứng hỏng hoàn
+    # toàn, vì HYBRID đã nuốt lệnh trước. §23 hệ luận 1: selfcheck không assert lên trạng
+    # thái SỐNG (ở đây là một cờ config toàn cục đang trôi). Ca KẾT HỢP đo ở nhóm J.
+    cfg = dict(DEFAULTS); cfg["fill_timing_hybrid_enabled"] = False
+    cfg.update(cfg_over or {}); cfg["mode"] = "paper"
     plan = TradePlan(plan_date="2099-01-01", signal_date="2099-01-01", strategy="tst",
                      strategy_version="0", state=3, state_name="NEUTRAL",
                      nav_basis={}, orders=orders, account=TAG,
@@ -338,6 +348,59 @@ for _f in sorted(glob.glob(os.path.join(PLAN_DIR, "plan_*.json"))):
     except Exception as _e:      # plan cũ schema khác → không phải lỗi của cơ chế này
         print(f"  [skip] {os.path.basename(_f)}: {_e}")
 print(f"  (I6 đã kiểm {_checked} lệnh mua mang anchor trên plan thật)")
+
+# ──────────────────────── J. TRẦN CỨNG × HYBRID (đúng cấu hình paper THẬT từ 2026-08-10)
+print("J. HYBRID BẬT — trần cứng vẫn phải chặn, và chặn vì ĐÚNG lý do")
+# Vì sao nhóm này phải tồn tại: nhóm A-I cố ý ghim HYBRID tắt để cô lập tầng trần. Nếu chỉ
+# ghim mà không bù, bộ test sẽ mô tả một cấu hình KHÔNG ai chạy (paper thật đang bật HYBRID)
+# và lần đổi cờ tiếp theo lại đi qua không ai thấy. Điểm mấu chốt: khi HYBRID bật, "không
+# đặt lệnh nào" có HAI nguyên nhân khác hẳn nhau — HARD_CEILING_BLOCK (cổng GIÁ, bảo vệ
+# tiền) và HYBRID_DEFER (lịch CHI PHÍ, chỉ hoãn). Đếm số lệnh KHÔNG phân biệt được chúng,
+# nên phân biệt bằng JOURNAL — tên sự kiện là bằng chứng nguyên nhân.
+NOW_J = dt.datetime(2099, 1, 1, 11, 5, 0)      # TRONG block MUA đầu tiên (11:00-11:15)
+
+
+def _journal_events_j(ex):
+    if not os.path.exists(ex.journal_file):
+        return set()
+    import csv as _csv
+    with open(ex.journal_file, encoding="utf-8") as f:
+        return {row[1] for row in _csv.reader(f) if len(row) > 1}
+
+
+def _reset_j():
+    """Executor NẠP state ngay trong __init__ ⇒ ca sau thừa hưởng lệnh con đang mở của ca
+    trước và đi nhánh khác. Không reset thì J2 có thể 'pass' vì parent đã có child mở."""
+    for _f in glob.glob(os.path.join(EXEC_DIR, f"exec_{TAG}_*")):
+        os.remove(_f)
+
+
+# J1 — trong block MUA nên HYBRID KHÔNG hoãn; sàn phiên vẫn trên trần ⇒ phải là cổng TRẦN
+# chặn, không phải lịch. Nếu trần cứng hỏng dưới HYBRID, ca này bắt được (E3/E4 thì không).
+_reset_j()
+ex_j = make_exec([buy_order(ceiling=ANCHOR)], q_gap, {"fill_timing_hybrid_enabled": True})
+ex_j._place_slices(NOW_J, "MORNING")
+ev_j = _journal_events_j(ex_j)
+check("J1 HYBRID bật, TRONG block MUA ⇒ chặn vì HARD_CEILING_BLOCK (KHÔNG phải HYBRID_DEFER)",
+      "HARD_CEILING_BLOCK" in ev_j and "HYBRID_DEFER" not in ev_j, f"events={sorted(ev_j)}")
+check("J2 …và không đặt lệnh mua nào", len(ex_j.broker.placed) == 0, str(ex_j.broker.placed))
+
+# J3 — CHỨNG MINH NGƯỢC cho J1: cùng cấu hình HYBRID + cùng giờ trong block, CHỈ bỏ trần.
+# Nếu J1 chỉ phản ánh "HYBRID/thứ gì đó nuốt lệnh" thì ca này cũng phải không đặt được.
+_reset_j()
+ex_j2 = make_exec([buy_order(ceiling=None)], q_gap, {"fill_timing_hybrid_enabled": True})
+ex_j2._place_slices(NOW_J, "MORNING")
+check("J3 CHỨNG MINH NGƯỢC: HYBRID bật, BỎ trần ⇒ lệnh đặt được (trần mới là thứ chặn J1)",
+      len(ex_j2.broker.placed) == 1, str(ex_j2.broker.placed))
+
+# J4 — chốt rằng ghim TẮT ở nhóm A-I là cần thiết, không phải tuỳ tiện: CÙNG lệnh có trần,
+# CHỈ dời ra ngoài block (09:30 = NOW gốc) thì nguyên nhân đổi hẳn sang lịch.
+_reset_j()
+ex_j3 = make_exec([buy_order(ceiling=ANCHOR)], q_gap, {"fill_timing_hybrid_enabled": True})
+ex_j3._place_slices(NOW, "MORNING")
+ev_j3 = _journal_events_j(ex_j3)
+check("J4 HYBRID bật, NGOÀI block ⇒ HYBRID_DEFER (đây chính là thứ che mất E4 trước khi vá)",
+      "HYBRID_DEFER" in ev_j3 and "HARD_CEILING_BLOCK" not in ev_j3, f"events={sorted(ev_j3)}")
 
 for _f in glob.glob(os.path.join(EXEC_DIR, f"exec_{TAG}_*")):
     os.remove(_f)

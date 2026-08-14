@@ -64,7 +64,16 @@ class FakeBroker:
 
 
 def make_exec(cfg_over, orders):
-    cfg = dict(DEFAULTS); cfg.update(cfg_over); cfg["mode"] = "paper"
+    # HYBRID fill-timing GHIM TẮT làm nền (cfg_over vẫn bật lại được — nhóm D dùng).
+    # Vì sao: bộ này đo TẦNG EXTREME, mà từ 2026-08-10 `fill_timing_hybrid_enabled`
+    # mặc định True (bật trên paper). Mọi ca ở đây chạy mode="paper" và now=09:30 — NGOÀI
+    # block MUA của HYBRID (11:00-13:45) ⇒ lệnh MUA bị HOÃN vì lịch HYBRID, không phải vì
+    # cổng EXTREME. Đã đo trên chính bộ này: C1 (OFF ⇒ mua đặt bình thường) FAIL, và tệ
+    # hơn — B6 (EXTREME ⇒ mua bị dừng) PASS VÌ LÝ DO SAI: nó pass kể cả khi cổng EXTREME
+    # hỏng hoàn toàn. Ghim TẮT = cô lập đúng một biến (§23 hệ luận 1: selfcheck không
+    # assert lên trạng thái SỐNG). Sự KẾT HỢP hai tầng đo riêng ở nhóm D, không bỏ sót.
+    cfg = dict(DEFAULTS); cfg["fill_timing_hybrid_enabled"] = False
+    cfg.update(cfg_over); cfg["mode"] = "paper"
     plan = TradePlan(plan_date="2099-01-01", signal_date="2099-01-01", strategy="tst",
                      strategy_version="0", state=3, state_name="NEUTRAL",
                      nav_basis={}, orders=orders, account=TAG,
@@ -146,6 +155,70 @@ ex_c, q = make_exec({"extreme_regime_enabled": False}, [buy_o])
 ex_c._place_slices(now, "MORNING")
 buy_c = [p for p in ex_c.broker.placed if p["side"] == "buy"]
 check("C1 OFF: buy order placed normally", len(buy_c) == 1, f"placed={len(buy_c)}")
+
+# ------------------------------------------------- D. EXTREME × HYBRID (hai tầng chồng nhau)
+print("D. EXTREME × HYBRID — HYBRID BẬT (đúng trạng thái paper thật từ 2026-08-10)")
+# Vì sao nhóm này phải tồn tại: khi HYBRID bật, "không đặt lệnh nào" có HAI nguyên nhân
+# khác hẳn nhau — EXTREME_PAUSE (cổng RỦI RO) và HYBRID_DEFER (lịch CHI PHÍ). Đếm số lệnh
+# KHÔNG phân biệt được chúng, nên B6 sẽ PASS kể cả khi cổng EXTREME chết hẳn (đó chính là
+# thứ đã xảy ra từ 2026-08-10 đến khi bộ này được vá). Ở đây phân biệt bằng JOURNAL —
+# tên sự kiện là bằng chứng nguyên nhân — và mỗi khẳng định đều kèm ca chứng minh ngược.
+import tempfile
+
+
+def _reset_state():
+    """Xoá state/journal của TAG giữa các ca: Executor NẠP state ngay trong __init__ nên
+    ca sau sẽ thừa hưởng lệnh con đang mở của ca trước và đi nhánh khác (xem ghi chú TAG
+    đầu file). Không reset thì D1/D3 có thể 'pass' vì parent đã có child mở."""
+    for _f in glob.glob(os.path.join(EXEC_DIR, f"exec_{TAG}_*")):
+        os.remove(_f)
+
+
+def _journal_events(ex):
+    if not os.path.exists(ex.journal_file):
+        return set()
+    with open(ex.journal_file, encoding="utf-8") as f:
+        return {row[1] for row in csv.reader(f) if len(row) > 1}
+
+
+with tempfile.TemporaryDirectory() as _tmp:
+    # D1/D2 — EXTREME armed + HYBRID bật ⇒ `_hybrid_bypass` mở, lệnh KHÔNG bị hoãn theo
+    # lịch mà rơi xuống ĐÚNG cổng EXTREME. 09:30 nằm NGOÀI block MUA (11:00-13:45), nên
+    # nếu bypass hỏng ta sẽ thấy HYBRID_DEFER thay cho EXTREME_PAUSE.
+    _reset_state()
+    ex_d, _ = make_exec({"extreme_regime_enabled": True,
+                         "fill_timing_hybrid_enabled": True}, [buy_o])
+    ex_d.journal_file = os.path.join(_tmp, "d1.csv")
+    ex_d._extreme_state["TST"] = {"n": 2,
+        "until": (now + dt.timedelta(minutes=15)).isoformat(timespec="seconds")}
+    ex_d._place_slices(now, "MORNING")
+    ev_d = _journal_events(ex_d)
+    check("D1 HYBRID bật + EXTREME armed ⇒ dừng vì EXTREME_PAUSE (KHÔNG phải HYBRID_DEFER)",
+          "EXTREME_PAUSE" in ev_d and "HYBRID_DEFER" not in ev_d, f"events={sorted(ev_d)}")
+    check("D2 …và vẫn không đặt lệnh mua nào",
+          len([p for p in ex_d.broker.placed if p["side"] == "buy"]) == 0)
+
+    # D3 — CHỨNG MINH NGƯỢC cho D1: cùng cấu hình HYBRID, CHỈ tắt cờ EXTREME. Nếu D1 chỉ
+    # phản ánh "HYBRID nuốt lệnh" thì ca này cũng phải ra EXTREME_PAUSE. Nó không được.
+    _reset_state()
+    ex_d2, _ = make_exec({"extreme_regime_enabled": False,
+                          "fill_timing_hybrid_enabled": True}, [buy_o])
+    ex_d2.journal_file = os.path.join(_tmp, "d3.csv")
+    ex_d2._place_slices(now, "MORNING")
+    ev_d2 = _journal_events(ex_d2)
+    check("D3 CHỨNG MINH NGƯỢC: HYBRID bật + EXTREME tắt ⇒ HYBRID_DEFER, KHÔNG EXTREME_PAUSE",
+          "HYBRID_DEFER" in ev_d2 and "EXTREME_PAUSE" not in ev_d2, f"events={sorted(ev_d2)}")
+
+    # D4 — chốt rằng D3 là "hoãn theo lịch", không phải "bật HYBRID là hỏng đường đặt lệnh":
+    # cùng cấu hình, dời vào ĐÚNG block MUA 11:00 thì lệnh đi bình thường.
+    _reset_state()
+    ex_d3, _ = make_exec({"extreme_regime_enabled": False,
+                          "fill_timing_hybrid_enabled": True}, [buy_o])
+    ex_d3.journal_file = os.path.join(_tmp, "d4.csv")
+    ex_d3._place_slices(now.replace(hour=11, minute=0), "MORNING")
+    check("D4 HYBRID bật, TRONG block MUA 11:00 ⇒ lệnh mua đặt bình thường",
+          len([p for p in ex_d3.broker.placed if p["side"] == "buy"]) == 1,
+          f"placed={len([p for p in ex_d3.broker.placed if p['side'] == 'buy'])}")
 
 print()
 if fails:

@@ -105,7 +105,7 @@ class FakeBroker:
         return []
 
 
-def make_executor(tmpdir, broker, orders, shared):
+def make_executor(tmpdir, broker, orders, shared, hybrid=False):
     plan = TradePlan(plan_date="2099-01-01", signal_date="2099-01-01", strategy="selfcheck",
                      strategy_version="0", state=3, state_name="NEUTRAL",
                      nav_basis={"account_nav": 1e9, "scale": 1.0}, orders=orders,
@@ -114,7 +114,10 @@ def make_executor(tmpdir, broker, orders, shared):
     cfg["mode"] = "paper"
     cfg["extreme_regime_enabled"] = False
     cfg["gap_adaptive_enabled"] = False
-    cfg["fill_timing_enabled"] = False
+    # Nhóm A-G ghim TẮT cả layer fill-timing để cô lập trần participation. Nhóm H bật
+    # HYBRID (đúng cấu hình paper THẬT từ 2026-08-10) — xem lý do ở đầu nhóm H.
+    cfg["fill_timing_enabled"] = bool(hybrid)
+    cfg["fill_timing_hybrid_enabled"] = bool(hybrid)
     ex = Executor(plan, broker, cfg, shared=shared)
     ex.state_file = os.path.join(tmpdir, "state.json")
     ex.journal_file = os.path.join(tmpdir, "journal.csv")
@@ -353,6 +356,56 @@ with tempfile.TemporaryDirectory() as td:
           f"cancel={br.cancelled} place={br.placed}")
     check("G4 CHỨNG MINH NGƯỢC — journal nhánh cũ = CANCEL_STALE + PLACE",
           journal_events(ex) == ["CANCEL_STALE", "PLACE"], str(journal_events(ex)))
+
+# =============================================================== H. REFRESH_SKIP × HYBRID
+print("H. HYBRID BẬT (đúng cấu hình paper thật) ⇒ hai đường tính KL vẫn phải KHỚP")
+# Vì sao nhóm này phải có: cùng một lớp lỗi với bug gốc. `_would_be_unchanged` hỏi "huỷ rồi
+# đặt lại có ra ĐÚNG giá+KL cũ không"; nếu đường KIỂM TRA và đường ĐẶT không áp CÙNG các
+# trần thì hai bên ra hai số khác nhau ⇒ CANCEL_STALE mỗi chu kỳ ⇒ mất ưu tiên FIFO vô ích,
+# đúng triệu chứng DRI 08-10 chỉ khác nguyên nhân. Trần HYBRID (`_hybrid_block_cap`) là trần
+# THỨ HAI như vậy, và nó chỉ được áp khi `now` được truyền vào `_child_qty`. Trước nhóm này
+# KHÔNG bộ nào phủ: bộ refresh_skip ghim `fill_timing_enabled=False`, còn
+# hybrid_fill_timing_selfcheck.py không chạm `_would_be_unchanged`.
+NOW_H = dt.datetime(2099, 1, 5, 11, 5, 0)     # trong block MUA đầu tiên (11:00-11:15)
+
+with tempfile.TemporaryDirectory() as td:
+    # H1 — trần PARTICIPATION ràng buộc (đúng ca DRI thật) + HYBRID bật: fix vẫn phải sống.
+    q = mkquote(day_volume=2269)
+    br = FakeBroker([q])
+    o = dri_order()
+    ex = make_executor(td, br, [o], shared={"DRI": 200}, hybrid=True)
+    ps = ex.state["parents"][o.id]
+    c = {"oid": "54921", "qty": 200, "price": 13000.0, "filled": 0, "status": "open",
+         "ts": (NOW_H - dt.timedelta(minutes=9)).isoformat(timespec="seconds")}
+    ps["children"].append(c); ps["filled"] = 0; ps["last_slice_ts"] = c["ts"]
+    ex._cancel_stale(NOW_H)
+    check("H1 participation binding + HYBRID bật ⇒ vẫn REFRESH_SKIP (fix không bị HYBRID vô hiệu)",
+          journal_events(ex) == ["REFRESH_SKIP"] and br.cancelled == [],
+          f"journal={journal_events(ex)} cancel={br.cancelled}")
+
+with tempfile.TemporaryDirectory() as td:
+    # H2/H3 — đảo vai: thanh khoản DÀY nên participation KHÔNG ràng buộc, giờ chính TRẦN
+    # HYBRID quyết định KL (ceil(2800/5 block còn lại)=560 → round_lot 500). Đây là ca duy
+    # nhất chứng minh `_would_be_unchanged` có truyền `now`: bỏ `now` đi thì đường kiểm tra
+    # trả 2800 còn đường đặt trả 500 ⇒ lệch ⇒ huỷ+đặt lại mỗi chu kỳ.
+    q = mkquote(day_volume=5_000_000)
+    br = FakeBroker([q])
+    o = dri_order()
+    ex = make_executor(td, br, [o], shared={"DRI": 500}, hybrid=True)
+    ps = ex.state["parents"][o.id]
+    c = {"oid": "77001", "qty": 500, "price": 13000.0, "filled": 0, "status": "open",
+         "ts": (NOW_H - dt.timedelta(minutes=9)).isoformat(timespec="seconds")}
+    ps["children"].append(c); ps["filled"] = 0; ps["last_slice_ts"] = c["ts"]
+    px = ex._limit_price(o, q, cross=True)
+    qty_with_now = ex._child_qty(o, ps, q, px, NOW_H, exclude_reserved=500)
+    qty_no_now = ex._child_qty(o, ps, q, px, exclude_reserved=500)
+    check("H2 TRẦN HYBRID thật sự là ràng buộc ở kịch bản này (nếu không, H3 vô nghĩa)",
+          qty_with_now == 500 and qty_no_now != qty_with_now,
+          f"có `now`={qty_with_now}cp · không `now`={qty_no_now}cp")
+    ex._cancel_stale(NOW_H)
+    check("H3 trần HYBRID ràng buộc ⇒ REFRESH_SKIP (hai đường áp CÙNG trần, không churn)",
+          journal_events(ex) == ["REFRESH_SKIP"] and br.cancelled == [],
+          f"journal={journal_events(ex)} cancel={br.cancelled}")
 
 print()
 if fails:
