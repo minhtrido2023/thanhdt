@@ -19,8 +19,8 @@
 #       lượt quét sáng thứ Hai nằm ở chỗ khác: bot 09:05 thứ Hai đặt lệnh theo plan đã duyệt
 #       CUỐI TUẦN, tức trước khi tin cuối tuần tồn tại. Lượt này để người duyệt biết luận
 #       điểm của một mã sắp mua vừa gãy trong lúc mình ngủ — RÚT lệnh mua, không phải bán tháo.
-#       (Khoảng trống là THẬT và đo được: thứ Hai tập trung 1,408× tỉ lệ sập riêng lẻ,
-#       p=1,6e-37, và lệch BẤT ĐỐI XỨNG — chiều tăng chỉ 1,114×.)
+#       (Khoảng trống là THẬT và đo được: thứ Hai tập trung 1,409× tỉ lệ sập riêng lẻ,
+#       p=2,1e-37, và lệch BẤT ĐỐI XỨNG — chiều tăng chỉ 1,115×.)
 #
 # Đây là DISPATCH wrapper (cần LLM: đọc tin, phân loại QUALIFY/NON/AMBIGUOUS), không phải
 # checker tất định — cùng khuôn với bq_freshness_check.sh, khác check_sbv_weekly.sh.

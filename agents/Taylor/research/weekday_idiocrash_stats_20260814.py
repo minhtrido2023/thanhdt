@@ -57,6 +57,14 @@ UP_RET, UP_IDIO = 6.0, 5.0            # đối chứng đối xứng
 FLOOR_RET, FLOOR_IDIO = -6.5, -4.0    # luật FLOOR2 (2 phiên liên tiếp)
 LIQ_1M_BN = 3.0
 MERGE_DAYS = 7                # hợp nhất phiên cách nhau <= 7 ngày LỊCH thành 1 episode
+
+# Phân kỳ (khuyến nghị #3 quant-skeptic vòng 2, 2026-08-14): hiệu ứng thứ Hai KHÔNG đồng nhất
+# theo thời gian, nên mọi bảng phải chạy được cả trên từng giai đoạn con. `all` = nguyên mẫu
+# 2016→nay (số dùng trong headline); ba giai đoạn còn lại chia đều ~3 năm/khối.
+PERIODS = (("all", START, "2099-12-31"),
+           ("2016-19", "2016-01-01", "2019-12-31"),
+           ("2020-22", "2020-01-01", "2022-12-31"),
+           ("2023-26", "2023-01-01", "2026-12-31"))
 WD = ["Hai", "Ba", "Tu", "Nam", "Sau"]
 
 # 29 mã đang giữ, chụp 2026-08-14 từ anomaly_scan.py --print-universe (vị thế thật 2 account).
@@ -104,18 +112,23 @@ def liq_mask(df, variant):
     raise ValueError(variant)
 
 
-def episodes(df, hits):
-    """Giữ phiên ĐẦU của mỗi cụm: cùng mã, cách phiên hit trước <= MERGE_DAYS ngày lịch thì bỏ."""
+def episodes(df, hits, lo=START, hi="2099-12-31"):
+    """Giữ phiên ĐẦU của mỗi cụm: cùng mã, cách phiên hit trước <= MERGE_DAYS ngày lịch thì bỏ.
+
+    Cụm được gộp TRƯỚC khi cắt theo giai đoạn — cắt trước rồi mới gộp sẽ biến phiên thứ 2 của
+    một cụm nằm vắt qua ranh giới thành một episode giả ở đầu giai đoạn sau.
+    """
     h = df[hits & (df["time"] >= START)].sort_values(["ticker", "time"])
     if h.empty:
         return h
     gap = h.groupby("ticker")["time"].diff()
     keep = gap.isna() | (gap > pd.Timedelta(days=MERGE_DAYS))
-    return h[keep]
+    h = h[keep]
+    return h[(h["time"] >= lo) & (h["time"] <= hi)]
 
 
-def sessions_by_wd(df):
-    d = df.loc[df["time"] >= START, ["time"]].drop_duplicates()
+def sessions_by_wd(df, lo=START, hi="2099-12-31"):
+    d = df.loc[(df["time"] >= lo) & (df["time"] <= hi), ["time"]].drop_duplicates()
     return d["time"].dt.weekday.value_counts().reindex(range(5), fill_value=0).sort_index()
 
 
@@ -154,7 +167,6 @@ def boot_mean_ci(x, n_boot=2000, seed=20260814):
 
 def main():
     df = load_panel()
-    sess = sessions_by_wd(df)
     out_wd, out_fwd, ep_rows = [], [], []
 
     crash_raw = (df["ret"] <= CRASH_RET) & (df["idio"] <= CRASH_IDIO)
@@ -165,51 +177,57 @@ def main():
     print(f"panel: {len(df):,} dòng · {df['ticker'].nunique():,} mã · "
           f"{df.loc[df['time'] >= START, 'time'].min():%Y-%m-%d} → "
           f"{df['time'].max():%Y-%m-%d}")
-    print(f"phiên theo thứ (T2..T6): {list(sess.values)}  tổng {int(sess.sum()):,}\n")
+    print(f"phiên theo thứ (T2..T6, toàn mẫu): {list(sessions_by_wd(df).values)}  "
+          f"tổng {int(sessions_by_wd(df).sum()):,}\n")
 
-    for scope, tickers in (("market", None), ("hold29", HOLD29)):
-        sub = df if tickers is None else df[df["ticker"].isin(tickers)]
-        # FLOOR1 = phiên sàn ĐƠN LẺ (ngày 1); FLOOR2 = sàn 2 phiên LIÊN TIẾP. Chạy cả hai vì
-        # bản report đầu gắn nhãn "FLOOR2" cho số thực ra là FLOOR1 — không có cả hai thì không
-        # ai truy được nhãn nào ứng với số nào (§F.7).
-        for rule, raw in (("IDIOCRASH", crash_raw), ("UPSPIKE", up_raw),
-                          ("FLOOR1", floor), ("FLOOR2", floor2_raw)):
-            for variant in ("none", "adv", "both"):
-                hits = raw.loc[sub.index] & liq_mask(sub, variant)
-                ep = episodes(sub, hits)
-                if ep.empty:
-                    continue
-                obs = ep["wd"].value_counts().reindex(range(5), fill_value=0).sort_index()
-                stat, p, exp = chi2_uniform_rate(obs, sess)
-                rate = obs / sess
-                mon_ratio = rate.iloc[0] / rate.iloc[1:].mean()
-                out_wd.append(dict(
-                    scope=scope, rule=rule, liq=variant, n_episode=int(obs.sum()),
-                    n_mon=int(obs.iloc[0]), n_tue=int(obs.iloc[1]), n_wed=int(obs.iloc[2]),
-                    n_thu=int(obs.iloc[3]), n_fri=int(obs.iloc[4]),
-                    mon_share_pct=round(100 * obs.iloc[0] / obs.sum(), 2),
-                    mon_vs_rest_ratio=round(float(mon_ratio), 4),
-                    chi2=round(stat, 2), p_value=f"{p:.3g}"))
-                if rule == "IDIOCRASH":
-                    for wd in range(5):
-                        e = ep[ep["wd"] == wd]
-                        lo1, hi1 = boot_mean_ci(e["fwd1"])
-                        out_fwd.append(dict(
-                            scope=scope, liq=variant, wd=WD[wd], n=len(e),
-                            crash_day_ret=round(float(e["ret"].mean()), 3),
-                            fwd1_mean=round(float(e["fwd1"].mean()), 3),
-                            fwd1_ci_lo=None if np.isnan(lo1) else round(lo1, 3),
-                            fwd1_ci_hi=None if np.isnan(hi1) else round(hi1, 3),
-                            fwd2_mean=round(float(e["fwd2"].mean()), 3),
-                            fwd3_mean=round(float(e["fwd3"].mean()), 3),
-                            p_next_neg_pct=round(100 * float((e["fwd1"] < 0).mean()), 2)))
-                    # dump episode chi tiết cho 2 biến thể ĐƯỢC TRÍCH trong report; bỏ liq=none
-                    # (71.749 episode toàn thị trường, không bảng nào dùng, CSV phình lên 12MB).
-                    if scope == "market" and variant in ("adv", "both"):
-                        keep = ep[["time", "ticker", "wd", "ret", "vni_ret", "idio",
-                                   "val_bn", "val1m_bn", "fwd1", "fwd2", "fwd3"]].round(4).copy()
-                        keep.insert(0, "liq", variant)
-                        ep_rows.append(keep)
+    for period, plo, phi in PERIODS:
+        sess = sessions_by_wd(df, plo, phi)
+        for scope, tickers in (("market", None), ("hold29", HOLD29)):
+            sub = df if tickers is None else df[df["ticker"].isin(tickers)]
+            # FLOOR1 = phiên sàn ĐƠN LẺ (ngày 1); FLOOR2 = sàn 2 phiên LIÊN TIẾP. Chạy cả hai vì
+            # bản report đầu gắn nhãn "FLOOR2" cho số thực ra là FLOOR1 — không có cả hai thì không
+            # ai truy được nhãn nào ứng với số nào (§F.7).
+            for rule, raw in (("IDIOCRASH", crash_raw), ("UPSPIKE", up_raw),
+                              ("FLOOR1", floor), ("FLOOR2", floor2_raw)):
+                for variant in ("none", "adv", "both"):
+                    hits = raw.loc[sub.index] & liq_mask(sub, variant)
+                    ep = episodes(sub, hits, plo, phi)
+                    if ep.empty:
+                        continue
+                    obs = ep["wd"].value_counts().reindex(range(5), fill_value=0).sort_index()
+                    stat, p, exp = chi2_uniform_rate(obs, sess)
+                    rate = obs / sess
+                    mon_ratio = rate.iloc[0] / rate.iloc[1:].mean()
+                    out_wd.append(dict(
+                        period=period, scope=scope, rule=rule, liq=variant,
+                        n_episode=int(obs.sum()),
+                        n_mon=int(obs.iloc[0]), n_tue=int(obs.iloc[1]), n_wed=int(obs.iloc[2]),
+                        n_thu=int(obs.iloc[3]), n_fri=int(obs.iloc[4]),
+                        mon_share_pct=round(100 * obs.iloc[0] / obs.sum(), 2),
+                        mon_vs_rest_ratio=round(float(mon_ratio), 4),
+                        chi2=round(stat, 2), p_value=f"{p:.3g}"))
+                    if rule == "IDIOCRASH":
+                        for wd in range(5):
+                            e = ep[ep["wd"] == wd]
+                            lo1, hi1 = boot_mean_ci(e["fwd1"])
+                            out_fwd.append(dict(
+                                period=period, scope=scope, liq=variant, wd=WD[wd], n=len(e),
+                                crash_day_ret=round(float(e["ret"].mean()), 3),
+                                fwd1_mean=round(float(e["fwd1"].mean()), 3),
+                                fwd1_ci_lo=None if np.isnan(lo1) else round(lo1, 3),
+                                fwd1_ci_hi=None if np.isnan(hi1) else round(hi1, 3),
+                                fwd2_mean=round(float(e["fwd2"].mean()), 3),
+                                fwd3_mean=round(float(e["fwd3"].mean()), 3),
+                                p_next_neg_pct=round(100 * float((e["fwd1"] < 0).mean()), 2)))
+                        # dump episode chi tiết cho 2 biến thể ĐƯỢC TRÍCH trong report; bỏ liq=none
+                        # (71.749 episode toàn thị trường, không bảng nào dùng, CSV phình lên 12MB).
+                        # Chỉ period='all' — 3 giai đoạn con là lát cắt của chính tập này, dump lại
+                        # là nhân 2 dung lượng CSV mà không thêm một dòng dữ liệu nào.
+                        if period == "all" and scope == "market" and variant in ("adv", "both"):
+                            keep = ep[["time", "ticker", "wd", "ret", "vni_ret", "idio",
+                                       "val_bn", "val1m_bn", "fwd1", "fwd2", "fwd3"]].round(4).copy()
+                            keep.insert(0, "liq", variant)
+                            ep_rows.append(keep)
 
     wd_df = pd.DataFrame(out_wd)
     fwd_df = pd.DataFrame(out_fwd)
@@ -218,14 +236,28 @@ def main():
     pd.concat(ep_rows).to_csv(f"{STEM}_episodes.csv", index=False)
 
     pd.set_option("display.width", 200, "display.max_columns", 40)
-    print("=== §C.2 — phân bố episode theo THỨ ===")
-    print(wd_df.to_string(index=False))
-    print("\n=== §C.3 — lợi suất sau cú sập (IDIOCRASH) ===")
-    print(fwd_df.to_string(index=False))
+    print("=== §C.2 — phân bố episode theo THỨ (period=all) ===")
+    print(wd_df[wd_df.period == "all"].to_string(index=False))
+    print("\n=== §C.3 — lợi suất sau cú sập (IDIOCRASH, period=all) ===")
+    print(fwd_df[fwd_df.period == "all"].to_string(index=False))
+
+    # §F.9 — ổn định theo thời gian. Cắt trên biến thể ĐƯỢC TRÍCH trong headline
+    # (market/IDIOCRASH/liq=both = nhánh tier-W production) + fwd1 thứ Hai của cùng lát cắt.
+    print("\n=== §F.9 — phân kỳ (market · IDIOCRASH · liq=both) ===")
+    per = wd_df[(wd_df.scope == "market") & (wd_df.rule == "IDIOCRASH") & (wd_df.liq == "both")]
+    fmon = fwd_df[(fwd_df.scope == "market") & (fwd_df.liq == "both") & (fwd_df.wd == "Hai")]
+    ffri = fwd_df[(fwd_df.scope == "market") & (fwd_df.liq == "both") & (fwd_df.wd == "Sau")]
+    print(per[["period", "n_episode", "mon_share_pct", "mon_vs_rest_ratio",
+               "chi2", "p_value"]].to_string(index=False))
+    print(fmon[["period", "n", "fwd1_mean", "fwd1_ci_lo", "fwd1_ci_hi",
+                "p_next_neg_pct"]].to_string(index=False))
+    print(ffri[["period", "n", "fwd1_mean", "fwd1_ci_lo", "fwd1_ci_hi",
+                "p_next_neg_pct"]].to_string(index=False))
 
     # đối chứng đối xứng §C.2 (sập vs tăng), biến thể 'both' = luật tier-W production
     for variant in ("adv", "both"):
-        d = wd_df[(wd_df.scope == "market") & (wd_df.liq == variant)].set_index("rule")
+        d = wd_df[(wd_df.period == "all") & (wd_df.scope == "market")
+                  & (wd_df.liq == variant)].set_index("rule")
         if {"IDIOCRASH", "UPSPIKE"} <= set(d.index):
             c, u = d.loc["IDIOCRASH"], d.loc["UPSPIKE"]
             z, p = two_prop_z(c.n_mon, c.n_episode, u.n_mon, u.n_episode)

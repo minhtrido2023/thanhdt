@@ -16,7 +16,8 @@ PNJ đúng phiên sàn ĐẦU TIÊN (03/07) và DGC đúng ngày khởi tố (17
 hôm qua, chưa có ai kiểm nó còn sống); (b) kênh TIN chỉ quét **1 lần/tuần vào thứ Sáu** trong khi
 kênh GIÁ quét hằng ngày — tin nổ thứ Hai-thứ Năm phải chờ tới 4 ngày; (c) khoảng trống cuối tuần
 là **THẬT và đo được** (thứ Hai tập trung 1,409× tỉ lệ sập riêng lẻ, p=2,1e-37, và lệch này **bất
-đối xứng** — chiều tăng chỉ 1,115×; số đã cập nhật theo bản chạy ổn định §C.2). Đề xuất: **không xây cơ chế mới nào**, chỉ vá 3 chỗ đó và gộp
+đối xứng** — chiều tăng chỉ 1,115×; số đã cập nhật theo bản chạy ổn định §C.2, và là số TOÀN
+mẫu — hiệu ứng tập trung sau 2020, xem §F.9). Đề xuất: **không xây cơ chế mới nào**, chỉ vá 3 chỗ đó và gộp
 Tầng 1 ngân hàng vào cùng một lượt quét portfolio-wide. Chi phí biên: **0 cron mới** cho (a)+(b),
 **1 dòng cron mới** cho (c).
 
@@ -231,6 +232,8 @@ nhất các phiên cách nhau ≤7 ngày thành 1 episode), 2016-01→2026-08-13
 
 **Thứ Hai = 1,409× tỉ lệ trung bình T3-T6**, χ²=177,9, **p=2,1e-37**, N=5.496.
 (`liq=adv`: 1,414×, χ²=189,4, p=7,3e-40, N=5.738 — cùng kết luận.)
+⚠️ Đây là số của **TOÀN mẫu**, không phải hằng số đều suốt 10 năm: 2016-19 chỉ 1,202× và
+**p=0,14 (không có ý nghĩa)**; 2020-22 1,369×; 2023-26 1,543×. Đọc **§F.9** trước khi trích.
 
 **Kiểm chứng đối xứng (bắt buộc, nếu không thì đây chỉ là hiệu ứng phương sai cuối tuần):** làm lại
 y hệt cho cú **TĂNG** riêng lẻ (`ret ≥ +6%`, `idio ≥ +5%`), N=10.921 → thứ Hai chỉ **1,115×**.
@@ -441,6 +444,32 @@ CÁ NHÂN?* — đúng trục đã tách đúng PNJ-2015 (QUALIFY) khỏi PNJ-20
    từng byte), nhưng **bài học chung thì rộng hơn script này**: mọi phép đo dùng `pct_change()`
    trên dữ liệu có ô khuyết đều dính, và nó **hỏng ÂM THẦM** — không exception, không cảnh báo,
    chỉ là vài trăm episode dôi ra từ những phiên lẽ ra không có `idio`.
+
+9. **1,409× là số của TOÀN mẫu 2016→nay, KHÔNG phải một hằng số ổn định suốt 10 năm.** Cắt theo
+   giai đoạn (thêm 2026-08-14 theo khuyến nghị #3 vòng verify quant-skeptic; nay có sẵn cột
+   `period` trong `_weekday.csv` / `_forward.csv`, lát cắt `market · IDIOCRASH · liq=both`):
+
+   | Giai đoạn | N episode | Tỉ trọng T2 | Tỉ lệ T2/T3-T6 | χ² | p | fwd1 sau sập T2 | fwd1 sau sập T6 |
+   |---|---:|---:|---:|---:|---:|---:|---:|
+   | **all (2016→08/2026)** | 5.496 | 25,49% | **1,409×** | 177,9 | 2,1e-37 | +0,02% | **−3,10%** |
+   | 2016-19 | 834 | 22,30% | 1,202× | 6,9 | **0,141 (KHÔNG có ý nghĩa)** | **−1,20%** | −1,54% |
+   | 2020-22 | 2.883 | 25,29% | 1,369× | 131,6 | 1,8e-27 | +0,18% | −4,16% |
+   | 2023-26 | 1.779 | 27,32% | 1,543× | 122,1 | 1,9e-25 | +0,24% | −2,54% |
+
+   Ba hệ quả, phải đọc đủ cả ba:
+   - **Câu chữ**: hiệu ứng thứ Hai là **hiện tượng SAU 2020**, không phải sự thật đồng nhất
+     "đo 10 năm". Đừng viết "10 năm ⇒ 1,409×" như một hằng số; viết "toàn mẫu 1,409×, tập trung
+     ở nửa sau".
+   - **Hướng lại có lợi cho việc deploy**: hiệu ứng **mạnh dần** về phía hiện tại
+     (1,20 → 1,37 → 1,54), tức ngược hẳn chữ ký overfit thường gặp (mạnh IS, suy yếu OOS). Nếu
+     nó là hiện vật khai thác dữ liệu thì đã phải yếu đi ở giai đoạn gần nhất.
+   - **Bất đối xứng thứ Sáu ổn định DẤU ở cả 3 giai đoạn con** (−1,54 / −4,16 / −2,54), và
+     `fwd1` sau sập thứ Hai không âm có ý nghĩa ở 2 giai đoạn gần nhất. Đây mới là chân đỡ của
+     kết luận vận hành E3 (bảo vệ phía MUA sáng thứ Hai, không phải bán kịp) — nên **kết luận
+     vận hành KHÔNG đổi**. Cái duy nhất phải chỉnh là mức tuyệt đối hoá của headline.
+   - Lưu ý ngược chiều, không được giấu: ở **2016-19** `fwd1` sau sập thứ Hai là **−1,20%**
+     (CI [−1,86; −0,56], không chứa 0) — tức mệnh đề "~0%" của §C.3 cũng là mệnh đề của giai
+     đoạn SAU 2020, không phải của cả mẫu đều nhau.
 
 ---
 
