@@ -21,6 +21,22 @@ preserve_verbatim: >
 
 # Log thay đổi Cron Registry
 
+- 2026-08-17 (Mike/Codex, user duyệt 2026-08-17 04:06 UTC): **THÊM cron `late_plan_catchup.sh`**
+  3 mốc tối: `45 14 * * 1-5` (21:45 ICT), `0 15 * * 1-5` (22:00 ICT), `30 16 * * 1-5`
+  (23:30 ICT), cùng chạy `/home/trido/thanhdt/WorkingClaude/mike/bin/late_plan_catchup.sh`.
+  Script mới `mike/bin/late_plan_catchup.sh`: tự no-op trước 21:00 ICT / ngày không giao dịch;
+  per-account chỉ chạy nếu plan T+1 hợp lệ, chưa duyệt, chưa có dấu merge; chạy đúng 1 lần
+  chuỗi L1→L2→merge→inject→`send_plan_report.sh --account <acct> --second-chance`.
+  4 câu hỏi §11: (1) DNSE live same-day + cache parquet T-1 (qua L1/L2) + file plan local do
+  DollarBill ghi tối hôm đó — đo thật 08-05→08-14 có 2/5 phiên plan ghi sau 21:00 (muộn nhất
+  23:25 ICT); (2) plan tươi khi ghi xong, DNSE tươi sau 14:45; (3) cần T (giá đóng cửa + vị thế
+  hôm nay) — ràng buộc ≥15:00 ICT kế thừa từ L1/L2 guard; (4) consumer = user duyệt qua đêm,
+  deadline `preflight_check.sh` 08:45 sáng sau.
+  Chống xung đột: 21:45/22:00 cách send_plan_report 21:00 và second-chance 23:00; 23:30 trước
+  `sync_bq_cache_daily.sh` 23:45 (15' đệm, runtime toàn chain đo <60s + gửi báo cáo);
+  idempotent 2 lớp (trạng thái plan + lock per-account) nên 3 lần chạy/đêm không trùng việc,
+  không bao giờ chạm plan đã duyệt (APPROVED/INVALID → REFUSE rc=1).
+
 - 2026-08-16 (Mike/Codex, user yêu cầu tự động hóa gửi báo cáo tuần sáng chủ nhật 09:00
   không miss): **THÊM cron `0 2 * * 0` = Sun 09:00 ICT**
   `/home/trido/thanhdt/WorkingClaude/mike/bin/spend_report_weekly.sh >> .../mike/logs/spend_report_weekly.log 2>&1`.
