@@ -26,9 +26,15 @@
   15/15 selfcheck PASS, không cần làm gì thêm.
 
 ## Bối cảnh còn hiệu lực
-- TV1 mới đạt 61%(SpaceX)/50%(ZaloPay) kế hoạch 08-13 — chưa quyết mua nốt hay coi đã đóng.
-- `merge_park_orders.py` cron schedule — Taylor đề xuất C-rồi-A, chưa cài chính thức.
+- TV1 — ĐỪNG tự nhắc lại status (61%/50%) nữa: user 08-14 xác nhận bên planning (DollarBill) đã
+  báo rồi, Mike lặp lại là thừa/gây khó chịu. Chỉ nêu TV1 nếu có THAY ĐỔI thật (khớp thêm/huỷ),
+  không nêu lại trạng thái tĩnh.
+- `merge_park_orders.py` cron chain — user 08-14 ĐỒNG Ý cài (3 dòng: L1+L2 ~19:3x, merge ~20:2x,
+  theo đề xuất `park_merge_wire_20260811.md` §6). Đang dispatch Taylor cài + cập nhật
+  `kb/cron_registry.md` (§11, 4-câu-hỏi) — xem "Đang chờ" bên dưới khi có job_id.
 - corp_action_daily.py SANITY_FACTOR WARN (phương án C) đã đóng 08-14, quant-skeptic CONFIRMED.
+- `git stash@{0}` ("hybrid+refresh_skip_fix WIP 20260810") — user 08-14 ĐỒNG Ý resolve. Đang
+  dispatch Taylor+quant-skeptic ngoài giờ giao dịch (an toàn giờ này, phiên đã đóng cửa).
 
 - [2026-08-14T06:09:42Z] 2026-08-14: problem_key/supersession DEFERRED (user quyết dừng+quan sát, không overthink khi chi phí > lợi ích đo được) — mở lại nếu có ca thật root-cause-D trong 3-4 tuần/15-20 vòng coord tới. Mạch 'warning vận hành lặp lại' hôm nay ĐÃ ĐÓNG HẾT: kb/coding_guidelines split, dt5g false-alarm, notify_thread swap-fix, 3/4 wags-fix cũ + 3 việc rẻ (fail-loud/aged_q cap/dispatch hint).
 - [2026-08-14T06:44:02Z] [2026-08-14T06:45Z] Paper-main không có plan hôm nay — giải thích: git stash apply bỏ dở (session khác, 07:56 ICT) để lại conflict marker trong config.py+executor.py, giết CẢ 2 bot live 09:05 (đã tự phục hồi qua ops_autofix/Winston lúc 09:06-09:10, 0 tiền mất, incident kb/incidents/2026-08/2026-08-14-git-stash-conflict-markers-giet-bot-ca-2-account.md) VÀ giết cron paper_main_probe_plan.py 08:52 (không có autoheal như live). Đã chạy tay lại 13:40 ICT, plan_main_2026-08-14.json tồn tại nhưng evidence trong-cửa-sổ hôm nay coi như mất (paper-only). Còn mở: stash@{0} vẫn giữ 2 thay đổi thật CHƯA landed đúng cách (fill_timing_hybrid_enabled=True paper + REFRESH_SKIP fix executor.py +283/-22, liên quan job Taylor_20260810_042759 DRI cancel-reissue bug) — cần Taylor+quant-skeptic resolve ngoài giờ giao dịch, KHÔNG phải khôi phục vội.
