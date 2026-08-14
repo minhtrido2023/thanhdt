@@ -77,6 +77,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Sự cố | status |
 |---|---|---|
+| 2026-08-14 | [2026-08-14: `git stash apply` bỏ dở lúc 07:56 để lại conflict marker trong `trading_bot/config.py`+`executor.py` ⇒ `SyntaxError` giết bot NGAY khi cron 09:05 khởi động, CẢ 2 account (0 lệnh đặt, không lệnh kẹt)](2026-08/2026-08-14-git-stash-conflict-markers-giet-bot-ca-2-account.md) | fixed — `git checkout HEAD --` 2 file (ours(stage2)==HEAD từng byte ⇒ không mất việc), stash@{0} giữ nguyên; CÒN MỞ: ai đó vẫn cần resolve stash đúng cách qua Taylor |
 | 2026-08-13 | [2026-08/2026-08-13-tv1-ceiling-decision-via-action-not-bus.md](2026-08/2026-08-13-tv1-ceiling-decision-via-action-not-bus.md) | ? |
 | 2026-08-13 | [2026-08/2026-08-13-codex-headless-dns-block-tv1-and-smtp.md](2026-08/2026-08-13-codex-headless-dns-block-tv1-and-smtp.md) | ? |
 | 2026-08-13 | [2026-08/2026-08-13-append-event-word-split-silent-truncation.md](2026-08/2026-08-13-append-event-word-split-silent-truncation.md) | ? |
