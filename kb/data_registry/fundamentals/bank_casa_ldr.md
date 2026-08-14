@@ -1,22 +1,20 @@
 ---
 kind: derived-file
-status: MIXED — chân LDR DERIVED (verify chéo 5/5), chân CASA UNVERIFIED (báo chí, 10/13 mã)
-source: data/bank_casa_ldr_<YYYYMMDD>.csv
+status: DERIVED — cả 2 chân. LDR verify chéo 5/5; CASA đọc từ BCTC GỐC, 13/13 mã, 3 chân verify độc lập
+source: data/bank_casa_ldr_<YYYYMMDD>.csv (LDR) · data/bank_casa_primary_<YYYYMMDD>.csv (CASA)
 group: fundamentals
-writer: mike/agents/Taylor/build_bank_casa_ldr.py (chạy TAY, KHÔNG có cron)
-upstream: vnstock 4.0.4 → VCI `finance.balance_sheet` (LDR) · báo chí tổng hợp BCTC Q2/2026 (CASA)
+writer: mike/agents/Taylor/build_bank_casa_ldr.py (LDR) · mike/agents/Taylor/build_bank_casa_primary.py (CASA) — chạy TAY, KHÔNG có cron
+upstream: vnstock 4.0.4 → VCI `finance.balance_sheet` (LDR) · thuyết minh BCTC hợp nhất Q2/2026 gốc, PDF từ kho công bố thông tin HOSE (CASA)
 created: 2026-08-14 (job Taylor_20260813_172358)
+updated: 2026-08-14 (job Taylor_20260814_002041 — chân CASA UNVERIFIED→DERIVED, 10/13→13/13 mã)
 ---
 
 # `bank_casa_ldr` — CASA + LDR rổ ngân hàng đang nắm giữ (13 mã)
 
-**Đọc trước: file này có HAI CHÂN, độ tin cậy KHÁC HẲN NHAU.** Trích một chân bằng lời lẽ dành
-cho chân kia là cách sai duy nhất đáng lo ở đây.
-
 | Chân | Cách có | Status | Phủ |
 |---|---|---|---|
 | **LDR** | TỰ TÍNH từ 2 dòng bảng cân đối | **DERIVED** — đối soát chéo 5/5 lệch ≤0,13% | 13/13 mã × 4 quý |
-| **CASA** | CHÉP từ báo chí tổng hợp BCTC | **UNVERIFIED** — chưa đối soát thuyết minh gốc | 10/13 mã × **1 quý** |
+| **CASA** | Đọc thuyết minh BCTC **GỐC** (OCR/text) | **DERIVED** — 3 chân verify độc lập, xem dưới | 13/13 mã × **1 quý** |
 
 ## Vì sao tồn tại
 
@@ -46,21 +44,47 @@ Hai self-check chạy sẵn trong script, cả hai PASS ngày 2026-08-14:
 835,8k tỷ (−1,4%). Hai khái niệm khác nhau (cho vay khách hàng hợp nhất vs dư nợ tín dụng) — nên
 `loan_gross` KHÔNG đối soát được bằng tin "tăng trưởng tín dụng", chỉ đối soát bằng đúng dòng BCTC.
 
-## Chân CASA — CHƯA dùng được cho quyết định
+## Chân CASA — đã đóng bằng NGUỒN SƠ CẤP (2026-08-14, job `Taylor_20260814_002041`)
 
-`casa_source = "PRESS_UNVERIFIED_2026Q2"`. Bốn giới hạn, tất cả đều đủ để chặn một quyết định tiền:
+`casa_source = "BCTC_PRIMARY_2026Q2"`. Số đọc thẳng từ thuyết minh **"Tiền gửi của khách hàng"**
+trong BCTC hợp nhất Q2/2026 của từng ngân hàng — không còn chép báo chí.
 
-1. **KHÔNG phải 2 nguồn độc lập.** Hai bài (vietnambiz, mekongasean) khớp tới 2 chữ số thập phân
-   ⇒ gần như chắc chắn **cùng một bảng tổng hợp gốc**. Đếm là MỘT nguồn.
-2. **Hai bài định nghĩa KHÁC NHAU cho cùng con số**: vietnambiz ghi
-   `(không kỳ hạn + ký quỹ)/tiền gửi KH`, mekongasean ghi `không kỳ hạn/tiền gửi KH`. Số giống
-   nhau ⇒ **ít nhất một mô tả sai**, chưa biết cái nào. Tiền ký quỹ ở NH lớn cỡ 1–3pp ⇒ sai số
-   đúng cỡ đó.
-3. **Bình quân hệ thống không khớp giữa nguồn**: 14,7% (vietnambiz) vs 17,19% (nguoiquansat) —
-   chênh 2,5pp ⇒ rổ mẫu hoặc định nghĩa khác nhau.
-4. **Chỉ 1 kỳ (30/6/2026), không có chuỗi lịch sử**, và **thiếu 3/13 mã: HDB, SHB, VPB**
-   (không tìm thấy ở nguồn nào đã quét — để TRỐNG, script cố ý KHÔNG suy đoán, KHÔNG kéo ngang
-   sang kỳ khác).
+**Định nghĩa đã CHỐT** (trước đây là điều mơ hồ nhất): chuỗi báo chí = **(Tiền gửi không kỳ hạn +
+Tiền gửi ký quỹ) / Tổng tiền gửi khách hàng**. Không phải suy đoán — dựng lại công thức này từ
+BCTC gốc khớp báo chí **10/10 mã trong phạm vi ±0,03pp** (mức làm tròn). ⇒ mô tả của vietnambiz
+ĐÚNG, mô tả của mekongasean (`không kỳ hạn / tiền gửi KH`) SAI. Giới hạn (2) của bản cũ đã đóng.
+
+CSV xuất **3 cột tỉ lệ**, chọn đúng cột theo việc — đừng trộn:
+
+| Cột | Công thức | Dùng khi |
+|---|---|---|
+| `casa_strict_pct` | (không kỳ hạn **+ tiết kiệm không kỳ hạn**) / tổng | **mặc định** — sát nghĩa kinh tế "tiền rẻ, rút bất kỳ lúc nào" |
+| `casa_narrow_pct` | chỉ dòng "không kỳ hạn" / tổng | khi cần khớp đúng 1 dòng BCTC |
+| `casa_pressdef_pct` | (không kỳ hạn + ký quỹ) / tổng | **chỉ** khi đối chiếu số báo chí/broker |
+
+⚠️ Chỉ **ACB** có chênh giữa `strict` và `narrow` (21,41% vs 20,03%) vì ACB tách riêng dòng
+"Tiền gửi tiết kiệm không kỳ hạn". 12 mã còn lại hai cột bằng nhau. Tiền ký quỹ đẩy TPB lệch
+nhiều nhất: 18,32% (strict) → 20,97% (định nghĩa báo chí), **+2,65pp** — nên trích nhầm cột ở
+TPB là sai thật, không phải làm tròn.
+
+### Ba chân verify ĐỘC LẬP (đây là cái nâng status, không phải "trông hợp lý")
+
+1. **Bất biến số học nội bộ, 13/13 PASS.** Mỗi mã qua 2 kiểm tra: (A) mỗi nhóm == Σ thành phần
+   VND + ngoại tệ; (B) tổng cộng == Σ các nhóm, so với **dòng tổng in sẵn trong bảng**. Một chữ
+   số OCR sai gần như chắc chắn phá vỡ ít nhất một bất biến.
+2. **Mẫu số vs nguồn hoàn toàn khác đường: 13/13 khớp TUYỆT ĐỐI (0,0000%).** Tổng tiền gửi đọc
+   từ PDF gốc == `cust_deposit_vnd` lấy qua vnstock/VCI. Hai đường dữ liệu không chung khâu nào.
+3. **Tỉ lệ vs báo chí: 10/10 mã, |lệch| ≤ 0,03pp** dưới đúng định nghĩa đã chốt ở trên.
+
+### Phủ 13/13 — và 3 mã bổ sung KHÔNG ngẫu nhiên
+
+HDB, SHB, VPB (trước đây trống ở mọi nguồn báo chí) nay đã có, và **cả ba rơi vào nhóm 4 mã CASA
+thấp nhất**: SHB 7,77% · HDB 10,81% · VPB 11,48%. ⇒ khoảng trống dữ liệu cũ **lệch có hệ thống về
+phía các mã yếu nhất**; lấp bằng "mã nào báo chí có" sẽ cho bức tranh lạc quan giả. Đây là lý do
+cụ thể để không dùng độ phủ báo chí làm mẫu.
+
+**Vẫn còn đúng giới hạn (4) cũ**: chỉ **1 kỳ (30/6/2026)**, KHÔNG có chuỗi lịch sử — không kéo
+ngang sang kỳ khác. Chuỗi lịch sử phải OCR thêm BCTC từng quý.
 
 ## Bẫy (1) — `vnstock finance.ratio()` trả CASA/LDR của **2018**, không phải kỳ mới
 
@@ -84,13 +108,47 @@ Bảng cân đối trả 2 dòng cùng tên: bản **ròng** (đã trừ dự ph
 = gộp. Lấy nhầm bản ròng làm LDR thấp đi ~1,5–2% một cách âm thầm. Tương tự `Chứng khoán kinh
 doanh`, `Tài sản Có khác` cũng trùng tên.
 
-## Bẫy (3) — thuyết minh BCTC gốc là PDF SCAN, máy này không OCR được
+## Bẫy (3) — ĐÃ GIẢI. Cách lấy BCTC gốc + 3 cái bẫy thật khi OCR
 
-Đường "chuẩn" nhất cho CASA là thuyết minh "Tiền gửi của khách hàng — phân theo loại tiền gửi"
-trong BCTC hợp nhất. Đã thử với CTG (`investor.vietinbank.vn`, BCTC HN Q2/2026, 6,4MB): **61 trang,
-`PyMuPDF` trích ra 0 ký tự** — ảnh scan thuần. Máy hiện tại **không có** `pdftotext`/`tesseract`.
-⇒ Muốn đóng chân CASA đúng cách phải cài OCR hoặc tìm bank phát hành PDF text-based. Đây là lý do
-kỹ thuật cụ thể, không phải "chưa làm".
+Bản cũ ghi "máy không OCR được" — **hết hiệu lực từ 2026-08-14**: Mike đã cài `tesseract 4.1.1`
+(`~/.local/bin/tesseract`, ngôn ngữ `eng`/`vie`/`osd`). Không có `pdftoppm`; rasterize bằng
+**PyMuPDF** `page.get_pixmap(dpi=...)` rồi `tesseract <png> stdout -l vie --psm 6`.
+Toàn bộ 13 mã (~660 trang) OCR xong trong **~2 phút** (6 luồng, tuần tự từng PDF — chạy 10 PDF
+song song mỗi cái 6 luồng thì thrash, chậm hơn hẳn).
+
+**Nguồn PDF có hệ thống** (không phải mò từng trang IR): kho công bố thông tin HOSE mirror trên
+Vietstock —
+`https://static2.vietstock.vn/data/HOSE/2026/BCTC/VN/QUY%202/<TICKER>_Baocaotaichinh_Q2_2026_Hopnhat.pdf`
+→ trúng **11/13** mã ngay lần đầu. Ngoại lệ: **LPB** bỏ hậu tố (`..._Q2_2026.pdf`), **VPB** không
+có trên kho này, phải lấy từ IR VPBank (bản **"tra cứu"** = text-based sạch).
+
+### (3a) "Có text layer" ≠ "đọc được" — ca HDB
+`PyMuPDF` trích **94.112 ký tự** từ BCTC HDB ⇒ mọi phép thử `chars > ngưỡng` đều kết luận
+"text-based, khỏi OCR". Nhưng CMap của font **HỎNG**, text ra mojibake:
+`"NGAN HANG THUoNG MAr c6 eHAN IHAT TRrdN"` (= "NGÂN HÀNG THƯƠNG MẠI CỔ PHẦN PHÁT TRIỂN"), và
+**chữ số cũng hỏng** (`"2.71O.773"` — chữ O thay số 0). ⇒ đừng phân loại text/scan bằng số ký tự;
+kiểm bằng việc **có khớp được một từ khoá tiếng Việt có dấu** không. HDB phải OCR như scan.
+
+### (3b) "Tiền gửi không kỳ hạn" xuất hiện ở NHIỀU thuyết minh
+Cụm này có cả trong note **tiền gửi tại/của các TCTD khác** (liên ngân hàng) lẫn note **tiền gửi
+của khách hàng**. Lấy khớp đầu tiên ⇒ ra số liên ngân hàng, sai hoàn toàn và **không có gì báo
+lỗi**. Phải neo vào tiêu đề note "TIỀN GỬI CỦA KHÁCH HÀNG" rồi mới đọc dòng.
+
+### (3c) OCR đọc sai số THẬT — và bất biến (B) chốt lại được giá trị đúng
+Không phải rủi ro lý thuyết, **3 ca đã xảy ra** ở 300 dpi:
+
+| Mã | OCR đọc | Giá trị ĐÚNG (do dòng tổng chốt) | Kiểu lỗi |
+|---|---|---|---|
+| MSB | ký quỹ `4.900.330` | `1.900.330` | 1→4 |
+| TPB | ký quỹ `1.649.049` | `7.649.049` | 7→1 |
+| LPB | không kỳ hạn `22.291.930`, ký quỹ `221.996` | `22.292.930`, `227.996` | nhiều chữ số |
+
+Cách chốt: nhóm nào Σ thành phần ≠ tổng nhóm, HOẶC Σ nhóm ≠ dòng tổng in trong bảng, thì có ít
+nhất 1 số sai; hệ 2 phương trình thường **định lại duy nhất** giá trị đúng. **Nâng dpi KHÔNG đủ**
+— LPB đọc sai ở cả 300 lẫn 500 dpi theo hai kiểu khác nhau; chỉ ràng buộc số học mới chốt được.
+⇒ **Không bao giờ nhận một con số OCR chưa qua ít nhất 1 bất biến cộng.** TPB vẫn còn 1 thành
+phần con (VND của dòng không kỳ hạn) đọc lệch không tự chốt được, nhưng **tổng nhóm** — thứ CASA
+thật sự cần — thì đã được dòng tổng xác nhận.
 
 ## Cách dùng
 
