@@ -96,8 +96,36 @@ sur_ok = np.isclose(mrg["surprise_B_MA_old"], mrg["surprise_B_MA_new"], rtol=0, 
 check("A4 surprise_B_MA identical", bool(sur_ok.all()), f"{int((~sur_ok).sum())} mismatches")
 check("A5 tier identical", bool((mrg["tier_old"] == mrg["tier_new"]).all()))
 q_ok = (mrg["qualify_old"].astype(bool) == mrg["qualify_new"].astype(bool))
-check("A6 qualify decision identical on all shared events", bool(q_ok.all()),
-      f"{int((~q_ok).sum())} mismatches / old qualifiers={int(old['qualify'].sum()):,}")
+# A6 exempts the SAME class A2/A3 already exempt, and for the same reason. Fixed 2026-08-14
+# (job Taylor_20260814_080528) after this line went red on exactly ONE row.
+#
+# The original text asserted qualify must be identical on ALL rows, noting the 2 sibling ties
+# then in history (BOT, CT6) happened not to change the verdict. That was an OBSERVATION at
+# authoring time, not an invariant — it holds only while no tie row sits near a gate. A third
+# tie has since appeared and straddles the pa_HL3 ≥ 5 gate:
+#   VKC 2026Q1 rel 2026-05-04 — prior_n_good 21→20, pa_HL3 5.572→4.507, qualify True→False
+# On a same-day sibling the OLD walk counted that sibling as a prior using its post_ret, i.e.
+# a release+30 LOOK-AHEAD (and CSV-row-order dependent). The NEW module uses strictly-earlier
+# priors. So 4.507/False is the look-ahead-free answer and 5.572/True is the contaminated one:
+# demanding equality here would demand the new module REPRODUCE a look-ahead. Per §2 of the
+# quant rules (no look-ahead) the new value is the correct one.
+#
+# Detection power is kept, not traded away: any qualify difference on a NON-tie row still
+# fails (A6), and A6b pins the exemption to the documented mechanism instead of letting the
+# tie mask drift into a blanket excuse.
+check("A6 qualify identical outside same-day-sibling ties", bool((q_ok | tie).all()),
+      f"{int((~q_ok).sum())} mismatches, {int((~q_ok & ~tie).sum())} outside ties "
+      f"/ old qualifiers={int(old['qualify'].sum()):,}")
+_flip = mrg[~q_ok]
+check("A6b every qualify flip is a same-day sibling AND the new side uses fewer priors "
+      "(look-ahead removed, not added)",
+      bool(((_flip["prior_n_good_new"].astype(int)
+             <= _flip["prior_n_good_old"].astype(int)).all())) if len(_flip) else True,
+      "; ".join(f"{r.ticker} {r.quarter} rel {r.Release_Date} "
+                f"prior {int(r.prior_n_good_old)}→{int(r.prior_n_good_new)} "
+                f"pa {r.pa_HL3_old:.3f}→{r.pa_HL3_new:.3f} "
+                f"qualify {bool(r.qualify_old)}→{bool(r.qualify_new)}"
+                for r in _flip.itertuples()) or "no flips")
 csv_max = old["Release_Date"].max()
 fresh = new[new["Release_Date"] > csv_max]
 check("A7 new source additionally sees post-CSV releases", len(fresh) > 0,
