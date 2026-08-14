@@ -35,3 +35,4 @@ từ retro-08-13 ĐÃ ĐÓNG bằng quyết định user thật (coding_guidelin
 - corp_action_daily.py SANITY_FACTOR WARN: đã đóng 08-14, quant-skeptic CONFIRMED.
 - stash@{0}: đã resolve xong (DROP đúng, duplicate landed), không còn việc mở.
 
+- [2026-08-14T17:51:05Z] [2026-08-14T17:51:05Z] Nghiên cứu ceiling A/B (tham chiếu ×1,03 vs mean-5) + participation TV1-class: job Taylor_20260814_170351 XONG, cả 2 finding quant-skeptic CONFIRMED (1 high, 1 medium — gap auditability nhẹ: script IS day-clustered chưa commit, không đổi khuyến nghị). Đã báo đầy đủ vào thread 1521183164364754974. ĐANG CHỜ user chốt (a) đổi rule giá A hay giữ B (chính sách, không phải tối ưu miễn phí); (b) đề xuất Taylor ghi 'số phiên gom kỳ vọng' vào plan note cho lệnh >10% ADV20 — sẽ làm luôn trừ khi user phản đối. Chi tiết: agents/Taylor/research/ceiling_ab_pacing_20260814/README.md.
