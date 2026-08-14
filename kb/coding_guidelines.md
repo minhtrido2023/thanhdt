@@ -665,3 +665,25 @@ báo cáo trong-phiên/cùng ngày trước giờ đó vẫn phải đọc `posi
 chính là nó đi qua đường dữ liệu khác (backend DNSE tự phát hành, không phải API client của mình)
 nên bắt được lỗi ở CẢ HAI phía. Fold vào pipeline sinh report tự động là thay đổi lớn hơn — qua
 Taylor + quant-skeptic review trước khi coi là đã wire, như mọi thay đổi khác chạm pipeline §6.
+
+## 28. Checker So Sánh 2 Nguồn — Chuẩn Hoá GIÁ TRỊ Trước Khi So, Không So Chuỗi Mô Tả Hay Suy Từ Sự Vắng Mặt
+
+**Quy tắc:** khi 1 checker/script verify so sánh 2 nguồn để phát hiện lệch (dữ liệu thật vs kỳ
+vọng, trạng thái A vs B, "quyết định này đã có chưa") — luôn quy CẢ HAI về **giá trị đã chuẩn hoá**
+(số, enum, timestamp) trước khi so. Ba dạng SAI cụ thể, đều đã xảy ra thật:
+- **So chuỗi mô tả tự do** thay vì giá trị bên dưới — 2 câu nói cùng 1 việc nhưng khác chữ ⇒ báo
+  lệch giả.
+- **So kênh HÀNH ĐỘNG** (tham số shell, dòng lệnh, log thô) khi chưa parse ra giá trị thật.
+- **Suy diễn từ SỰ VẮNG MẶT của 1 kênh** ("không thấy `answer` trên bus" ⇒ "quyết định chưa có")
+  — trong khi quyết định đã được thực thi qua đường khác (code/config đã đổi thật) mà chỉ thiếu
+  bước ghi lại lên đúng kênh checker đang nhìn. Vắng mặt trên 1 kênh không phải bằng chứng của sự
+  vắng mặt trong thực tế — phải xác nhận bằng ARTIFACT (giống nguyên tắc §6/§9/§14), không suy diễn.
+
+**Vì sao thành luật:** tái diễn 4 ngày liên tiếp (2026-08-10→08-13) dưới ≥6 hình dạng khác nhau,
+đều cùng gốc — vá từng call-site cụ thể (đã làm, có test, có commit) chặn đúng ca đó nhưng không
+chặn được ca tiếp theo ở call-site KHÁC vì không có quy tắc chung. Ghi vào đây để mọi checker MỚI
+tự tránh, không lặp lại nhóm lỗi này ở vị trí thứ 7.
+
+*→ retro-2026-08-10 Pattern 1 · retro-2026-08-11 mục 1/4/5 · retro-2026-08-12 Pattern 2 ·
+retro-2026-08-13 Pattern 1 — chi tiết từng ca cụ thể nằm trong các file retro tương ứng
+(`kb/incidents/retro/`), không chép lại ở đây.
