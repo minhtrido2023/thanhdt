@@ -783,6 +783,14 @@ if [ "$ACCOUNT" = "SpaceX" ] && [ -f "$ANOMALY_SCAN" ]; then
     || timeout 90 python3 "$ANOMALY_SCAN" --emit-json "$EMIT" >/dev/null 2>&1 || true
   if [ -f "$EMIT" ]; then
     ESC_OUT="$(python3 "$WC_ROOT/mike/bin/anomaly_escalate.py" --emit-json "$EMIT" 2>&1 || true)"
+    # Cổng độ tươi watchlist (§14, 2026-08-14) — kiểm TRƯỚC tier-H: quét sổ cũ thì kết luận
+    # "không có tín hiệu" không có giá trị, phải nói ra chứ không được nuốt vào dòng ✅.
+    ANOMALY_STALE_NOTE=""
+    if echo "$ESC_OUT" | grep -q "watchlist QUÁ HẠN"; then
+      ANOMALY_WARN=1
+      ANOMALY_STALE_NOTE="🕒 $(echo "$ESC_OUT" | grep 'watchlist QUÁ HẠN') — đang quét theo SỔ CŨ, mã mua sau ngày đó không được theo dõi. Kiểm compute_active_nav_all.sh 20:15 ICT.
+"
+    fi
     if echo "$ESC_OUT" | grep -q "tier-H MỚI"; then
       ANOMALY_WARN=1
       ANOMALY_SUMMARY="🚨 Anomaly (giá/khối lượng): $(echo "$ESC_OUT" | grep 'tier-H MỚI') — ĐÃ khởi động due-diligence (Wendy+Spyros), chi tiết ở alert riêng phía trên. KHÔNG tự mua/bán, chờ user/Mike duyệt."
@@ -791,6 +799,7 @@ if [ "$ACCOUNT" = "SpaceX" ] && [ -f "$ANOMALY_SCAN" ]; then
     else
       ANOMALY_SUMMARY="✅ Anomaly scan (giá/khối lượng + trạng thái sàn): không có tín hiệu tier-H mới."
     fi
+    ANOMALY_SUMMARY="${ANOMALY_STALE_NOTE}${ANOMALY_SUMMARY}"
   else
     ANOMALY_SUMMARY="ℹ️ Anomaly scan: không tạo được emit (BQ cache/DNSE tạm lỗi) — bỏ qua lượt này, tự chạy lại sau."
   fi

@@ -6,6 +6,9 @@ Job Taylor_20260717_111204. READ-ONLY — không đổi logic trading, không đ
 
 Universe = mã đang giữ (SpaceX/ZaloPay, đọc active_nav_*.json)  [tier H — nhạy]
          + watchlist Golden/Strong (fa_ratings_8l rating<=2)     [tier W — chặt]
+Cổng độ tươi cho nguồn watchlist: `universe_freshness()` (§14, thêm 2026-08-14 job
+Taylor_20260814_041116) — producer active_nav chạy cron RIÊNG 20:15 ICT, chết một tối là
+sáng sau quét sổ cũ trong im lặng. CẢNH BÁO, không fail-closed; cờ ra `--emit-json`.
 
 Tín hiệu giá/khối lượng (backtest FP 2024-01→2026-07, xem finding trên bus):
   tier H: 1.2 episode/tháng; tier W: 9.2 episode/tháng (245 mã).
@@ -38,20 +41,164 @@ WC = "/home/trido/thanhdt/WorkingClaude"
 CACHE = os.path.join(WC, "data", "bq_cache")
 FLAGS_PATH = os.path.join(WC, "data", "anomaly_flags.json")
 STATUS_SNAP = os.path.join(WC, "data", "anomaly_status_snapshot.json")
+ACTIVE_NAV_GLOB = os.path.join(WC, "data/execution_logs/active_nav_*.json")
 
 LIQ_1M_BN = 3.0   # mã "thanh khoản": giá trị GD bình quân 1 tháng >= 3 tỷ/phiên
 
+# Producer của `active_nav_*.json` = compute_active_nav_all.sh, cron 20:15 ICT T2-T6.
+# Cho nó tới 21:00 ICT mới coi là "đáng lẽ đã có bản của hôm nay" (45' dự phòng cho retry/
+# DNSE chậm — §14: đủ rộng cho jitter thường, đủ chặt để trượt TRỌN một phiên là trip).
+_ACTIVE_NAV_DONE_BY_ICT = datetime.time(21, 0)
 
-def load_universe():
+sys.path.insert(0, WC)
+
+
+def _ict_now():
+    """Giờ ICT thật, KHÔNG phụ thuộc TZ của process gọi vào (§16 — cron chạy dưới TZ=UTC)."""
+    return datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None) + datetime.timedelta(hours=7)
+
+
+def _is_trading_day(d):
+    from trading_bot.vn_market import is_holiday
+    return d.weekday() < 5 and not is_holiday(d)
+
+
+def _prev_trading_day(d):
+    d -= datetime.timedelta(days=1)
+    while not _is_trading_day(d):
+        d -= datetime.timedelta(days=1)
+    return d
+
+
+def expected_universe_asof(now_ict=None):
+    """Ngày `computed_at` MỚI NHẤT mà producer đã có thể ghi, tính tới thời điểm `now_ict`.
+
+    Sáng thứ Hai 08:20 ⇒ Thứ Sáu (producer chưa chạy lượt 20:15 của thứ Hai). Tối thứ Ba
+    22:00 ⇒ thứ Ba. Không phải "hôm nay" — đó chính là chỗ một cổng độ tươi ngây thơ sẽ báo
+    động giả mỗi sáng.
+    """
+    now = now_ict or _ict_now()
+    d = now.date()
+    if _is_trading_day(d) and now.time() >= _ACTIVE_NAV_DONE_BY_ICT:
+        return d
+    return _prev_trading_day(d)
+
+
+def _sessions_between(older, newer):
+    """Số phiên giao dịch mà `older` bị trễ so với `newer` (0 = không trễ)."""
+    n, d = 0, newer
+    while d > older and n < 60:
+        d = _prev_trading_day(d)
+        n += 1
+    return n
+
+
+def universe_freshness(files, now_ict=None):
+    """Cổng độ tươi cho nguồn watchlist `active_nav_*.json` (§14 producer→consumer).
+
+    Producer (compute_active_nav_all.sh, 20:15 ICT T2-T6) và consumer (anomaly_scan qua
+    ops_health_check, 08:20 ICT) chạy trên HAI cron độc lập. Producer chết một tối ⇒ sáng
+    hôm sau scan này quét một danh mục CŨ và không ai biết: mã vừa mua hôm qua vô hình với
+    lớp bảo vệ. `load_universe()` trước đây chỉ `json.load()` nên không phân biệt được.
+
+    CHỈ CẢNH BÁO, KHÔNG fail-closed — cùng lựa chọn với `anomaly_gate.anomaly_flags_freshness()`:
+    quét sổ cũ vẫn hơn không quét gì. Nhưng phải NÓI RA (quiet-heartbeat: "đã quét, sạch" phải
+    phân biệt được với "quét nhầm sổ cũ").
+
+    Trả dict {"is_stale", "asof", "expected", "lag_sessions", "reason", "files"}.
+    """
+    exp = expected_universe_asof(now_ict)
+    per_file, dates, bad = [], [], []
+    for f in sorted(files):
+        rec = {"file": os.path.basename(f), "computed_at": None}
+        try:
+            d = json.load(open(f, encoding="utf-8"))
+            rec["computed_at"] = d.get("computed_at")
+            rec["n_positions"] = len(d.get("positions", []))
+            dates.append(datetime.date.fromisoformat(str(d["computed_at"])))
+        except Exception as ex:
+            rec["error"] = str(ex)[:120]
+            bad.append(f"{rec['file']}: {str(ex)[:60]}")
+        per_file.append(rec)
+    if not files:
+        return {"is_stale": True, "asof": None, "expected": str(exp), "lag_sessions": None,
+                "reason": "không thấy file active_nav_*.json nào", "files": []}
+    if bad:
+        return {"is_stale": True, "asof": None, "expected": str(exp), "lag_sessions": None,
+                "reason": "không đọc được computed_at (" + "; ".join(bad) + ")", "files": per_file}
+    # Lấy file CŨ NHẤT: 1 account trễ cũng đủ làm watchlist thiếu mã của account đó.
+    oldest = min(dates)
+    if oldest >= exp:
+        return {"is_stale": False, "asof": str(oldest), "expected": str(exp),
+                "lag_sessions": 0, "reason": "", "files": per_file}
+    lag = _sessions_between(oldest, exp)
+    return {"is_stale": True, "asof": str(oldest), "expected": str(exp), "lag_sessions": lag,
+            "reason": f"computed_at cũ nhất {oldest} trễ {lag} phiên so với kỳ vọng {exp} "
+                      f"(compute_active_nav_all.sh 20:15 ICT T2-T6 có chạy không?)",
+            "files": per_file}
+
+
+def load_universe(now_ict=None):
+    """→ (hold, watchlist, freshness_meta). `freshness_meta` KHÔNG được bỏ qua ở caller —
+    xem `universe_freshness()`; nó là lý do duy nhất để phân biệt sổ hôm nay với sổ tuần trước."""
+    files = glob.glob(ACTIVE_NAV_GLOB)
+    meta = universe_freshness(files, now_ict=now_ict)
     hold = set()
-    for f in glob.glob(os.path.join(WC, "data/execution_logs/active_nav_*.json")):
-        d = json.load(open(f))
+    for f in files:
+        try:
+            d = json.load(open(f, encoding="utf-8"))
+        except Exception:
+            continue          # đã được ghi nhận trong meta.reason ở trên
         hold |= {p["ticker"] for p in d.get("positions", [])}
     import pandas as pd
     fr = pd.read_parquet(os.path.join(CACHE, "fa_ratings_8l.parquet"))
     fr["time"] = pd.to_datetime(fr["time"])
     wl = set(fr.sort_values("time").groupby("ticker").tail(1).query("rating<=2")["ticker"])
-    return hold, wl
+    return hold, wl, meta
+
+
+ICB_BANK = 8355   # ICB level-4 "Banks". EVF (8773 tài chính tiêu dùng) và VIX/VND (8777
+                  # chứng khoán) là tài chính NHƯNG KHÔNG phải ngân hàng — bộ từ khoá
+                  # "kiểm soát đặc biệt / chuyển giao bắt buộc" không áp cho chúng.
+
+
+def classify_bank_group(tickers):
+    """Chia watchlist thành (ngân hàng, ngoài ngân hàng) theo ICB_Code — KHÔNG chép cứng
+    danh sách mã. Đây là điểm của Việc E2: danh sách ngân hàng chép tay sẽ lạc hậu đúng lúc
+    danh mục đổi (thêm/bớt 1 nhà băng), mà đó lại là lúc cần nó nhất.
+
+    Không tra được ICB (mã mới, cache thiếu) → xếp vào NGOÀI ngân hàng: bộ từ khoá chung vẫn
+    phủ, chỉ mất phần bổ sung riêng ngành — fail-safe đúng chiều.
+    """
+    import duckdb
+    tickers = sorted(tickers)
+    if not tickers:
+        return [], []
+    files = sorted(glob.glob(os.path.join(CACHE, "ticker", "*.parquet")))[-2:]
+    tl = "','".join(tickers)
+    q = (f"select ticker, last(ICB_Code order by time) icb from read_parquet({files!r}) "
+         f"where ticker in ('{tl}') and ICB_Code is not null group by ticker")
+    icb = dict(duckdb.connect().execute(q).df().itertuples(index=False, name=None))
+    banks = [t for t in tickers if int(icb.get(t) or 0) == ICB_BANK]
+    return banks, [t for t in tickers if t not in banks]
+
+
+def print_universe_block():
+    """In khối watchlist SỐNG, dạng text nhúng thẳng vào prompt dispatch (fearbuy scan).
+
+    Cố ý KHÔNG dùng ký tự ` hay " — chuỗi này được nội suy vào heredoc bash của
+    fearbuy_weekly_scan.sh; cả hai đều là metachar sống trong nháy kép (§15).
+    """
+    hold, wl, meta = load_universe()
+    banks, others = classify_bank_group(hold)
+    state = "QUA HAN — DANH MUC CO THE THIEU MA MOI MUA" if meta["is_stale"] else "TUOI"
+    print("WATCHLIST SONG — sinh tu dong tu vi the that cua ca 2 account, KHONG chep cung.")
+    print(f"  nguon: data/execution_logs/active_nav_*.json | computed_at={meta['asof']} [{state}]")
+    if meta["is_stale"]:
+        print(f"  CANH BAO: {meta['reason']}")
+    print(f"  NHOM NGAN HANG (ICB {ICB_BANK}, n={len(banks)}): {' '.join(banks) if banks else '(khong co)'}")
+    print(f"  NHOM NGOAI NGAN HANG (n={len(others)}): {' '.join(others) if others else '(khong co)'}")
+    print(f"  (tier W — watchlist chat luong 8L rating<=2, khong phai vi the: {len(wl)} ma)")
 
 
 def load_prices(tickers, start, end):
@@ -186,7 +333,7 @@ def write_flags(alerts_df, scan_asof=None):
 
 def selftest():
     import pandas as pd
-    hold, wl = load_universe()
+    hold, wl, _meta = load_universe()
     ok = True
     cases = [("PNJ", "2026-07-03"), ("DGC", "2026-03-17")]
     df = load_prices({"PNJ", "DGC"}, datetime.date(2026, 1, 1), datetime.date(2026, 7, 16))
@@ -210,6 +357,9 @@ def main():
     ap.add_argument("--asof", help="YYYY-MM-DD, scan phiên này (mặc định: phiên cuối trong cache)")
     ap.add_argument("--status-check", action="store_true")
     ap.add_argument("--selftest", action="store_true")
+    ap.add_argument("--print-universe", action="store_true",
+                    help="in watchlist SỐNG theo nhóm ngân hàng/ngoài ngân hàng để nhúng vào "
+                         "prompt dispatch (fearbuy_weekly_scan.sh) — thay danh sách chép cứng")
     ap.add_argument("--no-flags", action="store_true", help="không ghi anomaly_flags.json")
     ap.add_argument("--backfill-days", type=int, default=0,
                     help="ghi cờ cho MỌI phiên trong N ngày gần nhất thay vì chỉ phiên cuối "
@@ -219,9 +369,12 @@ def main():
     args = ap.parse_args()
     if args.selftest:
         sys.exit(selftest())
+    if args.print_universe:
+        print_universe_block()
+        return
 
     import pandas as pd
-    hold, wl = load_universe()
+    hold, wl, uni_meta = load_universe()
     uni = hold | wl
     end = datetime.date.fromisoformat(args.asof) if args.asof else datetime.date.today()
     start = end - datetime.timedelta(days=70 + args.backfill_days)  # đủ cho Volume_1M + 2 phiên streak
@@ -235,7 +388,12 @@ def main():
         al = al[al["time"] >= last - pd.Timedelta(days=args.backfill_days)]
     else:
         al = al[al["time"] == last]
-    emit = {"asof": str(last.date()), "tier_h": [], "tier_w_count": 0, "status_changes": []}
+    emit = {"asof": str(last.date()), "tier_h": [], "tier_w_count": 0, "status_changes": [],
+            # Cổng độ tươi watchlist — anomaly_escalate.py đọc 3 field này để báo Trading Daily.
+            # Không đưa ra emit thì cảnh báo chết trong /tmp và không ai thấy.
+            "universe_stale": bool(uni_meta["is_stale"]),
+            "universe_asof": uni_meta["asof"],
+            "universe_stale_reason": uni_meta["reason"]}
     for _, r in al.iterrows():
         rec = {"ticker": r["ticker"], "reasons": r["reasons"], "ret": round(float(r["ret"]), 2),
                "vni_ret": round(float(r["vni_ret"]), 2), "idio": round(float(r["idio"]), 2),
@@ -246,6 +404,12 @@ def main():
         else:
             emit["tier_w_count"] += 1
     print(f"# Anomaly scan — phiên {last.date()} | universe {len(uni)} mã (H:{len(hold)} / W:{len(wl)})")
+    if uni_meta["is_stale"]:
+        print(f"⚠️ WATCHLIST QUÁ HẠN — {uni_meta['reason']}")
+        print("   ⇒ đang quét theo SỔ CŨ: mã mua sau ngày đó KHÔNG được bảo vệ. Vẫn quét tiếp "
+              "(quét sổ cũ hơn không quét gì), nhưng đừng đọc kết quả này như 'danh mục sạch'.")
+    else:
+        print(f"  watchlist tươi (active_nav computed_at {uni_meta['asof']})")
     if al.empty:
         print("Không có tín hiệu giá/khối lượng bất thường.")
     else:

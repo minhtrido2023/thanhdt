@@ -65,7 +65,7 @@ json.dump(state, open('$EMAILED_STATE', 'w'), indent=2, ensure_ascii=False)
   fi
 done
 
-# --- Auto-close các bus question `report-cadence-overdue-*` mà báo cáo ĐÃ có trên đĩa.
+# --- Auto-close các bus question `report-cadence-overdue-*` mà kỳ báo cáo ĐÃ được phủ.
 #     Đây là question do CHÍNH script này sinh ra (máy hỏi, không có chủ sở hữu là người) —
 #     khi Taylor soạn xong file thì việc đã xong THẬT, nhưng không ai post `answer` giữ nguyên
 #     topic, nên ops_health_check §5 (fail-closed, đúng) cứ báo pending mãi → COORD_WARN
@@ -73,53 +73,35 @@ done
 #     report-cadence-overdue-weekly_2026-08-03_2026-08-07 pending trong khi file 59KB đã nằm
 #     trên đĩa từ 11:49 ICT). Máy hỏi thì máy tự đóng — bằng chứng đóng là ARTIFACT tồn tại,
 #     không phải self-report của agent nào.
-#     Idempotent: chỉ post khi CHƯA có answer cùng topic trên bus (không cần state file).
-CLOSABLE_Q="$(python3 - "$ROOT" "$WC_ROOT" << 'PYEOF'
-import glob, json, os, sys
-
-root, wc_root = sys.argv[1], sys.argv[2]
-PREFIX = "report-cadence-overdue-"
-questions, answered = {}, set()
-for path in sorted(glob.glob(os.path.join(root, "bus", "inbox", "*.jsonl"))):
-    try:
-        fh = open(path, encoding="utf-8")
-    except OSError:
-        continue
-    with fh:
-        for line in fh:
-            try:
-                rec = json.loads(line)
-            except Exception:
-                continue
-            topic = str(rec.get("topic") or "")
-            if not topic.startswith(PREFIX):
-                continue
-            etype = rec.get("event_type")
-            if etype == "question":
-                payload = rec.get("payload")
-                if isinstance(payload, dict) and payload.get("target_file"):
-                    questions[topic] = payload["target_file"]
-            elif etype in ("answer", "decision"):
-                answered.add(topic)
-
-for topic, tfile in sorted(questions.items()):
-    if topic in answered:
-        continue
-    # target_file lưu dạng "mike/reports/..." tương đối WorkingClaude
-    if os.path.exists(os.path.join(wc_root, tfile)):
-        print(f"{topic}\t{tfile}")
-PYEOF
-)"
-
-if [ -n "$CLOSABLE_Q" ]; then
-  printf '%s\n' "$CLOSABLE_Q" | while IFS=$'\t' read -r TOPIC TFILE; do
-    [ -n "$TOPIC" ] || continue
-    "$ROOT/bin/append_event.sh" Mike answer "$TOPIC" \
-      "{\"closed_by\":\"check_report_cadence.sh (auto)\",\"evidence\":\"target_file da ton tai tren dia\",\"target_file\":\"${TFILE}\"}" \
-      >/dev/null 2>&1 || true
-    echo "check_report_cadence: auto-closed bus question '${TOPIC}' (báo cáo đã có: ${TFILE})."
-  done
-fi
+#
+#     HAI SỬA sau arch-review coord-2026-08-10 (verdict NEEDS_CHANGES) — cả hai đều là lỗi
+#     "closer dùng phép kiểm KHÁC detector", tức đúng lớp sự cố mà chính nó định vá:
+#     (1) DANH SÁCH CÂU HỎI CÒN TREO không tự dò lại bằng matcher thứ BA nữa (bản cũ: exact
+#         topic-match, phi thời gian, không quét archive .jsonl.gz) mà hỏi thẳng
+#         bin/bus_question_audit.py — matcher CHÍNH THỐNG, port đúng thuật toán của
+#         ops_health_check §5 (cross-agent, substring+timestamp r_ts>=q_ts, quét archive).
+#         Hệ quả trực tiếp: hỏi LẠI cùng topic sau một answer cũ thì lại đóng được (bản cũ
+#         chết vĩnh viễn ở ca này), và không còn 3 bản matcher lệch nhau.
+#     (2) BẰNG CHỨNG ĐÓNG dùng CÙNG phép kiểm với detector sinh ra question (most_recent_weekly
+#         theo ngày trong TÊN của bất kỳ *_weekly_report_*.md nào), KHÔNG phải os.path.exists
+#         trên đúng chuỗi target_file. Tên biến thể (SpaceX_weekly_report_2026-08-07.md, có
+#         thật trong repo) làm detector im nhưng closer không đóng được ⇒ question treo vĩnh
+#         viễn — đúng ca sự cố này nhắm tới thì lại không có đường thoát nào cả.
+#     Quyết định phủ nằm CÙNG khối python với detector (dưới đây, biến `closable`) để hai bên
+#     không thể trôi ra khỏi nhau.
+RC_PENDING_TOPICS="$(python3 "$ROOT/bin/bus_question_audit.py" --json 2>/dev/null | python3 -c '
+import json, sys
+try:
+    d = json.load(sys.stdin)
+except Exception:
+    sys.exit(0)
+P = "report-cadence-overdue-"
+for q in d.get("pending", []):
+    t = str(q.get("topic") or "")
+    if t.startswith(P):
+        print(t)
+')"
+export RC_PENDING_TOPICS
 
 PLAN="$(python3 - "$WC_ROOT" "$TODAY" "$STATE" << 'PYEOF'
 import glob, json, os, re, sys
@@ -176,6 +158,7 @@ for last_monday in candidate_mondays:
 
 # --- Monthly: từ ngày 5, tháng trước phải có báo cáo (bỏ qua trước go-live 2026-07) ---
 GO_LIVE_MONTH = (2026, 7)
+monthly_files = glob.glob(os.path.join(reports_dir, "*_monthly_report_*.md"))
 if today.day >= 5:
     if today.month == 1:
         lm_year, lm_num = today.year - 1, 12
@@ -183,7 +166,6 @@ if today.day >= 5:
         lm_year, lm_num = today.year, today.month - 1
     if (lm_year, lm_num) >= GO_LIVE_MONTH:
         last_month_str = f"{lm_year}-{lm_num:02d}"
-        monthly_files = glob.glob(os.path.join(reports_dir, "*_monthly_report_*.md"))
         has_last_month = any(last_month_str in os.path.basename(f) for f in monthly_files)
         if not has_last_month:
             period_key = f"monthly_{last_month_str}"
@@ -195,11 +177,60 @@ if today.day >= 5:
                     "most_recent": "CHƯA CÓ" if not monthly_files else "có tháng khác, thiếu tháng này",
                 })
 
-print(json.dumps(actions))
+# ── RC_CLOSE_BEGIN — quyết định "kỳ này ĐÃ ĐƯỢC PHỦ, đóng được question" ────────────────
+# Marker ỔN ĐỊNH: bin/check_report_cadence_selfcheck.py trích ĐÚNG khối python trên rồi chạy
+# nó trên reports_dir giả để khoá hồi quy. Khối này CỐ TÌNH nằm cùng scope với detector và
+# dùng lại NGUYÊN các biến của nó (most_recent_weekly, monthly_files) — không được viết lại
+# phép kiểm, vì "closer kiểm khác detector" chính là bug arch-review coord-2026-08-10 bắt.
+PREFIX = "report-cadence-overdue-"
+pending_keys = [t[len(PREFIX):].strip()
+                for t in os.environ.get("RC_PENDING_TOPICS", "").splitlines()
+                if t.strip().startswith(PREFIX)]
+closable = []
+for pk in pending_keys:
+    mw = re.match(r"^weekly_(\d{4}-\d{2}-\d{2})_(\d{4}-\d{2}-\d{2})$", pk)
+    if mw:
+        # Y HỆT điều kiện của nhánh weekly: candidate_mondays bắt đầu từ most_recent_weekly+3,
+        # nên mọi tuần có thứ Hai TRƯỚC mốc đó đã được detector coi là có báo cáo.
+        mon = date.fromisoformat(mw.group(1))
+        if most_recent_weekly is not None and mon < most_recent_weekly + timedelta(days=3):
+            closable.append([pk, f"most_recent_weekly={most_recent_weekly.isoformat()} "
+                                 f"(phep kiem CUA CHINH detector, khong phai ten file co dinh)"])
+        continue
+    mm = re.match(r"^monthly_(\d{4}-\d{2})$", pk)
+    if mm:
+        # Y HỆT `has_last_month` của nhánh monthly.
+        hit = [os.path.basename(f) for f in monthly_files if mm.group(1) in os.path.basename(f)]
+        if hit:
+            closable.append([pk, f"co bao cao thang {mm.group(1)}: {sorted(hit)[0]}"])
+    # period_key lạ (schema đổi) ⇒ KHÔNG đóng — fail về phía để người xem, không tự dọn.
+
+print(json.dumps({"actions": actions, "closable": closable}))
+# ── RC_CLOSE_END ────────────────────────────────────────────────────────────────────────
 PYEOF
 )"
 
-N=$(echo "$PLAN" | python3 -c "import json,sys; print(len(json.load(sys.stdin)))")
+# ── RC_BASH_CLOSE_BEGIN — ghi answer đóng question (marker cho selfcheck) ────────────────
+# KHÔNG nuốt lỗi: chỉ in "auto-closed" khi append_event.sh THẬT SỰ exit 0. Bản cũ dùng
+# `>/dev/null 2>&1 || true` rồi echo vô điều kiện ⇒ log nói đã đóng trong khi bus không có
+# answer nào (arch-review coord-2026-08-10, đúng pattern đã bị bác ở coord-2026-07-30).
+echo "$PLAN" | python3 -c "
+import json, sys
+for pk, evid in json.load(sys.stdin).get('closable', []):
+    print(f'{pk}\t{evid}')
+" | while IFS=$'\t' read -r PKEY EVID; do
+  [ -n "$PKEY" ] || continue
+  TOPIC="report-cadence-overdue-${PKEY}"
+  if "$ROOT/bin/append_event.sh" Mike answer "$TOPIC" \
+       "{\"closed_by\":\"check_report_cadence.sh (auto)\",\"evidence\":\"${EVID}\"}" >/dev/null; then
+    echo "check_report_cadence: auto-closed bus question '${TOPIC}' (${EVID})."
+  else
+    echo "check_report_cadence: KHÔNG ghi được answer đóng '${TOPIC}' (append_event.sh lỗi) — question VẪN TREO, sẽ thử lại lần chạy sau." >&2
+  fi
+done
+# ── RC_BASH_CLOSE_END ───────────────────────────────────────────────────────────────────
+
+N=$(echo "$PLAN" | python3 -c "import json,sys; print(len(json.load(sys.stdin)['actions']))")
 if [ "$N" -eq 0 ]; then
   echo "check_report_cadence: OK — không có báo cáo tuần/tháng nào quá hạn."
   exit 0
@@ -207,7 +238,7 @@ fi
 
 echo "$PLAN" | python3 -c "
 import json, sys
-for a in json.load(sys.stdin):
+for a in json.load(sys.stdin)['actions']:
     print(f\"{a['kind']}\t{a['period_key']}\t{a['desc']}\t{a['target_file']}\t{a['most_recent']}\")
 " | while IFS=$'\t' read -r KIND PKEY DESC TFILE MOSTRECENT; do
   MSG="🔴 **Báo cáo ${KIND} quá hạn — ${DESC}** — chưa có file, đang TỰ ĐỘNG dispatch Taylor soạn + gửi (báo cáo gần nhất: ${MOSTRECENT}). File dự kiến: \`${TFILE}\`. Đây là auto-dispatch từ check_report_cadence.sh (cron), không phải người theo dõi thủ công — nếu 24h sau vẫn chưa thấy báo cáo, đó là dấu hiệu dispatch thất bại, cần Mike kiểm tra bin/jobs.sh."
