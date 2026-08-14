@@ -15,8 +15,8 @@ PNJ đúng phiên sàn ĐẦU TIÊN (03/07) và DGC đúng ngày khởi tố (17
 **ba lỗ hổng nhỏ, cụ thể, rẻ**: (a) không có cổng độ tươi cho nguồn watchlist (cron nguồn mới cài
 hôm qua, chưa có ai kiểm nó còn sống); (b) kênh TIN chỉ quét **1 lần/tuần vào thứ Sáu** trong khi
 kênh GIÁ quét hằng ngày — tin nổ thứ Hai-thứ Năm phải chờ tới 4 ngày; (c) khoảng trống cuối tuần
-là **THẬT và đo được** (thứ Hai tập trung 1,408× tỉ lệ sập riêng lẻ, p=1,6e-37, và lệch này **bất
-đối xứng** — chiều tăng chỉ 1,114×). Đề xuất: **không xây cơ chế mới nào**, chỉ vá 3 chỗ đó và gộp
+là **THẬT và đo được** (thứ Hai tập trung 1,409× tỉ lệ sập riêng lẻ, p=2,1e-37, và lệch này **bất
+đối xứng** — chiều tăng chỉ 1,115×; số đã cập nhật theo bản chạy ổn định §C.2). Đề xuất: **không xây cơ chế mới nào**, chỉ vá 3 chỗ đó và gộp
 Tầng 1 ngân hàng vào cùng một lượt quét portfolio-wide. Chi phí biên: **0 cron mới** cho (a)+(b),
 **1 dòng cron mới** cho (c).
 
