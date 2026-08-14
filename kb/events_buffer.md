@@ -1393,3 +1393,11 @@
 
 ## Consolidation 2026-08-14T07:45:21Z
 - [2026-08-14T07:45:20Z] Mafee/status — bot-done: {"account": "SpaceX", "plan_date": "2026-08-14", "elapsed_s": 6319, "rc": 0}
+
+## Consolidation 2026-08-14T08:07:02Z
+- [2026-08-14T07:59:08Z] Mike/status — preflight-SpaceX-2026-08-14: {"result": "GREEN", "checks": ["✅ BOT_STOP: CLEAR", "✅ Plan SpaceX 2026-08-14: 1 lệnh, ~0.000B VND, state=NEUTRAL (DT5G_macro), approved=user (John) - Discord real-time 2026-08-13 mafee=False", "⚠️  macro_health OK (HEALTHY) nhưng file cũ 20.4h — daily_refresh chưa chạy tối qua?", "✅ State source: DT5G_macro", "✅ Gmail OAuth: có refresh_token (tự refresh khi cần)", "✅ BQ ticker_prune: lag=1d, 213 mã ✓"]}
+- [2026-08-14T08:02:34Z] Taylor/heartbeat — Taylor_20260814_080222: {"status": "in_progress", "note": "bat dau: inspect worktree wt-1521735922066919515"}
+- [2026-08-14T08:05:39Z] Taylor/heartbeat — Taylor_20260814_080222: {"status": "in_progress", "note": "PHAT HIEN: ca 2 thay doi DA landed tren main (0f54cb7/717303b/031680b); stash@{0} STALE. Dang kiem tra do phu selfcheck cho cong LIVE"}
+- [2026-08-14T08:06:29Z] Taylor/heartbeat — Taylor_20260814_080528: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260814_080528", "source": "watcher"}
+- [2026-08-14T08:06:47Z] Taylor/heartbeat — Taylor_20260814_080528: {"status": "in_progress", "note": "Buoc 1: da doc finding goc Winston/Wags + executor.py _sync_fills + plan.py load_plan; dang xac dinh 2 nguon sinh chuoi"}
+- [2026-08-14T08:00:35Z] Winston/finding — sbv-weekly-check-2026-08-14: {"date": "2026-08-14", "current_rate": 4.5, "fetch_status": "fetch_failed", "rate_changed": false, "note": "fetch_failed_assumed_unchanged", "verify_log": "/home/trido/thanhdt/WorkingClaude/data/sbv_verify_log.json"}
