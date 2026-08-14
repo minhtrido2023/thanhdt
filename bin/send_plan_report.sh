@@ -481,6 +481,18 @@ pt_orders  = [o for o in (park_trim.get("orders") or []) if isinstance(o, dict)]
 jit_orders = [o for o in (jit_prop.get("orders") or []) if isinstance(o, dict)]
 jit_amends = [a for a in (jit_prop.get("buy_amendments") or []) if isinstance(a, dict)]
 
+# merge_park_orders.py đánh dấu proposal đã trở thành một phần của orders[].  Từ lúc cron
+# merge chạy mỗi ngày, render cả orders[] lẫn hai mục proposal khiến người duyệt thấy cùng
+# một lệnh BÁN PARK hai lần, dù executor chỉ đọc orders[] một lần.  Marker là hợp đồng của
+# writer duy nhất; thiếu/hỏng marker thì giữ cách hiển thị cũ (an toàn: không giấu lệnh).
+def _already_merged(prop):
+    return str(prop.get("_merged_into_orders") or "").startswith("✅ ĐÃ MERGE")
+
+pt_merged = _already_merged(park_trim)
+jit_merged = _already_merged(jit_prop)
+pt_report_orders = [] if pt_merged else pt_orders
+jit_report_orders = [] if jit_merged else jit_orders
+
 def _amend_for(o):
     """Khớp 1 lệnh trong orders[] với buy_amendments. Plan THẬT (cả SpaceX lẫn ZaloPay
     2026-08-07) KHÔNG ghi `order_id` vào orders[] trong khi amendment CÓ (`BUY-SSI-LAG-01`)
@@ -555,10 +567,14 @@ if orders:
     buys  = [o for o in orders if str(o.get("side","")).lower() in ("buy","mua","b")]
     sells = [o for o in orders if str(o.get("side","")).lower() in ("sell","ban","s")]
     lines.append(f"🎯 Hành động: **{len(orders)} lệnh** ({len(sells)} bán, {len(buys)} mua):")
-    if pt_orders or jit_orders:
-        lines.append(f"   ➕ Ngoài {len(orders)} lệnh trên, plan còn **{len(pt_orders) + len(jit_orders)} "
-                     f"lệnh BÁN PARK đề xuất** (L1 trim {len(pt_orders)} + L2 JIT {len(jit_orders)}) — "
+    if pt_report_orders or jit_report_orders:
+        lines.append(f"   ➕ Ngoài {len(orders)} lệnh trên, plan còn **{len(pt_report_orders) + len(jit_report_orders)} "
+                     f"lệnh BÁN PARK đề xuất** (L1 trim {len(pt_report_orders)} + L2 JIT {len(jit_report_orders)}) — "
                      f"xem 2 mục riêng ở cuối, CẦN DUYỆT.")
+    if pt_merged or jit_merged:
+        _which = " + ".join(x for x, ok in (("L1 trim", pt_merged), ("L2 JIT", jit_merged)) if ok)
+        lines.append(f"   ✅ Lệnh BÁN PARK {_which} đã nằm trong {len(orders)} lệnh ở trên — "
+                     "chỉ hiển thị một lần; proposal giữ trong JSON để kiểm toán.")
     if price_verify_note:
         lines.append(f"   {price_verify_note}")
     if capit_note:
@@ -649,7 +665,7 @@ else:
 # Ngang hàng với orders[], KHÔNG phải câu phụ trong đoạn văn: đây là lệnh BÁN THẬT cần user
 # duyệt riêng (chúng KHÔNG nằm trong orders[] mà bot đọc lúc 09:05).
 try:
-    if pt_dec == "TRIM" and pt_orders:
+    if pt_dec == "TRIM" and pt_report_orders:
         _pt_sum = sum(_o_val(o) for o in pt_orders)
         _pt_eng = _num(park_trim.get("trim_proposed_vnd"))
         _tgt = park_trim.get("target_park")
@@ -690,7 +706,7 @@ except Exception as _e:      # fail-open: một khối báo cáo không được
 
 # ── MỤC RIÊNG 2: L2 jit_unpark_proposal ─────────────────────────────────────────────────
 try:
-    if jit_dec == "JIT" and (jit_orders or jit_amends):
+    if jit_dec == "JIT" and (jit_report_orders or jit_amends) and not jit_merged:
         _jit_sum = sum(_o_val(o) for o in jit_orders)
         _for = sorted({str(o.get("for_ticker") or o.get("for_order_id") or "?")
                        for o in jit_orders})
