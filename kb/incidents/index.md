@@ -4,7 +4,7 @@ title: Incidents — Mike fleet (sổ postmortem, cấu trúc OKF)
 owner: Mike fleet (mọi agent ghi; daily_retro.sh ghi entry RETRO hằng đêm)
 format: OKF (Open Knowledge Format) — markdown + YAML frontmatter, 1 sự cố = 1 file
 migrated_from: kb/INCIDENTS.md (single-file 408KB, migrate → OKF 2026-07-30 job Winston_20260730_144031)
-entries: 104 file (72 sự cố + 31 RETRO + 1 mục open-items chung)
+entries: 108 file (75 sự cố + 32 RETRO + 1 mục open-items chung)
 ---
 
 # Incidents — Mike fleet
@@ -77,6 +77,10 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Sự cố | status |
 |---|---|---|
+| 2026-08-13 | [2026-08/2026-08-13-tv1-ceiling-decision-via-action-not-bus.md](2026-08/2026-08-13-tv1-ceiling-decision-via-action-not-bus.md) | ? |
+| 2026-08-13 | [2026-08/2026-08-13-codex-headless-dns-block-tv1-and-smtp.md](2026-08/2026-08-13-codex-headless-dns-block-tv1-and-smtp.md) | ? |
+| 2026-08-13 | [2026-08/2026-08-13-append-event-word-split-silent-truncation.md](2026-08/2026-08-13-append-event-word-split-silent-truncation.md) | ? |
+| 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
 | 2026-08-12 | [2026-08/2026-08-12-arch-review-verdict-mat-vi-json-thieu-dau-dong.md](2026-08/2026-08-12-arch-review-verdict-mat-vi-json-thieu-dau-dong.md) | ? |
 | 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
 | 2026-08-12 | [2026-08-12: verdict `CONFIRMED/high` của arch-reviewer bị vứt vì khối VERDICT_JSON thiếu ĐÚNG 1 dấu `}` (object `checks` không đóng) ⇒ `INCONCLUSIVE` giả ⇒ question `wags-arch-review-inconclusive` giả — hỏng đường ĐỌC bị trình bày như kết quả xấu](2026-08/2026-08-12-arch-review-verdict-mat-vi-json-thieu-dau-dong.md) | fixed (`bin/wags_verdict_parse.py` + selfcheck 37/37, có ca chạy lại trên log thật đã fail) |
