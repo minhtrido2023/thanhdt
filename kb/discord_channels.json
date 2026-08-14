@@ -54,6 +54,11 @@
       "id": "1525112292159651940",
       "title": "Momentum deals (project)",
       "purpose": "Topic rieng cua du an momentum-deals — tach khoi van hanh hang ngay. Chua co script nao dung; dispatch dung --thread/ten nay."
+    },
+    "new_deals": {
+      "id": "1523612826260734112",
+      "title": "New deals",
+      "purpose": "newdeals_daily_report.py — AlphaLens Paper Portfolio + Golden/Strong Watchlist hang ngay."
     }
   }
 }

@@ -4,7 +4,7 @@ title: Incidents — Mike fleet (sổ postmortem, cấu trúc OKF)
 owner: Mike fleet (mọi agent ghi; daily_retro.sh ghi entry RETRO hằng đêm)
 format: OKF (Open Knowledge Format) — markdown + YAML frontmatter, 1 sự cố = 1 file
 migrated_from: kb/INCIDENTS.md (single-file 408KB, migrate → OKF 2026-07-30 job Winston_20260730_144031)
-entries: 99 file (69 sự cố + 29 RETRO + 1 mục open-items chung)
+entries: 108 file (75 sự cố + 32 RETRO + 1 mục open-items chung)
 ---
 
 # Incidents — Mike fleet
@@ -77,7 +77,18 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Sự cố | status |
 |---|---|---|
-| 2026-08-11 | [2026-08-11: FUNDING gate chặn OAN ZaloPay khi restart phiên chiều (rc=3) — gate cộng Σ mua trên TOÀN BỘ `orders[]` (108,2tr) thay vì phần CÒN LẠI sau fills buổi sáng (27,2tr vs pp0Buy 60,5tr); bot ZaloPay không chạy cả phiên chiều, TV1 200cp còn open](2026-08/2026-08-11-funding-gate-chan-oan-khi-restart-phien-chieu.md) | escalated (chưa vá — gate tiền thật, vùng cấm Winston) |
+| 2026-08-14 | [2026-08-14: `git stash apply` bỏ dở lúc 07:56 để lại conflict marker trong `trading_bot/config.py`+`executor.py` ⇒ `SyntaxError` giết bot NGAY khi cron 09:05 khởi động, CẢ 2 account (0 lệnh đặt, không lệnh kẹt)](2026-08/2026-08-14-git-stash-conflict-markers-giet-bot-ca-2-account.md) | fixed — `git checkout HEAD --` 2 file (ours(stage2)==HEAD từng byte ⇒ không mất việc), stash@{0} giữ nguyên; CÒN MỞ: ai đó vẫn cần resolve stash đúng cách qua Taylor |
+| 2026-08-13 | [2026-08/2026-08-13-tv1-ceiling-decision-via-action-not-bus.md](2026-08/2026-08-13-tv1-ceiling-decision-via-action-not-bus.md) | ? |
+| 2026-08-13 | [2026-08/2026-08-13-codex-headless-dns-block-tv1-and-smtp.md](2026-08/2026-08-13-codex-headless-dns-block-tv1-and-smtp.md) | ? |
+| 2026-08-13 | [2026-08/2026-08-13-append-event-word-split-silent-truncation.md](2026-08/2026-08-13-append-event-word-split-silent-truncation.md) | ? |
+| 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
+| 2026-08-12 | [2026-08/2026-08-12-arch-review-verdict-mat-vi-json-thieu-dau-dong.md](2026-08/2026-08-12-arch-review-verdict-mat-vi-json-thieu-dau-dong.md) | ? |
+| 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
+| 2026-08-12 | [2026-08-12: verdict `CONFIRMED/high` của arch-reviewer bị vứt vì khối VERDICT_JSON thiếu ĐÚNG 1 dấu `}` (object `checks` không đóng) ⇒ `INCONCLUSIVE` giả ⇒ question `wags-arch-review-inconclusive` giả — hỏng đường ĐỌC bị trình bày như kết quả xấu](2026-08/2026-08-12-arch-review-verdict-mat-vi-json-thieu-dau-dong.md) | fixed (`bin/wags_verdict_parse.py` + selfcheck 37/37, có ca chạy lại trên log thật đã fail) |
+| 2026-08-11 | [2026-08/2026-08-11-plan-dd-check-string-poll-fail.md](2026-08/2026-08-11-plan-dd-check-string-poll-fail.md) | ? |
+| 2026-08-11 | [2026-08/2026-08-11-funding-gate-chan-oan-khi-restart-phien-chieu.md](2026-08/2026-08-11-funding-gate-chan-oan-khi-restart-phien-chieu.md) | ? |
+| 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
+| 2026-08-11 | [2026-08-11: FUNDING gate chặn OAN ZaloPay khi restart phiên chiều (rc=3) — gate cộng Σ mua trên TOÀN BỘ `orders[]` (108,2tr) thay vì phần CÒN LẠI sau fills buổi sáng (27,2tr vs pp0Buy 60,5tr); bot ZaloPay không chạy cả phiên chiều, TV1 200cp còn open](2026-08/2026-08-11-funding-gate-chan-oan-khi-restart-phien-chieu.md) | **fixed** — commit `911f12b` (2026-08-11T06:22Z, 18 phút SAU khi escalate) `_remaining_quantities()` trừ `parents[*].filled`, fail-closed khi state không kiểm được; selfcheck `plan_funding_gate_selfcheck.py` 103/103. Question đóng bởi Wags coord-2026-08-12 (việc xong nhưng THIẾU event đóng) |
 | 2026-08-11 | [2026-08-11: plan ghi `dd_check` dạng CHUỖI (08-07/08-10 là dict) ⇒ `_sync_fills` ném `'str' object has no attribute 'get'` sau MỖI fill — 22 POLL_FAIL ZaloPay + 27 SpaceX, chặn đặt lệnh 1 chu kỳ/lần fill; fail-safe hoạt động đúng, không mất tiền](2026-08/2026-08-11-plan-dd-check-string-poll-fail.md) | escalated (chưa vá — điểm vá nằm ở `load_plan()`/executor, vùng cấm Winston) |
 | 2026-08-10 | [2026-08/2026-08-10-funding-gate-multipackage-shared-pot-false-block.md](2026-08/2026-08-10-funding-gate-multipackage-shared-pot-false-block.md) | ? |
 | 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
@@ -169,6 +180,9 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Tóm tắt (nguyên văn tiêu đề) | status |
 |---|---|---|
+| 2026-08-13 | [RETRO — 2026-08-13: 4 sự cố (1 fixed hoàn chỉnh, 1 hở bug hạ tầng vẫn treo dù bot tự phục hồi khớp lệnh một phần, 2 là câu hỏi bus chưa đóng), 2 pattern xuyên suốt (Pattern-B ngày thứ 4 liên tiếp, Pattern backlog ngày thứ 5)](retro/retro-2026-08-13.md) | logged |
+| 2026-08-12 | [RETRO — 2026-08-12: 9 sự cố, 3 pattern xuyên suốt (1 pattern-họ đã đặt tên "Pattern-B" tái diễn NGÀY THỨ 4 dưới 3 hình dạng MỚI cùng một ngày; 2 câu hỏi backlog VẪN CHƯA được user quyết sau nhiều ngày escalate)](retro/retro-2026-08-12.md) | logged |
+| 2026-08-11 | [RETRO — 2026-08-11: 5 sự cố, 2 pattern xuyên suốt (state_source escalated 2 retro liên tiếp, hôm nay fix THẬT nhưng SAU khi đã gây 30 lệnh lỡ phiên)](retro/retro-2026-08-11.md) | logged |
 | 2026-08-10 | [RETRO — 2026-08-10: 7 sự cố, 3 pattern xuyên suốt (1 pattern ĐÃ ESCALATE ngày trước, VẪN chưa có quyết định sau retro thứ 3 liên tiếp — 1 pattern MỚI khẩn: SpaceX T+1 mất tích, tái diễn hình dạng sự cố ngày trước)](retro/retro-2026-08-10.md) | logged |
 | 2026-08-09 | [RETRO — 2026-08-09: 7 sự cố, 4 pattern xuyên suốt (2 ĐẠT NGƯỠNG ESCALATE — 1 tiếp tục theo mục 6, 1 mới nhưng đủ nghiêm trọng để nêu bật ngay dù chưa đạt ngưỡng cứng)](retro/retro-2026-08-09.md) | logged |
 | 2026-08-08 | [RETRO — 2026-08-08: 1 sự cố mới, 1 đóng thành công (Pattern 1 test-bus-pollution FIXED_VERIFIED cùng ngày), 1 pattern quy trình MỚI formal hoá (backlog ghi file kb/incidents/ — 4 retro liên tiếp chưa từng có Prevention)](retro/retro-2026-08-08.md) | logged |

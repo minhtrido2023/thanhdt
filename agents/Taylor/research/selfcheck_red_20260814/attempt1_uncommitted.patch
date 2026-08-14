@@ -1,0 +1,58 @@
+diff --git a/WorkingClaude/extreme_regime_selfcheck.py b/WorkingClaude/extreme_regime_selfcheck.py
+index e53263d..1e314be 100644
+--- a/WorkingClaude/extreme_regime_selfcheck.py
++++ b/WorkingClaude/extreme_regime_selfcheck.py
+@@ -64,7 +64,14 @@ class FakeBroker:
+ 
+ 
+ def make_exec(cfg_over, orders):
+-    cfg = dict(DEFAULTS); cfg.update(cfg_over); cfg["mode"] = "paper"
++    cfg = dict(DEFAULTS)
++    # GHIM cờ HYBRID fill-timing TẮT — file này KHÔNG kiểm fill-timing. `DEFAULTS` bật nó từ
++    # 2026-08-10 (commit 717307f, user duyệt, paper-only) và block MUA của hybrid là
++    # 11:00-13:45, nên lệnh mua lúc `now`=09:30 bị HYBRID_DEFER ⇒ ca C1 đỏ vì một cờ KHÔNG
++    # liên quan tới cơ chế đang kiểm. §23 hệ luận 1: assertion không được phụ thuộc cấu hình
++    # toàn cục đang trôi — muốn kiểm hybrid thì đã có hybrid_fill_timing_selfcheck.py riêng.
++    cfg["fill_timing_hybrid_enabled"] = False
++    cfg.update(cfg_over); cfg["mode"] = "paper"
+     plan = TradePlan(plan_date="2099-01-01", signal_date="2099-01-01", strategy="tst",
+                      strategy_version="0", state=3, state_name="NEUTRAL",
+                      nav_basis={}, orders=orders, account=TAG,
+diff --git a/WorkingClaude/hard_no_chase_ceiling_selfcheck.py b/WorkingClaude/hard_no_chase_ceiling_selfcheck.py
+index 7bd11cb..6eed5c8 100644
+--- a/WorkingClaude/hard_no_chase_ceiling_selfcheck.py
++++ b/WorkingClaude/hard_no_chase_ceiling_selfcheck.py
+@@ -86,7 +86,14 @@ class FakeBroker:
+ 
+ 
+ def make_exec(orders, quote, cfg_over=None):
+-    cfg = dict(DEFAULTS); cfg.update(cfg_over or {}); cfg["mode"] = "paper"
++    cfg = dict(DEFAULTS)
++    # GHIM cờ HYBRID fill-timing TẮT — file này kiểm TRẦN GIÁ, không kiểm fill-timing.
++    # `DEFAULTS` bật hybrid từ 2026-08-10 (commit 717307f, user duyệt, paper-only); block MUA
++    # 11:00-13:45 làm lệnh mua bị HYBRID_DEFER TRƯỚC khi tới chỗ kiểm trần ⇒ ca E4 không thấy
++    # journal HARD_CEILING_BLOCK. §23 hệ luận 1: đừng để assertion treo vào cấu hình toàn cục
++    # đang trôi. Hybrid có selfcheck riêng (hybrid_fill_timing_selfcheck.py).
++    cfg["fill_timing_hybrid_enabled"] = False
++    cfg.update(cfg_over or {}); cfg["mode"] = "paper"
+     plan = TradePlan(plan_date="2099-01-01", signal_date="2099-01-01", strategy="tst",
+                      strategy_version="0", state=3, state_name="NEUTRAL",
+                      nav_basis={}, orders=orders, account=TAG,
+diff --git a/WorkingClaude/t2_settlement_selfcheck.py b/WorkingClaude/t2_settlement_selfcheck.py
+index 784759f..e93cda8 100644
+--- a/WorkingClaude/t2_settlement_selfcheck.py
++++ b/WorkingClaude/t2_settlement_selfcheck.py
+@@ -105,6 +105,13 @@ def make_executor(tmpdir, orders, positions, forbidden_tickers=()):
+                      account=TAG, created_at="2099-01-01T00:00:00")
+     cfg = load_config()
+     cfg["mode"] = "paper"
++    # GHIM cờ HYBRID fill-timing TẮT — file này kiểm TRẦN T+2 sellable, không kiểm fill-timing.
++    # `load_config()` bật hybrid từ 2026-08-10 (commit 717307f, user duyệt, paper-only) và nó
++    # đổi CẢ HAI thứ mà file này assert: (a) lệnh MUA lúc `NOW`=09:20 nằm ngoài block mua
++    # 11:00-13:45 ⇒ HYBRID_DEFER ⇒ ca E1 thấy 0 lệnh; (b) trần theo block chia nhỏ KL lệnh BÁN
++    # ⇒ ca C1 thấy 200 thay vì đúng 300 sellable. §23 hệ luận 1: assertion không được treo vào
++    # cấu hình toàn cục đang trôi. Hybrid có selfcheck riêng (hybrid_fill_timing_selfcheck.py).
++    cfg["fill_timing_hybrid_enabled"] = False
+     broker = _RecordingBroker(positions, forbidden_tickers)
+     ex = Executor(plan, broker, cfg, shared={})
+     ex.state_file = os.path.join(tmpdir, "state.json")

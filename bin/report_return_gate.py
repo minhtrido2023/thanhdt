@@ -57,6 +57,18 @@ EXEC_DIR = os.path.join(ROOT, "data", "execution_logs")
 LOOKBACK_DAYS = 120          # đủ phủ mọi ex-date còn nằm trong giá vốn của vị thế đang giữ
 DEFAULT_TOL_PP = 0.15        # điểm %; nới hơn sai số làm tròn giá vốn 2 chữ số, chặt hơn mọi cổ tức thật
 
+# chân SỔ PAPER (thêm 2026-08-13). Nhận diện theo NỘI DUNG, không theo tên file: mục paper đi vào
+# báo cáo "New deals" — tên file KHÔNG chứa nhãn tài khoản nào, nên chân broker ở trên tự bỏ qua.
+#
+# Cả 2 marker PHẢI neo vào heading mà newdeals_daily_report.py TỰ KIỂM SOÁT ("## AlphaLens Paper
+# Portfolio" / "## DC Book Paper Portfolio" — parts[] trong build_message()), KHÔNG neo vào text
+# nội bộ của converge_report.py/alphalens_report.py (thư viện khác, đổi độc lập không ai báo).
+# quant-skeptic vòng 3 (Taylor_20260813_073404): marker cũ "DC Book (double-confirm)" chỉ tình cờ
+# khớp một dòng "### 🔗 DC Book (double-confirm) — Paper Portfolio" bên TRONG converge_md — không
+# khớp heading thật mà newdeals_daily_report.py tự in ra; đổi tên heading nội bộ đó (không ai
+# review vì nó không đụng gate) sẽ âm thầm vô hiệu hoá gate.
+PAPER_MARKERS = ("AlphaLens Paper Portfolio", "DC Book Paper Portfolio")
+
 
 # ---------------------------------------------------------------- nguồn (1): broker
 def broker_positions(account_no: str, asof: str) -> dict:
@@ -256,10 +268,138 @@ def accounts_asof_from_name(path: str) -> tuple:
     raise ValueError(f"không suy được ngày chốt từ tên file: {name}")
 
 
+# ---------------------------------------------------------------- chân SỔ PAPER (T1)
+def paper_t1_verdict(book: str, ticker: str, asof: str, adj, price_adjusting_events) -> list:
+    """Phán quyết T1 cho MỘT vị thế paper — thuần logic, không I/O (để selfcheck chạy offline).
+
+    `adj` = một `AdjustedEntry`; chỉ đọc `factor_terp`, `factor`, `status`, `degraded`, `note`.
+    """
+    fails = []
+    moved = adj.factor_terp is not None and adj.factor_terp < 1.0 - 1e-6
+    has_event = bool(price_adjusting_events)
+    if has_event != moved:
+        detail = ", ".join(f"{e['event_code']} {e['exright_date']}"
+                           for e in price_adjusting_events) or "—"
+        fails.append(
+            f"{book}/{ticker}: Close/Price {'ĐÃ' if moved else 'KHÔNG'} điều chỉnh sau {asof} "
+            f"nhưng corporate_action nói {'KHÔNG có' if moved else 'CÓ'} sự kiện ({detail}) "
+            f"— một trong hai nguồn sai, không được công bố tỉ suất khi chưa biết là nguồn nào")
+    if adj.degraded:
+        fails.append(f"{book}/{ticker}: trạng thái {adj.status} — tỉ suất đang tính trên giá "
+                     f"THÔ: {adj.note}")
+    return fails
+
+
+def paper_entry_gate(report_path: str, out=sys.stdout) -> tuple:
+    """(applied, fails) — kiểm giá VÀO của sổ paper bằng nguồn ĐỘC LẬP với chuỗi giá.
+
+    Vì sao cần một chân riêng: chân broker ở trên đối chiếu tỉ suất với `costPrice` — sổ paper
+    không có tài khoản broker nào để đối chiếu. Giá vào của nó được quy về hệ điều chỉnh bằng
+    `Close/Price` (`paper_entry_adjust.py`), và cách hỏng ÂM THẦM của cơ chế đó là factor = 1,0:
+    cache giá cũ/lệch vintage cho ra ĐÚNG con số mà "mã này không có sự kiện gì" cũng cho ra.
+    Không phân biệt được hai thứ đó = phục hồi nguyên vẹn bug 2026-08-13 (MBB báo −18,8% thay vì
+    −2,9%) mà không ai thấy. Nên phép kiểm phải hỏi một nguồn KHÁC: `tav2_bq.corporate_action`.
+
+        T1:  factor_terp < 1  ⟺  tồn tại DIV/ISS executed điều-chỉnh-giá trong (asof, hôm nay]
+
+    T1 neo vào `factor_terp` (Close/Price thô) chứ KHÔNG phải factor được dùng để báo cáo: T1 hỏi
+    "chuỗi giá có điều chỉnh không", đó là câu hỏi về chuỗi giá. Quy ước accrue-only (loại quyền
+    mua) là lựa chọn của TA ở tầng trên; một sự kiện quyền-mua-đơn-thuần sẽ cho factor accrue-only
+    = 1,0 một cách hoàn toàn đúng đắn, và neo T1 vào nó sẽ sinh báo động giả.
+
+    Mọi trạng thái `degraded` (`RIGHTS_UNRESOLVED`, `VINTAGE_STALE`, `BAD_FACTOR`, `NO_DATA`) đều
+    CHẶN: báo cáo đang in tỉ suất tính trên giá THÔ, tức là con số sai kiểu cũ.
+
+    Fail-closed: không tra được `corporate_action` ⇒ CHẶN. Cổng này tồn tại đúng để bắt ca "không
+    biết mà tưởng biết"; trả PASS khi không kiểm được là tự vô hiệu hoá mình.
+    """
+    try:
+        with open(report_path, encoding="utf-8") as f:
+            text = f.read()
+    except OSError as e:
+        return False, [f"không đọc được báo cáo: {e}"]
+    if not any(m in text for m in PAPER_MARKERS):
+        return False, []
+
+    sys.path.insert(0, ROOT)
+    try:
+        from corp_action_lib import is_price_adjusting
+        from paper_entry_adjust import adjust_entries, stale_years
+        from paper_entry_corpaction_crosscheck import _bq, load_books
+    except Exception as e:
+        return True, [f"sổ paper: không nạp được công cụ đối chiếu ({e}) — CHẶN (fail-closed)"]
+
+    books = load_books()
+    if not books:
+        return True, ["báo cáo có mục sổ paper nhưng không đọc được file paper nào — CHẶN"]
+
+    fails = []
+    # KHÔNG chặn theo "có file năm nào cũ không" — đo thật 2026-08-13: 13/14 file năm (2013-2025)
+    # cũ hơn 2026.parquet ~14 ngày, đó là trạng thái BÌNH THƯỜNG của cache (sync đêm chỉ ghi lại
+    # năm hiện tại). Chặn theo đó = báo động giả trên MỌI báo cáo, và một cổng kêu mỗi ngày là
+    # một cổng bị bỏ qua. Việc chặn thuộc về `adjust_entries`, nó gắn VINTAGE_STALE cho ĐÚNG vị
+    # thế nào có `asof` rơi vào một năm cũ — và VINTAGE_STALE là `degraded` nên bị chặn bên dưới.
+    stale = stale_years()
+    used_years = sorted({a[:4] for _, _, a, _ in books})
+    if stale:
+        print(f"\nℹ️  bq_cache/ticker: {len(stale)} file năm cũ hơn phần còn lại "
+              f"({', '.join(sorted(stale))}); sổ paper đang dùng năm {', '.join(used_years)} "
+              f"⇒ {'CÓ giao nhau, xem trạng thái VINTAGE_STALE bên dưới' if set(stale) & set(used_years) else 'không giao nhau, không ảnh hưởng'}",
+              file=out)
+
+    try:
+        adj = adjust_entries([(t, a, p) for _, t, a, p in books])
+        tk_sql = ",".join(f'"{t}"' for t in sorted({t for _, t, _, _ in books}))
+        asof_min = min(a for _, _, a, _ in books)
+        events = _bq(f"""
+            SELECT ticker, event_code, CAST(exright_date AS STRING) exright_date,
+                   value_per_share, exercise_ratio, issue_method_name_vi
+            FROM `lithe-record-440915-m9.tav2_bq.corporate_action`
+            WHERE ticker IN ({tk_sql}) AND event_code IN ("DIV", "ISS")
+              AND event_status = "executed"
+              AND exright_date > DATE "{asof_min}" AND exright_date <= CURRENT_DATE()
+        """)
+    except Exception as e:
+        return True, [f"sổ paper: không đối chiếu được với corporate_action ({str(e)[:150]}) "
+                      f"— CHẶN (fail-closed)"]
+
+    by_ticker = {}
+    for e in events:
+        by_ticker.setdefault(e["ticker"], []).append(e)
+
+    print(f"\nCHÂN SỔ PAPER (T1 — đối chiếu corporate_action, độc lập với chuỗi giá): "
+          f"{len(books)} vị thế", file=out)
+    for book, ticker, asof, entry_price in books:
+        a = adj[(ticker, asof)]
+        evs = [e for e in by_ticker.get(ticker, [])
+               if e["exright_date"] > asof and is_price_adjusting(e)]
+        detail = ", ".join(f"{e['event_code']} {e['exright_date']}" for e in evs) or "—"
+        bad = paper_t1_verdict(book, ticker, asof, a, evs)
+        print(f"   {'CHẶN' if bad else 'OK  '} {book:9s} {ticker:4s} "
+              f"asof={asof} terp={a.factor_terp if a.factor_terp is not None else float('nan'):.6f} "
+              f"dùng={a.factor if a.factor is not None else float('nan'):.6f} "
+              f"[{a.status}] | {detail}", file=out)
+        fails.extend(bad)
+    return True, fails
+
+
 # ---------------------------------------------------------------- cổng
 def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -> int:
+    # chân sổ paper chạy TRƯỚC và độc lập với chân broker: báo cáo "New deals" mang mục paper
+    # nhưng không mang nhãn tài khoản nào, nên nhánh thoát sớm dưới đây sẽ bỏ qua nó.
+    paper_applied, paper_fails = paper_entry_gate(report_path, out=out)
+
     labels, asof = accounts_asof_from_name(report_path)
     if not labels:
+        if paper_applied:
+            if paper_fails:
+                print(f"\n❌ CHẶN — {len(paper_fails)} vấn đề ở sổ paper:", file=out)
+                for f_ in paper_fails:
+                    print(f"   • {f_}", file=out)
+                return 1
+            print("\n✅ PASS — chân sổ paper khớp corporate_action (chân broker không áp dụng: "
+                  "tên file không mang nhãn tài khoản nào).", file=out)
+            return 0
         print(f"⚠️  {os.path.basename(report_path)}: không nhận ra tài khoản nào trong tên file "
               f"→ cổng KHÔNG áp dụng (không chặn).", file=out)
         return 0
@@ -286,7 +426,7 @@ def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -
             expected[key] = (lb, pct, pl, raw, cp, gross.get(tk, 0.0))
         agg[lb] = (tot_pl, tot_cost, tot_pl / tot_cost * 100.0 if tot_cost else 0.0)
 
-    fails, checked, unmatched = [], 0, 0
+    fails, checked, unmatched = list(paper_fails), 0, 0
     print(f"\n{'ma':5}{'KL':>7}{'TK':>9}{'% cong bo':>11}{'% ky vong':>11}{'lech pp':>9}"
           f"{'co tuc GOP':>11}  ket qua", file=out)
     for tk, qty, pct in rows:
@@ -366,11 +506,17 @@ def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -
 # ---------------------------------------------------------------- selfcheck (offline)
 def _selfcheck() -> int:
     ok = True
+    ran = []                 # counted, never typed — a hand-written "N ca" drifts silently
+
+    pass_count = 0
 
     def check(name, got, want):
-        nonlocal ok
+        nonlocal ok, pass_count
+        ran.append(name)
         good = (abs(got - want) < 1e-6) if isinstance(want, float) else (got == want)
-        if not good:
+        if good:
+            pass_count += 1
+        else:
             ok = False
         print(f"  {'PASS' if good else 'FAIL'}  {name}: got={got!r} want={want!r}")
 
@@ -463,7 +609,163 @@ def _selfcheck() -> int:
     except FileNotFoundError:
         check("thiếu dnse_raw ⇒ fail-closed", True, True)
 
-    print("SELFCHECK:", "PASS" if ok else "FAIL")
+    # 17-24: chân SỔ PAPER (T1). Logic thuần, chạy offline — không chạm BQ, không chạm cache.
+    class _A:                                   # thế thân AdjustedEntry, chỉ các trường T1 đọc
+        def __init__(self, terp, factor, status, note=None):
+            self.factor_terp, self.factor, self.status, self.note = terp, factor, status, note
+
+        @property
+        def degraded(self):
+            return self.status in ("NO_DATA", "BAD_FACTOR", "RIGHTS_UNRESOLVED", "VINTAGE_STALE")
+
+    DIV = [{"event_code": "DIV", "exright_date": "2026-07-09"}]
+    v = lambda a, evs: paper_t1_verdict("alphalens", "MBB", "2026-06-30", a, evs)  # noqa: E731
+
+    check("paper T1: có sự kiện + factor ĐÃ điều chỉnh ⇒ qua",
+          v(_A(0.800794, 0.836, "ADJUSTED"), DIV), [])
+    # ĐÂY là ca cổng sinh ra để bắt: cache cũ ⇒ factor 1,0 ⇒ status UNCHANGED, trông y hệt
+    # "mã này không có sự kiện gì". Bug 2026-08-13 (MBB −18,8%) quay lại qua đúng cửa này.
+    check("paper T1: CÓ sự kiện nhưng factor = 1,0 (cache cũ) ⇒ CHẶN",
+          len(v(_A(1.0, 1.0, "UNCHANGED"), DIV)), 1)
+    check("paper T1: KHÔNG sự kiện nhưng factor < 1 (chuỗi giá điều chỉnh vu vơ) ⇒ CHẶN",
+          len(v(_A(0.95, 0.95, "ADJUSTED"), [])), 1)
+    check("paper T1: không sự kiện + không điều chỉnh ⇒ qua (không báo động giả)",
+          v(_A(1.0, 1.0, "UNCHANGED"), []), [])
+    # quy ước accrue-only: quyền mua ĐƠN THUẦN cho factor dùng-để-báo-cáo = 1,0 một cách ĐÚNG
+    # ĐẮN. T1 neo vào factor_terp nên không được coi đó là lỗi.
+    check("paper T1: quyền mua đơn thuần (accrue-only = 1,0, terp < 1) ⇒ KHÔNG báo động giả",
+          v(_A(0.90, 1.0, "UNCHANGED"), [{"event_code": "ISS", "exright_date": "2026-08-11"}]), [])
+    for st in ("VINTAGE_STALE", "RIGHTS_UNRESOLVED", "BAD_FACTOR", "NO_DATA"):
+        check(f"paper T1: trạng thái {st} ⇒ CHẶN (đang in tỉ suất trên giá THÔ)",
+              len(v(_A(0.800794, None, st, "…"), DIV)) >= 1, True)
+
+    # 25-26: nhận diện theo NỘI DUNG — báo cáo không có mục paper thì chân này không chạy
+    import tempfile as _tf
+    with _tf.NamedTemporaryFile("w", suffix=".md", delete=False, encoding="utf-8") as fh:
+        fh.write("# báo cáo không có sổ paper\n\n| mã | % |\n|---|---|\n| FPT | +1,0% |\n")
+        p_no = fh.name
+    applied, f_ = paper_entry_gate(p_no, out=open(os.devnull, "w"))
+    check("báo cáo KHÔNG có mục paper ⇒ chân paper không áp dụng, không chặn", (applied, f_),
+          (False, []))
+    os.unlink(p_no)
+
+    # 27: coupling test THẬT với newdeals_daily_report.build_message() — thay ca cũ ("marker nhận
+    # diện đúng 2 mục paper thật") vốn so PAPER_MARKERS với một bản copy cứng của CHÍNH NÓ (tautology,
+    # không bao giờ fail được dù ai đổi tiêu đề thật). quant-skeptic vòng 3, Taylor_20260813_073404.
+    # Stub 3 nguồn dữ liệu build_message() cần (sector_lens_monitor/alphalens_report/converge_report
+    # — đều chạm BQ/cache thật) qua sys.modules; phần build header "## AlphaLens Paper Portfolio" /
+    # "## DC Book Paper Portfolio" chạy CODE THẬT của newdeals_daily_report.py, không phải giả lập.
+    import pandas as _pd
+    import types as _types
+
+    def _fake_compute_status():
+        df = _pd.DataFrame([{"ticker": "FPT", "status": "BUY", "buy_mode": "ACCUMULATE"}])
+        return {"df": df, "transitions": ["FPT BUY"], "prior": {}, "state": "BULL",
+                "spread_yoy": 0.0, "feed_ok": True, "feed_asof": "2026-08-13"}
+
+    _fake_slm = _types.ModuleType("sector_lens_monitor")
+    _fake_slm.compute_status = _fake_compute_status
+    _fake_slm.load_ratings = lambda: {"FPT": 1}
+    _fake_slm.build_telegram_message = lambda *a, **k: "<b>sector stub</b>"
+    _fake_alphalens = _types.ModuleType("alphalens_report")
+    _fake_alphalens.generate_section = lambda as_of_date=None: "alphalens stub"
+    _fake_converge = _types.ModuleType("converge_report")
+    _fake_converge.generate_section = lambda as_of_date=None, live_set=None: "converge stub"
+
+    _stub_names = ("sector_lens_monitor", "alphalens_report", "converge_report")
+    _saved_mods = {n: sys.modules.get(n) for n in _stub_names}
+    sys.modules["sector_lens_monitor"] = _fake_slm
+    sys.modules["alphalens_report"] = _fake_alphalens
+    sys.modules["converge_report"] = _fake_converge
+    sys.path.insert(0, ROOT)
+    sys.path.insert(0, os.path.join(ROOT, "mike", "bin"))
+    try:
+        import newdeals_daily_report as _ndr
+        msg, changed = _ndr.build_message()
+    finally:
+        for n in _stub_names:
+            if _saved_mods[n] is None:
+                sys.modules.pop(n, None)
+            else:
+                sys.modules[n] = _saved_mods[n]
+
+    check("coupling THẬT: build_message() nhánh có-thay-đổi → changed=True", changed, True)
+    # all(), KHÔNG any(): production chỉ cần any() để KÍCH gate (đủ 1 marker khớp), nhưng
+    # selfcheck phải bắt được CẢ HAI marker trôi độc lập — any() sẽ vẫn PASS nếu marker[0]
+    # ("AlphaLens Paper Portfolio") còn đúng trong khi marker[1] đã trôi, y hệt lỗ hổng vừa vá
+    # (reverse-proof đã chạy tay: any() không bắt được khi marker[1] bị đổi lại về giá trị cũ sai).
+    check("coupling THẬT: CẢ HAI marker khớp heading thật (fail nếu bất kỳ heading nào trôi)",
+          all(m in msg for m in PAPER_MARKERS), True)
+
+    # 28: ngày KHÔNG có gì mới — đường chạy hàng ngày thật, trước bản vá này chưa có test nào phủ.
+    # one-liner "vẫn giám sát bình thường" không được chứa marker paper nào (không kích T1/BQ oan),
+    # và run_gate() trên đúng nội dung đó phải PASS (rc=0) vì nó không mang mục paper nào cả.
+    quiet_msg = ("🆕 **NEW DEALS — 2026-08-13** — Không có deal mới / thay đổi thứ hạng đáng chú ý "
+                 "trong AlphaLens, Golden/Strong Watchlist, DC Book hôm nay. Hệ thống vẫn giám "
+                 "sát bình thường.")
+    check("ngày không đổi gì: one-liner KHÔNG chứa marker paper nào",
+          any(m in quiet_msg for m in PAPER_MARKERS), False)
+    with tempfile.NamedTemporaryFile("w", suffix="_2026-08-13.md", delete=False,
+                                      encoding="utf-8") as fh:
+        fh.write(quiet_msg)
+        p_quiet = fh.name
+    rc_quiet = run_gate(p_quiet, out=open(os.devnull, "w"))
+    os.unlink(p_quiet)
+    check("ngày không đổi gì: run_gate() PASS (rc=0, không có tài khoản/mục paper nào để chặn)",
+          rc_quiet, 0)
+
+    # 29: nhánh CRASH của _check_return_gate() (import lỗi / run_gate() tự ném exception, ca
+    # thật: gate chạm parquet cache đang ghi dở lúc overnight sync 06:00 ICT) — quant-skeptic
+    # vòng 4, Taylor_20260813_075454. Trước bản vá này alert chỉ nằm bên trong
+    # _check_return_gate() (nhánh `if rc != 0`), nên khi CHÍNH nó ném exception, main() bắt ở
+    # `except Exception` và return 3 mà KHÔNG post gì — 1 ngày gate crash không phân biệt được
+    # với 1 ngày yên ả. Stub sector_lens_monitor/alphalens_report/converge_report (build_message
+    # cần) + report_return_gate.run_gate() ném lỗi + notify_thread.sh (subprocess.run) để bắt
+    # đúng 1 lần gọi, đúng loại "crash" (không lẫn với "blocked").
+    _fake_slm2 = _types.ModuleType("sector_lens_monitor")
+    _fake_slm2.compute_status = _fake_compute_status
+    _fake_slm2.load_ratings = lambda: {"FPT": 1}
+    _fake_slm2.build_telegram_message = lambda *a, **k: "<b>sector stub</b>"
+    _fake_alphalens2 = _types.ModuleType("alphalens_report")
+    _fake_alphalens2.generate_section = lambda as_of_date=None: "alphalens stub"
+    _fake_converge2 = _types.ModuleType("converge_report")
+    _fake_converge2.generate_section = lambda as_of_date=None, live_set=None: "converge stub"
+
+    class _CrashingGate:
+        @staticmethod
+        def run_gate(*a, **k):
+            raise RuntimeError("parquet cache đang ghi dở (mô phỏng đúng overnight sync)")
+
+    _saved_mods2 = {n: sys.modules.get(n) for n in _stub_names}
+    _saved_rrg = sys.modules.get("report_return_gate")
+    sys.modules["sector_lens_monitor"] = _fake_slm2
+    sys.modules["alphalens_report"] = _fake_alphalens2
+    sys.modules["converge_report"] = _fake_converge2
+    sys.modules["report_return_gate"] = _CrashingGate
+    notify_calls = []
+    _saved_subprocess_run = _ndr.subprocess.run
+    _ndr.subprocess.run = lambda cmd, **k: notify_calls.append(cmd)
+    try:
+        rc_crash = _ndr.main()
+    finally:
+        _ndr.subprocess.run = _saved_subprocess_run
+        for n in _stub_names:
+            if _saved_mods2[n] is None:
+                sys.modules.pop(n, None)
+            else:
+                sys.modules[n] = _saved_mods2[n]
+        if _saved_rrg is None:
+            sys.modules.pop("report_return_gate", None)
+        else:
+            sys.modules["report_return_gate"] = _saved_rrg
+
+    check("nhánh CRASH: main() trả về rc=3", rc_crash, 3)
+    check("nhánh CRASH: đúng 1 alert được post", len(notify_calls), 1)
+    crash_msg = notify_calls[0][1] if notify_calls else ""
+    check("nhánh CRASH: nội dung alert đúng loại 'crash' (không lẫn 'blocked')",
+          ("TỰ CRASH" in crash_msg) and ("BLOCKED by return gate" not in crash_msg), True)
+
+    print(f"SELFCHECK: {'PASS' if ok else 'FAIL'} ({pass_count}/{len(ran)} ca)")
     return 0 if ok else 1
 
 

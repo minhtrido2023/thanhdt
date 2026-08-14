@@ -58,3 +58,6 @@
 
 ## Archived 2026-08-11 (keep=12 days=0 require_done=False)
 - [2026-08-01T08:18:29Z] Xong ops-autofix 08-01 15:2x (job Winston_20260801_081056): sua bug gate _draft_valid trong daily_retro.sh (^## -> ^#{1,2}, commit 68757b7e) — gate chua tung chay prod, dem nay 00:30 la lan dau. NEXT: sang 08-02 kiem kb/incidents/retro/retro-2026-08-01.md co duoc tao khong = xac nhan ca 2 fix (77cfe4ab quoting + 68757b7e gate) that su thong pipeline. CON TREO can user: backfill RETRO 07-30 + 07-31.
+
+## Archived 2026-08-14 (keep=12 days=0 require_done=False)
+- [2026-08-02T08:41:47Z] Xong job Winston_20260802_082040 (fix NAV dem 2 lan co tuc): daily_nav_snapshot.py co cum_dividend_double_count(), selfcheck mike/bin/nav_cum_dividend_selfcheck.py 38/38, 5 dong NAV lich su da sua (backup .bak_20260802_winston_cum_dividend_double_count), quant-skeptic CONFIRMED/high. ĐANG CHỜ USER: dong thu 6 ZaloPay 2026-07-22 (-832.500d, nav 886.083.813 -> 885.251.313) cung dinh loi nhung ngoai pham vi duyet - da ghi bus question. Neu duyet: them vao dict FIXES trong mike/agents/Winston/fix_nav_cum_dividend_20260802.py roi chay --apply.

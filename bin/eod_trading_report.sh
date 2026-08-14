@@ -279,6 +279,46 @@ if reconciled:
         if real != internal:
             mismatches.append((sym, internal, real, real - internal))
 
+# ---- LEG 3: statement DNSE tự phát hành (email ~16:30 ICT) -------------------
+# Hai leg trên (state.json, dnse_raw) ĐỀU do tiến trình bot của mình ghi ⇒ cùng chết chung khi
+# bot lỗi/bị kill, và cả hai đều MÙ với fill trên mã ngoài plan (leg dnse_raw lọc thẳng
+# `sym not in plan_tickers`). Leg 3 đi qua đường dữ liệu khác hẳn: file DNSE tự phát hành.
+# Fail-safe tuyệt đối: report chạy 19:10 ICT còn email tới ~16:30 — nhưng nếu email trễ/thiếu
+# thì chỉ in 1 dòng "bỏ qua", KHÔNG được làm hỏng báo cáo (coding_guidelines §27 + skill
+# dnse-fill-reconciliation). Chi tiết cơ chế: mike/bin/broker_fill_confirm.py.
+broker_lines = []
+broker_escalate = []
+try:
+    sys.path.insert(0, os.path.join(wc_root, 'mike', 'bin'))
+    from broker_fill_confirm import load_broker_fills, reconcile_lines
+
+    plan_by_key = {}
+    for o in orders_by_id.values():
+        k = (o.get('ticker'), o.get('side'))
+        if k[0] and k[1]:
+            plan_by_key[k] = plan_by_key.get(k, 0) + (o.get('qty') or 0)
+    state_by_key = {}
+    for oid, p in parents.items():
+        o = orders_by_id.get(oid, {})
+        k = (o.get('ticker'), o.get('side'))
+        if k[0] and k[1]:
+            state_by_key[k] = state_by_key.get(k, 0) + p.get('filled', 0)
+
+    _bk = load_broker_fills(plan_date, account, wc_root)
+    broker_lines = reconcile_lines(_bk, plan_by_key, state_by_key)
+    if _bk.available:
+        # CHỈ escalate khi hai nguồn ĐỘC LẬP bất đồng (nghi bug/lệnh ngoài luồng). Khớp thiếu
+        # so với kế hoạch KHÔNG escalate — đó là thanh khoản mỏng, hành vi thị trường bình
+        # thường (ca TV1 2026-08-11), escalate sẽ thành báo động giả mỗi phiên.
+        for k in set(plan_by_key) | set(state_by_key) | set(_bk.by_key):
+            real, internal = _bk.qty(*k), state_by_key.get(k, 0)
+            if real != internal or (k not in plan_by_key and real > 0):
+                broker_escalate.append({'ticker': k[0], 'side': k[1],
+                                        'state_filled': internal, 'broker_filled': real,
+                                        'in_plan': k in plan_by_key})
+except Exception as e:
+    broker_lines = [f"ℹ️ Đối soát broker-statement (leg 3): bỏ qua — lỗi {type(e).__name__}."]
+
 rows = []
 tot_value_planned = 0
 tot_value_filled = 0
@@ -343,6 +383,10 @@ elif reconciled:
 else:
     lines.append("ℹ️ Không đối soát được (không có dnse_raw log — bình thường nếu account paper).")
     lines.append("")
+for _bl in broker_lines:
+    lines.append(_bl)
+if broker_lines:
+    lines.append("")
 lines.append(f"Tổng lệnh: **{len(rows)}** ({n_buy} mua / {n_sell} bán) | "
              f"Khớp đủ: {n_full} | Khớp một phần: {n_partial} | Chưa khớp: {n_zero}")
 lines.append("")
@@ -377,11 +421,14 @@ print("\n".join(lines))
 # Ghi mismatch ra file máy-đọc-được (nếu có) để bash phía dưới quyết định có kích hoạt
 # kiểm toán độc lập hay không — tách khỏi text Discord để không phải parse markdown.
 mismatch_file = os.path.join(os.path.dirname(state_file), f'eod_mismatch_{account}_{plan_date}.json')
-if mismatches:
+if mismatches or broker_escalate:
+    # Leg 3 dùng LẠI đúng cơ chế escalate sẵn có (file cờ → dispatch risk-auditor bên dưới),
+    # không dựng đường escalate thứ hai song song.
     with open(mismatch_file, 'w', encoding='utf-8') as f:
         json.dump({'account': account, 'plan_date': plan_date,
                    'mismatches': [{'ticker': s, 'state_filled': i, 'broker_filled': r, 'diff': d}
-                                  for s, i, r, d in mismatches]}, f, ensure_ascii=False, indent=2)
+                                  for s, i, r, d in mismatches],
+                   'broker_statement_mismatches': broker_escalate}, f, ensure_ascii=False, indent=2)
 elif os.path.exists(mismatch_file):
     os.remove(mismatch_file)  # ngày trước có lệch, hôm nay sạch -> dọn cờ cũ
 PYEOF

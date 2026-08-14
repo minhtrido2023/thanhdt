@@ -18,3 +18,6 @@
 
 ## Archived 2026-08-10 (keep=6 days=5 require_done=True)
 - [2026-07-16T17:14:40Z] Job Mafee_20260716_170856 XONG: Trứng vàng KHÔNG có trên DNSE OpenAPI (probe 22 pattern 404 + docs + SDK chính thức đều không có; balances() khớp từng đồng 4/5 mục app, chỉ thiếu Trứng vàng — tiền nằm ngoài tiểu khoản giao dịch). Đề xuất manual_assets config cho daily_nav_snapshot đã ghi bus, CHỜ duyệt. Không có việc dở.
+
+## Archived 2026-08-13 (keep=6 days=5 require_done=True)
+- [2026-07-21T12:21:05Z] DONE 2026-07-21: fix eod_trading_report.sh bug — dnse_raw không filter account_no, ZaloPay/SpaceX thấy fills của nhau → false positive mismatch. Fix: lookup account_id từ secrets (list với label field), filter rec['account_no'] != target trước khi process. False-positive mismatch files đã xóa. PVT có 1 share diff thật nhưng không phải cross-account. NEXT: monitor cron 15:00 ICT ngày mai để xác nhận report sạch.

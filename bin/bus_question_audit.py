@@ -37,6 +37,11 @@ import re
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# BUS_AUDIT_ROOT: trỏ sang một cây bus GIẢ để test. Thêm 2026-08-14 vì check_report_cadence.sh
+# nay gọi script này làm matcher chính thống (thay vì tự nuôi bản copy thứ 3) — muốn khoá hồi
+# quy cho ca "hỏi lại cùng topic sau answer cũ" và "question nằm trong archive .jsonl.gz" thì
+# phải chạy được matcher trên bus dựng sẵn. Không set ⇒ hành vi y hệt trước.
+ROOT = os.environ.get("BUS_AUDIT_ROOT") or ROOT
 INBOX_DIR = os.path.join(ROOT, "bus", "inbox")
 
 

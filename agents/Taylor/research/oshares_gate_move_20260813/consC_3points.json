@@ -1,0 +1,1875 @@
+{
+ "asof": "2026-08-13",
+ "diff_gate_off_to_on": {
+  "check_retro": {
+   "n_changed": 2,
+   "rows": {
+    "EVF": {
+     "after": {
+      "anchor_date": "2024-12-06",
+      "anchor_source": "corporate_action.AIS",
+      "method": "AIS_UNCERTIFIED",
+      "uncertified_value": 704248289.0,
+      "value": null
+     },
+     "before": {
+      "anchor_date": "2024-12-06",
+      "anchor_source": "corporate_action.AIS",
+      "method": "AIS_EXACT",
+      "uncertified_value": null,
+      "value": 704248289.0
+     },
+     "held": true
+    },
+    "SHB": {
+     "after": {
+      "anchor_date": "2025-10-07",
+      "anchor_source": "corporate_action.AIS",
+      "method": "AIS_UNCERTIFIED",
+      "uncertified_value": 5377339511.750105,
+      "value": null
+     },
+     "before": {
+      "anchor_date": "2025-10-07",
+      "anchor_source": "corporate_action.AIS",
+      "method": "ISS_ESTIMATE",
+      "uncertified_value": null,
+      "value": 5377339511.750105
+     },
+     "held": true
+    }
+   },
+   "tickers": [
+    "EVF",
+    "SHB"
+   ]
+  },
+  "crosscheck": {
+   "n_changed": 3,
+   "rows": {
+    "EVF": {
+     "after": {
+      "anchor_date": "2024-12-06",
+      "anchor_source": "corporate_action.AIS",
+      "kind": "NO_MODEL_VALUE",
+      "method": "AIS_UNCERTIFIED",
+      "quarter_date": "2026-07-21",
+      "ticker_financial": 760565802.0,
+      "uncertified_value": 704248289.0,
+      "value": null
+     },
+     "before": {
+      "anchor_date": "2024-12-06",
+      "anchor_source": "corporate_action.AIS",
+      "err_pct_vs_ticker_financial": 7.404686465248145,
+      "kind": "DIVERGENT",
+      "method": "AIS_EXACT",
+      "quarter_date": "2026-07-21",
+      "ticker_financial": 760565802.0,
+      "uncertified_value": null,
+      "value": 704248289.0
+     },
+     "held": true
+    },
+    "SHB": {
+     "after": {
+      "anchor_date": "2025-10-07",
+      "anchor_source": "corporate_action.AIS",
+      "kind": "NO_MODEL_VALUE",
+      "method": "AIS_UNCERTIFIED",
+      "quarter_date": "2026-07-30",
+      "ticker_financial": 5343703838.0,
+      "uncertified_value": 5377339511.750105,
+      "value": null
+     },
+     "before": {
+      "anchor_date": "2025-10-07",
+      "anchor_source": "corporate_action.AIS",
+      "err_pct_vs_ticker_financial": 0.6294449462359014,
+      "kind": "DIVERGENT",
+      "method": "ISS_ESTIMATE",
+      "quarter_date": "2026-07-30",
+      "ticker_financial": 5343703838.0,
+      "uncertified_value": null,
+      "value": 5377339511.750105
+     },
+     "held": true
+    },
+    "TCB": {
+     "after": {
+      "anchor_date": "2025-12-01",
+      "anchor_source": "corporate_action.AIS",
+      "kind": "NO_MODEL_VALUE",
+      "method": "AIS_UNCERTIFIED",
+      "quarter_date": "2026-07-21",
+      "ticker_financial": 7086240414.0,
+      "uncertified_value": 7064851739.0,
+      "value": null
+     },
+     "before": {
+      "anchor_date": "2025-12-01",
+      "anchor_source": "corporate_action.AIS",
+      "err_pct_vs_ticker_financial": 0.3018338886406289,
+      "kind": "DIVERGENT",
+      "method": "AIS_EXACT",
+      "quarter_date": "2026-07-21",
+      "ticker_financial": 7086240414.0,
+      "uncertified_value": null,
+      "value": 7064851739.0
+     },
+     "held": true
+    }
+   },
+   "tickers": [
+    "EVF",
+    "SHB",
+    "TCB"
+   ]
+  },
+  "publish": {
+   "n_changed": 2,
+   "rows": {
+    "EVF": {
+     "after": {
+      "anchor_date": "2024-12-06",
+      "anchor_source": "corporate_action.AIS",
+      "method": "AIS_UNCERTIFIED",
+      "uncertified_value": 704248289.0,
+      "value": null
+     },
+     "before": {
+      "anchor_date": "2024-12-06",
+      "anchor_source": "corporate_action.AIS",
+      "method": "AIS_EXACT",
+      "uncertified_value": null,
+      "value": 704248289.0
+     },
+     "held": true
+    },
+    "SHB": {
+     "after": {
+      "anchor_date": "2025-10-07",
+      "anchor_source": "corporate_action.AIS",
+      "method": "AIS_UNCERTIFIED",
+      "uncertified_value": 5377339511.750105,
+      "value": null
+     },
+     "before": {
+      "anchor_date": "2025-10-07",
+      "anchor_source": "corporate_action.AIS",
+      "method": "ISS_ESTIMATE",
+      "uncertified_value": null,
+      "value": 5377339511.750105
+     },
+     "held": true
+    }
+   },
+   "tickers": [
+    "EVF",
+    "SHB"
+   ]
+  }
+ },
+ "held": [
+  "ACB",
+  "BID",
+  "CSV",
+  "CTG",
+  "DGC",
+  "DRI",
+  "EVF",
+  "HDB",
+  "HPG",
+  "LPB",
+  "MBB",
+  "MSB",
+  "NCT",
+  "PVT",
+  "SAB",
+  "SCL",
+  "SHB",
+  "SIP",
+  "TCB",
+  "TPB",
+  "TV1",
+  "VCB",
+  "VHM",
+  "VIB",
+  "VIX",
+  "VND",
+  "VNM",
+  "VPB",
+  "VRE"
+ ],
+ "legs": {
+  "gate_off": {
+   "check_retro": {
+    "at": "2026-08-12",
+    "n": 33,
+    "rows": {
+     "ACB": {
+      "anchor_date": "2026-07-22",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 5804421957.0
+     },
+     "BCF": {
+      "anchor_date": "2026-07-29",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 37964770.0
+     },
+     "BID": {
+      "anchor_date": "2026-07-31",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 7280065210.0
+     },
+     "CSV": {
+      "anchor_date": "2026-07-21",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 110499910.0
+     },
+     "CTG": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 7766944637.0
+     },
+     "DGC": {
+      "anchor_date": "2026-07-22",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 379778413.0
+     },
+     "DHN": {
+      "anchor_date": null,
+      "anchor_source": null,
+      "method": "NO_ANCHOR",
+      "uncertified_value": null,
+      "value": null
+     },
+     "DRI": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_UNVERIFIED",
+      "uncertified_value": null,
+      "value": 73200000.0
+     },
+     "EVF": {
+      "anchor_date": "2024-12-06",
+      "anchor_source": "corporate_action.AIS",
+      "method": "AIS_EXACT",
+      "uncertified_value": null,
+      "value": 704248289.0
+     },
+     "HDB": {
+      "anchor_date": "2026-07-31",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 5005276323.0
+     },
+     "HGM": {
+      "anchor_date": "2026-07-22",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_UNVERIFIED",
+      "uncertified_value": null,
+      "value": 12600000.0
+     },
+     "HPG": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 8442964520.0
+     },
+     "LPB": {
+      "anchor_date": "2026-07-21",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 2987282100.0
+     },
+     "MBB": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ISS_ESTIMATE",
+      "uncertified_value": null,
+      "value": 10189574884.885
+     },
+     "MSB": {
+      "anchor_date": "2026-07-31",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 3120000000.0
+     },
+     "NCT": {
+      "anchor_date": "2026-07-21",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 26165732.0
+     },
+     "PVT": {
+      "anchor_date": "2026-07-29",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 516918938.0
+     },
+     "SAB": {
+      "anchor_date": "2026-07-23",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 1282562372.0
+     },
+     "SAC": {
+      "anchor_date": "2020-11-02",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_UNVERIFIED",
+      "uncertified_value": null,
+      "value": 4050000.0
+     },
+     "SCL": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 38836815.0
+     },
+     "SHB": {
+      "anchor_date": "2025-10-07",
+      "anchor_source": "corporate_action.AIS",
+      "method": "ISS_ESTIMATE",
+      "uncertified_value": null,
+      "value": 5377339511.750105
+     },
+     "SIP": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 242112943.0
+     },
+     "TCB": {
+      "anchor_date": "2026-08-05",
+      "anchor_source": "corporate_action.AIS",
+      "method": "AIS_EXACT",
+      "uncertified_value": null,
+      "value": 7086240414.0
+     },
+     "TPB": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 2774046873.0
+     },
+     "TV1": {
+      "anchor_date": "2026-08-03",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_UNVERIFIED",
+      "uncertified_value": null,
+      "value": 26691319.0
+     },
+     "VCB": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 8355675094.0
+     },
+     "VHM": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ISS_ESTIMATE",
+      "uncertified_value": null,
+      "value": 8214824008.0
+     },
+     "VIB": {
+      "anchor_date": "2026-07-28",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 3404005710.0
+     },
+     "VIX": {
+      "anchor_date": "2026-07-20",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 2450287772.0
+     },
+     "VND": {
+      "anchor_date": "2026-07-20",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 1522299908.0
+     },
+     "VNM": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 2089955445.0
+     },
+     "VPB": {
+      "anchor_date": "2022-11-08",
+      "anchor_source": "corporate_action.AIS",
+      "method": "UNKNOWN_RATIO",
+      "uncertified_value": null,
+      "value": null
+     },
+     "VRE": {
+      "anchor_date": "2018-12-26",
+      "anchor_source": "corporate_action.AIS",
+      "method": "AIS_EXACT",
+      "uncertified_value": null,
+      "value": 2328818410.0
+     }
+    },
+    "synthetic": true
+   },
+   "crosscheck": {
+    "at": "ngày dòng quý của TỪNG mã",
+    "n": 32,
+    "rows": {
+     "ACB": {
+      "anchor_date": "2026-07-22",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-22",
+      "ticker_financial": 5804421957.0,
+      "uncertified_value": null,
+      "value": 5804421957.0
+     },
+     "BCF": {
+      "anchor_date": "2026-07-29",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-29",
+      "ticker_financial": 37964770.0,
+      "uncertified_value": null,
+      "value": 37964770.0
+     },
+     "BID": {
+      "anchor_date": "2026-07-31",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-31",
+      "ticker_financial": 7280065210.0,
+      "uncertified_value": null,
+      "value": 7280065210.0
+     },
+     "CSV": {
+      "anchor_date": "2026-07-21",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-21",
+      "ticker_financial": 110499910.0,
+      "uncertified_value": null,
+      "value": 110499910.0
+     },
+     "CTG": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-30",
+      "ticker_financial": 7766944637.0,
+      "uncertified_value": null,
+      "value": 7766944637.0
+     },
+     "DGC": {
+      "anchor_date": "2026-07-22",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-22",
+      "ticker_financial": 379778413.0,
+      "uncertified_value": null,
+      "value": 379778413.0
+     },
+     "DRI": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_UNVERIFIED",
+      "quarter_date": "2026-07-30",
+      "ticker_financial": 73200000.0,
+      "uncertified_value": null,
+      "value": 73200000.0
+     },
+     "EVF": {
+      "anchor_date": "2024-12-06",
+      "anchor_source": "corporate_action.AIS",
+      "err_pct_vs_ticker_financial": 7.404686465248145,
+      "kind": "DIVERGENT",
+      "method": "AIS_EXACT",
+      "quarter_date": "2026-07-21",
+      "ticker_financial": 760565802.0,
+      "uncertified_value": null,
+      "value": 704248289.0
+     },
+     "HDB": {
+      "anchor_date": "2026-07-31",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-31",
+      "ticker_financial": 5005276323.0,
+      "uncertified_value": null,
+      "value": 5005276323.0
+     },
+     "HGM": {
+      "anchor_date": "2026-07-22",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_UNVERIFIED",
+      "quarter_date": "2026-07-22",
+      "ticker_financial": 12600000.0,
+      "uncertified_value": null,
+      "value": 12600000.0
+     },
+     "HPG": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-30",
+      "ticker_financial": 8442964520.0,
+      "uncertified_value": null,
+      "value": 8442964520.0
+     },
+     "LPB": {
+      "anchor_date": "2026-07-21",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-21",
+      "ticker_financial": 2987282100.0,
+      "uncertified_value": null,
+      "value": 2987282100.0
+     },
+     "MBB": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-30",
+      "ticker_financial": 8054999909.0,
+      "uncertified_value": null,
+      "value": 8054999909.0
+     },
+     "MSB": {
+      "anchor_date": "2026-07-31",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-31",
+      "ticker_financial": 3120000000.0,
+      "uncertified_value": null,
+      "value": 3120000000.0
+     },
+     "NCT": {
+      "anchor_date": "2026-07-21",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-21",
+      "ticker_financial": 26165732.0,
+      "uncertified_value": null,
+      "value": 26165732.0
+     },
+     "PVT": {
+      "anchor_date": "2026-07-29",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-29",
+      "ticker_financial": 516918938.0,
+      "uncertified_value": null,
+      "value": 516918938.0
+     },
+     "SAB": {
+      "anchor_date": "2026-07-23",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-23",
+      "ticker_financial": 1282562372.0,
+      "uncertified_value": null,
+      "value": 1282562372.0
+     },
+     "SAC": {
+      "anchor_date": "2020-11-02",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_UNVERIFIED",
+      "quarter_date": "2020-11-02",
+      "ticker_financial": 4050000.0,
+      "uncertified_value": null,
+      "value": 4050000.0
+     },
+     "SCL": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-30",
+      "ticker_financial": 38836815.0,
+      "uncertified_value": null,
+      "value": 38836815.0
+     },
+     "SHB": {
+      "anchor_date": "2025-10-07",
+      "anchor_source": "corporate_action.AIS",
+      "err_pct_vs_ticker_financial": 0.6294449462359014,
+      "kind": "DIVERGENT",
+      "method": "ISS_ESTIMATE",
+      "quarter_date": "2026-07-30",
+      "ticker_financial": 5343703838.0,
+      "uncertified_value": null,
+      "value": 5377339511.750105
+     },
+     "SIP": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-30",
+      "ticker_financial": 242112943.0,
+      "uncertified_value": null,
+      "value": 242112943.0
+     },
+     "TCB": {
+      "anchor_date": "2025-12-01",
+      "anchor_source": "corporate_action.AIS",
+      "err_pct_vs_ticker_financial": 0.3018338886406289,
+      "kind": "DIVERGENT",
+      "method": "AIS_EXACT",
+      "quarter_date": "2026-07-21",
+      "ticker_financial": 7086240414.0,
+      "uncertified_value": null,
+      "value": 7064851739.0
+     },
+     "TPB": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-30",
+      "ticker_financial": 2774046873.0,
+      "uncertified_value": null,
+      "value": 2774046873.0
+     },
+     "TV1": {
+      "anchor_date": "2026-08-03",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_UNVERIFIED",
+      "quarter_date": "2026-08-03",
+      "ticker_financial": 26691319.0,
+      "uncertified_value": null,
+      "value": 26691319.0
+     },
+     "VCB": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-30",
+      "ticker_financial": 8355675094.0,
+      "uncertified_value": null,
+      "value": 8355675094.0
+     },
+     "VHM": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-30",
+      "ticker_financial": 4107412004.0,
+      "uncertified_value": null,
+      "value": 4107412004.0
+     },
+     "VIB": {
+      "anchor_date": "2026-07-28",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-28",
+      "ticker_financial": 3404005710.0,
+      "uncertified_value": null,
+      "value": 3404005710.0
+     },
+     "VIX": {
+      "anchor_date": "2026-07-20",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-20",
+      "ticker_financial": 2450287772.0,
+      "uncertified_value": null,
+      "value": 2450287772.0
+     },
+     "VND": {
+      "anchor_date": "2026-07-20",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-20",
+      "ticker_financial": 1522299908.0,
+      "uncertified_value": null,
+      "value": 1522299908.0
+     },
+     "VNM": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-30",
+      "ticker_financial": 2089955445.0,
+      "uncertified_value": null,
+      "value": 2089955445.0
+     },
+     "VPB": {
+      "anchor_date": "2022-11-08",
+      "anchor_source": "corporate_action.AIS",
+      "kind": "NO_MODEL_VALUE",
+      "method": "UNKNOWN_RATIO",
+      "quarter_date": "2026-07-20",
+      "ticker_financial": 7933923601.0,
+      "uncertified_value": null,
+      "value": null
+     },
+     "VRE": {
+      "anchor_date": "2018-12-26",
+      "anchor_source": "corporate_action.AIS",
+      "err_pct_vs_ticker_financial": 2.4864473108766476,
+      "kind": "DIVERGENT",
+      "method": "AIS_EXACT",
+      "quarter_date": "2026-07-29",
+      "ticker_financial": 2272318410.0,
+      "uncertified_value": null,
+      "value": 2328818410.0
+     }
+    }
+   },
+   "publish": {
+    "at": "2026-08-13",
+    "n": 33,
+    "rows": {
+     "ACB": {
+      "anchor_date": "2026-07-22",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 5804421957.0
+     },
+     "BCF": {
+      "anchor_date": "2026-07-29",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 37964770.0
+     },
+     "BID": {
+      "anchor_date": "2026-07-31",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 7280065210.0
+     },
+     "CSV": {
+      "anchor_date": "2026-07-21",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 110499910.0
+     },
+     "CTG": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 7766944637.0
+     },
+     "DGC": {
+      "anchor_date": "2026-07-22",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 379778413.0
+     },
+     "DHN": {
+      "anchor_date": null,
+      "anchor_source": null,
+      "method": "NO_ANCHOR",
+      "uncertified_value": null,
+      "value": null
+     },
+     "DRI": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_UNVERIFIED",
+      "uncertified_value": null,
+      "value": 73200000.0
+     },
+     "EVF": {
+      "anchor_date": "2024-12-06",
+      "anchor_source": "corporate_action.AIS",
+      "method": "AIS_EXACT",
+      "uncertified_value": null,
+      "value": 704248289.0
+     },
+     "HDB": {
+      "anchor_date": "2026-07-31",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 5005276323.0
+     },
+     "HGM": {
+      "anchor_date": "2026-07-22",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_UNVERIFIED",
+      "uncertified_value": null,
+      "value": 12600000.0
+     },
+     "HPG": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 8442964520.0
+     },
+     "LPB": {
+      "anchor_date": "2026-07-21",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 2987282100.0
+     },
+     "MBB": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ISS_ESTIMATE",
+      "uncertified_value": null,
+      "value": 10189574884.885
+     },
+     "MSB": {
+      "anchor_date": "2026-07-31",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 3120000000.0
+     },
+     "NCT": {
+      "anchor_date": "2026-07-21",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 26165732.0
+     },
+     "PVT": {
+      "anchor_date": "2026-07-29",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 516918938.0
+     },
+     "SAB": {
+      "anchor_date": "2026-07-23",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 1282562372.0
+     },
+     "SAC": {
+      "anchor_date": "2020-11-02",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_UNVERIFIED",
+      "uncertified_value": null,
+      "value": 4050000.0
+     },
+     "SCL": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 38836815.0
+     },
+     "SHB": {
+      "anchor_date": "2025-10-07",
+      "anchor_source": "corporate_action.AIS",
+      "method": "ISS_ESTIMATE",
+      "uncertified_value": null,
+      "value": 5377339511.750105
+     },
+     "SIP": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 242112943.0
+     },
+     "TCB": {
+      "anchor_date": "2026-08-05",
+      "anchor_source": "corporate_action.AIS",
+      "method": "AIS_EXACT",
+      "uncertified_value": null,
+      "value": 7086240414.0
+     },
+     "TPB": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 2774046873.0
+     },
+     "TV1": {
+      "anchor_date": "2026-08-03",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_UNVERIFIED",
+      "uncertified_value": null,
+      "value": 26691319.0
+     },
+     "VCB": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 8355675094.0
+     },
+     "VHM": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ISS_ESTIMATE",
+      "uncertified_value": null,
+      "value": 8214824008.0
+     },
+     "VIB": {
+      "anchor_date": "2026-07-28",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 3404005710.0
+     },
+     "VIX": {
+      "anchor_date": "2026-07-20",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 2450287772.0
+     },
+     "VND": {
+      "anchor_date": "2026-07-20",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 1522299908.0
+     },
+     "VNM": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 2089955445.0
+     },
+     "VPB": {
+      "anchor_date": "2022-11-08",
+      "anchor_source": "corporate_action.AIS",
+      "method": "UNKNOWN_RATIO",
+      "uncertified_value": null,
+      "value": null
+     },
+     "VRE": {
+      "anchor_date": "2018-12-26",
+      "anchor_source": "corporate_action.AIS",
+      "method": "AIS_EXACT",
+      "uncertified_value": null,
+      "value": 2328818410.0
+     }
+    }
+   }
+  },
+  "gate_on": {
+   "check_retro": {
+    "at": "2026-08-12",
+    "n": 33,
+    "rows": {
+     "ACB": {
+      "anchor_date": "2026-07-22",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 5804421957.0
+     },
+     "BCF": {
+      "anchor_date": "2026-07-29",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 37964770.0
+     },
+     "BID": {
+      "anchor_date": "2026-07-31",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 7280065210.0
+     },
+     "CSV": {
+      "anchor_date": "2026-07-21",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 110499910.0
+     },
+     "CTG": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 7766944637.0
+     },
+     "DGC": {
+      "anchor_date": "2026-07-22",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 379778413.0
+     },
+     "DHN": {
+      "anchor_date": null,
+      "anchor_source": null,
+      "method": "NO_ANCHOR",
+      "uncertified_value": null,
+      "value": null
+     },
+     "DRI": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_UNVERIFIED",
+      "uncertified_value": null,
+      "value": 73200000.0
+     },
+     "EVF": {
+      "anchor_date": "2024-12-06",
+      "anchor_source": "corporate_action.AIS",
+      "method": "AIS_UNCERTIFIED",
+      "uncertified_value": 704248289.0,
+      "value": null
+     },
+     "HDB": {
+      "anchor_date": "2026-07-31",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 5005276323.0
+     },
+     "HGM": {
+      "anchor_date": "2026-07-22",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_UNVERIFIED",
+      "uncertified_value": null,
+      "value": 12600000.0
+     },
+     "HPG": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 8442964520.0
+     },
+     "LPB": {
+      "anchor_date": "2026-07-21",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 2987282100.0
+     },
+     "MBB": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ISS_ESTIMATE",
+      "uncertified_value": null,
+      "value": 10189574884.885
+     },
+     "MSB": {
+      "anchor_date": "2026-07-31",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 3120000000.0
+     },
+     "NCT": {
+      "anchor_date": "2026-07-21",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 26165732.0
+     },
+     "PVT": {
+      "anchor_date": "2026-07-29",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 516918938.0
+     },
+     "SAB": {
+      "anchor_date": "2026-07-23",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 1282562372.0
+     },
+     "SAC": {
+      "anchor_date": "2020-11-02",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_UNVERIFIED",
+      "uncertified_value": null,
+      "value": 4050000.0
+     },
+     "SCL": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 38836815.0
+     },
+     "SHB": {
+      "anchor_date": "2025-10-07",
+      "anchor_source": "corporate_action.AIS",
+      "method": "AIS_UNCERTIFIED",
+      "uncertified_value": 5377339511.750105,
+      "value": null
+     },
+     "SIP": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 242112943.0
+     },
+     "TCB": {
+      "anchor_date": "2026-08-05",
+      "anchor_source": "corporate_action.AIS",
+      "method": "AIS_EXACT",
+      "uncertified_value": null,
+      "value": 7086240414.0
+     },
+     "TPB": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 2774046873.0
+     },
+     "TV1": {
+      "anchor_date": "2026-08-03",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_UNVERIFIED",
+      "uncertified_value": null,
+      "value": 26691319.0
+     },
+     "VCB": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 8355675094.0
+     },
+     "VHM": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ISS_ESTIMATE",
+      "uncertified_value": null,
+      "value": 8214824008.0
+     },
+     "VIB": {
+      "anchor_date": "2026-07-28",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 3404005710.0
+     },
+     "VIX": {
+      "anchor_date": "2026-07-20",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 2450287772.0
+     },
+     "VND": {
+      "anchor_date": "2026-07-20",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 1522299908.0
+     },
+     "VNM": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 2089955445.0
+     },
+     "VPB": {
+      "anchor_date": "2022-11-08",
+      "anchor_source": "corporate_action.AIS",
+      "method": "UNKNOWN_RATIO",
+      "uncertified_value": null,
+      "value": null
+     },
+     "VRE": {
+      "anchor_date": "2018-12-26",
+      "anchor_source": "corporate_action.AIS",
+      "method": "AIS_EXACT",
+      "uncertified_value": null,
+      "value": 2328818410.0
+     }
+    },
+    "synthetic": true
+   },
+   "crosscheck": {
+    "at": "ngày dòng quý của TỪNG mã",
+    "n": 32,
+    "rows": {
+     "ACB": {
+      "anchor_date": "2026-07-22",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-22",
+      "ticker_financial": 5804421957.0,
+      "uncertified_value": null,
+      "value": 5804421957.0
+     },
+     "BCF": {
+      "anchor_date": "2026-07-29",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-29",
+      "ticker_financial": 37964770.0,
+      "uncertified_value": null,
+      "value": 37964770.0
+     },
+     "BID": {
+      "anchor_date": "2026-07-31",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-31",
+      "ticker_financial": 7280065210.0,
+      "uncertified_value": null,
+      "value": 7280065210.0
+     },
+     "CSV": {
+      "anchor_date": "2026-07-21",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-21",
+      "ticker_financial": 110499910.0,
+      "uncertified_value": null,
+      "value": 110499910.0
+     },
+     "CTG": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-30",
+      "ticker_financial": 7766944637.0,
+      "uncertified_value": null,
+      "value": 7766944637.0
+     },
+     "DGC": {
+      "anchor_date": "2026-07-22",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-22",
+      "ticker_financial": 379778413.0,
+      "uncertified_value": null,
+      "value": 379778413.0
+     },
+     "DRI": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_UNVERIFIED",
+      "quarter_date": "2026-07-30",
+      "ticker_financial": 73200000.0,
+      "uncertified_value": null,
+      "value": 73200000.0
+     },
+     "EVF": {
+      "anchor_date": "2024-12-06",
+      "anchor_source": "corporate_action.AIS",
+      "kind": "NO_MODEL_VALUE",
+      "method": "AIS_UNCERTIFIED",
+      "quarter_date": "2026-07-21",
+      "ticker_financial": 760565802.0,
+      "uncertified_value": 704248289.0,
+      "value": null
+     },
+     "HDB": {
+      "anchor_date": "2026-07-31",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-31",
+      "ticker_financial": 5005276323.0,
+      "uncertified_value": null,
+      "value": 5005276323.0
+     },
+     "HGM": {
+      "anchor_date": "2026-07-22",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_UNVERIFIED",
+      "quarter_date": "2026-07-22",
+      "ticker_financial": 12600000.0,
+      "uncertified_value": null,
+      "value": 12600000.0
+     },
+     "HPG": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-30",
+      "ticker_financial": 8442964520.0,
+      "uncertified_value": null,
+      "value": 8442964520.0
+     },
+     "LPB": {
+      "anchor_date": "2026-07-21",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-21",
+      "ticker_financial": 2987282100.0,
+      "uncertified_value": null,
+      "value": 2987282100.0
+     },
+     "MBB": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-30",
+      "ticker_financial": 8054999909.0,
+      "uncertified_value": null,
+      "value": 8054999909.0
+     },
+     "MSB": {
+      "anchor_date": "2026-07-31",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-31",
+      "ticker_financial": 3120000000.0,
+      "uncertified_value": null,
+      "value": 3120000000.0
+     },
+     "NCT": {
+      "anchor_date": "2026-07-21",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-21",
+      "ticker_financial": 26165732.0,
+      "uncertified_value": null,
+      "value": 26165732.0
+     },
+     "PVT": {
+      "anchor_date": "2026-07-29",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-29",
+      "ticker_financial": 516918938.0,
+      "uncertified_value": null,
+      "value": 516918938.0
+     },
+     "SAB": {
+      "anchor_date": "2026-07-23",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-23",
+      "ticker_financial": 1282562372.0,
+      "uncertified_value": null,
+      "value": 1282562372.0
+     },
+     "SAC": {
+      "anchor_date": "2020-11-02",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_UNVERIFIED",
+      "quarter_date": "2020-11-02",
+      "ticker_financial": 4050000.0,
+      "uncertified_value": null,
+      "value": 4050000.0
+     },
+     "SCL": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-30",
+      "ticker_financial": 38836815.0,
+      "uncertified_value": null,
+      "value": 38836815.0
+     },
+     "SHB": {
+      "anchor_date": "2025-10-07",
+      "anchor_source": "corporate_action.AIS",
+      "kind": "NO_MODEL_VALUE",
+      "method": "AIS_UNCERTIFIED",
+      "quarter_date": "2026-07-30",
+      "ticker_financial": 5343703838.0,
+      "uncertified_value": 5377339511.750105,
+      "value": null
+     },
+     "SIP": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-30",
+      "ticker_financial": 242112943.0,
+      "uncertified_value": null,
+      "value": 242112943.0
+     },
+     "TCB": {
+      "anchor_date": "2025-12-01",
+      "anchor_source": "corporate_action.AIS",
+      "kind": "NO_MODEL_VALUE",
+      "method": "AIS_UNCERTIFIED",
+      "quarter_date": "2026-07-21",
+      "ticker_financial": 7086240414.0,
+      "uncertified_value": 7064851739.0,
+      "value": null
+     },
+     "TPB": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-30",
+      "ticker_financial": 2774046873.0,
+      "uncertified_value": null,
+      "value": 2774046873.0
+     },
+     "TV1": {
+      "anchor_date": "2026-08-03",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_UNVERIFIED",
+      "quarter_date": "2026-08-03",
+      "ticker_financial": 26691319.0,
+      "uncertified_value": null,
+      "value": 26691319.0
+     },
+     "VCB": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-30",
+      "ticker_financial": 8355675094.0,
+      "uncertified_value": null,
+      "value": 8355675094.0
+     },
+     "VHM": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-30",
+      "ticker_financial": 4107412004.0,
+      "uncertified_value": null,
+      "value": 4107412004.0
+     },
+     "VIB": {
+      "anchor_date": "2026-07-28",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-28",
+      "ticker_financial": 3404005710.0,
+      "uncertified_value": null,
+      "value": 3404005710.0
+     },
+     "VIX": {
+      "anchor_date": "2026-07-20",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-20",
+      "ticker_financial": 2450287772.0,
+      "uncertified_value": null,
+      "value": 2450287772.0
+     },
+     "VND": {
+      "anchor_date": "2026-07-20",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-20",
+      "ticker_financial": 1522299908.0,
+      "uncertified_value": null,
+      "value": 1522299908.0
+     },
+     "VNM": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "err_pct_vs_ticker_financial": 0.0,
+      "kind": "OK",
+      "method": "ANCHOR_ONLY",
+      "quarter_date": "2026-07-30",
+      "ticker_financial": 2089955445.0,
+      "uncertified_value": null,
+      "value": 2089955445.0
+     },
+     "VPB": {
+      "anchor_date": "2022-11-08",
+      "anchor_source": "corporate_action.AIS",
+      "kind": "NO_MODEL_VALUE",
+      "method": "UNKNOWN_RATIO",
+      "quarter_date": "2026-07-20",
+      "ticker_financial": 7933923601.0,
+      "uncertified_value": null,
+      "value": null
+     },
+     "VRE": {
+      "anchor_date": "2018-12-26",
+      "anchor_source": "corporate_action.AIS",
+      "err_pct_vs_ticker_financial": 2.4864473108766476,
+      "kind": "DIVERGENT",
+      "method": "AIS_EXACT",
+      "quarter_date": "2026-07-29",
+      "ticker_financial": 2272318410.0,
+      "uncertified_value": null,
+      "value": 2328818410.0
+     }
+    }
+   },
+   "publish": {
+    "at": "2026-08-13",
+    "n": 33,
+    "rows": {
+     "ACB": {
+      "anchor_date": "2026-07-22",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 5804421957.0
+     },
+     "BCF": {
+      "anchor_date": "2026-07-29",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 37964770.0
+     },
+     "BID": {
+      "anchor_date": "2026-07-31",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 7280065210.0
+     },
+     "CSV": {
+      "anchor_date": "2026-07-21",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 110499910.0
+     },
+     "CTG": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 7766944637.0
+     },
+     "DGC": {
+      "anchor_date": "2026-07-22",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 379778413.0
+     },
+     "DHN": {
+      "anchor_date": null,
+      "anchor_source": null,
+      "method": "NO_ANCHOR",
+      "uncertified_value": null,
+      "value": null
+     },
+     "DRI": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_UNVERIFIED",
+      "uncertified_value": null,
+      "value": 73200000.0
+     },
+     "EVF": {
+      "anchor_date": "2024-12-06",
+      "anchor_source": "corporate_action.AIS",
+      "method": "AIS_UNCERTIFIED",
+      "uncertified_value": 704248289.0,
+      "value": null
+     },
+     "HDB": {
+      "anchor_date": "2026-07-31",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 5005276323.0
+     },
+     "HGM": {
+      "anchor_date": "2026-07-22",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_UNVERIFIED",
+      "uncertified_value": null,
+      "value": 12600000.0
+     },
+     "HPG": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 8442964520.0
+     },
+     "LPB": {
+      "anchor_date": "2026-07-21",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 2987282100.0
+     },
+     "MBB": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ISS_ESTIMATE",
+      "uncertified_value": null,
+      "value": 10189574884.885
+     },
+     "MSB": {
+      "anchor_date": "2026-07-31",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 3120000000.0
+     },
+     "NCT": {
+      "anchor_date": "2026-07-21",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 26165732.0
+     },
+     "PVT": {
+      "anchor_date": "2026-07-29",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 516918938.0
+     },
+     "SAB": {
+      "anchor_date": "2026-07-23",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 1282562372.0
+     },
+     "SAC": {
+      "anchor_date": "2020-11-02",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_UNVERIFIED",
+      "uncertified_value": null,
+      "value": 4050000.0
+     },
+     "SCL": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 38836815.0
+     },
+     "SHB": {
+      "anchor_date": "2025-10-07",
+      "anchor_source": "corporate_action.AIS",
+      "method": "AIS_UNCERTIFIED",
+      "uncertified_value": 5377339511.750105,
+      "value": null
+     },
+     "SIP": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 242112943.0
+     },
+     "TCB": {
+      "anchor_date": "2026-08-05",
+      "anchor_source": "corporate_action.AIS",
+      "method": "AIS_EXACT",
+      "uncertified_value": null,
+      "value": 7086240414.0
+     },
+     "TPB": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 2774046873.0
+     },
+     "TV1": {
+      "anchor_date": "2026-08-03",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_UNVERIFIED",
+      "uncertified_value": null,
+      "value": 26691319.0
+     },
+     "VCB": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 8355675094.0
+     },
+     "VHM": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ISS_ESTIMATE",
+      "uncertified_value": null,
+      "value": 8214824008.0
+     },
+     "VIB": {
+      "anchor_date": "2026-07-28",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 3404005710.0
+     },
+     "VIX": {
+      "anchor_date": "2026-07-20",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 2450287772.0
+     },
+     "VND": {
+      "anchor_date": "2026-07-20",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 1522299908.0
+     },
+     "VNM": {
+      "anchor_date": "2026-07-30",
+      "anchor_source": "ticker_financial",
+      "method": "ANCHOR_ONLY",
+      "uncertified_value": null,
+      "value": 2089955445.0
+     },
+     "VPB": {
+      "anchor_date": "2022-11-08",
+      "anchor_source": "corporate_action.AIS",
+      "method": "UNKNOWN_RATIO",
+      "uncertified_value": null,
+      "value": null
+     },
+     "VRE": {
+      "anchor_date": "2018-12-26",
+      "anchor_source": "corporate_action.AIS",
+      "method": "AIS_EXACT",
+      "uncertified_value": null,
+      "value": 2328818410.0
+     }
+    }
+   }
+  }
+ },
+ "n_held": 29,
+ "n_track": 33,
+ "prev_asof": "2026-08-12",
+ "retro_synthetic": true
+}

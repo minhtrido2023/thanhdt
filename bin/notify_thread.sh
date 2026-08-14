@@ -25,6 +25,8 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 msg="${1:?usage: notify_thread.sh \"<message>\" [thread_id]}"
 thread_id="${2:-}"
+topic_from_arg=0
+[ -n "${2:-}" ] && topic_from_arg=1
 
 # Chỉ CÒN 1 tầng mặc định: $DISCORD_THREAD_ID = topic RIÊNG của chính caller — bridge bơm vào
 # mỗi phiên tương tác, dispatch.sh export ID ĐÃ GHIM cho tiến trình agent con. Đó là ngữ cảnh
@@ -63,14 +65,41 @@ fi
 # toàn fleet câm phía Discord mà không ai biết (đã xảy ra THẬT: logs/notify_thread_errors.log
 # 2026-08-02T23:14:57 "discord_channel.sh: Permission denied" ⇒ mất 1 tin momentum_deals).
 # Nhánh TÊN vẫn qua registry như cũ — chỉ chỗ đó mới cần phân giải.
+#
+# ĐỐI SỐ BỊ ĐẢO (topic ở vị trí 1, message ở vị trí 2): chữ ký message-TRƯỚC/topic-SAU đi
+# ngược trực giác `notify <where> <what>` của mọi call site do agent viết tay ⇒ 3 lần nuốt
+# nguyên một báo cáo gửi user trong 6 ngày (logs/notify_thread_errors.log 2026-08-07 bot-chặn-
+# cả-2-account, 08-10 ops-autofix ZaloPay, 08-12 Winston ops-health-SpaceX). Chỉ dò ĐÚNG trong
+# nhánh đã thất bại nên đường thành công không tốn thêm 1 tiến trình con nào, và điều kiện là
+# TẤT ĐỊNH chứ không phỏng đoán: vị trí 2 KHÔNG phân giải được thành topic, VÀ vị trí 1 phân
+# giải ĐƯỢC (registry/snowflake) VÀ trông như một token topic (1 dòng, ≤64 ký tự, không khoảng
+# trắng) — một message thật không bao giờ thoả cả ba. Vẫn ghi 1 dòng vào error log (ops_health
+# check #10 đọc file này) vì call site vẫn SAI và phải sửa; dòng ghi nói rõ tin nhắn ĐÃ GỬI.
+_swap_candidate=0
+if [ "$topic_from_arg" = "1" ] && [ ${#msg} -le 64 ] && [[ "$msg" != *$'\n'* ]] && [[ "$msg" != *" "* ]]; then
+  _swap_candidate=1
+fi
 if [[ "$thread_id" =~ ^[0-9]{17,20}$ ]]; then
   resolved="$thread_id"
 elif ! resolved="$("$ROOT/bin/discord_channel.sh" "$thread_id" 2>&1)"; then
+  _swapped=""
+  if [ "$_swap_candidate" = "1" ]; then
+    _swapped="$("$ROOT/bin/discord_channel.sh" "$msg" 2>/dev/null)" || _swapped=""
+  fi
   mkdir -p "$ROOT/logs"
-  printf '%s notify_thread: KHONG phan giai duoc topic %q — TIN NHAN KHONG GUI. %s\n' \
-    "$(date -Iseconds)" "$thread_id" "$resolved" >> "$ROOT/logs/notify_thread_errors.log"
-  echo "notify_thread: $resolved" >&2
-  exit 1
+  if [ -n "$_swapped" ]; then
+    printf '%s notify_thread: DOI SO BI DAO (topic o vi tri 1, message o vi tri 2) — DA TU SUA VA GUI toi topic %q. SUA CALL SITE: dung `notify_thread.sh "<message>" <topic>`. caller=%s\n' \
+      "$(date -Iseconds)" "$msg" "${0##*/}<-$(ps -o comm= -p "$PPID" 2>/dev/null)" \
+      >> "$ROOT/logs/notify_thread_errors.log"
+    echo "notify_thread: đối số bị đảo — đã tự sửa, gửi tới topic '$msg'; sửa call site" >&2
+    msg="$thread_id"
+    resolved="$_swapped"
+  else
+    printf '%s notify_thread: KHONG phan giai duoc topic %q — TIN NHAN KHONG GUI. %s\n' \
+      "$(date -Iseconds)" "$thread_id" "$resolved" >> "$ROOT/logs/notify_thread_errors.log"
+    echo "notify_thread: $resolved" >&2
+    exit 1
+  fi
 fi
 thread_id="$resolved"
 

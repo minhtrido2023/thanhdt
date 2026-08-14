@@ -599,9 +599,20 @@ if [ "$CHANGED" -gt 0 ]; then
     # index, so a file staged (or partially staged) by another in-flight session at the wrong
     # moment would still ride along. Lower-risk here (02:00 ICT, not hourly/post-dispatch),
     # but kept consistent so this isn't miscited as the safe pattern to copy elsewhere.
-    git -C "$ROOT" commit -m "kb: nightly cleanup $(date -u +%Y-%m-%d) — archive+trim" \
-        --author="Mike <mike@fleet>" -- kb/ || true
-    log "Git committed."
+    # `|| true` + an unconditional "Git committed." (arch-review round 4, 2026-08-12): the same
+    # false-success shape already killed in consolidate.sh / fleet_backup.sh / Phase 4.6 was
+    # still alive HERE. Reachable for real, not theoretical: `add kb/` stages
+    # kb/coding_guidelines.md, which is a SHARED_TOOLING_PATH (mike_json.py:1122), so ANY live
+    # Wags job makes the commit-collision gate BLOCK at tier-2 while the log said "committed".
+    # Nothing downstream is deleted on the refused branch (no stamp/state assumes the commit
+    # happened) — kb/ simply stays dirty and staged for a hand commit.
+    if git -C "$ROOT" commit -m "kb: nightly cleanup $(date -u +%Y-%m-%d) — archive+trim" \
+            --author="Mike <mike@fleet>" -- kb/ >> "$LOG" 2>&1; then
+        log "Git committed."
+    else
+        log "Git commit BỊ TỪ CHỐI (commit-collision gate?) — kb/ còn dirty, KHÔNG có commit nào xảy ra. CẦN COMMIT TAY. Chi tiết: $LOG"
+        "$ROOT/bin/notify.sh" "⚠️ [kb_nightly] Phase 3: git commit kb/ BỊ TỪ CHỐI (commit-collision gate?) — dọn dẹp KB đã ghi lên đĩa nhưng CHƯA COMMIT, kb/ còn dirty. CẦN COMMIT TAY, xem $LOG" >/dev/null 2>&1 || true
+    fi
 else
     log "No KB changes to commit."
 fi
@@ -610,12 +621,30 @@ fi
 # — file đó CHƯA TỪNG tồn tại kể từ khi dòng này được thêm 2026-06-30 (commit 044c63ca9), silent
 # "No such file or directory" mỗi đêm suốt hơn 1 tháng vì có `|| true`. Đích đúng là script backup
 # top-level WorkingClaude (nhận message argument), không phải mike/bin/.
-"$ROOT/../../backup.sh" "kb_nightly $(date -u +%Y-%m-%d)" >> "$LOG" 2>&1 || true
+#
+# 2026-08-12: cái `|| true` cũ nuốt luôn exit THẬT của backup.sh, nên hết đĩa / git push bị từ
+# chối / credential hỏng đều chìm vào log trong khi Phase 4 vẫn bắn "🌙 KB nightly done" ra
+# Discord + topic architecture. Cùng họ false-success với chuỗi commit-collision-gate.
+# QUYẾT ĐỊNH: backup fail KHÔNG chặn dòng "done" — nén/archive KB và backup là hai việc độc
+# lập, KB nén xong thật; chặn cả dòng done sẽ nuốt luôn cảnh báo OVERSIZE/PRUNE_WARN và biến
+# "im lặng" thành không phân biệt được với cron chết. Nó đi kèm dòng done như một cảnh báo
+# NÓI RÕ backup hỏng, để người đọc không tưởng cả đêm ổn.
+BACKUP_WARN=""
+if _bk_out="$("$ROOT/../../backup.sh" "kb_nightly $(date -u +%Y-%m-%d)" 2>&1)"; then
+    printf '%s\n' "$_bk_out" >> "$LOG"
+else
+    _bk_rc=$?
+    printf '%s\n' "$_bk_out" >> "$LOG"
+    printf '%s\n' "$_bk_out" >&2
+    BACKUP_WARN="BACKUP THẤT BẠI (exit $_bk_rc) — KB đã nén xong nhưng KHÔNG có backup đêm nay, xem $LOG"
+    log "Backup THẤT BẠI (exit $_bk_rc) — xem $LOG"
+fi
 
 # ── Phase 4: notify ──────────────────────────────────────────────────────────
 MSG="🌙 KB nightly done ($(date -u +%Y-%m-%d))"
 [ -n "${OVERSIZE:-}" ] && MSG="$MSG — ⚠️ oversized memories:$OVERSIZE"
 [ -n "${PRUNE_WARN:-}" ] && MSG="$MSG — ⚠️ $PRUNE_WARN"
+[ -n "${BACKUP_WARN:-}" ] && MSG="$MSG — ⚠️ $BACKUP_WARN"
 "$ROOT/bin/notify.sh" "$MSG" 2>/dev/null || true
 # Topic CỐ ĐỊNH (Architecture) — trước 2026-07-22 đọc con trỏ global
 # state/ccdb_thread_id = "topic Mike mở phiên gần nhất", nên tin bảo trì KB đêm nào cũng
@@ -742,9 +771,24 @@ không tự quyết định việc này." \
         return 1
     fi
     mv "$proposed" "$file"
-    (cd "$ROOT" && git add "$file" && git commit -q -m "kb: auto-compress $label ${old_kb}KB→${new_kb}KB (ctxbloat_autofix, mechanical fact-check PASS, kb_nightly.sh Phase 4.6)") >> "$LOG" 2>&1 || true
-    log "AUTO-FIX APPLIED: $label ${old_kb}KB → ${new_kb}KB, committed."
-    return 0
+    # `|| true` + an unconditional "committed." line (arch-review round 2, 2026-08-12): the
+    # pre-commit collision gate (bin/repo_commit_gate.sh) can REFUSE this commit, and swallowed
+    # that way the log claimed a commit that never happened.
+    # THREE exit states, not two (arch-review round 3, 2026-08-12): fixing the log line alone
+    # left the CALLER blind — it saw return 0 either way and kept Discord-announcing "đã commit
+    # — không cần người can thiệp" on the refused branch, i.e. the same false-success claim, on
+    # the channel a human actually reads. 0 = compressed AND committed · 2 = compressed on disk
+    # but NOT committed (needs a hand commit; the episode is NOT closed) · 1 = not compressed.
+    # `-- "$file"` pathspec (arch-review round 4, 2026-08-12), same reason as Phase 3 above:
+    # `git add "$file"` only controls what THIS function stages — a commit with no pathspec
+    # commits the whole index, so anything another in-flight session left staged rides along
+    # inside a commit whose message claims it is one auto-compressed file.
+    if (cd "$ROOT" && git add "$file" && git commit -q -m "kb: auto-compress $label ${old_kb}KB→${new_kb}KB (ctxbloat_autofix, mechanical fact-check PASS, kb_nightly.sh Phase 4.6)" -- "$file") >> "$LOG" 2>&1; then
+        log "AUTO-FIX APPLIED: $label ${old_kb}KB → ${new_kb}KB, committed."
+        return 0
+    fi
+    log "AUTO-FIX APPLIED NHƯNG CHƯA COMMIT: $label ${old_kb}KB → ${new_kb}KB — file ĐÃ đổi trên đĩa, git add/commit bị từ chối (commit-collision gate?) hoặc lỗi. Chi tiết: $LOG. Cần commit tay."
+    return 2
 }
 
 if [ -n "$SAME_DAY_BREACH" ]; then
@@ -768,14 +812,31 @@ if [ -n "$SAME_DAY_BREACH" ]; then
         printf '%s' "$_BREACH_KEY" > "$_CTXBLOAT_AUTOFIX_STAMP"
         _ANY_FIXED=0
         _STILL_OVER=""
+        _UNCOMMITTED=""
+        # Route the function's THREE outcomes to three different accumulators. A file that was
+        # compressed but not committed must NOT land in $_STILL_OVER (it is under the threshold
+        # on disk — saying "vẫn vượt ngưỡng" would be a second false claim, and would escalate a
+        # question about the wrong problem); it needs its own "commit tay" message instead.
+        _ctxbloat_try() {   # file limit label kb → sets _ANY_FIXED / _UNCOMMITTED / _STILL_OVER
+            local _rc=0
+            # `|| _rc=$?`, not a bare call: this script runs under `set -e` (line 12), where a
+            # bare command returning 2 would kill the whole nightly. The old form was exempt
+            # only because it sat in an `if` condition.
+            _ctxbloat_autofix_one "$1" "$2" "$3" "$4" || _rc=$?
+            case "$_rc" in
+                0) _ANY_FIXED=1 ;;
+                2) _ANY_FIXED=1; _UNCOMMITTED="${_UNCOMMITTED}$3 " ;;
+                *) _STILL_OVER="${_STILL_OVER}$3 " ;;
+            esac
+        }
         if [ "$_CP_KB" != "MISSING" ] && [ "$_CP_KB" -gt 45 ]; then
-            if _ctxbloat_autofix_one "$ROOT/kb/context_pack.md" 45 "kb/context_pack.md" "$_CP_KB"; then _ANY_FIXED=1; else _STILL_OVER="${_STILL_OVER}kb/context_pack.md "; fi
+            _ctxbloat_try "$ROOT/kb/context_pack.md" 45 "kb/context_pack.md" "$_CP_KB"
         fi
         if [ "$_MIKE_KB" != "MISSING" ] && [ "$_MIKE_KB" -gt 40 ]; then
-            if _ctxbloat_autofix_one "$ROOT/MIKE.md" 40 "MIKE.md" "$_MIKE_KB"; then _ANY_FIXED=1; else _STILL_OVER="${_STILL_OVER}MIKE.md "; fi
+            _ctxbloat_try "$ROOT/MIKE.md" 40 "MIKE.md" "$_MIKE_KB"
         fi
         if [ "$_CG_KB" != "MISSING" ] && [ "$_CG_KB" -gt 40 ]; then
-            if _ctxbloat_autofix_one "$ROOT/kb/coding_guidelines.md" 40 "kb/coding_guidelines.md" "$_CG_KB"; then _ANY_FIXED=1; else _STILL_OVER="${_STILL_OVER}kb/coding_guidelines.md "; fi
+            _ctxbloat_try "$ROOT/kb/coding_guidelines.md" 40 "kb/coding_guidelines.md" "$_CG_KB"
         fi
         # Re-measure after the attempt(s) — a file fixed above no longer belongs in the alert.
         _REMAIN=""
@@ -783,18 +844,28 @@ if [ -n "$SAME_DAY_BREACH" ]; then
         [[ "$SAME_DAY_BREACH" == *"MIKE.md MẤT"* ]] && _REMAIN="${_REMAIN}MIKE.md MẤT/rỗng; "
         [[ "$SAME_DAY_BREACH" == *"coding_guidelines.md MẤT"* ]] && _REMAIN="${_REMAIN}kb/coding_guidelines.md MẤT/rỗng; "
         for f in $_STILL_OVER; do _REMAIN="${_REMAIN}${f} vẫn vượt ngưỡng sau auto-fix; "; done
-        if [ -z "$_REMAIN" ]; then
+        # "Không cần người can thiệp" is only true when the change is BOTH under threshold AND
+        # in the repo. Compressed-but-refused keeps the stamp: the episode is not closed while
+        # the fix exists only in the working tree.
+        _UNCOMMITTED_NOTE=""
+        [ -n "$_UNCOMMITTED" ] && _UNCOMMITTED_NOTE=" ĐÃ NÉN TRÊN ĐĨA NHƯNG CHƯA COMMIT: ${_UNCOMMITTED}— git add/commit bị từ chối (commit-collision gate?), CẦN COMMIT TAY, xem $LOG."
+        if [ -z "$_REMAIN" ] && [ -z "$_UNCOMMITTED" ]; then
             MSG="✅ [kb_nightly] context-bloat auto-fix: $SAME_DAY_BREACH đã tự nén xong, dưới ngưỡng, đã commit — không cần người can thiệp."
             "$ROOT/bin/notify.sh" "$MSG" >/dev/null 2>&1 || true
             "$ROOT/bin/notify_thread.sh" "$MSG" "architecture" >/dev/null 2>&1 || true
             log "Episode resolved by auto-fix, no escalation needed."
             rm -f "$_CTXBLOAT_STAMP"
+        elif [ -z "$_REMAIN" ]; then
+            MSG="⚠️ [kb_nightly] context-bloat auto-fix: $SAME_DAY_BREACH đã tự nén xong, dưới ngưỡng — NHƯNG chưa vào repo.${_UNCOMMITTED_NOTE}"
+            "$ROOT/bin/notify.sh" "$MSG" >/dev/null 2>&1 || true
+            "$ROOT/bin/notify_thread.sh" "$MSG" "architecture" >/dev/null 2>&1 || true
+            log "Auto-fix applied but NOT committed (${_UNCOMMITTED})— stamp giữ nguyên, episode CHƯA đóng."
         else
-            MSG="⚠️ [kb_nightly] context-bloat auto-fix KHÔNG đủ: ${_REMAIN}Đã thử tự nén 1 lần (fact-check cơ học chặn hoặc không đủ nhỏ) — cần Mike/user xử lý HÔM NAY, xem $LOG."
+            MSG="⚠️ [kb_nightly] context-bloat auto-fix KHÔNG đủ: ${_REMAIN}Đã thử tự nén 1 lần (fact-check cơ học chặn hoặc không đủ nhỏ) — cần Mike/user xử lý HÔM NAY, xem $LOG.${_UNCOMMITTED_NOTE}"
             "$ROOT/bin/notify.sh" "$MSG" >/dev/null 2>&1 || true
             "$ROOT/bin/notify_thread.sh" "$MSG" "architecture" >/dev/null 2>&1 || true
             "$ROOT/bin/append_event.sh" Mike question "context-bloat-same-day" \
-"Vượt ngưỡng cứng: ${_REMAIN}Phát hiện NGOÀI Thứ Sáu (kb_nightly.sh Phase 4.6, $(date -u +%Y-%m-%dT%H:%M:%SZ)). Auto-fix ĐÃ THỬ 1 lần đêm nay (bin/ctxbloat_fact_check.py chặn mất-fact HOẶC nén không đủ nhỏ — xem $LOG để biết lý do cụ thể) — sẽ KHÔNG tự thử lại đêm sau cho cùng đợt vượt ngưỡng này (tránh treadmill, xem kb/coding_guidelines.md §Enforcement policy). Cần người/Mike quyết: nén tay sâu hơn, hay đây là nội dung evergreen không thể nén thêm mà không mất fact (như context_pack.md 2026-07-30) → nâng ngưỡng hay OKF-hoá sâu hơn." \
+"Vượt ngưỡng cứng: ${_REMAIN}Phát hiện NGOÀI Thứ Sáu (kb_nightly.sh Phase 4.6, $(date -u +%Y-%m-%dT%H:%M:%SZ)). Auto-fix ĐÃ THỬ 1 lần đêm nay (bin/ctxbloat_fact_check.py chặn mất-fact HOẶC nén không đủ nhỏ — xem $LOG để biết lý do cụ thể) — sẽ KHÔNG tự thử lại đêm sau cho cùng đợt vượt ngưỡng này (tránh treadmill, xem kb/coding_guidelines.md §Enforcement policy). Cần người/Mike quyết: nén tay sâu hơn, hay đây là nội dung evergreen không thể nén thêm mà không mất fact (như context_pack.md 2026-07-30) → nâng ngưỡng hay OKF-hoá sâu hơn.${_UNCOMMITTED_NOTE}" \
                 2>/dev/null || true
             log "Escalated after auto-fix attempt (still over threshold)."
         fi

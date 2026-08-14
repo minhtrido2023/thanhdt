@@ -127,6 +127,17 @@ Khi thấy event_type `question` trong KB delta, Mike phải:
    bin/dispatch.sh <agent_đã_hỏi> "Trả lời cho câu hỏi '<topic>': <quyết định của user>"
    ```
 
+**Escalation TỔNG (gom nhiều câu hỏi con đang mở) — bắt buộc khai `rollup_of`.** Câu hỏi tổng
+có topic RIÊNG, nên đóng hết các câu hỏi con KHÔNG đóng được nó (`ops_health_check` check #5
+khớp theo topic-string) ⇒ nó ở lại pending và đốt 1 job `wags_autofix` mỗi ngày cho tới khi ai
+đó nhớ ra (ca thật `retro-escalation-2026-08-13-patternB-and-backlog`). Khai tường minh danh
+sách topic con trong payload thì check #5 tự đóng tổng khi MỌI con đã có `answer`/`decision`:
+```bash
+bin/append_event.sh Mike question "retro-escalation-<ngày>-..." \
+  '{"summary":"...", "rollup_of":["topic-con-1","Mike/topic-con-2"], "urgency":"medium"}'
+```
+Không khai thì hành vi y như cũ (fail-closed) — vẫn phải tự đăng `answer` giữ NGUYÊN topic tổng.
+
 ## Routing — khi user hỏi Mike
 1. Tra `kb/KNOWLEDGE.md` + `kb/context_pack.md` + `kb/fleet_status.md` trước.
 2. Nếu KB đủ → Mike trả lời thẳng, ghi rõ "nguồn: <agent_id> @ KB v<version>".
@@ -488,6 +499,12 @@ tự ý bớt file này khỏi Mafee/DollarBill/Winston để "tiết kiệm tok
 "File sở hữu" trong CLAUDE.md của agent đó — cả 3 sở hữu code chạm tiền thật hoặc gate production.
 Wags cân nhắc thêm nếu autofix của mình tái phạm đúng loại lỗi guideline này nhắm tới (chưa cần,
 lý do đầy đủ: git log file này).
+
+**Tách OKF 2026-08-14** (user duyệt, sau 3 lần vượt ngưỡng 40KB): 11 mục dùng-theo-tình-huống
+(§7/§8b/§10/§11/§13/§14/§15/§17/§18b/§22/§24) sang `kb/coding_guidelines_ext.md` — KHÔNG auto-load,
+số hiệu § giữ nguyên, bảng con trỏ ở đầu `coding_guidelines.md`. ⚠️ Con trỏ đó **không được** đổi
+thành `@`-import (đệ quy ⇒ nạp lại, mất sạch tác dụng tách); mục mới loại tình-huống thêm vào file
+ext, đừng nhồi vào file chính.
 
 **Quy tắc ghi chép — mở rộng nguyên tắc "ghi 1 lần đúng chỗ" ở trên:** khi tạo tri thức bền mới
 (quyết định/kết luận/quy tắc), trước khi ghi vào `context_pack.md`/`canonical.md`, tự hỏi **"role

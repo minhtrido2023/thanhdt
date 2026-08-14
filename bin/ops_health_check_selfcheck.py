@@ -20,6 +20,7 @@ Chạy: python3 bin/ops_health_check_selfcheck.py   (exit 0 = PASS, 1 = FAIL)
 Được cắm vào kb_nightly.sh Phase 0 (alert-only, không gate prune).
 """
 import datetime as dt
+import glob
 import gzip
 import json
 import os
@@ -50,6 +51,7 @@ def extract_block(tag):
 
 CHECK5_SRC = extract_block("CHECK5")
 CHECK10_SRC = extract_block("CHECK10")
+CHECK11_SRC = extract_block("CHECK11")
 
 
 def run_check5(wc_root):
@@ -272,51 +274,105 @@ def case_fresh_question_is_pending():
         shutil.rmtree(root, ignore_errors=True)
 
 
-# ── Ca 10 (2026-07-31, audit kiến trúc fleet #14): câu hỏi wags-fix-not-confirmed:*
-#    <48h KHÔNG được re-trigger COORD_WARN — đây chính là input của vòng lặp Wags
-#    coord-fix tự nuôi quan sát được thật hôm 07-31 (arch-reviewer NEEDS_CHANGES → question
-#    → question đó tự nó lại là "câu hỏi tồn đọng" khiến ops_health_check dispatch LẠI
-#    wags_autofix cho ĐÚNG issue vừa NEEDS_CHANGES). Câu hỏi KHÁC (không phải wags-fix) vẫn
-#    phải routable như cũ — ca 9 ở trên đã khoá phần đó, ca này chỉ khoá phần MỚI.
+# ── Ca 10 (2026-07-31, audit kiến trúc fleet #14): câu hỏi do CHÍNH pipeline wags_autofix
+#    sinh ra ở cuối vòng fix+arch-review, <48h, KHÔNG được re-trigger COORD_WARN — đây chính
+#    là input của vòng lặp Wags coord-fix tự nuôi quan sát được thật hôm 07-31 (arch-reviewer
+#    NEEDS_CHANGES → question → question đó tự nó lại là "câu hỏi tồn đọng" khiến
+#    ops_health_check dispatch LẠI wags_autofix cho ĐÚNG issue vừa NEEDS_CHANGES). Câu hỏi
+#    KHÁC (không phải của pipeline) vẫn phải routable như cũ — ca 9 ở trên đã khoá phần đó.
+#
+#    ⚠️ CHẠY CHO MỌI TIỀN TỐ trong WAGS_SELF_Q_PREFIXES, không chỉ tiền tố đầu tiên: bản
+#    2026-07-31 chỉ pin "wags-fix-not-confirmed:" nên khi wags_autofix.sh tách thêm nhánh
+#    "wags-arch-review-inconclusive:" (08-11, commit 35625a6f) mà quên cập nhật ops_health_check,
+#    selfcheck VẪN xanh trong lúc production đã lặp vòng thật (question 08-11T05:57:50Z →
+#    dispatch coord-2026-08-12 → INCONCLUSIVE → question coord-2026-08-12). Selfcheck chỉ pin
+#    một mẫu đại diện thì không bắt được lớp lỗi "quên mở rộng danh sách".
+WAGS_SELF_Q_PREFIXES = ("wags-fix-not-confirmed:", "wags-arch-review-inconclusive:")
+
+
 def case_wagsfix_not_confirmed_is_warn_only():
-    root, inbox = mkbus()
-    try:
-        write_events(os.path.join(inbox, "Wags.jsonl"),
-                     [ev("Wags", "question", "wags-fix-not-confirmed: coord-2026-07-31", ago(0, 3)),
-                      ev("Wags", "question", "coord-that-su-moi", ago(0, 1))])
-        lines, _ = run_check5(root)
-        out = joined(lines)
-        wagsfix_lines = [ln for ln in lines if "vòng wags-fix CHƯA CONFIRMED" in ln]
-        pending_lines = [ln for ln in lines if "trong 48h qua CHƯA thấy answer" in ln]
-        check("wags-fix-not-confirmed <48h: có dòng riêng, mang [WARN-ONLY]",
-              len(wagsfix_lines) == 1 and "[WARN-ONLY]" in wagsfix_lines[0]
-              and "wags-fix-not-confirmed: coord-2026-07-31" in wagsfix_lines[0], out)
-        check("wags-fix-not-confirmed <48h: KHÔNG lẫn vào dòng pending routable",
-              not any("wags-fix-not-confirmed" in ln for ln in pending_lines), out)
-        check("câu hỏi coordination KHÁC (không phải wags-fix) vẫn ở dòng pending routable",
-              len(pending_lines) == 1 and "coord-that-su-moi" in pending_lines[0], out)
-        check("câu hỏi coordination khác đó KHÔNG mang [WARN-ONLY]",
-              not any("[WARN-ONLY]" in ln for ln in pending_lines), out)
-    finally:
-        shutil.rmtree(root, ignore_errors=True)
+    for prefix in WAGS_SELF_Q_PREFIXES:
+        topic = f"{prefix} coord-2026-07-31"
+        root, inbox = mkbus()
+        try:
+            write_events(os.path.join(inbox, "Wags.jsonl"),
+                         [ev("Wags", "question", topic, ago(0, 3)),
+                          ev("Wags", "question", "coord-that-su-moi", ago(0, 1))])
+            lines, _ = run_check5(root)
+            out = joined(lines)
+            wagsfix_lines = [ln for ln in lines if "vòng wags-fix CHƯA CONFIRMED" in ln]
+            pending_lines = [ln for ln in lines if "trong 48h qua CHƯA thấy answer" in ln]
+            check(f"{prefix} <48h: có dòng riêng, mang [WARN-ONLY]",
+                  len(wagsfix_lines) == 1 and "[WARN-ONLY]" in wagsfix_lines[0]
+                  and topic in wagsfix_lines[0], out)
+            check(f"{prefix} <48h: KHÔNG lẫn vào dòng pending routable",
+                  not any(prefix in ln for ln in pending_lines), out)
+            check(f"{prefix}: câu hỏi coordination KHÁC vẫn ở dòng pending routable",
+                  len(pending_lines) == 1 and "coord-that-su-moi" in pending_lines[0], out)
+            check(f"{prefix}: câu hỏi coordination khác đó KHÔNG mang [WARN-ONLY]",
+                  not any("[WARN-ONLY]" in ln for ln in pending_lines), out)
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
 
 
-# ── Ca 11: chỉ có wags-fix-not-confirmed (không có câu hỏi routable nào khác) — dòng
+# ── Ca 10b (đối chứng ÂM, 2026-08-12): miễn trừ phải khớp TIỀN TỐ, không phải substring.
+#    Một câu hỏi thật của người mà tình cờ NHẮC ĐẾN tiền tố ở GIỮA topic vẫn phải routable —
+#    nếu không, ai đặt tên topic hơi giống là tự tắt mất đường escalate của mình.
+def case_wagsfix_prefix_not_substring():
+    for prefix in WAGS_SELF_Q_PREFIXES:
+        topic = f"ai-đang-nợ {prefix} coord-2026-07-31 — cần người xem"
+        root, inbox = mkbus()
+        try:
+            write_events(os.path.join(inbox, "Wags.jsonl"),
+                         [ev("Wags", "question", topic, ago(0, 3))])
+            lines, _ = run_check5(root)
+            out = joined(lines)
+            pending_lines = [ln for ln in lines if "trong 48h qua CHƯA thấy answer" in ln]
+            wagsfix_lines = [ln for ln in lines if "vòng wags-fix CHƯA CONFIRMED" in ln]
+            check(f"substring-ở-giữa '{prefix}': VẪN routable (không bị miễn trừ nhầm)",
+                  len(pending_lines) == 1 and topic in pending_lines[0], out)
+            check(f"substring-ở-giữa '{prefix}': KHÔNG rơi vào dòng WARN-ONLY wags-fix",
+                  not wagsfix_lines, out)
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 11: chỉ có câu hỏi tự-sinh của pipeline (không có câu hỏi routable nào khác) — dòng
 #    "Không có câu hỏi nào đang chờ" KHÔNG được in (sẽ nói dối — vẫn có 1 mục đang chờ,
 #    chỉ là WARN-ONLY).
 def case_wagsfix_only_no_false_ok():
-    root, inbox = mkbus()
-    try:
-        write_events(os.path.join(inbox, "Wags.jsonl"),
-                     [ev("Wags", "question", "wags-fix-not-confirmed: coord-2026-07-31", ago(0, 3))])
-        lines, _ = run_check5(root)
-        out = joined(lines)
-        check("chỉ có wags-fix: KHÔNG in 'Không có câu hỏi nào đang chờ' (sẽ nói dối)",
-              "Không có câu hỏi (question) nào đang chờ xử lý" not in out, out)
-        check("chỉ có wags-fix: vẫn có dòng WARN-ONLY nêu rõ",
-              "vòng wags-fix CHƯA CONFIRMED" in out, out)
-    finally:
-        shutil.rmtree(root, ignore_errors=True)
+    for prefix in WAGS_SELF_Q_PREFIXES:
+        root, inbox = mkbus()
+        try:
+            write_events(os.path.join(inbox, "Wags.jsonl"),
+                         [ev("Wags", "question", f"{prefix} coord-2026-07-31", ago(0, 3))])
+            lines, _ = run_check5(root)
+            out = joined(lines)
+            check(f"chỉ có {prefix}: KHÔNG in 'Không có câu hỏi nào đang chờ' (sẽ nói dối)",
+                  "Không có câu hỏi (question) nào đang chờ xử lý" not in out, out)
+            check(f"chỉ có {prefix}: vẫn có dòng WARN-ONLY nêu rõ",
+                  "vòng wags-fix CHƯA CONFIRMED" in out, out)
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 11b (2026-08-12): danh sách miễn trừ trong selfcheck phải KHỚP danh sách thật trong
+#    bin/ops_health_check.sh. Đây là chốt chặn cuối cho lớp lỗi đã xảy ra: thêm nhánh question
+#    mới vào wags_autofix.sh + ops_health_check.sh nhưng quên selfcheck (hoặc ngược lại) thì
+#    ca 10/11 ở trên lặng lẽ kiểm thiếu. So sánh bằng cách đọc chính dòng khai báo.
+def case_wagsfix_prefix_list_in_sync():
+    with open(SRC, encoding="utf-8") as f:
+        src = f.read()
+    m = re.search(r"^WAGS_SELF_Q_PREFIXES = \(([^)]*)\)", src, re.M)
+    check("ops_health_check.sh: tìm thấy khai báo WAGS_SELF_Q_PREFIXES", bool(m),
+          "không thấy dòng WAGS_SELF_Q_PREFIXES = (...) — đã đổi tên biến?")
+    if not m:
+        return
+    real = tuple(re.findall(r'"([^"]+)"', m.group(1)))
+    check("danh sách tiền tố miễn trừ: selfcheck KHỚP ops_health_check.sh",
+          real == WAGS_SELF_Q_PREFIXES,
+          f"ops_health_check.sh={real} vs selfcheck={WAGS_SELF_Q_PREFIXES} — thêm tiền tố mới "
+          f"phải cập nhật CẢ HAI")
 
 
 # ── Check #10 (notify_thread.sh nuốt tin nhắn) ────────────────────────────────────────────
@@ -546,6 +602,60 @@ def case_ack_suppress_days_window():
         shutil.rmtree(root, ignore_errors=True)
 
 
+# ── Ca 15b (2026-08-14, job Wags_20260814_050746): câu hỏi TỔNG khai `rollup_of`.
+#    Ca thật: Mike/retro-escalation-2026-08-13-patternB-and-backlog — 2 câu hỏi con được đóng
+#    bằng `decision` trong cùng 1 giây, topic tổng không có event đóng riêng ⇒ đốt 1 job
+#    wags_autofix. Pin CẢ 5 nhánh, trong đó 3 nhánh fail-closed và 1 RED control (đóng thiếu
+#    1 con thì KHÔNG được đóng tổng — đây mới là nhánh nguy hiểm nếu code nới tay thành any()).
+def case_rollup_of_umbrella_question():
+    root, inbox = mkbus()
+    try:
+        q_ts = ago(0, 6)
+        def umbrella(topic, subs):
+            e = ev("Mike", "question", topic, q_ts)
+            if subs is not None:
+                e["payload"] = {"rollup_of": subs}
+            return e
+        write_events(os.path.join(inbox, "Mike.jsonl"), [
+            umbrella("tong-du-2-con", ["con-a", "con-b"]),
+            umbrella("tong-thieu-1-con", ["con-a", "con-chua-dong"]),
+            umbrella("tong-khong-khai", None),
+            umbrella("tong-rollup-rong", []),
+            umbrella("tong-rollup-sai-kieu", "con-a"),
+            umbrella("tong-dang-agent-slash", ["Winston/con-b"]),
+            # Con đã đóng TRƯỚC khi escalation tổng được mở ⇒ không được tính là đã quyết
+            # (giữ đúng ràng buộc thời gian của _resolved: escalation mở lại là chuyện mới).
+            umbrella("tong-con-dong-truoc-khi-hoi", ["con-dong-som"]),
+            ev("Mike", "question", "con-a", ago(1)),
+            ev("Mike", "question", "con-b", ago(1)),
+            ev("Mike", "question", "con-chua-dong", ago(1)),
+            ev("Mike", "question", "con-dong-som", ago(2)),
+        ])
+        write_events(os.path.join(inbox, "Wags.jsonl"), [
+            ev("Wags", "decision", "con-a", ago(0, 1)),
+            ev("Wags", "decision", "con-b", ago(0, 1)),
+            ev("Wags", "decision", "con-dong-som", ago(1, 12)),
+        ])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        pending = joined([ln for ln in lines if "trong 48h qua CHƯA thấy answer" in ln])
+        check("rollup_of: mọi câu hỏi con đã có decision ⇒ câu hỏi TỔNG tự đóng",
+              "tong-du-2-con" not in out, out)
+        check("rollup_of RED CONTROL: thiếu 1 con chưa đóng ⇒ TỔNG vẫn pending (all, không any)",
+              "tong-thieu-1-con" in pending, out)
+        check("rollup_of: dạng 'Agent/topic' vẫn khớp được con",
+              "tong-dang-agent-slash" not in out, out)
+        check("rollup_of: con đóng TRƯỚC khi tổng được hỏi ⇒ KHÔNG đóng tổng (giữ ràng buộc ts)",
+              "tong-con-dong-truoc-khi-hoi" in pending, out)
+        for t in ("tong-khong-khai", "tong-rollup-rong", "tong-rollup-sai-kieu"):
+            check(f"rollup_of fail-closed: {t} ⇒ giữ nguyên hành vi cũ (vẫn routable)",
+                  t in pending, out)
+        check("rollup_of: các câu hỏi CON vẫn tự đóng như cũ (không hồi quy)",
+              "con-a" not in pending and "con-b" not in pending, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
 # ── Ca 15: trần ACK_MAX_SUPPRESS_DAYS — ack không được tắt dispatch quá hạn trần.
 def case_ack_suppress_days_capped():
     root, inbox = mkbus()
@@ -564,19 +674,301 @@ def case_ack_suppress_days_capped():
         shutil.rmtree(root, ignore_errors=True)
 
 
+# ── Ca 16 (2026-08-14, job Wags_20260814_050658): lớp vòng-wags-fix MIỄN CẮT trong aged_q.
+#    Vì sao cần: lớp này đã bị loại khỏi auto-dispatch (đúng — lặp tự động là vòng tự nuôi),
+#    nên dòng aged_q là kênh DUY NHẤT đưa nó tới người; mà nó lão hoá theo ngày ⇒ càng treo
+#    lâu càng trôi vào ĐÚNG vùng bị cắt giữa.
+#    ⚠️ Ghi cho đúng lịch sử: nhánh cắt-giữa CHƯA TỪNG chạy trong production tính đến hôm nay
+#    (grep "mục giữa" logs/ops_health.log = 0; nhiều nhất từng thấy 9 mục ≤ 10) — 4 mục
+#    wags-fix treo lâu hôm nay ĐỀU đã được in đủ. Đây là bịt lỗ TRƯỚC khi nó cắn, không phải
+#    tái lập sự cố đã xảy ra. Nhưng nó SẮP cắn: fixture dưới là 20 câu hỏi pending THẬT của
+#    bus lúc 2026-08-14 (bin/bus_question_audit.py), tuổi +2 ngày = trạng thái NGÀY MAI khi
+#    cả 20 đều qua mốc 48h ⇒ aged_q=20 > AGED_SHOW_ALL_UPTO, nhánh cắt chạy lần đầu tiên và
+#    12/20 mục rơi vào vùng "…mục giữa…". RED control (chứng minh ca này đỏ được, chạy tay):
+#      OPS_HEALTH_CHECK_SRC=<file ops_health_check.sh bản HEAD cũ> python3 <selfcheck này>
+_AGED_REAL_BOARD_20260814 = [
+    # (agent, topic, tuổi ngày) — bảng pending THẬT + 2 ngày, thứ tự cũ → mới
+    ("Taylor", "cron-cho-buoc-gop-park-merge-CAN-USER-QUYET", 5),
+    ("Mike", "paper-checkpoint-overdue-fill_timing", 4),
+    ("Wags", "wags-arch-review-inconclusive: coord-2026-08-12", 4),          # wags-class
+    ("Winston", "plan-dd-check-string-gay-poll-fail-moi-fill", 4),
+    ("Winston", "ops-autofix-unresolved: ops-health-ZaloPay", 4),
+    ("Taylor", "can-user-quyet-mo-cong-CASH_VENDOR-va-kiem-freshness", 3),
+    # 9 câu hỏi selfcheck-red: Wags là TÁC GIẢ nhưng topic KHÔNG thuộc WAGS_SELF_Q_PREFIXES
+    # ⇒ phải ở nhóm "còn lại", chịu cắt như thường (miễn trừ theo TIỀN TỐ TOPIC, không theo
+    # agent_id). Chính 9 mục này là thứ đẩy backlog vượt 10 trong vòng 1 ngày.
+    ("Wags", "selfcheck-red: extreme_regime_selfcheck.py", 3),
+    ("Wags", "selfcheck-red: hard_no_chase_ceiling_selfcheck.py", 3),
+    ("Wags", "selfcheck-red: lag_live_schedule_selfcheck.py", 3),
+    ("Wags", "selfcheck-red: mike/bin/exrights_price_basis_selfcheck.py", 3),
+    ("Wags", "selfcheck-red: mike/bin/send_plan_report_park_jit_selfcheck.py", 3),
+    ("Wags", "selfcheck-red: mike/bin/universe_pit_quality_selfcheck.py", 3),
+    ("Wags", "selfcheck-red: paper_main_window_selfcheck.py", 3),
+    ("Wags", "selfcheck-red: plan_cash_commitment_selfcheck.py", 3),
+    ("Wags", "selfcheck-red: t2_settlement_selfcheck.py", 3),
+    ("Wags", "wags-fix-not-confirmed: coord-2026-08-12", 3),                 # wags-class ← bị nuốt
+    ("Wags", "selfcheck-red: mike/bin/job_cancel_guard_selfcheck.py", 3),
+    ("Wags", "wags-arch-review-inconclusive: coord-2026-08-13", 3),          # wags-class
+    ("Mike", "retro-escalation-2026-08-13-patternB-and-backlog", 2),
+    ("Wags", "wags-fix-not-confirmed: coord-2026-08-13", 2),                 # wags-class
+]
+
+
+def _write_board(inbox, board):
+    by_agent = {}
+    for agent, topic, age in board:
+        by_agent.setdefault(agent, []).append(ev(agent, "question", topic, ago(age)))
+    for agent, evs in by_agent.items():
+        write_events(os.path.join(inbox, f"{agent}.jsonl"), evs)
+
+
+def case_aged_wagsfix_never_truncated():
+    root, inbox = mkbus()
+    try:
+        _write_board(inbox, _AGED_REAL_BOARD_20260814)
+        lines, _ = run_check5(root)
+        aged = joined([ln for ln in lines if "TREO LÂU" in ln])
+        check("aged: bảng THẬT 20 mục ⇒ vào nhánh CẮT (không phải nhánh in-đủ ≤10)",
+              "20 mục" in aged and "VÒNG WAGS-FIX" in aged, aged)
+        # Điều kiện làm ca này CÓ NGHĨA: nhóm "còn lại" thật sự bị cắt. Nếu không cắt thì
+        # mọi assertion "wags vẫn hiện" dưới đây đều đúng một cách vô nghĩa.
+        check("aged: nhóm CÒN LẠI vẫn bị cắt giữa (miễn trừ chỉ áp cho lớp wags)",
+              "mục giữa" in aged, aged)
+        for _a, topic, _d in _AGED_REAL_BOARD_20260814:
+            if topic.startswith(WAGS_SELF_Q_PREFIXES):
+                check(f"aged MIỄN CẮT: '{topic}' vẫn hiện dù nằm giữa danh sách",
+                      topic in aged, aged)
+        check("aged: 5 mục cũ nhất vẫn hiện (không hồi quy)",
+              all(t in aged for _a, t, _d in _AGED_REAL_BOARD_20260814[:5]), aged)
+        check("aged: mục MỚI nhất vẫn hiện (chống crowd-out — lý do sinh ra cắt-giữa)",
+              "retro-escalation-2026-08-13-patternB-and-backlog" in aged, aged)
+        check("aged: 16 mục KHÔNG thuộc tiền tố (gồm 10 selfcheck-red do Wags viết) nằm ở "
+              "nhóm CÒN LẠI — miễn trừ theo TIỀN TỐ TOPIC, không theo agent_id",
+              "16 mục còn lại" in aged, aged)
+        check("aged: mỗi mục chỉ in 1 lần (không trùng giữa 2 nhóm)",
+              all(aged.count(t) <= 1 for _a, t, _d in _AGED_REAL_BOARD_20260814), aged)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_aged_no_wagsfix_keeps_old_cut():
+    # Backlog dài mà KHÔNG có mục wags-class ⇒ hành vi phải y hệt trước (cắt giữa).
+    root, inbox = mkbus()
+    try:
+        evs = [ev("Zombie", "question", f"zombie-{i}", ago(100 - i)) for i in range(12)]
+        write_events(os.path.join(inbox, "Zombie.jsonl"), evs)
+        lines, _ = run_check5(root)
+        aged = joined([ln for ln in lines if "TREO LÂU" in ln])
+        check("aged: không có mục wags ⇒ giữ NGUYÊN dòng cắt-giữa cũ (không nhắc VÒNG WAGS-FIX)",
+              "VÒNG WAGS-FIX" not in aged and "…và 4 mục giữa…" in aged, aged)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_aged_wagsfix_overflow_is_loud():
+    # Miễn trừ không được biến thành đường crowd-out mới: quá trần thì CẮT nhưng NÓI RA.
+    root, inbox = mkbus()
+    try:
+        evs = [ev("Wags", "question", f"wags-fix-not-confirmed: coord-{i:03d}", ago(60 - i))
+               for i in range(25)]
+        write_events(os.path.join(inbox, "Wags.jsonl"), evs)
+        evs2 = [ev("Mike", "question", f"khac-{i}", ago(3)) for i in range(3)]
+        write_events(os.path.join(inbox, "Mike.jsonl"), evs2)
+        lines, _ = run_check5(root)
+        aged = joined([ln for ln in lines if "TREO LÂU" in ln])
+        check("aged: 25 mục wags ⇒ cắt ở trần AGED_WAGS_MAX=20", "(20 mục, MIỄN CẮT" in aged, aged)
+        check("aged: cắt trần phải NÓI RA số bị cắt (không bao giờ cắt im lặng)",
+              "đã cắt 5 mục wags vượt trần 20" in aged, aged)
+        check("aged: mục KHÁC vẫn hiện dù nhóm wags dài", "khac-0" in aged, aged)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Check #11 (quét selfcheck production: freshness + ca đỏ) ──────────────────────────────
+# Thêm 2026-08-12 (job Wags_20260812_112724). Check #11 KHÔNG chạy lại 92 selfcheck, nó chỉ đọc
+# artifact — nên toàn bộ giá trị nằm ở 5 nhánh phân loại. Cả 5 chạy THẬT trên artifact giả ở
+# đây, gồm 2 nhánh im-lặng-nguy-hiểm (thiếu artifact / artifact hỏng).
+def run_check11(wc_root):
+    lines, warn = [], []
+
+    def W(msg):
+        warn.append(msg)
+        lines.append(f"⚠️ {msg}")
+
+    def OK(msg):
+        lines.append(f"✅ {msg}")
+
+    ns = {"os": os, "re": re, "json": json, "dt": dt, "glob": glob, "wc_root": wc_root,
+          "W": W, "OK": OK, "lines": lines, "WARN_ONLY": "[WARN-ONLY]"}
+    exec(compile(CHECK11_SRC, SRC + ":CHECK11", "exec"), ns)
+    return lines, warn
+
+
+def _mkscan(result=None, baseline=None):
+    """wc_root giả: mike/logs/selfcheck_weekly_<d>.json + mike/kb/selfcheck_baseline.json.
+    Tham số = None ⇒ KHÔNG tạo file đó (mô phỏng thiếu artifact)."""
+    d = tempfile.mkdtemp(prefix="ops_health_check11_")
+    if result is not None:
+        os.makedirs(os.path.join(d, "mike", "logs"), exist_ok=True)
+        with open(os.path.join(d, "mike", "logs", "selfcheck_weekly_20260812.json"),
+                  "w", encoding="utf-8") as f:
+            f.write(result if isinstance(result, str) else json.dumps(result, ensure_ascii=False))
+    if baseline is not None:
+        os.makedirs(os.path.join(d, "mike", "kb"), exist_ok=True)
+        with open(os.path.join(d, "mike", "kb", "selfcheck_baseline.json"),
+                  "w", encoding="utf-8") as f:
+            f.write(baseline if isinstance(baseline, str)
+                    else json.dumps(baseline, ensure_ascii=False))
+    return d
+
+
+def _res(hours_ago, total=92, passed=92):
+    return {"ts": (dt.datetime.now(dt.timezone.utc)
+                   - dt.timedelta(hours=hours_ago)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "total": total, "pass": passed}
+
+
+def case_c11_fresh_all_green():
+    d = _mkscan(_res(3), {"known_red": {}})
+    try:
+        lines, warn = run_check11(d)
+        check("check11: quét tươi + 0 đỏ ⇒ OK, không WARN", not warn and "✅" in joined(lines),
+              joined(lines))
+        check("check11: OK nêu số file đã quét (không phải câu chữ rỗng)",
+              "92" in joined(lines), joined(lines))
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+def case_c11_lists_every_red_no_truncation():
+    """Danh sách đỏ KHÔNG được cắt ngắn.
+
+    Bản đầu in `_sc_new[:8]`. Đo thật 2026-08-12: đúng 9 ca đỏ chưa triage, và ca thứ 9 theo thứ
+    tự alphabet là `t2_settlement_selfcheck.py` — guard settlement, thứ chạm tiền thật — bị cắt
+    khỏi báo cáo hằng ngày. Việc nợ bị cắt khỏi báo cáo là việc không tồn tại: người đọc thấy
+    "8 ca" và không có cách nào biết ca thứ 9 là ca nguy hiểm nhất.
+    """
+    names = ["a%d_selfcheck.py" % i for i in range(1, 9)] + ["t2_settlement_selfcheck.py"]
+    d = _mkscan(_res(3, 93, 84), {"known_red": {n: {"auto": True, "since": "2026-08-12"}
+                                                for n in names}})
+    try:
+        lines, warn = run_check11(d)
+        out = joined(lines)
+        missing = [n for n in names if n not in out]
+        check("check11: liệt kê ĐỦ cả 9 ca đỏ, không cắt (ca thứ 9 = guard settlement)",
+              not missing, "THIẾU: %s | %s" % (missing, out))
+        check("check11: không còn dấu cắt '…' trong danh sách đỏ", "…" not in out, out)
+        check("check11: số đếm khớp danh sách in ra (9 ca)", "9 selfcheck" in out, out)
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+def case_c11_red_is_warn_only():
+    d = _mkscan(_res(3, 92, 88), {"known_red": {
+        "extreme_regime_selfcheck.py": {"auto": True, "since": "2026-08-12"},
+        "t2_settlement_selfcheck.py": {"auto": True, "since": "2026-08-12"},
+        "immutable_publish_selfcheck.py": {"reason": "IAM", "verified_by": "Mike"}}})
+    try:
+        lines, warn = run_check11(d)
+        out = joined(lines)
+        check("check11: có ca đỏ chưa triage ⇒ CÓ cảnh báo cho người thấy", len(warn) == 1, out)
+        check("check11: mang [WARN-ONLY] (bộ quét đã escalate rồi — không dispatch lại)",
+              "[WARN-ONLY]" in out, out)
+        check("check11: liệt kê tên file đỏ để triage ngay trong báo cáo",
+              "extreme_regime_selfcheck.py" in out, out)
+        check("check11: TÁCH đỏ-chưa-triage (2) khỏi đỏ-đã-chấp-nhận (1) — không gộp để việc nợ "
+              "chìm vào cái đã chấp nhận",
+              "2 selfcheck" in out and "1 ca đỏ đã chấp nhận" in out, out)
+        check("check11 CONTROL: bộ lọc routing THẬT (grep -vF) loại đúng dòng này",
+              not [l for l in lines if "⚠️" in l and "[WARN-ONLY]" not in l], out)
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+    # chỉ còn đỏ ĐÃ CHẤP NHẬN ⇒ không WARN, nhưng vẫn phải NÓI RA số đó
+    d = _mkscan(_res(3, 92, 91), {"known_red": {
+        "immutable_publish_selfcheck.py": {"reason": "IAM", "verified_by": "Mike"}}})
+    try:
+        lines, warn = run_check11(d)
+        check("check11: chỉ còn đỏ đã chấp nhận ⇒ không WARN nhưng vẫn nêu ra",
+              not warn and "1 đỏ đã chấp nhận" in joined(lines), joined(lines))
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+def case_c11_stale_is_routable():
+    d = _mkscan(_res(40), {"known_red": {}})
+    try:
+        lines, warn = run_check11(d)
+        out = joined(lines)
+        check("check11: quét ôi >36h ⇒ WARN", len(warn) == 1, out)
+        check("check11: WARN ôi KHÔNG mang [WARN-ONLY] (cron chết là lỗi SỬA ĐƯỢC, phải route)",
+              "[WARN-ONLY]" not in out, out)
+        check("check11: nói rõ ÔI + nghi cron chết, không lẫn với 'có ca đỏ'",
+              "ÔI" in out and "cron" in out, out)
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+    d2 = _mkscan(_res(30), {"known_red": {}})
+    try:
+        _, warn2 = run_check11(d2)
+        check("check11: 30h (lỡ đúng 1 lần chạy) CHƯA kêu ôi", not warn2)
+    finally:
+        shutil.rmtree(d2, ignore_errors=True)
+    # ÔI phải thắng cả khi đang có ca đỏ: số liệu cũ 40h không được trình bày như tình trạng hiện tại
+    d3 = _mkscan(_res(40), {"known_red": {"a_selfcheck.py": {"auto": True}}})
+    try:
+        lines3, warn3 = run_check11(d3)
+        check("check11: ÔI + có đỏ ⇒ báo ÔI (routable), KHÔNG rơi vào nhánh [WARN-ONLY]",
+              len(warn3) == 1 and "[WARN-ONLY]" not in joined(lines3), joined(lines3))
+    finally:
+        shutil.rmtree(d3, ignore_errors=True)
+
+
+def case_c11_missing_and_corrupt_never_silent():
+    d = _mkscan(None, {"known_red": {}})
+    try:
+        lines, warn = run_check11(d)
+        check("check11: KHÔNG có file kết quả ⇒ WARN 'chưa từng chạy', không im lặng",
+              len(warn) == 1 and "CHƯA TỪNG CHẠY" in joined(lines), joined(lines))
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+    d = _mkscan(_res(3), None)
+    try:
+        lines, warn = run_check11(d)
+        check("check11: có kết quả nhưng THIẾU baseline ⇒ vẫn WARN (không báo '0 đỏ')",
+              len(warn) == 1 and "✅" not in joined(lines), joined(lines))
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+    d = _mkscan("{ day khong phai json", {"known_red": {}})
+    try:
+        lines, warn = run_check11(d)
+        out = joined(lines)
+        check("check11: artifact HỎNG ⇒ WARN, không rơi về nhánh '0 đỏ'", len(warn) == 1, out)
+        check("check11: câu chữ nói rõ KHÔNG kết luận được (khác hẳn 'không có ca đỏ')",
+              "không kết luận được" in out, out)
+        check("check11 CONTROL: nhánh hỏng KHÔNG in dòng ✅ nào", "✅" not in out, out)
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
 def main():
     print("ops_health_check_selfcheck: check #5 (backlog question) + check #10 (notify_thread) "
-          "+ khối DELIVER (Discord→Telegram) regression")
+          "+ check #11 (selfcheck_red_sweep freshness) + khối DELIVER (Discord→Telegram) regression")
     for fn in (case_archived_question_visible, case_cross_layer_resolve,
                case_resolver_must_be_after, case_dedupe_hot_and_archive,
                case_no_crowd_out, case_small_pool_prints_all,
                case_corrupt_gz_warns, case_empty_archive_warns,
                case_fresh_question_is_pending,
-               case_wagsfix_not_confirmed_is_warn_only, case_wagsfix_only_no_false_ok,
+               case_wagsfix_not_confirmed_is_warn_only, case_wagsfix_prefix_not_substring,
+               case_wagsfix_only_no_false_ok, case_wagsfix_prefix_list_in_sync,
                case_triaged_needs_human_ack, case_triaged_only_no_false_ok,
-               case_ack_suppress_days_window, case_ack_suppress_days_capped,
+               case_ack_suppress_days_window, case_rollup_of_umbrella_question,
+               case_ack_suppress_days_capped,
+               case_aged_wagsfix_never_truncated, case_aged_no_wagsfix_keeps_old_cut,
+               case_aged_wagsfix_overflow_is_loud,
                case_c10_no_file_is_ok, case_c10_fresh_log_warns,
                case_c10_fresh_log_without_timestamp_line, case_c10_old_log_is_ok,
+               case_c11_fresh_all_green, case_c11_red_is_warn_only,
+               case_c11_lists_every_red_no_truncation,
+               case_c11_stale_is_routable, case_c11_missing_and_corrupt_never_silent,
                case_deliver_discord_ok_no_telegram,
                case_deliver_discord_fails_falls_back_to_telegram,
                case_deliver_both_fail_logs_for_check10):

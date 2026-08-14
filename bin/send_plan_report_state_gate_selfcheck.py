@@ -35,25 +35,50 @@ SRC_ANNOTATED = "DT5G_macro (deploy_golive_dt5g_v4/golive_state_today.json, publ
 SRC_PATHY = ("deploy_golive_dt5g_v4/golive_state_today.json "
              "(tav2_bq.vnindex_5state_dt5g_live qua get_gated_state)")
 
+# Mỗi case là dict để thêm trường mới không phải sửa lại mọi dòng cũ.
+#   want_block : gate state có ĐƯỢC PHÉP chặn việc gửi plan không
+#   want_note  : chuỗi BẮT BUỘC có trong report render ra (None = không kiểm)
+#   deny_note  : chuỗi KHÔNG được có trong report
+# want_note tồn tại vì arch-review coord-2026-08-11: "fail-open được phép, fail-open CÂM thì
+# không" — mọi nhánh bỏ qua gate phải để lại dấu vết ĐỌC ĐƯỢC trong chính report, nếu không
+# một RED giả ồn ào bị đổi lấy một GREEN giả câm (lớp lỗi khó phát hiện hơn hẳn).
 CASES = [
-    # (tên, plan_state_source, plan_state, golive_source, golive_state, có_golive, mong_đợi_chặn)
-    ("annotated-source cùng state  -> KHÔNG chặn (bug 08-10/11)",
-     SRC_ANNOTATED, 3, SRC_BARE, 3, True, False),
-    ("pathy-source cùng state      -> KHÔNG chặn (bug 08-07)",
-     SRC_PATHY, 3, SRC_BARE, 3, True, False),
-    ("LỆCH STATE, nhãn source TRÙNG -> PHẢI chặn (bản cũ mù ca này)",
-     SRC_BARE, 1, SRC_BARE, 3, True, True),
-    ("plan thiếu field state       -> KHÔNG chặn (fail-open có chủ đích)",
-     SRC_PATHY, None, SRC_BARE, 3, True, False),
-    ("không có golive_state_today  -> KHÔNG chặn (nguồn không bắt buộc)",
-     SRC_ANNOTATED, 1, None, None, False, False),
+    dict(name="annotated-source cùng state  -> KHÔNG chặn (bug 08-10/11)",
+         p_src=SRC_ANNOTATED, p_state=3, g_src=SRC_BARE, g_state=3, has_golive=True,
+         want_block=False, want_note="✅ state=3 (NEUTRAL) khớp"),
+    dict(name="pathy-source cùng state      -> KHÔNG chặn (bug 08-07)",
+         p_src=SRC_PATHY, p_state=3, g_src=SRC_BARE, g_state=3, has_golive=True,
+         want_block=False, want_note="✅ state=3 (NEUTRAL) khớp"),
+    dict(name="LỆCH STATE, nhãn source TRÙNG -> PHẢI chặn (bản cũ mù ca này)",
+         p_src=SRC_BARE, p_state=1, g_src=SRC_BARE, g_state=3, has_golive=True,
+         want_block=True),
+    dict(name="plan thiếu field state       -> KHÔNG chặn NHƯNG phải NÓI RA",
+         p_src=SRC_PATHY, p_state=None, g_src=SRC_BARE, g_state=3, has_golive=True,
+         want_block=False, want_note="⚠️ CHƯA đối chiếu được state plan"),
+    dict(name="không có golive_state_today  -> KHÔNG chặn NHƯNG phải NÓI RA",
+         p_src=SRC_ANNOTATED, p_state=1, g_src=None, g_state=None, has_golive=False,
+         want_block=False, want_note="không có deploy_golive_dt5g_v4/golive_state_today.json"),
+    dict(name="golive.state là prose        -> KHÔNG chặn NHƯNG phải NÓI RA",
+         p_src=SRC_BARE, p_state=3, g_src=SRC_BARE, g_state="NEUTRAL", has_golive=True,
+         want_block=False, want_note="⚠️ CHƯA đối chiếu được state plan"),
+    dict(name="golive JSON HỎNG            -> KHÔNG chặn NHƯNG phải NÓI RA (except Exception)",
+         p_src=SRC_BARE, p_state=3, g_src=SRC_BARE, g_state=3, has_golive="corrupt",
+         want_block=False, want_note="⚠️ CHƯA đối chiếu được state plan"),
+    dict(name="state=-1 (PROBE)             -> KHÔNG chặn (sentinel, không phải regime 1-5)",
+         p_src=SRC_BARE, p_state=-1, g_src=SRC_BARE, g_state=3, has_golive=True,
+         p_state_name="PROBE", want_block=False, want_note="PROBE, không phải regime 1-5"),
+    dict(name="state=3 nhưng state_name='BULL' -> KHÔNG chặn, PHẢI cảnh báo mâu thuẫn",
+         p_src=SRC_BARE, p_state=3, g_src=SRC_BARE, g_state=3, has_golive=True,
+         p_state_name="BULL", want_block=False,
+         want_note="hai field trong cùng plan mâu thuẫn"),
 ]
 
 PLAN_DATE = "2026-08-11"
 ACCOUNT = "SpaceX"
 
 
-def run_case(name, p_src, p_state, g_src, g_state, has_golive, want_block):
+def run_case(name, p_src, p_state, g_src, g_state, has_golive, want_block,
+             want_note=None, deny_note=None, p_state_name="NEUTRAL"):
     sandbox = tempfile.mkdtemp(prefix="sendplan_selfcheck_")
     try:
         plans = os.path.join(sandbox, "data", "trade_plans")
@@ -62,7 +87,7 @@ def run_case(name, p_src, p_state, g_src, g_state, has_golive, want_block):
             "plan_date": PLAN_DATE,
             "account": ACCOUNT,
             "state_source": p_src,
-            "state_name": "NEUTRAL",
+            "state_name": p_state_name,
             "orders": [],
             "summary": {"action": "HOLD", "reasons": ["selfcheck fixture"]},
             "requires_user_approval": False,
@@ -75,11 +100,16 @@ def run_case(name, p_src, p_state, g_src, g_state, has_golive, want_block):
         if has_golive:
             gdir = os.path.join(sandbox, "deploy_golive_dt5g_v4")
             os.makedirs(gdir)
-            golive = {"as_of": "2026-08-10", "source": g_src, "bq_publish_ok": True}
-            if g_state is not None:
-                golive["state"] = g_state
-            with open(os.path.join(gdir, "golive_state_today.json"), "w") as f:
-                json.dump(golive, f)
+            gpath = os.path.join(gdir, "golive_state_today.json")
+            if has_golive == "corrupt":
+                with open(gpath, "w") as f:
+                    f.write('{"as_of": "2026-08-10", "state": 3,')   # JSON cụt
+            else:
+                golive = {"as_of": "2026-08-10", "source": g_src, "bq_publish_ok": True}
+                if g_state is not None:
+                    golive["state"] = g_state
+                with open(gpath, "w") as f:
+                    json.dump(golive, f)
 
         env = dict(os.environ)
         env["SEND_PLAN_WORKDIR_OVERRIDE"] = sandbox
@@ -92,7 +122,13 @@ def run_case(name, p_src, p_state, g_src, g_state, has_golive, want_block):
         # Chỉ quan tâm gate state — không nhận nhầm escalate của gate khác là "đã chặn đúng".
         blocked = ("plan_state_mismatch" in out) or ("plan_state_source_mismatch" in out)
         ok = blocked == want_block
-        return ok, blocked, out
+        why = "" if ok else f"mong đợi chặn={want_block}, thực tế chặn={blocked}"
+        # Bỏ qua gate mà KHÔNG để lại dấu vết = fail-open câm ⇒ FAIL, dù hành vi chặn đúng.
+        if ok and want_note and want_note not in out:
+            ok, why = False, f"thiếu dấu vết trong report: không thấy {want_note!r}"
+        if ok and deny_note and deny_note in out:
+            ok, why = False, f"report không được chứa {deny_note!r}"
+        return ok, blocked, why, out
     finally:
         shutil.rmtree(sandbox, ignore_errors=True)
 
@@ -102,15 +138,15 @@ def main():
         print(f"FAIL: không thấy {SCRIPT}")
         return 1
     passed = 0
-    for name, p_src, p_state, g_src, g_state, has_golive, want_block in CASES:
-        ok, blocked, out = run_case(name, p_src, p_state, g_src, g_state, has_golive, want_block)
+    for case in CASES:
+        ok, blocked, why, out = run_case(**case)
         status = "PASS" if ok else "FAIL"
-        print(f"[{status}] {name}")
+        print(f"[{status}] {case['name']}")
         if ok:
             passed += 1
         else:
-            print(f"        mong đợi chặn={want_block}, thực tế chặn={blocked}")
-            for line in out.strip().splitlines()[:6]:
+            print(f"        {why}")
+            for line in out.strip().splitlines()[:8]:
                 print(f"        | {line}")
     total = len(CASES)
     print(f"\n{passed}/{total} PASS")

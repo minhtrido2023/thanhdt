@@ -27,14 +27,19 @@ import glob
 import json
 import os
 import sys
+from zoneinfo import ZoneInfo
 
 WC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, WC_ROOT)
 
-from trading_bot.discretionary_accumulation import compute_session_order, validate_state, BOOK
+from trading_bot.discretionary_accumulation import (
+    compute_session_order, validate_state, BOOK, DYNAMIC_CEILING_SESSIONS_DEFAULT)
 from trading_bot.config import live_dnse_labels
 from trading_bot.plan_cash_commitment import gate_injected_order, replan_dropped_injection
-from trading_bot.vn_market import session_phase, now_ict
+from trading_bot.vn_market import (
+    session_phase, now_ict, normalize_price_vnd, is_holiday)
+
+_ICT_TZ = ZoneInfo("Asia/Ho_Chi_Minh")   # §16: neo TZ tường minh, không tin TZ của process
 
 # Phiên đang giao dịch (09:00–14:45 T2-T6) → day_volume của DNSE là KL DỞ DANG. Cơ chế
 # opportunistic (compute_session_order) giả định day_volume là KHỐI LƯỢNG CẢ PHIÊN đã chốt để
@@ -45,6 +50,7 @@ _SESSION_OPEN_PHASES = {"ATO", "MORNING", "LUNCH", "AFTERNOON", "ATC"}
 
 DISC_DIR = os.path.join(WC_ROOT, "data", "trade_plans", "discretionary")
 PLAN_DIR = os.path.join(WC_ROOT, "data", "trade_plans")
+ACTIVE_NAV_DIR = os.path.join(WC_ROOT, "data", "execution_logs")
 
 
 def _atomic_write_json(path, obj):
@@ -61,28 +67,44 @@ def next_trading_day_str():
 
 
 def load_active_states(account):
-    """Đọc mọi state_*_<account>.json status=active. Trả list (path, state)."""
-    out = []
+    """Đọc mọi state_*_<account>.json status=active. Trả (list (path, state), list bị bỏ qua).
+
+    Danh sách BỊ BỎ QUA trả kèm là có chủ đích: chính một state `status="completed"` nằm im
+    (TV1, 07-29 → 08-12) là thứ khiến toàn bộ cơ chế trần động không chạm được chương trình
+    đang chạy, mà KHÔNG một artifact nào người duyệt plan đọc được nhắc tới. Caller ghi nó vào
+    plan để lần sau nhìn thấy được thay vì phải suy ra.
+    """
+    out, skipped = [], []
     for path in sorted(glob.glob(os.path.join(DISC_DIR, f"state_*_{account}.json"))):
         try:
             state = json.load(open(path, encoding="utf-8"))
         except Exception as exc:
             print(f"  [WARN] state file lỗi đọc, bỏ qua: {path}: {exc}")
+            skipped.append({"state_file": os.path.relpath(path, WC_ROOT), "ticker": None,
+                            "why": f"file lỗi đọc: {exc}"})
             continue
-        state["_state_file"] = os.path.relpath(path, WC_ROOT)
+        rel = os.path.relpath(path, WC_ROOT)
+        state["_state_file"] = rel
         if state.get("account") != account:
             print(f"  [WARN] {path}: account={state.get('account')} ≠ {account}, bỏ qua")
+            skipped.append({"state_file": rel, "ticker": state.get("ticker"),
+                            "why": f"account={state.get('account')} ≠ {account}"})
             continue
         if state.get("status") != "active":
             print(f"  [skip] {os.path.basename(path)}: status={state.get('status')}")
+            skipped.append({"state_file": rel, "ticker": state.get("ticker"),
+                            "why": f"status={state.get('status')} (≠ active) — chương trình "
+                                   f"KHÔNG sinh lệnh; đúng ý thì bỏ qua, không thì bật lại state"})
             continue
         try:
             validate_state(state)
         except ValueError as exc:
             print(f"  [WARN] {path}: state không hợp lệ ({exc}) — bỏ qua, KHÔNG chèn")
+            skipped.append({"state_file": rel, "ticker": state.get("ticker"),
+                            "why": f"state không hợp lệ: {exc}"})
             continue
         out.append((path, state))
-    return out
+    return out, skipped
 
 
 def broker_filled_qty(account, account_id, ticker, baseline):
@@ -116,6 +138,164 @@ def prev_session_market(broker, ticker):
     return float(vol) * float(price), float(price)
 
 
+def bar_is_completed_session(bar_ts, now=None):
+    """Bar 1D của DNSE (timestamp `t` = 09:00 ICT của NGÀY GIAO DỊCH đó) đã là phiên HOÀN TẤT chưa?
+
+    True = phiên đã đóng ⇒ giá đóng cửa dùng được làm anchor.
+    False = bar CHƯA hoàn tất (nến hôm nay đang chạy, hoặc bar ngày tương lai) ⇒ phải LOẠI.
+    None = timestamp không parse được ⇒ caller fail-safe (bỏ trần động).
+
+    Vì sao KHÔNG loại thẳng mọi bar mang ngày hôm nay: cron thật chạy 20:30 ICT, lúc đó phiên
+    hôm nay ĐÃ đóng (14:45) nên giá đóng cửa hôm nay LÀ một phiên hoàn tất — bỏ nó đi làm anchor
+    già thêm 1 phiên mà không tăng độ an toàn. Cái phải chặn là bar đọc GIỮA phiên (dry-run
+    11:00) hoặc TRƯỚC phiên (PRE, 00:00–09:00, DNSE có thể trả bar stub), vì lúc đó `c` là giá
+    LIVE đang chạy ⇒ trần "không đuổi giá" bị nhiễm chính cái giá nó đang đuổi.
+    """
+    now = now or now_ict()
+    try:
+        bar_date = dt.datetime.fromtimestamp(int(bar_ts), _ICT_TZ).date()
+    except (TypeError, ValueError, OSError, OverflowError):
+        return None
+    today = now.date()
+    if bar_date < today:
+        return True
+    if bar_date > today:
+        return False                      # bar ngày tương lai = rác feed
+    # Bar HÔM NAY: chỉ hoàn tất khi hôm nay là NGÀY GIAO DỊCH thật và phiên đã đóng (≥14:45).
+    # Cuối tuần/lễ mà vẫn có bar mang ngày hôm nay ⇒ rác, loại (session_phase trả CLOSED cho cả
+    # T7/CN nên phải kiểm lịch riêng, không dựa mỗi tên phiên).
+    if now.weekday() >= 5 or is_holiday(today):
+        return False
+    return session_phase(now)[0] == "CLOSED"
+
+
+def anchor_prices_for(broker, state, ticker, now=None):
+    """Giá đóng cửa N phiên ĐÃ HOÀN TẤT gần nhất (cũ→mới) cho luật trần động P1, hoặc None.
+
+    CHỈ gọi khi state bật `dynamic_ceiling.enabled` — mặc định (cờ tắt) hàm này không chạy,
+    không thêm một lời gọi API nào so với trước.
+
+    Nguồn = DNSE `/price/ohlc` resolution=1D — CÙNG feed với giá live đang dùng để đặt lệnh,
+    nên không có rủi ro lệch cơ sở giá (adjusted `Close` của BQ ≠ giá thị trường thật, xem
+    kb/data_registry/price-volume/ticker_close_vs_price_dividend_adj.md). Đây là dữ liệu LỊCH
+    SỬ (phiên đã đóng) nên không phạm luật same-day §6, nhưng dùng DNSE vẫn là lựa chọn đúng
+    hơn: một feed, một cơ sở giá.
+
+    ⚠️ DNSE TRẢ CẢ NẾN HÔM NAY (xác nhận bằng probe live 2026-08-12 18:28 ICT: TV1/DGC đều có
+    bar `t`=09:00 ICT ngày 08-12). Vì vậy PHẢI lọc theo mảng `t`, không được lấy `c[-n:]` trần
+    trụi — đọc giữa phiên thì `c` cuối là giá LIVE, làm trần "không đuổi giá" nhiễm đúng cái
+    giá nó đang đuổi (lỗi quant-skeptic bắt được ở log verify_20260812_104435_640589).
+    `now` = neo thời gian để test tất định; None → now_ict().
+
+    None ⇒ engine tự fail-safe về trần CỐ ĐỊNH (không chèn lệnh sai, không crash).
+    """
+    cfg = state.get("dynamic_ceiling") or {}
+    if cfg.get("enabled") is not True:
+        return None
+    n = int(cfg.get("sessions", DYNAMIC_CEILING_SESSIONS_DEFAULT) or DYNAMIC_CEILING_SESSIONS_DEFAULT)
+    try:
+        client = getattr(broker, "client", None)
+        if client is None:
+            print(f"  [FAILSAFE] {ticker}: broker chưa có client DNSE → không lấy được anchor")
+            return None
+        # Lấy dư (n+10 phiên lịch, ~2 tuần) rồi cắt n phần tử cuối: DNSE trả theo phiên GIAO
+        # DỊCH nên nghỉ lễ/cuối tuần không tạo lỗ hổng, nhưng lấy dư vẫn rẻ và chống hụt.
+        # §16: gắn TZ ICT tường minh trước khi .timestamp() — now_ict() trả datetime NAIVE nên
+        # .timestamp() trần trụi sẽ diễn giải theo TZ của process (sai khi cron/test không có TZ).
+        now_eff = now or now_ict()
+        to_ts = int(now_eff.replace(tzinfo=_ICT_TZ).timestamp())
+        from_ts = to_ts - (n + 20) * 86400
+        raw = client.ohlc(ticker, resolution="1D", **{"from": from_ts, "to": to_ts})
+    except Exception as exc:
+        print(f"  [FAILSAFE] {ticker}: DNSE ohlc lỗi ({exc}) → trần động không kích hoạt")
+        return None
+    closes = raw.get("c") if isinstance(raw, dict) else None
+    stamps = raw.get("t") if isinstance(raw, dict) else None
+    # `t` BẮT BUỘC phải có và khớp độ dài `c`: không có nó thì KHÔNG biết bar nào là phiên hoàn
+    # tất ⇒ không giữ được lời hứa của docstring ⇒ fail-safe (KHÔNG đoán bừa theo vị trí mảng).
+    if (not isinstance(closes, list) or not isinstance(stamps, list)
+            or len(stamps) != len(closes) or not closes):
+        print(f"  [FAILSAFE] {ticker}: ohlc thiếu/lệch mảng t↔c "
+              f"(t={len(stamps) if isinstance(stamps, list) else 'n/a'}, "
+              f"c={len(closes) if isinstance(closes, list) else 'n/a'}) → trần động không kích hoạt")
+        return None
+    completed, n_dropped = [], 0
+    for ts, v in zip(stamps, closes):
+        ok = bar_is_completed_session(ts, now)
+        if ok is None:
+            print(f"  [FAILSAFE] {ticker}: timestamp bar không parse được ({ts!r}) → bỏ trần động")
+            return None
+        if ok:
+            completed.append(v)
+        else:
+            n_dropped += 1
+    if n_dropped:
+        print(f"  [anchor] {ticker}: loại {n_dropped} bar CHƯA hoàn tất (nến hôm nay đang chạy / "
+              f"bar tương lai) — anchor chỉ dùng phiên đã đóng")
+    if len(completed) < n:
+        print(f"  [FAILSAFE] {ticker}: ohlc còn {len(completed)} phiên ĐÃ HOÀN TẤT < {n} "
+              f"→ trần động không kích hoạt")
+        return None
+    out = []
+    for v in completed[-n:]:
+        try:
+            # Cùng chuẩn hoá đơn vị với Quote (một số feed DNSE trả giá đơn vị NGHÌN). Kể cả
+            # nếu hàm này sai, guard sanity trong resolve_price_band vẫn bắt được (anchor lệch
+            # >2× giá mới nhất ⇒ fail-safe) — hai lớp, vì lỗi đơn vị đã cắn thật một lần rồi.
+            out.append(float(normalize_price_vnd(float(v))))
+        except (TypeError, ValueError):
+            print(f"  [FAILSAFE] {ticker}: giá ohlc không parse được ({v!r}) → bỏ trần động")
+            return None
+    return out
+
+
+def load_active_nav(account, now=None):
+    """active_nav mới nhất của account, hoặc None (fail-safe) → (nav_vnd|None, info).
+
+    Nguồn = `data/execution_logs/active_nav_<account>.json` do `mike/bin/compute_active_nav.py`
+    ghi. Chọn nguồn này chứ KHÔNG tự tính lại vì script đó là nơi chuẩn tắc cho cơ sở tiền
+    `totalCash − totalDebt` (§25 coding_guidelines — hai bug cùng loại trong hai ngày liên tiếp
+    vì mỗi consumer tự lấy field tiền), đã fail-closed sẵn (guard nổ ⇒ KHÔNG ghi file, bản cũ ở
+    lại nguyên), và nó chạy NGAY TRONG chuỗi lập plan (~19:0x) — tức đúng cơ sở NAV mà phần còn
+    lại của plan hôm đó đã dùng.
+
+    Vì file ghi AD-HOC (không cron riêng), mtime tươi KHÔNG chứng minh nội dung tươi (bẫy thật
+    lag_edge_health 07-12) ⇒ cổng tươi đọc `computed_at` TRONG NỘI DUNG và đòi ĐÚNG ngày hôm
+    nay (ICT, §16). Dung sai chặt là cố ý (§14): injector chạy 20:30 cùng ngày với producer
+    19:0x, nên trễ tới một ngày đã là dấu hiệu chuỗi lập plan hỏng — lúc đó KHÔNG đặt lệnh còn
+    hơn đặt theo NAV hôm qua.
+    """
+    path = os.path.join(ACTIVE_NAV_DIR, f"active_nav_{account}.json")
+    rel = os.path.relpath(path, WC_ROOT)
+    if not os.path.exists(path):
+        return None, {"source": rel, "reason": f"chưa có file {rel}"}
+    try:
+        d = json.load(open(path, encoding="utf-8"))
+    except Exception as exc:
+        return None, {"source": rel, "reason": f"{rel} lỗi đọc: {exc}"}
+    today = (now or now_ict()).date().isoformat()
+    computed_at = str(d.get("computed_at"))
+    nav = d.get("active_nav")
+    info = {"source": rel, "computed_at": computed_at, "expected_date": today,
+            "active_nav_vnd": nav, "cash_basis": d.get("cash_basis")}
+    # §12: file dữ liệu mang nhãn account thì phải KIỂM nhãn, không tin tên file. Tên file đúng
+    # mà nội dung của account khác = sizing account này bằng NAV account kia (tiền lệ thật
+    # 2026-07-19, cross-account contamination). Rẻ, và bắt được cả lỗi copy file thủ công.
+    if d.get("account") not in (None, account):
+        info["reason"] = (f"{rel} có account={d.get('account')!r} ≠ {account} — nhiễm chéo "
+                          f"account, KHÔNG dùng (§12)")
+        return None, info
+    if computed_at != today:
+        info["reason"] = (f"{rel} computed_at={computed_at} ≠ hôm nay {today} — CŨ. "
+                          f"Chạy `mike/bin/compute_active_nav.py --account {account}` rồi lặp lại.")
+        return None, info
+    if not isinstance(nav, (int, float)) or isinstance(nav, bool) or nav <= 0:
+        info["reason"] = f"{rel} active_nav={nav!r} không phải số dương"
+        return None, info
+    info["reason"] = f"active_nav {float(nav):,.0f}đ (computed_at {computed_at})"
+    return float(nav), info
+
+
 def already_injected(plan, ticker):
     """Dedup: đã có order DISCRETIONARY_SPECIAL cho ticker này trong plan chưa?
     (bắt cả tranche chèn tay lẫn lần chạy trước — chống chèn trùng bất kể id scheme.)"""
@@ -134,10 +314,13 @@ def process_account(account, plan_date, dry_run):
         return 1
     account_id = profile.get("account_id")  # key CHUẨN trong secrets (KHÔNG phải account_no)
 
-    states = load_active_states(account)
-    if not states:
-        print(f"[inject] {account} {plan_date}: KHÔNG có state active — no-op.")
+    states, skipped_states = load_active_states(account)
+    if not states and not skipped_states:
+        print(f"[inject] {account} {plan_date}: KHÔNG có state discretionary nào — no-op.")
         return 0
+    # CÓ state nhưng không state nào active vẫn đi tiếp: mục đích là ghi được lý do vào plan
+    # (xem khối discretionary_inject_notes bên dưới). Vòng lặp chạy trên `states` rỗng ⇒ không
+    # lệnh nào được sinh — đúng ý, chỉ khác ở chỗ nay nó nói ra tại sao.
 
     plan_path = os.path.join(PLAN_DIR, f"plan_{account}_{plan_date}.json")
     if not os.path.exists(plan_path):
@@ -153,6 +336,32 @@ def process_account(account, plan_date, dry_run):
 
     now_iso = dt.datetime.now().astimezone().isoformat(timespec="seconds")
     account_mode = "live" if account in live_dnse_labels() else "paper"
+
+    # active_nav CHỈ đọc khi có state khai target theo tỷ trọng — state target cố định không
+    # phụ thuộc NAV, không được để nó chết lây vì một file NAV cũ.
+    active_nav_vnd, nav_info = None, None
+    if any(s.get("target_pct_active_nav") is not None for _, s in states):
+        active_nav_vnd, nav_info = load_active_nav(account)
+        tag = "active_nav" if active_nav_vnd else "FAILSAFE active_nav"
+        print(f"  [{tag}] {nav_info['reason']}")
+
+    # State BỊ BỎ QUA (completed/inactive/hỏng/sai account) ⇒ ghi vào plan. Đây chính là lỗ
+    # hổng đã gây ra job này: state TV1 nằm im ở status="completed" từ 07-29, injector bỏ qua
+    # đúng luật và IM LẶNG, nên không artifact nào người duyệt plan đọc được nhắc rằng có một
+    # chương trình gom đang không sinh lệnh. Dedup theo (state_file, why) để lần chạy lại
+    # (retry khi plan chưa kịp ghi) không nhân bản ghi chú.
+    if skipped_states:
+        notes = plan.setdefault("discretionary_inject_notes", [])
+        seen = {(n.get("state_file"), n.get("note")) for n in notes}
+        for sk in skipped_states:
+            if (sk["state_file"], sk["why"]) in seen:
+                continue
+            notes.append({"at": now_iso, "ticker": sk["ticker"], "action": "state_skipped",
+                          "state_file": sk["state_file"], "note": sk["why"]})
+            print(f"  [note→plan] {sk['state_file']}: {sk['why']}")
+        if not dry_run:
+            _atomic_write_json(plan_path, plan)
+
     n_injected = 0
     broker = None
 
@@ -180,12 +389,14 @@ def process_account(account, plan_date, dry_run):
 
         baseline = int(state.get("baseline_qty_before_program", 0) or 0)
         filled, broker = broker_filled_qty(account, account_id, ticker, baseline)
-        prev_turnover = prev_price = None
+        prev_turnover = prev_price = anchors = None
         if filled is not None and broker is not None:
             prev_turnover, prev_price = prev_session_market(broker, ticker)
+            anchors = anchor_prices_for(broker, state, ticker)   # None khi cờ P1 tắt (mặc định)
 
         order, decision = compute_session_order(
-            state, filled, prev_turnover, prev_price, plan_date, now_iso)
+            state, filled, prev_turnover, prev_price, plan_date, now_iso,
+            anchor_prices=anchors, active_nav_vnd=active_nav_vnd)
         print(f"  decision: {decision['action']} — {decision['reason']}")
 
         # đánh dấu completed vào state nếu engine báo (rule e: không mua quá)
@@ -205,6 +416,16 @@ def process_account(account, plan_date, dry_run):
             state.setdefault("history_noninject", []).append(
                 {"plan_date": plan_date, "action": decision["action"],
                  "reason": decision["reason"], "at": now_iso})
+            # Từ khi injector là CHỦ SỞ HỮU DUY NHẤT của lệnh gom này (DollarBill không còn gõ
+            # tay — xem kb/context_planning_mini.md), một lần fail-safe/halt im lặng = lệnh biến
+            # mất khỏi plan mà không ai thấy. Ghi lý do THẲNG vào plan để nó nằm trong artifact
+            # user duyệt lúc 21:00, không chỉ trong log của cron.
+            if decision["action"] in ("failsafe", "halted"):
+                plan.setdefault("discretionary_inject_notes", []).append(
+                    {"at": now_iso, "ticker": ticker, "action": decision["action"],
+                     "state_file": state.get("_state_file"), "note": decision["reason"]})
+                if not dry_run:
+                    _atomic_write_json(plan_path, plan)
             if not dry_run:
                 _atomic_write_json(state_path, {k: v for k, v in state.items()
                                                 if not k.startswith("_")})

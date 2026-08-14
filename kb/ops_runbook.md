@@ -73,11 +73,22 @@ checker: nó tra không ra bằng chứng rồi báo như thể việc chưa xon
   question `wags-fix-not-confirmed:` như cũ; `INCONCLUSIVE`/rỗng (chuỗi kiểm chứng không ra phán
   quyết) → question **`wags-arch-review-inconclusive:`** + nói thẳng "KHÔNG phải arch-reviewer bác
   fix", kèm bằng chứng finding của Wags có trên bus hay không.
+  ⚠️ **Tách nhánh question mới thì PHẢI thêm tiền tố đó vào `WAGS_SELF_Q_PREFIXES`**
+  (`bin/ops_health_check.sh`) **CÙNG LÚC.** Chính bản tách 08-11 đã quên bước này: question
+  `wags-arch-review-inconclusive:` rơi vào `pending_q` → COORD_WARN → tự dispatch `wags_autofix`
+  mỗi chu kỳ checker cho ĐÚNG issue vừa không ra phán quyết, và job đó lại đẻ question cùng loại —
+  đúng vòng tự nuôi audit §14 (2026-07-31) tưởng đã đóng. Câu hỏi do CHÍNH pipeline sinh ra là
+  OUTPUT của vòng lặp; đưa lại vào INPUT là phản hồi dương. Selfcheck ca 11b
+  (`ops_health_check_selfcheck.py`) so danh sách này với bản thật, quên là FAIL.
 - **Verdict lấy từ ARTIFACT (bus), đừng lấy từ stdout của pipe.** stdout đã nhiễu thật 2 lần
   (2026-07-08 `notify_thread.sh` in `{"status":"sent"}` → 2 question giả; 2026-07-22T05:55Z
   INCONCLUSIVE, 8 ngày sau đóng lại là FALSE_ALARM). `bin/wags_bus_verdict.py` đọc verification
   arch-reviewer ghi deterministic trên bus; chỉ dùng để NÂNG lên CONFIRMED khi stdout hỏng, không
   bao giờ dùng để hạ (bus im lặng = thiếu bằng chứng, giữ nguyên đường báo động).
+  **Nhưng luật một chiều thì phải canh cả chiều còn lại**: stdout=CONFIRMED mà bus nói KHÁC
+  (2 nguồn lẽ ra cùng một `verdict_json`) trước 08-12 đi thẳng vào ✅ HOÀN TẤT trong im lặng. Nay
+  vẫn KHÔNG tự hạ verdict, nhưng đổi ✅→🟠 + ghi pipelog để người đối chiếu. Nguyên tắc chung: mỗi
+  lần thêm một luật "chỉ X, không Y", hỏi ngay ca Y xảy ra thì ai thấy.
 
 ⚠️ Trước khi kết luận "báo động lặp = tooling hỏng": **đọc log/verdict thật của lần escalate đó**.
 Verdict có chẩn đoán cụ thể (trích đúng dòng code, tái lập được lỗi) là review THẬT — phải sửa,
@@ -95,6 +106,7 @@ kiểm lại thì cả 2 đều là `NEEDS_CHANGES` có bằng chứng — vẫn
 | 21:00 (tối trước) | `send_plan_report.sh` (per account) | Plan T+1 TỒN TẠI THẬT, đúng ngày, đúng schema (verify artifact, không tin job status) | Escalate bus `question` + Telegram (có sẵn) — plan cần user duyệt, KHÔNG tự tạo |
 | 23:00 (tối trước) | `send_plan_report.sh --second-chance` (per account) | Re-send idempotent nếu plan sửa sau 21:00 chưa được gửi lại | Như 21:00 |
 | 23:45 (đêm trước) | `sync_bq_cache_daily.sh` | **Cache verified OK toàn bộ bảng** (không chỉ preflight) | Verify FAILED → **autofix tự động** (đã wire 2026-07-07) — bài học: cache thối âm thầm 10 ngày gây false-SEV1 |
+| 04:30 | `selfcheck_weekly_baseline_check.sh` (**tên di sản — nhịp thật là NGÀY từ 2026-08-12**) | Chạy 93 selfcheck production HEAD (gốc `WorkingClaude/` + `mike/bin/`) bằng `$DNA_PYEXE` + env theo `kb/selfcheck_baseline.json.required_env`, diff `known_red` | ĐỎ MỚI → 1 bus `question` `selfcheck-red: <file>` + ack + Discord `architecture`, **1 lần/ca** (ghi vào `known_red` nên không báo lại); xanh lại → tự đăng `answer` đóng vòng. **Wags KHÔNG tự sửa selfcheck giao dịch** — chủ sở hữu file / user quyết |
 | 08:20 | `ops_health_check.sh` (per account) | BOT_STOP, xung đột file plan, lỗi lặp journal, circuit breaker, question tồn, đối chiếu preflight | WARN > 0 → **autofix tự động** (wire 2026-07-07) + vẫn post cảnh báo như cũ |
 | 08:45 | `preflight_check.sh` (per account) | Plan hôm nay tồn tại + approved + macro_health + Gmail OTP + BQ lag | RED vì plan thiếu/chưa duyệt → USER phải xử lý (không autofix); RED vì hạ tầng → autofix |
 | 09:05 | `run_bot.sh` (per account) | Bot chạy, đặt lệnh theo plan | — (thực thi thật, autofix KHÔNG đụng) |

@@ -54,7 +54,10 @@ fi
 if [ -z "${PLAN_FILE:-}" ] || [ ! -f "${PLAN_FILE:-}" ]; then
   _fail "Plan $ACCOUNT $TODAY KHÔNG TÌM THẤY — DollarBill chưa lập plan hoặc BQ stale."
 else
-  PLAN_INFO=$(python3 - "$PLAN_FILE" 2>/dev/null <<'PY'
+  # stderr KHÔNG bị nuốt (arch-review coord-2026-08-07): khối này crash ⇒ PLAN_INFO rỗng ⇒
+  # dòng RED không có lý do, và người đọc không phân biệt được "plan xấu" với "checker hỏng".
+  _PF_ERR="$(mktemp)"
+  PLAN_INFO=$(python3 - "$PLAN_FILE" 2>"$_PF_ERR" <<'PY'
 import json, sys
 d = json.load(open(sys.argv[1]))
 approved  = d.get("approved_by") or d.get("approved_by_user")
@@ -94,7 +97,17 @@ flags = []
 #     vượt lô sở hữu) và nó vẫn chạy trên MỌI lệnh, kể cả lệnh do merge sinh ra — lý do
 #     chính khiến thu hẹp (a) là an toàn: (a) là heuristic cấu trúc, (b) là trần thật.
 _orders = d.get("orders", [])
-def _q(o): return o.get("qty", o.get("quantity")) or 0
+# qty có thể là chuỗi ("100") tuỳ writer plan — so sánh chuỗi với số sẽ TypeError và giết cả
+# khối (arch-review coord-2026-08-07). Ép kiểu; giá trị KHÔNG ép được thì báo cờ chứ không
+# lặng lẽ coi là 0 (0 làm bất biến (b) tính thiếu và đọc ra "sạch").
+_bad_qty = []
+def _q(o):
+    v = o.get("qty", o.get("quantity")) or 0
+    try:
+        return int(float(v))
+    except (TypeError, ValueError):
+        _bad_qty.append(str(o.get("id") or o.get("ticker") or "?"))
+        return 0
 _MERGE_PLAYS = {"PARK_TRIM", "JIT_UNPARK", "PARK_TRIM+JIT_UNPARK"}
 def _merge_domain(o):
     """Lệnh này có thuộc miền bước gộp L1/L2 không (⇒ đáng lẽ đã bị gộp/xoá)?"""
@@ -103,7 +116,8 @@ def _merge_domain(o):
             or str(o.get("play_type", "")).upper() in _MERGE_PLAYS)
 _by_key = {}
 for _o in _orders:
-    _by_key.setdefault((_o.get("side"), _o.get("ticker")), []).append(_o)
+    # side chuẩn hoá về chữ thường: 'SELL' viết hoa từng làm nhánh (b) im lặng không chạy.
+    _by_key.setdefault((str(_o.get("side") or "").lower(), _o.get("ticker")), []).append(_o)
 _stale = sorted({k[1] for k, v in _by_key.items()
                  if len(v) > 1 and any(o.get("merged_from") for o in v)
                  and sum(1 for o in v if _merge_domain(o)) > 1})
@@ -111,10 +125,13 @@ if _stale: flags.append("MERGE_STALE_SRC:" + ",".join(_stale))
 _over = []
 for (_side, _tk), _os in _by_key.items():
     if _side != "sell": continue
-    _cap = max((o.get("merged_from", {}).get("sellable_at_calc") or 0) for o in _os)
+    # (… or {}) chứ KHÔNG phải .get(k, {}): merged_from=null có thật trong plan ⇒ default
+    # không được dùng ⇒ None.get() AttributeError giết cả khối (idiom giống dòng approved).
+    _cap = max(((o.get("merged_from") or {}).get("sellable_at_calc") or 0) for o in _os)
     if _cap and sum(_q(o) for o in _os) > _cap:
         _over.append(f"{_tk}({sum(_q(o) for o in _os)}>{_cap})")
 if _over: flags.append("SELL_GT_SELLABLE:" + ",".join(sorted(_over)))
+if _bad_qty: flags.append("BAD_QTY:" + ",".join(sorted(set(_bad_qty))))
 
 # Plan HOLD (0 lệnh) không có gì để thực thi — approval chỉ bắt buộc khi có lệnh thật.
 # mafee_authorized KHÔNG còn là fail-flag: không có code path nào ghi field này (INCIDENTS
@@ -131,11 +148,14 @@ PY
 
   IFS='|' read -r _approved _mafee _mode _n_orders _est _state_nm _src _flags <<< "$PLAN_INFO"
 
-  if [ "$_flags" = "OK" ]; then
+  if [ -z "$PLAN_INFO" ]; then
+    _fail "Plan $ACCOUNT $TODAY: khối kiểm plan/bất biến lệnh CRASH, KHÔNG kết luận được gì về plan — $(tr '\n' ' ' < "$_PF_ERR" | tail -c 300)"
+  elif [ "$_flags" = "OK" ]; then
     _ok "Plan $ACCOUNT $TODAY: $_n_orders lệnh, ~${_est}B VND, state=$_state_nm ($_src), approved=$_approved mafee=$_mafee"
   else
     _fail "Plan $ACCOUNT $TODAY: $_flags — orders=$_n_orders approved=$_approved mafee=$_mafee"
   fi
+  rm -f "$_PF_ERR"
 fi
 
 # ── 3. Macro health ───────────────────────────────────────────────────────────

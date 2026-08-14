@@ -254,6 +254,17 @@ preserve_verbatim: >
   vớt bản mới ngay đêm đó. Kèm cùng commit: `sync_bq_cache.py` chuyển `fa_ratings`/`fa_ratings_8l`
   sang `full_only` (delta-append không tương thích refresh DELETE+INSERT/re-rank — hết alert
   count-mismatch giả mỗi thứ Bảy).
+- 2026-08-14: **thêm 1 dòng cron** `0 1 * * 1` = **08:00 ICT thứ Hai** —
+  `fearbuy_weekly_scan.sh --mode monday` (job `Taylor_20260814_041116`, user duyệt §G
+  `agents/Taylor/research/portfolio_wide_badnews_protection_20260814.md`). Cùng script với lượt
+  thứ Sáu (thêm `--mode`), KHÔNG dựng script thứ hai. **Lý do phải ghi đúng kẻo hiểu nhầm về sau:
+  bảo vệ PHÍA MUA, không phải "bán kịp"** — đo 10 năm cho thấy sau cú sập riêng lẻ thứ Hai thì
+  fwd1 trung bình +0,02% (bán không cứu được gì), trong khi bot 09:05 thứ Hai lại đang đặt lệnh
+  theo plan duyệt từ cuối tuần, tức trước khi tin cuối tuần tồn tại. 4 câu hỏi §11 trả lời đầy đủ
+  trong ô "Đọc" của bảng chính. Cùng commit: cổng độ tươi `active_nav_*.json` trong
+  `anomaly_scan.load_universe()` (§14 — cặp producer 20:15 / consumer 08:20 trước nay KHÔNG có
+  precheck, producer chết 1 tối là quét sổ cũ trong im lặng) + watchlist sống thay danh sách mã
+  chép cứng trong prompt lượt thứ Sáu.
 - 2026-07-13: thêm second-chance 23:00 cho `send_plan_report.sh` (sự cố kb/INCIDENTS.md 2026-07-13
   root-cause 1: plan sửa/re-dispatch sau 21:00 không bao giờ được gửi lại duyệt). Script đã hỗ trợ
   `--second-chance`/`--dry-run` + marker idempotent `state/plan_report_sent/` (Winston, job

@@ -86,6 +86,24 @@ def escalate(emit, dry=False):
     asof = emit.get("asof", "?")
     new_h, new_status, changed = [], [], False
 
+    # CỔNG ĐỘ TƯƠI WATCHLIST (§14, thêm 2026-08-14) — nguồn `active_nav_*.json` do cron RIÊNG
+    # (compute_active_nav_all.sh 20:15 ICT) ghi. Nó chết một tối ⇒ scan sáng sau quét sổ cũ,
+    # mã vừa mua vô hình. Cảnh báo này KHÔNG chặn gì, nhưng phải tới được người: cờ nằm trong
+    # emit-json ở /tmp thì không ai đọc. Idempotent 1 lần/ngày qua cùng ledger như trip giá.
+    if emit.get("universe_stale"):
+        key = f"UNIVERSE_STALE|{emit.get('universe_asof')}|{asof}"
+        if key not in led:
+            _notify(f"🕒 **Watchlist anomaly QUÁ HẠN** (phiên scan {asof})\n"
+                    f"  {emit.get('universe_stale_reason', '')}\n"
+                    f"  ⇒ lớp bảo vệ tin xấu đang chạy trên SỔ CŨ: mã mua sau "
+                    f"`{emit.get('universe_asof')}` KHÔNG được theo dõi. Scan vẫn chạy "
+                    f"(quét sổ cũ hơn không quét gì) — nhưng đừng đọc kết quả hôm nay là "
+                    f"'danh mục sạch'. Kiểm `compute_active_nav_all.sh` 20:15 ICT.", dry)
+            if not dry:
+                led[key] = {"escalated_at": datetime.datetime.now().isoformat(timespec="seconds"),
+                            "type": "UNIVERSE_STALE", "universe_asof": emit.get("universe_asof")}
+                changed = True
+
     # PRIMARY — tier-H giá/volume → khởi động due-diligence
     for a in emit.get("tier_h", []):
         key = f"{a['ticker']}|{asof}"
@@ -155,6 +173,11 @@ def main():
         return
     emit = json.load(open(args.emit_json))
     nh, ns = escalate(emit, dry=args.dry_run)
+    # In RA STDOUT luôn, kể cả khi đã escalate rồi (khác `nh`/`ns` chỉ báo cái MỚI):
+    # ops_health_check.sh grep stdout để dựng dòng tóm tắt Discord — không có dòng này thì
+    # bản tóm tắt vẫn nói "✅ không có tín hiệu tier-H mới" trong khi đang quét sổ cũ.
+    if emit.get("universe_stale"):
+        print(f"ANOMALY_ESCALATE: watchlist QUÁ HẠN — {emit.get('universe_stale_reason', '')}")
     if nh:
         print(f"ANOMALY_ESCALATE: {len(nh)} tier-H MỚI khởi động due-diligence: {nh}")
     if ns:

@@ -227,13 +227,34 @@ def probe_journal_scan(probe, prog, today):
 
 
 def probe_alphalens(probe, prog, today):
-    """Đọc alphalens_paper.json + giá close mới nhất từ BQ cache → return vs benchmark."""
+    """Đọc alphalens_paper.json + giá close mới nhất từ BQ cache → return vs benchmark.
+
+    `entry_price` là giá THÔ đóng băng lúc mở sổ; `Close` (BQ) hồi tố theo cổ tức/chia tách từ
+    vintage HÔM NAY — so trực tiếp hai giá này gán oan mọi corp-action sau ngày vào lệnh thành
+    lỗ giá (Bẫy 2, kb/data_registry/price-volume/ticker_close_vs_price_dividend_adj.md). Ca thật
+    MBB (quyền mua + cổ tức CP 2026-08-11): báo cáo cũ ra -18,8% khi tỉ suất thật +1,3%. Rebase
+    qua paper_entry_adjust.adjust_entries() (WC_ROOT, job Taylor_20260813_041648, đã có sẵn +
+    selfcheck 19 ca — trước đây chỉ wire vào alphalens_report.py đứng riêng, KHÔNG chạm probe
+    này, nên báo cáo ngày vẫn sai dù fix đã tồn tại từ 08-13).
+    """
     import duckdb  # sẵn trong env papertrade
+    sys.path.insert(0, WC_ROOT)
+    import paper_entry_adjust
     jpath = os.path.join(WC_ROOT, probe["json_path"])
     ppath = os.path.join(WC_ROOT, probe["prices_parquet"])
     with open(jpath, encoding="utf-8") as f:
         al = json.load(f)
     meta, positions = al["meta"], al["positions"]
+    entry_asof = {p["ticker"]: (meta.get("entry_price_asof") or p.get("entry_date"))
+                  for p in positions}
+    try:
+        adj = paper_entry_adjust.adjust_entries(
+            [(p["ticker"], entry_asof[p["ticker"]], p["entry_price"]) for p in positions])
+    except Exception as e:
+        adj = {}
+        adj_err = str(e)[:120]
+    else:
+        adj_err = None
     tickers = [p["ticker"] for p in positions]
     con = duckdb.connect()
     con.execute("PRAGMA threads=1")
@@ -255,10 +276,21 @@ def probe_alphalens(probe, prog, today):
             lines.append(f"  • {t}: n/a — thiếu giá trong cache")
             continue
         close = px[t][1]
-        ret = (close / p["entry_price"] - 1) * 100
+        a = adj.get((t, entry_asof[t]))
+        if a is None:
+            entry_show, ret = p["entry_price"], (close / p["entry_price"] - 1) * 100
+            note = f" [⚠ chưa rebase corp-action: {adj_err}]" if adj_err else ""
+        else:
+            entry_show, ret = a.entry_price, a.pct_vs(close)
+            if a.degraded:
+                note = f" [⚠ chưa rebase corp-action: {a.note}]"
+            elif a.is_adjusted:
+                note = f" [giá vào {a.entry_price:,.0f}→{a.entry_adj:,.0f} do quyền]"
+            else:
+                note = ""
         port_ret += p.get("weight_paper", 1.0 / len(positions)) * ret
-        lines.append(f"  • {t}: {p['entry_price']:,.0f} → {close:,.0f} = **{ret:+.2f}%** "
-                     f"(entry {p['entry_date']}, {p['lens']})")
+        lines.append(f"  • {t}: {entry_show:,.0f} → {close:,.0f} = **{ret:+.2f}%** "
+                     f"(entry {p['entry_date']}, {p['lens']}){note}")
     excess = port_ret - bench_ret
     return {"headline": (f"EW **{port_ret:+.2f}%** vs VNINDEX {bench_ret:+.2f}% → "
                          f"**excess {excess:+.2f}pp** (MTM as-of {asof})"),

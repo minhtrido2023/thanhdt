@@ -84,6 +84,9 @@ import sys
 BQ_PATH_PREFIX = "/home/trido/google-cloud-sdk/bin"
 WC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+sys.path.insert(0, WC_ROOT)
+from trading_bot.vn_market import today_ict  # noqa: E402 — ICT thật, không phụ thuộc TZ host (§16)
+
 
 def get_account_profile(label):
     accounts_path = os.path.join(WC_ROOT, "secrets", "trading_bot_accounts.json")
@@ -184,8 +187,7 @@ def resolve_prices(tickers, asof):
     Ticker DNSE thiếu giá (API hiccup) → fallback BQ từng mã + cảnh báo LỚN ra stderr
     (đánh dấu nguồn 'bq_close_stale' để provenance trong output JSON không nói dối).
     """
-    import datetime as _dt
-    today = _dt.date.today().isoformat()
+    today = today_ict().isoformat()
     if asof is None or asof == today:
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         from verify_account_snapshot import dnse_close_prices
@@ -236,8 +238,7 @@ def main():
     offbook_asof = profile.get("manual_offbook_assets_asof") or ""
     offbook_stale_warning = None
     if offbook and offbook_asof:
-        import datetime as _dt_stale
-        asof_ref = args.asof or _dt_stale.date.today().isoformat()
+        asof_ref = args.asof or today_ict().isoformat()
         try:
             age_days = (_dt_stale.date.fromisoformat(asof_ref)
                         - _dt_stale.date.fromisoformat(offbook_asof)).days
@@ -332,7 +333,7 @@ def main():
         # phải tự kiểm tra nó còn tươi không — và phải kiểm theo nội dung, không theo mtime
         # (mtime tươi/nội dung cũ là bẫy đã gặp thật, sự cố lag_edge_health 2026-07-12).
         # Consumer: golive_recommend_v23._account_nav_basis() (chia trần %ADV cho CAPIT).
-        "computed_at": __import__("datetime").date.today().isoformat(),
+        "computed_at": today_ict().isoformat(),
         # `cash` = totalCash − totalDebt kể từ 2026-08-10 (trước đó là `availableCash`, §cash).
         # Ba field thô đi kèm để consumer/audit tái lập được con số mà không phải gọi lại API.
         "cash": cash,

@@ -79,36 +79,105 @@ def load_real(account, date="2026-08-07"):
 SX = load_real("SpaceX")
 ZP = load_real("ZaloPay")
 
+
+# ── Kỳ vọng SUY TỪ ARTIFACT, không ghim số (sửa 2026-08-14, job Taylor_20260814_080528) ──
+# Bản cũ ghim chuỗi "12 lệnh BÁN, Σ 71.7tr" / "3 mã PARK tổng 16.0tr"… đo tại một vintage của
+# `data/trade_plans/plan_*_2026-08-07.json`. Hai file đó KHÔNG nằm trong git (`.gitignore:12
+# *.json`) và bị ghi đè khi re-plan — bản trên đĩa hiện là 11 lệnh/42.0tr, nên 14 ca đỏ dù
+# renderer hoàn toàn đúng. Đây đúng ca §23 hệ luận 1 cảnh báo: "đọc thẳng file production
+# (data/trade_plans/…) làm assertion ⇒ test tự vô hiệu theo thời gian".
+#
+# BẤT BIẾN THẬT mà bộ này sinh ra để bảo vệ KHÔNG phải "đúng 12 lệnh" — mà là "report KHÔNG
+# ĐƯỢC GIẤU/NÓI SAI đề xuất nằm trong plan" (lỗ hổng 08-05 giấu L1, 08-07 giấu L2). Vì vậy
+# kỳ vọng giờ TÍNH TỪ chính artifact rồi đối chiếu với TEXT đã render: artifact đổi bao nhiêu
+# lần cũng không sao, giấu một lệnh là đỏ ngay.
+def _prop(plan, key):
+    """(n_lệnh, Σ tiền) của một proposal — theo ĐÚNG quy ước renderer: `value_vnd`, thiếu thì
+    fallback qty × ref_price (chính ca ZaloPay đang phủ)."""
+    pr = plan.get(key) or {}
+    orders = pr.get("orders") or pr.get("sells") or []
+    total = 0.0
+    for o in orders:
+        v = o.get("value_vnd")
+        if v in (None, 0):
+            v = (o.get("qty") or 0) * (o.get("ref_price") or o.get("limit_price_vnd") or 0)
+        total += float(v or 0)
+    return len(orders), total
+
+
+def _tr(vnd):
+    """Định dạng 'tr' y hệt renderer (1 chữ số thập phân) để so được bằng chuỗi."""
+    return f"{vnd / 1e6:.1f}tr"
+
+
+def _main_buy(plan):
+    """(ticker, qty) của lệnh MUA chính trong plan — cũng suy từ artifact, vì rổ mã đổi theo
+    ngày (bản cũ ghim 'SSI 3100cp'; artifact trên đĩa nay là DRI)."""
+    b = next((o for o in plan.get("orders") or []
+              if str(o.get("side", "")).lower() == "buy"), {})
+    return b.get("ticker"), b.get("qty")
+
+
+SX_L1_N, SX_L1_V = _prop(SX, "park_trim_proposal")
+SX_L2_N, SX_L2_V = _prop(SX, "jit_unpark_proposal")
+ZP_L1_N, ZP_L1_V = _prop(ZP, "park_trim_proposal")
+ZP_L2_N, ZP_L2_V = _prop(ZP, "jit_unpark_proposal")
+SX_TK, SX_QTY = _main_buy(SX)
+ZP_TK, ZP_QTY = _main_buy(ZP)
+print(f"  (kỳ vọng suy từ artifact — SpaceX L1 {SX_L1_N}/{_tr(SX_L1_V)} "
+      f"L2 {SX_L2_N}/{_tr(SX_L2_V)} · ZaloPay L1 {ZP_L1_N}/{_tr(ZP_L1_V)} "
+      f"L2 {ZP_L2_N}/{_tr(ZP_L2_V)})")
+
 # ── T1. Plan THẬT 2026-08-07, cả 2 account: đủ 4 mục ─────────────────────────────────────
 print("\n[T1] Plan thật 2026-08-07 — 4 mục bắt buộc (orders / funding note / L1 / L2)")
 out_sx = run_sender(SX, "SpaceX")
-check("SpaceX: lệnh mua chính vẫn hiện", "MUA SSI 3100cp" in out_sx)
+check("SpaceX: lệnh mua chính vẫn hiện", f"MUA {SX_TK} {SX_QTY}cp" in out_sx,
+      f"chờ MUA {SX_TK} {SX_QTY}cp")
 check("SpaceX: funding note NGAY CẠNH lệnh mua, nói rõ bán N mã PARK tổng X",
-      "Tiền đâu ra:" in out_sx and "bán 12 mã PARK tổng 71.7tr" in out_sx,
+      "Tiền đâu ra:" in out_sx
+      and f"bán {SX_L2_N} mã PARK tổng {_tr(SX_L2_V)}" in out_sx,
       [l.strip()[:110] for l in out_sx.splitlines() if "Tiền đâu ra" in l][:1])
 check("SpaceX: funding note nói mua NGUYÊN lệnh (không để user tưởng thiếu tiền)",
-      "mua NGUYÊN lệnh 3100cp" in out_sx)
+      f"mua NGUYÊN lệnh {SX_QTY}cp" in out_sx)
 check("SpaceX: có mục RIÊNG L1 park_trim + số mã + Σ tiền + mục tiêu trần PARK",
-      "ĐỀ XUẤT TRIM PARK (L1) — 13 lệnh BÁN, Σ 92.8tr" in out_sx
+      f"ĐỀ XUẤT TRIM PARK (L1) — {SX_L1_N} lệnh BÁN, Σ {_tr(SX_L1_V)}" in out_sx
       and "đưa PARK về trần 80% của pool" in out_sx,
       [l.strip()[:110] for l in out_sx.splitlines() if "TRIM PARK (L1)" in l][:1])
 check("SpaceX: L1 nói rõ CẦN DUYỆT RIÊNG + không nằm trong lệnh chính",
       "CẦN DUYỆT RIÊNG" in out_sx and "KHÔNG nằm trong danh sách lệnh chính" in out_sx)
 check("SpaceX: có mục RIÊNG L2 jit_unpark + liệt kê mã bán + amendment",
-      "ĐỀ XUẤT BÁN PARK TÀI TRỢ LỆNH MUA (L2/JIT) — 12 lệnh BÁN, Σ 71.7tr" in out_sx
-      and "MUA SSI: FUNDED_BY_JIT" in out_sx)
-check("SpaceX: heading tổng nêu có thêm 25 lệnh bán PARK ngoài orders[]",
-      "25 lệnh BÁN PARK đề xuất" in out_sx)
+      f"ĐỀ XUẤT BÁN PARK TÀI TRỢ LỆNH MUA (L2/JIT) — {SX_L2_N} lệnh BÁN, "
+      f"Σ {_tr(SX_L2_V)}" in out_sx
+      and f"MUA {SX_TK}: FUNDED_BY_JIT" in out_sx)
+check("SpaceX: heading tổng nêu có thêm N lệnh bán PARK ngoài orders[]",
+      f"{SX_L1_N + SX_L2_N} lệnh BÁN PARK đề xuất" in out_sx,
+      f"chờ {SX_L1_N + SX_L2_N} = L1 {SX_L1_N} + L2 {SX_L2_N}")
+# Mã bị chặn trim phải HIỆN, không im lặng. Bản cũ dựa vào việc artifact 08-07 tình cờ có
+# SHS/VND trong `blocked` — nay `blocked == []` nên ca đó không thể xanh và cũng không còn
+# kiểm gì. Dựng ca TƯỜNG MINH: bơm blocked vào bản sao ⇒ luôn đi qua đúng nhánh render, độc
+# lập với vintage artifact. Kèm ca chứng minh ngược (blocked rỗng ⇒ KHÔNG in dòng thừa).
+_pb = copy.deepcopy(SX)
+_pb["park_trim_proposal"]["blocked"] = [
+    {"ticker": "SHS", "reason": "T+2 chưa về, không bán được"},
+    {"ticker": "VND", "reason": "vượt trần %ADV phiên"}]
+_out_pb = run_sender(_pb, "SpaceX")
 check("SpaceX: mã bị chặn trim (SHS/VND) vẫn hiện, không im lặng",
-      "SHS" in out_sx and "VND" in out_sx and "Không trim được" in out_sx)
+      "Không trim được" in _out_pb and "SHS" in _out_pb and "VND" in _out_pb
+      and "T+2 chưa về" in _out_pb,
+      [l.strip()[:110] for l in _out_pb.splitlines() if "Không trim được" in l][:1])
+check("SpaceX: CHỨNG MINH NGƯỢC — blocked rỗng ⇒ KHÔNG in dòng 'Không trim được'",
+      "Không trim được" not in out_sx,
+      f"blocked artifact = {len((SX.get('park_trim_proposal') or {}).get('blocked') or [])}")
 
 out_zp = run_sender(ZP, "ZaloPay")
-check("ZaloPay: funding note đúng số (3 mã PARK, 16,0tr)",
-      "bán 3 mã PARK tổng 16.0tr" in out_zp and "mua NGUYÊN lệnh 800cp" in out_zp,
+check(f"ZaloPay: funding note đúng số ({ZP_L2_N} mã PARK, {_tr(ZP_L2_V)})",
+      f"bán {ZP_L2_N} mã PARK tổng {_tr(ZP_L2_V)}" in out_zp
+      and f"mua NGUYÊN lệnh {ZP_QTY}cp" in out_zp,
       [l.strip()[:110] for l in out_zp.splitlines() if "Tiền đâu ra" in l][:1])
-check("ZaloPay: L1 (8 lệnh, 36.1tr) + L2 (3 lệnh, 16.0tr) đều có mục riêng",
-      "TRIM PARK (L1) — 8 lệnh BÁN, Σ 36.1tr" in out_zp
-      and "(L2/JIT) — 3 lệnh BÁN, Σ 16.0tr" in out_zp)
+check(f"ZaloPay: L1 ({ZP_L1_N} lệnh, {_tr(ZP_L1_V)}) + L2 ({ZP_L2_N} lệnh, "
+      f"{_tr(ZP_L2_V)}) đều có mục riêng",
+      f"TRIM PARK (L1) — {ZP_L1_N} lệnh BÁN, Σ {_tr(ZP_L1_V)}" in out_zp
+      and f"(L2/JIT) — {ZP_L2_N} lệnh BÁN, Σ {_tr(ZP_L2_V)}" in out_zp)
 check("ZaloPay: value_vnd KHÔNG có trong proposal orders → fallback qty×ref_price ra số đúng",
       "VHM 100cp (7.7tr)" in out_zp)
 
@@ -139,7 +208,7 @@ a.update({"status": "SHRINK", "qty_final": 1200, "target_value_final_vnd": 29160
           "reason": "bán PARK không đủ bù, co còn 1200cp theo sức mua"})
 out = run_sender(p, "SpaceX")
 check("SHRINK: nói rõ lệnh bị CO từ qty_plan → qty_final + lý do",
-      "Lệnh bị CO** 3100cp → 1200cp" in out and "co còn 1200cp" in out,
+      f"Lệnh bị CO** {SX_QTY}cp → 1200cp" in out and "co còn 1200cp" in out,
       [l.strip()[:110] for l in out.splitlines() if "bị CO" in l][:1])
 
 p = copy.deepcopy(SX)
@@ -158,7 +227,8 @@ p["orders"] = []
 p.pop("jit_unpark_proposal", None)
 out = run_sender(p, "SpaceX")
 check("HOLD 0 lệnh nhưng vẫn hiện mục TRIM PARK (L1) — đúng lỗ hổng 08-05",
-      "GIỮ NGUYÊN (HOLD)" in out and "ĐỀ XUẤT TRIM PARK (L1) — 13 lệnh BÁN" in out)
+      "GIỮ NGUYÊN (HOLD)" in out
+      and f"ĐỀ XUẤT TRIM PARK (L1) — {SX_L1_N} lệnh BÁN" in out)
 
 # ── T7. Tương thích ngược: plan KHÔNG có 2 field này → không thêm dòng nào ───────────────
 print("\n[T7] Plan cũ không có park_trim/jit_unpark — không đổi hành vi")
@@ -168,7 +238,7 @@ p.pop("jit_unpark_proposal", None)
 out = run_sender(p, "SpaceX")
 check("không có 2 field → KHÔNG in mục L1/L2 nào, report vẫn render bình thường",
       "TRIM PARK" not in out and "L2/JIT" not in out and "Tiền đâu ra" not in out
-      and "MUA SSI 3100cp" in out)
+      and f"MUA {SX_TK} {SX_QTY}cp" in out)
 
 # ── T8. Artifact méo mó → fail-open, KHÔNG crash report (render_crashed = mất plan) ──────
 print("\n[T8] Artifact méo mó (kiểu sai) → fail-open, không crash")
@@ -177,7 +247,7 @@ p["park_trim_proposal"] = "TRIM"                       # str thay vì dict
 p["jit_unpark_proposal"] = {"decision": "JIT", "orders": "xxx", "buy_amendments": None}
 out = run_sender(p, "SpaceX")
 check("kiểu sai → vẫn render plan đầy đủ, không ESCALATE render_crashed",
-      "Kế hoạch giao dịch ngày mai" in out and "MUA SSI 3100cp" in out
+      "Kế hoạch giao dịch ngày mai" in out and f"MUA {SX_TK} {SX_QTY}cp" in out
       and "render_crashed" not in out)
 
 # ── T9. Phụ thuộc môi trường: chạy lại T1 dưới env -u TZ và TZ ngoại lai ─────────────────
@@ -186,10 +256,10 @@ for label, extra in (("env -u TZ", {"TZ": None}),
                      ("TZ=America/New_York", {"TZ": "America/New_York"})):
     o = run_sender(SX, "SpaceX", env_extra=extra)
     check(f"{label}: 4 mục vẫn đủ (khối L1/L2 không phụ thuộc TZ)",
-          "bán 12 mã PARK tổng 71.7tr" in o
-          and "ĐỀ XUẤT TRIM PARK (L1) — 13 lệnh BÁN" in o
-          and "(L2/JIT) — 12 lệnh BÁN" in o
-          and "MUA SSI 3100cp" in o)
+          f"bán {SX_L2_N} mã PARK tổng {_tr(SX_L2_V)}" in o
+          and f"ĐỀ XUẤT TRIM PARK (L1) — {SX_L1_N} lệnh BÁN" in o
+          and f"(L2/JIT) — {SX_L2_N} lệnh BÁN" in o
+          and f"MUA {SX_TK} {SX_QTY}cp" in o)
 
 print(f"\n{'=' * 72}\nKẾT QUẢ: {len(PASS)} PASS / {len(FAIL)} FAIL")
 for f in FAIL:

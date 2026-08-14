@@ -42,7 +42,9 @@
       "Bash(git log *)",
       "Bash(bin/jobs.sh status *)",
       "Bash(bin/jobs.sh list *)",
-      "Bash(bin/jobs.sh wait *)"
+      "Bash(bin/jobs.sh wait *)",
+      "Edit(//home/trido/thanhdt/WorkingClaude/data/trade_plans/**)",
+      "Write(//home/trido/thanhdt/WorkingClaude/data/trade_plans/**)"
     ]
   }
 }

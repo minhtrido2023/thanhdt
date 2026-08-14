@@ -9,6 +9,7 @@ title: Giá / khối lượng cổ phiếu
 | Nguồn (file) | Status |
 |---|---|
 | [`corp_action_pending.md`](corp_action_pending.md) — data/corp_action_pending.json + data/corp_action_backlog.json | VANHANH |
+| [`corporate_action_bq.md`](corporate_action_bq.md) — tav2_bq.corporate_action (per-event corp action, mới tạo 2026-08-12) | TRAP |
 | [`dnse_api_live.md`](dnse_api_live.md) — DNSE API live (dnse_api.py secdef/latest_trade/positions/balances) | CANONICAL |
 | [`shares_outstanding_live.md`](shares_outstanding_live.md) — tav2_bq.shares_outstanding_live | CANONICAL |
 | [`ticker_close_vs_price_dividend_adj.md`](ticker_close_vs_price_dividend_adj.md) — cặp cột Close (đã điều chỉnh) vs Price (thô) trong tav2_bq.ticker | TRAP |

@@ -163,6 +163,37 @@ out = run_block(block, plan([pm("VHM", 400, 300, 100, 300), foreign_sell("VHM", 
 check("#12 SELL_GT_SELLABLE VẪN chặn lệnh merge vượt trần (nhánh (b) không bị thu hẹp)",
       "SELL_GT_SELLABLE" in out and "VHM(500>300)" in out, out)
 
+# ── #13-#15: ba hình dạng dữ liệu THẬT làm cả khối crash (arch-review coord-2026-08-07) ──
+# Cả ba từng bị `2>/dev/null` nuốt ⇒ PLAN_INFO rỗng ⇒ RED không lý do. Không ca nào trong
+# #1-#12 phủ chúng vì fixture ở trên luôn sinh dữ liệu "đẹp".
+
+out = run_block(block, plan([{"id": "SELL-ACB-01", "side": "sell", "ticker": "ACB",
+                              "qty": 100, "merged_from": None},
+                             merged("ACB", 400, 300, 100, 1500)]))
+check("#13 merged_from=null KHÔNG làm crash khối (dùng `or {}` chứ không phải .get(k,{}))",
+      not out.startswith("__CRASH__"), out)
+
+out = run_block(block, plan([merged("VHM", "300", 200, 100, 300),
+                             {"id": "SELL-JIT-PARK-VHM-01", "side": "sell", "ticker": "VHM",
+                              "qty": "100", "play_type": "JIT_UNPARK"}]))
+check("#14 qty dạng CHUỖI: không crash VÀ vẫn bắt được bán vượt sellable",
+      not out.startswith("__CRASH__") and "SELL_GT_SELLABLE" in out
+      and "VHM(400>300)" in out, out)
+
+out = run_block(block, plan([{"id": "PARKMERGE-SELL-VHM", "side": "SELL", "ticker": "VHM",
+                              "qty": 300, "merge_owner": "park_merge_v1", "book": "PARK",
+                              "play_type": "PARK_TRIM+JIT_UNPARK",
+                              "merged_from": {"sellable_at_calc": 300}},
+                             {"id": "SELL-JIT-PARK-VHM-01", "side": "SELL", "ticker": "VHM",
+                              "qty": 100, "play_type": "JIT_UNPARK"}]))
+check("#15 side viết HOA ('SELL') vẫn kích hoạt CẢ hai bất biến (không im lặng bỏ qua)",
+      "MERGE_STALE_SRC" in out and "SELL_GT_SELLABLE" in out, out)
+
+# qty rác (không ép được số) phải LỘ RA thành cờ, không lặng lẽ thành 0 rồi đọc ra "sạch".
+out = run_block(block, plan([merged("VHM", "ba trăm", 200, 100, 300)]))
+check("#16 qty không ép được số ⇒ cờ BAD_QTY, không im lặng coi là 0",
+      "BAD_QTY" in out, out)
+
 print()
 if fails:
     print(f"❌ FAIL {len(fails)}/{len(fails)+len(oks)}")

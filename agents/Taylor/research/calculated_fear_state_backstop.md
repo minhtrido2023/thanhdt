@@ -1167,6 +1167,105 @@ này) **+ 5 truy vấn tin tức** · **0 QUALIFY mới** · **0 case mới đá
 1 khuyết tật cơ chế báo lên fleet. **Mốc gần nhất phải theo: TV1 10/08 (3 ngày) → TV4 30/08 → PNJ Q3
 cuối 10/2026.**
 
+### 2026-08-14 (job `Taylor_20260814_011001`) — 0 QUALIFY mới · 0 case mới · 4 read-through (2 có tin mới THẬT) · 1 đề xuất lọc nhiễu
+
+**Phần 1 — anomaly_scan** (`anomaly_scan.py --backfill-days 8 --no-flags`, cache BQ refresh 13/08
+23:45, phiên cuối **2026-08-13**, universe 252 mã = 29 holding + 241 watchlist rating≤2).
+Cờ trong 8 phiên (06/08→13/08): **3, TẤT CẢ đều là cờ TĂNG** — GAS `CEIL2` 10/08 (+7,0%, idio +6,5%,
+239,2 tỷ), GVR `CEIL2` 10/08 (+6,9%, idio +6,4%, 194,6 tỷ), PNJ `CEIL2` 05/08 (+6,9%, đã ghi tuần
+trước). **0 cờ FLOOR2/IDIOCRASH** trong universe hẹp ⇒ không có mã nào trong watchlist bị sập riêng lẻ.
+
+**Phần 2 — quét RỘNG toàn `bq_cache/ticker` 2026** (bù điểm mù universe hẹp, cùng phương pháp tuần
+trước): 1.275 mã có dữ liệu 2026 → **458 mã đạt sàn thanh khoản ≥1 tỷ/phiên**, tiêu chí IDIOCRASH
+(ret ≤ −6% ∧ idio ≤ −5% ∧ val ≥ 1 tỷ), cửa sổ 05/08→13/08 → **18 sự kiện / 16 mã**.
+*(⚠️ Số 458 KHÔNG so trực tiếp với 297 của tuần trước — tuần này lọc bằng `max(val1m_bn)` cả năm
+2026, tuần trước lọc trong cửa sổ. Cùng chiều nới lỏng, tức quét rộng hơn chứ không hụt.)*
+
+**Phần 2b — bước lọc MỚI tuần này: vị trí giá so với đỉnh/đáy 3 tháng.** Tiêu chí ret/idio 1 phiên
+KHÔNG phân biệt được "sập xuống đáy mới" (dislocation — cái sleeve này cần) với "chốt lời sau khi
+tăng dựng đứng" (không có nỗi sợ nào để mua). Đo cả 16 mã:
+
+| Nhóm | Mã | Đọc |
+|---|---|---|
+| **PULLBACK từ đỉnh** (còn ≥ +25% trên đáy 3M) — 7 mã | LLM (+112,6% trên đáy), THD (+303,4%), DST (+117,5%), VNZ (+93,9%), DDG (+66,7%), HII (+60,4%), MVN (+26,5%), L14 (+26,0%) | **Không phải case fear-buy** — đang trong xu hướng TĂNG. Ví dụ rõ nhất: **HII** 6.200 (29/07) → **9.390 (11/08), +51% trong 9 phiên**, cờ 12/08 chỉ là nhịp chỉnh −6,3%; **LLM** 19.200 → 40.400 (+110%). |
+| **Trung gian** — 6 mã | F88, HHP, TDM, DCL, HID, VNE | Không ở đáy, không có sự kiện — xem Phần 2c/2d |
+| **Đáy 3M mới** — 2 mã | **CRC** (−37,5% so đỉnh, +1,9% trên đáy), **ANT** (−30,1% / +6,7%) | Chỉ 2 mã này đáng chấm §2 — xem Phần 2c |
+
+⇒ **13/16 mã bị loại chỉ bằng bước vị-trí-giá**, trước cả khi đọc BCTC. Đề xuất (chưa wire, chỉ ghi
+vào playbook): mọi lần quét rộng sau này chạy bước này TRƯỚC khi kéo dữ liệu tài chính — rẻ hơn
+nhiều lần và loại đúng nhóm dương tính giả áp đảo của tuần này.
+
+**Phần 2c — chấm §2/§2.5/§10.10 cho 2 mã đáy-mới + các mã trung gian đáng nhắc (BQ Q2/2026):**
+
+| Mã | Số chặn | Kết luận |
+|---|---|---|
+| **ANT** (Antesco) | **CF_OA_P0 −6,49 tỷ trong khi NP_P0 +30,4 tỷ** = đúng chữ ký §10.10 (lãi sổ sách không có tiền) · Debt_Eq **2,95** · CR 1,06 · FSCORE 3 · PB **1,80** (không có sàn tài sản §2#5) | **NON** |
+| **CRC** (Create Capital VN) | PB **0,50** và CF_OA_P0 +118 tỷ / CR 3,02 / Debt_Eq 0,49 — hồ sơ *không* xấu — NHƯNG **không có sự kiện khủng hoảng nào** (WebSearch 0 tin pháp lý/sự cố), giá **trôi chậm** 5.830→5.220 suốt 8 phiên chứ không phải cú sập rời rạc. ROE_Trailing 5,8%, FSCORE 3, DY 0 | **Không phải case** (thiếu trigger §0.5); WATCH yếu |
+| **F88** (Đầu tư F88, UPCoM) | Trôi 72.600→65.500 (−10%/8 phiên). Tin thật: **Christopher E. Freund (Mekong Capital) từ nhiệm HĐQT từ 11/08** + đợt chào bán chỉ phân phối 11/22 triệu cp. NHƯNG **Q2/2026 LÃI 303 tỷ, gấp đôi cùng kỳ; 6T 545 tỷ** — doanh nghiệp đang lãi kỷ lục, không có nỗi sợ để mua. Thêm: **không có dòng nào trong `ticker_financial`** ⇒ không chấm được §2#3/#4/#5 | **Không phải case** |
+| DCL, HID, DST | Đã kết luận **NON** tuần trước (07/08), không làm lại | NON (cũ) |
+| HHP, TDM, VNE, DDG, L14, VNZ, MVN, THD | HHP CF_OA_3Y **−550 tỷ**; TDM PB 2,91 + FSCORE 2; VNE CR 0,96 (<1) + Debt_Eq 3,13 + ROE_Min3Y −30%; DDG ROE_Trailing **−97%**, CR 0,39; L14 CF_OA −41 tỷ, ROE 2,3%; VNZ PB **16,99**, Debt_Eq 12,8; MVN PB **2,99**; THD PB **9,41**, PE 313 | **NON** (8 mã) |
+
+**Phần 3 — WebSearch tin khởi tố/bắt giữ (cửa sổ 07/08→14/08): 0 case NIÊM YẾT mới.** 6 truy vấn.
+Vụ khởi tố duy nhất mới trong cửa sổ là **CTCP Đầu tư 706** (08/08 — CT Phan Anh Tuấn + GĐ Đặng Minh
+Khoa, tội vi phạm quy định về khai thác tài nguyên, mỏ núi Lệ Thuỷ/Quảng Ngãi) — **không niêm yết,
+không có mã** ⇒ ngoài phạm vi. Mọi tên khác xuất hiện đều đã có kết luận: DGC, PAT, PC1 (**BANNED**),
+TV4, ACV/Vinaconex (tin quý 1).
+
+**Phần 4 — read-through case đang theo dõi (2 case có tin MỚI thật)**
+
+- **DGC** (§6, AMBIGUOUS-nghiêng-constructive): **ĐHĐCĐ đã họp sáng 13/08 — có 4 dữ kiện mới, ngược
+  chiều nhau, và lần đầu là lời của chính ban lãnh đạo chứ không phải suy đoán báo chí.**
+  *(xác nhận cái xấu, đúng như tuần trước ghi)* Ban lãnh đạo giải trình: **"Khai trường 25 phải tạm
+  dừng hoạt động để phục vụ công tác điều tra"** ⇒ **chuyển sang dùng HOÀN TOÀN quặng apatit mua ngoài
+  + nhập khẩu**, giá vốn phốt pho vàng tăng đáng kể. Kế hoạch 2026: **10.100 tỷ doanh thu / 1.600 tỷ
+  LNST — thấp nhất kể từ 2020**. Trên 379,78 triệu cp ⇒ EPS mục tiêu ≈ **4.213đ** ⇒ tại giá 43.900
+  là **PE forward ≈ 10,4×** và ROE forward ≈ 9,9% (so ROE_Trailing 14,7%).
+  *(cái tốt, và là góc mandate dặn không được bỏ sót — dòng tiền/cổ tức)* **CF_OA_P0 Q2 = 1.083 tỷ vs
+  NP_P0 389 tỷ = 2,8× NP** ✓ (§2#3 vẫn PASS dù biên bị đánh) · **Debt_Eq 0,19 · CR 5,21** (bảng cân
+  đối gần như không nợ) · HĐQT trình **cổ tức 2025 tổng 80% tiền mặt** và **duy trì 30% cho 2026** =
+  3.000đ/cp ⇒ **6,8% yield tại 43.900**. Miễn nhiệm TGĐ Lưu Bách Đạt + TV HĐQT Nguyễn Quốc Trung; nhóm
+  cổ đông 20,34% đề cử 2 người thay. **Lưu Bách Đạt XUẤT HIỆN TRỰC TIẾP tại đại hội** — nhất quán với
+  biện pháp ngăn chặn là *cấm đi khỏi nơi cư trú*, KHÔNG phải tạm giam.
+  → **Không đổi phân loại. Nhưng đọc cho đúng: đây KHÔNG còn là scandal cá nhân thuần** — mỏ bị dừng
+  là thiệt hại *vận hành cấu trúc* (gạch ❌ §2 "lõi tự hỏng"), chỉ được bù bằng bảng cân đối + dòng
+  tiền + cổ tức mạnh bất thường. **Và vẫn không có dislocation để mua**: giá 43.900 (13/08) ≈ đỉnh
+  trước cú sập 20/07, PB 1,03. Tranh luận QUALIFY/NON tiếp tục vô nghĩa cho mục đích *vào lệnh*.
+- **PNJ** (§7, AMBIGUOUS): **số Q2/2026 nay đã vào BQ và XẤU HƠN những gì báo chí mô tả tuần trước.**
+  `NP_P0 = **−282,9 tỷ (LỖ quý)**` · `CF_OA_P0 = **−1.568 tỷ**` (dòng tiền kinh doanh âm nặng — khớp
+  cơ chế nghĩa vụ mua lại hàng 5.900 tỷ) · **FSCORE rơi xuống 1** (từ mức lành mạnh trước đó). Giá
+  35.300 (13/08), đã lùi từ 37.900 (05/08) nhưng vẫn **+14,8% trên đáy 30.750 (24/07)**.
+  → **Không đổi AMBIGUOUS, và luận điểm "chờ cổng Q3" nay mạnh hơn**: thiệt hại đã bắt đầu hiện ra
+  trong SỔ chứ không chỉ trong tin. **Không có lý do gì vào trước BCTC Q3/2026 (~cuối 10/2026).**
+- **TV1** (§4/§14, QUALIFY): **giá phá lên khỏi biên đi ngang 3 tuần** — 19.400-20.000 → **20.300
+  (12-13/08)**, PE 3,51 · PB 1,07. **Hai cổng đều CHƯA đóng được bằng bằng chứng:**
+  (a) **kết quả lấy ý kiến bằng văn bản chọn đơn vị kiểm toán (10/08) VẪN CHƯA công bố** — 4 ngày sau
+  cuộc lấy ý kiến, tra vietstock/stockbiz/dantri đều chỉ có tin *lịch*, không có tin *kết quả*.
+  ⚠️ Giữ nguyên cảnh báo §14: **"chưa thấy tin xấu" ≠ "đã qua cổng"** — kiểm lại tuần tới.
+  (b) **ngày thanh toán cổ tức 15% = 14/08 chính là HÔM NAY**, chưa verify được đã trả thật (nguồn
+  tổng hợp 1 chiều, chưa có công bố gốc HOSE/HNX). Đây đúng là phép thử DDM mà §14 đặt ra ⇒ **việc
+  cụ thể cho lần quét tuần sau: xác nhận tiền cổ tức đã về.**
+  ⚠️ **Điểm mới đáng ghi, chưa từng nêu ở §14: `CR_P0 = 0,97` (<1)** và `Debt_Eq 1,18` — thanh khoản
+  ngắn hạn của TV1 mỏng hơn hồ sơ TV4 (CR 1,72) rõ rệt. Chưa đủ để hạ QUALIFY (ROE_Trailing 30,6%,
+  **CF_OA_3Y +498 tỷ ≈ 92% vốn hoá 542 tỷ**), nhưng phải theo dõi: một công ty tư vấn có CR<1 mà vừa
+  chi cổ tức 15% thì đệm thanh khoản còn mỏng hơn con số này.
+- **TV4** (§13 tuần trước, AMBIGUOUS): **không có tin mới về kiểm toán.** Giá **12.800** (13/08,
+  PB 0,96 · PE 5,76 · DY 7,8%), KL 200-7.200 cp/phiên — ràng buộc thanh khoản không đổi. Xác nhận lại
+  ĐHĐCĐ bất thường tháng 8 **vẫn chưa công bố chương trình/địa điểm**. **Cổng nhị phân giữ nguyên: ý
+  kiến kiểm toán BCTC bán niên soát xét 2026, hạn ~30/08 (còn 16 ngày).**
+
+**Tổng kết tuần**: **252 mã** (anomaly_scan) **+ 458 mã** (quét rộng) **+ 6 truy vấn tin tức** ·
+**0 QUALIFY mới · 0 case mới đáng nâng thành mục riêng** · 10 NON + 3 không-phải-case (CRC, F88, và
+nhóm pullback) · 4 read-through (**DGC, PNJ, TV1 đều có dữ kiện mới thật**; TV4 không) · 1 đề xuất
+lọc nhiễu (bước vị-trí-giá 3M, loại 13/16 dương tính giả).
+**Mốc gần nhất phải theo: TV1 kết quả kiểm toán + cổ tức 14/08 (kiểm tuần sau) → TV4 30/08 → PNJ Q3
+cuối 10/2026.**
+
+Nguồn tin tuần này: [nguoiquansat — khởi tố CT/GĐ Đầu tư 706 (08/08)](https://nguoiquansat.vn/khoi-to-chu-tich-hdqt-va-giam-doc-mot-cong-ty-lon-302746.html) ·
+[nguoiquansat — DGC ĐHĐCĐ 13/08, Lưu Bách Đạt xuất hiện](https://nguoiquansat.vn/hoa-chat-duc-giang-dgc-sau-bien-co-khoi-to-ong-luu-bach-dat-bat-ngo-xuat-hien-tai-dhdcd-310193.html) ·
+[tuoitre — Mekong Capital founder rời HĐQT F88 (11/08)](https://news.tuoitre.vn/mekong-capital-founder-resigns-from-vietnams-pawnshop-chain-f88-board-103260811202442933.htm) ·
+[baomoi/TheLEADER — F88 lãi Q2/2026 gấp đôi](https://baomoi.com/f88-bao-lai-quy-ii-2026-gap-doi-cung-ky-c55692596.epi) ·
+[baomoi — PECC4 thay toàn bộ ban lãnh đạo](https://baomoi.com/sau-bien-co-phap-ly-pecc4-da-thay-toan-bo-ban-lanh-dao-c55703646.epi)
+
 ---
 
 ## 14. TV1 — cập nhật 2026-08-10 (Mike, due-diligence trực tiếp theo yêu cầu user, đúng ngày cổng T3)
