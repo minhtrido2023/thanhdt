@@ -40,8 +40,26 @@ def check(name, cond, detail=""):
 
 
 # ── Fixture đóng băng từ bản đọc THẬT sáng 2026-08-11 01:36 ICT (§23: đóng băng, không đọc live)
-TODAY = "2026-08-11"
-PREV = "2026-08-10"
+#
+# GIÁ thì đóng băng; NGÀY thì KHÔNG được đóng băng. Sửa 2026-08-14 (job
+# Taylor_20260814_080528) sau khi bộ này đỏ 7 ca: bản cũ ghim TODAY="2026-08-11" trong khi
+# hàm bị kiểm tự tính "hôm nay" từ ĐỒNG HỒ THẬT
+# (`datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).date()` — verify_account_snapshot.py:331).
+# Đóng băng MỘT NỬA thế giới ⇒ từ 08-12 trở đi mọi fixture "hôm nay" bị đọc thành "phiên
+# trước", nhánh `dnse_g1_today`/`dnse_trade_today` không bao giờ chạy nữa, và 7 ca chuyển
+# sang xanh-đỏ VÌ LÝ DO SAI chứ không vì cơ chế hỏng.
+#
+# Hai ngày dưới đây là NHÃN VAI ("phiên hôm nay" / "phiên liền trước"), không phải dữ liệu —
+# nên chúng phải bám cùng đồng hồ mà hàm bị kiểm dùng. Đây đúng là cách ca [11] trong chính
+# file này đã làm từ đầu (probe tự tính ngày theo ICT); phần fixture chỉ quên làm theo.
+# Neo ICT tường minh (§16) ⇒ chạy dưới TZ nào cũng ra cùng cặp ngày.
+# Không cần là ngày giao dịch thật: fixture tự cấp mọi giá, sàn không được hỏi tới.
+import datetime as _d                                                        # noqa: E402
+from zoneinfo import ZoneInfo as _Z                                          # noqa: E402
+
+_ICT_TODAY = _d.datetime.now(_Z("Asia/Ho_Chi_Minh")).date()
+TODAY = _ICT_TODAY.isoformat()
+PREV = (_ICT_TODAY - _d.timedelta(days=1)).isoformat()
 
 # (close G1 nghìn đồng, ngày của close đó, basicPrice nghìn đồng)
 REAL = {
