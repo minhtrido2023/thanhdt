@@ -60,7 +60,22 @@ số request `place_order`. (Draft retro đầu tiên kết luận sai "0cp cả
 Email P0: không có bằng chứng retry thành công riêng cho lần gửi này trong ngày — nhưng đây là
 paper-only, không chặn vận hành thật.
 
-## Nghi vấn CHƯA GIẢI QUYẾT — job Mafee/DollarBill chạy qua codex, ngược với allow_agents
+## Nghi vấn ĐÃ ĐÓNG (2026-08-14, user xác nhận trực tiếp qua Discord) — job Mafee/DollarBill chạy qua codex, ngược với allow_agents
+
+**Trả lời:** user xác nhận sáng 08-13 claude bị chết đầu phiên, nên **user TỰ TAY dùng codex để
+xử lý thay** — không qua `dispatch.sh`. Đây là 1 lần can thiệp thủ công thật của user, KHÔNG PHẢI
+lỗ hổng bypass trong `cli_provider.sh`/`dispatch.sh`. Giải thích luôn tại sao `job_id` khác định
+dạng chuẩn và không có bản ghi `bus/jobs/`: vì không đi qua `dispatch.sh` nên hàm `JSET` (sinh job
+record chuẩn) không chạy — nhất quán với lời user, không phải bug ghi thiếu.
+
+**Kết luận cuối:** pipeline dispatch tự động (`dispatch.sh` → `cli_provider.sh validate`) không có
+lỗ hổng — code hiện tại vẫn chặn đúng theo thiết kế cho input `id="Mafee"`/`id="DollarBill"` tường
+minh, như đã verify 2026-08-14. Không cần sửa code, không cần điều tra forensics thêm. Bus
+`answer` đóng câu hỏi: `Mike/codex-dns-block-08-13-root-cause-tat-dinh-khong-phai-flaky` (2026-08-14).
+
+<details><summary>Nội dung gốc trước khi đóng (giữ để tham khảo lịch sử điều tra)</summary>
+
+## Nghi vấn CHƯA GIẢI QUYẾT (ĐÃ ĐÓNG, xem trên) — job Mafee/DollarBill chạy qua codex, ngược với allow_agents
 
 `kb/cli_providers.json`'s `codex.allow_agents = ["Taylor","Winston","Wendy","Spyros","Wags"]` —
 **KHÔNG gồm Mafee/DollarBill**. `bin/cli_provider.sh`'s `validate` (tồn tại từ commit `be1bd7d5`,
@@ -79,14 +94,15 @@ production hôm đó (đã tự đóng từ khi nào, hay còn tồn tại)? **C
 — không suy đoán thêm chỉ bằng đọc code hiện tại, vì code hiện tại (đã verify 2026-08-14) chặn
 đúng theo thiết kế cho input `id="Mafee"`/`id="DollarBill"` tường minh.
 
+</details>
+
 ## Còn hở — chưa làm
 
-1. **Xác nhận nguồn gốc 2 job `_codex_`** — xem mục trên, KHẨN vì liên quan tới cổng an toàn cho
-   agent chạm tiền thật (Mafee) và kênh gửi ra ngoài (DollarBill email).
+1. ~~Xác nhận nguồn gốc 2 job `_codex_`~~ — **ĐÃ ĐÓNG 2026-08-14** (xem mục trên).
 2. **KHÔNG xây retry/backoff** — đã bác bỏ theo phân tích 2026-08-14: lỗi tất định thì retry đập
-   vào cùng 1 deny mãi mãi, chỉ tốn cửa sổ giao dịch. Đây là quyết định CẤU HÌNH (bật
-   `network_access=true` cho lớp job cần mạng, hoặc không chạy job chạm tiền thật qua sandbox
-   codex nữa), không phải quyết định kỹ thuật đơn thuần — cần user/Mike duyệt (§22).
+   vào cùng 1 deny mãi mãi, chỉ tốn cửa sổ giao dịch. Nếu tương lai còn cần chạy job chạm tiền
+   thật qua codex thủ công lúc claude chết, cân nhắc bật `network_access=true` cho lần đó — nhưng
+   đây KHÔNG phải sự cố lặp lại có tính hệ thống, không cần policy riêng.
 
 ## Bài học
 
@@ -96,4 +112,4 @@ gốc) là ví dụ sống của Pattern-B (§28 coding_guidelines.md) — tin b
 giờ ⇒ "chắc là hạ tầng chập chờn") thay vì xác nhận artifact (argv sandbox thật + A/B tái lập).
 Ngoài ra: Mafee vẫn xử lý đúng theo thiết kế bất kể lỗi hạ tầng gì (fail-safe, không đặt lệnh mù)
 — đây là bằng chứng độc lập cho việc gate an toàn cấp-lệnh hoạt động đúng, tách biệt hoàn toàn
-với câu hỏi CHƯA GIẢI QUYẾT ở trên về việc job đó có lẽ ra không nên chạy qua codex từ đầu.
+với câu hỏi (nay đã đóng ở trên) về việc job đó chạy qua codex bằng cách nào.
