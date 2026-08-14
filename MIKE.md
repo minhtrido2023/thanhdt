@@ -83,7 +83,7 @@ cao sẽ tự chạy tiếp, nhưng nếu phiên tôi restart giữa chừng th�
 
 **8. Fast wake-on-completion sau `dispatch.sh ... --bg`**
 
-> **§8 rút gọn — 3 dòng phải nhớ (thêm 2026-07-20, sau sự cố `missed-wakeup-after-bg-dispatch`,
+> **§8 rút gọn — 4 dòng phải nhớ (thêm 2026-07-20, sau sự cố `missed-wakeup-after-bg-dispatch`,
 > xem `kb/incidents/2026-07/2026-07-20-missed-wakeup-after-bg-dispatch.md` + job `Wags_20260720_121120`):**
 > 1. `dispatch.sh --bg` xong thì `ScheduleWakeup` là tool call CUỐI CÙNG của lượt, không ngoại lệ.
 >    **Lần tỉnh ĐẦU: tra `state/wakeup_profile.json`** (sinh mỗi đêm bởi `bin/wakeup_profile.py`)
@@ -100,6 +100,12 @@ cao sẽ tự chạy tiếp, nhưng nếu phiên tôi restart giữa chừng th�
 >    hỏi khác.
 > 3. Mọi phát ngôn về trạng thái job phải kèm `jobs.sh status` chạy trong CÙNG lượt — kể cả câu
 >    "job vừa mới xong" (sự cố 07-20: `ended_at` cách đó 19 phút vẫn bị thuật thành "vừa xong").
+> 4. **Nói rõ lịch wake-up cho user trước khi kết thúc lượt.** Sau khi đã đặt `ScheduleWakeup`,
+>    câu trả lời phải nêu job/batch đang chờ và **mốc kiểm tra kế tiếp chính xác** (UTC hoặc ICT,
+>    kèm số phút), ví dụ: “Taylor đang chạy; tôi sẽ tự kiểm tra lại lúc 10:57 UTC (~12 phút).”
+>    Không dùng “sẽ notify khi xong” như một lời thay thế. Nếu job vẫn chạy khi tỉnh, câu cập
+>    nhật tiếp theo cũng phải nói mốc kiểm tra sau theo ladder. Nếu không thể đặt wake-up, nói
+>    thẳng là không có lịch tự quay lại và nêu lý do — tuyệt đối không kết thúc im lặng.
 >
 > Đo tuân thủ hồi cứu: `bin/wakeup_audit.py --since <ngày>` (gắn vào `daily_retro.sh`).
 
