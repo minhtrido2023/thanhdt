@@ -1120,7 +1120,7 @@ def cmd_job_write_scope_conflict(a):
 # the running job and the shared git index sweeps that job's staged-but-uncommitted files
 # into a commit with the wrong author and the wrong message.
 SHARED_TOOLING_PATHS = ("bin/", "hooks/", ".pre-commit-config.yaml", "MIKE.md",
-                        "kb/coding_guidelines.md")
+                        "kb/coding_guidelines.md", "kb/coding_guidelines_ext.md")
 
 # Agents whose charter IS the shared tooling above, so a live job of theirs is presumed to
 # be writing there even when it declared no --write-scope. Deliberately narrow: measured on

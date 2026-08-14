@@ -489,6 +489,12 @@ tự ý bớt file này khỏi Mafee/DollarBill/Winston để "tiết kiệm tok
 Wags cân nhắc thêm nếu autofix của mình tái phạm đúng loại lỗi guideline này nhắm tới (chưa cần,
 lý do đầy đủ: git log file này).
 
+**Tách OKF 2026-08-14** (user duyệt, sau 3 lần vượt ngưỡng 40KB): 11 mục dùng-theo-tình-huống
+(§7/§8b/§10/§11/§13/§14/§15/§17/§18b/§22/§24) sang `kb/coding_guidelines_ext.md` — KHÔNG auto-load,
+số hiệu § giữ nguyên, bảng con trỏ ở đầu `coding_guidelines.md`. ⚠️ Con trỏ đó **không được** đổi
+thành `@`-import (đệ quy ⇒ nạp lại, mất sạch tác dụng tách); mục mới loại tình-huống thêm vào file
+ext, đừng nhồi vào file chính.
+
 **Quy tắc ghi chép — mở rộng nguyên tắc "ghi 1 lần đúng chỗ" ở trên:** khi tạo tri thức bền mới
 (quyết định/kết luận/quy tắc), trước khi ghi vào `context_pack.md`/`canonical.md`, tự hỏi **"role
 nào thực sự cần fact này khi làm việc?"** rồi sửa đúng (các) file role-scoped tương ứng CÙNG LÚC:
