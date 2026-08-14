@@ -515,7 +515,17 @@ def compute_session_order(state, filled_qty, prev_turnover_vnd, prev_price_vnd,
             + (f" [TRẦN ĐỘNG: {band_info.get('reason', '')}]"
                if band_info.get("mode") == "dynamic" else "")
             + ". Hết hạn theo catalyst phi-giá (hard_expiry), không theo lịch."),
-        "dcf_check": "N/A (SOTP/asset-backed deep-value, không dùng LAG/BAL gate)",
+        # PHẢI là OBJECT đúng schema `_dcf_check_for_order`, KHÔNG phải chuỗi: `executor.
+        # _sync_fills` đọc `dcf_check.get("status")` sau mỗi fill. Literal chuỗi ở đây là NGUỒN
+        # SỐ 1 của sự cố POLL_FAIL 1:1-với-FILL 2026-08-11→08-14 (bus question
+        # `plan-dd-check-string-gay-poll-fail-moi-fill`) — nó tái diễn MỌI phiên gom, không phải
+        # ca lẻ. `NOT_COMPUTED` là đúng ngữ nghĩa: case này CỐ Ý không chạy DCF (định giá theo
+        # SOTP/tài sản), không phải "chạy rồi không kết luận được". Phụ phẩm: chuỗi cũ bị mọi
+        # report bỏ qua im lặng (`format_dcf_check` có guard `isinstance(dcf, dict)`), dạng dict
+        # này hiện đúng một dòng "DCF: NOT_COMPUTED (…)" như chủ đích ban đầu.
+        "dcf_check": {"status": "NOT_COMPUTED", "margin_of_safety": None, "robust": False,
+                      "reason": "SOTP/asset-backed deep-value — không dùng LAG/BAL gate",
+                      "as_of": plan_date},
         "dcf_override_reason": "",
     }
     return order, _decide("inject", f"chèn {session_qty}cp", decision_extra)

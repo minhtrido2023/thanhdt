@@ -10,6 +10,7 @@ import dataclasses
 import datetime as dt
 import json
 import os
+import sys
 
 from .config import PLAN_DIR
 
@@ -130,6 +131,67 @@ class TradePlan:
         return "\n".join(lines)
 
 
+# ── Field CHECK mà executor đọc như DICT — chuẩn hoá TẠI RANH GIỚI NẠP PLAN ────────────────
+# Sự cố thật 2026-08-11 → 08-14 (bus question `plan-dd-check-string-gay-poll-fail-moi-fill`,
+# incident kb/incidents/2026-08/2026-08-11-plan-dd-check-string-poll-fail.md): plan ghi
+# `dd_check`/`dcf_check` dạng CHUỖI văn xuôi thay vì object ⇒ `Executor._sync_fills` gọi
+# `_dd.get(...)` ⇒ AttributeError sau MỖI fill ⇒ 22 POLL_FAIL ZaloPay + 27 SpaceX trong một
+# phiên (số POLL_FAIL khớp 1:1 số FILL). Fail-safe của `step()` giữ đúng an toàn tiền — không
+# lệnh nào sai, không mất tiền — nhưng `_sync_fills` bỏ dở vòng lặp (order sau không cập nhật
+# filled/done chu kỳ đó) và throughput tụt về ~1 chu kỳ/lần fill.
+#
+# HAI nguồn sinh chuỗi, KHÁC HẲN nhau ⇒ vá một chỗ KHÔNG đủ:
+#   1. `discretionary_accumulation.py` — literal `"dcf_check": "N/A (SOTP/...)"`. LỖI CODE, cố
+#      định, tái diễn mọi phiên gom (plan 08-13 và 08-14 vẫn còn). Đã vá tại nguồn cùng lượt
+#      này: nay sinh dict `NOT_COMPUTED` đúng schema `_dcf_check_for_order`.
+#   2. Plan do người/agent soạn tay (08-11, 08-12) — KHÔNG có code nào để vá. Chỉ ranh giới nạp
+#      plan chặn được, và phải chặn theo KIỂU chứ không theo nguồn.
+#
+# Vì sao dạng chuẩn hoá này, chứ không phải hai dạng dễ nghĩ ra hơn:
+#   · KHÔNG "coi như None" (bỏ hẳn field): text người viết là bằng chứng due-diligence thật
+#     ("PASS — 0 red flag, đo 2026-08-11"); mất nó là mất audit trail, đúng thứ §24 cấm.
+#   · KHÔNG rải `getattr(x, "get", None)` khắp executor — Winston nêu đúng: vá theo triệu chứng
+#     thì lần thứ 3 lại hở ở call-site khác. Một helper, dùng ở ranh giới.
+# Thay vào đó: quy về ĐÚNG schema mà mọi consumer đã biết đọc (`format_dcf_check` /
+# `format_dd_check` / `_sync_fills`), ở dạng "CHƯA XÁC ĐỊNH" — KHÔNG phải "đã kiểm và sạch" —
+# giữ nguyên text gốc trong field lý do, kèm cờ `schema_error=True` để đối soát về sau.
+CHECK_FIELDS_AS_DICT = ("dcf_check", "dd_check")
+
+
+def normalize_check_field(name, val, order_id="", warn=True):
+    """Quy `dcf_check`/`dd_check` về dict (hoặc None). KHÔNG BAO GIỜ raise.
+
+    dict → trả NGUYÊN VẸN (hành vi cũ byte-identical cho mọi plan đúng schema).
+    None / chuỗi rỗng → None. Khác dict (chuỗi văn xuôi, số, list) → dict "chưa xác định".
+    """
+    if isinstance(val, dict) or val is None:
+        return val
+    if isinstance(val, str) and not val.strip():
+        return None
+    text = val if isinstance(val, str) else repr(val)
+    if warn:
+        # stderr, KHÔNG raise: một dòng dữ liệu sai schema không được làm hỏng việc nạp plan
+        # (bot vẫn phải chạy), nhưng cũng KHÔNG được im lặng — im lặng là cách sự cố này sống
+        # được 4 ngày.
+        print(f"⚠️ plan schema: order {order_id or '?'} field `{name}` là "
+              f"{type(val).__name__} chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác "
+              f"định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — "
+              f"lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.", file=sys.stderr)
+    if name == "dd_check":
+        # `has_red_flag=None`, KHÔNG phải False: ta không biết có cờ đỏ hay không. False là một
+        # KHẲNG ĐỊNH "đã kiểm, sạch" mà không ai kiểm — nếu text kia thật ra ghi một cờ đỏ thì
+        # False xoá đúng cái cảnh báo cần giữ. None vẫn falsy nên `format_dd_check` /
+        # `_sync_fills` (`is True`) im lặng y như trước; chỉ bản ghi là trung thực hơn.
+        return {"has_red_flag": None, "red_flags": [], "schema_error": True,
+                "evidence": f"schema_error (plan ghi {type(val).__name__}): {text[:200]}"}
+    # `dcf_check` (và mọi field check thêm sau): `NOT_COMPUTED` là dạng "không có kết luận" mà
+    # `format_dcf_check` + executor đã xử lý đúng từ trước — không tạo status thứ hai cho cùng
+    # một ý (status lạ sẽ rơi vào nhánh hiển thị 🔴, đọc thành "đắt", tệ hơn là không hiện gì).
+    return {"status": "NOT_COMPUTED", "margin_of_safety": None, "robust": False,
+            "schema_error": True,
+            "reason": f"schema_error (plan ghi {type(val).__name__}): {text[:120]}"}
+
+
 def load_plan(plan_date, account="main"):
     """Đọc plan của (account, plan_date)."""
     if not isinstance(plan_date, str):
@@ -153,6 +215,12 @@ def load_plan(plan_date, account="main"):
                 raise ValueError(f"order {filtered.get('id')} thiếu ref_price/mtm_price_ref — "
                                   f"không có cơ sở giá tham chiếu để đặt lệnh.")
             filtered["ref_price"] = ref
+        # Field executor đọc như dict — chuẩn hoá NGAY, trước khi PlannedOrder tồn tại. Xem
+        # normalize_check_field() phía trên (sự cố POLL_FAIL 1:1-với-FILL 2026-08-11→08-14).
+        for _cf in CHECK_FIELDS_AS_DICT:
+            if _cf in filtered:
+                filtered[_cf] = normalize_check_field(_cf, filtered[_cf],
+                                                      filtered.get("id", ""))
         # Luật entry-window LAG V2.4 (user duyệt 2026-08-09): lệnh mua có `entry_anchor_price`
         # thì KHÔNG BAO GIỜ được khớp trên giá đó. Suy thẳng ra trần cứng ngay tại ranh giới
         # nạp plan — cùng tinh thần filter_excluded_tickers(): enforce Ở MỘT CHỖ, không phụ

@@ -30,6 +30,7 @@ import subprocess
 import time
 
 from .config import EXEC_DIR, STOP_FILE
+from .plan import CHECK_FIELDS_AS_DICT, normalize_check_field
 from .plan_funding_gate import _effective_loan_package
 
 # Root of the Mike fleet (two levels up from trading_bot/).
@@ -92,6 +93,17 @@ class Executor:
 
     def __init__(self, plan, broker, cfg, shared=None):
         self.plan = plan
+        # Lớp phòng thủ THỨ HAI cho field check sai kiểu (sự cố POLL_FAIL 1:1-với-FILL
+        # 2026-08-11→08-14 — xem trading_bot/plan.py::normalize_check_field). `load_plan()` đã
+        # chuẩn hoá ở ranh giới nạp file, nhưng KHÔNG phải TradePlan nào cũng đi qua đó:
+        # `bot_prepare_plan`/`V23Strategy`/selfcheck dựng PlannedOrder thẳng trong bộ nhớ. Chuẩn
+        # hoá MỘT LẦN tại đây (không phải mỗi lần đọc trong `_sync_fills`, chạy mỗi 20s) ⇒ mọi
+        # chỗ sau đó — kể cả audit trail `state["parents"][id]["dcf_check"]` — thấy cùng một
+        # kiểu. Idempotent + không mất thông tin nên gọi lại trên plan đã chuẩn hoá là vô hại.
+        for _o in getattr(plan, "orders", None) or []:
+            for _cf in CHECK_FIELDS_AS_DICT:
+                setattr(_o, _cf, normalize_check_field(_cf, getattr(_o, _cf, None),
+                                                       getattr(_o, "id", "")))
         self.broker = broker
         self.cfg = cfg
         self.label = plan.account
