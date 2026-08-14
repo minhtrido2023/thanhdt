@@ -46,3 +46,4 @@ chưa có `answer`/`decision` 5 ngày liên tục dù đã triage GENUINE từ 0
   chọn consumer đầu tiên. Crontab `corp_action_daily.py` (07:30 ICT T2-T6) đã cài, alert-only.
 
 - [2026-08-13T18:29:45Z] 2026-08-13 tối: Chuỗi Oshares/corp-action HOÀN TẤT (12 vòng quant-skeptic tổng cộng cả ngày, 3 lần REFUTED thật đều đã vá). Việc A/B đã wire an toàn. 1 quyết định chính sách còn treo cho user: mở SANITY_FACTOR cho corp_action_daily.py không (ẩn số 34 mã lịch sử gồm VHM/VND đang giữ). 08-14 07:30 ICT sẽ có 1 cảnh báo THẬT (EVF/SHB, do mô hình siết chặt) — đã biết trước, không phải sự cố.
+- [2026-08-14T01:31:16Z] [2026-08-14T01:26Z] SANITY_FACTOR ĐÓNG: user chọn C (WARN, không ẩn số), Taylor wire (mike@1ea8c4ee), quant-skeptic CONFIRMED cao (tái lập BQ thật khớp tuyệt đối). Còn 1 gap coverage kỹ thuật nhẹ (0 test run()-level) — không khẩn, không phải policy. Đã báo user + đóng kb/projects/corporate-action-bq-integration-0813.md.
