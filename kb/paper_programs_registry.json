@@ -345,6 +345,57 @@
       }
     },
     {
+      "id": "order_book_execution_shadow",
+      "name": "Order-book execution shadow (10-level bid-ask)",
+      "owner": "Taylor",
+      "objective": "Giảm implementation shortfall/slippage và adverse selection của child order bằng dữ liệu snapshot 10 mức bid-ask; đây là nghiên cứu execution-only, KHÔNG tạo alpha, KHÔNG đổi chọn mã/sizing/lệnh.",
+      "start": "2026-08-18",
+      "end": "2026-09-14",
+      "end_or_trigger": "20 phiên evidence từ 2026-08-18, không tính ngày không có snapshot hợp lệ hoặc không có child-order opportunity. Review cố định 2026-09-16 09:30 ICT; nếu <20 phiên, báo thiếu mẫu và gia hạn minh bạch, không kết luận sớm.",
+      "gate_criteria": [
+        {
+          "text": "Telemetry v1 ghi được snapshot 10 mức, quyết định baseline/HYBRID, child order, fill và hậu kiểm 1/5/15 phút với khóa nối traceable",
+          "status": "pending",
+          "note": "Pha 0: chỉ instrumentation; không tác động cách đặt lệnh paper hoặc live."
+        },
+        {
+          "text": "Shadow policy chỉ đưa khuyến nghị KEEP/REDUCE/DEFER; không có đường gọi broker, không đổi child size, không đổi lịch HYBRID",
+          "status": "pending",
+          "note": "Pha 1: policy đơn giản, khóa trước rule và version."
+        },
+        {
+          "text": "Có >=20 phiên evidence và so sánh ngoài mẫu với baseline HYBRID theo slippage, fill-rate, time-to-fill và adverse selection",
+          "status": "pending",
+          "note": "Không dùng P&L/alpha làm tiêu chí."
+        },
+        {
+          "text": "Quant-skeptic review trước bất kỳ paper A/B có tác động execution; user sign-off trước mọi thay đổi live",
+          "status": "pending"
+        }
+      ],
+      "probe": {
+        "type": "command",
+        "cmd": [
+          "python3",
+          "-c",
+          "print('Pha 0 chưa triển khai telemetry — daily report phải giữ WATCH, không được suy diễn không có hoạt động.')"
+        ],
+        "timeout": 10,
+        "max_chars": 500
+      },
+      "data_sources": [
+        "telemetry v1 (sẽ tạo): timestamp, 10 mức bid/ask, spread/microprice/imbalance, baseline decision, shadow recommendation, order/fill và hậu kiểm 1/5/15 phút",
+        "data/execution_logs/exec_main_*_journal.csv (baseline HYBRID, chỉ đối chiếu)",
+        "snapshot nguồn broker với timestamp/freshness được kiểm tra"
+      ],
+      "notes": "Kế hoạch đã được user chốt 2026-08-14: ưu tiên cải thiện chất lượng fill và giảm chi phí giao dịch, không nghiên cứu alpha. Pha 0 (trước 2026-08-18): audit nguồn snapshot + schema immutable + retention + freshness; Pha 1 (20 phiên): bot giữ nguyên HYBRID, shadow policy chỉ log KEEP/REDUCE/DEFER. Rule đầu tiên nếu đủ dữ liệu: REDUCE khi spread rộng và top-of-book mỏng; KHÔNG dùng imbalance để dự đoán giá hoặc tăng aggressiveness. Thiết kế phải fail-open về baseline HYBRID khi snapshot thiếu/cũ/lỗi. Mọi số phải tách theo side, ticker-liquidity bucket và phiên; kiểm định bằng paired comparison cùng opportunity, không so P&L toàn portfolio.",
+      "review_short": "Review 2026-09-16 09:30 ICT — cần >=20 phiên evidence; chỉ quyết định sang paper A/B hay dừng, không go-live",
+      "today_activity": {
+        "mode": "none_available",
+        "reason": "Telemetry order-book v1 chưa được triển khai; status WATCH là đúng, không suy diễn thành không có giao dịch hay hiệu quả bằng 0"
+      }
+    },
+    {
       "id": "orb_intraday",
       "name": "ORB intraday VN30F (ring-fenced)",
       "owner": "Taylor",
