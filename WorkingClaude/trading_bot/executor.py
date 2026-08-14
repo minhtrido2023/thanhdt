@@ -120,6 +120,12 @@ class Executor:
                                       # parent/phiên. `_child_qty` chạy từ CẢ `_place_slices`
                                       # LẪN `_would_be_unchanged` mỗi chu kỳ 20s ⇒ không chặn
                                       # thì journal ngập vô ích (cùng lý do `_hybrid_deferred`).
+        self._expvol_shadow_logged = set()  # (order id, 'YYYY-MM-DD HH:MM') đã ghi EXPVOL_SHADOW.
+                                      # Khoá THEO PHÚT (không theo ngày như `_expvol_logged`):
+                                      # đây là chuỗi thời gian dùng để ĐO — 1 điểm/phút là độ
+                                      # phân giải cần; nhưng vẫn phải chặn 2 lời gọi `_child_qty`
+                                      # trong CÙNG chu kỳ 20s ghi thành 2 quan sát, vì đếm trùng
+                                      # sẽ thổi phồng N của chính paper trial này.
         self._hybrid_deferred = set()  # order id đã ghi journal HYBRID_DEFER (1 lần/parent mỗi
                                        # lần chạy process — không bền qua restart, cố ý: chỉ là
                                        # dòng quan sát, không phải state điều khiển)
@@ -603,17 +609,81 @@ class Executor:
                 return f0 if m1 == m0 else f0 + (f1 - f0) * (t - m0) / (m1 - m0)
         return pts[-1][1]
 
+    def _expvol_active(self):
+        """True = P2 ĐƯỢC PHÉP đổi KL của lệnh này. Hai điều kiện, cùng semantics với HYBRID
+        (`fill_timing_live_gate`, xem `_hybrid_active`): cờ tính năng BẬT **và** không bị cổng
+        LIVE chặn. Fail-safe cả hai chiều: cờ thiếu ⇒ TẮT, gate thiếu ⇒ BẬT (paper-only).
+
+        Vì sao là hàm riêng chứ không inline: `_expected_vol_basis` (đường HÀNH ĐỘNG) và
+        `_expvol_shadow` (đường ĐO LƯỜNG) phải đọc CÙNG một điều kiện — nếu hai nơi tự đánh giá
+        thì shadow có thể ghi số của một chế độ khác với chế độ đang chạy, tức mẫu đối chứng
+        nói dối mà không ai thấy (§28: chuẩn hoá giá trị trước khi so, đừng so hai kênh)."""
+        return bool(self.cfg.get("expected_volume_pacing_enabled", False)
+                    and not (self.cfg.get("expected_volume_pacing_live_gate", True)
+                             and self.cfg.get("mode") != "paper"))
+
+    def _expvol_shadow(self, o, adv20_vnd, px, now, day_volume, fleet_filled,
+                       floor_allow, ceil_allow):
+        """Ghi journal `EXPVOL_SHADOW` — allowance THẬT hôm nay vs allowance mà P2 SẼ cho, ở
+        CÙNG lệnh / CÙNG tape / CÙNG thời điểm. Chỉ ghi, **KHÔNG trả về gì và không đổi KL**.
+
+        Chạy khi P2 KHÔNG hoạt động (mọi account live, và cả paper khi cờ tắt) — lúc P2 hoạt
+        động thì đường thật đã ghi `EXPVOL_PACING`, ghi thêm ở đây là đếm trùng.
+
+        Bọc try/except TOÀN BỘ và nuốt mọi lỗi: đây là nhánh ĐO LƯỜNG gắn vào `_child_qty`,
+        tức đường sinh KL của MỌI lệnh CAPIT/DISCRETIONARY_SPECIAL trên tiền thật. Một
+        ZeroDivisionError vì cấu hình clamp rác mà làm hỏng lệnh live là cái giá không tương
+        xứng với giá trị của một dòng log (§5: tác dụng phụ ngoài phải an toàn khi bị cắt)."""
+        try:
+            if not self.cfg.get("expected_volume_pacing_shadow_log", True):
+                return
+            if now is None or not day_volume or not adv20_vnd or not px:
+                return
+            key = (o.id, now.strftime("%Y-%m-%d %H:%M"))
+            if key in self._expvol_shadow_logged:
+                return
+            frac = self._expected_vol_frac(now)
+            if frac is None:
+                return
+            c = float(self.cfg["expected_volume_tape_clamp"])
+            if not (0.0 < c < 1.0):
+                return
+            exp_basis = (adv20_vnd / px) * frac
+            basis = max(day_volume, exp_basis)
+            p2_ceil = int(self.cfg["capit_realized_participation_ceiling"] * basis) - fleet_filled
+            p2_clamp = int((c * day_volume - fleet_filled) / (1.0 - c))
+            p2_allow = min(floor_allow, p2_ceil, p2_clamp)
+            base_allow = min(floor_allow, ceil_allow)
+            # Guard nào đang QUYẾT ĐỊNH allowance nền — câu hỏi gate G2 ("ceil có thật sự
+            # BINDING không"); P2 chỉ có ý nghĩa ở đúng những slice `bind=ceil`.
+            bind = "ceil" if ceil_allow < floor_allow else ("floor" if floor_allow < ceil_allow
+                                                            else "tie")
+            self._expvol_shadow_logged.add(key)
+            self._journal("EXPVOL_SHADOW", o, "", max(0, base_allow), px, note=(
+                f"P2 OFF (đối chứng ghép cặp) f({now:%H:%M})={frac:.3f};"
+                f"tape={int(day_volume)};fleet_filled={int(fleet_filled)};"
+                f"exp_basis={int(exp_basis)};floor_allow={int(floor_allow)};"
+                f"base_ceil={int(ceil_allow)};base_allow={int(base_allow)};"
+                f"p2_ceil={int(p2_ceil)};p2_clamp={int(p2_clamp)};p2_allow={int(p2_allow)};"
+                f"delta={int(p2_allow - base_allow)};bind={bind}"))
+        except Exception as e:      # noqa: BLE001 — xem docstring: đo lường KHÔNG được ném lỗi
+            try:
+                self._journal("EXPVOL_SHADOW_ERR", o, "", "", "", note=f"{type(e).__name__}: {e}")
+            except Exception:       # noqa: BLE001 — kể cả ghi log lỗi cũng không được ném
+                pass
+
     def _expected_vol_basis(self, o, adv20_vnd, px, now):
         """KL (cổ phiếu) KỲ VỌNG đã khớp tới `now` = ADV20_cp × f(t). None = P2 KHÔNG áp
         dụng ⇒ mọi thứ giữ nguyên như trước (byte-identical).
 
-        None khi: cờ tắt (MẶC ĐỊNH) · `now=None` (đường gọi không có thời gian — cùng quy
-        ước với HYBRID) · thiếu ADV20/giá · cấu hình clamp ngoài (0,1) · đường cong hỏng.
+        None khi: cờ tắt (MẶC ĐỊNH) · **cổng LIVE chặn** (mode ≠ paper) · `now=None` (đường gọi
+        không có thời gian — cùng quy ước với HYBRID) · thiếu ADV20/giá · cấu hình clamp ngoài
+        (0,1) · đường cong hỏng.
         Cấu hình clamp được kiểm TẠI ĐÂY dù nó dùng ở `_child_qty`: nới mẫu số mà không có
         trần đuôi là đúng cái mà nghiên cứu bác bỏ (chiếm >50% tape ở 6,9% số phiên) —
         hai vế phải cùng bật hoặc cùng tắt, không được tách.
         """
-        if now is None or not self.cfg.get("expected_volume_pacing_enabled", False):
+        if now is None or not self._expvol_active():
             return None
         if not adv20_vnd or not px or adv20_vnd <= 0 or px <= 0:
             return None
@@ -694,6 +764,11 @@ class Executor:
                     c = float(self.cfg["expected_volume_tape_clamp"])
                     clamp_allow = int((c * q.day_volume - fleet_filled) / (1.0 - c))
                     allowance = min(allowance, clamp_allow)
+                else:
+                    # P2 KHÔNG ăn (live-gate hoặc cờ tắt) ⇒ ghi đối chứng ghép cặp. Log-only:
+                    # `allowance` bên trên KHÔNG được đọc lại sau dòng này.
+                    self._expvol_shadow(o, adv20_vnd, px, now, q.day_volume, fleet_filled,
+                                        floor_allow, ceil_allow)
             else:
                 # halt / chưa có tape (Volume=0): chỉ còn ADV20-floor; khan người bán tự
                 # giới hạn fill thực (không ai bán → lệnh treo, không đẩy giá — memo Result 2).

@@ -49,7 +49,23 @@ DEFAULTS = {
     # SỬA: mẫu số = max(KL đã khớp, ADV20_cp × f(t)). KL HIỂN THỊ không cần neo vào tape đã
     # xảy ra (hiện lệnh KHÔNG tiêu thụ thanh khoản của ai); chỉ KL ĐÃ KHỚP mới cần — và đó
     # là việc của `expected_volume_tape_clamp` bên dưới.
-    "expected_volume_pacing_enabled": False,   # DEFAULT OFF — bật paper cần user/Mike duyệt
+    # BẬT TRÊN PAPER 2026-08-17 (user John chốt qua Mike, job Taylor_20260814_161511) — VẪN LÀ
+    # PAPER-ONLY nhờ `expected_volume_pacing_live_gate` ngay dưới. Không account LIVE nào đổi
+    # hành vi: cờ này một mình KHÔNG đủ, gate phải TẮT thì P2 mới ăn ở mode≠paper.
+    "expected_volume_pacing_enabled": True,    # PAPER 2026-08-17 (was False)
+    # Cổng LIVE — cùng cơ chế `fill_timing_live_gate` (executor.py:1207) đã dùng cho HYBRID:
+    # True ⇒ P2 chỉ ăn ở account `mode == "paper"`; mọi account live giữ nguyên byte-identical
+    # hành vi cũ. Fail-safe: `.get(..., True)` ⇒ cấu hình THIẾU khoá này = gate BẬT (paper-only),
+    # không phải mở toang. Flip sang False = đưa P2 lên tiền thật ⇒ cần quant-skeptic CONFIRMED
+    # + user sign-off RIÊNG (gate criteria: kb/paper_programs_charter/expvol_pacing.md).
+    "expected_volume_pacing_live_gate": True,
+    # Đối chứng GHÉP CẶP trên tape THẬT (log-only, KHÔNG đổi hành vi ở bất kỳ mode nào): khi P2
+    # đang TẮT/bị gate, executor vẫn tính allowance mà P2 SẼ cho ở cùng lệnh/cùng tape/cùng
+    # giây, rồi ghi journal `EXPVOL_SHADOW`. Đây là mẫu ghép cặp DUY NHẤT có thể có: paper
+    # không sinh fill thật (PaperBroker khớp đúng giá đặt), còn bật P2 trên live thì đã là thay
+    # đổi hành vi — tức thứ ta đang xin phép đo. Tắt = mất nguồn số của paper trial, không mất
+    # an toàn.
+    "expected_volume_pacing_shadow_log": True,
     # Trần đuôi neo vào TAPE THẬT: fill luỹ kế của fleet ≤ 50% KL khớp thật của phiên.
     # Suy ra allowance: đặt F=fleet đã khớp, V=KL phiên (V ĐÃ gồm F). Fill thêm X vẫn giữ
     # F+X ≤ c(V+X) ⇒ X ≤ (cV−F)/(1−c); với c=0,5 ⇒ **X ≤ V − 2F**. KHÔNG dùng dạng lỏng tay

@@ -355,9 +355,204 @@ with tempfile.TemporaryDirectory() as tmp:
     check("K1 đường KIỂM TRA (exclude_reserved) ra CÙNG KL với đường ĐẶT ⇒ không huỷ+đặt lại vô ích",
           recheck == place, f"place={place}, recheck={recheck}")
 
+# ================================================================ L. CỔNG LIVE (paper-only)
+# Từ 2026-08-17 `expected_volume_pacing_enabled` = True. Cái GIỮ tiền thật an toàn không còn là
+# cờ đó nữa mà là `expected_volume_pacing_live_gate` — nên nó phải được kiểm như một guard tiền
+# thật: chặn đúng, fail-safe khi THIẾU khoá, và có ca chứng minh ngược (paper thì P2 ăn thật).
+VOLS = (0, 100, 500, 3000, 12_400, 42_700)
+TIMES = (T(9, 15), T(10, 0), T(11, 30), T(13, 30), T(14, 30))
+# ⚠️ `mode` KHÔNG chỉ gác P2: `fill_timing_live_gate` cũng đọc nó, nên đổi mode=paper→live cũng
+# TẮT luôn lịch HYBRID (đang bật mặc định trên paper từ 2026-08-10) ⇒ KL đổi vì lý do KHÁC P2.
+# Bản nháp mục này so paper-off với live-on và "bắt" được 11/30 ô lệch — toàn bộ là HYBRID, 0
+# do P2. Vì vậy mọi lưới dưới đây TẮT HẲN fill-timing: chỉ còn đúng một biến thay đổi.
+BASE = {"fill_timing_enabled": False}
+LIVE = dict(BASE, mode="live")
+
+
+def qty_grid(ex, o, shared_start=0):
+    """KL của `_child_qty` trên toàn lưới (KL tape × giờ) — chữ ký hành vi của một cấu hình."""
+    out = []
+    for vol in VOLS:
+        for now in TIMES:
+            ex.shared["TV1"] = shared_start
+            out.append(ex._child_qty(o, ex.state["parents"][o.id], FakeQuote(vol), PX, now))
+    return out
+
+
+with tempfile.TemporaryDirectory() as tmp:
+    dd = os.path.join(tmp, "disc")
+    write_state(dd, "TV1", TAG, ADV_VND)
+    o = disc_order()
+    g_live_off = qty_grid(make_ex(tmp, [o], on=False, disc_dir=dd, extra_cfg=LIVE), o)
+    g_live_on = qty_grid(make_ex(tmp, [o], on=True, disc_dir=dd, extra_cfg=LIVE), o)
+    g_paper_off = qty_grid(make_ex(tmp, [o], on=False, disc_dir=dd, extra_cfg=BASE), o)
+    g_paper_on = qty_grid(make_ex(tmp, [o], on=True, disc_dir=dd, extra_cfg=BASE), o)
+    check("L1 cờ BẬT + mode=live ⇒ KL y hệt cờ TẮT trên toàn lưới (30 ô) — LIVE không đổi hành vi",
+          g_live_on == g_live_off, f"{sum(a != b for a, b in zip(g_live_on, g_live_off))}/30 ô lệch")
+    check("L2 CA CHỨNG MINH NGƯỢC: cùng cờ đó + mode=paper ⇒ KL THỰC SỰ khác (gate không phải "
+          "no-op trá hình)", g_paper_on != g_paper_off,
+          f"{sum(a != b for a, b in zip(g_paper_on, g_paper_off))}/30 ô khác")
+
+    # THIẾU khoá gate (config cũ chưa có, hoặc ai đó xoá) ⇒ phải coi như gate BẬT.
+    ex_nokey = make_ex(tmp, [o], on=True, disc_dir=dd, extra_cfg=LIVE)
+    ex_nokey.cfg.pop("expected_volume_pacing_live_gate", None)
+    check("L3 THIẾU khoá live_gate + mode=live ⇒ vẫn chặn (fail-safe .get(...,True), không mở toang)",
+          qty_grid(ex_nokey, o) == g_live_off, "")
+    check("L3b _expvol_active() = False khi thiếu khoá + live", ex_nokey._expvol_active() is False)
+
+    # Flip gate = cánh cửa DUY NHẤT lên tiền thật; test này ghi lại đúng cái mà sign-off mở ra.
+    ex_flip = make_ex(tmp, [o], on=True, disc_dir=dd,
+                      extra_cfg=dict(LIVE, expected_volume_pacing_live_gate=False))
+    check("L4 gate=False + mode=live ⇒ P2 ăn ĐÚNG như trên paper (flip gate là cánh cửa duy "
+          "nhất, cần user sign-off)", qty_grid(ex_flip, o) == g_paper_on, "")
+
+    # Đường HÀNH ĐỘNG và cổng phải nhất quán: không có ca nào basis≠None trong khi P2 bị chặn.
+    incons = []
+    for ex_ in (make_ex(tmp, [o], on=True, disc_dir=dd, extra_cfg=LIVE),
+                make_ex(tmp, [o], on=False, disc_dir=dd, extra_cfg=BASE),
+                make_ex(tmp, [o], on=True, disc_dir=dd, extra_cfg=BASE)):
+        for now in TIMES:
+            b = ex_._expected_vol_basis(o, ADV_VND, PX, now)
+            if (b is not None) != ex_._expvol_active():
+                incons.append((ex_.cfg.get("mode"), now))
+    check("L5 _expected_vol_basis ≠ None ⟺ _expvol_active() — hành động và cổng không lệch nhau",
+          not incons, f"{len(incons)} ca lệch")
+
+# ================================================================ M. Đối chứng ghép cặp (shadow)
+# EXPVOL_SHADOW là NGUỒN SỐ của paper trial. Hai rủi ro phải chặn: (a) nó đổi hành vi live —
+# thì việc "không chạm LIVE" thành lời nói suông; (b) nó ghi số SAI — thì trial đo một cơ chế
+# không tồn tại, tệ hơn không đo (§28: đối chứng phải so GIÁ TRỊ, và giá trị phải đúng).
+import csv as _csv          # noqa: E402 — chỉ mục M cần, giữ import cục bộ cho gọn
+
+
+def own_journal(ex, tmp, name):
+    """Tách journal RIÊNG cho mỗi executor. `make_ex` mặc định trỏ mọi executor vào cùng
+    `<tmp>/journal.csv`; ở mục M (đọc NGƯỢC từ journal ra để kiểm) dùng chung file làm
+    `shadow_rows(...)[0]` trả dòng của executor TRƯỚC ĐÓ — bản nháp mục này "PASS" M3 chỉ vì
+    hai fixture tình cờ cùng tham số, và FAIL M3d mới lộ ra. Đọc chéo file là lỗi ĐO, không
+    phải lỗi code được đo."""
+    ex.journal_file = os.path.join(tmp, f"jrn_{name}.csv")
+    return ex
+
+
+def shadow_rows(path):
+    if not os.path.exists(path):
+        return []
+    with open(path, newline="", encoding="utf-8") as f:
+        return [r for r in _csv.DictReader(f) if r["event"] == "EXPVOL_SHADOW"]
+
+
+def note_fields(row):
+    out = {}
+    for part in row["note"].split(";"):
+        if "=" in part:
+            k, v = part.rsplit("=", 1)
+            out[k.strip().split()[-1]] = v.strip()
+    return out
+
+
+# Fixture "ceil BINDING": tape 500cp lúc 10:00 — phiên mỏng thật, đúng nhóm ca mà P2 sinh ra để
+# sửa. floor_allow=3.522 (ADV20) KHÔNG ràng buộc; base_ceil=0,3×500=150 mới là thứ bóp.
+THIN_VOL, THIN_T = 500, T(10, 0)
+
+with tempfile.TemporaryDirectory() as tmp:
+    dd = os.path.join(tmp, "disc")
+    write_state(dd, "TV1", TAG, ADV_VND)
+    o = disc_order()
+    ex_live = own_journal(make_ex(tmp, [o], on=True, disc_dir=dd, extra_cfg=LIVE), tmp, "live")
+    ps = ex_live.state["parents"][o.id]
+    q_live = ex_live._child_qty(o, ps, FakeQuote(THIN_VOL), PX, THIN_T)
+    rows = shadow_rows(ex_live.journal_file)
+    check("M1 mode=live ⇒ CÓ ghi EXPVOL_SHADOW", len(rows) == 1, f"{len(rows)} dòng")
+
+    # KL live phải bằng đúng KL của cấu hình TẮT HẲN — shadow chỉ được ghi, không được chạm.
+    ex_off = own_journal(make_ex(tmp, [o], on=False, disc_dir=dd, extra_cfg=LIVE), tmp, "off")
+    q_off = ex_off._child_qty(o, ex_off.state["parents"][o.id], FakeQuote(THIN_VOL), PX, THIN_T)
+    check("M2 ghi shadow KHÔNG đổi KL live (bằng đúng KL cấu hình tắt hẳn)", q_live == q_off,
+          f"live={q_live}, off={q_off}")
+
+    # Số trong shadow phải TRÙNG số mà P2 thật sự cho ở cùng lệnh/tape/giờ. Parent lớn ⇒
+    # allowance là ràng buộc BINDING ⇒ KL = round_lot(allowance), so được trực tiếp.
+    o_big = disc_order(oid="D2", qty=100_000)
+    ex_p2 = own_journal(make_ex(tmp, [o_big], on=True, disc_dir=dd, extra_cfg=BASE), tmp, "p2")
+    q_p2 = ex_p2._child_qty(o_big, ex_p2.state["parents"][o_big.id], FakeQuote(THIN_VOL), PX, THIN_T)
+    ex_sh = own_journal(make_ex(tmp, [o_big], on=True, disc_dir=dd, extra_cfg=LIVE), tmp, "sh")
+    ex_sh._child_qty(o_big, ex_sh.state["parents"][o_big.id], FakeQuote(THIN_VOL), PX, THIN_T)
+    f = note_fields(shadow_rows(ex_sh.journal_file)[0])
+    p2_allow = int(f["p2_allow"])
+    check("M3 p2_allow trong shadow = allowance P2 THẬT (chạy paper cùng tham số) — đối chứng "
+          "không nói dối", (p2_allow // LOT) * LOT == q_p2, f"p2_allow={p2_allow}, P2 thật={q_p2}")
+    check("M3b delta = p2_allow − base_allow, và > 0 ở ca tape mỏng 10:00 (P2 nới thật)",
+          int(f["delta"]) == p2_allow - int(f["base_allow"]) and int(f["delta"]) > 0,
+          f"delta={f['delta']}, base={f['base_allow']}, p2={p2_allow}")
+    check("M3c bind ghi đúng guard đang quyết định (ceil ở ca này)", f["bind"] == "ceil", f["bind"])
+    # Ca ngược: tape DÀY ⇒ floor ADV20 mới là thứ bind, P2 KHÔNG mở thêm được gì. Nếu delta>0 ở
+    # đây thì shadow đang thổi phồng cơ hội của chính trial (đo nhầm ra edge không tồn tại).
+    ex_th = own_journal(make_ex(tmp, [o_big], on=True, disc_dir=dd, extra_cfg=LIVE), tmp, "th")
+    ex_th._child_qty(o_big, ex_th.state["parents"][o_big.id], FakeQuote(42_700), PX, THIN_T)
+    f2 = note_fields(shadow_rows(ex_th.journal_file)[0])
+    check("M3d tape DÀY ⇒ bind=floor và delta=0 (P2 không mở thêm khi ADV20 mới là ràng buộc)",
+          f2["bind"] == "floor" and int(f2["delta"]) == 0,
+          f"bind={f2['bind']}, delta={f2['delta']}")
+
+with tempfile.TemporaryDirectory() as tmp:
+    dd = os.path.join(tmp, "disc")
+    write_state(dd, "TV1", TAG, ADV_VND)
+    o = disc_order()
+    ex = make_ex(tmp, [o], on=True, disc_dir=dd, extra_cfg=LIVE)
+    ps = ex.state["parents"][o.id]
+    for _ in range(25):
+        ex._child_qty(o, ps, FakeQuote(3000), PX, T(10, 0))
+    n_same_min = len(shadow_rows(ex.journal_file))
+    ex._child_qty(o, ps, FakeQuote(3200), PX, T(10, 8))
+    n_next_min = len(shadow_rows(ex.journal_file))
+    check("M4 dedupe THEO PHÚT: 25 lời gọi cùng phút ⇒ 1 dòng (không thổi phồng N của trial)",
+          n_same_min == 1, f"{n_same_min} dòng")
+    check("M4b phút khác ⇒ điểm quan sát mới (chuỗi thời gian vẫn đo được)",
+          n_next_min == 2, f"{n_next_min} dòng")
+
+with tempfile.TemporaryDirectory() as tmp:
+    dd = os.path.join(tmp, "disc")
+    write_state(dd, "TV1", TAG, ADV_VND)
+    o = disc_order()
+    ex = own_journal(make_ex(tmp, [o], on=True, disc_dir=dd,
+                             extra_cfg=dict(LIVE, expected_volume_pacing_shadow_log=False)), tmp, "nolog")
+    ex._child_qty(o, ex.state["parents"][o.id], FakeQuote(THIN_VOL), PX, THIN_T)
+    check("M5 tắt shadow_log ⇒ không ghi dòng nào (tắt được mà không đụng an toàn)",
+          not shadow_rows(ex.journal_file), "")
+
+    # P2 ĐANG chạy (paper) ⇒ đường thật đã ghi EXPVOL_PACING; shadow phải im, nếu không thì
+    # cùng một slice bị đếm hai lần ở hai chế độ khác nhau.
+    ex_p = own_journal(make_ex(tmp, [o], on=True, disc_dir=dd, extra_cfg=BASE), tmp, "paper")
+    ex_p._child_qty(o, ex_p.state["parents"][o.id], FakeQuote(THIN_VOL), PX, THIN_T)
+    check("M6 P2 đang ăn (paper) ⇒ KHÔNG ghi shadow (không đếm trùng 1 slice ở 2 chế độ)",
+          not shadow_rows(ex_p.journal_file), "")
+
+# Cấu hình rác + shadow bật: nhánh ĐO LƯỜNG nằm trên đường sinh KL của lệnh tiền thật ⇒
+# nó phải nuốt lỗi và trả KL y nguyên, không được ném lên.
+for label, bad in [("clamp không parse được", {"expected_volume_tape_clamp": "một nửa"}),
+                   ("clamp = 1 (ZeroDivisionError nếu không chặn)",
+                    {"expected_volume_tape_clamp": 1.0}),
+                   ("curve rác", {"expected_volume_curve": [[555, 0.045], "x"]}),
+                   ("thiếu hẳn khoá clamp", {"expected_volume_tape_clamp": None})]:
+    with tempfile.TemporaryDirectory() as tmp:
+        dd = os.path.join(tmp, "disc")
+        write_state(dd, "TV1", TAG, ADV_VND)
+        o = disc_order()
+        ex = make_ex(tmp, [o], on=True, disc_dir=dd, extra_cfg=dict(LIVE, **bad))
+        ex_ref = make_ex(tmp, [o], on=False, disc_dir=dd, extra_cfg=LIVE)
+        try:
+            got = ex._child_qty(o, ex.state["parents"][o.id], FakeQuote(THIN_VOL), PX, THIN_T)
+            raised = None
+        except Exception as e:                                    # noqa: BLE001
+            got, raised = None, f"{type(e).__name__}: {e}"
+        want = ex_ref._child_qty(o, ex_ref.state["parents"][o.id], FakeQuote(THIN_VOL), PX, THIN_T)
+        check(f"M7 {label} ⇒ shadow nuốt lỗi, KL live y nguyên", raised is None and got == want,
+              raised or f"got={got}, want={want}")
+
 print()
 if fails:
     print(f"❌ {len(fails)} FAIL: {fails}")
     sys.exit(1)
-print("✅ tất cả PASS — P2 mặc định byte-identical; clamp giữ bất biến ≤50% tape; "
-      "không chạm BÁN/non-ADV20 nên EXTREME không bị làm chậm.")
+print("✅ tất cả PASS — P2 paper-only qua live_gate (LIVE byte-identical); clamp giữ bất biến "
+      "≤50% tape; shadow ghi đúng số P2 mà không chạm hành vi; không chạm BÁN/non-ADV20.")

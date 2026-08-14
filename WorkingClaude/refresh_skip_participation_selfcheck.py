@@ -145,11 +145,22 @@ def seed_open_child(ex, o, qty, price, age_min=9, filled=0):
     return ps, c
 
 
+# Event THÔNG TIN của P2 (pacing theo KL kỳ vọng), không phải hành động sổ lệnh. Từ 2026-08-17
+# `expected_volume_pacing_enabled=True` trên paper ⇒ mọi executor paper đi qua nhánh ADV20-paced
+# ghi thêm 1 dòng EXPVOL_PACING, làm ca E2 dưới đây đỏ dù hành vi churn KHÔNG đổi (E1/E3 vẫn ra
+# đúng KL, REFRESH_SKIP vẫn kích, broker không bị gọi cancel). Bất biến mà file này kiểm là
+# HUỶ-hay-KHÔNG-HUỶ, không phải độ dài journal ⇒ lọc đúng 2 event thông tin đó.
+# ⚠️ CỐ Ý KHÔNG lọc `EXPVOL_SHADOW_ERR`: nó nghĩa là nhánh đo lường đã ném lỗi — muốn nó làm
+# đỏ mọi assert so khớp tuyệt đối ở đây, đó là cách rẻ nhất để lỗi đó không đi qua im lặng.
+EXPVOL_INFO = {"EXPVOL_PACING", "EXPVOL_SHADOW"}
+
+
 def journal_events(ex):
     if not os.path.exists(ex.journal_file):
         return []
     with open(ex.journal_file, encoding="utf-8") as f:
-        return [ln.split(",")[1] for ln in f.read().splitlines()[1:] if "," in ln]
+        return [e for e in (ln.split(",")[1] for ln in f.read().splitlines()[1:] if "," in ln)
+                if e not in EXPVOL_INFO]
 
 
 # =============================================================== A. Ca DRI thật
