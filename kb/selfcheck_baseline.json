@@ -27,6 +27,16 @@
       "since": "2026-08-08",
       "fix_needed": "Cấp quyền bigquery.tables.create trên tav2_bq cho đúng service account, hoặc dùng service account khác có quyền ghi cho riêng luồng dispatch chạy selfcheck. Ngoài phạm vi Mike tự quyết (IAM/billing-adjacent) — cần user/project-owner xác nhận.",
       "verified_by": "Mike, 2026-08-08, job Taylor_20260808_075933 follow-up"
+    },
+    "mike/bin/job_cancel_guard_selfcheck.py": {
+      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
+      "since": "2026-08-14T19:42:33Z",
+      "status": "FAIL",
+      "auto": true,
+      "topic": "selfcheck-red: mike/bin/job_cancel_guard_selfcheck.py",
+      "escalated_utc": "2026-08-14T19:42:33Z",
+      "ack_pending": false,
+      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
     }
   }
 }
