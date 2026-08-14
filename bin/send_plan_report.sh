@@ -183,23 +183,59 @@ def _as_state_int(v):
         return int(v.strip())
     return None
 
+# Fail-open ĐƯỢC PHÉP, fail-open CÂM thì KHÔNG (arch-review coord-2026-08-11, cùng yêu cầu
+# arch-reviewer đặt ra cho gate giá ở dòng ~213: price_verify_note). `plan['state']` là literal
+# GÕ TAY ở bên sinh plan (build_plans_*.py) — một bản builder quên field / ghi 'NEUTRAL' là gate
+# này chết lặng vĩnh viễn trong khi report render y hệt như đã đối chiếu, tức đổi một RED giả ồn
+# ào lấy một GREEN giả câm. Mọi nhánh bỏ qua đều PHẢI để lại dấu vết trong chính report.
+STATE_NAMES = {1: "CRISIS", 2: "BEAR", 3: "NEUTRAL", 4: "BULL", 5: "EX-BULL"}
+state_verify_note = ""
 try:
     with open("deploy_golive_dt5g_v4/golive_state_today.json") as f:
         golive = json.load(f)
     plan_state = _as_state_int(plan.get("state"))
     golive_state = _as_state_int(golive.get("state"))
     # Thiếu/không phải số ở bất kỳ vế nào → BỎ QUA assert, không chặn (fail-open có chủ đích:
-    # đây là gate phụ, gate approval ở executor mới là lớp chặn tiền thật).
-    if plan_state is not None and golive_state is not None and plan_state != golive_state:
+    # đây là gate phụ, gate approval ở executor mới là lớp chặn tiền thật) — nhưng NÓI RA.
+    # state=-1 là sentinel PROBE (thấy thật ở plan_main_*.json), KHÔNG phải một regime 1-5 —
+    # so nó với golive thì LUÔN lệch. Hôm nay main không nằm trong live_dnse_labels() nên chưa
+    # cắn, nhưng onboard một account PROBE là gate này thành RED giả chặn plan ngay ngày đầu.
+    if plan_state is not None and plan_state < 0:
+        state_verify_note = (
+            f"⚠️ plan.state={plan_state} (PROBE, không phải regime 1-5) — KHÔNG đối chiếu được "
+            f"với DT5G hôm nay (golive.state={golive.get('state')!r}), không chặn plan")
+    elif plan_state is None or golive_state is None:
+        state_verify_note = (
+            f"⚠️ CHƯA đối chiếu được state plan vs DT5G hôm nay (plan.state="
+            f"{plan.get('state')!r}, golive.state={golive.get('state')!r} — cần số nguyên ở cả "
+            f"hai vế): không chặn plan, người duyệt tự kiểm regime trước khi duyệt")
+    elif plan_state != golive_state:
         escalate("plan_state_mismatch",
                  f"{plan_file}: state={plan_state} nhưng golive_state_today.json (nguồn DT5G "
                  f"thật hôm nay, as_of={golive.get('as_of')!r}) nói state={golive_state} — plan "
                  f"có thể được sinh từ state cũ.")
         sys.exit(0)
+    else:
+        state_verify_note = (
+            f"✅ state={plan_state} ({STATE_NAMES.get(plan_state, '?')}) khớp "
+            f"golive_state_today.json (as_of={golive.get('as_of')})")
+        # Đại lượng được VERIFY (state, int) và đại lượng được HIỂN THỊ cho người duyệt
+        # (state_name, chuỗi) là hai literal gõ tay cạnh nhau: state=3/state_name='BULL' qua
+        # được gate mà người duyệt vẫn đọc sai regime. Chỉ CẢNH BÁO, không chặn.
+        _shown = str(plan.get("state_name") or plan.get("market_state") or "").strip().upper()
+        _expect = STATE_NAMES.get(plan_state)
+        if _expect and _shown and _shown.replace("_", "-") != _expect:
+            state_verify_note += (
+                f" — ⚠️ NHƯNG nhãn plan hiển thị là {_shown!r} trong khi state={plan_state} "
+                f"nghĩa là {_expect!r}: hai field trong cùng plan mâu thuẫn, đọc theo state")
 except FileNotFoundError:
-    pass  # không phải nguồn bắt buộc; thiếu file thì bỏ qua assert này, không chặn plan
-except Exception:
-    pass
+    # không phải nguồn bắt buộc; thiếu file thì bỏ qua assert này, không chặn plan
+    state_verify_note = ("⚠️ CHƯA đối chiếu được state plan vs DT5G hôm nay: không có "
+                         "deploy_golive_dt5g_v4/golive_state_today.json — không chặn plan, "
+                         "người duyệt tự kiểm regime")
+except Exception as _e:
+    state_verify_note = (f"⚠️ CHƯA đối chiếu được state plan vs DT5G hôm nay ({type(_e).__name__}: "
+                         f"{_e}) — không chặn plan, người duyệt tự kiểm regime")
 
 # 1a: price-plausibility gate — so giá ref mỗi lệnh với giá đóng cửa DNSE THẬT hôm nay (nguồn
 # plan BẮT BUỘC phải đã dùng — coding_guidelines §6 "same-day data: DNSE API, never BigQuery").
@@ -524,6 +560,10 @@ for _m in margin_note:
 src_vn = " (nguồn DT5G đầy đủ)" if src == "DT5G_macro" else (f" (nguồn {src})" if src else "")
 nav_str = f"{nav:,.0f}đ" if isinstance(nav, (int, float)) else "n/a"
 lines.append(f"🧭 Thị trường: {state}{src_vn} · NAV cơ sở: {nav_str}")
+# Đặt CẠNH dòng thị trường (không nằm trong nhánh `if orders:`) — plan HOLD cũng phải nói rõ
+# đã/chưa đối chiếu được regime, đó là ca gate câm dễ lọt nhất.
+if state_verify_note:
+    lines.append(f"   {state_verify_note}")
 
 # DT4-gate candidate streak clock — đã wire vào eod_trading_report.sh (2026-07-10) nhưng
 # CHƯA vào plan T+1 report này (khoảng trống user phát hiện 2026-08-11). Tái dùng

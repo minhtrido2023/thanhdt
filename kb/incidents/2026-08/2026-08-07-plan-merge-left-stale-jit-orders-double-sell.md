@@ -27,9 +27,17 @@ automation — đúng dạng điểm mù đã lặp lại nhiều lần trong fl
 **Escalate + fix.** Wags KHÔNG tự sửa plan (vùng cấm, mandate 2026-07-07): ghi bus event
 `error` + notify `plan_approval` và `trading_daily` (12:47), dispatch `DollarBill_20260807_054858`
 kèm bằng chứng và cách sửa. DollarBill xác nhận và xoá 15 lệnh sót lúc **12:50:15** — trước
-giờ chạy 13:05 khoảng 15 phút. Sau sửa: SpaceX 26→15 lệnh, ZaloPay 13→9 lệnh, `approved_at`
-giữ nguyên (thay đổi là GIẢM lệnh). Không lệnh nào bị đặt sai: không có journal/exec
-SpaceX/ZaloPay hôm nay tính đến 12:51.
+giờ chạy 13:05 khoảng 15 phút. Sau sửa: SpaceX 26→15 lệnh, ZaloPay 13→9 lệnh. Không lệnh nào
+bị đặt sai: không có journal/exec SpaceX/ZaloPay hôm nay tính đến 12:51.
+
+> **ĐÍNH CHÍNH 2026-08-14** (arch-review coord-2026-08-07 06:02, verdict NEEDS_CHANGES). Bản
+> đầu của mục này viết "`approved_at` giữ nguyên (thay đổi là GIẢM lệnh)" — **SAI, artifact bác
+> bỏ**: sau khi ghi đè plan, cả `plan_SpaceX` lẫn `plan_ZaloPay` 2026-08-07 đều có
+> `approved_by=None`/`approved_at=None`, chính file ghi `duplicate_jit_fix_note: CẦN USER DUYỆT
+> LẠI`, và bus DollarBill 05:52:48Z báo "chờ user duyệt lại trước 13:05". Ghi đè plan làm **mất
+> approval bất kể tăng hay giảm lệnh** — đó là thiết kế của `approval_block_reason()`
+> (`trading_bot/plan.py`), xem `2026-08-07-plan-rewrite-drops-user-approval.md`. Bài học #2 bên
+> dưới đã được viết lại theo đúng hành vi thật.
 
 **Fix tooling (Wags, trong phạm vi checker).** Thêm 2 bất biến lệnh vào
 `bin/preflight_check.sh`:
@@ -38,7 +46,9 @@ SpaceX/ZaloPay hôm nay tính đến 12:51.
 - `SELL_GT_SELLABLE:<mã>(gửi>cap)` — tổng qty BÁN 1 mã vượt `sellable_at_calc` mà chính plan
   ghi ra. Bất biến độc lập, bắt được cả ca ZaloPay VHM.
 
-Selfcheck `bin/preflight_order_invariants_selfcheck.py` (9 assert) **trích khối python thật
+Selfcheck `bin/preflight_order_invariants_selfcheck.py` (9 assert lúc đầu; 16 từ 2026-08-14 —
+thêm #13-#16 cho `merged_from=null`, qty dạng chuỗi, `side` viết HOA, qty rác) **trích khối
+python thật
 đang nằm trong preflight_check.sh** rồi chạy khối đó — không chép lại logic; khối bị đổi/di
 chuyển thì selfcheck exit 1 chứ không im lặng pass. Đối chứng `PF_SRC=<HEAD cũ>` ⇒ **FAIL
 3/9** đúng 3 assert mô tả điểm mù (chứng minh check mới thật sự thêm năng lực, không phải
@@ -50,8 +60,9 @@ assert tự thoả). Preflight thật chạy end-to-end 2 account trên plan đ�
    (không lệnh nguồn nào sót, không bán quá sellable), không phải bằng niềm tin vào script gộp.
    Script gộp là thứ mới nhất, chưa từng chạy production — chính nó cần bị nghi ngờ nhất.
 2. Chữ "user đã duyệt" KHÔNG có nghĩa nội dung đúng. Approval xác nhận **ý định**; bất biến dữ
-   liệu vẫn phải do máy kiểm. Sửa plan sau khi duyệt theo hướng GIẢM lệnh thì giữ approval
-   được, nhưng phải báo lại topic duyệt plan.
+   liệu vẫn phải do máy kiểm. Và sửa `orders[]` sau khi duyệt — **kể cả chỉ GIẢM lệnh** — làm
+   MẤT approval theo đúng thiết kế (`approval_block_reason()` đọc `approved_by`, writer ghi đè
+   plan reset nó về null): phải xin user duyệt LẠI, không được coi là "giữ approval được".
 3. Việc triage question tồn đọng có giá trị vượt xa việc đóng question: cả 2 question
    (Taylor 03:27, Winston 02:07) đều đã tự hết hiệu lực khi user duyệt 12:36 — nhưng đọc lại
    artifact thật để xác nhận điều đó là thứ tìm ra bug. Đừng đóng question bằng suy luận
