@@ -30,3 +30,4 @@
 - `merge_park_orders.py` cron schedule — Taylor đề xuất C-rồi-A, chưa cài chính thức.
 - corp_action_daily.py SANITY_FACTOR WARN (phương án C) đã đóng 08-14, quant-skeptic CONFIRMED.
 
+- [2026-08-14T06:09:42Z] 2026-08-14: problem_key/supersession DEFERRED (user quyết dừng+quan sát, không overthink khi chi phí > lợi ích đo được) — mở lại nếu có ca thật root-cause-D trong 3-4 tuần/15-20 vòng coord tới. Mạch 'warning vận hành lặp lại' hôm nay ĐÃ ĐÓNG HẾT: kb/coding_guidelines split, dt5g false-alarm, notify_thread swap-fix, 3/4 wags-fix cũ + 3 việc rẻ (fail-loud/aged_q cap/dispatch hint).
