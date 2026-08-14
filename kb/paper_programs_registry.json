@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updated": "2026-08-11",
+  "updated": "2026-08-14",
   "description": "Registry các chương trình PAPER-TRADING đang active — nguồn duy nhất cho paper_programs_daily_report.py. Thêm sleeve mới = thêm 1 entry (không sửa code render). Probe types: command | journal_scan | alphalens. Field BẮT BUỘC cho entry mới (v3, redesign trình bày 2026-07-31): today_activity (mode journal|csv_row|static|none_available — thiếu field này thì report báo WATCH vì không phân biệt được 'không có giao dịch' với 'không đo được'), review_short (mốc nghiệm thu 1 dòng), và nên có headline (csv_row hoặc regex) để dòng đầu section có số. objective/end_or_trigger/gate_criteria/notes = phần TĨNH, KHÔNG in lại mỗi ngày nữa — tự sinh ra mike/kb/paper_programs_charter/<id>.md, report chỉ link tới.",
   "programs": [
     {
@@ -156,7 +156,7 @@
         {
           "text": "quant-skeptic → user sign-off mới flip fill_timing_live_gate",
           "status": "pending",
-          "note": "4/4 gate cơ học ĐÃ ĐẠT 2026-08-11 ⇒ hết vướng về dữ liệu, chỉ còn quyết định. KHUYẾN NGHỊ Taylor: CHƯA flip. Cái sẽ lên live là HYBRID (bật paper 2026-08-10) nhưng mới có ĐÚNG 1 phiên paper (08-11), trong khi 5 phiên của gate 1 là 4 cũ + 1 hybrid; và qty probe (100 cp) quá nhỏ nên hybrid khớp trọn ở block đầu — cơ chế TRẢI BLOCK chưa từng được thực chứng trên paper. Đề xuất: gom thêm 4 phiên BUY hybrid (cron T3/T5: 08-13, 08-18, 08-20, 08-25) → quant-skeptic ~08-26 → user sign-off. User có quyền chốt sớm nếu coi gate cơ học là bất biến theo cơ chế."
+          "note": "4/4 gate cơ học ĐÃ ĐẠT 2026-08-11 ⇒ hết vướng về dữ liệu, chỉ còn quyết định. KHUYẾN NGHỊ Taylor: CHƯA flip. Cái sẽ lên live là HYBRID (bật paper 2026-08-10) nhưng mới có ĐÚNG 1 phiên paper (08-11), trong khi 5 phiên của gate 1 là 4 cũ + 1 hybrid; và qty probe (100 cp) quá nhỏ nên hybrid khớp trọn ở block đầu — cơ chế TRẢI BLOCK chưa từng được thực chứng trên paper. Đề xuất: gom thêm 4 phiên BUY hybrid (cron T3/T5: 08-13, 08-18, 08-20, 08-25) → quant-skeptic ~08-26 → user sign-off. User có quyền chốt sớm nếu coi gate cơ học là bất biến theo cơ chế. QUYẾT ĐỊNH USER 2026-08-14 (qua Mike): phương án A — KHÔNG rút ngắn, chờ đủ 5 phiên hybrid. NEXT ACTION khi checker này tự fire lại (dự kiến từ 2026-08-26, xem bin/paper_checkpoint_escalation.sh so end<today): (1) đo lại journal 5 phiên hybrid (08-11/08-13/08-18/08-20/08-25) bằng timestamp thật như đã làm 08-11/08-14, (2) dispatch quant-skeptic verify_finding.sh trên bằng chứng đó, (3) nếu CONFIRMED thì escalate thẳng cho user xin sign-off flip fill_timing_live_gate (KHÔNG cần hỏi lại A/B/C — đã chốt A rồi, chỉ còn xin chữ ký cuối). KHÔNG cần Mike nhớ việc này qua hội thoại — checker tự nhắc, việc chỉ là ĐỌC ĐÚNG next-action này khi nó fire."
         }
       ],
       "probe": {
