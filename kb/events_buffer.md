@@ -1092,3 +1092,8 @@
 - [2026-08-14T02:05:01Z] Mafee/status — bot-start: {"account": "SpaceX", "plan_date": "2026-08-14", "auto_otp": true}
 - [2026-08-14T02:05:01Z] Mafee/status — bot-start: {"account": "ZaloPay", "plan_date": "2026-08-14", "auto_otp": true}
 - [2026-08-14T02:05:02Z] Mafee/error — bot-fail: {"account": "ZaloPay", "plan_date": "2026-08-14", "elapsed_s": 0, "rc": 1, "log": "/home/trido/thanhdt/WorkingClaude/mike/logs/run_bot_ZaloPay_2026-08-14.log"}
+
+## Consolidation 2026-08-14T02:07:02Z
+- [2026-08-14T02:05:05Z] Mafee/error — bot-fail: {"account": "SpaceX", "plan_date": "2026-08-14", "elapsed_s": 0, "rc": 1, "log": "/home/trido/thanhdt/WorkingClaude/mike/logs/run_bot_SpaceX_2026-08-14.log"}
+- [2026-08-14T02:05:27Z] Winston/heartbeat — Winston_20260814_020503: {"status": "in_progress", "note": "root cause = git stash pop conflict markers ton dong trong config.py+executor.py; dang xac dinh cach resolve dung"}
+- [2026-08-14T02:06:04Z] Winston/heartbeat — Winston_20260814_020503: {"status": "still_running", "elapsed_min": 1, "job_id": "Winston_20260814_020503", "source": "watcher"}
