@@ -143,3 +143,6 @@
 
 ## Archived 2026-08-14 (keep=12 days=0 require_done=False)
 - [2026-08-13T16:09:43Z] Oshares vong 4 (job Taylor_20260813_154112) XONG refactor: cong chung nhan AIS da vao oshares_live (AIS_UNCERTIFIED, uncertified_value); oshares_pit chi DOC phan quyet. Commit WC 8908640 / mike e5a408d4. CHO quant-skeptic vong 4 - chua tu nhan dong. Con treo: corp_action_daily goi thang oshares_at nen KHONG co lop bien do SANITY_FACTOR (chua do can hay khong); vong nay lam no mat phu 2/33 ma (EVF vendor hong that, SHB bao oan +0,63%).
+
+## Archived 2026-08-14 (keep=12 days=0 require_done=False)
+- [2026-08-13T16:55:03Z] oshares vong 5 (job Taylor_20260813_162914) DA VA + ghi bus, commit mike 9d5b9e24, CHO quant-skeptic vong 5. Con treo: (1) cong bien do SANITY_FACTOR cho corp_action_daily CHUA wire - can USER duyet vi doi so cong bo (279 o/34 ma lot, 2 ma dang giu VHM+VND); (2) check_retro + none_value_watch chua co moc, kich hoat tu luot cron 08-14 07:30 - ngay dau PHAI in 'CHUA DANH GIA DUOC', in ra phan quyet la bug.
