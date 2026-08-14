@@ -161,18 +161,55 @@ wrapper đối chiếu bq_admin, chỉ dùng số mới khi khớp ≤0,1% — t
 hôm nay siết chặt mô hình, không phải feed hỏng. Đã chứng minh bằng A/B (code cũ chạy trên feed hôm
 nay vẫn tái lập đúng số cũ; code mới từ chối) — tự hết từ 08-15 khi baseline có `model_version`.
 
+## SANITY_FACTOR — ĐÃ ĐÓNG 2026-08-14 (phương án C, CONFIRMED)
+
+User chọn **phương án C** (mở rộng WARN cho rõ, KHÔNG tự ẩn/chặn số nào) trong 3 phương án trình
+bày sáng 08-14, lý do nguyên văn: *"C mới phát hiện được vấn đề thay vì im lặng từ chối trả lời
+như A"*. Wire xong bởi Taylor (job `Taylor_20260814_003610`, commit `mike@1ea8c4ee`):
+
+- Cổng `SANITY_FACTOR=3` (import `oshares_pit`, đọc tại lúc gọi, KHÔNG chép hằng số riêng) chạy ở
+  **cả 3 điểm gọi** `oshares_at()` (publish/retro/crosscheck) dưới dạng **WARN thuần** — gắn cờ
+  `sanity_warn` + báo Discord/bus, `value` công bố giữ NGUYÊN, không suppress.
+- Nhãn 📏 tách biệt rõ với 🚨 (bất biến, số ĐÃ BỊ GIẤU) và ⚠️ (hai nguồn khác nhau); câu "SỐ VẪN
+  ĐƯỢC CÔNG BỐ NGUYÊN VẸN" nằm trong tiêu đề; mã ĐANG GIỮ (VHM, VND) tách riêng.
+- Hồi quy 153/153 → 178/178 (25 ca mới), PASS dưới 4 môi trường TZ.
+- **quant-skeptic CONFIRMED, độ tin cậy cao** (`bus` ts 01:22:55Z) — tự tái lập độc lập trên BQ
+  thật: VHM ratio `0.000999999887928614`, VND ratio `3.6489793197671685`, khớp tuyệt đối tới chữ
+  số cuối, cả hai phía ngưỡng, `value` không đổi. Chạy thật `run(asof=2026-08-14, dry_run=True)`
+  trên BQ live xác nhận đường end-to-end (rc=0, đủ 5 field `magnitude_*`, dòng 📏 render đúng).
+
+**⚠️ Lỗ hổng coverage thật do quant-skeptic phát hiện (killer_objection) — CHƯA VÁ:**
+việc "lớp 4c có thực sự nối vào `run()` không" **0 test bảo vệ**. quant-skeptic tự dựng 2 mutant
+(xoá cả khối tính `mag` trong `run()`; tắt dòng nối `_fmt_magnitude` vào message Discord) — **cả
+hai sống sót 178/178**, vì hôm nay `mag` rỗng (không mã nào lệch ×3) nên A/B cũng mù với 2 mutant
+đó. Không phải REFUTED (hệ đang chạy ĐÚNG hôm nay, đã tự verify end-to-end trên BQ thật) — chỉ là
+tương lai có thể bị âm thầm gỡ dây (refactor vô tình) mà không ai biết. Đề xuất fix rẻ (quant-
+skeptic cho sẵn template): thêm 1 ca regression ở mức `run()` — monkeypatch `sanity_warns` bơm 1
+cảnh báo giả, gọi `run(dry_run=True)`, assert snapshot có field `magnitude_suspect`/dòng 📏 xuất
+hiện TRONG KHI mọi `value` giữ y hệt bản không bơm. Việc kỹ thuật thuần (không phải chính sách),
+để dispatch khi thuận tiện.
+
 ## Việc còn mở (rất nhẹ, không khẩn)
 
 1. Việc B — consumer MÁY thứ 2/3 nếu muốn mở rộng thêm (đã có A=backtest, B=rating; còn use case
    khác nếu phát sinh) — không phải việc treo, chỉ là chưa có yêu cầu mới.
-2. `SANITY_FACTOR` cho `corp_action_daily.py` (gọi trực tiếp, không qua `oshares_pit`) — **cần user
-   quyết định chính sách**: có mở cổng biên độ ×3 không (sẽ ẩn số ở 34 mã lịch sử, gồm VHM/VND đang
-   giữ, để an toàn hơn)? Hiện chỉ có WARN, không tự chặn.
-3. Vòng 6 cũ (rc=1 + import-time KeyError của Việc D) — **CHỦ ĐỘNG BỎ QUA** (quyết định user
+2. Vòng 6 cũ (rc=1 + import-time KeyError của Việc D) — **CHỦ ĐỘNG BỎ QUA** (quyết định user
    2026-08-13, xác suất thấp + đã có backstop `cron_health_check_daily.sh`).
-4. `corporate_action` freshness — verify tiếp qua đợt burn-in 5-10 phiên đang chạy.
-5. `model_version()` chưa phủ logic bất biến riêng của `corp_action_daily.py` — chỉ cần nhớ khi
+3. `corporate_action` freshness — verify tiếp qua đợt burn-in 5-10 phiên đang chạy.
+4. `model_version()` chưa phủ logic bất biến riêng của `corp_action_daily.py` — chỉ cần nhớ khi
    sửa file đó lần sau (không phải bug, không hành động ngay).
+5. `run()`-level regression cho lớp 4c (xem trên) — kỹ thuật thuần, rẻ, chưa khẩn.
+6. Cờ `magnitude_suspect` chưa đo lại 279 ô/34 mã sau khi cổng chứng nhận AIS (vòng 4-6) đã siết —
+   con số đó nên đọc là CẬN TRÊN, không phải tần suất cảnh báo thật; xem lại sau burn-in.
+
+**Va chạm dispatch đáng ghi nhớ (2026-08-14, KHÔNG gây hỏng gì):** một phiên Mike KHÁC (thread
+Discord Trading Daily, `1521470705563340910`) độc lập dispatch `Taylor_20260814_003518` cho ĐÚNG
+việc này chỉ 52 giây trước job `Taylor_20260814_003610` ở đây — hai job không biết nhau, cùng sửa
+1 file. Job kia tự phát hiện qua cảnh báo "file đã đổi" của tool Edit, tự gỡ sạch 7 hunk của mình
+(verify bằng `git diff`/`ast.parse`), nhường lại cho job đã bắt đầu trước. Không mất code của ai,
+nhưng đây là ca thứ 2 (sau `plan_funding_gate.py` 2026-08-07) của cùng lớp rủi ro "2 dispatch cùng
+đêm cùng chạm 1 file, không worktree/lock" — đáng cân nhắc cơ chế `--write-scope` (đã có sẵn trong
+`dispatch.sh`, MIKE.md §Công cụ) cho các lần sửa file lõi tiếp theo.
 
 ## Commit chính
 `WorkingClaude@2037e5c`, `mike@91434457` (vòng 1) · `WorkingClaude@abd7cd6`, `mike@60085443`
