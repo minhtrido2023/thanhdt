@@ -136,12 +136,20 @@ def commitment_summary(orders, exclude_ids=()):
 
 
 class _GateOrder:
-    """Hình dạng tối thiểu `check_plan_funding` đọc (`o.side/.qty/.ref_price/.ticker/
+    """Hình dạng tối thiểu `check_plan_funding` đọc (`o.id/.side/.qty/.ref_price/.ticker/
     .cash_only/.loan_package_id`). Cần vì injector cầm plan dạng **dict JSON thô** còn A1
     viết cho `PlannedOrder` dataclass — không có lớp này thì gate nổ `AttributeError` ngay
-    lệnh đầu tiên."""
+    lệnh đầu tiên.
 
-    __slots__ = ("ticker", "qty", "ref_price", "side", "cash_only", "loan_package_id")
+    ⚠️ ADAPTER NÀY PHẢI THEO KỊP `check_plan_funding`. Đã trôi một lần và thành bug thật:
+    911f12b (2026-08-11) thêm `_remaining_quantities()` đọc `o.id` để trừ phần đã khớp khi
+    resume, nhưng adapter không có `.id` ⇒ `residual_headroom()` nổ AttributeError. Không
+    lộ ra ngay vì `original = {str(o.id): ...}` là dict-comprehension: plan RỖNG thì không
+    chạm `.id` lần nào. Phiên 08-13 tình cờ có plan rỗng lúc 20:30 nên gate vẫn PASS —
+    lệnh sẽ nổ ở phiên đầu tiên plan đã có sẵn order (tức trường hợp THƯỜNG, vì V2.4 ghi
+    plan ~19:0x trước injector 20:30). Thêm field vào gate ⇒ thêm field vào đây."""
+
+    __slots__ = ("id", "ticker", "qty", "ref_price", "side", "cash_only", "loan_package_id")
 
     def __init__(self, o):
         self.ticker = _get(o, "ticker")
@@ -151,6 +159,12 @@ class _GateOrder:
         self.side = _get(o, "side")
         self.cash_only = bool(_get(o, "cash_only", False))
         self.loan_package_id = _get(o, "loan_package_id")
+        # `id` chỉ dùng làm KHOÁ tra `remaining_qty`. Lệnh thiếu id (plan soạn tay) phải ra
+        # khoá DUY NHẤT — nếu để cùng "None" thì hai lệnh đè khoá nhau và phần đã khớp của
+        # lệnh này bị gán cho lệnh kia. Fail theo hướng "không trừ gì" (chặt hơn), không
+        # theo hướng nới gate.
+        oid = _get(o, "id")
+        self.id = oid if oid not in (None, "") else f"_noid_{id(o):x}"
 
 
 def _plan_orders(plan):
@@ -162,7 +176,12 @@ def _plan_orders(plan):
 
 def _as_gate_plan(plan):
     import types as _types
-    return _types.SimpleNamespace(orders=[_GateOrder(o) for o in _plan_orders(plan)])
+    # `plan_date` đi kèm vì `_remaining_quantities` đọc nó để từ chối state khác ngày. Hiện
+    # `residual_headroom` gọi `check_plan_funding` KHÔNG truyền `execution_state` nên nhánh
+    # đó chưa chạy — mang sẵn để lần sau ai truyền vào thì không nổ lại đúng kiểu `.id`.
+    pd = plan.get("plan_date") if isinstance(plan, dict) else getattr(plan, "plan_date", None)
+    return _types.SimpleNamespace(
+        orders=[_GateOrder(o) for o in _plan_orders(plan)], plan_date=pd)
 
 
 def _resolved_package(broker, ticker, cash_only):

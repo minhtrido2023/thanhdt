@@ -331,6 +331,95 @@ def run():
     check("lot_size lớn hơn qty mua nổi → 0",
           cap_qty_to_headroom(200, 19900, 3_000_000, 1000) == 0)
 
+    # ── S. ADAPTER `_GateOrder` KHÔNG ĐƯỢC TRÔI KHỎI `check_plan_funding` ────────────────
+    # Đây là bug THẬT đã xảy ra, không phải giả định: 911f12b (2026-08-11) thêm
+    # `_remaining_quantities()` đọc `o.id`, adapter không có ⇒ `residual_headroom()` nổ
+    # AttributeError trên MỌI account live. Ẩn 3 ngày vì `{str(o.id): ...}` là
+    # dict-comprehension — plan RỖNG không chạm `.id` lần nào, và phiên 08-13 tình cờ có
+    # plan rỗng lúc injector chạy.
+    #
+    # S1/S2 là CONTROL tái lập đúng ca lỗi. S3 là cái ngăn lần TRÔI TIẾP THEO: thay vì chép
+    # tay danh sách field (sẽ mốc y như docstring cũ đã mốc), nó ĐO ĐỘNG — cho gate ăn một
+    # plan gồm các probe ghi lại MỌI attribute bị đọc, rồi đòi `_GateOrder` phải phủ hết.
+    # §22: luật văn xuôi áp sai thì chuyển thành code.
+    print("\n[S] adapter _GateOrder phủ đủ hình dạng `check_plan_funding` đọc")
+    from trading_bot.plan_cash_commitment import _GateOrder, _as_gate_plan
+    from trading_bot.plan_funding_gate import check_plan_funding
+
+    check("S1 _GateOrder có `.id` (field mà 911f12b thêm vào gate)",
+          "id" in _GateOrder.__slots__, str(_GateOrder.__slots__))
+
+    # S2 — CONTROL: plan KHÔNG rỗng là ca đã nổ. Plan rỗng vẫn phải chạy (ca 08-13 may mắn).
+    b = Broker(pp_by_package={1122: 50_000_000, 1841: 50_000_000}, cash=8_000_000,
+               resolve={"TV1": 1122})
+    orders_s = [order("TV1", 100, 20_000, oid="X1"),
+                order("POW", 200, 13_000, oid="X2"),
+                order("SSI", 50, 24_000, side="sell", oid="S9")]
+    try:
+        check_plan_funding(_as_gate_plan(plan(orders_s)), b, "live")
+        check("S2 plan CÓ SẴN order → gate chạy được (ca nổ AttributeError trước khi vá)", True)
+    except AttributeError as e:
+        check("S2 plan CÓ SẴN order → gate chạy được (ca nổ AttributeError trước khi vá)",
+              False, f"{type(e).__name__}: {e}")
+
+    # S3 — bất biến chống-trôi: đo THẬT attribute nào gate đọc trên order, không chép tay.
+    class _Probe:
+        """Ghi lại mọi attribute bị đọc, uỷ quyền về order thật."""
+
+        def __init__(self, real, seen):
+            object.__setattr__(self, "_real", real)
+            object.__setattr__(self, "_seen", seen)
+
+        def __getattr__(self, n):
+            object.__getattribute__(self, "_seen").add(n)
+            return getattr(object.__getattribute__(self, "_real"), n)
+
+    seen = set()
+    gp = _as_gate_plan(plan(orders_s))
+    probed = types.SimpleNamespace(
+        orders=[_Probe(o, seen) for o in gp.orders], plan_date=gp.plan_date)
+    for st in (None, {"plan_date": gp.plan_date, "parents": {}}):
+        try:
+            check_plan_funding(probed, b, "live", execution_state=st)
+        except Exception:
+            pass          # chỉ cần THU attribute, verdict không phải việc của ca này
+    # Field gate ĐỌC mà adapter CỐ Ý không mang — mỗi mục phải có lý do + ca chứng minh
+    # fail-safe ở dưới. Danh sách này là chỗ khai báo QUYẾT ĐỊNH, không phải chỗ giấu rác:
+    # thêm mục vào đây = phải thêm ca S4 tương ứng chứng minh hướng lệch là AN TOÀN.
+    _KNOWN_GAPS = {
+        # `_order_priority` có default 5 nên KHÔNG crash. Bỏ qua `priority` ⇒ mọi lệnh =5 ⇒
+        # điều kiện `sell_prio < min_buy_prio` (NGHIÊM NGẶT) luôn sai ⇒ injector KHÔNG bao
+        # giờ được cấp tín dụng JIT từ tiền bán. Hướng lệch = CHẶT HƠN gate thật (S4 chứng
+        # minh). Mang `priority` vào adapter sẽ NỚI một cổng tiền ⇒ đổi hành vi cấp vốn
+        # live, KHÔNG tự làm trong khuôn khổ vá lỗi này — đã escalate cho user/quant-skeptic
+        # (bus finding job Taylor_20260814_080528).
+        "priority",
+    }
+    missing = {a for a in seen if not a.startswith("_")} - set(_GateOrder.__slots__)
+    check("S3 không có attribute MỚI nào gate đọc mà adapter thiếu "
+          f"(đo động, {len(seen)} attr; {len(_KNOWN_GAPS)} gap đã khai báo)",
+          not (missing - _KNOWN_GAPS),
+          f"THIẾU CHƯA KHAI: {sorted(missing - _KNOWN_GAPS)} — thêm field vào gate thì "
+          f"phải thêm vào adapter, hoặc khai vào _KNOWN_GAPS kèm ca S4 chứng minh fail-safe")
+    check("S3b mọi gap đã khai vẫn CÒN THẬT (khai thừa = danh sách bắt đầu mốc)",
+          _KNOWN_GAPS <= missing, f"khai thừa: {sorted(_KNOWN_GAPS - missing)}")
+
+    # S4 — gap `priority` phải lệch về phía CHẶT HƠN, không bao giờ nới.
+    from trading_bot.plan_funding_gate import _jit_sell_credit
+    real_orders = [order("AAA", 100, 20_000, side="sell", oid="S1"),
+                   order("BBB", 100, 20_000, oid="B1")]
+    real_orders[0].priority, real_orders[1].priority = 1, 5      # bán TRƯỚC mua
+    real_plan = plan(real_orders)
+    gate_plan = _as_gate_plan(real_plan)
+    real_buys = [o for o in real_plan.orders if o.side == "buy"]
+    gate_buys = [o for o in gate_plan.orders if o.side == "buy"]
+    credit_real = _jit_sell_credit(real_plan, real_buys)[0]
+    credit_gate = _jit_sell_credit(gate_plan, gate_buys)[0]
+    check("S4 gap `priority` lệch về phía CHẶT HƠN: adapter cấp tín dụng JIT ≤ gate thật",
+          credit_gate <= credit_real, f"adapter={credit_gate:,.0f} vs thật={credit_real:,.0f}")
+    check("S4b …và ca này tín dụng thật > 0 (nếu không, S4 đúng một cách vô nghĩa)",
+          credit_real > 0, f"thật={credit_real:,.0f}")
+
     print("\n" + "=" * 78)
     print(f"KẾT QUẢ: {PASS} PASS / {FAIL} FAIL")
     print("=" * 78)
