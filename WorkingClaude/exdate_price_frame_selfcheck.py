@@ -23,6 +23,7 @@ Chạy: `python3 exdate_price_frame_selfcheck.py`   (exit 0 = PASS)
 import os
 import subprocess
 import sys
+import tempfile
 
 WC_ROOT = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, WC_ROOT)
@@ -31,6 +32,7 @@ os.environ.setdefault("MIKE_BOT_TEST_MODE", "1")          # §5b coding_guidelin
 from trading_bot import price_frame as pf                          # noqa: E402
 from trading_bot.exdate_gate import apply_exdate_gate              # noqa: E402
 from trading_bot.plan import PlannedOrder, TradePlan               # noqa: E402
+from trading_bot import gdkhq_rollout                              # noqa: E402
 
 FAILS = []
 
@@ -487,6 +489,38 @@ try:
           len(keep3) == 1)
 finally:
     _cal.pricing_events = _real_pricing
+
+
+# ══════════════════════════════════════════════════════════════════════════════════════
+print("\n── 10. Rollout hai bước — pending chặn riêng mã GDKHQ, PASS marker bật atomically ──")
+# ══════════════════════════════════════════════════════════════════════════════════════
+with tempfile.TemporaryDirectory() as td:
+    state_path = os.path.join(td, "rollout.json")
+    check("thiếu marker ⇒ mặc định SHADOW_PENDING (fail-safe sau restore/deploy mới)",
+          not gdkhq_rollout.enabled(state_path))
+    trace_path = os.path.join(td, "trace.json")
+    with open(trace_path, "w", encoding="utf-8") as f:
+        f.write("{}\n")
+    state = gdkhq_rollout.mark_enabled(trace_path, "2026-08-17", state_path)
+    check("chỉ mark_enabled sau trace PASS mới bật rollout",
+          gdkhq_rollout.enabled(state_path) and state.get("approved_by") == "user")
+
+pending_plan, pending_adj = apply_exdate_gate(
+    plan_main_0811(), br_mbb, "2026-08-11", events_map=emap_mbb,
+    resolver=gdkhq_rollout.pending_resolver)
+check("SHADOW_PENDING chặn RIÊNG mọi lệnh mã GDKHQ trước khi rollout",
+      not pending_plan.orders and pending_adj
+      and all(a.get("gate") == "ROLLOUT_PENDING" for a in pending_adj))
+
+normal_plan = TradePlan(plan_date="2026-08-12", signal_date="2026-08-11",
+                        strategy="fixture", strategy_version="1", state=2,
+                        state_name="NEUTRAL", nav_basis={}, account="main", created_at="",
+                        orders=[PlannedOrder("BUY-FPT", "FPT", "buy", 100, 73200)])
+normal_after, normal_adj = apply_exdate_gate(
+    normal_plan, br_mbb, "2026-08-12", events_map=pf.events_by_ticker_date([]),
+    resolver=gdkhq_rollout.pending_resolver)
+check("SHADOW_PENDING không đụng mã thường trong cùng cơ chế",
+      len(normal_after.orders) == 1 and normal_adj[0].get("action") == "NO_EVENT")
 
 
 # ══════════════════════════════════════════════════════════════════════════════════════

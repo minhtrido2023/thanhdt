@@ -4,7 +4,12 @@
 import json
 import os
 
-WORKDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Isolated worktrees can execute code against the canonical runtime data/secrets only when the
+# operator opts in explicitly.  Normal bot/cron processes do not set this and retain the exact
+# historical path.  Used by the one-session GDKHQ shadow: code stays isolated, reads the same
+# approved plans and broker profiles as production, and still never constructs an Executor.
+_CODE_WORKDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+WORKDIR = os.path.abspath(os.environ.get("TRADING_BOT_RUNTIME_ROOT") or _CODE_WORKDIR)
 DATA_DIR = os.path.join(WORKDIR, "data")
 PLAN_DIR = os.path.join(DATA_DIR, "trade_plans")
 EXEC_DIR = os.path.join(DATA_DIR, "execution_logs")
