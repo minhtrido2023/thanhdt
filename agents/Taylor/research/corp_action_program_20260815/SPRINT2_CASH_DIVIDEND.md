@@ -1,0 +1,320 @@
+# Sprint 2 — Cash dividend: cơ học ex-date & drift sau ngày GDKHQ
+
+> Job `Taylor_20260815_121850` · 2026-08-15 · nối tiếp Sprint 1 (`f8cb4596`, gate CONDITIONAL PASS).
+> **Pre-registration commit trước outcome: `2a9b951a`.** Lệch khỏi kế hoạch: `SPRINT2_DEVIATIONS.md`.
+> Selfcheck: **38/38 PASS** (`selfcheck_sprint2.py`).
+
+---
+
+## 0. Phán quyết
+
+# ⚠️ RISK / DUE-DILIGENCE — **KHÔNG PHẢI ALPHA**
+
+**Module A (cơ học ex-date): DESCRIPTIVE ONLY.** Đã tuyên bố trước khi chạy và giữ nguyên sau khi
+chạy — giá tham chiếu ngày GDKHQ do **sở giao dịch ấn định**, nên mọi thứ đo quanh nó là
+microstructure, không phải khám phá giá.
+
+**Module B (drift sau ex-date): RISK / DUE-DILIGENCE.** Có một hiệu ứng **ÂM**, bền, có liều-đáp
+ứng theo tỉ suất cổ tức. Nó KHÔNG thể là ALPHA vì hai lý do độc lập:
+
+1. **Trượt tiêu chí prereg §9(a) ngay từ dấu**: tiêu chí ALPHA đòi mean `BHAR_20` **≥ +0,75%**;
+   đo được **−1,065%**. Hiệu ứng âm không thể là "cơ hội mua".
+2. **Không bán khống được ở VN** ⇒ một drift âm về mặt cấu trúc là **chi phí phải biết**, không
+   phải nguồn lợi nhuận có thể thu hoạch.
+
+Cái nó thật sự là: **một dữ kiện định lượng cho khâu lập plan** — mua một mã tỉ suất cao ngay
+trước ngày GDKHQ có chi phí kỳ vọng đo được trong tháng sau đó, **cộng thêm** vào cú rơi cơ học và
+thuế cổ tức 5%.
+
+**Con số một dòng:** cứ **1 điểm phần trăm tỉ suất cổ tức gộp** thì `BHAR_20` giảm **≈ 0,50 điểm
+phần trăm** (hồi quy, t = **−5,60**, SE cluster hai chiều theo mã và theo tháng ex-date, có FE
+ngành + FE năm và 6 biến kiểm soát khác).
+
+> **KHÔNG có đề xuất wire nào trong báo cáo này.** Muốn wire thì phải qua sprint riêng với
+> DSR/PBO + quant-skeptic + user duyệt.
+
+---
+
+## 1. Mẫu — funnel đầy đủ
+
+| bước | N |
+|---|---:|
+| Sự kiện cash dividend actionable, `exright_date` ∈ [2014-01-01, 2026-06-30] | 12.416 |
+| 0. có phiên giao dịch **đúng ngày** ex-date | **9.273** |
+| 1. có phiên trước đó với `Price` thô > 0 (T−1) | 9.215 |
+| 2. **có giao dịch** ngày ex-date (`Volume_0 > 0`) | 7.116 |
+| 3. X2 chất lượng giá (bỏ DNN/BCB/PTX: 1 · giá cum thô < 1.000đ: 0) | 7.115 |
+| 4. X3 tỉ suất gộp ≤ 50% (bỏ **1**, không bỏ im lặng) | 7.114 |
+| 5. **P-CORE** — nằm trong `universe_pit` tại ex-date (point-in-time) | **2.985** |
+| 6. P-CORE sau loại nhiễm X1a/X1b (W = 21 ngày) | **2.619** |
+| — P-WIDE sau loại nhiễm (W = 21) | 6.549 |
+
+**N khai theo sự kiện độc lập VÀ số mã độc lập** (Sprint 1 C7): P-CORE = **2.619 sự kiện /
+465 mã / 150 tháng-ex**. P-WIDE = 6.540 sự kiện / 925 mã. Tỉ suất gộp trung bình P-CORE
+**4,325%**, trung vị 3,695%.
+
+**Không có hao hụt do huỷ niêm yết:** 0/2.573 sự kiện P-CORE (ex-date ≤ 2026-05-01) thiếu giá
+T+20; 0/2.559 thiếu T+60. ⇒ kết quả **không** đến từ survivorship.
+
+**Bước 2 loại 2.099 sự kiện (23%) — đã kiểm xem có phải thiên lệch riêng của ex-date không.**
+Tỉ lệ `Volume = 0` trên các mã universe: **9,65% ĐÚNG ngày ex-date** vs **17,89% các phiên khác**.
+Ngày GDKHQ **thanh khoản hơn** ngày thường; bộ lọc này loại mã mỏng nói chung, không tạo thiên
+lệch riêng cho ex-date.
+
+---
+
+## 2. Đường thoát khỏi bẫy `ticker.Price` — và bằng chứng nó đúng
+
+Gate Sprint 1 **cấm** đọc `ticker.Price` của dòng đúng ngày ex-date. Sprint 2 **không cần** nó.
+
+Với quy ước hồi tố nhân (`C_k = P_k × ∏ factor` mọi sự kiện SAU `k`, `factor_ex = (P_cum−D)/P_cum`):
+
+```
+C_0 / C_{−1}   ==   P_0 / (P_{−1} − D)   ==   giá ex thô / giá tham chiếu lý thuyết
+```
+
+⇒ **lợi suất ex-day đo trên `Close` CHÍNH LÀ lợi suất so với giá tham chiếu lý thuyết**, không
+chạm dòng `Price` hỏng. `Price` chỉ được đọc ở **k = −1, +1, +2, +3** — selfcheck **T1** grep
+chính file SQL đã chạy để chứng minh, và **T2** xác nhận không tồn tại cột `p_0` ở bất kỳ đâu.
+
+**Chứng minh quy ước (prereg 4.1, nghĩa vụ bắt buộc), n = 5.855:**
+
+| | |
+|---|---:|
+| `r_{−1}/r_{+1}` khớp `P_{−1}/(P_{−1}−D)` trong **±0,2%** | **92,04%** |
+| khớp trong ±1% | **97,46%** |
+| sai số tuyệt đối trung vị của hệ số | **0,000198** |
+| *(sàn fail-closed của prereg: ≥ 80% trong ±1%)* | **ĐẠT** |
+
+Giá ex thô, khi cần (chỉ cho outcome phụ), **dựng lại** bằng `P̂_0 = C_0 × r_{+1}` — lấy hệ số từ
+phiên T+1, không bao giờ từ dòng ex-date. Selfcheck **T17**: bản dựng lại nhất quán với chính
+đồng nhất thức trên **98,16%** sự kiện. Bảng spot-check 12 ca phân tầng theo tỉ suất (có đủ
+`P_{−1}, C_{−1}, C_0, r_{+1}, D`): `out2/module_A_spotcheck12.csv`.
+
+**Bộ lọc X4** (chỉ Module A): đòi `r` xác định được và **ổn định** trên T+1..T+3 trong ±0,1% —
+bằng chứng không có sự kiện điều chỉnh nào xen giữa. 6.549 → **5.855**.
+
+---
+
+## 3. Module A — cơ học ex-date · **DESCRIPTIVE ONLY**
+
+![Module A](out2/fig2_module_A.png)
+
+| | P-WIDE (n = 5.855) | **P-CORE (n = 2.387)** |
+|---|---:|---:|
+| `AR_ex` mean | **+1,008%** [+0,845; +1,167] | **+0,348%** [+0,228; +0,469] |
+| `AR_ex` median | +0,626% | +0,266% |
+| tỉ lệ dương | 61,9% | 57,9% |
+| **drop ratio** trung vị | **0,833** | **0,898** |
+| drop ratio trong [0, 2] | 80,3% | — |
+
+**Đọc thế nào:** giá rơi **ÍT HƠN** cổ tức — trung vị chỉ ~83% mức cổ tức trên toàn bộ, ~90% trên
+tập đầu tư được. Đây là phát hiện ex-day kinh điển của tài liệu quốc tế, **tái lập được trên VN**.
+
+**Nhưng phải kèm điều kiện, nếu không sẽ gây hiểu nhầm** (deviation D4): mức under-adjustment
+**co lại gần 3 lần** khi giới hạn vào mã thật sự mua được (+1,01% → +0,35%). Con số P-WIDE bị chi
+phối bởi mã thanh khoản mỏng và **không** mô tả thứ danh mục thật gặp phải.
+
+**Khối lượng — kết quả ngược trực giác, giữ nguyên:**
+
+| | mean | **median** | tỉ lệ trên trung bình 60 phiên |
+|---|---:|---:|---:|
+| `AVOL_0` (ngày ex) P-WIDE | +118,9% | **−20,5%** | 42,1% |
+| `AVOL_1..5` P-WIDE | +65,1% | **−25,2%** | 36,8% |
+| `AVOL_0` P-CORE | +8,7% | **−19,8%** | 38,2% |
+
+Mean dương nhưng **median âm** ⇒ mean bị đuôi kéo. Sự kiện ex-date **điển hình** có khối lượng
+**THẤP HƠN** trung bình 60 phiên. **Không có bằng chứng của cơn sốt dividend-capture tại chính
+ngày GDKHQ.** (Trích mean mà bỏ median ở đây sẽ kể một câu chuyện ngược hẳn sự thật.)
+
+---
+
+## 4. Module B — drift sau ex-date
+
+![CAAR](out2/fig1_caar_path.png)
+
+### 4.1 Kết quả primary (đã khai báo trước là DUY NHẤT)
+
+**`BHAR_20`, P-CORE, W = 21, benchmark = EW `universe_pit` cùng cơ sở `Close` hồi tố:**
+
+| | |
+|---|---|
+| **mean** | **−1,065%** · CI95 block-bootstrap **[−1,599%; −0,533%]** |
+| median | −1,842% · tỉ lệ dương **41,2%** |
+| p (bootstrap) | **< 0,0001** · **Holm trên cả 27 trial: 0,000** |
+| ngưỡng Bonferroni họ 4 horizon | 0,0125 → **vượt qua** |
+| N | 2.619 sự kiện / **465 mã** / 150 tháng |
+
+Mean và median **cùng dấu** ⇒ không phải hiệu ứng đuôi (tiêu chí prereg §9(d), đúng chiều âm).
+
+### 4.2 Họ horizon + benchmark + population thay thế
+
+| | N | mean | CI95 | p thô | Holm |
+|---|---:|---:|---|---:|---:|
+| `BHAR_5` | 2.619 | −1,112% | [−1,310; −0,920] | 0,0000 | **0,000** |
+| `BHAR_10` | 2.619 | −1,350% | [−1,675; −1,037] | 0,0000 | **0,000** |
+| **`BHAR_20`** | 2.619 | **−1,065%** | [−1,599; −0,533] | 0,0000 | **0,000** |
+| `BHAR_60` | 2.311 | −0,988% | [−1,995; −0,014] | 0,0472 | 0,283 ✗ |
+| benchmark = VNINDEX | 2.619 | −1,155% | [−1,781; −0,512] | 0,0008 | 0,009 |
+| P-WIDE | 6.540 | −1,286% | [−1,946; −0,622] | 0,0006 | 0,007 |
+
+**`BHAR_60` KHÔNG sống sót hiệu chỉnh bội kiểm** — hiệu ứng nằm ở 5–20 phiên, không kéo ra 3 tháng.
+
+### 4.3 Liều–đáp ứng theo tỉ suất — kết quả chắc nhất của sprint
+
+![BHAR by yield](out2/fig3_bhar_by_yield.png)
+
+| bin | N | `BHAR_20` thô | p | ghép cặp (trừ baseline xa) |
+|---|---:|---:|---:|---:|
+| Y1 [0, 2%) | 515 | −0,579% | 0,182 | −2,839% ⚠️ |
+| Y2 [2, 4%) | 911 | −0,353% | 0,338 | −0,531% |
+| Y3 [4, 6%) | 641 | −0,741% | 0,109 | −0,540% |
+| Y4 [6, 10%) | 431 | **−2,072%** | 0,000 | −2,231% |
+| Y5 [10, 50%] | 121 | **−6,625%** | 0,000 | −7,965% |
+| **contrast Y5 − Y1** | | **−6,047pp** [−7,97; −4,03] | 0,000 | |
+
+⚠️ **Y1 ghép cặp là NHIỄU BASELINE, không phải hiệu ứng.** Y1 **thô** không có ý nghĩa (p = 0,182);
+con số ghép cặp −2,84% sinh ra vì baseline xa của riêng Y1 cao bất thường (+2,26%). Đọc **hệ số
+hồi quy**, đừng đọc từng bin ghép cặp.
+
+**Hồi quy — nguồn phát biểu heterogeneity đáng tin nhất** (n = 2.551, 450 mã, 150 tháng, SE
+cluster hai chiều mã × tháng-ex, 60 FE ngành + 12 FE năm):
+
+| biến | β | SE | t |
+|---|---:|---:|---:|
+| **`y_gross` (tỉ suất gộp)** | **−0,4971** | 0,0887 | **−5,60** |
+| `pb_m1` | −0,0070 | 0,0023 | −3,12 |
+| `mom_6m` (6 tháng, bỏ 1 tháng cuối) | +0,0205 | 0,0101 | +2,03 |
+| `log_mcap` (PIT, `OShares` theo `Release_Date ≤ T−1`) | +0,0051 | 0,0026 | +1,98 |
+| `rvol_60` | −0,6375 | 0,3526 | −1,81 |
+| `log_adv` | −0,0011 | 0,0017 | −0,62 |
+| `ey` = 1/PE | +0,0010 | 0,0397 | +0,03 |
+
+**≈ một nửa cổ tức bị trả lại trong 20 phiên tiếp theo**, sau khi đã kiểm soát size, thanh khoản,
+momentum, biến động, value, ngành và năm.
+
+### 4.4 Đường CAAR — bức tranh gắn kết
+
+| k (phiên) | −21 | −1 | **0 (ex)** | +5 | +10 | +20 | +60 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| CAAR vs EW universe | 0 | +2,27% | **+2,59%** | +1,46% | +1,27% | +1,63% | +2,17% |
+
+**Chạy giá vào → đỉnh đúng ngày GDKHQ → trả lại trong ~10 phiên → đi ngang.** Cộng với
+`AR_ex > 0` (giá rơi ít hơn cổ tức) và `drop ratio < 1`, đây là một **vòng round-trip
+dividend-capture** nhất quán, không phải ba mảnh rời rạc.
+
+---
+
+## 5. Robustness — toàn bộ, kể cả cái làm xấu kết luận
+
+| # | lát | kết quả | đọc |
+|---|---|---|---|
+| **R1** | IS 2014-2019 | −0,911% [−1,583; −0,207] | **cùng dấu** |
+| | OOS 2020+ | **−1,191%** [−1,998; −0,415] | **OOS MẠNH HƠN IS** — không rớt OOS |
+| | per-year LOO | năm gánh nhiều nhất = **2020 (27%)** | < 50% ⇒ **không phải reshuffle-luck**; 9/13 năm âm |
+| **R2** | ADV cao (nửa trên) | −0,519% [−1,159; +0,144] p = 0,124 | **KHÔNG có ý nghĩa** |
+| | ADV thấp | −1,611% [−2,314; −0,927] | có ý nghĩa |
+| | mcap lớn | −0,615% [−1,240; +0,041] p = 0,065 | biên |
+| | mcap nhỏ | −1,484% [−2,148; −0,813] | có ý nghĩa |
+| **R3** | winsorise 1/99 · trim 1/99 · thô | −1,056% · −1,136% · −1,065% | **không do ngoại lai** |
+| **R4** | cửa sổ nhiễm W = 5 thay vì 21 | −1,025% [−1,551; −0,502] | **không nhạy quy tắc loại** |
+| **R5** | **placebo** neo `ex − 40` | **+1,180%** [+0,684; +1,693] | ⚠️ **null của pipeline ≠ 0** |
+| **R6** | **pre-trend** −21 → −1 | **+2,271%** [+1,811; +2,758] | có chạy giá trước ex-date |
+| **R7** | baseline xa `ex − 250` → `ex − 230` | +0,637% [+0,132; +1,136], **Holm 0,118 ✗** | phần bù chất lượng ~½ mức R5 |
+| — | **ghép cặp** `BHAR_20 − FARBASE_20` | **−1,609%** [−2,350; −0,864] · IS −1,563% · OOS −1,645% | hiệu ứng **lớn hơn** sau khi trừ nền |
+
+### 5.1 R2 là hạn chế quan trọng nhất cho ĐỘI này
+
+Hiệu ứng **tập trung ở mã kém thanh khoản / vốn hoá nhỏ**. Ở nửa ADV cao, **−0,52% và không phân
+biệt được với 0** (p = 0,124). Từ **2026-08-10** book đã có **cổng cứng ADV3T ≥ 2 tỷ/phiên**
+(`lag_liquidity_filter.py`, commit `c4ca90f`) ⇒ rổ thật của mình nằm ở **đầu YẾU** của hiệu ứng
+này. Đây là lý do trực tiếp để **không** biến phát hiện này thành một luật giao dịch.
+
+### 5.2 Hai chẩn đoán bác bỏ giả thuyết "đây chỉ là hiện vật dữ liệu"
+
+Nghi vấn nghiêm túc nhất: nếu vendor đặt **bước điều chỉnh giá nhầm sang k = +1** thay vì k = 0
+thì toàn bộ cổ tức sẽ rơi vào cửa sổ 0→20 và tạo ra đúng một `BHAR` âm tỉ lệ với tỉ suất.
+**Bác bỏ bằng SỐ:**
+
+1. **Máy dò một phiên:** `AAR_0_1` = **−0,446%** [−0,535; −0,357]. Nếu là hiện vật thì phải
+   ≈ **−4,325%** (tỉ suất gộp trung bình P-CORE). Lệch gần 10 lần.
+2. **Phân rã đoạn (lợi suất thô):** 0→1 **−0,389%** · 1→2 **−0,334%** · 2→3 −0,094% ·
+   3→5 +0,048% · 5→10 +0,032% · 10→20 +0,652%. Đây là **suy giảm dần nhiều phiên**, không phải
+   cú nhảy một phiên. Hiện vật đặt nhầm bước điều chỉnh **không thể** tạo ra hình dạng này.
+3. Cộng thêm: quy ước điều chỉnh đã được chứng minh độc lập ở §2 (97,46% khớp ±1%).
+
+---
+
+## 6. Đo tradability — chỉ SCREENING, không tối ưu
+
+```
+BHAR_net = BHAR_20 − 0,05·y_gross − 0,002 (TC 2 chiều) − 0,003 (spread/slippage)
+```
+
+| | |
+|---|---|
+| mean | **−1,781%** [−2,317%; −1,250%] |
+| median | −2,543% · tỉ lệ dương 37,5% |
+
+Không có cách nào biến con số này thành lợi nhuận long-only. **Không bán khống được ở VN** ⇒ cũng
+không thu hoạch được chiều âm. Đây là **chi phí**, và đó chính là toàn bộ giá trị sử dụng của nó.
+
+**Hàm ý cho lập plan (dữ kiện, KHÔNG phải luật):** mua một mã **tỉ suất cao** ngay trước ngày
+GDKHQ mang chi phí kỳ vọng ≈ **0,50 × tỉ suất** trong 20 phiên sau đó, **cộng** thuế cổ tức 5%,
+**cộng** cú rơi cơ học. Với Y5 (tỉ suất ≥ 10%) là **−6,6%** trong 20 phiên. Với mã ADV cao —
+tức phần lớn rổ thật sau cổng ADV3T — hiệu ứng **không phân biệt được với 0**.
+
+---
+
+## 7. Hạn chế đã biết — nói thẳng
+
+1. **`universe_pit` có `backfilled = TRUE` trên 99,99% dòng.** Point-in-time **theo thiết kế của
+   rule**, không phải theo dấu vết lịch sử của chính bảng. Đây là hạn chế thật, không phải hình thức.
+2. **R7 không sống sót Holm** (0,118) ⇒ phép hiệu chỉnh baseline **bất định**. Vì vậy primary giữ
+   nguyên bản **THÔ** theo prereg (−1,065%), không lấy bản ghép cặp lớn hơn (−1,609%).
+3. **Y1 ở bản ghép cặp là nhiễu baseline** (§4.3), không được trích như hiệu ứng.
+4. **`ICB_Code` là phân ngành HIỆN TẠI** ⇒ look-ahead nhẹ. Chỉ dùng làm FE, không làm biến kết luận.
+5. **Không cắt được theo SÀN** — bảng nguồn không có cột sàn (Sprint 1 A10/C6). Chiều này bỏ hẳn.
+6. **`value_per_share` vẫn CHƯA đối soát với tiền thật về tài khoản** (Sprint 1 C5). `coding_guidelines`
+   §21 **không đổi**: sổ broker vẫn là nguồn chính thức cho tỉ suất per-position trong báo cáo NĐT.
+7. **Mọi con số là GỘP**, trừ đúng phép trừ ở §6.
+8. **X4 loại 694 sự kiện** (6.549 → 5.855) khỏi Module A vì hệ số điều chỉnh không xác định/không
+   ổn định. **Chưa truy nguyên từng ca** — Sprint 1 C2 (182 sự kiện không có bước điều chỉnh) vẫn
+   **CÒN MỞ**, chỉ bị chặn khỏi mẫu chứ chưa được giải thích.
+9. **Tỉ lệ amendment vẫn chưa đo được** (Sprint 1 C1). Study này neo `exright_date` nên **không phụ
+   thuộc** vào nó — nhưng announcement study vẫn **CẤM** cho tới khi có vintage thứ hai (≈ 4 tuần nữa).
+10. **27 trial thực thi / 20 khai báo.** Chênh + lý do: `SPRINT2_DEVIATIONS.md`. Kết luận primary
+    có Holm-p = 0,000 nên không phụ thuộc vào cách đếm.
+
+---
+
+## 8. Câu hỏi mở chuyển đi
+
+| # | câu hỏi | cho ai |
+|---|---|---|
+| S2-1 | Cổ tức có được cộng lại vào `Close` **gộp hay ròng thuế**? Ảnh hưởng trực tiếp mức `AR_ex`. | Winston → bq_admin |
+| S2-2 | 694 ca X4 + 182 ca "không có bước điều chỉnh" (Sprint 1 C2) — vì sao? | Sprint 3 hoặc Winston |
+| S2-3 | Chạy lại `build_event_ledger.py` **≈ 2026-09-12** để có vintage thứ 2 → đo amendment (Sprint 1 C1) | Taylor/Winston |
+| S2-4 | Có nên đưa "ngày GDKHQ + tỉ suất" vào bảng due-diligence của ứng viên mua không? Đây là **quyết định sản phẩm**, không phải kết quả nghiên cứu. | user / Mike |
+
+---
+
+## 9. Artifact
+
+| file | nội dung |
+|---|---|
+| `SPRINT2_PREREG.md` | pre-registration, commit `2a9b951a` **trước** mọi outcome |
+| `SPRINT2_DEVIATIONS.md` | 5 deviation + bảng trial + điều kiện prereg đã giải quyết |
+| `sprint2_build.py` | dựng panel từ BQ (read-only); SQL sinh ra ở `out2/sql/*.sql` |
+| `sprint2_analyze.py` | thực thi prereg; block bootstrap + OLS cluster hai chiều + Holm |
+| `sprint2_plots.py` | 3 hình |
+| `selfcheck_sprint2.py` | **38 invariant, 38 PASS** |
+| `out2/results.json` | mọi con số trích trong file này |
+| `out2/module_A_spotcheck12.csv` | spot-check tay 12 ca phân tầng theo tỉ suất |
+| *(gitignore)* `out2/event_panel.csv`, `event_features.csv`, `module_A_events.csv` | 15MB per-event, **KHÔNG commit** (theo tiền lệ Sprint 1) — dựng lại đúng 25s bằng `sprint2_build.py`, SQL đã commit ở `out2/sql/` |
+| `out2/ew_universe.csv`, `out2/vnindex.csv`, `out2/caar_path.json` | benchmark + đường CAAR |
+| `out2/fig1_caar_path.png`, `fig2_module_A.png`, `fig3_bhar_by_yield.png` | hình |
+
+Dựng lại: `python3 sprint2_build.py` → `$VENV/python sprint2_analyze.py` →
+`$VENV/python sprint2_plots.py` → `$VENV/python selfcheck_sprint2.py`
+(`$VENV = /home/trido/thanhdt/wc_venv/bin`; cần scipy/pandas 3).

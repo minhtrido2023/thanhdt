@@ -49,6 +49,26 @@ một con số đã bị chính tác giả bác bỏ.
 
 ---
 
+## C-bis. Trạng thái các câu hỏi C sau Sprint 2 (`Taylor_20260815_121850`)
+
+| # | trạng thái sau Sprint 2 |
+|---|---|
+| C1 amendment | **CÒN MỞ.** Sprint 2 neo `exright_date` nên không phụ thuộc; announcement study **vẫn CẤM**. Chạy lại `build_event_ledger.py` ≈ **2026-09-12** để có vintage thứ 2. |
+| C2 182 ca không có bước điều chỉnh | **CÒN MỞ.** Sprint 2 **chặn** chúng khỏi mẫu bằng bộ lọc X4 (loại 694/6.549 ca hệ số không xác định hoặc không ổn định) nhưng **KHÔNG truy nguyên**. Chặn ≠ giải thích. |
+| C3 DNN/BCB/PTX | **ĐÃ ÁP DỤNG** — loại cứng trong X2 (selfcheck T11). Vẫn cần báo Winston về `ticker.Price`. |
+| C5 đối soát tiền thật | **CÒN MỞ.** `coding_guidelines` §21 **không đổi**. |
+| C6 coverage theo sàn | **ĐÓNG — bỏ chiều này.** Không có cột sàn; Sprint 2 không kết luận gì theo sàn. |
+| C7 N theo mã độc lập | **ĐÓNG.** Mọi thống kê khai N theo **sự kiện + số mã + số tháng** (P-CORE: 2.619 / 465 / 150); CI dùng block bootstrap theo tháng ex-date. |
+| C8 thuế cổ tức 5% | **ĐÓNG.** Nghiên cứu chạy trên số **GỘP**, nói rõ ở mọi kết luận; phép trừ thuế chỉ xuất hiện ở đúng một chỗ — cổng screening §6 của `SPRINT2_CASH_DIVIDEND.md`. |
+
+## E. Sai sót của Sprint 2 — đầy đủ ở `SPRINT2_DEVIATIONS.md`
+
+| # | sai | bài học |
+|---|---|---|
+| E1 | Selfcheck **T27** viết sai: assert "CI block-bootstrap rộng hơn CI theo sự kiện" trên dữ liệu tổng hợp **không có tương quan trong block** → FAIL. | Giả thuyết đầu tiên khi selfcheck fail là **"tôi viết sai test"**, không phải "code sai". Đã sửa test (thêm cú sốc chung theo block → 7,07×) + thêm T27b đo trên dữ liệu THẬT (1,46×). Không đụng estimator. |
+| E2 | Prereg ngầm định **null của pipeline = 0**; placebo R5 trả về **+1,18% có ý nghĩa** → giả định sai. | Placebo tồn tại đúng để bắt chuyện này. Đã thêm baseline XA (R7, `ex−250`) + estimator ghép cặp (deviation D3), và **giữ primary ở bản THÔ** vì R7 không sống sót Holm. |
+| E3 | `Index.level()` bản đầu ném `TypeError` khi gặp ngày thiếu (sự kiện chưa có T+h). | Đã sửa để trả **NaN** (fail-safe: sự kiện thiếu giá phải rơi khỏi mẫu, **không** được mượn giá phiên lân cận). Selfcheck **T22** khoá hành vi này. |
+
 ## D. Ranh giới đã giữ
 
 - Không sửa gì ngoài `agents/Taylor/research/corp_action_program_20260815/`.
