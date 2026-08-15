@@ -26,7 +26,7 @@ os.environ.setdefault("MIKE_BOT_TEST_MODE", "1")
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, ROOT)
-sys.path.insert(0, os.path.join(ROOT, "mike", "bin"))
+sys.path.insert(0, os.environ.get("QUOTE_L2_MIKE_BIN", os.path.join(ROOT, "mike", "bin")))
 from trading_bot.brokers import DNSEBroker  # noqa: E402
 
 fails = []
@@ -82,6 +82,10 @@ with tempfile.TemporaryDirectory() as tmp:
           [lv["quantity"] for lv in p["bids"][:3]] == [300, 1200, 5000], f"{p['bids'][:3]}")
     check("A8 kèm mốc neo để join với tape (last + day_volume)",
           p["last"] == 20300 and p["day_volume"] == 39500)
+    check("A8b schema v1 khóa đơn vị + timestamp nguồn/capture tách biệt",
+          p["schema_version"] == "orderbook_l2_v1" and p["price_unit"] == "VND"
+          and p["quantity_unit"] == "shares" and p["source_time_status"] == "ok"
+          and p["captured_epoch_ms"] > 0)
     check("A9 KHÔNG có key 'resp'/'orders' — execution_quality_review.py là consumer DUY NHẤT "
           "không lọc theo kind, nó đọc đúng 2 key này trên MỌI bản ghi",
           "resp" not in p and "orders" not in p)
@@ -161,6 +165,8 @@ with tempfile.TemporaryDirectory() as tmp:
     check("D1 Quote vẫn dựng được bình thường", q is not None and q.ok())
     check("D2 Quote giữ ĐÚNG mức 1 như trước (bid/ask không đổi nghĩa)",
           q.bid == 20200.0 and q.ask == 20300.0, f"bid={q.bid} ask={q.ask}")
+    check("D2b Quote mang snapshot v1 để executor nối đúng child-order, không fetch lại",
+          q.l2_snapshot["n_bid"] == 10 and q.l2_snapshot["n_offer"] == 2)
     check("D3 Quote vẫn có day_volume/last/trần/sàn", q.day_volume == 39500 and q.last == 20300
           and q.ceiling == 23000 and q.floor == 17000)
     calls = dict(b.client.calls)
@@ -189,7 +195,8 @@ with tempfile.TemporaryDirectory() as tmp:
 #   (2) Chọn `asof` = HÔM NAY làm `park_holdings.read_broker_snapshot` đi thẳng ra broker LIVE
 #       thay vì đọc file ⇒ test không hề chạm dữ liệu mình chèn. Dùng ngày QUÁ KHỨ.
 DATE = "2026-08-11"      # ngày QUÁ KHỨ, có đủ orders/positions/balances/ppse của cả 2 account
-SRC = os.path.join(ROOT, "data", "execution_logs", f"dnse_raw_{DATE}.jsonl")
+SRC = os.environ.get("QUOTE_L2_REAL_LOG",
+                     os.path.join(ROOT, "data", "execution_logs", f"dnse_raw_{DATE}.jsonl"))
 ACCTS = [("SpaceX", "0002023347"), ("ZaloPay", "0001743768")]
 
 if not os.path.exists(SRC):

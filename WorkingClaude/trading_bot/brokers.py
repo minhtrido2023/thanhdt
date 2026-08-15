@@ -17,7 +17,9 @@ import datetime as dt
 import json
 import os
 import sys
+import time
 import uuid
+from zoneinfo import ZoneInfo
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -588,6 +590,27 @@ class DNSEBroker(BrokerBase):
             out.append({"price": p, "quantity": v})
         return out
 
+    @staticmethod
+    def _l2_source_time(qt, captured):
+        """Chuẩn hoá timestamp của feed về ISO ICT + age_ms; không đoán khi parse không được."""
+        raw = qget(qt, "time", "timestamp", "quoteTime", "tradingTime")
+        if raw in (None, ""):
+            return None, None, "missing"
+        try:
+            s = str(raw).strip().replace("Z", "+00:00")
+            if len(s) <= 15 and ":" in s and "T" not in s and "-" not in s:
+                parsed = dt.datetime.combine(captured.date(), dt.time.fromisoformat(s))
+            else:
+                parsed = dt.datetime.fromisoformat(s)
+            ict = ZoneInfo("Asia/Ho_Chi_Minh")
+            if parsed.tzinfo is None:
+                parsed = parsed.replace(tzinfo=ict)
+            parsed = parsed.astimezone(ict)
+            cap = captured.replace(tzinfo=ict) if captured.tzinfo is None else captured.astimezone(ict)
+            return parsed.isoformat(timespec="milliseconds"), int((cap - parsed).total_seconds() * 1000), "ok"
+        except (TypeError, ValueError, OverflowError):
+            return str(raw), None, "unparseable"
+
     def _log_l2(self, symbol, qt, raw):
         """Ghi 1 bản ghi `kind="quote_l2"` vào dnse_raw_<date>.jsonl. KHÔNG BAO GIỜ raise —
         lỗi ghi log tuyệt đối không được làm hỏng đường lấy quote (nó nằm trên đường đặt lệnh).
@@ -600,29 +623,44 @@ class DNSEBroker(BrokerBase):
         phân tích là 30 phút, và TV1 chỉ ~40k cp khớp CẢ NGÀY. 60s cho 30 mẫu/bucket.
         """
         try:
-            import time as _t
-            gap = float(os.environ.get("DNSE_L2_LOG_SEC", "60"))
-            last = self._l2_log_last.get(symbol)
-            nowt = _t.time()
-            if gap > 0 and last is not None and nowt - last < gap:
-                return
+            captured = now_ict()
+            captured_epoch_ms = int(time.time() * 1000)
             bids = self._l2_levels(qget(qt, "bid", "bids"))
             offers = self._l2_levels(qget(qt, "offer", "offers", "asks"))
             if not bids and not offers:
-                return          # không có gì để ghi — đừng làm nhiễu file
-            self._l2_log_last[symbol] = nowt
-            # Tên field CỐ Ý tránh `resp`/`orders`: execution_quality_review.py là consumer DUY
-            # NHẤT không lọc theo `kind` — nó đọc `payload["resp"]` (dict) và `payload["orders"]`
-            # (list) trên MỌI bản ghi. Không có 2 key đó ⇒ nó bỏ qua bản ghi này, không vỡ.
-            self._log_raw("quote_l2", {
-                "symbol": symbol, "bids": bids, "offers": offers,
-                "n_bid": len(bids), "n_offer": len(offers),
-                "last": qget(raw, "matchPrice", "lastPrice"),
-                "day_volume": qget(raw, "totalVolumeTraded", "totalTrading"),
-                "note": "P5 depth logging — logging thuần, KHÔNG đổi hành vi đặt lệnh",
-            })
+                return None
+            source_ts, source_age_ms, source_status = self._l2_source_time(qt, captured)
+            snapshot = {
+                "schema_version": "orderbook_l2_v1",
+                "symbol": symbol,
+                "board_id": qget(qt, "boardId", "board", default="G1") or "G1",
+                "captured_at": captured.isoformat(timespec="milliseconds"),
+                "captured_epoch_ms": captured_epoch_ms,
+                "source_ts": source_ts,
+                "source_age_ms": source_age_ms,
+                "source_time_status": source_status,
+                "price_unit": "VND",
+                "quantity_unit": "shares",
+                "bids": bids,
+                "offers": offers,
+                "n_bid": len(bids),
+                "n_offer": len(offers),
+                "last": normalize_price_vnd(_fnum(qget(raw, "matchPrice", "lastPrice"))),
+                "day_volume": _fnum(qget(raw, "totalVolumeTraded", "totalTrading")),
+            }
+            gap = float(os.environ.get("DNSE_L2_LOG_SEC", "60"))
+            last = self._l2_log_last.get(symbol)
+            nowt = time.time()
+            if gap <= 0 or last is None or nowt - last >= gap:
+                self._l2_log_last[symbol] = nowt
+                # Tên field CỐ Ý tránh `resp`/`orders`: execution_quality_review.py là consumer
+                # DUY NHẤT không lọc kind; không có 2 key đó ⇒ nó bỏ qua sạch.
+                self._log_raw("quote_l2", {**snapshot,
+                    "note": "P5 depth logging — logging thuần, KHÔNG đổi hành vi đặt lệnh"})
+            # Kể cả throttle không ghi file, trả snapshot fetch hiện tại cho telemetry child-order.
+            return snapshot
         except Exception:
-            pass
+            return None
 
     def get_quote(self, symbol):
         import time as _t
@@ -646,6 +684,7 @@ class DNSEBroker(BrokerBase):
         except Exception as e:
             print(f"[dnse] ⚠ trade {symbol} lỗi: {e}")
         # 3) top giá chờ — {"quotes":[board G1: bid/offer = [{price, quantity},…]]}
+        l2_snapshot = None
         try:
             qt = self._pick_board(self.client.latest_quote(symbol), "quotes")
             for side_key, flat in (("bid", "bidPrice1"), ("bids", "bidPrice1"),
@@ -659,10 +698,11 @@ class DNSEBroker(BrokerBase):
             if isinstance(qt, dict):
                 raw.update({k: v for k, v in qt.items()
                             if not isinstance(v, (list, dict)) and k not in raw})
-                self._log_l2(symbol, qt, raw)   # P5: giữ lại 10 mức trước khi chúng bị vứt
+                l2_snapshot = self._log_l2(symbol, qt, raw)  # P5: giữ 10 mức + metadata v1
         except Exception as e:
             print(f"[dnse] ⚠ quote {symbol} lỗi: {e}")
         q = Quote(raw)
+        q.l2_snapshot = l2_snapshot
         if not q.ok():
             self._log_raw("quote_unmapped", raw)
         self._quote_cache[symbol] = (_t.time(), q)

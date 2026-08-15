@@ -66,6 +66,15 @@ DEFAULTS = {
     # đổi hành vi — tức thứ ta đang xin phép đo. Tắt = mất nguồn số của paper trial, không mất
     # an toàn.
     "expected_volume_pacing_shadow_log": True,
+    # Order-book execution research v1 (user duyệt 2026-08-15): THUẦN TELEMETRY/SHADOW.
+    # Không field nào dưới đây được đọc vào `_child_qty`, `_limit_price` hay lịch HYBRID.
+    "order_book_shadow_enabled": True,
+    "order_book_snapshot_max_age_ms": 5_000,
+    "order_book_shadow_policy_version": "spread_depth_v1",
+    "order_book_reduce_spread_ticks": 2.0,
+    "order_book_defer_spread_ticks": 4.0,
+    "order_book_reduce_depth_ratio": 1.0,
+    "order_book_defer_depth_ratio": 0.5,
     # Trần đuôi neo vào TAPE THẬT: fill luỹ kế của fleet ≤ 50% KL khớp thật của phiên.
     # Suy ra allowance: đặt F=fleet đã khớp, V=KL phiên (V ĐÃ gồm F). Fill thêm X vẫn giữ
     # F+X ≤ c(V+X) ⇒ X ≤ (cV−F)/(1−c); với c=0,5 ⇒ **X ≤ V − 2F**. KHÔNG dùng dạng lỏng tay
