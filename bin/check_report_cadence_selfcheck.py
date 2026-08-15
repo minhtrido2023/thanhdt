@@ -59,7 +59,7 @@ def extract(begin, end):
 # ta chạy TOÀN BỘ heredoc detector — đó cũng chính là điều cần khoá: hai bên phải cùng scope.
 def detector_block():
     src = SRC.read_text(encoding="utf-8")
-    m = re.search(r'PLAN="\$\(python3 - "\$WC_ROOT" "\$TODAY" "\$STATE" << \'PYEOF\'\n(.*?)\nPYEOF\n',
+    m = re.search(r'PLAN="\$\(python3 - "\$WC_ROOT" "\$TODAY" "\$STATE" "\$DELIVERY_STATE" << \'PYEOF\'\n(.*?)\nPYEOF\n',
                   src, re.S)
     if not m:
         print(f"❌ FATAL: không trích được khối detector trong {SRC}.")
@@ -81,10 +81,20 @@ def run_detector(report_files, pending_topics, today="2026-08-14"):
             (reports / fn).write_text("fixture", encoding="utf-8")
         state = Path(td) / "state.json"
         state.write_text("{}", encoding="utf-8")
+        delivery = Path(td) / "delivery.json"
+        records = {}
+        import hashlib
+        for fn in report_files:
+            p = reports / fn
+            sha = hashlib.sha256(p.read_bytes()).hexdigest()
+            records[fn] = {"sha256": sha, "artifact_validated_at": "fixture",
+                           "discord": {"status": "delivered", "delivered_at": "fixture", "sha256": sha},
+                           "email": {"status": "delivered", "delivered_at": "fixture", "sha256": sha}}
+        delivery.write_text(json.dumps({"reports": records}), encoding="utf-8")
         py = Path(td) / "block.py"
         py.write_text(detector_block(), encoding="utf-8")
         env = dict(os.environ, RC_PENDING_TOPICS="\n".join(pending_topics))
-        r = subprocess.run([sys.executable, str(py), td, today, str(state)],
+        r = subprocess.run([sys.executable, str(py), td, today, str(state), str(delivery)],
                            capture_output=True, text=True, env=env)
         if r.returncode != 0:
             return {"__crash__": r.stderr.strip()[-400:]}

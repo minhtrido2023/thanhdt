@@ -16,11 +16,8 @@
 #   3. Idempotency: mỗi (period, ngày) chỉ dispatch 1 lần — state/report_cadence_dispatched.json.
 #      Nếu qua ngày mà báo cáo vẫn chưa xuất hiện (dispatch trước thất bại âm thầm) → tự dispatch
 #      lại ngày sau (retry tự nhiên, không cần người nhắc).
-#   4. Email (thêm 2026-08-01, user yêu cầu): mỗi lần chạy, quét MỌI file weekly/monthly report
-#      đã có trên đĩa (không riêng report vừa được dispatch trong lần chạy này) và gửi qua
-#      send_report_email.py bất kỳ file nào chưa từng gửi (state/report_emailed.json) — tự
-#      chữa lành nếu Taylor quên gọi bước gửi email trong prompt (cùng bài học attempt-1-crash
-#      của check_report_cadence chính nó: đừng chỉ tin 1 agent nhớ làm đủ bước, có lớp quét lại).
+#   4. Delivery closure: artifact != delivery. Report chưa gửi đi qua report_delivery_gate.py;
+#      chỉ COMPLETE khi validation + Discord + email đều có bằng chứng gắn với SHA-256.
 set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WC_ROOT="$(cd "$ROOT/.." && pwd)"
@@ -33,10 +30,11 @@ mkdir -p "$ROOT/state"
 
 EMAILED_STATE="$ROOT/state/report_emailed.json"
 [ -f "$EMAILED_STATE" ] || echo '{}' > "$EMAILED_STATE"
+DELIVERY_STATE="$ROOT/state/report_delivery.json"
 
-# --- Catch-up email sweep: gửi MỌI report chưa từng gửi qua email, bất kể vừa tạo lần này
-#     hay đã có từ trước (backfill). Idempotent qua $EMAILED_STATE, không phụ thuộc Taylor/
-#     DollarBill có nhớ gọi bước gửi email trong prompt của lần dispatch hay không.
+# --- Catch-up DELIVERY sweep: cứu report đã tạo nhưng agent dừng/max-turn trước lúc gửi.
+#     Chỉ chọn file chưa có legacy email proof để không phát lại kho lịch sử khi rollout;
+#     gate mới giữ ledger hai kênh và retry riêng kênh còn thiếu.
 #     Mở rộng *_daily_report_*.md 2026-08-11 (coding_guidelines.md §6 mục 5, user yêu cầu):
 #     trước đó chỉ quét weekly/monthly — daily report (vd SpaceX_ZaloPay_daily_report_*.md) hoàn
 #     toàn không có lưới an toàn nào, chỉ tin dispatch prompt nhớ gọi send_report_email.py.
@@ -52,16 +50,8 @@ state = json.load(open('$EMAILED_STATE'))
 print('yes' if state.get('$FNAME') else 'no')
 ")"
   if [ "$ALREADY" = "no" ]; then
-    if python3 "$ROOT/bin/send_report_email.py" "$f"; then
-      python3 -c "
-import json
-state = json.load(open('$EMAILED_STATE'))
-state['$FNAME'] = '$TODAY'
-json.dump(state, open('$EMAILED_STATE', 'w'), indent=2, ensure_ascii=False)
-"
-    else
-      echo "check_report_cadence: gửi email THẤT BẠI cho $FNAME (xem stderr ở trên) — sẽ tự thử lại lần chạy cron sau." >&2
-    fi
+    python3 "$ROOT/bin/report_delivery_gate.py" "$f" --topic "$TRADING_REPORT_THREAD" ||
+      echo "check_report_cadence: DELIVERY INCOMPLETE cho $FNAME — giữ việc mở và tự retry lần sau." >&2
   fi
 done
 
@@ -103,14 +93,31 @@ for q in d.get("pending", []):
 ')"
 export RC_PENDING_TOPICS
 
-PLAN="$(python3 - "$WC_ROOT" "$TODAY" "$STATE" << 'PYEOF'
-import glob, json, os, re, sys
+PLAN="$(python3 - "$WC_ROOT" "$TODAY" "$STATE" "$DELIVERY_STATE" << 'PYEOF'
+import glob, hashlib, json, os, re, sys
 from datetime import date, timedelta
 
-wc_root, today_s, state_path = sys.argv[1], sys.argv[2], sys.argv[3]
+wc_root, today_s, state_path, delivery_state_path = sys.argv[1:5]
 today = date.fromisoformat(today_s)
 reports_dir = os.path.join(wc_root, "mike", "reports")
 state = json.load(open(state_path))
+try:
+    delivery_state = json.load(open(delivery_state_path))
+except FileNotFoundError:
+    delivery_state = {"reports": {}}
+
+def delivered(fname):
+    path = os.path.join(reports_dir, fname)
+    rec = delivery_state.get("reports", {}).get(fname, {})
+    if not os.path.isfile(path) or not isinstance(rec, dict):
+        return False
+    with open(path, "rb") as fh:
+        sha = hashlib.sha256(fh.read()).hexdigest()
+    def ok(channel):
+        val = rec.get(channel, {})
+        return (isinstance(val, dict) and val.get("status") == "delivered"
+                and val.get("sha256") == sha and val.get("delivered_at"))
+    return rec.get("sha256") == sha and rec.get("artifact_validated_at") and ok("discord") and ok("email")
 
 def dates_from(fname):
     return [date.fromisoformat(m) for m in re.findall(r"\d{4}-\d{2}-\d{2}", os.path.basename(fname))]
@@ -125,6 +132,9 @@ actions = []
 weekly_files = glob.glob(os.path.join(reports_dir, "*_weekly_report_*.md"))
 weekly_dates = [max(dates_from(f)) for f in weekly_files if dates_from(f)]
 most_recent_weekly = max(weekly_dates) if weekly_dates else None
+delivered_weekly = [f for f in weekly_files if delivered(os.path.basename(f))]
+delivered_weekly_dates = [max(dates_from(f)) for f in delivered_weekly if dates_from(f)]
+most_recent_delivered_weekly = max(delivered_weekly_dates) if delivered_weekly_dates else None
 
 this_monday = today - timedelta(days=today.weekday())
 if most_recent_weekly is None:
@@ -193,14 +203,16 @@ for pk in pending_keys:
         # Y HỆT điều kiện của nhánh weekly: candidate_mondays bắt đầu từ most_recent_weekly+3,
         # nên mọi tuần có thứ Hai TRƯỚC mốc đó đã được detector coi là có báo cáo.
         mon = date.fromisoformat(mw.group(1))
-        if most_recent_weekly is not None and mon < most_recent_weekly + timedelta(days=3):
-            closable.append([pk, f"most_recent_weekly={most_recent_weekly.isoformat()} "
-                                 f"(phep kiem CUA CHINH detector, khong phai ten file co dinh)"])
+        if (most_recent_delivered_weekly is not None
+                and mon < most_recent_delivered_weekly + timedelta(days=3)):
+            closable.append([pk, f"delivery ledger COMPLETE through {most_recent_delivered_weekly.isoformat()} "
+                                 f"(artifact validated + Discord + email, hash-bound)"])
         continue
     mm = re.match(r"^monthly_(\d{4}-\d{2})$", pk)
     if mm:
         # Y HỆT `has_last_month` của nhánh monthly.
-        hit = [os.path.basename(f) for f in monthly_files if mm.group(1) in os.path.basename(f)]
+        hit = [os.path.basename(f) for f in monthly_files
+               if mm.group(1) in os.path.basename(f) and delivered(os.path.basename(f))]
         if hit:
             closable.append([pk, f"co bao cao thang {mm.group(1)}: {sorted(hit)[0]}"])
     # period_key lạ (schema đổi) ⇒ KHÔNG đóng — fail về phía để người xem, không tự dọn.
@@ -248,7 +260,7 @@ for a in json.load(sys.stdin)['actions']:
     "{\"kind\":\"${KIND}\",\"period\":\"${DESC}\",\"target_file\":\"${TFILE}\",\"question\":\"Bao cao ${KIND} qua han, da auto-dispatch Taylor. Xac nhan/theo doi.\"}" \
     2>/dev/null || true
 
-  EMAIL_STEP="Sau khi gửi Discord xong, CŨNG chạy: python3 mike/bin/send_report_email.py ${TFILE} — gửi email báo cáo này cho user. Nếu lệnh đó exit khác 0 (vd thiếu credential), NÓI RÕ trong phần trả lời cuối, đừng bỏ qua im lặng."
+  EMAIL_STEP="Sau khi tạo artifact, BẮT BUỘC chạy: python3 mike/bin/report_delivery_gate.py ${TFILE} --topic ${TRADING_REPORT_THREAD}. File tồn tại, maxturns_pending hay gửi một kênh đều CHƯA hoàn tất; chỉ báo xong khi gate in COMPLETE."
 
   # Delegate step (thêm 2026-08-04, user mandate — tiết kiệm chi phí): phần NGHĨ/VIẾT văn xuôi
   # (narrative/nhận định, không cần chạy script/broker data) có thể peer-dispatch cho Winston
