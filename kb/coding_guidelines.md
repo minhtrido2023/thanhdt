@@ -175,6 +175,12 @@ report (daily/weekly/monthly, or any client-facing artifact):
    `*_weekly_report_*.md` / `*_monthly_report_*.md` chưa từng gửi qua `state/report_emailed.json`
    và tự gửi bù — nhưng đó là lưới AN TOÀN trễ tới hôm sau, không thay được việc gửi ngay lúc
    soạn xong report.
+6. **Delivery closure — file được tạo KHÔNG có nghĩa là báo cáo đã gửi.** Mọi báo cáo tự động
+   phải kết thúc bằng `python3 mike/bin/report_delivery_gate.py <report.md> --topic
+   trading_report`. Chỉ `COMPLETE` (artifact qua gate + Discord + email đều có bằng chứng
+   hash-bound) mới được đóng job/bus question. `maxturns_pending`, `usage_limited`, file tồn
+   tại, hay chỉ một kênh thành công đều là **INCOMPLETE** và phải rescue/retry; retry không gửi
+   lại kênh đã có bằng chứng. Quy trình bắt buộc: skill `report-delivery-closure`.
 
 **Bright-line rule — same-day data: DNSE API, never BigQuery (user directive, 2026-07-09).** BQ
 (`tav2_bq.ticker`/`ticker_1m`) syncs overnight only (`sync_bq_cache_daily.sh`, 23:45 ICT) — a
