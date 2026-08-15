@@ -14,6 +14,7 @@ title: Giá / khối lượng cổ phiếu
 | [`shares_outstanding_live.md`](shares_outstanding_live.md) — tav2_bq.shares_outstanding_live | CANONICAL |
 | [`ticker_close_vs_price_dividend_adj.md`](ticker_close_vs_price_dividend_adj.md) — cặp cột Close (đã điều chỉnh) vs Price (thô) trong tav2_bq.ticker | TRAP |
 | [`ticker_ohlcv_tables.md`](ticker_ohlcv_tables.md) — tav2_bq.ticker / ticker_1m / ticker_prune | CANONICAL |
+| [`ticker_price_stale_on_exdate.md`](ticker_price_stale_on_exdate.md) — cột Price của tav2_bq.ticker/ticker_prune ĐÚNG NGÀY GDKHQ có thể kẹt ở hệ CUM (ca VHM 2026-08-06 sai +98,4%) | TRAP |
 | [`ticker_prune.md`](ticker_prune.md) — tav2_bq.ticker_prune | TRAP |
 | [`universe_pit.md`](universe_pit.md) — lithe-record-440915-m9.tav2_mike.universe_pit | CANONICAL |
 | [`universe_pit_quality.md`](universe_pit_quality.md) — lithe-record-440915-m9.tav2_mike.universe_pit_quality | CANONICAL |
