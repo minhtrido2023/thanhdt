@@ -77,9 +77,10 @@ RULE_A_REF_TOL_DEFAULT = 0.01
 
 # Book có ENGINE TRẦN RIÊNG đã wire + đã được user duyệt cận trên tuyệt đối
 # (`price_band.max_no_chase_ceiling`): discretionary_accumulation.resolve_price_band().
-# Với book này, "Rule A" = đổi `dynamic_ceiling.sessions` 5 → 1 trong state file, KHÔNG phải
-# thêm cơ chế thứ hai. Áp hai cơ chế lên cùng một lệnh là cách chắc chắn nhất để không ai
-# còn truy được trần thật đến từ đâu.
+# Với book này, luật A được bật TRONG CHÍNH ENGINE ĐÓ (`dynamic_ceiling.ceiling_rule = "A"`,
+# user chốt 2026-08-15) và engine đó gọi ngược `rule_a_ceiling()` ở file này — một chính sách,
+# một chỗ tính công thức. `apply_rule_a()` vẫn LOẠI book này: áp hai cơ chế lên cùng một lệnh
+# là cách chắc chắn nhất để không ai còn truy được trần thật đến từ đâu.
 BOOKS_WITH_OWN_CEILING_ENGINE = ("DISCRETIONARY_SPECIAL",)
 
 

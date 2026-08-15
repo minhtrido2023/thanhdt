@@ -16,7 +16,10 @@ Doctrine (bất biến — §4 memo):
 KHÔNG chạm kế toán V2.4 (BAL/LAG/CAPIT/PARK). Book cố định = DISCRETIONARY_SPECIAL.
 """
 
+import datetime as dt
 import math
+
+from .no_chase_ceiling import RULE_A, rule_a_ceiling
 
 BOOK = "DISCRETIONARY_SPECIAL"
 
@@ -43,6 +46,22 @@ DYNAMIC_CEILING_TAU_DEFAULT = 0.03      # chính sách user duyệt 2026-08-12 (
 DYNAMIC_CEILING_TAU_MAX = 0.10          # τ > 10% = gần như bỏ trần → từ chối, không phải "nới"
 DYNAMIC_CEILING_SESSIONS_DEFAULT = 5    # đúng anchor đã đo trong exp_ceiling_tolerance.py
 DYNAMIC_CEILING_SESSIONS_MAX = 20
+
+# ─────────────────────────────────────────────────── LUẬT A cho book discretionary (2026-08-15)
+# `sessions=5` (mean 5 phiên) CHÍNH LÀ luật B: trần tính theo cửa sổ cố định nên nó TỤT LẠI khi
+# giá đi lên liên tục — đúng cơ chế đã khiến TV1 kẹt 3 tuần. User chốt 2026-08-15 (qua Mike,
+# job Taylor_20260815_022340): "Đổi luôn sang rule A. Tôi thích ý tưởng adaptive hơn là fix
+# cứng." Luật A = anchor là giá đóng phiên ĐÃ HOÀN TẤT GẦN NHẤT (một phiên, không phải trung
+# bình N), trần tái lập MỖI LẦN lập plan.
+#
+# BẬT BẰNG STATE FILE, KHÔNG PHẢI BẰNG MẶC ĐỊNH CODE: `dynamic_ceiling.ceiling_rule = "A"`.
+# Thiếu/khác ⇒ giữ nguyên hành vi mean-N hiện tại, byte-identical. Cố ý — code này landed
+# TRƯỚC khi state file được lật, để việc lật là MỘT commit riêng dễ audit/rollback.
+#
+# CÔNG THỨC KHÔNG ĐƯỢC CHÉP LẠI Ở ĐÂY: gọi thẳng `no_chase_ceiling.rule_a_ceiling()` — một
+# chính sách, một chỗ tính, nên `τ ∈ (0; 0,10]` + `floor()` + mọi bất biến của nó áp cho cả
+# hai book mà không cần đồng bộ tay hai bản.
+DYNAMIC_CEILING_RULE_A = RULE_A
 # Giá anchor lệch quá xa giá mới nhất ⇒ nghi sai ĐƠN VỊ (nghìn đồng vs VND — lỗi thật đã cắn
 # trong chính nghiên cứu này) hoặc feed hỏng ⇒ fail-safe, KHÔNG dùng để tính trần.
 _ANCHOR_SANITY_LO, _ANCHOR_SANITY_HI = 0.5, 2.0
@@ -178,7 +197,15 @@ def validate_state(state):
     return True
 
 
-def resolve_price_band(state, anchor_prices=None, latest_price=None):
+def _as_date(x):
+    try:
+        return dt.date.fromisoformat(str(x)[:10])
+    except (TypeError, ValueError):
+        return None
+
+
+def resolve_price_band(state, anchor_prices=None, latest_price=None,
+                       anchor_dates=None, plan_date=None):
     """→ (no_chase_ceiling, resting_limit, info) — band GIÁ dùng cho phiên này.
 
     MẶC ĐỊNH (không truyền `anchor_prices`, hoặc cờ tắt) trả về ĐÚNG band cố định trong
@@ -197,6 +224,14 @@ def resolve_price_band(state, anchor_prices=None, latest_price=None):
 
     Trần động có thể HẠ trần xuống khi anchor đi xuống — đó là ĐÚNG luật, không phải lỗi:
     luật đối xứng, và hạ trần chỉ làm mua rẻ hơn/ít hơn, không bao giờ mua đắt hơn.
+
+    **LUẬT A** (`dynamic_ceiling.ceiling_rule = "A"`, user chốt 2026-08-15): anchor = giá đóng
+    phiên ĐÃ HOÀN TẤT GẦN NHẤT (`anchor_prices[-1]`), `sessions` KHÔNG được dùng, trần =
+    `min(rule_a_ceiling(anchor, τ), max_no_chase_ceiling)`. Bắt buộc có `anchor_dates` (cùng
+    độ dài `anchor_prices`) và `plan_date`, để khoá bất biến "anchor phải là phiên ĐÃ ĐÓNG
+    TRƯỚC ngày thực thi" — chính bất biến #4 của luật A. Thiếu ⇒ fail-safe về band cố định,
+    KHÔNG âm thầm rơi về mean-N (rơi về mean-N sẽ khiến việc lật state file trông như đã ăn
+    trong khi nó chạy luật khác).
     """
     band = state["price_band"]
     fixed_ceiling = float(band["no_chase_ceiling"])
@@ -214,10 +249,18 @@ def resolve_price_band(state, anchor_prices=None, latest_price=None):
         info["reason"] = f"FAIL-SAFE → band cố định: {reason}"
         return fixed_ceiling, fixed_resting, info
 
+    rule = str(cfg.get("ceiling_rule") or "").strip().upper()
+    if rule and rule != DYNAMIC_CEILING_RULE_A:
+        return _failsafe(f"dynamic_ceiling.ceiling_rule={cfg.get('ceiling_rule')!r} không nhận "
+                         f"dạng (chỉ {DYNAMIC_CEILING_RULE_A!r} hoặc bỏ trống = mean-N)")
+    is_rule_a = rule == DYNAMIC_CEILING_RULE_A
+
     tau = cfg.get("tau", DYNAMIC_CEILING_TAU_DEFAULT)
     if not _pos_num(tau) or tau > DYNAMIC_CEILING_TAU_MAX:
         return _failsafe(f"tau={tau!r} ngoài (0, {DYNAMIC_CEILING_TAU_MAX}]")
-    n = cfg.get("sessions", DYNAMIC_CEILING_SESSIONS_DEFAULT)
+    # Luật A chỉ nhìn MỘT phiên đã đóng gần nhất ⇒ `sessions` không có vai trò gì; đọc nó ở
+    # nhánh đó chỉ tạo ảo giác rằng đổi số ấy vẫn còn tác dụng.
+    n = 1 if is_rule_a else cfg.get("sessions", DYNAMIC_CEILING_SESSIONS_DEFAULT)
     if (not isinstance(n, int) or isinstance(n, bool) or n < 1
             or n > DYNAMIC_CEILING_SESSIONS_MAX):
         return _failsafe(f"sessions={n!r} ngoài [1, {DYNAMIC_CEILING_SESSIONS_MAX}]")
@@ -241,8 +284,34 @@ def resolve_price_band(state, anchor_prices=None, latest_price=None):
         return _failsafe(f"giá anchor lệch >{_ANCHOR_SANITY_HI:g}× hoặc <{_ANCHOR_SANITY_LO:g}× "
                          f"giá mới nhất ({ref:,.0f}) — nghi sai đơn vị/feed hỏng")
 
-    anchor = sum(prices) / len(prices)
-    ceiling = math.floor(min(anchor * (1.0 + tau), float(max_cap)))
+    anchor_date = None
+    if is_rule_a:
+        # Bất biến #4 của luật A: anchor phải là phiên ĐÃ ĐÓNG TRƯỚC ngày thực thi. Ở đây
+        # KHÔNG có đường nào suy ra ngày từ giá, nên thiếu `anchor_dates`/`plan_date` là
+        # FAIL-SAFE thật sự, không phải hình thức.
+        dates = list(anchor_dates or [])
+        if len(dates) != len(list(anchor_prices or [])):
+            return _failsafe(f"luật A cần anchor_dates cùng độ dài anchor_prices "
+                             f"(có {len(dates)} ngày / {len(list(anchor_prices or []))} giá)")
+        a_date = _as_date(dates[-1])
+        if a_date is None:
+            return _failsafe(f"luật A: anchor_date không parse được ({dates[-1]!r})")
+        p_date = _as_date(plan_date)
+        if p_date is None:
+            return _failsafe(f"luật A: plan_date không parse được ({plan_date!r})")
+        if a_date >= p_date:
+            return _failsafe(f"luật A: anchor_date {a_date} KHÔNG nằm trước plan_date {p_date} "
+                             f"— trần chỉ được neo vào phiên ĐÃ ĐÓNG (bất biến #4)")
+        anchor_date = a_date.isoformat()
+
+    anchor = sum(prices) / len(prices)          # luật A: n=1 ⇒ đúng giá phiên đã đóng gần nhất
+    if is_rule_a:
+        base, why = rule_a_ceiling(anchor, tau)   # ← MỘT chỗ tính công thức, dùng chung với LAG
+        if base is None:
+            return _failsafe(f"luật A: {why}")
+        ceiling = math.floor(min(base, float(max_cap)))
+    else:
+        ceiling = math.floor(min(anchor * (1.0 + tau), float(max_cap)))
     if ceiling <= 0:
         return _failsafe("trần động tính ra ≤0")
     resting = math.floor(min(float(ceiling), fixed_resting * ceiling / fixed_ceiling))
@@ -251,20 +320,36 @@ def resolve_price_band(state, anchor_prices=None, latest_price=None):
     if resting > ceiling:   # bất biến no-chase — không thể xảy ra theo công thức, chặn ở đây
         return _failsafe(f"resting động ({resting}) > trần động ({ceiling}) — vi phạm no-chase")
 
+    capped = bool(anchor * (1.0 + tau) > float(max_cap))
     info.update({
-        "mode": "dynamic", "ceiling_vnd": float(ceiling), "resting_vnd": float(resting),
+        "mode": "rule_a" if is_rule_a else "dynamic",
+        "ceiling_vnd": float(ceiling), "resting_vnd": float(resting),
         "tau": float(tau), "sessions": n, "anchor_vnd": round(anchor, 2),
         "anchor_prices": prices, "max_no_chase_ceiling_vnd": float(max_cap),
-        "capped_by_max": bool(anchor * (1.0 + tau) > float(max_cap)),
-        "reason": (f"trần động = mean({n} phiên)={anchor:,.0f}×(1+{tau:.2%}) "
-                   f"→ {ceiling:,} (cố định {fixed_ceiling:,.0f}), resting kéo theo "
-                   f"cùng tỉ lệ → {resting:,}"),
+        "capped_by_max": capped,
+        "reason": ((f"trần LUẬT A = giá đóng phiên {anchor_date} {anchor:,.0f}×(1+{tau:.2%}) "
+                    f"→ {ceiling:,}" + (f" (bị kẹp bởi trần tuyệt đối {max_cap:,.0f})"
+                                        if capped else ""))
+                   if is_rule_a else
+                   f"trần động = mean({n} phiên)={anchor:,.0f}×(1+{tau:.2%}) → {ceiling:,}")
+                  + f" (cố định {fixed_ceiling:,.0f}), resting kéo theo cùng tỉ lệ → {resting:,}",
     })
+    if is_rule_a:
+        # Provenance để `load_plan()` TÁI LẬP lại trần và để cổng fail-safe cơ sở giá
+        # (`Executor._rule_a_ref_guard`) nhận ra lệnh này. CHỈ khai khi trần ĐÚNG BẰNG công
+        # thức luật A: khi `max_no_chase_ceiling` kẹp, trần không còn tái lập được từ
+        # `anchor × (1+τ)` nên gắn nhãn "A" vào sẽ khiến `resolve_buy_ceiling()` fail-closed
+        # rồi XOÁ SẠCH trần (lệnh discretionary không có `entry_anchor_price` để rơi về) —
+        # fail-OPEN, đúng thứ nguy hiểm nhất có thể làm ở đây.
+        info["rule_a_provenance"] = None if capped else {
+            "ceiling_rule": RULE_A, "ceiling_anchor_price": float(anchor),
+            "ceiling_anchor_date": anchor_date, "ceiling_tau": float(tau)}
     return float(ceiling), float(resting), info
 
 
 def compute_session_order(state, filled_qty, prev_turnover_vnd, prev_price_vnd,
-                          plan_date, now_iso, anchor_prices=None, active_nav_vnd=None):
+                          plan_date, now_iso, anchor_prices=None, active_nav_vnd=None,
+                          anchor_dates=None):
     """Tính lệnh gom cho MỘT phiên (plan_date).
 
     Inputs:
@@ -367,7 +452,9 @@ def compute_session_order(state, filled_qty, prev_turnover_vnd, prev_price_vnd,
     #    đã đảm bảo). No-chase là bất biến — không bao giờ đặt > ceiling.
     #    Trần ĐỘNG (P1) chỉ ăn khi state bật cờ + khai cận trên tuyệt đối + đủ giá anchor;
     #    mọi trường hợp khác trả đúng band cố định (xem resolve_price_band).
-    ceiling, limit_price, band_info = resolve_price_band(state, anchor_prices, prev_price_vnd)
+    ceiling, limit_price, band_info = resolve_price_band(
+        state, anchor_prices, prev_price_vnd,
+        anchor_dates=anchor_dates, plan_date=plan_date)
     lot = int(state["lot_size"])
     adv_ref = float(state["adv_ref_vnd"])
     cap_pct = float(state["per_session_cap_pct_adv"])
@@ -466,6 +553,11 @@ def compute_session_order(state, filled_qty, prev_turnover_vnd, prev_price_vnd,
         "order_type": "LO",
         "limit_price_vnd": int(limit_price),
         "hard_no_chase_ceiling_vnd": int(ceiling),
+        # Provenance LUẬT A (chỉ có khi state bật `ceiling_rule="A"` VÀ trần không bị trần
+        # tuyệt đối kẹp — xem resolve_price_band). Có nó thì `load_plan()` tái lập được trần
+        # và `Executor._rule_a_ref_guard` mới soi được lệnh này; không có thì lệnh giữ nguyên
+        # hình dạng cũ, không nhãn, không cổng — đúng hành vi hôm nay.
+        **(band_info.get("rule_a_provenance") or {}),
         "estimated_cost_vnd": int(session_qty * limit_price),
         "book": BOOK,
         # Lệnh gom discretionary special = thanh toán TIỀN MẶT theo thiết kế (master

@@ -406,6 +406,31 @@ check("G17f timestamp không parse được ⇒ None (caller fail-safe)",
 check("G17g lễ 02/09 dù sau 14:45 ⇒ bar mang ngày lễ vẫn là rác",
       inj.bar_is_completed_session(_bar_ts(2026, 9, 2), _now(2026, 9, 2, 20, 0)) is False)
 
+# --- G18: `with_dates=True` — NGÀY phải song song từng phần tử với GIÁ ------------------------
+# Luật A (2026-08-15) đọc `dates[-1]` để khoá bất biến "anchor là phiên ĐÃ ĐÓNG TRƯỚC
+# plan_date". Ngày lệch một nấc so với giá = trần neo vào sai phiên mà KHÔNG có gì báo.
+_b18 = _FakeBrokerOHLC(RAW)
+res18 = inj.anchor_prices_for(_b18, G_STATE, "TV1", now=_now(2026, 8, 12, 11, 0),
+                              with_dates=True)
+check("G18 with_dates=True ⇒ trả TUPLE (prices, dates)",
+      isinstance(res18, tuple) and len(res18) == 2, f"{type(res18).__name__}")
+p18, d18 = res18
+check("G18b giá y hệt chế độ cũ (thêm ngày KHÔNG được đổi giá)", p18 == COMPLETED_5, f"{p18}")
+check("G18c len(dates) == len(prices) — điều kiện resolve_price_band() bắt buộc",
+      len(d18) == len(p18) == 5, f"{len(d18)}/{len(p18)}")
+check("G18d ngày SONG SONG với giá và là 5 phiên ĐÃ ĐÓNG (bar hôm nay 08-12 bị loại khỏi CẢ HAI)",
+      d18 == ["2026-08-05", "2026-08-06", "2026-08-07", "2026-08-10", "2026-08-11"],
+      f"{d18}")
+check("G18e ngày tăng dần (cũ→mới) ⇒ dates[-1] đúng là phiên gần nhất",
+      d18 == sorted(d18), f"{d18}")
+# Fail-safe phải trả MỘT giá trị None ở cả hai chế độ — caller chỉ làm một phép `is None`.
+check("G18f payload hỏng + with_dates=True ⇒ None (không phải (None, None) làm nổ unpack)",
+      inj.anchor_prices_for(_FakeBrokerOHLC({"t": [], "c": []}), G_STATE, "TV1",
+                            now=_now(2026, 8, 12, 11, 0), with_dates=True) is None)
+check("G18g mặc định with_dates=False ⇒ vẫn trả LIST giá trần trụi (không phá caller cũ)",
+      inj.anchor_prices_for(_FakeBrokerOHLC(RAW), G_STATE, "TV1",
+                            now=_now(2026, 8, 12, 11, 0)) == COMPLETED_5)
+
 print()
 if fails:
     print(f"❌ {len(fails)} FAIL: {fails}")
