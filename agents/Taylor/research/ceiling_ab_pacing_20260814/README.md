@@ -280,6 +280,24 @@ vốn, backtest nói ngược, đã ghi rõ trong comment code).
    phiên là đuổi giá thật sự, khác hẳn cái đo ở đây.
 4. Selfcheck: `plan.py` là **module lõi (21 selfcheck phụ thuộc, §23)** ⇒ quét rộng bắt buộc.
 
+> **ĐÃ WIRE 2026-08-15** (user chốt A, bus `ceiling-rule-AB-user-decision-CORRECTED`,
+> `decided_by=user`; job `Taylor_20260815_004105`, commit **`2db6d37`** repo WorkingClaude).
+> **CHƯA áp cho plan thật nào** — không plan hiện hữu nào khai `ceiling_rule` nên hành vi hôm
+> nay không đổi; còn chờ quant-skeptic CONFIRMED + user duyệt lần cuối.
+> Cơ chế: `trading_bot/no_chase_ceiling.py` (mới) + 4 field provenance trong `PlannedOrder` +
+> `load_plan()` TÁI LẬP trần từ provenance (plan sửa tay không ghi được trần rộng rồi dán nhãn
+> "A") + `lag_rule_a_ceiling.py` (CLI chỉ đọc, tra `tav2_bq.ticker.Price`). **KHÔNG đụng
+> `executor.py`.** Hỏng bất kỳ bất biến nào (τ ngoài (0;0,10], anchor ≤0, trần không tái lập
+> được, `ceiling_anchor_date` ≥ `plan_date`) ⇒ **fail-CLOSED về luật cũ** (trần = `entry_anchor_price`).
+> **Phạm vi đo thật trên 97 plan lịch sử**: `entry_anchor_price` CHỈ có ở book **LAG**
+> (DRI/POW/SCL/SSI plan 08-10 — đúng ca DollarBill 08-09 tự chế workaround). BAL/CAPIT/momentum
+> **0 hit**. `DISCRETIONARY_SPECIAL` loại tường minh: book đó đã có engine trần riêng và
+> `dynamic_ceiling.sessions = 5` của nó **CHÍNH LÀ Rule B** — "Rule A" ở đó là đổi `sessions`
+> 5 → 1 trong state file (**thay đổi CẤU HÌNH, không phải code**), chứ không phải thêm cơ chế
+> thứ hai lên cùng một lệnh.
+> Chênh lệch thật, đo bằng BQ trên đúng ca 08-10: trần DRI 13.000 → **13.596** (+4,6%),
+> POW 13.400 → 14.008, SCL 24.200 → 24.926, SSI 24.450 → 25.183.
+
 ### (b) Participation-rate cho mã mỏng — **NO-GO cho "nới participation", GO cho "kéo dài cửa sổ"**
 
 **NO-GO — nâng `max_participation` (10% → 20/30%)**: mua +64pp khớp-đủ bằng cách nâng %tape
