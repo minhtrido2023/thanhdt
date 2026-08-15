@@ -120,10 +120,71 @@ _APPROVAL_KEYS = ("approved_by", "approved_by_user")
 
 DEFAULT_PLAN_DIR = "/home/trido/thanhdt/WorkingClaude/data/trade_plans"
 
+# Repo root, suy từ vị trí CHÍNH FILE NÀY (mike/bin/x.py → lên 3 cấp) chứ không chép cứng:
+# file này chạy từ cron, từ worktree, và từ selfcheck ở các cwd khác nhau.
+_WC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Ngưỡng phân biệt "nhiễu giá thường giữa hai lần chạy L1/L2" với "cú LẬT HỆ QUY CHIẾU" —
+# xem khối chú thích ở bước 2b. Chọn 1,0%: nhỏ nhất trong 22 ngày-mã GDKHQ đo được (README §4
+# của exdate_order_pipeline_20260815) là **0,8%** (VCB 2026-07-23) và trung vị là 5,46%, nên
+# ngưỡng phải nằm DƯỚI phân bố đó; đồng thời 1,0% là đúng con số dung sai
+# `RULE_A_REF_TOL_DEFAULT` mà cổng cơ sở giá tầng đặt lệnh đang dùng — một chính sách, một số.
+# Ngưỡng CHỈ có hiệu lực khi mã có sự kiện quyền trong cửa sổ; ngoài cửa sổ, mọi mức lệch giữ
+# nguyên hành vi cũ (cảnh báo + lấy giá thấp hơn).
+REF_PRICE_EXDATE_TOL = 0.01
+
 
 # ══════════════════════════════════════════════════════════════════════════════════════
 # helpers
 # ══════════════════════════════════════════════════════════════════════════════════════
+def _exdate_map(tickers, plan_date, report=None):
+    """Lịch sự kiện quyền quanh `plan_date` → map của `price_frame`, {} khi tra không được.
+
+    FAIL-OPEN có chủ ý (cùng lý lẽ với `exdate_gate.apply_exdate_gate`): nguồn là BigQuery,
+    một hệ ngoài đường đặt lệnh; cho nó quyền dừng merge mỗi khi BQ hắt hơi là đổi một rủi ro
+    hiếm lấy một rủi ro thường. Map rỗng ⇒ hành vi merge NGUYÊN VẸN như trước bản vá, và lý do
+    được ghi vào `report["warnings"]` để không ai nhầm im lặng với "không có sự kiện".
+    """
+    if not tickers or not plan_date:
+        return {}
+    try:
+        if _WC_ROOT not in sys.path:
+            sys.path.insert(0, _WC_ROOT)
+        from trading_bot.price_frame import pricing_events, events_by_ticker_date
+        import datetime as _dt
+        d = _dt.date.fromisoformat(str(plan_date)[:10])
+        evs = pricing_events(tickers, since=(d - _dt.timedelta(days=6)).isoformat(),
+                             until=(d + _dt.timedelta(days=4)).isoformat())
+        return events_by_ticker_date(evs)
+    except Exception as exc:                                        # noqa: BLE001
+        if report is not None:
+            report["warnings"].append(
+                f"KHÔNG tra được lịch sự kiện quyền ({type(exc).__name__}: {exc}) — cổng chặn "
+                f"lệch-L1/L2-do-lật-hệ-quy-chiếu KHÔNG hoạt động phiên này (hành vi cũ giữ nguyên).")
+        return {}
+
+
+def _has_event_in_window(ex_map, ticker, plan_date):
+    """Mã có sự kiện quyền quanh `plan_date` không → (bool, [event]).
+
+    ⚠️ Tự neo repo root vào `sys.path` chứ KHÔNG dựa vào việc `_exdate_map()` đã chạy trước.
+    Khi caller TIÊM `ex_map` (selfcheck, hoặc bất kỳ orchestrator nào tra lịch một lần rồi
+    truyền xuống) thì `_exdate_map()` không hề chạy ⇒ không ai chèn path ⇒ import này hỏng ⇒
+    hàm trả `False` và cổng chặn-lật-hệ-quy-chiếu **tự tắt trong im lặng**, đúng cách hỏng tệ
+    nhất mà cả bản vá này sinh ra để tránh (README §0 mục 4). Một dòng path ở đây làm hàm
+    đúng độc lập với THỨ TỰ GỌI.
+    """
+    if not ex_map:
+        return False, []
+    try:
+        if _WC_ROOT not in sys.path:
+            sys.path.insert(0, _WC_ROOT)
+        from trading_bot.price_frame import has_event_in_window
+        return has_event_in_window(ex_map, ticker, str(plan_date)[:10])
+    except Exception:                                               # noqa: BLE001
+        return False, []
+
+
 def _i(v, default=0):
     try:
         return int(v)
@@ -183,7 +244,7 @@ def _layer_state(art, want_decision, layer):
 # ══════════════════════════════════════════════════════════════════════════════════════
 # lõi thuần — không I/O, không phụ thuộc file
 # ══════════════════════════════════════════════════════════════════════════════════════
-def merge_park_orders(plan, l1=None, l2=None, *, allow_approved=False):
+def merge_park_orders(plan, l1=None, l2=None, *, allow_approved=False, ex_map=None):
     """Dựng lại phần lệnh bán PARK trong `plan["orders"]` từ artifact L1/L2.
 
     Trả về `(new_plan, report)`. `plan` đầu vào KHÔNG bị sửa (deep-copy).
@@ -344,14 +405,47 @@ def merge_park_orders(plan, l1=None, l2=None, *, allow_approved=False):
 
     # ref_price: L1≠L2 KHÔNG phải lý do dừng cả plan (bài học 08-06) — cảnh báo + lấy giá
     # THẤP HƠN (ước tính tiền bán thận trọng; executor định giá lại từ ref_price+urgency).
-    for tk, d in agg.items():
+    #
+    # 🔴 NGOẠI LỆ (README §6.2 + §8-D3 mục 2, job Taylor_20260815_054822): hành vi "cảnh báo
+    # rồi lấy giá thấp hơn" ĐÚNG cho nhiễu giá thường và SAI cho ca lật hệ quy chiếu. L1
+    # (`park_trim`) chạy ~19:04 và L2 (`jit_unpark`) chạy ~19:40 có thể đứng HAI BÊN cú lật
+    # của DNSE — ĐÃ XẢY RA THẬT ngày 2026-08-14 với BID (L1 19:04:15 hệ CŨ 38.850; cú lật
+    # 19:10:23; L2 sau đó hệ MỚI 35.800). Hôm đó không thiệt hại vì L1 ra 0 lệnh, nhưng cơ
+    # chế đã kích hoạt thật. Lúc ấy chênh L1/L2 KHÔNG phải nhiễu: "lấy giá thấp hơn" chọn
+    # đúng giá hệ MỚI (may) trong khi qty vẫn là của L1 hệ CŨ (rủi) — hai hệ quy chiếu trong
+    # một lệnh, đúng cách hỏng README §0 mục 4 mô tả.
+    # ⇒ lệch VƯỢT NGƯỠNG **VÀ** mã có sự kiện quyền trong cửa sổ ⇒ **CHẶN riêng mã đó** (bỏ
+    # khỏi vùng bán merge, không dừng cả plan). Ngoài cửa sổ sự kiện: hành vi cũ NGUYÊN VẸN.
+    # `ex_map` tiêm được để selfcheck đóng băng lịch sự kiện (§23: không assert lên trạng thái
+    # SỐNG — bảng BQ đổi một dòng là test đổi kết quả). None ⇒ tra thật như đường production.
+    ex_map = _exdate_map(sorted(agg), plan.get("plan_date"), report) if ex_map is None else ex_map
+    blocked_exdate = []
+    for tk in sorted(agg):
+        d = agg[tk]
         pxs = d["px"]
         if len(set(pxs.values())) > 1:
             lo, hi = min(pxs.values()), max(pxs.values())
+            dev = hi / lo - 1
+            has_ev, evs = _has_event_in_window(ex_map, tk, plan.get("plan_date"))
+            if dev > REF_PRICE_EXDATE_TOL and has_ev:
+                blocked_exdate.append(tk)
+                report["errors"].append(
+                    f"{tk}: ⛔ CHẶN mã này khỏi vùng bán merge — ref_price L1≠L2 ({pxs}) lệch "
+                    f"{dev * 100:.2f}% > {REF_PRICE_EXDATE_TOL * 100:.2f}% VÀ mã có sự kiện "
+                    f"quyền trong cửa sổ "
+                    f"({', '.join(sorted({str(e.get('exright_date')) for e in evs}))}) — đây là "
+                    f"chữ ký của một cú LẬT HỆ QUY CHIẾU giữa hai lần chạy L1/L2, không phải "
+                    f"nhiễu giá. Lấy giá thấp hơn sẽ ghép giá hệ MỚI với qty hệ CŨ. Chạy lại "
+                    f"CẢ L1 và L2 sau khi broker đã lật xong rồi merge lại.")
+                continue
             report["warnings"].append(
-                f"{tk}: ref_price L1≠L2 ({pxs}) lệch {(hi/lo - 1) * 100:.2f}% — dùng giá THẤP "
+                f"{tk}: ref_price L1≠L2 ({pxs}) lệch {dev * 100:.2f}% — dùng giá THẤP "
                 f"hơn ({lo:,.0f}) cho ước tính thận trọng, KHÔNG dừng merge.")
         d["ref_price"] = min(pxs.values())
+    for tk in blocked_exdate:
+        agg.pop(tk, None)              # KHÔNG sinh lệnh bán nào cho mã bị chặn
+    if blocked_exdate:
+        report["exdate_blocked"] = blocked_exdate
 
     # ── 3. trần sellable, tính TRÊN TOÀN BỘ orders[] (kể cả lệnh của writer khác) ─────
     foreign_sell_qty = {}

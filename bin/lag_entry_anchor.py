@@ -17,9 +17,22 @@ BA QUYẾT ĐỊNH DỮ LIỆU (đừng đảo lại nếu chưa đọc lý do):
    với GIÁ LIVE trên bảng (DNSE) — giá thô. Trộn hai hệ quy chiếu = đúng "Bẫy (2)" trong
    `kb/data_registry/price-volume/ticker_close_vs_price_dividend_adj.md`. Nếu mã chốt quyền
    giữa phiên chuẩn và phiên 2/3, `Close` của phiên chuẩn bị kéo XUỐNG so với giá thật đã khớp
-   ⇒ anchor thấp giả tạo ⇒ chặn oan một entry hợp lệ. `Price` không hồi tố nên miễn nhiễm.
+   ⇒ anchor thấp giả tạo ⇒ chặn oan một entry hợp lệ.
    (Với DRI 08-06 hai cột tình cờ bằng nhau = 13.000; sự trùng khớp đó KHÔNG phải lý do để
    dùng `Close` — nó chỉ có nghĩa là DRI chưa có ex-date trong cửa sổ này.)
+
+   🔴 **ĐÍNH CHÍNH 2026-08-15 (job Taylor_20260815_054822)** — câu *"`Price` không hồi tố nên
+   miễn nhiễm"* ở bản cũ **ĐÚNG MỘT NỬA và đã bị gỡ**. `Price` miễn nhiễm với *hiện vật hồi
+   tố*, nhưng **KHÔNG** miễn nhiễm với *lệch hệ quy chiếu qua một ngày GDKHQ*:
+     · anchor lấy ở phiên chuẩn (hệ CŨ, trước quyền) rồi đem so với giá live của phiên SAU
+       GDKHQ (hệ MỚI). Anchor là **TRẦN** ⇒ anchor hệ cũ CAO hơn ⇒ **trần NỚI RA, không siết**.
+       Ca SSI (−20,1%): anchor phiên 08-14 dùng cho phiên 08-17 nới trần **+25%** — cơ chế trần
+       coi như TẮT, và tắt trong im lặng.
+     · Thêm bẫy thứ hai (README §1.1): nếu chính phiên chuẩn rơi ĐÚNG ngày GDKHQ thì `Price`
+       của dòng đó có thể là giá phiên TRƯỚC (ca VHM 2026-08-06 lệch nguyên hệ số 2,0).
+   ⇒ `fetch_anchor_prices()` nay **LOẠI** mọi cặp có sự kiện làm-đổi-giá trong khoảng
+   `[entry_date, plan_date]` (xem `_drop_pairs_crossing_exdate`). Vắng mặt = loại khỏi ứng
+   viên, đúng hợp đồng đã ghi ở docstring hàm đó — không có anchor còn hơn anchor sai hệ.
 
 2. **Đọc thẳng BẢNG BQ, không qua cache local.** `data/bq_cache` chỉ sync 23:45 ICT (sự cố
    2026-07-09, lệch +5,7%). Ở đây gọi `bq` CLI trực tiếp nên không dính cache — và đừng
@@ -89,15 +102,59 @@ def _reject_non_historical(pairs, plan_date):
             f"Giá trong ngày PHẢI lấy DNSE (coding_guidelines §6).")
 
 
+def _drop_pairs_crossing_exdate(pairs, plan_date):
+    """Loại cặp (mã, phiên chuẩn) có sự kiện làm-đổi-giá trong `[entry_date, plan_date]`.
+
+    → (pairs còn lại, [mô tả cặp đã loại]). Xem QUYẾT ĐỊNH DỮ LIỆU #1 (đính chính 2026-08-15):
+    anchor là TRẦN, nên anchor đứng ở hệ quy chiếu CŨ NỚI trần ra chứ không siết — hỏng theo
+    hướng fail-OPEN, im lặng. Bao gồm cả `entry_date` (không phải nửa khoảng mở) vì bẫy §1.1:
+    `Price` của chính dòng ngày GDKHQ có thể là giá phiên trước.
+
+    KHÔNG có `plan_date` ⇒ không biết cửa sổ nào để kiểm ⇒ trả nguyên (giữ hành vi cũ cho các
+    lời gọi tra cứu thủ công; đường production luôn truyền `plan_date`).
+    Tra hỏng ⇒ **raise**, đúng như mọi lỗi BQ khác trong file này: caller đã fail-closed sẵn.
+    """
+    if plan_date is None or not pairs:
+        return pairs, []
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(
+        os.path.abspath(__file__)))))
+    from corp_action_lib import pricing_events, is_price_adjusting
+
+    lo = min(d for _, d in pairs)
+    rows = [r for r in pricing_events(sorted({t for t, _ in pairs}),
+                                      since=(lo - dt.timedelta(days=1)).isoformat(),
+                                      until=_d(plan_date).isoformat())
+            if is_price_adjusting(r)]
+    by_tk = {}
+    for r in rows:
+        by_tk.setdefault(str(r.get("ticker") or "").upper(), []).append(_d(r["exright_date"]))
+    keep, dropped = [], []
+    for t, d in pairs:
+        hits = sorted(x for x in by_tk.get(t, []) if d <= x <= _d(plan_date))
+        if hits:
+            dropped.append(f"{t}@{d}: có GDKHQ {[str(x) for x in hits]} trong khoảng tới "
+                           f"{_d(plan_date)} — anchor phiên chuẩn thuộc hệ quy chiếu CŨ, dùng "
+                           f"làm TRẦN sẽ NỚI trần chứ không siết ⇒ loại khỏi ứng viên")
+        else:
+            keep.append((t, d))
+    return keep, dropped
+
+
 def fetch_anchor_prices(pairs, plan_date=None):
     """[(ticker, entry_date)] → {(ticker, 'YYYY-MM-DD'): giá thô}.
 
     Cặp nào KHÔNG có dữ liệu thật thì VẮNG MẶT trong dict trả về — caller phải coi "vắng mặt"
-    là loại khỏi ứng viên, không được suy diễn giá thay thế."""
+    là loại khỏi ứng viên, không được suy diễn giá thay thế. Cặp bị loại vì vắt qua một ngày
+    GDKHQ cũng vắng mặt theo đúng cơ chế đó (in lý do ra stdout, không nuốt im lặng)."""
     pairs = [(str(t).strip().upper(), _d(d)) for t, d in pairs]
     if not pairs:
         return {}
     _reject_non_historical(pairs, plan_date)
+    pairs, dropped = _drop_pairs_crossing_exdate(pairs, plan_date)
+    for msg in dropped:
+        print(f"[lag_entry_anchor] ⛔ {msg}")
+    if not pairs:
+        return {}
 
     inlist = ",".join(f"'{t}'" for t in sorted({t for t, _ in pairs}))
     lo, hi = min(d for _, d in pairs), max(d for _, d in pairs)

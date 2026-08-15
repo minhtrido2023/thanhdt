@@ -412,11 +412,86 @@ hệ quy chiếu **tại chỗ** mới là thứ đúng.
 
 ---
 
+## 10. ĐÃ CODE HOÁ — job `Taylor_20260815_054822` (2026-08-15)
+
+User duyệt code hoá D1-D3. Thiết kế trên **KHÔNG đổi**; phần này chỉ ghi cái gì nằm ở đâu và
+những chỗ hiện thực phải quyết định thêm.
+
+| Thiết kế | File | Ghi chú |
+|---|---|---|
+| D1 `resolve_reference()` + G1-G5 | `trading_bot/price_frame.py` (mới) | G1/G2/G3 tái dùng NGUYÊN `check_reference_snapshot()`; G4/G5 mới |
+| D1 lịch sự kiện, lọc `!= not_executed` | `corp_action_lib.pricing_events()` (mới) | `events()` cũ giữ nguyên semantics cho 3 caller cũ |
+| D1 bằng chứng cho G4 | `DNSEBroker.positions_raw()` (mới) | `get_positions()` cộng gộp lô ⇒ XOÁ mất bằng chứng cần kiểm |
+| D2 cổng một chỗ | `trading_bot/exdate_gate.py` (mới), wire ở `bot_execute.py` (sau `connect()`, trước funding gate) | cùng vị trí + cùng lý lẽ với `filter_lag_rating_orders` |
+| D3#1 | `trading_bot/strategies.py::_price(ex_tickers=…)` | chặn CẢ `recs_close` LẪN giá giao dịch paper |
+| D3#2 | `mike/bin/merge_park_orders.py` (`REF_PRICE_EXDATE_TOL=1%`) | chặn RIÊNG mã, không dừng plan |
+| D3#3 | `mike/bin/paper_main_probe_plan.py::exdate_tickers()` | mã có sự kiện bị bỏ khỏi plan probe |
+| §6.1 | `mike/bin/lag_entry_anchor.py::_drop_pairs_crossing_exdate()` | + đính chính docstring "Price miễn nhiễm" (đúng một nửa) |
+
+**Bốn quyết định hiện thực không có sẵn trong thiết kế** (nêu ra để review nhắm đúng chỗ):
+
+1. **Lệnh BÁN vào ngày có sự kiện đổi SỐ LƯỢNG ⇒ BỎ, không quy đổi.** Không suy được ý định
+   gốc từ một con số qty ("bán nửa vị thế" hay "bán đúng 500cp"?) — đúng cơ chế "bán ảo" §2.
+   Cổ tức TIỀN MẶT không đổi số lượng ⇒ giữ qty, chỉ làm tươi `ref_price`.
+2. **Lệnh MUA giữ GIÁ TRỊ, tính lại SỐ LƯỢNG.** Số lượng là đại lượng dẫn xuất; giá trị mới
+   là ý định của sizing. Ca thật: `plan_main` MBB 1.300cp@24.250 → 1.500cp@20.200.
+3. **Tra lịch hỏng ⇒ cổng FAIL-OPEN + báo TO** (không phải fail-closed như các cổng khác).
+   Nguồn lịch là BigQuery — hệ THỨ BA ngoài đường đặt lệnh; cho nó quyền dừng cả phiên là
+   đổi một rủi ro hiếm lấy một rủi ro thường. Lưới còn lại: `check_ref_vs_live()` tầng đặt
+   lệnh (dung sai 1%, mà mọi cú lật đo được đều ≥0,8%). Đây là chỗ tồn dư rủi ro, có công bố.
+4. **Giá phát hành quyền mua: sổ tay `RIGHTS_ISSUE_PRICE`, thiếu ⇒ FAIL-CLOSED.** Bảng vendor
+   để `value_per_share = NULL` cho MỌI dòng ISS (kiểm 14 sự kiện thật) — đúng như §4 cảnh báo.
+
+**Một defect TỰ TÌM RA khi review lại chính bản vá này (2026-08-15, vòng verify độc lập):**
+`merge_park_orders._has_event_in_window()` import `trading_bot.price_frame` mà KHÔNG tự neo
+repo root vào `sys.path` — nó dựa vào việc `_exdate_map()` đã chạy trước và chèn hộ. Khi caller
+**TIÊM `ex_map`** (selfcheck, hoặc bất kỳ orchestrator nào tra lịch một lần rồi truyền xuống)
+thì `_exdate_map()` KHÔNG chạy ⇒ import hỏng ⇒ hàm trả `False` ⇒ **cổng D3#2 tự tắt TRONG IM
+LẶNG** — đúng cách hỏng tệ nhất mà cả bản vá này sinh ra để tránh (§0 mục 4). Tái hiện được:
+tiến trình sạch, cwd `/tmp`, thân hàm bản cũ trả `(False, [])`. Đường production KHÔNG hở
+(ở đó `ex_map=None` nên `_exdate_map()` luôn chạy trước), nhưng nó hở đúng vào lối mà một
+người viết selfcheck/orchestrator sau này sẽ đi. Vá: hằng `_WC_ROOT` suy từ `__file__` + neo
+path trong CHÍNH hàm đó ⇒ đúng độc lập với THỨ TỰ GỌI; `_exdate_map()` dùng chung hằng đó
+thay cho đường dẫn chép cứng. Regression case chạy ở **tiến trình riêng từ cwd lạ** (chạy
+trong tiến trình selfcheck thì `sys.path` đã sạch sẵn nên không tái hiện được).
+
+**Bằng chứng chạy được:**
+- `python3 exdate_price_frame_selfcheck.py` — **53/53 PASS**, gồm 2 ca chứng minh ngược §9.1
+  dựng từ artifact nguyên bản (bản đọc BID 19:10:23 ⇒ G4 CHẶN; `plan_main_2026-08-11` ref
+  24.250 ⇒ cổng bắt, mua quy về 20.200, bán bị bỏ). Chạy offline, tất định, và PASS y hệt
+  dưới `env -u TZ` / `TZ=UTC` / `TZ=America/New_York`.
+- `replay_plans_regression.py` — **61/61 plan lịch sử KHÔNG có sự kiện đi qua cổng với 0 lệnh
+  đổi giá trị**, kể cả khi resolver LUÔN thất bại. 4 plan bị cổng chạm đúng bằng 4 plan §5.1/
+  §5.2 đã chỉ ra (SpaceX/ZaloPay 08-11, main 07-09, main 08-11) — xác nhận độc lập rằng phạm
+  vi cổng khớp CHÍNH XÁC với phơi nhiễm đã đo.
+- Bẫy `announced` đo trực tiếp trên BQ sống 2026-08-15, dải 08-14→08-20:
+  `events(executed_only=True)` → **0 dòng**; `pricing_events()` → **5 dòng** (BID/MBS/SSI
+  08-17, VIX 08-20). Reader cũ sẽ im lặng đúng những ngày cổng cần chạy.
+- 18 selfcheck theo phạm vi §23 (12 `brokers` + 2 `strategies` + `merge_park_orders` +
+  3 `corp_action*`) + `filter_lag_entry_window_selfcheck` (53/53): tất cả rc=0 — chạy lại TOÀN BỘ sau bản vá `_WC_ROOT`.
+
+**Chưa làm, CỐ Ý — cần job riêng, không nên nhét vào bản vá này:**
+- **§6.3 luật B của TV1** (trung bình 5 giá ĐÓNG). Trần do luật B sinh ra ĐƯỢC cổng D2 quy đổi
+  ở tầng lệnh (nhánh "trần lịch sử ×hệ số"), nên lỗ hổng **không còn hở tới lệnh thật**. Nhưng
+  bản thân đại lượng mean-5 vẫn tính trên chuỗi vắt qua GDKHQ — sửa tận gốc phải chạm
+  `discretionary_accumulation.py`, book có engine trần RIÊNG đã được user duyệt cận trên. Đổi
+  engine đó là đổi chính sách, không phải dịch hệ quy chiếu ⇒ tách job. TV1 hiện KHÔNG có sự
+  kiện sắp tới nên không cấp bách.
+- **§2 mirror sổ paper vs vị thế broker.** Cổng D2 chặn được HỆ QUẢ (lệnh bán ảo bị bỏ ở ngày
+  GDKHQ — xác nhận bằng chính ca `plan_main` trong selfcheck), nhưng nguyên nhân gốc
+  (`target` từ sổ paper không nhân lên trong khi `have` từ broker thì có) vẫn nằm nguyên trong
+  `build_plan`. Sửa nó là đổi cách đối chiếu paper↔broker, phạm vi khác hẳn.
+- **Việc dữ liệu cho Winston** (README §9 mục 4): bẫy `ticker.Price` dòng ngày GDKHQ — chưa báo.
+
+---
+
 ## Tái lập
 
 ```bash
 cd /home/trido/thanhdt/WorkingClaude
 python3 mike/agents/Taylor/research/exdate_order_pipeline_20260815/scan_exdate_orders.py
+python3 exdate_price_frame_selfcheck.py                                    # 53/53
+python3 mike/agents/Taylor/research/exdate_order_pipeline_20260815/replay_plans_regression.py
 ```
 
 Dữ liệu trung gian: `data/real_orders.json` (745 lệnh thật), `data/corp_events.csv` (30 sự kiện,
