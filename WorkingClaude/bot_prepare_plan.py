@@ -20,6 +20,7 @@ if hasattr(sys.stdout, "reconfigure"):  # console Windows cp1252 → utf-8
 
 from trading_bot.config import load_config, load_accounts, pick_accounts
 from trading_bot.brokers import make_broker
+from trading_bot.plan import annotate_pacing_horizon
 from trading_bot.strategies import get_strategy
 
 
@@ -49,6 +50,13 @@ def main():
         broker = make_broker(cfg, profile=p).connect()
         plan = strat.build_plan(cfg, broker, signal_date=args.date)
         plan.account = p["label"]
+        # Chú thích "số phiên gom kỳ vọng" cho lệnh lớn so với ADV — THUẦN THÔNG TIN,
+        # không đổi sizing/giá/số lệnh (user duyệt 2026-08-15, việc (b) nghiên cứu
+        # ceiling_ab_pacing_20260814). Lỗi nguồn ADV chỉ in cảnh báo, KHÔNG chặn plan.
+        plan, pacing_notes = annotate_pacing_horizon(plan)
+        for n in pacing_notes:
+            if n["action"] == "NO_ADV":
+                print(f"   ⚠️ pacing-note bỏ qua {n['ticker']}: {n['reason']}")
         print()
         print(plan.summary())
         if not args.dry:

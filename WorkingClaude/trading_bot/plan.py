@@ -626,6 +626,93 @@ def _adv_for_gate(ticker, asof):
     return adv_vnd(ticker, asof)
 
 
+PACING_NOTE_MARK = "[PACING]"
+# Ngưỡng dưới: lệnh ≤10% ADV đã khớp-đủ 98,7% trong 5 phiên ⇒ không ghi gì (khỏi nhiễu).
+PACING_MIN_RATIO = 0.10
+
+
+def pacing_horizon_for_ratio(ratio):
+    """(số phiên kỳ vọng dạng chuỗi, chú thích) cho `ratio` = giá trị lệnh / ADV; None nếu ≤10%.
+
+    Bảng ĐO ĐƯỢC — `mike/agents/Taylor/research/ceiling_ab_pacing_20260814/README.md` §3.1/§3.2
+    (rổ mã MỎNG ADV20 < 2 tỷ, n=23 mã, mô phỏng bar 1 phút 2023-09→2026-08, Rule A, κ=0,34).
+    "Số phiên" = số phiên gom cần để tỷ lệ khớp-ĐỦ (100% khối lượng đặt) đạt ≥90%:
+
+        ≤10% ADV  → 5 phiên (đã đạt 98,7%)
+        20-30% ADV → 5 phiên chỉ 82,9%; **10 phiên 96,0%**
+        ≥60% ADV  → 5 phiên 4,0% (BẤT KHẢ THI về số học: max_participation 10%/phiên × 5 = 50%
+                    < 60%); 10 phiên 81,6%
+
+    Khoảng 10-20% và 30-60% KHÔNG được đo trực tiếp → làm tròn LÊN nhóm đo được kế tiếp
+    (thận trọng, không nội suy giả vờ chính xác). Mọi con số MỨC ở đây là ước lượng có điều
+    kiện vào κ không quan sát được (README §5) — dùng để đặt KỲ VỌNG người đọc plan, KHÔNG
+    phải dự báo.
+    """
+    if ratio is None or ratio <= PACING_MIN_RATIO:
+        return None
+    if ratio <= 0.30:
+        return "10", "5 phiên chỉ khớp-đủ ~83%, 10 phiên ~96%"
+    if ratio < 0.60:
+        return "≥10", "vùng 30-60% ADV chưa đo trực tiếp — lấy theo nhóm ≥60% (thận trọng)"
+    return "≥10", ("5 phiên BẤT KHẢ THI về số học (trần participation 10% ADV/phiên × 5 phiên "
+                   "= 50% ADV < khối lượng lệnh)")
+
+
+def annotate_pacing_horizon(plan, asof=None):
+    """Ghi vào `note` của mỗi lệnh có giá trị/ADV > 10% số PHIÊN GOM KỲ VỌNG để khớp đủ ≥90%.
+
+    **THUẦN THÔNG TIN — KHÔNG đổi sizing, KHÔNG chặn lệnh, KHÔNG đổi giá.** Cùng khuôn mẫu
+    `dcf_check`/`dd_check` (informational, không block). Mục đích: đóng lỗ hổng "báo cáo EOD
+    đọc partial fill là SỰ CỐ" — với lệnh lớn so với ADV, khớp một phần trong phiên đầu là
+    hành vi ĐÚNG như thiết kế, không phải lỗi. Nguồn số: README §4b của nghiên cứu
+    ceiling_ab_pacing_20260814 (quant-skeptic CONFIRMED medium), user duyệt 2026-08-15.
+
+    Cơ sở ADV = ĐÚNG nguồn `cap_lag_orders` đang dùng (`_adv_for_gate` → `due_diligence.adv_vnd`
+    = `Volume_3M_P50 × COALESCE(Price, Close)`), KHÔNG mở nguồn thứ hai cho cùng khái niệm.
+    ⚠️ Đó là median 3 THÁNG, không phải ADV20 của nghiên cứu — cùng ngữ nghĩa "turnover một
+    phiên điển hình", nhưng KHÔNG đồng nhất; đây là lý do các ngưỡng chỉ dùng để phân NHÓM
+    thô, không dùng làm số chính xác.
+
+    Fail-mode: không đọc được ADV cho một mã → KHÔNG ghi note cho mã đó và trả về một bản ghi
+    action="NO_ADV" để caller báo. Không bao giờ raise, không bao giờ đụng `qty`/giá.
+    Idempotent: gọi lại sẽ THAY thế đoạn `[PACING] ...` cũ chứ không nối thêm.
+
+    Trả (plan, list dict) — mỗi dict {"ticker","order_id","adv_vnd","ratio","sessions","action"}.
+    """
+    asof = str(asof or plan.plan_date)[:10]
+    adv_cache, notes = {}, []
+    for o in plan.orders:
+        # dọn dấu vết lần chạy trước TRƯỚC khi quyết định ghi lại (idempotent)
+        base_note = (o.note or "").split(PACING_NOTE_MARK)[0].rstrip(" |")
+        o.note = base_note
+        if not o.qty or not o.ref_price:
+            continue
+        if o.ticker not in adv_cache:
+            try:
+                adv, data_date, err = _adv_for_gate(o.ticker, asof)
+            except Exception as ex:
+                adv, data_date, err = None, None, f"{type(ex).__name__}: {str(ex)[:120]}"
+            adv_cache[o.ticker] = (adv, data_date, err)
+        adv, data_date, err = adv_cache[o.ticker]
+        if not adv or adv <= 0:
+            notes.append({"ticker": o.ticker, "order_id": o.id, "adv_vnd": adv, "ratio": None,
+                          "sessions": None, "action": "NO_ADV",
+                          "reason": err or "ADV ≤ 0"})
+            continue
+        ratio = o.value / adv
+        hz = pacing_horizon_for_ratio(ratio)
+        if hz is None:
+            continue
+        sessions, why = hz
+        txt = (f"{PACING_NOTE_MARK} lệnh ≈ {ratio:.0%} ADV (ADV {adv:,.0f}đ, data {data_date}) "
+               f"⇒ số phiên gom kỳ vọng để khớp đủ ≥90%: {sessions} phiên — {why}. "
+               f"Thông tin, KHÔNG đổi sizing/giá; khớp một phần trong phiên đầu là ĐÚNG thiết kế.")
+        o.note = f"{base_note} | {txt}" if base_note else txt
+        notes.append({"ticker": o.ticker, "order_id": o.id, "adv_vnd": adv,
+                      "ratio": ratio, "sessions": sessions, "action": "ANNOTATED"})
+    return plan, notes
+
+
 def _rating_gate_deps():
     """Nguồn cho gate rating LAG. Tách riêng để self-check monkeypatch được (như _adv_for_gate).
 
