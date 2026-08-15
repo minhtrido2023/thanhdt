@@ -59,7 +59,7 @@ một con số đã bị chính tác giả bác bỏ.
 | C5 đối soát tiền thật | **CÒN MỞ.** `coding_guidelines` §21 **không đổi**. |
 | C6 coverage theo sàn | **ĐÓNG — bỏ chiều này.** Không có cột sàn; Sprint 2 không kết luận gì theo sàn. |
 | C7 N theo mã độc lập | **ĐÓNG.** Mọi thống kê khai N theo **sự kiện + số mã + số tháng** (P-CORE: 2.619 / 465 / 150); CI dùng block bootstrap theo tháng ex-date. |
-| C8 thuế cổ tức 5% | **ĐÓNG.** Nghiên cứu chạy trên số **GỘP**, nói rõ ở mọi kết luận; phép trừ thuế chỉ xuất hiện ở đúng một chỗ — cổng screening §6 của `SPRINT2_CASH_DIVIDEND.md`. |
+| C8 thuế cổ tức 5% | **ĐÓNG LẠI SAU KHI SỬA (`Taylor_20260815_125247`).** Nghiên cứu chạy trên số **GỘP**. Phép trừ thuế 5% **KHÔNG** được áp cho cổng screening §6.1 (mua sau ex ⇒ không nhận cổ tức) — bản đầu áp sai, xem **E4**/D6. Thuế chỉ xuất hiện ở đúng một chỗ hợp lệ: outcome hold-through §6.2 vào lệnh T−1, nơi người mua thật sự nhận cổ tức. |
 
 ## E. Sai sót của Sprint 2 — đầy đủ ở `SPRINT2_DEVIATIONS.md`
 
@@ -67,6 +67,7 @@ một con số đã bị chính tác giả bác bỏ.
 |---|---|---|
 | E1 | Selfcheck **T27** viết sai: assert "CI block-bootstrap rộng hơn CI theo sự kiện" trên dữ liệu tổng hợp **không có tương quan trong block** → FAIL. | Giả thuyết đầu tiên khi selfcheck fail là **"tôi viết sai test"**, không phải "code sai". Đã sửa test (thêm cú sốc chung theo block → 7,07×) + thêm T27b đo trên dữ liệu THẬT (1,46×). Không đụng estimator. |
 | E2 | Prereg ngầm định **null của pipeline = 0**; placebo R5 trả về **+1,18% có ý nghĩa** → giả định sai. | Placebo tồn tại đúng để bắt chuyện này. Đã thêm baseline XA (R7, `ex−250`) + estimator ghép cặp (deviation D3), và **giữ primary ở bản THÔ** vì R7 không sống sót Holm. |
+| E4 | ⭐ **Lỗi ENTITLEMENT**: trừ thuế cổ tức 5% khỏi `BHAR_20` — outcome neo ở **giá đóng cửa ex-date**, người mua ở đó **đã ex và không nhận cổ tức**. Kéo theo: báo cáo suy chi phí của "mua trước GDKHQ" bằng cách **cộng** thuế + cú rơi cơ học vào `BHAR_20`, một outcome chưa bao giờ đo giao dịch đó. Selfcheck **T36** lại assert công thức PHẢI có số hạng thuế ⇒ test **bảo vệ chính lỗi**. | Mỗi outcome phải khai **cửa sổ vào lệnh** và **entitlement** ngay tại chỗ định nghĩa, và selfcheck phải khoá cặp đó — chứ không khoá hình dạng công thức. Số học trên một outcome **không** tạo ra được outcome của một giao dịch khác: muốn phát biểu về hold-through thì phải **đo** hold-through. Khi đo thật, kết quả (**−0,907%**) **ngược hướng** với con số suy diễn (−1,281%), vì giá rơi ít hơn cổ tức nên người giữ xuyên ex được bù một phần. Sửa: D6 (C1 cost screen, C2 outcome mới, C3 8 test entitlement). |
 | E3 | `Index.level()` bản đầu ném `TypeError` khi gặp ngày thiếu (sự kiện chưa có T+h). | Đã sửa để trả **NaN** (fail-safe: sự kiện thiếu giá phải rơi khỏi mẫu, **không** được mượn giá phiên lân cận). Selfcheck **T22** khoá hành vi này. |
 
 ## D. Ranh giới đã giữ

@@ -26,6 +26,7 @@ BAD_TICKERS = {"DNN", "BCB", "PTX"}          # prereg X2, from Sprint 1 issue C3
 YIELD_BINS = [0.0, 0.02, 0.04, 0.06, 0.10, 0.50]
 YIELD_LABELS = ["Y1 [0,2%)", "Y2 [2,4%)", "Y3 [4,6%)", "Y4 [6,10%)", "Y5 [10,50%]"]
 HORIZONS = [5, 10, 20, 60]
+DIV_TAX = 0.05                               # VN personal income tax on cash dividends
 PRIMARY_H = 20
 IS_END = "2019-12-31"
 
@@ -491,15 +492,54 @@ def main() -> int:
             "n_icb_fe": int(icb_d.shape[1]), "n_year_fe": int(yr_d.shape[1])}
 
     # ---- §8 cost screen ------------------------------------------------------------------
-    net = core20["BHAR_20"] - 0.05 * core20["y_gross"] - 0.002 - 0.003
+    # CORRECTION C1 (2026-08-15, post-hoc; see SPRINT2_DEVIATIONS.md D6).
+    # ENTITLEMENT: the primary outcome BHAR_20 is anchored at the ex-date CLOSE (raw_h =
+    # c_h/c_0 - 1). Whoever buys at that price buys the share ALREADY EX -- they do NOT receive
+    # this event's dividend and therefore owe NO 5% dividend PIT on it. The pre-registered
+    # formula (prereg §8) subtracted 0.05*y_gross from an outcome whose holder has no
+    # entitlement to y_gross at all. That term is REMOVED here. Only costs a post-ex buyer
+    # actually pays remain: round-trip commission and spread/slippage.
+    net = core20["BHAR_20"] - 0.002 - 0.003
     B["net_of_cost_screen"] = {
-        "formula": "BHAR_20 - 0.05*y_gross - 0.002 (TC 2 sides) - 0.003 (spread/slippage)",
+        "entry_anchor": "ex_date_close_T0",
+        "dividend_entitlement": False,
+        "formula": "BHAR_20 - 0.002 (TC 2 sides) - 0.003 (spread/slippage)",
+        "correction_note": "prereg §8 also subtracted 0.05*y_gross (dividend PIT). REMOVED: a "
+                           "T0-close buyer is post-ex and receives no dividend. See D6.",
+        "superseded_prereg_formula": "BHAR_20 - 0.05*y_gross - 0.002 - 0.003",
         **desc(net),
         **{"boot": block_bootstrap_mean(net.to_numpy(), core20["ex_month"].to_numpy())}}
 
+    # ---- POST-HOC OUTCOME (CORRECTION C2, not pre-registered; D6) ------------------------
+    # The report previously ASSERTED a cost for buying just BEFORE the ex-date by adding the
+    # mechanical drop and the dividend tax on top of BHAR_20. That is arithmetic on an outcome
+    # that never measured that trade. If the hold-through claim is to be made at all it has to
+    # be its OWN measured outcome, on a total-return basis with the correct entitlement:
+    #   buy at the raw T-1 close, receive the dividend NET of 5% PIT, sell at the raw T+20 close.
+    # In adjusted space, with f = 1 - y the ex-factor and no contaminating event in the window
+    # (guaranteed by clean(.,21)):  P_20/P_-1 = (c_20/c_-1)*f  and  D/P_-1 = 1 - f = y.
+    ht = core20.dropna(subset=["c_20", "c_m1", "y_gross"]).copy()
+    y_ = ht["y_gross"].to_numpy(dtype=float)
+    ht["HOLDTHRU_20"] = ((ht["c_20"] / ht["c_m1"]).to_numpy(dtype=float) * (1.0 - y_)
+                         + (1.0 - DIV_TAX) * y_ - 1.0) - bm_ew.ret(ht["d_m1"], ht["d_20"])
+    ht["HOLDTHRU_20_net"] = ht["HOLDTHRU_20"] - 0.002 - 0.003
+    B["holdthrough_T_minus_1_to_T20_POSTHOC"] = {
+        "entry_anchor": "close_T_minus_1",
+        "dividend_entitlement": True,
+        "dividend_tax_rate": DIV_TAX,
+        "formula": "(c_20/c_m1)*(1-y) + (1-0.05)*y - 1 - EW_benchmark(d_m1,d_20)",
+        "note": "POST-HOC, NOT pre-registered. A distinct measured outcome, NOT derivable from "
+                "BHAR_20 by adding the mechanical drop and the tax. Counts as its own trial "
+                "and pays its own Holm multiplicity cost.",
+        "gross": run("holdthru", ht, "HOLDTHRU_20"),
+        "net_of_cost": run("holdthru_net", ht, "HOLDTHRU_20_net"),
+        "naive_wrong_arithmetic_for_contrast": float(
+            B["BHAR_20"]["mean"] - DIV_TAX * core20["y_gross"].mean()),
+    }
+
     res["module_B"] = B
     res["trials"] = {"declared_in_prereg": 20, "executed": len(pv),
-                     "note_extra": "R7 far baseline + paired estimator + AAR_0_1 are NOT in the prereg; see SPRINT2_DEVIATIONS.md D3. Holm below is computed over ALL executed trials, so the extra ones pay their own multiplicity cost.",
+                     "note_extra": "R7 far baseline + paired estimator + AAR_0_1 are NOT in the prereg; see SPRINT2_DEVIATIONS.md D3. The two hold-through outcomes (gross + net of cost) are NOT in the prereg either; see D6. Holm below is computed over ALL executed trials, so the extra ones pay their own multiplicity cost.",
                      "raw_p": pv, "holm_adjusted_p": holm(pv),
                      "bonferroni_threshold_primary_family_4_horizons": 0.05 / 4}
 

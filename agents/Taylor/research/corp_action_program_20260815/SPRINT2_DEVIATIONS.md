@@ -118,6 +118,93 @@ CI báo cáo là bản **thận trọng**.
 
 ---
 
+## D6 — ⭐ **SỬA LỖI ENTITLEMENT** trong cost screen + outcome hold-through mới (post-hoc)
+
+> Job `Taylor_20260815_125247`, sau khi bản đầu tiên đã commit (`7ae396c9`). Đây là **sửa lỗi**,
+> không phải mở rộng nghiên cứu. Prereg `SPRINT2_PREREG.md` **KHÔNG bị sửa** — nó đã khoá và lỗi
+> này nằm ngay trong chính prereg (§8).
+
+### Lỗi
+
+Outcome primary `BHAR_20` được dựng là `raw_h = c_h/c_0 − 1`, tức **vào lệnh ở giá đóng cửa T0 =
+chính ngày GDKHQ**. Người mua ở giá đó mua cổ phiếu **đã ex** ⇒ **không nhận cổ tức của sự kiện
+đó** ⇒ **không nợ thuế TNCN 5%** trên nó.
+
+Nhưng prereg §8 và code lại tính:
+
+```
+BHAR_net = BHAR_20 − 0,05·y_gross − 0,002 − 0,003        ← SAI entitlement
+```
+
+Nó trừ thuế của một khoản tiền mà người nắm giữ không được nhận. Kéo theo hai lỗi nữa trong báo cáo:
+
+1. Câu "mua ngay trước GDKHQ có chi phí ≈ 0,50 × tỉ suất, **cộng** thuế 5%, **cộng** cú rơi cơ
+   học" — `BHAR_20` **không đo** giao dịch mua-trước-ex. Cộng thêm số hạng vào nó là **số học trên
+   một outcome khác**, không phải kết quả đo.
+2. Selfcheck **T36** khẳng định cost screen *phải* trừ `0,05·y_gross` ⇒ test đang **bảo vệ chính
+   lỗi đó**. Xanh 38/38 vì vậy không có giá trị chứng minh ở điểm này.
+
+### Sửa — C1: cost screen post-ex (số ĐỔI)
+
+```
+BHAR_net = BHAR_20 − 0,002 (TC 2 chiều) − 0,003 (spread/slippage)
+```
+
+| | cũ (SAI) | mới | chênh |
+|---|---:|---:|---:|
+| mean | −1,781% | **−1,565%** | **+0,216pp** |
+| CI95 lo | −2,317% | −2,099% | +0,218 |
+| CI95 hi | −1,250% | −1,033% | +0,217 |
+| trung vị | −2,543% | −2,342% | +0,201 |
+| tỉ lệ dương | 37,5% | 38,7% | +1,2pp |
+
+Chênh = `0,05 × tỉ suất gộp trung bình` = 0,05 × 4,325% = 0,216pp. Khớp chính xác.
+
+### Sửa — C2: hold-through T−1 → T+20 thành **outcome MỚI đo riêng**, không phải suy diễn
+
+Nếu vẫn muốn phát biểu về việc mua trước ex thì phải đo nó, trên **total return đúng
+entitlement**: mua giá thô `P₋₁`, **nhận** cổ tức ròng thuế 5%, bán giá thô `P₊₂₀`.
+Trong hệ giá điều chỉnh, với `f = 1 − y` và không có sự kiện nhiễm trong cửa sổ (đảm bảo bởi
+`clean(·, 21)`): `P₊₂₀/P₋₁ = (C₊₂₀/C₋₁)·f` và `D/P₋₁ = y`.
+
+```
+HOLDTHRU_20 = (C₊₂₀/C₋₁)·(1−y) + 0,95·y − 1 − EW(d₋₁, d₊₂₀)
+```
+
+| | mean | trung vị | CI95 | p thô | Holm |
+|---|---:|---:|---|---:|---:|
+| gộp | **−0,907%** | −1,576% | [−1,464; −0,356] | 0,0012 | **0,013** |
+| sau phí (−50bps) | **−1,407%** | −2,076% | [−1,964; −0,856] | 0,0000 | **0,000** |
+
+**Kết quả này bác bỏ narrative cũ, không xác nhận nó.** Số học sai cũ cho ra âm hơn nhiều
+(−1,281% nếu chỉ cộng thuế; còn âm hơn nếu cộng cả cú rơi cơ học). Đo thật: **−0,907%**, tức
+**ít âm hơn cả `BHAR_20` (−1,065%)**. Cơ chế đã có sẵn trong chính §3: giá rơi **ít hơn** cổ tức
+(drop ratio trung vị 0,90 P-CORE) ⇒ người giữ xuyên ex **được hưởng** phần dưới-điều-chỉnh, người
+mua sau ex thì không. Ghi rõ: **post-hoc, KHÔNG pre-register**, +2 trial, chịu Holm riêng.
+
+### Sửa — C3: selfcheck
+
+| test | trước | sau |
+|---|---|---|
+| **T36** | khẳng định công thức **CÓ** `0.05*y_gross` (bảo vệ lỗi) | neo `entry_anchor = ex_date_close_T0`, `dividend_entitlement = False`, chỉ TC + slippage |
+| **T36b** | — | chống tái phát: công thức post-ex **không chứa** `y_gross` / `0.05` / `tax` |
+| **T36c** | — | bất biến số: `net − BHAR_20 == −0,005` đúng bằng phí, không số hạng ẩn |
+| **T36d** | — | mọi claim hold-through/pre-ex phải có outcome riêng, `entry_anchor = close_T_minus_1` và `dividend_entitlement = True` |
+| **T36e** | — | hold-through **khác** phép số học `BHAR_20 − thuế` (nếu trùng nghĩa là suy diễn chứ không đo) |
+| **T36f** | — | outcome post-hoc phải xuất hiện trong bảng trial + Holm |
+| **T36g** | — | prohibition ở TẦNG MÃ NGUỒN: dòng dựng `net` không được chứa `y_gross` |
+| **T36h** | — | prohibition ở TẦNG BÁO CÁO: không dòng nào còn tính thuế cổ tức cho người mua sau ex |
+
+38 → **45 test, 45 PASS**.
+
+### Cái KHÔNG đổi
+
+Mọi outcome thô confirmatory giữ nguyên **từng chữ số**: `BHAR_5/10/20/60`, bin theo tỉ suất, hồi
+quy, IS/OOS, LOO, R1-R7, ghép cặp, phân rã đoạn, Module A. Lỗi nằm **chỉ** ở lớp trừ chi phí và ở
+lớp diễn giải. Commit prereg `2a9b951a` và commit kết quả `7ae396c9` giữ nguyên trong lịch sử.
+
+---
+
 ## Điều kiện của prereg đã được GIẢI QUYẾT (không phải deviation, ghi để truy được)
 
 | prereg | điều kiện | kết quả đo | hành động |
@@ -134,10 +221,12 @@ CI báo cáo là bản **thận trọng**.
 | | |
 |---|---:|
 | Khai báo trước trong prereg | 20 |
-| Thực thi thật | **27** |
+| Thực thi thật | **29** |
 | Thêm do D3 | 5 (`R7`, `paired`, `paired_IS`, `paired_OOS`, `aar01`) |
 | Thêm do D4 | 1 (Module A P-CORE) |
 | Chênh còn lại | 1 (`R3_trim` — prereg gộp R3 thành 1 lát, thực thi tách phần trimmed thành test riêng) |
+| Thêm do **D6** | **2** (`holdthru`, `holdthru_net` — outcome hold-through post-hoc) |
 
-Holm tính trên **cả 27**. Kết luận primary (`BHAR_20`) có Holm-adjusted p = **0,000** nên không
-phụ thuộc vào việc đếm 20 hay 27.
+Holm tính trên **cả 29**. Kết luận primary (`BHAR_20`) có Holm-adjusted p = **0,000** nên không
+phụ thuộc vào việc đếm 20, 27 hay 29. Hai trial của D6 thì **có** phụ thuộc: `holdthru` gộp có
+Holm-p = 0,013 — đọc như outcome post-hoc biên, không phải kết quả đã pre-register.

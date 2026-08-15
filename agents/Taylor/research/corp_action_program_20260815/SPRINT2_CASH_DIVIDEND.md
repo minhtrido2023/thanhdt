@@ -2,7 +2,12 @@
 
 > Job `Taylor_20260815_121850` · 2026-08-15 · nối tiếp Sprint 1 (`f8cb4596`, gate CONDITIONAL PASS).
 > **Pre-registration commit trước outcome: `2a9b951a`.** Lệch khỏi kế hoạch: `SPRINT2_DEVIATIONS.md`.
-> Selfcheck: **38/38 PASS** (`selfcheck_sprint2.py`).
+>
+> ⚠️ **BẢN ĐÃ SỬA LỖI ENTITLEMENT — job `Taylor_20260815_125247`.** Bản đầu tiên trừ thuế cổ tức
+> 5% khỏi một outcome mà người nắm giữ **không được nhận cổ tức**, và suy ra chi phí của việc
+> "mua ngay trước GDKHQ" bằng phép cộng số học trên `BHAR_20` — thứ chưa bao giờ đo giao dịch đó.
+> Chi tiết + số cũ/số mới: `SPRINT2_DEVIATIONS.md` **D6**. Prereg giữ nguyên, KHÔNG sửa.
+> Selfcheck: **45/45 PASS** (`selfcheck_sprint2.py`).
 
 ---
 
@@ -22,9 +27,16 @@ microstructure, không phải khám phá giá.
 2. **Không bán khống được ở VN** ⇒ một drift âm về mặt cấu trúc là **chi phí phải biết**, không
    phải nguồn lợi nhuận có thể thu hoạch.
 
-Cái nó thật sự là: **một dữ kiện định lượng cho khâu lập plan** — mua một mã tỉ suất cao ngay
-trước ngày GDKHQ có chi phí kỳ vọng đo được trong tháng sau đó, **cộng thêm** vào cú rơi cơ học và
-thuế cổ tức 5%.
+Cái nó thật sự là: **một dữ kiện định lượng cho khâu lập plan về giai đoạn SAU ngày GDKHQ** — mua
+một mã tỉ suất cao **tại giá đóng cửa ngày GDKHQ** (tức đã ex, KHÔNG được nhận cổ tức) có chi phí
+kỳ vọng đo được trong 20 phiên sau đó. Đây là **cửa sổ vào lệnh mà `BHAR_20` thật sự đo**, không
+phải cửa sổ giữ-xuyên-ex.
+
+> **Ranh giới entitlement — phải đọc trước mọi trích dẫn.** `BHAR_20` neo ở **giá đóng cửa T0
+> (ex-date)**. Người mua ở đó **không có quyền nhận cổ tức của chính sự kiện đó** ⇒ **không** chịu
+> thuế cổ tức 5%, và cú rơi cơ học đã nằm TRƯỚC điểm vào, không phải chi phí của họ. Câu hỏi "mua
+> trước GDKHQ rồi giữ qua ex tốn bao nhiêu?" là **outcome KHÁC**, phải đo riêng trên cơ sở
+> **total return** (§6.2) — **không được** suy ra từ `BHAR_20` bằng cách cộng thuế và cú rơi.
 
 **Con số một dòng:** cứ **1 điểm phần trăm tỉ suất cổ tức gộp** thì `BHAR_20` giảm **≈ 0,50 điểm
 phần trăm** (hồi quy, t = **−5,60**, SE cluster hai chiều theo mã và theo tháng ex-date, có FE
@@ -141,7 +153,7 @@ ngày GDKHQ.** (Trích mean mà bỏ median ở đây sẽ kể một câu chuy�
 |---|---|
 | **mean** | **−1,065%** · CI95 block-bootstrap **[−1,599%; −0,533%]** |
 | median | −1,842% · tỉ lệ dương **41,2%** |
-| p (bootstrap) | **< 0,0001** · **Holm trên cả 27 trial: 0,000** |
+| p (bootstrap) | **< 0,0001** · **Holm trên cả 29 trial: 0,000** |
 | ngưỡng Bonferroni họ 4 horizon | 0,0125 → **vượt qua** |
 | N | 2.619 sự kiện / **465 mã** / 150 tháng |
 
@@ -200,8 +212,14 @@ momentum, biến động, value, ngành và năm.
 | CAAR vs EW universe | 0 | +2,27% | **+2,59%** | +1,46% | +1,27% | +1,63% | +2,17% |
 
 **Chạy giá vào → đỉnh đúng ngày GDKHQ → trả lại trong ~10 phiên → đi ngang.** Cộng với
-`AR_ex > 0` (giá rơi ít hơn cổ tức) và `drop ratio < 1`, đây là một **vòng round-trip
-dividend-capture** nhất quán, không phải ba mảnh rời rạc.
+`AR_ex > 0` (giá rơi ít hơn cổ tức) và `drop ratio < 1`, đây là một hình dạng **nhất quán** của
+một vòng round-trip quanh ngày GDKHQ, không phải ba mảnh rời rạc.
+
+⚠️ **Nhưng đọc hình này như nhân quả là vượt quá số đo.** Đỉnh ở T0 đến sau một pre-trend
+**+2,27%** (R6), và placebo ở `ex − 40` cũng dương **+1,18%** (R5) ⇒ pipeline có nền dương cho
+chính nhóm mã này. Phần "trả lại" sau ex vì vậy **không tách được** khỏi hoàn nguyên của đợt chạy
+giá trước đó; phép tách duy nhất có sẵn (R7 baseline xa) **không sống sót Holm**. Đây là mô tả
+hiệp biến, không phải chứng minh rằng chia cổ tức GÂY ra drift âm.
 
 ---
 
@@ -247,22 +265,59 @@ thì toàn bộ cổ tức sẽ rơi vào cửa sổ 0→20 và tạo ra đúng 
 
 ## 6. Đo tradability — chỉ SCREENING, không tối ưu
 
+**Hai cửa sổ vào lệnh KHÁC NHAU, hai entitlement KHÁC NHAU, hai outcome đo riêng.** Trộn chúng
+chính là lỗi của bản đầu tiên (D6).
+
+### 6.1 Mua SAU ex, tại giá đóng cửa T0 — đúng cửa sổ mà `BHAR_20` đo
+
+Người mua ở đây **đã ex**: không nhận cổ tức ⇒ **không có thuế cổ tức trong công thức**.
+
 ```
-BHAR_net = BHAR_20 − 0,05·y_gross − 0,002 (TC 2 chiều) − 0,003 (spread/slippage)
+BHAR_net = BHAR_20 − 0,002 (TC 2 chiều) − 0,003 (spread/slippage)
 ```
 
 | | |
 |---|---|
-| mean | **−1,781%** [−2,317%; −1,250%] |
-| median | −2,543% · tỉ lệ dương 37,5% |
+| mean | **−1,565%** [−2,099%; −1,033%] |
+| trung vị | −2,342% · tỉ lệ dương **38,7%** |
+
+*(Bản cũ ghi −1,781% vì trừ thêm 0,05 × tỉ suất — sai entitlement, đã bỏ. Chênh +0,216pp.)*
 
 Không có cách nào biến con số này thành lợi nhuận long-only. **Không bán khống được ở VN** ⇒ cũng
-không thu hoạch được chiều âm. Đây là **chi phí**, và đó chính là toàn bộ giá trị sử dụng của nó.
+không thu hoạch được chiều âm. Đây là **chi phí của việc VÀO SAU ex**, và đó là toàn bộ giá trị
+sử dụng của nó.
 
-**Hàm ý cho lập plan (dữ kiện, KHÔNG phải luật):** mua một mã **tỉ suất cao** ngay trước ngày
-GDKHQ mang chi phí kỳ vọng ≈ **0,50 × tỉ suất** trong 20 phiên sau đó, **cộng** thuế cổ tức 5%,
-**cộng** cú rơi cơ học. Với Y5 (tỉ suất ≥ 10%) là **−6,6%** trong 20 phiên. Với mã ADV cao —
-tức phần lớn rổ thật sau cổng ADV3T — hiệu ứng **không phân biệt được với 0**.
+### 6.2 Giữ XUYÊN ex: mua đóng cửa T−1 → bán T+20 — **outcome MỚI, POST-HOC**
+
+Không suy ra được từ §6.1. Phải đo trên **total return đúng entitlement**: mua giá thô `P₋₁`,
+**nhận** cổ tức **ròng thuế 5%**, bán giá thô `P₊₂₀`, rồi trừ benchmark EW cùng cửa sổ.
+
+```
+HOLDTHRU_20 = (C₊₂₀/C₋₁)·(1−y) + 0,95·y − 1 − EW(d₋₁, d₊₂₀)
+```
+
+| | mean | trung vị | CI95 | p thô | Holm (họ 29 trial) |
+|---|---:|---:|---|---:|---:|
+| gộp (trước phí) | **−0,907%** | −1,576% | [−1,464; −0,356] | 0,0012 | **0,013** |
+| trừ phí 2 chiều + slippage | **−1,407%** | −2,076% | [−1,964; −0,856] | 0,0000 | **0,000** |
+
+n = 2.619 sự kiện / 465 mã / 150 tháng. Tỉ lệ dương 41,9% (gộp).
+
+⚠️ **Đây là con số bác bỏ chính narrative cũ.** Bản đầu suy "chi phí = `BHAR_20` + thuế + cú rơi
+cơ học" ⇒ ra một con số âm hơn nhiều. Đo thật thì hold-through **−0,91%**, tức **ít âm hơn cả
+`BHAR_20` (−1,065%)**. Lý do có cơ sở và đã đo ở §3: giá rơi **ÍT hơn** cổ tức (drop ratio trung
+vị 0,90 trên P-CORE, `AR_ex` > 0) — người giữ xuyên ex **được** phần dưới-điều-chỉnh đó bù lại
+một phần, trong khi người mua sau ex thì không. Phép cộng số học cũ (−1,281% nếu chỉ cộng thuế,
+còn âm hơn nữa nếu cộng cả cú rơi) **sai cả về hướng lẫn về mức**.
+
+### 6.3 Hàm ý cho lập plan — dữ kiện, KHÔNG phải luật
+
+- **Mua sau ngày GDKHQ** (ở giá đóng cửa ex-date): chi phí kỳ vọng đo được ≈ **0,50 × tỉ suất
+  gộp** trong 20 phiên; Y5 (tỉ suất ≥ 10%) là **−6,6%**. Không tính thuế cổ tức — không được nhận.
+- **Giữ xuyên ngày GDKHQ** (vào T−1): **−0,91% gộp / −1,41% sau phí** trong 21 phiên, đã tính
+  đúng cổ tức ròng thuế và cú rơi cơ học. Không phải "cộng dồn" của mục trên.
+- Cả hai đều **KHÔNG cắt được theo tỉ suất một cách đáng tin ở mã ADV cao** — tức phần lớn rổ
+  thật sau cổng ADV3T ≥ 2 tỷ. Ở nửa ADV cao hiệu ứng **không phân biệt được với 0** (§5.1).
 
 ---
 
@@ -283,8 +338,20 @@ tức phần lớn rổ thật sau cổng ADV3T — hiệu ứng **không phân 
    **CÒN MỞ**, chỉ bị chặn khỏi mẫu chứ chưa được giải thích.
 9. **Tỉ lệ amendment vẫn chưa đo được** (Sprint 1 C1). Study này neo `exright_date` nên **không phụ
    thuộc** vào nó — nhưng announcement study vẫn **CẤM** cho tới khi có vintage thứ hai (≈ 4 tuần nữa).
-10. **27 trial thực thi / 20 khai báo.** Chênh + lý do: `SPRINT2_DEVIATIONS.md`. Kết luận primary
-    có Holm-p = 0,000 nên không phụ thuộc vào cách đếm.
+10. **29 trial thực thi / 20 khai báo** (27 + 2 outcome hold-through post-hoc của D6). Chênh +
+    lý do: `SPRINT2_DEVIATIONS.md`. Kết luận primary có Holm-p = 0,000 nên không phụ thuộc vào
+    cách đếm; hold-through gộp có Holm-p = 0,013 nên **có** phụ thuộc — đọc nó như một outcome
+    post-hoc biên, không phải kết quả đã pre-register.
+11. **Nhân quả bị giới hạn, không chỉ là câu chữ.** `R5` placebo trả về **+1,18% có ý nghĩa** ⇒
+    null của pipeline **không bằng 0**; `R6` pre-trend **+2,27%** ⇒ mã sắp trả cổ tức đã chạy giá
+    trước đó. Cả hai đồng nghĩa: một phần `BHAR_20` âm có thể chỉ là **hoàn nguyên của đợt chạy
+    giá trước ex**, không phải hiệu ứng nhân quả của bản thân việc chia cổ tức. Bản ghép cặp trừ
+    baseline xa (R7) chính là để tách chuyện đó, nhưng **R7 không sống sót Holm** ⇒ chưa tách
+    được dứt điểm. Phát biểu đúng mức: **hiệp biến bền, chiều âm, có liều-đáp ứng** — chưa phải
+    quan hệ nhân quả đã chứng minh.
+12. **Cửa sổ vào lệnh phải khai rõ khi trích.** `BHAR_20` = vào **sau ex**; `HOLDTHRU_20` = vào
+    **T−1**. Hai entitlement khác nhau (không / có nhận cổ tức). Số này **không cộng trừ được cho
+    nhau** — xem D6 và selfcheck T36–T36h.
 
 ---
 
@@ -308,7 +375,7 @@ tức phần lớn rổ thật sau cổng ADV3T — hiệu ứng **không phân 
 | `sprint2_build.py` | dựng panel từ BQ (read-only); SQL sinh ra ở `out2/sql/*.sql` |
 | `sprint2_analyze.py` | thực thi prereg; block bootstrap + OLS cluster hai chiều + Holm |
 | `sprint2_plots.py` | 3 hình |
-| `selfcheck_sprint2.py` | **38 invariant, 38 PASS** |
+| `selfcheck_sprint2.py` | **45 invariant, 45 PASS** (7 test entitlement mới + T36 viết lại, D6) |
 | `out2/results.json` | mọi con số trích trong file này |
 | `out2/module_A_spotcheck12.csv` | spot-check tay 12 ca phân tầng theo tỉ suất |
 | *(gitignore)* `out2/event_panel.csv`, `event_features.csv`, `module_A_events.csv` | 15MB per-event, **KHÔNG commit** (theo tiền lệ Sprint 1) — dựng lại đúng 25s bằng `sprint2_build.py`, SQL đã commit ở `out2/sql/` |

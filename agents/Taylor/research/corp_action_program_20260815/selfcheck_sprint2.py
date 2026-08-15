@@ -194,9 +194,57 @@ def main() -> int:
           "(a negative result that survives them is the only kind worth keeping)",
           "R5_placebo_ex_minus_40" in res["module_B"]
           and "R6_pretrend_m21_to_m1" in res["module_B"])
-    check("T36 the cost screen subtracts dividend tax AND both-side TC AND slippage",
-          all(x in res["module_B"]["net_of_cost_screen"]["formula"]
-              for x in ("0.05*y_gross", "0.002", "0.003")))
+    # --- ENTITLEMENT INVARIANTS (correction 2026-08-15, D6) ------------------------------
+    # The bug this replaces: T36 used to assert the cost screen DID subtract 0.05*y_gross.
+    # It green-lit an entitlement error -- BHAR_20 is anchored at the ex-date close, whose
+    # buyer is post-ex and receives no dividend, so no dividend tax is owed on it.
+    ns = res["module_B"]["net_of_cost_screen"]
+    check("T36 the POST-EX cost screen is anchored at the ex-date close, declares NO dividend "
+          "entitlement, and subtracts round-trip TC + slippage ONLY",
+          ns.get("entry_anchor") == "ex_date_close_T0"
+          and ns.get("dividend_entitlement") is False
+          and all(x in ns["formula"] for x in ("0.002", "0.003")),
+          ns.get("formula"))
+    check("T36b ANTI-REGRESSION: the post-ex cost screen contains NO dividend-tax / yield term",
+          not any(x in ns["formula"] for x in ("y_gross", "0.05", "tax", "y)")),
+          ns["formula"])
+    check("T36c the post-ex net mean equals BHAR_20 mean minus exactly the 50bps of "
+          "trading cost -- no hidden dividend term",
+          abs((ns["mean"] - res["module_B"]["BHAR_20"]["mean"]) + 0.005) < 1e-9,
+          f"delta={ns['mean'] - res['module_B']['BHAR_20']['mean']:.8f}")
+    ht = res["module_B"].get("holdthrough_T_minus_1_to_T20_POSTHOC")
+    check("T36d any hold-through / pre-ex claim rests on its OWN measured outcome with entry "
+          "before the ex-date AND dividend entitlement TRUE (never on BHAR_20 arithmetic)",
+          ht is not None and ht["entry_anchor"] == "close_T_minus_1"
+          and ht["dividend_entitlement"] is True
+          and ht["dividend_tax_rate"] == 0.05
+          and "gross" in ht and "n" in ht["gross"])
+    check("T36e the hold-through outcome is NOT the naive 'BHAR_20 - tax' arithmetic "
+          "(it is a distinct measurement; agreement would mean it was derived, not measured)",
+          abs(ht["gross"]["mean"] - ht["naive_wrong_arithmetic_for_contrast"]) > 0.001,
+          f"measured={ht['gross']['mean']:.5f} naive={ht['naive_wrong_arithmetic_for_contrast']:.5f}")
+    check("T36f every post-hoc outcome added by the correction pays its own Holm cost",
+          "holdthru" in t["raw_p"] and "holdthru_net" in t["raw_p"]
+          and "holdthru" in t["holm_adjusted_p"])
+    # source-level prohibition: the post-ex net series must never be built with a yield term
+    net_src = re.search(r"net\s*=\s*core20\[.BHAR_20.\][^\n]*", src_ana)
+    check("T36g SOURCE: the post-ex net series is built without any y_gross term",
+          net_src is not None and "y_gross" not in net_src.group(0),
+          net_src.group(0) if net_src else "line not found")
+    # report-level prohibition: the superseded formula may appear ONLY as a marked correction
+    rep = open(os.path.join(HERE, "SPRINT2_CASH_DIVIDEND.md")).read()
+    # two shapes of the same bug: the formula itself, and the narrative "... plus 5% dividend tax"
+    # NOTE the tight \W{0,4}: "cộng** thuế" (the bug) must match, while the legitimate open
+    # question "cổ tức có được cộng lại vào Close gộp hay ròng thuế?" must not.
+    BAD_PAT = (r"0[,.]05\s*[·*x×]?\s*y"                       # 0.05*y_gross in a formula
+               r"|c[ộo]ng\W{0,4}thu[ếe]"                       # "... cộng thuế ..." as a cost add-on
+               r"|thu[ếe]\W{0,4}c[ộo]ng")
+    OK_PAT = r"SAI|superseded|D6|đã bỏ|correction|bác bỏ|cũ|KHÔNG được|không được"
+    bad = [ln for ln in rep.splitlines()
+           if re.search(BAD_PAT, ln) and not re.search(OK_PAT, ln, re.I)]
+    check("T36h REPORT: no live formula/claim still charges dividend tax to the post-ex buyer "
+          "(the string may appear only on a line marked as the corrected/superseded one)",
+          not bad, "; ".join(bad[:2]))
     check("T37 no ALPHA claim can pass on a negative primary effect "
           "(prereg §9(a) requires mean >= +0.75%)",
           res["module_B"]["BHAR_20"]["mean"] < 0.0075
