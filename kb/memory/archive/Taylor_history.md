@@ -177,3 +177,6 @@
 
 ## Archived 2026-08-15 (keep=12 days=0 require_done=False)
 - [2026-08-14T05:41:39Z] Chuoi 'portfolio-wide badnews protection' DA DONG (job Taylor_20260814_050107, commit mike@0f642695): 3 diem quant-skeptic da va + verify. Bai hoc mang di: pct_change() PHAI khai fill_method=None tuong minh (pandas 2 pad vs 3 khong -> cung script cung data ra so khac tuy interpreter, hong AM THAM); moi phep do phai khai bien the loc thanh khoan (liq=none/adv/both) vi N khong don tri.
+
+## Archived 2026-08-15 (keep=12 days=0 require_done=False)
+- [2026-08-14T08:20:02Z] job Taylor_20260814_080222 XONG (commit wt@867853b): HYBRID paper-enable + REFRESH_SKIP fix DA nam san tren main tu 08-10/11 — stash@{0} STALE, chi cho drop (memory Mike ghi 'chua landed' la SAI). Viec that: 717303b landed khong quet §23 => 3 selfcheck do 4 ngay (extreme_regime/t2_settlement/paper_main_window), da va + them nhom D/F/H phu EXTREMExHYBRID va REFRESH_SKIPxHYBRID (lo hong that, truoc do khong bo nao phu). | CHUA LAM (de xuat, ngoai pham vi): HYBRID khong co cong LIVE RIENG — tat fill_timing_live_gate se bat luon HYBRID cho tien that; nen them fill_timing_hybrid_live_gate. | Truoc khi merge branch: main da tien den 9a9dbb1 (fix dd_check/dcf_check polling) cham plan.py+executor.py => phai chay lai 4 bo selfcheck tren main moi.
