@@ -44,6 +44,37 @@ RULE_A = "A"
 RULE_A_TAU_DEFAULT = 0.03
 RULE_A_TAU_MAX = 0.10
 
+# Dung sai của cổng đối soát CƠ SỞ GIÁ tại thời điểm ĐẶT LỆNH (xem `check_ref_vs_live`).
+# CHỌN TỪ SỐ ĐO THẬT, không phải số tròn cho đẹp (probe 2026-08-15, N=66 mã trên feed DNSE
+# sống + BQ `ticker.Price`, script `mike/agents/Taylor/research/rule_a_ref_guard_20260815/
+# probe_ref_vs_close.py`, dữ liệu thô `ref_vs_close_probe.json`):
+#   · CẬN DƯỚI — thứ dung sai phải DUNG NẠP: nhiễu chéo-feed giữa cơ sở giá của anchor
+#     (BQ `ticker.Price`) và giá đóng phiên đã hoàn tất trên DNSE `ohlc` 1D. Đo 29 mã cùng
+#     ngày 2026-08-14: **28/29 khớp TUYỆT ĐỐI tới từng đồng**; ca còn lại (SSI) lệch −20%,
+#     tức KHÔNG phải nhiễu mà là feed hỏng thật — đúng thứ cổng này phải bắt. Nhiễu cấu trúc
+#     duy nhất còn lại là độ phân giải 10đ của payload `ohlc` ⇒ ≤0,10% ở mã 10.000đ,
+#     ≤1,00% ở mã 1.000đ (sàn thanh khoản ADV3T 2 tỷ khiến mã dưới 2.000đ gần như không có
+#     trong sổ, nhưng 1% vẫn phủ trọn cả ca đó).
+#   · CẬN TRÊN — phải NHỎ HƠN HẲN τ=3%: sai số x% ở cơ sở giá dịch gần 1:1 thành x% dư/thiếu
+#     dư địa đuổi trên tổng ngân sách 3% mà user duyệt. 1% = 1/3 ngân sách, và vẫn nằm dưới
+#     `max_chase_pct_buy`=1,5% ⇒ một sai số lọt cổng KHÔNG BAO GIỜ ăn hết trần đuổi tĩnh.
+#   · Đối chiếu các ngưỡng đã có trong hệ: τ=3% (chính luật A), `chase_cap_vol_ceil`=4%,
+#     `max_chase_pct_buy`=1,5%. 1% là số duy nhất nằm dưới CẢ BA mà vẫn trên nhiễu đo được.
+# GIỚI HẠN ĐÃ BIẾT (công bố, không giấu): plan trễ đúng một phiên mà mã đó đi <1% qua đêm sẽ
+# LỌT cổng — nhưng khi ấy sai số trần cũng <1%, tức bị chặn bởi chính cận trên ở trên. Cổng
+# này chặn sai số LỚN, không hứa phát hiện mọi plan cũ.
+RULE_A_REF_TOL_DEFAULT = 0.01
+
+# ⚠️ KHÔNG dùng `q.ref` (secdef `basicPrice`) làm mốc sống để so với anchor. Đã đo và BÁC BỎ
+# 2026-08-15 trên cùng N=66: với mã HOSE thì `q.ref` == giá đóng phiên trước tuyệt đối
+# (59/66 lệch đúng 0,000%), NHƯNG với UPCOM (biên ±15% — TV1/DRI/SCL/SGP/TMG/QNS/ACV) giá
+# tham chiếu phiên là BÌNH QUÂN GIA QUYỀN phiên trước chứ không phải giá đóng: SCL lệch
+# −3,376%, TMG +0,949%, TV1 −0,497% trong một ngày HOÀN TOÀN BÌNH THƯỜNG (SCL 08-14
+# o=23,0 h=24,0 l=22,4 c=23,7 ⇒ bình quân ~22,9 là hợp lý, không có sự kiện quyền nào).
+# Mà TV1/DRI/SCL đều là mã ĐANG trong sổ. Dùng `q.ref` thì mọi dung sai đủ chặt để bắt plan
+# cũ (≤1%) sẽ chặn oan sạch UPCOM, còn dung sai đủ rộng cho UPCOM (>3,4%) thì to hơn cả τ=3%
+# ⇒ vô dụng. Mốc ĐÚNG là giá ĐÓNG phiên đã hoàn tất, CÙNG CƠ SỞ với anchor.
+
 # Book có ENGINE TRẦN RIÊNG đã wire + đã được user duyệt cận trên tuyệt đối
 # (`price_band.max_no_chase_ceiling`): discretionary_accumulation.resolve_price_band().
 # Với book này, "Rule A" = đổi `dynamic_ceiling.sessions` 5 → 1 trong state file, KHÔNG phải
@@ -204,3 +235,112 @@ def apply_rule_a(orders, anchors, tau=RULE_A_TAU_DEFAULT):
         notes.append(f"{tk}: Rule A {why} (anchor {a_date}, entry_anchor "
                      f"{o.get('entry_anchor_price'):,.0f})")
     return n, notes
+
+
+# --------------------------------------------------------- cổng đối soát lúc ĐẶT LỆNH (V2)
+
+def rule_a_in_force(order):
+    """True khi lệnh này THỰC SỰ đang chạy dưới luật A ở tầng executor.
+
+    Không đủ nếu chỉ `ceiling_rule == "A"`: `load_plan()` fail-closed về LUẬT CŨ khi provenance
+    hỏng nhưng KHÔNG xoá nhãn `ceiling_rule` khỏi `PlannedOrder` (nó là field hợp lệ của
+    dataclass). Lệnh như vậy đang chạy trần LUẬT CŨ — áp cổng luật A lên nó là chặn oan một
+    hành vi nằm ngoài phạm vi thay đổi này. Điều kiện đúng = trần ĐANG hiệu lực tái lập được
+    từ đúng provenance đã khai, tức chính bất biến #3.
+    """
+    if str(getattr(order, "side", "") or "").lower() != "buy":
+        return False
+    if str(getattr(order, "ceiling_rule", "") or "").strip().upper() != RULE_A:
+        return False
+    declared = _as_pos_float(getattr(order, "hard_no_chase_ceiling_vnd", None))
+    anchor = _as_pos_float(getattr(order, "ceiling_anchor_price", None))
+    tau = _as_pos_float(getattr(order, "ceiling_tau", None))
+    if declared is None or anchor is None or tau is None:
+        return False
+    expect, _ = rule_a_ceiling(anchor, tau)
+    return expect is not None and abs(declared - expect) <= 0.5
+
+
+def check_ref_vs_live(order, live_prev_close, chase_pct,
+                      tol=RULE_A_REF_TOL_DEFAULT):
+    """Cổng FAIL-SAFE: cơ sở giá của lệnh luật A còn khớp phiên giao dịch SỐNG không?
+
+    → `(ok: bool, info: dict)`. Hàm THUẦN (không I/O, không broker) — caller lo việc lấy
+    `live_prev_close` từ feed sống; nhờ vậy selfcheck chạy được không cần DNSE.
+
+    `live_prev_close` = giá ĐÓNG của phiên ĐÃ HOÀN TẤT gần nhất, lấy từ FEED SỐNG (DNSE
+    `ohlc` 1D). **KHÔNG được lấy từ BigQuery** (§6 coding_guidelines: BQ sync 23:45 nên luôn
+    trễ ≥1 phiên) và **KHÔNG được lấy `q.ref`** (xem khối chú thích ở đầu file — sai cơ sở
+    trên UPCOM). `chase_pct` = trần đuổi % mà executor SẼ dùng cho chính lệnh này
+    (`Executor._buy_chase_pct`), không phải hằng số tĩnh.
+
+    HAI phép kiểm, cả hai đều FAIL-CLOSED (thiếu dữ liệu ⇒ từ chối):
+
+      **C1 — anchor còn đúng phiên.** `|ceiling_anchor_price / live_prev_close − 1| ≤ tol`.
+      Đây là phát biểu chính xác của yêu cầu "ref_price khác giá live thì từ chối": trần luật
+      A = `anchor × (1+τ)`, nên anchor SAI ⇒ trần sai đúng bấy nhiêu, im lặng. Bắt được: plan
+      thực thi trễ phiên, sự kiện quyền (điều chỉnh giá tham chiếu), sai đơn vị (nghìn↔VND),
+      feed vỡ (ca SSI đo được 2026-08-15: BQ 24.500 vs DNSE 19.580).
+      So với `live_prev_close` chứ KHÔNG so với giá khớp hiện tại (`q.last`) là CỐ Ý: giá
+      khớp chạy suốt phiên, và luật A CHO PHÉP thị trường chạy tới +τ trên anchor — lấy
+      `q.last` làm mốc sẽ chặn oan đúng cái vùng vận hành mà luật A sinh ra để phục vụ.
+
+      **C2 — trần % theo `ref_price` không được âm thầm THAY trần luật A.** Executor tính
+      `cap = ref_price × (1 + chase_pct)` rồi mới `min()` với trần cứng. Nếu `ref_price` cũ
+      hơn thị trường thì `cap` tụt xuống dưới cả trần LẪN giá tham chiếu sống, lệnh nằm ở một
+      mức không ai chào — luật A còn nguyên trên giấy nhưng mất sạch tác dụng, và KHÔNG có
+      log nào nói điều đó. Điều kiện: `ref_price × (1 + chase_pct) ≥ min(trần, live_prev_close)`.
+      MỘT CHIỀU có chủ đích: `ref_price` CAO hơn anchor là thiết kế hợp lệ (book
+      DISCRETIONARY_SPECIAL cố ý kéo `resting_limit` lên cùng tỉ lệ với trần đúng để tránh
+      cái bẫy này) và vô hại vì trần cứng vẫn kẹp phía trên.
+
+    `info` luôn mang đủ số để người đọc log tái lập kết luận mà không phải chạy lại gì.
+    """
+    info = {"live_prev_close": live_prev_close, "tol": tol, "chase_pct": chase_pct,
+            "ticker": getattr(order, "ticker", None)}
+    live = _as_pos_float(live_prev_close)
+    if live is None:
+        info["reason"] = (f"KHÔNG lấy được giá đóng phiên trước từ feed sống "
+                          f"({live_prev_close!r}) — không đối soát được cơ sở giá")
+        info["check"] = "live_unavailable"
+        return False, info
+
+    anchor = _as_pos_float(getattr(order, "ceiling_anchor_price", None))
+    if anchor is None:
+        info["reason"] = "lệnh khai luật A nhưng thiếu/rác ceiling_anchor_price"
+        info["check"] = "C1"
+        return False, info
+    dev = anchor / live - 1.0
+    info.update({"anchor_vnd": anchor, "anchor_dev": dev,
+                 "anchor_date": str(getattr(order, "ceiling_anchor_date", None))})
+    if abs(dev) > tol:
+        info["check"] = "C1"
+        info["reason"] = (f"anchor luật A {anchor:,.0f}đ lệch {dev:+.2%} so với giá đóng phiên "
+                          f"đã hoàn tất trên feed sống {live:,.0f}đ (dung sai ±{tol:.2%}) — "
+                          f"cơ sở giá của trần KHÔNG còn mô tả phiên hiện tại")
+        return False, info
+
+    ref = _as_pos_float(getattr(order, "ref_price", None))
+    ceiling = _as_pos_float(getattr(order, "hard_no_chase_ceiling_vnd", None))
+    chase = chase_pct if _pos_num(chase_pct) else None
+    if ref is None or ceiling is None or chase is None:
+        info["check"] = "C2"
+        info["reason"] = (f"thiếu dữ liệu để kiểm trần đuổi (ref_price={ref!r}, "
+                          f"trần={ceiling!r}, chase_pct={chase_pct!r})")
+        return False, info
+    cap_chase = ref * (1.0 + chase)
+    need = min(ceiling, live)
+    info.update({"ref_price": ref, "ceiling_vnd": ceiling,
+                 "cap_from_ref_price": cap_chase, "cap_required_at_least": need})
+    if cap_chase < need:
+        info["check"] = "C2"
+        info["reason"] = (f"trần đuổi suy từ ref_price ({ref:,.0f} × (1+{chase:.2%}) = "
+                          f"{cap_chase:,.0f}đ) THẤP HƠN mức tối thiểu {need:,.0f}đ "
+                          f"(= min(trần luật A {ceiling:,.0f}, tham chiếu sống {live:,.0f})) — "
+                          f"ref_price đã cũ, trần luật A không còn là ràng buộc quyết định")
+        return False, info
+
+    info["check"] = "OK"
+    info["reason"] = (f"anchor {anchor:,.0f} lệch {dev:+.2%} vs phiên trước {live:,.0f} "
+                      f"(≤{tol:.2%}); trần đuổi từ ref {cap_chase:,.0f} ≥ {need:,.0f}")
+    return True, info

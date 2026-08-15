@@ -101,6 +101,11 @@ DEFAULTS = {
     "px_sample_sec": 60,              # chu kỳ ghi giá vào px_hist (tính r15)
     "max_chase_pct_buy": 0.015,       # trần đuổi giá mua = ref_plan × (1+1.5%)
     "max_chase_pct_sell": 0.03,       # sàn đuổi giá bán = ref_plan × (1−3%)
+    # Dung sai cổng đối soát cơ sở giá cho lệnh mua LUẬT A ngay trước khi đặt
+    # (Executor._rule_a_ref_guard → no_chase_ceiling.check_ref_vs_live). Vượt ⇒ KHÔNG đặt lệnh
+    # đó + bắn event bus RULE_A_REF_PRICE_MISMATCH. 1% chọn từ số đo N=66 mã ngày 2026-08-15 —
+    # căn cứ đầy đủ ở `no_chase_ceiling.RULE_A_REF_TOL_DEFAULT`, đừng đổi số này mà không đọc.
+    "rule_a_ref_tol_pct": 0.01,
     "atc_remainder_sell": True,       # phần bán còn sót → quét ATC
     "atc_remainder_buy": False,       # phần mua còn sót → mặc định bỏ (mai plan mới tự sync)
     "paper_fee_rate": 0.0015,         # phí mô phỏng paper (0.15% mỗi chiều)

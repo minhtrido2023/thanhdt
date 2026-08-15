@@ -28,6 +28,7 @@ import json
 import os
 import subprocess
 import time
+from zoneinfo import ZoneInfo
 
 from .config import EXEC_DIR, STOP_FILE
 from .plan import CHECK_FIELDS_AS_DICT, normalize_check_field
@@ -77,8 +78,14 @@ def _publish_bot_event(event_type: str, topic: str, payload: dict) -> None:
         )
     except Exception:
         pass
-from .vn_market import session_phase, tick_size, round_price, round_lot, LOT, now_ict
+from .vn_market import (session_phase, tick_size, round_price, round_lot, LOT, now_ict,
+                        normalize_price_vnd)
 from .brokers import qget
+from .no_chase_ceiling import rule_a_in_force, check_ref_vs_live, RULE_A_REF_TOL_DEFAULT
+
+# §16: neo TZ tường minh khi đổi ngày ICT ↔ epoch cho DNSE `ohlc` — `now_ict()` trả datetime
+# NAIVE nên `.timestamp()` trần trụi sẽ diễn giải theo TZ của process (sai dưới cron/test).
+ICT_TZ = ZoneInfo("Asia/Ho_Chi_Minh")
 
 _GAP_Z_DOWN_THRESHOLD = -2.0  # gap_z < this on a BUY → full-speed 09:15-09:45
 
@@ -138,6 +145,14 @@ class Executor:
         self._extreme_cache = {}      # (ticker, now) -> bool; memoise _extreme_regime_raw so a
                                        # cycle where BOTH _cancel_stale (via _would_be_unchanged)
                                        # AND _place_slices ask only mutates the 2-poll counter once
+        self._prev_close_cache = {}   # ticker -> (giá đóng phiên đã hoàn tất | None, lý do).
+                                       # Cache CẢ LẦN HỎNG: giá phiên ĐÃ ĐÓNG không đổi trong
+                                       # ngày, nên 1 lời gọi `ohlc`/mã/lần chạy là đủ — cổng
+                                       # luật A chạy mỗi chu kỳ 20s, không cache thì nó tự biến
+                                       # thành nguồn tải API mới (đúng bài học throttle EXTREME).
+        self._rule_a_blocked = set()  # (ticker, check) đã bắn event bus — 1 lần/mã/loại lỗi mỗi
+                                       # lần chạy; journal vẫn ghi mọi chu kỳ (rẻ, tại chỗ), chỉ
+                                       # kênh bus mới bị chặn lặp.
         self._load_gap_ref_data()
         # ticker -> ADV20 causal (giá trị giao dịch VND, TỔNG cả fleet) cho lệnh CAPIT.
         # Rỗng {} = không phải phiên CAPIT, hoặc artifact thiếu/stale → _child_qty tự
@@ -478,6 +493,86 @@ class Executor:
         except (TypeError, ValueError):
             return None
         return v if v > 0 else None
+
+    def _live_prev_close(self, ticker):
+        """Giá ĐÓNG của phiên ĐÃ HOÀN TẤT gần nhất, từ FEED SỐNG DNSE → (giá|None, lý do).
+
+        Nguồn = `client.ohlc(resolution="1D")` — CÙNG feed và CÙNG cơ sở giá với anchor luật A.
+        **KHÔNG dùng BigQuery** (§6: BQ sync 23:45 ⇒ truy vấn "hôm nay" luôn đọc phiên trước,
+        đúng cái ta đang muốn phát hiện thì lại không phát hiện được), **KHÔNG dùng `q.ref`**
+        (sai cơ sở trên UPCOM — xem `no_chase_ceiling.py` đầu file).
+
+        Chỉ nhận bar có NGÀY < hôm nay (ICT). DNSE trả cả nến HÔM NAY đang chạy (xác nhận bằng
+        probe live 2026-08-12, `discretionary_accumulation_inject.anchor_prices_for`); lấy nhầm
+        nó là đem chính giá đang đuổi làm mốc chống-đuổi.
+
+        Broker không có client `ohlc` (Sim/PHS/paper) → `(None, "no_ohlc")`; caller BỎ QUA cổng
+        thay vì chặn — chân paper không đụng tiền thật, và chặn ở đó chỉ làm hỏng đối chứng.
+        """
+        hit = self._prev_close_cache.get(ticker)
+        if hit is not None:
+            return hit
+        client = getattr(self.broker, "client", None)
+        if client is None or not hasattr(client, "ohlc"):
+            out = (None, "no_ohlc")
+        else:
+            out = self._fetch_prev_close(client, ticker)
+        self._prev_close_cache[ticker] = out
+        return out
+
+    @staticmethod
+    def _fetch_prev_close(client, ticker):
+        today = now_ict().date()
+        try:
+            to_ts = int(dt.datetime.combine(today, dt.time(23, 59))
+                        .replace(tzinfo=ICT_TZ).timestamp())
+            raw = client.ohlc(ticker, resolution="1D",
+                              **{"from": to_ts - 30 * 86400, "to": to_ts})
+        except Exception as exc:
+            return None, f"DNSE ohlc lỗi: {type(exc).__name__}: {exc}"
+        closes = raw.get("c") if isinstance(raw, dict) else None
+        stamps = raw.get("t") if isinstance(raw, dict) else None
+        if (not isinstance(closes, list) or not isinstance(stamps, list)
+                or len(closes) != len(stamps) or not closes):
+            return None, "ohlc thiếu/lệch mảng t↔c"
+        for ts, v in zip(reversed(stamps), reversed(closes)):
+            try:
+                bar_date = dt.datetime.fromtimestamp(int(ts), ICT_TZ).date()
+            except (TypeError, ValueError, OSError, OverflowError):
+                return None, f"timestamp bar không parse được ({ts!r})"
+            if bar_date >= today:
+                continue                       # nến hôm nay đang chạy / bar tương lai
+            try:
+                px = normalize_price_vnd(float(v))
+            except (TypeError, ValueError):
+                return None, f"giá ohlc không parse được ({v!r})"
+            return (float(px), f"đóng cửa {bar_date}") if px and px > 0 else \
+                   (None, f"giá ohlc ≤0 ({v!r})")
+        return None, "không có bar phiên ĐÃ HOÀN TẤT nào trong 30 ngày"
+
+    def _rule_a_ref_guard(self, o):
+        """Cổng FAIL-SAFE ngay TRƯỚC khi đặt lệnh mua luật A → None nếu được phép đặt.
+
+        Trả `(reason, info)` ⇒ KHÔNG đặt lệnh này chu kỳ này (giống HARD_CEILING_BLOCK /
+        WAIT_CASH: `continue`, thử lại chu kỳ sau — KHÔNG raise, KHÔNG giết cả bot; §5
+        coding_guidelines "fail-safe pause", cùng khuôn `_ghost_tickers`).
+
+        Vì sao đặt Ở ĐÂY chứ không ở `load_plan()`: `load_plan` chỉ chứng minh được trần TỰ
+        NHẤT QUÁN với provenance plan khai; nó không biết gì về phiên giao dịch mà lệnh THẬT SỰ
+        chạy trong đó. Khoảng cách giữa hai điều đó chính là lỗ hổng quant-skeptic chỉ ra.
+        """
+        if not rule_a_in_force(o):
+            return None
+        live, why = self._live_prev_close(o.ticker)
+        if live is None and why == "no_ohlc":
+            return None          # broker không có feed lịch sử (paper/sim) — không chặn
+        ok, info = check_ref_vs_live(o, live, self._buy_chase_pct(o.ticker),
+                                     tol=self.cfg.get("rule_a_ref_tol_pct",
+                                                      RULE_A_REF_TOL_DEFAULT))
+        if ok:
+            return None
+        info["live_source"] = why
+        return info.get("reason", "cơ sở giá luật A không đối soát được"), info
 
     def _limit_price(self, o, q, cross=True, extreme=False):
         """Giá LO cho lệnh con; None = không đặt được (thiếu quote).
@@ -1501,6 +1596,18 @@ class Executor:
                 self._journal("EXTREME_FLOOR_GUARD", o,
                               note="quote cận sàn (fact cứng) → chặn slice mua từ poll 1, "
                                    "thử lại chu kỳ sau")
+                continue
+            blocked = self._rule_a_ref_guard(o)
+            if blocked is not None:
+                reason, ginfo = blocked
+                self._journal("RULE_A_REF_BLOCK", o, price=ginfo.get("ceiling_vnd"),
+                              note=f"[{ginfo.get('check')}] {reason}")
+                key = (o.ticker, ginfo.get("check"))
+                if key not in self._rule_a_blocked:
+                    self._rule_a_blocked.add(key)
+                    _publish_bot_event("error", "RULE_A_REF_PRICE_MISMATCH", {
+                        "account": self.label, "plan_date": self.plan.plan_date,
+                        "order_id": o.id, "reason": reason, **ginfo})
                 continue
             cross, dip_note = self._decide_cross(o, now, q)
             if extreme_down:                 # o.side == "sell" (buy đã pause ở trên)
