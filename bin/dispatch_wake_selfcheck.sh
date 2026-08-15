@@ -103,7 +103,7 @@ _wait_bg() {
 }
 
 echo "== CA 1: from=Mike, job THÀNH CÔNG, có thread pinned ⇒ wake_thread.sh ĐƯỢC gọi"
-FROM_AGENT=Mike CLAUDE_STUB_RC=0
+FROM_AGENT=Mike
 run_dispatch -u DISCORD_THREAD_ID CLAUDE_STUB_RC=0 -- Wags "selfcheck wake ca1" --thread architecture --bg --timeout 30
 _wait_bg
 assert "exit code (--bg trả ngay)" "$RC" "0"
