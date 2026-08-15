@@ -1,0 +1,17 @@
+{
+  "n_ex_panel": 1914,
+  "n_core": 1276,
+  "n_stock_dividend": 1277,
+  "n_bonus": 514,
+  "n_mixed": 123,
+  "ais_tiers": {
+    "A": 1899,
+    "B": 2,
+    "CONFLICT": 0,
+    "UNLINKED": 13,
+    "AMBIGUOUS": 0
+  },
+  "n_ais_conflict": 242,
+  "n_match_candidate_rows": 4297,
+  "n_events_with_match_candidate": 1019
+}
