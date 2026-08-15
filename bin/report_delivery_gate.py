@@ -22,6 +22,10 @@ import tempfile
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_STATE = ROOT / "state" / "report_delivery.json"
 LEGACY_EMAIL_STATE = ROOT / "state" / "report_emailed.json"
+# Standalone cron/Discord sessions do not always source wc_env.sh.
+_gcloud_bin = Path("/home/trido/google-cloud-sdk/bin")
+if _gcloud_bin.is_dir():
+    os.environ["PATH"] = f"{_gcloud_bin}:{os.environ.get('PATH', '')}"
 
 
 def now() -> str:
@@ -122,7 +126,12 @@ def deliver(report: Path, state_path: Path, topic: str, notify_script: Path,
                 save_atomic(state_path, state)
 
             if not channel_done(record, "email", sha):
-                run_checked([sys.executable, str(email_script), str(report)])
+                # The exact hash already passed the same return gate above while this process
+                # holds the delivery lock. Avoid running the expensive BQ gate a second time;
+                # send_report_email records this explicit, auditable bypass reason.
+                run_checked([sys.executable, str(email_script), str(report),
+                             "--skip-return-gate",
+                             f"report_delivery_gate already validated sha256={sha}"])
                 record["email"] = {"status": "delivered", "delivered_at": now(),
                                    "sha256": sha}
                 save_atomic(state_path, state)
