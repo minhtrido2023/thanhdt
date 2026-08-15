@@ -126,7 +126,6 @@ assert "prompt wake nêu lý do fail (THẤT BẠI/timeout)" "$(echo "$WAKE_LINE
 
 echo "== CA 4: from=Mike, KHÔNG có thread nào pinned (không --thread, không ambient) ⇒ wake_thread.sh KHÔNG được gọi"
 FROM_AGENT=Mike
-rm -f "$MK/agents/Mike/state/ccdb_thread_id"
 run_dispatch -u DISCORD_THREAD_ID CLAUDE_STUB_RC=0 -- Taylor "selfcheck wake ca4" --bg --timeout 30
 _wait_bg
 assert "wake_thread.sh KHÔNG được gọi (không có _tid để đánh thức)" "$NWAKE" "0"
