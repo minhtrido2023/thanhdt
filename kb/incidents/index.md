@@ -183,6 +183,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Tóm tắt (nguyên văn tiêu đề) | status |
 |---|---|---|
+| 2026-08-15 | [RETRO — 2026-08-15: 4 sự cố (1 flip-live→bug→revert→fix trong 25 phút, 1 báo cáo sai cost-basis, 2 checker fail-open im lặng phát hiện qua weekly audit), 1 pattern ESCALATE (wakeup-miss tái diễn 2 retro liên tiếp)](retro/retro-2026-08-15.md) | logged |
 | 2026-08-14 | [RETRO — 2026-08-14: 6 sự cố, 0 pattern mới cần escalate — Pattern-B (4 ngày) và backlog-2 (5 ngày) ĐÃ ĐÓNG hôm nay, +1 gap qua verify Wags (ops_health_check.sh substring-match chưa vá theo NEEDS_CHANGES)](retro/retro-2026-08-14.md) | logged |
 | 2026-08-13 | [RETRO — 2026-08-13: 4 sự cố (1 fixed hoàn chỉnh, 1 hở bug hạ tầng vẫn treo dù bot tự phục hồi khớp lệnh một phần, 2 là câu hỏi bus chưa đóng), 2 pattern xuyên suốt (Pattern-B ngày thứ 4 liên tiếp, Pattern backlog ngày thứ 5)](retro/retro-2026-08-13.md) | logged |
 | 2026-08-12 | [RETRO — 2026-08-12: 9 sự cố, 3 pattern xuyên suốt (1 pattern-họ đã đặt tên "Pattern-B" tái diễn NGÀY THỨ 4 dưới 3 hình dạng MỚI cùng một ngày; 2 câu hỏi backlog VẪN CHƯA được user quyết sau nhiều ngày escalate)](retro/retro-2026-08-12.md) | logged |
