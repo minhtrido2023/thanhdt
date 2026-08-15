@@ -19,6 +19,34 @@ done
 
 TRADING_REPORT_THREAD="trading_report"   # tên trong kb/discord_channels.json (đổi từ Trading Daily 2026-07-03, theo yêu cầu user)
 
+# Delivery closure (user chốt phương án A 2026-08-15): EOD daily cũng là báo cáo client-facing,
+# nên "đã render" hoặc "đã post Discord" chưa phải hoàn tất. MỌI nhánh bên dưới phải tạo
+# artifact .md ổn định rồi đi qua cùng cổng hash-bound với weekly/monthly: Discord
+# + email đều có durable proof; report có số liệu còn phải qua return validation. Backstop
+# check_report_cadence.sh sẽ retry đúng kênh còn thiếu.
+_deliver_eod() {
+  local body="$1"
+  local validation_mode="${2:-full}"
+  local artifact="$ROOT/reports/${ACCOUNT}_daily_report_${PLAN_DATE}.md"
+  mkdir -p "$ROOT/reports"
+  printf '%s\n' "$body" > "$artifact"
+  # Alert sớm không công bố tỉ suất/vị thế, nên return gate không áp dụng;
+  # delivery gate vẫn hash-bind đủ Discord + email. Report đầy đủ chạy validation.
+  local gate_args=("$artifact" --topic "$TRADING_REPORT_THREAD")
+  [ "$validation_mode" = "not_applicable" ] && gate_args+=(--skip-validation)
+  if python3 "$ROOT/bin/report_delivery_gate.py" "${gate_args[@]}"; then
+    "$ROOT/bin/append_event.sh" Mafee status "eod-trading-report" \
+      "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"delivered_via\":\"report_delivery_gate\",\"artifact\":\"$(basename "$artifact")\"}" \
+      2>/dev/null || true
+    return 0
+  fi
+  "$ROOT/bin/append_event.sh" Mafee error "eod-trading-report-delivery-incomplete" \
+    "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"artifact\":\"$(basename "$artifact")\",\"retry\":\"check_report_cadence\"}" \
+    2>/dev/null || true
+  echo "eod_trading_report: DELIVERY INCOMPLETE cho $(basename "$artifact")" >&2
+  return 1
+}
+
 PLAN_FILE="$WC_ROOT/data/trade_plans/plan_${ACCOUNT}_${PLAN_DATE}.json"
 STATE_FILE="$WC_ROOT/data/execution_logs/exec_${ACCOUNT}_${PLAN_DATE}_state.json"
 
@@ -100,10 +128,8 @@ if [ ! -f "$PLAN_FILE" ]; then
   # Không có bằng chứng → nêu cả 2 khả năng, để người đọc xác nhận, không buộc kết luận.
   MSG="🟡 **EOD $ACCOUNT ($PLAN_DATE)** — KHÔNG TÌM THẤY file plan hôm nay. 2 khả năng: (i) CHỦ ĐỘNG không lập plan cho account này (quyết định HOLD có chủ đích — bình thường), hoặc (ii) DollarBill lỗi lúc 17:30/19:30 hôm qua. Kiểm tra plan channel / bus để xác nhận là chủ động hay lỗi — báo cáo này không đủ bằng chứng tự kết luận."
   echo "$MSG"
-  "$ROOT/bin/notify_thread.sh" "$MSG" "$TRADING_REPORT_THREAD" 2>/dev/null || true
-  "$ROOT/bin/append_event.sh" Mafee status "eod-trading-report" \
-    "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"delivered_via\":\"no_plan_alert\"}" 2>/dev/null || true
-  exit 0
+  _deliver_eod "$MSG" not_applicable
+  exit $?
 elif [ "$N_ORDERS_TODAY" = "0" ]; then
   # Case 2: HOLD hợp lệ (0 lệnh) — không cần state file (bot_execute.py thoát sớm đúng
   # thiết kế). Vẫn báo NAV để xác nhận hệ thống sống + số đúng, không phải im lặng.
@@ -118,19 +144,15 @@ elif [ "$N_ORDERS_TODAY" = "0" ]; then
 
 $NAV_SECTION$(_dt_gate_block)"
   echo "$MSG"
-  "$ROOT/bin/notify_thread.sh" "$MSG" "$TRADING_REPORT_THREAD" 2>/dev/null || true
-  "$ROOT/bin/append_event.sh" Mafee status "eod-trading-report" \
-    "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"delivered_via\":\"hold_day\"}" 2>/dev/null || true
-  exit 0
+  _deliver_eod "$MSG" not_applicable
+  exit $?
 elif [ ! -f "$STATE_FILE" ]; then
   # Case 3: CÓ lệnh trong plan nhưng KHÔNG có state file — bot chưa từng chạy/crash trước
   # khi ghi state đầu tiên. Vấn đề thật, khác hẳn case 1/2.
   MSG="🔴 **EOD $ACCOUNT ($PLAN_DATE)** — Plan có $N_ORDERS_TODAY lệnh nhưng KHÔNG có state file thực thi. Bot có thể chưa chạy được lần nào hôm nay (kiểm tra run_bot.sh log / bot_heartbeat) — cần xem ngay."
   echo "$MSG"
-  "$ROOT/bin/notify_thread.sh" "$MSG" "$TRADING_REPORT_THREAD" 2>/dev/null || true
-  "$ROOT/bin/append_event.sh" Mafee error "eod-trading-report" \
-    "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"delivered_via\":\"missing_state_alert\"}" 2>/dev/null || true
-  exit 0
+  _deliver_eod "$MSG" not_applicable
+  exit $?
 fi
 # Case 4 (bình thường: có lệnh + có state) rơi xuống phần render đầy đủ bên dưới.
 
@@ -449,23 +471,8 @@ FULL_REPORT="${DT5G_WARN:+$DT5G_WARN
 $NAV_SECTION$(_dt_gate_block)"
 
 echo "$FULL_REPORT"
-# Báo cáo client-facing KHÔNG được rơi im lặng (sự cố 2026-07-06: topic Trading report bị
-# Missing Access — bot mất quyền/thread archive — notify fail bị `|| true` nuốt, user không
-# nhận được report ngày và không ai biết). Fallback 2 tầng khi post thất bại: (1) Telegram
-# qua notify.sh, (2) Trading Daily thread kèm cảnh báo — và luôn ghi bus event nêu rõ kênh
-# nào nhận được.
-TRADING_DAILY_THREAD="trading_daily"
-DELIVERED_VIA="trading_report_thread"
-if ! "$ROOT/bin/notify_thread.sh" "$FULL_REPORT" "$TRADING_REPORT_THREAD" 2>>"$ROOT/logs/eod_notify_errors.log"; then
-  DELIVERED_VIA="fallback"
-  FALLBACK_HEADER="⚠️ **Topic Trading report đang không truy cập được (bot Missing Access) — gửi tạm qua kênh dự phòng.**"
-  "$ROOT/bin/notify.sh" "$FALLBACK_HEADER
-$FULL_REPORT" 2>/dev/null || true
-  "$ROOT/bin/notify_thread.sh" "$FALLBACK_HEADER
-$FULL_REPORT" "$TRADING_DAILY_THREAD" 2>/dev/null || true
-fi
-"$ROOT/bin/append_event.sh" Mafee status "eod-trading-report" \
-  "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"delivered_via\":\"$DELIVERED_VIA\"}" 2>/dev/null || true
+DELIVERY_RC=0
+_deliver_eod "$FULL_REPORT" || DELIVERY_RC=$?
 
 # Phương án B (user duyệt 2026-07-02): kiểm toán độc lập CÓ ĐIỀU KIỆN — chỉ kích hoạt
 # risk-auditor khi đối soát cơ học phía trên đã phát hiện lệch, không chạy tốn kém mỗi
@@ -503,3 +510,4 @@ Báo cáo ngắn gọn lên bus + Discord Trading report topic (bin/notify_threa
 PROMPT
 )" --bg --thread "$_discord_thread" --timeout 900 2>&1 || true
 fi
+exit "$DELIVERY_RC"

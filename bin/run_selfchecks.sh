@@ -67,9 +67,11 @@ for f in "${FILES[@]}"; do
     continue
   fi
   # offline = sandbox tmpdir, phải nhanh (giây) — 60s đủ rộng phòng máy chậm; live = BQ/network
-  # thật, cho tới 300s. Timeout mismatch (offline hoá ra chậm) tự nó LÀ 1 finding đáng xem lại
+  # thật, cho tới 300s. immutable_publish tạo/đọc/drop sandbox BQ và đã đo >300s,
+  # nên có budget 720s riêng. Timeout mismatch (offline hoá ra chậm) tự nó LÀ 1 finding đáng xem lại
   # phân loại, không chỉ tăng số cho qua.
   t=60; [ "$tier" = "live" ] && t=300
+  [ "$f" = "immutable_publish_selfcheck.py" ] && t=720
   start=$(date +%s)
   if [[ "$f" == *.sh ]]; then
     ( cd "$WC_ROOT" && timeout "$t" bash "$f" ) >/tmp/rsc_out.$$ 2>&1

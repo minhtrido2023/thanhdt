@@ -409,12 +409,12 @@ một dòng vào bảng, đó là cách rule này không mốc.
 *→ `agents/Taylor/research/active_nav_cash_basis_fix_20260810.md` (bản vá + 26 selfcheck + đối
 soát độc lập khớp từng đồng, quant-skeptic CONFIRMED cao vòng 1).*
 
-## 26. Đóng Câu Hỏi Trên Bus NGAY Khi Xử Lý Xong — Theo `~/.claude/skills/close-the-loop/`
+## 26. Đóng Câu Hỏi Trên Bus NGAY Khi Xử Lý Xong — Theo skill `bus-question-closure`
 
 Khi hành động của bạn giải quyết một `question` trên bus (fix xong, quyết định xong, điều tra ra
 kết luận) — post event đóng (`answer`/`decision`/`finding` phù hợp) **NGAY**, đúng topic string,
 kèm bằng chứng artifact (commit hash, giá trị config đọc lại, output selfcheck thật) — không đợi
-cuối phiên. Đọc `~/.claude/skills/close-the-loop/SKILL.md` trước khi sửa/vận hành bất kỳ
+cuối phiên. Đọc `.claude/skills/bus-question-closure/SKILL.md` trước khi sửa/vận hành bất kỳ
 checker/pipeline escalation nào (autofix, health-check, weekly audit). 2 lỗi khác nhau cho cùng
 1 triệu chứng "báo động treo nhiều ngày dù việc đã xong": (A) người xử lý quên đóng — kỷ luật, có
 backstop là auto-close-bằng-artifact trước khi escalate; (B) chính pipeline verify tra topic

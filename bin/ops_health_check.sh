@@ -376,7 +376,7 @@ if os.path.isdir(inbox_dir):
     # Winston 2026-07-14, SpaceX mù từ vệ sinh coord-2026-07-30) → alert plan T+1 chưa
     # sẵn sàng của account tiền thật biến mất khỏi check #5. Fix: required_change #1 của
     # arch-reviewer, NEEDS_CHANGES coord-2026-07-30.
-    resolvers = []
+    resolvers = []          # (topic, ts, explicit refs from payload.resolves)
     acks = []                # (topic_câu_hỏi_được_ack, hạn_ack) — xem ACK_PREFIX
     # HINT-ONLY (Wags coord-2026-08-03): ngoài resolver ĐÚNG quy ước, gom thêm MỌI
     # finding/answer/decision (kèm agent + ts) để GỢI Ý "có thể đã đóng nhưng sai quy ước".
@@ -426,14 +426,30 @@ if os.path.isdir(inbox_dir):
                     continue
                 closure_cands.append((agent_p, t, r_ts))
                 if etype != "finding":
-                    resolvers.append((t, r_ts))
-    def _resolved(q_topic, q_ts):
+                    _rp = rec.get("payload")
+                    if isinstance(_rp, str):
+                        try:
+                            _rp = json.loads(_rp)
+                        except Exception:
+                            _rp = {}
+                    _raw = _rp.get("resolves", []) if isinstance(_rp, dict) else []
+                    if isinstance(_raw, str):
+                        _raw = [_raw]
+                    _explicit = {str(x).strip() for x in _raw
+                                 if isinstance(_raw, list) and str(x).strip()}
+                    resolvers.append((t, r_ts, _explicit))
+    def _resolved(q_topic, q_ts, q_agent=""):
         # Exact-match, HOẶC resolver CHỨA nguyên topic câu hỏi (quy ước hậu-tố trạng thái) —
         # và resolver phải xuất hiện SAU câu hỏi. Chỉ 1 chiều (resolver ⊇ topic-hỏi) để 1
         # decision topic-ngắn KHÔNG vô tình khớp câu hỏi dài khác chủ đề.
         if not q_topic:
             return False
-        return any((r == q_topic or q_topic in r) and r_ts >= q_ts for r, r_ts in resolvers)
+        refs = {q_topic}
+        if q_agent:
+            refs.add(f"{q_agent}/{q_topic}")
+        return any(r_ts >= q_ts and
+                   ((r == q_topic or q_topic in r) or bool(refs & explicit))
+                   for r, r_ts, explicit in resolvers)
     def _rollup_resolved(rec, q_ts):
         # Câu hỏi TỔNG (escalation gom nhiều câu hỏi con đã mở sẵn) — ca thật
         # `Mike/retro-escalation-2026-08-13-patternB-and-backlog` (08-13T17:46): user quyết
@@ -487,7 +503,7 @@ if os.path.isdir(inbox_dir):
                 ts_dt = dt.datetime.fromisoformat(rec.get("ts", "").replace("Z", "+00:00"))
             except Exception:
                 continue
-            if _resolved(rec.get("topic"), ts_dt) or _rollup_resolved(rec, ts_dt):
+            if _resolved(rec.get("topic"), ts_dt, agent) or _rollup_resolved(rec, ts_dt):
                 continue
             # Chống đếm đôi nếu 1 event vừa còn ở hot inbox vừa đã sang archive (kb_nightly
             # bị kill giữa chừng): khoá theo (agent, topic, ts).

@@ -24,7 +24,8 @@
 #      không báo lại mỗi ngày (bản cũ không ghi ⇒ ở nhịp ngày sẽ thành bão báo động giả).
 #
 # ⚠️ BẮT BUỘC dùng đúng $DNA_PYEXE (Python 3.12 + pandas 3) + GOOGLE_APPLICATION_CREDENTIALS +
-# PATH có gcloud sdk — chạy sai môi trường tự tạo FAIL/TIMEOUT giả (đã đo thật tối 2026-08-08:
+# CLOUDSDK_CONFIG của writer + PATH có gcloud sdk — chạy sai môi trường tự tạo
+# FAIL/TIMEOUT giả (đã đo thật tối 2026-08-08:
 # 4/51 file báo lỗi sai chỉ vì Mike verify bằng system python3 thay vì $DNA_PYEXE). Env này lấy
 # từ chính kb/selfcheck_baseline.json's required_env, không hardcode 2 lần.
 set -uo pipefail
@@ -57,8 +58,13 @@ else
     "$ROOT/bin/notify.sh" "⚠️ [selfcheck sweep] Không mở được file khoá — vẫn quét nhưng KHÔNG có bảo vệ chạy-song-song. Kiểm quyền $ROOT/logs/." >/dev/null 2>&1 || true
 fi
 BASELINE="$ROOT/kb/selfcheck_baseline.json"
-DNA_PYEXE=/home/trido/thanhdt/wc_venv/bin/python
-export GOOGLE_APPLICATION_CREDENTIALS="/home/trido/thanhdt/gcloud_dtienthanh/application_default_credentials.json"
+# `bq` CLI chọn identity từ gcloud config, KHÔNG từ GOOGLE_APPLICATION_CREDENTIALS.
+# Nếu chỉ export ADC, nó dùng default config read-only bq-reader-8l và immutable_publish
+# báo thiếu tables.create dù writer config đã có sẵn. Nguồn canonical của cron env:
+[ -f "$WC/wc_env.sh" ] && source "$WC/wc_env.sh" 2>/dev/null || true
+DNA_PYEXE="${DNA_PYEXE:-/home/trido/thanhdt/wc_venv/bin/python}"
+export GOOGLE_APPLICATION_CREDENTIALS="${GOOGLE_APPLICATION_CREDENTIALS:-/home/trido/thanhdt/gcloud_dtienthanh/application_default_credentials.json}"
+export CLOUDSDK_CONFIG="${CLOUDSDK_CONFIG:-/home/trido/thanhdt/gcloud_dtienthanh}"
 export PATH="/home/trido/google-cloud-sdk/bin:$PATH"
 export MIKE_BOT_TEST_MODE=1
 

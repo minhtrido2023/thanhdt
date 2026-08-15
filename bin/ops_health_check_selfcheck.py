@@ -89,9 +89,9 @@ def ago(days, hours=0):
             - dt.timedelta(days=days, hours=hours)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def ev(agent, etype, topic, ts):
+def ev(agent, etype, topic, ts, payload=None):
     return {"agent_id": agent, "event_type": etype, "topic": topic, "ts": ts,
-            "payload": {}, "event_id": f"{agent}-{etype}-{topic}"}
+            "payload": payload or {}, "event_id": f"{agent}-{etype}-{topic}"}
 
 
 def mkbus():
@@ -146,6 +146,24 @@ def case_cross_layer_resolve():
         out = joined(lines)
         check("resolve chéo tầng+chéo agent: answer hot inbox đóng question trong archive",
               "cache-stability-blocker" not in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 2b: quyết định ở topic khác đóng canonical question qua payload.resolves.
+def case_explicit_cross_topic_resolve():
+    root, inbox = mkbus()
+    try:
+        write_events(os.path.join(inbox, "Taylor.jsonl"),
+                     [ev("Taylor", "question", "cash-vendor-policy", ago(3))])
+        write_events(os.path.join(inbox, "Mike.jsonl"),
+                     [ev("Mike", "decision", "ops-backlog-batch", ago(1),
+                         {"resolves": ["Taylor/cash-vendor-policy"],
+                          "evidence": "commit abc"})])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        check("resolves explicit: decision topic khác đóng canonical Agent/topic",
+              "cash-vendor-policy" not in out, out)
     finally:
         shutil.rmtree(root, ignore_errors=True)
 
@@ -953,6 +971,7 @@ def main():
     print("ops_health_check_selfcheck: check #5 (backlog question) + check #10 (notify_thread) "
           "+ check #11 (selfcheck_red_sweep freshness) + khối DELIVER (Discord→Telegram) regression")
     for fn in (case_archived_question_visible, case_cross_layer_resolve,
+               case_explicit_cross_topic_resolve,
                case_resolver_must_be_after, case_dedupe_hot_and_archive,
                case_no_crowd_out, case_small_pool_prints_all,
                case_corrupt_gz_warns, case_empty_archive_warns,

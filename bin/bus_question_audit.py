@@ -84,7 +84,7 @@ def main():
             if rec.get("event_type") == "question" and rec.get("topic"):
                 all_question_topics.add(rec.get("topic"))
 
-    resolvers = []
+    resolvers = []          # (resolver_topic, ts, explicit question refs from payload.resolves)
     prov_cutoff = now - dt.timedelta(days=a.provenance_days)
     recent_closures = []   # (ts, agent_of_file, topic, decided_by_or_None)
     for p in files:
@@ -97,7 +97,18 @@ def main():
                     r_ts = dt.datetime.fromisoformat(rec.get("ts", "").replace("Z", "+00:00"))
                 except Exception:
                     continue
-                resolvers.append((t, r_ts))
+                payload = rec.get("payload")
+                if isinstance(payload, str):
+                    try:
+                        payload = json.loads(payload)
+                    except Exception:
+                        payload = {}
+                raw_resolves = payload.get("resolves", []) if isinstance(payload, dict) else []
+                if isinstance(raw_resolves, str):
+                    raw_resolves = [raw_resolves]
+                explicit = {str(x).strip() for x in raw_resolves
+                            if isinstance(raw_resolves, list) and str(x).strip()}
+                resolvers.append((t, r_ts, explicit))
                 # chỉ đếm provenance nếu topic này THẬT SỰ đóng 1 question đã biết (exact hoặc
                 # chứa nguyên topic câu hỏi gốc, cùng quy ước hậu-tố trạng thái đã dùng ở resolved())
                 closes_real_question = any(t == qt or qt in t for qt in all_question_topics)
@@ -106,10 +117,13 @@ def main():
                     decided_by = payload.get("decided_by") if isinstance(payload, dict) else None
                     recent_closures.append((r_ts, agent_of(p), t, decided_by))
 
-    def resolved(q_topic, q_ts):
+    def resolved(q_agent, q_topic, q_ts):
         if not q_topic:
             return False
-        return any((r == q_topic or q_topic in r) and r_ts >= q_ts for r, r_ts in resolvers)
+        refs = {q_topic, f"{q_agent}/{q_topic}"}
+        return any(r_ts >= q_ts and
+                   ((r == q_topic or q_topic in r) or bool(refs & explicit))
+                   for r, r_ts, explicit in resolvers)
 
     seen = set()
     pending = []
@@ -127,7 +141,7 @@ def main():
             if key in seen:
                 continue
             seen.add(key)
-            if resolved(topic, ts_dt):
+            if resolved(agent, topic, ts_dt):
                 continue
             age_d = (now - ts_dt).days
             pending.append({"agent": agent, "topic": topic, "ts": rec.get("ts"), "age_days": age_d})
