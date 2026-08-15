@@ -169,8 +169,14 @@ def bar_is_completed_session(bar_ts, now=None):
     return session_phase(now)[0] == "CLOSED"
 
 
-def anchor_prices_for(broker, state, ticker, now=None):
+def anchor_prices_for(broker, state, ticker, now=None, with_dates=False):
     """Giá đóng cửa N phiên ĐÃ HOÀN TẤT gần nhất (cũ→mới) cho luật trần động P1, hoặc None.
+
+    `with_dates=True` → trả `(prices, dates)` với `dates` là ngày ICT của ĐÚNG các bar đó
+    (ISO, cùng thứ tự). LUẬT A bắt buộc có nó để khoá bất biến "anchor là phiên ĐÃ ĐÓNG TRƯỚC
+    plan_date"; không suy được ngày từ giá nên thiếu ⇒ engine fail-safe về band cố định.
+    Thất bại vẫn trả `None` (một giá trị, không phải tuple) ở cả hai chế độ — caller chỉ cần
+    một phép kiểm `is None`.
 
     CHỈ gọi khi state bật `dynamic_ceiling.enabled` — mặc định (cờ tắt) hàm này không chạy,
     không thêm một lời gọi API nào so với trước.
@@ -219,7 +225,7 @@ def anchor_prices_for(broker, state, ticker, now=None):
               f"(t={len(stamps) if isinstance(stamps, list) else 'n/a'}, "
               f"c={len(closes) if isinstance(closes, list) else 'n/a'}) → trần động không kích hoạt")
         return None
-    completed, n_dropped = [], 0
+    completed, comp_dates, n_dropped = [], [], 0
     for ts, v in zip(stamps, closes):
         ok = bar_is_completed_session(ts, now)
         if ok is None:
@@ -227,6 +233,7 @@ def anchor_prices_for(broker, state, ticker, now=None):
             return None
         if ok:
             completed.append(v)
+            comp_dates.append(dt.datetime.fromtimestamp(int(ts), _ICT_TZ).date().isoformat())
         else:
             n_dropped += 1
     if n_dropped:
@@ -246,7 +253,9 @@ def anchor_prices_for(broker, state, ticker, now=None):
         except (TypeError, ValueError):
             print(f"  [FAILSAFE] {ticker}: giá ohlc không parse được ({v!r}) → bỏ trần động")
             return None
-    return out
+    # Cắt ngày CÙNG một lát `[-n:]` với giá — hai danh sách phải song song từng phần tử, vì
+    # luật A đọc `dates[-1]` để khoá bất biến "anchor là phiên ĐÃ ĐÓNG TRƯỚC plan_date".
+    return (out, comp_dates[-n:]) if with_dates else out
 
 
 def load_active_nav(account, now=None):
@@ -389,14 +398,22 @@ def process_account(account, plan_date, dry_run):
 
         baseline = int(state.get("baseline_qty_before_program", 0) or 0)
         filled, broker = broker_filled_qty(account, account_id, ticker, baseline)
-        prev_turnover = prev_price = anchors = None
+        prev_turnover = prev_price = anchors = anchor_dates = None
         if filled is not None and broker is not None:
             prev_turnover, prev_price = prev_session_market(broker, ticker)
-            anchors = anchor_prices_for(broker, state, ticker)   # None khi cờ P1 tắt (mặc định)
+            # LUÔN xin kèm ngày (`with_dates=True`), kể cả khi state chưa bật luật A: ngày lấy
+            # từ ĐÚNG các bar đã dùng làm giá nên không tốn thêm lời gọi API nào, và nhánh
+            # mean-N bỏ qua tham số này. Xin có điều kiện thì ngày ngày lật state file sẽ ra
+            # fail-safe câm (thiếu anchor_dates ⇒ engine rơi về band cố định) — đúng cái bẫy
+            # "đổi cấu hình mà không có gì đổi" mà job này sinh ra để tránh.
+            res = anchor_prices_for(broker, state, ticker, with_dates=True)  # None khi cờ P1 tắt
+            if res is not None:
+                anchors, anchor_dates = res
 
         order, decision = compute_session_order(
             state, filled, prev_turnover, prev_price, plan_date, now_iso,
-            anchor_prices=anchors, active_nav_vnd=active_nav_vnd)
+            anchor_prices=anchors, active_nav_vnd=active_nav_vnd,
+            anchor_dates=anchor_dates)
         print(f"  decision: {decision['action']} — {decision['reason']}")
 
         # đánh dấu completed vào state nếu engine báo (rule e: không mua quá)
