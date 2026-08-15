@@ -4,7 +4,7 @@ status: TRAP
 source: tav2_bq.ticker.Price (và tav2_bq.ticker_prune.Price) — dòng ĐÚNG NGÀY GDKHQ
 group: price-volume
 scope: mọi code lấy giá lịch sử một phiên cụ thể từ ticker/ticker_prune (neo giá, trần đuổi giá, sizing, ADV cap)
-writer: Ingest ETL EOD ~15:30 ICT — RECONCILE 2 vendor (cafef GiaDongCua + VCI adjusted close), có cửa sổ tự sửa 15 phiên nhưng ĐO ĐƯỢC LÀ KHÔNG FIRE
+writer: Ingest ETL EOD ~15:30 ICT — RECONCILE 2 vendor (cafef GiaDongCua + VCI adjusted close); cửa sổ tự sửa 15 phiên KHÔNG BAO GIỜ chạm lớp lỗi này (bq_admin CONFIRMED bằng code 2026-08-15) ⇒ dữ liệu sai KHÔNG TỰ LÀNH
 ---
 
 # `tav2_bq.ticker.Price` có thể ĐỨNG YÊN ở hệ quy chiếu CŨ đúng ngày GDKHQ
@@ -71,6 +71,9 @@ Sai số: **+98,4%** so với giá thật (153.000 vs 77.100).
 2. **Cửa sổ tự sửa `RECENT=15`** (15 phiên gần nhất): nếu phát hiện một `anchor_event` lệch **>1%**
    giữa cache cũ và VCI adjusted, **VÀ** cafef đã "settled" (`SETTLE_RUN=4` — 4 phiên gần nhất tỉ số
    VCI/cafef ≈ 1), job sẽ **ghi đè lại TOÀN BỘ `recent_dates`**.
+   ⚠️ **Trên GIẤY thôi.** Gate `need_cafef` (dòng 209) khiến khối này **không bao giờ chạy** cho
+   lớp lỗi ở file này — xem §"Nguyên nhân — bq_admin CONFIRMED bằng code". Đừng đọc mục 2 này
+   như một cơ chế bảo vệ đang hoạt động.
 3. **Ngoài cửa sổ 15 phiên: chốt VĨNH VIỄN.** Daily job không bao giờ đụng lại (`overwrite=False`
    mặc định). ⇒ Sai quá 15 phiên = **chỉ backfill thủ công mới sửa được**.
 4. **Giờ chốt**: pipeline EOD chạy **~15:30 ICT**, sau khi HOSE đóng cửa 14:45.
@@ -82,7 +85,7 @@ Sai số: **+98,4%** so với giá thật (153.000 vs 77.100).
 - ⇒ **Đừng viết detector "Price ≠ Close là sai"** — nó sẽ báo động giả trên toàn bộ lịch sử trước
   mọi sự kiện quyền. Detector đúng nằm ở cuối file này (so `r_ex` với `r_next`).
 
-## Ca VHM 2026-08-06 — self-heal ĐÃ KHÔNG fire, mâu thuẫn với mô tả cơ chế
+## Ca VHM 2026-08-06 — self-heal ĐÃ KHÔNG fire (nguyên nhân đã CONFIRMED, xem dưới)
 
 Đo lại **2026-08-15** (job `Winston_20260815_072951`), tức **7 phiên giao dịch** sau ex-date
 (08-06 → 08-14) ⇒ **VẪN NẰM TRONG cửa sổ 15 phiên**, và độ lệch **98,4%** vượt ngưỡng 1% gấp ~98
@@ -96,32 +99,52 @@ Cấu trúc `Price/Close` của VHM (bằng chứng quyết định — chỉ M�
 | **2026-08-06 (GDKHQ)** | **1,9844** | **GÃY** — `Price` = 153.000 chép nguyên từ 08-05 |
 | 2026-08-07 → 08-14 (6 phiên) | **1,0000** mọi phiên | đúng, hệ số đã về 1 |
 
-### Ba giả thuyết (chỉ nêu — hệ thống của bq_admin, ta không code hoá)
+### Nguyên nhân — bq_admin CONFIRMED bằng code, 2026-08-15
 
-**H1 — `SETTLE_RUN=4` không bao giờ thoả ĐÚNG LÚC cần.** Điều kiện settle là "4 phiên gần nhất tỉ
-số VCI/cafef ≈ 1". Nhưng cafef là **unadjusted vĩnh viễn**, nên **mọi phiên cum** có tỉ số = **0,5**
-(chính là `Price/Close`=2,0 ở bảng trên). Trong các phiên 08-06 → 08-11, cửa sổ 15 phiên vẫn còn đầy
-dòng cum ⇒ chuỗi 4 phiên tỉ số ≈1 **chưa đủ dài** ⇒ gate settle FAIL ⇒ self-heal bị bỏ qua. Chuỗi 4
-phiên post-ex đầu tiên (08-07, 08-10, 08-11, 08-12) chỉ hoàn tất **ngày 08-12** — và nếu
-`anchor_event` là trạng thái tính-một-lần-rồi-bỏ (không xếp hàng chờ), cửa sổ vá đã trôi qua khi
-gate mở. Đây là bản làm sắc của giả thuyết Mike nêu, có số neo.
+> Nguồn: bq_admin qua user relay, bus `finding:bq-admin-confirmed-H2-va-fill-forward-bang-code`
+> (trace `Winston_20260815_082902`). **Đây là code của hệ thống ingest NGOÀI — ta không đọc,
+> không sửa, không test được nó.** Ghi lại để biết dữ liệu có thể sai **kiểu này** và **không tự
+> lành**; mọi trích dẫn dòng code dưới đây là nguyên văn bq_admin đưa, không phải ta verify được.
 
-**H2 — `anchor_event` chỉ được đánh giá trên phiên MỚI NHẤT, không quét hết `recent_dates`.** Phiên
-mới nhất (08-14) có cache 68.200 == VCI adjusted 68.200 ⇒ lệch **0%** ⇒ không sinh event ⇒ không bao
-giờ ghi đè `recent_dates`. Một hỏng nằm GIỮA cửa sổ thì vĩnh viễn không được nhìn tới. **H2 giải
-thích được cả 42 dòng bằng một cơ chế duy nhất**, nên là giả thuyết mạnh nhất.
+**✅ H2 — CONFIRMED. `anchor_event` chỉ so sánh MỘT ngày, và gate ở dòng 209 chặn toàn bộ khối sửa.**
+Nguyên văn bq_admin:
+- `anchor_event` chỉ so sánh **một ngày** (`d_last`) — ngày này **dịch mỗi lần chạy lại**.
+- `holes` chỉ bắt giá trị **THIẾU (NaN)**, **không** bắt giá trị **CÓ MẶT nhưng SAI**.
+- Toàn bộ khối sửa lỗi — **kể cả** nhánh `cafef_settled` ghi đè lại cả `recent_dates`
+  (**dòng 261-270**) — **chỉ chạy khi `need_cafef=True`**.
+- ⇒ Dòng lỗi nằm **GIỮA** cửa sổ, **không phải NaN**, và **không rơi đúng vị trí `d_last`** ngày
+  nó xảy ra ⇒ `need_cafef` **không bao giờ bật lại** ⇒ cơ chế sửa (kể cả phần quét cả cửa sổ) bị
+  **bỏ qua VĨNH VIỄN** cho ticker/ngày đó.
+- **Điểm gãy là GATE ở dòng 209**, không phải bản thân vòng lặp sửa lỗi.
 
-**H3 — "cache 153.000 chính là VCI-adjusted-của-T-1 nên so sánh bị lẫn hệ quy chiếu": BÁC BỎ bằng
-số.** VCI adjusted close của 08-05 trong hệ quy chiếu hôm nay là **76.500** (= `Close` 08-05), không
-phải 153.000. Giá trị kẹt 153.000 là **cafef unadjusted của 08-05** — tức hỏng nằm ở **nhánh cafef**,
-không phải nhánh VCI.
+⇒ Cửa sổ tự sửa 15 phiên là **hư ảo đối với lớp lỗi này**. Số đo khớp: **0/42 dòng được self-heal**.
 
-**H4 — cơ chế ghi ra giá trị sai ban đầu = FILL-FORWARD khi vendor thiếu.** 26/42 dòng lệch có
-`Price[ex] == Price[ex−1]` **tuyệt đối từng đồng**. Chép nguyên T−1 là chữ ký kinh điển của
-fill-forward khi vendor trả null/chưa cập nhật. Ngày GDKHQ đúng là ngày cafef lật hệ quy chiếu ⇒
-đúng ngày dễ trả null nhất lúc 15:30 ICT. **Fail-safe đúng phải là bỏ trống/fail, không phải chép
-T−1** — chép T−1 tạo ra một giá trị *trông hợp lệ* mà không consumer nào phát hiện được.
-⇒ Có **HAI lỗi độc lập**: (a) ingest chép T−1 khi thiếu dữ liệu; (b) self-heal không sửa lại.
+**✅ H4a — CONFIRMED. Chép T−1 khi vendor null là forward-fill CHỦ ĐÍCH, và im lặng tuyệt đối.**
+Nguyên văn bq_admin:
+- Chép nguyên T−1 khi vendor trả null = **forward-fill `Price`/`Close` cho giá trị thiếu**, là
+  **CHỦ ĐÍCH thiết kế** (invariant: `Price` không bao giờ ≤ 0).
+- Có **test riêng khẳng định hành vi**: `tests/test_worker_tasks_behavior.py:2443-2453`,
+  `test_zero_price_midseries_is_ffilled` — verify với input `Price=0` giữa chuỗi → output ffill,
+  **đúng y hệt 26/42 dòng** đã tìm thấy.
+- **KHÔNG LOG GÌ CẢ** — khác `clean_ohlc_df` (có log khi drop spike); `merge_adjust_unadjust`
+  ffill **ÂM THẦM**, tạo giá trị *nhìn hợp lệ* mà không ai biết nó bị lặp.
+
+⇒ Xác nhận có **HAI lỗi độc lập**, và cả hai đều là **hành vi đã được chủ đích hoá / test hoá** ở
+phía họ: (a) ingest chép T−1 khi thiếu dữ liệu, im lặng; (b) self-heal không bao giờ sửa lại.
+**Không có lý do gì để chờ nó tự hết.**
+
+### Hai giả thuyết cũ nay đã hết vai trò
+
+**H1 (`SETTLE_RUN=4` không thoả đúng lúc)** — **KHÔNG CÒN CẦN**. H2 đã giải thích trọn hiện tượng
+ở tầng trên (`need_cafef` không bao giờ bật ⇒ gate settle không bao giờ được đánh giá tới). Giữ lại
+làm ghi chú: cafef unadjusted vĩnh viễn nên mọi phiên cum có tỉ số VCI/cafef = 0,5, chuỗi 4 phiên
+post-ex đầu tiên của VHM (08-07, 08-10, 08-11, 08-12) chỉ hoàn tất 08-12 — vẫn đúng, nhưng không
+phải điểm gãy.
+
+**H3 ("cache 153.000 là VCI-adjusted-của-T−1")** — **ĐÃ BÁC BỎ bằng số** (job
+`Winston_20260815_072951`). VCI adjusted close của 08-05 trong hệ quy chiếu hôm nay là **76.500**
+(= `Close` 08-05), không phải 153.000. Giá trị kẹt 153.000 là **cafef unadjusted của 08-05** ⇒ hỏng
+ở **nhánh cafef**, không phải nhánh VCI. Khớp với H4a đã CONFIRMED.
 
 ## Kiểm chứng "self-heal có hoạt động nói chung không" — KHÔNG kết luận được từ 41 dòng còn lại
 
@@ -142,8 +165,15 @@ sổ 15 phiên suốt 15 phiên sau ex-date của nó, và **thoát ra mà khôn
 (Không chứng minh được self-heal *chưa từng* fire — 2.033 dòng ex-date ĐÚNG không phân biệt được
 "ghi đúng ngay từ đầu" với "đã được sửa" — nhưng riêng trên tập lỗi thì tỉ lệ sửa là **0/42**.)
 
-❓ **Còn treo — Q3 chưa được trả lời**: có backfill được 42 dòng đã liệt kê không? (39/42 đã ngoài
-cửa sổ 15 phiên ⇒ theo chính mô tả cơ chế, **chỉ backfill thủ công mới sửa được**.)
+📌 **Q3 (backfill 42 dòng lịch sử) — bq_admin chưa trả lời, và ta ĐÃ THÔI HỎI.** Đây giờ là ghi
+chú "nice to have", **không phải việc đang chờ**: 42 dòng đều là dữ liệu lịch sử, không dòng nào
+đang được dùng cho một quyết định live nào. Bus question đã đóng 2026-08-15
+(`Winston/bq-admin-ticker-price-exdate-backfill` + `.../bq-admin-followup-self-heal-khong-fire-va-Q3-backfill`)
+vì phần lõi kỹ thuật đã được trả lời xác đáng. **Lý do quan trọng hơn: kể cả có backfill, nó cũng
+không bảo vệ được ta** — cơ chế sinh lỗi vẫn nguyên (H4a là hành vi chủ đích, có test khẳng định)
+và self-heal vẫn không bao giờ chạm tới (H2), nên **dòng lỗi MỚI sẽ tiếp tục xuất hiện**. Bảo vệ
+duy nhất có tác dụng là **guard phía consumer** (mục "Việc phải làm khi viết code" §1). Ai cần
+backfill cho một nghiên cứu cụ thể thì hỏi lại bq_admin theo ca đó, đừng mở lại câu hỏi tổng.
 
 ## Quy mô — quét toàn bộ 2024-01-01 → 2026-08-15
 
@@ -176,9 +206,18 @@ nền của mã mỏng chứ không đo hiện tượng này. Phải giữ đủ
 
 ## Việc phải làm khi viết code
 
+> ⚠️ **Tiền đề đã đổi (2026-08-15, bq_admin CONFIRMED):** đây **KHÔNG phải lỗi ingest ngẫu nhiên
+> rồi sẽ được sửa**. Ghi sai là hành vi **chủ đích, im lặng, có test khẳng định** (H4a); và cơ chế
+> tự sửa **theo cấu trúc không bao giờ chạm tới lớp lỗi này** (H2, gate dòng 209). ⇒ **Đừng chờ
+> dữ liệu tự lành, đừng giả định "chắc đã được backfill rồi".** Nghi một dòng GDKHQ cụ thể sai thì
+> **luôn verify tay qua nguồn thứ 2** (`ticker_1m`, `Close` cùng dòng, hoặc DNSE API) — kể cả dòng
+> mới tinh trong cửa sổ 15 phiên, vì chính ca VHM 7-phiên-tuổi vẫn sai. Guard phía consumer là
+> **lớp bảo vệ DUY NHẤT** có tác dụng.
+
 1. **Cần giá THÔ của một phiên quá khứ cụ thể** (neo giá, trần đuổi giá, giá vốn) ⇒ phải xử lý
    khả năng dòng đó là ngày GDKHQ. Rẻ nhất: `LEAST(Price, High)` / kiểm `Low ≤ Price ≤ High` và
-   fail-closed nếu vi phạm — bắt trọn ca VHM.
+   fail-closed nếu vi phạm — bắt trọn ca VHM. **Đây là guard BẮT BUỘC, không phải tuỳ chọn**:
+   không có cơ chế nào ở phía upstream sẽ bắt hộ (ffill im lặng + self-heal không fire).
 2. **Nếu chỉ cần "giá theo hệ quy chiếu HÔM NAY"** (đại đa số việc sizing) ⇒ **dùng `Close`**, đừng
    dùng `Price`. `Close` đúng ở cả ba bảng trong mọi ca đã quét.
 3. **Trong cửa sổ ~1 tháng gần nhất** ⇒ `ticker_1m.Price` là bản đáng tin hơn `ticker.Price`.
