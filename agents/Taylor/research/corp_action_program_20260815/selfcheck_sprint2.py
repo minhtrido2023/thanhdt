@@ -245,6 +245,68 @@ def main() -> int:
     check("T36h REPORT: no live formula/claim still charges dividend tax to the post-ex buyer "
           "(the string may appear only on a line marked as the corrected/superseded one)",
           not bad, "; ".join(bad[:2]))
+    # --- STABILITY OF THE POST-HOC OUTCOME (D7, 2026-08-15) ------------------------------
+    # The gap this closes: the hold-through outcome was quoted FULL-SAMPLE ONLY. A post-hoc
+    # number with no IS/OOS split and no leave-one-out is exactly the shape that hides
+    # reshuffle-luck (kb/KNOWLEDGE.md §8), so the split is mandatory, not optional.
+    st = ht.get("stability", {})
+    keys4 = ["gross_IS_2014_2019", "gross_OOS_2020_plus", "net_IS_2014_2019",
+             "net_OOS_2020_plus"]
+    check("T36i the hold-through outcome carries an IS/OOS split and a per-year LOO for BOTH "
+          "the gross and the net-of-cost series, and the two halves partition the sample",
+          all(k in st for k in keys4)
+          and all(k in st for k in ("per_year_leave_one_out", "per_year_leave_one_out_net"))
+          and st["gross_IS_2014_2019"]["n"] + st["gross_OOS_2020_plus"]["n"]
+          == ht["gross"]["n"],
+          f"IS={st.get('gross_IS_2014_2019',{}).get('n')} "
+          f"OOS={st.get('gross_OOS_2020_plus',{}).get('n')} full={ht['gross']['n']}")
+    check("T36j each of the 4 subsample tests pays its own multiplicity cost "
+          "(present in BOTH raw_p and holm_adjusted_p)",
+          all(tag in t["raw_p"] and tag in t["holm_adjusted_p"]
+              for tag in ("holdthru_IS", "holdthru_OOS", "holdthru_net_IS",
+                          "holdthru_net_OOS")))
+    loo_ok = True
+    for tag in ("per_year_leave_one_out", "per_year_leave_one_out_net"):
+        L = st.get(tag, {})
+        yrs = L.get("years", [])
+        loo_ok &= (len(yrs) >= 10
+                   and all({"year", "n", "mean_in_year", "mean_excluding_year",
+                            "share_of_total_effect"} <= set(r) for r in yrs)
+                   # the summary flag must agree with the table it summarises
+                   and L.get("sign_flips_when_any_single_year_excluded")
+                   == any(np.sign(r["mean_excluding_year"]) != np.sign(L["overall_mean"])
+                          for r in yrs))
+    check("T36k per-year LOO covers >=10 years, every row is complete, and the sign-flip "
+          "summary flag agrees with its own table", bool(loo_ok))
+    check("T36l cost invariant holds INSIDE each subsample too: net - gross == -50bps "
+          "exactly, so no dividend term leaked into the split",
+          all(abs((st[f"net_{h}"]["mean"] - st[f"gross_{h}"]["mean"]) + 0.005) < 1e-9
+              for h in ("IS_2014_2019", "OOS_2020_plus")),
+          f"IS_delta={st['net_IS_2014_2019']['mean'] - st['gross_IS_2014_2019']['mean']:.8f}")
+    # report-vs-results agreement: the numbers printed in the report must BE the computed ones
+    def _pct(x):  # "−1,312%" -> -1.312 ; report uses U+2212 and a comma decimal separator
+        return float(x.replace("−", "-").replace(",", "."))
+    rep_ok, rep_detail = True, []
+    for label, key in [("gộp · IS 2014–2019", "gross_IS_2014_2019"),
+                       ("gộp · OOS 2020+", "gross_OOS_2020_plus"),
+                       ("sau phí · IS", "net_IS_2014_2019"),
+                       ("sau phí · OOS", "net_OOS_2020_plus")]:
+        line = next((l for l in rep.splitlines() if l.startswith(f"| {label} |")), None)
+        if line is None:
+            rep_ok, _ = False, rep_detail.append(f"{label}: missing row")
+            continue
+        # first percentage on the row = the mean cell; bold markers are optional
+        m = re.search(r"\*{0,2}([−-][\d,]+)%", line)
+        if m is None or abs(_pct(m.group(1)) - st[key]["mean"] * 100) > 1e-3:
+            rep_ok = False
+            rep_detail.append(f"{label}: report={m.group(1) if m else None} "
+                              f"results={st[key]['mean']*100:.3f}")
+    gap_ok = any("§6.2" in l and ("ĐỘ LỚN" in l or "độ lớn" in l.lower())
+                 for l in rep.splitlines())
+    check("T36m REPORT matches RESULTS: every IS/OOS mean printed in §6.2 equals the computed "
+          "value to 0.001pp, and §7 names the magnitude-instability limitation",
+          rep_ok and gap_ok,
+          "; ".join(rep_detail) or ("§7 gap item missing" if not gap_ok else ""))
     check("T37 no ALPHA claim can pass on a negative primary effect "
           "(prereg §9(a) requires mean >= +0.75%)",
           res["module_B"]["BHAR_20"]["mean"] < 0.0075

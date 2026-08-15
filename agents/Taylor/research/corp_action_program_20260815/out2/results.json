@@ -488,7 +488,11 @@
           "mean_excluding_year": -0.010786643501980437,
           "share_of_total_effect": 0.018073524371201896
         }
-      ]
+      ],
+      "largest_carrier_year": 2020,
+      "largest_carrier_share": 0.26724790427043615,
+      "sign_flips_when_any_single_year_excluded": false,
+      "n_years": 13
     },
     "R2_liquidity": {
       "high_adv": {
@@ -934,13 +938,276 @@
         "share_pos": 0.3955708285605193,
         "n_tickers": 465
       },
-      "naive_wrong_arithmetic_for_contrast": -0.012812060686863188
+      "naive_wrong_arithmetic_for_contrast": -0.012812060686863188,
+      "stability": {
+        "note": "POST-HOC robustness only. IS/OOS cut identical to BHAR_20 (IS_END=2019-12-31); LOO is descriptive, not a test, so it adds no trial.",
+        "gross_IS_2014_2019": {
+          "n": 1180,
+          "n_blocks": 72,
+          "mean": -0.004143651283855937,
+          "lo": -0.010964914973355343,
+          "hi": 0.002933631640958724,
+          "p": 0.2518,
+          "p10": -0.10291158270629698,
+          "p25": -0.05812508969815225,
+          "p50": -0.01002252556474359,
+          "p75": 0.040816649736372,
+          "p90": 0.10732550785845658,
+          "share_pos": 0.45254237288135596,
+          "n_tickers": 324
+        },
+        "gross_OOS_2020_plus": {
+          "n": 1439,
+          "n_blocks": 78,
+          "mean": -0.01311668085624917,
+          "lo": -0.021447225572022048,
+          "hi": -0.005064466039378235,
+          "p": 0.0012,
+          "p10": -0.12166464992607744,
+          "p25": -0.06918554556139334,
+          "p50": -0.021231177399454904,
+          "p75": 0.03295741590345874,
+          "p90": 0.09506188548372069,
+          "share_pos": 0.3912439193884642,
+          "n_tickers": 364
+        },
+        "net_IS_2014_2019": {
+          "n": 1180,
+          "n_blocks": 72,
+          "mean": -0.009143651283855941,
+          "lo": -0.015964914973355348,
+          "hi": -0.0020663683590412805,
+          "p": 0.0122,
+          "p10": -0.10791158270629699,
+          "p25": -0.06312508969815225,
+          "p50": -0.01502252556474359,
+          "p75": 0.035816649736372,
+          "p90": 0.10232550785845658,
+          "share_pos": 0.42627118644067796,
+          "n_tickers": 324
+        },
+        "net_OOS_2020_plus": {
+          "n": 1439,
+          "n_blocks": 78,
+          "mean": -0.018116680856249175,
+          "lo": -0.026447225572022056,
+          "hi": -0.01006446603937824,
+          "p": 0.0,
+          "p10": -0.12666464992607745,
+          "p25": -0.07418554556139334,
+          "p50": -0.026231177399454905,
+          "p75": 0.02795741590345874,
+          "p90": 0.09006188548372068,
+          "share_pos": 0.3703961084086171,
+          "n_tickers": 364
+        },
+        "per_year_leave_one_out": {
+          "overall_mean": -0.009073849662883757,
+          "years": [
+            {
+              "year": 2014,
+              "n": 159,
+              "mean_in_year": -0.01174241055668928,
+              "mean_excluding_year": -0.008901369507552423,
+              "share_of_total_effect": 0.07856467298789281
+            },
+            {
+              "year": 2015,
+              "n": 162,
+              "mean_in_year": -0.0010710964072827766,
+              "mean_excluding_year": -0.009601503723692614,
+              "share_of_total_effect": 0.007301574136554007
+            },
+            {
+              "year": 2016,
+              "n": 206,
+              "mean_in_year": 0.003248520173145195,
+              "mean_excluding_year": -0.010125821559370274,
+              "share_of_total_effect": -0.028159550008925276
+            },
+            {
+              "year": 2017,
+              "n": 238,
+              "mean_in_year": -0.021493942723042694,
+              "mean_excluding_year": -0.007832361990343721,
+              "share_of_total_effect": 0.21526130377597683
+            },
+            {
+              "year": 2018,
+              "n": 221,
+              "mean_in_year": 0.013234596600254016,
+              "mean_excluding_year": -0.01112979904743482,
+              "share_of_total_effect": -0.12307671722671962
+            },
+            {
+              "year": 2019,
+              "n": 194,
+              "mean_in_year": -0.006842423993280858,
+              "mean_excluding_year": -0.00925236371645199,
+              "share_of_total_effect": 0.0558579038175763
+            },
+            {
+              "year": 2020,
+              "n": 209,
+              "mean_in_year": -0.03625524282164109,
+              "mean_excluding_year": -0.006716625110941731,
+              "share_of_total_effect": 0.3188526467458912
+            },
+            {
+              "year": 2021,
+              "n": 250,
+              "mean_in_year": -0.02287711411683165,
+              "mean_excluding_year": -0.007617194486232439,
+              "share_of_total_effect": 0.24066568383547207
+            },
+            {
+              "year": 2022,
+              "n": 261,
+              "mean_in_year": 0.005433728186826725,
+              "mean_excluding_year": -0.010679650264569268,
+              "share_of_total_effect": -0.059677598621936556
+            },
+            {
+              "year": 2023,
+              "n": 198,
+              "mean_in_year": -0.0004686010454731741,
+              "mean_excluding_year": -0.009777624642746332,
+              "share_of_total_effect": 0.003904283681030414
+            },
+            {
+              "year": 2024,
+              "n": 221,
+              "mean_in_year": -0.0039404559510016765,
+              "mean_excluding_year": -0.009546943912394157,
+              "share_of_total_effect": 0.03664474237291596
+            },
+            {
+              "year": 2025,
+              "n": 220,
+              "mean_in_year": -0.024246521642216672,
+              "mean_excluding_year": -0.0076824416447706925,
+              "share_of_total_effect": 0.22446314688262564
+            },
+            {
+              "year": 2026,
+              "n": 80,
+              "mean_in_year": -0.008732799956383774,
+              "mean_excluding_year": -0.00908459561661357,
+              "share_of_total_effect": 0.029397907621646163
+            }
+          ],
+          "largest_carrier_year": 2020,
+          "largest_carrier_share": 0.3188526467458912,
+          "sign_flips_when_any_single_year_excluded": false,
+          "n_years": 13
+        },
+        "per_year_leave_one_out_net": {
+          "overall_mean": -0.014073849662883763,
+          "years": [
+            {
+              "year": 2014,
+              "n": 159,
+              "mean_in_year": -0.01674241055668928,
+              "mean_excluding_year": -0.013901369507552427,
+              "share_of_total_effect": 0.07222153351832526
+            },
+            {
+              "year": 2015,
+              "n": 162,
+              "mean_in_year": -0.00607109640728278,
+              "mean_excluding_year": -0.01460150372369262,
+              "share_of_total_effect": 0.026682943581763985
+            },
+            {
+              "year": 2016,
+              "n": 206,
+              "mean_in_year": -0.0017514798268548103,
+              "mean_excluding_year": -0.01512582155937028,
+              "share_of_total_effect": 0.009788676002688493
+            },
+            {
+              "year": 2017,
+              "n": 238,
+              "mean_in_year": -0.0264939427230427,
+              "mean_excluding_year": -0.012832361990343722,
+              "share_of_total_effect": 0.17107050764652731
+            },
+            {
+              "year": 2018,
+              "n": 221,
+              "mean_in_year": 0.008234596600254013,
+              "mean_excluding_year": -0.016129799047434824,
+              "share_of_total_effect": -0.049372622533128754
+            },
+            {
+              "year": 2019,
+              "n": 194,
+              "mean_in_year": -0.011842423993280863,
+              "mean_excluding_year": -0.014252363716451994,
+              "share_of_total_effect": 0.06232954117794201
+            },
+            {
+              "year": 2020,
+              "n": 209,
+              "mean_in_year": -0.04125524282164109,
+              "mean_excluding_year": -0.011716625110941735,
+              "share_of_total_effect": 0.2339252098553092
+            },
+            {
+              "year": 2021,
+              "n": 250,
+              "mean_in_year": -0.027877114116831657,
+              "mean_excluding_year": -0.012617194486232443,
+              "share_of_total_effect": 0.18907731025950086
+            },
+            {
+              "year": 2022,
+              "n": 261,
+              "mean_in_year": 0.00043372818682672074,
+              "mean_excluding_year": -0.015679650264569273,
+              "share_of_total_effect": -0.0030712116607144
+            },
+            {
+              "year": 2023,
+              "n": 198,
+              "mean_in_year": -0.005468601045473178,
+              "mean_excluding_year": -0.014777624642746337,
+              "share_of_total_effect": 0.029376024749325116
+            },
+            {
+              "year": 2024,
+              "n": 221,
+              "mean_in_year": -0.00894045595100168,
+              "mean_excluding_year": -0.01454694391239416,
+              "share_of_total_effect": 0.05360478216130882
+            },
+            {
+              "year": 2025,
+              "n": 220,
+              "mean_in_year": -0.02924652164221668,
+              "mean_excluding_year": -0.012682441644770694,
+              "share_of_total_effect": 0.17456151266503073
+            },
+            {
+              "year": 2026,
+              "n": 80,
+              "mean_in_year": -0.013732799956383778,
+              "mean_excluding_year": -0.014084595616613576,
+              "share_of_total_effect": 0.029805792576121305
+            }
+          ],
+          "largest_carrier_year": 2020,
+          "largest_carrier_share": 0.2339252098553092,
+          "sign_flips_when_any_single_year_excluded": false,
+          "n_years": 13
+        }
+      }
     }
   },
   "trials": {
     "declared_in_prereg": 20,
-    "executed": 29,
-    "note_extra": "R7 far baseline + paired estimator + AAR_0_1 are NOT in the prereg; see SPRINT2_DEVIATIONS.md D3. The two hold-through outcomes (gross + net of cost) are NOT in the prereg either; see D6. Holm below is computed over ALL executed trials, so the extra ones pay their own multiplicity cost.",
+    "executed": 33,
+    "note_extra": "R7 far baseline + paired estimator + AAR_0_1 are NOT in the prereg; see SPRINT2_DEVIATIONS.md D3. The two hold-through outcomes (gross + net of cost) are NOT in the prereg either, nor are their four IS/OOS subsample tests; see D6/D7. Holm below is computed over ALL executed trials, so the extra ones pay their own multiplicity cost.",
     "raw_p": {
       "BHAR_5": 0.0,
       "BHAR_10": 0.0,
@@ -970,7 +1237,11 @@
       "paired_OOS": 0.0042,
       "aar01": 0.0,
       "holdthru": 0.0012,
-      "holdthru_net": 0.0
+      "holdthru_net": 0.0,
+      "holdthru_IS": 0.2518,
+      "holdthru_OOS": 0.0012,
+      "holdthru_net_IS": 0.0122,
+      "holdthru_net_OOS": 0.0
     },
     "holm_adjusted_p": {
       "BHAR_5": 0.0,
@@ -988,20 +1259,24 @@
       "paired": 0.0,
       "aar01": 0.0,
       "holdthru_net": 0.0,
-      "paired_IS": 0.0028,
-      "p_wide": 0.0078,
-      "bench_vni": 0.009600000000000001,
-      "holdthru": 0.013199999999999998,
-      "OOS": 0.022000000000000002,
-      "paired_OOS": 0.0378,
-      "IS": 0.088,
-      "R7": 0.1176,
-      "BHAR_60": 0.2832,
-      "R2_lg": 0.323,
-      "bin_Y3": 0.4368,
-      "R2_hi": 0.4368,
-      "bin_Y1": 0.4368,
-      "bin_Y2": 0.4368
+      "holdthru_net_OOS": 0.0,
+      "paired_IS": 0.0034000000000000002,
+      "p_wide": 0.0096,
+      "bench_vni": 0.012,
+      "holdthru": 0.0168,
+      "holdthru_OOS": 0.0168,
+      "OOS": 0.0264,
+      "paired_OOS": 0.0462,
+      "IS": 0.10999999999999999,
+      "holdthru_net_IS": 0.10999999999999999,
+      "R7": 0.1344,
+      "BHAR_60": 0.33039999999999997,
+      "R2_lg": 0.38760000000000006,
+      "bin_Y3": 0.546,
+      "R2_hi": 0.546,
+      "bin_Y1": 0.5472,
+      "holdthru_IS": 0.5472,
+      "bin_Y2": 0.5472
     },
     "bonferroni_threshold_primary_family_4_horizons": 0.0125
   }

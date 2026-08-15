@@ -134,6 +134,32 @@ def ols_twoway(y: np.ndarray, X: np.ndarray, g1: np.ndarray, g2: np.ndarray) -> 
     return {"beta": beta, "se": se, "t": t, "n": int(len(y))}
 
 
+def _loo(df, col: str) -> dict:
+    """Per-year leave-one-out: is one year carrying the whole effect?
+
+    `share_of_total_effect` = that year's contribution to the sum of the outcome, divided by
+    the total sum. >1 means the rest of the sample pulls the other way; a value near 1 with a
+    sign flip in `mean_excluding_year` is the reshuffle-luck signature.
+    """
+    d = df[df[col].notna()]
+    tot = d[col].mean()
+    years = []
+    for yr in sorted(d["ex_year"].unique()):
+        s, rest = d[d["ex_year"] == yr], d[d["ex_year"] != yr]
+        years.append({"year": int(yr), "n": int(len(s)),
+                      "mean_in_year": float(s[col].mean()),
+                      "mean_excluding_year": float(rest[col].mean()) if len(rest) else np.nan,
+                      "share_of_total_effect": float(
+                          (len(s) * s[col].mean()) / (len(d) * tot)) if tot else np.nan})
+    carrier = max(years, key=lambda r: abs(r["share_of_total_effect"])) if years else None
+    return {"overall_mean": float(tot), "years": years,
+            "largest_carrier_year": carrier["year"] if carrier else None,
+            "largest_carrier_share": carrier["share_of_total_effect"] if carrier else None,
+            "sign_flips_when_any_single_year_excluded": bool(
+                any(np.sign(r["mean_excluding_year"]) != np.sign(tot) for r in years)),
+            "n_years": len(years)}
+
+
 def holm(pvals: dict[str, float]) -> dict[str, float]:
     """Holm-Bonferroni adjusted p-values across the declared trial family."""
     items = sorted(((k, v) for k, v in pvals.items() if np.isfinite(v)), key=lambda x: x[1])
@@ -394,15 +420,7 @@ def main() -> int:
     B["IS_2014_2019"] = run("IS", is_, "BHAR_20")
     B["OOS_2020_plus"] = run("OOS", oos, "BHAR_20")
 
-    loo, tot = [], core20["BHAR_20"].mean()
-    for yr in sorted(core20["ex_year"].unique()):
-        s = core20[core20["ex_year"] == yr]
-        rest = core20[core20["ex_year"] != yr]
-        loo.append({"year": int(yr), "n": len(s), "mean_in_year": float(s["BHAR_20"].mean()),
-                    "mean_excluding_year": float(rest["BHAR_20"].mean()),
-                    "share_of_total_effect": float(
-                        (len(s) * s["BHAR_20"].mean()) / (len(core20) * tot)) if tot else np.nan})
-    B["per_year_leave_one_out"] = {"overall_mean": float(tot), "years": loo}
+    B["per_year_leave_one_out"] = _loo(core20, "BHAR_20")
 
     # ---- R2/R3/R4/R5/R6 ---------------------------------------------------------------
     med_adv = core20["log_adv"].median()
@@ -536,10 +554,28 @@ def main() -> int:
         "naive_wrong_arithmetic_for_contrast": float(
             B["BHAR_20"]["mean"] - DIV_TAX * core20["y_gross"].mean()),
     }
+    # --- stability of the POST-HOC outcome: IS/OOS split + per-year leave-one-out --------
+    # Same estimator (month-block bootstrap), same window (T-1 -> T+20), same entitlement
+    # (dividend net of 5% PIT) and the same IS_END cut used for BHAR_20 above. Reported so the
+    # hold-through number is not quoted full-sample-only; the four subsample tests are added to
+    # `pv` and therefore pay their own Holm cost. Still POST-HOC -- stability here is a
+    # robustness statement, never a promotion to confirmatory.
+    ht_is = ht[ht["ex_date"] <= IS_END]
+    ht_oos = ht[ht["ex_date"] > IS_END]
+    B["holdthrough_T_minus_1_to_T20_POSTHOC"]["stability"] = {
+        "note": "POST-HOC robustness only. IS/OOS cut identical to BHAR_20 (IS_END="
+                + IS_END + "); LOO is descriptive, not a test, so it adds no trial.",
+        "gross_IS_2014_2019": run("holdthru_IS", ht_is, "HOLDTHRU_20"),
+        "gross_OOS_2020_plus": run("holdthru_OOS", ht_oos, "HOLDTHRU_20"),
+        "net_IS_2014_2019": run("holdthru_net_IS", ht_is, "HOLDTHRU_20_net"),
+        "net_OOS_2020_plus": run("holdthru_net_OOS", ht_oos, "HOLDTHRU_20_net"),
+        "per_year_leave_one_out": _loo(ht, "HOLDTHRU_20"),
+        "per_year_leave_one_out_net": _loo(ht, "HOLDTHRU_20_net"),
+    }
 
     res["module_B"] = B
     res["trials"] = {"declared_in_prereg": 20, "executed": len(pv),
-                     "note_extra": "R7 far baseline + paired estimator + AAR_0_1 are NOT in the prereg; see SPRINT2_DEVIATIONS.md D3. The two hold-through outcomes (gross + net of cost) are NOT in the prereg either; see D6. Holm below is computed over ALL executed trials, so the extra ones pay their own multiplicity cost.",
+                     "note_extra": "R7 far baseline + paired estimator + AAR_0_1 are NOT in the prereg; see SPRINT2_DEVIATIONS.md D3. The two hold-through outcomes (gross + net of cost) are NOT in the prereg either, nor are their four IS/OOS subsample tests; see D6/D7. Holm below is computed over ALL executed trials, so the extra ones pay their own multiplicity cost.",
                      "raw_p": pv, "holm_adjusted_p": holm(pv),
                      "bonferroni_threshold_primary_family_4_horizons": 0.05 / 4}
 
@@ -555,6 +591,7 @@ def main() -> int:
                       "placebo": B["R5_placebo_ex_minus_40"],
                       "pretrend": B["R6_pretrend_m21_to_m1"],
                       "net": B["net_of_cost_screen"],
+                      "holdthru": B["holdthrough_T_minus_1_to_T20_POSTHOC"],
                       "trials": res["trials"]}, indent=2, default=float))
     return 0
 

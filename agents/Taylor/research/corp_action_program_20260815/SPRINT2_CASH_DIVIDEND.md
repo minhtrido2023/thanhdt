@@ -7,7 +7,13 @@
 > 5% khỏi một outcome mà người nắm giữ **không được nhận cổ tức**, và suy ra chi phí của việc
 > "mua ngay trước GDKHQ" bằng phép cộng số học trên `BHAR_20` — thứ chưa bao giờ đo giao dịch đó.
 > Chi tiết + số cũ/số mới: `SPRINT2_DEVIATIONS.md` **D6**. Prereg giữ nguyên, KHÔNG sửa.
-> Selfcheck: **45/45 PASS** (`selfcheck_sprint2.py`).
+> Selfcheck: **50/50 PASS** (`selfcheck_sprint2.py`).
+>
+> ⚠️ **BỔ SUNG ĐỘ BỀN HOLD-THROUGH — job `Taylor_20260815_130912`** (đóng gap quant-skeptic vòng
+> trước). Outcome post-hoc `HOLDTHRU_20` trước đây chỉ có số **full-sample**; nay có IS/OOS +
+> per-year leave-one-out (§6.2). Kết quả **hạ narrative**: dấu bền nhưng **độ lớn không bền** —
+> nửa IS không phân biệt được với 0. Chi tiết: `SPRINT2_DEVIATIONS.md` **D7**. Họ trial 29 → **33**,
+> không verdict nào đổi. Nhãn **POST-HOC giữ nguyên**; prereg KHÔNG sửa.
 
 ---
 
@@ -153,7 +159,7 @@ ngày GDKHQ.** (Trích mean mà bỏ median ở đây sẽ kể một câu chuy�
 |---|---|
 | **mean** | **−1,065%** · CI95 block-bootstrap **[−1,599%; −0,533%]** |
 | median | −1,842% · tỉ lệ dương **41,2%** |
-| p (bootstrap) | **< 0,0001** · **Holm trên cả 29 trial: 0,000** |
+| p (bootstrap) | **< 0,0001** · **Holm trên cả 33 trial: 0,000** |
 | ngưỡng Bonferroni họ 4 horizon | 0,0125 → **vượt qua** |
 | N | 2.619 sự kiện / **465 mã** / 150 tháng |
 
@@ -166,9 +172,9 @@ Mean và median **cùng dấu** ⇒ không phải hiệu ứng đuôi (tiêu ch�
 | `BHAR_5` | 2.619 | −1,112% | [−1,310; −0,920] | 0,0000 | **0,000** |
 | `BHAR_10` | 2.619 | −1,350% | [−1,675; −1,037] | 0,0000 | **0,000** |
 | **`BHAR_20`** | 2.619 | **−1,065%** | [−1,599; −0,533] | 0,0000 | **0,000** |
-| `BHAR_60` | 2.311 | −0,988% | [−1,995; −0,014] | 0,0472 | 0,283 ✗ |
-| benchmark = VNINDEX | 2.619 | −1,155% | [−1,781; −0,512] | 0,0008 | 0,009 |
-| P-WIDE | 6.540 | −1,286% | [−1,946; −0,622] | 0,0006 | 0,007 |
+| `BHAR_60` | 2.311 | −0,988% | [−1,995; −0,014] | 0,0472 | 0,330 ✗ |
+| benchmark = VNINDEX | 2.619 | −1,155% | [−1,781; −0,512] | 0,0008 | 0,012 |
+| P-WIDE | 6.540 | −1,286% | [−1,946; −0,622] | 0,0006 | 0,010 |
 
 **`BHAR_60` KHÔNG sống sót hiệu chỉnh bội kiểm** — hiệu ứng nằm ở 5–20 phiên, không kéo ra 3 tháng.
 
@@ -229,7 +235,7 @@ hiệp biến, không phải chứng minh rằng chia cổ tức GÂY ra drift �
 |---|---|---|---|
 | **R1** | IS 2014-2019 | −0,911% [−1,583; −0,207] | **cùng dấu** |
 | | OOS 2020+ | **−1,191%** [−1,998; −0,415] | **OOS MẠNH HƠN IS** — không rớt OOS |
-| | per-year LOO | năm gánh nhiều nhất = **2020 (27%)** | < 50% ⇒ **không phải reshuffle-luck**; 9/13 năm âm |
+| | per-year LOO | năm gánh nhiều nhất = **2020 (26,7%)**; bỏ năm nào cũng **không đổi dấu** | < 50% ⇒ **không phải reshuffle-luck**; 10/13 năm âm |
 | **R2** | ADV cao (nửa trên) | −0,519% [−1,159; +0,144] p = 0,124 | **KHÔNG có ý nghĩa** |
 | | ADV thấp | −1,611% [−2,314; −0,927] | có ý nghĩa |
 | | mcap lớn | −0,615% [−1,240; +0,041] p = 0,065 | biên |
@@ -238,7 +244,7 @@ hiệp biến, không phải chứng minh rằng chia cổ tức GÂY ra drift �
 | **R4** | cửa sổ nhiễm W = 5 thay vì 21 | −1,025% [−1,551; −0,502] | **không nhạy quy tắc loại** |
 | **R5** | **placebo** neo `ex − 40` | **+1,180%** [+0,684; +1,693] | ⚠️ **null của pipeline ≠ 0** |
 | **R6** | **pre-trend** −21 → −1 | **+2,271%** [+1,811; +2,758] | có chạy giá trước ex-date |
-| **R7** | baseline xa `ex − 250` → `ex − 230` | +0,637% [+0,132; +1,136], **Holm 0,118 ✗** | phần bù chất lượng ~½ mức R5 |
+| **R7** | baseline xa `ex − 250` → `ex − 230` | +0,637% [+0,132; +1,136], **Holm 0,134 ✗** | phần bù chất lượng ~½ mức R5 |
 | — | **ghép cặp** `BHAR_20 − FARBASE_20` | **−1,609%** [−2,350; −0,864] · IS −1,563% · OOS −1,645% | hiệu ứng **lớn hơn** sau khi trừ nền |
 
 ### 5.1 R2 là hạn chế quan trọng nhất cho ĐỘI này
@@ -296,12 +302,38 @@ Không suy ra được từ §6.1. Phải đo trên **total return đúng entitl
 HOLDTHRU_20 = (C₊₂₀/C₋₁)·(1−y) + 0,95·y − 1 − EW(d₋₁, d₊₂₀)
 ```
 
-| | mean | trung vị | CI95 | p thô | Holm (họ 29 trial) |
+| | mean | trung vị | CI95 | p thô | Holm (họ 33 trial) |
 |---|---:|---:|---|---:|---:|
-| gộp (trước phí) | **−0,907%** | −1,576% | [−1,464; −0,356] | 0,0012 | **0,013** |
+| gộp (trước phí) | **−0,907%** | −1,576% | [−1,464; −0,356] | 0,0012 | **0,017** |
 | trừ phí 2 chiều + slippage | **−1,407%** | −2,076% | [−1,964; −0,856] | 0,0000 | **0,000** |
 
 n = 2.619 sự kiện / 465 mã / 150 tháng. Tỉ lệ dương 41,9% (gộp).
+
+**Độ bền IS/OOS — CHIỀU bền, MỨC thì KHÔNG** (bổ sung 2026-08-15; cùng estimator month-block, cùng
+cửa sổ, cùng entitlement, cùng mốc cắt `IS_END = 2019-12-31` như `BHAR_20` ở §5):
+
+| | n | mean | CI95 | p thô | Holm (họ 33) |
+|---|---:|---:|---|---:|---:|
+| gộp · IS 2014–2019 | 1.180 | **−0,414%** | **[−1,096; +0,293]** | 0,252 | 0,547 |
+| gộp · OOS 2020+ | 1.439 | **−1,312%** | [−2,145; −0,506] | 0,0012 | **0,017** |
+| sau phí · IS | 1.180 | −0,914% | [−1,596; −0,207] | 0,012 | 0,110 |
+| sau phí · OOS | 1.439 | −1,812% | [−2,645; −1,006] | 0,0000 | **0,000** |
+
+⚠️ **Đọc đúng ba điều:**
+1. **Nửa IS gộp KHÔNG phân biệt được với 0** — CI chứa 0, p = 0,25, Holm 0,55. Toàn bộ ý nghĩa
+   thống kê của hold-through gộp nằm ở **nửa OOS 2020+**, nơi mức âm gấp **3,2×** nửa IS.
+2. **Ý nghĩa của "sau phí · IS" là do HẰNG SỐ, không do dữ liệu.** Phép trừ phí là một dịch chuyển
+   xác định −0,50pp áp lên mọi sự kiện; nó làm hẹp khoảng cách tới 0 mà không thêm một mẩu bằng
+   chứng nào. Không được trích dòng đó như xác nhận độc lập của dòng gộp.
+3. **Per-year leave-one-out: chiều bền, mức tập trung.** Không năm nào bị loại làm đổi DẤU
+   (`sign_flips_when_any_single_year_excluded = false`, 13/13 năm). Nhưng **4/13 năm dương**
+   (2016 +0,33%, 2018 +1,32%, 2022 +0,54%, 2023 −0,05% ≈ 0) và bốn năm gánh **gần như TOÀN BỘ** hiệu ứng (tổng share = **99,9%**): **2020 (31,9%)**, 2021 (24,1%), 2025 (22,4%), 2017 (21,5%). Bỏ riêng 2020, trung bình chỉ
+   còn **−0,672%** (từ −0,907%).
+
+⇒ Phát biểu đúng mức cho hold-through: **dấu âm bền qua mọi lát cắt; ĐỘ LỚN thì không** — nó là số
+của giai đoạn 2020+ và của bốn năm cụ thể, không phải hằng số đều qua 12 năm. Vẫn giữ nguyên nhãn
+**POST-HOC**: độ bền này là robustness của một outcome hậu nghiệm, **không** nâng nó thành
+confirmatory, và **không** biến nó thành alpha (không bán khống được — xem §6.1).
 
 ⚠️ **Đây là con số bác bỏ chính narrative cũ.** Bản đầu suy "chi phí = `BHAR_20` + thuế + cú rơi
 cơ học" ⇒ ra một con số âm hơn nhiều. Đo thật thì hold-through **−0,91%**, tức **ít âm hơn cả
@@ -315,7 +347,10 @@ còn âm hơn nữa nếu cộng cả cú rơi) **sai cả về hướng lẫn v
 - **Mua sau ngày GDKHQ** (ở giá đóng cửa ex-date): chi phí kỳ vọng đo được ≈ **0,50 × tỉ suất
   gộp** trong 20 phiên; Y5 (tỉ suất ≥ 10%) là **−6,6%**. Không tính thuế cổ tức — không được nhận.
 - **Giữ xuyên ngày GDKHQ** (vào T−1): **−0,91% gộp / −1,41% sau phí** trong 21 phiên, đã tính
-  đúng cổ tức ròng thuế và cú rơi cơ học. Không phải "cộng dồn" của mục trên.
+  đúng cổ tức ròng thuế và cú rơi cơ học. Không phải "cộng dồn" của mục trên. **Trích kèm khoảng
+  IS/OOS**, đừng trích số gộp trần: nửa IS 2014–2019 là **−0,41% và không phân biệt được với 0**,
+  toàn bộ mức âm nằm ở **OOS 2020+ (−1,31%)**. Dùng nó như *cảnh báo chi phí có thể có*, không như
+  hằng số trừ vào kỳ vọng của một plan cụ thể.
 - Cả hai đều **KHÔNG cắt được theo tỉ suất một cách đáng tin ở mã ADV cao** — tức phần lớn rổ
   thật sau cổng ADV3T ≥ 2 tỷ. Ở nửa ADV cao hiệu ứng **không phân biệt được với 0** (§5.1).
 
@@ -325,7 +360,7 @@ còn âm hơn nữa nếu cộng cả cú rơi) **sai cả về hướng lẫn v
 
 1. **`universe_pit` có `backfilled = TRUE` trên 99,99% dòng.** Point-in-time **theo thiết kế của
    rule**, không phải theo dấu vết lịch sử của chính bảng. Đây là hạn chế thật, không phải hình thức.
-2. **R7 không sống sót Holm** (0,118) ⇒ phép hiệu chỉnh baseline **bất định**. Vì vậy primary giữ
+2. **R7 không sống sót Holm** (0,134) ⇒ phép hiệu chỉnh baseline **bất định**. Vì vậy primary giữ
    nguyên bản **THÔ** theo prereg (−1,065%), không lấy bản ghép cặp lớn hơn (−1,609%).
 3. **Y1 ở bản ghép cặp là nhiễu baseline** (§4.3), không được trích như hiệu ứng.
 4. **`ICB_Code` là phân ngành HIỆN TẠI** ⇒ look-ahead nhẹ. Chỉ dùng làm FE, không làm biến kết luận.
@@ -338,10 +373,11 @@ còn âm hơn nữa nếu cộng cả cú rơi) **sai cả về hướng lẫn v
    **CÒN MỞ**, chỉ bị chặn khỏi mẫu chứ chưa được giải thích.
 9. **Tỉ lệ amendment vẫn chưa đo được** (Sprint 1 C1). Study này neo `exright_date` nên **không phụ
    thuộc** vào nó — nhưng announcement study vẫn **CẤM** cho tới khi có vintage thứ hai (≈ 4 tuần nữa).
-10. **29 trial thực thi / 20 khai báo** (27 + 2 outcome hold-through post-hoc của D6). Chênh +
-    lý do: `SPRINT2_DEVIATIONS.md`. Kết luận primary có Holm-p = 0,000 nên không phụ thuộc vào
-    cách đếm; hold-through gộp có Holm-p = 0,013 nên **có** phụ thuộc — đọc nó như một outcome
-    post-hoc biên, không phải kết quả đã pre-register.
+10. **33 trial thực thi / 20 khai báo** (27 + 2 outcome hold-through post-hoc của D6 + 4 test
+    IS/OOS của chính hai outcome đó, D7). Chênh + lý do: `SPRINT2_DEVIATIONS.md`. Kết luận primary
+    có Holm-p = 0,000 nên không phụ thuộc vào cách đếm; hold-through gộp có Holm-p = **0,017**
+    (từ 0,013 khi họ còn 29 trial) nên **có** phụ thuộc — đọc nó như một outcome post-hoc biên,
+    không phải kết quả đã pre-register.
 11. **Nhân quả bị giới hạn, không chỉ là câu chữ.** `R5` placebo trả về **+1,18% có ý nghĩa** ⇒
     null của pipeline **không bằng 0**; `R6` pre-trend **+2,27%** ⇒ mã sắp trả cổ tức đã chạy giá
     trước đó. Cả hai đồng nghĩa: một phần `BHAR_20` âm có thể chỉ là **hoàn nguyên của đợt chạy
@@ -352,6 +388,13 @@ còn âm hơn nữa nếu cộng cả cú rơi) **sai cả về hướng lẫn v
 12. **Cửa sổ vào lệnh phải khai rõ khi trích.** `BHAR_20` = vào **sau ex**; `HOLDTHRU_20` = vào
     **T−1**. Hai entitlement khác nhau (không / có nhận cổ tức). Số này **không cộng trừ được cho
     nhau** — xem D6 và selfcheck T36–T36h.
+13. **Hold-through: ĐỘ LỚN không bền qua thời gian** (§6.2, thêm 2026-08-15 — trước đó bản báo cáo
+    chỉ có số **full-sample**, thiếu IS/OOS và leave-one-out, đó là một khoảng trống thật của bản
+    trước chứ không phải chi tiết bổ sung). Đo xong: dấu bền (0/13 năm làm đổi dấu) nhưng nửa IS
+    2014–2019 **không phân biệt được với 0** (−0,41%, p = 0,25) và 4 năm gánh tới **99,9%** hiệu ứng
+    (2020 31,9% / 2021 24,1% / 2025 22,4% / 2017 21,5%). Đây đúng chữ ký **reshuffle-luck** mà `kb/KNOWLEDGE.md` §8 cảnh báo ⇒
+    **cấm** trích −0,91% như hằng số chi phí; phải trích kèm khoảng IS/OOS. `BHAR_20` primary
+    KHÔNG bị hạn chế này (IS −0,91% p = 0,011 và OOS −1,19% p = 0,0022, cùng dấu và cùng bậc).
 
 ---
 
@@ -375,7 +418,7 @@ còn âm hơn nữa nếu cộng cả cú rơi) **sai cả về hướng lẫn v
 | `sprint2_build.py` | dựng panel từ BQ (read-only); SQL sinh ra ở `out2/sql/*.sql` |
 | `sprint2_analyze.py` | thực thi prereg; block bootstrap + OLS cluster hai chiều + Holm |
 | `sprint2_plots.py` | 3 hình |
-| `selfcheck_sprint2.py` | **45 invariant, 45 PASS** (7 test entitlement mới + T36 viết lại, D6) |
+| `selfcheck_sprint2.py` | **50 invariant, 50 PASS** (7 test entitlement D6 + T36 viết lại; 5 test độ bền D7: T36i–T36m) |
 | `out2/results.json` | mọi con số trích trong file này |
 | `out2/module_A_spotcheck12.csv` | spot-check tay 12 ca phân tầng theo tỉ suất |
 | *(gitignore)* `out2/event_panel.csv`, `event_features.csv`, `module_A_events.csv` | 15MB per-event, **KHÔNG commit** (theo tiền lệ Sprint 1) — dựng lại đúng 25s bằng `sprint2_build.py`, SQL đã commit ở `out2/sql/` |

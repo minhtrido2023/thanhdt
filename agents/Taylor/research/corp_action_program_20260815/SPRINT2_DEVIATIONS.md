@@ -171,9 +171,9 @@ Trong hệ giá điều chỉnh, với `f = 1 − y` và không có sự kiện 
 HOLDTHRU_20 = (C₊₂₀/C₋₁)·(1−y) + 0,95·y − 1 − EW(d₋₁, d₊₂₀)
 ```
 
-| | mean | trung vị | CI95 | p thô | Holm |
+| | mean | trung vị | CI95 | p thô | Holm (họ 33) |
 |---|---:|---:|---|---:|---:|
-| gộp | **−0,907%** | −1,576% | [−1,464; −0,356] | 0,0012 | **0,013** |
+| gộp | **−0,907%** | −1,576% | [−1,464; −0,356] | 0,0012 | **0,017** |
 | sau phí (−50bps) | **−1,407%** | −2,076% | [−1,964; −0,856] | 0,0000 | **0,000** |
 
 **Kết quả này bác bỏ narrative cũ, không xác nhận nó.** Số học sai cũ cho ra âm hơn nhiều
@@ -195,7 +195,7 @@ mua sau ex thì không. Ghi rõ: **post-hoc, KHÔNG pre-register**, +2 trial, ch
 | **T36g** | — | prohibition ở TẦNG MÃ NGUỒN: dòng dựng `net` không được chứa `y_gross` |
 | **T36h** | — | prohibition ở TẦNG BÁO CÁO: không dòng nào còn tính thuế cổ tức cho người mua sau ex |
 
-38 → **45 test, 45 PASS**.
+38 → **45 test, 45 PASS**. (D7 dưới đây nâng tiếp lên **50**.)
 
 ### Cái KHÔNG đổi
 
@@ -226,7 +226,63 @@ lớp diễn giải. Commit prereg `2a9b951a` và commit kết quả `7ae396c9` 
 | Thêm do D4 | 1 (Module A P-CORE) |
 | Chênh còn lại | 1 (`R3_trim` — prereg gộp R3 thành 1 lát, thực thi tách phần trimmed thành test riêng) |
 | Thêm do **D6** | **2** (`holdthru`, `holdthru_net` — outcome hold-through post-hoc) |
+| Thêm do **D7** | **4** (`holdthru_IS`, `holdthru_OOS`, `holdthru_net_IS`, `holdthru_net_OOS`) |
+| **Tổng thực thi** | **33** |
 
-Holm tính trên **cả 29**. Kết luận primary (`BHAR_20`) có Holm-adjusted p = **0,000** nên không
-phụ thuộc vào việc đếm 20, 27 hay 29. Hai trial của D6 thì **có** phụ thuộc: `holdthru` gộp có
-Holm-p = 0,013 — đọc như outcome post-hoc biên, không phải kết quả đã pre-register.
+Holm tính trên **cả 33**. Kết luận primary (`BHAR_20`) có Holm-adjusted p = **0,000** nên không
+phụ thuộc vào việc đếm 20, 27, 29 hay 33. Sáu trial của D6+D7 thì **có** phụ thuộc: `holdthru`
+gộp có Holm-p = **0,017** (từ 0,013 khi họ còn 29) và `holdthru_IS` có Holm-p = **0,547** — đọc
+như outcome post-hoc biên, không phải kết quả đã pre-register.
+
+Không kết luận nào ĐỔI VERDICT vì +4 trial: `paired_OOS` 0,0378 → 0,0462 (vẫn qua 0,05), `R7`
+0,118 → 0,134 (vẫn trượt), `BHAR_60` 0,283 → 0,330 (vẫn trượt). Danh sách đầy đủ Holm cũ/mới nằm
+trong `out2/results.json`.
+
+---
+
+## D7 — hold-through post-hoc: thêm IS/OOS + per-year leave-one-out
+
+**Job `Taylor_20260815_130912`. Đóng đúng một gap của vòng quant-skeptic** (verdict vòng trước:
+CONFIRMED/high, gap còn lại: outcome post-hoc `HOLDTHRU_20` chỉ có số **full-sample**, thiếu
+IS/OOS và leave-one-out, và §7 báo cáo **không nêu** khoảng trống đó).
+
+**Làm gì:** chạy đúng estimator đang dùng (block bootstrap theo tháng-ex, 5.000 lần), đúng cửa sổ
+(T−1 → T+20), đúng entitlement (nhận cổ tức ròng thuế 5%), đúng mốc cắt `IS_END = 2019-12-31` của
+`BHAR_20`, trên cả hai bản gộp và sau phí. Thêm per-year leave-one-out cho cả hai.
+`_loo()` được tách thành hàm dùng chung và `BHAR_20` LOO cũng chuyển sang gọi nó — cùng một định
+nghĩa cho cả hai, thêm ba trường (`largest_carrier_year/_share`,
+`sign_flips_when_any_single_year_excluded`).
+
+**Kết quả:**
+
+| | n | mean | CI95 | p thô | Holm (họ 33) |
+|---|---:|---:|---|---:|---:|
+| gộp · IS 2014–2019 | 1.180 | **−0,414%** | **[−1,096; +0,293]** | 0,2518 | 0,547 ✗ |
+| gộp · OOS 2020+ | 1.439 | **−1,312%** | [−2,145; −0,506] | 0,0012 | **0,017** |
+| sau phí · IS | 1.180 | −0,914% | [−1,596; −0,207] | 0,0122 | 0,110 ✗ |
+| sau phí · OOS | 1.439 | −1,812% | [−2,645; −1,006] | 0,0000 | **0,000** |
+
+LOO gộp: **0/13** năm làm đổi dấu; 4/13 năm dương (2016 +0,33%, 2018 +1,32%, 2022 +0,54%, 2023
+−0,05%); bốn năm gánh **99,9%** hiệu ứng — 2020 (31,9%), 2021 (24,1%), 2025 (22,4%), 2017 (21,5%).
+Bỏ riêng 2020: −0,907% → **−0,672%**.
+
+**Đọc — và hạ narrative ngay theo yêu cầu:** **DẤU bền, ĐỘ LỚN thì KHÔNG.** Nửa IS gộp không phân
+biệt được với 0; toàn bộ ý nghĩa thống kê của bản gộp nằm ở OOS 2020+ (mức âm gấp 3,2×). Dòng
+"sau phí · IS" có p = 0,012 nhưng ý nghĩa đó đến từ **hằng số** −0,50pp áp lên mọi sự kiện, không
+từ thêm bằng chứng nào — cấm trích nó như xác nhận độc lập. ⇒ báo cáo §6.2/§6.3/§7(13) nay bắt
+buộc trích kèm khoảng IS/OOS, không được trích −0,907% như hằng số chi phí.
+
+**Nhãn KHÔNG đổi: POST-HOC.** Độ bền đo được ở đây là *robustness của một outcome hậu nghiệm*,
+không nâng nó thành confirmatory, không biến nó thành alpha, và `SPRINT2_PREREG.md` **không sửa**.
+
+### Selfcheck thêm
+
+| test | nội dung |
+|---|---|
+| **T36i** | tồn tại khối `stability` với đủ 4 test IS/OOS + 2 LOO; `n_IS + n_OOS == n` full-sample |
+| **T36j** | 4 tag IS/OOS có mặt trong `raw_p` **và** trong `holm_adjusted_p` (chịu đúng chi phí bội kiểm) |
+| **T36k** | LOO có ≥ 10 năm, mỗi năm đủ trường, và `sign_flips…` nhất quán với chính bảng `years` |
+| **T36l** | bất biến hằng số phí: `mean(net_IS) − mean(gross_IS) == −0,005` (và OOS cũng vậy) |
+| **T36m** | **báo cáo khớp results**: mọi số IS/OOS in trong §6.2 khớp `results.json` tới 0,001pp; §7 phải có mục nêu gap |
+
+45 → **50 test, 50 PASS**.
