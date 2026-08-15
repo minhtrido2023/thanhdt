@@ -64,3 +64,6 @@
 
 ## Archived 2026-08-14 (keep=6 days=5 require_done=True)
 - [2026-08-07T06:56:27Z] 2026-08-07 13:59: CHAN DOAN XONG 2 su co (job Winston_20260807_065124, da len bus). (1) SpaceX BUY-DRI-LAG-01 ket WAIT_CASH = bay goi vay UPCOM (ppse loan_package_id=null -> goi 1841 mainboard -> qmaxBuy=0 GIA), KHONG thieu tien (totalCash 203.6M). Con defect 2: order thieu cash_only=true nen place_order cung se bi reject. (2) ZaloPay funding gate check_plan_funding nhanh (1) khong cong lenh BAN cung-plan -> chan cung moi plan L2 JIT-unpark; nhanh (3) fallback LAI co cong -> bat doi xung, chung minh la thieu sot thiet ke. NEXT sau gio: fix executor.py:1081 dung _effective_loan_package (plan_funding_gate.py:103); cash_only=true cho ma UPCOM; fix gate JIT (CAN Taylor/arch-reviewer duyet vi noi long gate tien that). Dinh chinh: 13/14 sell PARK khop, VHM-12 con mo.
+
+## Archived 2026-08-15 (keep=12 days=0 require_done=False)
+- [2026-08-02T09:13:30Z] Xong job Winston_20260802_085555: da sua dong NAV thu 6 (ZaloPay 2026-07-22, -832.500d cum-dividend double-count), quant-skeptic CONFIRMED high. Da dong not muc skeptic neu (SpaceX 09/07 2.4M MBB = KHONG phai loi, tien vao dung phien ex). 6 dong da sua = DAY DU ca 2 account. Script fix_nav_cum_dividend_20260802.py gio idempotent (chay lai an toan). VIEC MO: chua commit git - file nav_history_*.csv + script dang uncommitted.
