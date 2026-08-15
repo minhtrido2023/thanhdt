@@ -34,6 +34,7 @@ sys.path.insert(0, WC_ROOT)
 
 from trading_bot.discretionary_accumulation import (
     compute_session_order, validate_state, BOOK, DYNAMIC_CEILING_SESSIONS_DEFAULT)
+from trading_bot.no_chase_ceiling import ANCHOR_BASIS_OFFICIAL_REF, check_reference_snapshot
 from trading_bot.config import live_dnse_labels
 from trading_bot.plan_cash_commitment import gate_injected_order, replan_dropped_injection
 from trading_bot.vn_market import (
@@ -169,8 +170,36 @@ def bar_is_completed_session(bar_ts, now=None):
     return session_phase(now)[0] == "CLOSED"
 
 
+def official_reference_price(broker, ticker):
+    """Giá tham chiếu CHÍNH THỨC của phiên giao dịch kế tiếp → (giá | None, info).
+
+    Nguồn = DNSE `q.ref` (secdef `refPrice`/`basicPrice`) — số do chính sở giao dịch công bố,
+    nên đã đúng công thức RIÊNG của từng sàn và đã điều chỉnh theo giá trị quyền.
+
+    🔴 VÌ SAO KHÔNG DÙNG `anchor_prices_for()` CHO LUẬT A (sửa lỗi 2026-08-15, job
+    Taylor_20260815_034407): hàm đó trả GIÁ ĐÓNG CỬA. Giá đóng cửa == giá tham chiếu **chỉ ở
+    HOSE/HNX trong ngày thường**. TV1 — mã DUY NHẤT chạy nhánh này — niêm yết **UPCOM**, nơi
+    tham chiếu là BÌNH QUÂN GIA QUYỀN giá khớp lô chẵn phiên trước. Đo 259 phiên TV1: median
+    lệch 0,389%, p90 1,333%, max 7,041%, và 47 phiên lệch >1%. Nhánh mean-N (luật B) KHÔNG
+    đụng tới: nó cố ý là trung bình 5 phiên GIÁ ĐÓNG, một đại lượng khác hẳn.
+
+    FAIL-CLOSED: quote lỗi / thiếu ref / snapshot không nhất quán ⇒ `(None, info)` và caller
+    rơi về band CỐ ĐỊNH (không chèn lệnh sai, không crash)."""
+    try:
+        q = broker.get_quote(ticker)
+    except Exception as exc:                                    # noqa: BLE001
+        return None, {"reason": f"DNSE không trả quote: {type(exc).__name__}: {exc}"}
+    ok, info = check_reference_snapshot(q.ref, q.ceiling, q.floor,
+                                        q.exchange, getattr(q, "exchange_known", False))
+    info["market_id"] = getattr(q, "market_id", None)
+    return (float(q.ref) if ok else None), info
+
+
 def anchor_prices_for(broker, state, ticker, now=None, with_dates=False):
     """Giá đóng cửa N phiên ĐÃ HOÀN TẤT gần nhất (cũ→mới) cho luật trần động P1, hoặc None.
+
+    ⚠️ CHỈ dùng cho nhánh **mean-N (luật B)**. Luật A phải lấy anchor từ
+    `official_reference_price()` — xem lý do ở docstring hàm đó.
 
     `with_dates=True` → trả `(prices, dates)` với `dates` là ngày ICT của ĐÚNG các bar đó
     (ISO, cùng thứ tự). LUẬT A bắt buộc có nó để khoá bất biến "anchor là phiên ĐÃ ĐÓNG TRƯỚC
@@ -399,6 +428,7 @@ def process_account(account, plan_date, dry_run):
         baseline = int(state.get("baseline_qty_before_program", 0) or 0)
         filled, broker = broker_filled_qty(account, account_id, ticker, baseline)
         prev_turnover = prev_price = anchors = anchor_dates = None
+        anchor_basis = anchor_exchange = None
         if filled is not None and broker is not None:
             prev_turnover, prev_price = prev_session_market(broker, ticker)
             # LUÔN xin kèm ngày (`with_dates=True`), kể cả khi state chưa bật luật A: ngày lấy
@@ -409,11 +439,31 @@ def process_account(account, plan_date, dry_run):
             res = anchor_prices_for(broker, state, ticker, with_dates=True)  # None khi cờ P1 tắt
             if res is not None:
                 anchors, anchor_dates = res
+                # LUẬT A: thay phần tử CUỐI (giá đóng phiên gần nhất) bằng GIÁ THAM CHIẾU CHÍNH
+                # THỨC của phiên kế tiếp. Giữ nguyên `anchor_dates` — ngày vẫn là phiên ĐÃ ĐÓNG
+                # sinh ra tham chiếu đó, nên bất biến #4 không đổi nghĩa. Nhánh mean-N không
+                # chạm tới (`ceiling_rule` trống ⇒ `anchor_basis` để None ⇒ engine dùng như cũ).
+                _cfg = state.get("dynamic_ceiling") or {}
+                if str(_cfg.get("ceiling_rule") or "").strip().upper() == "A":
+                    ref_px, ref_info = official_reference_price(broker, ticker)
+                    if ref_px is None:
+                        print(f"  [FAILSAFE] {ticker}: luật A không lấy được giá tham chiếu "
+                              f"chính thức ({ref_info.get('reason')}) → band cố định")
+                        anchors = anchor_dates = None
+                    else:
+                        print(f"  [anchor] {ticker}: luật A dùng GIÁ THAM CHIẾU chính thức "
+                              f"{ref_px:,.0f}đ (sàn {ref_info.get('exchange')}, "
+                              f"marketId={ref_info.get('market_id')}) thay giá đóng "
+                              f"{anchors[-1]:,.0f}đ — lệch {ref_px/anchors[-1]-1:+.3%}")
+                        anchors = anchors[:-1] + [float(ref_px)]
+                        anchor_basis = ANCHOR_BASIS_OFFICIAL_REF
+                        anchor_exchange = ref_info.get("exchange")
 
         order, decision = compute_session_order(
             state, filled, prev_turnover, prev_price, plan_date, now_iso,
             anchor_prices=anchors, active_nav_vnd=active_nav_vnd,
-            anchor_dates=anchor_dates)
+            anchor_dates=anchor_dates, anchor_basis=anchor_basis,
+            anchor_exchange=anchor_exchange)
         print(f"  decision: {decision['action']} — {decision['reason']}")
 
         # đánh dấu completed vào state nếu engine báo (rule e: không mua quá)
