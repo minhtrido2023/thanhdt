@@ -19,6 +19,13 @@
 #   4. Delivery closure: artifact != delivery. Report chưa gửi đi qua report_delivery_gate.py;
 #      chỉ COMPLETE khi validation + Discord + email đều có bằng chứng gắn với SHA-256.
 set -uo pipefail
+SCHEDULED_KIND=""
+case "${1:-}" in
+  "") ;;
+  --scheduled-weekly) SCHEDULED_KIND="weekly" ;;
+  --scheduled-monthly) SCHEDULED_KIND="monthly" ;;
+  *) echo "Usage: $0 [--scheduled-weekly|--scheduled-monthly]" >&2; exit 2 ;;
+esac
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WC_ROOT="$(cd "$ROOT/.." && pwd)"
 TRADING_REPORT_THREAD="trading_report"
@@ -92,6 +99,7 @@ for q in d.get("pending", []):
         print(t)
 ')"
 export RC_PENDING_TOPICS
+export REPORT_SCHEDULED_KIND="$SCHEDULED_KIND"
 
 PLAN="$(python3 - "$WC_ROOT" "$TODAY" "$STATE" "$DELIVERY_STATE" << 'PYEOF'
 import glob, hashlib, json, os, re, sys
@@ -101,6 +109,7 @@ wc_root, today_s, state_path, delivery_state_path = sys.argv[1:5]
 today = date.fromisoformat(today_s)
 reports_dir = os.path.join(wc_root, "mike", "reports")
 state = json.load(open(state_path))
+scheduled_kind = os.environ.get("REPORT_SCHEDULED_KIND", "")
 try:
     delivery_state = json.load(open(delivery_state_path))
 except FileNotFoundError:
@@ -137,6 +146,11 @@ delivered_weekly_dates = [max(dates_from(f)) for f in delivered_weekly if dates_
 most_recent_delivered_weekly = max(delivered_weekly_dates) if delivered_weekly_dates else None
 
 this_monday = today - timedelta(days=today.weekday())
+if scheduled_kind == "weekly":
+    # Lượt chính thức sáng thứ Bảy: tuần T2→T6 vừa đóng, không chờ watchdog +3 ngày.
+    candidate_mondays = [this_monday]
+else:
+    candidate_mondays = []
 if most_recent_weekly is None:
     # chưa từng có báo cáo tuần nào — chỉ backfill 1 tuần gần nhất (tránh dispatch runaway lịch sử)
     start_monday = this_monday - timedelta(days=7)
@@ -146,14 +160,14 @@ else:
 # Liệt kê MỌI tuần đã ĐÓNG ĐỦ (qua hết thứ Sáu + buffer 3 ngày) kể từ start_monday — KHÔNG
 # giới hạn bởi "tuần hiện tại" theo weekday(), vì hôm nay có thể là T7/CN và tuần T2-T6 vừa
 # rồi đã đóng xong dù cùng "tuần lịch" với hôm nay theo cách tính weekday-anchor.
-candidate_mondays = []
-m = start_monday
-while len(candidate_mondays) < 8:
-    last_friday = m + timedelta(days=4)
-    if (today - last_friday).days < 3:
-        break  # tuần này (và mọi tuần sau) chưa đóng đủ — dừng, không cần xét tiếp
-    candidate_mondays.append(m)
-    m += timedelta(days=7)
+if scheduled_kind not in ("weekly", "monthly"):
+    m = start_monday
+    while len(candidate_mondays) < 8:
+        last_friday = m + timedelta(days=4)
+        if (today - last_friday).days < 3:
+            break  # tuần này (và mọi tuần sau) chưa đóng đủ — dừng, không cần xét tiếp
+        candidate_mondays.append(m)
+        m += timedelta(days=7)
 
 for last_monday in candidate_mondays:
     last_friday = last_monday + timedelta(days=4)
@@ -169,12 +183,12 @@ for last_monday in candidate_mondays:
 # --- Monthly: từ ngày 5, tháng trước phải có báo cáo (bỏ qua trước go-live 2026-07) ---
 GO_LIVE_MONTH = (2026, 7)
 monthly_files = glob.glob(os.path.join(reports_dir, "*_monthly_report_*.md"))
-if today.day >= 5:
+if today.day >= 5 or scheduled_kind == "monthly":
     if today.month == 1:
         lm_year, lm_num = today.year - 1, 12
     else:
         lm_year, lm_num = today.year, today.month - 1
-    if (lm_year, lm_num) >= GO_LIVE_MONTH:
+    if (lm_year, lm_num) >= GO_LIVE_MONTH and scheduled_kind != "weekly":
         last_month_str = f"{lm_year}-{lm_num:02d}"
         has_last_month = any(last_month_str in os.path.basename(f) for f in monthly_files)
         if not has_last_month:

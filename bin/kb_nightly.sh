@@ -877,6 +877,14 @@ elif [ -f "$_CTXBLOAT_STAMP" ] || [ -f "$_CTXBLOAT_AUTOFIX_STAMP" ]; then
     log "Context-bloat episode cleared."
 fi
 
+# ── Phase 4.6b: đóng câu hỏi đã stale bằng bằng chứng cơ học ──────────────────
+# Không dùng LLM/khớp ngữ nghĩa: script chỉ xử lý các lớp có probe fail-closed
+# (context limits, delivery ledger hash-bound, cron path ổn định, full-sweep selfcheck PASS).
+# CASH_VENDOR và mọi câu hỏi nghiệp vụ/tiền thật không có resolver nên luôn được giữ mở.
+log "Daily deterministic bus-question housekeeping..."
+python3 "$ROOT/bin/bus_question_housekeeping.py" >> "$LOG" 2>&1 || \
+    log "bus_question_housekeeping: lỗi (non-fatal; giữ nguyên question, không đóng đoán)"
+
 # ── Phase 4.7: hồ sơ thời lượng job → độ trễ wakeup thích ứng (Wags 2026-08-01) ──
 # Sinh state/wakeup_profile.json: median/p75 thời lượng job theo (agent|model|effort),
 # cửa sổ trượt 6 tuần, chỉ bucket n>=8. Mike ĐỌC file này để chọn độ trễ cho lần
