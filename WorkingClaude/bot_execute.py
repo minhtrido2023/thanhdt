@@ -38,6 +38,7 @@ from trading_bot.plan import (load_plan, filter_excluded_tickers, net_offsetting
                               filter_lag_governance_orders,
                               apply_capit_lever, lever_live_preflight, approval_block_reason)
 from trading_bot.plan_funding_gate import check_plan_funding
+from trading_bot.exdate_gate import apply_exdate_gate
 from trading_bot.netting_recon import (reconcile_netted_fills, get_net_fill_from_journal,
                                        write_recon_log)
 from trading_bot.executor import Executor, run_session, _publish_bot_event
@@ -509,6 +510,26 @@ def main():
         broker = make_broker(cfg, otp=otp, profile=p).connect()
         if cfg["mode"] == "paper" and hasattr(broker, "set_fallback_refs"):
             broker.set_fallback_refs({o.ticker: o.ref_price for o in plan.orders})
+        # CỔNG NGÀY GIAO DỊCH KHÔNG HƯỞNG QUYỀN (GDKHQ) — cưỡng chế MỘT hệ quy chiếu giá.
+        # Mã có exright_date == plan_date thì ref_price PHẢI là giá tham chiếu chính thức của
+        # phiên (DNSE q.ref, qua 5 cổng G1-G5), qty tính lại trên chính giá đó, trần dựng lại
+        # trên chính giá đó; chốt không được ⇒ BỎ lệnh mã đó. Phải nằm SAU connect() (cần
+        # q.ref + positions RAW sống) và TRƯỚC shadow-log/funding gate (Σ mua phải là tập lệnh
+        # ĐÃ quy về hệ đúng). Ngày thường: 0 lệnh bị đụng, 0 lời gọi thêm.
+        # Cơ chế + độ lớn đã đo (median 5,46%, max 50,0%): trading_bot/price_frame.py và
+        # mike/agents/Taylor/research/exdate_order_pipeline_20260815/README.md.
+        plan, ex_adj = apply_exdate_gate(plan, broker, plan_date)
+        for a in ex_adj:
+            if a["action"] == "BLOCKED":
+                print(f"[{p['label']}] ⛔ GDKHQ BỎ lệnh {a['ticker']} "
+                      f"({a.get('side')}, {a.get('qty_before')} cp) — {a['reason']}")
+            elif a["action"] == "REPRICED":
+                print(f"[{p['label']}] 🔁 GDKHQ quy hệ quy chiếu {a['ticker']}: {a['reason']}")
+            elif a["action"] == "CALENDAR_FAIL":
+                print(f"[{p['label']}] ⚠️⚠️ CỔNG GDKHQ KHÔNG CHẠY ĐƯỢC — {a['reason']}")
+        if not plan.orders:
+            print(f"[{p['label']}] plan {plan_date} không còn lệnh nào sau cổng GDKHQ — bỏ qua")
+            continue
         # PREFLIGHT SỐNG cho lệnh ĐÒN BẨY — phải nằm SAU connect() (cần sổ broker sống) và
         # TRƯỚC shadow-log + Executor (shadow-log đo sức mua theo gói vay của lệnh, nên nó
         # phải thấy trạng thái đòn bẩy CHUNG CUỘC). Chỉ GỠ, không bao giờ cấp: neo NAV sống

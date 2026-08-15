@@ -285,11 +285,25 @@ class V23Strategy(StrategyBase):
             pass
         return None
 
-    def _price(self, broker, ticker, recs_close=None, notes=None):
-        """Chuỗi fallback giá: quote PHS → close trong recs → transactions paper."""
+    def _price(self, broker, ticker, recs_close=None, notes=None, ex_tickers=None):
+        """Chuỗi fallback giá: quote PHS → close trong recs → transactions paper.
+
+        ⚠️ `ex_tickers` = tập mã có GDKHQ đúng phiên đang lập plan. Với các mã đó, **CẢ HAI
+        fallback LỊCH SỬ đều bị chặn** (README §8-D3 mục 1, job Taylor_20260815_054822): cả
+        `recs_close` (giá đóng BQ ngày signal) lẫn giá giao dịch paper gần nhất đều thuộc hệ
+        quy chiếu CŨ, còn khối lượng và mọi số khác của phiên đã ở hệ MỚI. Trộn hai hệ là
+        đúng cách hỏng đã đo được: median 5,46%, max 50,0% (VHM 2026-08-06). Thà KHÔNG có giá
+        (mã rơi khỏi plan) còn hơn một con số sai hệ đi tiếp mà không ai thấy — quote sống câm
+        đúng vào ngày GDKHQ là ca hiếm, sai hệ quy chiếu thì không hiếm (≈1 sự kiện/2,4 phiên).
+        """
         q = broker.get_quote(ticker)
         if q is not None and q.ok():
             return q.last or q.ref
+        if ticker in (ex_tickers or ()):
+            if notes is not None:
+                notes.append(f"{ticker}: GDKHQ hôm nay + quote sống câm ⇒ TỪ CHỐI fallback giá "
+                             f"LỊCH SỬ (hệ quy chiếu cũ) — bỏ mã khỏi plan")
+            return None
         if recs_close and recs_close > 0:
             return float(recs_close)
         p = self._last_tx_price(ticker)
@@ -298,6 +312,26 @@ class V23Strategy(StrategyBase):
         if notes is not None:
             notes.append(f"không có giá cho {ticker} — bỏ qua")
         return None
+
+    @staticmethod
+    def _ex_tickers_for(tickers, plan_date, notes=None):
+        """Mã có GDKHQ đúng `plan_date` → set. FAIL-OPEN (set rỗng) + ghi note khi tra hỏng.
+
+        Fail-open ở đây đúng cùng lý lẽ với `exdate_gate.apply_exdate_gate` (đọc docstring hàm
+        đó): nguồn lịch là BigQuery, một hệ THỨ BA ngoài đường đặt lệnh; cho nó quyền làm hỏng
+        cả phiên là rủi ro lớn hơn thứ nó chặn. Lưới thật nằm ở cascade bot_execute.py.
+        """
+        try:
+            from .price_frame import pricing_events, events_by_ticker_date, events_on
+            d = dt.date.fromisoformat(str(plan_date)[:10])
+            m = events_by_ticker_date(pricing_events(
+                tickers, since=(d - dt.timedelta(days=1)).isoformat(), until=d.isoformat()))
+            return {t for t in tickers if events_on(m, t, d.isoformat())}
+        except Exception as exc:                                    # noqa: BLE001
+            if notes is not None:
+                notes.append(f"KHÔNG tra được lịch GDKHQ ({type(exc).__name__}: {exc}) — "
+                             f"fallback giá lịch sử KHÔNG bị chặn phiên này")
+            return set()
 
     # ----- plan building -----
 
@@ -333,10 +367,20 @@ class V23Strategy(StrategyBase):
         ref_px = {}      # ticker -> giá dùng để tính/đặt lệnh
         meta = {}        # ticker -> (book, play_type)
 
+        # Mã có GDKHQ đúng phiên plan này thực thi ⇒ mọi fallback giá LỊCH SỬ trong _price()
+        # bị chặn cho riêng chúng (README §8-D3 mục 1). Tra MỘT lần cho toàn bộ mã ứng viên.
+        _plan_date = next_trading_day(signal_date).strftime("%Y-%m-%d")
+        _ex = self._ex_tickers_for(
+            sorted({str(t) for t in paper["positions"]["ticker"]}
+                   | {str(r["ticker"]) for _, r in recs.iterrows()}),
+            _plan_date, notes)
+        if _ex:
+            notes.append(f"GDKHQ {_plan_date}: {sorted(_ex)} — cấm fallback giá lịch sử cho các mã này")
+
         # 1) mirror vị thế paper hiện có
         for _, r in paper["positions"].iterrows():
             t = str(r["ticker"])
-            px = self._price(broker, t, recs_close.get(t), notes)
+            px = self._price(broker, t, recs_close.get(t), notes, ex_tickers=_ex)
             if px is None:
                 continue
             target[t] = target.get(t, 0) + float(r["shares"]) * scale
@@ -371,7 +415,7 @@ class V23Strategy(StrategyBase):
                 w = w if w > 0 else 1.0 / max(1, int(status.get("n_capit_basket", 1)))
             else:
                 continue
-            px = self._price(broker, t, recs_close.get(t), notes)
+            px = self._price(broker, t, recs_close.get(t), notes, ex_tickers=_ex)
             if px is None:
                 continue
             qty_rec = book_nav * w / px
@@ -385,7 +429,7 @@ class V23Strategy(StrategyBase):
         if cfg["include_etf_park"] and etf not in target:
             etf_val = paper["etf_value"] * scale
             if etf_val > cfg["min_order_value"]:
-                px = self._price(broker, etf, None, notes)
+                px = self._price(broker, etf, None, notes, ex_tickers=_ex)
                 if px:
                     target[etf] = etf_val / px
                     ref_px[etf] = px
@@ -399,7 +443,8 @@ class V23Strategy(StrategyBase):
             tgt = target.get(t, 0.0)
             have = real_pos.get(t, {}).get("total", 0)
             sellable = real_pos.get(t, {}).get("sellable", have)
-            px = ref_px.get(t) or self._price(broker, t, recs_close.get(t), notes)
+            px = ref_px.get(t) or self._price(broker, t, recs_close.get(t), notes,
+                                                ex_tickers=_ex)
             if px is None:
                 continue
             diff = tgt - have

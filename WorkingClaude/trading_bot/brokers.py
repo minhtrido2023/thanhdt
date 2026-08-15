@@ -493,6 +493,23 @@ class DNSEBroker(BrokerBase):
         except Exception:
             return None
 
+    def positions_raw(self):
+        """Danh sách vị thế THÔ — MỘT DÒNG MỖI DEAL/GÓI VAY, chưa cộng gộp theo mã.
+
+        `get_positions()` ngay dưới cộng gộp và giữ đúng MỘT `marketPrice` cho mỗi mã. Việc
+        gộp đó đúng cho mọi mục đích kế toán, nhưng nó XOÁ đúng bằng chứng mà cổng đồng-hệ
+        (`price_frame.check_same_frame`, G4) cần đọc: ngày 2026-08-14 19:10:23, BID có lô
+        gói-vay 1826 đã ở hệ quy chiếu MỚI (107cp @35.800) trong khi lô 1258 còn hệ CŨ
+        (300cp @38.850) — TRONG CÙNG MỘT bản đọc. DNSE điều chỉnh theo TỪNG GÓI VAY và cú lật
+        KHÔNG nguyên tử. Nhìn qua bản gộp thì bản đọc đó trông hoàn toàn lành.
+
+        Không log lại `_log_raw` (get_positions đã log cùng payload nếu được gọi cùng phiên);
+        trả list rỗng khi payload không đúng dạng, caller fail-closed theo ngữ cảnh của nó.
+        """
+        r = self.client.positions(self.account_id)
+        rows = r.get("positions") or r.get("data") if isinstance(r, dict) else r
+        return list(rows or [])
+
     def get_positions(self):
         r = self.client.positions(self.account_id)
         self._log_raw("positions", r)

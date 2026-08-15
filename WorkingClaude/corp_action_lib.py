@@ -110,12 +110,37 @@ def events(tickers, since=None, until=None, codes=("DIV", "ISS"), executed_only=
     the registry doc. Rows are returned raw, including duplicates on (ticker, exright_date,
     event_code): those are real (several tranches can go ex on one day) and the CALLER must
     decide whether to sum them or take the latest revision, after reading `event_title_vi`.
+
+    ⚠️ NOT usable as a forward PRICE CALENDAR — use `pricing_events()` for that. A future event
+    sits at `announced` until the ~22:2x ICT reload of its own ex-date, so `executed_only=True`
+    returns EMPTY for exactly the days a pricing gate needs to fire.
     """
+    return _events(tickers, since, until, codes,
+                   status_sql='event_status = "executed"' if executed_only else None)
+
+
+def pricing_events(tickers, since=None, until=None, codes=("DIV", "ISS")):
+    """Corp-action events usable as a forward PRICE CALENDAR (includes `announced`).
+
+    Filters `event_status != "not_executed"` — i.e. drops only CANCELLED events. Anything else
+    is a real scheduled ex-date the exchange will price against.
+
+    Why this exists as a separate reader instead of a flag on `events()`: the `announced` trap
+    is a measured bug (`mike/bin/corp_action_daily.py:422-437`, quant-skeptic REFUTED round 1),
+    and a boolean flag invites callers to guess. A pricing consumer that reaches for the wrong
+    reader gets silence — an empty result on the one day it matters, indistinguishable from
+    "no event today". Named readers make the choice explicit at the call site.
+    """
+    return _events(tickers, since, until, codes,
+                   status_sql='event_status != "not_executed"')
+
+
+def _events(tickers, since, until, codes, status_sql):
     tk = ",".join(f'"{t}"' for t in tickers)
     cd = ",".join(f'"{c}"' for c in codes)
     where = [f"ticker IN ({tk})", f"event_code IN ({cd})"]
-    if executed_only:
-        where.append('event_status = "executed"')
+    if status_sql:
+        where.append(status_sql)
     if since:
         where.append(f'exright_date > DATE "{since}"')
     if until:
