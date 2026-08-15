@@ -2,26 +2,25 @@
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
 
 # Working memory — Mike
-> Cập nhật lần cuối: 2026-08-15T04:41Z (bug UPCOM ref-price — fix xong, chờ verify)
+> Cập nhật lần cuối: 2026-08-15T05:04Z (TV1 relit + GDKHQ investigation dispatched)
 
-## Bug UPCOM ref-price — FIX XONG, chờ quant-skeptic (2026-08-15)
-- Job Taylor_20260815_034407 XONG: commit `38b6c04` (WorkingClaude, PHẦN 2 fix) +
-  `1533b596`/`e524d326` (mike repo, injector fix + research doc/regression).
-- Tự đọc diff xác nhận: TV1 VẪN reverted (Taylor tự tôn trọng ranh giới, không lật lại).
-- 2 bug THÊM tự phát hiện: (1) `Quote.exchange` fail-OPEN — DNSE trả `marketId` không phải
-  `exchange`/`market`/`floorcode`, nên 43/43 mã test mặc định "HOSE" (root cause sự cố SHS/MBS
-  07-01, trước chỉ vá ngọn). (2) Ngày GDKHQ: tham chiếu đã điều chỉnh quyền, giá đóng thì
-  không — ca SSI 08-17 trần cũ sẽ CAO HƠN CẢ trần hợp lệ phiên → luật A vô hiệu im lặng.
-- Hồi quy N=777 phiên-mã (DRI+SCL+TV1): median lệch 0,553% (18% ngân sách τ=3%), p90 1,527%,
-  max 9,868%, 1,8% phiên vượt cả τ. Lệch 2 CHIỀU (37,6% mất tiền thật, 32,6% mất cơ hội) —
-  KHÔNG phải bias 1 chiều sửa được bằng hằng số. **0 thiệt hại tiền thật** (chưa từng áp live).
-- Cơ chế mới: anchor = `q.ref` (giá tham chiếu chính thức DNSE) thay vì tự tính close; 3 cổng
-  G1/G2/G3 (sàn xác định được / biên độ khớp sàn / tham chiếu ∈ [Low,High] phiên trước);
-  fail-safe guard đổi mốc sống close→q.ref (chặt hơn, không lỏng hơn); BQ hạ vai trò kiểm chéo.
-- Selfcheck 25/25 PASS (TZ-robust), hồi quy 96 plan LIVE: 0/23 lệnh đổi giá trị.
-- **ĐANG CHỜ**: 2 verify_finding.sh chạy nền (topic "XAC MINH DOC LAP" + "BAN VA"). Khi CONFIRMED
-  cả 2 → hỏi lại user có muốn lật TV1 sang Rule A (bản fix) lần nữa không.
-- TV1 VẪN ở mean-5 (Rule B) — KHÔNG tự lật cho tới khi user quyết lại.
+## TV1 — ĐÃ lật lại Rule A (bản fix), an toàn (2026-08-15)
+- User duyệt lật lại sau khi cả 2 finding UPCOM-fix CONFIRMED (high). Đã sửa 2 state file
+  (SpaceX+ZaloPay), verify SỐNG bằng resolve_price_band() thật với anchor_basis=
+  official_reference_price + anchor_exchange=UPCOM: mode=rule_a, anchor lấy đúng giá tham
+  chiếu (khác giá đóng cửa). Selfcheck 37/37 + 33/33 PASS. Bus event
+  tv1-rule-a-relit-post-upcom-fix (decided_by=user).
+- THEO DÕI phiên tiếp theo: lệnh Rule A đầu tiên chạy thật với anchor đã fix — kiểm journal +
+  log injector có in [anchor] đúng sàn/marketId không.
+
+## GDKHQ tổng quát — ĐANG ĐIỀU TRA (job Taylor_20260815_050425, opus/high, ~50 phút)
+- User duyệt mở rộng phạm vi: không chỉ Rule A, mà TOÀN BỘ vận hành đặt lệnh khi chạm mã GDKHQ.
+- 3 phần: (1) vẽ bản đồ điểm rủi ro + kiểm BQ/DNSE có tự điều chỉnh quyền không, (2) thiết kế
+  fix (KHÔNG code ngay, chỉ thiết kế + đo độ lớn), (3) quét lịch sử lệnh thật từ 07-01 xem đã
+  từng dính GDKHQ chưa.
+- Đã kiểm trước dispatch: KHÔNG có lệnh SSI nào trong plan 08-17 hiện tại → không khẩn cấp tiền
+  thật ngay, nhưng cần điều tra kỹ.
+- ĐANG CHỜ job này.
 
 ## Việc còn hở từ trước (chưa xử lý)
 1. ops_health_check.sh::_rollup_resolved() substring-match — NEEDS_CHANGES 08-14, CHƯA vá.
